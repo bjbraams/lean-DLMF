@@ -28,7 +28,7 @@ the finite families and on `ℕ` for the infinite ones.
   `hahn_orthogonal`: DLMF Table 18.19.1.
 * `hahn_weight_sum`: the total mass of the Hahn weight.
 * `meixner_recurrence`, `krawtchouk_recurrence`, `hahn_recurrence`: DLMF 18.22.2.
-* `poch_mul_meixner_eq_sum`: an explicit sum for the Meixner polynomials (Beals–Wong (6.5.2)).
+* `pochhammer_mul_meixner_eq_sum`: an explicit sum for the Meixner polynomials (Beals–Wong (6.5.2)).
 -/
 
 @[expose] public section
@@ -260,16 +260,17 @@ theorem charlier_mul_x {a : ℂ} (ha : a ≠ 0) (n : ℕ) (x : ℂ) :
 
 /-- A two-numerator terminating sum `₂F_q(-n, -x; b; z)` as a polynomial in `x`. -/
 def hgPoly (n : ℕ) (b : List ℂ) (z : ℂ) : ℂ[X] :=
-  ∑ k ∈ Finset.range (n + 1), C (poch (-(n : ℂ)) k / (b.map (fun t => poch t k)).prod *
+  ∑ k ∈ Finset.range (n + 1), C (pochhammer (-(n : ℂ)) k / (b.map (fun t => pochhammer t k)).prod *
     z ^ k / k.factorial) * (ascPochhammer ℂ k).comp (-X)
 
 /-- Evaluating `hgPoly n b z` at `x` gives the terminating sum `F(-n, -x; b; z)`. -/
 theorem eval_hgPoly (n : ℕ) (b : List ℂ) (z x : ℂ) :
-    (hgPoly n b z).eval x = terminatingHG n [-(n : ℂ), -x] b z := by
-  simp only [hgPoly, terminatingHG, eval_finsetSum, eval_mul, eval_C, eval_comp, eval_neg, eval_X,
+    (hgPoly n b z).eval x = terminatingHypergeometric n [-(n : ℂ), -x] b z := by
+  simp only [hgPoly, terminatingHypergeometric, eval_finsetSum, eval_mul, eval_C, eval_comp,
+      eval_neg, eval_X,
     List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one]
   refine Finset.sum_congr rfl fun k _ => ?_
-  rw [poch]; ring
+  rw [pochhammer]; ring
 
 /-- The Meixner polynomial is the evaluation of `hgPoly n [β] (1 - 1/c)`. -/
 theorem eval_hgPoly_meixner (β c : ℂ) (n : ℕ) (x : ℂ) :
@@ -278,9 +279,9 @@ theorem eval_hgPoly_meixner (β c : ℂ) (n : ℕ) (x : ℂ) :
 /-- For `β > 0` and `0 < c < 1` the Meixner weight `(β)_x cˣ/x!` has finite moments of
 every order. -/
 theorem summable_meixnerWeight {β c : ℝ} (hβ : 0 < β) (hc : 0 < c) (hc1 : c < 1) (K : ℕ) :
-    Summable fun x : ℕ => ‖poch (β : ℂ) x * (c : ℂ) ^ x / (x ! : ℂ)‖ * ((x : ℝ) + 1) ^ K := by
-  have hp : ∀ n : ℕ, poch (β : ℂ) n ≠ 0 := poch_ne_zero_of_re_pos (by simpa using hβ)
-  have hu : ∀ n : ℕ, 0 < ‖poch (β : ℂ) n‖ * c ^ n / n ! * ((n : ℝ) + 1) ^ K := fun n => by
+    Summable fun x : ℕ => ‖pochhammer (β : ℂ) x * (c : ℂ) ^ x / (x ! : ℂ)‖ * ((x : ℝ) + 1) ^ K := by
+  have hp : ∀ n : ℕ, pochhammer (β : ℂ) n ≠ 0 := pochhammer_ne_zero_of_re_pos (by simpa using hβ)
+  have hu : ∀ n : ℕ, 0 < ‖pochhammer (β : ℂ) n‖ * c ^ n / n ! * ((n : ℝ) + 1) ^ K := fun n => by
     have := norm_pos_iff.mpr (hp n); positivity
   have h := summable_of_ratio_pos hu (l := c) hc1 ?_
   · refine h.congr fun x => ?_
@@ -289,15 +290,15 @@ theorem summable_meixnerWeight {β c : ℝ} (hβ : 0 < β) (hc : 0 < c) (hc1 : c
   have hb : ∀ n : ℕ, ‖(β : ℂ) + n‖ = β + n := fun n => by
     rw [show (β : ℂ) + n = ((β + n : ℝ) : ℂ) by push_cast; ring, Complex.norm_real,
       Real.norm_eq_abs, abs_of_pos (by positivity)]
-  have e : ∀ n : ℕ, ‖poch (β : ℂ) (n + 1)‖ * c ^ (n + 1) / (n + 1)! *
-      (((n + 1 : ℕ) : ℝ) + 1) ^ K / (‖poch (β : ℂ) n‖ * c ^ n / n ! * ((n : ℝ) + 1) ^ K) =
+  have e : ∀ n : ℕ, ‖pochhammer (β : ℂ) (n + 1)‖ * c ^ (n + 1) / (n + 1)! *
+      (((n + 1 : ℕ) : ℝ) + 1) ^ K / (‖pochhammer (β : ℂ) n‖ * c ^ n / n ! * ((n : ℝ) + 1) ^ K) =
       (1 + (β - 1) * (1 / ((n : ℝ) + 1))) * c *
         (((n : ℝ) + 1 + 1) / ((n : ℝ) + 1)) ^ K := by
     intro n
     have h1 : (n ! : ℝ) ≠ 0 := by positivity
     have h2 : (n : ℝ) + 1 ≠ 0 := by positivity
-    have h3 : ‖poch (β : ℂ) n‖ ≠ 0 := norm_ne_zero_iff.mpr (hp n)
-    rw [poch_succ, norm_mul, hb, Nat.factorial_succ, div_pow]
+    have h3 : ‖pochhammer (β : ℂ) n‖ ≠ 0 := norm_ne_zero_iff.mpr (hp n)
+    rw [pochhammer_succ, norm_mul, hb, Nat.factorial_succ, div_pow]
     push_cast
     field_simp
     ring
@@ -350,7 +351,8 @@ theorem meixner_mul_x {β c : ℂ} (hβ : 0 < β.re) (hc : c ≠ 0) (n : ℕ) (x
   | zero =>
     have hβ0 : β ≠ 0 := fun h => by simp [h] at hβ
     simp only [meixner_zero, Nat.cast_zero, zero_add, zero_mul, add_zero, mul_one]
-    simp [meixner, terminatingHG, Finset.sum_range_succ, poch_zero, poch_one]
+    simp [meixner, terminatingHypergeometric, Finset.sum_range_succ, pochhammer_zero,
+        pochhammer_one]
     field_simp
     ring
   | succ k =>
@@ -445,26 +447,28 @@ theorem charlier_orthogonality {a : ℝ} (ha : 0 < a) (m n : ℕ) :
   · simpa only [hwdef, mul_div_assoc] using hO m n hmn
 
 open DiscreteOrtho in
-/-- The series with terms `(fun x : ℕ => meixner β c m x * meixner β c n x * poch β x * (c : ℂ) ^
-x / x.factorial)` converges to `(if m = n then (c : ℂ)⁻¹ ^ n * n.factorial / (poch β n * (1 -
-c : ℂ) ^ (β : ℂ)) else 0)`. -/
+/-- The series with terms
+`(fun x : ℕ => meixner β c m x * meixner β c n x * pochhammer β x * (c : ℂ) ^ x / x.factorial)`
+converges to `(if m = n then (c : ℂ)⁻¹ ^ n * n.factorial / (pochhammer β n * (1 - c : ℂ) ^ (β : ℂ))
+else 0)`. -/
 @[dlmf 18.19.T1]
 theorem meixner_orthogonality {β c : ℝ} (hβ : 0 < β) (hc : 0 < c) (hc1 : c < 1) (m n : ℕ) :
-    HasSum (fun x : ℕ => meixner β c m x * meixner β c n x * poch β x *
+    HasSum (fun x : ℕ => meixner β c m x * meixner β c n x * pochhammer β x *
       (c : ℂ) ^ x / x.factorial)
-      (if m = n then (c : ℂ)⁻¹ ^ n * n.factorial / (poch β n * (1 - c : ℂ) ^ (β : ℂ)) else 0) := by
+      (if m = n then (c : ℂ)⁻¹ ^ n * n.factorial /
+          (pochhammer β n * (1 - c : ℂ) ^ (β : ℂ)) else 0) := by
   have hc' : (c : ℂ) ≠ 0 := by exact_mod_cast hc.ne'
   have hc1' : (c : ℂ) - 1 ≠ 0 := by
     intro h; have : (c : ℂ) = 1 := by linear_combination h
     exact hc1.ne (by exact_mod_cast this)
   have hβre : 0 < (β : ℂ).re := by simpa using hβ
-  have hp : ∀ n : ℕ, poch (β : ℂ) n ≠ 0 := poch_ne_zero_of_re_pos hβre
-  set w : ℕ → ℂ := fun x => poch (β : ℂ) x * (c : ℂ) ^ x / (x ! : ℂ) with hwdef
+  have hp : ∀ n : ℕ, pochhammer (β : ℂ) n ≠ 0 := pochhammer_ne_zero_of_re_pos hβre
+  set w : ℕ → ℂ := fun x => pochhammer (β : ℂ) x * (c : ℂ) ^ x / (x ! : ℂ) with hwdef
   have hw := summable_meixnerWeight hβ hc hc1
   have hP : ∀ x : ℕ, w (x + 1) * (X : ℂ[X]).eval ((x : ℂ) + 1) =
       w x * (C (c : ℂ) * (X + C (β : ℂ))).eval (x : ℂ) := by
     intro x
-    simp only [hwdef, eval_X, eval_C, eval_mul, eval_add, Nat.factorial_succ, poch_succ]
+    simp only [hwdef, eval_X, eval_C, eval_mul, eval_add, Nat.factorial_succ, pochhammer_succ]
     push_cast
     have : (x ! : ℂ) ≠ 0 := by exact_mod_cast x.factorial_ne_zero
     field_simp
@@ -491,14 +495,14 @@ theorem meixner_orthogonality {β c : ℝ} (hβ : 0 < β) (hc : 0 < c) (hc1 : c 
     refine (summable_mul_eval hw (P k * P k)).congr fun x => ?_
     simp only [hPdef, eval_mul, eval_hgPoly_meixner]; ring
   have hN : ∀ k : ℕ, HasSum (fun x : ℕ => meixner β c k x * meixner β c k x * w x)
-      ((c : ℂ)⁻¹ ^ k * k.factorial / (poch β k * (1 - c : ℂ) ^ (β : ℂ))) := by
+      ((c : ℂ)⁻¹ ^ k * k.factorial / (pochhammer β k * (1 - c : ℂ) ^ (β : ℂ))) := by
     intro k
     induction k with
     | zero =>
-      simp only [meixner_zero, one_mul, pow_zero, Nat.factorial_zero, Nat.cast_one, poch_zero]
+      simp only [meixner_zero, one_mul, pow_zero, Nat.factorial_zero, Nat.cast_one, pochhammer_zero]
       have hcn : ‖(c : ℂ)‖ < 1 := by
         rw [Complex.norm_real, Real.norm_eq_abs, abs_of_pos hc]; exact hc1
-      have h := hasSum_poch_div_factorial (β := (β : ℂ)) hcn
+      have h := hasSum_pochhammer_div_factorial (β := (β : ℂ)) hcn
       rw [cpow_neg] at h
       convert h using 1
       · funext x; simp only [hwdef]; ring
@@ -507,7 +511,8 @@ theorem meixner_orthogonality {β c : ℝ} (hβ : 0 < β) (hc : 0 < c) (hc1 : c 
       set S := ∑' x : ℕ, meixner β c (k + 1) x * meixner β c (k + 1) x * w x
       have hT1 : HasSum (fun x : ℕ =>
           ((c : ℂ) - 1) * x * meixner β c (k + 1) x * meixner β c k x * w x)
-          ((k + 1 : ℂ) * ((c : ℂ)⁻¹ ^ k * k.factorial / (poch β k * (1 - c : ℂ) ^ (β : ℂ)))) := by
+          ((k + 1 : ℂ) * ((c : ℂ)⁻¹ ^ k * k.factorial /
+              (pochhammer β k * (1 - c : ℂ) ^ (β : ℂ)))) := by
         have h := (((hO (k + 2) k (by omega)).mul_left ((c : ℂ) * ((k + 1 : ℕ) + β))).sub
           ((hO (k + 1) k (by omega)).mul_left (((k + 1 : ℕ) : ℂ) + ((k + 1 : ℕ) + β) * c))).add
           (ih.mul_left ((k + 1 : ℕ) : ℂ))
@@ -533,9 +538,9 @@ theorem meixner_orthogonality {β c : ℝ} (hβ : 0 < β) (hc : 0 < c) (hc1 : c 
       have hkb : (k : ℂ) + β ≠ 0 := by
         intro h; have := congrArg re h; simp at this; linarith [(Nat.cast_nonneg k : (0:ℝ) ≤ k)]
       have : S = (c : ℂ)⁻¹ ^ (k + 1) * (k + 1).factorial /
-          (poch β (k + 1) * (1 - c : ℂ) ^ (β : ℂ)) := by
+          (pochhammer β (k + 1) * (1 - c : ℂ) ^ (β : ℂ)) := by
         have e : S = ((c : ℂ) * (k + β))⁻¹ * ((c : ℂ) * (k + β) * S) := by field_simp
-        rw [e, ← hv, poch_succ, Nat.factorial_succ, pow_succ]
+        rw [e, ← hv, pochhammer_succ, Nat.factorial_succ, pow_succ]
         push_cast
         have h1 : (1 - c : ℂ) ^ (β : ℂ) ≠ 0 := by
           rw [Ne, cpow_eq_zero_iff]; push Not; intro h
@@ -699,14 +704,16 @@ theorem krawtchouk_orthogonality {p : ℝ} (hp : 0 < p) (hp1 : p < 1) {N m n : �
     simp only [hwdef]; ring
 
 /-- Formula under the stated hypotheses: `∑ x ∈ Finset.range (N + 1), hahn α β N m x * hahn α β N
-n x * poch (α + 1) x * poch (β + 1) (N - x) / ((x.factorial : ℂ) * (N - x).factorial) = 0`. -/
+n x * pochhammer (α + 1) x * pochhammer (β + 1) (N - x) / ((x.factorial : ℂ) * (N - x).factorial) =
+0`. -/
 @[dlmf 18.19.T1]
 theorem hahn_orthogonal {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) {N m n : ℕ}
     (hm : m ≤ N) (hn : n ≤ N) (hmn : m ≠ n) :
     ∑ x ∈ Finset.range (N + 1), hahn α β N m x * hahn α β N n x *
-      poch (α + 1) x * poch (β + 1) (N - x) / ((x.factorial : ℂ) * (N - x).factorial) = 0 := by
+      pochhammer (α + 1) x * pochhammer (β + 1) (N - x) /
+          ((x.factorial : ℂ) * (N - x).factorial) = 0 := by
   have hαre : -1 < (α : ℂ).re := by simpa using hα
-  set w : ℕ → ℂ := fun x => poch ((α : ℂ) + 1) x * poch ((β : ℂ) + 1) (N - x) /
+  set w : ℕ → ℂ := fun x => pochhammer ((α : ℂ) + 1) x * pochhammer ((β : ℂ) + 1) (N - x) /
     ((x.factorial : ℂ) * (N - x).factorial) with hwdef
   set B : ℂ → ℂ := fun x => (x + α + 1) * (N - x)
   set D : ℂ → ℂ := fun x => x * (N + β + 1 - x)
@@ -715,7 +722,7 @@ theorem hahn_orthogonal {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) {N m n : �
     simp only [hwdef, B, D]
     obtain ⟨j, rfl⟩ : ∃ j, N = x + 1 + j := ⟨N - (x + 1), by omega⟩
     rw [show x + 1 + j - (x + 1) = j by omega, show x + 1 + j - x = j + 1 by omega,
-      poch_succ, poch_succ, Nat.factorial_succ, Nat.factorial_succ]
+      pochhammer_succ, pochhammer_succ, Nat.factorial_succ, Nat.factorial_succ]
     have h1 : (x.factorial : ℂ) ≠ 0 := by exact_mod_cast x.factorial_ne_zero
     have h2 : (j.factorial : ℂ) ≠ 0 := by exact_mod_cast j.factorial_ne_zero
     push_cast
@@ -796,9 +803,9 @@ theorem krawtchouk_recurrence {p : ℂ} (hp : p ≠ 0) {N n : ℕ} (hn : n + 1 �
 /-- The total mass of the Hahn weight, the case `n = 0` of Table 18.19.1. -/
 @[dlmf 18.19.T1]
 theorem hahn_weight_sum (α β : ℂ) (N : ℕ) :
-    ∑ x ∈ Finset.range (N + 1), poch (α + 1) x * poch (β + 1) (N - x) /
-      ((x.factorial : ℂ) * (N - x).factorial) = poch (α + β + 2) N / N.factorial := by
-  have h := poch_add_eq_sum (α + 1) (β + 1) N
+    ∑ x ∈ Finset.range (N + 1), pochhammer (α + 1) x * pochhammer (β + 1) (N - x) /
+      ((x.factorial : ℂ) * (N - x).factorial) = pochhammer (α + β + 2) N / N.factorial := by
+  have h := pochhammer_add_eq_sum (α + 1) (β + 1) N
   rw [show α + 1 + (β + 1) = α + β + 2 by ring] at h
   rw [h, Finset.sum_div]
   refine Finset.sum_congr rfl fun x hx => ?_
@@ -817,7 +824,7 @@ theorem hahn_weight_sum (α β : ℂ) (N : ℕ) :
 namespace HahnRec
 
 /-- The dual basis `(-m)_k (m + s)_k` in the degree variable. -/
-def phi (s m : ℂ) (k : ℕ) : ℂ := poch (-m) k * poch (m + s) k
+def phi (s m : ℂ) (k : ℕ) : ℂ := pochhammer (-m) k * pochhammer (m + s) k
 
 /-- The recurrence operator on the dual basis, with denominators cleared. -/
 theorem op_phi_succ (α β N n : ℂ) (j : ℕ) :
@@ -832,25 +839,25 @@ theorem op_phi_succ (α β N n : ℂ) (j : ℕ) :
         (-((j : ℂ) + 1) * phi (α + β + 1) n (j + 1) +
           (α + j + 1) * (j - N) * (j + 1) * phi (α + β + 1) n j) := by
   set s := α + β + 1 with hs
-  set U := poch (-n) j
-  set Up := poch (-n + 1) j
-  set V := poch (n + s) j
-  set Vp := poch (n + s + 1) j
+  set U := pochhammer (-n) j
+  set Up := pochhammer (-n + 1) j
+  set V := pochhammer (n + s) j
+  set Vp := pochhammer (n + s + 1) j
   have hU : U * (-n + j) = (-n) * Up := by
-    rw [← poch_succ, poch_succ_left]
+    rw [← pochhammer_succ, pochhammer_succ_left]
   have hV : V * (n + s + j) = (n + s) * Vp := by
-    rw [← poch_succ, poch_succ_left]
+    rw [← pochhammer_succ, pochhammer_succ_left]
   have e1 : phi s (n + 1) (j + 1) = (-n - 1) * U * (Vp * (n + s + 1 + j)) := by
     simp only [phi, U, Vp]
-    rw [poch_succ_left, show -(n + 1) + 1 = -n by ring, show -(n + 1) = -n - 1 by ring,
-      show n + 1 + s = n + s + 1 by ring, poch_succ]
+    rw [pochhammer_succ_left, show -(n + 1) + 1 = -n by ring, show -(n + 1) = -n - 1 by ring,
+      show n + 1 + s = n + s + 1 by ring, pochhammer_succ]
   have e2 : phi s n (j + 1) = U * (-n + j) * (V * (n + s + j)) := by
     simp only [phi, U, V]
-    rw [poch_succ, poch_succ]
+    rw [pochhammer_succ, pochhammer_succ]
   have e3 : phi s (n - 1) (j + 1) = Up * (-n + 1 + j) * ((n + s - 1) * V) := by
     simp only [phi, Up, V]
-    rw [show -(n - 1) = -n + 1 by ring, poch_succ, show n - 1 + s = n + s - 1 by ring,
-      poch_succ_left, show n + s - 1 + 1 = n + s by ring]
+    rw [show -(n - 1) = -n + 1 by ring, pochhammer_succ, show n - 1 + s = n + s - 1 by ring,
+      pochhammer_succ_left, show n + s - 1 + 1 = n + s by ring]
   have e4 : phi s n j = U * V := rfl
   rw [e1, e2, e3, e4]
   linear_combination
@@ -858,14 +865,15 @@ theorem op_phi_succ (α β N n : ℂ) (j : ℕ) :
     (-(2 * n + s - 1) * (n + α + 1) * (N - n) * (-n - 1) * U * (n + s + 1 + j)) * hV
 
 /-- The coefficient `1 / ((α+1)_k (-N)_k k!)`. -/
-def dcoef (α : ℂ) (N : ℕ) (k : ℕ) : ℂ := (poch (α + 1) k * poch (-(N : ℂ)) k * k.factorial)⁻¹
+def dcoef (α : ℂ) (N : ℕ) (k : ℕ) : ℂ :=
+    (pochhammer (α + 1) k * pochhammer (-(N : ℂ)) k * k.factorial)⁻¹
 
 /-- The Hahn polynomial as a sum over `k ≤ K` (any `K ≥ m`) of
 `dcoef α N k (-x)_k (-m)_k (m+α+β+1)_k`. -/
 theorem hahn_eq_sum (α β : ℂ) (N m K : ℕ) (hm : m ≤ K) (x : ℂ) :
     hahn α β N m x = ∑ k ∈ Finset.range (K + 1),
-      dcoef α N k * poch (-x) k * phi (α + β + 1) m k := by
-  unfold hahn terminatingHG
+      dcoef α N k * pochhammer (-x) k * phi (α + β + 1) m k := by
+  unfold hahn terminatingHypergeometric
   have hsub : Finset.range (m + 1) ⊆ Finset.range (K + 1) :=
     Finset.range_mono (Nat.add_le_add_right hm 1)
   rw [← Finset.sum_subset hsub]
@@ -876,14 +884,14 @@ theorem hahn_eq_sum (α β : ℂ) (N m K : ℕ) (hm : m ≤ K) (x : ℂ) :
     field_simp
   · intro k _ hk
     have : m < k := by simp at hk; omega
-    simp [phi, poch_neg_nat_eq_zero this]
+    simp [phi, pochhammer_neg_nat_eq_zero this]
 
 /-- The ratio of consecutive coefficients `dcoef α N j`. -/
 theorem dcoef_succ {α : ℂ} (hα : -1 < α.re) {N j : ℕ} (hj : j + 1 ≤ N) :
     dcoef α N (j + 1) * ((α + j + 1) * (j - N) * (j + 1)) = dcoef α N j := by
-  have h1 : poch (α + 1) j ≠ 0 := poch_ne_zero_of_re_pos (by simp; linarith) j
-  have h2 : poch (-(N : ℂ)) j ≠ 0 := by
-    rw [poch_neg_coe_nat]
+  have h1 : pochhammer (α + 1) j ≠ 0 := pochhammer_ne_zero_of_re_pos (by simp; linarith) j
+  have h2 : pochhammer (-(N : ℂ)) j ≠ 0 := by
+    rw [pochhammer_neg_coe_nat]
     refine mul_ne_zero (pow_ne_zero _ (by norm_num)) ?_
     exact_mod_cast (Nat.descFactorial_pos.mpr (by omega)).ne'
   have h3 : (j.factorial : ℂ) ≠ 0 := by exact_mod_cast j.factorial_ne_zero
@@ -895,7 +903,7 @@ theorem dcoef_succ {α : ℂ} (hα : -1 < α.re) {N j : ℕ} (hj : j + 1 ≤ N) 
     omega
   have h6 : (j : ℂ) + 1 ≠ 0 := by exact_mod_cast Nat.succ_ne_zero j
   simp only [dcoef]
-  rw [poch_succ, poch_succ, Nat.factorial_succ]
+  rw [pochhammer_succ, pochhammer_succ, Nat.factorial_succ]
   push_cast
   have e : α + 1 + j = α + j + 1 := by ring
   rw [e]
@@ -919,7 +927,7 @@ theorem hahn_recurrence {α β : ℂ} (hα : -1 < α.re) {N n : ℕ} (hn : n + 1
   set A' := (2 * (n : ℂ) + s - 1) * (n + s) * (n + α + 1) * (N - n)
   set C' := (2 * (n : ℂ) + s + 1) * n * (n + s + N) * (n + β)
   set D' := (2 * (n : ℂ) + s - 1) * (2 * n + s) * (2 * n + s + 1)
-  set c : ℕ → ℂ := fun k => dcoef α N k * poch (-x) k
+  set c : ℕ → ℂ := fun k => dcoef α N k * pochhammer (-x) k
   have hQ1 := hahn_eq_sum α β N (n + 1) (n + 1) le_rfl x
   have hQ0 := hahn_eq_sum α β N n (n + 1) (Nat.le_succ n) x
   have hQm : C' * hahn α β N (n - 1) x =
@@ -936,10 +944,11 @@ theorem hahn_recurrence {α β : ℂ} (hα : -1 < α.re) {N n : ℕ} (hn : n + 1
   have hterm : ∀ k ∈ Finset.range (n + 1 + 1),
       c k * (A' * phi s ((n : ℂ) + 1) k - (A' + C') * phi s n k + C' * phi s ((n : ℂ) - 1) k) =
         D' * (-(k : ℂ) * (c k * phi s n k)) +
-          (if k = 0 then 0 else D' * (dcoef α N (k - 1) * poch (-x) k * phi s n (k - 1))) := by
+          (if k = 0 then 0 else D' *
+              (dcoef α N (k - 1) * pochhammer (-x) k * phi s n (k - 1))) := by
     intro k hk
     rcases k with _ | j
-    · simp [phi, poch_zero]
+    · simp [phi, pochhammer_zero]
     · have hj : j + 1 ≤ N := by simp at hk; omega
       have hb := op_phi_succ α β N n j
       have hd := dcoef_succ hα hj
@@ -948,7 +957,7 @@ theorem hahn_recurrence {α β : ℂ} (hα : -1 < α.re) {N n : ℕ} (hn : n + 1
       push_cast
       simp only [A', C', D']
       rw [show (α + β + 1) = s from rfl] at hb
-      linear_combination (dcoef α N (j + 1) * poch (-x) (j + 1)) * hb
+      linear_combination (dcoef α N (j + 1) * pochhammer (-x) (j + 1)) * hb
   -- assemble
   have hsum : A' * hahn α β N (n + 1) x - (A' + C') * hahn α β N n x +
       C' * hahn α β N (n - 1) x = ∑ k ∈ Finset.range (n + 1 + 1),
@@ -961,23 +970,23 @@ theorem hahn_recurrence {α β : ℂ} (hα : -1 < α.re) {N n : ℕ} (hn : n + 1
     push_cast
     ring
   have h2 : ∑ k ∈ Finset.range (n + 1 + 1), (if k = 0 then 0 else
-      D' * (dcoef α N (k - 1) * poch (-x) k * phi s n (k - 1))) =
-      ∑ j ∈ Finset.range (n + 1), D' * (dcoef α N j * poch (-x) (j + 1) * phi s n j) := by
+      D' * (dcoef α N (k - 1) * pochhammer (-x) k * phi s n (k - 1))) =
+      ∑ j ∈ Finset.range (n + 1), D' * (dcoef α N j * pochhammer (-x) (j + 1) * phi s n j) := by
     rw [Finset.sum_range_succ']
     simp
   rw [Finset.sum_congr rfl hterm, Finset.sum_add_distrib, h2] at hsum
   -- telescoping identity
   have htel : ∑ k ∈ Finset.range (n + 1 + 1), D' * (-(k : ℂ) * (c k * phi s n k)) +
-      ∑ j ∈ Finset.range (n + 1), D' * (dcoef α N j * poch (-x) (j + 1) * phi s n j) =
+      ∑ j ∈ Finset.range (n + 1), D' * (dcoef α N j * pochhammer (-x) (j + 1) * phi s n j) =
       D' * (-x * hahn α β N n x) := by
     have hz : phi s n (n + 1) = 0 := by
-      simp [phi, poch_neg_nat_eq_zero (Nat.lt_succ_self n)]
+      simp [phi, pochhammer_neg_nat_eq_zero (Nat.lt_succ_self n)]
     rw [Finset.sum_range_succ, hz, mul_zero, mul_zero, mul_zero, add_zero,
       ← Finset.sum_add_distrib, hahn_eq_sum α β N n n le_rfl x, ← hs, Finset.mul_sum,
       Finset.mul_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     simp only [c]
-    rw [poch_succ]
+    rw [pochhammer_succ]
     ring
   have hD'eq : D' = (2 * n + α + β) * (2 * n + α + β + 1) * (2 * n + α + β + 2) := by
     simp only [D', hs]; ring
@@ -987,11 +996,12 @@ theorem hahn_recurrence {α β : ℂ} (hα : -1 < α.re) {N n : ℕ} (hn : n + 1
 
 /-- The inner Chu–Vandermonde sum for the explicit Meixner formula. -/
 theorem meixner_explicit_inner {n j : ℕ} (hj : j ≤ n) (x β : ℂ) :
-    ∑ k ∈ Finset.range (n + 1), (-1 : ℂ) ^ k * n.choose k * k.choose j * poch (-x) k *
-      poch (β + k) (n - k) = (-1 : ℂ) ^ j * n.choose j * poch (-x) j * poch (x + β) (n - j) := by
+    ∑ k ∈ Finset.range (n + 1), (-1 : ℂ) ^ k * n.choose k * k.choose j * pochhammer (-x) k *
+      pochhammer (β + k) (n - k) = (-1 : ℂ) ^ j * n.choose j * pochhammer (-x) j *
+          pochhammer (x + β) (n - j) := by
   rw [← Finset.sum_range_add_sum_Ico _ (by omega : j ≤ n + 1)]
-  have h0 : ∑ k ∈ Finset.range j, (-1 : ℂ) ^ k * n.choose k * k.choose j * poch (-x) k *
-      poch (β + k) (n - k) = 0 :=
+  have h0 : ∑ k ∈ Finset.range j, (-1 : ℂ) ^ k * n.choose k * k.choose j * pochhammer (-x) k *
+      pochhammer (β + k) (n - k) = 0 :=
     Finset.sum_eq_zero fun k hk => by
       rw [Nat.choose_eq_zero_of_lt (Finset.mem_range.mp hk)]; simp
   rw [h0, zero_add, Finset.sum_Ico_eq_sum_range, show n + 1 - j = n - j + 1 by omega]
@@ -1004,46 +1014,48 @@ theorem meixner_explicit_inner {n j : ℕ} (hj : j ≤ n) (x β : ℂ) :
   rw [show j + i - j = i by omega] at hc
   have hc' : (n.choose (j + i) : ℂ) * ((j + i).choose j) = n.choose j * (n - j).choose i := by
     exact_mod_cast hc
-  rw [poch_add, show n - (j + i) = n - j - i by omega, pow_add]
+  rw [pochhammer_add, show n - (j + i) = n - j - i by omega, pow_add]
   push_cast
   rw [show β + (j + i : ℂ) = β + j + i by ring]
-  linear_combination ((-1 : ℂ) ^ j * (-1 : ℂ) ^ i * poch (-x) j * poch (-x + j) i *
-    poch (β + j + i) (n - j - i)) * hc'
+  linear_combination ((-1 : ℂ) ^ j * (-1 : ℂ) ^ i * pochhammer (-x) j * pochhammer (-x + j) i *
+    pochhammer (β + j + i) (n - j - i)) * hc'
 
 /-- The explicit Meixner sum needs only the denominator factors up to its degree to be
 nonzero. This includes the negative-integer specialization defining Krawtchouk polynomials. -/
-theorem poch_mul_meixner_eq_sum_of_ne_zero {β c : ℂ} (n : ℕ)
-    (hβ : ∀ k ≤ n, poch β k ≠ 0) (x : ℂ) :
-    poch β n * meixner β c n x =
-      ∑ k ∈ Finset.range (n + 1), (n.choose k : ℂ) * poch (-x) k * poch (x + β) (n - k) *
+theorem pochhammer_mul_meixner_eq_sum_of_ne_zero {β c : ℂ} (n : ℕ)
+    (hβ : ∀ k ≤ n, pochhammer β k ≠ 0) (x : ℂ) :
+    pochhammer β n * meixner β c n x =
+      ∑ k ∈ Finset.range (n + 1), (n.choose k : ℂ) * pochhammer (-x) k *
+          pochhammer (x + β) (n - k) *
         c⁻¹ ^ k := by
   -- rewrite the Meixner sum
-  have e1 : poch β n * meixner β c n x = ∑ k ∈ Finset.range (n + 1),
-      (-1 : ℂ) ^ k * n.choose k * poch (-x) k * poch (β + k) (n - k) * (-c⁻¹ + 1) ^ k := by
-    unfold meixner terminatingHG
+  have e1 : pochhammer β n * meixner β c n x = ∑ k ∈ Finset.range (n + 1),
+      (-1 : ℂ) ^ k * n.choose k * pochhammer (-x) k * pochhammer (β + k) (n - k) *
+          (-c⁻¹ + 1) ^ k := by
+    unfold meixner terminatingHypergeometric
     rw [Finset.mul_sum]
     refine Finset.sum_congr rfl fun k hk => ?_
     have hk' : k ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hk)
-    have hp : poch β n = poch β k * poch (β + k) (n - k) := by
-      rw [← poch_add, Nat.add_sub_cancel' hk']
-    have hd : poch (-(n : ℂ)) k = (-1 : ℂ) ^ k * n.choose k * k.factorial := by
-      rw [poch_neg_coe_nat, Nat.descFactorial_eq_factorial_mul_choose]
+    have hp : pochhammer β n = pochhammer β k * pochhammer (β + k) (n - k) := by
+      rw [← pochhammer_add, Nat.add_sub_cancel' hk']
+    have hd : pochhammer (-(n : ℂ)) k = (-1 : ℂ) ^ k * n.choose k * k.factorial := by
+      rw [pochhammer_neg_coe_nat, Nat.descFactorial_eq_factorial_mul_choose]
       push_cast; ring
     have hf : (k.factorial : ℂ) ≠ 0 := by exact_mod_cast k.factorial_ne_zero
     simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one]
     rw [hp, hd, show (1 : ℂ) - c⁻¹ = -c⁻¹ + 1 by ring]
     field_simp [hβ k hk']
   -- expand the binomial and swap
-  have e2 : ∀ k ∈ Finset.range (n + 1), (-1 : ℂ) ^ k * n.choose k * poch (-x) k *
-      poch (β + k) (n - k) * (-c⁻¹ + 1) ^ k = ∑ j ∈ Finset.range (n + 1),
-        (-c⁻¹) ^ j * ((-1 : ℂ) ^ k * n.choose k * k.choose j * poch (-x) k *
-          poch (β + k) (n - k)) := by
+  have e2 : ∀ k ∈ Finset.range (n + 1), (-1 : ℂ) ^ k * n.choose k * pochhammer (-x) k *
+      pochhammer (β + k) (n - k) * (-c⁻¹ + 1) ^ k = ∑ j ∈ Finset.range (n + 1),
+        (-c⁻¹) ^ j * ((-1 : ℂ) ^ k * n.choose k * k.choose j * pochhammer (-x) k *
+          pochhammer (β + k) (n - k)) := by
     intro k hk
     have hk' : k ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hk)
     rw [add_pow, Finset.mul_sum]
     rw [← Finset.sum_range_add_sum_Ico _ (by omega : k + 1 ≤ n + 1)]
     have h0 : ∑ j ∈ Finset.Ico (k + 1) (n + 1), (-c⁻¹) ^ j * ((-1 : ℂ) ^ k * n.choose k *
-        k.choose j * poch (-x) k * poch (β + k) (n - k)) = 0 :=
+        k.choose j * pochhammer (-x) k * pochhammer (β + k) (n - k)) = 0 :=
       Finset.sum_eq_zero fun j hj => by
         rw [Nat.choose_eq_zero_of_lt (n := k) (k := j) (by simp at hj; omega)]; simp
     rw [h0, add_zero]
@@ -1056,15 +1068,16 @@ theorem poch_mul_meixner_eq_sum_of_ne_zero {β c : ℂ} (n : ℕ)
   rw [← Finset.mul_sum, meixner_explicit_inner hj' x β, neg_pow]
   have h1 : (-1 : ℂ) ^ j * (-1 : ℂ) ^ j = 1 := by
     rw [← pow_add, ← two_mul, pow_mul]; norm_num
-  linear_combination (n.choose j * poch (-x) j * poch (x + β) (n - j) * c⁻¹ ^ j) * h1
+  linear_combination (n.choose j * pochhammer (-x) j * pochhammer (x + β) (n - j) * c⁻¹ ^ j) * h1
 
 /-- An explicit sum for the Meixner polynomials (Beals–Wong (6.5.2)):
 `(β)_n M_n(x; β, c) = ∑_k C(n,k) (-x)_k (x + β)_{n-k} c^{-k}`. -/
-theorem poch_mul_meixner_eq_sum {β c : ℂ} (hβ : 0 < β.re) (n : ℕ) (x : ℂ) :
-    poch β n * meixner β c n x =
-      ∑ k ∈ Finset.range (n + 1), (n.choose k : ℂ) * poch (-x) k * poch (x + β) (n - k) *
+theorem pochhammer_mul_meixner_eq_sum {β c : ℂ} (hβ : 0 < β.re) (n : ℕ) (x : ℂ) :
+    pochhammer β n * meixner β c n x =
+      ∑ k ∈ Finset.range (n + 1), (n.choose k : ℂ) * pochhammer (-x) k *
+          pochhammer (x + β) (n - k) *
         c⁻¹ ^ k :=
-  poch_mul_meixner_eq_sum_of_ne_zero n (fun k _ => poch_ne_zero_of_re_pos hβ k) x
+  pochhammer_mul_meixner_eq_sum_of_ne_zero n (fun k _ => pochhammer_ne_zero_of_re_pos hβ k) x
 
 end DLMF.OrthogonalPolynomials
 

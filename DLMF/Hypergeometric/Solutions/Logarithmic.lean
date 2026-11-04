@@ -109,17 +109,19 @@ theorem hasDerivAt_recip_pow (p : ℕ) {v : ℂ} (hv : v ≠ 0) :
 def logSing (a b : ℂ) (n : ℕ) (z : ℂ) : ℂ :=
   ∑ j ∈ Finset.range (n - 1),
     ((n - 1).factorial : ℂ) * (j.factorial : ℂ) /
-      (((n - j - 2).factorial : ℂ) * poch (1 - a) (j + 1) * poch (1 - b) (j + 1)) *
+      (((n - j - 2).factorial : ℂ) * pochhammer (1 - a) (j + 1) * pochhammer (1 - b) (j + 1)) *
           ((-z)⁻¹) ^ (j + 1)
 
 
 
 /-- For `c = n ≥ 1`, the Gauss operator maps the pole part `logSing` to `(n - 1)/z`. -/
 theorem gaussOperator_logSing {a b : ℂ} {n : ℕ} (hn : 0 < n)
-    (ha : poch (1 - a) (n - 1) ≠ 0) (hb : poch (1 - b) (n - 1) ≠ 0) {z : ℂ} (hz : z ≠ 0) :
+    (ha : pochhammer (1 - a) (n - 1) ≠ 0) (hb : pochhammer (1 - b) (n - 1) ≠ 0)
+        {z : ℂ} (hz : z ≠ 0) :
     gaussOperator a b n (logSing a b n) z = (n - 1) / z := by
   set e : ℕ → ℂ := fun j => ((n - 1).factorial : ℂ) * (j.factorial : ℂ) /
-      (((n - j - 2).factorial : ℂ) * poch (1 - a) (j + 1) * poch (1 - b) (j + 1)) with he
+      (((n - j - 2).factorial : ℂ) * pochhammer (1 - a) (j + 1) *
+          pochhammer (1 - b) (j + 1)) with he
   set σ : ℕ → ℂ := fun j => e j * (-1) ^ (j + 1) with hσ
   have hS : logSing a b n = fun v => ∑ j ∈ Finset.range (n - 1), σ j * v⁻¹ ^ (j + 1) := by
     funext v
@@ -158,20 +160,20 @@ theorem gaussOperator_logSing {a b : ℂ} {n : ℕ} (hn : 0 < n)
     have key : t (j + 1) = σ j * (j + 1) * (j + 2 - n) * u ^ (j + 2) := by
       by_cases hj1 : j + 1 < n - 1
       · obtain ⟨N, hN⟩ : ∃ N, n = N + j + 3 := ⟨n - j - 3, by omega⟩
-        have hpa := poch_ne_zero_of_le (show j + 2 ≤ n - 1 by omega) ha
-        have hpb := poch_ne_zero_of_le (show j + 2 ≤ n - 1 by omega) hb
-        have hpa1 := poch_ne_zero_of_le (show j + 1 ≤ j + 2 by omega) hpa
-        have hpb1 := poch_ne_zero_of_le (show j + 1 ≤ j + 2 by omega) hpb
-        rw [poch_succ] at hpa hpb
+        have hpa := pochhammer_ne_zero_of_le (show j + 2 ≤ n - 1 by omega) ha
+        have hpb := pochhammer_ne_zero_of_le (show j + 2 ≤ n - 1 by omega) hb
+        have hpa1 := pochhammer_ne_zero_of_le (show j + 1 ≤ j + 2 by omega) hpa
+        have hpb1 := pochhammer_ne_zero_of_le (show j + 1 ≤ j + 2 by omega) hpb
+        rw [pochhammer_succ] at hpa hpb
         have h1 : n - j - 2 = N + 1 := by omega
         have h2 : n - (j + 1) - 2 = N := by omega
         simp only [ht, ite_eq_left_iff.mpr (fun h => absurd hj1 h), hσ, he, h1, h2]
-        rw [poch_succ (1 - a) (j + 1), poch_succ (1 - b) (j + 1), Nat.factorial_succ j,
+        rw [pochhammer_succ (1 - a) (j + 1), pochhammer_succ (1 - b) (j + 1), Nat.factorial_succ j,
           Nat.factorial_succ N]
         have hn' : (n : ℂ) = N + j + 3 := by rw [hN]; push_cast; ring
         rw [hn']
-        generalize poch (1 - a) (j + 1) = Pa at *
-        generalize poch (1 - b) (j + 1) = Pb at *
+        generalize pochhammer (1 - a) (j + 1) = Pa at *
+        generalize pochhammer (1 - b) (j + 1) = Pb at *
         generalize ((n - 1).factorial : ℂ) = M
         have hF : (N.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr N.factorial_ne_zero
         have hJ : (j.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr j.factorial_ne_zero
@@ -206,9 +208,9 @@ theorem gaussOperator_logSing {a b : ℂ} {n : ℕ} (hn : 0 < n)
     simp [ht]
   · obtain ⟨N, rfl⟩ : ∃ N, n = N + 2 := ⟨n - 2, by omega⟩
     have h0 : (0 : ℕ) < N + 2 - 1 := by omega
-    have hpa := poch_ne_zero_of_le (show 1 ≤ N + 2 - 1 by omega) ha
-    have hpb := poch_ne_zero_of_le (show 1 ≤ N + 2 - 1 by omega) hb
-    rw [poch_one] at hpa hpb
+    have hpa := pochhammer_ne_zero_of_le (show 1 ≤ N + 2 - 1 by omega) ha
+    have hpb := pochhammer_ne_zero_of_le (show 1 ≤ N + 2 - 1 by omega) hb
+    rw [pochhammer_one] at hpa hpb
     have ht0 : t 0 = σ 0 * (1 - a) * (1 - b) * u := by
       simp only [ht]
       rw [ite_eq_left_of_eq_true _ _ (eq_true h0)]
@@ -216,7 +218,7 @@ theorem gaussOperator_logSing {a b : ℂ} {n : ℕ} (hn : 0 < n)
     have he0 : e 0 = ((N + 1 : ℕ) : ℂ) / ((1 - a) * (1 - b)) := by
       simp only [he]
       rw [show N + 2 - 1 = N + 1 by omega, show N + 2 - 0 - 2 = N by omega, Nat.factorial_succ N,
-        Nat.factorial_zero, zero_add, poch_one, poch_one]
+        Nat.factorial_zero, zero_add, pochhammer_one, pochhammer_one]
       have hF : (N.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr N.factorial_ne_zero
       push_cast
       field_simp
@@ -232,19 +234,21 @@ theorem analyticAt_logSing (a b : ℂ) (n : ℕ) {z : ℂ} (hz : z ≠ 0) : Anal
     (logSing a b n) z := by
   unfold logSing
   have h : ∀ j ∈ Finset.range (n - 1), AnalyticAt ℂ (fun v : ℂ => ((n - 1).factorial : ℂ) *
-      (j.factorial : ℂ) / (((n - j - 2).factorial : ℂ) * poch (1 - a) (j + 1) *
-        poch (1 - b) (j + 1)) * ((-v)⁻¹) ^ (j + 1)) z := fun j _ =>
+      (j.factorial : ℂ) / (((n - j - 2).factorial : ℂ) * pochhammer (1 - a) (j + 1) *
+        pochhammer (1 - b) (j + 1)) * ((-v)⁻¹) ^ (j + 1)) z := fun j _ =>
     analyticAt_const.mul ((analyticAt_id.neg.inv (neg_ne_zero.mpr hz)).pow _)
   exact (Finset.analyticAt_fun_sum _ h)
 
 /-- A logarithmic solution of the Gauss equation with integral denominator `n`, given the
 recurrence for the coefficients of its power-series part. -/
 theorem gaussOperator_logSolution {a b : ℂ} {n : ℕ} (hn : 0 < n)
-    (ha : poch (1 - a) (n - 1) ≠ 0) (hb : poch (1 - b) (n - 1) ≠ 0) {h : ℕ → ℂ} {H : ℂ → ℂ}
+    (ha : pochhammer (1 - a) (n - 1) ≠ 0) (hb : pochhammer (1 - b) (n - 1) ≠ 0)
+        {h : ℕ → ℂ} {H : ℂ → ℂ}
     (hH : HasFPowerSeriesOnBall H (ofScalars ℂ h) 0 1)
     (hrec : ∀ k : ℕ, (k + 1) * (n + k) * h (k + 1) - (k + a) * (k + b) * h k +
-      2 * (k + 1) * gaussHGCoeff a b n (k + 1) - (2 * k + a + b) * gaussHGCoeff a b n k +
-      (n - 1) * gaussHGCoeff a b n (k + 1) = 0)
+      2 * (k + 1) * gaussHypergeometricCoeff a b n (k + 1) - (2 * k + a + b) *
+          gaussHypergeometricCoeff a b n k +
+      (n - 1) * gaussHypergeometricCoeff a b n (k + 1) = 0)
     {z : ℂ} (hz : ‖z‖ < 1) (hs : z ∈ slitPlane) :
     gaussOperator a b n (fun v => ₂F₁ a b (n : ℂ) v * log v - logSing a b n v + H v) z = 0 := by
   have hz0 := slitPlane_ne_zero hs
@@ -269,13 +273,13 @@ theorem gaussOperator_logSolution {a b : ℂ} {n : ℕ} (hn : 0 < n)
     simpa [gaussOperator, iteratedDeriv_succ, iteratedDeriv_zero] using this
   rw [hLF]
   -- the series parts
-  set f := gaussHGCoeff a b (n : ℂ) with hf
+  set f := gaussHypergeometricCoeff a b (n : ℂ) with hf
   have h0 := hFs.hasSum_mul_pow hzb
   have h1 := hFs.deriv_ofScalars.hasSum_mul_pow hzb
   have hz1' := hFs.hasSum_z_mul_deriv hzb
   have hsh : HasSum (fun k : ℕ => f (k + 1) * z ^ k) ((F z - 1) / z) := by
     have h0' := (hasSum_nat_add_iff' 1).mpr h0
-    have hf0 : f 0 = 1 := by simp [hf, gaussHGCoeff, poch_zero]
+    have hf0 : f 0 = 1 := by simp [hf, gaussHypergeometricCoeff, pochhammer_zero]
     simp only [Finset.sum_range_one, pow_zero, mul_one, hf0] at h0'
     have h2 := h0'.mul_left z⁻¹
     convert h2 using 1
@@ -298,7 +302,8 @@ theorem gaussOperator_logSolution {a b : ℂ} {n : ℕ} (hn : 0 < n)
 /-- Signed coefficients of the pole part `logSing`. -/
 def logSingCoeff (a b : ℂ) (n j : ℕ) : ℂ :=
   ((n - 1).factorial : ℂ) * (j.factorial : ℂ) /
-    (((n - j - 2).factorial : ℂ) * poch (1 - a) (j + 1) * poch (1 - b) (j + 1)) * (-1) ^ (j + 1)
+    (((n - j - 2).factorial : ℂ) * pochhammer (1 - a) (j + 1) * pochhammer (1 - b) (j + 1))
+        * (-1) ^ (j + 1)
 
 /-- The pole part `logSing` written with the signed coefficients `logSingCoeff`. -/
 theorem logSing_eq (a b : ℂ) (n : ℕ) (v : ℂ) :
@@ -365,7 +370,7 @@ theorem differentiable_logSingPoly1 (a b : ℂ) (n : ℕ) : Differentiable ℂ (
 /-- The leading coefficient of the pole part is nonzero when `n ≥ 2` and the Pochhammer factors do
   not vanish. -/
 theorem logSingCoeff_ne_zero {a b : ℂ} {n : ℕ} (hn : 2 ≤ n)
-    (ha : poch (1 - a) (n - 1) ≠ 0) (hb : poch (1 - b) (n - 1) ≠ 0) :
+    (ha : pochhammer (1 - a) (n - 1) ≠ 0) (hb : pochhammer (1 - b) (n - 1) ≠ 0) :
     logSingCoeff a b n (n - 2) ≠ 0 := by
   unfold logSingCoeff
   rw [show n - 2 + 1 = n - 1 by omega]
@@ -377,11 +382,13 @@ theorem logSingCoeff_ne_zero {a b : ℂ} {n : ℕ} (hn : 2 ≤ n)
 
 /-- The Wronskian of `₂F₁(a,b;n;z)` and a logarithmic solution does not vanish. -/
 theorem wronskian_logSolution_ne_zero {a b : ℂ} {n : ℕ} (hn : 0 < n)
-    (ha : poch (1 - a) (n - 1) ≠ 0) (hb : poch (1 - b) (n - 1) ≠ 0) {h : ℕ → ℂ} {H : ℂ → ℂ}
+    (ha : pochhammer (1 - a) (n - 1) ≠ 0) (hb : pochhammer (1 - b) (n - 1) ≠ 0)
+        {h : ℕ → ℂ} {H : ℂ → ℂ}
     (hH : HasFPowerSeriesOnBall H (ofScalars ℂ h) 0 1)
     (hrec : ∀ k : ℕ, (k + 1) * (n + k) * h (k + 1) - (k + a) * (k + b) * h k +
-      2 * (k + 1) * gaussHGCoeff a b n (k + 1) - (2 * k + a + b) * gaussHGCoeff a b n k +
-      (n - 1) * gaussHGCoeff a b n (k + 1) = 0)
+      2 * (k + 1) * gaussHypergeometricCoeff a b n (k + 1) - (2 * k + a + b) *
+          gaussHypergeometricCoeff a b n k +
+      (n - 1) * gaussHypergeometricCoeff a b n (k + 1) = 0)
     {z : ℂ} (hz : ‖z‖ < 1) (hs : z ∈ slitPlane) :
     solutionWronskian (₂F₁ a b (n : ℂ))
       (fun v => ₂F₁ a b (n : ℂ) v * log v - logSing a b n v + H v) z ≠ 0 := by
@@ -564,17 +571,17 @@ theorem one_le_radius_ofScalars {h : ℕ → ℂ}
 
 /-- Coefficients eventually of polynomial growth relative to a Gauss series give radius at
 least one. -/
-theorem one_le_radius_of_le_gaussHGCoeff {h : ℕ → ℂ} (a b c : ℂ) {C : ℝ} (N : ℕ)
-    (hC : ∀ k, N ≤ k → ‖h k‖ ≤ C * (k + 1) * ‖gaussHGCoeff a b c k‖) :
+theorem one_le_radius_of_le_gaussHypergeometricCoeff {h : ℕ → ℂ} (a b c : ℂ) {C : ℝ} (N : ℕ)
+    (hC : ∀ k, N ≤ k → ‖h k‖ ≤ C * (k + 1) * ‖gaussHypergeometricCoeff a b c k‖) :
     1 ≤ (ofScalars ℂ h).radius := by
   refine one_le_radius_ofScalars fun r hr0 hr1 => ?_
   set r' : ℝ := (1 + r) / 2 with hr'
   have hr'0 : 0 < r' := by rw [hr']; linarith
   have hr'1 : r' < 1 := by rw [hr']; linarith
-  have hsum := summable_norm_gaussHGCoeff_mul_pow a b c (z := (r' : ℂ))
+  have hsum := summable_norm_gaussHypergeometricCoeff_mul_pow a b c (z := (r' : ℂ))
     (by rw [Complex.norm_real, Real.norm_eq_abs, abs_of_pos hr'0]; exact hr'1)
-  set M := ∑' k, ‖gaussHGCoeff a b c k * (r' : ℂ) ^ k‖
-  have hM : ∀ k, ‖gaussHGCoeff a b c k‖ * r' ^ k ≤ M := by
+  set M := ∑' k, ‖gaussHypergeometricCoeff a b c k * (r' : ℂ) ^ k‖
+  have hM : ∀ k, ‖gaussHypergeometricCoeff a b c k‖ * r' ^ k ≤ M := by
     intro k
     have := hsum.le_tsum k (fun j _ => norm_nonneg _)
     rwa [norm_mul, norm_pow, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hr'0] at this
@@ -598,14 +605,17 @@ theorem one_le_radius_of_le_gaussHGCoeff {h : ℕ → ℂ} (a b c : ℂ) {C : �
   rw [hrk]
   push_cast at hk ⊢
   calc ‖h (k + N)‖ * (q ^ (k + N) * r' ^ (k + N))
-      ≤ C * ((k : ℝ) + N + 1) * ‖gaussHGCoeff a b c (k + N)‖ * (q ^ (k + N) * r' ^ (k + N)) := by
+      ≤ C * ((k : ℝ) + N + 1) * ‖gaussHypergeometricCoeff a b c (k + N)‖ *
+          (q ^ (k + N) * r' ^ (k + N)) := by
         gcongr
-    _ = C * ((k : ℝ) + N + 1) * q ^ (k + N) * (‖gaussHGCoeff a b c (k + N)‖ * r' ^ (k + N)) := by
+    _ = C * ((k : ℝ) + N + 1) * q ^ (k + N) *
+        (‖gaussHypergeometricCoeff a b c (k + N)‖ * r' ^ (k + N)) := by
         ring
     _ ≤ |C| * ((k : ℝ) + N + 1) * q ^ (k + N) * M := by
-        calc C * ((k : ℝ) + N + 1) * q ^ (k + N) * (‖gaussHGCoeff a b c (k + N)‖ * r' ^ (k + N))
+        calc C * ((k : ℝ) + N + 1) * q ^ (k + N) *
+               (‖gaussHypergeometricCoeff a b c (k + N)‖ * r' ^ (k + N))
             ≤ |C| * ((k : ℝ) + N + 1) * q ^ (k + N) *
-                (‖gaussHGCoeff a b c (k + N)‖ * r' ^ (k + N)) := by
+                (‖gaussHypergeometricCoeff a b c (k + N)‖ * r' ^ (k + N)) := by
               gcongr; exact le_abs_self C
           _ ≤ |C| * ((k : ℝ) + N + 1) * q ^ (k + N) * M := by gcongr; exact hM _
     _ = |C| * M * (((k : ℝ) + N + 1) * q ^ (k + N)) := by ring
@@ -687,13 +697,14 @@ theorem logarithmic_second_fundamental
     simpa using natCast_not_neg_nat (n := 1) one_pos m
   set δ : ℕ → ℂ := fun k => digamma (a + k) + digamma (b + k) - digamma (1 + k) - digamma (n + k)
     with hδ
-  set h : ℕ → ℂ := fun k => gaussHGCoeff a b n k * δ k with hh
+  set h : ℕ → ℂ := fun k => gaussHypergeometricCoeff a b n k * δ k with hh
   obtain ⟨Ca, hCa⟩ := exists_norm_digamma_add_nat_le ha'
   obtain ⟨Cb, hCb⟩ := exists_norm_digamma_add_nat_le hb'
   obtain ⟨C1, hC1⟩ := exists_norm_digamma_add_nat_le h1c
   obtain ⟨Cn, hCn⟩ := exists_norm_digamma_add_nat_le hnc
   have hr : 1 ≤ (ofScalars ℂ h).radius := by
-    refine one_le_radius_of_le_gaussHGCoeff a b n (C := Ca + Cb + C1 + Cn) 0 fun k _ => ?_
+    refine one_le_radius_of_le_gaussHypergeometricCoeff a b n (C := Ca + Cb + C1 + Cn)
+        0 fun k _ => ?_
     simp only [hh, hδ, norm_mul]
     have : ‖digamma (a + k) + digamma (b + k) - digamma (1 + k) - digamma (n + k)‖ ≤
         (Ca + Cb + C1 + Cn) * (k + 1) := by
@@ -711,17 +722,19 @@ theorem logarithmic_second_fundamental
             · exact hC1 k
             · exact hCn k
         _ = _ := by ring
-    calc ‖gaussHGCoeff a b n k‖ * ‖digamma (a + k) + digamma (b + k) - digamma (1 + k) -
-          digamma (n + k)‖ ≤ ‖gaussHGCoeff a b n k‖ * ((Ca + Cb + C1 + Cn) * (k + 1)) := by
+    calc ‖gaussHypergeometricCoeff a b n k‖ * ‖digamma (a + k) + digamma (b + k) - digamma (1 + k) -
+          digamma (n + k)‖ ≤ ‖gaussHypergeometricCoeff a b n k‖ *
+              ((Ca + Cb + C1 + Cn) * (k + 1)) := by
           gcongr
       _ = _ := by ring
   have hH := hasFPowerSeriesOnBall_ofScalars_sum hr
   set H := (ofScalars ℂ h).sum with hHdef
   have hrec : ∀ k : ℕ, (k + 1) * (n + k) * h (k + 1) - (k + a) * (k + b) * h k +
-      2 * (k + 1) * gaussHGCoeff a b n (k + 1) - (2 * k + a + b) * gaussHGCoeff a b n k +
-      (n - 1) * gaussHGCoeff a b n (k + 1) = 0 := by
+      2 * (k + 1) * gaussHypergeometricCoeff a b n (k + 1) - (2 * k + a + b) *
+          gaussHypergeometricCoeff a b n k +
+      (n - 1) * gaussHypergeometricCoeff a b n (k + 1) = 0 := by
     intro k
-    have hrec0 := gaussHGCoeff_recurrence (a := a) (b := b) hnc k
+    have hrec0 := gaussHypergeometricCoeff_recurrence (a := a) (b := b) hnc k
     have hk : ∀ x : ℂ, (∀ m : ℕ, x ≠ -(m : ℂ)) →
         digamma (x + ((k + 1 : ℕ) : ℂ)) = digamma (x + k) + (x + k)⁻¹ := by
       intro x hx
@@ -733,12 +746,13 @@ theorem logarithmic_second_fundamental
     rw [hk a ha', hk b hb', hk 1 h1c, hk n hnc]
     linear_combination (digamma (a + k) + digamma (b + k) - digamma (1 + k) - digamma (n + k) +
         (a + k)⁻¹ + (b + k)⁻¹) * hrec0 +
-      (b + k) * gaussHGCoeff a b n k * hne a ha' + (a + k) * gaussHGCoeff a b n k * hne b hb' -
-      (n + k) * gaussHGCoeff a b n (k + 1) * hne 1 h1c -
-      (k + 1) * gaussHGCoeff a b n (k + 1) * hne n hnc
-  have hpa : poch (1 - a) (n - 1) ≠ 0 := poch_ne_zero_of_not_neg_nat
+      (b + k) * gaussHypergeometricCoeff a b n k * hne a ha' + (a + k) *
+          gaussHypergeometricCoeff a b n k * hne b hb' -
+      (n + k) * gaussHypergeometricCoeff a b n (k + 1) * hne 1 h1c -
+      (k + 1) * gaussHypergeometricCoeff a b n (k + 1) * hne n hnc
+  have hpa : pochhammer (1 - a) (n - 1) ≠ 0 := pochhammer_ne_zero_of_not_neg_nat
     (fun k hk => ha (k + 1) (by push_cast; linear_combination -hk)) _
-  have hpb : poch (1 - b) (n - 1) ≠ 0 := poch_ne_zero_of_not_neg_nat
+  have hpb : pochhammer (1 - b) (n - 1) ≠ 0 := pochhammer_ne_zero_of_not_neg_nat
     (fun k hk => hb (k + 1) (by push_cast; linear_combination -hk)) _
   have hev : logarithmicSecond a b n =ᶠ[𝓝 z]
       fun v => ₂F₁ a b (n : ℂ) v * log v - logSing a b n v + H v := by
@@ -757,8 +771,8 @@ theorem logarithmic_second_fundamental
     exact wronskian_logSolution_ne_zero hn hpa hpb hH hrec hz hs
 
 /-- For a positive integer `n`, `k! ≤ ‖(n)ₖ‖`. -/
-theorem factorial_le_norm_poch_natCast {n : ℕ} (hn : 0 < n) (k : ℕ) :
-    (k.factorial : ℝ) ≤ ‖poch (n : ℂ) k‖ :=
+theorem factorial_le_norm_pochhammer_natCast {n : ℕ} (hn : 0 < n) (k : ℕ) :
+    (k.factorial : ℝ) ≤ ‖pochhammer (n : ℂ) k‖ :=
   factorial_le_norm_ascPochhammer_eval (by simp; exact_mod_cast hn) k
 
 /-- Identity under the stated parameter and domain assumptions: `gaussOperator (-m) b n
@@ -780,45 +794,46 @@ theorem logarithmic_second_terminating_fundamental
   have hnc := natCast_not_neg_nat hn
   have h1c : ∀ m : ℕ, (1 : ℂ) ≠ -(m : ℂ) := fun m => by
     simpa using natCast_not_neg_nat (n := 1) one_pos m
-  set f : ℕ → ℂ := gaussHGCoeff (-(m : ℂ)) b n with hf
+  set f : ℕ → ℂ := gaussHypergeometricCoeff (-(m : ℂ)) b n with hf
   set δ : ℕ → ℂ := fun k => digamma (1 + m - k) + digamma (b + k) - digamma (1 + k) -
     digamma (n + k) with hδ
   set h : ℕ → ℂ := fun k => if k ≤ m then f k * δ k else
-    (-1) ^ m * (m.factorial : ℂ) * ((k - m - 1).factorial : ℂ) * poch b k /
-      (poch n k * (k.factorial : ℂ)) with hh
+    (-1) ^ m * (m.factorial : ℂ) * ((k - m - 1).factorial : ℂ) * pochhammer b k /
+      (pochhammer n k * (k.factorial : ℂ)) with hh
   have hf0 : ∀ k, m < k → f k = 0 := fun k hk => by
-    simp only [hf, gaussHGCoeff, poch_neg_nat_eq_zero hk, zero_mul, zero_div]
+    simp only [hf, gaussHypergeometricCoeff, pochhammer_neg_nat_eq_zero hk, zero_mul, zero_div]
   have hr : 1 ≤ (ofScalars ℂ h).radius := by
-    refine one_le_radius_of_le_gaussHGCoeff b 1 1 (C := m.factorial) (m + 1) fun k hk => ?_
+    refine one_le_radius_of_le_gaussHypergeometricCoeff b 1 1 (C := m.factorial)
+        (m + 1) fun k hk => ?_
     have hkm : ¬ k ≤ m := by omega
     simp only [hh, ite_eq_right_iff.mpr (fun h => absurd h hkm)]
     have hfk : (0 : ℝ) < k.factorial := by positivity
-    have hpn := factorial_le_norm_poch_natCast hn k
+    have hpn := factorial_le_norm_pochhammer_natCast hn k
     have hkf : (((k - m - 1).factorial : ℕ) : ℝ) ≤ k.factorial :=
       by exact_mod_cast Nat.factorial_le (by omega)
-    rw [gaussHGCoeff_self_right]
+    rw [gaussHypergeometricCoeff_self_right]
     simp only [norm_div, norm_mul, norm_pow, norm_neg, norm_one, one_pow, one_mul,
       Complex.norm_natCast]
-    have hQ : (0 : ℝ) < ‖poch (n : ℂ) k‖ := lt_of_lt_of_le hfk hpn
+    have hQ : (0 : ℝ) < ‖pochhammer (n : ℂ) k‖ := lt_of_lt_of_le hfk hpn
     rw [div_le_iff₀ (mul_pos hQ hfk)]
-    have e : (m.factorial : ℝ) * (k + 1) * (‖poch b k‖ / k.factorial) *
-        (‖poch (n : ℂ) k‖ * k.factorial)
-        = m.factorial * ‖poch b k‖ * ((k + 1) * ‖poch (n : ℂ) k‖) := by
+    have e : (m.factorial : ℝ) * (k + 1) * (‖pochhammer b k‖ / k.factorial) *
+        (‖pochhammer (n : ℂ) k‖ * k.factorial)
+        = m.factorial * ‖pochhammer b k‖ * ((k + 1) * ‖pochhammer (n : ℂ) k‖) := by
       field_simp
     rw [e]
-    have h1 : (k.factorial : ℝ) ≤ (k + 1) * ‖poch (n : ℂ) k‖ := by
+    have h1 : (k.factorial : ℝ) ≤ (k + 1) * ‖pochhammer (n : ℂ) k‖ := by
       nlinarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
-    have h2 : (0 : ℝ) ≤ m.factorial * ‖poch b k‖ := by positivity
-    calc (m.factorial : ℝ) * ((k - m - 1).factorial : ℝ) * ‖poch b k‖
-        ≤ m.factorial * k.factorial * ‖poch b k‖ := by gcongr
-      _ = m.factorial * ‖poch b k‖ * k.factorial := by ring
+    have h2 : (0 : ℝ) ≤ m.factorial * ‖pochhammer b k‖ := by positivity
+    calc (m.factorial : ℝ) * ((k - m - 1).factorial : ℝ) * ‖pochhammer b k‖
+        ≤ m.factorial * k.factorial * ‖pochhammer b k‖ := by gcongr
+      _ = m.factorial * ‖pochhammer b k‖ * k.factorial := by ring
       _ ≤ _ := mul_le_mul_of_nonneg_left h1 h2
   have hH := hasFPowerSeriesOnBall_ofScalars_sum hr
   set H := (ofScalars ℂ h).sum with hHdef
   have hrec : ∀ k : ℕ, (k + 1) * (n + k) * h (k + 1) - (k + -(m : ℂ)) * (k + b) * h k +
       2 * (k + 1) * f (k + 1) - (2 * k + -(m : ℂ) + b) * f k + (n - 1) * f (k + 1) = 0 := by
     intro k
-    have hrec0 := gaussHGCoeff_recurrence (a := -(m : ℂ)) (b := b) hnc k
+    have hrec0 := gaussHypergeometricCoeff_recurrence (a := -(m : ℂ)) (b := b) hnc k
     rw [← hf] at hrec0
     rcases Nat.lt_trichotomy k m with hkm | rfl | hkm
     · -- both coefficients come from the finite part
@@ -858,10 +873,10 @@ theorem logarithmic_second_terminating_fundamental
       simp only [hh, ite_eq_left_iff.mpr (fun h => absurd le_rfl h),
           ite_eq_right_iff.mpr (fun h => absurd h (by omega : ¬ k + 1 ≤ k)),
         hf0 (k + 1) (by omega), show k + 1 - k - 1 = 0 by omega, Nat.factorial_zero]
-      have hfm : f k = (-1) ^ k * poch b k / poch (n : ℂ) k := by
-        rw [hf, gaussHGCoeff_neg_nat, Nat.choose_self]; simp
-      rw [hfm, poch_succ b k, poch_succ (n : ℂ) k, Nat.factorial_succ]
-      have hpn : poch (n : ℂ) k ≠ 0 := poch_ne_zero_of_not_neg_nat hnc k
+      have hfm : f k = (-1) ^ k * pochhammer b k / pochhammer (n : ℂ) k := by
+        rw [hf, gaussHypergeometricCoeff_neg_nat, Nat.choose_self]; simp
+      rw [hfm, pochhammer_succ b k, pochhammer_succ (n : ℂ) k, Nat.factorial_succ]
+      have hpn : pochhammer (n : ℂ) k ≠ 0 := pochhammer_ne_zero_of_not_neg_nat hnc k
       have hnk : (n : ℂ) + k ≠ 0 := by simpa using not_neg_nat_add_nat hnc k 0
       have hkf : (k.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr k.factorial_ne_zero
       push_cast
@@ -874,8 +889,9 @@ theorem logarithmic_second_terminating_fundamental
         ite_eq_right_iff.mpr (fun h => absurd h hk), hf0 k hkm, hf0 (k + 1) (by omega)]
       obtain ⟨j, rfl⟩ : ∃ j, k = m + 1 + j := ⟨k - m - 1, by omega⟩
       rw [show m + 1 + j + 1 - m - 1 = j + 1 by omega, show m + 1 + j - m - 1 = j by omega,
-        poch_succ b, poch_succ (n : ℂ), Nat.factorial_succ (m + 1 + j), Nat.factorial_succ j]
-      have hpn : poch (n : ℂ) (m + 1 + j) ≠ 0 := poch_ne_zero_of_not_neg_nat hnc _
+        pochhammer_succ b, pochhammer_succ (n : ℂ), Nat.factorial_succ (m + 1 + j),
+            Nat.factorial_succ j]
+      have hpn : pochhammer (n : ℂ) (m + 1 + j) ≠ 0 := pochhammer_ne_zero_of_not_neg_nat hnc _
       have hnk : (n : ℂ) + ((m + 1 + j : ℕ) : ℂ) ≠ 0 := by
         simpa using not_neg_nat_add_nat hnc (m + 1 + j) 0
       have hkf : ((m + 1 + j).factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
@@ -883,12 +899,12 @@ theorem logarithmic_second_terminating_fundamental
       push_cast at hnk h2 ⊢
       field_simp
       ring
-  have hpa : poch (1 - -(m : ℂ)) (n - 1) ≠ 0 := by
-    refine poch_ne_zero_of_not_neg_nat (fun k hk => ?_) _
+  have hpa : pochhammer (1 - -(m : ℂ)) (n - 1) ≠ 0 := by
+    refine pochhammer_ne_zero_of_not_neg_nat (fun k hk => ?_) _
     have := congrArg re hk
     simp at this
     linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k), (Nat.cast_nonneg m : (0 : ℝ) ≤ m)]
-  have hpb : poch (1 - b) (n - 1) ≠ 0 := poch_ne_zero_of_not_neg_nat
+  have hpb : pochhammer (1 - b) (n - 1) ≠ 0 := pochhammer_ne_zero_of_not_neg_nat
     (fun k hk => hb (k + 1) (by push_cast; linear_combination -hk)) _
   have hev : logarithmicSecondTerminating b m n =ᶠ[𝓝 z]
       fun v => ₂F₁ (-(m : ℂ)) b (n : ℂ) v * log v - logSing (-(m : ℂ)) b n v + H v := by
@@ -899,11 +915,11 @@ theorem logarithmic_second_terminating_fundamental
     rw [← hsum.tsum_eq, ← hsum.summable.sum_add_tsum_nat_add (m + 1)]
     have hS : logSing (-(m : ℂ)) b n v = ∑ j ∈ Finset.range (n - 1),
         ((n - 1).factorial : ℂ) * (j.factorial : ℂ) /
-          (((n - j - 2).factorial : ℂ) * poch (m + 1) (j + 1) * poch (1 - b) (j + 1)) *
+          (((n - j - 2).factorial : ℂ) * pochhammer (m + 1) (j + 1) * pochhammer (1 - b) (j + 1)) *
             ((-v)⁻¹) ^ (j + 1) := by
       simp only [logSing, show (1 : ℂ) - -(m : ℂ) = m + 1 by ring]
     have hP : ∑ k ∈ Finset.range (m + 1), h k * v ^ k =
-        ∑ k ∈ Finset.range (m + 1), gaussHGCoeff (-m) b n k * v ^ k *
+        ∑ k ∈ Finset.range (m + 1), gaussHypergeometricCoeff (-m) b n k * v ^ k *
           (digamma (1 + m - k) + digamma (b + k) - digamma (1 + k) - digamma (n + k)) := by
       refine Finset.sum_congr rfl fun k hk => ?_
       rw [Finset.mem_range] at hk
@@ -911,8 +927,8 @@ theorem logarithmic_second_terminating_fundamental
       ring
     have hT : ∑' j : ℕ, h (j + (m + 1)) * v ^ (j + (m + 1)) =
         (-1 : ℂ) ^ m * (m.factorial : ℂ) * ∑' j : ℕ,
-          (j.factorial : ℂ) * poch b (m + 1 + j) /
-            (poch n (m + 1 + j) * ((m + 1 + j).factorial : ℂ)) * v ^ (m + 1 + j) := by
+          (j.factorial : ℂ) * pochhammer b (m + 1 + j) /
+            (pochhammer n (m + 1 + j) * ((m + 1 + j).factorial : ℂ)) * v ^ (m + 1 + j) := by
       rw [← tsum_mul_left]
       refine tsum_congr fun j => ?_
       rw [show j + (m + 1) = m + 1 + j by omega]
@@ -961,26 +977,26 @@ theorem logarithmic_second_both_terminating_fundamental
   have hnc := natCast_not_neg_nat hn
   have h1c : ∀ m : ℕ, (1 : ℂ) ≠ -(m : ℂ) := fun m => by
     simpa using natCast_not_neg_nat (n := 1) one_pos m
-  set f : ℕ → ℂ := gaussHGCoeff (-(m : ℂ)) (-(l : ℂ)) n with hf
+  set f : ℕ → ℂ := gaussHypergeometricCoeff (-(m : ℂ)) (-(l : ℂ)) n with hf
   set δ : ℕ → ℂ := fun k => digamma (1 + m - k) + digamma (1 + l - k) - digamma (1 + k) -
     digamma (n + k) with hδ
   set h : ℕ → ℂ := fun k => if k ≤ l then f k * δ k else
-    (-1) ^ l * (l.factorial : ℂ) * ((k - l - 1).factorial : ℂ) * poch (-(m : ℂ)) k /
-      (poch n k * (k.factorial : ℂ)) with hh
+    (-1) ^ l * (l.factorial : ℂ) * ((k - l - 1).factorial : ℂ) * pochhammer (-(m : ℂ)) k /
+      (pochhammer n k * (k.factorial : ℂ)) with hh
   have hf0 : ∀ k, l < k → f k = 0 := fun k hk => by
-    simp only [hf, gaussHGCoeff, poch_neg_nat_eq_zero hk, mul_zero, zero_div]
+    simp only [hf, gaussHypergeometricCoeff, pochhammer_neg_nat_eq_zero hk, mul_zero, zero_div]
   have hh0 : ∀ k, m < k → h k = 0 := fun k hk => by
     simp only [hh, ite_eq_right_iff.mpr (fun h => absurd h (by omega : ¬ k ≤ l)),
-      poch_neg_nat_eq_zero hk, mul_zero, zero_div]
+      pochhammer_neg_nat_eq_zero hk, mul_zero, zero_div]
   have hr : 1 ≤ (ofScalars ℂ h).radius :=
-    one_le_radius_of_le_gaussHGCoeff 1 1 1 (C := 0) (m + 1) fun k hk => by
+    one_le_radius_of_le_gaussHypergeometricCoeff 1 1 1 (C := 0) (m + 1) fun k hk => by
       rw [hh0 k (by omega)]; simp
   have hH := hasFPowerSeriesOnBall_ofScalars_sum hr
   set H := (ofScalars ℂ h).sum with hHdef
   have hrec : ∀ k : ℕ, (k + 1) * (n + k) * h (k + 1) - (k + -(m : ℂ)) * (k + -(l : ℂ)) * h k +
       2 * (k + 1) * f (k + 1) - (2 * k + -(m : ℂ) + -(l : ℂ)) * f k + (n - 1) * f (k + 1) = 0 := by
     intro k
-    have hrec0 := gaussHGCoeff_recurrence (a := -(m : ℂ)) (b := -(l : ℂ)) hnc k
+    have hrec0 := gaussHypergeometricCoeff_recurrence (a := -(m : ℂ)) (b := -(l : ℂ)) hnc k
     rw [← hf] at hrec0
     rcases Nat.lt_trichotomy k l with hkl | rfl | hkl
     · have hk1 : k + 1 ≤ l := hkl
@@ -1003,12 +1019,12 @@ theorem logarithmic_second_both_terminating_fundamental
     · simp only [hh, ite_eq_left_iff.mpr (fun h => absurd le_rfl h),
         ite_eq_right_iff.mpr (fun h => absurd h (by omega : ¬ k + 1 ≤ k)),
         hf0 (k + 1) (by omega), show k + 1 - k - 1 = 0 by omega, Nat.factorial_zero]
-      have hfm : f k = (-1) ^ k * poch (-(m : ℂ)) k / poch (n : ℂ) k := by
-        have : f k = gaussHGCoeff (-(k : ℂ)) (-(m : ℂ)) n k := by
-          simp only [hf, gaussHGCoeff]; ring
-        rw [this, gaussHGCoeff_neg_nat, Nat.choose_self]; simp
-      rw [hfm, poch_succ (-(m : ℂ)) k, poch_succ (n : ℂ) k, Nat.factorial_succ]
-      have hpn : poch (n : ℂ) k ≠ 0 := poch_ne_zero_of_not_neg_nat hnc k
+      have hfm : f k = (-1) ^ k * pochhammer (-(m : ℂ)) k / pochhammer (n : ℂ) k := by
+        have : f k = gaussHypergeometricCoeff (-(k : ℂ)) (-(m : ℂ)) n k := by
+          simp only [hf, gaussHypergeometricCoeff]; ring
+        rw [this, gaussHypergeometricCoeff_neg_nat, Nat.choose_self]; simp
+      rw [hfm, pochhammer_succ (-(m : ℂ)) k, pochhammer_succ (n : ℂ) k, Nat.factorial_succ]
+      have hpn : pochhammer (n : ℂ) k ≠ 0 := pochhammer_ne_zero_of_not_neg_nat hnc k
       have hnk : (n : ℂ) + k ≠ 0 := by simpa using not_neg_nat_add_nat hnc k 0
       have hkf : (k.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr k.factorial_ne_zero
       push_cast
@@ -1020,9 +1036,9 @@ theorem logarithmic_second_both_terminating_fundamental
         ite_eq_right_iff.mpr (fun h => absurd h hk), hf0 k hkl, hf0 (k + 1) (by omega)]
       obtain ⟨j, rfl⟩ : ∃ j, k = l + 1 + j := ⟨k - l - 1, by omega⟩
       rw [show l + 1 + j + 1 - l - 1 = j + 1 by omega, show l + 1 + j - l - 1 = j by omega,
-        poch_succ (-(m : ℂ)), poch_succ (n : ℂ), Nat.factorial_succ (l + 1 + j),
+        pochhammer_succ (-(m : ℂ)), pochhammer_succ (n : ℂ), Nat.factorial_succ (l + 1 + j),
             Nat.factorial_succ j]
-      have hpn : poch (n : ℂ) (l + 1 + j) ≠ 0 := poch_ne_zero_of_not_neg_nat hnc _
+      have hpn : pochhammer (n : ℂ) (l + 1 + j) ≠ 0 := pochhammer_ne_zero_of_not_neg_nat hnc _
       have hnk : (n : ℂ) + ((l + 1 + j : ℕ) : ℂ) ≠ 0 := by
         simpa using not_neg_nat_add_nat hnc (l + 1 + j) 0
       have hkf : ((l + 1 + j).factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
@@ -1030,9 +1046,9 @@ theorem logarithmic_second_both_terminating_fundamental
       push_cast at hnk h2 ⊢
       field_simp
       ring
-  have hpos : ∀ p : ℕ, poch (1 - -(p : ℂ)) (n - 1) ≠ 0 := by
+  have hpos : ∀ p : ℕ, pochhammer (1 - -(p : ℂ)) (n - 1) ≠ 0 := by
     intro p
-    refine poch_ne_zero_of_not_neg_nat (fun k hk => ?_) _
+    refine pochhammer_ne_zero_of_not_neg_nat (fun k hk => ?_) _
     have := congrArg re hk
     simp at this
     linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k), (Nat.cast_nonneg p : (0 : ℝ) ≤ p)]
@@ -1046,12 +1062,12 @@ theorem logarithmic_second_both_terminating_fundamental
     rw [← hsum.tsum_eq, ← hsum.summable.sum_add_tsum_nat_add (l + 1)]
     have hS : logSing (-(m : ℂ)) (-(l : ℂ)) n v = ∑ j ∈ Finset.range (n - 1),
         ((n - 1).factorial : ℂ) * (j.factorial : ℂ) /
-          (((n - j - 2).factorial : ℂ) * poch (m + 1) (j + 1) * poch (l + 1) (j + 1)) *
+          (((n - j - 2).factorial : ℂ) * pochhammer (m + 1) (j + 1) * pochhammer (l + 1) (j + 1)) *
             ((-v)⁻¹) ^ (j + 1) := by
       simp only [logSing, show (1 : ℂ) - -(m : ℂ) = m + 1 by ring,
         show (1 : ℂ) - -(l : ℂ) = l + 1 by ring]
     have hP : ∑ k ∈ Finset.range (l + 1), h k * v ^ k =
-        ∑ k ∈ Finset.range (l + 1), gaussHGCoeff (-m) (-l) n k * v ^ k *
+        ∑ k ∈ Finset.range (l + 1), gaussHypergeometricCoeff (-m) (-l) n k * v ^ k *
           (digamma (1 + m - k) + digamma (1 + l - k) - digamma (1 + k) - digamma (n + k)) := by
       refine Finset.sum_congr rfl fun k hk => ?_
       rw [Finset.mem_range] at hk
@@ -1059,8 +1075,8 @@ theorem logarithmic_second_both_terminating_fundamental
       ring
     have hT : ∑' j : ℕ, h (j + (l + 1)) * v ^ (j + (l + 1)) =
         (-1 : ℂ) ^ l * (l.factorial : ℂ) * ∑ j ∈ Finset.range (m - l),
-          (j.factorial : ℂ) * poch (-m) (l + 1 + j) /
-            (poch n (l + 1 + j) * ((l + 1 + j).factorial : ℂ)) * v ^ (l + 1 + j) := by
+          (j.factorial : ℂ) * pochhammer (-m) (l + 1 + j) /
+            (pochhammer n (l + 1 + j) * ((l + 1 + j).factorial : ℂ)) * v ^ (l + 1 + j) := by
       rw [tsum_eq_sum (s := Finset.range (m - l)), Finset.mul_sum]
       · refine Finset.sum_congr rfl fun j _ => ?_
         rw [show j + (l + 1) = l + 1 + j by omega]

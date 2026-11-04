@@ -22,7 +22,7 @@ file adds the few objects of DLMF §1.11 that Mathlib does not name.
   `b_k` (`k ≥ 1`) the coefficients of the quotient `f /ₘ (X - α)`.
 * `hornerC f α k` (1.11.5–1.11.6): the coefficients `c_k` (`k ≥ 1`) of the extended scheme,
   Horner's scheme applied to the quotient.
-* `dlmfResolventCubic p q r` (1.11.18): the resolvent cubic `z³ - 2pz² + (p² - 4r)z + q²` of the
+* `eulerResolventCubic p q r` (1.11.18): the resolvent cubic `z³ - 2pz² + (p² - 4r)z + q²` of the
   reduced quartic `w⁴ + pw² + qw + r` in DLMF's normalization (TauCeti's
   `TauCeti.resolventCubic` is a different normalization).
 * `IsStablePolynomial f` (1.11.24), the Hurwitz matrices `hurwitzMatrix f k` and determinants
@@ -56,7 +56,7 @@ def hornerC (f : K[X]) (α : K) (k : ℕ) : K :=
 `w⁴ + pw² + qw + r` (1.11.16), as a Mathlib `Cubic`. Its roots are `θ_j = -(α_1 + α_{j+1})²`
 for the roots `α_i` of the quartic. -/
 @[dlmf 1.11.E18]
-def dlmfResolventCubic (p q r : K) : Cubic K :=
+def eulerResolventCubic (p q r : K) : Cubic K :=
   ⟨1, -2 * p, p ^ 2 - 4 * r, q ^ 2⟩
 
 /-- DLMF 1.11.24: a real polynomial `f(z) = a_0 + a_1 z + ⋯ + a_n z^n` is **stable** if all of
@@ -68,7 +68,7 @@ def IsStablePolynomial (f : ℝ[X]) : Prop :=
 
 /-- The coefficient `a_m` of a polynomial at an integer index, with `a_m = 0` for `m < 0`
 (and automatically for `m > n`), as used in the Hurwitz determinants (DLMF 1.11.26). -/
-def coeffInt {R : Type*} [Semiring R] (f : R[X]) (m : ℤ) : R :=
+def coeffOfInt {R : Type*} [Semiring R] (f : R[X]) (m : ℤ) : R :=
   if 0 ≤ m then f.coeff m.toNat else 0
 
 /-- DLMF 1.11.26: the `k × k` **Hurwitz matrix** of `f`, whose `j`-th column (`j = 0, …, k-1`)
@@ -76,7 +76,7 @@ is `h_k^{(2j+1)}`, the first `k` members of `a_{2j+1}, a_{2j}, a_{2j-1}, …`; t
 `(i, j)` entry is `a_{2j+1-i}` (with `a_m = 0` outside `0 ≤ m ≤ n`). -/
 @[dlmf 1.11.E26]
 def hurwitzMatrix (f : ℝ[X]) (k : ℕ) : Matrix (Fin k) (Fin k) ℝ :=
-  Matrix.of fun i j => coeffInt f (2 * (j : ℤ) + 1 - i)
+  Matrix.of fun i j => coeffOfInt f (2 * (j : ℤ) + 1 - i)
 
 /-- DLMF 1.11.25–1.11.26: the **Hurwitz determinant** `D_k = det[h_k^{(1)}, h_k^{(3)}, …,
 h_k^{(2k-1)}]`. -/

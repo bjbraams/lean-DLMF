@@ -18,15 +18,18 @@ together with the second solution `UBar` and the modulus and phase functions of 
 
 * `IsQuadraticCylinderSolution`: the equation `f″(z) + (az² + bz + c)f(z) = 0` (DLMF 12.2.1).
 * `IsOscillatoryCylinderSolution`: the equation `f″(z) + (z²/4 - a)f(z) = 0` (DLMF 12.2.3).
-* `pcfUBar`, `pcfUBarDeriv`: the solution `Ū(a,z)` of DLMF 12.2.21 and its derivative.
-* `pcfF`, `pcfTheta`: the modulus and phase of `U(a,x) + iŪ(a,x)` (DLMF 12.2.22).
-* `pcfG`, `pcfPsi`: the modulus and phase of `U′(a,x) + iŪ′(a,x)` (DLMF 12.2.23).
+* `parabolicCylinderUBar`, `parabolicCylinderUBarDeriv`: the solution `Ū(a,z)` of DLMF 12.2.21 and
+  its derivative.
+* `parabolicCylinderF`, `parabolicCylinderTheta`: the modulus and phase of `U(a,x) + iŪ(a,x)` (DLMF
+  12.2.22).
+* `parabolicCylinderG`, `parabolicCylinderPsi`: the modulus and phase of `U′(a,x) + iŪ′(a,x)` (DLMF
+  12.2.23).
 * `IsGeneralizedCylinderSolution`: the generalized cylinder equation (DLMF 12.15.1).
 
 ## Implementation notes
 
-The equations are written with totalized iterated derivatives. `pcfUBar` is meaningful only
-away from positive half-integral parameters; the bar does not denote complex conjugation. The
+The equations are written with totalized iterated derivatives. `parabolicCylinderUBar` is meaningful
+only away from positive half-integral parameters; the bar does not denote complex conjugation. The
 phases are principal representatives; a continuous lift differs by integral multiples of `2π`.
 -/
 
@@ -53,32 +56,32 @@ def IsOscillatoryCylinderSolution (a : ℂ) (f : ℂ → ℂ) : Prop :=
 /-- The barred U solution; meaningful only away from positive half-integral parameters, not complex
 conjugation. -/
 @[dlmf 12.2.E21]
-def pcfUBar (a z : ℂ) : ℂ :=
-  Gamma (1/2-a)*pcfV a z
+def parabolicCylinderUBar (a z : ℂ) : ℂ :=
+  Gamma (1/2-a)*parabolicCylinderV a z
 
 /-- The derivative of the Gamma-normalized second cylinder solution: `Γ(1/2-a) V′(a,z)`. -/
-def pcfUBarDeriv (a z : ℂ) : ℂ :=
-  Gamma (1/2-a)*pcfVDeriv a z
+def parabolicCylinderUBarDeriv (a z : ℂ) : ℂ :=
+  Gamma (1/2-a)*parabolicCylinderVDeriv a z
 
 /-- The modulus of the complex pair `U(a,x) + i UBar(a,x)` on the real axis. -/
 @[dlmf 12.2.E22]
-def pcfF (a x : ℝ) : ℝ :=
-  ‖pcfU a x+I*pcfUBar a x‖
+def parabolicCylinderF (a x : ℝ) : ℝ :=
+  ‖parabolicCylinderU a x+I*parabolicCylinderUBar a x‖
 
 /-- Principal phase representative; a continuous lift differs by integral multiples of two pi. -/
 @[dlmf 12.2.E22]
-def pcfTheta (a x : ℝ) : ℝ :=
-  arg ((pcfU a x+I*pcfUBar a x))
+def parabolicCylinderTheta (a x : ℝ) : ℝ :=
+  arg ((parabolicCylinderU a x+I*parabolicCylinderUBar a x))
 
 /-- The modulus of the derivative pair `U′(a,x) + i UBar′(a,x)` on the real axis. -/
 @[dlmf 12.2.E23]
-def pcfG (a x : ℝ) : ℝ :=
-  ‖pcfUDeriv a x+I*pcfUBarDeriv a x‖
+def parabolicCylinderG (a x : ℝ) : ℝ :=
+  ‖parabolicCylinderUDeriv a x+I*parabolicCylinderUBarDeriv a x‖
 
 /-- Principal phase representative; a continuous lift differs by integral multiples of two pi. -/
 @[dlmf 12.2.E23]
-def pcfPsi (a x : ℝ) : ℝ :=
-  arg (-(pcfUDeriv a x+I*pcfUBarDeriv a x))
+def parabolicCylinderPsi (a x : ℝ) : ℝ :=
+  arg (-(parabolicCylinderUDeriv a x+I*parabolicCylinderUBarDeriv a x))
 
 /-- The generalized cylinder equation with nonzero exponent parameter `lam`, evaluated at the
 specified argument. -/

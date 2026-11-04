@@ -52,9 +52,9 @@ def logarithmicSecond (a b : ℂ) (n : ℕ) (z : ℂ) : ℂ :=
   ₂F₁ a b (n : ℂ) z * log z -
     (∑ j ∈ Finset.range (n - 1),
       ((n - 1).factorial : ℂ) * (j.factorial : ℂ) /
-        (((n - j - 2).factorial : ℂ) * poch (1 - a) (j + 1) * poch (1 - b) (j + 1)) *
+        (((n - j - 2).factorial : ℂ) * pochhammer (1 - a) (j + 1) * pochhammer (1 - b) (j + 1)) *
             ((-z)⁻¹) ^ (j + 1)) +
-    ∑' k : ℕ, gaussHGCoeff a b n k * z ^ k *
+    ∑' k : ℕ, gaussHypergeometricCoeff a b n k * z ^ k *
       (digamma (a + k) + digamma (b + k) - digamma (1 + k) - digamma (n + k))
 
 /-- The logarithmic second solution with one terminating numerator. -/
@@ -63,13 +63,13 @@ def logarithmicSecondTerminating (b : ℂ) (m n : ℕ) (z : ℂ) : ℂ :=
   ₂F₁ (-m : ℂ) b (n : ℂ) z * log z -
     (∑ j ∈ Finset.range (n - 1),
       ((n - 1).factorial : ℂ) * (j.factorial : ℂ) /
-        (((n - j - 2).factorial : ℂ) * poch (m + 1) (j + 1) * poch (1 - b) (j + 1)) *
+        (((n - j - 2).factorial : ℂ) * pochhammer (m + 1) (j + 1) * pochhammer (1 - b) (j + 1)) *
             ((-z)⁻¹) ^ (j + 1)) +
-    (∑ k ∈ Finset.range (m + 1), gaussHGCoeff (-m) b n k * z ^ k *
+    (∑ k ∈ Finset.range (m + 1), gaussHypergeometricCoeff (-m) b n k * z ^ k *
       (digamma (1 + m - k) + digamma (b + k) - digamma (1 + k) - digamma (n + k))) +
     (-1 : ℂ) ^ m * (m.factorial : ℂ) * ∑' j : ℕ,
-      (j.factorial : ℂ) * poch b (m + 1 + j) /
-        (poch n (m + 1 + j) * ((m + 1 + j).factorial : ℂ)) * z ^ (m + 1 + j)
+      (j.factorial : ℂ) * pochhammer b (m + 1 + j) /
+        (pochhammer n (m + 1 + j) * ((m + 1 + j).factorial : ℂ)) * z ^ (m + 1 + j)
 
 /-- The logarithmic second solution with two terminating numerators. -/
 @[dlmf 15.10.E10]
@@ -77,13 +77,13 @@ def logarithmicSecondBothTerminating (m l n : ℕ) (z : ℂ) : ℂ :=
   ₂F₁ (-m : ℂ) (-l) (n : ℂ) z * log z -
     (∑ j ∈ Finset.range (n - 1),
       ((n - 1).factorial : ℂ) * (j.factorial : ℂ) /
-        (((n - j - 2).factorial : ℂ) * poch (m + 1) (j + 1) * poch (l + 1) (j + 1)) *
+        (((n - j - 2).factorial : ℂ) * pochhammer (m + 1) (j + 1) * pochhammer (l + 1) (j + 1)) *
             ((-z)⁻¹) ^ (j + 1)) +
-    (∑ k ∈ Finset.range (l + 1), gaussHGCoeff (-m) (-l) n k * z ^ k *
+    (∑ k ∈ Finset.range (l + 1), gaussHypergeometricCoeff (-m) (-l) n k * z ^ k *
       (digamma (1 + m - k) + digamma (1 + l - k) - digamma (1 + k) - digamma (n + k))) +
     (-1 : ℂ) ^ l * (l.factorial : ℂ) * ∑ j ∈ Finset.range (m - l),
-      (j.factorial : ℂ) * poch (-m) (l + 1 + j) /
-        (poch n (l + 1 + j) * ((l + 1 + j).factorial : ℂ)) * z ^ (l + 1 + j)
+      (j.factorial : ℂ) * pochhammer (-m) (l + 1 + j) /
+        (pochhammer n (l + 1 + j) * ((l + 1 + j).factorial : ℂ)) * z ^ (l + 1 + j)
 
 /-! ### Uniqueness for the Gauss equation on an open set -/
 

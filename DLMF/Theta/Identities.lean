@@ -385,8 +385,8 @@ private lemma jacobiTheta₂_eq_even_add_odd (u τ : ℂ) (hτ : 0 < τ.im) :
     congr 1; push_cast; ring
   exact hP.unique (hA.sum hB)
 
-/-- `θ₃(z|τ) = θ₃(2z|4τ) + θ₂(2z|4τ)` (helper). -/
-private lemma jacobiThetaThreeTau_eq_four_mul_tau (z τ : ℂ) (hτ : 0 < τ.im) :
+/-- `θ₃(z|τ) = θ₃(2z|4τ) + θ₂(2z|4τ)`: the even and odd terms of the series for `θ₃`. -/
+theorem jacobiThetaThreeTau_eq_four_mul_tau (z τ : ℂ) (hτ : 0 < τ.im) :
     jacobiThetaThreeTau z τ = jacobiThetaThreeTau (2 * z) (4 * τ) +
       jacobiThetaTwoTau (2 * z) (4 * τ) := by
   have h := jacobiTheta₂_eq_even_add_odd (z / π) τ hτ

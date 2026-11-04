@@ -24,19 +24,22 @@ public import Mathlib.Algebra.Group.ForwardDiff
 
 ## Main results
 
-* `genHG_theta_ode`: the `θ`-equation on the principal analytic domain, DLMF 16.8.3
-  (`genHG_theta_ode'` without the regularity hypothesis).
-* `genHG_expanded_ode_entire`, `genHG_expanded_ode_balanced`: the expanded equations,
-  DLMF 16.8.4–16.8.5 (`genHG_expanded_ode_balanced'` without the regularity hypothesis).
-* `genHG_ode_singularities_entire`, `genHG_ode_singularities_balanced`,
-  `genHG_ode_nominal_order`: classification of the singularities and the order (the primed
-  classifications drop the regularity hypothesis).
+* `generalizedHypergeometric_theta_ode`: the `θ`-equation on the principal analytic domain, DLMF
+  16.8.3 (`generalizedHypergeometric_theta_ode'` without the regularity hypothesis).
+* `generalizedHypergeometric_expanded_ode_entire`,
+  `generalizedHypergeometric_expanded_ode_balanced`: the expanded equations, DLMF 16.8.4–16.8.5
+  (`generalizedHypergeometric_expanded_ode_balanced'` without the regularity hypothesis).
+* `generalizedHypergeometric_ode_singularities_entire`,
+  `generalizedHypergeometric_ode_singularities_balanced`,
+  `generalizedHypergeometric_ode_nominal_order`: classification of the singularities and the order
+  (the primed classifications drop the regularity hypothesis).
 * `genFrobeniusZero_fundamental`, `genFrobeniusInfinity_fundamental`: fundamental systems at
   `0` and `∞`; `genFrobeniusZero_resonant`, `genFrobeniusInfinity_resonant` for the resonant
   cases.
-* `genHG_infinity_connection`, `genHG_centered_infinity_connection`: connection formulas,
-  DLMF 16.8.8–16.8.9.
-* `genHG_upper_confluence`, `genHG_lower_confluence`: confluence, DLMF 16.8.10–16.8.11.
+* `generalizedHypergeometric_infinity_connection`,
+  `generalizedHypergeometric_centered_infinity_connection`: connection formulas, DLMF 16.8.8–16.8.9.
+* `generalizedHypergeometric_upper_confluence`, `generalizedHypergeometric_lower_confluence`:
+  confluence, DLMF 16.8.10–16.8.11.
 
 ## Implementation notes
 
@@ -114,16 +117,16 @@ def genFrobeniusRoot {q : ℕ} (b : Fin q → ℂ) : Fin (q + 1) → ℂ :=
 def genFrobeniusZero {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
     (i : Fin (q + 1)) (z : ℂ) : ℂ := by
   classical
-  exact Fin.cases (genHG (genParams a) (genParams b) z)
+  exact Fin.cases (generalizedHypergeometric (parametersOfFin a) (parametersOfFin b) z)
     (fun j => z ^ (1 - b j) *
-      genHG (genShift (genParams a) (1 - b j))
-        ((2 - b j) ::ₘ genShift ((genParams b).erase (b j)) (1 - b j)) z) i
+      generalizedHypergeometric (shiftParameters (parametersOfFin a) (1 - b j))
+        ((2 - b j) ::ₘ shiftParameters ((parametersOfFin b).erase (b j)) (1 - b j)) z) i
 
 /-- A closed log(-z) sheet: the upper edge corresponds to the lower z-cut value. -/
 def genHGNegativeLog (a b : Multiset ℂ) (w : ℂ) : ℂ := by
   classical
-  exact if w.im = Real.pi then genHGLower a b (-Complex.exp w)
-    else genHG a b (-Complex.exp w)
+  exact if w.im = Real.pi then generalizedHypergeometricLower a b (-Complex.exp w)
+    else generalizedHypergeometric a b (-Complex.exp w)
 
 /-- The nonresonant infinity solutions with an explicit log(-z) sheet (16.8.7). -/
 @[dlmf 16.8.E7]
@@ -131,14 +134,14 @@ def genFrobeniusInfinityLog {q : ℕ} (a : Fin (q + 1) → ℂ) (b : Fin q → �
     (j : Fin (q + 1)) (w : ℂ) : ℂ := by
   classical
   exact Complex.exp (-a j * w) *
-    genHGNegativeLog ((a j) ::ₘ genShift (genParams b) (1 + a j))
-      (genShift ((genParams a).erase (a j)) (1 + a j)) (-w)
+    genHGNegativeLog ((a j) ::ₘ shiftParameters (parametersOfFin b) (1 + a j))
+      (shiftParameters ((parametersOfFin a).erase (a j)) (1 + a j)) (-w)
 
 /-- Connection coefficient to the jth infinity solution. -/
 def genInfinityConnectionCoeff {q : ℕ} (a : Fin (q + 1) → ℂ) (b : Fin q → ℂ)
     (j : Fin (q + 1)) : ℂ :=
-  (∏ k ∈ univ.erase j, Gamma (a k - a j)) * genGamma (genParams b) /
-    ((∏ k ∈ univ.erase j, Gamma (a k)) * genGamma (genShift (genParams b) (-a j)))
+  (∏ k ∈ univ.erase j, Gamma (a k - a j)) * gammaProduct (parametersOfFin b) /
+    ((∏ k ∈ univ.erase j, Gamma (a k)) * gammaProduct (shiftParameters (parametersOfFin b) (-a j)))
 
 /-- Principal component for the displaced-center infinity expansion. -/
 def genCenteredInfinityDomain (z₀ : ℂ) : Set ℂ :=
@@ -152,8 +155,8 @@ def genCenteredInfinityTerm {q : ℕ} (a : Fin (q + 1) → ℂ) (b : Fin q → �
     (z₀ z : ℂ) (j : Fin (q + 1)) (n : ℕ) : ℂ :=
   Gamma (a j + n) / n.factorial * (∏ k ∈ univ.erase j, Gamma (a k - a j - n)) *
     (∑ k ∈ range (n + 1),
-      Complex.regularizedHGFunCoeff (genShift (genParams a) (-a j - n))
-        (genShift (genParams b) (-a j - n)) k * z₀ ^ k) * (z - z₀) ^ (-(n : ℤ))
+      Complex.regularizedHGFunCoeff (shiftParameters (parametersOfFin a) (-a j - n))
+        (shiftParameters (parametersOfFin b) (-a j - n)) k * z₀ ^ k) * (z - z₀) ^ (-(n : ℤ))
 
 /-- Derivative of an iterated derivative of a smooth function. -/
 private lemma hasDerivAt_iteratedDeriv_of_contDiff {f : ℂ → ℂ} (hf : ContDiff ℂ ⊤ f)
@@ -294,18 +297,21 @@ private lemma genThetaDCoeff_genThetaB_zero (b : Multiset ℂ) : genThetaDCoeff
   simp [genThetaB]
 
 /-- For p≤q the principal function is the Gamma-normalized native series. -/
-private lemma genHG_eq_genGamma_mul_of_card_le {a b : Multiset ℂ} (h : a.card ≤ b.card) :
-    genHG a b = fun z => genGamma b * Complex.regularizedHGFun a b z := by
+private lemma generalizedHypergeometric_eq_gammaProduct_mul_of_card_le {a b : Multiset ℂ}
+    (h : a.card ≤ b.card) :
+    generalizedHypergeometric a b = fun z => gammaProduct b * Complex.regularizedHGFun a b z := by
   have hne : a.card ≠ b.card + 1 := by omega
   funext z
-  unfold genHG genRegularizedHG
+  unfold generalizedHypergeometric regularizedGeneralizedHypergeometric
   simp only [ite_eq_right hne]
 
 /-- For p≤q the theta equation holds at every complex point. -/
-private lemma genODESolution_genHG_of_card_le {a b : Multiset ℂ} (h : a.card ≤ b.card) (z : ℂ) :
-    GenODESolution a b (genHG a b) z := by
+private lemma genODESolution_generalizedHypergeometric_of_card_le {a b : Multiset ℂ}
+    (h : a.card ≤ b.card) (z : ℂ) :
+    GenODESolution a b (generalizedHypergeometric a b) z := by
   unfold GenODESolution
-  rw [genHG_eq_genGamma_mul_of_card_le h, thetaPoly_const_mul, thetaPoly_const_mul]
+  rw [generalizedHypergeometric_eq_gammaProduct_mul_of_card_le h, thetaPoly_const_mul,
+      thetaPoly_const_mul]
   have := regularizedHGFun_ode_of_card_le h z
   simp only [genThetaA, genThetaB]
   rw [this]; ring
@@ -345,22 +351,22 @@ private lemma analyticOnNhd_thetaPoly {f : ℂ → ℂ} {U : Set ℂ} (hf : Anal
     analyticOnNhd_const.mul (analyticOnNhd_eulerTheta_iterate hf k)
 
 /-- The theta equation for the regularized principal function on its analytic domain. -/
-private lemma genRegularizedHG_theta_ode (a b : Multiset ℂ)
-    (h : a.card ≤ b.card + 1 ∨ GenTerminates a) {z : ℂ} (hz : z ∈ genAnalyticDomain a b) :
-    thetaPoly (genThetaB b) (genRegularizedHG a b) z =
-      z * thetaPoly (genThetaA a) (genRegularizedHG a b) z := by
-  by_cases hT : GenTerminates a
-  · have heq : genRegularizedHG a b = Complex.regularizedHGFun a b :=
-      funext (genRegularizedHG_eq_series_of_terminates hT)
+private lemma regularizedGeneralizedHypergeometric_theta_ode (a b : Multiset ℂ)
+    (h : a.card ≤ b.card + 1 ∨ IsTerminating a) {z : ℂ} (hz : z ∈ genAnalyticDomain a b) :
+    thetaPoly (genThetaB b) (regularizedGeneralizedHypergeometric a b) z =
+      z * thetaPoly (genThetaA a) (regularizedGeneralizedHypergeometric a b) z := by
+  by_cases hT : IsTerminating a
+  · have heq : regularizedGeneralizedHypergeometric a b = Complex.regularizedHGFun a b :=
+      funext (regularizedGeneralizedHypergeometric_eq_series_of_terminates hT)
     rw [heq]
     obtain ⟨x, hx, m, hxm⟩ := hT
     have hr := Complex.radius_regularizedHGFunSeries_eq_top_of_finite (b := b) hx hxm
     exact regularizedHGFun_ode a b (by rw [hr]; simp) (by rw [hr]; simp)
   · by_cases hc : a.card ≤ b.card
     · have hne : a.card ≠ b.card + 1 := by omega
-      have heq : genRegularizedHG a b = Complex.regularizedHGFun a b := by
+      have heq : regularizedGeneralizedHypergeometric a b = Complex.regularizedHGFun a b := by
         funext w
-        unfold genRegularizedHG
+        unfold regularizedGeneralizedHypergeometric
         simp only [ite_eq_right hne]
       rw [heq]
       exact regularizedHGFun_ode_of_card_le hc z
@@ -371,45 +377,50 @@ private lemma genRegularizedHG_theta_ode (a b : Multiset ℂ)
       have hzc : z ∈ cutPlane := by
         unfold genAnalyticDomain at hz
         rwa [ite_eq_right (by tauto)] at hz
-      have hA := analyticOnNhd_genRegularizedHG hc'
-      refine eqOn_cutPlane_of_eqOn_disk (f := thetaPoly (genThetaB b) (genRegularizedHG a b))
-        (g := fun z => z * thetaPoly (genThetaA a) (genRegularizedHG a b) z)
+      have hA := analyticOnNhd_regularizedGeneralizedHypergeometric hc'
+      refine eqOn_cutPlane_of_eqOn_disk
+          (f := thetaPoly (genThetaB b) (regularizedGeneralizedHypergeometric a b))
+        (g := fun z => z * thetaPoly (genThetaA a) (regularizedGeneralizedHypergeometric a b) z)
         (analyticOnNhd_thetaPoly hA _) (analyticOnNhd_id.mul (analyticOnNhd_thetaPoly hA _))
         (fun w hw => ?_) hzc
-      have hev : genRegularizedHG a b =ᶠ[𝓝 w] Complex.regularizedHGFun a b := by
+      have hev : regularizedGeneralizedHypergeometric a b =ᶠ[𝓝 w] Complex.regularizedHGFun a b := by
         filter_upwards [Metric.isOpen_ball.mem_nhds (mem_ball_zero_iff.mpr hw)] with v hv
-        exact genRegularizedHG_eq_series (by simpa using hv)
+        exact regularizedGeneralizedHypergeometric_eq_series (by simpa using hv)
       rw [thetaPoly_congr hev, thetaPoly_congr hev]
       exact regularizedHGFun_ode_of_card_eq_add_one hc' hw
 
 /-- The theta equation on the principal analytic domain, without the regularity hypothesis on
 the lower parameters; stronger than DLMF, which assumes regular lower parameters. -/
 @[dlmf 16.8.E3]
-theorem genHG_theta_ode' (a b : Multiset ℂ)
-    (h : a.card ≤ b.card + 1 ∨ GenTerminates a) {z : ℂ} (hz : z ∈ genAnalyticDomain a b) :
-    GenODESolution a b (genHG a b) z := by
+theorem generalizedHypergeometric_theta_ode' (a b : Multiset ℂ)
+    (h : a.card ≤ b.card + 1 ∨ IsTerminating a) {z : ℂ} (hz : z ∈ genAnalyticDomain a b) :
+    GenODESolution a b (generalizedHypergeometric a b) z := by
   unfold GenODESolution
-  have hgen : genHG a b = fun z => genGamma b * genRegularizedHG a b z := rfl
-  rw [hgen, thetaPoly_const_mul, thetaPoly_const_mul, genRegularizedHG_theta_ode a b h hz]
+  have hgen : generalizedHypergeometric a b = fun z => gammaProduct b *
+      regularizedGeneralizedHypergeometric a b z := rfl
+  rw [hgen, thetaPoly_const_mul, thetaPoly_const_mul,
+      regularizedGeneralizedHypergeometric_theta_ode a b h hz]
   ring
 
 /-- The proved theta equation continued throughout the ordinary principal analytic domain. -/
 @[dlmf 16.8.E3]
-theorem genHG_theta_ode (a b : Multiset ℂ) (_hb : GenDenRegular b)
-    (h : a.card ≤ b.card + 1 ∨ GenTerminates a) {z : ℂ} (hz : z ∈ genAnalyticDomain a b) :
-    GenODESolution a b (genHG a b) z :=
-  genHG_theta_ode' a b h hz
+theorem generalizedHypergeometric_theta_ode (a b : Multiset ℂ) (_hb : LowerParametersRegular b)
+    (h : a.card ≤ b.card + 1 ∨ IsTerminating a) {z : ℂ} (hz : z ∈ genAnalyticDomain a b) :
+    GenODESolution a b (generalizedHypergeometric a b) z :=
+  generalizedHypergeometric_theta_ode' a b h hz
 
 /-- The full expanded equation for p≤q with the explicit alpha and beta constants. -/
 @[dlmf 16.8.E4]
-theorem genHG_expanded_ode_entire (a b : Multiset ℂ) (h : a.card ≤ b.card) (z : ℂ) :
-    z ^ b.card * iteratedDeriv (b.card + 1) (genHG a b) z +
+theorem generalizedHypergeometric_expanded_ode_entire (a b : Multiset ℂ)
+    (h : a.card ≤ b.card) (z : ℂ) :
+    z ^ b.card * iteratedDeriv (b.card + 1) (generalizedHypergeometric a b) z +
       (∑ j ∈ Finset.Icc 1 b.card, z ^ (j - 1) *
-        (genODEAlpha a j * z + genODEBeta b j) * iteratedDeriv j (genHG a b) z) +
-      genODEAlpha a 0 * genHG a b z = 0 := by
-  set f := genHG a b with hfdef
+        (genODEAlpha a j * z + genODEBeta b j) *
+            iteratedDeriv j (generalizedHypergeometric a b) z) +
+      genODEAlpha a 0 * generalizedHypergeometric a b z = 0 := by
+  set f := generalizedHypergeometric a b with hfdef
   set q := b.card
-  have hf : ContDiff ℂ ⊤ f := (genHG_entire h).contDiff
+  have hf : ContDiff ℂ ⊤ f := (generalizedHypergeometric_entire h).contDiff
   have hc : ∀ j, Continuous (iteratedDeriv j f) := fun j => hf.continuous_iteratedDeriv j
     le_top
   have hBdeg : (genThetaB b).natDegree = q + 1 := by
@@ -428,7 +439,7 @@ theorem genHG_expanded_ode_entire (a b : Multiset ℂ) (h : a.card ≤ b.card) (
       genODEAlpha a 0 * f z with hT
   have hzT : ∀ z, z * T z = 0 := by
     intro z
-    have hode := genODESolution_genHG_of_card_le h z
+    have hode := genODESolution_generalizedHypergeometric_of_card_le h z
     unfold GenODESolution at hode
     rw [thetaPoly_eq_sum_iteratedDeriv hf _ (M := q + 1) hBdeg.le,
       thetaPoly_eq_sum_iteratedDeriv hf _ (M := q + 1) (by rw [hAdeg]; omega)] at hode
@@ -542,16 +553,18 @@ private lemma thetaPoly_eq_sum_iteratedDeriv_on {f : ℂ → ℂ} {U : Set ℂ} 
 /-- The full expanded equation for p=q+1, without the regularity hypothesis on the lower
 parameters; stronger than DLMF, which assumes regular lower parameters. -/
 @[dlmf 16.8.E5]
-theorem genHG_expanded_ode_balanced' (a b : Multiset ℂ) (h : a.card = b.card + 1)
+theorem generalizedHypergeometric_expanded_ode_balanced' (a b : Multiset ℂ)
+    (h : a.card = b.card + 1)
     {z : ℂ} (hz : z ∈ cutPlane) :
-    z ^ b.card * (1 - z) * iteratedDeriv (b.card + 1) (genHG a b) z +
+    z ^ b.card * (1 - z) * iteratedDeriv (b.card + 1) (generalizedHypergeometric a b) z +
       (∑ j ∈ Finset.Icc 1 b.card, z ^ (j - 1) *
-        (genODEAlpha a j * z + genODEBeta b j) * iteratedDeriv j (genHG a b) z) +
-      genODEAlpha a 0 * genHG a b z = 0 := by
-  set f := genHG a b with hfdef
+        (genODEAlpha a j * z + genODEBeta b j) *
+            iteratedDeriv j (generalizedHypergeometric a b) z) +
+      genODEAlpha a 0 * generalizedHypergeometric a b z = 0 := by
+  set f := generalizedHypergeometric a b with hfdef
   set q := b.card
   have hf : AnalyticOnNhd ℂ f cutPlane :=
-    analyticOnNhd_const.mul (analyticOnNhd_genRegularizedHG h)
+    analyticOnNhd_const.mul (analyticOnNhd_regularizedGeneralizedHypergeometric h)
   have hdom : cutPlane ⊆ genAnalyticDomain a b := by
     intro w hw
     unfold genAnalyticDomain
@@ -574,7 +587,7 @@ theorem genHG_expanded_ode_balanced' (a b : Multiset ℂ) (h : a.card = b.card +
       genODEAlpha a 0 * f z with hT
   have hzT : ∀ z ∈ cutPlane, z * T z = 0 := by
     intro z hz
-    have hode := genHG_theta_ode' a b (Or.inl h.le) (hdom hz)
+    have hode := generalizedHypergeometric_theta_ode' a b (Or.inl h.le) (hdom hz)
     unfold GenODESolution at hode
     rw [thetaPoly_eq_sum_iteratedDeriv_on isOpen_cutPlane hf _ (M := q + 1) hBdeg.le hz,
       thetaPoly_eq_sum_iteratedDeriv_on isOpen_cutPlane hf _ (M := q + 1) hAdeg.le hz] at hode
@@ -623,14 +636,15 @@ theorem genHG_expanded_ode_balanced' (a b : Multiset ℂ) (h : a.card = b.card +
 
 /-- The full expanded equation for p=q+1. -/
 @[dlmf 16.8.E5]
-theorem genHG_expanded_ode_balanced (a b : Multiset ℂ) (h : a.card = b.card + 1)
-    (_hb : GenDenRegular b)
+theorem generalizedHypergeometric_expanded_ode_balanced (a b : Multiset ℂ) (h : a.card = b.card + 1)
+    (_hb : LowerParametersRegular b)
     {z : ℂ} (hz : z ∈ cutPlane) :
-    z ^ b.card * (1 - z) * iteratedDeriv (b.card + 1) (genHG a b) z +
+    z ^ b.card * (1 - z) * iteratedDeriv (b.card + 1) (generalizedHypergeometric a b) z +
       (∑ j ∈ Finset.Icc 1 b.card, z ^ (j - 1) *
-        (genODEAlpha a j * z + genODEBeta b j) * iteratedDeriv j (genHG a b) z) +
-      genODEAlpha a 0 * genHG a b z = 0 :=
-  genHG_expanded_ode_balanced' a b h hz
+        (genODEAlpha a j * z + genODEBeta b j) *
+            iteratedDeriv j (generalizedHypergeometric a b) z) +
+      genODEAlpha a 0 * generalizedHypergeometric a b z = 0 :=
+  generalizedHypergeometric_expanded_ode_balanced' a b h hz
 
 /-! ### Singularities of the expanded equation -/
 
@@ -862,7 +876,8 @@ private lemma linearODEAtMostRegularAt_of_ordinaryAt {n : ℕ} {c : Fin n → �
   rw [hz]
 
 /-- The classification for `p ≤ q`, without the regularity hypothesis on the lower parameters. -/
-theorem genHG_ode_singularities_entire' (a b : Multiset ℂ) (h : a.card ≤ b.card) :
+theorem generalizedHypergeometric_ode_singularities_entire' (a b : Multiset ℂ)
+    (h : a.card ≤ b.card) :
     Complex.LinearODEAtMostRegularAt (genODECoeff a b) 0 ∧
     Complex.LinearODEIrregularAtInfinity (genODECoeff a b) ∧
     ∀ z : ℂ, z ≠ 0 → Complex.LinearODEOrdinaryAt (genODECoeff a b) z := by
@@ -926,7 +941,8 @@ theorem genHG_ode_singularities_entire' (a b : Multiset ℂ) (h : a.card ≤ b.c
 
 /-- The classification for `p = q + 1`, without the regularity hypothesis on the lower
 parameters. -/
-theorem genHG_ode_singularities_balanced' (a b : Multiset ℂ) (h : a.card = b.card + 1) :
+theorem generalizedHypergeometric_ode_singularities_balanced' (a b : Multiset ℂ)
+    (h : a.card = b.card + 1) :
     Complex.LinearODEAtMostRegularAt (genODECoeff a b) 0 ∧
     Complex.LinearODEAtMostRegularAt (genODECoeff a b) 1 ∧
     Complex.LinearODEAtMostRegularAtInfinity (genODECoeff a b) ∧
@@ -994,25 +1010,26 @@ theorem genHG_ode_singularities_balanced' (a b : Multiset ℂ) (h : a.card = b.c
     ring
 
 /-- Zero is at most regular, infinity is irregular, and there are no other singularities for p≤q. -/
-theorem genHG_ode_singularities_entire (a b : Multiset ℂ) (h : a.card ≤ b.card)
-    (_hb : GenDenRegular b) :
+theorem generalizedHypergeometric_ode_singularities_entire (a b : Multiset ℂ) (h : a.card ≤ b.card)
+    (_hb : LowerParametersRegular b) :
     Complex.LinearODEAtMostRegularAt (genODECoeff a b) 0 ∧
     Complex.LinearODEIrregularAtInfinity (genODECoeff a b) ∧
     ∀ z : ℂ, z ≠ 0 → Complex.LinearODEOrdinaryAt (genODECoeff a b) z :=
-  genHG_ode_singularities_entire' a b h
+  generalizedHypergeometric_ode_singularities_entire' a b h
 
 /-- Zero, one and infinity are at most regular; removable parameter degeneracies are retained. -/
-theorem genHG_ode_singularities_balanced (a b : Multiset ℂ) (h : a.card = b.card + 1)
-    (_hb : GenDenRegular b) :
+theorem generalizedHypergeometric_ode_singularities_balanced (a b : Multiset ℂ)
+    (h : a.card = b.card + 1)
+    (_hb : LowerParametersRegular b) :
     Complex.LinearODEAtMostRegularAt (genODECoeff a b) 0 ∧
     Complex.LinearODEAtMostRegularAt (genODECoeff a b) 1 ∧
     Complex.LinearODEAtMostRegularAtInfinity (genODECoeff a b) ∧
     ∀ z : ℂ, z ≠ 0 → z ≠ 1 → Complex.LinearODEOrdinaryAt (genODECoeff a b) z :=
-  genHG_ode_singularities_balanced' a b h
+  generalizedHypergeometric_ode_singularities_balanced' a b h
 
 /-- The nominal operator order is max(p,q+1), independently of lower-order equations for special
 solutions. -/
-theorem genHG_ode_nominal_order (a b : Multiset ℂ) :
+theorem generalizedHypergeometric_ode_nominal_order (a b : Multiset ℂ) :
     max (genThetaA a).natDegree (genThetaB b).natDegree = genODEOrder a b := by
   have hA (c : Multiset ℂ) : (genThetaA c).natDegree = c.card := by
     unfold genThetaA
@@ -1034,15 +1051,16 @@ theorem genHG_ode_nominal_order (a b : Multiset ℂ) :
 theorem genFrobeniusZero_fundamental {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ) (hpq : p ≤ q + 1)
     (hb : ∀ j, ∀ n : ℤ, b j ≠ n)
     (hdiff : ∀ i j, i ≠ j → ∀ n : ℤ, b i - b j ≠ n) :
-    GenFundamentalSystem (genParams a) (genParams b) genFrobeniusDomain (genFrobeniusZero a b) := by
+    GenFundamentalSystem (parametersOfFin a) (parametersOfFin b) genFrobeniusDomain
+        (genFrobeniusZero a b) := by
   sorry
 
 /-- All resonant cases admit logarithmic Frobenius series, with analytic power series and logs
 through order q. -/
 theorem genFrobeniusZero_resonant {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ) (hpq : p ≤ q + 1)
-    (hb : GenDenRegular (genParams b)) :
+    (hb : LowerParametersRegular (parametersOfFin b)) :
     ∃ r : ℝ, 0 < r ∧ ∃ F : Fin (q + 1) → ℂ → ℂ,
-      GenFundamentalSystem (genParams a) (genParams b)
+      GenFundamentalSystem (parametersOfFin a) (parametersOfFin b)
         (Complex.slitPlane ∩ Metric.ball 0 r) F ∧
       ∃ A : Fin (q + 1) → Fin (q + 1) → Fin (q + 1) → ℂ → ℂ,
         (∀ i j k, AnalyticOnNhd ℂ (A i j k) (Metric.ball 0 r)) ∧
@@ -1055,90 +1073,98 @@ theorem genFrobeniusZero_resonant {p q : ℕ} (a : Fin p → ℂ) (b : Fin q →
 -/
 @[dlmf 16.8.E7]
 theorem genFrobeniusInfinity_fundamental {q : ℕ} (a : Fin (q + 1) → ℂ) (b : Fin q → ℂ)
-    (hb : GenDenRegular (genParams b))
+    (hb : LowerParametersRegular (parametersOfFin b))
     (hdiff : ∀ i j, i ≠ j → ∀ n : ℤ, a i - a j ≠ n) :
-    GenFundamentalSystem (genParams a) (genParams b)
+    GenFundamentalSystem (parametersOfFin a) (parametersOfFin b)
       {z : ℂ | 1 < ‖z‖ ∧ -z ∈ Complex.slitPlane}
       (fun j z => genFrobeniusInfinityLog a b j (Complex.log (-z))) := by
   sorry
 
 /-- The connection formula on both correlated closed log(-z) cut sides. -/
 @[dlmf 16.8.E8]
-theorem genHG_infinity_connection {q : ℕ} (a : Fin (q + 1) → ℂ) (b : Fin q → ℂ)
-    (hb : GenDenRegular (genParams b))
+theorem generalizedHypergeometric_infinity_connection {q : ℕ} (a : Fin (q + 1) → ℂ) (b : Fin q → ℂ)
+    (hb : LowerParametersRegular (parametersOfFin b))
     (hdiff : ∀ i j, i ≠ j → ∀ n : ℤ, a i - a j ≠ n)
     {w : ℂ} (hw : |w.im| ≤ Real.pi) (hz : -Complex.exp w ≠ 1) :
-    genHGNegativeLog (genParams a) (genParams b) w =
+    genHGNegativeLog (parametersOfFin a) (parametersOfFin b) w =
       ∑ j, genInfinityConnectionCoeff a b j * genFrobeniusInfinityLog a b j w := by
   sorry
 
 /-- The convergent displaced-center expansion with correlated principal branches and all regularized
 finite inner polynomials. -/
 @[dlmf 16.8.E9]
-theorem genHG_centered_infinity_connection {q : ℕ} (a : Fin (q + 1) → ℂ) (b : Fin q → ℂ)
-    (ha : GenDenRegular (genParams a)) (hb : GenDenRegular (genParams b))
+theorem generalizedHypergeometric_centered_infinity_connection {q : ℕ} (a : Fin (q + 1) → ℂ)
+    (b : Fin q → ℂ)
+    (ha : LowerParametersRegular (parametersOfFin a))
+        (hb : LowerParametersRegular (parametersOfFin b))
     (hdiff : ∀ i j, i ≠ j → ∀ n : ℤ, a i - a j ≠ n)
     (z₀ : ℂ) {z : ℂ} (hz : z ∈ genCenteredInfinityDomain z₀) :
     ∃ v : Fin (q + 1) → ℂ,
       (∀ j, HasSum (genCenteredInfinityTerm a b z₀ z j) (v j)) ∧
-      genGamma (genParams a) * genRegularizedHG (genParams a) (genParams b) z =
+      gammaProduct (parametersOfFin a) *
+          regularizedGeneralizedHypergeometric (parametersOfFin a) (parametersOfFin b) z =
         ∑ j, (z₀ - z) ^ (-a j) * v j := by
   sorry
 
 /-- A rising factorial divided by the matching power is a product of `1 + j/α`. -/
-private lemma poch_div_pow_eq_prod {α : ℂ} (hα : α ≠ 0) (k : ℕ) :
-    poch α k / α ^ k = ∏ j ∈ range k, (1 + j / α) := by
+private lemma pochhammer_div_pow_eq_prod {α : ℂ} (hα : α ≠ 0) (k : ℕ) :
+    pochhammer α k / α ^ k = ∏ j ∈ range k, (1 + j / α) := by
   induction k with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ k ih =>
-    rw [poch_succ, prod_range_succ, ← ih, pow_succ]
+    rw [pochhammer_succ, prod_range_succ, ← ih, pow_succ]
     field_simp
 
 /-- Adding an upper parameter multiplies the coefficient by one rising factorial. -/
-private lemma genCoeff_cons (x : ℂ) (a b : Multiset ℂ) (n : ℕ) :
-    genCoeff (x ::ₘ a) b n = poch x n * genCoeff a b n := by
-  simp only [genCoeff, genPoch, Multiset.map_cons, Multiset.prod_cons]
+private lemma generalizedHypergeometricCoeff_cons (x : ℂ) (a b : Multiset ℂ) (n : ℕ) :
+    generalizedHypergeometricCoeff (x ::ₘ a) b n = pochhammer x n *
+        generalizedHypergeometricCoeff a b n := by
+  simp only [generalizedHypergeometricCoeff, pochhammerProduct, Multiset.map_cons,
+      Multiset.prod_cons]
   ring
 
 /-- The coefficient series converges absolutely in the open unit disk for p≤q+1. -/
-private lemma summable_norm_genCoeff_mul_pow_of_norm_lt_one {a b : Multiset ℂ}
+private lemma summable_norm_generalizedHypergeometricCoeff_mul_pow_of_norm_lt_one {a b : Multiset ℂ}
     (h : a.card ≤ b.card + 1)
-    (hb : GenDenRegular b) {w : ℂ} (hw : ‖w‖ < 1) :
-    Summable (fun n : ℕ => ‖genCoeff a b n * w ^ n‖) := by
-  have hr : (1 : ENNReal) ≤ (FormalMultilinearSeries.ofScalars ℂ (genCoeff a b)).radius := by
+    (hb : LowerParametersRegular b) {w : ℂ} (hw : ‖w‖ < 1) :
+    Summable (fun n : ℕ => ‖generalizedHypergeometricCoeff a b n * w ^ n‖) := by
+  have hr : (1 : ENNReal) ≤
+      (FormalMultilinearSeries.ofScalars ℂ (generalizedHypergeometricCoeff a b)).radius := by
     rw [genScalarSeries_eq_gamma_smul hb,
-      FormalMultilinearSeries.radius_smul_eq _ (genGamma_ne_zero hb)]
+      FormalMultilinearSeries.radius_smul_eq _ (gammaProduct_ne_zero hb)]
     by_cases hc : a.card ≤ b.card
     · rw [Complex.radius_regularizedHGFunSeries_eq_top hc]; exact le_top
     · exact Complex.radius_regularizedHGFunSeries_ge_one (by omega)
   have hlt : ((‖w‖₊ : NNReal) : ENNReal) <
-      (FormalMultilinearSeries.ofScalars ℂ (genCoeff a b)).radius :=
+      (FormalMultilinearSeries.ofScalars ℂ (generalizedHypergeometricCoeff a b)).radius :=
     lt_of_lt_of_le (by exact_mod_cast hw) hr
-  have := (FormalMultilinearSeries.ofScalars ℂ (genCoeff a b)).summable_norm_mul_pow hlt
+  have := (FormalMultilinearSeries.ofScalars ℂ
+      (generalizedHypergeometricCoeff a b)).summable_norm_mul_pow hlt
   simpa only [FormalMultilinearSeries.ofScalars_norm, coe_nnnorm, norm_mul, norm_pow] using this
 
 /-- Upper-parameter confluence along every complex direction to infinity. -/
 @[dlmf 16.8.E10]
-theorem genHG_upper_confluence (a b : Multiset ℂ) (h : a.card ≤ b.card)
-    (hb : GenDenRegular b) (z : ℂ) :
-    Tendsto (fun α : ℂ => genHG (α ::ₘ a) b (z / α)) (Bornology.cobounded ℂ)
-      (𝓝 (genHG a b z)) := by
+theorem generalizedHypergeometric_upper_confluence (a b : Multiset ℂ) (h : a.card ≤ b.card)
+    (hb : LowerParametersRegular b) (z : ℂ) :
+    Tendsto (fun α : ℂ => generalizedHypergeometric (α ::ₘ a) b (z / α)) (Bornology.cobounded ℂ)
+      (𝓝 (generalizedHypergeometric a b z)) := by
   set R : ℝ := ‖z‖ + 1 with hR
   have hR0 : 0 < R := by positivity
   have hfar : ∀ᶠ α : ℂ in Bornology.cobounded ℂ, R ≤ ‖α‖ :=
     tendsto_norm_cobounded_atTop.eventually_ge_atTop R
   have hsum : ∀ᶠ α : ℂ in Bornology.cobounded ℂ,
-      genHG (α ::ₘ a) b (z / α) = ∑' n, genCoeff (α ::ₘ a) b n * (z / α) ^ n := by
+      generalizedHypergeometric (α ::ₘ a) b (z / α) = ∑' n,
+          generalizedHypergeometricCoeff (α ::ₘ a) b n * (z / α) ^ n := by
     filter_upwards [hfar] with α hα
     have hα0 : 0 < ‖α‖ := lt_of_lt_of_le hR0 hα
-    refine (genHG_hasSum_disk (by simp; omega) hb ?_).tsum_eq.symm
+    refine (generalizedHypergeometric_hasSum_disk (by simp; omega) hb ?_).tsum_eq.symm
     rw [norm_div, div_lt_one hα0]; linarith
-  rw [← (genHG_hasSum_entire h hb z).tsum_eq]
+  rw [← (generalizedHypergeometric_hasSum_entire h hb z).tsum_eq]
   refine Tendsto.congr' (EventuallyEq.symm hsum) ?_
   have hRz : ‖z / (R : ℂ)‖ < 1 := by
     rw [norm_div, Complex.norm_real, Real.norm_of_nonneg hR0.le, div_lt_one hR0]; linarith
   refine tendsto_tsum_of_dominated_convergence
-    (summable_norm_genCoeff_mul_pow_of_norm_lt_one (a := (R : ℂ) ::ₘ a)
+    (summable_norm_generalizedHypergeometricCoeff_mul_pow_of_norm_lt_one (a := (R : ℂ) ::ₘ a)
         (by simp; omega) hb hRz) ?_ ?_
   · intro k
     have hinv : Tendsto (fun α : ℂ => α⁻¹) (Bornology.cobounded ℂ) (𝓝 0) := tendsto_inv₀_cobounded
@@ -1147,24 +1173,24 @@ theorem genHG_upper_confluence (a b : Multiset ℂ) (h : a.card ≤ b.card)
       have := tendsto_finsetProd (range k) (fun j _ =>
         ((hinv.const_mul (j : ℂ)).const_add 1))
       simpa using this
-    have := hprod.mul_const (genCoeff a b k * z ^ k)
+    have := hprod.mul_const (generalizedHypergeometricCoeff a b k * z ^ k)
     rw [one_mul] at this
     refine this.congr' ?_
     filter_upwards [hfar] with α hα
     have hα0 : α ≠ 0 := norm_pos_iff.mp (lt_of_lt_of_le hR0 hα)
     simp only [← div_eq_mul_inv]
-    rw [genCoeff_cons, div_pow, ← poch_div_pow_eq_prod hα0]
+    rw [generalizedHypergeometricCoeff_cons, div_pow, ← pochhammer_div_pow_eq_prod hα0]
     ring
   · filter_upwards [hfar] with α hα k
     have hα0 : α ≠ 0 := norm_pos_iff.mp (lt_of_lt_of_le hR0 hα)
     have hR0' : (R : ℂ) ≠ 0 := by exact_mod_cast hR0.ne'
-    have e1 : genCoeff (α ::ₘ a) b k * (z / α) ^ k =
-        (∏ j ∈ range k, (1 + j / α)) * (genCoeff a b k * z ^ k) := by
-      rw [genCoeff_cons, div_pow, ← poch_div_pow_eq_prod hα0]; ring
-    have e2 : genCoeff ((R : ℂ) ::ₘ a) b k * (z / R) ^ k =
-        (∏ j ∈ range k, (1 + j / (R : ℂ))) * (genCoeff a b k * z ^ k) := by
-      rw [genCoeff_cons, div_pow, ← poch_div_pow_eq_prod hR0']; ring
-    rw [e1, e2, norm_mul, norm_mul _ (genCoeff a b k * z ^ k)]
+    have e1 : generalizedHypergeometricCoeff (α ::ₘ a) b k * (z / α) ^ k =
+        (∏ j ∈ range k, (1 + j / α)) * (generalizedHypergeometricCoeff a b k * z ^ k) := by
+      rw [generalizedHypergeometricCoeff_cons, div_pow, ← pochhammer_div_pow_eq_prod hα0]; ring
+    have e2 : generalizedHypergeometricCoeff ((R : ℂ) ::ₘ a) b k * (z / R) ^ k =
+        (∏ j ∈ range k, (1 + j / (R : ℂ))) * (generalizedHypergeometricCoeff a b k * z ^ k) := by
+      rw [generalizedHypergeometricCoeff_cons, div_pow, ← pochhammer_div_pow_eq_prod hR0']; ring
+    rw [e1, e2, norm_mul, norm_mul _ (generalizedHypergeometricCoeff a b k * z ^ k)]
     gcongr
     rw [norm_prod, norm_prod]
     gcongr with j hj
@@ -1179,21 +1205,22 @@ theorem genHG_upper_confluence (a b : Multiset ℂ) (h : a.card ≤ b.card)
 
 /-- Lower-parameter confluence with the full angle-dependent z restriction from the source. -/
 @[dlmf 16.8.E11]
-theorem genHG_lower_confluence (a b : Multiset ℂ) (h : a.card ≤ b.card + 1) (hb : GenDenRegular b)
+theorem generalizedHypergeometric_lower_confluence (a b : Multiset ℂ) (h : a.card ≤ b.card + 1)
+    (hb : LowerParametersRegular b)
     (z : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ ≤ Real.pi) :
-    Tendsto (fun β : ℂ => genHG a (β ::ₘ b) (β * z))
+    Tendsto (fun β : ℂ => generalizedHypergeometric a (β ::ₘ b) (β * z))
       (comap norm atTop ⊓ 𝓟 {β : ℂ | β ≠ 0 ∧ |β.arg| ≤ Real.pi - δ ∧
         (a.card ≤ b.card ∨ (|β.arg| ≤ Real.pi / 2 ∧ ‖z‖ < 1) ∨
           (Real.pi / 2 ≤ |β.arg| ∧ ‖z‖ < |Real.sin β.arg|))})
-      (𝓝 (genHG a b z)) := by
+      (𝓝 (generalizedHypergeometric a b z)) := by
   sorry
 
 /-- Resonant infinity exponents admit a fundamental system with power series in 1/z
 and logarithms of degree at most q, without integer-difference exclusions. -/
 theorem genFrobeniusInfinity_resonant {q : ℕ} (a : Fin (q + 1) → ℂ) (b : Fin q → ℂ)
-    (hb : GenDenRegular (genParams b)) :
+    (hb : LowerParametersRegular (parametersOfFin b)) :
     ∃ R : ℝ, 1 < R ∧ ∃ F : Fin (q + 1) → ℂ → ℂ,
-      GenFundamentalSystem (genParams a) (genParams b)
+      GenFundamentalSystem (parametersOfFin a) (parametersOfFin b)
         {z : ℂ | R < ‖z‖ ∧ -z ∈ Complex.slitPlane} F ∧
       ∃ A : Fin (q + 1) → Fin (q + 1) → Fin (q + 1) → ℂ → ℂ,
         (∀ i j k, AnalyticOnNhd ℂ (A i j k) (Metric.ball 0 (1 / R))) ∧

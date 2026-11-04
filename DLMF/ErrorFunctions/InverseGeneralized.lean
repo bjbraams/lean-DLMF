@@ -62,7 +62,7 @@ def Real.generalizedDawsonIntegral (p x : ℝ) : ℝ :=
 
 /-- Change of variable to incomplete Gamma in DLMF §7.16. -/
 theorem Real.generalizedErrorIntegral_gamma {p x : ℝ} (hp : 0 < p) (hx : 0 < x) :
-    (Real.generalizedErrorIntegral p x : ℂ)=lowerIncGamma (1/p) ((x^p : ℝ) : ℂ)/p := by
+    (Real.generalizedErrorIntegral p x : ℂ)=lowerIncompleteGamma (1/p) ((x^p : ℝ) : ℂ)/p := by
   have hxp : 0 < x^p := Real.rpow_pos_of_pos hx p
   -- real change of variables u = t^p
   let G : ℝ → ℝ := fun u => u^(1/p-1)*Real.exp (-u)/p
@@ -94,7 +94,7 @@ theorem Real.generalizedErrorIntegral_gamma {p x : ℝ} (hp : 0 < p) (hx : 0 < x
           indicator_of_notMem (show t ∉ Iic x from htx), smul_zero]
     rw [← hL, h, hR]
   have hpc : (p:ℂ) ≠ 0 := by exact_mod_cast hp.ne'
-  rw [lowerIncGamma_eq_integral (by simp [hp]) hxp, Real.generalizedErrorIntegral, hreal,
+  rw [lowerIncompleteGamma_eq_integral (by simp [hp]) hxp, Real.generalizedErrorIntegral, hreal,
     ← intervalIntegral.integral_ofReal, ← intervalIntegral.integral_div]
   refine intervalIntegral.integral_congr_ae (ae_of_all _ fun u hu => ?_)
   rw [uIoc_of_le hxp.le] at hu
@@ -105,11 +105,12 @@ theorem Real.generalizedErrorIntegral_gamma {p x : ℝ} (hp : 0 < p) (hx : 0 < x
   ring
 
 /-- `(a)_n (a+n) = a (a+1)_n`. -/
-theorem poch_mul_add_nat (a : ℂ) (n : ℕ) : poch a n*(a+n) = a*poch (a+1) n := by
+theorem pochhammer_mul_add_nat (a : ℂ) (n : ℕ) : pochhammer a n*(a+n) = a*pochhammer (a+1) n := by
   induction n with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ n ih =>
-    rw [poch_succ, poch_succ, mul_assoc, ← mul_assoc (poch a n), ih]; push_cast; ring
+    rw [pochhammer_succ, pochhammer_succ, mul_assoc, ← mul_assoc (pochhammer a n), ih];
+        push_cast; ring
 
 /-- Termwise integration of `exp(t^p)` on `[0, x]`. -/
 theorem hasSum_generalizedDawsonIntegral {p x : ℝ} (hp : 0 < p) (hx : 0 < x) :
@@ -146,14 +147,15 @@ theorem hasSum_generalizedDawsonIntegral {p x : ℝ} (hp : 0 < p) (hx : 0 < x) :
 
 /-- The negative-argument Gamma formula retains the compensating branch factor. -/
 theorem Real.generalizedDawsonIntegral_gamma {p x : ℝ} (hp : 0 < p) (hx : 0 < x) :
-    (Real.generalizedDawsonIntegral p x : ℂ)=exp (-π*I/p)/p*lowerIncGamma (1/p) (-(x^p : ℝ)) := by
+    (Real.generalizedDawsonIntegral p x : ℂ)=exp (-π*I/p)/p*lowerIncompleteGamma (1/p)
+        (-(x^p : ℝ)) := by
   set X : ℝ := x^p with hXdef
   have hX : 0 < X := Real.rpow_pos_of_pos hx p
   set a : ℂ := ((1/p:ℝ):ℂ) with ha
   have hpc : (p:ℂ) ≠ 0 := by exact_mod_cast hp.ne'
   have hxc : (x:ℂ) ≠ 0 := by exact_mod_cast hx.ne'
   -- the Kummer series
-  have hS : HasSum (fun n : ℕ => poch a n/(poch (a+1) n*n !)*(X:ℂ)^n)
+  have hS : HasSum (fun n : ℕ => pochhammer a n/(pochhammer (a+1) n*n !)*(X:ℂ)^n)
       ((Real.generalizedDawsonIntegral p x : ℂ)/x) := by
     have h := (Complex.hasSum_ofReal.mpr (hasSum_generalizedDawsonIntegral hp hx)).div_const (x:ℂ)
     refine h.congr_fun fun n => ?_
@@ -163,14 +165,14 @@ theorem Real.generalizedDawsonIntegral_gamma {p x : ℝ} (hp : 0 < p) (hx : 0 < 
       simp [ha] at this
       have : (0:ℝ) < p⁻¹+1 := by positivity
       linarith [(Nat.cast_nonneg k : (0:ℝ) ≤ k)]
-    have hp0 : poch (a+1) n ≠ 0 := poch_ne_zero_of_not_neg_nat
+    have hp0 : pochhammer (a+1) n ≠ 0 := pochhammer_ne_zero_of_not_neg_nat
       (fun k hk => hna ⟨k, hk.symm⟩) n
     have han : a+n ≠ 0 := by
       intro h0; have := congrArg Complex.re h0; simp [ha] at this
       have : (0:ℝ) < p⁻¹ := by positivity
       linarith [(Nat.cast_nonneg n : (0:ℝ) ≤ n)]
-    have hpoch : poch a n = a*poch (a+1) n/(a+n) := by
-      rw [← poch_mul_add_nat]; field_simp
+    have hpoch : pochhammer a n = a*pochhammer (a+1) n/(a+n) := by
+      rw [← pochhammer_mul_add_nat]; field_simp
     rw [hpoch]
     have hxn : ((x^(p*n+1):ℝ):ℂ) = (x:ℂ)*(X:ℂ)^n := by
       rw [Real.rpow_add hx, Real.rpow_one, Real.rpow_mul hx.le, Real.rpow_natCast]; push_cast; ring
@@ -180,7 +182,7 @@ theorem Real.generalizedDawsonIntegral_gamma {p x : ℝ} (hp : 0 < p) (hx : 0 < 
     have hpn : (p:ℂ)*n+1 ≠ 0 := by
       intro h0; have := congrArg Complex.re h0; simp at this
       nlinarith [(Nat.cast_nonneg n : (0:ℝ) ≤ n)]
-    rw [show a*poch (a+1) n/(a+n)/(poch (a+1) n*n !) = a/((a+n)*n !) by field_simp]
+    rw [show a*pochhammer (a+1) n/(a+n)/(pochhammer (a+1) n*n !) = a/((a+n)*n !) by field_simp]
     have hpn' : 1+(p:ℂ)*n ≠ 0 := by rw [add_comm]; exact hpn
     rw [ha]
     push_cast
@@ -193,7 +195,7 @@ theorem Real.generalizedDawsonIntegral_gamma {p x : ℝ} (hp : 0 < p) (hx : 0 < 
       show -((-X:ℝ):ℂ) = ((X:ℝ):ℂ) by push_cast; ring, ha, ← ofReal_cpow hX.le, one_div,
       hXdef, Real.rpow_rpow_inv hx.le hp.ne']
   have ha0 : a ≠ 0 := by simp [ha, hp.ne']
-  rw [lowerIncGamma, show (1/(p:ℂ)) = a by simp [ha], hpow, neg_neg, hM]
+  rw [lowerIncompleteGamma, show (1/(p:ℂ)) = a by simp [ha], hpow, neg_neg, hM]
   simp only [ha]
   push_cast
   have he' : exp (-(π*I/p))*exp (π*I/p) = 1 := by rw [← Complex.exp_add]; simp

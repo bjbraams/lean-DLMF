@@ -69,7 +69,7 @@ theorem normSq_cuspoidIntegral_one_eq_integral (x : ℝ) :
   have hc53 : (2 : ℝ) ^ (5 / 3 : ℝ) = 2 * c := by
     rw [hc, show (5 / 3 : ℝ) = 1 + 2 / 3 by norm_num, Real.rpow_add (by norm_num),
       Real.rpow_one]
-  set g : ℝ → ℝ := fun t => DLMF.Airy.airyAiReal (c * (x / a + t ^ 2)) with hg
+  set g : ℝ → ℝ := fun t => DLMF.Airy.Real.airyAi (c * (x / a + t ^ 2)) with hg
   have hgi : Integrable g :=
     DLMF.Airy.AiSquare.integrable DLMF.Airy.AiSquare.decay_ai DLMF.Airy.AiSquare.continuous_ai
       DLMF.Airy.AiSquare.scale_pos (x / a)
@@ -97,7 +97,7 @@ theorem normSq_cuspoidIntegral_one_eq_integral (x : ℝ) :
   rw [this, smul_eq_mul]
   have hc0 : 0 < c := DLMF.Airy.AiSquare.scale_pos
   have hF' : DLMF.Airy.AiSquare.tailIntegral (x / a) = π *
-      DLMF.Airy.airyAiReal (x / a) ^ 2 / c := by
+      DLMF.Airy.Real.airyAi (x / a) ^ 2 / c := by
     field_simp; linarith
   rw [hF']
   have hcC : (c : ℂ) ≠ 0 := ofReal_ne_zero.mpr hc0.ne'

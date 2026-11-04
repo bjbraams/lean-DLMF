@@ -24,7 +24,7 @@ are therefore best written with the entire functions `recipGammaDeriv n = (1/Γ)
 
 ## Main results
 
-* `poch_mul_recip_Gamma_add_nat`: `(x)_n / Γ(x+n) = 1/Γ(x)` for every `x`.
+* `pochhammer_mul_recip_Gamma_add_nat`: `(x)_n / Γ(x+n) = 1/Γ(x)` for every `x`.
 * `recipGammaDeriv_one_eq`, `recipGammaDeriv_one_neg_nat`: `(1/Γ)' = -ψ/Γ` away from the poles,
   and `(1/Γ)'(-n) = (-1)^n n!`.
 * `recipGammaDeriv_two_eq`: `(1/Γ)'' = (ψ² - ψ')/Γ` away from the poles.
@@ -95,13 +95,13 @@ theorem hasDerivAt_recip_Gamma' (z : ℂ) :
   rwa [e] at h
 
 /-- `(x)_n / Γ(x+n) = 1/Γ(x)` for every `x`, including the poles of `Γ`. -/
-theorem poch_mul_recip_Gamma_add_nat (x : ℂ) (r : ℕ) :
-    poch x r * (Gamma (x + r))⁻¹ = (Gamma x)⁻¹ := by
+theorem pochhammer_mul_recip_Gamma_add_nat (x : ℂ) (r : ℕ) :
+    pochhammer x r * (Gamma (x + r))⁻¹ = (Gamma x)⁻¹ := by
   induction r with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ r ih =>
     have h := one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (x + r)
-    rw [poch_succ, Nat.cast_succ, ← add_assoc, mul_assoc, ← h, ih]
+    rw [pochhammer_succ, Nat.cast_succ, ← add_assoc, mul_assoc, ← h, ih]
 
 /-- The non-poles of `Γ` form an open set. -/
 theorem isOpen_setOf_Gamma_ne_zero : IsOpen {z : ℂ | Gamma z ≠ 0} := by
@@ -144,9 +144,9 @@ theorem recipGammaDeriv_one_eq {x : ℂ} (hx : ∀ m : ℕ, x ≠ -(m : ℂ)) :
 theorem recipGammaDeriv_one_neg_nat (p : ℕ) :
     recipGammaDeriv 1 (-(p : ℂ)) = (-1 : ℂ) ^ p * (p ! : ℂ) := by
   have heq : (fun y : ℂ => (Gamma y)⁻¹) =
-      fun y => poch y p * (y + p) * (Gamma (y + (p + 1 : ℕ)))⁻¹ := by
+      fun y => pochhammer y p * (y + p) * (Gamma (y + (p + 1 : ℕ)))⁻¹ := by
     funext y
-    rw [← poch_mul_recip_Gamma_add_nat y (p + 1), poch_succ]
+    rw [← pochhammer_mul_recip_Gamma_add_nat y (p + 1), pochhammer_succ]
   have hp := Polynomial.hasDerivAt (ascPochhammer ℂ p) (-(p : ℂ))
   have h1 : HasDerivAt (fun y : ℂ => y + p) 1 (-(p : ℂ)) := (hasDerivAt_id _).add_const _
   have hpole : ∀ m : ℕ, -(p : ℂ) + ((p + 1 : ℕ) : ℂ) ≠ -(m : ℂ) := by
@@ -162,8 +162,8 @@ theorem recipGammaDeriv_one_neg_nat (p : ℕ) :
   have e1 : -(p : ℂ) + ((p + 1 : ℕ) : ℂ) = 1 := by push_cast; ring
   simp only [_root_.id, Function.comp_apply, Pi.mul_apply, e1, Gamma_one, inv_one, mul_one,
     neg_add_cancel, mul_zero, zero_add]
-  rw [show (Polynomial.eval (-(p : ℂ)) (ascPochhammer ℂ p)) = poch (-(p : ℂ)) p from rfl,
-    poch_neg_coe_nat, Nat.descFactorial_self]
+  rw [show (Polynomial.eval (-(p : ℂ)) (ascPochhammer ℂ p)) = pochhammer (-(p : ℂ)) p from rfl,
+    pochhammer_neg_coe_nat, Nat.descFactorial_self]
   ring
 
 /-- `(1/Γ)'' = (ψ² - ψ')/Γ` away from the poles. -/
@@ -189,8 +189,8 @@ theorem deriv_digamma_mul_recip_Gamma_sq {x : ℂ} (hx : ∀ m : ℕ, x ≠ -(m 
 
 /-- `ψ(x+n)/Γ(x) = -(x)_n (1/Γ)'(x+n)` whenever `x + n` is not a pole. -/
 theorem recip_Gamma_mul_digamma_add_nat {x : ℂ} (n : ℕ) (hx : ∀ m : ℕ, x + n ≠ -(m : ℂ)) :
-    (Gamma x)⁻¹ * digamma (x + n) = -(poch x n * recipGammaDeriv 1 (x + n)) := by
-  rw [← poch_mul_recip_Gamma_add_nat x n, recipGammaDeriv_one_eq hx]
+    (Gamma x)⁻¹ * digamma (x + n) = -(pochhammer x n * recipGammaDeriv 1 (x + n)) := by
+  rw [← pochhammer_mul_recip_Gamma_add_nat x n, recipGammaDeriv_one_eq hx]
   ring
 
 end DLMF.Gamma

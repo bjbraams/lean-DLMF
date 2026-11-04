@@ -700,7 +700,7 @@ private lemma mem_umbilicCuspLines_elliptic_iff_ribs (x y z : ℝ) :
       · linear_combination (-z) * h3
       · linear_combination -6 * Real.sqrt 3 * h3
 
-/-- The cube roots of unity `e^{2πim/3}` for `m = 0, 1, 2` are `1, -1/2 ± (√3/2) i`. -/
+/-- The unitCube roots of unity `e^{2πim/3}` for `m = 0, 1, 2` are `1, -1/2 ± (√3/2) i`. -/
 private lemma exp_two_pi_I_div_three_mul (m : Fin 3) :
     Complex.exp (2 / 3 * I * π * ((m : ℕ) : ℂ)) =
       ![1, -1 / 2 + Real.sqrt 3 / 2 * I, -1 / 2 - Real.sqrt 3 / 2 * I] m := by

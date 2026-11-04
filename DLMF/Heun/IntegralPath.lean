@@ -47,7 +47,7 @@ variable {a q α β γ δ ε : ℂ}
 `∫_C (𝒟 k)(t) w(t) ρ(t) dt = q ∫_C k(t) w(t) ρ(t) dt`. -/
 theorem integral_heunOperator_comp_path {V : Set ℂ}
     (hVs : ∀ t ∈ V, t ≠ 0 ∧ t ≠ 1 ∧ t ≠ a) {w ρ k : ℂ → ℂ} {C : ℝ → ℂ}
-    (hw : IsHeunSolOn a q α β γ δ ε w V)
+    (hw : IsHeunSolutionOn a q α β γ δ ε w V)
     (hρ : ∀ t ∈ V, HasDerivAt ρ (ρ t * ((γ - 1) / t + (δ - 1) / (t - 1) + (ε - 1) / (t - a))) t)
     (hk : ∀ t ∈ V, AnalyticAt ℂ k t)
     (hC : ContDiffOn ℝ 1 C (Icc 0 1)) (hCV : ∀ s ∈ Icc (0 : ℝ) 1, C s ∈ V)
@@ -61,7 +61,8 @@ theorem integral_heunOperator_comp_path {V : Set ℂ}
   have hCc : ContinuousOn C (Icc 0 1) := hC.continuousOn
   have hdm : AEStronglyMeasurable (deriv C) (volume.restrict (uIoc (0 : ℝ) 1)) :=
     (measurable_deriv C).aestronglyMeasurable
-  have hwc : ContinuousOn w V := fun t ht => (hw.1 t ht).continuousAt.continuousWithinAt
+  have hwc : ContinuousOn w V := fun t ht =>
+      (hw.differentiableAt t ht).continuousAt.continuousWithinAt
   have hρc : ContinuousOn ρ V := fun t ht => (hρ t ht).continuousAt.continuousWithinAt
   have hkc : ContinuousOn k V := fun t ht => (hk t ht).continuousAt.continuousWithinAt
   -- the integrand `k w ρ` along the path
@@ -90,7 +91,8 @@ theorem integral_heunOperator_comp_path {V : Set ℂ}
         ((hasDerivAt_id' t).sub_const a)
       exact this.congr_deriv (by ring)
     have h := (hp.fun_mul (hρ t ht)).fun_mul ((hKt.deriv.differentiableAt.hasDerivAt.fun_mul
-      (hw.1 t ht).hasDerivAt).fun_sub (hKt.differentiableAt.hasDerivAt.fun_mul (hw.2 t ht)))
+      (hw.differentiableAt t ht).hasDerivAt).fun_sub
+          (hKt.differentiableAt.hasDerivAt.fun_mul (hw.hasDerivAt_deriv t ht)))
     refine h.congr_deriv ?_
     simp only [hE, heunOperator, heunCoeffP, heunCoeffR]
     have h0 : t - 1 ≠ 0 := sub_ne_zero.2 ht1
@@ -105,8 +107,8 @@ theorem integral_heunOperator_comp_path {V : Set ℂ}
       have h2 : ContinuousAt (deriv (deriv k)) t := hKt.deriv.deriv.continuousAt
       have h1 : ContinuousAt (deriv k) t := hKt.deriv.continuousAt
       fun_prop
-    exact ((((hc.mul (hw.1 t ht).continuousAt).mul (hρ t ht).continuousAt).sub
-      (((continuousAt_const.mul hKt.continuousAt).mul (hw.1 t ht).continuousAt).mul
+    exact ((((hc.mul (hw.differentiableAt t ht).continuousAt).mul (hρ t ht).continuousAt).sub
+      (((continuousAt_const.mul hKt.continuousAt).mul (hw.differentiableAt t ht).continuousAt).mul
         (hρ t ht).continuousAt))).continuousWithinAt
   have hECc : ContinuousOn (fun s => E (C s)) (Icc 0 1) := hEc.comp hCc hCV
   obtain ⟨ME, hME⟩ := isCompact_Icc.exists_bound_of_continuousOn hECc
@@ -163,7 +165,7 @@ Stronger than DLMF: Fuchs's relation `α + β + 1 = γ + δ + ε` is not needed.
 theorem heun_integral_typeII' {U V : Set ℂ} (hU : IsOpen U)
     (hV : IsOpen V) (hUs : ∀ z ∈ U, z ≠ 0 ∧ z ≠ 1 ∧ z ≠ a)
     (hVs : ∀ t ∈ V, t ≠ 0 ∧ t ≠ 1 ∧ t ≠ a) {w ρ₁ : ℂ → ℂ} {K : ℂ → ℂ → ℂ → ℂ}
-    {C₁ C₂ : ℝ → ℂ} (hw : IsHeunSolOn a q α β γ δ ε w V)
+    {C₁ C₂ : ℝ → ℂ} (hw : IsHeunSolutionOn a q α β γ δ ε w V)
     (hρ : ∀ t ∈ V, HasDerivAt ρ₁ (ρ₁ t * ((γ - 1) / t + (δ - 1) / (t - 1) + (ε - 1) / (t - a))) t)
     (hK : AnalyticOnNhd ℂ (fun x : ℂ × ℂ × ℂ => K x.1 x.2.1 x.2.2) (U ×ˢ V ×ˢ V))
     (hKpde : ∀ z ∈ U, ∀ s ∈ V, ∀ t ∈ V,
@@ -178,7 +180,7 @@ theorem heun_integral_typeII' {U V : Set ℂ} (hU : IsOpen U)
     (hbd₁ : ∀ z ∈ U, ∀ t ∈ V, let B : ℂ → ℂ := fun s => s * (s - 1) * (s - a) * ρ₁ s *
         (deriv (fun s' => K z s' t) s * w s - K z s t * deriv w s)
       B (C₁ 1) = B (C₁ 0)) :
-    IsHeunSolOn a q α β γ δ ε
+    IsHeunSolutionOn a q α β γ δ ε
       (fun z => ∫ x in (0 : ℝ)..1, ∫ y in (0 : ℝ)..1,
         K z (C₁ x) (C₂ y) * w (C₁ x) * w (C₂ y) * ((C₁ x - C₂ y) * ρ₁ (C₁ x) * ρ₁ (C₂ y)) *
           deriv C₁ x * deriv C₂ y) U := by
@@ -245,7 +247,8 @@ theorem heun_integral_typeII' {U V : Set ℂ} (hU : IsOpen U)
     fun {G} hG z hz => hG.comp (continuous_const.prodMk continuous_id).continuousOn
       fun p hp => ⟨hz, hp.1, hp.2⟩
   -- the weights
-  have hwc : ContinuousOn w V := fun t ht => (hw.1 t ht).continuousAt.continuousWithinAt
+  have hwc : ContinuousOn w V := fun t ht =>
+      (hw.differentiableAt t ht).continuousAt.continuousWithinAt
   have hρc : ContinuousOn ρ₁ V := fun t ht => (hρ t ht).continuousAt.continuousWithinAt
   have hwt : ∀ {C : ℝ → ℂ}, ContDiffOn ℝ 1 C (Icc 0 1) → (∀ x ∈ Icc (0 : ℝ) 1, C x ∈ V) →
       AEStronglyMeasurable (fun x => w (C x) * ρ₁ (C x) * deriv C x)
@@ -305,7 +308,7 @@ theorem heun_integral_typeII' {U V : Set ℂ} (hU : IsOpen U)
   rw [hfun]
   have hW1 := hWd hK
   have hW2 := hWd hA1
-  refine ⟨fun z hz => (hW1 z hz).differentiableAt, fun z hz => ?_⟩
+  refine IsLinearODE2On.mk (fun z hz => (hW1 z hz).differentiableAt) (fun z hz => ?_)
   have hev : deriv (fun z => ∫ x in (0 : ℝ)..1,
         (∫ y in (0 : ℝ)..1, K z (C₁ x) (C₂ y) * (C₁ x - C₂ y) * g₂ y) * g₁ x) =ᶠ[𝓝 z]
       fun z => ∫ x in (0 : ℝ)..1,

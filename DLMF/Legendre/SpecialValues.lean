@@ -43,8 +43,9 @@ of complete elliptic integrals.
 ## Implementation notes
 
 The values at `x = 0` (DLMF 14.5.1, 14.5.2) hold for all complex `ν, μ`. The complete elliptic
-integrals `DLMF.Elliptic.Real.compEllIntKm` and `DLMF.Elliptic.Real.compEllIntEm` take the
-parameter `m = k²`, the square of the DLMF modulus `k`.
+integrals `DLMF.Elliptic.Real.completeEllipticKOfParameter` and
+`DLMF.Elliptic.Real.completeEllipticEOfParameter` take the parameter `m = k²`, the square of the
+DLMF modulus `k`.
 -/
 
 @[expose] public noncomputable section
@@ -63,9 +64,10 @@ theorem ferrersP_zero_1 (ν μ : ℂ) :
     have := congrArg re h; simp at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
   unfold ferrersP
   simp only [ofReal_zero, add_zero, sub_zero, div_one, ofReal_one, one_cpow, one_mul]
-  rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hz, show -ν = 1-(ν+1) by ring, hq,
+  rw [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hz, show -ν =
+      1-(ν+1) by ring, hq,
     show (1:ℂ)-2*(1/2) = 0 by norm_num, zero_pow two_ne_zero,
-                                regularizedGaussHGFun_zero_of_regular hh,
+                                regularizedGaussHypergeometricFun_zero_of_regular hh,
     show (1:ℂ)-1/2 = 1/2 by norm_num, show 1-μ-1 = -μ by ring, half_cpow_neg,
     show (1-μ-(ν+1)+1)/2 = (1-ν-μ)/2 by ring, show (1-μ+(ν+1))/2 = (ν-μ)/2+1 by ring,
     legendre_Gamma_one_half]
@@ -84,14 +86,14 @@ theorem ferrersP_zero_2 (ν μ : ℂ) :
   have hd := ((h1.const_mul (π/(Gamma ((1-ν-μ)/2)*Gamma ((ν-μ+2)/2)))).sub
     (h2.const_mul (π/(Gamma (-(ν+μ)/2)*Gamma ((ν-μ+1)/2))))).const_mul ((2:ℂ)^μ)
   have hev : ferrersP ν μ =ᶠ[𝓝 0] fun x : ℝ => 2^μ*(π/(Gamma ((1-ν-μ)/2)*Gamma ((ν-μ+2)/2))*
-        ((1-(x:ℂ)^2)^(-μ/2)*regularizedGaussHG (-(ν+μ)/2) ((ν-μ+1)/2) (1/2) ((x:ℂ)^2)) -
+        ((1-(x:ℂ)^2)^(-μ/2)*regularizedGaussHypergeometric (-(ν+μ)/2) ((ν-μ+1)/2) (1/2) ((x:ℂ)^2)) -
       π/(Gamma (-(ν+μ)/2)*Gamma ((ν-μ+1)/2))*
-        ((x:ℂ)*((1-(x:ℂ)^2)^(-μ/2)*regularizedGaussHG ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2)
+        ((x:ℂ)*((1-(x:ℂ)^2)^(-μ/2)*regularizedGaussHypergeometric ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2)
             ((x:ℂ)^2)))) := by
     filter_upwards [Ioo_mem_nhds (show (-1:ℝ) < 0 by norm_num) (show (0:ℝ) < 1 by norm_num)]
       with x hx using ferrersP_eq_quadratic ν μ hx
   refine (hd.congr_of_eventuallyEq hev).congr_deriv ?_
-  rw [regularizedGaussHG_zero_of_regular Complex.three_div_two_ne_neg_natCast,
+  rw [regularizedGaussHypergeometric_zero_of_regular Complex.three_div_two_ne_neg_natCast,
       legendre_Gamma_three_halves,
     cpow_add _ _ (by norm_num : (2:ℂ) ≠ 0), cpow_one]
   have hs : (Real.sqrt π : ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
@@ -110,7 +112,7 @@ theorem ferrersQ_zero_3 (ν μ : ℂ) :
   simp only [ofReal_zero, zero_mul, mul_zero, add_zero, ne_eq, OfNat.ofNat_ne_zero,
       not_false_eq_true,
     zero_pow, sub_zero, one_cpow, mul_one]
-  rw [regularizedGaussHG_zero_of_regular Complex.one_div_two_ne_neg_natCast,
+  rw [regularizedGaussHypergeometric_zero_of_regular Complex.one_div_two_ne_neg_natCast,
       legendre_Gamma_one_half,
     cpow_sub _ _ (by norm_num : (2:ℂ) ≠ 0), cpow_one, show (ν-μ+2)/2 = (ν-μ)/2+1 by ring]
   have hs : (Real.sqrt π : ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
@@ -131,16 +133,16 @@ theorem ferrersQ_zero_4 (ν μ : ℂ) :
     (h2.const_mul (π/2*cos ((ν+μ)*π/2)*(2^μ*Gamma ((ν+μ+2)/2)/Gamma ((ν-μ+1)/2))))
   have he : ferrersQ ν μ = fun x : ℝ =>
       -π/2*sin ((ν+μ)*π/2)*(2^μ*Gamma ((ν+μ+1)/2)/Gamma ((ν-μ+2)/2))*
-        ((1-(x:ℂ)^2)^(-μ/2)*regularizedGaussHG (-(ν+μ)/2) ((ν-μ+1)/2) (1/2) ((x:ℂ)^2)) +
+        ((1-(x:ℂ)^2)^(-μ/2)*regularizedGaussHypergeometric (-(ν+μ)/2) ((ν-μ+1)/2) (1/2) ((x:ℂ)^2)) +
       π/2*cos ((ν+μ)*π/2)*(2^μ*Gamma ((ν+μ+2)/2)/Gamma ((ν-μ+1)/2))*
-        ((x:ℂ)*((1-(x:ℂ)^2)^(-μ/2)*regularizedGaussHG ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2)
+        ((x:ℂ)*((1-(x:ℂ)^2)^(-μ/2)*regularizedGaussHypergeometric ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2)
             ((x:ℂ)^2))) := by
     funext x
     unfold ferrersQ ferrersW1 ferrersW2
     ring
   rw [he]
   refine hd.congr_deriv ?_
-  rw [regularizedGaussHG_zero_of_regular Complex.three_div_two_ne_neg_natCast,
+  rw [regularizedGaussHypergeometric_zero_of_regular Complex.three_div_two_ne_neg_natCast,
       legendre_Gamma_three_halves,
     show (ν+μ+2)/2 = (ν+μ)/2+1 by ring]
   have hs : (Real.sqrt π : ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
@@ -159,7 +161,7 @@ theorem ferrersP_degree_0 {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
   have hN := legendreP_nat 0 hz
   norm_num only [Nat.cast_zero, Nat.cast_one, Nat.cast_ofNat] at hN
   rw [hN]
-  exact DLMF.OrthogonalPolynomials.legendrePolyP_zero _
+  exact DLMF.OrthogonalPolynomials.legendrePolynomialP_zero _
 
 /-- DLMF 14.5.6: `𝖯_1(x) = x` for `-1 < x < 1`. -/
 @[dlmf 14.5.E6]
@@ -170,7 +172,7 @@ theorem ferrersP_degree_1 {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
   have hN := legendreP_nat 1 hz
   norm_num only [Nat.cast_zero, Nat.cast_one, Nat.cast_ofNat] at hN
   rw [hN]
-  exact DLMF.OrthogonalPolynomials.legendrePolyP_one _
+  exact DLMF.OrthogonalPolynomials.legendrePolynomialP_one _
 
 /-- DLMF 14.5.28: `𝖯_2(x) = (3x²-1)/2` for `-1 < x < 1`. -/
 @[dlmf 14.5.E28]
@@ -181,9 +183,9 @@ theorem ferrersP_degree_2 {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
   have hN := legendreP_nat 2 hz
   norm_num only [Nat.cast_zero, Nat.cast_one, Nat.cast_ofNat] at hN
   rw [hN]
-  have h := DLMF.OrthogonalPolynomials.legendrePolyP_recurrence 0 (x:ℂ)
-  norm_num [DLMF.OrthogonalPolynomials.legendrePolyP_zero,
-    DLMF.OrthogonalPolynomials.legendrePolyP_one] at h
+  have h := DLMF.OrthogonalPolynomials.legendrePolynomialP_recurrence 0 (x:ℂ)
+  norm_num [DLMF.OrthogonalPolynomials.legendrePolynomialP_zero,
+    DLMF.OrthogonalPolynomials.legendrePolynomialP_one] at h
   linear_combination h/2
 
 /-- DLMF 14.5.5: `P_0(z) = 1` for `z-1` in the slit plane (`z ∉ (-∞, 1]`). -/
@@ -195,7 +197,7 @@ theorem associatedP_degree_0 {z : ℂ} (hz : z-1 ∈ slitPlane) :
   have hN := legendreP_nat 0 hz'
   norm_num only [Nat.cast_zero, Nat.cast_one, Nat.cast_ofNat] at hN
   rw [hN]
-  exact DLMF.OrthogonalPolynomials.legendrePolyP_zero _
+  exact DLMF.OrthogonalPolynomials.legendrePolynomialP_zero _
 
 /-- DLMF 14.5.6: `P_1(z) = z` for `z-1` in the slit plane (`z ∉ (-∞, 1]`). -/
 @[dlmf 14.5.E6]
@@ -206,7 +208,7 @@ theorem associatedP_degree_1 {z : ℂ} (hz : z-1 ∈ slitPlane) :
   have hN := legendreP_nat 1 hz'
   norm_num only [Nat.cast_zero, Nat.cast_one, Nat.cast_ofNat] at hN
   rw [hN]
-  exact DLMF.OrthogonalPolynomials.legendrePolyP_one _
+  exact DLMF.OrthogonalPolynomials.legendrePolynomialP_one _
 
 /-- DLMF 14.5.28: `P_2(z) = (3z²-1)/2` for `z-1` in the slit plane (`z ∉ (-∞, 1]`). -/
 @[dlmf 14.5.E28]
@@ -217,28 +219,30 @@ theorem associatedP_degree_2 {z : ℂ} (hz : z-1 ∈ slitPlane) :
   have hN := legendreP_nat 2 hz'
   norm_num only [Nat.cast_zero, Nat.cast_one, Nat.cast_ofNat] at hN
   rw [hN]
-  have h := DLMF.OrthogonalPolynomials.legendrePolyP_recurrence 0 z
-  norm_num [DLMF.OrthogonalPolynomials.legendrePolyP_zero,
-    DLMF.OrthogonalPolynomials.legendrePolyP_one] at h
+  have h := DLMF.OrthogonalPolynomials.legendrePolynomialP_recurrence 0 z
+  norm_num [DLMF.OrthogonalPolynomials.legendrePolynomialP_zero,
+    DLMF.OrthogonalPolynomials.legendrePolynomialP_one] at h
   linear_combination h/2
 
 /-- `𝐅(1/2,1;1/2;w) = (1-w)⁻¹/Γ(1/2)` on the cut plane. -/
-theorem regularizedGaussHG_half_one_half {w : ℂ} (hw : w ∈ cutPlane) :
-    regularizedGaussHG (1/2) 1 (1/2) w = (1-w)⁻¹/Real.sqrt π := by
-  rw [regularizedGaussHG_euler _ _ _ hw, show (1/2:ℂ)-1/2-1 = -1 by norm_num,
-    show (1/2:ℂ)-1/2 = 0 by norm_num, regularizedGaussHG_zero_left _ _ hw, legendre_Gamma_one_half,
+theorem regularizedGaussHypergeometric_half_one_half {w : ℂ} (hw : w ∈ cutPlane) :
+    regularizedGaussHypergeometric (1/2) 1 (1/2) w = (1-w)⁻¹/Real.sqrt π := by
+  rw [regularizedGaussHypergeometric_euler _ _ _ hw, show (1/2:ℂ)-1/2-1 = -1 by norm_num,
+    show (1/2:ℂ)-1/2 = 0 by norm_num, regularizedGaussHypergeometric_zero_left _ _ hw,
+                              legendre_Gamma_one_half,
     cpow_neg_one]
   ring
 
 /-- Values of `𝐅(·,·;·;x²)` behind `𝖰₀, 𝖰₁, 𝖰₂`, in terms of `A = 𝐅(1/2,1;3/2;x²)`. -/
-lemma regularizedGaussHG_ferrersQ_aux {w : ℂ} (hw : w ∈ cutPlane) :
-    regularizedGaussHG (-(1/2)) 1 (1/2) w = 1/Real.sqrt π - w/2*regularizedGaussHG (1/2) 1 (3/2) w ∧
-    w*regularizedGaussHG (-(1/2)) 2 (3/2) w =
-      w*(3/(2*Real.sqrt π) + (1-3*w)/4*regularizedGaussHG (1/2) 1 (3/2) w) := by
-  have h1 := regularizedGaussHG_contiguous_a_pred_c_succ (1/2) 1 (1/2) hw
-  have h2 := regularizedGaussHG_contiguous_a_c_succ (-1/2) 1 (1/2) hw
-  have h3 := regularizedGaussHG_contiguous_ab (-1/2) 1 (3/2) hw
-  have hh := regularizedGaussHG_half_one_half hw
+lemma regularizedGaussHypergeometric_ferrersQ_aux {w : ℂ} (hw : w ∈ cutPlane) :
+    regularizedGaussHypergeometric (-(1/2)) 1 (1/2) w = 1/Real.sqrt π -
+        w/2*regularizedGaussHypergeometric (1/2) 1 (3/2) w ∧
+    w*regularizedGaussHypergeometric (-(1/2)) 2 (3/2) w =
+      w*(3/(2*Real.sqrt π) + (1-3*w)/4*regularizedGaussHypergeometric (1/2) 1 (3/2) w) := by
+  have h1 := regularizedGaussHypergeometric_contiguous_a_pred_c_succ (1/2) 1 (1/2) hw
+  have h2 := regularizedGaussHypergeometric_contiguous_a_c_succ (-1/2) 1 (1/2) hw
+  have h3 := regularizedGaussHypergeometric_contiguous_ab (-1/2) 1 (3/2) hw
+  have hh := regularizedGaussHypergeometric_half_one_half hw
   have hw1 : 1-w ≠ 0 := one_sub_ne_zero_of_mem_cutPlane hw
   have hs : (Real.sqrt π : ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
   norm_num at h1 h2 h3
@@ -248,13 +252,14 @@ lemma regularizedGaussHG_ferrersQ_aux {w : ℂ} (hw : w ∈ cutPlane) :
   exact ⟨by linear_combination -h1, by linear_combination (-w)*h3 - 3*h2 - (3/2)*(w-1)*h1 + (3/2)*e⟩
 
 /-- `x 𝐅(1/2,1;3/2;x²) = log((1+x)/(1-x))/√π` on `(-1,1)`. -/
-theorem ofReal_mul_regularizedGaussHG_log_ratio {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    (x:ℂ)*regularizedGaussHG (1/2) 1 (3/2) ((x:ℂ)^2) = log ((1+x)/(1-x):ℂ)/Real.sqrt π := by
+theorem ofReal_mul_regularizedGaussHypergeometric_log_ratio {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+    (x:ℂ)*regularizedGaussHypergeometric (1/2) 1 (3/2) ((x:ℂ)^2) =
+        log ((1+x)/(1-x):ℂ)/Real.sqrt π := by
   have hx1 : ‖(x:ℂ)‖ < 1 := by
     rw [Complex.norm_real, Real.norm_eq_abs, abs_lt]; exact ⟨hx.1, hx.2⟩
   have hw : ‖(x:ℂ)^2‖ < 1 := by rw [norm_pow]; nlinarith [norm_nonneg (x:ℂ)]
-  rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hw,
-    regularizedGaussHGFun_eq_div_Gamma Complex.three_div_two_ne_neg_natCast,
+  rw [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hw,
+    regularizedGaussHypergeometricFun_eq_div_Gamma Complex.three_div_two_ne_neg_natCast,
         legendre_Gamma_three_halves,
     ← log_ratio hx1]
   have hs : (Real.sqrt π : ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
@@ -264,7 +269,7 @@ theorem ofReal_mul_regularizedGaussHG_log_ratio {x : ℝ} (hx : x ∈ Ioo (-1:�
 @[dlmf 14.5.E7]
 theorem ferrersQ_degree_0 {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersQ 0 0 x=1/2*log ((1+x)/(1-x):ℂ) := by
-  have hA := ofReal_mul_regularizedGaussHG_log_ratio hx
+  have hA := ofReal_mul_regularizedGaussHypergeometric_log_ratio hx
   unfold ferrersQ ferrersW1 ferrersW2
   norm_num
   have hs : (Real.sqrt π : ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
@@ -276,14 +281,14 @@ theorem ferrersQ_degree_0 {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
 @[dlmf 14.5.E8]
 theorem ferrersQ_degree_1 {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersQ 1 0 x=x/2*log ((1+x)/(1-x):ℂ)-1 := by
-  have hA := ofReal_mul_regularizedGaussHG_log_ratio hx
+  have hA := ofReal_mul_regularizedGaussHypergeometric_log_ratio hx
   unfold ferrersQ ferrersW1 ferrersW2
   norm_num
   have hs : (Real.sqrt π : ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hpi : (π:ℂ) = (Real.sqrt π : ℂ)^2 := by rw [← ofReal_pow, Real.sq_sqrt Real.pi_pos.le]
   have hw : (x:ℂ)^2 ∈ cutPlane := mem_cutPlane_of_norm_lt_one (by
     rw [norm_pow, Complex.norm_real, Real.norm_eq_abs, sq_abs]; nlinarith [hx.1, hx.2])
-  obtain ⟨h1, h2⟩ := regularizedGaussHG_ferrersQ_aux hw
+  obtain ⟨h1, h2⟩ := regularizedGaussHypergeometric_ferrersQ_aux hw
   rw [h1, legendre_Gamma_three_halves, hpi]
   field_simp at hA ⊢
   linear_combination (x:ℂ) * hA
@@ -292,14 +297,14 @@ theorem ferrersQ_degree_1 {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
 @[dlmf 14.5.E29]
 theorem ferrersQ_degree_2 {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersQ 2 0 x=(3*x^2-1:ℂ)/4*log ((1+x)/(1-x):ℂ)-3*x/2 := by
-  have hA := ofReal_mul_regularizedGaussHG_log_ratio hx
+  have hA := ofReal_mul_regularizedGaussHypergeometric_log_ratio hx
   unfold ferrersQ ferrersW1 ferrersW2
   norm_num
   have hs : (Real.sqrt π : ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hpi : (π:ℂ) = (Real.sqrt π : ℂ)^2 := by rw [← ofReal_pow, Real.sq_sqrt Real.pi_pos.le]
   have hw : (x:ℂ)^2 ∈ cutPlane := mem_cutPlane_of_norm_lt_one (by
     rw [norm_pow, Complex.norm_real, Real.norm_eq_abs, sq_abs]; nlinarith [hx.1, hx.2])
-  obtain ⟨h1, h2⟩ := regularizedGaussHG_ferrersQ_aux hw
+  obtain ⟨h1, h2⟩ := regularizedGaussHypergeometric_ferrersQ_aux hw
   rcases eq_or_ne x 0 with rfl | hx0
   · simp
   have hx0' : (x:ℂ)^2 ≠ 0 := pow_ne_zero 2 (ofReal_ne_zero.mpr hx0)
@@ -362,8 +367,8 @@ theorem ferrersP_half_order_11 (ν : ℂ) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < �
     exact hsq1
   have hc : ∀ k : ℕ, (1 - 1/2 : ℂ) ≠ -(k : ℂ) := fun k h => by
     have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
-  rw [ferrersP, regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hz,
-      regularizedGaussHGFun_eq_div_Gamma hc,
+  rw [ferrersP, regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hz,
+      regularizedGaussHypergeometricFun_eq_div_Gamma hc,
     show (1 - 1/2 : ℂ) = 1/2 by norm_num, show -ν = 1 - (ν+1) by ring,
     show ((1:ℂ) - (Real.cos θ:ℝ))/2 = (Real.sin t:ℂ)^2 by rw [hcos]; push_cast; ring,
     sin_sq_cos_quotient (ν+1) habs, legendre_Gamma_one_half]
@@ -410,8 +415,8 @@ theorem ferrersP_half_order_12 (ν : ℂ) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < �
     exact hsq1
   have hc : ∀ k : ℕ, (1 - -1/2 : ℂ) ≠ -(k : ℂ) := fun k h => by
     have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
-  rw [ferrersP, regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hz,
-      regularizedGaussHGFun_eq_div_Gamma hc,
+  rw [ferrersP, regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hz,
+      regularizedGaussHypergeometricFun_eq_div_Gamma hc,
     show (1 - -1/2 : ℂ) = 3/2 by norm_num, show -ν = 1 - (ν+1) by ring,
     show ((1:ℂ) - (Real.cos θ:ℝ))/2 = (Real.sin t:ℂ)^2 by rw [hcos]; push_cast; ring,
     legendre_Gamma_three_halves]
@@ -491,8 +496,10 @@ theorem ferrersQ_half_order_13 (ν : ℂ) (h : LegendreQRegular ν (1/2)) {θ : 
   have hc3 : ∀ k : ℕ, (3/2 : ℂ) ≠ -(k : ℂ) := fun k h => by
     have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
   rw [ferrersQ, ferrersW1, ferrersW2,
-    regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hx2, regularizedGaussHGFun_eq_div_Gamma hc1,
-    regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hx2, regularizedGaussHGFun_eq_div_Gamma hc3,
+    regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hx2,
+        regularizedGaussHypergeometricFun_eq_div_Gamma hc1,
+    regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hx2,
+        regularizedGaussHypergeometricFun_eq_div_Gamma hc3,
     legendre_Gamma_one_half, legendre_Gamma_three_halves]
   set b := (ν + 1/2)/2 with hb
   -- Gamma ratios
@@ -583,8 +590,10 @@ theorem ferrersQ_half_order_14 (ν : ℂ) (h : LegendreQRegular ν (-1/2)) {θ :
   have hn : ν + 1/2 ≠ 0 := by
     intro h'; apply h 0; push_cast; linear_combination h'
   rw [ferrersQ, ferrersW1, ferrersW2,
-    regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hx2, regularizedGaussHGFun_eq_div_Gamma hc1,
-    regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hx2, regularizedGaussHGFun_eq_div_Gamma hc3,
+    regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hx2,
+        regularizedGaussHypergeometricFun_eq_div_Gamma hc1,
+    regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hx2,
+        regularizedGaussHypergeometricFun_eq_div_Gamma hc3,
     legendre_Gamma_one_half, legendre_Gamma_three_halves]
   set b := (ν + 1/2)/2 with hb
   have hb0 : b ≠ 0 := by rw [hb]; exact div_ne_zero hn two_ne_zero
@@ -701,8 +710,9 @@ theorem associatedP_half_order_15 (ν : ℂ) {ξ : ℝ} (hξ : 0 < ξ) :
     rw [norm_pow]; exact pow_lt_one₀ (norm_nonneg _) hm two_ne_zero
   have hc : ∀ k : ℕ, (1 - 1/2 : ℂ) ≠ -(k : ℂ) := fun k h => by
     have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
-  rw [associatedP, hz, regularizedGaussHG_pfaff _ _ _ hcut, hq,
-    regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hnorm, regularizedGaussHGFun_eq_div_Gamma hc,
+  rw [associatedP, hz, regularizedGaussHypergeometric_pfaff _ _ _ hcut, hq,
+    regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hnorm,
+        regularizedGaussHypergeometricFun_eq_div_Gamma hc,
     ordinaryHypergeometric_symm, show (1 - 1/2 : ℂ) - -ν = ν + 1/2 by ring,
     show ν + 1 = (ν + 1/2) + 1/2 by ring, show (1 - 1/2 : ℂ) = 1/2 by norm_num, even_binomial _ hm,
     legendre_Gamma_one_half]
@@ -783,8 +793,9 @@ theorem associatedP_half_order_16 (ν : ℂ) {ξ : ℝ} (hξ : 0 < ξ) :
     rw [norm_pow]; exact pow_lt_one₀ (norm_nonneg _) hm two_ne_zero
   have hc : ∀ k : ℕ, (1 - -1/2 : ℂ) ≠ -(k : ℂ) := fun k h => by
     have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
-  rw [associatedP, hz, regularizedGaussHG_pfaff _ _ _ hcut, hq,
-    regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hnorm, regularizedGaussHGFun_eq_div_Gamma hc,
+  rw [associatedP, hz, regularizedGaussHypergeometric_pfaff _ _ _ hcut, hq,
+    regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hnorm,
+        regularizedGaussHypergeometricFun_eq_div_Gamma hc,
     show (1 - -1/2 : ℂ) - -ν = (ν + 1) + 1/2 by ring, show (1 - -1/2 : ℂ) = 3/2 by norm_num,
     legendre_Gamma_three_halves]
   have hp : (Real.cosh ξ : ℂ) + 1 = ((2*C^2 : ℝ) : ℂ) := by rw [hcosh, hcs]; push_cast; ring
@@ -859,13 +870,13 @@ theorem olverQ_half_order_1 (ν : ℂ) {ξ : ℝ} (hξ : 0 < ξ) :
   have hw : ‖(1:ℂ)/(Z:ℂ)^2‖ < 1 := by
     rw [show (1:ℂ)/(Z:ℂ)^2 = ((1/Z^2 : ℝ) : ℂ) by push_cast; ring, Complex.norm_real,
       Real.norm_eq_abs, abs_of_pos (by positivity), div_lt_one (by positivity)]; nlinarith
-  rw [olverQ, regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hw,
+  rw [olverQ, regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hw,
     show (ν + 1/2 + 2)/2 = (ν+3/2)/2 + 1/2 by ring, show (ν + 1/2 + 1)/2 = (ν+3/2)/2 by ring]
   by_cases hc : ∀ k : ℕ, ν + 3/2 ≠ -(k:ℂ)
   · have hq := quadratic_binomial_derivative (a := (ν+3/2)/2)
       (by rw [show 2*((ν+3/2)/2) = ν+3/2 by ring]; exact hc) hw
     rw [show 2*((ν+3/2)/2) = ν+3/2 by ring] at hq
-    rw [regularizedGaussHGFun_eq_div_Gamma hc, ordinaryHypergeometric_symm, hq]
+    rw [regularizedGaussHypergeometricFun_eq_div_Gamma hc, ordinaryHypergeometric_symm, hq]
     have hZne : (Z:ℂ) ≠ 0 := by exact_mod_cast hZ0.ne'
     have h1w : (1:ℂ) - 1/(Z:ℂ)^2 = (((Sh/Z)^2 : ℝ) : ℂ) := by
       have : ((Z:ℂ))^2 = 1 + (Sh:ℂ)^2 := by exact_mod_cast hZS
@@ -910,14 +921,15 @@ theorem olverQ_half_order_1 (ν : ℂ) {ξ : ℝ} (hξ : 0 < ξ) :
   · push Not at hc
     obtain ⟨n, hn⟩ := hc
     have hG : Gamma (ν + 3/2) = 0 := by rw [hn]; exact Complex.Gamma_neg_nat_eq_zero n
-    rw [hG, div_zero, ← regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hw, hn,
-      regularizedGaussHG_neg_nat _ _ _ (mem_cutPlane_of_norm_lt_one hw)]
+    rw [hG, div_zero, ← regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _
+        hw, hn,
+      regularizedGaussHypergeometric_neg_nat _ _ _ (mem_cutPlane_of_norm_lt_one hw)]
     have hν : ν = -(n:ℂ) - 3/2 := by linear_combination hn
     rcases Nat.even_or_odd n with ⟨j, hj⟩ | ⟨j, hj⟩
     · have : -(n:ℂ)/2 = -(j:ℂ) := by rw [hj]; push_cast; ring
-      rw [this, poch_neg_nat_eq_zero (by omega : j < n + 1)]; simp
+      rw [this, pochhammer_neg_nat_eq_zero (by omega : j < n + 1)]; simp
     · have : -(n:ℂ)/2 + 1/2 = -(j:ℂ) := by rw [hj]; push_cast; ring
-      rw [this, poch_neg_nat_eq_zero (by omega : j < n + 1)]; simp
+      rw [this, pochhammer_neg_nat_eq_zero (by omega : j < n + 1)]; simp
 
 /-- DLMF 14.5.17 (order `-1/2`): for `ξ > 0`, `𝑸^{-1/2}_ν(cosh ξ) = (π/(2 sinh ξ))^{1/2}
 e^{-(ν+1/2)ξ}/Γ(ν+3/2)`. -/
@@ -934,13 +946,13 @@ theorem olverQ_half_order_2 (ν : ℂ) {ξ : ℝ} (hξ : 0 < ξ) :
   have hw : ‖(1:ℂ)/(Z:ℂ)^2‖ < 1 := by
     rw [show (1:ℂ)/(Z:ℂ)^2 = ((1/Z^2 : ℝ) : ℂ) by push_cast; ring, Complex.norm_real,
       Real.norm_eq_abs, abs_of_pos (by positivity), div_lt_one (by positivity)]; nlinarith
-  rw [olverQ, regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hw,
+  rw [olverQ, regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hw,
     show (ν + -1/2 + 2)/2 = (ν+1/2)/2 + 1/2 by ring, show (ν + -1/2 + 1)/2 = (ν+1/2)/2 by ring]
   by_cases hc : ∀ k : ℕ, ν + 3/2 ≠ -(k:ℂ)
   · have hq := quadratic_binomial (a := (ν+1/2)/2)
       (by rw [show 1 + 2*((ν+1/2)/2) = ν+3/2 by ring]; exact hc) hw
     rw [show 1 + 2*((ν+1/2)/2) = ν+3/2 by ring] at hq
-    rw [regularizedGaussHGFun_eq_div_Gamma hc, ordinaryHypergeometric_symm, hq]
+    rw [regularizedGaussHypergeometricFun_eq_div_Gamma hc, ordinaryHypergeometric_symm, hq]
     have hZne : (Z:ℂ) ≠ 0 := by exact_mod_cast hZ0.ne'
     have h1w : (1:ℂ) - 1/(Z:ℂ)^2 = (((Sh/Z)^2 : ℝ) : ℂ) := by
       have : ((Z:ℂ))^2 = 1 + (Sh:ℂ)^2 := by exact_mod_cast hZS
@@ -984,14 +996,15 @@ theorem olverQ_half_order_2 (ν : ℂ) {ξ : ℝ} (hξ : 0 < ξ) :
   · push Not at hc
     obtain ⟨n, hn⟩ := hc
     have hG : Gamma (ν + 3/2) = 0 := by rw [hn]; exact Complex.Gamma_neg_nat_eq_zero n
-    rw [hG, div_zero, ← regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hw, hn,
-      regularizedGaussHG_neg_nat _ _ _ (mem_cutPlane_of_norm_lt_one hw)]
+    rw [hG, div_zero, ← regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _
+        hw, hn,
+      regularizedGaussHypergeometric_neg_nat _ _ _ (mem_cutPlane_of_norm_lt_one hw)]
     have hν : ν = -(n:ℂ) - 3/2 := by linear_combination hn
     rcases Nat.even_or_odd n with ⟨j, hj⟩ | ⟨j, hj⟩
     · have : (ν + 1/2)/2 + 1/2 = -(j:ℂ) := by rw [hν, hj]; push_cast; ring
-      rw [this, poch_neg_nat_eq_zero (by omega : j < n + 1)]; simp
+      rw [this, pochhammer_neg_nat_eq_zero (by omega : j < n + 1)]; simp
     · have : (ν + 1/2)/2 = -((j+1:ℕ):ℂ) := by rw [hν, hj]; push_cast; ring
-      rw [this, poch_neg_nat_eq_zero (by omega : j + 1 < n + 1)]; simp
+      rw [this, pochhammer_neg_nat_eq_zero (by omega : j + 1 < n + 1)]; simp
 
 /-- DLMF 14.5.18: for `0 < θ < π`, `𝖯^{-ν}_ν(cos θ) = (sin θ)^ν/(2^ν Γ(ν+1))`. -/
 @[dlmf 14.5.E18]
@@ -1006,9 +1019,10 @@ theorem ferrersP_negative_degree_order (ν : ℂ) {θ : ℝ} (h0 : 0 < θ) (hπ 
   have hz : ‖((1:ℂ) - x)/2‖ < 1 := by
     rw [show ((1:ℂ) - x)/2 = (((1-x)/2 : ℝ) : ℂ) by push_cast; ring, Complex.norm_real,
       Real.norm_eq_abs, abs_lt]; constructor <;> linarith
-  rw [ferrersP, show 1 - -ν = ν + 1 by ring, regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hz]
+  rw [ferrersP, show 1 - -ν = ν + 1 by ring,
+    regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hz]
   by_cases hc : ∀ k : ℕ, ν + 1 ≠ -(k:ℂ)
-  · rw [regularizedGaussHGFun_eq_div_Gamma hc, ordinaryHypergeometric_symm,
+  · rw [regularizedGaussHypergeometricFun_eq_div_Gamma hc, ordinaryHypergeometric_symm,
       ordinaryHypergeometric_eq_one_sub_neg_cpow (fun k h => hc k (by rw [h, neg_neg])) hz,
       neg_neg]
     have h1 : 0 < 1 + x := by linarith
@@ -1028,30 +1042,32 @@ theorem ferrersP_negative_degree_order (ν : ℂ) {θ : ℝ} (h0 : 0 < θ) (hπ 
   · push Not at hc
     obtain ⟨k, hk⟩ := hc
     have hG : Gamma (ν+1) = 0 := by rw [hk]; exact Complex.Gamma_neg_nat_eq_zero k
-    rw [hG, mul_zero, div_zero, ← regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hz, hk,
-      regularizedGaussHG_neg_nat]
-    · rw [poch_neg_nat_eq_zero (Nat.lt_succ_self k)]; simp
+    rw [hG, mul_zero, div_zero,
+        ← regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hz, hk,
+      regularizedGaussHypergeometric_neg_nat]
+    · rw [pochhammer_neg_nat_eq_zero (Nat.lt_succ_self k)]; simp
     · exact mem_cutPlane_of_norm_lt_one hz
 
 /-- The degree-order balanced regularized function `𝐅(ν+1,-ν;ν+1;w) = (1-w)^ν/Γ(ν+1)`
 on the cut plane, including the exceptional parameters. -/
-theorem regularizedGaussHG_legendre_neg_degree (ν : ℂ) {w : ℂ} (hw : w ∈ cutPlane) :
-    regularizedGaussHG (ν+1) (-ν) (ν+1) w = (1-w)^ν / Gamma (ν+1) := by
-  refine eqOn_cutPlane_of_eqOn_disk (f := regularizedGaussHG (ν+1) (-ν) (ν+1))
-    (g := fun w => (1-w)^ν / Gamma (ν+1)) (analyticOnNhd_regularizedGaussHG _ _ _)
+theorem regularizedGaussHypergeometric_legendre_neg_degree (ν : ℂ) {w : ℂ} (hw : w ∈ cutPlane) :
+    regularizedGaussHypergeometric (ν+1) (-ν) (ν+1) w = (1-w)^ν / Gamma (ν+1) := by
+  refine eqOn_cutPlane_of_eqOn_disk (f := regularizedGaussHypergeometric (ν+1) (-ν) (ν+1))
+    (g := fun w => (1-w)^ν / Gamma (ν+1)) (analyticOnNhd_regularizedGaussHypergeometric _ _ _)
     (fun w hw => ?_) (fun w hz => ?_) hw
   · exact ((analyticAt_const.sub analyticAt_id).cpow analyticAt_const hw).div_const
-  · rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hz]
+  · rw [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hz]
     by_cases hc : ∀ k : ℕ, ν + 1 ≠ -(k:ℂ)
-    · rw [regularizedGaussHGFun_eq_div_Gamma hc, ordinaryHypergeometric_symm,
+    · rw [regularizedGaussHypergeometricFun_eq_div_Gamma hc, ordinaryHypergeometric_symm,
         ordinaryHypergeometric_eq_one_sub_neg_cpow
             (fun k h => hc k (by rw [h, neg_neg])) hz, neg_neg]
     · push Not at hc
       obtain ⟨k, hk⟩ := hc
       have hG : Gamma (ν+1) = 0 := by rw [hk]; exact Complex.Gamma_neg_nat_eq_zero k
-      rw [hG, div_zero, ← regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hz, hk,
-        regularizedGaussHG_neg_nat _ _ _ (mem_cutPlane_of_norm_lt_one hz),
-        poch_neg_nat_eq_zero (Nat.lt_succ_self k)]
+      rw [hG, div_zero, ← regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _
+          hz, hk,
+        regularizedGaussHypergeometric_neg_nat _ _ _ (mem_cutPlane_of_norm_lt_one hz),
+        pochhammer_neg_nat_eq_zero (Nat.lt_succ_self k)]
       simp
 
 /-- DLMF 14.5.19: for `ξ > 0`, `P^{-ν}_ν(cosh ξ) = (sinh ξ)^ν/(2^ν Γ(ν+1))`. -/
@@ -1066,7 +1082,8 @@ theorem associatedP_negative_degree_order (ν : ℂ) {θ : ℝ} (h0 : 0 < θ) :
   have hw : ((1:ℂ) - z)/2 ∈ cutPlane := by
     rw [mem_cutPlane, show (1:ℂ) - (1 - z)/2 = (((1+z)/2 : ℝ) : ℂ) by push_cast; ring]
     exact Or.inl (by simp only [ofReal_re]; linarith)
-  rw [associatedP, show 1 - -ν = ν + 1 by ring, regularizedGaussHG_legendre_neg_degree ν hw,
+  rw [associatedP, show 1 - -ν = ν + 1 by ring,
+                                            regularizedGaussHypergeometric_legendre_neg_degree ν hw,
     show (1:ℂ) - (1 - z)/2 = (((z+1)/2 : ℝ) : ℂ) by push_cast; ring,
     show (z:ℂ) + 1 = ((z+1:ℝ):ℂ) by push_cast; ring, show (z:ℂ) - 1 =
                                       ((z-1:ℝ):ℂ) by push_cast; ring,
@@ -1102,8 +1119,8 @@ theorem ferrersP_zero_order_sin_sq (ν : ℂ) {θ : ℝ} (h0 : 0 < θ) (hπ : θ
     exact hsq1
   have hc : ∀ k : ℕ, (1 - 0 : ℂ) ≠ -(k : ℂ) := fun k h => by
     have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
-  rw [ferrersP, regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hz,
-      regularizedGaussHGFun_eq_div_Gamma hc,
+  rw [ferrersP, regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hz,
+      regularizedGaussHypergeometricFun_eq_div_Gamma hc,
     zero_div, cpow_zero, one_mul, sub_zero, Complex.Gamma_one, div_one,
     show ((1:ℂ) - (Real.cos θ:ℝ))/2 = ((Real.sin (θ/2)^2 : ℝ) : ℂ) by rw [hcos]; push_cast; ring]
 
@@ -1111,11 +1128,12 @@ theorem ferrersP_zero_order_sin_sq (ν : ℂ) {θ : ℝ} (h0 : 0 < θ) (hπ : θ
 @[dlmf 14.5.E20]
 theorem legendre_elliptic_20 {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
     ferrersP (1/2) 0 (Real.cos
-        θ)=2/π*(2*(DLMF.Elliptic.Real.compEllIntEm
-        ((Real.sin (θ/2))^2):ℂ)-(DLMF.Elliptic.Real.compEllIntKm ((Real.sin (θ/2))^2):ℂ)) := by
+        θ)=2/π*(2*(DLMF.Elliptic.Real.completeEllipticEOfParameter
+        ((Real.sin (θ/2))^2):ℂ)-(DLMF.Elliptic.Real.completeEllipticKOfParameter
+            ((Real.sin (θ/2))^2):ℂ)) := by
   obtain ⟨h, hm⟩ := ferrersP_zero_order_sin_sq (1/2) h0 hπ
-  rw [h, DLMF.Elliptic.Real.compEllIntKm_eq_ordinaryHypergeometric hm,
-    DLMF.Elliptic.Real.compEllIntEm_eq_ordinaryHypergeometric hm]
+  rw [h, DLMF.Elliptic.Real.completeEllipticKOfParameter_eq_ordinaryHypergeometric hm,
+    DLMF.Elliptic.Real.completeEllipticEOfParameter_eq_ordinaryHypergeometric hm]
   have hz : ‖(((Real.sin (θ/2))^2 : ℝ) : ℂ)‖ < 1 := by
                                                       rw [Complex.norm_real,
                                                         Real.norm_eq_abs]; exact hm
@@ -1131,10 +1149,10 @@ theorem legendre_elliptic_20 {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
 /-- Complete elliptic integrals use parameter equal to the square of DLMF modulus. -/
 @[dlmf 14.5.E21]
 theorem legendre_elliptic_21 {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
-    ferrersP (-1/2) 0 (Real.cos θ)=2/π*(DLMF.Elliptic.Real.compEllIntKm
+    ferrersP (-1/2) 0 (Real.cos θ)=2/π*(DLMF.Elliptic.Real.completeEllipticKOfParameter
         ((Real.sin (θ/2))^2):ℂ) := by
   obtain ⟨h, hm⟩ := ferrersP_zero_order_sin_sq (-1/2) h0 hπ
-  rw [h, DLMF.Elliptic.Real.compEllIntKm_eq_ordinaryHypergeometric hm]
+  rw [h, DLMF.Elliptic.Real.completeEllipticKOfParameter_eq_ordinaryHypergeometric hm]
   have hπ0 : (π:ℂ) ≠ 0 := by exact_mod_cast Real.pi_pos.ne'
   field_simp
   norm_num
@@ -1162,8 +1180,9 @@ private lemma sin_half_pi_sub (θ : ℝ) : Real.sin ((π-θ)/2) = Real.cos (θ/2
 /-- Complete elliptic integrals use parameter equal to the square of DLMF modulus. -/
 @[dlmf 14.5.E22]
 theorem legendre_elliptic_22 {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
-    ferrersQ (1/2) 0 (Real.cos θ)=(DLMF.Elliptic.Real.compEllIntKm
-        ((Real.cos (θ/2))^2):ℂ)-2*(DLMF.Elliptic.Real.compEllIntEm ((Real.cos (θ/2))^2):ℂ) := by
+    ferrersQ (1/2) 0 (Real.cos θ)=(DLMF.Elliptic.Real.completeEllipticKOfParameter
+        ((Real.cos (θ/2))^2):ℂ)-2*(DLMF.Elliptic.Real.completeEllipticEOfParameter
+            ((Real.cos (θ/2))^2):ℂ) := by
   have hr : LegendreQRegular (1/2) 0 := by
     intro n h; have := congrArg Complex.re h; simp at this; linarith [(n.cast_nonneg : (0:ℝ) ≤ n)]
   have h := ferrersQ_zero_order_connection hr h0 hπ
@@ -1182,7 +1201,8 @@ theorem legendre_elliptic_22 {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
 /-- Complete elliptic integrals use parameter equal to the square of DLMF modulus. -/
 @[dlmf 14.5.E23]
 theorem legendre_elliptic_23 {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
-    ferrersQ (-1/2) 0 (Real.cos θ)=(DLMF.Elliptic.Real.compEllIntKm ((Real.cos (θ/2))^2):ℂ) := by
+    ferrersQ (-1/2) 0 (Real.cos θ)=(DLMF.Elliptic.Real.completeEllipticKOfParameter
+        ((Real.cos (θ/2))^2):ℂ) := by
   have hr : LegendreQRegular (-1/2) 0 := by
     intro n h; have := congrArg Complex.re h; simp at this; linarith [(n.cast_nonneg : (0:ℝ) ≤ n)]
   have h := ferrersQ_zero_order_connection hr h0 hπ
@@ -1202,7 +1222,8 @@ theorem legendre_elliptic_23 {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
 @[dlmf 14.5.E24]
 theorem legendre_elliptic_24 {θ : ℝ} (h0 : 0 < θ) :
     associatedP (1/2) 0 (Real.cosh θ)=2/π*Real.exp
-        (θ/2)*(DLMF.Elliptic.Real.compEllIntEm ((Real.sqrt (1-Real.exp (-2*θ)))^2):ℂ) := by
+        (θ/2)*(DLMF.Elliptic.Real.completeEllipticEOfParameter
+            ((Real.sqrt (1-Real.exp (-2*θ)))^2):ℂ) := by
   have hc1 : 1 < Real.cosh θ := Real.one_lt_cosh.mpr h0.ne'
   have hsl : (Real.cosh θ : ℂ) - 1 ∈ slitPlane := Or.inl (by simp; linarith)
   set m : ℝ := 1 - Real.exp (-2*θ) with hm
@@ -1234,14 +1255,14 @@ theorem legendre_elliptic_24 {θ : ℝ} (h0 : 0 < θ) :
   rw [intervalIntegral.integral_ofReal, intervalIntegral.integral_const_mul,
     intervalIntegral.integral_comp_div (fun t => (1 - m * Real.sin t ^ 2) ^ (1/2:ℝ)) two_ne_zero,
     zero_div]
-  simp only [DLMF.Elliptic.Real.compEllIntEm, smul_eq_mul]
+  simp only [DLMF.Elliptic.Real.completeEllipticEOfParameter, smul_eq_mul]
   push_cast; ring
 
 /-- Complete elliptic integrals use parameter equal to the square of DLMF modulus. -/
 @[dlmf 14.5.E25]
 theorem legendre_elliptic_25 {θ : ℝ} (h0 : 0 < θ) :
     associatedP (-1/2) 0
-        (Real.cosh θ)=2/(π*Real.cosh (θ/2))*(DLMF.Elliptic.Real.compEllIntKm
+        (Real.cosh θ)=2/(π*Real.cosh (θ/2))*(DLMF.Elliptic.Real.completeEllipticKOfParameter
         ((Real.tanh (θ/2))^2):ℂ) := by
   set s := Real.sinh (θ/2)
   set c := Real.cosh (θ/2)
@@ -1266,9 +1287,10 @@ theorem legendre_elliptic_25 {θ : ℝ} (h0 : 0 < θ) :
   have hc1 : ∀ k : ℕ, (1 - 0 : ℂ) ≠ -(k : ℂ) := fun k h => by
     have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
   rw [associatedP, zero_div, zero_mul, exp_zero, one_mul, hz,
-      regularizedGaussHG_pfaff _ _ _ hcut, hq,
-    regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hnorm, regularizedGaussHGFun_eq_div_Gamma hc1,
-    DLMF.Elliptic.Real.compEllIntKm_eq_ordinaryHypergeometric hm]
+      regularizedGaussHypergeometric_pfaff _ _ _ hcut, hq,
+    regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hnorm,
+        regularizedGaussHypergeometricFun_eq_div_Gamma hc1,
+    DLMF.Elliptic.Real.completeEllipticKOfParameter_eq_ordinaryHypergeometric hm]
   have h1 : (1:ℂ) - ((-s^2:ℝ):ℂ) = ((c^2:ℝ):ℂ) := by rw [hcs]; push_cast; ring
   have hcC : (c:ℂ) ≠ 0 := by exact_mod_cast hc0.ne'
   have hπ0 : (π:ℂ) ≠ 0 := by exact_mod_cast Real.pi_pos.ne'
@@ -1283,19 +1305,20 @@ theorem legendre_elliptic_25 {θ : ℝ} (h0 : 0 < θ) :
 /-- `₂F₁(1/2, 3/2; 2; q) = 4(K(q) - E(q))/(πq)`, from `dE/dm = (E-K)/(2m)` and DLMF 15.5.1. -/
 private lemma hyp_half_three_halves_two {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) :
     ₂F₁ (1/2:ℂ) (3/2) 2 (q:ℂ) = 4/π *
-        ((DLMF.Elliptic.Real.compEllIntKm q:ℂ) - DLMF.Elliptic.Real.compEllIntEm q)/q := by
+        ((DLMF.Elliptic.Real.completeEllipticKOfParameter q:ℂ) -
+            DLMF.Elliptic.Real.completeEllipticEOfParameter q)/q := by
   have hqn : ‖(q:ℂ)‖ < 1 := by rw [Complex.norm_real, Real.norm_eq_abs, abs_of_pos hq0]; exact hq1
   have hc : ∀ k : ℕ, (1:ℂ) ≠ -k := fun k h => by
     have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
   have hd1 := (hasDerivAt_ordinaryHypergeometric (a := -(1/2)) (b := 1/2) hc hqn).comp_ofReal
-  have hd2 := (DLMF.Elliptic.Real.hasDerivAt_compEllIntEm hq1 hq0.ne').ofReal_comp
-  have heq : (fun m : ℝ => (DLMF.Elliptic.Real.compEllIntEm m : ℂ)) =ᶠ[𝓝 q]
+  have hd2 := (DLMF.Elliptic.Real.hasDerivAt_completeEllipticEOfParameter hq1 hq0.ne').ofReal_comp
+  have heq : (fun m : ℝ => (DLMF.Elliptic.Real.completeEllipticEOfParameter m : ℂ)) =ᶠ[𝓝 q]
       fun m : ℝ => (π/2:ℂ) * ₂F₁ (-(1/2):ℂ) (1/2) 1 (m:ℂ) := by
     have : ∀ᶠ m in 𝓝 q, |m| < 1 := by
       have : |q| < 1 := by rw [abs_of_pos hq0]; exact hq1
       exact (continuous_abs.tendsto q).eventually (gt_mem_nhds this)
     filter_upwards [this] with m hm
-    exact DLMF.Elliptic.Real.compEllIntEm_eq_ordinaryHypergeometric hm
+    exact DLMF.Elliptic.Real.completeEllipticEOfParameter_eq_ordinaryHypergeometric hm
   have hd3 := (hd1.const_mul (π/2:ℂ)).congr_of_eventuallyEq heq
   have hu := hd2.unique hd3
   rw [show -(1/2:ℂ)+1 = 1/2 by norm_num, show (1/2:ℂ)+1 = 3/2 by norm_num,
@@ -1310,8 +1333,9 @@ private lemma hyp_half_three_halves_two {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) :
 @[dlmf 14.5.E26]
 theorem legendre_elliptic_26 {θ : ℝ} (h0 : 0 < θ) :
     olverQ (1/2) 0 (Real.cosh θ)=2/Real.sqrt π*Real.cosh θ/Real.cosh
-        (θ/2)*(DLMF.Elliptic.Real.compEllIntKm ((1/Real.cosh (θ/2))^2):ℂ)-4/Real.sqrt π*Real.cosh
-        (θ/2)*(DLMF.Elliptic.Real.compEllIntEm ((1/Real.cosh (θ/2))^2):ℂ) := by
+        (θ/2)*(DLMF.Elliptic.Real.completeEllipticKOfParameter
+            ((1/Real.cosh (θ/2))^2):ℂ)-4/Real.sqrt π*Real.cosh
+        (θ/2)*(DLMF.Elliptic.Real.completeEllipticEOfParameter ((1/Real.cosh (θ/2))^2):ℂ) := by
   set Z := Real.cosh θ
   set k := Real.exp (-θ) with hkdef
   set q := k^2 with hqdef
@@ -1345,8 +1369,8 @@ theorem legendre_elliptic_26 {θ : ℝ} (h0 : 0 < θ) :
   have hc1 : ∀ k : ℕ, (1/2 : ℂ) + 3/2 ≠ -(k : ℂ) := fun k h => by
     have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
   have hG2 : Gamma (2:ℂ) = 1 := by simp
-  rw [olverQ, regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hw,
-      regularizedGaussHGFun_eq_div_Gamma hc1,
+  rw [olverQ, regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hw,
+      regularizedGaussHypergeometricFun_eq_div_Gamma hc1,
     show (1/2:ℂ) + 0 + 2 = 5/2 by norm_num, show (1/2:ℂ) + 0 + 1 = 3/2 by norm_num,
     show (5/2:ℂ)/2 = 5/4 by norm_num, show (3/2:ℂ)/2 = 3/4 by norm_num,
     show (1/2:ℂ) + 3/2 = 2 by norm_num, hG2, div_one,
@@ -1372,8 +1396,8 @@ theorem legendre_elliptic_26 {θ : ℝ} (h0 : 0 < θ) :
   have hcu : Real.cosh (θ/2) = (u + u⁻¹)/2 := by rw [Real.cosh_eq, hu, Real.exp_neg]
   have hM : (2 * Real.sqrt (Real.sqrt q) / (1 + Real.sqrt q))^2 = (1/Real.cosh (θ/2))^2 := by
     rw [hsq, hsk, hcu, hku]; field_simp
-  have hKa := DLMF.Elliptic.Real.compEllIntKm_landen_ascending hq0.le hq1
-  have hEa := DLMF.Elliptic.Real.compEllIntEm_landen_ascending hq0.le hq1
+  have hKa := DLMF.Elliptic.Real.completeEllipticKOfParameter_landen_ascending hq0.le hq1
+  have hEa := DLMF.Elliptic.Real.completeEllipticEOfParameter_landen_ascending hq0.le hq1
   rw [hM, hsq] at hKa hEa
   have hZu : Z = (u^2 + (u⁻¹)^2)/2 := by
     show Real.cosh θ = _
@@ -1381,10 +1405,10 @@ theorem legendre_elliptic_26 {θ : ℝ} (h0 : 0 < θ) :
         push_cast; ring_nf
   have he3 : Real.exp (-3*θ/2) = (u⁻¹)^3 := by
     rw [hu, ← Real.exp_neg, ← Real.exp_nat_mul]; push_cast; ring_nf
-  set A := DLMF.Elliptic.Real.compEllIntKm ((1/Real.cosh (θ/2))^2)
-  set B := DLMF.Elliptic.Real.compEllIntEm ((1/Real.cosh (θ/2))^2)
-  set Kq := DLMF.Elliptic.Real.compEllIntKm q
-  set Eq := DLMF.Elliptic.Real.compEllIntEm q
+  set A := DLMF.Elliptic.Real.completeEllipticKOfParameter ((1/Real.cosh (θ/2))^2)
+  set B := DLMF.Elliptic.Real.completeEllipticEOfParameter ((1/Real.cosh (θ/2))^2)
+  set Kq := DLMF.Elliptic.Real.completeEllipticKOfParameter q
+  set Eq := DLMF.Elliptic.Real.completeEllipticEOfParameter q
   have hK' : Kq = A / (1 + k) := hKa
   have hE' : Eq = (1 + k)/2 * B + (1 - q)/2 * Kq := hEa
   rw [hE', hK', he3, hcu, hZu, hqdef, hku]
@@ -1402,7 +1426,7 @@ theorem legendre_elliptic_26 {θ : ℝ} (h0 : 0 < θ) :
 @[dlmf 14.5.E27]
 theorem legendre_elliptic_27 {θ : ℝ} (h0 : 0 < θ) :
     olverQ (-1/2) 0 (Real.cosh θ)=2/Real.sqrt π*Real.exp
-        (-θ/2)*(DLMF.Elliptic.Real.compEllIntKm ((Real.exp (-θ))^2):ℂ) := by
+        (-θ/2)*(DLMF.Elliptic.Real.completeEllipticKOfParameter ((Real.exp (-θ))^2):ℂ) := by
   set Z := Real.cosh θ
   set q := (Real.exp (-θ))^2 with hqdef
   have hZ0 : 0 < Z := Real.cosh_pos _
@@ -1435,12 +1459,13 @@ theorem legendre_elliptic_27 {θ : ℝ} (h0 : 0 < θ) :
     show ((1/2:ℂ)+1)/2 = 3/4 by norm_num] at hwp
   have hc1 : ∀ k : ℕ, (-1/2 : ℂ) + 3/2 ≠ -(k : ℂ) := fun k h => by
     have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
-  rw [olverQ, regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hw,
-      regularizedGaussHGFun_eq_div_Gamma hc1,
+  rw [olverQ, regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hw,
+      regularizedGaussHypergeometricFun_eq_div_Gamma hc1,
     show (-1/2:ℂ) + 0 + 2 = 2*(3/4) by norm_num, show (-1/2:ℂ) + 0 + 1 = 1/2 by norm_num,
     show (2*(3/4:ℂ))/2 = 3/4 by norm_num, show (1/2:ℂ)/2 = 1/4 by norm_num,
     show (-1/2:ℂ) + 3/2 = 1 by norm_num, Complex.Gamma_one, div_one,
-    ordinaryHypergeometric_symm (3/4), DLMF.Elliptic.Real.compEllIntKm_eq_ordinaryHypergeometric hm]
+    ordinaryHypergeometric_symm (3/4),
+        DLMF.Elliptic.Real.completeEllipticKOfParameter_eq_ordinaryHypergeometric hm]
   rw [hwp, legendreBranchPower, zero_div, zero_mul, exp_zero, mul_one]
   have h1q : 0 < 1 + q := by linarith
   have hpi : (Real.sqrt π : ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.2 Real.pi_pos).ne'

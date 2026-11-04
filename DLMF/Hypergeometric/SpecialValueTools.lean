@@ -28,7 +28,7 @@ segments, for the special-argument evaluations 15.4.31 and 15.4.32.
 
 The proofs follow `cubic_transformation` (15.8.31): both sides solve the same Gauss equation
 near the origin, and the identity is continued through the cut-plane continuation
-`regularizedGaussHG`. The image of the domain lies in the cut plane because `1 - ψ(z)`
+`regularizedGaussHypergeometric`. The image of the domain lies in the cut plane because `1 - ψ(z)`
 (resp. `1 - s(u)`) has positive real part there; this is checked with elementary tangent bounds
 for products (`SpecialValues.tan_mul`, `SpecialValues.tan_inv`).
 -/
@@ -250,7 +250,8 @@ theorem SpecialValues.cubic_psi {a z : ℂ} (hc : ∀ k : ℕ, 2 * a + 5 / 6 ≠
     · simp [hP, hφdef, hH, ordinaryHypergeometric_zero]
   -- extension to `D` through the cut-plane continuation
   set c₂ := 2 * a + 5 / 6 with hc₂
-  set R : ℂ → ℂ := fun w => P w * (Gamma c₂ * regularizedGaussHG a (a + 1 / 2) c₂ (φ w)) with hR
+  set R : ℂ → ℂ := fun w => P w *
+      (Gamma c₂ * regularizedGaussHypergeometric a (a + 1 / 2) c₂ (φ w)) with hR
   have hDc : IsPreconnected D := by
     have hconv : Convex ℝ D := by
       have : D = {w : ℂ | 30 * w.im - 3 * w.re < 1} ∩ {w : ℂ | -30 * w.im - 3 * w.re < 1} ∩
@@ -272,7 +273,8 @@ theorem SpecialValues.cubic_psi {a z : ℂ} (hc : ∀ k : ℕ, 2 * a + 5 / 6 ≠
   have hRe : ∀ w : ℂ, ‖φ w‖ < 1 → R w = P w * H (φ w) := by
     intro w hw
     simp only [hR, hH]
-    rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hw, regularizedGaussHGFun_eq_div_Gamma hc,
+    rw [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hw,
+        regularizedGaussHypergeometricFun_eq_div_Gamma hc,
       mul_div_cancel₀ _ (Gamma_ne_zero hc)]
   have hLan : AnalyticOnNhd ℂ (₂F₁ (3 * a) (3 * a + 1 / 2) (2 * a + 5 / 6) : ℂ → ℂ) D :=
     fun w hw => analyticAt_ordinaryHypergeometric (hnorm w hw)
@@ -281,7 +283,7 @@ theorem SpecialValues.cubic_psi {a z : ℂ} (hc : ∀ k : ℕ, 2 * a + 5 / 6 ≠
     rw [mem_cutPlane]
     exact mem_slitPlane_iff.mpr (Or.inl (SpecialValues.psi_one_sub_re_pos hw.1 hw.2))
   have hRan : AnalyticOnNhd ℂ R D := fun w hw =>
-    (hPa w hw).mul (analyticAt_const.mul ((analyticAt_regularizedGaussHG _ _ _
+    (hPa w hw).mul (analyticAt_const.mul ((analyticAt_regularizedGaussHypergeometric _ _ _
       (hcut w hw)).comp (f := φ) (hφa w hw)))
   have h0D : (0 : ℂ) ∈ D := by simp [hD]
   have hev : (₂F₁ (3 * a) (3 * a + 1 / 2) (2 * a + 5 / 6) : ℂ → ℂ) =ᶠ[𝓝 0] R := by
@@ -457,7 +459,8 @@ theorem SpecialValues.cubic_two {a z : ℂ} (hc : ∀ k : ℕ, 2 * a + 5 / 6 ≠
       ring
     · simp [hP, hφdef, hH, ordinaryHypergeometric_zero]
   set c₂ := 2 * a + 5 / 6 with hc₂
-  set R : ℂ → ℂ := fun w => P w * (Gamma c₂ * regularizedGaussHG a (a + 1 / 3) c₂ (φ w)) with hR
+  set R : ℂ → ℂ := fun w => P w *
+      (Gamma c₂ * regularizedGaussHypergeometric a (a + 1 / 3) c₂ (φ w)) with hR
   have hDc : IsPreconnected D := by
     have hconv : Convex ℝ D := by
       have : D = {w : ℂ | 80 * w.im - 8 * w.re < 1} ∩ {w : ℂ | -80 * w.im - 8 * w.re < 1} ∩
@@ -477,7 +480,8 @@ theorem SpecialValues.cubic_two {a z : ℂ} (hc : ∀ k : ℕ, 2 * a + 5 / 6 ≠
   have hRe : ∀ w : ℂ, ‖φ w‖ < 1 → R w = P w * H (φ w) := by
     intro w hw
     simp only [hR, hH]
-    rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hw, regularizedGaussHGFun_eq_div_Gamma hc,
+    rw [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hw,
+        regularizedGaussHypergeometricFun_eq_div_Gamma hc,
       mul_div_cancel₀ _ (Gamma_ne_zero hc)]
   have hLan : AnalyticOnNhd ℂ (₂F₁ (3 * a) (1 / 3 - a) (2 * a + 5 / 6) : ℂ → ℂ) D :=
     fun w hw => analyticAt_ordinaryHypergeometric (hnorm w hw)
@@ -486,7 +490,7 @@ theorem SpecialValues.cubic_two {a z : ℂ} (hc : ∀ k : ℕ, 2 * a + 5 / 6 ≠
     rw [mem_cutPlane]
     exact mem_slitPlane_iff.mpr (Or.inl (SpecialValues.cubicTwo_one_sub_re_pos hw.1 hw.2))
   have hRan : AnalyticOnNhd ℂ R D := fun w hw =>
-    (hPa w hw).mul (analyticAt_const.mul ((analyticAt_regularizedGaussHG _ _ _
+    (hPa w hw).mul (analyticAt_const.mul ((analyticAt_regularizedGaussHypergeometric _ _ _
       (hcut w hw)).comp (f := φ) (hφa w hw)))
   have h0D : (0 : ℂ) ∈ D := by simp [hD]
   have hev : (₂F₁ (3 * a) (1 / 3 - a) (2 * a + 5 / 6) : ℂ → ℂ) =ᶠ[𝓝 0] R := by
@@ -563,12 +567,12 @@ theorem SpecialValues.cubic_psi_neg_one_third {A : ℂ} (hcA : ∀ k : ℕ, 2 * 
 
 /-- `₂F₁` as the tsum of its Gauss coefficients, at every argument (the tsum is totalized). -/
 theorem SpecialValues.ordinaryHypergeometric_eq_tsum (a b c z : ℂ) :
-    ₂F₁ a b c z = ∑' n, gaussHGCoeff a b c n * z ^ n := by
+    ₂F₁ a b c z = ∑' n, gaussHypergeometricCoeff a b c n * z ^ n := by
   rw [_root_.ordinaryHypergeometric_eq_tsum]
   simp only [smul_eq_mul]
   congr 1
   funext n
-  simp [gaussHGCoeff, poch, div_eq_mul_inv, mul_assoc, mul_left_comm, mul_comm]
+  simp [gaussHypergeometricCoeff, pochhammer, div_eq_mul_inv, mul_assoc, mul_left_comm, mul_comm]
 
 /-- Abel's theorem for `₂F₁` along a radius to a point `ω` of the unit circle, when
 `Re(c - a - b) > 0`. -/
@@ -673,10 +677,10 @@ theorem SpecialValues.cubic_psi_eventually {A : ℂ} (hcA : ∀ k : ℕ, 2 * A +
       show A + (A + 1 / 2) - c + 1 = 2 / 3 by rw [hc]; ring,
       show c - A = A + 5 / 6 by rw [hc]; ring, show c - (A + 1 / 2) = A + 1 / 3 by rw [hc]; ring,
       show (1 : ℂ) / 3 + 1 = 4 / 3 by norm_num,
-      regularizedGaussHGFun_eq_div_Gamma hcA,
-      regularizedGaussHGFun_eq_div_Gamma (c := 2 / 3) (fun k => by
+      regularizedGaussHypergeometricFun_eq_div_Gamma hcA,
+      regularizedGaussHypergeometricFun_eq_div_Gamma (c := 2 / 3) (fun k => by
         intro h; have := congrArg re h; simp at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]),
-      regularizedGaussHGFun_eq_div_Gamma (c := 4 / 3) (fun k => by
+      regularizedGaussHypergeometricFun_eq_div_Gamma (c := 4 / 3) (fun k => by
         intro h; have := congrArg re h; simp at this;
             linarith [(k.cast_nonneg : (0:ℝ) ≤ k)])] at hcon
     have hthird : (1 - ψ) ^ (1 / 3 : ℂ) = (1 + 3 * (x : ℂ)) *

@@ -12,7 +12,7 @@ public import Mathlib.Analysis.SpecialFunctions.OrdinaryHypergeometric
 # Generalized hypergeometric functions of matrix argument (DLMF §35.8)
 
 Properties of the generalized hypergeometric series `pFq(a; b; T)` of a real symmetric matrix
-argument. The series `hypergeometricPFQ a b T` (DLMF 35.8.1) is defined in
+argument. The series `matrixHypergeometricPFQ a b T` (DLMF 35.8.1) is defined in
 `DLMF.MatrixArgument.Basic`.
 
 ## Main results
@@ -20,22 +20,24 @@ argument. The series `hypergeometricPFQ a b T` (DLMF 35.8.1) is defined in
 * `mem_partitions`, `partitions_zero`: the partitions of weight `k`.
 * `partitionalShiftedFactorial_ne_zero`: no `[b]_κ` vanishes when `Γ_m(b) ≠ 0` (which is DLMF's
   condition `-b + (j+1)/2 ∉ ℕ`, `1 ≤ j ≤ m`).
-* `hypergeometricPFQ_eq_sum_of_neg_nat`: termination when some `a_j` is a nonpositive integer
+* `matrixHypergeometricPFQ_eq_sum_of_neg_nat`: termination when some `a_j` is a nonpositive integer
   (DLMF §35.8(i), corrected, see below).
-* `hypergeometricPFQ_summable_of_le`, `hypergeometricPFQ_summable_of_eq_succ`,
-  `not_summable_hypergeometricPFQ_of_eq_succ`, `not_summable_hypergeometricPFQ_of_lt`: the
-  convergence and divergence statements of DLMF §35.8(i).
-* `hyp0F0_eq_etr`, `hyp2F1_self_right`, `hyp1F0_eq_det_cpow`, `besselA_eq_hyp0F1`: the special
+* `matrixHypergeometricPFQ_summable_of_le`, `matrixHypergeometricPFQ_summable_of_eq_succ`,
+  `not_summable_matrixHypergeometricPFQ_of_eq_succ`, `not_summable_matrixHypergeometricPFQ_of_lt`:
+  the convergence and divergence statements of DLMF §35.8(i).
+* `matrixHypergeometric0F0_eq_expTrace`, `matrixHypergeometric2F1_self_right`,
+  `matrixHypergeometric1F0_eq_det_cpow`, `matrixBesselA_eq_matrixHypergeometric0F1`: the special
   cases DLMF 35.8.2–35.8.4.
-* `hyp3F2_one_kummer`, `hyp3F2_one_saalschutz`, `hyp3F2_one_thomae`: the `₃F₂` formulas
-  DLMF 35.8.5–35.8.7 (the last two corrected).
-* `hypergeometricPFQ_zero`, `hypergeometricPFQ_conj`: `pFq(a; b; 0) = 1` and orthogonal
+* `matrixHypergeometric3F2_one_kummer`, `matrixHypergeometric3F2_one_saalschutz`,
+  `matrixHypergeometric3F2_one_thomae`: the `₃F₂` formulas DLMF 35.8.5–35.8.7 (the last two
+  corrected).
+* `matrixHypergeometricPFQ_zero`, `matrixHypergeometricPFQ_conj`: `pFq(a; b; 0) = 1` and orthogonal
   invariance (DLMF 35.8.8 and 35.8.11).
-* `tendsto_hypergeometricPFQ_snoc`, `tendsto_hypergeometricPFQ_snoc_denom`: the confluence
-  limits DLMF 35.8.9 and 35.8.10.
-* `hasIntegralOn_hypergeometricPFQ_laplace`, `hasIntegralOn_hypergeometricPFQ_euler`: the
-  Laplace transform DLMF 35.8.12 and the Euler integral DLMF 35.8.13 (corrected).
-* `hypergeometricPFQ_fin_one`: for `m = 1` the series reduces to the classical one; `₂F₁` is
+* `tendsto_matrixHypergeometricPFQ_snoc`, `tendsto_matrixHypergeometricPFQ_snoc_denom`: the
+  confluence limits DLMF 35.8.9 and 35.8.10.
+* `hasIntegralOn_matrixHypergeometricPFQ_laplace`, `hasIntegralOn_matrixHypergeometricPFQ_euler`:
+  the Laplace transform DLMF 35.8.12 and the Euler integral DLMF 35.8.13 (corrected).
+* `matrixHypergeometricPFQ_fin_one`: for `m = 1` the series reduces to the classical one; `₂F₁` is
   then Mathlib's `ordinaryHypergeometric`.
 
 ## Implementation notes
@@ -126,12 +128,12 @@ theorem partitionalShiftedFactorial_ne_zero {m : ℕ} {b : ℂ} (hb : multivaria
 states termination under `-a_j + (k+1)/2 ∈ ℕ` for some `1 ≤ k ≤ m`; only `k = 1` is correct
 (see the module docstring). -/
 @[dlmf 35.8.i "corrected: termination only for a_j a nonpositive integer (k = 1)"]
-theorem hypergeometricPFQ_eq_sum_of_neg_nat {m p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
+theorem matrixHypergeometricPFQ_eq_sum_of_neg_nat {m p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
     (T : Matrix (Fin m) (Fin m) ℝ) {i : Fin p} {n : ℕ} (hn : a i = -n) :
-    hypergeometricPFQ a b T = ∑ k ∈ Finset.range (m * n + 1), (1 / (k ! : ℂ)) *
+    matrixHypergeometricPFQ a b T = ∑ k ∈ Finset.range (m * n + 1), (1 / (k ! : ℂ)) *
       ∑ κ ∈ partitions m k, (∏ i, partitionalShiftedFactorial (a i) κ) /
         (∏ j, partitionalShiftedFactorial (b j) κ) * (zonalPolynomial κ T : ℂ) := by
-  unfold hypergeometricPFQ
+  unfold matrixHypergeometricPFQ
   refine tsum_eq_sum fun k hk => ?_
   rw [Finset.mem_range, not_lt] at hk
   rw [Finset.sum_eq_zero, mul_zero]
@@ -156,35 +158,35 @@ theorem hypergeometricPFQ_eq_sum_of_neg_nat {m p q : ℕ} (a : Fin p → ℂ) (b
 
 /-- DLMF §35.8(i): for `p ≤ q` the series 35.8.1 converges absolutely for every `T ∈ 𝓢`
 (the double series over `k` and `|κ| = k` of absolute values converges), and its sum is
-`hypergeometricPFQ a b T`. -/
+`matrixHypergeometricPFQ a b T`. -/
 @[dlmf 35.8.i]
-theorem hypergeometricPFQ_summable_of_le {m p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
+theorem matrixHypergeometricPFQ_summable_of_le {m p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
     (hb : ∀ j, multivariateGamma m (b j) ≠ 0) (hpq : p ≤ q)
     (T : Matrix (Fin m) (Fin m) ℝ) (hT : T.IsHermitian) :
     Summable (fun k : ℕ => ∑ κ ∈ partitions m k, ‖(∏ i, partitionalShiftedFactorial (a i) κ) /
         (∏ j, partitionalShiftedFactorial (b j) κ) * (zonalPolynomial κ T : ℂ)‖ / (k ! : ℝ)) ∧
       HasSum (fun k : ℕ => (1 / (k ! : ℂ)) * ∑ κ ∈ partitions m k,
         (∏ i, partitionalShiftedFactorial (a i) κ) / (∏ j, partitionalShiftedFactorial (b j) κ) *
-          (zonalPolynomial κ T : ℂ)) (hypergeometricPFQ a b T) := by
+          (zonalPolynomial κ T : ℂ)) (matrixHypergeometricPFQ a b T) := by
   sorry
 
 /-- DLMF §35.8(i): for `p = q + 1` the series 35.8.1 converges absolutely for `‖T‖ < 1`. -/
 @[dlmf 35.8.i]
-theorem hypergeometricPFQ_summable_of_eq_succ {m p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
+theorem matrixHypergeometricPFQ_summable_of_eq_succ {m p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
     (hb : ∀ j, multivariateGamma m (b j) ≠ 0) (hpq : p = q + 1)
     (T : Matrix (Fin m) (Fin m) ℝ) (hT : T.IsHermitian) (hT1 : matrixSpectralNorm T < 1) :
     Summable (fun k : ℕ => ∑ κ ∈ partitions m k, ‖(∏ i, partitionalShiftedFactorial (a i) κ) /
         (∏ j, partitionalShiftedFactorial (b j) κ) * (zonalPolynomial κ T : ℂ)‖ / (k ! : ℝ)) ∧
       HasSum (fun k : ℕ => (1 / (k ! : ℂ)) * ∑ κ ∈ partitions m k,
         (∏ i, partitionalShiftedFactorial (a i) κ) / (∏ j, partitionalShiftedFactorial (b j) κ) *
-          (zonalPolynomial κ T : ℂ)) (hypergeometricPFQ a b T) := by
+          (zonalPolynomial κ T : ℂ)) (matrixHypergeometricPFQ a b T) := by
   sorry
 
 /-- DLMF §35.8(i): for `p = q + 1` and `‖T‖ > 1` the series 35.8.1 diverges (its absolute
 series diverges), unless it terminates; non-termination is the hypothesis that no `a_i` is a
-nonpositive integer (see `hypergeometricPFQ_eq_sum_of_neg_nat`). -/
+nonpositive integer (see `matrixHypergeometricPFQ_eq_sum_of_neg_nat`). -/
 @[dlmf 35.8.i]
-theorem not_summable_hypergeometricPFQ_of_eq_succ {m p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
+theorem not_summable_matrixHypergeometricPFQ_of_eq_succ {m p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
     (ha : ∀ i (n : ℕ), a i ≠ -n) (hb : ∀ j, multivariateGamma m (b j) ≠ 0) (hpq : p = q + 1)
     (T : Matrix (Fin m) (Fin m) ℝ) (hT : T.IsHermitian) (hT1 : 1 < matrixSpectralNorm T) :
     ¬ Summable (fun k : ℕ => ∑ κ ∈ partitions m k, ‖(∏ i, partitionalShiftedFactorial (a i) κ) /
@@ -194,7 +196,7 @@ theorem not_summable_hypergeometricPFQ_of_eq_succ {m p q : ℕ} (a : Fin p → �
 /-- DLMF §35.8(i): for `p > q + 1` the series 35.8.1 diverges for every `T ≠ 0` in `𝓢`, unless
 it terminates (no `a_i` is a nonpositive integer). -/
 @[dlmf 35.8.i]
-theorem not_summable_hypergeometricPFQ_of_lt {m p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
+theorem not_summable_matrixHypergeometricPFQ_of_lt {m p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
     (ha : ∀ i (n : ℕ), a i ≠ -n) (hb : ∀ j, multivariateGamma m (b j) ≠ 0) (hpq : q + 1 < p)
     (T : Matrix (Fin m) (Fin m) ℝ) (hT : T.IsHermitian) (hT0 : T ≠ 0) :
     ¬ Summable (fun k : ℕ => ∑ κ ∈ partitions m k, ‖(∏ i, partitionalShiftedFactorial (a i) κ) /
@@ -205,9 +207,9 @@ theorem not_summable_hypergeometricPFQ_of_lt {m p q : ℕ} (a : Fin p → ℂ) (
 
 /-- DLMF 35.8.8: `pFq(a; b; 0) = 1`. -/
 @[dlmf 35.8.E8]
-theorem hypergeometricPFQ_zero {m p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ) :
-    hypergeometricPFQ (m := m) a b 0 = 1 := by
-  unfold hypergeometricPFQ
+theorem matrixHypergeometricPFQ_zero {m p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ) :
+    matrixHypergeometricPFQ (m := m) a b 0 = 1 := by
+  unfold matrixHypergeometricPFQ
   rw [tsum_eq_single 0]
   · simp [partitions_zero, zonalPolynomial_zero, partitionalShiftedFactorial_zero]
   · intro k hk
@@ -220,26 +222,29 @@ theorem hypergeometricPFQ_zero {m p q : ℕ} (a : Fin p → ℂ) (b : Fin q → 
 
 /-- DLMF 35.8.11: `pFq(a; b; H T H⁻¹) = pFq(a; b; T)` for `H ∈ O(m)`. -/
 @[dlmf 35.8.E11]
-theorem hypergeometricPFQ_conj {m p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
+theorem matrixHypergeometricPFQ_conj {m p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
     (H : Matrix.orthogonalGroup (Fin m) ℝ) (T : Matrix (Fin m) (Fin m) ℝ) :
-    hypergeometricPFQ a b ((H : Matrix (Fin m) (Fin m) ℝ) * T * (H : Matrix (Fin m) (Fin m) ℝ)⁻¹)
-      = hypergeometricPFQ a b T := by
-  unfold hypergeometricPFQ
+    matrixHypergeometricPFQ a b
+        ((H : Matrix (Fin m) (Fin m) ℝ) * T * (H : Matrix (Fin m) (Fin m) ℝ)⁻¹)
+      = matrixHypergeometricPFQ a b T := by
+  unfold matrixHypergeometricPFQ
   simp_rw [zonalPolynomial_conj]
 
 /-! ## §35.8(ii) Relations to other functions -/
 
-/-- DLMF 35.8.2: `₀F₀(−; −; T) = etr(T)` for `T ∈ 𝓢`. -/
+/-- DLMF 35.8.2: `₀F₀(−; −; T) = expTrace(T)` for `T ∈ 𝓢`. -/
 @[dlmf 35.8.E2]
-theorem hyp0F0_eq_etr {m : ℕ} (T : Matrix (Fin m) (Fin m) ℝ) (hT : T.IsHermitian) :
-    hyp0F0 T = (etr T : ℂ) := by
+theorem matrixHypergeometric0F0_eq_expTrace {m : ℕ} (T : Matrix (Fin m) (Fin m) ℝ)
+    (hT : T.IsHermitian) :
+    matrixHypergeometric0F0 T = (expTrace T : ℂ) := by
   sorry
 
 /-- DLMF 35.8.3 (first equality): `₂F₁(a, b; b; T) = ₁F₀(a; −; T)` when `Γ_m(b) ≠ 0`. -/
 @[dlmf 35.8.E3]
-theorem hyp2F1_self_right {m : ℕ} (a b : ℂ) (hb : multivariateGamma m b ≠ 0)
-    (T : Matrix (Fin m) (Fin m) ℝ) : hyp2F1 a b b T = hyp1F0 a T := by
-  unfold hyp2F1 hyp1F0 hypergeometricPFQ
+theorem matrixHypergeometric2F1_self_right {m : ℕ} (a b : ℂ) (hb : multivariateGamma m b ≠ 0)
+    (T : Matrix (Fin m) (Fin m) ℝ) : matrixHypergeometric2F1 a b b T =
+        matrixHypergeometric1F0 a T := by
+  unfold matrixHypergeometric2F1 matrixHypergeometric1F0 matrixHypergeometricPFQ
   congr 1
   funext k
   congr 1
@@ -251,16 +256,17 @@ theorem hyp2F1_self_right {m : ℕ} (a b : ℂ) (hb : multivariateGamma m b ≠ 
 
 /-- DLMF 35.8.3 (second equality): `₁F₀(a; −; T) = |I - T|^{-a}` for `0 < T < I`. -/
 @[dlmf 35.8.E3]
-theorem hyp1F0_eq_det_cpow {m : ℕ} (a : ℂ) {T : Matrix (Fin m) (Fin m) ℝ} (hT : T.PosDef)
-    (hT1 : (1 - T).PosDef) : hyp1F0 a T = (((1 - T).det : ℝ) : ℂ) ^ (-a) := by
+theorem matrixHypergeometric1F0_eq_det_cpow {m : ℕ} (a : ℂ) {T : Matrix (Fin m) (Fin m) ℝ}
+    (hT : T.PosDef)
+    (hT1 : (1 - T).PosDef) : matrixHypergeometric1F0 a T = (((1 - T).det : ℝ) : ℂ) ^ (-a) := by
   sorry
 
 /-- DLMF 35.8.4: `A_ν(T) = ₀F₁(−; ν + (m+1)/2; -T) / Γ_m(ν + (m+1)/2)` for `T ∈ 𝓢`. -/
 @[dlmf 35.8.E4]
-theorem besselA_eq_hyp0F1 {m : ℕ} (ν : ℂ) (T : Matrix (Fin m) (Fin m) ℝ) :
-    besselA ν T = 1 / multivariateGamma m (ν + ((m : ℂ) + 1) / 2) *
-      hyp0F1 (ν + ((m : ℂ) + 1) / 2) (-T) := by
-  unfold besselA hyp0F1 hypergeometricPFQ
+theorem matrixBesselA_eq_matrixHypergeometric0F1 {m : ℕ} (ν : ℂ) (T : Matrix (Fin m) (Fin m) ℝ) :
+    matrixBesselA ν T = 1 / multivariateGamma m (ν + ((m : ℂ) + 1) / 2) *
+      matrixHypergeometric0F1 (ν + ((m : ℂ) + 1) / 2) (-T) := by
+  unfold matrixBesselA matrixHypergeometric0F1 matrixHypergeometricPFQ
   congr 1
   refine tsum_congr fun k => ?_
   rw [Finset.mul_sum, Finset.mul_sum]
@@ -279,14 +285,15 @@ theorem besselA_eq_hyp0F1 {m : ℕ} (ν : ℂ) (T : Matrix (Fin m) (Fin m) ℝ) 
 `ℜ(b₂ - a₃) > (m-1)/2`, which makes the right-hand series converge, and the regularity of the
 denominator parameters are added. -/
 @[dlmf 35.8.E5]
-theorem hyp3F2_one_kummer {m : ℕ} (a₁ a₂ a₃ b₁ b₂ : ℂ)
+theorem matrixHypergeometric3F2_one_kummer {m : ℕ} (a₁ a₂ a₃ b₁ b₂ : ℂ)
     (hb₂ : ((m : ℝ) - 1) / 2 < b₂.re) (hc : ((m : ℝ) - 1) / 2 < (b₁ + b₂ - a₁ - a₂ - a₃).re)
     (hb₂a₃ : ((m : ℝ) - 1) / 2 < (b₂ - a₃).re) (hb₁ : multivariateGamma m b₁ ≠ 0)
     (hca : multivariateGamma m (b₁ + b₂ - a₁ - a₂) ≠ 0) :
-    hyp3F2 a₁ a₂ a₃ b₁ b₂ (1 : Matrix (Fin m) (Fin m) ℝ) =
+    matrixHypergeometric3F2 a₁ a₂ a₃ b₁ b₂ (1 : Matrix (Fin m) (Fin m) ℝ) =
       multivariateGamma m b₂ * multivariateGamma m (b₁ + b₂ - a₁ - a₂ - a₃) /
         (multivariateGamma m (b₂ - a₃) * multivariateGamma m (b₁ + b₂ - a₁ - a₂)) *
-        hyp3F2 (b₁ - a₁) (b₁ - a₂) a₃ b₁ (b₁ + b₂ - a₁ - a₂) (1 : Matrix (Fin m) (Fin m) ℝ) := by
+        matrixHypergeometric3F2 (b₁ - a₁) (b₁ - a₂) a₃ b₁ (b₁ + b₂ - a₁ - a₂)
+            (1 : Matrix (Fin m) (Fin m) ℝ) := by
   sorry
 
 /-- DLMF 35.8.6 (Pfaff–Saalschütz, **corrected**): if `a₁ + a₂ + a₃ + (m+1)/2 = b₁ + b₂`, one of
@@ -296,13 +303,13 @@ the `a_j` is a negative integer and `ℜ(b₁ - a₁), ℜ(b₁ - a₂), ℜ(b�
   (Γ_m(b₁ - a₁) Γ_m(b₁ - a₂) Γ_m(b₁ - a₃) Γ_m(b₁ - a₁ - a₂ - a₃))`.
 DLMF prints the reciprocal of this quotient. Regularity of `b₁, b₂` is added. -/
 @[dlmf 35.8.E6 "corrected: DLMF prints the reciprocal"]
-theorem hyp3F2_one_saalschutz {m : ℕ} (a₁ a₂ a₃ b₁ b₂ : ℂ)
+theorem matrixHypergeometric3F2_one_saalschutz {m : ℕ} (a₁ a₂ a₃ b₁ b₂ : ℂ)
     (hsum : a₁ + a₂ + a₃ + ((m : ℂ) + 1) / 2 = b₁ + b₂)
     (hneg : ∃ n : ℕ, 0 < n ∧ (a₁ = -n ∨ a₂ = -n ∨ a₃ = -n))
     (h₁ : ((m : ℝ) - 1) / 2 < (b₁ - a₁).re) (h₂ : ((m : ℝ) - 1) / 2 < (b₁ - a₂).re)
     (h₃ : ((m : ℝ) - 1) / 2 < (b₁ - a₃).re) (h₄ : ((m : ℝ) - 1) / 2 < (b₁ - a₁ - a₂ - a₃).re)
     (hb₁ : multivariateGamma m b₁ ≠ 0) (hb₂ : multivariateGamma m b₂ ≠ 0) :
-    hyp3F2 a₁ a₂ a₃ b₁ b₂ (1 : Matrix (Fin m) (Fin m) ℝ) =
+    matrixHypergeometric3F2 a₁ a₂ a₃ b₁ b₂ (1 : Matrix (Fin m) (Fin m) ℝ) =
       multivariateGamma m b₁ * multivariateGamma m (b₁ - a₁ - a₂) *
           multivariateGamma m (b₁ - a₁ - a₃) * multivariateGamma m (b₁ - a₂ - a₃) /
         (multivariateGamma m (b₁ - a₁) * multivariateGamma m (b₁ - a₂) *
@@ -316,17 +323,17 @@ theorem hyp3F2_one_saalschutz {m : ℕ} (a₁ a₂ a₃ b₁ b₂ : ℂ)
 `ℜa₁ > (m-1)/2` (convergence of the right-hand series) and regularity of the denominator
 parameters are added. -/
 @[dlmf 35.8.E7 "corrected: b₂ - a₁ for b₂ - a₂, and Γ_m for Γ"]
-theorem hyp3F2_one_thomae {m : ℕ} (a₁ a₂ a₃ b₁ b₂ : ℂ)
+theorem matrixHypergeometric3F2_one_thomae {m : ℕ} (a₁ a₂ a₃ b₁ b₂ : ℂ)
     (hb₁ : ((m : ℝ) - 1) / 2 < b₁.re) (hb₂ : ((m : ℝ) - 1) / 2 < b₂.re)
     (hc : ((m : ℝ) - 1) / 2 < (b₁ + b₂ - a₁ - a₂ - a₃).re) (ha₁ : ((m : ℝ) - 1) / 2 < a₁.re)
     (hc₂ : multivariateGamma m (b₁ + b₂ - a₁ - a₃) ≠ 0)
     (hc₃ : multivariateGamma m (b₁ + b₂ - a₁ - a₂) ≠ 0) :
-    hyp3F2 a₁ a₂ a₃ b₁ b₂ (1 : Matrix (Fin m) (Fin m) ℝ) =
+    matrixHypergeometric3F2 a₁ a₂ a₃ b₁ b₂ (1 : Matrix (Fin m) (Fin m) ℝ) =
       multivariateGamma m b₁ * multivariateGamma m b₂ *
           multivariateGamma m (b₁ + b₂ - a₁ - a₂ - a₃) /
         (multivariateGamma m a₁ * multivariateGamma m (b₁ + b₂ - a₁ - a₃) *
           multivariateGamma m (b₁ + b₂ - a₁ - a₂)) *
-        hyp3F2 (b₁ - a₁) (b₂ - a₁) (b₁ + b₂ - a₁ - a₂ - a₃) (b₁ + b₂ - a₁ - a₃)
+        matrixHypergeometric3F2 (b₁ - a₁) (b₂ - a₁) (b₁ + b₂ - a₁ - a₂ - a₃) (b₁ + b₂ - a₁ - a₃)
           (b₁ + b₂ - a₁ - a₂) (1 : Matrix (Fin m) (Fin m) ℝ) := by
   sorry
 
@@ -335,38 +342,38 @@ theorem hyp3F2_one_thomae {m : ℕ} (a₁ a₂ a₃ b₁ b₂ : ℂ)
 /-- DLMF 35.8.9: `lim_{γ→∞} p+1Fq(a, γ; b; γ⁻¹T) = pFq(a; b; T)` (real `γ → +∞`), for `p ≤ q`
 (where the left side converges for large `γ`), `T ∈ 𝓢` and regular `b`. -/
 @[dlmf 35.8.E9]
-theorem tendsto_hypergeometricPFQ_snoc {m p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
+theorem tendsto_matrixHypergeometricPFQ_snoc {m p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
     (hb : ∀ j, multivariateGamma m (b j) ≠ 0) (hpq : p ≤ q)
     (T : Matrix (Fin m) (Fin m) ℝ) (hT : T.IsHermitian) :
-    Tendsto (fun γ : ℝ => hypergeometricPFQ (Fin.snoc a (γ : ℂ)) b (γ⁻¹ • T)) atTop
-      (𝓝 (hypergeometricPFQ a b T)) := by
+    Tendsto (fun γ : ℝ => matrixHypergeometricPFQ (Fin.snoc a (γ : ℂ)) b (γ⁻¹ • T)) atTop
+      (𝓝 (matrixHypergeometricPFQ a b T)) := by
   sorry
 
 /-- DLMF 35.8.10: `lim_{γ→∞} pFq+1(a; b, γ; γT) = pFq(a; b; T)` (real `γ → +∞`), where the
 right side converges: `p ≤ q`, or `p = q + 1` and `‖T‖ < 1`. -/
 @[dlmf 35.8.E10]
-theorem tendsto_hypergeometricPFQ_snoc_denom {m p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
+theorem tendsto_matrixHypergeometricPFQ_snoc_denom {m p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
     (hb : ∀ j, multivariateGamma m (b j) ≠ 0)
     (T : Matrix (Fin m) (Fin m) ℝ) (hT : T.IsHermitian)
     (hpq : p ≤ q ∨ (p = q + 1 ∧ matrixSpectralNorm T < 1)) :
-    Tendsto (fun γ : ℝ => hypergeometricPFQ a (Fin.snoc b (γ : ℂ)) (γ • T)) atTop
-      (𝓝 (hypergeometricPFQ a b T)) := by
+    Tendsto (fun γ : ℝ => matrixHypergeometricPFQ a (Fin.snoc b (γ : ℂ)) (γ • T)) atTop
+      (𝓝 (matrixHypergeometricPFQ a b T)) := by
   sorry
 
 /-- DLMF 35.8.12 (Laplace transform): for `T ∈ Ω` and `ℜγ > (m-1)/2`,
-`∫_Ω etr(-TX) |X|^{γ-(m+1)/2} pFq(a; b; -X) dX = Γ_m(γ) |T|^{-γ} p+1Fq(a, γ; b; -T⁻¹)`.
+`∫_Ω expTrace(-TX) |X|^{γ-(m+1)/2} pFq(a; b; -X) dX = Γ_m(γ) |T|^{-γ} p+1Fq(a, γ; b; -T⁻¹)`.
 Restricted to the parameters where both series converge (`p < q`, or `p = q` and `T > I`);
 regularity of `b` is added. -/
 @[dlmf 35.8.E12]
-theorem hasIntegralOn_hypergeometricPFQ_laplace {m p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
+theorem hasIntegralOn_matrixHypergeometricPFQ_laplace {m p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
     (hb : ∀ j, multivariateGamma m (b j) ≠ 0) {γ : ℂ} (hγ : ((m : ℝ) - 1) / 2 < γ.re)
     {T : Matrix (Fin m) (Fin m) ℝ} (hT : T.PosDef)
     (hpq : p < q ∨ (p = q ∧ (T - 1).PosDef)) :
     HasIntegralOn (posDefCone m)
-      (fun X => (etr (-(T * X)) : ℂ) * ((X.det : ℂ) ^ (γ - ((m : ℂ) + 1) / 2)) *
-        hypergeometricPFQ a b (-X))
+      (fun X => (expTrace (-(T * X)) : ℂ) * ((X.det : ℂ) ^ (γ - ((m : ℂ) + 1) / 2)) *
+        matrixHypergeometricPFQ a b (-X))
       (multivariateGamma m γ * (T.det : ℂ) ^ (-γ) *
-        hypergeometricPFQ (Fin.snoc a γ) b (-T⁻¹)) := by
+        matrixHypergeometricPFQ (Fin.snoc a γ) b (-T⁻¹)) := by
   sorry
 
 /-- DLMF 35.8.13 (Euler integral, **corrected**): for `ℜ(b₁ - a₁), ℜa₁ > (m-1)/2`,
@@ -376,7 +383,7 @@ DLMF prints `1/B_m(b₁ - a₁, a₁)`. `pFq(TX)` is the function of the eigenva
 `pFq(X^{1/2} T X^{1/2})`. Restricted to `T ∈ 𝓢` where the series converge (`p ≤ q`, or
 `p = q + 1` and `‖T‖ < 1`); regularity of the denominator parameters is added. -/
 @[dlmf 35.8.E13 "corrected: factor B_m(b₁ - a₁, a₁), not its reciprocal"]
-theorem hasIntegralOn_hypergeometricPFQ_euler {m p q : ℕ} (a₁ b₁ : ℂ) (a : Fin p → ℂ)
+theorem hasIntegralOn_matrixHypergeometricPFQ_euler {m p q : ℕ} (a₁ b₁ : ℂ) (a : Fin p → ℂ)
     (b : Fin q → ℂ) (hb₁ : multivariateGamma m b₁ ≠ 0) (hb : ∀ j, multivariateGamma m (b j) ≠ 0)
     (h₁ : ((m : ℝ) - 1) / 2 < (b₁ - a₁).re) (h₂ : ((m : ℝ) - 1) / 2 < a₁.re)
     (T : Matrix (Fin m) (Fin m) ℝ) (hT : T.IsHermitian)
@@ -384,8 +391,9 @@ theorem hasIntegralOn_hypergeometricPFQ_euler {m p q : ℕ} (a₁ b₁ : ℂ) (a
     HasIntegralOn (m := m) (matrixInterval 0 1)
       (fun X => ((X.det : ℂ) ^ (a₁ - ((m : ℂ) + 1) / 2)) *
         (((1 - X).det : ℂ) ^ (b₁ - a₁ - ((m : ℂ) + 1) / 2)) *
-        hypergeometricPFQ a b (CFC.sqrt X * T * CFC.sqrt X))
-      (multivariateBeta m (b₁ - a₁) a₁ * hypergeometricPFQ (Fin.cons a₁ a) (Fin.cons b₁ b) T) := by
+        matrixHypergeometricPFQ a b (CFC.sqrt X * T * CFC.sqrt X))
+      (multivariateBeta m (b₁ - a₁) a₁ *
+          matrixHypergeometricPFQ (Fin.cons a₁ a) (Fin.cons b₁ b) T) := by
   sorry
 
 /-! ## The case `m = 1` -/
@@ -397,12 +405,12 @@ theorem partitionalShiftedFactorial_fin_one {𝕜 : Type*} [Field 𝕜] (a : �
 
 /-- For `m = 1` the series 35.8.1 is the classical generalized hypergeometric series in
 `t = T₁₁`: `pFq(a; b; t) = ∑_k (a₁)_k ⋯ (a_p)_k / ((b₁)_k ⋯ (b_q)_k) t^k / k!`. -/
-theorem hypergeometricPFQ_fin_one {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
+theorem matrixHypergeometricPFQ_fin_one {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
     (T : Matrix (Fin 1) (Fin 1) ℝ) :
-    hypergeometricPFQ a b T = ∑' k : ℕ, (1 / (k ! : ℂ)) *
+    matrixHypergeometricPFQ a b T = ∑' k : ℕ, (1 / (k ! : ℂ)) *
       ((∏ i, (ascPochhammer ℂ k).eval (a i)) / (∏ j, (ascPochhammer ℂ k).eval (b j)) *
         ((T 0 0 : ℂ) ^ k)) := by
-  unfold hypergeometricPFQ
+  unfold matrixHypergeometricPFQ
   refine tsum_congr fun k => ?_
   rw [partitions_fin_one, Finset.sum_singleton, zonalPolynomial_fin_one]
   simp only [partitionalShiftedFactorial_fin_one]
@@ -410,9 +418,9 @@ theorem hypergeometricPFQ_fin_one {p q : ℕ} (a : Fin p → ℂ) (b : Fin q →
   rfl
 
 /-- For `m = 1`, `₂F₁(a, b; c; T)` is Mathlib's `ordinaryHypergeometric` at `t = T₁₁`. -/
-private lemma hyp2F1_fin_one (a b c : ℂ) (T : Matrix (Fin 1) (Fin 1) ℝ) :
-    hyp2F1 a b c T = ordinaryHypergeometric a b c (T 0 0 : ℂ) := by
-  rw [hyp2F1, hypergeometricPFQ_fin_one, ordinaryHypergeometric_eq_tsum]
+private lemma matrixHypergeometric2F1_fin_one (a b c : ℂ) (T : Matrix (Fin 1) (Fin 1) ℝ) :
+    matrixHypergeometric2F1 a b c T = ordinaryHypergeometric a b c (T 0 0 : ℂ) := by
+  rw [matrixHypergeometric2F1, matrixHypergeometricPFQ_fin_one, ordinaryHypergeometric_eq_tsum]
   refine tsum_congr fun k => ?_
   simp only [Fin.prod_univ_two, Fin.prod_univ_one, Matrix.cons_val_zero, Matrix.cons_val_one,
     smul_eq_mul]

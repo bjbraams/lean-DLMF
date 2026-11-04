@@ -30,11 +30,11 @@ the three-term recurrence, and so does the closed form.
 * `jacPoly_eq_nodal`: `P_n^{(α,β)} = kk ∏ (X - xᵢ)` over its `n` distinct real zeros.
 * `discRootProdForm_eq_discClosedForm`, `disc_eq_discRootProdForm`: the two steps of the
   evaluation.
-* `jacobiPolyP_prod_sq_sub`: the product of squared differences of the zeros (AAR 8.5.3).
+* `jacobiPolynomialP_prod_sq_sub`: the product of squared differences of the zeros (AAR 8.5.3).
 
 ## Implementation notes
 
-`jacobiPolyP_prod_sq_sub` is stated for the monic normalization; DLMF 18.16.19 is its
+`jacobiPolynomialP_prod_sq_sub` is stated for the monic normalization; DLMF 18.16.19 is its
 restatement `jacobi_discriminant` in `DLMF.OrthogonalPolynomials.BoundsZeros.Discriminants`.
 -/
 
@@ -64,7 +64,7 @@ open Polynomial Finset
 
 /-- Coefficients of the Jacobi polynomial in powers of `(x - 1)/2`. -/
 def coef (a b : ℂ) (n k : ℕ) : ℂ :=
-  poch (n + a + b + 1) k * poch (a + k + 1) (n - k) / ((k ! : ℂ) * (n - k)!)
+  pochhammer (n + a + b + 1) k * pochhammer (a + k + 1) (n - k) / ((k ! : ℂ) * (n - k)!)
 
 /-- The Jacobi polynomial as an element of `ℂ[X]`. -/
 def jacPoly (a b : ℂ) (n : ℕ) : ℂ[X] :=
@@ -72,7 +72,7 @@ def jacPoly (a b : ℂ) (n : ℕ) : ℂ[X] :=
 
 /-- For `Re a > -1`, `jacPoly a b n` evaluates to `P_n^{(a,b)}`. -/
 theorem eval_jacPoly {a : ℂ} (hα : -1 < a.re) (b : ℂ) (n : ℕ) (x : ℂ) :
-    (jacPoly a b n).eval x = jacobiPolyP a b n x := by
+    (jacPoly a b n).eval x = jacobiPolynomialP a b n x := by
   rw [jacobi_finite_sum hα]
   simp only [jacPoly, eval_finsetSum, eval_mul, eval_C, eval_pow, eval_sub, eval_X, coef]
   refine Finset.sum_congr rfl fun k _ => ?_
@@ -256,8 +256,8 @@ variable {α β : ℝ}
 def kk (a b : ℂ) (n : ℕ) : ℂ := coef a b n n * (1 / 2) ^ n
 
 /-- The top coefficient `coef a b n n = (n+a+b+1)_n / n!`. -/
-theorem coef_diag (a b : ℂ) (n : ℕ) : coef a b n n = poch (n + a + b + 1) n / n ! := by
-  simp [coef, poch_zero]
+theorem coef_diag (a b : ℂ) (n : ℕ) : coef a b n n = pochhammer (n + a + b + 1) n / n ! := by
+  simp [coef, pochhammer_zero]
 
 /-- For `α, β > -1` the leading coefficient of `P_n^{(α,β)}` is nonzero. -/
 theorem kk_ne_zero (hα : -1 < α) (hβ : -1 < β) (n : ℕ) : kk α β n ≠ 0 := by
@@ -265,8 +265,8 @@ theorem kk_ne_zero (hα : -1 < α) (hβ : -1 < β) (n : ℕ) : kk α β n ≠ 0 
   rw [coef_diag]
   refine div_ne_zero ?_ (by exact_mod_cast n.factorial_ne_zero)
   rcases n with _ | n
-  · simp [poch_zero]
-  refine poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos ?_) _
+  · simp [pochhammer_zero]
+  refine pochhammer_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos ?_) _
   simp only [add_re, natCast_re, ofReal_re, one_re]
   push_cast
   linarith
@@ -299,12 +299,13 @@ theorem kk_succ (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
         (2 * ((n + 1 + 1 : ℕ) : ℂ) * (n + α + β + 2))) := by
   set x : ℂ := (n : ℂ) + α + β + 2 with hxdef
   have hx : x ≠ 0 := ne_zero_of_re_pos (by simp [x]; linarith [(Nat.cast_nonneg n : (0 : ℝ) ≤ n)])
-  have hp : poch (x + 1) (n + 2) * x = poch x (n + 1) * (x + (n + 1)) * (x + (n + 2)) := by
-    have h1 := poch_add x 1 (n + 2)
-    have h2 : poch x (n + 3) = poch x (n + 1) * (x + (n + 1)) * (x + (n + 2)) := by
-      rw [show n + 3 = n + 1 + 1 + 1 by ring, poch_succ, poch_succ]
+  have hp : pochhammer (x + 1) (n + 2) * x = pochhammer x (n + 1) * (x + (n + 1)) *
+      (x + (n + 2)) := by
+    have h1 := pochhammer_add x 1 (n + 2)
+    have h2 : pochhammer x (n + 3) = pochhammer x (n + 1) * (x + (n + 1)) * (x + (n + 2)) := by
+      rw [show n + 3 = n + 1 + 1 + 1 by ring, pochhammer_succ, pochhammer_succ]
       push_cast; ring
-    rw [show 1 + (n + 2) = n + 3 by ring, poch_one] at h1
+    rw [show 1 + (n + 2) = n + 3 by ring, pochhammer_one] at h1
     rw [← h2, h1, Nat.cast_one, mul_comm]
   have e1 : ((n + 1 : ℕ) : ℂ) + α + β + 1 = x := by push_cast; ring
   have e2 : ((n + 2 : ℕ) : ℂ) + α + β + 1 = x + 1 := by push_cast; ring
@@ -312,7 +313,8 @@ theorem kk_succ (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
   have hf : (((n + 2)! : ℕ) : ℂ) = ((n + 1)! : ℕ) * ((n + 1 + 1 : ℕ) : ℂ) := by
     rw [Nat.factorial_succ (n + 1)]; push_cast; ring
   rw [hf]
-  have hpe : poch (x + 1) (n + 2) = poch x (n + 1) * (x + (n + 1)) * (x + (n + 2)) / x := by
+  have hpe : pochhammer (x + 1) (n + 2) = pochhammer x (n + 1) * (x + (n + 1)) *
+      (x + (n + 2)) / x := by
     rw [← hp]; field_simp
   rw [hpe]
   have hn2 : ((n + 1 + 1 : ℕ) : ℂ) ≠ 0 := by exact_mod_cast Nat.succ_ne_zero (n + 1)
@@ -342,8 +344,8 @@ theorem eval_jacPoly_two_of_root (hα : -1 < α) (hβ : -1 < β) (n : ℕ) {y : 
     ne_zero_of_re_pos (by simp; linarith [(Nat.cast_nonneg n : (0 : ℝ) ≤ n)])
   have hK : (2 * ((n : ℂ) + 2) * ((n : ℂ) + α + β + 2) * (2 * (n : ℂ) + α + β + 2)) ≠ 0 := by
     simp [h1, h2, h3]
-  have hP : jacobiPolyP (α : ℂ) β (n + 2) y = -(2 * ((n : ℂ) + α + 1) * ((n : ℂ) + β + 1) *
-      (2 * (n : ℂ) + α + β + 4)) * jacobiPolyP (α : ℂ) β n y /
+  have hP : jacobiPolynomialP (α : ℂ) β (n + 2) y = -(2 * ((n : ℂ) + α + 1) * ((n : ℂ) + β + 1) *
+      (2 * (n : ℂ) + α + β + 4)) * jacobiPolynomialP (α : ℂ) β n y /
         (2 * ((n : ℂ) + 2) * ((n : ℂ) + α + β + 2) * (2 * (n : ℂ) + α + β + 2)) := by
     rw [eq_div_iff hK]
     linear_combination hrec
@@ -361,7 +363,7 @@ def rootProd (a b : ℂ) (n : ℕ) : ℂ :=
 /-- `SS a b 0 = 1`. -/
 theorem rootProd_zero (a b : ℂ) : rootProd a b 0 = 1 := by
   have : ∀ x, (jacPoly a b 0).eval x = 1 := by
-    intro x; simp [jacPoly, coef, poch_zero]
+    intro x; simp [jacPoly, coef, pochhammer_zero]
   simp [rootProd, this]
 
 /-- The recursion for the product of `P_n` over the zeros of `P_{n+1}`. -/
@@ -457,7 +459,7 @@ def discRootProdForm (a b : ℂ) (n : ℕ) : ℂ :=
   (-1) ^ ((n + 1).choose 2) * (2 * ((n : ℂ) + a + 1) * ((n : ℂ) + b + 1)) ^ (n + 1) *
       rootProd a b n *
       (((n + 1)! : ℕ) : ℂ) ^ 2 * kk a b (n + 1) ^ 2 /
-    ((2 * (n : ℂ) + a + b + 2) ^ (n + 1) * poch (a + 1) (n + 1) * poch (b + 1) (n + 1) *
+    ((2 * (n : ℂ) + a + b + 2) ^ (n + 1) * pochhammer (a + 1) (n + 1) * pochhammer (b + 1) (n + 1) *
       kk a b (n + 1) ^ (n + 1))
 
 /-- `EE` satisfies the same recursion as `Fr`. -/
@@ -470,25 +472,26 @@ theorem discRootProdForm_succ (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
     (c1 := 2 * (n : ℂ) + α + β + 2) (u2 := ((n + 1 : ℕ) : ℂ) + α + 1)
     (v2 := ((n + 1 : ℕ) : ℂ) + β + 1) (c2 := 2 * ((n + 1 : ℕ) : ℂ) + α + β + 2)
     (d := 2 * (n : ℂ) + α + β + 3) (e := (n : ℂ) + α + β + 2) (n2 := ((n + 1 + 1 : ℕ) : ℂ))
-    (pa1 := poch (α + 1) (n + 1)) (pb1 := poch (β + 1) (n + 1)) (f1 := (((n + 1)! : ℕ) : ℂ))
+    (pa1 := pochhammer (α + 1) (n + 1)) (pb1 := pochhammer (β + 1) (n + 1))
+        (f1 := (((n + 1)! : ℕ) : ℂ))
     (σ1 := (-1) ^ ((n + 1).choose 2))
     (kk_ne_zero hα hβ _) (ne_zero_of_re_pos (by simp; linarith))
     (ne_zero_of_re_pos (by simp; linarith)) (by exact_mod_cast Nat.succ_ne_zero (n + 1))
     (ne_zero_of_re_pos (by simp; linarith)) (ne_zero_of_re_pos (by simp; linarith))
     (ne_zero_of_re_pos (by simp; linarith)) (ne_zero_of_re_pos (by simp; linarith))
     (ne_zero_of_re_pos (by simp; linarith)) (ne_zero_of_re_pos (by simp; linarith))
-    (poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith)) _)
-    (poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith)) _)
+    (pochhammer_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith)) _)
+    (pochhammer_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith)) _)
     (by exact_mod_cast Nat.factorial_ne_zero (n + 1))
     (kk_succ hα hβ n) (rootProd_succ hα hβ n)
   have hσ : (-1 : ℂ) ^ ((n + 1 + 1).choose 2) = (-1) ^ ((n + 1).choose 2) * (-1) ^ (n + 1) := by
     rw [← pow_add, Nat.choose_succ_succ', Nat.choose_one_right, add_comm]
-  have hpa : poch ((α : ℂ) + 1) (n + 1 + 1) =
-      poch (α + 1) (n + 1) * (((n + 1 : ℕ) : ℂ) + α + 1) := by
-    rw [poch_succ]; ring
-  have hpb : poch ((β : ℂ) + 1) (n + 1 + 1) =
-      poch (β + 1) (n + 1) * (((n + 1 : ℕ) : ℂ) + β + 1) := by
-    rw [poch_succ]; ring
+  have hpa : pochhammer ((α : ℂ) + 1) (n + 1 + 1) =
+      pochhammer (α + 1) (n + 1) * (((n + 1 : ℕ) : ℂ) + α + 1) := by
+    rw [pochhammer_succ]; ring
+  have hpb : pochhammer ((β : ℂ) + 1) (n + 1 + 1) =
+      pochhammer (β + 1) (n + 1) * (((n + 1 : ℕ) : ℂ) + β + 1) := by
+    rw [pochhammer_succ]; ring
   have hf : (((n + 1 + 1)! : ℕ) : ℂ) = (((n + 1)! : ℕ) : ℂ) * ((n + 1 + 1 : ℕ) : ℂ) := by
     rw [Nat.factorial_succ]; push_cast; ring
   unfold discRootProdForm ratioR
@@ -498,12 +501,12 @@ theorem discRootProdForm_succ (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
 /-- `EE α β 0 = 1`. -/
 theorem discRootProdForm_zero (hα : -1 < α) (hβ : -1 < β) : discRootProdForm α β 0 = 1 := by
   have hk : kk α β 1 = ((α : ℂ) + β + 2) / 2 := by
-    simp [kk, coef_diag, poch_one]; ring
+    simp [kk, coef_diag, pochhammer_one]; ring
   have h1 : (α : ℂ) + 1 ≠ 0 := ne_zero_of_re_pos (by simp; linarith)
   have h2 : (β : ℂ) + 1 ≠ 0 := ne_zero_of_re_pos (by simp; linarith)
   have h3 : (α : ℂ) + β + 2 ≠ 0 := ne_zero_of_re_pos (by simp; linarith)
   simp only [discRootProdForm, rootProd_zero, hk]
-  norm_num [poch_one]
+  norm_num [pochhammer_one]
   field_simp
 
 /-- `EE α β n = Fr α β (n + 1)`, by induction. -/
@@ -520,7 +523,7 @@ variable {α β : ℝ}
 
 /-- If `x` lists `n` distinct real zeros of `P_n^{(α,β)}`, they are all its complex roots. -/
 theorem roots_jacPoly_eq (hα : -1 < α) (hβ : -1 < β) {n : ℕ} (x : Fin n → ℝ)
-    (hroot : ∀ i, jacobiPolyP α β n (x i) = 0) (hinj : Function.Injective x) :
+    (hroot : ∀ i, jacobiPolynomialP α β n (x i) = 0) (hinj : Function.Injective x) :
     (jacPoly α β n).roots = (univ.val.map fun i => (x i : ℂ)) := by
   have hα' : -1 < (α : ℂ).re := by simpa using hα
   have hne := jacPoly_ne_zero hα hβ n
@@ -538,7 +541,7 @@ theorem roots_jacPoly_eq (hα : -1 < α) (hβ : -1 < β) {n : ℕ} (x : Fin n �
 
 /-- `P_n^{(α,β)} = kk ∏ (X - xᵢ)` over its `n` distinct real zeros. -/
 theorem jacPoly_eq_nodal (hα : -1 < α) (hβ : -1 < β) {n : ℕ} (x : Fin n → ℝ)
-    (hroot : ∀ i, jacobiPolyP α β n (x i) = 0) (hinj : Function.Injective x) :
+    (hroot : ∀ i, jacobiPolynomialP α β n (x i) = 0) (hinj : Function.Injective x) :
     jacPoly α β n = C (kk α β n) * Lagrange.nodal univ fun i => (x i : ℂ) := by
   conv_lhs => rw [← C_leadingCoeff_mul_prod_multiset_X_sub_C
     (IsAlgClosed.card_roots_eq_natDegree (k := ℂ) (p := jacPoly α β n))]
@@ -547,7 +550,7 @@ theorem jacPoly_eq_nodal (hα : -1 < α) (hβ : -1 < β) {n : ℕ} (x : Fin n �
 
 /-- The Jacobi discriminant equals `EE`. -/
 theorem disc_eq_discRootProdForm (hα : -1 < α) (hβ : -1 < β) (m : ℕ) (x : Fin (m + 1) → ℝ)
-    (hroot : ∀ i, jacobiPolyP α β (m + 1) (x i) = 0) (hinj : Function.Injective x) :
+    (hroot : ∀ i, jacobiPolynomialP α β (m + 1) (x i) = 0) (hinj : Function.Injective x) :
     (∏ i : Fin (m + 1), ∏ j : Fin (m + 1),
       if i.val < j.val then ((x i - x j : ℝ) : ℂ) ^ 2 else 1) = discRootProdForm α β m := by
   have hα' : -1 < (α : ℂ).re := by simpa using hα
@@ -558,17 +561,17 @@ theorem disc_eq_discRootProdForm (hα : -1 < α) (hβ : -1 < β) (m : ℕ) (x : 
   have hK0 : K ≠ 0 := kk_ne_zero hα hβ _
   have hnodal := jacPoly_eq_nodal hα hβ x hroot hinj
   -- derivative at the nodes
-  have hder : ∀ i, deriv (jacobiPolyP α β (m + 1)) (xc i) =
+  have hder : ∀ i, deriv (jacobiPolynomialP α β (m + 1)) (xc i) =
       K * ∏ j ∈ univ.erase i, (xc i - xc j) := by
     intro i
-    have hfun : jacobiPolyP α β (m + 1) = fun z => (jacPoly α β (m + 1)).eval z :=
+    have hfun : jacobiPolynomialP α β (m + 1) = fun z => (jacPoly α β (m + 1)).eval z :=
       funext fun z => (eval_jacPoly hα' _ _ z).symm
     rw [hfun, Polynomial.deriv, hnodal, derivative_C_mul, eval_mul, eval_C,
       Lagrange.eval_nodal_derivative_eval_node_eq (mem_univ i), Lagrange.eval_nodal]
   -- lowering relation at the nodes
   have hlow : ∀ i, (2 * (m : ℂ) + α + β + 2) * (1 - xc i ^ 2) *
       (K * ∏ j ∈ univ.erase i, (xc i - xc j)) =
-      2 * ((m : ℂ) + α + 1) * ((m : ℂ) + β + 1) * jacobiPolyP α β m (xc i) := by
+      2 * ((m : ℂ) + α + 1) * ((m : ℂ) + β + 1) * jacobiPolynomialP α β m (xc i) := by
     intro i
     have h := jacobi_lowering_derivative (β := (β : ℂ)) hα' m (xc i)
     rw [hder i, hroot i] at h
@@ -576,20 +579,20 @@ theorem disc_eq_discRootProdForm (hα : -1 < α) (hβ : -1 < β) (m : ℕ) (x : 
   have hprod := congrArg (fun f : Fin (m + 1) → ℂ => ∏ i, f i) (funext hlow)
   simp only [prod_mul_distrib, prod_const, card_univ, Fintype.card_fin] at hprod
   -- the product of `P_m` over the nodes
-  have hSS : ∏ i, jacobiPolyP α β m (xc i) = rootProd α β m := by
+  have hSS : ∏ i, jacobiPolynomialP α β m (xc i) = rootProd α β m := by
     unfold rootProd
     rw [roots_jacPoly_eq hα hβ x hroot hinj, Multiset.map_map]
     simp only [Function.comp_def, eval_jacPoly hα']
     rfl
   -- values at `±1`
-  have h1 : K * ∏ i, (1 - xc i) = poch (α + 1) (m + 1) / (m + 1)! := by
+  have h1 : K * ∏ i, (1 - xc i) = pochhammer (α + 1) (m + 1) / (m + 1)! := by
     have := congrArg (fun p => p.eval 1) hnodal
     simp only [eval_mul, eval_C, Lagrange.eval_nodal, eval_jacPoly hα'] at this
-    rw [← this, jacobiPolyP_one ]
-  have h2 : K * ∏ i, (1 + xc i) = poch (β + 1) (m + 1) / (m + 1)! := by
+    rw [← this, jacobiPolynomialP_one ]
+  have h2 : K * ∏ i, (1 + xc i) = pochhammer (β + 1) (m + 1) / (m + 1)! := by
     have := congrArg (fun p => p.eval (-1)) hnodal
     simp only [eval_mul, eval_C, Lagrange.eval_nodal, eval_jacPoly hα'] at this
-    rw [jacobi_reflection hα' hβ' (m + 1) 1, jacobiPolyP_one ] at this
+    rw [jacobi_reflection hα' hβ' (m + 1) 1, jacobiPolynomialP_one ] at this
     have hneg : ∏ i, (-1 - xc i) = (-1) ^ (m + 1) * ∏ i, (1 + xc i) := by
       have hc : ∏ _i : Fin (m + 1), (-1 : ℂ) = (-1) ^ (m + 1) := by simp
       rw [← hc, ← prod_mul_distrib]
@@ -598,7 +601,7 @@ theorem disc_eq_discRootProdForm (hα : -1 < α) (hβ : -1 < β) (m : ℕ) (x : 
     have hs : ((-1 : ℂ) ^ (m + 1)) * (-1) ^ (m + 1) = 1 := by
       rw [← pow_add, ← two_mul, pow_mul]; norm_num
     linear_combination (-(-1) ^ (m + 1)) * this -
-      (K * ∏ i, (1 + xc i) - poch ((β : ℂ) + 1) (m + 1) / (m + 1)!) * hs
+      (K * ∏ i, (1 + xc i) - pochhammer ((β : ℂ) + 1) (m + 1) / (m + 1)!) * hs
   have hsq : ∏ i, (1 - xc i ^ 2) = (∏ i, (1 - xc i)) * ∏ i, (1 + xc i) := by
     rw [← prod_mul_distrib]; exact prod_congr rfl fun i _ => by ring
   have hpair := prod_prod_erase_sub xc
@@ -613,28 +616,30 @@ theorem disc_eq_discRootProdForm (hα : -1 < α) (hβ : -1 < β) (m : ℕ) (x : 
   rw [hSS, hsq] at hprod
   have hσ : ((-1 : ℂ) ^ (m + 1).choose 2) * (-1) ^ (m + 1).choose 2 = 1 := by
     rw [← pow_add, ← two_mul, pow_mul]; norm_num
-  have hpa : poch ((α : ℂ) + 1) (m + 1) ≠ 0 :=
-    poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith)) _
-  have hpb : poch ((β : ℂ) + 1) (m + 1) ≠ 0 :=
-    poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith)) _
+  have hpa : pochhammer ((α : ℂ) + 1) (m + 1) ≠ 0 :=
+    pochhammer_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith)) _
+  have hpb : pochhammer ((β : ℂ) + 1) (m + 1) ≠ 0 :=
+    pochhammer_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith)) _
   have hc : (2 * (m : ℂ) + α + β + 2) ≠ 0 := ne_zero_of_re_pos (by simp; linarith)
   have hf : (((m + 1)! : ℕ) : ℂ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero (m + 1)
-  have hA : ∏ i, (1 - xc i) = poch (α + 1) (m + 1) / (m + 1)! / K := by
+  have hA : ∏ i, (1 - xc i) = pochhammer (α + 1) (m + 1) / (m + 1)! / K := by
     rw [← h1]; field_simp
-  have hB : ∏ i, (1 + xc i) = poch (β + 1) (m + 1) / (m + 1)! / K := by
+  have hB : ∏ i, (1 + xc i) = pochhammer (β + 1) (m + 1) / (m + 1)! / K := by
     rw [← h2]; field_simp
   rw [hA, hB] at hprod
   unfold discRootProdForm
   rw [hpair] at hprod
   rw [← hK]
-  have hden : (2 * (m : ℂ) + α + β + 2) ^ (m + 1) * poch (α + 1) (m + 1) * poch (β + 1) (m + 1) *
+  have hden : (2 * (m : ℂ) + α + β + 2) ^ (m + 1) * pochhammer (α + 1) (m + 1) *
+      pochhammer (β + 1) (m + 1) *
       K ^ (m + 1) ≠ 0 := by
     simp [hc, hpa, hpb, hK0]
   rw [eq_div_iff hden]
   field_simp at hprod
   simp only [mul_pow] at hprod ⊢
   linear_combination ((-1 : ℂ) ^ (m + 1).choose 2) * hprod -
-    (D * ((2 * (m : ℂ) + α + β + 2) ^ (m + 1) * poch (α + 1) (m + 1) * poch (β + 1) (m + 1) *
+    (D * ((2 * (m : ℂ) + α + β + 2) ^ (m + 1) * pochhammer (α + 1) (m + 1) *
+        pochhammer (β + 1) (m + 1) *
       K ^ (m + 1))) * hσ
 
 end Main
@@ -642,9 +647,9 @@ end Main
 end JacobiDisc
 
 /-- The product of squared differences of the Jacobi roots (AAR Theorem 8.5.3). -/
-theorem jacobiPolyP_prod_sq_sub {α β : ℝ} {n : ℕ} (hn : n ≠ 0)
+theorem jacobiPolynomialP_prod_sq_sub {α β : ℝ} {n : ℕ} (hn : n ≠ 0)
     (hα : -1 < α) (hβ : -1 < β) (x : Fin n → ℝ)
-    (hroot : ∀ i, jacobiPolyP α β n (x i) = 0) (hinj : Function.Injective x) :
+    (hroot : ∀ i, jacobiPolynomialP α β n (x i) = 0) (hinj : Function.Injective x) :
     (Finset.univ.prod fun i : Fin n => Finset.univ.prod fun j : Fin n =>
       if i.val < j.val then ((x i - x j : ℝ) : ℂ) ^ (2 : ℕ) else (1 : ℂ)) =
       (2 : ℂ) ^ (n * (n - 1)) *

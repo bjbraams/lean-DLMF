@@ -7,6 +7,7 @@ module -- shake: keep-all
 
 public import DLMF.Theta.Products.InfiniteProducts
 public import DLMF.Theta.Products.LogDerivativesAndDoubleProducts
+public import DLMF.Theta.Products.LogNormIntegral
 
 /-!
 # Theta functions: infinite products and related results (DLMF §20.5)

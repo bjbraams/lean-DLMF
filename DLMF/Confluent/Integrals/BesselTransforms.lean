@@ -117,12 +117,12 @@ theorem KummerHankelTransforms.laplace_0F1 {β c x : ℂ} (hβ : 0 < β.re) {s :
             (by linarith [hβk k, show (β + k).re = β0 + k by simp [hβ0]]) hs]
       ring_nf
     rw [hint, hd, DLMF.Bessel.regularizedHGFunCoeff_empty]
-    have hGR : Real.Gamma (β0 + k) = ‖Gamma (β0 : ℂ)‖ * ‖poch (β0 : ℂ) k‖ := by
-      rw [← norm_mul, ← Gamma_add_nat_eq_mul_poch (hβ0k k) k,
+    have hGR : Real.Gamma (β0 + k) = ‖Gamma (β0 : ℂ)‖ * ‖pochhammer (β0 : ℂ) k‖ := by
+      rw [← norm_mul, ← Gamma_add_nat_eq_mul_pochhammer (hβ0k k) k,
         show (β0 : ℂ) + k = ((β0 + k : ℝ) : ℂ) by push_cast; ring, Complex.Gamma_ofReal,
         Complex.norm_real, Real.norm_of_nonneg (Real.Gamma_pos_of_pos (by
           linarith [hβk k, show (β + k).re = β0 + k by simp [hβ0]])).le]
-    have hp := norm_poch_le_factorial_mul_exp (β0 : ℂ) k
+    have hp := norm_pochhammer_le_factorial_mul_exp (β0 : ℂ) k
     rw [Complex.norm_real, Real.norm_of_nonneg hβ.le] at hp
     have hc := hCg k
     have hfac : (0 : ℝ) < k ! := by exact_mod_cast Nat.factorial_pos k
@@ -134,7 +134,7 @@ theorem KummerHankelTransforms.laplace_0F1 {β c x : ℂ} (hβ : 0 < β.re) {s :
     have e1 : Real.exp (β0 + k) = Real.exp β0 * Real.exp 1 ^ k := by
       rw [Real.exp_add, ← Real.exp_nat_mul, mul_one]
     calc (k ! : ℝ)⁻¹ * ‖(Gamma (c + k))⁻¹‖ * ‖x‖ ^ k *
-          (‖Gamma (β0 : ℂ)‖ * ‖poch (β0 : ℂ) k‖ * (s ^ (-β0) * (s ^ k)⁻¹))
+          (‖Gamma (β0 : ℂ)‖ * ‖pochhammer (β0 : ℂ) k‖ * (s ^ (-β0) * (s ^ k)⁻¹))
         ≤ (k ! : ℝ)⁻¹ * (Cg * (2 ^ k / k !)) * ‖x‖ ^ k *
           (‖Gamma (β0 : ℂ)‖ * (k ! * Real.exp (β0 + k)) * (s ^ (-β0) * (s ^ k)⁻¹)) := by
           gcongr
@@ -156,7 +156,8 @@ theorem KummerHankelTransforms.laplace_0F1 {β c x : ℂ} (hβ : 0 < β.re) {s :
       rw [one_div, inv_cpow _ _ (by rw [arg_ofReal_of_nonneg hs.le]; exact Real.pi_ne_zero.symm),
         ← cpow_neg, show -(β + k) = -β + -(k : ℂ) by ring, cpow_add _ _ hs0,
         cpow_neg (s : ℂ) (k : ℂ), cpow_natCast]
-    have hG : Gamma (β + k) = Gamma β * poch β k := Gamma_add_nat_eq_mul_poch (fun i h => by
+    have hG : Gamma (β + k) = Gamma β * pochhammer β k :=
+        Gamma_add_nat_eq_mul_pochhammer (fun i h => by
       have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg i : (0:ℝ) ≤ i)]) k
     rw [hp, hG, div_pow]
     field_simp
@@ -702,8 +703,8 @@ theorem KummerHankelTransforms.contiguous_b (a b z : ℂ) :
     ← ((summable_regularizedConfluent_term a (b + 1) z).mul_left (b - a)).tsum_add
       ((summable_regularizedConfluent_term (a + 1) (b + 1) z).mul_left a)]
   refine tsum_congr fun n => ?_
-  have hp : a * poch (a + 1) n = poch a n * (a + n) := by
-    rw [← poch_succ_left, poch_succ]
+  have hp : a * pochhammer (a + 1) n = pochhammer a n * (a + n) := by
+    rw [← pochhammer_succ_left, pochhammer_succ]
   rw [one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (b + n), show b + n + 1 = b + 1 + n by ring]
   linear_combination (-(z ^ n / n.factorial * (Gamma (b + 1 + n))⁻¹)) * hp
 
@@ -712,7 +713,7 @@ parameters. -/
 theorem KummerHankelTransforms.contiguous_down (A B x : ℂ) :
     regularizedHGFun {A - 1} {B - 1} x =
       (B - 1) * regularizedHGFun {A} {B} x - (B - A) * x * regularizedHGFun {A} {B + 1} x := by
-  set T : ℂ → ℂ → ℕ → ℂ := fun a b n => poch a n * x ^ n / n.factorial * (Gamma (b + n))⁻¹
+  set T : ℂ → ℂ → ℕ → ℂ := fun a b n => pochhammer a n * x ^ n / n.factorial * (Gamma (b + n))⁻¹
     with hT
   have hS : ∀ a b, HasSum (T a b) (regularizedHGFun {a} {b} x) := fun a b => by
     rw [regularizedConfluent_eq_tsum]
@@ -721,16 +722,17 @@ theorem KummerHankelTransforms.contiguous_down (A B x : ℂ) :
   have hU : HasSum u (regularizedHGFun {A - 1} {B - 1} x - (B - 1) * regularizedHGFun {A} {B} x) :=
     (hS _ _).sub ((hS A B).mul_left _)
   have hu0 : u 0 = 0 := by
-    simp only [hu, hT, poch_zero, pow_zero, Nat.factorial_zero, Nat.cast_one, div_one, one_mul,
+    simp only [hu, hT, pochhammer_zero, pow_zero, Nat.factorial_zero, Nat.cast_one,
+        div_one, one_mul,
       CharP.cast_eq_zero, add_zero]
     rw [one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (B - 1), sub_add_cancel]
     ring
   have husucc : ∀ n : ℕ, u (n + 1) = -(B - A) * x * T A (B + 1) n := by
     intro n
     simp only [hu, hT]
-    have hp1 : poch (A - 1) (n + 1) = (A - 1) * poch A n := by
-      rw [poch_succ_left, sub_add_cancel]
-    rw [hp1, poch_succ, Nat.factorial_succ, pow_succ]
+    have hp1 : pochhammer (A - 1) (n + 1) = (A - 1) * pochhammer A n := by
+      rw [pochhammer_succ_left, sub_add_cancel]
+    rw [hp1, pochhammer_succ, Nat.factorial_succ, pow_succ]
     push_cast
     rw [show B - 1 + ((n : ℂ) + 1) = B + n by ring,
       one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (B + n),

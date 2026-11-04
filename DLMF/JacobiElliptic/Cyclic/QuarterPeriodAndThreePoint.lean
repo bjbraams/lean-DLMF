@@ -22,7 +22,7 @@ cyclic points at multiples of `2K/3`, and the cyclic identities DLMF 22.9.8–22
 
 ## Main results
 
-* `jacobiSnCnDnk_add_compEllIntKk`: the values at `z + K` in terms of `sn, cn, dn` at `z`.
+* `jacobiSnCnDnk_add_completeEllipticK`: the values at `z + K` in terms of `sn, cn, dn` at `z`.
 * `jacobi_cyclic_s4_pairs`, `jacobi_cyclic_c4_pairs`, `jacobi_cyclic_d_pairs`:
   DLMF 22.9.8–22.9.10.
 * `jacobi_cyclic_d2_two`, `jacobi_cyclic_csd_two`: DLMF 22.9.11 and 22.9.12.
@@ -39,71 +39,72 @@ noncomputable section
 
 namespace DLMF.JacobiElliptic
 
-open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
+open DLMF.EllipticIntegrals (completeEllipticK completeEllipticKPrime)
 
 /-- The cyclic argument `z + N p⁻¹ (m - 1) K(k)` of DLMF 22.9.1–22.9.6 (`N = 2` or `4`). -/
 @[dlmf 22.9.E1, dlmf 22.9.E4]
-def jacobiCyclicArg (N m p : ℕ) (z k : ℂ) : ℂ := z + N * ((m : ℂ) - 1) / p * compEllIntKk k
+def jacobiCyclicArg (N m p : ℕ) (z k : ℂ) : ℂ := z + N * ((m : ℂ) - 1) / p * completeEllipticK k
 
 /-- `s_{m,p}^{(N)} = sn(z + N p⁻¹(m - 1)K, k)` (DLMF 22.9.1, 22.9.4). -/
 @[dlmf 22.9.E1, dlmf 22.9.E4]
-def jacobiCyclicS (N m p : ℕ) (z k : ℂ) : ℂ := jacobiSnk (jacobiCyclicArg N m p z k) k
+def jacobiCyclicS (N m p : ℕ) (z k : ℂ) : ℂ := jacobiSn (jacobiCyclicArg N m p z k) k
 
 /-- `c_{m,p}^{(N)} = cn(z + N p⁻¹(m - 1)K, k)` (DLMF 22.9.2, 22.9.5). -/
 @[dlmf 22.9.E2, dlmf 22.9.E5]
-def jacobiCyclicC (N m p : ℕ) (z k : ℂ) : ℂ := jacobiCnk (jacobiCyclicArg N m p z k) k
+def jacobiCyclicC (N m p : ℕ) (z k : ℂ) : ℂ := jacobiCn (jacobiCyclicArg N m p z k) k
 
 /-- `d_{m,p}^{(N)} = dn(z + N p⁻¹(m - 1)K, k)` (DLMF 22.9.3, 22.9.6). -/
 @[dlmf 22.9.E3, dlmf 22.9.E6]
-def jacobiCyclicD (N m p : ℕ) (z k : ℂ) : ℂ := jacobiDnk (jacobiCyclicArg N m p z k) k
+def jacobiCyclicD (N m p : ℕ) (z k : ℂ) : ℂ := jacobiDn (jacobiCyclicArg N m p z k) k
 
 /-- `κ = dn(2K/3, k)` (DLMF 22.9.7). -/
 @[dlmf 22.9.E7]
-def jacobiCyclicKappa (k : ℂ) : ℂ := jacobiDnk (2 * compEllIntKk k / 3) k
+def jacobiCyclicKappa (k : ℂ) : ℂ := jacobiDn (2 * completeEllipticK k / 3) k
 
 /-! ### Helpers (quarter-period shifts and the points `2K/3`, `4K/3`) -/
 
-/-- The stated relation follows from the given hypotheses: `JacobiRegulark .d z k`. -/
-lemma jacobiRegulark_d_of_n_add_compEllIntKk {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (h : JacobiRegulark .n (z + compEllIntKk k) k) : JacobiRegulark .d z k :=
-  (jacobiRegulark_add_compEllIntKk_iff hk .n z).1 h
+/-- The stated relation follows from the given hypotheses: `IsJacobiRegular .d z k`. -/
+lemma isJacobiRegular_d_of_n_add_completeEllipticK {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
+    (h : IsJacobiRegular .n (z + completeEllipticK k) k) : IsJacobiRegular .d z k :=
+  (isJacobiRegular_add_completeEllipticK_iff hk .n z).1 h
 
 /-- Values at `z + K` in terms of `sn, cn, dn` at `z` (`dn z ≠ 0`). -/
-lemma jacobiSnCnDnk_add_compEllIntKk {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hn : JacobiRegulark .n z k) :
-    jacobiSnk (z + compEllIntKk k) k = jacobiCnk z k / jacobiDnk z k ∧
-    jacobiCnk (z + compEllIntKk k) k =
-      -jacobiComodulusk k * (jacobiSnk z k / jacobiDnk z k) ∧
-    jacobiDnk (z + compEllIntKk k) k = jacobiComodulusk k * (1 / jacobiDnk z k) := by
-  obtain ⟨-, -, -, -, -, -, e7, e8, e9⟩ := jacobiPQk_eq_div_of_regular_n hn
+lemma jacobiSnCnDnk_add_completeEllipticK {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
+    (hn : IsJacobiRegular .n z k) :
+    jacobiSn (z + completeEllipticK k) k = jacobiCn z k / jacobiDn z k ∧
+    jacobiCn (z + completeEllipticK k) k =
+      -jacobiComodulus k * (jacobiSn z k / jacobiDn z k) ∧
+    jacobiDn (z + completeEllipticK k) k = jacobiComodulus k * (1 / jacobiDn z k) := by
+  obtain ⟨-, -, -, -, -, -, e7, e8, e9⟩ := jacobiPQ_eq_div_of_regular_n hn
   refine ⟨?_, ?_, ?_⟩
-  · rw [(jacobiSnk_shift hk z).1, e8]
-  · rw [(jacobiCnk_shift hk z).1, e7]
-  · rw [(jacobiDnk_shift hk z).1, e9]
+  · rw [(jacobiSn_shift hk z).1, e8]
+  · rw [(jacobiCn_shift hk z).1, e7]
+  · rw [(jacobiDn_shift hk z).1, e9]
 
 /-- Identity under the stated parameter and domain assumptions: `jacobiCyclicArg 2 1 2 z k = z ∧
-jacobiCyclicArg 2 2 2 z k = z + compEllIntKk k`. -/
+jacobiCyclicArg 2 2 2 z k = z + completeEllipticK k`. -/
 lemma jacobiCyclicArg_two_two (k z : ℂ) : jacobiCyclicArg 2 1 2 z k = z ∧
-    jacobiCyclicArg 2 2 2 z k = z + compEllIntKk k := by
+    jacobiCyclicArg 2 2 2 z k = z + completeEllipticK k := by
   constructor <;> (simp only [jacobiCyclicArg]; push_cast; ring)
 
 /-- Identity under the stated parameter and domain assumptions: `jacobiCyclicArg 2 1 4 z k = z ∧
-jacobiCyclicArg 2 2 4 z k = z + compEllIntKk k / 2 ∧ jacobiCyclicArg 2 3 4 z k = z +
-compEllIntKk k ∧ jacobiCyclicArg 2 4 4 z k = (z + compEllIntKk k / 2) + compEllIntKk k`. -/
+jacobiCyclicArg 2 2 4 z k = z + completeEllipticK k / 2 ∧ jacobiCyclicArg 2 3 4 z k = z +
+completeEllipticK k ∧ jacobiCyclicArg 2 4 4 z k = (z + completeEllipticK k / 2) + completeEllipticK
+k`. -/
 lemma jacobiCyclicArg_two_four (k z : ℂ) : jacobiCyclicArg 2 1 4 z k = z ∧
-    jacobiCyclicArg 2 2 4 z k = z + compEllIntKk k / 2 ∧
-    jacobiCyclicArg 2 3 4 z k = z + compEllIntKk k ∧
-    jacobiCyclicArg 2 4 4 z k = (z + compEllIntKk k / 2) + compEllIntKk k := by
+    jacobiCyclicArg 2 2 4 z k = z + completeEllipticK k / 2 ∧
+    jacobiCyclicArg 2 3 4 z k = z + completeEllipticK k ∧
+    jacobiCyclicArg 2 4 4 z k = (z + completeEllipticK k / 2) + completeEllipticK k := by
   refine ⟨?_, ?_, ?_, ?_⟩ <;> (simp only [jacobiCyclicArg]; push_cast; ring)
 
 /-- The three cyclic points `z, z + 4K/3, z + 8K/3` (`N = 4`, `p = 3`). -/
 lemma jacobiCyclicArg_four_three_values {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : ℂ)
-    (hreg4 : ∀ m : ℕ, JacobiRegulark .n (jacobiCyclicArg 4 m 3 z k) k) :
-    let s := jacobiSnk z k; let c := jacobiCnk z k; let d := jacobiDnk z k
-    let a := 2 * compEllIntKk k / 3
-    let sa := jacobiSnk a k; let ca := jacobiCnk a k; let κ := jacobiDnk a k
+    (hreg4 : ∀ m : ℕ, IsJacobiRegular .n (jacobiCyclicArg 4 m 3 z k) k) :
+    let s := jacobiSn z k; let c := jacobiCn z k; let d := jacobiDn z k
+    let a := 2 * completeEllipticK k / 3
+    let sa := jacobiSn a k; let ca := jacobiCn a k; let κ := jacobiDn a k
     let D := 1 - k ^ 2 * s ^ 2 * sa ^ 2
-    JacobiRegulark .n z k ∧ D ≠ 0 ∧
+    IsJacobiRegular .n z k ∧ D ≠ 0 ∧
     jacobiCyclicS 4 1 3 z k = s ∧ jacobiCyclicC 4 1 3 z k = c ∧ jacobiCyclicD 4 1 3 z k = d ∧
     jacobiCyclicS 4 2 3 z k = (-s * ca * κ + sa * c * d) / D ∧
     jacobiCyclicC 4 2 3 z k = (-c * ca - s * d * sa * κ) / D ∧
@@ -112,24 +113,28 @@ lemma jacobiCyclicArg_four_three_values {k : ℂ} (hk : k ∈ jacobiModulusDomai
     jacobiCyclicC 4 3 3 z k = (-c * ca + s * d * sa * κ) / D ∧
     jacobiCyclicD 4 3 3 z k = (d * κ - k ^ 2 * s * c * sa * ca) / D := by
   intro s c d a sa ca κ D
-  obtain ⟨-, hnb, -, vs, vc, vd, -⟩ := jacobiSnCnDnk_two_mul_compEllIntKk_div_three hk
-  set b := 4 * compEllIntKk k / 3 with hb
+  obtain ⟨-, hnb, -, vs, vc, vd, -⟩ := jacobiSnCnDnk_two_mul_completeEllipticK_div_three hk
+  set b := 4 * completeEllipticK k / 3 with hb
   have g1 : jacobiCyclicArg 4 1 3 z k = z := by simp only [jacobiCyclicArg]; push_cast; ring
   have g2 : jacobiCyclicArg 4 2 3 z k = z + b := by simp only [jacobiCyclicArg, b]; push_cast; ring
-  have g3 : jacobiCyclicArg 4 3 3 z k = z - b + 2 * compEllIntKk k + 2 * compEllIntKk k := by
+  have g3 : jacobiCyclicArg 4 3 3 z k = z - b + 2 * completeEllipticK k + 2 *
+      completeEllipticK k := by
     simp only [jacobiCyclicArg, b]; push_cast; ring
   have hn := hreg4 1; have hp := hreg4 2; have hm := hreg4 3
   rw [g1] at hn; rw [g2] at hp;
-      rw [g3, jacobiRegulark_n_add_two_mul_compEllIntKk_iff hk,
-      jacobiRegulark_n_add_two_mul_compEllIntKk_iff hk] at hm
+      rw [g3, isJacobiRegular_n_add_two_mul_completeEllipticK_iff hk,
+      isJacobiRegular_n_add_two_mul_completeEllipticK_iff hk] at hm
   obtain ⟨hD, e1, e2, e3, e4, e5, e6⟩ := jacobiSnCnDnk_add_sub hk hn hnb hp hm
   simp only [vs, vc, vd] at hD e1 e2 e3 e4 e5 e6
-  have s4 : ∀ w, jacobiSnk (w + 2 * compEllIntKk k + 2 * compEllIntKk k) k = jacobiSnk w k := by
-    intro w; rw [(jacobiSnk_shift hk _).2.2.2.1, (jacobiSnk_shift hk _).2.2.2.1, neg_neg]
-  have c4 : ∀ w, jacobiCnk (w + 2 * compEllIntKk k + 2 * compEllIntKk k) k = jacobiCnk w k := by
-    intro w; rw [(jacobiCnk_shift hk _).2.2.2.1, (jacobiCnk_shift hk _).2.2.2.1, neg_neg]
-  have d4 : ∀ w, jacobiDnk (w + 2 * compEllIntKk k + 2 * compEllIntKk k) k = jacobiDnk w k := by
-    intro w; rw [(jacobiDnk_shift hk _).2.2.2.1, (jacobiDnk_shift hk _).2.2.2.1]
+  have s4 : ∀ w, jacobiSn (w + 2 * completeEllipticK k + 2 * completeEllipticK k) k =
+      jacobiSn w k := by
+    intro w; rw [(jacobiSn_shift hk _).2.2.2.1, (jacobiSn_shift hk _).2.2.2.1, neg_neg]
+  have c4 : ∀ w, jacobiCn (w + 2 * completeEllipticK k + 2 * completeEllipticK k) k =
+      jacobiCn w k := by
+    intro w; rw [(jacobiCn_shift hk _).2.2.2.1, (jacobiCn_shift hk _).2.2.2.1, neg_neg]
+  have d4 : ∀ w, jacobiDn (w + 2 * completeEllipticK k + 2 * completeEllipticK k) k =
+      jacobiDn w k := by
+    intro w; rw [(jacobiDn_shift hk _).2.2.2.1, (jacobiDn_shift hk _).2.2.2.1]
   refine ⟨hn, hD, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · simp only [jacobiCyclicS, g1, s]
   · simp only [jacobiCyclicC, g1, c]
@@ -143,12 +148,12 @@ lemma jacobiCyclicArg_four_three_values {k : ℂ} (hk : k ∈ jacobiModulusDomai
 
 /-- The three cyclic points `z, z + 2K/3, z + 4K/3` (`N = 2`, `p = 3`). -/
 lemma jacobiCyclicArg_two_three_values {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : ℂ)
-    (hreg2 : ∀ m : ℕ, JacobiRegulark .n (jacobiCyclicArg 2 m 3 z k) k) :
-    let s := jacobiSnk z k; let c := jacobiCnk z k; let d := jacobiDnk z k
-    let a := 2 * compEllIntKk k / 3
-    let sa := jacobiSnk a k; let ca := jacobiCnk a k; let κ := jacobiDnk a k
+    (hreg2 : ∀ m : ℕ, IsJacobiRegular .n (jacobiCyclicArg 2 m 3 z k) k) :
+    let s := jacobiSn z k; let c := jacobiCn z k; let d := jacobiDn z k
+    let a := 2 * completeEllipticK k / 3
+    let sa := jacobiSn a k; let ca := jacobiCn a k; let κ := jacobiDn a k
     let D := 1 - k ^ 2 * s ^ 2 * sa ^ 2
-    JacobiRegulark .n z k ∧ D ≠ 0 ∧
+    IsJacobiRegular .n z k ∧ D ≠ 0 ∧
     jacobiCyclicS 2 1 3 z k = s ∧ jacobiCyclicC 2 1 3 z k = c ∧ jacobiCyclicD 2 1 3 z k = d ∧
     jacobiCyclicS 2 2 3 z k = (s * ca * κ + sa * c * d) / D ∧
     jacobiCyclicC 2 2 3 z k = (c * ca - s * d * sa * κ) / D ∧
@@ -157,13 +162,14 @@ lemma jacobiCyclicArg_two_three_values {k : ℂ} (hk : k ∈ jacobiModulusDomain
     jacobiCyclicC 2 3 3 z k = -((c * ca + s * d * sa * κ) / D) ∧
     jacobiCyclicD 2 3 3 z k = (d * κ + k ^ 2 * s * c * sa * ca) / D := by
   intro s c d a sa ca κ D
-  obtain ⟨hna, -⟩ := jacobiSnCnDnk_two_mul_compEllIntKk_div_three hk
+  obtain ⟨hna, -⟩ := jacobiSnCnDnk_two_mul_completeEllipticK_div_three hk
   have g1 : jacobiCyclicArg 2 1 3 z k = z := by simp only [jacobiCyclicArg]; push_cast; ring
   have g2 : jacobiCyclicArg 2 2 3 z k = z + a := by simp only [jacobiCyclicArg, a]; push_cast; ring
-  have g3 : jacobiCyclicArg 2 3 3 z k = z - a + 2 * compEllIntKk k := by
+  have g3 : jacobiCyclicArg 2 3 3 z k = z - a + 2 * completeEllipticK k := by
     simp only [jacobiCyclicArg, a]; push_cast; ring
   have hn := hreg2 1; have hp := hreg2 2; have hm := hreg2 3
-  rw [g1] at hn; rw [g2] at hp; rw [g3, jacobiRegulark_n_add_two_mul_compEllIntKk_iff hk] at hm
+  rw [g1] at hn; rw [g2] at hp;
+      rw [g3, isJacobiRegular_n_add_two_mul_completeEllipticK_iff hk] at hm
   obtain ⟨hD, e1, e2, e3, e4, e5, e6⟩ := jacobiSnCnDnk_add_sub hk hn hna hp hm
   refine ⟨hn, hD, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · simp only [jacobiCyclicS, g1, s]
@@ -172,34 +178,34 @@ lemma jacobiCyclicArg_two_three_values {k : ℂ} (hk : k ∈ jacobiModulusDomain
   · rw [jacobiCyclicS, g2, e1]
   · rw [jacobiCyclicC, g2, e2]
   · rw [jacobiCyclicD, g2, e3]
-  · rw [jacobiCyclicS, g3, (jacobiSnk_shift hk _).2.2.2.1, e4]
-  · rw [jacobiCyclicC, g3, (jacobiCnk_shift hk _).2.2.2.1, e5]
-  · rw [jacobiCyclicD, g3, (jacobiDnk_shift hk _).2.2.2.1, e6]
+  · rw [jacobiCyclicS, g3, (jacobiSn_shift hk _).2.2.2.1, e4]
+  · rw [jacobiCyclicC, g3, (jacobiCn_shift hk _).2.2.2.1, e5]
+  · rw [jacobiCyclicD, g3, (jacobiDn_shift hk _).2.2.2.1, e6]
 
 /-- DLMF 22.9.8: cyclic identity (three points, rank 2), at points where the functions
 are finite. -/
 @[dlmf 22.9.E7, dlmf 22.9.E8]
 theorem jacobi_cyclic_s4_pairs {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : ℂ)
-    (hreg4 : ∀ m : ℕ, JacobiRegulark .n (jacobiCyclicArg 4 m 3 z k) k) :
+    (hreg4 : ∀ m : ℕ, IsJacobiRegular .n (jacobiCyclicArg 4 m 3 z k) k) :
     jacobiCyclicS 4 1 3 z k * jacobiCyclicS 4 2 3 z k + jacobiCyclicS 4 2 3 z k *
       jacobiCyclicS 4 3 3 z k + jacobiCyclicS 4 3 3 z k * jacobiCyclicS 4 1 3 z k =
         (jacobiCyclicKappa k ^ 2 - 1) / k ^ 2 := by
   have V := jacobiCyclicArg_four_three_values hk z hreg4
-  have W := jacobiSnCnDnk_two_mul_compEllIntKk_div_three hk
+  have W := jacobiSnCnDnk_two_mul_completeEllipticK_div_three hk
   simp only at V W
   obtain ⟨hn, hD, e1, e2, e3, e4, e5, e6, e7, e8, e9⟩ := V
   obtain ⟨hna, -, hsa, -, -, -, -, E1, E2⟩ := W
   obtain ⟨h1, h2⟩ := jacobi_sq_sum hk hn
   obtain ⟨ha1, ha2⟩ := jacobi_sq_sum hk hna
-  have hκ := jacobiDnk_two_mul_compEllIntKk_div_three_ne_zero hk
+  have hκ := jacobiDn_two_mul_completeEllipticK_div_three_ne_zero hk
   have hk0 : k ≠ 0 := ne_zero_of_mem_jacobiModulusDomain hk
   simp only [jacobiCyclicKappa, e1, e2, e3, e4, e5, e6, e7, e8, e9]
-  generalize jacobiSnk z k = s at *
-  generalize jacobiCnk z k = c at *
-  generalize jacobiDnk z k = d at *
-  generalize jacobiSnk (2 * compEllIntKk k / 3) k = sa at *
-  generalize jacobiCnk (2 * compEllIntKk k / 3) k = ca at *
-  generalize jacobiDnk (2 * compEllIntKk k / 3) k = κ at *
+  generalize jacobiSn z k = s at *
+  generalize jacobiCn z k = c at *
+  generalize jacobiDn z k = d at *
+  generalize jacobiSn (2 * completeEllipticK k / 3) k = sa at *
+  generalize jacobiCn (2 * completeEllipticK k / 3) k = ca at *
+  generalize jacobiDn (2 * completeEllipticK k / 3) k = κ at *
   generalize hDdef : 1 - k ^ 2 * s ^ 2 * sa ^ 2 = D at hD ⊢
   have hE : 1 - κ ^ 2 ≠ 0 := by
     intro h; apply hsa; have : k ^ 2 * sa ^ 2 = 0 := by linear_combination ha2 + h
@@ -264,26 +270,26 @@ theorem jacobi_cyclic_s4_pairs {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : �
 are finite. -/
 @[dlmf 22.9.E7, dlmf 22.9.E9]
 theorem jacobi_cyclic_c4_pairs {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : ℂ)
-    (hreg4 : ∀ m : ℕ, JacobiRegulark .n (jacobiCyclicArg 4 m 3 z k) k) :
+    (hreg4 : ∀ m : ℕ, IsJacobiRegular .n (jacobiCyclicArg 4 m 3 z k) k) :
     jacobiCyclicC 4 1 3 z k * jacobiCyclicC 4 2 3 z k + jacobiCyclicC 4 2 3 z k *
       jacobiCyclicC 4 3 3 z k + jacobiCyclicC 4 3 3 z k * jacobiCyclicC 4 1 3 z k =
         -(jacobiCyclicKappa k * (jacobiCyclicKappa k + 2)) / (1 + jacobiCyclicKappa k) ^ 2 := by
   have V := jacobiCyclicArg_four_three_values hk z hreg4
-  have W := jacobiSnCnDnk_two_mul_compEllIntKk_div_three hk
+  have W := jacobiSnCnDnk_two_mul_completeEllipticK_div_three hk
   simp only at V W
   obtain ⟨hn, hD, e1, e2, e3, e4, e5, e6, e7, e8, e9⟩ := V
   obtain ⟨hna, -, hsa, -, -, -, -, E1, E2⟩ := W
   obtain ⟨h1, h2⟩ := jacobi_sq_sum hk hn
   obtain ⟨ha1, ha2⟩ := jacobi_sq_sum hk hna
-  have hκ := jacobiDnk_two_mul_compEllIntKk_div_three_ne_zero hk
+  have hκ := jacobiDn_two_mul_completeEllipticK_div_three_ne_zero hk
   have hk0 : k ≠ 0 := ne_zero_of_mem_jacobiModulusDomain hk
   simp only [jacobiCyclicKappa, e1, e2, e3, e4, e5, e6, e7, e8, e9]
-  generalize jacobiSnk z k = s at *
-  generalize jacobiCnk z k = c at *
-  generalize jacobiDnk z k = d at *
-  generalize jacobiSnk (2 * compEllIntKk k / 3) k = sa at *
-  generalize jacobiCnk (2 * compEllIntKk k / 3) k = ca at *
-  generalize jacobiDnk (2 * compEllIntKk k / 3) k = κ at *
+  generalize jacobiSn z k = s at *
+  generalize jacobiCn z k = c at *
+  generalize jacobiDn z k = d at *
+  generalize jacobiSn (2 * completeEllipticK k / 3) k = sa at *
+  generalize jacobiCn (2 * completeEllipticK k / 3) k = ca at *
+  generalize jacobiDn (2 * completeEllipticK k / 3) k = κ at *
   generalize hDdef : 1 - k ^ 2 * s ^ 2 * sa ^ 2 = D at hD ⊢
   have hE : 1 - κ ^ 2 ≠ 0 := by
     intro h; apply hsa; have : k ^ 2 * sa ^ 2 = 0 := by linear_combination ha2 + h
@@ -428,8 +434,8 @@ theorem jacobi_cyclic_c4_pairs {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : �
 functions are finite. -/
 @[dlmf 22.9.E7, dlmf 22.9.E10]
 theorem jacobi_cyclic_d_pairs {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : ℂ)
-    (hreg2 : ∀ m : ℕ, JacobiRegulark .n (jacobiCyclicArg 2 m 3 z k) k)
-        (hreg4 : ∀ m : ℕ, JacobiRegulark .n (jacobiCyclicArg 4 m 3 z k) k) :
+    (hreg2 : ∀ m : ℕ, IsJacobiRegular .n (jacobiCyclicArg 2 m 3 z k) k)
+        (hreg4 : ∀ m : ℕ, IsJacobiRegular .n (jacobiCyclicArg 4 m 3 z k) k) :
     jacobiCyclicD 2 1 3 z k * jacobiCyclicD 2 2 3 z k + jacobiCyclicD 2 2 3 z k *
       jacobiCyclicD 2 3 3 z k + jacobiCyclicD 2 3 3 z k * jacobiCyclicD 2 1 3 z k =
         jacobiCyclicKappa k * (jacobiCyclicKappa k + 2) ∧
@@ -438,21 +444,21 @@ theorem jacobi_cyclic_d_pairs {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : �
         jacobiCyclicKappa k * (jacobiCyclicKappa k + 2) := by
   constructor
   · have V := jacobiCyclicArg_two_three_values hk z hreg2
-    have W := jacobiSnCnDnk_two_mul_compEllIntKk_div_three hk
+    have W := jacobiSnCnDnk_two_mul_completeEllipticK_div_three hk
     simp only at V W
     obtain ⟨hn, hD, e1, e2, e3, e4, e5, e6, e7, e8, e9⟩ := V
     obtain ⟨hna, -, hsa, -, -, -, -, E1, E2⟩ := W
     obtain ⟨h1, h2⟩ := jacobi_sq_sum hk hn
     obtain ⟨ha1, ha2⟩ := jacobi_sq_sum hk hna
-    have hκ := jacobiDnk_two_mul_compEllIntKk_div_three_ne_zero hk
+    have hκ := jacobiDn_two_mul_completeEllipticK_div_three_ne_zero hk
     have hk0 : k ≠ 0 := ne_zero_of_mem_jacobiModulusDomain hk
     simp only [jacobiCyclicKappa, e1, e2, e3, e4, e5, e6, e7, e8, e9]
-    generalize jacobiSnk z k = s at *
-    generalize jacobiCnk z k = c at *
-    generalize jacobiDnk z k = d at *
-    generalize jacobiSnk (2 * compEllIntKk k / 3) k = sa at *
-    generalize jacobiCnk (2 * compEllIntKk k / 3) k = ca at *
-    generalize jacobiDnk (2 * compEllIntKk k / 3) k = κ at *
+    generalize jacobiSn z k = s at *
+    generalize jacobiCn z k = c at *
+    generalize jacobiDn z k = d at *
+    generalize jacobiSn (2 * completeEllipticK k / 3) k = sa at *
+    generalize jacobiCn (2 * completeEllipticK k / 3) k = ca at *
+    generalize jacobiDn (2 * completeEllipticK k / 3) k = κ at *
     generalize hDdef : 1 - k ^ 2 * s ^ 2 * sa ^ 2 = D at hD ⊢
     have hE : 1 - κ ^ 2 ≠ 0 := by
       intro h; apply hsa; have : k ^ 2 * sa ^ 2 = 0 := by linear_combination ha2 + h
@@ -581,21 +587,21 @@ theorem jacobi_cyclic_d_pairs {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : �
           -ca^2*κ*X-d^2*ca+ca^3+d^2*κ+ca*κ^2-3/2*d^2*D+3*ca^2*D-3/2*ca*κ*D
           -κ^2*D-1/2*ca*D^2+1/2*κ*D^2-d^2-ca*κ+ca*D-κ*D+3/2*D^2+D) * hX
   · have V := jacobiCyclicArg_four_three_values hk z hreg4
-    have W := jacobiSnCnDnk_two_mul_compEllIntKk_div_three hk
+    have W := jacobiSnCnDnk_two_mul_completeEllipticK_div_three hk
     simp only at V W
     obtain ⟨hn, hD, e1, e2, e3, e4, e5, e6, e7, e8, e9⟩ := V
     obtain ⟨hna, -, hsa, -, -, -, -, E1, E2⟩ := W
     obtain ⟨h1, h2⟩ := jacobi_sq_sum hk hn
     obtain ⟨ha1, ha2⟩ := jacobi_sq_sum hk hna
-    have hκ := jacobiDnk_two_mul_compEllIntKk_div_three_ne_zero hk
+    have hκ := jacobiDn_two_mul_completeEllipticK_div_three_ne_zero hk
     have hk0 : k ≠ 0 := ne_zero_of_mem_jacobiModulusDomain hk
     simp only [jacobiCyclicKappa, e1, e2, e3, e4, e5, e6, e7, e8, e9]
-    generalize jacobiSnk z k = s at *
-    generalize jacobiCnk z k = c at *
-    generalize jacobiDnk z k = d at *
-    generalize jacobiSnk (2 * compEllIntKk k / 3) k = sa at *
-    generalize jacobiCnk (2 * compEllIntKk k / 3) k = ca at *
-    generalize jacobiDnk (2 * compEllIntKk k / 3) k = κ at *
+    generalize jacobiSn z k = s at *
+    generalize jacobiCn z k = c at *
+    generalize jacobiDn z k = d at *
+    generalize jacobiSn (2 * completeEllipticK k / 3) k = sa at *
+    generalize jacobiCn (2 * completeEllipticK k / 3) k = ca at *
+    generalize jacobiDn (2 * completeEllipticK k / 3) k = κ at *
     generalize hDdef : 1 - k ^ 2 * s ^ 2 * sa ^ 2 = D at hD ⊢
     have hE : 1 - κ ^ 2 ≠ 0 := by
       intro h; apply hsa; have : k ^ 2 * sa ^ 2 = 0 := by linear_combination ha2 + h
@@ -728,66 +734,66 @@ theorem jacobi_cyclic_d_pairs {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : �
 the functions are finite. -/
 @[dlmf 22.9.E11]
 theorem jacobi_cyclic_d2_two {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : ℂ)
-    (hreg2 : ∀ m : ℕ, JacobiRegulark .n (jacobiCyclicArg 2 m 2 z k) k) :
+    (hreg2 : ∀ m : ℕ, IsJacobiRegular .n (jacobiCyclicArg 2 m 2 z k) k) :
     jacobiCyclicD 2 1 2 z k ^ 2 * jacobiCyclicD 2 2 2 z k + jacobiCyclicD 2 2 2 z k ^ 2 *
-      jacobiCyclicD 2 1 2 z k = jacobiComodulusk k * (jacobiCyclicD 2 1 2 z k +
+      jacobiCyclicD 2 1 2 z k = jacobiComodulus k * (jacobiCyclicD 2 1 2 z k +
         jacobiCyclicD 2 2 2 z k) ∧
     jacobiCyclicD 2 1 2 z k ^ 2 * jacobiCyclicD 2 2 2 z k - jacobiCyclicD 2 2 2 z k ^ 2 *
-      jacobiCyclicD 2 1 2 z k = jacobiComodulusk k * (jacobiCyclicD 2 1 2 z k -
+      jacobiCyclicD 2 1 2 z k = jacobiComodulus k * (jacobiCyclicD 2 1 2 z k -
         jacobiCyclicD 2 2 2 z k) := by
   obtain ⟨a1, a2⟩ := jacobiCyclicArg_two_two k z
   have hn := hreg2 1
   have hn2 := hreg2 2
   rw [a1] at hn; rw [a2] at hn2
-  have hd := jacobiPQk_ne_zero (by decide) (jacobiRegulark_d_of_n_add_compEllIntKk hk hn2) hn
-  obtain ⟨v1, v2, v3⟩ := jacobiSnCnDnk_add_compEllIntKk hk hn
+  have hd := jacobiPQ_ne_zero (by decide) (isJacobiRegular_d_of_n_add_completeEllipticK hk hn2) hn
+  obtain ⟨v1, v2, v3⟩ := jacobiSnCnDnk_add_completeEllipticK hk hn
   obtain ⟨h1, h2⟩ := jacobi_sq_sum hk hn
-  have hkp := jacobiComodulusk_sq k
+  have hkp := jacobiComodulus_sq k
   simp only [jacobiCyclicS, jacobiCyclicC, jacobiCyclicD, a1, a2, v1, v2, v3]
-  change jacobiDnk z k ≠ 0 at hd
+  change jacobiDn z k ≠ 0 at hd
   constructor <;> field_simp <;> ring
 
 /-- DLMF 22.9.12: cyclic identity (two points, rank 3), at points where the functions
 are finite. -/
 @[dlmf 22.9.E12]
 theorem jacobi_cyclic_csd_two {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : ℂ)
-    (hreg2 : ∀ m : ℕ, JacobiRegulark .n (jacobiCyclicArg 2 m 2 z k) k) :
+    (hreg2 : ∀ m : ℕ, IsJacobiRegular .n (jacobiCyclicArg 2 m 2 z k) k) :
     jacobiCyclicC 2 1 2 z k * jacobiCyclicS 2 1 2 z k * jacobiCyclicD 2 2 2 z k +
       jacobiCyclicC 2 2 2 z k * jacobiCyclicS 2 2 2 z k * jacobiCyclicD 2 1 2 z k = 0 := by
   obtain ⟨a1, a2⟩ := jacobiCyclicArg_two_two k z
   have hn := hreg2 1
   have hn2 := hreg2 2
   rw [a1] at hn; rw [a2] at hn2
-  have hd := jacobiPQk_ne_zero (by decide) (jacobiRegulark_d_of_n_add_compEllIntKk hk hn2) hn
-  obtain ⟨v1, v2, v3⟩ := jacobiSnCnDnk_add_compEllIntKk hk hn
+  have hd := jacobiPQ_ne_zero (by decide) (isJacobiRegular_d_of_n_add_completeEllipticK hk hn2) hn
+  obtain ⟨v1, v2, v3⟩ := jacobiSnCnDnk_add_completeEllipticK hk hn
   simp only [jacobiCyclicS, jacobiCyclicC, jacobiCyclicD, a1, a2, v1, v2, v3]
-  change jacobiDnk z k ≠ 0 at hd
+  change jacobiDn z k ≠ 0 at hd
   field_simp; ring
 
 /-- DLMF 22.9.13: cyclic identity (three points, rank 3), at points where the
 functions are finite. -/
 @[dlmf 22.9.E7, dlmf 22.9.E13]
 theorem jacobi_cyclic_s4_triple {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : ℂ)
-    (hreg4 : ∀ m : ℕ, JacobiRegulark .n (jacobiCyclicArg 4 m 3 z k) k) :
+    (hreg4 : ∀ m : ℕ, IsJacobiRegular .n (jacobiCyclicArg 4 m 3 z k) k) :
     jacobiCyclicS 4 1 3 z k * jacobiCyclicS 4 2 3 z k * jacobiCyclicS 4 3 3 z k = -(1 /
       (1 - jacobiCyclicKappa k ^ 2)) * (jacobiCyclicS 4 1 3 z k + jacobiCyclicS 4 2 3 z k +
         jacobiCyclicS 4 3 3 z k) := by
   have V := jacobiCyclicArg_four_three_values hk z hreg4
-  have W := jacobiSnCnDnk_two_mul_compEllIntKk_div_three hk
+  have W := jacobiSnCnDnk_two_mul_completeEllipticK_div_three hk
   simp only at V W
   obtain ⟨hn, hD, e1, e2, e3, e4, e5, e6, e7, e8, e9⟩ := V
   obtain ⟨hna, -, hsa, -, -, -, -, E1, E2⟩ := W
   obtain ⟨h1, h2⟩ := jacobi_sq_sum hk hn
   obtain ⟨ha1, ha2⟩ := jacobi_sq_sum hk hna
-  have hκ := jacobiDnk_two_mul_compEllIntKk_div_three_ne_zero hk
+  have hκ := jacobiDn_two_mul_completeEllipticK_div_three_ne_zero hk
   have hk0 : k ≠ 0 := ne_zero_of_mem_jacobiModulusDomain hk
   simp only [jacobiCyclicKappa, e1, e2, e3, e4, e5, e6, e7, e8, e9]
-  generalize jacobiSnk z k = s at *
-  generalize jacobiCnk z k = c at *
-  generalize jacobiDnk z k = d at *
-  generalize jacobiSnk (2 * compEllIntKk k / 3) k = sa at *
-  generalize jacobiCnk (2 * compEllIntKk k / 3) k = ca at *
-  generalize jacobiDnk (2 * compEllIntKk k / 3) k = κ at *
+  generalize jacobiSn z k = s at *
+  generalize jacobiCn z k = c at *
+  generalize jacobiDn z k = d at *
+  generalize jacobiSn (2 * completeEllipticK k / 3) k = sa at *
+  generalize jacobiCn (2 * completeEllipticK k / 3) k = ca at *
+  generalize jacobiDn (2 * completeEllipticK k / 3) k = κ at *
   generalize hDdef : 1 - k ^ 2 * s ^ 2 * sa ^ 2 = D at hD ⊢
   have hE : 1 - κ ^ 2 ≠ 0 := by
     intro h; apply hsa; have : k ^ 2 * sa ^ 2 = 0 := by linear_combination ha2 + h

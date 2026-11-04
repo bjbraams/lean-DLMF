@@ -17,15 +17,16 @@ for `Re c > 0`.
 
 ## Main results
 
-* `selbergInt_succ_one`: `(a + n c) S_{n+1}(a, 1, c) = S_n(a, 1 + 2c, c)`.
+* `selbergIntegral_succ_one`: `(a + n c) S_{n+1}(a, 1, c) = S_n(a, 1 + 2c, c)`.
 * `selbergRHS_comm`, `selbergRHS_add_one`, `selbergRHS_succ_one`: symmetry, the `a`-shift and
   the dimension recursion of the right-hand side.
-* `differentiableOn_selbergInt_a`, `differentiableOn_selbergInt_c`: holomorphy of the Selberg
-  integral in `a` and in `c`.
+* `differentiableOn_selbergIntegral_a`, `differentiableOn_selbergIntegral_c`: holomorphy of the
+  Selberg integral in `a` and in `c`.
 * `selbergRatio_eq_one_left`: Carlson's theorem in `a`: `S/R` does not depend on `a`.
-* `selbergInt_eq_of_half_le`: Selberg's integral for `Re a, Re b > 0` and `Re c ≥ 1/2`.
-* `isOpen_cDomain`, `convex_cDomain`, `pos_mem_cDomain`: the domain of convergence in `c`.
-* `selbergInt_eq_of_re_pos`: Selberg's integral for `Re a, Re b, Re c > 0`.
+* `selbergIntegral_eq_of_half_le`: Selberg's integral for `Re a, Re b > 0` and `Re c ≥ 1/2`.
+* `isOpen_selbergConvergenceDomain`, `convex_selbergConvergenceDomain`,
+  `pos_mem_selbergConvergenceDomain`: the domain of convergence in `c`.
+* `selbergIntegral_eq_of_re_pos`: Selberg's integral for `Re a, Re b, Re c > 0`.
 -/
 
 @[expose] public section
@@ -43,17 +44,17 @@ namespace DLMF.Selberg
 /-- The cross term in the dimension recursion: for `b = 1`,
 `∫ t₀ · 2c/(t₀ - tⱼ₊₁) · Φ = c · S_{n+1}(a, 1, c)`. -/
 theorem scaling_cross {n : ℕ} {a c : ℂ} (ha : 0 < a.re) (hc : 1 / 2 ≤ c.re) (j : Fin n) :
-    ∫ t in cube (n + 1), (t 0 : ℂ) * (2 * c / ((t 0 : ℂ) - t j.succ) *
-        selbergIntegrand (n + 1) a 1 c t) = c * selbergInt (n + 1) a 1 c := by
+    ∫ t in unitCube (n + 1), (t 0 : ℂ) * (2 * c / ((t 0 : ℂ) - t j.succ) *
+        selbergIntegrand (n + 1) a 1 c t) = c * selbergIntegral (n + 1) a 1 c := by
   obtain ⟨σ, hσ⟩ : ∃ σ : Equiv.Perm (Fin (n + 1)), σ = Equiv.swap 0 j.succ := ⟨_, rfl⟩
   have hsw0 : ∀ t : Fin (n + 1) → ℝ, (t ∘ σ) 0 = t j.succ := fun t => by simp [hσ]
   have hsw1 : ∀ t : Fin (n + 1) → ℝ, (t ∘ σ) j.succ = t 0 := fun t => by simp [hσ]
   have h1 : (0 : ℝ) < (1 : ℂ).re := by simp
   have hI : IntegrableOn (fun t => (t 0 : ℂ) * (2 * c / ((t 0 : ℂ) - t j.succ) *
-      selbergIntegrand (n + 1) a 1 c t)) (cube (n + 1)) := by
+      selbergIntegrand (n + 1) a 1 c t)) (unitCube (n + 1)) := by
     refine integrableOn_mul_div_selbergIntegrand ha h1 hc j (M := 1) (by fun_prop) ?_
     intro t ht
-    have h0 := zero_mem_Icc_of_mem_cube ht
+    have h0 := zero_mem_Icc_of_mem_unitCube ht
     rw [Complex.norm_real, Real.norm_eq_abs, abs_le]; constructor <;> linarith [h0.1, h0.2]
   have h2 := two_mul_integral_eq_of_swap σ hI
     (g := fun t => 2 * c * selbergIntegrand (n + 1) a 1 c t) (by
@@ -64,61 +65,61 @@ theorem scaling_cross {n : ℕ} {a c : ℂ} (ha : 0 < a.re) (hc : 1 / 2 ≤ c.re
       field_simp
       ring)
   rw [integral_const_mul] at h2
-  unfold selbergInt
+  unfold selbergIntegral
   linear_combination h2 / 2
 
 /-- **The recursion in the dimension**: `(a + n c) S_{n+1}(a, 1, c) = S_n(a, 1 + 2c, c)`. -/
-theorem selbergInt_succ_one {n : ℕ} {a c : ℂ} (ha : 0 < a.re) (hc : 1 / 2 ≤ c.re) :
-    (a + n * c) * selbergInt (n + 1) a 1 c = selbergInt n a (1 + 2 * c) c := by
+theorem selbergIntegral_succ_one {n : ℕ} {a c : ℂ} (ha : 0 < a.re) (hc : 1 / 2 ≤ c.re) :
+    (a + n * c) * selbergIntegral (n + 1) a 1 c = selbergIntegral n a (1 + 2 * c) c := by
   have h1 : (0 : ℝ) < (1 : ℂ).re := by simp
   have hc0 : (0 : ℝ) ≤ c.re := by linarith
-  have hK : IntegrableOn (selbergIntegrand n a 1 c) (cube n) := by
+  have hK : IntegrableOn (selbergIntegrand n a 1 c) (unitCube n) := by
     have := integrableOn_mul_selbergIntegrand ha h1 hc0 (n := n) (h := fun _ => (1 : ℂ))
       (M := 1) measurable_const (fun _ _ => by simp)
     simpa using this
-  have h := integral_cube_ibp ha (Or.inr rfl) hc hK
+  have h := integral_unitCube_ibp ha (Or.inr rfl) hc hK
   simp only [↓reduceIte] at h
-  have hR : ∫ y in cube n, selbergIntegrand n a 1 c y * vprod y c 1 =
-      selbergInt n a (1 + 2 * c) c := by
-    refine setIntegral_congr_fun (measurableSet_cube n) fun y hy => ?_
-    rw [selbergIntegrand_eq, selbergIntegrand_eq, vprod]
+  have hR : ∫ y in unitCube n, selbergIntegrand n a 1 c y * linearFactorAbsPow y c 1 =
+      selbergIntegral n a (1 + 2 * c) c := by
+    refine setIntegral_congr_fun (measurableSet_unitCube n) fun y hy => ?_
+    rw [selbergIntegrand_eq, selbergIntegrand_eq, linearFactorAbsPow]
     rw [mul_right_comm, ← Finset.prod_mul_distrib]
     congr 1
     refine Finset.prod_congr rfl fun i _ => ?_
     have hyi := hy i (Set.mem_univ _)
-    simp only [weight, sub_self, Complex.cpow_zero, mul_one, add_sub_cancel_left]
+    simp only [selbergWeight, sub_self, Complex.cpow_zero, mul_one, add_sub_cancel_left]
     rw [show |1 - y i| = 1 - y i from abs_of_nonneg (by linarith [hyi.2]), one_sub_ofReal]
-  have hL : ∫ t in cube (n + 1), selbergIntegrand n a 1 c (Fin.tail t) *
-      ibpD (Fin.tail t) a 0 c (t 0) =
-      ∫ t in cube (n + 1), (a * selbergIntegrand (n + 1) a 1 c t +
+  have hL : ∫ t in unitCube (n + 1), selbergIntegrand n a 1 c (Fin.tail t) *
+      integrationByPartsD (Fin.tail t) a 0 c (t 0) =
+      ∫ t in unitCube (n + 1), (a * selbergIntegrand (n + 1) a 1 c t +
         ∑ j : Fin n, (t 0 : ℂ) * (2 * c / ((t 0 : ℂ) - t j.succ) *
           selbergIntegrand (n + 1) a 1 c t)) := by
-    refine setIntegral_congr_ae (measurableSet_cube _) ?_
+    refine setIntegral_congr_ae (measurableSet_unitCube _) ?_
     filter_upwards [ae_coord_mem_Ioo] with t ht0 ht
-    rw [ibpD_zero_eq _ _ _ (ht0 ht), selbergIntegrand_eq_cons_tail, Finset.mul_sum]
+    rw [integrationByPartsD_zero_eq _ _ _ (ht0 ht), selbergIntegrand_eq_cons_tail, Finset.mul_sum]
     simp only [Fin.tail]
     rw [mul_add, mul_add, Finset.mul_sum, Finset.mul_sum]
     congr 1
     · ring
     · refine Finset.sum_congr rfl fun j _ => ?_
       ring
-  have hI0 : IntegrableOn (fun t => a * selbergIntegrand (n + 1) a 1 c t) (cube (n + 1)) := by
+  have hI0 : IntegrableOn (fun t => a * selbergIntegrand (n + 1) a 1 c t) (unitCube (n + 1)) := by
     have := integrableOn_mul_selbergIntegrand ha h1 hc0 (n := n + 1) (h := fun _ => a)
       (M := ‖a‖) measurable_const (fun _ _ => le_rfl)
     simpa using this
   have hIj : ∀ j : Fin n, IntegrableOn (fun t => (t 0 : ℂ) * (2 * c / ((t 0 : ℂ) - t j.succ) *
-      selbergIntegrand (n + 1) a 1 c t)) (cube (n + 1)) := by
+      selbergIntegrand (n + 1) a 1 c t)) (unitCube (n + 1)) := by
     intro j
     refine integrableOn_mul_div_selbergIntegrand ha h1 hc j (M := 1) (by fun_prop) ?_
     intro t ht
-    have h0 := zero_mem_Icc_of_mem_cube ht
+    have h0 := zero_mem_Icc_of_mem_unitCube ht
     rw [Complex.norm_real, Real.norm_eq_abs, abs_le]; constructor <;> linarith [h0.1, h0.2]
   rw [hL, hR, integral_add hI0 (integrable_finsetSum _ fun j _ => hIj j), integral_const_mul,
     integral_finsetSum _ fun j _ => hIj j] at h
   simp only [scaling_cross ha hc, Finset.sum_const, Finset.card_univ, Fintype.card_fin,
     nsmul_eq_mul] at h
   rw [← h]
-  unfold selbergInt
+  unfold selbergIntegral
   ring
 
 /-! ### The right-hand side -/
@@ -250,9 +251,9 @@ theorem selbergRHS_succ_one {n : ℕ} {a c : ℂ} (ha : 0 < a.re) (hc : 0 ≤ c.
 
 /-! ### Holomorphy in the parameters -/
 
-/-- Almost every point of the cube has all coordinates in `(0,1)`. -/
-theorem ae_cube_coords_Ioo (N : ℕ) :
-    ∀ᵐ t : Fin N → ℝ, t ∈ cube N → ∀ i, t i ∈ Ioo (0 : ℝ) 1 := by
+/-- Almost every point of the unitCube has all coordinates in `(0,1)`. -/
+theorem ae_unitCube_coords_Ioo (N : ℕ) :
+    ∀ᵐ t : Fin N → ℝ, t ∈ unitCube N → ∀ i, t i ∈ Ioo (0 : ℝ) 1 := by
   have h0 : ∀ᵐ t : Fin N → ℝ, ∀ i, t i ≠ 0 := ae_all_iff.2 fun i => ae_coord_ne i 0
   have h1 : ∀ᵐ t : Fin N → ℝ, ∀ i, t i ≠ 1 := ae_all_iff.2 fun i => ae_coord_ne i 1
   filter_upwards [h0, h1] with t ht0 ht1 ht i
@@ -260,9 +261,9 @@ theorem ae_cube_coords_Ioo (N : ℕ) :
   exact ⟨lt_of_le_of_ne this.1 (Ne.symm (ht0 i)), lt_of_le_of_ne this.2 (ht1 i)⟩
 
 /-- On `(0,1)`, `‖x^{a-1}(1-x)^{b-1}‖` decreases as `Re a` increases. -/
-theorem norm_weight_le_of_re_le {a a' b : ℂ} (h : a'.re ≤ a.re) {x : ℝ}
-    (hx : x ∈ Ioo (0 : ℝ) 1) : ‖weight a b x‖ ≤ ‖weight a' b x‖ := by
-  unfold weight
+theorem norm_selbergWeight_le_of_re_le {a a' b : ℂ} (h : a'.re ≤ a.re) {x : ℝ}
+    (hx : x ∈ Ioo (0 : ℝ) 1) : ‖selbergWeight a b x‖ ≤ ‖selbergWeight a' b x‖ := by
+  unfold selbergWeight
   rw [norm_mul, norm_mul, Complex.norm_cpow_eq_rpow_re_of_pos hx.1,
     Complex.norm_cpow_eq_rpow_re_of_pos hx.1]
   refine mul_le_mul_of_nonneg_right ?_ (norm_nonneg _)
@@ -270,10 +271,11 @@ theorem norm_weight_le_of_re_le {a a' b : ℂ} (h : a'.re ≤ a.re) {x : ℝ}
   simp only [Complex.sub_re, Complex.one_re]
   linarith
 
-/-- On `(0,1)` and for `Re a ≥ 1`, `‖weight a b x‖ ≤ ‖weight 1 b x‖`. -/
-theorem norm_weight_le_one_left {a b : ℂ} (h : 1 ≤ a.re) {x : ℝ} (hx : x ∈ Ioo (0 : ℝ) 1) :
-    ‖weight a b x‖ ≤ ‖weight 1 b x‖ := by
-  exact norm_weight_le_of_re_le (a := a) (a' := 1) (b := b) (by rw [Complex.one_re]; exact h) hx
+/-- On `(0,1)` and for `Re a ≥ 1`, `‖selbergWeight a b x‖ ≤ ‖selbergWeight 1 b x‖`. -/
+theorem norm_selbergWeight_le_one_left {a b : ℂ} (h : 1 ≤ a.re) {x : ℝ} (hx : x ∈ Ioo (0 : ℝ) 1) :
+    ‖selbergWeight a b x‖ ≤ ‖selbergWeight 1 b x‖ := by
+  exact norm_selbergWeight_le_of_re_le (a := a) (a' := 1) (b := b)
+      (by rw [Complex.one_re]; exact h) hx
 
 /-- For `x > 0`, `a ↦ x^{a-1}` is complex differentiable. -/
 theorem differentiableAt_ofReal_cpow_sub_one {x : ℝ} (hx : 0 < x) (a : ℂ) :
@@ -281,14 +283,14 @@ theorem differentiableAt_ofReal_cpow_sub_one {x : ℝ} (hx : 0 < x) (a : ℂ) :
   ((differentiableAt_id.sub_const 1).const_cpow (Or.inl (by exact_mod_cast hx.ne')))
 
 /-- The Selberg integral is holomorphic in `a` on the right half-plane. -/
-theorem differentiableOn_selbergInt_a (N : ℕ) {b c : ℂ} (hb : 0 < b.re) (hc : 0 ≤ c.re) :
-    DifferentiableOn ℂ (fun a => selbergInt N a b c) {a | 0 < a.re} := by
-  unfold selbergInt
+theorem differentiableOn_selbergIntegral_a (N : ℕ) {b c : ℂ} (hb : 0 < b.re) (hc : 0 ≤ c.re) :
+    DifferentiableOn ℂ (fun a => selbergIntegral N a b c) {a | 0 < a.re} := by
+  unfold selbergIntegral
   refine DLMF.Gamma.VerticalBeta.differentiableOn_integral
       (isOpen_lt continuous_const Complex.continuous_re)
     (fun a _ => (measurable_selbergIntegrand N a b c).aestronglyMeasurable) ?_ ?_
-  · filter_upwards [ae_restrict_mem (measurableSet_cube N),
-      (ae_restrict_iff' (measurableSet_cube N)).2 (ae_cube_coords_Ioo N)] with t ht ht'
+  · filter_upwards [ae_restrict_mem (measurableSet_unitCube N),
+      (ae_restrict_iff' (measurableSet_unitCube N)).2 (ae_unitCube_coords_Ioo N)] with t ht ht'
     intro a _
     refine DifferentiableAt.differentiableWithinAt ?_
     unfold selbergIntegrand
@@ -304,15 +306,17 @@ theorem differentiableOn_selbergInt_a (N : ℕ) {b c : ℂ} (hb : 0 < b.re) (hc 
       have h2 : |(z - a₀).re| ≤ a₀.re / 2 := this.trans hz
       rw [Complex.sub_re, abs_le] at h2
       linarith
-    refine ⟨fun t => ‖∏ i, weight ((a₀.re / 2 : ℝ) : ℂ) b (t i)‖, ?_, ?_⟩
-    · exact (integrableOn_prod_cube (n := N) (integrableOn_weight (by simp at ha₀ ⊢; positivity)
+    refine ⟨fun t => ‖∏ i, selbergWeight ((a₀.re / 2 : ℝ) : ℂ) b (t i)‖, ?_, ?_⟩
+    · exact (integrableOn_prod_unitCube (n := N)
+          (integrableOn_selbergWeight (by simp at ha₀ ⊢; positivity)
         hb)).norm
-    · filter_upwards [ae_restrict_mem (measurableSet_cube N),
-        (ae_restrict_iff' (measurableSet_cube N)).2 (ae_cube_coords_Ioo N)] with t ht ht' z hz
+    · filter_upwards [ae_restrict_mem (measurableSet_unitCube N),
+        (ae_restrict_iff' (measurableSet_unitCube N)).2 (ae_unitCube_coords_Ioo N)]
+            with t ht ht' z hz
       refine (norm_selbergIntegrand_le hc ht).trans ?_
       rw [norm_prod, norm_prod]
       refine Finset.prod_le_prod₀ (fun _ _ => norm_nonneg _) fun i _ => ?_
-      refine norm_weight_le_of_re_le ?_ (ht' i)
+      refine norm_selbergWeight_le_of_re_le ?_ (ht' i)
       have := Complex.abs_re_le_norm (z - a₀)
       rw [Metric.mem_closedBall, dist_eq_norm] at hz
       have h2 : |(z - a₀).re| ≤ a₀.re / 2 := this.trans hz
@@ -429,25 +433,26 @@ theorem exists_norm_recip_selbergRHS_le (N : ℕ) {b c : ℂ} (hb : 0 < b.re) (h
     _ = D j * (1 + |a.im|) ^ (K1 j + K2 j) := by rw [hexp, mul_one]
 
 /-- The Selberg integral is bounded on `Re a ≥ 1`. -/
-theorem norm_selbergInt_le {N : ℕ} {a b c : ℂ} (ha : 1 ≤ a.re) (hb : 0 < b.re) (hc : 0 ≤ c.re) :
-    ‖selbergInt N a b c‖ ≤ ∫ t in cube N, ‖∏ i, weight 1 b (t i)‖ := by
-  unfold selbergInt
+theorem norm_selbergIntegral_le {N : ℕ} {a b c : ℂ} (ha : 1 ≤ a.re) (hb : 0 < b.re)
+    (hc : 0 ≤ c.re) :
+    ‖selbergIntegral N a b c‖ ≤ ∫ t in unitCube N, ‖∏ i, selbergWeight 1 b (t i)‖ := by
+  unfold selbergIntegral
   refine norm_integral_le_of_norm_le
-    (integrableOn_prod_cube (integrableOn_weight (by simp) hb)).norm ?_
-  filter_upwards [ae_restrict_mem (measurableSet_cube N),
-    (ae_restrict_iff' (measurableSet_cube N)).2 (ae_cube_coords_Ioo N)] with t ht ht'
+    (integrableOn_prod_unitCube (integrableOn_selbergWeight (by simp) hb)).norm ?_
+  filter_upwards [ae_restrict_mem (measurableSet_unitCube N),
+    (ae_restrict_iff' (measurableSet_unitCube N)).2 (ae_unitCube_coords_Ioo N)] with t ht ht'
   refine (norm_selbergIntegrand_le hc ht).trans ?_
   rw [norm_prod, norm_prod]
   exact Finset.prod_le_prod₀ (fun _ _ => norm_nonneg _) fun i _ =>
-    norm_weight_le_one_left ha (ht' i)
+    norm_selbergWeight_le_one_left ha (ht' i)
 
 /-- `S/R` is `1`-periodic in `a`. -/
 theorem selbergRatio_add_one {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re)
     (hc : 1 / 2 ≤ c.re) :
-    selbergInt N (a + 1) b c / selbergRHS N (a + 1) b c =
-      selbergInt N a b c / selbergRHS N a b c := by
+    selbergIntegral N (a + 1) b c / selbergRHS N (a + 1) b c =
+      selbergIntegral N a b c / selbergRHS N a b c := by
   have hc0 : (0 : ℝ) ≤ c.re := by linarith
-  rw [selbergInt_add_one ha hb hc, selbergRHS_add_one ha hb hc0]
+  rw [selbergIntegral_add_one ha hb hc, selbergRHS_add_one ha hb hc0]
   have hP : ∏ j ∈ Finset.range N, aomotoFactor N a b c j ≠ 0 :=
     Finset.prod_ne_zero_iff.mpr fun j _ => aomotoFactor_ne_zero ha hb hc0 j
   rw [mul_div_mul_left _ _ hP]
@@ -455,16 +460,17 @@ theorem selbergRatio_add_one {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b
 /-- **Carlson's theorem in `a`**: `S/R` does not depend on `a`. -/
 theorem selbergRatio_eq_one_left {N : ℕ} {b c : ℂ} (hb : 0 < b.re) (hc : 1 / 2 ≤ c.re)
     {a : ℂ} (ha : 0 < a.re) :
-    selbergInt N a b c / selbergRHS N a b c = selbergInt N 1 b c / selbergRHS N 1 b c := by
+    selbergIntegral N a b c / selbergRHS N a b c = selbergIntegral N 1 b c /
+        selbergRHS N 1 b c := by
   have hc0 : (0 : ℝ) ≤ c.re := by linarith
-  set F : ℂ → ℂ := fun a => selbergInt N a b c / selbergRHS N a b c with hF
+  set F : ℂ → ℂ := fun a => selbergIntegral N a b c / selbergRHS N a b c with hF
   have hFd : DifferentiableOn ℂ F {a | 0 < a.re} :=
-    (differentiableOn_selbergInt_a N hb hc0).div (differentiableOn_selbergRHS_a N hb hc0)
+    (differentiableOn_selbergIntegral_a N hb hc0).div (differentiableOn_selbergRHS_a N hb hc0)
       fun a ha => selbergRHS_ne_zero ha hb hc0
   set f : ℂ → ℂ := fun w => F (w + 1) - F 1 with hf
   obtain ⟨C, K, hC⟩ := exists_norm_recip_selbergRHS_le N hb hc0
-  set B := ∫ t in cube N, ‖∏ i, weight 1 b (t i)‖ with hB
-  have hB0 : 0 ≤ B := setIntegral_nonneg (measurableSet_cube N) fun _ _ => norm_nonneg _
+  set B := ∫ t in unitCube N, ‖∏ i, selbergWeight 1 b (t i)‖ with hB
+  have hB0 : 0 ≤ B := setIntegral_nonneg (measurableSet_unitCube N) fun _ _ => norm_nonneg _
   have hfz : ∀ w : ℂ, 0 ≤ w.re → f w = 0 := by
     refine DLMF.Hypergeometric.CarlsonTheorem.eq_zero_of_periodic_of_bound (δ := 1 / 2)
       (by norm_num) ?_ ?_ (C := B * max C 0 + ‖F 1‖) (σ := 0) (K := K) Real.pi_pos ?_ ?_
@@ -481,7 +487,7 @@ theorem selbergRatio_eq_one_left {N : ℕ} {b c : ℂ} (hb : 0 < b.re) (hc : 1 /
     · intro w hw0 hw1
       have h1 : 1 ≤ (w + 1).re := by simp; linarith
       have h2 : (w + 1).re ≤ 2 := by simp; linarith
-      have hS := norm_selbergInt_le (N := N) (c := c) h1 hb hc0
+      have hS := norm_selbergIntegral_le (N := N) (c := c) h1 hb hc0
       have hR := hC (w + 1) h1 h2
       have hR' : ‖(selbergRHS N (w + 1) b c)⁻¹‖ ≤ max C 0 * (1 + |w.im|) ^ K := by
         refine hR.trans ?_
@@ -489,16 +495,16 @@ theorem selbergRatio_eq_one_left {N : ℕ} {b c : ℂ} (hb : 0 < b.re) (hc : 1 /
         exact mul_le_mul_of_nonneg_right (le_max_left _ _) (by positivity)
       have hX : 1 ≤ (1 + |w.im|) ^ K := one_le_pow₀ (by linarith [abs_nonneg w.im])
       simp only [hf, hF, zero_mul, Real.exp_zero, mul_one]
-      calc ‖selbergInt N (w + 1) b c / selbergRHS N (w + 1) b c -
-            selbergInt N 1 b c / selbergRHS N 1 b c‖
-          ≤ ‖selbergInt N (w + 1) b c‖ * ‖(selbergRHS N (w + 1) b c)⁻¹‖ +
-              ‖selbergInt N 1 b c / selbergRHS N 1 b c‖ := by
+      calc ‖selbergIntegral N (w + 1) b c / selbergRHS N (w + 1) b c -
+            selbergIntegral N 1 b c / selbergRHS N 1 b c‖
+          ≤ ‖selbergIntegral N (w + 1) b c‖ * ‖(selbergRHS N (w + 1) b c)⁻¹‖ +
+              ‖selbergIntegral N 1 b c / selbergRHS N 1 b c‖ := by
             rw [div_eq_mul_inv, ← norm_mul]; exact norm_sub_le _ _
         _ ≤ B * (max C 0 * (1 + |w.im|) ^ K) +
-              ‖selbergInt N 1 b c / selbergRHS N 1 b c‖ * (1 + |w.im|) ^ K := by
+              ‖selbergIntegral N 1 b c / selbergRHS N 1 b c‖ * (1 + |w.im|) ^ K := by
             gcongr
             · exact le_mul_of_one_le_right (norm_nonneg _) hX
-        _ = (B * max C 0 + ‖selbergInt N 1 b c / selbergRHS N 1 b c‖) * (1 + |w.im|) ^ K := by
+        _ = (B * max C 0 + ‖selbergIntegral N 1 b c / selbergRHS N 1 b c‖) * (1 + |w.im|) ^ K := by
             ring
     · simp [hf]
   by_cases h1 : 1 ≤ a.re
@@ -514,15 +520,16 @@ theorem selbergRatio_eq_one_left {N : ℕ} {b c : ℂ} (hb : 0 < b.re) (hc : 1 /
 does not depend on `a` and `b`. -/
 theorem selbergRatio_eq_one_one {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re)
     (hc : 1 / 2 ≤ c.re) :
-    selbergInt N a b c / selbergRHS N a b c = selbergInt N 1 1 c / selbergRHS N 1 1 c := by
+    selbergIntegral N a b c / selbergRHS N a b c = selbergIntegral N 1 1 c /
+        selbergRHS N 1 1 c := by
   have h1 : (0 : ℝ) < (1 : ℂ).re := by simp
-  rw [selbergRatio_eq_one_left hb hc ha, selbergInt_comm, selbergRHS_comm,
+  rw [selbergRatio_eq_one_left hb hc ha, selbergIntegral_comm, selbergRHS_comm,
     selbergRatio_eq_one_left h1 hc hb]
 
 /-- The zero-dimensional Selberg integral is `1`. -/
-theorem selbergInt_zero (a b c : ℂ) : selbergInt 0 a b c = 1 := by
-  have hcube : cube 0 = Set.univ := Set.eq_univ_of_forall fun t => fun i => i.elim0
-  rw [selbergInt, hcube, Measure.restrict_univ]
+theorem selbergIntegral_zero (a b c : ℂ) : selbergIntegral 0 a b c = 1 := by
+  have hcube : unitCube 0 = Set.univ := Set.eq_univ_of_forall fun t => fun i => i.elim0
+  rw [selbergIntegral, hcube, Measure.restrict_univ]
   simp only [selbergIntegrand, Finset.univ_eq_empty, Finset.prod_empty, mul_one,
     integral_const]
   rw [Measure.real, volume_pi, Measure.pi_univ]
@@ -534,15 +541,15 @@ theorem selbergRHS_zero (a b c : ℂ) : selbergRHS 0 a b c = 1 := by
 
 /-- For `Re c ≥ 1/2` and every `N`, `S_N(1, 1, c) = R_N(1, 1, c)`. -/
 theorem selbergRatio_one_one_eq_one {c : ℂ} (hc : 1 / 2 ≤ c.re) :
-    ∀ N : ℕ, selbergInt N 1 1 c / selbergRHS N 1 1 c = 1 := by
+    ∀ N : ℕ, selbergIntegral N 1 1 c / selbergRHS N 1 1 c = 1 := by
   have h1 : (0 : ℝ) < (1 : ℂ).re := by simp
   have hc0 : (0 : ℝ) ≤ c.re := by linarith
   intro N
   induction N with
-  | zero => simp [selbergInt_zero, selbergRHS_zero]
+  | zero => simp [selbergIntegral_zero, selbergRHS_zero]
   | succ n ih =>
     have hb2 : 0 < (1 + 2 * c).re := by simp; linarith
-    have hS := selbergInt_succ_one (n := n) h1 hc
+    have hS := selbergIntegral_succ_one (n := n) h1 hc
     have hR := selbergRHS_succ_one (n := n) h1 hc0
     have hK := selbergRatio_eq_one_one (N := n) h1 hb2 hc
     rw [ih] at hK
@@ -556,8 +563,8 @@ theorem selbergRatio_one_one_eq_one {c : ℂ} (hc : 1 / 2 ≤ c.re) :
     rw [hS, hR, hK]
 
 /-- **Selberg's integral** for `Re a, Re b > 0` and `Re c ≥ 1/2`. -/
-theorem selbergInt_eq_of_half_le {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re)
-    (hc : 1 / 2 ≤ c.re) : selbergInt N a b c = selbergRHS N a b c := by
+theorem selbergIntegral_eq_of_half_le {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re)
+    (hc : 1 / 2 ≤ c.re) : selbergIntegral N a b c = selbergRHS N a b c := by
   have h := selbergRatio_eq_one_one (N := N) ha hb hc
   rw [selbergRatio_one_one_eq_one hc N,
     div_eq_one_iff_eq (selbergRHS_ne_zero ha hb (by linarith))] at h
@@ -587,9 +594,9 @@ theorem differentiableAt_selbergIntegrand_c {N : ℕ} (a b : ℂ) {t : Fin N →
   · exact differentiableAt_const _
 
 /-- For `Re a, Re b > 0`, the Selberg integral is holomorphic in `c` on `Re c > 0`. -/
-theorem differentiableOn_selbergInt_c (N : ℕ) {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) :
-    DifferentiableOn ℂ (fun c => selbergInt N a b c) {c | 0 < c.re} := by
-  unfold selbergInt
+theorem differentiableOn_selbergIntegral_c (N : ℕ) {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) :
+    DifferentiableOn ℂ (fun c => selbergIntegral N a b c) {c | 0 < c.re} := by
+  unfold selbergIntegral
   refine DLMF.Gamma.VerticalBeta.differentiableOn_integral
       (isOpen_lt continuous_const Complex.continuous_re)
     (fun c _ => (measurable_selbergIntegrand N a b c).aestronglyMeasurable) ?_ ?_
@@ -604,9 +611,9 @@ theorem differentiableOn_selbergInt_c (N : ℕ) {a b : ℂ} (ha : 0 < a.re) (hb 
       have h2 : |(z - c₀).re| ≤ c₀.re / 2 := this.trans hz
       rw [Complex.sub_re, abs_le] at h2
       linarith
-    refine ⟨fun t => ‖∏ i, weight a b (t i)‖,
-      (integrableOn_prod_cube (n := N) (integrableOn_weight ha hb)).norm, ?_⟩
-    filter_upwards [ae_restrict_mem (measurableSet_cube N)] with t ht z hz
+    refine ⟨fun t => ‖∏ i, selbergWeight a b (t i)‖,
+      (integrableOn_prod_unitCube (n := N) (integrableOn_selbergWeight ha hb)).norm, ?_⟩
+    filter_upwards [ae_restrict_mem (measurableSet_unitCube N)] with t ht z hz
     refine norm_selbergIntegrand_le ?_ ht
     have := Complex.abs_re_le_norm (z - c₀)
     rw [Metric.mem_closedBall, dist_eq_norm] at hz
@@ -615,7 +622,8 @@ theorem differentiableOn_selbergInt_c (N : ℕ) {a b : ℂ} (ha : 0 < a.re) (hb 
     linarith
 
 /-- The domain of convergence in `c` is open. -/
-theorem isOpen_cDomain (N : ℕ) (a b : ℂ) : IsOpen (cDomain N a b) := by
+theorem isOpen_selbergConvergenceDomain (N : ℕ) (a b : ℂ) : IsOpen
+    (selbergConvergenceDomain N a b) := by
   have h1 : Continuous fun c : ℂ => 1 + (N : ℝ) * c.re := by fun_prop
   have h2 : Continuous fun c : ℂ => a.re + ((N - 1 : ℕ) : ℝ) * c.re := by fun_prop
   have h3 : Continuous fun c : ℂ => b.re + ((N - 1 : ℕ) : ℝ) * c.re := by fun_prop
@@ -624,11 +632,12 @@ theorem isOpen_cDomain (N : ℕ) (a b : ℂ) : IsOpen (cDomain N a b) := by
     (isOpen_lt (continuous_const (y := (0 : ℝ))) h3)
   convert this using 1
   ext c
-  simp [cDomain, and_assoc]
+  simp [selbergConvergenceDomain, and_assoc]
 
 /-- The domain of convergence in `c` is convex. -/
-theorem convex_cDomain (N : ℕ) (a b : ℂ) : Convex ℝ (cDomain N a b) := by
-  unfold cDomain
+theorem convex_selbergConvergenceDomain (N : ℕ) (a b : ℂ) : Convex ℝ
+    (selbergConvergenceDomain N a b) := by
+  unfold selbergConvergenceDomain
   intro x hx y hy s t hs ht hst
   simp only [Set.mem_ofPred_eq, Complex.add_re, Complex.smul_re, smul_eq_mul] at hx hy ⊢
   have key : ∀ {u v : ℝ}, 0 < u → 0 < v → 0 < s * u + t * v := fun hu hv => by
@@ -650,7 +659,8 @@ theorem convex_cDomain (N : ℕ) (a b : ℂ) : Convex ℝ (cDomain N a b) := by
     rw [e]; exact key hx.2.2 hy.2.2
 
 /-- On the domain of convergence, `Re (a + j c) > 0` for `j ≤ N - 1`. -/
-theorem re_pos_of_mem_cDomain {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hc : c ∈ cDomain N a b)
+theorem re_pos_of_mem_selbergConvergenceDomain {N : ℕ} {a b c : ℂ} (ha : 0 < a.re)
+    (hc : c ∈ selbergConvergenceDomain N a b)
     {j : ℕ} (hj : j ≤ N - 1) : 0 < (a + (j : ℂ) * c).re := by
   obtain ⟨_, h2, _⟩ := hc
   simp only [Complex.add_re, Complex.mul_re, Complex.natCast_re, Complex.natCast_im, zero_mul,
@@ -661,7 +671,8 @@ theorem re_pos_of_mem_cDomain {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hc : c �
   · nlinarith
 
 /-- On the domain of convergence, `Re (1 + j c) > 0` for `j ≤ N`. -/
-theorem re_one_add_pos_of_mem_cDomain {N : ℕ} {a b c : ℂ} (hc : c ∈ cDomain N a b)
+theorem re_one_add_pos_of_mem_selbergConvergenceDomain {N : ℕ} {a b c : ℂ}
+    (hc : c ∈ selbergConvergenceDomain N a b)
     {j : ℕ} (hj : j ≤ N) : 0 < (1 + (j : ℂ) * c).re := by
   obtain ⟨h1, _, _⟩ := hc
   simp only [Complex.add_re, Complex.one_re, Complex.mul_re, Complex.natCast_re,
@@ -672,31 +683,35 @@ theorem re_one_add_pos_of_mem_cDomain {N : ℕ} {a b c : ℂ} (hc : c ∈ cDomai
   · nlinarith
 
 /-- Every `c` with `Re c > 0` lies in the domain of convergence when `Re a, Re b > 0`. -/
-theorem pos_mem_cDomain (N : ℕ) {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (hc : 0 < c.re) :
-    c ∈ cDomain N a b := by
+theorem pos_mem_selbergConvergenceDomain (N : ℕ) {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re)
+    (hc : 0 < c.re) :
+    c ∈ selbergConvergenceDomain N a b := by
   refine ⟨by positivity, by positivity, by positivity⟩
 
 /-- The right-hand side of Selberg's formula is holomorphic in `c` on the domain
 of convergence. -/
 theorem differentiableOn_selbergRHS_c {N : ℕ} {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re)
-    (hN : 0 < N) : DifferentiableOn ℂ (fun c => selbergRHS N a b c) (cDomain N a b) := by
+    (hN : 0 < N) : DifferentiableOn ℂ (fun c => selbergRHS N a b c)
+        (selbergConvergenceDomain N a b) := by
   intro c hc
   refine DifferentiableAt.differentiableWithinAt ?_
   unfold selbergRHS
   refine DifferentiableAt.fun_finsetProd fun j _ => ?_
   have hj : (j : ℕ) ≤ N - 1 := by omega
   have hc1 : 0 < (1 + c).re := by
-    have := re_one_add_pos_of_mem_cDomain hc (j := 1) (by omega); simpa using this
+    have := re_one_add_pos_of_mem_selbergConvergenceDomain hc (j := 1) (by omega); simpa using this
   refine DifferentiableAt.mul ?_ ?_
   · refine DifferentiableAt.mul (DifferentiableAt.mul ?_ ?_) ?_
     · exact (Complex.differentiableAt_Gamma _
-        (DLMF.Hypergeometric.not_neg_nat_of_re_pos (re_pos_of_mem_cDomain ha hc hj))).comp c
+        (DLMF.Hypergeometric.not_neg_nat_of_re_pos
+            (re_pos_of_mem_selbergConvergenceDomain ha hc hj))).comp c
         (by fun_prop : DifferentiableAt ℂ (fun x : ℂ => a + ((j : ℕ) : ℂ) * x) c)
-    · have hc' : c ∈ cDomain N b a := ⟨hc.1, hc.2.2, hc.2.1⟩
+    · have hc' : c ∈ selbergConvergenceDomain N b a := ⟨hc.1, hc.2.2, hc.2.1⟩
       exact (Complex.differentiableAt_Gamma _
-        (DLMF.Hypergeometric.not_neg_nat_of_re_pos (re_pos_of_mem_cDomain hb hc' hj))).comp c
+        (DLMF.Hypergeometric.not_neg_nat_of_re_pos
+            (re_pos_of_mem_selbergConvergenceDomain hb hc' hj))).comp c
         (by fun_prop : DifferentiableAt ℂ (fun x : ℂ => b + ((j : ℕ) : ℂ) * x) c)
-    · have := re_one_add_pos_of_mem_cDomain hc (j := (j : ℕ) + 1) (by omega)
+    · have := re_one_add_pos_of_mem_selbergConvergenceDomain hc (j := (j : ℕ) + 1) (by omega)
       exact (Complex.differentiableAt_Gamma _
         (DLMF.Hypergeometric.not_neg_nat_of_re_pos (by simpa using this))).comp c
         (by fun_prop : DifferentiableAt ℂ (fun x : ℂ => 1 + (((j : ℕ) : ℂ) + 1) * x) c)
@@ -714,20 +729,20 @@ theorem differentiableOn_selbergRHS_c {N : ℕ} {a b : ℂ} (ha : 0 < a.re) (hb 
     simp only [Pi.mul_apply, mul_inv]
 
 /-- **Selberg's integral** for `Re a, Re b, Re c > 0`. -/
-theorem selbergInt_eq_of_re_pos {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re)
-    (hc : 0 < c.re) : selbergInt N a b c = selbergRHS N a b c := by
+theorem selbergIntegral_eq_of_re_pos {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re)
+    (hc : 0 < c.re) : selbergIntegral N a b c = selbergRHS N a b c := by
   rcases Nat.eq_zero_or_pos N with rfl | hN
-  · rw [selbergInt_zero, selbergRHS_zero]
+  · rw [selbergIntegral_zero, selbergRHS_zero]
   have hV : IsOpen {c : ℂ | 0 < c.re} := isOpen_lt continuous_const Complex.continuous_re
-  have hf := (differentiableOn_selbergInt_c N ha hb).analyticOnNhd hV
+  have hf := (differentiableOn_selbergIntegral_c N ha hb).analyticOnNhd hV
   have hg := ((differentiableOn_selbergRHS_c ha hb hN).mono
-    fun c hc => pos_mem_cDomain N ha hb hc).analyticOnNhd hV
+    fun c hc => pos_mem_selbergConvergenceDomain N ha hb hc).analyticOnNhd hV
   have hconv : Convex ℝ {c : ℂ | 0 < c.re} := convex_halfSpace_re_gt 0
   refine hf.eqOn_of_preconnected_of_eventuallyEq hg hconv.isPreconnected
     (z₀ := 1) (by simp) ?_ hc
   have hW : IsOpen {c : ℂ | 1 / 2 < c.re} := isOpen_lt continuous_const Complex.continuous_re
   filter_upwards [hW.mem_nhds (by norm_num : (1 / 2 : ℝ) < (1 : ℂ).re)] with c hc'
-  exact selbergInt_eq_of_half_le ha hb (le_of_lt hc')
+  exact selbergIntegral_eq_of_half_le ha hb (le_of_lt hc')
 
 end DLMF.Selberg
 end

@@ -19,19 +19,19 @@ Whittaker functions for `ε < 0` (33.16.8–33.16.13, 33.16.16–33.16.18). We w
 
 ## Main results
 
-* `coulombF_eq_coulombf`, `coulombG_eq_coulombh`: DLMF 33.16.1 and 33.16.2.
-* `coulombf_eq_coulombF_pos`, `coulombf_eq_coulombF_pos'`, `coulombh_eq_coulombG_pos`: `ε > 0`,
-  `r > 0` (DLMF 33.16.4, 33.16.5).
-* `coulombf_eq_coulombF_neg`, `coulombf_eq_coulombF_neg'`, `coulombh_eq_coulombG_neg`: `ε > 0`,
-  `r < 0` (DLMF 33.16.6, 33.16.7).
-* `coulombs_coulombc_eq_pos`: DLMF 33.16.14.
-* `coulombs_coulombc_eq_neg`: DLMF 33.16.15, corrected.
-* `coulombf_eq_whittaker_pos`, `coulombh_eq_whittaker_pos`: `ε < 0`, `r > 0`
+* `coulombF_eq_coulombEnergyF`, `coulombG_eq_coulombEnergyH`: DLMF 33.16.1 and 33.16.2.
+* `coulombEnergyF_eq_coulombF_pos`, `coulombEnergyF_eq_coulombF_pos'`,
+  `coulombEnergyH_eq_coulombG_pos`: `ε > 0`, `r > 0` (DLMF 33.16.4, 33.16.5).
+* `coulombEnergyF_eq_coulombF_neg`, `coulombEnergyF_eq_coulombF_neg'`,
+  `coulombEnergyH_eq_coulombG_neg`: `ε > 0`, `r < 0` (DLMF 33.16.6, 33.16.7).
+* `coulombEnergyS_coulombEnergyC_eq_pos`: DLMF 33.16.14.
+* `coulombEnergyS_coulombEnergyC_eq_neg`: DLMF 33.16.15, corrected.
+* `coulombEnergyF_eq_whittaker_pos`, `coulombEnergyH_eq_whittaker_pos`: `ε < 0`, `r > 0`
   (DLMF 33.16.10, 33.16.11).
-* `coulombf_eq_whittaker_neg`, `coulombh_eq_whittaker_neg`: `ε < 0`, `r < 0`
+* `coulombEnergyF_eq_whittaker_neg`, `coulombEnergyH_eq_whittaker_neg`: `ε < 0`, `r < 0`
   (DLMF 33.16.12, 33.16.13).
-* `coulombs_coulombc_eq_whittaker_pos`, `coulombs_coulombc_eq_whittaker_neg`: DLMF 33.16.17 and
-  33.16.18, corrected.
+* `coulombEnergyS_coulombEnergyC_eq_whittaker_pos`,
+  `coulombEnergyS_coulombEnergyC_eq_whittaker_neg`: DLMF 33.16.17 and 33.16.18, corrected.
 
 ## Implementation notes
 
@@ -75,9 +75,10 @@ private lemma coulombKappa_one_div_sq {η : ℝ} (hη : η ≠ 0) (r : ℝ) :
 
 /-- At `κ = iη`, the Kummer form of `f(ε,ℓ;r)` at `r = -ηρ` is `(-2η)^{ℓ+1}/(2ℓ+1)!` times the
 Kummer form of the Coulomb wave. -/
-private lemma coulombfKummer_I_mul (η ρ : ℝ) (hη : η ≠ 0) (ℓ : ℕ) :
-    coulombfKummer (I * η) ℓ (-η * ρ) = (-2 * η) ^ (ℓ + 1) * coulombWave ℓ η ρ / (2 * ℓ + 1)! := by
-  unfold coulombfKummer coulombWave
+private lemma coulombEnergyFKummer_I_mul (η ρ : ℝ) (hη : η ≠ 0) (ℓ : ℕ) :
+    coulombEnergyFKummer (I * η) ℓ (-η * ρ) = (-2 * η) ^ (ℓ + 1) * coulombWave ℓ η ρ /
+        (2 * ℓ + 1)! := by
+  unfold coulombEnergyFKummer coulombWave
   have hη' : (η : ℂ) ≠ 0 := by exact_mod_cast hη
   have h1 : -(((-η * ρ : ℝ)) : ℂ) / (I * η) = -I * ρ := by
     push_cast; field_simp; ring_nf; rw [I_sq]; ring
@@ -90,28 +91,29 @@ private lemma coulombfKummer_I_mul (η ρ : ℝ) (hη : η ≠ 0) (ℓ : ℕ) :
 /-- **DLMF 33.16.1**: `F_ℓ(η,ρ) = (2ℓ+1)! C_ℓ(η) (-2η)^{-ℓ-1} f(1/η², ℓ; -ηρ)` for `η ≠ 0`
 (and all real `ρ`). -/
 @[dlmf 33.16.E1]
-theorem coulombF_eq_coulombf (ℓ : ℕ) {η : ℝ} (hη : η ≠ 0) (ρ : ℝ) :
+theorem coulombF_eq_coulombEnergyF (ℓ : ℕ) {η : ℝ} (hη : η ≠ 0) (ρ : ℝ) :
     coulombF ℓ η ρ =
-      (2 * ℓ + 1)! * coulombC ℓ η / (-2 * η) ^ (ℓ + 1) * coulombf (1 / η ^ 2) ℓ (-η * ρ) := by
+      (2 * ℓ + 1)! * coulombC ℓ η / (-2 * η) ^ (ℓ + 1) * coulombEnergyF (1 / η ^ 2) ℓ (-η * ρ) := by
   apply Complex.ofReal_injective
   have hε : (1 / η ^ 2 : ℝ) ≠ 0 := by positivity
   push_cast
-  rw [ofReal_coulombF, ofReal_coulombf hε, coulombKappa_one_div_sq hη]
-  have hK : coulombfKummer (I * (|η| : ℝ)) ℓ (-η * ρ) = coulombfKummer (I * η) ℓ (-η * ρ) := by
+  rw [ofReal_coulombF, ofReal_coulombEnergyF hε, coulombKappa_one_div_sq hη]
+  have hK : coulombEnergyFKummer (I * (|η| : ℝ)) ℓ (-η * ρ) =
+      coulombEnergyFKummer (I * η) ℓ (-η * ρ) := by
     rcases abs_choice η with h | h <;> rw [h]
     push_cast
-    rw [mul_neg, coulombfKummer_neg]
-  rw [hK, coulombfKummer_I_mul η ρ hη ℓ]
+    rw [mul_neg, coulombEnergyFKummer_neg]
+  rw [hK, coulombEnergyFKummer_I_mul η ρ hη ℓ]
   have h2 : (-(2 * (η : ℂ))) ^ (ℓ + 1) ≠ 0 :=
     pow_ne_zero _ (neg_ne_zero.mpr (mul_ne_zero two_ne_zero (by exact_mod_cast hη)))
   have hf : (((2 * ℓ + 1)! : ℕ) : ℂ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero _
   field_simp
 
 /-- Away from `ε = 0` and when `κ` is not real, `h(ε,ℓ;r)` is the real part of 33.14.7. -/
-theorem coulombh_eq_re_coulombhFormula_of_im_ne {ε : ℝ} (hε : ε ≠ 0) (ℓ : ℕ) (r : ℝ)
+theorem coulombEnergyH_eq_re_coulombEnergyHFormula_of_im_ne {ε : ℝ} (hε : ε ≠ 0) (ℓ : ℕ) (r : ℝ)
     (him : (coulombKappa ε r).im ≠ 0) :
-    coulombh ε ℓ r = (coulombhFormula ε ℓ r).re := by
-  unfold coulombh
+    coulombEnergyH ε ℓ r = (coulombEnergyHFormula ε ℓ r).re := by
+  unfold coulombEnergyH
   split_ifs with h
   · exfalso
     rcases h with h | ⟨m, hm⟩
@@ -124,32 +126,34 @@ theorem coulombh_eq_re_coulombhFormula_of_im_ne {ε : ℝ} (hε : ε ≠ 0) (ℓ
 
 /-- For `η < 0`, `ρ > 0`, the real part of the bracketed form 33.14.7 at `κ = -iη`,
 `r = -ηρ` is a real multiple of `G_ℓ(η,ρ)`. -/
-private lemma re_coulombhKappa_of_neg (ℓ : ℕ) {η : ℝ} (hη : η < 0) {ρ : ℝ} (hρ : 0 < ρ) (S : ℝ) :
-    (coulombhKappa (I * (-η : ℝ)) S ℓ (-η * ρ)).re =
+private lemma re_coulombEnergyHKappa_of_neg (ℓ : ℕ) {η : ℝ} (hη : η < 0) {ρ : ℝ}
+    (hρ : 0 < ρ) (S : ℝ) :
+    (coulombEnergyHKappa (I * (-η : ℝ)) S ℓ (-η * ρ)).re =
       (-1) ^ ℓ * ‖Gamma (ℓ + 1 + I * η)‖ * Real.exp (-π * η / 2) / (π * η ^ ℓ) *
         coulombG ℓ η ρ := by
-  rw [coulombhKappa_I_mul_neg_eq ℓ hη.ne hρ, sub_re, re_ofReal_mul, I_mul_re, ofReal_im,
+  rw [coulombEnergyHKappa_I_mul_neg_eq ℓ hη.ne hρ, sub_re, re_ofReal_mul, I_mul_re, ofReal_im,
     neg_zero, sub_zero, coulombG]
 
 /-- For `η > 0`, `ρ > 0`, the real part of the bracketed form 33.14.7 at `κ = iη`,
 `r = -ηρ` is a real multiple of `G_ℓ(η,ρ)`. -/
-private lemma re_coulombhKappa_of_pos (ℓ : ℕ) {η : ℝ} (hη : 0 < η) {ρ : ℝ} (hρ : 0 < ρ) (S : ℝ) :
-    (coulombhKappa (I * (η : ℝ)) S ℓ (-η * ρ)).re =
+private lemma re_coulombEnergyHKappa_of_pos (ℓ : ℕ) {η : ℝ} (hη : 0 < η) {ρ : ℝ}
+    (hρ : 0 < ρ) (S : ℝ) :
+    (coulombEnergyHKappa (I * (η : ℝ)) S ℓ (-η * ρ)).re =
       (-1) ^ ℓ * ‖Gamma (ℓ + 1 + I * η)‖ * Real.exp (-π * η / 2) / (π * η ^ ℓ) *
         coulombG ℓ η ρ := by
-  rw [coulombhKappa_I_mul_eq ℓ hη.ne' hρ, add_re, re_ofReal_mul, I_mul_re, ofReal_im,
+  rw [coulombEnergyHKappa_I_mul_eq ℓ hη.ne' hρ, add_re, re_ofReal_mul, I_mul_re, ofReal_im,
     neg_zero, add_zero, coulombHMinus_eq_conj ℓ η hρ, conj_re, coulombG]
 
 /-- **DLMF 33.16.2**: `G_ℓ(η,ρ) = π(-2η)^ℓ / ((2ℓ+1)! C_ℓ(η)) h(1/η², ℓ; -ηρ)` for `η ≠ 0`,
 `ρ > 0`. -/
 @[dlmf 33.16.E2]
-theorem coulombG_eq_coulombh (ℓ : ℕ) {η : ℝ} (hη : η ≠ 0) {ρ : ℝ} (hρ : 0 < ρ) :
+theorem coulombG_eq_coulombEnergyH (ℓ : ℕ) {η : ℝ} (hη : η ≠ 0) {ρ : ℝ} (hρ : 0 < ρ) :
     coulombG ℓ η ρ =
-      π * (-2 * η) ^ ℓ / ((2 * ℓ + 1)! * coulombC ℓ η) * coulombh (1 / η ^ 2) ℓ (-η * ρ) := by
+      π * (-2 * η) ^ ℓ / ((2 * ℓ + 1)! * coulombC ℓ η) * coulombEnergyH (1 / η ^ 2) ℓ (-η * ρ) := by
   have hε : (1 / η ^ 2 : ℝ) ≠ 0 := by positivity
   have hκ := coulombKappa_one_div_sq hη (-η * ρ)
-  rw [coulombh_eq_re_coulombhFormula_of_im_ne hε ℓ _ (by rw [hκ]; simpa using hη),
-    coulombhFormula, hκ]
+  rw [coulombEnergyH_eq_re_coulombEnergyHFormula_of_im_ne hε ℓ _ (by rw [hκ]; simpa using hη),
+    coulombEnergyHFormula, hκ]
   have hX : (-1) ^ ℓ * ‖Gamma (ℓ + 1 + I * η)‖ * Real.exp (-π * η / 2) / (π * η ^ ℓ) *
       (π * (-2 * η) ^ ℓ / ((2 * ℓ + 1)! * coulombC ℓ η)) = 1 := by
     have hN : ‖Gamma (ℓ + 1 + I * η)‖ ≠ 0 :=
@@ -161,9 +165,9 @@ theorem coulombG_eq_coulombh (ℓ : ℕ) {η : ℝ} (hη : η ≠ 0) {ρ : ℝ} 
     field_simp
     linear_combination hm1
   rcases hη.lt_or_gt with hneg | hpos
-  · rw [abs_of_neg hneg, re_coulombhKappa_of_neg ℓ hneg hρ]
+  · rw [abs_of_neg hneg, re_coulombEnergyHKappa_of_neg ℓ hneg hρ]
     linear_combination (-coulombG ℓ η ρ) * hX
-  · rw [abs_of_pos hpos, re_coulombhKappa_of_pos ℓ hpos hρ]
+  · rw [abs_of_pos hpos, re_coulombEnergyHKappa_of_pos ℓ hpos hρ]
     linear_combination (-coulombG ℓ η ρ) * hX
 
 /-! ### `ε > 0`: `f`, `h`, `s`, `c` in terms of `F_ℓ` and `G_ℓ` (`τ = ε^{1/2}`) -/
@@ -219,15 +223,15 @@ private lemma factorial_mul_coulombC_sq (ℓ : ℕ) {η : ℝ} (hη : η ≠ 0) 
 `f(ε,ℓ;r) = ((2/(πτ)) (1 - e^{-2π/τ}) / A(ε,ℓ))^{1/2} F_ℓ(-1/τ, τr)`. This is stronger than DLMF,
 which assumes `r > 0`. -/
 @[dlmf 33.16.E3, dlmf 33.16.E4]
-theorem coulombf_eq_coulombF_pos' {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ} :
-    coulombf ε ℓ r = Real.sqrt (2 / (π * Real.sqrt ε) *
+theorem coulombEnergyF_eq_coulombF_pos' {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ} :
+    coulombEnergyF ε ℓ r = Real.sqrt (2 / (π * Real.sqrt ε) *
         (1 - Real.exp (-(2 * π / Real.sqrt ε))) / coulombAProd ε ℓ) *
       coulombF ℓ (-1 / Real.sqrt ε) (Real.sqrt ε * r) := by
   have hτ := Real.sqrt_pos.mpr hε
   set τ := Real.sqrt ε with hτ_def
   have hτ2 : τ ^ 2 = ε := Real.sq_sqrt hε.le
   have hη : (-1 / τ) ≠ 0 := by positivity
-  rw [coulombF_eq_coulombf ℓ hη, show -(-1 / τ) * (τ * r) = r by field_simp,
+  rw [coulombF_eq_coulombEnergyF ℓ hη, show -(-1 / τ) * (τ * r) = r by field_simp,
     show 1 / (-1 / τ) ^ 2 = ε by rw [← hτ2]; field_simp]
   have hA := coulombAProd_pos hε.le ℓ
   have hE := one_sub_exp_neg_two_pi_div_sqrt_pos hε
@@ -241,7 +245,7 @@ theorem coulombf_eq_coulombF_pos' {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ
   rw [hd]
   suffices h : Real.sqrt (2 / (π * τ) * (1 - Real.exp (-(2 * π / τ))) / coulombAProd ε ℓ) *
       (K / (2 / τ) ^ (ℓ + 1)) = 1 by
-    linear_combination (-coulombf ε ℓ r) * h
+    linear_combination (-coulombEnergyF ε ℓ r) * h
   rw [← Real.sqrt_sq (by positivity : 0 ≤ K / (2 / τ) ^ (ℓ + 1)), ← Real.sqrt_mul (by positivity),
     div_pow, hK]
   rw [Real.sqrt_eq_one]
@@ -259,24 +263,24 @@ theorem coulombf_eq_coulombF_pos' {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ
 /-- **DLMF 33.16.4**: for `ε > 0`, `τ = ε^{1/2}` (33.16.3) and `r > 0`,
 `f(ε,ℓ;r) = ((2/(πτ)) (1 - e^{-2π/τ}) / A(ε,ℓ))^{1/2} F_ℓ(-1/τ, τr)`. -/
 @[dlmf 33.16.E3, dlmf 33.16.E4]
-theorem coulombf_eq_coulombF_pos {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ} (_hr : 0 < r) :
-    coulombf ε ℓ r = Real.sqrt (2 / (π * Real.sqrt ε) *
+theorem coulombEnergyF_eq_coulombF_pos {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ} (_hr : 0 < r) :
+    coulombEnergyF ε ℓ r = Real.sqrt (2 / (π * Real.sqrt ε) *
         (1 - Real.exp (-(2 * π / Real.sqrt ε))) / coulombAProd ε ℓ) *
       coulombF ℓ (-1 / Real.sqrt ε) (Real.sqrt ε * r) :=
-  coulombf_eq_coulombF_pos' hε ℓ
+  coulombEnergyF_eq_coulombF_pos' hε ℓ
 
 /-- **DLMF 33.16.5**: for `ε > 0`, `r > 0`,
 `h(ε,ℓ;r) = ((2/(πτ)) A(ε,ℓ) / (1 - e^{-2π/τ}))^{1/2} G_ℓ(-1/τ, τr)`. -/
 @[dlmf 33.16.E5]
-theorem coulombh_eq_coulombG_pos {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ} (hr : 0 < r) :
-    coulombh ε ℓ r = Real.sqrt (2 / (π * Real.sqrt ε) * coulombAProd ε ℓ /
+theorem coulombEnergyH_eq_coulombG_pos {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ} (hr : 0 < r) :
+    coulombEnergyH ε ℓ r = Real.sqrt (2 / (π * Real.sqrt ε) * coulombAProd ε ℓ /
         (1 - Real.exp (-(2 * π / Real.sqrt ε)))) *
       coulombG ℓ (-1 / Real.sqrt ε) (Real.sqrt ε * r) := by
   have hτ := Real.sqrt_pos.mpr hε
   set τ := Real.sqrt ε with hτ_def
   have hτ2 : τ ^ 2 = ε := Real.sq_sqrt hε.le
   have hη : (-1 / τ) ≠ 0 := by positivity
-  rw [coulombG_eq_coulombh ℓ hη (by positivity), show -(-1 / τ) * (τ * r) = r by field_simp,
+  rw [coulombG_eq_coulombEnergyH ℓ hη (by positivity), show -(-1 / τ) * (τ * r) = r by field_simp,
     show 1 / (-1 / τ) ^ 2 = ε by rw [← hτ2]; field_simp]
   have hA := coulombAProd_pos hε.le ℓ
   have hC := coulombC_pos ℓ (-1 / τ)
@@ -309,15 +313,15 @@ theorem coulombh_eq_coulombG_pos {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ}
 `f(ε,ℓ;r) = (-1)^{ℓ+1} ((2/(πτ)) (e^{2π/τ} - 1) / A(ε,ℓ))^{1/2} F_ℓ(1/τ, -τr)`. This is stronger
 than DLMF, which assumes `r < 0`. -/
 @[dlmf 33.16.E6]
-theorem coulombf_eq_coulombF_neg' {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ} :
-    coulombf ε ℓ r = (-1) ^ (ℓ + 1) * Real.sqrt (2 / (π * Real.sqrt ε) *
+theorem coulombEnergyF_eq_coulombF_neg' {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ} :
+    coulombEnergyF ε ℓ r = (-1) ^ (ℓ + 1) * Real.sqrt (2 / (π * Real.sqrt ε) *
         (Real.exp (2 * π / Real.sqrt ε) - 1) / coulombAProd ε ℓ) *
       coulombF ℓ (1 / Real.sqrt ε) (-(Real.sqrt ε * r)) := by
   have hτ := Real.sqrt_pos.mpr hε
   set τ := Real.sqrt ε with hτ_def
   have hτ2 : τ ^ 2 = ε := Real.sq_sqrt hε.le
   have hη : (1 / τ) ≠ 0 := by positivity
-  rw [coulombF_eq_coulombf ℓ hη, show -(1 / τ) * -(τ * r) = r by field_simp,
+  rw [coulombF_eq_coulombEnergyF ℓ hη, show -(1 / τ) * -(τ * r) = r by field_simp,
     show 1 / (1 / τ) ^ 2 = ε by rw [← hτ2]; field_simp]
   have hA := coulombAProd_pos hε.le ℓ
   have hC := coulombC_pos ℓ (1 / τ)
@@ -334,7 +338,7 @@ theorem coulombf_eq_coulombF_neg' {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ
     have h1 : ((-1 : ℝ) ^ (ℓ + 1)) ≠ 0 := pow_ne_zero _ (by norm_num)
     symm
     calc _ = Real.sqrt (2 / (π * τ) * (Real.exp (2 * π / τ) - 1) / coulombAProd ε ℓ) *
-          (K / (2 / τ) ^ (ℓ + 1)) * coulombf ε ℓ r *
+          (K / (2 / τ) ^ (ℓ + 1)) * coulombEnergyF ε ℓ r *
           ((-1 : ℝ) ^ (ℓ + 1) / (-1 : ℝ) ^ (ℓ + 1)) := by ring
       _ = _ := by rw [div_self h1, mul_one, h, one_mul]
   have hD : 0 < Real.exp (2 * π / τ) - 1 := by
@@ -355,17 +359,17 @@ theorem coulombf_eq_coulombF_neg' {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ
 /-- **DLMF 33.16.6**: for `ε > 0`, `r < 0`,
 `f(ε,ℓ;r) = (-1)^{ℓ+1} ((2/(πτ)) (e^{2π/τ} - 1) / A(ε,ℓ))^{1/2} F_ℓ(1/τ, -τr)`. -/
 @[dlmf 33.16.E6]
-theorem coulombf_eq_coulombF_neg {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ} (_hr : r < 0) :
-    coulombf ε ℓ r = (-1) ^ (ℓ + 1) * Real.sqrt (2 / (π * Real.sqrt ε) *
+theorem coulombEnergyF_eq_coulombF_neg {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ} (_hr : r < 0) :
+    coulombEnergyF ε ℓ r = (-1) ^ (ℓ + 1) * Real.sqrt (2 / (π * Real.sqrt ε) *
         (Real.exp (2 * π / Real.sqrt ε) - 1) / coulombAProd ε ℓ) *
       coulombF ℓ (1 / Real.sqrt ε) (-(Real.sqrt ε * r)) :=
-  coulombf_eq_coulombF_neg' hε ℓ
+  coulombEnergyF_eq_coulombF_neg' hε ℓ
 
 /-- **DLMF 33.16.7**: for `ε > 0`, `r < 0`,
 `h(ε,ℓ;r) = (-1)^ℓ ((2/(πτ)) A(ε,ℓ) / (e^{2π/τ} - 1))^{1/2} G_ℓ(1/τ, -τr)`. -/
 @[dlmf 33.16.E7]
-theorem coulombh_eq_coulombG_neg {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ} (hr : r < 0) :
-    coulombh ε ℓ r = (-1) ^ ℓ * Real.sqrt (2 / (π * Real.sqrt ε) * coulombAProd ε ℓ /
+theorem coulombEnergyH_eq_coulombG_neg {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ} (hr : r < 0) :
+    coulombEnergyH ε ℓ r = (-1) ^ ℓ * Real.sqrt (2 / (π * Real.sqrt ε) * coulombAProd ε ℓ /
         (Real.exp (2 * π / Real.sqrt ε) - 1)) *
       coulombG ℓ (1 / Real.sqrt ε) (-(Real.sqrt ε * r)) := by
   have hτ := Real.sqrt_pos.mpr hε
@@ -373,7 +377,7 @@ theorem coulombh_eq_coulombG_neg {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ}
   have hτ2 : τ ^ 2 = ε := Real.sq_sqrt hε.le
   have hη : (1 / τ) ≠ 0 := by positivity
   have hρ : 0 < -(τ * r) := by nlinarith
-  rw [coulombG_eq_coulombh ℓ hη hρ, show -(1 / τ) * -(τ * r) = r by field_simp,
+  rw [coulombG_eq_coulombEnergyH ℓ hη hρ, show -(1 / τ) * -(τ * r) = r by field_simp,
     show 1 / (1 / τ) ^ 2 = ε by rw [← hτ2]; field_simp]
   have hA := coulombAProd_pos hε.le ℓ
   have hC := coulombC_pos ℓ (1 / τ)
@@ -391,7 +395,7 @@ theorem coulombh_eq_coulombG_neg {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ}
       K / (π * (2 / τ) ^ ℓ) by
     have hm1 : ((-1 : ℝ) ^ ℓ) ^ 2 = 1 := by rw [← pow_mul, mul_comm, pow_mul]; norm_num
     rw [h]; field_simp
-    linear_combination (-coulombh ε ℓ r) * hm1
+    linear_combination (-coulombEnergyH ε ℓ r) * hm1
   rw [← Real.sqrt_sq (by positivity : 0 ≤ K / (π * (2 / τ) ^ ℓ)), div_pow, hK]
   congr 1
   have hτ0 : τ ≠ 0 := hτ.ne'
@@ -404,10 +408,10 @@ theorem coulombh_eq_coulombG_neg {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ}
 /-- **DLMF 33.16.14**: for `ε > 0`, `r > 0`, `s(ε,ℓ;r) = (πτ)^{-1/2} F_ℓ(-1/τ, τr)` and
 `c(ε,ℓ;r) = (πτ)^{-1/2} G_ℓ(-1/τ, τr)`. -/
 @[dlmf 33.16.E14]
-theorem coulombs_coulombc_eq_pos {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ} (hr : 0 < r) :
-    coulombs ε ℓ r = ((Real.sqrt (π * Real.sqrt ε))⁻¹ *
+theorem coulombEnergyS_coulombEnergyC_eq_pos {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ} (hr : 0 < r) :
+    coulombEnergyS ε ℓ r = ((Real.sqrt (π * Real.sqrt ε))⁻¹ *
         coulombF ℓ (-1 / Real.sqrt ε) (Real.sqrt ε * r) : ℝ) ∧
-      coulombc ε ℓ r = ((Real.sqrt (π * Real.sqrt ε))⁻¹ *
+      coulombEnergyC ε ℓ r = ((Real.sqrt (π * Real.sqrt ε))⁻¹ *
         coulombG ℓ (-1 / Real.sqrt ε) (Real.sqrt ε * r) : ℝ) := by
   have hA := coulombAProd_pos hε.le ℓ
   have hE := one_sub_exp_neg_two_pi_div_sqrt_pos hε
@@ -415,13 +419,15 @@ theorem coulombs_coulombc_eq_pos {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ}
   have hB := coulombBFactor_eq_of_pos hε ℓ
   have hπτ : 0 < π * Real.sqrt ε := by positivity
   constructor
-  · rw [coulombs, hB, Carlson.ofReal_cpow_half (by positivity), coulombf_eq_coulombF_pos hε ℓ hr,
+  · rw [coulombEnergyS, hB, Carlson.ofReal_cpow_half (by positivity),
+        coulombEnergyF_eq_coulombF_pos hε ℓ hr,
       ← Complex.ofReal_mul, ← mul_assoc, ← Real.sqrt_mul (by positivity)]
     congr 3
     rw [← Real.sqrt_inv]
     congr 1
     field_simp
-  · rw [coulombc, hB, ofReal_cpow_neg_half_eq_inv_sqrt (by positivity), coulombh_eq_coulombG_pos hε
+  · rw [coulombEnergyC, hB, ofReal_cpow_neg_half_eq_inv_sqrt (by positivity),
+        coulombEnergyH_eq_coulombG_pos hε
         ℓ hr,
       ← Complex.ofReal_mul, ← mul_assoc, ← Real.sqrt_inv, ← Real.sqrt_mul (by positivity)]
     congr 3
@@ -434,11 +440,11 @@ theorem coulombs_coulombc_eq_pos {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ}
 `c(ε,ℓ;r) = (-1)^ℓ e^{-π/τ} (πτ)^{-1/2} G_ℓ(1/τ, -τr)`. DLMF prints these without the factors
 `(-1)^{ℓ+1} e^{π/τ}` and `(-1)^ℓ e^{-π/τ}`, contradicting 33.16.6–33.16.7 and 33.14.9–33.14.10. -/
 @[dlmf 33.16.E15]
-theorem coulombs_coulombc_eq_neg {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ} (hr : r < 0) :
-    coulombs ε ℓ r = ((-1) ^ (ℓ + 1) * Real.exp (π / Real.sqrt ε) *
+theorem coulombEnergyS_coulombEnergyC_eq_neg {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ} (hr : r < 0) :
+    coulombEnergyS ε ℓ r = ((-1) ^ (ℓ + 1) * Real.exp (π / Real.sqrt ε) *
         (Real.sqrt (π * Real.sqrt ε))⁻¹ *
         coulombF ℓ (1 / Real.sqrt ε) (-(Real.sqrt ε * r)) : ℝ) ∧
-      coulombc ε ℓ r = ((-1) ^ ℓ * Real.exp (-(π / Real.sqrt ε)) *
+      coulombEnergyC ε ℓ r = ((-1) ^ ℓ * Real.exp (-(π / Real.sqrt ε)) *
         (Real.sqrt (π * Real.sqrt ε))⁻¹ *
         coulombG ℓ (1 / Real.sqrt ε) (-(Real.sqrt ε * r)) : ℝ) := by
   have hA := coulombAProd_pos hε.le ℓ
@@ -456,7 +462,8 @@ theorem coulombs_coulombc_eq_neg {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ}
     have := Real.one_lt_exp_iff.mpr this
     linarith
   constructor
-  · rw [coulombs, hB, Carlson.ofReal_cpow_half (by positivity), coulombf_eq_coulombF_neg hε ℓ hr,
+  · rw [coulombEnergyS, hB, Carlson.ofReal_cpow_half (by positivity),
+        coulombEnergyF_eq_coulombF_neg hε ℓ hr,
       ← Complex.ofReal_mul]
     congr 1
     have key : Real.sqrt (coulombAProd ε ℓ / (1 - Real.exp (-(2 * π / Real.sqrt ε))) / 2) *
@@ -471,7 +478,8 @@ theorem coulombs_coulombc_eq_neg {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ}
       have hq1 : 1 - (Real.exp (π / Real.sqrt ε) ^ 2)⁻¹ ≠ 0 := by rw [← h3]; exact hE.ne'
       field_simp
     linear_combination ((-1) ^ (ℓ + 1) * coulombF ℓ (1 / Real.sqrt ε) (-(Real.sqrt ε * r))) * key
-  · rw [coulombc, hB, ofReal_cpow_neg_half_eq_inv_sqrt (by positivity), coulombh_eq_coulombG_neg hε
+  · rw [coulombEnergyC, hB, ofReal_cpow_neg_half_eq_inv_sqrt (by positivity),
+        coulombEnergyH_eq_coulombG_neg hε
         ℓ hr,
       ← Complex.ofReal_mul]
     congr 1
@@ -591,10 +599,10 @@ private lemma sin_pi_mul_sub_nat (ν : ℝ) (ℓ : ℕ) :
 `A(ε,ℓ) = 0` (the poles of `Γ(ν-ℓ)`),
 `f(ε,ℓ;r) = (-1)^ℓ ν^{ℓ+1} (-cos(πν) ζ_ℓ(ν,r)/Γ(ℓ+1+ν) + sin(πν) Γ(ν-ℓ) ξ_ℓ(ν,r)/π)`. -/
 @[dlmf 33.16.E8, dlmf 33.16.E10]
-theorem coulombf_eq_whittaker_pos {ε : ℝ} (hε : ε < 0) (ℓ : ℕ) {r : ℝ} (hr : 0 < r)
+theorem coulombEnergyF_eq_whittaker_pos {ε : ℝ} (hε : ε < 0) (ℓ : ℕ) {r : ℝ} (hr : 0 < r)
     (hA : coulombAProd ε ℓ ≠ 0) :
     let ν := (-ε) ^ (-(1 / 2 : ℝ))
-    (coulombf ε ℓ r : ℂ) = (-1) ^ ℓ * (ν : ℂ) ^ (ℓ + 1) *
+    (coulombEnergyF ε ℓ r : ℂ) = (-1) ^ ℓ * (ν : ℂ) ^ (ℓ + 1) *
       (-(Real.cos (π * ν) : ℂ) * coulombZeta ℓ ν r / (Real.Gamma (ℓ + 1 + ν) : ℂ) +
         (Real.sin (π * ν) * Real.Gamma (ν - ℓ) * coulombXi ℓ ν r / π : ℝ)) := by
   intro ν
@@ -606,15 +614,15 @@ theorem coulombf_eq_whittaker_pos {ε : ℝ} (hε : ε < 0) (ℓ : ℕ) {r : ℝ
   have hζ := conj_coulombZeta ℓ (ν := ν) (r := r) hx
   have hxc : (2 * (r : ℂ) / (ν : ℂ)) = (x : ℂ) := by rw [hx_def]; push_cast; ring
   have hν0 : (ν : ℂ) ≠ 0 := by exact_mod_cast hν.ne'
-  have hE : (coulombf ε ℓ r : ℂ) =
+  have hE : (coulombEnergyF ε ℓ r : ℂ) =
       (ν : ℂ) ^ (ℓ + 1) * exp (-((ℓ : ℂ) + 1 - ν) * π * I) / Gamma (ℓ + 1 + ν) *
         coulombZeta ℓ ν r +
       (ν : ℂ) ^ (ℓ + 1) / Gamma (ℓ + 1 - ν) *
         (exp (I * π * (ν : ℂ)) * (exp (-(-(2 * (r : ℂ) / (ν : ℂ))) / 2) *
           (-(2 * (r : ℂ) / (ν : ℂ))) ^ (ℓ + 1) *
           kummerU (ℓ + 1 + (ν : ℂ)) (2 * ℓ + 2) (-(2 * (r : ℂ) / (ν : ℂ))))) := by
-    rw [ofReal_coulombf hε.ne, hκ]
-    unfold coulombfKummer coulombZeta
+    rw [ofReal_coulombEnergyF hε.ne, hκ]
+    unfold coulombEnergyFKummer coulombZeta
     rw [hxc, kummerM_two_mul_add_two_eq_kummerU_connection ℓ _ hx]
     have hr2 : (2 * (r : ℂ)) = (ν : ℂ) * x := by rw [← hxc]; field_simp
     have he1 : exp (-(r : ℂ) / (ν : ℂ)) = exp (-(x : ℂ) / 2) := by
@@ -663,13 +671,13 @@ theorem coulombf_eq_whittaker_pos {ε : ℝ} (hε : ε < 0) (ℓ : ℕ) {r : ℝ
       sin_pi_mul_sub_nat]
   set G1 := Real.Gamma (ℓ + 1 - ν)
   set G2 := Real.Gamma (ℓ + 1 + ν)
-  have hE2 : (coulombf ε ℓ r : ℂ) =
+  have hE2 : (coulombEnergyF ε ℓ r : ℂ) =
       (((-1) ^ (ℓ + 1) * ν ^ (ℓ + 1) * c * zr / G2 + ν ^ (ℓ + 1) * wr * G1⁻¹ : ℝ) : ℂ) +
       (((-1) ^ (ℓ + 1) * ν ^ (ℓ + 1) * s * zr / G2 + ν ^ (ℓ + 1) * wi * G1⁻¹ : ℝ) : ℂ) * I := by
     rw [hE, hexp, hG1, hG2, hζr, hWr]
     push_cast
     ring
-  have hP : coulombf ε ℓ r =
+  have hP : coulombEnergyF ε ℓ r =
       (-1) ^ (ℓ + 1) * ν ^ (ℓ + 1) * c * zr / G2 + ν ^ (ℓ + 1) * wr * G1⁻¹ := by
     have := congrArg Complex.re hE2
     simp only [Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.ofReal_im, Complex.I_re,
@@ -682,9 +690,10 @@ theorem coulombf_eq_whittaker_pos {ε : ℝ} (hε : ε < 0) (ℓ : ℕ) {r : ℝ
 
 /-- For `ε < 0`, `r > 0`, `A(ε,ℓ) ≠ 0` and away from the poles of `Γ(ℓ+1-κ)`, the real part of
 the formula 33.14.7 is the right-hand side of DLMF 33.16.11. -/
-private lemma coulombhFormula_re_eq_whittaker {ε : ℝ} (hε : ε < 0) (ℓ : ℕ) {r : ℝ} (hr : 0 < r)
+private lemma coulombEnergyHFormula_re_eq_whittaker {ε : ℝ} (hε : ε < 0) (ℓ : ℕ)
+    {r : ℝ} (hr : 0 < r)
     (hA : coulombAProd ε ℓ ≠ 0) (hp : ∀ m : ℕ, (ℓ : ℂ) + 1 - coulombKappa ε r ≠ -(m : ℂ)) :
-    (coulombhFormula ε ℓ r).re = (-1) ^ ℓ * ((-ε) ^ (-(1 / 2 : ℝ))) ^ (ℓ + 1) *
+    (coulombEnergyHFormula ε ℓ r).re = (-1) ^ ℓ * ((-ε) ^ (-(1 / 2 : ℝ))) ^ (ℓ + 1) *
       coulombAProd ε ℓ * (Real.sin (π * (-ε) ^ (-(1 / 2 : ℝ))) *
         (coulombZeta ℓ ((-ε) ^ (-(1 / 2 : ℝ))) r).re / Real.Gamma (ℓ + 1 + (-ε) ^ (-(1 / 2 : ℝ))) +
         Real.cos (π * (-ε) ^ (-(1 / 2 : ℝ))) * Real.Gamma ((-ε) ^ (-(1 / 2 : ℝ)) - ℓ) *
@@ -711,11 +720,11 @@ private lemma coulombhFormula_re_eq_whittaker {ε : ℝ} (hε : ε < 0) (ℓ : �
           (-(2 * (r : ℂ) / (ν : ℂ))) ^ (ℓ + 1) *
           kummerU (ℓ + 1 + (ν : ℂ)) (2 * ℓ + 2) (-(2 * (r : ℂ) / (ν : ℂ))))
     with hW
-  have hE : coulombhFormula ε ℓ r =
+  have hE : coulombEnergyHFormula ε ℓ r =
       (Gamma ((ℓ : ℂ) + 1 - ν) * coulombZeta ℓ ν r + (-1) ^ ℓ * (Real.cos (π * ν) : ℂ) *
         (Gamma ((ℓ : ℂ) + 1 - ν) * exp (-((ℓ : ℂ) + 1 - ν) * π * I) * coulombZeta ℓ ν r +
           Gamma ((ℓ : ℂ) + 1 + ν) * W)) / (π * (ν : ℂ) ^ ℓ) := by
-    unfold coulombhFormula coulombhKappa
+    unfold coulombEnergyHFormula coulombEnergyHKappa
     rw [hκ, hS]
     unfold coulombZeta
     rw [hW, hxc, kummerM_two_mul_add_two_eq_kummerU_connection ℓ _ hx]
@@ -763,7 +772,7 @@ private lemma coulombhFormula_re_eq_whittaker {ε : ℝ} (hε : ε < 0) (ℓ : �
   have hG1ne : G1 ≠ 0 := by rw [hG1] at hGa; exact_mod_cast hGa
   have hG2ne : G2 ≠ 0 := by rw [hG2] at hGb; exact_mod_cast hGb
   have hm1 : ((-1 : ℝ) ^ ℓ) ^ 2 = 1 := by rw [← pow_mul, mul_comm, pow_mul]; simp
-  have hE2 : coulombhFormula ε ℓ r =
+  have hE2 : coulombEnergyHFormula ε ℓ r =
       (((G1 * zr * (1 - c ^ 2) + (-1) ^ ℓ * c * G2 * wr) / (π * ν ^ ℓ) : ℝ) : ℂ) +
       (((-(G1 * zr * c * s) + (-1) ^ ℓ * c * G2 * wi) / (π * ν ^ ℓ) : ℝ) : ℂ) * I := by
     rw [hE, hexp, hG1, hG2, hζr, hWr]
@@ -772,7 +781,7 @@ private lemma coulombhFormula_re_eq_whittaker {ε : ℝ} (hε : ε < 0) (ℓ : �
     push_cast
     field_simp
     linear_combination (-(↑G1 * ↑zr * ↑c * (↑c + ↑s * I))) * hm1c
-  have hP : (coulombhFormula ε ℓ r).re =
+  have hP : (coulombEnergyHFormula ε ℓ r).re =
       (G1 * zr * (1 - c ^ 2) + (-1) ^ ℓ * c * G2 * wr) / (π * ν ^ ℓ) := by
     have := congrArg Complex.re hE2
     simp only [Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.ofReal_im, Complex.I_re,
@@ -886,10 +895,10 @@ private lemma continuousAt_kummerU_intCast_neg_ofReal (n : ℤ) (a : ℂ) {x : �
 /-- **DLMF 33.16.11**: for `ε < 0`, `r > 0`, `A(ε,ℓ) ≠ 0`,
 `h(ε,ℓ;r) = (-1)^ℓ ν^{ℓ+1} A(ε,ℓ) (sin(πν) ζ_ℓ(ν,r)/Γ(ℓ+1+ν) + cos(πν) Γ(ν-ℓ) ξ_ℓ(ν,r)/π)`. -/
 @[dlmf 33.16.E11]
-theorem coulombh_eq_whittaker_pos {ε : ℝ} (hε : ε < 0) (ℓ : ℕ) {r : ℝ} (hr : 0 < r)
+theorem coulombEnergyH_eq_whittaker_pos {ε : ℝ} (hε : ε < 0) (ℓ : ℕ) {r : ℝ} (hr : 0 < r)
     (hA : coulombAProd ε ℓ ≠ 0) :
     let ν := (-ε) ^ (-(1 / 2 : ℝ))
-    (coulombh ε ℓ r : ℂ) = (-1) ^ ℓ * (ν : ℂ) ^ (ℓ + 1) * coulombAProd ε ℓ *
+    (coulombEnergyH ε ℓ r : ℂ) = (-1) ^ ℓ * (ν : ℂ) ^ (ℓ + 1) * coulombAProd ε ℓ *
       ((Real.sin (π * ν) : ℂ) * coulombZeta ℓ ν r / (Real.Gamma (ℓ + 1 + ν) : ℂ) +
         (Real.cos (π * ν) * Real.Gamma (ν - ℓ) * coulombXi ℓ ν r / π : ℝ)) := by
   intro ν
@@ -901,7 +910,7 @@ theorem coulombh_eq_whittaker_pos {ε : ℝ} (hε : ε < 0) (ℓ : ℕ) {r : ℝ
   have hζ := conj_coulombZeta ℓ (ν := ν) (r := r) (by positivity)
   have hζr : coulombZeta ℓ ν r = ((coulombZeta ℓ ν r).re : ℂ) :=
     (Complex.conj_eq_iff_re.mp hζ).symm
-  suffices h : coulombh ε ℓ r = G ε by
+  suffices h : coulombEnergyH ε ℓ r = G ε by
     rw [h, hζr]
     simp only [hG, hνf]
     push_cast
@@ -911,7 +920,7 @@ theorem coulombh_eq_whittaker_pos {ε : ℝ} (hε : ε < 0) (ℓ : ℕ) {r : ℝ
   by_cases hpole : ∃ m : ℕ, (ℓ : ℂ) + 1 - coulombKappa ε r = -(m : ℂ)
   · obtain ⟨m₀, hm₀⟩ := hpole
     have hpole' : ε = 0 ∨ ∃ m : ℕ, (ℓ : ℂ) + 1 - coulombKappa ε r = -(m : ℂ) := Or.inr ⟨m₀, hm₀⟩
-    unfold coulombh
+    unfold coulombEnergyH
     simp only [hpole', ↓reduceIte]
     have hνc : ContinuousAt νf ε :=
       continuousAt_neg.rpow_const (Or.inl (neg_ne_zero.mpr hε.ne))
@@ -977,7 +986,7 @@ theorem coulombh_eq_whittaker_pos {ε : ℝ} (hε : ε < 0) (ℓ : ℕ) {r : ℝ
       have := congrArg Complex.re hm₀
       simp at this
       linarith
-    have hev : ∀ᶠ e in 𝓝[≠] ε, (coulombhFormula e ℓ r).re = G e := by
+    have hev : ∀ᶠ e in 𝓝[≠] ε, (coulombEnergyHFormula e ℓ r).re = G e := by
       have h1 : ∀ᶠ e in 𝓝 ε, e < 0 := eventually_lt_nhds hε
       have h2 : ∀ᶠ e in 𝓝 ε, coulombAProd e ℓ ≠ 0 := hAc.eventually_ne hA
       have h3 : ∀ᶠ e in 𝓝 ε, |νf e - νf ε| < 1 := by
@@ -986,7 +995,7 @@ theorem coulombh_eq_whittaker_pos {ε : ℝ} (hε : ε < 0) (ℓ : ℕ) {r : ℝ
         simpa [Real.dist_eq] using this 1 one_pos
       filter_upwards [nhdsWithin_le_nhds (h1.and (h2.and h3)), self_mem_nhdsWithin] with e
         ⟨he, hAe, hνe⟩ hne
-      refine coulombhFormula_re_eq_whittaker he ℓ hr hAe fun m hm => hne ?_
+      refine coulombEnergyHFormula_re_eq_whittaker he ℓ hr hAe fun m hm => hne ?_
       rw [hκ e he] at hm
       have hm' : νf e = ℓ + 1 + m := by
         have := congrArg Complex.re hm
@@ -1008,17 +1017,17 @@ theorem coulombh_eq_whittaker_pos {ε : ℝ} (hε : ε < 0) (ℓ : ℕ) {r : ℝ
       rintro (h | h)
       · exact hε.ne h
       · exact hpole h
-    unfold coulombh
+    unfold coulombEnergyH
     simp only [hnp, ↓reduceIte]
-    exact coulombhFormula_re_eq_whittaker hε ℓ hr hA fun m hm => hpole ⟨m, hm⟩
+    exact coulombEnergyHFormula_re_eq_whittaker hε ℓ hr hA fun m hm => hpole ⟨m, hm⟩
 
 /-- **DLMF 33.16.12**: for `ε < 0`, `r < 0`, `A(ε,ℓ) ≠ 0`,
 `f(ε,ℓ;r) = (-1)^ℓ ν^{ℓ+1}/π (-π ξ_ℓ(-ν,r)/Γ(ℓ+1+ν) + sin(πν) cos(πν) Γ(ν-ℓ) ζ_ℓ(-ν,r))`. -/
 @[dlmf 33.16.E12]
-theorem coulombf_eq_whittaker_neg {ε : ℝ} (hε : ε < 0) (ℓ : ℕ) {r : ℝ} (hr : r < 0)
+theorem coulombEnergyF_eq_whittaker_neg {ε : ℝ} (hε : ε < 0) (ℓ : ℕ) {r : ℝ} (hr : r < 0)
     (hA : coulombAProd ε ℓ ≠ 0) :
     let ν := (-ε) ^ (-(1 / 2 : ℝ))
-    (coulombf ε ℓ r : ℂ) = (-1) ^ ℓ * (ν : ℂ) ^ (ℓ + 1) / π *
+    (coulombEnergyF ε ℓ r : ℂ) = (-1) ^ ℓ * (ν : ℂ) ^ (ℓ + 1) / π *
       ((-(π * coulombXi ℓ (-ν) r / Real.Gamma (ℓ + 1 + ν)) : ℝ) +
         (Real.sin (π * ν) * Real.cos (π * ν) * Real.Gamma (ν - ℓ) : ℝ) * coulombZeta ℓ (-ν) r) := by
   intro ν
@@ -1031,15 +1040,15 @@ theorem coulombf_eq_whittaker_neg {ε : ℝ} (hε : ε < 0) (ℓ : ℕ) {r : ℝ
   have hxc : (2 * (r : ℂ) / -(ν : ℂ)) = (x : ℂ) := by rw [hx_def]; push_cast; ring
   have hν0 : (ν : ℂ) ≠ 0 := by exact_mod_cast hν.ne'
   -- the complex form
-  have hE : (coulombf ε ℓ r : ℂ) =
+  have hE : (coulombEnergyF ε ℓ r : ℂ) =
       (-(ν : ℂ)) ^ (ℓ + 1) * exp (-((ℓ : ℂ) + 1 + ν) * π * I) / Gamma (ℓ + 1 - ν) *
         coulombZeta ℓ (-ν) r +
       (-(ν : ℂ)) ^ (ℓ + 1) / Gamma (ℓ + 1 + ν) *
         (exp (I * π * ((-ν : ℝ) : ℂ)) * (exp (-(-(2 * (r : ℂ) / ((-ν : ℝ) : ℂ))) / 2) *
           (-(2 * (r : ℂ) / ((-ν : ℝ) : ℂ))) ^ (ℓ + 1) *
           kummerU (ℓ + 1 + ((-ν : ℝ) : ℂ)) (2 * ℓ + 2) (-(2 * (r : ℂ) / ((-ν : ℝ) : ℂ))))) := by
-    rw [ofReal_coulombf hε.ne, hκ]
-    unfold coulombfKummer coulombZeta
+    rw [ofReal_coulombEnergyF hε.ne, hκ]
+    unfold coulombEnergyFKummer coulombZeta
     rw [hxc, kummerM_two_mul_add_two_eq_kummerU_connection ℓ _ hx]
     push_cast
     simp only [hxc]
@@ -1094,7 +1103,7 @@ theorem coulombf_eq_whittaker_neg {ε : ℝ} (hε : ε < 0) (ℓ : ℕ) {r : ℝ
   set G1 := Real.Gamma (ℓ + 1 - ν)
   set G2 := Real.Gamma (ℓ + 1 + ν)
   have h1 : ((-1 : ℂ) ^ (ℓ + 1)) ^ 2 = 1 := by rw [← pow_mul, mul_comm, pow_mul]; simp
-  have hE2 : (coulombf ε ℓ r : ℂ) =
+  have hE2 : (coulombEnergyF ε ℓ r : ℂ) =
       ((ν ^ (ℓ + 1) * c * zr * G1⁻¹ + (-1) ^ (ℓ + 1) * ν ^ (ℓ + 1) * wr / G2 : ℝ) : ℂ) +
       ((-(ν ^ (ℓ + 1) * s * zr * G1⁻¹) + (-1) ^ (ℓ + 1) * ν ^ (ℓ + 1) * wi / G2 : ℝ) : ℂ) *
         I := by
@@ -1103,7 +1112,7 @@ theorem coulombf_eq_whittaker_neg {ε : ℝ} (hε : ε < 0) (ℓ : ℕ) {r : ℝ
     push_cast
     linear_combination ((ν : ℂ) ^ (ℓ + 1) * ((c : ℂ) - (s : ℂ) * I) * (zr : ℂ) /
       (G1 : ℂ)) * h1
-  have hP : coulombf ε ℓ r =
+  have hP : coulombEnergyF ε ℓ r =
       ν ^ (ℓ + 1) * c * zr * G1⁻¹ + (-1) ^ (ℓ + 1) * ν ^ (ℓ + 1) * wr / G2 := by
     have := congrArg Complex.re hE2
     simp only [Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.ofReal_im, Complex.I_re,
@@ -1117,10 +1126,10 @@ theorem coulombf_eq_whittaker_neg {ε : ℝ} (hε : ε < 0) (ℓ : ℕ) {r : ℝ
 /-- **DLMF 33.16.13**: for `ε < 0`, `r < 0`, `A(ε,ℓ) ≠ 0`,
 `h(ε,ℓ;r) = (-1)^ℓ ν^{ℓ+1} A(ε,ℓ) Γ(ν-ℓ) ζ_ℓ(-ν,r)/π`. -/
 @[dlmf 33.16.E13]
-theorem coulombh_eq_whittaker_neg {ε : ℝ} (hε : ε < 0) (ℓ : ℕ) {r : ℝ} (hr : r < 0)
+theorem coulombEnergyH_eq_whittaker_neg {ε : ℝ} (hε : ε < 0) (ℓ : ℕ) {r : ℝ} (hr : r < 0)
     (hA : coulombAProd ε ℓ ≠ 0) :
     let ν := (-ε) ^ (-(1 / 2 : ℝ))
-    (coulombh ε ℓ r : ℂ) = (-1) ^ ℓ * (ν : ℂ) ^ (ℓ + 1) * coulombAProd ε ℓ *
+    (coulombEnergyH ε ℓ r : ℂ) = (-1) ^ ℓ * (ν : ℂ) ^ (ℓ + 1) * coulombAProd ε ℓ *
       Real.Gamma (ν - ℓ) * coulombZeta ℓ (-ν) r / π := by
   intro ν
   have hν : 0 < ν := neg_rpow_neg_half_pos hε
@@ -1138,20 +1147,20 @@ theorem coulombh_eq_whittaker_neg {ε : ℝ} (hε : ε < 0) (ℓ : ℕ) {r : ℝ
   have hζ := conj_coulombZeta ℓ (ν := -ν) (r := r) (by
     rw [div_pos_iff]; right; constructor <;> linarith)
   -- the formula
-  have hF : coulombhFormula ε ℓ r = Gamma (ℓ + 1 + ν) / (π * (-(ν : ℂ)) ^ ℓ) *
+  have hF : coulombEnergyHFormula ε ℓ r = Gamma (ℓ + 1 + ν) / (π * (-(ν : ℂ)) ^ ℓ) *
       coulombZeta ℓ (-ν) r := by
-    unfold coulombhFormula coulombhKappa coulombZeta
+    unfold coulombEnergyHFormula coulombEnergyHKappa coulombZeta
     rw [hκ, hS]
     push_cast
     ring_nf
   have hG : Gamma (ℓ + 1 + ν) = (Real.Gamma (ℓ + 1 + ν) : ℂ) := by
     rw [← Complex.Gamma_ofReal]; push_cast; ring_nf
-  have hreal : conj (coulombhFormula ε ℓ r) = coulombhFormula ε ℓ r := by
+  have hreal : conj (coulombEnergyHFormula ε ℓ r) = coulombEnergyHFormula ε ℓ r := by
     rw [hF, map_mul, hζ, map_div₀, hG, Complex.conj_ofReal, map_mul, map_pow, map_neg,
       Complex.conj_ofReal]
     simp
-  have hh : (coulombh ε ℓ r : ℂ) = coulombhFormula ε ℓ r := by
-    unfold coulombh
+  have hh : (coulombEnergyH ε ℓ r : ℂ) = coulombEnergyHFormula ε ℓ r := by
+    unfold coulombEnergyH
     simp only [hnp, ↓reduceIte]
     exact Complex.conj_eq_iff_re.mp hreal
   rw [hh, hF]
@@ -1175,14 +1184,15 @@ theorem coulombh_eq_whittaker_neg {ε : ℝ} (hε : ε < 0) (ℓ : ℕ) {r : ℝ
 `c(ε,ℓ;r) = (-1)^ℓ (2ν)^{-1/2} (cos(πν) ξ_ℓ(ν,r)/(πK) + sin(πν) ν² K ζ_ℓ(ν,r))`.
 DLMF prints the prefactor as `(-1)^ℓ/(2ν^{1/2})`, which is too small by `2^{1/2}`. -/
 @[dlmf 33.16.E17]
-theorem coulombs_coulombc_eq_whittaker_pos {ε : ℝ} (hε : ε < 0) (ℓ : ℕ) {r : ℝ} (hr : 0 < r)
+theorem coulombEnergyS_coulombEnergyC_eq_whittaker_pos {ε : ℝ} (hε : ε < 0) (ℓ : ℕ)
+    {r : ℝ} (hr : 0 < r)
     (hA : 0 < coulombAProd ε ℓ) :
     let ν := (-ε) ^ (-(1 / 2 : ℝ))
     let K := coulombKNorm ν ℓ
-    coulombs ε ℓ r = (-1) ^ ℓ / (Real.sqrt (2 * ν) : ℂ) *
+    coulombEnergyS ε ℓ r = (-1) ^ ℓ / (Real.sqrt (2 * ν) : ℂ) *
         ((Real.sin (π * ν) / (π * K) * coulombXi ℓ ν r : ℝ) -
           (Real.cos (π * ν) * ν ^ 2 * K : ℝ) * coulombZeta ℓ ν r) ∧
-      coulombc ε ℓ r = (-1) ^ ℓ / (Real.sqrt (2 * ν) : ℂ) *
+      coulombEnergyC ε ℓ r = (-1) ^ ℓ / (Real.sqrt (2 * ν) : ℂ) *
         ((Real.cos (π * ν) / (π * K) * coulombXi ℓ ν r : ℝ) +
           (Real.sin (π * ν) * ν ^ 2 * K : ℝ) * coulombZeta ℓ ν r) := by
   intro ν K
@@ -1191,14 +1201,14 @@ theorem coulombs_coulombc_eq_whittaker_pos {ε : ℝ} (hε : ε < 0) (ℓ : ℕ)
   have hνA := neg_rpow_neg_half_sub_ne_neg_nat hε hA.ne'
   have hAG := coulombAProd_eq_Gamma hε.ne ℓ 1 (by rw [hκ1]; exact hνA)
   rw [hκ1] at hAG
-  have hf : (coulombf ε ℓ r : ℂ) = (-1) ^ ℓ * (ν : ℂ) ^ (ℓ + 1) *
+  have hf : (coulombEnergyF ε ℓ r : ℂ) = (-1) ^ ℓ * (ν : ℂ) ^ (ℓ + 1) *
       (-(Real.cos (π * ν) : ℂ) * coulombZeta ℓ ν r / (Real.Gamma (ℓ + 1 + ν) : ℂ) +
         (Real.sin (π * ν) * Real.Gamma (ν - ℓ) * coulombXi ℓ ν r / π : ℝ)) :=
-    coulombf_eq_whittaker_pos hε ℓ hr hA.ne'
-  have hh : (coulombh ε ℓ r : ℂ) = (-1) ^ ℓ * (ν : ℂ) ^ (ℓ + 1) * coulombAProd ε ℓ *
+    coulombEnergyF_eq_whittaker_pos hε ℓ hr hA.ne'
+  have hh : (coulombEnergyH ε ℓ r : ℂ) = (-1) ^ ℓ * (ν : ℂ) ^ (ℓ + 1) * coulombAProd ε ℓ *
       ((Real.sin (π * ν) : ℂ) * coulombZeta ℓ ν r / (Real.Gamma (ℓ + 1 + ν) : ℂ) +
         (Real.cos (π * ν) * Real.Gamma (ν - ℓ) * coulombXi ℓ ν r / π : ℝ)) :=
-    coulombh_eq_whittaker_pos hε ℓ hr hA.ne'
+    coulombEnergyH_eq_whittaker_pos hε ℓ hr hA.ne'
   have hB : coulombBFactor ε ℓ = coulombAProd ε ℓ := by simp [coulombBFactor, not_lt.mpr hε.le]
   have hG1 : Real.Gamma (ℓ + 1 + ν) = Real.Gamma (ν + ℓ + 1) := by ring_nf
   rw [hG1] at hf hh
@@ -1245,13 +1255,14 @@ theorem coulombs_coulombc_eq_whittaker_pos {ε : ℝ} (hε : ε < 0) (ℓ : ℕ)
   have cπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
   have c2 : (Real.sqrt 2 : ℂ) ≠ 0 := by exact_mod_cast h2.ne'
   constructor
-  · rw [coulombs, hB, Carlson.ofReal_cpow_half (by positivity), hf, Real.sqrt_div' _ (by norm_num),
+  · rw [coulombEnergyS, hB, Carlson.ofReal_cpow_half (by positivity), hf,
+        Real.sqrt_div' _ (by norm_num),
       hsA, h2ν, hK']
     rw [hνt, hGmk, hGpg]
     push_cast
     field_simp
     ring
-  · rw [coulombc, hB, ofReal_cpow_neg_half_eq_inv_sqrt (by positivity), hh, Real.sqrt_mul
+  · rw [coulombEnergyC, hB, ofReal_cpow_neg_half_eq_inv_sqrt (by positivity), hh, Real.sqrt_mul
         (by norm_num), hsA, h2ν, hK', hAr]
     rw [hνt, hGmk, hGpg]
     push_cast
@@ -1263,15 +1274,16 @@ theorem coulombs_coulombc_eq_whittaker_pos {ε : ℝ} (hε : ε < 0) (ℓ : ℕ)
 and `c(ε,ℓ;r) = (-1)^ℓ ζ_ℓ(-ν,r) / (π (2ν)^{1/2} K)`. DLMF interchanges `K` and `1/K` in all
 three places. -/
 @[dlmf 33.16.E18]
-theorem coulombs_coulombc_eq_whittaker_neg {ε : ℝ} (hε : ε < 0) (ℓ : ℕ) {r : ℝ} (hr : r < 0)
+theorem coulombEnergyS_coulombEnergyC_eq_whittaker_neg {ε : ℝ} (hε : ε < 0) (ℓ : ℕ)
+    {r : ℝ} (hr : r < 0)
     (hA : 0 < coulombAProd ε ℓ) :
     let ν := (-ε) ^ (-(1 / 2 : ℝ))
     let K := coulombKNorm ν ℓ
-    coulombs ε ℓ r = (-1) ^ (ℓ + 1) / (Real.sqrt 2 : ℂ) *
+    coulombEnergyS ε ℓ r = (-1) ^ (ℓ + 1) / (Real.sqrt 2 : ℂ) *
         ((ν ^ (3 / 2 : ℝ) * K * coulombXi ℓ (-ν) r : ℝ) -
           (Real.sin (π * ν) * Real.cos (π * ν) / (π * Real.sqrt ν * K) : ℝ) *
             coulombZeta ℓ (-ν) r) ∧
-      coulombc ε ℓ r = (-1) ^ ℓ / ((π * Real.sqrt (2 * ν) * K : ℝ) : ℂ) *
+      coulombEnergyC ε ℓ r = (-1) ^ ℓ / ((π * Real.sqrt (2 * ν) * K : ℝ) : ℂ) *
         coulombZeta ℓ (-ν) r := by
   intro ν K
   have hν : 0 < ν := neg_rpow_neg_half_pos hε
@@ -1279,13 +1291,13 @@ theorem coulombs_coulombc_eq_whittaker_neg {ε : ℝ} (hε : ε < 0) (ℓ : ℕ)
   have hνA := neg_rpow_neg_half_sub_ne_neg_nat hε hA.ne'
   have hAG := coulombAProd_eq_Gamma hε.ne ℓ 1 (by rw [hκ1]; exact hνA)
   rw [hκ1] at hAG
-  have hf : (coulombf ε ℓ r : ℂ) = (-1) ^ ℓ * (ν : ℂ) ^ (ℓ + 1) / π *
+  have hf : (coulombEnergyF ε ℓ r : ℂ) = (-1) ^ ℓ * (ν : ℂ) ^ (ℓ + 1) / π *
       ((-(π * coulombXi ℓ (-ν) r / Real.Gamma (ℓ + 1 + ν)) : ℝ) +
         (Real.sin (π * ν) * Real.cos (π * ν) * Real.Gamma (ν - ℓ) : ℝ) * coulombZeta ℓ (-ν) r) :=
-    coulombf_eq_whittaker_neg hε ℓ hr hA.ne'
-  have hh : (coulombh ε ℓ r : ℂ) = (-1) ^ ℓ * (ν : ℂ) ^ (ℓ + 1) * coulombAProd ε ℓ *
+    coulombEnergyF_eq_whittaker_neg hε ℓ hr hA.ne'
+  have hh : (coulombEnergyH ε ℓ r : ℂ) = (-1) ^ ℓ * (ν : ℂ) ^ (ℓ + 1) * coulombAProd ε ℓ *
       Real.Gamma (ν - ℓ) * coulombZeta ℓ (-ν) r / π :=
-    coulombh_eq_whittaker_neg hε ℓ hr hA.ne'
+    coulombEnergyH_eq_whittaker_neg hε ℓ hr hA.ne'
   have hB : coulombBFactor ε ℓ = coulombAProd ε ℓ := by simp [coulombBFactor, not_lt.mpr hε.le]
   have hG1 : Real.Gamma (ℓ + 1 + ν) = Real.Gamma (ν + ℓ + 1) := by ring_nf
   rw [hG1] at hf
@@ -1334,14 +1346,15 @@ theorem coulombs_coulombc_eq_whittaker_neg {ε : ℝ} (hε : ε < 0) (ℓ : ℕ)
   have cπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
   have c2 : (Real.sqrt 2 : ℂ) ≠ 0 := by exact_mod_cast h2.ne'
   constructor
-  · rw [coulombs, hB, Carlson.ofReal_cpow_half (by positivity), hf, Real.sqrt_div' _ (by norm_num),
+  · rw [coulombEnergyS, hB, Carlson.ofReal_cpow_half (by positivity), hf,
+        Real.sqrt_div' _ (by norm_num),
         hsA,
       h32, hK']
     rw [hνt, hGmk, hGpg]
     push_cast
     field_simp
     ring
-  · rw [coulombc, hB, ofReal_cpow_neg_half_eq_inv_sqrt (by positivity), hh, Real.sqrt_mul
+  · rw [coulombEnergyC, hB, ofReal_cpow_neg_half_eq_inv_sqrt (by positivity), hh, Real.sqrt_mul
         (by norm_num), hsA,
       h2ν, hK', hAr]
     rw [hνt, hGmk, hGpg]

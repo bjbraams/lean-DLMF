@@ -26,8 +26,9 @@ whose partial sums are written as contour integrals over the contour `𝒞` of F
 
 ## Main results
 
-* `hypergeometric0F2OneOne_hasSum`, `genCoeff_zero_one_one`: the series DLMF 2.10.19, matched
-  with the generalized hypergeometric coefficients `genCoeff` of DLMF 16.2.1.
+* `hypergeometric0F2OneOne_hasSum`, `generalizedHypergeometricCoeff_zero_one_one`: the series DLMF
+  2.10.19, matched with the generalized hypergeometric coefficients `generalizedHypergeometricCoeff`
+  of DLMF 16.2.1.
 * `sum_0F2_eq_contourIntegral`, `cot_div_two_I`, `sum_0F2_eq_real_integral_add`: the contour
   integral representations DLMF 2.10.20–2.10.22.
 * `hypergeometric0F2OneOne_eq_integrals`, `hypergeometric0F2OneOne_sub_integral_isBigO`,
@@ -37,7 +38,7 @@ whose partial sums are written as contour integrals over the contour `𝒞` of F
   (DLMF 2.10.27–2.10.32).
 * `legendre_generating_cos`: DLMF 2.10.33, the generating function
   `DLMF.OrthogonalPolynomials.legendre_generating_function` (DLMF 18.12.11) at `x = cos α`.
-* `legendreComparison_hasSum`, `legendrePolyP_cos_asymptotic`: DLMF 2.10.35–2.10.36.
+* `legendreComparison_hasSum`, `legendrePolynomialP_cos_asymptotic`: DLMF 2.10.35–2.10.36.
 
 ## Implementation notes
 
@@ -59,12 +60,13 @@ namespace DLMF.AsymptoticApproximations
 /-- DLMF 2.10.19 (coefficients): the coefficients of `₀F₂(-; 1, 1; x)` in the normalization
 16.2.1 are `1/(j!)³`. -/
 @[dlmf 2.10.E19]
-theorem genCoeff_zero_one_one (j : ℕ) :
-    DLMF.Hypergeometric.genCoeff 0 {1, 1} j = 1 / (j.factorial : ℂ) ^ 3 := by
-  simp only [DLMF.Hypergeometric.genCoeff, DLMF.Hypergeometric.genPoch,
+theorem generalizedHypergeometricCoeff_zero_one_one (j : ℕ) :
+    DLMF.Hypergeometric.generalizedHypergeometricCoeff 0 {1, 1} j = 1 / (j.factorial : ℂ) ^ 3 := by
+  simp only [DLMF.Hypergeometric.generalizedHypergeometricCoeff,
+      DLMF.Hypergeometric.pochhammerProduct,
     Multiset.map_zero, Multiset.prod_zero, Multiset.insert_eq_cons, Multiset.map_cons,
     Multiset.map_singleton, Multiset.prod_cons, Multiset.prod_singleton,
-    DLMF.Hypergeometric.poch, ascPochhammer_eval_one]
+    DLMF.Hypergeometric.pochhammer, ascPochhammer_eval_one]
   have : (j.factorial : ℂ) ≠ 0 := by exact_mod_cast j.factorial_ne_zero
   field_simp
 
@@ -83,17 +85,17 @@ hypergeometric series with upper parameters `()` and lower parameters `(1, 1)` c
 `hypergeometric0F2OneOne x` for every complex `x`. -/
 @[dlmf 2.10.E19]
 theorem hypergeometric0F2OneOne_hasSum (x : ℂ) :
-    HasSum (fun j : ℕ => DLMF.Hypergeometric.genCoeff 0 {1, 1} j * x ^ j)
+    HasSum (fun j : ℕ => DLMF.Hypergeometric.generalizedHypergeometricCoeff 0 {1, 1} j * x ^ j)
       (hypergeometric0F2OneOne x) := by
   have h := (summable_pow_div_factorial_cube x).hasSum
   refine h.congr_fun fun j => ?_
-  rw [genCoeff_zero_one_one]
+  rw [generalizedHypergeometricCoeff_zero_one_one]
   ring
 
 /-- DLMF 2.10.19 in the project's convergence predicate for generalized hypergeometric series. -/
 @[dlmf 2.10.E19]
-theorem genSeriesConvergesTo_0F2 (x : ℂ) :
-    DLMF.Hypergeometric.GenSeriesConvergesTo 0 {1, 1} x
+theorem hypergeometricSeriesConvergesTo_0F2 (x : ℂ) :
+    DLMF.Hypergeometric.HypergeometricSeriesConvergesTo 0 {1, 1} x
       (hypergeometric0F2OneOne x) :=
   (hypergeometric0F2OneOne_hasSum x).tendsto_sum_nat
 
@@ -186,11 +188,6 @@ theorem hypergeometric0F2OneOne_isEquivalent :
 
 /-! ### §2.10(iv) Laurent coefficients and Darboux's method -/
 
-/-- The Laurent coefficients of DLMF 2.10.26 are those of §1.10(iii) about `z₀ = 0`. -/
-private lemma laurentCoeff_eq_laurentCoeff_zero (f : ℂ → ℂ) (ρ : ℝ) (n : ℤ) :
-    laurentCoeff f ρ n = DLMF.AlgebraicAnalytic.laurentCoeff f 0 ρ n := by
-  simp only [laurentCoeff, DLMF.AlgebraicAnalytic.laurentCoeff, sub_zero, neg_add']
-
 /-- The punctured disc as the annulus `0 < |z - 0| < r` of §1.10. -/
 private lemma puncturedDisc_eq (r : ℝ) :
     puncturedDisc r = {z : ℂ | 0 < ‖z - 0‖ ∧ ‖z - 0‖ < r} := by
@@ -201,10 +198,11 @@ private lemma isOpen_puncturedDisc (r : ℝ) : IsOpen (puncturedDisc r) :=
   (isOpen_lt continuous_const continuous_norm).inter (isOpen_lt continuous_norm continuous_const)
 
 /-- Radius independence of the Laurent coefficients in a punctured disc. -/
-private lemma laurentCoeff_eq_of_le_puncturedDisc {f : ℂ → ℂ} {r : ℝ}
+private lemma laurentCoeff_zero_eq_of_le_puncturedDisc {f : ℂ → ℂ} {r : ℝ}
     (hf : DifferentiableOn ℂ f (puncturedDisc r)) {ρ ρ' : ℝ} (hρ : 0 < ρ) (hle : ρ ≤ ρ')
-    (hρ' : ρ' < r) (n : ℤ) : laurentCoeff f ρ' n = laurentCoeff f ρ n := by
-  unfold laurentCoeff
+    (hρ' : ρ' < r) (n : ℤ) : AlgebraicAnalytic.laurentCoeff f 0 ρ' n =
+        AlgebraicAnalytic.laurentCoeff f 0 ρ n := by
+  simp only [laurentCoeff_zero_eq]
   congr 1
   have hsub : closedBall (0 : ℂ) ρ' \ ball 0 ρ ⊆ puncturedDisc r := by
     intro z hz
@@ -224,19 +222,20 @@ private lemma laurentCoeff_eq_of_le_puncturedDisc {f : ℂ → ℂ} {r : ℝ}
       (ball_subset_closedBall h)⟩)
 
 /-- Laurent coefficients do not depend on the radius in the punctured disc. -/
-private lemma laurentCoeff_eq_puncturedDisc {f : ℂ → ℂ} {r : ℝ}
+private lemma laurentCoeff_zero_eq_puncturedDisc {f : ℂ → ℂ} {r : ℝ}
     (hf : DifferentiableOn ℂ f (puncturedDisc r)) {ρ ρ' : ℝ} (hρ : 0 < ρ) (hρr : ρ < r)
-    (hρ' : 0 < ρ') (hρ'r : ρ' < r) (n : ℤ) : laurentCoeff f ρ n = laurentCoeff f ρ' n := by
+    (hρ' : 0 < ρ') (hρ'r : ρ' < r) (n : ℤ) : AlgebraicAnalytic.laurentCoeff f 0 ρ n =
+        AlgebraicAnalytic.laurentCoeff f 0 ρ' n := by
   rcases le_total ρ ρ' with h | h
-  · exact (laurentCoeff_eq_of_le_puncturedDisc hf hρ h hρ'r n).symm
-  · exact laurentCoeff_eq_of_le_puncturedDisc hf hρ' h hρr n
+  · exact (laurentCoeff_zero_eq_of_le_puncturedDisc hf hρ h hρ'r n).symm
+  · exact laurentCoeff_zero_eq_of_le_puncturedDisc hf hρ' h hρr n
 
 /-- The Laurent coefficient as a Fourier coefficient on the circle `|z| = s`. -/
-private lemma laurentCoeff_eq_integral (h : ℂ → ℂ) {s : ℝ} (hs : 0 < s) (n : ℤ) :
-    laurentCoeff h s n = (2 * π * (s : ℂ) ^ n)⁻¹ *
+private lemma laurentCoeff_zero_eq_integral (h : ℂ → ℂ) {s : ℝ} (hs : 0 < s) (n : ℤ) :
+    AlgebraicAnalytic.laurentCoeff h 0 s n = (2 * π * (s : ℂ) ^ n)⁻¹ *
       ∫ θ in (0 : ℝ)..2 * π, h (s * Complex.exp (θ * I)) * Complex.exp (-(n * θ * I)) := by
   have hs0 : (s : ℂ) ≠ 0 := ofReal_ne_zero.2 hs.ne'
-  rw [laurentCoeff, circleIntegral]
+  rw [laurentCoeff_zero_eq, circleIntegral]
   simp only [deriv_circleMap, circleMap, zero_add, smul_eq_mul]
   have hpt : ∀ θ : ℝ, (s : ℂ) * Complex.exp (θ * I) * I * (h (s * Complex.exp (θ * I)) *
       ((s : ℂ) * Complex.exp (θ * I)) ^ (-(n + 1))) =
@@ -351,12 +350,13 @@ coefficients `f_n = (2πi)⁻¹ ∮_{|z|=ρ} f(z) z^{-n-1} dz` do not depend on 
 @[dlmf 2.10.E25, dlmf 2.10.E26]
 theorem laurent_expansion {f : ℂ → ℂ} {r : ℝ} (hf : DifferentiableOn ℂ f (puncturedDisc r))
     {ρ ρ' : ℝ} (hρ : 0 < ρ) (hρr : ρ < r) (hρ' : 0 < ρ') (hρ'r : ρ' < r) :
-    laurentCoeff f ρ = laurentCoeff f ρ' ∧
-      ∀ z ∈ puncturedDisc r, HasSum (fun n : ℤ => laurentCoeff f ρ n * z ^ n) (f z) := by
-  refine ⟨funext fun n => laurentCoeff_eq_puncturedDisc hf hρ hρr hρ' hρ'r n, fun z hz => ?_⟩
+    AlgebraicAnalytic.laurentCoeff f 0 ρ = AlgebraicAnalytic.laurentCoeff f 0 ρ' ∧
+      ∀ z ∈ puncturedDisc r,
+          HasSum (fun n : ℤ => AlgebraicAnalytic.laurentCoeff f 0 ρ n * z ^ n) (f z) := by
+  refine ⟨funext fun n => laurentCoeff_zero_eq_puncturedDisc hf hρ hρr hρ' hρ'r n, fun z hz => ?_⟩
   rw [puncturedDisc_eq] at hf hz
   have := DLMF.AlgebraicAnalytic.hasSum_laurentSeries le_rfl hf ⟨hρ, hρr⟩ hz
-  simpa only [laurentCoeff_eq_laurentCoeff_zero, sub_zero] using this
+  simpa only [sub_zero] using this
 
 /-- DLMF 2.10.27–2.10.29 (Darboux's method, conditions (a)–(c)): let `f` and the comparison
 function `g` be analytic on `0 < |z| < r` (`g_n` its Laurent coefficients, 2.10.27), and let
@@ -368,10 +368,12 @@ theorem darboux {f g h : ℂ → ℂ} {r : ℝ} (hr : 0 < r)
     (hf : DifferentiableOn ℂ f (puncturedDisc r)) (hg : DifferentiableOn ℂ g (puncturedDisc r))
     (hh : ContinuousOn h {z : ℂ | 0 < ‖z‖ ∧ ‖z‖ ≤ r})
     (hfg : EqOn h (f - g) (puncturedDisc r)) {ρ : ℝ} (hρ : 0 < ρ) (hρr : ρ < r) :
-    (∀ n : ℤ, laurentCoeff f ρ n - laurentCoeff g ρ n =
+    (∀ n : ℤ, AlgebraicAnalytic.laurentCoeff f 0 ρ n - AlgebraicAnalytic.laurentCoeff g 0 ρ n =
       (2 * π * (r : ℂ) ^ n)⁻¹ *
         ∫ θ in (0 : ℝ)..2 * π, h (r * Complex.exp (θ * I)) * Complex.exp (-(n * θ * I))) ∧
-    Tendsto (fun n : ℤ => (laurentCoeff f ρ n - laurentCoeff g ρ n) * (r : ℂ) ^ n) cofinite
+    Tendsto (fun n : ℤ =>
+        (AlgebraicAnalytic.laurentCoeff f 0 ρ n - AlgebraicAnalytic.laurentCoeff g 0 ρ n) *
+        (r : ℂ) ^ n) cofinite
       (𝓝 0) := by
   have hr0 : (r : ℂ) ≠ 0 := ofReal_ne_zero.2 hr.ne'
   have hpi : (π : ℂ) ≠ 0 := ofReal_ne_zero.2 Real.pi_ne_zero
@@ -381,7 +383,9 @@ theorem darboux {f g h : ℂ → ℂ} {r : ℝ} (hr : 0 < r)
     rw [mem_sphere, dist_zero_right] at hz
     exact ⟨hz ▸ hs, hz ▸ hsr⟩
   -- `f_n - g_n` is the Laurent coefficient of `h`
-  have hsubc : ∀ n : ℤ, laurentCoeff f ρ n - laurentCoeff g ρ n = laurentCoeff h ρ n := by
+  have hsubc : ∀ n : ℤ, AlgebraicAnalytic.laurentCoeff f 0 ρ n -
+      AlgebraicAnalytic.laurentCoeff g 0 ρ n =
+      AlgebraicAnalytic.laurentCoeff h 0 ρ n := by
     intro n
     have hci : ∀ F : ℂ → ℂ, DifferentiableOn ℂ F (puncturedDisc r) →
         CircleIntegrable (fun z => F z * z ^ (-(n + 1))) 0 ρ := fun F hF => by
@@ -392,7 +396,7 @@ theorem darboux {f g h : ℂ → ℂ} {r : ℝ} (hr : 0 < r)
         have h1 := hz'.1; rw [h0, norm_zero] at h1; exact lt_irrefl _ h1
       exact ((hF.continuousOn.mono (hsph ρ hρ hρr)) z hz).mul
         ((continuous_id.continuousAt.zpow₀ _ (Or.inl hz0)).continuousWithinAt)
-    rw [laurentCoeff, laurentCoeff, laurentCoeff, ← mul_sub,
+    rw [laurentCoeff_zero_eq, laurentCoeff_zero_eq, laurentCoeff_zero_eq, ← mul_sub,
       ← circleIntegral.integral_sub (hci f hf) (hci g hg)]
     congr 1
     refine circleIntegral.integral_congr hρ.le fun z hz => ?_
@@ -401,7 +405,7 @@ theorem darboux {f g h : ℂ → ℂ} {r : ℝ} (hr : 0 < r)
   -- the Fourier integrals on circles of radius `s`
   set Φ : ℤ → ℝ → ℂ := fun n s => ∫ θ in (0 : ℝ)..2 * π,
     h (s * Complex.exp (θ * I)) * Complex.exp (-(n * θ * I)) with hΦ
-  have key : ∀ n : ℤ, laurentCoeff h ρ n = (2 * π * (r : ℂ) ^ n)⁻¹ * Φ n r := by
+  have key : ∀ n : ℤ, AlgebraicAnalytic.laurentCoeff h 0 ρ n = (2 * π * (r : ℂ) ^ n)⁻¹ * Φ n r := by
     intro n
     set c : ℝ → ℝ := fun s => max ρ (min s r)
     have hc : Continuous c := continuous_const.max (continuous_id.min continuous_const)
@@ -421,23 +425,24 @@ theorem darboux {f g h : ℂ → ℂ} {r : ℝ} (hr : 0 < r)
       exact (continuous_ofReal.comp (hc.comp continuous_fst)).mul (by fun_prop)
     have heq : ∀ s ∈ Ioo ρ r, (∫ θ in (0 : ℝ)..2 * π,
         h (c s * Complex.exp (θ * I)) * Complex.exp (-(n * θ * I))) =
-        2 * π * (s : ℂ) ^ n * laurentCoeff h ρ n := by
+        2 * π * (s : ℂ) ^ n * AlgebraicAnalytic.laurentCoeff h 0 ρ n := by
       intro s hs
       have hcs : c s = s := by
         simp only [c, min_eq_left hs.2.le, max_eq_right hs.1.le]
-      rw [hcs, laurentCoeff_eq_puncturedDisc hhd hρ hρr (hρ.trans hs.1) hs.2 n,
-        laurentCoeff_eq_integral h (hρ.trans hs.1) n]
+      rw [hcs, laurentCoeff_zero_eq_puncturedDisc hhd hρ hρr (hρ.trans hs.1) hs.2 n,
+        laurentCoeff_zero_eq_integral h (hρ.trans hs.1) n]
       have hsn : (s : ℂ) ^ n ≠ 0 := zpow_ne_zero n (ofReal_ne_zero.2 (hρ.trans hs.1).ne')
       rw [← mul_assoc, mul_inv_cancel₀ (mul_ne_zero (mul_ne_zero two_ne_zero hpi) hsn), one_mul]
     have hcr : c r = r := by simp only [c, min_self, max_eq_right hρr.le]
     have hlim1 := (hΨ.tendsto r).mono_left (nhdsWithin_le_nhds (s := Iio r))
-    have hlim2 : Tendsto (fun s : ℝ => 2 * π * (s : ℂ) ^ n * laurentCoeff h ρ n) (𝓝[<] r)
-        (𝓝 (2 * π * (r : ℂ) ^ n * laurentCoeff h ρ n)) := by
+    have hlim2 : Tendsto
+        (fun s : ℝ => 2 * π * (s : ℂ) ^ n * AlgebraicAnalytic.laurentCoeff h 0 ρ n) (𝓝[<] r)
+        (𝓝 (2 * π * (r : ℂ) ^ n * AlgebraicAnalytic.laurentCoeff h 0 ρ n)) := by
       refine ((tendsto_const_nhds.mul ?_).mul tendsto_const_nhds).mono_left nhdsWithin_le_nhds
       exact ((continuous_ofReal.continuousAt.zpow₀ n (Or.inl hr0))).tendsto
     have hev : (fun s => ∫ θ in (0 : ℝ)..2 * π,
         h (c s * Complex.exp (θ * I)) * Complex.exp (-(n * θ * I))) =ᶠ[𝓝[<] r]
-        fun s : ℝ => 2 * π * (s : ℂ) ^ n * laurentCoeff h ρ n := by
+        fun s : ℝ => 2 * π * (s : ℂ) ^ n * AlgebraicAnalytic.laurentCoeff h 0 ρ n := by
       filter_upwards [Ioo_mem_nhdsLT hρr] with s hs using heq s hs
     have huniq := tendsto_nhds_unique (hlim1.congr' hev) hlim2
     simp only [hcr] at huniq
@@ -469,7 +474,9 @@ theorem darboux_singular {f g h : ℂ → ℂ} {r : ℝ} (hr : 0 < r)
     (hfg : EqOn h (f - g) (puncturedDisc r)) (σ : ℂ → ℝ) (hσ : ∀ w ∈ Z, 0 < σ w)
     (hsing : ∀ w ∈ Z, (f - g) =O[𝓝[puncturedDisc r] w] fun z => ‖z - w‖ ^ (σ w - 1))
     {ρ : ℝ} (hρ : 0 < ρ) (hρr : ρ < r) :
-    Tendsto (fun n : ℤ => (laurentCoeff f ρ n - laurentCoeff g ρ n) * (r : ℂ) ^ n) cofinite
+    Tendsto (fun n : ℤ =>
+        (AlgebraicAnalytic.laurentCoeff f 0 ρ n - AlgebraicAnalytic.laurentCoeff g 0 ρ n) *
+        (r : ℂ) ^ n) cofinite
       (𝓝 0) := by
   sorry
 
@@ -482,7 +489,9 @@ theorem darboux_smooth {f g h : ℂ → ℂ} {r : ℝ} (hr : 0 < r)
     (hfg : EqOn h (f - g) (puncturedDisc r)) {m : ℕ}
     (hm : ContDiff ℝ m fun θ : ℝ => h (r * Complex.exp (θ * I))) {ρ : ℝ} (hρ : 0 < ρ)
     (hρr : ρ < r) :
-    Tendsto (fun n : ℤ => (laurentCoeff f ρ n - laurentCoeff g ρ n) * (r : ℂ) ^ n *
+    Tendsto (fun n : ℤ =>
+        (AlgebraicAnalytic.laurentCoeff f 0 ρ n - AlgebraicAnalytic.laurentCoeff g 0 ρ n)
+        * (r : ℂ) ^ n *
       ((|n| : ℤ) : ℂ) ^ m) cofinite (𝓝 0) := by
   have hr0 : (r : ℂ) ≠ 0 := ofReal_ne_zero.2 hr.ne'
   have hpi : (π : ℂ) ≠ 0 := ofReal_ne_zero.2 Real.pi_ne_zero
@@ -524,7 +533,9 @@ theorem darboux_smooth_singular {f g : ℂ → ℂ} {r : ℝ} (hr : 0 < r)
     (hsing : ∀ w ∈ Z, iteratedDeriv m (f - g) =O[𝓝[puncturedDisc r] w]
       fun z => ‖z - w‖ ^ (σ w - 1))
     {ρ : ℝ} (hρ : 0 < ρ) (hρr : ρ < r) :
-    Tendsto (fun n : ℤ => (laurentCoeff f ρ n - laurentCoeff g ρ n) * (r : ℂ) ^ n *
+    Tendsto (fun n : ℤ =>
+        (AlgebraicAnalytic.laurentCoeff f 0 ρ n - AlgebraicAnalytic.laurentCoeff g 0 ρ n)
+        * (r : ℂ) ^ n *
       ((|n| : ℤ) : ℂ) ^ m) cofinite (𝓝 0) := by
   sorry
 
@@ -534,15 +545,15 @@ theorem darboux_smooth_singular {f g : ℂ → ℂ} {r : ℝ} (hr : 0 < r)
 (principal power). Corollary of the project's generating function 18.12.11. -/
 @[dlmf 2.10.E33]
 theorem legendre_generating_cos (α : ℝ) {z : ℂ} (hz : ‖z‖ < 1) :
-    HasSum (fun n : ℕ => DLMF.OrthogonalPolynomials.legendrePolyP n (Real.cos α) * z ^ n)
+    HasSum (fun n : ℕ => DLMF.OrthogonalPolynomials.legendrePolynomialP n (Real.cos α) * z ^ n)
       ((1 - 2 * (Real.cos α : ℂ) * z + z ^ 2) ^ (-1 / 2 : ℂ)) :=
   DLMF.OrthogonalPolynomials.legendre_generating_function (Real.abs_cos_le_one α) hz
 
 /-- `(1/2)ₙ/n! = Γ(n + 1/2)/(√π n!)`. -/
-private lemma poch_half_div_factorial (n : ℕ) :
-    DLMF.Hypergeometric.poch (1 / 2) n / n ! =
+private lemma pochhammer_half_div_factorial (n : ℕ) :
+    DLMF.Hypergeometric.pochhammer (1 / 2) n / n ! =
       ((Real.Gamma (n + 1 / 2) / Real.sqrt π / n ! : ℝ) : ℂ) := by
-  have h := DLMF.Hypergeometric.Gamma_add_nat_eq_poch_mul_Gamma (α := (1 / 2 : ℂ))
+  have h := DLMF.Hypergeometric.Gamma_add_nat_eq_pochhammer_mul_Gamma (α := (1 / 2 : ℂ))
     (by norm_num) n
   have hG : Complex.Gamma (1 / 2) = (Real.sqrt π : ℂ) := by
     rw [Complex.Gamma_one_half_eq, Real.sqrt_eq_rpow, ofReal_cpow Real.pi_pos.le]
@@ -579,7 +590,7 @@ theorem legendreComparison_hasSum {α : ℝ} (hα : α ∈ Ioo 0 π) {z : ℂ} (
   convert h using 1
   · funext n
     rw [mul_pow, mul_pow, ← Complex.exp_nat_mul, ← Complex.exp_nat_mul]
-    have hc := poch_half_div_factorial n
+    have hc := pochhammer_half_div_factorial n
     -- coefficient identity
     have hK : ((2 / (π * Real.sin α)) ^ (1 / 2 : ℝ) : ℝ) = 2 * K / Real.sqrt π := by
       simp only [K]
@@ -617,8 +628,8 @@ theorem legendreComparison_hasSum {α : ℝ} (hα : α ∈ Ioo 0 π) {z : ℂ} (
 `P_n(cos α) = (2/(πn sin α))^{1/2} cos(nα + α/2 - π/4) + o(n^{-1})` as `n → ∞`.
 DLMF states the example for `α ∈ (0, 2π)`; for `π < α < 2π` the right side is not real. -/
 @[dlmf 2.10.E36 "corrected: α ∈ (0, π), not (0, 2π)", dlmf 2.10.iv]
-theorem legendrePolyP_cos_asymptotic {α : ℝ} (hα : α ∈ Ioo 0 π) :
-    Tendsto (fun n : ℕ => (n : ℝ) * ‖DLMF.OrthogonalPolynomials.legendrePolyP n (Real.cos α) -
+theorem legendrePolynomialP_cos_asymptotic {α : ℝ} (hα : α ∈ Ioo 0 π) :
+    Tendsto (fun n : ℕ => (n : ℝ) * ‖DLMF.OrthogonalPolynomials.legendrePolynomialP n (Real.cos α) -
       (((2 / (π * n * Real.sin α)) ^ (1 / 2 : ℝ) *
         Real.cos (n * α + α / 2 - π / 4) : ℝ) : ℂ)‖) atTop (𝓝 0) := by
   sorry

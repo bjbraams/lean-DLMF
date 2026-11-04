@@ -16,7 +16,7 @@ public import Mathlib.Analysis.SpecialFunctions.Complex.Arctan
 
 ## Main definitions
 
-* `gaussHGCoeff`: the coefficient of `z^n` in `₂F₁(a,b;c;z)`.
+* `gaussHypergeometricCoeff`: the coefficient of `z^n` in `₂F₁(a,b;c;z)`.
 
 ## Main results
 
@@ -32,13 +32,14 @@ open scoped Real Nat Topology ENNReal Interval
 namespace DLMF.Hypergeometric
 
 /-- The coefficient of `z^n` in `₂F₁(a,b;c;z)`. -/
-def gaussHGCoeff (a b c : ℂ) (n : ℕ) : ℂ :=
-  poch a n * poch b n / (poch c n * n !)
+def gaussHypergeometricCoeff (a b c : ℂ) (n : ℕ) : ℂ :=
+  pochhammer a n * pochhammer b n / (pochhammer c n * n !)
 /-- Mathlib's `ordinaryHypergeometricCoefficient` agrees with the project coefficient
-  `gaussHGCoeff`. -/
+  `gaussHypergeometricCoeff`. -/
 theorem ordinaryHypergeometricCoefficient_eq (a b c : ℂ) (n : ℕ) :
-    ordinaryHypergeometricCoefficient a b c n = gaussHGCoeff a b c n := by
-  simp [ordinaryHypergeometricCoefficient, gaussHGCoeff, poch, div_eq_mul_inv, mul_assoc,
+    ordinaryHypergeometricCoefficient a b c n = gaussHypergeometricCoeff a b c n := by
+  simp [ordinaryHypergeometricCoefficient, gaussHypergeometricCoeff, pochhammer,
+      div_eq_mul_inv, mul_assoc,
     mul_left_comm, mul_comm]
 
 end DLMF.Hypergeometric

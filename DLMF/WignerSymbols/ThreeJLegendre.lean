@@ -16,15 +16,15 @@ symbols (DLMF §34.3(vii)).
 
 ## Main results
 
-* `legendrePolyP_mul_legendrePolyP`: DLMF 34.3.19, for every complex argument (stronger than
-  DLMF).
+* `legendrePolynomialP_mul_legendrePolynomialP`: DLMF 34.3.19, for every complex argument (stronger
+  than DLMF).
 * `sphericalHarmonic_mul_sphericalHarmonic`: DLMF 34.3.20.
-* `integral_legendrePolyP_mul_mul`: DLMF 34.3.21.
+* `integral_legendrePolynomialP_mul_mul`: DLMF 34.3.21.
 * `integral_sphericalHarmonic_mul_mul`: Gaunt's integral, DLMF 34.3.22.
 
 ## Implementation notes
 
-The Legendre polynomials `P_l` of §18.3 are `DLMF.OrthogonalPolynomials.legendrePolyP` and the
+The Legendre polynomials `P_l` of §18.3 are `DLMF.OrthogonalPolynomials.legendrePolynomialP` and the
 spherical harmonics `Y_{l,m}` of §14.30 are `DLMF.Legendre.sphericalHarmonic` (with
 `Y_{l,m} = 0` for `|m| > l`). The sums over `l` run over `0, …, l₁ + l₂` and over
 `m = -l, …, l`; the summands vanish outside the triangle conditions.
@@ -42,10 +42,10 @@ open DLMF.OrthogonalPolynomials DLMF.Legendre
 /-- DLMF 34.3.19, for every complex argument (stronger than DLMF, which takes `x = cos θ`):
 `P_{l₁}(x) P_{l₂}(x) = ∑_l (2l+1) (l₁ l₂ l; 0 0 0)² P_l(x)`. -/
 @[dlmf 34.3.E19]
-theorem legendrePolyP_mul_legendrePolyP (l₁ l₂ : ℕ) (x : ℂ) :
-    legendrePolyP l₁ x * legendrePolyP l₂ x =
+theorem legendrePolynomialP_mul_legendrePolynomialP (l₁ l₂ : ℕ) (x : ℂ) :
+    legendrePolynomialP l₁ x * legendrePolynomialP l₂ x =
       ∑ l ∈ range (l₁ + l₂ + 1),
-        ((2 * (l : ℝ) + 1) * wigner3j l₁ l₂ l 0 0 0 ^ 2 : ℝ) * legendrePolyP l x := by
+        ((2 * (l : ℝ) + 1) * wigner3j l₁ l₂ l 0 0 0 ^ 2 : ℝ) * legendrePolynomialP l x := by
   sorry
 
 /-- DLMF 34.3.20: `Y_{l₁,m₁} Y_{l₂,m₂}`
@@ -62,9 +62,9 @@ theorem sphericalHarmonic_mul_sphericalHarmonic (l₁ l₂ : ℕ) (m₁ m₂ : �
 /-- DLMF 34.3.21: `∫₀^π P_{l₁}(cos θ) P_{l₂}(cos θ) P_{l₃}(cos θ) sin θ dθ`
 `= 2 (l₁ l₂ l₃; 0 0 0)²`. -/
 @[dlmf 34.3.E21]
-theorem integral_legendrePolyP_mul_mul (l₁ l₂ l₃ : ℕ) :
-    ∫ θ in (0 : ℝ)..π, legendrePolyP l₁ (Real.cos θ) * legendrePolyP l₂ (Real.cos θ) *
-        legendrePolyP l₃ (Real.cos θ) * (Real.sin θ : ℂ) =
+theorem integral_legendrePolynomialP_mul_mul (l₁ l₂ l₃ : ℕ) :
+    ∫ θ in (0 : ℝ)..π, legendrePolynomialP l₁ (Real.cos θ) * legendrePolynomialP l₂ (Real.cos θ) *
+        legendrePolynomialP l₃ (Real.cos θ) * (Real.sin θ : ℂ) =
       ((2 * wigner3j l₁ l₂ l₃ 0 0 0 ^ 2 : ℝ) : ℂ) := by
   sorry
 

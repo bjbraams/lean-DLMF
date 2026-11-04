@@ -560,14 +560,18 @@ theorem regularized_integral_rpow_eq_zero :
 
 /-- DLMF 2.6.60: with the hypotheses of 2.6.55 (`f_n(t) = O(t^{n+α-1})` as `t → 0+`), the
 continued Mellin transform of `f` equals the Mellin transform of `f_n` in the strip
-`1 - n - α < ℜz < 2 - n - α` where the latter converges: `𝓜f(z) = 𝓜f_n(z)`. -/
+`1 - n - α < ℜz < 2 - n - α` where the latter converges: `𝓜f(z) = 𝓜f_n(z)`. The domain `U`
+of the continuation is assumed convex: DLMF means the continuation through the strip of
+convergence, and on a domain that winds around a branch point (for example the slit plane) a
+holomorphic continuation can take another branch at `z`. -/
 @[dlmf 2.6.E60, dlmf 2.6.E55]
 theorem mellin_continuation_eq_mellin_remainder {f : ℝ → ℂ} {a : ℕ → ℂ} {α : ℝ}
     (hα0 : 0 < α) (hα1 : α ≤ 1) {n : ℕ} (hn : 1 ≤ n)
     (hloc : ∀ R, 0 < R → IntegrableOn f (Ioc 0 R))
     (hfn : (fun t : ℝ => f t - ∑ j ∈ range n, a j * ((t ^ ((j : ℝ) + α - 1) : ℝ) : ℂ))
       =O[𝓝[>] 0] (fun t : ℝ => t ^ ((n : ℝ) + α - 1)))
-    {M : ℂ → ℂ} {U : Set ℂ} (hM : IsMellinContinuationOn f M U) {z : ℂ} (hz : z ∈ U)
+    {M : ℂ → ℂ} {U : Set ℂ} (hM : IsMellinContinuationOn f M U) (hUc : Convex ℝ U)
+    {z : ℂ} (hz : z ∈ U)
     (hz1 : 1 - n - α < z.re) (hz2 : z.re < 2 - n - α)
     (hconv : MellinConvergent
       (fun t : ℝ => f t - ∑ j ∈ range n, a j * ((t ^ ((j : ℝ) + α - 1) : ℝ) : ℂ)) z) :

@@ -42,9 +42,9 @@ weighted Wronskian `W = (1-x²)(u'y - uy')` is strictly monotone wherever `u y >
 
 The end comparisons use `ODE.sturmCount_exists_pos_of_deriv_ge`. The comparison functions are
 the polynomial cases, obtained from DLMF 14.3.1 and Euler's transformation 15.8.1, whose zeros
-are those of the Gegenbauer polynomial (`ultrasphPoly_zeros_Ioo`, DLMF §18.16(i)). Simplicity of
-the zeros follows from the Wronskians DLMF 14.2.3–14.2.4. The zero count needs no continuity in
-the parameters. Helper names live in the namespace `LegendreSturm`.
+are those of the Gegenbauer polynomial (`ultrasphericalPolynomial_zeros_Ioo`, DLMF §18.16(i)).
+Simplicity of the zeros follows from the Wronskians DLMF 14.2.3–14.2.4. The zero count needs no
+continuity in the parameters. Helper names live in the namespace `LegendreSturm`.
 -/
 
 @[expose] public noncomputable section
@@ -776,21 +776,22 @@ theorem LegendreSturm.ferrersP_polynomial {m : ℝ} (hm : 0 ≤ m) (j : ℕ) {x 
   have hc : ∀ k : ℕ, (1 : ℂ) + m ≠ -(k : ℂ) := fun k h => by
     have := congrArg re h; simp at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
   have hU := eval_ultrasphPolyR (show -1/2 < m + 1/2 by linarith) j x
-  unfold ultrasphPoly at hU
+  unfold ultrasphericalPolynomial at hU
   unfold ferrersP
-  rw [regularizedGaussHG_euler _ _ _ ht, regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ htn]
+  rw [regularizedGaussHypergeometric_euler _ _ _ ht,
+      regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ htn]
   have e1 : (1:ℂ) - ((-m:ℝ):ℂ) - (((m + j:ℝ):ℂ) + 1) - -((m + j:ℝ):ℂ) = ((-(-m):ℝ):ℂ) := by
     push_cast; ring
   have e2 : (1:ℂ) - ((-m:ℝ):ℂ) - (((m + j:ℝ):ℂ) + 1) = -(j:ℂ) := by push_cast; ring
   have e3 : (1:ℂ) - ((-m:ℝ):ℂ) - -((m + j:ℝ):ℂ) = (j:ℂ) + 2 * ((m + 1/2 : ℝ) : ℂ) := by
     push_cast; ring
   have e4 : (1:ℂ) - ((-m:ℝ):ℂ) = ((m + 1/2 : ℝ) : ℂ) + 1/2 := by push_cast; ring
-  rw [e1, e2, e3, e4, regularizedGaussHGFun_eq_div_Gamma
+  rw [e1, e2, e3, e4, regularizedGaussHypergeometricFun_eq_div_Gamma
       (by rw [← e4]; push_cast; simpa [sub_neg_eq_add] using hc)]
   have hg := ferrers_quadratic_gauge ((-m:ℝ):ℂ) hx
   rw [show (1:ℂ) - (1 - (x:ℂ)) / 2 = (1 + (x:ℂ)) / 2 by ring]
   rw [show 2 * ((m + 1/2 : ℝ) : ℂ) = ((2 * m + 1 : ℝ) : ℂ) by push_cast; ring,
-    poch_ofReal_eq_eval] at hU
+    pochhammer_ofReal_eq_eval] at hU
   have hpoch : 0 < (ascPochhammer ℝ j).eval (2 * m + 1) := ascPochhammer_pos _ _ (by linarith)
   have hF : ₂F₁ (-(j:ℂ)) ((j:ℂ) + ((2 * m + 1 : ℝ) : ℂ)) (((m + 1/2 : ℝ) : ℂ) + 1/2)
       ((1 - (x:ℂ)) / 2) = (((ultrasphPolyR (m + 1 / 2) j).eval x : ℝ) : ℂ) * j ! /
@@ -903,21 +904,21 @@ theorem LegendreSturm.rpow_le {m x : ℝ} (hm : 0 ≤ m) (hx0 : 0 ≤ x) (hx1 : 
 theorem LegendreSturm.ferrersP_near_one (ν : ℝ) {m : ℝ} (hm : 0 ≤ m) :
     ∃ s₀ < 1, ∃ M, ∀ x ∈ Ioo s₀ 1, (ferrersP ν (-m : ℝ) x).re ≠ 0 ∧
       |(ferrersP ν (-m : ℝ) x).re| ≤ M * (1 - x ^ 2) ^ (m / 2) := by
-  set g : ℝ → ℂ := fun x => regularizedGaussHG ((ν:ℂ) + 1) (-(ν:ℂ)) (1 - ((-m:ℝ):ℂ))
+  set g : ℝ → ℂ := fun x => regularizedGaussHypergeometric ((ν:ℂ) + 1) (-(ν:ℂ)) (1 - ((-m:ℝ):ℂ))
     ((1 - (x:ℂ)) / 2) with hg
   have h0c : (0:ℂ) ∈ cutPlane := mem_cutPlane_of_norm_lt_one (by simp)
   have hcont : ContinuousAt g 1 := by
     have h1 : ContinuousAt (fun x : ℝ => (1 - (x:ℂ)) / 2) 1 := by fun_prop
     have h2 : ((1:ℂ) - ((1:ℝ):ℂ)) / 2 = 0 := by simp
-    have h3 := (analyticOnNhd_regularizedGaussHG ((ν:ℂ) + 1) (-(ν:ℂ)) (1 - ((-m:ℝ):ℂ)) 0
+    have h3 := (analyticOnNhd_regularizedGaussHypergeometric ((ν:ℂ) + 1) (-(ν:ℂ)) (1 - ((-m:ℝ):ℂ)) 0
       h0c).continuousAt
     exact h3.comp_of_eq h1 h2
   have hc : ∀ k : ℕ, (1:ℂ) - ((-m:ℝ):ℂ) ≠ -(k:ℂ) := fun k h => by
     have := congrArg re h; simp at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
   have hg1 : g 1 = ((Real.Gamma (1 + m))⁻¹ : ℝ) := by
     simp only [hg, ofReal_one, sub_self, zero_div]
-    rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ (by simp),
-      regularizedGaussHGFun_eq_div_Gamma hc, ordinaryHypergeometric_zero,
+    rw [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ (by simp),
+      regularizedGaussHypergeometricFun_eq_div_Gamma hc, ordinaryHypergeometric_zero,
       show (1:ℂ) - ((-m:ℝ):ℂ) = ((1 + m : ℝ) : ℂ) by push_cast; ring, Complex.Gamma_ofReal]
     push_cast; ring
   have hG := Real.Gamma_pos_of_pos (show 0 < 1 + m by linarith)
@@ -959,7 +960,7 @@ theorem LegendreSturm.polynomial_data {m : ℝ} (hm : 0 ≤ m) (j : ℕ) :
         (1 - x ^ 2) * (ferrersP ((m + j : ℝ) : ℂ) ((-m : ℝ) : ℂ) x).re ^ 2 ≤ K * (1 + x)) ∧
       (∃ s₀ < 1, ∃ c > 0, ∀ x ∈ Ioo s₀ 1,
         c * (1 - x ^ 2) ^ (m / 2) ≤ |(ferrersP ((m + j : ℝ) : ℂ) ((-m : ℝ) : ℂ) x).re|) := by
-  obtain ⟨e, he, heI, hz⟩ := ultrasphPoly_zeros_Ioo (lam := m + 1/2) (by linarith)
+  obtain ⟨e, he, heI, hz⟩ := ultrasphericalPolynomial_zeros_Ioo (lam := m + 1/2) (by linarith)
     (by linarith) j
   set P := ultrasphPolyR (m + 1 / 2) j with hP
   set B := LegendreSturm.polynomialConst m j with hB

@@ -34,18 +34,19 @@ Hermite polynomials, and also for the Gegenbauer, Legendre and Chebyshev `T` pol
 * `jacobi_isOrthogonalPolynomials`, `laguerre_isOrthogonalPolynomials`,
   `hermite_isOrthogonalPolynomials`, `ultrasph_isOrthogonalPolynomials`,
   `legendre_isOrthogonalPolynomials`, `chebyshevT_isOrthogonalPolynomials`: the instances.
-* `jacobiPolyP_zeros_Ioo`, `laguerrePolyL_zeros_pos`, `hermitePolyH_zeros_bound`,
-  `ultrasphPoly_zeros_Ioo`, `legendrePolyP_zeros_Ioo`, `chebyshevT_zeros_Ioo`: the zeros are
-  real, simple and in the interval of orthogonality (DLMF §18.16); for Hermite with the bound
-  `|x| < √(2n+1)` of DLMF 18.16.16.
+* `jacobiPolynomialP_zeros_Ioo`, `laguerrePolynomialL_zeros_pos`, `hermitePolynomialH_zeros_bound`,
+  `ultrasphericalPolynomial_zeros_Ioo`, `legendrePolynomialP_zeros_Ioo`, `chebyshevT_zeros_Ioo`: the
+  zeros are real, simple and in the interval of orthogonality (DLMF §18.16); for Hermite with the
+  bound `|x| < √(2n+1)` of DLMF 18.16.16.
 * `jacobi_gauss_quadrature`, `laguerre_gauss_quadrature`, `hermite_gauss_quadrature`: Gauss
   quadrature for each family.
 * `jacobi_christoffel_darboux`, `laguerre_christoffel_darboux`, `hermite_christoffel_darboux`:
   the Christoffel–Darboux formula for each family.
 * `IsOrthogonalPolynomials.ae_eq_zero_of_forall_integral_mul_eq_zero`: completeness under a
   finite exponential moment, from Tau Ceti's moment determinacy.
-* `jacobiPolyP_complete`, `laguerrePolyL_complete`, `hermitePolyH_complete`,
-  `ultrasphPoly_complete`: completeness of the classical families in `L²` (DLMF §18.18(i)).
+* `jacobiPolynomialP_complete`, `laguerrePolynomialL_complete`, `hermitePolynomialH_complete`,
+  `ultrasphericalPolynomial_complete`: completeness of the classical families in `L²` (DLMF
+  §18.18(i)).
 
 ## Implementation notes
 
@@ -242,22 +243,22 @@ theorem hermite_isOrthogonalPolynomials : IsOrthogonalPolynomials hermiteMeasure
     (fun q => (TauCeti.integrable_eval_mul_exp_neg_sq q).integrableOn)
     hermitePolyHR_natDegree hermitePolyHR_ne_zero fun m n hmn => ?_
   rw [setIntegral_univ]
-  have := hermitePolyH_orthogonality m n
-  simp only [aeval_hermitePolyH_eq_eval, hmn, ite_false] at this
+  have := hermitePolynomialH_orthogonality m n
+  simp only [aeval_hermitePolynomialH_eq_eval, hmn, ite_false] at this
   exact this
 
 /-- Evaluating the integer Hermite polynomial at `z ∈ ℂ` agrees with evaluating its real form. -/
-theorem aeval_hermitePolyH_complex (n : ℕ) (z : ℂ) :
-    (aeval z (hermitePolyH n) : ℂ) = ((hermitePolyHR n).map (algebraMap ℝ ℂ)).eval z := by
+theorem aeval_hermitePolynomialH_complex (n : ℕ) (z : ℂ) :
+    (aeval z (hermitePolynomialH n) : ℂ) = ((hermitePolyHR n).map (algebraMap ℝ ℂ)).eval z := by
   rw [aeval_def, eval₂_eq_eval_map, hermitePolyHR, Polynomial.map_map]
   congr 2
 
 /-- The zeros of `H_n` are real and simple: the qualitative part of DLMF 18.16.16. -/
-theorem hermitePolyH_zeros_real (n : ℕ) :
+theorem hermitePolynomialH_zeros_real (n : ℕ) :
     ∃ x : Fin n → ℝ, StrictMono x ∧
-      ∀ z : ℂ, (aeval z (hermitePolyH n) : ℂ) = 0 ↔ ∃ i, z = (x i : ℂ) := by
+      ∀ z : ℂ, (aeval z (hermitePolynomialH n) : ℂ) = 0 ↔ ∃ i, z = (x i : ℂ) := by
   obtain ⟨x, hx, -, hz⟩ := hermite_isOrthogonalPolynomials.exists_strictMono_roots n
-  exact ⟨x, hx, fun z => by rw [aeval_hermitePolyH_complex]; exact hz z⟩
+  exact ⟨x, hx, fun z => by rw [aeval_hermitePolynomialH_complex]; exact hz z⟩
 
 /-! #### The bound `|x| < √(2n+1)` for the zeros of `H_n`
 
@@ -269,7 +270,7 @@ With `c = √(2n+1)` and `u_k = H_k(ξ)/c^k`, the recurrence reads
 theorem eval_hermitePolyHR_succ_succ (k : ℕ) (ξ : ℝ) :
     (hermitePolyHR (k + 2)).eval ξ =
       2 * ξ * (hermitePolyHR (k + 1)).eval ξ - 2 * (k + 1) * (hermitePolyHR k).eval ξ := by
-  simp only [hermitePolyHR, hermitePolyH_recurrence, Polynomial.map_sub, Polynomial.map_mul,
+  simp only [hermitePolyHR, hermitePolynomialH_recurrence, Polynomial.map_sub, Polynomial.map_mul,
     map_X, eval_sub, eval_mul, eval_X, eq_intCast]
   push_cast
   simp
@@ -353,22 +354,23 @@ theorem abs_lt_sqrt_of_hermitePolyHR_eval_eq_zero {n : ℕ} {ξ : ℝ}
   exact hξ.trans_lt hlt
 
 /-- The zeros of `H_n` are real, simple, and satisfy `|x| < √(2n+1)` (DLMF 18.16.16). -/
-theorem hermitePolyH_zeros_bound (n : ℕ) :
+theorem hermitePolynomialH_zeros_bound (n : ℕ) :
     ∃ x : Fin n → ℝ, StrictMono x ∧ (∀ i, |x i| < Real.sqrt (2 * n + 1)) ∧
-      ∀ z : ℂ, (aeval z (hermitePolyH n) : ℂ) = 0 ↔ ∃ i, z = (x i : ℂ) := by
+      ∀ z : ℂ, (aeval z (hermitePolynomialH n) : ℂ) = 0 ↔ ∃ i, z = (x i : ℂ) := by
   obtain ⟨x, hx, hmem, hz⟩ := hermite_isOrthogonalPolynomials.exists_strictMono_roots n
   refine ⟨x, hx, fun i => abs_lt_sqrt_of_hermitePolyHR_eval_eq_zero ?_, fun z => ?_⟩
   · exact (mem_roots (hermitePolyHR_ne_zero n)).1 (hmem i)
-  · rw [aeval_hermitePolyH_complex]
+  · rw [aeval_hermitePolynomialH_complex]
     exact hz z
 
 /-! ### Real forms of complex-defined polynomials -/
 
 open DLMF.Hypergeometric DLMF.Confluent in
 /-- At a real argument the Pochhammer symbol `(x)_k` is the real rising factorial. This is
-`DLMF.Hypergeometric.poch_ofReal`. -/
-theorem poch_ofReal_eq_eval (x : ℝ) (k : ℕ) : poch (x : ℂ) k = ((ascPochhammer ℝ k).eval x : ℝ) :=
-  poch_ofReal x k
+`DLMF.Hypergeometric.pochhammer_ofReal`. -/
+theorem pochhammer_ofReal_eq_eval (x : ℝ) (k : ℕ) : pochhammer (x : ℂ) k =
+    ((ascPochhammer ℝ k).eval x : ℝ) :=
+  pochhammer_ofReal x k
 
 /-- Evaluating the complexification of a real polynomial at a real point gives the real value. -/
 theorem eval_map_ofReal (q : ℝ[X]) (x : ℝ) :
@@ -392,17 +394,18 @@ open DLMF.Hypergeometric DLMF.Confluent in
 polynomial. -/
 theorem laguerreCoeffR_ofReal (α : ℝ) (n j : ℕ) :
     ((laguerreCoeffR α n j : ℝ) : ℂ) =
-      poch ((α : ℂ) + 1) n / n ! * kummerMCoeff (-(n : ℂ)) ((α : ℂ) + 1) j := by
+      pochhammer ((α : ℂ) + 1) n / n ! * kummerMCoeff (-(n : ℂ)) ((α : ℂ) + 1) j := by
   rw [show (α : ℂ) + 1 = ((α + 1 : ℝ) : ℂ) by push_cast; ring,
-    show -(n : ℂ) = ((-(n : ℝ) : ℝ) : ℂ) by push_cast; ring, kummerMCoeff, poch_ofReal_eq_eval,
-    poch_ofReal_eq_eval, poch_ofReal_eq_eval, laguerreCoeffR]
+    show -(n : ℂ) = ((-(n : ℝ) : ℝ) : ℂ) by push_cast; ring, kummerMCoeff,
+                                              pochhammer_ofReal_eq_eval,
+    pochhammer_ofReal_eq_eval, pochhammer_ofReal_eq_eval, laguerreCoeffR]
   push_cast
   ring
 
 /-- The complexified real Laguerre polynomial evaluates to `L_n^{(α)}(z)`. -/
 theorem eval_map_laguerrePolyLR (α : ℝ) (n : ℕ) (z : ℂ) :
-    ((laguerrePolyLR α n).map (algebraMap ℝ ℂ)).eval z = laguerrePolyL α n z := by
-  rw [laguerrePolyL_eq_sum_coeff, laguerrePolyLR, Polynomial.map_sum, eval_finsetSum]
+    ((laguerrePolyLR α n).map (algebraMap ℝ ℂ)).eval z = laguerrePolynomialL α n z := by
+  rw [laguerrePolynomialL_eq_sum_coeff, laguerrePolyLR, Polynomial.map_sum, eval_finsetSum]
   refine Finset.sum_congr rfl fun j _ => ?_
   simp only [Polynomial.map_mul, Polynomial.map_pow, map_C, map_X, eval_mul, eval_C, eval_pow,
     eval_X]
@@ -411,7 +414,7 @@ theorem eval_map_laguerrePolyLR (α : ℝ) (n : ℕ) (z : ℂ) :
 
 /-- At a real point the real Laguerre polynomial agrees with `L_n^{(α)}`. -/
 theorem eval_laguerrePolyLR (α : ℝ) (n : ℕ) (x : ℝ) :
-    (((laguerrePolyLR α n).eval x : ℝ) : ℂ) = laguerrePolyL α n x := by
+    (((laguerrePolyLR α n).eval x : ℝ) : ℂ) = laguerrePolynomialL α n x := by
   rw [← eval_map_ofReal, eval_map_laguerrePolyLR]
 
 /-- For `α > -1` the leading Laguerre coefficient is nonzero. -/
@@ -479,7 +482,7 @@ theorem laguerre_isOrthogonalPolynomials {α : ℝ} (hα : -1 < α) :
     (fun x hx => mul_pos (Real.rpow_pos_of_pos hx _) (Real.exp_pos _))
     (integrableOn_eval_mul_laguerreWeight hα) (laguerrePolyLR_natDegree hα)
     (laguerrePolyLR_ne_zero hα) fun m n hmn => ?_
-  have horth := laguerrePolyL_orthogonal (α := α) hα hmn
+  have horth := laguerrePolynomialL_orthogonal (α := α) hα hmn
   have hc : (∫ x in Ioi (0 : ℝ), (((laguerrePolyLR α m).eval x * (laguerrePolyLR α n).eval x *
       laguerreWeight α x : ℝ) : ℂ)) = 0 := by
     rw [← horth]
@@ -492,9 +495,9 @@ theorem laguerre_isOrthogonalPolynomials {α : ℝ} (hα : -1 < α) :
   exact_mod_cast hc
 
 /-- The zeros of `L_n^{(α)}` are real, simple and positive (DLMF §18.16(iv)). -/
-theorem laguerrePolyL_zeros_pos {α : ℝ} (hα : -1 < α) (n : ℕ) :
+theorem laguerrePolynomialL_zeros_pos {α : ℝ} (hα : -1 < α) (n : ℕ) :
     ∃ x : Fin n → ℝ, StrictMono x ∧ (∀ i, 0 < x i) ∧
-      ∀ z : ℂ, laguerrePolyL α n z = 0 ↔ ∃ i, z = (x i : ℂ) := by
+      ∀ z : ℂ, laguerrePolynomialL α n z = 0 ↔ ∃ i, z = (x i : ℂ) := by
   have h := laguerre_isOrthogonalPolynomials hα
   obtain ⟨x, hx, hmem, hz⟩ := h.exists_strictMono_roots n
   refine ⟨x, hx, fun i => h.lt_of_mem_roots ?_ (hmem i), fun z => ?_⟩
@@ -518,7 +521,7 @@ theorem jacobiCoeffR_ofReal (α β : ℝ) (n k : ℕ) :
   rw [JacobiDisc.coef,
     show (n : ℂ) + α + β + 1 = ((n + α + β + 1 : ℝ) : ℂ) by push_cast; ring,
     show (α : ℂ) + k + 1 = ((α + k + 1 : ℝ) : ℂ) by push_cast; ring,
-    poch_ofReal_eq_eval, poch_ofReal_eq_eval,
+    pochhammer_ofReal_eq_eval, pochhammer_ofReal_eq_eval,
     jacobiCoeffR]
   push_cast
   ring
@@ -535,12 +538,12 @@ theorem map_jacobiPolyPR (α β : ℝ) (n : ℕ) :
 
 /-- For `α > -1` the complexified real Jacobi polynomial evaluates to `P_n^{(α,β)}(z)`. -/
 theorem eval_map_jacobiPolyPR {α : ℝ} (hα : -1 < α) (β : ℝ) (n : ℕ) (z : ℂ) :
-    ((jacobiPolyPR α β n).map (algebraMap ℝ ℂ)).eval z = jacobiPolyP α β n z := by
+    ((jacobiPolyPR α β n).map (algebraMap ℝ ℂ)).eval z = jacobiPolynomialP α β n z := by
   rw [map_jacobiPolyPR, JacobiDisc.eval_jacPoly (by simpa using hα)]
 
 /-- At a real point the real Jacobi polynomial agrees with `P_n^{(α,β)}`. -/
 theorem eval_jacobiPolyPR {α : ℝ} (hα : -1 < α) (β : ℝ) (n : ℕ) (x : ℝ) :
-    (((jacobiPolyPR α β n).eval x : ℝ) : ℂ) = jacobiPolyP α β n x := by
+    (((jacobiPolyPR α β n).eval x : ℝ) : ℂ) = jacobiPolynomialP α β n x := by
   rw [← eval_map_ofReal, eval_map_jacobiPolyPR hα]
 
 /-- For `α, β > -1` the leading Jacobi coefficient is nonzero. -/
@@ -621,7 +624,7 @@ theorem jacobi_isOrthogonalPolynomials {α β : ℝ} (hα : -1 < α) (hβ : -1 <
       (Real.rpow_pos_of_pos (by linarith [hx.1]) _))
     (integrableOn_eval_mul_jacobiWeight hα hβ) (jacobiPolyPR_natDegree hα hβ)
     (jacobiPolyPR_ne_zero hα hβ) fun m n hmn => ?_
-  have horth := jacobiPolyP_orthogonal (α := α) (β := β) hα hβ hmn
+  have horth := jacobiPolynomialP_orthogonal (α := α) (β := β) hα hβ hmn
   rw [intervalIntegral.integral_of_le (by norm_num), integral_Ioc_eq_integral_Ioo] at horth
   have hc : (∫ x in Ioo (-1 : ℝ) 1, (((jacobiPolyPR α β m).eval x *
       (jacobiPolyPR α β n).eval x * jacobiWeight α β x : ℝ) : ℂ)) = 0 := by
@@ -638,9 +641,9 @@ theorem jacobi_isOrthogonalPolynomials {α β : ℝ} (hα : -1 < α) (hβ : -1 <
   exact_mod_cast hc
 
 /-- The zeros of `P_n^{(α,β)}` are real, simple and lie in `(-1,1)` (DLMF §18.16(i)). -/
-theorem jacobiPolyP_zeros_Ioo {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
+theorem jacobiPolynomialP_zeros_Ioo {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
     ∃ x : Fin n → ℝ, StrictMono x ∧ (∀ i, x i ∈ Ioo (-1) 1) ∧
-      ∀ z : ℂ, jacobiPolyP α β n z = 0 ↔ ∃ i, z = (x i : ℂ) := by
+      ∀ z : ℂ, jacobiPolynomialP α β n z = 0 ↔ ∃ i, z = (x i : ℂ) := by
   have h := jacobi_isOrthogonalPolynomials hα hβ
   obtain ⟨x, hx, hmem, hz⟩ := h.exists_strictMono_roots n
   have hae : ∀ᵐ x ∂jacobiMeasure α β, x ∈ Ioo (-1 : ℝ) 1 :=
@@ -795,9 +798,9 @@ theorem measurable_laguerreWeight (α : ℝ) : Measurable (laguerreWeight α) :=
 
 /-- Completeness of the Jacobi polynomials in `L²((-1,1),(1-x)^α(1+x)^β dx)`. -/
 @[dlmf 18.18.i]
-theorem jacobiPolyP_complete {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) {f : ℝ → ℂ}
+theorem jacobiPolynomialP_complete {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) {f : ℝ → ℂ}
     (hf : MemLp f 2 (jacobiMeasure α β))
-    (hcoeff : ∀ n : ℕ, ∫ x, f x * jacobiPolyP α β n x ∂jacobiMeasure α β = 0) :
+    (hcoeff : ∀ n : ℕ, ∫ x, f x * jacobiPolynomialP α β n x ∂jacobiMeasure α β = 0) :
     ∀ᵐ x : ℝ, x ∈ Set.Ioo (-1 : ℝ) 1 → f x = 0 := by
   have hwpos : ∀ x ∈ Ioo (-1 : ℝ) 1, 0 < jacobiWeight α β x := fun x hx =>
     mul_pos (Real.rpow_pos_of_pos (by linarith [hx.2]) _)
@@ -817,9 +820,9 @@ theorem jacobiPolyP_complete {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) {f : 
   exact ae_of_ae_weightMeasure measurableSet_Ioo (measurable_jacobiWeight α β) hwpos h0
 
 /-- Completeness of the Laguerre polynomials in `L²((0,∞), x^α e^{-x} dx)`. -/
-theorem laguerrePolyL_complete {α : ℝ} (hα : -1 < α) {f : ℝ → ℂ}
+theorem laguerrePolynomialL_complete {α : ℝ} (hα : -1 < α) {f : ℝ → ℂ}
     (hf : MemLp f 2 (laguerreMeasure α))
-    (hcoeff : ∀ n : ℕ, ∫ x, f x * laguerrePolyL α n x ∂laguerreMeasure α = 0) :
+    (hcoeff : ∀ n : ℕ, ∫ x, f x * laguerrePolynomialL α n x ∂laguerreMeasure α = 0) :
     ∀ᵐ x : ℝ, x ∈ Ioi (0 : ℝ) → f x = 0 := by
   have hwpos : ∀ x ∈ Ioi (0 : ℝ), 0 < laguerreWeight α x := fun x hx =>
     mul_pos (Real.rpow_pos_of_pos hx _) (Real.exp_pos _)
@@ -839,7 +842,7 @@ theorem laguerrePolyL_complete {α : ℝ} (hα : -1 < α) {f : ℝ → ℂ}
   exact ae_of_ae_weightMeasure measurableSet_Ioi (measurable_laguerreWeight α) hwpos h0
 
 /-- Completeness of the Hermite polynomials in `L²(ℝ, e^{-x²} dx)`. -/
-theorem hermitePolyH_complete {f : ℝ → ℂ} (hf : MemLp f 2 hermiteMeasure)
+theorem hermitePolynomialH_complete {f : ℝ → ℂ} (hf : MemLp f 2 hermiteMeasure)
     (hcoeff : ∀ n : ℕ, ∫ x, f x * (((hermitePolyHR n).eval x : ℝ) : ℂ) ∂hermiteMeasure = 0) :
     f =ᵐ[volume] 0 := by
   have hwpos : ∀ x ∈ (univ : Set ℝ), 0 < Real.exp (-(x ^ 2)) := fun x _ => Real.exp_pos _
@@ -887,24 +890,25 @@ def ultrasphPolyR (lam : ℝ) (n : ℕ) : ℝ[X] :=
 open DLMF.Hypergeometric in
 /-- For `λ > -1/2` the complexified real ultraspherical polynomial evaluates to `C_n^{(λ)}(z)`. -/
 theorem eval_map_ultrasphPolyR {lam : ℝ} (hlam : -1 / 2 < lam) (n : ℕ) (z : ℂ) :
-    ((ultrasphPolyR lam n).map (algebraMap ℝ ℂ)).eval z = ultrasphPoly lam n z := by
+    ((ultrasphPolyR lam n).map (algebraMap ℝ ℂ)).eval z = ultrasphericalPolynomial lam n z := by
   have hden : 0 < (ascPochhammer ℝ n).eval (lam + 1 / 2) := ascPochhammer_pos _ _ (by linarith)
-  have hp : poch ((lam : ℂ) + 1 / 2) n ≠ 0 := by
+  have hp : pochhammer ((lam : ℂ) + 1 / 2) n ≠ 0 := by
     rw [show (lam : ℂ) + 1 / 2 = ((lam + 1 / 2 : ℝ) : ℂ) by push_cast; ring,
-      poch_ofReal_eq_eval]
+      pochhammer_ofReal_eq_eval]
     exact_mod_cast hden.ne'
-  rw [ultrasphPoly_eq_jacobiPolyP n z hp, ultrasphPolyR, Polynomial.map_mul, map_C, eval_mul,
+  rw [ultrasphericalPolynomial_eq_jacobiPolynomialP n z hp, ultrasphPolyR, Polynomial.map_mul,
+      map_C, eval_mul,
     eval_C, eval_map_jacobiPolyPR (by linarith), ultrasphCoeffR,
     show (2 : ℂ) * lam = ((2 * lam : ℝ) : ℂ) by push_cast; ring,
     show (lam : ℂ) + 1 / 2 = ((lam + 1 / 2 : ℝ) : ℂ) by push_cast; ring,
-    poch_ofReal_eq_eval, poch_ofReal_eq_eval]
+    pochhammer_ofReal_eq_eval, pochhammer_ofReal_eq_eval]
   rw [Complex.coe_algebraMap]
   push_cast
   ring
 
 /-- At a real point the real ultraspherical polynomial agrees with `C_n^{(λ)}`. -/
 theorem eval_ultrasphPolyR {lam : ℝ} (hlam : -1 / 2 < lam) (n : ℕ) (x : ℝ) :
-    (((ultrasphPolyR lam n).eval x : ℝ) : ℂ) = ultrasphPoly lam n x := by
+    (((ultrasphPolyR lam n).eval x : ℝ) : ℂ) = ultrasphericalPolynomial lam n x := by
   rw [← eval_map_ofReal, eval_map_ultrasphPolyR hlam]
 
 /-- For `λ > -1/2`, `λ ≠ 0`, the leading ultraspherical coefficient is nonzero. -/
@@ -926,9 +930,10 @@ theorem ultrasph_isOrthogonalPolynomials {lam : ℝ} (hlam : -1 / 2 < lam) (hlam
 
 /-- The zeros of `C_n^{(λ)}`, `λ > -1/2`, `λ ≠ 0`, are real, simple and lie in `(-1,1)`
 (DLMF §18.16(i)). -/
-theorem ultrasphPoly_zeros_Ioo {lam : ℝ} (hlam : -1 / 2 < lam) (hlam0 : lam ≠ 0) (n : ℕ) :
+theorem ultrasphericalPolynomial_zeros_Ioo {lam : ℝ} (hlam : -1 / 2 < lam)
+    (hlam0 : lam ≠ 0) (n : ℕ) :
     ∃ x : Fin n → ℝ, StrictMono x ∧ (∀ i, x i ∈ Ioo (-1) 1) ∧
-      ∀ z : ℂ, ultrasphPoly lam n z = 0 ↔ ∃ i, z = (x i : ℂ) := by
+      ∀ z : ℂ, ultrasphericalPolynomial lam n z = 0 ↔ ∃ i, z = (x i : ℂ) := by
   have h := ultrasph_isOrthogonalPolynomials hlam hlam0
   obtain ⟨x, hx, hmem, hz⟩ := h.exists_strictMono_roots n
   have hae : ∀ᵐ x ∂jacobiMeasure (lam - 1 / 2) (lam - 1 / 2), x ∈ Ioo (-1 : ℝ) 1 :=
@@ -938,16 +943,17 @@ theorem ultrasphPoly_zeros_Ioo {lam : ℝ} (hlam : -1 / 2 < lam) (hlam0 : lam �
   rw [← hz z, eval_map_ultrasphPolyR hlam]
 
 /-- Completeness of the Gegenbauer polynomials in `L²((-1,1),(1-x²)^{λ-1/2} dx)`. -/
-theorem ultrasphPoly_complete {lam : ℝ} (hlam : -1 / 2 < lam) (hlam0 : lam ≠ 0) {f : ℝ → ℂ}
+theorem ultrasphericalPolynomial_complete {lam : ℝ} (hlam : -1 / 2 < lam)
+    (hlam0 : lam ≠ 0) {f : ℝ → ℂ}
     (hf : MemLp f 2 (jacobiMeasure (lam - 1 / 2) (lam - 1 / 2)))
     (hcoeff : ∀ n : ℕ,
-      ∫ x, f x * ultrasphPoly lam n x ∂jacobiMeasure (lam - 1 / 2) (lam - 1 / 2) = 0) :
+      ∫ x, f x * ultrasphericalPolynomial lam n x ∂jacobiMeasure (lam - 1 / 2) (lam - 1 / 2) = 0) :
     ∀ᵐ x : ℝ, x ∈ Set.Ioo (-1 : ℝ) 1 → f x = 0 := by
-  refine jacobiPolyP_complete (by linarith) (by linarith) hf fun n => ?_
+  refine jacobiPolynomialP_complete (by linarith) (by linarith) hf fun n => ?_
   have hc := ultrasphCoeffR_ne_zero hlam hlam0 n
   have h1 := hcoeff n
-  have h2 : ∀ x : ℝ, f x * ultrasphPoly lam n x =
-      (ultrasphCoeffR lam n : ℂ) * (f x * jacobiPolyP ((lam - 1 / 2 : ℝ) : ℂ)
+  have h2 : ∀ x : ℝ, f x * ultrasphericalPolynomial lam n x =
+      (ultrasphCoeffR lam n : ℂ) * (f x * jacobiPolynomialP ((lam - 1 / 2 : ℝ) : ℂ)
         ((lam - 1 / 2 : ℝ) : ℂ) n x) := fun x => by
     rw [← eval_ultrasphPolyR hlam, ultrasphPolyR, eval_mul, eval_C,
       ← eval_jacobiPolyPR (by linarith)]
@@ -962,11 +968,11 @@ theorem legendre_isOrthogonalPolynomials :
   jacobi_isOrthogonalPolynomials (by norm_num) (by norm_num)
 
 /-- The zeros of `P_n` are real, simple and lie in `(-1,1)`. -/
-theorem legendrePolyP_zeros_Ioo (n : ℕ) :
+theorem legendrePolynomialP_zeros_Ioo (n : ℕ) :
     ∃ x : Fin n → ℝ, StrictMono x ∧ (∀ i, x i ∈ Ioo (-1) 1) ∧
-      ∀ z : ℂ, legendrePolyP n z = 0 ↔ ∃ i, z = (x i : ℂ) := by
-  simpa [legendrePolyP] using
-    jacobiPolyP_zeros_Ioo (α := 0) (β := 0) (by norm_num) (by norm_num) n
+      ∀ z : ℂ, legendrePolynomialP n z = 0 ↔ ∃ i, z = (x i : ℂ) := by
+  simpa [legendrePolynomialP] using
+    jacobiPolynomialP_zeros_Ioo (α := 0) (β := 0) (by norm_num) (by norm_num) n
 
 /-- The Chebyshev polynomials `T_n` are orthogonal for `(1-x²)^{-1/2} dx`
 (Mathlib's `Polynomial.Chebyshev.measureT`). -/

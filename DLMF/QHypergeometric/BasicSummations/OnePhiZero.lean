@@ -405,8 +405,8 @@ lemma hasSum_qPhi_two_one_shift {a b c q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
 @[dlmf 17.5.E2]
 theorem one_phi_zero {a q z : ℂ} (hq : ‖q‖<1) (hz : ‖z‖<1) :
     qPhi [a] [] q z=qPochhammerInf (a*z) q/qPochhammerInf z q := by
-  rw [qPhi_eq_basicHG (by simp)]
-  simpa [basicHG] using (q_binomial_theorem (a := a) hq hz).symm
+  rw [qPhi_eq_basicHypergeometric (by simp)]
+  simpa [basicHypergeometric] using (q_binomial_theorem (a := a) hq hz).symm
 
 /-- Terminating q-binomial theorem: `1φ0(q^(-n);-;q,z) = (z q^(-n);q)_n` (DLMF 17.5.E3). -/
 @[dlmf 17.5.E3]

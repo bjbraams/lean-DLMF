@@ -22,11 +22,11 @@ integrals in modified and ordinary spherical Bessel functions.
 
 * `hasSum_erf_complex`, `hasSum_erf_scaled`: the power series of `erf` (DLMF 7.6.1, 7.6.2).
 * `hasSum_faddeevaW`: the power series of `w(z)` (DLMF 7.6.3).
-* `fresnelCosInt_alternate_series`, `fresnelSinInt_alternate_series`: DLMF 7.6.5, 7.6.7.
+* `fresnelC_alternate_series`, `fresnelS_alternate_series`: DLMF 7.6.5, 7.6.7.
 * `erf_spherical_series`: `erf` in modified spherical Bessel functions (DLMF 7.6.8).
 * `ErfChebyshev.hasSum`, `erf_chebyshev_spherical_series`: the Chebyshev–spherical Bessel series of
   DLMF 7.6.9, the first valid for all complex `b` (stronger than DLMF).
-* `fresnelCosInt_spherical_series`, `fresnelSinInt_spherical_series`: DLMF 7.6.10, 7.6.11.
+* `fresnelC_spherical_series`, `fresnelS_spherical_series`: DLMF 7.6.10, 7.6.11.
 
 The power series of `C(z)` and `S(z)` (DLMF 7.6.4, 7.6.6) are in
 `DLMF.ErrorFunctions.AnalyticProperties`.
@@ -60,11 +60,11 @@ theorem hasSum_erf_complex (z : ℂ) :
   ring
 
 /-- The rising factorial `(3/2)_n` times `2^n` is the odd product `1·3···(2n+1)`. -/
-theorem poch_three_half_mul_two_pow (n : ℕ) : poch (3/2) n*(2:ℂ)^n = oddProduct n := by
+theorem pochhammer_three_half_mul_two_pow (n : ℕ) : pochhammer (3/2) n*(2:ℂ)^n = oddProduct n := by
   induction n with
-  | zero => simp [oddProduct, poch_zero]
+  | zero => simp [oddProduct, pochhammer_zero]
   | succ n ih =>
-    rw [poch_succ, oddProduct, Finset.prod_range_succ, ← oddProduct, ← ih, pow_succ]
+    rw [pochhammer_succ, oddProduct, Finset.prod_range_succ, ← oddProduct, ← ih, pow_succ]
     push_cast
     ring
 
@@ -77,9 +77,9 @@ theorem hasSum_erf_scaled (z : ℂ) :
     (2*z/Real.sqrt π*exp (-z^2))
   rw [← (erf_kummerM_pair z).2] at h
   refine h.congr_fun fun n => ?_
-  have hp : poch (3/2:ℂ) n ≠ 0 := by
+  have hp : pochhammer (3/2:ℂ) n ≠ 0 := by
     intro h0
-    have := poch_three_half_mul_two_pow n
+    have := pochhammer_three_half_mul_two_pow n
     rw [h0, zero_mul] at this
     have hne : oddProduct n ≠ 0 := by
       unfold oddProduct
@@ -87,7 +87,7 @@ theorem hasSum_erf_scaled (z : ℂ) :
       intro j _
       exact_mod_cast (show (2*j+1 : ℕ) ≠ 0 by omega)
     exact hne this.symm
-  rw [← poch_three_half_mul_two_pow, kummerMCoeff, poch_nat_one]
+  rw [← pochhammer_three_half_mul_two_pow, kummerMCoeff, pochhammer_nat_one]
   have hf : (n ! : ℂ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero n
   field_simp
   ring
@@ -193,7 +193,7 @@ theorem fresnelAlternateSeries_summable (odd : Bool) (z : ℂ) :
 /-- Signed combination of the Fresnel integrals as a modulated series:
 `C(z) + iε S(z) = e^{iεπz²/2} (A(z) - iε B(z))` with `A`, `B` the alternate series. -/
 theorem fresnel_signed_alternate (z : ℂ) {ε : ℝ} (hε : ε = 1 ∨ ε = -1) :
-    fresnelCosInt z+ε*I*fresnelSinInt z = exp (ε*I*(π*z^2/2))*
+    fresnelC z+ε*I*fresnelS z = exp (ε*I*(π*z^2/2))*
       (fresnelAlternateSeries false z-ε*I*fresnelAlternateSeries true z) := by
   have hε2 : (ε:ℂ)^2 = 1 := by rcases hε with rfl | rfl <;> norm_num
   have hπ : (Real.sqrt π:ℂ)^2 = π := by exact_mod_cast Real.sq_sqrt Real.pi_pos.le
@@ -247,11 +247,11 @@ theorem fresnel_signed_alternate (z : ℂ) {ε : ℝ} (hε : ε = 1 ∨ ε = -1)
   simp only [hK]
   linear_combination (-((1+ε*I)/2*erf ζ))*hK0
 
-/-- Identity under the stated parameter and domain assumptions: `fresnelCosInt z=cos
+/-- Identity under the stated parameter and domain assumptions: `fresnelC z=cos
 (π*z^2/2)*fresnelAlternateSeries false z+sin (π*z^2/2)*fresnelAlternateSeries true z`. -/
 @[dlmf 7.6.E5]
-theorem fresnelCosInt_alternate_series (z : ℂ) :
-    fresnelCosInt z=cos (π*z^2/2)*fresnelAlternateSeries false z+sin
+theorem fresnelC_alternate_series (z : ℂ) :
+    fresnelC z=cos (π*z^2/2)*fresnelAlternateSeries false z+sin
         (π*z^2/2)*fresnelAlternateSeries true z := by
   have h1 := fresnel_signed_alternate z (Or.inl rfl)
   have h2 := fresnel_signed_alternate z (Or.inr rfl)
@@ -261,11 +261,11 @@ theorem fresnelCosInt_alternate_series (z : ℂ) :
   rw [show (1:ℂ)*I*(π*z^2/2) = (π:ℂ)*z^2/2*I by ring] at h1
   linear_combination h1/2 + h2/2
 
-/-- Identity under the stated parameter and domain assumptions: `fresnelSinInt z = -cos
+/-- Identity under the stated parameter and domain assumptions: `fresnelS z = -cos
 (π*z^2/2)*fresnelAlternateSeries true z+sin (π*z^2/2)*fresnelAlternateSeries false z`. -/
 @[dlmf 7.6.E7]
-theorem fresnelSinInt_alternate_series (z : ℂ) :
-    fresnelSinInt z = -cos (π*z^2/2)*fresnelAlternateSeries true z+sin
+theorem fresnelS_alternate_series (z : ℂ) :
+    fresnelS z = -cos (π*z^2/2)*fresnelAlternateSeries true z+sin
         (π*z^2/2)*fresnelAlternateSeries false z := by
   have h1 := fresnel_signed_alternate z (Or.inl rfl)
   have h2 := fresnel_signed_alternate z (Or.inr rfl)
@@ -273,7 +273,7 @@ theorem fresnelSinInt_alternate_series (z : ℂ) :
   rw [Complex.cos, Complex.sin]
   rw [show (-1:ℂ)*I*(π*z^2/2) = -((π:ℂ)*z^2/2)*I by ring] at h2
   rw [show (1:ℂ)*I*(π*z^2/2) = (π:ℂ)*z^2/2*I by ring] at h1
-  linear_combination (-I/2)*h1 + (I/2)*h2 + (fresnelSinInt z + (exp ((π:ℂ)*z^2/2*I) +
+  linear_combination (-I/2)*h1 + (I/2)*h2 + (fresnelS z + (exp ((π:ℂ)*z^2/2*I) +
     exp (-((π:ℂ)*z^2/2)*I))*fresnelAlternateSeries true z/2)*I_sq
 
 /-- The series with terms `(fun n : ℕ => 2*z/Real.sqrt π*(-1 : ℂ)^n*(Bessel.sphericalI (2*n)
@@ -599,15 +599,15 @@ theorem erf_chebyshev_spherical_series {a : ℝ} (z : ℂ) :
   simpa only [hT] using ErfChebyshev.hasSum z a
 
 /-- The series with terms `(fun n : ℕ => z*Bessel.sphericalJ (2*n+0) (π*z^2/2))` converges to
-`(fresnelCosInt z)`. -/
+`(fresnelC z)`. -/
 @[dlmf 7.6.E10]
-theorem fresnelCosInt_spherical_series (z : ℂ) :
-    HasSum (fun n : ℕ => z*Bessel.sphericalJ (2*n+0) (π*z^2/2)) (fresnelCosInt z) := by
+theorem fresnelC_spherical_series (z : ℂ) :
+    HasSum (fun n : ℕ => z*Bessel.sphericalJ (2*n+0) (π*z^2/2)) (fresnelC z) := by
   obtain ⟨p, hp⟩ : ∃ p : ℂ, p = π/2 := ⟨_, rfl⟩
   have key := Bessel.SphericalSeries.hasSum_of_hasDerivAt
     (f := fun n w => w * Bessel.sphericalJ (2*n) (p*w^2))
     (g := fun n w => if n = 0 then cos (p*w^2) else p*w^2 * Bessel.sphericalJ (2*n-1) (p*w^2))
-    (F := fresnelCosInt)
+    (F := fresnelC)
     (fun n w => by
       rcases n with _ | n
       · simpa using Bessel.SphericalSeries.hasDerivAt_mul_sphericalJ_zero_sq p w
@@ -626,22 +626,22 @@ theorem fresnelCosInt_spherical_series (z : ℂ) :
     (fun w => by
       have h := hasDerivAt_primitive (f := fun t => cos (π*t^2/2)) (by fun_prop) w
       simp only [ite_true]
-      rw [show fresnelCosInt = primitive (fun t => cos (π*t^2/2)) from rfl]
+      rw [show fresnelC = primitive (fun t => cos (π*t^2/2)) from rfl]
       convert h using 2
       rw [hp]; ring)
-    (by simp [fresnelCosInt, primitive, segmentIntegral]) z
+    (by simp [fresnelC, primitive, segmentIntegral]) z
   convert key using 3 with n
   · rw [hp]; congr 1; ring
 
 /-- The series with terms `(fun n : ℕ => z*Bessel.sphericalJ (2*n+1) (π*z^2/2))` converges to
-`(fresnelSinInt z)`. -/
+`(fresnelS z)`. -/
 @[dlmf 7.6.E11]
-theorem fresnelSinInt_spherical_series (z : ℂ) :
-    HasSum (fun n : ℕ => z*Bessel.sphericalJ (2*n+1) (π*z^2/2)) (fresnelSinInt z) := by
+theorem fresnelS_spherical_series (z : ℂ) :
+    HasSum (fun n : ℕ => z*Bessel.sphericalJ (2*n+1) (π*z^2/2)) (fresnelS z) := by
   obtain ⟨p, hp⟩ : ∃ p : ℂ, p = π/2 := ⟨_, rfl⟩
   have key := Bessel.SphericalSeries.hasSum_of_hasDerivAt
     (f := fun n w => w * Bessel.sphericalJ (2*n+1) (p*w^2))
-    (g := fun n w => p*w^2 * Bessel.sphericalJ (2*n) (p*w^2)) (F := fresnelSinInt)
+    (g := fun n w => p*w^2 * Bessel.sphericalJ (2*n) (p*w^2)) (F := fresnelS)
     (fun n w => by
       have h := Bessel.SphericalSeries.hasDerivAt_mul_sphericalJ_succ_sq p (2*n) w
       rwa [show 2*n+2 = 2*(n+1) by ring, mul_sub] at h)
@@ -654,10 +654,10 @@ theorem fresnelSinInt_spherical_series (z : ℂ) :
     (fun w => by
       have h := hasDerivAt_primitive (f := fun t => sin (π*t^2/2)) (by fun_prop) w
       simp only [mul_zero, Bessel.SphericalSeries.mul_sphericalJ_zero]
-      rw [show fresnelSinInt = primitive (fun t => sin (π*t^2/2)) from rfl]
+      rw [show fresnelS = primitive (fun t => sin (π*t^2/2)) from rfl]
       convert h using 2
       rw [hp]; ring)
-    (by simp [fresnelSinInt, primitive, segmentIntegral]) z
+    (by simp [fresnelS, primitive, segmentIntegral]) z
   convert key using 3 with n
   · rw [hp]; congr 1; ring
 

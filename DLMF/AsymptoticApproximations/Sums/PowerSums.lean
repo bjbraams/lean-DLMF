@@ -30,6 +30,10 @@ and the remainder bound of DLMF §2.10(i), from the zeta Euler–Maclaurin formu
 The exact formula `DLMF.Zeta.riemannZeta_eq_eulerMaclaurin` supplies the constant and the finite
 Bernoulli expansion; its bounded periodic-Bernoulli integral gives the asymptotic error.
 Mathlib's `Complex.ofReal_choose` handles the generalized-binomial coefficient casts.
+For the remainder bound, the consecutive remainders after `s < 2m` and `s < 2m + 2` are written,
+by `DLMF.Zeta.integral_Ioi_periodicBernoulli_div_cpow_recursion`, as integrals of
+`B̃_{2k}(t) - B_{2k}` against powers of `t`; these have opposite signs by the Fourier series of
+`B_{2k}` (Mathlib's `hasSum_one_div_nat_pow_mul_cos`).
 -/
 
 @[expose] public noncomputable section
@@ -238,6 +242,196 @@ theorem powerSum_asymptotic {α : ℝ} (hα : α ≠ -1) :
   rw [← hsum]
   ring
 
+open scoped _root_.Real in
+/-- `(-1)^{k+1}(B̃_{2k}(x) - B_{2k}) ≤ 0`, from the Fourier series of `B_{2k}`. -/
+private lemma neg_one_pow_mul_periodicBernoulli_sub_nonpos {k : ℕ} (hk : 1 ≤ k) (x : ℝ) :
+    (-1 : ℝ) ^ (k + 1) * (periodicBernoulli (2 * k) x - bernoulli (2 * k)) ≤ 0 := by
+  have hx : Int.fract x ∈ Icc (0 : ℝ) 1 := ⟨Int.fract_nonneg x, (Int.fract_lt_one x).le⟩
+  have h1 := hasSum_one_div_nat_pow_mul_cos (by omega : k ≠ 0) hx
+  have h0 := hasSum_one_div_nat_pow_mul_cos (by omega : k ≠ 0)
+    (x := 0) ⟨le_rfl, zero_le_one⟩
+  have hle := hasSum_le (fun n => ?_) (h1.sub h0) hasSum_zero
+  · rw [← mul_sub] at hle
+    change _ * (bernoulliFun (2 * k) (Int.fract x) - bernoulliFun (2 * k) 0) ≤ 0 at hle
+    rw [bernoulliFun_eval_zero] at hle
+    have hc : 0 < (2 * π) ^ (2 * k) / 2 / ((2 * k)! : ℝ) := by positivity
+    have e : (-1 : ℝ) ^ (k + 1) * (2 * π) ^ (2 * k) / 2 / ((2 * k)! : ℝ) =
+        (2 * π) ^ (2 * k) / 2 / ((2 * k)! : ℝ) * (-1) ^ (k + 1) := by ring
+    rw [e, mul_assoc] at hle
+    exact nonpos_of_mul_nonpos_right (by simpa [periodicBernoulli] using hle) hc
+  · simp only [mul_zero, Real.cos_zero]
+    rw [← mul_sub]
+    refine mul_nonpos_of_nonneg_of_nonpos (by positivity) ?_
+    linarith [Real.cos_le_one (2 * π * n * Int.fract x)]
+
+/-- The real form of `DLMF.Zeta.integral_Ioi_periodicBernoulli_div_cpow_recursion`. -/
+private lemma integral_Ioi_periodicBernoulli_rpow_recursion {p : ℕ} (hp : 1 ≤ p) {β : ℝ}
+    (hβ : β < -1) {a : ℝ} (ha : 0 < a) :
+    (p + 1) * ∫ x in Ioi a, periodicBernoulli p x * x ^ β =
+      -(periodicBernoulli (p + 1) a * a ^ β) +
+        -β * ∫ x in Ioi a, periodicBernoulli (p + 1) x * x ^ (β - 1) := by
+  have h := DLMF.Zeta.integral_Ioi_periodicBernoulli_div_cpow_recursion hp
+    (w := ((-β : ℝ) : ℂ)) (by simp; linarith) ha
+  have hconv : ∀ (q : ℕ) (γ : ℝ), (∫ x in Ioi a,
+      (periodicBernoulli q x : ℂ) / (x : ℂ) ^ ((-γ : ℝ) : ℂ)) =
+      ((∫ x in Ioi a, periodicBernoulli q x * x ^ γ : ℝ) : ℂ) := by
+    intro q γ
+    rw [← integral_complex_ofReal]
+    refine setIntegral_congr_fun measurableSet_Ioi fun x (hx : a < x) => ?_
+    have hx0 : 0 < x := ha.trans hx
+    rw [← Complex.ofReal_cpow hx0.le, Real.rpow_neg hx0.le]
+    push_cast
+    rw [div_eq_mul_inv, inv_inv]
+  rw [hconv, show ((-β : ℝ) : ℂ) + 1 = ((-(β - 1) : ℝ) : ℂ) by push_cast; ring, hconv,
+    ← Complex.ofReal_cpow ha.le, Real.rpow_neg ha.le] at h
+  apply Complex.ofReal_injective
+  push_cast at h ⊢
+  rw [h]
+  field_simp
+
+/-- `B̃_q x · x^γ` is integrable on `(a, ∞)` for `γ < -1`, `a > 0`. -/
+private lemma integrableOn_periodicBernoulli_mul_rpow (q : ℕ) {γ : ℝ} (hγ : γ < -1) {a : ℝ}
+    (ha : 0 < a) : IntegrableOn (fun x => periodicBernoulli q x * x ^ γ) (Ioi a) := by
+  obtain ⟨C, hC⟩ := DLMF.Zeta.exists_abs_periodicBernoulli_le q
+  exact Integrable.bdd_mul (c := C) (integrableOn_Ioi_rpow_of_lt hγ ha)
+    (measurable_periodicBernoulli q).aestronglyMeasurable
+    (ae_of_all _ fun x => by simpa [Real.norm_eq_abs] using hC x)
+
+/-- Splitting off the constant term `B_q` of `∫_a^∞ B̃_q(x) x^γ dx`. -/
+private lemma integral_periodicBernoulli_mul_rpow_eq (q : ℕ) {γ : ℝ} (hγ : γ < -1) {a : ℝ}
+    (ha : 0 < a) :
+    ∫ x in Ioi a, periodicBernoulli q x * x ^ γ =
+      (∫ x in Ioi a, (periodicBernoulli q x - bernoulli q) * x ^ γ) +
+        bernoulli q * (-a ^ (γ + 1) / (γ + 1)) := by
+  rw [← integral_Ioi_rpow_of_lt hγ ha, ← integral_const_mul, ← integral_add]
+  · refine setIntegral_congr_fun measurableSet_Ioi fun x _ => ?_
+    ring
+  · exact ((integrableOn_periodicBernoulli_mul_rpow q hγ ha).sub
+      ((integrableOn_Ioi_rpow_of_lt hγ ha).const_mul _)).congr_fun
+      (fun x _ => by simp only [Pi.sub_apply]; ring) measurableSet_Ioi
+  · exact (integrableOn_Ioi_rpow_of_lt hγ ha).const_mul _
+
+/-- Sign of `∫_a^∞ (B̃_{2k}(x) - B_{2k}) x^γ dx`. -/
+private lemma neg_one_pow_mul_integral_periodicBernoulli_sub_nonpos {k : ℕ} (hk : 1 ≤ k)
+    (γ a : ℝ) (ha : 0 < a) :
+    (-1 : ℝ) ^ (k + 1) * ∫ x in Ioi a, (periodicBernoulli (2 * k) x - bernoulli (2 * k)) *
+      x ^ γ ≤ 0 := by
+  rw [← integral_const_mul]
+  refine setIntegral_nonpos measurableSet_Ioi fun x (hx : a < x) => ?_
+  rw [← mul_assoc]
+  exact mul_nonpos_of_nonpos_of_nonneg (neg_one_pow_mul_periodicBernoulli_sub_nonpos hk x)
+    (Real.rpow_nonneg (ha.trans hx).le _)
+
+/-- `B̃_q(n) = B_q` at the integers. -/
+private lemma periodicBernoulli_natCast_eq_bernoulli (q n : ℕ) :
+    periodicBernoulli q n = bernoulli q := by
+  simp [periodicBernoulli, bernoulliFun_eval_zero]
+
+/-- The two consecutive remainders `E_m` (after `s < 2m`) and `E_{m+1}` (after `s < 2m + 2`)
+of 2.10.7 have opposite signs. -/
+private lemma powerSum_remainder_mul_nonpos {α : ℝ} (hα : α ≠ -1) {m : ℕ} (hm : 1 ≤ m)
+    (hmα : (α + 1) / 2 ≤ m) {n : ℕ} (hn : 1 ≤ n) :
+    ((∑ j ∈ Ico 1 n, (j : ℝ) ^ α) - (riemannZeta (-(α : ℂ))).re -
+        ∑ s ∈ range (2 * m), powSumScale α s n * powSumCoeff α s) *
+      (Ring.choose (-α + 2 * m) (2 * m + 1) *
+        ∫ t in Ioi (n : ℝ), periodicBernoulli (2 * m + 1) t * t ^ (α - 2 * m - 1)) ≤ 0 := by
+  have hmα' : α ≤ 2 * m - 1 := by linarith
+  have hn0 : (0 : ℝ) < n := by exact_mod_cast hn
+  rcases hmα'.lt_or_eq with hlt | heq
+  · -- the remainder after `s < 2m + 2`
+    have hfull := powerSum_eq_truncation_add_remainder hα hm hn (by linarith)
+    rw [show 2 * m + 2 = 2 * m + 1 + 1 by ring, sum_range_succ, sum_range_succ] at hfull
+    have hodd : powSumCoeff α (2 * m + 1) = 0 := by
+      rw [powSumCoeff, bernoulli_eq_zero_of_odd ⟨m, rfl⟩ (by omega)]
+      simp
+    have hsc : powSumScale α (2 * m) n = (n : ℝ) ^ (α + 1 - 2 * m) := by
+      rw [powSumScale]; push_cast; ring_nf
+    rw [hodd, powerSum_evenCoeff hα hm, hsc] at hfull
+    -- the recursion for `p = 2m + 1`
+    have hr1 := integral_Ioi_periodicBernoulli_rpow_recursion (p := 2 * m + 1) (by omega)
+      (β := α - 2 * m - 1) (by linarith) hn0
+    rw [integral_periodicBernoulli_mul_rpow_eq (2 * m + 1 + 1) (γ := α - 2 * m - 1 - 1)
+      (by linarith) hn0, periodicBernoulli_natCast_eq_bernoulli] at hr1
+    have hs1 := neg_one_pow_mul_integral_periodicBernoulli_sub_nonpos (k := m + 1) (by omega)
+      (α - 2 * m - 1 - 1) n hn0
+    rw [show 2 * (m + 1) = 2 * m + 1 + 1 by ring] at hs1
+    set I2 := ∫ x in Ioi (n : ℝ), (periodicBernoulli (2 * m + 1 + 1) x -
+      bernoulli (2 * m + 1 + 1)) * x ^ (α - 2 * m - 1 - 1)
+    -- the recursion for `p = 2m`
+    have hr0 := integral_Ioi_periodicBernoulli_rpow_recursion (p := 2 * m) (by omega)
+      (β := α - 2 * m) (by linarith) hn0
+    rw [integral_periodicBernoulli_mul_rpow_eq (2 * m) (γ := α - 2 * m) (by linarith) hn0,
+      periodicBernoulli_natCast_eq_bernoulli, bernoulli_eq_zero_of_odd ⟨m, rfl⟩ (by omega),
+      show α - 2 * m - 1 = α - 2 * (m : ℝ) - 1 by ring] at hr0
+    have hs0 := neg_one_pow_mul_integral_periodicBernoulli_sub_nonpos (k := m) hm (α - 2 * m) n
+      hn0
+    set J := ∫ x in Ioi (n : ℝ), (periodicBernoulli (2 * m) x - bernoulli (2 * m)) *
+      x ^ (α - 2 * m)
+    -- binomial relations
+    have hc1 := Ring.natCast_mul_choose_succ (-α + 2 * m) (2 * m)
+    have hc2 := Ring.natCast_mul_choose_succ (-α + 2 * m - 1) (2 * m - 1)
+    rw [show 2 * m - 1 + 1 = 2 * m by omega, Nat.cast_sub (by omega),
+      show -α + 2 * m - 1 - 1 = -α + 2 * m - 2 by ring] at hc2
+    rw [show α - 2 * (m : ℝ) - 1 - 1 + 1 = α - 2 * m - 1 by ring] at hr1
+    rw [show α - 2 * (m : ℝ) + 1 = α + 1 - 2 * m by ring] at hr0
+    push_cast at hr0 hr1 hc1 hc2 hfull
+    set C := Ring.choose (-α + 2 * (m : ℝ)) (2 * m + 1) with hCdef
+    set I := ∫ t in Ioi (n : ℝ), periodicBernoulli (2 * m + 1) t * t ^ (α - 2 * (m : ℝ) - 1)
+      with hIdef
+    have hm0 : (0 : ℝ) < m := by exact_mod_cast hm
+    have hw1 : (0 : ℝ) < 2 * m - α - 1 := by linarith
+    -- the sign of `I`
+    have hI : (-1 : ℝ) ^ m * I ≤ 0 := by
+      have hβ : α - 2 * (m : ℝ) - 1 ≠ 0 := by linarith
+      have hI2 : (2 * m + 2) * I = -(α - 2 * m - 1) * I2 := by
+        field_simp at hr1
+        linear_combination hr1
+      have e : (-1 : ℝ) ^ m * I = (2 * m + 1 - α) / (2 * m + 2) *
+          ((-1) ^ (m + 1 + 1) * I2) := by
+        field_simp
+        rw [pow_succ, pow_succ]
+        linear_combination (-1 : ℝ) ^ m * hI2
+      rw [e]
+      exact mul_nonpos_of_nonneg_of_nonpos (div_nonneg (by linarith) (by positivity)) hs1
+    have hJI : J * I ≤ 0 := by
+      rw [pow_succ] at hs0
+      rcases neg_one_pow_eq_or ℝ m with h | h <;> rw [h] at hs0 hI <;> nlinarith
+    set E := (∑ j ∈ Ico 1 n, (j : ℝ) ^ α) - (riemannZeta (-(α : ℂ))).re -
+        ∑ s ∈ range (2 * m), powSumScale α s n * powSumCoeff α s
+    set N := (n : ℝ) ^ (α + 1 - 2 * m) with hN
+    set b := (bernoulli (2 * m) : ℝ)
+    set ch1 := Ring.choose (-α + 2 * (m : ℝ) - 1) (2 * m)
+    set ch2 := Ring.choose (-α + 2 * (m : ℝ) - 2) (2 * m - 1)
+    have hA : 2 * m * E = 2 * m * (C * I) - N * ch2 * b := by
+      field_simp at hfull
+      linear_combination hfull
+    have hB : (2 * m + 1) * ((2 * m - α - 1) * J + b * N) =
+        (2 * m - α - 1) * (2 * m - α) * I := by
+      have hne : α + 1 - 2 * (m : ℝ) ≠ 0 := by linarith
+      field_simp at hr0
+      linear_combination -hr0
+    have hE : E * (2 * m - α) = C * (2 * m + 1) * J := by
+      have h : 2 * m * (2 * m - α - 1) * (E * (2 * m - α) - C * (2 * m + 1) * J) = 0 := by
+        linear_combination (2 * m - α - 1) * (2 * m - α) * hA - 2 * m * C * hB +
+          (2 * m - α) * N * b * hc2 + 2 * m * b * N * hc1
+      have h0 : 2 * (m : ℝ) * (2 * m - α - 1) ≠ 0 := by positivity
+      linear_combination (mul_eq_zero.1 h).resolve_left h0
+    have hw : (0 : ℝ) < 2 * m - α := by linarith
+    have h2 : C ^ 2 * (2 * m + 1) * (J * I) ≤ 0 :=
+      mul_nonpos_of_nonneg_of_nonpos (by positivity) hJI
+    have h3 : E * (C * I) * (2 * m - α) = C ^ 2 * (2 * m + 1) * (J * I) := by
+      linear_combination (C * I) * hE
+    nlinarith
+  · have hC : Ring.choose (-α + 2 * m) (2 * m + 1) = 0 := by
+      rw [heq, show -(2 * (m : ℝ) - 1) + 2 * m = 1 by ring]
+      have h := Ring.natCast_mul_choose_succ (1 : ℝ) (2 * m)
+      rw [sub_self, show 2 * m = (2 * m - 1) + 1 by omega, Ring.choose_zero_succ,
+        mul_zero] at h
+      have hne : ((2 * m - 1 + 1 : ℕ) : ℝ) + 1 ≠ 0 := by positivity
+      rw [show 2 * m - 1 + 1 = 2 * m by omega] at h hne
+      exact (mul_eq_zero.1 h).resolve_left hne
+    rw [hC]
+    simp
 /-- DLMF §2.10(i) (remainder of 2.10.7): truncating 2.10.7 after `s = 2m - 1`, where
 `m ≥ (α+1)/2`, leaves a remainder bounded in absolute value by the first neglected term
 (`s = 2m`) and of the same sign, for every `n ≥ 1`. -/
@@ -248,6 +442,23 @@ theorem powerSum_remainder_bound {α : ℝ} (hα : α ≠ -1) {m : ℕ} (hm : 1 
       ∑ s ∈ range (2 * m), powSumScale α s n * powSumCoeff α s
     0 ≤ R * (powSumScale α (2 * m) n * powSumCoeff α (2 * m)) ∧
       |R| ≤ |powSumScale α (2 * m) n * powSumCoeff α (2 * m)| := by
-  sorry
+  intro R
+  have hfull := powerSum_eq_truncation_add_remainder hα hm hn (by linarith)
+  have hodd : powSumCoeff α (2 * m + 1) = 0 := by
+    rw [powSumCoeff, bernoulli_eq_zero_of_odd ⟨m, rfl⟩ (by omega)]
+    simp
+  rw [show 2 * m + 2 = 2 * m + 1 + 1 by ring, sum_range_succ, sum_range_succ, hodd, mul_zero,
+    add_zero] at hfull
+  have hmul := powerSum_remainder_mul_nonpos hα hm hmα hn
+  set K := Ring.choose (-α + 2 * m) (2 * m + 1) *
+    ∫ t in Ioi (n : ℝ), periodicBernoulli (2 * m + 1) t * t ^ (α - 2 * m - 1)
+  have hT : powSumScale α (2 * m) n * powSumCoeff α (2 * m) = R - K := by
+    simp only [R]; linear_combination -hfull
+  have hRK : R * K ≤ 0 := hmul
+  rw [hT]
+  clear_value R K
+  refine ⟨by nlinarith [sq_nonneg R], ?_⟩
+  rw [← sq_le_sq]
+  nlinarith [sq_nonneg K]
 
 end DLMF.AsymptoticApproximations

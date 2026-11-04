@@ -15,29 +15,29 @@ public import Mathlib.Analysis.Normed.Group.Tannery
 # The Gauss function on the cut plane (DLMF §§15.2(i), 15.6)
 
 Euler's integral represents `₂F₁` on the unit disk for `Re c > Re b > 0`. Its regularized form
-`regularizedGaussHGIntegral` is analytic on the cut plane `ℂ ∖ [1, ∞)`, and the contiguous
-shifts of `regularizedGaussHG` reduce every parameter triple to that region. This file proves
-that `regularizedGaussHG` is the analytic continuation of Mathlib's `regularizedGaussHGFun` to
-the cut plane.
+`regularizedGaussHypergeometricIntegral` is analytic on the cut plane `ℂ ∖ [1, ∞)`, and the
+contiguous shifts of `regularizedGaussHypergeometric` reduce every parameter triple to that region.
+This file proves that `regularizedGaussHypergeometric` is the analytic continuation of Mathlib's
+`regularizedGaussHGFun` to the cut plane.
 
 ## Main results
 
 * `ordinaryHypergeometric_eq_integral`: Euler's integral, DLMF 15.6.1 (AAR Theorem 2.2.1).
-* `regularizedGaussHGIntegral_eq_regularizedGaussHGFun`,
-  `analyticOnNhd_regularizedGaussHGIntegral`: Euler's integral agrees with `𝐅` on the disk and is
-  analytic on the cut plane for `Re b > 0`, `Re (c - b) > 0`.
-* `regularizedGaussHG_eq_regularizedGaussHGFun`, `analyticOnNhd_regularizedGaussHG`,
-  `regularizedGaussHG_unique`: agreement with `𝐅` on the disk, analyticity on the cut plane and
-  uniqueness characterize the continuation.
-* `regularizedGaussHG_zero_of_regular`: `𝐅(a,b;c;0) = 1/Γ(c)` for regular `c`.
-* `regularizedGaussHG_eq_regularizedGaussHGIntegral`: the continuation is Euler's integral on
-  the whole cut plane.
-* `ordinaryHypergeometric_eq_Gamma_mul_regularizedGaussHG`: `₂F₁ = Γ(c) 𝐅` on the disk.
-* `regularizedGaussHG_symm`: symmetry in `a` and `b`.
-* `deriv_regularizedGaussHG`, `iteratedDeriv_regularizedGaussHG`: DLMF 15.5.1–15.5.2 on the cut
-  plane.
-* `regularizedGaussHG_ode`: the hypergeometric equation DLMF 15.10.1 on the cut plane.
-* `regularizedGaussHG_neg_nat`: DLMF 15.2.3_5 on the cut plane.
+* `regularizedGaussHypergeometricIntegral_eq_regularizedGaussHypergeometricFun`,
+  `analyticOnNhd_regularizedGaussHypergeometricIntegral`: Euler's integral agrees with `𝐅` on the
+  disk and is analytic on the cut plane for `Re b > 0`, `Re (c - b) > 0`.
+* `regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun`,
+  `analyticOnNhd_regularizedGaussHypergeometric`, `regularizedGaussHypergeometric_unique`: agreement
+  with `𝐅` on the disk, analyticity on the cut plane and uniqueness characterize the continuation.
+* `regularizedGaussHypergeometric_zero_of_regular`: `𝐅(a,b;c;0) = 1/Γ(c)` for regular `c`.
+* `regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricIntegral`: the continuation is
+  Euler's integral on the whole cut plane.
+* `ordinaryHypergeometric_eq_Gamma_mul_regularizedGaussHypergeometric`: `₂F₁ = Γ(c) 𝐅` on the disk.
+* `regularizedGaussHypergeometric_symm`: symmetry in `a` and `b`.
+* `deriv_regularizedGaussHypergeometric`, `iteratedDeriv_regularizedGaussHypergeometric`: DLMF
+  15.5.1–15.5.2 on the cut plane.
+* `regularizedGaussHypergeometric_ode`: the hypergeometric equation DLMF 15.10.1 on the cut plane.
+* `regularizedGaussHypergeometric_neg_nat`: DLMF 15.2.3_5 on the cut plane.
 
 ## Implementation notes
 
@@ -71,21 +71,21 @@ theorem not_neg_nat_of_re_pos {w : ℂ} (hw : 0 < w.re) : ∀ k : ℕ, w ≠ -k 
 AAR's binomial expansion of `(1-zt)^{-a}` on `t ∈ [0,1]`. -/
 theorem hasSum_one_sub_mul_cpow {a z : ℂ} {t : ℝ} (ht : t ∈ Set.Icc (0 : ℝ) 1)
     (hz : ‖z‖ < 1) :
-    HasSum (fun n : ℕ => poch a n / n.factorial * (z * t) ^ n) ((1 - z * t) ^ (-a)) := by
+    HasSum (fun n : ℕ => pochhammer a n / n.factorial * (z * t) ^ n) ((1 - z * t) ^ (-a)) := by
   have hzt : ‖z * (t : ℂ)‖ < 1 := by
     rw [norm_mul]
     have htnorm : ‖(t : ℂ)‖ = |t| := by simp
     rw [htnorm]
     have ht' : |t| ≤ 1 := abs_le.mpr ⟨by linarith [ht.1], ht.2⟩
     nlinarith [norm_nonneg z, hz, abs_nonneg t]
-  simpa using hasSum_poch_div_factorial (β := a) (z := z * t) hzt
+  simpa using hasSum_pochhammer_div_factorial (β := a) (z := z * t) hzt
 
 /-- Helper lemma for `ordinaryHypergeometric_eq_integral`. -/
-theorem euler_term_eq_gaussHGCoeff {a b c : ℂ} (n : ℕ)
+theorem euler_term_eq_gaussHypergeometricCoeff {a b c : ℂ} (n : ℕ)
     (hb : 0 < b.re) (hcb : 0 < (c - b).re) :
     Gamma c / (Gamma b * Gamma (c - b)) *
-        (poch a n / n.factorial * betaIntegral (b + n) (c - b)) =
-      gaussHGCoeff a b c n := by
+        (pochhammer a n / n.factorial * betaIntegral (b + n) (c - b)) =
+      gaussHypergeometricCoeff a b c n := by
   have hb' : 0 < (b + n).re := by
     have : (b + n).re = b.re + n := by simp
     have hn : (0 : ℝ) ≤ n := Nat.cast_nonneg n
@@ -103,13 +103,13 @@ theorem euler_term_eq_gaussHGCoeff {a b c : ℂ} (n : ℕ)
     have hsum : b + n + (c - b) = c + n := by ring
     rw [hsum] at hGamma
     exact eq_div_of_mul_eq hcn (by rw [mul_comm]; exact hGamma.symm)
-  have hpochb : Gamma (b + n) / Gamma b = poch b n := Gamma_add_nat_div_Gamma_eq b hbn
-  have hpochc : Gamma (c + n) / Gamma c = poch c n := Gamma_add_nat_div_Gamma_eq c hc
+  have hpochb : Gamma (b + n) / Gamma b = pochhammer b n := Gamma_add_nat_div_Gamma_eq b hbn
+  have hpochc : Gamma (c + n) / Gamma c = pochhammer c n := Gamma_add_nat_div_Gamma_eq c hc
   have hf : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
-  have hcp : poch c n ≠ 0 := poch_ne_zero_of_not_neg_nat hc n
-  have hbmul : Gamma (b + n) = poch b n * Gamma b := (div_eq_iff hb0).mp hpochb
-  have hcmul : Gamma (c + n) = poch c n * Gamma c := (div_eq_iff hc0).mp hpochc
-  rw [hbeta, gaussHGCoeff, hbmul, hcmul]
+  have hcp : pochhammer c n ≠ 0 := pochhammer_ne_zero_of_not_neg_nat hc n
+  have hbmul : Gamma (b + n) = pochhammer b n * Gamma b := (div_eq_iff hb0).mp hpochb
+  have hcmul : Gamma (c + n) = pochhammer c n * Gamma c := (div_eq_iff hc0).mp hpochc
+  rw [hbeta, gaussHypergeometricCoeff, hbmul, hcmul]
   field [hb0, hc0, hcb0, hcn, hf, hcp]
 
 /-- Euler's integral representation of `₂F₁`, AAR Theorem 2.2.1. -/
@@ -121,10 +121,10 @@ theorem ordinaryHypergeometric_eq_integral {a b c z : ℂ}
         ∫ t : ℝ in (0 : ℝ)..1,
           (t : ℂ) ^ (b - 1) * (1 - (t : ℂ)) ^ (c - b - 1) * (1 - z * t) ^ (-a) := by
   let w : ℝ → ℂ := fun t => (t : ℂ) ^ (b - 1) * (1 - (t : ℂ)) ^ (c - b - 1)
-  let d : ℕ → ℂ := fun n => poch a n / n.factorial * z ^ n
+  let d : ℕ → ℂ := fun n => pochhammer a n / n.factorial * z ^ n
   let F : ℕ → ℝ → ℂ := fun n t => w t * (d n * (t : ℂ) ^ n)
   have hw : IntervalIntegrable w volume 0 1 := betaIntegral_convergent hb hcb
-  have hd : Summable (fun n => ‖d n‖) := (hasSum_poch_div_factorial (β := a) hz).summable.norm
+  have hd : Summable (fun n => ‖d n‖) := (hasSum_pochhammer_div_factorial (β := a) hz).summable.norm
   have hFi (n : ℕ) : IntervalIntegrable (F n) volume 0 1 :=
     hw.mul_continuousOn (by fun_prop)
   have hs := intervalIntegral.hasSum_integral_of_dominated_convergence
@@ -139,7 +139,7 @@ theorem ordinaryHypergeometric_eq_integral {a b c z : ℂ}
     (Filter.Eventually.of_forall fun t ht => ?_)
   · have hterm (n : ℕ) :
         ∫ t : ℝ in (0 : ℝ)..1, F n t =
-          (poch a n / n.factorial * betaIntegral (b + n) (c - b)) * z ^ n := by
+          (pochhammer a n / n.factorial * betaIntegral (b + n) (c - b)) * z ^ n := by
       rw [betaIntegral, ← intervalIntegral.integral_const_mul,
         ← intervalIntegral.integral_mul_const]
       apply intervalIntegral.integral_congr_Ioo_of_le (by norm_num)
@@ -152,8 +152,8 @@ theorem ordinaryHypergeometric_eq_integral {a b c z : ℂ}
       ring
     have hs' := hs.mul_left (Gamma c / (Gamma b * Gamma (c - b)))
     have hscaled (n : ℕ) : Gamma c / (Gamma b * Gamma (c - b)) *
-        (∫ t : ℝ in (0 : ℝ)..1, F n t) = gaussHGCoeff a b c n * z ^ n := by
-      rw [hterm, ← mul_assoc, euler_term_eq_gaussHGCoeff n hb hcb]
+        (∫ t : ℝ in (0 : ℝ)..1, F n t) = gaussHypergeometricCoeff a b c n * z ^ n := by
+      rw [hterm, ← mul_assoc, euler_term_eq_gaussHypergeometricCoeff n hb hcb]
     simp_rw [hscaled] at hs'
     exact ((hasFPowerSeriesOnBall_ordinaryHypergeometric a b c).hasSum_mul_pow
       (mem_eball_one_of_norm_lt_one hz)).unique hs'
@@ -174,16 +174,18 @@ theorem ordinaryHypergeometric_eq_integral {a b c z : ℂ}
     simpa only [F, d, mul_pow, mul_assoc] using h
 
 /-- On the unit disk the Euler integral is the regularized Gauss function. -/
-theorem regularizedGaussHGIntegral_eq_regularizedGaussHGFun {a b c : ℂ} (hb : 0 < b.re)
+theorem regularizedGaussHypergeometricIntegral_eq_regularizedGaussHypergeometricFun {a b c : ℂ}
+    (hb : 0 < b.re)
     (hcb : 0 < (c - b).re)
-    {z : ℂ} (hz : ‖z‖ < 1) : regularizedGaussHGIntegral a b c z
+    {z : ℂ} (hz : ‖z‖ < 1) : regularizedGaussHypergeometricIntegral a b c z
         = regularizedGaussHGFun a b c z := by
   have hc := not_neg_nat_of_re_pos (re_c_pos_of hb hcb)
   have hΓc : Gamma c ≠ 0 := Gamma_ne_zero hc
   have hΓb : Gamma b ≠ 0 := Gamma_ne_zero (not_neg_nat_of_re_pos hb)
   have hΓcb : Gamma (c - b) ≠ 0 := Gamma_ne_zero (not_neg_nat_of_re_pos hcb)
-  rw [regularizedGaussHGFun_eq_div_Gamma hc, ordinaryHypergeometric_eq_integral hb hcb hz,
-    regularizedGaussHGIntegral]
+  rw [regularizedGaussHypergeometricFun_eq_div_Gamma hc,
+      ordinaryHypergeometric_eq_integral hb hcb hz,
+    regularizedGaussHypergeometricIntegral]
   simp only [eulerKernel]
   set I := ∫ t : ℝ in (0 : ℝ)..1,
     (t : ℂ) ^ (b - 1) * (1 - (t : ℂ)) ^ (c - b - 1) * (1 - z * t) ^ (-a) with hI
@@ -267,13 +269,13 @@ theorem hasDerivAt_integral_eulerKernel {a b c : ℂ} (hb : 0 < b.re) (hcb : 0 <
     exact hasDerivAt_eulerKernel (hsub hz) (hIoc t ht)
 
 /-- Euler's integral is analytic in `z` on the cut plane when `Re b > 0`, `Re (c - b) > 0`. -/
-theorem analyticOnNhd_regularizedGaussHGIntegral (a : ℂ) {b c : ℂ} (hb : 0 < b.re)
+theorem analyticOnNhd_regularizedGaussHypergeometricIntegral (a : ℂ) {b c : ℂ} (hb : 0 < b.re)
     (hcb : 0 < (c - b).re) :
-    AnalyticOnNhd ℂ (regularizedGaussHGIntegral a b c) cutPlane := by
+    AnalyticOnNhd ℂ (regularizedGaussHypergeometricIntegral a b c) cutPlane := by
   refine DifferentiableOn.analyticOnNhd ?_ isOpen_cutPlane
   intro z hz
   refine DifferentiableAt.differentiableWithinAt ?_
-  unfold regularizedGaussHGIntegral
+  unfold regularizedGaussHypergeometricIntegral
   exact (differentiableAt_const _).mul (hasDerivAt_integral_eulerKernel hb hcb hz).differentiableAt
 
 /-- For `x > 0`, `⌈x - 1⌉₊ < ⌈x⌉₊`. -/
@@ -315,25 +317,28 @@ theorem euler_region_of_shift_eq_zero {b c : ℂ} (hB : shiftB b = 0) (hC : shif
   constructor <;> linarith
 
 /-- Unfolding the recursion when a `c`-shift is needed: the contiguous relation in `c`. -/
-theorem regularizedGaussHGByShifts_succ_of_pos_c {n : ℕ} {a b c z : ℂ} (h : 0 < shiftC b c) :
-    regularizedGaussHGByShifts (n + 1) a b c z =
-      (c - a) * regularizedGaussHGByShifts n a b (c + 1) z + a
-          * regularizedGaussHGByShifts n (a + 1) b (c + 1) z := by
-  simp only [regularizedGaussHGByShifts, h, ↓reduceIte]
+theorem regularizedGaussHypergeometricByShifts_succ_of_pos_c {n : ℕ} {a b c z : ℂ}
+    (h : 0 < shiftC b c) :
+    regularizedGaussHypergeometricByShifts (n + 1) a b c z =
+      (c - a) * regularizedGaussHypergeometricByShifts n a b (c + 1) z + a
+          * regularizedGaussHypergeometricByShifts n (a + 1) b (c + 1) z := by
+  simp only [regularizedGaussHypergeometricByShifts, h, ↓reduceIte]
 
 /-- Unfolding the recursion when only a `b`-shift is needed: the contiguous relation in `b`. -/
-lemma regularizedGaussHGByShifts_succ_of_pos_b {n : ℕ} {a b c z : ℂ} (hc : ¬ 0 < shiftC b c)
+lemma regularizedGaussHypergeometricByShifts_succ_of_pos_b {n : ℕ} {a b c z : ℂ}
+    (hc : ¬ 0 < shiftC b c)
     (hb : 0 < shiftB b) :
-    regularizedGaussHGByShifts (n + 1) a b c z =
-      regularizedGaussHGByShifts n a (b + 1) c z - a * z
-          * regularizedGaussHGByShifts n (a + 1) (b + 1) (c + 1) z := by
-  simp only [regularizedGaussHGByShifts, hc, hb, ↓reduceIte]
+    regularizedGaussHypergeometricByShifts (n + 1) a b c z =
+      regularizedGaussHypergeometricByShifts n a (b + 1) c z - a * z
+          * regularizedGaussHypergeometricByShifts n (a + 1) (b + 1) (c + 1) z := by
+  simp only [regularizedGaussHypergeometricByShifts, hc, hb, ↓reduceIte]
 
 /-- Unfolding the recursion when no shift is needed: Euler's integral. -/
-theorem regularizedGaussHGByShifts_succ_of_zero {n : ℕ} {a b c z : ℂ} (hc : ¬ 0 < shiftC b c)
-    (hb : ¬ 0 < shiftB b) : regularizedGaussHGByShifts (n + 1) a b c z
-        = regularizedGaussHGIntegral a b c z := by
-  simp only [regularizedGaussHGByShifts, hc, hb, ↓reduceIte]
+theorem regularizedGaussHypergeometricByShifts_succ_of_zero {n : ℕ} {a b c z : ℂ}
+    (hc : ¬ 0 < shiftC b c)
+    (hb : ¬ 0 < shiftB b) : regularizedGaussHypergeometricByShifts (n + 1) a b c z
+        = regularizedGaussHypergeometricIntegral a b c z := by
+  simp only [regularizedGaussHypergeometricByShifts, hc, hb, ↓reduceIte]
 
 /-- The measures of the recursive calls in the `b`-shift branch. -/
 theorem shiftMeasure_b_step {b c : ℂ} (hc : ¬ 0 < shiftC b c) (hb : 0 < shiftB b) :
@@ -359,199 +364,220 @@ theorem shiftMeasure_b_step {b c : ℂ} (hc : ¬ 0 < shiftC b c) (hb : 0 < shift
   omega
 
 /-- On the unit disk, every stage of the recursion agrees with `𝐅` once the fuel suffices. -/
-lemma regularizedGaussHGByShifts_eq_regularized (n : ℕ) {a b c : ℂ}
+lemma regularizedGaussHypergeometricByShifts_eq_regularized (n : ℕ) {a b c : ℂ}
     (hn : shiftMeasure b c ≤ n) {z : ℂ}
-    (hz : ‖z‖ < 1) : regularizedGaussHGByShifts n a b c z = regularizedGaussHGFun a b c z := by
+    (hz : ‖z‖ < 1) : regularizedGaussHypergeometricByShifts n a b c z =
+        regularizedGaussHGFun a b c z := by
   induction n generalizing a b c with
   | zero =>
     have h0 : shiftB b = 0 ∧ shiftC b c = 0 := by unfold shiftMeasure at hn; omega
     obtain ⟨h1, h2⟩ := euler_region_of_shift_eq_zero h0.1 h0.2
-    exact regularizedGaussHGIntegral_eq_regularizedGaussHGFun (by linarith) (by linarith) hz
+    exact regularizedGaussHypergeometricIntegral_eq_regularizedGaussHypergeometricFun (by linarith)
+        (by linarith) hz
   | succ n ih =>
     by_cases hc : 0 < shiftC b c
-    · rw [regularizedGaussHGByShifts_succ_of_pos_c hc]
+    · rw [regularizedGaussHypergeometricByShifts_succ_of_pos_c hc]
       have hlt := shiftC_add_one_lt hc
       have hn' : shiftMeasure b (c + 1) ≤ n := by unfold shiftMeasure at hn ⊢; omega
-      rw [ih hn', ih hn', regularizedGaussHGFun_contiguous_c a b c hz]
+      rw [ih hn', ih hn', regularizedGaussHypergeometricFun_contiguous_c a b c hz]
     · by_cases hb : 0 < shiftB b
-      · rw [regularizedGaussHGByShifts_succ_of_pos_b hc hb]
+      · rw [regularizedGaussHypergeometricByShifts_succ_of_pos_b hc hb]
         obtain ⟨hm1, hm2⟩ := shiftMeasure_b_step hc hb
         rw [ih (a := a) (b := b + 1) (c := c) (by omega),
           ih (a := a + 1) (b := b + 1) (c := c + 1) (by omega)]
-        linear_combination (-1 : ℂ) * regularizedGaussHGFun_contiguous_shift_b a b c hz
-      · rw [regularizedGaussHGByShifts_succ_of_zero hc hb]
+        linear_combination (-1 : ℂ) * regularizedGaussHypergeometricFun_contiguous_shift_b a b c hz
+      · rw [regularizedGaussHypergeometricByShifts_succ_of_zero hc hb]
         obtain ⟨h1, h2⟩ := euler_region_of_shift_eq_zero (Nat.eq_zero_of_not_pos hb)
           (Nat.eq_zero_of_not_pos hc)
-        exact regularizedGaussHGIntegral_eq_regularizedGaussHGFun (by linarith) (by linarith) hz
+        exact regularizedGaussHypergeometricIntegral_eq_regularizedGaussHypergeometricFun
+            (by linarith) (by linarith) hz
 
 /-- Every stage of the recursion is analytic on the cut plane once the fuel suffices. -/
-lemma analyticOnNhd_regularizedGaussHGAux (n : ℕ) {a b c : ℂ} (hn : shiftMeasure b c ≤ n) :
-    AnalyticOnNhd ℂ (fun z => regularizedGaussHGByShifts n a b c z) cutPlane := by
+lemma analyticOnNhd_regularizedGaussHypergeometricAux (n : ℕ) {a b c : ℂ}
+    (hn : shiftMeasure b c ≤ n) :
+    AnalyticOnNhd ℂ (fun z => regularizedGaussHypergeometricByShifts n a b c z) cutPlane := by
   induction n generalizing a b c with
   | zero =>
     have h0 : shiftB b = 0 ∧ shiftC b c = 0 := by unfold shiftMeasure at hn; omega
     obtain ⟨h1, h2⟩ := euler_region_of_shift_eq_zero h0.1 h0.2
-    exact analyticOnNhd_regularizedGaussHGIntegral a (by linarith) (by linarith)
+    exact analyticOnNhd_regularizedGaussHypergeometricIntegral a (by linarith) (by linarith)
   | succ n ih =>
     by_cases hc : 0 < shiftC b c
-    · simp_rw [regularizedGaussHGByShifts_succ_of_pos_c hc]
+    · simp_rw [regularizedGaussHypergeometricByShifts_succ_of_pos_c hc]
       have hlt := shiftC_add_one_lt hc
       have hn' : shiftMeasure b (c + 1) ≤ n := by unfold shiftMeasure at hn ⊢; omega
       exact (analyticOnNhd_const.mul (ih hn')).add (analyticOnNhd_const.mul (ih hn'))
     · by_cases hb : 0 < shiftB b
-      · simp_rw [regularizedGaussHGByShifts_succ_of_pos_b hc hb]
+      · simp_rw [regularizedGaussHypergeometricByShifts_succ_of_pos_b hc hb]
         obtain ⟨hm1, hm2⟩ := shiftMeasure_b_step hc hb
         exact (ih (a := a) (b := b + 1) (c := c) (by omega)).sub
           ((analyticOnNhd_const.mul analyticOnNhd_id).mul
             (ih (a := a + 1) (b := b + 1) (c := c + 1) (by omega)))
-      · simp_rw [regularizedGaussHGByShifts_succ_of_zero hc hb]
+      · simp_rw [regularizedGaussHypergeometricByShifts_succ_of_zero hc hb]
         obtain ⟨h1, h2⟩ := euler_region_of_shift_eq_zero (Nat.eq_zero_of_not_pos hb)
           (Nat.eq_zero_of_not_pos hc)
-        exact analyticOnNhd_regularizedGaussHGIntegral a (by linarith) (by linarith)
+        exact analyticOnNhd_regularizedGaussHypergeometricIntegral a (by linarith) (by linarith)
 
 /-- On the unit disk the continuation is the regularized Gauss series. -/
-theorem regularizedGaussHG_eq_regularizedGaussHGFun (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
-    regularizedGaussHG a b c z = regularizedGaussHGFun a b c z :=
-  regularizedGaussHGByShifts_eq_regularized _ le_rfl hz
+theorem regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun (a b c : ℂ) {z : ℂ}
+    (hz : ‖z‖ < 1) :
+    regularizedGaussHypergeometric a b c z = regularizedGaussHGFun a b c z :=
+  regularizedGaussHypergeometricByShifts_eq_regularized _ le_rfl hz
 
 /-- The continuation is analytic on the cut plane. -/
-theorem analyticOnNhd_regularizedGaussHG (a b c : ℂ) : AnalyticOnNhd ℂ (regularizedGaussHG a b c)
+theorem analyticOnNhd_regularizedGaussHypergeometric (a b c : ℂ) : AnalyticOnNhd ℂ
+    (regularizedGaussHypergeometric a b c)
     cutPlane :=
-  analyticOnNhd_regularizedGaussHGAux _ le_rfl
+  analyticOnNhd_regularizedGaussHypergeometricAux _ le_rfl
 
 /-- The continued regularized function `𝐅(a, b; c; z)` is analytic on the cut plane. -/
 @[fun_prop]
-theorem analyticAt_regularizedGaussHG (a b c : ℂ) {z : ℂ} (hz : z ∈ cutPlane) :
-    AnalyticAt ℂ (regularizedGaussHG a b c) z :=
-  analyticOnNhd_regularizedGaussHG a b c z hz
+theorem analyticAt_regularizedGaussHypergeometric (a b c : ℂ) {z : ℂ} (hz : z ∈ cutPlane) :
+    AnalyticAt ℂ (regularizedGaussHypergeometric a b c) z :=
+  analyticOnNhd_regularizedGaussHypergeometric a b c z hz
 
 /-- The continued regularized function `𝐅(a, b; c; z)` is differentiable on the cut plane. -/
 @[fun_prop]
-theorem differentiableAt_regularizedGaussHG (a b c : ℂ) {z : ℂ} (hz : z ∈ cutPlane) :
-    DifferentiableAt ℂ (regularizedGaussHG a b c) z :=
-  (analyticAt_regularizedGaussHG a b c hz).differentiableAt
+theorem differentiableAt_regularizedGaussHypergeometric (a b c : ℂ) {z : ℂ} (hz : z ∈ cutPlane) :
+    DifferentiableAt ℂ (regularizedGaussHypergeometric a b c) z :=
+  (analyticAt_regularizedGaussHypergeometric a b c hz).differentiableAt
 
 /-- Uniqueness: any function analytic on the cut plane that agrees with `𝐅` on the unit disk
 is the continuation. -/
-theorem regularizedGaussHG_unique {a b c : ℂ} {f : ℂ → ℂ} (hf : AnalyticOnNhd ℂ f cutPlane)
+theorem regularizedGaussHypergeometric_unique {a b c : ℂ} {f : ℂ → ℂ}
+    (hf : AnalyticOnNhd ℂ f cutPlane)
     (h : ∀ z : ℂ, ‖z‖ < 1 → f z = regularizedGaussHGFun a b c z) :
-    EqOn f (regularizedGaussHG a b c) cutPlane :=
-  eqOn_cutPlane_of_eqOn_disk hf (analyticOnNhd_regularizedGaussHG a b c) fun z hz =>
-    (h z hz).trans (regularizedGaussHG_eq_regularizedGaussHGFun a b c hz).symm
+    EqOn f (regularizedGaussHypergeometric a b c) cutPlane :=
+  eqOn_cutPlane_of_eqOn_disk hf (analyticOnNhd_regularizedGaussHypergeometric a b c) fun z hz =>
+    (h z hz).trans (regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun a b c
+        hz).symm
 
 /-- The continuation equals the Euler integral on the whole cut plane, for `Re b > 0` and
 `Re (c - b) > 0`. -/
-theorem regularizedGaussHG_eq_regularizedGaussHGIntegral {a b c : ℂ} (hb : 0 < b.re)
+theorem regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricIntegral {a b c : ℂ}
+    (hb : 0 < b.re)
     (hcb : 0 < (c - b).re) {z : ℂ} (hz : z ∈ cutPlane) :
-    regularizedGaussHG a b c z = regularizedGaussHGIntegral a b c z :=
-  (regularizedGaussHG_unique (analyticOnNhd_regularizedGaussHGIntegral a hb hcb)
-    (fun _ hw => regularizedGaussHGIntegral_eq_regularizedGaussHGFun hb hcb hw) hz).symm
+    regularizedGaussHypergeometric a b c z = regularizedGaussHypergeometricIntegral a b c z :=
+  (regularizedGaussHypergeometric_unique
+      (analyticOnNhd_regularizedGaussHypergeometricIntegral a hb hcb)
+    (fun _ hw => regularizedGaussHypergeometricIntegral_eq_regularizedGaussHypergeometricFun hb
+        hcb hw) hz).symm
 
 /-- The classical `₂F₁` on the unit disk is `Γ(c)` times the continuation. -/
-theorem ordinaryHypergeometric_eq_Gamma_mul_regularizedGaussHG {a b c : ℂ}
+theorem ordinaryHypergeometric_eq_Gamma_mul_regularizedGaussHypergeometric {a b c : ℂ}
     (hc : ∀ k : ℕ, c ≠ -(k : ℂ))
-    {z : ℂ} (hz : ‖z‖ < 1) : ₂F₁ a b c z = Gamma c * regularizedGaussHG a b c z := by
-  rw [regularizedGaussHG_eq_regularizedGaussHGFun a b c hz, regularizedGaussHGFun_eq_div_Gamma hc,
+    {z : ℂ} (hz : ‖z‖ < 1) : ₂F₁ a b c z = Gamma c * regularizedGaussHypergeometric a b c z := by
+  rw [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun a b c hz,
+      regularizedGaussHypergeometricFun_eq_div_Gamma hc,
     mul_div_cancel₀ _ (Gamma_ne_zero hc)]
 
 /-- Symmetry `𝐅(a,b;c;z) = 𝐅(b,a;c;z)` on the cut plane. -/
-theorem regularizedGaussHG_symm (a b c : ℂ) {z : ℂ} (hz : z ∈ cutPlane) :
-    regularizedGaussHG a b c z = regularizedGaussHG b a c z :=
-  eqOn_cutPlane_of_eqOn_disk (analyticOnNhd_regularizedGaussHG a b c)
-      (analyticOnNhd_regularizedGaussHG b a c)
+theorem regularizedGaussHypergeometric_symm (a b c : ℂ) {z : ℂ} (hz : z ∈ cutPlane) :
+    regularizedGaussHypergeometric a b c z = regularizedGaussHypergeometric b a c z :=
+  eqOn_cutPlane_of_eqOn_disk (analyticOnNhd_regularizedGaussHypergeometric a b c)
+      (analyticOnNhd_regularizedGaussHypergeometric b a c)
     (fun z hz => by rw
-        [regularizedGaussHG_eq_regularizedGaussHGFun a b c hz,
-            regularizedGaussHG_eq_regularizedGaussHGFun b a c hz,
+        [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun a b c hz,
+            regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun b a c hz,
       regularizedGaussHGFun_symm]) hz
 
 /-- 15.5.1 on the cut plane: `𝐅'(a,b;c;z) = a b 𝐅(a+1,b+1;c+1;z)`. -/
-theorem deriv_regularizedGaussHG (a b c : ℂ) {z : ℂ} (hz : z ∈ cutPlane) :
-    deriv (regularizedGaussHG a b c) z = a * b * regularizedGaussHG (a + 1) (b + 1) (c + 1) z :=
-  eqOn_cutPlane_of_eqOn_disk (f := deriv (regularizedGaussHG a b c))
-    (g := fun z => a * b * regularizedGaussHG (a + 1) (b + 1) (c + 1) z)
-    (analyticOnNhd_regularizedGaussHG a b c).deriv (by intro z hz; fun_prop (disch := assumption))
+theorem deriv_regularizedGaussHypergeometric (a b c : ℂ) {z : ℂ} (hz : z ∈ cutPlane) :
+    deriv (regularizedGaussHypergeometric a b c) z = a * b *
+        regularizedGaussHypergeometric (a + 1) (b + 1) (c + 1) z :=
+  eqOn_cutPlane_of_eqOn_disk (f := deriv (regularizedGaussHypergeometric a b c))
+    (g := fun z => a * b * regularizedGaussHypergeometric (a + 1) (b + 1) (c + 1) z)
+    (analyticOnNhd_regularizedGaussHypergeometric a b c).deriv
+        (by intro z hz; fun_prop (disch := assumption))
     (fun z hz => by
-      have heq : regularizedGaussHG a b c =ᶠ[𝓝 z] regularizedGaussHGFun a b c := by
+      have heq : regularizedGaussHypergeometric a b c =ᶠ[𝓝 z] regularizedGaussHGFun a b c := by
         filter_upwards [(isOpen_lt continuous_norm continuous_const).mem_nhds hz] with w hw
-        exact regularizedGaussHG_eq_regularizedGaussHGFun a b c hw
-      rw [heq.deriv_eq, deriv_regularizedGaussHGFun a b c hz,
-          regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hz])
+        exact regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun a b c hw
+      rw [heq.deriv_eq, deriv_regularizedGaussHypergeometricFun a b c hz,
+          regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hz])
     hz
 
 /-- 15.5.2 on the cut plane: `𝐅⁽ⁿ⁾(a,b;c;z) = (a)ₙ (b)ₙ 𝐅(a+n,b+n;c+n;z)`. -/
-theorem iteratedDeriv_regularizedGaussHG (a b c : ℂ) (n : ℕ) {z : ℂ} (hz : z ∈ cutPlane) :
-    iteratedDeriv n (regularizedGaussHG a b c) z =
-      poch a n * poch b n * regularizedGaussHG (a + n) (b + n) (c + n) z := by
+theorem iteratedDeriv_regularizedGaussHypergeometric (a b c : ℂ) (n : ℕ) {z : ℂ}
+    (hz : z ∈ cutPlane) :
+    iteratedDeriv n (regularizedGaussHypergeometric a b c) z =
+      pochhammer a n * pochhammer b n *
+          regularizedGaussHypergeometric (a + n) (b + n) (c + n) z := by
   induction n generalizing z with
-  | zero => simp [iteratedDeriv_zero, poch_zero]
+  | zero => simp [iteratedDeriv_zero, pochhammer_zero]
   | succ n ih =>
     rw [iteratedDeriv_succ]
-    have heq : iteratedDeriv n (regularizedGaussHG a b c) =ᶠ[𝓝 z]
-        fun w => poch a n * poch b n * regularizedGaussHG (a + n) (b + n) (c + n) w := by
+    have heq : iteratedDeriv n (regularizedGaussHypergeometric a b c) =ᶠ[𝓝 z]
+        fun w => pochhammer a n * pochhammer b n *
+            regularizedGaussHypergeometric (a + n) (b + n) (c + n) w := by
       filter_upwards [isOpen_cutPlane.mem_nhds hz] with w hw
       exact ih hw
-    rw [heq.deriv_eq, deriv_const_mul _ (differentiableAt_regularizedGaussHG _ _ _ hz),
-      deriv_regularizedGaussHG _ _ _ hz, poch_succ, poch_succ,
+    rw [heq.deriv_eq, deriv_const_mul _ (differentiableAt_regularizedGaussHypergeometric _ _ _ hz),
+      deriv_regularizedGaussHypergeometric _ _ _ hz, pochhammer_succ, pochhammer_succ,
       show a + ((n + 1 : ℕ) : ℂ) = a + n + 1 by push_cast; ring,
       show b + ((n + 1 : ℕ) : ℂ) = b + n + 1 by push_cast; ring,
       show c + ((n + 1 : ℕ) : ℂ) = c + n + 1 by push_cast; ring]
     ring
 
 /-- `𝐅(a,b;c;0) = 1/Γ(c)` for regular `c`. -/
-theorem regularizedGaussHGFun_zero_of_regular {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) :
+theorem regularizedGaussHypergeometricFun_zero_of_regular {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) :
     regularizedGaussHGFun a b c 0 = 1/Gamma c := by
-  rw [regularizedGaussHGFun_eq_div_Gamma hc, ordinaryHypergeometric_zero]
+  rw [regularizedGaussHypergeometricFun_eq_div_Gamma hc, ordinaryHypergeometric_zero]
 
 /-- `𝐅(a,b;c;0) = 1/Γ(c)` for regular `c`, on the cut plane. -/
-theorem regularizedGaussHG_zero_of_regular {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) :
-    regularizedGaussHG a b c 0 = 1/Gamma c := by
-  rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ (by simp),
-    regularizedGaussHGFun_zero_of_regular hc]
+theorem regularizedGaussHypergeometric_zero_of_regular {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) :
+    regularizedGaussHypergeometric a b c 0 = 1/Gamma c := by
+  rw [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ (by simp),
+    regularizedGaussHypergeometricFun_zero_of_regular hc]
 
 /-- The hypergeometric equation (DLMF 15.10.1) for the continuation `𝐅` on the cut plane, with
 `𝐅'` and `𝐅''` written through 15.5.1–15.5.2. -/
 @[dlmf 15.10.E1]
-theorem regularizedGaussHG_ode (a b c : ℂ) {z : ℂ} (hz : z ∈ cutPlane) :
-    z * (1 - z) * (poch a 2 * poch b 2 * regularizedGaussHG (a + 2) (b + 2) (c + 2) z) +
-      (c - (a + b + 1) * z) * (a * b * regularizedGaussHG (a + 1) (b + 1) (c + 1) z) -
-      a * b * regularizedGaussHG a b c z = 0 := by
+theorem regularizedGaussHypergeometric_ode (a b c : ℂ) {z : ℂ} (hz : z ∈ cutPlane) :
+    z * (1 - z) * (pochhammer a 2 * pochhammer b 2 *
+        regularizedGaussHypergeometric (a + 2) (b + 2) (c + 2) z) +
+      (c - (a + b + 1) * z) * (a * b * regularizedGaussHypergeometric (a + 1) (b + 1) (c + 1) z) -
+      a * b * regularizedGaussHypergeometric a b c z = 0 := by
   have hdisk : ∀ w : ℂ, ‖w‖ < 1 →
-      w * (1 - w) * (poch a 2 * poch b 2 * regularizedGaussHGFun (a + 2) (b + 2) (c + 2) w) +
+      w * (1 - w) * (pochhammer a 2 * pochhammer b 2 *
+          regularizedGaussHGFun (a + 2) (b + 2) (c + 2) w) +
         (c - (a + b + 1) * w) * (a * b * regularizedGaussHGFun (a + 1) (b + 1) (c + 1) w) -
         a * b * regularizedGaussHGFun a b c w = 0 := by
     intro w hw
-    have h := regularizedGaussHGFun_ode a b c hw
-    have h2 := iteratedDeriv_regularizedGaussHGFun a b c 2 hw
+    have h := regularizedGaussHypergeometricFun_ode a b c hw
+    have h2 := iteratedDeriv_regularizedGaussHypergeometricFun a b c 2 hw
     simp only [iteratedDeriv_succ, iteratedDeriv_zero] at h2
-    rw [h2, deriv_regularizedGaussHGFun a b c hw] at h
+    rw [h2, deriv_regularizedGaussHypergeometricFun a b c hw] at h
     push_cast at h
     linear_combination h
   refine eqOn_cutPlane_of_eqOn_disk
     (f := fun z =>
-      z * (1 - z) * (poch a 2 * poch b 2 * regularizedGaussHG (a + 2) (b + 2) (c + 2) z) +
-        (c - (a + b + 1) * z) * (a * b * regularizedGaussHG (a + 1) (b + 1) (c + 1) z) -
-        a * b * regularizedGaussHG a b c z) (g := fun _ => 0)
+      z * (1 - z) * (pochhammer a 2 * pochhammer b 2 *
+          regularizedGaussHypergeometric (a + 2) (b + 2) (c + 2) z) +
+        (c - (a + b + 1) * z) * (a * b * regularizedGaussHypergeometric (a + 1) (b + 1) (c + 1) z) -
+        a * b * regularizedGaussHypergeometric a b c z) (g := fun _ => 0)
     (by intro z hz; fun_prop (disch := assumption)) analyticOnNhd_const (fun w hw => ?_) hz
-  rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hw,
-    regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hw,
-    regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hw]
+  rw [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hw,
+    regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hw,
+    regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hw]
   exact hdisk w hw
 
 /-- DLMF 15.2.3_5 on the cut plane: `𝐅(a,b;-n;z) = (a)ₙ₊₁ (b)ₙ₊₁ zⁿ⁺¹ 𝐅(a+n+1,b+n+1;n+2;z)`. -/
 @[dlmf 15.2.E3_5]
-theorem regularizedGaussHG_neg_nat (a b : ℂ) (n : ℕ) {z : ℂ} (hz : z ∈ cutPlane) :
-    regularizedGaussHG a b (-n) z = poch a (n + 1) * poch b (n + 1) * z ^ (n + 1) *
-      regularizedGaussHG (a + n + 1) (b + n + 1) (n + 2) z := by
-  refine eqOn_cutPlane_of_eqOn_disk (f := regularizedGaussHG a b (-n))
-    (g := fun z => poch a (n + 1) * poch b (n + 1) * z ^ (n + 1) *
-      regularizedGaussHG (a + n + 1) (b + n + 1) (n + 2) z)
-    (analyticOnNhd_regularizedGaussHG _ _ _)
+theorem regularizedGaussHypergeometric_neg_nat (a b : ℂ) (n : ℕ) {z : ℂ} (hz : z ∈ cutPlane) :
+    regularizedGaussHypergeometric a b (-n) z = pochhammer a (n + 1) *
+        pochhammer b (n + 1) * z ^ (n + 1) *
+      regularizedGaussHypergeometric (a + n + 1) (b + n + 1) (n + 2) z := by
+  refine eqOn_cutPlane_of_eqOn_disk (f := regularizedGaussHypergeometric a b (-n))
+    (g := fun z => pochhammer a (n + 1) * pochhammer b (n + 1) * z ^ (n + 1) *
+      regularizedGaussHypergeometric (a + n + 1) (b + n + 1) (n + 2) z)
+    (analyticOnNhd_regularizedGaussHypergeometric _ _ _)
     (by intro z hz; fun_prop (disch := assumption)) (fun z hz => ?_) hz
   have hc : ∀ k : ℕ, ((n : ℂ) + 2) ≠ -(k : ℂ) := fun k h => by
     have := congrArg re h; simp at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
-  rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hz,
-      regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hz,
-    regularized_at_neg_nat a b n hz, regularizedGaussHGFun_eq_div_Gamma hc,
+  rw [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hz,
+      regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hz,
+    regularized_at_neg_nat a b n hz, regularizedGaussHypergeometricFun_eq_div_Gamma hc,
     show (n : ℂ) + 2 = ((n + 1 : ℕ) : ℂ) + 1 by push_cast; ring, Gamma_nat_eq_factorial]
   push_cast
   ring

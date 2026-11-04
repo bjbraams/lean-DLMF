@@ -45,22 +45,25 @@ open scoped Real Topology Nat
 namespace DLMF.Legendre
 
 /-- The regularized Gauss pullback `x ↦ 𝐅(a,b;c;(1-x)/2)` is continuous at `x = 1`. -/
-theorem continuousAt_regularizedGaussHG_half_one (a b c : ℂ) :
-    ContinuousAt (fun x : ℝ => regularizedGaussHG a b c ((1-(x:ℂ))/2)) 1 := by
-  have hG := (analyticAt_regularizedGaussHG a b c zero_mem_cutPlane).continuousAt
+theorem continuousAt_regularizedGaussHypergeometric_half_one (a b c : ℂ) :
+    ContinuousAt (fun x : ℝ => regularizedGaussHypergeometric a b c ((1-(x:ℂ))/2)) 1 := by
+  have hG := (analyticAt_regularizedGaussHypergeometric a b c zero_mem_cutPlane).continuousAt
   exact hG.comp_of_eq (by fun_prop) (by simp)
 
 /-- The factor `((1+x)/2)^p K 𝐅(a,b;c;(1-x)/2)` tends to `1` at `x = 1` when `K 𝐅(a,b;c;0) = 1`. -/
-theorem tendsto_legendre_singular_factor (a b c p K : ℂ) (hK : K * regularizedGaussHG a b c 0 = 1)
+theorem tendsto_legendre_singular_factor (a b c p K : ℂ)
+    (hK : K * regularizedGaussHypergeometric a b c 0 = 1)
     (l : Filter ℝ) (hl : l ≤ 𝓝 1) :
-    Tendsto (fun x : ℝ => ((1+(x:ℂ))/2)^p * (K * regularizedGaussHG a b c ((1-(x:ℂ))/2)))
+    Tendsto (fun x : ℝ => ((1+(x:ℂ))/2)^p *
+        (K * regularizedGaussHypergeometric a b c ((1-(x:ℂ))/2)))
       l (𝓝 1) := by
   have hc : ContinuousAt (fun x : ℝ => ((1+(x:ℂ))/2)^p *
-      (K * regularizedGaussHG a b c ((1-(x:ℂ))/2))) 1 := by
+      (K * regularizedGaussHypergeometric a b c ((1-(x:ℂ))/2))) 1 := by
     refine ContinuousAt.mul ?_
-        (continuousAt_const.mul (continuousAt_regularizedGaussHG_half_one _ _ _))
+        (continuousAt_const.mul (continuousAt_regularizedGaussHypergeometric_half_one _ _ _))
     exact ContinuousAt.cpow (by fun_prop) continuousAt_const (by norm_num)
-  have h1 : ((1+((1:ℝ):ℂ))/2)^p * (K * regularizedGaussHG a b c ((1-((1:ℝ):ℂ))/2)) = 1 := by
+  have h1 : ((1+((1:ℝ):ℂ))/2)^p *
+      (K * regularizedGaussHypergeometric a b c ((1-((1:ℝ):ℂ))/2)) = 1 := by
     rw [show (1-((1:ℝ):ℂ))/2 = 0 by simp, hK]
     norm_num
   have h := hc.tendsto.mono_left hl
@@ -116,7 +119,7 @@ theorem legendre_singular_1 (ν μ : ℂ) (hμ : ∀ n : ℕ, μ ≠ n+1) :
   refine BoundaryAsymptotics.isEquivalent_of_eventuallyEq_mul ?_
       (tendsto_legendre_singular_factor (ν+1) (-ν)
       (1-μ)
-    (μ/2) (Gamma (1-μ)) (by rw [regularizedGaussHG_zero_of_regular fun n hn => hμ n
+    (μ/2) (Gamma (1-μ)) (by rw [regularizedGaussHypergeometric_zero_of_regular fun n hn => hμ n
       (by linear_combination -hn)]; field_simp) _ nhdsWithin_le_nhds)
   filter_upwards [Ioo_mem_nhdsLT (show (-1:ℝ) < 1 by norm_num)] with x hx
   have h1 : (0:ℝ) < 1+x := by linarith [hx.1]
@@ -131,16 +134,16 @@ theorem legendre_singular_1 (ν μ : ℂ) (hμ : ∀ n : ℕ, μ ≠ n+1) :
 /-- DLMF 14.8.2: for `m ∈ ℕ` (DLMF: `m ≥ 1`) with `(ν−m+1)_{2m} ≠ 0`,
 `𝖯^m_ν(x) ~ (−1)^m (ν−m+1)_{2m}/m! · ((1−x)/2)^{m/2}` as `x → 1⁻`. -/
 @[dlmf 14.8.E2]
-theorem legendre_singular_2 (ν : ℂ) (m : ℕ) (hν : poch (ν-m+1) (2*m) ≠ 0) :
+theorem legendre_singular_2 (ν : ℂ) (m : ℕ) (hν : pochhammer (ν-m+1) (2*m) ≠ 0) :
     (fun x : ℝ => ferrersP ν m x) ~[𝓝[<] (1:ℝ)]
-        (fun x : ℝ => (-1)^m*poch (ν-m+1) (2*m)/(m.factorial:ℂ)*((1-x)/2:ℂ)^((m:ℂ)/2)) := by
+        (fun x : ℝ => (-1)^m*pochhammer (ν-m+1) (2*m)/(m.factorial:ℂ)*((1-x)/2:ℂ)^((m:ℂ)/2)) := by
   have hf : (m.factorial:ℂ) ≠ 0 := Nat.cast_ne_zero.mpr m.factorial_ne_zero
   have hc : ∀ n : ℕ, (m:ℂ)+1 ≠ -n := fun n hn => by
     have := congrArg re hn; simp at this; linarith [(n.cast_nonneg : (0:ℝ) ≤ n)]
   refine BoundaryAsymptotics.isEquivalent_of_eventuallyEq_mul ?_
       (tendsto_legendre_singular_factor (ν+m+1) (m-ν)
       (m+1)
-    ((m:ℂ)/2) (m.factorial) (by rw [regularizedGaussHG_zero_of_regular hc,
+    ((m:ℂ)/2) (m.factorial) (by rw [regularizedGaussHypergeometric_zero_of_regular hc,
       show (m:ℂ)+1 = ((m:ℕ):ℂ)+1 by rfl, Gamma_nat_eq_factorial]; field_simp) _ nhdsWithin_le_nhds)
   filter_upwards [Ioo_mem_nhdsLT (show (-1:ℝ) < 1 by norm_num)] with x hx
   rw [ferrersP_integer_hypergeometric_4 ν m hx]
@@ -249,7 +252,7 @@ theorem legendre_singular_7 (ν μ : ℂ) (hμ : ∀ n : ℕ, μ ≠ n+1) :
   refine BoundaryAsymptotics.isEquivalent_of_eventuallyEq_mul ?_
       (tendsto_legendre_singular_factor (ν+1) (-ν)
       (1-μ)
-    (μ/2) (Gamma (1-μ)) (by rw [regularizedGaussHG_zero_of_regular fun n hn => hμ n
+    (μ/2) (Gamma (1-μ)) (by rw [regularizedGaussHypergeometric_zero_of_regular fun n hn => hμ n
       (by linear_combination -hn)]; field_simp) _ nhdsWithin_le_nhds)
   filter_upwards [self_mem_nhdsWithin] with x (hx : 1 < x)
   have h1 : (0:ℝ) < x+1 := by linarith
@@ -282,7 +285,7 @@ theorem legendre_singular_8 (ν : ℂ) (m : ℕ) (hn : LegendreQRegular ν (-m))
   have hc : ∀ n : ℕ, (m:ℂ)+1 ≠ -n := fun n hn => by
     have := congrArg re hn; simp at this; linarith [(n.cast_nonneg : (0:ℝ) ≤ n)]
   have hreg : ∀ k : ℕ, ν-m+1 ≠ -k := fun k hk => hn k (by linear_combination hk)
-  have hQ : poch (ν-m+1) (2*m) = Gamma (ν+m+1)/Gamma (ν-m+1) := by
+  have hQ : pochhammer (ν-m+1) (2*m) = Gamma (ν+m+1)/Gamma (ν-m+1) := by
     have h3 := Gamma_add_nat_div_Gamma_eq (n := 2*m) (ν-m+1) hreg
     rw [show ν-m+1+((2*m:ℕ):ℂ) = ν+m+1 by push_cast; ring] at h3
     rw [h3]
@@ -290,7 +293,7 @@ theorem legendre_singular_8 (ν : ℂ) (m : ℕ) (hn : LegendreQRegular ν (-m))
   refine BoundaryAsymptotics.isEquivalent_of_eventuallyEq_mul ?_
       (tendsto_legendre_singular_factor (ν+m+1) (m-ν)
       (m+1)
-    ((m:ℂ)/2) (m.factorial) (by rw [regularizedGaussHG_zero_of_regular hc,
+    ((m:ℂ)/2) (m.factorial) (by rw [regularizedGaussHypergeometric_zero_of_regular hc,
       show (m:ℂ)+1 = ((m:ℕ):ℂ)+1 by rfl, Gamma_nat_eq_factorial]; field_simp) _ nhdsWithin_le_nhds)
   filter_upwards [self_mem_nhdsWithin] with x (hx : 1 < x)
   have hz : (x:ℂ)-1 ∈ slitPlane := Or.inl (by simp; linarith)
@@ -410,14 +413,14 @@ theorem legendre_singular_15 (ν μ : ℂ) (hν : ∀ n : ℕ, ν ≠ -n-3/2) :
         (fun x : ℝ => Real.sqrt π/(Gamma (ν+3/2)*(2*x:ℂ)^(ν+1))) := by
   have hc : ∀ k : ℕ, ν+3/2 ≠ -k := fun k hk => hν k (by linear_combination hk)
   have hΓ : Gamma (ν+3/2) ≠ 0 := Gamma_ne_zero hc
-  set G := regularizedGaussHG ((ν+μ+2)/2) ((ν+μ+1)/2) (ν+3/2)
+  set G := regularizedGaussHypergeometric ((ν+μ+2)/2) ((ν+μ+1)/2) (ν+3/2)
   have hcont : ContinuousAt (fun w : ℂ => (1-w)^(μ/2) * (Gamma (ν+3/2) * G w)) 0 := by
     refine ContinuousAt.mul ?_ (continuousAt_const.mul
-      (analyticAt_regularizedGaussHG _ _ _ zero_mem_cutPlane).continuousAt)
+      (analyticAt_regularizedGaussHypergeometric _ _ _ zero_mem_cutPlane).continuousAt)
     exact ContinuousAt.cpow (by fun_prop) continuousAt_const (by norm_num)
   have h1 : (1-(0:ℂ))^(μ/2) * (Gamma (ν+3/2) * G 0) = 1 := by
     simp only [G, sub_zero, one_cpow, one_mul];
-        rw [regularizedGaussHG_zero_of_regular hc, mul_one_div_cancel hΓ]
+        rw [regularizedGaussHypergeometric_zero_of_regular hc, mul_one_div_cancel hΓ]
   have hg := hcont.tendsto.comp tendsto_one_div_sq_atTop
   rw [h1] at hg
   refine BoundaryAsymptotics.isEquivalent_of_eventuallyEq_mul ?_ hg
@@ -435,7 +438,7 @@ theorem legendre_singular_15 (ν μ : ℂ) (hν : ∀ n : ℕ, ν ≠ -n-3/2) :
   simp only [olverQ, Function.comp_apply]
   rw [BoundaryAsymptotics.branchPower_eq μ hx, hp, h2x]
   simp only [G]
-  generalize regularizedGaussHG ((ν+μ+2)/2) ((ν+μ+1)/2) (ν+3/2) (1/(x:ℂ)^2) = R
+  generalize regularizedGaussHypergeometric ((ν+μ+2)/2) ((ν+μ+1)/2) (ν+3/2) (1/(x:ℂ)^2) = R
   generalize (1-1/(x:ℂ)^2)^(μ/2) = P
   generalize Gamma (ν+3/2) = Γ0 at hΓ ⊢
   field_simp
@@ -452,23 +455,26 @@ theorem legendre_singular_16 (μ : ℂ) (n : ℕ) (hn : 0 < n) (hμ : ∀ k : �
   have hc : ∀ j : ℕ, ((k+1:ℕ):ℂ)+1 ≠ -j := fun j hj => by
     have := congrArg re hj; simp at this; linarith [(j.cast_nonneg : (0:ℝ) ≤ j)]
   have hΓ : Gamma (μ-((k+1:ℕ):ℂ)+1/2) ≠ 0 := Gamma_ne_zero hμ
-  have hP : poch ((-((k+1:ℕ):ℂ)-1/2+μ+2)/2) (k+1) * poch ((-((k+1:ℕ):ℂ)-1/2+μ+1)/2) (k+1) =
+  have hP : pochhammer ((-((k+1:ℕ):ℂ)-1/2+μ+2)/2) (k+1) *
+      pochhammer ((-((k+1:ℕ):ℂ)-1/2+μ+1)/2) (k+1) =
       Gamma (μ+((k+1:ℕ):ℂ)+1/2) / Gamma (μ-((k+1:ℕ):ℂ)+1/2) / 4^(k+1) := by
-    have h2 := DLMF.Legendre.poch_two_mul (μ-((k+1:ℕ):ℂ)+1/2) (k+1)
+    have h2 := DLMF.Legendre.pochhammer_two_mul (μ-((k+1:ℕ):ℂ)+1/2) (k+1)
     have h3 := Gamma_add_nat_div_Gamma_eq (n := 2*(k+1)) (μ-((k+1:ℕ):ℂ)+1/2) hμ
     rw [show μ-((k+1:ℕ):ℂ)+1/2+((2*(k+1):ℕ):ℂ) = μ+((k+1:ℕ):ℂ)+1/2 by push_cast; ring] at h3
-    rw [h3, ← poch, h2, show (μ-((k+1:ℕ):ℂ)+1/2)/2 = (-((k+1:ℕ):ℂ)-1/2+μ+1)/2 by ring,
+    rw [h3, ← pochhammer, h2, show (μ-((k+1:ℕ):ℂ)+1/2)/2 = (-((k+1:ℕ):ℂ)-1/2+μ+1)/2 by ring,
       show (μ-((k+1:ℕ):ℂ)+1/2+1)/2 = (-((k+1:ℕ):ℂ)-1/2+μ+2)/2 by ring]
     field_simp
-  set G := regularizedGaussHG ((-((k+1:ℕ):ℂ)-1/2+μ+2)/2+k+1) ((-((k+1:ℕ):ℂ)-1/2+μ+1)/2+k+1)
+  set G := regularizedGaussHypergeometric ((-((k+1:ℕ):ℂ)-1/2+μ+2)/2+k+1)
+      ((-((k+1:ℕ):ℂ)-1/2+μ+1)/2+k+1)
     (k+2)
   have hcont : ContinuousAt (fun w : ℂ => (1-w)^(μ/2) * (((k+1).factorial:ℂ) * G w)) 0 := by
     refine ContinuousAt.mul ?_ (continuousAt_const.mul
-      (analyticAt_regularizedGaussHG _ _ _ zero_mem_cutPlane).continuousAt)
+      (analyticAt_regularizedGaussHypergeometric _ _ _ zero_mem_cutPlane).continuousAt)
     exact ContinuousAt.cpow (by fun_prop) continuousAt_const (by norm_num)
   have h1 : (1-(0:ℂ))^(μ/2) * (((k+1).factorial:ℂ) * G 0) = 1 := by
     simp only [G, sub_zero, one_cpow, one_mul]
-    rw [show (k:ℂ)+2 = ((k+1:ℕ):ℂ)+1 by push_cast; ring, regularizedGaussHG_zero_of_regular hc,
+    rw [show (k:ℂ)+2 = ((k+1:ℕ):ℂ)+1 by push_cast; ring,
+                                          regularizedGaussHypergeometric_zero_of_regular hc,
       Gamma_nat_eq_factorial, mul_one_div_cancel hf]
   have hg := hcont.tendsto.comp tendsto_one_div_sq_atTop
   rw [h1] at hg
@@ -496,11 +502,12 @@ theorem legendre_singular_16 (μ : ℂ) (n : ℕ) (hn : 0 < n) (hμ : ∀ k : �
   have hc' : -((k+1:ℕ):ℂ)-1/2+3/2 = -(k:ℂ) := by push_cast; ring
   have hν1 : -((k+1:ℕ):ℂ)-1/2+1 = s := by simp only [s]; ring
   simp only [olverQ, Function.comp_apply]
-  rw [hc', regularizedGaussHG_neg_nat _ _ _ hw,
+  rw [hc', regularizedGaussHypergeometric_neg_nat _ _ _ hw,
       BoundaryAsymptotics.branchPower_eq μ hx, hp, hν1, h2x,
     h2q, hq, hP]
   simp only [G]
-  generalize regularizedGaussHG ((-((k+1:ℕ):ℂ)-1/2+μ+2)/2+k+1) ((-((k+1:ℕ):ℂ)-1/2+μ+1)/2+k+1)
+  generalize regularizedGaussHypergeometric ((-((k+1:ℕ):ℂ)-1/2+μ+2)/2+k+1)
+      ((-((k+1:ℕ):ℂ)-1/2+μ+1)/2+k+1)
     (k+2) (1/(x:ℂ)^2) = R
   generalize (1-1/(x:ℂ)^2)^(μ/2) = P
   rw [div_pow, one_pow, ← pow_mul]

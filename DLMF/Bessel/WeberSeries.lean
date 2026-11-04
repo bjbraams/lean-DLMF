@@ -317,9 +317,9 @@ theorem eq_besselJ_besselY_of_ode (ν : ℂ) {U : Set ℂ} (hU : IsOpen U) (hUc 
 theorem sum_antidiagonal_choose_recip_Gamma (n : ℕ) : ∀ a b : ℂ,
     ∑ ij ∈ Finset.antidiagonal n, ((n.choose ij.1 : ℕ) : ℂ) * (Gamma (a + ij.1))⁻¹ *
         (Gamma (b + ij.2))⁻¹ =
-      poch (a + b + n - 1) n * (Gamma (a + n))⁻¹ * (Gamma (b + n))⁻¹ := by
+      pochhammer (a + b + n - 1) n * (Gamma (a + n))⁻¹ * (Gamma (b + n))⁻¹ := by
   induction n with
-  | zero => intro a b; simp [poch_zero]
+  | zero => intro a b; simp [pochhammer_zero]
   | succ n ih =>
     intro a b
     have h := Finset.sum_antidiagonal_choose_succ_mul
@@ -344,7 +344,7 @@ theorem sum_antidiagonal_choose_recip_Gamma (n : ℕ) : ∀ a b : ℂ,
         (Gamma (a + n + 1))⁻¹ from Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one _,
       show (Gamma (b + n))⁻¹ = (b + n) *
           (Gamma (b + n + 1))⁻¹ from Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one _,
-      poch_succ]
+      pochhammer_succ]
     push_cast
     rw [show a + (b + 1) + n - 1 = a + b + (n + 1) - 1 by ring,
       show a + 1 + b + n - 1 = a + b + (n + 1) - 1 by ring,
@@ -358,7 +358,7 @@ set_option maxHeartbeats 600000 in
 @[dlmf 10.8.E3]
 theorem besselJ_mul_besselJ (μ ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     besselJ μ z * besselJ ν z = (z / 2) ^ (μ + ν) *
-      ∑' k : ℕ, poch (μ + ν + k + 1) k * (-(z ^ 2 / 4)) ^ k / (k ! : ℂ) *
+      ∑' k : ℕ, pochhammer (μ + ν + k + 1) k * (-(z ^ 2 / 4)) ^ k / (k ! : ℂ) *
         (Gamma (μ + k + 1))⁻¹ * (Gamma (ν + k + 1))⁻¹ := by
   have hz2 : z / 2 ≠ 0 := div_ne_zero (slitPlane_ne_zero hz) two_ne_zero
   set w : ℂ := -(z ^ 2 / 4)

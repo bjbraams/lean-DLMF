@@ -18,15 +18,15 @@ and principal ranges are in `DLMF.JacobiElliptic.Basic.Inverse`.
 
 ## Main results
 
-* `Real.jacobiSnm_eq_iff`, `Real.jacobiCnm_eq_iff`, `Real.jacobiDnm_eq_iff`: the general
-  solutions DLMF 22.15.8–22.15.10.
-* `Real.eq_integral_jacobiSnm`: DLMF 22.15.11 for `-K ≤ x ≤ K` (stronger than DLMF's
+* `Real.jacobiSnOfParameter_eq_iff`, `Real.jacobiCnOfParameter_eq_iff`,
+  `Real.jacobiDnOfParameter_eq_iff`: the general solutions DLMF 22.15.8–22.15.10.
+* `Real.eq_integral_jacobiSnOfParameter`: DLMF 22.15.11 for `-K ≤ x ≤ K` (stronger than DLMF's
   `-1 ≤ x ≤ 1`).
-* `Real.jacobiArcsnm_eq_integral`, `Real.jacobiArccnm_eq_integral`,
-  `Real.jacobiArcdnm_eq_integral`: DLMF 22.15.12–22.15.14.
-* `Real.jacobiCdm_jacobiArccdm`, `Real.jacobiSdm_jacobiArcsdm`, `Real.jacobiNdm_jacobiArcndm`,
-  `Real.jacobiDcm_jacobiArcdcm`, `Real.jacobiNcm_jacobiArcncm`, `Real.jacobiScm_jacobiArcscm`,
-  `Real.jacobiNsm_jacobiArcnsm`, `Real.jacobiDsm_jacobiArcdsm`, `Real.jacobiCsm_jacobiArccsm`:
+* `Real.jacobiArcsnOfParameter_eq_integral`, `Real.jacobiArccn_eq_integral`,
+  `Real.jacobiArcdn_eq_integral`: DLMF 22.15.12–22.15.14.
+* `Real.jacobiCdm_jacobiArccd`, `Real.jacobiSdm_jacobiArcsd`, `Real.jacobiNdm_jacobiArcnd`,
+  `Real.jacobiDcm_jacobiArcdc`, `Real.jacobiNcm_jacobiArcnc`, `Real.jacobiScm_jacobiArcsc`,
+  `Real.jacobiNsm_jacobiArcns`, `Real.jacobiDsm_jacobiArcds`, `Real.jacobiCsm_jacobiArccs`:
   the integrals 22.15.15–22.15.23 invert `cd, sd, nd, dc, nc, sc, ns, ds, cs`.
 
 ## Implementation notes
@@ -51,36 +51,44 @@ section Principal
 
 variable {m : ℝ}
 
-/-- Identity under the stated parameter and domain assumptions: `Real.incEllIntFm (φ + n * π) m =
-Real.incEllIntFm φ m + 2 * n * Real.compEllIntKm m`. -/
-private lemma incEllIntFm_add_intCast_mul_pi {m : ℝ} (hm : m < 1) (φ : ℝ) (n : ℤ) :
-    Real.incEllIntFm (φ + n * π) m = Real.incEllIntFm φ m + 2 * n * Real.compEllIntKm m := by
+/-- Identity under the stated parameter and domain assumptions:
+`Real.incompleteEllipticFOfParameter (φ + n * π) m = Real.incompleteEllipticFOfParameter φ m + 2 * n
+* Real.completeEllipticKOfParameter m`. -/
+private lemma incompleteEllipticFOfParameter_add_intCast_mul_pi {m : ℝ} (hm : m < 1)
+    (φ : ℝ) (n : ℤ) :
+    Real.incompleteEllipticFOfParameter (φ + n * π) m = Real.incompleteEllipticFOfParameter φ m +
+        2 * n * Real.completeEllipticKOfParameter m := by
   induction n using Int.induction_on with
   | zero => simp
   | succ n ih =>
     push_cast at ih ⊢
-    rw [show φ + (n + 1) * π = φ + n * π + π by ring, Real.incEllIntFm_add_pi hm, ih]; ring
+    rw [show φ + (n + 1) * π = φ + n * π + π by ring,
+                                                  Real.incompleteEllipticFOfParameter_add_pi hm,
+                                                  ih]; ring
   | pred n ih =>
     push_cast at ih ⊢
-    have h := Real.incEllIntFm_add_pi hm (φ + (-(n : ℝ) - 1) * π)
+    have h := Real.incompleteEllipticFOfParameter_add_pi hm (φ + (-(n : ℝ) - 1) * π)
     rw [show φ + (-(n : ℝ) - 1) * π + π = φ + -(n : ℝ) * π by ring, ih] at h
     linarith
 
-/-- Identity under the stated parameter and domain assumptions: `ξ = Real.incEllIntFm B m ↔
-Real.jacobiAmm ξ m = B`. -/
-private lemma eq_incEllIntFm_iff_jacobiAmm_eq {m : ℝ} (hm : m < 1) (ξ B : ℝ) :
-    ξ = Real.incEllIntFm B m ↔ Real.jacobiAmm ξ m = B := by
+/-- Identity under the stated parameter and domain assumptions:
+`ξ = Real.incompleteEllipticFOfParameter B m ↔ Real.jacobiAmOfParameter ξ m = B`. -/
+private lemma eq_incompleteEllipticFOfParameter_iff_jacobiAmOfParameter_eq {m : ℝ}
+    (hm : m < 1) (ξ B : ℝ) :
+    ξ = Real.incompleteEllipticFOfParameter B m ↔ Real.jacobiAmOfParameter ξ m = B := by
   constructor
-  · rintro rfl; exact Real.jacobiAmm_incEllIntFm hm B
-  · rintro rfl; exact (Real.incEllIntFm_jacobiAmm hm ξ).symm
+  · rintro rfl; exact Real.jacobiAmOfParameter_incompleteEllipticFOfParameter hm B
+  · rintro rfl; exact (Real.incompleteEllipticFOfParameter_jacobiAmOfParameter hm ξ).symm
 
-/-- Identity under the stated parameter and domain assumptions: `Real.incEllIntFm ((-1) ^ n * a) m
-= (-1) ^ n * Real.incEllIntFm a m`. -/
-private lemma incEllIntFm_neg_one_zpow_mul {m : ℝ} (n : ℤ) (a : ℝ) :
-    Real.incEllIntFm ((-1) ^ n * a) m = (-1) ^ n * Real.incEllIntFm a m := by
+/-- Identity under the stated parameter and domain assumptions:
+`Real.incompleteEllipticFOfParameter ((-1) ^ n * a) m = (-1) ^ n *
+Real.incompleteEllipticFOfParameter a m`. -/
+private lemma incompleteEllipticFOfParameter_neg_one_zpow_mul {m : ℝ} (n : ℤ) (a : ℝ) :
+    Real.incompleteEllipticFOfParameter ((-1) ^ n * a) m = (-1) ^ n *
+        Real.incompleteEllipticFOfParameter a m := by
   rcases Int.even_or_odd n with h | h
   · simp [h.neg_one_zpow]
-  · simp [h.neg_one_zpow, Real.incEllIntFm_neg]
+  · simp [h.neg_one_zpow, Real.incompleteEllipticFOfParameter_neg]
 
 /-- Identity under the stated parameter and domain assumptions: `sin A = sin a ↔ ∃ n : ℤ, A = (-1)
 ^ n * a + n * π`. -/
@@ -100,40 +108,45 @@ private lemma sin_eq_sin_iff_neg_one_zpow (A a : ℝ) :
 /-- DLMF 22.15.8: the general real solution of `sn(ξ, k) = x`, `-1 ≤ x ≤ 1`, is
 `ξ = (-1)ᵐ arcsn(x, k) + 2mK`, `m ∈ ℤ`. -/
 @[dlmf 22.15.E8 "special case: real parameter k² < 1"]
-theorem Real.jacobiSnm_eq_iff (hm : m < 1) {x ξ : ℝ} (hx0 : -1 ≤ x) (hx1 : x ≤ 1) :
-    Real.jacobiSnm ξ m = x ↔
-      ∃ n : ℤ, ξ = (-1) ^ n * Real.jacobiArcsnm x m + 2 * n * Real.compEllIntKm m := by
-  have key : ∀ n : ℤ, (-1) ^ n * Real.jacobiArcsnm x m + 2 * n * Real.compEllIntKm m =
-      Real.incEllIntFm ((-1) ^ n * arcsin x + n * π) m := by
-    intro n; rw [incEllIntFm_add_intCast_mul_pi hm, incEllIntFm_neg_one_zpow_mul, Real.jacobiArcsnm]
-  simp only [key, eq_incEllIntFm_iff_jacobiAmm_eq hm]
-  rw [Real.jacobiSnm, ← sin_eq_sin_iff_neg_one_zpow, Real.sin_arcsin hx0 hx1]
+theorem Real.jacobiSnOfParameter_eq_iff (hm : m < 1) {x ξ : ℝ} (hx0 : -1 ≤ x) (hx1 : x ≤ 1) :
+    Real.jacobiSnOfParameter ξ m = x ↔
+      ∃ n : ℤ, ξ = (-1) ^ n * Real.jacobiArcsnOfParameter x m + 2 * n *
+          Real.completeEllipticKOfParameter m := by
+  have key : ∀ n : ℤ, (-1) ^ n * Real.jacobiArcsnOfParameter x m + 2 * n *
+      Real.completeEllipticKOfParameter m =
+      Real.incompleteEllipticFOfParameter ((-1) ^ n * arcsin x + n * π) m := by
+    intro n; rw [incompleteEllipticFOfParameter_add_intCast_mul_pi hm,
+        incompleteEllipticFOfParameter_neg_one_zpow_mul, Real.jacobiArcsnOfParameter]
+  simp only [key, eq_incompleteEllipticFOfParameter_iff_jacobiAmOfParameter_eq hm]
+  rw [Real.jacobiSnOfParameter, ← sin_eq_sin_iff_neg_one_zpow, Real.sin_arcsin hx0 hx1]
 
 /-- DLMF 22.15.9: the general real solution of `cn(η, k) = x`, `-1 ≤ x ≤ 1`, is
 `η = ± arccn(x, k) + 4mK`, `m ∈ ℤ`. -/
 @[dlmf 22.15.E9 "special case: real parameter k² < 1"]
-theorem Real.jacobiCnm_eq_iff (hm : m < 1) {x η : ℝ} (hx0 : -1 ≤ x) (hx1 : x ≤ 1) :
-    Real.jacobiCnm η m = x ↔ ∃ n : ℤ, ∃ σ : ℝ, (σ = 1 ∨ σ = -1) ∧
-      η = σ * Real.jacobiArccnm x m + 4 * n * Real.compEllIntKm m := by
+theorem Real.jacobiCnOfParameter_eq_iff (hm : m < 1) {x η : ℝ} (hx0 : -1 ≤ x) (hx1 : x ≤ 1) :
+    Real.jacobiCnOfParameter η m = x ↔ ∃ n : ℤ, ∃ σ : ℝ, (σ = 1 ∨ σ = -1) ∧
+      η = σ * Real.jacobiArccn x m + 4 * n * Real.completeEllipticKOfParameter m := by
   have key : ∀ (n : ℤ) (σ : ℝ), (σ = 1 ∨ σ = -1) →
-      σ * Real.jacobiArccnm x m + 4 * n * Real.compEllIntKm m =
-      Real.incEllIntFm (σ * arccos x + ((2 * n : ℤ) : ℝ) * π) m := by
+      σ * Real.jacobiArccn x m + 4 * n * Real.completeEllipticKOfParameter m =
+      Real.incompleteEllipticFOfParameter (σ * arccos x + ((2 * n : ℤ) : ℝ) * π) m := by
     intro n σ hσ
-    rw [incEllIntFm_add_intCast_mul_pi hm, Real.jacobiArccnm]
+    rw [incompleteEllipticFOfParameter_add_intCast_mul_pi hm, Real.jacobiArccn]
     rcases hσ with rfl | rfl
     · push_cast; ring
-    · simp only [neg_one_mul, Real.incEllIntFm_neg]; push_cast; ring
+    · simp only [neg_one_mul, Real.incompleteEllipticFOfParameter_neg]; push_cast; ring
   constructor
   · intro h
-    rw [Real.jacobiCnm, ← Real.cos_arccos hx0 hx1, Real.cos_eq_cos_iff] at h
+    rw [Real.jacobiCnOfParameter, ← Real.cos_arccos hx0 hx1, Real.cos_eq_cos_iff] at h
     obtain ⟨n, h | h⟩ := h
     · refine ⟨-n, 1, Or.inl rfl, ?_⟩
-      rw [key (-n) 1 (Or.inl rfl), eq_incEllIntFm_iff_jacobiAmm_eq hm]; push_cast; linarith
+      rw [key (-n) 1 (Or.inl rfl), eq_incompleteEllipticFOfParameter_iff_jacobiAmOfParameter_eq hm];
+          push_cast; linarith
     · refine ⟨n, -1, Or.inr rfl, ?_⟩
-      rw [key n (-1) (Or.inr rfl), eq_incEllIntFm_iff_jacobiAmm_eq hm]; push_cast; linarith
+      rw [key n (-1) (Or.inr rfl), eq_incompleteEllipticFOfParameter_iff_jacobiAmOfParameter_eq hm];
+          push_cast; linarith
   · rintro ⟨n, σ, hσ, h⟩
-    rw [key n σ hσ, eq_incEllIntFm_iff_jacobiAmm_eq hm] at h
-    rw [Real.jacobiCnm, h]
+    rw [key n σ hσ, eq_incompleteEllipticFOfParameter_iff_jacobiAmOfParameter_eq hm] at h
+    rw [Real.jacobiCnOfParameter, h]
     push_cast
     rw [show σ * arccos x + 2 * n * π = σ * arccos x + (n : ℤ) * (2 * π) by ring,
       Real.cos_add_int_mul_two_pi]
@@ -144,10 +157,10 @@ theorem Real.jacobiCnm_eq_iff (hm : m < 1) {x η : ℝ} (hx0 : -1 ≤ x) (hx1 : 
 /-- DLMF 22.15.10: the general real solution of `dn(ζ, k) = x`, `k' ≤ x ≤ 1`, is
 `ζ = ± arcdn(x, k) + 2mK`, `m ∈ ℤ` (`0 < k² < 1`). -/
 @[dlmf 22.15.E10 "special case: real parameter 0 < k² < 1"]
-theorem Real.jacobiDnm_eq_iff (hm0 : 0 < m) (hm : m < 1) {x ζ : ℝ} (hx0 : √(1 - m) ≤ x)
+theorem Real.jacobiDnOfParameter_eq_iff (hm0 : 0 < m) (hm : m < 1) {x ζ : ℝ} (hx0 : √(1 - m) ≤ x)
     (hx1 : x ≤ 1) :
-    Real.jacobiDnm ζ m = x ↔ ∃ n : ℤ, ∃ σ : ℝ, (σ = 1 ∨ σ = -1) ∧
-      ζ = σ * Real.jacobiArcdnm x m + 2 * n * Real.compEllIntKm m := by
+    Real.jacobiDnOfParameter ζ m = x ↔ ∃ n : ℤ, ∃ σ : ℝ, (σ = 1 ∨ σ = -1) ∧
+      ζ = σ * Real.jacobiArcdn x m + 2 * n * Real.completeEllipticKOfParameter m := by
   have hx : 0 ≤ x := le_trans (Real.sqrt_nonneg _) hx0
   have h1 : 1 - m ≤ x ^ 2 := by
     have := Real.sq_sqrt (show (0 : ℝ) ≤ 1 - m by linarith)
@@ -160,18 +173,19 @@ theorem Real.jacobiDnm_eq_iff (hm0 : 0 < m) (hm : m < 1) {x ζ : ℝ} (hx0 : √
   have hsn : sin (arcsin s0) = s0 :=
       Real.sin_arcsin (by linarith [Real.sqrt_nonneg ((1 - x ^ 2) / m)]) hs1
   have key : ∀ (n : ℤ) (σ : ℝ), (σ = 1 ∨ σ = -1) →
-      σ * Real.jacobiArcdnm x m + 2 * n * Real.compEllIntKm m =
-      Real.incEllIntFm (σ * arcsin s0 + n * π) m := by
+      σ * Real.jacobiArcdn x m + 2 * n * Real.completeEllipticKOfParameter m =
+      Real.incompleteEllipticFOfParameter (σ * arcsin s0 + n * π) m := by
     intro n σ hσ
-    rw [incEllIntFm_add_intCast_mul_pi hm, Real.jacobiArcdnm]
+    rw [incompleteEllipticFOfParameter_add_intCast_mul_pi hm, Real.jacobiArcdn]
     rcases hσ with rfl | rfl
     · simp [hs0]
-    · simp [Real.incEllIntFm_neg, hs0]
+    · simp [Real.incompleteEllipticFOfParameter_neg, hs0]
   -- dn ζ = x ↔ sin² am = s0²
-  have hdn : Real.jacobiDnm ζ m = x ↔ sin (Real.jacobiAmm ζ m) ^ 2 = s0 ^ 2 := by
-    have hp : 0 ≤ 1 - m * sin (Real.jacobiAmm ζ m) ^ 2 := by
-      nlinarith [sin_sq_le_one (Real.jacobiAmm ζ m)]
-    rw [Real.jacobiDnm, Real.jacobiSnm, ← Real.sqrt_eq_rpow, hs0sq]
+  have hdn : Real.jacobiDnOfParameter ζ m = x ↔
+      sin (Real.jacobiAmOfParameter ζ m) ^ 2 = s0 ^ 2 := by
+    have hp : 0 ≤ 1 - m * sin (Real.jacobiAmOfParameter ζ m) ^ 2 := by
+      nlinarith [sin_sq_le_one (Real.jacobiAmOfParameter ζ m)]
+    rw [Real.jacobiDnOfParameter, Real.jacobiSnOfParameter, ← Real.sqrt_eq_rpow, hs0sq]
     constructor
     · intro h
       have := Real.sq_sqrt hp
@@ -182,8 +196,8 @@ theorem Real.jacobiDnm_eq_iff (hm0 : 0 < m) (hm : m < 1) {x ζ : ℝ} (hx0 : √
   rw [hdn]
   constructor
   · intro h
-    have h' : sin (Real.jacobiAmm ζ m) = sin (arcsin s0) ∨
-        sin (Real.jacobiAmm ζ m) = sin (-arcsin s0) := by
+    have h' : sin (Real.jacobiAmOfParameter ζ m) = sin (arcsin s0) ∨
+        sin (Real.jacobiAmOfParameter ζ m) = sin (-arcsin s0) := by
       rw [Real.sin_neg, hsn]
       rcases sq_eq_sq_iff_eq_or_eq_neg.mp h with h | h
       · exact Or.inl h
@@ -192,17 +206,22 @@ theorem Real.jacobiDnm_eq_iff (hm0 : 0 < m) (hm : m < 1) {x ζ : ℝ} (hx0 : √
     · obtain ⟨n, hn⟩ := (sin_eq_sin_iff_neg_one_zpow _ _).mp h'
       rcases Int.even_or_odd n with he | ho
       · refine ⟨n, 1, Or.inl rfl, ?_⟩
-        rw [key n 1 (Or.inl rfl), eq_incEllIntFm_iff_jacobiAmm_eq hm, hn, he.neg_one_zpow]
+        rw [key n 1 (Or.inl rfl), eq_incompleteEllipticFOfParameter_iff_jacobiAmOfParameter_eq hm,
+            hn, he.neg_one_zpow]
       · refine ⟨n, -1, Or.inr rfl, ?_⟩
-        rw [key n (-1) (Or.inr rfl), eq_incEllIntFm_iff_jacobiAmm_eq hm, hn, ho.neg_one_zpow]
+        rw [key n (-1) (Or.inr rfl),
+            eq_incompleteEllipticFOfParameter_iff_jacobiAmOfParameter_eq hm, hn, ho.neg_one_zpow]
     · obtain ⟨n, hn⟩ := (sin_eq_sin_iff_neg_one_zpow _ _).mp h'
       rcases Int.even_or_odd n with he | ho
       · refine ⟨n, -1, Or.inr rfl, ?_⟩
-        rw [key n (-1) (Or.inr rfl), eq_incEllIntFm_iff_jacobiAmm_eq hm, hn, he.neg_one_zpow]; ring
+        rw [key n (-1) (Or.inr rfl),
+            eq_incompleteEllipticFOfParameter_iff_jacobiAmOfParameter_eq hm, hn,
+            he.neg_one_zpow]; ring
       · refine ⟨n, 1, Or.inl rfl, ?_⟩
-        rw [key n 1 (Or.inl rfl), eq_incEllIntFm_iff_jacobiAmm_eq hm, hn, ho.neg_one_zpow]; ring
+        rw [key n 1 (Or.inl rfl), eq_incompleteEllipticFOfParameter_iff_jacobiAmOfParameter_eq hm,
+            hn, ho.neg_one_zpow]; ring
   · rintro ⟨n, σ, hσ, h⟩
-    rw [key n σ hσ, eq_incEllIntFm_iff_jacobiAmm_eq hm] at h
+    rw [key n σ hσ, eq_incompleteEllipticFOfParameter_iff_jacobiAmOfParameter_eq hm] at h
     rw [h, Real.sin_add_int_mul_pi, mul_pow, ← zpow_natCast, ← zpow_mul]
     rcases hσ with rfl | rfl
     · rw [one_mul, hsn]; rw [Even.neg_one_zpow ⟨n, by push_cast; ring⟩]; ring
@@ -218,28 +237,31 @@ variable {m : ℝ}
 
 /-- DLMF 22.15.12: `arcsn(x, k) = ∫₀ˣ dt/√((1 - t²)(1 - k²t²))` for `-1 ≤ x ≤ 1`. -/
 @[dlmf 22.15.E12 "special case: real parameter m = k² < 1"]
-theorem Real.jacobiArcsnm_eq_integral (hm : m < 1) {x : ℝ} (hx0 : -1 ≤ x) (hx1 : x ≤ 1) :
-    Real.jacobiArcsnm x m = ∫ t in (0 : ℝ)..x, 1 / √((1 - t ^ 2) * (1 - m * t ^ 2)) := by
+theorem Real.jacobiArcsnOfParameter_eq_integral (hm : m < 1) {x : ℝ} (hx0 : -1 ≤ x) (hx1 : x ≤ 1) :
+    Real.jacobiArcsnOfParameter x m = ∫ t in (0 : ℝ)..x, 1 / √((1 - t ^ 2) * (1 - m * t ^ 2)) := by
   rcases le_total 0 x with hx | hx
-  · rw [Real.integral_recip_sqrt_eq_incEllIntFm hm hx hx1, Real.jacobiArcsnm]
-  · have h := Real.integral_recip_sqrt_eq_incEllIntFm hm (neg_nonneg.mpr hx) (by linarith)
-    rw [Real.arcsin_neg, Real.incEllIntFm_neg] at h
+  · rw [Real.integral_recip_sqrt_eq_incompleteEllipticFOfParameter hm hx hx1,
+        Real.jacobiArcsnOfParameter]
+  · have h := Real.integral_recip_sqrt_eq_incompleteEllipticFOfParameter hm
+        (neg_nonneg.mpr hx) (by linarith)
+    rw [Real.arcsin_neg, Real.incompleteEllipticFOfParameter_neg] at h
     have hneg : (∫ t in (0 : ℝ)..x, 1 / √((1 - t ^ 2) * (1 - m * t ^ 2))) =
         -∫ t in (0 : ℝ)..-x, 1 / √((1 - t ^ 2) * (1 - m * t ^ 2)) := by
       have hc := intervalIntegral.integral_comp_neg (a := 0) (b := -x)
         (fun t => 1 / √((1 - t ^ 2) * (1 - m * t ^ 2)))
       simp only [neg_sq, neg_neg, neg_zero] at hc
       rw [hc, intervalIntegral.integral_symm x 0]
-    rw [hneg, h, neg_neg, Real.jacobiArcsnm]
+    rw [hneg, h, neg_neg, Real.jacobiArcsnOfParameter]
 
 /-- DLMF 22.15.11: `x = ∫₀^{sn(x,k)} dt/√((1 - t²)(1 - k²t²))`; proved for `-K ≤ x ≤ K`
 (stronger than DLMF's `-1 ≤ x ≤ 1`, since `K ≥ π/2 > 1`). -/
 @[dlmf 22.15.E11 "stronger than DLMF: -K ≤ x ≤ K; real parameter m = k² < 1"]
-theorem Real.eq_integral_jacobiSnm (hm : m < 1) {x : ℝ} (hx : |x| ≤ Real.compEllIntKm m) :
-    x = ∫ t in (0 : ℝ)..Real.jacobiSnm x m, 1 / √((1 - t ^ 2) * (1 - m * t ^ 2)) := by
-  have hs := (abs_jacobiSnm_le_one_and_abs_jacobiCnm_le_one (m := m) x).1
-  rw [← Real.jacobiArcsnm_eq_integral hm (neg_le_of_abs_le hs) (le_of_abs_le hs),
-    Real.jacobiArcsnm_jacobiSnm hm hx]
+theorem Real.eq_integral_jacobiSnOfParameter (hm : m < 1) {x : ℝ}
+    (hx : |x| ≤ Real.completeEllipticKOfParameter m) :
+    x = ∫ t in (0 : ℝ)..Real.jacobiSnOfParameter x m, 1 / √((1 - t ^ 2) * (1 - m * t ^ 2)) := by
+  have hs := (abs_jacobiSnOfParameter_le_one_and_abs_jacobiCnOfParameter_le_one (m := m) x).1
+  rw [← Real.jacobiArcsnOfParameter_eq_integral hm (neg_le_of_abs_le hs) (le_of_abs_le hs),
+    Real.jacobiArcsnOfParameter_jacobiSnOfParameter hm hx]
 
 open MeasureTheory Set in
 /-- Substitution `t = f θ` for a continuous strictly decreasing `f` on `[a, b]`. -/
@@ -261,8 +283,8 @@ private lemma integral_comp_strictAntiOn_eq {f f' g h : ℝ → ℝ} {a b : ℝ}
 /-- DLMF 22.15.13: `arccn(x, k) = ∫ₓ¹ dt/√((1 - t²)(k'² + k²t²))` for `-1 ≤ x ≤ 1` (substitution
 `t = cos θ`). -/
 @[dlmf 22.15.E13 "special case: real parameter m = k² < 1"]
-theorem Real.jacobiArccnm_eq_integral (hm : m < 1) {x : ℝ} (hx0 : -1 ≤ x) (hx1 : x ≤ 1) :
-    Real.jacobiArccnm x m = ∫ t in x..1, 1 / √((1 - t ^ 2) * ((1 - m) + m * t ^ 2)) := by
+theorem Real.jacobiArccn_eq_integral (hm : m < 1) {x : ℝ} (hx0 : -1 ≤ x) (hx1 : x ≤ 1) :
+    Real.jacobiArccn x m = ∫ t in x..1, 1 / √((1 - t ^ 2) * ((1 - m) + m * t ^ 2)) := by
   have hb := Real.arccos_nonneg x
   have hbπ := Real.arccos_le_pi x
   have h := integral_comp_strictAntiOn_eq (f := cos) (f' := fun θ => -sin θ)
@@ -271,7 +293,7 @@ theorem Real.jacobiArccnm_eq_integral (hm : m < 1) {x : ℝ} (hx0 : -1 ≤ x) (h
     (Real.strictAntiOn_cos.mono (Set.Icc_subset_Icc le_rfl hbπ))
     (fun θ _ => Real.hasDerivAt_cos θ) (fun θ hθ => ?_)
   · rw [Real.cos_arccos hx0 hx1, Real.cos_zero] at h
-    rw [h, Real.jacobiArccnm, Real.incEllIntFm]
+    rw [h, Real.jacobiArccn, Real.incompleteEllipticFOfParameter]
   · have hs : 0 < sin θ := Real.sin_pos_of_pos_of_lt_pi hθ.1 (lt_of_lt_of_le hθ.2 hbπ)
     have hp := one_sub_mul_sin_sq_pos hm θ
     rw [abs_neg, abs_of_pos hs,
@@ -284,9 +306,9 @@ theorem Real.jacobiArccnm_eq_integral (hm : m < 1) {x : ℝ} (hx0 : -1 ≤ x) (h
 /-- DLMF 22.15.14: `arcdn(x, k) = ∫ₓ¹ dt/√((1 - t²)(t² - k'²))` for `k' ≤ x ≤ 1` (substitution
 `t = dn`). -/
 @[dlmf 22.15.E14 "special case: real parameter 0 < m = k² < 1"]
-theorem Real.jacobiArcdnm_eq_integral (hm0 : 0 < m) (hm : m < 1) {x : ℝ} (hx0 : √(1 - m) ≤ x)
+theorem Real.jacobiArcdn_eq_integral (hm0 : 0 < m) (hm : m < 1) {x : ℝ} (hx0 : √(1 - m) ≤ x)
     (hx1 : x ≤ 1) :
-    Real.jacobiArcdnm x m = ∫ t in x..1, 1 / √((1 - t ^ 2) * (t ^ 2 - (1 - m))) := by
+    Real.jacobiArcdn x m = ∫ t in x..1, 1 / √((1 - t ^ 2) * (t ^ 2 - (1 - m))) := by
   have hx : 0 ≤ x := le_trans (Real.sqrt_nonneg _) hx0
   have h1 : 1 - m ≤ x ^ 2 := by
     have := Real.sq_sqrt (show (0 : ℝ) ≤ 1 - m by linarith)
@@ -321,7 +343,7 @@ theorem Real.jacobiArcdnm_eq_integral (hm0 : 0 < m) (hm : m < 1) {x : ℝ} (hx0 
     rw [show 1 - m * ((1 - x ^ 2) / m) = x ^ 2 by field_simp; ring, Real.sqrt_sq hx] at h
     simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, mul_zero, sub_zero,
       Real.sqrt_one] at h
-    rw [h, Real.jacobiArcdnm, Real.incEllIntFm]
+    rw [h, Real.jacobiArcdn, Real.incompleteEllipticFOfParameter]
   · have hd := ((Real.hasDerivAt_sin θ).pow 2).const_mul m |>.const_sub 1
     convert hd.sqrt (hpos θ).ne' using 1
     simp; ring
@@ -340,18 +362,19 @@ theorem Real.jacobiArcdnm_eq_integral (hm0 : 0 < m) (hm : m < 1) {x : ℝ} (hx0 
 open Set in
 /-- `∫_{t₀}^{f φ} g = F(φ|m)` for an increasing substitution `t = f θ` with `f 0 = t₀` and
 `f' · g ∘ f = (1 - m sin²)^{-1/2}`. -/
-private lemma integral_eq_incEllIntFm_of_subst {m : ℝ} {f f' g : ℝ → ℝ} {a b φ : ℝ}
+private lemma integral_eq_incompleteEllipticFOfParameter_of_subst {m : ℝ}
+    {f f' g : ℝ → ℝ} {a b φ : ℝ}
     (ha : a ≤ 0) (hb : 0 ≤ b)
     (hφ : φ ∈ Icc a b) (hc : ContinuousOn f (Icc a b))
     (hd : ∀ θ ∈ Ioo a b, HasDerivAt f (f' θ) θ) (hpos : ∀ θ ∈ Ioo a b, 0 < f' θ)
     {t0 : ℝ} (f0 : f 0 = t0)
     (hg : ∀ θ ∈ Ioo a b, f' θ * g (f θ) = (1 - m * sin θ ^ 2) ^ (-(1 / 2) : ℝ)) :
-    ∫ t in t0..f φ, g t = Real.incEllIntFm φ m := by
+    ∫ t in t0..f φ, g t = Real.incompleteEllipticFOfParameter φ m := by
   have mono : StrictMonoOn f (Icc a b) := strictMonoOn_of_deriv_pos (convex_Icc a b) hc
     (fun x hx => by rw [interior_Icc] at hx; rw [(hd x hx).deriv]; exact hpos x hx)
   have hg' : ∀ θ ∈ Ioo a b, |f' θ| * g (f θ) = (1 - m * sin θ ^ 2) ^ (-(1 / 2) : ℝ) :=
     fun θ hθ => by rw [abs_of_pos (hpos θ hθ)]; exact hg θ hθ
-  rw [Real.incEllIntFm]
+  rw [Real.incompleteEllipticFOfParameter]
   rcases le_total 0 φ with h | h
   · have hs : Icc 0 φ ⊆ Icc a b := Icc_subset_Icc ha hφ.2
     have hs' : Ioo 0 φ ⊆ Ioo a b := Ioo_subset_Ioo ha hφ.2
@@ -368,15 +391,18 @@ private lemma integral_eq_incEllIntFm_of_subst {m : ℝ} {f f' g : ℝ → ℝ} 
 /-- DLMF 22.15.15: `arccd` inverts `cd`: `cd(arccd(x,k), k) = x` for `-1 ≤ x ≤ 1` (substitution
 `t = cos θ`). -/
 @[dlmf 22.15.E15 "special case: real parameter m = k² < 1"]
-theorem Real.jacobiCdm_jacobiArccdm (hm : m < 1) {x : ℝ} (hx0 : -1 ≤ x) (hx1 : x ≤ 1) :
-    Real.jacobiCnm (Real.jacobiArccdm x m) m / Real.jacobiDnm (Real.jacobiArccdm x m) m = x := by
+theorem Real.jacobiCdm_jacobiArccd (hm : m < 1) {x : ℝ} (hx0 : -1 ≤ x) (hx1 : x ≤ 1) :
+    Real.jacobiCnOfParameter (Real.jacobiArccd x m) m /
+        Real.jacobiDnOfParameter (Real.jacobiArccd x m) m = x := by
   set g : ℝ → ℝ := fun t => 1 / √((1 - t ^ 2) * (1 - m * t ^ 2)) with hg
-  have hK := Real.compEllIntKm_pos hm
-  have I1 : ∫ t in (0 : ℝ)..1, g t = Real.compEllIntKm m :=
-    (Real.compEllIntKm_eq_integral_algebraic hm).symm
-  have I2 : ∫ t in (0 : ℝ)..(-1), g t = -Real.compEllIntKm m := by
-    rw [← Real.jacobiArcsnm_eq_integral hm le_rfl (by norm_num), Real.jacobiArcsnm,
-      Real.arcsin_neg_one, Real.incEllIntFm_neg, Real.incEllIntFm_pi_div_two]
+  have hK := Real.completeEllipticKOfParameter_pos hm
+  have I1 : ∫ t in (0 : ℝ)..1, g t = Real.completeEllipticKOfParameter m :=
+    (Real.completeEllipticKOfParameter_eq_integral_algebraic hm).symm
+  have I2 : ∫ t in (0 : ℝ)..(-1), g t = -Real.completeEllipticKOfParameter m := by
+    rw [← Real.jacobiArcsnOfParameter_eq_integral hm le_rfl (by norm_num),
+        Real.jacobiArcsnOfParameter,
+      Real.arcsin_neg_one, Real.incompleteEllipticFOfParameter_neg,
+          Real.incompleteEllipticFOfParameter_pi_div_two]
   have h1 : IntervalIntegrable g MeasureTheory.volume 0 1 :=
     intervalIntegral.intervalIntegrable_of_integral_ne_zero (by rw [I1]; exact hK.ne')
   have h2 : IntervalIntegrable g MeasureTheory.volume 0 (-1) :=
@@ -386,23 +412,26 @@ theorem Real.jacobiCdm_jacobiArccdm (hm : m < 1) {x : ℝ} (hx0 : -1 ≤ x) (hx1
     h3.mono_set (by
       rw [Set.uIcc_of_le (by norm_num : (-1 : ℝ) ≤ 1)]
       exact Set.uIcc_subset_Icc ⟨by norm_num, by norm_num⟩ ⟨hx0, hx1⟩)
-  have harc : Real.jacobiArccdm x m = Real.compEllIntKm m - Real.jacobiArcsnm x m := by
-    rw [Real.jacobiArccdm, ← intervalIntegral.integral_interval_sub_left h1 hx, I1,
-      Real.jacobiArcsnm_eq_integral hm hx0 hx1]
-  set a := Real.jacobiArcsnm x m
-  obtain ⟨-, hc, hd⟩ := Real.jacobi_add_compEllIntKm hm (-a)
+  have harc : Real.jacobiArccd x m = Real.completeEllipticKOfParameter m -
+      Real.jacobiArcsnOfParameter x m := by
+    rw [Real.jacobiArccd, ← intervalIntegral.integral_interval_sub_left h1 hx, I1,
+      Real.jacobiArcsnOfParameter_eq_integral hm hx0 hx1]
+  set a := Real.jacobiArcsnOfParameter x m
+  obtain ⟨-, hc, hd⟩ := Real.jacobi_add_completeEllipticKOfParameter hm (-a)
   obtain ⟨ns, nc, nd⟩ := jacobi_neg hm a
-  rw [harc, show Real.compEllIntKm m - a = -a + Real.compEllIntKm m by ring, hc, hd, ns, nd]
-  have hdn := (Real.jacobiDnm_pos hm a).ne'
+  rw [harc, show Real.completeEllipticKOfParameter m - a = -a +
+      Real.completeEllipticKOfParameter m by ring, hc, hd, ns, nd]
+  have hdn := (Real.jacobiDnOfParameter_pos hm a).ne'
   have hk : (1 - m) ^ (1 / 2 : ℝ) ≠ 0 := (Real.rpow_pos_of_pos (by linarith) _).ne'
-  rw [← Real.jacobiSnm_jacobiArcsnm hm hx0 hx1]
+  rw [← Real.jacobiSnOfParameter_jacobiArcsnOfParameter hm hx0 hx1]
   field_simp
   rfl
 
 /-- DLMF 22.15.16: `arcsd` inverts `sd` for `-1/k' ≤ x ≤ 1/k'` (substitution `t = sd`). -/
 @[dlmf 22.15.E16 "special case: real parameter m = k² < 1"]
-theorem Real.jacobiSdm_jacobiArcsdm (hm : m < 1) {x : ℝ} (hx : |x| ≤ 1 / √(1 - m)) :
-    Real.jacobiSnm (Real.jacobiArcsdm x m) m / Real.jacobiDnm (Real.jacobiArcsdm x m) m = x := by
+theorem Real.jacobiSdm_jacobiArcsd (hm : m < 1) {x : ℝ} (hx : |x| ≤ 1 / √(1 - m)) :
+    Real.jacobiSnOfParameter (Real.jacobiArcsd x m) m /
+        Real.jacobiDnOfParameter (Real.jacobiArcsd x m) m = x := by
   have hp := fun θ => one_sub_mul_sin_sq_pos hm θ
   have hq := fun θ => Real.sqrt_pos.mpr (hp θ)
   have h1m : 0 < 1 - m := by linarith
@@ -427,7 +456,7 @@ theorem Real.jacobiSdm_jacobiArcsdm (hm : m < 1) {x : ℝ} (hx : |x| ≤ 1 / √
     rw [hsinφ, hy2, show 1 - m * (x ^ 2 / (1 + m * x ^ 2)) = 1 / (1 + m * x ^ 2) by
       field_simp; ring, Real.sqrt_div' _ hD.le, Real.sqrt_one, hy, div_div_eq_mul_div, div_one,
       div_mul_cancel₀ x hsD.ne']
-  have key := integral_eq_incEllIntFm_of_subst (m := m) (t0 := 0)
+  have key := integral_eq_incompleteEllipticFOfParameter_of_subst (m := m) (t0 := 0)
       (f := fun θ => sin θ / √(1 - m * sin θ ^ 2))
     (f' := fun θ => cos θ / √(1 - m * sin θ ^ 2) ^ 3)
     (g := fun t => 1 / √((1 - (1 - m) * t ^ 2) * (1 + m * t ^ 2)))
@@ -436,8 +465,9 @@ theorem Real.jacobiSdm_jacobiArcsdm (hm : m < 1) {x : ℝ} (hx : |x| ≤ 1 / √
     (Continuous.continuousOn (continuous_sin.div (by fun_prop) fun θ => (hq θ).ne'))
     (fun θ _ => ?_) (fun θ hθ => ?_) (by simp) (fun θ hθ => ?_)
   · rw [hfφ] at key
-    rw [Real.jacobiArcsdm, key, Real.jacobiSnm, Real.jacobiDnm, Real.jacobiSnm,
-      Real.jacobiAmm_incEllIntFm hm, ← Real.sqrt_eq_rpow, hfφ]
+    rw [Real.jacobiArcsd, key, Real.jacobiSnOfParameter, Real.jacobiDnOfParameter,
+        Real.jacobiSnOfParameter,
+      Real.jacobiAmOfParameter_incompleteEllipticFOfParameter hm, ← Real.sqrt_eq_rpow, hfφ]
   · have hd := (hasDerivAt_sin θ).div
       ((((hasDerivAt_sin θ).pow 2).const_mul m).const_sub 1 |>.sqrt (hp θ).ne') (hq θ).ne'
     refine hd.congr_deriv ?_
@@ -486,8 +516,8 @@ private lemma integral_one_div_subst {g h : ℝ → ℝ} {x : ℝ} (hx : 1 ≤ x
 
 /-- DLMF 22.15.17: `arcnd` inverts `nd` for `1 ≤ x ≤ 1/k'`. -/
 @[dlmf 22.15.E17 "special case: real parameter m = k² < 1"]
-theorem Real.jacobiNdm_jacobiArcndm (hm : m < 1) {x : ℝ} (hx0 : 1 ≤ x) (hx1 : x ≤ 1 / √(1 - m)) :
-    1 / Real.jacobiDnm (Real.jacobiArcndm x m) m = x := by
+theorem Real.jacobiNdm_jacobiArcnd (hm : m < 1) {x : ℝ} (hx0 : 1 ≤ x) (hx1 : x ≤ 1 / √(1 - m)) :
+    1 / Real.jacobiDnOfParameter (Real.jacobiArcnd x m) m = x := by
   rcases le_or_gt m 0 with hm0 | hm0
   · have hx : x = 1 := by
       have : 1 / √(1 - m) ≤ 1 := by
@@ -495,14 +525,15 @@ theorem Real.jacobiNdm_jacobiArcndm (hm : m < 1) {x : ℝ} (hx0 : 1 ≤ x) (hx1 
         exact Real.le_sqrt_of_sq_le (by linarith)
       linarith
     subst hx
-    simp [Real.jacobiArcndm, Real.jacobiDnm, Real.jacobiSnm, Real.jacobiAmm_zero hm]
+    simp [Real.jacobiArcnd, Real.jacobiDnOfParameter, Real.jacobiSnOfParameter,
+        Real.jacobiAmOfParameter_zero hm]
   have hs : 0 < √(1 - m) := Real.sqrt_pos.mpr (by linarith)
   have hxpos : 0 < x := by linarith
   have hy0 : √(1 - m) ≤ 1 / x := by
     rw [le_div_iff₀ hxpos]; rw [le_div_iff₀ hs] at hx1; linarith
   have hy1 : 1 / x ≤ 1 := by rw [div_le_one hxpos]; exact hx0
-  have key : Real.jacobiArcndm x m = Real.jacobiArcdnm (1 / x) m := by
-    rw [Real.jacobiArcdnm_eq_integral hm0 hm hy0 hy1, Real.jacobiArcndm]
+  have key : Real.jacobiArcnd x m = Real.jacobiArcdn (1 / x) m := by
+    rw [Real.jacobiArcdn_eq_integral hm0 hm hy0 hy1, Real.jacobiArcnd]
     refine (integral_one_div_subst hx0 fun t ht => ?_).symm
     have ht1 : 1 < t := ht.1
     have htx : t < x := ht.2
@@ -522,19 +553,20 @@ theorem Real.jacobiNdm_jacobiArcndm (hm : m < 1) {x : ℝ} (hx0 : 1 ≤ x) (hx1 
     rw [e, Real.sqrt_div' _ (by positivity), Real.sqrt_sq (by positivity)]
     have := Real.sqrt_pos.mpr (mul_pos h1 h2)
     field_simp
-  rw [key, Real.jacobiDnm_jacobiArcdnm hm0 hm hy0 hy1]
+  rw [key, Real.jacobiDnm_jacobiArcdn hm0 hm hy0 hy1]
   field_simp
 
 /-- DLMF 22.15.18: `arcdc` inverts `dc` for `1 ≤ x < ∞`. -/
 @[dlmf 22.15.E18 "special case: real parameter 0 ≤ m = k² < 1"]
-theorem Real.jacobiDcm_jacobiArcdcm (hm : m < 1) {x : ℝ} (hx : 1 ≤ x) :
-    Real.jacobiDnm (Real.jacobiArcdcm x m) m / Real.jacobiCnm (Real.jacobiArcdcm x m) m = x := by
+theorem Real.jacobiDcm_jacobiArcdc (hm : m < 1) {x : ℝ} (hx : 1 ≤ x) :
+    Real.jacobiDnOfParameter (Real.jacobiArcdc x m) m /
+        Real.jacobiCnOfParameter (Real.jacobiArcdc x m) m = x := by
   have hxpos : 0 < x := by linarith
   have hy0 : -1 ≤ 1 / x := by have : 0 < 1 / x := by positivity
                               linarith
   have hy1 : 1 / x ≤ 1 := by rw [div_le_one hxpos]; exact hx
-  have key : Real.jacobiArcdcm x m = Real.jacobiArccdm (1 / x) m := by
-    rw [Real.jacobiArccdm, Real.jacobiArcdcm]
+  have key : Real.jacobiArcdc x m = Real.jacobiArccd (1 / x) m := by
+    rw [Real.jacobiArccd, Real.jacobiArcdc]
     refine (integral_one_div_subst hx fun t ht => ?_).symm
     have ht1 : 1 < t := ht.1
     have h1 : 0 < t ^ 2 - 1 := by nlinarith
@@ -546,20 +578,20 @@ theorem Real.jacobiDcm_jacobiArcdcm (hm : m < 1) {x : ℝ} (hx : 1 ≤ x) :
     rw [e, Real.sqrt_div' _ (by positivity), Real.sqrt_sq (by positivity)]
     have := Real.sqrt_pos.mpr (mul_pos h1 h2)
     field_simp
-  have h := Real.jacobiCdm_jacobiArccdm hm hy0 hy1
+  have h := Real.jacobiCdm_jacobiArccd hm hy0 hy1
   rw [key, ← one_div_div, h]
   field_simp
 
 /-- DLMF 22.15.19: `arcnc` inverts `nc` for `1 ≤ x < ∞`. -/
 @[dlmf 22.15.E19 "special case: real parameter 0 ≤ m = k² < 1"]
-theorem Real.jacobiNcm_jacobiArcncm (hm0 : 0 ≤ m) (hm : m < 1) {x : ℝ} (hx : 1 ≤ x) :
-    1 / Real.jacobiCnm (Real.jacobiArcncm x m) m = x := by
+theorem Real.jacobiNcm_jacobiArcnc (hm0 : 0 ≤ m) (hm : m < 1) {x : ℝ} (hx : 1 ≤ x) :
+    1 / Real.jacobiCnOfParameter (Real.jacobiArcnc x m) m = x := by
   have hxpos : 0 < x := by linarith
   have hy0 : -1 ≤ 1 / x := by have : 0 < 1 / x := by positivity
                               linarith
   have hy1 : 1 / x ≤ 1 := by rw [div_le_one hxpos]; exact hx
-  have key : Real.jacobiArcncm x m = Real.jacobiArccnm (1 / x) m := by
-    rw [Real.jacobiArccnm_eq_integral hm hy0 hy1, Real.jacobiArcncm]
+  have key : Real.jacobiArcnc x m = Real.jacobiArccn (1 / x) m := by
+    rw [Real.jacobiArccn_eq_integral hm hy0 hy1, Real.jacobiArcnc]
     refine (integral_one_div_subst hx fun t ht => ?_).symm
     have ht1 : 1 < t := ht.1
     have h1 : 0 < t ^ 2 - 1 := by nlinarith
@@ -571,7 +603,7 @@ theorem Real.jacobiNcm_jacobiArcncm (hm0 : 0 ≤ m) (hm : m < 1) {x : ℝ} (hx :
     rw [e, Real.sqrt_div' _ (by positivity), Real.sqrt_sq (by positivity)]
     have := Real.sqrt_pos.mpr (mul_pos h1 h2)
     field_simp
-  rw [key, Real.jacobiCnm_jacobiArccnm hm hy0 hy1]
+  rw [key, Real.jacobiCnm_jacobiArccn hm hy0 hy1]
   field_simp
 
 open Set MeasureTheory in
@@ -606,14 +638,14 @@ private lemma integral_Ioi_one_div_subst {g h : ℝ → ℝ} {x : ℝ} (hx : 0 <
 
 /-- DLMF 22.15.21: `arcns` inverts `ns` for `1 ≤ x < ∞`. -/
 @[dlmf 22.15.E21 "special case: real parameter 0 ≤ m = k² < 1"]
-theorem Real.jacobiNsm_jacobiArcnsm (hm : m < 1) {x : ℝ} (hx : 1 ≤ x) :
-    1 / Real.jacobiSnm (Real.jacobiArcnsm x m) m = x := by
+theorem Real.jacobiNsm_jacobiArcns (hm : m < 1) {x : ℝ} (hx : 1 ≤ x) :
+    1 / Real.jacobiSnOfParameter (Real.jacobiArcns x m) m = x := by
   have hxpos : 0 < x := by linarith
   have hy0 : -1 ≤ 1 / x := by have : 0 < 1 / x := by positivity
                               linarith
   have hy1 : 1 / x ≤ 1 := by rw [div_le_one hxpos]; exact hx
-  have key : Real.jacobiArcnsm x m = Real.jacobiArcsnm (1 / x) m := by
-    rw [Real.jacobiArcsnm_eq_integral hm hy0 hy1, Real.jacobiArcnsm]
+  have key : Real.jacobiArcns x m = Real.jacobiArcsnOfParameter (1 / x) m := by
+    rw [Real.jacobiArcsnOfParameter_eq_integral hm hy0 hy1, Real.jacobiArcns]
     refine integral_Ioi_one_div_subst hxpos fun s hs => ?_
     have hs0 : 0 < s := hs.1
     have hs1 : s < 1 := lt_of_lt_of_le hs.2 hy1
@@ -625,19 +657,20 @@ theorem Real.jacobiNsm_jacobiArcnsm (hm : m < 1) {x : ℝ} (hx : 1 ≤ x) :
     rw [e, Real.sqrt_div' _ (by positivity), Real.sqrt_sq (by positivity)]
     have := Real.sqrt_pos.mpr (mul_pos h1 h2)
     field_simp
-  rw [key, Real.jacobiSnm_jacobiArcsnm hm hy0 hy1]
+  rw [key, Real.jacobiSnOfParameter_jacobiArcsnOfParameter hm hy0 hy1]
   field_simp
 
 /-- DLMF 22.15.22: `arcds` inverts `ds` for `k' ≤ x < ∞` (`0 < m`). -/
 @[dlmf 22.15.E22 "special case: real parameter 0 < m = k² < 1"]
-theorem Real.jacobiDsm_jacobiArcdsm (hm0 : 0 < m) (hm : m < 1) {x : ℝ} (hx : √(1 - m) ≤ x) :
-    Real.jacobiDnm (Real.jacobiArcdsm x m) m / Real.jacobiSnm (Real.jacobiArcdsm x m) m = x := by
+theorem Real.jacobiDsm_jacobiArcds (hm0 : 0 < m) (hm : m < 1) {x : ℝ} (hx : √(1 - m) ≤ x) :
+    Real.jacobiDnOfParameter (Real.jacobiArcds x m) m /
+        Real.jacobiSnOfParameter (Real.jacobiArcds x m) m = x := by
   have hsq : 0 < √(1 - m) := Real.sqrt_pos.mpr (by linarith)
   have hxpos : 0 < x := lt_of_lt_of_le hsq hx
   have hy : |1 / x| ≤ 1 / √(1 - m) := by
     rw [abs_of_pos (by positivity)]; exact one_div_le_one_div_of_le hsq hx
-  have key : Real.jacobiArcdsm x m = Real.jacobiArcsdm (1 / x) m := by
-    rw [Real.jacobiArcsdm, Real.jacobiArcdsm]
+  have key : Real.jacobiArcds x m = Real.jacobiArcsd (1 / x) m := by
+    rw [Real.jacobiArcsd, Real.jacobiArcds]
     refine integral_Ioi_one_div_subst hxpos fun s hs => ?_
     have hs0 : 0 < s := hs.1
     have hsx : s * x < 1 := by
@@ -655,20 +688,21 @@ theorem Real.jacobiDsm_jacobiArcdsm (hm0 : 0 < m) (hm : m < 1) {x : ℝ} (hx : �
     rw [e, Real.sqrt_div' _ (by positivity), Real.sqrt_sq (by positivity)]
     have := Real.sqrt_pos.mpr (mul_pos h1 h2)
     field_simp
-  have h := Real.jacobiSdm_jacobiArcsdm hm hy
+  have h := Real.jacobiSdm_jacobiArcsd hm hy
   rw [key, ← one_div_div, h]
   field_simp
 
 /-- DLMF 22.15.20: `arcsc` inverts `sc` on `ℝ` (substitution `t = tan θ`). -/
 @[dlmf 22.15.E20 "special case: real parameter 0 ≤ m = k² < 1"]
-theorem Real.jacobiScm_jacobiArcscm (hm : m < 1) (x : ℝ) :
-    Real.jacobiSnm (Real.jacobiArcscm x m) m / Real.jacobiCnm (Real.jacobiArcscm x m) m = x := by
+theorem Real.jacobiScm_jacobiArcsc (hm : m < 1) (x : ℝ) :
+    Real.jacobiSnOfParameter (Real.jacobiArcsc x m) m /
+        Real.jacobiCnOfParameter (Real.jacobiArcsc x m) m = x := by
   set φ := arctan x with hφ
   have hb : |φ| < π / 2 := by rw [abs_lt];
                               exact ⟨Real.neg_pi_div_two_lt_arctan x, Real.arctan_lt_pi_div_two x⟩
   have hcos : ∀ θ ∈ Set.Icc (-|φ|) |φ|, 0 < cos θ := fun θ hθ =>
     Real.cos_pos_of_mem_Ioo ⟨by linarith [hθ.1], by linarith [hθ.2]⟩
-  have key := integral_eq_incEllIntFm_of_subst (m := m) (t0 := 0) (f := tan)
+  have key := integral_eq_incompleteEllipticFOfParameter_of_subst (m := m) (t0 := 0) (f := tan)
       (f' := fun θ => 1 / cos θ ^ 2)
     (g := fun t => 1 / √((1 + t ^ 2) * (1 + (1 - m) * t ^ 2)))
     (a := -|φ|) (b := |φ|) (φ := φ) (by simp) (abs_nonneg _) ⟨neg_abs_le φ, le_abs_self φ⟩
@@ -677,7 +711,8 @@ theorem Real.jacobiScm_jacobiArcscm (hm : m < 1) (x : ℝ) :
     (fun θ hθ => by have := hcos θ (Set.Ioo_subset_Icc_self hθ); positivity)
     Real.tan_zero (fun θ hθ => ?_)
   · rw [Real.tan_arctan] at key
-    rw [Real.jacobiArcscm, key, Real.jacobiSnm, Real.jacobiCnm, Real.jacobiAmm_incEllIntFm hm,
+    rw [Real.jacobiArcsc, key, Real.jacobiSnOfParameter, Real.jacobiCnOfParameter,
+        Real.jacobiAmOfParameter_incompleteEllipticFOfParameter hm,
       ← Real.tan_eq_sin_div_cos, Real.tan_arctan]
   · have hc := hcos θ (Set.Ioo_subset_Icc_self hθ)
     have hp := one_sub_mul_sin_sq_pos hm θ
@@ -693,8 +728,9 @@ theorem Real.jacobiScm_jacobiArcscm (hm : m < 1) (x : ℝ) :
 open Set MeasureTheory in
 /-- DLMF 22.15.23: `arccs` inverts `cs` on `ℝ`. -/
 @[dlmf 22.15.E23 "special case: real parameter 0 ≤ m = k² < 1"]
-theorem Real.jacobiCsm_jacobiArccsm (hm : m < 1) (x : ℝ) :
-    Real.jacobiCnm (Real.jacobiArccsm x m) m / Real.jacobiSnm (Real.jacobiArccsm x m) m = x := by
+theorem Real.jacobiCsm_jacobiArccs (hm : m < 1) (x : ℝ) :
+    Real.jacobiCnOfParameter (Real.jacobiArccs x m) m /
+        Real.jacobiSnOfParameter (Real.jacobiArccs x m) m = x := by
   set φ0 := π / 2 - Real.arctan x with hφ0
   have hφpos : 0 < φ0 := by linarith [Real.arctan_lt_pi_div_two x]
   have hφlt : φ0 < π := by linarith [Real.neg_pi_div_two_lt_arctan x]
@@ -743,8 +779,9 @@ theorem Real.jacobiCsm_jacobiArccsm (hm : m < 1) (x : ℝ) :
       · exact absurd hab (hanti a b ha.1 h (by linarith [hb.2])).ne'
       · exact absurd hab (hanti b a hb.1 h (by linarith [ha.2])).ne)
     (fun t => 1 / √((1 + t ^ 2) * (t ^ 2 + (1 - m))))
-  have hF : Real.jacobiArccsm x m = Real.incEllIntFm φ0 m := by
-    rw [Real.jacobiArccsm, ← himg, hcv, Real.incEllIntFm, intervalIntegral.integral_of_le hφpos.le,
+  have hF : Real.jacobiArccs x m = Real.incompleteEllipticFOfParameter φ0 m := by
+    rw [Real.jacobiArccs, ← himg, hcv, Real.incompleteEllipticFOfParameter,
+        intervalIntegral.integral_of_le hφpos.le,
       integral_Ioc_eq_integral_Ioo]
     refine setIntegral_congr_fun measurableSet_Ioo fun φ hφ => ?_
     have hs := hsinpos φ ⟨hφ.1, by linarith [hφ.2]⟩
@@ -760,7 +797,8 @@ theorem Real.jacobiCsm_jacobiArccsm (hm : m < 1) (x : ℝ) :
       ← Real.sqrt_eq_rpow]
     have := Real.sqrt_pos.mpr hp
     field_simp
-  rw [hF, Real.jacobiCnm, Real.jacobiSnm, Real.jacobiAmm_incEllIntFm hm, hφ0, hcot]
+  rw [hF, Real.jacobiCnOfParameter, Real.jacobiSnOfParameter,
+      Real.jacobiAmOfParameter_incompleteEllipticFOfParameter hm, hφ0, hcot]
 
 end Integrals
 

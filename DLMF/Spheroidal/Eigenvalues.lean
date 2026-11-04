@@ -26,19 +26,20 @@ equation (§30.3(iii)), the power series in `γ²` (§30.3(iv)) and the asymptot
 * `spheroidalEigenvalue_deriv_bounds`: the derivative bounds DLMF 30.3.4.
 * `spheroidal_cf_of_eigenvalue`, `spheroidal_eigenvalue_of_cf`: the two directions of the
   continued-fraction characterization DLMF 30.3.5 with the coefficients 30.3.6 or 30.3.7.
-* `hasSum_spheroidalEll`: the power series DLMF 30.3.8.
-* `spheroidalEll_zero`, `spheroidalEll_one`, `spheroidalEll_two`, `spheroidalEll_three`,
-  `spheroidalEll_four`: the coefficients DLMF 30.3.9–30.3.12.
+* `hasSum_spheroidalEigenvalueCoeff`: the power series DLMF 30.3.8.
+* `spheroidalEigenvalueCoeff_zero`, `spheroidalEigenvalueCoeff_one`,
+  `spheroidalEigenvalueCoeff_two`, `spheroidalEigenvalueCoeff_three`,
+  `spheroidalEigenvalueCoeff_four`: the coefficients DLMF 30.3.9–30.3.12.
 * `spheroidalEigenvalue_prolate_asymptotic`, `spheroidalEigenvalue_oblate_asymptotic`: the
   asymptotic expansions DLMF 30.9.1–30.9.6.
 
 ## Implementation notes
 
-The continued fraction 30.3.5 is written with the project's continuants (`DLMF.Core.cfTail`,
-`DLMF.Core.HasContinuedFraction`, which assert convergence of the finite truncations). The
-equivalence "`λ` solves 30.3.5 iff `λ` is an eigenvalue of the right parity" is split into two
-directions with explicit nondegeneracy hypotheses (nonvanishing finite continuant,
-nonvanishing expansion coefficient), which DLMF leaves implicit.
+The continued fraction 30.3.5 is written with the project's continuants
+(`DLMF.Core.continuedFractionTail`, `DLMF.Core.HasContinuedFraction`, which assert convergence of
+the finite truncations). The equivalence "`λ` solves 30.3.5 iff `λ` is an eigenvalue of the right
+parity" is split into two directions with explicit nondegeneracy hypotheses (nonvanishing finite
+continuant, nonvanishing expansion coefficient), which DLMF leaves implicit.
 
 The printed formulas of §§30.3 and 30.9 agree numerically with the eigenvalues of the
 recurrences 30.8.4 and 30.3.5 computed in high precision and with SciPy's `pro_cv`/`obl_cv`.
@@ -127,21 +128,21 @@ theorem spheroidal_cf_of_eigenvalue {m : ℕ} {γ2 : ℝ} (alt : Bool) (p j : �
         spheroidalCoeff (m + p % 2 + 2 * j) m γ2 (((p : ℤ) + m - (m + p % 2 + 2 * j)) / 2) ≠ 0
       else iteratedDeriv p (spheroidalPsFactor (m + p % 2 + 2 * j) m γ2) 0 ≠ 0)
     (hden :
-      let α : ℕ → ℝ := if alt then spheroidalCFAlphaAlt m γ2 else spheroidalCFAlpha m γ2
-      let β : ℕ → ℝ := if alt then spheroidalCFBetaAlt m γ2 else spheroidalCFBeta m γ2
-      let γ : ℕ → ℝ := if alt then spheroidalCFGammaAlt m γ2 else spheroidalCFGamma m γ2
+      let α : ℕ → ℝ := if alt then spheroidalLegendreAlpha m γ2 else spheroidalPowerAlpha m γ2
+      let β : ℕ → ℝ := if alt then spheroidalLegendreBeta m γ2 else spheroidalPowerBeta m γ2
+      let γ : ℕ → ℝ := if alt then spheroidalLegendreGamma m γ2 else spheroidalPowerGamma m γ2
       let lam : ℝ := spheroidalEigenvalue (m + p % 2 + 2 * j) m γ2
-      (DLMF.Core.cfContinuants
+      (DLMF.Core.continuedFractionContinuants
         (fun i => ((if i = 0 then 1 else -1) * (α (p - 2 - 2 * i) * γ (p - 2 * i)) : ℂ))
         (fun i => ((β (p - 2 - 2 * i) - lam : ℝ) : ℂ)) 0 (p / 2)).2.1 ≠ 0) :
-    let α : ℕ → ℝ := if alt then spheroidalCFAlphaAlt m γ2 else spheroidalCFAlpha m γ2
-    let β : ℕ → ℝ := if alt then spheroidalCFBetaAlt m γ2 else spheroidalCFBeta m γ2
-    let γ : ℕ → ℝ := if alt then spheroidalCFGammaAlt m γ2 else spheroidalCFGamma m γ2
+    let α : ℕ → ℝ := if alt then spheroidalLegendreAlpha m γ2 else spheroidalPowerAlpha m γ2
+    let β : ℕ → ℝ := if alt then spheroidalLegendreBeta m γ2 else spheroidalPowerBeta m γ2
+    let γ : ℕ → ℝ := if alt then spheroidalLegendreGamma m γ2 else spheroidalPowerGamma m γ2
     let lam : ℝ := spheroidalEigenvalue (m + p % 2 + 2 * j) m γ2
     ∃ v : ℂ, DLMF.Core.HasContinuedFraction
         (fun i => ((if i = 0 then 1 else -1) * (α (p + 2 * i) * γ (p + 2 * i + 2)) : ℂ))
         (fun i => ((β (p + 2 * i + 2) - lam : ℝ) : ℂ)) v ∧
-      ((β p - lam : ℝ) : ℂ) - DLMF.Core.cfTail
+      ((β p - lam : ℝ) : ℂ) - DLMF.Core.continuedFractionTail
         (fun i => ((if i = 0 then 1 else -1) * (α (p - 2 - 2 * i) * γ (p - 2 * i)) : ℂ))
         (fun i => ((β (p - 2 - 2 * i) - lam : ℝ) : ℂ)) 0 (p / 2) = v := by
   sorry
@@ -151,16 +152,16 @@ theorem spheroidal_cf_of_eigenvalue {m : ℕ} {γ2 : ℝ} (alt : Bool) (p j : �
 and a convergent right side) is `λ^m_{m+p mod 2+2j}(γ²)` for some `j`. -/
 @[dlmf 30.3.E5, dlmf 30.3.E6, dlmf 30.3.E7]
 theorem spheroidal_eigenvalue_of_cf {m : ℕ} {γ2 : ℝ} (alt : Bool) (p : ℕ) (lam : ℝ) (v : ℂ) :
-    let α : ℕ → ℝ := if alt then spheroidalCFAlphaAlt m γ2 else spheroidalCFAlpha m γ2
-    let β : ℕ → ℝ := if alt then spheroidalCFBetaAlt m γ2 else spheroidalCFBeta m γ2
-    let γ : ℕ → ℝ := if alt then spheroidalCFGammaAlt m γ2 else spheroidalCFGamma m γ2
-    (DLMF.Core.cfContinuants
+    let α : ℕ → ℝ := if alt then spheroidalLegendreAlpha m γ2 else spheroidalPowerAlpha m γ2
+    let β : ℕ → ℝ := if alt then spheroidalLegendreBeta m γ2 else spheroidalPowerBeta m γ2
+    let γ : ℕ → ℝ := if alt then spheroidalLegendreGamma m γ2 else spheroidalPowerGamma m γ2
+    (DLMF.Core.continuedFractionContinuants
         (fun i => ((if i = 0 then 1 else -1) * (α (p - 2 - 2 * i) * γ (p - 2 * i)) : ℂ))
         (fun i => ((β (p - 2 - 2 * i) - lam : ℝ) : ℂ)) 0 (p / 2)).2.1 ≠ 0 →
     DLMF.Core.HasContinuedFraction
         (fun i => ((if i = 0 then 1 else -1) * (α (p + 2 * i) * γ (p + 2 * i + 2)) : ℂ))
         (fun i => ((β (p + 2 * i + 2) - lam : ℝ) : ℂ)) v →
-    ((β p - lam : ℝ) : ℂ) - DLMF.Core.cfTail
+    ((β p - lam : ℝ) : ℂ) - DLMF.Core.continuedFractionTail
         (fun i => ((if i = 0 then 1 else -1) * (α (p - 2 - 2 * i) * γ (p - 2 * i)) : ℂ))
         (fun i => ((β (p - 2 - 2 * i) - lam : ℝ) : ℂ)) 0 (p / 2) = v →
     ∃ j : ℕ, lam = spheroidalEigenvalue (m + p % 2 + 2 * j) m γ2 := by
@@ -172,9 +173,9 @@ theorem spheroidal_eigenvalue_of_cf {m : ℕ} {γ2 : ℝ} (alt : Bool) (p : ℕ)
 `|γ²| < r^m_n`, with some radius `r^m_n > 0`. Proved from the analyticity
 (`analyticAt_spheroidalEigenvalue`). -/
 @[dlmf 30.3.E8]
-theorem hasSum_spheroidalEll {n m : ℕ} (hmn : m ≤ n) :
+theorem hasSum_spheroidalEigenvalueCoeff {n m : ℕ} (hmn : m ≤ n) :
     ∃ r > 0, ∀ t : ℝ, |t| < r →
-      HasSum (fun k => spheroidalEll n m k * t ^ k) (spheroidalEigenvalue n m t) := by
+      HasSum (fun k => spheroidalEigenvalueCoeff n m k * t ^ k) (spheroidalEigenvalue n m t) := by
   obtain ⟨r, hr⟩ := (analyticAt_spheroidalEigenvalue hmn 0).hasFPowerSeriesAt
   obtain ⟨ρ, hρ0, hρr⟩ : ∃ ρ : ℝ, 0 < ρ ∧ ENNReal.ofReal ρ < r := by
     obtain ⟨ρ, hρ, hρr⟩ := ENNReal.lt_iff_exists_nnreal_btwn.mp hr.r_pos
@@ -188,17 +189,18 @@ theorem hasSum_spheroidalEll {n m : ℕ} (hmn : m ≤ n) :
   have h := hr.hasSum hmem
   simp only [zero_add, FormalMultilinearSeries.ofScalars_apply_eq, smul_eq_mul] at h
   convert h using 2 with k
-  simp only [spheroidalEll]
+  simp only [spheroidalEigenvalueCoeff]
 
 /-- **`ℓ_0 = n(n+1)`** (DLMF 30.3.9, first equation). Proved from 30.3.3. -/
 @[dlmf 30.3.E9]
-theorem spheroidalEll_zero {n m : ℕ} (hmn : m ≤ n) : spheroidalEll n m 0 = (n : ℝ) * (n + 1) := by
-  simp [spheroidalEll, spheroidalEigenvalue_zero hmn]
+theorem spheroidalEigenvalueCoeff_zero {n m : ℕ} (hmn : m ≤ n) : spheroidalEigenvalueCoeff n m 0 =
+    (n : ℝ) * (n + 1) := by
+  simp [spheroidalEigenvalueCoeff, spheroidalEigenvalue_zero hmn]
 
 /-- **`2ℓ_2 = -1 - (2m-1)(2m+1)/((2n-1)(2n+3))`** (DLMF 30.3.9, second equation). -/
 @[dlmf 30.3.E9]
-theorem spheroidalEll_one {n m : ℕ} (hmn : m ≤ n) :
-    2 * spheroidalEll n m 1 =
+theorem spheroidalEigenvalueCoeff_one {n m : ℕ} (hmn : m ≤ n) :
+    2 * spheroidalEigenvalueCoeff n m 1 =
       -1 - (2 * (m : ℝ) - 1) * (2 * m + 1) / ((2 * (n : ℝ) - 1) * (2 * n + 3)) := by
   sorry
 
@@ -206,10 +208,10 @@ theorem spheroidalEll_one {n m : ℕ} (hmn : m ≤ n) :
 `2ℓ_4 = (n-m-1)(n-m)(n+m-1)(n+m)/((2n-3)(2n-1)³(2n+1))
   - (n-m+1)(n-m+2)(n+m+1)(n+m+2)/((2n+1)(2n+3)³(2n+5))`. -/
 @[dlmf 30.3.E9]
-theorem spheroidalEll_two {n m : ℕ} (hmn : m ≤ n) :
+theorem spheroidalEigenvalueCoeff_two {n m : ℕ} (hmn : m ≤ n) :
     let a : ℝ := n
     let b : ℝ := m
-    2 * spheroidalEll n m 2 =
+    2 * spheroidalEigenvalueCoeff n m 2 =
       (a - b - 1) * (a - b) * (a + b - 1) * (a + b) /
           ((2 * a - 3) * (2 * a - 1) ^ 3 * (2 * a + 1)) -
         (a - b + 1) * (a - b + 2) * (a + b + 1) * (a + b + 2) /
@@ -218,10 +220,10 @@ theorem spheroidalEll_two {n m : ℕ} (hmn : m ≤ n) :
 
 /-- **`ℓ_6`** (DLMF 30.3.10). -/
 @[dlmf 30.3.E10]
-theorem spheroidalEll_three {n m : ℕ} (hmn : m ≤ n) :
+theorem spheroidalEigenvalueCoeff_three {n m : ℕ} (hmn : m ≤ n) :
     let a : ℝ := n
     let b : ℝ := m
-    spheroidalEll n m 3 = (4 * b ^ 2 - 1) *
+    spheroidalEigenvalueCoeff n m 3 = (4 * b ^ 2 - 1) *
       ((a - b + 1) * (a - b + 2) * (a + b + 1) * (a + b + 2) /
           ((2 * a - 1) * (2 * a + 1) * (2 * a + 3) ^ 5 * (2 * a + 5) * (2 * a + 7)) -
         (a - b - 1) * (a - b) * (a + b - 1) * (a + b) /
@@ -230,9 +232,10 @@ theorem spheroidalEll_three {n m : ℕ} (hmn : m ≤ n) :
 
 /-- **`ℓ_8 = 2(4m²-1)²A + B/16 + C/8 + D/2`** (DLMF 30.3.11, with `A, B, C, D` from 30.3.12). -/
 @[dlmf 30.3.E11, dlmf 30.3.E12]
-theorem spheroidalEll_four {n m : ℕ} (hmn : m ≤ n) :
-    spheroidalEll n m 4 = 2 * (4 * (m : ℝ) ^ 2 - 1) ^ 2 * spheroidalEllA n m +
-      spheroidalEllB n m / 16 + spheroidalEllC n m / 8 + spheroidalEllD n m / 2 := by
+theorem spheroidalEigenvalueCoeff_four {n m : ℕ} (hmn : m ≤ n) :
+    spheroidalEigenvalueCoeff n m 4 = 2 * (4 * (m : ℝ) ^ 2 - 1) ^ 2 * spheroidalEigenvalueAuxA n m +
+      spheroidalEigenvalueAuxB n m / 16 + spheroidalEigenvalueAuxC n m / 8 +
+          spheroidalEigenvalueAuxD n m / 2 := by
   sorry
 
 /-! ### §30.9 Asymptotic expansions of the eigenvalues -/

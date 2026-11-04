@@ -24,17 +24,18 @@ Lamé polynomials have the polynomial form, periods and parities of Table 29.12.
 
 ## Main results
 
-* `lamePolyType_alpha_mul_gamma_pos`: the products `α_p γ_{p+1}`, `p < n`, are positive for all
-  eight types.
-* `lamePolyH_strictMono`, `lamePolyH_strictMono'`: DLMF 29.15.3, by symmetrization and Mathlib's
-  spectral theorem.
-* `eval_lamePolyH_charpoly`: `H_m` is a root of the characteristic polynomial.
-* `lameRecVec_zero`, `lameRecVec_succ`: the forward recursion for the eigenvector.
-* `degree_lameSqPoly`, `sum_lamePolyCoeff_mul_basis`: `deg P = n` and the Chebyshev series is
+* `lamePolynomialType_alpha_mul_gamma_pos`: the products `α_p γ_{p+1}`, `p < n`, are positive for
+  all eight types.
+* `lamePolynomialH_strictMono`, `lamePolynomialH_strictMono'`: DLMF 29.15.3, by symmetrization and
+  Mathlib's spectral theorem.
+* `eval_lamePolynomialH_charpoly`: `H_m` is a root of the characteristic polynomial.
+* `lameRecurrenceVector_zero`, `lameRecurrenceVector_succ`: the forward recursion for the
+  eigenvector.
+* `degree_lameSqPoly`, `sum_lamePolynomialCoeff_mul_basis`: `deg P = n` and the Chebyshev series is
   `s^ε P(s²)`.
-* `lamePolyEk_polynomial_form`: each Lamé polynomial is `sn^a cn^b dn^c P(sn²)` with
+* `lamePolynomialE_polynomial_form`: each Lamé polynomial is `sn^a cn^b dn^c P(sn²)` with
   `deg P = n` (Table 29.12.1, DLMF §29.12(i)).
-* `lamePolyEk_periods`, `lamePolyEk_parities`: the periods and parities of Table 29.12.1.
+* `lamePolynomialE_periods`, `lamePolynomialE_parities`: the periods and parities of Table 29.12.1.
 -/
 
 @[expose] public section
@@ -46,7 +47,7 @@ noncomputable section
 
 namespace DLMF.Lame
 
-open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
+open DLMF.EllipticIntegrals (completeEllipticK completeEllipticKPrime)
 
 variable {k : ℝ}
 
@@ -223,28 +224,30 @@ private lemma tridiagMatrix_charpoly_roots {a b c : ℕ → ℝ} {n : ℕ}
 
 end Tridiagonal
 /-- The products `α_p γ_{p+1}`, `p < n`, of the matrix 29.15.2 are positive for all eight types. -/
-theorem lamePolyType_alpha_mul_gamma_pos {k : ℝ} (hk0 : 0 < k) (t : LamePolyType) (n : ℕ) :
+theorem lamePolynomialType_alpha_mul_gamma_pos {k : ℝ} (hk0 : 0 < k)
+    (t : LamePolynomialType) (n : ℕ) :
     ∀ p < n, 0 < t.recurrence.alpha (t.order n) k p *
       t.recurrence.gamma (t.order n) k (p + 1) := by
   intro p hp
   have hp' : (p : ℝ) + 1 ≤ n := by exact_mod_cast hp
   have hk2 : 0 < k ^ 2 := by positivity
-  cases t <;> simp only [LamePolyType.recurrence, LamePolyType.order, LameRecurrence.alpha,
+  cases t <;> simp only
+                [LamePolynomialType.recurrence, LamePolynomialType.order, LameRecurrence.alpha,
     LameRecurrence.gamma] <;> push_cast <;> (try split_ifs) <;>
     apply_rules [mul_pos, div_pos] <;> norm_num <;> nlinarith
 
 
 /-- 29.15.3: the eigenvalues of the tridiagonal matrix 29.15.2 (for any of the eight types)
 are real and simple, `H₀ < H₁ < ⋯ < Hₙ`: the characteristic polynomial has `n + 1` distinct
-real roots, and `lamePolyH` lists them increasingly. Proved by symmetrizing the matrix
+real roots, and `lamePolynomialH` lists them increasingly. Proved by symmetrizing the matrix
 (`α_p γ_{p+1} > 0`) and the spectral theorem. This is stronger than DLMF, which assumes `k < 1`. -/
 @[dlmf 29.15.E3]
-theorem lamePolyH_strictMono' (hk0 : 0 < k) (t : LamePolyType) (n : ℕ) :
+theorem lamePolynomialH_strictMono' (hk0 : 0 < k) (t : LamePolynomialType) (n : ℕ) :
     (lameMatrix t.recurrence (t.order n) k n).charpoly.roots.card = n + 1 ∧
       (lameMatrix t.recurrence (t.order n) k n).charpoly.roots.Nodup ∧
-      ∀ m < n, lamePolyH t n m k < lamePolyH t n (m + 1) k := by
+      ∀ m < n, lamePolynomialH t n m k < lamePolynomialH t n (m + 1) k := by
   obtain ⟨hc, hn⟩ := tridiagMatrix_charpoly_roots (b := t.recurrence.beta (t.order n) k)
-    (lamePolyType_alpha_mul_gamma_pos hk0 t n)
+    (lamePolynomialType_alpha_mul_gamma_pos hk0 t n)
   refine ⟨hc, hn, fun m hm => ?_⟩
   set L := (lameMatrix t.recurrence (t.order n) k n).charpoly.roots.sort (· ≤ ·) with hL
   have hlen : L.length = n + 1 := by rw [hL, Multiset.length_sort]; exact hc
@@ -253,20 +256,20 @@ theorem lamePolyH_strictMono' (hk0 : 0 < k) (t : LamePolyType) (n : ℕ) :
     have h2 : L.Nodup := by
       rw [hL]; exact (Multiset.coe_nodup.mp (by rw [Multiset.sort_eq]; exact hn))
     exact (h1.and h2).imp fun h => lt_of_le_of_ne h.1 h.2
-  simp only [lamePolyH, lameMatrixEigenvalue]
+  simp only [lamePolynomialH, lameMatrixEigenvalue]
   rw [← hL, List.getD_eq_getElem _ _ (by omega), List.getD_eq_getElem _ _ (by omega)]
   exact List.pairwise_iff_getElem.mp hpw m (m + 1) (by omega) (by omega) (by omega)
 
 /-- 29.15.3: the eigenvalues of the tridiagonal matrix 29.15.2 (for any of the eight types)
 are real and simple, `H₀ < H₁ < ⋯ < Hₙ`: the characteristic polynomial has `n + 1` distinct
-real roots, and `lamePolyH` lists them increasingly. Proved by symmetrizing the matrix
+real roots, and `lamePolynomialH` lists them increasingly. Proved by symmetrizing the matrix
 (`α_p γ_{p+1} > 0`) and the spectral theorem. -/
 @[dlmf 29.15.E3]
-theorem lamePolyH_strictMono (hk0 : 0 < k) (_hk1 : k < 1) (t : LamePolyType) (n : ℕ) :
+theorem lamePolynomialH_strictMono (hk0 : 0 < k) (_hk1 : k < 1) (t : LamePolynomialType) (n : ℕ) :
     (lameMatrix t.recurrence (t.order n) k n).charpoly.roots.card = n + 1 ∧
       (lameMatrix t.recurrence (t.order n) k n).charpoly.roots.Nodup ∧
-      ∀ m < n, lamePolyH t n m k < lamePolyH t n (m + 1) k :=
-  lamePolyH_strictMono' hk0 t n
+      ∀ m < n, lamePolynomialH t n m k < lamePolynomialH t n (m + 1) k :=
+  lamePolynomialH_strictMono' hk0 t n
 
 
 /-! ### Polynomial form, periods and parities (Table 29.12.1) -/
@@ -314,21 +317,23 @@ theorem tridiagMatrix_mulVec_apply (a b c : ℕ → ℝ) {n : ℕ} (u : Fin (n +
       · simp [h1, vecExtendZero]
 
 /-- The forward recursion `v_{p+1} = ((H - β_p) v_p - γ_p v_{p-1}) / α_p` (`v_{-1} = 0`). -/
-theorem lameRecVec_succ (r : LameRecurrence) (ν k H : ℝ) (p : ℕ) :
-    lameRecVec r ν k H (p + 1) = ((H - r.beta ν k p) * lameRecVec r ν k H p -
-      r.gamma ν k p * (if p = 0 then 0 else lameRecVec r ν k H (p - 1))) / r.alpha ν k p := by
+theorem lameRecurrenceVector_succ (r : LameRecurrence) (ν k H : ℝ) (p : ℕ) :
+    lameRecurrenceVector r ν k H (p + 1) = ((H - r.beta ν k p) * lameRecurrenceVector r ν k H p -
+      r.gamma ν k p * (if p = 0 then 0 else lameRecurrenceVector r ν k H (p - 1))) /
+          r.alpha ν k p := by
   rcases p with _ | p
-  · simp [lameRecVec, lameRecVecPair]
-  · simp [lameRecVec, lameRecVecPair]
+  · simp [lameRecurrenceVector, lameRecurrenceVectorPair]
+  · simp [lameRecurrenceVector, lameRecurrenceVectorPair]
 
 /-- The forward recursion starts at `v₀ = 1`. -/
-theorem lameRecVec_zero (r : LameRecurrence) (ν k H : ℝ) : lameRecVec r ν k H 0 = 1 := rfl
+theorem lameRecurrenceVector_zero (r : LameRecurrence) (ν k H : ℝ) : lameRecurrenceVector r ν
+    k H 0 = 1 := rfl
 
 /-- If `H` is an eigenvalue of the matrix 29.15.2 (with `α_p γ_{p+1} > 0`), the forward
 recursion gives an eigenvector with nonzero last entry `v_n`. -/
-private lemma lameRecVec_last_ne_zero {r : LameRecurrence} {ν k H : ℝ} {n : ℕ}
+private lemma lameRecurrenceVector_last_ne_zero {r : LameRecurrence} {ν k H : ℝ} {n : ℕ}
     (hpos : ∀ p < n, 0 < r.alpha ν k p * r.gamma ν k (p + 1))
-    (hH : (lameMatrix r ν k n).charpoly.eval H = 0) : lameRecVec r ν k H n ≠ 0 := by
+    (hH : (lameMatrix r ν k n).charpoly.eval H = 0) : lameRecurrenceVector r ν k H n ≠ 0 := by
   rw [eval_charpoly, ← exists_mulVec_eq_zero_iff] at hH
   obtain ⟨u, hu0, hu⟩ := hH
   have hMu : lameMatrix r ν k n *ᵥ u = H • u := by
@@ -364,15 +369,15 @@ private lemma lameRecVec_last_ne_zero {r : LameRecurrence} {ν k H : ℝ} {n : �
       exact hα i (by omega)
     · simpa [hU, vecExtendZero] using h0
   -- forward recursion
-  have hfw : ∀ p ≤ n, U p = U 0 * lameRecVec r ν k H p := by
+  have hfw : ∀ p ≤ n, U p = U 0 * lameRecurrenceVector r ν k H p := by
     intro p
     induction p using Nat.strong_induction_on with
     | _ p ih =>
       intro hp
       rcases p with _ | p
-      · rw [lameRecVec_zero, mul_one]
+      · rw [lameRecurrenceVector_zero, mul_one]
       · have hr := hrow p (by omega)
-        rw [lameRecVec_succ]
+        rw [lameRecurrenceVector_succ]
         rw [ih p (by omega) (by omega)] at hr
         have hap := hα p (by omega)
         rw [eq_comm, mul_div_assoc', div_eq_iff hap]
@@ -408,14 +413,15 @@ private lemma lameRecVec_last_ne_zero {r : LameRecurrence} {ν k H : ℝ} {n : �
   exact hU0 (hbw n le_rfl 0 (by omega))
 
 /-- The eigenvalue `H_m` (`m ≤ n`) is a root of the characteristic polynomial of 29.15.2. -/
-theorem eval_lamePolyH_charpoly {k : ℝ} (hk0 : 0 < k) (t : LamePolyType) {n m : ℕ} (hm : m ≤ n) :
-    (lameMatrix t.recurrence (t.order n) k n).charpoly.eval (lamePolyH t n m k) = 0 := by
+theorem eval_lamePolynomialH_charpoly {k : ℝ} (hk0 : 0 < k) (t : LamePolynomialType)
+    {n m : ℕ} (hm : m ≤ n) :
+    (lameMatrix t.recurrence (t.order n) k n).charpoly.eval (lamePolynomialH t n m k) = 0 := by
   obtain ⟨hc, -⟩ := tridiagMatrix_charpoly_roots (b := t.recurrence.beta (t.order n) k)
-    (lamePolyType_alpha_mul_gamma_pos hk0 t n)
+    (lamePolynomialType_alpha_mul_gamma_pos hk0 t n)
   set L := (lameMatrix t.recurrence (t.order n) k n).charpoly.roots.sort (· ≤ ·) with hL
   have hlen : L.length = n + 1 := by rw [hL, Multiset.length_sort]; exact hc
-  have hmem : lamePolyH t n m k ∈ L := by
-    simp only [lamePolyH, lameMatrixEigenvalue]
+  have hmem : lamePolynomialH t n m k ∈ L := by
+    simp only [lamePolynomialH, lameMatrixEigenvalue]
     rw [← hL, List.getD_eq_getElem _ _ (by omega)]
     exact List.getElem_mem _
   rw [hL, Multiset.mem_sort] at hmem
@@ -433,7 +439,8 @@ private lemma sum_sq_sub_sum_mul_succ (c : ℕ → ℝ) (n : ℕ) :
     linear_combination ih
 
 /-- The normalization forms 29.15.5, … are positive at a vector with `c₀ = 1`. -/
-private lemma lamePolyType_normForm_pos {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType)
+private lemma lamePolynomialType_normForm_pos {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1)
+    (t : LamePolynomialType)
     (n : ℕ)
     {c : ℕ → ℝ} (hc : c 0 = 1) : 0 < t.normForm k n c := by
   have hid := sum_sq_sub_sum_mul_succ c n
@@ -449,7 +456,7 @@ private lemma lamePolyType_normForm_pos {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (t
   set cr := ∑ p ∈ Finset.range n, c p * c (p + 1)
   have h1 : 0 ≤ k ^ 2 * (sq - 1 / 2 - cr) := mul_nonneg hk2.le (by linarith)
   have h2 : 0 < (1 - k ^ 2) * (sq - 1 / 2) := mul_pos (by linarith) (by linarith)
-  cases t <;> simp only [LamePolyType.normForm, hc] <;> nlinarith
+  cases t <;> simp only [LamePolynomialType.normForm, hc] <;> nlinarith
 
 /-- Even and odd parts `(E_p, O_p)` of the Chebyshev-type sequence with
 `f₀ = e`, `f₁ = o X`, `f_{j+2} = 2X f_{j+1} - f_j`: `f_{2p}(s) = E_p(s²)`,
@@ -534,7 +541,7 @@ private lemma chebyshevU_eval_chebyshevParityPair (p : ℕ) (s : ℂ) :
     simp; ring
 
 /-- The polynomial `Q_p` with `basis_p(s) = s^ε Q_p(s²)` for the Lamé polynomial type `t`. -/
-def lameBasisSqPoly : LamePolyType → ℕ → ℝ[X]
+def lameBasisSqPoly : LamePolynomialType → ℕ → ℝ[X]
   | .uE, p => C (if p = 0 then 1 / 2 else 1) * (chebyshevParityPair 1 1 p).1
   | .dE, p => C (if p = 0 then 1 / 2 else 1) * (chebyshevParityPair 1 1 p).1
   | .sE, p => (chebyshevParityPair 1 1 p).2
@@ -545,7 +552,8 @@ def lameBasisSqPoly : LamePolyType → ℕ → ℝ[X]
   | .scdE, p => (chebyshevParityPair 1 2 p).2
 
 /-- The polynomial `Q_p` of each Lamé polynomial type has degree `p`. -/
-private lemma lameBasisSqPoly_degree (t : LamePolyType) (p : ℕ) : (lameBasisSqPoly t p).degree =
+private lemma lameBasisSqPoly_degree (t : LamePolynomialType) (p : ℕ) :
+    (lameBasisSqPoly t p).degree =
     p := by
   have hT := chebyshevParityPair_degree (e := 1) (o := 1) one_ne_zero one_ne_zero p
   have hU := chebyshevParityPair_degree (e := 1) (o := 2) one_ne_zero two_ne_zero p
@@ -554,30 +562,31 @@ private lemma lameBasisSqPoly_degree (t : LamePolyType) (p : ℕ) : (lameBasisSq
 
 /-- The Chebyshev basis function of type `t` is `basis_p(s) = s^ε Q_p(s²)`, with `ε = 1` for
 the types `sE, scE, sdE, scdE` and `ε = 0` otherwise. -/
-private lemma lamePolyType_basis_eq (t : LamePolyType) (p : ℕ) (s : ℂ) :
+private lemma lamePolynomialType_basis_eq (t : LamePolynomialType) (p : ℕ) (s : ℂ) :
     t.basis p s = (if t = .sE ∨ t = .scE ∨ t = .sdE ∨ t = .scdE then s else 1) *
       ((lameBasisSqPoly t p).map (algebraMap ℝ ℂ)).eval (s ^ 2) := by
   have hT := chebyshevT_eval_chebyshevParityPair p s
   have hU := chebyshevU_eval_chebyshevParityPair p s
   cases t <;> simp only
-      [LamePolyType.basis, lameBasisSqPoly, hT.1, hT.2, hU.1, hU.2, Polynomial.map_mul,
+      [LamePolynomialType.basis, lameBasisSqPoly, hT.1, hT.2, hU.1, hU.2, Polynomial.map_mul,
     map_C, eval_mul, eval_C, reduceCtorEq, or_false, or_true, ite_true, ite_false,
     one_mul] <;> split_ifs <;> simp
 
 /-- The top coefficient `c_n` of a Lamé polynomial is nonzero. -/
-private lemma lamePolyCoeff_last_ne_zero {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType)
-    {n m : ℕ} (hm : m ≤ n) : lamePolyCoeff t n m k n ≠ 0 := by
-  have hv := lameRecVec_last_ne_zero (lamePolyType_alpha_mul_gamma_pos hk0 t n)
-    (eval_lamePolyH_charpoly hk0 t hm)
-  have hN := lamePolyType_normForm_pos hk0 hk1 t n
-    (c := lameRecVec t.recurrence (t.order n) k (lamePolyH t n m k)) rfl
-  simp only [lamePolyCoeff, le_refl, ite_true]
+private lemma lamePolynomialCoeff_last_ne_zero {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1)
+    (t : LamePolynomialType)
+    {n m : ℕ} (hm : m ≤ n) : lamePolynomialCoeff t n m k n ≠ 0 := by
+  have hv := lameRecurrenceVector_last_ne_zero (lamePolynomialType_alpha_mul_gamma_pos hk0 t n)
+    (eval_lamePolynomialH_charpoly hk0 t hm)
+  have hN := lamePolynomialType_normForm_pos hk0 hk1 t n
+    (c := lameRecurrenceVector t.recurrence (t.order n) k (lamePolynomialH t n m k)) rfl
+  simp only [lamePolynomialCoeff, le_refl, ite_true]
   refine div_ne_zero (mul_ne_zero (by split_ifs <;> norm_num) hv) ?_
   exact (Real.sqrt_pos.mpr hN).ne'
 
 end PolynomialForm
 /-- Parity of the Chebyshev basis functions of Table 29.12.1 in `s = sn`. -/
-private lemma lamePolyType_basis_neg (t : LamePolyType) (p : ℕ) (s : ℂ) :
+private lemma lamePolynomialType_basis_neg (t : LamePolynomialType) (p : ℕ) (s : ℂ) :
     t.basis p (-s) =
       (if t = .sE ∨ t = .scE ∨ t = .sdE ∨ t = .scdE then -1 else 1) * t.basis p s := by
   have hT : ∀ j : ℕ, (Chebyshev.T ℂ (j : ℤ)).eval (-s) =
@@ -586,61 +595,62 @@ private lemma lamePolyType_basis_neg (t : LamePolyType) (p : ℕ) (s : ℂ) :
   have hU : ∀ j : ℕ, (Chebyshev.U ℂ (j : ℤ)).eval (-s) =
       (-1) ^ j * (Chebyshev.U ℂ (j : ℤ)).eval s := fun j => by
     rw [Chebyshev.U_eval_neg, Int.negOnePow_def, zpow_natCast]; push_cast; ring
-  cases t <;> simp only [LamePolyType.basis, hT, hU, pow_succ, pow_mul] <;> simp
+  cases t <;> simp only [LamePolynomialType.basis, hT, hU, pow_succ, pow_mul] <;> simp
 
 /-- How a Lamé polynomial transforms when `sn, cn, dn` are multiplied by constants
 `ε = ±1`, `a`, `b`. -/
-theorem lamePolyEk_of_jacobi_scale (t : LamePolyType) (n m : ℕ) {z z' : ℂ} {ε a b : ℂ}
-    (hε : ε = 1 ∨ ε = -1) (hs : jacobiSnk z' k = ε * jacobiSnk z k)
-    (hc : jacobiCnk z' k = a * jacobiCnk z k) (hd : jacobiDnk z' k = b * jacobiDnk z k) :
-    lamePolyEk t n m z' k =
+theorem lamePolynomialE_of_jacobi_scale (t : LamePolynomialType) (n m : ℕ) {z z' : ℂ} {ε a b : ℂ}
+    (hε : ε = 1 ∨ ε = -1) (hs : jacobiSn z' k = ε * jacobiSn z k)
+    (hc : jacobiCn z' k = a * jacobiCn z k) (hd : jacobiDn z' k = b * jacobiDn z k) :
+    lamePolynomialE t n m z' k =
       (if t = .sE ∨ t = .scE ∨ t = .sdE ∨ t = .scdE then ε else 1) *
         (if t = .cE ∨ t = .scE ∨ t = .cdE ∨ t = .scdE then a else 1) *
         (if t = .dE ∨ t = .sdE ∨ t = .cdE ∨ t = .scdE then b else 1) *
-        lamePolyEk t n m z k := by
-  have hsum : ∑ p ∈ Finset.range (n + 1), (lamePolyCoeff t n m k p : ℂ) *
-      t.basis p (jacobiSnk z' k) =
+        lamePolynomialE t n m z k := by
+  have hsum : ∑ p ∈ Finset.range (n + 1), (lamePolynomialCoeff t n m k p : ℂ) *
+      t.basis p (jacobiSn z' k) =
       (if t = .sE ∨ t = .scE ∨ t = .sdE ∨ t = .scdE then ε else 1) *
-      ∑ p ∈ Finset.range (n + 1), (lamePolyCoeff t n m k p : ℂ) * t.basis p (jacobiSnk z k) := by
+      ∑ p ∈ Finset.range (n + 1), (lamePolynomialCoeff t n m k p : ℂ) *
+          t.basis p (jacobiSn z k) := by
     rw [hs, Finset.mul_sum]
     refine Finset.sum_congr rfl fun p _ => ?_
     rcases hε with rfl | rfl
     · simp
-    · rw [neg_one_mul, lamePolyType_basis_neg]
+    · rw [neg_one_mul, lamePolynomialType_basis_neg]
       split_ifs <;> ring
-  rw [lamePolyEk, lamePolyEk, hsum]
-  cases t <;> simp [LamePolyType.prefactor, hc, hd] <;> ring
+  rw [lamePolynomialE, lamePolynomialE, hsum]
+  cases t <;> simp [LamePolynomialType.prefactor, hc, hd] <;> ring
 
 /-- The shift identities used for the periods and parities of Lamé polynomials. -/
-theorem jacobiSnk_cnk_dnk_add_periods (hk0 : 0 < k) (hk1 : k < 1) (z : ℂ) :
-    let K : ℂ := Real.compEllIntKm (k ^ 2)
-    let K' : ℂ := Real.compEllIntKm (1 - k ^ 2)
-    (jacobiSnk (z + 2 * K) k = -jacobiSnk z k ∧ jacobiCnk (z + 2 * K) k = -jacobiCnk z k ∧
-      jacobiDnk (z + 2 * K) k = jacobiDnk z k) ∧
-    (jacobiSnk (z + 2 * I * K') k = jacobiSnk z k ∧
-      jacobiCnk (z + 2 * I * K') k = -jacobiCnk z k ∧
-      jacobiDnk (z + 2 * I * K') k = -jacobiDnk z k) ∧
-    (jacobiSnk (-z) k = -jacobiSnk z k ∧ jacobiCnk (-z) k = jacobiCnk z k ∧
-      jacobiDnk (-z) k = jacobiDnk z k) ∧
-    (jacobiSnk (K - z) k = jacobiSnk (K + z) k ∧ jacobiCnk (K - z) k = -jacobiCnk (K + z) k ∧
-      jacobiDnk (K - z) k = jacobiDnk (K + z) k) ∧
-    (jacobiSnk (K + I * K' - z) k = jacobiSnk (K + I * K' + z) k ∧
-      jacobiCnk (K + I * K' - z) k = jacobiCnk (K + I * K' + z) k ∧
-      jacobiDnk (K + I * K' - z) k = -jacobiDnk (K + I * K' + z) k) := by
+theorem jacobiSn_cnk_dnk_add_periods (hk0 : 0 < k) (hk1 : k < 1) (z : ℂ) :
+    let K : ℂ := Real.completeEllipticKOfParameter (k ^ 2)
+    let K' : ℂ := Real.completeEllipticKOfParameter (1 - k ^ 2)
+    (jacobiSn (z + 2 * K) k = -jacobiSn z k ∧ jacobiCn (z + 2 * K) k = -jacobiCn z k ∧
+      jacobiDn (z + 2 * K) k = jacobiDn z k) ∧
+    (jacobiSn (z + 2 * I * K') k = jacobiSn z k ∧
+      jacobiCn (z + 2 * I * K') k = -jacobiCn z k ∧
+      jacobiDn (z + 2 * I * K') k = -jacobiDn z k) ∧
+    (jacobiSn (-z) k = -jacobiSn z k ∧ jacobiCn (-z) k = jacobiCn z k ∧
+      jacobiDn (-z) k = jacobiDn z k) ∧
+    (jacobiSn (K - z) k = jacobiSn (K + z) k ∧ jacobiCn (K - z) k = -jacobiCn (K + z) k ∧
+      jacobiDn (K - z) k = jacobiDn (K + z) k) ∧
+    (jacobiSn (K + I * K' - z) k = jacobiSn (K + I * K' + z) k ∧
+      jacobiCn (K + I * K' - z) k = jacobiCn (K + I * K' + z) k ∧
+      jacobiDn (K + I * K' - z) k = -jacobiDn (K + I * K' + z) k) := by
   intro K K'
   have hkD : (k : ℂ) ∈ jacobiModulusDomain := ofReal_mem_jacobiModulusDomain hk0 hk1
-  have hK : compEllIntKk (k : ℂ) = K := compEllIntKk_ofReal (by nlinarith)
-  have hK' : compEllIntKpk (k : ℂ) = K' := compEllIntKpk_ofReal (by positivity)
-  have neg : ∀ w : ℂ, jacobiSnk (-w) k = -jacobiSnk w k ∧ jacobiCnk (-w) k = jacobiCnk w k ∧
-      jacobiDnk (-w) k = jacobiDnk w k ∧ jacobiCdk (-w) k = jacobiCdk w k ∧
-      jacobiSdk (-w) k = -jacobiSdk w k ∧ jacobiNdk (-w) k = jacobiNdk w k ∧
-      jacobiDck (-w) k = jacobiDck w k ∧ jacobiNck (-w) k = jacobiNck w k ∧
-      jacobiSck (-w) k = -jacobiSck w k := fun w => by
-    simp [jacobiSnk, jacobiCnk, jacobiDnk, jacobiCdk, jacobiSdk, jacobiNdk, jacobiDck, jacobiNck,
-      jacobiSck, jacobiPQk_neg]
-  have sn := jacobiSnk_shift hkD
-  have cn := jacobiCnk_shift hkD
-  have dn := jacobiDnk_shift hkD
+  have hK : completeEllipticK (k : ℂ) = K := completeEllipticK_ofReal (by nlinarith)
+  have hK' : completeEllipticKPrime (k : ℂ) = K' := completeEllipticKPrime_ofReal (by positivity)
+  have neg : ∀ w : ℂ, jacobiSn (-w) k = -jacobiSn w k ∧ jacobiCn (-w) k = jacobiCn w k ∧
+      jacobiDn (-w) k = jacobiDn w k ∧ jacobiCd (-w) k = jacobiCd w k ∧
+      jacobiSd (-w) k = -jacobiSd w k ∧ jacobiNd (-w) k = jacobiNd w k ∧
+      jacobiDc (-w) k = jacobiDc w k ∧ jacobiNc (-w) k = jacobiNc w k ∧
+      jacobiSc (-w) k = -jacobiSc w k := fun w => by
+    simp [jacobiSn, jacobiCn, jacobiDn, jacobiCd, jacobiSd, jacobiNd, jacobiDc, jacobiNc,
+      jacobiSc, jacobiPQ_neg]
+  have sn := jacobiSn_shift hkD
+  have cn := jacobiCn_shift hkD
+  have dn := jacobiDn_shift hkD
   rw [hK, hK'] at sn cn dn
   have e1 : ∀ w : ℂ, w + 2 * I * K' = w + 2 * (I * K') := fun w => by ring
   have e2 : K - z = -z + K := by ring
@@ -660,14 +670,14 @@ theorem jacobiSnk_cnk_dnk_add_periods (hk0 : 0 < k) (hk1 : k < 1) (z : ℂ) :
 
 /-- The polynomial `P` of the algebraic form 29.12.9 of the Lamé polynomial of type `t`:
 `P = ∑_p c_p Q_p`, so that the Chebyshev series `∑_p c_p basis_p(s)` is `s^ε P(s²)`. -/
-def lameSqPoly (t : LamePolyType) (n m : ℕ) (k : ℝ) : ℝ[X] :=
-  ∑ p ∈ Finset.range (n + 1), C (lamePolyCoeff t n m k p) * lameBasisSqPoly t p
+def lameSqPoly (t : LamePolynomialType) (n m : ℕ) (k : ℝ) : ℝ[X] :=
+  ∑ p ∈ Finset.range (n + 1), C (lamePolynomialCoeff t n m k p) * lameBasisSqPoly t p
 
 /-- The polynomial `lameSqPoly t n m k` has degree `n`. -/
-theorem degree_lameSqPoly (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType) {n m : ℕ}
+theorem degree_lameSqPoly (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolynomialType) {n m : ℕ}
     (hm : m ≤ n) : (lameSqPoly t n m k).degree = n := by
-  set c := lamePolyCoeff t n m k
-  have hcn : c n ≠ 0 := lamePolyCoeff_last_ne_zero hk0 hk1 t hm
+  set c := lamePolynomialCoeff t n m k
+  have hcn : c n ≠ 0 := lamePolynomialCoeff_last_ne_zero hk0 hk1 t hm
   rw [lameSqPoly, Finset.sum_range_succ]
   have htop : (C (c n) * lameBasisSqPoly t n).degree = n := by
     rw [degree_C_mul hcn, lameBasisSqPoly_degree]
@@ -683,24 +693,25 @@ theorem degree_lameSqPoly (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType) {n m : 
 
 /-- The Chebyshev series of type `t` is `s^ε P(s²)` with `P = lameSqPoly t n m k`, where
 `ε = 1` for the types `sE, scE, sdE, scdE` and `ε = 0` otherwise. -/
-theorem sum_lamePolyCoeff_mul_basis (t : LamePolyType) (n m : ℕ) (k : ℝ) (s : ℂ) :
-    ∑ p ∈ Finset.range (n + 1), (lamePolyCoeff t n m k p : ℂ) * t.basis p s =
+theorem sum_lamePolynomialCoeff_mul_basis (t : LamePolynomialType) (n m : ℕ) (k : ℝ) (s : ℂ) :
+    ∑ p ∈ Finset.range (n + 1), (lamePolynomialCoeff t n m k p : ℂ) * t.basis p s =
       (if t = .sE ∨ t = .scE ∨ t = .sdE ∨ t = .scdE then s else 1) *
         ((lameSqPoly t n m k).map (algebraMap ℝ ℂ)).eval (s ^ 2) := by
-  simp only [lameSqPoly, lamePolyType_basis_eq, Polynomial.map_sum, Polynomial.map_mul, map_C,
+  simp only [lameSqPoly, lamePolynomialType_basis_eq, Polynomial.map_sum, Polynomial.map_mul, map_C,
     eval_finsetSum, eval_mul, eval_C, Finset.mul_sum]
   refine Finset.sum_congr rfl fun p _ => ?_
   split_ifs <;> simp; ring
 
 /-- The polynomial form with `deg P = n` (in particular `P ≠ 0`). -/
-theorem lamePolyEk_eq_prefactor_mul_eval (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType) {n m : ℕ}
+theorem lamePolynomialE_eq_prefactor_mul_eval (hk0 : 0 < k) (hk1 : k < 1)
+    (t : LamePolynomialType) {n m : ℕ}
     (hm : m ≤ n) :
     ∃ P : ℝ[X], P.degree = n ∧ ∀ z : ℂ,
-      lamePolyEk t n m z k = t.prefactor z k *
-        (if t = .sE ∨ t = .scE ∨ t = .sdE ∨ t = .scdE then jacobiSnk z k else 1) *
-        (P.map (algebraMap ℝ ℂ)).eval (jacobiSnk z k ^ 2) :=
+      lamePolynomialE t n m z k = t.prefactor z k *
+        (if t = .sE ∨ t = .scE ∨ t = .sdE ∨ t = .scdE then jacobiSn z k else 1) *
+        (P.map (algebraMap ℝ ℂ)).eval (jacobiSn z k ^ 2) :=
   ⟨lameSqPoly t n m k, degree_lameSqPoly hk0 hk1 t hm, fun z => by
-    rw [lamePolyEk, mul_assoc, sum_lamePolyCoeff_mul_basis]⟩
+    rw [lamePolynomialE, mul_assoc, sum_lamePolynomialCoeff_mul_basis]⟩
 
 /-- Table 29.12.1, polynomial form: each Lamé polynomial of type `t` is
 `sn^a cn^b dn^c P(sn²)` with `P` a polynomial of degree `n`, where `sn`, `cn`, `dn` occur as
@@ -710,47 +721,47 @@ function of `z`. Proved from 29.15.3: the eigenvector of the eigenvalue `H_m` ha
 entry, and `T_{2p}`, `T_{2p+1}/s`, `U_{2p}`, `U_{2p+1}/s` are polynomials of degree `p` in
 `s²`. -/
 @[dlmf 29.12.T1, dlmf 29.12.i]
-theorem lamePolyEk_polynomial_form (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType)
+theorem lamePolynomialE_polynomial_form (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolynomialType)
     {n m : ℕ} (hm : m ≤ n) :
     ∃ P : ℝ[X], P.natDegree = n ∧ ∀ z : ℂ,
-      lamePolyEk t n m z k = t.prefactor z k *
-        (if t = .sE ∨ t = .scE ∨ t = .sdE ∨ t = .scdE then jacobiSnk z k else 1) *
-        (P.map (algebraMap ℝ ℂ)).eval (jacobiSnk z k ^ 2) := by
-  obtain ⟨P, hP, hE⟩ := lamePolyEk_eq_prefactor_mul_eval hk0 hk1 t hm
+      lamePolynomialE t n m z k = t.prefactor z k *
+        (if t = .sE ∨ t = .scE ∨ t = .sdE ∨ t = .scdE then jacobiSn z k else 1) *
+        (P.map (algebraMap ℝ ℂ)).eval (jacobiSn z k ^ 2) := by
+  obtain ⟨P, hP, hE⟩ := lamePolynomialE_eq_prefactor_mul_eval hk0 hk1 t hm
   exact ⟨P, natDegree_eq_of_degree_eq_some hP, hE⟩
 
 /-- Table 29.12.1, periods: the real period of the Lamé polynomial is `2K` for
 `uE, dE, scE` and `4K` otherwise (`w(z + rK) = w(z)` with `r = 2` resp. `4`), and its
 imaginary period is `2iK'` for `uE, sE` and `4iK'` otherwise. Proved from Table 22.4.3. -/
 @[dlmf 29.12.T1]
-theorem lamePolyEk_periods (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType) (n m : ℕ)
+theorem lamePolynomialE_periods (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolynomialType) (n m : ℕ)
     (z : ℂ) :
-    lamePolyEk t n m (z + (if t = .uE ∨ t = .dE ∨ t = .scE then 2 else 4) *
-        Real.compEllIntKm (k ^ 2)) k = lamePolyEk t n m z k ∧
-      lamePolyEk t n m (z + (if t = .uE ∨ t = .sE then 2 else 4) * I *
-        Real.compEllIntKm (1 - k ^ 2)) k = lamePolyEk t n m z k := by
-  set K : ℂ := ((Real.compEllIntKm (k ^ 2) : ℝ) : ℂ)
-  set K' : ℂ := ((Real.compEllIntKm (1 - k ^ 2) : ℝ) : ℂ)
-  have h2 : ∀ w, lamePolyEk t n m (w + 2 * K) k =
+    lamePolynomialE t n m (z + (if t = .uE ∨ t = .dE ∨ t = .scE then 2 else 4) *
+        Real.completeEllipticKOfParameter (k ^ 2)) k = lamePolynomialE t n m z k ∧
+      lamePolynomialE t n m (z + (if t = .uE ∨ t = .sE then 2 else 4) * I *
+        Real.completeEllipticKOfParameter (1 - k ^ 2)) k = lamePolynomialE t n m z k := by
+  set K : ℂ := ((Real.completeEllipticKOfParameter (k ^ 2) : ℝ) : ℂ)
+  set K' : ℂ := ((Real.completeEllipticKOfParameter (1 - k ^ 2) : ℝ) : ℂ)
+  have h2 : ∀ w, lamePolynomialE t n m (w + 2 * K) k =
       (if t = .sE ∨ t = .scE ∨ t = .sdE ∨ t = .scdE then -1 else 1) *
         (if t = .cE ∨ t = .scE ∨ t = .cdE ∨ t = .scdE then -1 else 1) *
-        (if t = .dE ∨ t = .sdE ∨ t = .cdE ∨ t = .scdE then 1 else 1) * lamePolyEk t n m w k :=
-    fun w => lamePolyEk_of_jacobi_scale t n m (Or.inr rfl)
-      (by rw [(jacobiSnk_cnk_dnk_add_periods hk0 hk1 w).1.1]; ring)
-          (by rw [(jacobiSnk_cnk_dnk_add_periods hk0 hk1 w).1.2.1]; ring)
-      (by rw [(jacobiSnk_cnk_dnk_add_periods hk0 hk1 w).1.2.2]; ring)
-  have h2i : ∀ w, lamePolyEk t n m (w + 2 * I * K') k =
+        (if t = .dE ∨ t = .sdE ∨ t = .cdE ∨ t = .scdE then 1 else 1) * lamePolynomialE t n m w k :=
+    fun w => lamePolynomialE_of_jacobi_scale t n m (Or.inr rfl)
+      (by rw [(jacobiSn_cnk_dnk_add_periods hk0 hk1 w).1.1]; ring)
+          (by rw [(jacobiSn_cnk_dnk_add_periods hk0 hk1 w).1.2.1]; ring)
+      (by rw [(jacobiSn_cnk_dnk_add_periods hk0 hk1 w).1.2.2]; ring)
+  have h2i : ∀ w, lamePolynomialE t n m (w + 2 * I * K') k =
       (if t = .sE ∨ t = .scE ∨ t = .sdE ∨ t = .scdE then 1 else 1) *
         (if t = .cE ∨ t = .scE ∨ t = .cdE ∨ t = .scdE then -1 else 1) *
-        (if t = .dE ∨ t = .sdE ∨ t = .cdE ∨ t = .scdE then -1 else 1) * lamePolyEk t n m w k :=
-    fun w => lamePolyEk_of_jacobi_scale t n m (Or.inl rfl)
-      (by rw [(jacobiSnk_cnk_dnk_add_periods hk0 hk1 w).2.1.1]; ring)
-          (by rw [(jacobiSnk_cnk_dnk_add_periods hk0 hk1 w).2.1.2.1]; ring)
-      (by rw [(jacobiSnk_cnk_dnk_add_periods hk0 hk1 w).2.1.2.2]; ring)
-  have h4 : lamePolyEk t n m (z + 4 * K) k = lamePolyEk t n m z k := by
+        (if t = .dE ∨ t = .sdE ∨ t = .cdE ∨ t = .scdE then -1 else 1) * lamePolynomialE t n m w k :=
+    fun w => lamePolynomialE_of_jacobi_scale t n m (Or.inl rfl)
+      (by rw [(jacobiSn_cnk_dnk_add_periods hk0 hk1 w).2.1.1]; ring)
+          (by rw [(jacobiSn_cnk_dnk_add_periods hk0 hk1 w).2.1.2.1]; ring)
+      (by rw [(jacobiSn_cnk_dnk_add_periods hk0 hk1 w).2.1.2.2]; ring)
+  have h4 : lamePolynomialE t n m (z + 4 * K) k = lamePolynomialE t n m z k := by
     rw [show z + 4 * K = z + 2 * K + 2 * K by ring, h2, h2]
     cases t <;> simp
-  have h4i : lamePolyEk t n m (z + 4 * I * K') k = lamePolyEk t n m z k := by
+  have h4i : lamePolynomialE t n m (z + 4 * I * K') k = lamePolynomialE t n m z k := by
     rw [show z + 4 * I * K' = z + 2 * I * K' + 2 * I * K' by ring, h2i, h2i]
     cases t <;> simp
   constructor
@@ -762,28 +773,32 @@ theorem lamePolyEk_periods (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType) (n m :
 `w(K + iK' - z) = ±w(K + iK' + z)` with `-` exactly for a factor `dn`. Proved from
 Table 22.4.3 and the parities of `sn, cn, dn` and of the Chebyshev polynomials. -/
 @[dlmf 29.12.T1]
-theorem lamePolyEk_parities (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType) (n m : ℕ)
+theorem lamePolynomialE_parities (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolynomialType) (n m : ℕ)
     (z : ℂ) :
-    lamePolyEk t n m (-z) k =
-        (if t = .sE ∨ t = .scE ∨ t = .sdE ∨ t = .scdE then -1 else 1) * lamePolyEk t n m z k ∧
-      lamePolyEk t n m (Real.compEllIntKm (k ^ 2) - z) k =
+    lamePolynomialE t n m (-z) k =
+        (if t = .sE ∨ t = .scE ∨ t = .sdE ∨ t = .scdE then -1 else 1) * lamePolynomialE t n m z k ∧
+      lamePolynomialE t n m (Real.completeEllipticKOfParameter (k ^ 2) - z) k =
         (if t = .cE ∨ t = .scE ∨ t = .cdE ∨ t = .scdE then -1 else 1) *
-          lamePolyEk t n m (Real.compEllIntKm (k ^ 2) + z) k ∧
-      lamePolyEk t n m (Real.compEllIntKm (k ^ 2) + I * Real.compEllIntKm (1 - k ^ 2) - z) k =
+          lamePolynomialE t n m (Real.completeEllipticKOfParameter (k ^ 2) + z) k ∧
+      lamePolynomialE t n m
+          (Real.completeEllipticKOfParameter (k ^ 2) + I *
+          Real.completeEllipticKOfParameter (1 - k ^ 2) - z) k =
         (if t = .dE ∨ t = .sdE ∨ t = .cdE ∨ t = .scdE then -1 else 1) *
-          lamePolyEk t n m (Real.compEllIntKm (k ^ 2) + I * Real.compEllIntKm (1 - k ^ 2) + z) k
+          lamePolynomialE t n m
+              (Real.completeEllipticKOfParameter (k ^ 2) + I *
+              Real.completeEllipticKOfParameter (1 - k ^ 2) + z) k
       := by
-  obtain ⟨-, -, h1, h2, h3⟩ := jacobiSnk_cnk_dnk_add_periods hk0 hk1 z
+  obtain ⟨-, -, h1, h2, h3⟩ := jacobiSn_cnk_dnk_add_periods hk0 hk1 z
   refine ⟨?_, ?_, ?_⟩
-  · rw [lamePolyEk_of_jacobi_scale t n m (z' := -z) (z := z) (ε := -1) (a := 1) (b := 1)
+  · rw [lamePolynomialE_of_jacobi_scale t n m (z' := -z) (z := z) (ε := -1) (a := 1) (b := 1)
         (Or.inr rfl)
       (by rw [h1.1]; ring) (by rw [h1.2.1]; ring) (by rw [h1.2.2]; ring)]
     cases t <;> simp
-  · rw [lamePolyEk_of_jacobi_scale t n m (z' := _ - z) (z := _ + z) (ε := 1) (a := -1) (b := 1)
+  · rw [lamePolynomialE_of_jacobi_scale t n m (z' := _ - z) (z := _ + z) (ε := 1) (a := -1) (b := 1)
       (Or.inl rfl)
       (by rw [h2.1]; ring) (by rw [h2.2.1]; ring) (by rw [h2.2.2]; ring)]
     cases t <;> simp
-  · rw [lamePolyEk_of_jacobi_scale t n m (z' := _ - z) (z := _ + z) (ε := 1) (a := 1)
+  · rw [lamePolynomialE_of_jacobi_scale t n m (z' := _ - z) (z := _ + z) (ε := 1) (a := 1)
       (b := -1) (Or.inl rfl)
       (by rw [h3.1]; ring) (by rw [h3.2.1]; ring) (by rw [h3.2.2]; ring)]
     cases t <;> simp

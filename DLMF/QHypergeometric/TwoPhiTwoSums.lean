@@ -167,9 +167,10 @@ theorem two_phi_two_sum {a b q : ℂ} (ha : a≠0) (hq : ‖q‖<1) (hd : QDenom
       show -a*(x/a) = -x by field_simp] at hJ
     have hsum : qPhi [a,-a] [-q] q (x/a) =
         qPochhammerInf (a*x) (q^2)/qPochhammerInf (x/a) (q^2) := by
-      rw [qPhi_eq_basicHG (by simp), show a*x = a^2*(x/a) by field_simp,
+      rw [qPhi_eq_basicHypergeometric (by simp), show a*x = a^2*(x/a) by field_simp,
         q_binomial_theorem hQ hxa]
-      simp only [basicHG, List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one]
+      simp only [basicHypergeometric, List.map_cons, List.map_nil, List.prod_cons,
+          List.prod_nil, mul_one]
       refine tsum_congr fun n => ?_
       rw [qPochhammer_squared, qPochhammer_squared]
       ring

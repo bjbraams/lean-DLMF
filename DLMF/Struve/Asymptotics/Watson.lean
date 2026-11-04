@@ -368,13 +368,14 @@ theorem struveK_eq_struveKRotated (ν : ℂ) {α : ℝ} (hα : |α| < π / 2) {z
   exact hU.eqOn_of_preconnected_of_eventuallyEq hV hHc.isPreconnected hzsH hev hz
 
 /-- `(a)(a-1)⋯(a-k+1)/Γ(a+1) = 1/Γ(a+1-k)`. -/
-theorem neg_one_pow_mul_poch_mul_recip_Gamma (a : ℂ) (k : ℕ) :
-    (Gamma (a + 1))⁻¹ * ((-1) ^ k * poch (-a) k) = (Gamma (a + 1 - k))⁻¹ := by
+theorem neg_one_pow_mul_pochhammer_mul_recip_Gamma (a : ℂ) (k : ℕ) :
+    (Gamma (a + 1))⁻¹ * ((-1) ^ k * pochhammer (-a) k) = (Gamma (a + 1 - k))⁻¹ := by
   induction k with
-  | zero => simp [poch]
+  | zero => simp [pochhammer]
   | succ k ih =>
-    rw [poch_succ, pow_succ, show (Gamma (a + 1))⁻¹ * ((-1) ^ k * (-1) * (poch (-a) k * (-a + k)))
-      = (Gamma (a + 1))⁻¹ * ((-1) ^ k * poch (-a) k) * (a - k) by ring, ih,
+    rw [pochhammer_succ, pow_succ, show (Gamma (a + 1))⁻¹ *
+        ((-1) ^ k * (-1) * (pochhammer (-a) k * (-a + k)))
+      = (Gamma (a + 1))⁻¹ * ((-1) ^ k * pochhammer (-a) k) * (a - k) by ring, ih,
       Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (a + 1 - ((k + 1 : ℕ) : ℂ))]
     push_cast
     rw [show a + 1 - (k + 1) + 1 = a + 1 - k by ring]
@@ -400,9 +401,9 @@ theorem struveK_coeff_eq (ν : ℂ) {z : ℂ} (hz : z ≠ 0) (k : ℕ) :
       ((z ^ (2 * k + 1))⁻¹ * (Gamma (((2 * k : ℕ) : ℂ) + 1) * Ring.choose (ν - 1 / 2) k)) =
       struveAsymptoticTerm ν z k := by
   have hz2 : z / 2 ≠ 0 := div_ne_zero hz two_ne_zero
-  have hch : Ring.choose (ν - 1 / 2) k = (-1) ^ k * poch (-(ν - 1 / 2)) k / k ! := by
-    rw [← ring_choose_neg_eq_poch, neg_neg]
-  have hG := neg_one_pow_mul_poch_mul_recip_Gamma (ν - 1 / 2) k
+  have hch : Ring.choose (ν - 1 / 2) k = (-1) ^ k * pochhammer (-(ν - 1 / 2)) k / k ! := by
+    rw [← ring_choose_neg_eq_pochhammer, neg_neg]
+  have hG := neg_one_pow_mul_pochhammer_mul_recip_Gamma (ν - 1 / 2) k
   rw [show ν - 1 / 2 + 1 = ν + 1 / 2 by ring] at hG
   have hH := Gamma_nat_add_half_mul k
   have hpow : (z / 2) ^ (ν - 2 * k - 1) = (z / 2) ^ ν * 2 ^ (2 * k + 1) * (z ^ (2 * k + 1))⁻¹ := by

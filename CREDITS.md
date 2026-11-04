@@ -83,7 +83,7 @@ Targets and proof routes follow D. Duverney, *An Introduction to Hypergeometric 
 ## Gap pass, Temme Chapters 8, 9, 11, 12 (2026-10-16)
 
 Legendre: Neumann's integral uses Mathlib's `HasDerivAt.clog_real` and the project's
-`legendre_orthogonality` and `legendrePolyP_recurrence`. The integer Wronskian uses
+`legendre_orthogonality` and `legendrePolynomialP_recurrence`. The integer Wronskian uses
 `IsOpen.is_const_of_deriv_eq_zero`. Bessel zeros (Sturm comparison after Watson §15.6) use
 `strictMonoOn_of_deriv_pos`, `IsClosed.csInf_mem` and `intermediate_value_Icc'`. The continued fraction for
 `Γ(a,x)` uses Mathlib's `GenContFract` recurrences (`nums_recurrence`, `dens_recurrence`) and
@@ -104,10 +104,10 @@ form of the incomplete Beta function uses the project's Euler integral
 
 The proof routes follow N. M. Temme, *Special Functions* (Wiley, 1996), Chapters 8, 11 and 12,
 and the DLMF, Chapters 8, 14, 19, 20 and 22. The Legendre functions are built on the project's
-cut-plane continuation `regularizedGaussHG` and its contiguous relations, Gauss's second summation and
+cut-plane continuation `regularizedGaussHypergeometric` and its contiguous relations, Gauss's second summation and
 quadratic transformations, Pfaff's transformation, and Mathlib's `binomialSeries` /
 `ordinaryHypergeometric` API. The statistical functions bridge to and reuse TauCeti's
-`regularizedGamma`, `lowerIncGamma_eq_integral`, `regularizedIncompleteBeta` and
+`regularizedGamma`, `lowerIncompleteGamma_eq_integral`, `regularizedIncompleteBeta` and
 `sum_Icc_choose_mul_pow_eq_regularizedIncompleteBeta`, and Mathlib's `Complex.betaIntegral` API,
 `integral_cpow` and `MeasureTheory.integral_tsum_of_summable_integral_norm`. The elliptic functions
 use Mathlib's `NNReal.agm` and `agmSequences` lemmas, `jacobiTheta₂` with its functional equation,
@@ -289,7 +289,7 @@ The affected module headers also credit the imported work.
   the real `erf` and `erfc` APIs, identified with the project's complex functions on real inputs.
 - [Hermite Fourier transform](https://github.com/TauCetiProject/TauCeti/blob/a780c7ad6beb23f60a17351a492d177878020ad5/TauCeti/Analysis/SpecialFunctions/Hermite/Function/Fourier/Basic.lean):
   `fourier_twoPiHermiteFunction` supplies the upstream eigenfunction theorem for
-  the now-proved `hermitePolyH_fourier_eigenfunction` and `hermite_fourier_eigenfunction`.
+  the now-proved `hermitePolynomialH_fourier_eigenfunction` and `hermite_fourier_eigenfunction`.
   Local adapters account for the Fourier phase, dilation and polynomial normalization.
 - [Polynomial completeness](https://github.com/TauCetiProject/TauCeti/blob/a780c7ad6beb23f60a17351a492d177878020ad5/TauCeti/Analysis/InnerProductSpace/PolynomialCompleteness.lean)
   and [weighted orthogonal bases](https://github.com/TauCetiProject/TauCeti/blob/a780c7ad6beb23f60a17351a492d177878020ad5/TauCeti/Analysis/InnerProductSpace/WeightedOrthogonalBasis.lean):
@@ -727,7 +727,7 @@ Abel/Wronskian argument to the already proved modified Bessel Wronskian.
 
 Mathlib's `Complex.hasSum_taylorSeries_of_entire` supplies the repeated-erfc
 Taylor sum. The coefficient evaluation uses the project's proved
-`pcfU_iterated_deriv_10` and `pcfU_zero`; it does not cancel a Gamma factor at
+`parabolicCylinderU_iterated_deriv_10` and `parabolicCylinderU_zero`; it does not cancel a Gamma factor at
 an exceptional parameter. The Fresnel primitive adapter uses
 `Complex.hasSum_cos`, `Complex.hasSum_sin`,
 `intervalIntegral.hasSum_integral_of_dominated_convergence`,
@@ -756,7 +756,7 @@ The P order recurrences reuse proved regularized Gauss contiguous identities.
 
 The regularized quadratic connection reuses the project's proved ordinary
 quadratic formula and
-`DLMF.Hypergeometric.analyticOnNhd_regularizedGaussHGFun_comp`, with the proved
+`DLMF.Hypergeometric.analyticOnNhd_regularizedGaussHypergeometricFun_comp`, with the proved
 `Complex.eq_of_differentiable_of_eqOn_pos_reals` adapter. Mathlib's
 `Complex.differentiable_one_div_Gamma`, `Complex.Gamma_mul_Gamma_one_sub` and
 positive-real logarithm identities supply the normalization and exceptional
@@ -767,7 +767,7 @@ The lower-Gamma parameter proof uses the project's
 `analyticAt_regularizedConfluent_comp` and Mathlib's reciprocal-Gamma
 analyticity. Logarithmic monodromy uses
 `Complex.exp_int_mul_two_pi_mul_I`. The lower trigonometric bridge uses the
-proved `scIncGamma_hasSum_alternating`, the previously established factorial
+proved `tricomiIncompleteGamma_hasSum_alternating`, the previously established factorial
 decay bound and Mathlib's `HasSum.even_add_odd`.
 
 No dependency was added and no TauCeti source was copied or adapted. Existing
@@ -825,7 +825,7 @@ The branch-free form `regularizedHGFun_eq_besselExpansion` and the corrected Bes
 Mathlib's formal power series derivative (`PowerSeries.derivative`) and
 `PowerSeries.exp_mul_exp_eq_exp_add`, and the project's Neumann-series coefficient bounds
 (`exists_norm_regularized0F1Coeff_le`, `exists_norm_recip_Gamma_add_nat_le`,
-`norm_poch_le_factorial_mul_exp`). The telescoping certificate was found by hand after a sympy
+`norm_pochhammer_le_factorial_mul_exp`). The telescoping certificate was found by hand after a sympy
 ansatz.
 
 ## Reciprocal-Gamma strengthening (2026-10-21)
@@ -1150,8 +1150,8 @@ derivative rules and improper fundamental theorem. Complete trig/hyperbolic fibe
 use Mathlib's sine/cosine equality and period APIs. Branch-set corrections use
 explicit logarithm lifts and paired sinh/cosh identities, with no parameter loss.
 
-Chapter 16 finite inversions reuse the proved local `poch_one_sub_sub_mul` and
-`poch_ne_zero_of_le`, plus Mathlib's
+Chapter 16 finite inversions reuse the proved local `pochhammer_one_sub_sub_mul` and
+`pochhammer_ne_zero_of_le`, plus Mathlib's
 `Nat.descFactorial_eq_factorial_mul_choose`. The integer-index Gamma bridge
 extends `Complex.Gamma_add_nat_div_Gamma_eq`, handling shifted poles explicitly.
 Odd Dixon follows from finite inversion; normalized bilateral Dougall reuses the
@@ -1649,7 +1649,7 @@ arcsine series uses lean-codes’
 The latter imports the proved pinned TauCeti binomial-series result. Absolute
 summability at the boundary reuses the project’s proved
 `DLMF.Hypergeometric.ordinaryHypergeometric_summable_of_mem_sphere` and
-`poch_three_halves_eq`; Mathlib’s `continuousOn_tsum` and `EqOn.of_subset_closure`
+`pochhammer_three_halves_eq`; Mathlib’s `continuousOn_tsum` and `EqOn.of_subset_closure`
 extend the identity to the closed unit disk. The even-series primitive adapter and
 principal-branch continuity lemma are original adapters to Mathlib’s APIs. The arccosine
 series on its shifted closed disk follows from the half-angle identity and the proved
@@ -1827,3 +1827,25 @@ Gauss's transformation 19.8.18–19.8.19 (`incEllInt_gauss`,
 `Carlson.carlsonRF_landen` and `Carlson.carlsonRG_landen` of lean-codes. The Abel means of Fourier
 integrals in `DLMF/AlgebraicAnalytic/Summability/Integrals.lean` use TauCeti's
 `TauCeti.Analysis.Fourier.ExpNegAbs`. No external proof body was copied.
+
+## Proof round 6 of 2026-11-03
+
+The quintuple product 17.8.3 (`DLMF/QHypergeometric/QuintupleProduct.lean`) takes its four base
+cases from Mathlib's pentagonal number theorem (`Mathlib.Combinatorics.Enumerative.Pentagonal`).
+The `L¹` approximate identity in `DLMFMathlib/MeasureTheory/Integral/ApproximateIdentity.lean`
+uses TauCeti's `TauCeti.MeasureTheory.Function.Lp.Translation`. The real form of 20.9.3
+(`symmetricEllipticRF_jacobiTheta`) uses the Carlson `R_F` of lean-codes. Apéry's series 25.6.9 follows
+the telescoping argument of A. van der Poorten, *A proof that Euler missed*, Math. Intelligencer
+1 (1979); Perron's and Pincherle's theorems in
+`DLMFMathlib/Analysis/SpecificLimits/PoincarePerron.lean` follow the classical proofs. No
+external proof body was copied.
+
+## Proof round 7 of 2026-11-03
+
+The variation formula 1.4.34 (`eVariationOn_eq_integral_norm_deriv`) uses TauCeti's metric
+derivative (`TauCeti.MeasureTheory.Function.MetricDerivative.Variation`). The convergence of the
+incomplete-Beta continued fraction 8.17.22 uses Perron's and Pincherle's theorems from the
+previous round. The 3j and 6j recursions and the Heun kernel identities were found with sympy and
+checked by `ring`. The bound 14.15.1 uses `isBigO_gaussHypergeometricCoeff` of the Carlson development of
+lean-codes, and 17.7.23 uses Mathlib's Lagrange interpolation (`Lagrange.coeff_eq_sum`). No
+external proof body was copied.

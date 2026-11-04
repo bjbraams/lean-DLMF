@@ -18,8 +18,8 @@ Legendre's complete elliptic integral of the first kind `K(k)` and its complemen
 
 ## Main definitions
 
-* `compEllIntKk`: `K(k) = ∫₀^{π/2} (1 - k² sin²θ)^{-1/2} dθ` (DLMF 19.2.8).
-* `compEllIntKpk`: `K'(k) = ∫₀^{π/2} (1 - (1 - k²) sin²θ)^{-1/2} dθ` (DLMF 19.2.9).
+* `completeEllipticK`: `K(k) = ∫₀^{π/2} (1 - k² sin²θ)^{-1/2} dθ` (DLMF 19.2.8).
+* `completeEllipticKPrime`: `K'(k) = ∫₀^{π/2} (1 - (1 - k²) sin²θ)^{-1/2} dθ` (DLMF 19.2.9).
 
 ## Implementation notes
 
@@ -43,13 +43,13 @@ namespace DLMF.EllipticIntegrals
 `K(k) = ∫₀^{π/2} (1 - k² sin²θ)^{-1/2} dθ` with the principal power (DLMF 19.2.8); it is the
 principal branch for `k² ∈ ℂ \ [1, ∞)`. -/
 @[dlmf 19.2.E8]
-def compEllIntKk (k : ℂ) : ℂ :=
+def completeEllipticK (k : ℂ) : ℂ :=
   ∫ θ in (0 : ℝ)..(π / 2), (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ))
 
 /-- The complementary integral `K'(k) = K(k') = ∫₀^{π/2} (1 - (1 - k²) sin²θ)^{-1/2} dθ`
 (DLMF 19.2.9), principal for `k² ∈ ℂ \ (-∞, 0]`. -/
 @[dlmf 19.2.E9]
-def compEllIntKpk (k : ℂ) : ℂ :=
+def completeEllipticKPrime (k : ℂ) : ℂ :=
   ∫ θ in (0 : ℝ)..(π / 2), (1 - (1 - k ^ 2) * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ))
 
 end DLMF.EllipticIntegrals

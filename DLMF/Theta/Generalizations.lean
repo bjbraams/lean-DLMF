@@ -174,7 +174,7 @@ theorem ordinaryHypergeometric_half_half_one_thetaModulusK {t : ℝ} (ht : 0 < t
   simp only [ofReal_re] at hK
   have hm : |DLMF.JacobiElliptic.jacobiModulusImag t ^ 2| < 1 := by
     rw [abs_of_nonneg (by positivity)]; nlinarith
-  rw [Real.compEllIntKm_eq_ordinaryHypergeometric hm] at hK
+  rw [Real.completeEllipticKOfParameter_eq_ordinaryHypergeometric hm] at hK
   have hpi : (π : ℂ) / 2 ≠ 0 := by
     have := Real.pi_pos; exact_mod_cast (by positivity : π / 2 ≠ 0)
   push_cast at hK

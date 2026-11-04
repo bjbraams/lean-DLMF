@@ -16,10 +16,10 @@ forms as `ℓ → ∞` of the Coulomb functions `f(ε,ℓ;r)` and `h(ε,ℓ;r)` 
 
 ## Main results
 
-* `coulombf_recurrence`, `coulombh_recurrence`: the recurrences DLMF 33.17.1–33.17.2, for
-  `ℓ ≥ 1`.
-* `coulombf_deriv`, `coulombh_deriv`: the derivative formulas DLMF 33.17.3–33.17.4.
-* `coulombf_coulombh_isEquivalent_atTop`: as `ℓ → ∞` with `ε` and `r ≠ 0` fixed,
+* `coulombEnergyF_recurrence`, `coulombEnergyH_recurrence`: the recurrences DLMF 33.17.1–33.17.2,
+  for `ℓ ≥ 1`.
+* `coulombEnergyF_deriv`, `coulombEnergyH_deriv`: the derivative formulas DLMF 33.17.3–33.17.4.
+* `coulombEnergyF_coulombEnergyH_isEquivalent_atTop`: as `ℓ → ∞` with `ε` and `r ≠ 0` fixed,
   `f(ε,ℓ;r) ~ (2r)^{ℓ+1}/(2ℓ+1)!` and the companion form for `h` (DLMF 33.18.1).
 
 ## Implementation notes
@@ -40,58 +40,62 @@ namespace DLMF.Coulomb
 /-- **DLMF 33.17.1**: for `ℓ ≥ 1`,
 `(ℓ+1) r f(ε,ℓ-1;r) - (2ℓ+1)(ℓ(ℓ+1) - r) f(ε,ℓ;r) + ℓ(1 + (ℓ+1)²ε) r f(ε,ℓ+1;r) = 0`. -/
 @[dlmf 33.17.E1]
-theorem coulombf_recurrence (ε : ℝ) {ℓ : ℕ} (hℓ : 1 ≤ ℓ) (r : ℝ) :
-    (ℓ + 1) * r * coulombf ε (ℓ - 1) r - (2 * ℓ + 1) * (ℓ * (ℓ + 1) - r) * coulombf ε ℓ r +
-      ℓ * (1 + (ℓ + 1) ^ 2 * ε) * r * coulombf ε (ℓ + 1) r = 0 := by
+theorem coulombEnergyF_recurrence (ε : ℝ) {ℓ : ℕ} (hℓ : 1 ≤ ℓ) (r : ℝ) :
+    (ℓ + 1) * r * coulombEnergyF ε (ℓ - 1) r - (2 * ℓ + 1) * (ℓ * (ℓ + 1) - r) *
+        coulombEnergyF ε ℓ r +
+      ℓ * (1 + (ℓ + 1) ^ 2 * ε) * r * coulombEnergyF ε (ℓ + 1) r = 0 := by
   obtain ⟨m, rfl⟩ := Nat.exists_eq_add_of_le' hℓ
   have h := congrArg Complex.re (coulombfComplex_three_term ε m r)
   simp only [Complex.add_re, Complex.sub_re, Complex.mul_re, Complex.ofReal_re,
     Complex.ofReal_im, Complex.natCast_re, Complex.natCast_im, Complex.add_im, Complex.sub_im,
     Complex.mul_im, Complex.one_re, Complex.one_im, Complex.re_ofNat, Complex.im_ofNat,
     Complex.zero_re, pow_two] at h
-  rw [Nat.add_sub_cancel, coulombf_eq_re_coulombfComplex, coulombf_eq_re_coulombfComplex,
-      coulombf_eq_re_coulombfComplex]
+  rw [Nat.add_sub_cancel, coulombEnergyF_eq_re_coulombfComplex,
+      coulombEnergyF_eq_re_coulombfComplex,
+      coulombEnergyF_eq_re_coulombfComplex]
   push_cast
   linear_combination h
 
 /-- **DLMF 33.17.2**: for `ℓ ≥ 1` and `r ≠ 0`,
 `(ℓ+1)(1 + ℓ²ε) r h(ε,ℓ-1;r) - (2ℓ+1)(ℓ(ℓ+1) - r) h(ε,ℓ;r) + ℓ r h(ε,ℓ+1;r) = 0`. -/
 @[dlmf 33.17.E2]
-theorem coulombh_recurrence (ε : ℝ) {ℓ : ℕ} (hℓ : 1 ≤ ℓ) {r : ℝ} (hr : r ≠ 0) :
-    (ℓ + 1) * (1 + ℓ ^ 2 * ε) * r * coulombh ε (ℓ - 1) r -
-      (2 * ℓ + 1) * (ℓ * (ℓ + 1) - r) * coulombh ε ℓ r + ℓ * r * coulombh ε (ℓ + 1) r = 0 := by
+theorem coulombEnergyH_recurrence (ε : ℝ) {ℓ : ℕ} (hℓ : 1 ≤ ℓ) {r : ℝ} (hr : r ≠ 0) :
+    (ℓ + 1) * (1 + ℓ ^ 2 * ε) * r * coulombEnergyH ε (ℓ - 1) r -
+      (2 * ℓ + 1) * (ℓ * (ℓ + 1) - r) * coulombEnergyH ε ℓ r + ℓ * r *
+          coulombEnergyH ε (ℓ + 1) r = 0 := by
   sorry
 
 /-- **DLMF 33.17.3**: `(ℓ+1) r f'(ε,ℓ;r) = ((ℓ+1)² - r) f(ε,ℓ;r) - (1 + (ℓ+1)²ε) r f(ε,ℓ+1;r)`,
 the derivative being in `r`. -/
 @[dlmf 33.17.E3]
-theorem coulombf_deriv (ε : ℝ) (ℓ : ℕ) (r : ℝ) :
-    HasDerivAt (coulombf ε ℓ) (deriv (coulombf ε ℓ) r) r ∧
-      (ℓ + 1) * r * deriv (coulombf ε ℓ) r =
-        ((ℓ + 1) ^ 2 - r) * coulombf ε ℓ r - (1 + (ℓ + 1) ^ 2 * ε) * r * coulombf ε (ℓ + 1) r := by
-  have hd := hasDerivAt_coulombf ε ℓ r
+theorem coulombEnergyF_deriv (ε : ℝ) (ℓ : ℕ) (r : ℝ) :
+    HasDerivAt (coulombEnergyF ε ℓ) (deriv (coulombEnergyF ε ℓ) r) r ∧
+      (ℓ + 1) * r * deriv (coulombEnergyF ε ℓ) r =
+        ((ℓ + 1) ^ 2 - r) * coulombEnergyF ε ℓ r - (1 + (ℓ + 1) ^ 2 * ε) * r *
+            coulombEnergyF ε (ℓ + 1) r := by
+  have hd := hasDerivAt_coulombEnergyF ε ℓ r
   refine ⟨hd.deriv ▸ hd, ?_⟩
   have h := congrArg Complex.re (coulombfComplex_raise ε ℓ r)
   simp only [Complex.add_re, Complex.sub_re, Complex.mul_re, Complex.ofReal_re,
     Complex.ofReal_im, Complex.natCast_re, Complex.natCast_im, Complex.add_im, Complex.sub_im,
     Complex.mul_im, Complex.one_re, Complex.one_im, pow_two] at h
-  rw [hd.deriv, coulombf_eq_re_coulombfComplex, coulombf_eq_re_coulombfComplex]
+  rw [hd.deriv, coulombEnergyF_eq_re_coulombfComplex, coulombEnergyF_eq_re_coulombfComplex]
   linear_combination h
 
 /-- **DLMF 33.17.4**: `(ℓ+1) r h'(ε,ℓ;r) = ((ℓ+1)² - r) h(ε,ℓ;r) - r h(ε,ℓ+1;r)` for `r ≠ 0`. -/
 @[dlmf 33.17.E4]
-theorem coulombh_deriv (ε : ℝ) (ℓ : ℕ) {r : ℝ} (hr : r ≠ 0) :
-    HasDerivAt (coulombh ε ℓ) (deriv (coulombh ε ℓ) r) r ∧
-      (ℓ + 1) * r * deriv (coulombh ε ℓ) r =
-        ((ℓ + 1) ^ 2 - r) * coulombh ε ℓ r - r * coulombh ε (ℓ + 1) r := by
+theorem coulombEnergyH_deriv (ε : ℝ) (ℓ : ℕ) {r : ℝ} (hr : r ≠ 0) :
+    HasDerivAt (coulombEnergyH ε ℓ) (deriv (coulombEnergyH ε ℓ) r) r ∧
+      (ℓ + 1) * r * deriv (coulombEnergyH ε ℓ) r =
+        ((ℓ + 1) ^ 2 - r) * coulombEnergyH ε ℓ r - r * coulombEnergyH ε (ℓ + 1) r := by
   sorry
 
 /-- **DLMF 33.18.1**: as `ℓ → ∞` with `ε` and `r ≠ 0` fixed,
 `f(ε,ℓ;r) ~ (2r)^{ℓ+1}/(2ℓ+1)!` and `h(ε,ℓ;r) ~ (2ℓ)!/(π(2r)^ℓ)`. -/
 @[dlmf 33.18.E1]
-theorem coulombf_coulombh_isEquivalent_atTop (ε : ℝ) {r : ℝ} (hr : r ≠ 0) :
-    (fun ℓ : ℕ => coulombf ε ℓ r) ~[atTop] (fun ℓ : ℕ => (2 * r) ^ (ℓ + 1) / (2 * ℓ + 1)!) ∧
-      (fun ℓ : ℕ => coulombh ε ℓ r) ~[atTop] (fun ℓ : ℕ => (2 * ℓ)! / (π * (2 * r) ^ ℓ)) := by
+theorem coulombEnergyF_coulombEnergyH_isEquivalent_atTop (ε : ℝ) {r : ℝ} (hr : r ≠ 0) :
+    (fun ℓ : ℕ => coulombEnergyF ε ℓ r) ~[atTop] (fun ℓ : ℕ => (2 * r) ^ (ℓ + 1) / (2 * ℓ + 1)!) ∧
+      (fun ℓ : ℕ => coulombEnergyH ε ℓ r) ~[atTop] (fun ℓ : ℕ => (2 * ℓ)! / (π * (2 * r) ^ ℓ)) := by
   sorry
 
 end DLMF.Coulomb

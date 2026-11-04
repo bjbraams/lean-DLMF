@@ -50,8 +50,8 @@ In `Mathlib/Analysis/SpecialFunctions/RegularizedHypergeometric.lean`:
 - Empty-denominator series supplies `{}_2F_0` in [13.6.21](https://dlmf.nist.gov/13.6.E21).
 
 Mathlib has no named Kummer `M`, Tricomi `U`, Whittaker pair, incomplete gamma,
-or error function. Project definitions `erf`, `lowerIncGamma`,
-`erfc`, and `upperIncGamma` are used in §13.6 and §13.18.
+or error function. Project definitions `erf`, `lowerIncompleteGamma`,
+`erfc`, and `upperIncompleteGamma` are used in §13.6 and §13.18.
 
 ## Existing tagged project results
 
@@ -65,7 +65,7 @@ or error function. Project definitions `erf`, `lowerIncGamma`,
 | 13.4.E1 | `kummerM_eq_euler_integral` (the `M` form); regularized form in `IntegralRepresentations.lean` |
 | 13.6.E1 | `kummerM_self` |
 | 13.6.E3 | `kummerM_of_zero_param`; `U` form in `Relations.lean` |
-| 13.6.E5 | `lowerIncGamma` |
+| 13.6.E5 | `lowerIncompleteGamma` |
 | 13.6.E7 | `erf` |
 | 13.14.E1 | `whittakerM_ode`, `whittakerW_ode` |
 | 13.14.E2 | `whittakerM` |
@@ -78,7 +78,7 @@ or error function. Project definitions `erf`, `lowerIncGamma`,
 | 13.2.E27–E32 | Integer-`b` second-kind logarithmic tables; generic case is 13.2.E9 |
 | 13.4.E9–E15, 13.10.E8–E9, 13.16.E10, 13.23.E6–E7 | Hankel, Pochhammer, and loop contours |
 | 13.7.E5–E9, 13.7.E11–E13 | Remainder-region constants `R₁,R₂,R₃`, `χ(n)`, incomplete-gamma remainder |
-| 13.8.E4–E5, 13.8.E8–E16 | Uniform parabolic-cylinder / Bessel / `envJ` approximations |
+| 13.8.E4–E5, 13.8.E8–E16 | Uniform parabolic-cylinder / Bessel / `envelopeJ` approximations |
 | 13.6.E11, 13.18.E10 | Airy function not in the project API |
 | 13.6.E12–E15, 13.18.E11–E13 | Kummer forms of parabolic cylinder functions; `U(a,z)` and `V(a,z)` now exist (see the Chapter 12 index below) but these relations are not yet stated |
 | 13.6(vii) Coulomb | Coulomb wave functions (DLMF Chapter 33) |
@@ -137,38 +137,38 @@ remaining connection formulas 12.2.18–19, and the uniform expansions of §§12
 
 | DLMF | Declaration | Status |
 | --- | --- | --- |
-| [12.2.E2](https://dlmf.nist.gov/12.2.E2) | [hasDerivAt_pcfUDeriv](ParabolicCylinder.lean) (line 161); [hasDerivAt_pcfVDeriv](ParabolicCylinder.lean) (line 1072) | proved |
-| [12.2.E5](https://dlmf.nist.gov/12.2.E5) | [pcfD](ParabolicCylinder.lean) (line 154) | definition |
-| [12.2.E6](https://dlmf.nist.gov/12.2.E6) | [pcfU_zero](ParabolicCylinder.lean) (line 176) | proved |
-| [12.2.E7](https://dlmf.nist.gov/12.2.E7) | [pcfUDeriv_zero](ParabolicCylinder.lean) (line 184) | proved |
-| [12.2.E8](https://dlmf.nist.gov/12.2.E8) | [pcfV_zero](ParabolicCylinder.lean) (line 1093) | proved |
-| [12.2.E9](https://dlmf.nist.gov/12.2.E9) | [pcfVDeriv_zero](ParabolicCylinder.lean) (line 1102) | proved |
-| [12.2.E10](https://dlmf.nist.gov/12.2.E10) | [pcfV_wronskian](ParabolicCylinder.lean) (line 1154) | proved |
-| [12.2.E11](https://dlmf.nist.gov/12.2.E11) | [pcfU_wronskian_neg](ParabolicCylinder.lean) (line 813) | proved |
-| [12.2.E12](https://dlmf.nist.gov/12.2.E12) | [pcfU_wronskian_mul_I](ParabolicCylinder.lean) (line 869); [pcfU_wronskian_mul_neg_I](ParabolicCylinder.lean) (line 907) | proved |
-| [12.2.E13](https://dlmf.nist.gov/12.2.E13) | [pcfU_neg_nat_sub_half_neg](ParabolicCylinder.lean) (line 1310) | proved |
-| [12.2.E14](https://dlmf.nist.gov/12.2.E14) | [pcfV_nat_add_half_neg](ParabolicCylinder.lean) (line 1321) | proved |
-| [12.2.E15](https://dlmf.nist.gov/12.2.E15) | [pcfU_neg_eq](ParabolicCylinder.lean) (line 1203) | proved |
-| [12.2.E16](https://dlmf.nist.gov/12.2.E16) | [pcfV_neg_eq](ParabolicCylinder.lean) (line 1252) | proved |
-| [12.2.E17](https://dlmf.nist.gov/12.2.E17) | [pcfU_connection_mul_I](ParabolicCylinder.lean) (line 957); [pcfU_connection_mul_neg_I](ParabolicCylinder.lean) (line 1042) | proved |
-| [12.2.E20](https://dlmf.nist.gov/12.2.E20) | [pcfV_eq_mul_I](ParabolicCylinder.lean) (line 1357); [pcfV_eq_mul_neg_I](ParabolicCylinder.lean) (line 1419) | proved |
-| [12.4.E1](https://dlmf.nist.gov/12.4.E1) | [pcfU](ParabolicCylinder.lean) (line 142) | definition |
-| [12.4.E2](https://dlmf.nist.gov/12.4.E2) | [pcfV](ParabolicCylinder.lean) (line 1062) | definition |
-| [12.5.E1](https://dlmf.nist.gov/12.5.E1) | [pcfU_eq_integral](ParabolicCylinder.lean) (line 694) | proved |
-| [12.7.E1](https://dlmf.nist.gov/12.7.E1) | [pcfU_neg_half](ParabolicCylinder.lean) (line 193) | proved |
-| [12.7.E2](https://dlmf.nist.gov/12.7.E2) | [pcfD_nat](ParabolicCylinder.lean) (line 494) | proved |
-| [12.7.E12](https://dlmf.nist.gov/12.7.E12) | [pcfEven](ParabolicCylinder.lean) (line 60) | definition |
-| [12.7.E13](https://dlmf.nist.gov/12.7.E13) | [pcfOdd](ParabolicCylinder.lean) (line 65) | definition |
-| [12.7.E14](https://dlmf.nist.gov/12.7.E14) | [pcfU_eq_kummerU](ParabolicCylinder.lean) (line 211) | proved |
-| [12.8.E1](https://dlmf.nist.gov/12.8.E1) | [pcfU_three_term](ParabolicCylinder.lean) (line 460) | proved |
-| [12.8.E2](https://dlmf.nist.gov/12.8.E2) | [pcfU_recurrence_add](ParabolicCylinder.lean) (line 425) | proved |
-| [12.8.E3](https://dlmf.nist.gov/12.8.E3) | [pcfU_recurrence_sub](ParabolicCylinder.lean) (line 391) | proved |
-| [12.8.E4](https://dlmf.nist.gov/12.8.E4) | [pcfU_deriv_recurrence](ParabolicCylinder.lean) (line 466) | proved |
-| [12.8.E5](https://dlmf.nist.gov/12.8.E5) | [pcfV_three_term](ParabolicCylinder.lean) (line 1562) | proved |
-| [12.8.E6](https://dlmf.nist.gov/12.8.E6) | [pcfV_recurrence_sub](ParabolicCylinder.lean) (line 1520) | proved |
-| [12.8.E7](https://dlmf.nist.gov/12.8.E7) | [pcfV_recurrence_add](ParabolicCylinder.lean) (line 1480) | proved |
-| [12.8.E8](https://dlmf.nist.gov/12.8.E8) | [pcfV_deriv_recurrence](ParabolicCylinder.lean) (line 1568) | proved |
-| [12.9.E1](https://dlmf.nist.gov/12.9.E1) | [hasAsymptoticExpansion_pcfU](ParabolicCylinder.lean) (line 266) | proved |
+| [12.2.E2](https://dlmf.nist.gov/12.2.E2) | [hasDerivAt_parabolicCylinderUDeriv](ParabolicCylinder.lean) (line 161); [hasDerivAt_parabolicCylinderVDeriv](ParabolicCylinder.lean) (line 1072) | proved |
+| [12.2.E5](https://dlmf.nist.gov/12.2.E5) | [parabolicCylinderD](ParabolicCylinder.lean) (line 154) | definition |
+| [12.2.E6](https://dlmf.nist.gov/12.2.E6) | [parabolicCylinderU_zero](ParabolicCylinder.lean) (line 176) | proved |
+| [12.2.E7](https://dlmf.nist.gov/12.2.E7) | [parabolicCylinderUDeriv_zero](ParabolicCylinder.lean) (line 184) | proved |
+| [12.2.E8](https://dlmf.nist.gov/12.2.E8) | [parabolicCylinderV_zero](ParabolicCylinder.lean) (line 1093) | proved |
+| [12.2.E9](https://dlmf.nist.gov/12.2.E9) | [parabolicCylinderVDeriv_zero](ParabolicCylinder.lean) (line 1102) | proved |
+| [12.2.E10](https://dlmf.nist.gov/12.2.E10) | [parabolicCylinderV_wronskian](ParabolicCylinder.lean) (line 1154) | proved |
+| [12.2.E11](https://dlmf.nist.gov/12.2.E11) | [parabolicCylinderU_wronskian_neg](ParabolicCylinder.lean) (line 813) | proved |
+| [12.2.E12](https://dlmf.nist.gov/12.2.E12) | [parabolicCylinderU_wronskian_mul_I](ParabolicCylinder.lean) (line 869); [parabolicCylinderU_wronskian_mul_neg_I](ParabolicCylinder.lean) (line 907) | proved |
+| [12.2.E13](https://dlmf.nist.gov/12.2.E13) | [parabolicCylinderU_neg_nat_sub_half_neg](ParabolicCylinder.lean) (line 1310) | proved |
+| [12.2.E14](https://dlmf.nist.gov/12.2.E14) | [parabolicCylinderV_nat_add_half_neg](ParabolicCylinder.lean) (line 1321) | proved |
+| [12.2.E15](https://dlmf.nist.gov/12.2.E15) | [parabolicCylinderU_neg_eq](ParabolicCylinder.lean) (line 1203) | proved |
+| [12.2.E16](https://dlmf.nist.gov/12.2.E16) | [parabolicCylinderV_neg_eq](ParabolicCylinder.lean) (line 1252) | proved |
+| [12.2.E17](https://dlmf.nist.gov/12.2.E17) | [parabolicCylinderU_connection_mul_I](ParabolicCylinder.lean) (line 957); [parabolicCylinderU_connection_mul_neg_I](ParabolicCylinder.lean) (line 1042) | proved |
+| [12.2.E20](https://dlmf.nist.gov/12.2.E20) | [parabolicCylinderV_eq_mul_I](ParabolicCylinder.lean) (line 1357); [parabolicCylinderV_eq_mul_neg_I](ParabolicCylinder.lean) (line 1419) | proved |
+| [12.4.E1](https://dlmf.nist.gov/12.4.E1) | [parabolicCylinderU](ParabolicCylinder.lean) (line 142) | definition |
+| [12.4.E2](https://dlmf.nist.gov/12.4.E2) | [parabolicCylinderV](ParabolicCylinder.lean) (line 1062) | definition |
+| [12.5.E1](https://dlmf.nist.gov/12.5.E1) | [parabolicCylinderU_eq_integral](ParabolicCylinder.lean) (line 694) | proved |
+| [12.7.E1](https://dlmf.nist.gov/12.7.E1) | [parabolicCylinderU_neg_half](ParabolicCylinder.lean) (line 193) | proved |
+| [12.7.E2](https://dlmf.nist.gov/12.7.E2) | [parabolicCylinderD_nat](ParabolicCylinder.lean) (line 494) | proved |
+| [12.7.E12](https://dlmf.nist.gov/12.7.E12) | [parabolicCylinderEven](ParabolicCylinder.lean) (line 60) | definition |
+| [12.7.E13](https://dlmf.nist.gov/12.7.E13) | [parabolicCylinderOdd](ParabolicCylinder.lean) (line 65) | definition |
+| [12.7.E14](https://dlmf.nist.gov/12.7.E14) | [parabolicCylinderU_eq_kummerU](ParabolicCylinder.lean) (line 211) | proved |
+| [12.8.E1](https://dlmf.nist.gov/12.8.E1) | [parabolicCylinderU_three_term](ParabolicCylinder.lean) (line 460) | proved |
+| [12.8.E2](https://dlmf.nist.gov/12.8.E2) | [parabolicCylinderU_recurrence_add](ParabolicCylinder.lean) (line 425) | proved |
+| [12.8.E3](https://dlmf.nist.gov/12.8.E3) | [parabolicCylinderU_recurrence_sub](ParabolicCylinder.lean) (line 391) | proved |
+| [12.8.E4](https://dlmf.nist.gov/12.8.E4) | [parabolicCylinderU_deriv_recurrence](ParabolicCylinder.lean) (line 466) | proved |
+| [12.8.E5](https://dlmf.nist.gov/12.8.E5) | [parabolicCylinderV_three_term](ParabolicCylinder.lean) (line 1562) | proved |
+| [12.8.E6](https://dlmf.nist.gov/12.8.E6) | [parabolicCylinderV_recurrence_sub](ParabolicCylinder.lean) (line 1520) | proved |
+| [12.8.E7](https://dlmf.nist.gov/12.8.E7) | [parabolicCylinderV_recurrence_add](ParabolicCylinder.lean) (line 1480) | proved |
+| [12.8.E8](https://dlmf.nist.gov/12.8.E8) | [parabolicCylinderV_deriv_recurrence](ParabolicCylinder.lean) (line 1568) | proved |
+| [12.9.E1](https://dlmf.nist.gov/12.9.E1) | [hasAsymptoticExpansion_parabolicCylinderU](ParabolicCylinder.lean) (line 266) | proved |
 
 ## Current proof status (2026-10-24)
 

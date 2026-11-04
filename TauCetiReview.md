@@ -59,7 +59,7 @@ callers can use the identities where needed.
 The related real incomplete-gamma development remains a separate opportunity.
 `TauCeti.Analysis.SpecialFunctions.IncompleteGamma` provides
 `ofReal_lowerIncGamma_eq_partialGamma` for positive shape and nonnegative
-argument. The project's `lowerIncGamma` has complex parameters and is defined using
+argument. The project's `lowerIncompleteGamma` has complex parameters and is defined using
 `kummerM`; TauCeti's real definition is zero for nonpositive shape or argument.
 A bridge on the appropriate domain still needs a proof. There is no claim of
 unrestricted equality of those definitions.
@@ -67,13 +67,13 @@ unrestricted equality of those definitions.
 ## 5. Hermite Fourier eigenfunctions — both admissions resolved
 
 [Integrals.lean](DLMF/OrthogonalPolynomials/Integrals.lean) now proves
-`hermitePolyH_fourier_eigenfunction` and `hermite_fourier_eigenfunction` using
+`hermitePolynomialH_fourier_eigenfunction` and `hermite_fourier_eigenfunction` using
 `TauCeti.fourier_twoPiHermiteFunction` from
 `TauCeti.Analysis.SpecialFunctions.Hermite.Function.Fourier.Basic`.
 
 The helper `hermiteFunction_integral` converts Mathlib's negative `2π` Fourier
 phase to the positive unit-frequency phase, using dilation and Hermite parity.
-The helpers `hermitePolyH_envelope` and `hermite_envelope` identify the two local
+The helpers `hermitePolynomialH_envelope` and `hermite_envelope` identify the two local
 unnormalized polynomial envelopes with TauCeti's normalized Hermite function.
 The probabilists’ convention additionally requires dilation by `√2`.
 Neither proof uses an admitted local identity. Both original statements,
@@ -140,7 +140,7 @@ little further special-function material at the pinned revision. Hermite parity
 (`Polynomial.hermite_aeval_neg`) and Gaussian integrability
 (`integrable_aeval_mul_gaussian`) were adopted for the Hermite cosine and sine transforms.
 TauCeti's complex binomial series and Hermite generating function were checked; the
-project's existing `hasSum_poch_div_factorial` already covers the former, and the latter
+project's existing `hasSum_pochhammer_div_factorial` already covers the former, and the latter
 did not match a remaining admission. There is nothing for polygamma, Barnes G, q-series,
 partition congruences, the Jacobi triple product, Hasse–Davenport or the
 `SU(2) → SO(3)` cover.
@@ -152,13 +152,13 @@ partition congruences, the Jacobi triple product, Hasse–Davenport or the
   `digamma_half_diff`, `digamma_one_add_zeta`, `digamma_one_add_odd_zeta`,
   `sum_alternating_trigamma`, `digamma_add_euler`, `digamma_gauss`, `digamma_binet`.
 - Orthogonal polynomials: `hermite_even_cosine_transform`, `hermite_odd_sine_transform`,
-  `ultrasphPoly_cos_sum`, `ultrasphPoly_finite_sum`, the four quadratic transformations
-  18.7.13–18.7.16, `ultrasphPoly_convolution`, `ultrasphPoly_geometric_convolution`,
-  `legendre_convolution`, `ultrasphPoly_generating_function`,
-  `ultrasphPoly_weighted_generating_function`, `legendre_generating_function`,
-  `laguerrePolyL_addition`, `hermitePolyH_even_convolution`,
-  `jacobi_regularized_generating_function`, `laguerrePolyL_bessel_generating_function`,
-  `hermitePolyH_half_factorial_generating_function`, `ultrasphPoly_bound_at_one`,
+  `ultrasphericalPolynomial_cos_sum`, `ultrasphericalPolynomial_finite_sum`, the four quadratic transformations
+  18.7.13–18.7.16, `ultrasphericalPolynomial_convolution`, `ultrasphericalPolynomial_geometric_convolution`,
+  `legendre_convolution`, `ultrasphericalPolynomial_generating_function`,
+  `ultrasphericalPolynomial_weighted_generating_function`, `legendre_generating_function`,
+  `laguerrePolynomialL_addition`, `hermitePolynomialH_even_convolution`,
+  `jacobi_regularized_generating_function`, `laguerrePolynomialL_bessel_generating_function`,
+  `hermitePolynomialH_half_factorial_generating_function`, `ultrasphericalPolynomial_bound_at_one`,
   `meixnerPollaczek_generating_function`, `pollaczek_finite_sum`,
   `pollaczek_generating_function`, `charlier_limit_hermite`, `besselPolynomial_recurrence`.
 
@@ -167,6 +167,6 @@ differential equation and three-term recurrence), `GegenbauerSeries.lean` and
 `LaguerreSeries.lean`. The Gegenbauer sums 18.5.10–18.5.11 and the quadratic
 transformations need the recurrences of `Differential.lean`, which imports
 `Explicit.lean`. They were therefore moved from `Explicit.lean` to
-`GegenbauerSeries.lean` with unchanged statements. `aeval_hermitePolyH_succ_succ` moved
+`GegenbauerSeries.lean` with unchanged statements. `aeval_hermitePolynomialH_succ_succ` moved
 from `Integrals.lean` to `Classical.lean` so that `Hahn.lean` can use it. No theorem
 statement or hypothesis was changed, and no false statement was found.

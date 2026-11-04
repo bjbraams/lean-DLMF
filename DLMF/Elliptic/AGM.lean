@@ -27,11 +27,13 @@ of `K` and `E` (Temme §12.1.2, DLMF §19.8).
   `(a, b) ↦ ((a+b)/2, √(ab))`.
 * `agmIntegral_eq_pi_div_two_div_agm`: `agmIntegral a b = π/(2 M(a,b))` (Temme Theorem 12.1,
   DLMF 19.8.4).
-* `Real.compEllIntKm_eq_pi_div_agm`: `K(m) = π/(2 M(1, √(1-m)))` (DLMF 19.8.5).
-* `Real.compEllIntKm_landen_descending`, `Real.compEllIntEm_landen_descending`: the descending
-  Landen transformations (Temme (12.11), (12.14); DLMF 19.8.12).
-* `Real.compEllIntKm_landen_ascending`, `Real.compEllIntEm_landen_ascending`: the ascending
-  Landen transformations (Temme (12.12), (12.13)).
+* `Real.completeEllipticKOfParameter_eq_pi_div_agm`: `K(m) = π/(2 M(1, √(1-m)))` (DLMF 19.8.5).
+* `Real.completeEllipticKOfParameter_landen_descending`,
+  `Real.completeEllipticEOfParameter_landen_descending`: the descending Landen transformations
+  (Temme (12.11), (12.14); DLMF 19.8.12).
+* `Real.completeEllipticKOfParameter_landen_ascending`,
+  `Real.completeEllipticEOfParameter_landen_ascending`: the ascending Landen transformations (Temme
+  (12.12), (12.13)).
 
 ## Implementation notes
 
@@ -306,29 +308,30 @@ theorem agmIntegral_eq_pi_div_two_div_agm {x y : ℝ≥0} (hx : 0 < x) (hy : 0 <
   exact le_antisymm (ge_of_tendsto' h1 fun n => (hb n).2) (le_of_tendsto' h2 fun n => (hb n).1)
 
 /-- `K(m) = ∫₀^{π/2} (cos²θ + (1-m) sin²θ)^{-1/2} dθ`. -/
-theorem Real.compEllIntKm_eq_agmIntegral {m : ℝ} (hm : m < 1) :
-    Real.compEllIntKm m = agmIntegral 1 √(1 - m) := by
-  rw [Real.compEllIntKm, agmIntegral]
+theorem Real.completeEllipticKOfParameter_eq_agmIntegral {m : ℝ} (hm : m < 1) :
+    Real.completeEllipticKOfParameter m = agmIntegral 1 √(1 - m) := by
+  rw [Real.completeEllipticKOfParameter, agmIntegral]
   refine intervalIntegral.integral_congr fun θ _ => ?_
   rw [sq_sqrt (by linarith), one_pow, one_mul, cos_sq']
   ring_nf
 
 /-- **Gauss's AGM formula** `K(m) = π / (2 M(1, √(1-m)))` (Temme (12.10), DLMF 19.8.5). -/
 @[dlmf 19.8.E5]
-theorem Real.compEllIntKm_eq_pi_div_agm {m : ℝ} (hm : m < 1) :
-    Real.compEllIntKm m = π / (2 * (NNReal.agm 1 (NNReal.sqrt (1 - m).toNNReal) : ℝ)) := by
+theorem Real.completeEllipticKOfParameter_eq_pi_div_agm {m : ℝ} (hm : m < 1) :
+    Real.completeEllipticKOfParameter m = π /
+        (2 * (NNReal.agm 1 (NNReal.sqrt (1 - m).toNNReal) : ℝ)) := by
   have hy : (0 : NNReal) < NNReal.sqrt (1 - m).toNNReal :=
     NNReal.sqrt_pos.mpr (Real.toNNReal_pos.mpr (by linarith))
   have h := agmIntegral_eq_pi_div_two_div_agm one_pos hy
   rw [Real.coe_sqrt, Real.coe_toNNReal _ (by linarith), NNReal.coe_one] at h
-  rw [Real.compEllIntKm_eq_agmIntegral hm, h, div_div]
+  rw [Real.completeEllipticKOfParameter_eq_agmIntegral hm, h, div_div]
 
 /-- **Descending Landen transformation** (Temme (12.11), DLMF 19.8.12): with
 `k' = √(1-m)` and `k₁ = (1 - k')/(1 + k')`, `K(m) = (1 + k₁) K(k₁²)`. -/
 @[dlmf 19.8.E12]
-theorem Real.compEllIntKm_landen_descending {m : ℝ} (hm : m < 1) :
-    Real.compEllIntKm m = (1 + (1 - √(1 - m)) / (1 + √(1 - m))) *
-      Real.compEllIntKm (((1 - √(1 - m)) / (1 + √(1 - m))) ^ 2) := by
+theorem Real.completeEllipticKOfParameter_landen_descending {m : ℝ} (hm : m < 1) :
+    Real.completeEllipticKOfParameter m = (1 + (1 - √(1 - m)) / (1 + √(1 - m))) *
+      Real.completeEllipticKOfParameter (((1 - √(1 - m)) / (1 + √(1 - m))) ^ 2) := by
   set k' := √(1 - m) with hk'
   have hk0 : 0 < k' := sqrt_pos.mpr (by linarith)
   have hk1 : 0 < 1 + k' := by linarith
@@ -342,7 +345,8 @@ theorem Real.compEllIntKm_landen_descending {m : ℝ} (hm : m < 1) :
         rw [div_pow, mul_pow, sq_sqrt hk0.le]; norm_num]
       field_simp; ring]
     exact sqrt_sq (by positivity)
-  rw [Real.compEllIntKm_eq_agmIntegral hm, Real.compEllIntKm_eq_agmIntegral hsq, hroot,
+  rw [Real.completeEllipticKOfParameter_eq_agmIntegral hm,
+      Real.completeEllipticKOfParameter_eq_agmIntegral hsq, hroot,
     ← agmIntegral_am_gm one_pos hk0, one_mul]
   have hl : 0 < (1 + k') / 2 := by positivity
   rw [show (1 + k') / 2 = (1 + k') / 2 * 1 by ring,
@@ -352,8 +356,9 @@ theorem Real.compEllIntKm_landen_descending {m : ℝ} (hm : m < 1) :
 
 /-- **Ascending Landen transformation** (Temme (12.12)): for `0 ≤ m < 1`, `k = √m`,
 `K(m) = K((2√k/(1+k))²)/(1+k)`. -/
-theorem Real.compEllIntKm_landen_ascending {m : ℝ} (hm0 : 0 ≤ m) (hm : m < 1) :
-    Real.compEllIntKm m = Real.compEllIntKm ((2 * √(√m) / (1 + √m)) ^ 2) / (1 + √m) := by
+theorem Real.completeEllipticKOfParameter_landen_ascending {m : ℝ} (hm0 : 0 ≤ m) (hm : m < 1) :
+    Real.completeEllipticKOfParameter m =
+        Real.completeEllipticKOfParameter ((2 * √(√m) / (1 + √m)) ^ 2) / (1 + √m) := by
   set k := √m with hk
   have hk0 : 0 ≤ k := sqrt_nonneg m
   have hk1 : k < 1 := by rw [hk, sqrt_lt' one_pos]; simpa using hm
@@ -367,7 +372,8 @@ theorem Real.compEllIntKm_landen_ascending {m : ℝ} (hm0 : 0 ≤ m) (hm : m < 1
       rw [div_pow, mul_pow, sq_sqrt hk0]; field_simp; ring]
     exact sqrt_sq (div_nonneg (by linarith) hpos.le)
   have hgm : √((1 + k) * (1 - k)) = √(1 - m) := by rw [← hkm]; ring_nf
-  rw [Real.compEllIntKm_eq_agmIntegral hm, Real.compEllIntKm_eq_agmIntegral hsq, hroot]
+  rw [Real.completeEllipticKOfParameter_eq_agmIntegral hm,
+      Real.completeEllipticKOfParameter_eq_agmIntegral hsq, hroot]
   have hinv := agmIntegral_am_gm hpos (by linarith : 0 < 1 - k)
   rw [show ((1 + k) + (1 - k)) / 2 = 1 by ring, hgm] at hinv
   have hmul := agmIntegral_mul (l := 1 + k) (a := 1) (b := (1 - k) / (1 + k)) hpos
@@ -379,12 +385,12 @@ theorem Real.compEllIntKm_landen_ascending {m : ℝ} (hm0 : 0 ≤ m) (hm : m < 1
 `k₁ = (1-k')/(1+k')`, `E(m) = (1+k') E(k₁²) - k' K(m)`. Obtained by differentiating the descending
 transformation of `K` and using `dK/dm` on both sides. -/
 @[dlmf 19.8.E12]
-theorem Real.compEllIntEm_landen_descending {m : ℝ} (hm : m < 1) :
-    Real.compEllIntEm m =
-      (1 + √(1 - m)) * Real.compEllIntEm (((1 - √(1 - m)) / (1 + √(1 - m))) ^ 2) -
-        √(1 - m) * Real.compEllIntKm m := by
+theorem Real.completeEllipticEOfParameter_landen_descending {m : ℝ} (hm : m < 1) :
+    Real.completeEllipticEOfParameter m =
+      (1 + √(1 - m)) * Real.completeEllipticEOfParameter (((1 - √(1 - m)) / (1 + √(1 - m))) ^ 2) -
+        √(1 - m) * Real.completeEllipticKOfParameter m := by
   rcases eq_or_ne m 0 with rfl | hm0
-  · simp [Real.compEllIntEm_zero, Real.compEllIntKm_zero]; ring
+  · simp [Real.completeEllipticEOfParameter_zero, Real.completeEllipticKOfParameter_zero]; ring
   set s := √(1 - m) with hsdef
   have hs0 : 0 < s := sqrt_pos.mpr (by linarith)
   have hs2 : s ^ 2 = 1 - m := sq_sqrt (by linarith)
@@ -405,20 +411,22 @@ theorem Real.compEllIntEm_landen_descending {m : ℝ} (hm : m < 1) :
   have hkd : HasDerivAt (fun m => (1 - √(1 - m)) / (1 + √(1 - m)))
       ((-(-1 / (2 * s)) * (1 + s) - (1 - s) * (-1 / (2 * s))) / (1 + s) ^ 2) m :=
     (hsd.const_sub 1).div (hsd.const_add 1) hk1.ne'
-  have hKμ := (Real.hasDerivAt_compEllIntKm hμ1 hμ0).comp m (hkd.pow 2)
+  have hKμ := (Real.hasDerivAt_completeEllipticKOfParameter hμ1 hμ0).comp m (hkd.pow 2)
   have hL := (hkd.const_add 1).mul hKμ
-  have heq : Real.compEllIntKm =ᶠ[𝓝 m] fun m => (1 + (1 - √(1 - m)) / (1 + √(1 - m))) *
-      Real.compEllIntKm (((1 - √(1 - m)) / (1 + √(1 - m))) ^ 2) := by
+  have heq : Real.completeEllipticKOfParameter =ᶠ[𝓝 m] fun m =>
+      (1 + (1 - √(1 - m)) / (1 + √(1 - m))) *
+      Real.completeEllipticKOfParameter (((1 - √(1 - m)) / (1 + √(1 - m))) ^ 2) := by
     filter_upwards [Iio_mem_nhds hm] with x hx
-    exact Real.compEllIntKm_landen_descending hx
-  have hd := (Real.hasDerivAt_compEllIntKm hm hm0).unique (hL.congr_of_eventuallyEq heq)
-  have hK := Real.compEllIntKm_landen_descending hm
+    exact Real.completeEllipticKOfParameter_landen_descending hx
+  have hd := (Real.hasDerivAt_completeEllipticKOfParameter hm hm0).unique
+      (hL.congr_of_eventuallyEq heq)
+  have hK := Real.completeEllipticKOfParameter_landen_descending hm
   rw [← hsdef, ← hkdef] at hK hd
   simp only [Function.comp] at hd
-  generalize Real.compEllIntEm m = E at *
-  generalize Real.compEllIntKm m = K at *
-  generalize Real.compEllIntEm (k ^ 2) = Eμ at *
-  generalize Real.compEllIntKm (k ^ 2) = Kμ at *
+  generalize Real.completeEllipticEOfParameter m = E at *
+  generalize Real.completeEllipticKOfParameter m = K at *
+  generalize Real.completeEllipticEOfParameter (k ^ 2) = Eμ at *
+  generalize Real.completeEllipticKOfParameter (k ^ 2) = Kμ at *
   rw [show m = 1 - s ^ 2 by linarith] at hd
   have h1 : (1 : ℝ) - s ≠ 0 := sub_ne_zero.mpr (Ne.symm hs1)
   have h2 : (1 : ℝ) - s ^ 2 ≠ 0 := by
@@ -438,10 +446,11 @@ theorem Real.compEllIntEm_landen_descending {m : ℝ} (hm : m < 1) :
 
 /-- **Ascending Landen transformation for `E`** (Temme (12.13)): for `0 ≤ m < 1`, `k = √m`,
 `E(m) = (1+k)/2 · E((2√k/(1+k))²) + k'²/2 · K(m)`. -/
-theorem Real.compEllIntEm_landen_ascending {m : ℝ} (hm0 : 0 ≤ m) (hm : m < 1) :
-    Real.compEllIntEm m = (1 + √m) / 2 * Real.compEllIntEm ((2 * √(√m) / (1 + √m)) ^ 2) +
-      (1 - m) / 2 * Real.compEllIntKm m := by
-  have hKa := Real.compEllIntKm_landen_ascending hm0 hm
+theorem Real.completeEllipticEOfParameter_landen_ascending {m : ℝ} (hm0 : 0 ≤ m) (hm : m < 1) :
+    Real.completeEllipticEOfParameter m = (1 + √m) / 2 *
+        Real.completeEllipticEOfParameter ((2 * √(√m) / (1 + √m)) ^ 2) +
+      (1 - m) / 2 * Real.completeEllipticKOfParameter m := by
+  have hKa := Real.completeEllipticKOfParameter_landen_ascending hm0 hm
   set k := √m with hk
   have hk0 : 0 ≤ k := sqrt_nonneg m
   have hk1 : k < 1 := by rw [hk, sqrt_lt' one_pos]; simpa using hm
@@ -454,7 +463,7 @@ theorem Real.compEllIntEm_landen_ascending {m : ℝ} (hm0 : 0 ≤ m) (hm : m < 1
     rw [show 1 - (2 * √k / (1 + k)) ^ 2 = ((1 - k) / (1 + k)) ^ 2 by
       rw [div_pow, mul_pow, sq_sqrt hk0]; field_simp; ring]
     exact sqrt_sq (div_nonneg (by linarith) hpos.le)
-  have hd := Real.compEllIntEm_landen_descending hsq
+  have hd := Real.completeEllipticEOfParameter_landen_descending hsq
   rw [hroot, show (1 - (1 - k) / (1 + k)) / (1 + (1 - k) / (1 + k)) = k by field_simp; ring,
     hkm] at hd
   rw [hd]

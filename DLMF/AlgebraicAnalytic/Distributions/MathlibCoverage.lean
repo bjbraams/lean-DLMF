@@ -20,7 +20,7 @@ functions `𝓓(Ω, ℝ)` (complex distributions take `F = ℂ`; testing only re
 equivalent), with the topology of compact convergence; its tempered distributions `𝓢'(E, F)` are
 continuous `ℂ`-linear maps on `𝓢(E, ℂ)` with the topology of pointwise convergence. Mathlib's
 Fourier transform is `𝓕 f ξ = ∫ e^{-2πi⟪x, ξ⟫} f x dx`, not DLMF's 1.14.1; DLMF's transform is
-`DLMF.AlgebraicAnalytic.dlmfFourierSchwartz`.
+`DLMF.AlgebraicAnalytic.fourierTransformSchwartz`.
 -/
 
 /- §1.16(i): test functions and distributions. -/
@@ -65,7 +65,7 @@ dlmf_upstream 1.16.E28 SchwartzMap.decay
 
 /- §1.16(vii)–(viii): Fourier transforms (Mathlib's normalization). -/
 dlmf_upstream 1.16.E29 SchwartzMap.fourier_coe
-  "different convention: Mathlib's 𝓕 on 𝓢 uses e^{-2πi⟪x, ξ⟫}; DLMF's is dlmfFourierSchwartz"
+  "different convention: Mathlib's 𝓕 on 𝓢 uses e^{-2πi⟪x, ξ⟫}; DLMF's is fourierTransformSchwartz"
 dlmf_upstream 1.16.E35 TemperedDistribution.fourier_apply
   "different convention: ⟨𝓕 u, φ⟩ = ⟨u, 𝓕 φ⟩ with Mathlib's 𝓕"
 dlmf_upstream 1.16.E36 TemperedDistribution.fourier_lineDerivOp_eq

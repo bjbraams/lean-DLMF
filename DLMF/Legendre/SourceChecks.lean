@@ -17,8 +17,8 @@ checks that rule on a terminating case, degree `ν = 1` and order `μ = -1/2`, w
 ## Main results
 
 * `associatedP_one_neg_half`: the closed form of `P^{-1/2}_1(z)` for `z - 1` in the slit plane.
-* `dlmf_14_27_no_boundary_zero`: `P^{-1/2}_1` has no boundary zero on either side of the cut
-  at any `x < -1`.
+* `not_tendsto_associatedP_one_neg_half_zero`: `P^{-1/2}_1` has no boundary zero on either side of
+  the cut at any `x < -1`.
 -/
 
 @[expose] public noncomputable section
@@ -34,15 +34,16 @@ theorem associatedP_one_neg_half {z : ℂ} (hz : z-1 ∈ slitPlane) :
     have h:=congrArg Complex.re hk
     norm_num at h
     linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
-  have H : EqOn (regularizedGaussHG (-1) 2 (3/2))
+  have H : EqOn (regularizedGaussHypergeometric (-1) 2 (3/2))
       (fun u : ℂ => (1-4/3*u)/Gamma (3/2)) cutPlane := by
-    apply eqOn_cutPlane_of_eqOn_disk (analyticOnNhd_regularizedGaussHG _ _ _)
+    apply eqOn_cutPlane_of_eqOn_disk (analyticOnNhd_regularizedGaussHypergeometric _ _ _)
       (by intro u hu; fun_prop)
     intro u hu
-    rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hu,
-      regularizedGaussHGFun_eq_div_Gamma hc]
+    rw [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hu,
+      regularizedGaussHypergeometricFun_eq_div_Gamma hc]
     have hh:=ordinaryHypergeometric_eq_sum_neg_nat 1 2 (3/2) u
-    norm_num [Finset.sum_range_succ, gaussHGCoeff, poch_one, poch_zero] at hh
+    norm_num [Finset.sum_range_succ, gaussHypergeometricCoeff, pochhammer_one,
+        pochhammer_zero] at hh
     rw [hh]
     ring
   have hz' : 1+z ∈ slitPlane := by
@@ -53,12 +54,12 @@ theorem associatedP_one_neg_half {z : ℂ} (hz : z-1 ∈ slitPlane) :
   have hu:=mem_cutPlane_of_one_add hz'
   unfold associatedP
   norm_num only
-  rw [regularizedGaussHG_symm 2 (-1) (3/2) hu, H hu]
+  rw [regularizedGaussHypergeometric_symm 2 (-1) (3/2) hu, H hu]
   rw [show -(1/4:ℂ)*(log (z+1)-log (z-1))=-(log (z+1)-log (z-1))/4 by ring]
   ring
 
 /-- The n=1, order=-1/2 example cannot have a zero on either side of the left cut. -/
-theorem dlmf_14_27_no_boundary_zero {s : ℝ} (hs : s=1 ∨ s=-1) {x : ℝ} (hx : x < -1) :
+theorem not_tendsto_associatedP_one_neg_half_zero {s : ℝ} (hs : s=1 ∨ s=-1) {x : ℝ} (hx : x < -1) :
     ¬Tendsto (fun ε : ℝ => associatedP 1 (-1/2) (x+s*I*ε)) (𝓝[>] (0:ℝ)) (𝓝 0) := by
   intro hz0
   have hs0 : s ≠ 0 := by rcases hs with rfl | rfl <;> norm_num

@@ -7,6 +7,8 @@ module
 
 public import DLMF.Legendre.UniformCoordinates
 public import DLMF.Legendre.IntegralRepresentations
+public import DLMF.Hypergeometric.Identities.CarlsonTools
+public import DLMF.Hypergeometric.Saalschutz
 
 /-!
 # Uniform asymptotic approximations of Legendre functions
@@ -51,15 +53,130 @@ namespace DLMF.Legendre
 
 open DLMF.Bessel DLMF.Confluent
 
+/-- `Γ(J+1+μ) (J+k+1)! ≤ Γ(J+k+1+μ) (J+1)!` for `μ ≥ 1`. -/
+private theorem LargeOrder.Gamma_mul_factorial_le (J : ℕ) {μ : ℝ} (hμ : 1 ≤ μ) (k : ℕ) :
+    Real.Gamma (J + 1 + μ) * ((J + k + 1).factorial : ℝ) ≤
+      Real.Gamma (J + k + 1 + μ) * ((J + 1).factorial : ℝ) := by
+  induction k with
+  | zero => simp
+  | succ k ih =>
+    have hpos : 0 < (J:ℝ) + k + 1 + μ := by positivity
+    have hG : 0 < Real.Gamma (J + k + 1 + μ) := Real.Gamma_pos_of_pos hpos
+    have e1 : Real.Gamma ((J:ℝ) + (k + 1 : ℕ) + 1 + μ) =
+        ((J:ℝ) + k + 1 + μ) * Real.Gamma (J + k + 1 + μ) := by
+      rw [show ((J:ℝ) + (k + 1 : ℕ) + 1 + μ) = (J + k + 1 + μ) + 1 by push_cast; ring,
+        Real.Gamma_add_one hpos.ne']
+    have e2 : ((J + (k + 1) + 1).factorial : ℝ) = ((J:ℝ) + k + 2) * (J + k + 1).factorial := by
+      rw [show J + (k + 1) + 1 = (J + k + 1) + 1 by ring, Nat.factorial_succ]; push_cast; ring
+    rw [e1, e2]
+    have hJ : (0:ℝ) ≤ ((J + 1).factorial : ℝ) := by positivity
+    have hΓ : 0 ≤ Real.Gamma (J + 1 + μ) := (Real.Gamma_pos_of_pos (by positivity)).le
+    calc Real.Gamma (J + 1 + μ) * (((J:ℝ) + k + 2) * (J + k + 1).factorial)
+        = ((J:ℝ) + k + 2) * (Real.Gamma (J + 1 + μ) * (J + k + 1).factorial) := by ring
+      _ ≤ ((J:ℝ) + k + 2) * (Real.Gamma (J + k + 1 + μ) * (J + 1).factorial) :=
+          mul_le_mul_of_nonneg_left ih (by positivity)
+      _ ≤ ((J:ℝ) + k + 1 + μ) * (Real.Gamma (J + k + 1 + μ) * (J + 1).factorial) :=
+          mul_le_mul_of_nonneg_right (by linarith) (by positivity)
+      _ = _ := by ring
+
+/-- `(2)ₙ = (n+1)!`. -/
+private theorem LargeOrder.pochhammer_two (n : ℕ) : pochhammer 2 n = ((n + 1).factorial : ℂ) := by
+  induction n with
+  | zero => simp [pochhammer_zero]
+  | succ n ih => rw [pochhammer_succ, ih, Nat.factorial_succ (n + 1)]; push_cast; ring
+
 /-- DLMF 14.15.1: for fixed `ν` and `J ∈ ℕ`, `((1+x)/(1−x))^{μ/2} 𝖯^{−μ}_ν(x) = Σ_{j<J} (ν+1)_j
 (−ν)_j/(j! Γ(j+1+μ)) ((1−x)/2)^j + O(1/Γ(J+1+μ))` as `μ → ∞`, uniformly for `-1 < x < 1`. -/
 @[dlmf 14.15.E1]
 theorem ferrersP_large_order_uniform (ν : ℂ) (J : ℕ) :
     (fun p : ℝ × ℝ => ((1+p.2)/(1-p.2):ℂ)^((p.1:ℂ)/2)*ferrersP ν (-p.1) p.2-∑ j ∈ Finset.range J,
-        poch (ν+1) j*poch (-ν) j/((j.factorial:ℂ)*Gamma (j+1+p.1))*((1-p.2)/2:ℂ)^j)
+        pochhammer (ν+1) j*pochhammer (-ν) j/((j.factorial:ℂ)*Gamma (j+1+p.1))*((1-p.2)/2:ℂ)^j)
         =O[comap Prod.fst atTop ⊓ 𝓟 {p : ℝ × ℝ | p.2 ∈ Ioo (-1:ℝ) 1}]
         (fun p : ℝ × ℝ => 1/Gamma (J+1+p.1)) := by
-  sorry
+  set gc : ℕ → ℂ := gaussHypergeometricCoeff (ν + 1) (-ν) 2 with hgc
+  have hsum : Summable fun n => ‖gc n‖ := by
+    have h := CarlsonTheorem.isBigO_gaussHypergeometricCoeff (ν + 1) (-ν) 2 (fun k h => by
+      have := congrArg re h; simp at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)])
+    have he : (ν + 1 + -ν - 2 - 1 : ℂ).re = -2 := by ring_nf; simp
+    rw [he] at h
+    exact summable_of_isBigO_nat (Real.summable_nat_rpow.mpr (by norm_num)) h.norm_left
+  set C : ℝ := ((J + 1).factorial : ℝ) * ∑' n, ‖gc n‖ with hC
+  refine IsBigO.of_bound C ?_
+  have h1 : ∀ᶠ p : ℝ × ℝ in comap Prod.fst atTop ⊓ 𝓟 {p : ℝ × ℝ | p.2 ∈ Ioo (-1:ℝ) 1},
+      1 ≤ p.1 ∧ p.2 ∈ Ioo (-1:ℝ) 1 :=
+    ((tendsto_comap.eventually (eventually_ge_atTop 1)).filter_mono inf_le_left).and
+      (mem_inf_of_right (mem_principal_self _))
+  filter_upwards [h1] with p ⟨hμ, hx⟩
+  obtain ⟨μ, x⟩ := p
+  simp only at hμ hx ⊢
+  have hx1 : 0 < 1 - x := by linarith [hx.2]
+  have hx2 : 0 < 1 + x := by linarith [hx.1]
+  set z : ℂ := (1 - (x:ℂ)) / 2 with hzdef
+  have hzr : z = (((1 - x) / 2 : ℝ) : ℂ) := by rw [hzdef]; push_cast; ring
+  have hz1 : ‖z‖ ≤ 1 := by
+    rw [hzr, Complex.norm_real, Real.norm_eq_abs, abs_of_pos (by linarith)]; linarith [hx.1]
+  have hz : ‖z‖ < 1 := by
+    rw [hzr, Complex.norm_real, Real.norm_eq_abs, abs_of_pos (by linarith)]; linarith [hx.1]
+  have hpre : ((1 + (x:ℂ)) / (1 - x)) ^ ((μ:ℂ) / 2) * ferrersP ν (-μ) x =
+      regularizedGaussHGFun (ν + 1) (-ν) (1 - -(μ:ℂ)) z := by
+    have hw : (1 + (x:ℂ)) / (1 - x) = (((1 + x) / (1 - x) : ℝ) : ℂ) := by push_cast; ring
+    have hw0 : ((((1 + x) / (1 - x) : ℝ) : ℂ)) ≠ 0 := ofReal_ne_zero.mpr (by positivity)
+    rw [ferrersP, ← regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hz,
+        hw, ← mul_assoc,
+      ← cpow_add _ _ hw0, show (μ:ℂ) / 2 + -(μ:ℂ) / 2 = 0 by ring, cpow_zero, one_mul]
+  set s : ℕ → ℂ := fun n => pochhammer (ν + 1) n * pochhammer (-ν) n /
+      (n ! * Gamma (1 - -(μ:ℂ) + n)) *
+    z ^ n with hs
+  have hS : HasSum s _ :=
+      hasSum_regularizedGaussHypergeometricFun_coeff (ν + 1) (-ν) (1 - -(μ:ℂ)) hz
+  have htail := (hasSum_nat_add_iff' J).mpr hS
+  have hfin : ∑ j ∈ Finset.range J, pochhammer (ν+1) j * pochhammer (-ν) j / ((j.factorial:ℂ) *
+      Gamma (j + 1 + μ)) * ((1 - x) / 2 : ℂ) ^ j = ∑ j ∈ Finset.range J, s j := by
+    refine Finset.sum_congr rfl fun j _ => ?_
+    simp only [hs, hzdef]
+    rw [show (j:ℂ) + 1 + μ = 1 - -(μ:ℂ) + j by ring]
+  rw [hpre, hfin]
+  have hΓ : ∀ m : ℕ, Gamma (1 - -(μ:ℂ) + m) = ((Real.Gamma (m + 1 + μ) : ℝ) : ℂ) := fun m => by
+    rw [show 1 - -(μ:ℂ) + m = ((m + 1 + μ : ℝ) : ℂ) by push_cast; ring, Complex.Gamma_ofReal]
+  have hΓJ : Gamma ((J:ℂ) + 1 + μ) = ((Real.Gamma (J + 1 + μ) : ℝ) : ℂ) := by
+    rw [show (J:ℂ) + 1 + μ = ((J + 1 + μ : ℝ) : ℂ) by push_cast; ring, Complex.Gamma_ofReal]
+  have hGJ : 0 < Real.Gamma (J + 1 + μ) := Real.Gamma_pos_of_pos (by positivity)
+  set g : ℕ → ℝ := fun n => ((J + 1).factorial : ℝ) * ‖gc (n + J)‖ / Real.Gamma (J + 1 + μ)
+  have hg : HasSum g (((J + 1).factorial : ℝ) * (∑' n, ‖gc (n + J)‖) / Real.Gamma (J + 1 + μ)) :=
+    (((summable_nat_add_iff J).mpr hsum).hasSum.mul_left _).div_const _
+  have hbound : ∀ n, ‖s (n + J)‖ ≤ g n := by
+    intro n
+    have hGm : 0 < Real.Gamma ((n + J : ℕ) + 1 + μ) := Real.Gamma_pos_of_pos (by positivity)
+    have key := LargeOrder.Gamma_mul_factorial_le J hμ n
+    rw [show (J:ℝ) + n + 1 + μ = ((n + J : ℕ) : ℝ) + 1 + μ by push_cast; ring,
+      show J + n + 1 = (n + J) + 1 by omega] at key
+    simp only [hs, g, hgc, gaussHypergeometricCoeff, LargeOrder.pochhammer_two]
+    rw [hΓ]
+    simp only [norm_mul, norm_div, norm_pow, Complex.norm_real, Real.norm_eq_abs,
+      abs_of_pos hGm, Complex.norm_natCast]
+    set A := ‖pochhammer (ν + 1) (n + J)‖ * ‖pochhammer (-ν) (n + J)‖
+    have hA : 0 ≤ A := by positivity
+    have hm1 : (0:ℝ) < ((n + J) ! : ℝ) := by positivity
+    have hm2 : (0:ℝ) < ((n + J + 1).factorial : ℝ) := by positivity
+    have hinv : 1 / ((n + J) ! * Real.Gamma ((n + J : ℕ) + 1 + μ)) ≤
+        ((J + 1).factorial : ℝ) / (((n + J + 1).factorial : ℝ) * (n + J) !) /
+          Real.Gamma (J + 1 + μ) := by
+      rw [div_div, div_le_div_iff₀ (by positivity) (by positivity)]
+      nlinarith
+    calc A / ((n + J) ! * Real.Gamma ((n + J : ℕ) + 1 + μ)) * ‖z‖ ^ (n + J)
+        ≤ A / ((n + J) ! * Real.Gamma ((n + J : ℕ) + 1 + μ)) * 1 := by
+          gcongr; exact pow_le_one₀ (norm_nonneg _) hz1
+      _ = A * (1 / ((n + J) ! * Real.Gamma ((n + J : ℕ) + 1 + μ))) := by ring
+      _ ≤ A * (((J + 1).factorial : ℝ) / (((n + J + 1).factorial : ℝ) * (n + J) !) /
+          Real.Gamma (J + 1 + μ)) := mul_le_mul_of_nonneg_left hinv hA
+      _ = _ := by ring
+  have hle := htail.norm_le_of_bounded hg hbound
+  have htl : ∑' n, ‖gc (n + J)‖ ≤ ∑' n, ‖gc n‖ := by
+    rw [← hsum.sum_add_tsum_nat_add J]
+    exact le_add_of_nonneg_left (Finset.sum_nonneg fun _ _ => norm_nonneg _)
+  rw [one_div, norm_inv, hΓJ, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hGJ, hC]
+  calc _ ≤ _ := hle
+    _ ≤ ((J + 1).factorial : ℝ) * (∑' n, ‖gc n‖) / Real.Gamma (J + 1 + μ) := by gcongr
 
 /-- DLMF 14.15.2: for fixed real `ν ≥ −1/2`, `P^{−μ}_ν(x) = (1/Γ(μ+1)) (2μu/π)^{1/2} K_{ν+1/2}(μu)
 (1 + O(1/μ))` as `μ → ∞`, uniformly for `x > 1`, where `u = ½ ln((x+1)/(x−1))`. -/
@@ -233,7 +350,7 @@ quotient by the prefactor. -/
 theorem ferrersP_cylinder_uniform {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < 1) :
     (fun p : ℝ × ℝ × ℝ => let ν:=p.1; let μ:=p.2.1; let x:=p.2.2;
         ferrersP ν (-μ) x/(1/((ν+1/2:ℂ)^(1/4:ℂ)*2^((ν+μ:ℂ)/2)*Gamma
-        ((ν+μ:ℂ)/2+3/4))*legendreCylinderAmplitude ν μ x)-pcfU (μ-ν-1/2)
+        ((ν+μ:ℂ)/2+3/4))*legendreCylinderAmplitude ν μ x)-parabolicCylinderU (μ-ν-1/2)
         (Real.sqrt (2*ν+1)*legendreCylinderZeta ν μ x))
         =O[legendreUniformFilter
         {p : ℝ × ℝ × ℝ | p.2.2 ∈ Ico 0 1 ∧ δ*(p.1+1/2) ≤ p.2.1 ∧ p.2.1 ≤ p.1+1/2}]
@@ -250,7 +367,7 @@ theorem ferrersP_cylinder_uniform {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < 1) :
 theorem ferrersQ_cylinder_uniform {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < 1) :
     (fun p : ℝ × ℝ × ℝ => let ν:=p.1; let μ:=p.2.1; let x:=p.2.2;
         ferrersQ ν (-μ) x/(π/2*1/((ν+1/2:ℂ)^(1/4:ℂ)*2^((ν+μ:ℂ)/2)*Gamma
-        ((ν+μ:ℂ)/2+3/4))*legendreCylinderAmplitude ν μ x)-pcfUBar (μ-ν-1/2)
+        ((ν+μ:ℂ)/2+3/4))*legendreCylinderAmplitude ν μ x)-parabolicCylinderUBar (μ-ν-1/2)
         (Real.sqrt (2*ν+1)*legendreCylinderZeta ν μ x))
         =O[legendreUniformFilter
         {p : ℝ × ℝ × ℝ | p.2.2 ∈ Ico 0 1 ∧ δ*(p.1+1/2) ≤ p.2.1 ∧ p.2.1 ≤ p.1+1/2}]
@@ -267,7 +384,7 @@ theorem ferrersQ_cylinder_uniform {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < 1) :
 theorem ferrersP_cylinder_exponential_uniform {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < 1) :
     (fun p : ℝ × ℝ × ℝ => let ν:=p.1; let μ:=p.2.1; let x:=p.2.2;
         ferrersP ν (-μ) x/(1/((ν+1/2:ℂ)^(1/4:ℂ)*2^((ν+μ:ℂ)/2)*Gamma
-        ((ν+μ:ℂ)/2+3/4))*legendreCylinderAmplitude ν μ x*pcfU (μ-ν-1/2)
+        ((ν+μ:ℂ)/2+3/4))*legendreCylinderAmplitude ν μ x*parabolicCylinderU (μ-ν-1/2)
         (Real.sqrt (2*ν+1)*legendreCylinderZeta ν μ x))-1)
         =O[legendreUniformFilter
         {p : ℝ × ℝ × ℝ | p.2.2 ∈ Ioo (-1:ℝ) 1 ∧ p.1+1/2 ≤ p.2.1 ∧ p.2.1 ≤ (p.1+1/2)/δ}]

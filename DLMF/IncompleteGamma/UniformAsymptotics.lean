@@ -40,7 +40,8 @@ with the coefficient recursions, Paris's transition expansion and the inversion 
 * `gammaUniformEta_equation`, `gammaUniformEta_derivative`, `gammaUniformEta_normalization`:
   DLMF 8.12.1 and 8.12.2.
 * `gammaUniformP_identity`, `gammaUniformQ_negative_identity`,
-  `gammaUniform_scIncGamma_identity`: the exact representations DLMF 8.12.3, 8.12.5 and 8.12.6.
+  `gammaUniform_tricomiIncompleteGamma_identity`: the exact representations DLMF 8.12.3, 8.12.5 and
+  8.12.6.
 * `gammaUniformS_uniform_expansion`, `gammaUniformT_uniform_expansion`: the uniform expansions
   DLMF 8.12.7 and 8.12.8.
 * `gammaUniformC_first`: DLMF 8.12.9.
@@ -48,8 +49,8 @@ with the coefficient recursions, Paris's transition expansion and the inversion 
   `gammaUniformAlpha_hasSum`: DLMF 8.12.11–8.12.13.
 * `gammaUniformAlpha_printed`, `gammaUniformC_at_zero_printed`: the printed coefficients of
   DLMF 8.12.14 and 8.12.17.
-* `normIncGammaQ_diagonal_uniform_asymptotic`, `normIncGammaQ_negative_diagonal_asymptotic`:
-  DLMF 8.12.15 and 8.12.16.
+* `regularizedIncompleteGammaQ_diagonal_uniform_asymptotic`,
+  `regularizedIncompleteGammaQ_negative_diagonal_asymptotic`: DLMF 8.12.15 and 8.12.16.
 * `gammaParis_uniform_expansion`, `gammaParis_printed`: DLMF 8.12.18 and 8.12.20.
 * `gammaQInverse_spec`, `gammaQInverse_median_asymptotic`: DLMF 8.12.21 and 8.12.22.
 
@@ -350,23 +351,23 @@ theorem gammaUniformEta_equation {w : ℂ} (hw : |w.im| < 2*π) :
 /-- The exact S remainder, with w the logarithm of λ. -/
 @[dlmf 8.12.E4]
 def gammaUniformS (a w : ℂ) : ℂ :=
-  normIncGammaQOnLog a (log a+w)-erfc (gammaUniformEtaOnLog w*(a/2)^(1/2 : ℂ))/2
+  regularizedIncompleteGammaQOnLog a (log a+w)-erfc (gammaUniformEtaOnLog w*(a/2)^(1/2 : ℂ))/2
 
 /-- The exact T remainder with the removable integer-parameter quotient cancelled. -/
 def gammaUniformT (a w : ℂ) : ℂ :=
-  I*(-exp (π*I*a)*Gamma (a+1)/(2*π*I)*upperIncGammaOnLog (-a) (log a+w+π*I)-erfc
+  I*(-exp (π*I*a)*Gamma (a+1)/(2*π*I)*upperIncompleteGammaOnLog (-a) (log a+w+π*I)-erfc
       (I*gammaUniformEtaOnLog w*(a/2)^(1/2 : ℂ))/2)
 
-/-- Identity under the stated parameter and domain assumptions: `normIncGammaPOnLog a (log
+/-- Identity under the stated parameter and domain assumptions: `regularizedGammaOnLog a (log
 a+w)=erfc (-gammaUniformEtaOnLog w*(a/2)^(1/2 : ℂ))/2-gammaUniformS a w`. -/
 @[dlmf 8.12.E3]
 theorem gammaUniformP_identity (a w : ℂ) :
-    normIncGammaPOnLog a (log a+w)=erfc
+    regularizedGammaOnLog a (log a+w)=erfc
         (-gammaUniformEtaOnLog w*(a/2)^(1/2 : ℂ))/2-gammaUniformS a w := by
   have h : ∀ u : ℂ, erfc (-u) + erfc u = 2 := by
     intro u; simp only [erfc, erf, neg_sq]; ring
   have := h (gammaUniformEtaOnLog w*(a/2)^(1/2 : ℂ))
-  rw [gammaUniformS, normIncGammaQOnLog, neg_mul]
+  rw [gammaUniformS, regularizedIncompleteGammaQOnLog, neg_mul]
   linear_combination -this/2
 
 /-- Points of the slit plane are not poles of `Γ(a+1)`. -/
@@ -380,14 +381,14 @@ theorem slitPlane_add_one_ne_neg_nat {a : ℂ} (ha : a ∈ slitPlane) : ∀ n : 
 @[dlmf 8.12.E5]
 theorem gammaUniformQ_negative_identity {a : ℂ} (ha : a ∈ slitPlane) {w : ℂ} {ε : ℝ}
     (hε : ε=1 ∨ ε = -1) :
-    -exp (ε*π*I*a)*Gamma (a+1)/(2*π*I)*upperIncGammaOnLog (-a) (log a+w+ε*π*I)=ε/2*erfc
+    -exp (ε*π*I*a)*Gamma (a+1)/(2*π*I)*upperIncompleteGammaOnLog (-a) (log a+w+ε*π*I)=ε/2*erfc
         (ε*I*gammaUniformEtaOnLog w*(a/2)^(1/2 : ℂ))-I*gammaUniformT a w := by
   have hG := Gamma_ne_zero (slitPlane_add_one_ne_neg_nat ha)
   rcases hε with rfl | rfl
   · simp only [gammaUniformT]
     push_cast
     ring_nf; rw [I_sq]; ring
-  · have hj := upperIncGammaOnLog_jump (-a) (log a+w)
+  · have hj := upperIncompleteGammaOnLog_jump (-a) (log a+w)
     rw [show 1-(-a)=a+1 by ring] at hj
     have he : ∀ u : ℂ, erfc (-u) + erfc u = 2 := by
       intro u; simp only [erfc, erf, neg_sq]; ring
@@ -403,14 +404,15 @@ theorem gammaUniformQ_negative_identity {a : ℂ} (ha : a ∈ slitPlane) {w : �
     have hI3 : I^3 = -I := by rw [pow_succ, I_sq]; ring
     rw [hI3]
     linear_combination hj + π*I*h2
-      - Gamma (1+a)*exp (π*I*a)*upperIncGammaOnLog (-a) (π*I+log a+w)*I_sq
+      - Gamma (1+a)*exp (π*I*a)*upperIncompleteGammaOnLog (-a) (π*I+log a+w)*I_sq
 
-/-- Identity under the stated parameter and domain assumptions: `exp (-a*(log a+w))*scIncGamma
-(-a) (-a*exp w)=cos (π*a)-2*sin (π*a)*(exp (a*gammaUniformEtaOnLog w^2/2)/Real.sqrt π*dawsonF
-(gammaUniformEtaOnLog w*(a/2)^(1/2 : ℂ))+gammaUniformT a w)`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`exp (-a*(log a+w))*tricomiIncompleteGamma (-a) (-a*exp w)=cos (π*a)-2*sin (π*a)*(exp
+(a*gammaUniformEtaOnLog w^2/2)/Real.sqrt π*dawsonF (gammaUniformEtaOnLog w*(a/2)^(1/2 :
+ℂ))+gammaUniformT a w)`. -/
 @[dlmf 8.12.E6]
-theorem gammaUniform_scIncGamma_identity {a : ℂ} (ha : a ∈ slitPlane) {w : ℂ} :
-    exp (-a*(log a+w))*scIncGamma (-a) (-a*exp w)=cos (π*a)-2*sin
+theorem gammaUniform_tricomiIncompleteGamma_identity {a : ℂ} (ha : a ∈ slitPlane) {w : ℂ} :
+    exp (-a*(log a+w))*tricomiIncompleteGamma (-a) (-a*exp w)=cos (π*a)-2*sin
         (π*a)*(exp (a*gammaUniformEtaOnLog w^2/2)/Real.sqrt π*dawsonF
         (gammaUniformEtaOnLog w*(a/2)^(1/2 : ℂ))+gammaUniformT a w) := by
   have ha0 : a ≠ 0 := slitPlane_ne_zero ha
@@ -422,7 +424,8 @@ theorem gammaUniform_scIncGamma_identity {a : ℂ} (ha : a ∈ slitPlane) {w : �
     have hc : Complex.cos (π*n)=(-1)^n := by
       rw [show (π:ℂ)*n=((n*π:ℝ):ℂ) by push_cast; ring, ← ofReal_cos,
                                         Real.cos_nat_mul_pi]; push_cast; rfl
-    rw [hs, hc, scIncGamma_neg_nat, mul_pow, neg_pow, show -(n:ℂ)*(log n+w)=-(n*(log n+w)) by ring,
+    rw [hs, hc, tricomiIncompleteGamma_neg_nat, mul_pow, neg_pow,
+        show -(n:ℂ)*(log n+w)=-(n*(log n+w)) by ring,
       Complex.exp_neg, show (n:ℂ)*(log n+w)=(n:ℕ)*(log n+w) by rfl, Complex.exp_nat_mul, hev]
     have : (n:ℂ)*exp w ≠ 0 := mul_ne_zero ha0 (Complex.exp_ne_zero w)
     field_simp
@@ -439,7 +442,7 @@ theorem gammaUniform_scIncGamma_identity {a : ℂ} (ha : a ∈ slitPlane) {w : �
     · have : a = ((-(j:ℝ)) : ℝ) := by rw [hk']; push_cast; ring
       rw [this, ofReal_mem_slitPlane] at ha
       linarith [(Nat.cast_nonneg j : (0:ℝ) ≤ j)]
-  have hU := upperIncGammaOnLog_halfTurn (log a+w) hreg (ε := 1) (Or.inl rfl)
+  have hU := upperIncompleteGammaOnLog_halfTurn (log a+w) hreg (ε := 1) (Or.inl rfl)
   rw [hev] at hU
   have hr := Complex.Gamma_mul_Gamma_one_sub (-a)
   rw [show 1-(-a)=a+1 by ring, show (π:ℂ)*(-a)=-(π*a) by ring, Complex.sin_neg] at hr
@@ -482,7 +485,8 @@ theorem gammaUniform_scIncGamma_identity {a : ℂ} (ha : a ∈ slitPlane) {w : �
   have hpm' : (Complex.cos (a*π)+Complex.sin (a*π)*I)*exp (-(a*π*I))=1 := by
     rw [← hpm]; ring_nf
   field_simp
-  linear_combination (-(Real.sqrt π:ℂ)*exp (-(a*(log a+w)))*scIncGamma (-a) (-(a*exp w)))*hpm'
+  linear_combination (-(Real.sqrt π:ℂ)*exp (-(a*(log a+w)))*tricomiIncompleteGamma (-a)
+      (-(a*exp w)))*hpm'
     + Complex.sin (a*π)*(2*exp (a*gammaUniformEtaOnLog w^2/2)*dawsonF
         (gammaUniformEtaOnLog w*(a/2)^(1/2 : ℂ)))*I_sq
 
@@ -1050,23 +1054,25 @@ theorem gammaUniformC_at_zero_printed  :
 
 /-- Identity under the stated parameter and domain assumptions: `HasAsymptoticExpansion (logSector
 (π-δ)) (fun k w => exp (-((k : ℂ)+1/2)*w)/Real.sqrt (2*π)) (fun k => gammaUniformC k 0) (fun w
-=> normIncGammaQOnLog (exp w) w-1/2)`. -/
+=> regularizedIncompleteGammaQOnLog (exp w) w-1/2)`. -/
 @[dlmf 8.12.E15]
-theorem normIncGammaQ_diagonal_uniform_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π) :
+theorem regularizedIncompleteGammaQ_diagonal_uniform_asymptotic {δ : ℝ} (hδ : 0 < δ)
+    (hδ1 : δ < π) :
     HasAsymptoticExpansion (logSector (π-δ)) (fun k w => exp (-((k : ℂ)+1/2)*w)/Real.sqrt (2*π))
-        (fun k => gammaUniformC k 0) (fun w => normIncGammaQOnLog (exp w) w-1/2) := by
+        (fun k => gammaUniformC k 0) (fun w => regularizedIncompleteGammaQOnLog (exp w) w-1/2) := by
   sorry
 
 /-- Identity under the stated parameter and domain assumptions: `HasAsymptoticExpansion (logSector
 (π-δ)) (fun k w => exp (-((k : ℂ)+1/2)*w)/Real.sqrt (2*π)) (fun k => -I*(-1 :
 ℂ)^k*gammaUniformC k 0) (fun w => -exp (ε*π*I*exp w)*Gamma (exp
-w+1)/(2*π*I)*upperIncGammaOnLog (-exp w) (w+ε*π*I)-ε/2)`. -/
+w+1)/(2*π*I)*upperIncompleteGammaOnLog (-exp w) (w+ε*π*I)-ε/2)`. -/
 @[dlmf 8.12.E16]
-theorem normIncGammaQ_negative_diagonal_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π) {ε : ℝ}
+theorem regularizedIncompleteGammaQ_negative_diagonal_asymptotic {δ : ℝ} (hδ : 0 < δ)
+    (hδ1 : δ < π) {ε : ℝ}
     (hε : ε=1 ∨ ε = -1) :
     HasAsymptoticExpansion (logSector (π-δ)) (fun k w => exp (-((k : ℂ)+1/2)*w)/Real.sqrt (2*π))
         (fun k => -I*(-1 : ℂ)^k*gammaUniformC k 0)
-        (fun w => -exp (ε*π*I*exp w)*Gamma (exp w+1)/(2*π*I)*upperIncGammaOnLog (-exp w)
+        (fun w => -exp (ε*π*I*exp w)*Gamma (exp w+1)/(2*π*I)*upperIncompleteGammaOnLog (-exp w)
         (w+ε*π*I)-ε/2) := by
   sorry
 
@@ -1079,7 +1085,7 @@ def gammaParisD (χ : ℂ) : ℂ :=
 def gammaParisRawCoeff (upper : Bool) (χ : ℂ) (k : ℕ) : ℂ :=
   asymptoticCoeff (fun t : ℝ => let z : ℂ := t^2; let a := z-χ*t;
       Gamma a*z^(1/2-a)*exp
-      z*(if upper then normIncGammaQContinued a z else normIncGammaPContinued a z)) k
+      z*(if upper then regularizedIncompleteGammaQ a z else regularizedGamma a z)) k
 
 /-- The coefficients A_k(χ) fixed by the two complementary transitions. -/
 def gammaParisA (k : ℕ) (χ : ℂ) : ℂ :=
@@ -1107,8 +1113,9 @@ theorem gammaParis_uniform_expansion (upper : Bool) {δ B : ℝ} (hδ : 0 < δ) 
                                 (if upper then 0 ≤ (p.2*exp (p.1/2)).re else (p.2*exp (p.1/2)).re ≤
                                 0)}) (fun p => let a := exp p.1-p.2*exp (p.1/2);
         let ε : ℂ := if upper then 1 else -1;
-        Gamma a*exp ((1/2-a)*p.1+exp p.1)*(if upper then normIncGammaQContinued a (exp p.1) else
-        normIncGammaPContinued a (exp p.1))-gammaParisD
+        Gamma a*exp ((1/2-a)*p.1+exp p.1)*(if upper then
+            regularizedIncompleteGammaQ a (exp p.1) else
+        regularizedGamma a (exp p.1))-gammaParisD
         (ε*p.2)*(∑ k ∈ Finset.range N, gammaParisA k p.2*exp (-(k : ℂ)*p.1/2))+ε*(∑ k ∈
         Finset.range N, gammaParisB k p.2*exp (-(k : ℂ)*p.1/2)))
         (fun p => exp (-(N : ℂ)*p.1/2)) := by
@@ -1118,27 +1125,30 @@ theorem gammaParis_uniform_expansion (upper : Bool) {δ B : ℝ} (hδ : 0 < δ) 
 @[dlmf 8.12.E21]
 def gammaQInverse (a q : ℝ) : ℝ≥0∞ :=
   if q=0 then ∞ else if q=1 then 0 else
-      ENNReal.ofReal (Classical.epsilon (fun x : ℝ => 0 ≤ x ∧ (normIncGammaQContinued a x).re=q))
+      ENNReal.ofReal (Classical.epsilon
+          (fun x : ℝ => 0 ≤ x ∧ (regularizedIncompleteGammaQ a x).re=q))
 
 /-- The continued `P(a,x)` for real `a > 0`, `x ≥ 0` is TauCeti's regularized lower Gamma. -/
-theorem IncompleteGammaUniform.normIncGammaPContinued_ofReal {a : ℝ} (ha : 0 < a)
+theorem IncompleteGammaUniform.regularizedGamma_ofReal {a : ℝ} (ha : 0 < a)
     {x : ℝ} (hx : 0 ≤ x) :
-    normIncGammaPContinued a x = ((TauCeti.lowerIncompleteGamma a x / Real.Gamma a : ℝ) : ℂ) := by
+    regularizedGamma a x = ((TauCeti.lowerIncompleteGamma a x / Real.Gamma a : ℝ) : ℂ) := by
   rcases hx.eq_or_lt with h0 | h0
   · subst h0
-    rw [TauCeti.lowerIncompleteGamma_eq_zero_of_nonpos_right a le_rfl, normIncGammaPContinued,
+    rw [TauCeti.lowerIncompleteGamma_eq_zero_of_nonpos_right a le_rfl, regularizedGamma,
       ofReal_zero, zero_cpow (ofReal_ne_zero.mpr ha.ne')]
     simp
   · have ha' : ∀ n : ℕ, (a:ℂ) ≠ -n := fun n h => by
       have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg n : (0:ℝ) ≤ n)]
-    rw [normIncGammaPContinued_eq ha', normIncGammaP, lowerIncGamma_ofReal ha h0,
+    rw [regularizedGamma_eq ha',
+        lowerIncompleteGamma_ofReal ha h0,
       Complex.Gamma_ofReal]
     push_cast; rfl
 
 /-- Existence of a real point `x ≥ 0` with `Q(a,x) = q` for `0 < q < 1`. -/
-theorem IncompleteGammaUniform.exists_normIncGammaQ_eq {a : ℝ} (ha : 0 < a) {q : ℝ} (hq : 0 < q)
+theorem IncompleteGammaUniform.exists_re_regularizedIncompleteGammaQ_eq {a : ℝ} (ha : 0 < a)
+    {q : ℝ} (hq : 0 < q)
     (hq1 : q < 1) :
-    ∃ x : ℝ, 0 ≤ x ∧ (normIncGammaQContinued a x).re = q := by
+    ∃ x : ℝ, 0 ≤ x ∧ (regularizedIncompleteGammaQ a x).re = q := by
   set f : ℝ → ℝ := fun x => TauCeti.lowerIncompleteGamma a x / Real.Gamma a
   have hf : Continuous f := (TauCeti.continuous_lowerIncompleteGamma a).div_const _
   have hG := Real.Gamma_pos_of_pos ha
@@ -1154,17 +1164,18 @@ theorem IncompleteGammaUniform.exists_normIncGammaQ_eq {a : ℝ} (ha : 0 < a) {q
   obtain ⟨x, hx, hfx⟩ := intermediate_value_Icc (le_max_right R 0) hf.continuousOn
     ⟨by rw [h0]; linarith, hR'.le⟩
   refine ⟨x, hx.1, ?_⟩
-  rw [normIncGammaQContinued, IncompleteGammaUniform.normIncGammaPContinued_ofReal ha hx.1, sub_re,
+  rw [regularizedIncompleteGammaQ, IncompleteGammaUniform.regularizedGamma_ofReal ha hx.1, sub_re,
       one_re, ofReal_re]
   change 1 - f x = q
   rw [hfx]; ring
 
 /-- Identity under the stated parameter and domain assumptions: `(if gammaQInverse a q=∞ then 0
-else (normIncGammaQContinued a (gammaQInverse a q).toReal).re)=q ∧ (q ≠ 0 → gammaQInverse a q
+else (regularizedIncompleteGammaQ a (gammaQInverse a q).toReal).re)=q ∧ (q ≠ 0 → gammaQInverse a q
 ≠ ∞)`. -/
 @[dlmf 8.12.E21]
 theorem gammaQInverse_spec {a q : ℝ} (ha : 0 < a) (hq : 0 ≤ q) (hq1 : q ≤ 1) :
-    (if gammaQInverse a q=∞ then 0 else (normIncGammaQContinued a (gammaQInverse a q).toReal).re)=q
+    (if gammaQInverse a q=∞ then 0 else
+        (regularizedIncompleteGammaQ a (gammaQInverse a q).toReal).re)=q
         ∧ (q ≠ 0 → gammaQInverse a q ≠ ∞) := by
   rcases hq.eq_or_lt with h0 | h0
   · subst h0; simp [gammaQInverse]
@@ -1172,14 +1183,14 @@ theorem gammaQInverse_spec {a q : ℝ} (ha : 0 < a) (hq : 0 ≤ q) (hq1 : q ≤ 
   · subst h1
     have : gammaQInverse a 1 = 0 := by simp [gammaQInverse]
     simp only [this, ENNReal.zero_ne_top, ite_false, ENNReal.toReal_zero, ofReal_zero,
-      normIncGammaQContinued, normIncGammaPContinued, zero_cpow (ofReal_ne_zero.mpr ha.ne')]
+      regularizedIncompleteGammaQ, regularizedGamma, zero_cpow (ofReal_ne_zero.mpr ha.ne')]
     simp
-  have hex := IncompleteGammaUniform.exists_normIncGammaQ_eq ha h0 h1
+  have hex := IncompleteGammaUniform.exists_re_regularizedIncompleteGammaQ_eq ha h0 h1
   have hs := Classical.epsilon_spec
-      (p := fun x : ℝ => 0 ≤ x ∧ (normIncGammaQContinued a x).re = q) hex
+      (p := fun x : ℝ => 0 ≤ x ∧ (regularizedIncompleteGammaQ a x).re = q) hex
   have hg : gammaQInverse a q =
       ENNReal.ofReal (Classical.epsilon
-      (fun x : ℝ => 0 ≤ x ∧ (normIncGammaQContinued a x).re=q)) := by
+      (fun x : ℝ => 0 ≤ x ∧ (regularizedIncompleteGammaQ a x).re=q)) := by
     simp [gammaQInverse, h0.ne', h1.ne]
   rw [hg]
   simp only [ENNReal.ofReal_ne_top, ite_false, ENNReal.toReal_ofReal hs.1]

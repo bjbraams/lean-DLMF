@@ -15,9 +15,9 @@ public import TauCeti.RingTheory.Polynomial.Hermite.Derivative
 /-!
 # Parabolic cylinder functions: Weber's equation, recurrences and integrals
 
-Weber's function `U(a,z)` (`pcfU`) is the solution of `w'' = (z²/4 + a) w` that is recessive as
-`z → +∞` (DLMF Chapter 12, Temme §7.3.3). It is defined, following DLMF 12.4.1, through the even
-and odd Kummer solutions `u₁(a,z) = e^{-z²/4} M(a/2 + 1/4, 1/2, z²/2)` and
+Weber's function `U(a,z)` (`parabolicCylinderU`) is the solution of `w'' = (z²/4 + a) w` that is
+recessive as `z → +∞` (DLMF Chapter 12, Temme §7.3.3). It is defined, following DLMF 12.4.1, through
+the even and odd Kummer solutions `u₁(a,z) = e^{-z²/4} M(a/2 + 1/4, 1/2, z²/2)` and
 `u₂(a,z) = z e^{-z²/4} M(a/2 + 3/4, 3/2, z²/2)` with the initial values 12.2.6 and 12.2.7, so
 that `U(a, ·)` is entire for every `a`. This file proves the relation to Tricomi's function,
 the asymptotic expansion and the Laplace-type integral of `U`. Weber's equation, the initial
@@ -26,16 +26,16 @@ values, uniqueness of solutions, the recurrences and the Hermite specialization 
 
 ## Main results
 
-* `pcfU_eq_kummerU`: `U(a,z) = 2^{-1/4-a/2} e^{-z²/4} U(a/2 + 1/4, 1/2, z²/2)` for `re z > 0`
-  (DLMF 12.7.14).
-* `hasAsymptoticExpansion_pcfU`:
+* `parabolicCylinderU_eq_kummerU`: `U(a,z) = 2^{-1/4-a/2} e^{-z²/4} U(a/2 + 1/4, 1/2, z²/2)` for
+  `re z > 0` (DLMF 12.7.14).
+* `hasAsymptoticExpansion_parabolicCylinderU`:
   `U(a,x) ~ e^{-x²/4} x^{-a-1/2} ∑ (-1)^s (a + 1/2)_{2s}/(s! (2x²)^s)` (DLMF 12.9.1).
-* `pcfU_eq_integral`: `U(a,z) = e^{-z²/4}/Γ(1/2+a) ∫₀^∞ t^{a-1/2} e^{-t²/2-zt} dt` for
+* `parabolicCylinderU_eq_integral`: `U(a,z) = e^{-z²/4}/Γ(1/2+a) ∫₀^∞ t^{a-1/2} e^{-t²/2-zt} dt` for
   `re a > -1/2` (DLMF 12.5.1).
 
 ## Implementation notes
 
-Whittaker's `D_ν(z) = U(-ν - 1/2, z)` is `pcfD`.
+Whittaker's `D_ν(z) = U(-ν - 1/2, z)` is `parabolicCylinderD`.
 -/
 
 @[expose] public section
@@ -53,8 +53,8 @@ namespace DLMF.Confluent
 /-- **`U(a,z)` through Tricomi's function** (DLMF 12.7.14), for `re z > 0`:
 `U(a,z) = 2^{-1/4 - a/2} e^{-z²/4} U(a/2 + 1/4, 1/2, z²/2)`. -/
 @[dlmf 12.7.E14]
-theorem pcfU_eq_kummerU (a : ℂ) {z : ℂ} (hre : 0 < z.re) :
-    pcfU a z = (2 : ℂ) ^ (-(1 / 4) - a / 2) * exp (-z ^ 2 / 4) *
+theorem parabolicCylinderU_eq_kummerU (a : ℂ) {z : ℂ} (hre : 0 < z.re) :
+    parabolicCylinderU a z = (2 : ℂ) ^ (-(1 / 4) - a / 2) * exp (-z ^ 2 / 4) *
       kummerU (a / 2 + 1 / 4) (1 / 2) (z ^ 2 / 2) := by
   have hb : ∀ k : ℤ, (1 / 2 : ℂ) ≠ k := fun k h => by
     have := congrArg Complex.re h
@@ -80,7 +80,8 @@ theorem pcfU_eq_kummerU (a : ℂ) {z : ℂ} (hre : 0 < z.re) :
   have h2pow : (2 : ℂ) ^ (-(a / 2 - 1 / 4)) = (2 : ℂ) ^ (-(1 / 4) - a / 2) * s2 := by
     rw [hs2, ← two_cpow_half, ← Complex.cpow_add _ _ two_ne_zero]
     ring_nf
-  rw [kummerU_eq_connection _ _ _ hb, kummerUConnection, pcfU, pcfEven, pcfOdd,
+  rw [kummerU_eq_connection _ _ _ hb, kummerUConnection, parabolicCylinderU, parabolicCylinderEven,
+      parabolicCylinderOdd,
     show (1 : ℂ) - 1 / 2 = 1 / 2 by ring, show a / 2 + 1 / 4 - 1 / 2 + 1 = 3 / 4 + a / 2 by ring,
     show (1 / 2 : ℂ) - 1 = -1 / 2 by ring, show (2 : ℂ) - 1 / 2 = 3 / 2 by ring,
     show a / 2 + 3 / 4 = 3 / 4 + a / 2 by ring, show a / 2 + 1 / 4 = 1 / 4 + a / 2 by ring,
@@ -96,24 +97,25 @@ theorem pcfU_eq_kummerU (a : ℂ) {z : ℂ} (hre : 0 < z.re) :
   linear_combination (-(z * N * G1⁻¹)) * hs2sq
 
 /-- Legendre duplication for Pochhammer symbols: `(2c)_{2s} = 4^s (c)_s (c + 1/2)_s`. -/
-theorem poch_two_mul (c : ℂ) (s : ℕ) :
-    poch (2 * c) (2 * s) = 4 ^ s * poch c s * poch (c + 1 / 2) s := by
+theorem pochhammer_two_mul (c : ℂ) (s : ℕ) :
+    pochhammer (2 * c) (2 * s) = 4 ^ s * pochhammer c s * pochhammer (c + 1 / 2) s := by
   induction s with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ s ih =>
-    rw [show 2 * (s + 1) = 2 * s + 1 + 1 by ring, poch_succ, poch_succ, ih, poch_succ c,
-      poch_succ (c + 1 / 2), pow_succ]
+    rw [show 2 * (s + 1) = 2 * s + 1 + 1 by ring, pochhammer_succ, pochhammer_succ, ih,
+                                              pochhammer_succ c,
+      pochhammer_succ (c + 1 / 2), pow_succ]
     push_cast
     ring
 
 /-- **Asymptotic expansion of `U(a,x)`** (DLMF 12.9.1, Temme §7.3.3):
 `U(a,x) ~ e^{-x²/4} x^{-a-1/2} ∑ (-1)^s (a + 1/2)_{2s} / (s! (2x²)^s)` as `x → +∞`. -/
 @[dlmf 12.9.E1]
-theorem hasAsymptoticExpansion_pcfU (a : ℂ) :
+theorem hasAsymptoticExpansion_parabolicCylinderU (a : ℂ) :
     HasAsymptoticExpansion atTop
       (fun (s : ℕ) (x : ℝ) => exp (-(x : ℂ) ^ 2 / 4) * (x : ℂ) ^ (-a - 1 / 2 - 2 * (s : ℂ)))
-      (fun s => (-1) ^ s * poch (a + 1 / 2) (2 * s) / (2 ^ s * s.factorial))
-      (fun x : ℝ => pcfU a x) := by
+      (fun s => (-1) ^ s * pochhammer (a + 1 / 2) (2 * s) / (2 ^ s * s.factorial))
+      (fun x : ℝ => parabolicCylinderU a x) := by
   set α : ℂ := a / 2 + 1 / 4 with hα
   have hsq : Tendsto (fun x : ℝ => x ^ 2 / 2) atTop atTop :=
     (tendsto_pow_atTop two_ne_zero).atTop_div_const two_pos
@@ -124,12 +126,12 @@ theorem hasAsymptoticExpansion_pcfU (a : ℂ) :
   · refine (h.congr' ?_).congr_coeff ?_
     · filter_upwards [eventually_gt_atTop 0] with x hx
       simp only [Function.comp_apply, smul_eq_mul]
-      rw [pcfU_eq_kummerU a (by simpa using hx)]
+      rw [parabolicCylinderU_eq_kummerU a (by simpa using hx)]
       push_cast
       ring
     · funext s
       rw [tricomiCoeff, show α - 1 / 2 + 1 = α + 1 / 2 by ring, smul_eq_mul,
-        show a + 1 / 2 = 2 * α by rw [hα]; ring, poch_two_mul]
+        show a + 1 / 2 = 2 * α by rw [hα]; ring, pochhammer_two_mul]
       have hf : (s.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr s.factorial_ne_zero
       rw [show (4 : ℂ) ^ s = 2 ^ s * 2 ^ s by rw [← mul_pow]; norm_num]
       field_simp
@@ -209,8 +211,8 @@ theorem integrableOn_pcfIntegrand {c : ℂ} (hc : -1 < c.re) (z : ℂ) :
     norm_pcfIntegrand_le c z le_rfl ht
 
 /-- Differentiation of the moments in `z`: `∂_z M_c(z) = -M_{c+1}(z)`. -/
-theorem hasDerivAt_pcfMoment {c : ℂ} (hc : -1 < c.re) (z₀ : ℂ) :
-    HasDerivAt (pcfMoment c) (-pcfMoment (c + 1) z₀) z₀ := by
+theorem hasDerivAt_parabolicCylinderMoment {c : ℂ} (hc : -1 < c.re) (z₀ : ℂ) :
+    HasDerivAt (parabolicCylinderMoment c) (-parabolicCylinderMoment (c + 1) z₀) z₀ := by
   set R : ℝ := ‖z₀‖ + 1
   have hc1 : -1 < (c + 1).re := by simp; linarith
   have key := hasDerivAt_integral_of_dominated_loc_of_deriv_le (μ := volume.restrict (Ioi 0))
@@ -240,13 +242,14 @@ theorem hasDerivAt_pcfMoment {c : ℂ} (hc : -1 < c.re) (z₀ : ℂ) :
       simp only [id]
       ring)
   have hfun : (fun z => ∫ t in Ioi (0 : ℝ), (t : ℂ) ^ c * exp (-(t : ℂ) ^ 2 / 2 - z * t)) =
-      pcfMoment c := rfl
+      parabolicCylinderMoment c := rfl
   rw [hfun, integral_neg] at key
   exact key.2
 
 /-- Integration by parts: `M_{c+2}(z) + z M_{c+1}(z) = (c + 1) M_c(z)`. -/
-theorem pcfMoment_ibp {c : ℂ} (hc : -1 < c.re) (z : ℂ) :
-    pcfMoment (c + 2) z + z * pcfMoment (c + 1) z = (c + 1) * pcfMoment c z := by
+theorem parabolicCylinderMoment_ibp {c : ℂ} (hc : -1 < c.re) (z : ℂ) :
+    parabolicCylinderMoment (c + 2) z + z * parabolicCylinderMoment (c + 1) z = (c + 1) *
+        parabolicCylinderMoment c z := by
   have hc1 : -1 < (c + 1).re := by simp; linarith
   have hc2 : -1 < (c + 2).re := by simp; linarith
   have hc0 : c + 1 ≠ 0 := fun h => by
@@ -297,21 +300,22 @@ theorem pcfMoment_ibp {c : ℂ} (hc : -1 < c.re) (z : ℂ) :
     rw [Complex.zero_cpow hc0, zero_mul]
   rw [hg0, sub_zero] at hibp
   have hsplit : ∫ t in Ioi (0 : ℝ), g' t =
-      (c + 1) * pcfMoment c z - pcfMoment (c + 2) z - z * pcfMoment (c + 1) z := by
+      (c + 1) * parabolicCylinderMoment c z - parabolicCylinderMoment (c + 2) z - z *
+          parabolicCylinderMoment (c + 1) z := by
     have i0 := (integrableOn_pcfIntegrand hc z).const_mul (c + 1)
     have i1 := integrableOn_pcfIntegrand hc2 z
     have i2 := (integrableOn_pcfIntegrand hc1 z).const_mul z
     have e1 := integral_sub i0 i1
     have e2 := integral_sub (i0.sub i1) i2
     simp only [Pi.sub_apply] at e1 e2
-    simp only [pcfMoment]
+    simp only [parabolicCylinderMoment]
     rw [← integral_const_mul, ← integral_const_mul, ← e1, ← e2]
   rw [hsplit] at hibp
   linear_combination -hibp
 
 /-- `M_c(0) = 2^{(c-1)/2} Γ((c+1)/2)`, in the form `(1/2) Γ((c+1)/2) 2^{(c+1)/2}`. -/
-theorem pcfMoment_zero {c : ℂ} (hc : -1 < c.re) :
-    pcfMoment c 0 = 1 / 2 * Gamma ((c + 1) / 2) * (2 : ℂ) ^ ((c + 1) / 2) := by
+theorem parabolicCylinderMoment_zero {c : ℂ} (hc : -1 < c.re) :
+    parabolicCylinderMoment c 0 = 1 / 2 * Gamma ((c + 1) / 2) * (2 : ℂ) ^ ((c + 1) / 2) := by
   have h := DLMF.Gamma.Gamma_laplace_power (μ := 2) (ν := c + 1) (z := 1 / 2) (by norm_num)
     (by norm_num) (by simp; linarith) (by norm_num)
   have hinv : (1 / 2 : ℂ) ^ (-((c + 1) / 2)) = (2 : ℂ) ^ ((c + 1) / 2) := by
@@ -320,7 +324,7 @@ theorem pcfMoment_zero {c : ℂ} (hc : -1 < c.re) :
       exact Real.pi_ne_zero.symm), Complex.cpow_neg,
       inv_inv]
   rw [hinv, show c + 1 - 1 = c by ring] at h
-  rw [h, pcfMoment]
+  rw [h, parabolicCylinderMoment]
   refine setIntegral_congr_fun measurableSet_Ioi fun t _ => ?_
   simp only [Complex.cpow_two, zero_mul, sub_zero]
   ring_nf
@@ -328,20 +332,22 @@ theorem pcfMoment_zero {c : ℂ} (hc : -1 < c.re) :
 /-- **Laplace-type integral for `U(a,z)`** (DLMF 12.5.1): for `re a > -1/2` and all `z`,
 `U(a,z) = e^{-z²/4}/Γ(1/2 + a) ∫₀^∞ t^{a-1/2} e^{-t²/2 - z t} dt`. -/
 @[dlmf 12.5.E1]
-theorem pcfU_eq_integral {a : ℂ} (ha : -1 / 2 < a.re) (z : ℂ) :
-    pcfU a z = exp (-z ^ 2 / 4) / Gamma (1 / 2 + a) *
+theorem parabolicCylinderU_eq_integral {a : ℂ} (ha : -1 / 2 < a.re) (z : ℂ) :
+    parabolicCylinderU a z = exp (-z ^ 2 / 4) / Gamma (1 / 2 + a) *
       ∫ t in Ioi (0 : ℝ), (t : ℂ) ^ (a - 1 / 2) * exp (-(t : ℂ) ^ 2 / 2 - z * t) := by
   have h0 : -1 < (a - 1 / 2).re := by simp; linarith
   have h1 : -1 < (a - 1 / 2 + 1).re := by simp; linarith
   have h2 : -1 < (a - 1 / 2 + 1 + 1).re := by simp; linarith
   set G := (Gamma (1 / 2 + a))⁻¹ with hG
-  have hs : IsWeberSol a (fun w => G * (exp (-w ^ 2 / 4) * pcfMoment (a - 1 / 2) w))
+  have hs : IsWeberSolution a
+      (fun w => G * (exp (-w ^ 2 / 4) * parabolicCylinderMoment (a - 1 / 2) w))
       (fun w => G * (exp (-w ^ 2 / 4) *
-        (-pcfMoment (a - 1 / 2 + 1) w - w / 2 * pcfMoment (a - 1 / 2) w))) := fun w => by
-    have hM0 := hasDerivAt_pcfMoment h0 w
-    have hM1 := hasDerivAt_pcfMoment h1 w
+        (-parabolicCylinderMoment (a - 1 / 2 + 1) w - w / 2 *
+            parabolicCylinderMoment (a - 1 / 2) w))) := fun w => by
+    have hM0 := hasDerivAt_parabolicCylinderMoment h0 w
+    have hM1 := hasDerivAt_parabolicCylinderMoment h1 w
     have he := hasDerivAt_exp_neg_sq_div_four w
-    have hibp := pcfMoment_ibp h0 w
+    have hibp := parabolicCylinderMoment_ibp h0 w
     rw [show a - 1 / 2 + 2 = a - 1 / 2 + 1 + 1 by ring] at hibp
     refine ⟨((he.mul hM0).const_mul G).congr_deriv (by ring), ?_⟩
     refine ((he.mul ((hM1.neg).sub (((hasDerivAt_id w).div_const 2).mul hM0))).const_mul G)
@@ -362,9 +368,11 @@ theorem pcfU_eq_integral {a : ℂ} (ha : -1 / 2 < a.re) (z : ℂ) :
       Complex.cpow_one]
   have hπ : (Real.sqrt π : ℂ) ≠ 0 :=
     Complex.ofReal_ne_zero.mpr (Real.sqrt_pos.mpr Real.pi_pos).ne'
-  have hinit0 : G * (exp (-(0 : ℂ) ^ 2 / 4) * pcfMoment (a - 1 / 2) 0) = pcfU a 0 := by
+  have hinit0 : G * (exp (-(0 : ℂ) ^ 2 / 4) * parabolicCylinderMoment (a - 1 / 2) 0) =
+      parabolicCylinderU a 0 := by
     have hp := hpow (a / 2 + 1 / 4) (-(a / 2 + 1 / 4)) (by ring)
-    rw [pcfMoment_zero h0, pcfU_zero', hG, show (a - 1 / 2 + 1) / 2 = a / 2 + 1 / 4 by ring]
+    rw [parabolicCylinderMoment_zero h0, parabolicCylinderU_zero', hG, show (a - 1 / 2 + 1) / 2 =
+        a / 2 + 1 / 4 by ring]
     simp only [zero_pow two_ne_zero, neg_zero, zero_div, Complex.exp_zero, one_mul]
     generalize Gamma (1 / 2 + a) = A at hGa hd ⊢
     generalize Gamma (a / 2 + 1 / 4) = B at hG1 hd ⊢
@@ -375,9 +383,10 @@ theorem pcfU_eq_integral {a : ℂ} (ha : -1 / 2 < a.re) (z : ℂ) :
     field_simp
     linear_combination P * hd + A * (Real.sqrt π : ℂ) * hp
   have hinit1 : G * (exp (-(0 : ℂ) ^ 2 / 4) *
-      (-pcfMoment (a - 1 / 2 + 1) 0 - 0 / 2 * pcfMoment (a - 1 / 2) 0)) = pcfUDeriv a 0 := by
+      (-parabolicCylinderMoment (a - 1 / 2 + 1) 0 - 0 / 2 * parabolicCylinderMoment (a - 1 / 2) 0))
+          = parabolicCylinderUDeriv a 0 := by
     have hp := hpow (a / 2 + 3 / 4) (-(a / 2 - 1 / 4)) (by ring)
-    rw [pcfMoment_zero h1, pcfUDeriv_zero', hG,
+    rw [parabolicCylinderMoment_zero h1, parabolicCylinderUDeriv_zero', hG,
       show (a - 1 / 2 + 1 + 1) / 2 = 3 / 4 + a / 2 by ring,
       show (3 / 4 + a / 2 : ℂ) = a / 2 + 3 / 4 by ring]
     rw [show (1 / 4 + a / 2 : ℂ) = a / 2 + 1 / 4 by ring]
@@ -392,8 +401,8 @@ theorem pcfU_eq_integral {a : ℂ} (ha : -1 / 2 < a.re) (z : ℂ) :
     generalize (2 : ℂ) ^ (1 / 2 - a) = T at hd hp
     field_simp
     linear_combination -P * hd - A * (Real.sqrt π : ℂ) * hp
-  have := hs.eq_of_initial (isWeberSol_pcfU a) hinit0 hinit1 z
-  rw [← this, pcfMoment, hG]
+  have := hs.eq_of_initial (isWeberSolution_parabolicCylinderU a) hinit0 hinit1 z
+  rw [← this, parabolicCylinderMoment, hG]
   ring
 
 end DLMF.Confluent

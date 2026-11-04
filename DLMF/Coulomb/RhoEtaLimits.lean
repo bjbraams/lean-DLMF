@@ -685,19 +685,20 @@ section Pochhammer
 open DLMF.Hypergeometric
 
 /-- `(a)_n = ∏_{j<n} (a + j)`. -/
-private lemma poch_eq_prod_range (a : ℂ) (n : ℕ) : poch a n = ∏ j ∈ Finset.range n, (a + j) := by
+private lemma pochhammer_eq_prod_range (a : ℂ) (n : ℕ) : pochhammer a n = ∏ j ∈
+    Finset.range n, (a + j) := by
   induction n with
-  | zero => simp [poch_zero]
-  | succ n ih => rw [poch_succ, ih, Finset.prod_range_succ]
+  | zero => simp [pochhammer_zero]
+  | succ n ih => rw [pochhammer_succ, ih, Finset.prod_range_succ]
 
 /-- The terms of `M(ℓ+1-iη, 2ℓ+2, z)` as products of ratios. -/
 private lemma kummerM_term_eq_prod_ratio (ℓ n : ℕ) (η : ℝ) (z : ℂ) :
-    poch ((ℓ : ℂ) + 1 - I * η) n / (poch (2 * ℓ + 2) n * n !) * z ^ n =
+    pochhammer ((ℓ : ℂ) + 1 - I * η) n / (pochhammer (2 * ℓ + 2) n * n !) * z ^ n =
       (∏ j ∈ Finset.range n, (((ℓ : ℂ) + 1 - I * η + j) / (2 * ℓ + 2 + j))) * (z ^ n / n !) := by
   have hb : ∀ j ∈ Finset.range n, (2 * (ℓ : ℂ) + 2 + j) ≠ 0 := fun j _ => by
     have : (0 : ℝ) < 2 * ℓ + 2 + j := by positivity
     exact_mod_cast this.ne'
-  rw [Finset.prod_div_distrib, poch_eq_prod_range, poch_eq_prod_range]
+  rw [Finset.prod_div_distrib, pochhammer_eq_prod_range, pochhammer_eq_prod_range]
   have : ∏ j ∈ Finset.range n, (2 * (ℓ : ℂ) + 2 + j) ≠ 0 := Finset.prod_ne_zero_iff.mpr hb
   have hf : (n ! : ℂ) ≠ 0 := by exact_mod_cast n.factorial_ne_zero
   field_simp

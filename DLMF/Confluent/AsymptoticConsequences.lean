@@ -203,10 +203,10 @@ theorem regularizedHGFun_poincare_sector (a b : ℂ) (n : ℕ) {δ : ℝ}
         Filter.principal {z : ℂ | δ ≤ z.arg ∧ z.arg ≤ π - δ})
       (fun z => regularizedHGFun {a} {b} z -
         (exp z * z ^ (a - b) / Gamma a *
-          ∑ s ∈ Finset.range n, poch (1 - a) s * poch (b - a) s / s.factorial *
+          ∑ s ∈ Finset.range n, pochhammer (1 - a) s * pochhammer (b - a) s / s.factorial *
             z ^ (-(s : ℂ)) +
          exp (π * I * a) * z ^ (-a) / Gamma (b - a) *
-          ∑ s ∈ Finset.range n, poch a s * poch (a - b + 1) s / s.factorial *
+          ∑ s ∈ Finset.range n, pochhammer a s * pochhammer (a - b + 1) s / s.factorial *
             (-z) ^ (-(s : ℂ))))
       (fun z => ‖exp z * z ^ (a - b - n)‖ + ‖z ^ (-a - n)‖) := by
   change IsBigO (upperSectorAtTop δ) _ _
@@ -266,7 +266,8 @@ theorem regularizedHGFun_poincare_sector (a b : ℂ) (n : ℕ) {δ : ℝ}
   rw [show exp ((-1 : ℂ) * π * I) * z = -z by
     rw [show (-1 : ℂ) * π * I = -(π * I) by ring, exp_neg, exp_pi_mul_I]; ring] at hconn
   have hS1 : c1 * S1 z = exp (π * I * a) * z ^ (-a) / Gamma (b - a) *
-      ∑ s ∈ Finset.range n, poch a s * poch (a - b + 1) s / s.factorial * (-z) ^ (-(s : ℂ)) := by
+      ∑ s ∈ Finset.range n, pochhammer a s * pochhammer (a - b + 1) s / s.factorial *
+          (-z) ^ (-(s : ℂ)) := by
     simp only [S1, c1, Finset.mul_sum]
     refine Finset.sum_congr rfl fun s _ => ?_
     rw [hneg, show (-1 : ℂ) * π * I * -(s : ℂ) = π * I * s by ring, hpow, smul_eq_mul,
@@ -274,7 +275,8 @@ theorem regularizedHGFun_poincare_sector (a b : ℂ) (n : ℕ) {δ : ℝ}
       show -(-1 : ℂ) * a * π * I = π * I * a by ring]
     ring
   have hS2 : c2 * (exp z * S2 z) = exp z * z ^ (a - b) / Gamma a *
-      ∑ s ∈ Finset.range n, poch (1 - a) s * poch (b - a) s / s.factorial * z ^ (-(s : ℂ)) := by
+      ∑ s ∈ Finset.range n, pochhammer (1 - a) s * pochhammer (b - a) s / s.factorial *
+          z ^ (-(s : ℂ)) := by
     simp only [S2, c2, Finset.mul_sum]
     refine Finset.sum_congr rfl fun s _ => ?_
     have he : exp ((-1) * (b - a) * π * I) * exp ((-1) * π * I * -((s : ℂ) + (b - a))) =
@@ -284,9 +286,10 @@ theorem regularizedHGFun_poincare_sector (a b : ℂ) (n : ℕ) {δ : ℝ}
     have hzc : z ^ (-((s : ℂ) + (b - a))) = z ^ (-(s : ℂ)) * z ^ (a - b) := by
       rw [← cpow_add _ _ hz0]; ring_nf
     rw [hneg, smul_eq_mul, tricomiCoeff, show b - a - b + 1 = 1 - a by ring, hzc]
-    linear_combination (exp z * z ^ (-(s : ℂ)) * z ^ (a - b) * (-1) ^ s * poch (b - a) s *
-      poch (1 - a) s / s.factorial / Gamma a) * he +
-      (exp z * z ^ (-(s : ℂ)) * z ^ (a - b) * poch (b - a) s * poch (1 - a) s / s.factorial /
+    linear_combination (exp z * z ^ (-(s : ℂ)) * z ^ (a - b) * (-1) ^ s * pochhammer (b - a) s *
+      pochhammer (1 - a) s / s.factorial / Gamma a) * he +
+      (exp z * z ^ (-(s : ℂ)) * z ^ (a - b) * pochhammer (b - a) s *
+          pochhammer (1 - a) s / s.factorial /
         Gamma a) * hsq
   rw [hconn, ← hS1, ← hS2]
   simp only [S1, S2, c1, c2]

@@ -54,7 +54,7 @@ weighted Wronskian `W = p (u'y - uy')` is strictly monotone wherever `u y > 0`. 
 of `W` forces `y/u` to diverge as soon as `p u² = O(x)` at `0` or `p u² = O(1)` at `∞`.
 
 The comparison functions are the polynomial cases `U(-n,b,x) = (-1)ⁿ n! L_n^{(b-1)}(x)`
-(DLMF 13.6.19), whose zeros are those of the Laguerre polynomial (`laguerrePolyL_zeros_pos`,
+(DLMF 13.6.19), whose zeros are those of the Laguerre polynomial (`laguerrePolynomialL_zeros_pos`,
 DLMF 18.16(iv)). Simplicity of zeros comes from the Wronskian 13.2.34. The positive-zero count
 gives DLMF 13.9.14 by Kummer's transformation.
 
@@ -890,13 +890,13 @@ the Laguerre polynomial `L_n^{(b-1)}` (DLMF 13.6.19 and 18.16(iv)), `n` simple p
 theorem KummerUZeroCount.base_zeros {b : ℝ} (hb : 0 < b) (n : ℕ) :
     ∃ e : Fin n → ℝ, StrictMono e ∧ (∀ i, 0 < e i) ∧
       ∀ x ∈ Ioi (0:ℝ), KummerUZeroCount.realU (-(n : ℝ)) b x = 0 ↔ ∃ i, x = e i := by
-  obtain ⟨e, he, hpos, hz⟩ := laguerrePolyL_zeros_pos (α := b - 1) (by linarith) n
+  obtain ⟨e, he, hpos, hz⟩ := laguerrePolynomialL_zeros_pos (α := b - 1) (by linarith) n
   refine ⟨e, he, hpos, fun x hx => ?_⟩
   have hα : ∀ k : ℕ, (((b - 1 : ℝ) : ℂ)) + 1 ≠ -(k : ℂ) := fun k h => by
     have : ((b : ℝ) : ℂ) = -(k : ℂ) := by push_cast at h ⊢; linear_combination h
     have h2 : b = -(k : ℝ) := by exact_mod_cast this
     have := k.cast_nonneg (α := ℝ); linarith
-  have hL := (kummerU_laguerrePolyL n ((b - 1 : ℝ) : ℂ) (x : ℂ) hα).2
+  have hL := (kummerU_laguerrePolynomialL n ((b - 1 : ℝ) : ℂ) (x : ℂ) hα).2
   rw [show ((b - 1 : ℝ) : ℂ) + 1 = (b : ℂ) by push_cast; ring] at hL
   have hcast : ((-(n : ℝ) : ℝ) : ℂ) = -(n : ℂ) := by push_cast; ring
   rw [← ofReal_eq_zero, ← KummerUZeroCount.realU_eq _ _ (show (0:ℝ) < x from hx), hcast, hL]
@@ -913,10 +913,10 @@ theorem KummerUZeroCount.base_poly {b : ℝ} (hb : 0 < b) (n : ℕ) {x : ℝ} (h
     have : ((b : ℝ) : ℂ) = -(k : ℂ) := by push_cast at h ⊢; linear_combination h
     have h2 : b = -(k : ℝ) := by exact_mod_cast this
     have := k.cast_nonneg (α := ℝ); linarith
-  have hL := (kummerU_laguerrePolyL n ((b - 1 : ℝ) : ℂ) (x : ℂ) hα).2
+  have hL := (kummerU_laguerrePolynomialL n ((b - 1 : ℝ) : ℂ) (x : ℂ) hα).2
   rw [show ((b - 1 : ℝ) : ℂ) + 1 = (b : ℂ) by push_cast; ring] at hL
   have hcast : ((-(n : ℝ) : ℝ) : ℂ) = -(n : ℂ) := by push_cast; ring
-  have hP : laguerrePolyL ((b - 1 : ℝ) : ℂ) n (x : ℂ) =
+  have hP : laguerrePolynomialL ((b - 1 : ℝ) : ℂ) n (x : ℂ) =
       (((laguerrePolyLR (b - 1) n).eval x : ℝ) : ℂ) := by
     rw [← eval_map_laguerrePolyLR, Polynomial.eval_map_algebraMap,
       ← Complex.coe_algebraMap, Polynomial.aeval_algebraMap_apply_eq_algebraMap_eval]
@@ -1118,10 +1118,11 @@ theorem KummerUZeroCount.connection_neg (a b : ℂ) {x : ℝ} (hx : x < 0) :
 theorem KummerUZeroCount.regM_im (a b x : ℝ) :
     (regularizedHGFun {(a : ℂ)} {(b : ℂ)} (x : ℂ)).im = 0 := by
   rw [regularizedConfluent_eq_tsum]
-  have : ∀ n : ℕ, poch (a : ℂ) n * (x : ℂ) ^ n / n.factorial * (Gamma ((b : ℂ) + n))⁻¹ =
+  have : ∀ n : ℕ, pochhammer (a : ℂ) n * (x : ℂ) ^ n / n.factorial * (Gamma ((b : ℂ) + n))⁻¹ =
       (((ascPochhammer ℝ n).eval a * x ^ n / n.factorial * (Real.Gamma (b + n))⁻¹ : ℝ) : ℂ) := by
     intro n
-    rw [poch_ofReal, show (b : ℂ) + n = ((b + n : ℝ) : ℂ) by push_cast; ring, Complex.Gamma_ofReal]
+    rw [pochhammer_ofReal, show (b : ℂ) + n = ((b + n : ℝ) : ℂ) by push_cast; ring,
+                                                                     Complex.Gamma_ofReal]
     push_cast; ring
   simp_rw [this, ← ofReal_tsum, ofReal_im]
 

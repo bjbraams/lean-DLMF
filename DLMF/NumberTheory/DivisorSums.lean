@@ -433,8 +433,8 @@ private lemma hasSum_lambert_totient {x : ℂ} (hx : ‖x‖ < 1) :
 /-- DLMF 27.7.5 (proof). -/
 private lemma hasSum_lambert_cpow (α : ℂ) {x : ℂ} (hx : ‖x‖ < 1) :
     HasSum (fun n : ℕ ↦ ((n + 1 : ℕ) : ℂ) ^ α * x ^ (n + 1) / (1 - x ^ (n + 1)))
-      (∑' n : ℕ, sigmaC α (n + 1) * x ^ (n + 1)) ∧
-      Summable fun n : ℕ ↦ sigmaC α (n + 1) * x ^ (n + 1) := by
+      (∑' n : ℕ, sigmaCpow α (n + 1) * x ^ (n + 1)) ∧
+      Summable fun n : ℕ ↦ sigmaCpow α (n + 1) * x ^ (n + 1) := by
   have hr0 : 0 ≤ ‖x‖ := norm_nonneg x
   obtain ⟨K, hK⟩ := exists_nat_ge α.re
   have hf : Summable fun n : ℕ ↦ ‖((n + 1 : ℕ) : ℂ) ^ α‖ * ‖x‖ ^ (n + 1) := by
@@ -444,10 +444,10 @@ private lemma hasSum_lambert_cpow (α : ℂ) {x : ℂ} (hx : ‖x‖ < 1) :
     rw [Complex.norm_natCast_cpow_of_pos (Nat.succ_pos n), ← Real.rpow_natCast]
     exact Real.rpow_le_rpow_of_exponent_le (by exact_mod_cast Nat.succ_le_succ (Nat.zero_le n)) hK
   obtain ⟨h1, h2⟩ := hasSum_lambert_rows_and_diagonals (fun n ↦ (n : ℂ) ^ α) hx hf
-  have h3 : HasSum (fun n : ℕ ↦ sigmaC α (n + 1) * x ^ (n + 1))
+  have h3 : HasSum (fun n : ℕ ↦ sigmaCpow α (n + 1) * x ^ (n + 1))
       (∑' c : ℕ+ × ℕ+, ((c.1 : ℕ) : ℂ) ^ α * x ^ ((c.1 : ℕ) * c.2)) := by
     refine h2.congr_fun fun n ↦ ?_
-    rw [sigmaC_apply]
+    rw [sigmaCpow_apply]
   rw [← h3.tsum_eq] at h1
   exact ⟨h1, h3.summable⟩
 
@@ -526,8 +526,8 @@ converge. -/
 @[dlmf 27.7.E5]
 theorem lambert_cpow (α : ℂ) {x : ℂ} (hx : ‖x‖ < 1) :
     HasSum (fun n : ℕ ↦ ((n + 1 : ℕ) : ℂ) ^ α * x ^ (n + 1) / (1 - x ^ (n + 1)))
-      (∑' n : ℕ, sigmaC α (n + 1) * x ^ (n + 1)) ∧
-      Summable fun n : ℕ ↦ sigmaC α (n + 1) * x ^ (n + 1) :=
+      (∑' n : ℕ, sigmaCpow α (n + 1) * x ^ (n + 1)) ∧
+      Summable fun n : ℕ ↦ sigmaCpow α (n + 1) * x ^ (n + 1) :=
   hasSum_lambert_cpow α hx
 
 /-- DLMF 27.7.6: `∑_{n≥1} λ(n) xⁿ/(1 - xⁿ) = ∑_{n≥1} x^{n²}`, `|x| < 1`. -/

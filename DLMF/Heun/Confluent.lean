@@ -11,11 +11,11 @@ public import DLMF.Heun.Basic.Equation
 # Confluent forms of Heun's equation (DLMF §31.12)
 
 The four standard confluent forms 31.12.1–31.12.4 are defined in `DLMF.Heun.Basic`
-(`IsConfluentHeunSolOn`, `IsDoublyConfluentHeunSolOn`, `IsBiconfluentHeunSolOn` with the sign
-corrected in DLMF 1.0.7, `IsTriconfluentHeunSolOn`). This file proves the classification of
-their singular points stated after each equation: at most regular singular points through the
-API of `DLMFMathlib.Analysis.ODE.Singularities`, and the ranks of the irregular singularities
-through Poincaré's rank (`HasIrregularRankAtInfinity`, `HasIrregularRankAt`).
+(`IsConfluentHeunSolutionOn`, `IsDoublyConfluentHeunSolutionOn`, `IsBiconfluentHeunSolutionOn` with
+the sign corrected in DLMF 1.0.7, `IsTriconfluentHeunSolutionOn`). This file proves the
+classification of their singular points stated after each equation: at most regular singular points
+through the API of `DLMFMathlib.Analysis.ODE.Singularities`, and the ranks of the irregular
+singularities through Poincaré's rank (`HasIrregularRankAtInfinity`, `HasIrregularRankAt`).
 
 ## Main results
 

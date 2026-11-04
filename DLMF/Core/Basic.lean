@@ -34,8 +34,8 @@ namespace `DLMF.Core`; files that use them `open DLMF.Core`.
   based at zero of an entire integrand.
 * `sector`, `logSector`: uniform approach to infinity in a closed sector, on the principal sheet
   and on the logarithmic plane.
-* `cfContinuants`, `cfTail`, `HasContinuedFraction`: finite continued fractions and their
-  convergence.
+* `continuedFractionContinuants`, `continuedFractionTail`, `HasContinuedFraction`: finite continued
+  fractions and their convergence.
 * `oddProduct`: the odd product `1·3···(2n+1)`.
 * `orderedZero`: a zero selected by the number of strictly closer zeros.
 * `asymptoticCoeff`: coefficients extracted successively by limits at positive infinity.
@@ -187,24 +187,24 @@ def logSector (α : ℝ) : Filter ℂ :=
 Mathlib’s `GenContFract.nextConts` supplies the recurrence. Continuants avoid
 nested division by an intermediate zero. A zero numerator
 at a positive index terminates the fraction and freezes subsequent convergents. -/
-def cfContinuants (a b : ℕ → ℂ) (k : ℕ) : ℕ → ℂ × ℂ × Bool
+def continuedFractionContinuants (a b : ℕ → ℂ) (k : ℕ) : ℕ → ℂ × ℂ × Bool
   | 0 => (0, 1, false)
   | 1 => (a k, b k, false)
   | n+2 =>
-    let u := cfContinuants a b k (n+1)
-    let v := cfContinuants a b k n
+    let u := continuedFractionContinuants a b k (n+1)
+    let v := continuedFractionContinuants a b k n
     if u.2.2 = true ∨ a (k+n+1) = 0 then (u.1, u.2.1, true)
     else
       let p := GenContFract.nextConts (a (k+n+1)) (b (k+n+1))
         ⟨v.1, v.2.1⟩ ⟨u.1, u.2.1⟩
       (p.a, p.b, false)
 /-- Finite continued fraction as a ratio of continuants, with exact termination. -/
-def cfTail (a b : ℕ → ℂ) (k N : ℕ) : ℂ :=
-  let p := cfContinuants a b k N
+def continuedFractionTail (a b : ℕ → ℂ) (k N : ℕ) : ℂ :=
+  let p := continuedFractionContinuants a b k N
   p.1/p.2.1
 /-- Convergence of the specified finite continued fractions. -/
 def HasContinuedFraction (a b : ℕ → ℂ) (v : ℂ) : Prop :=
-  Tendsto (cfTail a b 0) atTop (𝓝 v)
+  Tendsto (continuedFractionTail a b 0) atTop (𝓝 v)
 /-- The odd product 1·3···(2n+1). -/
 def oddProduct (n : ℕ) : ℂ := ∏ j ∈ Finset.range (n+1), (2*j+1 : ℂ)
 /-- A zero chosen by the count of strictly closer zeros; existence is a theorem. -/

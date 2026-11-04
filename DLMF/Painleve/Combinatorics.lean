@@ -7,6 +7,7 @@ module
 
 public import DLMF.Painleve.Basic.Solutions
 public import DLMF.Airy.Framework
+public import DLMF.Painleve.FreudWeight
 
 /-!
 # Combinatorics and orthogonal polynomials (DLMF §32.14, §32.15)
@@ -49,7 +50,7 @@ solution) such that, for every real `s`,
 @[dlmf 32.14.E1, dlmf 32.14.E3, dlmf 32.14.E4]
 theorem longestIncreasing_tracyWidom :
     ∃ w : ℝ → ℝ, IsRealODE2SolutionOn (realPainleveIIRhs 0) w univ ∧
-      (w ~[atTop] airyAiReal) ∧ (w ~[atBot] fun x => Real.sqrt (-x / 2)) ∧
+      (w ~[atTop] DLMF.Airy.Real.airyAi) ∧ (w ~[atBot] fun x => Real.sqrt (-x / 2)) ∧
       ∀ s : ℝ, Tendsto (fun N : ℕ =>
         ((Finset.univ.filter fun π : Equiv.Perm (Fin N) =>
           ((longestIncreasingLength π : ℝ) - 2 * Real.sqrt N) / (N : ℝ) ^ (1 / 6 : ℝ) ≤ s).card :
@@ -62,8 +63,8 @@ polynomials for the weight `exp(-ξ⁴/4 - zξ²)` satisfy the discrete Painlev�
 @[dlmf 32.15.E3]
 theorem freudRecurrenceSq_discretePainleveI (z : ℝ) {n : ℕ} (hn : 1 ≤ n) :
     (freudRecurrenceSq z (n + 1) + freudRecurrenceSq z n + freudRecurrenceSq z (n - 1)) *
-      freudRecurrenceSq z n = n - 2 * z * freudRecurrenceSq z n := by
-  sorry
+      freudRecurrenceSq z n = n - 2 * z * freudRecurrenceSq z n :=
+  FreudWeight.discretePainleveI z hn
 
 /-- §32.15: for `n = 1, 2, …` the squared recurrence coefficient `u_n(z)` is positive and, as a
 function of real `z`, satisfies `PIV` with `α = -n/2` and `β = -n²/2`. -/

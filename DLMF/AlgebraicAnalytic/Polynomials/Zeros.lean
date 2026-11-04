@@ -39,7 +39,7 @@ Statements of DLMF §1.11 that are not already in Mathlib (the upstream ones are
 
 ## Implementation notes
 
-In the cubic and quartic formulas, cube and square roots are replaced by arbitrary roots
+In the cubic and quartic formulas, unitCube and square roots are replaced by arbitrary roots
 (`A ^ 3 = …`, `s ^ 2 = …`), so the statements are branch-free and cover every choice; DLMF's
 choice 1.11.20 of the square roots is a hypothesis. The discriminant 1.11.17 of the depressed
 quartic uses TauCeti's `TauCeti.discr_resolventCubic` (the quartic and TauCeti's resolvent
@@ -324,8 +324,8 @@ theorem discr_reduced_cubic {R : Type*} [CommRing R] [Nontrivial R] (p q : R) :
   rw [h3, h2, h1, h0]
   ring
 
-/-- DLMF 1.11.13–1.11.14, **Cardano's formula**: let `s` be a square root of `-3D`, `A` a cube
-root of `-27q/2 + 3s/2` with `A ≠ 0`, `B = -3p/A`, and `ρ` a primitive cube root of unity
+/-- DLMF 1.11.13–1.11.14, **Cardano's formula**: let `s` be a square root of `-3D`, `A` a unitCube
+root of `-27q/2 + 3s/2` with `A ≠ 0`, `B = -3p/A`, and `ρ` a primitive unitCube root of unity
 (`ρ² + ρ + 1 = 0`). Then the roots of `w³ + pw + q` are `(A + B)/3`, `(ρA + ρ²B)/3`,
 `(ρ²A + ρB)/3`. (Branch-free: every choice of the roots is covered. `A ≠ 0` fails only when
 `p = 0` and `s = 9q`; then the other square root must be taken.) -/
@@ -413,16 +413,16 @@ cubic `z³ - 2pz² + (p² - 4r)z + q²` and `s_j` square roots of `-θ_j` chosen
 `α₄ = (-s₁ - s₂ + s₃)/2` (1.11.19). -/
 @[dlmf 1.11.E18, dlmf 1.11.E19, dlmf 1.11.E20]
 theorem ferrari {p q r θ₁ θ₂ θ₃ s₁ s₂ s₃ : ℂ}
-    (hθ : (dlmfResolventCubic p q r).roots = {θ₁, θ₂, θ₃})
+    (hθ : (eulerResolventCubic p q r).roots = {θ₁, θ₂, θ₃})
     (hs₁ : s₁ ^ 2 = -θ₁) (hs₂ : s₂ ^ 2 = -θ₂) (hs₃ : s₃ ^ 2 = -θ₃) (hq : s₁ * s₂ * s₃ = -q) :
     (X ^ 4 + C p * X ^ 2 + C q * X + C r : ℂ[X]) =
       (X - C ((s₁ + s₂ + s₃) / 2)) * (X - C ((s₁ - s₂ - s₃) / 2)) *
         (X - C ((-s₁ + s₂ - s₃) / 2)) * (X - C ((-s₁ - s₂ + s₃) / 2)) := by
-  have hb := Cubic.b_eq_three_roots (φ := RingHom.id ℂ) (P := dlmfResolventCubic p q r)
+  have hb := Cubic.b_eq_three_roots (φ := RingHom.id ℂ) (P := eulerResolventCubic p q r)
     one_ne_zero hθ
-  have hc := Cubic.c_eq_three_roots (φ := RingHom.id ℂ) (P := dlmfResolventCubic p q r)
+  have hc := Cubic.c_eq_three_roots (φ := RingHom.id ℂ) (P := eulerResolventCubic p q r)
     one_ne_zero hθ
-  simp only [dlmfResolventCubic, RingHom.id_apply, one_mul] at hb hc
+  simp only [eulerResolventCubic, RingHom.id_apply, one_mul] at hb hc
   have hG0 : s₁ ^ 2 + s₂ ^ 2 + s₃ ^ 2 + 2 * p = 0 := by
     linear_combination hs₁ + hs₂ + hs₃ - hb
   have hG1 : s₁ ^ 2 * s₂ ^ 2 + s₁ ^ 2 * s₃ ^ 2 + s₂ ^ 2 * s₃ ^ 2 - (p ^ 2 - 4 * r) = 0 := by
@@ -511,20 +511,20 @@ theorem pow_eq_iff {n : ℕ} (hn : n ≠ 0) (a b : ℝ) (z : ℂ) :
 /-- DLMF 1.11.25: `D₁ = a₁`. -/
 @[dlmf 1.11.E25]
 theorem hurwitzDet_one (f : ℝ[X]) : hurwitzDet f 1 = f.coeff 1 := by
-  simp [hurwitzDet, hurwitzMatrix, coeffInt]
+  simp [hurwitzDet, hurwitzMatrix, coeffOfInt]
 
 /-- DLMF 1.11.25: `D₂ = a₁a₂ - a₃a₀`. -/
 @[dlmf 1.11.E25]
 theorem hurwitzDet_two (f : ℝ[X]) :
     hurwitzDet f 2 = f.coeff 1 * f.coeff 2 - f.coeff 3 * f.coeff 0 := by
-  simp [hurwitzDet, hurwitzMatrix, coeffInt, Matrix.det_fin_two]
+  simp [hurwitzDet, hurwitzMatrix, coeffOfInt, Matrix.det_fin_two]
 
 /-- DLMF 1.11.25: `D₃ = det [[a₁, a₃, a₅], [a₀, a₂, a₄], [0, a₁, a₃]]`. -/
 @[dlmf 1.11.E25]
 theorem hurwitzDet_three (f : ℝ[X]) :
     hurwitzDet f 3 = Matrix.det !![f.coeff 1, f.coeff 3, f.coeff 5; f.coeff 0, f.coeff 2,
       f.coeff 4; 0, f.coeff 1, f.coeff 3] := by
-  simp [hurwitzDet, hurwitzMatrix, coeffInt, Matrix.det_fin_three]
+  simp [hurwitzDet, hurwitzMatrix, coeffOfInt, Matrix.det_fin_three]
 
 /-- DLMF §1.11(v), **Hurwitz criterion**: a real polynomial `f` of degree `n` (`a_n ≠ 0`) is
 stable iff `a₀ ≠ 0`, `D_{2k} > 0` for `k = 1, …, ⌊n/2⌋` (that is, `2k ≤ n`), and

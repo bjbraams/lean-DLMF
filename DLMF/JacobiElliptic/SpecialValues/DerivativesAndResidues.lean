@@ -16,11 +16,11 @@ functions, the `z`-derivative at the regular special points and the residue at t
 
 ## Main results
 
-* `jacobiSnk_specialDerivs`, `jacobiCnk_specialDerivs`, `jacobiDnk_specialDerivs`: Table 22.5.1,
+* `jacobiSn_specialDerivs`, `jacobiCn_specialDerivs`, `jacobiDn_specialDerivs`: Table 22.5.1,
   rows `sn, cn, dn`.
-* `jacobiCdk_specialDerivs`, `jacobiSdk_specialDerivs`, `jacobiNdk_specialDerivs`,
-  `jacobiDck_specialDerivs`, `jacobiNck_specialDerivs`, `jacobiSck_specialDerivs`,
-  `jacobiNsk_specialDerivs`, `jacobiDsk_specialDerivs`, `jacobiCsk_specialDerivs`: the
+* `jacobiCd_specialDerivs`, `jacobiSd_specialDerivs`, `jacobiNd_specialDerivs`,
+  `jacobiDc_specialDerivs`, `jacobiNc_specialDerivs`, `jacobiSc_specialDerivs`,
+  `jacobiNs_specialDerivs`, `jacobiDs_specialDerivs`, `jacobiCs_specialDerivs`: the
   remaining rows.
 
 ## Implementation notes
@@ -30,7 +30,7 @@ Table 22.4.3.
 
 **Correction.** Table 22.5.1 prints `0, k` for `dc` at `z = K + iK'`; the derivative is `-k`
 (from `dc(z) = ns(z + K)`, `ns(z + 2K) = -ns z` and `ns'(iK') = k`, and numerically), which is
-the form stated in `jacobiDck_specialDerivs`.
+the form stated in `jacobiDc_specialDerivs`.
 -/
 
 @[expose] public section
@@ -43,12 +43,12 @@ noncomputable section
 
 namespace DLMF.JacobiElliptic
 
-open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
+open DLMF.EllipticIntegrals (completeEllipticK completeEllipticKPrime)
 
 macro "jacobi_value_tac " hk:term:max : tactic => `(tactic|
-  (simp only [jacobiSnk_zero $hk, jacobiCnk_zero $hk, jacobiDnk_zero $hk, jacobiCdk_zero $hk,
-    jacobiSdk_zero $hk, jacobiNdk_zero $hk, jacobiDck_zero $hk, jacobiNck_zero $hk,
-    jacobiSck_zero $hk, mul_one, mul_zero, neg_zero] <;> try ring))
+  (simp only [jacobiSn_zero $hk, jacobiCn_zero $hk, jacobiDn_zero $hk, jacobiCd_zero $hk,
+    jacobiSd_zero $hk, jacobiNd_zero $hk, jacobiDc_zero $hk, jacobiNc_zero $hk,
+    jacobiSc_zero $hk, mul_one, mul_zero, neg_zero] <;> try ring))
 
 /-! ### Derivatives and residues at the special points (helpers) -/
 
@@ -86,1014 +86,1091 @@ private lemma tendsto_sub_mul_of_add_eq_mul_inv {f s : ℂ → ℂ} {c p : ℂ}
   simp only [Function.comp_apply, this]
   ring
 
-/-- Nonvanishing under the stated hypotheses: `jacobiLetterTheta q (jacobiZetak 0 k) (jacobiTauk
-k) ≠ 0`. -/
-theorem jacobiLetterTheta_jacobiZetak_zero_ne_zero {k : ℂ} (hk : k ∈ jacobiModulusDomain)
+/-- Nonvanishing under the stated hypotheses:
+`jacobiLetterTheta q (jacobiThetaArgument 0 k) (jacobiTau k) ≠ 0`. -/
+theorem jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero {k : ℂ} (hk : k ∈ jacobiModulusDomain)
     {q : JacobiLetter} (hq : q ≠ .s) :
-    jacobiLetterTheta q (jacobiZetak 0 k) (jacobiTauk k) ≠ 0 := by
-  have : jacobiZetak 0 k = 0 := by simp [jacobiZetak]
-  rw [this, jacobiLetterTheta_zero (jacobiTauk_im_pos hk)]
+    jacobiLetterTheta q (jacobiThetaArgument 0 k) (jacobiTau k) ≠ 0 := by
+  have : jacobiThetaArgument 0 k = 0 := by simp [jacobiThetaArgument]
+  rw [this, jacobiLetterTheta_zero (jacobiTau_im_pos hk)]
   simp [hq]
 
 /-- Table 22.5.1, row `sn`: the `z`-derivative of `sn(z, k)` at the regular
 special points and the residue at the poles (from Table 22.13.1 and the shifts of Table 22.4.3). -/
 @[dlmf 22.5.T1]
-theorem jacobiSnk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
-    HasDerivAt (fun w => jacobiSnk w k) (1) (0) ∧
-    HasDerivAt (fun w => jacobiSnk w k) (0) (compEllIntKk k) ∧
-    HasDerivAt (fun w => jacobiSnk w k) (0) (compEllIntKk k + I * compEllIntKpk k) ∧
-    Tendsto (fun w => (w - (I * compEllIntKpk k)) * jacobiSnk w k) (𝓝[≠] (I * compEllIntKpk k))
+theorem jacobiSn_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
+    HasDerivAt (fun w => jacobiSn w k) (1) (0) ∧
+    HasDerivAt (fun w => jacobiSn w k) (0) (completeEllipticK k) ∧
+    HasDerivAt (fun w => jacobiSn w k) (0) (completeEllipticK k + I * completeEllipticKPrime k) ∧
+    Tendsto (fun w => (w - (I * completeEllipticKPrime k)) * jacobiSn w k)
+        (𝓝[≠] (I * completeEllipticKPrime k))
         (𝓝 (k⁻¹)) ∧
-    HasDerivAt (fun w => jacobiSnk w k) (-1) (2 * compEllIntKk k) ∧
-    HasDerivAt (fun w => jacobiSnk w k) (-1) (2 * compEllIntKk k + 2 * (I * compEllIntKpk k)) ∧
-    HasDerivAt (fun w => jacobiSnk w k) (1) (2 * (I * compEllIntKpk k)) := by
+    HasDerivAt (fun w => jacobiSn w k) (-1) (2 * completeEllipticK k) ∧
+    HasDerivAt (fun w => jacobiSn w k) (-1)
+        (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k)) ∧
+    HasDerivAt (fun w => jacobiSn w k) (1) (2 * (I * completeEllipticKPrime k)) := by
   refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
-  · have hfg : ∀ z, jacobiSnk (z + (0)) k = 1 * jacobiSnk z k :=
+  · have hfg : ∀ z, jacobiSn (z + (0)) k = 1 * jacobiSn z k :=
       fun z => by rw [add_zero, one_mul]
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSnk w k) hfg
-      (hasDerivAt_jacobiSnk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiCnk_zero hk, jacobiDnk_zero hk])
-  · have hfg : ∀ z, jacobiSnk (z + (compEllIntKk k)) k = 1 * jacobiCdk z k :=
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSn w k) hfg
+      (hasDerivAt_jacobiSn hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiCn_zero hk, jacobiDn_zero hk])
+  · have hfg : ∀ z, jacobiSn (z + (completeEllipticK k)) k = 1 * jacobiCd z k :=
       fun z => by
-        rw [show z + (compEllIntKk k) = z + compEllIntKk k by ring, (jacobiSnk_shift hk z).1]
+        rw [show z + (completeEllipticK k) = z + completeEllipticK k by ring,
+                                                                          (jacobiSn_shift hk z).1]
         try ring
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSnk w k) hfg
-      (hasDerivAt_jacobiCdk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiSdk_zero hk, jacobiNdk_zero hk])
-  · have hfg : ∀ z, jacobiSnk (z + (compEllIntKk k + I * compEllIntKpk k)) k =
-        ((k)⁻¹) * jacobiDck z k :=
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSn w k) hfg
+      (hasDerivAt_jacobiCd hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiSd_zero hk, jacobiNd_zero hk])
+  · have hfg : ∀ z, jacobiSn (z + (completeEllipticK k + I * completeEllipticKPrime k)) k =
+        ((k)⁻¹) * jacobiDc z k :=
       fun z => by
-        rw [show z + (compEllIntKk k + I * compEllIntKpk k) =
-            z + compEllIntKk k + I * compEllIntKpk k by ring, (jacobiSnk_shift hk z).2.1]
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSnk w k) hfg
-      (hasDerivAt_jacobiDck hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiNck_zero hk, jacobiSck_zero hk])
-  · have hfg : ∀ z, jacobiSnk (z + (I * compEllIntKpk k)) k = ((k)⁻¹) * jacobiNsk z k :=
+        rw [show z + (completeEllipticK k + I * completeEllipticKPrime k) =
+            z + completeEllipticK k + I * completeEllipticKPrime k by ring,
+                                                                        (jacobiSn_shift hk z).2.1]
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSn w k) hfg
+      (hasDerivAt_jacobiDc hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiNc_zero hk, jacobiSc_zero hk])
+  · have hfg : ∀ z, jacobiSn (z + (I * completeEllipticKPrime k)) k = ((k)⁻¹) * jacobiNs z k :=
       fun z => by
-        rw [show z + (I * compEllIntKpk k) = z + I * compEllIntKpk k by ring,
-            (jacobiSnk_shift hk z).2.2.1]
-    have hfs : ∀ z, jacobiSnk (z + (I * compEllIntKpk k)) k = ((k)⁻¹) * (1 / jacobiSnk z k) := by
-      intro z; rw [hfg, jacobiNsk, jacobiPQk_eq_one_div]; rfl
-    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiSnk w k) hfs
-      ((hasDerivAt_jacobiSnk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
-          (by simp [jacobiCnk_zero hk, jacobiDnk_zero hk]))
-      (by simp [jacobiSnk_zero hk])
+        rw [show z + (I * completeEllipticKPrime k) = z + I * completeEllipticKPrime k by ring,
+            (jacobiSn_shift hk z).2.2.1]
+    have hfs : ∀ z, jacobiSn (z + (I * completeEllipticKPrime k)) k = ((k)⁻¹) *
+        (1 / jacobiSn z k) := by
+      intro z; rw [hfg, jacobiNs, jacobiPQ_eq_one_div]; rfl
+    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiSn w k) hfs
+      ((hasDerivAt_jacobiSn hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide))).congr_deriv
+          (by simp [jacobiCn_zero hk, jacobiDn_zero hk]))
+      (by simp [jacobiSn_zero hk])
     convert h using 2
-  · have hfg : ∀ z, jacobiSnk (z + (2 * compEllIntKk k)) k = -1 * jacobiSnk z k :=
+  · have hfg : ∀ z, jacobiSn (z + (2 * completeEllipticK k)) k = -1 * jacobiSn z k :=
       fun z => by
-        rw [show z + (2 * compEllIntKk k) = z + 2 * compEllIntKk k by ring,
-            (jacobiSnk_shift hk z).2.2.2.1]
+        rw [show z + (2 * completeEllipticK k) = z + 2 * completeEllipticK k by ring,
+            (jacobiSn_shift hk z).2.2.2.1]
         try ring
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSnk w k) hfg
-      (hasDerivAt_jacobiSnk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiCnk_zero hk, jacobiDnk_zero hk])
-  · have hfg : ∀ z, jacobiSnk (z + (2 * compEllIntKk k + 2 * (I * compEllIntKpk k))) k =
-        -1 * jacobiSnk z k :=
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSn w k) hfg
+      (hasDerivAt_jacobiSn hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiCn_zero hk, jacobiDn_zero hk])
+  · have hfg : ∀ z, jacobiSn
+        (z + (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k))) k =
+        -1 * jacobiSn z k :=
       fun z => by
-        rw [show z + (2 * compEllIntKk k + 2 * (I * compEllIntKpk k)) =
-            z + 2 * compEllIntKk k + 2 * (I * compEllIntKpk k) by ring,
-                (jacobiSnk_shift hk z).2.2.2.2.1]
+        rw [show z + (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k)) =
+            z + 2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k) by ring,
+                (jacobiSn_shift hk z).2.2.2.2.1]
         try ring
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSnk w k) hfg
-      (hasDerivAt_jacobiSnk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiCnk_zero hk, jacobiDnk_zero hk])
-  · have hfg : ∀ z, jacobiSnk (z + (2 * (I * compEllIntKpk k))) k = 1 * jacobiSnk z k :=
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSn w k) hfg
+      (hasDerivAt_jacobiSn hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiCn_zero hk, jacobiDn_zero hk])
+  · have hfg : ∀ z, jacobiSn (z + (2 * (I * completeEllipticKPrime k))) k = 1 * jacobiSn z k :=
       fun z => by
-        rw [show z + (2 * (I * compEllIntKpk k)) = z + 2 * (I * compEllIntKpk k) by ring,
-            (jacobiSnk_shift hk z).2.2.2.2.2]
+        rw [show z + (2 * (I * completeEllipticKPrime k)) = z + 2 *
+            (I * completeEllipticKPrime k) by ring,
+            (jacobiSn_shift hk z).2.2.2.2.2]
         try ring
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSnk w k) hfg
-      (hasDerivAt_jacobiSnk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiCnk_zero hk, jacobiDnk_zero hk])
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSn w k) hfg
+      (hasDerivAt_jacobiSn hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiCn_zero hk, jacobiDn_zero hk])
 
 /-- Table 22.5.1, row `cn`: the `z`-derivative of `cn(z, k)` at the regular
 special points and the residue at the poles (from Table 22.13.1 and the shifts of Table 22.4.3). -/
 @[dlmf 22.5.T1]
-theorem jacobiCnk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
-    HasDerivAt (fun w => jacobiCnk w k) (0) (0) ∧
-    HasDerivAt (fun w => jacobiCnk w k) (-jacobiComodulusk k) (compEllIntKk k) ∧
-    HasDerivAt (fun w => jacobiCnk w k) (0) (compEllIntKk k + I * compEllIntKpk k) ∧
-    Tendsto (fun w => (w - (I * compEllIntKpk k)) * jacobiCnk w k) (𝓝[≠] (I * compEllIntKpk k))
+theorem jacobiCn_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
+    HasDerivAt (fun w => jacobiCn w k) (0) (0) ∧
+    HasDerivAt (fun w => jacobiCn w k) (-jacobiComodulus k) (completeEllipticK k) ∧
+    HasDerivAt (fun w => jacobiCn w k) (0) (completeEllipticK k + I * completeEllipticKPrime k) ∧
+    Tendsto (fun w => (w - (I * completeEllipticKPrime k)) * jacobiCn w k)
+        (𝓝[≠] (I * completeEllipticKPrime k))
         (𝓝 (-I / k)) ∧
-    HasDerivAt (fun w => jacobiCnk w k) (0) (2 * compEllIntKk k) ∧
-    HasDerivAt (fun w => jacobiCnk w k) (0) (2 * compEllIntKk k + 2 * (I * compEllIntKpk k)) ∧
-    HasDerivAt (fun w => jacobiCnk w k) (0) (2 * (I * compEllIntKpk k)) := by
+    HasDerivAt (fun w => jacobiCn w k) (0) (2 * completeEllipticK k) ∧
+    HasDerivAt (fun w => jacobiCn w k) (0)
+        (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k)) ∧
+    HasDerivAt (fun w => jacobiCn w k) (0) (2 * (I * completeEllipticKPrime k)) := by
   refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
-  · have hfg : ∀ z, jacobiCnk (z + (0)) k = 1 * jacobiCnk z k :=
+  · have hfg : ∀ z, jacobiCn (z + (0)) k = 1 * jacobiCn z k :=
       fun z => by rw [add_zero, one_mul]
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCnk w k) hfg
-      (hasDerivAt_jacobiCnk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiSnk_zero hk, jacobiDnk_zero hk])
-  · have hfg : ∀ z, jacobiCnk (z + (compEllIntKk k)) k = (-jacobiComodulusk k) * jacobiSdk z k :=
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCn w k) hfg
+      (hasDerivAt_jacobiCn hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiSn_zero hk, jacobiDn_zero hk])
+  · have hfg : ∀ z, jacobiCn (z + (completeEllipticK k)) k = (-jacobiComodulus k) * jacobiSd z k :=
       fun z => by
-        rw [show z + (compEllIntKk k) = z + compEllIntKk k by ring, (jacobiCnk_shift hk z).1]
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCnk w k) hfg
-      (hasDerivAt_jacobiSdk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiCdk_zero hk, jacobiNdk_zero hk])
-  · have hfg : ∀ z, jacobiCnk (z + (compEllIntKk k + I * compEllIntKpk k)) k =
-        (-(I * jacobiComodulusk k / k)) * jacobiNck z k :=
+        rw [show z + (completeEllipticK k) = z + completeEllipticK k by ring,
+                                                                          (jacobiCn_shift hk z).1]
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCn w k) hfg
+      (hasDerivAt_jacobiSd hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiCd_zero hk, jacobiNd_zero hk])
+  · have hfg : ∀ z, jacobiCn (z + (completeEllipticK k + I * completeEllipticKPrime k)) k =
+        (-(I * jacobiComodulus k / k)) * jacobiNc z k :=
       fun z => by
-        rw [show z + (compEllIntKk k + I * compEllIntKpk k) =
-            z + compEllIntKk k + I * compEllIntKpk k by ring, (jacobiCnk_shift hk z).2.1]
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCnk w k) hfg
-      (hasDerivAt_jacobiNck hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiDck_zero hk, jacobiSck_zero hk])
-  · have hfg : ∀ z, jacobiCnk (z + (I * compEllIntKpk k)) k = (-(I / k)) * jacobiDsk z k :=
+        rw [show z + (completeEllipticK k + I * completeEllipticKPrime k) =
+            z + completeEllipticK k + I * completeEllipticKPrime k by ring,
+                                                                        (jacobiCn_shift hk z).2.1]
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCn w k) hfg
+      (hasDerivAt_jacobiNc hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiDc_zero hk, jacobiSc_zero hk])
+  · have hfg : ∀ z, jacobiCn (z + (I * completeEllipticKPrime k)) k = (-(I / k)) * jacobiDs z k :=
       fun z => by
-        rw [show z + (I * compEllIntKpk k) = z + I * compEllIntKpk k by ring,
-            (jacobiCnk_shift hk z).2.2.1]
-    have hfs : ∀ z, jacobiCnk (z + (I * compEllIntKpk k)) k = (-(I / k)) * (1 / jacobiSdk z k) := by
-      intro z; rw [hfg, jacobiDsk, jacobiPQk_eq_one_div]; rfl
-    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiCnk w k) hfs
-      ((hasDerivAt_jacobiSdk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
-          (by simp [jacobiCdk_zero hk, jacobiNdk_zero hk]))
-      (by simp [jacobiSdk_zero hk])
+        rw [show z + (I * completeEllipticKPrime k) = z + I * completeEllipticKPrime k by ring,
+            (jacobiCn_shift hk z).2.2.1]
+    have hfs : ∀ z, jacobiCn (z + (I * completeEllipticKPrime k)) k = (-(I / k)) *
+        (1 / jacobiSd z k) := by
+      intro z; rw [hfg, jacobiDs, jacobiPQ_eq_one_div]; rfl
+    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiCn w k) hfs
+      ((hasDerivAt_jacobiSd hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide))).congr_deriv
+          (by simp [jacobiCd_zero hk, jacobiNd_zero hk]))
+      (by simp [jacobiSd_zero hk])
     convert h using 2
     ring
-  · have hfg : ∀ z, jacobiCnk (z + (2 * compEllIntKk k)) k = -1 * jacobiCnk z k :=
+  · have hfg : ∀ z, jacobiCn (z + (2 * completeEllipticK k)) k = -1 * jacobiCn z k :=
       fun z => by
-        rw [show z + (2 * compEllIntKk k) = z + 2 * compEllIntKk k by ring,
-            (jacobiCnk_shift hk z).2.2.2.1]
+        rw [show z + (2 * completeEllipticK k) = z + 2 * completeEllipticK k by ring,
+            (jacobiCn_shift hk z).2.2.2.1]
         try ring
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCnk w k) hfg
-      (hasDerivAt_jacobiCnk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiSnk_zero hk, jacobiDnk_zero hk])
-  · have hfg : ∀ z, jacobiCnk (z + (2 * compEllIntKk k + 2 * (I * compEllIntKpk k))) k =
-        1 * jacobiCnk z k :=
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCn w k) hfg
+      (hasDerivAt_jacobiCn hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiSn_zero hk, jacobiDn_zero hk])
+  · have hfg : ∀ z, jacobiCn
+        (z + (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k))) k =
+        1 * jacobiCn z k :=
       fun z => by
-        rw [show z + (2 * compEllIntKk k + 2 * (I * compEllIntKpk k)) =
-            z + 2 * compEllIntKk k + 2 * (I * compEllIntKpk k) by ring,
-                (jacobiCnk_shift hk z).2.2.2.2.1]
+        rw [show z + (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k)) =
+            z + 2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k) by ring,
+                (jacobiCn_shift hk z).2.2.2.2.1]
         try ring
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCnk w k) hfg
-      (hasDerivAt_jacobiCnk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiSnk_zero hk, jacobiDnk_zero hk])
-  · have hfg : ∀ z, jacobiCnk (z + (2 * (I * compEllIntKpk k))) k = -1 * jacobiCnk z k :=
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCn w k) hfg
+      (hasDerivAt_jacobiCn hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiSn_zero hk, jacobiDn_zero hk])
+  · have hfg : ∀ z, jacobiCn (z + (2 * (I * completeEllipticKPrime k))) k = -1 * jacobiCn z k :=
       fun z => by
-        rw [show z + (2 * (I * compEllIntKpk k)) = z + 2 * (I * compEllIntKpk k) by ring,
-            (jacobiCnk_shift hk z).2.2.2.2.2]
+        rw [show z + (2 * (I * completeEllipticKPrime k)) = z + 2 *
+            (I * completeEllipticKPrime k) by ring,
+            (jacobiCn_shift hk z).2.2.2.2.2]
         try ring
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCnk w k) hfg
-      (hasDerivAt_jacobiCnk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiSnk_zero hk, jacobiDnk_zero hk])
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCn w k) hfg
+      (hasDerivAt_jacobiCn hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiSn_zero hk, jacobiDn_zero hk])
 
 /-- Table 22.5.1, row `dn`: the `z`-derivative of `dn(z, k)` at the regular
 special points and the residue at the poles (from Table 22.13.1 and the shifts of Table 22.4.3). -/
 @[dlmf 22.5.T1]
-theorem jacobiDnk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
-    HasDerivAt (fun w => jacobiDnk w k) (0) (0) ∧
-    HasDerivAt (fun w => jacobiDnk w k) (0) (compEllIntKk k) ∧
-    HasDerivAt (fun w => jacobiDnk w k) (I * jacobiComodulusk k)
-        (compEllIntKk k + I * compEllIntKpk k) ∧
-    Tendsto (fun w => (w - (I * compEllIntKpk k)) * jacobiDnk w k) (𝓝[≠] (I * compEllIntKpk k))
+theorem jacobiDn_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
+    HasDerivAt (fun w => jacobiDn w k) (0) (0) ∧
+    HasDerivAt (fun w => jacobiDn w k) (0) (completeEllipticK k) ∧
+    HasDerivAt (fun w => jacobiDn w k) (I * jacobiComodulus k)
+        (completeEllipticK k + I * completeEllipticKPrime k) ∧
+    Tendsto (fun w => (w - (I * completeEllipticKPrime k)) * jacobiDn w k)
+        (𝓝[≠] (I * completeEllipticKPrime k))
         (𝓝 (-I)) ∧
-    HasDerivAt (fun w => jacobiDnk w k) (0) (2 * compEllIntKk k) ∧
-    HasDerivAt (fun w => jacobiDnk w k) (0) (2 * compEllIntKk k + 2 * (I * compEllIntKpk k)) ∧
-    HasDerivAt (fun w => jacobiDnk w k) (0) (2 * (I * compEllIntKpk k)) := by
+    HasDerivAt (fun w => jacobiDn w k) (0) (2 * completeEllipticK k) ∧
+    HasDerivAt (fun w => jacobiDn w k) (0)
+        (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k)) ∧
+    HasDerivAt (fun w => jacobiDn w k) (0) (2 * (I * completeEllipticKPrime k)) := by
   refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
-  · have hfg : ∀ z, jacobiDnk (z + (0)) k = 1 * jacobiDnk z k :=
+  · have hfg : ∀ z, jacobiDn (z + (0)) k = 1 * jacobiDn z k :=
       fun z => by rw [add_zero, one_mul]
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDnk w k) hfg
-      (hasDerivAt_jacobiDnk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiSnk_zero hk, jacobiCnk_zero hk])
-  · have hfg : ∀ z, jacobiDnk (z + (compEllIntKk k)) k = (jacobiComodulusk k) * jacobiNdk z k :=
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDn w k) hfg
+      (hasDerivAt_jacobiDn hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiSn_zero hk, jacobiCn_zero hk])
+  · have hfg : ∀ z, jacobiDn (z + (completeEllipticK k)) k = (jacobiComodulus k) * jacobiNd z k :=
       fun z => by
-        rw [show z + (compEllIntKk k) = z + compEllIntKk k by ring, (jacobiDnk_shift hk z).1]
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDnk w k) hfg
-      (hasDerivAt_jacobiNdk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiCdk_zero hk, jacobiSdk_zero hk])
-  · have hfg : ∀ z, jacobiDnk (z + (compEllIntKk k + I * compEllIntKpk k)) k =
-        (I * jacobiComodulusk k) * jacobiSck z k :=
+        rw [show z + (completeEllipticK k) = z + completeEllipticK k by ring,
+                                                                          (jacobiDn_shift hk z).1]
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDn w k) hfg
+      (hasDerivAt_jacobiNd hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiCd_zero hk, jacobiSd_zero hk])
+  · have hfg : ∀ z, jacobiDn (z + (completeEllipticK k + I * completeEllipticKPrime k)) k =
+        (I * jacobiComodulus k) * jacobiSc z k :=
       fun z => by
-        rw [show z + (compEllIntKk k + I * compEllIntKpk k) =
-            z + compEllIntKk k + I * compEllIntKpk k by ring, (jacobiDnk_shift hk z).2.1]
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDnk w k) hfg
-      (hasDerivAt_jacobiSck hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiDck_zero hk, jacobiNck_zero hk])
-  · have hfg : ∀ z, jacobiDnk (z + (I * compEllIntKpk k)) k = (-I) * jacobiCsk z k :=
+        rw [show z + (completeEllipticK k + I * completeEllipticKPrime k) =
+            z + completeEllipticK k + I * completeEllipticKPrime k by ring,
+                                                                        (jacobiDn_shift hk z).2.1]
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDn w k) hfg
+      (hasDerivAt_jacobiSc hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiDc_zero hk, jacobiNc_zero hk])
+  · have hfg : ∀ z, jacobiDn (z + (I * completeEllipticKPrime k)) k = (-I) * jacobiCs z k :=
       fun z => by
-        rw [show z + (I * compEllIntKpk k) = z + I * compEllIntKpk k by ring,
-            (jacobiDnk_shift hk z).2.2.1]
-    have hfs : ∀ z, jacobiDnk (z + (I * compEllIntKpk k)) k = (-I) * (1 / jacobiSck z k) := by
-      intro z; rw [hfg, jacobiCsk, jacobiPQk_eq_one_div]; rfl
-    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiDnk w k) hfs
-      ((hasDerivAt_jacobiSck hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
-          (by simp [jacobiDck_zero hk, jacobiNck_zero hk]))
-      (by simp [jacobiSck_zero hk])
+        rw [show z + (I * completeEllipticKPrime k) = z + I * completeEllipticKPrime k by ring,
+            (jacobiDn_shift hk z).2.2.1]
+    have hfs : ∀ z, jacobiDn (z + (I * completeEllipticKPrime k)) k = (-I) *
+        (1 / jacobiSc z k) := by
+      intro z; rw [hfg, jacobiCs, jacobiPQ_eq_one_div]; rfl
+    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiDn w k) hfs
+      ((hasDerivAt_jacobiSc hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide))).congr_deriv
+          (by simp [jacobiDc_zero hk, jacobiNc_zero hk]))
+      (by simp [jacobiSc_zero hk])
     convert h using 2
-  · have hfg : ∀ z, jacobiDnk (z + (2 * compEllIntKk k)) k = 1 * jacobiDnk z k :=
+  · have hfg : ∀ z, jacobiDn (z + (2 * completeEllipticK k)) k = 1 * jacobiDn z k :=
       fun z => by
-        rw [show z + (2 * compEllIntKk k) = z + 2 * compEllIntKk k by ring,
-            (jacobiDnk_shift hk z).2.2.2.1]
+        rw [show z + (2 * completeEllipticK k) = z + 2 * completeEllipticK k by ring,
+            (jacobiDn_shift hk z).2.2.2.1]
         try ring
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDnk w k) hfg
-      (hasDerivAt_jacobiDnk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiSnk_zero hk, jacobiCnk_zero hk])
-  · have hfg : ∀ z, jacobiDnk (z + (2 * compEllIntKk k + 2 * (I * compEllIntKpk k))) k =
-        -1 * jacobiDnk z k :=
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDn w k) hfg
+      (hasDerivAt_jacobiDn hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiSn_zero hk, jacobiCn_zero hk])
+  · have hfg : ∀ z, jacobiDn
+        (z + (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k))) k =
+        -1 * jacobiDn z k :=
       fun z => by
-        rw [show z + (2 * compEllIntKk k + 2 * (I * compEllIntKpk k)) =
-            z + 2 * compEllIntKk k + 2 * (I * compEllIntKpk k) by ring,
-                (jacobiDnk_shift hk z).2.2.2.2.1]
+        rw [show z + (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k)) =
+            z + 2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k) by ring,
+                (jacobiDn_shift hk z).2.2.2.2.1]
         try ring
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDnk w k) hfg
-      (hasDerivAt_jacobiDnk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiSnk_zero hk, jacobiCnk_zero hk])
-  · have hfg : ∀ z, jacobiDnk (z + (2 * (I * compEllIntKpk k))) k = -1 * jacobiDnk z k :=
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDn w k) hfg
+      (hasDerivAt_jacobiDn hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiSn_zero hk, jacobiCn_zero hk])
+  · have hfg : ∀ z, jacobiDn (z + (2 * (I * completeEllipticKPrime k))) k = -1 * jacobiDn z k :=
       fun z => by
-        rw [show z + (2 * (I * compEllIntKpk k)) = z + 2 * (I * compEllIntKpk k) by ring,
-            (jacobiDnk_shift hk z).2.2.2.2.2]
+        rw [show z + (2 * (I * completeEllipticKPrime k)) = z + 2 *
+            (I * completeEllipticKPrime k) by ring,
+            (jacobiDn_shift hk z).2.2.2.2.2]
         try ring
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDnk w k) hfg
-      (hasDerivAt_jacobiDnk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiSnk_zero hk, jacobiCnk_zero hk])
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDn w k) hfg
+      (hasDerivAt_jacobiDn hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiSn_zero hk, jacobiCn_zero hk])
 
 /-- Table 22.5.1, row `cd`: the `z`-derivative of `cd(z, k)` at the regular
 special points and the residue at the poles (from Table 22.13.1 and the shifts of Table 22.4.3). -/
 @[dlmf 22.5.T1]
-theorem jacobiCdk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
-    HasDerivAt (fun w => jacobiCdk w k) (0) (0) ∧
-    HasDerivAt (fun w => jacobiCdk w k) (-1) (compEllIntKk k) ∧
-    Tendsto (fun w => (w - (compEllIntKk k + I * compEllIntKpk k)) * jacobiCdk w k)
-        (𝓝[≠] (compEllIntKk k + I * compEllIntKpk k))
+theorem jacobiCd_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
+    HasDerivAt (fun w => jacobiCd w k) (0) (0) ∧
+    HasDerivAt (fun w => jacobiCd w k) (-1) (completeEllipticK k) ∧
+    Tendsto (fun w => (w - (completeEllipticK k + I * completeEllipticKPrime k)) * jacobiCd w k)
+        (𝓝[≠] (completeEllipticK k + I * completeEllipticKPrime k))
         (𝓝 (-k⁻¹)) ∧
-    HasDerivAt (fun w => jacobiCdk w k) (0) (I * compEllIntKpk k) ∧
-    HasDerivAt (fun w => jacobiCdk w k) (0) (2 * compEllIntKk k) ∧
-    HasDerivAt (fun w => jacobiCdk w k) (0) (2 * compEllIntKk k + 2 * (I * compEllIntKpk k)) ∧
-    HasDerivAt (fun w => jacobiCdk w k) (0) (2 * (I * compEllIntKpk k)) := by
+    HasDerivAt (fun w => jacobiCd w k) (0) (I * completeEllipticKPrime k) ∧
+    HasDerivAt (fun w => jacobiCd w k) (0) (2 * completeEllipticK k) ∧
+    HasDerivAt (fun w => jacobiCd w k) (0)
+        (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k)) ∧
+    HasDerivAt (fun w => jacobiCd w k) (0) (2 * (I * completeEllipticKPrime k)) := by
   refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
-  · have hfg : ∀ z, jacobiCdk (z + (0)) k = 1 * jacobiCdk z k :=
+  · have hfg : ∀ z, jacobiCd (z + (0)) k = 1 * jacobiCd z k :=
       fun z => by rw [add_zero, one_mul]
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCdk w k) hfg
-      (hasDerivAt_jacobiCdk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiSdk_zero hk, jacobiNdk_zero hk])
-  · have hfg : ∀ z, jacobiCdk (z + (compEllIntKk k)) k = -1 * jacobiSnk z k :=
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCd w k) hfg
+      (hasDerivAt_jacobiCd hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiSd_zero hk, jacobiNd_zero hk])
+  · have hfg : ∀ z, jacobiCd (z + (completeEllipticK k)) k = -1 * jacobiSn z k :=
       fun z => by
-        rw [show z + (compEllIntKk k) = z + compEllIntKk k by ring, (jacobiCdk_shift hk z).1]
+        rw [show z + (completeEllipticK k) = z + completeEllipticK k by ring,
+                                                                          (jacobiCd_shift hk z).1]
         try ring
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCdk w k) hfg
-      (hasDerivAt_jacobiSnk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiCnk_zero hk, jacobiDnk_zero hk])
-  · have hfg : ∀ z, jacobiCdk (z + (compEllIntKk k + I * compEllIntKpk k)) k =
-        (-(k)⁻¹) * jacobiNsk z k :=
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCd w k) hfg
+      (hasDerivAt_jacobiSn hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiCn_zero hk, jacobiDn_zero hk])
+  · have hfg : ∀ z, jacobiCd (z + (completeEllipticK k + I * completeEllipticKPrime k)) k =
+        (-(k)⁻¹) * jacobiNs z k :=
       fun z => by
-        rw [show z + (compEllIntKk k + I * compEllIntKpk k) =
-            z + compEllIntKk k + I * compEllIntKpk k by ring, (jacobiCdk_shift hk z).2.1]
-    have hfs : ∀ z, jacobiCdk (z + (compEllIntKk k + I * compEllIntKpk k)) k =
-        (-(k)⁻¹) * (1 / jacobiSnk z k) := by
-      intro z; rw [hfg, jacobiNsk, jacobiPQk_eq_one_div]; rfl
-    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiCdk w k) hfs
-      ((hasDerivAt_jacobiSnk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
-          (by simp [jacobiCnk_zero hk, jacobiDnk_zero hk]))
-      (by simp [jacobiSnk_zero hk])
+        rw [show z + (completeEllipticK k + I * completeEllipticKPrime k) =
+            z + completeEllipticK k + I * completeEllipticKPrime k by ring,
+                                                                        (jacobiCd_shift hk z).2.1]
+    have hfs : ∀ z, jacobiCd (z + (completeEllipticK k + I * completeEllipticKPrime k)) k =
+        (-(k)⁻¹) * (1 / jacobiSn z k) := by
+      intro z; rw [hfg, jacobiNs, jacobiPQ_eq_one_div]; rfl
+    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiCd w k) hfs
+      ((hasDerivAt_jacobiSn hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide))).congr_deriv
+          (by simp [jacobiCn_zero hk, jacobiDn_zero hk]))
+      (by simp [jacobiSn_zero hk])
     convert h using 2
-  · have hfg : ∀ z, jacobiCdk (z + (I * compEllIntKpk k)) k = ((k)⁻¹) * jacobiDck z k :=
+  · have hfg : ∀ z, jacobiCd (z + (I * completeEllipticKPrime k)) k = ((k)⁻¹) * jacobiDc z k :=
       fun z => by
-        rw [show z + (I * compEllIntKpk k) = z + I * compEllIntKpk k by ring,
-            (jacobiCdk_shift hk z).2.2.1]
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCdk w k) hfg
-      (hasDerivAt_jacobiDck hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiNck_zero hk, jacobiSck_zero hk])
-  · have hfg : ∀ z, jacobiCdk (z + (2 * compEllIntKk k)) k = -1 * jacobiCdk z k :=
+        rw [show z + (I * completeEllipticKPrime k) = z + I * completeEllipticKPrime k by ring,
+            (jacobiCd_shift hk z).2.2.1]
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCd w k) hfg
+      (hasDerivAt_jacobiDc hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiNc_zero hk, jacobiSc_zero hk])
+  · have hfg : ∀ z, jacobiCd (z + (2 * completeEllipticK k)) k = -1 * jacobiCd z k :=
       fun z => by
-        rw [show z + (2 * compEllIntKk k) = z + 2 * compEllIntKk k by ring,
-            (jacobiCdk_shift hk z).2.2.2.1]
+        rw [show z + (2 * completeEllipticK k) = z + 2 * completeEllipticK k by ring,
+            (jacobiCd_shift hk z).2.2.2.1]
         try ring
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCdk w k) hfg
-      (hasDerivAt_jacobiCdk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiSdk_zero hk, jacobiNdk_zero hk])
-  · have hfg : ∀ z, jacobiCdk (z + (2 * compEllIntKk k + 2 * (I * compEllIntKpk k))) k =
-        -1 * jacobiCdk z k :=
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCd w k) hfg
+      (hasDerivAt_jacobiCd hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiSd_zero hk, jacobiNd_zero hk])
+  · have hfg : ∀ z, jacobiCd
+        (z + (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k))) k =
+        -1 * jacobiCd z k :=
       fun z => by
-        rw [show z + (2 * compEllIntKk k + 2 * (I * compEllIntKpk k)) =
-            z + 2 * compEllIntKk k + 2 * (I * compEllIntKpk k) by ring,
-                (jacobiCdk_shift hk z).2.2.2.2.1]
+        rw [show z + (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k)) =
+            z + 2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k) by ring,
+                (jacobiCd_shift hk z).2.2.2.2.1]
         try ring
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCdk w k) hfg
-      (hasDerivAt_jacobiCdk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiSdk_zero hk, jacobiNdk_zero hk])
-  · have hfg : ∀ z, jacobiCdk (z + (2 * (I * compEllIntKpk k))) k = 1 * jacobiCdk z k :=
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCd w k) hfg
+      (hasDerivAt_jacobiCd hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiSd_zero hk, jacobiNd_zero hk])
+  · have hfg : ∀ z, jacobiCd (z + (2 * (I * completeEllipticKPrime k))) k = 1 * jacobiCd z k :=
       fun z => by
-        rw [show z + (2 * (I * compEllIntKpk k)) = z + 2 * (I * compEllIntKpk k) by ring,
-            (jacobiCdk_shift hk z).2.2.2.2.2]
+        rw [show z + (2 * (I * completeEllipticKPrime k)) = z + 2 *
+            (I * completeEllipticKPrime k) by ring,
+            (jacobiCd_shift hk z).2.2.2.2.2]
         try ring
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCdk w k) hfg
-      (hasDerivAt_jacobiCdk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiSdk_zero hk, jacobiNdk_zero hk])
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCd w k) hfg
+      (hasDerivAt_jacobiCd hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiSd_zero hk, jacobiNd_zero hk])
 
 /-- Table 22.5.1, row `sd`: the `z`-derivative of `sd(z, k)` at the regular
 special points and the residue at the poles (from Table 22.13.1 and the shifts of Table 22.4.3). -/
 @[dlmf 22.5.T1]
-theorem jacobiSdk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
-    HasDerivAt (fun w => jacobiSdk w k) (1) (0) ∧
-    HasDerivAt (fun w => jacobiSdk w k) (0) (compEllIntKk k) ∧
-    Tendsto (fun w => (w - (compEllIntKk k + I * compEllIntKpk k)) * jacobiSdk w k)
-        (𝓝[≠] (compEllIntKk k + I * compEllIntKpk k))
-        (𝓝 (-I / (k * jacobiComodulusk k))) ∧
-    HasDerivAt (fun w => jacobiSdk w k) (0) (I * compEllIntKpk k) ∧
-    HasDerivAt (fun w => jacobiSdk w k) (-1) (2 * compEllIntKk k) ∧
-    HasDerivAt (fun w => jacobiSdk w k) (1) (2 * compEllIntKk k + 2 * (I * compEllIntKpk k)) ∧
-    HasDerivAt (fun w => jacobiSdk w k) (-1) (2 * (I * compEllIntKpk k)) := by
+theorem jacobiSd_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
+    HasDerivAt (fun w => jacobiSd w k) (1) (0) ∧
+    HasDerivAt (fun w => jacobiSd w k) (0) (completeEllipticK k) ∧
+    Tendsto (fun w => (w - (completeEllipticK k + I * completeEllipticKPrime k)) * jacobiSd w k)
+        (𝓝[≠] (completeEllipticK k + I * completeEllipticKPrime k))
+        (𝓝 (-I / (k * jacobiComodulus k))) ∧
+    HasDerivAt (fun w => jacobiSd w k) (0) (I * completeEllipticKPrime k) ∧
+    HasDerivAt (fun w => jacobiSd w k) (-1) (2 * completeEllipticK k) ∧
+    HasDerivAt (fun w => jacobiSd w k) (1)
+        (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k)) ∧
+    HasDerivAt (fun w => jacobiSd w k) (-1) (2 * (I * completeEllipticKPrime k)) := by
   refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
-  · have hfg : ∀ z, jacobiSdk (z + (0)) k = 1 * jacobiSdk z k :=
+  · have hfg : ∀ z, jacobiSd (z + (0)) k = 1 * jacobiSd z k :=
       fun z => by rw [add_zero, one_mul]
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSdk w k) hfg
-      (hasDerivAt_jacobiSdk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiCdk_zero hk, jacobiNdk_zero hk])
-  · have hfg : ∀ z, jacobiSdk (z + (compEllIntKk k)) k = ((jacobiComodulusk k)⁻¹) * jacobiCnk z k :=
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSd w k) hfg
+      (hasDerivAt_jacobiSd hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiCd_zero hk, jacobiNd_zero hk])
+  · have hfg : ∀ z, jacobiSd (z + (completeEllipticK k)) k = ((jacobiComodulus k)⁻¹) *
+        jacobiCn z k :=
       fun z => by
-        rw [show z + (compEllIntKk k) = z + compEllIntKk k by ring, (jacobiSdk_shift hk z).1]
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSdk w k) hfg
-      (hasDerivAt_jacobiCnk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiSnk_zero hk, jacobiDnk_zero hk])
-  · have hfg : ∀ z, jacobiSdk (z + (compEllIntKk k + I * compEllIntKpk k)) k =
-        (-(I / (k * jacobiComodulusk k))) * jacobiDsk z k :=
+        rw [show z + (completeEllipticK k) = z + completeEllipticK k by ring,
+                                                                          (jacobiSd_shift hk z).1]
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSd w k) hfg
+      (hasDerivAt_jacobiCn hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiSn_zero hk, jacobiDn_zero hk])
+  · have hfg : ∀ z, jacobiSd (z + (completeEllipticK k + I * completeEllipticKPrime k)) k =
+        (-(I / (k * jacobiComodulus k))) * jacobiDs z k :=
       fun z => by
-        rw [show z + (compEllIntKk k + I * compEllIntKpk k) =
-            z + compEllIntKk k + I * compEllIntKpk k by ring, (jacobiSdk_shift hk z).2.1]
-    have hfs : ∀ z, jacobiSdk (z + (compEllIntKk k + I * compEllIntKpk k)) k =
-        (-(I / (k * jacobiComodulusk k))) * (1 / jacobiSdk z k) := by
-      intro z; rw [hfg, jacobiDsk, jacobiPQk_eq_one_div]; rfl
-    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiSdk w k) hfs
-      ((hasDerivAt_jacobiSdk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
-          (by simp [jacobiCdk_zero hk, jacobiNdk_zero hk]))
-      (by simp [jacobiSdk_zero hk])
+        rw [show z + (completeEllipticK k + I * completeEllipticKPrime k) =
+            z + completeEllipticK k + I * completeEllipticKPrime k by ring,
+                                                                        (jacobiSd_shift hk z).2.1]
+    have hfs : ∀ z, jacobiSd (z + (completeEllipticK k + I * completeEllipticKPrime k)) k =
+        (-(I / (k * jacobiComodulus k))) * (1 / jacobiSd z k) := by
+      intro z; rw [hfg, jacobiDs, jacobiPQ_eq_one_div]; rfl
+    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiSd w k) hfs
+      ((hasDerivAt_jacobiSd hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide))).congr_deriv
+          (by simp [jacobiCd_zero hk, jacobiNd_zero hk]))
+      (by simp [jacobiSd_zero hk])
     convert h using 2
     ring
-  · have hfg : ∀ z, jacobiSdk (z + (I * compEllIntKpk k)) k = ((I / k)) * jacobiNck z k :=
+  · have hfg : ∀ z, jacobiSd (z + (I * completeEllipticKPrime k)) k = ((I / k)) * jacobiNc z k :=
       fun z => by
-        rw [show z + (I * compEllIntKpk k) = z + I * compEllIntKpk k by ring,
-            (jacobiSdk_shift hk z).2.2.1]
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSdk w k) hfg
-      (hasDerivAt_jacobiNck hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiDck_zero hk, jacobiSck_zero hk])
-  · have hfg : ∀ z, jacobiSdk (z + (2 * compEllIntKk k)) k = -1 * jacobiSdk z k :=
+        rw [show z + (I * completeEllipticKPrime k) = z + I * completeEllipticKPrime k by ring,
+            (jacobiSd_shift hk z).2.2.1]
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSd w k) hfg
+      (hasDerivAt_jacobiNc hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiDc_zero hk, jacobiSc_zero hk])
+  · have hfg : ∀ z, jacobiSd (z + (2 * completeEllipticK k)) k = -1 * jacobiSd z k :=
       fun z => by
-        rw [show z + (2 * compEllIntKk k) = z + 2 * compEllIntKk k by ring,
-            (jacobiSdk_shift hk z).2.2.2.1]
+        rw [show z + (2 * completeEllipticK k) = z + 2 * completeEllipticK k by ring,
+            (jacobiSd_shift hk z).2.2.2.1]
         try ring
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSdk w k) hfg
-      (hasDerivAt_jacobiSdk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiCdk_zero hk, jacobiNdk_zero hk])
-  · have hfg : ∀ z, jacobiSdk (z + (2 * compEllIntKk k + 2 * (I * compEllIntKpk k))) k =
-        1 * jacobiSdk z k :=
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSd w k) hfg
+      (hasDerivAt_jacobiSd hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiCd_zero hk, jacobiNd_zero hk])
+  · have hfg : ∀ z, jacobiSd
+        (z + (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k))) k =
+        1 * jacobiSd z k :=
       fun z => by
-        rw [show z + (2 * compEllIntKk k + 2 * (I * compEllIntKpk k)) =
-            z + 2 * compEllIntKk k + 2 * (I * compEllIntKpk k) by ring,
-                (jacobiSdk_shift hk z).2.2.2.2.1]
+        rw [show z + (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k)) =
+            z + 2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k) by ring,
+                (jacobiSd_shift hk z).2.2.2.2.1]
         try ring
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSdk w k) hfg
-      (hasDerivAt_jacobiSdk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiCdk_zero hk, jacobiNdk_zero hk])
-  · have hfg : ∀ z, jacobiSdk (z + (2 * (I * compEllIntKpk k))) k = -1 * jacobiSdk z k :=
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSd w k) hfg
+      (hasDerivAt_jacobiSd hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiCd_zero hk, jacobiNd_zero hk])
+  · have hfg : ∀ z, jacobiSd (z + (2 * (I * completeEllipticKPrime k))) k = -1 * jacobiSd z k :=
       fun z => by
-        rw [show z + (2 * (I * compEllIntKpk k)) = z + 2 * (I * compEllIntKpk k) by ring,
-            (jacobiSdk_shift hk z).2.2.2.2.2]
+        rw [show z + (2 * (I * completeEllipticKPrime k)) = z + 2 *
+            (I * completeEllipticKPrime k) by ring,
+            (jacobiSd_shift hk z).2.2.2.2.2]
         try ring
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSdk w k) hfg
-      (hasDerivAt_jacobiSdk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiCdk_zero hk, jacobiNdk_zero hk])
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSd w k) hfg
+      (hasDerivAt_jacobiSd hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiCd_zero hk, jacobiNd_zero hk])
 
 /-- Table 22.5.1, row `nd`: the `z`-derivative of `nd(z, k)` at the regular
 special points and the residue at the poles (from Table 22.13.1 and the shifts of Table 22.4.3). -/
 @[dlmf 22.5.T1]
-theorem jacobiNdk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
-    HasDerivAt (fun w => jacobiNdk w k) (0) (0) ∧
-    HasDerivAt (fun w => jacobiNdk w k) (0) (compEllIntKk k) ∧
-    Tendsto (fun w => (w - (compEllIntKk k + I * compEllIntKpk k)) * jacobiNdk w k)
-        (𝓝[≠] (compEllIntKk k + I * compEllIntKpk k))
-        (𝓝 (-I / jacobiComodulusk k)) ∧
-    HasDerivAt (fun w => jacobiNdk w k) (I) (I * compEllIntKpk k) ∧
-    HasDerivAt (fun w => jacobiNdk w k) (0) (2 * compEllIntKk k) ∧
-    HasDerivAt (fun w => jacobiNdk w k) (0) (2 * compEllIntKk k + 2 * (I * compEllIntKpk k)) ∧
-    HasDerivAt (fun w => jacobiNdk w k) (0) (2 * (I * compEllIntKpk k)) := by
+theorem jacobiNd_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
+    HasDerivAt (fun w => jacobiNd w k) (0) (0) ∧
+    HasDerivAt (fun w => jacobiNd w k) (0) (completeEllipticK k) ∧
+    Tendsto (fun w => (w - (completeEllipticK k + I * completeEllipticKPrime k)) * jacobiNd w k)
+        (𝓝[≠] (completeEllipticK k + I * completeEllipticKPrime k))
+        (𝓝 (-I / jacobiComodulus k)) ∧
+    HasDerivAt (fun w => jacobiNd w k) (I) (I * completeEllipticKPrime k) ∧
+    HasDerivAt (fun w => jacobiNd w k) (0) (2 * completeEllipticK k) ∧
+    HasDerivAt (fun w => jacobiNd w k) (0)
+        (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k)) ∧
+    HasDerivAt (fun w => jacobiNd w k) (0) (2 * (I * completeEllipticKPrime k)) := by
   refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
-  · have hfg : ∀ z, jacobiNdk (z + (0)) k = 1 * jacobiNdk z k :=
+  · have hfg : ∀ z, jacobiNd (z + (0)) k = 1 * jacobiNd z k :=
       fun z => by rw [add_zero, one_mul]
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNdk w k) hfg
-      (hasDerivAt_jacobiNdk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiCdk_zero hk, jacobiSdk_zero hk])
-  · have hfg : ∀ z, jacobiNdk (z + (compEllIntKk k)) k = ((jacobiComodulusk k)⁻¹) * jacobiDnk z k :=
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNd w k) hfg
+      (hasDerivAt_jacobiNd hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiCd_zero hk, jacobiSd_zero hk])
+  · have hfg : ∀ z, jacobiNd (z + (completeEllipticK k)) k = ((jacobiComodulus k)⁻¹) *
+        jacobiDn z k :=
       fun z => by
-        rw [show z + (compEllIntKk k) = z + compEllIntKk k by ring, (jacobiNdk_shift hk z).1]
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNdk w k) hfg
-      (hasDerivAt_jacobiDnk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiSnk_zero hk, jacobiCnk_zero hk])
-  · have hfg : ∀ z, jacobiNdk (z + (compEllIntKk k + I * compEllIntKpk k)) k =
-        (-(I / jacobiComodulusk k)) * jacobiCsk z k :=
+        rw [show z + (completeEllipticK k) = z + completeEllipticK k by ring,
+                                                                          (jacobiNd_shift hk z).1]
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNd w k) hfg
+      (hasDerivAt_jacobiDn hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiSn_zero hk, jacobiCn_zero hk])
+  · have hfg : ∀ z, jacobiNd (z + (completeEllipticK k + I * completeEllipticKPrime k)) k =
+        (-(I / jacobiComodulus k)) * jacobiCs z k :=
       fun z => by
-        rw [show z + (compEllIntKk k + I * compEllIntKpk k) =
-            z + compEllIntKk k + I * compEllIntKpk k by ring, (jacobiNdk_shift hk z).2.1]
-    have hfs : ∀ z, jacobiNdk (z + (compEllIntKk k + I * compEllIntKpk k)) k =
-        (-(I / jacobiComodulusk k)) * (1 / jacobiSck z k) := by
-      intro z; rw [hfg, jacobiCsk, jacobiPQk_eq_one_div]; rfl
-    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiNdk w k) hfs
-      ((hasDerivAt_jacobiSck hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
-          (by simp [jacobiDck_zero hk, jacobiNck_zero hk]))
-      (by simp [jacobiSck_zero hk])
+        rw [show z + (completeEllipticK k + I * completeEllipticKPrime k) =
+            z + completeEllipticK k + I * completeEllipticKPrime k by ring,
+                                                                        (jacobiNd_shift hk z).2.1]
+    have hfs : ∀ z, jacobiNd (z + (completeEllipticK k + I * completeEllipticKPrime k)) k =
+        (-(I / jacobiComodulus k)) * (1 / jacobiSc z k) := by
+      intro z; rw [hfg, jacobiCs, jacobiPQ_eq_one_div]; rfl
+    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiNd w k) hfs
+      ((hasDerivAt_jacobiSc hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide))).congr_deriv
+          (by simp [jacobiDc_zero hk, jacobiNc_zero hk]))
+      (by simp [jacobiSc_zero hk])
     convert h using 2
     ring
-  · have hfg : ∀ z, jacobiNdk (z + (I * compEllIntKpk k)) k = (I) * jacobiSck z k :=
+  · have hfg : ∀ z, jacobiNd (z + (I * completeEllipticKPrime k)) k = (I) * jacobiSc z k :=
       fun z => by
-        rw [show z + (I * compEllIntKpk k) = z + I * compEllIntKpk k by ring,
-            (jacobiNdk_shift hk z).2.2.1]
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNdk w k) hfg
-      (hasDerivAt_jacobiSck hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiDck_zero hk, jacobiNck_zero hk])
-  · have hfg : ∀ z, jacobiNdk (z + (2 * compEllIntKk k)) k = 1 * jacobiNdk z k :=
+        rw [show z + (I * completeEllipticKPrime k) = z + I * completeEllipticKPrime k by ring,
+            (jacobiNd_shift hk z).2.2.1]
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNd w k) hfg
+      (hasDerivAt_jacobiSc hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiDc_zero hk, jacobiNc_zero hk])
+  · have hfg : ∀ z, jacobiNd (z + (2 * completeEllipticK k)) k = 1 * jacobiNd z k :=
       fun z => by
-        rw [show z + (2 * compEllIntKk k) = z + 2 * compEllIntKk k by ring,
-            (jacobiNdk_shift hk z).2.2.2.1]
+        rw [show z + (2 * completeEllipticK k) = z + 2 * completeEllipticK k by ring,
+            (jacobiNd_shift hk z).2.2.2.1]
         try ring
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNdk w k) hfg
-      (hasDerivAt_jacobiNdk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiCdk_zero hk, jacobiSdk_zero hk])
-  · have hfg : ∀ z, jacobiNdk (z + (2 * compEllIntKk k + 2 * (I * compEllIntKpk k))) k =
-        -1 * jacobiNdk z k :=
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNd w k) hfg
+      (hasDerivAt_jacobiNd hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiCd_zero hk, jacobiSd_zero hk])
+  · have hfg : ∀ z, jacobiNd
+        (z + (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k))) k =
+        -1 * jacobiNd z k :=
       fun z => by
-        rw [show z + (2 * compEllIntKk k + 2 * (I * compEllIntKpk k)) =
-            z + 2 * compEllIntKk k + 2 * (I * compEllIntKpk k) by ring,
-                (jacobiNdk_shift hk z).2.2.2.2.1]
+        rw [show z + (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k)) =
+            z + 2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k) by ring,
+                (jacobiNd_shift hk z).2.2.2.2.1]
         try ring
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNdk w k) hfg
-      (hasDerivAt_jacobiNdk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiCdk_zero hk, jacobiSdk_zero hk])
-  · have hfg : ∀ z, jacobiNdk (z + (2 * (I * compEllIntKpk k))) k = -1 * jacobiNdk z k :=
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNd w k) hfg
+      (hasDerivAt_jacobiNd hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiCd_zero hk, jacobiSd_zero hk])
+  · have hfg : ∀ z, jacobiNd (z + (2 * (I * completeEllipticKPrime k))) k = -1 * jacobiNd z k :=
       fun z => by
-        rw [show z + (2 * (I * compEllIntKpk k)) = z + 2 * (I * compEllIntKpk k) by ring,
-            (jacobiNdk_shift hk z).2.2.2.2.2]
+        rw [show z + (2 * (I * completeEllipticKPrime k)) = z + 2 *
+            (I * completeEllipticKPrime k) by ring,
+            (jacobiNd_shift hk z).2.2.2.2.2]
         try ring
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNdk w k) hfg
-      (hasDerivAt_jacobiNdk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiCdk_zero hk, jacobiSdk_zero hk])
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNd w k) hfg
+      (hasDerivAt_jacobiNd hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiCd_zero hk, jacobiSd_zero hk])
 
 /-- Table 22.5.1, row `dc`: the `z`-derivative of `dc(z, k)` at the regular
 special points and the residue at the poles (proved). Corrected from the printed DLMF formula: the
 printed derivative `k` of `dc` at `K + iK'` has the wrong sign; it is `-k` (numerical
 differentiation and `dc' = (1 - k²) sc nc`, see the ledger). -/
 @[dlmf 22.5.T1 "corrected: d dc/dz = -k at K + iK'"]
-theorem jacobiDck_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
-    HasDerivAt (fun w => jacobiDck w k) (0) (0) ∧
-    Tendsto (fun w => (w - (compEllIntKk k)) * jacobiDck w k) (𝓝[≠] (compEllIntKk k))
+theorem jacobiDc_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
+    HasDerivAt (fun w => jacobiDc w k) (0) (0) ∧
+    Tendsto (fun w => (w - (completeEllipticK k)) * jacobiDc w k) (𝓝[≠] (completeEllipticK k))
         (𝓝 (-1)) ∧
-    HasDerivAt (fun w => jacobiDck w k) (-k) (compEllIntKk k + I * compEllIntKpk k) ∧
-    HasDerivAt (fun w => jacobiDck w k) (0) (I * compEllIntKpk k) ∧
-    HasDerivAt (fun w => jacobiDck w k) (0) (2 * compEllIntKk k) ∧
-    HasDerivAt (fun w => jacobiDck w k) (0) (2 * compEllIntKk k + 2 * (I * compEllIntKpk k)) ∧
-    HasDerivAt (fun w => jacobiDck w k) (0) (2 * (I * compEllIntKpk k)) := by
+    HasDerivAt (fun w => jacobiDc w k) (-k) (completeEllipticK k + I * completeEllipticKPrime k) ∧
+    HasDerivAt (fun w => jacobiDc w k) (0) (I * completeEllipticKPrime k) ∧
+    HasDerivAt (fun w => jacobiDc w k) (0) (2 * completeEllipticK k) ∧
+    HasDerivAt (fun w => jacobiDc w k) (0)
+        (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k)) ∧
+    HasDerivAt (fun w => jacobiDc w k) (0) (2 * (I * completeEllipticKPrime k)) := by
   refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
-  · have hfg : ∀ z, jacobiDck (z + (0)) k = 1 * jacobiDck z k :=
+  · have hfg : ∀ z, jacobiDc (z + (0)) k = 1 * jacobiDc z k :=
       fun z => by rw [add_zero, one_mul]
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDck w k) hfg
-      (hasDerivAt_jacobiDck hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiNck_zero hk, jacobiSck_zero hk])
-  · have hfg : ∀ z, jacobiDck (z + (compEllIntKk k)) k = -1 * jacobiNsk z k :=
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDc w k) hfg
+      (hasDerivAt_jacobiDc hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiNc_zero hk, jacobiSc_zero hk])
+  · have hfg : ∀ z, jacobiDc (z + (completeEllipticK k)) k = -1 * jacobiNs z k :=
       fun z => by
-        rw [show z + (compEllIntKk k) = z + compEllIntKk k by ring, (jacobiDck_shift hk z).1]
+        rw [show z + (completeEllipticK k) = z + completeEllipticK k by ring,
+                                                                          (jacobiDc_shift hk z).1]
         try ring
-    have hfs : ∀ z, jacobiDck (z + (compEllIntKk k)) k = -1 * (1 / jacobiSnk z k) := by
-      intro z; rw [hfg, jacobiNsk, jacobiPQk_eq_one_div]; rfl
-    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiDck w k) hfs
-      ((hasDerivAt_jacobiSnk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
-          (by simp [jacobiCnk_zero hk, jacobiDnk_zero hk]))
-      (by simp [jacobiSnk_zero hk])
+    have hfs : ∀ z, jacobiDc (z + (completeEllipticK k)) k = -1 * (1 / jacobiSn z k) := by
+      intro z; rw [hfg, jacobiNs, jacobiPQ_eq_one_div]; rfl
+    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiDc w k) hfs
+      ((hasDerivAt_jacobiSn hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide))).congr_deriv
+          (by simp [jacobiCn_zero hk, jacobiDn_zero hk]))
+      (by simp [jacobiSn_zero hk])
     convert h using 2
-  · have hfg : ∀ z, jacobiDck (z + (compEllIntKk k + I * compEllIntKpk k)) k =
-        (-k) * jacobiSnk z k :=
+  · have hfg : ∀ z, jacobiDc (z + (completeEllipticK k + I * completeEllipticKPrime k)) k =
+        (-k) * jacobiSn z k :=
       fun z => by
-        rw [show z + (compEllIntKk k + I * compEllIntKpk k) =
-            z + compEllIntKk k + I * compEllIntKpk k by ring, (jacobiDck_shift hk z).2.1]
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDck w k) hfg
-      (hasDerivAt_jacobiSnk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiCnk_zero hk, jacobiDnk_zero hk])
-  · have hfg : ∀ z, jacobiDck (z + (I * compEllIntKpk k)) k = (k) * jacobiCdk z k :=
+        rw [show z + (completeEllipticK k + I * completeEllipticKPrime k) =
+            z + completeEllipticK k + I * completeEllipticKPrime k by ring,
+                                                                        (jacobiDc_shift hk z).2.1]
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDc w k) hfg
+      (hasDerivAt_jacobiSn hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiCn_zero hk, jacobiDn_zero hk])
+  · have hfg : ∀ z, jacobiDc (z + (I * completeEllipticKPrime k)) k = (k) * jacobiCd z k :=
       fun z => by
-        rw [show z + (I * compEllIntKpk k) = z + I * compEllIntKpk k by ring,
-            (jacobiDck_shift hk z).2.2.1]
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDck w k) hfg
-      (hasDerivAt_jacobiCdk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiSdk_zero hk, jacobiNdk_zero hk])
-  · have hfg : ∀ z, jacobiDck (z + (2 * compEllIntKk k)) k = -1 * jacobiDck z k :=
+        rw [show z + (I * completeEllipticKPrime k) = z + I * completeEllipticKPrime k by ring,
+            (jacobiDc_shift hk z).2.2.1]
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDc w k) hfg
+      (hasDerivAt_jacobiCd hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiSd_zero hk, jacobiNd_zero hk])
+  · have hfg : ∀ z, jacobiDc (z + (2 * completeEllipticK k)) k = -1 * jacobiDc z k :=
       fun z => by
-        rw [show z + (2 * compEllIntKk k) = z + 2 * compEllIntKk k by ring,
-            (jacobiDck_shift hk z).2.2.2.1]
+        rw [show z + (2 * completeEllipticK k) = z + 2 * completeEllipticK k by ring,
+            (jacobiDc_shift hk z).2.2.2.1]
         try ring
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDck w k) hfg
-      (hasDerivAt_jacobiDck hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiNck_zero hk, jacobiSck_zero hk])
-  · have hfg : ∀ z, jacobiDck (z + (2 * compEllIntKk k + 2 * (I * compEllIntKpk k))) k =
-        -1 * jacobiDck z k :=
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDc w k) hfg
+      (hasDerivAt_jacobiDc hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiNc_zero hk, jacobiSc_zero hk])
+  · have hfg : ∀ z, jacobiDc
+        (z + (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k))) k =
+        -1 * jacobiDc z k :=
       fun z => by
-        rw [show z + (2 * compEllIntKk k + 2 * (I * compEllIntKpk k)) =
-            z + 2 * compEllIntKk k + 2 * (I * compEllIntKpk k) by ring,
-                (jacobiDck_shift hk z).2.2.2.2.1]
+        rw [show z + (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k)) =
+            z + 2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k) by ring,
+                (jacobiDc_shift hk z).2.2.2.2.1]
         try ring
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDck w k) hfg
-      (hasDerivAt_jacobiDck hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiNck_zero hk, jacobiSck_zero hk])
-  · have hfg : ∀ z, jacobiDck (z + (2 * (I * compEllIntKpk k))) k = 1 * jacobiDck z k :=
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDc w k) hfg
+      (hasDerivAt_jacobiDc hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiNc_zero hk, jacobiSc_zero hk])
+  · have hfg : ∀ z, jacobiDc (z + (2 * (I * completeEllipticKPrime k))) k = 1 * jacobiDc z k :=
       fun z => by
-        rw [show z + (2 * (I * compEllIntKpk k)) = z + 2 * (I * compEllIntKpk k) by ring,
-            (jacobiDck_shift hk z).2.2.2.2.2]
+        rw [show z + (2 * (I * completeEllipticKPrime k)) = z + 2 *
+            (I * completeEllipticKPrime k) by ring,
+            (jacobiDc_shift hk z).2.2.2.2.2]
         try ring
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDck w k) hfg
-      (hasDerivAt_jacobiDck hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiNck_zero hk, jacobiSck_zero hk])
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDc w k) hfg
+      (hasDerivAt_jacobiDc hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiNc_zero hk, jacobiSc_zero hk])
 
 /-- Table 22.5.1, row `nc`: the `z`-derivative of `nc(z, k)` at the regular
 special points and the residue at the poles (from Table 22.13.1 and the shifts of Table 22.4.3). -/
 @[dlmf 22.5.T1]
-theorem jacobiNck_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
-    HasDerivAt (fun w => jacobiNck w k) (0) (0) ∧
-    Tendsto (fun w => (w - (compEllIntKk k)) * jacobiNck w k) (𝓝[≠] (compEllIntKk k))
-        (𝓝 (-1 / jacobiComodulusk k)) ∧
-    HasDerivAt (fun w => jacobiNck w k) (0) (compEllIntKk k + I * compEllIntKpk k) ∧
-    HasDerivAt (fun w => jacobiNck w k) (I * k) (I * compEllIntKpk k) ∧
-    HasDerivAt (fun w => jacobiNck w k) (0) (2 * compEllIntKk k) ∧
-    HasDerivAt (fun w => jacobiNck w k) (0) (2 * compEllIntKk k + 2 * (I * compEllIntKpk k)) ∧
-    HasDerivAt (fun w => jacobiNck w k) (0) (2 * (I * compEllIntKpk k)) := by
+theorem jacobiNc_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
+    HasDerivAt (fun w => jacobiNc w k) (0) (0) ∧
+    Tendsto (fun w => (w - (completeEllipticK k)) * jacobiNc w k) (𝓝[≠] (completeEllipticK k))
+        (𝓝 (-1 / jacobiComodulus k)) ∧
+    HasDerivAt (fun w => jacobiNc w k) (0) (completeEllipticK k + I * completeEllipticKPrime k) ∧
+    HasDerivAt (fun w => jacobiNc w k) (I * k) (I * completeEllipticKPrime k) ∧
+    HasDerivAt (fun w => jacobiNc w k) (0) (2 * completeEllipticK k) ∧
+    HasDerivAt (fun w => jacobiNc w k) (0)
+        (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k)) ∧
+    HasDerivAt (fun w => jacobiNc w k) (0) (2 * (I * completeEllipticKPrime k)) := by
   refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
-  · have hfg : ∀ z, jacobiNck (z + (0)) k = 1 * jacobiNck z k :=
+  · have hfg : ∀ z, jacobiNc (z + (0)) k = 1 * jacobiNc z k :=
       fun z => by rw [add_zero, one_mul]
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNck w k) hfg
-      (hasDerivAt_jacobiNck hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiDck_zero hk, jacobiSck_zero hk])
-  · have hfg : ∀ z, jacobiNck (z + (compEllIntKk k)) k =
-        (-(jacobiComodulusk k)⁻¹) * jacobiDsk z k :=
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNc w k) hfg
+      (hasDerivAt_jacobiNc hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiDc_zero hk, jacobiSc_zero hk])
+  · have hfg : ∀ z, jacobiNc (z + (completeEllipticK k)) k =
+        (-(jacobiComodulus k)⁻¹) * jacobiDs z k :=
       fun z => by
-        rw [show z + (compEllIntKk k) = z + compEllIntKk k by ring, (jacobiNck_shift hk z).1]
-    have hfs : ∀ z, jacobiNck (z + (compEllIntKk k)) k =
-        (-(jacobiComodulusk k)⁻¹) * (1 / jacobiSdk z k) := by
-      intro z; rw [hfg, jacobiDsk, jacobiPQk_eq_one_div]; rfl
-    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiNck w k) hfs
-      ((hasDerivAt_jacobiSdk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
-          (by simp [jacobiCdk_zero hk, jacobiNdk_zero hk]))
-      (by simp [jacobiSdk_zero hk])
+        rw [show z + (completeEllipticK k) = z + completeEllipticK k by ring,
+                                                                          (jacobiNc_shift hk z).1]
+    have hfs : ∀ z, jacobiNc (z + (completeEllipticK k)) k =
+        (-(jacobiComodulus k)⁻¹) * (1 / jacobiSd z k) := by
+      intro z; rw [hfg, jacobiDs, jacobiPQ_eq_one_div]; rfl
+    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiNc w k) hfs
+      ((hasDerivAt_jacobiSd hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide))).congr_deriv
+          (by simp [jacobiCd_zero hk, jacobiNd_zero hk]))
+      (by simp [jacobiSd_zero hk])
     convert h using 2
     ring
-  · have hfg : ∀ z, jacobiNck (z + (compEllIntKk k + I * compEllIntKpk k)) k =
-        ((I * k / jacobiComodulusk k)) * jacobiCnk z k :=
+  · have hfg : ∀ z, jacobiNc (z + (completeEllipticK k + I * completeEllipticKPrime k)) k =
+        ((I * k / jacobiComodulus k)) * jacobiCn z k :=
       fun z => by
-        rw [show z + (compEllIntKk k + I * compEllIntKpk k) =
-            z + compEllIntKk k + I * compEllIntKpk k by ring, (jacobiNck_shift hk z).2.1]
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNck w k) hfg
-      (hasDerivAt_jacobiCnk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiSnk_zero hk, jacobiDnk_zero hk])
-  · have hfg : ∀ z, jacobiNck (z + (I * compEllIntKpk k)) k = (I * k) * jacobiSdk z k :=
+        rw [show z + (completeEllipticK k + I * completeEllipticKPrime k) =
+            z + completeEllipticK k + I * completeEllipticKPrime k by ring,
+                                                                        (jacobiNc_shift hk z).2.1]
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNc w k) hfg
+      (hasDerivAt_jacobiCn hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiSn_zero hk, jacobiDn_zero hk])
+  · have hfg : ∀ z, jacobiNc (z + (I * completeEllipticKPrime k)) k = (I * k) * jacobiSd z k :=
       fun z => by
-        rw [show z + (I * compEllIntKpk k) = z + I * compEllIntKpk k by ring,
-            (jacobiNck_shift hk z).2.2.1]
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNck w k) hfg
-      (hasDerivAt_jacobiSdk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiCdk_zero hk, jacobiNdk_zero hk])
-  · have hfg : ∀ z, jacobiNck (z + (2 * compEllIntKk k)) k = -1 * jacobiNck z k :=
+        rw [show z + (I * completeEllipticKPrime k) = z + I * completeEllipticKPrime k by ring,
+            (jacobiNc_shift hk z).2.2.1]
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNc w k) hfg
+      (hasDerivAt_jacobiSd hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiCd_zero hk, jacobiNd_zero hk])
+  · have hfg : ∀ z, jacobiNc (z + (2 * completeEllipticK k)) k = -1 * jacobiNc z k :=
       fun z => by
-        rw [show z + (2 * compEllIntKk k) = z + 2 * compEllIntKk k by ring,
-            (jacobiNck_shift hk z).2.2.2.1]
+        rw [show z + (2 * completeEllipticK k) = z + 2 * completeEllipticK k by ring,
+            (jacobiNc_shift hk z).2.2.2.1]
         try ring
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNck w k) hfg
-      (hasDerivAt_jacobiNck hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiDck_zero hk, jacobiSck_zero hk])
-  · have hfg : ∀ z, jacobiNck (z + (2 * compEllIntKk k + 2 * (I * compEllIntKpk k))) k =
-        1 * jacobiNck z k :=
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNc w k) hfg
+      (hasDerivAt_jacobiNc hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiDc_zero hk, jacobiSc_zero hk])
+  · have hfg : ∀ z, jacobiNc
+        (z + (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k))) k =
+        1 * jacobiNc z k :=
       fun z => by
-        rw [show z + (2 * compEllIntKk k + 2 * (I * compEllIntKpk k)) =
-            z + 2 * compEllIntKk k + 2 * (I * compEllIntKpk k) by ring,
-                (jacobiNck_shift hk z).2.2.2.2.1]
+        rw [show z + (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k)) =
+            z + 2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k) by ring,
+                (jacobiNc_shift hk z).2.2.2.2.1]
         try ring
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNck w k) hfg
-      (hasDerivAt_jacobiNck hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiDck_zero hk, jacobiSck_zero hk])
-  · have hfg : ∀ z, jacobiNck (z + (2 * (I * compEllIntKpk k))) k = -1 * jacobiNck z k :=
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNc w k) hfg
+      (hasDerivAt_jacobiNc hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiDc_zero hk, jacobiSc_zero hk])
+  · have hfg : ∀ z, jacobiNc (z + (2 * (I * completeEllipticKPrime k))) k = -1 * jacobiNc z k :=
       fun z => by
-        rw [show z + (2 * (I * compEllIntKpk k)) = z + 2 * (I * compEllIntKpk k) by ring,
-            (jacobiNck_shift hk z).2.2.2.2.2]
+        rw [show z + (2 * (I * completeEllipticKPrime k)) = z + 2 *
+            (I * completeEllipticKPrime k) by ring,
+            (jacobiNc_shift hk z).2.2.2.2.2]
         try ring
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNck w k) hfg
-      (hasDerivAt_jacobiNck hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiDck_zero hk, jacobiSck_zero hk])
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNc w k) hfg
+      (hasDerivAt_jacobiNc hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiDc_zero hk, jacobiSc_zero hk])
 
 /-- Table 22.5.1, row `sc`: the `z`-derivative of `sc(z, k)` at the regular
 special points and the residue at the poles (from Table 22.13.1 and the shifts of Table 22.4.3). -/
 @[dlmf 22.5.T1]
-theorem jacobiSck_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
-    HasDerivAt (fun w => jacobiSck w k) (1) (0) ∧
-    Tendsto (fun w => (w - (compEllIntKk k)) * jacobiSck w k) (𝓝[≠] (compEllIntKk k))
-        (𝓝 (-1 / jacobiComodulusk k)) ∧
-    HasDerivAt (fun w => jacobiSck w k) (0) (compEllIntKk k + I * compEllIntKpk k) ∧
-    HasDerivAt (fun w => jacobiSck w k) (0) (I * compEllIntKpk k) ∧
-    HasDerivAt (fun w => jacobiSck w k) (1) (2 * compEllIntKk k) ∧
-    HasDerivAt (fun w => jacobiSck w k) (-1) (2 * compEllIntKk k + 2 * (I * compEllIntKpk k)) ∧
-    HasDerivAt (fun w => jacobiSck w k) (-1) (2 * (I * compEllIntKpk k)) := by
+theorem jacobiSc_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
+    HasDerivAt (fun w => jacobiSc w k) (1) (0) ∧
+    Tendsto (fun w => (w - (completeEllipticK k)) * jacobiSc w k) (𝓝[≠] (completeEllipticK k))
+        (𝓝 (-1 / jacobiComodulus k)) ∧
+    HasDerivAt (fun w => jacobiSc w k) (0) (completeEllipticK k + I * completeEllipticKPrime k) ∧
+    HasDerivAt (fun w => jacobiSc w k) (0) (I * completeEllipticKPrime k) ∧
+    HasDerivAt (fun w => jacobiSc w k) (1) (2 * completeEllipticK k) ∧
+    HasDerivAt (fun w => jacobiSc w k) (-1)
+        (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k)) ∧
+    HasDerivAt (fun w => jacobiSc w k) (-1) (2 * (I * completeEllipticKPrime k)) := by
   refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
-  · have hfg : ∀ z, jacobiSck (z + (0)) k = 1 * jacobiSck z k :=
+  · have hfg : ∀ z, jacobiSc (z + (0)) k = 1 * jacobiSc z k :=
       fun z => by rw [add_zero, one_mul]
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSck w k) hfg
-      (hasDerivAt_jacobiSck hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiDck_zero hk, jacobiNck_zero hk])
-  · have hfg : ∀ z, jacobiSck (z + (compEllIntKk k)) k =
-        (-(jacobiComodulusk k)⁻¹) * jacobiCsk z k :=
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSc w k) hfg
+      (hasDerivAt_jacobiSc hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiDc_zero hk, jacobiNc_zero hk])
+  · have hfg : ∀ z, jacobiSc (z + (completeEllipticK k)) k =
+        (-(jacobiComodulus k)⁻¹) * jacobiCs z k :=
       fun z => by
-        rw [show z + (compEllIntKk k) = z + compEllIntKk k by ring, (jacobiSck_shift hk z).1]
-    have hfs : ∀ z, jacobiSck (z + (compEllIntKk k)) k =
-        (-(jacobiComodulusk k)⁻¹) * (1 / jacobiSck z k) := by
-      intro z; rw [hfg, jacobiCsk, jacobiPQk_eq_one_div]; rfl
-    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiSck w k) hfs
-      ((hasDerivAt_jacobiSck hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
-          (by simp [jacobiDck_zero hk, jacobiNck_zero hk]))
-      (by simp [jacobiSck_zero hk])
+        rw [show z + (completeEllipticK k) = z + completeEllipticK k by ring,
+                                                                          (jacobiSc_shift hk z).1]
+    have hfs : ∀ z, jacobiSc (z + (completeEllipticK k)) k =
+        (-(jacobiComodulus k)⁻¹) * (1 / jacobiSc z k) := by
+      intro z; rw [hfg, jacobiCs, jacobiPQ_eq_one_div]; rfl
+    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiSc w k) hfs
+      ((hasDerivAt_jacobiSc hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide))).congr_deriv
+          (by simp [jacobiDc_zero hk, jacobiNc_zero hk]))
+      (by simp [jacobiSc_zero hk])
     convert h using 2
     ring
-  · have hfg : ∀ z, jacobiSck (z + (compEllIntKk k + I * compEllIntKpk k)) k =
-        ((I / jacobiComodulusk k)) * jacobiDnk z k :=
+  · have hfg : ∀ z, jacobiSc (z + (completeEllipticK k + I * completeEllipticKPrime k)) k =
+        ((I / jacobiComodulus k)) * jacobiDn z k :=
       fun z => by
-        rw [show z + (compEllIntKk k + I * compEllIntKpk k) =
-            z + compEllIntKk k + I * compEllIntKpk k by ring, (jacobiSck_shift hk z).2.1]
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSck w k) hfg
-      (hasDerivAt_jacobiDnk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiSnk_zero hk, jacobiCnk_zero hk])
-  · have hfg : ∀ z, jacobiSck (z + (I * compEllIntKpk k)) k = (I) * jacobiNdk z k :=
+        rw [show z + (completeEllipticK k + I * completeEllipticKPrime k) =
+            z + completeEllipticK k + I * completeEllipticKPrime k by ring,
+                                                                        (jacobiSc_shift hk z).2.1]
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSc w k) hfg
+      (hasDerivAt_jacobiDn hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiSn_zero hk, jacobiCn_zero hk])
+  · have hfg : ∀ z, jacobiSc (z + (I * completeEllipticKPrime k)) k = (I) * jacobiNd z k :=
       fun z => by
-        rw [show z + (I * compEllIntKpk k) = z + I * compEllIntKpk k by ring,
-            (jacobiSck_shift hk z).2.2.1]
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSck w k) hfg
-      (hasDerivAt_jacobiNdk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiCdk_zero hk, jacobiSdk_zero hk])
-  · have hfg : ∀ z, jacobiSck (z + (2 * compEllIntKk k)) k = 1 * jacobiSck z k :=
+        rw [show z + (I * completeEllipticKPrime k) = z + I * completeEllipticKPrime k by ring,
+            (jacobiSc_shift hk z).2.2.1]
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSc w k) hfg
+      (hasDerivAt_jacobiNd hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiCd_zero hk, jacobiSd_zero hk])
+  · have hfg : ∀ z, jacobiSc (z + (2 * completeEllipticK k)) k = 1 * jacobiSc z k :=
       fun z => by
-        rw [show z + (2 * compEllIntKk k) = z + 2 * compEllIntKk k by ring,
-            (jacobiSck_shift hk z).2.2.2.1]
+        rw [show z + (2 * completeEllipticK k) = z + 2 * completeEllipticK k by ring,
+            (jacobiSc_shift hk z).2.2.2.1]
         try ring
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSck w k) hfg
-      (hasDerivAt_jacobiSck hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiDck_zero hk, jacobiNck_zero hk])
-  · have hfg : ∀ z, jacobiSck (z + (2 * compEllIntKk k + 2 * (I * compEllIntKpk k))) k =
-        -1 * jacobiSck z k :=
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSc w k) hfg
+      (hasDerivAt_jacobiSc hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiDc_zero hk, jacobiNc_zero hk])
+  · have hfg : ∀ z, jacobiSc
+        (z + (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k))) k =
+        -1 * jacobiSc z k :=
       fun z => by
-        rw [show z + (2 * compEllIntKk k + 2 * (I * compEllIntKpk k)) =
-            z + 2 * compEllIntKk k + 2 * (I * compEllIntKpk k) by ring,
-                (jacobiSck_shift hk z).2.2.2.2.1]
+        rw [show z + (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k)) =
+            z + 2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k) by ring,
+                (jacobiSc_shift hk z).2.2.2.2.1]
         try ring
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSck w k) hfg
-      (hasDerivAt_jacobiSck hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiDck_zero hk, jacobiNck_zero hk])
-  · have hfg : ∀ z, jacobiSck (z + (2 * (I * compEllIntKpk k))) k = -1 * jacobiSck z k :=
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSc w k) hfg
+      (hasDerivAt_jacobiSc hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiDc_zero hk, jacobiNc_zero hk])
+  · have hfg : ∀ z, jacobiSc (z + (2 * (I * completeEllipticKPrime k))) k = -1 * jacobiSc z k :=
       fun z => by
-        rw [show z + (2 * (I * compEllIntKpk k)) = z + 2 * (I * compEllIntKpk k) by ring,
-            (jacobiSck_shift hk z).2.2.2.2.2]
+        rw [show z + (2 * (I * completeEllipticKPrime k)) = z + 2 *
+            (I * completeEllipticKPrime k) by ring,
+            (jacobiSc_shift hk z).2.2.2.2.2]
         try ring
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSck w k) hfg
-      (hasDerivAt_jacobiSck hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiDck_zero hk, jacobiNck_zero hk])
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiSc w k) hfg
+      (hasDerivAt_jacobiSc hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiDc_zero hk, jacobiNc_zero hk])
 
 /-- Table 22.5.1, row `ns`: the `z`-derivative of `ns(z, k)` at the regular
 special points and the residue at the poles (from Table 22.13.1 and the shifts of Table 22.4.3). -/
 @[dlmf 22.5.T1]
-theorem jacobiNsk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
-    Tendsto (fun w => (w - (0)) * jacobiNsk w k) (𝓝[≠] (0))
+theorem jacobiNs_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
+    Tendsto (fun w => (w - (0)) * jacobiNs w k) (𝓝[≠] (0))
         (𝓝 (1)) ∧
-    HasDerivAt (fun w => jacobiNsk w k) (0) (compEllIntKk k) ∧
-    HasDerivAt (fun w => jacobiNsk w k) (0) (compEllIntKk k + I * compEllIntKpk k) ∧
-    HasDerivAt (fun w => jacobiNsk w k) (k) (I * compEllIntKpk k) ∧
-    Tendsto (fun w => (w - (2 * compEllIntKk k)) * jacobiNsk w k) (𝓝[≠] (2 * compEllIntKk k))
+    HasDerivAt (fun w => jacobiNs w k) (0) (completeEllipticK k) ∧
+    HasDerivAt (fun w => jacobiNs w k) (0) (completeEllipticK k + I * completeEllipticKPrime k) ∧
+    HasDerivAt (fun w => jacobiNs w k) (k) (I * completeEllipticKPrime k) ∧
+    Tendsto (fun w => (w - (2 * completeEllipticK k)) * jacobiNs w k)
+        (𝓝[≠] (2 * completeEllipticK k))
         (𝓝 (-1)) ∧
-    Tendsto (fun w => (w - (2 * compEllIntKk k + 2 * (I * compEllIntKpk k))) * jacobiNsk w k)
-        (𝓝[≠] (2 * compEllIntKk k + 2 * (I * compEllIntKpk k)))
+    Tendsto (fun w => (w - (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k)))
+        * jacobiNs w k)
+        (𝓝[≠] (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k)))
         (𝓝 (-1)) ∧
-    Tendsto (fun w => (w - (2 * (I * compEllIntKpk k))) * jacobiNsk w k)
-        (𝓝[≠] (2 * (I * compEllIntKpk k)))
+    Tendsto (fun w => (w - (2 * (I * completeEllipticKPrime k))) * jacobiNs w k)
+        (𝓝[≠] (2 * (I * completeEllipticKPrime k)))
         (𝓝 (1)) := by
   refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
-  · have hfg : ∀ z, jacobiNsk (z + (0)) k = 1 * jacobiNsk z k :=
+  · have hfg : ∀ z, jacobiNs (z + (0)) k = 1 * jacobiNs z k :=
       fun z => by rw [add_zero, one_mul]
-    have hfs : ∀ z, jacobiNsk (z + (0)) k = 1 * (1 / jacobiSnk z k) := by
-      intro z; rw [hfg, jacobiNsk, jacobiPQk_eq_one_div]; rfl
-    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiNsk w k) hfs
-      ((hasDerivAt_jacobiSnk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
-          (by simp [jacobiCnk_zero hk, jacobiDnk_zero hk]))
-      (by simp [jacobiSnk_zero hk])
+    have hfs : ∀ z, jacobiNs (z + (0)) k = 1 * (1 / jacobiSn z k) := by
+      intro z; rw [hfg, jacobiNs, jacobiPQ_eq_one_div]; rfl
+    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiNs w k) hfs
+      ((hasDerivAt_jacobiSn hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide))).congr_deriv
+          (by simp [jacobiCn_zero hk, jacobiDn_zero hk]))
+      (by simp [jacobiSn_zero hk])
     convert h using 2
-  · have hfg : ∀ z, jacobiNsk (z + (compEllIntKk k)) k = 1 * jacobiDck z k :=
+  · have hfg : ∀ z, jacobiNs (z + (completeEllipticK k)) k = 1 * jacobiDc z k :=
       fun z => by
-        rw [show z + (compEllIntKk k) = z + compEllIntKk k by ring, (jacobiNsk_shift hk z).1]
+        rw [show z + (completeEllipticK k) = z + completeEllipticK k by ring,
+                                                                          (jacobiNs_shift hk z).1]
         try ring
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNsk w k) hfg
-      (hasDerivAt_jacobiDck hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiNck_zero hk, jacobiSck_zero hk])
-  · have hfg : ∀ z, jacobiNsk (z + (compEllIntKk k + I * compEllIntKpk k)) k =
-        (k) * jacobiCdk z k :=
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNs w k) hfg
+      (hasDerivAt_jacobiDc hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiNc_zero hk, jacobiSc_zero hk])
+  · have hfg : ∀ z, jacobiNs (z + (completeEllipticK k + I * completeEllipticKPrime k)) k =
+        (k) * jacobiCd z k :=
       fun z => by
-        rw [show z + (compEllIntKk k + I * compEllIntKpk k) =
-            z + compEllIntKk k + I * compEllIntKpk k by ring, (jacobiNsk_shift hk z).2.1]
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNsk w k) hfg
-      (hasDerivAt_jacobiCdk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiSdk_zero hk, jacobiNdk_zero hk])
-  · have hfg : ∀ z, jacobiNsk (z + (I * compEllIntKpk k)) k = (k) * jacobiSnk z k :=
+        rw [show z + (completeEllipticK k + I * completeEllipticKPrime k) =
+            z + completeEllipticK k + I * completeEllipticKPrime k by ring,
+                                                                        (jacobiNs_shift hk z).2.1]
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNs w k) hfg
+      (hasDerivAt_jacobiCd hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiSd_zero hk, jacobiNd_zero hk])
+  · have hfg : ∀ z, jacobiNs (z + (I * completeEllipticKPrime k)) k = (k) * jacobiSn z k :=
       fun z => by
-        rw [show z + (I * compEllIntKpk k) = z + I * compEllIntKpk k by ring,
-            (jacobiNsk_shift hk z).2.2.1]
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNsk w k) hfg
-      (hasDerivAt_jacobiSnk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiCnk_zero hk, jacobiDnk_zero hk])
-  · have hfg : ∀ z, jacobiNsk (z + (2 * compEllIntKk k)) k = -1 * jacobiNsk z k :=
+        rw [show z + (I * completeEllipticKPrime k) = z + I * completeEllipticKPrime k by ring,
+            (jacobiNs_shift hk z).2.2.1]
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiNs w k) hfg
+      (hasDerivAt_jacobiSn hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiCn_zero hk, jacobiDn_zero hk])
+  · have hfg : ∀ z, jacobiNs (z + (2 * completeEllipticK k)) k = -1 * jacobiNs z k :=
       fun z => by
-        rw [show z + (2 * compEllIntKk k) = z + 2 * compEllIntKk k by ring,
-            (jacobiNsk_shift hk z).2.2.2.1]
+        rw [show z + (2 * completeEllipticK k) = z + 2 * completeEllipticK k by ring,
+            (jacobiNs_shift hk z).2.2.2.1]
         try ring
-    have hfs : ∀ z, jacobiNsk (z + (2 * compEllIntKk k)) k = -1 * (1 / jacobiSnk z k) := by
-      intro z; rw [hfg, jacobiNsk, jacobiPQk_eq_one_div]; rfl
-    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiNsk w k) hfs
-      ((hasDerivAt_jacobiSnk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
-          (by simp [jacobiCnk_zero hk, jacobiDnk_zero hk]))
-      (by simp [jacobiSnk_zero hk])
+    have hfs : ∀ z, jacobiNs (z + (2 * completeEllipticK k)) k = -1 * (1 / jacobiSn z k) := by
+      intro z; rw [hfg, jacobiNs, jacobiPQ_eq_one_div]; rfl
+    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiNs w k) hfs
+      ((hasDerivAt_jacobiSn hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide))).congr_deriv
+          (by simp [jacobiCn_zero hk, jacobiDn_zero hk]))
+      (by simp [jacobiSn_zero hk])
     convert h using 2
-  · have hfg : ∀ z, jacobiNsk (z + (2 * compEllIntKk k + 2 * (I * compEllIntKpk k))) k =
-        -1 * jacobiNsk z k :=
+  · have hfg : ∀ z, jacobiNs
+        (z + (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k))) k =
+        -1 * jacobiNs z k :=
       fun z => by
-        rw [show z + (2 * compEllIntKk k + 2 * (I * compEllIntKpk k)) =
-            z + 2 * compEllIntKk k + 2 * (I * compEllIntKpk k) by ring,
-                (jacobiNsk_shift hk z).2.2.2.2.1]
+        rw [show z + (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k)) =
+            z + 2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k) by ring,
+                (jacobiNs_shift hk z).2.2.2.2.1]
         try ring
-    have hfs : ∀ z, jacobiNsk (z + (2 * compEllIntKk k + 2 * (I * compEllIntKpk k))) k =
-        -1 * (1 / jacobiSnk z k) := by
-      intro z; rw [hfg, jacobiNsk, jacobiPQk_eq_one_div]; rfl
-    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiNsk w k) hfs
-      ((hasDerivAt_jacobiSnk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
-          (by simp [jacobiCnk_zero hk, jacobiDnk_zero hk]))
-      (by simp [jacobiSnk_zero hk])
+    have hfs : ∀ z, jacobiNs
+        (z + (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k))) k =
+        -1 * (1 / jacobiSn z k) := by
+      intro z; rw [hfg, jacobiNs, jacobiPQ_eq_one_div]; rfl
+    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiNs w k) hfs
+      ((hasDerivAt_jacobiSn hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide))).congr_deriv
+          (by simp [jacobiCn_zero hk, jacobiDn_zero hk]))
+      (by simp [jacobiSn_zero hk])
     convert h using 2
-  · have hfg : ∀ z, jacobiNsk (z + (2 * (I * compEllIntKpk k))) k = 1 * jacobiNsk z k :=
+  · have hfg : ∀ z, jacobiNs (z + (2 * (I * completeEllipticKPrime k))) k = 1 * jacobiNs z k :=
       fun z => by
-        rw [show z + (2 * (I * compEllIntKpk k)) = z + 2 * (I * compEllIntKpk k) by ring,
-            (jacobiNsk_shift hk z).2.2.2.2.2]
+        rw [show z + (2 * (I * completeEllipticKPrime k)) = z + 2 *
+            (I * completeEllipticKPrime k) by ring,
+            (jacobiNs_shift hk z).2.2.2.2.2]
         try ring
-    have hfs : ∀ z, jacobiNsk (z + (2 * (I * compEllIntKpk k))) k = 1 * (1 / jacobiSnk z k) := by
-      intro z; rw [hfg, jacobiNsk, jacobiPQk_eq_one_div]; rfl
-    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiNsk w k) hfs
-      ((hasDerivAt_jacobiSnk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
-          (by simp [jacobiCnk_zero hk, jacobiDnk_zero hk]))
-      (by simp [jacobiSnk_zero hk])
+    have hfs : ∀ z, jacobiNs (z + (2 * (I * completeEllipticKPrime k))) k = 1 *
+        (1 / jacobiSn z k) := by
+      intro z; rw [hfg, jacobiNs, jacobiPQ_eq_one_div]; rfl
+    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiNs w k) hfs
+      ((hasDerivAt_jacobiSn hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide))).congr_deriv
+          (by simp [jacobiCn_zero hk, jacobiDn_zero hk]))
+      (by simp [jacobiSn_zero hk])
     convert h using 2
 
 /-- Table 22.5.1, row `ds`: the `z`-derivative of `ds(z, k)` at the regular
 special points and the residue at the poles (from Table 22.13.1 and the shifts of Table 22.4.3). -/
 @[dlmf 22.5.T1]
-theorem jacobiDsk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
-    Tendsto (fun w => (w - (0)) * jacobiDsk w k) (𝓝[≠] (0))
+theorem jacobiDs_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
+    Tendsto (fun w => (w - (0)) * jacobiDs w k) (𝓝[≠] (0))
         (𝓝 (1)) ∧
-    HasDerivAt (fun w => jacobiDsk w k) (0) (compEllIntKk k) ∧
-    HasDerivAt (fun w => jacobiDsk w k) (I * k * jacobiComodulusk k)
-        (compEllIntKk k + I * compEllIntKpk k) ∧
-    HasDerivAt (fun w => jacobiDsk w k) (0) (I * compEllIntKpk k) ∧
-    Tendsto (fun w => (w - (2 * compEllIntKk k)) * jacobiDsk w k) (𝓝[≠] (2 * compEllIntKk k))
+    HasDerivAt (fun w => jacobiDs w k) (0) (completeEllipticK k) ∧
+    HasDerivAt (fun w => jacobiDs w k) (I * k * jacobiComodulus k)
+        (completeEllipticK k + I * completeEllipticKPrime k) ∧
+    HasDerivAt (fun w => jacobiDs w k) (0) (I * completeEllipticKPrime k) ∧
+    Tendsto (fun w => (w - (2 * completeEllipticK k)) * jacobiDs w k)
+        (𝓝[≠] (2 * completeEllipticK k))
         (𝓝 (-1)) ∧
-    Tendsto (fun w => (w - (2 * compEllIntKk k + 2 * (I * compEllIntKpk k))) * jacobiDsk w k)
-        (𝓝[≠] (2 * compEllIntKk k + 2 * (I * compEllIntKpk k)))
+    Tendsto (fun w => (w - (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k)))
+        * jacobiDs w k)
+        (𝓝[≠] (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k)))
         (𝓝 (1)) ∧
-    Tendsto (fun w => (w - (2 * (I * compEllIntKpk k))) * jacobiDsk w k)
-        (𝓝[≠] (2 * (I * compEllIntKpk k)))
+    Tendsto (fun w => (w - (2 * (I * completeEllipticKPrime k))) * jacobiDs w k)
+        (𝓝[≠] (2 * (I * completeEllipticKPrime k)))
         (𝓝 (-1)) := by
   refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
-  · have hfg : ∀ z, jacobiDsk (z + (0)) k = 1 * jacobiDsk z k :=
+  · have hfg : ∀ z, jacobiDs (z + (0)) k = 1 * jacobiDs z k :=
       fun z => by rw [add_zero, one_mul]
-    have hfs : ∀ z, jacobiDsk (z + (0)) k = 1 * (1 / jacobiSdk z k) := by
-      intro z; rw [hfg, jacobiDsk, jacobiPQk_eq_one_div]; rfl
-    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiDsk w k) hfs
-      ((hasDerivAt_jacobiSdk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
-          (by simp [jacobiCdk_zero hk, jacobiNdk_zero hk]))
-      (by simp [jacobiSdk_zero hk])
+    have hfs : ∀ z, jacobiDs (z + (0)) k = 1 * (1 / jacobiSd z k) := by
+      intro z; rw [hfg, jacobiDs, jacobiPQ_eq_one_div]; rfl
+    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiDs w k) hfs
+      ((hasDerivAt_jacobiSd hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide))).congr_deriv
+          (by simp [jacobiCd_zero hk, jacobiNd_zero hk]))
+      (by simp [jacobiSd_zero hk])
     convert h using 2
-  · have hfg : ∀ z, jacobiDsk (z + (compEllIntKk k)) k = (jacobiComodulusk k) * jacobiNck z k :=
+  · have hfg : ∀ z, jacobiDs (z + (completeEllipticK k)) k = (jacobiComodulus k) * jacobiNc z k :=
       fun z => by
-        rw [show z + (compEllIntKk k) = z + compEllIntKk k by ring, (jacobiDsk_shift hk z).1]
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDsk w k) hfg
-      (hasDerivAt_jacobiNck hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiDck_zero hk, jacobiSck_zero hk])
-  · have hfg : ∀ z, jacobiDsk (z + (compEllIntKk k + I * compEllIntKpk k)) k =
-        (I * k * jacobiComodulusk k) * jacobiSdk z k :=
+        rw [show z + (completeEllipticK k) = z + completeEllipticK k by ring,
+                                                                          (jacobiDs_shift hk z).1]
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDs w k) hfg
+      (hasDerivAt_jacobiNc hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiDc_zero hk, jacobiSc_zero hk])
+  · have hfg : ∀ z, jacobiDs (z + (completeEllipticK k + I * completeEllipticKPrime k)) k =
+        (I * k * jacobiComodulus k) * jacobiSd z k :=
       fun z => by
-        rw [show z + (compEllIntKk k + I * compEllIntKpk k) =
-            z + compEllIntKk k + I * compEllIntKpk k by ring, (jacobiDsk_shift hk z).2.1]
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDsk w k) hfg
-      (hasDerivAt_jacobiSdk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiCdk_zero hk, jacobiNdk_zero hk])
-  · have hfg : ∀ z, jacobiDsk (z + (I * compEllIntKpk k)) k = (-(I * k)) * jacobiCnk z k :=
+        rw [show z + (completeEllipticK k + I * completeEllipticKPrime k) =
+            z + completeEllipticK k + I * completeEllipticKPrime k by ring,
+                                                                        (jacobiDs_shift hk z).2.1]
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDs w k) hfg
+      (hasDerivAt_jacobiSd hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiCd_zero hk, jacobiNd_zero hk])
+  · have hfg : ∀ z, jacobiDs (z + (I * completeEllipticKPrime k)) k = (-(I * k)) * jacobiCn z k :=
       fun z => by
-        rw [show z + (I * compEllIntKpk k) = z + I * compEllIntKpk k by ring,
-            (jacobiDsk_shift hk z).2.2.1]
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDsk w k) hfg
-      (hasDerivAt_jacobiCnk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiSnk_zero hk, jacobiDnk_zero hk])
-  · have hfg : ∀ z, jacobiDsk (z + (2 * compEllIntKk k)) k = -1 * jacobiDsk z k :=
+        rw [show z + (I * completeEllipticKPrime k) = z + I * completeEllipticKPrime k by ring,
+            (jacobiDs_shift hk z).2.2.1]
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiDs w k) hfg
+      (hasDerivAt_jacobiCn hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiSn_zero hk, jacobiDn_zero hk])
+  · have hfg : ∀ z, jacobiDs (z + (2 * completeEllipticK k)) k = -1 * jacobiDs z k :=
       fun z => by
-        rw [show z + (2 * compEllIntKk k) = z + 2 * compEllIntKk k by ring,
-            (jacobiDsk_shift hk z).2.2.2.1]
+        rw [show z + (2 * completeEllipticK k) = z + 2 * completeEllipticK k by ring,
+            (jacobiDs_shift hk z).2.2.2.1]
         try ring
-    have hfs : ∀ z, jacobiDsk (z + (2 * compEllIntKk k)) k = -1 * (1 / jacobiSdk z k) := by
-      intro z; rw [hfg, jacobiDsk, jacobiPQk_eq_one_div]; rfl
-    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiDsk w k) hfs
-      ((hasDerivAt_jacobiSdk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
-          (by simp [jacobiCdk_zero hk, jacobiNdk_zero hk]))
-      (by simp [jacobiSdk_zero hk])
+    have hfs : ∀ z, jacobiDs (z + (2 * completeEllipticK k)) k = -1 * (1 / jacobiSd z k) := by
+      intro z; rw [hfg, jacobiDs, jacobiPQ_eq_one_div]; rfl
+    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiDs w k) hfs
+      ((hasDerivAt_jacobiSd hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide))).congr_deriv
+          (by simp [jacobiCd_zero hk, jacobiNd_zero hk]))
+      (by simp [jacobiSd_zero hk])
     convert h using 2
-  · have hfg : ∀ z, jacobiDsk (z + (2 * compEllIntKk k + 2 * (I * compEllIntKpk k))) k =
-        1 * jacobiDsk z k :=
+  · have hfg : ∀ z, jacobiDs
+        (z + (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k))) k =
+        1 * jacobiDs z k :=
       fun z => by
-        rw [show z + (2 * compEllIntKk k + 2 * (I * compEllIntKpk k)) =
-            z + 2 * compEllIntKk k + 2 * (I * compEllIntKpk k) by ring,
-                (jacobiDsk_shift hk z).2.2.2.2.1]
+        rw [show z + (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k)) =
+            z + 2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k) by ring,
+                (jacobiDs_shift hk z).2.2.2.2.1]
         try ring
-    have hfs : ∀ z, jacobiDsk (z + (2 * compEllIntKk k + 2 * (I * compEllIntKpk k))) k =
-        1 * (1 / jacobiSdk z k) := by
-      intro z; rw [hfg, jacobiDsk, jacobiPQk_eq_one_div]; rfl
-    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiDsk w k) hfs
-      ((hasDerivAt_jacobiSdk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
-          (by simp [jacobiCdk_zero hk, jacobiNdk_zero hk]))
-      (by simp [jacobiSdk_zero hk])
+    have hfs : ∀ z, jacobiDs
+        (z + (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k))) k =
+        1 * (1 / jacobiSd z k) := by
+      intro z; rw [hfg, jacobiDs, jacobiPQ_eq_one_div]; rfl
+    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiDs w k) hfs
+      ((hasDerivAt_jacobiSd hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide))).congr_deriv
+          (by simp [jacobiCd_zero hk, jacobiNd_zero hk]))
+      (by simp [jacobiSd_zero hk])
     convert h using 2
-  · have hfg : ∀ z, jacobiDsk (z + (2 * (I * compEllIntKpk k))) k = -1 * jacobiDsk z k :=
+  · have hfg : ∀ z, jacobiDs (z + (2 * (I * completeEllipticKPrime k))) k = -1 * jacobiDs z k :=
       fun z => by
-        rw [show z + (2 * (I * compEllIntKpk k)) = z + 2 * (I * compEllIntKpk k) by ring,
-            (jacobiDsk_shift hk z).2.2.2.2.2]
+        rw [show z + (2 * (I * completeEllipticKPrime k)) = z + 2 *
+            (I * completeEllipticKPrime k) by ring,
+            (jacobiDs_shift hk z).2.2.2.2.2]
         try ring
-    have hfs : ∀ z, jacobiDsk (z + (2 * (I * compEllIntKpk k))) k = -1 * (1 / jacobiSdk z k) := by
-      intro z; rw [hfg, jacobiDsk, jacobiPQk_eq_one_div]; rfl
-    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiDsk w k) hfs
-      ((hasDerivAt_jacobiSdk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
-          (by simp [jacobiCdk_zero hk, jacobiNdk_zero hk]))
-      (by simp [jacobiSdk_zero hk])
+    have hfs : ∀ z, jacobiDs (z + (2 * (I * completeEllipticKPrime k))) k = -1 *
+        (1 / jacobiSd z k) := by
+      intro z; rw [hfg, jacobiDs, jacobiPQ_eq_one_div]; rfl
+    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiDs w k) hfs
+      ((hasDerivAt_jacobiSd hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide))).congr_deriv
+          (by simp [jacobiCd_zero hk, jacobiNd_zero hk]))
+      (by simp [jacobiSd_zero hk])
     convert h using 2
 
 /-- Table 22.5.1, row `cs`: the `z`-derivative of `cs(z, k)` at the regular
 special points and the residue at the poles (from Table 22.13.1 and the shifts of Table 22.4.3). -/
 @[dlmf 22.5.T1]
-theorem jacobiCsk_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
-    Tendsto (fun w => (w - (0)) * jacobiCsk w k) (𝓝[≠] (0))
+theorem jacobiCs_specialDerivs {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
+    Tendsto (fun w => (w - (0)) * jacobiCs w k) (𝓝[≠] (0))
         (𝓝 (1)) ∧
-    HasDerivAt (fun w => jacobiCsk w k) (-jacobiComodulusk k) (compEllIntKk k) ∧
-    HasDerivAt (fun w => jacobiCsk w k) (0) (compEllIntKk k + I * compEllIntKpk k) ∧
-    HasDerivAt (fun w => jacobiCsk w k) (0) (I * compEllIntKpk k) ∧
-    Tendsto (fun w => (w - (2 * compEllIntKk k)) * jacobiCsk w k) (𝓝[≠] (2 * compEllIntKk k))
+    HasDerivAt (fun w => jacobiCs w k) (-jacobiComodulus k) (completeEllipticK k) ∧
+    HasDerivAt (fun w => jacobiCs w k) (0) (completeEllipticK k + I * completeEllipticKPrime k) ∧
+    HasDerivAt (fun w => jacobiCs w k) (0) (I * completeEllipticKPrime k) ∧
+    Tendsto (fun w => (w - (2 * completeEllipticK k)) * jacobiCs w k)
+        (𝓝[≠] (2 * completeEllipticK k))
         (𝓝 (1)) ∧
-    Tendsto (fun w => (w - (2 * compEllIntKk k + 2 * (I * compEllIntKpk k))) * jacobiCsk w k)
-        (𝓝[≠] (2 * compEllIntKk k + 2 * (I * compEllIntKpk k)))
+    Tendsto (fun w => (w - (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k)))
+        * jacobiCs w k)
+        (𝓝[≠] (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k)))
         (𝓝 (-1)) ∧
-    Tendsto (fun w => (w - (2 * (I * compEllIntKpk k))) * jacobiCsk w k)
-        (𝓝[≠] (2 * (I * compEllIntKpk k)))
+    Tendsto (fun w => (w - (2 * (I * completeEllipticKPrime k))) * jacobiCs w k)
+        (𝓝[≠] (2 * (I * completeEllipticKPrime k)))
         (𝓝 (-1)) := by
   refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
-  · have hfg : ∀ z, jacobiCsk (z + (0)) k = 1 * jacobiCsk z k :=
+  · have hfg : ∀ z, jacobiCs (z + (0)) k = 1 * jacobiCs z k :=
       fun z => by rw [add_zero, one_mul]
-    have hfs : ∀ z, jacobiCsk (z + (0)) k = 1 * (1 / jacobiSck z k) := by
-      intro z; rw [hfg, jacobiCsk, jacobiPQk_eq_one_div]; rfl
-    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiCsk w k) hfs
-      ((hasDerivAt_jacobiSck hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
-          (by simp [jacobiDck_zero hk, jacobiNck_zero hk]))
-      (by simp [jacobiSck_zero hk])
+    have hfs : ∀ z, jacobiCs (z + (0)) k = 1 * (1 / jacobiSc z k) := by
+      intro z; rw [hfg, jacobiCs, jacobiPQ_eq_one_div]; rfl
+    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiCs w k) hfs
+      ((hasDerivAt_jacobiSc hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide))).congr_deriv
+          (by simp [jacobiDc_zero hk, jacobiNc_zero hk]))
+      (by simp [jacobiSc_zero hk])
     convert h using 2
-  · have hfg : ∀ z, jacobiCsk (z + (compEllIntKk k)) k = (-jacobiComodulusk k) * jacobiSck z k :=
+  · have hfg : ∀ z, jacobiCs (z + (completeEllipticK k)) k = (-jacobiComodulus k) * jacobiSc z k :=
       fun z => by
-        rw [show z + (compEllIntKk k) = z + compEllIntKk k by ring, (jacobiCsk_shift hk z).1]
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCsk w k) hfg
-      (hasDerivAt_jacobiSck hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiDck_zero hk, jacobiNck_zero hk])
-  · have hfg : ∀ z, jacobiCsk (z + (compEllIntKk k + I * compEllIntKpk k)) k =
-        (-(I * jacobiComodulusk k)) * jacobiNdk z k :=
+        rw [show z + (completeEllipticK k) = z + completeEllipticK k by ring,
+                                                                          (jacobiCs_shift hk z).1]
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCs w k) hfg
+      (hasDerivAt_jacobiSc hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiDc_zero hk, jacobiNc_zero hk])
+  · have hfg : ∀ z, jacobiCs (z + (completeEllipticK k + I * completeEllipticKPrime k)) k =
+        (-(I * jacobiComodulus k)) * jacobiNd z k :=
       fun z => by
-        rw [show z + (compEllIntKk k + I * compEllIntKpk k) =
-            z + compEllIntKk k + I * compEllIntKpk k by ring, (jacobiCsk_shift hk z).2.1]
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCsk w k) hfg
-      (hasDerivAt_jacobiNdk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiCdk_zero hk, jacobiSdk_zero hk])
-  · have hfg : ∀ z, jacobiCsk (z + (I * compEllIntKpk k)) k = (-I) * jacobiDnk z k :=
+        rw [show z + (completeEllipticK k + I * completeEllipticKPrime k) =
+            z + completeEllipticK k + I * completeEllipticKPrime k by ring,
+                                                                        (jacobiCs_shift hk z).2.1]
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCs w k) hfg
+      (hasDerivAt_jacobiNd hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiCd_zero hk, jacobiSd_zero hk])
+  · have hfg : ∀ z, jacobiCs (z + (I * completeEllipticKPrime k)) k = (-I) * jacobiDn z k :=
       fun z => by
-        rw [show z + (I * compEllIntKpk k) = z + I * compEllIntKpk k by ring,
-            (jacobiCsk_shift hk z).2.2.1]
-    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCsk w k) hfg
-      (hasDerivAt_jacobiDnk hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide)))).congr_deriv
-          (by simp [jacobiSnk_zero hk, jacobiCnk_zero hk])
-  · have hfg : ∀ z, jacobiCsk (z + (2 * compEllIntKk k)) k = 1 * jacobiCsk z k :=
+        rw [show z + (I * completeEllipticKPrime k) = z + I * completeEllipticKPrime k by ring,
+            (jacobiCs_shift hk z).2.2.1]
+    exact (hasDerivAt_of_add_eq_mul (f := fun w => jacobiCs w k) hfg
+      (hasDerivAt_jacobiDn hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide)))).congr_deriv
+          (by simp [jacobiSn_zero hk, jacobiCn_zero hk])
+  · have hfg : ∀ z, jacobiCs (z + (2 * completeEllipticK k)) k = 1 * jacobiCs z k :=
       fun z => by
-        rw [show z + (2 * compEllIntKk k) = z + 2 * compEllIntKk k by ring,
-            (jacobiCsk_shift hk z).2.2.2.1]
+        rw [show z + (2 * completeEllipticK k) = z + 2 * completeEllipticK k by ring,
+            (jacobiCs_shift hk z).2.2.2.1]
         try ring
-    have hfs : ∀ z, jacobiCsk (z + (2 * compEllIntKk k)) k = 1 * (1 / jacobiSck z k) := by
-      intro z; rw [hfg, jacobiCsk, jacobiPQk_eq_one_div]; rfl
-    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiCsk w k) hfs
-      ((hasDerivAt_jacobiSck hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
-          (by simp [jacobiDck_zero hk, jacobiNck_zero hk]))
-      (by simp [jacobiSck_zero hk])
+    have hfs : ∀ z, jacobiCs (z + (2 * completeEllipticK k)) k = 1 * (1 / jacobiSc z k) := by
+      intro z; rw [hfg, jacobiCs, jacobiPQ_eq_one_div]; rfl
+    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiCs w k) hfs
+      ((hasDerivAt_jacobiSc hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide))).congr_deriv
+          (by simp [jacobiDc_zero hk, jacobiNc_zero hk]))
+      (by simp [jacobiSc_zero hk])
     convert h using 2
-  · have hfg : ∀ z, jacobiCsk (z + (2 * compEllIntKk k + 2 * (I * compEllIntKpk k))) k =
-        -1 * jacobiCsk z k :=
+  · have hfg : ∀ z, jacobiCs
+        (z + (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k))) k =
+        -1 * jacobiCs z k :=
       fun z => by
-        rw [show z + (2 * compEllIntKk k + 2 * (I * compEllIntKpk k)) =
-            z + 2 * compEllIntKk k + 2 * (I * compEllIntKpk k) by ring,
-                (jacobiCsk_shift hk z).2.2.2.2.1]
+        rw [show z + (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k)) =
+            z + 2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k) by ring,
+                (jacobiCs_shift hk z).2.2.2.2.1]
         try ring
-    have hfs : ∀ z, jacobiCsk (z + (2 * compEllIntKk k + 2 * (I * compEllIntKpk k))) k =
-        -1 * (1 / jacobiSck z k) := by
-      intro z; rw [hfg, jacobiCsk, jacobiPQk_eq_one_div]; rfl
-    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiCsk w k) hfs
-      ((hasDerivAt_jacobiSck hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
-          (by simp [jacobiDck_zero hk, jacobiNck_zero hk]))
-      (by simp [jacobiSck_zero hk])
+    have hfs : ∀ z, jacobiCs
+        (z + (2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k))) k =
+        -1 * (1 / jacobiSc z k) := by
+      intro z; rw [hfg, jacobiCs, jacobiPQ_eq_one_div]; rfl
+    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiCs w k) hfs
+      ((hasDerivAt_jacobiSc hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide))).congr_deriv
+          (by simp [jacobiDc_zero hk, jacobiNc_zero hk]))
+      (by simp [jacobiSc_zero hk])
     convert h using 2
-  · have hfg : ∀ z, jacobiCsk (z + (2 * (I * compEllIntKpk k))) k = -1 * jacobiCsk z k :=
+  · have hfg : ∀ z, jacobiCs (z + (2 * (I * completeEllipticKPrime k))) k = -1 * jacobiCs z k :=
       fun z => by
-        rw [show z + (2 * (I * compEllIntKpk k)) = z + 2 * (I * compEllIntKpk k) by ring,
-            (jacobiCsk_shift hk z).2.2.2.2.2]
+        rw [show z + (2 * (I * completeEllipticKPrime k)) = z + 2 *
+            (I * completeEllipticKPrime k) by ring,
+            (jacobiCs_shift hk z).2.2.2.2.2]
         try ring
-    have hfs : ∀ z, jacobiCsk (z + (2 * (I * compEllIntKpk k))) k = -1 * (1 / jacobiSck z k) := by
-      intro z; rw [hfg, jacobiCsk, jacobiPQk_eq_one_div]; rfl
-    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiCsk w k) hfs
-      ((hasDerivAt_jacobiSck hk
-          (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (by decide))).congr_deriv
-          (by simp [jacobiDck_zero hk, jacobiNck_zero hk]))
-      (by simp [jacobiSck_zero hk])
+    have hfs : ∀ z, jacobiCs (z + (2 * (I * completeEllipticKPrime k))) k = -1 *
+        (1 / jacobiSc z k) := by
+      intro z; rw [hfg, jacobiCs, jacobiPQ_eq_one_div]; rfl
+    have h := tendsto_sub_mul_of_add_eq_mul_inv (f := fun w => jacobiCs w k) hfs
+      ((hasDerivAt_jacobiSc hk
+          (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (by decide))).congr_deriv
+          (by simp [jacobiDc_zero hk, jacobiNc_zero hk]))
+      (by simp [jacobiSc_zero hk])
     convert h using 2
 
 end DLMF.JacobiElliptic

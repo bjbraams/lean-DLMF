@@ -25,7 +25,7 @@ the Jacobian elliptic functions, and the nome `q = e^{iπτ}` of the modulus `k`
   `ζ ↦ ζ + π/2`.
 * `jacobiThetaOneTau_add_pi_mul_div_two`, …, `jacobiThetaFourTau_add_pi_mul_div_two`: the shift
   `ζ ↦ ζ + πτ/2`.
-* `jacobiNomek_eq_exp_tau`: `q = e^{iπτ}` with `τ = iK'/K` (DLMF 22.2.1, 22.2.12).
+* `jacobiNome_eq_exp_tau`: `q = e^{iπτ}` with `τ = iK'/K` (DLMF 22.2.1, 22.2.12).
 -/
 
 @[expose] public section
@@ -107,8 +107,8 @@ theorem jacobiThetaFourTau_add_pi_mul_div_two (ζ τ : ℂ) :
 
 /-- The nome is `q = e^{iπτ}` with `τ = iK'/K` (DLMF 22.2.1 and 22.2.12). -/
 @[dlmf 22.2.E1]
-theorem jacobiNomek_eq_exp_tau (k : ℂ) : jacobiNomek k = cexp (π * I * jacobiTauk k) := by
-  rw [jacobiNomek, jacobiTauk]
+theorem jacobiNome_eq_exp_tau (k : ℂ) : jacobiNome k = cexp (π * I * jacobiTau k) := by
+  rw [jacobiNome, jacobiTau]
   congr 1
   rw [mul_div_assoc', ← mul_assoc, mul_assoc (π : ℂ) I I, I_mul_I]
   ring

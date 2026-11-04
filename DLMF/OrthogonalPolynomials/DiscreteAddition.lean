@@ -64,20 +64,20 @@ def charlierSeries (a x : ℂ) : PowerSeries ℂ :=
 theorem coeff_charlierSeries (a x : ℂ) (n : ℕ) :
     coeff n (charlierSeries a x) * n ! = charlier a n x := by
   rw [charlierSeries, coeff_mul_factorial]
-  unfold charlier terminatingHG
+  unfold charlier terminatingHypergeometric
   refine Finset.sum_congr rfl fun k hk => ?_
   have hk' : k ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hk)
   rw [coeff_rescale, coeff_binomSeries, coeff_exp]
   simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one,
     map_div₀, map_one, map_natCast]
-  rw [poch_neg_coe_nat, Nat.descFactorial_eq_factorial_mul_choose, neg_pow]
+  rw [pochhammer_neg_coe_nat, Nat.descFactorial_eq_factorial_mul_choose, neg_pow]
   push_cast
   have hs : (-1 : ℂ) ^ k * (-1 : ℂ) ^ k = 1 := by
     rw [← mul_pow]; norm_num
   have hf : (k ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr k.factorial_ne_zero
   have hg : ((n - k) ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (n - k).factorial_ne_zero
   field_simp [hf, hg]
-  linear_combination -(n.choose k * poch (-x) k * a⁻¹ ^ k) * hs
+  linear_combination -(n.choose k * pochhammer (-x) k * a⁻¹ ^ k) * hs
 
 /-- Translation of the Charlier generating series. -/
 theorem charlierSeries_add (a x y : ℂ) :
@@ -108,9 +108,9 @@ def meixnerSeries (β c x : ℂ) : PowerSeries ℂ :=
 
 /-- Meixner coefficients with only the finite denominator restrictions needed at degree `n`. -/
 theorem coeff_meixnerSeries {β c : ℂ} (n : ℕ)
-    (hβ : ∀ k ≤ n, poch β k ≠ 0) (x : ℂ) :
-    coeff n (meixnerSeries β c x) * n ! = poch β n * meixner β c n x := by
-  rw [meixnerSeries, coeff_mul_factorial, poch_mul_meixner_eq_sum_of_ne_zero n hβ]
+    (hβ : ∀ k ≤ n, pochhammer β k ≠ 0) (x : ℂ) :
+    coeff n (meixnerSeries β c x) * n ! = pochhammer β n * meixner β c n x := by
+  rw [meixnerSeries, coeff_mul_factorial, pochhammer_mul_meixner_eq_sum_of_ne_zero n hβ]
   refine Finset.sum_congr rfl fun k _ => ?_
   simp only [coeff_rescale, coeff_binomSeries]
   have hf : (k ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr k.factorial_ne_zero
@@ -141,10 +141,10 @@ def krawtchoukSeries (p : ℂ) (N : ℕ) (x : ℂ) : PowerSeries ℂ :=
 /-- Krawtchouk coefficients up to degree `N`; the finite denominator factors are nonzero. -/
 theorem coeff_krawtchoukSeries (p : ℂ) (N n : ℕ) (hn : n ≤ N) (x : ℂ) :
     coeff n (krawtchoukSeries p N x) * n ! =
-      poch (-(N : ℂ)) n * p ^ n * krawtchouk p N n x := by
-  have hb : ∀ k ≤ n, poch (-(N : ℂ)) k ≠ 0 := by
+      pochhammer (-(N : ℂ)) n * p ^ n * krawtchouk p N n x := by
+  have hb : ∀ k ≤ n, pochhammer (-(N : ℂ)) k ≠ 0 := by
     intro k hk
-    rw [poch_neg_coe_nat]
+    rw [pochhammer_neg_coe_nat]
     exact mul_ne_zero (pow_ne_zero _ (by norm_num))
       (Nat.cast_ne_zero.mpr (Nat.descFactorial_pos.mpr (hk.trans hn)).ne')
   rw [krawtchoukSeries, coeff_rescale, mul_assoc, coeff_meixnerSeries n hb]
@@ -167,7 +167,7 @@ open DiscreteAddition PowerSeries
 theorem charlier_addition (a x y : ℂ) (n : ℕ) :
     charlier a n (x + y) =
       ∑ k ∈ Finset.range (n + 1), (n.choose k : ℂ) *
-        charlier a (n - k) x * poch (-y) k / a ^ k := by
+        charlier a (n - k) x * pochhammer (-y) k / a ^ k := by
   rw [← coeff_charlierSeries, charlierSeries_add, coeff_mul_factorial]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [coeff_charlierSeries, coeff_rescale, coeff_binomSeries]
@@ -196,13 +196,13 @@ theorem charlier_addition_convolution (a x y : ℂ) (n : ℕ) :
 
 /-- Meixner addition formula, Beals–Wong (6.5.11), in the project's standard normalization. -/
 theorem meixner_addition {β : ℂ} (hβ : 0 < β.re) (c x y : ℂ) (n : ℕ) :
-    poch β n * meixner β c n (x + y) =
+    pochhammer β n * meixner β c n (x + y) =
       ∑ j ∈ Finset.range (n + 1), ∑ k ∈ Finset.range (n - j + 1),
-        (n.choose j : ℂ) * ((n - j).choose k : ℂ) * poch (-β) j *
-          (poch β k * meixner β c k x) *
-          (poch β (n - j - k) * meixner β c (n - j - k) y) := by
-  have hb (m : ℕ) : ∀ k ≤ m, poch β k ≠ 0 :=
-    fun k _ => poch_ne_zero_of_re_pos hβ k
+        (n.choose j : ℂ) * ((n - j).choose k : ℂ) * pochhammer (-β) j *
+          (pochhammer β k * meixner β c k x) *
+          (pochhammer β (n - j - k) * meixner β c (n - j - k) y) := by
+  have hb (m : ℕ) : ∀ k ≤ m, pochhammer β k ≠ 0 :=
+    fun k _ => pochhammer_ne_zero_of_re_pos hβ k
   rw [← coeff_meixnerSeries n (hb n), meixnerSeries_add_fixed, coeff_mul_factorial]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [coeff_binomSeries, div_mul_cancel₀ _ (Nat.cast_ne_zero.mpr j.factorial_ne_zero),
@@ -214,16 +214,16 @@ theorem meixner_addition {β : ℂ} (hβ : 0 < β.re) (c x y : ℂ) (n : ℕ) :
 /-- Krawtchouk convolution, Beals–Wong (6.4.12), after translating its normalization:
 `k_n = (-N)_n p^n K_n/n!`. Multiplication by `n!` avoids quotients in the convolution. -/
 theorem krawtchouk_addition (p x y : ℂ) {N n : ℕ} (hn : n ≤ N) :
-    poch (-(N : ℂ)) n * p ^ n * krawtchouk p N n (x + y) =
+    pochhammer (-(N : ℂ)) n * p ^ n * krawtchouk p N n (x + y) =
       ∑ j ∈ Finset.range (n + 1), ∑ k ∈ Finset.range (n - j + 1),
-        (n.choose j : ℂ) * ((n - j).choose k : ℂ) * poch (N : ℂ) j * p ^ j *
-          (poch (-(N : ℂ)) k * p ^ k * krawtchouk p N k x) *
-          (poch (-(N : ℂ)) (n - j - k) * p ^ (n - j - k) *
+        (n.choose j : ℂ) * ((n - j).choose k : ℂ) * pochhammer (N : ℂ) j * p ^ j *
+          (pochhammer (-(N : ℂ)) k * p ^ k * krawtchouk p N k x) *
+          (pochhammer (-(N : ℂ)) (n - j - k) * p ^ (n - j - k) *
             krawtchouk p N (n - j - k) y) := by
   rw [← coeff_krawtchoukSeries p N n hn, krawtchoukSeries_add, coeff_mul_factorial]
   refine Finset.sum_congr rfl fun j hj => ?_
   have hj' : j ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hj)
-  have he : coeff j (rescale p (binomSeries (N : ℂ))) * j ! = p ^ j * poch (N : ℂ) j := by
+  have he : coeff j (rescale p (binomSeries (N : ℂ))) * j ! = p ^ j * pochhammer (N : ℂ) j := by
     rw [coeff_rescale, coeff_binomSeries]
     field_simp [Nat.cast_ne_zero.mpr j.factorial_ne_zero]
   rw [he, coeff_mul_factorial, Finset.mul_sum]

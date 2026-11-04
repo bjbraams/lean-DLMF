@@ -16,7 +16,8 @@ solution with constant term one of the generating-function equation
 three-term recurrence. Products of solutions solve the equation with parameters
 `α + β + 1` and `x + y`, which gives the Laguerre addition theorem for `Re α, Re β > -1`.
 Both sides of that theorem are entire in `α` and `β`, so the identity theorem removes the
-restriction (`laguerrePolyL_addition` in `DLMF.OrthogonalPolynomials.Series.ClassicalGenerating`).
+restriction (`laguerrePolynomialL_addition` in
+`DLMF.OrthogonalPolynomials.Series.ClassicalGenerating`).
 
 ## Main definitions
 
@@ -30,7 +31,7 @@ restriction (`laguerrePolyL_addition` in `DLMF.OrthogonalPolynomials.Series.Clas
 * `eq_of_laguerreODE`: a solution is determined by its constant coefficient.
 * `laguerreODE_mul`: products of solutions are solutions with added parameters.
 * `laguerreODE_laguerreSeries`: the Laguerre series solves the equation for `Re α > -1`.
-* `laguerrePolyL_addition_of_re`: the Laguerre addition theorem for `Re α, Re β > -1`.
+* `laguerrePolynomialL_addition_of_re`: the Laguerre addition theorem for `Re α, Re β > -1`.
 * `differentiable_laguerreExtended`, `eq_of_differentiable_of_re_gt`: the ingredients of the
   continuation in the parameters.
 -/
@@ -56,11 +57,11 @@ def LaguerreODE (α x : ℂ) (F : PowerSeries ℂ) : Prop :=
 
 /-- `L_0^{(α)} = 1`. -/
 theorem laguerreExtended_zero (α x : ℂ) : laguerreExtended α 0 x = 1 := by
-  simp [laguerreExtended, poch_zero]
+  simp [laguerreExtended, pochhammer_zero]
 
 /-- `L_1^{(α)}(x) = α + 1 - x`. -/
 theorem laguerreExtended_one (α x : ℂ) : laguerreExtended α 1 x = α + 1 - x := by
-  simp [laguerreExtended, Finset.sum_range_succ, poch_succ, poch_zero]
+  simp [laguerreExtended, Finset.sum_range_succ, pochhammer_succ, pochhammer_zero]
   ring
 
 /-- The Laguerre equation with the products expanded. -/
@@ -157,10 +158,11 @@ theorem laguerreODE_laguerreSeries {α : ℂ} (hα : -1 < α.re) (x : ℂ) :
   · simp only [laguerreSeries, coeff_mk, laguerreExtended_zero, laguerreExtended_one, mul_one]
   · intro n
     simp only [laguerreSeries, coeff_mk, laguerreExtended_eq hc]
-    exact laguerrePolyL_recurrence hα n x
+    exact laguerrePolynomialL_recurrence hα n x
 
 /-- The Laguerre addition theorem for `Re α, Re β > -1`. -/
-theorem laguerrePolyL_addition_of_re {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) (x y : ℂ) (n : ℕ) :
+theorem laguerrePolynomialL_addition_of_re {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re)
+    (x y : ℂ) (n : ℕ) :
     laguerreExtended (α + β + 1) n (x + y) =
       ∑ k ∈ Finset.range (n + 1), laguerreExtended α k x * laguerreExtended β (n - k) y := by
   have hγ : -1 < (α + β + 1).re := by

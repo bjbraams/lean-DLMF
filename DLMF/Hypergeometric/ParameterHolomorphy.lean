@@ -22,20 +22,22 @@ cut plane. This file proves the joint form, on the whole cut plane.
 
 ## Main results
 
-* `differentiable_regularizedGaussHGFun_of_differentiable`: on the unit disk, Mathlib's series
-  `regularizedGaussHGFun` composed with holomorphic maps `A B C : E → ℂ` on any complex normed
-  space is holomorphic.
-* `differentiableOn_regularizedGaussHGIntegral_joint`: Euler's integral is jointly holomorphic.
-* `regularizedGaussHG_eq_regularizedGaussHGShift`: the fixed-shift recursion is the
+* `differentiable_regularizedGaussHypergeometricFun_of_differentiable`: on the unit disk, Mathlib's
+  series `regularizedGaussHGFun` composed with holomorphic maps `A B C : E → ℂ` on any complex
+  normed space is holomorphic.
+* `differentiableOn_regularizedGaussHypergeometricIntegral_joint`: Euler's integral is jointly
+  holomorphic.
+* `regularizedGaussHypergeometric_eq_regularizedGaussHGShift`: the fixed-shift recursion is the
   continuation where its shift counts suffice.
-* `differentiableOn_regularizedGaussHG_joint`: `(a, b, c, z) ↦ regularizedGaussHG a b c z` is
-  holomorphic on `ℂ³ × cutPlane`.
-* `DifferentiableOn.regularizedGaussHG`, `differentiable_regularizedGaussHG_params`,
-  `differentiable_regularizedGaussHG_comp`: corollaries for parameter maps.
+* `differentiableOn_regularizedGaussHypergeometric_joint`:
+  `(a, b, c, z) ↦ regularizedGaussHypergeometric a b c z` is holomorphic on `ℂ³ × cutPlane`.
+* `DifferentiableOn.regularizedGaussHypergeometric`,
+  `differentiable_regularizedGaussHypergeometric_params`,
+  `differentiable_regularizedGaussHypergeometric_comp`: corollaries for parameter maps.
 
 ## Implementation notes
 
-The definition `regularizedGaussHG` chooses its numbers of contiguous shifts from the
+The definition `regularizedGaussHypergeometric` chooses its numbers of contiguous shifts from the
 parameters, so its recursion is not locally uniform in them. Here the counts `p`, `q` are fixed
 instead: on the open set `Re b + p > 0`, `Re (c - b) + q > p` the fixed-shift recursion reaches
 Euler integrals only inside the Euler region, agrees with the series on the disk, and is
@@ -56,12 +58,13 @@ namespace DLMF.Hypergeometric
 
 /-- On the unit disk, the regularized Gauss series composed with holomorphic parameter maps on a
 complex normed space is holomorphic: the joint form of
-`analyticOnNhd_regularizedGaussHGFun_comp`. -/
-theorem differentiable_regularizedGaussHGFun_of_differentiable {E : Type*} [NormedAddCommGroup E]
+`analyticOnNhd_regularizedGaussHypergeometricFun_comp`. -/
+theorem differentiable_regularizedGaussHypergeometricFun_of_differentiable {E : Type*}
+    [NormedAddCommGroup E]
     [NormedSpace ℂ E] {A B C : E → ℂ} (hA : Differentiable ℂ A)
     (hB : Differentiable ℂ B) (hC : Differentiable ℂ C) {z : ℂ} (hz : ‖z‖ < 1) :
     Differentiable ℂ (fun w => regularizedGaussHGFun (A w) (B w) (C w) z) := by
-  simp_rw [regularizedGaussHGFun_eq_tsum]
+  simp_rw [regularizedGaussHypergeometricFun_eq_tsum]
   rw [← differentiableOn_univ]
   refine Complex.differentiableOn_tsum_of_eventually_dominated isOpen_univ ?_ ?_
   · intro n
@@ -137,7 +140,7 @@ theorem norm_ofReal_cpow_le {t : ℝ} (ht0 : 0 < t) (ht1 : t ≤ 1) {w : ℂ} {�
 
 /-- Euler's integral `∫₀¹ t^(b-1) (1-t)^(c-b-1) (1-zt)^(-a) dt` is jointly holomorphic in
 `(a, b, c, z)` on the Euler region. -/
-theorem differentiableOn_regularizedGaussHGIntegral_joint :
+theorem differentiableOn_regularizedGaussHypergeometricIntegral_joint :
     DifferentiableOn ℂ (fun q : ℂ × ℂ × ℂ × ℂ =>
       ∫ t : ℝ in (0 : ℝ)..1, eulerKernel q.1 q.2.1 q.2.2.1 q.2.2.2 t) eulerRegion := by
   have hI : Ι (0 : ℝ) 1 = Ioc 0 1 := uIoc_of_le zero_le_one
@@ -215,13 +218,13 @@ theorem differentiableOn_regularizedGaussHGIntegral_joint :
           Metric.ball_subset_closedBall hqz⟩
       gcongr
 
-/-- Euler's integral in the regularized normalization, `regularizedGaussHGIntegral`, is jointly
-holomorphic in `(a, b, c, z)` on the Euler region. -/
-theorem differentiableOn_regularizedGaussHGIntegral_eulerRegion :
+/-- Euler's integral in the regularized normalization, `regularizedGaussHypergeometricIntegral`, is
+jointly holomorphic in `(a, b, c, z)` on the Euler region. -/
+theorem differentiableOn_regularizedGaussHypergeometricIntegral_eulerRegion :
     DifferentiableOn ℂ (fun q : ℂ × ℂ × ℂ × ℂ =>
-      regularizedGaussHGIntegral q.1 q.2.1 q.2.2.1 q.2.2.2) eulerRegion := by
-  unfold regularizedGaussHGIntegral
-  refine DifferentiableOn.mul ?_ differentiableOn_regularizedGaussHGIntegral_joint
+      regularizedGaussHypergeometricIntegral q.1 q.2.1 q.2.2.1 q.2.2.2) eulerRegion := by
+  unfold regularizedGaussHypergeometricIntegral
+  refine DifferentiableOn.mul ?_ differentiableOn_regularizedGaussHypergeometricIntegral_joint
   have hG : Differentiable ℂ fun s : ℂ => (Gamma s)⁻¹ := by
     simpa only [one_div] using differentiable_one_div_Gamma
   have h1 : Differentiable ℂ fun q : ℂ × ℂ × ℂ × ℂ => (Gamma q.2.1)⁻¹ :=
@@ -234,7 +237,7 @@ theorem differentiableOn_regularizedGaussHGIntegral_eulerRegion :
 /-- The continuation recursion with a fixed number `p` of `b`-shifts, ending in Euler's
 integral. -/
 def regularizedGaussHGShiftB : ℕ → ℂ → ℂ → ℂ → ℂ → ℂ
-  | 0, a, b, c, z => regularizedGaussHGIntegral a b c z
+  | 0, a, b, c, z => regularizedGaussHypergeometricIntegral a b c z
   | p + 1, a, b, c, z => regularizedGaussHGShiftB p a (b + 1) c z -
       a * z * regularizedGaussHGShiftB p (a + 1) (b + 1) (c + 1) z
 
@@ -251,14 +254,14 @@ theorem regularizedGaussHGShiftB_eq (p : ℕ) {a b c z : ℂ} (hb : 0 < b.re + p
   induction p generalizing a b c with
   | zero =>
     simp only [CharP.cast_eq_zero, add_zero] at hb hc
-    exact regularizedGaussHGIntegral_eq_regularizedGaussHGFun hb hc hz
+    exact regularizedGaussHypergeometricIntegral_eq_regularizedGaussHypergeometricFun hb hc hz
   | succ p ih =>
     simp only [Nat.cast_succ] at hb hc
     rw [regularizedGaussHGShiftB, ih (by simp only [add_re, one_re]; linarith)
         (by simp only [sub_re, add_re, one_re] at hc ⊢; linarith),
       ih (by simp only [add_re, one_re]; linarith)
         (by simp only [sub_re, add_re, one_re] at hc ⊢; linarith)]
-    linear_combination (-1 : ℂ) * regularizedGaussHGFun_contiguous_shift_b a b c hz
+    linear_combination (-1 : ℂ) * regularizedGaussHypergeometricFun_contiguous_shift_b a b c hz
 
 /-- On the disk the fixed-shift recursion is the series, when its Euler integrals are
 convergent. -/
@@ -273,7 +276,7 @@ theorem regularizedGaussHGShift_eq (p q : ℕ) {a b c z : ℂ} (hb : 0 < b.re + 
     simp only [Nat.cast_succ] at hc
     rw [regularizedGaussHGShift, ih hb (by simp only [sub_re, add_re, one_re] at hc ⊢; linarith),
       ih hb (by simp only [sub_re, add_re, one_re] at hc ⊢; linarith),
-      regularizedGaussHGFun_contiguous_c a b c hz]
+      regularizedGaussHypergeometricFun_contiguous_c a b c hz]
 
 /-- The step of the `b`-shift recursion. -/
 theorem regularizedGaussHGShiftB_succ (p : ℕ) (a b c z : ℂ) :
@@ -300,7 +303,7 @@ theorem differentiableOn_regularizedGaussHGShiftB (p : ℕ) {A B C Z : E → ℂ
       exact ⟨h1, h2, h3⟩
     have hg : DifferentiableOn ℂ (fun w => ((A w, B w, C w, Z w) : ℂ × ℂ × ℂ × ℂ)) W :=
       (hA.prodMk (hB.prodMk (hC.prodMk hZ))).differentiableOn
-    have hc := differentiableOn_regularizedGaussHGIntegral_eulerRegion.comp hg hmap
+    have hc := differentiableOn_regularizedGaussHypergeometricIntegral_eulerRegion.comp hg hmap
     simp only [regularizedGaussHGShiftB]
     exact hc
   | succ p ih =>
@@ -344,21 +347,22 @@ end Comp
 
 /-- In the region where the fixed shift counts suffice, the fixed-shift recursion is the
 continuation. -/
-theorem regularizedGaussHG_eq_regularizedGaussHGShift (p q : ℕ) {a b c z : ℂ}
+theorem regularizedGaussHypergeometric_eq_regularizedGaussHGShift (p q : ℕ) {a b c z : ℂ}
     (hb : 0 < b.re + p) (hc : (p : ℝ) < (c - b).re + q) (hz : z ∈ cutPlane) :
-    regularizedGaussHG a b c z = regularizedGaussHGShift p q a b c z := by
+    regularizedGaussHypergeometric a b c z = regularizedGaussHGShift p q a b c z := by
   have han : AnalyticOnNhd ℂ (fun z => regularizedGaussHGShift p q a b c z) cutPlane := by
     refine DifferentiableOn.analyticOnNhd ?_ isOpen_cutPlane
     exact differentiableOn_regularizedGaussHGShift p q (differentiable_const a)
       (differentiable_const b) (differentiable_const c) differentiable_id
       fun w hw => ⟨hb, hc, hw⟩
-  exact (regularizedGaussHG_unique han
+  exact (regularizedGaussHypergeometric_unique han
     (fun w hw => regularizedGaussHGShift_eq p q hb hc hw) hz).symm
 
 /-- **Joint holomorphy of the continued Gauss function.** `(a, b, c, z) ↦ 𝐅(a, b; c; z)` is
 holomorphic on `ℂ³ × cutPlane`, for all parameters. -/
-theorem differentiableOn_regularizedGaussHG_joint :
-    DifferentiableOn ℂ (fun q : ℂ × ℂ × ℂ × ℂ => regularizedGaussHG q.1 q.2.1 q.2.2.1 q.2.2.2)
+theorem differentiableOn_regularizedGaussHypergeometric_joint :
+    DifferentiableOn ℂ (fun q : ℂ × ℂ × ℂ × ℂ =>
+        regularizedGaussHypergeometric q.1 q.2.1 q.2.2.1 q.2.2.2)
       {q | q.2.2.2 ∈ cutPlane} := by
   rintro ⟨a₀, b₀, c₀, z₀⟩ hz₀
   obtain ⟨P, hP⟩ : ∃ P : ℕ, 1 - b₀.re ≤ P := exists_nat_ge _
@@ -379,42 +383,42 @@ theorem differentiableOn_regularizedGaussHG_joint :
   refine (hd.differentiableAt (hWo.mem_nhds hq₀)).congr_of_eventuallyEq ?_
     |>.differentiableWithinAt
   filter_upwards [hWo.mem_nhds hq₀] with q hq
-  exact regularizedGaussHG_eq_regularizedGaussHGShift P Q hq.1 hq.2.1 hq.2.2
+  exact regularizedGaussHypergeometric_eq_regularizedGaussHGShift P Q hq.1 hq.2.1 hq.2.2
 
 /-- The continued Gauss function composed with holomorphic parameter and argument maps is
 holomorphic wherever the argument stays in the cut plane. -/
-theorem _root_.DifferentiableOn.regularizedGaussHG {E : Type*} [NormedAddCommGroup E]
+theorem _root_.DifferentiableOn.regularizedGaussHypergeometric {E : Type*} [NormedAddCommGroup E]
     [NormedSpace ℂ E] {A B C Z : E → ℂ} {s : Set E} (hA : DifferentiableOn ℂ A s)
     (hB : DifferentiableOn ℂ B s) (hC : DifferentiableOn ℂ C s) (hZ : DifferentiableOn ℂ Z s)
     (hs : ∀ w ∈ s, Z w ∈ cutPlane) :
-    DifferentiableOn ℂ (fun w => regularizedGaussHG (A w) (B w) (C w) (Z w)) s :=
-  differentiableOn_regularizedGaussHG_joint.comp (hA.prodMk (hB.prodMk (hC.prodMk hZ)))
+    DifferentiableOn ℂ (fun w => regularizedGaussHypergeometric (A w) (B w) (C w) (Z w)) s :=
+  differentiableOn_regularizedGaussHypergeometric_joint.comp (hA.prodMk (hB.prodMk (hC.prodMk hZ)))
     fun w hw => hs w hw
 
 /-- For `z` in the cut plane, `(a, b, c) ↦ 𝐅(a, b; c; z)` is entire (DLMF §15.2(ii), on the
 whole cut plane). -/
-theorem differentiable_regularizedGaussHG_params {z : ℂ} (hz : z ∈ cutPlane) :
-    Differentiable ℂ (fun p : ℂ × ℂ × ℂ => regularizedGaussHG p.1 p.2.1 p.2.2 z) := by
+theorem differentiable_regularizedGaussHypergeometric_params {z : ℂ} (hz : z ∈ cutPlane) :
+    Differentiable ℂ (fun p : ℂ × ℂ × ℂ => regularizedGaussHypergeometric p.1 p.2.1 p.2.2 z) := by
   rw [← differentiableOn_univ]
-  exact DifferentiableOn.regularizedGaussHG (by fun_prop) (by fun_prop) (by fun_prop)
+  exact DifferentiableOn.regularizedGaussHypergeometric (by fun_prop) (by fun_prop) (by fun_prop)
     (differentiableOn_const z) fun _ _ => hz
 
 /-- Along holomorphic parameter maps, the continued Gauss function is holomorphic for every `z`
 in the cut plane. -/
-theorem differentiable_regularizedGaussHG_comp {E : Type*} [NormedAddCommGroup E]
+theorem differentiable_regularizedGaussHypergeometric_comp {E : Type*} [NormedAddCommGroup E]
     [NormedSpace ℂ E] {A B C : E → ℂ} (hA : Differentiable ℂ A) (hB : Differentiable ℂ B)
     (hC : Differentiable ℂ C) {z : ℂ} (hz : z ∈ cutPlane) :
-    Differentiable ℂ (fun w => regularizedGaussHG (A w) (B w) (C w) z) := by
+    Differentiable ℂ (fun w => regularizedGaussHypergeometric (A w) (B w) (C w) z) := by
   rw [← differentiableOn_univ]
-  exact DifferentiableOn.regularizedGaussHG hA.differentiableOn hB.differentiableOn
+  exact DifferentiableOn.regularizedGaussHypergeometric hA.differentiableOn hB.differentiableOn
     hC.differentiableOn (differentiableOn_const z) fun _ _ => hz
 
 /-- Along entire parameter curves, the continued Gauss function is entire for every `z` in the
-cut plane; the cut-plane form of `analyticOnNhd_regularizedGaussHGFun_comp`. -/
-theorem analyticOnNhd_regularizedGaussHG_comp {A B C : ℂ → ℂ} (hA : Differentiable ℂ A)
+cut plane; the cut-plane form of `analyticOnNhd_regularizedGaussHypergeometricFun_comp`. -/
+theorem analyticOnNhd_regularizedGaussHypergeometric_comp {A B C : ℂ → ℂ} (hA : Differentiable ℂ A)
     (hB : Differentiable ℂ B) (hC : Differentiable ℂ C) {z : ℂ} (hz : z ∈ cutPlane) :
-    AnalyticOnNhd ℂ (fun w => regularizedGaussHG (A w) (B w) (C w) z) univ := by
+    AnalyticOnNhd ℂ (fun w => regularizedGaussHypergeometric (A w) (B w) (C w) z) univ := by
   refine DifferentiableOn.analyticOnNhd ?_ isOpen_univ
-  exact (differentiable_regularizedGaussHG_comp hA hB hC hz).differentiableOn
+  exact (differentiable_regularizedGaussHypergeometric_comp hA hB hC hz).differentiableOn
 
 end DLMF.Hypergeometric

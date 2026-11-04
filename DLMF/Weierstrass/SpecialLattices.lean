@@ -7,8 +7,13 @@ module
 
 public import DLMF.Weierstrass.Relations
 public import DLMF.Weierstrass.RealPaths
+public import DLMF.Theta.Identities
 public import DLMF.Elliptic.SpecialValues
 public import DLMF.Gamma.BetaFunction.ParameterIntegrals
+public import DLMF.EllipticIntegrals.EquianharmonicModulus
+public import DLMF.Theta.ImaginaryAxisMonotonicity
+public import DLMF.EllipticIntegrals.Quadratic
+public import DLMF.EllipticIntegrals.Connection.CompleteIntegrals
 
 /-!
 # Real-valued Weierstrass functions and special lattices
@@ -31,19 +36,25 @@ modulus.
 * `IsRectangular.discriminant_pos`, `IsRectangular.roots`, `IsRectangular.e_two_g₃`,
   `rectangular_roots_monotone`: rectangular lattices (DLMF 23.5.1, §23.5(ii)).
 * `IsLemniscatic.eta`, `IsLemniscatic.roots`, `IsLemniscatic.invariants`,
-  `IsLemniscatic.modulus_sq`, `compEllIntKm_lemniscatic`: DLMF 23.5.2–23.5.5.
+  `IsLemniscatic.modulus_sq`, `completeEllipticKOfParameter_lemniscatic`: DLMF 23.5.2–23.5.5.
 * `IsRhombic.discriminant_neg`, `IsRhombic.roots`, `rhombic_e_one_monotone`: rhombic lattices
   (DLMF §23.5(iv)).
 * `IsEquianharmonic.eta`, `IsEquianharmonic.roots`, `IsEquianharmonic.invariants`,
-  `IsEquianharmonic.modulus_sq`, `compEllIntKk_equianharmonic`: DLMF 23.5.6–23.5.9.
+  `IsEquianharmonic.modulus_sq`, `completeEllipticK_equianharmonic`: DLMF 23.5.6–23.5.9.
 
 ## Implementation notes
 
 Real numbers are complex numbers with vanishing imaginary part, and order statements are made
 for real parts. The complete elliptic integral of 23.5.5 is the project's real
-`DLMF.Elliptic.Real.compEllIntKm` with parameter `m = k² = 1/2`; the complex values in 23.5.9
-use the principal complex integral `DLMF.EllipticIntegrals.compEllIntKk` (modulus form) and the
-modulus `k = e^{iπ/6}` with `k² = e^{iπ/3}`.
+`DLMF.Elliptic.Real.completeEllipticKOfParameter` with parameter `m = k² = 1/2`; the complex values
+in 23.5.9 use the principal complex integral `DLMF.EllipticIntegrals.completeEllipticK` (modulus
+form) and the modulus `k = e^{iπ/6}` with `k² = e^{iπ/3}`.
+
+For a rhombic lattice `τ = 1/2 + it`, and splitting the theta series into even and odd terms
+gives `θ₃, θ₄(0|τ) = A ± iB` with `A, B = θ₃, θ₂(0|4it)`, so the roots are explicit in `A` and
+`B`. The root `e₁` vanishes exactly when `(B/A)²`, the modulus at `4it`, is the smaller root of
+`k² - 6k + 1`; since `t = K'/(4K)` is determined by the modulus, this happens only in the
+pseudo-lemniscatic case, where `e₁ = 0` follows from the invariance of the lattice under `i`.
 -/
 
 @[expose] public section
@@ -55,7 +66,9 @@ noncomputable section
 
 namespace DLMF.Weierstrass
 
-open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
+open DLMF.EllipticIntegrals
+    (completeEllipticK completeEllipticKPrime completeEllipticK_singular_three_eq_integral
+  exp_pi_mul_I_div_twelve completeEllipticK_exp_pi_mul_I_div_six)
 
 section Conjugation
 open Filter Topology
@@ -269,9 +282,9 @@ theorem exists_real_data_of_isRectangular {H : HalfPeriods} (h : H.IsRectangular
   · push_cast; linear_combination (d3 + d2 + hs) / 3
   · push_cast; linear_combination (d3 - 2 * d2 + hs) / 3
   · push_cast; linear_combination (-2 * d3 + d2 + hs) / 3
-  · rw [HalfPeriods.quarterK, compEllIntKTau, h3]; push_cast; ring
-  · rw [HalfPeriods.modulus, jacobiModulusTau, h2, h3]; push_cast; ring
-  · rw [HalfPeriods.comodulus, jacobiComodulusTau, h4, h3]; push_cast; ring
+  · rw [HalfPeriods.quarterK, completeEllipticKOfTau, h3]; push_cast; ring
+  · rw [HalfPeriods.modulus, jacobiModulusOfTau, h2, h3]; push_cast; ring
+  · rw [HalfPeriods.comodulus, jacobiComodulusOfTau, h4, h3]; push_cast; ring
 
 /-- DLMF §23.5(ii): for a rectangular lattice `Δ > 0`. -/
 @[dlmf 23.5.ii]
@@ -311,6 +324,31 @@ def rectangular (a b : ℝ) (ha : 0 < a) (hb : 0 < b) : HalfPeriods :=
   ⟨a, b * I, by exact_mod_cast ha.ne', by
     rw [Complex.div_ofReal_im]; simpa using div_pos hb ha⟩
 
+open DLMF.Theta in
+/-- The roots of a rectangular lattice through the real theta constants at `τ = ib/a`. -/
+private lemma rectangular_e_eq (a b : ℝ) (ha : 0 < a) (hb : 0 < b) :
+    (rectangular a b ha hb).e 1 = (((π / (2 * a)) ^ 2 *
+        (jacobiThetaThreeImag (b / a) ^ 4 + jacobiThetaFourImag (b / a) ^ 4) / 3 : ℝ) : ℂ) ∧
+      (rectangular a b ha hb).e 2 = (((π / (2 * a)) ^ 2 *
+        (jacobiThetaThreeImag (b / a) ^ 4 - 2 * jacobiThetaFourImag (b / a) ^ 4) / 3 : ℝ) : ℂ) ∧
+      (rectangular a b ha hb).e 3 = (((π / (2 * a)) ^ 2 *
+        (jacobiThetaFourImag (b / a) ^ 4 - 2 * jacobiThetaThreeImag (b / a) ^ 4) / 3 : ℝ) : ℂ) := by
+  set H := rectangular a b ha hb
+  obtain ⟨d3, d2⟩ := H.e_one_sub_e_three_and_e_one_sub_e_two
+  have hs := H.e_sum
+  have hω : H.ω₁ = a := rfl
+  have hτ : H.tau = I * ((b / a : ℝ) : ℂ) := by
+    have : (a : ℂ) ≠ 0 := by exact_mod_cast ha.ne'
+    simp only [HalfPeriods.tau, H, rectangular]; push_cast; field_simp
+  simp only [hτ, hω, jacobiThetaThreeTau_zero_I_mul_eq_imag,
+    jacobiThetaFourTau_zero_I_mul_eq_imag] at d3 d2
+  refine ⟨?_, ?_, ?_⟩
+  all_goals push_cast
+  · linear_combination (hs + d3 + d2) / 3
+  · linear_combination (hs + d3 - 2 * d2) / 3
+  · linear_combination (hs - 2 * d3 + d2) / 3
+
+open DLMF.Theta in
 /-- DLMF §23.5(ii): with `ω₁` fixed, `e₁` and `e₂` are decreasing and `e₃` is increasing
 functions of `ℑω₃`. -/
 @[dlmf 23.5.ii]
@@ -319,7 +357,35 @@ theorem rectangular_roots_monotone (a b₁ b₂ : ℝ) (ha : 0 < a) (hb₁ : 0 <
     ((rectangular a b₂ ha hb₂).e 1).re < ((rectangular a b₁ ha hb₁).e 1).re ∧
       ((rectangular a b₂ ha hb₂).e 2).re < ((rectangular a b₁ ha hb₁).e 2).re ∧
       ((rectangular a b₁ ha hb₁).e 3).re < ((rectangular a b₂ ha hb₂).e 3).re := by
-  sorry
+  obtain ⟨e11, e12, e13⟩ := rectangular_e_eq a b₁ ha hb₁
+  obtain ⟨e21, e22, e23⟩ := rectangular_e_eq a b₂ ha hb₂
+  rw [e11, e12, e13, e21, e22, e23]
+  simp only [ofReal_re]
+  set t₁ := b₁ / a
+  set t₂ := b₂ / a
+  have ht₁ : 0 < t₁ := div_pos hb₁ ha
+  have ht : t₁ < t₂ := div_lt_div_of_pos_right hb ha
+  have hc : 0 < (π / (2 * a)) ^ 2 := by have := Real.pi_pos; positivity
+  have h4 : ∀ {x y : ℝ}, 0 ≤ x → x < y → x ^ 4 < y ^ 4 := fun hx hxy =>
+    pow_lt_pow_left₀ hxy hx (by norm_num)
+  have p3 : ∀ {t : ℝ}, 0 < t → 0 ≤ jacobiThetaThreeImag t := fun ht =>
+    zero_le_one.trans (one_le_jacobiThetaThreeImag ht)
+  have p4 : ∀ {t : ℝ}, 0 < t → 0 ≤ jacobiThetaFourImag t := fun ht =>
+    (jacobiThetaFourImag_pos ht).le
+  have a3 := h4 (p3 (ht₁.trans ht)) (jacobiThetaThreeImag_lt ht₁ ht)
+  have a4 := h4 (p4 ht₁) (jacobiThetaFourImag_lt ht₁ ht)
+  refine ⟨?_, ?_, ?_⟩
+  · rw [jacobiThetaThreeImag_pow_four_add ht₁, jacobiThetaThreeImag_pow_four_add (ht₁.trans ht)]
+    have b3 := h4 (p3 (by positivity)) (jacobiThetaThreeImag_lt (by positivity : 0 < 2 * t₁)
+      (by linarith : 2 * t₁ < 2 * t₂))
+    have b4 := h4 (p4 (by positivity)) (jacobiThetaFourImag_lt (by positivity : 0 < 2 * t₁)
+      (by linarith : 2 * t₁ < 2 * t₂))
+    gcongr ?_ * ?_ / 3
+    linarith
+  · gcongr ?_ * ?_ / 3
+    linarith
+  · gcongr ?_ * ?_ / 3
+    linarith
 
 /-- `ζ(cz) = c⁻¹ζ(z)` when multiplication by `c` preserves the lattice. -/
 private lemma weierstrassZeta_mul_of_lattice_invariant (H : HalfPeriods) (c : ℂ) (hc : c ≠ 0)
@@ -416,21 +482,23 @@ theorem IsLemniscatic.roots {H : HalfPeriods} (h : H.IsLemniscatic) :
   set k : ℝ := Real.sqrt (1 / 2) with hkdef
   have hk2 : k ^ 2 = 1 / 2 := Real.sq_sqrt (by norm_num)
   have hkpos : 0 < k := Real.sqrt_pos.mpr (by norm_num)
-  have hKk : compEllIntKk k = (DLMF.Elliptic.Real.compEllIntKm (1 / 2) : ℂ) := by
-    rw [compEllIntKk_ofReal (by rw [hk2]; norm_num), hk2]
-  have hKpk : compEllIntKpk k = (DLMF.Elliptic.Real.compEllIntKm (1 / 2) : ℂ) := by
-    rw [compEllIntKpk_ofReal (by rw [hk2]; norm_num), hk2]; norm_num
-  have hval := DLMF.Elliptic.Real.compEllIntKm_one_half
+  have hKk : completeEllipticK k =
+      (DLMF.Elliptic.Real.completeEllipticKOfParameter (1 / 2) : ℂ) := by
+    rw [completeEllipticK_ofReal (by rw [hk2]; norm_num), hk2]
+  have hKpk : completeEllipticKPrime k =
+      (DLMF.Elliptic.Real.completeEllipticKOfParameter (1 / 2) : ℂ) := by
+    rw [completeEllipticKPrime_ofReal (by rw [hk2]; norm_num), hk2]; norm_num
+  have hval := DLMF.Elliptic.Real.completeEllipticKOfParameter_one_half
   have hG : 0 < Real.Gamma (1 / 4) := Real.Gamma_pos_of_pos (by norm_num)
-  have hK0 : (DLMF.Elliptic.Real.compEllIntKm (1 / 2) : ℂ) ≠ 0 := by
+  have hK0 : (DLMF.Elliptic.Real.completeEllipticKOfParameter (1 / 2) : ℂ) ≠ 0 := by
     rw [hval]; exact_mod_cast (div_pos (pow_pos hG 2)
       (mul_pos (by norm_num) (Real.sqrt_pos.mpr Real.pi_pos))).ne'
   have hdom : (k : ℂ) ∈ jacobiModulusDomain := by
     refine ⟨by simpa using hkpos, fun _ => ?_⟩
     simp only [ofReal_re]
     nlinarith
-  have htk : jacobiTauk k = I := by
-    rw [jacobiTauk, hKk, hKpk]; field_simp
+  have htk : jacobiTau k = I := by
+    rw [jacobiTau, hKk, hKpk]; field_simp
   have hinv := (jacobi_inversion_k hdom).2.2
   rw [htk, hKk, hval] at hinv
   have hKq : H.quarterK = (Real.Gamma (1 / 4) : ℂ) ^ 2 / (4 * Real.sqrt π) := by
@@ -552,12 +620,15 @@ theorem IsRectangular.e_two_g₃ {H : HalfPeriods} (h : H.IsRectangular) :
     nlinarith
 
 /-- DLMF 23.5.5: `K(k) = K'(k) = Γ(1/4)²/(4√π)` for `k² = 1/2` (parameter form; this is the
-project's `DLMF.Elliptic.Real.compEllIntKm_one_half`, and `K' = K(1 - k²) = K(1/2)`). -/
+project's `DLMF.Elliptic.Real.completeEllipticKOfParameter_one_half`, and
+`K' = K(1 - k²) = K(1/2)`). -/
 @[dlmf 23.5.E5]
-theorem compEllIntKm_lemniscatic :
-    DLMF.Elliptic.Real.compEllIntKm (1 / 2) = Real.Gamma (1 / 4) ^ 2 / (4 * Real.sqrt π) ∧
-      DLMF.Elliptic.Real.compEllIntKm (1 - 1 / 2) = DLMF.Elliptic.Real.compEllIntKm (1 / 2) :=
-  ⟨DLMF.Elliptic.Real.compEllIntKm_one_half, by norm_num⟩
+theorem completeEllipticKOfParameter_lemniscatic :
+    DLMF.Elliptic.Real.completeEllipticKOfParameter (1 / 2) = Real.Gamma (1 / 4) ^ 2 /
+        (4 * Real.sqrt π) ∧
+      DLMF.Elliptic.Real.completeEllipticKOfParameter (1 - 1 / 2) =
+          DLMF.Elliptic.Real.completeEllipticKOfParameter (1 / 2) :=
+  ⟨DLMF.Elliptic.Real.completeEllipticKOfParameter_one_half, by norm_num⟩
 
 open scoped ComplexConjugate in
 /-- Rhombic lattices: `e₁` real and `e₃ = conj e₂ ∉ ℝ`. -/
@@ -617,6 +688,182 @@ theorem IsRhombic.discriminant_neg {H : HalfPeriods} (h : H.IsRhombic) :
   have : 0 < ((r - x) ^ 2 + y ^ 2) ^ 2 := by positivity
   nlinarith
 
+open DLMF.Elliptic DLMF.Theta in
+/-- At `τ = 1/2 + it`, `θ₃(0|τ) = A + iB` and `θ₄(0|τ) = A - iB` with `A = θ₃(0|4it)` and
+`B = θ₂(0|4it)`. -/
+private lemma jacobiThetaTau_half_add_I_mul {t : ℝ} (ht : 0 < t) :
+    jacobiThetaThreeTau 0 (1 / 2 + I * t) =
+        (jacobiThetaThreeImag (4 * t) : ℂ) + I * (jacobiThetaTwoImag (4 * t) : ℂ) ∧
+      jacobiThetaFourTau 0 (1 / 2 + I * t) =
+        (jacobiThetaThreeImag (4 * t) : ℂ) - I * (jacobiThetaTwoImag (4 * t) : ℂ) := by
+  have hτ : 0 < (1 / 2 + I * (t : ℂ)).im := by simpa using ht
+  have h4 : 4 * (1 / 2 + I * (t : ℂ)) = I * ((4 * t : ℝ) : ℂ) + 1 + 1 := by push_cast; ring
+  have h4t : (0 : ℝ) < 4 * t := by positivity
+  have e3 : jacobiThetaThreeTau 0 (4 * (1 / 2 + I * (t : ℂ))) = jacobiThetaThreeImag (4 * t) := by
+    rw [h4, jacobiThetaThreeTau_add_one, jacobiThetaFourTau_add_one,
+      jacobiThetaThreeTau_zero_I_mul_eq_imag]
+  have hI : cexp (π * I / 4) * cexp (π * I / 4) = I := by
+    rw [← Complex.exp_add, show (π : ℂ) * I / 4 + π * I / 4 = π / 2 * I by ring,
+      Complex.exp_pi_div_two_mul_I]
+  have e2 : jacobiThetaTwoTau 0 (4 * (1 / 2 + I * (t : ℂ))) =
+      I * jacobiThetaTwoImag (4 * t) := by
+    rw [h4, jacobiThetaTwoTau_add_one, jacobiThetaTwoTau_add_one,
+      jacobiThetaTwoTau_zero_I_mul_eq_div_sqrt h4t, ← mul_assoc, hI]
+    rfl
+  constructor
+  · rw [jacobiThetaThreeTau_eq_four_mul_tau _ _ hτ, mul_zero, e3, e2]
+  · rw [jacobiThetaFourTau, zero_add, jacobiThetaThreeTau_eq_four_mul_tau _ _ hτ,
+      show 2 * ((π : ℂ) / 2) = 0 + π by ring, jacobiThetaThreeTau_add_pi,
+      jacobiThetaTwoTau_add_pi, e3, e2]
+    ring
+
+open DLMF.Elliptic DLMF.Theta in
+/-- Real data of a rhombic lattice: with `ω₁ = a`, `ω₃ = a/2 + iat`, `A, B = θ₃, θ₂(0|4it)`,
+`c = (π/(2a))²` and `P = A⁴ - 6A²B² + B⁴`, `e₁ = 2cP/3` and `e₂, e₃ = -cP/3 ± 4cAB(A² - B²)i`. -/
+private lemma exists_real_data_of_isRhombic {H : HalfPeriods} (h : H.IsRhombic) :
+    ∃ a t c A B : ℝ, 0 < a ∧ 0 < t ∧ H.ω₁ = a ∧ H.ω₃ = a / 2 + a * t * I ∧ 0 < c ∧
+      0 < B ∧ B < A ∧ A = jacobiThetaThreeImag (4 * t) ∧ B = jacobiThetaTwoImag (4 * t) ∧
+      H.e 1 = ((2 * c * (A ^ 4 - 6 * A ^ 2 * B ^ 2 + B ^ 4) / 3 : ℝ) : ℂ) ∧
+      H.e 2 = ((-(c * (A ^ 4 - 6 * A ^ 2 * B ^ 2 + B ^ 4)) / 3 : ℝ) : ℂ) +
+        ((4 * c * A * B * (A ^ 2 - B ^ 2) : ℝ) : ℂ) * I ∧
+      H.e 3 = ((-(c * (A ^ 4 - 6 * A ^ 2 * B ^ 2 + B ^ 4)) / 3 : ℝ) : ℂ) -
+        ((4 * c * A * B * (A ^ 2 - B ^ 2) : ℝ) : ℂ) * I := by
+  obtain ⟨h1i, h1r, h3r⟩ := h
+  set a := H.ω₁.re
+  have hω1 : H.ω₁ = a := Complex.ext rfl (by simp [h1i])
+  have ha0 : (a : ℂ) ≠ 0 := ofReal_ne_zero.mpr h1r.ne'
+  set t := H.ω₃.im / a
+  have hdiv := H.im_div_pos
+  rw [hω1, Complex.div_ofReal_im] at hdiv
+  have ht : 0 < t := hdiv
+  have hω3 : H.ω₃ = a / 2 + a * t * I := by
+    apply Complex.ext
+    · simp [h3r]
+    · have : (a : ℂ) * t * I = ((a * t : ℝ) : ℂ) * I := by push_cast; ring
+      rw [add_im, this, Complex.mul_I_im, ofReal_re, Complex.div_ofNat_im, ofReal_im]
+      simp only [t]
+      field_simp
+      ring
+  have hτ : H.tau = 1 / 2 + I * t := by
+    rw [HalfPeriods.tau, hω1, hω3]; field_simp
+  have h4t : (0 : ℝ) < 4 * t := by positivity
+  set A := jacobiThetaThreeImag (4 * t)
+  set B := jacobiThetaTwoImag (4 * t)
+  have hB := jacobiThetaTwoImag_pos h4t
+  have hA := one_le_jacobiThetaThreeImag h4t
+  have hC := jacobiThetaFourImag_pos h4t
+  have hJ := jacobiThetaThreeImag_pow_four h4t
+  have hBA : B < A := by
+    by_contra hle
+    push Not at hle
+    have : A ^ 4 ≤ B ^ 4 := pow_le_pow_left₀ (by linarith) hle 4
+    have : 0 < jacobiThetaFourImag (4 * t) ^ 4 := by positivity
+    linarith
+  obtain ⟨th3, th4⟩ := jacobiThetaTau_half_add_I_mul ht
+  obtain ⟨d3, d2⟩ := H.e_one_sub_e_three_and_e_one_sub_e_two
+  have hs := H.e_sum
+  set c : ℝ := (π / (2 * a)) ^ 2 with hc
+  have hcc : (π / (2 * H.ω₁)) ^ 2 = (c : ℂ) := by rw [hc, hω1]; push_cast; ring
+  rw [hcc, hτ, th3] at d3
+  rw [hcc, hτ, th4] at d2
+  refine ⟨a, t, c, A, B, h1r, ht, hω1, hω3, by positivity, hB, hBA, rfl, rfl, ?_, ?_, ?_⟩
+  · push_cast
+    linear_combination (d3 + d2 + hs) / 3 +
+      2 * (B : ℂ) ^ 2 * c * (6 * A ^ 2 + B ^ 2 * I ^ 2 - B ^ 2) / 3 * I_sq
+  · push_cast
+    linear_combination (d3 - 2 * d2 + hs) / 3 -
+      (B : ℂ) ^ 2 * c * (6 * A ^ 2 - 12 * A * B * I + B ^ 2 * I ^ 2 - B ^ 2) / 3 * I_sq
+  · push_cast
+    linear_combination (-2 * d3 + d2 + hs) / 3 -
+      (B : ℂ) ^ 2 * c * (6 * A ^ 2 + 12 * A * B * I + B ^ 2 * I ^ 2 - B ^ 2) / 3 * I_sq
+
+/-- If `2ω₃ = (1 + i)ω₁` the lattice is invariant under multiplication by `i`. -/
+private lemma mem_lattice_iff_div_I_of_two_mul_ω₃_eq {H : HalfPeriods}
+    (h3 : 2 * H.ω₃ = (1 + I) * H.ω₁) : ∀ z, z ∈ H.lattice ↔ z / I ∈ H.lattice := by
+  intro z
+  have hω3 : H.ω₃ = (1 + I) * H.ω₁ / 2 := by linear_combination h3 / 2
+  simp only [H.mem_lattice_iff, Complex.div_I, hω3]
+  constructor
+  · rintro ⟨m, n, rfl⟩
+    refine ⟨m + n, -(2 * m + n), ?_⟩
+    push_cast
+    linear_combination (-(n : ℂ)) * H.ω₁ * I_sq
+  · rintro ⟨m, n, hmn⟩
+    refine ⟨-m - n, 2 * m + n, ?_⟩
+    push_cast
+    linear_combination I * hmn + ((n : ℂ) * H.ω₁ + z) * I_sq
+
+/-- If `2ω₃ = (1 + i)ω₁` (the pseudo-lemniscatic case) then `e₁ = 0`. -/
+private lemma e_one_eq_zero_of_two_mul_ω₃_eq {H : HalfPeriods}
+    (h3 : 2 * H.ω₃ = (1 + I) * H.ω₁) : H.e 1 = 0 := by
+  have hp := H.weierstrassP_mul_of_lattice_invariant I I_ne_zero
+    (mem_lattice_iff_div_I_of_two_mul_ω₃_eq h3) H.ω₁
+  have hI2 : (I⁻¹ : ℂ) ^ 2 = -1 := by rw [inv_I]; ring_nf; rw [I_sq]
+  have hz : I * H.ω₁ = -H.ω₁ + 2 * H.halfPeriod 3 := by
+    rw [halfPeriod_three]; linear_combination -h3
+  rw [hz, H.weierstrassP_add_two_mul_halfPeriod _ (by simp), hI2] at hp
+  have hneg : H.weierstrassP (-H.ω₁) = H.weierstrassP H.ω₁ := H.periodPair.weierstrassP_neg H.ω₁
+  rw [hneg] at hp
+  have : H.e 1 = H.weierstrassP H.ω₁ := rfl
+  rw [this]; linear_combination hp / 2
+
+/-- The real modulus `t ↦ θ₂²/θ₃²(0|it)` is injective on `(0, ∞)`: `t = K'(k)/K(k)`. -/
+private lemma eq_of_jacobiModulusImag_eq {s s' : ℝ} (hs : 0 < s) (hs' : 0 < s')
+    (h : jacobiModulusImag s = jacobiModulusImag s') : s = s' := by
+  obtain ⟨-, -, -, -, -, -, hK, hK'⟩ := jacobiModulusImag_spec hs
+  obtain ⟨-, -, -, -, -, -, hL, hL'⟩ := jacobiModulusImag_spec hs'
+  rw [h, hL] at hK
+  rw [h, hL'] at hK'
+  have hB := one_le_jacobiThetaThreeImag hs
+  have hB' := one_le_jacobiThetaThreeImag hs'
+  have h0 : 0 < π / 2 * jacobiThetaThreeImag s ^ 2 := by positivity
+  have h1 : s' * (π / 2 * jacobiThetaThreeImag s' ^ 2) =
+      s * (π / 2 * jacobiThetaThreeImag s ^ 2) := by linear_combination hK'
+  rw [hK] at h1
+  exact (mul_right_cancel₀ h0.ne' h1).symm
+
+/-- For a rhombic lattice, `e₁ = 0` only in the pseudo-lemniscatic case `2ω₃ = (1 + i)ω₁`. -/
+private lemma two_mul_ω₃_eq_of_e_one_eq_zero {H : HalfPeriods} (h : H.IsRhombic)
+    (he : H.e 1 = 0) : 2 * H.ω₃ = (1 + I) * H.ω₁ := by
+  have key : ∀ {H : HalfPeriods}, H.IsRhombic → H.e 1 = 0 → ∃ a t : ℝ, 0 < t ∧ H.ω₁ = a ∧
+      H.ω₃ = a / 2 + a * t * I ∧
+      (jacobiModulusImag (4 * t)) ^ 2 - 6 * jacobiModulusImag (4 * t) + 1 = 0 := by
+    intro H h he
+    obtain ⟨a, t, c, A, B, -, ht, hω1, hω3, hc, hB, hBA, hA, hBd, e1, -, -⟩ :=
+      exists_real_data_of_isRhombic h
+    refine ⟨a, t, ht, hω1, hω3, ?_⟩
+    rw [he] at e1
+    have hP : A ^ 4 - 6 * A ^ 2 * B ^ 2 + B ^ 4 = 0 := by
+      have := congrArg Complex.re e1
+      simp only [zero_re, ofReal_re] at this
+      have : c * (A ^ 4 - 6 * A ^ 2 * B ^ 2 + B ^ 4) = 0 := by linarith
+      exact (mul_eq_zero.mp this).resolve_left hc.ne'
+    rw [jacobiModulusImag, ← hA, ← hBd]
+    have hA0 : A ≠ 0 := by linarith
+    field_simp
+    linear_combination hP
+  obtain ⟨a, t, ht, hω1, hω3, hk⟩ := key h he
+  let H₀ : HalfPeriods := ⟨1, 1 / 2 + 1 / 2 * I, one_ne_zero, by simp⟩
+  have h₀ : H₀.IsRhombic := ⟨by simp [H₀], by simp [H₀], by simp [H₀]⟩
+  have hps : 2 * H₀.ω₃ = (1 + I) * H₀.ω₁ := by simp [H₀]; ring
+  obtain ⟨a₀, t₀, ht₀, hω1₀, hω3₀, hk₀⟩ := key h₀ (e_one_eq_zero_of_two_mul_ω₃_eq hps)
+  have ha₀ : a₀ = 1 := by
+    have := congrArg Complex.re hω1₀; simpa [H₀] using this.symm
+  have ht₀' : t₀ = 1 / 2 := by
+    have := congrArg Complex.im hω3₀; simp [H₀, ha₀] at this; linarith
+  obtain ⟨k0, k1, -⟩ := jacobiModulusImag_spec (show (0 : ℝ) < 4 * t by positivity)
+  obtain ⟨l0, l1, -⟩ := jacobiModulusImag_spec (show (0 : ℝ) < 4 * t₀ by positivity)
+  have hkk : jacobiModulusImag (4 * t) = jacobiModulusImag (4 * t₀) := by
+    have : (jacobiModulusImag (4 * t) - jacobiModulusImag (4 * t₀)) *
+        (jacobiModulusImag (4 * t) + jacobiModulusImag (4 * t₀) - 6) = 0 := by
+      linear_combination hk - hk₀
+    rcases mul_eq_zero.mp this with h1 | h1
+    · linarith
+    · linarith
+  have := eq_of_jacobiModulusImag_eq (by positivity) (by positivity) hkk
+  have htt : t = 1 / 2 := by linarith
+  rw [hω3, hω1, htt]; push_cast; ring
+
 /-- DLMF §23.5(iv): for a rhombic lattice `e₁` is real and `e₃ = conj e₂` with `ℑe₂ > 0`; `e₁`
 and `g₃` have the same sign unless `2ω₃ = (1 + i)ω₁` (the pseudo-lemniscatic case), when both
 vanish. -/
@@ -625,7 +872,31 @@ theorem IsRhombic.roots {H : HalfPeriods} (h : H.IsRhombic) :
     (H.e 1).im = 0 ∧ H.e 3 = (starRingEnd ℂ) (H.e 2) ∧ 0 < (H.e 2).im ∧ H.g₃.im = 0 ∧
       (2 * H.ω₃ = (1 + I) * H.ω₁ → H.e 1 = 0 ∧ H.g₃ = 0) ∧
       (2 * H.ω₃ ≠ (1 + I) * H.ω₁ → 0 < (H.e 1).re * H.g₃.re) := by
-  sorry
+  obtain ⟨a, t, c, A, B, -, -, -, -, hc, hB, hBA, -, -, e1, e2, e3⟩ :=
+    exists_real_data_of_isRhombic h
+  set r : ℝ := 2 * c * (A ^ 4 - 6 * A ^ 2 * B ^ 2 + B ^ 4) / 3
+  set x : ℝ := -(c * (A ^ 4 - 6 * A ^ 2 * B ^ 2 + B ^ 4)) / 3
+  set y : ℝ := 4 * c * A * B * (A ^ 2 - B ^ 2) with hy
+  have hy0 : 0 < y := by
+    have : 0 < A ^ 2 - B ^ 2 := by nlinarith
+    have : 0 < A := by linarith
+    positivity
+  have hg : H.g₃ = ((4 * r * (x ^ 2 + y ^ 2) : ℝ) : ℂ) := by
+    rw [H.g₃_eq_e.1, e1, e2, e3]; push_cast
+    linear_combination (-4 * (r : ℂ) * y ^ 2) * I_sq
+  refine ⟨by rw [e1, ofReal_im], ?_, by simpa [e2] using hy0, by rw [hg, ofReal_im], ?_, ?_⟩
+  · rw [e2, e3]; simp [map_add, map_mul, Complex.conj_ofReal, Complex.conj_I]; ring
+  · intro h3
+    have h0 := e_one_eq_zero_of_two_mul_ω₃_eq h3
+    exact ⟨h0, by rw [H.g₃_eq_e.1, h0]; ring⟩
+  · intro h3
+    have hr : r ≠ 0 := by
+      intro h0; apply h3; apply two_mul_ω₃_eq_of_e_one_eq_zero h; rw [e1, h0, ofReal_zero]
+    rw [e1, hg, ofReal_re, ofReal_re]
+    have : 0 < r * r := mul_self_pos.mpr hr
+    have : 0 < x ^ 2 + y ^ 2 := by positivity
+    nlinarith
+
 
 /-- Rhombic half-periods `ω₁ = a`, `ω₃ = a/2 + ib` with `a, b > 0`. -/
 def rhombic (a b : ℝ) (ha : 0 < a) (hb : 0 < b) : HalfPeriods :=
@@ -1147,17 +1418,78 @@ theorem IsEquianharmonic.modulus_sq {H : HalfPeriods} (h : H.IsEquianharmonic) :
   rw [he2, he3, div_eq_iff hden]
   ring
 
+open scoped ComplexConjugate in
+open MeasureTheory Set in
 /-- DLMF 23.5.9: for `k = e^{iπ/6}` (so `k² = e^{iπ/3}`),
 `K(k) = e^{iπ/6}K'(k) = e^{iπ/12} 3^{1/4} Γ(1/3)³/(2^{7/3}π)`, with the principal complex
 complete elliptic integrals. -/
 @[dlmf 23.5.E9]
-theorem compEllIntKk_equianharmonic :
-    EllipticIntegrals.compEllIntKk (cexp (π * I / 6)) =
-        cexp (π * I / 6) * EllipticIntegrals.compEllIntKpk (cexp (π * I / 6)) ∧
-      EllipticIntegrals.compEllIntKk (cexp (π * I / 6)) =
+theorem completeEllipticK_equianharmonic :
+    EllipticIntegrals.completeEllipticK (cexp (π * I / 6)) =
+        cexp (π * I / 6) * EllipticIntegrals.completeEllipticKPrime (cexp (π * I / 6)) ∧
+      EllipticIntegrals.completeEllipticK (cexp (π * I / 6)) =
         cexp (π * I / 12) * (3 : ℂ) ^ (1 / 4 : ℂ) * (Real.Gamma (1 / 3) : ℂ) ^ 3 /
           ((2 : ℂ) ^ (7 / 3 : ℂ) * π) := by
-  sorry
+  have hs3 : √3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
+  have hs3lt : √3 < 2 := by nlinarith [Real.sqrt_nonneg 3]
+  have hs3c : ((√3 : ℝ) : ℂ) ^ 2 = 3 := by rw [← ofReal_pow, hs3]; norm_num
+  set s := √((2 - √3) / 4) with hs
+  set c := √((2 + √3) / 4) with hc
+  have hs2 : s ^ 2 = (2 - √3) / 4 := Real.sq_sqrt (by linarith)
+  have hc2 : c ^ 2 = (2 + √3) / 4 := Real.sq_sqrt (by positivity)
+  have hc0 : 0 < c := Real.sqrt_pos.mpr (by positivity)
+  have hs0 : 0 < s := Real.sqrt_pos.mpr (by linarith)
+  have hsc : s = (2 - √3) * c := by
+    have h1 : 0 ≤ (2 - √3) * c := mul_nonneg (by linarith) hc0.le
+    rw [← Real.sqrt_sq h1, ← Real.sqrt_sq hs0.le, mul_pow, hc2, hs2]
+    congr 1; nlinarith
+  have hk12 : cexp (π * I / 12) = c + s * I := exp_pi_mul_I_div_twelve
+  obtain ⟨hk, hL, hKp⟩ := completeEllipticK_exp_pi_mul_I_div_six
+  have hcs : (1 : ℝ) - s ^ 2 = c ^ 2 := by rw [hs2, hc2]; ring
+  have hslit_s : 1 - (s : ℂ) ^ 2 ∈ slitPlane := by
+    rw [← ofReal_pow, ← ofReal_one, ← ofReal_sub, hcs]
+    exact ofReal_mem_slitPlane.2 (by positivity)
+  have hkps : jacobiComodulus (s : ℂ) = c := by
+    rw [jacobiComodulus, show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring,
+      ← ofReal_pow, ← ofReal_one, ← ofReal_sub, hcs, ← ofReal_cpow (by positivity),
+      ← Real.sqrt_eq_rpow, Real.sqrt_sq hc0.le]
+  obtain ⟨hI, -⟩ := EllipticIntegrals.compEllInt_imaginary_modulus hslit_s
+  rw [hkps, show I * (s : ℂ) / c = I * (2 - √3) by
+    have : (c : ℂ) ≠ 0 := by exact_mod_cast hc0.ne'
+    rw [hsc]; push_cast; field_simp] at hI
+  have hV : ∫ t in Ioi (1 : ℝ), (√(t ^ 3 - 1))⁻¹ =
+      (2 : ℝ) ^ (2 / 3 : ℝ) * Real.Gamma (1 / 3) ^ 3 / (4 * π) := by
+    have := integral_Ioi_one_div_sqrt_cube_sub_eq (c := 1) one_pos
+    simpa [one_div] using this
+  have hint : IntegrableOn (fun t : ℝ => (√(t ^ 3 - 1))⁻¹) (Ioi 1) := by
+    refine Integrable.of_integral_ne_zero ?_
+    rw [hV]; have := Real.Gamma_pos_of_pos (by norm_num : (0 : ℝ) < 1 / 3); positivity
+  have hKs := completeEllipticK_singular_three_eq_integral hint
+  rw [hV] at hKs
+  set R : ℝ := (3 : ℝ) ^ (1 / 4 : ℝ) / 2 * ((2 : ℝ) ^ (2 / 3 : ℝ) * Real.Gamma (1 / 3) ^ 3 /
+    (4 * π)) with hR
+  have hK : completeEllipticK (cexp (π * I / 6)) = (1 + I * (2 - √3)) * ((c * R : ℝ) : ℂ) := by
+    rw [hL, hI, hKs]; push_cast; ring
+  have hc12 : cexp (π * I / 12) = (1 + I * (2 - √3)) * c := by rw [hk12, hsc]; push_cast; ring
+  have h3 : (3 : ℂ) ^ (1 / 4 : ℂ) = (((3 : ℝ) ^ (1 / 4 : ℝ) : ℝ) : ℂ) := by
+    rw [ofReal_cpow (by norm_num)]; push_cast; ring
+  have h2 : (2 : ℂ) ^ (7 / 3 : ℂ) = (((2 : ℝ) ^ (7 / 3 : ℝ) : ℝ) : ℂ) := by
+    rw [ofReal_cpow (by norm_num)]; push_cast; ring
+  have h27 : (2 : ℝ) ^ (2 / 3 : ℝ) * (2 : ℝ) ^ (7 / 3 : ℝ) = 8 := by
+    rw [← Real.rpow_add (by norm_num), show (2 / 3 : ℝ) + 7 / 3 = (3 : ℕ) by norm_num,
+      Real.rpow_natCast]; norm_num
+  have hpos : (0 : ℝ) < (2 : ℝ) ^ (7 / 3 : ℝ) := by positivity
+  refine ⟨?_, ?_⟩
+  · rw [hKp, hK, hk]
+    simp only [map_mul, map_add, map_one, map_sub, conj_I, conj_ofReal, map_ofNat]
+    push_cast
+    linear_combination ((1 - √3 / 2) * ((c : ℂ) * R)) * I_sq - (I / 2 * ((c : ℂ) * R)) * hs3c
+  · have hRv : R = (3 : ℝ) ^ (1 / 4 : ℝ) * Real.Gamma (1 / 3) ^ 3 /
+        ((2 : ℝ) ^ (7 / 3 : ℝ) * π) := by
+      rw [hR]
+      field_simp
+      rw [h27]; norm_num
+    rw [hK, hc12, h3, h2, hRv]; push_cast; ring
 
 end HalfPeriods
 

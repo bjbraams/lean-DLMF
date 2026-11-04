@@ -22,7 +22,7 @@ has no statements here.
 
 * `mathieuLambda_isBigO_zero`: the power series of `λ_ν(q)` (DLMF 28.15.1).
 * `mathieuLambda_contFrac`: the continued-fraction equation for `λ_ν(q)` (DLMF 28.15.2), from
-  Pincherle's theorem `tendsto_mathieuCFTail_of_tendsto_zero`.
+  Pincherle's theorem `tendsto_mathieuContinuedFractionTail_of_tendsto_zero`.
 * `mathieuMe_isBigO_zero`: the power series of `me_ν(z, q)` (DLMF 28.15.3).
 * `mathieuLambda_isBigO_atTop`: the large-`q` expansion of `λ_ν(h²)` (DLMF 28.16.1).
 * `isMathieuStable_q_zero`, `isMathieuStable_mathieuLambda`: stable pairs (DLMF §28.17).
@@ -65,23 +65,25 @@ theorem mathieuLambda_isBigO_zero (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) :
       =O[𝓝 0] (fun q : ℂ => q ^ 8) := by
   sorry
 
-/-- The approximants `mathieuContFrac` are the negatives of the tails `mathieuCFTail`. -/
-theorem mathieuContFrac_eq_neg_mathieuCFTail (ν q a : ℂ) (k N : ℕ) :
+/-- The approximants `mathieuContFrac` are the negatives of the tails
+`mathieuContinuedFractionTail`. -/
+theorem mathieuContFrac_eq_neg_mathieuContinuedFractionTail (ν q a : ℂ) (k N : ℕ) :
     mathieuContFrac ν q a (k + 1) N =
-      -mathieuCFTail q a (fun j => (ν + 2 * ((k + 1 + j : ℕ) : ℂ)) ^ 2) N := by
+      -mathieuContinuedFractionTail q a (fun j => (ν + 2 * ((k + 1 + j : ℕ) : ℂ)) ^ 2) N := by
   induction N generalizing k with
-  | zero => simp [mathieuContFrac, mathieuCFTail]
+  | zero => simp [mathieuContFrac, mathieuContinuedFractionTail]
   | succ N ih =>
-    rw [mathieuContFrac, mathieuCFTail_succ, ih (k + 1)]
+    rw [mathieuContFrac, mathieuContinuedFractionTail_succ, ih (k + 1)]
     have e : (fun j : ℕ => (ν + 2 * ((k + 1 + (j + 1) : ℕ) : ℂ)) ^ 2) =
         fun j : ℕ => (ν + 2 * ((k + 1 + 1 + j : ℕ) : ℂ)) ^ 2 := by
       funext j; push_cast; ring_nf
     rw [e]
     simp only [add_zero, Nat.cast_add, Nat.cast_one]
     rw [show a - (ν + 2 * ((k : ℂ) + 1)) ^ 2 -
-        -mathieuCFTail q a (fun j : ℕ => (ν + 2 * ((k : ℂ) + 1 + 1 + j)) ^ 2) N =
+        -mathieuContinuedFractionTail q a (fun j : ℕ => (ν + 2 * ((k : ℂ) + 1 + 1 + j)) ^ 2) N =
         -((ν + 2 * ((k : ℂ) + 1)) ^ 2 - a -
-          mathieuCFTail q a (fun j : ℕ => (ν + 2 * ((k : ℂ) + 1 + 1 + j)) ^ 2) N) by ring,
+          mathieuContinuedFractionTail q a
+              (fun j : ℕ => (ν + 2 * ((k : ℂ) + 1 + 1 + j)) ^ 2) N) by ring,
       div_neg]
 
 /-- Convergence of `mathieuContFrac ν q a 1 N` to `q A₁/A₀` for a decaying solution `A`. -/
@@ -105,13 +107,13 @@ theorem tendsto_mathieuContFrac_of_tendsto_zero {ν q a : ℂ} {A : ℕ → ℂ}
       linarith
     refine (h1.atTop_mul_atTop₀ h1).congr (fun k => ?_)
     rw [norm_pow, sq]
-  have h := tendsto_mathieuCFTail_of_tendsto_zero
+  have h := tendsto_mathieuContinuedFractionTail_of_tendsto_zero
     (s := fun j => (ν + 2 * ((0 + 1 + j : ℕ) : ℂ)) ^ 2)
     hq (fun k => by simpa [add_comm, add_left_comm] using hrec k) hA0 hlim hs
   have := h.neg
   rw [neg_neg] at this
   refine this.congr (fun N => ?_)
-  rw [mathieuContFrac_eq_neg_mathieuCFTail ν q a 0 N]
+  rw [mathieuContFrac_eq_neg_mathieuContinuedFractionTail ν q a 0 N]
 
 /-- **Continued-fraction equation** (DLMF 28.15.2): for `ν ∉ ℤ` and `q` normal along the
 segment with `c^ν_0(q) ≠ 0` (which DLMF assumes implicitly: the forward fraction is

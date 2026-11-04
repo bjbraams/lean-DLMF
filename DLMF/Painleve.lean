@@ -25,6 +25,7 @@ public import DLMF.Painleve.SpecialSolutions
 public import DLMF.Painleve.RealAsymptotics
 public import DLMF.Painleve.Reductions
 public import DLMF.Painleve.Combinatorics
+public import DLMF.Painleve.FreudWeight
 
 /-! # Painlevé transcendents: DLMF Chapter 32 and Beals–Wong Chapter 15
 

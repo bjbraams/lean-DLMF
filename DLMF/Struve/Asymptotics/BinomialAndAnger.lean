@@ -27,7 +27,7 @@ the Anger–Weber functions, and the large-order expansion of the Anger function
 * `struveBinomRem_bound`: sign and size of the binomial remainder for `a ≤ m` and `u ≥ 0`.
 * `struveK_remainder_sign`: the first omitted term bounds the remainder of the expansion of
   `𝐊_ν` for real positive argument.
-* `angerFG_poch`: `F_k`, `G_k` as Pochhammer symbols (DLMF 11.11.1).
+* `angerFG_pochhammer`: `F_k`, `G_k` as Pochhammer symbols (DLMF 11.11.1).
 * `AngerAsymptotics.angerA_sector`: DLMF 11.11.4 as an asymptotic expansion in `z^{-n-1}`.
 * `angerJ_large_argument`, `weberE_large_argument`, `angerA_large_argument`: the
   large-argument expansions DLMF 11.11.2–11.11.4.
@@ -58,13 +58,13 @@ def struveBinomRem (a : ℝ) (m : ℕ) (u : ℝ) : ℝ :=
 /-- `(k+1) (a choose k+1) = a (a-1 choose k)`. -/
 theorem succ_mul_ring_choose_succ (a : ℝ) (k : ℕ) :
     ((k : ℝ) + 1) * Ring.choose a (k + 1) = a * Ring.choose (a - 1) k := by
-  have h1 := DLMF.Confluent.ring_choose_neg_eq_poch (-(a : ℂ)) (k + 1)
-  have h2 := DLMF.Confluent.ring_choose_neg_eq_poch (-(a : ℂ) + 1) k
+  have h1 := DLMF.Confluent.ring_choose_neg_eq_pochhammer (-(a : ℂ)) (k + 1)
+  have h2 := DLMF.Confluent.ring_choose_neg_eq_pochhammer (-(a : ℂ) + 1) k
   rw [neg_neg] at h1
   rw [show -(-(a : ℂ) + 1) = (a : ℂ) - 1 by ring] at h2
   apply Complex.ofReal_injective
   push_cast
-  rw [h1, h2, poch_succ_left, Nat.factorial_succ]
+  rw [h1, h2, pochhammer_succ_left, Nat.factorial_succ]
   push_cast
   have hk : (k ! : ℂ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero k
   have hk1 : (k : ℂ) + 1 ≠ 0 := by exact_mod_cast Nat.succ_ne_zero k
@@ -298,21 +298,22 @@ def angerF (ν : ℂ) (k : ℕ) : ℂ :=
 def angerG (ν : ℂ) (k : ℕ) : ℂ :=
   ∏ j ∈ Finset.range k, (ν^2-(2*j+2)^2)
 
-/-- Identity under the stated parameter and domain assumptions: `angerF ν k = (-4)^k*poch
-(1/2-ν/2) k*poch (1/2+ν/2) k ∧ angerG ν k = (-4)^k*poch (1-ν/2) k*poch (1+ν/2) k`. -/
+/-- Identity under the stated parameter and domain assumptions: `angerF ν k = (-4)^k*pochhammer
+(1/2-ν/2) k*pochhammer (1/2+ν/2) k ∧ angerG ν k = (-4)^k*pochhammer (1-ν/2) k*pochhammer (1+ν/2)
+k`. -/
 @[dlmf 11.11.E1]
-theorem angerFG_poch (ν : ℂ) (k : ℕ) :
-    angerF ν k = (-4)^k*poch (1/2-ν/2) k*poch (1/2+ν/2) k ∧ angerG ν k =
-        (-4)^k*poch (1-ν/2) k*poch (1+ν/2) k := by
+theorem angerFG_pochhammer (ν : ℂ) (k : ℕ) :
+    angerF ν k = (-4)^k*pochhammer (1/2-ν/2) k*pochhammer (1/2+ν/2) k ∧ angerG ν k =
+        (-4)^k*pochhammer (1-ν/2) k*pochhammer (1+ν/2) k := by
   induction k with
-  | zero => simp [angerF, angerG, poch_zero]
+  | zero => simp [angerF, angerG, pochhammer_zero]
   | succ k ih =>
     rcases ih with ⟨ihF, ihG⟩
     have hF : angerF ν (k+1)=angerF ν k*(ν^2-(2*k+1)^2) := by
       simp [angerF, Finset.prod_range_succ]
     have hG : angerG ν (k+1)=angerG ν k*(ν^2-(2*k+2)^2) := by
       simp [angerG, Finset.prod_range_succ]
-    rw [hF,hG,ihF,ihG,poch_succ,poch_succ,poch_succ,poch_succ,pow_succ]
+    rw [hF,hG,ihF,ihG,pochhammer_succ,pochhammer_succ,pochhammer_succ,pochhammer_succ,pow_succ]
     push_cast
     constructor <;> ring
 

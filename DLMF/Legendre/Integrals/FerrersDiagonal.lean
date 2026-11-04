@@ -65,13 +65,14 @@ theorem UniformBound.bound_F (R : ℝ) : ∃ M : ℝ, ∀ a b c w : ℂ, ‖a‖
     have := Complex.re_le_norm w
     simp only [sub_re, one_re]; linarith
   obtain ⟨M, hM⟩ := hS.exists_bound_of_continuousOn
-    (differentiableOn_regularizedGaussHG_joint.continuousOn.mono hsub)
+    (differentiableOn_regularizedGaussHypergeometric_joint.continuousOn.mono hsub)
   refine ⟨M, fun a b c w ha hb hc hw => ?_⟩
   have hq : ((a, b, c, w) : ℂ × ℂ × ℂ × ℂ) ∈ S := by
     simp only [S, Set.mem_prod, Metric.mem_closedBall, dist_zero_right]
     exact ⟨ha, hb, hc, hw⟩
   have := hM _ hq
-  rwa [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ (by linarith)] at this
+  rwa [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _
+      (by linarith)] at this
 
 /-- A continuous function is bounded on `‖a‖, ‖b‖ ≤ R`. -/
 theorem UniformBound.bound_pair {f : ℂ × ℂ → ℂ} (hf : Continuous f) (R : ℝ) :
@@ -107,7 +108,7 @@ theorem UniformBound.bound_H (R : ℝ) : ∃ M : ℝ, ∀ a b w : ℂ, ‖a‖ �
   -- first derivative
   have hd1 : ‖deriv (fun c => regularizedGaussHGFun a b (a+b-c+1) w) (a+b)‖ ≤ MF := by
     have hdiff : Differentiable ℂ (fun c => regularizedGaussHGFun a b (a+b-c+1) w) :=
-      differentiable_regularizedGaussHGFun_of_differentiable (differentiable_const _)
+      differentiable_regularizedGaussHypergeometricFun_of_differentiable (differentiable_const _)
         (differentiable_const _) ((differentiable_const _).sub differentiable_id |>.add_const 1) hw1
     have := Complex.norm_deriv_le_of_forall_mem_sphere_norm_le (c := a+b) (R := 1) one_pos
       hdiff.diffContOnCl (C := MF) fun c hc => by
@@ -119,7 +120,8 @@ theorem UniformBound.bound_H (R : ℝ) : ∃ M : ℝ, ∀ a b w : ℂ, ‖a‖ �
     simpa using this
   have hd2 : ‖deriv (fun c => regularizedGaussHGFun (c-a) (c-b) (c-a-b+1) w) (a+b)‖ ≤ MF := by
     have hdiff : Differentiable ℂ (fun c => regularizedGaussHGFun (c-a) (c-b) (c-a-b+1) w) :=
-      differentiable_regularizedGaussHGFun_of_differentiable (differentiable_id.sub_const _)
+      differentiable_regularizedGaussHypergeometricFun_of_differentiable
+          (differentiable_id.sub_const _)
         (differentiable_id.sub_const _)
             ((differentiable_id.sub_const _).sub_const _ |>.add_const 1) hw1
     have := Complex.norm_deriv_le_of_forall_mem_sphere_norm_le (c := a+b) (R := 1) one_pos
@@ -174,14 +176,14 @@ theorem UniformBound.bound_P (R : ℝ) : ∃ M : ℝ, ∀ α : ℂ, ‖α‖ ≤
   have hB0 : 0 ≤ B := by positivity
   have hw1 := FerrersGreen.weight_one_le hx
   have hw0 := FerrersGreen.weight_pos hx
-  rw [FerrersGreen.ferrersP_zero_eq_regularizedGaussHG]
+  rw [FerrersGreen.ferrersP_zero_eq_regularizedGaussHypergeometric]
   by_cases hx0 : 0 ≤ x
   · have hn : ‖(1-(x:ℂ))/2‖ ≤ 1/2 := by
       rw [show (1-(x:ℂ))/2 = (((1-x)/2:ℝ):ℂ) by push_cast; ring, Complex.norm_real,
                                                   Real.norm_eq_abs,
         abs_le]
       constructor <;> linarith [hx.2]
-    rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ (by linarith)]
+    rw [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ (by linarith)]
     calc _ ≤ MF := hMF _ _ _ _ ha hb hone hn
       _ ≤ A := le_max_left _ _
       _ ≤ A + B := by linarith
@@ -197,7 +199,7 @@ theorem UniformBound.bound_P (R : ℝ) : ∃ M : ℝ, ∀ α : ℂ, ‖α‖ ≤
       constructor <;> linarith
     have htn : ‖(1:ℂ) - (1 - (t:ℂ))‖ < 1 := by
       rw [sub_sub_cancel, Complex.norm_real, Real.norm_eq_abs, abs_of_pos ht0]; linarith
-    rw [hz, regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hzn,
+    rw [hz, regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hzn,
       show regularizedGaussHGFun (α+1) (-α) 1 (1 - (t:ℂ)) =
         regularizedGaussHGFun (α+1) (-α) ((α+1) + -α) (1 - (t:ℂ)) by
           rw [show (α+1) + -α = (1:ℂ) by ring],
@@ -237,8 +239,9 @@ theorem UniformBound.bound_P (R : ℝ) : ∃ M : ℝ, ∀ α : ℂ, ‖α‖ ≤
 /-- `λ ↦ 𝖯_λ(x)` is entire for `x > -1`. -/
 theorem UniformBound.continuous_degree {x : ℝ} (hx : -1 < x) : Continuous fun α : ℂ =>
     ferrersP α 0 x := by
-  simp only [FerrersGreen.ferrersP_zero_eq_regularizedGaussHG]
-  exact (differentiable_regularizedGaussHG_comp (A := fun α : ℂ => α+1) (B := fun α : ℂ => -α)
+  simp only [FerrersGreen.ferrersP_zero_eq_regularizedGaussHypergeometric]
+  exact (differentiable_regularizedGaussHypergeometric_comp (A := fun α : ℂ => α+1)
+      (B := fun α : ℂ => -α)
     (C := fun _ => 1) (by fun_prop) (by fun_prop) (by fun_prop)
         (OrthogonalityIntegrals.half_mem_cutPlane hx)).continuous
 
@@ -373,7 +376,7 @@ theorem UniformBound.bound_zeroBalanced (R : ℝ) : ∃ C : ℝ, 0 ≤ C ∧ ∀
 
 /-- `‖𝐅(a,b;a+b;x²)‖ ≤ M (1-x²)^{-1/4}` on `(-1,1)`, uniformly for `‖a‖, ‖b‖ ≤ R`. -/
 theorem UniformBound.bound_sq (R : ℝ) : ∃ M : ℝ, ∀ a b : ℂ, ‖a‖ ≤ R → ‖b‖ ≤ R → ∀ x ∈ Ioo (-1:ℝ) 1,
-    ‖regularizedGaussHG a b (a+b) ((x:ℂ)^2)‖ ≤ M * FerrersGreen.weight x := by
+    ‖regularizedGaussHypergeometric a b (a+b) ((x:ℂ)^2)‖ ≤ M * FerrersGreen.weight x := by
   obtain ⟨C, hC0, hC⟩ := UniformBound.bound_zeroBalanced R
   obtain ⟨MF, hMF⟩ := UniformBound.bound_F (2*|R| + 1)
   refine ⟨max MF 0 + C, fun a b ha hb x hx => ?_⟩
@@ -383,7 +386,7 @@ theorem UniformBound.bound_sq (R : ℝ) : ∃ M : ℝ, ∀ a b : ℂ, ‖a‖ �
   have hsq : ((x:ℂ))^2 = ((x^2:ℝ):ℂ) := by push_cast; ring
   have hn : ‖((x:ℂ))^2‖ < 1 := by
     rw [hsq, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg (sq_nonneg x)]; exact hx2
-  rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hn]
+  rw [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hn]
   by_cases hx0 : x^2 ≤ 1/2
   · have hn' : ‖((x:ℂ))^2‖ ≤ 1/2 := by
       rw [hsq, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg (sq_nonneg x)]; exact hx0
@@ -835,20 +838,20 @@ theorem FerrersGreen.continuousOn_of_solution' {α μ : ℂ} {f : ℝ → ℂ}
   fun y hy => (hf y hy).1.continuousAt.continuousWithinAt
 
 /-- `(k+1)_j · k! = (k+j)!`. -/
-theorem FerrersGreen.poch_nat (k j : ℕ) : poch ((k:ℂ)+1) j * (k.factorial : ℂ) =
+theorem FerrersGreen.pochhammer_nat (k j : ℕ) : pochhammer ((k:ℂ)+1) j * (k.factorial : ℂ) =
     ((k+j).factorial : ℂ) := by
   induction j with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ j ih =>
-    rw [poch_succ, mul_right_comm, ih, show k + (j+1) = (k+j)+1 by ring, Nat.factorial_succ]
+    rw [pochhammer_succ, mul_right_comm, ih, show k + (j+1) = (k+j)+1 by ring, Nat.factorial_succ]
     push_cast; ring
 
 /-- `𝖯^m_k 𝖰^m_j → (k+m)!/((k-m)! 2m)` as `x → 1⁻`, for `1 ≤ m ≤ k`. -/
 theorem FerrersGreen.tendsto_PQ_one {k j m : ℕ} (hm : 0 < m) (hk : m ≤ k) :
     Tendsto (fun x : ℝ => ferrersP k m x * ferrersQ j m x) (𝓝[<] (1:ℝ))
       (𝓝 (((k+m).factorial : ℂ) / ((k-m).factorial * (2*m)))) := by
-  have hp : poch ((k:ℂ)-m+1) (2*m) ≠ 0 := by
-    have := FerrersGreen.poch_nat (k-m) (2*m)
+  have hp : pochhammer ((k:ℂ)-m+1) (2*m) ≠ 0 := by
+    have := FerrersGreen.pochhammer_nat (k-m) (2*m)
     rw [show ((k-m:ℕ):ℂ) = (k:ℂ) - m by push_cast [hk]; ring] at this
     intro h; rw [h, zero_mul] at this
     exact (Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)) this.symm
@@ -865,9 +868,10 @@ theorem FerrersGreen.tendsto_PQ_one {k j m : ℕ} (hm : 0 < m) (hk : m ≤ k) :
     omega
   have h2 := legendre_singular_4 (j:ℂ) (m:ℂ) hreg hμ hh
   have h3 := h1.mul h2
-  set c : ℂ := (-1)^m*poch ((k:ℂ)-m+1) (2*m)/(m.factorial:ℂ) * (1/2*cos ((m:ℂ)*π)*Gamma m)
+  set c : ℂ := (-1)^m*pochhammer ((k:ℂ)-m+1) (2*m)/(m.factorial:ℂ) * (1/2*cos ((m:ℂ)*π)*Gamma m)
     with hc
-  have h4 : (fun x : ℝ => (-1)^m*poch ((k:ℂ)-m+1) (2*m)/(m.factorial:ℂ)*((1-x)/2:ℂ)^((m:ℂ)/2) *
+  have h4 : (fun x : ℝ =>
+      (-1)^m*pochhammer ((k:ℂ)-m+1) (2*m)/(m.factorial:ℂ)*((1-x)/2:ℂ)^((m:ℂ)/2) *
       (1/2*cos ((m:ℂ)*π)*Gamma m*(2/(1-x):ℂ)^((m:ℂ)/2))) =ᶠ[𝓝[<] (1:ℝ)] (fun _ => c) := by
     filter_upwards [self_mem_nhdsWithin] with x (hx : x < 1)
     have h1x : (0:ℝ) < 1 - x := by linarith
@@ -878,12 +882,12 @@ theorem FerrersGreen.tendsto_PQ_one {k j m : ℕ} (hm : 0 < m) (hk : m ≤ k) :
         show (1-x)/2*(2/(1-x)) = 1 by field_simp]
       simp
     rw [hc]
-    linear_combination ((-1)^m*poch ((k:ℂ)-m+1) (2*m)/(m.factorial:ℂ) *
+    linear_combination ((-1)^m*pochhammer ((k:ℂ)-m+1) (2*m)/(m.factorial:ℂ) *
       (1/2*cos ((m:ℂ)*π)*Gamma m)) * e
   have h5 := (h3.congr_right h4).symm.tendsto_nhds (tendsto_const_nhds (x := c))
   convert h5 using 2
   obtain ⟨m', rfl⟩ : ∃ m' : ℕ, m = m' + 1 := ⟨m - 1, by omega⟩
-  have hpn := FerrersGreen.poch_nat (k-(m'+1)) (2*(m'+1))
+  have hpn := FerrersGreen.pochhammer_nat (k-(m'+1)) (2*(m'+1))
   rw [show ((k-(m'+1):ℕ):ℂ) = (k:ℂ) - ((m'+1:ℕ):ℂ) by push_cast [hk]; ring,
     show k-(m'+1)+2*(m'+1) = k+(m'+1) by omega] at hpn
   have hcos : cos (((m'+1:ℕ):ℂ)*π) = (-1)^(m'+1) := by
@@ -899,7 +903,7 @@ theorem FerrersGreen.tendsto_PQ_one {k j m : ℕ} (hm : 0 < m) (hk : m ≤ k) :
   rw [hc, hcos, hG, ← hpn, Nat.factorial_succ]
   push_cast
   field_simp
-  linear_combination (-poch ((k:ℂ)-((m':ℂ)+1)+1) (2*(m'+1))) * hsq
+  linear_combination (-pochhammer ((k:ℂ)-((m':ℂ)+1)+1) (2*(m'+1))) * hsq
 
 /-- `𝖯^m_k 𝖰^m_j → (-1)^{k+j+1} (k+m)!/((k-m)! 2m)` as `x → -1⁺`, for `1 ≤ m ≤ k`. -/
 theorem FerrersGreen.tendsto_PQ_neg_one {k j m : ℕ} (hm : 0 < m) (hk : m ≤ k) :

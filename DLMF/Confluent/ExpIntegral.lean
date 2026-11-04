@@ -14,7 +14,7 @@ public import DLMF.Confluent.Basic.ExponentialIntegralSeries
 # Exponential, sine and cosine integrals (Temme §7.3.5; DLMF Chapter 6, §§8.19–8.20)
 
 The generalized exponential integral is `E_p(z) = z^{p-1} Γ(1-p, z)` (DLMF 8.19.1), defined
-through the project's Tricomi-based `upperIncGamma`. Its integral representation, recurrence,
+through the project's Tricomi-based `upperIncompleteGamma`. Its integral representation, recurrence,
 derivative and asymptotic expansion follow from the corresponding properties of `U`.
 For `p = 1` the classical function `E₁` is related to the entire function `Ein` and Euler's
 constant, which gives its power series. The power series and derivatives of the real
@@ -23,11 +23,11 @@ functions `Ein`, `Si`, `Cin` and `Ci` are in
 
 ## Main results
 
-* `genExpIntE_eq_exp_mul_kummerU`: `E_p(z) = e^{-z} U(1, 2-p, z)`.
-* `genExpIntE_eq_integral`: `E_p(x) = ∫₁^∞ e^{-xt} t^{-p} dt` for `x > 0`.
-* `genExpIntE_add_one`, `hasDerivAt_genExpIntE`: recurrence and derivative.
-* `hasAsymptoticExpansion_genExpIntE`: `E_p(x) ~ e^{-x}/x ∑ (-1)^k (p)_k x^{-k}`.
-* `genExpIntE_one_eq_Ein`, `genExpIntE_one_eq_tsum`: `E₁(x) = Ein(x) - log x - γ` and
+* `expIntegralE_eq_exp_mul_kummerU`: `E_p(z) = e^{-z} U(1, 2-p, z)`.
+* `expIntegralE_eq_integral`: `E_p(x) = ∫₁^∞ e^{-xt} t^{-p} dt` for `x > 0`.
+* `expIntegralE_add_one`, `hasDerivAt_expIntegralE`: recurrence and derivative.
+* `hasAsymptoticExpansion_expIntegralE`: `E_p(x) ~ e^{-x}/x ∑ (-1)^k (p)_k x^{-k}`.
+* `expIntegralE_one_eq_Ein`, `expIntegralE_one_eq_tsum`: `E₁(x) = Ein(x) - log x - γ` and
   its power series.
 
 The limit `Ci(x) → 0` (DLMF 6.2.14) and the Laplace-type representations of the auxiliary
@@ -46,89 +46,89 @@ namespace DLMF.Confluent
 
 /-- `E_p(z) = z^{p-1} e^{-z} U(p, p, z)` (Temme §7.3.5). -/
 @[dlmf 8.19.E16]
-theorem genExpIntE_eq_cpow_mul_kummerU (p z : ℂ) :
-    genExpIntE p z = z ^ (p - 1) * exp (-z) * kummerU p p z := by
-  rw [genExpIntE, upperIncGamma, sub_sub_cancel]
+theorem expIntegralE_eq_cpow_mul_kummerU (p z : ℂ) :
+    expIntegralE p z = z ^ (p - 1) * exp (-z) * kummerU p p z := by
+  rw [expIntegralE, upperIncompleteGamma, sub_sub_cancel]
   ring
 
 /-- `E_p(z) = e^{-z} U(1, 2-p, z)` (Temme §7.3.5). -/
-theorem genExpIntE_eq_exp_mul_kummerU (p : ℂ) {z : ℂ} (hz : z ≠ 0) :
-    genExpIntE p z = exp (-z) * kummerU 1 (2 - p) z := by
-  rw [genExpIntE, upperIncGamma_eq_cpow_mul_kummerU _ hz, show 1 - p + 1 = 2 - p by ring,
+theorem expIntegralE_eq_exp_mul_kummerU (p : ℂ) {z : ℂ} (hz : z ≠ 0) :
+    expIntegralE p z = exp (-z) * kummerU 1 (2 - p) z := by
+  rw [expIntegralE, upperIncompleteGamma_eq_cpow_mul_kummerU _ hz, show 1 - p + 1 = 2 - p by ring,
     ← mul_assoc, ← mul_assoc, ← Complex.cpow_add _ _ hz]
   simp
 
 /-- **The exponential integral** (DLMF 8.19.3): `E_p(x) = ∫₁^∞ e^{-xt} t^{-p} dt` for `x > 0`
 and all complex `p`. -/
 @[dlmf 8.19.E3]
-theorem genExpIntE_eq_integral (p : ℂ) {x : ℝ} (hx : 0 < x) :
-    genExpIntE p x = ∫ t in Ioi (1 : ℝ), Real.exp (-x * t) • (t : ℂ) ^ (-p) := by
+theorem expIntegralE_eq_integral (p : ℂ) {x : ℝ} (hx : 0 < x) :
+    expIntegralE p x = ∫ t in Ioi (1 : ℝ), Real.exp (-x * t) • (t : ℂ) ^ (-p) := by
   have hx0 : (x : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hx.ne'
-  rw [genExpIntE, upperIncGamma_eq_cpow_mul_integral_Ioi_one _ hx, ← mul_assoc,
+  rw [expIntegralE, upperIncompleteGamma_eq_cpow_mul_integral_Ioi_one _ hx, ← mul_assoc,
     ← Complex.cpow_add _ _ hx0]
   simp [show 1 - p - 1 = -p by ring]
 
 /-- `E_0(z) = e^{-z}/z`. -/
 @[dlmf 8.19.E5]
-theorem genExpIntE_zero {z : ℂ} (hz : z ≠ 0) : genExpIntE 0 z = exp (-z) / z := by
-  rw [genExpIntE, sub_zero, upperIncGamma_one, zero_sub, Complex.cpow_neg_one]
+theorem expIntegralE_zero {z : ℂ} (hz : z ≠ 0) : expIntegralE 0 z = exp (-z) / z := by
+  rw [expIntegralE, sub_zero, upperIncompleteGamma_one, zero_sub, Complex.cpow_neg_one]
   field_simp
 
 /-- The recurrence (DLMF 8.19.12): `p E_{p+1}(z) + z E_p(z) = e^{-z}`. -/
 @[dlmf 8.19.E12]
-theorem genExpIntE_add_one (p : ℂ) {z : ℂ} (hz : z ≠ 0) :
-    p * genExpIntE (p + 1) z + z * genExpIntE p z = exp (-z) := by
-  have h := upperIncGamma_add_one (-p) hz
+theorem expIntegralE_add_one (p : ℂ) {z : ℂ} (hz : z ≠ 0) :
+    p * expIntegralE (p + 1) z + z * expIntegralE p z = exp (-z) := by
+  have h := upperIncompleteGamma_add_one (-p) hz
   rw [show -p + 1 = 1 - p by ring] at h
-  rw [genExpIntE, genExpIntE, show 1 - (p + 1) = -p by ring, show p + 1 - 1 = p by ring, h]
+  rw [expIntegralE, expIntegralE, show 1 - (p + 1) = -p by ring, show p + 1 - 1 = p by ring, h]
   have hzp : z * z ^ (p - 1) = z ^ p := by
     conv_rhs => rw [show p = 1 + (p - 1) by ring]
     rw [Complex.cpow_add _ _ hz, Complex.cpow_one]
   have hp : z ^ p * z ^ (-p) = 1 := by rw [← Complex.cpow_add _ _ hz]; simp
   linear_combination (exp (-z)) * hp +
-    (-p * upperIncGamma (-p) z + z ^ (-p) * exp (-z)) * hzp
+    (-p * upperIncompleteGamma (-p) z + z ^ (-p) * exp (-z)) * hzp
 
 /-- The derivative (DLMF 8.19.13): `E_p'(z) = -E_{p-1}(z)` on the cut plane. -/
 @[dlmf 8.19.E13]
-theorem hasDerivAt_genExpIntE (p : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
-    HasDerivAt (genExpIntE p) (-genExpIntE (p - 1) z) z := by
+theorem hasDerivAt_expIntegralE (p : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
+    HasDerivAt (expIntegralE p) (-expIntegralE (p - 1) z) z := by
   have hz0 := slitPlane_ne_zero hz
   have hU := (hasDerivAt_kummerU 1 (2 - p) hz)
   have hd := ((hasDerivAt_neg z).cexp).mul hU
   have hrel := kummerU_contiguous_a_b 1 (3 - p) z hz0
   rw [show (3 : ℂ) - p - 1 = 2 - p by ring, show (1 : ℂ) + 1 = 2 by norm_num] at hrel
   refine (hd.congr_deriv ?_).congr_of_eventuallyEq ?_
-  · rw [genExpIntE_eq_exp_mul_kummerU _ hz0, show 2 - (p - 1) = 3 - p by ring,
+  · rw [expIntegralE_eq_exp_mul_kummerU _ hz0, show 2 - (p - 1) = 3 - p by ring,
       show (1 : ℂ) + 1 = 2 by norm_num, show 2 - p + 1 = 3 - p by ring]
     linear_combination exp (-z) * hrel
   · filter_upwards [isOpen_slitPlane.mem_nhds hz] with w hw
-    exact genExpIntE_eq_exp_mul_kummerU p (slitPlane_ne_zero hw)
+    exact expIntegralE_eq_exp_mul_kummerU p (slitPlane_ne_zero hw)
 
 /-- **Asymptotic expansion of `E_p(x)`** (DLMF 8.20.2, Temme §7.3.5):
 `E_p(x) ~ e^{-x}/x ∑ (-1)^k (p)_k x^{-k}` as `x → +∞`, for all complex `p`. -/
 @[dlmf 8.20.E2]
-theorem hasAsymptoticExpansion_genExpIntE (p : ℂ) :
+theorem hasAsymptoticExpansion_expIntegralE (p : ℂ) :
     HasAsymptoticExpansion atTop (fun (k : ℕ) (x : ℝ) => exp (-(x : ℂ)) * (x : ℂ) ^ (-1 - k : ℂ))
-      (fun k => (-1) ^ k * poch p k) (fun x : ℝ => genExpIntE p x) := by
+      (fun k => (-1) ^ k * pochhammer p k) (fun x : ℝ => expIntegralE p x) := by
   refine (((hasAsymptoticExpansion_kummerU 1 (2 - p)).mul_left
     (fun x : ℝ => exp (-(x : ℂ)))).congr_scale fun k => Eventually.of_forall fun x => ?_
     ).congr_coeff ?_ |>.congr' ?_
   · simp only
     ring_nf
   · funext k
-    rw [tricomiCoeff, poch_nat_one, show 1 - (2 - p) + 1 = p by ring]
+    rw [tricomiCoeff, pochhammer_nat_one, show 1 - (2 - p) + 1 = p by ring]
     have hf : (k.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr k.factorial_ne_zero
     field_simp
   · filter_upwards [eventually_gt_atTop 0] with x hx
-    rw [genExpIntE_eq_exp_mul_kummerU _ (Complex.ofReal_ne_zero.mpr hx.ne'), smul_eq_mul]
+    rw [expIntegralE_eq_exp_mul_kummerU _ (Complex.ofReal_ne_zero.mpr hx.ne'), smul_eq_mul]
 
 /-! ### The exponential integral `E₁` -/
 
 /-- `E₁(x) = ∫ₓ^∞ e^{-t}/t dt` for `x > 0` (DLMF 6.2.1). -/
 @[dlmf 6.2.E1]
-theorem genExpIntE_one_eq_integral {x : ℝ} (hx : 0 < x) :
-    genExpIntE 1 x = ((∫ t in Ioi x, Real.exp (-t) / t : ℝ) : ℂ) := by
-  rw [genExpIntE, sub_self, Complex.cpow_zero, one_mul, upperIncGamma_eq_integral 0 hx,
+theorem expIntegralE_one_eq_integral {x : ℝ} (hx : 0 < x) :
+    expIntegralE 1 x = ((∫ t in Ioi x, Real.exp (-t) / t : ℝ) : ℂ) := by
+  rw [expIntegralE, sub_self, Complex.cpow_zero, one_mul, upperIncompleteGamma_eq_integral 0 hx,
     ← integral_complex_ofReal]
   refine setIntegral_congr_fun measurableSet_Ioi fun t ht => ?_
   have ht : (0 : ℝ) < t := lt_trans hx ht
@@ -208,10 +208,10 @@ theorem integral_Ioi_one_one_div_mul_one_add :
 
 /-- **`E₁` through `Ein`** (DLMF 6.2.4): `E₁(x) = Ein(x) - log x - γ` for `x > 0`. -/
 @[dlmf 6.2.E4]
-theorem genExpIntE_one_eq_Ein {x : ℝ} (hx : 0 < x) :
-    genExpIntE 1 x =
-      ((Real.expIntEin x - Real.log x - Real.eulerMascheroniConstant : ℝ) : ℂ) := by
-  rw [genExpIntE_one_eq_integral hx]
+theorem expIntegralE_one_eq_Ein {x : ℝ} (hx : 0 < x) :
+    expIntegralE 1 x =
+      ((Real.expIntegralEin x - Real.log x - Real.eulerMascheroniConstant : ℝ) : ℂ) := by
+  rw [expIntegralE_one_eq_integral hx]
   congr 1
   set f : ℝ → ℝ := fun t => Real.exp (-t) / t with hf
   set g : ℝ → ℝ := fun t => (1 - Real.exp (-t)) / t with hg
@@ -246,8 +246,8 @@ theorem genExpIntE_one_eq_Ein {x : ℝ} (hx : 0 < x) :
     rw [DLMF.Gamma.eulerMascheroni_eq_integral_recip_one_add]
     linarith [hsplit, h01, h1]
   -- `Ein(x) = ∫₀¹ g - ∫ₓ¹ g` and `log x = -∫ₓ¹ dt/t`
-  have hEin : Real.expIntEin x = (∫ t in (0 : ℝ)..1, g t) - ∫ t in x..1, g t := by
-    rw [Real.expIntEin, ← intervalIntegral.integral_add_adjacent_intervals
+  have hEin : Real.expIntegralEin x = (∫ t in (0 : ℝ)..1, g t) - ∫ t in x..1, g t := by
+    rw [Real.expIntegralEin, ← intervalIntegral.integral_add_adjacent_intervals
       (intervalIntegrable_einIntegrand le_rfl hx.le)
       (intervalIntegrable_einIntegrand hx.le zero_le_one)]
     ring
@@ -277,10 +277,10 @@ theorem genExpIntE_one_eq_Ein {x : ℝ} (hx : 0 < x) :
 /-- **The series of `E₁`** (DLMF 6.6.2): for `x > 0`,
 `E₁(x) = -γ - log x + ∑_{k≥0} (-1)^k x^{k+1} / ((k+1) (k+1)!)`. -/
 @[dlmf 6.6.E2]
-theorem genExpIntE_one_eq_tsum {x : ℝ} (hx : 0 < x) :
-    genExpIntE 1 x = ((-Real.eulerMascheroniConstant - Real.log x +
+theorem expIntegralE_one_eq_tsum {x : ℝ} (hx : 0 < x) :
+    expIntegralE 1 x = ((-Real.eulerMascheroniConstant - Real.log x +
       ∑' k : ℕ, (-1) ^ k * x ^ (k + 1) / ((k + 1) * (k + 1)!) : ℝ) : ℂ) := by
-  rw [genExpIntE_one_eq_Ein hx, (Real.hasSum_expIntEin x).tsum_eq]
+  rw [expIntegralE_one_eq_Ein hx, (Real.hasSum_expIntegralEin x).tsum_eq]
   congr 1
   ring
 

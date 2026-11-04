@@ -22,17 +22,20 @@ DLMF 18.18.29–18.18.40, and the regularized Jacobi generating function (DLMF 1
 
 ## Main results
 
-* `ultrasphPoly_connection`, `monomial_ultrasphPoly_expansion`: DLMF 18.18.16 and 18.18.17.
-* `laguerrePolyL_connection`, `monomial_laguerrePolyL_expansion`: DLMF 18.18.18 and 18.18.19.
-* `monomial_hermitePolyH_expansion`: DLMF 18.18.20.
+* `ultrasphericalPolynomial_connection`, `monomial_ultrasphericalPolynomial_expansion`: DLMF
+  18.18.16 and 18.18.17.
+* `laguerrePolynomialL_connection`, `monomial_laguerrePolynomialL_expansion`: DLMF 18.18.18 and
+  18.18.19.
+* `monomial_hermitePolynomialH_expansion`: DLMF 18.18.20.
 * `legendre_addition`: DLMF 18.18.9.
-* `ultrasphPoly_linearization`, `hermitePolyH_linearization`: DLMF 18.18.22 and 18.18.23.
+* `ultrasphericalPolynomial_linearization`, `hermitePolynomialH_linearization`: DLMF 18.18.22 and
+  18.18.23.
 * `mehler_formula`: DLMF 18.18.28.
-* `ultrasphPoly_convolution`, `ultrasphPoly_geometric_convolution`: DLMF 18.18.29 and
-  18.18.30.
+* `ultrasphericalPolynomial_convolution`, `ultrasphericalPolynomial_geometric_convolution`: DLMF
+  18.18.29 and 18.18.30.
 * `chebyshev_geometric_sum`, `chebyshevT_even_sum`, `chebyshevT_odd_sum`,
   `chebyshevU_even_sum`, `chebyshevU_odd_sum`: DLMF 18.18.31–18.18.35.
-* `legendre_convolution`, `laguerrePolyL_sum`, `hermitePolyH_even_convolution`:
+* `legendre_convolution`, `laguerrePolynomialL_sum`, `hermitePolynomialH_even_convolution`:
   DLMF 18.18.36, 18.18.37 and 18.18.40.
 * `jacobi_regularized_generating_function`: DLMF 18.12.2.
 -/
@@ -56,51 +59,53 @@ set_option autoImplicit false
 namespace DLMF.OrthogonalPolynomials
 
 /-- Formula under the stated hypotheses: `(2 * x) ^ n = n.factorial * ∑ k ∈ Finset.range (n / 2 +
-1), (lam + n - 2 * k) / lam / (poch (lam + 1) (n - k) * k.factorial) * ultrasphPoly lam (n - 2
+1), (lam + n - 2 * k) / lam / (pochhammer (lam + 1) (n - k) * k.factorial) *
+ultrasphericalPolynomial lam (n - 2
 * k) x`. -/
 @[dlmf 18.18.E17]
-theorem monomial_ultrasphPoly_expansion {lam : ℂ} (hlam : 0 < lam.re) (n : ℕ) (x : ℂ) :
+theorem monomial_ultrasphericalPolynomial_expansion {lam : ℂ} (hlam : 0 < lam.re) (n : ℕ) (x : ℂ) :
     (2 * x) ^ n = n.factorial * ∑ k ∈ Finset.range (n / 2 + 1),
-      (lam + n - 2 * k) / lam / (poch (lam + 1) (n - k) * k.factorial)
-          * ultrasphPoly lam (n - 2 * k) x := by
+      (lam + n - 2 * k) / lam / (pochhammer (lam + 1) (n - k) * k.factorial)
+          * ultrasphericalPolynomial lam (n - 2 * k) x := by
   have hl : lam ≠ 0 := by intro he; simp [he] at hlam
-  have hp (r : ℕ) : poch lam r ≠ 0 := poch_ne_zero_of_re_pos hlam r
-  have hp1 (r : ℕ) : poch (lam + 1) r ≠ 0 := poch_ne_zero_of_re_pos (by simp; linarith) r
+  have hp (r : ℕ) : pochhammer lam r ≠ 0 := pochhammer_ne_zero_of_re_pos hlam r
+  have hp1 (r : ℕ) : pochhammer (lam + 1) r ≠ 0 :=
+      pochhammer_ne_zero_of_re_pos (by simp; linarith) r
   have hf (r : ℕ) : (r.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr r.factorial_ne_zero
   let F : ℕ → ℕ → ℂ := fun k j =>
-    (lam + n - 2 * k) / lam / (poch (lam + 1) (n - k) * k.factorial) *
-      ((-1 : ℂ) ^ j * poch lam (n - 2 * k - j) /
+    (lam + n - 2 * k) / lam / (pochhammer (lam + 1) (n - k) * k.factorial) *
+      ((-1 : ℂ) ^ j * pochhammer lam (n - 2 * k - j) /
         ((j.factorial : ℂ) * (n - 2 * k - 2 * j).factorial) * (2 * x) ^ (n - 2 * k - 2 * j))
   have hexpand : (∑ k ∈ Finset.range (n / 2 + 1),
-      (lam + n - 2 * k) / lam / (poch (lam + 1) (n - k) * k.factorial) *
-        ultrasphPoly lam (n - 2 * k) x) =
+      (lam + n - 2 * k) / lam / (pochhammer (lam + 1) (n - k) * k.factorial) *
+        ultrasphericalPolynomial lam (n - 2 * k) x) =
       ∑ k ∈ Finset.range (n / 2 + 1), ∑ j ∈ Finset.range (n / 2 - k + 1), F k j := by
     apply Finset.sum_congr rfl
     intro k hk
     have hk' : 2 * k ≤ n := by have := Finset.mem_range.mp hk; omega
-    rw [ultrasphPoly_finite_sum (by linarith : -1 / 2 < lam.re), Finset.mul_sum,
+    rw [ultrasphericalPolynomial_finite_sum (by linarith : -1 / 2 < lam.re), Finset.mul_sum,
       show (n - 2 * k) / 2 = n / 2 - k by omega]
   have hterm {r k : ℕ} (hr : 2 * r ≤ n) (hk : k ≤ r) :
       F (r - k) k = (2 * x) ^ (n - 2 * r) / ((r.factorial : ℂ) * (n - 2 * r).factorial) *
         ((-1 : ℂ) ^ k * (r.choose k : ℂ) * ((lam + (n - 2 * r : ℕ)) + 2 * k) /
-          poch ((lam + (n - 2 * r : ℕ)) + k) (r + 1)) := by
+          pochhammer ((lam + (n - 2 * r : ℕ)) + k) (r + 1)) := by
     have hidx1 : n - (r - k) = n - r + k := by omega
     have hidx2 : n - 2 * (r - k) - k = n - 2 * r + k := by omega
     have hidx3 : n - 2 * (r - k) - 2 * k = n - 2 * r := by omega
     have hcast : lam + n - 2 * ((r - k : ℕ) : ℂ) = lam + ((n - 2 * r : ℕ) : ℂ) + 2 * k := by
       rw [Nat.cast_sub hk, Nat.cast_sub hr, Nat.cast_mul, Nat.cast_ofNat]
       ring
-    have hrel : poch (lam + 1) (n - r + k) =
-        poch lam (n - 2 * r + k) * poch (lam + (n - 2 * r : ℕ) + k) (r + 1) / lam := by
+    have hrel : pochhammer (lam + 1) (n - r + k) =
+        pochhammer lam (n - 2 * r + k) * pochhammer (lam + (n - 2 * r : ℕ) + k) (r + 1) / lam := by
       rw [eq_div_iff hl]
-      have he := poch_add lam (n - 2 * r + k) (r + 1)
+      have he := pochhammer_add lam (n - 2 * r + k) (r + 1)
       rw [show n - 2 * r + k + (r + 1) = (n - r + k) + 1 by omega,
-        poch_succ_left] at he
+        pochhammer_succ_left] at he
       push_cast at he
       simp only [← add_assoc] at he
       linear_combination he
-    have hpa : poch (lam + (n - 2 * r : ℕ) + k) (r + 1) ≠ 0 :=
-      poch_ne_zero_of_re_pos (by simp only [add_re, natCast_re]; positivity) _
+    have hpa : pochhammer (lam + (n - 2 * r : ℕ) + k) (r + 1) ≠ 0 :=
+      pochhammer_ne_zero_of_re_pos (by simp only [add_re, natCast_re]; positivity) _
     dsimp only [F]
     rw [hidx1, hidx2, hidx3, hcast, hrel, Nat.cast_choose ℂ hk]
     field_simp [hl, hp, hpa, hf]
@@ -115,14 +120,15 @@ theorem monomial_ultrasphPoly_expansion {lam : ℂ} (hlam : 0 < lam.re) (n : ℕ
     have hh : (∑ k ∈ Finset.range (r + 1), F (r + 1 - 1 - k) (r - (r + 1 - 1 - k))) =
         (2 * x) ^ (n - 2 * r) / ((r.factorial : ℂ) * (n - 2 * r).factorial) *
           ∑ k ∈ Finset.range (r + 1), (-1 : ℂ) ^ k * (r.choose k : ℂ) *
-            ((lam + (n - 2 * r : ℕ)) + 2 * k) / poch ((lam + (n - 2 * r : ℕ)) + k) (r + 1) := by
+            ((lam + (n - 2 * r : ℕ)) + 2 * k) /
+                pochhammer ((lam + (n - 2 * r : ℕ)) + k) (r + 1) := by
       rw [Finset.mul_sum]
       apply Finset.sum_congr rfl
       intro k hk
       have hkr : k ≤ r := Nat.le_of_lt_succ (Finset.mem_range.mp hk)
       rw [show r + 1 - 1 - k = r - k by omega, Nat.sub_sub_self hkr]
       exact hterm hrn hkr
-    rw [hh, sum_choose_weighted_recip_poch_eq ha]
+    rw [hh, sum_choose_weighted_recip_pochhammer_eq ha]
     split_ifs with he
     · subst r; simp
     · simp
@@ -134,29 +140,32 @@ theorem monomial_ultrasphPoly_expansion {lam : ℂ} (hlam : 0 < lam.re) (n : ℕ
     simp [hr0]
   · simp
 
-/-- Formula under the stated hypotheses: `ultrasphPoly μ n x = ∑ k ∈ Finset.range (n / 2 + 1),
-(lam + n - 2 * k) / lam * poch μ (n - k) / poch (lam + 1) (n - k) * (poch (μ - lam) k /
-k.factorial) * ultrasphPoly lam (n - 2 * k) x`. -/
+/-- Formula under the stated hypotheses:
+`ultrasphericalPolynomial μ n x = ∑ k ∈ Finset.range (n / 2 + 1), (lam + n - 2 * k) / lam *
+pochhammer μ (n - k) / pochhammer (lam + 1) (n - k) * (pochhammer (μ - lam) k / k.factorial) *
+ultrasphericalPolynomial lam (n - 2 * k) x`. -/
 @[dlmf 18.18.E16]
-theorem ultrasphPoly_connection {lam μ : ℂ} (hlam : 0 < lam.re) (hμ : -1 / 2 < μ.re) (n : ℕ)
+theorem ultrasphericalPolynomial_connection {lam μ : ℂ} (hlam : 0 < lam.re)
+    (hμ : -1 / 2 < μ.re) (n : ℕ)
     (x : ℂ) :
-    ultrasphPoly μ n x = ∑ k ∈ Finset.range (n / 2 + 1),
-      (lam + n - 2 * k) / lam * poch μ (n - k) / poch (lam + 1) (n - k) *
-      (poch (μ - lam) k / k.factorial) * ultrasphPoly lam (n - 2 * k) x := by
+    ultrasphericalPolynomial μ n x = ∑ k ∈ Finset.range (n / 2 + 1),
+      (lam + n - 2 * k) / lam * pochhammer μ (n - k) / pochhammer (lam + 1) (n - k) *
+      (pochhammer (μ - lam) k / k.factorial) * ultrasphericalPolynomial lam (n - 2 * k) x := by
   have hl : lam ≠ 0 := by intro he; simp [he] at hlam
-  have hp (r : ℕ) : poch (lam + 1) r ≠ 0 := poch_ne_zero_of_re_pos (by simp; linarith) r
+  have hp (r : ℕ) : pochhammer (lam + 1) r ≠ 0 := pochhammer_ne_zero_of_re_pos (by simp; linarith) r
   have hf (r : ℕ) : (r.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr r.factorial_ne_zero
   let G : ℕ → ℕ → ℂ := fun j k =>
-    ((-1 : ℂ) ^ j * poch μ (n - j) / ((j.factorial : ℂ) * (n - 2 * j).factorial)) *
+    ((-1 : ℂ) ^ j * pochhammer μ (n - j) / ((j.factorial : ℂ) * (n - 2 * j).factorial)) *
       ((n - 2 * j).factorial * ((lam + ((n - 2 * j : ℕ) : ℂ) - 2 * k) / lam /
-        (poch (lam + 1) (n - 2 * j - k) * k.factorial)) * ultrasphPoly lam (n - 2 * j - 2 * k) x)
-  have he : ultrasphPoly μ n x = ∑ j ∈ Finset.range (n / 2 + 1),
+        (pochhammer (lam + 1) (n - 2 * j - k) * k.factorial)) *
+            ultrasphericalPolynomial lam (n - 2 * j - 2 * k) x)
+  have he : ultrasphericalPolynomial μ n x = ∑ j ∈ Finset.range (n / 2 + 1),
       ∑ k ∈ Finset.range (n / 2 - j + 1), G j k := by
-    rw [ultrasphPoly_finite_sum hμ]
+    rw [ultrasphericalPolynomial_finite_sum hμ]
     apply Finset.sum_congr rfl
     intro j hj
     have hj' : 2 * j ≤ n := by have := Finset.mem_range.mp hj; omega
-    rw [monomial_ultrasphPoly_expansion hlam, Finset.mul_sum, Finset.mul_sum,
+    rw [monomial_ultrasphericalPolynomial_expansion hlam, Finset.mul_sum, Finset.mul_sum,
       show (n - 2 * j) / 2 = n / 2 - j by omega]
     apply Finset.sum_congr rfl
     intro k hk
@@ -166,17 +175,17 @@ theorem ultrasphPoly_connection {lam μ : ℂ} (hlam : 0 < lam.re) (hμ : -1 / 2
   apply Finset.sum_congr rfl
   intro r hr
   have hrn : 2 * r ≤ n := by have := Finset.mem_range.mp hr; omega
-  let C : ℂ := (lam + n - 2 * r) / lam * poch μ (n - r) /
-    poch (lam + 1) (n - r) / r.factorial * ultrasphPoly lam (n - 2 * r) x
+  let C : ℂ := (lam + n - 2 * r) / lam * pochhammer μ (n - r) /
+    pochhammer (lam + 1) (n - r) / r.factorial * ultrasphericalPolynomial lam (n - 2 * r) x
   have ht (j : ℕ) (hj : j ∈ Finset.range (r + 1)) : G j (r - j) = C *
-      ((r.choose j : ℂ) * poch (-lam - n + r) j * poch (μ + (n - r : ℕ)) (r - j)) := by
+      ((r.choose j : ℂ) * pochhammer (-lam - n + r) j * pochhammer (μ + (n - r : ℕ)) (r - j)) := by
     have hjr : j ≤ r := Nat.le_of_lt_succ (Finset.mem_range.mp hj)
     have hjn : j ≤ n - r := by omega
-    have hden : poch (lam + 1) (n - r) = poch (lam + 1) (n - r - j) *
-        ((-1 : ℂ) ^ j * poch (-lam - n + r) j) := by
-      have hh := poch_add (lam + 1) (n - r - j) j
+    have hden : pochhammer (lam + 1) (n - r) = pochhammer (lam + 1) (n - r - j) *
+        ((-1 : ℂ) ^ j * pochhammer (-lam - n + r) j) := by
+      have hh := pochhammer_add (lam + 1) (n - r - j) j
       rw [show n - r - j + j = n - r by omega] at hh
-      have href := DLMF.Confluent.poch_sub_nat_self (lam + 1 + (n - r : ℕ)) j
+      have href := DLMF.Confluent.pochhammer_sub_nat_self (lam + 1 + (n - r : ℕ)) j
       rw [show lam + 1 + (n - r : ℕ) - j = lam + 1 + (n - r - j : ℕ) by
         rw [Nat.cast_sub hjn]; ring,
         show 1 - (lam + 1 + (n - r : ℕ)) = -lam - n + r by
@@ -184,11 +193,12 @@ theorem ultrasphPoly_connection {lam μ : ℂ} (hlam : 0 < lam.re) (hμ : -1 / 2
                                                                                  n)]; ring] at href
       rw [href] at hh
       exact hh
-    have hnum : poch μ (n - j) = poch μ (n - r) * poch (μ + (n - r : ℕ)) (r - j) := by
-      rw [← poch_add]
+    have hnum : pochhammer μ (n - j) = pochhammer μ (n - r) *
+        pochhammer (μ + (n - r : ℕ)) (r - j) := by
+      rw [← pochhammer_add]
       congr 1
       omega
-    have hB : poch (-lam - n + r) j ≠ 0 := by
+    have hB : pochhammer (-lam - n + r) j ≠ 0 := by
       have hh := hp (n - r)
       rw [hden] at hh
       exact right_ne_zero_of_mul (right_ne_zero_of_mul hh)
@@ -204,7 +214,7 @@ theorem ultrasphPoly_connection {lam μ : ℂ} (hlam : 0 < lam.re) (hμ : -1 / 2
     field_simp [hl, hp, hf, hB]
     rw [hsgn, one_mul]
   rw [Finset.sum_congr rfl ht, ← Finset.mul_sum]
-  have hv := poch_add_eq_sum (-lam - n + r) (μ + (n - r : ℕ)) r
+  have hv := pochhammer_add_eq_sum (-lam - n + r) (μ + (n - r : ℕ)) r
   rw [show -lam - n + r + (μ + (n - r : ℕ)) = μ - lam by
     rw [Nat.cast_sub (by omega : r ≤ n)]; ring] at hv
   rw [← hv]
@@ -212,11 +222,11 @@ theorem ultrasphPoly_connection {lam μ : ℂ} (hlam : 0 < lam.re) (hμ : -1 / 2
   ring
 
 /-- Formula under the stated hypotheses: `laguerreExtended β n x = ∑ k ∈ Finset.range (n + 1),
-poch (β - α) (n - k) / (n - k).factorial * laguerreExtended α k x`. -/
+pochhammer (β - α) (n - k) / (n - k).factorial * laguerreExtended α k x`. -/
 @[dlmf 18.18.E18]
-theorem laguerrePolyL_connection (α β : ℂ) (n : ℕ) (x : ℂ) :
+theorem laguerrePolynomialL_connection (α β : ℂ) (n : ℕ) (x : ℂ) :
     laguerreExtended β n x = ∑ k ∈ Finset.range (n + 1),
-      poch (β - α) (n - k) / (n - k).factorial * laguerreExtended α k x := by
+      pochhammer (β - α) (n - k) / (n - k).factorial * laguerreExtended α k x := by
   unfold laguerreExtended
   simp_rw [Finset.mul_sum]
   rw [Finset.sum_comm' (t' := Finset.range (n + 1)) (s' := fun j => Finset.Ico j (n + 1))
@@ -224,7 +234,7 @@ theorem laguerrePolyL_connection (α β : ℂ) (n : ℕ) (x : ℂ) :
   refine Finset.sum_congr rfl fun j hj => ?_
   have hjn : j ≤ n := by simp at hj; omega
   rw [Finset.sum_Ico_eq_sum_range, show n + 1 - j = (n - j) + 1 by omega]
-  have hv := poch_add_eq_sum (α + j + 1) (β - α) (n - j)
+  have hv := pochhammer_add_eq_sum (α + j + 1) (β - α) (n - j)
   rw [show α + j + 1 + (β - α) = β + j + 1 by ring] at hv
   rw [hv, Finset.sum_div, Finset.sum_mul]
   refine Finset.sum_congr rfl fun m hm => ?_
@@ -237,40 +247,41 @@ theorem laguerrePolyL_connection (α β : ℂ) (n : ℕ) (x : ℂ) :
   have h4 : ((n - j).factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
   field_simp
 
-/-- Formula under the stated hypotheses: `x ^ n = poch (α + 1) n * ∑ k ∈ Finset.range (n + 1),
-poch (-(n : ℂ)) k / poch (α + 1) k * laguerrePolyL α k x`. -/
+/-- Formula under the stated hypotheses: `x ^ n = pochhammer (α + 1) n * ∑ k ∈ Finset.range (n + 1),
+pochhammer (-(n : ℂ)) k / pochhammer (α + 1) k * laguerrePolynomialL α k x`. -/
 @[dlmf 18.18.E19]
-theorem monomial_laguerrePolyL_expansion {α : ℂ} (hα : -1 < α.re) (n : ℕ) (x : ℂ) :
-    x ^ n = poch (α + 1) n * ∑ k ∈ Finset.range (n + 1),
-      poch (-(n : ℂ)) k / poch (α + 1) k * laguerrePolyL α k x := by
+theorem monomial_laguerrePolynomialL_expansion {α : ℂ} (hα : -1 < α.re) (n : ℕ) (x : ℂ) :
+    x ^ n = pochhammer (α + 1) n * ∑ k ∈ Finset.range (n + 1),
+      pochhammer (-(n : ℂ)) k / pochhammer (α + 1) k * laguerrePolynomialL α k x := by
   have hc : ∀ k : ℕ, α + 1 ≠ -(k : ℂ) := not_neg_nat_of_re_pos (by simp; linarith)
-  have hpk : ∀ k, poch (α + 1) k ≠ 0 := poch_ne_zero_of_not_neg_nat hc
-  simp_rw [laguerrePolyL_eq_sum hc, Finset.mul_sum]
+  have hpk : ∀ k, pochhammer (α + 1) k ≠ 0 := pochhammer_ne_zero_of_not_neg_nat hc
+  simp_rw [laguerrePolynomialL_eq_sum hc, Finset.mul_sum]
   rw [Finset.sum_comm' (t' := Finset.range (n + 1)) (s' := fun j => Finset.Ico j (n + 1))
     (by intro k j; simp only [Finset.mem_range, Finset.mem_Ico]; omega)]
   have hterm : ∀ j ∈ Finset.range (n + 1), ∑ k ∈ Finset.Ico j (n + 1),
-      poch (α + 1) n * (poch (-(n : ℂ)) k / poch (α + 1) k *
-        (poch (α + 1 + j) (k - j) / ((k - j).factorial * j.factorial : ℂ) * (-x) ^ j)) =
-      poch (α + 1) n * (-x) ^ j * poch (-(n : ℂ)) j / (poch (α + 1) j * j.factorial) *
+      pochhammer (α + 1) n * (pochhammer (-(n : ℂ)) k / pochhammer (α + 1) k *
+        (pochhammer (α + 1 + j) (k - j) / ((k - j).factorial * j.factorial : ℂ) * (-x) ^ j)) =
+      pochhammer (α + 1) n * (-x) ^ j * pochhammer (-(n : ℂ)) j /
+          (pochhammer (α + 1) j * j.factorial) *
         0 ^ (n - j) := by
     intro j hj
     have hjn : j ≤ n := by simp at hj; omega
     rw [Finset.sum_Ico_eq_sum_range, show n + 1 - j = (n - j) + 1 by omega]
-    have hs := sum_poch_neg_nat_div_factorial_mul_pow (n - j) 1
+    have hs := sum_pochhammer_neg_nat_div_factorial_mul_pow (n - j) 1
     rw [sub_self] at hs
     rw [← hs, Finset.mul_sum]
     refine Finset.sum_congr rfl fun m hm => ?_
-    rw [show j + m - j = m by omega, poch_add (α + 1) j m, poch_add (-(n : ℂ)) j m,
+    rw [show j + m - j = m by omega, pochhammer_add (α + 1) j m, pochhammer_add (-(n : ℂ)) j m,
       show -(n : ℂ) + j = -((n - j : ℕ) : ℂ) by push_cast [Nat.cast_sub hjn]; ring]
     have h1 := hpk j
-    have h2 : poch (α + 1 + j) m ≠ 0 := by
-      have := hpk (j + m); rw [poch_add] at this; exact right_ne_zero_of_mul this
+    have h2 : pochhammer (α + 1 + j) m ≠ 0 := by
+      have := hpk (j + m); rw [pochhammer_add] at this; exact right_ne_zero_of_mul this
     have h3 : (m.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
     have h4 : (j.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
     field_simp
     ring
   rw [Finset.sum_congr rfl hterm, Finset.sum_eq_single n]
-  · rw [Nat.sub_self, pow_zero, mul_one, poch_neg_coe_nat, Nat.descFactorial_self, neg_pow]
+  · rw [Nat.sub_self, pow_zero, mul_one, pochhammer_neg_coe_nat, Nat.descFactorial_self, neg_pow]
     have h4 : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
     field_simp [hpk n]
     rw [← pow_mul, mul_comm n 2, pow_mul, neg_one_sq, one_pow, mul_one]
@@ -279,16 +290,17 @@ theorem monomial_laguerrePolyL_expansion {α : ℂ} (hα : -1 < α.re) (n : ℕ)
     simp [zero_pow this.ne']
   · simp
 
-/-- Formula under the stated hypotheses: `(2 * x) ^ n = ∑ k ∈ Finset.range (n / 2 + 1), poch (-(n
-: ℂ)) (2 * k) / k.factorial * aeval x (hermitePolyH (n - 2 * k))`. -/
+/-- Formula under the stated hypotheses:
+`(2 * x) ^ n = ∑ k ∈ Finset.range (n / 2 + 1), pochhammer (-(n : ℂ)) (2 * k) / k.factorial * aeval x
+(hermitePolynomialH (n - 2 * k))`. -/
 @[dlmf 18.18.E20]
-theorem monomial_hermitePolyH_expansion (n : ℕ) (x : ℂ) :
+theorem monomial_hermitePolynomialH_expansion (n : ℕ) (x : ℂ) :
     (2 * x) ^ n = ∑ k ∈ Finset.range (n / 2 + 1),
-      poch (-(n : ℂ)) (2 * k) / k.factorial * aeval x (hermitePolyH (n - 2 * k)) := by
+      pochhammer (-(n : ℂ)) (2 * k) / k.factorial * aeval x (hermitePolynomialH (n - 2 * k)) := by
   have hc := Complex.powerSeries_coefficients_unique
     (c := fun j => (2 * x) ^ j / j !)
     (d := fun j => ∑ k ∈ Finset.range (j / 2 + 1),
-      (1 : ℂ) ^ k / k ! * ((aeval x (hermitePolyH (j - 2 * k)) : ℂ) / (j - 2 * k)! *
+      (1 : ℂ) ^ k / k ! * ((aeval x (hermitePolynomialH (j - 2 * k)) : ℂ) / (j - 2 * k)! *
         (1 : ℂ) ^ (j - 2 * k)))
     (f := fun z => exp (2 * x * z))
     (fun z _ => by
@@ -304,42 +316,44 @@ theorem monomial_hermitePolyH_expansion (n : ℕ) (x : ℂ) :
   apply Finset.sum_congr rfl
   intro k hk
   have hk' : 2 * k ≤ n := by have := Finset.mem_range.mp hk; omega
-  rw [← poch_neg_nat_even_mul_factorial hk']
+  rw [← pochhammer_neg_nat_even_mul_factorial hk']
   simp only [one_pow, mul_one, one_div]
   field_simp [Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero k),
     Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero (n - 2 * k))]
 
-/-- Formula under the stated hypotheses: `(aeval x (hermitePolyH m) : ℂ) * aeval x (hermitePolyH
-n) = ∑ k ∈ Finset.range (min m n + 1), (m.choose k : ℂ) * n.choose k * 2 ^ k * k.factorial *
-aeval x (hermitePolyH (m + n - 2 * k))`. -/
+/-- Formula under the stated hypotheses:
+`(aeval x (hermitePolynomialH m) : ℂ) * aeval x (hermitePolynomialH n) = ∑ k ∈ Finset.range (min m n
++ 1), (m.choose k : ℂ) * n.choose k * 2 ^ k * k.factorial * aeval x (hermitePolynomialH (m + n - 2 *
+k))`. -/
 @[dlmf 18.18.E23]
-theorem hermitePolyH_linearization (m n : ℕ) (x : ℂ) :
-    (aeval x (hermitePolyH m) : ℂ) * aeval x (hermitePolyH n) =
+theorem hermitePolynomialH_linearization (m n : ℕ) (x : ℂ) :
+    (aeval x (hermitePolynomialH m) : ℂ) * aeval x (hermitePolynomialH n) =
       ∑ k ∈ Finset.range (min m n + 1), (m.choose k : ℂ) * n.choose k * 2 ^ k * k.factorial *
-        aeval x (hermitePolyH (m + n - 2 * k)) := by
+        aeval x (hermitePolynomialH (m + n - 2 * k)) := by
   have hc := Complex.powerSeries_coefficients_unique
-    (c := fun j => (aeval x (hermitePolyH m) : ℂ) * aeval x (hermitePolyH j) / j !)
+    (c := fun j => (aeval x (hermitePolynomialH m) : ℂ) * aeval x (hermitePolynomialH j) / j !)
     (d := fun j => ∑ k ∈ Finset.range (m + 1),
       (m.choose k : ℂ) * 2 ^ k *
-        (if k ≤ j then (aeval x (hermitePolyH (m - k + (j - k))) : ℂ) / (j - k)! else 0))
-    (f := fun z => (aeval x (hermitePolyH m) : ℂ) * exp (2 * x * z - z ^ 2))
-    (fun z _ => ((hasSum_hermitePolyH_generating_function x z).mul_left
-      (aeval x (hermitePolyH m) : ℂ)).congr_fun (by intro j; ring))
+        (if k ≤ j then (aeval x (hermitePolynomialH (m - k + (j - k))) : ℂ) / (j - k)! else 0))
+    (f := fun z => (aeval x (hermitePolynomialH m) : ℂ) * exp (2 * x * z - z ^ 2))
+    (fun z _ => ((hasSum_hermitePolynomialH_generating_function x z).mul_left
+      (aeval x (hermitePolynomialH m) : ℂ)).congr_fun (by intro j; ring))
     (fun z _ => by
       have hs (k : ℕ) := (hasSum_scalar_shift
-        (c := fun j => (aeval x (hermitePolyH (m - k + j)) : ℂ) / j !) (z := z)
-        ((hasSum_hermitePolyH_shifted (m - k) x z).congr_fun (by intro j; ring)) k).mul_left
+        (c := fun j => (aeval x (hermitePolynomialH (m - k + j)) : ℂ) / j !) (z := z)
+        ((hasSum_hermitePolynomialH_shifted (m - k) x z).congr_fun (by intro j; ring)) k).mul_left
           ((m.choose k : ℂ) * 2 ^ k)
       have h := hasSum_sum (s := Finset.range (m + 1)) (fun k _ => hs k)
       have hv : (∑ k ∈ Finset.range (m + 1), (m.choose k : ℂ) * 2 ^ k *
-          (z ^ k * ((aeval (x - z) (hermitePolyH (m - k)) : ℂ) * exp (2 * x * z - z ^ 2)))) =
-          (aeval x (hermitePolyH m) : ℂ) * exp (2 * x * z - z ^ 2) := by
+          (z ^ k * ((aeval (x - z) (hermitePolynomialH (m - k)) : ℂ) * exp (2 * x * z - z ^ 2)))) =
+          (aeval x (hermitePolynomialH m) : ℂ) * exp (2 * x * z - z ^ 2) := by
         rw [show (∑ k ∈ Finset.range (m + 1), (m.choose k : ℂ) * 2 ^ k *
-            (z ^ k * ((aeval (x - z) (hermitePolyH (m - k)) : ℂ) * exp (2 * x * z - z ^ 2)))) =
+            (z ^ k * ((aeval (x - z) (hermitePolynomialH (m - k)) : ℂ) *
+                exp (2 * x * z - z ^ 2)))) =
             (∑ k ∈ Finset.range (m + 1), (m.choose k : ℂ) * (2 * z) ^ k *
-              aeval (x - z) (hermitePolyH (m - k))) * exp (2 * x * z - z ^ 2) by
+              aeval (x - z) (hermitePolynomialH (m - k))) * exp (2 * x * z - z ^ 2) by
           rw [Finset.sum_mul]; apply Finset.sum_congr rfl; intro k _; rw [mul_pow]; ring]
-        rw [← hermitePolyH_translation, sub_add_cancel]
+        rw [← hermitePolynomialH_translation, sub_add_cancel]
       rw [hv] at h
       simpa only [Finset.sum_mul, mul_assoc] using h)
   have h := congrArg (fun c : ℕ → ℂ => c n * n !) hc
@@ -362,30 +376,32 @@ theorem hermitePolyH_linearization (m n : ℕ) (x : ℂ) :
   rw [← he]
   field_simp [Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero (n - k))]
 
-/-- The series with terms `(fun n : ℕ => (aeval (x : ℂ) (hermitePolyH n) : ℂ) * aeval (y : ℂ)
-(hermitePolyH n) / (2 ^ n * (n.factorial : ℂ)) * z ^ n)` converges to `((1 - z ^ 2) ^ (-1 / 2
+/-- The series with terms `(fun n : ℕ => (aeval (x : ℂ) (hermitePolynomialH n) : ℂ) * aeval (y : ℂ)
+(hermitePolynomialH n) / (2 ^ n * (n.factorial : ℂ)) * z ^ n)` converges to `((1 - z ^ 2) ^ (-1 / 2
 : ℂ) * exp ((2 * x * y * z - (x ^ 2 + y ^ 2) * z ^ 2) / (1 - z ^ 2)))`. -/
 @[dlmf 18.18.E28]
 theorem mehler_formula (x y : ℝ) {z : ℂ} (hz : ‖z‖ < 1) :
-    HasSum (fun n : ℕ => (aeval (x : ℂ) (hermitePolyH n) : ℂ) * aeval (y : ℂ) (hermitePolyH n) /
+    HasSum (fun n : ℕ => (aeval (x : ℂ) (hermitePolynomialH n) : ℂ) *
+        aeval (y : ℂ) (hermitePolynomialH n) /
       (2 ^ n * (n.factorial : ℂ)) * z ^ n)
       ((1 - z ^ 2) ^ (-1 / 2 : ℂ) *
           exp ((2 * x * y * z - (x ^ 2 + y ^ 2) * z ^ 2) / (1 - z ^ 2))) := by
   exact Mehler.hasSum_kernel (x : ℂ) (y : ℂ) hz
 
-/-- Formula under the stated hypotheses: `legendrePolyP n (Real.cos θ * Real.cos ψ + Real.sin θ *
-Real.sin ψ * Real.cos phi) = legendrePolyP n (Real.cos θ) * legendrePolyP n (Real.cos ψ) + 2 *
-∑ k ∈ Finset.Icc 1 n, ((n - k).factorial : ℂ) * (n + k).factorial / (2 ^ (2 * k) *
-(n.factorial : ℂ) ^ 2) * (Real.sin θ : ℂ) ^ k * jacobiPolyP k k (n - k) (Real.cos θ) *
-(Real.sin ψ : ℂ) ^ k * jacobiPolyP k k (n - k) (Real.cos ψ) * Real.cos (k * phi)`. -/
+/-- Formula under the stated hypotheses:
+`legendrePolynomialP n (Real.cos θ * Real.cos ψ + Real.sin θ * Real.sin ψ * Real.cos phi) =
+legendrePolynomialP n (Real.cos θ) * legendrePolynomialP n (Real.cos ψ) + 2 * ∑ k ∈ Finset.Icc 1 n,
+((n - k).factorial : ℂ) * (n + k).factorial / (2 ^ (2 * k) * (n.factorial : ℂ) ^ 2) * (Real.sin θ :
+ℂ) ^ k * jacobiPolynomialP k k (n - k) (Real.cos θ) * (Real.sin ψ : ℂ) ^ k * jacobiPolynomialP k k
+(n - k) (Real.cos ψ) * Real.cos (k * phi)`. -/
 @[dlmf 18.18.E9]
 theorem legendre_addition (n : ℕ) (θ ψ phi : ℝ) :
-    legendrePolyP n (Real.cos θ * Real.cos ψ + Real.sin θ * Real.sin ψ * Real.cos phi) =
-      legendrePolyP n (Real.cos θ) * legendrePolyP n (Real.cos ψ) +
+    legendrePolynomialP n (Real.cos θ * Real.cos ψ + Real.sin θ * Real.sin ψ * Real.cos phi) =
+      legendrePolynomialP n (Real.cos θ) * legendrePolynomialP n (Real.cos ψ) +
       2 * ∑ k ∈ Finset.Icc 1 n, ((n - k).factorial : ℂ) * (n + k).factorial /
         (2 ^ (2 * k) * (n.factorial : ℂ) ^ 2) * (Real.sin θ : ℂ) ^ k *
-        jacobiPolyP k k (n - k) (Real.cos θ) * (Real.sin ψ : ℂ) ^ k *
-        jacobiPolyP k k (n - k) (Real.cos ψ) * Real.cos (k * phi) := by
+        jacobiPolynomialP k k (n - k) (Real.cos θ) * (Real.sin ψ : ℂ) ^ k *
+        jacobiPolynomialP k k (n - k) (Real.cos ψ) * Real.cos (k * phi) := by
   have hs0 := congrArg (fun x : ℝ => (x : ℂ)) (Real.sin_sq_add_cos_sq θ)
   have ht0 := congrArg (fun x : ℝ => (x : ℂ)) (Real.sin_sq_add_cos_sq ψ)
   push_cast at hs0 ht0 ⊢
@@ -412,8 +428,8 @@ theorem legendre_addition (n : ℕ) (θ ψ phi : ℝ) :
 noncomputable def gegenbauerProductCoeff (lam : ℂ) (a b k : ℕ) : ℂ :=
   (lam + a + b) / (lam + a + b + k) * (a + b).factorial /
     (k.factorial * a.factorial * b.factorial) *
-      (poch lam k * poch lam a * poch lam b * poch (2 * lam) (a + b + k) /
-        (poch lam (a + b + k) * poch (2 * lam) (a + b)))
+      (pochhammer lam k * pochhammer lam a * pochhammer lam b * pochhammer (2 * lam) (a + b + k) /
+        (pochhammer lam (a + b + k) * pochhammer (2 * lam) (a + b)))
 
 set_option maxRecDepth 4096 in
 set_option maxHeartbeats 1000000 in
@@ -424,10 +440,10 @@ theorem gegenbauerProductCoeff_recurrence {lam : ℂ} (hlam : 0 < lam.re) (a b k
       (b + k + 1 + lam) * (a + b + 2 * lam + 1) / (lam + a + b + 2) *
         gegenbauerProductCoeff lam (a + 1) (b + 1) k -
       (b + k + 2 * lam) * gegenbauerProductCoeff lam (a + 1) b k := by
-  have hp (j : ℕ) : poch lam j ≠ 0 :=
-    poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos hlam) j
-  have hp2 (j : ℕ) : poch (2 * lam) j ≠ 0 :=
-    poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith)) j
+  have hp (j : ℕ) : pochhammer lam j ≠ 0 :=
+    pochhammer_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos hlam) j
+  have hp2 (j : ℕ) : pochhammer (2 * lam) j ≠ 0 :=
+    pochhammer_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith)) j
   have hf (j : ℕ) : (j.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr j.factorial_ne_zero
   have hn (i j q : ℕ) : lam + i + j + q ≠ 0 := by
     intro he
@@ -443,7 +459,7 @@ theorem gegenbauerProductCoeff_recurrence {lam : ℂ} (hlam : 0 < lam.re) (a b k
   have hidx10' : (a + b + 1) + k = (a + b + k) + 1 := by omega
   unfold gegenbauerProductCoeff
   simp only [hd01, hd11, hd10]
-  simp only [hidx01', hidx11', hidx10', Nat.add_succ, poch_succ, Nat.factorial_succ]
+  simp only [hidx01', hidx11', hidx10', Nat.add_succ, pochhammer_succ, Nat.factorial_succ]
   push_cast
   have h0 : lam + a + b ≠ 0 := by simpa using hn a b 0
   have h1 : lam + a + b + 1 ≠ 0 := by simpa using hn a b 1
@@ -465,14 +481,15 @@ theorem gegenbauerProductCoeff_recurrence {lam : ℂ} (hlam : 0 < lam.re) (a b k
 /-- The coefficient of the trivial factor is one. -/
 theorem gegenbauerProductCoeff_zero {lam : ℂ} (hlam : 0 < lam.re) (a : ℕ) :
     gegenbauerProductCoeff lam a 0 0 = 1 := by
-  have hp (j : ℕ) : poch lam j ≠ 0 := poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos hlam) j
-  have hp2 (j : ℕ) : poch (2 * lam) j ≠ 0 :=
-    poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith)) j
+  have hp (j : ℕ) : pochhammer lam j ≠ 0 :=
+      pochhammer_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos hlam) j
+  have hp2 (j : ℕ) : pochhammer (2 * lam) j ≠ 0 :=
+    pochhammer_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith)) j
   have hf (j : ℕ) : (j.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr j.factorial_ne_zero
   have hn : lam + a ≠ 0 := by
     intro he; have hh := congrArg Complex.re he; simp at hh
     linarith [Nat.cast_nonneg (α := ℝ) a]
-  simp [gegenbauerProductCoeff, poch_zero, hp, hp2, hf, hn]
+  simp [gegenbauerProductCoeff, pochhammer_zero, hp, hp2, hf, hn]
 
 set_option maxRecDepth 4096 in
 set_option maxHeartbeats 1000000 in
@@ -480,9 +497,10 @@ set_option maxHeartbeats 1000000 in
 theorem gegenbauerProductCoeff_top {lam : ℂ} (hlam : 0 < lam.re) (a b : ℕ) :
     (b + 1 : ℂ) * gegenbauerProductCoeff lam a (b + 1) 0 =
       (b + lam) * (a + b + 1) / (lam + a + b) * gegenbauerProductCoeff lam a b 0 := by
-  have hp (j : ℕ) : poch lam j ≠ 0 := poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos hlam) j
-  have hp2 (j : ℕ) : poch (2 * lam) j ≠ 0 :=
-    poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith)) j
+  have hp (j : ℕ) : pochhammer lam j ≠ 0 :=
+      pochhammer_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos hlam) j
+  have hp2 (j : ℕ) : pochhammer (2 * lam) j ≠ 0 :=
+    pochhammer_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith)) j
   have hf (j : ℕ) : (j.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr j.factorial_ne_zero
   have hn (q : ℕ) : lam + a + b + q ≠ 0 := by
     intro he; have hh := congrArg Complex.re he; simp at hh
@@ -491,8 +509,8 @@ theorem gegenbauerProductCoeff_top {lam : ℂ} (hlam : 0 < lam.re) (a b : ℕ) :
   have h1 : lam + a + b + 1 ≠ 0 := by simpa using hn 1
   unfold gegenbauerProductCoeff
   simp only [Nat.cast_zero, add_zero, Nat.factorial_zero, Nat.cast_one,
-    poch_zero, one_mul, show a + (b + 1) = (a + b) + 1 by omega,
-    poch_succ, Nat.factorial_succ]
+    pochhammer_zero, one_mul, show a + (b + 1) = (a + b) + 1 by omega,
+    pochhammer_succ, Nat.factorial_succ]
   push_cast
   have h20 : 2 * lam + a + b ≠ 0 := by
     intro he; have hh := congrArg Complex.re he; simp at hh
@@ -506,9 +524,10 @@ set_option maxHeartbeats 1000000 in
 theorem gegenbauerProductCoeff_bottom {lam : ℂ} (hlam : 0 < lam.re) (a k : ℕ) :
     (k + 1 : ℂ) * gegenbauerProductCoeff lam a 0 (k + 1) =
       (k + lam) * (a + 2 * lam) / (lam + a + 1) * gegenbauerProductCoeff lam (a + 1) 0 k := by
-  have hp (j : ℕ) : poch lam j ≠ 0 := poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos hlam) j
-  have hp2 (j : ℕ) : poch (2 * lam) j ≠ 0 :=
-    poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith)) j
+  have hp (j : ℕ) : pochhammer lam j ≠ 0 :=
+      pochhammer_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos hlam) j
+  have hp2 (j : ℕ) : pochhammer (2 * lam) j ≠ 0 :=
+    pochhammer_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith)) j
   have hf (j : ℕ) : (j.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr j.factorial_ne_zero
   have hn (q : ℕ) : lam + a + q ≠ 0 := by
     intro he; have hh := congrArg Complex.re he; simp at hh
@@ -521,22 +540,23 @@ theorem gegenbauerProductCoeff_bottom {lam : ℂ} (hlam : 0 < lam.re) (a k : ℕ
     linarith [Nat.cast_nonneg (α := ℝ) a]
   unfold gegenbauerProductCoeff
   simp only [Nat.cast_zero, add_zero, Nat.factorial_zero, Nat.cast_one,
-    poch_zero, mul_one, show (a + 1) + k = a + k + 1 by omega,
-    Nat.add_succ, poch_succ, Nat.factorial_succ]
+    pochhammer_zero, mul_one, show (a + 1) + k = a + k + 1 by omega,
+    Nat.add_succ, pochhammer_succ, Nat.factorial_succ]
   push_cast
   have hs0 : lam + a + k ≠ 0 := hn k
   simp only [mul_comm, add_comm, add_left_comm, add_assoc] at hp2 h0 h1 hs hs0 h2 ⊢
   field_simp [hp, hp2, hf, h0, h1, hs, hs0, h2]
 
 /-- Multiplication by `2x` in the Gegenbauer basis, for positive degree. -/
-theorem two_mul_x_ultrasphPoly {lam : ℂ} (hlam : 0 < lam.re) {d : ℕ} (hd : 0 < d) (x : ℂ) :
-    2 * x * ultrasphPoly lam d x =
-      (d + 1 : ℂ) / (lam + d) * ultrasphPoly lam (d + 1) x +
-      (d + 2 * lam - 1) / (lam + d) * ultrasphPoly lam (d - 1) x := by
+theorem two_mul_x_ultrasphericalPolynomial {lam : ℂ} (hlam : 0 < lam.re) {d : ℕ}
+    (hd : 0 < d) (x : ℂ) :
+    2 * x * ultrasphericalPolynomial lam d x =
+      (d + 1 : ℂ) / (lam + d) * ultrasphericalPolynomial lam (d + 1) x +
+      (d + 2 * lam - 1) / (lam + d) * ultrasphericalPolynomial lam (d - 1) x := by
   have hn : lam + d ≠ 0 := by
     intro he; have hh := congrArg Complex.re he; simp at hh
     linarith [Nat.cast_nonneg (α := ℝ) d]
-  have hh := ultrasphPoly_recurrence (by linarith : -1 / 2 < lam.re) (d - 1) x
+  have hh := ultrasphericalPolynomial_recurrence (by linarith : -1 / 2 < lam.re) (d - 1) x
   rw [show d - 1 + 2 = d + 1 by omega, show d - 1 + 1 = d by omega,
     Nat.cast_sub (by omega : 1 ≤ d)] at hh
   push_cast at hh
@@ -546,7 +566,7 @@ theorem two_mul_x_ultrasphPoly {lam : ℂ} (hlam : 0 < lam.re) {d : ℕ} (hd : 0
 /-- The finite product expansion with the second degree bounded by the first. -/
 noncomputable def gegenbauerLinearizationSum (lam : ℂ) (m n : ℕ) (x : ℂ) : ℂ :=
   ∑ k ∈ Finset.range (n + 1), gegenbauerProductCoeff lam (m - k) (n - k) k *
-    ultrasphPoly lam (m + n - 2 * k) x
+    ultrasphericalPolynomial lam (m + n - 2 * k) x
 
 /-- The finite coefficient sum obeys the Gegenbauer recurrence in its second degree. -/
 theorem gegenbauerLinearizationSum_recurrence {lam : ℂ} (hlam : 0 < lam.re)
@@ -555,27 +575,28 @@ theorem gegenbauerLinearizationSum_recurrence {lam : ℂ} (hlam : 0 < lam.re)
       2 * (n + lam + 1) * x * gegenbauerLinearizationSum lam m (n + 1) x -
         (n + 2 * lam) * gegenbauerLinearizationSum lam m n x := by
   let T : ℕ → ℂ := fun k => gegenbauerProductCoeff lam (m - k) (n + 2 - k) k *
-    ultrasphPoly lam (m + (n + 2) - 2 * k) x
+    ultrasphericalPolynomial lam (m + (n + 2) - 2 * k) x
   let U : ℕ → ℂ := fun k => gegenbauerProductCoeff lam (m - k) (n + 1 - k) k *
-    ultrasphPoly lam (m + (n + 1) - 2 * k) x
+    ultrasphericalPolynomial lam (m + (n + 1) - 2 * k) x
   let V : ℕ → ℂ := fun k => gegenbauerProductCoeff lam (m - k) (n - k) k *
-    ultrasphPoly lam (m + n - 2 * k) x
+    ultrasphericalPolynomial lam (m + n - 2 * k) x
   let A : ℕ → ℂ := fun k => (n + lam + 1) * ((m + (n + 1) - 2 * k : ℕ) + 1) /
     (lam + (m + (n + 1) - 2 * k : ℕ)) * gegenbauerProductCoeff lam (m - k) (n + 1 - k) k *
-      ultrasphPoly lam ((m + (n + 1) - 2 * k) + 1) x
+      ultrasphericalPolynomial lam ((m + (n + 1) - 2 * k) + 1) x
   let B : ℕ → ℂ := fun k => (n + lam + 1) * ((m + (n + 1) - 2 * k : ℕ) + 2 * lam - 1) /
     (lam + (m + (n + 1) - 2 * k : ℕ)) * gegenbauerProductCoeff lam (m - k) (n + 1 - k) k *
-      ultrasphPoly lam ((m + (n + 1) - 2 * k) - 1) x
+      ultrasphericalPolynomial lam ((m + (n + 1) - 2 * k) - 1) x
   have hU (k : ℕ) (hk : k ∈ Finset.range (n + 2)) :
       2 * (n + lam + 1) * x * U k = A k + B k := by
     have hd : 0 < m + (n + 1) - 2 * k := by have := Finset.mem_range.mp hk; omega
     dsimp [U, A, B]
     have he := congrArg (fun v : ℂ => (n + lam + 1) *
-      gegenbauerProductCoeff lam (m - k) (n + 1 - k) k * v) (two_mul_x_ultrasphPoly hlam hd x)
+      gegenbauerProductCoeff lam (m - k) (n + 1 - k) k *
+          v) (two_mul_x_ultrasphericalPolynomial hlam hd x)
     linear_combination he
   have hhead : (n + 2 : ℂ) * T 0 = A 0 := by
     dsimp [T, A]
-    have he := congrArg (fun v : ℂ => v * ultrasphPoly lam (m + (n + 2)) x)
+    have he := congrArg (fun v : ℂ => v * ultrasphericalPolynomial lam (m + (n + 2)) x)
       (gegenbauerProductCoeff_top hlam m (n + 1))
     rw [show m + (n + 1) + 1 = m + (n + 2) by omega]
     push_cast at he ⊢
@@ -584,7 +605,7 @@ theorem gegenbauerLinearizationSum_recurrence {lam : ℂ} (hlam : 0 < lam.re)
     have hm : m - (n + 2) + 1 = m - (n + 1) := by omega
     dsimp [T, B]
     rw [Nat.sub_self, Nat.sub_self]
-    have he := congrArg (fun v : ℂ => v * ultrasphPoly lam (m - (n + 2)) x)
+    have he := congrArg (fun v : ℂ => v * ultrasphericalPolynomial lam (m - (n + 2)) x)
       (gegenbauerProductCoeff_bottom hlam (m - (n + 2)) (n + 1))
     rw [hm] at he
     rw [show m + (n + 2) - 2 * (n + 2) = m - (n + 2) by omega,
@@ -608,7 +629,8 @@ theorem gegenbauerLinearizationSum_recurrence {lam : ℂ} (hlam : 0 < lam.re)
     rw [hM, hN, hN0, hd0, hd1, hd2, hd3,
       show ((m - j - 1) + (n - j) + 2) - 1 = (m - j - 1) + (n - j) + 1 by omega]
     rw [hN1]
-    have he := congrArg (fun v : ℂ => v * ultrasphPoly lam ((m - j - 1) + (n - j) + 1) x)
+    have he := congrArg (fun v : ℂ => v *
+        ultrasphericalPolynomial lam ((m - j - 1) + (n - j) + 1) x)
       (gegenbauerProductCoeff_recurrence hlam (m - j - 1) (n - j) j)
     rw [hM1, hN1] at he
     push_cast [Nat.cast_sub hjn] at he ⊢
@@ -628,9 +650,10 @@ theorem gegenbauerLinearizationSum_recurrence {lam : ℂ} (hlam : 0 < lam.re)
   linear_combination hi
 
 /-- Gegenbauer products are the finite coefficient sums when the second degree is smaller. -/
-theorem ultrasphPoly_product_eq_sum_of_le {lam : ℂ} (hlam : 0 < lam.re) (m n : ℕ)
+theorem ultrasphericalPolynomial_product_eq_sum_of_le {lam : ℂ} (hlam : 0 < lam.re) (m n : ℕ)
     (hnm : n ≤ m) (x : ℂ) :
-    ultrasphPoly lam m x * ultrasphPoly lam n x = gegenbauerLinearizationSum lam m n x := by
+    ultrasphericalPolynomial lam m x * ultrasphericalPolynomial lam n x =
+        gegenbauerLinearizationSum lam m n x := by
   induction n using Nat.twoStepInduction with
   | zero => simp [gegenbauerLinearizationSum, gegenbauerProductCoeff_zero hlam]
   | one =>
@@ -647,8 +670,8 @@ theorem ultrasphPoly_product_eq_sum_of_le {lam : ℂ} (hlam : 0 < lam.re) (m n :
       norm_num at he
       push_cast [Nat.cast_sub (show 1 ≤ m by omega)] at he
       convert he using 1; ring
-    have he := two_mul_x_ultrasphPoly hlam hm x
-    rw [ultrasphPoly_one_eq (by linarith : -1 / 2 < lam.re)]
+    have he := two_mul_x_ultrasphericalPolynomial hlam hm x
+    rw [ultrasphericalPolynomial_one_eq (by linarith : -1 / 2 < lam.re)]
     unfold gegenbauerLinearizationSum
     norm_num only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add, Nat.sub_zero,
       Nat.sub_self, Nat.mul_zero, Nat.mul_one, Nat.cast_zero, Nat.cast_one]
@@ -659,10 +682,10 @@ theorem ultrasphPoly_product_eq_sum_of_le {lam : ℂ} (hlam : 0 < lam.re) (m n :
     have h1 := ih1 (by omega : n + 1 ≤ m)
     have hS := gegenbauerLinearizationSum_recurrence hlam hnm x
     rw [← h0, ← h1] at hS
-    have hC := ultrasphPoly_recurrence (by linarith : -1 / 2 < lam.re) n x
+    have hC := ultrasphericalPolynomial_recurrence (by linarith : -1 / 2 < lam.re) n x
     have hn : (n + 2 : ℂ) ≠ 0 := by exact_mod_cast (by omega : n + 2 ≠ 0)
     apply mul_left_cancel₀ hn
-    linear_combination ultrasphPoly lam m x * hC - hS
+    linear_combination ultrasphericalPolynomial lam m x * hC - hS
 
 /-- Symmetry of the coefficient in the two gap indices. -/
 theorem gegenbauerProductCoeff_swap (lam : ℂ) (a b k : ℕ) :
@@ -676,8 +699,9 @@ theorem gegenbauerProductCoeff_eq (lam : ℂ) {m n k : ℕ} (hkm : k ≤ m) (hkn
     gegenbauerProductCoeff lam (m - k) (n - k) k =
       (m + n + lam - 2 * k) * (m + n - 2 * k).factorial /
         ((m + n + lam - k) * k.factorial * (m - k).factorial * (n - k).factorial) *
-        (poch lam k * poch lam (m - k) * poch lam (n - k) * poch (2 * lam) (m + n - k) /
-          (poch lam (m + n - k) * poch (2 * lam) (m + n - 2 * k))) := by
+        (pochhammer lam k * pochhammer lam (m - k) * pochhammer lam (n - k) *
+            pochhammer (2 * lam) (m + n - k) /
+          (pochhammer lam (m + n - k) * pochhammer (2 * lam) (m + n - 2 * k))) := by
   unfold gegenbauerProductCoeff
   rw [show (m - k) + (n - k) = m + n - 2 * k by omega,
     show m + n - 2 * k + k = m + n - k by omega]
@@ -685,28 +709,32 @@ theorem gegenbauerProductCoeff_eq (lam : ℂ) {m n k : ℕ} (hkm : k ≤ m) (hkn
   simp only [div_eq_mul_inv, mul_inv_rev]
   ring
 
-/-- Formula under the stated hypotheses: `ultrasphPoly lam m x * ultrasphPoly lam n x = ∑ k ∈
-Finset.range (min m n + 1), (m + n + (lam : ℂ) - 2 * k) * (m + n - 2 * k).factorial / ((m + n
-+ lam - k) * k.factorial * (m - k).factorial * (n - k).factorial) * (poch lam k * poch lam (m
-- k) * poch lam (n - k) * poch (2 * lam) (m + n - k) / (poch lam (m + n - k) * poch (2 * lam)
-(m + n - 2 * k))) * ultrasphPoly lam (m + n - 2 * k) x`. -/
+/-- Formula under the stated hypotheses:
+`ultrasphericalPolynomial lam m x * ultrasphericalPolynomial lam n x = ∑ k ∈ Finset.range (min m n +
+1), (m + n + (lam : ℂ) - 2 * k) * (m + n - 2 * k).factorial / ((m + n + lam - k) * k.factorial * (m
+- k).factorial * (n - k).factorial) * (pochhammer lam k * pochhammer lam (m
+- k) * pochhammer lam (n - k) * pochhammer (2 * lam) (m + n - k) / (pochhammer lam (m + n - k) *
+  pochhammer (2 * lam)
+(m + n - 2 * k))) * ultrasphericalPolynomial lam (m + n - 2 * k) x`. -/
 @[dlmf 18.18.E22]
-theorem ultrasphPoly_linearization {lam : ℝ} (hlam : 0 < lam) (m n : ℕ) (x : ℂ) :
-    ultrasphPoly lam m x * ultrasphPoly lam n x = ∑ k ∈ Finset.range (min m n + 1),
+theorem ultrasphericalPolynomial_linearization {lam : ℝ} (hlam : 0 < lam) (m n : ℕ) (x : ℂ) :
+    ultrasphericalPolynomial lam m x * ultrasphericalPolynomial lam n x = ∑ k ∈
+        Finset.range (min m n + 1),
       (m + n + (lam : ℂ) - 2 * k) * (m + n - 2 * k).factorial /
       ((m + n + lam - k) * k.factorial * (m - k).factorial * (n - k).factorial) *
-      (poch lam k * poch lam (m - k) * poch lam (n - k) * poch (2 * lam) (m + n - k) /
-       (poch lam (m + n - k) * poch (2 * lam) (m + n - 2 * k)))
-           * ultrasphPoly lam (m + n - 2 * k) x := by
+      (pochhammer lam k * pochhammer lam (m - k) * pochhammer lam (n - k) *
+          pochhammer (2 * lam) (m + n - k) /
+       (pochhammer lam (m + n - k) * pochhammer (2 * lam) (m + n - 2 * k)))
+           * ultrasphericalPolynomial lam (m + n - 2 * k) x := by
   have hl : 0 < (lam : ℂ).re := by simpa using hlam
-  have he : ultrasphPoly lam m x * ultrasphPoly lam n x =
+  have he : ultrasphericalPolynomial lam m x * ultrasphericalPolynomial lam n x =
       ∑ k ∈ Finset.range (min m n + 1), gegenbauerProductCoeff lam (m - k) (n - k) k *
-        ultrasphPoly lam (m + n - 2 * k) x := by
+        ultrasphericalPolynomial lam (m + n - 2 * k) x := by
     rcases le_total n m with hnm | hmn
     · rw [min_eq_right hnm]
-      exact ultrasphPoly_product_eq_sum_of_le hl m n hnm x
+      exact ultrasphericalPolynomial_product_eq_sum_of_le hl m n hnm x
     · rw [min_eq_left hmn, mul_comm]
-      have hh := ultrasphPoly_product_eq_sum_of_le hl n m hmn x
+      have hh := ultrasphericalPolynomial_product_eq_sum_of_le hl n m hmn x
       simpa only [gegenbauerLinearizationSum, gegenbauerProductCoeff_swap (lam : ℂ),
           Nat.add_comm n m] using hh
   rw [he]
@@ -716,33 +744,38 @@ theorem ultrasphPoly_linearization {lam : ℝ} (hlam : 0 < lam) (m n : ℕ) (x :
   have hkn : k ≤ n := by have := Finset.mem_range.mp hk; omega
   rw [gegenbauerProductCoeff_eq (lam : ℂ) hkm hkn]
 
-/-- Formula under the stated hypotheses: `∑ k ∈ Finset.range (n + 1), ultrasphPoly lam k x *
-ultrasphPoly μ (n - k) x = ultrasphPoly (lam + μ) n x`. -/
+/-- Formula under the stated hypotheses:
+`∑ k ∈ Finset.range (n + 1), ultrasphericalPolynomial lam k x * ultrasphericalPolynomial μ (n - k) x
+= ultrasphericalPolynomial (lam + μ) n x`. -/
 @[dlmf 18.18.E29]
-theorem ultrasphPoly_convolution {lam μ : ℂ} (hlam : 0 < lam.re) (hμ : 0 < μ.re) (n : ℕ) (x : ℂ) :
+theorem ultrasphericalPolynomial_convolution {lam μ : ℂ} (hlam : 0 < lam.re) (hμ : 0 < μ.re)
+    (n : ℕ) (x : ℂ) :
     ∑ k ∈ Finset.range (n + 1),
-        ultrasphPoly lam k x * ultrasphPoly μ (n - k) x = ultrasphPoly (lam + μ) n x := by
+        ultrasphericalPolynomial lam k x * ultrasphericalPolynomial μ (n - k) x =
+            ultrasphericalPolynomial (lam + μ) n x := by
   obtain ⟨w, hw, rfl⟩ := exists_eq_half_add_recip x
   have h1 : -1 / 2 < lam.re := by linarith
   have h2 : -1 / 2 < μ.re := by linarith
   have h3 : -1 / 2 < (lam + μ).re := by rw [Complex.add_re]; linarith
-  simp_rw [ultrasphPoly_eq_coeff_gegenbauerSeries h1 hw,
-      ultrasphPoly_eq_coeff_gegenbauerSeries h2 hw,
-    ultrasphPoly_eq_coeff_gegenbauerSeries h3 hw]
+  simp_rw [ultrasphericalPolynomial_eq_coeff_gegenbauerSeries h1 hw,
+      ultrasphericalPolynomial_eq_coeff_gegenbauerSeries h2 hw,
+    ultrasphericalPolynomial_eq_coeff_gegenbauerSeries h3 hw]
   exact sum_coeff_mul_coeff_gegenbauerSeries lam μ w n
 
 /-- Formula under the stated hypotheses: `∑ k ∈ Finset.range (n + 1), (k + 2 * lam) / (2 * lam) *
-ultrasphPoly lam k x * x ^ (n - k) = ultrasphPoly (lam + 1) n x`. -/
+ultrasphericalPolynomial lam k x * x ^ (n - k) = ultrasphericalPolynomial (lam + 1) n x`. -/
 @[dlmf 18.18.E30]
-theorem ultrasphPoly_geometric_convolution {lam : ℂ} (hlam : 0 < lam.re) (n : ℕ) (x : ℂ) :
-    ∑ k ∈ Finset.range (n + 1), (k + 2 * lam) / (2 * lam) * ultrasphPoly lam k x * x ^ (n - k) =
-      ultrasphPoly (lam + 1) n x := by
+theorem ultrasphericalPolynomial_geometric_convolution {lam : ℂ} (hlam : 0 < lam.re)
+    (n : ℕ) (x : ℂ) :
+    ∑ k ∈ Finset.range (n + 1), (k + 2 * lam) / (2 * lam) *
+        ultrasphericalPolynomial lam k x * x ^ (n - k) =
+      ultrasphericalPolynomial (lam + 1) n x := by
   obtain ⟨w, hw, rfl⟩ := exists_eq_half_add_recip x
   have h1 : -1 / 2 < lam.re := by linarith
   have h2 : -1 / 2 < (lam + 1).re := by rw [Complex.add_re, Complex.one_re]; linarith
   have hlam0 : lam ≠ 0 := fun h => by rw [h, Complex.zero_re] at hlam; exact lt_irrefl _ hlam
-  simp_rw [ultrasphPoly_eq_coeff_gegenbauerSeries h1 hw,
-      ultrasphPoly_eq_coeff_gegenbauerSeries h2 hw]
+  simp_rw [ultrasphericalPolynomial_eq_coeff_gegenbauerSeries h1 hw,
+      ultrasphericalPolynomial_eq_coeff_gegenbauerSeries h2 hw]
   exact sum_weighted_coeff_gegenbauerSeries hlam0 hw n
 
 /-- `U_{n+2} = 2 T_{n+2} + U_n`. -/
@@ -860,27 +893,28 @@ theorem chebyshevU_odd_sum (n : ℕ) (x : ℂ) :
       show (2 : ℤ) * ((n + 1 : ℕ) : ℤ) + 3 = 2 * (n : ℤ) + 3 + 2 by push_cast; ring]
     linear_combination 2 * h1 - h2
 
-/-- Formula under the stated hypotheses: `∑ k ∈ Finset.range (n + 1), legendrePolyP k x *
-legendrePolyP (n - k) x = (Chebyshev.U ℂ n).eval x`. -/
+/-- Formula under the stated hypotheses: `∑ k ∈ Finset.range (n + 1), legendrePolynomialP k x *
+legendrePolynomialP (n - k) x = (Chebyshev.U ℂ n).eval x`. -/
 @[dlmf 18.18.E36]
 theorem legendre_convolution (n : ℕ) (x : ℂ) :
     ∑ k ∈ Finset.range (n + 1),
-        legendrePolyP k x * legendrePolyP (n - k) x = (Chebyshev.U ℂ n).eval x := by
-  simp_rw [legendre_eq_ultrasphPoly]
-  rw [ultrasphPoly_convolution (by norm_num) (by norm_num), eval_U_eq_ultrasphPoly]
+        legendrePolynomialP k x * legendrePolynomialP (n - k) x = (Chebyshev.U ℂ n).eval x := by
+  simp_rw [legendre_eq_ultrasphericalPolynomial]
+  rw [ultrasphericalPolynomial_convolution (by norm_num) (by norm_num),
+      eval_U_eq_ultrasphericalPolynomial]
   norm_num
 
 /-- Formula under the stated hypotheses: `∑ k ∈ Finset.range (n + 1), laguerreExtended α k x =
 laguerreExtended (α + 1) n x`. -/
 @[dlmf 18.18.E37]
-theorem laguerrePolyL_sum (α : ℂ) (n : ℕ) (x : ℂ) :
+theorem laguerrePolynomialL_sum (α : ℂ) (n : ℕ) (x : ℂ) :
     ∑ k ∈ Finset.range (n + 1), laguerreExtended α k x = laguerreExtended (α + 1) n x := by
   -- the polynomial identity in `α` is proved for `Re α > 0` and extended by analyticity
   have hana : ∀ m : ℕ, AnalyticOnNhd ℂ (fun a : ℂ => laguerreExtended a m x) Set.univ := by
     intro m a _
     unfold laguerreExtended
     refine Finset.analyticAt_fun_sum (Finset.range (m + 1)) fun k _ => ?_
-    have h : AnalyticAt ℂ (fun a : ℂ => poch (a + k + 1) (m - k)) a :=
+    have h : AnalyticAt ℂ (fun a : ℂ => pochhammer (a + k + 1) (m - k)) a :=
       (((Polynomial.differentiable (ascPochhammer ℂ (m - k))).comp
         ((differentiable_id.add_const _).add_const _))).analyticAt a
     exact (h.div_const).mul analyticAt_const
@@ -903,27 +937,27 @@ theorem laguerrePolyL_sum (α : ℂ) (n : ℕ) (x : ℂ) :
     induction n with
     | zero => simp
     | succ m ih =>
-      rw [Finset.sum_range_succ, ih, laguerrePolyL_raise_parameter ha']
+      rw [Finset.sum_range_succ, ih, laguerrePolynomialL_raise_parameter ha']
       ring
   exact congrFun key α
 
 /-- Formula under the stated hypotheses: `∑ k ∈ Finset.range (n + 1), (n.choose k : ℂ) * (aeval x
-(hermitePolyH (2 * k)) : ℂ) * aeval y (hermitePolyH (2 * n - 2 * k)) = (-1 : ℂ) ^ n * 2 ^ (2 *
-n) * n.factorial * laguerrePolyL 0 n (x ^ 2 + y ^ 2)`. -/
+(hermitePolynomialH (2 * k)) : ℂ) * aeval y (hermitePolynomialH (2 * n - 2 * k)) = (-1 : ℂ) ^ n * 2
+^ (2 * n) * n.factorial * laguerrePolynomialL 0 n (x ^ 2 + y ^ 2)`. -/
 @[dlmf 18.18.E40]
-theorem hermitePolyH_even_convolution (n : ℕ) (x y : ℂ) :
-    ∑ k ∈ Finset.range (n + 1), (n.choose k : ℂ) * (aeval x (hermitePolyH (2 * k)) : ℂ) *
-      aeval y (hermitePolyH (2 * n - 2 * k)) = (-1 : ℂ) ^ n * 2 ^ (2 * n) * n.factorial
-          * laguerrePolyL 0 n (x ^ 2 + y ^ 2) := by
+theorem hermitePolynomialH_even_convolution (n : ℕ) (x y : ℂ) :
+    ∑ k ∈ Finset.range (n + 1), (n.choose k : ℂ) * (aeval x (hermitePolynomialH (2 * k)) : ℂ) *
+      aeval y (hermitePolynomialH (2 * n - 2 * k)) = (-1 : ℂ) ^ n * 2 ^ (2 * n) * n.factorial
+          * laguerrePolynomialL 0 n (x ^ 2 + y ^ 2) := by
   have hc : ∀ k : ℕ, (-1 / 2 : ℂ) + 1 ≠ -(k : ℂ) := not_neg_nat_of_re_pos (by norm_num)
   have hc0 : ∀ k : ℕ, (0 : ℂ) + 1 ≠ -(k : ℂ) := not_neg_nat_of_re_pos (by norm_num)
-  have hadd := laguerrePolyL_addition (-1 / 2) (-1 / 2) (x ^ 2) (y ^ 2) n
+  have hadd := laguerrePolynomialL_addition (-1 / 2) (-1 / 2) (x ^ 2) (y ^ 2) n
   rw [show (-1 / 2 : ℂ) + -1 / 2 + 1 = 0 by ring, laguerreExtended_eq hc0] at hadd
   rw [hadd, Finset.mul_sum]
   refine Finset.sum_congr rfl fun k hk => ?_
   have hkn : k ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hk)
-  rw [show 2 * n - 2 * k = 2 * (n - k) by omega, hermitePolyH_even_eq_laguerrePolyL,
-    hermitePolyH_even_eq_laguerrePolyL, laguerreExtended_eq hc, laguerreExtended_eq hc,
+  rw [show 2 * n - 2 * k = 2 * (n - k) by omega, hermitePolynomialH_even_eq_laguerrePolynomialL,
+    hermitePolynomialH_even_eq_laguerrePolynomialL, laguerreExtended_eq hc, laguerreExtended_eq hc,
     Nat.cast_choose ℂ hkn]
   have h1 : (k.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
   have h2 : ((n - k).factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
@@ -944,22 +978,24 @@ theorem summable_norm_regularized0F1 (c w : ℂ) :
   simpa [FormalMultilinearSeries.ofScalars_norm, norm_mul, norm_pow] using this
 
 /-- `(a)ₖ / Γ(a + k) = 1 / Γ(a)` away from the poles of `Γ`. -/
-theorem poch_div_Gamma_add_nat {a : ℂ} (ha : ∀ k : ℕ, a ≠ -k) (k : ℕ) :
-    poch a k / Complex.Gamma (a + k) = 1 / Complex.Gamma a := by
+theorem pochhammer_div_Gamma_add_nat {a : ℂ} (ha : ∀ k : ℕ, a ≠ -k) (k : ℕ) :
+    pochhammer a k / Complex.Gamma (a + k) = 1 / Complex.Gamma a := by
   have h := Complex.Gamma_add_nat_div_Gamma_eq (n := k) a ha
   have hG : Complex.Gamma a ≠ 0 := Complex.Gamma_ne_zero ha
-  rw [poch, ← h]
+  rw [pochhammer, ← h]
   have hGk : Complex.Gamma (a + k) ≠ 0 := Complex.Gamma_ne_zero fun m hm =>
     ha (m + k) (by push_cast; linear_combination hm)
   field_simp
 
-/-- The series with terms `(fun n : ℕ => jacobiPolyP α β n x / (Gamma (n + α + 1) * Gamma (n + β +
-1)) * z ^ n)` converges to `(regularizedHGFun (∅ : Multiset ℂ) {α + 1} ((x - 1) * z / 2) *
-regularizedHGFun (∅ : Multiset ℂ) {β + 1} ((x + 1) * z / 2))`. -/
+/-- The series with terms
+`(fun n : ℕ => jacobiPolynomialP α β n x / (Gamma (n + α + 1) * Gamma (n + β + 1)) * z ^ n)`
+converges to `(regularizedHGFun (∅ : Multiset ℂ) {α + 1} ((x - 1) * z / 2) * regularizedHGFun (∅ :
+Multiset ℂ) {β + 1} ((x + 1) * z / 2))`. -/
 @[dlmf 18.12.E2]
 theorem jacobi_regularized_generating_function {α β : ℂ} (hα : -1 < α.re)
     (hβ : -1 < β.re) (x z : ℂ) :
-    HasSum (fun n : ℕ => jacobiPolyP α β n x / (Gamma (n + α + 1) * Gamma (n + β + 1)) * z ^ n)
+    HasSum (fun n : ℕ => jacobiPolynomialP α β n x /
+        (Gamma (n + α + 1) * Gamma (n + β + 1)) * z ^ n)
       (regularizedHGFun (∅ : Multiset ℂ) {α + 1} ((x - 1) * z / 2) *
        regularizedHGFun (∅ : Multiset ℂ) {β + 1} ((x + 1) * z / 2)) := by
   set u := (x - 1) * z / 2
@@ -977,16 +1013,16 @@ theorem jacobi_regularized_generating_function {α β : ℂ} (hα : -1 < α.re)
     Finset.sum_div, Finset.sum_mul]
   refine Finset.sum_congr rfl fun k hk => ?_
   have hkn : k ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hk)
-  have hA : poch (α + n - k + 1) k / Gamma (n + α + 1) = 1 / Gamma (α + 1 + (n - k : ℕ)) := by
-    have := poch_div_Gamma_add_nat (a := α + 1 + (n - k : ℕ)) (not_neg_nat_of_re_pos (by
+  have hA : pochhammer (α + n - k + 1) k / Gamma (n + α + 1) = 1 / Gamma (α + 1 + (n - k : ℕ)) := by
+    have := pochhammer_div_Gamma_add_nat (a := α + 1 + (n - k : ℕ)) (not_neg_nat_of_re_pos (by
       simp only [Complex.add_re, Complex.one_re, Complex.natCast_re]
       linarith [(Nat.cast_nonneg (α := ℝ) (n - k))])) k
     rw [← this]
     congr 1
     · congr 1; push_cast [Nat.cast_sub hkn]; ring
     · congr 1; push_cast [Nat.cast_sub hkn]; ring
-  have hB : poch (β + k + 1) (n - k) / Gamma (n + β + 1) = 1 / Gamma (β + 1 + k) := by
-    have := poch_div_Gamma_add_nat (a := β + 1 + k) (not_neg_nat_of_re_pos (by
+  have hB : pochhammer (β + k + 1) (n - k) / Gamma (n + β + 1) = 1 / Gamma (β + 1 + k) := by
+    have := pochhammer_div_Gamma_add_nat (a := β + 1 + k) (not_neg_nat_of_re_pos (by
       simp only [Complex.add_re, Complex.one_re, Complex.natCast_re]
       linarith [(Nat.cast_nonneg (α := ℝ) k)])) (n - k)
     rw [← this]

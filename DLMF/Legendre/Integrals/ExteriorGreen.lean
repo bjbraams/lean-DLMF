@@ -335,7 +335,7 @@ theorem ExteriorGreen.sub_one_log_isBigO :
 
 /-- `P_α(z) = 𝐅(α+1,-α;1;(1-z)/2)` for every `z`. -/
 theorem ExteriorGreen.associatedP_eq (α z : ℂ) :
-    associatedP α 0 z = regularizedGaussHG (α+1) (-α) 1 ((1-z)/2) := by
+    associatedP α 0 z = regularizedGaussHypergeometric (α+1) (-α) 1 ((1-z)/2) := by
   simp [associatedP]
 
 /-- `P_α - 1 = O(τ ln τ)` with `τ = (x-1)/2`, as `x → 1⁺`. -/
@@ -343,16 +343,16 @@ theorem ExteriorGreen.P_isBigO (α : ℂ) :
     (fun x : ℝ => associatedP α 0 x + (0:ℂ) * Real.log ((x-1)/2) - 1) =O[𝓝[>] (1:ℝ)]
       (fun x => (x-1)/2 * Real.log ((x-1)/2)) := by
   have hfun : (fun y : ℝ => associatedP α 0 y) =
-      fun y : ℝ => regularizedGaussHG (α+1) (-α) 1 ((1-(y:ℂ))/2) :=
+      fun y : ℝ => regularizedGaussHypergeometric (α+1) (-α) 1 ((1-(y:ℂ))/2) :=
     funext fun y => ExteriorGreen.associatedP_eq α y
   have hw : ((1-((1:ℝ):ℂ))/2) ∈ cutPlane := by simpa using zero_mem_cutPlane
   have hd : DifferentiableAt ℝ (fun y : ℝ => associatedP α 0 y) 1 := by
     rw [hfun]
-    exact ((differentiableAt_regularizedGaussHG _ _ _ hw).restrictScalars ℝ).comp (1:ℝ)
+    exact ((differentiableAt_regularizedGaussHypergeometric _ _ _ hw).restrictScalars ℝ).comp (1:ℝ)
       (by fun_prop)
   have h1 := hd.isBigO_sub.mono (nhdsWithin_le_nhds (s := Ioi (1:ℝ)))
   have hv : associatedP α 0 ((1:ℝ):ℂ) = 1 := by
-    rw [ExteriorGreen.associatedP_eq]; simp [regularizedGaussHG_at_zero]
+    rw [ExteriorGreen.associatedP_eq]; simp [regularizedGaussHypergeometric_at_zero]
   simp only [hv] at h1
   have h2 : (fun x : ℝ => x - 1) =O[𝓝[>] (1:ℝ)] (fun x : ℝ => (((x-1)/2 : ℝ) : ℂ)) := by
     refine Asymptotics.IsBigO.of_bound 2 (Eventually.of_forall fun x => ?_)
@@ -401,9 +401,9 @@ theorem ExteriorGreen.Q_isBigO_succ {α : ℂ} (h : LegendreQRegular α 0) :
 /-- `𝑸_ν(x) = O(x^{-Re ν - 1})` as `x → ∞`, for every degree `ν`. -/
 theorem ExteriorGreen.olverQ_isBigO_atTop (ν : ℂ) :
     (fun x : ℝ => olverQ ν 0 x) =O[atTop] (fun x : ℝ => x^(-(ν.re+1))) := by
-  set G := regularizedGaussHG ((ν+0+2)/2) ((ν+0+1)/2) (ν+3/2)
+  set G := regularizedGaussHypergeometric ((ν+0+2)/2) ((ν+0+1)/2) (ν+3/2)
   have hG : Tendsto (fun x : ℝ => G (1/(x:ℂ)^2)) atTop (𝓝 (G 0)) :=
-    (analyticAt_regularizedGaussHG _ _ _ zero_mem_cutPlane).continuousAt.tendsto.comp
+    (analyticAt_regularizedGaussHypergeometric _ _ _ zero_mem_cutPlane).continuousAt.tendsto.comp
       tendsto_one_div_sq_atTop
   have hG1 := hG.isBigO_one ℝ
   have hP : (fun x : ℝ => ((x:ℂ)^(ν+1))⁻¹) =O[atTop] (fun x : ℝ => x^(-(ν.re+1))) := by
@@ -547,7 +547,7 @@ theorem ExteriorGreen.isBigO_rpow_mono {f : ℝ → ℂ} {p q : ℝ} (hpq : p �
 /-- `𝑄_λ(x) = Γ(λ+1) √π 2^{-λ-1} x^{-λ-1} 𝐅(λ/2+1, λ/2+1/2; λ+3/2; x^{-2})` for `x > 0`. -/
 theorem UniformBound.associatedQ_exterior (lam : ℂ) {x : ℝ} (hx0 : 0 < x) :
     associatedQ lam 0 x = Gamma (lam+1) * ((Real.sqrt π : ℂ) * ((2:ℂ)^(lam+1))⁻¹ *
-      ((x:ℂ)^(lam+1))⁻¹ * regularizedGaussHG ((lam+0+2)/2) ((lam+0+1)/2) (lam+3/2)
+      ((x:ℂ)^(lam+1))⁻¹ * regularizedGaussHypergeometric ((lam+0+2)/2) ((lam+0+1)/2) (lam+3/2)
           (1/(x:ℂ)^2)) := by
   simp only [associatedQ, olverQ, legendreBranchPower, zero_div, zero_mul, Complex.exp_zero,
     mul_one, add_zero, one_mul]
@@ -559,14 +559,14 @@ theorem UniformBound.associatedQ_exterior (lam : ℂ) {x : ℝ} (hx0 : 0 < x) :
 /-- `𝐅(a,b;a+b;y)` is `O((1-y)^{-1/4})` on `[0,1)`, uniformly for `‖a‖, ‖b‖ ≤ R`. -/
 theorem UniformBound.bound_real (R : ℝ) : ∃ M : ℝ, 0 ≤ M ∧ ∀ a b : ℂ, ‖a‖ ≤ R → ‖b‖ ≤ R →
     ∀ y : ℝ, 0 ≤ y →
-    y < 1 → ‖regularizedGaussHG a b (a+b) (y:ℂ)‖ ≤ M * (1-y)^(-(1/4:ℝ)) := by
+    y < 1 → ‖regularizedGaussHypergeometric a b (a+b) (y:ℂ)‖ ≤ M * (1-y)^(-(1/4:ℝ)) := by
   obtain ⟨C, hC0, hC⟩ := UniformBound.bound_zeroBalanced R
   obtain ⟨MF, hMF⟩ := UniformBound.bound_F (2*|R| + 1)
   refine ⟨max MF 0 + C, by positivity, fun a b ha hb y hy0 hy1 => ?_⟩
   have hR1 : R ≤ |R| := le_abs_self R
   have hp : 1 ≤ (1-y)^(-(1/4:ℝ)) := FerrersGreen.rpow_ge_one (by linarith) (by linarith)
   have hn : ‖(y:ℂ)‖ < 1 := by rw [Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hy0]; exact hy1
-  rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hn]
+  rw [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hn]
   by_cases hyh : y ≤ 1/2
   · have hn' : ‖(y:ℂ)‖ ≤ 1/2 := by
                                   rw [Complex.norm_real, Real.norm_eq_abs,
@@ -657,7 +657,7 @@ theorem UniformBound.bound_exteriorQ {ν : ℂ} (hν : LegendreQRegular ν 0) {r
     rw [Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg (Real.sqrt_nonneg _)]
   rw [UniformBound.associatedQ_exterior lam hx0, norm_mul, norm_mul, norm_mul, norm_mul, hsq]
   calc ‖Gamma (lam+1)‖ * (Real.sqrt π * ‖((2:ℂ)^(lam+1))⁻¹‖ * ‖((x:ℂ)^(lam+1))⁻¹‖ *
-        ‖regularizedGaussHG ((lam+0+2)/2) ((lam+0+1)/2) (lam+3/2) (1/(x:ℂ)^2)‖)
+        ‖regularizedGaussHypergeometric ((lam+0+2)/2) ((lam+0+1)/2) (lam+3/2) (1/(x:ℂ)^2)‖)
       ≤ B1 * (Real.sqrt π * B2 * x^(-(ν.re-r)-1) * (MS * (1-1/x^2)^(-(1/4:ℝ)))) := by
         gcongr
     _ = Real.sqrt π * B1 * B2 * MS * ((1-1/x^2)^(-(1/4:ℝ)) * x^(-(ν.re-r)-1)) := by ring
@@ -671,7 +671,7 @@ theorem UniformBound.continuousAt_exteriorQ {ν : ℂ} (hν : LegendreQRegular �
   have hx0' : (x:ℂ) ≠ 0 := ofReal_ne_zero.mpr hx0.ne'
   have heq : (fun lam : ℂ => associatedQ lam 0 x) = fun lam => Gamma (lam+1) *
       ((Real.sqrt π : ℂ) * ((2:ℂ)^(lam+1))⁻¹ * ((x:ℂ)^(lam+1))⁻¹ *
-        regularizedGaussHG ((lam+0+2)/2) ((lam+0+1)/2) (lam+3/2) (1/(x:ℂ)^2)) :=
+        regularizedGaussHypergeometric ((lam+0+2)/2) ((lam+0+1)/2) (lam+3/2) (1/(x:ℂ)^2)) :=
     funext fun lam => UniformBound.associatedQ_exterior lam hx0
   rw [heq]
   have hz : 1/(x:ℂ)^2 ∈ cutPlane := by
@@ -679,7 +679,7 @@ theorem UniformBound.continuousAt_exteriorQ {ν : ℂ} (hν : LegendreQRegular �
     rw [norm_div, norm_one, norm_pow, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hx0,
       div_lt_one (by positivity)]
     nlinarith
-  have hG := (differentiable_regularizedGaussHG_comp (A := fun lam : ℂ => (lam+0+2)/2)
+  have hG := (differentiable_regularizedGaussHypergeometric_comp (A := fun lam : ℂ => (lam+0+2)/2)
     (B := fun lam : ℂ => (lam+0+1)/2) (C := fun lam : ℂ => lam+3/2) (by fun_prop) (by fun_prop)
     (by fun_prop) hz).continuous.continuousAt (x := ν)
   refine ContinuousAt.mul (ContinuousAt.comp (g := Gamma) (f := fun l : ℂ => l + 1)

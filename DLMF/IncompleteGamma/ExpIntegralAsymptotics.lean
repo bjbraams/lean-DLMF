@@ -21,16 +21,23 @@ sectors of the logarithmic plane, and for large order `p` (DLMF §8.20).
 
 ## Main results
 
-* `genExpIntE_exact_remainder`: the expansion with exact remainder, DLMF 8.20.1.
-* `genExpIntE_eq_exp_mul_integral`, `genExpIntEOnLog_eq_integral_rotate`: Laplace
+* `expIntegralE_exact_remainder`: the expansion with exact remainder, DLMF 8.20.1.
+* `expIntegralE_eq_exp_mul_integral`, `genExpIntEOnLog_eq_integral_rotate`: Laplace
   representations of `E_p`, the latter rotated on the logarithmic plane.
 * `genExpIntEOnLog_strip_asymptotic`: Watson's expansion of `E_p` on a strip.
-* `genExpIntE_log_sector_asymptotic`: the expansion on `|ph z| ≤ 3π/2 - δ`, DLMF 8.20.2.
-* `genExpIntE_extended_sector_asymptotic`: the extended-sector expansion with connection
+* `expIntegralE_log_sector_asymptotic`: the expansion on `|ph z| ≤ 3π/2 - δ`, DLMF 8.20.2.
+* `expIntegralE_extended_sector_asymptotic`: the extended-sector expansion with connection
   terms, DLMF 8.20.3.
 * `expIntLargeOrderPolynomial_initial`, `expIntLargeOrderPolynomial_degree`: DLMF 8.20.5 and
   the degree statement of DLMF §8.20(ii).
-* `genExpIntE_large_order_uniform`: the uniform large-order expansion, DLMF 8.20.6.
+* `expIntegralE_large_order_uniform`: the uniform large-order expansion, DLMF 8.20.6.
+
+## Implementation notes
+
+The uniform expansion 8.20.6 follows by repeated integration by parts in
+`e^{λp} E_p(λp) = ∫₁^∞ e^{-λp(t-1)} t^{-p} dt`. The `k`-th step produces
+`g_k(t) = A_k(λt)/(1+λt)^{2k}`, which is bounded uniformly in `λ ≥ 0` and `t ≥ 0` since
+`deg A_k ≤ k`, and the remainder is controlled by `(1+λ) ∫₁^∞ e^{-λp(t-1)} t^{-p} dt ≤ 1/(p-1)`.
 -/
 
 @[expose] public noncomputable section
@@ -40,22 +47,23 @@ open DLMF.Core
 
 namespace DLMF.Confluent
 
-/-- Formula under the stated hypotheses: `genExpIntE p z=exp (-z)/z*(∑ k ∈ Finset.range N, (-1 :
-ℂ)^k*poch p k/z^k)+(-1 : ℂ)^N*poch p N/z^N*genExpIntE (N+p) z`. -/
+/-- Formula under the stated hypotheses: `expIntegralE p z=exp (-z)/z*(∑ k ∈ Finset.range N, (-1 :
+ℂ)^k*pochhammer p k/z^k)+(-1 : ℂ)^N*pochhammer p N/z^N*expIntegralE (N+p) z`. -/
 @[dlmf 8.20.E1]
-theorem genExpIntE_exact_remainder (p : ℂ) {z : ℂ} (hz : z ≠ 0) (N : ℕ) :
-    genExpIntE p z=exp (-z)/z*(∑ k ∈ Finset.range N, (-1 : ℂ)^k*poch p k/z^k)+(-1 : ℂ)^N*poch p
-        N/z^N*genExpIntE (N+p) z := by
+theorem expIntegralE_exact_remainder (p : ℂ) {z : ℂ} (hz : z ≠ 0) (N : ℕ) :
+    expIntegralE p z=exp
+        (-z)/z*(∑ k ∈ Finset.range N, (-1 : ℂ)^k*pochhammer p k/z^k)+(-1 : ℂ)^N*pochhammer p
+        N/z^N*expIntegralE (N+p) z := by
   induction N with
-  | zero => simp [poch]
+  | zero => simp [pochhammer]
   | succ N ih =>
-    have h := genExpIntE_add_one ((N:ℂ)+p) hz
+    have h := expIntegralE_add_one ((N:ℂ)+p) hz
     rw [show (N:ℂ)+p+1 = ((N+1:ℕ):ℂ)+p by push_cast; ring] at h
-    rw [ih, Finset.sum_range_succ, poch_succ, pow_succ, pow_succ]
+    rw [ih, Finset.sum_range_succ, pochhammer_succ, pow_succ, pow_succ]
     have hzN : z^N ≠ 0 := pow_ne_zero _ hz
-    set S := ∑ k ∈ Finset.range N, (-1 : ℂ)^k*poch p k/z^k
+    set S := ∑ k ∈ Finset.range N, (-1 : ℂ)^k*pochhammer p k/z^k
     field_simp
-    linear_combination (-1:ℂ)^N*poch p N*h
+    linear_combination (-1:ℂ)^N*pochhammer p N*h
 
 /-- Polynomial bound for `(1+t)^{-p}` on the sector `|arg t| ≤ |θ| < π`. -/
 theorem exists_norm_one_add_cpow_neg_le (p : ℂ) {θ : ℝ} (hθ : |θ| < π) :
@@ -100,17 +108,17 @@ theorem exists_norm_one_add_cpow_neg_le (p : ℂ) {θ : ℝ} (hθ : |θ| < π) :
     _ = _ := by ring
 
 /-- `E_p(z) = e^{-z} ∫₀^∞ e^{-zt} (1+t)^{-p} dt` for `re z > 0`. -/
-theorem genExpIntE_eq_exp_mul_integral {p z : ℂ} (hz : 0 < z.re) :
-    genExpIntE p z = cexp (-z) * ∫ t : ℝ in Ioi 0, cexp (-(z * t)) * (1 + (t : ℂ)) ^ (-p) := by
+theorem expIntegralE_eq_exp_mul_integral {p z : ℂ} (hz : 0 < z.re) :
+    expIntegralE p z = cexp (-z) * ∫ t : ℝ in Ioi 0, cexp (-(z * t)) * (1 + (t : ℂ)) ^ (-p) := by
   have hz0 : z ≠ 0 := fun h => by simp [h] at hz
-  rw [genExpIntE_eq_exp_mul_kummerU p hz0, kummerU_laplace (by norm_num) hz]
+  rw [expIntegralE_eq_exp_mul_kummerU p hz0, kummerU_laplace (by norm_num) hz]
   simp only [Gamma_one, div_one, one_mul, sub_self, cpow_zero, mul_one,
     show (2 - p : ℂ) - 1 - 1 = -p by ring, neg_mul]
 
 /-- On the principal strip the logarithmic-plane `E_p` is the principal one. -/
-theorem genExpIntEOnLog_eq_genExpIntE (p : ℂ) {w : ℂ} (h1 : -π < w.im) (h2 : w.im ≤ π) :
-    genExpIntEOnLog p w = genExpIntE p (cexp w) := by
-  rw [genExpIntEOnLog, genExpIntE, upperIncGammaOnLog_eq_upperIncGamma _ h1 h2,
+theorem genExpIntEOnLog_eq_expIntegralE (p : ℂ) {w : ℂ} (h1 : -π < w.im) (h2 : w.im ≤ π) :
+    genExpIntEOnLog p w = expIntegralE p (cexp w) := by
+  rw [genExpIntEOnLog, expIntegralE, upperIncompleteGammaOnLog_eq_upperIncompleteGamma _ h1 h2,
     cpow_def_of_ne_zero (Complex.exp_ne_zero w), Complex.log_exp h1 h2, mul_comm w]
 
 /-- `1 + r e^{iy}` lies in the slit plane for `r ≥ 0` and `|y| < π`. -/
@@ -204,7 +212,7 @@ theorem genExpIntEOnLog_eq_integral_rotate (p : ℂ) {θ : ℝ} (hθ : |θ| < π
   have hL : Differentiable ℂ (genExpIntEOnLog p) := fun v => by
     unfold genExpIntEOnLog
     exact (by fun_prop : Differentiable ℂ fun v : ℂ => cexp ((p - 1) * v)) v |>.mul
-      (hasDerivAt_upperIncGammaOnLog (1 - p) v).differentiableAt
+      (hasDerivAt_upperIncompleteGammaOnLog (1 - p) v).differentiableAt
   -- agreement on the principal strip
   have hagree : ∀ v : ℂ, |v.im| < π / 2 → v ∈ U → genExpIntEOnLog p v =
       cexp (-cexp v) * (exp (θ * I) * ∫ r in Ioi (0 : ℝ),
@@ -216,8 +224,8 @@ theorem genExpIntEOnLog_eq_integral_rotate (p : ℂ) {θ : ℝ} (hθ : |θ| < π
       refine mul_pos (Real.exp_pos _) ?_
       rw [← Real.cos_abs]
       exact Real.cos_pos_of_mem_Ioo ⟨by linarith [abs_nonneg v.im, Real.pi_pos], hv⟩
-    rw [genExpIntEOnLog_eq_genExpIntE p (by linarith [neg_abs_le v.im, Real.pi_pos])
-      (by linarith [le_abs_self v.im, Real.pi_pos]), genExpIntE_eq_exp_mul_integral hre]
+    rw [genExpIntEOnLog_eq_expIntegralE p (by linarith [neg_abs_le v.im, Real.pi_pos])
+      (by linarith [le_abs_self v.im, Real.pi_pos]), expIntegralE_eq_exp_mul_integral hre]
     congr 1
     refine integral_cexp_neg_mul_mul_eq_rotate (F := fun t : ℂ => (1 + t) ^ (-p))
       (σ := 1) (C := C * 2 ^ k) (k := k) one_pos (fun r hr y hy => ?_) (fun r hr hr1 y hy => ?_)
@@ -292,7 +300,7 @@ theorem tendsto_cexp_mul_logStripAtTop (θ : ℝ) {δ : ℝ} (hδ : 0 < δ) :
 /-- Watson's expansion of `E_p` on a strip of the logarithmic plane. -/
 theorem genExpIntEOnLog_strip_asymptotic (p : ℂ) {θ δ : ℝ} (hθ : |θ| < π) (hδ : 0 < δ) :
     HasAsymptoticExpansion (logStripAtTop θ δ) (fun k w => exp (-exp w-(k+1 : ℂ)*w))
-      (fun k => (-1 : ℂ)^k*poch p k) (genExpIntEOnLog p) := by
+      (fun k => (-1 : ℂ)^k*pochhammer p k) (genExpIntEOnLog p) := by
   obtain ⟨C, hC0, hC⟩ := exists_norm_one_add_cpow_neg_le p hθ
   set k := |p.re| with hk
   have hk0 : 0 ≤ k := abs_nonneg _
@@ -351,7 +359,7 @@ theorem genExpIntEOnLog_strip_asymptotic (p : ℂ) {θ δ : ℝ} (hθ : |θ| < �
   · funext n
     have hG : Gamma ((n : ℂ) + 1) = n.factorial := Complex.Gamma_nat_eq_factorial n
     have hf : (n.factorial : ℂ) ≠ 0 := by exact_mod_cast n.factorial_ne_zero
-    simp only [smul_eq_mul, hG, ring_choose_neg_eq_poch, mul_neg, Complex.exp_neg]
+    simp only [smul_eq_mul, hG, ring_choose_neg_eq_pochhammer, mul_neg, Complex.exp_neg]
     field_simp
 
 /-- Three strips `|im w + θ| ≤ π/2 - d/4`, `θ ∈ {π - d/2, 0, -(π - d/2)}`, cover the closed
@@ -391,12 +399,12 @@ theorem logSector_le_sup_logStripAtTop {δ : ℝ} (hδ : 0 < δ) :
         rfl
 
 /-- Identity under the stated parameter and domain assumptions: `HasAsymptoticExpansion (logSector
-(3*π/2-δ)) (fun k w => exp (-exp w-(k+1 : ℂ)*w)) (fun k => (-1 : ℂ)^k*poch p k)
+(3*π/2-δ)) (fun k w => exp (-exp w-(k+1 : ℂ)*w)) (fun k => (-1 : ℂ)^k*pochhammer p k)
 (genExpIntEOnLog p)`. -/
 @[dlmf 8.20.E2]
-theorem genExpIntE_log_sector_asymptotic (p : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < 3*π/2) :
+theorem expIntegralE_log_sector_asymptotic (p : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < 3*π/2) :
     HasAsymptoticExpansion (logSector (3*π/2-δ)) (fun k w => exp (-exp w-(k+1 : ℂ)*w))
-        (fun k => (-1 : ℂ)^k*poch p k) (genExpIntEOnLog p) := by
+        (fun k => (-1 : ℂ)^k*pochhammer p k) (genExpIntEOnLog p) := by
   have hd0 : 0 < min δ 1 / 4 := by have := lt_min hδ one_pos; positivity
   have hd1 : min δ 1 ≤ 1 := min_le_right _ _
   have hθ : |π - min δ 1 / 2| < π := by
@@ -468,14 +476,14 @@ theorem genExpIntEOnLog_sub_connection (p w : ℂ) {m : ℤ} (hm : m = 1 ∨ m =
 
 /-- Estimate under the stated parameter and domain assumptions: `HasAsymptoticExpansion (comap
 (fun w : ℂ => Real.exp w.re) atTop ⊓ 𝓟 {w : ℂ | π/2+δ ≤ ε*w.im ∧ ε*w.im ≤ 7*π/2-δ}) (fun k w
-=> exp (-exp w-(k+1 : ℂ)*w)) (fun k => (-1 : ℂ)^k*poch p k) (fun w => genExpIntEOnLog p
+=> exp (-exp w-(k+1 : ℂ)*w)) (fun k => (-1 : ℂ)^k*pochhammer p k) (fun w => genExpIntEOnLog p
 w-ε*2*π*I/Gamma p*exp (-ε*p*π*I+(p-1)*w))`. -/
 @[dlmf 8.20.E3]
-theorem genExpIntE_extended_sector_asymptotic (p : ℂ) {ε : ℝ} (hε : ε=1 ∨ ε = -1) {δ : ℝ}
+theorem expIntegralE_extended_sector_asymptotic (p : ℂ) {ε : ℝ} (hε : ε=1 ∨ ε = -1) {δ : ℝ}
     (hδ : 0 < δ) (hδ1 : δ < 3*π/2) :
     HasAsymptoticExpansion
         (comap (fun w : ℂ => Real.exp w.re) atTop ⊓ 𝓟 {w : ℂ | π/2+δ ≤ ε*w.im ∧ ε*w.im ≤ 7*π/2-δ})
-        (fun k w => exp (-exp w-(k+1 : ℂ)*w)) (fun k => (-1 : ℂ)^k*poch p k)
+        (fun k w => exp (-exp w-(k+1 : ℂ)*w)) (fun k => (-1 : ℂ)^k*pochhammer p k)
         (fun w => genExpIntEOnLog p w-ε*2*π*I/Gamma p*exp (-ε*p*π*I+(p-1)*w)) := by
   obtain ⟨m, hm, hεm⟩ : ∃ m : ℤ, (m = 1 ∨ m = -1) ∧ ε = m := by
     rcases hε with rfl | rfl
@@ -500,7 +508,7 @@ theorem genExpIntE_extended_sector_asymptotic (p : ℂ) {ε : ℝ} (hε : ε=1 �
       rcases hm with rfl | rfl
       · norm_num at hw ⊢; constructor <;> linarith
       · norm_num at hw ⊢; constructor <;> linarith
-  have h := (genExpIntE_log_sector_asymptotic p hδ hδ1).comp_tendsto hg
+  have h := (expIntegralE_log_sector_asymptotic p hδ hδ1).comp_tendsto hg
   have hφ : (fun (k : ℕ) (w : ℂ) => exp (-exp (w - 2*m*π*I)-(k+1 : ℂ)*(w - 2*m*π*I))) =
       fun (k : ℕ) (w : ℂ) => exp (-exp w-(k+1 : ℂ)*w) := by
     funext k w
@@ -593,16 +601,402 @@ theorem expIntLargeOrderPolynomial_degree {k : ℕ} (hk : 1 ≤ k) :
   rw [hc]
   exact mul_ne_zero (pow_ne_zero _ (by norm_num)) (Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _))
 
+namespace ExpIntLargeOrder
+
+/-- The functions `g_k(t) = A_k(λt)/(1+λt)^{2k}` of the repeated integration by parts in the
+large-order expansion of `E_p(λp)`. -/
+private noncomputable def coeffFn (l : ℝ) (k : ℕ) (t : ℝ) : ℂ :=
+  (expIntLargeOrderPolynomial k).eval ((l : ℂ) * t) / (1 + (l : ℂ) * t) ^ (2 * k)
+
+/-- The recurrence of DLMF 8.20.4 evaluated at a point. -/
+private theorem eval_succ (k : ℕ) (x : ℂ) : (expIntLargeOrderPolynomial (k+1)).eval x =
+    (1 - 2 * k * x) * (expIntLargeOrderPolynomial k).eval x +
+      x * (x + 1) * (expIntLargeOrderPolynomial k).derivative.eval x := by
+  simp [expIntLargeOrderPolynomial]
+
+/-- `g_{k+1} = (t g_k/(1+λt))'`. -/
+private theorem hasDerivAt_coeffFn {l : ℝ} (hl : 0 ≤ l) (k : ℕ) {t : ℝ} (ht : 0 < t) :
+    HasDerivAt (fun t : ℝ => (t : ℂ) / (1 + (l : ℂ) * t) * coeffFn l k t) (coeffFn l (k+1) t)
+      t := by
+  set P := expIntLargeOrderPolynomial k
+  have hne : (1 + (l : ℂ) * t) ≠ 0 := by
+    have : (0 : ℝ) < 1 + l * t := by positivity
+    exact_mod_cast this.ne'
+  have hlin : HasDerivAt (fun t : ℝ => (l : ℂ) * t) (l : ℂ) t := by
+    simpa using ((hasDerivAt_id (t : ℂ)).const_mul (l : ℂ)).comp_ofReal
+  have hP : HasDerivAt (fun t : ℝ => P.eval ((l : ℂ) * t))
+      (P.derivative.eval ((l : ℂ) * t) * l) t :=
+    (P.hasDerivAt _).comp t hlin
+  have hD : HasDerivAt (fun t : ℝ => 1 + (l : ℂ) * t) (l : ℂ) t := by
+    simpa using hlin.const_add 1
+  have hT : HasDerivAt (fun t : ℝ => (t : ℂ)) 1 t := by
+    simpa using (hasDerivAt_id (t : ℂ)).comp_ofReal
+  have h := (hT.mul hP).div (hD.pow (2 * k + 1)) (pow_ne_zero _ hne)
+  have heq : (fun t : ℝ => (t : ℂ) / (1 + (l : ℂ) * t) * coeffFn l k t) =
+      fun t : ℝ => (t : ℂ) * P.eval ((l : ℂ) * t) / (1 + (l : ℂ) * t) ^ (2 * k + 1) := by
+    funext s
+    simp only [coeffFn, P]
+    rw [pow_succ]
+    by_cases hs : (1 + (l : ℂ) * s) = 0
+    · simp [hs]
+    · field_simp
+  rw [heq]
+  convert h using 1
+  simp only [coeffFn, eval_succ, P, Pi.pow_apply, Pi.mul_apply]
+  rw [show 2 * k + 1 - 1 = 2 * k by omega, pow_succ]
+  field_simp
+  push_cast
+  ring
+
+/-- `deg A_k ≤ k`. -/
+private theorem natDegree_le (k : ℕ) : (expIntLargeOrderPolynomial k).natDegree ≤ k := by
+  rcases k with _ | m
+  · simp [expIntLargeOrderPolynomial]
+  · exact (expIntLargeOrderPolynomial_succ_degree_coeff m).1.trans (Nat.le_succ m)
+
+/-- A bound for `|g_k|` on `t ≥ 0`, uniform in `λ ≥ 0`. -/
+private noncomputable def coeffBound (k : ℕ) : ℝ :=
+  ∑ i ∈ Finset.range (k + 1), ‖(expIntLargeOrderPolynomial k).coeff i‖
+
+/-- `|g_k(t)|` is bounded uniformly in `λ ≥ 0` and `t ≥ 0`. -/
+private theorem norm_coeffFn_le {l : ℝ} (hl : 0 ≤ l) (k : ℕ) {t : ℝ} (ht : 0 ≤ t) :
+    ‖coeffFn l k t‖ ≤ coeffBound k := by
+  set P := expIntLargeOrderPolynomial k
+  set s : ℝ := l * t with hs
+  have hs0 : 0 ≤ s := mul_nonneg hl ht
+  have hx : (l : ℂ) * t = (s : ℂ) := by rw [hs]; push_cast; ring
+  have h1 : (1 + (s : ℂ)) = ((1 + s : ℝ) : ℂ) := by push_cast; ring
+  have hev : ‖P.eval (s : ℂ)‖ ≤ coeffBound k * (1 + s) ^ k := by
+    rw [Polynomial.eval_eq_sum_range' (Nat.lt_succ_of_le (natDegree_le k)), coeffBound,
+      Finset.sum_mul]
+    refine (norm_sum_le _ _).trans (Finset.sum_le_sum fun i hi => ?_)
+    rw [norm_mul, norm_pow, Complex.norm_real, Real.norm_of_nonneg hs0]
+    gcongr
+    calc s ^ i ≤ (1 + s) ^ i := by gcongr; linarith
+      _ ≤ (1 + s) ^ k := pow_le_pow_right₀ (by linarith) (by
+          simpa [Nat.lt_succ_iff] using Finset.mem_range.mp hi)
+  have hpos : (0 : ℝ) < 1 + s := by linarith
+  rw [coeffFn, hx, h1, norm_div, norm_pow, Complex.norm_real, Real.norm_of_nonneg hpos.le,
+    div_le_iff₀ (by positivity)]
+  have hS : 0 ≤ coeffBound k := Finset.sum_nonneg fun _ _ => norm_nonneg _
+  calc ‖P.eval (s : ℂ)‖ ≤ coeffBound k * (1 + s) ^ k := hev
+    _ ≤ coeffBound k * (1 + s) ^ (2 * k) := by
+        gcongr
+        · linarith
+        · omega
+
+/-- The Laplace kernel `e^{-λp(t-1)} t^{-p}` of `e^{λp} E_p(λp)`. -/
+private noncomputable def laplaceKernel (p l t : ℝ) : ℂ :=
+  ((Real.exp (-(l * p * (t - 1))) * t ^ (-p) : ℝ) : ℂ)
+
+/-- The kernel is dominated by `t^{-p}` on `t ≥ 1`. -/
+private theorem norm_laplaceKernel_le {p l : ℝ} (hp : 0 ≤ p) (hl : 0 ≤ l) {t : ℝ} (ht : 1 ≤ t) :
+    ‖laplaceKernel p l t‖ ≤ t ^ (-p) := by
+  rw [laplaceKernel, Complex.norm_real, Real.norm_of_nonneg (by positivity)]
+  have : Real.exp (-(l * p * (t - 1))) ≤ 1 :=
+    Real.exp_le_one_iff.mpr (by
+      have := mul_nonneg (mul_nonneg hl hp) (by linarith : 0 ≤ t - 1); linarith)
+  calc _ ≤ 1 * t ^ (-p) := by gcongr
+    _ = _ := one_mul _
+
+/-- The derivative of the kernel, `-p (1+λt)/t` times the kernel. -/
+private theorem hasDerivAt_laplaceKernel (p l : ℝ) {t : ℝ} (ht : 0 < t) :
+    HasDerivAt (laplaceKernel p l) (-(p : ℂ) * ((1 + (l : ℂ) * t) / t) * laplaceKernel p l t)
+      t := by
+  have h1 : HasDerivAt (fun t : ℝ => Real.exp (-(l * p * (t - 1)))) 
+      (Real.exp (-(l * p * (t - 1))) * (-(l * p))) t := by
+    have := ((((hasDerivAt_id t).sub_const 1).const_mul (l * p)).neg).exp
+    simpa using this
+  have h2 := Real.hasDerivAt_rpow_const (p := -p) (x := t) (Or.inl ht.ne')
+  have h := (h1.mul h2).ofReal_comp
+  unfold laplaceKernel
+  convert h using 1
+  have ht0 : (t : ℂ) ≠ 0 := by exact_mod_cast ht.ne'
+  rw [Real.rpow_sub_one ht.ne']
+  push_cast
+  field_simp
+  ring
+
+/-- `g_k` is continuous on `t ≥ 0`. -/
+private theorem continuousOn_coeffFn {l : ℝ} (hl : 0 ≤ l) (k : ℕ) :
+    ContinuousOn (coeffFn l k) (Ici 0) := by
+  intro t ht
+  have hne : (1 + (l : ℂ) * t) ≠ 0 := by
+    have : (0 : ℝ) < 1 + l * t := by have := mul_nonneg hl (show (0:ℝ) ≤ t from ht); linarith
+    exact_mod_cast this.ne'
+  refine ContinuousAt.continuousWithinAt ?_
+  unfold coeffFn
+  refine ContinuousAt.div ?_ ?_ (pow_ne_zero _ hne)
+  · exact ((Polynomial.continuous _).comp (by fun_prop)).continuousAt
+  · fun_prop
+
+/-- The kernel is continuous on `t > 0`. -/
+private theorem continuousOn_laplaceKernel (p l : ℝ) :
+    ContinuousOn (laplaceKernel p l) (Ioi 0) := by
+  intro t ht
+  have ht : (0 : ℝ) < t := ht
+  exact (hasDerivAt_laplaceKernel p l ht).continuousAt.continuousWithinAt
+
+/-- The integrands `e^{-λp(t-1)} t^{-p} g_k(t)` are integrable on `(1, ∞)`. -/
+private theorem integrableOn_laplaceKernel_mul {p l : ℝ} (hp : 1 < p) (hl : 0 ≤ l) (k : ℕ) :
+    IntegrableOn (fun t => laplaceKernel p l t * coeffFn l k t) (Ioi 1) := by
+  have hint : IntegrableOn (fun t : ℝ => coeffBound k * t ^ (-p)) (Ioi 1) :=
+    (integrableOn_Ioi_rpow_of_lt (by linarith) one_pos).const_mul _
+  refine hint.mono' ?_ ?_
+  · refine ContinuousOn.aestronglyMeasurable ?_ measurableSet_Ioi
+    exact ((continuousOn_laplaceKernel p l).mono (Ioi_subset_Ioi zero_le_one)).mul
+      ((continuousOn_coeffFn hl k).mono (fun t (ht : (1 : ℝ) < t) => show (0 : ℝ) ≤ t by linarith))
+  · refine (ae_restrict_iff' measurableSet_Ioi).mpr (Eventually.of_forall fun t ht => ?_)
+    have ht : (1 : ℝ) < t := ht
+    rw [norm_mul, mul_comm]
+    exact mul_le_mul (norm_coeffFn_le hl k (by linarith))
+      (norm_laplaceKernel_le (by linarith) hl ht.le)
+      (norm_nonneg _) (Finset.sum_nonneg fun _ _ => norm_nonneg _)
+
+/-- The integrals `I_k = ∫₁^∞ e^{-λp(t-1)} t^{-p} g_k(t) dt`. -/
+private noncomputable def kernelIntegral (p l : ℝ) (k : ℕ) : ℂ :=
+  ∫ t in Ioi 1, laplaceKernel p l t * coeffFn l k t
+
+/-- Integration by parts: `p I_k = g_k(1)/(1+λ) + I_{k+1}`. -/
+private theorem kernelIntegral_succ {p l : ℝ} (hp : 1 < p) (hl : 0 ≤ l) (k : ℕ) :
+    (p : ℂ) * kernelIntegral p l k = coeffFn l k 1 / (1 + l) + kernelIntegral p l (k + 1) := by
+  set F : ℝ → ℂ := fun t => laplaceKernel p l t * ((t : ℂ) / (1 + (l : ℂ) * t) * coeffFn l k t)
+  have hderiv : ∀ t ∈ Ioi (1 : ℝ), HasDerivAt F
+      (-(p : ℂ) * (laplaceKernel p l t * coeffFn l k t) +
+        laplaceKernel p l t * coeffFn l (k + 1) t) t := by
+    intro t ht
+    have ht : (1 : ℝ) < t := ht
+    have ht0 : (0 : ℝ) < t := by linarith
+    have h := (hasDerivAt_laplaceKernel p l ht0).mul (hasDerivAt_coeffFn hl k ht0)
+    convert h using 1
+    have hne : (1 + (l : ℂ) * t) ≠ 0 := by
+      have : (0 : ℝ) < 1 + l * t := by have := mul_nonneg hl ht0.le; linarith
+      exact_mod_cast this.ne'
+    have htc : (t : ℂ) ≠ 0 := by exact_mod_cast ht0.ne'
+    field_simp
+  have hint := ((integrableOn_laplaceKernel_mul hp hl k).const_mul (-(p : ℂ))).add
+    (integrableOn_laplaceKernel_mul hp hl (k + 1))
+  have hlim : Tendsto F atTop (𝓝 0) := by
+    have ht : Tendsto (fun t : ℝ => coeffBound k * t ^ (-(p - 1))) atTop (𝓝 0) := by
+      simpa using (tendsto_rpow_neg_atTop (by linarith : 0 < p - 1)).const_mul (coeffBound k)
+    refine squeeze_zero_norm' ?_ ht
+    filter_upwards [eventually_gt_atTop (1 : ℝ)] with t ht
+    have ht0 : (0 : ℝ) < t := by linarith
+    have hden : 1 ≤ ‖(1 + (l : ℂ) * t)‖ := by
+      have : (1 + (l : ℂ) * t) = ((1 + l * t : ℝ) : ℂ) := by push_cast; ring
+      rw [this, Complex.norm_real, Real.norm_of_nonneg (by positivity)]
+      have := mul_nonneg hl ht0.le; linarith
+    simp only [F, norm_mul, norm_div, Complex.norm_real, Real.norm_of_nonneg ht0.le]
+    have h1 := norm_laplaceKernel_le (p := p) (by linarith) hl ht.le
+    have h2 := norm_coeffFn_le hl k ht0.le
+    have h3 : t / ‖(1 + (l : ℂ) * t)‖ ≤ t := div_le_self ht0.le hden
+    calc ‖laplaceKernel p l t‖ * (t / ‖(1 + (l : ℂ) * t)‖ * ‖coeffFn l k t‖)
+        ≤ t ^ (-p) * (t * coeffBound k) := by gcongr
+      _ = coeffBound k * t ^ (-(p - 1)) := by
+        rw [show -(p - 1) = -p + 1 by ring, Real.rpow_add ht0, Real.rpow_one]; ring
+  have hcont : ContinuousWithinAt F (Ici 1) 1 := by
+    have h := (hasDerivAt_laplaceKernel p l one_pos).mul (hasDerivAt_coeffFn hl k one_pos)
+    exact h.continuousAt.continuousWithinAt
+  have hF := integral_Ioi_of_hasDerivAt_of_tendsto hcont hderiv hint hlim
+  rw [integral_add ((integrableOn_laplaceKernel_mul hp hl k).const_mul _)
+      (integrableOn_laplaceKernel_mul hp hl (k + 1)),
+    integral_const_mul] at hF
+  have hF1 : F 1 = coeffFn l k 1 / (1 + l) := by
+    simp [F, laplaceKernel, div_eq_inv_mul]
+  rw [hF1] at hF
+  unfold kernelIntegral
+  linear_combination -hF
+
+/-- The expansion with exact remainder after `N` integrations by parts. -/
+private theorem kernelIntegral_expand {p l : ℝ} (hp : 1 < p) (hl : 0 ≤ l) (N : ℕ) :
+    (1 + (l : ℂ)) * p * kernelIntegral p l 0 = ∑ k ∈ Finset.range N, coeffFn l k 1 / (p : ℂ) ^ k +
+      (1 + (l : ℂ)) * p * kernelIntegral p l N / (p : ℂ) ^ N := by
+  have hp0 : (p : ℂ) ≠ 0 := by exact_mod_cast (by linarith : (0 : ℝ) < p).ne'
+  have hl1 : (1 + (l : ℂ)) ≠ 0 := by
+    have : (0 : ℝ) < 1 + l := by linarith
+    exact_mod_cast this.ne'
+  induction N with
+  | zero => simp
+  | succ N ih =>
+    rw [ih, Finset.sum_range_succ, add_assoc]
+    congr 1
+    rw [mul_assoc, kernelIntegral_succ hp hl N]
+    field_simp
+    ring
+
+/-- `g_0 = 1`. -/
+private theorem coeffFn_zero (l : ℝ) (t : ℝ) : coeffFn l 0 t = 1 := by
+  simp [coeffFn, expIntLargeOrderPolynomial]
+
+/-- `g_1(t) = 1/(1+λt)²`. -/
+private theorem coeffFn_one (l : ℝ) (t : ℝ) : coeffFn l 1 t = 1 / (1 + (l : ℂ) * t) ^ 2 := by
+  simp [coeffFn, expIntLargeOrderPolynomial_initial.1]
+
+/-- The real kernel is integrable on `(1, ∞)`. -/
+private theorem integrableOn_realKernel {p l : ℝ} (hp : 1 < p) (hl : 0 ≤ l) :
+    IntegrableOn (fun t : ℝ => Real.exp (-(l * p * (t - 1))) * t ^ (-p)) (Ioi 1) := by
+  refine (integrableOn_Ioi_rpow_of_lt (by linarith : -p < -1) one_pos).mono' ?_ ?_
+  · refine ContinuousOn.aestronglyMeasurable (fun t (ht : (1 : ℝ) < t) => ?_) measurableSet_Ioi
+    exact ((by fun_prop : Continuous fun t : ℝ => Real.exp (-(l * p * (t - 1)))).continuousAt.mul
+      (Real.continuousAt_rpow_const _ _ (Or.inl (by linarith)))).continuousWithinAt
+  · refine (ae_restrict_iff' measurableSet_Ioi).mpr (Eventually.of_forall fun t ht => ?_)
+    have ht : (1 : ℝ) < t := ht
+    have h := norm_laplaceKernel_le (p := p) (by linarith) hl ht.le
+    rwa [laplaceKernel, Complex.norm_real] at h
+
+/-- `I_0` is the integral of the real kernel. -/
+private theorem kernelIntegral_zero_eq {p l : ℝ} : kernelIntegral p l 0 =
+    ((∫ t in Ioi (1 : ℝ), Real.exp (-(l * p * (t - 1))) * t ^ (-p) : ℝ) : ℂ) := by
+  rw [kernelIntegral, ← integral_complex_ofReal]
+  refine setIntegral_congr_fun measurableSet_Ioi fun t _ => ?_
+  simp [laplaceKernel, coeffFn_zero]
+
+/-- `(1+λ) I_0 ≤ 1/(p-1)`. -/
+private theorem realKernel_integral_le {p l : ℝ} (hp : 1 < p) (hl : 0 ≤ l) :
+    (1 + l) * (∫ t in Ioi (1 : ℝ), Real.exp (-(l * p * (t - 1))) * t ^ (-p)) ≤ 1 / (p - 1) := by
+  set J := ∫ t in Ioi (1 : ℝ), Real.exp (-(l * p * (t - 1))) * t ^ (-p)
+  have hJ0 : 0 ≤ J := setIntegral_nonneg measurableSet_Ioi fun t ht => by
+    have : (0 : ℝ) < t := lt_trans one_pos ht
+    positivity
+  have hl1 : (0 : ℝ) < 1 + l := by linarith
+  -- bound on I_1
+  have hI1 : ‖kernelIntegral p l 1‖ ≤ J / (1 + l) ^ 2 := by
+    rw [kernelIntegral, div_eq_mul_inv, mul_comm, ← integral_const_mul]
+    refine (norm_integral_le_integral_norm _).trans ?_
+    refine setIntegral_mono_on (integrableOn_laplaceKernel_mul hp hl 1).norm ?_ measurableSet_Ioi
+      fun t ht => ?_
+    · exact (integrableOn_realKernel hp hl).const_mul _
+    · have ht : (1 : ℝ) < t := ht
+      have ht0 : (0 : ℝ) < t := by linarith
+      rw [norm_mul, laplaceKernel, Complex.norm_real, Real.norm_of_nonneg (by positivity),
+        coeffFn_one,
+        mul_comm ((1 + l) ^ 2)⁻¹]
+      gcongr
+      have : (1 + (l : ℂ) * t) = ((1 + l * t : ℝ) : ℂ) := by push_cast; ring
+      rw [this, norm_div, norm_one, norm_pow, Complex.norm_real,
+        Real.norm_of_nonneg (by positivity), one_div]
+      gcongr
+      nlinarith
+  have hid := kernelIntegral_succ hp hl 0
+  rw [kernelIntegral_zero_eq, coeffFn_zero] at hid
+  have hnorm := congrArg norm hid
+  rw [norm_mul, Complex.norm_real, Complex.norm_real, Real.norm_of_nonneg hJ0,
+    Real.norm_of_nonneg (by linarith)] at hnorm
+  have htri : p * J ≤ 1 / (1 + l) + J / (1 + l) ^ 2 := by
+    rw [hnorm]
+    refine (norm_add_le _ _).trans ?_
+    gcongr
+    · have : (1 : ℂ) / (1 + (l : ℂ)) = ((1 / (1 + l) : ℝ) : ℂ) := by push_cast; ring
+      rw [this, Complex.norm_real, Real.norm_of_nonneg (by positivity)]
+  rw [le_div_iff₀ (by linarith)]
+  have h2 : J / (1 + l) ^ 2 ≤ J := div_le_self hJ0 (by nlinarith)
+  have h3 : p * J * (1 + l) ≤ 1 + J * (1 + l) := by
+    have := mul_le_mul_of_nonneg_right htri hl1.le
+    calc p * J * (1 + l) ≤ (1 / (1 + l) + J / (1 + l) ^ 2) * (1 + l) := this
+      _ = 1 + J / (1 + l) := by field_simp
+      _ ≤ 1 + J * (1 + l) := by
+        gcongr
+        exact div_le_self hJ0 (by linarith) |>.trans (le_mul_of_one_le_right hJ0 (by linarith))
+  nlinarith
+
+/-- `e^{λp} E_p(λp) = I_0`, with `E_p(0) = 1/(p-1)`. -/
+private theorem exp_mul_genExpIntEExtended_eq {p l : ℝ} (hp : 1 < p) (hl : 0 ≤ l) :
+    exp ((p : ℂ) * l) * genExpIntEExtended p (l * p) = kernelIntegral p l 0 := by
+  rw [kernelIntegral_zero_eq]
+  rcases hl.eq_or_lt with h0 | hpos
+  · subst h0
+    simp only [ofReal_zero, zero_mul, mul_zero, Complex.exp_zero, one_mul, genExpIntEExtended,
+      ite_true, neg_zero, Real.exp_zero]
+    rw [integral_Ioi_rpow_of_lt (by linarith) one_pos, Real.one_rpow]
+    have : (1 : ℂ) - p ≠ 0 := by
+      have : (1:ℝ) - p ≠ 0 := by linarith
+      exact_mod_cast this
+    have : (p : ℂ) - 1 ≠ 0 := by
+      have : (0:ℝ) < p - 1 := by linarith
+      exact_mod_cast this.ne'
+    push_cast
+    field_simp
+    ring_nf
+    rw [show -((p : ℂ) * (1 - (p : ℂ))⁻¹) + (1 - (p : ℂ))⁻¹ = (1 - (p : ℂ)) * (1 - (p : ℂ))⁻¹ by
+      ring, mul_inv_cancel₀ (by assumption)]
+  · have hz : ((l : ℂ) * p) ≠ 0 := by
+      have : (0 : ℝ) < l * p := by nlinarith
+      exact_mod_cast this.ne'
+    have hre : 0 < ((l : ℂ) * p).re := by
+      rw [← ofReal_mul, ofReal_re]; nlinarith
+    simp only [genExpIntEExtended, hz, ↓reduceIte]
+    rw [expIntegralE_laplace_complex _ hre, ← integral_const_mul,
+      ← integral_complex_ofReal]
+    refine setIntegral_congr_fun measurableSet_Ioi fun t ht => ?_
+    have ht0 : (0 : ℝ) ≤ t := le_of_lt (lt_trans one_pos ht)
+    rw [ofReal_mul, ofReal_exp, ofReal_cpow ht0, ← mul_assoc, ← Complex.exp_add]
+    push_cast
+    congr 2
+    ring
+
+/-- `|I_N| ≤ S_N I_0`. -/
+private theorem norm_kernelIntegral_le {p l : ℝ} (hp : 1 < p) (hl : 0 ≤ l) (N : ℕ) :
+    ‖kernelIntegral p l N‖ ≤
+      coeffBound N * ∫ t in Ioi (1 : ℝ), Real.exp (-(l * p * (t - 1))) * t ^ (-p) := by
+  rw [kernelIntegral, ← integral_const_mul]
+  refine norm_integral_le_of_norm_le ((integrableOn_realKernel hp hl).const_mul _) ?_
+  refine (ae_restrict_iff' measurableSet_Ioi).mpr (Eventually.of_forall fun t ht => ?_)
+  have ht : (1 : ℝ) < t := ht
+  have ht0 : (0 : ℝ) < t := by linarith
+  rw [norm_mul, laplaceKernel, Complex.norm_real, Real.norm_of_nonneg (by positivity), mul_comm]
+  exact mul_le_mul_of_nonneg_right (norm_coeffFn_le hl N ht0.le) (by positivity)
+
+end ExpIntLargeOrder
+
+open ExpIntLargeOrder in
 /-- Estimate under the stated parameter and domain assumptions: `IsBigO (comap Prod.fst atTop ⊓ 𝓟
 {p : ℝ × ℝ | 1 < p.1 ∧ 0 ≤ p.2}) (fun p => exp (p.1*p.2 : ℂ)*(p.2+1)*p.1*genExpIntEExtended
 p.1 (p.2*p.1)-∑ k ∈ Finset.range N, (expIntLargeOrderPolynomial k).eval (p.2 : ℂ)/(((p.2+1 :
 ℂ)^(2*k))*(p.1 : ℂ)^k)) (fun p => p.1^(-(N : ℤ)))`. -/
 @[dlmf 8.20.E6]
-theorem genExpIntE_large_order_uniform (N : ℕ) :
+theorem expIntegralE_large_order_uniform (N : ℕ) :
     IsBigO (comap Prod.fst atTop ⊓ 𝓟 {p : ℝ × ℝ | 1 < p.1 ∧ 0 ≤ p.2})
         (fun p => exp (p.1*p.2 : ℂ)*(p.2+1)*p.1*genExpIntEExtended p.1 (p.2*p.1)-∑ k ∈
         Finset.range N, (expIntLargeOrderPolynomial k).eval
         (p.2 : ℂ)/(((p.2+1 : ℂ)^(2*k))*(p.1 : ℂ)^k)) (fun p => p.1^(-(N : ℤ))) := by
-  sorry
+  have h2 : ∀ᶠ q : ℝ × ℝ in comap Prod.fst atTop, 2 ≤ q.1 :=
+    tendsto_comap.eventually (eventually_ge_atTop 2)
+  refine IsBigO.of_bound (2 * coeffBound N) ?_
+  filter_upwards [h2.filter_mono inf_le_left,
+    (eventually_principal.mpr fun q hq => hq).filter_mono inf_le_right] with q hq2 hqS
+  obtain ⟨P, L⟩ := q
+  obtain ⟨hP1, hL⟩ := hqS
+  simp only at hq2 hP1 hL ⊢
+  have hP0 : (0 : ℝ) < P := by linarith
+  have hPc : (P : ℂ) ≠ 0 := by exact_mod_cast hP0.ne'
+  have hE := exp_mul_genExpIntEExtended_eq hP1 hL
+  have hexp := kernelIntegral_expand hP1 hL N
+  have hsum : ∑ k ∈ Finset.range N, (expIntLargeOrderPolynomial k).eval (L : ℂ) /
+      (((L + 1 : ℂ) ^ (2 * k)) * (P : ℂ) ^ k) =
+        ∑ k ∈ Finset.range N, coeffFn L k 1 / (P : ℂ) ^ k := by
+    refine Finset.sum_congr rfl fun k _ => ?_
+    simp only [coeffFn, ofReal_one, mul_one]
+    rw [add_comm (1 : ℂ), div_div]
+  have hlhs : exp ((P : ℂ) * L) * (L + 1) * P * genExpIntEExtended P (L * P) =
+      (1 + (L : ℂ)) * P * kernelIntegral P L 0 := by
+    rw [← hE]; ring
+  rw [hsum, hlhs, hexp, add_sub_cancel_left]
+  have hJ := realKernel_integral_le hP1 hL
+  have hI := norm_kernelIntegral_le hP1 hL N
+  set J := ∫ t in Ioi (1 : ℝ), Real.exp (-(L * P * (t - 1))) * t ^ (-P)
+  have hS : 0 ≤ coeffBound N := Finset.sum_nonneg fun _ _ => norm_nonneg _
+  have hn1 : ‖(1 + (L : ℂ))‖ = 1 + L := by
+    rw [show (1 + (L : ℂ)) = ((1 + L : ℝ) : ℂ) by push_cast; ring, Complex.norm_real,
+      Real.norm_of_nonneg (by linarith)]
+  rw [norm_div, norm_mul, norm_mul, hn1, norm_pow, Complex.norm_real, Real.norm_of_nonneg hP0.le,
+    Real.norm_of_nonneg (by positivity), zpow_neg, zpow_natCast]
+  have hPN : 0 < P ^ N := by positivity
+  rw [div_le_iff₀ hPN, mul_assoc (2 * coeffBound N), inv_mul_cancel₀ hPN.ne', mul_one]
+  calc (1 + L) * P * ‖kernelIntegral P L N‖ ≤ (1 + L) * P * (coeffBound N * J) := by gcongr
+    _ = P * coeffBound N * ((1 + L) * J) := by ring
+    _ ≤ P * coeffBound N * (1 / (P - 1)) := by gcongr
+    _ ≤ 2 * coeffBound N := by
+        rw [mul_one_div, div_le_iff₀ (by linarith)]
+        nlinarith
 
 end DLMF.Confluent

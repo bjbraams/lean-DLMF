@@ -44,8 +44,8 @@ Legendre's equation and tends to `P_n(1)² = 1` as `z → 1`, `𝒲{P_n, Q_n} = 
 
 ## Main results
 
-* `regularizedGaussHGFun_legendreQ`, `regularizedGaussHG_legendreQ`: the three-term identity for
-  `𝐅(a, b; a+b; u)` on the unit disk and on the cut plane.
+* `regularizedGaussHypergeometricFun_legendreQ`, `regularizedGaussHypergeometric_legendreQ`: the
+  three-term identity for `𝐅(a, b; a+b; u)` on the unit disk and on the cut plane.
 * `legendreQ_recurrence`: the recurrence of `Q_ν` for `ν ≠ 0` (DLMF 14.10.3 with `μ = 0`).
 * `legendreQ_one`: `Q₁(z) = z Q₀(z) - 1` (Temme (8.24)).
 * `legendreQ_nat`: `Q_n = P_n Q₀ - R_n` (Temme (8.25)).
@@ -68,22 +68,22 @@ noncomputable section
 namespace DLMF.Legendre
 
 /-- `(x)ₙ₊₁ = x (x+1)ₙ`. -/
-theorem poch_succ_left (x : ℂ) (n : ℕ) :
+theorem pochhammer_succ_left (x : ℂ) (n : ℕ) :
     (ascPochhammer ℂ (n + 1)).eval x = x * (ascPochhammer ℂ n).eval (x + 1) := by
   rw [ascPochhammer_succ_left]; simp [Polynomial.eval_comp]
 
 /-- The regularized series identity behind the recurrence of `Q_ν`: for `c = a + b`,
 `𝐅(a-1,b;c-1;u) - (c-1)𝐅(a,b;c;u) + b² u 𝐅(a,b+1;c+1;u) = 0` on the unit disk. -/
-theorem regularizedGaussHGFun_legendreQ (a b : ℂ) {u : ℂ} (hu : ‖u‖ < 1) :
+theorem regularizedGaussHypergeometricFun_legendreQ (a b : ℂ) {u : ℂ} (hu : ‖u‖ < 1) :
     regularizedGaussHGFun (a - 1) b (a + b - 1) u -
         (a + b - 1) * regularizedGaussHGFun a b (a + b) u +
       b ^ 2 * u * regularizedGaussHGFun a (b + 1) (a + b + 1) u = 0 := by
   set c := a + b with hc
-  have s1 := summable_regularizedGaussHGFun_term (a - 1) b (c - 1) hu
-  have s2 := summable_regularizedGaussHGFun_term a b c hu
-  have s3 := summable_regularizedGaussHGFun_term a (b + 1) (c + 1) hu
-  rw [regularizedGaussHGFun_eq_tsum, regularizedGaussHGFun_eq_tsum,
-    regularizedGaussHGFun_eq_tsum]
+  have s1 := summable_regularizedGaussHypergeometricFun_term (a - 1) b (c - 1) hu
+  have s2 := summable_regularizedGaussHypergeometricFun_term a b c hu
+  have s3 := summable_regularizedGaussHypergeometricFun_term a (b + 1) (c + 1) hu
+  rw [regularizedGaussHypergeometricFun_eq_tsum, regularizedGaussHypergeometricFun_eq_tsum,
+    regularizedGaussHypergeometricFun_eq_tsum]
   have h1 := (hasSum_nat_add_iff' 1).mpr s1.hasSum
   have h2 := (hasSum_nat_add_iff' 1).mpr s2.hasSum
   have h := (h1.sub (h2.mul_left (c - 1))).add (s3.hasSum.mul_left (b ^ 2 * u))
@@ -101,7 +101,7 @@ theorem regularizedGaussHGFun_legendreQ (a b : ℂ) {u : ℂ} (hu : ‖u‖ < 1)
         show c + n + 1 = c + 1 + n by ring]
     have hG' : (Gamma (c + ((n + 1 : ℕ) : ℂ)))⁻¹ = (Gamma (c + 1 + n))⁻¹ := by
       rw [show c + ((n + 1 : ℕ) : ℂ) = c + 1 + n by push_cast; ring]
-    rw [hG, hG', poch_succ_left (a - 1), poch_succ_left b, show a - 1 + 1 = a by ring,
+    rw [hG, hG', pochhammer_succ_left (a - 1), pochhammer_succ_left b, show a - 1 + 1 = a by ring,
       ascPochhammer_succ_eval, Nat.factorial_succ]
     have hf : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
     have hn : ((n : ℂ) + 1) ≠ 0 := by exact_mod_cast Nat.succ_ne_zero n
@@ -122,20 +122,21 @@ theorem regularizedGaussHGFun_legendreQ (a b : ℂ) {u : ℂ} (hu : ‖u‖ < 1)
   linear_combination h0 + hT
 
 
-/-- The identity `regularizedGaussHGFun_legendreQ` on the cut plane. -/
-theorem regularizedGaussHG_legendreQ (a b : ℂ) {u : ℂ} (hu : u ∈ cutPlane) :
-    regularizedGaussHG (a - 1) b (a + b - 1) u - (a + b - 1) * regularizedGaussHG a b (a + b) u +
-      b ^ 2 * u * regularizedGaussHG a (b + 1) (a + b + 1) u = 0 :=
+/-- The identity `regularizedGaussHypergeometricFun_legendreQ` on the cut plane. -/
+theorem regularizedGaussHypergeometric_legendreQ (a b : ℂ) {u : ℂ} (hu : u ∈ cutPlane) :
+    regularizedGaussHypergeometric (a - 1) b (a + b - 1) u - (a + b - 1) *
+        regularizedGaussHypergeometric a b (a + b) u +
+      b ^ 2 * u * regularizedGaussHypergeometric a (b + 1) (a + b + 1) u = 0 :=
   eqOn_cutPlane_of_eqOn_disk
-    (f := fun u => regularizedGaussHG (a - 1) b (a + b - 1) u - (a + b - 1)
-        * regularizedGaussHG a b (a + b) u +
-      b ^ 2 * u * regularizedGaussHG a (b + 1) (a + b + 1) u) (g := fun _ => 0)
+    (f := fun u => regularizedGaussHypergeometric (a - 1) b (a + b - 1) u - (a + b - 1)
+        * regularizedGaussHypergeometric a b (a + b) u +
+      b ^ 2 * u * regularizedGaussHypergeometric a (b + 1) (a + b + 1) u) (g := fun _ => 0)
     (by intro u hu; fun_prop (disch := assumption)) analyticOnNhd_const
     (fun u hu => by
-      rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hu,
-          regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hu,
-        regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hu]
-      exact regularizedGaussHGFun_legendreQ a b hu) hu
+      rw [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hu,
+          regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hu,
+        regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hu]
+      exact regularizedGaussHypergeometricFun_legendreQ a b hu) hu
 
 /-- The three-term recurrence `(ν+1) Q_{ν+1} - (2ν+1) z Q_ν + ν Q_{ν-1} = 0` for `ν ≠ 0`
 (DLMF 14.10.3 with `μ = 0`). At `ν = 0` it is replaced by `Q₁ = z Q₀ - 1`. -/
@@ -146,15 +147,17 @@ theorem legendreQ_recurrence {ν : ℂ} (hν : ν ≠ 0) {z : ℂ} (hz : z - 1 �
   have hu := recip_sq_mem_cutPlane hz
   set a := (ν + 2) / 2
   set b := (ν + 1) / 2
-  have hid := regularizedGaussHG_legendreQ a b hu
-  have e1 : regularizedGaussHG ((ν + 1 + 2) / 2) ((ν + 1 + 1) / 2) (ν + 1 + 3 / 2) (1 / z ^ 2) =
-      regularizedGaussHG a (b + 1) (a + b + 1) (1 / z ^ 2) := by
-    rw [regularizedGaussHG_symm _ _ _ hu]; congr 1 <;> simp only [a, b] <;> ring
-  have e2 : regularizedGaussHG ((ν - 1 + 2) / 2) ((ν - 1 + 1) / 2) (ν - 1 + 3 / 2) (1 / z ^ 2) =
-      regularizedGaussHG (a - 1) b (a + b - 1) (1 / z ^ 2) := by
-    rw [regularizedGaussHG_symm _ _ _ hu]; congr 1 <;> simp only [a, b] <;> ring
-  have e0 : regularizedGaussHG ((ν + 2) / 2) ((ν + 1) / 2) (ν + 3 / 2) (1 / z ^ 2) =
-      regularizedGaussHG a b (a + b) (1 / z ^ 2) := by
+  have hid := regularizedGaussHypergeometric_legendreQ a b hu
+  have e1 : regularizedGaussHypergeometric ((ν + 1 + 2) / 2) ((ν + 1 + 1) / 2)
+      (ν + 1 + 3 / 2) (1 / z ^ 2) =
+      regularizedGaussHypergeometric a (b + 1) (a + b + 1) (1 / z ^ 2) := by
+    rw [regularizedGaussHypergeometric_symm _ _ _ hu]; congr 1 <;> simp only [a, b] <;> ring
+  have e2 : regularizedGaussHypergeometric ((ν - 1 + 2) / 2) ((ν - 1 + 1) / 2)
+      (ν - 1 + 3 / 2) (1 / z ^ 2) =
+      regularizedGaussHypergeometric (a - 1) b (a + b - 1) (1 / z ^ 2) := by
+    rw [regularizedGaussHypergeometric_symm _ _ _ hu]; congr 1 <;> simp only [a, b] <;> ring
+  have e0 : regularizedGaussHypergeometric ((ν + 2) / 2) ((ν + 1) / 2) (ν + 3 / 2) (1 / z ^ 2) =
+      regularizedGaussHypergeometric a b (a + b) (1 / z ^ 2) := by
     congr 1; simp only [a, b]; ring
   simp only [legendreQ]
   rw [e1, e2, e0]
@@ -175,9 +178,9 @@ theorem legendreQ_recurrence {ν : ℂ} (hν : ν ≠ 0) {z : ℂ} (hz : z - 1 �
     rw [show -(ν - 1 + 1) = -(ν + 1) + 1 by ring, cpow_add _ _ hz0, cpow_one]
   rw [c1, c2, c3, c4]
   have hzz : z * z⁻¹ = 1 := mul_inv_cancel₀ hz0
-  generalize regularizedGaussHG a (b + 1) (a + b + 1) (1 / z ^ 2) = Gp at *
-  generalize regularizedGaussHG (a - 1) b (a + b - 1) (1 / z ^ 2) = Gm at *
-  generalize regularizedGaussHG a b (a + b) (1 / z ^ 2) = G at *
+  generalize regularizedGaussHypergeometric a (b + 1) (a + b + 1) (1 / z ^ 2) = Gp at *
+  generalize regularizedGaussHypergeometric (a - 1) b (a + b - 1) (1 / z ^ 2) = Gm at *
+  generalize regularizedGaussHypergeometric a b (a + b) (1 / z ^ 2) = G at *
   generalize (2 : ℂ) ^ (-(ν + 1)) = A
   generalize z ^ (-(ν + 1)) = Z
   simp only [a, b] at hid
@@ -186,11 +189,12 @@ theorem legendreQ_recurrence {ν : ℂ} (hν : ν ≠ 0) {z : ℂ} (hz : z - 1 �
     (-(ν + 1) ^ 2 / 2 * (Real.sqrt π * A * Z * Gp * Gamma (ν + 1)) * z⁻¹) * hzz
 
 /-- `𝐅(0,b;c;u) = 1/Γ(c)` on the cut plane. -/
-theorem regularizedGaussHG_zero_left (b c : ℂ) {u : ℂ} (hu : u ∈ cutPlane) :
-    regularizedGaussHG 0 b c u = (Gamma c)⁻¹ :=
-  eqOn_cutPlane_of_eqOn_disk (f := regularizedGaussHG 0 b c) (g := fun _ => (Gamma c)⁻¹)
-    (analyticOnNhd_regularizedGaussHG _ _ _) analyticOnNhd_const (fun u hu => by
-      rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hu, regularizedGaussHGFun_eq_tsum,
+theorem regularizedGaussHypergeometric_zero_left (b c : ℂ) {u : ℂ} (hu : u ∈ cutPlane) :
+    regularizedGaussHypergeometric 0 b c u = (Gamma c)⁻¹ :=
+  eqOn_cutPlane_of_eqOn_disk (f := regularizedGaussHypergeometric 0 b c) (g := fun _ => (Gamma c)⁻¹)
+    (analyticOnNhd_regularizedGaussHypergeometric _ _ _) analyticOnNhd_const (fun u hu => by
+      rw [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hu,
+          regularizedGaussHypergeometricFun_eq_tsum,
         tsum_eq_single 0 (fun n hn => by
           obtain ⟨m, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hn
           simp [ascPochhammer_succ_left])]
@@ -201,9 +205,9 @@ theorem legendreQ_one {z : ℂ} (hz : z - 1 ∈ slitPlane) :
     legendreQ 1 z = z * legendreQ 0 z - 1 := by
   have hz0 := slitPlane_ne_zero (mem_slitPlane_of_sub_one hz)
   have hu := recip_sq_mem_cutPlane hz
-  have hid := regularizedGaussHG_legendreQ 1 (1 / 2) hu
+  have hid := regularizedGaussHypergeometric_legendreQ 1 (1 / 2) hu
   rw [show (1 : ℂ) - 1 = 0 by ring, show (1 : ℂ) + 1 / 2 - 1 = 1 / 2 by norm_num,
-    regularizedGaussHG_zero_left _ _ hu, show (1 : ℂ) + 1 / 2 = 3 / 2 by norm_num,
+    regularizedGaussHypergeometric_zero_left _ _ hu, show (1 : ℂ) + 1 / 2 = 3 / 2 by norm_num,
     show (1 : ℂ) / 2 + 1 = 3 / 2 by norm_num, show (3 / 2 : ℂ) + 1 = 5 / 2 by norm_num,
     Complex.Gamma_one_half_eq] at hid
   have hsq : (π : ℂ) ^ (1 / 2 : ℂ) = Real.sqrt π := by
@@ -211,7 +215,7 @@ theorem legendreQ_one {z : ℂ} (hz : z - 1 ∈ slitPlane) :
       ← ofReal_cpow Real.pi_pos.le, ← Real.sqrt_eq_rpow]
   rw [hsq] at hid
   simp only [legendreQ]
-  rw [regularizedGaussHG_symm ((1 + 2) / 2) _ _ hu]
+  rw [regularizedGaussHypergeometric_symm ((1 + 2) / 2) _ _ hu]
   norm_num [cpow_neg_one]
   have hs : (Real.sqrt π : ℂ) ≠ 0 := ofReal_ne_zero.mpr (Real.sqrt_pos.mpr Real.pi_pos).ne'
   rw [show (2 : ℂ) ^ (-2 : ℂ) = 1 / 4 by
@@ -222,8 +226,8 @@ theorem legendreQ_one {z : ℂ} (hz : z - 1 ∈ slitPlane) :
   have hzz : z * z⁻¹ = 1 := mul_inv_cancel₀ hz0
   have hsi : (Real.sqrt π : ℂ) * (Real.sqrt π : ℂ)⁻¹ = 1 := mul_inv_cancel₀ hs
   rw [show (1 : ℂ) / z ^ 2 = (z ^ 2)⁻¹ from one_div _]
-  generalize regularizedGaussHG 1 (3 / 2) (5 / 2) (z ^ 2)⁻¹ = Gp at *
-  generalize regularizedGaussHG 1 (1 / 2) (3 / 2) (z ^ 2)⁻¹ = G at *
+  generalize regularizedGaussHypergeometric 1 (3 / 2) (5 / 2) (z ^ 2)⁻¹ = Gp at *
+  generalize regularizedGaussHypergeometric 1 (1 / 2) (3 / 2) (z ^ 2)⁻¹ = G at *
   linear_combination (Real.sqrt π : ℂ) * hid - ((Real.sqrt π : ℂ) / 2 * G) * hzz - hsi
 
 /-- The polynomials `R_n` with `Q_n = P_n Q₀ - R_n` (Temme's `W_{n-1}`, (8.25)), defined by the
@@ -251,7 +255,7 @@ theorem legendreQ_nat (n : ℕ) {z : ℂ} (hz : z - 1 ∈ slitPlane) :
     match n, ih with
     | 0, _ =>
       have h := legendreP_nat 0 hz'
-      rw [Nat.cast_zero, legendrePolyP_zero] at h
+      rw [Nat.cast_zero, legendrePolynomialP_zero] at h
       simp [legendreQPoly, h]
     | 1, _ =>
       have h := legendreP_nat 1 hz'
@@ -259,11 +263,11 @@ theorem legendreQ_nat (n : ℕ) {z : ℂ} (hz : z - 1 ∈ slitPlane) :
       rw [legendreQPoly, Polynomial.eval_one, Nat.cast_one, legendreQ_one hz, h]
       have hF : ₂F₁ (-((1 : ℕ) : ℂ)) ((1 : ℕ) + 0 + 0 + 1) (0 + 1) ((1 - z) / 2) = z := by
         rw [ordinaryHypergeometric_eq_sum_neg_nat]
-        simp [Finset.sum_range_succ, gaussHGCoeff, poch]
+        simp [Finset.sum_range_succ, gaussHypergeometricCoeff, pochhammer]
         ring
-      simp only [legendrePolyP, jacobiPolyP] at *
+      simp only [legendrePolynomialP, jacobiPolynomialP] at *
       rw [hF]
-      simp [poch]
+      simp [pochhammer]
     | n + 2, ih =>
       have hQ := legendreQ_recurrence (ν := (n + 1 : ℂ))
         (by exact_mod_cast Nat.succ_ne_zero n) hz
@@ -280,15 +284,17 @@ theorem legendreQ_nat (n : ℕ) {z : ℂ} (hz : z - 1 ∈ slitPlane) :
         ((n : ℂ) + 1) * h0
 
 /-- Legendre polynomials are entire. -/
-theorem differentiable_legendrePolyP (n : ℕ) : Differentiable ℂ (legendrePolyP n) := by
-  have h : legendrePolyP n = fun x => poch (0 + 1) n / n.factorial *
-      ∑ k ∈ Finset.range (n + 1), gaussHGCoeff (-(n : ℂ)) ((n : ℂ) + 0 + 0 + 1) (0 + 1) k *
+theorem differentiable_legendrePolynomialP (n : ℕ) : Differentiable ℂ (legendrePolynomialP n) := by
+  have h : legendrePolynomialP n = fun x => pochhammer (0 + 1) n / n.factorial *
+      ∑ k ∈ Finset.range (n + 1),
+          gaussHypergeometricCoeff (-(n : ℂ)) ((n : ℂ) + 0 + 0 + 1) (0 + 1) k *
         ((1 - x) / 2) ^ k := by
-    funext x; simp only [legendrePolyP, jacobiPolyP, ordinaryHypergeometric_eq_sum_neg_nat]
+    funext x; simp only [legendrePolynomialP, jacobiPolynomialP,
+        ordinaryHypergeometric_eq_sum_neg_nat]
   rw [h]; fun_prop
 
 /-- `P_n(1) = 1`. -/
-theorem legendrePolyP_one_eq (n : ℕ) : legendrePolyP n 1 = 1 := by
+theorem legendrePolynomialP_one_eq (n : ℕ) : legendrePolynomialP n 1 = 1 := by
   have h := legendreP_nat n (z := 1) (by norm_num)
   rw [legendreP_one] at h
   exact h.symm
@@ -312,7 +318,8 @@ theorem hasDerivAt_legendreQ_zero {z : ℂ} (hz : z - 1 ∈ slitPlane) :
 /-- `P_ν` is analytic off `(-∞, -1]`. -/
 theorem analyticAt_legendreP (ν : ℂ) {z : ℂ} (hz : 1 + z ∈ slitPlane) :
     AnalyticAt ℂ (legendreP ν) z :=
-  (analyticAt_regularizedGaussHG _ _ _ (mem_cutPlane_of_one_add hz)).comp_of_eq (by fun_prop) rfl
+  (analyticAt_regularizedGaussHypergeometric _ _ _ (mem_cutPlane_of_one_add hz)).comp_of_eq
+      (by fun_prop) rfl
 
 /-- The Wronskian `𝒲{P_n, Q_n}(z) = 1/(1 - z²)` for integer degree (Temme §8.5). -/
 theorem wronskian_legendreP_legendreQ_nat (n : ℕ) {z : ℂ} (hz : z - 1 ∈ slitPlane) :
@@ -353,9 +360,9 @@ theorem wronskian_legendreP_legendreQ_nat (n : ℕ) {z : ℂ} (hz : z - 1 ∈ sl
       (fun v hv => (hFd v hv).differentiableAt.differentiableWithinAt)
       (fun v hv => (hFd v hv).deriv) hw (show (2 : ℂ) - 1 ∈ slitPlane by norm_num)
   -- the polynomial form of `F`
-  set L := legendrePolyP n
+  set L := legendrePolynomialP n
   set R : ℂ → ℂ := fun w => (legendreQPoly n).eval w
-  have hL : Differentiable ℂ L := differentiable_legendrePolyP n
+  have hL : Differentiable ℂ L := differentiable_legendrePolynomialP n
   have hR : Differentiable ℂ R := (legendreQPoly n).differentiable
   set g : ℂ → ℂ := fun w => L w ^ 2 + (1 - w ^ 2) * (deriv L w * R w - L w * deriv R w)
   have hFg (w : ℂ) (hw : w ∈ D) : F w = g w := by
@@ -377,7 +384,7 @@ theorem wronskian_legendreP_legendreQ_nat (n : ℕ) {z : ℂ} (hz : z - 1 ∈ sl
     have := hne w hw
     field_simp
     ring
-  have hg1 : g 1 = 1 := by simp [g, L, legendrePolyP_one_eq n]
+  have hg1 : g 1 = 1 := by simp [g, L, legendrePolynomialP_one_eq n]
   have hgc : Continuous g := by
     have h1 : Continuous (deriv L) := (hL.contDiff (n := 1)).continuous_deriv le_rfl
     have h2 : Continuous (deriv R) := (hR.contDiff (n := 1)).continuous_deriv le_rfl

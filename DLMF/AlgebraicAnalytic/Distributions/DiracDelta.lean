@@ -27,7 +27,7 @@ Airy kernels, Fourier series and orthogonal-polynomial expansions.
   Mathlib's `Distribution.delta`.
 * `tendsto_gaussian_integral`, `isDeltaSequence_gaussian`, `tendsto_gaussian_integral_of_growth`,
   `tendsto_gaussian_integral_jump`: the Gaussian delta sequence (DLMF 1.17.3–1.17.7).
-* `fourier_inversion_dlmf`, `gaussian_fourier_eq`, `isDeltaSequence_gaussian_fourier`,
+* `fourierTransform_inversion_integral`, `gaussian_fourier_eq`, `isDeltaSequence_gaussian_fourier`,
   `tendsto_fourier_kernel`: Fourier inversion and `δ(x-a) = (2π)⁻¹ ∫ e^{i(x-a)t} dt`
   (DLMF 1.17.8–1.17.12).
 * `tendsto_cos_kernel`, `tendsto_sin_kernel`, `tendsto_bessel_kernel`,
@@ -341,7 +341,7 @@ theorem tendsto_gaussian_integral_jump {φ : ℝ → ℂ} {a : ℝ} {φm φp : �
 `(2π)⁻¹ ∫ e^{-iat} (∫ φ(x) e^{itx} dx) dt = φ(a)` for `φ` integrable, continuous, with
 integrable Fourier transform. -/
 @[dlmf 1.17.E8]
-theorem fourier_inversion_dlmf {φ : ℝ → ℂ} (hφ : Integrable φ) (hc : Continuous φ)
+theorem fourierTransform_inversion_integral {φ : ℝ → ℂ} (hφ : Integrable φ) (hc : Continuous φ)
     (hF : Integrable fun t : ℝ => ∫ x, φ x * exp (I * t * x)) (a : ℝ) :
     (1 / (2 * Real.pi) : ℂ) * ∫ t : ℝ, exp (-(I * a * t)) * ∫ x, φ x * exp (I * t * x) =
       φ a := by
@@ -585,13 +585,13 @@ theorem tendsto_sphericalBessel_kernel (ℓ : ℕ) {φ : ℝ → ℂ} (hφ : IsT
   sorry
 
 /-- DLMF 1.17.15: `δ(x - a) = ∫_0^∞ s(x, ℓ; r) s(a, ℓ; r) dr` for energies `x, a > 0`, with the
-energy-normalized Coulomb function `coulombs` (DLMF 33.14.9). The normalization is that of
+energy-normalized Coulomb function `coulombEnergyS` (DLMF 33.14.9). The normalization is that of
 Seaton (2002a); not verified numerically during acquisition. -/
 @[dlmf 1.17.E15]
 theorem tendsto_coulomb_kernel (ℓ : ℕ) {φ : ℝ → ℂ} (hφ : IsTestFunctionOn (Ioi 0) φ)
     {a : ℝ} (ha : 0 < a) :
     Tendsto (fun R : ℝ => ∫ x in Ioi (0 : ℝ), (∫ r in (0 : ℝ)..R,
-      DLMF.Coulomb.coulombs x ℓ r * DLMF.Coulomb.coulombs a ℓ r) * φ x) atTop
+      DLMF.Coulomb.coulombEnergyS x ℓ r * DLMF.Coulomb.coulombEnergyS a ℓ r) * φ x) atTop
       (𝓝 (φ a)) := by
   sorry
 
@@ -748,33 +748,33 @@ theorem tendsto_dirichletKernel_integral {φ : ℝ → ℂ} (hφ : ContDiff ℝ 
   tendsto_integral_dirichletKernel_mul hφ hper a
 
 /-- DLMF 1.17.22: `δ(x - a) = Σ_k (k + ½) P_k(x) P_k(a)` on `(-1, 1)` (Legendre polynomials
-`legendrePolyP`), as the limit of the partial sums tested against test functions. -/
+`legendrePolynomialP`), as the limit of the partial sums tested against test functions. -/
 @[dlmf 1.17.E22]
 theorem tendsto_legendre_kernel {φ : ℝ → ℂ} (hφ : IsTestFunctionOn (Ioo (-1) 1) φ) {a : ℝ}
     (ha : a ∈ Ioo (-1 : ℝ) 1) :
     Tendsto (fun N : ℕ => ∫ x in Ioo (-1 : ℝ) 1, (∑ k ∈ Finset.range N,
-      ((k : ℂ) + 1 / 2) * DLMF.OrthogonalPolynomials.legendrePolyP k x *
-        DLMF.OrthogonalPolynomials.legendrePolyP k a) * φ x) atTop (𝓝 (φ a)) := by
+      ((k : ℂ) + 1 / 2) * DLMF.OrthogonalPolynomials.legendrePolynomialP k x *
+        DLMF.OrthogonalPolynomials.legendrePolynomialP k a) * φ x) atTop (𝓝 (φ a)) := by
   sorry
 
 /-- DLMF 1.17.23: `δ(x - a) = e^{-(x+a)/2} Σ_k L_k(x) L_k(a)` on `(0, ∞)` (Laguerre polynomials
-`laguerrePolyL 0`). -/
+`laguerrePolynomialL 0`). -/
 @[dlmf 1.17.E23]
 theorem tendsto_laguerre_kernel {φ : ℝ → ℂ} (hφ : IsTestFunctionOn (Ioi 0) φ) {a : ℝ}
     (ha : 0 < a) :
     Tendsto (fun N : ℕ => ∫ x in Ioi (0 : ℝ), ((Real.exp (-(x + a) / 2) : ℂ) *
-      ∑ k ∈ Finset.range N, DLMF.OrthogonalPolynomials.laguerrePolyL 0 k x *
-        DLMF.OrthogonalPolynomials.laguerrePolyL 0 k a) * φ x) atTop (𝓝 (φ a)) := by
+      ∑ k ∈ Finset.range N, DLMF.OrthogonalPolynomials.laguerrePolynomialL 0 k x *
+        DLMF.OrthogonalPolynomials.laguerrePolynomialL 0 k a) * φ x) atTop (𝓝 (φ a)) := by
   sorry
 
 /-- DLMF 1.17.24: `δ(x - a) = π^{-1/2} e^{-(x²+a²)/2} Σ_k H_k(x) H_k(a) / (2^k k!)` on `ℝ`
-(physicists' Hermite polynomials `hermitePolyH`). -/
+(physicists' Hermite polynomials `hermitePolynomialH`). -/
 @[dlmf 1.17.E24]
 theorem tendsto_hermite_kernel {φ : ℝ → ℂ} (hφ : IsTestFunctionOn univ φ) (a : ℝ) :
     Tendsto (fun N : ℕ => ∫ x : ℝ, ((Real.exp (-(x ^ 2 + a ^ 2) / 2) / Real.sqrt Real.pi : ℝ) *
       ∑ k ∈ Finset.range N,
-        (((DLMF.OrthogonalPolynomials.hermitePolyH k).map (Int.castRingHom ℝ)).eval x *
-          ((DLMF.OrthogonalPolynomials.hermitePolyH k).map (Int.castRingHom ℝ)).eval a /
+        (((DLMF.OrthogonalPolynomials.hermitePolynomialH k).map (Int.castRingHom ℝ)).eval x *
+          ((DLMF.OrthogonalPolynomials.hermitePolynomialH k).map (Int.castRingHom ℝ)).eval a /
             (2 ^ k * k.factorial) : ℝ) : ℂ) * φ x) atTop (𝓝 (φ a)) := by
   sorry
 

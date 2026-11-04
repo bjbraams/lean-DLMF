@@ -183,31 +183,32 @@ restricted to the slit plane. -/
 @[dlmf 13.3.E23]
 theorem iteratedDeriv_kummerU (a b : ℂ) (n : ℕ) {z : ℂ} (hz : z ∈ slitPlane) :
     iteratedDeriv n (kummerU a b) z =
-      (-1 : ℂ) ^ n * poch a n * kummerU (a + n) (b + n) z := by
+      (-1 : ℂ) ^ n * pochhammer a n * kummerU (a + n) (b + n) z := by
   induction n generalizing a b with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ n ih =>
     have heq : deriv (kummerU a b) =ᶠ[𝓝 z] fun w => -a * kummerU (a + 1) (b + 1) w := by
       filter_upwards [isOpen_slitPlane.mem_nhds hz] with w hw
       exact deriv_kummerU a b hw
     rw [iteratedDeriv_succ', heq.iteratedDeriv_eq n, iteratedDeriv_const_mul_field, ih,
-      poch_succ_left]
+      pochhammer_succ_left]
     rw [show a + 1 + (n : ℂ) = a + ((n + 1 : ℕ) : ℂ) by push_cast; ring,
       show b + 1 + (n : ℂ) = b + ((n + 1 : ℕ) : ℂ) by push_cast; ring, pow_succ]
     ring
 
 /-- Identity under the stated parameter and domain assumptions: `mulDerivMul^[n] (fun w => w ^ (a
-- 1) * kummerU a b w) z = poch a n * poch (a - b + 1) n * z ^ (a + n - 1) * kummerU (a + n) b
+- 1) * kummerU a b w) z = pochhammer a n * pochhammer (a - b + 1) n * z ^ (a + n - 1) * kummerU (a +
+  n) b
 z`. -/
 @[dlmf 13.3.E24]
 theorem iterate_mulDerivMul_kummerU (a b : ℂ) (n : ℕ) {z : ℂ} (hz : z ∈ slitPlane) :
     mulDerivMul^[n] (fun w => w ^ (a - 1) * kummerU a b w) z =
-      poch a n * poch (a - b + 1) n * z ^ (a + n - 1) * kummerU (a + n) b z := by
+      pochhammer a n * pochhammer (a - b + 1) n * z ^ (a + n - 1) * kummerU (a + n) b z := by
   induction n generalizing z with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ n ih =>
     have heq : (fun w => w * mulDerivMul^[n] (fun t => t ^ (a - 1) * kummerU a b t) w)
-        =ᶠ[𝓝 z] (fun w => poch a n * poch (a - b + 1) n *
+        =ᶠ[𝓝 z] (fun w => pochhammer a n * pochhammer (a - b + 1) n *
           (w ^ (a + n) * kummerU (a + n) b w)) := by
       filter_upwards [isOpen_slitPlane.mem_nhds hz] with w hw
       rw [ih hw, ← mul_cpow_pred' (slitPlane_ne_zero hw) (a + n)]
@@ -220,18 +221,19 @@ theorem iterate_mulDerivMul_kummerU (a b : ℂ) (n : ℕ) {z : ℂ} (hz : z ∈ 
     have e1 : z ^ (a + ((n + 1 : ℕ) : ℂ) - 1) = z ^ (a + n) := by congr 1; push_cast; ring
     have e2 : a + ((n + 1 : ℕ) : ℂ) = a + n + 1 := by push_cast; ring
     have e4 : z ^ (a + n) = z * z ^ (a + n - 1) := (mul_cpow_pred' hz0 _).symm
-    rw [e1, e2, poch_succ, poch_succ, e4]
-    linear_combination (poch a n * poch (a - b + 1) n * z * z ^ (a + n - 1) * (a + n)) * hA
+    rw [e1, e2, pochhammer_succ, pochhammer_succ, e4]
+    linear_combination (pochhammer a n * pochhammer (a - b + 1) n * z *
+        z ^ (a + n - 1) * (a + n)) * hA
 
 /-- Identity under the stated parameter and domain assumptions: `iteratedDeriv n (fun w => w ^ (b
-- 1) * kummerU a b w) z = (-1 : ℂ) ^ n * poch (a - b + 1) n * z ^ (b - n - 1) * kummerU a (b -
+- 1) * kummerU a b w) z = (-1 : ℂ) ^ n * pochhammer (a - b + 1) n * z ^ (b - n - 1) * kummerU a (b -
 n) z`. -/
 @[dlmf 13.3.E25]
 theorem iteratedDeriv_mul_cpow_kummerU (a b : ℂ) (n : ℕ) {z : ℂ} (hz : z ∈ slitPlane) :
     iteratedDeriv n (fun w => w ^ (b - 1) * kummerU a b w) z =
-      (-1 : ℂ) ^ n * poch (a - b + 1) n * z ^ (b - n - 1) * kummerU a (b - n) z := by
+      (-1 : ℂ) ^ n * pochhammer (a - b + 1) n * z ^ (b - n - 1) * kummerU a (b - n) z := by
   induction n generalizing b with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ n ih =>
     have heq : deriv (fun w => w ^ (b - 1) * kummerU a b w) =ᶠ[𝓝 z]
         (fun w => -(a - b + 1) * (w ^ (b - 1 - 1) * kummerU a (b - 1) w)) := by
@@ -245,7 +247,7 @@ theorem iteratedDeriv_mul_cpow_kummerU (a b : ℂ) (n : ℕ) {z : ℂ} (hz : z �
       rw [e]
       linear_combination (w ^ (b - 1 - 1) * a) * h1 + (w ^ (b - 1 - 1) * (b - a - 1)) * h2
     rw [iteratedDeriv_succ', heq.iteratedDeriv_eq n, iteratedDeriv_const_mul_field, ih]
-    rw [show b - 1 - (n : ℂ) = b - ((n + 1 : ℕ) : ℂ) by push_cast; ring, poch_succ_left,
+    rw [show b - 1 - (n : ℂ) = b - ((n + 1 : ℕ) : ℂ) by push_cast; ring, pochhammer_succ_left,
       show a - (b - 1) + 1 = a - b + 1 + 1 by ring, pow_succ]
     ring
 
@@ -677,7 +679,7 @@ theorem iteratedDeriv_exp_mul_whittakerM {κ μ : ℂ} (n : ℕ) {z : ℂ}
     (hz : z ∈ slitPlane)
     (hshift : ∀ k : ℕ, 1 + 2 * μ - n ≠ -k) :
     iteratedDeriv n (fun w => exp (w / 2) * w ^ (μ - 1 / 2) * whittakerM κ μ w) z =
-      (-1 : ℂ) ^ n * poch (-2 * μ) n * exp (z / 2) * z ^ (μ - (n + 1) / 2) *
+      (-1 : ℂ) ^ n * pochhammer (-2 * μ) n * exp (z / 2) * z ^ (μ - (n + 1) / 2) *
         whittakerM (κ - n / 2) (μ - n / 2) z := by
   have hz0 : z ≠ 0 := slitPlane_ne_zero hz
   have heq : (fun w => exp (w / 2) * w ^ (μ - 1 / 2) * whittakerM κ μ w) =ᶠ[𝓝 z]
@@ -693,24 +695,24 @@ theorem iteratedDeriv_exp_mul_whittakerM {κ μ : ℂ} (n : ℕ) {z : ℂ}
   unfold whittakerM
   rw [show μ - (n : ℂ) / 2 - (κ - n / 2) + 1 / 2 = μ - κ + 1 / 2 by ring,
     show 1 + 2 * (μ - (n : ℂ) / 2) = 1 + 2 * μ - n by ring,
-    show (-2 * μ : ℂ) = 1 - (1 + 2 * μ - n) - n by ring, DLMF.Hypergeometric.poch_reflect]
+    show (-2 * μ : ℂ) = 1 - (1 + 2 * μ - n) - n by ring, DLMF.Hypergeometric.pochhammer_reflect]
   have h2 := cpow_mul_cpow_eq hz0 (s := μ - (n + 1) / 2) (t := μ - n / 2 + 1 / 2)
       (u := 1 + 2 * μ - n - 1) (by ring)
   have hs : ((-1 : ℂ) ^ n) * (-1) ^ n = 1 := by rw [← mul_pow]; simp
-  linear_combination (-(poch (1 + 2 * μ - n) n * kummerM (μ - κ + 1 / 2) (1 + 2 * μ - n) z *
+  linear_combination (-(pochhammer (1 + 2 * μ - n) n * kummerM (μ - κ + 1 / 2) (1 + 2 * μ - n) z *
     z ^ (μ - (n + 1) / 2) * z ^ (μ - n / 2 + 1 / 2) * exp (z / 2) * exp (-z / 2))) * hs -
-    (poch (1 + 2 * μ - n) n * kummerM (μ - κ + 1 / 2) (1 + 2 * μ - n) z *
+    (pochhammer (1 + 2 * μ - n) n * kummerM (μ - κ + 1 / 2) (1 + 2 * μ - n) z *
     z ^ (μ - (n + 1) / 2) * z ^ (μ - n / 2 + 1 / 2)) * exp_half_mul_exp_neg_half z -
-    (poch (1 + 2 * μ - n) n * kummerM (μ - κ + 1 / 2) (1 + 2 * μ - n) z) * h2
+    (pochhammer (1 + 2 * μ - n) n * kummerM (μ - κ + 1 / 2) (1 + 2 * μ - n) z) * h2
 
 /-- Identity under the stated parameter and domain assumptions: `iteratedDeriv n (fun w => exp (w
-/ 2) * w ^ (-μ - 1 / 2) * whittakerM κ μ w) z = poch (1 / 2 + μ - κ) n / poch (1 + 2 * μ) n *
-exp (z / 2) * z ^ (-μ - (n + 1) / 2) * whittakerM (κ - n / 2) (μ + n / 2) z`. -/
+/ 2) * w ^ (-μ - 1 / 2) * whittakerM κ μ w) z = pochhammer (1 / 2 + μ - κ) n / pochhammer (1 + 2 *
+μ) n * exp (z / 2) * z ^ (-μ - (n + 1) / 2) * whittakerM (κ - n / 2) (μ + n / 2) z`. -/
 @[dlmf 13.15.E16]
 theorem iteratedDeriv_exp_mul_whittakerM_neg {κ μ : ℂ} (n : ℕ) {z : ℂ}
     (hμ : ∀ k : ℕ, 1 + 2 * μ ≠ -k) (hz : z ∈ slitPlane) :
     iteratedDeriv n (fun w => exp (w / 2) * w ^ (-μ - 1 / 2) * whittakerM κ μ w) z =
-      poch (1 / 2 + μ - κ) n / poch (1 + 2 * μ) n * exp (z / 2) *
+      pochhammer (1 / 2 + μ - κ) n / pochhammer (1 + 2 * μ) n * exp (z / 2) *
         z ^ (-μ - (n + 1) / 2) * whittakerM (κ - n / 2) (μ + n / 2) z := by
   have hz0 : z ≠ 0 := slitPlane_ne_zero hz
   have heq : (fun w => exp (w / 2) * w ^ (-μ - 1 / 2) * whittakerM κ μ w) =ᶠ[𝓝 z]
@@ -736,19 +738,19 @@ theorem iteratedDeriv_exp_mul_whittakerM_neg {κ μ : ℂ} (n : ℕ) {z : ℂ}
   have h2 : z ^ (-μ - ((n : ℂ) + 1) / 2) * z ^ (μ + n / 2 + 1 / 2) = 1 := by
     rw [← cpow_add _ _ hz0, show -μ - ((n : ℂ) + 1) / 2 + (μ + n / 2 + 1 / 2) = (0 : ℂ) by ring,
       cpow_zero]
-  linear_combination (-(poch (μ - κ + 1 / 2) n / poch (1 + 2 * μ) n *
+  linear_combination (-(pochhammer (μ - κ + 1 / 2) n / pochhammer (1 + 2 * μ) n *
       kummerM (μ - κ + 1 / 2 + n) (1 + 2 * μ + n) z)) * h1 -
-    (poch (μ - κ + 1 / 2) n / poch (1 + 2 * μ) n *
+    (pochhammer (μ - κ + 1 / 2) n / pochhammer (1 + 2 * μ) n *
       kummerM (μ - κ + 1 / 2 + n) (1 + 2 * μ + n) z * exp (z / 2) * exp (-z / 2)) * h2
 
 /-- Identity under the stated parameter and domain assumptions: `mulDerivMul^[n] (fun w => exp (w
-/ 2) * w ^ (-κ - 1) * whittakerM κ μ w) z = poch (1 / 2 + μ - κ) n * exp (z / 2) * z ^ (n - κ
+/ 2) * w ^ (-κ - 1) * whittakerM κ μ w) z = pochhammer (1 / 2 + μ - κ) n * exp (z / 2) * z ^ (n - κ
 - 1) * whittakerM (κ - n) μ z`. -/
 @[dlmf 13.15.E17]
 theorem iterate_mulDerivMul_whittakerM {κ μ : ℂ} (n : ℕ) {z : ℂ}
     (hμ : ∀ k : ℕ, 1 + 2 * μ ≠ -k) (hz : z ∈ slitPlane) :
     mulDerivMul^[n] (fun w => exp (w / 2) * w ^ (-κ - 1) * whittakerM κ μ w) z =
-      poch (1 / 2 + μ - κ) n * exp (z / 2) * z ^ (n - κ - 1) *
+      pochhammer (1 / 2 + μ - κ) n * exp (z / 2) * z ^ (n - κ - 1) *
         whittakerM (κ - n) μ z := by
   have hz0 : z ≠ 0 := slitPlane_ne_zero hz
   have hfun : ∀ w ∈ slitPlane, exp (w / 2) * w ^ (-κ - 1) * whittakerM κ μ w =
@@ -772,9 +774,9 @@ theorem iterate_mulDerivMul_whittakerM {κ μ : ℂ} (n : ℕ) {z : ℂ}
     rw [← Complex.exp_add, show z / 2 + -z / 2 = (0 : ℂ) by ring, Complex.exp_zero]
   have h2 : z ^ ((n : ℂ) - κ - 1) * z ^ (μ + 1 / 2) = z ^ (μ - κ + 1 / 2 + n - 1) := by
     rw [← cpow_add _ _ hz0]; congr 1; ring
-  linear_combination (-(poch (μ - κ + 1 / 2) n * kummerM (μ - κ + 1 / 2 + n) (1 + 2 * μ) z *
+  linear_combination (-(pochhammer (μ - κ + 1 / 2) n * kummerM (μ - κ + 1 / 2 + n) (1 + 2 * μ) z *
       z ^ ((n : ℂ) - κ - 1) * z ^ (μ + 1 / 2))) * h1 -
-    (poch (μ - κ + 1 / 2) n * kummerM (μ - κ + 1 / 2 + n) (1 + 2 * μ) z) * h2
+    (pochhammer (μ - κ + 1 / 2) n * kummerM (μ - κ + 1 / 2 + n) (1 + 2 * μ) z) * h2
 
 /-- An iterated Whittaker-M derivative with regular initial and shifted denominators. -/
 @[dlmf 13.15.E18]
@@ -782,7 +784,7 @@ theorem iteratedDeriv_exp_neg_whittakerM {κ μ : ℂ} (n : ℕ) {z : ℂ}
     (hz : z ∈ slitPlane)
     (hshift : ∀ k : ℕ, 1 + 2 * μ - n ≠ -k) :
     iteratedDeriv n (fun w => exp (-w / 2) * w ^ (μ - 1 / 2) * whittakerM κ μ w) z =
-      (-1 : ℂ) ^ n * poch (-2 * μ) n * exp (-z / 2) * z ^ (μ - (n + 1) / 2) *
+      (-1 : ℂ) ^ n * pochhammer (-2 * μ) n * exp (-z / 2) * z ^ (μ - (n + 1) / 2) *
         whittakerM (κ + n / 2) (μ - n / 2) z := by
   have hz0 : z ≠ 0 := slitPlane_ne_zero hz
   have heq : (fun w => exp (-w / 2) * w ^ (μ - 1 / 2) * whittakerM κ μ w) =ᶠ[𝓝 z]
@@ -798,24 +800,26 @@ theorem iteratedDeriv_exp_neg_whittakerM {κ μ : ℂ} (n : ℕ) {z : ℂ}
   unfold whittakerM
   rw [show μ - (n : ℂ) / 2 - (κ + n / 2) + 1 / 2 = μ - κ + 1 / 2 - n by ring,
     show 1 + 2 * (μ - (n : ℂ) / 2) = 1 + 2 * μ - n by ring,
-    show (-2 * μ : ℂ) = 1 - (1 + 2 * μ - n) - n by ring, DLMF.Hypergeometric.poch_reflect]
+    show (-2 * μ : ℂ) = 1 - (1 + 2 * μ - n) - n by ring, DLMF.Hypergeometric.pochhammer_reflect]
   have h2 := cpow_mul_cpow_eq hz0 (s := μ - (n + 1) / 2) (t := μ - n / 2 + 1 / 2)
       (u := 1 + 2 * μ - n - 1) (by ring)
   have hs : ((-1 : ℂ) ^ n) * (-1) ^ n = 1 := by rw [← mul_pow]; simp
-  linear_combination (-(poch (1 + 2 * μ - n) n * kummerM (μ - κ + 1 / 2 - n) (1 + 2 * μ - n) z *
+  linear_combination (-(pochhammer (1 + 2 * μ - n) n *
+      kummerM (μ - κ + 1 / 2 - n) (1 + 2 * μ - n) z *
     z ^ (μ - (n + 1) / 2) * z ^ (μ - n / 2 + 1 / 2) * exp (-z / 2) * exp (-z / 2))) * hs -
-    (poch (1 + 2 * μ - n) n * kummerM (μ - κ + 1 / 2 - n) (1 + 2 * μ - n) z *
+    (pochhammer (1 + 2 * μ - n) n * kummerM (μ - κ + 1 / 2 - n) (1 + 2 * μ - n) z *
     z ^ (μ - (n + 1) / 2) * z ^ (μ - n / 2 + 1 / 2)) * exp_neg_half_mul_self z -
-    (poch (1 + 2 * μ - n) n * kummerM (μ - κ + 1 / 2 - n) (1 + 2 * μ - n) z * exp (-z)) * h2
+    (pochhammer (1 + 2 * μ - n) n * kummerM (μ - κ + 1 / 2 - n) (1 + 2 * μ - n) z * exp (-z)) * h2
 
 /-- Identity under the stated parameter and domain assumptions: `iteratedDeriv n (fun w => exp (-w
-/ 2) * w ^ (-μ - 1 / 2) * whittakerM κ μ w) z = (-1 : ℂ) ^ n * poch (1 / 2 + μ + κ) n / poch
-(1 + 2 * μ) n * exp (-z / 2) * z ^ (-μ - (n + 1) / 2) * whittakerM (κ + n / 2) (μ + n / 2) z`. -/
+/ 2) * w ^ (-μ - 1 / 2) * whittakerM κ μ w) z = (-1 : ℂ) ^ n * pochhammer (1 / 2 + μ + κ) n /
+pochhammer (1 + 2 * μ) n * exp (-z / 2) * z ^ (-μ - (n + 1) / 2) * whittakerM (κ + n / 2) (μ + n /
+2) z`. -/
 @[dlmf 13.15.E19]
 theorem iteratedDeriv_exp_neg_whittakerM_neg {κ μ : ℂ} (n : ℕ) {z : ℂ}
     (hμ : ∀ k : ℕ, 1 + 2 * μ ≠ -k) (hz : z ∈ slitPlane) :
     iteratedDeriv n (fun w => exp (-w / 2) * w ^ (-μ - 1 / 2) * whittakerM κ μ w) z =
-      (-1 : ℂ) ^ n * poch (1 / 2 + μ + κ) n / poch (1 + 2 * μ) n * exp (-z / 2) *
+      (-1 : ℂ) ^ n * pochhammer (1 / 2 + μ + κ) n / pochhammer (1 + 2 * μ) n * exp (-z / 2) *
         z ^ (-μ - (n + 1) / 2) * whittakerM (κ + n / 2) (μ + n / 2) z := by
   have hz0 : z ≠ 0 := slitPlane_ne_zero hz
   have heq : (fun w => exp (-w / 2) * w ^ (-μ - 1 / 2) * whittakerM κ μ w) =ᶠ[𝓝 z]
@@ -841,20 +845,20 @@ theorem iteratedDeriv_exp_neg_whittakerM_neg {κ μ : ℂ} (n : ℕ) {z : ℂ}
   have h2 : z ^ (-μ - ((n : ℂ) + 1) / 2) * z ^ (μ + n / 2 + 1 / 2) = 1 := by
     rw [← cpow_add _ _ hz0, show -μ - ((n : ℂ) + 1) / 2 + (μ + n / 2 + 1 / 2) = (0 : ℂ) by ring,
       cpow_zero]
-  linear_combination (-((-1 : ℂ) ^ n * poch (1 / 2 + μ + κ) n / poch (1 + 2 * μ) n *
+  linear_combination (-((-1 : ℂ) ^ n * pochhammer (1 / 2 + μ + κ) n / pochhammer (1 + 2 * μ) n *
       kummerM (μ - κ + 1 / 2) (1 + 2 * μ + n) z *
       z ^ (-μ - ((n : ℂ) + 1) / 2) * z ^ (μ + n / 2 + 1 / 2))) * h1 -
-    ((-1 : ℂ) ^ n * poch (1 / 2 + μ + κ) n / poch (1 + 2 * μ) n *
+    ((-1 : ℂ) ^ n * pochhammer (1 / 2 + μ + κ) n / pochhammer (1 + 2 * μ) n *
       kummerM (μ - κ + 1 / 2) (1 + 2 * μ + n) z * exp (-z)) * h2
 
 /-- Identity under the stated parameter and domain assumptions: `mulDerivMul^[n] (fun w => exp (-w
-/ 2) * w ^ (κ - 1) * whittakerM κ μ w) z = poch (1 / 2 + μ + κ) n * exp (-z / 2) * z ^ (κ + n
+/ 2) * w ^ (κ - 1) * whittakerM κ μ w) z = pochhammer (1 / 2 + μ + κ) n * exp (-z / 2) * z ^ (κ + n
 - 1) * whittakerM (κ + n) μ z`. -/
 @[dlmf 13.15.E20]
 theorem iterate_mulDerivMul_exp_neg_whittakerM {κ μ : ℂ} (n : ℕ) {z : ℂ}
     (hμ : ∀ k : ℕ, 1 + 2 * μ ≠ -k) (hz : z ∈ slitPlane) :
     mulDerivMul^[n] (fun w => exp (-w / 2) * w ^ (κ - 1) * whittakerM κ μ w) z =
-      poch (1 / 2 + μ + κ) n * exp (-z / 2) * z ^ (κ + n - 1) *
+      pochhammer (1 / 2 + μ + κ) n * exp (-z / 2) * z ^ (κ + n - 1) *
         whittakerM (κ + n) μ z := by
   have hz0 : z ≠ 0 := slitPlane_ne_zero hz
   have hfun : ∀ w ∈ slitPlane, exp (-w / 2) * w ^ (κ - 1) * whittakerM κ μ w =
@@ -879,17 +883,17 @@ theorem iterate_mulDerivMul_exp_neg_whittakerM {κ μ : ℂ} (n : ℕ) {z : ℂ}
     rw [← Complex.exp_add]; congr 1; ring
   have h2 : z ^ (κ + (n : ℂ) - 1) * z ^ (μ + 1 / 2) = z ^ (1 / 2 + μ + κ + n - 1) := by
     rw [← cpow_add _ _ hz0]; congr 1; ring
-  linear_combination (-(poch (1 / 2 + μ + κ) n * kummerM (μ - κ + 1 / 2 - n) (1 + 2 * μ) z *
+  linear_combination (-(pochhammer (1 / 2 + μ + κ) n * kummerM (μ - κ + 1 / 2 - n) (1 + 2 * μ) z *
       z ^ (κ + (n : ℂ) - 1) * z ^ (μ + 1 / 2))) * h1 -
-    (poch (1 / 2 + μ + κ) n * kummerM (μ - κ + 1 / 2 - n) (1 + 2 * μ) z * exp (-z)) * h2
+    (pochhammer (1 / 2 + μ + κ) n * kummerM (μ - κ + 1 / 2 - n) (1 + 2 * μ) z * exp (-z)) * h2
 
 /-- Identity under the stated parameter and domain assumptions: `iteratedDeriv n (fun w => exp (w
-/ 2) * w ^ (-μ - 1 / 2) * whittakerW κ μ w) z = (-1 : ℂ) ^ n * poch (1 / 2 + μ - κ) n * exp (z
+/ 2) * w ^ (-μ - 1 / 2) * whittakerW κ μ w) z = (-1 : ℂ) ^ n * pochhammer (1 / 2 + μ - κ) n * exp (z
 / 2) * z ^ (-μ - (n + 1) / 2) * whittakerW (κ - n / 2) (μ + n / 2) z`. -/
 @[dlmf 13.15.E21]
 theorem iteratedDeriv_exp_mul_whittakerW {κ μ : ℂ} (n : ℕ) {z : ℂ} (hz : z ∈ slitPlane) :
     iteratedDeriv n (fun w => exp (w / 2) * w ^ (-μ - 1 / 2) * whittakerW κ μ w) z =
-      (-1 : ℂ) ^ n * poch (1 / 2 + μ - κ) n * exp (z / 2) *
+      (-1 : ℂ) ^ n * pochhammer (1 / 2 + μ - κ) n * exp (z / 2) *
         z ^ (-μ - (n + 1) / 2) * whittakerW (κ - n / 2) (μ + n / 2) z := by
   have hz0 : z ≠ 0 := slitPlane_ne_zero hz
   have heq : (fun w => exp (w / 2) * w ^ (-μ - 1 / 2) * whittakerW κ μ w) =ᶠ[𝓝 z]
@@ -909,19 +913,20 @@ theorem iteratedDeriv_exp_mul_whittakerW {κ μ : ℂ} (n : ℕ) {z : ℂ} (hz :
   have h2 := cpow_mul_cpow_eq hz0 (s := -μ - (n + 1) / 2) (t := 1 / 2 + (μ + n / 2))
       (u := 0) (by ring)
   rw [cpow_zero] at h2
-  linear_combination (-((-1 : ℂ) ^ n * poch (1 / 2 + μ - κ) n *
+  linear_combination (-((-1 : ℂ) ^ n * pochhammer (1 / 2 + μ - κ) n *
     kummerU (1 / 2 + μ - κ + n) (1 + 2 * μ + n) z *
     z ^ (-μ - (n + 1) / 2) * z ^ (1 / 2 + (μ + n / 2)))) * exp_half_mul_exp_neg_half z -
-    ((-1 : ℂ) ^ n * poch (1 / 2 + μ - κ) n * kummerU (1 / 2 + μ - κ + n) (1 + 2 * μ + n) z) * h2
+    ((-1 : ℂ) ^ n * pochhammer (1 / 2 + μ - κ) n *
+        kummerU (1 / 2 + μ - κ + n) (1 + 2 * μ + n) z) * h2
 
 /-- Identity under the stated parameter and domain assumptions: `iteratedDeriv n (fun w => exp (w
-/ 2) * w ^ (μ - 1 / 2) * whittakerW κ μ w) z = (-1 : ℂ) ^ n * poch (1 / 2 - μ - κ) n * exp (z
+/ 2) * w ^ (μ - 1 / 2) * whittakerW κ μ w) z = (-1 : ℂ) ^ n * pochhammer (1 / 2 - μ - κ) n * exp (z
 / 2) * z ^ (μ - (n + 1) / 2) * whittakerW (κ - n / 2) (μ - n / 2) z`. -/
 @[dlmf 13.15.E22]
 theorem iteratedDeriv_exp_mul_whittakerW_pos {κ μ : ℂ} (n : ℕ) {z : ℂ}
     (hz : z ∈ slitPlane) :
     iteratedDeriv n (fun w => exp (w / 2) * w ^ (μ - 1 / 2) * whittakerW κ μ w) z =
-      (-1 : ℂ) ^ n * poch (1 / 2 - μ - κ) n * exp (z / 2) *
+      (-1 : ℂ) ^ n * pochhammer (1 / 2 - μ - κ) n * exp (z / 2) *
         z ^ (μ - (n + 1) / 2) * whittakerW (κ - n / 2) (μ - n / 2) z := by
   have hz0 : z ≠ 0 := slitPlane_ne_zero hz
   have heq : (fun w => exp (w / 2) * w ^ (μ - 1 / 2) * whittakerW κ μ w) =ᶠ[𝓝 z]
@@ -940,18 +945,18 @@ theorem iteratedDeriv_exp_mul_whittakerW_pos {κ μ : ℂ} (n : ℕ) {z : ℂ}
     show 1 / 2 + μ - κ - (1 + 2 * μ) + 1 = 1 / 2 - μ - κ by ring]
   have h2 := cpow_mul_cpow_eq hz0 (s := μ - (n + 1) / 2) (t := 1 / 2 + (μ - n / 2))
       (u := 1 + 2 * μ - n - 1) (by ring)
-  linear_combination (-((-1 : ℂ) ^ n * poch (1 / 2 - μ - κ) n *
+  linear_combination (-((-1 : ℂ) ^ n * pochhammer (1 / 2 - μ - κ) n *
     kummerU (1 / 2 + μ - κ) (1 + 2 * μ - n) z *
     z ^ (μ - (n + 1) / 2) * z ^ (1 / 2 + (μ - n / 2)))) * exp_half_mul_exp_neg_half z -
-    ((-1 : ℂ) ^ n * poch (1 / 2 - μ - κ) n * kummerU (1 / 2 + μ - κ) (1 + 2 * μ - n) z) * h2
+    ((-1 : ℂ) ^ n * pochhammer (1 / 2 - μ - κ) n * kummerU (1 / 2 + μ - κ) (1 + 2 * μ - n) z) * h2
 
 /-- Identity under the stated parameter and domain assumptions: `mulDerivMul^[n] (fun w => exp (w
-/ 2) * w ^ (-κ - 1) * whittakerW κ μ w) z = poch (1 / 2 + μ - κ) n * poch (1 / 2 - μ - κ) n *
-exp (z / 2) * z ^ (n - κ - 1) * whittakerW (κ - n) μ z`. -/
+/ 2) * w ^ (-κ - 1) * whittakerW κ μ w) z = pochhammer (1 / 2 + μ - κ) n * pochhammer (1 / 2 - μ -
+κ) n * exp (z / 2) * z ^ (n - κ - 1) * whittakerW (κ - n) μ z`. -/
 @[dlmf 13.15.E23]
 theorem iterate_mulDerivMul_whittakerW {κ μ : ℂ} (n : ℕ) {z : ℂ} (hz : z ∈ slitPlane) :
     mulDerivMul^[n] (fun w => exp (w / 2) * w ^ (-κ - 1) * whittakerW κ μ w) z =
-      poch (1 / 2 + μ - κ) n * poch (1 / 2 - μ - κ) n * exp (z / 2) *
+      pochhammer (1 / 2 + μ - κ) n * pochhammer (1 / 2 - μ - κ) n * exp (z / 2) *
         z ^ (n - κ - 1) * whittakerW (κ - n) μ z := by
   have hz0 : z ≠ 0 := slitPlane_ne_zero hz
   have hfun : ∀ w ∈ slitPlane, exp (w / 2) * w ^ (-κ - 1) * whittakerW κ μ w =
@@ -970,10 +975,10 @@ theorem iterate_mulDerivMul_whittakerW {κ μ : ℂ} (n : ℕ) {z : ℂ} (hz : z
     show 1 / 2 + μ - κ - (1 + 2 * μ) + 1 = 1 / 2 - μ - κ by ring]
   have h2 := cpow_mul_cpow_eq hz0 (s := (n : ℂ) - κ - 1) (t := 1 / 2 + μ)
       (u := 1 / 2 + μ - κ + n - 1) (by ring)
-  linear_combination (-(poch (1 / 2 + μ - κ) n * poch (1 / 2 - μ - κ) n *
+  linear_combination (-(pochhammer (1 / 2 + μ - κ) n * pochhammer (1 / 2 - μ - κ) n *
     kummerU (1 / 2 + μ - κ + n) (1 + 2 * μ) z *
     z ^ ((n : ℂ) - κ - 1) * z ^ (1 / 2 + μ))) * exp_half_mul_exp_neg_half z -
-    (poch (1 / 2 + μ - κ) n * poch (1 / 2 - μ - κ) n *
+    (pochhammer (1 / 2 + μ - κ) n * pochhammer (1 / 2 - μ - κ) n *
       kummerU (1 / 2 + μ - κ + n) (1 + 2 * μ) z) * h2
 
 /-- Identity under the stated parameter and domain assumptions: `iteratedDeriv n (fun w => exp (-w

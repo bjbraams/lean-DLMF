@@ -25,19 +25,22 @@ and DiDonato's approximation from DLMF §8.27(i).
 
 ## Main results
 
-* `scIncGamma_nonnegative_parameter_no_real_zeros`: no real zeros for `a ≥ 0`.
-* `scIncGamma_one_negative_zero`, `scIncGamma_two_real_zeros`: one or two real zeros,
-  according to the range of `a` (DLMF §8.13(i)).
+* `tricomiIncompleteGamma_nonnegative_parameter_no_real_zeros`: no real zeros for `a ≥ 0`.
+* `tricomiIncompleteGamma_one_negative_zero`, `tricomiIncompleteGamma_two_real_zeros`: one or two
+  real zeros, according to the range of `a` (DLMF §8.13(i)).
 * `Real.scIncGammaNegativeZero_strictAnti`, `Real.scIncGammaNegativeZero_bounds`: monotonicity
   and the bounds DLMF 8.13.1.
-* `scIncGamma_two_parameter_zeros_negative_x`, `scIncGamma_two_parameter_zeros_positive_x`,
-  `scIncGamma_double_parameter_zero`, `scIncGamma_parameter_zeros_at_x_zero`,
-  `scIncGamma_conjugate_zero_trajectories`: the parameter zeros of DLMF §8.13(ii).
-* `normIncGammaP_laplace`, `upperIncGamma_laplace`: the Laplace transforms DLMF 8.14.1 and
-  8.14.2.
-* `lowerIncGamma_mellin`, `upperIncGamma_mellin`, `lowerIncGamma_mellin_laplace`,
-  `upperIncGamma_mellin_laplace`: the Mellin transforms DLMF 8.14.3–8.14.6.
-* `lowerIncGamma_multiplication_hasSum`: the multiplication formula DLMF 8.15.1.
+* `tricomiIncompleteGamma_two_parameter_zeros_negative_x`,
+  `tricomiIncompleteGamma_two_parameter_zeros_positive_x`,
+  `tricomiIncompleteGamma_double_parameter_zero`,
+  `tricomiIncompleteGamma_parameter_zeros_at_x_zero`,
+  `tricomiIncompleteGamma_conjugate_zero_trajectories`: the parameter zeros of DLMF §8.13(ii).
+* `regularizedGamma_laplace`, `upperIncompleteGamma_laplace`: the Laplace
+  transforms DLMF 8.14.1 and 8.14.2.
+* `lowerIncompleteGamma_mellin`, `upperIncompleteGamma_mellin`,
+  `lowerIncompleteGamma_mellin_laplace`, `upperIncompleteGamma_mellin_laplace`: the Mellin
+  transforms DLMF 8.14.3–8.14.6.
+* `lowerIncompleteGamma_multiplication_hasSum`: the multiplication formula DLMF 8.15.1.
 * `incompleteGamma_hurwitz_fourier_sum`: the Fourier sum DLMF 8.15.2.
 * `Real.gammaDiDonato_gamma`, `Real.gammaDiDonato_approximation`: the change of variable and
   the `O(x^{-7})` approximation of DLMF §8.27(i).
@@ -59,11 +62,11 @@ open DLMF.Statistical
 
 /-- The negative x-zero when it exists. -/
 def Real.scIncGammaNegativeZero (a : ℝ) : ℝ :=
-  Classical.epsilon (fun x : ℝ => x < 0 ∧ scIncGamma a x=0)
+  Classical.epsilon (fun x : ℝ => x < 0 ∧ tricomiIncompleteGamma a x=0)
 
 /-- The positive x-zero when it exists. -/
 def Real.scIncGammaPositiveZero (a : ℝ) : ℝ :=
-  Classical.epsilon (fun x : ℝ => 0 < x ∧ scIncGamma a x=0)
+  Classical.epsilon (fun x : ℝ => 0 < x ∧ tricomiIncompleteGamma a x=0)
 
 /-- A complex sum of nonnegative real terms with positive leading term is nonzero. -/
 theorem ne_zero_of_hasSum_ofReal_nonneg {f : ℕ → ℝ} {S : ℂ} (h : HasSum (fun k => (f k : ℂ)) S)
@@ -78,17 +81,17 @@ theorem ne_zero_of_hasSum_ofReal_nonneg {f : ℕ → ℝ} {S : ℂ} (h : HasSum 
   rw [hS]
   exact ofReal_ne_zero.mpr (lt_of_lt_of_le h0 (le_hasSum hr 0 fun j _ => hf j)).ne'
 
-/-- Nonvanishing under the stated hypotheses: `scIncGamma a x ≠ 0`. -/
-theorem scIncGamma_nonnegative_parameter_no_real_zeros {a : ℝ} (ha : 0 ≤ a) (x : ℝ) :
-    scIncGamma a x ≠ 0 := by
+/-- Nonvanishing under the stated hypotheses: `tricomiIncompleteGamma a x ≠ 0`. -/
+theorem tricomiIncompleteGamma_nonnegative_parameter_no_real_zeros {a : ℝ} (ha : 0 ≤ a) (x : ℝ) :
+    tricomiIncompleteGamma a x ≠ 0 := by
   rcases ha.eq_or_lt with h0 | hpos
   · subst h0
-    have := scIncGamma_neg_nat 0 (x:ℂ)
+    have := tricomiIncompleteGamma_neg_nat 0 (x:ℂ)
     simp only [Nat.cast_zero, neg_zero, pow_zero] at this
     rw [ofReal_zero, this]; exact one_ne_zero
   have hG : ∀ k : ℕ, 0 < Real.Gamma (a+k+1) := fun k => Real.Gamma_pos_of_pos (by positivity)
   rcases le_or_gt 0 x with hx | hx
-  · have h := scIncGamma_hasSum_exponential (a:ℂ) x
+  · have h := tricomiIncompleteGamma_hasSum_exponential (a:ℂ) x
     refine ne_zero_of_hasSum_ofReal_nonneg (f := fun k => Real.exp (-x)*x^k/Real.Gamma (a+k+1))
       ?_ (fun k => by have := hG k; positivity) (by have := hG 0; simp; positivity)
     refine h.congr_fun fun k => ?_
@@ -107,7 +110,7 @@ theorem scIncGamma_nonnegative_parameter_no_real_zeros {a : ℝ} (ha : 0 ≤ a) 
         have : 0 < Real.Gamma (a+1+0) := Real.Gamma_pos_of_pos (by positivity)
         simp; positivity)
     refine hs.congr_fun fun k => ?_
-    rw [regularizedHGFunCoeff_singleton, poch_ofReal,
+    rw [regularizedHGFunCoeff_singleton, pochhammer_ofReal,
       show (a:ℂ)+1+k = ((a+1+k : ℝ) : ℂ) by push_cast; ring, Complex.Gamma_ofReal]
     push_cast
     ring
@@ -120,9 +123,9 @@ monotone on each half-line. The signs at `0` and at `±∞` come from the two po
 /-- `e^z γ*(a,z) = ∑ zᵏ / Γ(a+k+1)`. -/
 theorem IncompleteGammaZeros.hasSum_expScaled (a z : ℂ) :
     HasSum (fun k : ℕ => z ^ k / Gamma (a + k + 1)) (regularizedHGFun {1} {a + 1} z) := by
-  have h := (scIncGamma_hasSum_exponential a z).mul_left (exp z)
+  have h := (tricomiIncompleteGamma_hasSum_exponential a z).mul_left (exp z)
   have he : exp z * exp (-z) = 1 := by rw [← Complex.exp_add]; simp
-  rw [scIncGamma, ← mul_assoc, he, one_mul] at h
+  rw [tricomiIncompleteGamma, ← mul_assoc, he, one_mul] at h
   refine h.congr_fun fun k => ?_
   rw [← mul_div_assoc, ← mul_assoc, he, one_mul]
 
@@ -134,10 +137,10 @@ theorem IncompleteGammaZeros.hasSum_expScaled' (a z : ℂ) :
     (by simp : z ∈ Metric.eball (0 : ℂ) ⊤)
   refine hs.congr_fun fun k => ?_
   rw [regularizedHGFunCoeff_singleton]
-  have hp : poch (2 : ℂ) k = (k + 1 : ℕ)! := by
-    have h1 := poch_succ_left (1 : ℂ) k
+  have hp : pochhammer (2 : ℂ) k = (k + 1 : ℕ)! := by
+    have h1 := pochhammer_succ_left (1 : ℂ) k
     rw [one_mul, show (1 : ℂ) + 1 = 2 by norm_num] at h1
-    rw [← h1, poch_nat_one]
+    rw [← h1, pochhammer_nat_one]
   rw [hp, Nat.factorial_succ]
   have hk : (k ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero k)
   push_cast
@@ -210,17 +213,20 @@ theorem IncompleteGammaZeros.expScaled_zero (a : ℝ) : IncompleteGammaZeros.exp
     simp
   linarith [h0.unique h]
 
-/-- Identity under the stated parameter and domain assumptions: `scIncGamma a x = exp (-(x : ℂ)) *
-(IncompleteGammaZeros.expScaled a x : ℂ)`. -/
-theorem IncompleteGammaZeros.scIncGamma_eq_exp_mul (a x : ℝ) : scIncGamma a x = exp (-(x : ℂ)) *
+/-- Identity under the stated parameter and domain assumptions:
+`tricomiIncompleteGamma a x = exp (-(x : ℂ)) * (IncompleteGammaZeros.expScaled a x : ℂ)`. -/
+theorem IncompleteGammaZeros.tricomiIncompleteGamma_eq_exp_mul (a x : ℝ) : tricomiIncompleteGamma a
+    x = exp (-(x : ℂ)) *
     (IncompleteGammaZeros.expScaled a x : ℂ) := by
-  rw [scIncGamma, (IncompleteGammaZeros.hasSum_real a x).2]
+  rw [tricomiIncompleteGamma, (IncompleteGammaZeros.hasSum_real a x).2]
 
 /-- Identity under the stated parameter and domain assumptions:
-`scIncGamma a x = 0 ↔ IncompleteGammaZeros.expScaled a x = 0`. -/
-theorem IncompleteGammaZeros.scIncGamma_eq_zero_iff (a x : ℝ) : scIncGamma a x = 0 ↔
+`tricomiIncompleteGamma a x = 0 ↔ IncompleteGammaZeros.expScaled a x = 0`. -/
+theorem IncompleteGammaZeros.tricomiIncompleteGamma_eq_zero_iff (a x : ℝ) :
+    tricomiIncompleteGamma a x = 0 ↔
     IncompleteGammaZeros.expScaled a x = 0 := by
-  rw [IncompleteGammaZeros.scIncGamma_eq_exp_mul, mul_eq_zero, ofReal_eq_zero]; simp [exp_ne_zero]
+  rw [IncompleteGammaZeros.tricomiIncompleteGamma_eq_exp_mul, mul_eq_zero, ofReal_eq_zero];
+      simp [exp_ne_zero]
 
 /-- Identity under the stated parameter and domain assumptions:
 `∃ d : ℝ, HasDerivAt (IncompleteGammaZeros.expScaled a) d x ∧ x * d = (x - a) *
@@ -325,8 +331,8 @@ theorem IncompleteGammaZeros.hasSum_alternating {a : ℝ} (ha : ∀ n : ℤ, a �
       (Real.Gamma a * Real.exp y * IncompleteGammaZeros.expScaled a (-y)) := by
   have ha' := IncompleteGammaZeros.nonInteger ha
   have hG : Real.Gamma a ≠ 0 := Real.Gamma_ne_zero fun m h => ha (-m) (by rw [h]; simp)
-  have h := scIncGamma_hasSum_alternating ha' (((-y : ℝ)) : ℂ)
-  rw [IncompleteGammaZeros.scIncGamma_eq_exp_mul] at h
+  have h := tricomiIncompleteGamma_hasSum_alternating ha' (((-y : ℝ)) : ℂ)
+  rw [IncompleteGammaZeros.tricomiIncompleteGamma_eq_exp_mul] at h
   have hr : HasSum (fun k : ℕ => ((((k ! : ℝ) * (a + k))⁻¹ * y ^ k / Real.Gamma a : ℝ) : ℂ))
       (exp (-((-y : ℝ) : ℂ)) * (IncompleteGammaZeros.expScaled a (-y) : ℂ)) := by
     refine h.congr_fun fun k => ?_
@@ -484,10 +490,11 @@ theorem IncompleteGammaZeros.exp_series (y : ℝ) : HasSum (fun k : ℕ => y ^ k
   rw [Real.exp_eq_exp_ℝ]; exact NormedSpace.expSeries_div_hasSum_exp y
 
 /-- Estimate under the stated parameter and domain assumptions: `Real.scIncGammaNegativeZero a < 0
-∧ ∀ x : ℝ, scIncGamma a x=0 ↔ x=Real.scIncGammaNegativeZero a`. -/
-theorem scIncGamma_one_negative_zero {n : ℕ} (hn : 1 ≤ n) {a : ℝ} (ha0 : 1-2*(n : ℝ) < a)
+∧ ∀ x : ℝ, tricomiIncompleteGamma a x=0 ↔ x=Real.scIncGammaNegativeZero a`. -/
+theorem tricomiIncompleteGamma_one_negative_zero {n : ℕ} (hn : 1 ≤ n) {a : ℝ}
+    (ha0 : 1-2*(n : ℝ) < a)
     (ha1 : a < 2-2*(n : ℝ)) :
-    Real.scIncGammaNegativeZero a < 0 ∧ ∀ x : ℝ, scIncGamma a x=0 ↔
+    Real.scIncGammaNegativeZero a < 0 ∧ ∀ x : ℝ, tricomiIncompleteGamma a x=0 ↔
         x=Real.scIncGammaNegativeZero a := by
   have ha : ∀ m : ℤ, a ≠ m :=
       IncompleteGammaZeros.nonInteger_of_Ioo (m := 1 - 2 * n) (by push_cast; linarith)
@@ -524,19 +531,21 @@ theorem scIncGamma_one_negative_zero {n : ℕ} (hn : 1 ≤ n) {a : ℝ} (ha0 : 1
     · rw [h] at hx; exact absurd hx hU0.ne'
     · exact absurd hx (hpos x h)
   have he : Real.scIncGammaNegativeZero a = x0 := by
-    have hs := Classical.epsilon_spec (p := fun x : ℝ => x < 0 ∧ scIncGamma a x = 0)
-      ⟨x0, hx0, (IncompleteGammaZeros.scIncGamma_eq_zero_iff a x0).mpr hUx0⟩
-    exact (hzero _).mp ((IncompleteGammaZeros.scIncGamma_eq_zero_iff a _).mp hs.2)
+    have hs := Classical.epsilon_spec (p := fun x : ℝ => x < 0 ∧ tricomiIncompleteGamma a x = 0)
+      ⟨x0, hx0, (IncompleteGammaZeros.tricomiIncompleteGamma_eq_zero_iff a x0).mpr hUx0⟩
+    exact (hzero _).mp ((IncompleteGammaZeros.tricomiIncompleteGamma_eq_zero_iff a _).mp hs.2)
   rw [he]
-  exact ⟨hx0, fun x => (IncompleteGammaZeros.scIncGamma_eq_zero_iff a x).trans (hzero x)⟩
+  exact ⟨hx0, fun x =>
+      (IncompleteGammaZeros.tricomiIncompleteGamma_eq_zero_iff a x).trans (hzero x)⟩
 
 /-- Estimate under the stated parameter and domain assumptions: `Real.scIncGammaNegativeZero a < 0
-∧ 0 < Real.scIncGammaPositiveZero a ∧ ∀ x : ℝ, scIncGamma a x=0 ↔
+∧ 0 < Real.scIncGammaPositiveZero a ∧ ∀ x : ℝ, tricomiIncompleteGamma a x=0 ↔
 x=Real.scIncGammaNegativeZero a ∨ x=Real.scIncGammaPositiveZero a`. -/
-theorem scIncGamma_two_real_zeros {n : ℕ} (hn : 1 ≤ n) {a : ℝ} (ha0 : -2*(n : ℝ) < a)
+theorem tricomiIncompleteGamma_two_real_zeros {n : ℕ} (hn : 1 ≤ n) {a : ℝ} (ha0 : -2*(n : ℝ) < a)
     (ha1 : a < 1-2*(n : ℝ)) :
     Real.scIncGammaNegativeZero a < 0 ∧ 0 < Real.scIncGammaPositiveZero a ∧ ∀ x : ℝ,
-        scIncGamma a x=0 ↔ x=Real.scIncGammaNegativeZero a ∨ x=Real.scIncGammaPositiveZero a := by
+        tricomiIncompleteGamma a x=0 ↔ x=Real.scIncGammaNegativeZero a ∨
+            x=Real.scIncGammaPositiveZero a := by
   have ha : ∀ m : ℤ, a ≠ m :=
       IncompleteGammaZeros.nonInteger_of_Ioo (m := -2 * n) (by push_cast; linarith)
     (by push_cast; linarith)
@@ -567,19 +576,22 @@ theorem scIncGamma_two_real_zeros {n : ℕ} (hn : 1 ≤ n) {a : ℝ} (ha0 : -2*(
     · rw [h] at hx; exact absurd hx hU0.ne
     · exact Or.inr (IncompleteGammaZeros.unique_pos ha h hy0.1 hx hUy0)
   have he1 : Real.scIncGammaNegativeZero a = x0 := by
-    have hs := Classical.epsilon_spec (p := fun x : ℝ => x < 0 ∧ scIncGamma a x = 0)
-      ⟨x0, hx0, (IncompleteGammaZeros.scIncGamma_eq_zero_iff a x0).mpr hUx0⟩
-    rcases (hzero _).mp ((IncompleteGammaZeros.scIncGamma_eq_zero_iff a _).mp hs.2) with h | h
+    have hs := Classical.epsilon_spec (p := fun x : ℝ => x < 0 ∧ tricomiIncompleteGamma a x = 0)
+      ⟨x0, hx0, (IncompleteGammaZeros.tricomiIncompleteGamma_eq_zero_iff a x0).mpr hUx0⟩
+    rcases (hzero _).mp ((IncompleteGammaZeros.tricomiIncompleteGamma_eq_zero_iff a _).mp
+        hs.2) with h | h
     · exact h
     · exact absurd hs.1 (not_lt.mpr (h ▸ hy0.1.le))
   have he2 : Real.scIncGammaPositiveZero a = y0 := by
-    have hs := Classical.epsilon_spec (p := fun x : ℝ => 0 < x ∧ scIncGamma a x = 0)
-      ⟨y0, hy0.1, (IncompleteGammaZeros.scIncGamma_eq_zero_iff a y0).mpr hUy0⟩
-    rcases (hzero _).mp ((IncompleteGammaZeros.scIncGamma_eq_zero_iff a _).mp hs.2) with h | h
+    have hs := Classical.epsilon_spec (p := fun x : ℝ => 0 < x ∧ tricomiIncompleteGamma a x = 0)
+      ⟨y0, hy0.1, (IncompleteGammaZeros.tricomiIncompleteGamma_eq_zero_iff a y0).mpr hUy0⟩
+    rcases (hzero _).mp ((IncompleteGammaZeros.tricomiIncompleteGamma_eq_zero_iff a _).mp
+        hs.2) with h | h
     · exact absurd hs.1 (not_lt.mpr (h ▸ hx0.le))
     · exact h
   rw [he1, he2]
-  exact ⟨hx0, hy0.1, fun x => (IncompleteGammaZeros.scIncGamma_eq_zero_iff a x).trans (hzero x)⟩
+  exact ⟨hx0, hy0.1, fun x =>
+      (IncompleteGammaZeros.tricomiIncompleteGamma_eq_zero_iff a x).trans (hzero x)⟩
 
 /-- The stated relation follows from the given hypotheses: `StrictAntiOn
 Real.scIncGammaNegativeZero (Ioo (-1) 0)`. -/
@@ -592,9 +604,10 @@ theorem Real.scIncGammaNegativeZero_strictAnti  :
   have hz : ∀ a ∈ Ioo (-1 : ℝ) 0, Real.scIncGammaNegativeZero a < 0 ∧
       IncompleteGammaZeros.expScaled a (Real.scIncGammaNegativeZero a) = 0 := by
     intro a ha
-    obtain ⟨hneg, hiff⟩ := scIncGamma_one_negative_zero (n := 1) le_rfl (a := a)
+    obtain ⟨hneg, hiff⟩ := tricomiIncompleteGamma_one_negative_zero (n := 1) le_rfl (a := a)
       (by norm_num; linarith [ha.1]) (by norm_num; linarith [ha.2])
-    exact ⟨hneg, (IncompleteGammaZeros.scIncGamma_eq_zero_iff a _).mp ((hiff _).mpr rfl)⟩
+    exact ⟨hneg, (IncompleteGammaZeros.tricomiIncompleteGamma_eq_zero_iff a _).mp
+        ((hiff _).mpr rfl)⟩
   have hG : ∀ a ∈ Ioo (-1 : ℝ) 0, Real.Gamma a < 0 := by
     intro a ha
     have h := IncompleteGammaZeros.Gamma_sign 0 (x := a) (by norm_num; linarith [ha.1])
@@ -647,11 +660,11 @@ theorem Real.scIncGammaNegativeZero_bounds {a : ℝ} (ha0 : -1 < a) (ha1 : a < 0
   have ha : ∀ m : ℤ, a ≠ m :=
       IncompleteGammaZeros.nonInteger_of_Ioo (m := -1) (by push_cast; linarith)
     (by push_cast; linarith)
-  obtain ⟨hneg, hiff⟩ := scIncGamma_one_negative_zero (n := 1) le_rfl (a := a)
+  obtain ⟨hneg, hiff⟩ := tricomiIncompleteGamma_one_negative_zero (n := 1) le_rfl (a := a)
     (by norm_num; linarith) (by norm_num; linarith)
   set x0 := Real.scIncGammaNegativeZero a
   have hUx0 : IncompleteGammaZeros.expScaled a x0 = 0 :=
-      (IncompleteGammaZeros.scIncGamma_eq_zero_iff a x0).mp ((hiff x0).mpr rfl)
+      (IncompleteGammaZeros.tricomiIncompleteGamma_eq_zero_iff a x0).mp ((hiff x0).mpr rfl)
   have hG : Real.Gamma a < 0 := by
     have h := IncompleteGammaZeros.Gamma_sign 0 (x := a) (by norm_num; linarith)
         (by norm_num; linarith)
@@ -749,40 +762,46 @@ theorem Real.scIncGammaNegativeZero_bounds {a : ℝ} (ha0 : -1 < a) (ha1 : a < 0
 /-- The double parameter-zero pair (a_n*,x_n*). -/
 def scIncGammaDoubleZero (n : ℕ) : ℝ × ℝ :=
   Classical.epsilon (fun p : ℝ × ℝ => -2*(n : ℝ) < p.1 ∧ p.1 < 1-2*(n : ℝ) ∧ 0 < p.2 ∧
-      scIncGamma p.1 p.2=0 ∧ deriv (fun a : ℂ => scIncGamma a p.2) p.1=0)
+      tricomiIncompleteGamma p.1 p.2=0 ∧ deriv (fun a : ℂ => tricomiIncompleteGamma a p.2) p.1=0)
 
 /-- Estimate under the stated parameter and domain assumptions: `({a : ℝ | -2*(n : ℝ) < a ∧ a <
-2-2*(n : ℝ) ∧ scIncGamma a x=0} : Set ℝ).ncard=2`. -/
-theorem scIncGamma_two_parameter_zeros_negative_x {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx : x < 0) :
-    ({a : ℝ | -2*(n : ℝ) < a ∧ a < 2-2*(n : ℝ) ∧ scIncGamma a x=0} : Set ℝ).ncard=2 := by
+2-2*(n : ℝ) ∧ tricomiIncompleteGamma a x=0} : Set ℝ).ncard=2`. -/
+theorem tricomiIncompleteGamma_two_parameter_zeros_negative_x {n : ℕ} (hn : 1 ≤ n)
+    {x : ℝ} (hx : x < 0) :
+    ({a : ℝ | -2*(n : ℝ) < a ∧ a < 2-2*(n : ℝ) ∧ tricomiIncompleteGamma a x=0} : Set
+        ℝ).ncard=2 := by
   sorry
 
 /-- Estimate under the stated parameter and domain assumptions: `({a : ℝ | -2*(n : ℝ) < a ∧ a <
-1-2*(n : ℝ) ∧ scIncGamma a x=0} : Set ℝ).ncard=2`. -/
-theorem scIncGamma_two_parameter_zeros_positive_x {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx : 0 < x)
+1-2*(n : ℝ) ∧ tricomiIncompleteGamma a x=0} : Set ℝ).ncard=2`. -/
+theorem tricomiIncompleteGamma_two_parameter_zeros_positive_x {n : ℕ} (hn : 1 ≤ n)
+    {x : ℝ} (hx : 0 < x)
     (hx1 : x < (scIncGammaDoubleZero n).2) :
-    ({a : ℝ | -2*(n : ℝ) < a ∧ a < 1-2*(n : ℝ) ∧ scIncGamma a x=0} : Set ℝ).ncard=2 := by
+    ({a : ℝ | -2*(n : ℝ) < a ∧ a < 1-2*(n : ℝ) ∧ tricomiIncompleteGamma a x=0} : Set
+        ℝ).ncard=2 := by
   sorry
 
 /-- At coalescence the two zeros are counted with multiplicity, not as distinct points. -/
-theorem scIncGamma_double_parameter_zero {n : ℕ} (hn : 1 ≤ n) :
+theorem tricomiIncompleteGamma_double_parameter_zero {n : ℕ} (hn : 1 ≤ n) :
     let p := scIncGammaDoubleZero n; -2*(n : ℝ) < p.1 ∧ p.1 < 1-2*(n : ℝ) ∧ 0 < p.2 ∧
-        scIncGamma p.1 p.2=0 ∧ deriv (fun a : ℂ => scIncGamma a p.2) p.1=0 ∧
-        iteratedDeriv 2 (fun a : ℂ => scIncGamma a p.2) p.1 ≠ 0 ∧
-        ({a : ℝ | -2*(n : ℝ) < a ∧ a < 1-2*(n : ℝ) ∧ scIncGamma a p.2=0} : Set ℝ).ncard=1 := by
+        tricomiIncompleteGamma p.1 p.2=0 ∧ deriv (fun a : ℂ => tricomiIncompleteGamma a p.2) p.1=0 ∧
+        iteratedDeriv 2 (fun a : ℂ => tricomiIncompleteGamma a p.2) p.1 ≠ 0 ∧
+        ({a : ℝ | -2*(n : ℝ) < a ∧ a < 1-2*(n : ℝ) ∧ tricomiIncompleteGamma a p.2=0} : Set
+            ℝ).ncard=1 := by
   sorry
 
-/-- Estimate under the stated parameter and domain assumptions: `scIncGamma a 0=0 ↔ ∃ n : ℕ, 1 ≤ n
-∧ a = -(n : ℝ)`. -/
-theorem scIncGamma_parameter_zeros_at_x_zero (a : ℝ) :
-    scIncGamma a 0=0 ↔ ∃ n : ℕ, 1 ≤ n ∧ a = -(n : ℝ) := by
-  have h := scIncGamma_hasSum_exponential (a:ℂ) 0
+/-- Estimate under the stated parameter and domain assumptions:
+`tricomiIncompleteGamma a 0=0 ↔ ∃ n : ℕ, 1 ≤ n ∧ a = -(n : ℝ)`. -/
+theorem tricomiIncompleteGamma_parameter_zeros_at_x_zero (a : ℝ) :
+    tricomiIncompleteGamma a 0=0 ↔ ∃ n : ℕ, 1 ≤ n ∧ a = -(n : ℝ) := by
+  have h := tricomiIncompleteGamma_hasSum_exponential (a:ℂ) 0
   rw [← hasSum_nat_add_iff' 1] at h
   simp only [Finset.sum_range_one, pow_zero, neg_zero, Complex.exp_zero, one_mul, Nat.cast_zero,
     add_zero, ne_eq, Nat.add_eq_zero_iff, one_ne_zero, and_false, not_false_eq_true, zero_pow,
     mul_zero, zero_div] at h
   have h0 := (hasSum_zero.unique h)
-  rw [show scIncGamma a 0 = 1/Gamma (a+1) by linear_combination -h0, one_div, inv_eq_zero,
+  rw [show tricomiIncompleteGamma a 0 = 1/Gamma (a+1) by linear_combination -h0,
+                                                           one_div, inv_eq_zero,
     Complex.Gamma_eq_zero_iff]
   constructor
   · rintro ⟨m, hm⟩
@@ -796,37 +815,37 @@ theorem scIncGamma_parameter_zeros_at_x_zero (a : ℝ) :
 /-- Estimate under the stated parameter and domain assumptions: `∃ δ : ℝ, 0 < δ ∧ ∃ f : ℝ → ℂ,
 ContinuousOn f (Icc (scIncGammaDoubleZero n).2 ((scIncGammaDoubleZero n).2+δ)) ∧ f
 (scIncGammaDoubleZero n).2=(scIncGammaDoubleZero n).1 ∧ ∀ x ∈ Ioo (scIncGammaDoubleZero n).2
-((scIncGammaDoubleZero n).2+δ), 0 < (f x).im ∧ scIncGamma (f x) x=0 ∧ scIncGamma (star (f x))
-x=0`. -/
-theorem scIncGamma_conjugate_zero_trajectories {n : ℕ} (hn : 1 ≤ n) :
+((scIncGammaDoubleZero n).2+δ), 0 < (f x).im ∧ tricomiIncompleteGamma (f x) x=0 ∧
+tricomiIncompleteGamma (star (f x)) x=0`. -/
+theorem tricomiIncompleteGamma_conjugate_zero_trajectories {n : ℕ} (hn : 1 ≤ n) :
     ∃ δ : ℝ, 0 < δ ∧ ∃ f : ℝ → ℂ,
         ContinuousOn f (Icc (scIncGammaDoubleZero n).2 ((scIncGammaDoubleZero n).2+δ)) ∧
         f (scIncGammaDoubleZero n).2=(scIncGammaDoubleZero n).1 ∧ ∀ x ∈
         Ioo (scIncGammaDoubleZero n).2 ((scIncGammaDoubleZero n).2+δ), 0 < (f x).im ∧
-        scIncGamma (f x) x=0 ∧ scIncGamma (star (f x)) x=0 := by
+        tricomiIncompleteGamma (f x) x=0 ∧ tricomiIncompleteGamma (star (f x)) x=0 := by
   sorry
 
 /-- The lower Gamma in the exponentially weighted regularized Kummer normalization. -/
-theorem lowerIncGamma_eq_exp_regularized {b : ℂ} (hb : ∀ k : ℕ, b≠-k) (x : ℂ) :
-    lowerIncGamma b x=Gamma b*x^b*exp (-x)*regularizedHGFun {1} {b+1} x := by
-  rw [lowerIncGamma_eq_regularized hb,
+theorem lowerIncompleteGamma_eq_exp_regularized {b : ℂ} (hb : ∀ k : ℕ, b≠-k) (x : ℂ) :
+    lowerIncompleteGamma b x=Gamma b*x^b*exp (-x)*regularizedHGFun {1} {b+1} x := by
+  rw [lowerIncompleteGamma_eq_regularized hb,
     regularizedConfluent_kummer_transform b (b+1) (-x)]
   simp only [show b+1-b=1 by ring, neg_neg]
   ring
 
 /-- Identity under the stated parameter and domain assumptions: `(∫ x : ℝ in Ioi 0, exp
-(-a*x)*normIncGammaPContinued b x)=(1+a)^(-b)/a`. -/
+(-a*x)*regularizedGamma b x)=(1+a)^(-b)/a`. -/
 @[dlmf 8.14.E1]
-theorem normIncGammaP_laplace {a b : ℂ} (ha : 0 < a.re) (hb : -1 < b.re) :
-    (∫ x : ℝ in Ioi 0, exp (-a*x)*normIncGammaPContinued b x)=(1+a)^(-b)/a := by
+theorem regularizedGamma_laplace {a b : ℂ} (ha : 0 < a.re) (hb : -1 < b.re) :
+    (∫ x : ℝ in Ioi 0, exp (-a*x)*regularizedGamma b x)=(1+a)^(-b)/a := by
   have ha0 := ne_zero_of_re_pos ha
   have ha1 : 1+a≠0 := ne_zero_of_re_pos (by simp; linarith)
-  have hi : (∫ x : ℝ in Ioi 0, exp (-a*x)*normIncGammaPContinued b x)=
+  have hi : (∫ x : ℝ in Ioi 0, exp (-a*x)*regularizedGamma b x)=
       ∫ x : ℝ in Ioi 0, exp (-(1+a)*x)*(x:ℂ)^((b+1)-1)*regularizedHGFun {1} {b+1} x := by
     apply setIntegral_congr_fun measurableSet_Ioi
     intro x hx
     dsimp only
-    rw [normIncGammaPContinued,scIncGamma, add_sub_cancel_right]
+    rw [regularizedGamma,tricomiIncompleteGamma, add_sub_cancel_right]
     have he : exp (-a*x)*exp (-(x:ℂ))=exp (-(1+a)*x) := by rw [← Complex.exp_add]; congr 1; ring
     linear_combination (x:ℂ)^b*regularizedHGFun {1} {b+1} x*he
   rw [hi,laplace_regularizedHGFun_self (by simp; linarith) (by simp; linarith),
@@ -835,19 +854,19 @@ theorem normIncGammaP_laplace {a b : ℂ} (ha : 0 < a.re) (hb : -1 < b.re) :
   ring
 
 /-- Identity under the stated parameter and domain assumptions: `(∫ x : ℝ in Ioi 0, exp
-(-a*x)*upperIncGamma b x)=if a=0 then Gamma (b+1) else if b=0 then log (1+a)/a else Gamma
+(-a*x)*upperIncompleteGamma b x)=if a=0 then Gamma (b+1) else if b=0 then log (1+a)/a else Gamma
 b*(1-(1+a)^(-b))/a`. -/
 @[dlmf 8.14.E2]
-theorem upperIncGamma_laplace {a b : ℂ} (ha : -1 < a.re) (hb : -1 < b.re) :
-    (∫ x : ℝ in Ioi 0, exp (-a*x)*upperIncGamma b x)=if a=0 then Gamma (b+1) else if b=0 then
+theorem upperIncompleteGamma_laplace {a b : ℂ} (ha : -1 < a.re) (hb : -1 < b.re) :
+    (∫ x : ℝ in Ioi 0, exp (-a*x)*upperIncompleteGamma b x)=if a=0 then Gamma (b+1) else if b=0 then
         log (1+a)/a else Gamma b*(1-(1+a)^(-b))/a := by
   have hm := (laplace_kummerU_gauss (a:=1-b) (b:=1) (c:=1-b) (z:=1+a)
     (by simp) (by simp only [sub_re,one_re]; linarith) (by simp; linarith)).2
-  have hi : (∫ x : ℝ in Ioi 0, exp (-a*x)*upperIncGamma b x)=
+  have hi : (∫ x : ℝ in Ioi 0, exp (-a*x)*upperIncompleteGamma b x)=
       ∫ x : ℝ in Ioi 0, tricomiLaplaceKernel (1-b) 1 (1-b) (1+a) x := by
     apply setIntegral_congr_fun measurableSet_Ioi
     intro x hx
-    dsimp only [upperIncGamma,tricomiLaplaceKernel]
+    dsimp only [upperIncompleteGamma,tricomiLaplaceKernel]
     simp only [sub_self,cpow_zero,mul_one]
     rw [← mul_assoc,← Complex.exp_add]
     congr 2
@@ -855,9 +874,10 @@ theorem upperIncGamma_laplace {a b : ℂ} (ha : -1 < a.re) (hb : -1 < b.re) :
   rw [hi,hm,show 1-(1-b)+1=b+1 by ring,show (1-b)+1-(1-b)+1=(2:ℂ) by ring,
     show 1-(1+a)= -a by ring,Gamma_one,one_mul]
   have hcut : -a∈cutPlane := by change 1-(-a)∈slitPlane; left; simp; linarith
-  rw [regularizedGaussHG_symm 1 (b+1) 2 hcut,
-    regularizedGaussHG_eq_regularizedGaussHGIntegral (by norm_num) (by norm_num) hcut]
-  simp only [regularizedGaussHGIntegral,eulerKernel,sub_self,cpow_zero,one_mul,
+  rw [regularizedGaussHypergeometric_symm 1 (b+1) 2 hcut,
+    regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricIntegral (by norm_num)
+        (by norm_num) hcut]
+  simp only [regularizedGaussHypergeometricIntegral,eulerKernel,sub_self,cpow_zero,one_mul,
     show (2:ℂ)-1-1=0 by ring,show (2:ℂ)-1=1 by ring,Gamma_one,inv_one]
   simp_rw [show ∀ t : ℝ, 1-(-a)*(t:ℂ)=1+a*t by intro t; ring]
   have hslit (t : ℝ) (ht : t∈Icc (0:ℝ) 1) : 1+a*(t:ℂ)∈slitPlane := by
@@ -906,19 +926,19 @@ theorem upperIncGamma_laplace {a b : ℂ} (ha : -1 < a.re) (hb : -1 < b.re) :
   ring
 
 /-- Identity under the stated parameter and domain assumptions: `(∫ x : ℝ in Ioi 0, (x :
-ℂ)^(a-1)*lowerIncGamma b x) = -Gamma (a+b)/a`. -/
+ℂ)^(a-1)*lowerIncompleteGamma b x) = -Gamma (a+b)/a`. -/
 @[dlmf 8.14.E3]
-theorem lowerIncGamma_mellin {a b : ℂ} (ha : a.re < 0) (hab : 0 < (a+b).re) :
-    (∫ x : ℝ in Ioi 0, (x : ℂ)^(a-1)*lowerIncGamma b x) = -Gamma (a+b)/a := by
+theorem lowerIncompleteGamma_mellin {a b : ℂ} (ha : a.re < 0) (hab : 0 < (a+b).re) :
+    (∫ x : ℝ in Ioi 0, (x : ℂ)^(a-1)*lowerIncompleteGamma b x) = -Gamma (a+b)/a := by
   have hbpos : 0<b.re := by simp only [add_re] at hab; linarith
   have hb := not_neg_nat_of_re_pos hbpos
-  have hi : (∫ x : ℝ in Ioi 0, (x:ℂ)^(a-1)*lowerIncGamma b x)=Gamma b*
+  have hi : (∫ x : ℝ in Ioi 0, (x:ℂ)^(a-1)*lowerIncompleteGamma b x)=Gamma b*
       ∫ x : ℝ in Ioi 0, exp (-(x:ℂ))*(x:ℂ)^((a+b)-1)*regularizedHGFun {1} {b+1} x := by
     rw [← integral_const_mul]
     apply setIntegral_congr_fun measurableSet_Ioi
     intro x hx
     dsimp only
-    rw [lowerIncGamma_eq_exp_regularized hb]
+    rw [lowerIncompleteGamma_eq_exp_regularized hb]
     have hp : (x:ℂ)^(a-1)*(x:ℂ)^b=(x:ℂ)^((a+b)-1) := by
       rw [← cpow_add _ _ (Complex.ofReal_ne_zero.mpr (ne_of_gt hx))]; congr 1; ring
     linear_combination Gamma b*exp (-(x:ℂ))*regularizedHGFun {1} {b+1} x*hp
@@ -930,45 +950,46 @@ theorem lowerIncGamma_mellin {a b : ℂ} (ha : a.re < 0) (hab : 0 < (a+b).re) :
   field_simp
 
 /-- Identity under the stated parameter and domain assumptions: `(∫ x : ℝ in Ioi 0, (x :
-ℂ)^(a-1)*upperIncGamma b x)=Gamma (a+b)/a`. -/
+ℂ)^(a-1)*upperIncompleteGamma b x)=Gamma (a+b)/a`. -/
 @[dlmf 8.14.E4]
-theorem upperIncGamma_mellin {a b : ℂ} (ha : 0 < a.re) (hab : 0 < (a+b).re) :
-    (∫ x : ℝ in Ioi 0, (x : ℂ)^(a-1)*upperIncGamma b x)=Gamma (a+b)/a := by
+theorem upperIncompleteGamma_mellin {a b : ℂ} (ha : 0 < a.re) (hab : 0 < (a+b).re) :
+    (∫ x : ℝ in Ioi 0, (x : ℂ)^(a-1)*upperIncompleteGamma b x)=Gamma (a+b)/a := by
   have hm := (laplace_kummerU_gauss (a:=1-b) (b:=a) (c:=1-b) (z:=1)
     ha (by simp only [sub_re,one_re]; simp only [add_re] at hab; linarith) (by simp)).2
-  have hi : (∫ x : ℝ in Ioi 0, (x:ℂ)^(a-1)*upperIncGamma b x)=
+  have hi : (∫ x : ℝ in Ioi 0, (x:ℂ)^(a-1)*upperIncompleteGamma b x)=
       ∫ x : ℝ in Ioi 0, tricomiLaplaceKernel (1-b) a (1-b) 1 x := by
     apply setIntegral_congr_fun measurableSet_Ioi
     intro x hx
     dsimp only
-    simp only [upperIncGamma,tricomiLaplaceKernel,one_mul]
+    simp only [upperIncompleteGamma,tricomiLaplaceKernel,one_mul]
     ring
   rw [hi,hm]
   rw [show a-(1-b)+1=a+b by ring, show 1-b+a-(1-b)+1=a+1 by ring]
   simp only [sub_self]
-  rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ (by simp)]
-  rw [regularizedGaussHGFun_eq_div_Gamma (not_neg_nat_of_re_pos (by simp; linarith))]
+  rw [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ (by simp)]
+  rw [regularizedGaussHypergeometricFun_eq_div_Gamma (not_neg_nat_of_re_pos (by simp; linarith))]
   simp only [ordinaryHypergeometric_zero]
   rw [Gamma_add_one a (ne_zero_of_re_pos ha)]
   field_simp [Gamma_ne_zero_of_re_pos ha]
 
 /-- Identity under the stated parameter and domain assumptions: `(∫ x : ℝ in Ioi 0, (x :
-ℂ)^(a-1)*exp (-s*x)*lowerIncGamma b x)=Gamma (a+b)/(b*(1+s)^(a+b))*Gamma
-(1+b)*DLMF.Hypergeometric.regularizedGaussHG 1 (a+b) (1+b) (1/(1+s))`. -/
+ℂ)^(a-1)*exp (-s*x)*lowerIncompleteGamma b x)=Gamma (a+b)/(b*(1+s)^(a+b))*Gamma
+(1+b)*DLMF.Hypergeometric.regularizedGaussHypergeometric 1 (a+b) (1+b) (1/(1+s))`. -/
 @[dlmf 8.14.E5]
-theorem lowerIncGamma_mellin_laplace {a b s : ℂ} (hs : 0 < s.re) (hab : 0 < (a+b).re)
+theorem lowerIncompleteGamma_mellin_laplace {a b s : ℂ} (hs : 0 < s.re) (hab : 0 < (a+b).re)
     (hb : ∀ n : ℕ, b ≠ -n) :
-    (∫ x : ℝ in Ioi 0, (x : ℂ)^(a-1)*exp (-s*x)*lowerIncGamma b x)=Gamma (a+b)/(b*(1+s)^(a+b))*Gamma
-        (1+b)*DLMF.Hypergeometric.regularizedGaussHG 1 (a+b) (1+b) (1/(1+s)) := by
+    (∫ x : ℝ in Ioi 0, (x : ℂ)^(a-1)*exp (-s*x)*lowerIncompleteGamma b x)=Gamma
+        (a+b)/(b*(1+s)^(a+b))*Gamma
+        (1+b)*DLMF.Hypergeometric.regularizedGaussHypergeometric 1 (a+b) (1+b) (1/(1+s)) := by
   have hm := laplace_regularizedHGFun (a:=1) (b:=a+b) (c:=b+1) (k:=1) (z:=1+s)
     hab (by simp; linarith) (by simp; linarith)
-  have hi : (∫ x : ℝ in Ioi 0, (x:ℂ)^(a-1)*exp (-s*x)*lowerIncGamma b x)=Gamma b*
+  have hi : (∫ x : ℝ in Ioi 0, (x:ℂ)^(a-1)*exp (-s*x)*lowerIncompleteGamma b x)=Gamma b*
       ∫ x : ℝ in Ioi 0, exp (-(1+s)*x)*(x:ℂ)^((a+b)-1)*regularizedHGFun {1} {b+1} (1*x) := by
     rw [← integral_const_mul]
     apply setIntegral_congr_fun measurableSet_Ioi
     intro x hx
     dsimp only
-    rw [lowerIncGamma_eq_exp_regularized hb]
+    rw [lowerIncompleteGamma_eq_exp_regularized hb]
     have hp : (x:ℂ)^(a-1)*(x:ℂ)^b=(x:ℂ)^((a+b)-1) := by
       rw [← cpow_add _ _ (Complex.ofReal_ne_zero.mpr (ne_of_gt hx))]; congr 1; ring
     have he : exp (-s*x)*exp (-(x:ℂ))=exp (-(1+s)*x) := by rw [← Complex.exp_add]; congr 1; ring
@@ -981,21 +1002,22 @@ theorem lowerIncGamma_mellin_laplace {a b s : ℂ} (hs : 0 < s.re) (hab : 0 < (a
   field_simp [show b≠0 by simpa using hb 0]
 
 /-- Identity under the stated parameter and domain assumptions: `(∫ x : ℝ in Ioi 0, (x :
-ℂ)^(a-1)*exp (-s*x)*upperIncGamma b x)=Gamma (a+b)/(a*(1+s)^(a+b))*Gamma
-(1+a)*DLMF.Hypergeometric.regularizedGaussHG 1 (a+b) (1+a) (s/(1+s))`. -/
+ℂ)^(a-1)*exp (-s*x)*upperIncompleteGamma b x)=Gamma (a+b)/(a*(1+s)^(a+b))*Gamma
+(1+a)*DLMF.Hypergeometric.regularizedGaussHypergeometric 1 (a+b) (1+a) (s/(1+s))`. -/
 @[dlmf 8.14.E6]
-theorem upperIncGamma_mellin_laplace {a b s : ℂ} (hs : -1 < s.re) (hab : 0 < (a+b).re)
+theorem upperIncompleteGamma_mellin_laplace {a b s : ℂ} (hs : -1 < s.re) (hab : 0 < (a+b).re)
     (ha : 0 < a.re) :
-    (∫ x : ℝ in Ioi 0, (x : ℂ)^(a-1)*exp (-s*x)*upperIncGamma b x)=Gamma (a+b)/(a*(1+s)^(a+b))*Gamma
-        (1+a)*DLMF.Hypergeometric.regularizedGaussHG 1 (a+b) (1+a) (s/(1+s)) := by
+    (∫ x : ℝ in Ioi 0, (x : ℂ)^(a-1)*exp (-s*x)*upperIncompleteGamma b x)=Gamma
+        (a+b)/(a*(1+s)^(a+b))*Gamma
+        (1+a)*DLMF.Hypergeometric.regularizedGaussHypergeometric 1 (a+b) (1+a) (s/(1+s)) := by
   have hm := (laplace_kummerU_gauss (a:=1) (b:=a+b) (c:=b+1) (z:=1+s)
     hab (by simp only [add_re,sub_re,one_re]; linarith) (by simp; linarith)).2
-  have hi : (∫ x : ℝ in Ioi 0, (x:ℂ)^(a-1)*exp (-s*x)*upperIncGamma b x)=
+  have hi : (∫ x : ℝ in Ioi 0, (x:ℂ)^(a-1)*exp (-s*x)*upperIncompleteGamma b x)=
       ∫ x : ℝ in Ioi 0, tricomiLaplaceKernel 1 (a+b) (b+1) (1+s) x := by
     apply setIntegral_congr_fun measurableSet_Ioi
     intro x hx
     dsimp only
-    rw [upperIncGamma_eq_cpow_mul_kummerU _ (Complex.ofReal_ne_zero.mpr (ne_of_gt hx))]
+    rw [upperIncompleteGamma_eq_cpow_mul_kummerU _ (Complex.ofReal_ne_zero.mpr (ne_of_gt hx))]
     unfold tricomiLaplaceKernel
     have hp : (x:ℂ)^(a-1)*(x:ℂ)^b=(x:ℂ)^((a+b)-1) := by
       rw [← cpow_add _ _ (Complex.ofReal_ne_zero.mpr (ne_of_gt hx))]; congr 1; ring
@@ -1006,38 +1028,38 @@ theorem upperIncGamma_mellin_laplace {a b s : ℂ} (hs : -1 < s.re) (hab : 0 < (
   rw [hi,hm,show a+b-(b+1)+1=a by ring, show 1+(a+b)-(b+1)+1=a+1 by ring,
     show 1-(1+s)= -s by ring]
   have hcut : -s∈cutPlane := by change 1-(-s)∈slitPlane; left; simp; linarith
-  rw [regularizedGaussHG_pfaff (a+b) a (a+1) hcut,
+  rw [regularizedGaussHypergeometric_pfaff (a+b) a (a+1) hcut,
     show (a+1)-a=1 by ring, show 1-(-s)=1+s by ring,
     show (-s)/(-s-1)=s/(1+s) by rw [show -s-1= -(1+s) by ring, neg_div_neg_eq]]
   have hmap : s/(1+s)∈cutPlane := by
     convert div_sub_one_mem_cutPlane hcut using 1
     rw [show -s-1= -(1+s) by ring, neg_div_neg_eq]
-  rw [regularizedGaussHG_symm (a+b) 1 (a+1) hmap]
+  rw [regularizedGaussHypergeometric_symm (a+b) 1 (a+1) hmap]
   rw [show (1:ℂ)+a=a+1 by ring,Gamma_add_one a (ne_zero_of_re_pos ha),cpow_neg]
   field_simp [ne_zero_of_re_pos ha]
 
-/-- The series with terms `(fun k : ℕ => exp (a*v)*lowerIncGammaOnLog (a+k) u*(1-exp
-v)^k/(k.factorial : ℂ))` converges to `(lowerIncGammaOnLog a (u+v))`. -/
+/-- The series with terms `(fun k : ℕ => exp (a*v)*lowerIncompleteGammaOnLog (a+k) u*(1-exp
+v)^k/(k.factorial : ℂ))` converges to `(lowerIncompleteGammaOnLog a (u+v))`. -/
 @[dlmf 8.15.E1]
-theorem lowerIncGamma_multiplication_hasSum {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (u v : ℂ) :
-    HasSum (fun k : ℕ => exp (a*v)*lowerIncGammaOnLog (a+k) u*(1-exp v)^k/(k.factorial : ℂ))
-        (lowerIncGammaOnLog a (u+v)) := by
-  have hsc (b z : ℂ) : scIncGamma b z = regularizedHGFun {b} {b+1} (-z) := by
-    simpa only [add_comm 1 b] using (scIncGamma_regularized_pair b z).2
+theorem lowerIncompleteGamma_multiplication_hasSum {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (u v : ℂ) :
+    HasSum (fun k : ℕ => exp (a*v)*lowerIncompleteGammaOnLog (a+k) u*(1-exp v)^k/(k.factorial : ℂ))
+        (lowerIncompleteGammaOnLog a (u+v)) := by
+  have hsc (b z : ℂ) : tricomiIncompleteGamma b z = regularizedHGFun {b} {b+1} (-z) := by
+    simpa only [add_comm 1 b] using (tricomiIncompleteGamma_regularized_pair b z).2
   have hf : Differentiable ℂ (regularizedHGFun {a} {a+1}) :=
     fun z => differentiableAt_regularizedConfluent _ _ z
   have ht := (Complex.hasSum_taylorSeries_of_entire hf (-exp u) (-exp (u+v))).mul_left
     (Gamma a * exp (a*(u+v)))
   have hv : Gamma a * exp (a*(u+v)) * regularizedHGFun {a} {a+1} (-exp (u+v)) =
-      lowerIncGammaOnLog a (u+v) := by
-    rw [lowerIncGammaOnLog, hsc]
+      lowerIncompleteGammaOnLog a (u+v) := by
+    rw [lowerIncompleteGammaOnLog, hsc]
   rw [hv] at ht
   refine ht.congr_fun fun k => ?_
   rw [iteratedDeriv_regularizedConfluent,
     show a+1+(k:ℂ) = (a+k)+1 by ring,
     ← hsc]
-  have hg : Gamma a * poch a k = Gamma (a+k) := by
-    rw [poch, ← Gamma_add_nat_div_Gamma_eq a ha]
+  have hg : Gamma a * pochhammer a k = Gamma (a+k) := by
+    rw [pochhammer, ← Gamma_add_nat_div_Gamma_eq a ha]
     field_simp [Gamma_ne_zero ha]
   have he : exp (a*(u+v)) * exp u ^ k = exp (a*v) * exp ((a+k)*u) := by
     rw [← exp_nat_mul, ← exp_add, ← exp_add]
@@ -1046,11 +1068,11 @@ theorem lowerIncGamma_multiplication_hasSum {a : ℂ} (ha : ∀ n : ℕ, a ≠ -
   have hd : -exp (u+v) - -exp u = exp u * (1-exp v) := by
     rw [exp_add]
     ring
-  simp only [smul_eq_mul, hd, mul_pow, lowerIncGammaOnLog]
+  simp only [smul_eq_mul, hd, mul_pow, lowerIncompleteGammaOnLog]
   symm
   calc
-    _ = (Gamma a * poch a k) * (exp (a*(u+v)) * exp u ^ k) *
-        scIncGamma (a+k) (exp u) * (1-exp v)^k / k.factorial := by ring
+    _ = (Gamma a * pochhammer a k) * (exp (a*(u+v)) * exp u ^ k) *
+        tricomiIncompleteGamma (a+k) (exp u) * (1-exp v)^k / k.factorial := by ring
     _ = _ := by rw [hg, he]; ring
 
 -- `hurwitzZetaComplex` (Euler–Maclaurin continuation) is defined in `DLMF.Zeta.Basic.Hurwitz`.
@@ -1065,8 +1087,9 @@ theorem hurwitzZetaComplex_mathlib {x : ℝ} (hx : 0 < x) (hx1 : x ≤ 1) {s : �
 theorem incompleteGamma_hurwitz_fourier_sum {a z : ℂ} (ha : a ≠ -1) (hz : 0 < z.re) {h : ℝ}
     (hh0 : 0 ≤ h) (hh1 : h ≤ 1) :
     HasSum (fun k : ℕ => let j : ℂ := k+1;
-        a*(exp (2*π*I*j*(z+h))/(2*π*I*j)^(a+1)*upperIncGammaOnLog a (log z+log (2*π*j)+π*I/2)+exp
-        (-2*π*I*j*(z+h))/(-2*π*I*j)^(a+1)*upperIncGammaOnLog a (log z+log (2*π*j)-π*I/2)))
+        a*(exp (2*π*I*j*(z+h))/(2*π*I*j)^(a+1)*upperIncompleteGammaOnLog a
+            (log z+log (2*π*j)+π*I/2)+exp
+        (-2*π*I*j*(z+h))/(-2*π*I*j)^(a+1)*upperIncompleteGammaOnLog a (log z+log (2*π*j)-π*I/2)))
         (DLMF.Zeta.hurwitzZetaComplex (-a) (z+h)+z^(a+1)/(a+1)+(h-1/2)*z^a) := by
   sorry
 
@@ -1081,9 +1104,9 @@ def Real.gammaDiDonatoH (p x : ℝ) : ℝ :=
 /-- The change of variable mentioned in DLMF §8.27(i). -/
 theorem Real.gammaDiDonato_gamma (p : ℝ) {x : ℝ} (hx : 0 < x) :
     (Real.gammaDiDonatoF p x : ℂ)=(x : ℂ)^(-(p : ℂ))*Real.exp
-        (x^2/2)*(2 : ℂ)^(((p : ℂ)-1)/2)*upperIncGamma ((p+1)/2) (x^2/2) := by
+        (x^2/2)*(2 : ℂ)^(((p : ℂ)-1)/2)*upperIncompleteGamma ((p+1)/2) (x^2/2) := by
   have hx2 : 0 < x^2/2 := by positivity
-  have hU := upperIncGamma_eq_integral (((p:ℂ)+1)/2) hx2
+  have hU := upperIncompleteGamma_eq_integral (((p:ℂ)+1)/2) hx2
   push_cast at hU
   rw [hU]
   -- real substitution

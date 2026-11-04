@@ -59,7 +59,7 @@ def errorFunctionZero (complement : Bool) (k : ℕ) : ℂ :=
 
 /-- Fresnel representatives in the first octant; the other octants follow by symmetry. -/
 def fresnelFunctionZero (sine : Bool) (k : ℕ) : ℂ :=
-  orderedZero (if sine then fresnelSinInt else fresnelCosInt) {z : ℂ | 0 < arg z ∧ arg z < π/4} k
+  orderedZero (if sine then fresnelS else fresnelC) {z : ℂ | 0 < arg z ∧ arg z < π/4} k
 
 /-- Identity under the stated parameter and domain assumptions: `erf 0=0 ∧ deriv erf 0=2/Real.sqrt
 π`. -/
@@ -71,16 +71,16 @@ theorem erf_zero_simple  :
 
 /-- The simple C zero and triple S zero at the origin. -/
 theorem fresnel_zero_orders  :
-    fresnelCosInt 0=0 ∧ deriv fresnelCosInt 0=1 ∧ fresnelSinInt 0=0 ∧ deriv fresnelSinInt 0=0 ∧
-        iteratedDeriv 2 fresnelSinInt 0=0 ∧ iteratedDeriv 3 fresnelSinInt 0=π := by
-  have hS1 : deriv fresnelSinInt = fun z => sin (π*z^2/2) :=
-    funext fun z => (hasDerivAt_fresnelSinInt_complex z).deriv
+    fresnelC 0=0 ∧ deriv fresnelC 0=1 ∧ fresnelS 0=0 ∧ deriv fresnelS 0=0 ∧
+        iteratedDeriv 2 fresnelS 0=0 ∧ iteratedDeriv 3 fresnelS 0=π := by
+  have hS1 : deriv fresnelS = fun z => sin (π*z^2/2) :=
+    funext fun z => (hasDerivAt_fresnelS_complex z).deriv
   have hd2 (z : ℂ) : HasDerivAt (fun z : ℂ => sin (π*z^2/2)) (cos (π*z^2/2)*(π*z)) z := by
     have h := (((hasDerivAt_id' z).pow 2).const_mul (π:ℂ)).div_const 2 |>.csin
     convert h using 1
     simp only [Pi.pow_apply]
     ring
-  have hS2 : iteratedDeriv 2 fresnelSinInt = fun z => cos (π*z^2/2)*(π*z) := by
+  have hS2 : iteratedDeriv 2 fresnelS = fun z => cos (π*z^2/2)*(π*z) := by
     rw [iteratedDeriv_succ, iteratedDeriv_one, hS1]
     exact funext fun z => (hd2 z).deriv
   have hd3 : HasDerivAt (fun z : ℂ => cos (π*z^2/2)*(π*z))
@@ -90,7 +90,7 @@ theorem fresnel_zero_orders  :
     convert h1.mul h2 using 1
     simp
   refine ⟨primitive_zero _, ?_, primitive_zero _, ?_, ?_, ?_⟩
-  · rw [(hasDerivAt_fresnelCosInt_complex 0).deriv]; simp
+  · rw [(hasDerivAt_fresnelC_complex 0).deriv]; simp
   · rw [hS1]; simp
   · rw [hS2]; simp
   · rw [iteratedDeriv_succ, hS2, hd3.deriv]; simp
@@ -227,7 +227,7 @@ theorem faddeevaW_zero_classification (z : ℂ) :
 
 /-- The stated relation follows from the given hypotheses: `let f`. -/
 theorem fresnelFunctionZero_spec (sine : Bool) {k : ℕ} (hk : 1 ≤ k) :
-    let f := if sine then fresnelSinInt else fresnelCosInt; 0 < arg (fresnelFunctionZero sine k) ∧
+    let f := if sine then fresnelS else fresnelC; 0 < arg (fresnelFunctionZero sine k) ∧
         arg (fresnelFunctionZero sine k) < π/4 ∧ f (fresnelFunctionZero sine k)=0 ∧
         ({z : ℂ | 0 < arg z ∧ arg z < π/4 ∧ f z=0 ∧ ‖z‖ < ‖fresnelFunctionZero sine k‖} : Set
         ℂ).ncard=k-1 := by
@@ -239,7 +239,7 @@ theorem fresnelFunctionZero_ordered (sine : Bool) :
     StrictMonoOn (fun k => ‖fresnelFunctionZero sine k‖) (Ici 1) := by
   obtain ⟨-, hC1, -, -, -, hS3⟩ := fresnel_zero_orders
   have hconv : ∀ (s : Bool) (k : ℕ), 1 ≤ k →
-      let f := if s then fresnelSinInt else fresnelCosInt
+      let f := if s then fresnelS else fresnelC
       let S : Set ℂ := {z : ℂ | 0 < arg z ∧ arg z < π/4}
       orderedZero f S k ∈ S ∧ f (orderedZero f S k) = 0 ∧
         ({w : ℂ | w ∈ S ∧ f w = 0 ∧ ‖w‖ < ‖orderedZero f S k‖} : Set ℂ).ncard = k - 1 := by
@@ -249,37 +249,37 @@ theorem fresnelFunctionZero_ordered (sine : Bool) :
     simp only [fresnelFunctionZero] at h4
     simpa only [Set.mem_ofPred_eq, and_assoc] using h4
   cases sine
-  · have hx : ∃ x, fresnelCosInt x ≠ 0 := by
+  · have hx : ∃ x, fresnelC x ≠ 0 := by
       by_contra h
       push Not at h
-      have : fresnelCosInt = fun _ => 0 := funext h
+      have : fresnelC = fun _ => 0 := funext h
       rw [this, deriv_const] at hC1
       exact zero_ne_one hC1
     obtain ⟨x, hx⟩ := hx
     exact Core.orderedZero_strictMonoOn
-      (Core.finite_zeros_lt (fun z => (hasDerivAt_fresnelCosInt_complex z).differentiableAt) hx _)
+      (Core.finite_zeros_lt (fun z => (hasDerivAt_fresnelC_complex z).differentiableAt) hx _)
       (fun k hk => hconv false k hk)
-  · have hx : ∃ x, fresnelSinInt x ≠ 0 := by
+  · have hx : ∃ x, fresnelS x ≠ 0 := by
       by_contra h
       push Not at h
-      have : fresnelSinInt = fun _ => 0 := funext h
+      have : fresnelS = fun _ => 0 := funext h
       rw [this, iteratedDeriv_const] at hS3
       simp at hS3
       exact Real.pi_ne_zero (by exact_mod_cast hS3.symm)
     obtain ⟨x, hx⟩ := hx
     exact Core.orderedZero_strictMonoOn
-      (Core.finite_zeros_lt (fun z => (hasDerivAt_fresnelSinInt_complex z).differentiableAt) hx _)
+      (Core.finite_zeros_lt (fun z => (hasDerivAt_fresnelS_complex z).differentiableAt) hx _)
       (fun k hk => hconv true k hk)
 
-/-- Estimate under the stated parameter and domain assumptions: `(if sine then fresnelSinInt z
-else fresnelCosInt z)=0 ↔ z=0 ∨ ∃ k : ℕ, 1 ≤ k ∧ let u`. -/
+/-- Estimate under the stated parameter and domain assumptions: `(if sine then fresnelS z
+else fresnelC z)=0 ↔ z=0 ∨ ∃ k : ℕ, 1 ≤ k ∧ let u`. -/
 theorem fresnel_zero_classification (sine : Bool) (z : ℂ) :
-    (if sine then fresnelSinInt z else fresnelCosInt z)=0 ↔ z=0 ∨ ∃ k : ℕ, 1 ≤ k ∧
+    (if sine then fresnelS z else fresnelC z)=0 ↔ z=0 ∨ ∃ k : ℕ, 1 ≤ k ∧
         let u := fresnelFunctionZero sine k; z=u ∨ z = -u ∨ z=star u ∨ z = -star u ∨ z=I*u ∨ z =
         -I*u ∨ z=I*star u ∨ z = -I*star u := by
   obtain ⟨hC0, hC1, hS0, -, -, hS3⟩ := fresnel_zero_orders
   have hspec : ∀ k : ℕ, 1 ≤ k →
-      let f := if sine then fresnelSinInt else fresnelCosInt
+      let f := if sine then fresnelS else fresnelC
       let S : Set ℂ := {z : ℂ | 0 < arg z ∧ arg z < π/4}
       orderedZero f S k ∈ S ∧ f (orderedZero f S k) = 0 ∧
         ({w : ℂ | w ∈ S ∧ f w = 0 ∧ ‖w‖ < ‖orderedZero f S k‖} : Set ℂ).ncard = k - 1 := by
@@ -290,29 +290,29 @@ theorem fresnel_zero_classification (sine : Bool) (z : ℂ) :
     simpa only [Set.mem_ofPred_eq, and_assoc] using h4
   have hstar : ∀ w : ℂ, star w = (starRingEnd ℂ) w := fun _ => rfl
   cases sine
-  · have hx : ∃ x, fresnelCosInt x ≠ 0 := ⟨1, by
-      simpa using ZeroClassification.fresnelCosInt_ofReal_ne_zero (x := 1) one_ne_zero⟩
+  · have hx : ∃ x, fresnelC x ≠ 0 := ⟨1, by
+      simpa using ZeroClassification.fresnelC_ofReal_ne_zero (x := 1) one_ne_zero⟩
     obtain ⟨x, hx⟩ := hx
-    simpa [fresnelFunctionZero] using ZeroClassification.octant_classification (f := fresnelCosInt)
-      (Core.finite_zeros_lt (fun z => (hasDerivAt_fresnelCosInt_complex z).differentiableAt) hx _)
+    simpa [fresnelFunctionZero] using ZeroClassification.octant_classification (f := fresnelC)
+      (Core.finite_zeros_lt (fun z => (hasDerivAt_fresnelC_complex z).differentiableAt) hx _)
       (hspec · ·) hC0
-      (fun w => by rw [ZeroClassification.fresnelCosInt_neg, neg_eq_zero])
-      (fun w => by rw [hstar, ZeroClassification.fresnelCosInt_conj, map_eq_zero])
-      (fun w => by rw [ZeroClassification.fresnelCosInt_I_mul, mul_eq_zero, or_iff_right I_ne_zero])
-      (fun x hx => ZeroClassification.fresnelCosInt_ofReal_ne_zero hx)
-      (fun x hx => ZeroClassification.fresnelCosInt_diag_ne_zero hx) z
-  · have hx : ∃ x, fresnelSinInt x ≠ 0 := ⟨1, by
-      simpa using ZeroClassification.fresnelSinInt_ofReal_ne_zero (x := 1) one_ne_zero⟩
+      (fun w => by rw [ZeroClassification.fresnelC_neg, neg_eq_zero])
+      (fun w => by rw [hstar, ZeroClassification.fresnelC_conj, map_eq_zero])
+      (fun w => by rw [ZeroClassification.fresnelC_I_mul, mul_eq_zero, or_iff_right I_ne_zero])
+      (fun x hx => ZeroClassification.fresnelC_ofReal_ne_zero hx)
+      (fun x hx => ZeroClassification.fresnelC_diag_ne_zero hx) z
+  · have hx : ∃ x, fresnelS x ≠ 0 := ⟨1, by
+      simpa using ZeroClassification.fresnelS_ofReal_ne_zero (x := 1) one_ne_zero⟩
     obtain ⟨x, hx⟩ := hx
-    simpa [fresnelFunctionZero] using ZeroClassification.octant_classification (f := fresnelSinInt)
-      (Core.finite_zeros_lt (fun z => (hasDerivAt_fresnelSinInt_complex z).differentiableAt) hx _)
+    simpa [fresnelFunctionZero] using ZeroClassification.octant_classification (f := fresnelS)
+      (Core.finite_zeros_lt (fun z => (hasDerivAt_fresnelS_complex z).differentiableAt) hx _)
       (hspec · ·) hS0
-      (fun w => by rw [ZeroClassification.fresnelSinInt_neg, neg_eq_zero])
-      (fun w => by rw [hstar, ZeroClassification.fresnelSinInt_conj, map_eq_zero])
-      (fun w => by rw [ZeroClassification.fresnelSinInt_I_mul, mul_eq_zero,
+      (fun w => by rw [ZeroClassification.fresnelS_neg, neg_eq_zero])
+      (fun w => by rw [hstar, ZeroClassification.fresnelS_conj, map_eq_zero])
+      (fun w => by rw [ZeroClassification.fresnelS_I_mul, mul_eq_zero,
                      or_iff_right (neg_ne_zero.mpr I_ne_zero)])
-      (fun x hx => ZeroClassification.fresnelSinInt_ofReal_ne_zero hx)
-      (fun x hx => ZeroClassification.fresnelSinInt_diag_ne_zero hx) z
+      (fun x hx => ZeroClassification.fresnelS_ofReal_ne_zero hx)
+      (fun x hx => ZeroClassification.fresnelS_diag_ne_zero hx) z
 
 /-- The complete Fresnel-tail zero correspondence in DLMF §7.13(iv). -/
 theorem fresnelTail_zero_classification (z : ℂ) :

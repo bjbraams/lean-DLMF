@@ -109,20 +109,20 @@ structure IsSpheroidalCoeffPrime (n m : ℕ) (γ2 : ℝ) (f : ℤ → ℝ) : Pro
   support : ∀ k : ℤ, -(((n + m) / 2 : ℕ) : ℤ) ≤ k → f k = 0
   /-- The recurrence 30.8.4 for `k ≤ -N - 2`. -/
   recurrence : ∀ k : ℤ, k ≤ -(((n + m) / 2 : ℕ) : ℤ) - 2 →
-    spheroidalRecA n m γ2 k * f (k - 1) +
-      (spheroidalRecB n m γ2 k - spheroidalEigenvalue n m γ2) * f k +
-        spheroidalRecC n m γ2 k * f (k + 1) = 0
+    spheroidalRecurrenceA n m γ2 k * f (k - 1) +
+      (spheroidalRecurrenceB n m γ2 k - spheroidalEigenvalue n m γ2) * f k +
+        spheroidalRecurrenceC n m γ2 k * f (k + 1) = 0
   /-- The normalization 30.8.10 at `k = -N - 1`. -/
   normalization :
-    spheroidalRecA n m γ2 (-(((n + m) / 2 : ℕ) : ℤ) - 1) * f (-(((n + m) / 2 : ℕ) : ℤ) - 2) +
-      (spheroidalRecB n m γ2 (-(((n + m) / 2 : ℕ) : ℤ) - 1) - spheroidalEigenvalue n m γ2) *
+    spheroidalRecurrenceA n m γ2 (-(((n + m) / 2 : ℕ) : ℤ) - 1) * f (-(((n + m) / 2 : ℕ) : ℤ) - 2) +
+      (spheroidalRecurrenceB n m γ2 (-(((n + m) / 2 : ℕ) : ℤ) - 1) - spheroidalEigenvalue n m γ2) *
         f (-(((n + m) / 2 : ℕ) : ℤ) - 1) +
       spheroidalCPrime n m γ2 * spheroidalCoeff n m γ2 (-(((n + m) / 2 : ℕ) : ℤ)) = 0
   /-- Recessiveness as `k → -∞`. -/
   recessive : ∀ h : ℤ → ℝ, (∀ k : ℤ, k ≤ -(((n + m) / 2 : ℕ) : ℤ) - 2 →
-      spheroidalRecA n m γ2 k * h (k - 1) +
-        (spheroidalRecB n m γ2 k - spheroidalEigenvalue n m γ2) * h k +
-          spheroidalRecC n m γ2 k * h (k + 1) = 0) →
+      spheroidalRecurrenceA n m γ2 k * h (k - 1) +
+        (spheroidalRecurrenceB n m γ2 k - spheroidalEigenvalue n m γ2) * h k +
+          spheroidalRecurrenceC n m γ2 k * h (k + 1) = 0) →
     (¬ ∃ c : ℝ, ∀ k : ℤ, k ≤ -(((n + m) / 2 : ℕ) : ℤ) - 1 → h k = c * f k) →
     Tendsto (fun j : ℕ => f (-(j : ℤ)) / h (-(j : ℤ))) atTop (𝓝 0)
 
@@ -139,7 +139,7 @@ on `(-1, 1)` with `μ = m`, `λ = λ^m_n(γ²)`, of parity `(-1)^{n-m+1}`, whose
 @[dlmf 30.5.E1]
 structure IsSpheroidalQs (n m : ℕ) (γ2 : ℝ) (f : ℝ → ℝ) : Prop where
   /-- `f` solves 30.2.1 on `(-1, 1)`. -/
-  ode : IsSpheroidalSolutionReal (spheroidalEigenvalue n m γ2) γ2 m f
+  ode : DLMF.Spheroidal.Real.IsSpheroidalSolution (spheroidalEigenvalue n m γ2) γ2 m f
   /-- The parity 30.5.2. -/
   parity : ∀ x ∈ Ioo (-1 : ℝ) 1, f (-x) = (-1) ^ (n - m + 1) * f x
   /-- The Wronskian 30.5.4. -/

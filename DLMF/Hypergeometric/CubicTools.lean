@@ -23,8 +23,8 @@ The proof of `cubic_connection` (DLMF 15.8.32) works in the variable `u = 1/ζ`.
   `√3 Γ(a+1/3)/(2π Γ(2a+2/3)) F(a, a+1/3; 2a+2/3; 1-w)`, from 15.10.17 for generic `a` and
   holomorphy in `a` (all `a` with `2a+2/3, a+1/3 ∉ -ℕ`).
 * `CubicTransformation.cubic_upper_half`: the two combined near `u = 0` (where `w = Z³` with
-  `Z = ω²(1+ωu)/(u+ω)` and the principal cube root of `w` is `ω² Z`) and continued by the identity
-  theorem to the convex set `{Im u > 0, |u| < 1}`, where `|Z| < 1`.
+  `Z = ω²(1+ωu)/(u+ω)` and the principal unitCube root of `w` is `ω² Z`) and continued by the
+  identity theorem to the convex set `{Im u > 0, |u| < 1}`, where `|Z| < 1`.
 * `CubicTransformation.cpow`: the bookkeeping of principal powers on the image `u = 1/2 + iY`,
   `0 < Y < √3/2`, of the ray `x < -1`, by comparing logarithms whose imaginary parts differ by
   less than `2π`.
@@ -302,9 +302,11 @@ theorem CubicTransformation.connection {a w : ℂ} (hc : ∀ k : ℕ, 2 * a + 2 
     refine mem_slitPlane_iff.mpr (Or.inl ?_)
     have : (1 - w).re = 1 - w.re := by simp
     linarith [abs_re_le_norm (1 - w), le_abs_self (1 - w).re]
-  set F₁ : ℂ → ℂ := fun a => regularizedGaussHG a (a + 1 / 3) (2 / 3) w with hF₁
-  set F₂ : ℂ → ℂ := fun a => regularizedGaussHG (a + 1 / 3) (a + 2 / 3) (4 / 3) w with hF₂
-  set F₃ : ℂ → ℂ := fun a => regularizedGaussHG a (a + 1 / 3) (2 * a + 2 / 3) (1 - w) with hF₃
+  set F₁ : ℂ → ℂ := fun a => regularizedGaussHypergeometric a (a + 1 / 3) (2 / 3) w with hF₁
+  set F₂ : ℂ → ℂ := fun a =>
+      regularizedGaussHypergeometric (a + 1 / 3) (a + 2 / 3) (4 / 3) w with hF₂
+  set F₃ : ℂ → ℂ := fun a =>
+      regularizedGaussHypergeometric a (a + 1 / 3) (2 * a + 2 / 3) (1 - w) with hF₃
   set f : ℂ → ℂ := fun a => (1 / Gamma (a + 1 / 3)) *
     (F₁ a * (1 / Gamma (a + 2 / 3)) - w ^ (1 / 3 : ℂ) * F₂ a * (1 / Gamma a)) with hf
   set g : ℂ → ℂ := fun a => Real.sqrt 3 / (2 * π) * F₃ a with hg
@@ -312,10 +314,10 @@ theorem CubicTransformation.connection {a w : ℂ} (hc : ∀ k : ℕ, 2 * a + 2 
     simpa [one_div, Function.comp_def] using
       Complex.differentiable_one_div_Gamma.comp (differentiable_id.add_const s)
   have hfa : AnalyticOnNhd ℂ f Set.univ := by
-    have h1 := analyticOnNhd_regularizedGaussHG_comp (A := id) (B := fun a => a + 1 / 3)
+    have h1 := analyticOnNhd_regularizedGaussHypergeometric_comp (A := id) (B := fun a => a + 1 / 3)
       (C := fun _ => 2 / 3) differentiable_id (differentiable_id.add_const _)
       (differentiable_const _) hwc
-    have h2 := analyticOnNhd_regularizedGaussHG_comp (A := fun a => a + 1 / 3)
+    have h2 := analyticOnNhd_regularizedGaussHypergeometric_comp (A := fun a => a + 1 / 3)
       (B := fun a => a + 2 / 3) (C := fun _ => 4 / 3) (differentiable_id.add_const _)
       (differentiable_id.add_const _) (differentiable_const _) hwc
     refine DifferentiableOn.analyticOnNhd ?_ isOpen_univ
@@ -324,7 +326,7 @@ theorem CubicTransformation.connection {a w : ℂ} (hc : ∀ k : ℕ, 2 * a + 2 
     refine ((differentiableOn_const _).mul h2.differentiableOn).mul ?_
     simpa using (hinvG 0).differentiableOn
   have hga : AnalyticOnNhd ℂ g Set.univ := by
-    have h3 := analyticOnNhd_regularizedGaussHG_comp (A := id) (B := fun a => a + 1 / 3)
+    have h3 := analyticOnNhd_regularizedGaussHypergeometric_comp (A := id) (B := fun a => a + 1 / 3)
       (C := fun a => 2 * a + 2 / 3) differentiable_id (differentiable_id.add_const _)
       ((differentiable_id.const_mul _).add_const _) hwc'
     exact analyticOnNhd_const.mul h3
@@ -333,19 +335,19 @@ theorem CubicTransformation.connection {a w : ℂ} (hc : ∀ k : ℕ, 2 * a + 2 
       CubicTransformation.ne_intCast_of_re_mem_Ioo (by norm_num) (by norm_num)
   have e1 : ∀ b : ℂ, ₂F₁ b (b + 1 / 3) (2 / 3) w = Gamma (2 / 3) * F₁ b := fun b => by
     simp only [hF₁]
-    rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hw,
-      regularizedGaussHGFun_eq_div_Gamma (not_neg_nat_of_not_int hc23)]
+    rw [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hw,
+      regularizedGaussHypergeometricFun_eq_div_Gamma (not_neg_nat_of_not_int hc23)]
     field_simp [hGne (2 / 3) (by norm_num)]
   have e2 : ∀ b : ℂ, ₂F₁ (b + 1 / 3) (b + 2 / 3) (4 / 3) w = Gamma (4 / 3) * F₂ b := fun b => by
     simp only [hF₂]
-    rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hw,
-      regularizedGaussHGFun_eq_div_Gamma (not_neg_nat_of_re_pos (by norm_num))]
+    rw [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hw,
+      regularizedGaussHypergeometricFun_eq_div_Gamma (not_neg_nat_of_re_pos (by norm_num))]
     field_simp [hGne (4 / 3) (by norm_num)]
   have e3 : ∀ b : ℂ, (∀ k : ℕ, 2 * b + 2 / 3 ≠ -(k : ℂ)) →
       ₂F₁ b (b + 1 / 3) (2 * b + 2 / 3) (1 - w) = Gamma (2 * b + 2 / 3) * F₃ b := fun b hb => by
     simp only [hF₃]
-    rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hw1,
-      regularizedGaussHGFun_eq_div_Gamma hb]
+    rw [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hw1,
+      regularizedGaussHypergeometricFun_eq_div_Gamma hb]
     have : Gamma (2 * b + 2 / 3) ≠ 0 := Complex.Gamma_ne_zero hb
     exact (mul_div_cancel₀ _ this).symm
   have hm13 : Gamma (-1 / 3) = -3 * Gamma (2 / 3) := by
@@ -474,7 +476,7 @@ theorem CubicTransformation.exp_four_pi_I_div_three : exp (4 * Real.pi * I / 3) 
     Real.sin_pi_div_three]
   push_cast; ring
 
-/-- Principal cube root near `1`: if `‖y - 1‖ < 1/5` then `(y³)^{1/3} = y`. -/
+/-- Principal unitCube root near `1`: if `‖y - 1‖ < 1/5` then `(y³)^{1/3} = y`. -/
 theorem CubicTransformation.cube_root {y : ℂ} (hy : ‖y - 1‖ < 1 / 5) : (y ^ 3) ^
     (1 / 3 : ℂ) = y := by
   have him : |y.im| < 1 / 5 := by

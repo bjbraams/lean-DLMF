@@ -295,7 +295,7 @@ theorem Transport.continuous_deriv_associatedP_degree (μ : ℂ) {z : ℂ} (hz :
   have e := funext fun ν => deriv_associatedP ν (-μ) hz
   rw [e]
   have hP := (associatedP_entire_degree (-μ) z hz).continuous
-  have hG := (differentiable_regularizedGaussHG_comp (A := fun ν : ℂ => ν+1+1)
+  have hG := (differentiable_regularizedGaussHypergeometric_comp (A := fun ν : ℂ => ν+1+1)
       (B := fun ν : ℂ => -ν+1)
     (C := fun _ : ℂ => 1-(-μ)+1) (by fun_prop) (by fun_prop) (by fun_prop) hw).continuous
   exact (continuous_const.mul hP).sub ((by fun_prop : Continuous fun ν : ℂ => (ν+1)*(-ν)/2).mul

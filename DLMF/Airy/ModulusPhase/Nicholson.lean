@@ -406,7 +406,7 @@ theorem ModulusPhase.derivSq_eq_integral (x : ℝ) :
     rw [sub_eq_add_neg, Complex.exp_add]; ring
   rw [hI, hI2] at h
   rw [airyDerivModulus_sq]
-  have h' : ((airyAiDerivReal x ^ 2 + airyBiDerivReal x ^ 2 : ℝ) : ℂ) =
+  have h' : ((DLMF.Airy.Real.airyAiDeriv x ^ 2 + DLMF.Airy.Real.airyBiDeriv x ^ 2 : ℝ) : ℂ) =
       ((((∫ t in Ioi (0 : ℝ), ModulusPhase.kernel2 x t) / 2 - x * ∫ t in Ioi (0 : ℝ),
           ModulusPhase.kernel x t) /
         (π * Real.sqrt π) : ℝ) : ℂ) := by
@@ -911,7 +911,8 @@ noncomputable def ModulusPhase.kernel1 (x t : ℝ) : ℝ :=
 
 /-- Nicholson-type formula for `Ai Ai' + Bi Bi'` on the real line. -/
 theorem ModulusPhase.cross_eq_integral (x : ℝ) :
-    airyAiReal x * airyAiDerivReal x + airyBiReal x * airyBiDerivReal x =
+    DLMF.Airy.Real.airyAi x * DLMF.Airy.Real.airyAiDeriv x + DLMF.Airy.Real.airyBi x *
+        DLMF.Airy.Real.airyBiDeriv x =
       (∫ t in Ioi (0 : ℝ), ModulusPhase.kernel1 x t) / (2 * (π * Real.sqrt π)) := by
   have h := ModulusPhase.cross_integral x
   rw [airyAi_ofReal_eq, airyBi_ofReal_eq, airyAiDeriv_ofReal_eq, airyBiDeriv_ofReal_eq,
@@ -965,10 +966,12 @@ theorem airy_modulus_monotone :
 theorem airy_modulus_deriv_monotone :
     StrictMonoOn (deriv airyModulus) (Iic 0) := by
   have hπ := Real.pi_pos
-  set C : ℝ → ℝ := fun x => airyAiReal x * airyAiDerivReal x + airyBiReal x * airyBiDerivReal x
+  set C : ℝ → ℝ := fun x => DLMF.Airy.Real.airyAi x * DLMF.Airy.Real.airyAiDeriv x +
+      DLMF.Airy.Real.airyBi x * DLMF.Airy.Real.airyBiDeriv x
   have hC : ∀ x, HasDerivAt C (airyDerivModulus x ^ 2 + x * airyModulus x ^ 2) x := fun x => by
-    have h := ((hasDerivAt_airyAiReal x).mul (hasDerivAt_airyAiDerivReal x)).add
-      ((hasDerivAt_airyBiReal x).mul (hasDerivAt_airyBiDerivReal x))
+    have h := ((DLMF.Airy.Real.hasDerivAt_airyAi x).mul
+        (DLMF.Airy.Real.hasDerivAt_airyAiDeriv x)).add
+      ((DLMF.Airy.Real.hasDerivAt_airyBi x).mul (DLMF.Airy.Real.hasDerivAt_airyBiDeriv x))
     refine h.congr_deriv ?_
     rw [airyDerivModulus_sq, airyModulus_sq]; ring
   have hD : ∀ x, HasDerivAt (deriv airyModulus)

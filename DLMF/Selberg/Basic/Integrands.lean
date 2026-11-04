@@ -14,17 +14,18 @@ public import Mathlib.Analysis.SpecialFunctions.Pow.Complex
 
 ## Main definitions
 
-* `selbergIntegrand`, `selbergInt`: the Selberg integrand on `[0,1]^n` and the Selberg integral
+* `selbergIntegrand`, `selbergIntegral`: the Selberg integrand on `[0,1]^n` and the Selberg integral
   as a function of its parameters.
-* `cube`: the closed unit cube `[0,1]ⁿ`.
-* `weight`, `weightR`: the complex weight `x^{a-1}(1-x)^{b-1}` and the real product weight.
-* `vdm`, `vdmSq`, `vprod`: the Vandermonde factor `∏_{i<j} |tᵢ - tⱼ|^{2c}`, the squared
-  Vandermonde product and `∏ⱼ |x - yⱼ|^{2c}`.
-* `ibpF`, `ibpD`, `ibpBound`: the function, derivative and majorant of the one-variable
-  integration by parts.
-* `mono`, `aomotoInt`, `aomotoFactor`: the monomials `∏_{i∈S} tᵢ`, Aomoto's integrals and the
-  ratio in Aomoto's formula.
-* `reflect`: the reflection `t ↦ 1 - t` of the cube.
+* `unitCube`: the closed unit unitCube `[0,1]ⁿ`.
+* `selbergWeight`, `selbergWeightReal`: the complex selbergWeight `x^{a-1}(1-x)^{b-1}` and the real
+  product selbergWeight.
+* `vandermondeAbsPow`, `vandermondeSq`, `linearFactorAbsPow`: the Vandermonde factor
+  `∏_{i<j} |tᵢ - tⱼ|^{2c}`, the squared Vandermonde product and `∏ⱼ |x - yⱼ|^{2c}`.
+* `integrationByPartsF`, `integrationByPartsD`, `integrationByPartsBound`: the function, derivative
+  and majorant of the one-variable integration by parts.
+* `monomialProduct`, `aomotoIntegral`, `aomotoFactor`: the monomials `∏_{i∈S} tᵢ`, Aomoto's
+  integrals and the ratio in Aomoto's formula.
+* `reflectUnitCube`: the reflection `t ↦ 1 - t` of the unitCube.
 -/
 
 @[expose] public noncomputable section
@@ -40,64 +41,65 @@ def selbergIntegrand (n : ℕ) (a b c : ℂ) (t : Fin n → ℝ) : ℂ :=
     ∏ i : Fin n, ∏ j : Fin n,
       if i.val < j.val then ((abs (t i - t j) : ℝ) : ℂ) ^ (2 * c) else 1
 
-/-- The closed unit cube `[0,1]ⁿ`. -/
-abbrev cube (n : ℕ) : Set (Fin n → ℝ) := Set.pi Set.univ fun _ => Set.Icc (0 : ℝ) 1
+/-- The closed unit unitCube `[0,1]ⁿ`. -/
+abbrev unitCube (n : ℕ) : Set (Fin n → ℝ) := Set.pi Set.univ fun _ => Set.Icc (0 : ℝ) 1
 
-/-- The one-variable Selberg weight `x^{a-1}(1-x)^{b-1}`. -/
-def weight (a b : ℂ) (x : ℝ) : ℂ := (x : ℂ) ^ (a - 1) * (1 - (x : ℂ)) ^ (b - 1)
+/-- The one-variable Selberg selbergWeight `x^{a-1}(1-x)^{b-1}`. -/
+def selbergWeight (a b : ℂ) (x : ℝ) : ℂ := (x : ℂ) ^ (a - 1) * (1 - (x : ℂ)) ^ (b - 1)
 
 /-- The Vandermonde factor `∏_{i<j} |tᵢ - tⱼ|^{2c}`. -/
-def vdm (n : ℕ) (c : ℂ) (t : Fin n → ℝ) : ℂ :=
+def vandermondeAbsPow (n : ℕ) (c : ℂ) (t : Fin n → ℝ) : ℂ :=
   ∏ i : Fin n, ∏ j : Fin n, if i.val < j.val then ((|t i - t j| : ℝ) : ℂ) ^ (2 * c) else 1
 
 /-- `∏ⱼ |x - yⱼ|^{2c}`. -/
-def vprod {n : ℕ} (y : Fin n → ℝ) (c : ℂ) (x : ℝ) : ℂ :=
+def linearFactorAbsPow {n : ℕ} (y : Fin n → ℝ) (c : ℂ) (x : ℝ) : ℂ :=
   ∏ j : Fin n, ((|x - y j| : ℝ) : ℂ) ^ (2 * c)
 
 /-- The function differentiated in the one-variable integration by parts. -/
-def ibpF {n : ℕ} (y : Fin n → ℝ) (α β c : ℂ) (x : ℝ) : ℂ :=
-  (x : ℂ) ^ α * (1 - (x : ℂ)) ^ β * vprod y c x
+def integrationByPartsF {n : ℕ} (y : Fin n → ℝ) (α β c : ℂ) (x : ℝ) : ℂ :=
+  (x : ℂ) ^ α * (1 - (x : ℂ)) ^ β * linearFactorAbsPow y c x
 
 /-- Its derivative off the points `yⱼ`. -/
-def ibpD {n : ℕ} (y : Fin n → ℝ) (α β c : ℂ) (x : ℝ) : ℂ :=
+def integrationByPartsD {n : ℕ} (y : Fin n → ℝ) (α β c : ℂ) (x : ℝ) : ℂ :=
   (α * (x : ℂ) ^ (α - 1) * (1 - (x : ℂ)) ^ β - β * (x : ℂ) ^ α * (1 - (x : ℂ)) ^ (β - 1)) *
-      vprod y c x +
-    (x : ℂ) ^ α * (1 - (x : ℂ)) ^ β * ((∑ j : Fin n, 2 * c / ((x : ℂ) - y j)) * vprod y c x)
+      linearFactorAbsPow y c x +
+    (x : ℂ) ^ α * (1 - (x : ℂ)) ^ β *
+        ((∑ j : Fin n, 2 * c / ((x : ℂ) - y j)) * linearFactorAbsPow y c x)
 
-/-- An integrable majorant for `ibpD`, independent of `y`. -/
-def ibpBound (n : ℕ) (α β c : ℂ) (x : ℝ) : ℝ :=
+/-- An integrable majorant for `integrationByPartsD`, independent of `y`. -/
+def integrationByPartsBound (n : ℕ) (α β c : ℂ) (x : ℝ) : ℝ :=
   ‖α‖ * x ^ (α.re - 1) + (if β = 0 then 0 else ‖β‖ * (1 - x) ^ (β.re - 1)) + n * (2 * ‖c‖)
 
 /-- `∏ᵢ∈S tᵢ`. -/
-def mono {N : ℕ} (S : Finset (Fin N)) (t : Fin N → ℝ) : ℂ := ∏ i ∈ S, (t i : ℂ)
+def monomialProduct {N : ℕ} (S : Finset (Fin N)) (t : Fin N → ℝ) : ℂ := ∏ i ∈ S, (t i : ℂ)
 
 /-- Aomoto's integrals `∫ ∏ᵢ∈S tᵢ · Φ(t) dt`. -/
-def aomotoInt (N : ℕ) (a b c : ℂ) (S : Finset (Fin N)) : ℂ :=
-  ∫ t in cube N, mono S t * selbergIntegrand N a b c t
+def aomotoIntegral (N : ℕ) (a b c : ℂ) (S : Finset (Fin N)) : ℂ :=
+  ∫ t in unitCube N, monomialProduct S t * selbergIntegrand N a b c t
 
 /-- The preimage of `S` under `Fin.succ`. -/
-def succPre {n : ℕ} (S : Finset (Fin (n + 1))) : Finset (Fin n) :=
+def preimageSucc {n : ℕ} (S : Finset (Fin (n + 1))) : Finset (Fin n) :=
   Finset.univ.filter fun j => j.succ ∈ S
 
 /-- The initial segment `{i | i < m}`. -/
-def iseg (N m : ℕ) : Finset (Fin N) := Finset.univ.filter fun i => i.val < m
+def initialSegment (N m : ℕ) : Finset (Fin N) := Finset.univ.filter fun i => i.val < m
 
 /-- The ratio in Aomoto's formula. -/
 def aomotoFactor (N : ℕ) (a b c : ℂ) (j : ℕ) : ℂ :=
   (a + ((N - 1 - j : ℕ) : ℂ) * c) / (a + b + ((2 * N - 2 - j : ℕ) : ℂ) * c)
 
 /-- The Selberg integral as a function of its parameters. -/
-def selbergInt (N : ℕ) (a b c : ℂ) : ℂ := ∫ t in cube N, selbergIntegrand N a b c t
+def selbergIntegral (N : ℕ) (a b c : ℂ) : ℂ := ∫ t in unitCube N, selbergIntegrand N a b c t
 
-/-- The reflection `t ↦ 1 - t` of the cube. -/
-def reflect {N : ℕ} (t : Fin N → ℝ) : Fin N → ℝ := fun i => 1 - t i
+/-- The reflection `t ↦ 1 - t` of the unitCube. -/
+def reflectUnitCube {N : ℕ} (t : Fin N → ℝ) : Fin N → ℝ := fun i => 1 - t i
 
 /-- `∏_{i<j} (tᵢ - tⱼ)²`. -/
-def vdmSq (N : ℕ) (t : Fin N → ℝ) : ℝ :=
+def vandermondeSq (N : ℕ) (t : Fin N → ℝ) : ℝ :=
   ∏ i : Fin N, ∏ j : Fin N, if i.val < j.val then (t i - t j) ^ 2 else 1
 
-/-- The real weight `∏ tᵢ^{α-1}(1-tᵢ)^{β-1}`. -/
-def weightR (N : ℕ) (α β : ℝ) (t : Fin N → ℝ) : ℝ :=
+/-- The real selbergWeight `∏ tᵢ^{α-1}(1-tᵢ)^{β-1}`. -/
+def selbergWeightReal (N : ℕ) (α β : ℝ) (t : Fin N → ℝ) : ℝ :=
   ∏ i : Fin N, t i ^ (α - 1) * (1 - t i) ^ (β - 1)
 
 end DLMF.Selberg

@@ -9,6 +9,7 @@ public import DLMF.Mathieu.Basic.SpectralExistence
 public import Mathlib.RingTheory.Polynomial.Hermite.Basic
 public import DLMFMathlib.Analysis.ODE.Oscillation
 public import DLMF.Mathieu.Properties
+public import DLMF.Mathieu.SpectralContinuity
 
 /-!
 # Zeros of the Mathieu functions
@@ -76,28 +77,47 @@ theorem mathieu_zeros_count (n : ℕ) (q : ℝ) :
 theorem mathieuCe_even_zeros_continuous (n : ℕ) :
     ∃ Z : Fin n → ℝ → ℝ, (∀ k, Continuous (Z k)) ∧
       ∀ q, {x ∈ Ioo 0 (π / 2) | mathieuCe (2 * n) x q = 0} = Set.range fun k => Z k q := by
-  sorry
+  obtain ⟨Z, hZc, hZ⟩ := exists_continuous_zeros_mathieuWI_mathieuA (2 * n) (n := n) (by omega)
+  refine ⟨Z, hZc, fun q => ?_⟩
+  rw [← hZ q]
+  ext x
+  simp [mathieuCe, (mathieuCeZero_pos (2 * n) q).ne']
 
 /-- **Continuity of the zeros** (DLMF §28.9) of `se_{2n+1}(·, q)` in `(0, π/2)`. -/
 @[dlmf 28.9]
 theorem mathieuSe_odd_zeros_continuous (n : ℕ) :
     ∃ Z : Fin n → ℝ → ℝ, (∀ k, Continuous (Z k)) ∧
       ∀ q, {x ∈ Ioo 0 (π / 2) | mathieuSe (2 * n + 1) x q = 0} = Set.range fun k => Z k q := by
-  sorry
+  obtain ⟨Z, hZc, hZ⟩ := exists_continuous_zeros_mathieuWII_mathieuB (m := 2 * n + 1)
+    (by omega) (n := n) (by omega)
+  refine ⟨Z, hZc, fun q => ?_⟩
+  rw [← hZ q]
+  ext x
+  simp [mathieuSe, (mathieuSeDerivZero_pos (2 * n + 1) q).ne']
 
 /-- **Continuity of the zeros** (DLMF §28.9) of `ce_{2n+1}(·, q)` in `(0, π/2)`. -/
 @[dlmf 28.9]
 theorem mathieuCe_odd_zeros_continuous (n : ℕ) :
     ∃ Z : Fin n → ℝ → ℝ, (∀ k, Continuous (Z k)) ∧
       ∀ q, {x ∈ Ioo 0 (π / 2) | mathieuCe (2 * n + 1) x q = 0} = Set.range fun k => Z k q := by
-  sorry
+  obtain ⟨Z, hZc, hZ⟩ := exists_continuous_zeros_mathieuWI_mathieuA (2 * n + 1) (n := n)
+    (by omega)
+  refine ⟨Z, hZc, fun q => ?_⟩
+  rw [← hZ q]
+  ext x
+  simp [mathieuCe, (mathieuCeZero_pos (2 * n + 1) q).ne']
 
 /-- **Continuity of the zeros** (DLMF §28.9) of `se_{2n+2}(·, q)` in `(0, π/2)`. -/
 @[dlmf 28.9]
 theorem mathieuSe_even_zeros_continuous (n : ℕ) :
     ∃ Z : Fin n → ℝ → ℝ, (∀ k, Continuous (Z k)) ∧
       ∀ q, {x ∈ Ioo 0 (π / 2) | mathieuSe (2 * n + 2) x q = 0} = Set.range fun k => Z k q := by
-  sorry
+  obtain ⟨Z, hZc, hZ⟩ := exists_continuous_zeros_mathieuWII_mathieuB (m := 2 * n + 2)
+    (by omega) (n := n) (by omega)
+  refine ⟨Z, hZc, fun q => ?_⟩
+  rw [← hZ q]
+  ext x
+  simp [mathieuSe, (mathieuSeDerivZero_pos (2 * n + 2) q).ne']
 
 /-- **Zeros for large `q`** (DLMF §28.9): as `q → ∞`, the zeros of `ce_{2n}(·, q)` and
 `se_{2n+1}(·, q)` in `(0, π/2)` approach those of `He_{2n}(q^{1/4}(π - 2z))`: for every

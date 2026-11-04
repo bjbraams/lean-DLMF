@@ -267,25 +267,28 @@ theorem CylinderSectorAsymptotics.differentiable_laplace {μ : ℂ} (hμ : 0 < �
 theorem CylinderSectorAsymptotics.integral_rotate {a : ℂ} (ha : -1 / 2 < a.re) {θ : ℝ}
     (hθ : |θ| < π / 4)
     (z : ℂ) :
-    Gamma (1 / 2 + a) * (exp (z ^ 2 / 4) * pcfU a z) = exp (θ * I) * ∫ r in Ioi (0 : ℝ),
+    Gamma (1 / 2 + a) * (exp (z ^ 2 / 4) * parabolicCylinderU a z) = exp (θ * I) *
+        ∫ r in Ioi (0 : ℝ),
       cexp (-(z * exp (θ * I) * r)) *
           CylinderSectorAsymptotics.kernel (a + 1 / 2) ((r : ℂ) * exp (θ * I)) := by
   set μ := a + 1 / 2 with hμd
   have hμ : 0 < μ.re := by simp [hμd]; linarith
   have hΓ : Gamma (1 / 2 + a) ≠ 0 := Complex.Gamma_ne_zero_of_re_pos (by simp; linarith)
-  have hd1 : Differentiable ℂ (fun z : ℂ => Gamma (1 / 2 + a) * (exp (z ^ 2 / 4) * pcfU a z)) :=
+  have hd1 : Differentiable ℂ
+      (fun z : ℂ => Gamma (1 / 2 + a) * (exp (z ^ 2 / 4) * parabolicCylinderU a z)) :=
     (differentiable_const _).mul ((by fun_prop : Differentiable ℂ fun z : ℂ => exp (z ^ 2 / 4)).mul
-      (pcfU_entire a))
+      (parabolicCylinderU_entire a))
   have hd2 := CylinderSectorAsymptotics.differentiable_laplace hμ hθ
   have hy : ∀ y ∈ [[0, θ]], |y| ≤ π / 4 := fun y hy =>
     (abs_le_abs_of_mem_uIcc_zero hy).trans hθ.le
-  have hreal : ∀ x : ℝ, 0 < x → Gamma (1 / 2 + a) * (exp ((x : ℂ) ^ 2 / 4) * pcfU a x) =
+  have hreal : ∀ x : ℝ, 0 < x → Gamma (1 / 2 + a) *
+      (exp ((x : ℂ) ^ 2 / 4) * parabolicCylinderU a x) =
       exp (θ * I) * ∫ r in Ioi (0 : ℝ), cexp (-((x : ℂ) * exp (θ * I) * r)) *
         CylinderSectorAsymptotics.kernel μ ((r : ℂ) * exp (θ * I)) := by
     intro x hx
-    have h0 : Gamma (1 / 2 + a) * (exp ((x : ℂ) ^ 2 / 4) * pcfU a x) =
+    have h0 : Gamma (1 / 2 + a) * (exp ((x : ℂ) ^ 2 / 4) * parabolicCylinderU a x) =
         ∫ t in Ioi (0 : ℝ), cexp (-((x : ℂ) * t)) * CylinderSectorAsymptotics.kernel μ t := by
-      rw [pcfU_eq_integral ha]
+      rw [parabolicCylinderU_eq_integral ha]
       have he : exp ((x : ℂ) ^ 2 / 4) * exp (-(x : ℂ) ^ 2 / 4) = 1 := by
         rw [← Complex.exp_add]; ring_nf; exact Complex.exp_zero
       rw [show Gamma (1 / 2 + a) * (exp ((x : ℂ) ^ 2 / 4) * (exp (-(x : ℂ) ^ 2 / 4) /
@@ -312,7 +315,8 @@ theorem CylinderSectorAsymptotics.integral_rotate {a : ℂ} (ha : -1 / 2 < a.re)
       have := hy y hy'
       exact mul_pos hx (Real.cos_pos_of_mem_Ioo ⟨by linarith [neg_abs_le y, Real.pi_pos],
         by linarith [le_abs_self y, Real.pi_pos]⟩)
-  have hfreq : ∃ᶠ w in 𝓝[≠] (1 : ℂ), Gamma (1 / 2 + a) * (exp (w ^ 2 / 4) * pcfU a w) =
+  have hfreq : ∃ᶠ w in 𝓝[≠] (1 : ℂ), Gamma (1 / 2 + a) *
+      (exp (w ^ 2 / 4) * parabolicCylinderU a w) =
       exp (θ * I) * ∫ r in Ioi (0 : ℝ), cexp (-(w * exp (θ * I) * r)) *
         CylinderSectorAsymptotics.kernel μ ((r : ℂ) * exp (θ * I)) := by
     have ht : Tendsto (fun r : ℝ => (r : ℂ)) (𝓝[≠] (1 : ℝ)) (𝓝[≠] (1 : ℂ)) := by
@@ -382,11 +386,11 @@ theorem CylinderSectorAsymptotics.kernel_sub_sum_isBigO (μ : ℂ) {θ : ℝ} (h
 
 /-- The term `(-1)^s (a + 1/2)_{2s} / (s! (2z²)^s)` of DLMF 12.9.1. -/
 def CylinderSectorAsymptotics.uTerm (a z : ℂ) (s : ℕ) : ℂ :=
-  (-1) ^ s * poch (1 / 2 + a) (2 * s) / ((s.factorial : ℂ) * (2 * z ^ 2) ^ s)
+  (-1) ^ s * pochhammer (1 / 2 + a) (2 * s) / ((s.factorial : ℂ) * (2 * z ^ 2) ^ s)
 
 /-- The normalized function `e^{z²/4} z^{a+1/2} U(a,z)` of DLMF 12.9.1. -/
 def CylinderSectorAsymptotics.normalizedU (a z : ℂ) : ℂ := exp (z ^ 2 / 4) *
-    z ^ (a + 1 / 2) * pcfU a z
+    z ^ (a + 1 / 2) * parabolicCylinderU a z
 
 /-- The expansion DLMF 12.9.1 along a filter `l`, as a family of `O`-bounds. -/
 def CylinderSectorAsymptotics.IsExpansion (a : ℂ) (l : Filter ℂ) : Prop :=
@@ -411,7 +415,7 @@ theorem CylinderSectorAsymptotics.hasAsymptoticExpansion {a : ℂ} (ha : -1 / 2 
       (fun (n : ℕ) (z : ℂ) => z ^ (-(((2 * n : ℕ) : ℂ) + (a + 1 / 2))))
       (fun n => Complex.Gamma (((2 * n : ℕ) : ℂ) + (a + 1 / 2)) •
           CylinderSectorAsymptotics.gaussCoeff (2 * n))
-      (fun z => Gamma (1 / 2 + a) * (exp (z ^ 2 / 4) * pcfU a z)) := by
+      (fun z => Gamma (1 / 2 + a) * (exp (z ^ 2 / 4) * parabolicCylinderU a z)) := by
   set μ := a + 1 / 2 with hμd
   have hμ : 0 < μ.re := by simp [hμd]; linarith
   set d := min δ (π / 4) with hd
@@ -427,7 +431,7 @@ theorem CylinderSectorAsymptotics.hasAsymptoticExpansion {a : ℂ} (ha : -1 / 2 
       (fun (n : ℕ) (z : ℂ) => z ^ (-(((2 * n : ℕ) : ℂ) + μ)))
       (fun n => Complex.Gamma (((2 * n : ℕ) : ℂ) + μ) •
           CylinderSectorAsymptotics.gaussCoeff (2 * n))
-      (fun z => Gamma (1 / 2 + a) * (exp (z ^ 2 / 4) * pcfU a z)) := by
+      (fun z => Gamma (1 / 2 + a) * (exp (z ^ 2 / 4) * parabolicCylinderU a z)) := by
     intro θ hθ
     have hθ' : |θ| < π / 2 := by linarith [Real.pi_pos]
     have hθ1 : -π < θ := by linarith [neg_abs_le θ, Real.pi_pos]
@@ -477,20 +481,20 @@ theorem CylinderSectorAsymptotics.isExpansion_of_re {a : ℂ} (ha : -1 / 2 < a.r
       have hzp : z ^ (-(((2 * n : ℕ) : ℂ) + μ)) * z ^ μ = (z ^ (2 * n))⁻¹ := by
         rw [← Complex.cpow_add _ _ hz0, show -(((2 * n : ℕ) : ℂ) + μ) + μ = -((2 * n : ℕ) : ℂ)
           by ring, Complex.cpow_neg, Complex.cpow_natCast]
-      have hG : Gamma (μ + ((2 * n : ℕ) : ℂ)) / Gamma μ = poch μ (2 * n) :=
+      have hG : Gamma (μ + ((2 * n : ℕ) : ℂ)) / Gamma μ = pochhammer μ (2 * n) :=
         Complex.Gamma_add_nat_div_Gamma_eq μ hμk
       have hg : CylinderSectorAsymptotics.gaussCoeff (2 * n) = (-1 / 2 : ℂ) ^ n /
           (n.factorial : ℂ) := by
         simp [CylinderSectorAsymptotics.gaussCoeff, show 2 * n / 2 = n by omega]
       have hΓμ0 : Gamma μ ≠ 0 := hΓμ ▸ hΓ
-      have hG' : Gamma (((2 * n : ℕ) : ℂ) + μ) = poch μ (2 * n) * Gamma μ := by
+      have hG' : Gamma (((2 * n : ℕ) : ℂ) + μ) = pochhammer μ (2 * n) * Gamma μ := by
         rw [add_comm, ← hG]; field_simp
       rw [hg, hG', hΓμ, CylinderSectorAsymptotics.uTerm, show 1 / 2 + a = μ by rw [hμd]; ring]
       have hz2 : z ^ (2 * n) ≠ 0 := pow_ne_zero _ hz0
       have hf : (n.factorial : ℂ) ≠ 0 := by exact_mod_cast n.factorial_ne_zero
-      calc z ^ (-(((2 * n : ℕ) : ℂ) + μ)) * (poch μ (2 * n) * Gamma μ *
+      calc z ^ (-(((2 * n : ℕ) : ℂ) + μ)) * (pochhammer μ (2 * n) * Gamma μ *
             ((-1 / 2 : ℂ) ^ n / (n.factorial : ℂ))) * (z ^ μ / Gamma μ)
-          = (z ^ (-(((2 * n : ℕ) : ℂ) + μ)) * z ^ μ) * poch μ (2 * n) *
+          = (z ^ (-(((2 * n : ℕ) : ℂ) + μ)) * z ^ μ) * pochhammer μ (2 * n) *
             ((-1 / 2 : ℂ) ^ n / (n.factorial : ℂ)) := by field_simp
         _ = _ := by
           rw [hzp, mul_pow, pow_mul]
@@ -509,7 +513,7 @@ theorem CylinderSectorAsymptotics.isExpansion_of_re {a : ℂ} (ha : -1 / 2 < a.r
 theorem CylinderSectorAsymptotics.normalizedU_recurrence (a : ℂ) {z : ℂ} (hz : z ≠ 0) :
     CylinderSectorAsymptotics.normalizedU (a - 1) z = CylinderSectorAsymptotics.normalizedU a z +
         (a + 1 / 2) * (z ^ 2)⁻¹ * CylinderSectorAsymptotics.normalizedU (a + 1) z := by
-  have h3 := pcfU_three_term a z
+  have h3 := parabolicCylinderU_three_term a z
   have h1 : z ^ (a + 1 / 2) = z ^ (a - 1 + 1 / 2) * z := by
     rw [show a + 1 / 2 = (a - 1 + 1 / 2) + 1 by ring, Complex.cpow_add _ _ hz, Complex.cpow_one]
   have h2 : z ^ (a + 1 + 1 / 2) = z ^ (a - 1 + 1 / 2) * z ^ 2 := by
@@ -519,12 +523,12 @@ theorem CylinderSectorAsymptotics.normalizedU_recurrence (a : ℂ) {z : ℂ} (hz
   simp only [CylinderSectorAsymptotics.normalizedU]
   rw [h1, h2]
   linear_combination (-(exp (z ^ 2 / 4) * z ^ (a - 1 + 1 / 2))) * h3 -
-    exp (z ^ 2 / 4) * z ^ (a - 1 + 1 / 2) * (a + 1 / 2) * pcfU (a + 1) z * hz2
+    exp (z ^ 2 / 4) * z ^ (a - 1 + 1 / 2) * (a + 1 / 2) * parabolicCylinderU (a + 1) z * hz2
 
-/-- `poch x (1 + n) = x · poch (x + 1) n`. -/
-theorem CylinderSectorAsymptotics.poch_succ_left (x : ℂ) (n : ℕ) : poch x (1 + n) = x *
-    poch (x + 1) n := by
-  rw [poch_add, poch_one]; push_cast; ring_nf
+/-- `pochhammer x (1 + n) = x · pochhammer (x + 1) n`. -/
+theorem CylinderSectorAsymptotics.pochhammer_succ_left (x : ℂ) (n : ℕ) : pochhammer x (1 + n) = x *
+    pochhammer (x + 1) n := by
+  rw [pochhammer_add, pochhammer_one]; push_cast; ring_nf
 
 /-- The coefficient recurrence behind `CylinderSectorAsymptotics.normalizedU_recurrence`. -/
 theorem CylinderSectorAsymptotics.uTerm_recurrence (a z : ℂ) (hz : z ≠ 0) (s : ℕ) :
@@ -532,13 +536,13 @@ theorem CylinderSectorAsymptotics.uTerm_recurrence (a z : ℂ) (hz : z ≠ 0) (s
       CylinderSectorAsymptotics.uTerm a z (s + 1) + (a + 1 / 2) * (z ^ 2)⁻¹ *
           CylinderSectorAsymptotics.uTerm (a + 1) z s := by
   set x := 1 / 2 + (a - 1) with hx
-  have hA : poch x (2 * (s + 1)) = x * ((x + 1) * poch (x + 1 + 1) (2 * s)) := by
-    rw [show 2 * (s + 1) = 1 + (1 + 2 * s) by ring, CylinderSectorAsymptotics.poch_succ_left,
-      CylinderSectorAsymptotics.poch_succ_left]
-  have hB : poch (x + 1) (2 * (s + 1)) = (x + 1) * poch (x + 1 + 1) (2 * s) *
+  have hA : pochhammer x (2 * (s + 1)) = x * ((x + 1) * pochhammer (x + 1 + 1) (2 * s)) := by
+    rw [show 2 * (s + 1) = 1 + (1 + 2 * s) by ring, CylinderSectorAsymptotics.pochhammer_succ_left,
+      CylinderSectorAsymptotics.pochhammer_succ_left]
+  have hB : pochhammer (x + 1) (2 * (s + 1)) = (x + 1) * pochhammer (x + 1 + 1) (2 * s) *
       (x + 1 + ((1 + 2 * s : ℕ) : ℂ)) := by
-    rw [show 2 * (s + 1) = (1 + 2 * s) + 1 by ring, poch_succ,
-                                                CylinderSectorAsymptotics.poch_succ_left]
+    rw [show 2 * (s + 1) = (1 + 2 * s) + 1 by ring, pochhammer_succ,
+                                                CylinderSectorAsymptotics.pochhammer_succ_left]
   have e1 : 1 / 2 + a = x + 1 := by rw [hx]; ring
   have e2 : 1 / 2 + (a + 1) = x + 1 + 1 := by rw [hx]; ring
   have e3 : a + 1 / 2 = x + 1 := by rw [hx]; ring
@@ -563,7 +567,7 @@ theorem CylinderSectorAsymptotics.sum_uTerm_recurrence (a z : ℂ) (hz : z ≠ 0
       show M + 1 - 1 = M by omega, Finset.mul_sum]
     simp only [CylinderSectorAsymptotics.uTerm_recurrence a z hz, Finset.sum_add_distrib]
     have h0 : ∀ b : ℂ, CylinderSectorAsymptotics.uTerm b z 0 = 1 := fun b => by
-        simp [CylinderSectorAsymptotics.uTerm, poch_zero]
+        simp [CylinderSectorAsymptotics.uTerm, pochhammer_zero]
     rw [h0, h0]
     ring
 
@@ -652,8 +656,9 @@ theorem CylinderSectorAsymptotics.tendsto_exp_logWedge {δ : ℝ} (hδ : 0 < δ)
     constructor <;> linarith
 
 /-- `U(b, e^v) = e^{-e^{2v}/4 - (b+1/2) v} G(b, e^v)` for `-π < im v ≤ π`. -/
-theorem CylinderSectorAsymptotics.pcfU_exp (b : ℂ) {v : ℂ} (h1 : -π < v.im) (h2 : v.im ≤ π) :
-    pcfU b (exp v) = exp (-exp (2 * v) / 4 - (b + 1 / 2) * v) *
+theorem CylinderSectorAsymptotics.parabolicCylinderU_exp (b : ℂ) {v : ℂ} (h1 : -π < v.im)
+    (h2 : v.im ≤ π) :
+    parabolicCylinderU b (exp v) = exp (-exp (2 * v) / 4 - (b + 1 / 2) * v) *
         CylinderSectorAsymptotics.normalizedU b (exp v) := by
   rw [CylinderSectorAsymptotics.normalizedU, CylinderSectorAsymptotics.exp_cpow h1 h2,
       ← Complex.exp_nat_mul, ← mul_assoc, ← mul_assoc,
@@ -667,7 +672,7 @@ theorem CylinderSectorAsymptotics.pcfU_exp (b : ℂ) {v : ℂ} (h1 : -π < v.im)
 `U(b,z) - e^{-z²/4} z^{-b-1/2} ∑_{s<N} u_s(z) = O(|e^{-z²/4} z^{-b-1/2}| |z|^{-2N})`. -/
 theorem CylinderSectorAsymptotics.U_logWedge (b : ℂ) {δ : ℝ} (hδ : 0 < δ) (κ : ℝ) {lo hi : ℝ}
     (hlo : -(3 * π / 4 - δ) ≤ lo + κ) (hhi : hi + κ ≤ 3 * π / 4 - δ) (N : ℕ) :
-    (fun w : ℂ => pcfU b (exp (w + κ * I)) - exp (-exp (2 * (w + κ * I)) / 4 -
+    (fun w : ℂ => parabolicCylinderU b (exp (w + κ * I)) - exp (-exp (2 * (w + κ * I)) / 4 -
         (b + 1 / 2) * (w + κ * I)) * ∑ s ∈ Finset.range N,
             CylinderSectorAsymptotics.uTerm b (exp (w + κ * I)) s)
       =O[pcfLogWedge lo hi] (fun w : ℂ => ‖exp (-exp (2 * (w + κ * I)) / 4 -
@@ -683,7 +688,7 @@ theorem CylinderSectorAsymptotics.U_logWedge (b : ℂ) {δ : ℝ} (hδ : 0 < δ)
     have h1 : -π < (w + κ * I).im := by rw [him]; linarith [Real.pi_pos]
     have h2 : (w + κ * I).im ≤ π := by rw [him]; linarith [Real.pi_pos]
     simp only [Function.comp_apply, E]
-    rw [CylinderSectorAsymptotics.pcfU_exp b h1 h2]
+    rw [CylinderSectorAsymptotics.parabolicCylinderU_exp b h1 h2]
     ring
   · refine IsBigO.of_bound 1 (Eventually.of_forall fun w => ?_)
     simp only [Function.comp_apply, norm_mul, norm_zpow, Complex.norm_exp, one_mul, E]
@@ -718,7 +723,7 @@ theorem CylinderSectorAsymptotics.exp_eq_of_eq_add {X Y : ℂ} (k : ℤ) (h : X 
 
 /-- The term `(1/2 - a)_{2s} / (s! (2z²)^s)` of DLMF 12.9.2. -/
 def CylinderSectorAsymptotics.vTerm (a z : ℂ) (s : ℕ) : ℂ :=
-  poch (1 / 2 - a) (2 * s) / ((s.factorial : ℂ) * (2 * z ^ 2) ^ s)
+  pochhammer (1 / 2 - a) (2 * s) / ((s.factorial : ℂ) * (2 * z ^ 2) ^ s)
 
 /-- `u_s(b, z)` depends only on `z²`. -/
 theorem CylinderSectorAsymptotics.uTerm_congr_sq (b : ℂ) {z z' : ℂ} (h : z ^ 2 = z' ^ 2) (s : ℕ) :
@@ -835,7 +840,8 @@ theorem CylinderSectorAsymptotics.tendsto_I_mul {δ : ℝ} (hδ : 0 < δ) :
 /-- **DLMF 12.9.2**: uniformly in `|ph z| ≤ π/4 - δ`,
 `√(π/2) e^{-z²/4} z^{-a+1/2} V(a,z) - ∑_{s<N} (1/2-a)_{2s}/(s! (2z²)^s) = O(z^{-2N})`. -/
 theorem CylinderSectorAsymptotics.V_sector (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π / 4) (N : ℕ) :
-    (fun z : ℂ => (Real.sqrt (π / 2) : ℂ) * exp (-z ^ 2 / 4) * z ^ (-a + 1 / 2) * pcfV a z -
+    (fun z : ℂ => (Real.sqrt (π / 2) : ℂ) * exp (-z ^ 2 / 4) * z ^ (-a + 1 / 2) *
+        parabolicCylinderV a z -
       ∑ s ∈ Finset.range N, CylinderSectorAsymptotics.vTerm a z s) =O[sector (π / 4 - δ)]
       (fun z : ℂ => z ^ (-(2 * N : ℤ))) := by
   have hl := CylinderSectorAsymptotics.eventually_sector (π / 4 - δ)
@@ -877,7 +883,7 @@ theorem CylinderSectorAsymptotics.V_sector (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (
     rw [show ((π / 2 : ℝ) : ℂ) * I = π / 2 * I by push_cast; ring,
       Complex.exp_pi_div_two_mul_I, mul_comm z I] at h
     rw [h]; congr 2; ring
-  have hU' : pcfU (-a) (I * z) = exp (z ^ 2 / 4) * (I * z) ^ (a - 1 / 2) *
+  have hU' : parabolicCylinderU (-a) (I * z) = exp (z ^ 2 / 4) * (I * z) ^ (a - 1 / 2) *
       CylinderSectorAsymptotics.normalizedU (-a) (I * z) := by
     have h0 : (I * z) ^ (a - 1 / 2) * (I * z) ^ (-a + 1 / 2) = 1 := by
       rw [← Complex.cpow_add _ _ hIz, show a - 1 / 2 + (-a + 1 / 2) = 0 by ring,
@@ -886,11 +892,11 @@ theorem CylinderSectorAsymptotics.V_sector (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (
       rw [← Complex.exp_add, show z ^ 2 / 4 + (I * z) ^ 2 / 4 = z ^ 2 / 4 * (1 + I ^ 2) by ring,
         I_sq]; simp
     simp only [CylinderSectorAsymptotics.normalizedU]
-    calc pcfU (-a) (I * z) = (exp (z ^ 2 / 4) * exp ((I * z) ^ 2 / 4)) *
-          ((I * z) ^ (a - 1 / 2) * (I * z) ^ (-a + 1 / 2)) * pcfU (-a) (I * z) := by
+    calc parabolicCylinderU (-a) (I * z) = (exp (z ^ 2 / 4) * exp ((I * z) ^ 2 / 4)) *
+          ((I * z) ^ (a - 1 / 2) * (I * z) ^ (-a + 1 / 2)) * parabolicCylinderU (-a) (I * z) := by
           rw [he, h0]; ring
       _ = _ := by ring
-  have hUa : pcfU a z = exp (-z ^ 2 / 4) * z ^ (-a - 1 / 2) *
+  have hUa : parabolicCylinderU a z = exp (-z ^ 2 / 4) * z ^ (-a - 1 / 2) *
       CylinderSectorAsymptotics.normalizedU a z := by
     have h0 : z ^ (-a - 1 / 2) * z ^ (a + 1 / 2) = 1 := by
       rw [← Complex.cpow_add _ _ hz0, show -a - 1 / 2 + (a + 1 / 2) = 0 by ring,
@@ -898,8 +904,8 @@ theorem CylinderSectorAsymptotics.V_sector (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (
     have he : exp (-z ^ 2 / 4) * exp (z ^ 2 / 4) = 1 := by
       rw [← Complex.exp_add]; ring_nf; simp
     simp only [CylinderSectorAsymptotics.normalizedU]
-    calc pcfU a z = (exp (-z ^ 2 / 4) * exp (z ^ 2 / 4)) *
-          (z ^ (-a - 1 / 2) * z ^ (a + 1 / 2)) * pcfU a z := by rw [he, h0]; ring
+    calc parabolicCylinderU a z = (exp (-z ^ 2 / 4) * exp (z ^ 2 / 4)) *
+          (z ^ (-a - 1 / 2) * z ^ (a + 1 / 2)) * parabolicCylinderU a z := by rw [he, h0]; ring
       _ = _ := by ring
   have k1 : (Real.sqrt (π / 2) : ℂ) * (Real.sqrt (2 / π) : ℂ) = 1 := by
     rw [← Complex.ofReal_mul, ← Real.sqrt_mul (by positivity),
@@ -917,7 +923,7 @@ theorem CylinderSectorAsymptotics.V_sector (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (
   have k56 : (exp (-z ^ 2 / 4) * exp (-z ^ 2 / 4)) * (z ^ (-a + 1 / 2) * z ^ (-a - 1 / 2)) =
       exp (-z ^ 2 / 2) * z ^ (-2 * a) := by
     rw [← Complex.exp_add, ← Complex.cpow_add _ _ hz0]; ring_nf
-  rw [pcfV_eq_mul_I, hU', hcp, hUa, ← hsum]
+  rw [parabolicCylinderV_eq_mul_I, hU', hcp, hUa, ← hsum]
   simp only [C]
   linear_combination (-CylinderSectorAsymptotics.normalizedU (-a) (I * z)) * kk -
     (Real.sqrt (π / 2) : ℂ) * (-I / Gamma (1 / 2 - a)) *

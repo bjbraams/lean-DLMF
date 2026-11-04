@@ -40,13 +40,13 @@ namespace DLMF.OrthogonalPolynomials
 /-- The finite Hahn weight with zero extension at both ends of the support. -/
 def hahnWeightInt (α β : ℂ) (N : ℕ) (x : ℤ) : ℂ :=
   if 0 ≤ x ∧ x ≤ N then
-    poch (α + 1) x.toNat * poch (β + 1) (N - x.toNat) /
+    pochhammer (α + 1) x.toNat * pochhammer (β + 1) (N - x.toNat) /
       ((x.toNat.factorial : ℂ) * (N - x.toNat).factorial)
   else 0
 
 /-- The Hahn weight at a point of its natural support. -/
 theorem hahnWeightInt_nat (α β : ℂ) {N x : ℕ} (hx : x ≤ N) :
-    hahnWeightInt α β N x = poch (α + 1) x * poch (β + 1) (N - x) /
+    hahnWeightInt α β N x = pochhammer (α + 1) x * pochhammer (β + 1) (N - x) /
       ((x.factorial : ℂ) * (N - x).factorial) := by
   simp [hahnWeightInt, hx]
 
@@ -65,27 +65,27 @@ private lemma hahnWeightInt_shift (α β : ℂ) (N : ℕ) (x : ℤ) :
     · rw [hahnWeightInt_nat _ _ hxN, hahnWeightInt_nat _ _ (by omega : x ≤ N + 1)]
       have hsub : N + 1 - x = (N - x) + 1 := by omega
       rw [hsub, Nat.factorial_succ]
-      have hA := poch_succ_left (α + 1) x
-      have hB := poch_succ_left (β + 1) (N - x)
-      rw [poch_succ] at hA
+      have hA := pochhammer_succ_left (α + 1) x
+      have hB := pochhammer_succ_left (β + 1) (N - x)
+      rw [pochhammer_succ] at hA
       have hN : (N : ℂ) + 1 - x = (N - x : ℕ) + 1 := by push_cast [Nat.cast_sub hxN]; ring
       push_cast
       rw [hN]
       calc
-        _ = ((α + 1) * poch (α + 1 + 1) x) *
-            ((β + 1) * poch (β + 1 + 1) (N - x)) /
+        _ = ((α + 1) * pochhammer (α + 1 + 1) x) *
+            ((β + 1) * pochhammer (β + 1 + 1) (N - x)) /
               ((x.factorial : ℂ) * (N - x).factorial) := by ring
-        _ = (poch (α + 1) x * (α + 1 + x)) * poch (β + 1) (N - x + 1) /
+        _ = (pochhammer (α + 1) x * (α + 1 + x)) * pochhammer (β + 1) (N - x + 1) /
               ((x.factorial : ℂ) * (N - x).factorial) := by rw [← hA, ← hB]
         _ = _ := by
           have hj : ((N - x : ℕ) : ℂ) + 1 ≠ 0 := by exact_mod_cast (N - x).succ_ne_zero
           rw [show (x.factorial : ℂ) * ((((N - x : ℕ) : ℂ) + 1) * (N - x).factorial) =
             (((N - x : ℕ) : ℂ) + 1) * ((x.factorial : ℂ) * (N - x).factorial) by ring]
           rw [show ((x : ℂ) + α + 1) * (((N - x : ℕ) : ℂ) + 1) *
-              (poch (α + 1) x * poch (β + 1) (N - x + 1) /
+              (pochhammer (α + 1) x * pochhammer (β + 1) (N - x + 1) /
                 ((((N - x : ℕ) : ℂ) + 1) * ((x.factorial : ℂ) * (N - x).factorial))) =
             ((x : ℂ) + α + 1) *
-              ((((N - x : ℕ) : ℂ) + 1) * (poch (α + 1) x * poch (β + 1) (N - x + 1)) /
+              ((((N - x : ℕ) : ℂ) + 1) * (pochhammer (α + 1) x * pochhammer (β + 1) (N - x + 1)) /
                 ((((N - x : ℕ) : ℂ) + 1) * ((x.factorial : ℂ) * (N - x).factorial))) by ring,
             mul_div_mul_left _ _ hj]
           ring
@@ -117,18 +117,18 @@ private lemma hahnWeightInt_shift_sub_one (α β : ℂ) (N : ℕ) (x : ℤ) :
       · rw [hahnWeightInt_nat _ _ hxN,
           hahnWeightInt_nat _ _ (by omega : x + 1 ≤ N + 1)]
         rw [show N + 1 - (x + 1) = N - x by omega, Nat.factorial_succ]
-        have hA := poch_succ_left (α + 1) x
-        have hB := poch_succ_left (β + 1) (N - x)
-        rw [poch_succ] at hB
+        have hA := pochhammer_succ_left (α + 1) x
+        have hB := pochhammer_succ_left (β + 1) (N - x)
+        rw [pochhammer_succ] at hB
         have hN : (N : ℂ) + β + 2 - (x + 1) = β + 1 + (N - x : ℕ) := by
           push_cast [Nat.cast_sub hxN]; ring
         push_cast
         rw [hN]
         calc
-          _ = ((α + 1) * poch (α + 1 + 1) x) *
-              ((β + 1) * poch (β + 1 + 1) (N - x)) /
+          _ = ((α + 1) * pochhammer (α + 1 + 1) x) *
+              ((β + 1) * pochhammer (β + 1 + 1) (N - x)) /
                 ((x.factorial : ℂ) * (N - x).factorial) := by ring
-          _ = poch (α + 1) (x + 1) * (poch (β + 1) (N - x) * (β + 1 + (N - x : ℕ))) /
+          _ = pochhammer (α + 1) (x + 1) * (pochhammer (β + 1) (N - x) * (β + 1 + (N - x : ℕ))) /
                 ((x.factorial : ℂ) * (N - x).factorial) := by rw [← hA, ← hB]
           _ = _ := by
             field_simp [Nat.cast_ne_zero.mpr x.factorial_ne_zero,
@@ -186,14 +186,14 @@ private lemma hahn_rodrigues_step {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < �
 For `n ≤ N` it has support `0 ≤ x ≤ N-n` and equals the original weight times the product
 of the `n` shifted forward coefficients. -/
 def hahnRodriguesWeight (α β : ℂ) (N n : ℕ) (x : ℤ) : ℂ :=
-  poch (α + 1) n * poch (β + 1) n * hahnWeightInt (α + n) (β + n) (N - n) x
+  pochhammer (α + 1) n * pochhammer (β + 1) n * hahnWeightInt (α + n) (β + n) (N - n) x
 
 /-- Consecutive shifted Hahn weights, retaining the finite support exactly. -/
 private lemma hahnRodriguesWeight_succ (α β : ℂ) (N n : ℕ) :
     hahnRodriguesWeight α β (N + 1) (n + 1) =
       ((α + 1) * (β + 1)) • hahnRodriguesWeight (α + 1) (β + 1) N n := by
   funext x
-  simp only [hahnRodriguesWeight, Pi.smul_apply, smul_eq_mul, poch_succ_left,
+  simp only [hahnRodriguesWeight, Pi.smul_apply, smul_eq_mul, pochhammer_succ_left,
     Nat.add_sub_add_right, Nat.cast_add, Nat.cast_one]
   rw [show α + ((n : ℂ) + 1) = (α + 1) + n by ring,
     show β + ((n : ℂ) + 1) = (β + 1) + n by ring]
@@ -204,20 +204,20 @@ forward coefficients, expressed by two Pochhammer symbols. This identity is vali
 at both endpoints and outside the support as well. -/
 theorem hahnRodriguesWeight_eq (α β : ℂ) {N n : ℕ} (hn : n ≤ N) (x : ℤ) :
     hahnRodriguesWeight α β N n x = hahnWeightInt α β N x *
-      poch ((x : ℂ) + α + 1) n * (-1 : ℂ) ^ n * poch ((x : ℂ) - N) n := by
+      pochhammer ((x : ℂ) + α + 1) n * (-1 : ℂ) ^ n * pochhammer ((x : ℂ) - N) n := by
   induction n generalizing α β N with
-  | zero => simp [hahnRodriguesWeight, poch_zero]
+  | zero => simp [hahnRodriguesWeight, pochhammer_zero]
   | succ n ih =>
     cases N with
     | zero => omega
     | succ N =>
       rw [hahnRodriguesWeight_succ, Pi.smul_apply, smul_eq_mul, ih (α + 1) (β + 1) (by omega),
-        poch_succ_left, poch_succ_left, pow_succ]
+        pochhammer_succ_left, pochhammer_succ_left, pow_succ]
       push_cast
       rw [show (x : ℂ) + (α + 1) + 1 = ((x : ℂ) + α + 1) + 1 by ring,
         show (x : ℂ) - ((N : ℂ) + 1) + 1 = (x : ℂ) - N by ring]
-      linear_combination (poch ((x : ℂ) + α + 1 + 1) n * (-1 : ℂ) ^ n *
-        poch ((x : ℂ) - N) n) * hahnWeightInt_shift α β N x
+      linear_combination (pochhammer ((x : ℂ) + α + 1 + 1) n * (-1 : ℂ) ^ n *
+        pochhammer ((x : ℂ) - N) n) * hahnWeightInt_shift α β N x
 
 /-- Hahn's finite Rodrigues formula for all integer arguments, including the support
 endpoints. It uses the existing hypergeometric normalization and complex parameters
@@ -225,11 +225,11 @@ with real parts greater than `-1`. -/
 theorem hahn_rodrigues {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re)
     {N n : ℕ} (hn : n ≤ N) (x : ℤ) :
     (fwdDiff (-1 : ℤ))^[n] (hahnRodriguesWeight α β N n) x =
-      poch (α + 1) n * poch (-(N : ℂ)) n * hahnWeightInt α β N x *
+      pochhammer (α + 1) n * pochhammer (-(N : ℂ)) n * hahnWeightInt α β N x *
         hahn α β N n (x : ℂ) := by
   induction n generalizing α β N x with
   | zero =>
-    simp [hahnRodriguesWeight, hahn, terminatingHG, poch_zero]
+    simp [hahnRodriguesWeight, hahn, terminatingHypergeometric, pochhammer_zero]
   | succ n ih =>
     cases N with
     | zero => omega
@@ -238,17 +238,17 @@ theorem hahn_rodrigues {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re)
       have hα' : -1 < (α + 1).re := by simp; linarith
       have hβ' : -1 < (β + 1).re := by simp; linarith
       have hi : (fwdDiff (-1 : ℤ))^[n] (hahnRodriguesWeight (α + 1) (β + 1) N n) =
-          (poch (α + 1 + 1) n * poch (-(N : ℂ)) n) •
+          (pochhammer (α + 1 + 1) n * pochhammer (-(N : ℂ)) n) •
             (fun x : ℤ => hahnWeightInt (α + 1) (β + 1) N x *
               hahn (α + 1) (β + 1) N n (x : ℂ)) := by
         funext x
         simpa only [Pi.smul_apply, smul_eq_mul, mul_assoc] using ih hα' hβ' hnN x
       rw [hahnRodriguesWeight_succ, fwdDiff_iter_const_smul, Pi.smul_apply, smul_eq_mul,
         Function.iterate_succ_apply', hi, fwdDiff_const_smul, Pi.smul_apply, smul_eq_mul,
-        poch_succ_left, poch_succ_left]
+        pochhammer_succ_left, pochhammer_succ_left]
       push_cast
       rw [show -((N : ℂ) + 1) + 1 = -(N : ℂ) by ring]
-      linear_combination ((α + 1) * poch (α + 1 + 1) n * poch (-(N : ℂ)) n) *
+      linear_combination ((α + 1) * pochhammer (α + 1 + 1) n * pochhammer (-(N : ℂ)) n) *
         hahn_rodrigues_step hα hβ hnN x
 
 end DLMF.OrthogonalPolynomials

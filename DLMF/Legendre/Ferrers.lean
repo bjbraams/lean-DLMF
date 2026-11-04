@@ -14,8 +14,9 @@ public import DLMF.Hypergeometric.AnalyticProperties
 
 The Ferrers function `𝖯^μ_ν(x) = ((1+x)/(1-x))^{μ/2} 𝐅(ν+1, -ν; 1-μ; (1-x)/2)` on `(-1, 1)`
 (DLMF 14.3.1): the integer-order formula. The associated Legendre equation `ferrersP_ode`, the
-value `ferrersP_zero` at `μ = 0` and DLMF 15.2.3_5 on the cut plane (`regularizedGaussHG_neg_nat`)
-are in `DLMF.Legendre.Basic.Properties` and `DLMF.Hypergeometric.Basic.CutPlane`.
+value `ferrersP_zero` at `μ = 0` and DLMF 15.2.3_5 on the cut plane
+(`regularizedGaussHypergeometric_neg_nat`) are in `DLMF.Legendre.Basic.Properties` and
+`DLMF.Hypergeometric.Basic.CutPlane`.
 
 ## Main results
 
@@ -40,7 +41,7 @@ theorem ferrersP_nat (ν : ℂ) (m : ℕ) {x : ℝ} (hx : x ∈ Set.Ioo (-1 : �
   have hw := mem_cutPlane_of_one_add hs
   rw [iteratedDeriv_legendreP ν m hs]
   rcases m with _ | m
-  · simp [ferrersP_zero ν hx.1, legendreP, poch_zero]
+  · simp [ferrersP_zero ν hx.1, legendreP, pochhammer_zero]
   have h1 : (0 : ℝ) < 1 + x := by linarith [hx.1]
   have h2 : (0 : ℝ) < 1 - x := by linarith [hx.2]
   set k : ℕ := m + 1 with hk
@@ -55,7 +56,8 @@ theorem ferrersP_nat (ν : ℂ) (m : ℕ) {x : ℝ} (hx : x ∈ Set.Ioo (-1 : �
     field_simp
   have hwc : ((((1 - x) / 2 : ℝ)) : ℂ) ∈ cutPlane := by push_cast; exact hw
   rw [ferrersP, show (1 : ℂ) - (k : ℕ) = -(m : ℂ) by rw [hk]; push_cast; ring,
-    regularizedGaussHG_neg_nat _ _ _ hw, regularizedGaussHG_symm (-ν + (k : ℕ)) _ _ hw]
+    regularizedGaussHypergeometric_neg_nat _ _ _ hw,
+        regularizedGaussHypergeometric_symm (-ν + (k : ℕ)) _ _ hw]
   have hc : (((1 + x) / (1 - x) : ℝ) : ℂ) ^ (((k : ℕ) : ℂ) / 2) =
       (((1 + x) / (1 - x)) ^ ((k : ℝ) / 2) : ℝ) := by
     rw [ofReal_cpow (by positivity)]; push_cast; ring_nf
@@ -68,10 +70,11 @@ theorem ferrersP_nat (ν : ℂ) (m : ℕ) {x : ℝ} (hx : x ∈ Set.Ioo (-1 : �
   rw [← hk]
   have hneg : ((-1 : ℂ)) ^ k * (-1 / 2) ^ k = 1 / 2 ^ k := by
     rw [← mul_pow, one_div, ← inv_pow]; norm_num
-  linear_combination (poch (ν + 1) k * poch (-ν) k *
-    regularizedGaussHG (ν + 1 + m + 1) (-ν + m + 1) (m + 2) ((1 - (x : ℂ)) / 2)) * hreal' -
-    (((1 - x ^ 2) ^ ((k : ℝ) / 2) : ℝ) : ℂ) * poch (ν + 1) k * poch (-ν) k *
-    regularizedGaussHG (ν + 1 + m + 1) (-ν + m + 1) (m + 2) ((1 - (x : ℂ)) / 2) * hneg
+  linear_combination (pochhammer (ν + 1) k * pochhammer (-ν) k *
+    regularizedGaussHypergeometric (ν + 1 + m + 1) (-ν + m + 1) (m + 2)
+        ((1 - (x : ℂ)) / 2)) * hreal' -
+    (((1 - x ^ 2) ^ ((k : ℝ) / 2) : ℝ) : ℂ) * pochhammer (ν + 1) k * pochhammer (-ν) k *
+    regularizedGaussHypergeometric (ν + 1 + m + 1) (-ν + m + 1) (m + 2) ((1 - (x : ℂ)) / 2) * hneg
 
 end DLMF.Legendre
 

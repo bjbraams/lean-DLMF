@@ -294,14 +294,14 @@ theorem CylinderIntegrals.sq_cpow_neg_half {x : ℝ} (hx : 0 < x) : ((x^2:ℝ):�
 
 /-- DLMF 12.5.2 for real positive argument. -/
 theorem CylinderIntegrals.U_real_2 {a : ℂ} (ha : -1/2 < a.re) {x : ℝ} (hx : 0 < x) :
-    pcfU a x = x * exp (-(x:ℂ)^2/4) / Gamma (a/2+1/4) *
+    parabolicCylinderU a x = x * exp (-(x:ℂ)^2/4) / Gamma (a/2+1/4) *
         CylinderIntegrals.laplaceIntegral (a/2+1/4) (-a/2-3/4) (x^2) := by
   have hα : 0 < (a/2+1/4).re := by simp; linarith
   have hre : 0 < (x:ℂ).re := by simpa using hx
   have hb : (0:ℝ) < x^2/2 := by positivity
   have hw : (0:ℝ) < ((x:ℂ)^2/2).re := by
     rw [show (x:ℂ)^2/2 = ((x^2/2:ℝ):ℂ) by push_cast; ring, ofReal_re]; exact hb
-  rw [pcfU_eq_kummerU a hre, kummerU_laplace hα hw,
+  rw [parabolicCylinderU_eq_kummerU a hre, kummerU_laplace hα hw,
     show (x:ℂ)^2/2 = ((x^2/2:ℝ):ℂ) by push_cast; ring,
     show (1/2:ℂ) - (a/2+1/4) - 1 = -a/2-3/4 by ring, CylinderIntegrals.laplace_scale _ _ hb,
     show 2*(x^2/2) = x^2 by ring]
@@ -316,14 +316,14 @@ theorem CylinderIntegrals.U_real_2 {a : ℂ} (ha : -1/2 < a.re) {x : ℝ} (hx : 
 
 /-- DLMF 12.5.3 for real positive argument. -/
 theorem CylinderIntegrals.U_real_3 {a : ℂ} (ha : -3/2 < a.re) {x : ℝ} (hx : 0 < x) :
-    pcfU a x = exp (-(x:ℂ)^2/4) / Gamma (a/2+3/4) *
+    parabolicCylinderU a x = exp (-(x:ℂ)^2/4) / Gamma (a/2+3/4) *
         CylinderIntegrals.laplaceIntegral (a/2+3/4) (-a/2-1/4) (x^2) := by
   have hα : 0 < (a/2+3/4).re := by simp; linarith
   have hre : 0 < (x:ℂ).re := by simpa using hx
   have hb : (0:ℝ) < x^2/2 := by positivity
   have hw : (0:ℝ) < ((x:ℂ)^2/2).re := by
     rw [show (x:ℂ)^2/2 = ((x^2/2:ℝ):ℂ) by push_cast; ring, ofReal_re]; exact hb
-  rw [pcfU_kummerU_odd a hre, kummerU_laplace hα hw,
+  rw [parabolicCylinderU_kummerU_odd a hre, kummerU_laplace hα hw,
     show (x:ℂ)^2/2 = ((x^2/2:ℝ):ℂ) by push_cast; ring,
     show (3/2:ℂ) - (a/2+3/4) - 1 = -a/2-1/4 by ring, CylinderIntegrals.laplace_scale _ _ hb,
     show 2*(x^2/2) = x^2 by ring]
@@ -366,9 +366,11 @@ theorem CylinderIntegrals.differentiableOn_comp {c : ℂ} (hc : 0 < c.re) (p : �
 
 
 /-- `𝐅(a,b;c;0) = 1/Γ(c)` for every `c` (both sides vanish at the poles of `Γ`). -/
-theorem CylinderIntegrals.regularizedGaussHG_zero (a b c : ℂ) : regularizedGaussHG a b c 0 =
+theorem CylinderIntegrals.regularizedGaussHypergeometric_zero (a b c : ℂ) :
+    regularizedGaussHypergeometric a b c 0 =
     (Gamma c)⁻¹ := by
-  rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ (by simp), regularizedGaussHGFun_eq_tsum,
+  rw [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ (by simp),
+      regularizedGaussHypergeometricFun_eq_tsum,
     tsum_eq_single 0 (fun n hn => by simp [zero_pow hn])]
   simp
 
@@ -403,12 +405,12 @@ theorem CylinderIntegrals.sq_cpow {t : ℝ} (ht : 0 < t) (s : ℂ) : ((t^2:ℝ):
 
 /-- The integrand of DLMF 12.12.1 in terms of the Laplace kernel of Kummer's `U`. -/
 theorem CylinderIntegrals.integrand_1 (μ a : ℂ) {t : ℝ} (ht : 0 < t) :
-    exp (-t^2/4) * (t:ℂ)^(μ-1) * pcfU a t =
+    exp (-t^2/4) * (t:ℂ)^(μ-1) * parabolicCylinderU a t =
       (2:ℂ)^(-(1/4)-a/2) * (2:ℂ)^(μ/2-1) *
         ((t:ℂ) * tricomiLaplaceKernel (a/2+1/4) (μ/2) (1/2) 1 (t^2/2)) := by
   have hre : 0 < (t:ℂ).re := by simpa using ht
   have ht0 : (t:ℂ) ≠ 0 := ofReal_ne_zero.mpr ht.ne'
-  rw [pcfU_eq_kummerU a hre, tricomiLaplaceKernel, show (t:ℂ)^2/2 =
+  rw [parabolicCylinderU_eq_kummerU a hre, tricomiLaplaceKernel, show (t:ℂ)^2/2 =
       ((t^2/2:ℝ):ℂ) by push_cast; ring]
   have key := CylinderIntegrals.cpow_sq_half_mul_cpow_sq ht (1-μ/2) 0
   rw [neg_zero, cpow_zero, mul_one, sub_zero, neg_sub, CylinderIntegrals.sq_cpow ht] at key
@@ -425,12 +427,12 @@ theorem CylinderIntegrals.integrand_1 (μ a : ℂ) {t : ℝ} (ht : 0 < t) :
 
 /-- The integrand of DLMF 12.12.2 in terms of the Laplace kernel of Kummer's `U` at `z = 2`. -/
 theorem CylinderIntegrals.integrand_2 (μ a : ℂ) {t : ℝ} (ht : 0 < t) :
-    exp (-3*t^2/4) * (t:ℂ)^(μ-1) * pcfU a t =
+    exp (-3*t^2/4) * (t:ℂ)^(μ-1) * parabolicCylinderU a t =
       (2:ℂ)^(-(1/4)-a/2) * (2:ℂ)^(μ/2-1) *
         ((t:ℂ) * tricomiLaplaceKernel (a/2+1/4) (μ/2) (1/2) 2 (t^2/2)) := by
   have hre : 0 < (t:ℂ).re := by simpa using ht
   have ht0 : (t:ℂ) ≠ 0 := ofReal_ne_zero.mpr ht.ne'
-  rw [pcfU_eq_kummerU a hre, tricomiLaplaceKernel, show (t:ℂ)^2/2 =
+  rw [parabolicCylinderU_eq_kummerU a hre, tricomiLaplaceKernel, show (t:ℂ)^2/2 =
       ((t^2/2:ℝ):ℂ) by push_cast; ring]
   have key := CylinderIntegrals.cpow_sq_half_mul_cpow_sq ht (1-μ/2) 0
   rw [neg_zero, cpow_zero, mul_one, sub_zero, neg_sub, CylinderIntegrals.sq_cpow ht] at key
@@ -458,14 +460,15 @@ theorem CylinderIntegrals.laplace_two {b : ℂ} (hb : 0 < b.re) :
   have hw : 1 - (2:ℂ) ∈ DLMF.Hypergeometric.cutPlane := by
     change 1 - (1 - (2:ℂ)) ∈ slitPlane
     rw [sub_sub_cancel]; exact Or.inl (by simp)
-  have hp := DLMF.Hypergeometric.regularizedGaussHG_pfaff b (b - 1/2 + 1) (-b + b - 1/2 + 1) hw
-  have hs := DLMF.Hypergeometric.regularizedGaussHG_symm b (-b) (-b + b - 1/2 + 1)
+  have hp := DLMF.Hypergeometric.regularizedGaussHypergeometric_pfaff b (b - 1/2 + 1)
+      (-b + b - 1/2 + 1) hw
+  have hs := DLMF.Hypergeometric.regularizedGaussHypergeometric_symm b (-b) (-b + b - 1/2 + 1)
     (DLMF.Hypergeometric.div_sub_one_mem_cutPlane hw)
   rw [show (1 - (2:ℂ)) / (1 - 2 - 1) = 1/2 by norm_num] at hp hs
   rw [sub_sub_cancel, show (-b + b - 1/2 + 1) - (b - 1/2 + 1) = -b by ring] at hp
   rw [hp, hs, show -b + b - 1/2 + 1 = (1/2:ℂ) by ring,
-    regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ (by norm_num),
-    regularizedGaussHGFun_eq_div_Gamma (fun k h => by
+    regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ (by norm_num),
+    regularizedGaussHypergeometricFun_eq_div_Gamma (fun k h => by
       have := congrArg re h; simp at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)])]
   have hsin : ((Real.sin (π/4) : ℂ))^2 = 1/2 := by
     rw [Real.sin_pi_div_four]; push_cast
@@ -574,7 +577,7 @@ theorem CylinderIntegrals.barnesIntegrand_real_point (a : ℂ) {x : ℝ} (hx : 0
 theorem CylinderIntegrals.barnesIntegrand_real (a : ℂ) {c : ℝ} (hc : 0 < c) (hca : 2*c < 1/2 + a.re)
     {x : ℝ} (hx : 0 < x) :
     ∫ y, CylinderIntegrals.barnesIntegrand a x c y =
-        2*π*Gamma (1/2+1*a)*(exp ((x:ℂ)^2/4)*(x:ℂ)^(a+1/2))*pcfU a x := by
+        2*π*Gamma (1/2+1*a)*(exp ((x:ℂ)^2/4)*(x:ℂ)^(a+1/2))*parabolicCylinderU a x := by
   set α : ℂ := a/2+1/4 with hα
   have hX : (0:ℝ) < x^2/2 := by positivity
   have hb := kummerU_barnes (a := α) (b := 1/2) (σ := -c) hX (by simp [hα]; linarith)
@@ -615,7 +618,8 @@ theorem CylinderIntegrals.barnesIntegrand_real (a : ℂ) {c : ℝ} (hc : 0 < c) 
   have hQ : (2:ℂ)^α ≠ 0 := by rw [Ne, cpow_eq_zero_iff]; simp
   have hR : (x:ℂ)^(a+1/2) ≠ 0 := by
     rw [Ne, cpow_eq_zero_iff]; simp [hx.ne']
-  rw [pcfU_eq_kummerU a hre, show (x:ℂ)^2/2 = ((x^2/2:ℝ):ℂ) by push_cast; ring, hb, hXa,
+  rw [parabolicCylinderU_eq_kummerU a hre, show (x:ℂ)^2/2 = ((x^2/2:ℝ):ℂ) by
+      push_cast; ring, hb, hXa,
     show 1 + α - 1/2 = α + 1/2 by ring] at *
   simp only [Kc]
   rw [show 1 + α - 1/2 = α + 1/2 by ring, hd, h1, h2, h3]
@@ -728,25 +732,26 @@ theorem CylinderIntegrals.barnesIntegrand_integral (a : ℂ) {z : ℂ} (hz0 : z 
     (hz : |arg z| < 3*π/4) {c : ℝ}
     (hc : 0 < c) (hca : 2*c < 1/2 + a.re) :
     ∫ y, CylinderIntegrals.barnesIntegrand a z c y =
-        2*π*Gamma (1/2+1*a)*(exp (z^2/4)*z^(a+1/2))*pcfU a z := by
+        2*π*Gamma (1/2+1*a)*(exp (z^2/4)*z^(a+1/2))*parabolicCylinderU a z := by
   have hF := (CylinderIntegrals.barnesIntegrand_differentiableOn a hc hca).analyticOnNhd
       CylinderIntegrals.isOpen_barnesSector
-  have hG : AnalyticOnNhd ℂ (fun z => 2*π*Gamma (1/2+1*a)*(exp (z^2/4)*z^(a+1/2))*pcfU a z)
+  have hG : AnalyticOnNhd ℂ
+      (fun z => 2*π*Gamma (1/2+1*a)*(exp (z^2/4)*z^(a+1/2))*parabolicCylinderU a z)
       CylinderIntegrals.barnesSector := by
     refine DifferentiableOn.analyticOnNhd (fun z hz => ?_) CylinderIntegrals.isOpen_barnesSector
     refine DifferentiableAt.differentiableWithinAt ?_
     exact ((differentiableAt_const _).mul ((((differentiableAt_id.pow 2).div_const 4).cexp).mul
-      (differentiableAt_id.cpow_const hz.1))).mul ((pcfU_entire a) z)
+      (differentiableAt_id.cpow_const hz.1))).mul ((parabolicCylinderU_entire a) z)
   have h1 : (1:ℂ) ∈ CylinderIntegrals.barnesSector :=
       CylinderIntegrals.mem_barnesSector one_ne_zero (by simp; positivity)
   have hfreq : ∃ᶠ w in 𝓝[≠] (1:ℂ), (∫ y, CylinderIntegrals.barnesIntegrand a w c y) =
-      2*π*Gamma (1/2+1*a)*(exp (w^2/4)*w^(a+1/2))*pcfU a w := by
+      2*π*Gamma (1/2+1*a)*(exp (w^2/4)*w^(a+1/2))*parabolicCylinderU a w := by
     have hmap : Tendsto (fun x : ℝ => (x:ℂ)) (𝓝[≠] (1:ℝ)) (𝓝[≠] (1:ℂ)) := by
       have := continuous_ofReal.continuousWithinAt.tendsto_nhdsWithin (s := {(1:ℝ)}ᶜ)
         (t := {(1:ℂ)}ᶜ) (x := 1) (fun x hx h => hx (by simp at h ⊢; exact_mod_cast h))
       simpa using this
     have hev : ∀ᶠ x : ℝ in 𝓝[≠] (1:ℝ), (∫ y, CylinderIntegrals.barnesIntegrand a (x:ℂ) c y) =
-        2*π*Gamma (1/2+1*a)*(exp ((x:ℂ)^2/4)*(x:ℂ)^(a+1/2))*pcfU a x := by
+        2*π*Gamma (1/2+1*a)*(exp ((x:ℂ)^2/4)*(x:ℂ)^(a+1/2))*parabolicCylinderU a x := by
       filter_upwards [nhdsWithin_le_nhds (lt_mem_nhds (show (0:ℝ) < 1 by norm_num))] with x hx
       exact CylinderIntegrals.barnesIntegrand_real a hc hca hx
     exact hmap.frequently hev.frequently

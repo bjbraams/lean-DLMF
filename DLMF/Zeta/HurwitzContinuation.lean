@@ -72,7 +72,7 @@ noncomputable section
 
 namespace DLMF.Zeta
 
-open DLMF.Hypergeometric (poch poch_succ poch_zero)
+open DLMF.Hypergeometric (pochhammer pochhammer_succ pochhammer_zero)
 
 /-- The project's `hurwitzZetaComplex` is the Euler–Maclaurin limit for any admissible `M`. -/
 private lemma hurwitzZetaComplex_eq_limUnder_eulerMaclaurinSeq' {M : ℕ} {s z : ℂ} (hs : s ≠ 1)
@@ -104,9 +104,9 @@ private lemma hasDerivAt_add_cpow {w c : ℂ} (n : ℂ) (h : w + n ∈ slitPlane
 `eulerMaclaurinCoeff s k * (-s - (2 * k + 1)) = -s * eulerMaclaurinCoeff (s + 1) k`. -/
 private lemma eulerMaclaurinCoeff_mul_eq (s : ℂ) (k : ℕ) :
     eulerMaclaurinCoeff s k * (-s - (2 * k + 1)) = -s * eulerMaclaurinCoeff (s + 1) k := by
-  have h : poch s (2 * k + 1 + 1) = s * poch (s + 1) (2 * k + 1) := by
-    simp [poch, ascPochhammer_succ_left, Polynomial.eval_comp]
-  rw [poch_succ] at h
+  have h : pochhammer s (2 * k + 1 + 1) = s * pochhammer (s + 1) (2 * k + 1) := by
+    simp [pochhammer, ascPochhammer_succ_left, Polynomial.eval_comp]
+  rw [pochhammer_succ] at h
   simp only [eulerMaclaurinCoeff]
   push_cast at h ⊢
   linear_combination (-(bernoulli (2 * k + 2) : ℂ) / ((2 * k + 2)! : ℂ)) * h
@@ -291,7 +291,7 @@ private lemma continuous_subOneMulEulerMaclaurinSeq (M : ℕ) {a : ℂ}
       (differentiableAt_id.neg).const_cpow (Or.inl (ha n))) ?_)
       (DifferentiableAt.fun_sum fun k _ => ?_)
     · exact (differentiableAt_id.neg.const_cpow (Or.inl (ha N))).div_const _
-    · exact ((differentiableAt_poch _ s).const_mul _).mul
+    · exact ((differentiableAt_pochhammer _ s).const_mul _).mul
         ((differentiableAt_id.neg.sub (differentiableAt_const _)).const_cpow (Or.inl (ha N)))
   · exact ((differentiableAt_const _).sub differentiableAt_id).const_cpow (Or.inl (ha N))
 

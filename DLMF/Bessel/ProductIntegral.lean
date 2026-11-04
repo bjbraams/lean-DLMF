@@ -340,7 +340,7 @@ theorem besselJ_mul_besselJ_eq_integral (μ ν : ℂ) (hμν : -1 < (μ + ν).re
   refine tsum_congr fun k => ?_
   have hk0 : (0:ℝ) ≤ k := Nat.cast_nonneg k
   have hpos : 0 < (s + k + 1).re := by simp; linarith
-  have hp : Gamma (s + 2 * k + 1) = poch (s + k + 1) k * Gamma (s + 1 + k) := by
+  have hp : Gamma (s + 2 * k + 1) = pochhammer (s + k + 1) k * Gamma (s + 1 + k) := by
     have h := Complex.Gamma_add_nat_div_Gamma_eq (n := k) (s + k + 1) fun m h => by
       have := congrArg Complex.re h; simp at this; linarith [Nat.cast_nonneg (α := ℝ) m]
     have hG : Gamma (s + k + 1) ≠ 0 := Gamma_ne_zero_of_re_pos hpos

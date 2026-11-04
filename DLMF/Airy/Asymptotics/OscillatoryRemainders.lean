@@ -973,9 +973,9 @@ theorem DerivativeRemainders.d_mul_gamma_div (k : ℕ) :
     DerivativeRemainders.d k * Real.Gamma (7 / 6 + k) / Real.Gamma (7 / 6) = (-1) ^ k *
         airyV k * 2 ^ k := by
   have h1 := StieltjesBounds.gamma_ratio_real k (x := 7 / 6) (by norm_num)
-  rw [mul_div_assoc, h1, RotatedExpansions.poch_seven_sixths]
+  rw [mul_div_assoc, h1, RotatedExpansions.pochhammer_seven_sixths]
   unfold DerivativeRemainders.d airyV airyU
-  rw [← RotatedExpansions.poch_neg_sixth]
+  rw [← RotatedExpansions.pochhammer_neg_sixth]
   have hf : (k.factorial : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr k.factorial_ne_zero
   have h6 : (1 - 6 * (k : ℝ)) ≠ 0 := by
     intro h

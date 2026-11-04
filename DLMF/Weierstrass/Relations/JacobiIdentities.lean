@@ -27,8 +27,8 @@ attached to a modulus (DLMF 23.6.27–23.6.29), and the inversion of `℘` by in
 
 * `weierstrassZeta_eq_theta`, `weierstrassP_eq_theta`, `weierstrassSigma_add_halfPeriod_eq_theta`:
   DLMF 23.6.13–23.6.15.
-* `modulus_sq_eq`, `quarterK_sq_eq`, `compEllIntKk_sq_eq`: DLMF 23.6.16–23.6.17, in lattice form
-  for all generators and in the literal principal form.
+* `modulus_sq_eq`, `quarterK_sq_eq`, `completeEllipticK_sq_eq`: DLMF 23.6.16–23.6.17, in lattice
+  form for all generators and in the literal principal form.
 * `e_one_eq_jacobi`, `e_two_eq_jacobi`, `e_three_eq_jacobi`: DLMF 23.6.18–23.6.20.
 * `weierstrassP_sub_e_one_eq_cs`, `weierstrassP_sub_e_two_eq_ds`,
   `weierstrassP_sub_e_three_eq_ns`: DLMF 23.6.21–23.6.23.
@@ -57,7 +57,7 @@ noncomputable section
 
 namespace DLMF.Weierstrass
 
-open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
+open DLMF.EllipticIntegrals (completeEllipticK completeEllipticKPrime)
 
 namespace HalfPeriods
 
@@ -192,11 +192,11 @@ theorem weierstrassSigma_add_halfPeriod_eq_theta (u : ℂ) {j : ℕ}
 /-! ### Jacobian elliptic functions (§23.6(ii)) -/
 
 /-- The lattice quarter period `K = (π/2)θ₃²(0|τ)` of the half-periods. -/
-abbrev quarterK : ℂ := compEllIntKTau H.tau
+abbrev quarterK : ℂ := completeEllipticKOfTau H.tau
 /-- The lattice modulus `k = θ₂²(0|τ)/θ₃²(0|τ)`. -/
-abbrev modulus : ℂ := jacobiModulusTau H.tau
+abbrev modulus : ℂ := jacobiModulusOfTau H.tau
 /-- The lattice complementary modulus `k' = θ₄²(0|τ)/θ₃²(0|τ)`. -/
-abbrev comodulus : ℂ := jacobiComodulusTau H.tau
+abbrev comodulus : ℂ := jacobiComodulusOfTau H.tau
 
 /-- DLMF 23.6.16: `k² = (e₂ - e₃)/(e₁ - e₃)` and `k'² = (e₁ - e₂)/(e₁ - e₃)`. -/
 @[dlmf 23.6.E16]
@@ -211,7 +211,7 @@ theorem modulus_sq_eq :
   have hω := H.ω₁_ne_zero
   have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
   rw [show H.e 2 - H.e 3 = (H.e 1 - H.e 3) - (H.e 1 - H.e 2) by ring, d3, d2,
-    modulus, comodulus, jacobiModulusTau, jacobiComodulusTau]
+    modulus, comodulus, jacobiModulusOfTau, jacobiComodulusOfTau]
   constructor
   · field_simp
     linear_combination -hj
@@ -224,12 +224,13 @@ fails for some generator pairs; with the lattice `K = (π/2)θ₃²(0|τ)` it ho
 @[dlmf 23.6.E17]
 theorem quarterK_sq_eq :
     H.quarterK ^ 2 = H.ω₁ ^ 2 * (H.e 1 - H.e 3) ∧
-      compEllIntKpTau H.tau ^ 2 = H.ω₃ ^ 2 * (H.e 3 - H.e 1) := by
+      completeEllipticKPrimeOfTau H.tau ^ 2 = H.ω₃ ^ 2 * (H.e 3 - H.e 1) := by
   obtain ⟨d3, -⟩ := H.e_one_sub_e_three_and_e_one_sub_e_two
   have hω := H.ω₁_ne_zero
   constructor
-  · rw [d3, quarterK, compEllIntKTau]; field_simp
-  · rw [show H.e 3 - H.e 1 = -(H.e 1 - H.e 3) by ring, d3, compEllIntKpTau, compEllIntKTau,
+  · rw [d3, quarterK, completeEllipticKOfTau]; field_simp
+  · rw [show H.e 3 - H.e 1 = -(H.e 1 - H.e 3) by ring, d3, completeEllipticKPrimeOfTau,
+                                                   completeEllipticKOfTau,
       HalfPeriods.tau]
     field_simp
     rw [I_sq]
@@ -242,18 +243,18 @@ Corrected from the printed DLMF formula: with the principal `K(k)` the printed i
 for some pairs of generators, so the hypothesis `τ = iK'(k)/K(k)` is added; the lattice form
 `quarterK_sq_eq` holds for every pair (see the module docstring). -/
 @[dlmf 23.6.E17]
-theorem compEllIntKk_sq_eq {k : ℂ} (hk : k ∈ jacobiModulusDomain) (hτ : jacobiTauk k = H.tau) :
-    compEllIntKk k ^ 2 = H.ω₁ ^ 2 * (H.e 1 - H.e 3) ∧
-      compEllIntKpk k ^ 2 = H.ω₃ ^ 2 * (H.e 3 - H.e 1) := by
+theorem completeEllipticK_sq_eq {k : ℂ} (hk : k ∈ jacobiModulusDomain) (hτ : jacobiTau k = H.tau) :
+    completeEllipticK k ^ 2 = H.ω₁ ^ 2 * (H.e 1 - H.e 3) ∧
+      completeEllipticKPrime k ^ 2 = H.ω₃ ^ 2 * (H.e 3 - H.e 1) := by
   obtain ⟨-, -, hK⟩ := jacobi_inversion_k hk
   rw [hτ] at hK
   obtain ⟨q1, q2⟩ := H.quarterK_sq_eq
-  have hK0 : compEllIntKk k ≠ 0 := by
-    rw [← hK, compEllIntKTau]
+  have hK0 : completeEllipticK k ≠ 0 := by
+    rw [← hK, completeEllipticKOfTau]
     exact mul_ne_zero (by simp [Real.pi_ne_zero])
         (pow_ne_zero _ (jacobiThetaThreeTau_zero_ne_zero H.tau_im_pos))
-  have hKp : compEllIntKpk k = compEllIntKpTau H.tau := by
-    rw [compEllIntKpTau, hK, ← hτ, jacobiTauk]
+  have hKp : completeEllipticKPrime k = completeEllipticKPrimeOfTau H.tau := by
+    rw [completeEllipticKPrimeOfTau, hK, ← hτ, jacobiTau]
     field_simp
     rw [I_sq]; ring
   refine ⟨?_, ?_⟩
@@ -270,7 +271,7 @@ theorem e_one_eq_jacobi :
   obtain ⟨n2, n3, n4⟩ := jacobiThetaNullTau_ne_zero H.tau_im_pos
   simp only [jacobiThetaTwoNullTau, jacobiThetaThreeNullTau, jacobiThetaFourNullTau] at n2 n3 n4
   have hω := H.ω₁_ne_zero
-  rw [h, quarterK, comodulus, compEllIntKTau, jacobiComodulusTau]
+  rw [h, quarterK, comodulus, completeEllipticKOfTau, jacobiComodulusOfTau]
   field_simp
   linear_combination (-12 : ℂ) * hj
 
@@ -284,7 +285,8 @@ theorem e_two_eq_jacobi :
   obtain ⟨n2, n3, n4⟩ := jacobiThetaNullTau_ne_zero H.tau_im_pos
   simp only [jacobiThetaTwoNullTau, jacobiThetaThreeNullTau, jacobiThetaFourNullTau] at n2 n3 n4
   have hω := H.ω₁_ne_zero
-  rw [h, quarterK, comodulus, modulus, compEllIntKTau, jacobiComodulusTau, jacobiModulusTau]
+  rw [h, quarterK, comodulus, modulus, completeEllipticKOfTau, jacobiComodulusOfTau,
+      jacobiModulusOfTau]
   field_simp
   ring
 
@@ -298,18 +300,18 @@ theorem e_three_eq_jacobi :
   obtain ⟨n2, n3, n4⟩ := jacobiThetaNullTau_ne_zero H.tau_im_pos
   simp only [jacobiThetaTwoNullTau, jacobiThetaThreeNullTau, jacobiThetaFourNullTau] at n2 n3 n4
   have hω := H.ω₁_ne_zero
-  rw [h, quarterK, modulus, compEllIntKTau, jacobiModulusTau]
+  rw [h, quarterK, modulus, completeEllipticKOfTau, jacobiModulusOfTau]
   field_simp
   linear_combination (12 : ℂ) * hj
 
 /-- The Jacobi theta argument at `Kz/ω₁` is `πz/(2ω₁)`. -/
-private lemma jacobiZetaTau_quarterK_mul_div (z : ℂ) :
-    jacobiZetaTau (H.quarterK * z / H.ω₁) H.tau = π * z / (2 * H.ω₁) := by
+private lemma jacobiThetaArgumentOfTau_quarterK_mul_div (z : ℂ) :
+    jacobiThetaArgumentOfTau (H.quarterK * z / H.ω₁) H.tau = π * z / (2 * H.ω₁) := by
   have hω := H.ω₁_ne_zero
   have n3 := (jacobiThetaNullTau_ne_zero H.tau_im_pos).2.1
   simp only [jacobiThetaThreeNullTau] at n3
   have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
-  rw [jacobiZetaTau, quarterK, compEllIntKTau]
+  rw [jacobiThetaArgumentOfTau, quarterK, completeEllipticKOfTau]
   field_simp
 
 /-- `θ₁(w) ≠ 0` at `w = πz/(2ω₁)` for `z ∉ 𝕃`. -/
@@ -322,49 +324,52 @@ theorem jacobiThetaOneTau_pi_mul_div_ne_zero {z : ℂ} (hz : z ∉ H.lattice) :
 @[dlmf 23.6.E21]
 theorem weierstrassP_sub_e_one_eq_cs {z : ℂ} (hz : z ∉ H.lattice) :
     H.weierstrassP z - H.e 1 =
-      H.quarterK ^ 2 / H.ω₁ ^ 2 * jacobiCsTau (H.quarterK * z / H.ω₁) H.tau ^ 2 := by
+      H.quarterK ^ 2 / H.ω₁ ^ 2 * jacobiCsOfTau (H.quarterK * z / H.ω₁) H.tau ^ 2 := by
   have hω := H.ω₁_ne_zero
   have hθ := H.jacobiThetaOneTau_pi_mul_div_ne_zero hz
   obtain ⟨n2, n3, n4⟩ := jacobiThetaNullTau_ne_zero H.tau_im_pos
   simp only [jacobiThetaTwoNullTau, jacobiThetaThreeNullTau, jacobiThetaFourNullTau] at n2 n3 n4
-  rw [H.weierstrassP_sub_e_one_eq_jacobiTheta_sq hz, jacobiCsTau, jacobiPQTau,
-      H.jacobiZetaTau_quarterK_mul_div]
-  simp only [jacobiGlaisher, jacobiLetterTheta, reduceCtorEq, ite_false, quarterK, compEllIntKTau]
+  rw [H.weierstrassP_sub_e_one_eq_jacobiTheta_sq hz, jacobiCsOfTau, jacobiPQOfTau,
+      H.jacobiThetaArgumentOfTau_quarterK_mul_div]
+  simp only [jacobiGlaisher, jacobiLetterTheta, reduceCtorEq, ite_false, quarterK,
+      completeEllipticKOfTau]
   field_simp
 
 /-- DLMF 23.6.22: `℘(z) - e₂ = (K²/ω₁²) ds²(Kz/ω₁, k)`, `z ∉ 𝕃`. -/
 @[dlmf 23.6.E22]
 theorem weierstrassP_sub_e_two_eq_ds {z : ℂ} (hz : z ∉ H.lattice) :
     H.weierstrassP z - H.e 2 =
-      H.quarterK ^ 2 / H.ω₁ ^ 2 * jacobiDsTau (H.quarterK * z / H.ω₁) H.tau ^ 2 := by
+      H.quarterK ^ 2 / H.ω₁ ^ 2 * jacobiDsOfTau (H.quarterK * z / H.ω₁) H.tau ^ 2 := by
   have hω := H.ω₁_ne_zero
   have hθ := H.jacobiThetaOneTau_pi_mul_div_ne_zero hz
   obtain ⟨n2, n3, n4⟩ := jacobiThetaNullTau_ne_zero H.tau_im_pos
   simp only [jacobiThetaTwoNullTau, jacobiThetaThreeNullTau, jacobiThetaFourNullTau] at n2 n3 n4
-  rw [H.weierstrassP_sub_e_two_eq_jacobiTheta_sq hz, jacobiDsTau, jacobiPQTau,
-      H.jacobiZetaTau_quarterK_mul_div]
-  simp only [jacobiGlaisher, jacobiLetterTheta, reduceCtorEq, ite_false, quarterK, compEllIntKTau]
+  rw [H.weierstrassP_sub_e_two_eq_jacobiTheta_sq hz, jacobiDsOfTau, jacobiPQOfTau,
+      H.jacobiThetaArgumentOfTau_quarterK_mul_div]
+  simp only [jacobiGlaisher, jacobiLetterTheta, reduceCtorEq, ite_false, quarterK,
+      completeEllipticKOfTau]
   field_simp
 
 /-- DLMF 23.6.23: `℘(z) - e₃ = (K²/ω₁²) ns²(Kz/ω₁, k)`, `z ∉ 𝕃`. -/
 @[dlmf 23.6.E23]
 theorem weierstrassP_sub_e_three_eq_ns {z : ℂ} (hz : z ∉ H.lattice) :
     H.weierstrassP z - H.e 3 =
-      H.quarterK ^ 2 / H.ω₁ ^ 2 * jacobiNsTau (H.quarterK * z / H.ω₁) H.tau ^ 2 := by
+      H.quarterK ^ 2 / H.ω₁ ^ 2 * jacobiNsOfTau (H.quarterK * z / H.ω₁) H.tau ^ 2 := by
   have hω := H.ω₁_ne_zero
   have hθ := H.jacobiThetaOneTau_pi_mul_div_ne_zero hz
   obtain ⟨n2, n3, n4⟩ := jacobiThetaNullTau_ne_zero H.tau_im_pos
   simp only [jacobiThetaTwoNullTau, jacobiThetaThreeNullTau, jacobiThetaFourNullTau] at n2 n3 n4
-  rw [H.weierstrassP_sub_e_three_eq_jacobiTheta_sq hz, jacobiNsTau, jacobiPQTau,
-      H.jacobiZetaTau_quarterK_mul_div]
-  simp only [jacobiGlaisher, jacobiLetterTheta, reduceCtorEq, ite_false, quarterK, compEllIntKTau]
+  rw [H.weierstrassP_sub_e_three_eq_jacobiTheta_sq hz, jacobiNsOfTau, jacobiPQOfTau,
+      H.jacobiThetaArgumentOfTau_quarterK_mul_div]
+  simp only [jacobiGlaisher, jacobiLetterTheta, reduceCtorEq, ite_false, quarterK,
+      completeEllipticKOfTau]
   field_simp
 
 /-- DLMF 23.6.24: `℘(z + ω₁) - e₁ = (Kk'/ω₁)² sc²(Kz/ω₁, k)`, `z + ω₁ ∉ 𝕃`. -/
 @[dlmf 23.6.E24]
 theorem weierstrassP_add_ω₁_sub_e_one_eq_sc {z : ℂ} (hz : z + H.ω₁ ∉ H.lattice) :
     H.weierstrassP (z + H.ω₁) - H.e 1 =
-      (H.quarterK * H.comodulus / H.ω₁) ^ 2 * jacobiScTau (H.quarterK * z / H.ω₁) H.tau ^ 2 := by
+      (H.quarterK * H.comodulus / H.ω₁) ^ 2 * jacobiScOfTau (H.quarterK * z / H.ω₁) H.tau ^ 2 := by
   have hω := H.ω₁_ne_zero
   have hθ := H.jacobiThetaOneTau_pi_mul_div_ne_zero hz
   obtain ⟨n2, n3, n4⟩ := jacobiThetaNullTau_ne_zero H.tau_im_pos
@@ -376,10 +381,11 @@ theorem weierstrassP_add_ω₁_sub_e_one_eq_sc {z : ℂ} (hz : z + H.ω₁ ∉ H
     rw [(jacobiThetaTwoTau_half_periods _ _).1, add_assoc, add_halves, jacobiThetaOneTau_add_pi]
   rw [(jacobiThetaOneTau_add_sub_half_pi _ _).1] at hθ
   rw [H.weierstrassP_sub_e_one_eq_jacobiTheta_sq hz, hw, a,
-      (jacobiThetaOneTau_add_sub_half_pi _ _).1, jacobiScTau, jacobiPQTau,
-    H.jacobiZetaTau_quarterK_mul_div]
-  simp only [jacobiGlaisher, jacobiLetterTheta, reduceCtorEq, ite_false, quarterK, compEllIntKTau,
-    comodulus, jacobiComodulusTau]
+      (jacobiThetaOneTau_add_sub_half_pi _ _).1, jacobiScOfTau, jacobiPQOfTau,
+    H.jacobiThetaArgumentOfTau_quarterK_mul_div]
+  simp only [jacobiGlaisher, jacobiLetterTheta, reduceCtorEq, ite_false, quarterK,
+      completeEllipticKOfTau,
+    comodulus, jacobiComodulusOfTau]
   field_simp
 
 /-- DLMF 23.6.25: `℘(z + ω₂) - e₂ = -(Kkk'/ω₁)² sd²(Kz/ω₁, k)`, `z + ω₂ ∉ 𝕃`. -/
@@ -387,7 +393,7 @@ theorem weierstrassP_add_ω₁_sub_e_one_eq_sc {z : ℂ} (hz : z + H.ω₁ ∉ H
 theorem weierstrassP_add_ω₂_sub_e_two_eq_sd {z : ℂ} (hz : z + H.ω₂ ∉ H.lattice) :
     H.weierstrassP (z + H.ω₂) - H.e 2 =
       -(H.quarterK * H.modulus * H.comodulus / H.ω₁) ^ 2 *
-        jacobiSdTau (H.quarterK * z / H.ω₁) H.tau ^ 2 := by
+        jacobiSdOfTau (H.quarterK * z / H.ω₁) H.tau ^ 2 := by
   have hω := H.ω₁_ne_zero
   have hθ := H.jacobiThetaOneTau_pi_mul_div_ne_zero hz
   obtain ⟨n2, n3, n4⟩ := jacobiThetaNullTau_ne_zero H.tau_im_pos
@@ -403,10 +409,11 @@ theorem weierstrassP_add_ω₂_sub_e_two_eq_sd {z : ℂ} (hz : z + H.ω₂ ∉ H
   have hM : thetaMultiplierM ((π * z / (2 * H.ω₁)) - c) H.tau ≠ 0 := exp_ne_zero _
   have hθ3 : jacobiThetaThreeTau (π * z / (2 * H.ω₁)) H.tau ≠ 0 := by
     intro h0; rw [h0, mul_zero] at b; exact hθ b
-  rw [H.weierstrassP_sub_e_two_eq_jacobiTheta_sq hz, hw, jacobiSdTau, jacobiPQTau,
-      H.jacobiZetaTau_quarterK_mul_div]
-  simp only [jacobiGlaisher, jacobiLetterTheta, reduceCtorEq, ite_false, quarterK, compEllIntKTau,
-    modulus, jacobiModulusTau, comodulus, jacobiComodulusTau]
+  rw [H.weierstrassP_sub_e_two_eq_jacobiTheta_sq hz, hw, jacobiSdOfTau, jacobiPQOfTau,
+      H.jacobiThetaArgumentOfTau_quarterK_mul_div]
+  simp only [jacobiGlaisher, jacobiLetterTheta, reduceCtorEq, ite_false, quarterK,
+      completeEllipticKOfTau,
+    modulus, jacobiModulusOfTau, comodulus, jacobiComodulusOfTau]
   rw [a, b]
   generalize thetaMultiplierM (π * z / (2 * H.ω₁) - c) H.tau = M at *
   generalize jacobiThetaOneTau (π * z / (2 * H.ω₁)) H.tau = T1 at *
@@ -419,7 +426,7 @@ theorem weierstrassP_add_ω₂_sub_e_two_eq_sd {z : ℂ} (hz : z + H.ω₂ ∉ H
 @[dlmf 23.6.E26]
 theorem weierstrassP_add_ω₃_sub_e_three_eq_sn {z : ℂ} (hz : z + H.ω₃ ∉ H.lattice) :
     H.weierstrassP (z + H.ω₃) - H.e 3 =
-      (H.quarterK * H.modulus / H.ω₁) ^ 2 * jacobiSnTau (H.quarterK * z / H.ω₁) H.tau ^ 2 := by
+      (H.quarterK * H.modulus / H.ω₁) ^ 2 * jacobiSnOfTau (H.quarterK * z / H.ω₁) H.tau ^ 2 := by
   have hω := H.ω₁_ne_zero
   have hθ := H.jacobiThetaOneTau_pi_mul_div_ne_zero hz
   obtain ⟨n2, n3, n4⟩ := jacobiThetaNullTau_ne_zero H.tau_im_pos
@@ -431,10 +438,11 @@ theorem weierstrassP_add_ω₃_sub_e_three_eq_sn {z : ℂ} (hz : z + H.ω₃ ∉
   have a := (jacobiThetaOneTau_half_periods w H.tau).2.1
   have b := (jacobiThetaFourTau_half_periods w H.tau).2.1
   have hM : thetaMultiplierM w H.tau ≠ 0 := exp_ne_zero _
-  rw [H.weierstrassP_sub_e_three_eq_jacobiTheta_sq hz, hw, jacobiSnTau, jacobiPQTau,
-      H.jacobiZetaTau_quarterK_mul_div]
-  simp only [jacobiGlaisher, jacobiLetterTheta, reduceCtorEq, ite_false, quarterK, compEllIntKTau,
-    modulus, jacobiModulusTau]
+  rw [H.weierstrassP_sub_e_three_eq_jacobiTheta_sq hz, hw, jacobiSnOfTau, jacobiPQOfTau,
+      H.jacobiThetaArgumentOfTau_quarterK_mul_div]
+  simp only [jacobiGlaisher, jacobiLetterTheta, reduceCtorEq, ite_false, quarterK,
+      completeEllipticKOfTau,
+    modulus, jacobiModulusOfTau]
   rw [a, b]
   field_simp
 
@@ -649,34 +657,34 @@ private lemma periodic_lattice_of_generators (L : PeriodPair) {f : ℂ → ℂ}
 
 open DLMF.JacobiElliptic in
 /-- The Liouville identification specialized to `ps(z, k)`, `p ≠ s`. -/
-private lemma weierstrassZeta_sub_add_eq_jacobiPQk_s {k : ℂ} (hk : k ∈ jacobiModulusDomain)
+private lemma weierstrassZeta_sub_add_eq_jacobiPQ_s {k : ℂ} (hk : k ∈ jacobiModulusDomain)
     {p : JacobiLetter} (hp : p ≠ .s) (L : PeriodPair) {s : ℂ} (hs : s ∉ L.lattice)
     (h2s : 2 * s ∈ L.lattice)
-    (h1 : ∀ z, jacobiPQk p .s (z + L.ω₁) k = jacobiPQk p .s z k)
-    (h2 : ∀ z, jacobiPQk p .s (z + L.ω₂) k = jacobiPQk p .s z k)
-    (hanti : ∀ z, jacobiPQk p .s (z + s) k = -jacobiPQk p .s z k)
+    (h1 : ∀ z, jacobiPQ p .s (z + L.ω₁) k = jacobiPQ p .s z k)
+    (h2 : ∀ z, jacobiPQ p .s (z + L.ω₂) k = jacobiPQ p .s z k)
+    (hanti : ∀ z, jacobiPQ p .s (z + s) k = -jacobiPQ p .s z k)
     (hcong : ∀ z ∈ jacobiCongruentk 0 k, z ∈ L.lattice ∨ z + s ∈ L.lattice)
     {z : ℂ} (hz : z ∉ L.lattice) (hz' : z + s ∉ L.lattice) :
     weierstrassZeta L z - weierstrassZeta L (z + s) + weierstrassZeta L s =
-      jacobiPQk p .s z k :=
-  weierstrassZeta_sub_add_eq_of_antiperiodic L hs h2s (f := fun w => jacobiPQk p .s w k)
-    (fun w => (poleDichotomy_jacobiPQk hk hp).meromorphicAt w)
-    (periodic_lattice_of_generators L (f := fun w => jacobiPQk p .s w k) h1 h2) hanti
-    (fun w => by rw [jacobiPQk_neg]; simp [hp])
-    (fun w hw hw' => analyticAt_jacobiPQk_s hk hp fun h => (hcong w h).elim hw hw')
-    (exists_analyticAt_jacobiPQk_s_sub_one_div hk hp) hz hz'
+      jacobiPQ p .s z k :=
+  weierstrassZeta_sub_add_eq_of_antiperiodic L hs h2s (f := fun w => jacobiPQ p .s w k)
+    (fun w => (poleDichotomy_jacobiPQ hk hp).meromorphicAt w)
+    (periodic_lattice_of_generators L (f := fun w => jacobiPQ p .s w k) h1 h2) hanti
+    (fun w => by rw [jacobiPQ_neg]; simp [hp])
+    (fun w hw hw' => analyticAt_jacobiPQ_s hk hp fun h => (hcong w h).elim hw hw')
+    (exists_analyticAt_jacobiPQ_s_sub_one_div hk hp) hz hz'
 
 /-- DLMF 23.6.27: for a modulus `k` (`ℜk > 0`, `k ∉ [1, ∞)`), `K = K(k)`, `K' = K(k')` and
 `𝕃₁` the lattice with generators `4K, 2iK'`,
 `ζ(z|𝕃₁) - ζ(z + 2K|𝕃₁) + ζ(2K|𝕃₁) = ns(z, k)` for `z, z + 2K ∉ 𝕃₁`. -/
 @[dlmf 23.6.E27]
 theorem weierstrassZeta_ns {k : ℂ} (hk : k ∈ jacobiModulusDomain) (L : PeriodPair)
-    (h₁ : L.ω₁ = 4 * compEllIntKk k) (h₂ : L.ω₂ = 2 * I * compEllIntKpk k) {z : ℂ}
-    (hz : z ∉ L.lattice) (hz' : z + 2 * compEllIntKk k ∉ L.lattice) :
-    weierstrassZeta L z - weierstrassZeta L (z + 2 * compEllIntKk k) +
-      weierstrassZeta L (2 * compEllIntKk k) = jacobiNsk z k := by
-  refine weierstrassZeta_sub_add_eq_jacobiPQk_s hk (p := .n) (by decide) L ?_ ?_ ?_ ?_
-    (fun w => (jacobiNsk_shift hk w).2.2.2.1) ?_ hz hz'
+    (h₁ : L.ω₁ = 4 * completeEllipticK k) (h₂ : L.ω₂ = 2 * I * completeEllipticKPrime k) {z : ℂ}
+    (hz : z ∉ L.lattice) (hz' : z + 2 * completeEllipticK k ∉ L.lattice) :
+    weierstrassZeta L z - weierstrassZeta L (z + 2 * completeEllipticK k) +
+      weierstrassZeta L (2 * completeEllipticK k) = jacobiNs z k := by
+  refine weierstrassZeta_sub_add_eq_jacobiPQ_s hk (p := .n) (by decide) L ?_ ?_ ?_ ?_
+    (fun w => (jacobiNs_shift hk w).2.2.2.1) ?_ hz hz'
   · intro h
     obtain ⟨m, n, hmn⟩ := PeriodPair.mem_lattice.mp h
     have h0 : (((m : ℝ) - 1 / 2 : ℝ) : ℂ) * L.ω₁ + ((n : ℝ) : ℂ) * L.ω₂ = 0 := by
@@ -687,12 +695,13 @@ theorem weierstrassZeta_ns {k : ℂ} (hk : k ∈ jacobiModulusDomain) (L : Perio
     omega
   · exact PeriodPair.mem_lattice.mpr ⟨1, 0, by rw [h₁]; push_cast; ring⟩
   · intro w
-    change jacobiNsk (w + L.ω₁) k = jacobiNsk w k
-    rw [h₁, show w + 4 * compEllIntKk k = w + 2 * compEllIntKk k + 2 * compEllIntKk k by ring,
-      (jacobiNsk_shift hk _).2.2.2.1, (jacobiNsk_shift hk w).2.2.2.1, neg_neg]
+    change jacobiNs (w + L.ω₁) k = jacobiNs w k
+    rw [h₁, show w + 4 * completeEllipticK k = w + 2 * completeEllipticK k + 2 *
+        completeEllipticK k by ring,
+      (jacobiNs_shift hk _).2.2.2.1, (jacobiNs_shift hk w).2.2.2.1, neg_neg]
   · intro w
-    rw [h₂, show 2 * I * compEllIntKpk k = 2 * (I * compEllIntKpk k) by ring]
-    exact (jacobiNsk_shift hk w).2.2.2.2.2
+    rw [h₂, show 2 * I * completeEllipticKPrime k = 2 * (I * completeEllipticKPrime k) by ring]
+    exact (jacobiNs_shift hk w).2.2.2.2.2
   · rintro w ⟨m, n, rfl⟩
     rcases Int.even_or_odd' m with ⟨a, rfl | rfl⟩
     · left; exact PeriodPair.mem_lattice.mpr ⟨a, n, by rw [h₁, h₂]; push_cast; ring⟩
@@ -702,13 +711,13 @@ theorem weierstrassZeta_ns {k : ℂ} (hk : k ∈ jacobiModulusDomain) (L : Perio
 `ζ(z|𝕃₂) - ζ(z + 2K|𝕃₂) + ζ(2K|𝕃₂) = ds(z, k)` for `z, z + 2K ∉ 𝕃₂`. -/
 @[dlmf 23.6.E28]
 theorem weierstrassZeta_ds {k : ℂ} (hk : k ∈ jacobiModulusDomain) (L : PeriodPair)
-    (h₁ : L.ω₁ = 2 * compEllIntKk k - 2 * I * compEllIntKpk k)
-    (h₂ : L.ω₂ = 2 * compEllIntKk k + 2 * I * compEllIntKpk k) {z : ℂ}
-    (hz : z ∉ L.lattice) (hz' : z + 2 * compEllIntKk k ∉ L.lattice) :
-    weierstrassZeta L z - weierstrassZeta L (z + 2 * compEllIntKk k) +
-      weierstrassZeta L (2 * compEllIntKk k) = jacobiDsk z k := by
-  refine weierstrassZeta_sub_add_eq_jacobiPQk_s hk (p := .d) (by decide) L ?_ ?_ ?_ ?_
-    (fun w => (jacobiDsk_shift hk w).2.2.2.1) ?_ hz hz'
+    (h₁ : L.ω₁ = 2 * completeEllipticK k - 2 * I * completeEllipticKPrime k)
+    (h₂ : L.ω₂ = 2 * completeEllipticK k + 2 * I * completeEllipticKPrime k) {z : ℂ}
+    (hz : z ∉ L.lattice) (hz' : z + 2 * completeEllipticK k ∉ L.lattice) :
+    weierstrassZeta L z - weierstrassZeta L (z + 2 * completeEllipticK k) +
+      weierstrassZeta L (2 * completeEllipticK k) = jacobiDs z k := by
+  refine weierstrassZeta_sub_add_eq_jacobiPQ_s hk (p := .d) (by decide) L ?_ ?_ ?_ ?_
+    (fun w => (jacobiDs_shift hk w).2.2.2.1) ?_ hz hz'
   · intro h
     obtain ⟨m, n, hmn⟩ := PeriodPair.mem_lattice.mp h
     have h0 : (((m : ℝ) - 1 / 2 : ℝ) : ℂ) * L.ω₁ + (((n : ℝ) - 1 / 2 : ℝ) : ℂ) * L.ω₂ = 0 := by
@@ -719,16 +728,16 @@ theorem weierstrassZeta_ds {k : ℂ} (hk : k ∈ jacobiModulusDomain) (L : Perio
     omega
   · exact PeriodPair.mem_lattice.mpr ⟨1, 1, by rw [h₁, h₂]; push_cast; ring⟩
   · intro w
-    change jacobiDsk (w + L.ω₁) k = jacobiDsk w k
-    have e := (jacobiDsk_shift hk (w - 2 * (I * compEllIntKpk k))).2.2.2.2.2
+    change jacobiDs (w + L.ω₁) k = jacobiDs w k
+    have e := (jacobiDs_shift hk (w - 2 * (I * completeEllipticKPrime k))).2.2.2.2.2
     rw [sub_add_cancel] at e
-    rw [h₁, show w + (2 * compEllIntKk k - 2 * I * compEllIntKpk k) =
-      (w - 2 * (I * compEllIntKpk k)) + 2 * compEllIntKk k by ring,
-      (jacobiDsk_shift hk _).2.2.2.1, e]
+    rw [h₁, show w + (2 * completeEllipticK k - 2 * I * completeEllipticKPrime k) =
+      (w - 2 * (I * completeEllipticKPrime k)) + 2 * completeEllipticK k by ring,
+      (jacobiDs_shift hk _).2.2.2.1, e]
   · intro w
-    rw [h₂, show w + (2 * compEllIntKk k + 2 * I * compEllIntKpk k) =
-      w + 2 * compEllIntKk k + 2 * (I * compEllIntKpk k) by ring]
-    exact (jacobiDsk_shift hk w).2.2.2.2.1
+    rw [h₂, show w + (2 * completeEllipticK k + 2 * I * completeEllipticKPrime k) =
+      w + 2 * completeEllipticK k + 2 * (I * completeEllipticKPrime k) by ring]
+    exact (jacobiDs_shift hk w).2.2.2.2.1
   · rintro w ⟨m, n, rfl⟩
     rcases Int.even_or_odd' (m + n) with ⟨c, hc | hc⟩
     · left
@@ -749,15 +758,15 @@ Corrected from the printed DLMF formula: DLMF prints `- ζ(2iK'|𝕃₃)` for th
 is false (difference about `-0.49i` at `k² = 0.3`; see the module docstring). -/
 @[dlmf 23.6.E29]
 theorem weierstrassZeta_cs {k : ℂ} (hk : k ∈ jacobiModulusDomain) (L : PeriodPair)
-    (h₁ : L.ω₁ = 2 * compEllIntKk k) (h₂ : L.ω₂ = 4 * I * compEllIntKpk k) {z : ℂ}
-    (hz : z ∉ L.lattice) (hz' : z + 2 * I * compEllIntKpk k ∉ L.lattice) :
-    weierstrassZeta L z - weierstrassZeta L (z + 2 * I * compEllIntKpk k) +
-      weierstrassZeta L (2 * I * compEllIntKpk k) = jacobiCsk z k := by
-  have hanti : ∀ w, jacobiCsk (w + 2 * I * compEllIntKpk k) k = -jacobiCsk w k := by
+    (h₁ : L.ω₁ = 2 * completeEllipticK k) (h₂ : L.ω₂ = 4 * I * completeEllipticKPrime k) {z : ℂ}
+    (hz : z ∉ L.lattice) (hz' : z + 2 * I * completeEllipticKPrime k ∉ L.lattice) :
+    weierstrassZeta L z - weierstrassZeta L (z + 2 * I * completeEllipticKPrime k) +
+      weierstrassZeta L (2 * I * completeEllipticKPrime k) = jacobiCs z k := by
+  have hanti : ∀ w, jacobiCs (w + 2 * I * completeEllipticKPrime k) k = -jacobiCs w k := by
     intro w
-    rw [show w + 2 * I * compEllIntKpk k = w + 2 * (I * compEllIntKpk k) by ring]
-    exact (jacobiCsk_shift hk w).2.2.2.2.2
-  refine weierstrassZeta_sub_add_eq_jacobiPQk_s hk (p := .c) (by decide) L ?_ ?_ ?_ ?_
+    rw [show w + 2 * I * completeEllipticKPrime k = w + 2 * (I * completeEllipticKPrime k) by ring]
+    exact (jacobiCs_shift hk w).2.2.2.2.2
+  refine weierstrassZeta_sub_add_eq_jacobiPQ_s hk (p := .c) (by decide) L ?_ ?_ ?_ ?_
     hanti ?_ hz hz'
   · intro h
     obtain ⟨m, n, hmn⟩ := PeriodPair.mem_lattice.mp h
@@ -769,11 +778,12 @@ theorem weierstrassZeta_cs {k : ℂ} (hk : k ∈ jacobiModulusDomain) (L : Perio
     omega
   · exact PeriodPair.mem_lattice.mpr ⟨0, 1, by rw [h₂]; push_cast; ring⟩
   · intro w
-    rw [h₁]; exact (jacobiCsk_shift hk w).2.2.2.1
+    rw [h₁]; exact (jacobiCs_shift hk w).2.2.2.1
   · intro w
-    change jacobiCsk (w + L.ω₂) k = jacobiCsk w k
-    rw [h₂, show w + 4 * I * compEllIntKpk k =
-      w + 2 * I * compEllIntKpk k + 2 * I * compEllIntKpk k by ring, hanti, hanti, neg_neg]
+    change jacobiCs (w + L.ω₂) k = jacobiCs w k
+    rw [h₂, show w + 4 * I * completeEllipticKPrime k =
+      w + 2 * I * completeEllipticKPrime k + 2 * I * completeEllipticKPrime k by ring, hanti,
+                                                                                   hanti, neg_neg]
   · rintro w ⟨m, n, rfl⟩
     rcases Int.even_or_odd' n with ⟨a, rfl | rfl⟩
     · left; exact PeriodPair.mem_lattice.mpr ⟨m, a, by rw [h₁, h₂]; push_cast; ring⟩

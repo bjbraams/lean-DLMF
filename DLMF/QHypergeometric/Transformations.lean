@@ -223,8 +223,9 @@ theorem qPhi2_to_qPhi2_2' (a b c q z : ℂ)
   have hrhs : qProductRatioInf [z*a] [z] q*qPhi [a,c/b] [c,a*z] q (b*z) = ∑' p, T p := by
     rw [qPhi, ← tsum_mul_left, hT.tsum_prod]
     exact tsum_congr hrow
-  rw [hrhs, tsum_prod_eq_tsum_sum_antidiagonal hT, qPhi_eq_basicHG (by simp)]
-  simp only [basicHG, List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one]
+  rw [hrhs, tsum_prod_eq_tsum_sum_antidiagonal hT, qPhi_eq_basicHypergeometric (by simp)]
+  simp only [basicHypergeometric, List.map_cons, List.map_nil, List.prod_cons,
+      List.prod_nil, mul_one]
   refine tsum_congr fun n => ?_
   rw [Finset.Nat.sum_antidiagonal_eq_sum_range_succ (fun k m => T (k,m)) n]
   have hS := sum_qBinom_chuWeight q b n c

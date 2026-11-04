@@ -17,22 +17,24 @@ integral parameters.
 
 ## Main results
 
-* `scIncGamma_hasSum_alternating`: the alternating series DLMF 8.7.1.
+* `tricomiIncompleteGamma_hasSum_alternating`: the alternating series DLMF 8.7.1.
 * `incompleteGamma_increment_series`: the increment series DLMF 8.7.2.
-* `upperIncGamma_hasSum_alternating`, `upperIncGamma_hasSum_exponential`: DLMF 8.7.3.
-* `lowerIncGamma_besselI_series`, `scIncGamma_sphericalI_series`,
-  `upperIncGamma_laguerre_series`: the Bessel, spherical Bessel and Laguerre series
+* `upperIncompleteGamma_hasSum_alternating`, `upperIncompleteGamma_hasSum_exponential`: DLMF 8.7.3.
+* `lowerIncompleteGamma_besselI_series`, `tricomiIncompleteGamma_sphericalI_series`,
+  `upperIncompleteGamma_laguerre_series`: the Bessel, spherical Bessel and Laguerre series
   DLMF 8.7.4–8.7.6.
 * `incompleteGamma_threeTerm`: the three-term recurrence DLMF 8.8.3.
-* `lowerIncGamma_shift_up`, `lowerIncGamma_shift_down`, `upperIncGamma_shift_up`,
-  `upperIncGamma_shift_down`: the shift formulas DLMF 8.8.7–8.8.10.
-* `scIncGamma_deriv_parameter_zero`: the parameter derivative DLMF 8.8.14.
-* `lowerIncGamma_iteratedDeriv_scaled_power`, `upperIncGamma_iteratedDeriv_scaled_power`,
-  `lowerIncGamma_iteratedDeriv_scaled_exp`, `scIncGamma_iteratedDeriv_scaled`,
-  `upperIncGamma_iteratedDeriv_scaled_exp`: the derivative formulas DLMF 8.8.15–8.8.19.
-* `upperIncGammaOnLog_zero`, `upperIncGammaOnLog_neg_nat_monodromy`,
-  `upperIncGammaOnLog_eq_upperIncGamma`, `hasDerivAt_upperIncGammaOnLog`: the upper function
-  on the logarithmic plane.
+* `lowerIncompleteGamma_shift_up`, `lowerIncompleteGamma_shift_down`,
+  `upperIncompleteGamma_shift_up`, `upperIncompleteGamma_shift_down`: the shift formulas DLMF
+  8.8.7–8.8.10.
+* `tricomiIncompleteGamma_deriv_parameter_zero`: the parameter derivative DLMF 8.8.14.
+* `lowerIncompleteGamma_iteratedDeriv_scaled_power`,
+  `upperIncompleteGamma_iteratedDeriv_scaled_power`,
+  `lowerIncompleteGamma_iteratedDeriv_scaled_exp`, `tricomiIncompleteGamma_iteratedDeriv_scaled`,
+  `upperIncompleteGamma_iteratedDeriv_scaled_exp`: the derivative formulas DLMF 8.8.15–8.8.19.
+* `upperIncompleteGammaOnLog_zero`, `upperIncompleteGammaOnLog_neg_nat_monodromy`,
+  `upperIncompleteGammaOnLog_eq_upperIncompleteGamma`, `hasDerivAt_upperIncompleteGammaOnLog`: the
+  upper function on the logarithmic plane.
 
 ## Implementation notes
 
@@ -51,20 +53,21 @@ namespace DLMF.Confluent
 open DLMF.Statistical
 
 /-- The series with terms `(fun k : ℕ => (-z)^k/(Gamma a*(k.factorial : ℂ)*(a+k)))` converges to
-`(scIncGamma a z)`. -/
+`(tricomiIncompleteGamma a z)`. -/
 @[dlmf 8.7.E1]
-theorem scIncGamma_hasSum_alternating {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (z : ℂ) :
-    HasSum (fun k : ℕ => (-z)^k/(Gamma a*(k.factorial : ℂ)*(a+k))) (scIncGamma a z) := by
+theorem tricomiIncompleteGamma_hasSum_alternating {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (z : ℂ) :
+    HasSum (fun k : ℕ => (-z)^k/(Gamma a*(k.factorial : ℂ)*(a+k)))
+        (tricomiIncompleteGamma a z) := by
   have hs := (hasFPowerSeriesOnBall_regularizedConfluent a (a+1)).hasSum_mul_pow
     (by simp : -z ∈ Metric.eball (0:ℂ) ⊤)
-  have he : regularizedHGFun {a} {a+1} (-z)=scIncGamma a z := by
-    simpa [add_comm] using (scIncGamma_regularized_pair a z).2.symm
+  have he : regularizedHGFun {a} {a+1} (-z)=tricomiIncompleteGamma a z := by
+    simpa [add_comm] using (tricomiIncompleteGamma_regularized_pair a z).2.symm
   rw [he] at hs
   refine hs.congr_fun fun k => ?_
   have hk : a+(k:ℂ) ≠ 0 := by intro h; exact ha k (by linear_combination h)
   have hG : Gamma (a+k) ≠ 0 :=
       Gamma_ne_zero (fun n h => ha (k+n) (by push_cast; linear_combination h))
-  rw [regularizedHGFunCoeff_singleton, poch, ← Gamma_add_nat_div_Gamma_eq a ha,
+  rw [regularizedHGFunCoeff_singleton, pochhammer, ← Gamma_add_nat_div_Gamma_eq a ha,
     show a+1+k=(a+k)+1 by ring, Gamma_add_one _ hk]
   field_simp [Gamma_ne_zero ha, hG]
 
@@ -108,15 +111,16 @@ theorem incrSer_hasDerivAt_primitive (n : ℕ) (s : ℂ) :
 theorem incompleteGamma_increment_series {a x y : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (hx : x ∈ slitPlane)
     (hxy : ∀ t ∈ Set.Icc (0:ℝ) 1, x + t * y ∈ slitPlane) (hy : ‖y‖ < ‖x‖) :
     HasSum (fun n : ℕ =>
-        exp (-x)*x^(a-1)*poch (1-a) n/(-x)^n*(1-exp (-y)*Elementary.expPartialSum n y))
-        (lowerIncGamma a (x+y)-lowerIncGamma a x) ∧
-        lowerIncGamma a (x+y)-lowerIncGamma a x=upperIncGamma a x-upperIncGamma a (x+y) := by
+        exp (-x)*x^(a-1)*pochhammer (1-a) n/(-x)^n*(1-exp (-y)*Elementary.expPartialSum n y))
+        (lowerIncompleteGamma a (x+y)-lowerIncompleteGamma a x) ∧
+        lowerIncompleteGamma a (x+y)-lowerIncompleteGamma a x=upperIncompleteGamma a
+            x-upperIncompleteGamma a (x+y) := by
   have hx0 : x ≠ 0 := slitPlane_ne_zero hx
   have hxy1 : x + y ∈ slitPlane := by simpa using hxy 1 ⟨zero_le_one, le_rfl⟩
   refine ⟨?_, ?_⟩
   swap
-  · have h1 := lowerIncGamma_add_upperIncGamma ha hx0
-    have h2 := lowerIncGamma_add_upperIncGamma ha (slitPlane_ne_zero hxy1)
+  · have h1 := lowerIncompleteGamma_add_upperIncompleteGamma ha hx0
+    have h2 := lowerIncompleteGamma_add_upperIncompleteGamma ha (slitPlane_ne_zero hxy1)
     linear_combination h2 - h1
   have hxn : 0 < ‖x‖ := norm_pos_iff.mpr hx0
   set r : ℝ := ‖y/x‖ with hr
@@ -159,10 +163,10 @@ theorem incompleteGamma_increment_series {a x y : ℂ} (ha : ∀ n : ℕ, a ≠ 
   -- the integrand and its series
   set g : ℝ → ℂ := fun t => y*((x+t*y)^(a-1)*exp (-(x+t*y))) with hg
   set u : ℕ → ℝ → ℂ := fun n t => y*exp (-(x+t*y))*x^(a-1)*
-    (poch (1-a) n/(n.factorial : ℂ)*(-((t:ℂ)*y/x))^n) with hu
+    (pochhammer (1-a) n/(n.factorial : ℂ)*(-((t:ℂ)*y/x))^n) with hu
   have hpt : ∀ t ∈ Icc (0:ℝ) 1, HasSum (fun n => u n t) (g t) := by
     intro t ht
-    have h := (hasSum_poch_div_factorial (β := 1-a) (z := -((t:ℂ)*y/x))
+    have h := (hasSum_pochhammer_div_factorial (β := 1-a) (z := -((t:ℂ)*y/x))
       (by rw [norm_neg]; exact (hsmall t ht).trans_lt hr1)).mul_left (y*exp (-(x+t*y))*x^(a-1))
     rw [show (1:ℂ) - -((t:ℂ)*y/x) = 1+t*y/x by ring, show -(1-a) = a-1 by ring] at h
     rw [hg]; simp only
@@ -170,8 +174,9 @@ theorem incompleteGamma_increment_series {a x y : ℂ} (ha : ∀ n : ℕ, a ≠ 
     convert h using 1
     ring
   -- FTC for the lower incomplete Gamma along the segment
-  have hFTC : ∫ t in (0:ℝ)..1, g t = lowerIncGamma a (x+y) - lowerIncGamma a x := by
-    have hd : ∀ t ∈ uIcc (0:ℝ) 1, HasDerivAt (fun t:ℝ => lowerIncGamma a (x+t*y)) (g t) t := by
+  have hFTC : ∫ t in (0:ℝ)..1, g t = lowerIncompleteGamma a (x+y) - lowerIncompleteGamma a x := by
+    have hd : ∀ t ∈ uIcc (0:ℝ) 1,
+        HasDerivAt (fun t:ℝ => lowerIncompleteGamma a (x+t*y)) (g t) t := by
       intro t ht
       rw [← hI] at ht
       have h1 : HasDerivAt (fun s:ℂ => x+s*y) y (t:ℂ) := by
@@ -191,9 +196,9 @@ theorem incompleteGamma_increment_series {a x y : ℂ} (ha : ∀ n : ℕ, a ≠ 
     simp
   -- termwise integrals
   have hterm : ∀ n : ℕ, ∫ t in (0:ℝ)..1, u n t =
-      exp (-x)*x^(a-1)*poch (1-a) n/(-x)^n*(1-exp (-y)*Elementary.expPartialSum n y) := by
+      exp (-x)*x^(a-1)*pochhammer (1-a) n/(-x)^n*(1-exp (-y)*Elementary.expPartialSum n y) := by
     intro n
-    set c : ℂ := exp (-x)*x^(a-1)*poch (1-a) n/(n.factorial : ℂ)/(-x)^n with hc
+    set c : ℂ := exp (-x)*x^(a-1)*pochhammer (1-a) n/(n.factorial : ℂ)/(-x)^n with hc
     have hd : ∀ t ∈ uIcc (0:ℝ) 1, HasDerivAt
         (fun t:ℝ => c*(-(n.factorial : ℂ)*(exp (-(t*y))*Elementary.expPartialSum n (t*y))))
             (u n t) t := by
@@ -219,11 +224,11 @@ theorem incompleteGamma_increment_series {a x y : ℂ} (ha : ∀ n : ℕ, a ≠ 
     ring
   -- dominated convergence
   set K : ℝ := ‖y‖*Real.exp (‖x‖+‖y‖)*‖x^(a-1)‖ with hK
-  have hsum := summable_norm_gaussHGCoeff_mul_pow (1-a) 1 1 (z := (r:ℂ))
+  have hsum := summable_norm_gaussHypergeometricCoeff_mul_pow (1-a) 1 1 (z := (r:ℂ))
     (by rw [Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hr0]; exact hr1)
   have h := intervalIntegral.hasSum_integral_of_dominated_convergence (μ := volume)
     (a := 0) (b := 1) (F := u) (f := g)
-    (fun n t => K*‖gaussHGCoeff (1-a) 1 1 n * (r:ℂ)^n‖)
+    (fun n t => K*‖gaussHypergeometricCoeff (1-a) 1 1 n * (r:ℂ)^n‖)
     (fun n => ((by rw [hu]; fun_prop : Continuous (u n))).aestronglyMeasurable)
     (fun n => Eventually.of_forall fun t ht => ?_)
     (Eventually.of_forall fun t _ => hsum.mul_left K)
@@ -233,7 +238,8 @@ theorem incompleteGamma_increment_series {a x y : ℂ} (ha : ∀ n : ℕ, a ≠ 
     exact h.congr_fun fun n => (hterm n).symm
   · have ht' : t ∈ Icc (0:ℝ) 1 := Ioc_subset_Icc_self (by simpa using ht)
     rw [hu]; simp only
-    rw [gaussHGCoeff_self_right, norm_mul, norm_mul, norm_mul, norm_mul, norm_mul, norm_pow,
+    rw [gaussHypergeometricCoeff_self_right, norm_mul, norm_mul, norm_mul, norm_mul,
+        norm_mul, norm_pow,
       norm_pow, norm_neg, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hr0, hK]
     have hE : ‖exp (-(x+t*y))‖ ≤ Real.exp (‖x‖+‖y‖) := by
       refine (norm_exp_le_exp_norm _).trans (Real.exp_le_exp.mpr ?_)
@@ -243,28 +249,30 @@ theorem incompleteGamma_increment_series {a x y : ℂ} (ha : ∀ n : ℕ, a ≠ 
       exact mul_le_of_le_one_left (norm_nonneg _) ht'.2
     have hP : ‖(t:ℂ)*y/x‖^n ≤ r^n := pow_le_pow_left₀ (norm_nonneg _) (hsmall t ht') n
     have := mul_le_mul hE hP (by positivity) (by positivity)
-    calc ‖y‖*‖exp (-(x+t*y))‖*‖x^(a-1)‖*(‖poch (1-a) n/(n.factorial:ℂ)‖*‖(t:ℂ)*y/x‖^n)
-        = ‖y‖*‖x^(a-1)‖*‖poch (1-a) n/(n.factorial:ℂ)‖*(‖exp (-(x+t*y))‖*‖(t:ℂ)*y/x‖^n) := by ring
-      _ ≤ ‖y‖*‖x^(a-1)‖*‖poch (1-a) n/(n.factorial:ℂ)‖*(Real.exp (‖x‖+‖y‖)*r^n) :=
+    calc ‖y‖*‖exp (-(x+t*y))‖*‖x^(a-1)‖*(‖pochhammer (1-a) n/(n.factorial:ℂ)‖*‖(t:ℂ)*y/x‖^n)
+        = ‖y‖*‖x^(a-1)‖*‖pochhammer (1-a)
+            n/(n.factorial:ℂ)‖*(‖exp (-(x+t*y))‖*‖(t:ℂ)*y/x‖^n) := by ring
+      _ ≤ ‖y‖*‖x^(a-1)‖*‖pochhammer (1-a) n/(n.factorial:ℂ)‖*(Real.exp (‖x‖+‖y‖)*r^n) :=
           mul_le_mul_of_nonneg_left this (by positivity)
       _ = _ := by ring
 
 /-- The series with terms `(fun k : ℕ => (-1 : ℂ)^k*z^(a+k)/((k.factorial : ℂ)*(a+k)))` converges
-to `(Gamma a-upperIncGamma a z)`. -/
+to `(Gamma a-upperIncompleteGamma a z)`. -/
 @[dlmf 8.7.E3]
-theorem upperIncGamma_hasSum_alternating {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {z : ℂ} (hz : z ≠ 0) :
+theorem upperIncompleteGamma_hasSum_alternating {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n)
+    {z : ℂ} (hz : z ≠ 0) :
     HasSum (fun k : ℕ => (-1 : ℂ)^k*z^(a+k)/((k.factorial : ℂ)*(a+k)))
-        (Gamma a-upperIncGamma a z) := by
-  have hs := (scIncGamma_hasSum_alternating ha z).mul_left (Gamma a*z^a)
-  have he : Gamma a*z^a*scIncGamma a z=Gamma a-upperIncGamma a z := by
-    rw [scIncGamma_eq ha hz]
+        (Gamma a-upperIncompleteGamma a z) := by
+  have hs := (tricomiIncompleteGamma_hasSum_alternating ha z).mul_left (Gamma a*z^a)
+  have he : Gamma a*z^a*tricomiIncompleteGamma a z=Gamma a-upperIncompleteGamma a z := by
+    rw [tricomiIncompleteGamma_eq ha hz]
     have hp : z^a*z^(-a)=1 := by rw [← cpow_add _ _ hz]; simp
-    have hc := lowerIncGamma_add_upperIncGamma ha hz
+    have hc := lowerIncompleteGamma_add_upperIncompleteGamma ha hz
     calc
-      Gamma a*z^a*(z^(-a)*lowerIncGamma a z/Gamma a) =
-          (z^a*z^(-a))*lowerIncGamma a z := by field_simp [Gamma_ne_zero ha]
-      _ = lowerIncGamma a z := by rw [hp, one_mul]
-      _ = Gamma a-upperIncGamma a z := by linear_combination hc
+      Gamma a*z^a*(z^(-a)*lowerIncompleteGamma a z/Gamma a) =
+          (z^a*z^(-a))*lowerIncompleteGamma a z := by field_simp [Gamma_ne_zero ha]
+      _ = lowerIncompleteGamma a z := by rw [hp, one_mul]
+      _ = Gamma a-upperIncompleteGamma a z := by linear_combination hc
   rw [he] at hs
   refine hs.congr_fun fun k => ?_
   rw [neg_pow, show a+(k:ℂ)=a+(k:ℂ) by rfl, cpow_add _ _ hz, cpow_natCast]
@@ -272,20 +280,22 @@ theorem upperIncGamma_hasSum_alternating {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) 
   ring
 
 /-- The series with terms `(fun k : ℕ => Gamma a*z^a*exp (-z)*z^k/Gamma (a+k+1))` converges to
-`(Gamma a-upperIncGamma a z)`. -/
+`(Gamma a-upperIncompleteGamma a z)`. -/
 @[dlmf 8.7.E3]
-theorem upperIncGamma_hasSum_exponential {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {z : ℂ} (hz : z ≠ 0) :
-    HasSum (fun k : ℕ => Gamma a*z^a*exp (-z)*z^k/Gamma (a+k+1)) (Gamma a-upperIncGamma a z) := by
-  have hs := (scIncGamma_hasSum_exponential a z).mul_left (Gamma a*z^a)
-  have he : Gamma a*z^a*scIncGamma a z=Gamma a-upperIncGamma a z := by
-    rw [scIncGamma_eq ha hz]
+theorem upperIncompleteGamma_hasSum_exponential {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n)
+    {z : ℂ} (hz : z ≠ 0) :
+    HasSum (fun k : ℕ => Gamma a*z^a*exp (-z)*z^k/Gamma (a+k+1))
+        (Gamma a-upperIncompleteGamma a z) := by
+  have hs := (tricomiIncompleteGamma_hasSum_exponential a z).mul_left (Gamma a*z^a)
+  have he : Gamma a*z^a*tricomiIncompleteGamma a z=Gamma a-upperIncompleteGamma a z := by
+    rw [tricomiIncompleteGamma_eq ha hz]
     have hp : z^a*z^(-a)=1 := by rw [← cpow_add _ _ hz]; simp
-    have hc := lowerIncGamma_add_upperIncGamma ha hz
+    have hc := lowerIncompleteGamma_add_upperIncompleteGamma ha hz
     calc
-      Gamma a*z^a*(z^(-a)*lowerIncGamma a z/Gamma a) =
-          (z^a*z^(-a))*lowerIncGamma a z := by field_simp [Gamma_ne_zero ha]
-      _ = lowerIncGamma a z := by rw [hp, one_mul]
-      _ = Gamma a-upperIncGamma a z := by linear_combination hc
+      Gamma a*z^a*(z^(-a)*lowerIncompleteGamma a z/Gamma a) =
+          (z^a*z^(-a))*lowerIncompleteGamma a z := by field_simp [Gamma_ne_zero ha]
+      _ = lowerIncompleteGamma a z := by rw [hp, one_mul]
+      _ = Gamma a-upperIncompleteGamma a z := by linear_combination hc
   rw [he] at hs
   exact hs.congr_fun fun k => by ring
 
@@ -352,8 +362,8 @@ theorem IncompleteGammaSphericalSeries.add_ne {a : ℂ} (ha : ∀ n : ℕ, a ≠
 /-- Euler image of `w ↦ γ*(a, 2w)`. -/
 
 theorem IncompleteGammaSphericalSeries.eulerImage {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) :
-    Differentiable ℂ (fun w => scIncGamma a (2*w)) ∧ ∀ w,
-      w * deriv (fun w => scIncGamma a (2*w)) w + a * scIncGamma a (2*w) =
+    Differentiable ℂ (fun w => tricomiIncompleteGamma a (2*w)) ∧ ∀ w,
+      w * deriv (fun w => tricomiIncompleteGamma a (2*w)) w + a * tricomiIncompleteGamma a (2*w) =
         exp (-(2*w)) / Gamma a := by
   set h : ℕ → ℂ → ℂ := fun k w => (2*w)^k * (Gamma (a+k+1))⁻¹ with hh
   have hne : ∀ k : ℕ, a + k + 1 ≠ 0 := fun k e => ha (k+1) (by push_cast; linear_combination e)
@@ -397,10 +407,10 @@ theorem IncompleteGammaSphericalSeries.eulerImage {a : ℂ} (ha : ∀ n : ℕ, a
       gcongr
       simp
   obtain ⟨hD, hS⟩ := Bessel.SphericalSeries.euler_hasSum a hf hb
-  have hH : ∀ w, scIncGamma a (2*w) = exp (-(2*w)) * ∑' k, h k w := by
+  have hH : ∀ w, tricomiIncompleteGamma a (2*w) = exp (-(2*w)) * ∑' k, h k w := by
     intro w
     rw [← tsum_mul_left]
-    refine (scIncGamma_hasSum_exponential a (2*w)).tsum_eq.symm.trans ?_
+    refine (tricomiIncompleteGamma_hasSum_exponential a (2*w)).tsum_eq.symm.trans ?_
     exact tsum_congr fun k => by simp only [hh]; ring
   have hEu : ∀ w, w * deriv (fun w => ∑' k, h k w) w + a * ∑' k, h k w =
       1 / Gamma a + 2*w * ∑' k, h k w := by
@@ -429,36 +439,38 @@ theorem IncompleteGammaSphericalSeries.eulerImage {a : ℂ} (ha : ∀ n : ℕ, a
       field_simp
       push_cast
       ring
-  have hFd : ∀ w, HasDerivAt (fun w => scIncGamma a (2*w))
+  have hFd : ∀ w, HasDerivAt (fun w => tricomiIncompleteGamma a (2*w))
       (exp (-(2*w)) * (-2) * ∑' k, h k w + exp (-(2*w)) * deriv (fun w => ∑' k, h k w) w) w := by
     intro w
     have he : HasDerivAt (fun w : ℂ => exp (-(2*w))) (exp (-(2*w)) * (-2)) w := by
       have := (((hasDerivAt_id w).const_mul 2).neg).cexp
       exact this.congr_deriv (by simp)
     have := he.mul (hD w).hasDerivAt
-    rw [show (fun w => scIncGamma a (2*w)) = fun w => exp (-(2*w)) * ∑' k, h k w from funext hH]
+    rw [show (fun w => tricomiIncompleteGamma a (2*w)) = fun w => exp (-(2*w)) * ∑' k,
+        h k w from funext hH]
     exact this
   refine ⟨fun w => (hFd w).differentiableAt, fun w => ?_⟩
   rw [(hFd w).deriv, hH w]
   linear_combination (exp (-(2*w))) * hEu w
 
-/-- The series with terms `(fun n : ℕ => exp (-w) * (poch (1-a) n/Gamma (n+a+1)*(2*n+1) *
-Bessel.sphericalI n w))` converges to `(scIncGamma a (2*w))`. -/
+/-- The series with terms `(fun n : ℕ => exp (-w) * (pochhammer (1-a) n/Gamma (n+a+1)*(2*n+1) *
+Bessel.sphericalI n w))` converges to `(tricomiIncompleteGamma a (2*w))`. -/
 theorem IncompleteGammaSphericalSeries.hasSum_generic {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (w : ℂ) :
-    HasSum (fun n : ℕ => exp (-w) * (poch (1-a) n/Gamma (n+a+1)*(2*n+1) * Bessel.sphericalI n w))
-      (scIncGamma a (2*w)) := by
+    HasSum (fun n : ℕ => exp (-w) *
+        (pochhammer (1-a) n/Gamma (n+a+1)*(2*n+1) * Bessel.sphericalI n w))
+      (tricomiIncompleteGamma a (2*w)) := by
   have hΓ : ∀ k : ℕ, Gamma (k+a) ≠ 0 := fun k => Gamma_ne_zero (fun m e => ha (m+k)
     (by push_cast; linear_combination e))
   have hΓ1 : ∀ k : ℕ, Gamma (k+a+1) = (k+a) * Gamma (k+a) := fun k =>
     Gamma_add_one _ (by rw [add_comm]; exact IncompleteGammaSphericalSeries.add_ne ha k)
   have hka : ∀ k : ℕ, (k+a : ℂ) ≠ 0 := fun k => by rw [add_comm];
                                                    exact IncompleteGammaSphericalSeries.add_ne ha k
-  set c : ℕ → ℂ := fun n => poch (1-a) n/Gamma (n+a+1) with hc
-  set e : ℕ → ℂ := fun n => poch (1-a) n/Gamma (n+a) with he
+  set c : ℕ → ℂ := fun n => pochhammer (1-a) n/Gamma (n+a+1) with hc
+  set e : ℕ → ℂ := fun n => pochhammer (1-a) n/Gamma (n+a) with he
   have hce : ∀ n : ℕ, e n = (n+a) * c n := by
     intro n; simp only [hc, he, hΓ1]; field_simp [hΓ n, hka n]
   have hec : ∀ n : ℕ, e (n+1) = (1-a+n) * c n := by
-    intro n; simp only [hc, he, poch_succ]
+    intro n; simp only [hc, he, pochhammer_succ]
     rw [show ((n+1:ℕ):ℂ)+a = n+a+1 by push_cast; ring]; ring
   have hcc : ∀ n : ℕ, c (n+1) * (n+1+a) = (1-a+n) * c n := by
     intro n; rw [← hec n, hce (n+1)]; push_cast; ring
@@ -489,7 +501,7 @@ theorem IncompleteGammaSphericalSeries.hasSum_generic {a : ℂ} (ha : ∀ n : �
       have h1 := hec 0
       have hc0 : c 0 * a = 1 / Gamma a := by
         have := hce 0; simp only [Nat.cast_zero, zero_add] at this
-        rw [mul_comm, ← this]; simp [he, poch_zero]
+        rw [mul_comm, ← this]; simp [he, pochhammer_zero]
       have hE : exp (-(2*w)) = exp (-w) * (cosh w - sinh w) := by
         rw [cosh_sub_sinh, ← Complex.exp_add]; ring_nf
       rw [hE, ← Bessel.SphericalSeries.mul_sphericalI_zero,
@@ -568,7 +580,7 @@ theorem IncompleteGammaSphericalSeries.hasSum_generic {a : ℂ} (ha : ∀ n : �
   obtain ⟨hFd, hFL⟩ := IncompleteGammaSphericalSeries.eulerImage ha
   have key := Bessel.SphericalSeries.hasSum_of_euler
       (f := fun n w => exp (-w) * (C n * Bessel.sphericalI n w))
-    (f' := f') (g := g) (F := fun w => scIncGamma a (2*w)) a hf hL hgt hb hFd
+    (f' := f') (g := g) (F := fun w => tricomiIncompleteGamma a (2*w)) a hf hL hgt hb hFd
     (fun w => by rw [hFL w]; simp [hg])
     (fun m hm => absurd (by linear_combination hm : a = -m) (ha m)) w
   refine key.congr_fun fun n => ?_
@@ -578,8 +590,9 @@ theorem IncompleteGammaSphericalSeries.hasSum_generic {a : ℂ} (ha : ∀ n : �
 the poles of `Γ` included. -/
 
 theorem IncompleteGammaSphericalSeries.coeff_succ (a : ℂ) (n : ℕ) :
-    poch (1-a) (n+1)/Gamma ((n+1:ℕ)+a+1) * (n+1+a) = (1-a+n) * (poch (1-a) n/Gamma (n+a+1)) := by
-  rw [poch_succ, show ((n+1:ℕ):ℂ)+a+1 = (n+a+1)+1 by push_cast; ring]
+    pochhammer (1-a) (n+1)/Gamma ((n+1:ℕ)+a+1) * (n+1+a) = (1-a+n) *
+        (pochhammer (1-a) n/Gamma (n+a+1)) := by
+  rw [pochhammer_succ, show ((n+1:ℕ):ℂ)+a+1 = (n+a+1)+1 by push_cast; ring]
   by_cases h0 : (n:ℂ)+a+1 = 0
   · rw [h0, zero_add, Gamma_zero]
     rw [show (n:ℂ)+1+a = 0 by linear_combination h0]
@@ -593,14 +606,14 @@ theorem IncompleteGammaSphericalSeries.coeff_succ (a : ℂ) (n : ℕ) :
 
 theorem IncompleteGammaSphericalSeries.coeff_bound (a₀ : ℂ) : ∃ K : ℝ, ∀ n : ℕ, ∀ a ∈
     Metric.closedBall a₀ (1/2),
-    ‖poch (1-a) n/Gamma (n+a+1)‖ ≤ K * 2^n := by
+    ‖pochhammer (1-a) n/Gamma (n+a+1)‖ ≤ K * 2^n := by
   set s := Metric.closedBall a₀ (1/2) with hs
   set A : ℝ := ‖a₀‖ + 1/2 with hA
   have hAa : ∀ a ∈ s, ‖a‖ ≤ A := fun a ha => by
     have := norm_le_norm_add_norm_sub' a a₀
     rw [Metric.mem_closedBall, dist_eq_norm] at ha
     linarith
-  have hcont : ∀ n : ℕ, ContinuousOn (fun a : ℂ => poch (1-a) n/Gamma (n+a+1)) s := by
+  have hcont : ∀ n : ℕ, ContinuousOn (fun a : ℂ => pochhammer (1-a) n/Gamma (n+a+1)) s := by
     intro n
     simp only [div_eq_mul_inv]
     refine (Continuous.continuousOn ?_)
@@ -611,7 +624,7 @@ theorem IncompleteGammaSphericalSeries.coeff_bound (a₀ : ℂ) : ∃ K : ℝ, �
   set N₀ : ℕ := ⌈3*A⌉₊ with hN₀
   set K : ℝ := ∑ n ∈ Finset.range (N₀+1), max (Kf n) 0 with hK
   have hK0 : 0 ≤ K := Finset.sum_nonneg fun n _ => le_max_right _ _
-  have hle : ∀ n ≤ N₀, ∀ a ∈ s, ‖poch (1-a) n/Gamma (n+a+1)‖ ≤ K := by
+  have hle : ∀ n ≤ N₀, ∀ a ∈ s, ‖pochhammer (1-a) n/Gamma (n+a+1)‖ ≤ K := by
     intro n hn a ha
     refine (hKf n a ha).trans ((le_max_left (Kf n) 0).trans ?_)
     exact Finset.single_le_sum (f := fun n => max (Kf n) 0) (fun n _ => le_max_right _ _)
@@ -640,26 +653,29 @@ theorem IncompleteGammaSphericalSeries.coeff_bound (a₀ : ℂ) : ∃ K : ℝ, �
       have hpos : 0 < (n:ℝ) + 1 - A := by linarith
       have e := congrArg norm (IncompleteGammaSphericalSeries.coeff_succ a n)
       rw [norm_mul, norm_mul] at e
-      have h2 : ‖poch (1-a) (n+1)/Gamma ((n+1:ℕ)+a+1)‖ * ((n:ℝ)+1-A) ≤
-          2 * ((n:ℝ)+1-A) * ‖poch (1-a) n/Gamma (n+a+1)‖ := by
-        calc ‖poch (1-a) (n+1)/Gamma ((n+1:ℕ)+a+1)‖ * ((n:ℝ)+1-A)
-            ≤ ‖poch (1-a) (n+1)/Gamma ((n+1:ℕ)+a+1)‖ * ‖(n:ℂ)+1+a‖ := by gcongr
-          _ = ‖1-a+(n:ℂ)‖ * ‖poch (1-a) n/Gamma (n+a+1)‖ := e
-          _ ≤ (n+1+A) * ‖poch (1-a) n/Gamma (n+a+1)‖ := by gcongr
-          _ ≤ 2 * ((n:ℝ)+1-A) * ‖poch (1-a) n/Gamma (n+a+1)‖ := by gcongr; linarith
-      have h3 : ‖poch (1-a) (n+1)/Gamma ((n+1:ℕ)+a+1)‖ ≤ 2 * ‖poch (1-a) n/Gamma (n+a+1)‖ := by
-        nlinarith [norm_nonneg (poch (1-a) n/Gamma (n+a+1))]
+      have h2 : ‖pochhammer (1-a) (n+1)/Gamma ((n+1:ℕ)+a+1)‖ * ((n:ℝ)+1-A) ≤
+          2 * ((n:ℝ)+1-A) * ‖pochhammer (1-a) n/Gamma (n+a+1)‖ := by
+        calc ‖pochhammer (1-a) (n+1)/Gamma ((n+1:ℕ)+a+1)‖ * ((n:ℝ)+1-A)
+            ≤ ‖pochhammer (1-a) (n+1)/Gamma ((n+1:ℕ)+a+1)‖ * ‖(n:ℂ)+1+a‖ := by gcongr
+          _ = ‖1-a+(n:ℂ)‖ * ‖pochhammer (1-a) n/Gamma (n+a+1)‖ := e
+          _ ≤ (n+1+A) * ‖pochhammer (1-a) n/Gamma (n+a+1)‖ := by gcongr
+          _ ≤ 2 * ((n:ℝ)+1-A) * ‖pochhammer (1-a) n/Gamma (n+a+1)‖ := by gcongr; linarith
+      have h3 : ‖pochhammer (1-a) (n+1)/Gamma ((n+1:ℕ)+a+1)‖ ≤ 2 *
+          ‖pochhammer (1-a) n/Gamma (n+a+1)‖ := by
+        nlinarith [norm_nonneg (pochhammer (1-a) n/Gamma (n+a+1))]
       rw [pow_succ]
       nlinarith [ih]
 
 /-- DLMF 8.7.5 for every `a`: the generic case by the Euler operator, the poles of `Γ(a)`
 by continuity in `a`. -/
 theorem IncompleteGammaSphericalSeries.hasSum_series (a z : ℂ) :
-    HasSum (fun n : ℕ => exp (-z/2)*poch (1-a) n/Gamma (n+a+1)*(2*n+1)*Bessel.sphericalI n (z/2))
-        (scIncGamma a z) := by
+    HasSum (fun n : ℕ =>
+        exp (-z/2)*pochhammer (1-a) n/Gamma (n+a+1)*(2*n+1)*Bessel.sphericalI n (z/2))
+        (tricomiIncompleteGamma a z) := by
   have hgen : ∀ a : ℂ, (∀ n : ℕ, a ≠ -n) →
-      HasSum (fun n : ℕ => exp (-z/2)*poch (1-a) n/Gamma (n+a+1)*(2*n+1)*Bessel.sphericalI n (z/2))
-      (scIncGamma a z) := by
+      HasSum (fun n : ℕ =>
+          exp (-z/2)*pochhammer (1-a) n/Gamma (n+a+1)*(2*n+1)*Bessel.sphericalI n (z/2))
+      (tricomiIncompleteGamma a z) := by
     intro a ha
     have h := IncompleteGammaSphericalSeries.hasSum_generic ha (z/2)
     rw [show 2*(z/2) = z by ring] at h
@@ -672,7 +688,7 @@ theorem IncompleteGammaSphericalSeries.hasSum_series (a z : ℂ) :
   set a₀ : ℂ := -(m:ℂ) with ha₀
   set s := Metric.closedBall a₀ (1/2) with hs
   set T : ℂ → ℕ → ℂ := fun a n =>
-      exp (-z/2)*poch (1-a) n/Gamma (n+a+1)*(2*n+1)*Bessel.sphericalI n (z/2)
+      exp (-z/2)*pochhammer (1-a) n/Gamma (n+a+1)*(2*n+1)*Bessel.sphericalI n (z/2)
     with hT
   obtain ⟨K, hK⟩ := IncompleteGammaSphericalSeries.coeff_bound a₀
   have hr6 : ∀ᶠ k in atTop, ‖((2:ℂ)^(k+1)*(2*((k+1:ℕ):ℂ)+1))‖ ≤ 6 * ‖((2:ℂ)^k*(2*(k:ℂ)+1))‖ := by
@@ -693,21 +709,21 @@ theorem IncompleteGammaSphericalSeries.hasSum_series (a z : ℂ) :
     have hK0 : 0 ≤ K := by
       have := (norm_nonneg _).trans (hK 0 a ha); simpa using this
     simp only [hT]
-    rw [show exp (-z/2)*poch (1-a) n/Gamma (n+a+1)*(2*n+1)*Bessel.sphericalI n (z/2) =
-      exp (-z/2) * (poch (1-a) n/Gamma (n+a+1)) * ((2*n+1)*Bessel.sphericalI n (z/2)) by ring,
+    rw [show exp (-z/2)*pochhammer (1-a) n/Gamma (n+a+1)*(2*n+1)*Bessel.sphericalI n (z/2) =
+      exp (-z/2) * (pochhammer (1-a) n/Gamma (n+a+1)) * ((2*n+1)*Bessel.sphericalI n (z/2)) by ring,
       norm_mul, norm_mul]
     have h3 : ‖((2:ℂ)*n+1)*Bessel.sphericalI n (z/2)‖ * 2^n ≤ u n := by
       have h22 : ‖(2:ℂ)‖ = 2 := by simp
       rw [norm_mul, norm_mul, norm_pow, h22] at h2
       rw [norm_mul]; linarith
-    calc ‖exp (-z/2)‖ * ‖poch (1-a) n/Gamma (n+a+1)‖ * ‖((2:ℂ)*n+1)*Bessel.sphericalI n (z/2)‖
+    calc ‖exp (-z/2)‖ * ‖pochhammer (1-a) n/Gamma (n+a+1)‖ * ‖((2:ℂ)*n+1)*Bessel.sphericalI n (z/2)‖
         ≤ ‖exp (-z/2)‖ * (K * 2^n) * ‖((2:ℂ)*n+1)*Bessel.sphericalI n (z/2)‖ := by gcongr
       _ = ‖exp (-z/2)‖ * K * (‖((2:ℂ)*n+1)*Bessel.sphericalI n (z/2)‖ * 2^n) := by ring
       _ ≤ ‖exp (-z/2)‖ * K * u n := by gcongr
   have hsum : Summable fun n => ‖exp (-z/2)‖ * K * u n := hu.mul_left _
   have hTc : ∀ n, ContinuousOn (fun a => T a n) s := by
     intro n
-    have hp : Continuous fun a : ℂ => poch (1-a) n :=
+    have hp : Continuous fun a : ℂ => pochhammer (1-a) n :=
       (ascPochhammer ℂ n).continuous.comp (continuous_const.sub continuous_id)
     have hg : Continuous fun a : ℂ => (Gamma (n+a+1))⁻¹ :=
       differentiable_one_div_Gamma.continuous.comp (by fun_prop)
@@ -717,10 +733,10 @@ theorem IncompleteGammaSphericalSeries.hasSum_series (a z : ℂ) :
   have hΦ : ContinuousOn (fun a => ∑' n, T a n) s := continuousOn_tsum hTc hsum hbound
   have hmem : s ∈ 𝓝 a₀ := Metric.closedBall_mem_nhds a₀ (by norm_num)
   have hΦa : ContinuousAt (fun a => ∑' n, T a n) a₀ := hΦ.continuousAt hmem
-  have hSa : ContinuousAt (fun a => scIncGamma a z) a₀ :=
-    (scIncGamma_joint_entire.continuous.comp
+  have hSa : ContinuousAt (fun a => tricomiIncompleteGamma a z) a₀ :=
+    (tricomiIncompleteGamma_joint_entire.continuous.comp
         (by fun_prop : Continuous fun a : ℂ => (a, z))).continuousAt
-  have heq : ∀ᶠ a in 𝓝[≠] a₀, ∑' n, T a n = scIncGamma a z := by
+  have heq : ∀ᶠ a in 𝓝[≠] a₀, ∑' n, T a n = tricomiIncompleteGamma a z := by
     have hb : Metric.ball a₀ (1/2) ∈ 𝓝 a₀ := Metric.ball_mem_nhds a₀ (by norm_num)
     filter_upwards [self_mem_nhdsWithin, nhdsWithin_le_nhds hb] with a hne hball
     refine (hgen a fun k hk => hne ?_).tsum_eq
@@ -736,7 +752,7 @@ theorem IncompleteGammaSphericalSeries.hasSum_series (a z : ℂ) :
   have hlim1 := hΦa.tendsto.mono_left (nhdsWithin_le_nhds (s := {a₀}ᶜ))
   have hlim2 := (hSa.tendsto.mono_left (nhdsWithin_le_nhds (s := {a₀}ᶜ))).congr'
       (heq.mono fun a h => h.symm)
-  have hval : ∑' n, T a₀ n = scIncGamma a₀ z := tendsto_nhds_unique hlim1 hlim2
+  have hval : ∑' n, T a₀ n = tricomiIncompleteGamma a₀ z := tendsto_nhds_unique hlim1 hlim2
   have hsT : Summable (fun n => T a₀ n) :=
     Summable.of_norm_bounded hsum (fun n => hbound n a₀ (Metric.mem_closedBall_self (by norm_num)))
   rw [← hval]
@@ -744,13 +760,13 @@ theorem IncompleteGammaSphericalSeries.hasSum_series (a z : ℂ) :
 
 /-- The series with terms
 `(fun n : ℕ => Gamma a*(x : ℂ)^(a/2)*exp (-x : ℂ)*Elementary.expPartialSum n (-1)*(x : ℂ)^((n :
-ℂ)/2)*DLMF.Bessel.besselI (n+a) (2*Real.sqrt x))` converges to `(lowerIncGamma a x)`. -/
+ℂ)/2)*DLMF.Bessel.besselI (n+a) (2*Real.sqrt x))` converges to `(lowerIncompleteGamma a x)`. -/
 @[dlmf 8.7.E4]
-theorem lowerIncGamma_besselI_series {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {x : ℝ} (hx : 0 < x) :
+theorem lowerIncompleteGamma_besselI_series {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {x : ℝ} (hx : 0 < x) :
     HasSum (fun n : ℕ =>
         Gamma a*(x : ℂ)^(a/2)*exp (-x : ℂ)*Elementary.expPartialSum n
         (-1)*(x : ℂ)^((n : ℂ)/2)*DLMF.Bessel.besselI (n+a) (2*Real.sqrt x))
-        (lowerIncGamma a x) := by
+        (lowerIncompleteGamma a x) := by
   set r : ℂ := ((Real.sqrt x : ℝ) : ℂ) with hr
   have hr0 : r ≠ 0 := by simp only [hr]; exact_mod_cast (Real.sqrt_pos.mpr hx).ne'
   have hz : (2*r) ≠ 0 := mul_ne_zero two_ne_zero hr0
@@ -792,16 +808,16 @@ theorem lowerIncGamma_besselI_series {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {x :
       rw [show a + (p.1:ℂ) + 1 + p.2 = a + j + 1 by rw [← hp]; push_cast; ring]
       ring
     rw [Finset.sum_congr rfl this, ← Finset.mul_sum, serRec_sum_antidiagonal_expPartialSum, mul_one]
-  have hS := scIncGamma_eq_tsum a x
-  have hlow : lowerIncGamma a x = Gamma a * (x:ℂ)^a * scIncGamma a x := by
+  have hS := tricomiIncompleteGamma_eq_tsum a x
+  have hlow : lowerIncompleteGamma a x = Gamma a * (x:ℂ)^a * tricomiIncompleteGamma a x := by
     have hx0 : (x:ℂ) ≠ 0 := by exact_mod_cast hx.ne'
-    rw [scIncGamma_eq ha hx0]
+    rw [tricomiIncompleteGamma_eq ha hx0]
     have hΓ := Gamma_ne_zero ha
     have : (x:ℂ)^a * (x:ℂ)^(-a) = 1 := by
       rw [cpow_neg, mul_inv_cancel₀ (cpow_ne_zero_iff.mpr (Or.inl hx0))]
     field_simp
-    linear_combination (-lowerIncGamma a x) * this
-  have hval : lowerIncGamma a x = Gamma a*(x : ℂ)^(a/2)*exp (-x : ℂ) *
+    linear_combination (-lowerIncompleteGamma a x) * this
+  have hval : lowerIncompleteGamma a x = Gamma a*(x : ℂ)^(a/2)*exp (-x : ℂ) *
       (r^a * ∑' j, DLMF.Bessel.neumannCoeff a 1 (fun k => Elementary.expPartialSum k (-1))
           (fun k => k) j * r^(2*j)) := by
     rw [hlow, hS]
@@ -822,54 +838,57 @@ theorem lowerIncGamma_besselI_series {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {x :
   ring
 
 /-- The series with terms
-`(fun n : ℕ => exp (-z/2)*poch (1-a) n/Gamma (n+a+1)*(2*n+1)*Bessel.sphericalI n (z/2))` converges
-to `(scIncGamma a z)`. -/
+`(fun n : ℕ => exp (-z/2)*pochhammer (1-a) n/Gamma (n+a+1)*(2*n+1)*Bessel.sphericalI n (z/2))`
+converges to `(tricomiIncompleteGamma a z)`. -/
 @[dlmf 8.7.E5]
-theorem scIncGamma_sphericalI_series (a z : ℂ) :
-    HasSum (fun n : ℕ => exp (-z/2)*poch (1-a) n/Gamma (n+a+1)*(2*n+1)*Bessel.sphericalI n (z/2))
-        (scIncGamma a z) := by
+theorem tricomiIncompleteGamma_sphericalI_series (a z : ℂ) :
+    HasSum (fun n : ℕ =>
+        exp (-z/2)*pochhammer (1-a) n/Gamma (n+a+1)*(2*n+1)*Bessel.sphericalI n (z/2))
+        (tricomiIncompleteGamma a z) := by
   exact IncompleteGammaSphericalSeries.hasSum_series a z
 
 /-- The series with terms `(fun n : ℕ => (x : ℂ)^a*exp (-x :
-ℂ)*DLMF.OrthogonalPolynomials.laguerrePolyL a n x/(n+1))` converges to `(upperIncGamma a x)`. -/
+ℂ)*DLMF.OrthogonalPolynomials.laguerrePolynomialL a n x/(n+1))` converges to `(upperIncompleteGamma
+a x)`. -/
 @[dlmf 8.7.E6]
-theorem upperIncGamma_laguerre_series {a : ℂ} (ha : a.re < 1/2) {x : ℝ} (hx : 0 < x) :
+theorem upperIncompleteGamma_laguerre_series {a : ℂ} (ha : a.re < 1/2) {x : ℝ} (hx : 0 < x) :
     HasSum (fun n : ℕ =>
-        (x : ℂ)^a*exp (-x : ℂ)*DLMF.OrthogonalPolynomials.laguerrePolyL a n x/(n+1))
-        (upperIncGamma a x) := by
+        (x : ℂ)^a*exp (-x : ℂ)*DLMF.OrthogonalPolynomials.laguerrePolynomialL a n x/(n+1))
+        (upperIncompleteGamma a x) := by
   sorry
 
-/-- Formula under the stated hypotheses: `∀ f ∈ ({lowerIncGamma,upperIncGamma} : Set (ℂ → ℂ → ℂ)),
-f (a+2) z-(a+1+z)*f (a+1) z+a*z*f a z=0`. -/
+/-- Formula under the stated hypotheses:
+`∀ f ∈ ({lowerIncompleteGamma,upperIncompleteGamma} : Set (ℂ → ℂ → ℂ)), f (a+2) z-(a+1+z)*f (a+1)
+z+a*z*f a z=0`. -/
 @[dlmf 8.8.E3]
 theorem incompleteGamma_threeTerm {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {z : ℂ} (hz : z ≠ 0) :
-    ∀ f ∈ ({lowerIncGamma, upperIncGamma} : Set (ℂ → ℂ → ℂ)),
+    ∀ f ∈ ({lowerIncompleteGamma, upperIncompleteGamma} : Set (ℂ → ℂ → ℂ)),
         f (a+2) z-(a+1+z)*f (a+1) z+a*z*f a z=0 := by
   intro f hf
   rcases hf with rfl | rfl
-  · have h0 := lowerIncGamma_add_one ha hz
-    have h1 := lowerIncGamma_add_one (add_one_ne_neg_nat ha) hz
+  · have h0 := lowerIncompleteGamma_add_one ha hz
+    have h1 := lowerIncompleteGamma_add_one (add_one_ne_neg_nat ha) hz
     rw [show a+1+1=a+2 by ring, cpow_add _ _ hz, cpow_one] at h1
     linear_combination h1 - z*h0
-  · have h0 := upperIncGamma_add_one a hz
-    have h1 := upperIncGamma_add_one (a+1) hz
+  · have h0 := upperIncompleteGamma_add_one a hz
+    have h1 := upperIncompleteGamma_add_one (a+1) hz
     rw [show a+1+1=a+2 by ring, cpow_add _ _ hz, cpow_one] at h1
     linear_combination h1 - z*h0
 
-/-- Formula under the stated hypotheses: `lowerIncGamma (a+n) z=poch a n*lowerIncGamma a z -
-z^a*exp (-z)*(∑ k ∈ Finset.range n, Gamma (a+n)/Gamma (a+k+1)*z^k)`. -/
+/-- Formula under the stated hypotheses:
+`lowerIncompleteGamma (a+n) z=pochhammer a n*lowerIncompleteGamma a z - z^a*exp (-z)*(∑ k ∈
+Finset.range n, Gamma (a+n)/Gamma (a+k+1)*z^k)`. -/
 @[dlmf 8.8.E7]
-theorem lowerIncGamma_shift_up (n : ℕ) {a : ℂ} (ha : ∀ k : ℕ, a ≠ -k) {z : ℂ} (hz : z ≠ 0) :
-    lowerIncGamma (a+n) z=poch a n*lowerIncGamma a z -
+theorem lowerIncompleteGamma_shift_up (n : ℕ) {a : ℂ} (ha : ∀ k : ℕ, a ≠ -k) {z : ℂ} (hz : z ≠ 0) :
+    lowerIncompleteGamma (a+n) z=pochhammer a n*lowerIncompleteGamma a z -
         z^a*exp (-z)*(∑ k ∈ Finset.range n, Gamma (a+n)/Gamma (a+k+1)*z^k) := by
   have han := not_neg_nat_add_nat ha n
   have hGa := Gamma_ne_zero ha
   have hGan := Gamma_ne_zero han
-  have hs := normIncGammaPContinued_shift_up n a hz
-  rw [normIncGammaPContinued_eq han, normIncGammaPContinued_eq ha,
-    normIncGammaP, normIncGammaP] at hs
+  have hs := regularizedGamma_shift_up n a hz
+  rw [regularizedGamma_eq han, regularizedGamma_eq ha] at hs
   have hg := Gamma_add_nat_div_Gamma_eq (n := n) a ha
-  rw [← poch] at hg
+  rw [← pochhammer] at hg
   rw [← hg]
   have hsum : ∑ k ∈ Finset.range n, Gamma (a+n)/Gamma (a+k+1)*z^k =
       Gamma (a+n)*∑ k ∈ Finset.range n, z^k/Gamma (a+k+1) := by
@@ -879,7 +898,7 @@ theorem lowerIncGamma_shift_up (n : ℕ) {a : ℂ} (ha : ∀ k : ℕ, a ≠ -k) 
     ring
   rw [hsum]
   calc
-    lowerIncGamma (a+n) z = Gamma (a+n)*(lowerIncGamma a z/Gamma a-
+    lowerIncompleteGamma (a+n) z = Gamma (a+n)*(lowerIncompleteGamma a z/Gamma a-
         z^a*exp (-z)*∑ k ∈ Finset.range n, z^k/Gamma (a+k+1)) := by
       rw [← hs]
       field_simp
@@ -905,86 +924,92 @@ theorem incompleteGamma_shift_sum_reverse (n : ℕ) (a : ℂ) {z : ℂ} (hz : z�
     ring
   linear_combination (Gamma a/Gamma (a-k))*he
 
-/-- Formula under the stated hypotheses: `lowerIncGamma a z=Gamma a/Gamma (a-n)*lowerIncGamma
-(a-n) z - z^(a-1)*exp (-z)*(∑ k ∈ Finset.range n, Gamma a/Gamma (a-k)*z^(-(k : ℤ)))`. -/
+/-- Formula under the stated hypotheses:
+`lowerIncompleteGamma a z=Gamma a/Gamma (a-n)*lowerIncompleteGamma (a-n) z - z^(a-1)*exp (-z)*(∑ k ∈
+Finset.range n, Gamma a/Gamma (a-k)*z^(-(k : ℤ)))`. -/
 @[dlmf 8.8.E8]
-theorem lowerIncGamma_shift_down (n : ℕ) {a : ℂ} (ha : ∀ k : ℕ, a-n ≠ -k) {z : ℂ} (hz : z ≠ 0) :
-    lowerIncGamma a z=Gamma a/Gamma (a-n)*lowerIncGamma (a-n) z -
+theorem lowerIncompleteGamma_shift_down (n : ℕ) {a : ℂ} (ha : ∀ k : ℕ, a-n ≠ -k)
+    {z : ℂ} (hz : z ≠ 0) :
+    lowerIncompleteGamma a z=Gamma a/Gamma (a-n)*lowerIncompleteGamma (a-n) z -
         z^(a-1)*exp (-z)*(∑ k ∈ Finset.range n, Gamma a/Gamma (a-k)*z^(-(k : ℤ))) := by
-  have hs := lowerIncGamma_shift_up n ha hz
+  have hs := lowerIncompleteGamma_shift_up n ha hz
   have hg := Gamma_add_nat_div_Gamma_eq (n:=n) (a-n) ha
   rw [show a-(n:ℂ)+n=a by ring] at hs hg
-  rw [← poch] at hg
+  rw [← pochhammer] at hg
   rw [← hg] at hs
   have he := incompleteGamma_shift_sum_reverse n a hz
   linear_combination hs-exp (-z)*he
 
-/-- Formula under the stated hypotheses: `upperIncGamma (a+n) z=poch a n*upperIncGamma a z +
-z^a*exp (-z)*(∑ k ∈ Finset.range n, Gamma (a+n)/Gamma (a+k+1)*z^k)`. -/
+/-- Formula under the stated hypotheses:
+`upperIncompleteGamma (a+n) z=pochhammer a n*upperIncompleteGamma a z + z^a*exp (-z)*(∑ k ∈
+Finset.range n, Gamma (a+n)/Gamma (a+k+1)*z^k)`. -/
 @[dlmf 8.8.E9]
-theorem upperIncGamma_shift_up (n : ℕ) {a : ℂ} (ha : ∀ k : ℕ, a ≠ -k) {z : ℂ} (hz : z ≠ 0) :
-    upperIncGamma (a+n) z=poch a n*upperIncGamma a z +
+theorem upperIncompleteGamma_shift_up (n : ℕ) {a : ℂ} (ha : ∀ k : ℕ, a ≠ -k) {z : ℂ} (hz : z ≠ 0) :
+    upperIncompleteGamma (a+n) z=pochhammer a n*upperIncompleteGamma a z +
         z^a*exp (-z)*(∑ k ∈ Finset.range n, Gamma (a+n)/Gamma (a+k+1)*z^k) := by
-  have h0 := lowerIncGamma_add_upperIncGamma ha hz
-  have hn := lowerIncGamma_add_upperIncGamma (not_neg_nat_add_nat ha n) hz
-  have hs := lowerIncGamma_shift_up n ha hz
+  have h0 := lowerIncompleteGamma_add_upperIncompleteGamma ha hz
+  have hn := lowerIncompleteGamma_add_upperIncompleteGamma (not_neg_nat_add_nat ha n) hz
+  have hs := lowerIncompleteGamma_shift_up n ha hz
   have hg := Gamma_add_nat_div_Gamma_eq (n := n) a ha
-  rw [← poch, div_eq_iff (Gamma_ne_zero ha)] at hg
-  linear_combination hn-hs-poch a n*h0+hg
+  rw [← pochhammer, div_eq_iff (Gamma_ne_zero ha)] at hg
+  linear_combination hn-hs-pochhammer a n*h0+hg
 
-/-- Formula under the stated hypotheses: `upperIncGamma a z=Gamma a/Gamma (a-n)*upperIncGamma
-(a-n) z + z^(a-1)*exp (-z)*(∑ k ∈ Finset.range n, Gamma a/Gamma (a-k)*z^(-(k : ℤ)))`. -/
+/-- Formula under the stated hypotheses:
+`upperIncompleteGamma a z=Gamma a/Gamma (a-n)*upperIncompleteGamma (a-n) z + z^(a-1)*exp (-z)*(∑ k ∈
+Finset.range n, Gamma a/Gamma (a-k)*z^(-(k : ℤ)))`. -/
 @[dlmf 8.8.E10]
-theorem upperIncGamma_shift_down (n : ℕ) {a : ℂ} (ha : ∀ k : ℕ, a-n ≠ -k) {z : ℂ} (hz : z ≠ 0) :
-    upperIncGamma a z=Gamma a/Gamma (a-n)*upperIncGamma (a-n) z +
+theorem upperIncompleteGamma_shift_down (n : ℕ) {a : ℂ} (ha : ∀ k : ℕ, a-n ≠ -k)
+    {z : ℂ} (hz : z ≠ 0) :
+    upperIncompleteGamma a z=Gamma a/Gamma (a-n)*upperIncompleteGamma (a-n) z +
         z^(a-1)*exp (-z)*(∑ k ∈ Finset.range n, Gamma a/Gamma (a-k)*z^(-(k : ℤ))) := by
-  have hs := upperIncGamma_shift_up n ha hz
+  have hs := upperIncompleteGamma_shift_up n ha hz
   have hg := Gamma_add_nat_div_Gamma_eq (n:=n) (a-n) ha
   rw [show a-(n:ℂ)+n=a by ring] at hs hg
-  rw [← poch] at hg
+  rw [← pochhammer] at hg
   rw [← hg] at hs
   have he := incompleteGamma_shift_sum_reverse n a hz
   linear_combination hs+exp (-z)*he
 
-/-- Identity under the stated parameter and domain assumptions: `deriv (fun a => scIncGamma a z) 0
-= -genExpIntE 1 z-log z`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`deriv (fun a => tricomiIncompleteGamma a z) 0 = -expIntegralE 1 z-log z`. -/
 @[dlmf 8.8.E14]
-theorem scIncGamma_deriv_parameter_zero {z : ℂ} (hz : z ≠ 0) :
-    deriv (fun a => scIncGamma a z) 0 = -genExpIntE 1 z-log z := by
-  have he : (fun a : ℂ => scIncGamma a z)=
+theorem tricomiIncompleteGamma_deriv_parameter_zero {z : ℂ} (hz : z ≠ 0) :
+    deriv (fun a => tricomiIncompleteGamma a z) 0 = -expIntegralE 1 z-log z := by
+  have he : (fun a : ℂ => tricomiIncompleteGamma a z)=
       (fun a => regularizedHGFun {a} {a+1} (-z)) := by
     funext a
     rw [regularizedConfluent_kummer_transform a (a+1) (-z)]
-    simp only [show a+1-a=1 by ring, neg_neg, scIncGamma]
+    simp only [show a+1-a=1 by ring, neg_neg, tricomiIncompleteGamma]
   rw [he, (hasDerivAt_regularizedConfluent_Ein z).deriv, expIntE1_eq_Ein_complex hz]
   ring
 
 /-- Identity under the stated parameter and domain assumptions: `iteratedDeriv n (fun t =>
-t^(-a)*lowerIncGamma a t) z=(-1 : ℂ)^n*z^(-a-n)*lowerIncGamma (a+n) z`. -/
+t^(-a)*lowerIncompleteGamma a t) z=(-1 : ℂ)^n*z^(-a-n)*lowerIncompleteGamma (a+n) z`. -/
 @[dlmf 8.8.E15]
-theorem lowerIncGamma_iteratedDeriv_scaled_power (n : ℕ) {a : ℂ} (ha : ∀ k : ℕ, a ≠ -k) {z : ℂ}
+theorem lowerIncompleteGamma_iteratedDeriv_scaled_power (n : ℕ) {a : ℂ}
+    (ha : ∀ k : ℕ, a ≠ -k) {z : ℂ}
     (hz : z ∈ slitPlane) :
-    iteratedDeriv n (fun t => t^(-a)*lowerIncGamma a t)
-        z=(-1 : ℂ)^n*z^(-a-n)*lowerIncGamma (a+n) z := by
+    iteratedDeriv n (fun t => t^(-a)*lowerIncompleteGamma a t)
+        z=(-1 : ℂ)^n*z^(-a-n)*lowerIncompleteGamma (a+n) z := by
   have hz0 := slitPlane_ne_zero hz
   have ha0 : a≠0 := by simpa using ha 0
   have ha1 := add_one_ne_neg_nat ha
   have han0 : a+(n:ℂ)≠0 := by intro h; exact ha n (by linear_combination h)
-  have he : (fun t => t^(-a)*lowerIncGamma a t)=ᶠ[𝓝 z]
+  have he : (fun t => t^(-a)*lowerIncompleteGamma a t)=ᶠ[𝓝 z]
       (fun t => (1/a)*kummerM a (a+1) (-t)) := by
     filter_upwards [isOpen_slitPlane.mem_nhds hz] with t ht
-    rw [lowerIncGamma]
+    rw [lowerIncompleteGamma]
     have hp : t^(-a)*t^a=1 := by rw [← cpow_add _ _ (slitPlane_ne_zero ht)]; simp
     linear_combination kummerM a (a+1) (-t)/a*hp
   rw [he.iteratedDeriv_eq n, iteratedDeriv_const_mul_field,
-    iteratedDeriv_comp_neg, iteratedDeriv_kummerM n ha1, lowerIncGamma]
+    iteratedDeriv_comp_neg, iteratedDeriv_kummerM n ha1, lowerIncompleteGamma]
   simp only [smul_eq_mul]
   rw [show a+1+(n:ℂ)=a+n+1 by ring]
   have hp : z^(-a-n)*z^(a+n)=1 := by rw [← cpow_add _ _ hz0]; ring_nf; simp
-  have hpoch : a*poch (a+1) n=(a+n)*poch a n := by
-    rw [← poch_succ_left, poch_succ]
+  have hpoch : a*pochhammer (a+1) n=(a+n)*pochhammer a n := by
+    rw [← pochhammer_succ_left, pochhammer_succ]
     ring
-  have hpc := poch_ne_zero_of_not_neg_nat ha1 n
+  have hpc := pochhammer_ne_zero_of_not_neg_nat ha1 n
   rw [show (-1:ℂ)^n*z^(-a-n)*(z^(a+n)/(a+n)*kummerM (a+n) (a+n+1) (-z))=
       (-1:ℂ)^n/(a+n)*kummerM (a+n) (a+n+1) (-z) by
     linear_combination (-1:ℂ)^n/(a+n)*kummerM (a+n) (a+n+1) (-z)*hp]
@@ -992,57 +1017,59 @@ theorem lowerIncGamma_iteratedDeriv_scaled_power (n : ℕ) {a : ℂ} (ha : ∀ k
   linear_combination -kummerM (a+n) (a+n+1) (-z)*hpoch
 
 /-- Identity under the stated parameter and domain assumptions: `iteratedDeriv n (fun t =>
-t^(-a)*upperIncGamma a t) z=(-1 : ℂ)^n*z^(-a-n)*upperIncGamma (a+n) z`. -/
+t^(-a)*upperIncompleteGamma a t) z=(-1 : ℂ)^n*z^(-a-n)*upperIncompleteGamma (a+n) z`. -/
 @[dlmf 8.8.E16]
-theorem upperIncGamma_iteratedDeriv_scaled_power (n : ℕ) {a : ℂ} {z : ℂ} (hz : z ∈ slitPlane) :
-    iteratedDeriv n (fun t => t^(-a)*upperIncGamma a t)
-        z=(-1 : ℂ)^n*z^(-a-n)*upperIncGamma (a+n) z := by
-  have he : (fun t => t^(-a)*upperIncGamma a t)=ᶠ[𝓝 z]
+theorem upperIncompleteGamma_iteratedDeriv_scaled_power (n : ℕ) {a : ℂ} {z : ℂ}
+    (hz : z ∈ slitPlane) :
+    iteratedDeriv n (fun t => t^(-a)*upperIncompleteGamma a t)
+        z=(-1 : ℂ)^n*z^(-a-n)*upperIncompleteGamma (a+n) z := by
+  have he : (fun t => t^(-a)*upperIncompleteGamma a t)=ᶠ[𝓝 z]
       (fun t => exp (-t)*kummerU 1 (1+a) t) := by
     filter_upwards [isOpen_slitPlane.mem_nhds hz] with t ht
     have ht0 := slitPlane_ne_zero ht
-    rw [upperIncGamma_eq_cpow_mul_kummerU _ ht0, add_comm a 1]
+    rw [upperIncompleteGamma_eq_cpow_mul_kummerU _ ht0, add_comm a 1]
     have hp : t^(-a)*t^a=1 := by rw [← cpow_add _ _ ht0]; simp
     linear_combination exp (-t)*kummerU 1 (1+a) t*hp
   rw [he.iteratedDeriv_eq n, iteratedDeriv_exp_neg_kummerU _ _ _ hz,
-    upperIncGamma_eq_cpow_mul_kummerU _ (slitPlane_ne_zero hz)]
+    upperIncompleteGamma_eq_cpow_mul_kummerU _ (slitPlane_ne_zero hz)]
   have hp : z^(-a-n)*z^(a+n)=1 := by rw [← cpow_add _ _ (slitPlane_ne_zero hz)]; ring_nf; simp
   rw [show a+(n:ℂ)+1=1+a+n by ring]
   linear_combination -(-1:ℂ)^n*exp (-z)*kummerU 1 (1+a+n) z*hp
 
 /-- Exponentially weighted upper-Gamma differentiation holds at every parameter. -/
-theorem hasDerivAt_exp_mul_upperIncGamma (a : ℂ) {z : ℂ} (hz : z∈slitPlane) :
-    HasDerivAt (fun t => exp t*upperIncGamma a t)
-      ((a-1)*exp z*upperIncGamma (a-1) z) z := by
-  have hd := (Complex.hasDerivAt_exp z).mul (hasDerivAt_upperIncGamma_complex a hz)
+theorem hasDerivAt_exp_mul_upperIncompleteGamma (a : ℂ) {z : ℂ} (hz : z∈slitPlane) :
+    HasDerivAt (fun t => exp t*upperIncompleteGamma a t)
+      ((a-1)*exp z*upperIncompleteGamma (a-1) z) z := by
+  have hd := (Complex.hasDerivAt_exp z).mul (hasDerivAt_upperIncompleteGamma_complex a hz)
   refine hd.congr_deriv ?_
-  have hr := upperIncGamma_add_one (a-1) (slitPlane_ne_zero hz)
+  have hr := upperIncompleteGamma_add_one (a-1) (slitPlane_ne_zero hz)
   rw [sub_add_cancel] at hr
   have he : exp z*exp (-z)=1 := by rw [← Complex.exp_add]; simp
   linear_combination exp z*hr
 
 /-- Exponentially weighted lower-Gamma differentiation away from the shifted poles. -/
-theorem hasDerivAt_exp_mul_lowerIncGamma (a : ℂ)
+theorem hasDerivAt_exp_mul_lowerIncompleteGamma (a : ℂ)
     (ha : ∀ k : ℕ, a-1≠-k) {z : ℂ} (hz : z∈slitPlane) :
-    HasDerivAt (fun t => exp t*lowerIncGamma a t)
-      ((a-1)*exp z*lowerIncGamma (a-1) z) z := by
+    HasDerivAt (fun t => exp t*lowerIncompleteGamma a t)
+      ((a-1)*exp z*lowerIncompleteGamma (a-1) z) z := by
   have ha0 : ∀ k : ℕ, a≠-k := by simpa using add_one_ne_neg_nat ha
   have hd := (Complex.hasDerivAt_exp z).mul (hasDerivAt_incompleteGamma ha0 hz).1
   refine hd.congr_deriv ?_
-  have hr := lowerIncGamma_add_one ha (slitPlane_ne_zero hz)
+  have hr := lowerIncompleteGamma_add_one ha (slitPlane_ne_zero hz)
   rw [sub_add_cancel] at hr
   have he : exp z*exp (-z)=1 := by rw [← Complex.exp_add]; simp
   linear_combination exp z*hr
 
 /-- Identity under the stated parameter and domain assumptions: `iteratedDeriv n (fun t => exp
-t*lowerIncGamma a t) z=(-1 : ℂ)^n*poch (1-a) n*exp z*lowerIncGamma (a-n) z`. -/
+t*lowerIncompleteGamma a t) z=(-1 : ℂ)^n*pochhammer (1-a) n*exp z*lowerIncompleteGamma (a-n) z`. -/
 @[dlmf 8.8.E17]
-theorem lowerIncGamma_iteratedDeriv_scaled_exp (n : ℕ) {a : ℂ} (ha : ∀ k : ℕ, a-n ≠ -k) {z : ℂ}
+theorem lowerIncompleteGamma_iteratedDeriv_scaled_exp (n : ℕ) {a : ℂ}
+    (ha : ∀ k : ℕ, a-n ≠ -k) {z : ℂ}
     (hz : z ∈ slitPlane) :
-    iteratedDeriv n (fun t => exp t*lowerIncGamma a t) z=(-1 : ℂ)^n*poch (1-a) n*exp
-        z*lowerIncGamma (a-n) z := by
+    iteratedDeriv n (fun t => exp t*lowerIncompleteGamma a t) z=(-1 : ℂ)^n*pochhammer (1-a) n*exp
+        z*lowerIncompleteGamma (a-n) z := by
   induction n generalizing a with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ n ih =>
     have ha1 : ∀ k : ℕ, a-1≠-k := by
       intro k hk
@@ -1054,25 +1081,26 @@ theorem lowerIncGamma_iteratedDeriv_scaled_exp (n : ℕ) {a : ℂ} (ha : ∀ k :
       apply ha k
       push_cast
       linear_combination hk
-    have he : deriv (fun t => exp t*lowerIncGamma a t)=ᶠ[𝓝 z]
-        (fun t => (a-1)*(exp t*lowerIncGamma (a-1) t)) := by
+    have he : deriv (fun t => exp t*lowerIncompleteGamma a t)=ᶠ[𝓝 z]
+        (fun t => (a-1)*(exp t*lowerIncompleteGamma (a-1) t)) := by
       filter_upwards [isOpen_slitPlane.mem_nhds hz] with t ht
-      simpa only [mul_assoc] using (hasDerivAt_exp_mul_lowerIncGamma a ha1 ht).deriv
+      simpa only [mul_assoc] using (hasDerivAt_exp_mul_lowerIncompleteGamma a ha1 ht).deriv
     rw [iteratedDeriv_succ', he.iteratedDeriv_eq n, iteratedDeriv_const_mul_field, ih has,
-      poch_succ_left, pow_succ]
+      pochhammer_succ_left, pow_succ]
     rw [show (1:ℂ)-(a-1)=1-a+1 by ring,
       show a-1-(n:ℂ)=a-(n+1:ℕ) by push_cast; ring]
     ring
 
 /-- Identity under the stated parameter and domain assumptions: `iteratedDeriv n (fun t => exp
-t*upperIncGamma a t) z=(-1 : ℂ)^n*poch (1-a) n*exp z*upperIncGamma (a-n) z`. -/
+t*upperIncompleteGamma a t) z=(-1 : ℂ)^n*pochhammer (1-a) n*exp z*upperIncompleteGamma (a-n) z`. -/
 @[dlmf 8.8.E19]
-theorem upperIncGamma_iteratedDeriv_scaled_exp (n : ℕ) {a : ℂ} (ha : ∀ k : ℕ, a-n ≠ -k) {z : ℂ}
+theorem upperIncompleteGamma_iteratedDeriv_scaled_exp (n : ℕ) {a : ℂ}
+    (ha : ∀ k : ℕ, a-n ≠ -k) {z : ℂ}
     (hz : z ∈ slitPlane) :
-    iteratedDeriv n (fun t => exp t*upperIncGamma a t) z=(-1 : ℂ)^n*poch (1-a) n*exp
-        z*upperIncGamma (a-n) z := by
+    iteratedDeriv n (fun t => exp t*upperIncompleteGamma a t) z=(-1 : ℂ)^n*pochhammer (1-a) n*exp
+        z*upperIncompleteGamma (a-n) z := by
   induction n generalizing a with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ n ih =>
     have ha1 : ∀ k : ℕ, a-1≠-k := by
       intro k hk
@@ -1084,12 +1112,12 @@ theorem upperIncGamma_iteratedDeriv_scaled_exp (n : ℕ) {a : ℂ} (ha : ∀ k :
       apply ha k
       push_cast
       linear_combination hk
-    have he : deriv (fun t => exp t*upperIncGamma a t)=ᶠ[𝓝 z]
-        (fun t => (a-1)*(exp t*upperIncGamma (a-1) t)) := by
+    have he : deriv (fun t => exp t*upperIncompleteGamma a t)=ᶠ[𝓝 z]
+        (fun t => (a-1)*(exp t*upperIncompleteGamma (a-1) t)) := by
       filter_upwards [isOpen_slitPlane.mem_nhds hz] with t ht
-      simpa only [mul_assoc] using (hasDerivAt_exp_mul_upperIncGamma a ht).deriv
+      simpa only [mul_assoc] using (hasDerivAt_exp_mul_upperIncompleteGamma a ht).deriv
     rw [iteratedDeriv_succ', he.iteratedDeriv_eq n, iteratedDeriv_const_mul_field, ih has,
-      poch_succ_left, pow_succ]
+      pochhammer_succ_left, pow_succ]
     rw [show (1:ℂ)-(a-1)=1-a+1 by ring,
       show a-1-(n:ℂ)=a-(n+1:ℕ) by push_cast; ring]
     ring
@@ -1130,23 +1158,24 @@ theorem iteratedDeriv_cpow_mul_regularized_one (n : ℕ) (a : ℂ) {z : ℂ} (hz
     congr 1 <;> push_cast <;> ring
 
 /-- Identity under the stated parameter and domain assumptions: `iteratedDeriv n (fun t => t^a*exp
-t*scIncGamma a t) z=z^(a-n)*exp z*scIncGamma (a-n) z`. -/
+t*tricomiIncompleteGamma a t) z=z^(a-n)*exp z*tricomiIncompleteGamma (a-n) z`. -/
 @[dlmf 8.8.E18]
-theorem scIncGamma_iteratedDeriv_scaled (n : ℕ) (a : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
-    iteratedDeriv n (fun t => t^a*exp t*scIncGamma a t) z=z^(a-n)*exp z*scIncGamma (a-n) z := by
-  have he (a t : ℂ) : t^a*exp t*scIncGamma a t=t^a*regularizedHGFun {1} {a+1} t := by
-    rw [scIncGamma]
+theorem tricomiIncompleteGamma_iteratedDeriv_scaled (n : ℕ) (a : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
+    iteratedDeriv n (fun t => t^a*exp t*tricomiIncompleteGamma a t) z=z^(a-n)*exp
+        z*tricomiIncompleteGamma (a-n) z := by
+  have he (a t : ℂ) : t^a*exp t*tricomiIncompleteGamma a t=t^a*regularizedHGFun {1} {a+1} t := by
+    rw [tricomiIncompleteGamma]
     have hE : exp t*exp (-t)=1 := by rw [← Complex.exp_add]; simp
     linear_combination t^a*regularizedHGFun {1} {a+1} t*hE
   simp_rw [he]
   exact iteratedDeriv_cpow_mul_regularized_one n a hz
 
 /-- At parameter zero the logarithmic-plane upper Gamma function is `Ein(e^w)-w-γ`. -/
-theorem upperIncGammaOnLog_zero (w : ℂ) :
-    upperIncGammaOnLog 0 w=expIntEin (exp w)-w-Real.eulerMascheroniConstant := by
+theorem upperIncompleteGammaOnLog_zero (w : ℂ) :
+    upperIncompleteGammaOnLog 0 w=expIntegralEin (exp w)-w-Real.eulerMascheroniConstant := by
   have hz : exp w ≠ 0 := Complex.exp_ne_zero w
-  have hd (u : ℂ) : HasDerivAt (fun v => -(expIntEin (exp v)-v)) (exp (0*u-exp u)) u := by
-    have h := ((hasDerivAt_expIntEin_complex (Complex.exp_ne_zero u)).comp u
+  have hd (u : ℂ) : HasDerivAt (fun v => -(expIntegralEin (exp v)-v)) (exp (0*u-exp u)) u := by
+    have h := ((hasDerivAt_expIntegralEin_complex (Complex.exp_ne_zero u)).comp u
       (Complex.hasDerivAt_exp u)).sub (hasDerivAt_id u)
     refine h.neg.congr_deriv ?_
     have he : exp u ≠ 0 := Complex.exp_ne_zero u
@@ -1154,7 +1183,7 @@ theorem upperIncGammaOnLog_zero (w : ℂ) :
     field_simp
     ring
   have hi := segmentIntegral_eq_sub hd (log (exp w)) w
-  rw [upperIncGammaOnLog, hi, upperIncGamma_zero_E1, expIntE1_eq_Ein_complex hz,
+  rw [upperIncompleteGammaOnLog, hi, upperIncompleteGamma_zero_E1, expIntE1_eq_Ein_complex hz,
     Complex.exp_log hz]
   ring
 
@@ -1164,18 +1193,19 @@ theorem exp_add_two_pi_int_mul_I (w : ℂ) (m : ℤ) : exp (w+2*π*m*I)=exp w :=
 
 /-- At nonpositive integral parameters the logarithmic-plane upper Gamma function changes by an
 additive constant under a full turn. -/
-theorem upperIncGammaOnLog_neg_nat_monodromy (k : ℕ) (w : ℂ) (m : ℤ) :
-    upperIncGammaOnLog (-k) (w+2*π*m*I)=upperIncGammaOnLog (-k)
+theorem upperIncompleteGammaOnLog_neg_nat_monodromy (k : ℕ) (w : ℂ) (m : ℤ) :
+    upperIncompleteGammaOnLog (-k) (w+2*π*m*I)=upperIncompleteGammaOnLog (-k)
         w-2*π*m*I*(-1 : ℂ)^k/k.factorial := by
   induction k with
   | zero =>
-    simp only [CharP.cast_eq_zero, neg_zero, upperIncGammaOnLog_zero, exp_add_two_pi_int_mul_I,
+    simp only [CharP.cast_eq_zero, neg_zero, upperIncompleteGammaOnLog_zero,
+        exp_add_two_pi_int_mul_I,
       pow_zero, Nat.factorial_zero, Nat.cast_one, div_one]
     ring
   | succ k ih =>
     have hk : (-((k+1:ℕ):ℂ)) ≠ 0 := by push_cast;
                                        exact neg_ne_zero.mpr (by exact_mod_cast k.succ_ne_zero)
-    have hr (v : ℂ) := upperIncGammaOnLog_add_one (-((k+1:ℕ):ℂ)) v
+    have hr (v : ℂ) := upperIncompleteGammaOnLog_add_one (-((k+1:ℕ):ℂ)) v
     rw [show -((k+1:ℕ):ℂ)+1=-(k:ℂ) by push_cast; ring] at hr
     have he : exp (-((k+1:ℕ):ℂ)*(w+2*π*m*I))=exp (-((k+1:ℕ):ℂ)*w) := by
       have := exp_add_two_pi_int_mul_I (-((k+1:ℕ):ℂ)*w) (-((k+1:ℕ):ℤ)*m)
@@ -1192,31 +1222,32 @@ theorem upperIncGammaOnLog_neg_nat_monodromy (k : ℕ) (w : ℂ) (m : ℤ) :
     have hinv : ((k:ℂ)+1)⁻¹*((k:ℂ)+1)=1 := inv_mul_cancel₀ hk'
     push_cast at h1 h0 ⊢
     rw [pow_succ, div_eq_mul_inv, mul_inv]
-    linear_combination ((k:ℂ)+1)⁻¹*(h1-h0)-(upperIncGammaOnLog (-(k+1))
-        (w+2*π*m*I)-upperIncGammaOnLog (-(k+1)) w)*hinv
+    linear_combination ((k:ℂ)+1)⁻¹*(h1-h0)-(upperIncompleteGammaOnLog (-(k+1))
+        (w+2*π*m*I)-upperIncompleteGammaOnLog (-(k+1)) w)*hinv
 
 /-- On the principal strip the logarithmic-plane upper Gamma function is the principal one. -/
-theorem upperIncGammaOnLog_eq_upperIncGamma (a : ℂ) {w : ℂ} (h1 : -π < w.im) (h2 : w.im ≤ π) :
-    upperIncGammaOnLog a w=upperIncGamma a (exp w) := by
-  rw [upperIncGammaOnLog, Complex.log_exp h1 h2]
+theorem upperIncompleteGammaOnLog_eq_upperIncompleteGamma (a : ℂ) {w : ℂ} (h1 : -π < w.im)
+    (h2 : w.im ≤ π) :
+    upperIncompleteGammaOnLog a w=upperIncompleteGamma a (exp w) := by
+  rw [upperIncompleteGammaOnLog, Complex.log_exp h1 h2]
   simp [segmentIntegral]
 
 /-- The logarithmic-plane upper Gamma function has derivative `-exp (a w - e^w)` at every
 parameter. -/
-theorem hasDerivAt_upperIncGammaOnLog (a w : ℂ) :
-    HasDerivAt (upperIncGammaOnLog a) (-exp (a*w-exp w)) w := by
+theorem hasDerivAt_upperIncompleteGammaOnLog (a w : ℂ) :
+    HasDerivAt (upperIncompleteGammaOnLog a) (-exp (a*w-exp w)) w := by
   by_cases ha : ∀ n : ℕ, a ≠ -n
-  · have h := (hasDerivAt_lowerIncGammaOnLog ha w).const_sub (Gamma a)
+  · have h := (hasDerivAt_lowerIncompleteGammaOnLog ha w).const_sub (Gamma a)
     exact h.congr_of_eventuallyEq
-        (Eventually.of_forall fun v => upperIncGammaOnLog_eq_Gamma_sub ha v)
+        (Eventually.of_forall fun v => upperIncompleteGammaOnLog_eq_Gamma_sub ha v)
   push Not at ha
   obtain ⟨n, rfl⟩ := ha
   induction n generalizing w with
   | zero =>
-    have h := (((hasDerivAt_expIntEin_complex (Complex.exp_ne_zero w)).comp w
+    have h := (((hasDerivAt_expIntegralEin_complex (Complex.exp_ne_zero w)).comp w
       (Complex.hasDerivAt_exp w)).sub (hasDerivAt_id w)).sub_const (Real.eulerMascheroniConstant:ℂ)
     refine (h.congr_of_eventuallyEq (Eventually.of_forall fun v => ?_)).congr_deriv ?_
-    · simp [upperIncGammaOnLog_zero]
+    · simp [upperIncompleteGammaOnLog_zero]
     · have he : exp w ≠ 0 := Complex.exp_ne_zero w
       simp only [CharP.cast_eq_zero, neg_zero, zero_mul, zero_sub, id, Function.comp_apply]
       field_simp
@@ -1225,9 +1256,9 @@ theorem hasDerivAt_upperIncGammaOnLog (a w : ℂ) :
     have hk : (-((n+1:ℕ):ℂ)) ≠ 0 := by
       push_cast; exact neg_ne_zero.mpr (by exact_mod_cast n.succ_ne_zero)
     set a : ℂ := -((n+1:ℕ):ℂ) with ha
-    have hr (v : ℂ) : upperIncGammaOnLog a v =
-        (upperIncGammaOnLog (-(n:ℂ)) v - exp (a*v-exp v))/a := by
-      have := upperIncGammaOnLog_add_one a v
+    have hr (v : ℂ) : upperIncompleteGammaOnLog a v =
+        (upperIncompleteGammaOnLog (-(n:ℂ)) v - exp (a*v-exp v))/a := by
+      have := upperIncompleteGammaOnLog_add_one a v
       rw [show a+1 = -(n:ℂ) by rw [ha]; push_cast; ring] at this
       rw [this]; field_simp; ring
     have he : HasDerivAt (fun v => exp (a*v-exp v)) (exp (a*w-exp w)*(a-exp w)) w := by

@@ -26,8 +26,8 @@ DLMF §22.11 and §22.12.
 
 * `tendsto_sum_Icc_neg_one_zpow_div_sub`: `∑_{|m| ≤ M} (-1)^m/(w - m) → π/sin(πw)` (from
   Mathlib's cotangent Mittag-Leffler expansion and `cot(x/2) - cot x = 1/sin x`).
-* `jacobiPQk_s_eq_eisensteinSinSeries`: `2K ns(2Kt) = G₊(t)` and `2K ds(2Kt) = G₋(t)`.
-* `hasSum_pi_div_sin_jacobiNsk`, `hasSum_neg_one_zpow_pi_div_sin_jacobiDsk`: the outer series
+* `jacobiPQ_s_eq_eisensteinSinSeries`: `2K ns(2Kt) = G₊(t)` and `2K ds(2Kt) = G₋(t)`.
+* `hasSum_pi_div_sin_jacobiNs`, `hasSum_neg_one_zpow_pi_div_sin_jacobiDs`: the outer series
   of DLMF 22.12.11 and 22.12.12.
 * `hasSum_fourier_of_hasSum_pi_div_sin`: expanding each `π/sin` term geometrically and
   interchanging the double series gives the Fourier coefficients (used for DLMF §22.11).
@@ -50,7 +50,7 @@ noncomputable section
 
 namespace DLMF.JacobiElliptic
 
-open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
+open DLMF.EllipticIntegrals (completeEllipticK completeEllipticKPrime)
 
 /-- Lower bound `‖sin w‖ ≥ (e^{|Im w|} - e^{-|Im w|})/2`. -/
 private lemma sinh_abs_im_le_norm_sin (w : ℂ) :
@@ -658,10 +658,10 @@ theorem tendsto_sum_Icc_neg_one_zpow_div_sub {w : ℂ} (hw : ∀ m : ℤ, w - m 
   ring
 
 /-- `2Kτ = 2iK'`. -/
-lemma two_mul_compEllIntKk_mul_jacobiTauk {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
-    2 * compEllIntKk k * jacobiTauk k = 2 * (I * compEllIntKpk k) := by
-  have := compEllIntKk_ne_zero_of_mem_jacobiModulusDomain hk
-  rw [jacobiTauk]; field_simp
+lemma two_mul_completeEllipticK_mul_jacobiTau {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
+    2 * completeEllipticK k * jacobiTau k = 2 * (I * completeEllipticKPrime k) := by
+  have := completeEllipticK_ne_zero_of_mem_jacobiModulusDomain hk
+  rw [jacobiTau]; field_simp
 
 /-- A function with the pole dichotomy is analytic where its order is not negative. -/
 theorem HasPoleDichotomy.analyticAt_of_not_neg {f : ℂ → ℂ} (hf : HasPoleDichotomy f) {z : ℂ}
@@ -669,47 +669,47 @@ theorem HasPoleDichotomy.analyticAt_of_not_neg {f : ℂ → ℂ} (hf : HasPoleDi
   (hf z).resolve_right fun h' => h h'.1
 
 /-- `p s` (with `p ≠ s`) is analytic off the points congruent to `0`. -/
-lemma analyticAt_jacobiPQk_s {k : ℂ} (hk : k ∈ jacobiModulusDomain) {p : JacobiLetter}
+lemma analyticAt_jacobiPQ_s {k : ℂ} (hk : k ∈ jacobiModulusDomain) {p : JacobiLetter}
     (hp : p ≠ .s) {z : ℂ} (hz : z ∉ jacobiCongruentk 0 k) :
-    AnalyticAt ℂ (fun w => jacobiPQk p .s w k) z := by
-  have h := jacobiPQk_zeros_poles hk hp z
+    AnalyticAt ℂ (fun w => jacobiPQ p .s w k) z := by
+  have h := jacobiPQ_zeros_poles hk hp z
   by_cases hzp : z ∈ jacobiCongruentk (jacobiLetterPointk p k) k
-  · refine (poleDichotomy_jacobiPQk hk hp).analyticAt_of_not_neg ?_
+  · refine (poleDichotomy_jacobiPQ hk hp).analyticAt_of_not_neg ?_
     rw [h.1.mpr hzp]; decide
   · exact (h.2.2 hzp hz).1
 
 /-- A letter function is analytic at a point where its denominator letter is nonzero. -/
-lemma analyticAt_jacobiPQk {k : ℂ} (hk : k ∈ jacobiModulusDomain) {p q : JacobiLetter}
-    (hpq : p ≠ q) {z : ℂ} (hz : jacobiLetterTheta q (jacobiZetak z k) (jacobiTauk k) ≠ 0) :
-    AnalyticAt ℂ (fun w => jacobiPQk p q w k) z :=
+lemma analyticAt_jacobiPQ {k : ℂ} (hk : k ∈ jacobiModulusDomain) {p q : JacobiLetter}
+    (hpq : p ≠ q) {z : ℂ} (hz : jacobiLetterTheta q (jacobiThetaArgument z k) (jacobiTau k) ≠ 0) :
+    AnalyticAt ℂ (fun w => jacobiPQ p q w k) z :=
   Complex.analyticAt_iff_eventually_differentiableAt.mpr
     ((eventually_jacobiLetterTheta_ne_zero hk hz).mono fun _ hw =>
-        (hasDerivAt_jacobiPQk hk hpq hw).differentiableAt)
+        (hasDerivAt_jacobiPQ hk hpq hw).differentiableAt)
 
 /-- The Eisenstein-type series identity for `ns` (`ε = 1`) and `ds` (`ε = -1`):
 `2K · ps(2Kt) = ∑ₙ εⁿ π/sin(π(t - nτ))` off the lattice. -/
-lemma jacobiPQk_s_eq_eisensteinSinSeries {k : ℂ} (hk : k ∈ jacobiModulusDomain)
+lemma jacobiPQ_s_eq_eisensteinSinSeries {k : ℂ} (hk : k ∈ jacobiModulusDomain)
     {p : JacobiLetter} {ε : ℂ}
-    (hp : p = .n ∧ ε = 1 ∨ p = .d ∧ ε = -1) {t : ℂ} (ht : t ∉ eisensteinSinLattice (jacobiTauk k)) :
-    2 * compEllIntKk k * jacobiPQk p .s (2 * compEllIntKk k * t) k =
-        eisensteinSinSeries ε (jacobiTauk k) t := by
-  have hτ := jacobiTauk_im_pos hk
-  have hK := compEllIntKk_ne_zero_of_mem_jacobiModulusDomain hk
-  have hK2 : 2 * compEllIntKk k ≠ 0 := mul_ne_zero two_ne_zero hK
+    (hp : p = .n ∧ ε = 1 ∨ p = .d ∧ ε = -1) {t : ℂ} (ht : t ∉ eisensteinSinLattice (jacobiTau k)) :
+    2 * completeEllipticK k * jacobiPQ p .s (2 * completeEllipticK k * t) k =
+        eisensteinSinSeries ε (jacobiTau k) t := by
+  have hτ := jacobiTau_im_pos hk
+  have hK := completeEllipticK_ne_zero_of_mem_jacobiModulusDomain hk
+  have hK2 : 2 * completeEllipticK k ≠ 0 := mul_ne_zero two_ne_zero hK
   have hε : ε = 1 ∨ ε = -1 := by rcases hp with h | h; exacts [Or.inl h.2, Or.inr h.2]
   have hps : p ≠ .s := by rcases hp with h | h <;> rw [h.1] <;> decide
-  set K := compEllIntKk k
-  set f : ℂ → ℂ := fun t => 2 * K * jacobiPQk p .s (2 * K * t) k with hfdef
+  set K := completeEllipticK k
+  set f : ℂ → ℂ := fun t => 2 * K * jacobiPQ p .s (2 * K * t) k with hfdef
   -- lattice correspondence
-  have hlat : ∀ t, t ∉ eisensteinSinLattice (jacobiTauk k) → 2 * K * t ∉ jacobiCongruentk 0 k := by
+  have hlat : ∀ t, t ∉ eisensteinSinLattice (jacobiTau k) → 2 * K * t ∉ jacobiCongruentk 0 k := by
     rintro t ht ⟨m, n, hmn⟩
     apply ht
     refine ⟨m, n, ?_⟩
-    have h2 := two_mul_compEllIntKk_mul_jacobiTauk hk
+    have h2 := two_mul_completeEllipticK_mul_jacobiTau hk
     apply mul_left_cancel₀ hK2
     rw [hmn]; linear_combination (-(n : ℂ)) * h2
   have hdich : HasPoleDichotomy f := by
-    have := (poleDichotomy_jacobiPQk hk (p := p) (q := .s) hps).comp (a := (2 * K)⁻¹)
+    have := (poleDichotomy_jacobiPQ hk (p := p) (q := .s) hps).comp (a := (2 * K)⁻¹)
         (inv_ne_zero hK2) hK2
     convert this using 2 with w
     rw [div_inv_eq_mul, mul_comm w]
@@ -717,58 +717,58 @@ lemma jacobiPQk_s_eq_eisensteinSinSeries {k : ℂ} (hk : k ∈ jacobiModulusDoma
     intro t
     simp only [hfdef, show 2 * K * (t + 1) = 2 * K * t + 2 * K by ring]
     rcases hp with ⟨rfl, -⟩ | ⟨rfl, -⟩
-    · have hs : jacobiPQk .n .s (2 * K * t + 2 * K) k = -jacobiPQk .n .s (2 * K * t) k :=
-        (jacobiNsk_shift hk _).2.2.2.1
+    · have hs : jacobiPQ .n .s (2 * K * t + 2 * K) k = -jacobiPQ .n .s (2 * K * t) k :=
+        (jacobiNs_shift hk _).2.2.2.1
       rw [hs]; ring
-    · have hs : jacobiPQk .d .s (2 * K * t + 2 * K) k = -jacobiPQk .d .s (2 * K * t) k :=
-        (jacobiDsk_shift hk _).2.2.2.1
+    · have hs : jacobiPQ .d .s (2 * K * t + 2 * K) k = -jacobiPQ .d .s (2 * K * t) k :=
+        (jacobiDs_shift hk _).2.2.2.1
       rw [hs]; ring
-  have hfτ : ∀ t, f (t + jacobiTauk k) = ε * f t := by
+  have hfτ : ∀ t, f (t + jacobiTau k) = ε * f t := by
     intro t
-    have h2 : 2 * K * jacobiTauk k = 2 * (I * compEllIntKpk k) :=
-        two_mul_compEllIntKk_mul_jacobiTauk hk
-    simp only [hfdef, show 2 * K * (t + jacobiTauk k) = 2 * K * t + 2 * K * jacobiTauk k by ring,
+    have h2 : 2 * K * jacobiTau k = 2 * (I * completeEllipticKPrime k) :=
+        two_mul_completeEllipticK_mul_jacobiTau hk
+    simp only [hfdef, show 2 * K * (t + jacobiTau k) = 2 * K * t + 2 * K * jacobiTau k by ring,
       h2]
     rcases hp with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩
-    · have hs : jacobiPQk .n .s (2 * K * t + 2 * (I * compEllIntKpk k)) k =
-          jacobiPQk .n .s (2 * K * t) k := (jacobiNsk_shift hk _).2.2.2.2.2
+    · have hs : jacobiPQ .n .s (2 * K * t + 2 * (I * completeEllipticKPrime k)) k =
+          jacobiPQ .n .s (2 * K * t) k := (jacobiNs_shift hk _).2.2.2.2.2
       rw [hs]; ring
-    · have hs : jacobiPQk .d .s (2 * K * t + 2 * (I * compEllIntKpk k)) k =
-          -jacobiPQk .d .s (2 * K * t) k := (jacobiDsk_shift hk _).2.2.2.2.2
+    · have hs : jacobiPQ .d .s (2 * K * t + 2 * (I * completeEllipticKPrime k)) k =
+          -jacobiPQ .d .s (2 * K * t) k := (jacobiDs_shift hk _).2.2.2.2.2
       rw [hs]; ring
   have hfodd : ∀ t, f (-t) = -f t := by
     intro t
-    simp only [hfdef, show 2 * K * -t = -(2 * K * t) by ring, jacobiPQk_neg]
+    simp only [hfdef, show 2 * K * -t = -(2 * K * t) by ring, jacobiPQ_neg]
     rcases hp with ⟨rfl, -⟩ | ⟨rfl, -⟩ <;> simp
-  have hfan : ∀ t ∉ eisensteinSinLattice (jacobiTauk k), AnalyticAt ℂ f t := by
+  have hfan : ∀ t ∉ eisensteinSinLattice (jacobiTau k), AnalyticAt ℂ f t := by
     intro t ht
-    have h := analyticAt_jacobiPQk_s hk hps (hlat t ht)
+    have h := analyticAt_jacobiPQ_s hk hps (hlat t ht)
     have hl : AnalyticAt ℂ (fun t : ℂ => 2 * K * t) t := by fun_prop
     exact analyticAt_const.mul (h.comp hl)
   have hf0 : ∃ A : ℂ → ℂ, AnalyticAt ℂ A 0 ∧
       (fun t => f t - π / sin (π * t)) =ᶠ[𝓝[≠] 0] A := by
-    have hreg := jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (q := .n) (by decide)
+    have hreg := jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (q := .n) (by decide)
     have hlin : AnalyticAt ℂ (fun t : ℂ => 2 * K * t) 0 := by fun_prop
-    set N₁ : ℂ → ℂ := fun t => jacobiPQk p .n (2 * K * t) k
-    set S₁ : ℂ → ℂ := fun t => jacobiSnk (2 * K * t) k
+    set N₁ : ℂ → ℂ := fun t => jacobiPQ p .n (2 * K * t) k
+    set S₁ : ℂ → ℂ := fun t => jacobiSn (2 * K * t) k
     have hN₁ : AnalyticAt ℂ N₁ 0 := by
       rcases hp with ⟨rfl, -⟩ | ⟨rfl, -⟩
-      · simp only [N₁, jacobiPQk_self]; exact analyticAt_const
-      · exact (analyticAt_jacobiPQk hk (by decide) (by simpa using hreg)).comp_of_eq hlin
+      · simp only [N₁, jacobiPQ_self]; exact analyticAt_const
+      · exact (analyticAt_jacobiPQ hk (by decide) (by simpa using hreg)).comp_of_eq hlin
           (by simp)
     have hS₁ : AnalyticAt ℂ S₁ 0 :=
-      (analyticAt_jacobiPQk hk (p := .s) (q := .n) (by decide)
+      (analyticAt_jacobiPQ hk (p := .s) (q := .n) (by decide)
           (by simpa using hreg)).comp_of_eq hlin
         (by simp)
     have hn₁ : N₁ 0 = 1 := by
       rcases hp with ⟨rfl, -⟩ | ⟨rfl, -⟩
-      · simp [N₁, jacobiPQk_self]
-      · simp only [N₁, mul_zero]; exact jacobiDnk_zero hk
-    have h0₁ : S₁ 0 = 0 := by simp only [S₁, mul_zero]; exact jacobiSnk_zero hk
+      · simp [N₁, jacobiPQ_self]
+      · simp only [N₁, mul_zero]; exact jacobiDn_zero hk
+    have h0₁ : S₁ 0 = 0 := by simp only [S₁, mul_zero]; exact jacobiSn_zero hk
     have hd₁ : HasDerivAt S₁ (2 * K) 0 := by
-      have h := (hasDerivAt_jacobiSnk hk (z := 2 * K * 0) (by simpa using hreg)).comp (0 : ℂ)
+      have h := (hasDerivAt_jacobiSn hk (z := 2 * K * 0) (by simpa using hreg)).comp (0 : ℂ)
         ((hasDerivAt_id (0 : ℂ)).const_mul (2 * K))
-      simp only [mul_zero, jacobiCnk_zero hk, jacobiDnk_zero hk, mul_one, one_mul] at h
+      simp only [mul_zero, jacobiCn_zero hk, jacobiDn_zero hk, mul_one, one_mul] at h
       exact h
     have hd₂ : HasDerivAt (fun t : ℂ => sin (π * t)) (π : ℂ) 0 := by
       have := ((hasDerivAt_id (0 : ℂ)).const_mul (π : ℂ)).csin
@@ -784,10 +784,10 @@ lemma jacobiPQk_s_eq_eisensteinSinSeries {k : ℂ} (hk : k ∈ jacobiModulusDoma
       have ht : Tendsto (fun t : ℂ => 2 * K * t) (𝓝 0) (𝓝 0) := by
         have := (hlin.continuousAt.tendsto); simpa using this
       filter_upwards [ht.eventually h1] with t htn
-      simp only [hfdef, N₁, S₁, jacobiSnk]
+      simp only [hfdef, N₁, S₁, jacobiSn]
       rcases hp with ⟨rfl, -⟩ | ⟨rfl, -⟩
-      · rw [jacobiPQk_eq_one_div, jacobiPQk_self]; ring
-      · rw [jacobiPQk_eq_div (r := .n) (by decide) (by decide) (by decide) htn]; ring
+      · rw [jacobiPQ_eq_one_div, jacobiPQ_self]; ring
+      · rw [jacobiPQ_eq_div (r := .n) (by decide) (by decide) (by decide) htn]; ring
     filter_upwards [hev, nhdsWithin_le_nhds hfe] with t h1 h2
     rw [← h1, h2]; ring
   have := eq_eisensteinSinSeries_of_quasiPeriodic hε hτ hdich hf1 hfτ hfodd hfan hf0 t ht
@@ -795,38 +795,38 @@ lemma jacobiPQk_s_eq_eisensteinSinSeries {k : ℂ} (hk : k ∈ jacobiModulusDoma
 
 /-- `ps(z) - 1/z` has a removable singularity at `0` for `p ≠ s` (the simple pole of `ps` at `0`
 has residue `1`). -/
-lemma exists_analyticAt_jacobiPQk_s_sub_one_div {k : ℂ} (hk : k ∈ jacobiModulusDomain)
+lemma exists_analyticAt_jacobiPQ_s_sub_one_div {k : ℂ} (hk : k ∈ jacobiModulusDomain)
     {p : JacobiLetter} (hp : p ≠ .s) :
     ∃ A : ℂ → ℂ, AnalyticAt ℂ A 0 ∧
-      (fun z => jacobiPQk p .s z k - 1 / z) =ᶠ[𝓝[≠] 0] A := by
-  have hreg := jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (q := .n) (by decide)
-  set N₁ : ℂ → ℂ := fun z => jacobiPQk p .n z k
+      (fun z => jacobiPQ p .s z k - 1 / z) =ᶠ[𝓝[≠] 0] A := by
+  have hreg := jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk (q := .n) (by decide)
+  set N₁ : ℂ → ℂ := fun z => jacobiPQ p .n z k
   have hN₁ : AnalyticAt ℂ N₁ 0 := by
     by_cases hpn : p = .n
-    · subst hpn; simp only [N₁, jacobiPQk_self]; exact analyticAt_const
-    · exact analyticAt_jacobiPQk hk hpn (by simpa using hreg)
-  have hS₁ : AnalyticAt ℂ (fun z => jacobiSnk z k) 0 :=
-    analyticAt_jacobiPQk hk (p := .s) (q := .n) (by decide) (by simpa using hreg)
+    · subst hpn; simp only [N₁, jacobiPQ_self]; exact analyticAt_const
+    · exact analyticAt_jacobiPQ hk hpn (by simpa using hreg)
+  have hS₁ : AnalyticAt ℂ (fun z => jacobiSn z k) 0 :=
+    analyticAt_jacobiPQ hk (p := .s) (q := .n) (by decide) (by simpa using hreg)
   have hn₁ : N₁ 0 = 1 := by
     simp only [N₁]
     rcases p with _ | _ | _ | _
     · exact absurd rfl hp
-    · exact jacobiCnk_zero hk
-    · exact jacobiDnk_zero hk
-    · exact jacobiPQk_self _ _ _
-  have hd₁ : HasDerivAt (fun z => jacobiSnk z k) 1 0 := by
-    have h := hasDerivAt_jacobiSnk hk (z := 0) (by simpa using hreg)
-    simpa only [jacobiCnk_zero hk, jacobiDnk_zero hk, mul_one] using h
+    · exact jacobiCn_zero hk
+    · exact jacobiDn_zero hk
+    · exact jacobiPQ_self _ _ _
+  have hd₁ : HasDerivAt (fun z => jacobiSn z k) 1 0 := by
+    have h := hasDerivAt_jacobiSn hk (z := 0) (by simpa using hreg)
+    simpa only [jacobiCn_zero hk, jacobiDn_zero hk, mul_one] using h
   obtain ⟨A, hA, hev⟩ := exists_analyticAt_eq_div_sub_div_of_residue_eq (a := 1) (b := 1)
     (N₂ := fun _ => 1) (S₂ := fun z => z) hN₁ analyticAt_const hS₁ analyticAt_id
-    (jacobiSnk_zero hk) rfl hn₁ rfl hd₁ (hasDerivAt_id 0) one_ne_zero one_ne_zero (by ring)
+    (jacobiSn_zero hk) rfl hn₁ rfl hd₁ (hasDerivAt_id 0) one_ne_zero one_ne_zero (by ring)
   refine ⟨A, hA, ?_⟩
-  have hfe : ∀ᶠ z in 𝓝 (0 : ℂ), jacobiPQk p .s z k = N₁ z / jacobiSnk z k := by
+  have hfe : ∀ᶠ z in 𝓝 (0 : ℂ), jacobiPQ p .s z k = N₁ z / jacobiSn z k := by
     filter_upwards [eventually_jacobiLetterTheta_ne_zero hk hreg] with z hzn
-    simp only [N₁, jacobiSnk]
+    simp only [N₁, jacobiSn]
     by_cases hpn : p = .n
-    · subst hpn; rw [jacobiPQk_eq_one_div, jacobiPQk_self]
-    · rw [jacobiPQk_eq_div (r := .n) hp hpn (by decide) hzn]
+    · subst hpn; rw [jacobiPQ_eq_one_div, jacobiPQ_self]
+    · rw [jacobiPQ_eq_div (r := .n) hp hpn (by decide) hzn]
   filter_upwards [hev, nhdsWithin_le_nhds hfe] with z h1 h2
   rw [← h1, h2]; ring
 
@@ -836,27 +836,27 @@ theorem not_mem_eisensteinSinLattice {τ t : ℂ} (h : ∀ m n : ℤ, t - m - n 
   rintro ⟨m, n, rfl⟩; exact h m n (by ring)
 
 /-- DLMF 22.12.11 (outer series): `∑ₙ π/sin(π(t - nτ)) = 2K ns(2Kt)`. -/
-theorem hasSum_pi_div_sin_jacobiNsk {k : ℂ} (hk : k ∈ jacobiModulusDomain) {t : ℂ}
-    (ht : t ∉ eisensteinSinLattice (jacobiTauk k)) :
-    HasSum (fun n : ℤ => π / sin (π * (t - n * jacobiTauk k)))
-      (2 * compEllIntKk k * jacobiNsk (2 * compEllIntKk k * t) k) := by
-  have h := (summable_eisensteinSinTerm (ε := 1) (Or.inl rfl) (jacobiTauk_im_pos hk) t).hasSum
-  have e : (∑' n : ℤ, eisensteinSinTerm 1 (jacobiTauk k) n t) =
-      2 * compEllIntKk k * jacobiNsk (2 * compEllIntKk k * t) k :=
-    (jacobiPQk_s_eq_eisensteinSinSeries hk (Or.inl ⟨rfl, rfl⟩) ht).symm
+theorem hasSum_pi_div_sin_jacobiNs {k : ℂ} (hk : k ∈ jacobiModulusDomain) {t : ℂ}
+    (ht : t ∉ eisensteinSinLattice (jacobiTau k)) :
+    HasSum (fun n : ℤ => π / sin (π * (t - n * jacobiTau k)))
+      (2 * completeEllipticK k * jacobiNs (2 * completeEllipticK k * t) k) := by
+  have h := (summable_eisensteinSinTerm (ε := 1) (Or.inl rfl) (jacobiTau_im_pos hk) t).hasSum
+  have e : (∑' n : ℤ, eisensteinSinTerm 1 (jacobiTau k) n t) =
+      2 * completeEllipticK k * jacobiNs (2 * completeEllipticK k * t) k :=
+    (jacobiPQ_s_eq_eisensteinSinSeries hk (Or.inl ⟨rfl, rfl⟩) ht).symm
   rw [e] at h
   convert h using 2 with n
   simp [eisensteinSinTerm]
 
 /-- DLMF 22.12.12 (outer series): `∑ₙ (-1)ⁿ π/sin(π(t - nτ)) = 2K ds(2Kt)`. -/
-theorem hasSum_neg_one_zpow_pi_div_sin_jacobiDsk {k : ℂ} (hk : k ∈ jacobiModulusDomain) {t : ℂ}
-    (ht : t ∉ eisensteinSinLattice (jacobiTauk k)) :
-    HasSum (fun n : ℤ => (-1) ^ n * π / sin (π * (t - n * jacobiTauk k)))
-      (2 * compEllIntKk k * jacobiDsk (2 * compEllIntKk k * t) k) := by
-  have h := (summable_eisensteinSinTerm (ε := -1) (Or.inr rfl) (jacobiTauk_im_pos hk) t).hasSum
-  have e : (∑' n : ℤ, eisensteinSinTerm (-1) (jacobiTauk k) n t) =
-      2 * compEllIntKk k * jacobiDsk (2 * compEllIntKk k * t) k :=
-    (jacobiPQk_s_eq_eisensteinSinSeries hk (Or.inr ⟨rfl, rfl⟩) ht).symm
+theorem hasSum_neg_one_zpow_pi_div_sin_jacobiDs {k : ℂ} (hk : k ∈ jacobiModulusDomain) {t : ℂ}
+    (ht : t ∉ eisensteinSinLattice (jacobiTau k)) :
+    HasSum (fun n : ℤ => (-1) ^ n * π / sin (π * (t - n * jacobiTau k)))
+      (2 * completeEllipticK k * jacobiDs (2 * completeEllipticK k * t) k) := by
+  have h := (summable_eisensteinSinTerm (ε := -1) (Or.inr rfl) (jacobiTau_im_pos hk) t).hasSum
+  have e : (∑' n : ℤ, eisensteinSinTerm (-1) (jacobiTau k) n t) =
+      2 * completeEllipticK k * jacobiDs (2 * completeEllipticK k * t) k :=
+    (jacobiPQ_s_eq_eisensteinSinSeries hk (Or.inr ⟨rfl, rfl⟩) ht).symm
   rw [e] at h
   exact h
 
@@ -1052,29 +1052,32 @@ theorem exp_neg_add_exp_eq_two_mul_cos (m t : ℂ) :
   ring_nf
 
 /-- The nome is `q = e^{πiτ}`. -/
-theorem jacobiNomek_eq_exp_jacobiTauk {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
-    jacobiNomek k = cexp (π * I * jacobiTauk k) := by
-  have := compEllIntKk_ne_zero_of_mem_jacobiModulusDomain hk
-  rw [jacobiNomek, jacobiTauk]
+theorem jacobiNome_eq_exp_jacobiTau {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
+    jacobiNome k = cexp (π * I * jacobiTau k) := by
+  have := completeEllipticK_ne_zero_of_mem_jacobiModulusDomain hk
+  rw [jacobiNome, jacobiTau]
   congr 1
   field_simp
   ring_nf
   rw [Complex.I_sq]; ring
 
 /-- `ζ = π t` for `z = 2Kt`. -/
-theorem jacobiZetak_two_mul_compEllIntKk_mul {k : ℂ} (hk : k ∈ jacobiModulusDomain) (t : ℂ) :
-    jacobiZetak (2 * compEllIntKk k * t) k = π * t := by
-  have := compEllIntKk_ne_zero_of_mem_jacobiModulusDomain hk
-  rw [jacobiZetak]; field_simp
+theorem jacobiThetaArgument_two_mul_completeEllipticK_mul {k : ℂ}
+    (hk : k ∈ jacobiModulusDomain) (t : ℂ) :
+    jacobiThetaArgument (2 * completeEllipticK k * t) k = π * t := by
+  have := completeEllipticK_ne_zero_of_mem_jacobiModulusDomain hk
+  rw [jacobiThetaArgument]; field_simp
 
 /-- The strip condition `‖q‖ e^{c'|Im ζ|} < 1` in terms of `t`. -/
-theorem abs_im_lt_of_norm_jacobiNomek_mul_exp_lt {k : ℂ} (hk : k ∈ jacobiModulusDomain) {t : ℂ}
+theorem abs_im_lt_of_norm_jacobiNome_mul_exp_lt {k : ℂ} (hk : k ∈ jacobiModulusDomain) {t : ℂ}
     {c : ℝ} (hc : 0 < c)
-    (h : ‖jacobiNomek k‖ * Real.exp (c * |(jacobiZetak (2 * compEllIntKk k * t) k).im|) < 1) :
-    |t.im| < 1 / c * (jacobiTauk k).im := by
-  rw [jacobiNomek_eq_exp_jacobiTauk hk, Complex.norm_exp, jacobiZetak_two_mul_compEllIntKk_mul hk,
+    (h : ‖jacobiNome k‖ *
+        Real.exp (c * |(jacobiThetaArgument (2 * completeEllipticK k * t) k).im|) < 1) :
+    |t.im| < 1 / c * (jacobiTau k).im := by
+  rw [jacobiNome_eq_exp_jacobiTau hk, Complex.norm_exp,
+      jacobiThetaArgument_two_mul_completeEllipticK_mul hk,
       ← Real.exp_add, Real.exp_lt_one_iff] at h
-  have e1 : (π * I * jacobiTauk k).re = -(π * (jacobiTauk k).im) := by
+  have e1 : (π * I * jacobiTau k).re = -(π * (jacobiTau k).im) := by
     simp [Complex.mul_re, Complex.mul_im]
   have e2 : (π * t).im = π * t.im := by simp
   rw [e1, e2, abs_mul, abs_of_pos Real.pi_pos] at h
@@ -1091,9 +1094,9 @@ theorem hasSum_nat_add_neg_succ_of_hasSum {F : ℤ → ℂ} {S : ℂ} (h : HasSu
   · simp
 
 /-- `k' ≠ 0` on `jacobiModulusDomain`. -/
-theorem jacobiComodulusk_ne_zero {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
-    jacobiComodulusk k ≠ 0 := by
-  rw [jacobiComodulusk]
+theorem jacobiComodulus_ne_zero {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
+    jacobiComodulus k ≠ 0 := by
+  rw [jacobiComodulus]
   intro h
   rw [Complex.cpow_eq_zero_iff] at h
   have h1 : (k - 1) * (k + 1) = 0 := by linear_combination -h.1
@@ -1143,9 +1146,9 @@ theorem cos_odd_mul_add_pi_div_two (j : ℕ) (x : ℂ) :
     (sin_cos_add_nat_mul_pi _ j).2, Complex.cos_add_pi_div_two]; ring
 
 /-- `ζ(z + K) = ζ + π/2`. -/
-theorem jacobiZetak_add_compEllIntKk {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : ℂ) :
-    jacobiZetak (z + compEllIntKk k) k = jacobiZetak z k + π / 2 := by
-  have := compEllIntKk_ne_zero_of_mem_jacobiModulusDomain hk
-  simp only [jacobiZetak]; field_simp
+theorem jacobiThetaArgument_add_completeEllipticK {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : ℂ) :
+    jacobiThetaArgument (z + completeEllipticK k) k = jacobiThetaArgument z k + π / 2 := by
+  have := completeEllipticK_ne_zero_of_mem_jacobiModulusDomain hk
+  simp only [jacobiThetaArgument]; field_simp
 
 end DLMF.JacobiElliptic

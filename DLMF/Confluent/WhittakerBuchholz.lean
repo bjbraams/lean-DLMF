@@ -1006,7 +1006,7 @@ private lemma BuchholzExpansion.sum_eq_normalized (κ μ z : ℂ)
     · intro s hs0
       simp [buchholzTerm,buchholzC,zero_pow hs0]
   have hH0 : H 0=(Gamma (2*μ+1))⁻¹ := by
-    simp [H,regularizedHGFunCoeff_singleton,poch]
+    simp [H,regularizedHGFunCoeff_singleton,pochhammer]
   have hd : deriv d=fun w => deriv S w-deriv H w := by
     funext w
     exact deriv_fun_sub (hs w) (hh w)

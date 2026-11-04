@@ -19,10 +19,10 @@ The four Sturm–Liouville problems of Table 29.3.2 on `[0, K]`, their eigenvalu
 * `Real.LameBoundary`: the Neumann or Dirichlet boundary conditions at `0` and `K = K(k)`.
 * `Real.IsLameEigenfunction`, `Real.lameSpectrum`: eigenfunctions and the spectrum of a problem.
 * `Real.IsNthLameEigenvalue`, `Real.lameEigenvalue`: the `j`th eigenvalue (counting from `0`).
-* `Real.lameAk`, `Real.lameBk`: the eigenvalues `a^m_ν(k²)` and `b^m_ν(k²)` (Table 29.3.1).
+* `Real.lameA`, `Real.lameB`: the eigenvalues `a^m_ν(k²)` and `b^m_ν(k²)` (Table 29.3.1).
 * `Real.IsNormalizedLameEigenfunction`, `Real.lameEigenfunction`: the normalized `j`th
   eigenfunction.
-* `Real.lameEck`, `Real.lameEsk`: the Lamé functions `Ec^m_ν(x, k²)` and `Es^m_ν(x, k²)`.
+* `Real.lameEc`, `Real.lameEs`: the Lamé functions `Ec^m_ν(x, k²)` and `Es^m_ν(x, k²)`.
 
 ## Implementation notes
 
@@ -56,7 +56,8 @@ namespace DLMF.Lame
 `odd0` and `w'(0) = 0` otherwise; at `x = K`, `w(K) = 0` if `oddK` and `w'(K) = 0` otherwise. -/
 def Real.LameBoundary (k : ℝ) (odd0 oddK : Bool) (w : ℝ → ℝ) : Prop :=
   (if odd0 then w 0 = 0 else deriv w 0 = 0) ∧
-    (if oddK then w (Real.compEllIntKm (k ^ 2)) = 0 else deriv w (Real.compEllIntKm (k ^ 2)) = 0)
+    (if oddK then w (Real.completeEllipticKOfParameter (k ^ 2)) = 0 else
+        deriv w (Real.completeEllipticKOfParameter (k ^ 2)) = 0)
 
 /-- `w` is an eigenfunction of the Lamé problem with eigenvalue `h` and boundary types
 `odd0`, `oddK` (Table 29.3.2): a nonzero real solution of 29.2.1 satisfying the boundary
@@ -84,13 +85,13 @@ def Real.lameEigenvalue (ν k : ℝ) (odd0 oddK : Bool) (j : ℕ) : ℝ :=
 /-- The eigenvalue `a^m_ν(k²)` (DLMF §29.3(i), Table 29.3.1): `a^{2j}` is the `j`th eigenvalue
 of the problem `w'(0) = w'(K) = 0`, `a^{2j+1}` that of `w(0) = w'(K) = 0`. -/
 @[dlmf 29.3.i]
-def Real.lameAk (ν : ℝ) (m : ℕ) (k : ℝ) : ℝ := Real.lameEigenvalue ν k m.bodd false (m / 2)
+def Real.lameA (ν : ℝ) (m : ℕ) (k : ℝ) : ℝ := Real.lameEigenvalue ν k m.bodd false (m / 2)
 
 /-- The eigenvalue `b^m_ν(k²)`, `m ≥ 1` (DLMF §29.3(i), Table 29.3.1): `b^{2j+1}` is the `j`th
 eigenvalue of the problem `w'(0) = w(K) = 0`, `b^{2j+2}` that of `w(0) = w(K) = 0`. The value
 at `m = 0` is not used. -/
 @[dlmf 29.3.i]
-def Real.lameBk (ν : ℝ) (m : ℕ) (k : ℝ) : ℝ :=
+def Real.lameB (ν : ℝ) (m : ℕ) (k : ℝ) : ℝ :=
   Real.lameEigenvalue ν k (!m.bodd) true ((m - 1) / 2)
 
 /-- `w` is the normalized `j`th eigenfunction of the problem `odd0`, `oddK`: an eigenfunction
@@ -100,8 +101,10 @@ for `Real.lameEigenvalue ν k odd0 oddK j`, normalized by DLMF 29.3.18,
 def Real.IsNormalizedLameEigenfunction (ν k : ℝ) (odd0 oddK : Bool) (j : ℕ) (w : ℝ → ℝ) :
     Prop :=
   Real.IsLameEigenfunction (Real.lameEigenvalue ν k odd0 oddK j) ν k odd0 oddK w ∧
-    ∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2), Real.jacobiDnm x (k ^ 2) * w x ^ 2 = π / 4 ∧
-    (if oddK then deriv w (Real.compEllIntKm (k ^ 2)) < 0 else 0 < w (Real.compEllIntKm (k ^ 2)))
+    ∫ x in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2), Real.jacobiDnOfParameter x (k ^ 2) *
+        w x ^ 2 = π / 4 ∧
+    (if oddK then deriv w (Real.completeEllipticKOfParameter (k ^ 2)) < 0 else 0 <
+        w (Real.completeEllipticKOfParameter (k ^ 2)))
 
 /-- The normalized `j`th eigenfunction of the Lamé problem `odd0`, `oddK`, defined by choice
 (junk value `0` if it does not exist uniquely; see `Real.lameEigenfunction_spec`). -/
@@ -113,14 +116,14 @@ def Real.lameEigenfunction (ν k : ℝ) (odd0 oddK : Bool) (j : ℕ) : ℝ → �
 /-- The Lamé function `Ec^m_ν(x, k²)` for real `x` (DLMF §29.3(iv), Table 29.3.2): the
 eigenfunction for `a^m_ν(k²)`, normalized by 29.3.18 and `Ec^m_ν(K, k²) > 0`. -/
 @[dlmf 29.3.iv]
-def Real.lameEck (ν : ℝ) (m : ℕ) (x k : ℝ) : ℝ :=
+def Real.lameEc (ν : ℝ) (m : ℕ) (x k : ℝ) : ℝ :=
   Real.lameEigenfunction ν k m.bodd false (m / 2) x
 
 /-- The Lamé function `Es^m_ν(x, k²)`, `m ≥ 1`, for real `x` (DLMF §29.3(iv), Table 29.3.2):
 the eigenfunction for `b^m_ν(k²)`, normalized by 29.3.18 and `dEs^m_ν(z, k²)/dz < 0` at
 `z = K`. -/
 @[dlmf 29.3.iv]
-def Real.lameEsk (ν : ℝ) (m : ℕ) (x k : ℝ) : ℝ :=
+def Real.lameEs (ν : ℝ) (m : ℕ) (x k : ℝ) : ℝ :=
   Real.lameEigenfunction ν k (!m.bodd) true ((m - 1) / 2) x
 
 end DLMF.Lame

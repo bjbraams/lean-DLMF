@@ -20,6 +20,8 @@ public import DLMF.QHypergeometric.MathlibCoverage
 public import DLMF.QHypergeometric.SearsTransformation
 public import DLMF.QHypergeometric.Transformations
 public import DLMF.QHypergeometric.VeryWellPoisedSums
+public import DLMF.QHypergeometric.QuintupleProduct
+public import DLMF.QHypergeometric.BibasicBilateral
 
 /-!
 # Basic hypergeometric and related functions (DLMF Chapter 17)

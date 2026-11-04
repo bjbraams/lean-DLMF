@@ -20,16 +20,16 @@ DLMF §29.15(i), and defines the inner product of §29.14.
 
 ## Main definitions
 
-* `LamePolyType`: the eight types of Table 29.12.1, with `LamePolyType.recurrence`,
-  `LamePolyType.order`, `LamePolyType.normForm`, `LamePolyType.signForm`,
-  `LamePolyType.prefactor` and `LamePolyType.basis`.
+* `LamePolynomialType`: the eight types of Table 29.12.1, with `LamePolynomialType.recurrence`,
+  `LamePolynomialType.order`, `LamePolynomialType.normForm`, `LamePolynomialType.signForm`,
+  `LamePolynomialType.prefactor` and `LamePolynomialType.basis`.
 * `lameMatrix`: the tridiagonal matrix of DLMF 29.15.2.
-* `lameMatrixEigenvalue`, `lamePolyH`: its `m`th smallest eigenvalue `H_m`.
-* `lameRecVec`: the eigenvector by forward recursion from `v₀ = 1`.
-* `lamePolyCoeff`: the normalized coefficients (DLMF 29.15.4, 29.15.9, …).
-* `lamePolyEk`: the Lamé polynomial of type `t`, index `n` and `m` zeros in `(0, K)`, with the
-  named functions `lameUEk`, `lameSEk`, `lameCEk`, `lameDEk`, `lameSCEk`, `lameSDEk`, `lameCDEk`,
-  `lameSCDEk` (DLMF 29.15.43–29.15.50).
+* `lameMatrixEigenvalue`, `lamePolynomialH`: its `m`th smallest eigenvalue `H_m`.
+* `lameRecurrenceVector`: the eigenvector by forward recursion from `v₀ = 1`.
+* `lamePolynomialCoeff`: the normalized coefficients (DLMF 29.15.4, 29.15.9, …).
+* `lamePolynomialE`: the Lamé polynomial of type `t`, index `n` and `m` zeros in `(0, K)`, with the
+  named functions `lameUE`, `lameSE`, `lameCE`, `lameDE`, `lameSCE`, `lameSDE`, `lameCDE`,
+  `lameSCDE` (DLMF 29.15.43–29.15.50).
 * `lameOrthWeight`, `lameInner`, `lameProduct`: the weight, inner product and products of
   DLMF 29.14.1–29.14.11.
 
@@ -45,7 +45,7 @@ Each polynomial is built from the `(n+1) × (n+1)` tridiagonal matrix 29.15.2 wi
   scaled to satisfy the normalization (29.15.5, 29.15.10, …) and the sign condition (29.15.6,
   29.15.11, …) of its type;
 * the function is the Chebyshev series 29.15.43–29.15.50 in `sn(z, k)`, with the project's
-  complex `sn, cn, dn` (`DLMF.JacobiElliptic.jacobiSnk` etc.) and Mathlib's
+  complex `sn, cn, dn` (`DLMF.JacobiElliptic.jacobiSn` etc.) and Mathlib's
   `Polynomial.Chebyshev.T`, `U`.
 
 No choice is involved. The identification with the eigenfunctions `Ec`, `Es` of §29.3
@@ -63,21 +63,21 @@ noncomputable section
 namespace DLMF.Lame
 
 /-- The eight types of Lamé polynomials of DLMF Table 29.12.1. -/
-inductive LamePolyType
+inductive LamePolynomialType
   | uE | sE | cE | dE | scE | sdE | cdE | scdE
   deriving DecidableEq
 
-namespace LamePolyType
+namespace LamePolynomialType
 
 /-- The three-term recurrence (§§29.3(iii), 29.6) whose truncation gives the Fourier or
 Chebyshev coefficients of a Lamé polynomial type (DLMF §29.15(i)). -/
-def recurrence : LamePolyType → LameRecurrence
+def recurrence : LamePolynomialType → LameRecurrence
   | uE => .A0 | sE => .A1 | cE => .B1 | dE => .C0
   | scE => .B2 | sdE => .C1 | cdE => .D1 | scdE => .D2
 
 /-- The order `ν` of the Lamé polynomial of type `t` with index `n` (Table 29.12.1):
 `2n`, `2n+1` (`sE, cE, dE`), `2n+2` (`scE, sdE, cdE`) or `2n+3` (`scdE`). -/
-def order : LamePolyType → ℕ → ℕ
+def order : LamePolynomialType → ℕ → ℕ
   | uE, n => 2 * n
   | sE, n => 2 * n + 1 | cE, n => 2 * n + 1 | dE, n => 2 * n + 1
   | scE, n => 2 * n + 2 | sdE, n => 2 * n + 2 | cdE, n => 2 * n + 2
@@ -88,7 +88,7 @@ def order : LamePolyType → ℕ → ℕ
 `t.normForm k n c = 1`. -/
 @[dlmf 29.15.E5, dlmf 29.15.E10, dlmf 29.15.E15, dlmf 29.15.E20, dlmf 29.15.E25,
   dlmf 29.15.E30, dlmf 29.15.E35, dlmf 29.15.E40]
-def normForm (t : LamePolyType) (k : ℝ) (n : ℕ) (c : ℕ → ℝ) : ℝ :=
+def normForm (t : LamePolynomialType) (k : ℝ) (n : ℕ) (c : ℕ → ℝ) : ℝ :=
   let sq := ∑ p ∈ Finset.range (n + 1), c p ^ 2
   let cross := ∑ p ∈ Finset.range n, c p * c (p + 1)
   match t with
@@ -103,7 +103,7 @@ def normForm (t : LamePolyType) (k : ℝ) (n : ℕ) (c : ℕ → ℝ) : ℝ :=
 29.15.26, 29.15.31, 29.15.36, 29.15.41); the condition is `0 < t.signForm n c`. -/
 @[dlmf 29.15.E6, dlmf 29.15.E11, dlmf 29.15.E16, dlmf 29.15.E21, dlmf 29.15.E26,
   dlmf 29.15.E31, dlmf 29.15.E36, dlmf 29.15.E41]
-def signForm (t : LamePolyType) (n : ℕ) (c : ℕ → ℝ) : ℝ :=
+def signForm (t : LamePolynomialType) (n : ℕ) (c : ℕ → ℝ) : ℝ :=
   match t with
   | uE | dE => c 0 / 2 + ∑ p ∈ Finset.Ioc 0 n, c p
   | sE | sdE => ∑ p ∈ Finset.range (n + 1), c p
@@ -112,20 +112,20 @@ def signForm (t : LamePolyType) (n : ℕ) (c : ℕ → ℝ) : ℝ :=
 
 /-- The prefactor of the Chebyshev series of type `t` (DLMF 29.15.43–29.15.50): `1`, `1`,
 `cn`, `dn`, `cn`, `dn`, `cn dn`, `cn dn`. -/
-def prefactor : LamePolyType → ℂ → ℂ → ℂ
+def prefactor : LamePolynomialType → ℂ → ℂ → ℂ
   | uE, _, _ => 1
   | sE, _, _ => 1
-  | cE, z, k => jacobiCnk z k
-  | dE, z, k => jacobiDnk z k
-  | scE, z, k => jacobiCnk z k
-  | sdE, z, k => jacobiDnk z k
-  | cdE, z, k => jacobiCnk z k * jacobiDnk z k
-  | scdE, z, k => jacobiCnk z k * jacobiDnk z k
+  | cE, z, k => jacobiCn z k
+  | dE, z, k => jacobiDn z k
+  | scE, z, k => jacobiCn z k
+  | sdE, z, k => jacobiDn z k
+  | cdE, z, k => jacobiCn z k * jacobiDn z k
+  | scdE, z, k => jacobiCn z k * jacobiDn z k
 
 /-- The `p`th Chebyshev basis function of type `t` at `s = sn(z, k)` (DLMF 29.15.43–29.15.50):
 `½T₀, T_{2p}` (`uE`, `dE`), `T_{2p+1}` (`sE`, `sdE`), `U_{2p}` (`cE`, `cdE`), `U_{2p+1}`
 (`scE`, `scdE`). -/
-def basis : LamePolyType → ℕ → ℂ → ℂ
+def basis : LamePolynomialType → ℕ → ℂ → ℂ
   | uE, p, s => (if p = 0 then 1 / 2 else 1) * (Chebyshev.T ℂ (2 * p : ℕ)).eval s
   | dE, p, s => (if p = 0 then 1 / 2 else 1) * (Chebyshev.T ℂ (2 * p : ℕ)).eval s
   | sE, p, s => (Chebyshev.T ℂ (2 * p + 1 : ℕ)).eval s
@@ -135,7 +135,7 @@ def basis : LamePolyType → ℕ → ℂ → ℂ
   | scE, p, s => (Chebyshev.U ℂ (2 * p + 1 : ℕ)).eval s
   | scdE, p, s => (Chebyshev.U ℂ (2 * p + 1 : ℕ)).eval s
 
-end LamePolyType
+end LamePolynomialType
 
 /-- The `(n+1) × (n+1)` tridiagonal matrix of DLMF 29.15.2 for the recurrence `r`:
 `β_p` on the diagonal, `α_p` above and `γ_p` below it (row `p`, `0 ≤ p ≤ n`). -/
@@ -155,19 +155,20 @@ def lameMatrixEigenvalue (r : LameRecurrence) (ν k : ℝ) (n m : ℕ) : ℝ :=
 
 /-- The pair `(v_{p-1}, v_p)` of the forward recursion for an eigenvector of 29.15.2:
 `v₋₁ = 0`, `v₀ = 1`, `v_{p+1} = ((H - β_p)v_p - γ_p v_{p-1})/α_p` (rows `p` of `M v = H v`). -/
-def lameRecVecPair (r : LameRecurrence) (ν k H : ℝ) : ℕ → ℝ × ℝ
+def lameRecurrenceVectorPair (r : LameRecurrence) (ν k H : ℝ) : ℕ → ℝ × ℝ
   | 0 => (0, 1)
   | p + 1 =>
-      ((lameRecVecPair r ν k H p).2,
-        ((H - r.beta ν k p) * (lameRecVecPair r ν k H p).2 -
-          r.gamma ν k p * (lameRecVecPair r ν k H p).1) / r.alpha ν k p)
+      ((lameRecurrenceVectorPair r ν k H p).2,
+        ((H - r.beta ν k p) * (lameRecurrenceVectorPair r ν k H p).2 -
+          r.gamma ν k p * (lameRecurrenceVectorPair r ν k H p).1) / r.alpha ν k p)
 
 /-- The unnormalized eigenvector `v_p` of 29.15.2 by forward recursion from `v₀ = 1`. -/
-def lameRecVec (r : LameRecurrence) (ν k H : ℝ) (p : ℕ) : ℝ := (lameRecVecPair r ν k H p).2
+def lameRecurrenceVector (r : LameRecurrence) (ν k H : ℝ) (p : ℕ) : ℝ :=
+    (lameRecurrenceVectorPair r ν k H p).2
 
 /-- The eigenvalue `H_m` of the matrix 29.15.2 for the Lamé polynomial of type `t`, index `n`
 (order `ν = t.order n`) and modulus `k`. -/
-def lamePolyH (t : LamePolyType) (n m : ℕ) (k : ℝ) : ℝ :=
+def lamePolynomialH (t : LamePolynomialType) (n m : ℕ) (k : ℝ) : ℝ :=
   lameMatrixEigenvalue t.recurrence (t.order n) k n m
 
 /-- The normalized coefficients `c_p`, `0 ≤ p ≤ n` (`0` for `p > n`), of the Lamé polynomial
@@ -178,53 +179,55 @@ the sign condition `t.signForm > 0`. For `uE` these are `A₀, A₂, …, A_{2n}
 for `cdE` `D₁, …`; for `scdE` `D₂, …`. -/
 @[dlmf 29.15.E4, dlmf 29.15.E9, dlmf 29.15.E14, dlmf 29.15.E19, dlmf 29.15.E24,
   dlmf 29.15.E29, dlmf 29.15.E34, dlmf 29.15.E39]
-def lamePolyCoeff (t : LamePolyType) (n m : ℕ) (k : ℝ) (p : ℕ) : ℝ :=
+def lamePolynomialCoeff (t : LamePolynomialType) (n m : ℕ) (k : ℝ) (p : ℕ) : ℝ :=
   if p ≤ n then
-    (if t.signForm n (lameRecVec t.recurrence (t.order n) k (lamePolyH t n m k)) < 0 then -1
-      else 1) * lameRecVec t.recurrence (t.order n) k (lamePolyH t n m k) p /
-      Real.sqrt (t.normForm k n (lameRecVec t.recurrence (t.order n) k (lamePolyH t n m k)))
+    (if t.signForm n (lameRecurrenceVector t.recurrence (t.order n) k
+        (lamePolynomialH t n m k)) < 0 then -1
+      else 1) * lameRecurrenceVector t.recurrence (t.order n) k (lamePolynomialH t n m k) p /
+      Real.sqrt (t.normForm k n
+          (lameRecurrenceVector t.recurrence (t.order n) k (lamePolynomialH t n m k)))
   else 0
 
 /-- The Lamé polynomial of type `t`, index `n` and number of zeros `m` in `(0, K)`, as an
 explicit Chebyshev series in `sn(z, k)` (DLMF 29.15.43–29.15.50):
 `prefactor(z) · ∑_{p=0}^n c_p basis_p(sn(z, k))`. -/
-def lamePolyEk (t : LamePolyType) (n m : ℕ) (z : ℂ) (k : ℝ) : ℂ :=
+def lamePolynomialE (t : LamePolynomialType) (n m : ℕ) (z : ℂ) (k : ℝ) : ℂ :=
   t.prefactor z k *
-    ∑ p ∈ Finset.range (n + 1), (lamePolyCoeff t n m k p : ℂ) * t.basis p (jacobiSnk z k)
+    ∑ p ∈ Finset.range (n + 1), (lamePolynomialCoeff t n m k p : ℂ) * t.basis p (jacobiSn z k)
 
 /-- `uE^m_{2n}(z, k²) = ½A₀ + ∑_{p=1}^n A_{2p} T_{2p}(sn(z, k))` (DLMF 29.15.43). -/
 @[dlmf 29.15.E43]
-def lameUEk (n m : ℕ) (z : ℂ) (k : ℝ) : ℂ := lamePolyEk .uE n m z k
+def lameUE (n m : ℕ) (z : ℂ) (k : ℝ) : ℂ := lamePolynomialE .uE n m z k
 
 /-- `sE^m_{2n+1}(z, k²) = ∑_{p=0}^n A_{2p+1} T_{2p+1}(sn(z, k))` (DLMF 29.15.44). -/
 @[dlmf 29.15.E44]
-def lameSEk (n m : ℕ) (z : ℂ) (k : ℝ) : ℂ := lamePolyEk .sE n m z k
+def lameSE (n m : ℕ) (z : ℂ) (k : ℝ) : ℂ := lamePolynomialE .sE n m z k
 
 /-- `cE^m_{2n+1}(z, k²) = cn(z, k) ∑_{p=0}^n B_{2p+1} U_{2p}(sn(z, k))` (DLMF 29.15.45). -/
 @[dlmf 29.15.E45]
-def lameCEk (n m : ℕ) (z : ℂ) (k : ℝ) : ℂ := lamePolyEk .cE n m z k
+def lameCE (n m : ℕ) (z : ℂ) (k : ℝ) : ℂ := lamePolynomialE .cE n m z k
 
 /-- `dE^m_{2n+1}(z, k²) = dn(z, k)(½C₀ + ∑_{p=1}^n C_{2p} T_{2p}(sn(z, k)))` (DLMF 29.15.46). -/
 @[dlmf 29.15.E46]
-def lameDEk (n m : ℕ) (z : ℂ) (k : ℝ) : ℂ := lamePolyEk .dE n m z k
+def lameDE (n m : ℕ) (z : ℂ) (k : ℝ) : ℂ := lamePolynomialE .dE n m z k
 
 /-- `scE^m_{2n+2}(z, k²) = cn(z, k) ∑_{p=0}^n B_{2p+2} U_{2p+1}(sn(z, k))` (DLMF 29.15.47). -/
 @[dlmf 29.15.E47]
-def lameSCEk (n m : ℕ) (z : ℂ) (k : ℝ) : ℂ := lamePolyEk .scE n m z k
+def lameSCE (n m : ℕ) (z : ℂ) (k : ℝ) : ℂ := lamePolynomialE .scE n m z k
 
 /-- `sdE^m_{2n+2}(z, k²) = dn(z, k) ∑_{p=0}^n C_{2p+1} T_{2p+1}(sn(z, k))` (DLMF 29.15.48). -/
 @[dlmf 29.15.E48]
-def lameSDEk (n m : ℕ) (z : ℂ) (k : ℝ) : ℂ := lamePolyEk .sdE n m z k
+def lameSDE (n m : ℕ) (z : ℂ) (k : ℝ) : ℂ := lamePolynomialE .sdE n m z k
 
 /-- `cdE^m_{2n+2}(z, k²) = cn(z, k) dn(z, k) ∑_{p=0}^n D_{2p+1} U_{2p}(sn(z, k))`
 (DLMF 29.15.49). -/
 @[dlmf 29.15.E49]
-def lameCDEk (n m : ℕ) (z : ℂ) (k : ℝ) : ℂ := lamePolyEk .cdE n m z k
+def lameCDE (n m : ℕ) (z : ℂ) (k : ℝ) : ℂ := lamePolynomialE .cdE n m z k
 
 /-- `scdE^m_{2n+3}(z, k²) = cn(z, k) dn(z, k) ∑_{p=0}^n D_{2p+2} U_{2p+1}(sn(z, k))`
 (DLMF 29.15.50). -/
 @[dlmf 29.15.E50]
-def lameSCDEk (n m : ℕ) (z : ℂ) (k : ℝ) : ℂ := lamePolyEk .scdE n m z k
+def lameSCDE (n m : ℕ) (z : ℂ) (k : ℝ) : ℂ := lamePolynomialE .scdE n m z k
 
 /-! ### The inner product of §29.14 -/
 
@@ -232,7 +235,7 @@ def lameSCDEk (n m : ℕ) (z : ℂ) (k : ℝ) : ℂ := lamePolyEk .scdE n m z k
 and nonnegative on `[0, K] × [0, K']`). -/
 @[dlmf 29.14.E3]
 def lameOrthWeight (k s t : ℝ) : ℂ :=
-  jacobiSnk ((Real.compEllIntKm (k ^ 2) : ℂ) + I * t) k ^ 2 - jacobiSnk s k ^ 2
+  jacobiSn ((Real.completeEllipticKOfParameter (k ^ 2) : ℂ) + I * t) k ^ 2 - jacobiSn s k ^ 2
 
 /-- The inner product `⟨g, h⟩ = ∫₀^a ∫₀^b w(s, t) g(s, t) h(s, t) dt ds` of DLMF 29.14.2
 (`a = K`, `b = K'`) and 29.14.11 (`a = 4K`, `b = 2K'`); no complex conjugation, as in DLMF. -/
@@ -244,7 +247,8 @@ def lameInner (k a b : ℝ) (g h : ℝ → ℝ → ℂ) : ℂ :=
 `K + it` (DLMF 29.14.1, 29.14.4–29.14.10). -/
 @[dlmf 29.14.E1, dlmf 29.14.E4, dlmf 29.14.E5, dlmf 29.14.E6, dlmf 29.14.E7, dlmf 29.14.E8,
   dlmf 29.14.E9, dlmf 29.14.E10]
-def lameProduct (t : LamePolyType) (n m : ℕ) (k : ℝ) (s τ : ℝ) : ℂ :=
-  lamePolyEk t n m s k * lamePolyEk t n m ((Real.compEllIntKm (k ^ 2) : ℂ) + I * τ) k
+def lameProduct (t : LamePolynomialType) (n m : ℕ) (k : ℝ) (s τ : ℝ) : ℂ :=
+  lamePolynomialE t n m s k *
+      lamePolynomialE t n m ((Real.completeEllipticKOfParameter (k ^ 2) : ℂ) + I * τ) k
 
 end DLMF.Lame

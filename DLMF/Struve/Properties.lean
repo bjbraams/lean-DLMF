@@ -732,7 +732,7 @@ theorem struveH_zero_products {z : ℂ} (hz : z ∈ slitPlane) :
   have hx := div_two_mem_slitPlane hz
   set u : ℂ := z / 4 with hu
   set f : ℕ × ℕ → ℂ := fun p => 2 * (-1) ^ p.1 * u ^ (2 * p.1 + 1) *
-    (poch (2 * p.1 + p.2 + 2 : ℂ) p.2 * (-(u ^ 2)) ^ p.2 / p.2 ! *
+    (pochhammer (2 * p.1 + p.2 + 2 : ℂ) p.2 * (-(u ^ 2)) ^ p.2 / p.2 ! *
       ((Gamma (p.1 + p.2 + 3 / 2))⁻¹) ^ 2) with hf
   obtain ⟨C, hC0, hC⟩ := exists_norm_recip_Gamma_add_nat_le (3 / 2 : ℂ)
   -- absolute summability
@@ -743,7 +743,7 @@ theorem struveH_zero_products {z : ℂ} (hz : z ∈ slitPlane) :
         (4 * C ^ 2 * ‖u‖))
     obtain ⟨k, m⟩ := p
     simp only [hf]
-    rw [mul_div_right_comm, poch_div_factorial_eq_choose]
+    rw [mul_div_right_comm, pochhammer_div_factorial_eq_choose]
     simp only [norm_mul, norm_pow, norm_neg, norm_one, one_pow, mul_one,
       Complex.norm_natCast, Complex.norm_ofNat]
     have hch : ((2 * k + 2 * m + 1).choose m : ℝ) ≤ 2 * 4 ^ (k + m) := by
@@ -818,7 +818,7 @@ theorem struveH_zero_products {z : ℂ} (hz : z ∈ slitPlane) :
       simp only at hp
       subst hp
       simp only [hf]
-      rw [mul_div_right_comm, poch_div_factorial_eq_choose,
+      rw [mul_div_right_comm, pochhammer_div_factorial_eq_choose,
         show 2 * (k + m) + 1 = 2 * k + 2 * m + 1 by ring, neg_pow (u ^ 2) m, ← pow_mul]
       push_cast
       ring
@@ -892,9 +892,9 @@ theorem struveH_one_even {z : ℂ} (hz : z ∈ slitPlane) :
     ring
 
 /-- `(n+1)_m / m! = C(n+m, m)` for natural `n`. -/
-theorem poch_natCast_add_one_div_factorial (n m : ℕ) :
-    poch ((n : ℂ) + 1) m / m ! = ((n + m).choose m : ℕ) := by
-  have h1 := poch_natCast_add_one_mul_factorial n m
+theorem pochhammer_natCast_add_one_div_factorial (n m : ℕ) :
+    pochhammer ((n : ℂ) + 1) m / m ! = ((n + m).choose m : ℕ) := by
+  have h1 := pochhammer_natCast_add_one_mul_factorial n m
   have h2 := Nat.choose_mul_factorial_mul_factorial (show m ≤ n + m by omega)
   rw [show n + m - m = n by omega] at h2
   rw [← h2] at h1
@@ -943,13 +943,13 @@ theorem struveH_one_products {z : ℂ} (hz : z ∈ slitPlane) :
   have hx := div_two_mem_slitPlane hz
   set u : ℂ := z / 4 with hu
   set f : ℕ × ℕ → ℂ := fun p => 4 * u ^ (4 * p.1 + 2) *
-    (poch (4 * p.1 + p.2 + 3 : ℂ) p.2 * (-(u ^ 2)) ^ p.2 / p.2 ! *
+    (pochhammer (4 * p.1 + p.2 + 3 : ℂ) p.2 * (-(u ^ 2)) ^ p.2 / p.2 ! *
       ((Gamma (2 * p.1 + p.2 + 3 / 2))⁻¹ * (Gamma (2 * p.1 + p.2 + 5 / 2))⁻¹)) with hf
-  have hpoch : ∀ k m : ℕ, poch (4 * k + m + 3 : ℂ) m / m ! =
+  have hpoch : ∀ k m : ℕ, pochhammer (4 * k + m + 3 : ℂ) m / m ! =
       ((4 * k + 2 * m + 2).choose m : ℕ) := by
     intro k m
     rw [show (4 * k + m + 3 : ℂ) = ((4 * k + m + 2 : ℕ) : ℂ) + 1 by push_cast; ring,
-      poch_natCast_add_one_div_factorial, show 4 * k + m + 2 + m = 4 * k + 2 * m + 2 by ring]
+      pochhammer_natCast_add_one_div_factorial, show 4 * k + m + 2 + m = 4 * k + 2 * m + 2 by ring]
   obtain ⟨C, hC0, hC⟩ := exists_norm_recip_Gamma_add_nat_le (3 / 2 : ℂ)
   obtain ⟨C', hC0', hC'⟩ := exists_norm_recip_Gamma_add_nat_le (5 / 2 : ℂ)
   -- absolute summability

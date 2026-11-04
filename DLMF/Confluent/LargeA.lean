@@ -28,7 +28,7 @@ Bessel asymptotics 10.7.8 give the cosine form.
   - cos(2√((c/2 - a)x) - cπ/2 + π/4) → 0` as `a → -∞`, for every real `c`.
 * `tendsto_regularizedConfluent_atBot_besselJ`: the Bessel form (a weak form of DLMF 13.8.9).
 * `tendsto_kummerU_atBot`: Beals–Wong (8.2.10) for non-integer `c` (compare DLMF 13.8.10).
-* `laguerrePolyL_fejer`: Fejér's formula for Laguerre polynomials (Szegő (8.22.4)).
+* `laguerrePolynomialL_fejer`: Fejér's formula for Laguerre polynomials (Szegő (8.22.4)).
 
 All error terms here are `o(1)`; the sharper `O(|a|^{-1/2})` rates of Beals–Wong and DLMF
 (13.8.9, 13.8.10, 18.15.14) are proved in `DLMF.Confluent.LargeASharp`.
@@ -46,11 +46,11 @@ namespace DLMF.Confluent
 /-! ### A Tannery limit -/
 
 /-- `(d - κ)_n / κⁿ → (-1)ⁿ` as `κ → +∞`. -/
-theorem tendsto_poch_sub_div_pow (d : ℝ) (n : ℕ) :
-    Tendsto (fun κ : ℝ => poch ((d - κ : ℝ) : ℂ) n / (κ : ℂ) ^ n) atTop
+theorem tendsto_pochhammer_sub_div_pow (d : ℝ) (n : ℕ) :
+    Tendsto (fun κ : ℝ => pochhammer ((d - κ : ℝ) : ℂ) n / (κ : ℂ) ^ n) atTop
       (𝓝 ((-1 : ℂ) ^ n)) := by
   induction n with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ n ih =>
     have h1 : Tendsto (fun κ : ℝ => (((d - κ : ℝ) : ℂ) + n) / κ) atTop (𝓝 (-1)) := by
       have hr : Tendsto (fun κ : ℝ => (d + n) / κ - 1) atTop (𝓝 (0 - 1)) :=
@@ -69,20 +69,20 @@ theorem tendsto_poch_sub_div_pow (d : ℝ) (n : ℕ) :
     refine this.congr' ?_
     filter_upwards [eventually_gt_atTop (0 : ℝ)] with κ hκ
     have hκ' : (κ : ℂ) ≠ 0 := by exact_mod_cast hκ.ne'
-    rw [poch_succ, pow_succ]
+    rw [pochhammer_succ, pow_succ]
     field_simp
 
 /-- The bound `‖(d - κ)_n / κⁿ‖ ≤ (1 + |d|)_n` for `κ ≥ 1`. -/
-theorem norm_poch_sub_div_pow_le (d : ℝ) {κ : ℝ} (hκ : 1 ≤ κ) (n : ℕ) :
-    ‖poch ((d - κ : ℝ) : ℂ) n / (κ : ℂ) ^ n‖ ≤ (ascPochhammer ℝ n).eval (1 + |d|) := by
+theorem norm_pochhammer_sub_div_pow_le (d : ℝ) {κ : ℝ} (hκ : 1 ≤ κ) (n : ℕ) :
+    ‖pochhammer ((d - κ : ℝ) : ℂ) n / (κ : ℂ) ^ n‖ ≤ (ascPochhammer ℝ n).eval (1 + |d|) := by
   induction n with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ n ih =>
     have hκ0 : 0 < κ := by linarith
     have hκ' : (κ : ℂ) ≠ 0 := by exact_mod_cast hκ0.ne'
-    have hsplit : poch ((d - κ : ℝ) : ℂ) (n + 1) / (κ : ℂ) ^ (n + 1) =
-        poch ((d - κ : ℝ) : ℂ) n / (κ : ℂ) ^ n * ((((d - κ : ℝ) : ℂ) + n) / κ) := by
-      rw [poch_succ, pow_succ]
+    have hsplit : pochhammer ((d - κ : ℝ) : ℂ) (n + 1) / (κ : ℂ) ^ (n + 1) =
+        pochhammer ((d - κ : ℝ) : ℂ) n / (κ : ℂ) ^ n * ((((d - κ : ℝ) : ℂ) + n) / κ) := by
+      rw [pochhammer_succ, pow_succ]
       field_simp
     have hfac : ‖(((d - κ : ℝ) : ℂ) + n) / κ‖ ≤ 1 + |d| + n := by
       rw [show (((d - κ : ℝ) : ℂ) + n) / κ = (((d - κ + n) / κ : ℝ) : ℂ) by push_cast; ring,
@@ -108,7 +108,7 @@ theorem tendsto_regularizedConfluent_sub_div (d : ℝ) (b w : ℂ) :
       (𝓝 (regularizedHGFun (∅ : Multiset ℂ) {b} (-w))) := by
   set T : ℕ → ℂ := fun n => w ^ n / n ! * (Gamma (b + n))⁻¹ with hT
   have hL : ∀ κ : ℝ, κ ≠ 0 → regularizedHGFun {((d - κ : ℝ) : ℂ)} {b} (w / κ) =
-      ∑' n : ℕ, poch ((d - κ : ℝ) : ℂ) n / (κ : ℂ) ^ n * T n := by
+      ∑' n : ℕ, pochhammer ((d - κ : ℝ) : ℂ) n / (κ : ℂ) ^ n * T n := by
     intro κ hκ
     have hκ' : (κ : ℂ) ≠ 0 := by exact_mod_cast hκ
     rw [regularizedConfluent_eq_tsum]
@@ -125,16 +125,16 @@ theorem tendsto_regularizedConfluent_sub_div (d : ℝ) (b w : ℂ) :
     have hs := summable_norm_iff.mpr
       (summable_regularizedConfluent_term (((1 + |d| : ℝ)) : ℂ) b (‖w‖ : ℂ))
     refine hs.congr fun n => ?_
-    rw [poch_ofReal]
+    rw [pochhammer_ofReal]
     simp only [hT, norm_mul, norm_div, norm_pow, Complex.norm_real, Real.norm_eq_abs,
       norm_inv, Complex.norm_natCast, abs_norm]
     rw [abs_of_nonneg ((ascPochhammer_pos n _ (by positivity)).le)]
     ring
   refine (tendsto_tsum_of_dominated_convergence hsum
-    (fun n => (tendsto_poch_sub_div_pow d n).mul_const (T n)) ?_).congr' ?_
+    (fun n => (tendsto_pochhammer_sub_div_pow d n).mul_const (T n)) ?_).congr' ?_
   · filter_upwards [eventually_ge_atTop (1 : ℝ)] with κ hκ n
     rw [norm_mul]
-    exact mul_le_mul_of_nonneg_right (norm_poch_sub_div_pow_le d hκ n) (norm_nonneg _)
+    exact mul_le_mul_of_nonneg_right (norm_pochhammer_sub_div_pow_le d hκ n) (norm_nonneg _)
   · filter_upwards [eventually_gt_atTop (0 : ℝ)] with κ hκ
     exact (hL κ hκ.ne').symm
 
@@ -1315,9 +1315,9 @@ theorem tendsto_sqrt_add_sub_sqrt {d : ℝ} (hd : 0 ≤ d) :
 
 /-- **Fejér's formula** (Szegő (8.22.4); Beals–Wong (5.4.12)): for `α > -1` and fixed `x > 0`,
 `n^{1/4 - α/2} L_n^{(α)}(x) = π^{-1/2} e^{x/2} x^{-α/2-1/4} cos(2√(nx) - απ/2 - π/4) + o(1)`. -/
-theorem laguerrePolyL_fejer {α : ℝ} (hα : -1 < α) {x : ℝ} (hx : 0 < x) :
+theorem laguerrePolynomialL_fejer {α : ℝ} (hα : -1 < α) {x : ℝ} (hx : 0 < x) :
     Tendsto (fun n : ℕ => (((n : ℝ) ^ (1 / 4 - α / 2) : ℝ) : ℂ) *
-        DLMF.OrthogonalPolynomials.laguerrePolyL (α : ℂ) n (x : ℂ) -
+        DLMF.OrthogonalPolynomials.laguerrePolynomialL (α : ℂ) n (x : ℂ) -
       ((Real.exp (x / 2) * x ^ (-(α / 2) - 1 / 4) / Real.sqrt π *
         Real.cos (2 * Real.sqrt (n * x) - α * π / 2 - π / 4) : ℝ) : ℂ)) atTop (𝓝 0) := by
   set c : ℝ := α + 1 with hcdef
@@ -1393,16 +1393,16 @@ theorem laguerrePolyL_fejer {α : ℝ} (hα : -1 < α) {x : ℝ} (hx : 0 < x) :
     have := congrArg Complex.re hk
     simp at this
     linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
-  have hL : DLMF.OrthogonalPolynomials.laguerrePolyL (α : ℂ) n (x : ℂ) =
+  have hL : DLMF.OrthogonalPolynomials.laguerrePolynomialL (α : ℂ) n (x : ℂ) =
       Complex.Gamma ((n : ℂ) + c) / (n ! : ℂ) *
         regularizedHGFun {((-(n : ℝ) : ℝ) : ℂ)} {(c : ℂ)} (x : ℂ) := by
-    rw [DLMF.OrthogonalPolynomials.laguerrePolyL, kummerM_eq_mul_regularizedHGFun hcpole]
+    rw [DLMF.OrthogonalPolynomials.laguerrePolynomialL, kummerM_eq_mul_regularizedHGFun hcpole]
     have hG := Complex.Gamma_add_nat_div_Gamma_eq (n := n) ((α : ℂ) + 1) hcpole
     have hG0 : Complex.Gamma ((α : ℂ) + 1) ≠ 0 := Complex.Gamma_ne_zero hcpole
     rw [show ((-(n : ℝ) : ℝ) : ℂ) = -(n : ℂ) by push_cast; ring,
       show ((c : ℝ) : ℂ) = (α : ℂ) + 1 by rw [hcdef]; push_cast; ring,
       show (n : ℂ) + ((α : ℂ) + 1) = (α : ℂ) + 1 + n by ring]
-    rw [poch, ← hG]
+    rw [pochhammer, ← hG]
     field_simp
   -- the real identity for the prefactors
   have hpow : (n : ℝ) ^ (1 / 4 - α / 2) * (n : ℝ) ^ α = Q n * K *

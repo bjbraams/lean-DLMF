@@ -26,9 +26,10 @@ DLMF §6.15, evaluated through Binet's formulas: the digamma kernel integral DLM
 
 ## Main results
 
-* `ExpIntegralTransforms.integral_cosInt_sq`, `ExpIntegralTransforms.integral_sinIntTail_sq`:
-  `∫₀^∞ Ci² = ∫₀^∞ (Si - π/2)² = π/2`.
-* `ExpIntegralTransforms.integral_cosInt_mul_sinIntTail`: `∫₀^∞ Ci(t) (Si(t) - π/2) dt = log 2`.
+* `ExpIntegralTransforms.integral_cosIntegral_sq`,
+  `ExpIntegralTransforms.integral_sinIntegralTail_sq`: `∫₀^∞ Ci² = ∫₀^∞ (Si - π/2)² = π/2`.
+* `ExpIntegralTransforms.integral_cosIntegral_mul_sinIntegralTail`:
+  `∫₀^∞ Ci(t) (Si(t) - π/2) dt = log 2`.
 * `ExpIntegralTransforms.integral_realE1_sq`: `∫₀^∞ E₁(t)² dt = 2 log 2`.
 * `ExpIntegralTransforms.hasSum_realAuxG`, `ExpIntegralTransforms.hasSum_realAuxF`: alternating sums
   of the auxiliary functions as Fermi-type integrals.
@@ -46,16 +47,16 @@ open scoped Real Topology Nat
 namespace DLMF.Confluent
 
 /-- `t · Ci(t)² → 0` as `t → 0⁺`. -/
-theorem ExpIntegralTransforms.tendsto_mul_cosInt_sq :
-    Tendsto (fun t => t * Real.cosInt t ^ 2) (𝓝[>] 0) (𝓝 0) := by
-  set c : ℝ → ℝ := fun t => -Real.cosIntCin t + Real.eulerMascheroniConstant
-  have hc : Continuous c := ExpIntegralTransforms.continuous_cosIntCin.neg.add continuous_const
-  have e : ∀ t, 0 < t → t * Real.cosInt t ^ 2 =
+theorem ExpIntegralTransforms.tendsto_mul_cosIntegral_sq :
+    Tendsto (fun t => t * Real.cosIntegral t ^ 2) (𝓝[>] 0) (𝓝 0) := by
+  set c : ℝ → ℝ := fun t => -Real.cosIntegralCin t + Real.eulerMascheroniConstant
+  have hc : Continuous c := ExpIntegralTransforms.continuous_cosIntegralCin.neg.add continuous_const
+  have e : ∀ t, 0 < t → t * Real.cosIntegral t ^ 2 =
       t * c t ^ 2 + 2 * c t * (t * Real.log t) + (Real.log t * t ^ (1/2:ℝ)) ^ 2 := by
     intro t ht
     have : (t ^ (1/2:ℝ)) ^ 2 = t := by
       rw [← Real.rpow_natCast, ← Real.rpow_mul ht.le]; norm_num
-    rw [mul_pow, this, Real.cosInt]; ring
+    rw [mul_pow, this, Real.cosIntegral]; ring
   have h1 : Tendsto (fun t => t * c t ^ 2) (𝓝[>] 0) (𝓝 (0 * c 0 ^ 2)) :=
     ((continuous_id.mul (hc.pow 2)).tendsto 0).mono_left nhdsWithin_le_nhds
   have h2 : Tendsto (fun t => 2 * c t * (t * Real.log t)) (𝓝[>] 0)
@@ -70,95 +71,100 @@ theorem ExpIntegralTransforms.tendsto_mul_cosInt_sq :
   exact (e t ht).symm
 
 /-- `t ↦ t · Ci(t)²` is continuous on `[0, R]`. -/
-theorem ExpIntegralTransforms.continuousOn_mul_cosInt_sq (R : ℝ) :
-    ContinuousOn (fun t => t * Real.cosInt t ^ 2) (Icc 0 R) := by
+theorem ExpIntegralTransforms.continuousOn_mul_cosIntegral_sq (R : ℝ) :
+    ContinuousOn (fun t => t * Real.cosIntegral t ^ 2) (Icc 0 R) := by
   intro x hx
   rcases eq_or_lt_of_le hx.1 with h | h
   · subst h
-    have : ContinuousWithinAt (fun t => t * Real.cosInt t ^ 2) (Ici 0) 0 := by
+    have : ContinuousWithinAt (fun t => t * Real.cosIntegral t ^ 2) (Ici 0) 0 := by
       rw [← continuousWithinAt_Ioi_iff_Ici, ContinuousWithinAt]
-      simpa using ExpIntegralTransforms.tendsto_mul_cosInt_sq
+      simpa using ExpIntegralTransforms.tendsto_mul_cosIntegral_sq
     exact this.mono Icc_subset_Ici_self
   · exact (continuousAt_id.mul
-        ((ExpIntegralTransforms.continuousAt_cosInt h).pow 2)).continuousWithinAt
+        ((ExpIntegralTransforms.continuousAt_cosIntegral h).pow 2)).continuousWithinAt
 
 /-- Integration by parts: `∫₀^R Ci² = R Ci(R)² - 2 ∫₀^R cos t · Ci(t) dt`. -/
-theorem ExpIntegralTransforms.integral_cosInt_sq_eq {R : ℝ} (hR : 0 ≤ R) :
-    ∫ t in (0:ℝ)..R, Real.cosInt t ^ 2 =
-      R * Real.cosInt R ^ 2 - 2 * ∫ t in (0:ℝ)..R, Real.cos t * Real.cosInt t := by
-  have hi1 : IntervalIntegrable (fun t => Real.cosInt t ^ 2) volume 0 R := by
+theorem ExpIntegralTransforms.integral_cosIntegral_sq_eq {R : ℝ} (hR : 0 ≤ R) :
+    ∫ t in (0:ℝ)..R, Real.cosIntegral t ^ 2 =
+      R * Real.cosIntegral R ^ 2 - 2 * ∫ t in (0:ℝ)..R, Real.cos t * Real.cosIntegral t := by
+  have hi1 : IntervalIntegrable (fun t => Real.cosIntegral t ^ 2) volume 0 R := by
     rw [intervalIntegrable_iff_integrableOn_Ioc_of_le hR]
-    exact ExpIntegralTransforms.integrableOn_cosInt_sq.mono_set Ioc_subset_Ioi_self
-  have hi2 := (ExpIntegralTransforms.intervalIntegrable_cos_mul_cosInt R).const_mul 2
+    exact ExpIntegralTransforms.integrableOn_cosIntegral_sq.mono_set Ioc_subset_Ioi_self
+  have hi2 := (ExpIntegralTransforms.intervalIntegrable_cos_mul_cosIntegral R).const_mul 2
   have h := intervalIntegral.integral_eq_sub_of_hasDerivAt_of_le hR
-    (ExpIntegralTransforms.continuousOn_mul_cosInt_sq R) (f' := fun t => Real.cosInt t ^ 2 +
-      2 * (Real.cos t * Real.cosInt t)) (fun x hx => ?_) (hi1.add hi2)
+    (ExpIntegralTransforms.continuousOn_mul_cosIntegral_sq R)
+        (f' := fun t => Real.cosIntegral t ^ 2 +
+      2 * (Real.cos t * Real.cosIntegral t)) (fun x hx => ?_) (hi1.add hi2)
   · rw [intervalIntegral.integral_add hi1 hi2, intervalIntegral.integral_const_mul] at h
     simp only [zero_mul, sub_zero] at h
     linarith
   · have hx0 : 0 < x := hx.1
-    have := (hasDerivAt_id x).mul ((Real.hasDerivAt_cosInt hx0).pow 2)
+    have := (hasDerivAt_id x).mul ((Real.hasDerivAt_cosIntegral hx0).pow 2)
     refine this.congr_deriv ?_
     simp only [id, one_mul, Nat.cast_ofNat, Pi.pow_apply]
     field_simp
     ring
 
 /-- `∫₀^∞ Ci(t)² dt = π/2`. -/
-theorem ExpIntegralTransforms.integral_cosInt_sq : ∫ t in Ioi (0:ℝ), Real.cosInt t ^ 2 = π / 2 := by
+theorem ExpIntegralTransforms.integral_cosIntegral_sq : ∫ t in Ioi (0:ℝ),
+    Real.cosIntegral t ^ 2 = π / 2 := by
   have hlim := intervalIntegral_tendsto_integral_Ioi 0
-      ExpIntegralTransforms.integrableOn_cosInt_sq tendsto_id
+      ExpIntegralTransforms.integrableOn_cosIntegral_sq tendsto_id
   refine tendsto_nhds_unique hlim ?_
-  have h1 : Tendsto (fun R => R * Real.cosInt R ^ 2) atTop (𝓝 0) := by
+  have h1 : Tendsto (fun R => R * Real.cosIntegral R ^ 2) atTop (𝓝 0) := by
     refine squeeze_zero_norm' ?_ ((tendsto_const_nhds (x := (4:ℝ))).div_atTop tendsto_id)
     filter_upwards [eventually_gt_atTop 0] with R hR
-    have h := ExpIntegralTransforms.abs_cosInt_le hR
+    have h := ExpIntegralTransforms.abs_cosIntegral_le hR
     rw [Real.norm_eq_abs, abs_mul, abs_of_pos hR, abs_of_nonneg (sq_nonneg _), ← sq_abs]
-    calc R * |Real.cosInt R| ^ 2 ≤ R * (2 / R) ^ 2 :=
+    calc R * |Real.cosIntegral R| ^ 2 ≤ R * (2 / R) ^ 2 :=
           mul_le_mul_of_nonneg_left (pow_le_pow_left₀ (abs_nonneg _) h 2) hR.le
       _ = 4 / id R := by simp only [id]; field_simp; ring
-  have := h1.sub (ExpIntegralTransforms.tendsto_integral_cos_mul_cosInt.const_mul 2)
+  have := h1.sub (ExpIntegralTransforms.tendsto_integral_cos_mul_cosIntegral.const_mul 2)
   rw [show (0:ℝ) - 2 * -(π / 4) = π / 2 by ring] at this
   refine this.congr' ?_
   filter_upwards [eventually_ge_atTop 0] with R hR
   simp only [id]
-  rw [ExpIntegralTransforms.integral_cosInt_sq_eq hR]
+  rw [ExpIntegralTransforms.integral_cosIntegral_sq_eq hR]
 
 /-- `t ↦ Si(t) - π/2` is continuous. -/
-theorem ExpIntegralTransforms.continuous_sinIntTail : Continuous fun t => Real.sinInt t - π / 2 :=
-  ExpIntegralTransforms.continuous_sinInt.sub continuous_const
+theorem ExpIntegralTransforms.continuous_sinIntegralTail : Continuous fun t =>
+    Real.sinIntegral t - π / 2 :=
+  ExpIntegralTransforms.continuous_sinIntegral.sub continuous_const
 
 /-- `(Si - π/2)²` is integrable on `(0, ∞)`. -/
-theorem ExpIntegralTransforms.integrableOn_sinIntTail_sq :
-    IntegrableOn (fun t => (Real.sinInt t - π / 2) ^ 2) (Ioi 0) := by
+theorem ExpIntegralTransforms.integrableOn_sinIntegralTail_sq :
+    IntegrableOn (fun t => (Real.sinIntegral t - π / 2) ^ 2) (Ioi 0) := by
   refine ExpIntegralTransforms.integrableOn_Ioi_of_bound (A := 9) (B := 0) (C := 4)
-    (ExpIntegralTransforms.continuous_sinIntTail.pow 2).aestronglyMeasurable (fun t ht => ?_)
+    (ExpIntegralTransforms.continuous_sinIntegralTail.pow 2).aestronglyMeasurable (fun t ht => ?_)
         (fun t ht => ?_)
-  · have h := ExpIntegralTransforms.abs_sinIntTail_le_small ht.1.le ht.2
+  · have h := ExpIntegralTransforms.abs_sinIntegralTail_le_small ht.1.le ht.2
     rw [abs_of_nonneg (sq_nonneg _), ← sq_abs, zero_mul, add_zero]
-    calc |Real.sinInt t - π / 2| ^ 2 ≤ 3 ^ 2 := pow_le_pow_left₀ (abs_nonneg _) h 2
+    calc |Real.sinIntegral t - π / 2| ^ 2 ≤ 3 ^ 2 := pow_le_pow_left₀ (abs_nonneg _) h 2
       _ = 9 := by norm_num
-  · have h := ExpIntegralTransforms.abs_sinIntTail_le (by linarith : (0:ℝ) < t)
+  · have h := ExpIntegralTransforms.abs_sinIntegralTail_le (by linarith : (0:ℝ) < t)
     rw [abs_of_nonneg (sq_nonneg _), ← sq_abs]
-    calc |Real.sinInt t - π / 2| ^ 2 ≤ (2 / t) ^ 2 := pow_le_pow_left₀ (abs_nonneg _) h 2
+    calc |Real.sinIntegral t - π / 2| ^ 2 ≤ (2 / t) ^ 2 := pow_le_pow_left₀ (abs_nonneg _) h 2
       _ = 4 / t ^ 2 := by ring
 
 /-- Integration by parts: `∫₀^R (Si - π/2)² = R (Si(R) - π/2)² - 2 ∫₀^R sin t (Si(t) - π/2) dt`. -/
-theorem ExpIntegralTransforms.integral_sinIntTail_sq_eq (R : ℝ) :
-    ∫ t in (0:ℝ)..R, (Real.sinInt t - π / 2) ^ 2 =
-      R * (Real.sinInt R - π / 2) ^ 2 -
-        2 * ∫ t in (0:ℝ)..R, Real.sin t * (Real.sinInt t - π / 2) := by
-  have hi1 : IntervalIntegrable (fun t => (Real.sinInt t - π / 2) ^ 2) volume 0 R :=
-    (ExpIntegralTransforms.continuous_sinIntTail.pow 2).intervalIntegrable 0 R
-  have hi2 : IntervalIntegrable (fun t => 2 * (Real.sin t * (Real.sinInt t - π / 2))) volume 0 R :=
-    ((Real.continuous_sin.mul ExpIntegralTransforms.continuous_sinIntTail).intervalIntegrable
+theorem ExpIntegralTransforms.integral_sinIntegralTail_sq_eq (R : ℝ) :
+    ∫ t in (0:ℝ)..R, (Real.sinIntegral t - π / 2) ^ 2 =
+      R * (Real.sinIntegral R - π / 2) ^ 2 -
+        2 * ∫ t in (0:ℝ)..R, Real.sin t * (Real.sinIntegral t - π / 2) := by
+  have hi1 : IntervalIntegrable (fun t => (Real.sinIntegral t - π / 2) ^ 2) volume 0 R :=
+    (ExpIntegralTransforms.continuous_sinIntegralTail.pow 2).intervalIntegrable 0 R
+  have hi2 : IntervalIntegrable
+      (fun t => 2 * (Real.sin t * (Real.sinIntegral t - π / 2))) volume 0 R :=
+    ((Real.continuous_sin.mul ExpIntegralTransforms.continuous_sinIntegralTail).intervalIntegrable
         0 R).const_mul 2
   have h := intervalIntegral.integral_eq_sub_of_hasDerivAt
-    (f := fun t => t * (Real.sinInt t - π / 2) ^ 2) (f' := fun t => (Real.sinInt t - π / 2) ^ 2 +
-      2 * (Real.sin t * (Real.sinInt t - π / 2))) (fun x _ => ?_) (hi1.add hi2)
+    (f := fun t => t * (Real.sinIntegral t - π / 2) ^ 2)
+        (f' := fun t => (Real.sinIntegral t - π / 2) ^ 2 +
+      2 * (Real.sin t * (Real.sinIntegral t - π / 2))) (fun x _ => ?_) (hi1.add hi2)
   · rw [intervalIntegral.integral_add hi1 hi2, intervalIntegral.integral_const_mul] at h
     simp only [zero_mul, sub_zero] at h
     linarith
-  · have := (hasDerivAt_id x).mul (((Real.hasDerivAt_sinInt x).sub_const (π / 2)).pow 2)
+  · have := (hasDerivAt_id x).mul (((Real.hasDerivAt_sinIntegral x).sub_const (π / 2)).pow 2)
     refine this.congr_deriv ?_
     simp only [id, one_mul, Nat.cast_ofNat, Pi.pow_apply]
     rcases eq_or_ne x 0 with rfl | hx
@@ -168,36 +174,37 @@ theorem ExpIntegralTransforms.integral_sinIntTail_sq_eq (R : ℝ) :
     ring
 
 /-- `∫₀^∞ (Si(t) - π/2)² dt = π/2`. -/
-theorem ExpIntegralTransforms.integral_sinIntTail_sq : ∫ t in Ioi (0:ℝ),
-    (Real.sinInt t - π / 2) ^ 2 = π / 2 := by
+theorem ExpIntegralTransforms.integral_sinIntegralTail_sq : ∫ t in Ioi (0:ℝ),
+    (Real.sinIntegral t - π / 2) ^ 2 = π / 2 := by
   have hlim := intervalIntegral_tendsto_integral_Ioi 0
-      ExpIntegralTransforms.integrableOn_sinIntTail_sq tendsto_id
+      ExpIntegralTransforms.integrableOn_sinIntegralTail_sq tendsto_id
   refine tendsto_nhds_unique hlim ?_
-  have h1 : Tendsto (fun R => R * (Real.sinInt R - π / 2) ^ 2) atTop (𝓝 0) := by
+  have h1 : Tendsto (fun R => R * (Real.sinIntegral R - π / 2) ^ 2) atTop (𝓝 0) := by
     refine squeeze_zero_norm' ?_ ((tendsto_const_nhds (x := (4:ℝ))).div_atTop tendsto_id)
     filter_upwards [eventually_gt_atTop 0] with R hR
-    have h := ExpIntegralTransforms.abs_sinIntTail_le hR
+    have h := ExpIntegralTransforms.abs_sinIntegralTail_le hR
     rw [Real.norm_eq_abs, abs_mul, abs_of_pos hR, abs_of_nonneg (sq_nonneg _), ← sq_abs]
-    calc R * |Real.sinInt R - π / 2| ^ 2 ≤ R * (2 / R) ^ 2 :=
+    calc R * |Real.sinIntegral R - π / 2| ^ 2 ≤ R * (2 / R) ^ 2 :=
           mul_le_mul_of_nonneg_left (pow_le_pow_left₀ (abs_nonneg _) h 2) hR.le
       _ = 4 / id R := by simp only [id]; field_simp; ring
-  have := h1.sub (ExpIntegralTransforms.tendsto_integral_sin_mul_sinIntTail.const_mul 2)
+  have := h1.sub (ExpIntegralTransforms.tendsto_integral_sin_mul_sinIntegralTail.const_mul 2)
   rw [show (0:ℝ) - 2 * -(π / 4) = π / 2 by ring] at this
   refine this.congr' (Eventually.of_forall fun R => ?_)
   simp only [id]
-  rw [ExpIntegralTransforms.integral_sinIntTail_sq_eq R]
+  rw [ExpIntegralTransforms.integral_sinIntegralTail_sq_eq R]
 
 /-- The primitive of `cos t si(t) + sin t Ci(t)`, continuous at `0`. -/
 noncomputable def ExpIntegralTransforms.cosSiSinCiPrimitive (t : ℝ) : ℝ :=
-  Real.sin t * (Real.sinInt t - π / 2) - Real.cos t *
-      (-Real.cosIntCin t + Real.eulerMascheroniConstant) +
-    (-Real.cosIntCin (2 * t) + Real.eulerMascheroniConstant) + Real.log 2 +
+  Real.sin t * (Real.sinIntegral t - π / 2) - Real.cos t *
+      (-Real.cosIntegralCin t + Real.eulerMascheroniConstant) +
+    (-Real.cosIntegralCin (2 * t) + Real.eulerMascheroniConstant) + Real.log 2 +
     Real.sin (t / 2) * Real.sinc (t / 2) * (t * Real.log t)
 
 /-- Explicit formula for `ExpIntegralTransforms.cosSiSinCiPrimitive` at `t > 0`. -/
 theorem ExpIntegralTransforms.cosSiSinCiPrimitive_eq {t : ℝ} (ht : 0 < t) :
     ExpIntegralTransforms.cosSiSinCiPrimitive t =
-    Real.sin t * (Real.sinInt t - π / 2) - Real.cos t * Real.cosInt t + Real.cosInt (2 * t) := by
+    Real.sin t * (Real.sinIntegral t - π / 2) - Real.cos t * Real.cosIntegral t +
+        Real.cosIntegral (2 * t) := by
   have h1 : Real.sin (t / 2) * Real.sinc (t / 2) * (t * Real.log t) =
       (1 - Real.cos t) * Real.log t := by
     rw [Real.sinc_of_ne_zero (by positivity)]
@@ -206,7 +213,7 @@ theorem ExpIntegralTransforms.cosSiSinCiPrimitive_eq {t : ℝ} (ht : 0 < t) :
       rw [show 2 * (t / 2) = t by ring] at h2
       rw [h2, Real.cos_sq']; ring
     rw [this]; field_simp; ring
-  rw [ExpIntegralTransforms.cosSiSinCiPrimitive, h1, Real.cosInt, Real.cosInt,
+  rw [ExpIntegralTransforms.cosSiSinCiPrimitive, h1, Real.cosIntegral, Real.cosIntegral,
       Real.log_mul (by norm_num) ht.ne']
   ring
 
@@ -214,8 +221,8 @@ theorem ExpIntegralTransforms.cosSiSinCiPrimitive_eq {t : ℝ} (ht : 0 < t) :
 theorem ExpIntegralTransforms.continuous_cosSiSinCiPrimitive : Continuous
     ExpIntegralTransforms.cosSiSinCiPrimitive := by
   unfold ExpIntegralTransforms.cosSiSinCiPrimitive
-  have hc := ExpIntegralTransforms.continuous_cosIntCin
-  have hs := ExpIntegralTransforms.continuous_sinInt
+  have hc := ExpIntegralTransforms.continuous_cosIntegralCin
+  have hs := ExpIntegralTransforms.continuous_sinIntegral
   have hl := Real.continuous_mul_log
   fun_prop
 
@@ -223,14 +230,15 @@ theorem ExpIntegralTransforms.continuous_cosSiSinCiPrimitive : Continuous
 for `x > 0`. -/
 theorem ExpIntegralTransforms.hasDerivAt_cosSiSinCiPrimitive {x : ℝ} (hx : 0 < x) :
     HasDerivAt ExpIntegralTransforms.cosSiSinCiPrimitive
-        (Real.cos x * (Real.sinInt x - π / 2) + Real.sin x * Real.cosInt x) x := by
+        (Real.cos x * (Real.sinIntegral x - π / 2) + Real.sin x * Real.cosIntegral x) x := by
   have hev : ExpIntegralTransforms.cosSiSinCiPrimitive =ᶠ[𝓝 x] fun t =>
-      Real.sin t * (Real.sinInt t - π / 2) - Real.cos t * Real.cosInt t + Real.cosInt (2 * t) := by
+      Real.sin t * (Real.sinIntegral t - π / 2) - Real.cos t * Real.cosIntegral t +
+          Real.cosIntegral (2 * t) := by
     filter_upwards [lt_mem_nhds hx] with t ht using ExpIntegralTransforms.cosSiSinCiPrimitive_eq ht
   refine HasDerivAt.congr_of_eventuallyEq ?_ hev
-  have h1 := (Real.hasDerivAt_sin x).mul ((Real.hasDerivAt_sinInt x).sub_const (π / 2))
-  have h2 := (Real.hasDerivAt_cos x).mul (Real.hasDerivAt_cosInt hx)
-  have h3 := (Real.hasDerivAt_cosInt (by positivity : 0 < 2 * x)).comp x
+  have h1 := (Real.hasDerivAt_sin x).mul ((Real.hasDerivAt_sinIntegral x).sub_const (π / 2))
+  have h2 := (Real.hasDerivAt_cos x).mul (Real.hasDerivAt_cosIntegral hx)
+  have h3 := (Real.hasDerivAt_cosIntegral (by positivity : 0 < 2 * x)).comp x
     ((hasDerivAt_id x).const_mul 2)
   refine ((h1.sub h2).add h3).congr_deriv ?_
   rw [Real.sinc_of_ne_zero hx.ne', Real.cos_two_mul]
@@ -242,7 +250,7 @@ theorem ExpIntegralTransforms.hasDerivAt_cosSiSinCiPrimitive {x : ℝ} (hx : 0 <
 /-- `ExpIntegralTransforms.cosSiSinCiPrimitive 0 = log 2`. -/
 theorem ExpIntegralTransforms.cosSiSinCiPrimitive_zero : ExpIntegralTransforms.cosSiSinCiPrimitive 0
     = Real.log 2 := by
-  simp [ExpIntegralTransforms.cosSiSinCiPrimitive, Real.cosIntCin]
+  simp [ExpIntegralTransforms.cosSiSinCiPrimitive, Real.cosIntegralCin]
 
 /-- `ExpIntegralTransforms.cosSiSinCiPrimitive(t) → 0` as `t → ∞`. -/
 theorem ExpIntegralTransforms.tendsto_cosSiSinCiPrimitive : Tendsto
@@ -252,9 +260,10 @@ theorem ExpIntegralTransforms.tendsto_cosSiSinCiPrimitive : Tendsto
     refine squeeze_zero_norm (a := fun x => ‖g x‖) (fun x => ?_) (by simpa using hg.norm)
     rw [norm_mul, Real.norm_eq_abs (f x)]
     exact mul_le_of_le_one_left (norm_nonneg _) (hf x)
-  have h1 := hb _ _ Real.abs_sin_le_one ExpIntegralTransforms.tendsto_sinIntTail_real
-  have h2 := hb _ _ Real.abs_cos_le_one ExpIntegralTransforms.tendsto_cosInt_real
-  have h3 := ExpIntegralTransforms.tendsto_cosInt_real.comp (tendsto_id.const_mul_atTop two_pos)
+  have h1 := hb _ _ Real.abs_sin_le_one ExpIntegralTransforms.tendsto_sinIntegralTail_real
+  have h2 := hb _ _ Real.abs_cos_le_one ExpIntegralTransforms.tendsto_cosIntegral_real
+  have h3 := ExpIntegralTransforms.tendsto_cosIntegral_real.comp
+      (tendsto_id.const_mul_atTop two_pos)
   have := (h1.sub h2).add h3
   simp only [sub_zero, add_zero] at this
   refine this.congr' ?_
@@ -264,63 +273,68 @@ theorem ExpIntegralTransforms.tendsto_cosSiSinCiPrimitive : Tendsto
 /-- `∫₀^R (cos t (Si(t) - π/2) + sin t Ci(t)) dt = ExpIntegralTransforms.cosSiSinCiPrimitive R - log
 2`. -/
 theorem ExpIntegralTransforms.integral_cos_si_add_sin_ci {R : ℝ} (hR : 0 ≤ R) :
-    ∫ t in (0:ℝ)..R, (Real.cos t * (Real.sinInt t - π / 2) + Real.sin t * Real.cosInt t) =
+    ∫ t in (0:ℝ)..R, (Real.cos t * (Real.sinIntegral t - π / 2) + Real.sin t * Real.cosIntegral t) =
       ExpIntegralTransforms.cosSiSinCiPrimitive R - Real.log 2 := by
   rw [intervalIntegral.integral_eq_sub_of_hasDerivAt_of_le hR
       ExpIntegralTransforms.continuous_cosSiSinCiPrimitive.continuousOn
     (fun x hx => ExpIntegralTransforms.hasDerivAt_cosSiSinCiPrimitive hx.1)
-    (((Real.continuous_cos.mul ExpIntegralTransforms.continuous_sinIntTail).add
-      ExpIntegralTransforms.continuous_sin_mul_cosInt).intervalIntegrable 0 R),
+    (((Real.continuous_cos.mul ExpIntegralTransforms.continuous_sinIntegralTail).add
+      ExpIntegralTransforms.continuous_sin_mul_cosIntegral).intervalIntegrable 0 R),
           ExpIntegralTransforms.cosSiSinCiPrimitive_zero]
 
 /-- `Ci · (Si - π/2)` is integrable on `(0, ∞)`. -/
-theorem ExpIntegralTransforms.integrableOn_cosInt_mul_sinIntTail :
-    IntegrableOn (fun t => Real.cosInt t * (Real.sinInt t - π / 2)) (Ioi 0) := by
+theorem ExpIntegralTransforms.integrableOn_cosIntegral_mul_sinIntegralTail :
+    IntegrableOn (fun t => Real.cosIntegral t * (Real.sinIntegral t - π / 2)) (Ioi 0) := by
   refine ExpIntegralTransforms.integrableOn_Ioi_of_bound (A := 6) (B := 12) (C := 4)
-    (ExpIntegralTransforms.measurable_cosInt.mul
-        ExpIntegralTransforms.continuous_sinIntTail.measurable).aestronglyMeasurable
+    (ExpIntegralTransforms.measurable_cosIntegral.mul
+        ExpIntegralTransforms.continuous_sinIntegralTail.measurable).aestronglyMeasurable
     (fun t ht => ?_) (fun t ht => ?_)
-  · have h := ExpIntegralTransforms.abs_cosInt_le_small ht.1 ht.2
-    have h' := ExpIntegralTransforms.abs_sinIntTail_le_small ht.1.le ht.2
+  · have h := ExpIntegralTransforms.abs_cosIntegral_le_small ht.1 ht.2
+    have h' := ExpIntegralTransforms.abs_sinIntegralTail_le_small ht.1.le ht.2
     have h1 := ExpIntegralTransforms.rpow_quarter_le ht.1 ht.2
     rw [abs_mul]
-    calc |Real.cosInt t| * |Real.sinInt t - π / 2| ≤ (2 + 4 * t ^ (-(1/4:ℝ))) * 3 :=
+    calc |Real.cosIntegral t| * |Real.sinIntegral t - π / 2| ≤ (2 + 4 * t ^ (-(1/4:ℝ))) * 3 :=
           mul_le_mul h h' (abs_nonneg _)
             (by have := Real.rpow_nonneg ht.1.le (-(1/4:ℝ)); linarith)
       _ ≤ 6 + 12 * t ^ (-(1/2:ℝ)) := by nlinarith
   · have ht0 : (0:ℝ) < t := by linarith
-    have h := ExpIntegralTransforms.abs_cosInt_le ht0
-    have h' := ExpIntegralTransforms.abs_sinIntTail_le ht0
+    have h := ExpIntegralTransforms.abs_cosIntegral_le ht0
+    have h' := ExpIntegralTransforms.abs_sinIntegralTail_le ht0
     rw [abs_mul]
-    calc |Real.cosInt t| * |Real.sinInt t - π / 2| ≤ (2 / t) * (2 / t) :=
+    calc |Real.cosIntegral t| * |Real.sinIntegral t - π / 2| ≤ (2 / t) * (2 / t) :=
           mul_le_mul h h' (abs_nonneg _) (by positivity)
       _ = 4 / t ^ 2 := by ring
 
 /-- Integration by parts for `∫₀^R Ci(t) (Si(t) - π/2) dt`. -/
-theorem ExpIntegralTransforms.integral_cosInt_mul_sinIntTail_eq {R : ℝ} (hR : 0 ≤ R) :
-    ∫ t in (0:ℝ)..R, Real.cosInt t * (Real.sinInt t - π / 2) =
-      R * Real.cosInt R * (Real.sinInt R - π / 2) -
+theorem ExpIntegralTransforms.integral_cosIntegral_mul_sinIntegralTail_eq {R : ℝ} (hR : 0 ≤ R) :
+    ∫ t in (0:ℝ)..R, Real.cosIntegral t * (Real.sinIntegral t - π / 2) =
+      R * Real.cosIntegral R * (Real.sinIntegral R - π / 2) -
           (ExpIntegralTransforms.cosSiSinCiPrimitive R - Real.log 2) := by
-  have hi1 : IntervalIntegrable (fun t => Real.cosInt t * (Real.sinInt t - π / 2)) volume 0 R := by
+  have hi1 : IntervalIntegrable (fun t => Real.cosIntegral t * (Real.sinIntegral t - π / 2))
+      volume 0 R := by
     rw [intervalIntegrable_iff_integrableOn_Ioc_of_le hR]
-    exact ExpIntegralTransforms.integrableOn_cosInt_mul_sinIntTail.mono_set Ioc_subset_Ioi_self
+    exact ExpIntegralTransforms.integrableOn_cosIntegral_mul_sinIntegralTail.mono_set
+        Ioc_subset_Ioi_self
   have hi2 : IntervalIntegrable
-      (fun t => Real.cos t * (Real.sinInt t - π / 2) + Real.sin t * Real.cosInt t) volume 0 R :=
-    ((Real.continuous_cos.mul ExpIntegralTransforms.continuous_sinIntTail).add
-      ExpIntegralTransforms.continuous_sin_mul_cosInt).intervalIntegrable 0 R
-  have hc : Continuous fun t => t * Real.cosInt t * (Real.sinInt t - π / 2) :=
-    ExpIntegralTransforms.continuous_mul_cosInt.mul ExpIntegralTransforms.continuous_sinIntTail
+      (fun t => Real.cos t * (Real.sinIntegral t - π / 2) + Real.sin t *
+          Real.cosIntegral t) volume 0 R :=
+    ((Real.continuous_cos.mul ExpIntegralTransforms.continuous_sinIntegralTail).add
+      ExpIntegralTransforms.continuous_sin_mul_cosIntegral).intervalIntegrable 0 R
+  have hc : Continuous fun t => t * Real.cosIntegral t * (Real.sinIntegral t - π / 2) :=
+    ExpIntegralTransforms.continuous_mul_cosIntegral.mul
+        ExpIntegralTransforms.continuous_sinIntegralTail
   have h := intervalIntegral.integral_eq_sub_of_hasDerivAt_of_le hR hc.continuousOn
-    (f' := fun t => Real.cosInt t * (Real.sinInt t - π / 2) +
-      (Real.cos t * (Real.sinInt t - π / 2) + Real.sin t * Real.cosInt t)) (fun x hx => ?_)
+    (f' := fun t => Real.cosIntegral t * (Real.sinIntegral t - π / 2) +
+      (Real.cos t * (Real.sinIntegral t - π / 2) + Real.sin t * Real.cosIntegral t))
+          (fun x hx => ?_)
     (hi1.add hi2)
   · rw [intervalIntegral.integral_add hi1 hi2,
         ExpIntegralTransforms.integral_cos_si_add_sin_ci hR] at h
     simp only [zero_mul, sub_zero] at h
     linarith
   · have hx0 : 0 < x := hx.1
-    have := ((hasDerivAt_id x).mul (Real.hasDerivAt_cosInt hx0)).mul
-      ((Real.hasDerivAt_sinInt x).sub_const (π / 2))
+    have := ((hasDerivAt_id x).mul (Real.hasDerivAt_cosIntegral hx0)).mul
+      ((Real.hasDerivAt_sinIntegral x).sub_const (π / 2))
     refine this.congr_deriv ?_
     rw [Real.sinc_of_ne_zero hx0.ne']
     simp only [id, one_mul, Pi.mul_apply]
@@ -328,19 +342,20 @@ theorem ExpIntegralTransforms.integral_cosInt_mul_sinIntTail_eq {R : ℝ} (hR : 
     ring
 
 /-- `∫₀^∞ Ci(t) (Si(t) - π/2) dt = log 2`. -/
-theorem ExpIntegralTransforms.integral_cosInt_mul_sinIntTail :
-    ∫ t in Ioi (0:ℝ), Real.cosInt t * (Real.sinInt t - π / 2) = Real.log 2 := by
+theorem ExpIntegralTransforms.integral_cosIntegral_mul_sinIntegralTail :
+    ∫ t in Ioi (0:ℝ), Real.cosIntegral t * (Real.sinIntegral t - π / 2) = Real.log 2 := by
   have hlim := intervalIntegral_tendsto_integral_Ioi 0
-      ExpIntegralTransforms.integrableOn_cosInt_mul_sinIntTail
+      ExpIntegralTransforms.integrableOn_cosIntegral_mul_sinIntegralTail
     tendsto_id
   refine tendsto_nhds_unique hlim ?_
-  have h1 : Tendsto (fun R => R * Real.cosInt R * (Real.sinInt R - π / 2)) atTop (𝓝 0) := by
+  have h1 : Tendsto (fun R => R * Real.cosIntegral R * (Real.sinIntegral R - π / 2))
+      atTop (𝓝 0) := by
     refine squeeze_zero_norm' ?_ ((tendsto_const_nhds (x := (4:ℝ))).div_atTop tendsto_id)
     filter_upwards [eventually_gt_atTop 0] with R hR
-    have h := ExpIntegralTransforms.abs_cosInt_le hR
-    have h' := ExpIntegralTransforms.abs_sinIntTail_le hR
+    have h := ExpIntegralTransforms.abs_cosIntegral_le hR
+    have h' := ExpIntegralTransforms.abs_sinIntegralTail_le hR
     rw [Real.norm_eq_abs, abs_mul, abs_mul, abs_of_pos hR]
-    calc R * |Real.cosInt R| * |Real.sinInt R - π / 2| ≤ R * (2 / R) * (2 / R) := by
+    calc R * |Real.cosIntegral R| * |Real.sinIntegral R - π / 2| ≤ R * (2 / R) * (2 / R) := by
           gcongr
       _ = 4 / id R := by simp only [id]; field_simp; ring
   have := h1.sub (ExpIntegralTransforms.tendsto_cosSiSinCiPrimitive.sub_const (Real.log 2))
@@ -348,23 +363,23 @@ theorem ExpIntegralTransforms.integral_cosInt_mul_sinIntTail :
   refine this.congr' ?_
   filter_upwards [eventually_ge_atTop 0] with R hR
   simp only [id]
-  rw [ExpIntegralTransforms.integral_cosInt_mul_sinIntTail_eq hR]
+  rw [ExpIntegralTransforms.integral_cosIntegral_mul_sinIntegralTail_eq hR]
 
 /-- Real `E₁` through `Ein`, defined for all real `t`. -/
-noncomputable def ExpIntegralTransforms.realE1 (t : ℝ) : ℝ := Real.expIntEin t - Real.log t -
+noncomputable def ExpIntegralTransforms.realE1 (t : ℝ) : ℝ := Real.expIntegralEin t - Real.log t -
     Real.eulerMascheroniConstant
 
 /-- The entire exponential integral `Ein` is continuous on `ℝ`. -/
-theorem ExpIntegralTransforms.continuous_expIntEin : Continuous Real.expIntEin := by
-  have h : Real.expIntEin = fun x : ℝ => (expIntEin (x:ℂ)).re := by
-    funext x; rw [expIntEin_ofReal]; simp
+theorem ExpIntegralTransforms.continuous_expIntegralEin : Continuous Real.expIntegralEin := by
+  have h : Real.expIntegralEin = fun x : ℝ => (expIntegralEin (x:ℂ)).re := by
+    funext x; rw [expIntegralEin_ofReal]; simp
   rw [h]
-  exact Complex.continuous_re.comp (expIntEin_entire.continuous.comp continuous_ofReal)
+  exact Complex.continuous_re.comp (expIntegralEin_entire.continuous.comp continuous_ofReal)
 
 /-- `E₁(t)` equals the real function `ExpIntegralTransforms.realE1 t` for `t > 0`. -/
-theorem ExpIntegralTransforms.E1_ofReal {t : ℝ} (ht : 0 < t) : genExpIntE 1 t =
+theorem ExpIntegralTransforms.E1_ofReal {t : ℝ} (ht : 0 < t) : expIntegralE 1 t =
     (ExpIntegralTransforms.realE1 t : ℂ) :=
-  genExpIntE_one_eq_Ein ht
+  expIntegralE_one_eq_Ein ht
 
 /-- Derivative of the real `E₁`: `-e^{-x}/x` for `x > 0`. -/
 theorem ExpIntegralTransforms.hasDerivAt_realE1 {x : ℝ} (hx : 0 < x) : HasDerivAt
@@ -378,7 +393,7 @@ theorem ExpIntegralTransforms.hasDerivAt_realE1 {x : ℝ} (hx : 0 < x) : HasDeri
 /-- `0 ≤ E₁(t) ≤ e^{-t}/t` for `t > 0`. -/
 theorem ExpIntegralTransforms.realE1_bounds {t : ℝ} (ht : 0 < t) : 0 ≤
     ExpIntegralTransforms.realE1 t ∧ ExpIntegralTransforms.realE1 t ≤ Real.exp (-t) / t := by
-  have h := genExpIntE_one_eq_integral ht
+  have h := expIntegralE_one_eq_integral ht
   rw [ExpIntegralTransforms.E1_ofReal ht, ofReal_inj] at h
   rw [h]
   have hi := integrableOn_exp_neg_div ht
@@ -395,11 +410,11 @@ theorem ExpIntegralTransforms.realE1_bounds {t : ℝ} (ht : 0 < t) : 0 ≤
       _ = Real.exp (-t) / t := by rw [integral_div, integral_exp_neg_Ioi]
 
 /-- `|Ein(t)| ≤ 1` for `0 ≤ t ≤ 1`. -/
-theorem ExpIntegralTransforms.abs_expIntEin_le {t : ℝ} (ht : 0 ≤ t)
-    (ht1 : t ≤ 1) : |Real.expIntEin t| ≤ 1 := by
+theorem ExpIntegralTransforms.abs_expIntegralEin_le {t : ℝ} (ht : 0 ≤ t)
+    (ht1 : t ≤ 1) : |Real.expIntegralEin t| ≤ 1 := by
   have h := intervalIntegral.norm_integral_le_of_norm_le_const (a := 0) (b := t) (C := 1)
     (f := fun s : ℝ => (1 - Real.exp (-s)) / s) (fun s hs => ?_)
-  · rw [Real.expIntEin, ← Real.norm_eq_abs]
+  · rw [Real.expIntegralEin, ← Real.norm_eq_abs]
     calc _ ≤ 1 * |t - 0| := h
       _ ≤ 1 := by rw [sub_zero, abs_of_nonneg ht]; linarith
   · rw [uIoc_of_le ht] at hs
@@ -412,15 +427,15 @@ theorem ExpIntegralTransforms.abs_expIntEin_le {t : ℝ} (ht : 0 ≤ t)
 /-- `|E₁(t)| ≤ 2 + 4 t^{-1/4}` for `0 < t ≤ 1`. -/
 theorem ExpIntegralTransforms.abs_realE1_le_small {t : ℝ} (ht : 0 < t) (ht1 : t ≤ 1) :
     |ExpIntegralTransforms.realE1 t| ≤ 2 + 4 * t ^ (-(1/4:ℝ)) := by
-  have h1 := ExpIntegralTransforms.abs_expIntEin_le ht.le ht1
+  have h1 := ExpIntegralTransforms.abs_expIntegralEin_le ht.le ht1
   have h2 := ExpIntegralTransforms.abs_log_le ht ht1
   have h3 := Real.eulerMascheroniConstant_lt_two_thirds
   have h4 := Real.one_half_lt_eulerMascheroniConstant
   rw [ExpIntegralTransforms.realE1]
-  calc |Real.expIntEin t - Real.log t - Real.eulerMascheroniConstant|
-      ≤ |Real.expIntEin t| + |Real.log t| + |Real.eulerMascheroniConstant| := by
-        have := abs_sub (Real.expIntEin t - Real.log t) Real.eulerMascheroniConstant
-        have := abs_sub (Real.expIntEin t) (Real.log t)
+  calc |Real.expIntegralEin t - Real.log t - Real.eulerMascheroniConstant|
+      ≤ |Real.expIntegralEin t| + |Real.log t| + |Real.eulerMascheroniConstant| := by
+        have := abs_sub (Real.expIntegralEin t - Real.log t) Real.eulerMascheroniConstant
+        have := abs_sub (Real.expIntegralEin t) (Real.log t)
         linarith
     _ ≤ 2 + 4 * t ^ (-(1/4:ℝ)) := by
         rw [abs_of_pos (by linarith : (0:ℝ) < Real.eulerMascheroniConstant)]; linarith
@@ -437,7 +452,8 @@ theorem ExpIntegralTransforms.realE1_le_recip {t : ℝ} (ht : 1 ≤ t) : |ExpInt
 /-- The real `E₁` is measurable. -/
 theorem ExpIntegralTransforms.measurable_realE1 : Measurable ExpIntegralTransforms.realE1 := by
   unfold ExpIntegralTransforms.realE1
-  exact (ExpIntegralTransforms.continuous_expIntEin.measurable.sub Real.measurable_log).sub_const _
+  exact (ExpIntegralTransforms.continuous_expIntegralEin.measurable.sub
+      Real.measurable_log).sub_const _
 
 /-- `E₁²` is integrable on `(0, ∞)`. -/
 theorem ExpIntegralTransforms.integrableOn_realE1_sq : IntegrableOn
@@ -513,8 +529,8 @@ theorem ExpIntegralTransforms.integral_realE1_sq : ∫ t in Ioi (0:ℝ),
   have hF0 : ContinuousWithinAt (fun t => t * ExpIntegralTransforms.realE1 t ^ 2) (Ici 0) 0 := by
     rw [← continuousWithinAt_Ioi_iff_Ici, ContinuousWithinAt]
     have := ExpIntegralTransforms.tendsto_mul_sq_add_log
-        (c := fun t => Real.expIntEin t - Real.eulerMascheroniConstant)
-      (ExpIntegralTransforms.continuous_expIntEin.sub continuous_const) (-1)
+        (c := fun t => Real.expIntegralEin t - Real.eulerMascheroniConstant)
+      (ExpIntegralTransforms.continuous_expIntegralEin.sub continuous_const) (-1)
     simp only [zero_mul]
     refine this.congr' ?_
     filter_upwards [self_mem_nhdsWithin] with t _
@@ -639,7 +655,7 @@ noncomputable def ExpIntegralTransforms.realAuxG (x : ℝ) : ℝ := ∫ u in Ioi
 
 /-- The auxiliary function `g(x)` is real for `x > 0` and equals `ExpIntegralTransforms.realAuxG x`.
 -/
-theorem ExpIntegralTransforms.auxG_ofReal {x : ℝ} (hx : 0 < x) : expIntAuxG x =
+theorem ExpIntegralTransforms.auxG_ofReal {x : ℝ} (hx : 0 < x) : sinIntegralAuxiliaryG x =
     (ExpIntegralTransforms.realAuxG x : ℂ) := by
   rw [(ExpIntegralAuxiliary.ofReal_laplace_Ioi hx).2, ExpIntegralTransforms.realAuxG,
       ← integral_complex_ofReal]
@@ -647,11 +663,13 @@ theorem ExpIntegralTransforms.auxG_ofReal {x : ℝ} (hx : 0 < x) : expIntAuxG x 
   push_cast; ring_nf
 
 /-- `Ci(x) = -g(x) cos x` when `sin x = 0`, `x > 0`. -/
-theorem ExpIntegralTransforms.cosInt_of_sin_eq_zero {x : ℝ} (hx : 0 < x) (hs : Real.sin x = 0) :
-    Real.cosInt x = -ExpIntegralTransforms.realAuxG x * Real.cos x := by
-  have h := cosInt_eq_aux (x:ℂ)
-  rw [cosInt_ofReal hx, ExpIntegralTransforms.auxG_ofReal hx, ← ofReal_sin, hs, ← ofReal_cos] at h
-  have : ((Real.cosInt x : ℝ) : ℂ) =
+theorem ExpIntegralTransforms.cosIntegral_of_sin_eq_zero {x : ℝ} (hx : 0 < x)
+    (hs : Real.sin x = 0) :
+    Real.cosIntegral x = -ExpIntegralTransforms.realAuxG x * Real.cos x := by
+  have h := cosIntegral_eq_aux (x:ℂ)
+  rw [cosIntegral_ofReal hx, ExpIntegralTransforms.auxG_ofReal hx, ← ofReal_sin, hs,
+      ← ofReal_cos] at h
+  have : ((Real.cosIntegral x : ℝ) : ℂ) =
       ((-ExpIntegralTransforms.realAuxG x * Real.cos x : ℝ) : ℂ) := by
     rw [h]; push_cast; ring
   exact_mod_cast this
@@ -766,7 +784,7 @@ noncomputable def ExpIntegralTransforms.realAuxF (x : ℝ) : ℝ := ∫ u in Ioi
 
 /-- The auxiliary function `f(x)` is real for `x > 0` and equals `ExpIntegralTransforms.realAuxF x`.
 -/
-theorem ExpIntegralTransforms.auxF_ofReal {x : ℝ} (hx : 0 < x) : expIntAuxF x =
+theorem ExpIntegralTransforms.auxF_ofReal {x : ℝ} (hx : 0 < x) : sinIntegralAuxiliaryF x =
     (ExpIntegralTransforms.realAuxF x : ℂ) := by
   rw [(ExpIntegralAuxiliary.ofReal_laplace_Ioi hx).1, ExpIntegralTransforms.realAuxF,
       ← integral_complex_ofReal]
@@ -774,12 +792,13 @@ theorem ExpIntegralTransforms.auxF_ofReal {x : ℝ} (hx : 0 < x) : expIntAuxF x 
   push_cast; ring_nf
 
 /-- `Si(x) - π/2 = -f(x) cos x` when `sin x = 0`, `x > 0`. -/
-theorem ExpIntegralTransforms.sinIntTail_of_sin_eq_zero {x : ℝ} (hx : 0 < x) (hs : Real.sin x = 0) :
-    Real.sinInt x - π / 2 = -ExpIntegralTransforms.realAuxF x * Real.cos x := by
-  have h := sinInt_eq_aux (x:ℂ)
-  rw [sinInt_ofReal, ExpIntegralTransforms.auxF_ofReal hx, ← ofReal_sin, hs, ofReal_zero,
+theorem ExpIntegralTransforms.sinIntegralTail_of_sin_eq_zero {x : ℝ} (hx : 0 < x)
+    (hs : Real.sin x = 0) :
+    Real.sinIntegral x - π / 2 = -ExpIntegralTransforms.realAuxF x * Real.cos x := by
+  have h := sinIntegral_eq_aux (x:ℂ)
+  rw [sinIntegral_ofReal, ExpIntegralTransforms.auxF_ofReal hx, ← ofReal_sin, hs, ofReal_zero,
       mul_zero, sub_zero] at h
-  have : ((Real.sinInt x - π / 2 : ℝ) : ℂ) =
+  have : ((Real.sinIntegral x - π / 2 : ℝ) : ℂ) =
       ((-ExpIntegralTransforms.realAuxF x * Real.cos x : ℝ) : ℂ) := by
     push_cast; rw [h]; ring
   exact_mod_cast this

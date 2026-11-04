@@ -12,9 +12,11 @@ public import Mathlib.Analysis.Calculus.ImplicitContDiff
 public import Mathlib.Analysis.Calculus.ParametricIntervalIntegral
 public import Mathlib.Analysis.Calculus.UniformLimitsDeriv
 public import Mathlib.Analysis.Calculus.Deriv.Prod
+public import Mathlib.Analysis.Calculus.FDeriv.Partial
 public import Mathlib.Analysis.Calculus.FDeriv.Symmetric
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Deriv
 public import Mathlib.MeasureTheory.Function.Jacobian
+public import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 public import Mathlib.MeasureTheory.Integral.Prod
 
 /-!
@@ -507,7 +509,101 @@ theorem hasDerivAt_integral_variable_limits {f : ℝ × ℝ → ℝ} {α β : �
     HasDerivAt (fun x => ∫ y in α x..β x, f (x, y))
       (f (x, β x) * deriv β x - f (x, α x) * deriv α x +
         ∫ y in α x..β x, deriv (fun t => f (t, y)) x) x := by
-  sorry
+  have hab : a ≤ b := (hx.1.trans hx.2).le
+  have hcd : c ≤ d := (hβI x (Ioo_subset_Icc_self hx)).1.trans (hβI x (Ioo_subset_Icc_self hx)).2
+  set py : ℝ → ℝ := fun y => max c (min d y) with hpy
+  set px : ℝ → ℝ := fun t => max a (min b t) with hpx
+  have hpyc : Continuous py := by fun_prop
+  have hpxc : Continuous px := by fun_prop
+  have hpyI : ∀ y, py y ∈ Icc c d := fun y => ⟨le_max_left _ _, max_le hcd (min_le_left _ _)⟩
+  have hpxI : ∀ t, px t ∈ Icc a b := fun t => ⟨le_max_left _ _, max_le hab (min_le_left _ _)⟩
+  have hpyid : ∀ y ∈ Icc c d, py y = y := fun y hy => by
+    simp only [hpy, min_eq_right hy.2, max_eq_right hy.1]
+  have hpxid : ∀ t ∈ Icc a b, px t = t := fun t ht => by
+    simp only [hpx, min_eq_right ht.2, max_eq_right ht.1]
+  -- the extension of `f` in `y` and the clamped partial derivative
+  set F : ℝ × ℝ → ℝ := fun q => f (q.1, py q.2) with hF
+  set g : ℝ → ℝ → ℝ := fun t y => deriv (fun s => f (s, py y)) (px t) with hg
+  have hgc : Continuous (Function.uncurry g) :=
+    hfx.comp_continuous (hpxc.comp continuous_fst |>.prodMk (hpyc.comp continuous_snd))
+      (fun q => ⟨hpxI _, hpyI _⟩)
+  have hFc : ∀ t ∈ Icc a b, Continuous (fun y => F (t, y)) := fun t ht =>
+    hf.comp_continuous (continuous_const.prodMk hpyc) (fun y => ⟨ht, hpyI _⟩)
+  set Φ : ℝ → ℝ → ℝ := fun t v => ∫ y in (c - 1)..v, F (t, y) with hΦ
+  set f₁ : ℝ → ℝ → ℝ →L[ℝ] ℝ := fun t v =>
+    ContinuousLinearMap.smulRight (1 : ℝ →L[ℝ] ℝ) (∫ y in (c - 1)..v, g t y) with hf₁
+  set f₂ : ℝ → ℝ → ℝ →L[ℝ] ℝ := fun t v =>
+    ContinuousLinearMap.smulRight (1 : ℝ →L[ℝ] ℝ) (F (t, v)) with hf₂
+  have hstrict : ∀ w ∈ Icc c d,
+      HasStrictFDerivAt (Function.uncurry Φ) ((Function.uncurry f₁ (x, w)).coprod
+        (Function.uncurry f₂ (x, w))) (x, w) := by
+    intro w hw
+    have hev : ∀ᶠ v : ℝ × ℝ in 𝓝 (x, w), v.1 ∈ Ioo a b ∧ c - 1 < v.2 :=
+      (continuous_fst.continuousAt.eventually (Ioo_mem_nhds hx.1 hx.2)).and
+        (continuous_snd.continuousAt.eventually (Ioi_mem_nhds (by linarith [hw.1])))
+    refine hasStrictFDerivAt_uncurry_coprod (𝕜 := ℝ) (f := Φ) (f₁ := f₁) (f₂ := f₂) ?_ ?_ ?_ ?_
+    · filter_upwards [hev] with v hv
+      have h := hasDerivAt_integral_fixed_limits (f := F) (a := a) (b := b) (c := c - 1)
+        (d := v.2) hv.2.le
+        (hf.comp (continuous_fst.prodMk (hpyc.comp continuous_snd)).continuousOn
+          (fun q hq => ⟨hq.1, hpyI _⟩))
+        (hfx.comp (continuous_fst.prodMk (hpyc.comp continuous_snd)).continuousOn
+          (fun q hq => ⟨hq.1, hpyI _⟩))
+        (fun q hq => hdf (q.1, py q.2) ⟨hq.1, hpyI _⟩) hv.1
+      have he : (∫ y in (c - 1)..v.2, deriv (fun t => F (t, y)) v.1) =
+          ∫ y in (c - 1)..v.2, g v.1 y := by
+        simp only [hg, hF, hpxid v.1 (Ioo_subset_Icc_self hv.1)]
+      rw [he] at h
+      exact h.hasFDerivAt
+    · filter_upwards [hev] with v hv
+      have hc := hFc v.1 (Ioo_subset_Icc_self hv.1)
+      exact (intervalIntegral.integral_hasDerivAt_right (hc.intervalIntegrable _ _)
+        (hc.stronglyMeasurableAtFilter _ _) hc.continuousAt).hasFDerivAt
+    · have hcont := intervalIntegral.continuous_parametric_primitive_of_continuous
+        (μ := volume) (a₀ := c - 1) hgc
+      exact ((ContinuousLinearMap.smulRightL ℝ ℝ ℝ 1).continuous.comp hcont).continuousAt
+    · have hFat : ContinuousAt F (x, w) := by
+        have hmap : Tendsto (fun q : ℝ × ℝ => (q.1, py q.2)) (𝓝 (x, w))
+            (𝓝[Icc a b ×ˢ Icc c d] (x, py w)) := by
+          refine tendsto_nhdsWithin_iff.mpr ⟨?_, ?_⟩
+          · exact ((continuous_fst.prodMk (hpyc.comp continuous_snd)).tendsto _)
+          · filter_upwards [hev] with v hv using ⟨Ioo_subset_Icc_self hv.1, hpyI _⟩
+        exact (hf (x, py w) ⟨Ioo_subset_Icc_self hx, hpyI _⟩).tendsto.comp hmap
+      exact ((ContinuousLinearMap.smulRightL ℝ ℝ ℝ 1).continuous.continuousAt.comp hFat)
+  have hxI : x ∈ Icc a b := Ioo_subset_Icc_self hx
+  have hcomp : ∀ γ : ℝ → ℝ, ContDiffOn ℝ 1 γ (Icc a b) → (∀ t ∈ Icc a b, γ t ∈ Icc c d) →
+      HasDerivAt (fun t => Φ t (γ t))
+        ((∫ y in (c - 1)..γ x, g x y) + F (x, γ x) * deriv γ x) x := by
+    intro γ hγ hγI
+    have hγd : HasDerivAt γ (deriv γ x) x :=
+      ((hγ.differentiableOn one_ne_zero).differentiableAt (Icc_mem_nhds hx.1 hx.2)).hasDerivAt
+    have h := (hstrict (γ x) (hγI x hxI)).hasFDerivAt.comp_hasDerivAt x
+      ((hasDerivAt_id x).prodMk hγd)
+    convert h using 1
+    · rfl
+    · rw [ContinuousLinearMap.coprod_apply]
+      simp only [Function.uncurry_apply_pair, hf₁, hf₂, ContinuousLinearMap.smulRight_apply]
+      simp [mul_comm]
+  have hdiff := (hcomp β hβ hβI).sub (hcomp α hα hαI)
+  have hev : ∀ᶠ t in 𝓝 x, Φ t (β t) - Φ t (α t) = ∫ y in α t..β t, f (t, y) := by
+    filter_upwards [Ioo_mem_nhds hx.1 hx.2] with t ht
+    have htI := Ioo_subset_Icc_self ht
+    rw [hΦ, intervalIntegral.integral_interval_sub_left ((hFc t htI).intervalIntegrable _ _)
+      ((hFc t htI).intervalIntegrable _ _)]
+    refine intervalIntegral.integral_congr fun y hy => ?_
+    simp only [hF, hpyid y (uIcc_subset_Icc (hαI t htI) (hβI t htI) hy)]
+  refine (hdiff.congr_of_eventuallyEq (hev.mono fun t ht => ht.symm)).congr_deriv ?_
+  have hgI : Continuous (g x) := hgc.comp (continuous_const.prodMk continuous_id)
+  have hsub := intervalIntegral.integral_interval_sub_left 
+    (hgI.intervalIntegrable (μ := volume) (c - 1) (β x))
+    (hgI.intervalIntegrable (μ := volume) (c - 1) (α x))
+  have hgeq : (∫ y in α x..β x, g x y) = ∫ y in α x..β x, deriv (fun t => f (t, y)) x := by
+    refine intervalIntegral.integral_congr fun y hy => ?_
+    simp only [hg, hpxid x hxI, hpyid y (uIcc_subset_Icc (hαI x hxI) (hβI x hxI) hy)]
+  have hFβ : F (x, β x) = f (x, β x) := by simp only [hF, hpyid _ (hβI x hxI)]
+  have hFα : F (x, α x) = f (x, α x) := by simp only [hF, hpyid _ (hαI x hxI)]
+  rw [hFα, hFβ, ← hgeq, ← hsub]
+  ring
 
 /-- DLMF 1.5.23–1.5.24 (Leibniz's rule for infinite integrals, `d = +∞`): suppose `f` and
 `∂f/∂x` are continuous on `[a, b] × [c, ∞)`, `∫_c^∞ f(x, y) dy` converges to `I(x)` for

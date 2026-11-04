@@ -22,19 +22,21 @@ at the level of the integrals).
 ## Main results
 
 * `integral_Ioi_eq_integral_Ioo_csc_sq_subst`: the substitution `t = csc² θ - csc² φ`.
-* `symEllIntRF_csc_sq_eq_integral`, `symEllIntRD_csc_sq_eq_integral`,
-  `symEllIntRJ_csc_sq_eq_integral`: DLMF 19.25.5, 19.25.13 and 19.25.14 at the level of
+* `symmetricEllipticRF_csc_sq_eq_integral`, `symmetricEllipticRD_csc_sq_eq_integral`,
+  `symmetricEllipticRJ_csc_sq_eq_integral`: DLMF 19.25.5, 19.25.13 and 19.25.14 at the level of
   integrals.
-* `incEllIntDk_eq_one_third_symEllIntRD`, `incEllIntEk_eq_symEllIntRF_sub_one_third_symEllIntRD`:
-  DLMF 19.25.13 and 19.25.9 with explicit `c = csc² φ`.
-* `incEllIntEk_eq_symEllIntR_csc_sq`, `incEllIntPik_eq_symEllIntR_csc_sq`: DLMF 19.25.8 and
-  19.25.15 in terms of `symEllIntR`.
-* `compEllIntPik_eq_pi_div_two_mul_symEllIntR`: DLMF 19.25.3.
-* `symEllIntRF_scale`, `symEllIntRJ_scale`, `symEllIntRD_scale`, `symEllIntRG_scale`:
-  homogeneity of the symmetric integrals under real positive scaling.
+* `incompleteEllipticD_eq_one_third_symmetricEllipticRD`,
+  `incompleteEllipticE_eq_symmetricEllipticRF_sub_one_third_symmetricEllipticRD`: DLMF 19.25.13 and
+  19.25.9 with explicit `c = csc² φ`.
+* `incompleteEllipticE_eq_symmetricEllipticR_csc_sq`,
+  `incompleteEllipticPi_eq_symmetricEllipticR_csc_sq`: DLMF 19.25.8 and 19.25.15 in terms of
+  `symmetricEllipticR`.
+* `completeEllipticPi_eq_pi_div_two_mul_symmetricEllipticR`: DLMF 19.25.3.
+* `symmetricEllipticRF_scale`, `symmetricEllipticRJ_scale`, `symmetricEllipticRD_scale`,
+  `symmetricEllipticRG_scale`: homogeneity of the symmetric integrals under real positive scaling.
 * `real_symmetric_legendre_parametrization`: the data of §19.25(iii) as complex scalings.
-* `bulirschEl1_eq_symEllIntRF_of_pos`, `bulirschEl2_eq_symEllIntRD`: Bulirsch's integrals as
-  symmetric integrals.
+* `bulirschEl1_eq_symmetricEllipticRF_of_pos`, `bulirschEl2_eq_symmetricEllipticRD`: Bulirsch's
+  integrals as symmetric integrals.
 
 ## References
 
@@ -160,9 +162,10 @@ private lemma one_sub_one_mul_sin_sq_cpow_half {θ : ℝ} (hc : 0 < Real.cos θ)
     have := Complex.sin_sq_add_cos_sq (θ : ℂ); linear_combination -this
   rw [this, ofReal_sq_cpow_half hc.le]
 
-/-- The pointwise form of `symEllIntS (c - 1) (c - k²) c` under the substitution. -/
-lemma symEllIntS_csc_sq_subst {φ θ : ℝ} (hs : 0 < Real.sin θ) (hc : 0 < Real.cos θ) (k : ℂ) :
-    symEllIntS (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - 1) (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - k ^ 2)
+/-- The pointwise form of `carlsonRootProduct (c - 1) (c - k²) c` under the substitution. -/
+lemma carlsonRootProduct_csc_sq_subst {φ θ : ℝ} (hs : 0 < Real.sin θ)
+    (hc : 0 < Real.cos θ) (k : ℂ) :
+    carlsonRootProduct (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - 1) (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - k ^ 2)
         ((1 / Real.sin φ ^ 2 : ℝ) : ℂ) (1 / Real.sin θ ^ 2 - 1 / Real.sin φ ^ 2) =
       (Real.cos θ : ℂ) * (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (1 / 2 : ℂ) *
         ((1 / Real.sin θ ^ 3 : ℝ) : ℂ) := by
@@ -171,7 +174,7 @@ lemma symEllIntS_csc_sq_subst {φ θ : ℝ} (hs : 0 < Real.sin θ) (hc : 0 < Rea
   have h3 := csc_sq_subst_cpow_half hs (1 / Real.sin φ ^ 2) 0
   rw [one_sub_one_mul_sin_sq_cpow_half hc] at h1
   simp only [zero_mul, sub_zero, one_cpow, one_mul] at h3
-  simp only [symEllIntS]
+  simp only [carlsonRootProduct]
   rw [h1, h2, h3]
   have hs0 : (Real.sin θ : ℂ) ≠ 0 := ofReal_ne_zero.mpr hs.ne'
   push_cast
@@ -179,18 +182,19 @@ lemma symEllIntS_csc_sq_subst {φ θ : ℝ} (hs : 0 < Real.sin θ) (hc : 0 < Rea
 
 /-- **DLMF 19.25.5 at the level of integrals**: for real `0 < φ ≤ π/2`, `c = csc² φ` and every
 complex `k`, `R_F(c - 1, c - k², c) = ∫₀^φ (1 - k² sin² θ)^{-1/2} dθ`. -/
-theorem symEllIntRF_csc_sq_eq_integral {φ : ℝ} (h0 : 0 < φ) (h1 : φ ≤ π / 2) (k : ℂ) :
-    symEllIntRF (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - 1) (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - k ^ 2)
+theorem symmetricEllipticRF_csc_sq_eq_integral {φ : ℝ} (h0 : 0 < φ) (h1 : φ ≤ π / 2) (k : ℂ) :
+    symmetricEllipticRF (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - 1)
+        (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - k ^ 2)
         ((1 / Real.sin φ ^ 2 : ℝ) : ℂ) =
       ∫ θ in (0 : ℝ)..φ, (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) := by
-  rw [symEllIntRF, integral_Ioi_eq_integral_Ioo_csc_sq_subst h0 h1,
+  rw [symmetricEllipticRF, integral_Ioi_eq_integral_Ioo_csc_sq_subst h0 h1,
       intervalIntegral.integral_of_le h0.le,
     integral_Ioc_eq_integral_Ioo, ← integral_const_mul]
   refine setIntegral_congr_fun measurableSet_Ioo fun θ hθ => ?_
   have hs : 0 < Real.sin θ := Real.sin_pos_of_pos_of_lt_pi hθ.1 (by linarith [hθ.2, Real.pi_pos])
   have hc : 0 < Real.cos θ :=
     Real.cos_pos_of_mem_Ioo ⟨by linarith [hθ.1, Real.pi_pos], by linarith [hθ.2]⟩
-  rw [symEllIntS_csc_sq_subst hs hc k, cpow_neg]
+  rw [carlsonRootProduct_csc_sq_subst hs hc k, cpow_neg]
   generalize (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (1 / 2 : ℂ) = V
   have hs0 : Complex.sin (θ : ℂ) ≠ 0 := by
     rw [← Complex.ofReal_sin]; exact ofReal_ne_zero.mpr hs.ne'
@@ -203,13 +207,14 @@ theorem symEllIntRF_csc_sq_eq_integral {φ : ℝ} (h0 : 0 < φ) (h1 : φ ≤ π 
 
 /-- **DLMF 19.25.13 at the level of integrals**: `R_D(c - 1, c - k², c) =
 3 ∫₀^φ sin² θ (1 - k² sin² θ)^{-1/2} dθ` for real `0 < φ ≤ π/2`, every complex `k`. -/
-theorem symEllIntRD_csc_sq_eq_integral {φ : ℝ} (h0 : 0 < φ) (h1 : φ ≤ π / 2) (k : ℂ) :
-    symEllIntRD (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - 1) (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - k ^ 2)
+theorem symmetricEllipticRD_csc_sq_eq_integral {φ : ℝ} (h0 : 0 < φ) (h1 : φ ≤ π / 2) (k : ℂ) :
+    symmetricEllipticRD (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - 1)
+        (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - k ^ 2)
         ((1 / Real.sin φ ^ 2 : ℝ) : ℂ) =
       3 * ∫ θ in (0 : ℝ)..φ,
         (Real.sin θ : ℂ) ^ 2 * (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) := by
   have hsφ : 0 < Real.sin φ := Real.sin_pos_of_pos_of_lt_pi h0 (by linarith [Real.pi_pos])
-  rw [symEllIntRD_eq_integral (not_isNegReal_of_mem_slitPlane
+  rw [symmetricEllipticRD_eq_integral (not_isNegReal_of_mem_slitPlane
       (ofReal_mem_slitPlane.mpr (by positivity))),
     integral_Ioi_eq_integral_Ioo_csc_sq_subst h0 h1, intervalIntegral.integral_of_le h0.le,
     integral_Ioc_eq_integral_Ioo, ← integral_const_mul, ← integral_const_mul]
@@ -217,7 +222,7 @@ theorem symEllIntRD_csc_sq_eq_integral {φ : ℝ} (h0 : 0 < φ) (h1 : φ ≤ π 
   have hs : 0 < Real.sin θ := Real.sin_pos_of_pos_of_lt_pi hθ.1 (by linarith [hθ.2, Real.pi_pos])
   have hc : 0 < Real.cos θ :=
     Real.cos_pos_of_mem_Ioo ⟨by linarith [hθ.1, Real.pi_pos], by linarith [hθ.2]⟩
-  rw [symEllIntS_csc_sq_subst hs hc k, cpow_neg]
+  rw [carlsonRootProduct_csc_sq_subst hs hc k, cpow_neg]
   have e : (((1 / Real.sin θ ^ 2 - 1 / Real.sin φ ^ 2 : ℝ) : ℂ) + ((1 / Real.sin φ ^ 2 : ℝ) : ℂ))
       = ((1 / Real.sin θ ^ 2 : ℝ) : ℂ) := by push_cast; ring
   rw [e]
@@ -234,13 +239,14 @@ theorem symEllIntRD_csc_sq_eq_integral {φ : ℝ} (h0 : 0 < φ) (h1 : φ ≤ π 
 /-- **DLMF 19.25.14 at the level of integrals**: `R_J(c - 1, c - k², c, c - α²) =
 3 ∫₀^φ sin² θ (1 - α² sin² θ)⁻¹ (1 - k² sin² θ)^{-1/2} dθ` for real `0 < φ ≤ π/2`, every complex
 `k`, and `c - α²` not a negative real (no principal value). -/
-theorem symEllIntRJ_csc_sq_eq_integral {φ : ℝ} (h0 : 0 < φ) (h1 : φ ≤ π / 2) (k α2 : ℂ)
+theorem symmetricEllipticRJ_csc_sq_eq_integral {φ : ℝ} (h0 : 0 < φ) (h1 : φ ≤ π / 2) (k α2 : ℂ)
     (hα : ¬ IsNegReal (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - α2)) :
-    symEllIntRJ (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - 1) (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - k ^ 2)
+    symmetricEllipticRJ (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - 1)
+        (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - k ^ 2)
         ((1 / Real.sin φ ^ 2 : ℝ) : ℂ) (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - α2) =
       3 * ∫ θ in (0 : ℝ)..φ, (Real.sin θ : ℂ) ^ 2 * (1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹ *
         (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) := by
-  rw [symEllIntRJ]
+  rw [symmetricEllipticRJ]
   simp only [hα, ↓reduceIte]
   rw [integral_Ioi_eq_integral_Ioo_csc_sq_subst h0 h1,
     intervalIntegral.integral_of_le h0.le, integral_Ioc_eq_integral_Ioo, ← integral_const_mul,
@@ -249,7 +255,7 @@ theorem symEllIntRJ_csc_sq_eq_integral {φ : ℝ} (h0 : 0 < φ) (h1 : φ ≤ π 
   have hs : 0 < Real.sin θ := Real.sin_pos_of_pos_of_lt_pi hθ.1 (by linarith [hθ.2, Real.pi_pos])
   have hc : 0 < Real.cos θ :=
     Real.cos_pos_of_mem_Ioo ⟨by linarith [hθ.1, Real.pi_pos], by linarith [hθ.2]⟩
-  rw [symEllIntS_csc_sq_subst hs hc k, cpow_neg]
+  rw [carlsonRootProduct_csc_sq_subst hs hc k, cpow_neg]
   have e : (((1 / Real.sin θ ^ 2 - 1 / Real.sin φ ^ 2 : ℝ) : ℂ) +
       (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - α2)) =
       (1 - α2 * (Real.sin θ : ℂ) ^ 2) / (Real.sin θ : ℂ) ^ 2 := by
@@ -307,11 +313,11 @@ private lemma continuousOn_one_sub_mul_sin_sq_cpow {φ : ℝ} (h0 : 0 ≤ φ) (h
     (one_sub_mul_sin_sq_mem_slitPlane_of_le h1 hk hθ.1 hθ.2)
 
 /-- `E(φ, k) = F(φ, k) - k² D(φ, k)` for real `0 ≤ φ ≤ π/2` and `1 - k² sin² φ ∈ ℂ \ (-∞, 0]`. -/
-theorem incEllIntEk_eq_incEllIntFk_sub {φ : ℝ} (h0 : 0 ≤ φ) (h1 : φ ≤ π / 2) {k : ℂ}
+theorem incompleteEllipticE_eq_incompleteEllipticF_sub {φ : ℝ} (h0 : 0 ≤ φ) (h1 : φ ≤ π / 2) {k : ℂ}
     (hk : 1 - k ^ 2 * (Real.sin φ : ℂ) ^ 2 ∈ slitPlane) :
-    incEllIntEk φ k = incEllIntFk φ k - k ^ 2 * incEllIntDk φ k := by
-  rw [incEllIntEk_ofReal_eq_integral, incEllIntFk_ofReal_eq_integral,
-    incEllIntDk_ofReal_eq_integral, ← intervalIntegral.integral_const_mul,
+    incompleteEllipticE φ k = incompleteEllipticF φ k - k ^ 2 * incompleteEllipticD φ k := by
+  rw [incompleteEllipticE_ofReal_eq_integral, incompleteEllipticF_ofReal_eq_integral,
+    incompleteEllipticD_ofReal_eq_integral, ← intervalIntegral.integral_const_mul,
     ← intervalIntegral.integral_sub]
   · refine intervalIntegral.integral_congr fun θ hθ => ?_
     have hm : 1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2 ∈ slitPlane := by
@@ -332,10 +338,10 @@ theorem incEllIntEk_eq_incEllIntFk_sub {φ : ℝ} (h0 : 0 ≤ φ) (h1 : φ ≤ �
 
 /-- For real `0 ≤ φ ≤ π/2` and `1 - α² sin² φ ∈ ℂ \ (-∞, 0]`, the principal value in `Π` is not
 needed: `Π(φ, α², k) = ∫₀^φ (1 - α² sin²θ)⁻¹ (1 - k² sin²θ)^{-1/2} dθ`. -/
-private lemma incEllIntPik_eq_integral_of_mem_slitPlane {φ : ℝ} (h0 : 0 ≤ φ)
+private lemma incompleteEllipticPi_eq_integral_of_mem_slitPlane {φ : ℝ} (h0 : 0 ≤ φ)
     (h1 : φ ≤ π / 2) {α2 : ℂ}
     (hα : 1 - α2 * (Real.sin φ : ℂ) ^ 2 ∈ slitPlane) (k : ℂ) :
-    incEllIntPik φ α2 k = ∫ θ in (0 : ℝ)..φ, ((1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹ *
+    incompleteEllipticPi φ α2 k = ∫ θ in (0 : ℝ)..φ, ((1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹ *
       (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ))) := by
   set g : ℝ → ℝ := fun t => ‖1 - α2 * (Real.sin (t * φ) : ℂ) ^ 2‖ with hg
   have hgc : ContinuousOn g (Icc 0 1) := (Continuous.continuousOn (by fun_prop))
@@ -345,7 +351,8 @@ private lemma incEllIntPik_eq_integral_of_mem_slitPlane {φ : ℝ} (h0 : 0 ≤ �
       (by nlinarith [ht.1, ht.2])
   obtain ⟨t0, ht0, hmin⟩ := isCompact_Icc.exists_isMinOn (nonempty_Icc.mpr zero_le_one) hgc
   have hδ : 0 < g t0 := norm_pos_iff.mpr (slitPlane_ne_zero (hmem t0 ht0))
-  rw [incEllIntPik_eq_segmentIntegral (δ := g t0) hδ, segmentIntegral_ofReal]
+  rw [incompleteEllipticPi_eq_primitive (δ := g t0) hδ,
+      primitive_ofReal]
   · simp only [← Complex.ofReal_sin]
   · intro t ht
     have := hmin ht
@@ -364,13 +371,15 @@ private lemma continuousOn_inv_one_sub_mul_sin_sq {φ : ℝ} (h0 : 0 ≤ φ) (h1
     (slitPlane_ne_zero (one_sub_mul_sin_sq_mem_slitPlane_of_le h1 hα hθ.1 hθ.2))
 
 /-- `Π(φ, α², k) - F(φ, k) = α² ∫₀^φ sin²θ (1 - α² sin²θ)⁻¹ (1 - k² sin²θ)^{-1/2} dθ`. -/
-theorem incEllIntPik_sub_incEllIntFk_eq_integral {φ : ℝ} (h0 : 0 ≤ φ) (h1 : φ ≤ π / 2) {k α2 : ℂ}
+theorem incompleteEllipticPi_sub_incompleteEllipticF_eq_integral {φ : ℝ} (h0 : 0 ≤ φ)
+    (h1 : φ ≤ π / 2) {k α2 : ℂ}
     (hk : 1 - k ^ 2 * (Real.sin φ : ℂ) ^ 2 ∈ slitPlane)
     (hα : 1 - α2 * (Real.sin φ : ℂ) ^ 2 ∈ slitPlane) :
-    incEllIntPik φ α2 k - incEllIntFk φ k = α2 * ∫ θ in (0 : ℝ)..φ,
+    incompleteEllipticPi φ α2 k - incompleteEllipticF φ k = α2 * ∫ θ in (0 : ℝ)..φ,
       (Real.sin θ : ℂ) ^ 2 * (1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹ *
         (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) := by
-  rw [incEllIntPik_eq_integral_of_mem_slitPlane h0 h1 hα, incEllIntFk_ofReal_eq_integral,
+  rw [incompleteEllipticPi_eq_integral_of_mem_slitPlane h0 h1 hα,
+      incompleteEllipticF_ofReal_eq_integral,
     ← intervalIntegral.integral_const_mul, ← intervalIntegral.integral_sub]
   · refine intervalIntegral.integral_congr fun θ hθ => ?_
     have hm : 1 - α2 * (Real.sin θ : ℂ) ^ 2 ∈ slitPlane := by
@@ -406,10 +415,10 @@ theorem csc_sq_mem_slitPlane {φ : ℝ} (h0 : 0 < φ) (h1 : φ ≤ π / 2) :
     ((1 / Real.sin φ ^ 2 : ℝ) : ℂ) ∈ slitPlane :=
   ofReal_mem_slitPlane.mpr (lt_of_lt_of_le one_pos (one_le_csc_sq h0 h1))
 
-/-- The stated relation follows from the given hypotheses: `SymEllIntArg (((1 / Real.sin φ ^ 2 :
-ℝ) : ℂ) - 1)`. -/
-theorem symEllIntArg_csc_sq_sub_one {φ : ℝ} (h0 : 0 < φ) (h1 : φ ≤ π / 2) :
-    SymEllIntArg (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - 1) := by
+/-- The stated relation follows from the given hypotheses:
+`IsCarlsonArgument (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - 1)`. -/
+theorem isCarlsonArgument_csc_sq_sub_one {φ : ℝ} (h0 : 0 < φ) (h1 : φ ≤ π / 2) :
+    IsCarlsonArgument (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - 1) := by
   rcases eq_or_lt_of_le (one_le_csc_sq h0 h1) with h | h
   · right; rw [← h]; simp
   · left
@@ -447,41 +456,45 @@ theorem csc_sq_pi_div_two : ((1 / Real.sin (π / 2) ^ 2 : ℝ) : ℂ) = 1 := by
   simp [Real.sin_pi_div_two]
 
 /-- DLMF 19.25.13 with explicit `c = csc² φ`, every complex `k`. -/
-theorem incEllIntDk_eq_one_third_symEllIntRD {φ : ℝ} (h0 : 0 < φ) (h1 : φ ≤ π / 2) (k : ℂ) :
-    incEllIntDk φ k = (1 / 3) * symEllIntRD (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - 1)
+theorem incompleteEllipticD_eq_one_third_symmetricEllipticRD {φ : ℝ} (h0 : 0 < φ)
+    (h1 : φ ≤ π / 2) (k : ℂ) :
+    incompleteEllipticD φ k = (1 / 3) * symmetricEllipticRD (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - 1)
       (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - k ^ 2) ((1 / Real.sin φ ^ 2 : ℝ) : ℂ) := by
-  rw [symEllIntRD_csc_sq_eq_integral h0 h1 k, incEllIntDk_ofReal_eq_integral]
+  rw [symmetricEllipticRD_csc_sq_eq_integral h0 h1 k, incompleteEllipticD_ofReal_eq_integral]
   ring
 
 /-- DLMF 19.25.9 with explicit `c = csc² φ`. -/
-theorem incEllIntEk_eq_symEllIntRF_sub_one_third_symEllIntRD {φ : ℝ} (h0 : 0 < φ)
+theorem incompleteEllipticE_eq_symmetricEllipticRF_sub_one_third_symmetricEllipticRD
+    {φ : ℝ} (h0 : 0 < φ)
     (h1 : φ ≤ π / 2) {k : ℂ}
     (hk : 1 - k ^ 2 * (Real.sin φ : ℂ) ^ 2 ∈ slitPlane) :
-    incEllIntEk φ k = symEllIntRF (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - 1)
+    incompleteEllipticE φ k = symmetricEllipticRF (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - 1)
         (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - k ^ 2) ((1 / Real.sin φ ^ 2 : ℝ) : ℂ) -
-      (1 / 3) * k ^ 2 * symEllIntRD (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - 1)
+      (1 / 3) * k ^ 2 * symmetricEllipticRD (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - 1)
         (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - k ^ 2) ((1 / Real.sin φ ^ 2 : ℝ) : ℂ) := by
-  rw [incEllIntEk_eq_incEllIntFk_sub h0.le h1 hk, incEllIntDk_eq_one_third_symEllIntRD h0 h1,
-    incEllIntFk_ofReal_eq_integral, ← symEllIntRF_csc_sq_eq_integral h0 h1 k]
+  rw [incompleteEllipticE_eq_incompleteEllipticF_sub h0.le h1 hk,
+      incompleteEllipticD_eq_one_third_symmetricEllipticRD h0 h1,
+    incompleteEllipticF_ofReal_eq_integral, ← symmetricEllipticRF_csc_sq_eq_integral h0 h1 k]
   ring
 
 /-- DLMF 19.25.8 with explicit `c = csc² φ`, real `0 < φ < π/2`. -/
-theorem incEllIntEk_eq_symEllIntR_csc_sq {φ : ℝ} (h0 : 0 < φ) (h1 : φ < π / 2) {k : ℂ}
+theorem incompleteEllipticE_eq_symmetricEllipticR_csc_sq {φ : ℝ} (h0 : 0 < φ)
+    (h1 : φ < π / 2) {k : ℂ}
     (hk : 1 - k ^ 2 * (Real.sin φ : ℂ) ^ 2 ∈ slitPlane) :
-    incEllIntEk φ k = symEllIntR (1 / 2) ![1 / 2, -1 / 2, 3 / 2]
+    incompleteEllipticE φ k = symmetricEllipticR (1 / 2) ![1 / 2, -1 / 2, 3 / 2]
       ![((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - 1, ((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - k ^ 2,
         ((1 / Real.sin φ ^ 2 : ℝ) : ℂ)] := by
   have hx := csc_sq_sub_one_mem_slitPlane h0 h1
   have hy := csc_sq_sub_mem_slitPlane h0 h1.le hk
   have hz := csc_sq_mem_slitPlane h0 h1.le
-  rw [symEllIntR_eq_integral (a' := 1) (by norm_num) (by norm_num)
+  rw [symmetricEllipticR_eq_integral (a' := 1) (by norm_num) (by norm_num)
     (by simp [Fin.sum_univ_three]; try norm_num) (vec3_mem_carlsonRSlitDomain hx hy hz),
     inv_betaIntegral (by norm_num) (by norm_num)]
   simp only [Fin.prod_univ_three, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two,
     Matrix.head_cons, Matrix.tail_cons, sub_self, cpow_zero, one_mul, Gamma_one, mul_one]
   rw [show (1 / 2 : ℂ) + 1 = 3 / 2 by norm_num, Carlson.Gamma_three_halves,
     mul_div_assoc, div_self Gamma_one_half_ne_zero, mul_one]
-  rw [integral_Ioi_eq_integral_Ioo_csc_sq_subst h0 h1.le, incEllIntEk_ofReal_eq_integral,
+  rw [integral_Ioi_eq_integral_Ioo_csc_sq_subst h0 h1.le, incompleteEllipticE_ofReal_eq_integral,
     intervalIntegral.integral_of_le h0.le, integral_Ioc_eq_integral_Ioo, ← integral_const_mul]
   refine setIntegral_congr_fun measurableSet_Ioo fun θ hθ => ?_
   have hs : 0 < Real.sin θ := Real.sin_pos_of_pos_of_lt_pi hθ.1 (by linarith [hθ.2, Real.pi_pos])
@@ -509,17 +522,18 @@ theorem incEllIntEk_eq_symEllIntR_csc_sq {φ : ℝ} (h0 : 0 < φ) (h1 : φ < π 
   field_simp
 
 /-- DLMF 19.25.15 with explicit `c = csc² φ`, real `0 < φ < π/2`. -/
-theorem incEllIntPik_eq_symEllIntR_csc_sq {φ : ℝ} (h0 : 0 < φ) (h1 : φ < π / 2) {k α2 : ℂ}
+theorem incompleteEllipticPi_eq_symmetricEllipticR_csc_sq {φ : ℝ} (h0 : 0 < φ)
+    (h1 : φ < π / 2) {k α2 : ℂ}
     (hk : 1 - k ^ 2 * (Real.sin φ : ℂ) ^ 2 ∈ slitPlane)
     (hα : 1 - α2 * (Real.sin φ : ℂ) ^ 2 ∈ slitPlane) :
-    incEllIntPik φ α2 k = symEllIntR (1 / 2) ![1 / 2, 1 / 2, -1 / 2, 1]
+    incompleteEllipticPi φ α2 k = symmetricEllipticR (1 / 2) ![1 / 2, 1 / 2, -1 / 2, 1]
       ![((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - 1, ((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - k ^ 2,
         ((1 / Real.sin φ ^ 2 : ℝ) : ℂ), ((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - α2] := by
   have hx := csc_sq_sub_one_mem_slitPlane h0 h1
   have hy := csc_sq_sub_mem_slitPlane h0 h1.le hk
   have hz := csc_sq_mem_slitPlane h0 h1.le
   have hp := csc_sq_sub_mem_slitPlane h0 h1.le hα
-  rw [symEllIntR_eq_integral (a' := 1) (by norm_num) (by norm_num)
+  rw [symmetricEllipticR_eq_integral (a' := 1) (by norm_num) (by norm_num)
     (by simp [Fin.sum_univ_four]; try norm_num) (vec4_mem_carlsonRSlitDomain hx hy hz hp),
     inv_betaIntegral (by norm_num) (by norm_num)]
   simp only [Fin.prod_univ_four, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two,
@@ -528,7 +542,7 @@ theorem incEllIntPik_eq_symEllIntR_csc_sq {φ : ℝ} (h0 : 0 < φ) (h1 : φ < π
   rw [show (1 / 2 : ℂ) + 1 = 3 / 2 by norm_num, Carlson.Gamma_three_halves,
     mul_div_assoc, div_self Gamma_one_half_ne_zero, mul_one]
   rw [integral_Ioi_eq_integral_Ioo_csc_sq_subst h0 h1.le,
-      incEllIntPik_eq_integral_of_mem_slitPlane h0.le h1.le hα,
+      incompleteEllipticPi_eq_integral_of_mem_slitPlane h0.le h1.le hα,
     intervalIntegral.integral_of_le h0.le, integral_Ioc_eq_integral_Ioo, ← integral_const_mul]
   refine setIntegral_congr_fun measurableSet_Ioo fun θ hθ => ?_
   have hs : 0 < Real.sin θ := Real.sin_pos_of_pos_of_lt_pi hθ.1 (by linarith [hθ.2, Real.pi_pos])
@@ -560,16 +574,17 @@ theorem incEllIntPik_eq_symEllIntR_csc_sq {φ : ℝ} (h0 : 0 < φ) (h1 : φ < π
   field_simp
 
 /-- DLMF 19.25.3: `Π(α², k) = (π/2) R_{-1/2}(1/2, -1/2, 1; k'², 1, 1 - α²)`. -/
-theorem compEllIntPik_eq_pi_div_two_mul_symEllIntR {k α2 : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane)
+theorem completeEllipticPi_eq_pi_div_two_mul_symmetricEllipticR {k α2 : ℂ}
+    (hk : 1 - k ^ 2 ∈ slitPlane)
     (hα : 1 - α2 ∈ slitPlane) :
-    compEllIntPik α2 k =
-      (π / 2) * symEllIntR (1 / 2) ![1 / 2, -1 / 2, 1] ![1 - k ^ 2, 1, 1 - α2] := by
+    completeEllipticPi α2 k =
+      (π / 2) * symmetricEllipticR (1 / 2) ![1 / 2, -1 / 2, 1] ![1 - k ^ 2, 1, 1 - α2] := by
   have hp : (0 : ℝ) < π / 2 := by positivity
   have hk' : 1 - k ^ 2 * (Real.sin (π / 2) : ℂ) ^ 2 ∈ slitPlane := by
     simpa [Real.sin_pi_div_two] using hk
   have hα' : 1 - α2 * (Real.sin (π / 2) : ℂ) ^ 2 ∈ slitPlane := by
     simpa [Real.sin_pi_div_two] using hα
-  rw [symEllIntR_eq_integral (a' := 1 / 2) (by norm_num) (by norm_num)
+  rw [symmetricEllipticR_eq_integral (a' := 1 / 2) (by norm_num) (by norm_num)
     (by simp [Fin.sum_univ_three]; try norm_num)
         (vec3_mem_carlsonRSlitDomain hk one_mem_slitPlane hα),
     inv_betaIntegral (by norm_num) (by norm_num)]
@@ -577,8 +592,8 @@ theorem compEllIntPik_eq_pi_div_two_mul_symEllIntR {k α2 : ℂ} (hk : 1 - k ^ 2
     Matrix.head_cons, Matrix.tail_cons]
   rw [show (1 / 2 : ℂ) + 1 / 2 = 1 by norm_num, Gamma_one, Complex.Gamma_one_half_eq,
     cpow_half_mul_cpow_half]
-  rw [compEllIntPik, show ((π : ℂ) / 2) = ((π / 2 : ℝ) : ℂ) by push_cast; ring,
-    incEllIntPik_eq_integral_of_mem_slitPlane hp.le le_rfl hα',
+  rw [completeEllipticPi, show ((π : ℂ) / 2) = ((π / 2 : ℝ) : ℂ) by push_cast; ring,
+    incompleteEllipticPi_eq_integral_of_mem_slitPlane hp.le le_rfl hα',
         integral_Ioi_eq_integral_Ioo_csc_sq_subst hp le_rfl,
     intervalIntegral.integral_of_le hp.le, integral_Ioc_eq_integral_Ioo, ← integral_const_mul,
     ← integral_const_mul]
@@ -624,12 +639,13 @@ private lemma integral_Ioi_scale (g : ℝ → ℂ) {l : ℝ} (hl : 0 < l) :
   rw [mul_zero] at h
   rw [← h, Complex.real_smul]
 
-/-- Identity under the stated parameter and domain assumptions: `symEllIntS ((l : ℂ) * x) ((l : ℂ)
-* y) ((l : ℂ) * z) (l * s) = ((l : ℂ) ^ (1 / 2 : ℂ)) ^ 3 * symEllIntS x y z s`. -/
-private lemma symEllIntS_scale {l : ℝ} (hl : 0 < l) (x y z : ℂ) (s : ℝ) :
-    symEllIntS ((l : ℂ) * x) ((l : ℂ) * y) ((l : ℂ) * z) (l * s) =
-      ((l : ℂ) ^ (1 / 2 : ℂ)) ^ 3 * symEllIntS x y z s := by
-  simp only [symEllIntS]
+/-- Identity under the stated parameter and domain assumptions:
+`carlsonRootProduct ((l : ℂ) * x) ((l : ℂ)
+* y) ((l : ℂ) * z) (l * s) = ((l : ℂ) ^ (1 / 2 : ℂ)) ^ 3 * carlsonRootProduct x y z s`. -/
+private lemma carlsonRootProduct_scale {l : ℝ} (hl : 0 < l) (x y z : ℂ) (s : ℝ) :
+    carlsonRootProduct ((l : ℂ) * x) ((l : ℂ) * y) ((l : ℂ) * z) (l * s) =
+      ((l : ℂ) ^ (1 / 2 : ℂ)) ^ 3 * carlsonRootProduct x y z s := by
+  simp only [carlsonRootProduct]
   have e : ∀ w : ℂ, ((l * s : ℝ) : ℂ) + (l : ℂ) * w = (l : ℂ) * ((s : ℂ) + w) := by
     intro w; push_cast; ring
   rw [e, e, e, ofReal_mul_cpow_of_pos hl, ofReal_mul_cpow_of_pos hl, ofReal_mul_cpow_of_pos hl]
@@ -645,12 +661,12 @@ theorem ofReal_cpow_half_ne_zero {l : ℝ} (hl : 0 < l) : (l : ℂ) ^ (1 / 2 : �
   rw [Ne, cpow_eq_zero_iff]; push Not; intro h; exact absurd h (ofReal_ne_zero.mpr hl.ne')
 
 /-- `R_F(λx, λy, λz) = λ^{-1/2} R_F(x, y, z)` for real `λ > 0` and **all** complex arguments. -/
-theorem symEllIntRF_scale {l : ℝ} (hl : 0 < l) (x y z : ℂ) :
-    symEllIntRF ((l : ℂ) * x) ((l : ℂ) * y) ((l : ℂ) * z) =
-      ((l : ℂ) ^ (1 / 2 : ℂ))⁻¹ * symEllIntRF x y z := by
-  unfold symEllIntRF
+theorem symmetricEllipticRF_scale {l : ℝ} (hl : 0 < l) (x y z : ℂ) :
+    symmetricEllipticRF ((l : ℂ) * x) ((l : ℂ) * y) ((l : ℂ) * z) =
+      ((l : ℂ) ^ (1 / 2 : ℂ))⁻¹ * symmetricEllipticRF x y z := by
+  unfold symmetricEllipticRF
   rw [integral_Ioi_scale _ hl]
-  simp_rw [symEllIntS_scale hl, mul_inv]
+  simp_rw [carlsonRootProduct_scale hl, mul_inv]
   rw [integral_const_mul]
   have hL := ofReal_cpow_half_sq (l := l)
   have hL0 := ofReal_cpow_half_ne_zero hl
@@ -660,9 +676,9 @@ theorem symEllIntRF_scale {l : ℝ} (hl : 0 < l) (x y z : ℂ) :
 
 /-- `R_J(λx, λy, λz, λp) = λ^{-3/2} R_J(x, y, z, p)` for real `λ > 0`, all `x, y, z` and `p` not a
 negative real. -/
-theorem symEllIntRJ_scale {l : ℝ} (hl : 0 < l) (x y z p : ℂ) (hp : ¬ IsNegReal p) :
-    symEllIntRJ ((l : ℂ) * x) ((l : ℂ) * y) ((l : ℂ) * z) ((l : ℂ) * p) =
-      (((l : ℂ) ^ (1 / 2 : ℂ)) ^ 3)⁻¹ * symEllIntRJ x y z p := by
+theorem symmetricEllipticRJ_scale {l : ℝ} (hl : 0 < l) (x y z p : ℂ) (hp : ¬ IsNegReal p) :
+    symmetricEllipticRJ ((l : ℂ) * x) ((l : ℂ) * y) ((l : ℂ) * z) ((l : ℂ) * p) =
+      (((l : ℂ) ^ (1 / 2 : ℂ)) ^ 3)⁻¹ * symmetricEllipticRJ x y z p := by
   have hp' : ¬ IsNegReal ((l : ℂ) * p) := by
     rintro ⟨h1, h2⟩
     apply hp
@@ -671,33 +687,33 @@ theorem symEllIntRJ_scale {l : ℝ} (hl : 0 < l) (x y z p : ℂ) (hp : ¬ IsNegR
       rcases mul_eq_zero.mp h1 with h | h
       · exact absurd h hl.ne'
       · exact h, by nlinarith⟩
-  unfold symEllIntRJ
+  unfold symmetricEllipticRJ
   simp only [hp, hp', ↓reduceIte]
   rw [integral_Ioi_scale _ hl]
   have e : ∀ s : ℝ, ((l * s : ℝ) : ℂ) + (l : ℂ) * p = (l : ℂ) * ((s : ℂ) + p) := by
     intro s; push_cast; ring
-  simp_rw [symEllIntS_scale hl, e, mul_inv]
+  simp_rw [carlsonRootProduct_scale hl, e, mul_inv]
   have hL := ofReal_cpow_half_sq (l := l)
   have hL0 := ofReal_cpow_half_ne_zero hl
   have hl0 : (l : ℂ) ≠ 0 := ofReal_ne_zero.mpr hl.ne'
-  have : ∀ s : ℝ, ((((l : ℂ) ^ (1 / 2 : ℂ)) ^ 3)⁻¹ * (symEllIntS x y z s)⁻¹ * ((l : ℂ)⁻¹ *
+  have : ∀ s : ℝ, ((((l : ℂ) ^ (1 / 2 : ℂ)) ^ 3)⁻¹ * (carlsonRootProduct x y z s)⁻¹ * ((l : ℂ)⁻¹ *
       ((s : ℂ) + p)⁻¹)) = (((l : ℂ) ^ (1 / 2 : ℂ)) ^ 3)⁻¹ * (l : ℂ)⁻¹ *
-        ((symEllIntS x y z s)⁻¹ * ((s : ℂ) + p)⁻¹) := fun s => by ring
+        ((carlsonRootProduct x y z s)⁻¹ * ((s : ℂ) + p)⁻¹) := fun s => by ring
   simp_rw [this]
   rw [integral_const_mul]
   field_simp
 
 /-- `R_D(λx, λy, λz) = λ^{-3/2} R_D(x, y, z)` for real `λ > 0`, `z` not a negative real. -/
-theorem symEllIntRD_scale {l : ℝ} (hl : 0 < l) (x y z : ℂ) (hz : ¬ IsNegReal z) :
-    symEllIntRD ((l : ℂ) * x) ((l : ℂ) * y) ((l : ℂ) * z) =
-      (((l : ℂ) ^ (1 / 2 : ℂ)) ^ 3)⁻¹ * symEllIntRD x y z :=
-  symEllIntRJ_scale hl x y z z hz
+theorem symmetricEllipticRD_scale {l : ℝ} (hl : 0 < l) (x y z : ℂ) (hz : ¬ IsNegReal z) :
+    symmetricEllipticRD ((l : ℂ) * x) ((l : ℂ) * y) ((l : ℂ) * z) =
+      (((l : ℂ) ^ (1 / 2 : ℂ)) ^ 3)⁻¹ * symmetricEllipticRD x y z :=
+  symmetricEllipticRJ_scale hl x y z z hz
 
 /-- `R_G(λx, λy, λz) = λ^{1/2} R_G(x, y, z)` for real `λ > 0` and all complex arguments. -/
-theorem symEllIntRG_scale {l : ℝ} (hl : 0 < l) (x y z : ℂ) :
-    symEllIntRG ((l : ℂ) * x) ((l : ℂ) * y) ((l : ℂ) * z) =
-      (l : ℂ) ^ (1 / 2 : ℂ) * symEllIntRG x y z := by
-  unfold symEllIntRG
+theorem symmetricEllipticRG_scale {l : ℝ} (hl : 0 < l) (x y z : ℂ) :
+    symmetricEllipticRG ((l : ℂ) * x) ((l : ℂ) * y) ((l : ℂ) * z) =
+      (l : ℂ) ^ (1 / 2 : ℂ) * symmetricEllipticRG x y z := by
+  unfold symmetricEllipticRG
   rw [integral_Ioi_scale _ hl]
   have hL := ofReal_cpow_half_sq (l := l)
   have hL0 := ofReal_cpow_half_ne_zero hl
@@ -707,14 +723,14 @@ theorem symEllIntRG_scale {l : ℝ} (hl : 0 < l) (x y z : ℂ) :
     intro s w
     rw [show ((l * s : ℝ) : ℂ) + (l : ℂ) * w = (l : ℂ) * ((s : ℂ) + w) by push_cast; ring,
       mul_div_mul_left _ _ hl0]
-  have : ∀ s : ℝ, (symEllIntS ((l : ℂ) * x) ((l : ℂ) * y) ((l : ℂ) * z) (l * s))⁻¹ *
+  have : ∀ s : ℝ, (carlsonRootProduct ((l : ℂ) * x) ((l : ℂ) * y) ((l : ℂ) * z) (l * s))⁻¹ *
       ((l : ℂ) * x / (((l * s : ℝ) : ℂ) + (l : ℂ) * x) +
         (l : ℂ) * y / (((l * s : ℝ) : ℂ) + (l : ℂ) * y) +
         (l : ℂ) * z / (((l * s : ℝ) : ℂ) + (l : ℂ) * z)) * ((l * s : ℝ) : ℂ) =
-      ((((l : ℂ) ^ (1 / 2 : ℂ)) ^ 3)⁻¹ * l) * ((symEllIntS x y z s)⁻¹ *
+      ((((l : ℂ) ^ (1 / 2 : ℂ)) ^ 3)⁻¹ * l) * ((carlsonRootProduct x y z s)⁻¹ *
         (x / ((s : ℂ) + x) + y / ((s : ℂ) + y) + z / ((s : ℂ) + z)) * s) := by
     intro s
-    rw [e, e, e, symEllIntS_scale hl]
+    rw [e, e, e, carlsonRootProduct_scale hl]
     push_cast
     ring
   simp_rw [this]
@@ -847,15 +863,16 @@ private lemma cos_sq_add_kc_sq_mul_sin_sq (θ : ℝ) (kc : ℂ) :
     Complex.cos_sq']
   ring
 
-/-- Identity under the stated parameter and domain assumptions: `bulirschEl1 x kc = symEllIntRF
-((1 / x ^ 2 : ℝ) : ℂ) (((1 / x ^ 2 : ℝ) : ℂ) + kc ^ 2) (((1 / x ^ 2 : ℝ) : ℂ) + 1)`. -/
-theorem bulirschEl1_eq_symEllIntRF_of_pos {x : ℝ} (hx : 0 < x) (kc : ℂ) :
-    bulirschEl1 x kc = symEllIntRF ((1 / x ^ 2 : ℝ) : ℂ) (((1 / x ^ 2 : ℝ) : ℂ) + kc ^ 2)
+/-- Identity under the stated parameter and domain assumptions:
+`bulirschEl1 x kc = symmetricEllipticRF ((1 / x ^ 2 : ℝ) : ℂ) (((1 / x ^ 2 : ℝ) : ℂ) + kc ^ 2) (((1
+/ x ^ 2 : ℝ) : ℂ) + 1)`. -/
+theorem bulirschEl1_eq_symmetricEllipticRF_of_pos {x : ℝ} (hx : 0 < x) (kc : ℂ) :
+    bulirschEl1 x kc = symmetricEllipticRF ((1 / x ^ 2 : ℝ) : ℂ) (((1 / x ^ 2 : ℝ) : ℂ) + kc ^ 2)
       (((1 / x ^ 2 : ℝ) : ℂ) + 1) := by
   obtain ⟨h0, h1, hc⟩ := arctan_mem_and_csc_sq hx
-  rw [bulirschEl1, ← ofReal_arctan, segmentIntegral_ofReal]
+  rw [bulirschEl1, ← ofReal_arctan, primitive_ofReal]
   simp_rw [cos_sq_add_kc_sq_mul_sin_sq]
-  rw [← symEllIntRF_csc_sq_eq_integral h0 h1.le, sq ((1 - kc ^ 2) ^ (1 / 2 : ℂ)),
+  rw [← symmetricEllipticRF_csc_sq_eq_integral h0 h1.le, sq ((1 - kc ^ 2) ^ (1 / 2 : ℂ)),
     cpow_half_mul_cpow_half, hc]
   push_cast
   ring_nf
@@ -911,21 +928,21 @@ private lemma bulirschEl2_integrand_eq {θ : ℝ} (hc : 0 < Real.cos θ) (kc : �
 private lemma bulirschEl1_eq_integral {x : ℝ} (kc : ℂ) :
     bulirschEl1 x kc = ∫ θ in (0 : ℝ)..Real.arctan x,
       (1 - ((1 - kc ^ 2) ^ (1 / 2 : ℂ)) ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) := by
-  rw [bulirschEl1, ← ofReal_arctan, segmentIntegral_ofReal]
+  rw [bulirschEl1, ← ofReal_arctan, primitive_ofReal]
   simp_rw [cos_sq_add_kc_sq_mul_sin_sq]
 
 /-- Identity under the stated parameter and domain assumptions: `bulirschEl2 x kc a b = a *
-bulirschEl1 x kc + (1 / 3) * ((b - a : ℝ) : ℂ) * symEllIntRD ((1 / x ^ 2 : ℝ) : ℂ) (((1 / x ^
-2 : ℝ) : ℂ) + kc ^ 2) (((1 / x ^ 2 : ℝ) : ℂ) + 1)`. -/
-theorem bulirschEl2_eq_symEllIntRD {x : ℝ} (hx : 0 < x) {kc : ℂ}
+bulirschEl1 x kc + (1 / 3) * ((b - a : ℝ) : ℂ) * symmetricEllipticRD ((1 / x ^ 2 : ℝ) : ℂ) (((1 / x
+^ 2 : ℝ) : ℂ) + kc ^ 2) (((1 / x ^ 2 : ℝ) : ℂ) + 1)`. -/
+theorem bulirschEl2_eq_symmetricEllipticRD {x : ℝ} (hx : 0 < x) {kc : ℂ}
     (hkc : kc ^ 2 ∈ slitPlane) (a b : ℝ) :
     bulirschEl2 x kc a b = a * bulirschEl1 x kc + (1 / 3) * ((b - a : ℝ) : ℂ) *
-      symEllIntRD ((1 / x ^ 2 : ℝ) : ℂ) (((1 / x ^ 2 : ℝ) : ℂ) + kc ^ 2)
+      symmetricEllipticRD ((1 / x ^ 2 : ℝ) : ℂ) (((1 / x ^ 2 : ℝ) : ℂ) + kc ^ 2)
         (((1 / x ^ 2 : ℝ) : ℂ) + 1) := by
   obtain ⟨h0, h1, hc⟩ := arctan_mem_and_csc_sq hx
   have hk := one_sub_bulirsch_mul_sin_sq_mem_slitPlane (φ := Real.arctan x) hkc
   rw [sq ((1 - kc ^ 2) ^ (1 / 2 : ℂ)), cpow_half_mul_cpow_half] at hk
-  have hD := symEllIntRD_csc_sq_eq_integral h0 h1.le ((1 - kc ^ 2) ^ (1 / 2 : ℂ))
+  have hD := symmetricEllipticRD_csc_sq_eq_integral h0 h1.le ((1 - kc ^ 2) ^ (1 / 2 : ℂ))
   rw [sq ((1 - kc ^ 2) ^ (1 / 2 : ℂ)), cpow_half_mul_cpow_half, hc] at hD
   have e1 : ((1 / x ^ 2 + 1 : ℝ) : ℂ) - 1 = ((1 / x ^ 2 : ℝ) : ℂ) := by push_cast; ring
   have e2 : ((1 / x ^ 2 + 1 : ℝ) : ℂ) - (1 - kc ^ 2) = ((1 / x ^ 2 : ℝ) : ℂ) + kc ^ 2 := by
@@ -934,7 +951,7 @@ theorem bulirschEl2_eq_symEllIntRD {x : ℝ} (hx : 0 < x) {kc : ℂ}
   rw [e1, e2, e3] at hD
   have hF := bulirschEl1_eq_integral (x := x) kc
   simp_rw [sq ((1 - kc ^ 2) ^ (1 / 2 : ℂ)), cpow_half_mul_cpow_half] at hF
-  rw [hD, hF, bulirschEl2, ← ofReal_arctan, segmentIntegral_ofReal]
+  rw [hD, hF, bulirschEl2, ← ofReal_arctan, primitive_ofReal]
   have hcont := continuousOn_one_sub_mul_sin_sq_cpow h0.le h1.le hk (-(1 / 2 : ℂ))
   rw [intervalIntegral.integral_congr (g := fun θ : ℝ => (a : ℂ) *
       (1 - (1 - kc ^ 2) * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) +

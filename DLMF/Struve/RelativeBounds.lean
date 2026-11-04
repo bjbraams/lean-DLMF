@@ -29,20 +29,20 @@ open Complex Filter Set Finset MeasureTheory Asymptotics DLMF.Hypergeometric DLM
 open scoped Real Topology Nat
 namespace DLMF.Struve
 /-- A lower bound on each linear factor bounds the norm of a Pochhammer product. -/
-private lemma pow_le_norm_poch_of_forall {v : ℂ} {d : ℝ} (hd : 0 ≤ d)
-    (hv : ∀ n : ℕ, d ≤ ‖v + n‖) (n : ℕ) : d ^ n ≤ ‖poch v n‖ := by
+private lemma pow_le_norm_pochhammer_of_forall {v : ℂ} {d : ℝ} (hd : 0 ≤ d)
+    (hv : ∀ n : ℕ, d ≤ ‖v + n‖) (n : ℕ) : d ^ n ≤ ‖pochhammer v n‖ := by
   induction n with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ n ih =>
-    rw [poch_succ, norm_mul, pow_succ]
+    rw [pochhammer_succ, norm_mul, pow_succ]
     exact mul_le_mul ih (hv n) hd (norm_nonneg _)
 /-- The rising half-integer product exceeds three halves times the factorial. -/
-private lemma factorial_le_norm_poch_three_halves (n : ℕ) :
-    (3 / 2 : ℝ) * ((n + 1).factorial : ℝ) ≤ ‖poch (3 / 2) (n + 1)‖ := by
+private lemma factorial_le_norm_pochhammer_three_halves (n : ℕ) :
+    (3 / 2 : ℝ) * ((n + 1).factorial : ℝ) ≤ ‖pochhammer (3 / 2) (n + 1)‖ := by
   induction n with
-  | zero => norm_num [poch_succ, poch_zero]
+  | zero => norm_num [pochhammer_succ, pochhammer_zero]
   | succ n ih =>
-    rw [poch_succ, norm_mul, Nat.factorial_succ, Nat.cast_mul]
+    rw [pochhammer_succ, norm_mul, Nat.factorial_succ, Nat.cast_mul]
     have he : ‖(3 / 2 : ℂ) + (n + 1 : ℕ)‖ = (3 / 2 : ℝ) + (n + 1 : ℕ) := by
       rw [show (3 / 2 : ℂ) + (n + 1 : ℕ) = (((3 / 2 : ℝ) + (n + 1 : ℕ) : ℝ) : ℂ) by push_cast; ring]
       exact Complex.norm_of_nonneg (by positivity)
@@ -55,18 +55,18 @@ private lemma factorial_le_norm_poch_three_halves (n : ℕ) :
 /-- Gamma normalization expresses the ordinary Struve coefficients as Pochhammer quotients. -/
 lemma struveCoeff_normalized {ν : ℂ} (hν : ∀ n : ℕ, ν + 3 / 2 ≠ -n) (n : ℕ) :
     Gamma (3 / 2) * Gamma (ν + 3 / 2) * struveCoeff ν n =
-      1 / (poch (3 / 2) n * poch (ν + 3 / 2) n) := by
+      1 / (pochhammer (3 / 2) n * pochhammer (ν + 3 / 2) n) := by
   have hhalf : ∀ k : ℕ, (3 / 2 : ℂ) ≠ -k := fun k h => by
     have hh := congrArg Complex.re h
     simp at hh
     linarith [Nat.cast_nonneg (α := ℝ) k]
-  have hg (a : ℂ) (ha : ∀ k : ℕ, a ≠ -k) : Gamma (a + n) = poch a n * Gamma a := by
+  have hg (a : ℂ) (ha : ∀ k : ℕ, a ≠ -k) : Gamma (a + n) = pochhammer a n * Gamma a := by
     have h := Gamma_add_nat_div_Gamma_eq a ha (n := n)
-    change Gamma (a + n) / Gamma a = poch a n at h
+    change Gamma (a + n) / Gamma a = pochhammer a n at h
     exact (div_eq_iff (Gamma_ne_zero ha)).mp h
   rw [struveCoeff, show (n : ℂ) + 3 / 2 = 3 / 2 + n by ring,
     show (n : ℂ) + ν + 3 / 2 = (ν + 3 / 2) + n by ring, hg _ hhalf, hg _ hν]
-  convert mul_div_mul_left (1 : ℂ) (poch (3 / 2) n * poch (ν + 3 / 2) n)
+  convert mul_div_mul_left (1 : ℂ) (pochhammer (3 / 2) n * pochhammer (ν + 3 / 2) n)
     (mul_ne_zero (Gamma_ne_zero hhalf) (Gamma_ne_zero hν)) using 1
   ring
 /-- Each nonconstant normalized Struve-series term is bounded by an exponential term. -/
@@ -75,10 +75,10 @@ private lemma norm_struve_term_le {ν w : ℂ} (hν : ∀ n : ℕ, ν + 3 / 2 �
     ‖w ^ (n + 1) * (Gamma (3 / 2) * Gamma (ν + 3 / 2) * struveCoeff ν (n + 1))‖ ≤
       (2 / 3 : ℝ) * (‖w‖ / d) ^ (n + 1) / ((n + 1).factorial : ℝ) := by
   rw [struveCoeff_normalized hν, norm_mul, norm_pow, norm_div, norm_one, norm_mul]
-  have hprod := mul_le_mul (factorial_le_norm_poch_three_halves n)
-    (pow_le_norm_poch_of_forall hd.le hmin (n + 1)) (by positivity)
-    (norm_nonneg (poch (3 / 2) (n + 1)))
-  calc ‖w‖ ^ (n + 1) * (1 / (‖poch (3 / 2) (n + 1)‖ * ‖poch (ν + 3 / 2) (n + 1)‖))
+  have hprod := mul_le_mul (factorial_le_norm_pochhammer_three_halves n)
+    (pow_le_norm_pochhammer_of_forall hd.le hmin (n + 1)) (by positivity)
+    (norm_nonneg (pochhammer (3 / 2) (n + 1)))
+  calc ‖w‖ ^ (n + 1) * (1 / (‖pochhammer (3 / 2) (n + 1)‖ * ‖pochhammer (ν + 3 / 2) (n + 1)‖))
       ≤ ‖w‖ ^ (n + 1) * (1 / ((3 / 2 : ℝ) * ((n + 1).factorial : ℝ) * d ^ (n + 1))) := by
         gcongr
     _ = _ := by rw [div_pow]; field_simp
@@ -88,11 +88,11 @@ private lemma norm_struve_term_two_lt {ν w : ℂ} (hν : ∀ n : ℕ, ν + 3 / 
     ‖w ^ 2 * (Gamma (3 / 2) * Gamma (ν + 3 / 2) * struveCoeff ν 2)‖ <
       (2 / 3 : ℝ) * (‖w‖ / d) ^ 2 / (2 : ℕ).factorial := by
   rw [struveCoeff_normalized hν, norm_mul, norm_pow, norm_div, norm_one, norm_mul]
-  have hh : ‖poch (3 / 2 : ℂ) 2‖ = (15 / 4 : ℝ) := by
-    norm_num [poch_succ, poch_zero]
+  have hh : ‖pochhammer (3 / 2 : ℂ) 2‖ = (15 / 4 : ℝ) := by
+    norm_num [pochhammer_succ, pochhammer_zero]
   rw [hh]
-  have hp := pow_le_norm_poch_of_forall hd.le hmin 2
-  calc ‖w‖ ^ 2 * (1 / ((15 / 4 : ℝ) * ‖poch (ν + 3 / 2) 2‖))
+  have hp := pow_le_norm_pochhammer_of_forall hd.le hmin 2
+  calc ‖w‖ ^ 2 * (1 / ((15 / 4 : ℝ) * ‖pochhammer (ν + 3 / 2) 2‖))
       ≤ ‖w‖ ^ 2 * (1 / ((15 / 4 : ℝ) * d ^ 2)) := by gcongr
     _ < _ := by
       have hw0 : 0 < ‖w‖ := norm_pos_iff.mpr hw
@@ -127,7 +127,7 @@ theorem struveH_relative_bound {ν z : ℂ} (hz : z ≠ 0) (d : ℝ) (hd : 0 < d
   have hT0 : T 0 = 1 := by
     dsimp only [T, G]
     rw [struveCoeff_normalized hν]
-    simp [poch_zero]
+    simp [pochhammer_zero]
   have ht : HasSum (fun n => T (n + 1)) θ := by
     simpa only [sum_range_one, hT0] using (hasSum_nat_add_iff' 1).mpr hfull
   have hm : HasSum (fun n : ℕ => (2 / 3 : ℝ) * (‖w‖ / d) ^ (n + 1) / ((n + 1).factorial : ℝ))

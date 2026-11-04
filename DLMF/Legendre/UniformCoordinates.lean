@@ -7,6 +7,7 @@ module -- shake: keep-all
 
 public import DLMF.Legendre.UniformCoordinates.TurningPointMaps
 public import DLMF.Legendre.UniformCoordinates.InverseCoordinates
+public import DLMF.Legendre.UniformCoordinates.CylinderCrossing
 
 /-!
 # Coordinate changes and envelopes for Legendre uniform approximations

@@ -568,15 +568,15 @@ theorem hasAsymptoticExpansion_kummerU_rotSector_of_re_pos {a b : ℂ} (ha : 0 <
     simp only [tricomiKernel, hF, smul_eq_mul, hω]
     ring_nf
   · funext n
-    have hG : Gamma (a + n) / Gamma a = poch a n := Gamma_add_nat_div_Gamma_eq (n := n) a ha'
+    have hG : Gamma (a + n) / Gamma a = pochhammer a n := Gamma_add_nat_div_Gamma_eq (n := n) a ha'
     have hG0 : Gamma a ≠ 0 := Complex.Gamma_ne_zero ha'
     simp only [Pi.smul_apply, smul_eq_mul, hA, tricomiCoeff]
-    rw [show b - a - 1 = -(a - b + 1) by ring, ring_choose_neg_eq_poch,
+    rw [show b - a - 1 = -(a - b + 1) by ring, ring_choose_neg_eq_pochhammer,
       show (n : ℂ) + a = a + n by ring, ← hG]
     have he : exp (-(α * I * (a + n))) * exp (α * I * (a + n)) = 1 := by
       rw [← Complex.exp_add]; ring_nf; exact Complex.exp_zero
     field_simp
-    linear_combination (Gamma (a + n) * poch (a - b + 1) n / n.factorial) * he
+    linear_combination (Gamma (a + n) * pochhammer (a - b + 1) n / n.factorial) * he
 
 /-- **Tricomi's expansion in rotated sectors** (DLMF 13.7.3, Temme §7.2): for all complex `a, b`,
 `|α| < π/2` and `δ > 0`, as `z → ∞` with `δ |z| ≤ re (z e^{iα})`,

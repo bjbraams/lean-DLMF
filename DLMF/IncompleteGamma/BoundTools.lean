@@ -47,8 +47,9 @@ Alzer's bounds 8.10.11.
   `IncompleteGammaBounds.leftPropagation_one_lt_one`: Alzer's bounds
   `(1-e^{-αx})^a < P(a,x) < (1-e^{-βx})^a` (DLMF 8.10.11), via the sign of
   `IncompleteGammaBounds.alzerExponent`.
-* `IncompleteGammaBounds.normIncGammaP_re`, `IncompleteGammaBounds.normIncGammaQ_re`: the continued
-  `P`, `Q` at real `a > 0`, `x ≥ 0` in terms of TauCeti's `lowerIncompleteGamma`.
+* `IncompleteGammaBounds.re_regularizedGamma_ofReal`,
+  `IncompleteGammaBounds.re_regularizedIncompleteGammaQ_ofReal`: the continued `P`, `Q` at real
+  `a > 0`, `x ≥ 0` in terms of TauCeti's `lowerIncompleteGamma`.
 
 ## Implementation notes
 
@@ -520,29 +521,34 @@ theorem IncompleteGammaBounds.upper_lt {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (h
   linarith
 
 /-- The continued `P(a,x)` at real `a > 0`, `x ≥ 0` is TauCeti's regularized lower Gamma. -/
-theorem IncompleteGammaBounds.normIncGammaP_ofReal {a : ℝ} (ha : 0 < a) {x : ℝ} (hx : 0 ≤ x) :
-    normIncGammaPContinued a x = ((TauCeti.lowerIncompleteGamma a x / Real.Gamma a : ℝ) : ℂ) := by
+theorem IncompleteGammaBounds.regularizedGamma_ofReal_eq_div {a : ℝ} (ha : 0 < a)
+    {x : ℝ} (hx : 0 ≤ x) :
+    regularizedGamma a x = ((TauCeti.lowerIncompleteGamma a x / Real.Gamma a : ℝ) : ℂ) := by
   rcases hx.eq_or_lt with h0 | h0
   · subst h0
-    rw [TauCeti.lowerIncompleteGamma_eq_zero_of_nonpos_right a le_rfl, normIncGammaPContinued,
+    rw [TauCeti.lowerIncompleteGamma_eq_zero_of_nonpos_right a le_rfl, regularizedGamma,
       ofReal_zero, zero_cpow (ofReal_ne_zero.mpr ha.ne')]
     simp
   · have ha' : ∀ n : ℕ, (a:ℂ) ≠ -n := fun n h => by
       have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg n : (0:ℝ) ≤ n)]
-    rw [normIncGammaPContinued_eq ha', normIncGammaP, lowerIncGamma_ofReal ha h0,
+    rw [regularizedGamma_eq ha',
+        lowerIncompleteGamma_ofReal ha h0,
       Complex.Gamma_ofReal]
     push_cast; rfl
 
 /-- Real part of the continued `P(a,x)` at real `a > 0`, `x ≥ 0`. -/
-theorem IncompleteGammaBounds.normIncGammaP_re {a : ℝ} (ha : 0 < a) {x : ℝ} (hx : 0 ≤ x) :
-    (normIncGammaPContinued a x).re = TauCeti.regularizedGamma a x := by
-  rw [IncompleteGammaBounds.normIncGammaP_ofReal ha hx, ofReal_re, TauCeti.regularizedGamma_eq_div]
+theorem IncompleteGammaBounds.re_regularizedGamma_ofReal {a : ℝ} (ha : 0 < a)
+    {x : ℝ} (hx : 0 ≤ x) :
+    (regularizedGamma a x).re = TauCeti.regularizedGamma a x := by
+  rw [IncompleteGammaBounds.regularizedGamma_ofReal_eq_div ha hx, ofReal_re,
+      TauCeti.regularizedGamma_eq_div]
 
 /-- Real part of the continued `Q(a,x)` at real `a > 0`, `x ≥ 0`. -/
-theorem IncompleteGammaBounds.normIncGammaQ_re {a : ℝ} (ha : 0 < a) {x : ℝ} (hx : 0 ≤ x) :
-    (normIncGammaQContinued a x).re = 1 - TauCeti.lowerIncompleteGamma a x / Real.Gamma a := by
-  rw [normIncGammaQContinued, sub_re, one_re,
-      IncompleteGammaBounds.normIncGammaP_ofReal ha hx, ofReal_re]
+theorem IncompleteGammaBounds.re_regularizedIncompleteGammaQ_ofReal {a : ℝ} (ha : 0 < a)
+    {x : ℝ} (hx : 0 ≤ x) :
+    (regularizedIncompleteGammaQ a x).re = 1 - TauCeti.lowerIncompleteGamma a x / Real.Gamma a := by
+  rw [regularizedIncompleteGammaQ, sub_re, one_re,
+      IncompleteGammaBounds.regularizedGamma_ofReal_eq_div ha hx, ofReal_re]
 
 /-! ### DLMF 8.10.11: comparison with `(1-e^{-γx})^a` -/
 

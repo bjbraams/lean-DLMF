@@ -20,9 +20,9 @@ The complex error functions `erf` and `erfc` themselves are defined in
 
 * `faddeevaW`: the Faddeeva function `w(z)` (DLMF 7.2.3).
 * `dawsonF`: Dawson's integral `F(z)` (DLMF 7.2.5).
-* `fresnelCosInt`, `fresnelSinInt`, `fresnelTail`: the Fresnel integrals `C(z)`, `S(z)` and
+* `fresnelC`, `fresnelS`, `fresnelTail`: the Fresnel integrals `C(z)`, `S(z)` and
   `ℱ(z)` (DLMF 7.2.6–7.2.8).
-* `fresnelAuxFComplex`, `fresnelAuxGComplex`: the auxiliary functions `f(z)`, `g(z)`
+* `fresnelAuxiliaryFComplex`, `fresnelAuxiliaryGComplex`: the auxiliary functions `f(z)`, `g(z)`
   (DLMF 7.2.10, 7.2.11).
 * `goodwinStatonG`: the Goodwin–Staton integral `G(z)` on the slit plane (DLMF 7.2.12).
 * `gaussianTail`, `gaussianCdf`, `scaledErf`, `dawsonPrimitive`: the alternative notations
@@ -58,28 +58,28 @@ def dawsonF (z : ℂ) : ℂ :=
 
 /-- Entire Fresnel cosine integral. -/
 @[dlmf 7.2.E7]
-def fresnelCosInt (z : ℂ) : ℂ :=
+def fresnelC (z : ℂ) : ℂ :=
   primitive (fun t => cos (π*t^2/2)) z
 
 /-- Entire Fresnel sine integral. -/
 @[dlmf 7.2.E8]
-def fresnelSinInt (z : ℂ) : ℂ :=
+def fresnelS (z : ℂ) : ℂ :=
   primitive (fun t => sin (π*t^2/2)) z
 
 /-- Entire continued Fresnel tail integral. -/
 @[dlmf 7.2.E6]
 def fresnelTail (z : ℂ) : ℂ :=
-  (1+I)/2 - fresnelCosInt z-I*fresnelSinInt z
+  (1+I)/2 - fresnelC z-I*fresnelS z
 
 /-- Entire Fresnel auxiliary f. -/
 @[dlmf 7.2.E10]
-def fresnelAuxFComplex (z : ℂ) : ℂ :=
-  (1/2-fresnelSinInt z)*cos (π*z^2/2)-(1/2-fresnelCosInt z)*sin (π*z^2/2)
+def fresnelAuxiliaryFComplex (z : ℂ) : ℂ :=
+  (1/2-fresnelS z)*cos (π*z^2/2)-(1/2-fresnelC z)*sin (π*z^2/2)
 
 /-- Entire Fresnel auxiliary g. -/
 @[dlmf 7.2.E11]
-def fresnelAuxGComplex (z : ℂ) : ℂ :=
-  (1/2-fresnelCosInt z)*cos (π*z^2/2)+(1/2-fresnelSinInt z)*sin (π*z^2/2)
+def fresnelAuxiliaryGComplex (z : ℂ) : ℂ :=
+  (1/2-fresnelC z)*cos (π*z^2/2)+(1/2-fresnelS z)*sin (π*z^2/2)
 
 /-- Goodwin–Staton integral on the slit plane. -/
 @[dlmf 7.2.E12]
@@ -104,19 +104,19 @@ def dawsonPrimitive (z : ℂ) : ℂ :=
 
 /-- Alternative Fresnel C₁ normalization. -/
 def fresnelC1 (z : ℂ) : ℂ :=
-  fresnelCosInt (Real.sqrt (2/π)*z)
+  fresnelC (Real.sqrt (2/π)*z)
 
 /-- Alternative Fresnel S₁ normalization. -/
 def fresnelS1 (z : ℂ) : ℂ :=
-  fresnelSinInt (Real.sqrt (2/π)*z)
+  fresnelS (Real.sqrt (2/π)*z)
 
 /-- Alternative Fresnel C₂ normalization with the principal square root. -/
 def fresnelC2 (z : ℂ) : ℂ :=
-  fresnelCosInt ((2*z/π)^(1/2 : ℂ))
+  fresnelC ((2*z/π)^(1/2 : ℂ))
 
 /-- Alternative Fresnel S₂ normalization with the principal square root. -/
 def fresnelS2 (z : ℂ) : ℂ :=
-  fresnelSinInt ((2*z/π)^(1/2 : ℂ))
+  fresnelS ((2*z/π)^(1/2 : ℂ))
 
 /-- Repeated complementary Gaussian tail; only indices at least -1 have mathematical meaning. -/
 @[dlmf 7.18.E1, dlmf 7.18.E2]

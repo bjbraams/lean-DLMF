@@ -261,7 +261,7 @@ the round.
 
 ### A further principal-branch counterexample
 
-The admitted `symEllIntR_half_hasSum_mean` (19.19.7) is false with its current complex-domain
+The admitted `symmetricEllipticR_half_hasSum_mean` (19.19.7) is false with its current complex-domain
 hypotheses. For n=2 and a=1, take
 `z₀ = (−3200−798i)/169` and `z₁ = (−1120+3102i)/169`.
 Their mean `A = (−2160+1152i)/169` is in the slit plane, and
@@ -360,12 +360,12 @@ and axiom log are embedded in the round report. The cached DLMF §20.6 prints th
 common-radius condition. Appropriate shifted-lattice radii require review before proofs.
 The original statements and radius definition remain unchanged.
 
-`symEllIntRC_sq_eq` (19.26.26) also permits a problematic boundary case: x=−i, y=1.
+`symmetricEllipticRC_sq_eq` (19.26.26) also permits a problematic boundary case: x=−i, y=1.
 The defining RC(−1,1) integral has negative imaginary part; the transformed
 RC(−i/2,(1−i)/2) integral has positive imaginary part. Both converge, including the integrable
 square-root singularity at t=1 in the first integral. This analytical counterexample is
 not yet formalized in Lean. The strict-half-plane version is already proved as
-`symEllIntRC_sq` (19.22.22); the admitted boundary statement is retained for review.
+`symmetricEllipticRC_sq` (19.22.22); the admitted boundary statement is retained for review.
 
 An additional transcription concern remains in the variable-limit and improper-integral
 Leibniz statements: continuity of a totalized `deriv` expression does not explicitly assert
@@ -918,7 +918,7 @@ zero or expansion coefficient, or a fixed-precision polynomial or rational fit. 
   and solution behavior and explicitly exclude the decimal threshold brackets.
 
 **One statement deserves a scope decision:**
-`eight_add_sq_mul_compEllIntKk_div_log_bounds` in
+`eight_add_sq_mul_completeEllipticK_div_log_bounds` in
 [elliptic-integral inequalities](DLMF/EllipticIntegrals/Inequalities.lean), DLMF 19.9.3,
 includes the upper bound
 `(8 + k^2) * K(k) / log(4 / sqrt(1 - k^2)) < 9.096` for every `0 < k < 1`.
@@ -931,7 +931,7 @@ No statement was changed or removed in this review.
 
 Several names or file locations can otherwise be misleading:
 
-- `pcfU_chebyshev_infinite` in
+- `parabolicCylinderU_chebyshev_infinite` in
   [cylinder computation](DLMF/ParabolicCylinder/Computation.lean) asserts existence of an
   exact summable Chebyshev expansion on a compactified half-line. It supplies no fitted
   coefficient table, chosen finite degree or decimal accuracy target. The corresponding
@@ -1164,7 +1164,7 @@ remain and should guide the next structural cleanup:
    still repeat [BarnesContinuation](DLMF/ParabolicCylinder/BarnesContinuation.lean).
    Power-series uniqueness, derivative-sign arguments, trigonometric norm bounds,
    finite-sum bookkeeping and Bailey dominated-limit arguments retain the copies
-   identified in the earlier review. The two `incEllIntPik_special_k` proofs remain
+   identified in the earlier review. The two `incompleteEllipticPi_special_k` proofs remain
    identical in [SpecialCases](DLMF/EllipticIntegrals/SpecialCases.lean).
 3. **Adopt the checked upstream results.** The direct replacements by
    `_root_.riemannZeta_four`, `Complex.sin_int_mul_pi`, `sin_pi_mul_ne_zero`,
@@ -1178,7 +1178,7 @@ remain and should guide the next structural cleanup:
 4. **Complete the definitions layers.** The import survey now reports 20 cross-area
    definitions-name imports of theorem files, down from 24 in the original review.
    The Coulomb import in the cylinder foundation also remains necessary for
-   `conj_poch` and `conj_kummerM`; move these general conjugation lemmas down unchanged
+   `conj_pochhammer` and `conj_kummerM`; move these general conjugation lemmas down unchanged
    before removing that import. The seven pre-existing baseline-new edges remain: ErrorFunctions to Fresnel
    asymptotics; ExpIntegrals to the older exponential integral; GeneralizedHypergeometric
    to solution and argument-continuation theory; IncompleteGamma to Statistical's real
@@ -1349,7 +1349,7 @@ Several distinctions are essential when reading the code.
 ordinary Gaussian hypergeometric function is defined by its power series. An
 infinite-sum expression is not, by itself, analytic continuation beyond the
 convergence region. The project supplies a separate regularized continuation
-`DLMF.Hypergeometric.regularizedGaussHG` on
+`DLMF.Hypergeometric.regularizedGaussHypergeometric` on
 \(\mathbb C\setminus[1,\infty)\). Identities involving transformed arguments must
 either use this continued function or impose convergence conditions on each
 series argument. This corresponds to the distinction made in
@@ -1382,7 +1382,7 @@ Laguerre and Jacobi functions are defined by terminating hypergeometric formulas
 with Pochhammer prefactors. These formulas give the standard families on the
 regular parameter domains, including the usual orthogonality ranges. They do not
 automatically provide polynomial continuation in all parameters. For example,
-the current definition gives `laguerrePolyL (-1) 1 x = 0`, whereas the classically
+the current definition gives `laguerrePolynomialL (-1) 1 x = 0`, whereas the classically
 continued polynomial is \(L_1^{(-1)}(x)=-x\). The degree-zero definitions still give
 one. Any extension to exceptional parameters needs a denominator-free finite sum
 or a regularized definition, together with comparison theorems.
@@ -1671,7 +1671,7 @@ Ten admissions were replaced with proofs, preserving their mathematical hypothes
 | --- | --- | --- |
 | 1 | `kummerM_negZeros_eq`, `kummerM_posZeros_nonneg` | Kummer transformation and reflection of the zero set; nonnegative series coefficients, including the totalized `b = 0` case |
 | 2 | `compact_support_L2_expansion`, `kernel_polynomials_orthogonal` | TauCeti polynomial completeness and Mathlib Hilbert-basis convergence; Christoffel–Darboux and orthogonality on the measure's support |
-| 3 | `hermite_product_cosine_transform`, `hermite_product_sine_transform`, `hermitePolyH_convolution` | Finite Hermite linearization, Laguerre coefficients and single-polynomial transforms; integration by parts and Gaussian scaling |
+| 3 | `hermite_product_cosine_transform`, `hermite_product_sine_transform`, `hermitePolynomialH_convolution` | Finite Hermite linearization, Laguerre coefficients and single-polynomial transforms; integration by parts and Gaussian scaling |
 | 4 | `regularized_parameter_integral`, `whittakerM_parameter_integral`, `whittakerM_euler` | Dominated termwise Beta integration; positive-real scaling of principal complex powers and affine Euler substitution |
 
 The source admission count decreased from 347 to 337. The three repaired identities
@@ -1686,12 +1686,12 @@ statements or hypotheses:
 | Completed theorem | Proof ingredients |
 | --- | --- |
 | `tendsto_whittakerM_div_Gamma` | Joint continuity of regularized Kummer M, its proved denominator-pole formula, and a punctured affine parameter substitution |
-| `qGegenbauer_limit_ultrasphPoly` | Finite `q`-Pochhammer ratio limits and Gegenbauer generating-series coefficients |
-| `laguerrePolyL_fractional_integral` | Gamma normalization, the regularized Kummer parameter integral, and positive-real scaling by `y = x t` |
-| `laguerrePolyL_fractional_tail_integral` | Translation by `x`, Laguerre addition, and the proved Laguerre moments; all terms except degree zero vanish |
+| `qGegenbauer_limit_ultrasphericalPolynomial` | Finite `q`-Pochhammer ratio limits and Gegenbauer generating-series coefficients |
+| `laguerrePolynomialL_fractional_integral` | Gamma normalization, the regularized Kummer parameter integral, and positive-real scaling by `y = x t` |
+| `laguerrePolynomialL_fractional_tail_integral` | Translation by `x`, Laguerre addition, and the proved Laguerre moments; all terms except degree zero vanish |
 
 Two supporting lemmas were added: `whittakerW_zero_half` and
-`laguerrePolyL_div_Gamma_eq_regularized`. The source admission count decreased from
+`laguerrePolynomialL_div_Gamma_eq_regularized`. The source admission count decreased from
 337 to 333. The full build, direct file checks, entry-module check, and compiled
 axiom audits verify the new proofs and the previous priority proofs without
 `sorryAx`.
@@ -1711,7 +1711,7 @@ of the corrected identity remains open.
 The Gauss-kernel integral formulas were also checked against
 [DLMF 13.4.8](https://dlmf.nist.gov/13.4.E8) and
 [13.16.9](https://dlmf.nist.gov/13.16.E9). Their Gamma normalization is correct:
-`regularizedGaussHG` already denotes the regularized Gauss function.
+`regularizedGaussHypergeometric` already denotes the regularized Gauss function.
 
 ## Next priority proofs (2026-10-08)
 
@@ -1721,14 +1721,14 @@ Seven more admissions were closed with their original statements and hypotheses:
 | --- | --- |
 | `jacobi_fractional_integral` | Gamma normalization, the proved regularized Gauss fractional integral, and the substitution `y = 1 - (1-x)t` |
 | `jacobi_rodrigues` | Induction using the Jacobi weighted derivative; Mathlib's iterated derivative and real-scalar restriction APIs |
-| `laguerrePolyL_rodrigues` | Induction using the Laguerre weighted derivative and the same restriction APIs |
+| `laguerrePolynomialL_rodrigues` | Induction using the Laguerre weighted derivative and the same restriction APIs |
 | `legendre_orthogonality` | Proved Jacobi orthogonality for unequal degrees, followed by the three-term recurrence for the diagonal norms |
-| `laguerrePolyL_unweighted_convolution` | Interval integration by parts and the Laguerre derivative recurrence; valid for every real endpoint, including negative ones |
+| `laguerrePolynomialL_unweighted_convolution` | Interval integration by parts and the Laguerre derivative recurrence; valid for every real endpoint, including negative ones |
 | `laplace_regularizedHGFun_self` | Absolute summability of the integrated Kummer terms, Gamma moments, and the binomial series |
 | `laplace_whittakerM_closed` | The self-transform and an explicit principal-logarithm identity for the quotient of two right-half-plane arguments |
 
 Five supporting lemmas were added: `iteratedDeriv_jacobi_weight`,
-`iteratedDeriv_laguerrePolyL_weight`, `integral_cpow_mul_sub_cpow`,
+`iteratedDeriv_laguerrePolynomialL_weight`, `integral_cpow_mul_sub_cpow`,
 `kummerU_laplace_integrable`, and `kummerU_laplace_shift_one`.
 The Tricomi kernel is now proved absolutely integrable throughout `Re a > 0`,
 `Re z > 0`, for every complex `b`. Its identity with `U` is proved at `b = a + 1`;
@@ -1746,14 +1746,14 @@ Three further admissions were closed without changing their statements or assump
 
 | Completed theorem | Proof ingredients |
 | --- | --- |
-| `laguerrePolyL_convolution` | Finite Gamma-normalized Laguerre expansions, scaled Beta moments, and Vandermonde convolution via a polynomial additive functional |
+| `laguerrePolynomialL_convolution` | Finite Gamma-normalized Laguerre expansions, scaled Beta moments, and Vandermonde convolution via a polynomial additive functional |
 | `jacobi_norm` | Weighted integration by parts reduces the degree while shifting both parameters; the degree-zero Beta integral starts the induction |
-| `ultrasphPoly_orthogonality` | Symmetric Jacobi orthogonality and norms, positive-real factorization of the weight, and Mathlib's Gamma duplication formula |
+| `ultrasphericalPolynomial_orthogonality` | Symmetric Jacobi orthogonality and norms, positive-real factorization of the weight, and Mathlib's Gamma duplication formula |
 
 The Jacobi proof also establishes `jacobi_norm_all`, whose Gamma denominator is
 regular even when the degree is zero. Weight and polynomial-product integrability
 are explicit, so endpoint singularities remain covered by the original parameter
-range. `ultrasphPoly_norm` includes degree zero. Finite Laguerre normalization and
+range. `ultrasphericalPolynomial_norm` includes degree zero. Finite Laguerre normalization and
 scaled Beta integrability are reusable supporting lemmas.
 
 The general Kummer Laplace identity is now proved as
@@ -2004,10 +2004,10 @@ reducing that count from 101 to 99 and the source admission count from 288 to 28
 
 | Theorem | DLMF | Proof route |
 | --- | --- | --- |
-| `ultrasphPoly_laplace_integral` | 18.10.4 | The integrals `∫₀^π (x + √(x²-1) cos φ)ⁿ sin^{2λ-1} φ dφ` satisfy the Gegenbauer recurrence, by integrating the exact derivative of `wⁿ⁺¹ sin^{2λ} φ`; the normalization is `DLMF.Gamma.beta_sin_cos` |
+| `ultrasphericalPolynomial_laplace_integral` | 18.10.4 | The integrals `∫₀^π (x + √(x²-1) cos φ)ⁿ sin^{2λ-1} φ dφ` satisfy the Gegenbauer recurrence, by integrating the exact derivative of `wⁿ⁺¹ sin^{2λ} φ`; the normalization is `DLMF.Gamma.beta_sin_cos` |
 | `legendre_exponential_generating_function` | 18.12.12 | Laplace's integral 18.10.5, Wallis' integrals, and `J₀(u) = π⁻¹ ∫₀^π e^{iu cos t} dt`; the declaration moved from `Series.lean` to `Legendre.lean` to avoid an import cycle |
 
-New proved results include the Rodrigues formulas `ultrasphPoly_rodrigues` (18.5.5) and
+New proved results include the Rodrigues formulas `ultrasphericalPolynomial_rodrigues` (18.5.5) and
 `legendre_rodrigues` in [Integrals.lean](DLMF/OrthogonalPolynomials/Integrals.lean).
 
 Watson's lemma now also holds for complex `z → ∞` in a sector `δ|z| ≤ re z`
@@ -2145,13 +2145,13 @@ declaration counts in the inventory table for these rows are from 2026-10-16.
 [Legendre](DLMF/Legendre.lean) (Temme Ch. 8, DLMF 14). Mathlib has no Legendre functions.
 `legendreP ν z = 𝐅(-ν, ν+1; 1; (1-z)/2)` and
 `legendreQ ν z = √π Γ(ν+1) (2z)^{-ν-1} 𝐅((ν+2)/2, (ν+1)/2; ν+3/2; 1/z²)` use the
-continuation `regularizedGaussHG` of `₂F₁` to the cut plane, so they are analytic off `(-∞,-1]` and
+continuation `regularizedGaussHypergeometric` of `₂F₁` to the cut plane, so they are analytic off `(-∞,-1]` and
 `(-∞,1]` for every complex `ν`. `ferrersP ν μ x` is the Ferrers function on `(-1,1)` (14.3.1).
 Proved:
 * Legendre's equation for `P_ν` and `Q_ν`, and the associated equation for `𝖯^μ_ν` (14.2.1–2).
   These come from the hypergeometric equation on the cut plane, which is the hypothesis-free
   diagonal contiguous relation times `ab`.
-* `P_ν(1) = 1`, `P_{-ν-1} = P_ν` (14.9.5), `P_n = legendrePolyP n`, `P_ν(0)` (14.5.1, by Gauss's second
+* `P_ν(1) = 1`, `P_{-ν-1} = P_ν` (14.9.5), `P_n = legendrePolynomialP n`, `P_ν(0)` (14.5.1, by Gauss's second
   summation theorem).
 * The recurrence 14.10.3 and `(1-z²)P_ν' = ν(P_{ν-1} - zP_ν)`, as combinations of contiguous
   relations.
@@ -2333,7 +2333,7 @@ their area's namespace:
   `Transformations`, and `gauss_quadratic`, `kummer_quadratic`).
 * `DLMF.Confluent` (`Basic`, and the Whittaker definitions), `DLMF.Bessel` (nine files).
 
-Two name collisions surfaced and were resolved by renaming: `ultrasphPoly_param_one_eq` (the
+Two name collisions surfaced and were resolved by renaming: `ultrasphericalPolynomial_param_one_eq` (the
 `λ = 1` case in `Classical`) and `cpow_mul_cpow_of_re_pos` (in `Elementary`). The only remaining
 declarations outside `AAR` deliberately extend Mathlib namespaces (`Real.*`, `Complex.*` in the
 Gamma area, `HasFPowerSeriesOnBall.*`, `HasSum.*`, `MeasureTheory.*`, and
@@ -2490,7 +2490,7 @@ constrained maximum of the discriminant and the Laguerre discriminant), Hasse–
 
 The Schur resultant section for the Jacobi zeros moved from `Selberg/Applications.lean` to
 the new [JacobiDiscriminant.lean](DLMF/OrthogonalPolynomials/JacobiDiscriminant.lean)
-(general lemma `jacobiPolyP_prod_sq_sub`); AAR 8.5.3 is now a one-line corollary. In
+(general lemma `jacobiPolynomialP_prod_sq_sub`); AAR 8.5.3 is now a one-line corollary. In
 [BoundsZeros.lean](DLMF/OrthogonalPolynomials/BoundsZeros.lean) the discriminants 18.16.19
 (Jacobi), 18.16.20 (Laguerre) and 18.16.21 (Hermite) are proved, the latter two by the same
 Schur method on their recurrences (187 → 184). This also removes the duplicate admission
@@ -2508,7 +2508,7 @@ followed by its cheapest high-leverage items. Admissions went from 184 to 169.
   Laguerre, Hermite, Gegenbauer, Legendre and Chebyshev `T` are instances of
   `IsOrthogonalPolynomials`; zeros lie inside the support (general theorem); Gauss quadrature,
   Christoffel–Darboux, and completeness under a finite exponential moment (TauCeti). The
-  admitted `jacobiPolyP_complete` (18.18.i) moved here from `Classical.lean` with its statement
+  admitted `jacobiPolynomialP_complete` (18.18.i) moved here from `Classical.lean` with its statement
   unchanged and is proved. `zeros_interlace` (GeneralIdentities) is proved.
 * [BoundsZeros.lean](DLMF/OrthogonalPolynomials/BoundsZeros.lean): the zero theorems for Jacobi,
   Laguerre and Hermite (including `|x| < √(2n+1)`), the Jacobi endpoint bounds 18.14.1–2
@@ -2582,9 +2582,9 @@ area umbrellas:
   and (6.5.11). They use the existing normalizations and complex arguments;
   Krawtchouk requires `n ≤ N`, and Meixner requires `0 < Re β`.
   Formal power series avoid adding analytic generating-function assumptions.
-  In `Hahn.lean`, `poch_mul_meixner_eq_sum_of_ne_zero` generalizes the
+  In `Hahn.lean`, `pochhammer_mul_meixner_eq_sum_of_ne_zero` generalizes the
   coefficient lemma to explicit finite nonvanishing assumptions; the original
-  `poch_mul_meixner_eq_sum` retains its statement as a wrapper.
+  `pochhammer_mul_meixner_eq_sum` retains its statement as a wrapper.
 - [DiscreteRodrigues.lean](DLMF/OrthogonalPolynomials/DiscreteRodrigues.lean):
   `charlier_rodrigues`, using Mathlib's `fwdDiff (-1)` and the zero-extended
   Charlier weight. It holds for all integer arguments and nonzero complex `a`,
@@ -2899,7 +2899,7 @@ nonpole assumptions. Simply importing the admitted Kummer versions and rewriting
 
 1. **Three Mehler–Heine limits** in
    [Limits.lean](DLMF/OrthogonalPolynomials/Limits.lean):
-   `laguerrePolyL_mehler_heine`, `hermite_even_mehler_heine`, and
+   `laguerrePolynomialL_mehler_heine`, `hermite_even_mehler_heine`, and
    `hermite_odd_mehler_heine`. The new
    `DLMF.Confluent.tendsto_regularizedConfluent_sub_div` gives
    `regularizedHGFun {-n} {α+1} (z/n) → regularizedHGFun ∅ {α+1} (-z)`.
@@ -2912,7 +2912,7 @@ nonpole assumptions. Simply importing the admitted Kummer versions and rewriting
    complex Hermite conclusions. This is the clearest benefit of the Beals–Wong
    large-parameter work. Expected effort: small to moderate normalization proofs.
 
-2. **The Laguerre–Bessel integral** `laguerrePolyL_bessel_integral` in
+2. **The Laguerre–Bessel integral** `laguerrePolynomialL_bessel_integral` in
    [Integrals.lean](DLMF/OrthogonalPolynomials/Integrals.lean). Specialize the
    already-proved `DLMF.Confluent.regularized_bessel_integral` with
    `a = n+α+1`, `b = α+1`, and `z = x`. Apply the regularized Kummer
@@ -2921,13 +2921,13 @@ nonpole assumptions. Simply importing the admitted Kummer versions and rewriting
    Gaussian–Bessel transform provides another route, but no new transform theory
    is needed. Expected effort: small.
 
-3. **The uniform Laguerre bound** `laguerrePolyL_bound` in
+3. **The uniform Laguerre bound** `laguerrePolynomialL_bound` in
    [BoundsZeros.lean](DLMF/OrthogonalPolynomials/BoundsZeros.lean). Set the degree
    gap `m = 0` in the proved `hermite_product_cosine_transform`. Its integrand is
    a nonnegative Gaussian times a Hermite square, so `abs cos ≤ 1` bounds the
    transform by its value at zero. This gives the desired bound for `α = 0`,
    with `x = y^2`. Extend to `α ≥ 0` using the proved
-   `laguerrePolyL_connection`: its coefficients are nonnegative, and their sum
+   `laguerrePolynomialL_connection`: its coefficients are nonnegative, and their sum
    is `(α+1)_n/n!`. Handle `α = 0` separately rather than invoking strict
    positivity of `(α)_k`. Expected effort: moderate, with no sharp new ODE bound.
 
@@ -3292,14 +3292,14 @@ Classification totals: 5 F, 11 P1, 76 P2, 69 P3, 8 P4.
 **[DLMF/OrthogonalPolynomials/BoundsZeros.lean](DLMF/OrthogonalPolynomials/BoundsZeros.lean) — 11.**
 
 - P3: `jacobi_bernstein_bound` (admission at line 130).
-- P3: `ultrasphPoly_bernstein_bound` (admission at line 342).
-- P1: `laguerrePolyL_bound` (admission at line 347).
-- P3: `hermitePolyH_bound` (admission at line 352).
+- P3: `ultrasphericalPolynomial_bernstein_bound` (admission at line 342).
+- P1: `laguerrePolynomialL_bound` (admission at line 347).
+- P3: `hermitePolynomialH_bound` (admission at line 352).
 - P3: `jacobi_turan` (admission at line 359).
-- P2: `laguerrePolyL_turan` (admission at line 365).
+- P2: `laguerrePolynomialL_turan` (admission at line 365).
 - P3: `jacobi_positive_weighted_sum` (admission at line 408).
 - P3: `jacobi_positive_sum` (admission at line 414).
-- P3: `laguerrePolyL_positive_weighted_sum` (admission at line 422).
+- P3: `laguerrePolynomialL_positive_weighted_sum` (admission at line 422).
 - P3: `jacobi_darboux_asymptotic` (admission at line 448).
 - P3: `jacobi_weighted_bound` (admission at line 454).
 
@@ -3324,18 +3324,18 @@ Classification totals: 5 F, 11 P1, 76 P2, 69 P3, 8 P4.
 - P2: `legendre_dirichlet_mehler` (admission at line 880).
 - P2: `legendre_product_integral` (admission at line 1559).
 - P2: `legendre_singular_integral` (admission at line 2230).
-- P2: `ultrasphPoly_product_integral` (admission at line 2693).
+- P2: `ultrasphericalPolynomial_product_integral` (admission at line 2693).
 - P2: `legendre_bessel_square_integral` (admission at line 3085).
-- P2: `laguerrePolyL_product_laplace_transform` (admission at line 3561).
-- P2: `ultrasphPoly_dirichlet_integral` (admission at line 3587).
+- P2: `laguerrePolynomialL_product_laplace_transform` (admission at line 3561).
+- P2: `ultrasphericalPolynomial_dirichlet_integral` (admission at line 3587).
 - P2: `jacobi_double_laplace_integral` (admission at line 3599).
-- P2: `laguerrePolyL_double_laplace_integral` (admission at line 3608).
-- P1: `laguerrePolyL_bessel_integral` (admission at line 3615).
+- P2: `laguerrePolynomialL_double_laplace_integral` (admission at line 3608).
+- P1: `laguerrePolynomialL_bessel_integral` (admission at line 3615).
 
 **[DLMF/OrthogonalPolynomials/Limits.lean](DLMF/OrthogonalPolynomials/Limits.lean) — 4.**
 
 - P2: `jacobi_mehler_heine` (admission at line 516).
-- P1: `laguerrePolyL_mehler_heine` (admission at line 522).
+- P1: `laguerrePolynomialL_mehler_heine` (admission at line 522).
 - P1: `hermite_even_mehler_heine` (admission at line 529).
 - P1: `hermite_odd_mehler_heine` (admission at line 536).
 
@@ -3360,20 +3360,20 @@ Classification totals: 5 F, 11 P1, 76 P2, 69 P3, 8 P4.
 **[DLMF/OrthogonalPolynomials/Series.lean](DLMF/OrthogonalPolynomials/Series.lean) — 9.**
 
 - P2: `jacobi_generating_function` (admission at line 145).
-- P2: `ultrasphPoly_connection` (admission at line 656).
-- P2: `monomial_ultrasphPoly_expansion` (admission at line 663).
+- P2: `ultrasphericalPolynomial_connection` (admission at line 656).
+- P2: `monomial_ultrasphericalPolynomial_expansion` (admission at line 663).
 - P2: `mehler_formula` (admission at line 812).
 - P2: `legendre_addition` (admission at line 823).
-- P2: `ultrasphPoly_linearization` (admission at line 833).
+- P2: `ultrasphericalPolynomial_linearization` (admission at line 833).
 - P3: `jacobi_brafman_generating_function` (admission at line 1117).
 - P2: `jacobi_weighted_generating_function` (admission at line 1126).
 - P2: `jacobi_adjacent_generating_function` (admission at line 1133).
 
 **[DLMF/OrthogonalPolynomials/Topics.lean](DLMF/OrthogonalPolynomials/Topics.lean) — 4.**
 
-- P2: `jacobiPolyP_connection` (admission at line 42).
+- P2: `jacobiPolynomialP_connection` (admission at line 42).
 - P3: `vietoris_inequality` (admission at line 242).
-- P3: `ultrasphPoly_cesaro_nonneg` (admission at line 248).
+- P3: `ultrasphericalPolynomial_cesaro_nonneg` (admission at line 248).
 - P4: `irrational_riemannZeta_three` (admission at line 252).
 
 **[DLMF/OrthogonalPolynomials/UnitCircle.lean](DLMF/OrthogonalPolynomials/UnitCircle.lean) — 3.**
@@ -3413,7 +3413,7 @@ Classification totals: 5 F, 11 P1, 76 P2, 69 P3, 8 P4.
 
 - P3: `spherical_addition` (admission at line 44).
 - P3: `funk_hecke` (admission at line 56).
-- P3: `ultrasphPoly_addition` (admission at line 71).
+- P3: `ultrasphericalPolynomial_addition` (admission at line 71).
 - P1: `poissonKernelBall_reproduces` (admission at line 89).
 - P1: `su2_covers_so3` (admission at line 103).
 
@@ -3452,14 +3452,14 @@ dependency.
 ### Completed P1 proofs
 
 - [Limits.lean](DLMF/OrthogonalPolynomials/Limits.lean):
-  `laguerrePolyL_mehler_heine`, `hermite_even_mehler_heine`, and
+  `laguerrePolynomialL_mehler_heine`, `hermite_even_mehler_heine`, and
   `hermite_odd_mehler_heine`. A complex-argument regularized Laguerre limit handles
   both Hermite parity formulas, including the zero argument.
 - [Integrals.lean](DLMF/OrthogonalPolynomials/Integrals.lean):
-  `laguerrePolyL_bessel_integral`, from the regularized Bessel integral and Kummer
+  `laguerrePolynomialL_bessel_integral`, from the regularized Bessel integral and Kummer
   transformation, with explicit real-square-root normalization.
 - [BoundsZeros.lean](DLMF/OrthogonalPolynomials/BoundsZeros.lean):
-  `laguerrePolyL_bound`, first at parameter zero through the positive
+  `laguerrePolynomialL_bound`, first at parameter zero through the positive
   Hermite-square cosine transform, then for all nonnegative parameters through
   nonnegative Laguerre connection coefficients.
 - [GeneralIdentities.lean](DLMF/OrthogonalPolynomials/GeneralIdentities.lean):
@@ -3509,9 +3509,9 @@ restricted in this batch, and no admission or axiom was added.
 - [ProductsAddition.lean](DLMF/Confluent/ProductsAddition.lean): `kummerM_product`
   and `whittakerM_product`.
 - [Series.lean](DLMF/OrthogonalPolynomials/Series.lean):
-  `monomial_ultrasphPoly_expansion`, `ultrasphPoly_connection` and
-  `ultrasphPoly_linearization`.
-- [Topics.lean](DLMF/OrthogonalPolynomials/Topics.lean): `jacobiPolyP_connection`.
+  `monomial_ultrasphericalPolynomial_expansion`, `ultrasphericalPolynomial_connection` and
+  `ultrasphericalPolynomial_linearization`.
+- [Topics.lean](DLMF/OrthogonalPolynomials/Topics.lean): `jacobiPolynomialP_connection`.
 
 ### Proof structure and exceptional parameters
 
@@ -3582,7 +3582,7 @@ prerequisite. These are estimates of feasibility, not completed target proofs.
    [Series.lean](DLMF/OrthogonalPolynomials/Series.lean).
    This can be separated from the general Jacobi generating function. For
    `Re β > -1`, the proved `jacobi_raise_beta` and
-   `ultrasphPoly_eq_jacobiPolyP` give the coefficient identity
+   `ultrasphericalPolynomial_eq_jacobiPolynomialP` give the coefficient identity
 
    `(2β+2)_{n+1}/(β+1)_{n+1} P_{n+1}^{(β+1,β)}(x)
    = C_{n+1}^{β+3/2}(x) + C_n^{β+3/2}(x)`.
@@ -3590,13 +3590,13 @@ prerequisite. These are estimates of feasibility, not completed target proofs.
    This exact complex-parameter identity was proved in a temporary Lean probe,
    retaining the original parameter range. Summing the two consecutive
    Gegenbauer sequences with the already-proved
-   `ultrasphPoly_generating_function`, and handling degree zero separately,
+   `ultrasphericalPolynomial_generating_function`, and handling degree zero separately,
    should prove the admission without a new convergence estimate. This is the
    strongest immediate candidate. Expected effort: small.
 
-2. **`laguerrePolyL_product_laplace_transform`** in
+2. **`laguerrePolynomialL_product_laplace_transform`** in
    [Integrals.lean](DLMF/OrthogonalPolynomials/Integrals.lean).
-   Expand both polynomials with `laguerrePolyL_eq_sum_coeff`, integrate their
+   Expand both polynomials with `laguerrePolynomialL_eq_sum_coeff`, integrate their
    finitely many Gamma moments using
    `integrableOn_cpow_mul_cexp_neg` and
    `DLMF.Gamma.integral_cpow_mul_exp_neg_mul_Ioi`, and resum into the terminating
@@ -3606,7 +3606,7 @@ prerequisite. These are estimates of feasibility, not completed target proofs.
    Retain `Re z > -1` and `z ≠ 0`; the terminating Gauss argument `z⁻²` need not
    be inside the unit disk. Expected effort: moderate.
 
-3. **`laguerrePolyL_double_laplace_integral`**, in the same file.
+3. **`laguerrePolynomialL_double_laplace_integral`**, in the same file.
    Expand the finite power in the integrand. Odd cosine moments vanish and
    even cosine moments against `sin^(2α)` reduce to Beta integrals; the radial
    Gaussian moments are Gamma integrals after `u = r²`. Resumming should give
@@ -3796,8 +3796,8 @@ unchanged. No admission or axiom was introduced.
 - [Series.lean](DLMF/OrthogonalPolynomials/Series.lean):
   `jacobi_adjacent_generating_function`.
 - [Integrals.lean](DLMF/OrthogonalPolynomials/Integrals.lean):
-  `laguerrePolyL_product_laplace_transform`,
-  `laguerrePolyL_double_laplace_integral`, and
+  `laguerrePolynomialL_product_laplace_transform`,
+  `laguerrePolynomialL_double_laplace_integral`, and
   `jacobi_double_laplace_integral`.
 - [Associated.lean](DLMF/OrthogonalPolynomials/Associated.lean):
   `besselPolynomial_finite_orthogonality` and
@@ -4581,9 +4581,9 @@ These general proofs should be specialized rather than repeated.
 The [incomplete-Gamma core](DLMF/Confluent/IncompleteGamma.lean) and
 [normalized Gamma core](DLMF/Statistical/IncompleteGamma.lean) already prove
 complementarity, ordinary recurrences, natural-parameter Poisson sums,
-`scIncGamma_eq_tsum`, `analyticAt_scIncGamma` and `scIncGamma_neg_nat`.
+`tricomiIncompleteGamma_eq_tsum`, `analyticAt_tricomiIncompleteGamma` and `tricomiIncompleteGamma_neg_nat`.
 The [old exponential-integral core](DLMF/Confluent/ExpIntegral.lean) already proves
-`genExpIntE_add_one`, `hasDerivAt_genExpIntE`, real Ein/Si/Cin series and the
+`expIntegralE_add_one`, `hasDerivAt_expIntegralE`, real Ein/Si/Cin series and the
 real E1–Ein identity. The
 [old cylinder core](DLMF/Confluent/ParabolicCylinder.lean) already supplies
 `U,V,D`, derivatives, recurrences, Wronskians, rotated connections, a Laplace
@@ -4617,9 +4617,9 @@ targets below, then derivative and finite-shift families. This has the strongest
 combination of immediate reuse and consequences for Chapters 6 and 7.
 
 Use the defining and already proved identities
-`upperIncGamma = exp(-z) * U(1-a,1-a,z)` and
-`scIncGamma = exp(-z) * regularizedHGFun {1} {a+1} z`.
-The needed bridge is between `normIncGammaPContinued`/`QContinued` and the older
+`upperIncompleteGamma = exp(-z) * U(1-a,1-a,z)` and
+`tricomiIncompleteGamma = exp(-z) * regularizedHGFun {1} {a+1} z`.
+The needed bridge is between `regularizedGamma`/`QContinued` and the older
 quotients on regular parameters. Prove that bridge at its stated domain, then
 reuse the old normalized-Gamma formulas. It must retain the distinct continued
 values at nonpositive integral parameters; the old quotients are not a replacement
@@ -4627,10 +4627,10 @@ there.
 
 [SpecialValues.lean](DLMF/IncompleteGamma/SpecialValues.lean) contains particularly
 promising normalization and finite-sum adapters. The natural-parameter exponential
-sums are the old `normIncGammaP_nat_succ` and `normIncGammaQ_nat_succ`, expressed
+sums are the old `regularizedGamma_nat_succ` and `regularizedIncompleteGammaQ_nat_succ`, expressed
 through `expPartialSum` and, where needed, multiplication by `n!`.
 The regularized pair follows from all-parameter Kummer transformation.
-`upperIncGamma_one_minus_nat` follows from the definition of `genExpIntE` and
+`upperIncompleteGamma_one_minus_nat` follows from the definition of `expIntegralE` and
 nonzero-argument power cancellation.
 
 In [SeriesRecurrences.lean](DLMF/IncompleteGamma/SeriesRecurrences.lean), obtain
@@ -4639,7 +4639,7 @@ Gamma/Pochhammer coefficient rewrites then give the four elementary series.
 Three-term and finite-shift recurrences use the already proved one-step recurrence;
 weighted iterated derivatives use the general Kummer derivative families or an
 induction on the one-step formulas. No new contour theory is needed for these.
-The scaled `scIncGamma` ODE needs a regularized argument calculation that also
+The scaled `tricomiIncompleteGamma` ODE needs a regularized argument calculation that also
 handles exceptional parameters and `z=0`.
 
 In [ExponentialIntegral.lean](DLMF/IncompleteGamma/ExponentialIntegral.lean), the
@@ -4671,8 +4671,8 @@ and Tricomi transformation, retaining the square-argument branch condition.
 `hasDerivAt_gaussianPrimitive` already gives the required derivative of the
 underlying Gaussian antiderivative.
 
-Prove the complex-to-real bridges `dawsonF_ofReal`, `fresnelCosInt_ofReal` and
-`fresnelSinInt_ofReal`. Then lift the old real Dawson/Fresnel Kummer identities
+Prove the complex-to-real bridges `dawsonF_ofReal`, `fresnelC_ofReal` and
+`fresnelS_ofReal`. Then lift the old real Dawson/Fresnel Kummer identities
 by entire-function uniqueness, or derive their complex versions directly from
 the primitive calculus. After that, the Faddeeva derivative, Fresnel auxiliary
 derivatives, symmetries, error/Gamma relations and ordinary power series become
@@ -4706,9 +4706,9 @@ need another proof.
 ### 4. Incomplete Beta from continued Gauss and the old real integral
 
 **Fourth priority; 20 admissions in [Beta.lean](DLMF/IncompleteGamma/Beta.lean).**
-This is a compact additional reuse batch. First prove `incBeta_ofReal` and
-`normIncBetaI_ofReal` from the old
-`Real.incBeta_eq_ordinaryHypergeometric`, the regularized/ordinary Gauss bridge
+This is a compact additional reuse batch. First prove `incompleteBeta_ofReal` and
+`regularizedIncompleteBeta_ofReal` from the old
+`Real.incompleteBeta_eq_ordinaryHypergeometric`, the regularized/ordinary Gauss bridge
 and the Beta/Gamma normalization. Treat zero and one explicitly; the continued
 functions have a separate definition at one.
 
@@ -4735,7 +4735,7 @@ fraction results are themselves admitted and cannot close the latter by reuse.
 older cylinder theory is sufficiently extensive that these should precede the
 new uniform asymptotic system.
 
-- `pcfEven_kummer_alternative` and `pcfOdd_kummer_alternative` are Kummer
+- `parabolicCylinderEven_kummer_alternative` and `parabolicCylinderOdd_kummer_alternative` are Kummer
   transformation with an exponential prefactor. Their four explicit power series
   reuse the same ordinary Kummer series and Pochhammer duplication.
 - The four weighted iterated-derivative identities follow by induction from the
@@ -4744,7 +4744,7 @@ new uniform asymptotic system.
   statement need a separate limiting or entire argument.
 - The two physicists' Hermite statements adapt the proved probabilists' Hermite
   specialization and the project's existing normalization bridge.
-- `pcfU_half`, `pcfV_neg_half`, `pcfU_kummerU_odd` and `pcfU_whittaker` specialize
+- `parabolicCylinderU_half`, `parabolicCylinderV_neg_half`, `parabolicCylinderU_kummerU_odd` and `parabolicCylinderU_whittaker` specialize
   the existing cylinder–Tricomi, erf/Dawson and Whittaker relations.
   For the four Bessel-K special values, first prove one seed with
   `kummerU_besselK`, then use cylinder and Bessel recurrences.
@@ -4754,9 +4754,9 @@ new uniform asymptotic system.
   connection formula need more work than these first calculus results.
 
 Repeated erfc integrals should follow immediately after this core work. Prove
-one moment-integral bridge to `pcfU` using `pcfU_eq_integral`, including the change
-of scale and integrability. Then transfer `iteratedErfc_pcfU`, its Kummer forms,
-recurrence, derivatives, ODE and Hermite relation, and `pcfU_hh`. The analogous
+one moment-integral bridge to `parabolicCylinderU` using `parabolicCylinderU_eq_integral`, including the change
+of scale and integrability. Then transfer `iteratedErfc_parabolicCylinderU`, its Kummer forms,
+recurrence, derivatives, ODE and Hermite relation, and `parabolicCylinderU_hh`. The analogous
 statements in Chapters 7 and 12 should share this proof rather than be developed
 in two directions that depend circularly on one another. The present import order
 allows the Chapter 7 file to use the old cylinder core, and the new Chapter 12
@@ -4796,7 +4796,7 @@ require their integral/sum arguments.
 Global parameter analyticity of the continued Gauss API is a separate high-payoff
 extension. Prove it once, with local domination or a locally stable continuation
 construction, rather than reproducing it for `P`, Olver `Q` and each transform.
-The disk joint-parameter admission and `scIncGamma_joint_entire` need a genuine
+The disk joint-parameter admission and `tricomiIncompleteGamma_joint_entire` need a genuine
 multivariable argument. Neither is a one-line consequence of the existing
 one-variable parameter-curve theorems.
 
@@ -4903,12 +4903,12 @@ sources are the proved Gamma/confluent core described above. In-file ordering
 may require relocating declarations or importing a small bridge module to avoid
 using a later admission.
 
-- [DLMF/IncompleteGamma/Basic.lean](DLMF/IncompleteGamma/Basic.lean): [`normIncGammaPContinued_eq`](DLMF/IncompleteGamma/ContinuedProperties.lean#L30), [`normIncGammaQContinued_eq`](DLMF/IncompleteGamma/ContinuedProperties.lean#L40).
-- [DLMF/IncompleteGamma/SpecialValues.lean](DLMF/IncompleteGamma/SpecialValues.lean): [`scIncGamma_zero`](DLMF/IncompleteGamma/SpecialValues.lean#L49), [`scIncGamma_regularized_pair`](DLMF/IncompleteGamma/SpecialValues.lean#L253), [`lowerIncGamma_kummerM_pair`](DLMF/IncompleteGamma/SpecialValues.lean#L240), [`upperIncGamma_one_minus_nat`](DLMF/IncompleteGamma/SpecialValues.lean#L122), [`lowerIncGamma_nat_succ_expPartialSum`](DLMF/IncompleteGamma/SpecialValues.lean#L84), [`upperIncGamma_nat_succ_expPartialSum`](DLMF/IncompleteGamma/SpecialValues.lean#L95), [`normIncGammaPContinued_nat_succ_expPartialSum`](DLMF/IncompleteGamma/SpecialValues.lean#L106), [`normIncGammaQContinued_nat_succ_expPartialSum`](DLMF/IncompleteGamma/SpecialValues.lean#L114).
-- [DLMF/IncompleteGamma/SeriesRecurrences.lean](DLMF/IncompleteGamma/SeriesRecurrences.lean): [`scIncGamma_hasSum_exponential`](DLMF/IncompleteGamma/ContinuedProperties.lean#L49), [`scIncGamma_hasSum_alternating`](DLMF/IncompleteGamma/SeriesRecurrences.lean#L29), [`upperIncGamma_hasSum_alternating`](DLMF/IncompleteGamma/SeriesRecurrences.lean#L220), [`upperIncGamma_hasSum_exponential`](DLMF/IncompleteGamma/SeriesRecurrences.lean#L241), [`incompleteGamma_threeTerm`](DLMF/IncompleteGamma/SeriesRecurrences.lean#L783), [`scIncGamma_recurrence`](DLMF/IncompleteGamma/ContinuedProperties.lean#L63).
-- [DLMF/IncompleteGamma/ExponentialIntegral.lean](DLMF/IncompleteGamma/ExponentialIntegral.lean): [`genExpIntE_scaled_derivative`](DLMF/IncompleteGamma/ExponentialIntegral.lean#L438), [`genExpIntE_laplace_complex`](DLMF/IncompleteGamma/ExponentialIntegral.lean#L49).
+- [DLMF/IncompleteGamma/Basic.lean](DLMF/IncompleteGamma/Basic.lean): [`regularizedGamma_eq`](DLMF/IncompleteGamma/ContinuedProperties.lean#L30), [`regularizedIncompleteGammaQ_eq`](DLMF/IncompleteGamma/ContinuedProperties.lean#L40).
+- [DLMF/IncompleteGamma/SpecialValues.lean](DLMF/IncompleteGamma/SpecialValues.lean): [`tricomiIncompleteGamma_zero`](DLMF/IncompleteGamma/SpecialValues.lean#L49), [`tricomiIncompleteGamma_regularized_pair`](DLMF/IncompleteGamma/SpecialValues.lean#L253), [`lowerIncompleteGamma_kummerM_pair`](DLMF/IncompleteGamma/SpecialValues.lean#L240), [`upperIncompleteGamma_one_minus_nat`](DLMF/IncompleteGamma/SpecialValues.lean#L122), [`lowerIncompleteGamma_nat_succ_expPartialSum`](DLMF/IncompleteGamma/SpecialValues.lean#L84), [`upperIncompleteGamma_nat_succ_expPartialSum`](DLMF/IncompleteGamma/SpecialValues.lean#L95), [`regularizedGamma_nat_succ_expPartialSum`](DLMF/IncompleteGamma/SpecialValues.lean#L106), [`regularizedIncompleteGammaQ_nat_succ_expPartialSum`](DLMF/IncompleteGamma/SpecialValues.lean#L114).
+- [DLMF/IncompleteGamma/SeriesRecurrences.lean](DLMF/IncompleteGamma/SeriesRecurrences.lean): [`tricomiIncompleteGamma_hasSum_exponential`](DLMF/IncompleteGamma/ContinuedProperties.lean#L49), [`tricomiIncompleteGamma_hasSum_alternating`](DLMF/IncompleteGamma/SeriesRecurrences.lean#L29), [`upperIncompleteGamma_hasSum_alternating`](DLMF/IncompleteGamma/SeriesRecurrences.lean#L220), [`upperIncompleteGamma_hasSum_exponential`](DLMF/IncompleteGamma/SeriesRecurrences.lean#L241), [`incompleteGamma_threeTerm`](DLMF/IncompleteGamma/SeriesRecurrences.lean#L783), [`tricomiIncompleteGamma_recurrence`](DLMF/IncompleteGamma/ContinuedProperties.lean#L63).
+- [DLMF/IncompleteGamma/ExponentialIntegral.lean](DLMF/IncompleteGamma/ExponentialIntegral.lean): [`expIntegralE_scaled_derivative`](DLMF/IncompleteGamma/ExponentialIntegral.lean#L438), [`expIntegralE_laplace_complex`](DLMF/IncompleteGamma/ExponentialIntegral.lean#L49).
 
-For `scIncGamma_hasSum_exponential`, construct the genuine `HasSum` from the
+For `tricomiIncompleteGamma_hasSum_exponential`, construct the genuine `HasSum` from the
 regularized confluent series rather than treating the old `tsum` identity as
 convergence. For the alternating series use the regularized Kummer pair and
 Gamma recurrence. The upper-series versions then use complementarity. Prove the
@@ -4982,10 +4982,10 @@ the lower derivative on its original domain. The complex Laplace representation
 specializes the proved Kummer integral at first parameter one, with no extra
 restriction on the order.
 
-- [DLMF/IncompleteGamma/Basic.lean](DLMF/IncompleteGamma/Basic.lean): `normIncGammaPContinued_eq`, `normIncGammaQContinued_eq`.
-- [DLMF/IncompleteGamma/ExponentialIntegral.lean](DLMF/IncompleteGamma/ExponentialIntegral.lean): `genExpIntE_laplace_complex`, `genExpIntE_scaled_derivative`.
-- [DLMF/IncompleteGamma/SeriesRecurrences.lean](DLMF/IncompleteGamma/SeriesRecurrences.lean): `scIncGamma_hasSum_exponential`, `scIncGamma_hasSum_alternating`, `upperIncGamma_hasSum_alternating`, `upperIncGamma_hasSum_exponential`, `incompleteGamma_threeTerm`, `scIncGamma_recurrence`, `normIncGammaPContinued_shift_up`, `normIncGammaQContinued_shift_up`, `lowerIncGamma_shift_up`, `upperIncGamma_shift_up`, `hasDerivAt_incompleteGamma`, `scIncGamma_deriv_parameter_zero`.
-- [DLMF/IncompleteGamma/SpecialValues.lean](DLMF/IncompleteGamma/SpecialValues.lean): `scIncGamma_zero`, `lowerIncGamma_nat_succ_expPartialSum`, `upperIncGamma_nat_succ_expPartialSum`, `normIncGammaPContinued_nat_succ_expPartialSum`, `normIncGammaQContinued_nat_succ_expPartialSum`, `upperIncGamma_one_minus_nat`, `lowerIncGamma_kummerM_pair`, `scIncGamma_regularized_pair`.
+- [DLMF/IncompleteGamma/Basic.lean](DLMF/IncompleteGamma/Basic.lean): `regularizedGamma_eq`, `regularizedIncompleteGammaQ_eq`.
+- [DLMF/IncompleteGamma/ExponentialIntegral.lean](DLMF/IncompleteGamma/ExponentialIntegral.lean): `expIntegralE_laplace_complex`, `expIntegralE_scaled_derivative`.
+- [DLMF/IncompleteGamma/SeriesRecurrences.lean](DLMF/IncompleteGamma/SeriesRecurrences.lean): `tricomiIncompleteGamma_hasSum_exponential`, `tricomiIncompleteGamma_hasSum_alternating`, `upperIncompleteGamma_hasSum_alternating`, `upperIncompleteGamma_hasSum_exponential`, `incompleteGamma_threeTerm`, `tricomiIncompleteGamma_recurrence`, `regularizedGamma_shift_up`, `regularizedIncompleteGammaQ_shift_up`, `lowerIncompleteGamma_shift_up`, `upperIncompleteGamma_shift_up`, `hasDerivAt_incompleteGamma`, `tricomiIncompleteGamma_deriv_parameter_zero`.
+- [DLMF/IncompleteGamma/SpecialValues.lean](DLMF/IncompleteGamma/SpecialValues.lean): `tricomiIncompleteGamma_zero`, `lowerIncompleteGamma_nat_succ_expPartialSum`, `upperIncompleteGamma_nat_succ_expPartialSum`, `regularizedGamma_nat_succ_expPartialSum`, `regularizedIncompleteGammaQ_nat_succ_expPartialSum`, `upperIncompleteGamma_one_minus_nat`, `lowerIncompleteGamma_kummerM_pair`, `tricomiIncompleteGamma_regularized_pair`.
 
 ### 2. Error, Dawson and Fresnel: 20 removals
 
@@ -4994,8 +4994,8 @@ The Faddeeva derivative, Fresnel auxiliary derivatives, Dawson/Fresnel parity an
 inverse auxiliary identities follow without admitted integral representations.
 The two error-function Kummer forms reuse the old definition and Kummer transformation.
 
-- [DLMF/ErrorFunctions/Basic.lean](DLMF/ErrorFunctions/Basic.lean): `faddeevaW_entire`, `dawsonF_entire`, `fresnelCosInt_entire`, `fresnelSinInt_entire`, `fresnelTail_entire`, `fresnelAuxFComplex_entire`, `fresnelAuxGComplex_entire`, `dawsonF_ofReal`, `fresnelCosInt_ofReal`, `fresnelSinInt_ofReal`, `fresnelAuxFComplex_ofReal`, `fresnelAuxGComplex_ofReal`, `erf_complex_segment_integral`.
-- [DLMF/ErrorFunctions/Relations.lean](DLMF/ErrorFunctions/Relations.lean): `dawsonF_negative`, `fresnel_negative`, `fresnelCosInt_aux`, `fresnelSinInt_aux`, `hasDerivAt_faddeevaW`, `hasDerivAt_fresnelAux`, `erf_kummerM_pair`.
+- [DLMF/ErrorFunctions/Basic.lean](DLMF/ErrorFunctions/Basic.lean): `faddeevaW_entire`, `dawsonF_entire`, `fresnelC_entire`, `fresnelS_entire`, `fresnelTail_entire`, `fresnelAuxiliaryFComplex_entire`, `fresnelAuxiliaryGComplex_entire`, `dawsonF_ofReal`, `fresnelC_ofReal`, `fresnelS_ofReal`, `fresnelAuxiliaryFComplex_ofReal`, `fresnelAuxiliaryGComplex_ofReal`, `erf_complex_segment_integral`.
+- [DLMF/ErrorFunctions/Relations.lean](DLMF/ErrorFunctions/Relations.lean): `dawsonF_negative`, `fresnel_negative`, `fresnelC_aux`, `fresnelS_aux`, `hasDerivAt_faddeevaW`, `hasDerivAt_fresnelAux`, `erf_kummerM_pair`.
 
 ### 3. Ein, E1, Si, Cin and Shi: 24 removals
 
@@ -5009,7 +5009,7 @@ supplies the E1 series, principal logarithmic-sheet identity and scaled-Gamma
 parameter derivative without weakening a branch hypothesis. The continuation
 identities preserve inherited logarithms.
 
-- [DLMF/ExpIntegrals/Basic.lean](DLMF/ExpIntegrals/Basic.lean): `expIntEin_entire`, `sinInt_entire`, `cosIntCin_entire`, `sinhInt_entire`, `expIntEin_ofReal`, `sinInt_ofReal`, `cosIntCin_ofReal`, `cosInt_ofReal`, `sinInt_odd`, `cosIntCin_even`, `expIntE1_eq_Ein_complex`, `Real.expIntEi_negative`, `Real.expIntEi_Ein`, `sinInt_eq_aux`, `cosInt_eq_aux`.
+- [DLMF/ExpIntegrals/Basic.lean](DLMF/ExpIntegrals/Basic.lean): `expIntegralEin_entire`, `sinIntegral_entire`, `cosIntegralCin_entire`, `sinhIntegral_entire`, `expIntegralEin_ofReal`, `sinIntegral_ofReal`, `cosIntegralCin_ofReal`, `cosIntegral_ofReal`, `sinIntegral_odd`, `cosIntegralCin_even`, `expIntE1_eq_Ein_complex`, `Real.expIntegralEi_negative`, `Real.expIntegralEi_Ein`, `sinIntegral_eq_aux`, `cosIntegral_eq_aux`.
 - [DLMF/ExpIntegrals/Continuation.lean](DLMF/ExpIntegrals/Continuation.lean): `expIntE1OnLog_principal`, `expIntE1OnLog_monodromy`, `expIntE1OnLog_halfTurn`, `cosIntOnLog_halfTurn`, `coshIntOnLog_halfTurn`.
 - [DLMF/ExpIntegrals/Expansions.lean](DLMF/ExpIntegrals/Expansions.lean): `hasSum_Ein_complex`, `expIntE1_hasSum`, `hasSum_Si_complex`, `hasSum_Ci_complex`.
 
@@ -5020,7 +5020,7 @@ representations specialize the proved continued Gauss transformations, and the
 weighted contiguous identity 8.17.13 follows from the old real recurrences. No
 positivity assumption on a shifted parameter was introduced.
 
-- [DLMF/IncompleteGamma/Beta.lean](DLMF/IncompleteGamma/Beta.lean): `incBeta_ofReal`, `normIncBetaI_ofReal`, `incBeta_hypergeometric_euler`, `incBeta_hypergeometric_pfaff`, `normIncBetaI_contiguous_13`.
+- [DLMF/IncompleteGamma/Beta.lean](DLMF/IncompleteGamma/Beta.lean): `incompleteBeta_ofReal`, `regularizedIncompleteBeta_ofReal`, `incompleteBeta_hypergeometric_euler`, `incompleteBeta_hypergeometric_pfaff`, `regularizedIncompleteBeta_contiguous_13`.
 
 ### 5. Parabolic cylinders and Weber W: 10 removals
 
@@ -5031,8 +5031,8 @@ recurrences. The half-order U/erfc formula holds at every complex argument, dire
 from the Kummer bases. Weber W has its specified value and derivative at zero,
 using the rotated even/odd basis.
 
-- [DLMF/ParabolicCylinder/Basic.lean](DLMF/ParabolicCylinder/Basic.lean): `pcfU_entire_order`, `pcfV_entire_order`, `pcfEven_kummer_alternative`, `pcfOdd_kummer_alternative`, `pcfU_iterated_deriv_9`, `pcfU_iterated_deriv_10`, `pcfV_iterated_deriv_11`, `pcfV_iterated_deriv_12`.
-- [DLMF/ParabolicCylinder/Relations.lean](DLMF/ParabolicCylinder/Relations.lean): `pcfU_half`.
+- [DLMF/ParabolicCylinder/Basic.lean](DLMF/ParabolicCylinder/Basic.lean): `parabolicCylinderU_entire_order`, `parabolicCylinderV_entire_order`, `parabolicCylinderEven_kummer_alternative`, `parabolicCylinderOdd_kummer_alternative`, `parabolicCylinderU_iterated_deriv_9`, `parabolicCylinderU_iterated_deriv_10`, `parabolicCylinderV_iterated_deriv_11`, `parabolicCylinderV_iterated_deriv_12`.
+- [DLMF/ParabolicCylinder/Relations.lean](DLMF/ParabolicCylinder/Relations.lean): `parabolicCylinderU_half`.
 - [DLMF/ParabolicCylinder/Weber.lean](DLMF/ParabolicCylinder/Weber.lean): `pcfW_initial`.
 
 ### 6. Associated Legendre and Ferrers: 12 removals
@@ -5140,7 +5140,7 @@ on an admitted uniqueness or basis theorem. The logarithmic-plane Kummer formula
 retains `2 * log z` and is proved for every nonzero z. Chapter 12 receives the
 weighted-erfc derivative formula and both Hh representations.
 
-For the import order, the already proved `pcfU_half` is moved from cylinder
+For the import order, the already proved `parabolicCylinderU_half` is moved from cylinder
 Relations to Basic, with the same name, statement and proof. Likewise the already
 proved Ein and Si HasSum declarations move from Expansions to Basic. These three
 relocations are not counted as removals or new helpers.
@@ -5178,15 +5178,15 @@ was strengthened to bypass those cases.
 
 ### Completed theorem inventory
 
-- [DLMF/ErrorFunctions/Relations.lean](DLMF/ErrorFunctions/Relations.lean): `fresnel_mul_I`, `fresnelAux_mul_I`, `fresnelAux_negative`, `dawsonF_faddeeva`, `fresnel_signed_tail`, `fresnelTail_aux`, `fresnel_signed_erf`, `fresnel_signed_faddeeva`, `fresnelAux_signed_erfc`, `iteratedDeriv_erf_hermite`, `erfc_kummerU_pair`, `erfc_upperIncGamma`, `erf_lowerIncGamma`, `erfc_genExpIntE`, `fresnel_kummerM_pair`.
-- [DLMF/ErrorFunctions/Repeated.lean](DLMF/ErrorFunctions/Repeated.lean): `iteratedErfc_initial`, `hasDerivAt_iteratedErfc`, `iteratedErfc_recurrence`, `iteratedDeriv_scaled_erfc`, `iteratedErfc_ode`, `iteratedErfc_general_solution`, `iteratedErfc_hermite`, `iteratedErfc_kummerM`, `iteratedErfc_kummerU`, `iteratedErfc_kummerUOnLog`, `iteratedErfc_pcfU`, `iteratedErfc_probability`.
-- [DLMF/ExpIntegrals/Basic.lean](DLMF/ExpIntegrals/Basic.lean): `expIntEin_segment_integral`, `sinInt_segment_integral`, `cosIntCin_segment_integral`, `sinhInt_segment_integral`, `coshInt_segment_integral`.
-- [DLMF/ExpIntegrals/Continuation.lean](DLMF/ExpIntegrals/Continuation.lean): `expIntAuxFOnLog_halfTurn`, `expIntAuxGOnLog_halfTurn`, `expIntE1_negative_boundary`, `expIntEi_boundary_average`, `sinhInt_eq_Ei`, `coshInt_eq_Ei`, `sinInt_eq_E1`, `cosInt_eq_E1`, `expIntAux_eq_E1`.
+- [DLMF/ErrorFunctions/Relations.lean](DLMF/ErrorFunctions/Relations.lean): `fresnel_mul_I`, `fresnelAux_mul_I`, `fresnelAux_negative`, `dawsonF_faddeeva`, `fresnel_signed_tail`, `fresnelTail_aux`, `fresnel_signed_erf`, `fresnel_signed_faddeeva`, `fresnelAux_signed_erfc`, `iteratedDeriv_erf_hermite`, `erfc_kummerU_pair`, `erfc_upperIncompleteGamma`, `erf_lowerIncompleteGamma`, `erfc_expIntegralE`, `fresnel_kummerM_pair`.
+- [DLMF/ErrorFunctions/Repeated.lean](DLMF/ErrorFunctions/Repeated.lean): `iteratedErfc_initial`, `hasDerivAt_iteratedErfc`, `iteratedErfc_recurrence`, `iteratedDeriv_scaled_erfc`, `iteratedErfc_ode`, `iteratedErfc_general_solution`, `iteratedErfc_hermite`, `iteratedErfc_kummerM`, `iteratedErfc_kummerU`, `iteratedErfc_kummerUOnLog`, `iteratedErfc_parabolicCylinderU`, `iteratedErfc_probability`.
+- [DLMF/ExpIntegrals/Basic.lean](DLMF/ExpIntegrals/Basic.lean): `expIntegralEin_segment_integral`, `sinIntegral_segment_integral`, `cosIntegralCin_segment_integral`, `sinhIntegral_segment_integral`, `coshIntegral_segment_integral`.
+- [DLMF/ExpIntegrals/Continuation.lean](DLMF/ExpIntegrals/Continuation.lean): `expIntAuxFOnLog_halfTurn`, `expIntAuxGOnLog_halfTurn`, `expIntE1_negative_boundary`, `expIntegralEi_boundary_average`, `sinhIntegral_eq_Ei`, `coshIntegral_eq_Ei`, `sinIntegral_eq_E1`, `cosIntegral_eq_E1`, `expIntAux_eq_E1`.
 - [DLMF/ExpIntegrals/Expansions.lean](DLMF/ExpIntegrals/Expansions.lean): `expIntAux_eq_kummerU`.
-- [DLMF/IncompleteGamma/Beta.lean](DLMF/IncompleteGamma/Beta.lean): `normIncBetaI_contiguous_12`, `normIncBetaI_contiguous_14`, `normIncBetaI_contiguous_15`, `normIncBetaI_contiguous_16`, `normIncBetaI_contiguous_17`, `normIncBetaI_contiguous_18`, `normIncBetaI_contiguous_19`, `normIncBetaI_contiguous_limit_12`, `normIncBetaI_contiguous_limit_16`, `normIncBetaI_contiguous_limit_17`, `incBeta_continuedFraction_endpoint_limit`, `normIncBetaI_negative_binomial_sum`.
-- [DLMF/IncompleteGamma/SeriesRecurrences.lean](DLMF/IncompleteGamma/SeriesRecurrences.lean): `lowerIncGamma_shift_down`, `upperIncGamma_shift_down`, `lowerIncGamma_iteratedDeriv_scaled_power`, `upperIncGamma_iteratedDeriv_scaled_power`, `lowerIncGamma_iteratedDeriv_scaled_exp`, `upperIncGamma_iteratedDeriv_scaled_exp`, `scIncGamma_iteratedDeriv_scaled`.
-- [DLMF/IncompleteGamma/ZerosIntegrals.lean](DLMF/IncompleteGamma/ZerosIntegrals.lean): `normIncGammaP_laplace`, `upperIncGamma_laplace`, `lowerIncGamma_mellin`, `upperIncGamma_mellin`, `lowerIncGamma_mellin_laplace`, `upperIncGamma_mellin_laplace`.
-- [DLMF/ParabolicCylinder/Relations.lean](DLMF/ParabolicCylinder/Relations.lean): `pcfU_nat_add_half_deriv`, `pcfU_hh`.
+- [DLMF/IncompleteGamma/Beta.lean](DLMF/IncompleteGamma/Beta.lean): `regularizedIncompleteBeta_contiguous_12`, `regularizedIncompleteBeta_contiguous_14`, `regularizedIncompleteBeta_contiguous_15`, `regularizedIncompleteBeta_contiguous_16`, `regularizedIncompleteBeta_contiguous_17`, `regularizedIncompleteBeta_contiguous_18`, `regularizedIncompleteBeta_contiguous_19`, `regularizedIncompleteBeta_contiguous_limit_12`, `regularizedIncompleteBeta_contiguous_limit_16`, `regularizedIncompleteBeta_contiguous_limit_17`, `incompleteBeta_continuedFraction_endpoint_limit`, `regularizedIncompleteBeta_negative_binomial_sum`.
+- [DLMF/IncompleteGamma/SeriesRecurrences.lean](DLMF/IncompleteGamma/SeriesRecurrences.lean): `lowerIncompleteGamma_shift_down`, `upperIncompleteGamma_shift_down`, `lowerIncompleteGamma_iteratedDeriv_scaled_power`, `upperIncompleteGamma_iteratedDeriv_scaled_power`, `lowerIncompleteGamma_iteratedDeriv_scaled_exp`, `upperIncompleteGamma_iteratedDeriv_scaled_exp`, `tricomiIncompleteGamma_iteratedDeriv_scaled`.
+- [DLMF/IncompleteGamma/ZerosIntegrals.lean](DLMF/IncompleteGamma/ZerosIntegrals.lean): `regularizedGamma_laplace`, `upperIncompleteGamma_laplace`, `lowerIncompleteGamma_mellin`, `upperIncompleteGamma_mellin`, `lowerIncompleteGamma_mellin_laplace`, `upperIncompleteGamma_mellin_laplace`.
+- [DLMF/ParabolicCylinder/Relations.lean](DLMF/ParabolicCylinder/Relations.lean): `parabolicCylinderU_nat_add_half_deriv`, `parabolicCylinderU_hh`.
 
 ### Remaining obligations
 
@@ -5317,14 +5317,14 @@ derivative specializations; a slit-plane calculation alone is insufficient.
 ### 2. Short incomplete-Gamma and error-function transfers
 
 [SpecialValues.lean](DLMF/IncompleteGamma/SpecialValues.lean) still admits
-`lowerIncGamma_half_square`, `upperIncGamma_half_square`,
-`scIncGamma_half_negative_square`, the half-integer Q finite sum, the negative-
+`lowerIncompleteGamma_half_square`, `upperIncompleteGamma_half_square`,
+`tricomiIncompleteGamma_half_negative_square`, the half-integer Q finite sum, the negative-
 integer upper-Gamma finite sum and the two Whittaker representations. Most can
 use the now proved erf/erfc, Dawson, recurrence and Whittaker bridges. Check the
 import order when sharing an error-function relation: the current chapter
 imports prevent simply importing the downstream Relations module here.
 
-Also prioritize `lowerIncGamma_large_parameter_hasSum` in
+Also prioritize `lowerIncompleteGamma_large_parameter_hasSum` in
 [Asymptotics.lean](DLMF/IncompleteGamma/Asymptotics.lean), which is a convergent
 series specialization of the proved scaled-Gamma series despite its filename.
 It should precede the actual large-parameter estimates. The logarithmic-plane
@@ -5444,7 +5444,7 @@ In [Properties.lean](DLMF/Struve/Properties.lean):
 
 In [Asymptotics.lean](DLMF/IncompleteGamma/Asymptotics.lean):
 
-- `lowerIncGamma_large_parameter_hasSum`.
+- `lowerIncompleteGamma_large_parameter_hasSum`.
 
 In [SineCosine.lean](DLMF/IncompleteGamma/SineCosine.lean):
 
@@ -5457,15 +5457,15 @@ In [SineCosine.lean](DLMF/IncompleteGamma/SineCosine.lean):
 
 In [SpecialValues.lean](DLMF/IncompleteGamma/SpecialValues.lean):
 
-- `lowerIncGamma_half_square`.
-- `scIncGamma_half_negative_square`.
-- `upperIncGamma_half_square`.
-- `normIncGammaQ_half_nat`.
-- `upperIncGamma_neg_nat_finite`.
-- `lowerIncGamma_whittakerM`.
-- `upperIncGamma_whittakerW`.
-- `erf_lowerIncGammaOnLog_square`.
-- `erfc_upperIncGammaOnLog_square`.
+- `lowerIncompleteGamma_half_square`.
+- `tricomiIncompleteGamma_half_negative_square`.
+- `upperIncompleteGamma_half_square`.
+- `regularizedIncompleteGammaQ_half_nat`.
+- `upperIncompleteGamma_neg_nat_finite`.
+- `lowerIncompleteGamma_whittakerM`.
+- `upperIncompleteGamma_whittakerW`.
+- `erf_lowerIncompleteGammaOnLog_square`.
+- `erfc_upperIncompleteGammaOnLog_square`.
 - `erfc_kummerUOnLog_square`.
 
 ### Legendre: 7
@@ -5487,14 +5487,14 @@ In [AssociatedRecurrences.lean](DLMF/Legendre/AssociatedRecurrences.lean):
 
 In [Basic.lean](DLMF/ErrorFunctions/Basic.lean):
 
-- `fresnelCosInt_hasSum`.
-- `fresnelSinInt_hasSum`.
+- `fresnelC_hasSum`.
+- `fresnelS_hasSum`.
 
 In [Relations.lean](DLMF/ErrorFunctions/Relations.lean):
 
 - `iteratedDeriv_faddeevaW_recurrence`.
-- `fresnelCosInt_hypergeometric`.
-- `fresnelSinInt_hypergeometric`.
+- `fresnelC_hypergeometric`.
+- `fresnelS_hypergeometric`.
 
 In [Repeated.lean](DLMF/ErrorFunctions/Repeated.lean):
 
@@ -5573,7 +5573,7 @@ The work above does not complete every candidate in the preceding review.
    followed by parameter continuity and the integer-order limit. The project's
    joint `entire_regularized_parameters` statement is still admitted; it is
    not a proved input available for this continuation argument. However, the
-   proved `analyticOnNhd_regularizedGaussHGFun_comp` already supplies analyticity
+   proved `analyticOnNhd_regularizedGaussHypergeometricFun_comp` already supplies analyticity
    along entire parameter curves, including simultaneous changes to the upper
    parameters. The follow-up below uses that sufficient one-parameter result;
    the full joint-entireness statement is unnecessary for this continuation.
@@ -5624,8 +5624,8 @@ In [AssociatedRecurrences.lean](DLMF/Legendre/AssociatedRecurrences.lean):
 
 In [Basic.lean](DLMF/IncompleteGamma/Basic.lean):
 
-- `lowerIncGamma_parameter_analytic`.
-- `lowerIncGammaOnLog_monodromy`.
+- `lowerIncompleteGamma_parameter_analytic`.
+- `lowerIncompleteGammaOnLog_monodromy`.
 
 In [SineCosine.lean](DLMF/IncompleteGamma/SineCosine.lean):
 
@@ -5792,7 +5792,7 @@ in the declaration docstring.
     tag was removed. The statement is unchanged. The earlier removal of a negative-axis
     "13.9.14" rested on the same misreading of `P`.
 
-Also noted, but not changed: `expIntAuxF_laplace_integral` at `z = 0` relies on Lean's
+Also noted, but not changed: `sinIntegralAuxiliaryF_laplace_integral` at `z = 0` relies on Lean's
 `log 0 = 0`. `legendreQPoly_convolution` uses `legendreP` at all complex `z`, where the
 polynomial bridge is so far proved only for `1+z` in the slit plane.
 
@@ -5800,7 +5800,7 @@ polynomial bridge is so far proved only for `1+z` in the slit plane.
 
 1. Parabolic cylinders, about 47: all of `Basic` (rotated connections, real forms, phases,
    series), eleven `Relations` (Kummer/Whittaker forms, addition theorems, the Bessel-K
-   values from the seed `pcfU_bessel_10`), both Hermite statements, twelve Weber-`W`
+   values from the seed `parabolicCylinderU_bessel_10`), both Hermite statements, twelve Weber-`W`
    results, and a few `Integrals`/`AsymptoticsZeros` items.
 2. Legendre, about 68: `SpecialValues` (22), integer-order and Rodrigues results,
    reflections, singular behaviour, conical ODE and series, Christoffel sums, generating
@@ -5830,7 +5830,7 @@ polynomial bridge is so far proved only for `1+z` in the slit plane.
 - Integration along horizontal and vertical rays with Tricomi decay: about 21 in
   Chapters 6 and 8.
 - Scorer series core: about 20. Generalized Airy ₀F₁ derivative system: about 10.
-- `upperIncGammaOnLog` package (Gamma difference, `a = 0` value through Ein, recurrence):
+- `upperIncompleteGammaOnLog` package (Gamma difference, `a = 0` value through Ein, recurrence):
   about 14, then about 9 from its logarithmic-sector expansion.
 - Struve termwise Beta/Poisson integration: about 11. Anger sine-power moments: about 7.
 - The erfc bound for `Re z^2 > 0`, the shifted E₁ Laplace representation and the Voigt
@@ -5935,7 +5935,7 @@ prerequisites are available: `ferrers_wronskian_5` and `associated_wronskian_11`
 - [ParameterHolomorphy.lean](DLMF/Hypergeometric/ParameterHolomorphy.lean): **joint
   holomorphy of the continued regularized Gauss function in `(a,b,c,z)` on the cut plane**.
   The shift counts of the Euler-integral recursion are fixed on open parameter sets and
-  then identified with `regularizedGaussHG`. This closes `entire_regularized_parameters`
+  then identified with `regularizedGaussHypergeometric`. This closes `entire_regularized_parameters`
   and supplies entire degree and order dependence for Legendre P and Olver Q.
 - [Poisson.lean](DLMF/Struve/Poisson.lean): Poisson integrals for H, L and M.
 - In-file helper families:
@@ -5983,11 +5983,11 @@ prerequisites are available: `ferrers_wronskian_5` and `associated_wronskian_11`
     large-integer-order Weber estimates.
 - Incomplete Gamma, 25 (134 → 109):
   - `Basic` is complete: log-plane monodromy, half-turn and jump; horizontal integral;
-    `scIncGamma_joint_entire`.
+    `tricomiIncompleteGamma_joint_entire`.
   - The E_p log-plane monodromy and parameter entireness, generalized sine/cosine tails,
     and uniform-expansion identities.
   - The Stieltjes form 8.6.4, the Mellin–Barnes form 8.6.11, and 8.19.6.
-- Exponential integrals, 19 (59 → 40): horizontal integrals, `cosInt_tendsto_atTop`, the
+- Exponential integrals, 19 (59 → 40): horizontal integrals, `cosIntegral_tendsto_atTop`, the
   rational E₁ transforms, auxiliary oscillatory, Laplace and remainder integrals,
   `expIntE1_scaled_integrals`, the Acton initial value, and the Stieltjes form 6.2.2.
 - Confluent, 10 (49 → 39):
@@ -6154,7 +6154,7 @@ product ψ(x)·(1/Γ(x)) therefore evaluates to `0` there, although its continuo
 `(−1)^{n+1} n!` at `x = −n`. A census found eleven declarations whose pole-avoiding hypotheses
 existed only for this reason. The new module `DLMF/Gamma/RecipGammaDeriv.lean` provides the
 entire functions `recipGammaDeriv n = (1/Γ)^{(n)}` with `(1/Γ)' = −ψ/Γ`, `(1/Γ)'(−p) = (−1)^p p!`,
-`(1/Γ)'' = (ψ² − ψ')/Γ`, and the pole-free `poch_mul_recip_Gamma_add_nat`.
+`(1/Γ)'' = (ψ² − ψ')/Γ`, and the pole-free `pochhammer_mul_recip_Gamma_add_nat`.
 
 New theorems, each valid for all parameters and tagged as the original ("Stronger than DLMF"):
 
@@ -6172,8 +6172,8 @@ New theorems, each valid for all parameters and tagged as the original ("Stronge
   `logarithmic_connection_one_sub_recipGamma`, 15.8.9
   `logarithmic_connection_one_div_one_sub_recipGamma` and 15.8.11
   `logarithmic_connection_one_sub_recip_recipGamma`, with all integrality and pole hypotheses
-  on a, b, c − a dropped; helpers `recip_Gamma_mul_deriv_poch`, `recip_Gamma_mul_poch_one_sub`,
-  `recip_Gamma_mul_deriv_poch_one_sub`.
+  on a, b, c − a dropped; helpers `recip_Gamma_mul_deriv_pochhammer`, `recip_Gamma_mul_pochhammer_one_sub`,
+  `recip_Gamma_mul_deriv_pochhammer_one_sub`.
 
 The old statements are kept unchanged. All new statements were checked with mpmath at
 parameter values the old hypotheses excluded (agreement to 1e-19 or better).
@@ -6206,8 +6206,8 @@ Proved targets:
 - Airy: `exists_airy_zero_parametrizations` (9.9.6–9.9.17).
 - Parabolic cylinder (`SectorAsymptotics.lean`, new): rotated Laplace representation of U for
   |θ| < π/4, the expansion 12.9.1 on |ph z| ≤ 3π/4 − δ for every complex a, its log-plane form,
-  and from the connection formulas 12.2.19–20 the targets `pcfU_sector_asymptotic`,
-  `pcfV_sector_asymptotic`, `pcfU/V_adjacent_asymptotic_pos/neg` (12.9.1–12.9.4) and
+  and from the connection formulas 12.2.19–20 the targets `parabolicCylinderU_sector_asymptotic`,
+  `parabolicCylinderV_sector_asymptotic`, `parabolicCylinderU/V_adjacent_asymptotic_pos/neg` (12.9.1–12.9.4) and
   `pcfWS_asymptotic` (12.14.20–23).
 - Parabolic cylinder uniform (`Uniform.lean`, `UniformLG.lean` new): `pcfOlverU_spec` (12.10.11),
   `pcfGammaCoeff_expansion` and `pcfGammaCoeff_initial` (12.10.16–17); and the new
@@ -6323,7 +6323,7 @@ Proved targets by area:
   14.8.9 (`olverQ_log_singular_recipGamma`, so `olverQ_log_singular` is now proved too), 14.8.10;
   `ferrersP_reflected_dependence`, `associatedPQ_independent`; `ferrers_product_integral_10`,
   `_12`, `_14`, 14.17.16 (`ferrersPQ_nat_integral`); `ferrersPP_integral_all_degrees`.
-- Parabolic cylinder (−2): 12.10.31 (`pcfU_temme_uniform`) and 12.10.25, 12.10.28–29
+- Parabolic cylinder (−2): 12.10.31 (`parabolicCylinderU_temme_uniform`) and 12.10.25, 12.10.28–29
   (`pcf_positive_parameter_uniform`), proved in `UniformLG2.lean`; both statements were moved
   there unchanged from `Uniform.lean`, which `UniformLG2.lean` imports. The U part of 12.10.3
   with a normalizer satisfying 12.10.14 is the new `pcf_negative_parameter_uniform_U_normalizer`.
@@ -6590,15 +6590,15 @@ Main results proved:
   (14.20), `legendreOrderEta_spec`, `legendreOrderEta_bijective`, `legendreCylinderZeta_spec` (14.15).
 - Airy: the four well-conditioned pairs of Table 9.2.1 (`Airy/Equation.lean` now admission-free).
 - Zeros: Scorer 9.12(xi) (Gi has no zeros on [0, ∞), Gi′ exactly one; infinitely many negative
-  zeros of Gi and Gi′), 12.11(i) `pcfU_positive_zero_count` by parameter deformation from the
-  Hermite case, `pcfU_hermite_zero_count`, `pcfV_no_positive_zero`, `ferrersPQ_interlace`,
+  zeros of Gi and Gi′), 12.11(i) `parabolicCylinderU_positive_zero_count` by parameter deformation from the
+  Hermite case, `parabolicCylinderU_hermite_zero_count`, `parabolicCylinderV_no_positive_zero`, `ferrersPQ_interlace`,
   `ferrersQ_nat_zero_count`.
 - Principal values and integrals: 6.2.8, 8.6.2, 8.6.9 (convergence), 9.10.19 (convergence).
 - Series: 6.10.4, 6.10.8, 7.6.8, 7.6.10, 7.6.11, 8.7.4, 8.7.5 (all a, by continuity at a ∈ −ℕ),
   8.21.16, 8.21.17, and the absolute/non-absolute convergence statements of 14.13.
 - Error-function bounds 7.8.2–7.8.8 and the monotonicity of the normalized Dawson integral
   (`ErrorFunctions/BoundsAsymptotics.lean` now admission-free).
-- Spherical harmonics and addition: the Gegenbauer addition theorem `ultrasphPoly_addition`
+- Spherical harmonics and addition: the Gegenbauer addition theorem `ultrasphericalPolynomial_addition`
   (18.18.8; induction on n with varying λ), the product integral 18.17.5,
   `harmonicHomogeneous_orthogonal` (Gaussian weight and integration by parts), the spherical
   harmonic Rodrigues formula, orthonormality, Herglotz generating function, `scaledOblate_real`,
@@ -7080,7 +7080,7 @@ Earlier numerical totals in this document and the README are historical snapshot
   identity, and the earlier antidiagonal summation lemma. Continuation reuses the nonnegativity
   and monotonicity results in `Hypergeometric/Basic/RealPochhammer.lean`; Saalschütz reuses its binomial series.
 - **Legendre from general Gauss theory:** add
-  `DLMF.Hypergeometric.tendsto_regularizedGaussHG_left_one` in `Hypergeometric/Boundary.lean`.
+  `DLMF.Hypergeometric.tendsto_regularizedGaussHypergeometric_left_one` in `Hypergeometric/Boundary.lean`.
   It applies Mathlib's Abel limit theorem to the existing regularized Gauss summation theorem.
   Both Legendre boundary-limit helpers become adapters, eliminating a second exceptional-
   parameter calculation. All denominator parameters are retained. The separately proved
@@ -7094,7 +7094,7 @@ Earlier numerical totals in this document and the README are historical snapshot
 - **Bessel:** move `besselK_neg`, including its DLMF 10.27.3 tag, verbatim from `Elementary`
   to `SecondKind`. The integral representation can now call it directly, so its private copy
   disappears. Importing `Elementary` still provides the original theorem.
-- **Jacobi:** move `jacobiPolyP_one_ne_zero` from `Differential` to `Explicit`, replacing the
+- **Jacobi:** move `jacobiPolynomialP_one_ne_zero` from `Differential` to `Explicit`, replacing the
   private earlier copy and updating its callers. The public name and hypotheses are retained.
 - **Airy:** reuse the rotation connection formulas, sector-rotation limit, real-axis
   derivative facts, and derivative sign at zero instead of reproving them in later modules.
@@ -7136,7 +7136,7 @@ Further concrete consolidation candidates remain:
   below those chapters rather than adding cross-chapter dependencies solely for a helper.
 
 Two important non-duplicates must remain distinguished: totalized ordinary `₂F₁` series versus
-`regularizedGaussHG` on the cut plane, and principal-sheet special functions versus their
+`regularizedGaussHypergeometric` on the cut plane, and principal-sheet special functions versus their
 explicit logarithmic-plane continuations. Similarly, the hypergeometric definitions of Jacobi
 and Gegenbauer polynomials have exceptional-parameter behavior which cannot be erased by
 cancelling a possibly zero Pochhammer or Gamma factor. The Airy and core principal-value
@@ -7180,7 +7180,7 @@ uncommitted work is preserved. No commit was requested or made.
 - `associatedP_degree_deriv` (14.11.1) now reuses the existing regularized Gauss
   parameter-derivative machinery. The shared series lemma is generalized to a complex
   argument, and the older real-argument lemma becomes an adapter.
-- `lowerIncGamma_multiplication_hasSum` (8.15.1) follows from Mathlib's entire Taylor
+- `lowerIncompleteGamma_multiplication_hasSum` (8.15.1) follows from Mathlib's entire Taylor
   theorem and the existing regularized confluent derivatives. The proof retains the
   logarithmic-plane arguments and proves convergence for every stated `u, v`.
 - `goodwinStatonG_dawson` (7.5.13) follows from the proved Faddeeva Cauchy integral and
@@ -7354,9 +7354,9 @@ mathematical review estimates, not newly Lean-checked proof implementations.
 ### First: contained proof targets
 
 1. **The two compact cylinder Chebyshev expansions**:
-   `pcfU_chebyshev_compact` and `pcfV_chebyshev_compact` in
+   `parabolicCylinderU_chebyshev_compact` and `parabolicCylinderV_chebyshev_compact` in
    [Computation.lean](DLMF/ParabolicCylinder/Computation.lean).
-   `pcfU_entire` and `pcfV_entire` are proved, and
+   `parabolicCylinderU_entire` and `parabolicCylinderV_entire` are proved, and
    [ChebyshevExpansion.lean](DLMF/OrthogonalPolynomials/ChebyshevExpansion.lean)
    already has coefficient decay on Bernstein ellipses and pointwise reconstruction
    from absolutely summable coefficients. Supply a shared complex-valued version,
@@ -7379,14 +7379,14 @@ mathematical review estimates, not newly Lean-checked proof implementations.
    with a useful difference-operator identity as the outcome.
 
 3. **Fixed-x incomplete-Beta asymptotics**:
-   `incBeta_large_a_fixed_x` in
+   `incompleteBeta_large_a_fixed_x` in
    [BetaAsymptotics.lean](DLMF/IncompleteGamma/BetaAsymptotics.lean),
    [DLMF 8.18.1](https://dlmf.nist.gov/8.18.E1).
    Repeated integration by parts in the real Beta integral gives the finite
    expansion and a remainder bounded by a Beta moment. With x fixed strictly
    between zero and one, the residual power of `1-t` stays bounded even when
    `b-N` is negative. Use reciprocal Gamma factors at terminating integer b.
-   The proved `incBeta_large_a_integer_b_exact` is a useful consistency check,
+   The proved `incompleteBeta_large_a_integer_b_exact` is a useful consistency check,
    but does not settle arbitrary positive real b. This is a more contained
    incomplete-Gamma-area target than the uniform transition expansions.
 
@@ -7416,7 +7416,7 @@ mathematical review estimates, not newly Lean-checked proof implementations.
   telescoping certificate. This needs new algebra, not a direct application of
   the existing Dougall summation. Retain all denominator restrictions.
 - The two remaining [Legendre hypergeometric representations](DLMF/Legendre/Hypergeometric.lean)
-  and `pcfU_rotational_addition` in
+  and `parabolicCylinderU_rotational_addition` in
   [Relations.lean](DLMF/ParabolicCylinder/Relations.lean) are secondary identity
   targets. The former need a combined cut-boundary limit and removable
   parameter singularities; the latter needs convergence at `t = π/4` under its
@@ -7558,14 +7558,14 @@ The compiled audit has **13,111 project theorems**, of which **195 depend on
 independently verifies its two existing inverse-series consequences. No new
 nonstandard axiom occurs, and the completed statements retain their hypotheses.
 
-- `pcfU_chebyshev_compact` and `pcfV_chebyshev_compact` follow from a shared
+- `parabolicCylinderU_chebyshev_compact` and `parabolicCylinderV_chebyshev_compact` follow from a shared
   complex Chebyshev-series theorem for entire functions, including pointwise
   convergence at the interval endpoints. The real orthogonal-polynomial API
   now adapts this common result.
 - `askeyWilson_difference_equation` follows by triangular action on the finite
   Laurent basis and telescoping, with the original denominator restrictions
   and the cases `n = 0` and `a = 0` retained.
-- `incBeta_large_a_fixed_x` uses an exact finite diagonal-shift remainder and
+- `incompleteBeta_large_a_fixed_x` uses an exact finite diagonal-shift remainder and
   a uniform hypergeometric majorant. It covers arbitrary positive real `b`,
   including terminating reciprocal-Gamma factors, without restricting `b-N`.
 - `whipple_7F6` is a finite exponential-base `q → 1` limit of the project's
@@ -7735,12 +7735,12 @@ nonzero arguments in the overbalanced case, the regularized 0F1 contiguous adapt
 and the finite cancelled unity-sum family of 16.4.E2_5, including its removable
 limit. Exceptional parameters and the full acquired domains are retained.
 
-`genRegularizedHG` now guards the existence of a continuation before selecting it,
+`regularizedGeneralizedHypergeometric` now guards the existence of a continuation before selecting it,
 with the native series as fallback. Local and entire series proofs can therefore
 avoid the global existence admission. A proved equality identifies this definition
 with the previous one under the existing existence theorem, preserving the germ,
 upper cut values and endpoint convention. That equivalence explicitly inherits
-`sorryAx`; continuation existence remains admitted. The existing `genHG_entire`
+`sorryAx`; continuation existence remains admitted. The existing `generalizedHypergeometric_entire`
 becomes admission-independent in addition to the 14 source removals.
 
 Finite-product ratio estimates adapt Moritz Doll's private Mathlib proofs, with
@@ -7767,7 +7767,7 @@ The ordinary build passes (10,339 jobs). All ten changed Lean files and both roo
 entry modules pass separate checks with `autoImplicit=false` and
 `relaxedAutoImplicit=false`. The compiled audit confirms all 134 removed admissions
 are now independent of `sorryAx`, and separately confirms the newly pure
-`genHG_entire`. The intentional old-definition equivalence dependency remains
+`generalizedHypergeometric_entire`. The intentional old-definition equivalence dependency remains
 visible. The full environment contains 14,169 project theorems, of which 766 depend
 on `sorryAx`, with no other nonstandard axiom. The acquisition ledgers are refreshed
 from the final compiled declarations, including inherited dependencies of untagged
@@ -7915,7 +7915,7 @@ Jackson limits, and Chapter 16 unit-circle/continuation foundations.
 Seven agents with exclusive file ownership and a shared/exclusive Lake lock remove
 **234 source admissions** (706 → 472). No theorem statement, hypothesis or
 definition changed; the only moves are within files (`arccos_principal_log_half`,
-`genHG_one_converges_iff`, helper blocks), placed after the results their proofs use.
+`generalizedHypergeometric_one_converges_iff`, helper blocks), placed after the results their proofs use.
 The full build passes (10,349 jobs) and `git diff --check` is clean.
 
 ### Elementary: 155 removals
@@ -7998,19 +7998,19 @@ acquisition.
   identities, Watson's expansion, relations, integrals and generalizations. 70 admissions;
   all of 20.2, the zero set, 20.5.E1–E4, 20.7.E26–E33 and the modular properties of k² are proved.
   `th20_carlsonRF` was a local real R_F placeholder; the Chapter 19 acquisition replaced it
-  by `DLMF.EllipticIntegrals.symEllIntRF` the same day.
+  by `DLMF.EllipticIntegrals.symmetricEllipticRF` the same day.
 - **Chapter 21** (37 IDs): Riemann theta on any `Fintype` index with the Siegel condition,
   characteristics, absolute and locally uniform convergence and analyticity (proved),
   quasi-periodicity (all proved), modular transformations, Riemann's identity and the
   addition and four-product formulas (proved). 10 admissions. No upstream Siegel space exists.
 - **Chapter 22** (235 numbered IDs and 9 exact tables): all twelve Jacobi functions in a
-  lattice form `jacobiPQTau` (theta quotients, identities proved, including all of
-  Table 22.4.3) and a modulus form `jacobiPQk` using the principal complex K(k), K′(k) on
+  lattice form `jacobiPQOfTau` (theta quotients, identities proved, including all of
+  Table 22.4.3) and a modulus form `jacobiPQ` using the principal complex K(k), K′(k) on
   `jacobiModulusDomain` (Re k > 0, k ∉ [1,∞)). The modulus form rests on two admitted
-  foundations, `jacobiTauk_im_pos` and the inversion theorem `jacobi_inversion_k` (22.2.2);
+  foundations, `jacobiTau_im_pos` and the inversion theorem `jacobi_inversion_k` (22.2.2);
   51 proved results and 67 compiled dependencies inherit them. Real bridges to
-  `Real.jacobiSnm/Cnm/Dnm` are admitted. 215 admissions. Existing real Ch. 22 tags were
-  corrected: `Real.hasDerivAt_jacobiSnm/Cnm/Dnm` are Table 22.13.1 entries, not 22.13.E1–E3.
+  `Real.jacobiSnOfParameter/Cnm/Dnm` are admitted. 215 admissions. Existing real Ch. 22 tags were
+  corrected: `Real.hasDerivAt_jacobiSnOfParameter/Cnm/Dnm` are Table 22.13.1 entries, not 22.13.E1–E3.
 - **Chapter 23** (150 IDs, four by Mathlib pointers only): DLMF half periods (ω1, ω3)
   bridged to Mathlib's `PeriodPair`; Weierstrass ζ and σ, e_j, η_j, invariants, special
   lattices, relations to theta and Jacobi functions, series, addition theorems, integrals,
@@ -8056,7 +8056,7 @@ dump (5,074 entries, 395 upstream pointers, no nonstandard axiom) regenerates al
 
 ### Next steps
 
-The two Chapter 22 foundations (`jacobiTauk_im_pos`, `jacobi_inversion_k`) and Chapter 23's
+The two Chapter 22 foundations (`jacobiTau_im_pos`, `jacobi_inversion_k`) and Chapter 23's
 `e_distinct` and 23.3.E12 unlock the most downstream results. Theta-quotient identities in
 the lattice form are routine and plentiful. Chapter 19 (Carlson R_F etc.) would replace the
 Chapter 20 placeholder.
@@ -8068,10 +8068,10 @@ Chapter 20 placeholder.
 Five agents (parts A–E, exclusive files) acquired DLMF Chapter 19 (version 1.2.8) into the
 new area `DLMF/EllipticIntegrals` (26 modules, umbrella `DLMF.EllipticIntegrals`, imported by
 `DLMF.lean`); ledger DLMF19Acquisition.md. Part A: Legendre's integrals for complex φ and k
-along the straight path (`incEllIntFk/Ek/Dk/Pik`, complete and complementary integrals,
+along the straight path (`incompleteEllipticF/Ek/Dk/Pik`, complete and complementary integrals,
 Bulirsch's cel/el1–el3, Cauchy principal values), §§19.2, 19.4–19.8. Part B: §§19.9–19.14
 (inequalities, addition, asymptotics, reduction; 19.9.E10 excluded as numerical). Part C:
-Carlson's symmetric integrals `symEllIntRF/RJ/RG/RD/R` and the integrand `symEllIntS`, defined
+Carlson's symmetric integrals `symmetricEllipticRF/RJ/RG/RD/R` and the integrand `carlsonRootProduct`, defined
 through or bridged to lean-codes' proved `Carlson.carlsonR`, `carlsonRF`, `carlsonRG`,
 `carlsonRC` (the R_G bridge 19.16.E17 is admitted); §§19.16, 19.18–19.22. Part D:
 §§19.23–19.26. Part E: §§19.27–19.29. Excluded: 19.3, 19.17 (graphics), 19.30–19.35
@@ -8080,9 +8080,9 @@ through or bridged to lean-codes' proved `Carlson.carlsonR`, `carlsonRF`, `carls
 
 Totals: 426 tagged IDs on 528 declarations (66 definitions, 163 proved, 299 depending on
 admissions); 281 direct admissions. The Chapter 20 placeholder `th20_carlsonRF` was replaced by
-`symEllIntRF`, with two new admitted 20.9.E3 forms. Integration fixed one collision: parts A and
-D both declared `hasDerivAt_incEllIntFk/Ek`; part D's R_D forms (19.25.E6, E12) are now
-`hasDerivAt_incEllIntFk_symEllIntRD`, `hasDerivAt_incEllIntEk_symEllIntRD`.
+`symmetricEllipticRF`, with two new admitted 20.9.E3 forms. Integration fixed one collision: parts A and
+D both declared `hasDerivAt_incompleteEllipticF/Ek`; part D's R_D forms (19.25.E6, E12) are now
+`hasDerivAt_incompleteEllipticF_symmetricEllipticRD`, `hasDerivAt_incompleteEllipticE_symmetricEllipticRD`.
 
 ### DLMF errata
 
@@ -8095,16 +8095,16 @@ x + y ≤ π/2 (sufficient). Corrected after verification:
 
 - 19.20.E3/E23: the acquisition's description "off by a factor −i for complex arguments" was
   wrong; the formulas hold for Re x, Re y > 0 and fail elsewhere in the 19.16(i) domain. Added
-  the admitted complex forms `symEllIntRF_lemniscatic_complex`, `symEllIntRD_lemniscatic_complex`.
+  the admitted complex forms `symmetricEllipticRF_lemniscatic_complex`, `symmetricEllipticRD_lemniscatic_complex`.
 - 19.26.E27: the acquired statement (with Re x > 0) was false at x = 1, θ = 2, where the left
   side is a principal value. The hypothesis x² − θ ∈ ℂ \ (−∞, 0] was added
-  (`symEllIntRC_duplication_theta`; no failure at 3000 random points).
+  (`symmetricEllipticRC_duplication_theta`; no failure at 3000 random points).
 - §19.25(i): DLMF's range is already the complex strip 0 ≤ Re φ ≤ π/2; the failure is for φ and
   k² both nonreal. The Lean statements are for real φ, as before.
 
 Earlier the same day the errata found in Chapters 4 and 20–23 were corrected in docstrings and
 statements ("Corrected from the printed DLMF formula: …"), with two new admitted full-domain
-forms (`jacobiTheta_reduction_iq_eta`, 20.7.E34; `compEllIntKk_eq_jacobiThetaThreeNullTau_fundamental`,
+forms (`jacobiTheta_reduction_iq_eta`, 20.7.E34; `completeEllipticK_eq_jacobiThetaThreeNullTau_fundamental`,
 20.9.E2), and the false `hasSum_arctanh`, `hasSum_arctanh_large` (4.38.E5/E6) were corrected to
 the open domains and proved, with natural-order `tendsto_arctanh_series`,
 `tendsto_arctanh_large_series` for the DLMF domains. The project-wide register the errata report (reports/DLMFErrata.tex)
@@ -8134,7 +8134,7 @@ entries, 397 upstream pointers) regenerates all ledgers.
 
 ### Next steps
 
-Replace the inline Appell F₁ of 19.5.E4 by `DLMF.Hypergeometric.appF1` now that the import
+Replace the inline Appell F₁ of 19.5.E4 by `DLMF.Hypergeometric.appellF1` now that the import
 clash is gone. Prove the domain extensions of the Carlson bridges (one zero argument, limits on
 the cut), on which many §§19.20–19.25 statements rest.
 
@@ -8144,7 +8144,7 @@ Five agents with disjoint files worked from the committed state (commit 81e21fe)
 (`DLMF/JacobiElliptic`, `Theta/Relations.lean`), p23 (`DLMF/Weierstrass`), p19s (the
 `Symmetric*` files of `DLMF/EllipticIntegrals`), p19l (the Legendre-side files) and p20 (the other
 `DLMF/Theta` files and `DLMF/RiemannTheta`). Priorities came from a dependency count: four admissions
-blocked most of the others (`jacobiTauk_im_pos` 52 dependents, `jacobi_inversion_k` 42,
+blocked most of the others (`jacobiTau_im_pos` 52 dependents, `jacobi_inversion_k` 42,
 `HalfPeriods.e_distinct` 10, the R_G bridge 6); everything else was a leaf.
 
 Source admissions in the five areas fell from 703 to 334 (EllipticIntegrals 281 → 187, Theta
@@ -8168,7 +8168,7 @@ Source admissions in the five areas fell from 703 to 334 (EllipticIntegrals 281 
   the identity theorem and substitutions; 19.8.6, 19.8.11–12; the R_G bridge 19.16.17; most of the
   19.25 Legendre–Carlson bridges for complex k; 19.21 connection formulas; the lemniscate constants
   19.20.2, 19.20.22; 19.18.12, 14, 16; 19.19.2–3; 19.22.2–3, 9–10; 19.26.11. New fully proved
-  infrastructure: complex homogeneity of `symEllIntR` (`p19sR1_symEllIntR_mul`, in
+  infrastructure: complex homogeneity of `symmetricEllipticR` (`p19sR1_symEllIntR_mul`, in
   `SymmetricSeries`) and the modules `P19sR1Bounds`, `P19sR1Connection`, `P19sR1Legendre`.
 - **Chapter 20.** 20.7.1–24 and 20.7.34 (all forms), the products 20.5.5–8 and log-derivative
   series 20.5.10–13, Jacobi's derivative formula and 20.4.8–12, 20.10.1–2, and the §20.6 lattice
@@ -8236,7 +8236,7 @@ Reuse: Mathlib's `bernoulli`, `Polynomial.bernoulli`, `riemannZeta`, `completedR
 `Nat.Partition`, `Equiv.Perm`, `ArithmeticFunction`, Chebyshev ψ/θ, `legendreSym`, `jacobiSym`,
 `ModularForm.eta`; the project's `eulerNumber`, `Polynomial.euler`, `polylogSeries`, Dilog,
 `dirichletEta`, `catalanConstant`, `partitionFunction`, `qPochhammerInf`, `qBinom`,
-`DLMF.Confluent.hurwitzZetaComplex`, `dedekindSum` and `logIntLi`. New definitions include
+`DLMF.Confluent.hurwitzZetaComplex`, `dedekindSum` and `logIntegralLi`. New definitions include
 complex Bₙ(x), Eₙ(x) wrappers, periodic B̃ₙ, Nörlund polynomials, Bernoulli numbers of the second
 kind, degenerate and character Bernoulli numbers, Genocchi, tangent and Lucas numbers, Stieltjes
 constants, Riemann ξ, Riemann–Siegel θ and Z, N(T), general-order Li_s(z) and Lerch's Φ (their
@@ -8408,7 +8408,7 @@ Both corrections rest on proved counterexamples; recorded in the errata report (
   `r24b_tendsto_eulerRealZero_odd_counterexample` is proved. Numerical evidence was recomputed
   independently by the coordinator (n = 21, 41, 61).
 - 25.11.10 `hasSum_hurwitzZetaComplex_taylor` (formalization note, (c)): at s = 0, −1, −2, … the
-  term with n + s = 1 is DLMF's limit, while Lean's `poch s n · ζ(1)` is 0; hypothesis
+  term with n + s = 1 is DLMF's limit, while Lean's `pochhammer s n · ζ(1)` is 0; hypothesis
   s ≠ 0, −1, −2, … added (counterexample at s = 0, a = 1/2 proved). Still admitted.
 
 ### Integration
@@ -8510,7 +8510,7 @@ multiplicativity of the discriminant's coefficients; with bridges these would se
 TauCeti modules in the build (decision pending). Otherwise: 25.6.12 (ζ''(0), now unblocked by
 25.2.4), 25.11.10 (holomorphy of the double series), 25.11.20, 25.11.28, 25.11.42; Narayana 26.6.8 and
 the path counts of §26.6(i); plane-partition symmetry classes 26.12.5–17; q-multinomial counts
-26.16.2–3; 27.11.9 and 27.11.11 (elementary L(1, χ) estimates); Jacobi's cube identity as a formal series
+26.16.2–3; 27.11.9 and 27.11.11 (elementary L(1, χ) estimates); Jacobi's unitCube identity as a formal series
 (toward the Ramanujan congruences); real characters as Jacobi symbols. The 24.10 congruences need a
 p-integrality toolkit (Adams' theorem) that Mathlib lacks.
 
@@ -9116,7 +9116,7 @@ moves, so the moves do not preserve several copies of the same foundation.
   The latter file already documents the copying. Extract the finite-sum dominated-limit
   lemma into general series infrastructure instead of retaining two 19-line proofs.
 - **Copies within one area or file:**
-  `incEllIntPik_special_k'` and `incEllIntPik_special_k` in
+  `incompleteEllipticPi_special_k'` and `incompleteEllipticPi_special_k` in
   [EllipticIntegrals/SpecialCases](DLMF/EllipticIntegrals/SpecialCases.lean), lines 332
   and 635, have identical statements and 20-line bodies. Keep the documented DLMF theorem
   and update callers of the undocumented prime version. The Jacobi identities
@@ -9252,7 +9252,7 @@ arbitrary 60-line cuts would add little value.
   visible; several algebraic steps already require a locally raised recursion bound.
 - **Integral proofs:**
   [IncompleteGamma/ExponentialIntegral](DLMF/IncompleteGamma/ExponentialIntegral.lean),
-  line 1168, has a 159-line `genExpIntE_product_integral`. The choice of auxiliary
+  line 1168, has a 159-line `expIntegralE_product_integral`. The choice of auxiliary
   exponents, double-integral integrability, Fubini calculation and final real/complex
   bridge are reusable units. Similar local domination and remainder-bound blocks account
   for much of the longer Airy, Struve and error-function proofs.
@@ -9303,7 +9303,7 @@ The [Mathlib naming guide](https://leanprover-community.github.io/contribute/nam
 uses `UpperCamelCase` for propositions/types and file names, `lowerCamelCase` for data
 definitions, and `snake_case` for proofs, with existing mathematical names retained
 inside theorem names. Most central names such as `kummerM`, `besselY` and
-`regularizedGaussHG` fit this scheme. The largest naming problem is the helper API.
+`regularizedGaussHypergeometric` fit this scheme. The largest naming problem is the helper API.
 
 - The scan finds 4,400 non-private declarations with work-round prefixes such as `p22R1_`,
   `q27_` and `s26a_` under its recorded prefix pattern. Many are implementation lemmas
@@ -9313,8 +9313,8 @@ inside theorem names. Most central names such as `kummerM`, `besselY` and
 - Predicates such as `genDenRegular`, `genTerminates`, `genSeriesConvergesTo` and
   `genSeriesAbsolutelyConverges` in
   [GeneralizedHypergeometric/Basic](DLMF/GeneralizedHypergeometric/Basic.lean), lines
-  53–70, should use proposition-style capitalization, for example `GenDenRegular`,
-  `GenTerminates` and `HasGenSeriesSum`, after choosing clear mathematical terminology.
+  53–70, should use proposition-style capitalization, for example `LowerParametersRegular`,
+  `IsTerminating` and `HasGenSeriesSum`, after choosing clear mathematical terminology.
   `qDenominatorRegular`, `qBalanced` and `qWellPoised` have the same issue in
   `QHypergeometric/Basic.lean`. Likewise, `kzt_IsSol`, `lzt_IsSol` and `airySq_IsProdSol`
   combine an implementation prefix with a predicate name instead of exposing an ODE API.
@@ -9375,7 +9375,7 @@ including why it is needed, rather than only restating its type.
 
 Docstring presence is not the same as adequate documentation. Examples such as
 `/-- pcfUTerm. -/`, `/-- pcfLogWedge. -/` and
-`/-- normIncGammaPContinued eq. -/` give little help beyond the declaration name.
+`/-- regularizedGamma eq. -/` give little help beyond the declaration name.
 Replace these with the coefficient formula's role and normalization, the logarithmic
 sector's geometry, or the domain on which the two normalizations agree. Function and
 continuation definitions deserve explicit branch conventions and exceptional values;
@@ -9625,7 +9625,7 @@ real cut. Two Leibniz statements now assume existence of the partial derivative,
 lemma assumes holomorphy of each comparison function. These additional hypotheses are
 explained at the declarations and in [the errata report](reports/DLMFErrata.tex).
 
-The corrected `symEllIntR_half_hasSum_mean` has a proof from the existing Taylor expansion
+The corrected `symmetricEllipticR_half_hasSum_mean` has a proof from the existing Taylor expansion
 and homogeneity theorem. Its nonempty-index condition follows from the nonzero mean.
 The shifted theta radii now have nonnegativity, pointwise upper-bound and positivity lemmas.
 The order-zero Cesàro mean is identified with the ordinary partial sum by a proved simp lemma.
@@ -9638,7 +9638,7 @@ simplifications derive continuity for entire primitives, absolute convergence of
 monomial series from its `HasSum` assumption, positivity of the mean's index count, and the
 modulus instance for a Dirichlet-character conjugation wrapper. The two Wigner
 `AtLeastTwo` numeral guards are retained, and the other audit candidates still require
-caller or API review. The Jacobi value at one is now `jacobiPolyP_one`, without an
+caller or API review. The Jacobi value at one is now `jacobiPolynomialP_one`, without an
 unnecessary positivity restriction on its first parameter.
 
 All 76 lowercase predicate definitions identified by the review have been migrated to
@@ -9786,7 +9786,7 @@ The follow-up work requested after [the status review](reports/MathlibReview.tex
 - Binder cleanup. Explicit arguments that every caller can infer from a hypothesis or the goal
   are made implicit, and unused binders are removed, iterated to a fixpoint: two passes with
   141 edits and five further iterations with 77 edits, after which no candidate remains. Seven
-  explicit binders are kept on purpose: the Wigner `factQ`/`invFactQ` `ofNat` lemmas, the four
+  explicit binders are kept on purpose: the Wigner `ratFactorial`/`ratInvFactorial` `ofNat` lemmas, the four
   Mathieu `hasDerivAt_{zero,one}_in_{t,z}` lemmas and `abs_two_mul_cos_two_mul_le_add_one`,
   where the argument is used for rewriting or `simp` instantiation.
 - API generality. `PowerSeries.HasSumAt` is generalized from `ℂ` to an `R`-algebra `A`; the
@@ -9821,7 +9821,7 @@ Declarations, files, tactic macros and section labels named after development ro
   module docstrings and catalogue links updated.
 - Six primed duplicates of declarations available elsewhere are deleted and redirected.
   Left for review: 22 public primed wrapper/proof pairs (mostly Mathieu `BesselSeries`,
-  `Connection` and `Integrals` forwarding to proof files), `strictMono_jacobiAmm'`, and some
+  `Connection` and `Integrals` forwarding to proof files), `strictMono_jacobiAmOfParameter'`, and some
   private primed duplicates. Area prefixes such as `airyDer_`, `kzt_` and `legFS_` are not
   round names and are kept.
 
@@ -9865,7 +9865,7 @@ Imports:
 
 - `DLMF/Core/Framework.lean` is renamed `DLMF/Core/Basic.lean`; no declaration changes, and its
   36 importers are updated. It is now part of the foundational layer.
-- `symEllIntR` (DLMF 19.16.8), the only definition in a Basic file built on lean-codes
+- `symmetricEllipticR` (DLMF 19.16.8), the only definition in a Basic file built on lean-codes
   (Carlson's `R`-function), moves unchanged to `DLMF/EllipticIntegrals/Symmetric.lean`, and
   `EllipticIntegrals/Basic/Symmetric.lean` imports Mathlib only. The import closure of
   `DLMF.Basic` dropped 183 lean-codes modules and now contains none.
@@ -9929,14 +9929,14 @@ Left for review:
 
 - Overlapping definitions: three polylogarithms (`Polylog.polylogSeries`, `Zeta.polylog`,
   `Polylog.Real.dilog`); two `kleinJ` (`ModularForm.kleinJ` in `DLMFMathlib`,
-  `Weierstrass.kleinJ`); `compEllIntKk` in JacobiElliptic beside its siblings in
+  `Weierstrass.kleinJ`); `completeEllipticK` in JacobiElliptic beside its siblings in
   EllipticIntegrals; spherical harmonics in `SphericalHarmonics.Basic` and
-  `Legendre.Basic.Harmonics`; `jacobiPolyP` and the matrix-argument `jacobiP`;
+  `Legendre.Basic.Harmonics`; `jacobiPolynomialP` and the matrix-argument `matrixJacobiP`;
   `arctanCutPlane` and `arcsinhDomain`; `hurwitzZetaComplex` still in namespace `DLMF.Confluent`.
 - Duplicate lemmas: private copies of general power-series, continuity and Gamma/Pochhammer
   helpers (`besselBasic_*`, `airyBasic_*`) that should move to `DLMFMathlib`;
   `airyRot_neg_connection_*` and `airyDer_*_ofReal_im` duplicating the new Basic Airy results; `half_ne_neg_nat`,
-  `three_half_ne_neg_nat`, `poch_succ_left`, `Gamma_one_half_eq_sqrt` in several areas.
+  `three_half_ne_neg_nat`, `pochhammer_succ_left`, `Gamma_one_half_eq_sqrt` in several areas.
 - Not moved because the proofs are deep or admitted: the Lambert `W` definitions (admitted
   existence), the Laguerre, Jacobi and Gegenbauer recurrences, the Legendre and Kummer
   Wronskians, the Struve §11.2 series, the incomplete gamma §8.2 results, θ zeros (triple
@@ -9986,12 +9986,12 @@ These follow the overlap list above; the renames and removals are rows of
 
 These are rows of `reports/RenameMap20261101.tsv` as well.
 
-- `compEllIntKk` and `compEllIntKpk` (complete integrals as functions of the modulus `k`) moved
+- `completeEllipticK` and `completeEllipticKPrime` (complete integrals as functions of the modulus `k`) moved
   from `DLMF.JacobiElliptic` to the new foundational file `DLMF.EllipticIntegrals.Basic.Complete`
   in namespace `DLMF.EllipticIntegrals`. `EllipticIntegrals.Basic.Legendre` still uses
-  `jacobiComodulusk`, so EllipticIntegrals ↔ JacobiElliptic is a new two-way area pair.
-- Not duplicates, now cross-referenced in docstrings: `MatrixArgument.jacobiP` and
-  `OrthogonalPolynomials.jacobiPolyP`; the spherical harmonics of `SphericalHarmonics.Basic`
+  `jacobiComodulus`, so EllipticIntegrals ↔ JacobiElliptic is a new two-way area pair.
+- Not duplicates, now cross-referenced in docstrings: `MatrixArgument.matrixJacobiP` and
+  `OrthogonalPolynomials.jacobiPolynomialP`; the spherical harmonics of `SphericalHarmonics.Basic`
   and `Legendre.sphericalHarmonic`. `arcsinhDomain = arctanCutPlane` is the new theorem
   `arcsinhDomain_eq_arctanCutPlane` (`rfl`).
 - General helpers moved to `DLMFMathlib`: power-series lemmas
@@ -10006,14 +10006,14 @@ These are rows of `reports/RenameMap20261101.tsv` as well.
 - `DLMFMathlib.Analysis.SpecialFunctions.Gamma.Values` no longer imports
   `DLMFMathlib.Analysis.Complex.BarnesResidue`, which depends on lean-codes; `analyticAt_Gamma`
   proves its open-set step directly. Basic files may now import `Values`.
-- `Gamma_add_nat_eq_poch_mul_Gamma` (from `DLMF.Gamma`) and `poch_ne_zero_of_re_pos` (from
+- `Gamma_add_nat_eq_pochhammer_mul_Gamma` (from `DLMF.Gamma`) and `pochhammer_ne_zero_of_re_pos` (from
   `DLMF.OrthogonalPolynomials`) moved to `DLMF.Hypergeometric.Basic.Pochhammer`.
 - Removed duplicates: `Gamma.poch_succ_left`, `Gamma.poch_succ_left'`, the `half_ne_neg_nat`
   family (four copies), `Confluent.Gamma_one_half_eq_sqrt`, `airyRot_neg_connection_ai/bi`,
   `airyDer_ai/biDeriv_ofReal_im`, the private copy of `jacobiThetaOneTau_zero` in
   `Theta.Identities` (the public one moved to `Elliptic.Basic.ThetaPeriodicity`), the
   `Lame`/`JacobiElliptic` continuity lemmas for real `sn`, `cn`, `dn` (now
-  `Real.continuous_jacobiSnm`, `…Cnm`, `…Dnm` and `Real.jacobiSnm_zero` in
+  `Real.continuous_jacobiSnOfParameter`, `…Cnm`, `…Dnm` and `Real.jacobiSnOfParameter_zero` in
   `Elliptic.Basic.Jacobi`), and the wrapper `OrthogonalPolynomials.deriv_kummerM_regular` of
   `Confluent.deriv_kummerM` (DLMF 13.3.15).
 
@@ -10043,7 +10043,7 @@ changed except 33.6.5 below; all new theorems use only the standard axioms.
   split unchanged from `Properties.lean`.
 - QHypergeometric 85 → 81, QSeries 1 → 0: Ramanujan's 1ψ1 sum (new `QSeries/RamanujanPsi.lean`,
   Ismail's proof), 17.8.2, 17.13.3–4. GeneralizedHypergeometric unchanged: the cut-plane continuation
-  `genPrincipalContinuation_exists` is the main blocker (estimated 2,000 lines).
+  `principalContinuation_exists` is the main blocker (estimated 2,000 lines).
 - Coulomb 49 → 42: 33.14.7, 33.14.15 (hydrogen orthonormality), 33.16.2, 33.16.5, 33.16.7.
   Wigner and matrix argument unchanged (blockers: Whipple 4F3, Zeilberger certificates, 35.4.6).
 - Weierstrass 35 → 27: 23.12.1–4, 23.6.27–29, §23.5(ii) `IsRectangular.e_two_g₃`.
@@ -10051,7 +10051,7 @@ changed except 33.6.5 below; all new theorems use only the standard axioms.
   `NumberTheory/RamanujanCongruences.lean`), 26.10.8 via Gauss's identity (new
   `Combinatorics/PartitionIdentities/GaussIdentity.lean`), 26.9.10, 26.14.4.
 - Spheroidal 33 → 31, Lamé 41 → 40: 30.5.1 (with a stronger form), 30.11.3, §29.6(i)
-  `lameEck_even_fourierA_eq_zero` (moved unchanged to `Lame/Polynomials/Series.lean`).
+  `lameEc_even_fourierA_eq_zero` (moved unchanged to `Lame/Polynomials/Series.lean`).
 
 Statement correction (user decision): `hasSum_coulombHPlus_log` and `hasSum_coulombHMinus_log`
 (33.6.5) gained the hypothesis `η ≠ 0`; at `η = 0` Lean's right-hand side is `0` while the series is
@@ -10087,7 +10087,7 @@ foundational layer (its construction is now Mathlib-only); the pfq continuation.
 Ten agents with disjoint directories. Source admissions: 1,409 → 1,336. No statement was changed;
 all new theorems use only the standard axioms.
 
-- GeneralizedHypergeometric 93 → 86: `genPrincipalContinuation_exists` proved (new
+- GeneralizedHypergeometric 93 → 86: `principalContinuation_exists` proved (new
   `GeneralizedHypergeometric/Basic/PrincipalContinuationExistence.lean`: induction on `q` through Euler's
   integral 16.5.2, contiguous relations for the other parameters, values on the cut by a rectangle
   contour shift), with 16.8.3 and 16.8.5 (stronger forms without the lower-parameter hypothesis),
@@ -10133,8 +10133,8 @@ existence can move to the foundational layer depends on the imports of the new f
 - The existence and analyticity of the principal continuation of `q+1Fq` for all complex
   parameters are now foundational:
   `DLMF.GeneralizedHypergeometric.Basic.PrincipalContinuationExistence` holds
-  `genPrincipalContinuation_exists`, `genRegularizedHG_eq_original` and
-  `analyticOnNhd_genRegularizedHG` (moved unchanged from the deleted
+  `principalContinuation_exists`, `regularizedGeneralizedHypergeometric_eq_original` and
+  `analyticOnNhd_regularizedGeneralizedHypergeometric` (moved unchanged from the deleted
   `ParameterAndSeriesProperties`). Its supporting modules moved with it:
   `DLMF.Hypergeometric.{SeriesProperties, Series, Generalized, GeneralizedCalculus,
   GeneralizedIntegral}` became `DLMF.Hypergeometric.Basic.{SpecialValues, RealPochhammer,
@@ -10151,7 +10151,7 @@ existence can move to the foundational layer depends on the imports of the new f
   keep their names). All renames are rows of `reports/RenameMap20261101.tsv`.
 - New bridges: `DLMF.Bessel.re_besselI_ofReal` and `besselI_ofReal` to TauCeti's
   `Real.besselI` (foundational, `DLMF/Bessel/Basic/RealModified.lean`), and
-  `Real.logIntLi_eq_logIntLi_two_add_logIntegral` to `TauCeti.Real.logIntegral` (theorem
+  `Real.logIntegralLi_eq_logIntegralLi_two_add_logIntegral` to `TauCeti.Real.logIntegral` (theorem
   layer, `DLMF/ExpIntegrals/AnalyticProperties.lean`; a foundational proof needs the
   derivative of `li` from foundational imports).
 - Full build green (15,304 jobs); tag dump unchanged (10,744 entries, no item lost).
@@ -10183,7 +10183,7 @@ after the `xPlusDistrib` correction). Apart from the two approved corrections ab
 was changed; all new theorems use only the standard axioms. Unused hypotheses were removed in
 primed stronger forms (`arctan_general_integral'`, `arctanh_path_values'` and others below).
 
-- ParabolicCylinder 19 → 18: `pcfU_chebyshev_infinite` (§12.20), with the new
+- ParabolicCylinder 19 → 18: `parabolicCylinderU_chebyshev_infinite` (§12.20), with the new
   `DLMFMathlib/Analysis/SpecialFunctions/ChebyshevSeriesDecay.lean`.
 - Mathieu 139 → 137: `infinite_hillDiscriminant_eq` (§28.29(iii)) and
   `charExp_set_infinite_discrete` (§28.2(v)), with the new
@@ -10310,7 +10310,7 @@ all new theorems use only the standard axioms.
 - GeneralizedHypergeometric 80 → 73: the Fields–Wimp expansion 16.10.1 and the Euler integral
   16.5.2 (both with primed forms), 16.15.3 and the conditional convergence of `ₚFₚ₋₁` at unit
   argument (new `GeneralizedHypergeometric/Appell/TriangleDirichlet.lean`).
-- EllipticIntegrals 125 → 120: 19.5.4, 19.6.15, 19.9.1 (with `tendsto_compEllIntKk_sub_log`),
+- EllipticIntegrals 125 → 120: 19.5.4, 19.6.15, 19.9.1 (with `tendsto_completeEllipticK_sub_log`),
   19.24.1 and 19.11.6.
 - QHypergeometric 66 → 61: 17.6.10, the very-well-poised sums 17.7.15 and 17.7.7, the bilateral
   `₃ψ₃` sum 17.8.5 and its continuation (new `QHypergeometric/VeryWellPoisedSums.lean`).
@@ -10357,7 +10357,7 @@ Approved by the user after the fourth proof round.
   fraction equals `q c^ν_2/c^ν_0`; normality along the segment only makes `c^ν_0` continuous with
   value `1` at `q = 0`, so at a normal `q` with `c^ν_0(q) = 0` the approximants diverge. With the
   hypothesis the theorem is proved, from Pincherle's theorem
-  `tendsto_mathieuCFTail_of_tendsto_zero` applied to `(c^ν_{2k})_{k ≥ 0}` and `(c^ν_{-2k})_{k ≥ 0}`
+  `tendsto_mathieuContinuedFractionTail_of_tendsto_zero` applied to `(c^ν_{2k})_{k ≥ 0}` and `(c^ν_{-2k})_{k ≥ 0}`
   and the recurrence 28.14.4 at `m = 0`.
 - 2.4.9 `haar_isLittleO_pow` and 28.12.7 `integral_mathieuMe_orthogonal` were reviewed and are
   believed true as stated. For 2.4.9 the boundary terms of the integration by parts vanish because
@@ -10486,10 +10486,10 @@ in sub-namespaces whose last name component is that of a theorem of the enclosin
   docstring and `@[dlmf]` tag, now sits where the helper was and carries the helper's proof; the
   second copy is gone. This concerns `genSinInt_complement`, `genCosInt_complement`,
   `genSinInt_value_at_infinity`, `genCosInt_value_at_infinity`,
-  `gamma_rotated_oscillatory_integral`, `genExpIntE_nat_digamma_series`, `genExpIntE_nat_laplace`,
-  `genExpIntE_parameter_derivatives`, `gammaUniformC_first`, `gammaUniformEta_derivative`,
+  `gamma_rotated_oscillatory_integral`, `expIntegralE_nat_digamma_series`, `expIntegralE_nat_laplace`,
+  `expIntegralE_parameter_derivatives`, `gammaUniformC_first`, `gammaUniformEta_derivative`,
   `gammaUniformEta_normalization` (same file), `expIntE1_digamma_series` (to
-  `IncompleteGamma/ExponentialIntegral.lean`), `lowerIncGamma_bound_ge/le` (to
+  `IncompleteGamma/ExponentialIntegral.lean`), `lowerIncompleteGamma_bound_ge/le` (to
   `IncompleteGamma/RealIntegrals.lean`), `associatedP_addition` (to `Legendre/AdditionTools.lean`),
   `associatedP_complex_addition` (to `Legendre/QAdditionTools.lean`), `associatedP_cosh_integral`
   (to `Legendre/IntegralRepresentations/Exterior.lean`) and 4.38.9, 4.38.11
@@ -10499,7 +10499,7 @@ in sub-namespaces whose last name component is that of a theorem of the enclosin
 - `FerrersGreen.ferrersP_isFerrersSolution` and `FerrersGreen.ferrersQ_isFerrersSolution`, the
   case `μ = 0` of the area theorems, were removed in favour of `ferrersP_isFerrersSolution ν 0`.
 - Fifteen helpers with other statements were renamed after their content
-  (`FerrersGreen.ferrersP_zero_eq_regularizedGaussHG`, `GeneratingSeries.legendreP_one_left`,
+  (`FerrersGreen.ferrersP_zero_eq_regularizedGaussHypergeometric`, `GeneratingSeries.legendreP_one_left`,
   `GeneratingSeries.legendreP_nat_recurrence`, `ZeroClassification.norm_erfc_le_one_of_nonneg`,
   `SaffVarga.seriesCoeff` with `SaffVarga.seriesCoeffRatio`, …); the local definitions
   `HahnMoments.moment` and `PollaczekMoments.moment` became `fourGammaMoment` and
@@ -10513,3 +10513,311 @@ All changes are in `reports/RenameMap20261101.tsv`. The two-way import pair Elem
 IncompleteGamma (`Elementary.LogExpIntegrals` uses the continued-fraction tools of
 `IncompleteGamma.FractionTools`; `IncompleteGamma.SpecialValues` uses `LogExpIntegrals`) was
 accepted into `scripts/import_baseline.json`.
+
+## Correction of 28.4.22–28.4.23 (2026-11-03)
+
+With the user's approval, `mathieuFourierA_up_small_q`, `mathieuFourierB_up_small_q`,
+`mathieuFourierA_down_small_q` and `mathieuFourierB_down_small_q`
+(`Mathieu/SmallQFourierCoefficients.lean`) now require the identity
+`A^m_{m±2s}(q) = (c (q/4)^s + ε(q)) A^m_m(q)` only for `q` near `0` (`∀ᶠ q in 𝓝 0`) instead
+of for all real `q`. The global form was false at the real zeros of `A^m_m(q)` (for example
+`A^2_2(q) = 0` at `q ≈ 21.299` with `A^2_4 ≈ -0.683`); DLMF states the expansion for small `q`,
+so this was a translation error. The four theorems remain admitted.
+
+## Correction of 2.5.43 (2026-11-03)
+
+With the user's approval, the analyticity hypothesis `hHd` of `laplace_expansion_residues`
+(`AsymptoticApproximations/Mellin/SmallParameter.lean`) now concerns `Γ(1 - z)H(z)` instead of
+`Γ(1 - z)(𝓜h₁(z) + H(z))`, on the same strip `p ≤ ℜz ≤ l - δ` minus `P₂ ∪ P ∪ {1}`. The old
+form was false when `p < -c`: there Lean's `mellin (mellinTruncLow h)` diverges and is `0`, so
+`hHd` constrained only `Γ(1 - z)H(z)` on `p ≤ ℜz ≤ -c` and `H` could be chosen piecewise
+(counterexample `h(t) = t^{-1/2}`, `p = -1`, `l = 2`, `δ = 1/2`, `P₂ = {1/2, 1}`, `P = ∅`; at
+`ζ = 0.5` the two sides are 2.50663 and 2.04869). With the new form `H` is the continuation of
+`𝓜h₂` by the identity theorem, as DLMF intends, and `𝓜h₁` is analytic for `ℜz > -c`. The
+alternative hypothesis `-c < p` was rejected because it would force `-c < ℜβ₀`, which DLMF
+does not assume. The theorem remains admitted.
+
+## Hypotheses added to the Heun kernel examples (2026-11-03)
+
+With the user's approval, `heun_kernel_example₁_pde` (31.10.10) gained `γ, δ ∉ -ℕ` and
+`heun_kernel_example₂_pde` (31.10.11) gained `ε, α - β + 1 ∉ -ℕ` (`DLMF/Heun/Integral.lean`).
+At those parameters Mathlib's `ordinaryHypergeometric` truncates the series (`0⁻¹ = 0`), and
+the kernel equations fail numerically (residuals of order `10⁻²`, against `10⁻³²` for generic
+parameters; scripts `ex1.py`, `ex2b.py` of the sixth proof round). DLMF's kernels are the
+genuine hypergeometric functions, so this is a translation issue. Both theorems remain admitted.
+
+## Sixth project-wide proof round (2026-11-03)
+
+Eleven agents on disjoint directories reduced the admissions from 1,163 to 1,104; the tag dump
+moved 59 entries from admitted to proved and lost none. Build 15,420 jobs.
+
+- Mathieu 129 → 125: the four continuity statements of §28.9 for the zeros in `(0, π/2)`, with
+  the continuity of `a_n(q)` and `b_n(q)` (`continuous_mathieuA`, `continuous_mathieuB`; new
+  `Mathieu/SpectralContinuity.lean` and `DLMFMathlib/Analysis/ODE/SturmDeformationContinuity.lean`).
+- EllipticIntegrals 114 → 111: the ascending Landen transformation 19.8.16–17, 19.21.15 for both
+  signs of `p` and 19.20.9, with new principal-value infrastructure
+  (`DLMFMathlib/Analysis/Integral/PrincipalValueExcision.lean`,
+  `EllipticIntegrals/SymmetricPrincipalValue.lean`).
+- AlgebraicAnalytic 114 → 101: Abel and Cesàro means of Fourier series (§1.15(iii), 1.15.24–28),
+  1.15.38, 1.15.45, 1.15.46, 1.15.49–50 and the composition of fractional derivatives on powers
+  (new `DLMFMathlib/MeasureTheory/Integral/ApproximateIdentity.lean`); five stronger primed forms.
+- GeneralizedHypergeometric 69 → 68 and WignerSymbols 33 → 31: Whipple's terminating sum 16.4.8
+  by a WZ certificate, and 34.2.6 and 34.4.3 (new `ClearedTerminating.lean`,
+  `WhippleTerminating.lean`, `WignerSymbols/RacahPochhammer.lean`).
+- AsymptoticApproximations 67 → 64: §2.10(i) `powerSum_remainder_bound`, 2.7.i and 2.6.23.
+- QHypergeometric 53 → 48: the Rogers constant terms 17.14.2–5 and the quintuple product 17.8.3
+  (new `QHypergeometric/QuintupleProduct.lean`).
+- Lamé 36 → 24: the eight Fourier ratio limits of §29.6 and the continued-fraction equations of
+  §29.3 (moved unchanged to the new `Lame/FourierSeries/ContinuedFractions.lean`; new
+  `CoefficientRatios.lean` and `DLMFMathlib/Analysis/SpecificLimits/PoincarePerron.lean`).
+- Zeta 37 → 30: 25.11.20 (and a primed form), Apéry's series 25.6.9, 25.5.7 (and a primed form),
+  25.5.15, 25.5.16, 25.11.26, 25.11.28 (new `Zeta/Hurwitz/IteratedDerivatives.lean`; §25.11(xii)
+  moved to the new `Zeta/HurwitzAsymptotics.lean`).
+- JacobiElliptic 17 → 15, Theta 13 → 12, Weierstrass 12 → 11: 22.14.16–17 by Jensen's formula for
+  the theta product, the real form of 20.9.3 and §23.5(iv) `IsRhombic.roots` (new
+  `Theta/Products/LogNormIntegral.lean`).
+- Gamma 2 → 1, IncompleteGamma 35 → 34, ParabolicCylinder 18 → 17: 5.6.8 by the rotated Laplace
+  integral, 8.20.6 and 12.11.6.
+- Legendre 30 → 29 and OrthogonalPolynomials 21 → 20: 14.18.8 (`ferrersP_zonal_series`, new
+  `Legendre/ZonalSeries.lean`) and 18.33.14 (new `OrthogonalPolynomials/SzegoAskeyOrthogonality.lean`).
+
+Unchanged: CoalescingSaddles, Painlevé, Spheroidal, Heun, Coulomb, MatrixArgument, RiemannTheta,
+Combinatorics, NumberTheory, BernoulliEuler, Elementary, Airy and the remaining older areas.
+
+Integration: the duplicate definition `SzegoAskeyOrthogonality.poly` was removed and
+`szegoAskey` (18.33.13) moved unchanged from `UnitCircle.lean` into
+`SzegoAskeyOrthogonality.lean`, which `UnitCircle.lean` imports. The new
+`DLMFMathlib/Analysis/SpecificLimits/PoincarePerron.lean` states Pincherle's theorem for nested
+real fractions beside the `GenContFract` form in `Pincherle.lean`; the two are candidates for
+consolidation. `HurwitzIntegrals.lean` has private copies of two `periodicBernoulli` helpers of
+`Zeta/Riemann.lean`. The import survey reports no new two-way pair.
+
+Statement corrections approved during the round are recorded in the sections on 28.4.22–28.4.23,
+2.5.43 and the Heun kernel examples. Still suspected: 2.6.60
+`mellin_continuation_eq_mellin_remainder` (the domain `U` may wind around a logarithmic branch
+point; argument only) and the simple zeros of Scorer functions (no counterexample).
+
+Leads for the next round: the general change of parameter 19.21.12 (500–800 lines; unlocks
+19.20.13–14, 19.20.17, 19.7.8–10, 19.6.5, 19.25.4, 19.25.16); 19.20.12 (`p → +∞` routine);
+23.5.9 through the inverse of the modulus map; 14.15.23 (about 400 lines); 2.6.24 with a sharper
+dominator; 36.2.19; 5.13.5 from Wilson orthogonality 18.25.2; 17.13.1 together with the Fine and
+Heine expansions 17.6.9–16; 28.2.25 from 28.6.15; small-`q` normality for 28.14.10, 28.15.1, 28.15.3.
+
+
+## Seventh project-wide proof round (2026-11-03)
+
+Eleven agents on disjoint directories reduced the admissions from 1,104 to 1,058; the tag dump
+moved 47 entries from admitted to proved, lost none and gained five primed forms. Build 15,452
+jobs.
+
+- Mathieu 125 → 118: the corrected 28.4.22–23 (four theorems, with primed forms that also allow
+  `s = 0`), the interlacing 28.2.25 for both signs of `q` (moved unchanged to the new
+  `Mathieu/EigenvalueInterlacing.lean`) and 28.6.15 (`mathieuA_sub_mathieuB_small_q`).
+- EllipticIntegrals 111 → 106: 19.2.21, 19.23.4, 19.23.5, 19.16.12 and both limits of 19.20.12.
+- AlgebraicAnalytic 101 → 92: Table 1.14.5 rows 6, 11 and 12, Table 1.14.1 row 6, 1.15.48,
+  1.15.51, 1.15.52, 1.4.34 and Leibniz's rule 1.5.22 (new `Transforms/StieltjesPower.lean`; Table
+  1.14.5 moved unchanged to the new `Transforms/MellinTable.lean`).
+- WignerSymbols 31 → 28: the 3j recursions 34.3.14–15 and the 6j recursion 34.5.11–13 by
+  telescoping certificates (moved unchanged to the new `ThreeJRecursion.lean` and
+  `SixJRecursion.lean`). GeneralizedHypergeometric unchanged at 68.
+- AsymptoticApproximations 64 → 62: 2.6.24 and 2.8.9.
+- QHypergeometric 48 → 46: the bibasic sums 17.7.22 and 17.7.23 (new `BibasicBilateral.lean`).
+- Painlevé 42 → 40 and Heun 20 → 18: §32.11(i) `painleveI_not_global`, 32.15.3 through a Freud
+  orthogonal-polynomial development (new `Painleve/FreudWeight.lean`) and the Heun kernel
+  examples 31.10.10–11 (new `Heun/KernelExamples.lean` and
+  `DLMFMathlib/Analysis/Calculus/Deriv/MulComp.lean`).
+- Zeta 30 → 26: the loop integrals 25.5.20, 25.5.21 and 25.11.30 (new
+  `Zeta/HurwitzLoopIntegral.lean`, `DLMFMathlib/Analysis/Complex/KeyholeIntegral.lean`) and the
+  series form of 25.11.35 with a primed form.
+- Weierstrass 11 → 8: 23.17.5 (with 23.17.4 moved unchanged to the new `ModularExpansions.lean`),
+  23.5.9 (new `EquianharmonicModulus.lean`) and §23.5(ii) (new
+  `Theta/ImaginaryAxisMonotonicity.lean`).
+- IncompleteGamma 34 → 33 and ExpIntegrals 2 → 1: 8.17.22 (new `BetaContinuedFraction.lean`) and
+  6.12 `expIntegralEi_remainder_bound`.
+- Airy 33 → 30 and Legendre 29 → 27: the zero interlacing of `Gi` and `Gi'` (§9.12(ix)), 9.12.23,
+  14.15.1 and `cylinderEnvelopeCross_spec` (new `UniformCoordinates/CylinderCrossing.lean`).
+
+Unchanged: CoalescingSaddles, Lamé, Spheroidal, Combinatorics, NumberTheory, BernoulliEuler,
+Elementary, Coulomb, MatrixArgument, JacobiElliptic, Theta, RiemannTheta, OrthogonalPolynomials,
+Selberg and the remaining older areas.
+
+The import survey reports one new two-way pair, EllipticIntegrals ↔ Weierstrass
+(`EllipticIntegrals.SymmetricRelations → Weierstrass.EllipticFunctionsAndInvariants`,
+`Weierstrass.EquianharmonicModulus → EllipticIntegrals.Reduction`); it awaits acceptance.
+
+Findings that await a decision:
+- 2.6.60 `mellin_continuation_eq_mellin_remainder` is false: a proved Lean counterexample uses
+  `f(t) = (max(log t, 0))^{1/2}`, `U` the slit plane and `M(w) = Γ(3/2)(-i)w^{-3/2}`, which equals
+  `-𝓜f` at `z = -1/2 - i/2` because of the monodromy of `w^{-3/2}`.
+- 2.5.43 `laplace_expansion_residues` is still false after the correction of 2026-11-03: the
+  poles of `Γ(1 - z)𝓜h₁(z)` at `2, …, l - 1` need not lie in `P` (`h` the indicator of `(0, 1]`,
+  `l = 3`, `P = ∅`, `H = 0`: the sides differ by `ζ/2`). Proposed: require
+  `Γ(1 - z)(𝓜h₁(z) + H(z))` differentiable on `{1 < ℜz ≤ l - δ} \ P`.
+- `ContDiff ℝ ⊤` means analytic in current Mathlib. Hence `IsCompactTest` (§2.6) holds only for
+  `0`, `IsDeltaSequence` (1.17.3–4) quantifies over analytic test functions, the test functions of
+  33.14.13 `coulombEnergyS_orthogonality_dirac` vanish, and five hypotheses of
+  `AsymptoticApproximations/ODE/Parameter.lean` ask for analytic `ψ`. Proposed: `∞` in place of
+  `⊤`; the proved delta-sequence theorems use only continuity.
+- `scorerGi_simple_zeros` and `scorerHi_simple_zeros` assert simple zeros in all of `ℂ`, while
+  DLMF §9.12(ix) asserts it for real zeros (now proved:
+  `scorerGiDeriv_ne_zero_of_scorerGi_ofReal_eq_zero`); numerics show no counterexample.
+
+Leads for the next round: 19.21.12 (500–800 lines); the Hermite formula 25.11.29 with 25.5.11–12
+(about 450 lines, draft in the round's scratch); 17.8.4 by Ismail's method (about 500 lines);
+17.4.2 by Tannery's theorem; 27.8 by a CRT decomposition; Faà di Bruno 1.4.13 against
+`OrderedFinpartition`; complex slit-plane convergence for 8.9.2 and 8.19.17; Motzkin paths
+§26.6(i). The general Gram–Schmidt results in `Painleve/FreudWeight.lean` belong in
+`OrthogonalPolynomials`.
+
+## Corrections of 2.5.43, 2.6.60 and the smoothness classes (2026-11-04)
+
+Approved by the user after the seventh proof round.
+- 2.5.43 `laplace_expansion_residues` gained `hPd`: `Γ(1 - z)(𝓜h₁(z) + H(z))` is differentiable
+  on `{1 < ℜz ≤ l - δ} \ P`, so that `P` contains every pole in that strip, including the poles
+  of `Γ(1 - z)` at `2, …, l - 1`. Without it the statement failed for `h` the indicator of
+  `(0, 1]`, `l = 3`, `P = ∅`, `H = 0` (the sides differ by `ζ/2`).
+- 2.6.60 `mellin_continuation_eq_mellin_remainder` gained `hUc : Convex ℝ U`. On the slit plane
+  the continuation of `Γ(3/2)(-i)w^{-3/2}` is `-𝓜f` at `z = -1/2 - i/2` for
+  `f(t) = (max(log t, 0))^{1/2}` (a proved counterexample). With `U` convex, `U` meets the
+  half-strip on which `∫₀¹ f_n t^{z-1} dt + ∑ a_j/(z + j + α - 1) + ∫₁^∞ f t^{z-1} dt` is
+  analytic in a convex set containing both the convergence set `V` and `z`.
+- `ContDiff ℝ ⊤` denotes analyticity in current Mathlib. `IsCompactTest` (§2.6),
+  `IsDeltaSequence` (1.17.3–4), the test function of 33.14.13 `coulombEnergyS_orthogonality_dirac`
+  and the hypothesis `hψ` of the five theorems of 2.8 in `ODE/Parameter.lean` now use
+  `(⊤ : ℕ∞)` (smooth). The proved delta-sequence theorems use only continuity and are
+  unchanged.
+
+All rows are in `reports/RenameMap20261101.tsv`. Build 15,452 jobs.
+
+## Scorer tags and the equianharmonic module (2026-11-04)
+
+The eleven §9.12(ix) theorems of `Airy/Scorer/ExpansionsAndZeros.lean` now carry
+`@[dlmf 9.12.ix]`. DLMF states that all zeros of `Gi` and `Hi`, real or complex, are simple, so
+`scorerGi_simple_zeros` and `scorerHi_simple_zeros` are DLMF's statements (admitted); the real
+case for `Gi` is tagged as a special case.
+
+`EquianharmonicModulus.lean` (the singular modulus `k₃` and `∫₁^∞ dt/√(t³ - 1)`) moved unchanged
+from `Weierstrass/` to `EllipticIntegrals/`, namespace `DLMF.EllipticIntegrals`; three
+declaration rows and one module row are in the rename map. The two-way pair EllipticIntegrals ↔
+Weierstrass remains, because `Weierstrass.SpecialLattices` (23.5.9) needs `K` from Chapter 19
+while `EllipticIntegrals.SymmetricRelations` (§19.25(vi)) needs `℘`; the pair was accepted
+into `scripts/import_baseline.json` (22 pairs).
+
+## DLMF errata report restricted to DLMF errata (2026-11-04)
+
+`reports/DLMFErrata.tex` now holds only confirmed errata (a, 139 entries) and suspected errata
+and unstated conditions (b, 20 entries). Removed: the 30 fixed transcription defects of the
+project, the formalization notes that concern only Lean's conventions or the project's own
+statements (including the corrected 28.4.22–23 statements), DLMF's own published errata that
+the project follows (22.16.14, 23.18.7), the errors in AAR and Beals–Wong (recorded in the
+docstrings of `kummerM_kummer_transform`, `nearly_poised_3F2` and `DLMF/Painleve/Airy.lean`) and
+the two items checked and cleared (11.5.8, 11.11.16). Twenty former notes that point to a
+defect of DLMF itself moved to (b); 8.10.8, 14.12.4, 4.8.5 and 28.6.16 were rechecked against the
+DLMF page text. History text (correction dates, round references, former interfaces) was
+removed from the entries of (a); former "borderline" entries in (a) are marked "suspected".
+
+## TauCeti name-map decisions (2026-11-04)
+
+The six decisions of `reports/TauCetiNameMap.tex` §6 were adopted, with these refinements:
+the complex incomplete gamma and beta families mirror TauCeti's real names
+(`Complex.regularizedGamma` for `P`); `AlgebraicAnalytic.hermiteFunction` is replaced by
+TauCeti's function (equal up to the cast to `ℂ`); `dlmfResolventCubic` becomes
+`eulerResolventCubic`, because TauCeti's `resolventCubic` is the Ferrari cubic; the §33.14
+Coulomb functions become `coulombEnergyF/H/S/C`; theta functions keep spelled-out numbers, since
+Mathlib's `jacobiTheta₂` is θ₃(πz|τ); the suffix `Big` stays.
+The table has 732 rename proposals (370 definitions).
+
+## TauCeti renaming round (2026-11-04)
+
+The renames of `reports/TauCetiNameMap.tsv` were applied in both layers: 3,221 declarations,
+including the lemmas that follow a renamed definition, in 643 files (Lean sources, ledgers,
+`DEFINITIONS*.md` and reports). Every rename has a row in `reports/RenameMap20261101.tsv`. A
+fresh declaration scan finds no old name and every new name; the tag dump is unchanged
+(10,814 tags, 9,458 proved, 1,356 admitted), and the build is green.
+
+- Correction to the decisions above: `Statistical.Real.normIncBetaI` has complex parameters and a
+  real argument, so it is not TauCeti's `regularizedIncompleteBeta`; it was renamed
+  `Statistical.Real.regularizedIncompleteBeta` and receives a bridge on real positive parameters
+  instead of being replaced.
+- `AlgebraicAnalytic.hermiteFunction` was removed in favour of `TauCeti.hermiteFunction`; the
+  former `hermiteFunction_eq_ofReal` is the bridge `ofReal_hermiteFunction` (1.18.E42), and
+  `hermiteFunction_eigen` and `hermiteFunction_hilbertBasis` are stated with its cast to `ℂ`.
+- Real-variable forms moved into `DLMF.<Area>.Real` (Airy, the §2.10 sums, spheroidal); inside
+  such namespaces the shadowed complex names are written `Airy.airyAi`, and `open Real` after an
+  area namespace with a `Real` sub-namespace must be written `open _root_.Real`.
+- The longer names pushed three files past 1,500 lines. They were split along DLMF subsections:
+  `GeneralizedHypergeometric/UnitArgumentDougall` (Dougall's sums),
+  `Hypergeometric/QuadraticConnections` (§15.8(iv)) and `EllipticIntegrals/IncompleteInequalities`
+  (§19.9(ii)); nine helpers of `EllipticIntegrals/Inequalities` became public for the latter.
+- Two old names were shared by different areas. The rewriter applied the first entry to both;
+  `Weierstrass.mobius` was then corrected by hand to `modularMobius` (23.15.3), while
+  `AlgebraicAnalytic.mobius` is `mobiusMap`.
+- Not renamed in this round: the Carlson `R` family (`symEllIntRF/RC/RD/RG/RJ`, 319 names), whose
+  map targets clash with the lean-codes `Carlson.carlsonR*` functions; the `P`/`Q` duplicates of
+  the incomplete gamma area, which differ from the totalized quotients at the poles of `Γ` and
+  need a proof round before merging; and the merges of general-area duplicates.
+
+
+## Carlson names and the P/Q merge (2026-11-04)
+
+Carlson's symmetric integrals took names of their own in the style of `completeEllipticK`, distinct
+from the lean-codes `Carlson.carlsonR*`: `symEllIntRF/RC/RD/RG/RJ` became
+`symmetricEllipticRF/RC/RD/RG/RJ`, `symEllIntR` became `symmetricEllipticR`, and the helpers
+`symEllIntT`, `symEllIntE`, `symEllIntPm`, `symEllIntDupLambda` and `symEllIntRConj` became
+`homogeneousHypergeometricPolynomial` (19.19.1), `elementarySymmetric` (19.19.4),
+`quadraticTransformationP` (19.22.5), `duplicationLambda` (19.26.19) and
+`symmetricEllipticRConjugateExponent` (19.16.10); 407 public and 53 private names, including six
+Theta theorems on `R_F` that were named `carlsonRF_…`. Names with `carlsonR` keep referring to
+the lean-codes functions. `EllipticIntegrals/SymmetricSpecialCases` passed 1,500 lines, and
+§19.20(iv)–(v) moved to `EllipticIntegrals/SymmetricSpecialCasesRD`.
+
+The two definitions of `P` and `Q` were merged. The totalized quotients
+`Statistical.regularizedIncompleteGammaPQuotient` and `…QQuotient` were removed; the continued
+`Confluent.regularizedGamma` (`P = z^a γ*`) and `regularizedIncompleteGammaQ` (`1 - P`) are the
+only definitions. The new module `IncompleteGamma/Regularized` holds the bridges
+`regularizedGamma_eq` (`P = γ/Γ` for `a ∉ -ℕ`) and `regularizedIncompleteGammaQ_eq'`
+(`Q = Γ(a,z)/Γ(a)` for every `a` and `z ≠ 0`; at `a = -n` both sides vanish), together with
+the P/Q theorems formerly in `Statistical/IncompleteGamma` (8.2.5, 8.2.7, 8.4.10–8.4.11,
+8.8.5–8.8.6 and the TauCeti
+bridges), restated for the continued functions with unchanged hypotheses. Stronger primed forms
+were added for 8.2.4 (`Q`), 8.2.5 (no hypotheses; it replaces `normIncGammaContinued_complement`)
+and 8.2.7 (all `a`). Every other theorem already stated its result for the continued functions;
+twenty were renamed from `…Quotient…` names. The only parameter where the two `P` definitions
+differed, `a = -n`, is excluded by the hypotheses of every theorem that used the quotient. The tag
+count is unchanged (10,814 tags, 9,458 proved, 1,356 admitted).
+
+## General-area duplicate merges (2026-11-04)
+
+The duplicate definitions of Chapters 1, 2 and 19 were merged into one canonical home each:
+- `AsymptoticApproximations.stieltjesTransform` (2.6.8) was removed.
+  `AlgebraicAnalytic.stieltjesTransform` (1.14.47) is the definition, and 2.6.8 is the theorem
+  `stieltjesTransform_eq`.
+- `AsymptoticApproximations.IsLinearODE2SolutionOn` (2.7.1) was removed. The §2.7 theorems use
+  `AlgebraicAnalytic.IsLinearODE2SolutionOn f g 0`, and 2.7.1 is the theorem
+  `isLinearODE2SolutionOn_iff_isODE2SolutionOn`, which relates it to `Painleve.IsODE2SolutionOn`.
+  The structure `Heun.IsLinearODE2On` became an abbreviation of the homogeneous case, with the
+  API `differentiableAt`, `hasDerivAt_deriv` and `mk`.
+- `AsymptoticApproximations.laurentCoeffAtZero` was removed in favour of
+  `AlgebraicAnalytic.laurentCoeff f 0`. 2.10.26 is `laurentCoeff_zero_eq`, and `laurent_expansion`
+  is stated with it.
+- `AsymptoticApproximations.forwardDiff` was removed in favour of Mathlib's `fwdDiff 1`.
+- `EllipticIntegrals.segmentIntegralFromZero` was removed in favour of `Core.primitive`, with the
+  unfolding lemma `EllipticIntegrals.primitive_eq_integral`. The lemmas named
+  `…segmentIntegralFromZero…` became `…primitive…`.
+- `BernoulliEuler.binomialSeriesCoeff` (a polynomial over `ℚ`) and
+  `AsymptoticApproximations.binomSeriesCoeff` (its complex value) are both kept. For rational ratios
+  `pⱼ/p₀`, the bridge `binomSeriesCoeff_eq_eval_binomialSeriesCoeff` identifies them.
+
+The names that contained "DLMF" were spelled out:
+- `fourier_inversion_dlmf` became `fourierTransform_inversion_integral`.
+- `dlmfExamplePerm…` became `examplePermutation…`.
+- `dlmf_12_13_6_counterexample` became `parabolicCylinderU_half_zero_ne_erfc_mul`.
+- `askey_gasper_dlmf` became `askeyGasperPolynomial_pos`.
+- `dlmf_14_27_no_boundary_zero` became `not_tendsto_associatedP_one_neg_half_zero`.
+- `zonalPolynomial_eq_dlmf` became `zonalPolynomial_eq_integral_leadingMinor`.
+- `isCarmichael_iff_dlmf` became `isCarmichael_iff_composite_pow_modEq`.
+- The Weierstrass instance became `instNonemptyPeriodPair`.
+
+The infrastructure names `Core.dlmfUpstream` and `UpstreamPointer.dlmf` were kept. The tag count is
+unchanged (10,814 tags, 9,458 proved, 1,356 admitted). The tagged definitions of 2.6.8, 2.7.1 and
+2.10.26 are now tagged theorems. No new two-way area pairs were introduced.

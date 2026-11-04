@@ -174,7 +174,7 @@ private lemma integral_Icc_exp_two_pi_I_int (k : ℤ) :
       exact exp_int_mul_two_pi_mul_I k
     rw [this]; simp
 
-/-- The cube measure on `[0,1]^ι`. -/
+/-- The unitCube measure on `[0,1]^ι`. -/
 noncomputable abbrev unitCubeMeasure (ι : Type*) [Fintype ι] : Measure (ι → ℝ) :=
   Measure.pi fun _ : ι => volume.restrict (Set.Icc (0 : ℝ) 1)
 
@@ -210,7 +210,7 @@ private lemma norm_riemannThetaTerm_ofReal (Ω : Matrix ι ι ℂ) (n : ι → �
   rw [norm_riemannThetaTerm, norm_riemannThetaTerm]
   simp
 
-/-- The cube has measure one. -/
+/-- The unitCube has measure one. -/
 private lemma unitCubeMeasure_univ : (unitCubeMeasure ι) Set.univ = 1 := by
   rw [unitCubeMeasure, Measure.pi_univ]
   simp

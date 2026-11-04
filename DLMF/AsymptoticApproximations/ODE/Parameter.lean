@@ -8,6 +8,8 @@ module
 public import DLMF.AsymptoticApproximations.ODE.Basic
 public import DLMFMathlib.Analysis.ODE.LiouvilleGreenExpansion
 public import DLMFMathlib.Analysis.ODE.LiouvilleGreenFinite
+public import DLMF.Bessel.Basic.SecondKind
+public import Mathlib.Analysis.SpecialFunctions.Sqrt
 
 /-!
 # Differential equations with a parameter (DLMF §2.8)
@@ -149,6 +151,180 @@ theorem liouville_caseIII {f ξ : ℝ → ℝ} {z d : ℝ} (hf : 0 < f z) (hξp 
   rw [hd, inv_pow, mul_pow, Real.sq_sqrt hf.le, Real.sq_sqrt hξp.le]
   field_simp
 
+section BesselApproximation
+
+open scoped _root_.Real
+open DLMF.Bessel
+
+/-- `I_ν(-y) = e^{iπν} I_ν(y)` for `y > 0`, with the principal branch on the cut. -/
+private lemma besselI_neg_ofReal (ν : ℂ) {y : ℝ} (hy : 0 < y) :
+    besselI ν (-(y : ℂ)) = Complex.exp (π * Complex.I * ν) * besselI ν y := by
+  unfold besselI
+  have h : -(y : ℂ) / 2 = ((-(y / 2) : ℝ) : ℂ) := by push_cast; ring
+  rw [h, Complex.ofReal_cpow_of_nonpos (by linarith) ν]
+  push_cast
+  ring_nf
+
+/-- `K_ν(-y) = e^{-iπν} K_ν(y) - iπ I_ν(y)` for `y > 0` and `ν ∉ ℤ` (DLMF 10.34.2). -/
+private lemma besselK_neg_ofReal_of_not_int {ν : ℂ} (hν : ∀ k : ℤ, ν ≠ k) {y : ℝ}
+    (hy : 0 < y) :
+    besselK ν (-(y : ℂ)) =
+      Complex.exp (-(π * Complex.I * ν)) * besselK ν y - π * Complex.I * besselI ν y := by
+  have hs : Complex.sin (ν * π) ≠ 0 := sin_mul_pi_ne_zero hν
+  rw [besselK_eq_of_not_int hν, besselK_eq_of_not_int hν, besselE, besselE,
+    besselI_neg_ofReal ν hy, besselI_neg_ofReal (-ν) hy]
+  have hsin : Complex.sin (ν * π) =
+      (Complex.exp (-(π * Complex.I * ν)) - Complex.exp (π * Complex.I * ν)) * Complex.I / 2 := by
+    rw [Complex.sin]; ring_nf
+  have he : Complex.exp (π * Complex.I * -ν) = Complex.exp (-(π * Complex.I * ν)) := by
+    ring_nf
+  have hd : Complex.exp (-(π * Complex.I * ν)) - Complex.exp (π * Complex.I * ν) ≠ 0 := by
+    intro h; apply hs; rw [hsin, h]; ring
+  rw [he, hsin]
+  field_simp
+  ring_nf
+  rw [Complex.I_sq]
+  ring
+
+/-- `K_ν(-y) = e^{-iπν} K_ν(y) - iπ I_ν(y)` for `y > 0` and every order (DLMF 10.34.2). -/
+private lemma besselK_neg_ofReal (ν : ℂ) {y : ℝ} (hy : 0 < y) :
+    besselK ν (-(y : ℂ)) =
+      Complex.exp (-(π * Complex.I * ν)) * besselK ν y - π * Complex.I * besselI ν y := by
+  by_cases hν : ∃ k : ℤ, ν = k
+  · obtain ⟨n, rfl⟩ := hν
+    have hy' : (y : ℂ) ∈ Complex.slitPlane := Complex.ofReal_mem_slitPlane.2 hy
+    have hg : ContinuousAt (fun μ : ℂ => Complex.exp (-(π * Complex.I * μ)) * besselK μ y -
+        π * Complex.I * besselI μ y) n :=
+      ((by fun_prop : Continuous fun μ : ℂ => Complex.exp (-(π * Complex.I * μ))).continuousAt.mul
+        (continuousAt_besselK_order id continuous_id n hy')).sub
+        (continuousAt_const.mul (continuousAt_besselI_order id continuous_id n hy'))
+    have ht : Tendsto (fun μ => π / 2 * (besselI (-μ) (-(y : ℂ)) - besselI μ (-(y : ℂ))) /
+        Complex.sin (μ * π)) (𝓝[≠] (n : ℂ)) (𝓝 (Complex.exp (-(π * Complex.I * n)) *
+          besselK n y - π * Complex.I * besselI n y)) := by
+      refine (hg.tendsto.mono_left nhdsWithin_le_nhds).congr' ?_
+      filter_upwards [self_mem_nhdsWithin, nhdsWithin_le_nhds (Metric.ball_mem_nhds (n : ℂ)
+        (by norm_num : (0 : ℝ) < 1 / 2))] with μ hμ hμb
+      have hμ' := not_int_of_mem_ball hμb hμ
+      rw [← besselK_neg_ofReal_of_not_int hμ' hy, besselK_eq_of_not_int hμ', besselE]
+    have hex : ∃ k : ℤ, (n : ℂ) = k := ⟨n, rfl⟩
+    simp only [besselK, hex, ite_true] at ht ⊢
+    exact ht.limUnder_eq
+  · push Not at hν
+    exact besselK_neg_ofReal_of_not_int hν hy
+
+/-- If `G` solves the modified Bessel equation `z²G'' + zG' - (z² + c)G = 0` on the slit
+plane, then `W(ξ) = ξ^{1/2} G(2vξ^{1/2})`, `v > 0`, solves `W'' = (v²/ξ + ρ/ξ²) W` for `ξ > 0`,
+where `c = 1 + 4ρ`. -/
+private lemma hasDerivAt_sqrt_mul_modifiedBessel {G : ℂ → ℂ}
+    (hG : DifferentiableOn ℂ G Complex.slitPlane) {c : ℂ}
+    (hode : ∀ z ∈ Complex.slitPlane,
+      z ^ 2 * iteratedDeriv 2 G z + z * deriv G z - (z ^ 2 + c) * G z = 0)
+    {v ρ : ℝ} (hv : 0 < v) (hc : c = 1 + 4 * ρ) :
+    ∃ W' : ℝ → ℂ, ∀ ξ : ℝ, 0 < ξ →
+      HasDerivAt (fun ξ : ℝ => ((√ξ : ℝ) : ℂ) * G (2 * v * √ξ)) (W' ξ) ξ ∧
+      HasDerivAt W' ((v ^ 2 / ξ + ρ / ξ ^ 2 : ℝ) * (((√ξ : ℝ) : ℂ) * G (2 * v * √ξ))) ξ := by
+  have hGa : AnalyticOnNhd ℂ G Complex.slitPlane := hG.analyticOnNhd Complex.isOpen_slitPlane
+  have hmem : ∀ ξ : ℝ, 0 < ξ → (2 * (v : ℂ) * ((√ξ : ℝ) : ℂ)) ∈ Complex.slitPlane := by
+    intro ξ hξ
+    have : (2 * (v : ℂ) * ((√ξ : ℝ) : ℂ)) = ((2 * v * √ξ : ℝ) : ℂ) := by push_cast; ring
+    rw [this]
+    exact Complex.ofReal_mem_slitPlane.2 (by have := Real.sqrt_pos.2 hξ; positivity)
+  refine ⟨fun ξ => (2 * ((√ξ : ℝ) : ℂ))⁻¹ *
+    (G (2 * v * √ξ) + 2 * v * √ξ * deriv G (2 * v * √ξ)), fun ξ hξ => ?_⟩
+  have hs : 0 < √ξ := Real.sqrt_pos.2 hξ
+  have hs0 : ((√ξ : ℝ) : ℂ) ≠ 0 := Complex.ofReal_ne_zero.2 hs.ne'
+  have hsq : ((√ξ : ℝ) : ℂ) ^ 2 = (ξ : ℂ) := by
+    rw [← Complex.ofReal_pow, Real.sq_sqrt hξ.le]
+  have hS : HasDerivAt (fun ξ : ℝ => ((√ξ : ℝ) : ℂ)) ((2 * ((√ξ : ℝ) : ℂ))⁻¹) ξ := by
+    have := (Real.hasDerivAt_sqrt hξ.ne').ofReal_comp
+    convert this using 1
+    push_cast; ring
+  have hX : HasDerivAt (fun ξ : ℝ => 2 * (v : ℂ) * ((√ξ : ℝ) : ℂ))
+      (2 * v * (2 * ((√ξ : ℝ) : ℂ))⁻¹) ξ := hS.const_mul _
+  have hx := hmem ξ hξ
+  have hG1 := (hGa _ hx).differentiableAt.hasDerivAt
+  have hdG := ((hGa.deriv _ hx).differentiableAt).hasDerivAt
+  have hGc := hG1.comp ξ hX
+  have hdGc := hdG.comp ξ hX
+  have hode' := hode _ hx
+  rw [iteratedDeriv_succ, iteratedDeriv_one] at hode'
+  constructor
+  · convert hS.mul hGc using 1
+    · rfl
+    simp only [Function.comp_apply]
+    generalize deriv G (2 * (v : ℂ) * ((√ξ : ℝ) : ℂ)) = b
+    generalize G (2 * (v : ℂ) * ((√ξ : ℝ) : ℂ)) = b0
+    field_simp
+  · have hinv : HasDerivAt (fun ξ : ℝ => (2 * ((√ξ : ℝ) : ℂ))⁻¹)
+        (-(2 * (2 * ((√ξ : ℝ) : ℂ))⁻¹) / (2 * ((√ξ : ℝ) : ℂ)) ^ 2) ξ :=
+      (hS.const_mul 2).inv (mul_ne_zero two_ne_zero hs0)
+    have h := hinv.mul (hGc.add (hX.mul hdGc))
+    convert h using 1
+    · funext t; simp only [Function.comp_def, Pi.mul_apply, Pi.add_apply]
+    simp only [Function.comp_def, Pi.mul_apply, Pi.add_apply]
+    rw [hc] at hode'
+    push_cast
+    rw [← hsq]
+    generalize deriv (deriv G) (2 * (v : ℂ) * ((√ξ : ℝ) : ℂ)) = b2 at hode' ⊢
+    generalize deriv G (2 * (v : ℂ) * ((√ξ : ℝ) : ℂ)) = b1 at hode' ⊢
+    generalize G (2 * (v : ℂ) * ((√ξ : ℝ) : ℂ)) = b0 at hode' ⊢
+    field_simp
+    linear_combination (-1 : ℂ) * hode'
+
+/-- Linear combinations of solutions of `W'' = q W` on `ξ > 0` are solutions. -/
+private lemma hasDerivAt_linear_combination {W₁ W₂ W W₁' W₂' : ℝ → ℂ} {q : ℝ → ℂ} (a b : ℂ)
+    (h₁ : ∀ ξ : ℝ, 0 < ξ → HasDerivAt W₁ (W₁' ξ) ξ ∧ HasDerivAt W₁' (q ξ * W₁ ξ) ξ)
+    (h₂ : ∀ ξ : ℝ, 0 < ξ → HasDerivAt W₂ (W₂' ξ) ξ ∧ HasDerivAt W₂' (q ξ * W₂ ξ) ξ)
+    (hW : ∀ ξ : ℝ, 0 < ξ → W ξ = a * W₁ ξ + b * W₂ ξ) :
+    ∃ W' : ℝ → ℂ, ∀ ξ : ℝ, 0 < ξ → HasDerivAt W (W' ξ) ξ ∧ HasDerivAt W' (q ξ * W ξ) ξ := by
+  refine ⟨fun ξ => a * W₁' ξ + b * W₂' ξ, fun ξ hξ => ⟨?_, ?_⟩⟩
+  · have h := ((h₁ ξ hξ).1.const_mul a).add ((h₂ ξ hξ).1.const_mul b)
+    refine h.congr_of_eventuallyEq ?_
+    filter_upwards [Ioi_mem_nhds hξ] with t ht using hW t ht
+  · have h := ((h₁ ξ hξ).2.const_mul a).add ((h₂ ξ hξ).2.const_mul b)
+    convert h using 1
+    rw [hW ξ hξ]
+    ring
+
+/-- `W(ξ) = ξ^{1/2} C` solves `W'' = (ρ/ξ²) W` when `(1 + 4ρ) C = 0`. -/
+private lemma hasDerivAt_sqrt_mul_const {C : ℂ} {ρ : ℝ} (hC : (1 + 4 * (ρ : ℂ)) * C = 0) :
+    ∃ W' : ℝ → ℂ, ∀ ξ : ℝ, 0 < ξ →
+      HasDerivAt (fun ξ : ℝ => ((√ξ : ℝ) : ℂ) * C) (W' ξ) ξ ∧
+      HasDerivAt W' ((ρ / ξ ^ 2 : ℝ) * (((√ξ : ℝ) : ℂ) * C)) ξ := by
+  refine ⟨fun ξ => (2 * ((√ξ : ℝ) : ℂ))⁻¹ * C, fun ξ hξ => ?_⟩
+  have hs : 0 < √ξ := Real.sqrt_pos.2 hξ
+  have hs0 : ((√ξ : ℝ) : ℂ) ≠ 0 := Complex.ofReal_ne_zero.2 hs.ne'
+  have hsq : ((√ξ : ℝ) : ℂ) ^ 2 = (ξ : ℂ) := by
+    rw [← Complex.ofReal_pow, Real.sq_sqrt hξ.le]
+  have hS : HasDerivAt (fun ξ : ℝ => ((√ξ : ℝ) : ℂ)) ((2 * ((√ξ : ℝ) : ℂ))⁻¹) ξ := by
+    have := (Real.hasDerivAt_sqrt hξ.ne').ofReal_comp
+    convert this using 1
+    push_cast; ring
+  refine ⟨by simpa [mul_comm] using hS.mul_const C, ?_⟩
+  have h := ((hS.const_mul 2).inv (mul_ne_zero two_ne_zero hs0)).mul_const C
+  convert h using 1
+  have hρ : (ρ : ℂ) * C = -C / 4 := by linear_combination hC / 4
+  push_cast
+  rw [← hsq]
+  field_simp
+  linear_combination (4 : ℂ) * hρ
+
+/-- `K_ν(0) = 0` (Lean's value at the singular point) for `ν ≠ 0`. -/
+private lemma besselK_apply_zero {ν : ℂ} (hν : ν ≠ 0) : besselK ν 0 = 0 := by
+  by_cases hint : ∃ k : ℤ, ν = k
+  · have ht : Tendsto (fun μ => π / 2 * (besselI (-μ) 0 - besselI μ 0) / Complex.sin (μ * π))
+        (𝓝[≠] ν) (𝓝 0) := by
+      refine tendsto_const_nhds.congr' ?_
+      filter_upwards [nhdsWithin_le_nhds (eventually_ne_nhds hν)] with μ hμ
+      rw [besselI_apply_zero hμ, besselI_apply_zero (neg_ne_zero.2 hμ)]
+      simp
+    simp only [besselK, hint, ite_true]
+    exact ht.limUnder_eq
+  · push Not at hint
+    rw [besselK_eq_of_not_int hint, besselE, besselI_apply_zero hν,
+      besselI_apply_zero (neg_ne_zero.2 hν)]
+    simp
+
 /-- DLMF 2.8.9: the Case III approximating equation `W'' = (u²/ξ + ρ/ξ²) W` has the solutions
 `ξ^{1/2} I_ν(2uξ^{1/2})` and `ξ^{1/2} K_ν(2uξ^{1/2})` for `ξ > 0`, with `ν = (1 + 4ρ)^{1/2}`
 (equivalently `ν² = 1 + 4ρ`). -/
@@ -162,7 +338,52 @@ theorem bessel_approximating_equation {u ρ ν : ℝ} (hν : ν ^ 2 = 1 + 4 * ρ
       HasDerivAt (fun ξ : ℝ => ((√ξ : ℝ) : ℂ) * DLMF.Bessel.besselK ν (2 * u * √ξ)) (W' ξ) ξ ∧
       HasDerivAt W' ((u ^ 2 / ξ + ρ / ξ ^ 2 : ℝ) *
         (((√ξ : ℝ) : ℂ) * DLMF.Bessel.besselK ν (2 * u * √ξ))) ξ) := by
-  sorry
+  have hc : ((ν : ℂ)) ^ 2 = 1 + 4 * (ρ : ℂ) := by exact_mod_cast hν
+  have hIdiff : DifferentiableOn ℂ (besselI ν) Complex.slitPlane := fun z hz =>
+    (hasDerivAt_besselI hz).differentiableAt.differentiableWithinAt
+  have hKdiff : DifferentiableOn ℂ (besselK ν) Complex.slitPlane := fun z hz =>
+    (hasDerivAt_besselK (ν : ℂ) hz).differentiableAt.differentiableWithinAt
+  have hIode : ∀ z ∈ Complex.slitPlane, z ^ 2 * iteratedDeriv 2 (besselI ν) z +
+      z * deriv (besselI ν) z - (z ^ 2 + (ν : ℂ) ^ 2) * besselI ν z = 0 := fun z hz =>
+    besselI_ode hz
+  have hKode : ∀ z ∈ Complex.slitPlane, z ^ 2 * iteratedDeriv 2 (besselK ν) z +
+      z * deriv (besselK ν) z - (z ^ 2 + (ν : ℂ) ^ 2) * besselK ν z = 0 := fun z hz =>
+    besselK_ode_all (ν : ℂ) hz
+  rcases lt_trichotomy u 0 with hu | rfl | hu
+  · have hv : 0 < -u := neg_pos.2 hu
+    obtain ⟨WI, hWI⟩ := hasDerivAt_sqrt_mul_modifiedBessel hIdiff hIode hv hc
+    obtain ⟨WK, hWK⟩ := hasDerivAt_sqrt_mul_modifiedBessel hKdiff hKode hv hc
+    simp only [neg_sq] at hWI hWK
+    have harg : ∀ ξ : ℝ, 0 < ξ → (2 * (u : ℂ) * ((√ξ : ℝ) : ℂ)) =
+        -(((2 * (-u) * √ξ : ℝ)) : ℂ) := fun ξ _ => by push_cast; ring
+    have hpos : ∀ ξ : ℝ, 0 < ξ → 0 < 2 * (-u) * √ξ := fun ξ hξ => by
+      have := Real.sqrt_pos.2 hξ; positivity
+    have hcast : ∀ ξ : ℝ, (((2 * (-u) * √ξ : ℝ)) : ℂ) = 2 * ((-u : ℝ) : ℂ) * ((√ξ : ℝ) : ℂ) :=
+      fun ξ => by push_cast; ring
+    refine ⟨hasDerivAt_linear_combination (Complex.exp (π * Complex.I * ν)) 0 hWI hWI
+      fun ξ hξ => ?_, hasDerivAt_linear_combination (Complex.exp (-(π * Complex.I * ν)))
+        (-(π * Complex.I)) hWK hWI fun ξ hξ => ?_⟩
+    · rw [harg ξ hξ, besselI_neg_ofReal _ (hpos ξ hξ), hcast]
+      ring
+    · rw [harg ξ hξ, besselK_neg_ofReal _ (hpos ξ hξ), hcast]
+      ring
+  · have hsimp : ∀ ξ : ℝ, (2 * ((0 : ℝ) : ℂ) * ((√ξ : ℝ) : ℂ)) = 0 := fun ξ => by simp
+    have hq : ∀ ξ : ℝ, ((0 : ℝ) ^ 2 / ξ + ρ / ξ ^ 2 : ℝ) = (ρ / ξ ^ 2 : ℝ) := fun ξ => by simp
+    simp only [hsimp, hq]
+    by_cases hν0 : ν = 0
+    · have hρ : (1 + 4 * (ρ : ℂ)) = 0 := by
+        rw [← hc, hν0]; simp
+      exact ⟨hasDerivAt_sqrt_mul_const (by rw [hρ, zero_mul]),
+        hasDerivAt_sqrt_mul_const (by rw [hρ, zero_mul])⟩
+    · have hν0' : (ν : ℂ) ≠ 0 := Complex.ofReal_ne_zero.2 hν0
+      have hI0 : besselI ν 0 = 0 := besselI_apply_zero hν0'
+      have hK0 : besselK ν 0 = 0 := besselK_apply_zero hν0'
+      exact ⟨hasDerivAt_sqrt_mul_const (by rw [hI0, mul_zero]),
+        hasDerivAt_sqrt_mul_const (by rw [hK0, mul_zero])⟩
+  · exact ⟨hasDerivAt_sqrt_mul_modifiedBessel hIdiff hIode hu hc,
+      hasDerivAt_sqrt_mul_modifiedBessel hKdiff hKode hu hc⟩
+
+end BesselApproximation
 
 /-! ### §2.8(ii) Case I: no transition points -/
 
@@ -261,7 +482,7 @@ variations `𝒱(|ξ|^{1/2} B_0)`, `𝒱(|ξ|^{1/2} B_{n-1})`, there are solutio
 and the same with `Bi` (`W_{n,2}`), uniformly in `ξ`. -/
 @[dlmf 2.8.E14, dlmf 2.8.E15, dlmf 2.8.E16, dlmf 2.8.E17, dlmf 2.8.E18, dlmf 2.8.iii]
 theorem caseII_airy_expansion {α₁ α₂ : ℝ} (h₁ : α₁ < 0) (h₂ : 0 < α₂) {ψ : ℝ → ℝ}
-    (hψ : ContDiffOn ℝ ⊤ ψ (Ioo α₁ α₂)) {A Ad Ad2 B Bd Bd2 : ℕ → ℝ → ℝ}
+    (hψ : ContDiffOn ℝ (⊤ : ℕ∞) ψ (Ioo α₁ α₂)) {A Ad Ad2 B Bd Bd2 : ℕ → ℝ → ℝ}
     (hc : IsAiryCoeffs ψ α₁ α₂ A Ad Ad2 B Bd Bd2) {n : ℕ} (hn : 1 ≤ n)
     (hV : ∀ s ∈ ({0, n - 1} : Finset ℕ), IntegrableOn
       (fun ξ => |deriv (fun v => √|v| * B s v) ξ|) (Ioo α₁ α₂)) :
@@ -286,10 +507,10 @@ theorem caseII_airy_expansion {α₁ α₂ : ℝ} (h₁ : α₁ < 0) (h₂ : 0 <
 /-- DLMF 2.8.22–2.8.23 (Case II with envelope functions): with the solutions of
 `caseII_airy_expansion`, as `u → ∞` uniformly in `ξ ∈ (α₁, α₂)`,
 `W_{n,1} = Ai(u^{2/3}ξ) ∑_{s<n} A_s u^{-2s} + Ai'(u^{2/3}ξ) ∑_{s<n-1} B_s u^{-2s-4/3}
-  + envAi(u^{2/3}ξ) O(u^{1-2n})`, and the same with `Bi`, `envBi`. -/
+  + envelopeAi(u^{2/3}ξ) O(u^{1-2n})`, and the same with `Bi`, `envelopeBi`. -/
 @[dlmf 2.8.E22, dlmf 2.8.E23]
 theorem caseII_airy_envelope {α₁ α₂ : ℝ} (h₁ : α₁ < 0) (h₂ : 0 < α₂) {ψ : ℝ → ℝ}
-    (hψ : ContDiffOn ℝ ⊤ ψ (Ioo α₁ α₂)) {A Ad Ad2 B Bd Bd2 : ℕ → ℝ → ℝ}
+    (hψ : ContDiffOn ℝ (⊤ : ℕ∞) ψ (Ioo α₁ α₂)) {A Ad Ad2 B Bd Bd2 : ℕ → ℝ → ℝ}
     (hc : IsAiryCoeffs ψ α₁ α₂ A Ad Ad2 B Bd Bd2) {n : ℕ} (hn : 1 ≤ n)
     (hV : ∀ s ∈ ({0, n - 1} : Finset ℕ), IntegrableOn
       (fun ξ => |deriv (fun v => √|v| * B s v) ξ|) (Ioo α₁ α₂)) :
@@ -302,12 +523,12 @@ theorem caseII_airy_envelope {α₁ α₂ : ℝ} (h₁ : α₁ < 0) (h₂ : 0 < 
             (∑ s ∈ Finset.range n, A s ξ / u ^ (2 * s) : ℝ) +
           DLMF.Airy.airyAiDeriv ((u ^ (2 / 3 : ℝ) * ξ : ℝ)) *
             (∑ s ∈ Finset.range (n - 1), B s ξ / u ^ (2 * s + 4 / 3 : ℝ) : ℝ))‖ ≤
-          envAi (u ^ (2 / 3 : ℝ) * ξ) * (C / u ^ (2 * n - 1)) ∧
+          envelopeAi (u ^ (2 / 3 : ℝ) * ξ) * (C / u ^ (2 * n - 1)) ∧
         ‖W₂ u ξ - (DLMF.Airy.airyBi ((u ^ (2 / 3 : ℝ) * ξ : ℝ)) *
             (∑ s ∈ Finset.range n, A s ξ / u ^ (2 * s) : ℝ) +
           DLMF.Airy.airyBiDeriv ((u ^ (2 / 3 : ℝ) * ξ : ℝ)) *
             (∑ s ∈ Finset.range (n - 1), B s ξ / u ^ (2 * s + 4 / 3 : ℝ) : ℝ))‖ ≤
-          envBi (u ^ (2 / 3 : ℝ) * ξ) * (C / u ^ (2 * n - 1)) := by
+          envelopeBi (u ^ (2 / 3 : ℝ) * ξ) * (C / u ^ (2 * n - 1)) := by
   sorry
 
 /-! ### §2.8(iv) Case III: simple pole -/
@@ -321,7 +542,7 @@ and finite variations `𝒱_{0,α₂}(ξ^{1/2} B_0)`, `𝒱_{0,α₂}(ξ^{1/2} B
   + ξ^{1/2} K_ν(uξ^{1/2}) O(u^{1-2n})`, uniformly in `ξ ∈ (0, α₂)`. -/
 @[dlmf 2.8.E24, dlmf 2.8.E25, dlmf 2.8.E26, dlmf 2.8.E27, dlmf 2.8.E28, dlmf 2.8.iv]
 theorem caseIII_bessel_expansion_pos {α₁ α₂ ν : ℝ} (h₁ : α₁ < 0) (h₂ : 0 < α₂) (hν : 0 ≤ ν)
-    {ψ : ℝ → ℝ} (hψ : ContDiffOn ℝ ⊤ ψ (Ioo α₁ α₂)) {A Ad B Bd Bd2 : ℕ → ℝ → ℝ}
+    {ψ : ℝ → ℝ} (hψ : ContDiffOn ℝ (⊤ : ℕ∞) ψ (Ioo α₁ α₂)) {A Ad B Bd Bd2 : ℕ → ℝ → ℝ}
     (hc : IsBesselCoeffs ψ ν α₁ α₂ A Ad B Bd Bd2) {n : ℕ} (hn : 1 ≤ n)
     (hV : ∀ s ∈ ({0, n - 1} : Finset ℕ), IntegrableOn
       (fun ξ => |deriv (fun v => √v * B s v) ξ|) (Ioo 0 α₂)) :
@@ -351,7 +572,7 @@ finite variations `𝒱_{α₁,0}(|ξ|^{1/2} B_0)`, `𝒱_{α₁,0}(|ξ|^{1/2} B
 and the same with `Y_ν`, `Y_{ν+1}` (`W_{n,4}`), uniformly in `ξ ∈ (α₁, 0)`. -/
 @[dlmf 2.8.E29, dlmf 2.8.E30, dlmf 2.8.E31]
 theorem caseIII_bessel_expansion_neg {α₁ α₂ ν : ℝ} (h₁ : α₁ < 0) (h₂ : 0 < α₂) (hν : 0 ≤ ν)
-    {ψ : ℝ → ℝ} (hψ : ContDiffOn ℝ ⊤ ψ (Ioo α₁ α₂)) {A Ad B Bd Bd2 : ℕ → ℝ → ℝ}
+    {ψ : ℝ → ℝ} (hψ : ContDiffOn ℝ (⊤ : ℕ∞) ψ (Ioo α₁ α₂)) {A Ad B Bd Bd2 : ℕ → ℝ → ℝ}
     (hc : IsBesselCoeffs ψ ν α₁ α₂ A Ad B Bd Bd2) {n : ℕ} (hn : 1 ≤ n)
     (hV : ∀ s ∈ ({0, n - 1} : Finset ℕ), IntegrableOn
       (fun ξ => |deriv (fun v => √|v| * B s v) ξ|) (Ioo α₁ 0)) :
@@ -381,7 +602,7 @@ theorem caseIII_bessel_expansion_neg {α₁ α₂ ν : ℝ} (h₁ : α₁ < 0) (
   + |ξ|^{1/2} env J_ν(u|ξ|^{1/2}) O(u^{1-2n})`, and the same with `Y`, `env Y_ν`. -/
 @[dlmf 2.8.E35, dlmf 2.8.E36]
 theorem caseIII_bessel_envelope {α₁ α₂ ν : ℝ} (h₁ : α₁ < 0) (h₂ : 0 < α₂) (hν : 0 ≤ ν)
-    {ψ : ℝ → ℝ} (hψ : ContDiffOn ℝ ⊤ ψ (Ioo α₁ α₂)) {A Ad B Bd Bd2 : ℕ → ℝ → ℝ}
+    {ψ : ℝ → ℝ} (hψ : ContDiffOn ℝ (⊤ : ℕ∞) ψ (Ioo α₁ α₂)) {A Ad B Bd Bd2 : ℕ → ℝ → ℝ}
     (hc : IsBesselCoeffs ψ ν α₁ α₂ A Ad B Bd Bd2) {n : ℕ} (hn : 1 ≤ n)
     (hV : ∀ s ∈ ({0, n - 1} : Finset ℕ), IntegrableOn
       (fun ξ => |deriv (fun v => √|v| * B s v) ξ|) (Ioo α₁ 0)) :
@@ -396,12 +617,12 @@ theorem caseIII_bessel_envelope {α₁ α₂ ν : ℝ} (h₁ : α₁ < 0) (h₂ 
             (∑ s ∈ Finset.range n, A s ξ / u ^ (2 * s) : ℝ) -
           ((|ξ| : ℝ) : ℂ) * Complex.besselJ (ν + 1) (u * √|ξ| : ℝ) *
             (∑ s ∈ Finset.range (n - 1), B s ξ / u ^ (2 * s + 1) : ℝ))‖ ≤
-          √|ξ| * envJ ν (u * √|ξ|) * (C / u ^ (2 * n - 1)) ∧
+          √|ξ| * envelopeJ ν (u * √|ξ|) * (C / u ^ (2 * n - 1)) ∧
         ‖W₄ u ξ - ((√|ξ| : ℝ) * DLMF.Bessel.besselY ν (u * √|ξ| : ℝ) *
             (∑ s ∈ Finset.range n, A s ξ / u ^ (2 * s) : ℝ) -
           ((|ξ| : ℝ) : ℂ) * DLMF.Bessel.besselY (ν + 1) (u * √|ξ| : ℝ) *
             (∑ s ∈ Finset.range (n - 1), B s ξ / u ^ (2 * s + 1) : ℝ))‖ ≤
-          √|ξ| * envY ν (u * √|ξ|) * (C / u ^ (2 * n - 1)) := by
+          √|ξ| * envelopeY ν (u * √|ξ|) * (C / u ^ (2 * n - 1)) := by
   sorry
 
 end DLMF.AsymptoticApproximations

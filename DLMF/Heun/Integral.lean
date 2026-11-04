@@ -8,6 +8,7 @@ module
 public import DLMF.Heun.Basic
 public import DLMF.Heun.Basic.Equation
 public import DLMF.Heun.IntegralPath
+public import DLMF.Heun.KernelExamples
 public import DLMF.Heun.KernelAngles
 public import DLMF.Hypergeometric.Riemann
 public import DLMFMathlib.Analysis.Complex.BivariateCalculus
@@ -127,8 +128,9 @@ theorem heun_hermiteDarboux (ha0 : a ≠ 0) (ha1 : a ≠ 1) (m : Fin 4 → ℕ)
             (∀ z ∈ U, S z ^ 2 = ψ z ∧ R z ^ 2 = z * (z - 1) * (z - a) ∧ ψ z ≠ 0) →
             AnalyticOnNhd ℂ S U → AnalyticOnNhd ℂ R U →
             (∀ z ∈ U, HasDerivAt G (z ^ m 1 * (z - 1) ^ m 2 * (z - a) ^ m 3 / (ψ z * R z)) z) →
-            IsHeunSolOn a (-lam / 4) α β γ δ ε (fun z => S z * cexp (I * ν / 2 * G z)) U ∧
-            IsHeunSolOn a (-lam / 4) α β γ δ ε (fun z => S z * cexp (-(I * ν / 2 * G z))) U := by
+            IsHeunSolutionOn a (-lam / 4) α β γ δ ε (fun z => S z * cexp (I * ν / 2 * G z)) U ∧
+            IsHeunSolutionOn a (-lam / 4) α β γ δ ε
+                (fun z => S z * cexp (-(I * ν / 2 * G z))) U := by
   sorry
 
 /-- Riccati form: if `w' = Λ w` and `Λ' + Λ² + pΛ + r = 0` on an open set, then `w` solves
@@ -137,7 +139,7 @@ private lemma isLinearODE2On_of_riccati {p r w Λ Λ' : ℂ → ℂ} {U : Set �
     (hw : ∀ z ∈ U, HasDerivAt w (Λ z * w z) z) (hΛ : ∀ z ∈ U, HasDerivAt Λ (Λ' z) z)
     (hR : ∀ z ∈ U, r z + p z * Λ z + Λ z ^ 2 + Λ' z = 0) : IsLinearODE2On p r w U := by
   have h1 : IsLinearODE2On (fun z => p z + 2 * Λ z) 0 (fun _ => (1 : ℂ)) U := by
-    refine ⟨fun z _ => differentiableAt_const _, fun z _ => ?_⟩
+    refine IsLinearODE2On.mk (fun z _ => differentiableAt_const _) (fun z _ => ?_)
     have : deriv (fun _ : ℂ => (1 : ℂ)) = fun _ => 0 := funext fun _ => deriv_const _ _
     rw [this]
     simpa using hasDerivAt_const z (0 : ℂ)
@@ -172,7 +174,7 @@ theorem heun_hermiteDarboux_example₁ {lam ν : ℂ}
     (hSa : AnalyticOnNhd ℂ S U) (hRa : AnalyticOnNhd ℂ R U)
     (hG : ∀ z ∈ U, HasDerivAt G (z / ((z ^ 2 + lam * z + a) * R z)) z) (s : ℂ)
     (hs : s = 1 ∨ s = -1) :
-    IsHeunSolOn a (-lam / 4) (-1) (1 / 2) (-1 / 2) (1 / 2) (1 / 2)
+    IsHeunSolutionOn a (-lam / 4) (-1) (1 / 2) (-1 / 2) (1 / 2) (1 / 2)
       (fun z => S z * cexp (s * (I * ν / 2) * G z)) U := by
   have hc2 : (s * (I * ν / 2)) ^ 2 = -((lam + a + 1) * (lam ^ 2 - 4 * a)) / 4 := by
     have hs2 : s ^ 2 = 1 := by rcases hs with rfl | rfl <;> norm_num
@@ -262,7 +264,7 @@ theorem heun_hermiteDarboux_example₂ {lam ν : ℂ}
     (hG : ∀ z ∈ U, HasDerivAt G
       (z⁻¹ ^ 2 / ((z ^ 2 + (lam + 3 * a + 3) * z + a) / z ^ 3 * R z)) z) (s : ℂ)
     (hs : s = 1 ∨ s = -1) :
-    IsHeunSolOn a (-lam / 4) (1 / 2) 2 (5 / 2) (1 / 2) (1 / 2)
+    IsHeunSolutionOn a (-lam / 4) (1 / 2) 2 (5 / 2) (1 / 2) (1 / 2)
       (fun z => S z * cexp (s * (I * ν / 2) * G z)) U := by
   have hc2 : (s * (I * ν / 2)) ^ 2 =
       -((lam + 4 * a + 4) * ((lam + 3 * a + 3) ^ 2 - 4 * a)) / 4 := by
@@ -372,7 +374,7 @@ needed. -/
 theorem heun_integral_typeI' {U V : Set ℂ} (hU : IsOpen U)
     (hUs : ∀ z ∈ U, z ≠ 0 ∧ z ≠ 1 ∧ z ≠ a)
     (hVs : ∀ t ∈ V, t ≠ 0 ∧ t ≠ 1 ∧ t ≠ a) {w ρ : ℂ → ℂ} {K : ℂ → ℂ → ℂ} {C : ℝ → ℂ}
-    (hw : IsHeunSolOn a q α β γ δ ε w V)
+    (hw : IsHeunSolutionOn a q α β γ δ ε w V)
     (hρ : ∀ t ∈ V, HasDerivAt ρ (ρ t * ((γ - 1) / t + (δ - 1) / (t - 1) + (ε - 1) / (t - a))) t)
     (hK : AnalyticOnNhd ℂ (fun x : ℂ × ℂ => K x.1 x.2) (U ×ˢ V))
     (hKpde : ∀ z ∈ U, ∀ t ∈ V,
@@ -383,7 +385,7 @@ theorem heun_integral_typeI' {U V : Set ℂ} (hU : IsOpen U)
           K z (C 1) * deriv w (C 1)) =
         C 0 * (C 0 - 1) * (C 0 - a) * ρ (C 0) * (deriv (K z) (C 0) * w (C 0) -
           K z (C 0) * deriv w (C 0))) :
-    IsHeunSolOn a q α β γ δ ε
+    IsHeunSolutionOn a q α β γ δ ε
       (fun z => ∫ s in (0 : ℝ)..1, K z (C s) * w (C s) * ρ (C s) * deriv C s) U := by
   set g : ℝ → ℂ := fun s => w (C s) * ρ (C s) * deriv C s with hg
   have hfun : (fun z => ∫ s in (0 : ℝ)..1, K z (C s) * w (C s) * ρ (C s) * deriv C s) =
@@ -406,7 +408,8 @@ theorem heun_integral_typeI' {U V : Set ℂ} (hU : IsOpen U)
       (hK (z, t) ⟨hz, ht⟩) (analyticAt_const.prod analyticAt_id)
   obtain ⟨MC, hMC⟩ := hC.exists_bound_deriv_Icc_zero_one
   have hCc : ContinuousOn C (Icc 0 1) := hC.continuousOn
-  have hwc : ContinuousOn w V := fun t ht => (hw.1 t ht).continuousAt.continuousWithinAt
+  have hwc : ContinuousOn w V := fun t ht =>
+      (hw.differentiableAt t ht).continuousAt.continuousWithinAt
   have hρc : ContinuousOn ρ V := fun t ht => (hρ t ht).continuousAt.continuousWithinAt
   have hwρC : ContinuousOn (fun s => w (C s) * ρ (C s)) (Icc 0 1) :=
     (hwc.comp hCc hCV).mul (hρc.comp hCc hCV)
@@ -436,7 +439,7 @@ theorem heun_integral_typeI' {U V : Set ℂ} (hU : IsOpen U)
       (∫ s in (0 : ℝ)..1, K2 z (C s) * g s) z := fun z hz =>
     hasDerivAt_intervalIntegral_mul_comp_path hU hCc hCV hgm hgM hA1.continuousOn hA2.continuousOn
       (fun z hz t ht => hslz hA1 z hz t ht) hz
-  refine ⟨fun z hz => (hW1 z hz).differentiableAt, fun z hz => ?_⟩
+  refine IsLinearODE2On.mk (fun z hz => (hW1 z hz).differentiableAt) (fun z hz => ?_)
   have hev : deriv (fun z => ∫ s in (0 : ℝ)..1, K z (C s) * g s) =ᶠ[𝓝 z]
       fun z => ∫ s in (0 : ℝ)..1, K1 z (C s) * g s :=
     eventually_of_mem (hU.mem_nhds hz) fun y hy => (hW1 y hy).deriv
@@ -481,7 +484,7 @@ equation. -/
 theorem heun_integral_typeI (_hF : α + β + 1 = γ + δ + ε) {U V : Set ℂ} (hU : IsOpen U)
     (_hV : IsOpen V) (hUs : ∀ z ∈ U, z ≠ 0 ∧ z ≠ 1 ∧ z ≠ a)
     (hVs : ∀ t ∈ V, t ≠ 0 ∧ t ≠ 1 ∧ t ≠ a) {w ρ : ℂ → ℂ} {K : ℂ → ℂ → ℂ} {C : ℝ → ℂ}
-    (hw : IsHeunSolOn a q α β γ δ ε w V)
+    (hw : IsHeunSolutionOn a q α β γ δ ε w V)
     (hρ : ∀ t ∈ V, HasDerivAt ρ (ρ t * ((γ - 1) / t + (δ - 1) / (t - 1) + (ε - 1) / (t - a))) t)
     (hK : AnalyticOnNhd ℂ (fun x : ℂ × ℂ => K x.1 x.2) (U ×ˢ V))
     (hKpde : ∀ z ∈ U, ∀ t ∈ V,
@@ -492,7 +495,7 @@ theorem heun_integral_typeI (_hF : α + β + 1 = γ + δ + ε) {U V : Set ℂ} (
           K z (C 1) * deriv w (C 1)) =
         C 0 * (C 0 - 1) * (C 0 - a) * ρ (C 0) * (deriv (K z) (C 0) * w (C 0) -
           K z (C 0) * deriv w (C 0))) :
-    IsHeunSolOn a q α β γ δ ε
+    IsHeunSolutionOn a q α β γ δ ε
       (fun z => ∫ s in (0 : ℝ)..1, K z (C s) * w (C s) * ρ (C s) * deriv C s) U := by
   exact heun_integral_typeI' hU hUs hVs hw hρ hK hKpde hC hCV hbd
 
@@ -650,10 +653,11 @@ theorem heun_kernel_typeI_separable (σ : ℂ) {f g : ℂ → ℂ}
 /-- DLMF 31.10.10 (Example 1): the kernel
 `𝒦(z, t) = (zt - a)^{1/2-δ-σ} ₂F₁(1/2-δ-σ+α, 1/2-δ-σ+β; γ; zt/a)
 ₂F₁(-1/2+δ+σ, -1/2+ε-σ; δ; a(z-1)(t-1)/((a-1)(zt-a)))` satisfies `(𝒟_z - 𝒟_t)𝒦 = 0`
-(31.10.3) where both hypergeometric series converge and `zt - a ∈ slitPlane`. -/
+(31.10.3) where both hypergeometric series converge and `zt - a ∈ slitPlane`, for `γ` and `δ`
+not nonpositive integers (where Mathlib's `ordinaryHypergeometric` truncates the series). -/
 @[dlmf 31.10.E10, dlmf 31.10.E3]
 theorem heun_kernel_example₁_pde (hF : α + β + 1 = γ + δ + ε) (ha0 : a ≠ 0) (ha1 : a ≠ 1)
-    (σ : ℂ) {z t : ℂ}
+    (hγ : ∀ n : ℕ, γ ≠ -(n : ℂ)) (hδ : ∀ n : ℕ, δ ≠ -(n : ℂ)) (σ : ℂ) {z t : ℂ}
     (hzt : ‖z * t / a‖ < 1 ∧ ‖a * (z - 1) * (t - 1) / ((a - 1) * (z * t - a))‖ < 1 ∧
       z * t - a ∈ slitPlane) :
     let K : ℂ → ℂ → ℂ := fun z t => (z * t - a) ^ (1 / 2 - δ - σ) *
@@ -661,7 +665,54 @@ theorem heun_kernel_example₁_pde (hF : α + β + 1 = γ + δ + ε) (ha0 : a �
       ordinaryHypergeometric (-1 / 2 + δ + σ) (-1 / 2 + ε - σ) δ
         (a * (z - 1) * (t - 1) / ((a - 1) * (z * t - a)))
     heunOperator a α β γ δ ε (fun z' => K z' t) z = heunOperator a α β γ δ ε (K z) t := by
-  sorry
+  intro K
+  obtain ⟨hu, hv, hD⟩ := hzt
+  set F : ℂ → ℂ := ordinaryHypergeometric (1 / 2 - δ - σ + α) (1 / 2 - δ - σ + β) γ with hFdef
+  set G : ℂ → ℂ := ordinaryHypergeometric (-1 / 2 + δ + σ) (-1 / 2 + ε - σ) δ with hGdef
+  have hsym : K z = fun x => (x * z - a) ^ (1 / 2 - δ - σ) * F (x * z / a) *
+      G (a * (x - 1) * (z - 1) / ((a - 1) * (x * z - a))) := by
+    funext x
+    simp only [K]
+    rw [mul_comm z x, mul_right_comm a (z - 1) (x - 1)]
+  have hu' : ‖t * z / a‖ < 1 := by rwa [mul_comm t z]
+  have hv' : ‖a * (t - 1) * (z - 1) / ((a - 1) * (t * z - a))‖ < 1 := by
+    rwa [mul_comm t z, mul_right_comm a (t - 1) (z - 1)]
+  have hD' : t * z - a ∈ slitPlane := by rwa [mul_comm t z]
+  have h1 := heunOperator_kernelExample₁ (α := α) (β := β) (γ := γ) (δ := δ) (ε := ε)
+    (p := 1 / 2 - δ - σ) (F := F) (G := G) ha1
+    (Hypergeometric.analyticAt_ordinaryHypergeometric hu)
+    (Hypergeometric.analyticAt_ordinaryHypergeometric hv) hD
+  have h2 := heunOperator_kernelExample₁ (α := α) (β := β) (γ := γ) (δ := δ) (ε := ε)
+    (p := 1 / 2 - δ - σ) (F := F) (G := G) ha1
+    (Hypergeometric.analyticAt_ordinaryHypergeometric hu')
+    (Hypergeometric.analyticAt_ordinaryHypergeometric hv') hD'
+  rw [mul_comm t z, mul_right_comm a (t - 1) (z - 1)] at h2
+  rw [hsym, h2]
+  simp only [K]
+  rw [h1]
+  have oF := Hypergeometric.ordinaryHypergeometric_ode (a := 1 / 2 - δ - σ + α)
+    (b := 1 / 2 - δ - σ + β) hγ hu
+  have oG := Hypergeometric.ordinaryHypergeometric_ode (a := -1 / 2 + δ + σ)
+    (b := -1 / 2 + ε - σ) hδ hv
+  simp only [iteratedDeriv_succ, iteratedDeriv_zero, ← hFdef, ← hGdef] at oF oG
+  have hε : ε = α + β + 1 - γ - δ := by linear_combination -hF
+  subst hε
+  have hD0 : z * t - a ≠ 0 := slitPlane_ne_zero hD
+  have ha1' : a - 1 ≠ 0 := sub_ne_zero.mpr ha1
+  set P := (z * t - a) ^ (1 / 2 - δ - σ)
+  set F0 := F (z * t / a)
+  set F1 := deriv F (z * t / a)
+  set F2 := deriv (deriv F) (z * t / a)
+  set v := a * (z - 1) * (t - 1) / ((a - 1) * (z * t - a)) with hvdef
+  set G0 := G v
+  set G1 := deriv G v
+  set G2 := deriv (deriv G) v
+  unfold heunOperatorProductValue
+  linear_combination (norm := skip) (-(G0 * P * (z - t))) * oF +
+    (F0 * P * a * (z - t) / (z * t - a)) * oG
+  rw [hvdef]
+  field_simp
+  ring
 
 /-- DLMF §31.10(i), Example 1: for `ℜγ > 0`, `ℜδ > 0`, an eigenvalue `q_m` (pair `(0, 1)`) and
 `C` the Pochhammer loop `(1+, 0+, 1-, 0-)` based at `ζ ∈ (0, 1)`, the Heun function
@@ -671,7 +722,7 @@ all `z` near `ζ` (branches continued along `C`, principal at the start). -/
 @[dlmf 31.10.E10, dlmf 31.10.E1]
 theorem heun_integralEquation_example₁ (hF : α + β + 1 = γ + δ + ε) (ha : 1 < ‖a‖)
     (hγ : 0 < γ.re) (hδ : 0 < δ.re) (σ : ℂ) {ζ : ℝ} (hζ : ζ ∈ Ioo (0 : ℝ) 1)
-    (ha1 : 1 - ζ < ‖a - 1‖) (hε : ε = heunEps α β γ δ) {qm : ℂ}
+    (ha1 : 1 - ζ < ‖a - 1‖) (hε : ε = heunEpsilon α β γ δ) {qm : ℂ}
     (hm : IsHeunEigenvalue01 a qm α β γ δ) :
     ∃ κ : ℂ, ∀ᶠ z in 𝓝 (ζ : ℂ),
       continuedPathIntegral (pochhammerLoop 0 1 ζ)
@@ -689,10 +740,11 @@ theorem heun_integralEquation_example₁ (hF : α + β + 1 = γ + δ + ε) (ha :
 ₂F₁(1/2-δ-σ+α, 3/2-δ-σ+α-γ; α-β+1; a/(zt)) · g((z-a)(t-a)/((1-a)(zt-a)))` with `g` the
 branch `₂F₁(-1/2+δ+σ, -1/2+ε-σ; ε; ·)` (exponent `0` at `0`) of the P-symbol
 `P{0, 1, ∞; 0, 0, -1/2+δ+σ; 1-ε, 1-δ, -1/2+ε-σ; ·}` satisfies `(𝒟_z - 𝒟_t)𝒦 = 0`, where the
-series converge and the power bases are in `slitPlane`. -/
+series converge and the power bases are in `slitPlane`, for `ε` and `α - β + 1` not nonpositive
+integers (where Mathlib's `ordinaryHypergeometric` truncates the series). -/
 @[dlmf 31.10.E11, dlmf 31.10.E3]
-theorem heun_kernel_example₂_pde (hF : α + β + 1 = γ + δ + ε) (ha0 : a ≠ 0) (ha1 : a ≠ 1)
-    (σ : ℂ) {z t : ℂ}
+theorem heun_kernel_example₂_pde (hF : α + β + 1 = γ + δ + ε) (_ha0 : a ≠ 0) (ha1 : a ≠ 1)
+    (hε : ∀ n : ℕ, ε ≠ -(n : ℂ)) (hαβ : ∀ n : ℕ, α - β + 1 ≠ -(n : ℂ)) (σ : ℂ) {z t : ℂ}
     (hzt : ‖a / (z * t)‖ < 1 ∧ ‖(z - a) * (t - a) / ((1 - a) * (z * t - a))‖ < 1 ∧
       z * t - a ∈ slitPlane ∧ z * t / a ∈ slitPlane) :
     let K : ℂ → ℂ → ℂ := fun z t => (z * t - a) ^ (1 / 2 - δ - σ) *
@@ -702,7 +754,61 @@ theorem heun_kernel_example₂_pde (hF : α + β + 1 = γ + δ + ε) (ha0 : a �
       ordinaryHypergeometric (-1 / 2 + δ + σ) (-1 / 2 + ε - σ) ε
         ((z - a) * (t - a) / ((1 - a) * (z * t - a)))
     heunOperator a α β γ δ ε (fun z' => K z' t) z = heunOperator a α β γ δ ε (K z) t := by
-  sorry
+  intro K
+  obtain ⟨hu, hv, hD, hE⟩ := hzt
+  set F : ℂ → ℂ := ordinaryHypergeometric (1 / 2 - δ - σ + α) (3 / 2 - δ - σ + α - γ)
+    (α - β + 1) with hFdef
+  set G : ℂ → ℂ := ordinaryHypergeometric (-1 / 2 + δ + σ) (-1 / 2 + ε - σ) ε with hGdef
+  have hsym : K z = fun x => (x * z - a) ^ (1 / 2 - δ - σ) *
+      (x * z / a) ^ (-1 / 2 + δ + σ - α) * F (a / (x * z)) *
+      G ((x - a) * (z - a) / ((1 - a) * (x * z - a))) := by
+    funext x
+    simp only [K]
+    rw [mul_comm z x, mul_comm (z - a) (x - a)]
+  have hu' : ‖a / (t * z)‖ < 1 := by rwa [mul_comm t z]
+  have hv' : ‖(t - a) * (z - a) / ((1 - a) * (t * z - a))‖ < 1 := by
+    rwa [mul_comm t z, mul_comm (t - a) (z - a)]
+  have hD' : t * z - a ∈ slitPlane := by rwa [mul_comm t z]
+  have hE' : t * z / a ∈ slitPlane := by rwa [mul_comm t z]
+  have h1 := heunOperator_kernelExample₂ (α := α) (β := β) (γ := γ) (δ := δ) (ε := ε)
+    (p := 1 / 2 - δ - σ) (q := -1 / 2 + δ + σ - α) (F := F) (G := G) ha1
+    (Hypergeometric.analyticAt_ordinaryHypergeometric hu)
+    (Hypergeometric.analyticAt_ordinaryHypergeometric hv) hD hE
+  have h2 := heunOperator_kernelExample₂ (α := α) (β := β) (γ := γ) (δ := δ) (ε := ε)
+    (p := 1 / 2 - δ - σ) (q := -1 / 2 + δ + σ - α) (F := F) (G := G) ha1
+    (Hypergeometric.analyticAt_ordinaryHypergeometric hu')
+    (Hypergeometric.analyticAt_ordinaryHypergeometric hv') hD' hE'
+  rw [mul_comm t z, mul_comm (t - a) (z - a)] at h2
+  rw [hsym, h2]
+  simp only [K]
+  rw [h1]
+  have oF := Hypergeometric.ordinaryHypergeometric_ode (a := 1 / 2 - δ - σ + α)
+    (b := 3 / 2 - δ - σ + α - γ)
+    hαβ hu
+  have oG := Hypergeometric.ordinaryHypergeometric_ode (a := -1 / 2 + δ + σ)
+    (b := -1 / 2 + ε - σ) hε hv
+  simp only [iteratedDeriv_succ, iteratedDeriv_zero, ← hFdef, ← hGdef] at oF oG
+  have hεdef : ε = α + β + 1 - γ - δ := by linear_combination -hF
+  subst hεdef
+  have hD0 : z * t - a ≠ 0 := slitPlane_ne_zero hD
+  have hE0 : z * t / a ≠ 0 := slitPlane_ne_zero hE
+  have hz0 : z ≠ 0 := by rintro rfl; simp at hE0
+  have ht0 : t ≠ 0 := by rintro rfl; simp at hE0
+  have ha1' : 1 - a ≠ 0 := sub_ne_zero.mpr (Ne.symm ha1)
+  set P := (z * t - a) ^ (1 / 2 - δ - σ) * (z * t / a) ^ (-1 / 2 + δ + σ - α)
+  set F0 := F (a / (z * t))
+  set F1 := deriv F (a / (z * t))
+  set F2 := deriv (deriv F) (a / (z * t))
+  set v := (z - a) * (t - a) / ((1 - a) * (z * t - a)) with hvdef
+  set G0 := G v
+  set G1 := deriv G v
+  set G2 := deriv (deriv G) v
+  unfold heunOperatorProductValue
+  linear_combination (norm := skip) (G0 * P * a * (z - t) / (t * z)) * oF +
+    (F0 * P * a * (z - t) / (z * t - a)) * oG
+  rw [hvdef]
+  field_simp
+  ring
 
 /-! ### Type II integral equations (§31.10(ii)) -/
 
@@ -718,7 +824,7 @@ factor), then `W(z) = ∫_{C₁}∫_{C₂} 𝒦(z; s, t) w(s) w(t) ρ(s, t) dt d
 theorem heun_integral_typeII (_hF : α + β + 1 = γ + δ + ε) {U V : Set ℂ} (hU : IsOpen U)
     (hV : IsOpen V) (hUs : ∀ z ∈ U, z ≠ 0 ∧ z ≠ 1 ∧ z ≠ a)
     (hVs : ∀ t ∈ V, t ≠ 0 ∧ t ≠ 1 ∧ t ≠ a) {w ρ₁ : ℂ → ℂ} {K : ℂ → ℂ → ℂ → ℂ}
-    {C₁ C₂ : ℝ → ℂ} (hw : IsHeunSolOn a q α β γ δ ε w V)
+    {C₁ C₂ : ℝ → ℂ} (hw : IsHeunSolutionOn a q α β γ δ ε w V)
     (hρ : ∀ t ∈ V, HasDerivAt ρ₁ (ρ₁ t * ((γ - 1) / t + (δ - 1) / (t - 1) + (ε - 1) / (t - a))) t)
     (hK : AnalyticOnNhd ℂ (fun x : ℂ × ℂ × ℂ => K x.1 x.2.1 x.2.2) (U ×ˢ V ×ˢ V))
     (hKpde : ∀ z ∈ U, ∀ s ∈ V, ∀ t ∈ V,
@@ -733,7 +839,7 @@ theorem heun_integral_typeII (_hF : α + β + 1 = γ + δ + ε) {U V : Set ℂ} 
     (hbd₁ : ∀ z ∈ U, ∀ t ∈ V, let B : ℂ → ℂ := fun s => s * (s - 1) * (s - a) * ρ₁ s *
         (deriv (fun s' => K z s' t) s * w s - K z s t * deriv w s)
       B (C₁ 1) = B (C₁ 0)) :
-    IsHeunSolOn a q α β γ δ ε
+    IsHeunSolutionOn a q α β γ δ ε
       (fun z => ∫ x in (0 : ℝ)..1, ∫ y in (0 : ℝ)..1,
         K z (C₁ x) (C₂ y) * w (C₁ x) * w (C₂ y) * ((C₁ x - C₂ y) * ρ₁ (C₁ x) * ρ₁ (C₂ y)) *
           deriv C₁ x * deriv C₂ y) U := by

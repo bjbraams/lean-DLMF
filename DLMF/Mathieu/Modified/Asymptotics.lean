@@ -12,13 +12,13 @@ public import DLMFMathlib.Analysis.Asymptotics.AsymptoticExpansion
 # Modified Mathieu functions: asymptotics (DLMF §§28.25–28.26)
 
 The asymptotic expansions of `M^{(3)}_ν`, `M^{(4)}_ν` for large `Re z` (DLMF 28.25.1–28.25.5),
-with the coefficients `D^±_m` of the recurrence 28.25.3 (`modMathieuAsympD`), and Goldstein's
+with the coefficients `D^±_m` of the recurrence 28.25.3 (`modMathieuAsymptoticD`), and Goldstein's
 representations and expansions for large `h` (DLMF 28.26.1–28.26.5).
 
 ## Main results
 
-* `modMathieuAsympD_zero`, `modMathieuAsympD_recurrence`, `modMathieuAsympDPair_fst`: the
-  initial values and the recurrence of `D^±_m` (DLMF 28.25.2–28.25.3).
+* `modMathieuAsymptoticD_zero`, `modMathieuAsymptoticD_recurrence`, `modMathieuAsymptoticDPair_fst`:
+  the initial values and the recurrence of `D^±_m` (DLMF 28.25.2–28.25.3).
 * `modMathieuM_three_hasAsymptoticExpansion`, `modMathieuM_four_hasAsymptoticExpansion`: the
   expansions of `M^{(3)}_ν` and `M^{(4)}_ν` (DLMF 28.25.1, 28.25.4–28.25.5).
 * `radialMathieuMc_three_eq_goldstein`, `radialMathieuMs_three_eq_goldstein`: Goldstein's
@@ -45,28 +45,28 @@ namespace DLMF.Mathieu
 
 /-- `D^±_{0} = 1` (DLMF 28.25.2). -/
 @[dlmf 28.25.E2]
-theorem modMathieuAsympD_zero (σ a h : ℂ) : modMathieuAsympD σ a h 0 = 1 := rfl
+theorem modMathieuAsymptoticD_zero (σ a h : ℂ) : modMathieuAsymptoticD σ a h 0 = 1 := rfl
 
 /-- The recurrence 28.25.3 for `m ≥ 0`, with `D_{-1} = 0` (DLMF 28.25.2):
 `(m+1) D_{m+1} + ((m+½)² ± (m+¼) 8ih + 2h² - a) D_m ± (m-½)(8ihm) D_{m-1} = 0`, written with
-`σ = ±1` and `D_{-1}` the first component of `modMathieuAsympDPair σ a h m`. -/
+`σ = ±1` and `D_{-1}` the first component of `modMathieuAsymptoticDPair σ a h m`. -/
 @[dlmf 28.25.E3, dlmf 28.25.E2]
-theorem modMathieuAsympD_recurrence (σ a h : ℂ) (m : ℕ) :
-    ((m : ℂ) + 1) * modMathieuAsympD σ a h (m + 1) +
+theorem modMathieuAsymptoticD_recurrence (σ a h : ℂ) (m : ℕ) :
+    ((m : ℂ) + 1) * modMathieuAsymptoticD σ a h (m + 1) +
         (((m : ℂ) + 1 / 2) ^ 2 + σ * ((m : ℂ) + 1 / 4) * (8 * I * h) + 2 * h ^ 2 - a) *
-          modMathieuAsympD σ a h m +
-        σ * ((m : ℂ) - 1 / 2) * (8 * I * h * m) * (modMathieuAsympDPair σ a h m).1 = 0 := by
+          modMathieuAsymptoticD σ a h m +
+        σ * ((m : ℂ) - 1 / 2) * (8 * I * h * m) * (modMathieuAsymptoticDPair σ a h m).1 = 0 := by
   have hm : (m : ℂ) + 1 ≠ 0 := by exact_mod_cast Nat.succ_ne_zero m
-  simp only [modMathieuAsympD, modMathieuAsympDPair]
+  simp only [modMathieuAsymptoticD, modMathieuAsymptoticDPair]
   field_simp
   ring
 
 /-- `D_{m-1}` in the recurrence is the previous coefficient: the first component of the pair at
 `m + 1` is `D_m`, and at `0` it is `D_{-1} = 0` (DLMF 28.25.2). -/
 @[dlmf 28.25.E2]
-theorem modMathieuAsympDPair_fst (σ a h : ℂ) (m : ℕ) :
-    (modMathieuAsympDPair σ a h (m + 1)).1 = modMathieuAsympD σ a h m ∧
-      (modMathieuAsympDPair σ a h 0).1 = 0 :=
+theorem modMathieuAsymptoticDPair_fst (σ a h : ℂ) (m : ℕ) :
+    (modMathieuAsymptoticDPair σ a h (m + 1)).1 = modMathieuAsymptoticD σ a h m ∧
+      (modMathieuAsymptoticDPair σ a h 0).1 = 0 :=
   ⟨rfl, rfl⟩
 
 /-- **Asymptotic expansion of `M^{(3)}_ν`** for large `Re z` (DLMF 28.25.1, 28.25.4), fixed
@@ -77,9 +77,9 @@ as `Re z → +∞` with `-π + δ ≤ ph h + Im z ≤ 2π - δ`, `a = λ_ν(h²)
 @[dlmf 28.25.E1, dlmf 28.25.E4]
 theorem modMathieuM_three_hasAsymptoticExpansion {ν h : ℂ} (hν : ModMathieuAdmissible ν h)
     (hh : h ≠ 0) {δ : ℝ} (hδ : 0 < δ) :
-    HasAsymptoticExpansion (modMathieuAsympFilter h (-π + δ) (2 * π - δ))
-      (fun m z => modMathieuAsympPrefactor 1 ν h z * (-4 * I * h * (Complex.cosh z + 1))⁻¹ ^ m)
-      (modMathieuAsympD 1 (mathieuLambda ν (h ^ 2)) h) (fun z => modMathieuM 3 ν z h) := by
+    HasAsymptoticExpansion (modMathieuAsymptoticFilter h (-π + δ) (2 * π - δ))
+      (fun m z => modMathieuAsymptoticPrefactor 1 ν h z * (-4 * I * h * (Complex.cosh z + 1))⁻¹ ^ m)
+      (modMathieuAsymptoticD 1 (mathieuLambda ν (h ^ 2)) h) (fun z => modMathieuM 3 ν z h) := by
   sorry
 
 /-- **Asymptotic expansion of `M^{(4)}_ν`** for large `Re z` (DLMF 28.25.1, 28.25.5):
@@ -89,9 +89,10 @@ as `Re z → +∞` with `-2π + δ ≤ ph h + Im z ≤ π - δ`. -/
 @[dlmf 28.25.E1, dlmf 28.25.E5]
 theorem modMathieuM_four_hasAsymptoticExpansion {ν h : ℂ} (hν : ModMathieuAdmissible ν h)
     (hh : h ≠ 0) {δ : ℝ} (hδ : 0 < δ) :
-    HasAsymptoticExpansion (modMathieuAsympFilter h (-2 * π + δ) (π - δ))
-      (fun m z => modMathieuAsympPrefactor (-1) ν h z * (4 * I * h * (Complex.cosh z + 1))⁻¹ ^ m)
-      (modMathieuAsympD (-1) (mathieuLambda ν (h ^ 2)) h) (fun z => modMathieuM 4 ν z h) := by
+    HasAsymptoticExpansion (modMathieuAsymptoticFilter h (-2 * π + δ) (π - δ))
+      (fun m z => modMathieuAsymptoticPrefactor (-1) ν h z *
+          (4 * I * h * (Complex.cosh z + 1))⁻¹ ^ m)
+      (modMathieuAsymptoticD (-1) (mathieuLambda ν (h ^ 2)) h) (fun z => modMathieuM 4 ν z h) := by
   sorry
 
 /-! ### §28.26 Asymptotic approximations for large `q` -/

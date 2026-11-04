@@ -758,20 +758,22 @@ theorem hasSum_besselJ_neumann_lommel {l a b z : ℂ} (hab : a + b = l) (hl : �
   simp
 
 /-- `(n+1)_m · n! = (n+m)!` for natural `n`. -/
-theorem poch_natCast_add_one_mul_factorial (n m : ℕ) :
-    DLMF.Hypergeometric.poch ((n : ℂ) + 1) m * n ! = ((n + m)! : ℕ) := by
+theorem pochhammer_natCast_add_one_mul_factorial (n m : ℕ) :
+    DLMF.Hypergeometric.pochhammer ((n : ℂ) + 1) m * n ! = ((n + m)! : ℕ) := by
   induction m with
-  | zero => simp [DLMF.Hypergeometric.poch_zero]
+  | zero => simp [DLMF.Hypergeometric.pochhammer_zero]
   | succ m ih =>
-    rw [DLMF.Hypergeometric.poch_succ, show n + (m + 1) = (n + m) + 1 by ring, Nat.factorial_succ]
+    rw [DLMF.Hypergeometric.pochhammer_succ, show n + (m + 1) = (n + m) + 1 by
+        ring, Nat.factorial_succ]
     push_cast at ih ⊢
     rw [← ih]; ring
 
 /-- The Pochhammer factor of the Bessel product series (DLMF 10.8.3) at half-integer orders:
 `(2k+m+2)_m / m! = C(2k+2m+1, m)`. -/
-theorem poch_div_factorial_eq_choose (k m : ℕ) :
-    DLMF.Hypergeometric.poch (2 * k + m + 2 : ℂ) m / m ! = ((2 * k + 2 * m + 1).choose m : ℕ) := by
-  have h1 := poch_natCast_add_one_mul_factorial (2 * k + m + 1) m
+theorem pochhammer_div_factorial_eq_choose (k m : ℕ) :
+    DLMF.Hypergeometric.pochhammer (2 * k + m + 2 : ℂ) m / m ! =
+        ((2 * k + 2 * m + 1).choose m : ℕ) := by
+  have h1 := pochhammer_natCast_add_one_mul_factorial (2 * k + m + 1) m
   have h2 := Nat.choose_mul_factorial_mul_factorial (show m ≤ 2 * k + 2 * m + 1 by omega)
   rw [show 2 * k + 2 * m + 1 - m = 2 * k + m + 1 by omega] at h2
   rw [show 2 * k + m + 1 + m = 2 * k + 2 * m + 1 by ring, ← h2] at h1
@@ -791,19 +793,21 @@ open DLMF.Hypergeometric
 
 /-- Summand of the very-well-poised polynomial identity `sum_range_vwpTerm`. -/
 noncomputable def vwpTerm (A B : ℂ) (n s : ℕ) : ℂ :=
-  (n.choose s : ℂ) * poch A s * poch B s * (A + 2 * s) * poch (A + 1 - B + s) (n - s) *
-    poch (A + n + s + 1) (n - s)
+  (n.choose s : ℂ) * pochhammer A s * pochhammer B s * (A + 2 * s) *
+      pochhammer (A + 1 - B + s) (n - s) *
+    pochhammer (A + n + s + 1) (n - s)
 
 /-- WZ certificate for `sum_range_vwpTerm`. -/
 noncomputable def vwpCert (A B : ℂ) (n : ℕ) : ℕ → ℂ
   | 0 => 0
-  | r + 1 => -((n.choose r : ℂ) * poch A (r + 1) * poch B (r + 1) * poch (A - B + r + 1) (n - r) *
-      poch (A + n + r + 2) (n + 1 - r))
+  | r + 1 => -((n.choose r : ℂ) * pochhammer A (r + 1) * pochhammer B (r + 1) *
+               pochhammer (A - B + r + 1) (n - r) *
+      pochhammer (A + n + r + 2) (n + 1 - r))
 
 /-- `(x)_e (x+e)(x+e+1) = x (x+1)_{e+1}`. -/
-theorem poch_mul_two_succ (x : ℂ) (e : ℕ) :
-    poch x e * ((x + e) * (x + e + 1)) = x * poch (x + 1) (e + 1) := by
-  rw [← poch_succ_left, poch_succ, poch_succ]; push_cast; ring
+theorem pochhammer_mul_two_succ (x : ℂ) (e : ℕ) :
+    pochhammer x e * ((x + e) * (x + e + 1)) = x * pochhammer (x + 1) (e + 1) := by
+  rw [← pochhammer_succ_left, pochhammer_succ, pochhammer_succ]; push_cast; ring
 
 /-- The WZ step for `sum_range_vwpTerm`. -/
 theorem vwpTerm_succ_sub (A B : ℂ) (n s : ℕ) (hs : s ≤ n + 1) :
@@ -813,24 +817,25 @@ theorem vwpTerm_succ_sub (A B : ℂ) (n s : ℕ) (hs : s ≤ n + 1) :
   · -- s = n + 1
     obtain rfl : s = n + 1 := by omega
     simp only [vwpTerm, vwpCert, Nat.choose_succ_self, Nat.choose_self, Nat.sub_self,
-      Nat.cast_zero, zero_mul, mul_zero, sub_zero, show n + 1 - n = 1 by omega, poch_zero,
-      poch_one, Nat.cast_one]
+      Nat.cast_zero, zero_mul, mul_zero, sub_zero, show n + 1 - n = 1 by omega, pochhammer_zero,
+      pochhammer_one, Nat.cast_one]
     push_cast
     ring
   · obtain ⟨e, rfl⟩ := Nat.exists_eq_add_of_le h
-    have hY := poch_mul_two_succ (A + 2 * s + e + 1) e
-    have hR := poch_succ (A + 1 - B + s) e
+    have hY := pochhammer_mul_two_succ (A + 2 * s + e + 1) e
+    have hR := pochhammer_succ (A + 1 - B + s) e
     rcases s with _ | r
-    · simp only [vwpTerm, vwpCert, Nat.choose_zero_right, Nat.cast_one, poch_zero, Nat.cast_zero,
-        Nat.sub_zero, zero_add, poch_one]
+    · simp only [vwpTerm, vwpCert, Nat.choose_zero_right, Nat.cast_one,
+          pochhammer_zero, Nat.cast_zero,
+        Nat.sub_zero, zero_add, pochhammer_one]
       simp only [Nat.cast_zero] at hY hR
       rw [hR, show A + ((e + 1 : ℕ) : ℂ) + 0 + 1 = A + 2 * 0 + e + 1 + 1 by push_cast; ring,
         show A + (e : ℂ) + 0 + 1 = A + 2 * 0 + e + 1 by ring,
         show A - B + 0 + 1 = A + 1 - B + 0 by ring,
         show A + (e : ℂ) + 0 + 2 = A + 2 * 0 + e + 1 + 1 by ring]
-      generalize poch (A + 1 - B + 0) e = X at *
-      generalize poch (A + 2 * 0 + ↑e + 1 + 1) (e + 1) = Y at *
-      generalize poch (A + 2 * 0 + ↑e + 1) e = Z at *
+      generalize pochhammer (A + 1 - B + 0) e = X at *
+      generalize pochhammer (A + 2 * 0 + ↑e + 1 + 1) (e + 1) = Y at *
+      generalize pochhammer (A + 2 * 0 + ↑e + 1) e = Z at *
       linear_combination (-(A * X)) * hY
     · simp only [vwpTerm, vwpCert, show r + 1 + e + 1 - (r + 1) = e + 1 by omega,
         show r + 1 + e - (r + 1) = e by omega, show r + 1 + e - r = e + 1 by omega,
@@ -843,7 +848,8 @@ theorem vwpTerm_succ_sub (A B : ℂ) (n s : ℕ) (hs : s ≤ n + 1) :
       have hC1 : ((r + 1 + e + 1).choose (r + 1) : ℂ) =
           ((r + 1 + e).choose r : ℂ) + ((r + 1 + e).choose (r + 1) : ℂ) := by
         exact_mod_cast Nat.choose_succ_succ (r + 1 + e) r
-      rw [hR, poch_succ A (r + 1), poch_succ B (r + 1), poch_succ_left (A - B + r + 1) e,
+      rw [hR, pochhammer_succ A (r + 1), pochhammer_succ B (r + 1),
+          pochhammer_succ_left (A - B + r + 1) e,
         show A + ((r + 1 + e + 1 : ℕ) : ℂ) + ((r + 1 : ℕ) : ℂ) + 1 =
           A + 2 * ((r + 1 : ℕ) : ℂ) + e + 1 + 1 by push_cast; ring,
         show A + ((r + 1 + e : ℕ) : ℂ) + ((r + 1 : ℕ) : ℂ) + 1 =
@@ -854,13 +860,13 @@ theorem vwpTerm_succ_sub (A B : ℂ) (n s : ℕ) (hs : s ≤ n + 1) :
           A + 2 * ((r + 1 : ℕ) : ℂ) + e + 1 + 1 by push_cast; ring,
         show A + ((r + 1 + e : ℕ) : ℂ) + (r : ℂ) + 2 = A + 2 * ((r + 1 : ℕ) : ℂ) + e + 1 by
           push_cast; ring,
-        poch_succ_left (A + 2 * ((r + 1 : ℕ) : ℂ) + e + 1) (e + 1)]
+        pochhammer_succ_left (A + 2 * ((r + 1 : ℕ) : ℂ) + e + 1) (e + 1)]
       rw [hC1]
-      generalize poch A (r + 1) = PA at *
-      generalize poch B (r + 1) = PB at *
-      generalize poch (A + 1 - B + ((r + 1 : ℕ) : ℂ)) e = X at *
-      generalize poch (A + 2 * ((r + 1 : ℕ) : ℂ) + e + 1 + 1) (e + 1) = Y at *
-      generalize poch (A + 2 * ((r + 1 : ℕ) : ℂ) + e + 1) e = Z at *
+      generalize pochhammer A (r + 1) = PA at *
+      generalize pochhammer B (r + 1) = PB at *
+      generalize pochhammer (A + 1 - B + ((r + 1 : ℕ) : ℂ)) e = X at *
+      generalize pochhammer (A + 2 * ((r + 1 : ℕ) : ℂ) + e + 1 + 1) (e + 1) = Y at *
+      generalize pochhammer (A + 2 * ((r + 1 : ℕ) : ℂ) + e + 1) e = Z at *
       generalize ((r + 1 + e).choose (r + 1) : ℂ) = C0 at *
       generalize ((r + 1 + e).choose r : ℂ) = Cm at *
       push_cast at hY hb ⊢
@@ -870,9 +876,9 @@ theorem vwpTerm_succ_sub (A B : ℂ) (n s : ℕ) (hs : s ≤ n + 1) :
 /-- A terminating very-well-poised `₄F₃(-1)` sum in polynomial form:
 `∑ₛ C(n,s) (A)ₛ (B)ₛ (A+2s) (A+1-B+s)_{n-s} (A+n+s+1)_{n-s} = (A)_{2n+1}`. -/
 theorem sum_range_vwpTerm (A B : ℂ) (n : ℕ) :
-    ∑ s ∈ range (n + 1), vwpTerm A B n s = poch A (2 * n + 1) := by
+    ∑ s ∈ range (n + 1), vwpTerm A B n s = pochhammer A (2 * n + 1) := by
   induction n with
-  | zero => simp [vwpTerm, poch_one, poch_zero]
+  | zero => simp [vwpTerm, pochhammer_one, pochhammer_zero]
   | succ n ih =>
     have h := Finset.sum_congr rfl fun s (hs : s ∈ range (n + 2)) =>
       vwpTerm_succ_sub A B n s (by rw [Finset.mem_range] at hs; omega)
@@ -883,18 +889,18 @@ theorem sum_range_vwpTerm (A B : ℂ) (n : ℕ) :
     have h1 : vwpCert A B n (n + 1 + 1) = 0 := by simp [vwpCert, Nat.choose_succ_self]
     rw [h0, h1, show vwpCert A B n 0 = 0 from rfl, add_zero, sub_zero, sub_eq_zero] at h
     rw [show n + 1 + 1 = n + 2 by ring, h, show 2 * (n + 1) + 1 = 2 * n + 1 + 1 + 1 by ring,
-      poch_succ A (2 * n + 1 + 1), poch_succ A (2 * n + 1)]
+      pochhammer_succ A (2 * n + 1 + 1), pochhammer_succ A (2 * n + 1)]
     push_cast
     ring
 
 /-- Summand of `sum_range_kumTerm`: `C(K,2m) (2m)!/m! 2^{K-2m} (c+m)_{K-m}`. -/
 noncomputable def kumTerm (c : ℂ) (K m : ℕ) : ℂ :=
-  (K.choose (2 * m) : ℂ) * ((2 * m)! / m ! : ℂ) * 2 ^ (K - 2 * m) * poch (c + m) (K - m)
+  (K.choose (2 * m) : ℂ) * ((2 * m)! / m ! : ℂ) * 2 ^ (K - 2 * m) * pochhammer (c + m) (K - m)
 
 /-- WZ certificate for `sum_range_kumTerm`. -/
 noncomputable def kumCert (c : ℂ) (K m : ℕ) : ℂ :=
   -(2 * m * ((2 * m)! / m ! : ℂ) * ((K + 1).choose (2 * m) : ℂ) / (K + 1) * 2 ^ (K + 1 - 2 * m) *
-    poch (c + m) (K + 1 - m))
+    pochhammer (c + m) (K + 1 - m))
 
 /-- `(2m+2)!/(m+1)! = 2(2m+1) (2m)!/m!`. -/
 theorem two_mul_succ_factorial_div (m : ℕ) :
@@ -940,11 +946,12 @@ theorem kumTerm_succ_sub (c : ℂ) (K m : ℕ) :
       show 2 * m + e + 1 + 1 - m = (m + e + 1) + 1 by omega,
       show 2 * m + e + 1 - m = m + e + 1 by omega,
       show 2 * m + e + 1 + 1 - 2 * (m + 1) = e by omega,
-      show 2 * m + e + 1 + 1 - (m + 1) = m + e + 1 by omega, poch_succ_left (c + m) (m + e + 1),
+      show 2 * m + e + 1 + 1 - (m + 1) = m + e + 1 by omega,
+                                                        pochhammer_succ_left (c + m) (m + e + 1),
       show c + (m : ℂ) + 1 = c + 1 + m by ring, hq]
     push_cast
     rw [show c + ((m : ℂ) + 1) = c + 1 + m by ring]
-    generalize poch (c + 1 + m) (m + e + 1) = X
+    generalize pochhammer (c + 1 + m) (m + e + 1) = X
     generalize ((2 * m)! / m ! : ℂ) = q at *
     have hD : (2 * (m : ℂ) + e + 1 + 1) ≠ 0 := by
                                                  exact_mod_cast (show 2 * m + e + 1 +
@@ -964,7 +971,7 @@ theorem kumTerm_succ_sub (c : ℂ) (K m : ℕ) :
       rw [show 2 * m + 1 - 2 * m = 1 by omega, show 2 * m + 1 - m = m + 1 by omega, Nat.sub_self,
         show 2 * m - m = m by omega, show 2 * m + 1 - 2 * (m + 1) = 0 by omega,
         Nat.choose_eq_zero_of_lt (show 2 * m + 1 < 2 * (m + 1) by omega), Nat.choose_self,
-        Nat.choose_succ_self_right, poch_succ_left (c + m) m, show c + (m : ℂ) + 1 =
+        Nat.choose_succ_self_right, pochhammer_succ_left (c + m) m, show c + (m : ℂ) + 1 =
             c + 1 + m by ring]
       have hm : (2 * (m : ℂ) + 1) ≠ 0 := by exact_mod_cast (show 2 * m + 1 ≠ 0 by omega)
       push_cast
@@ -995,9 +1002,9 @@ theorem kumTerm_succ_sub (c : ℂ) (K m : ℕ) :
 /-- The coefficient identity behind `e^{2w} ₀F₁(;c;w²) = M(c-1/2, 2c-1, 4w)` in polynomial form:
 `∑ₘ C(K,2m) (2m)!/m! 2^{K-2m} (c+m)_{K-m} = (2c+K-1)_K`, valid for every `c`. -/
 theorem sum_range_kumTerm (c : ℂ) (K : ℕ) :
-    ∑ m ∈ range (K + 1), kumTerm c K m = poch (2 * c + K - 1) K := by
+    ∑ m ∈ range (K + 1), kumTerm c K m = pochhammer (2 * c + K - 1) K := by
   induction K generalizing c with
-  | zero => simp [kumTerm, poch_zero]
+  | zero => simp [kumTerm, pochhammer_zero]
   | succ K ih =>
     have h := Finset.sum_congr rfl fun m (_ : m ∈ range (K + 2)) => kumTerm_succ_sub c K m
     rw [Finset.sum_sub_distrib, Finset.sum_range_sub, ← Finset.mul_sum,
@@ -1008,18 +1015,18 @@ theorem sum_range_kumTerm (c : ℂ) (K : ℕ) :
       simp [kumCert, Nat.choose_eq_zero_of_lt (show K + 1 < 2 * (K + 1 + 1) by omega)]
     have h2 : kumCert c K 0 = 0 := by simp [kumCert]
     rw [h0, h1, h2, add_zero, sub_zero, sub_eq_zero] at h
-    rw [show K + 1 + 1 = K + 2 by ring, h, poch_succ_left]
+    rw [show K + 1 + 1 = K + 2 by ring, h, pochhammer_succ_left]
     push_cast
     rw [show 2 * (c + 1) + K - 1 = 2 * c + (K + 1) - 1 + 1 by ring,
       show 2 * c + K = 2 * c + (K + 1) - 1 by ring]
 
 /-- `Γ(x+n) = Γ(x) (x)_n` away from the poles. -/
-theorem Gamma_add_nat_eq_mul_poch {x : ℂ} (hx : ∀ i : ℕ, x + i ≠ 0) (n : ℕ) :
-    Gamma (x + n) = Gamma x * poch x n := by
+theorem Gamma_add_nat_eq_mul_pochhammer {x : ℂ} (hx : ∀ i : ℕ, x + i ≠ 0) (n : ℕ) :
+    Gamma (x + n) = Gamma x * pochhammer x n := by
   induction n with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ n ih =>
-    rw [Nat.cast_succ, ← add_assoc, Complex.Gamma_add_one _ (hx n), ih, poch_succ]; ring
+    rw [Nat.cast_succ, ← add_assoc, Complex.Gamma_add_one _ (hx n), ih, pochhammer_succ]; ring
 
 /-- Summing a summable family on `ℕ × ℕ` along the fibres of `(m, r) ↦ d m + r` (`d ≥ 1`). -/
 theorem hasSum_sum_range_fiber {d : ℕ} (hd : 0 < d) {f : ℕ × ℕ → ℂ} {s : ℂ} (hf : HasSum f s) :
@@ -1055,7 +1062,7 @@ theorem hasSum_sum_range_fiber {d : ℕ} (hd : 0 < d) {f : ℕ × ℕ → ℂ} {
 /-- Power series of `₀F̃₁(;c;w²) e^{2w}`: the coefficients are `(2c+K-1)_K / (K! Γ(c+K))`
 (the regularized form of `M(c-1/2, 2c-1, 4w)`, DLMF 13.6.9), valid for every `c ∉ -ℕ`. -/
 theorem hasSum_regularized0F1_mul_exp {c : ℂ} (hc : ∀ j : ℕ, c + j ≠ 0) (w : ℂ) :
-    HasSum (fun K : ℕ => poch (2 * c + K - 1) K / (K ! * Gamma (c + K)) * w ^ K)
+    HasSum (fun K : ℕ => pochhammer (2 * c + K - 1) K / (K ! * Gamma (c + K)) * w ^ K)
       (regularizedHGFun (∅ : Multiset ℂ) {c} (w ^ 2) * exp (2 * w)) := by
   have h1 : HasSum (fun m => regularizedHGFunCoeff (∅ : Multiset ℂ) {c} m * (w ^ 2) ^ m)
       (regularizedHGFun (∅ : Multiset ℂ) {c} (w ^ 2)) :=
@@ -1087,14 +1094,14 @@ theorem hasSum_regularized0F1_mul_exp {c : ℂ} (hc : ∀ j : ℕ, c + j ≠ 0) 
   · obtain ⟨r, rfl⟩ := Nat.exists_eq_add_of_le h2m
     have hcm : ∀ i : ℕ, c + m + i ≠ 0 := fun i => by
       rw [add_assoc, ← Nat.cast_add]; exact hc _
-    have hG := Gamma_add_nat_eq_mul_poch hcm (m + r)
+    have hG := Gamma_add_nat_eq_mul_pochhammer hcm (m + r)
     rw [show c + (m : ℂ) + ((m + r : ℕ) : ℂ) = c + ((2 * m + r : ℕ) : ℂ) by push_cast; ring] at hG
     have hΓm : Gamma (c + m) ≠ 0 := by
       have := Gamma_add_nat_ne_zero_of_ne (l := c) (fun n h => hc n (by rw [h]; ring)) m
       exact this
     have hΓK : Gamma (c + ((2 * m + r : ℕ) : ℂ)) ≠ 0 :=
       Gamma_add_nat_ne_zero_of_ne (l := c) (fun n h => hc n (by rw [h]; ring)) _
-    have hP : poch (c + m) (m + r) ≠ 0 := by
+    have hP : pochhammer (c + m) (m + r) ≠ 0 := by
       intro h; rw [h, mul_zero] at hG; exact hΓK hG
     have hfac := Nat.choose_mul_factorial_mul_factorial (show 2 * m ≤ 2 * m + r by omega)
     rw [show 2 * m + r - 2 * m = r by omega] at hfac
@@ -1114,11 +1121,11 @@ theorem hasSum_regularized0F1_mul_exp {c : ℂ} (hc : ∀ j : ℕ, c + j ≠ 0) 
   · simp [kumTerm, Nat.choose_eq_zero_of_lt (show K < 2 * m by omega)]
 
 /-- `‖(x)_K‖ ≤ (‖x‖ + K)^K`. -/
-theorem norm_poch_le_pow (x : ℂ) (K : ℕ) : ‖poch x K‖ ≤ (‖x‖ + K) ^ K := by
+theorem norm_pochhammer_le_pow (x : ℂ) (K : ℕ) : ‖pochhammer x K‖ ≤ (‖x‖ + K) ^ K := by
   induction K with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ K ih =>
-    rw [poch_succ, norm_mul, pow_succ]
+    rw [pochhammer_succ, norm_mul, pow_succ]
     have h1 : ‖x + K‖ ≤ ‖x‖ + (K + 1 : ℕ) := by
       calc ‖x + K‖ ≤ ‖x‖ + ‖(K : ℂ)‖ := norm_add_le _ _
         _ ≤ ‖x‖ + (K + 1 : ℕ) := by simp
@@ -1127,21 +1134,22 @@ theorem norm_poch_le_pow (x : ℂ) (K : ℕ) : ‖poch x K‖ ≤ (‖x‖ + K) 
     exact mul_le_mul (ih.trans h2) h1 (norm_nonneg _) (by positivity)
 
 /-- `‖(x)_K‖ ≤ K! e^{‖x‖+K}`. -/
-theorem norm_poch_le_factorial_mul_exp (x : ℂ) (K : ℕ) :
-    ‖poch x K‖ ≤ K ! * Real.exp (‖x‖ + K) := by
+theorem norm_pochhammer_le_factorial_mul_exp (x : ℂ) (K : ℕ) :
+    ‖pochhammer x K‖ ≤ K ! * Real.exp (‖x‖ + K) := by
   have h := Real.pow_div_factorial_le_exp (‖x‖ + K) (by positivity) K
   have hK : (0 : ℝ) < K ! := by exact_mod_cast Nat.factorial_pos K
   rw [div_le_iff₀ hK] at h
-  linarith [norm_poch_le_pow x K]
+  linarith [norm_pochhammer_le_pow x K]
 
 /-- Odd duplication: `(2ν)_{2N+1} = 2·4^N (ν)_{N+1} (ν+1/2)_N`. -/
-theorem poch_two_mul_two_mul_add_one (ν : ℂ) (N : ℕ) :
-    poch (2 * ν) (2 * N + 1) = 2 * 4 ^ N * poch ν (N + 1) * poch (ν + 1 / 2) N := by
+theorem pochhammer_two_mul_two_mul_add_one (ν : ℂ) (N : ℕ) :
+    pochhammer (2 * ν) (2 * N + 1) = 2 * 4 ^ N * pochhammer ν (N + 1) *
+        pochhammer (ν + 1 / 2) N := by
   induction N with
-  | zero => simp [poch_one, poch_zero]
+  | zero => simp [pochhammer_one, pochhammer_zero]
   | succ N ih =>
-    rw [show 2 * (N + 1) + 1 = 2 * N + 1 + 1 + 1 by ring, poch_succ, poch_succ, ih,
-      poch_succ ν (N + 1), poch_succ (ν + 1 / 2) N, pow_succ]
+    rw [show 2 * (N + 1) + 1 = 2 * N + 1 + 1 + 1 by ring, pochhammer_succ, pochhammer_succ, ih,
+      pochhammer_succ ν (N + 1), pochhammer_succ (ν + 1 / 2) N, pow_succ]
     push_cast
     ring
 
@@ -1149,7 +1157,7 @@ theorem poch_two_mul_two_mul_add_one (ν : ℂ) (N : ℕ) :
 -/
 theorem exists_norm_regularized0F1_mul_exp_coeff_le (ν : ℂ) :
     ∃ C X : ℝ, 0 ≤ C ∧ 1 ≤ X ∧ ∀ k K : ℕ,
-      ‖poch (2 * (ν + k + 1) + K - 1) K / (K ! * Gamma (ν + k + 1 + K))‖ ≤
+      ‖pochhammer (2 * (ν + k + 1) + K - 1) K / (K ! * Gamma (ν + k + 1 + K))‖ ≤
         C * (X ^ (k + K) / (k + K)!) := by
   obtain ⟨C, hC0, hC⟩ := exists_norm_recip_Gamma_add_nat_le (ν + 1)
   refine ⟨C * Real.exp ‖2 * ν + 1‖, 2 * Real.exp 1 ^ 2, by positivity, ?_, fun k K => ?_⟩
@@ -1160,11 +1168,11 @@ theorem exists_norm_regularized0F1_mul_exp_coeff_le (ν : ℂ) :
     rw [show 2 * (ν + k + 1) + (K : ℂ) - 1 = (2 * ν + 1) + ((2 * k + K : ℕ) : ℂ) by push_cast; ring]
     refine (norm_add_le _ _).trans (le_of_eq ?_)
     rw [Complex.norm_natCast]; push_cast; ring
-  have h1 := norm_poch_le_factorial_mul_exp (2 * (ν + k + 1) + K - 1) K
+  have h1 := norm_pochhammer_le_factorial_mul_exp (2 * (ν + k + 1) + K - 1) K
   have h2 := hC (k + K)
   rw [show ν + 1 + ((k + K : ℕ) : ℂ) = ν + k + 1 + K by push_cast; ring] at h2
   rw [div_eq_mul_inv, mul_inv, norm_mul, norm_mul, norm_inv (K ! : ℂ), Complex.norm_natCast]
-  calc ‖poch (2 * (ν + k + 1) + K - 1) K‖ * ((K ! : ℝ)⁻¹ * ‖(Gamma (ν + k + 1 + K))⁻¹‖)
+  calc ‖pochhammer (2 * (ν + k + 1) + K - 1) K‖ * ((K ! : ℝ)⁻¹ * ‖(Gamma (ν + k + 1 + K))⁻¹‖)
       ≤ (K ! * Real.exp (‖2 * ν + 1‖ + 2 * k + K + K)) *
           ((K ! : ℝ)⁻¹ * (C * (2 ^ (k + K) / (k + K)!))) := by
         gcongr

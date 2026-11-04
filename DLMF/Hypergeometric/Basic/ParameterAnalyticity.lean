@@ -21,18 +21,21 @@ extends identities proved under restrictive parameter hypotheses to all paramete
 
 ## Main results
 
-* `analyticOnNhd_regularizedGaussHGFun_comp`, `analyticOnNhd_regularizedGaussHGFun_a`,
-  `analyticOnNhd_regularizedGaussHGFun_b`, `analyticOnNhd_regularizedGaussHGFun_c`:
-  analyticity in the parameters, along any entire curve.
+* `analyticOnNhd_regularizedGaussHypergeometricFun_comp`,
+  `analyticOnNhd_regularizedGaussHypergeometricFun_a`,
+  `analyticOnNhd_regularizedGaussHypergeometricFun_b`,
+  `analyticOnNhd_regularizedGaussHypergeometricFun_c`: analyticity in the parameters, along any
+  entire curve.
 * `eq_of_eqOn_not_neg_nat`, `eq_of_eqOn_re_pos`: identity principles in the parameters.
-* `regularizedGaussHGFun_eq_div_Gamma`: `𝐅 = ₂F₁/Γ(c)` off the poles.
-* `deriv_regularizedGaussHGFun`, `iteratedDeriv_regularizedGaussHGFun`: DLMF 15.5.1–15.5.2 for
-  the regularized function, for all parameters.
+* `regularizedGaussHypergeometricFun_eq_div_Gamma`: `𝐅 = ₂F₁/Γ(c)` off the poles.
+* `deriv_regularizedGaussHypergeometricFun`, `iteratedDeriv_regularizedGaussHypergeometricFun`: DLMF
+  15.5.1–15.5.2 for the regularized function, for all parameters.
 * `regularized_at_neg_nat`, `tendsto_regularized_at_neg_nat`: the regularized function at a
   nonpositive integer denominator parameter, DLMF 15.2.3_5.
 * `contiguous_c`, `contiguous_shift_b`: two of Gauss's contiguous relations on the disk
-  (DLMF 15.5.16_5), and `regularizedGaussHGFun_contiguous_c`,
-  `regularizedGaussHGFun_contiguous_shift_b`: their regularized forms, for all parameters.
+  (DLMF 15.5.16_5), and `regularizedGaussHypergeometricFun_contiguous_c`,
+  `regularizedGaussHypergeometricFun_contiguous_shift_b`: their regularized forms, for all
+  parameters.
 
 ## Implementation notes
 
@@ -52,29 +55,30 @@ noncomputable section
 namespace DLMF.Hypergeometric
 
 /-- Helper lemma for contiguous relations: `a (a+1)_n = (a+n) (a)_n`. -/
-theorem poch_succ_left_mul (a : ℂ) (n : ℕ) : a * poch (a + 1) n = (a + n) * poch a n := by
-  rw [← poch_succ_left, poch_succ, mul_comm]
+theorem pochhammer_succ_left_mul (a : ℂ) (n : ℕ) : a * pochhammer (a + 1) n = (a + n) *
+    pochhammer a n := by
+  rw [← pochhammer_succ_left, pochhammer_succ, mul_comm]
 
 /-- Helper lemma for `contiguous_shift_b`. -/
-theorem poch_sub_succ (b : ℂ) (n : ℕ) :
-    poch b (n + 1) - poch (b + 1) (n + 1) = -(n + 1 : ℂ) * poch (b + 1) n := by
-  rw [poch_succ_left, poch_succ]
+theorem pochhammer_sub_succ (b : ℂ) (n : ℕ) :
+    pochhammer b (n + 1) - pochhammer (b + 1) (n + 1) = -(n + 1 : ℂ) * pochhammer (b + 1) n := by
+  rw [pochhammer_succ_left, pochhammer_succ]
   ring
 
 /-- Helper lemma for `contiguous_shift_b`. The identity is false at `c = 0` without this
 regularity hypothesis: both left-hand hypergeometric series collapse to `1` in Lean's
 totalization, while the right-hand side need not vanish. -/
-theorem gaussHGCoeff_contiguous_shift_b {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
-    c * gaussHGCoeff a b c (n + 1) - c * gaussHGCoeff a (b + 1) c (n + 1) =
-      -a * gaussHGCoeff (a + 1) (b + 1) (c + 1) n := by
+theorem gaussHypergeometricCoeff_contiguous_shift_b {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
+    c * gaussHypergeometricCoeff a b c (n + 1) - c * gaussHypergeometricCoeff a (b + 1) c (n + 1) =
+      -a * gaussHypergeometricCoeff (a + 1) (b + 1) (c + 1) n := by
   have hc0 : c ≠ 0 := by simpa using hc 0
-  have hcp1 := poch_ne_zero_of_not_neg_nat (not_neg_nat_add_nat hc 1) n
+  have hcp1 := pochhammer_ne_zero_of_not_neg_nat (not_neg_nat_add_nat hc 1) n
   have hn : (n + 1 : ℂ) ≠ 0 := by exact_mod_cast Nat.succ_ne_zero n
   have hf0 : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
-  have hdiff := poch_sub_succ b n
+  have hdiff := pochhammer_sub_succ b n
   have hfac : ((n + 1).factorial : ℂ) = (n + 1) * n.factorial := by
     rw [Nat.factorial_succ, Nat.cast_mul, Nat.cast_add, Nat.cast_one, mul_comm]
-  simp only [gaussHGCoeff, poch_succ_left a n, poch_succ_left c n, hfac]
+  simp only [gaussHypergeometricCoeff, pochhammer_succ_left a n, pochhammer_succ_left c n, hfac]
   field_simp [hc0, hcp1, hn, hf0]
   rw [hdiff]
   ring
@@ -96,26 +100,28 @@ theorem contiguous_shift_b {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (hz : �
   let d : ℕ → ℂ := fun n =>
     match n with
     | 0 => 0
-    | n + 1 => -a * gaussHGCoeff (a + 1) (b + 1) (c + 1) n
-  have hd_succ : ∀ n, d (n + 1) = -a * gaussHGCoeff (a + 1) (b + 1) (c + 1) n := fun n => rfl
+    | n + 1 => -a * gaussHypergeometricCoeff (a + 1) (b + 1) (c + 1) n
+  have hd_succ : ∀ n, d (n + 1) = -a *
+      gaussHypergeometricCoeff (a + 1) (b + 1) (c + 1) n := fun n => rfl
   have hds : HasSum (fun n => d (n + 1) * z ^ n)
       (-a * ₂F₁ (a + 1) (b + 1) (c + 1) z) := by
     have hfun : (fun n => d (n + 1) * z ^ n) =
-        fun n => -a * (gaussHGCoeff (a + 1) (b + 1) (c + 1) n * z ^ n) := by
+        fun n => -a * (gaussHypergeometricCoeff (a + 1) (b + 1) (c + 1) n * z ^ n) := by
       funext n
       rw [hd_succ]
       ring
     rwa [hfun]
   have hR := HasSum.mul_pow_shift hds rfl
   have hfunL : (fun n : ℕ =>
-      c * (gaussHGCoeff a b c n * z ^ n) - c * (gaussHGCoeff a (b + 1) c n * z ^ n)) =
+      c * (gaussHypergeometricCoeff a b c n * z ^ n) - c *
+          (gaussHypergeometricCoeff a (b + 1) c n * z ^ n)) =
       fun n => d n * z ^ n := by
     funext n
     cases n with
-    | zero => simp [d, gaussHGCoeff, poch_zero]
+    | zero => simp [d, gaussHypergeometricCoeff, pochhammer_zero]
     | succ n =>
       simp only [d]
-      have hcoeff := gaussHGCoeff_contiguous_shift_b (a := a) (b := b) (c := c) hc n
+      have hcoeff := gaussHypergeometricCoeff_contiguous_shift_b (a := a) (b := b) (c := c) hc n
       linear_combination hcoeff * z ^ (n + 1)
   have hL' : HasSum (fun n => d n * z ^ n)
       (c * ₂F₁ a b c z - c * ₂F₁ a (b + 1) c z) := by
@@ -125,28 +131,30 @@ theorem contiguous_shift_b {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (hz : �
   exact hL'.unique (hval ▸ hR)
 
 /-- Helper lemma for `contiguous_c`. -/
-theorem gaussHGCoeff_contiguous_c {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
-    c * gaussHGCoeff a b c n - (c - a) * gaussHGCoeff a b (c + 1) n -
-      a * gaussHGCoeff (a + 1) b (c + 1) n = 0 := by
-  have hcp := poch_ne_zero_of_not_neg_nat hc n
-  have hcp1 : poch (c + 1) n ≠ 0 := by
-    simpa using poch_ne_zero_of_not_neg_nat (not_neg_nat_add_nat hc 1) n
+theorem gaussHypergeometricCoeff_contiguous_c {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
+    c * gaussHypergeometricCoeff a b c n - (c - a) * gaussHypergeometricCoeff a b (c + 1) n -
+      a * gaussHypergeometricCoeff (a + 1) b (c + 1) n = 0 := by
+  have hcp := pochhammer_ne_zero_of_not_neg_nat hc n
+  have hcp1 : pochhammer (c + 1) n ≠ 0 := by
+    simpa using pochhammer_ne_zero_of_not_neg_nat (not_neg_nat_add_nat hc 1) n
   have hfact : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
-  have hA := poch_succ_left_mul a n
-  have hC := poch_succ_left_mul c n
+  have hA := pochhammer_succ_left_mul a n
+  have hC := pochhammer_succ_left_mul c n
   have hnum :
-      c * poch a n * poch (c + 1) n - (c - a) * poch a n * poch c n -
-        a * poch (a + 1) n * poch c n = 0 := by
-    rw [show c * poch a n * poch (c + 1) n = poch a n * (c * poch (c + 1) n) by ring, hC]
-    rw [show a * poch (a + 1) n * poch c n = poch c n * (a * poch (a + 1) n) by ring, hA]
+      c * pochhammer a n * pochhammer (c + 1) n - (c - a) * pochhammer a n * pochhammer c n -
+        a * pochhammer (a + 1) n * pochhammer c n = 0 := by
+    rw [show c * pochhammer a n * pochhammer (c + 1) n = pochhammer a n *
+        (c * pochhammer (c + 1) n) by ring, hC]
+    rw [show a * pochhammer (a + 1) n * pochhammer c n = pochhammer c n *
+        (a * pochhammer (a + 1) n) by ring, hA]
     ring
-  have hden : poch c n * poch (c + 1) n * (n.factorial : ℂ) ≠ 0 :=
+  have hden : pochhammer c n * pochhammer (c + 1) n * (n.factorial : ℂ) ≠ 0 :=
     mul_ne_zero (mul_ne_zero hcp hcp1) hfact
-  simp only [gaussHGCoeff]
+  simp only [gaussHypergeometricCoeff]
   apply mul_left_cancel₀ hden
   rw [mul_zero]
   field_simp [hcp, hcp1, hfact]
-  linear_combination poch b n * hnum
+  linear_combination pochhammer b n * hnum
 
 /-- Contiguous relation shifting the denominator parameter. The previous combination
 `(c-a-b) F(a,b;c) + a F(a+1,b;c+1) + b F(a,b+1;c+1) - c F(a,b;c+1)` is false already
@@ -163,12 +171,12 @@ theorem contiguous_c {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (hz : ‖z‖ 
     (hasFPowerSeriesOnBall_ordinaryHypergeometric (a + 1) b (c + 1)).hasSum_mul_pow hz'
   have hsum := (hs0.mul_left c).sub ((hs1.mul_left (c - a)).add (hs2.mul_left a))
   have hfun : (fun n : ℕ =>
-      c * (gaussHGCoeff a b c n * z ^ n) -
-        ((c - a) * (gaussHGCoeff a b (c + 1) n * z ^ n) +
-          a * (gaussHGCoeff (a + 1) b (c + 1) n * z ^ n))) =
+      c * (gaussHypergeometricCoeff a b c n * z ^ n) -
+        ((c - a) * (gaussHypergeometricCoeff a b (c + 1) n * z ^ n) +
+          a * (gaussHypergeometricCoeff (a + 1) b (c + 1) n * z ^ n))) =
       fun _ => 0 := by
     funext n
-    have hcoeff := gaussHGCoeff_contiguous_c (a := a) (b := b) (c := c) hc n
+    have hcoeff := gaussHypergeometricCoeff_contiguous_c (a := a) (b := b) (c := c) hc n
     linear_combination hcoeff * z ^ n
   have hsum' : HasSum (fun _ : ℕ => (0 : ℂ))
       (c * ₂F₁ a b c z - ((c - a) * ₂F₁ a b (c + 1) z + a * ₂F₁ (a + 1) b (c + 1) z)) := by
@@ -195,12 +203,12 @@ theorem eq_of_analyticOnNhd_univ_of_eqOn {f g : ℂ → ℂ}
 /-- Pochhammer symbols with nonnegative real argument are nonnegative. -/
 theorem ascPochhammer_eval_nonneg {x : ℝ} (hx : 0 ≤ x) (n : ℕ) :
     0 ≤ (ascPochhammer ℝ n).eval x := by
-  exact poch_eval_nonneg hx n
+  exact pochhammer_eval_nonneg hx n
 
 /-- Pochhammer symbols are monotone on the nonnegative reals. -/
 theorem ascPochhammer_eval_mono {x y : ℝ} (hx : 0 ≤ x) (hxy : x ≤ y) (n : ℕ) :
     (ascPochhammer ℝ n).eval x ≤ (ascPochhammer ℝ n).eval y := by
-  exact poch_eval_mono hx hxy n
+  exact pochhammer_eval_mono hx hxy n
 
 /-- Evaluating the complex Pochhammer polynomial at a real number. -/
 theorem ascPochhammer_eval_ofReal (x : ℝ) (n : ℕ) :
@@ -213,8 +221,8 @@ theorem ascPochhammer_eval_ofReal (x : ℝ) (n : ℕ) :
 theorem norm_ascPochhammer_eval_le {a : ℂ} {r : ℝ} (hr : ‖a‖ ≤ r) (n : ℕ) :
     ‖(ascPochhammer ℂ n).eval a‖ ≤ ‖(ascPochhammer ℂ n).eval (r : ℂ)‖ := by
   rw [ascPochhammer_eval_ofReal, Complex.norm_real, Real.norm_eq_abs]
-  exact (norm_poch_le a n).trans
-    ((poch_eval_mono (norm_nonneg a) hr n).trans (le_abs_self _))
+  exact (norm_pochhammer_le a n).trans
+    ((pochhammer_eval_mono (norm_nonneg a) hr n).trans (le_abs_self _))
 
 /-- The complement of the nonpositive integers is open in `ℂ`. -/
 theorem isOpen_not_neg_nat : IsOpen {s : ℂ | ∀ m : ℕ, s ≠ -(m : ℂ)} := by
@@ -255,13 +263,13 @@ theorem ascPochhammer_eval_add (x : ℂ) (m k : ℕ) :
   simp
 
 /-- `1/Γ(y) = (y)_{p+1}/Γ(y+p+1)` for every `y`. -/
-theorem recip_Gamma_eq_poch_mul (p : ℕ) (y : ℂ) :
-    (Gamma y)⁻¹ = poch y (p + 1) * (Gamma (y + (p + 1 : ℕ)))⁻¹ := by
+theorem recip_Gamma_eq_pochhammer_mul (p : ℕ) (y : ℂ) :
+    (Gamma y)⁻¹ = pochhammer y (p + 1) * (Gamma (y + (p + 1 : ℕ)))⁻¹ := by
   by_cases hy : ∀ m : ℕ, y ≠ -(m : ℂ)
   · have h := Gamma_add_nat_div_Gamma_eq (n := p + 1) y hy
     have h0 := Gamma_ne_zero hy
     have h1 : Gamma (y + (p + 1 : ℕ)) ≠ 0 := Gamma_ne_zero (not_neg_nat_add_nat hy _)
-    rw [poch, ← h]
+    rw [pochhammer, ← h]
     field_simp
   · simp only [not_forall, not_not] at hy
     obtain ⟨j, rfl⟩ := hy
@@ -270,10 +278,10 @@ theorem recip_Gamma_eq_poch_mul (p : ℕ) (y : ℂ) :
     · have : -(j : ℂ) + ((p + 1 : ℕ) : ℂ) = -((j - p - 1 : ℕ) : ℂ) := by
         rw [Nat.cast_sub (by omega), Nat.cast_sub (by omega)]; push_cast; ring
       rw [this, Gamma_neg_nat_eq_zero, inv_zero, mul_zero]
-    · rw [poch_neg_nat_eq_zero (by omega), zero_mul]
+    · rw [pochhammer_neg_nat_eq_zero (by omega), zero_mul]
 
 /-- The regularized Gauss series with the `Γ` factor isolated. -/
-theorem regularizedGaussHGFun_eq_tsum (a b c z : ℂ) :
+theorem regularizedGaussHypergeometricFun_eq_tsum (a b c z : ℂ) :
     regularizedGaussHGFun a b c z =
       ∑' n : ℕ, (ascPochhammer ℂ n).eval a * (ascPochhammer ℂ n).eval b * z ^ n / n.factorial *
         (Gamma (c + n))⁻¹ := by
@@ -285,21 +293,22 @@ theorem regularizedGaussHGFun_eq_tsum (a b c z : ℂ) :
   ring
 
 /-- Membership of the disk in the ball of convergence of the regularized series. -/
-theorem mem_eball_radius_regularizedGaussHGFunSeries (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem mem_eball_radius_regularizedGaussHypergeometricFunSeries (a b c : ℂ) {z : ℂ}
+    (hz : ‖z‖ < 1) :
     z ∈ Metric.eball (0 : ℂ) (regularizedGaussHGFunSeries a b c).radius :=
   Metric.eball_subset_eball (radius_regularizedGaussHGFunSeries_ge_one a b c)
     (mem_eball_one_of_norm_lt_one hz)
 
 /-- For `‖z‖ < 1`, the terms `(a)ₙ (b)ₙ zⁿ / (n! Γ(c + n))` of the regularized Gauss series are
   summable. -/
-theorem summable_regularizedGaussHGFun_term (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem summable_regularizedGaussHypergeometricFun_term (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     Summable fun n : ℕ =>
       (ascPochhammer ℂ n).eval a * (ascPochhammer ℂ n).eval b * z ^ n / n.factorial *
         (Gamma (c + n))⁻¹ := by
   have hpos : (0 : ENNReal) < (regularizedGaussHGFunSeries a b c).radius :=
     lt_of_lt_of_le (by norm_num) (radius_regularizedGaussHGFunSeries_ge_one a b c)
   have h := ((regularizedGaussHGFunSeries a b c).hasFPowerSeriesOnBall hpos).hasSum_mul_pow
-    (mem_eball_radius_regularizedGaussHGFunSeries a b c hz)
+    (mem_eball_radius_regularizedGaussHypergeometricFunSeries a b c hz)
   refine h.summable.congr fun n => ?_
   have hc : regularizedHGFunCoeff {a, b} {c} n = (regularizedGaussHGFunSeries a b c).coeff n := by
     rw [regularizedGaussHGFunSeries, regularizedHGFunSeries_coeff]
@@ -308,7 +317,7 @@ theorem summable_regularizedGaussHGFun_term (a b c : ℂ) {z : ℂ} (hz : ‖z�
 
 /-- For real `α, β` and `n ≥ N`, the norm of the `n`-th coefficient of the regularized series with
   `c = 1 - N` is `|(α)ₙ| |(β)ₙ| / (n! (n - N)!)`. -/
-theorem norm_regularizedGaussHGFunSeries_apply_ofReal (α β : ℝ) (N n : ℕ) (hn : N ≤ n) :
+theorem norm_regularizedGaussHypergeometricFunSeries_apply_ofReal (α β : ℝ) (N n : ℕ) (hn : N ≤ n) :
     ‖regularizedGaussHGFunSeries (α : ℂ) (β : ℂ) (1 - N) n‖ =
       ‖(ascPochhammer ℂ n).eval (α : ℂ)‖ * ‖(ascPochhammer ℂ n).eval (β : ℂ)‖ /
         (n.factorial * (n - N).factorial) := by
@@ -326,7 +335,8 @@ theorem norm_term_le_majorant {a b c : ℂ} {z : ℂ} {α β : ℝ}
     ‖(ascPochhammer ℂ n).eval a * (ascPochhammer ℂ n).eval b * z ^ n / n.factorial *
         (Gamma (c + n))⁻¹‖ ≤
       m⁻¹ * (‖regularizedGaussHGFunSeries (α : ℂ) (β : ℂ) (1 - N) n‖ * ‖z‖ ^ n) := by
-  rw [norm_regularizedGaussHGFunSeries_apply_ofReal α β N n hn, norm_mul, norm_div, norm_mul,
+  rw [norm_regularizedGaussHypergeometricFunSeries_apply_ofReal α β N n hn, norm_mul,
+      norm_div, norm_mul,
     norm_mul, norm_pow, Complex.norm_natCast]
   have hA := norm_ascPochhammer_eval_le ha n
   have hB := norm_ascPochhammer_eval_le hb n
@@ -341,10 +351,11 @@ theorem norm_term_le_majorant {a b c : ℂ} {z : ℂ} {α β : ℝ}
 
 /-- The regularized Gauss function is entire along any entire curve in the parameter space
 (DLMF §15.2(ii)): for entire `A B C`, `w ↦ 𝐅(A w, B w; C w; z)` is entire when `‖z‖ < 1`. -/
-theorem analyticOnNhd_regularizedGaussHGFun_comp {A B C : ℂ → ℂ} (hA : Differentiable ℂ A)
+theorem analyticOnNhd_regularizedGaussHypergeometricFun_comp {A B C : ℂ → ℂ}
+    (hA : Differentiable ℂ A)
     (hB : Differentiable ℂ B) (hC : Differentiable ℂ C) {z : ℂ} (hz : ‖z‖ < 1) :
     AnalyticOnNhd ℂ (fun w => regularizedGaussHGFun (A w) (B w) (C w) z) univ := by
-  simp_rw [regularizedGaussHGFun_eq_tsum]
+  simp_rw [regularizedGaussHypergeometricFun_eq_tsum]
   refine analyticOnNhd_tsum_of_eventually_dominated ?_ ?_ ?_
   · intro n
     have h1 : Differentiable ℂ fun w => (ascPochhammer ℂ n).eval (A w) :=
@@ -354,7 +365,7 @@ theorem analyticOnNhd_regularizedGaussHGFun_comp {A B C : ℂ → ℂ} (hA : Dif
     exact (((h1.mul h2).mul_const _).div_const _).mul
       (differentiable_one_div_Gamma.comp (hC.add_const _))
   · intro w
-    exact summable_regularizedGaussHGFun_term _ _ _ hz
+    exact summable_regularizedGaussHypergeometricFun_term _ _ _ hz
   · intro w₀
     obtain ⟨N, hN⟩ : ∃ N : ℕ, 3 - (C w₀).re ≤ N := exists_nat_ge _
     have hre0 : 2 ≤ (C w₀ + N).re := by
@@ -395,29 +406,31 @@ theorem analyticOnNhd_regularizedGaussHGFun_comp {A B C : ℂ → ℂ} (hA : Dif
       norm_term_le_majorant hAw.le hBw.le hre hm (hV _ hVw).le hn
 
 /-- The regularized Gauss function is entire in the parameter `c` (DLMF §15.2(ii)). -/
-theorem analyticOnNhd_regularizedGaussHGFun_c (a b : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem analyticOnNhd_regularizedGaussHypergeometricFun_c (a b : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     AnalyticOnNhd ℂ (fun c => regularizedGaussHGFun a b c z) univ :=
-  analyticOnNhd_regularizedGaussHGFun_comp (differentiable_const a) (differentiable_const b)
+  analyticOnNhd_regularizedGaussHypergeometricFun_comp (differentiable_const a)
+      (differentiable_const b)
     differentiable_id hz
 
 /-- The regularized Gauss function is entire in the parameter `a` (DLMF §15.2(ii)). -/
-theorem analyticOnNhd_regularizedGaussHGFun_a (b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem analyticOnNhd_regularizedGaussHypergeometricFun_a (b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     AnalyticOnNhd ℂ (fun a => regularizedGaussHGFun a b c z) univ :=
-  analyticOnNhd_regularizedGaussHGFun_comp differentiable_id (differentiable_const b)
+  analyticOnNhd_regularizedGaussHypergeometricFun_comp differentiable_id (differentiable_const b)
     (differentiable_const c) hz
 
 /-- The regularized Gauss function is entire in the parameter `b` (DLMF §15.2(ii)). -/
-theorem analyticOnNhd_regularizedGaussHGFun_b (a c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem analyticOnNhd_regularizedGaussHypergeometricFun_b (a c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     AnalyticOnNhd ℂ (fun b => regularizedGaussHGFun a b c z) univ :=
-  analyticOnNhd_regularizedGaussHGFun_comp (differentiable_const a) differentiable_id
+  analyticOnNhd_regularizedGaussHypergeometricFun_comp (differentiable_const a) differentiable_id
     (differentiable_const c) hz
 
-/-- Pointwise form of `analyticOnNhd_regularizedGaussHGFun_comp`, usable by `fun_prop`. -/
+/-- Pointwise form of `analyticOnNhd_regularizedGaussHypergeometricFun_comp`, usable by `fun_prop`.
+-/
 @[fun_prop]
-theorem analyticAt_regularizedGaussHGFun_comp {A B C : ℂ → ℂ} (hA : Differentiable ℂ A)
+theorem analyticAt_regularizedGaussHypergeometricFun_comp {A B C : ℂ → ℂ} (hA : Differentiable ℂ A)
     (hB : Differentiable ℂ B) (hC : Differentiable ℂ C) {z : ℂ} (hz : ‖z‖ < 1) (w : ℂ) :
     AnalyticAt ℂ (fun w => regularizedGaussHGFun (A w) (B w) (C w) z) w :=
-  analyticOnNhd_regularizedGaussHGFun_comp hA hB hC hz w (mem_univ w)
+  analyticOnNhd_regularizedGaussHypergeometricFun_comp hA hB hC hz w (mem_univ w)
 
 /-- Two entire functions agreeing off the nonpositive integers agree everywhere. -/
 theorem eq_of_eqOn_not_neg_nat {f g : ℂ → ℂ} (hf : AnalyticOnNhd ℂ f univ)
@@ -445,9 +458,9 @@ theorem regularizedHGFunCoeff_pair_succ (a b c : ℂ) (n : ℕ) :
     rw [regularizedGaussHGFunSeries, regularizedHGFunSeries_coeff]
   rw [hc1, hc2, coeff_regularizedGaussHGFunSeries, coeff_regularizedGaussHGFunSeries,
     show (ascPochhammer ℂ (n + 1)).eval a = a * (ascPochhammer ℂ n).eval (a + 1) from
-      poch_succ_left a n,
+      pochhammer_succ_left a n,
     show (ascPochhammer ℂ (n + 1)).eval b = b * (ascPochhammer ℂ n).eval (b + 1) from
-      poch_succ_left b n,
+      pochhammer_succ_left b n,
     show c + ((n + 1 : ℕ) : ℂ) = c + 1 + n by push_cast; ring, Nat.factorial_succ]
   push_cast
   have hf : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
@@ -457,7 +470,7 @@ theorem regularizedHGFunCoeff_pair_succ (a b c : ℂ) (n : ℕ) :
 
 /-- 15.5.1 for the regularized function: `𝐅'(a,b;c;z) = a b 𝐅(a+1,b+1;c+1;z)`, with no
 hypothesis on the parameters. -/
-theorem deriv_regularizedGaussHGFun (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem deriv_regularizedGaussHypergeometricFun (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     deriv (regularizedGaussHGFun a b c) z =
       a * b * regularizedGaussHGFun (a + 1) (b + 1) (c + 1) z := by
   have hpos : ∀ a b c : ℂ, (0 : ENNReal) < (regularizedGaussHGFunSeries a b c).radius :=
@@ -471,50 +484,54 @@ theorem deriv_regularizedGaussHGFun (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
       (regularizedGaussHGFunSeries (a + 1) (b + 1) (c + 1)).radius :=
     (regularizedGaussHGFunSeries (a + 1) (b + 1) (c + 1)).hasFPowerSeriesOnBall (hpos _ _ _)
   have hd := hp.deriv_ofScalars.hasSum_mul_pow
-    (mem_eball_radius_regularizedGaussHGFunSeries a b c hz)
+    (mem_eball_radius_regularizedGaussHypergeometricFunSeries a b c hz)
   have hs := (hq.hasSum_mul_pow
-    (mem_eball_radius_regularizedGaussHGFunSeries (a + 1) (b + 1) (c + 1) hz)).mul_left (a * b)
+    (mem_eball_radius_regularizedGaussHypergeometricFunSeries (a + 1) (b + 1) (c + 1)
+        hz)).mul_left (a * b)
   refine hd.unique ?_
   convert hs using 1
   funext n
   rw [← mul_assoc, regularizedHGFunCoeff_pair_succ]
 
 /-- `𝐅(a,b;c;·)` is differentiable on the unit disk. -/
-theorem differentiableAt_regularizedGaussHGFun (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem differentiableAt_regularizedGaussHypergeometricFun (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     DifferentiableAt ℂ (regularizedGaussHGFun a b c) z := by
   have hpos : (0 : ENNReal) < (regularizedGaussHGFunSeries a b c).radius :=
     lt_of_lt_of_le (by norm_num) (radius_regularizedGaussHGFunSeries_ge_one a b c)
   exact (((regularizedGaussHGFunSeries a b c).hasFPowerSeriesOnBall hpos).analyticAt_of_mem
-    (mem_eball_radius_regularizedGaussHGFunSeries a b c hz)).differentiableAt
+    (mem_eball_radius_regularizedGaussHypergeometricFunSeries a b c hz)).differentiableAt
 
 /-- 15.5.2 for the regularized function, with no hypothesis on the parameters:
 `𝐅⁽ⁿ⁾(a,b;c;z) = (a)ₙ (b)ₙ 𝐅(a+n,b+n;c+n;z)`. -/
-theorem iteratedDeriv_regularizedGaussHGFun (a b c : ℂ) (n : ℕ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem iteratedDeriv_regularizedGaussHypergeometricFun (a b c : ℂ) (n : ℕ) {z : ℂ} (hz : ‖z‖ < 1) :
     iteratedDeriv n (regularizedGaussHGFun a b c) z =
-      poch a n * poch b n * regularizedGaussHGFun (a + n) (b + n) (c + n) z := by
+      pochhammer a n * pochhammer b n * regularizedGaussHGFun (a + n) (b + n) (c + n) z := by
   induction n generalizing z with
-  | zero => simp [iteratedDeriv_zero, poch_zero]
+  | zero => simp [iteratedDeriv_zero, pochhammer_zero]
   | succ n ih =>
     rw [iteratedDeriv_succ]
     have heq : iteratedDeriv n (regularizedGaussHGFun a b c) =ᶠ[𝓝 z]
-        fun w => poch a n * poch b n * regularizedGaussHGFun (a + n) (b + n) (c + n) w := by
+        fun w => pochhammer a n * pochhammer b n *
+            regularizedGaussHGFun (a + n) (b + n) (c + n) w := by
       filter_upwards [(isOpen_lt continuous_norm continuous_const).mem_nhds hz] with w hw
       exact ih hw
-    rw [heq.deriv_eq, deriv_const_mul _ (differentiableAt_regularizedGaussHGFun _ _ _ hz),
-      deriv_regularizedGaussHGFun _ _ _ hz, poch_succ, poch_succ,
+    rw [heq.deriv_eq, deriv_const_mul _
+        (differentiableAt_regularizedGaussHypergeometricFun _ _ _ hz),
+      deriv_regularizedGaussHypergeometricFun _ _ _ hz, pochhammer_succ, pochhammer_succ,
       show a + ((n + 1 : ℕ) : ℂ) = a + n + 1 by push_cast; ring,
       show b + ((n + 1 : ℕ) : ℂ) = b + n + 1 by push_cast; ring,
       show c + ((n + 1 : ℕ) : ℂ) = c + n + 1 by push_cast; ring]
     ring
 
 /-- `𝐅(a,b;c;z)` is entire in `c` after any translation of `c`. -/
-theorem analyticOnNhd_regularizedGaussHGFun_c_add (a b t : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem analyticOnNhd_regularizedGaussHypergeometricFun_c_add (a b t : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     AnalyticOnNhd ℂ (fun c => regularizedGaussHGFun a b (c + t) z) univ :=
-  (analyticOnNhd_regularizedGaussHGFun_c a b hz).comp
+  (analyticOnNhd_regularizedGaussHypergeometricFun_c a b hz).comp
     (analyticOnNhd_id.add analyticOnNhd_const) (mapsTo_univ _ _)
 
 /-- The Gauss function and its regularization agree off the poles. -/
-theorem regularizedGaussHGFun_eq_div_Gamma {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (z : ℂ) :
+theorem regularizedGaussHypergeometricFun_eq_div_Gamma {a b c : ℂ}
+    (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (z : ℂ) :
     regularizedGaussHGFun a b c z = ₂F₁ a b c z / Gamma c :=
   (ordinaryHypergeometric_div_Gamma_eq hc).symm
 
@@ -550,13 +567,15 @@ theorem eqFun_of_eqOn_not_neg_nat (f g : ℂ → ℂ)
 /-- The regularized Gauss function as a differentiable function of an entire curve in the
 parameters, usable by `fun_prop`. -/
 @[fun_prop]
-theorem differentiable_regularizedGaussHGFun_comp {A B C : ℂ → ℂ} (hA : Differentiable ℂ A)
+theorem differentiable_regularizedGaussHypergeometricFun_comp {A B C : ℂ → ℂ}
+    (hA : Differentiable ℂ A)
     (hB : Differentiable ℂ B) (hC : Differentiable ℂ C) {z : ℂ} (hz : ‖z‖ < 1) :
     Differentiable ℂ (fun w => regularizedGaussHGFun (A w) (B w) (C w) z) :=
-  fun w => ((analyticOnNhd_regularizedGaussHGFun_comp hA hB hC hz) w (mem_univ w)).differentiableAt
+  fun w => ((analyticOnNhd_regularizedGaussHypergeometricFun_comp hA hB hC hz) w
+      (mem_univ w)).differentiableAt
 
 /-- 15.5.11 for the regularized function: `𝐅(a,b;c) = (c-a) 𝐅(a,b;c+1) + a 𝐅(a+1,b;c+1)`. -/
-theorem regularizedGaussHGFun_contiguous_c (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem regularizedGaussHypergeometricFun_contiguous_c (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     regularizedGaussHGFun a b c z =
       (c - a) * regularizedGaussHGFun a b (c + 1) z +
         a * regularizedGaussHGFun (a + 1) b (c + 1) z :=
@@ -571,13 +590,13 @@ theorem regularizedGaussHGFun_contiguous_c (a b c : ℂ) {z : ℂ} (hz : ‖z‖
       have hΓ0 : Gamma c ≠ 0 := Gamma_ne_zero hc
       have hΓ1 := Gamma_succ_of_not_neg_nat hc
       have h := contiguous_c (a := a) (b := b) hc hz
-      simp only [regularizedGaussHGFun_eq_div_Gamma hc,
-        regularizedGaussHGFun_eq_div_Gamma hc1, hΓ1]
+      simp only [regularizedGaussHypergeometricFun_eq_div_Gamma hc,
+        regularizedGaussHypergeometricFun_eq_div_Gamma hc1, hΓ1]
       field_simp [hΓ0, ne_zero_of_not_neg_nat hc]
       linear_combination h) c
 
 /-- 15.5.16 (`contiguous_shift_b`) for the regularized function, valid for all parameters. -/
-theorem regularizedGaussHGFun_contiguous_shift_b (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem regularizedGaussHypergeometricFun_contiguous_shift_b (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     regularizedGaussHGFun a b c z - regularizedGaussHGFun a (b + 1) c z =
       -(a * z) * regularizedGaussHGFun (a + 1) (b + 1) (c + 1) z :=
   eqFun_of_eqOn_not_neg_nat
@@ -590,21 +609,21 @@ theorem regularizedGaussHGFun_contiguous_shift_b (a b c : ℂ) {z : ℂ} (hz : �
       have hΓ0 : Gamma c ≠ 0 := Gamma_ne_zero hc
       have hΓ1 := Gamma_succ_of_not_neg_nat hc
       have h := contiguous_shift_b (a := a) (b := b) hc hz
-      simp only [regularizedGaussHGFun_eq_div_Gamma hc,
-        regularizedGaussHGFun_eq_div_Gamma hc1, hΓ1]
+      simp only [regularizedGaussHypergeometricFun_eq_div_Gamma hc,
+        regularizedGaussHypergeometricFun_eq_div_Gamma hc1, hΓ1]
       field_simp [hΓ0, ne_zero_of_not_neg_nat hc]
       linear_combination h) c
 
 /-- Identity under the stated parameter and domain assumptions: `regularizedGaussHGFun a b (-n) z
-= poch a (n + 1) * poch b (n + 1) / ((n + 1).factorial : ℂ) * z ^ (n + 1) * ₂F₁ (a + n + 1) (b
-+ n + 1) (n + 2) z`. -/
+= pochhammer a (n + 1) * pochhammer b (n + 1) / ((n + 1).factorial : ℂ) * z ^ (n + 1) * ₂F₁ (a + n +
+1) (b + n + 1) (n + 2) z`. -/
 @[dlmf 15.2.E3_5]
 theorem regularized_at_neg_nat (a b : ℂ) (n : ℕ) {z : ℂ} (hz : ‖z‖ < 1) :
     regularizedGaussHGFun a b (-n) z =
-      poch a (n + 1) * poch b (n + 1) / ((n + 1).factorial : ℂ) * z ^ (n + 1) *
+      pochhammer a (n + 1) * pochhammer b (n + 1) / ((n + 1).factorial : ℂ) * z ^ (n + 1) *
         ₂F₁ (a + n + 1) (b + n + 1) (n + 2) z := by
-  rw [regularizedGaussHGFun_eq_tsum]
-  have hs := summable_regularizedGaussHGFun_term a b (-n) hz
+  rw [regularizedGaussHypergeometricFun_eq_tsum]
+  have hs := summable_regularizedGaussHypergeometricFun_term a b (-n) hz
   rw [← hs.sum_add_tsum_nat_add (n + 1)]
   have hzero : ∀ k ∈ Finset.range (n + 1),
       (ascPochhammer ℂ k).eval a * (ascPochhammer ℂ k).eval b * z ^ k / k.factorial *
@@ -636,12 +655,12 @@ theorem regularized_at_neg_nat (a b : ℂ) (n : ℕ) {z : ℂ} (hz : ‖z‖ < 1
   have hΓ3 : Gamma (-(n : ℂ) + ((n + 1 + j : ℕ) : ℂ)) = (j.factorial : ℂ) := by
     rw [show -(n : ℂ) + ((n + 1 + j : ℕ) : ℂ) = (j : ℂ) + 1 by push_cast; ring]
     exact Complex.Gamma_nat_eq_factorial _
-  have hp : (ascPochhammer ℂ j).eval ((n : ℂ) + 2) ≠ 0 := poch_ne_zero_of_not_neg_nat hpole j
+  have hp : (ascPochhammer ℂ j).eval ((n : ℂ) + 2) ≠ 0 := pochhammer_ne_zero_of_not_neg_nat hpole j
   have hf1 : ((n + 1).factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
   have hf2 : (j.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
   have hf3 : ((n + 1 + j).factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
   rw [hΓ1, hΓ2] at hΓ
-  simp only [gaussHGCoeff, poch]
+  simp only [gaussHypergeometricCoeff, pochhammer]
   rw [add_comm j (n + 1), ascPochhammer_eval_add a, ascPochhammer_eval_add b, hΓ3,
     show a + ((n + 1 : ℕ) : ℂ) = a + n + 1 by push_cast; ring,
     show b + ((n + 1 : ℕ) : ℂ) = b + n + 1 by push_cast; ring, pow_add]
@@ -657,9 +676,9 @@ theorem tendsto_regularized_at_neg_nat (a b : ℂ) (n : ℕ) {z : ℂ} (hz : ‖
     Tendsto (fun c : ℂ => ₂F₁ a b c z / Gamma c) (𝓝[≠] (-(n : ℂ)))
       (𝓝 (regularizedGaussHGFun a b (-n) z)) := by
   have hcont : ContinuousAt (fun c => regularizedGaussHGFun a b c z) (-(n : ℂ)) :=
-    ((analyticOnNhd_regularizedGaussHGFun_c a b hz) _ (Set.mem_univ _)).continuousAt
+    ((analyticOnNhd_regularizedGaussHypergeometricFun_c a b hz) _ (Set.mem_univ _)).continuousAt
   refine (hcont.tendsto.mono_left nhdsWithin_le_nhds).congr' ?_
   filter_upwards [eventually_nhdsWithin_ne_neg_nat n] with c hc
-  exact regularizedGaussHGFun_eq_div_Gamma hc z
+  exact regularizedGaussHypergeometricFun_eq_div_Gamma hc z
 
 end DLMF.Hypergeometric

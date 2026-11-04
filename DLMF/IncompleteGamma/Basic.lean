@@ -18,14 +18,15 @@ The incomplete Gamma functions on the logarithmic plane and the continued normal
 
 ## Main definitions
 
-* `upperIncGammaOnLog`, `lowerIncGammaOnLog`: the incomplete Gamma functions on the logarithmic
-  plane.
-* `normIncGammaPOnLog`, `normIncGammaQOnLog`: the continued `P` and `Q` on the logarithmic plane.
-* `normIncGammaPContinued`, `normIncGammaQContinued`: the analytically continued `P` and `Q`,
+* `upperIncompleteGammaOnLog`, `lowerIncompleteGammaOnLog`: the incomplete Gamma functions on the
+  logarithmic plane.
+* `regularizedGammaOnLog`, `regularizedIncompleteGammaQOnLog`: the continued `P` and `Q` on the
+  logarithmic plane.
+* `regularizedGamma`, `regularizedIncompleteGammaQ`: the analytically continued `P` and `Q`,
   DLMF 8.2.4.
 
-The continued incomplete Beta functions `incBeta` and `normIncBetaI` (DLMF §8.17) are defined in
-`DLMF.IncompleteGamma.Basic.IncompleteBeta`.
+The continued incomplete Beta functions `incompleteBeta` and `regularizedIncompleteBeta` (DLMF
+§8.17) are defined in `DLMF.IncompleteGamma.Basic.IncompleteBeta`.
 -/
 
 @[expose] public noncomputable section
@@ -38,30 +39,31 @@ open DLMF.Core
 namespace DLMF.Confluent
 
 /-- Upper incomplete Gamma on the logarithmic plane, also at integral a. -/
-def upperIncGammaOnLog (a w : ℂ) : ℂ :=
-  upperIncGamma a (exp w) - segmentIntegral (fun u => exp (a*u-exp u)) (log (exp w)) w
+def upperIncompleteGammaOnLog (a w : ℂ) : ℂ :=
+  upperIncompleteGamma a (exp w) - segmentIntegral (fun u => exp (a*u-exp u)) (log (exp w)) w
 
 /-- Lower incomplete Gamma on the logarithmic plane away from its parameter poles. -/
-def lowerIncGammaOnLog (a w : ℂ) : ℂ :=
-  Gamma a*exp (a*w)*scIncGamma a (exp w)
+def lowerIncompleteGammaOnLog (a w : ℂ) : ℂ :=
+  Gamma a*exp (a*w)*tricomiIncompleteGamma a (exp w)
 
-/-- Analytically continued P; at nonpositive integral a it differs from the old totalized quotient.
--/
+/-- The analytically continued `P(a, z) = z^a γ*(a, z)` (DLMF 8.2.4, 8.2.7), entire in `a`.
+Away from nonpositive integral `a` it is the quotient `γ(a,z)/Γ(a)`; at `a = -n` and `z ≠ 0` it
+takes the limiting value `1`. -/
 @[dlmf 8.2.E4]
-def normIncGammaPContinued (a z : ℂ) : ℂ :=
-  z^a*scIncGamma a z
+def regularizedGamma (a z : ℂ) : ℂ :=
+  z^a*tricomiIncompleteGamma a z
 
 /-- Analytically continued Q. -/
 @[dlmf 8.2.E4]
-def normIncGammaQContinued (a z : ℂ) : ℂ :=
-  1-normIncGammaPContinued a z
+def regularizedIncompleteGammaQ (a z : ℂ) : ℂ :=
+  1-regularizedGamma a z
 
 /-- Continued P on the logarithmic plane. -/
-def normIncGammaPOnLog (a w : ℂ) : ℂ :=
-  exp (a*w)*scIncGamma a (exp w)
+def regularizedGammaOnLog (a w : ℂ) : ℂ :=
+  exp (a*w)*tricomiIncompleteGamma a (exp w)
 
 /-- Continued Q on the logarithmic plane. -/
-def normIncGammaQOnLog (a w : ℂ) : ℂ :=
-  1-normIncGammaPOnLog a w
+def regularizedIncompleteGammaQOnLog (a w : ℂ) : ℂ :=
+  1-regularizedGammaOnLog a w
 
 end DLMF.Confluent

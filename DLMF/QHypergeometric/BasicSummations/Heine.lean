@@ -143,7 +143,7 @@ theorem q_bailey_daum {a b q : ℂ} (hq : ‖q‖<1) (hb : ‖q‖<‖b‖)
   have hFphi : ∀ x : ℂ, QDenominatorRegular [x*q/b] q →
       F x = qPochhammerInf (x*q/b) q*qPhi [x,b] [x*q/b] q r := by
     intro x hx
-    rw [qPhi_eq_basicHG (by simp), basicHG, ← tsum_mul_left]
+    rw [qPhi_eq_basicHypergeometric (by simp), basicHypergeometric, ← tsum_mul_left]
     refine tsum_congr fun n => ?_
     simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, one_mul, t]
     have hxn := qPochhammer_ne_zero_of_qDenominatorRegular hq hx n
@@ -168,15 +168,16 @@ theorem q_bailey_daum {a b q : ℂ} (hq : ‖q‖<1) (hb : ‖q‖<‖b‖)
       simp only [List.mem_cons, List.not_mem_nil, or_false] at hy
       subst hy
       exact fun h => one_sub_mul_pow_ne_zero_of_norm hxq hq n (by rw [h]; ring)
-    rw [hFphi x hreg, qPhi_eq_basicHG (by simp), basicHG_swap,
+    rw [hFphi x hreg, qPhi_eq_basicHypergeometric (by simp), basicHypergeometric_swap,
       heine_transformation hq hr1 hx1 hx0 (fun k h => hreg _ (by simp) k h) (fun k h =>
         one_sub_mul_pow_ne_zero_of_norm (w := -q) (by simpa using hq) hq k
           (by rw [show -q = b*r by rw [hr]; field_simp, h]; ring))]
     rw [show b*r = -q by rw [hr]; field_simp, show x*q/b/x = q/b by field_simp]
-    have hsum : basicHG [q/b, r] [-q] q x = qPochhammerInf (x*q^2/b^2) (q^2)/
+    have hsum : basicHypergeometric [q/b, r] [-q] q x = qPochhammerInf (x*q^2/b^2) (q^2)/
         qPochhammerInf x (q^2) := by
       rw [show x*q^2/b^2 = (q/b)^2*x by ring, q_binomial_theorem hQ hx1]
-      simp only [basicHG, List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one]
+      simp only [basicHypergeometric, List.map_cons, List.map_nil, List.prod_cons,
+          List.prod_nil, mul_one]
       refine tsum_congr fun n => ?_
       rw [qPochhammer_squared, qPochhammer_squared, hr]
       ring_nf
@@ -209,7 +210,7 @@ theorem heine_first {a b c q z : ℂ} (hq : ‖q‖<1) (hz : ‖z‖<1) (hb : �
     (hc : QDenominatorRegular [c,a*z] q) :
     qPhi [a,b] [c] q z=qPochhammerListInf [b,a*z] q/qPochhammerListInf [c,z] q*
       qPhi [c/b,z] [a*z] q b := by
-  rw [qPhi_eq_basicHG (by simp),qPhi_eq_basicHG (by simp)]
+  rw [qPhi_eq_basicHypergeometric (by simp),qPhi_eq_basicHypergeometric (by simp)]
   simpa [qPochhammerListInf] using DLMF.QSeries.heine_transformation hq hz hb hb0
     (hc c (by simp)) (hc (a*z) (by simp))
 
@@ -253,8 +254,9 @@ private theorem heine_third_aux {a b c q z : ℂ} (ha : a≠0) (hb : b≠0) (hq 
   have hcn : ∀ n, qPochhammer c q n≠0 := qPochhammer_ne_zero_of_qDenominatorRegular hq hc
   have hcI : qPochhammerInf c q≠0 :=
     qPochhammerInf_ne_zero hq fun n h => hc c (by simp) n (sub_eq_zero.mp h).symm
-  rw [qPhi_eq_basicHG (by simp), qPhi_eq_basicHG (by simp)]
-  simp only [basicHG, List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one]
+  rw [qPhi_eq_basicHypergeometric (by simp), qPhi_eq_basicHypergeometric (by simp)]
+  simp only [basicHypergeometric, List.map_cons, List.map_nil, List.prod_cons,
+      List.prod_nil, mul_one]
   rw [show a*b*z/c = x*z by rw [hx]; ring, q_binomial_theorem hq hz]
   have hf := summable_norm_twoOne (α := c/a) (β := c/b) hq hcI hw
   have hg : Summable fun m : ℕ => ‖qPochhammer x q m/qPochhammer q q m*z^m‖ := by
@@ -301,7 +303,8 @@ private lemma differentiable_tsum_qPochhammer_mul {q α : ℂ} (hq : ‖q‖<1) 
 
 /-- Symmetry of `₂φ₁` in its upper parameters. -/
 private lemma qPhi_two_one_swap (a b c q z : ℂ) : qPhi [a,b] [c] q z=qPhi [b,a] [c] q z := by
-  rw [qPhi_eq_basicHG (by simp), qPhi_eq_basicHG (by simp), basicHG_swap]
+  rw [qPhi_eq_basicHypergeometric (by simp), qPhi_eq_basicHypergeometric (by simp),
+      basicHypergeometric_swap]
 
 /-- Heine's second transformation of `2φ1(a,b;c;q,z)` into a multiple of `2φ1(abz/c,b;bz;q,c/b)`
 (DLMF 17.6.E7). -/
@@ -320,8 +323,9 @@ theorem heine_second {a b c q z : ℂ} (hq : ‖q‖<1) (hz : ‖z‖<1) (hc0 : 
   have hzI : qPochhammerInf z q≠0 := qPochhammerInf_ne_zero_of_norm_lt_one hz hq
   by_cases hz0 : z=0
   · subst hz0
-    rw [qPhi_eq_basicHG (by simp), qPhi_eq_basicHG (by simp)]
-    simp only [basicHG, List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one,
+    rw [qPhi_eq_basicHypergeometric (by simp), qPhi_eq_basicHypergeometric (by simp)]
+    simp only [basicHypergeometric, List.map_cons, List.map_nil, List.prod_cons,
+        List.prod_nil, mul_one,
       qPochhammerListInf, mul_zero, zero_div, qPochhammer_zero_param]
     have h0 : ∑' n : ℕ, qPochhammer a q n*qPochhammer b q n/(qPochhammer c q n*qPochhammer q q n)*
         (0:ℂ)^n = 1 := by
@@ -347,15 +351,17 @@ theorem heine_second {a b c q z : ℂ} (hq : ‖q‖<1) (hz : ‖z‖<1) (hc0 : 
   set K := qPochhammerListInf [c/b,b*z] q/qPochhammerListInf [c,z] q
   have hF : ∀ a : ℂ, qPhi [a,b] [c] q z = ∑' k, qPochhammer (1*a) q k*t1 k := by
     intro a
-    rw [qPhi_eq_basicHG (by simp)]
-    simp only [basicHG, List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one,
+    rw [qPhi_eq_basicHypergeometric (by simp)]
+    simp only [basicHypergeometric, List.map_cons, List.map_nil, List.prod_cons,
+        List.prod_nil, mul_one,
       one_mul, t1]
     exact tsum_congr fun k => by ring
   have hG : ∀ a : ℂ, K*qPhi [a*b*z/c,b] [b*z] q (c/b) =
       K*∑' k, qPochhammer ((b*z/c)*a) q k*t2 k := by
     intro a
-    rw [qPhi_eq_basicHG (by simp)]
-    simp only [basicHG, List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, t2]
+    rw [qPhi_eq_basicHypergeometric (by simp)]
+    simp only [basicHypergeometric, List.map_cons, List.map_nil, List.prod_cons,
+        List.prod_nil, mul_one, t2]
     congr 1
     exact tsum_congr fun k => by rw [show b*z/c*a = a*b*z/c by ring]; ring
   have dF := differentiable_tsum_qPochhammer_mul (α := 1) hq ht1

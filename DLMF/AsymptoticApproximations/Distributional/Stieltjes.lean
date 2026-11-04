@@ -9,6 +9,9 @@ public import DLMF.AsymptoticApproximations.Distributional.Basic
 public import DLMF.Gamma.BetaFunction
 public import Mathlib.Analysis.Distribution.SchwartzSpace.Basic
 public import Mathlib.Analysis.SpecialFunctions.NonIntegrable
+public import Mathlib.Analysis.SpecialFunctions.Log.NegMulLog
+public import DLMF.Gamma.ComplexBinet
+public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 
 /-!
 # Divergent integrals and the Stieltjes transform (DLMF §2.6(i)–(ii))
@@ -183,7 +186,7 @@ private lemma integral_rpow_neg_third_div {x : ℝ} (hx : 0 < x) :
 private lemma stieltjesCubeRootExample_eq_ofReal (x : ℝ) :
     stieltjesCubeRootExample x =
       ((∫ t in Ioi (0 : ℝ), (1 + t) ^ (-(1 / 3 : ℝ)) / (t + x) : ℝ) : ℂ) := by
-  rw [stieltjesCubeRootExample, stieltjesTransform, ← integral_complex_ofReal]
+  rw [stieltjesCubeRootExample, stieltjesTransform_eq, ← integral_complex_ofReal]
   push_cast; rfl
 
 /-- `x (P(x) - S(x)) ≥ c/2` for `x ≥ 1`, where `P(x) = ∫ t^{-1/3}/(t+x)` and `c` is the
@@ -354,6 +357,182 @@ theorem functionPairing_eq_of_eq_one {f : ℝ → ℂ} {a : ℕ → ℂ}
         remainderPairing n (stieltjesRemainder f 1 a n) u := by
   sorry
 
+/-- Real iterated derivatives of the restriction of a holomorphic function to `ℝ`. -/
+private lemma iteratedDeriv_comp_ofReal_of_differentiableOn {Ψ : ℂ → ℂ} {U : Set ℂ}
+    (hU : IsOpen U) (hΨ : DifferentiableOn ℂ Ψ U) (k : ℕ) {t : ℝ} (ht : (t : ℂ) ∈ U) :
+    iteratedDeriv k (fun x : ℝ => Ψ x) t = iteratedDeriv k Ψ t := by
+  induction k generalizing t with
+  | zero => simp
+  | succ k ih =>
+    rw [iteratedDeriv_succ, iteratedDeriv_succ]
+    have hev : iteratedDeriv k (fun x : ℝ => Ψ x) =ᶠ[𝓝 t] fun x : ℝ => iteratedDeriv k Ψ x := by
+      filter_upwards [(hU.preimage Complex.continuous_ofReal).mem_nhds ht] with x hx using ih hx
+    rw [hev.deriv_eq]
+    have hd : DifferentiableAt ℂ (iteratedDeriv k Ψ) t := by
+      rw [iteratedDeriv_eq_iterate]
+      exact ((hΨ.analyticOnNhd hU).iterated_deriv k t ht).differentiableAt
+    exact hd.hasDerivAt.comp_ofReal.deriv
+
+/-- The iterated derivatives of `φ_ε(t) = e^{-εt}/(t+z)` (Leibniz rule). -/
+private lemma iteratedDeriv_stieltjesTestFunction (ε : ℝ) {z : ℂ} (n : ℕ) {t : ℝ}
+    (ht : (t : ℂ) + z ≠ 0) :
+    iteratedDeriv n (stieltjesTestFunction ε z) t = ∑ i ∈ range (n + 1),
+      (n.choose i : ℂ) * ((-(ε : ℂ)) ^ i * Complex.exp (-(ε : ℂ) * t)) *
+        ((-1) ^ (n - i) * ((n - i)! : ℂ) * ((t : ℂ) + z) ^ (-1 - ((n - i : ℕ) : ℤ))) := by
+  set U : Set ℂ := {w | w + z ≠ 0}
+  have hU : IsOpen U := isOpen_ne_fun (by fun_prop) continuous_const
+  set f : ℂ → ℂ := fun w => Complex.exp (-(ε : ℂ) * w)
+  set g : ℂ → ℂ := fun w => (1 * w + z)⁻¹
+  have hΨ : DifferentiableOn ℂ (f * g) U := fun w hw =>
+    ((by fun_prop : DifferentiableAt ℂ f w).mul
+      ((by fun_prop : DifferentiableAt ℂ (fun w : ℂ => 1 * w + z) w).inv
+        (by have hw2 : w + z ≠ 0 := hw; simpa using hw2))).differentiableWithinAt
+  have he : stieltjesTestFunction ε z = fun x : ℝ => (f * g) x := by
+    funext x
+    simp only [stieltjesTestFunction, Pi.mul_apply, f, g, one_mul]
+    rw [div_eq_mul_inv, neg_mul]
+  rw [he, iteratedDeriv_comp_ofReal_of_differentiableOn hU hΨ n ht]
+  have hfc : ContDiffAt ℂ n f t := by fun_prop
+  have hgc : ContDiffAt ℂ n g t :=
+    (contDiffAt_inv ℂ (by simpa using ht)).comp _ (by fun_prop)
+  rw [iteratedDeriv_mul hfc hgc]
+  refine sum_congr rfl fun i _ => ?_
+  have h1 : iteratedDeriv i f t = (-(ε : ℂ)) ^ i * Complex.exp (-(ε : ℂ) * t) := by
+    simp only [f]
+    rw [iteratedDeriv_cexp_const_mul]
+  have h2 : iteratedDeriv (n - i) g t =
+      (-1) ^ (n - i) * ((n - i)! : ℂ) * ((t : ℂ) + z) ^ (-1 - ((n - i : ℕ) : ℤ)) := by
+    simp only [g]
+    rw [iteratedDeriv_eq_iterate, iter_deriv_inv_linear]
+    simp
+  rw [h1, h2]
+
+/-- `t^{-α}/(1+t)` is integrable on `(0, ∞)` for `0 < α < 1`. -/
+private lemma integrableOn_rpow_neg_div_one_add {α : ℝ} (hα0 : 0 < α) (hα1 : α < 1) :
+    IntegrableOn (fun t : ℝ => t ^ (-α) / (1 + t)) (Ioi 0) := by
+  rw [← Ioc_union_Ioi_eq_Ioi zero_le_one]
+  refine IntegrableOn.union ?_ ?_
+  · have hi : IntegrableOn (fun t : ℝ => t ^ (-α)) (Ioc 0 1) := by
+      have := (intervalIntegral.intervalIntegrable_rpow' (r := -α) (by linarith)
+        (a := 0) (b := 1))
+      rwa [intervalIntegrable_iff_integrableOn_Ioc_of_le zero_le_one] at this
+    refine hi.mono' ?_ ((ae_restrict_iff' measurableSet_Ioc).2 (Eventually.of_forall
+      fun t ht => ?_))
+    · exact ((continuousOn_id.rpow_const fun t (ht : t ∈ Ioc (0 : ℝ) 1) =>
+        Or.inl (show t ≠ 0 from ht.1.ne')).div (by fun_prop)
+        fun t (ht : t ∈ Ioc (0 : ℝ) 1) => by linarith [ht.1]).aestronglyMeasurable
+        measurableSet_Ioc
+    · have h0 := Real.rpow_pos_of_pos ht.1 (-α)
+      rw [Real.norm_of_nonneg (by have := ht.1; positivity)]
+      exact div_le_self h0.le (by linarith [ht.1])
+  · have hi := integrableOn_Ioi_rpow_of_lt (a := -α - 1) (by linarith) one_pos
+    refine hi.mono' ?_ ((ae_restrict_iff' measurableSet_Ioi).2 (Eventually.of_forall
+      fun t (ht : 1 < t) => ?_))
+    · exact ((continuousOn_id.rpow_const fun t (ht : 1 < t) =>
+        Or.inl (show t ≠ 0 by linarith)).div
+        (by fun_prop) fun t (ht : 1 < t) => by linarith).aestronglyMeasurable measurableSet_Ioi
+    · have ht0 : 0 < t := by linarith
+      rw [Real.norm_of_nonneg (by positivity), Real.rpow_sub ht0, Real.rpow_one]
+      exact div_le_div_of_nonneg_left (by positivity) ht0 (by linarith)
+
+/-- The Beta integral `∫₀^∞ t^{-α} (t+x)^{-s-1} dt` for real `x > 0`. -/
+private lemma integral_rpow_neg_div_add_pow_ofReal {α : ℝ} (hα0 : 0 < α) (hα1 : α < 1)
+    (s : ℕ) {x : ℝ} (hx : 0 < x) :
+    ∫ t in Ioi (0 : ℝ), ((t ^ (-α) : ℝ) : ℂ) * (((t : ℂ) + x) ^ (s + 1))⁻¹ =
+      Complex.Gamma (1 - α) * Complex.Gamma (s + α) / Complex.Gamma (s + 1) *
+        (x : ℂ) ^ (-((s : ℂ) + α)) := by
+  have h := integral_rpow_div_add_cpow hx (α := 1 - α) (β := s + α) (by simp; linarith)
+    (by simp; positivity)
+  rw [show (1 - (α : ℂ)) + ((s : ℂ) + α) = ((s + 1 : ℕ) : ℂ) by push_cast; ring] at h
+  rw [show (((s + 1 : ℕ) : ℂ)) = (s : ℂ) + 1 by push_cast; ring, Complex.cpow_neg] at *
+  rw [← div_eq_mul_inv, ← h]
+  refine setIntegral_congr_fun measurableSet_Ioi fun t (ht : 0 < t) => ?_
+  rw [show (1 - (α : ℂ)) - 1 = ((-α : ℝ) : ℂ) by push_cast; ring, ← Complex.ofReal_cpow ht.le,
+    show (s : ℂ) + 1 = ((s + 1 : ℕ) : ℂ) by push_cast; ring, Complex.cpow_natCast,
+    add_comm (x : ℂ), div_eq_mul_inv]
+
+/-- `t + z` lies in the slit plane for `t ≥ 0`, `z` in the slit plane. -/
+private lemma ofReal_add_mem_slitPlane {z : ℂ} (hz : z ∈ Complex.slitPlane) {t : ℝ}
+    (ht : 0 ≤ t) : (t : ℂ) + z ∈ Complex.slitPlane := by
+  rw [Complex.mem_slitPlane_iff] at hz ⊢
+  rcases hz with h | h
+  · left; simp; linarith
+  · right; simpa using h
+
+/-- The Beta integral `∫₀^∞ t^{-α} (t+z)^{-s-1} dt = Γ(1-α)Γ(s+α)/s! · z^{-s-α}` on the slit
+plane, by analytic continuation from `z > 0`. -/
+private lemma integral_rpow_neg_div_add_pow {α : ℝ} (hα0 : 0 < α) (hα1 : α < 1) (s : ℕ)
+    {z : ℂ} (hz : z ∈ Complex.slitPlane) :
+    ∫ t in Ioi (0 : ℝ), ((t ^ (-α) : ℝ) : ℂ) * (((t : ℂ) + z) ^ (s + 1))⁻¹ =
+      Complex.Gamma (1 - α) * Complex.Gamma (s + α) / Complex.Gamma (s + 1) *
+        z ^ (-((s : ℂ) + α)) := by
+  set F : ℂ → ℂ := fun z => ∫ t in Ioi (0 : ℝ), ((t ^ (-α) : ℝ) : ℂ) *
+    (((t : ℂ) + z) ^ (s + 1))⁻¹
+  set G : ℂ → ℂ := fun z => Complex.Gamma (1 - α) * Complex.Gamma (s + α) /
+    Complex.Gamma (s + 1) * z ^ (-((s : ℂ) + α))
+  have hne : ∀ y ∈ Complex.slitPlane, ∀ t : ℝ, 0 ≤ t → (t : ℂ) + y ≠ 0 := fun y hy t ht =>
+    Complex.slitPlane_ne_zero (ofReal_add_mem_slitPlane hy ht)
+  have hF : DifferentiableOn ℂ F Complex.slitPlane := by
+    refine Complex.differentiableOn_integral_Ioi_of_locally_dominated
+      Complex.isOpen_slitPlane 0 (fun y hy => ?_) ?_ (fun y hy => ?_)
+    · exact (by fun_prop : Measurable fun t : ℝ => ((t ^ (-α) : ℝ) : ℂ) *
+        (((t : ℂ) + y) ^ (s + 1))⁻¹).aestronglyMeasurable
+    · refine (ae_restrict_iff' measurableSet_Ioi).2 (Eventually.of_forall fun t ht y hy => ?_)
+      exact (((differentiableAt_const _).mul ((by fun_prop : DifferentiableAt ℂ
+        (fun y : ℂ => ((t : ℂ) + y) ^ (s + 1)) y).inv
+        (pow_ne_zero _ (hne y hy t (le_of_lt ht))))).differentiableWithinAt)
+    · obtain ⟨κ, hκ, hκt'⟩ := DLMF.Gamma.exists_mul_one_add_le_norm_add hy
+      have hκt : ∀ t : ℝ, 0 ≤ t → κ * (1 + t) ≤ ‖(t : ℂ) + y‖ := fun t ht => by
+        rw [add_comm (t : ℂ)]; exact hκt' t ht
+      refine ⟨Metric.ball y (κ / 2), Metric.ball_mem_nhds _ (by positivity),
+        fun t => (2 / κ) ^ (s + 1) * (t ^ (-α) / (1 + t)),
+        (integrableOn_rpow_neg_div_one_add hα0 hα1).const_mul _, ?_⟩
+      refine (ae_restrict_iff' measurableSet_Ioi).2 (Eventually.of_forall
+        fun t (ht : 0 < t) w hw => ?_)
+      have hw' : ‖w - y‖ < κ / 2 := by simpa [dist_eq_norm] using hw
+      have hlow : κ / 2 * (1 + t) ≤ ‖(t : ℂ) + w‖ := by
+        have h1 := hκt t ht.le
+        have h2 : ‖(t : ℂ) + y‖ ≤ ‖(t : ℂ) + w‖ + ‖w - y‖ := by
+          calc ‖(t : ℂ) + y‖ = ‖((t : ℂ) + w) - (w - y)‖ := by ring_nf
+            _ ≤ _ := norm_sub_le _ _
+        nlinarith
+      have hpos : 0 < κ / 2 * (1 + t) := by positivity
+      have htp := Real.rpow_pos_of_pos ht (-α)
+      rw [norm_mul, norm_inv, norm_pow, Complex.norm_real, Real.norm_of_nonneg htp.le]
+      have hp : (κ / 2 * (1 + t)) ^ (s + 1) ≤ ‖(t : ℂ) + w‖ ^ (s + 1) :=
+        pow_le_pow_left₀ hpos.le hlow _
+      have hq : (1 + t) ≤ (1 + t) ^ (s + 1) := le_self_pow₀ (by linarith) (by omega)
+      calc t ^ (-α) * (‖(t : ℂ) + w‖ ^ (s + 1))⁻¹
+          ≤ t ^ (-α) * ((κ / 2 * (1 + t)) ^ (s + 1))⁻¹ := by
+            gcongr
+        _ = (2 / κ) ^ (s + 1) * (t ^ (-α) / (1 + t) ^ (s + 1)) := by
+            rw [mul_pow, mul_inv, div_pow, div_pow]; field_simp
+        _ ≤ (2 / κ) ^ (s + 1) * (t ^ (-α) / (1 + t)) := by
+            gcongr
+  have hG : DifferentiableOn ℂ G Complex.slitPlane := fun y hy =>
+    ((differentiableAt_const _).mul (differentiableAt_id.cpow_const hy)).differentiableWithinAt
+  have hpre : IsPreconnected Complex.slitPlane :=
+    (Complex.starConvex_one_slitPlane.isPathConnected
+      Complex.one_mem_slitPlane).isConnected.isPreconnected
+  have heq := (hF.analyticOnNhd Complex.isOpen_slitPlane).eqOn_of_preconnected_of_frequently_eq
+    (hG.analyticOnNhd Complex.isOpen_slitPlane) hpre Complex.one_mem_slitPlane ?_
+  · exact heq hz
+  · have ht : Tendsto (fun x : ℝ => (x : ℂ)) (𝓝[>] 1) (𝓝[≠] (1 : ℂ)) := by
+      refine tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within _
+        ((Complex.continuous_ofReal.tendsto 1).mono_left nhdsWithin_le_nhds) ?_
+      filter_upwards [self_mem_nhdsWithin] with x (hx : 1 < x)
+      simpa using hx.ne'
+    refine ht.frequently (Eventually.frequently ?_)
+    filter_upwards [self_mem_nhdsWithin] with x (hx : 1 < x)
+    exact integral_rpow_neg_div_add_pow_ofReal hα0 hα1 s (by linarith)
+
+/-- The real ascending Pochhammer polynomial at a real point, cast to `ℂ`. -/
+private lemma ofReal_eval_ascPochhammer (s : ℕ) (x : ℝ) :
+    (((ascPochhammer ℝ s).eval x : ℝ) : ℂ) = (ascPochhammer ℂ s).eval (x : ℂ) := by
+  induction s with
+  | zero => simp
+  | succ n ih => simp [ascPochhammer_succ_eval, ih]
+
 /-- DLMF 2.6.23: for `0 < α < 1`, `z ∉ (-∞, 0]` and `s = 0, 1, 2, …`,
 `lim_{ε → 0+} ⟨t^{-s-α}, φ_ε⟩ = π/sin(πα) · (-1)^s / z^{s+α}` (principal power). -/
 @[dlmf 2.6.E23]
@@ -361,7 +540,424 @@ theorem tendsto_powPairing_stieltjesTestFunction {α : ℝ} (hα0 : 0 < α) (hα
     {z : ℂ} (hz : z ∈ Complex.slitPlane) (s : ℕ) :
     Tendsto (fun ε : ℝ => powPairing α s (stieltjesTestFunction ε z)) (𝓝[>] 0)
       (𝓝 (π / Real.sin (π * α) * (-1 : ℂ) ^ s / z ^ ((s : ℂ) + α))) := by
-  sorry
+  obtain ⟨κ, hκ, hκt'⟩ := DLMF.Gamma.exists_mul_one_add_le_norm_add hz
+  have hκt : ∀ t : ℝ, 0 ≤ t → κ * (1 + t) ≤ ‖(t : ℂ) + z‖ := fun t ht => by
+    rw [add_comm (t : ℂ)]; exact hκt' t ht
+  have hne : ∀ t : ℝ, 0 ≤ t → (t : ℂ) + z ≠ 0 := fun t ht =>
+    Complex.slitPlane_ne_zero (ofReal_add_mem_slitPlane hz ht)
+  set D : ℝ → ℝ → ℂ := fun ε t => ∑ i ∈ range (s + 1),
+    (s.choose i : ℂ) * ((-(ε : ℂ)) ^ i * Complex.exp (-(ε : ℂ) * t)) *
+      ((-1) ^ (s - i) * ((s - i)! : ℂ) * (((t : ℂ) + z) ^ (s - i + 1))⁻¹) with hD
+  have hform : ∀ ε : ℝ, ∀ t : ℝ, 0 ≤ t → iteratedDeriv s (stieltjesTestFunction ε z) t = D ε t := by
+    intro ε t ht
+    rw [iteratedDeriv_stieltjesTestFunction ε s (hne t ht)]
+    refine sum_congr rfl fun i _ => ?_
+    rw [show (-1 - ((s - i : ℕ) : ℤ)) = -((s - i + 1 : ℕ) : ℤ) by push_cast; ring, zpow_neg,
+      zpow_natCast]
+  set A : ℂ := (((ascPochhammer ℝ s).eval α : ℝ) : ℂ)
+  have hpair : ∀ ε : ℝ, powPairing α s (stieltjesTestFunction ε z) =
+      A⁻¹ * ∫ t in Ioi (0 : ℝ), ((t ^ (-α) : ℝ) : ℂ) * D ε t := by
+    intro ε
+    unfold powPairing
+    congr 1
+    exact setIntegral_congr_fun measurableSet_Ioi fun t (ht : 0 < t) => by rw [hform ε t ht.le]
+  simp_rw [hpair]
+  set L : ℝ → ℂ := fun t => (-1) ^ s * (s ! : ℂ) * (((t : ℂ) + z) ^ (s + 1))⁻¹
+  have hD0 : ∀ t : ℝ, D 0 t = L t := by
+    intro t
+    simp only [hD, L]
+    rw [sum_eq_single 0]
+    · simp
+    · intro i _ hi
+      simp [zero_pow hi]
+    · intro h; simp at h
+  set K : ℝ := ∑ i ∈ range (s + 1), (s.choose i : ℝ) * (s - i)! * (1 / κ) ^ (s - i)
+  have hlim : Tendsto (fun ε : ℝ => ∫ t in Ioi (0 : ℝ), ((t ^ (-α) : ℝ) : ℂ) * D ε t) (𝓝[>] 0)
+      (𝓝 (∫ t in Ioi (0 : ℝ), ((t ^ (-α) : ℝ) : ℂ) * L t)) := by
+    refine tendsto_integral_filter_of_dominated_convergence
+      (fun t => K / κ * (t ^ (-α) / (1 + t))) ?_ ?_
+      ((integrableOn_rpow_neg_div_one_add hα0 hα1).const_mul _) ?_
+    · exact Eventually.of_forall fun ε => (by fun_prop : Measurable fun t : ℝ =>
+        ((t ^ (-α) : ℝ) : ℂ) * D ε t).aestronglyMeasurable
+    · filter_upwards [Ioc_mem_nhdsGT (show (0 : ℝ) < 1 from one_pos)] with ε hε
+      refine (ae_restrict_iff' measurableSet_Ioi).2 (Eventually.of_forall
+        fun t (ht : 0 < t) => ?_)
+      have htz := hκt t ht.le
+      have hκ1 : κ ≤ ‖(t : ℂ) + z‖ := le_trans (by nlinarith) htz
+      have hn0 : 0 < ‖(t : ℂ) + z‖ := hκ.trans_le hκ1
+      have htp := Real.rpow_pos_of_pos ht (-α)
+      rw [norm_mul, Complex.norm_real, Real.norm_of_nonneg htp.le]
+      have hDb : ‖D ε t‖ ≤ K / κ / (1 + t) := by
+        refine (norm_sum_le _ _).trans ?_
+        rw [show K / κ / (1 + t) = ∑ i ∈ range (s + 1),
+            (s.choose i : ℝ) * (s - i)! * (1 / κ) ^ (s - i) / κ / (1 + t) by
+          simp only [K, sum_div]]
+        refine sum_le_sum fun i _ => ?_
+        have he : ‖Complex.exp (-(ε : ℂ) * t)‖ ≤ 1 := by
+          rw [Complex.norm_exp]
+          simp only [neg_mul, Complex.neg_re, Complex.mul_re, Complex.ofReal_re,
+            Complex.ofReal_im, mul_zero, sub_zero, Real.exp_le_one_iff, Left.neg_nonpos_iff]
+          exact mul_nonneg hε.1.le ht.le
+        have hεi : ‖(-(ε : ℂ)) ^ i‖ ≤ 1 := by
+          rw [norm_pow, norm_neg, Complex.norm_real, Real.norm_of_nonneg hε.1.le]
+          exact pow_le_one₀ hε.1.le hε.2
+        have hpow : κ ^ (s - i) * ‖(t : ℂ) + z‖ ≤ ‖(t : ℂ) + z‖ ^ (s - i + 1) := by
+          rw [pow_succ]
+          gcongr
+        have hm : ‖(((t : ℂ) + z) ^ (s - i + 1))⁻¹‖ ≤ (1 / κ) ^ (s - i) / κ / (1 + t) := by
+          rw [norm_inv, norm_pow, show (1 / κ) ^ (s - i) / κ / (1 + t) =
+            (κ ^ (s - i) * (κ * (1 + t)))⁻¹ by rw [one_div_pow]; field_simp]
+          refine inv_anti₀ (by positivity) ?_
+          calc κ ^ (s - i) * (κ * (1 + t)) ≤ κ ^ (s - i) * ‖(t : ℂ) + z‖ := by gcongr
+            _ ≤ _ := hpow
+        calc ‖(s.choose i : ℂ) * ((-(ε : ℂ)) ^ i * Complex.exp (-(ε : ℂ) * t)) *
+              ((-1) ^ (s - i) * ((s - i)! : ℂ) * (((t : ℂ) + z) ^ (s - i + 1))⁻¹)‖
+            = (s.choose i : ℝ) * (‖(-(ε : ℂ)) ^ i‖ * ‖Complex.exp (-(ε : ℂ) * t)‖) *
+              ((s - i)! * ‖(((t : ℂ) + z) ^ (s - i + 1))⁻¹‖) := by
+              simp only [norm_mul, norm_pow, norm_neg, norm_one, one_pow, one_mul,
+                Complex.norm_natCast]
+          _ ≤ (s.choose i : ℝ) * (1 * 1) * ((s - i)! * ((1 / κ) ^ (s - i) / κ / (1 + t))) := by
+              gcongr
+          _ = _ := by ring
+      calc t ^ (-α) * ‖D ε t‖ ≤ t ^ (-α) * (K / κ / (1 + t)) := by gcongr
+        _ = _ := by ring
+    · refine (ae_restrict_iff' measurableSet_Ioi).2 (Eventually.of_forall
+        fun t (ht : 0 < t) => ?_)
+      rw [← hD0]
+      refine Tendsto.mono_left ?_ nhdsWithin_le_nhds
+      refine Continuous.tendsto' ?_ 0 _ rfl
+      fun_prop
+  have hint : ∫ t in Ioi (0 : ℝ), ((t ^ (-α) : ℝ) : ℂ) * L t =
+      (-1) ^ s * (s ! : ℂ) * ∫ t in Ioi (0 : ℝ), ((t ^ (-α) : ℝ) : ℂ) *
+        (((t : ℂ) + z) ^ (s + 1))⁻¹ := by
+    rw [← integral_const_mul]
+    exact setIntegral_congr_fun measurableSet_Ioi fun t _ => by simp only [L]; ring
+  rw [hint, integral_rpow_neg_div_add_pow hα0 hα1 s hz] at hlim
+  convert hlim.const_mul A⁻¹ using 2
+  have hαne : ∀ k : ℕ, (α : ℂ) ≠ -k := fun k h => by
+    have := congrArg Complex.re h
+    simp at this
+    linarith [(k.cast_nonneg : (0 : ℝ) ≤ k)]
+  have hGα : Complex.Gamma α ≠ 0 := Complex.Gamma_ne_zero hαne
+  have hA : A * Complex.Gamma α = Complex.Gamma (s + α) := by
+    have h := Complex.Gamma_add_nat_div_Gamma_eq (n := s) (α : ℂ) hαne
+    simp only [A, ofReal_eval_ascPochhammer, ← h, add_comm (α : ℂ)]
+    field_simp
+  have hA0 : A ≠ 0 := by
+    intro h0
+    rw [h0, zero_mul] at hA
+    exact Complex.Gamma_ne_zero_of_re_pos (s := (s : ℂ) + α) (by simp; positivity) hA.symm
+  have hrefl := Complex.Gamma_mul_Gamma_one_sub (α : ℂ)
+  have hsin : ((Real.sin (π * α) : ℝ) : ℂ) = Complex.sin (π * α) := by push_cast; ring_nf
+  have hzp : z ^ ((s : ℂ) + α) ≠ 0 := by
+    rw [Complex.cpow_ne_zero_iff_of_exponent_ne_zero (by
+      intro h; have := congrArg Complex.re h; simp at this
+      linarith [(s.cast_nonneg : (0 : ℝ) ≤ s)])]
+    exact Complex.slitPlane_ne_zero hz
+  have hfact : (s ! : ℂ) ≠ 0 := Nat.cast_ne_zero.2 (Nat.factorial_ne_zero s)
+  rw [Complex.Gamma_nat_eq_factorial, Complex.cpow_neg, ← hA, hsin, ← hrefl]
+  field_simp
+
+/-- The primitive `t log t/(z(t+z)) - log(t+z)/z` tends to `0` at infinity. -/
+private lemma tendsto_logPrimitive_atTop {z : ℂ} (hz : z ∈ Complex.slitPlane) :
+    Tendsto (fun t : ℝ => ((t * Real.log t : ℝ) : ℂ) / (z * ((t : ℂ) + z)) -
+      Complex.log ((t : ℂ) + z) / z) atTop (𝓝 0) := by
+  have hz0 : z ≠ 0 := Complex.slitPlane_ne_zero hz
+  have hzt : Tendsto (fun t : ℝ => z / (t : ℂ)) atTop (𝓝 0) := by
+    have : Tendsto (fun t : ℝ => ((t : ℂ))⁻¹) atTop (𝓝 0) := by
+      have h := (tendsto_inv_atTop_zero (𝕜 := ℝ))
+      have := (Complex.continuous_ofReal.tendsto 0).comp h
+      simpa [Function.comp_def] using this
+    simpa [div_eq_mul_inv] using this.const_mul z
+  have hlogt : Tendsto (fun t : ℝ => ((Real.log t / t : ℝ) : ℂ)) atTop (𝓝 0) := by
+    have h := tendsto_pow_log_div_mul_add_atTop 1 0 1 one_ne_zero
+    have := (Complex.continuous_ofReal.tendsto 0).comp h
+    simpa [Function.comp_def] using this
+  have hlog1 : Tendsto (fun t : ℝ => Complex.log (1 + z / t)) atTop (𝓝 0) := by
+    have hc : ContinuousAt Complex.log 1 :=
+      continuousAt_clog Complex.one_mem_slitPlane
+    have := hc.tendsto.comp (by simpa using hzt.const_add 1)
+    simpa [Function.comp_def] using this
+  have hlim : Tendsto (fun t : ℝ => (-(z * ((Real.log t / t : ℝ) : ℂ) / (1 + z / t)) -
+      Complex.log (1 + z / t)) / z) atTop (𝓝 0) := by
+    have h1 : Tendsto (fun t : ℝ => 1 + z / (t : ℂ)) atTop (𝓝 1) := by
+      simpa using hzt.const_add 1
+    have := ((((hlogt.const_mul z).div h1 one_ne_zero).neg).sub hlog1).div_const z
+    simpa using this
+  refine hlim.congr' ?_
+  filter_upwards [eventually_gt_atTop (0 : ℝ)] with t ht
+  have ht0 : (t : ℂ) ≠ 0 := Complex.ofReal_ne_zero.2 ht.ne'
+  have htz : (t : ℂ) + z ≠ 0 := Complex.slitPlane_ne_zero (ofReal_add_mem_slitPlane hz ht.le)
+  have h1 : 1 + z / t ≠ 0 := by
+    intro h; apply htz
+    have : (t : ℂ) + z = t * (1 + z / t) := by field_simp
+    rw [this, h, mul_zero]
+  have hlog : Complex.log ((t : ℂ) + z) = (Real.log t : ℂ) + Complex.log (1 + z / t) := by
+    have : (t : ℂ) + z = t * (1 + z / t) := by field_simp
+    rw [this, Complex.log_ofReal_mul ht h1]
+  rw [hlog]
+  have h1' : (1 + z / t) = ((t : ℂ) + z) / t := by field_simp
+  rw [h1']
+  push_cast
+  field_simp
+  ring
+
+private lemma integrableOn_abs_log_div_one_add_sq :
+    IntegrableOn (fun t : ℝ => |Real.log t| / (1 + t) ^ 2) (Ioi 0) := by
+  rw [← Ioc_union_Ioi_eq_Ioi zero_le_one]
+  refine IntegrableOn.union ?_ ?_
+  · have hi : IntegrableOn (fun t : ℝ => |Real.log t|) (Ioc 0 1) := by
+      have := (intervalIntegral.intervalIntegrable_log' (a := 0) (b := 1)).norm
+      rw [intervalIntegrable_iff_integrableOn_Ioc_of_le zero_le_one] at this
+      simpa using this
+    refine hi.mono' ?_ ((ae_restrict_iff' measurableSet_Ioc).2 (Eventually.of_forall
+      fun t ht => ?_))
+    · exact (by fun_prop : Measurable fun t : ℝ => |Real.log t| / (1 + t) ^ 2).aestronglyMeasurable
+    · have h1 : 1 ≤ (1 + t) ^ 2 := one_le_pow₀ (by linarith [ht.1])
+      rw [Real.norm_of_nonneg (by positivity)]
+      exact div_le_self (abs_nonneg _) h1
+  · have hi := (integrableOn_Ioi_rpow_of_lt (a := -(3 / 2)) (by norm_num) one_pos).const_mul 2
+    refine hi.mono' ?_ ((ae_restrict_iff' measurableSet_Ioi).2 (Eventually.of_forall
+      fun t (ht : 1 < t) => ?_))
+    · exact (by fun_prop : Measurable fun t : ℝ => |Real.log t| / (1 + t) ^ 2).aestronglyMeasurable
+    · have ht0 : 0 < t := by linarith
+      have hl0 : 0 ≤ Real.log t := Real.log_nonneg ht.le
+      have hl := Real.log_le_rpow_div ht0.le (show (0 : ℝ) < 1 / 2 by norm_num)
+      rw [Real.norm_of_nonneg (by positivity), abs_of_nonneg hl0]
+      have hsq : t ^ (2 : ℝ) ≤ (1 + t) ^ 2 := by
+        rw [Real.rpow_two]; nlinarith
+      have hsplit : t ^ (-(3 / 2) : ℝ) = t ^ (1 / 2 : ℝ) / t ^ (2 : ℝ) := by
+        rw [← Real.rpow_sub ht0]; norm_num
+      rw [hsplit]
+      calc Real.log t / (1 + t) ^ 2 ≤ (t ^ (1 / 2 : ℝ) / (1 / 2)) / t ^ (2 : ℝ) := by
+            gcongr
+        _ = _ := by ring
+
+/-- A point of the slit plane stays at distance `≥ κ (1 + t)` from `-t`, `t ≥ 0`. -/
+private lemma exists_mul_one_add_le_norm_ofReal_add {z : ℂ} (hz : z ∈ Complex.slitPlane) :
+    ∃ κ > 0, ∀ t : ℝ, 0 ≤ t → κ * (1 + t) ≤ ‖(t : ℂ) + z‖ := by
+  obtain ⟨κ, hκ, hκt'⟩ := DLMF.Gamma.exists_mul_one_add_le_norm_add hz
+  exact ⟨κ, hκ, fun t ht => by rw [add_comm (t : ℂ)]; exact hκt' t ht⟩
+
+/-- `log t · (t+z)^{-m}` is integrable on `(0, ∞)` for `m ≥ 2`, `z` in the slit plane. -/
+private lemma integrableOn_log_mul_inv_add_pow {z : ℂ} (hz : z ∈ Complex.slitPlane) {m : ℕ}
+    (hm : 2 ≤ m) :
+    IntegrableOn (fun t : ℝ => (Real.log t : ℂ) * (((t : ℂ) + z) ^ m)⁻¹) (Ioi 0) := by
+  obtain ⟨κ, hκ, hκt⟩ := exists_mul_one_add_le_norm_ofReal_add hz
+  refine (integrableOn_abs_log_div_one_add_sq.const_mul ((1 / κ) ^ m)).mono' ?_
+    ((ae_restrict_iff' measurableSet_Ioi).2 (Eventually.of_forall fun t (ht : 0 < t) => ?_))
+  · exact (by fun_prop : Measurable fun t : ℝ =>
+      (Real.log t : ℂ) * (((t : ℂ) + z) ^ m)⁻¹).aestronglyMeasurable
+  · have h1 := hκt t ht.le
+    have hpos : 0 < κ * (1 + t) := by positivity
+    rw [norm_mul, norm_inv, norm_pow, Complex.norm_real, Real.norm_eq_abs]
+    have hp : (κ * (1 + t)) ^ m ≤ ‖(t : ℂ) + z‖ ^ m := pow_le_pow_left₀ hpos.le h1 m
+    have hq : (1 + t) ^ 2 ≤ (1 + t) ^ m := pow_le_pow_right₀ (by linarith) hm
+    calc |Real.log t| * (‖(t : ℂ) + z‖ ^ m)⁻¹ ≤ |Real.log t| * ((κ * (1 + t)) ^ m)⁻¹ := by
+          gcongr
+      _ = (1 / κ) ^ m * (|Real.log t| / (1 + t) ^ m) := by
+          rw [mul_pow, one_div_pow]; field_simp
+      _ ≤ (1 / κ) ^ m * (|Real.log t| / (1 + t) ^ 2) := by gcongr
+
+/-- `∫₀^∞ log t/(t+z)² dt = log z/z` on the slit plane. -/
+private lemma integral_log_mul_inv_add_sq {z : ℂ} (hz : z ∈ Complex.slitPlane) :
+    ∫ t in Ioi (0 : ℝ), (Real.log t : ℂ) * (((t : ℂ) + z) ^ 2)⁻¹ = Complex.log z / z := by
+  have hz0 : z ≠ 0 := Complex.slitPlane_ne_zero hz
+  set F : ℝ → ℂ := fun t => ((t * Real.log t : ℝ) : ℂ) / (z * ((t : ℂ) + z)) -
+      Complex.log ((t : ℂ) + z) / z
+  have hne : ∀ t : ℝ, 0 ≤ t → (t : ℂ) + z ≠ 0 := fun t ht =>
+    Complex.slitPlane_ne_zero (ofReal_add_mem_slitPlane hz ht)
+  have hcont : ContinuousWithinAt F (Ici 0) 0 := by
+    refine ContinuousAt.continuousWithinAt ?_
+    have h1 : ContinuousAt (fun t : ℝ => ((t * Real.log t : ℝ) : ℂ)) 0 :=
+      (Complex.continuous_ofReal.comp Real.continuous_mul_log).continuousAt
+    have h2 : ContinuousAt (fun t : ℝ => z * ((t : ℂ) + z)) 0 := by fun_prop
+    have h3 : ContinuousAt (fun t : ℝ => Complex.log ((t : ℂ) + z)) 0 := by
+      refine (continuousAt_clog ?_).comp (by fun_prop)
+      simpa using hz
+    exact (h1.div h2 (mul_ne_zero hz0 (by simpa using hne 0 le_rfl))).sub (h3.div_const z)
+  have hderiv : ∀ t ∈ Ioi (0 : ℝ), HasDerivAt F
+      ((Real.log t : ℂ) * (((t : ℂ) + z) ^ 2)⁻¹) t := by
+    intro t (ht : 0 < t)
+    have htz := hne t ht.le
+    have h1 : HasDerivAt (fun t : ℝ => ((t * Real.log t : ℝ) : ℂ))
+        ((Real.log t + 1 : ℝ) : ℂ) t := (Real.hasDerivAt_mul_log ht.ne').ofReal_comp
+    have h2 : HasDerivAt (fun t : ℝ => z * ((t : ℂ) + z)) z t := by
+      have := ((Complex.ofRealCLM.hasDerivAt (x := t)).add_const z).const_mul z
+      simpa using this
+    have h3 : HasDerivAt (fun t : ℝ => Complex.log ((t : ℂ) + z)) (1 / ((t : ℂ) + z)) t := by
+      have := (Complex.ofRealCLM.hasDerivAt (x := t)).add_const z
+      have h := this.clog_real (ofReal_add_mem_slitPlane hz ht.le)
+      simpa using h
+    have h4 := (h1.div h2 (mul_ne_zero hz0 htz)).sub (h3.div_const z)
+    convert h4 using 1
+    push_cast
+    field_simp
+    ring
+  have hlim := tendsto_logPrimitive_atTop hz
+  rw [integral_Ioi_of_hasDerivAt_of_tendsto hcont hderiv
+    (integrableOn_log_mul_inv_add_pow hz le_rfl) hlim]
+  simp [F]
+
+/-- The parameter derivative of `∫₀^∞ log t (t+z)^{-s-2} dt`. -/
+private lemma hasDerivAt_integral_log_mul_inv_add_pow {z : ℂ} (hz : z ∈ Complex.slitPlane)
+    (s : ℕ) :
+    HasDerivAt (fun w => ∫ t in Ioi (0 : ℝ), (Real.log t : ℂ) * (((t : ℂ) + w) ^ (s + 2))⁻¹)
+      (-((s : ℂ) + 2) * ∫ t in Ioi (0 : ℝ), (Real.log t : ℂ) * (((t : ℂ) + z) ^ (s + 3))⁻¹)
+      z := by
+  have hne : ∀ y ∈ Complex.slitPlane, ∀ t : ℝ, 0 ≤ t → (t : ℂ) + y ≠ 0 := fun y hy t ht =>
+    Complex.slitPlane_ne_zero (ofReal_add_mem_slitPlane hy ht)
+  have h := Complex.hasDerivAt_integral_of_locally_dominated (μ := volume.restrict (Ioi (0 : ℝ)))
+    (Φ := fun w (t : ℝ) => (Real.log t : ℂ) * (((t : ℂ) + w) ^ (s + 2))⁻¹)
+    Complex.isOpen_slitPlane (fun y hy => ?_) ?_ (fun y hy => ?_) hz
+  · convert h using 1
+    rw [← integral_const_mul]
+    refine setIntegral_congr_fun measurableSet_Ioi fun t (ht : 0 < t) => ?_
+    have htz := hne z hz t ht.le
+    have hd : HasDerivAt (fun w : ℂ => (Real.log t : ℂ) * (((t : ℂ) + w) ^ (s + 2))⁻¹)
+        ((Real.log t : ℂ) * (-(((s + 2 : ℕ) : ℂ) * ((t : ℂ) + z) ^ (s + 1)) /
+          (((t : ℂ) + z) ^ (s + 2)) ^ 2)) z := by
+      refine HasDerivAt.const_mul _ ?_
+      have hp : HasDerivAt (fun w : ℂ => ((t : ℂ) + w) ^ (s + 2))
+          (((s + 2 : ℕ) : ℂ) * ((t : ℂ) + z) ^ (s + 1)) z := by
+        have := (hasDerivAt_pow (s + 2) ((t : ℂ) + z)).comp z
+          ((hasDerivAt_id z).const_add (t : ℂ))
+        exact this.congr_deriv (by rw [mul_one, show s + 2 - 1 = s + 1 by omega])
+      exact hp.inv (pow_ne_zero _ htz)
+    rw [hd.deriv]
+    push_cast
+    field_simp
+    ring
+  · exact (by fun_prop : Measurable fun t : ℝ => (Real.log t : ℂ) *
+      (((t : ℂ) + y) ^ (s + 2))⁻¹).aestronglyMeasurable
+  · refine (ae_restrict_iff' measurableSet_Ioi).2 (Eventually.of_forall fun t ht y hy => ?_)
+    exact ((differentiableAt_const _).mul ((by fun_prop : DifferentiableAt ℂ
+      (fun y : ℂ => ((t : ℂ) + y) ^ (s + 2)) y).inv
+      (pow_ne_zero _ (hne y hy t (le_of_lt ht))))).differentiableWithinAt
+  · obtain ⟨κ, hκ, hκt⟩ := exists_mul_one_add_le_norm_ofReal_add hy
+    refine ⟨Metric.ball y (κ / 2), Metric.ball_mem_nhds _ (by positivity),
+      fun t => (2 / κ) ^ (s + 2) * (|Real.log t| / (1 + t) ^ 2),
+      integrableOn_abs_log_div_one_add_sq.const_mul _, ?_⟩
+    refine (ae_restrict_iff' measurableSet_Ioi).2 (Eventually.of_forall
+      fun t (ht : 0 < t) w hw => ?_)
+    have hw' : ‖w - y‖ < κ / 2 := by simpa [dist_eq_norm] using hw
+    have hlow : κ / 2 * (1 + t) ≤ ‖(t : ℂ) + w‖ := by
+      have h1 := hκt t ht.le
+      have h2 : ‖(t : ℂ) + y‖ ≤ ‖(t : ℂ) + w‖ + ‖w - y‖ := by
+        calc ‖(t : ℂ) + y‖ = ‖((t : ℂ) + w) - (w - y)‖ := by ring_nf
+          _ ≤ _ := norm_sub_le _ _
+      nlinarith
+    have hpos : 0 < κ / 2 * (1 + t) := by positivity
+    simp only
+    rw [norm_mul, norm_inv, norm_pow, Complex.norm_real, Real.norm_eq_abs]
+    have hp : (κ / 2 * (1 + t)) ^ (s + 2) ≤ ‖(t : ℂ) + w‖ ^ (s + 2) :=
+      pow_le_pow_left₀ hpos.le hlow _
+    have hq : (1 + t) ^ 2 ≤ (1 + t) ^ (s + 2) := pow_le_pow_right₀ (by linarith) (by omega)
+    calc |Real.log t| * (‖(t : ℂ) + w‖ ^ (s + 2))⁻¹
+        ≤ |Real.log t| * ((κ / 2 * (1 + t)) ^ (s + 2))⁻¹ := by gcongr
+      _ = (2 / κ) ^ (s + 2) * (|Real.log t| / (1 + t) ^ (s + 2)) := by
+          rw [mul_pow, div_pow, div_pow]; field_simp
+      _ ≤ (2 / κ) ^ (s + 2) * (|Real.log t| / (1 + t) ^ 2) := by gcongr
+
+/-- The closed form of `∫₀^∞ log t (t+z)^{-s-2} dt`. -/
+private noncomputable def logIntegralClosedForm (s : ℕ) (z : ℂ) : ℂ :=
+  (z ^ (s + 1))⁻¹ * (Complex.log z - (harmonic s : ℂ)) / ((s : ℂ) + 1)
+
+/-- The closed forms satisfy `Φ_s' = -(s+2) Φ_{s+1}`, as the integrals do. -/
+private lemma hasDerivAt_logIntegralClosedForm {z : ℂ} (hz : z ∈ Complex.slitPlane) (s : ℕ) :
+    HasDerivAt (logIntegralClosedForm s) (-((s : ℂ) + 2) * logIntegralClosedForm (s + 1) z) z := by
+  have hz0 : z ≠ 0 := Complex.slitPlane_ne_zero hz
+  have hp : HasDerivAt (fun w : ℂ => w ^ (s + 1)) (((s + 1 : ℕ) : ℂ) * z ^ s) z := by
+    simpa using hasDerivAt_pow (s + 1) z
+  have h1 : HasDerivAt (fun w : ℂ => (w ^ (s + 1))⁻¹)
+      (-(((s + 1 : ℕ) : ℂ) * z ^ s) / (z ^ (s + 1)) ^ 2) z := hp.inv (pow_ne_zero _ hz0)
+  have h2 : HasDerivAt (fun w : ℂ => Complex.log w - (harmonic s : ℂ)) z⁻¹ z := by
+    simpa using ((hasDerivAt_id z).clog hz).sub_const (harmonic s : ℂ)
+  have h3 : HasDerivAt (fun w : ℂ => (w ^ (s + 1))⁻¹ * (Complex.log w - (harmonic s : ℂ)) /
+      ((s : ℂ) + 1)) ((-(((s + 1 : ℕ) : ℂ) * z ^ s) / (z ^ (s + 1)) ^ 2 *
+        (Complex.log z - (harmonic s : ℂ)) + (z ^ (s + 1))⁻¹ * z⁻¹) / ((s : ℂ) + 1)) z :=
+    (h1.mul h2).div_const _
+  unfold logIntegralClosedForm
+  refine h3.congr_deriv ?_
+  have hs1 : (s : ℂ) + 1 ≠ 0 := by exact_mod_cast Nat.succ_ne_zero s
+  have hs2 : (s : ℂ) + 1 + 1 ≠ 0 := by exact_mod_cast Nat.succ_ne_zero (s + 1)
+  rw [harmonic_succ]
+  push_cast
+  field_simp
+  ring
+
+/-- `∫₀^∞ log t (t+z)^{-s-2} dt = z^{-s-1}(log z - H_s)/(s+1)` on the slit plane. -/
+private lemma integral_log_mul_inv_add_pow {z : ℂ} (hz : z ∈ Complex.slitPlane) (s : ℕ) :
+    ∫ t in Ioi (0 : ℝ), (Real.log t : ℂ) * (((t : ℂ) + z) ^ (s + 2))⁻¹ =
+      logIntegralClosedForm s z := by
+  induction s generalizing z with
+  | zero =>
+    rw [integral_log_mul_inv_add_sq hz, logIntegralClosedForm]
+    simp [div_eq_mul_inv, mul_comm]
+  | succ s ih =>
+    have hev : (fun w => ∫ t in Ioi (0 : ℝ), (Real.log t : ℂ) * (((t : ℂ) + w) ^ (s + 2))⁻¹)
+        =ᶠ[𝓝 z] logIntegralClosedForm s :=
+      Filter.eventually_of_mem (Complex.isOpen_slitPlane.mem_nhds hz) fun w hw => ih hw
+    have h1 := (hasDerivAt_integral_log_mul_inv_add_pow hz s).congr_of_eventuallyEq hev.symm
+    have h2 := hasDerivAt_logIntegralClosedForm hz s
+    have heq := h1.unique h2
+    have hs2 : -((s : ℂ) + 2) ≠ 0 := neg_ne_zero.2 (by exact_mod_cast Nat.succ_ne_zero (s + 1))
+    exact mul_left_cancel₀ hs2 heq
+
+/-- `ε^i e^{-εt} ≤ 2/(1+t)` for `0 < ε ≤ 1`, `t ≥ 0`, `i ≥ 1`. -/
+private lemma pow_mul_exp_neg_le {ε t : ℝ} (hε0 : 0 < ε) (hε1 : ε ≤ 1) (ht : 0 ≤ t) {i : ℕ}
+    (hi : 1 ≤ i) : ε ^ i * Real.exp (-(ε * t)) ≤ 2 / (1 + t) := by
+  have hεi : ε ^ i ≤ ε := by
+    calc ε ^ i ≤ ε ^ 1 := pow_le_pow_of_le_one hε0.le hε1 hi
+      _ = ε := pow_one ε
+  have he := Real.add_one_le_exp (ε * t)
+  have hpos := Real.exp_pos (ε * t)
+  have hexp : Real.exp (-(ε * t)) = (Real.exp (ε * t))⁻¹ := Real.exp_neg _
+  rw [le_div_iff₀ (by linarith), hexp]
+  have h1 : ε ^ i * (Real.exp (ε * t))⁻¹ * (1 + t) ≤ ε * (Real.exp (ε * t))⁻¹ * (1 + t) := by
+    gcongr
+  refine h1.trans ?_
+  rw [show ε * (Real.exp (ε * t))⁻¹ * (1 + t) = (ε + ε * t) / Real.exp (ε * t) by ring,
+    div_le_iff₀ hpos]
+  have : 1 ≤ Real.exp (ε * t) := by nlinarith [mul_nonneg hε0.le ht]
+  nlinarith
+
+/-- One term of the Leibniz expansion of `φ_ε^{(s+1)}` is `O(1/(1+t)²)` uniformly in
+`0 < ε ≤ 1`. -/
+private lemma norm_leibnizTerm_le {ε t κ : ℝ} (hε0 : 0 < ε) (hε1 : ε ≤ 1) (ht : 0 ≤ t)
+    (hκ : 0 < κ) {z : ℂ} (hκt : κ * (1 + t) ≤ ‖(t : ℂ) + z‖) {i m : ℕ} (hm : 1 ≤ m)
+    (him : i = 0 → 2 ≤ m) :
+    ‖(-(ε : ℂ)) ^ i * Complex.exp (-(ε : ℂ) * t)‖ * ‖(((t : ℂ) + z) ^ m)⁻¹‖ ≤
+      2 * (1 / κ) ^ m / (1 + t) ^ 2 := by
+  have hpos : 0 < κ * (1 + t) := by positivity
+  have hinv : ‖(((t : ℂ) + z) ^ m)⁻¹‖ ≤ (1 / κ) ^ m / (1 + t) ^ m := by
+    rw [norm_inv, norm_pow, div_pow, one_pow, div_div, ← mul_pow]
+    exact inv_anti₀ (by positivity) (pow_le_pow_left₀ hpos.le hκt m) |>.trans_eq (by simp)
+  have hnorm : ‖(-(ε : ℂ)) ^ i * Complex.exp (-(ε : ℂ) * t)‖ = ε ^ i * Real.exp (-(ε * t)) := by
+    rw [norm_mul, norm_pow, norm_neg, Complex.norm_real, Real.norm_of_nonneg hε0.le,
+      Complex.norm_exp]
+    congr 2
+    simp
+  rw [hnorm]
+  have h1t : 1 ≤ 1 + t := by linarith
+  rcases Nat.eq_zero_or_pos i with rfl | hi
+  · have hm2 := him rfl
+    have he : Real.exp (-(ε * t)) ≤ 1 := Real.exp_le_one_iff.2 (by nlinarith)
+    have hq : (1 + t) ^ 2 ≤ (1 + t) ^ m := pow_le_pow_right₀ h1t hm2
+    calc ε ^ 0 * Real.exp (-(ε * t)) * ‖(((t : ℂ) + z) ^ m)⁻¹‖
+        ≤ 1 * ((1 / κ) ^ m / (1 + t) ^ m) := by
+          rw [pow_zero, one_mul]; gcongr
+      _ ≤ 1 * ((1 / κ) ^ m / (1 + t) ^ 2) := by gcongr
+      _ ≤ _ := by
+          rw [one_mul, mul_div_assoc]
+          have : 0 ≤ (1 / κ) ^ m / (1 + t) ^ 2 := by positivity
+          linarith
+  · have he := pow_mul_exp_neg_le hε0 hε1 ht hi
+    have hq : (1 + t) ^ 1 ≤ (1 + t) ^ m := pow_le_pow_right₀ h1t hm
+    calc ε ^ i * Real.exp (-(ε * t)) * ‖(((t : ℂ) + z) ^ m)⁻¹‖
+        ≤ 2 / (1 + t) * ((1 / κ) ^ m / (1 + t) ^ m) := by gcongr
+      _ ≤ 2 / (1 + t) * ((1 / κ) ^ m / (1 + t) ^ 1) := by gcongr
+      _ = _ := by field_simp
 
 /-- DLMF 2.6.24: for `z ∉ (-∞, 0]` and `s = 0, 1, 2, …`,
 `lim_{ε → 0+} ⟨t^{-s-1}, φ_ε⟩ = (-1)^{s+1} z^{-s-1} ∑_{k=1}^{s} 1/k + (-1)^s z^{-s-1} ln z`. -/
@@ -371,7 +967,87 @@ theorem tendsto_logPowPairing_stieltjesTestFunction {z : ℂ} (hz : z ∈ Comple
     Tendsto (fun ε : ℝ => logPowPairing s (stieltjesTestFunction ε z)) (𝓝[>] 0)
       (𝓝 ((-1 : ℂ) ^ (s + 1) / z ^ (s + 1) * (harmonic s : ℂ) +
         (-1 : ℂ) ^ s / z ^ (s + 1) * Complex.log z)) := by
-  sorry
+  obtain ⟨κ, hκ, hκt⟩ := exists_mul_one_add_le_norm_ofReal_add hz
+  have hne : ∀ t : ℝ, 0 ≤ t → (t : ℂ) + z ≠ 0 := fun t ht =>
+    Complex.slitPlane_ne_zero (ofReal_add_mem_slitPlane hz ht)
+  set n := s + 1 with hn
+  set D : ℝ → ℝ → ℂ := fun ε t => ∑ i ∈ range (n + 1),
+    (n.choose i : ℂ) * ((-(ε : ℂ)) ^ i * Complex.exp (-(ε : ℂ) * t)) *
+      ((-1) ^ (n - i) * ((n - i)! : ℂ) * (((t : ℂ) + z) ^ (n - i + 1))⁻¹) with hD
+  have hform : ∀ ε : ℝ, ∀ t : ℝ, 0 ≤ t →
+      iteratedDeriv n (stieltjesTestFunction ε z) t = D ε t := by
+    intro ε t ht
+    rw [iteratedDeriv_stieltjesTestFunction ε n (hne t ht)]
+    refine sum_congr rfl fun i _ => ?_
+    rw [show (-1 - ((n - i : ℕ) : ℤ)) = -((n - i + 1 : ℕ) : ℤ) by push_cast; ring, zpow_neg,
+      zpow_natCast]
+  have hpair : ∀ ε : ℝ, logPowPairing s (stieltjesTestFunction ε z) =
+      -((s ! : ℂ)⁻¹ * ∫ t in Ioi (0 : ℝ), (Real.log t : ℂ) * D ε t) := by
+    intro ε
+    unfold logPowPairing
+    congr 2
+    exact setIntegral_congr_fun measurableSet_Ioi fun t (ht : 0 < t) => by rw [hform ε t ht.le]
+  simp_rw [hpair]
+  set L : ℝ → ℂ := fun t => (-1) ^ n * (n ! : ℂ) * (((t : ℂ) + z) ^ (n + 1))⁻¹
+  have hD0 : ∀ t : ℝ, D 0 t = L t := by
+    intro t
+    simp only [hD, L]
+    rw [sum_eq_single 0]
+    · simp
+    · intro i _ hi
+      simp [zero_pow hi]
+    · intro h; simp at h
+  set K : ℝ := ∑ i ∈ range (n + 1), (n.choose i : ℝ) * (n - i)! * (2 * (1 / κ) ^ (n - i + 1))
+  have hlim : Tendsto (fun ε : ℝ => ∫ t in Ioi (0 : ℝ), (Real.log t : ℂ) * D ε t) (𝓝[>] 0)
+      (𝓝 (∫ t in Ioi (0 : ℝ), (Real.log t : ℂ) * L t)) := by
+    refine tendsto_integral_filter_of_dominated_convergence
+      (fun t => K * (|Real.log t| / (1 + t) ^ 2)) ?_ ?_
+      (integrableOn_abs_log_div_one_add_sq.const_mul _) ?_
+    · exact Eventually.of_forall fun ε => (by fun_prop : Measurable fun t : ℝ =>
+        (Real.log t : ℂ) * D ε t).aestronglyMeasurable
+    · filter_upwards [Ioc_mem_nhdsGT (show (0 : ℝ) < 1 from one_pos)] with ε hε
+      refine (ae_restrict_iff' measurableSet_Ioi).2 (Eventually.of_forall
+        fun t (ht : 0 < t) => ?_)
+      have htz := hκt t ht.le
+      rw [norm_mul, Complex.norm_real, Real.norm_eq_abs]
+      have hDb : ‖D ε t‖ ≤ K / (1 + t) ^ 2 := by
+        refine (norm_sum_le _ _).trans ?_
+        rw [show K / (1 + t) ^ 2 = ∑ i ∈ range (n + 1),
+            (n.choose i : ℝ) * (n - i)! * (2 * (1 / κ) ^ (n - i + 1) / (1 + t) ^ 2) by
+          simp only [K, sum_div, mul_div_assoc]]
+        refine sum_le_sum fun i hi => ?_
+        have hb := norm_leibnizTerm_le hε.1 hε.2 ht.le hκ htz (i := i) (m := n - i + 1)
+          le_add_self (fun h => by subst h; omega)
+        calc ‖(n.choose i : ℂ) * ((-(ε : ℂ)) ^ i * Complex.exp (-(ε : ℂ) * t)) *
+              ((-1) ^ (n - i) * ((n - i)! : ℂ) * (((t : ℂ) + z) ^ (n - i + 1))⁻¹)‖
+            = (n.choose i : ℝ) * (n - i)! * (‖(-(ε : ℂ)) ^ i * Complex.exp (-(ε : ℂ) * t)‖ *
+              ‖(((t : ℂ) + z) ^ (n - i + 1))⁻¹‖) := by
+              simp only [norm_mul, norm_pow, norm_neg, norm_one, one_pow, one_mul,
+                Complex.norm_natCast]
+              ring
+          _ ≤ _ := by gcongr
+      calc |Real.log t| * ‖D ε t‖ ≤ |Real.log t| * (K / (1 + t) ^ 2) := by gcongr
+        _ = _ := by ring
+    · refine (ae_restrict_iff' measurableSet_Ioi).2 (Eventually.of_forall
+        fun t (ht : 0 < t) => ?_)
+      rw [← hD0]
+      refine Tendsto.mono_left ?_ nhdsWithin_le_nhds
+      refine Continuous.tendsto' ?_ 0 _ rfl
+      fun_prop
+  have hint : ∫ t in Ioi (0 : ℝ), (Real.log t : ℂ) * L t =
+      (-1) ^ n * (n ! : ℂ) * ∫ t in Ioi (0 : ℝ), (Real.log t : ℂ) *
+        (((t : ℂ) + z) ^ (s + 2))⁻¹ := by
+    rw [← integral_const_mul]
+    exact setIntegral_congr_fun measurableSet_Ioi fun t _ => by simp only [L, hn]; ring
+  rw [hint, integral_log_mul_inv_add_pow hz s] at hlim
+  convert (hlim.const_mul (s ! : ℂ)⁻¹).neg using 2
+  have hz0 : z ≠ 0 := Complex.slitPlane_ne_zero hz
+  have hfact : (s ! : ℂ) ≠ 0 := Nat.cast_ne_zero.2 (Nat.factorial_ne_zero s)
+  have hs1 : (s : ℂ) + 1 ≠ 0 := by exact_mod_cast Nat.succ_ne_zero s
+  simp only [logIntegralClosedForm, hn, Nat.factorial_succ]
+  push_cast
+  field_simp
+  ring
 
 /-- DLMF 2.6.25: `lim_{ε → 0+} ⟨f, φ_ε⟩ = 𝒮f(z)` whenever `f(t)/(t+z)` is integrable on
 `(0, ∞)` (dominated convergence). This is stronger than DLMF, which assumes `z ∈ ℂ \ (-∞, 0]`. -/
@@ -379,8 +1055,9 @@ theorem tendsto_logPowPairing_stieltjesTestFunction {z : ℂ} (hz : z ∈ Comple
 theorem tendsto_functionPairing_stieltjesTestFunction' {f : ℝ → ℂ} {z : ℂ}
     (hf : IntegrableOn (fun t : ℝ => f t / ((t : ℂ) + z)) (Ioi 0)) :
     Tendsto (fun ε : ℝ => functionPairing f (stieltjesTestFunction ε z)) (𝓝[>] 0)
-      (𝓝 (stieltjesTransform f z)) := by
-  unfold functionPairing stieltjesTestFunction stieltjesTransform
+      (𝓝 (AlgebraicAnalytic.stieltjesTransform f z)) := by
+  rw [stieltjesTransform_eq]
+  unfold functionPairing stieltjesTestFunction
   refine tendsto_integral_filter_of_dominated_convergence (fun t => ‖f t / ((t : ℂ) + z)‖)
     ?_ ?_ hf.norm ?_
   · refine Eventually.of_forall fun ε => ?_
@@ -415,7 +1092,7 @@ theorem tendsto_functionPairing_stieltjesTestFunction {f : ℝ → ℂ} {z : ℂ
     (_hz : z ∈ Complex.slitPlane)
     (hf : IntegrableOn (fun t : ℝ => f t / ((t : ℂ) + z)) (Ioi 0)) :
     Tendsto (fun ε : ℝ => functionPairing f (stieltjesTestFunction ε z)) (𝓝[>] 0)
-      (𝓝 (stieltjesTransform f z)) :=
+      (𝓝 (AlgebraicAnalytic.stieltjesTransform f z)) :=
   tendsto_functionPairing_stieltjesTestFunction' hf
 
 /-- DLMF 2.6.26 and the display following it: under the hypotheses of §2.6(ii),
@@ -441,7 +1118,7 @@ an exact identity with the remainder `R_n(z) = (-1)ⁿ z⁻ⁿ ∫₀^∞ τⁿ 
 theorem stieltjesTransform_eq_of_lt_one {f : ℝ → ℂ} {α : ℝ} {a : ℕ → ℂ}
     (hf : IsStieltjesExpansion f α a) (hα : α < 1) {M : ℂ → ℂ} (hM : IsMellinContinuation f α M)
     {n : ℕ} (hn : 1 ≤ n) {z : ℂ} (hz : z ∈ Complex.slitPlane) :
-    stieltjesTransform f z =
+    AlgebraicAnalytic.stieltjesTransform f z =
       π / Real.sin (π * α) * ∑ s ∈ range n, (-1 : ℂ) ^ s * a s / z ^ ((s : ℂ) + α) -
         ∑ s ∈ Icc 1 n, ((s - 1)! : ℂ) * stieltjesDeltaCoeff M s / z ^ s +
         stieltjesRemainderTerm (stieltjesRemainder f α a n) n z := by
@@ -453,7 +1130,7 @@ theorem stieltjesTransform_eq_of_lt_one {f : ℝ → ℂ} {α : ℝ} {a : ℕ �
 theorem stieltjesTransform_eq_of_eq_one {f : ℝ → ℂ} {a : ℕ → ℂ}
     (hf : IsStieltjesExpansion f 1 a) {M : ℂ → ℂ} (hM : IsMellinContinuation f 1 M)
     {n : ℕ} (hn : 1 ≤ n) {z : ℂ} (hz : z ∈ Complex.slitPlane) :
-    stieltjesTransform f z =
+    AlgebraicAnalytic.stieltjesTransform f z =
       Complex.log z * ∑ s ∈ range n, (-1 : ℂ) ^ s * a s / z ^ (s + 1) +
         ∑ s ∈ range n, (-1 : ℂ) ^ s * stieltjesLogCoeff M a s / z ^ (s + 1) +
         stieltjesRemainderTerm (stieltjesRemainder f 1 a n) n z := by

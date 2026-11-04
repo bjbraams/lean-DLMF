@@ -43,18 +43,18 @@ noncomputable section
 
 namespace DLMF.OrthogonalPolynomials.LegendreAddition
 /-- Derivatives of the Legendre polynomial. -/
-def jet (n k : ℕ) : ℂ → ℂ := iteratedDeriv k (legendrePolyP n)
+def jet (n k : ℕ) : ℂ → ℂ := iteratedDeriv k (legendrePolynomialP n)
 /-- The zeroth derivative. -/
-theorem jet_zero (n : ℕ) : jet n 0 = legendrePolyP n := rfl
+theorem jet_zero (n : ℕ) : jet n 0 = legendrePolynomialP n := rfl
 /-- The first derivative. -/
-theorem jet_one (n : ℕ) : jet n 1 = deriv (legendrePolyP n) := iteratedDeriv_one
+theorem jet_one (n : ℕ) : jet n 1 = deriv (legendrePolynomialP n) := iteratedDeriv_one
 /-- Differentiation advances the derivative order. -/
 theorem deriv_jet (n k : ℕ) : deriv (jet n k) = jet n (k+1) := by
   exact (iteratedDeriv_succ).symm
 /-- Every derivative is entire. -/
 theorem analytic_jet (n k : ℕ) : AnalyticOnNhd ℂ (jet n k) univ := by
   induction k with
-  | zero => exact analyticOnNhd_jacobiPolyP 0 0 n
+  | zero => exact analyticOnNhd_jacobiPolynomialP 0 0 n
   | succ k ih => simpa only [← deriv_jet] using ih.deriv
 /-- Every derivative is differentiable. -/
 theorem diff_jet (n k : ℕ) : Differentiable ℂ (jet n k) :=
@@ -65,20 +65,20 @@ theorem hderiv_jet (n k : ℕ) (z : ℂ) : HasDerivAt (jet n k) (jet n (k+1) z) 
 
 /-- Weighted derivative ladders, valid also at the endpoints. -/
 theorem weighted_ladders (n : ℕ) (z : ℂ) :
-      (1-z^2) * deriv (legendrePolyP n) z = (n+1) *
-          (z * legendrePolyP n z - legendrePolyP (n+1) z) ∧
-      (1-z^2) * deriv (legendrePolyP (n+1)) z = (n+1) *
-          (legendrePolyP n z-z*legendrePolyP (n+1) z) := by
+      (1-z^2) * deriv (legendrePolynomialP n) z = (n+1) *
+          (z * legendrePolynomialP n z - legendrePolynomialP (n+1) z) ∧
+      (1-z^2) * deriv (legendrePolynomialP (n+1)) z = (n+1) *
+          (legendrePolynomialP n z-z*legendrePolynomialP (n+1) z) := by
   have h0 := jacobi_raising_derivative (α := 0) (β := 0) (by norm_num) n z
   have h1 := jacobi_lowering_derivative (α := 0) (β := 0) (by norm_num) n z
-  change (2*n+0+0+2) * (1-z^2) * deriv (legendrePolyP n) z = _ at h0
-  change (2*n+0+0+2) * (1-z^2) * deriv (legendrePolyP (n+1)) z = _ at h1
-  change (2*n+0+0+2) * (1-z^2) * deriv (legendrePolyP n) z =
-    (n+0+0+1) * (0-0+(2*n+0+0+2)*z) * legendrePolyP n z -
-      2*(n+1)*(n+0+0+1)*legendrePolyP (n+1) z at h0
-  change (2*n+0+0+2) * (1-z^2) * deriv (legendrePolyP (n+1)) z =
-    (n+1)*(0-0-(2*n+0+0+2)*z)*legendrePolyP (n+1) z +
-      2*(n+0+1)*(n+0+1)*legendrePolyP n z at h1
+  change (2*n+0+0+2) * (1-z^2) * deriv (legendrePolynomialP n) z = _ at h0
+  change (2*n+0+0+2) * (1-z^2) * deriv (legendrePolynomialP (n+1)) z = _ at h1
+  change (2*n+0+0+2) * (1-z^2) * deriv (legendrePolynomialP n) z =
+    (n+0+0+1) * (0-0+(2*n+0+0+2)*z) * legendrePolynomialP n z -
+      2*(n+1)*(n+0+0+1)*legendrePolynomialP (n+1) z at h0
+  change (2*n+0+0+2) * (1-z^2) * deriv (legendrePolynomialP (n+1)) z =
+    (n+1)*(0-0-(2*n+0+0+2)*z)*legendrePolynomialP (n+1) z +
+      2*(n+0+1)*(n+0+1)*legendrePolynomialP n z at h1
   have hn : (2*(n : ℂ)+2) ≠ 0 := by
     have hn := Nat.cast_nonneg (α := ℝ) n
     intro h; have := congrArg re h; simp at this; linarith
@@ -90,10 +90,11 @@ theorem weighted_ladders (n : ℕ) (z : ℂ) :
 
 /-- The two derivative ladders at order one. -/
 theorem base_ladders (n : ℕ) :
-    deriv (legendrePolyP (n+1)) =
-        (fun z => z * deriv (legendrePolyP n) z + (n+1) * legendrePolyP n z) ∧
-    deriv (legendrePolyP n) =
-        (fun z => z * deriv (legendrePolyP (n+1)) z - (n+1) * legendrePolyP (n+1) z) := by
+    deriv (legendrePolynomialP (n+1)) =
+        (fun z => z * deriv (legendrePolynomialP n) z + (n+1) * legendrePolynomialP n z) ∧
+    deriv (legendrePolynomialP n) =
+        (fun z => z * deriv (legendrePolynomialP (n+1)) z - (n+1) *
+            legendrePolynomialP (n+1) z) := by
   have hmul := weighted_ladders n
   have hne {z : ℂ} (hz : z ∈ Metric.ball (0 : ℂ) 1) : 1-z^2 ≠ 0 := by
     have hz' : ‖z‖ < 1 := by simpa using hz
@@ -101,8 +102,8 @@ theorem base_ladders (n : ℕ) :
     intro h
     have he : z^2 = 1 := (sub_eq_zero.mp h).symm
     simp [he] at hn
-  have hA : AnalyticOnNhd ℂ (deriv (legendrePolyP n)) univ := (analytic_jet n 0).deriv
-  have hB : AnalyticOnNhd ℂ (deriv (legendrePolyP (n+1))) univ := (analytic_jet (n+1) 0).deriv
+  have hA : AnalyticOnNhd ℂ (deriv (legendrePolynomialP n)) univ := (analytic_jet n 0).deriv
+  have hB : AnalyticOnNhd ℂ (deriv (legendrePolynomialP (n+1))) univ := (analytic_jet (n+1) 0).deriv
   constructor
   · refine eq_of_analyticOnNhd_univ_of_eqOn (U := Metric.ball (0 : ℂ) 1) hB ?_
       Metric.isOpen_ball ⟨0, by simp⟩ ?_
@@ -180,18 +181,18 @@ end DLMF.OrthogonalPolynomials.LegendreAddition
 namespace DLMF.OrthogonalPolynomials.LegendreAddition
 /-- The Jacobi form of the derivatives, including the top derivative. -/
 theorem jet_eq_jacobi (n k : ℕ) (hk : k ≤ n) (z : ℂ) :
-    jet n k z = poch (n+1) k / 2^k * jacobiPolyP k k (n-k) z := by
+    jet n k z = pochhammer (n+1) k / 2^k * jacobiPolynomialP k k (n-k) z := by
   induction k generalizing n z with
-  | zero => simp [jet, legendrePolyP, poch_zero]
+  | zero => simp [jet, legendrePolynomialP, pochhammer_zero]
   | succ k ih =>
     obtain ⟨r, rfl⟩ := Nat.exists_eq_add_of_le hk
-    have he : jet (k+1+r) k = fun z => poch ((k+1+r : ℕ)+1) k / 2^k *
-        jacobiPolyP k k ((k+1+r)-k) z := funext fun z => ih _ (by omega) z
+    have he : jet (k+1+r) k = fun z => pochhammer ((k+1+r : ℕ)+1) k / 2^k *
+        jacobiPolynomialP k k ((k+1+r)-k) z := funext fun z => ih _ (by omega) z
     rw [← deriv_jet, he, deriv_const_mul_field', show k+1+r-k = r+1 by omega]
     dsimp only
     rw [jacobi_derivative
         (show -1 < ((k : ℂ)).re by change -1 < (k : ℝ); linarith [Nat.cast_nonneg (α := ℝ) k])]
-    rw [show k+1+r-(k+1) = r by omega, poch_succ, pow_succ]
+    rw [show k+1+r-(k+1) = r by omega, pochhammer_succ, pow_succ]
     push_cast
     field_simp
     ring
@@ -200,9 +201,9 @@ theorem jet_eq_jacobi (n k : ℕ) (hk : k ≤ n) (z : ℂ) :
 theorem jet_eq_zero {n k : ℕ} (hk : n < k) : jet n k = 0 := by
   have hz : jet n (n+1) = 0 := by
     rw [← deriv_jet]
-    have he : jet n n = fun _ => poch (n+1) n / 2^n := by
+    have he : jet n n = fun _ => pochhammer (n+1) n / 2^n := by
       funext z
-      rw [jet_eq_jacobi n n le_rfl, Nat.sub_self, jacobiPolyP_zero, mul_one]
+      rw [jet_eq_jacobi n n le_rfl, Nat.sub_self, jacobiPolynomialP_zero, mul_one]
     rw [he]
     ext z
     simp
@@ -520,7 +521,7 @@ theorem kernel_recurrence {n : ℕ} (hn : 0 < n) (x y s t phi : ℂ)
 /-- The first two angular kernels. -/
 theorem kernel_initial (x y s t phi : ℂ) :
     kernel 0 x y s t phi = 1 ∧ kernel 1 x y s t phi = x*y+s*t*cos phi := by
-  have h0 (z : ℂ) : jet 0 0 z = 1 := by simp [jet_zero, legendrePolyP_zero]
+  have h0 (z : ℂ) : jet 0 0 z = 1 := by simp [jet_zero, legendrePolynomialP_zero]
   have h1 (z : ℂ) : jet 1 0 z = z := by simp [jet_zero]
   have h11 (z : ℂ) : jet 1 1 z = 1 := by rw [jet_succ_top]; simp [h0]
   constructor
@@ -531,14 +532,14 @@ theorem kernel_initial (x y s t phi : ℂ) :
 /-- The finite angular kernel is the Legendre polynomial of the inner product. -/
 theorem legendre_eq_kernel (n : ℕ) (x y s t phi : ℂ)
     (hs : s^2 = 1-x^2) (ht : t^2 = 1-y^2) :
-    legendrePolyP n (x*y+s*t*cos phi) = kernel n x y s t phi := by
+    legendrePolynomialP n (x*y+s*t*cos phi) = kernel n x y s t phi := by
   induction n using Nat.strong_induction_on with
   | _ n ih =>
     match n with
-    | 0 => rw [(kernel_initial x y s t phi).1, legendrePolyP_zero]
-    | 1 => rw [(kernel_initial x y s t phi).2, legendrePolyP_one]
+    | 0 => rw [(kernel_initial x y s t phi).1, legendrePolynomialP_zero]
+    | 1 => rw [(kernel_initial x y s t phi).2, legendrePolynomialP_one]
     | n+2 =>
-      have hp := legendrePolyP_recurrence n (x*y+s*t*cos phi)
+      have hp := legendrePolynomialP_recurrence n (x*y+s*t*cos phi)
       have hk := kernel_recurrence (n := n+1) (by omega) x y s t phi hs ht
       rw [show n+1-1 = n by omega] at hk
       rw [ih (n+1) (by omega), ih n (by omega)] at hp
@@ -551,13 +552,13 @@ namespace DLMF.OrthogonalPolynomials.LegendreAddition
 /-- The angular coefficient in the Jacobi normalization. -/
 theorem coeff_eq_jacobi (n k : ℕ) (hk : k ≤ n) (x y s t : ℂ) :
     coeff n k x y s t =
-      ((n-k)! : ℂ) * (n+k)! / (2^(2*k)*(n ! : ℂ)^2) * s^k * jacobiPolyP k k (n-k) x *
-        t^k * jacobiPolyP k k (n-k) y := by
-  have hf : (n ! : ℂ)*poch (n+1) k = (n+k)! := by
-    simpa [poch] using factorial_mul_ascPochhammer ℂ n k
+      ((n-k)! : ℂ) * (n+k)! / (2^(2*k)*(n ! : ℂ)^2) * s^k * jacobiPolynomialP k k (n-k) x *
+        t^k * jacobiPolynomialP k k (n-k) y := by
+  have hf : (n ! : ℂ)*pochhammer (n+1) k = (n+k)! := by
+    simpa [pochhammer] using factorial_mul_ascPochhammer ℂ n k
   have hn : (n ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
   have hnk : ((n+k)! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (n+k).factorial_ne_zero
-  have hp : poch (n+1) k = (n+k)! / (n ! : ℂ) := by
+  have hp : pochhammer (n+1) k = (n+k)! / (n ! : ℂ) := by
     apply (eq_div_iff hn).2
     linear_combination hf
   dsimp only [coeff, weight]

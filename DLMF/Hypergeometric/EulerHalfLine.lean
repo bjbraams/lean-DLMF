@@ -40,7 +40,7 @@ theorem eulerHalfLine_integrable_integral {p a d z : ℂ}
     (ha : 0 < a.re) (hd : 0 < d.re) (hz : 0 < z.re) :
     IntegrableOn (eulerHalfLineKernel p a d z) (Ioi 0) ∧
       (∫ u : ℝ in Ioi 0, eulerHalfLineKernel p a d z u) =
-        Gamma a * Gamma d * regularizedGaussHG p d (a + d) (1 - z) := by
+        Gamma a * Gamma d * regularizedGaussHypergeometric p d (a + d) (1 - z) := by
   let f : ℝ → ℝ := fun u => 1 / (1 + u)
   let f' : ℝ → ℝ := fun u => -1 / (1 + u) ^ 2
   have hderiv : ∀ u ∈ Ioi (0 : ℝ), HasDerivWithinAt f (f' u) (Ioi 0) u := by
@@ -124,9 +124,9 @@ theorem eulerHalfLine_integrable_integral {p a d z : ℂ}
   refine ⟨(hcovI.mp hi).congr (by
     filter_upwards [ae_restrict_mem measurableSet_Ioi] with u hu; exact hker u hu), ?_⟩
   rw [← setIntegral_congr_fun measurableSet_Ioi hker, ← hcov]
-  have hg := regularizedGaussHG_eq_regularizedGaussHGIntegral (a := p) hd
+  have hg := regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricIntegral (a := p) hd
     (show 0 < (a + d - d).re by simpa using ha) hw
-  rw [regularizedGaussHGIntegral, show a + d - d = a by ring,
+  rw [regularizedGaussHypergeometricIntegral, show a + d - d = a by ring,
     intervalIntegral.integral_of_le zero_le_one, integral_Ioc_eq_integral_Ioo] at hg
   rw [hg]
   have hG := mul_ne_zero (Gamma_ne_zero_of_re_pos ha) (Gamma_ne_zero_of_re_pos hd)

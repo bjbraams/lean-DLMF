@@ -20,14 +20,17 @@ for `V` are in `DLMF.ParabolicCylinder.Basic.Wronskians`.
 
 ## Main results
 
-* `pcfU_neg_eq`, `pcfV_neg_eq`: the connection formulas DLMF 12.2.15–12.2.16 for every `a`.
-* `pcfU_neg_nat_sub_half_neg`, `pcfV_nat_add_half_neg`: the parity relations
-  DLMF 12.2.13–12.2.14.
-* `pcfV_eq`: the classical form of `V` in terms of `U(a, ±z)`, away from the poles of
+* `parabolicCylinderU_neg_eq`, `parabolicCylinderV_neg_eq`: the connection formulas DLMF
+  12.2.15–12.2.16 for every `a`.
+* `parabolicCylinderU_neg_nat_sub_half_neg`, `parabolicCylinderV_nat_add_half_neg`: the parity
+  relations DLMF 12.2.13–12.2.14.
+* `parabolicCylinderV_eq`: the classical form of `V` in terms of `U(a, ±z)`, away from the poles of
   `Γ(1/2 + a)`.
-* `pcfV_eq_mul_I`, `pcfV_eq_mul_neg_I`: the connection formula DLMF 12.2.20 for every `a`.
-* `pcfV_three_term`, `pcfV_recurrence_sub`, `pcfV_recurrence_add`, `pcfV_deriv_recurrence`:
-  the recurrences DLMF 12.8.5–12.8.8.
+* `parabolicCylinderV_eq_mul_I`, `parabolicCylinderV_eq_mul_neg_I`: the connection formula DLMF
+  12.2.20 for every `a`.
+* `parabolicCylinderV_three_term`, `parabolicCylinderV_recurrence_sub`,
+  `parabolicCylinderV_recurrence_add`, `parabolicCylinderV_deriv_recurrence`: the recurrences DLMF
+  12.8.5–12.8.8.
 
 -/
 
@@ -62,13 +65,16 @@ theorem two_cpow_mul_two_cpow (x y z : ℂ) (h : x + y = z) :
 /-- **Connection formula** (DLMF 12.2.15), valid for every `a`:
 `U(a,-z) = -sin(πa) U(a,z) + π/Γ(1/2 + a) V(a,z)`. -/
 @[dlmf 12.2.E15]
-theorem pcfU_neg_eq (a z : ℂ) :
-    pcfU a (-z) = -Complex.sin (π * a) * pcfU a z + π / Gamma (1 / 2 + a) * pcfV a z := by
-  have hg := (isWeberSol_pcfU a).lincomb (isWeberSol_pcfV a) (-Complex.sin (π * a))
+theorem parabolicCylinderU_neg_eq (a z : ℂ) :
+    parabolicCylinderU a (-z) = -Complex.sin (π * a) * parabolicCylinderU a z + π /
+        Gamma (1 / 2 + a) * parabolicCylinderV a z := by
+  have hg := (isWeberSolution_parabolicCylinderU a).lincomb (isWeberSolution_parabolicCylinderV a)
+      (-Complex.sin (π * a))
     (π / Gamma (1 / 2 + a))
-  refine (isWeberSol_pcfU_neg a).eq_of_initial hg ?_ ?_ z
+  refine (isWeberSolution_parabolicCylinderU_neg a).eq_of_initial hg ?_ ?_ z
   · simp only [neg_zero]
-    rw [pcfU_zero', pcfV_zero', pcfVZero, div_eq_mul_inv (π : ℂ) (Gamma (1 / 2 + a)),
+    rw [parabolicCylinderU_zero', parabolicCylinderV_zero', parabolicCylinderVZero,
+        div_eq_mul_inv (π : ℂ) (Gamma (1 / 2 + a)),
       recip_Gamma_half_add, sin_pi_mul_eq_sq]
     have q2 := pi_mul_recip_Gamma_mul_recip_Gamma (1 / 4 + a / 2)
     rw [show 1 - (1 / 4 + a / 2) = 3 / 4 - a / 2 by ring] at q2
@@ -88,7 +94,7 @@ theorem pcfU_neg_eq (a z : ℂ) :
     linear_combination (-(r * g3p * T * B) * (π * (g1p * g3m) + s)) * q2 +
       (-(r * g3p * s ^ 2)) * pw + (-(r * A * g3p)) * htr
   · simp only [neg_zero]
-    rw [pcfUDeriv_zero', pcfVDeriv_zero', pcfVDerivZero,
+    rw [parabolicCylinderUDeriv_zero', parabolicCylinderVDeriv_zero', parabolicCylinderVDerivZero,
       div_eq_mul_inv (π : ℂ) (Gamma (1 / 2 + a)), recip_Gamma_half_add, sin_pi_mul_eq_sq]
     have q1 := pi_mul_recip_Gamma_mul_recip_Gamma (1 / 4 - a / 2)
     rw [show 1 - (1 / 4 - a / 2) = 3 / 4 + a / 2 by ring, sin_pi_quarter_sub] at q1
@@ -111,10 +117,10 @@ theorem pcfU_neg_eq (a z : ℂ) :
 /-- **Connection formula** (DLMF 12.2.16), valid for every `a`:
 `V(a,-z) = cos(πa)/Γ(1/2 - a) U(a,z) + sin(πa) V(a,z)`. -/
 @[dlmf 12.2.E16]
-theorem pcfV_neg_eq (a z : ℂ) :
-    pcfV a (-z) = Complex.cos (π * a) / Gamma (1 / 2 - a) * pcfU a z +
-      Complex.sin (π * a) * pcfV a z := by
-  have hg := (isWeberSol_pcfU a).lincomb (isWeberSol_pcfV a)
+theorem parabolicCylinderV_neg_eq (a z : ℂ) :
+    parabolicCylinderV a (-z) = Complex.cos (π * a) / Gamma (1 / 2 - a) * parabolicCylinderU a z +
+      Complex.sin (π * a) * parabolicCylinderV a z := by
+  have hg := (isWeberSolution_parabolicCylinderU a).lincomb (isWeberSolution_parabolicCylinderV a)
     (Complex.cos (π * a) / Gamma (1 / 2 - a)) (Complex.sin (π * a))
   have q1 := pi_mul_recip_Gamma_mul_recip_Gamma (1 / 4 - a / 2)
   rw [show 1 - (1 / 4 - a / 2) = 3 / 4 + a / 2 by ring, sin_pi_quarter_sub] at q1
@@ -123,9 +129,10 @@ theorem pcfV_neg_eq (a z : ℂ) :
   have htr := Complex.sin_sq_add_cos_sq (π * (1 / 4 + a / 2))
   have hππ : (Real.sqrt π : ℂ) * (Real.sqrt π : ℂ) = π := by
     rw [← Complex.ofReal_mul, Real.mul_self_sqrt Real.pi_pos.le]
-  refine (isWeberSol_pcfV_neg a).eq_of_initial hg ?_ ?_ z
+  refine (isWeberSolution_parabolicCylinderV_neg a).eq_of_initial hg ?_ ?_ z
   · simp only [neg_zero]
-    rw [pcfU_zero', pcfV_zero', pcfVZero, div_eq_mul_inv _ (Gamma (1 / 2 - a)),
+    rw [parabolicCylinderU_zero', parabolicCylinderV_zero', parabolicCylinderVZero,
+        div_eq_mul_inv _ (Gamma (1 / 2 - a)),
       recip_Gamma_half_sub, sin_pi_mul_eq_sq, cos_pi_mul_eq_mul]
     have pw : (2 : ℂ) ^ (1 / 2 + a) * 2 ^ (-(a / 2 + 1 / 4)) = 2 ^ (a / 2 + 1 / 4) :=
       two_cpow_mul_two_cpow _ _ _ (by ring)
@@ -143,7 +150,8 @@ theorem pcfV_neg_eq (a z : ℂ) :
       (-2 * s * c * π * g1m * g3m * g3p) * pw + (-2 * s * c * B * g3m) * q1 +
       (B * g3m * (1 - s ^ 2 + c ^ 2)) * q2 + (-s * B * g3m) * htr
   · simp only [neg_zero]
-    rw [pcfUDeriv_zero', pcfVDeriv_zero', pcfVDerivZero, div_eq_mul_inv _ (Gamma (1 / 2 - a)),
+    rw [parabolicCylinderUDeriv_zero', parabolicCylinderVDeriv_zero', parabolicCylinderVDerivZero,
+        div_eq_mul_inv _ (Gamma (1 / 2 - a)),
       recip_Gamma_half_sub, sin_pi_mul_eq_sq, cos_pi_mul_eq_mul]
     have pw : (2 : ℂ) ^ (1 / 2 + a) * 2 ^ (-(a / 2 - 1 / 4)) = 2 ^ (a / 2 + 3 / 4) :=
       two_cpow_mul_two_cpow _ _ _ (by ring)
@@ -170,9 +178,9 @@ theorem cos_nat_mul_pi' (n : ℕ) : Complex.cos (n * π) = (-1) ^ n := by
 /-- Parity of `U` at the Hermite parameters (DLMF 12.2.13):
 `U(-n - 1/2, -z) = (-1)ⁿ U(-n - 1/2, z)`. -/
 @[dlmf 12.2.E13]
-theorem pcfU_neg_nat_sub_half_neg (n : ℕ) (z : ℂ) :
-    pcfU (-n - 1 / 2) (-z) = (-1) ^ n * pcfU (-n - 1 / 2) z := by
-  rw [pcfU_neg_eq, show (1 / 2 + (-(n : ℂ) - 1 / 2)) = -(n : ℂ) by ring,
+theorem parabolicCylinderU_neg_nat_sub_half_neg (n : ℕ) (z : ℂ) :
+    parabolicCylinderU (-n - 1 / 2) (-z) = (-1) ^ n * parabolicCylinderU (-n - 1 / 2) z := by
+  rw [parabolicCylinderU_neg_eq, show (1 / 2 + (-(n : ℂ) - 1 / 2)) = -(n : ℂ) by ring,
     Complex.Gamma_neg_nat_eq_zero, div_zero, zero_mul, add_zero,
     show (π : ℂ) * (-(n : ℂ) - 1 / 2) = -(n * π) - π / 2 by ring, Complex.sin_sub_pi_div_two,
     Complex.cos_neg, cos_nat_mul_pi']
@@ -181,22 +189,24 @@ theorem pcfU_neg_nat_sub_half_neg (n : ℕ) (z : ℂ) :
 /-- Parity of `V` at the parameters `n + 1/2` (DLMF 12.2.14):
 `V(n + 1/2, -z) = (-1)ⁿ V(n + 1/2, z)`. -/
 @[dlmf 12.2.E14]
-theorem pcfV_nat_add_half_neg (n : ℕ) (z : ℂ) :
-    pcfV (n + 1 / 2) (-z) = (-1) ^ n * pcfV (n + 1 / 2) z := by
-  rw [pcfV_neg_eq, show (1 / 2 - ((n : ℂ) + 1 / 2)) = -(n : ℂ) by ring,
+theorem parabolicCylinderV_nat_add_half_neg (n : ℕ) (z : ℂ) :
+    parabolicCylinderV (n + 1 / 2) (-z) = (-1) ^ n * parabolicCylinderV (n + 1 / 2) z := by
+  rw [parabolicCylinderV_neg_eq, show (1 / 2 - ((n : ℂ) + 1 / 2)) = -(n : ℂ) by ring,
     Complex.Gamma_neg_nat_eq_zero, div_zero, zero_mul, zero_add,
     show (π : ℂ) * ((n : ℂ) + 1 / 2) = n * π + π / 2 by ring, Complex.sin_add_pi_div_two,
     cos_nat_mul_pi']
 
 /-- The classical form of `V` (DLMF 12.2.15 solved for `V`):
 `V(a,z) = Γ(1/2 + a)/π (sin(πa) U(a,z) + U(a,-z))`, away from the poles of `Γ(1/2 + a)`. -/
-theorem pcfV_eq {a : ℂ} (ha : ∀ n : ℕ, 1 / 2 + a ≠ -n) (z : ℂ) :
-    pcfV a z = Gamma (1 / 2 + a) / π * (Complex.sin (π * a) * pcfU a z + pcfU a (-z)) := by
+theorem parabolicCylinderV_eq {a : ℂ} (ha : ∀ n : ℕ, 1 / 2 + a ≠ -n) (z : ℂ) :
+    parabolicCylinderV a z = Gamma (1 / 2 + a) / π *
+        (Complex.sin (π * a) * parabolicCylinderU a z + parabolicCylinderU a (-z)) := by
   have hΓ := Complex.Gamma_ne_zero ha
   have hπ0 : (π : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
-  rw [pcfU_neg_eq, show Complex.sin (π * a) * pcfU a z +
-      (-Complex.sin (π * a) * pcfU a z + π / Gamma (1 / 2 + a) * pcfV a z) =
-      π / Gamma (1 / 2 + a) * pcfV a z by ring, ← mul_assoc, div_mul_div_comm,
+  rw [parabolicCylinderU_neg_eq, show Complex.sin (π * a) * parabolicCylinderU a z +
+      (-Complex.sin (π * a) * parabolicCylinderU a z + π / Gamma (1 / 2 + a) *
+          parabolicCylinderV a z) =
+      π / Gamma (1 / 2 + a) * parabolicCylinderV a z by ring, ← mul_assoc, div_mul_div_comm,
     mul_comm (Gamma (1 / 2 + a)) (π : ℂ), div_self (mul_ne_zero hπ0 hΓ), one_mul]
 
 /-- `exp(-iπ(a/2 - 1/4)) = sin(π(1/4 + a/2)) + i cos(π(1/4 + a/2))`. -/
@@ -219,10 +229,12 @@ theorem exp_I_pi_quarter (a : ℂ) :
 /-- **Connection formula** (DLMF 12.2.20, upper signs), valid for every `a`:
 `V(a,z) = -i/Γ(1/2 - a) U(a,z) + √(2/π) e^{-iπ(a/2 - 1/4)} U(-a, iz)`. -/
 @[dlmf 12.2.E20]
-theorem pcfV_eq_mul_I (a z : ℂ) :
-    pcfV a z = -I / Gamma (1 / 2 - a) * pcfU a z +
-      (Real.sqrt (2 / π) : ℂ) * exp (-I * π * (a / 2 - 1 / 4)) * pcfU (-a) (I * z) := by
-  have hg := (isWeberSol_pcfU a).lincomb (isWeberSol_pcfU_mul_I a) (-I / Gamma (1 / 2 - a))
+theorem parabolicCylinderV_eq_mul_I (a z : ℂ) :
+    parabolicCylinderV a z = -I / Gamma (1 / 2 - a) * parabolicCylinderU a z +
+      (Real.sqrt (2 / π) : ℂ) * exp (-I * π * (a / 2 - 1 / 4)) *
+          parabolicCylinderU (-a) (I * z) := by
+  have hg := (isWeberSolution_parabolicCylinderU a).lincomb
+      (isWeberSolution_parabolicCylinderU_mul_I a) (-I / Gamma (1 / 2 - a))
     ((Real.sqrt (2 / π) : ℂ) * exp (-I * π * (a / 2 - 1 / 4)))
   have q1 := pi_mul_recip_Gamma_mul_recip_Gamma (1 / 4 - a / 2)
   rw [show 1 - (1 / 4 - a / 2) = 3 / 4 + a / 2 by ring, sin_pi_quarter_sub] at q1
@@ -233,9 +245,10 @@ theorem pcfV_eq_mul_I (a z : ℂ) :
   have hR : (Real.sqrt (2 / π) : ℂ) * (Real.sqrt π : ℂ) = (Real.sqrt 2 : ℂ) := by
     rw [← Complex.ofReal_mul, ← Real.sqrt_mul (div_nonneg (by norm_num) Real.pi_pos.le),
       div_mul_cancel₀ _ Real.pi_ne_zero]
-  refine (isWeberSol_pcfV a).eq_of_initial hg ?_ ?_ z
+  refine (isWeberSolution_parabolicCylinderV a).eq_of_initial hg ?_ ?_ z
   · simp only [mul_zero]
-    rw [pcfV_zero', pcfVZero, pcfU_zero' a, pcfU_zero' (-a), div_eq_mul_inv _ (Gamma (1 / 2 - a)),
+    rw [parabolicCylinderV_zero', parabolicCylinderVZero, parabolicCylinderU_zero' a,
+        parabolicCylinderU_zero' (-a), div_eq_mul_inv _ (Gamma (1 / 2 - a)),
       recip_Gamma_half_sub, exp_neg_I_pi_quarter, show (3 / 4 + -a / 2 : ℂ) = 3 / 4 - a / 2 by ring]
     have pwA : (2 : ℂ) ^ (1 / 2 + a) * 2 ^ (-(a / 2 + 1 / 4)) = 2 ^ (a / 2 + 1 / 4) :=
       two_cpow_mul_two_cpow _ _ _ (by ring)
@@ -256,7 +269,8 @@ theorem pcfV_eq_mul_I (a z : ℂ) :
       (I * g3m * B) * q1 + (-(s + c * I) * A2 * g3m) * hR + (-(s + c * I) * g3m) * pwB +
       (B * g3m) * q2
   · simp only [mul_zero]
-    rw [pcfVDeriv_zero', pcfVDerivZero, pcfUDeriv_zero' a, pcfUDeriv_zero' (-a),
+    rw [parabolicCylinderVDeriv_zero', parabolicCylinderVDerivZero, parabolicCylinderUDeriv_zero' a,
+        parabolicCylinderUDeriv_zero' (-a),
       div_eq_mul_inv _ (Gamma (1 / 2 - a)), recip_Gamma_half_sub, exp_neg_I_pi_quarter,
       show (1 / 4 + -a / 2 : ℂ) = 1 / 4 - a / 2 by ring]
     have pwA : (2 : ℂ) ^ (1 / 2 + a) * 2 ^ (-(a / 2 - 1 / 4)) = 2 ^ (a / 2 + 3 / 4) :=
@@ -281,10 +295,12 @@ theorem pcfV_eq_mul_I (a z : ℂ) :
 /-- **Connection formula** (DLMF 12.2.20, lower signs), valid for every `a`:
 `V(a,z) = i/Γ(1/2 - a) U(a,z) + √(2/π) e^{iπ(a/2 - 1/4)} U(-a, -iz)`. -/
 @[dlmf 12.2.E20]
-theorem pcfV_eq_mul_neg_I (a z : ℂ) :
-    pcfV a z = I / Gamma (1 / 2 - a) * pcfU a z +
-      (Real.sqrt (2 / π) : ℂ) * exp (I * π * (a / 2 - 1 / 4)) * pcfU (-a) (-I * z) := by
-  have hg := (isWeberSol_pcfU a).lincomb (isWeberSol_pcfU_mul_neg_I a) (I / Gamma (1 / 2 - a))
+theorem parabolicCylinderV_eq_mul_neg_I (a z : ℂ) :
+    parabolicCylinderV a z = I / Gamma (1 / 2 - a) * parabolicCylinderU a z +
+      (Real.sqrt (2 / π) : ℂ) * exp (I * π * (a / 2 - 1 / 4)) *
+          parabolicCylinderU (-a) (-I * z) := by
+  have hg := (isWeberSolution_parabolicCylinderU a).lincomb
+      (isWeberSolution_parabolicCylinderU_mul_neg_I a) (I / Gamma (1 / 2 - a))
     ((Real.sqrt (2 / π) : ℂ) * exp (I * π * (a / 2 - 1 / 4)))
   have q1 := pi_mul_recip_Gamma_mul_recip_Gamma (1 / 4 - a / 2)
   rw [show 1 - (1 / 4 - a / 2) = 3 / 4 + a / 2 by ring, sin_pi_quarter_sub] at q1
@@ -295,9 +311,10 @@ theorem pcfV_eq_mul_neg_I (a z : ℂ) :
   have hR : (Real.sqrt (2 / π) : ℂ) * (Real.sqrt π : ℂ) = (Real.sqrt 2 : ℂ) := by
     rw [← Complex.ofReal_mul, ← Real.sqrt_mul (div_nonneg (by norm_num) Real.pi_pos.le),
       div_mul_cancel₀ _ Real.pi_ne_zero]
-  refine (isWeberSol_pcfV a).eq_of_initial hg ?_ ?_ z
+  refine (isWeberSolution_parabolicCylinderV a).eq_of_initial hg ?_ ?_ z
   · simp only [mul_zero]
-    rw [pcfV_zero', pcfVZero, pcfU_zero' a, pcfU_zero' (-a), div_eq_mul_inv _ (Gamma (1 / 2 - a)),
+    rw [parabolicCylinderV_zero', parabolicCylinderVZero, parabolicCylinderU_zero' a,
+        parabolicCylinderU_zero' (-a), div_eq_mul_inv _ (Gamma (1 / 2 - a)),
       recip_Gamma_half_sub, exp_I_pi_quarter, show (3 / 4 + -a / 2 : ℂ) = 3 / 4 - a / 2 by ring]
     have pwA : (2 : ℂ) ^ (1 / 2 + a) * 2 ^ (-(a / 2 + 1 / 4)) = 2 ^ (a / 2 + 1 / 4) :=
       two_cpow_mul_two_cpow _ _ _ (by ring)
@@ -318,7 +335,8 @@ theorem pcfV_eq_mul_neg_I (a z : ℂ) :
       (-I * g3m * B) * q1 + (-(s - c * I) * A2 * g3m) * hR + (-(s - c * I) * g3m) * pwB +
       (B * g3m) * q2
   · simp only [mul_zero]
-    rw [pcfVDeriv_zero', pcfVDerivZero, pcfUDeriv_zero' a, pcfUDeriv_zero' (-a),
+    rw [parabolicCylinderVDeriv_zero', parabolicCylinderVDerivZero, parabolicCylinderUDeriv_zero' a,
+        parabolicCylinderUDeriv_zero' (-a),
       div_eq_mul_inv _ (Gamma (1 / 2 - a)), recip_Gamma_half_sub, exp_I_pi_quarter,
       show (1 / 4 + -a / 2 : ℂ) = 1 / 4 - a / 2 by ring]
     have pwA : (2 : ℂ) ^ (1 / 2 + a) * 2 ^ (-(a / 2 - 1 / 4)) = 2 ^ (a / 2 + 3 / 4) :=
@@ -342,30 +360,37 @@ theorem pcfV_eq_mul_neg_I (a z : ℂ) :
 
 /-- DLMF 12.8.7: `V'(a,z) + (z/2) V(a,z) - V(a+1,z) = 0`. -/
 @[dlmf 12.8.E7]
-theorem pcfV_recurrence_add (a z : ℂ) :
-    deriv (pcfV a) z + z / 2 * pcfV a z - pcfV (a + 1) z = 0 := by
-  rw [deriv_pcfV]
-  have hs : IsWeberSol (a + 1) (fun w => pcfVDeriv a w + w / 2 * pcfV a w - pcfV (a + 1) w)
-      (fun w => (w ^ 2 / 4 + a) * pcfV a w + 1 / 2 * pcfV a w + w / 2 * pcfVDeriv a w -
-        pcfVDeriv (a + 1) w) := fun w => by
-    have hU := hasDerivAt_pcfV a w
-    have hU' := hasDerivAt_pcfVDeriv a w
-    have hV := hasDerivAt_pcfV (a + 1) w
-    have hV' := hasDerivAt_pcfVDeriv (a + 1) w
+theorem parabolicCylinderV_recurrence_add (a z : ℂ) :
+    deriv (parabolicCylinderV a) z + z / 2 * parabolicCylinderV a z -
+        parabolicCylinderV (a + 1) z = 0 := by
+  rw [deriv_parabolicCylinderV]
+  have hs : IsWeberSolution (a + 1)
+      (fun w => parabolicCylinderVDeriv a w + w / 2 * parabolicCylinderV a w -
+      parabolicCylinderV (a + 1) w)
+      (fun w => (w ^ 2 / 4 + a) * parabolicCylinderV a w + 1 / 2 * parabolicCylinderV a w + w / 2 *
+          parabolicCylinderVDeriv a w -
+        parabolicCylinderVDeriv (a + 1) w) := fun w => by
+    have hU := hasDerivAt_parabolicCylinderV a w
+    have hU' := hasDerivAt_parabolicCylinderVDeriv a w
+    have hV := hasDerivAt_parabolicCylinderV (a + 1) w
+    have hV' := hasDerivAt_parabolicCylinderVDeriv (a + 1) w
     refine ⟨(hU'.add (((hasDerivAt_id w).div_const 2).mul hU)).sub hV |>.congr_deriv ?_, ?_⟩
     · simp only [id]; ring
     · refine ((((((hasDerivAt_pow 2 w).div_const 4).add_const a).mul hU).add
         (hU.const_mul (1 / 2))).add (((hasDerivAt_id w).div_const 2).mul hU')).sub hV'
         |>.congr_deriv ?_
       simp only [id]; push_cast; ring
-  have h0 : pcfVDeriv a 0 + 0 / 2 * pcfV a 0 - pcfV (a + 1) 0 = 0 := by
-    simp only [pcfVDeriv_zero', pcfV_zero', pcfVZero, pcfVDerivZero]
+  have h0 : parabolicCylinderVDeriv a 0 + 0 / 2 * parabolicCylinderV a 0 -
+      parabolicCylinderV (a + 1) 0 = 0 := by
+    simp only [parabolicCylinderVDeriv_zero', parabolicCylinderV_zero', parabolicCylinderVZero,
+        parabolicCylinderVDerivZero]
     rw [show 3 / 4 - (a + 1) / 2 = 1 / 4 - a / 2 by ring,
       show 1 / 4 + (a + 1) / 2 = 3 / 4 + a / 2 by ring,
       show (a + 1) / 2 + 1 / 4 = a / 2 + 3 / 4 by ring]
     ring
-  have h1 : ((0 : ℂ) ^ 2 / 4 + a) * pcfV a 0 + 1 / 2 * pcfV a 0 + 0 / 2 * pcfVDeriv a 0 -
-      pcfVDeriv (a + 1) 0 = 0 := by
+  have h1 : ((0 : ℂ) ^ 2 / 4 + a) * parabolicCylinderV a 0 + 1 / 2 * parabolicCylinderV a 0 + 0 /
+      2 * parabolicCylinderVDeriv a 0 -
+      parabolicCylinderVDeriv (a + 1) 0 = 0 := by
     have hgA := mul_recip_Gamma_add_one' (-1 / 4 - a / 2)
     rw [show -1 / 4 - a / 2 + 1 = 3 / 4 - a / 2 by ring] at hgA
     have hgB := mul_recip_Gamma_add_one' (1 / 4 + a / 2)
@@ -373,7 +398,8 @@ theorem pcfV_recurrence_add (a z : ℂ) :
     have pw : (2 : ℂ) ^ (a / 2 + 5 / 4) = 2 * 2 ^ (a / 2 + 1 / 4) := by
       rw [show a / 2 + 5 / 4 = (a / 2 + 1 / 4) + 1 by ring, Complex.cpow_add _ _ two_ne_zero,
         Complex.cpow_one]; ring
-    simp only [pcfVDeriv_zero', pcfV_zero', pcfVZero, pcfVDerivZero]
+    simp only [parabolicCylinderVDeriv_zero', parabolicCylinderV_zero', parabolicCylinderVZero,
+        parabolicCylinderVDerivZero]
     rw [show 1 / 4 - (a + 1) / 2 = -1 / 4 - a / 2 by ring,
       show 3 / 4 + (a + 1) / 2 = 5 / 4 + a / 2 by ring,
       show (a + 1) / 2 + 3 / 4 = a / 2 + 5 / 4 by ring, ← hgA, ← hgB, pw]
@@ -382,17 +408,20 @@ theorem pcfV_recurrence_add (a z : ℂ) :
 
 /-- DLMF 12.8.6: `V'(a,z) - (z/2) V(a,z) - (a - 1/2) V(a-1,z) = 0`. -/
 @[dlmf 12.8.E6]
-theorem pcfV_recurrence_sub (a z : ℂ) :
-    deriv (pcfV a) z - z / 2 * pcfV a z - (a - 1 / 2) * pcfV (a - 1) z = 0 := by
-  rw [deriv_pcfV]
-  have hs : IsWeberSol (a - 1)
-      (fun w => pcfVDeriv a w - w / 2 * pcfV a w - (a - 1 / 2) * pcfV (a - 1) w)
-      (fun w => (w ^ 2 / 4 + a) * pcfV a w - 1 / 2 * pcfV a w - w / 2 * pcfVDeriv a w -
-        (a - 1 / 2) * pcfVDeriv (a - 1) w) := fun w => by
-    have hU := hasDerivAt_pcfV a w
-    have hU' := hasDerivAt_pcfVDeriv a w
-    have hV := hasDerivAt_pcfV (a - 1) w
-    have hV' := hasDerivAt_pcfVDeriv (a - 1) w
+theorem parabolicCylinderV_recurrence_sub (a z : ℂ) :
+    deriv (parabolicCylinderV a) z - z / 2 * parabolicCylinderV a z - (a - 1 / 2) *
+        parabolicCylinderV (a - 1) z = 0 := by
+  rw [deriv_parabolicCylinderV]
+  have hs : IsWeberSolution (a - 1)
+      (fun w => parabolicCylinderVDeriv a w - w / 2 * parabolicCylinderV a w - (a - 1 / 2) *
+          parabolicCylinderV (a - 1) w)
+      (fun w => (w ^ 2 / 4 + a) * parabolicCylinderV a w - 1 / 2 * parabolicCylinderV a w - w / 2 *
+          parabolicCylinderVDeriv a w -
+        (a - 1 / 2) * parabolicCylinderVDeriv (a - 1) w) := fun w => by
+    have hU := hasDerivAt_parabolicCylinderV a w
+    have hU' := hasDerivAt_parabolicCylinderVDeriv a w
+    have hV := hasDerivAt_parabolicCylinderV (a - 1) w
+    have hV' := hasDerivAt_parabolicCylinderVDeriv (a - 1) w
     refine ⟨(hU'.sub (((hasDerivAt_id w).div_const 2).mul hU)).sub (hV.const_mul (a - 1 / 2))
       |>.congr_deriv ?_, ?_⟩
     · simp only [id]; ring
@@ -400,7 +429,8 @@ theorem pcfV_recurrence_sub (a z : ℂ) :
         (hU.const_mul (1 / 2))).sub (((hasDerivAt_id w).div_const 2).mul hU')).sub
         (hV'.const_mul (a - 1 / 2)) |>.congr_deriv ?_
       simp only [id]; push_cast; ring
-  have h0 : pcfVDeriv a 0 - 0 / 2 * pcfV a 0 - (a - 1 / 2) * pcfV (a - 1) 0 = 0 := by
+  have h0 : parabolicCylinderVDeriv a 0 - 0 / 2 * parabolicCylinderV a 0 - (a - 1 / 2) *
+      parabolicCylinderV (a - 1) 0 = 0 := by
     have hgA := mul_recip_Gamma_add_one' (1 / 4 - a / 2)
     rw [show 1 / 4 - a / 2 + 1 = 5 / 4 - a / 2 by ring] at hgA
     have hgB := mul_recip_Gamma_add_one' (a / 2 - 1 / 4)
@@ -408,14 +438,17 @@ theorem pcfV_recurrence_sub (a z : ℂ) :
     have pw : (2 : ℂ) ^ (a / 2 + 3 / 4) = 2 * 2 ^ (a / 2 - 1 / 4) := by
       rw [show a / 2 + 3 / 4 = (a / 2 - 1 / 4) + 1 by ring, Complex.cpow_add _ _ two_ne_zero,
         Complex.cpow_one]; ring
-    simp only [pcfVDeriv_zero', pcfV_zero', pcfVZero, pcfVDerivZero]
+    simp only [parabolicCylinderVDeriv_zero', parabolicCylinderV_zero', parabolicCylinderVZero,
+        parabolicCylinderVDerivZero]
     rw [show 3 / 4 - (a - 1) / 2 = 5 / 4 - a / 2 by ring,
       show 1 / 4 + (a - 1) / 2 = a / 2 - 1 / 4 by ring,
       show (a - 1) / 2 + 1 / 4 = a / 2 - 1 / 4 by ring, ← hgA, ← hgB, pw]
     ring
-  have h1 : ((0 : ℂ) ^ 2 / 4 + a) * pcfV a 0 - 1 / 2 * pcfV a 0 - 0 / 2 * pcfVDeriv a 0 -
-      (a - 1 / 2) * pcfVDeriv (a - 1) 0 = 0 := by
-    simp only [pcfVDeriv_zero', pcfV_zero', pcfVZero, pcfVDerivZero]
+  have h1 : ((0 : ℂ) ^ 2 / 4 + a) * parabolicCylinderV a 0 - 1 / 2 * parabolicCylinderV a 0 - 0 /
+      2 * parabolicCylinderVDeriv a 0 -
+      (a - 1 / 2) * parabolicCylinderVDeriv (a - 1) 0 = 0 := by
+    simp only [parabolicCylinderVDeriv_zero', parabolicCylinderV_zero', parabolicCylinderVZero,
+        parabolicCylinderVDerivZero]
     rw [show 1 / 4 - (a - 1) / 2 = 3 / 4 - a / 2 by ring,
       show 3 / 4 + (a - 1) / 2 = 1 / 4 + a / 2 by ring,
       show (a - 1) / 2 + 3 / 4 = a / 2 + 1 / 4 by ring]
@@ -424,15 +457,17 @@ theorem pcfV_recurrence_sub (a z : ℂ) :
 
 /-- DLMF 12.8.5: `z V(a,z) - V(a+1,z) + (a - 1/2) V(a-1,z) = 0`. -/
 @[dlmf 12.8.E5]
-theorem pcfV_three_term (a z : ℂ) :
-    z * pcfV a z - pcfV (a + 1) z + (a - 1 / 2) * pcfV (a - 1) z = 0 := by
-  linear_combination pcfV_recurrence_add a z - pcfV_recurrence_sub a z
+theorem parabolicCylinderV_three_term (a z : ℂ) :
+    z * parabolicCylinderV a z - parabolicCylinderV (a + 1) z + (a - 1 / 2) *
+        parabolicCylinderV (a - 1) z = 0 := by
+  linear_combination parabolicCylinderV_recurrence_add a z - parabolicCylinderV_recurrence_sub a z
 
 /-- DLMF 12.8.8: `2 V'(a,z) - V(a+1,z) - (a - 1/2) V(a-1,z) = 0`. -/
 @[dlmf 12.8.E8]
-theorem pcfV_deriv_recurrence (a z : ℂ) :
-    2 * deriv (pcfV a) z - pcfV (a + 1) z - (a - 1 / 2) * pcfV (a - 1) z = 0 := by
-  linear_combination pcfV_recurrence_add a z + pcfV_recurrence_sub a z
+theorem parabolicCylinderV_deriv_recurrence (a z : ℂ) :
+    2 * deriv (parabolicCylinderV a) z - parabolicCylinderV (a + 1) z - (a - 1 / 2) *
+        parabolicCylinderV (a - 1) z = 0 := by
+  linear_combination parabolicCylinderV_recurrence_add a z + parabolicCylinderV_recurrence_sub a z
 
 end DLMF.Confluent
 

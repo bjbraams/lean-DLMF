@@ -21,16 +21,16 @@ parameters, their relations to Dawson's integral, Bessel, Kummer and Whittaker f
 
 ## Main results
 
-* `pcfV_nat_add_half`, `pcfV_neg_half`, `pcfU_nat_add_half_deriv`: the special cases
-  DLMF 12.7.3, 12.7.4 and 12.7.6.
-* `pcfU_hh`: `U(n + 1/2, z)` in terms of `Hh_n` (DLMF 12.7.7).
-* `pcfU_bessel_8`, `pcfU_bessel_9`, `pcfU_bessel_10`, `pcfU_bessel_11`: the Bessel-function
-  cases DLMF 12.7.8–12.7.11.
-* `pcfU_kummerU_odd`, `pcfU_whittaker`: `U(a,z)` in terms of Kummer's `U` and Whittaker's `W`
-  (DLMF 12.7.14).
-* `pcfU_addition_1`, `pcfU_addition_2`, `pcfV_addition_3`, `pcfV_addition_4`: the addition
-  theorems DLMF 12.13.1–12.13.4.
-* `pcfU_rotational_addition`: the rotational addition theorem DLMF 12.13.5.
+* `parabolicCylinderV_nat_add_half`, `parabolicCylinderV_neg_half`,
+  `parabolicCylinderU_nat_add_half_deriv`: the special cases DLMF 12.7.3, 12.7.4 and 12.7.6.
+* `parabolicCylinderU_hh`: `U(n + 1/2, z)` in terms of `Hh_n` (DLMF 12.7.7).
+* `parabolicCylinderU_bessel_8`, `parabolicCylinderU_bessel_9`, `parabolicCylinderU_bessel_10`,
+  `parabolicCylinderU_bessel_11`: the Bessel-function cases DLMF 12.7.8–12.7.11.
+* `parabolicCylinderU_kummerU_odd`, `parabolicCylinderU_whittaker`: `U(a,z)` in terms of Kummer's
+  `U` and Whittaker's `W` (DLMF 12.7.14).
+* `parabolicCylinderU_addition_1`, `parabolicCylinderU_addition_2`, `parabolicCylinderV_addition_3`,
+  `parabolicCylinderV_addition_4`: the addition theorems DLMF 12.13.1–12.13.4.
+* `parabolicCylinderU_rotational_addition`: the rotational addition theorem DLMF 12.13.5.
 
 ## Implementation notes
 
@@ -45,17 +45,18 @@ namespace DLMF.Confluent
 
 open DLMF.Bessel
 
-/-- Identity under the stated parameter and domain assumptions: `pcfV (n+1/2) z=(Real.sqrt
-(2/π):ℂ)*exp (z^2/4)*(-I)^n*Polynomial.aeval (I*z) (Polynomial.hermite n)`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`parabolicCylinderV (n+1/2) z=(Real.sqrt (2/π):ℂ)*exp (z^2/4)*(-I)^n*Polynomial.aeval (I*z)
+(Polynomial.hermite n)`. -/
 @[dlmf 12.7.E3]
-theorem pcfV_nat_add_half (n : ℕ) (z : ℂ) :
-    pcfV (n+1/2) z=(Real.sqrt (2/π):ℂ)*exp (z^2/4)*(-I)^n*Polynomial.aeval (I*z)
+theorem parabolicCylinderV_nat_add_half (n : ℕ) (z : ℂ) :
+    parabolicCylinderV (n+1/2) z=(Real.sqrt (2/π):ℂ)*exp (z^2/4)*(-I)^n*Polynomial.aeval (I*z)
         (Polynomial.hermite n) := by
-  rw [pcfV_eq_mul_I]
+  rw [parabolicCylinderV_eq_mul_I]
   rw [show (1/2:ℂ)-(n+1/2)=-(n:ℂ) by ring, Gamma_neg_nat_eq_zero]
   simp only [div_zero, zero_mul, zero_add]
-  have hu := pcfD_nat n (I*z)
-  simp only [pcfD] at hu
+  have hu := parabolicCylinderD_nat n (I*z)
+  simp only [parabolicCylinderD] at hu
   rw [show -(n+1/2:ℂ)=-(n:ℂ)-1/2 by ring, hu]
   have he : exp (-I*π*((n+1/2:ℂ)/2-1/4))=(-I)^n := by
     rw [show -I*π*((n+1/2:ℂ)/2-1/4)=(n:ℂ)*(-π/2*I) by ring,
@@ -65,11 +66,11 @@ theorem pcfV_nat_add_half (n : ℕ) (z : ℂ) :
   rw [hz]
   ring
 
-/-- Identity under the stated parameter and domain assumptions: `pcfV (-1/2) z=2/Real.sqrt π*exp
-(z^2/4)*dawsonF (z/Real.sqrt 2)`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`parabolicCylinderV (-1/2) z=2/Real.sqrt π*exp (z^2/4)*dawsonF (z/Real.sqrt 2)`. -/
 @[dlmf 12.7.E4]
-theorem pcfV_neg_half (z : ℂ) :
-    pcfV (-1/2) z=2/Real.sqrt π*exp (z^2/4)*dawsonF (z/Real.sqrt 2) := by
+theorem parabolicCylinderV_neg_half (z : ℂ) :
+    parabolicCylinderV (-1/2) z=2/Real.sqrt π*exp (z^2/4)*dawsonF (z/Real.sqrt 2) := by
   have hs : (Real.sqrt 2:ℂ)^2=2 := by exact_mod_cast Real.sq_sqrt (by norm_num : (0:ℝ)≤2)
   have hs0 : (Real.sqrt 2:ℂ) ≠ 0 := by
                                       exact_mod_cast (Real.sqrt_pos.mpr (by norm_num : (0:ℝ)<2)).ne'
@@ -77,7 +78,8 @@ theorem pcfV_neg_half (z : ℂ) :
   have hpp : (Real.sqrt π:ℂ)^2 = π := by exact_mod_cast Real.sq_sqrt Real.pi_pos.le
   have h2 : (2:ℂ)^((-1/2:ℂ)/2 + 3/4) = Real.sqrt 2 := by
     rw [show (-1/2:ℂ)/2 + 3/4 = 1/2 by norm_num, two_cpow_half]
-  rw [pcfV, pcfVZero, pcfVDerivZero, pcfOdd_kummer_alternative, dawsonF_eq_kummerM, h2,
+  rw [parabolicCylinderV, parabolicCylinderVZero, parabolicCylinderVDerivZero,
+      parabolicCylinderOdd_kummer_alternative, dawsonF_eq_kummerM, h2,
     show (1/4:ℂ) + (-1/2)/2 = 0 by norm_num, Complex.Gamma_zero, inv_zero, mul_zero, zero_mul,
     zero_add, show (1/4:ℂ) - (-1/2)/2 = 1/2 by norm_num, show (3/4:ℂ) + (-1/2)/2 = 1/2 by norm_num,
     show -(-1/2:ℂ)/2 + 3/4 = 1 by norm_num, Complex.Gamma_one_half_eq_sqrt, div_pow, hs]
@@ -85,23 +87,24 @@ theorem pcfV_neg_half (z : ℂ) :
   field_simp
   rw [hs]; ring
 
-/-- Identity under the stated parameter and domain assumptions: `pcfU (n+1/2) z=(Real.sqrt
-(π/2):ℂ)*(-1)^n/(n.factorial:ℂ)*exp (-z^2/4)*iteratedDeriv n (fun z : ℂ => exp (z^2/2)*erfc
-(z/Real.sqrt 2)) z`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`parabolicCylinderU (n+1/2) z=(Real.sqrt (π/2):ℂ)*(-1)^n/(n.factorial:ℂ)*exp (-z^2/4)*iteratedDeriv
+n (fun z : ℂ => exp (z^2/2)*erfc (z/Real.sqrt 2)) z`. -/
 @[dlmf 12.7.E6]
-theorem pcfU_nat_add_half_deriv (n : ℕ) (z : ℂ) :
-    pcfU (n+1/2) z=(Real.sqrt (π/2):ℂ)*(-1)^n/(n.factorial:ℂ)*exp (-z^2/4)*iteratedDeriv n
+theorem parabolicCylinderU_nat_add_half_deriv (n : ℕ) (z : ℂ) :
+    parabolicCylinderU (n+1/2) z=(Real.sqrt (π/2):ℂ)*(-1)^n/(n.factorial:ℂ)*exp
+        (-z^2/4)*iteratedDeriv n
         (fun z : ℂ => exp (z^2/2)*erfc (z/Real.sqrt 2)) z := by
-  have h := pcfU_iterated_deriv_9 (1/2) z n
-  have hf : (fun w : ℂ => exp (1*w^2/4)*pcfU (1/2) w)=
+  have h := parabolicCylinderU_iterated_deriv_9 (1/2) z n
+  have hf : (fun w : ℂ => exp (1*w^2/4)*parabolicCylinderU (1/2) w)=
       (fun w => (Real.sqrt (π/2):ℂ)*(exp (w^2/2)*erfc (w/Real.sqrt 2))) := by
     funext w
-    rw [pcfU_half]
+    rw [parabolicCylinderU_half]
     have he : exp (w^2/4)*exp (w^2/4)=exp (w^2/2) := by rw [← Complex.exp_add]; congr 1; ring
     simp only [one_mul]
     linear_combination (Real.sqrt (π/2):ℂ)*erfc (w/Real.sqrt 2)*he
   rw [hf,iteratedDeriv_const_mul_field,show (1/2:ℂ)+1/2=1 by norm_num,
-    poch_nat_one,show (1/2:ℂ)+n=n+1/2 by ring] at h
+    pochhammer_nat_one,show (1/2:ℂ)+n=n+1/2 by ring] at h
   simp only [one_mul] at h
   have he : exp (-z^2/4)*exp (z^2/4)=1 := by
                                             rw [← Complex.exp_add,
@@ -109,11 +112,11 @@ theorem pcfU_nat_add_half_deriv (n : ℕ) (z : ℂ) :
   have hn : ((-1:ℂ)^n)^2=1 := by rw [← pow_mul,mul_comm n 2,pow_mul]; simp
   have hn0 : (n.factorial:ℂ)≠0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
   calc
-    pcfU (n+1/2) z = ((-1:ℂ)^n/(n.factorial:ℂ)*exp (-z^2/4))*
-        ((-1:ℂ)^n*(n.factorial:ℂ)*exp (z^2/4)*pcfU (n+1/2) z) := by
+    parabolicCylinderU (n+1/2) z = ((-1:ℂ)^n/(n.factorial:ℂ)*exp (-z^2/4))*
+        ((-1:ℂ)^n*(n.factorial:ℂ)*exp (z^2/4)*parabolicCylinderU (n+1/2) z) := by
       rw [show ((-1:ℂ)^n/(n.factorial:ℂ)*exp (-z^2/4))*
-          ((-1:ℂ)^n*(n.factorial:ℂ)*exp (z^2/4)*pcfU (n+1/2) z)=
-          ((-1:ℂ)^n)^2*(exp (-z^2/4)*exp (z^2/4))*pcfU (n+1/2) z by field_simp,
+          ((-1:ℂ)^n*(n.factorial:ℂ)*exp (z^2/4)*parabolicCylinderU (n+1/2) z)=
+          ((-1:ℂ)^n)^2*(exp (-z^2/4)*exp (z^2/4))*parabolicCylinderU (n+1/2) z by field_simp,
         he,hn]
       ring
     _ = _ := by rw [←h]; ring
@@ -125,13 +128,14 @@ def hhFunction (n : ℤ) (z : ℂ) : ℂ :=
   if n = -1 then exp (-z^2/2) else
       (∫ t : ℝ in Ioi 0, (t:ℂ)^n.toNat/(n.toNat.factorial:ℂ)*exp (-(z+t)^2/2))
 
-/-- Identity under the stated parameter and domain assumptions: `pcfU (n+1/2) z=exp
-(z^2/4)*hhFunction n z ∧ pcfU (n+1/2) z=Real.sqrt π*2^(((n:ℂ)-1)/2)*exp (z^2/4)*iteratedErfc n
-(z/Real.sqrt 2)`. -/
+/-- Identity under the stated parameter and domain assumptions: `parabolicCylinderU (n+1/2) z=exp
+(z^2/4)*hhFunction n z ∧ parabolicCylinderU (n+1/2) z=Real.sqrt π*2^(((n:ℂ)-1)/2)*exp
+(z^2/4)*iteratedErfc n (z/Real.sqrt 2)`. -/
 @[dlmf 12.7.E7]
-theorem pcfU_hh (n : ℤ) (hn : -1 ≤ n) (z : ℂ) :
-    pcfU (n+1/2) z=exp (z^2/4)*hhFunction n z ∧
-        pcfU (n+1/2) z=Real.sqrt π*2^(((n:ℂ)-1)/2)*exp (z^2/4)*iteratedErfc n (z/Real.sqrt 2) := by
+theorem parabolicCylinderU_hh (n : ℤ) (hn : -1 ≤ n) (z : ℂ) :
+    parabolicCylinderU (n+1/2) z=exp (z^2/4)*hhFunction n z ∧
+        parabolicCylinderU (n+1/2) z=Real.sqrt π*2^(((n:ℂ)-1)/2)*exp (z^2/4)*iteratedErfc n
+            (z/Real.sqrt 2) := by
   have hs : (Real.sqrt 2:ℂ)^2=2 := by exact_mod_cast Real.sq_sqrt (by norm_num : (0:ℝ)≤2)
   have hs0 : (Real.sqrt 2:ℂ)≠0 := by exact_mod_cast (Real.sqrt_pos.mpr (by norm_num : (0:ℝ)<2)).ne'
   have hπ0 : (Real.sqrt π:ℂ)≠0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
@@ -139,19 +143,20 @@ theorem pcfU_hh (n : ℤ) (hn : -1 ≤ n) (z : ℂ) :
   · by_cases h : n= -1
     · subst n
       norm_num only [Int.cast_neg,Int.cast_one]
-      rw [show -(1/2:ℂ)= -1/2 by ring,pcfU_neg_half,hhFunction,if_pos rfl,← Complex.exp_add]
+      rw [show -(1/2:ℂ)= -1/2 by ring, parabolicCylinderU_neg_half, hhFunction, if_pos rfl,
+                                   ← Complex.exp_add]
       congr 1
       ring
     · have hn0 : 0≤n := by omega
       lift n to ℕ using hn0 with m
       rw [hhFunction,if_neg (by omega)]
       simp only [Int.toNat_natCast,Int.cast_natCast]
-      change pcfU (m+1/2) z=exp (z^2/4)*gaussianProbabilityHh m z
-      rw [gaussianProbabilityHh_eq_pcfU, ←mul_assoc, ←Complex.exp_add, show z^2/4 +
+      change parabolicCylinderU (m+1/2) z=exp (z^2/4)*gaussianProbabilityHh m z
+      rw [gaussianProbabilityHh_eq_parabolicCylinderU, ←mul_assoc, ←Complex.exp_add, show z^2/4 +
           -z^2/4=(0:ℂ) by ring]
       simp
   · rw [show ((n:ℂ)-1)/2=((n-1:ℤ):ℂ)/2 by push_cast; ring,two_cpow_int_half,
-      iteratedErfc_eq_pcfU_int n hn]
+      iteratedErfc_eq_parabolicCylinderU_int n hn]
     rw [show (Real.sqrt 2:ℂ)*(z/(Real.sqrt 2:ℂ))=z by field_simp]
     have hc : (Real.sqrt π:ℂ)*(Real.sqrt
         2:ℂ)^(n-1)*(2/((Real.sqrt π:ℂ)*(Real.sqrt 2:ℂ)^(n+1)))=1 := by
@@ -163,7 +168,7 @@ theorem pcfU_hh (n : ℤ) (hn : -1 ≤ n) (z : ℂ) :
     symm
     calc
       _ = ((Real.sqrt π:ℂ)*(Real.sqrt 2:ℂ)^(n-1)*(2/((Real.sqrt π:ℂ)*(Real.sqrt 2:ℂ)^(n+1))))*
-          (exp (z^2/4)*exp (-(z/(Real.sqrt 2:ℂ))^2/2))*pcfU ((n:ℂ)+1/2) z := by ring
+          (exp (z^2/4)*exp (-(z/(Real.sqrt 2:ℂ))^2/2))*parabolicCylinderU ((n:ℂ)+1/2) z := by ring
       _ = _ := by rw [hc,he]; ring
 
 /-- On the right half-plane, `log (z² / 2) = 2 log z - log 2`. -/
@@ -215,8 +220,8 @@ theorem div_two_pi_cpow_half {z : ℂ} (hz : z ≠ 0) :
   congr 1; push_cast; ring
 
 /-- `U(0,z) = z^{1/2} K_{1/4}(z²/4)/√(2π)` on the right half-plane. -/
-theorem pcfU_zero_eq_besselK {z : ℂ} (hz : 0 < z.re) :
-    pcfU 0 z = z^(1/2:ℂ) / Real.sqrt (2*π) * besselK (1/4) (z^2/4) := by
+theorem parabolicCylinderU_zero_eq_besselK {z : ℂ} (hz : 0 < z.re) :
+    parabolicCylinderU 0 z = z^(1/2:ℂ) / Real.sqrt (2*π) * besselK (1/4) (z^2/4) := by
   have hz0 : z ≠ 0 := fun h => by simp [h] at hz
   have hw := sq_div_four_mem_slitPlane hz
   have hK := kummerU_besselK (-1/4) (z^2/4) hw
@@ -233,20 +238,22 @@ theorem pcfU_zero_eq_besselK {z : ℂ} (hz : 0 < z.re) :
   have hp0 : (Real.sqrt π:ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hs0 : (Real.sqrt 2:ℂ) ≠ 0 := by
                                       exact_mod_cast (Real.sqrt_pos.mpr (by norm_num : (0:ℝ)<2)).ne'
-  rw [pcfU_eq_kummerU 0 hz, hK, ← key, hsq]
+  rw [parabolicCylinderU_eq_kummerU 0 hz, hK, ← key, hsq]
   calc _ = ((2:ℂ)^(-(1/4)-0/2:ℂ) * (z^2/2)^(1/4:ℂ) * Real.sqrt 2) * (exp (-z^2/4) * exp (z^2/4)) *
         besselK (1/4) (z^2/4) / (Real.sqrt 2 * Real.sqrt π) := by field_simp
     _ = _ := by rw [he]; ring
 
 /-- `U'(0,z) = -z^{3/2} K_{3/4}(z²/4)/(2√(2π))` on the right half-plane. -/
-theorem deriv_pcfU_zero_eq_besselK {z : ℂ} (hz : 0 < z.re) :
-    deriv (pcfU 0) z = -(z * z^(1/2:ℂ)) / (2 * Real.sqrt (2*π)) * besselK (3/4) (z^2/4) := by
+theorem deriv_parabolicCylinderU_zero_eq_besselK {z : ℂ} (hz : 0 < z.re) :
+    deriv (parabolicCylinderU 0) z = -(z * z^(1/2:ℂ)) / (2 * Real.sqrt (2*π)) *
+        besselK (3/4) (z^2/4) := by
   have hz0 : z ≠ 0 := fun h => by simp [h] at hz
   have hw := sq_div_four_mem_slitPlane hz
   have hzs : z ∈ slitPlane := Or.inl hz
-  have hev : pcfU 0 =ᶠ[nhds z] fun w => w^(1/2:ℂ) / Real.sqrt (2*π) * besselK (1/4) (w^2/4) :=
+  have hev : parabolicCylinderU 0 =ᶠ[nhds z] fun w => w^(1/2:ℂ) / Real.sqrt (2*π) *
+      besselK (1/4) (w^2/4) :=
     Filter.eventually_of_mem ((isOpen_lt continuous_const Complex.continuous_re).mem_nhds hz)
-      fun w hw => pcfU_zero_eq_besselK hw
+      fun w hw => parabolicCylinderU_zero_eq_besselK hw
   have hd1 := (Complex.hasStrictDerivAt_cpow_const (c := (1/2:ℂ)) hzs).hasDerivAt
   have hd2 : HasDerivAt (fun w : ℂ => w^2/4) (z/2) z := by
     convert (hasDerivAt_pow 2 z).div_const 4 using 1; ring
@@ -264,17 +271,19 @@ theorem deriv_pcfU_zero_eq_besselK {z : ℂ} (hz : 0 < z.re) :
 /-- Principal branches in the right half-plane; continuation elsewhere inherits the logarithm of z
 squared. -/
 @[dlmf 12.7.E8]
-theorem pcfU_bessel_8 {z : ℂ} (hz : 0 < z.re) :
-    pcfU (-2) z=z^(5/2:ℂ)/(4*Real.sqrt (2*π))*(2*besselK (1/4) (z^2/4)+3*besselK (3/4)
+theorem parabolicCylinderU_bessel_8 {z : ℂ} (hz : 0 < z.re) :
+    parabolicCylinderU (-2) z=z^(5/2:ℂ)/(4*Real.sqrt (2*π))*(2*besselK (1/4) (z^2/4)+3*besselK (3/4)
         (z^2/4)-besselK (5/4) (z^2/4)) := by
   have hz0 : z ≠ 0 := fun h => by simp [h] at hz
   have hw := sq_div_four_mem_slitPlane hz
   have hrec := besselK_add_sub (1/4) hw
   rw [show (1/4:ℂ) - 1 = -(3/4) by ring, besselK_neg _ hw, show (1/4:ℂ) + 1 = 5/4 by ring] at hrec
-  have h1 := pcfU_recurrence_sub 0 z
-  rw [deriv_pcfU_zero_eq_besselK hz, pcfU_zero_eq_besselK hz, show (0:ℂ) - 1 = -1 by ring] at h1
-  have h := pcfU_three_term (-1) z
-  rw [show (-1:ℂ) - 1 = -2 by ring, show (-1:ℂ) + 1 = 0 by ring, pcfU_zero_eq_besselK hz] at h
+  have h1 := parabolicCylinderU_recurrence_sub 0 z
+  rw [deriv_parabolicCylinderU_zero_eq_besselK hz, parabolicCylinderU_zero_eq_besselK hz,
+      show (0:ℂ) - 1 = -1 by ring] at h1
+  have h := parabolicCylinderU_three_term (-1) z
+  rw [show (-1:ℂ) - 1 = -2 by ring, show (-1:ℂ) + 1 = 0 by
+                                ring, parabolicCylinderU_zero_eq_besselK hz] at h
   rw [show (5/2:ℂ) = 2 + 1/2 by norm_num, Complex.cpow_add _ _ hz0, Complex.cpow_two]
   have hp0 : (Real.sqrt (2*π):ℂ) ≠ 0 := by
     exact_mod_cast (Real.sqrt_pos.mpr (by positivity : (0:ℝ) < 2*π)).ne'
@@ -284,11 +293,13 @@ theorem pcfU_bessel_8 {z : ℂ} (hz : 0 < z.re) :
 /-- Principal branches in the right half-plane; continuation elsewhere inherits the logarithm of z
 squared. -/
 @[dlmf 12.7.E9]
-theorem pcfU_bessel_9 {z : ℂ} (hz : 0 < z.re) :
-    pcfU (-1) z=z^(3/2:ℂ)/(2*Real.sqrt (2*π))*(besselK (1/4) (z^2/4)+besselK (3/4) (z^2/4)) := by
+theorem parabolicCylinderU_bessel_9 {z : ℂ} (hz : 0 < z.re) :
+    parabolicCylinderU (-1)
+        z=z^(3/2:ℂ)/(2*Real.sqrt (2*π))*(besselK (1/4) (z^2/4)+besselK (3/4) (z^2/4)) := by
   have hz0 : z ≠ 0 := fun h => by simp [h] at hz
-  have h := pcfU_recurrence_sub 0 z
-  rw [deriv_pcfU_zero_eq_besselK hz, pcfU_zero_eq_besselK hz, show (0:ℂ) - 1 = -1 by ring] at h
+  have h := parabolicCylinderU_recurrence_sub 0 z
+  rw [deriv_parabolicCylinderU_zero_eq_besselK hz, parabolicCylinderU_zero_eq_besselK hz,
+      show (0:ℂ) - 1 = -1 by ring] at h
   rw [show (3/2:ℂ) = 1 + 1/2 by norm_num, Complex.cpow_add _ _ hz0, Complex.cpow_one]
   have hp0 : (Real.sqrt (2*π):ℂ) ≠ 0 := by
     exact_mod_cast (Real.sqrt_pos.mpr (by positivity : (0:ℝ) < 2*π)).ne'
@@ -298,47 +309,49 @@ theorem pcfU_bessel_9 {z : ℂ} (hz : 0 < z.re) :
 /-- Principal branches in the right half-plane; continuation elsewhere inherits the logarithm of z
 squared. -/
 @[dlmf 12.7.E10]
-theorem pcfU_bessel_10 {z : ℂ} (hz : 0 < z.re) :
-    pcfU (0) z=(z/(2*π))^(1/2:ℂ)*besselK (1/4) (z^2/4) := by
+theorem parabolicCylinderU_bessel_10 {z : ℂ} (hz : 0 < z.re) :
+    parabolicCylinderU (0) z=(z/(2*π))^(1/2:ℂ)*besselK (1/4) (z^2/4) := by
   have hz0 : z ≠ 0 := fun h => by simp [h] at hz
-  rw [pcfU_zero_eq_besselK hz, div_two_pi_cpow_half hz0]
+  rw [parabolicCylinderU_zero_eq_besselK hz, div_two_pi_cpow_half hz0]
 
 /-- Principal branches in the right half-plane; continuation elsewhere inherits the logarithm of z
 squared. -/
 @[dlmf 12.7.E11]
-theorem pcfU_bessel_11 {z : ℂ} (hz : 0 < z.re) :
-    pcfU (1) z=z^(3/2:ℂ)/Real.sqrt (2*π)*(besselK (3/4) (z^2/4)-besselK (1/4) (z^2/4)) := by
+theorem parabolicCylinderU_bessel_11 {z : ℂ} (hz : 0 < z.re) :
+    parabolicCylinderU (1) z=z^(3/2:ℂ)/Real.sqrt
+        (2*π)*(besselK (3/4) (z^2/4)-besselK (1/4) (z^2/4)) := by
   have hz0 : z ≠ 0 := fun h => by simp [h] at hz
-  have h := pcfU_recurrence_add 0 z
-  rw [deriv_pcfU_zero_eq_besselK hz, pcfU_zero_eq_besselK hz, show (0:ℂ) + 1 = 1 by ring] at h
+  have h := parabolicCylinderU_recurrence_add 0 z
+  rw [deriv_parabolicCylinderU_zero_eq_besselK hz, parabolicCylinderU_zero_eq_besselK hz,
+      show (0:ℂ) + 1 = 1 by ring] at h
   rw [show (3/2:ℂ) = 1 + 1/2 by norm_num, Complex.cpow_add _ _ hz0, Complex.cpow_one]
   have hp0 : (Real.sqrt (2*π):ℂ) ≠ 0 := by
     exact_mod_cast (Real.sqrt_pos.mpr (by positivity : (0:ℝ) < 2*π)).ne'
   field_simp at h ⊢
   linear_combination h
 
-/-- Identity under the stated parameter and domain assumptions: `pcfU a z=2^(-3/4-a/2)*z*exp
-(-z^2/4)*kummerU (a/2+3/4) (3/2) (z^2/2)`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`parabolicCylinderU a z=2^(-3/4-a/2)*z*exp (-z^2/4)*kummerU (a/2+3/4) (3/2) (z^2/2)`. -/
 @[dlmf 12.7.E14]
-theorem pcfU_kummerU_odd (a : ℂ) {z : ℂ} (hz : 0 < z.re) :
-    pcfU a z=2^(-3/4-a/2)*z*exp (-z^2/4)*kummerU (a/2+3/4) (3/2) (z^2/2) := by
+theorem parabolicCylinderU_kummerU_odd (a : ℂ) {z : ℂ} (hz : 0 < z.re) :
+    parabolicCylinderU a z=2^(-3/4-a/2)*z*exp (-z^2/4)*kummerU (a/2+3/4) (3/2) (z^2/2) := by
   have hz0 : z ≠ 0 := fun h => by simp [h] at hz
   have key : (2:ℂ)^(-(1/4)-a/2) * (z^2/2)^(1-1/2:ℂ) = 2^(-3/4-a/2) * z := by
     rw [sq_div_two_cpow hz, two_cpow_eq_exp, two_cpow_eq_exp]
     conv_rhs => rw [← Complex.exp_log hz0]
     rw [← Complex.exp_add, ← Complex.exp_add]; congr 1; ring
-  rw [pcfU_eq_kummerU a hz,
+  rw [parabolicCylinderU_eq_kummerU a hz,
       kummerU_kummer_transform_all _ _ (div_ne_zero (pow_ne_zero 2 hz0) two_ne_zero),
     show a/2+1/4-1/2+1 = a/2+3/4 by ring, show (2:ℂ)-1/2 = 3/2 by norm_num]
   linear_combination (exp (-z^2/4) * kummerU (a/2+3/4) (3/2) (z^2/2)) * key
 
-/-- Identity under the stated parameter and domain assumptions: `pcfU a
-z=2^(-a/2)*z^(-1/2:ℂ)*whittakerW (-a/2) (1/4) (z^2/2) ∧ pcfU a
+/-- Identity under the stated parameter and domain assumptions: `parabolicCylinderU a
+z=2^(-a/2)*z^(-1/2:ℂ)*whittakerW (-a/2) (1/4) (z^2/2) ∧ parabolicCylinderU a
 z=2^(-a/2)*z^(-1/2:ℂ)*whittakerW (-a/2) (-1/4) (z^2/2)`. -/
 @[dlmf 12.7.E14]
-theorem pcfU_whittaker (a : ℂ) {z : ℂ} (hz : 0 < z.re) :
-    pcfU a z=2^(-a/2)*z^(-1/2:ℂ)*whittakerW (-a/2) (1/4) (z^2/2) ∧
-        pcfU a z=2^(-a/2)*z^(-1/2:ℂ)*whittakerW (-a/2) (-1/4) (z^2/2) := by
+theorem parabolicCylinderU_whittaker (a : ℂ) {z : ℂ} (hz : 0 < z.re) :
+    parabolicCylinderU a z=2^(-a/2)*z^(-1/2:ℂ)*whittakerW (-a/2) (1/4) (z^2/2) ∧
+        parabolicCylinderU a z=2^(-a/2)*z^(-1/2:ℂ)*whittakerW (-a/2) (-1/4) (z^2/2) := by
   have hz0 : z ≠ 0 := fun h => by simp [h] at hz
   have key1 : (2:ℂ)^(-a/2) * z^(-1/2:ℂ) * (z^2/2)^(1/2 + 1/4:ℂ) = 2^(-3/4-a/2) * z := by
     rw [sq_div_two_cpow hz, two_cpow_eq_exp, two_cpow_eq_exp, Complex.cpow_def_of_ne_zero hz0]
@@ -348,23 +361,26 @@ theorem pcfU_whittaker (a : ℂ) {z : ℂ} (hz : 0 < z.re) :
     rw [sq_div_two_cpow hz, two_cpow_eq_exp, two_cpow_eq_exp, Complex.cpow_def_of_ne_zero hz0]
     rw [← Complex.exp_add, ← Complex.exp_add]; congr 1; ring
   constructor
-  · rw [pcfU_kummerU_odd a hz, whittakerW, show (1:ℂ)/2 + 1/4 - -a/2 = a/2+3/4 by ring,
+  · rw [parabolicCylinderU_kummerU_odd a hz, whittakerW, show (1:ℂ)/2 + 1/4 - -a/2 =
+        a/2+3/4 by ring,
       show (1:ℂ) + 2*(1/4) = 3/2 by ring, show -(z^2/2)/2 = -z^2/4 by ring]
     linear_combination (-(exp (-z^2/4) * kummerU (a/2+3/4) (3/2) (z^2/2))) * key1
-  · rw [pcfU_eq_kummerU a hz, whittakerW, show (1:ℂ)/2 + -1/4 - -a/2 = a/2+1/4 by ring,
+  · rw [parabolicCylinderU_eq_kummerU a hz, whittakerW, show (1:ℂ)/2 + -1/4 - -a/2 =
+        a/2+1/4 by ring,
       show (1:ℂ) + 2*(-1/4) = 1/2 by ring, show -(z^2/2)/2 = -z^2/4 by ring]
     linear_combination (-(exp (-z^2/4) * kummerU (a/2+1/4) (1/2) (z^2/2))) * key2
 
-/-- The series with terms `(fun m : ℕ => exp (1*(x*y/2+y^2/4))*((-y)^m/(m.factorial:ℂ))*pcfU (a-m)
-x)` converges to `(pcfU a (x+y))`. -/
+/-- The series with terms
+`(fun m : ℕ => exp (1*(x*y/2+y^2/4))*((-y)^m/(m.factorial:ℂ))*parabolicCylinderU (a-m) x)` converges
+to `(parabolicCylinderU a (x+y))`. -/
 @[dlmf 12.13.E1]
-theorem pcfU_addition_1 (a x y : ℂ) :
-    HasSum (fun m : ℕ => exp (1*(x*y/2+y^2/4))*((-y)^m/(m.factorial:ℂ))*pcfU (a-m) x)
-        (pcfU a (x+y)) := by
-  have hf : Differentiable ℂ (fun w => exp (-1*w^2/4) * pcfU a w) :=
-    (by fun_prop : Differentiable ℂ (fun w : ℂ => exp (-1*w^2/4))).mul (pcfU_entire a)
+theorem parabolicCylinderU_addition_1 (a x y : ℂ) :
+    HasSum (fun m : ℕ => exp (1*(x*y/2+y^2/4))*((-y)^m/(m.factorial:ℂ))*parabolicCylinderU (a-m) x)
+        (parabolicCylinderU a (x+y)) := by
+  have hf : Differentiable ℂ (fun w => exp (-1*w^2/4) * parabolicCylinderU a w) :=
+    (by fun_prop : Differentiable ℂ (fun w : ℂ => exp (-1*w^2/4))).mul (parabolicCylinderU_entire a)
   have h := (Complex.hasSum_taylorSeries_of_entire hf x (x+y)).mul_left (exp ((x+y)^2/4))
-  simp only [smul_eq_mul, add_sub_cancel_left, pcfU_iterated_deriv_10] at h
+  simp only [smul_eq_mul, add_sub_cancel_left, parabolicCylinderU_iterated_deriv_10] at h
   have he : exp ((x+y)^2/4) * exp (-1*(x+y)^2/4) = 1 := by rw [← Complex.exp_add]; ring_nf; simp
   have he2 : exp (1*(x*y/2+y^2/4)) = exp ((x+y)^2/4) * exp (-1*x^2/4) := by
     rw [← Complex.exp_add]; ring_nf
@@ -372,17 +388,18 @@ theorem pcfU_addition_1 (a x y : ℂ) :
   · funext m; rw [he2, neg_pow]; ring
   · rw [← mul_assoc, he, one_mul]
 
-/-- The series with terms `(fun m : ℕ => exp (-1*(x*y/2+y^2/4))*((-1)^m*poch (a+1/2)
-m*y^m/(m.factorial:ℂ))*pcfU (a+m) x)` converges to `(pcfU a (x+y))`. -/
+/-- The series with terms `(fun m : ℕ => exp (-1*(x*y/2+y^2/4))*((-1)^m*pochhammer (a+1/2)
+m*y^m/(m.factorial:ℂ))*parabolicCylinderU (a+m) x)` converges to `(parabolicCylinderU a (x+y))`. -/
 @[dlmf 12.13.E2]
-theorem pcfU_addition_2 (a x y : ℂ) :
+theorem parabolicCylinderU_addition_2 (a x y : ℂ) :
     HasSum (fun m : ℕ =>
-        exp (-1*(x*y/2+y^2/4))*((-1)^m*poch (a+1/2) m*y^m/(m.factorial:ℂ))*pcfU (a+m) x)
-        (pcfU a (x+y)) := by
-  have hf : Differentiable ℂ (fun w => exp (1*w^2/4) * pcfU a w) :=
-    (by fun_prop : Differentiable ℂ (fun w : ℂ => exp (1*w^2/4))).mul (pcfU_entire a)
+        exp (-1*(x*y/2+y^2/4))*((-1)^m*pochhammer (a+1/2)
+            m*y^m/(m.factorial:ℂ))*parabolicCylinderU (a+m) x)
+        (parabolicCylinderU a (x+y)) := by
+  have hf : Differentiable ℂ (fun w => exp (1*w^2/4) * parabolicCylinderU a w) :=
+    (by fun_prop : Differentiable ℂ (fun w : ℂ => exp (1*w^2/4))).mul (parabolicCylinderU_entire a)
   have h := (Complex.hasSum_taylorSeries_of_entire hf x (x+y)).mul_left (exp (-1*(x+y)^2/4))
-  simp only [smul_eq_mul, add_sub_cancel_left, pcfU_iterated_deriv_9] at h
+  simp only [smul_eq_mul, add_sub_cancel_left, parabolicCylinderU_iterated_deriv_9] at h
   have he : exp (-1*(x+y)^2/4) * exp (1*(x+y)^2/4) = 1 := by rw [← Complex.exp_add]; ring_nf; simp
   have he2 : exp (-1*(x*y/2+y^2/4)) = exp (-1*(x+y)^2/4) * exp (1*x^2/4) := by
     rw [← Complex.exp_add]; ring_nf
@@ -390,17 +407,18 @@ theorem pcfU_addition_2 (a x y : ℂ) :
   · funext m; rw [he2, show (1/2:ℂ)+a = a+1/2 by ring]; ring
   · rw [← mul_assoc, he, one_mul]
 
-/-- The series with terms `(fun m : ℕ => exp (1*(x*y/2+y^2/4))*((-1)^m*poch (1/2-a)
-m*y^m/(m.factorial:ℂ))*pcfV (a-m) x)` converges to `(pcfV a (x+y))`. -/
+/-- The series with terms `(fun m : ℕ => exp (1*(x*y/2+y^2/4))*((-1)^m*pochhammer (1/2-a)
+m*y^m/(m.factorial:ℂ))*parabolicCylinderV (a-m) x)` converges to `(parabolicCylinderV a (x+y))`. -/
 @[dlmf 12.13.E3]
-theorem pcfV_addition_3 (a x y : ℂ) :
+theorem parabolicCylinderV_addition_3 (a x y : ℂ) :
     HasSum (fun m : ℕ =>
-        exp (1*(x*y/2+y^2/4))*((-1)^m*poch (1/2-a) m*y^m/(m.factorial:ℂ))*pcfV (a-m) x)
-        (pcfV a (x+y)) := by
-  have hf : Differentiable ℂ (fun w => exp (-1*w^2/4) * pcfV a w) :=
-    (by fun_prop : Differentiable ℂ (fun w : ℂ => exp (-1*w^2/4))).mul (pcfV_entire a)
+        exp (1*(x*y/2+y^2/4))*((-1)^m*pochhammer (1/2-a)
+            m*y^m/(m.factorial:ℂ))*parabolicCylinderV (a-m) x)
+        (parabolicCylinderV a (x+y)) := by
+  have hf : Differentiable ℂ (fun w => exp (-1*w^2/4) * parabolicCylinderV a w) :=
+    (by fun_prop : Differentiable ℂ (fun w : ℂ => exp (-1*w^2/4))).mul (parabolicCylinderV_entire a)
   have h := (Complex.hasSum_taylorSeries_of_entire hf x (x+y)).mul_left (exp ((x+y)^2/4))
-  simp only [smul_eq_mul, add_sub_cancel_left, pcfV_iterated_deriv_12] at h
+  simp only [smul_eq_mul, add_sub_cancel_left, parabolicCylinderV_iterated_deriv_12] at h
   have he : exp ((x+y)^2/4) * exp (-1*(x+y)^2/4) = 1 := by rw [← Complex.exp_add]; ring_nf; simp
   have he2 : exp (1*(x*y/2+y^2/4)) = exp ((x+y)^2/4) * exp (-1*x^2/4) := by
     rw [← Complex.exp_add]; ring_nf
@@ -408,16 +426,17 @@ theorem pcfV_addition_3 (a x y : ℂ) :
   · funext m; rw [he2]; ring
   · rw [← mul_assoc, he, one_mul]
 
-/-- The series with terms `(fun m : ℕ => exp (-1*(x*y/2+y^2/4))*(y^m/(m.factorial:ℂ))*pcfV (a+m)
-x)` converges to `(pcfV a (x+y))`. -/
+/-- The series with terms
+`(fun m : ℕ => exp (-1*(x*y/2+y^2/4))*(y^m/(m.factorial:ℂ))*parabolicCylinderV (a+m) x)` converges
+to `(parabolicCylinderV a (x+y))`. -/
 @[dlmf 12.13.E4]
-theorem pcfV_addition_4 (a x y : ℂ) :
-    HasSum (fun m : ℕ => exp (-1*(x*y/2+y^2/4))*(y^m/(m.factorial:ℂ))*pcfV (a+m) x)
-        (pcfV a (x+y)) := by
-  have hf : Differentiable ℂ (fun w => exp (1*w^2/4) * pcfV a w) :=
-    (by fun_prop : Differentiable ℂ (fun w : ℂ => exp (1*w^2/4))).mul (pcfV_entire a)
+theorem parabolicCylinderV_addition_4 (a x y : ℂ) :
+    HasSum (fun m : ℕ => exp (-1*(x*y/2+y^2/4))*(y^m/(m.factorial:ℂ))*parabolicCylinderV (a+m) x)
+        (parabolicCylinderV a (x+y)) := by
+  have hf : Differentiable ℂ (fun w => exp (1*w^2/4) * parabolicCylinderV a w) :=
+    (by fun_prop : Differentiable ℂ (fun w : ℂ => exp (1*w^2/4))).mul (parabolicCylinderV_entire a)
   have h := (Complex.hasSum_taylorSeries_of_entire hf x (x+y)).mul_left (exp (-1*(x+y)^2/4))
-  simp only [smul_eq_mul, add_sub_cancel_left, pcfV_iterated_deriv_11] at h
+  simp only [smul_eq_mul, add_sub_cancel_left, parabolicCylinderV_iterated_deriv_11] at h
   have he : exp (-1*(x+y)^2/4) * exp (1*(x+y)^2/4) = 1 := by rw [← Complex.exp_add]; ring_nf; simp
   have he2 : exp (-1*(x*y/2+y^2/4)) = exp (-1*(x+y)^2/4) * exp (1*x^2/4) := by
     rw [← Complex.exp_add]; ring_nf
@@ -425,16 +444,18 @@ theorem pcfV_addition_4 (a x y : ℂ) :
   · funext m; rw [he2]; ring
   · rw [← mul_assoc, he, one_mul]
 
-/-- The series with terms `(fun m : ℕ => exp ((x*Real.sin t-y*Real.cos t)^2/4)*(-1)^m*poch (a+1/2)
-m/(m.factorial:ℂ)*(Real.tan t:ℂ)^m*pcfU (m+a) x*pcfU (-m-1/2) y)` converges to `(pcfU a
-(x*Real.cos t+y*Real.sin t))`. -/
+/-- The series with terms
+`(fun m : ℕ => exp ((x*Real.sin t-y*Real.cos t)^2/4)*(-1)^m*pochhammer (a+1/2)
+m/(m.factorial:ℂ)*(Real.tan t:ℂ)^m*parabolicCylinderU (m+a) x*parabolicCylinderU (-m-1/2)
+y)` converges to `(parabolicCylinderU a (x*Real.cos t+y*Real.sin t))`. -/
 @[dlmf 12.13.E5]
-theorem pcfU_rotational_addition {a : ℂ} (ha : a.re ≤ -1/2) (x y : ℂ) {t : ℝ} (ht : 0 ≤ t)
+theorem parabolicCylinderU_rotational_addition {a : ℂ} (ha : a.re ≤ -1/2) (x y : ℂ)
+    {t : ℝ} (ht : 0 ≤ t)
     (htπ : t ≤ π/4) (hend : t = π/4 → |y.im| ≤ x.re) :
     HasSum (fun m : ℕ =>
-        exp ((x*Real.sin t-y*Real.cos t)^2/4)*(-1)^m*poch (a+1/2)
-        m/(m.factorial:ℂ)*(Real.tan t:ℂ)^m*pcfU (m+a) x*pcfU (-m-1/2) y)
-        (pcfU a (x*Real.cos t+y*Real.sin t)) := by
+        exp ((x*Real.sin t-y*Real.cos t)^2/4)*(-1)^m*pochhammer (a+1/2)
+        m/(m.factorial:ℂ)*(Real.tan t:ℂ)^m*parabolicCylinderU (m+a) x*parabolicCylinderU (-m-1/2) y)
+        (parabolicCylinderU a (x*Real.cos t+y*Real.sin t)) := by
   sorry
 
 /- DLMF 12.13.6 as printed fails at n = 0, z = 0: the left side is

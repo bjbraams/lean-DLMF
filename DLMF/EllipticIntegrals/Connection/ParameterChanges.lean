@@ -12,14 +12,15 @@ public import DLMF.EllipticIntegrals.Connection.ModulusChanges
 
 The imaginary-argument (hyperbolic amplitude) transformation of Legendre's incomplete
 integrals and the three transformations of the third-kind parameter, stated for real data
-with Cauchy principal values. Here `c = csc²φ` and `R_C = symEllIntRC`.
+with Cauchy principal values. Here `c = csc²φ` and `R_C = symmetricEllipticRC`.
 
 ## Main results
 
 * `incEllInt_imaginary_argument`: the imaginary-argument transformation with
   `tan ψ = sinh φ`, for complex `k` (DLMF 19.7.7).
-* `incEllIntPik_add_first`, `incEllIntPik_add_second`, `incEllIntPik_add_third`: the
-  parameter changes of `Π(φ, α², k)` (DLMF 19.7.8, 19.7.9, 19.7.10).
+* `incompleteEllipticPi_add_first`, `incompleteEllipticPi_add_second`,
+  `incompleteEllipticPi_add_third`: the parameter changes of `Π(φ, α², k)` (DLMF 19.7.8, 19.7.9,
+  19.7.10).
 * `first_relation_omega_lt`: under `α²ω² = k²`, `α² > c` implies `ω² < c`
   (DLMF §19.7(iii), prose).
 
@@ -56,11 +57,11 @@ private lemma ofReal_mul_cpow_eq_of_pos {r : ℝ} (hr : 0 < r) (z w : ℂ) :
     ring_nf
 
 /-- A segment integral along `[0, iφ]`. -/
-private lemma segmentIntegral_I_mul (f : ℂ → ℂ) (φ : ℝ) :
-    segmentIntegral f (I * φ) = I * ∫ u in (0 : ℝ)..φ, f (I * u) := by
-  have h := segmentIntegral_ofReal (fun z => I * f (I * z)) φ
+private lemma primitive_I_mul (f : ℂ → ℂ) (φ : ℝ) :
+    Core.primitive f (I * φ) = I * ∫ u in (0 : ℝ)..φ, f (I * u) := by
+  have h := primitive_ofReal (fun z => I * f (I * z)) φ
   rw [intervalIntegral.integral_const_mul] at h
-  rw [← h, segmentIntegral, segmentIntegral]
+  rw [← h, primitive_eq_integral, primitive_eq_integral]
   congr 1; funext t; ring_nf
 
 /-- Identity under the stated parameter and domain assumptions: `Complex.sin (I * u) ^ 2 =
@@ -134,12 +135,13 @@ private lemma cpow_one_sub_mul_sin_arctan_sinh_sq (b : ℂ) (u : ℝ) :
         (ofReal_inv_sq_cpow_half hc).2]
   exact ⟨rfl, rfl⟩
 
-/-- Identity under the stated parameter and domain assumptions: `incEllIntFk (I * φ) k = I *
-incEllIntFk (Real.arctan (Real.sinh φ)) (jacobiComodulusk k)`. -/
-private lemma incEllIntFk_I_mul (φ : ℝ) {k : ℂ} (hk : k ^ 2 ∈ slitPlane) :
-    incEllIntFk (I * φ) k = I * incEllIntFk (Real.arctan (Real.sinh φ)) (jacobiComodulusk k) := by
-  rw [incEllIntFk, segmentIntegral_I_mul, incEllIntFk_ofReal_eq_integral,
-    jacobiComodulusk_sq_eq_one_sub_sq]
+/-- Identity under the stated parameter and domain assumptions: `incompleteEllipticF (I * φ) k = I *
+incompleteEllipticF (Real.arctan (Real.sinh φ)) (jacobiComodulus k)`. -/
+private lemma incompleteEllipticF_I_mul (φ : ℝ) {k : ℂ} (hk : k ^ 2 ∈ slitPlane) :
+    incompleteEllipticF (I * φ) k = I *
+        incompleteEllipticF (Real.arctan (Real.sinh φ)) (jacobiComodulus k) := by
+  rw [incompleteEllipticF, primitive_I_mul, incompleteEllipticF_ofReal_eq_integral,
+    jacobiComodulus_sq_eq_one_sub_sq]
   congr 1
   rw [← integral_arctan_sinh_subst]
   · refine intervalIntegral.integral_congr fun u _ => ?_
@@ -163,18 +165,20 @@ private lemma uIcc_zero_subset_Ioo {ψ : ℝ} (h : ψ ∈ Ioo (-(π / 2)) (π / 
   · rw [uIcc_of_le h0] at hx; exact ⟨by linarith [hx.1, Real.pi_pos], by linarith [hx.2, h.2]⟩
   · rw [uIcc_of_ge h0] at hx; exact ⟨by linarith [hx.1, h.1], by linarith [hx.2, Real.pi_pos]⟩
 
-/-- Identity under the stated parameter and domain assumptions: `incEllIntEk (I * φ) k = I *
-(incEllIntFk (Real.arctan (Real.sinh φ)) (jacobiComodulusk k) - incEllIntEk (Real.arctan
-(Real.sinh φ)) (jacobiComodulusk k) + Real.tan (Real.arctan (Real.sinh φ)) * (1 - (1 - k ^ 2)
+/-- Identity under the stated parameter and domain assumptions: `incompleteEllipticE (I * φ) k = I *
+(incompleteEllipticF (Real.arctan (Real.sinh φ)) (jacobiComodulus k) - incompleteEllipticE
+(Real.arctan (Real.sinh φ)) (jacobiComodulus k) + Real.tan (Real.arctan (Real.sinh φ)) * (1 - (1 - k
+^ 2)
 * (Real.sin (Real.arctan (Real.sinh φ)) : ℂ) ^ 2) ^ (1 / 2 : ℂ))`. -/
-private lemma incEllIntEk_I_mul (φ : ℝ) {k : ℂ} (hk : k ^ 2 ∈ slitPlane) :
-    incEllIntEk (I * φ) k = I * (incEllIntFk (Real.arctan (Real.sinh φ)) (jacobiComodulusk k) -
-        incEllIntEk (Real.arctan (Real.sinh φ)) (jacobiComodulusk k) +
+private lemma incompleteEllipticE_I_mul (φ : ℝ) {k : ℂ} (hk : k ^ 2 ∈ slitPlane) :
+    incompleteEllipticE (I * φ) k = I *
+        (incompleteEllipticF (Real.arctan (Real.sinh φ)) (jacobiComodulus k) -
+        incompleteEllipticE (Real.arctan (Real.sinh φ)) (jacobiComodulus k) +
           Real.tan (Real.arctan (Real.sinh φ)) *
             (1 - (1 - k ^ 2) * (Real.sin (Real.arctan (Real.sinh φ)) : ℂ) ^ 2) ^ (1 / 2 : ℂ)) := by
   set ψ := Real.arctan (Real.sinh φ) with hψ
-  set k' := jacobiComodulusk k with hk'
-  have hk'2 : k' ^ 2 = 1 - k ^ 2 := jacobiComodulusk_sq_eq_one_sub_sq k
+  set k' := jacobiComodulus k with hk'
+  have hk'2 : k' ^ 2 = 1 - k ^ 2 := jacobiComodulus_sq_eq_one_sub_sq k
   have hk's : 1 - k' ^ 2 ∈ slitPlane := by rw [hk'2, sub_sub_cancel]; exact hk
   have hψI : ψ ∈ Ioo (-(π / 2)) (π / 2) :=
     ⟨Real.neg_pi_div_two_lt_arctan _, Real.arctan_lt_pi_div_two _⟩
@@ -185,8 +189,8 @@ private lemma incEllIntEk_I_mul (φ : ℝ) {k : ℂ} (hk : k ^ 2 ∈ slitPlane) 
     refine hΔc.continuousOn.div (by fun_prop) fun θ hθ => ?_
     exact pow_ne_zero _ (by exact_mod_cast cos_ne_zero_of_mem_Ioo hθ)
   -- the substitution
-  have h1 : incEllIntEk (I * φ) k = I * ∫ θ in (0 : ℝ)..ψ, G θ := by
-    rw [incEllIntEk, segmentIntegral_I_mul, ← integral_arctan_sinh_subst hGc]
+  have h1 : incompleteEllipticE (I * φ) k = I * ∫ θ in (0 : ℝ)..ψ, G θ := by
+    rw [incompleteEllipticE, primitive_I_mul, ← integral_arctan_sinh_subst hGc]
     congr 1
     refine intervalIntegral.integral_congr fun u _ => ?_
     simp only [hG, ellDelta, hk'2, (cpow_one_sub_mul_sin_arctan_sinh_sq _ u).2,
@@ -230,7 +234,8 @@ private lemma incEllIntEk_I_mul (φ : ℝ) {k : ℂ} (hk : k ^ 2 ∈ slitPlane) 
       ← intervalIntegral.integral_sub (((hGint.sub hΔiint).add hΔint).add hΔiint) hΔint]
     refine intervalIntegral.integral_congr fun θ _ => ?_
     ring
-  rw [h1, hsplit, hFTC, incEllIntFk_ofReal_eq_integral, incEllIntEk_ofReal_eq_integral]
+  rw [h1, hsplit, hFTC, incompleteEllipticF_ofReal_eq_integral,
+      incompleteEllipticE_ofReal_eq_integral]
   simp only [ellDelta, ← cpow_neg, hk'2]
   ring
 
@@ -255,31 +260,34 @@ private lemma exists_norm_lower_on_segment {g : ℂ → ℂ} (hg : Continuous g)
     (nonempty_Icc.2 zero_le_one) (by fun_prop : Continuous fun t : ℝ => ‖g (t * w)‖).continuousOn
   exact ⟨‖g (t0 * w)‖, norm_pos_iff.2 (hne t0 ht0), fun t ht => hmin ht⟩
 
-/-- Identity under the stated parameter and domain assumptions: `incEllIntPik ψ β k = ∫ θ in (0 :
-ℝ)..ψ, ((1 - β * (Real.sin θ : ℂ) ^ 2)⁻¹ * (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 :
-ℂ)))`. -/
-private lemma incEllIntPik_ofReal_eq_integral_of_slit (ψ : ℝ) {β : ℂ}
+/-- Identity under the stated parameter and domain assumptions:
+`incompleteEllipticPi ψ β k = ∫ θ in (0 : ℝ)..ψ, ((1 - β * (Real.sin θ : ℂ) ^ 2)⁻¹ * (1 - k ^ 2 *
+(Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)))`. -/
+private lemma incompleteEllipticPi_ofReal_eq_integral_of_slit (ψ : ℝ) {β : ℂ}
     (hβ : 1 - β ∈ slitPlane) (k : ℂ) :
-    incEllIntPik ψ β k = ∫ θ in (0 : ℝ)..ψ, ((1 - β * (Real.sin θ : ℂ) ^ 2)⁻¹ *
+    incompleteEllipticPi ψ β k = ∫ θ in (0 : ℝ)..ψ, ((1 - β * (Real.sin θ : ℂ) ^ 2)⁻¹ *
       (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ))) := by
   obtain ⟨δ, hδ, hb⟩ := exists_le_norm_one_sub_mul_sin_sq hβ
-  rw [incEllIntPik_eq_segmentIntegral (δ := δ) hδ, segmentIntegral_ofReal]
+  rw [incompleteEllipticPi_eq_primitive (δ := δ) hδ, primitive_ofReal]
   · simp only [← Complex.ofReal_sin]
   · intro t _
     have := hb (t * ψ)
     push_cast at this; exact this
 
-/-- Identity under the stated parameter and domain assumptions: `incEllIntPik (I * φ) α2 k = I *
-(incEllIntFk (Real.arctan (Real.sinh φ)) (jacobiComodulusk k) - α2 * incEllIntPik (Real.arctan
-(Real.sinh φ)) (1 - α2) (jacobiComodulusk k)) / (1 - α2)`. -/
-private lemma incEllIntPik_I_mul (φ : ℝ) {k α2 : ℂ} (hk : k ^ 2 ∈ slitPlane) (hα : α2 ∈ slitPlane)
+/-- Identity under the stated parameter and domain assumptions:
+`incompleteEllipticPi (I * φ) α2 k = I * (incompleteEllipticF (Real.arctan (Real.sinh φ))
+(jacobiComodulus k) - α2 * incompleteEllipticPi (Real.arctan (Real.sinh φ)) (1 - α2)
+(jacobiComodulus k)) / (1 - α2)`. -/
+private lemma incompleteEllipticPi_I_mul (φ : ℝ) {k α2 : ℂ} (hk : k ^ 2 ∈ slitPlane)
+    (hα : α2 ∈ slitPlane)
     (hα1 : α2 ≠ 1) :
-    incEllIntPik (I * φ) α2 k = I * (incEllIntFk (Real.arctan (Real.sinh φ)) (jacobiComodulusk k) -
-        α2 * incEllIntPik (Real.arctan (Real.sinh φ)) (1 - α2) (jacobiComodulusk k))
+    incompleteEllipticPi (I * φ) α2 k = I *
+        (incompleteEllipticF (Real.arctan (Real.sinh φ)) (jacobiComodulus k) -
+        α2 * incompleteEllipticPi (Real.arctan (Real.sinh φ)) (1 - α2) (jacobiComodulus k))
             / (1 - α2) := by
   set ψ := Real.arctan (Real.sinh φ) with hψ
-  set k' := jacobiComodulusk k with hk'
-  have hk'2 : k' ^ 2 = 1 - k ^ 2 := jacobiComodulusk_sq_eq_one_sub_sq k
+  set k' := jacobiComodulus k with hk'
+  have hk'2 : k' ^ 2 = 1 - k ^ 2 := jacobiComodulus_sq_eq_one_sub_sq k
   have hα1' : (1 : ℂ) - α2 ≠ 0 := sub_ne_zero.2 (Ne.symm hα1)
   have hpath : ∀ u : ℝ, 1 - α2 * Complex.sin (I * u) ^ 2 =
       1 + α2 * (((Real.sinh u) ^ 2 : ℝ) : ℂ) := by
@@ -290,9 +298,9 @@ private lemma incEllIntPik_I_mul (φ : ℝ) {k α2 : ℂ} (hk : k ^ 2 ∈ slitPl
       have : ((t : ℂ) * (I * φ)) = I * ((t * φ : ℝ) : ℂ) := by push_cast; ring
       simp only [this, hpath]
       exact slitPlane_ne_zero (one_add_mul_ofReal_mem_slitPlane hα (sq_nonneg _)))
-  rw [incEllIntPik_eq_segmentIntegral hδ hb, segmentIntegral_I_mul,
-    incEllIntPik_ofReal_eq_integral_of_slit ψ (by rw [sub_sub_cancel]; exact hα),
-    incEllIntFk_ofReal_eq_integral]
+  rw [incompleteEllipticPi_eq_primitive hδ hb, primitive_I_mul,
+    incompleteEllipticPi_ofReal_eq_integral_of_slit ψ (by rw [sub_sub_cancel]; exact hα),
+    incompleteEllipticF_ofReal_eq_integral]
   set P : ℝ → ℂ := fun θ => 1 - (1 - α2) * (Real.sin θ : ℂ) ^ 2 with hP
   have hPne : ∀ θ, P θ ≠ 0 := fun θ =>
       slitPlane_ne_zero (one_sub_one_sub_mul_sin_sq_mem_slitPlane hα θ)
@@ -359,13 +367,14 @@ private lemma incEllIntPik_I_mul (φ : ℝ) {k α2 : ℂ} (hk : k ^ 2 ∈ slitPl
 theorem incEllInt_imaginary_argument (φ : ℝ) {k α2 : ℂ} (hk : k ^ 2 ∈ slitPlane)
     (hα : α2 ∈ slitPlane) (hα1 : α2 ≠ 1) :
     let ψ := Real.arctan (Real.sinh φ)
-    incEllIntFk (I * φ) k = I * incEllIntFk ψ (jacobiComodulusk k) ∧
-      incEllIntEk (I * φ) k = I * (incEllIntFk ψ (jacobiComodulusk k) -
-        incEllIntEk ψ (jacobiComodulusk k) +
+    incompleteEllipticF (I * φ) k = I * incompleteEllipticF ψ (jacobiComodulus k) ∧
+      incompleteEllipticE (I * φ) k = I * (incompleteEllipticF ψ (jacobiComodulus k) -
+        incompleteEllipticE ψ (jacobiComodulus k) +
           Real.tan ψ * (1 - (1 - k ^ 2) * (Real.sin ψ : ℂ) ^ 2) ^ (1 / 2 : ℂ)) ∧
-      incEllIntPik (I * φ) α2 k = I * (incEllIntFk ψ (jacobiComodulusk k) -
-        α2 * incEllIntPik ψ (1 - α2) (jacobiComodulusk k)) / (1 - α2) :=
-  ⟨incEllIntFk_I_mul φ hk, incEllIntEk_I_mul φ hk, incEllIntPik_I_mul φ hk hα hα1⟩
+      incompleteEllipticPi (I * φ) α2 k = I * (incompleteEllipticF ψ (jacobiComodulus k) -
+        α2 * incompleteEllipticPi ψ (1 - α2) (jacobiComodulus k)) / (1 - α2) :=
+  ⟨incompleteEllipticF_I_mul φ hk, incompleteEllipticE_I_mul φ hk,
+      incompleteEllipticPi_I_mul φ hk hα hα1⟩
 
 /-! ### §19.7(iii) Change of parameter of `Π(φ, α², k)` -/
 
@@ -374,12 +383,12 @@ theorem incEllInt_imaginary_argument (φ : ℝ) {k α2 : ℂ} (hk : k ^ 2 ∈ sl
 exceeds `c`):
 `Π(φ, α², k) + Π(φ, ω², k) = F(φ, k) + √c R_C((c-1)(c-k²), (c-α²)(c-ω²))`. -/
 @[dlmf 19.7.E8]
-theorem incEllIntPik_add_first {φ k α2 ω2 : ℝ} (hφ0 : 0 < φ) (hφ1 : φ < π / 2) (hk0 : 0 < k)
+theorem incompleteEllipticPi_add_first {φ k α2 ω2 : ℝ} (hφ0 : 0 < φ) (hφ1 : φ < π / 2) (hk0 : 0 < k)
     (hk1 : k < 1) (hαω : α2 * ω2 = k ^ 2) (hα : α2 ≠ 1 / Real.sin φ ^ 2)
     (hω : ω2 ≠ 1 / Real.sin φ ^ 2) :
     let c := 1 / Real.sin φ ^ 2
-    incEllIntPik φ α2 k + incEllIntPik φ ω2 k = incEllIntFk φ k +
-      Real.sqrt c * symEllIntRC ((c - 1) * (c - k ^ 2) : ℝ) ((c - α2) * (c - ω2) : ℝ) := by
+    incompleteEllipticPi φ α2 k + incompleteEllipticPi φ ω2 k = incompleteEllipticF φ k +
+      Real.sqrt c * symmetricEllipticRC ((c - 1) * (c - k ^ 2) : ℝ) ((c - α2) * (c - ω2) : ℝ) := by
   sorry
 
 /-- **Admitted.** DLMF 19.7.9: for real `0 < φ < π/2`, `c = csc²φ`, real `0 < k < 1` and real
@@ -387,13 +396,15 @@ theorem incEllIntPik_add_first {φ k α2 ω2 : ℝ} (hφ0 : 0 < φ) (hφ1 : φ <
 `(k² - α²)Π(φ, α², k) + (k² - ω²)Π(φ, ω², k)
 = k²F(φ, k) - α²ω² √(c - 1) R_C(c(c - k²), (c - α²)(c - ω²))`. -/
 @[dlmf 19.7.E9]
-theorem incEllIntPik_add_second {φ k α2 ω2 : ℝ} (hφ0 : 0 < φ) (hφ1 : φ < π / 2) (hk0 : 0 < k)
+theorem incompleteEllipticPi_add_second {φ k α2 ω2 : ℝ} (hφ0 : 0 < φ)
+    (hφ1 : φ < π / 2) (hk0 : 0 < k)
     (hk1 : k < 1) (hαω : (1 - α2) * (1 - ω2) = 1 - k ^ 2) (hα : α2 ≠ 1 / Real.sin φ ^ 2)
     (hω : ω2 ≠ 1 / Real.sin φ ^ 2) :
     let c := 1 / Real.sin φ ^ 2
-    ((k ^ 2 - α2 : ℝ) : ℂ) * incEllIntPik φ α2 k + ((k ^ 2 - ω2 : ℝ) : ℂ) * incEllIntPik φ ω2 k =
-      (k ^ 2 : ℝ) * incEllIntFk φ k - (α2 * ω2 * Real.sqrt (c - 1) : ℝ) *
-        symEllIntRC (c * (c - k ^ 2) : ℝ) ((c - α2) * (c - ω2) : ℝ) := by
+    ((k ^ 2 - α2 : ℝ) : ℂ) * incompleteEllipticPi φ α2 k + ((k ^ 2 - ω2 : ℝ) : ℂ) *
+        incompleteEllipticPi φ ω2 k =
+      (k ^ 2 : ℝ) * incompleteEllipticF φ k - (α2 * ω2 * Real.sqrt (c - 1) : ℝ) *
+        symmetricEllipticRC (c * (c - k ^ 2) : ℝ) ((c - α2) * (c - ω2) : ℝ) := by
   sorry
 
 /-- **Admitted.** DLMF 19.7.10: for real `0 < φ < π/2`, `c = csc²φ`, real `0 < k < 1` and real
@@ -401,13 +412,14 @@ theorem incEllIntPik_add_second {φ k α2 ω2 : ℝ} (hφ0 : 0 < φ) (hφ1 : φ 
 `(1 - α²)Π(φ, α², k) + (1 - ω²)Π(φ, ω², k)
 = F(φ, k) + (1 - α² - ω²) √(c - k²) R_C(c(c - 1), (c - α²)(c - ω²))`. -/
 @[dlmf 19.7.E10]
-theorem incEllIntPik_add_third {φ k α2 ω2 : ℝ} (hφ0 : 0 < φ) (hφ1 : φ < π / 2) (hk0 : 0 < k)
+theorem incompleteEllipticPi_add_third {φ k α2 ω2 : ℝ} (hφ0 : 0 < φ) (hφ1 : φ < π / 2) (hk0 : 0 < k)
     (hk1 : k < 1) (hαω : (k ^ 2 - α2) * (k ^ 2 - ω2) = k ^ 2 * (k ^ 2 - 1))
     (hα : α2 ≠ 1 / Real.sin φ ^ 2) (hω : ω2 ≠ 1 / Real.sin φ ^ 2) :
     let c := 1 / Real.sin φ ^ 2
-    ((1 - α2 : ℝ) : ℂ) * incEllIntPik φ α2 k + ((1 - ω2 : ℝ) : ℂ) * incEllIntPik φ ω2 k =
-      incEllIntFk φ k + ((1 - α2 - ω2) * Real.sqrt (c - k ^ 2) : ℝ) *
-        symEllIntRC (c * (c - 1) : ℝ) ((c - α2) * (c - ω2) : ℝ) := by
+    ((1 - α2 : ℝ) : ℂ) * incompleteEllipticPi φ α2 k + ((1 - ω2 : ℝ) : ℂ) *
+        incompleteEllipticPi φ ω2 k =
+      incompleteEllipticF φ k + ((1 - α2 - ω2) * Real.sqrt (c - k ^ 2) : ℝ) *
+        symmetricEllipticRC (c * (c - 1) : ℝ) ((c - α2) * (c - ω2) : ℝ) := by
   sorry
 
 /-- DLMF §19.7(iii) (prose): under the relation `α²ω² = k²` of 19.7.8, since `k² ≤ c`, `α² > c`

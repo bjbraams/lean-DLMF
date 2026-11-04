@@ -51,18 +51,19 @@ section AiryLaplaceOneSided
 open scoped Nat
 
 /-- `(a)_{n+1} = a (a+1)_n`. -/
-theorem LaplaceTransforms.poch_succ_left (a : ℂ) (n : ℕ) : poch a (n + 1) = a * poch (a + 1) n := by
-  simp [poch, ascPochhammer_succ_left, Polynomial.eval_comp]
+theorem LaplaceTransforms.pochhammer_succ_left (a : ℂ) (n : ℕ) : pochhammer a (n + 1) = a *
+    pochhammer (a + 1) n := by
+  simp [pochhammer, ascPochhammer_succ_left, Polynomial.eval_comp]
 
 /-- The coefficients of `M(a, a+1, z)`: `a / ((a + n) n!)`. -/
 theorem LaplaceTransforms.coeff {a : ℂ} (ha : 0 < a.re) (n : ℕ) :
     kummerMCoeff a (a + 1) n = a / ((a + n) * n !) := by
-  have h1 : poch (a + 1) n ≠ 0 := poch_ne_zero_of_not_neg_nat
+  have h1 : pochhammer (a + 1) n ≠ 0 := pochhammer_ne_zero_of_not_neg_nat
     (Hypergeometric.not_neg_nat_of_re_pos (by simp; linarith)) n
   have h2 := Complex.add_natCast_ne_zero_of_re_pos ha n
   have hf : (n ! : ℂ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero n
-  have e : poch a n * (a + n) = a * poch (a + 1) n := by
-    rw [← poch_succ, LaplaceTransforms.poch_succ_left]
+  have e : pochhammer a n * (a + n) = a * pochhammer (a + 1) n := by
+    rw [← pochhammer_succ, LaplaceTransforms.pochhammer_succ_left]
   simp only [kummerMCoeff]
   rw [div_eq_div_iff (mul_ne_zero h1 hf) (mul_ne_zero h2 hf)]
   linear_combination (n ! : ℂ) * e
@@ -87,7 +88,7 @@ theorem LaplaceTransforms.kummer_identity {a : ℂ} (ha : 0 < a.re) (z : ℂ) :
     simpa only [exp_eq_exp_ℂ] using this.mul_left a
   refine (S1.add S2').unique (hexp.congr_fun fun n => ?_)
   rcases n with _ | m
-  · simp [g, kummerMCoeff, poch]
+  · simp [g, kummerMCoeff, pochhammer]
   · simp only [g, Nat.succ_ne_zero, ite_false, Nat.add_sub_cancel]
     rw [LaplaceTransforms.coeff ha, show a + 1 + 1 = (a + 1) + 1 by ring,
                                                                       LaplaceTransforms.coeff ha1]
@@ -380,15 +381,16 @@ section AiryLaplaceNeg
 /-- The logarithmic-plane upper incomplete Gamma function through Kummer's function:
 `Γ(a, e^w) = Γ(a) - e^{aw} M(a, a+1, -e^w)/a` on the whole logarithmic plane. -/
 theorem LaplaceTransforms.upperGamma_eq {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (w : ℂ) :
-    upperIncGammaOnLog a w = Gamma a - exp (a * w) * kummerM a (a + 1) (-exp w) / a := by
+    upperIncompleteGammaOnLog a w = Gamma a - exp (a * w) * kummerM a (a + 1) (-exp w) / a := by
   have ha0 : a ≠ 0 := by simpa using ha 0
-  have h1 : upperIncGammaOnLog a w = upperIncGammaOnLog a w := rfl
-  rw [h1, upperIncGammaOnLog_eq_Gamma_sub ha w, lowerIncGammaOnLog]
+  have h1 : upperIncompleteGammaOnLog a w = upperIncompleteGammaOnLog a w := rfl
+  rw [h1, upperIncompleteGammaOnLog_eq_Gamma_sub ha w, lowerIncompleteGammaOnLog]
   have hz : exp w ≠ 0 := Complex.exp_ne_zero w
-  have hl := lowerIncGamma_eq_regularized ha (exp w)
-  rw [regularizedConfluent_self_succ_neg, lowerIncGamma] at hl
+  have hl := lowerIncompleteGamma_eq_regularized ha (exp w)
+  rw [regularizedConfluent_self_succ_neg, lowerIncompleteGamma] at hl
   have hza : (exp w) ^ a ≠ 0 := cpow_ne_zero_iff.mpr (Or.inl hz)
-  have key : Gamma a * DLMF.Statistical.scIncGamma a (exp w) = kummerM a (a + 1) (-exp w) / a := by
+  have key : Gamma a * DLMF.Statistical.tricomiIncompleteGamma a (exp w) =
+      kummerM a (a + 1) (-exp w) / a := by
     field_simp
     have := hl
     field_simp at this
@@ -449,8 +451,8 @@ theorem LaplaceTransforms.neg_eq {p : ℂ} (hp : 0 < p.re) :
 /-- **9.10.15 (proof)**. -/
 theorem LaplaceTransforms.negative_laplace {p : ℂ} (hp : 0 < p.re) :
     (∫ t : ℝ in Ioi 0, exp (-p * t) * airyAi (-t)) = exp (p ^ 3 / 3) / 3 *
-      (upperIncGammaOnLog (1 / 3) (3 * log p - log 3) / Gamma (1 / 3) +
-        upperIncGammaOnLog (2 / 3) (3 * log p - log 3) / Gamma (2 / 3)) := by
+      (upperIncompleteGammaOnLog (1 / 3) (3 * log p - log 3) / Gamma (1 / 3) +
+        upperIncompleteGammaOnLog (2 / 3) (3 * log p - log 3) / Gamma (2 / 3)) := by
   have hp0 : p ≠ 0 := by intro h; rw [h] at hp; simp at hp
   rw [(LaplaceTransforms.neg_eq hp).2, airyLapL_eq, airyLapR, airyAiDeriv_zero, airyAi_zero]
   have h13 : ∀ n : ℕ, (1 / 3 : ℂ) ≠ -n := Hypergeometric.not_neg_nat_of_re_pos (by norm_num)
@@ -478,8 +480,8 @@ continued on the logarithmic plane (DLMF 9.10.15). -/
 theorem airyAi_negative_laplace {p : ℂ} (hp : 0 < p.re) :
     IntegrableOn (fun t : ℝ => exp (-p * t) * airyAi (-t)) (Ioi 0) ∧
       (∫ t : ℝ in Ioi 0, exp (-p * t) * airyAi (-t)) = exp (p ^ 3 / 3) / 3 *
-          (upperIncGammaOnLog (1 / 3) (3 * log p - log 3) / Gamma (1 / 3) +
-          upperIncGammaOnLog (2 / 3) (3 * log p - log 3) / Gamma (2 / 3)) :=
+          (upperIncompleteGammaOnLog (1 / 3) (3 * log p - log 3) / Gamma (1 / 3) +
+          upperIncompleteGammaOnLog (2 / 3) (3 * log p - log 3) / Gamma (2 / 3)) :=
   ⟨(LaplaceTransforms.neg_eq hp).1, LaplaceTransforms.negative_laplace hp⟩
 
 /-! ### The Laplace transform of `Bi(-t)`, 9.10.16 -/
@@ -742,8 +744,8 @@ theorem airyLapB_consts :
 /-- The closed form `R_B` agrees with the printed right-hand side of 9.10.16. -/
 theorem airyLapRB_eq_printed {p : ℂ} (hp0 : p ≠ 0) :
     airyLapRB p = exp (p ^ 3 / 3) / Real.sqrt 3 *
-      (upperIncGammaOnLog (2 / 3) (3 * log p - log 3) / Gamma (2 / 3) -
-        upperIncGammaOnLog (1 / 3) (3 * log p - log 3) / Gamma (1 / 3)) := by
+      (upperIncompleteGammaOnLog (2 / 3) (3 * log p - log 3) / Gamma (2 / 3) -
+        upperIncompleteGammaOnLog (1 / 3) (3 * log p - log 3) / Gamma (1 / 3)) := by
   have h13 : ∀ n : ℕ, (1 / 3 : ℂ) ≠ -n := Hypergeometric.not_neg_nat_of_re_pos (by norm_num)
   have h23 : ∀ n : ℕ, (2 / 3 : ℂ) ≠ -n := Hypergeometric.not_neg_nat_of_re_pos (by norm_num)
   rw [airyLapRB, airyBiDeriv_zero, airyBi_zero, LaplaceTransforms.upperGamma_eq h13,
@@ -761,7 +763,8 @@ theorem airyLapRB_eq_printed {p : ℂ} (hp0 : p ≠ 0) :
 
 /-- On the positive axis the logarithmic-plane upper Gamma is the ordinary one. -/
 theorem LaplaceTransforms.upperGamma_real (a : ℂ) {x : ℝ} (hx : 0 < x) :
-    upperIncGammaOnLog a (3 * log (x : ℂ) - log 3) = upperIncGamma a ((x ^ 3 / 3 : ℝ) : ℂ) := by
+    upperIncompleteGammaOnLog a (3 * log (x : ℂ) - log 3) =
+        upperIncompleteGamma a ((x ^ 3 / 3 : ℝ) : ℂ) := by
   have hw : 3 * log (x : ℂ) - log 3 = ((3 * Real.log x - Real.log 3 : ℝ) : ℂ) := by
     rw [← Complex.ofReal_log hx.le, show (3 : ℂ) = ((3 : ℝ) : ℂ) by norm_num,
       ← Complex.ofReal_log (by norm_num : (0 : ℝ) ≤ 3)]
@@ -774,12 +777,12 @@ theorem LaplaceTransforms.upperGamma_real (a : ℂ) {x : ℝ} (hx : 0 < x) :
   have he : exp (((3 * Real.log x - Real.log 3 : ℝ) : ℂ)) = ((x ^ 3 / 3 : ℝ) : ℂ) := by
     rw [← Complex.ofReal_exp, Real.exp_sub, show 3 * Real.log x = ((3 : ℕ) : ℝ) * Real.log x by
       norm_num, Real.exp_nat_mul, Real.exp_log hx, Real.exp_log (by norm_num)]
-  rw [hw, upperIncGammaOnLog, hlog, he]
+  rw [hw, upperIncompleteGammaOnLog, hlog, he]
   simp [segmentIntegral]
 
 /-- `Γ(a, y) → 0` as `y → +∞` for `Re a > 0`. -/
-theorem LaplaceTransforms.upperIncGamma_tendsto {a : ℂ} (ha : 0 < a.re) :
-    Tendsto (fun y : ℝ => upperIncGamma a (y : ℂ)) atTop (𝓝 0) := by
+theorem LaplaceTransforms.upperIncompleteGamma_tendsto {a : ℂ} (ha : 0 < a.re) :
+    Tendsto (fun y : ℝ => upperIncompleteGamma a (y : ℂ)) atTop (𝓝 0) := by
   set f : ℝ → ℂ := fun t => (t : ℂ) ^ (a - 1) * Real.exp (-t)
   have hi : IntegrableOn f (Ioi 0) := by
     have := Complex.GammaIntegral_convergent ha
@@ -790,7 +793,7 @@ theorem LaplaceTransforms.upperIncGamma_tendsto {a : ℂ} (ha : 0 < a.re) :
     simpa using h1.const_sub (∫ t in Ioi 0, f t)
   refine h2.congr' ?_
   filter_upwards [eventually_gt_atTop 0] with y hy
-  rw [upperIncGamma_eq_integral a hy, intervalIntegral.integral_of_le hy.le]
+  rw [upperIncompleteGamma_eq_integral a hy, intervalIntegral.integral_of_le hy.le]
   have e := setIntegral_union (Ioc_disjoint_Ioi_same (a := (0 : ℝ)) (b := y)) measurableSet_Ioi
     (hi.mono_set Ioc_subset_Ioi_self) (hi.mono_set (Ioi_subset_Ioi hy.le))
   rw [Ioc_union_Ioi_eq_Ioi hy.le] at e
@@ -839,8 +842,8 @@ theorem airyLapNB_eq {p : ℂ} (hp : 0 < p.re) : airyLapNB p = airyLapRB p := by
     have hR : Tendsto (fun x : ℝ => airyLapRB x * exp (-(x : ℂ) ^ 3 / 3)) atTop (𝓝 0) := by
       have hy : Tendsto (fun x : ℝ => x ^ 3 / 3) atTop atTop :=
         (tendsto_pow_atTop (by norm_num : (3 : ℕ) ≠ 0)).atTop_div_const (by norm_num)
-      have g1 := (LaplaceTransforms.upperIncGamma_tendsto (a := 1 / 3) (by norm_num)).comp hy
-      have g2 := (LaplaceTransforms.upperIncGamma_tendsto (a := 2 / 3) (by norm_num)).comp hy
+      have g1 := (LaplaceTransforms.upperIncompleteGamma_tendsto (a := 1 / 3) (by norm_num)).comp hy
+      have g2 := (LaplaceTransforms.upperIncompleteGamma_tendsto (a := 2 / 3) (by norm_num)).comp hy
       have := ((g2.div_const (Gamma (2 / 3))).sub (g1.div_const (Gamma (1 / 3)))).const_mul
         ((Real.sqrt 3 : ℂ))⁻¹
       rw [zero_div, zero_div, sub_zero, mul_zero] at this
@@ -879,8 +882,8 @@ continued on the logarithmic plane (DLMF 9.10.16). -/
 theorem airyBi_negative_laplace {p : ℂ} (hp : 0 < p.re) :
     IntegrableOn (fun t : ℝ => exp (-p * t) * airyBi (-t)) (Ioi 0) ∧
       (∫ t : ℝ in Ioi 0, exp (-p * t) * airyBi (-t)) = exp (p ^ 3 / 3) / Real.sqrt 3 *
-          (upperIncGammaOnLog (2 / 3) (3 * log p - log 3) / Gamma (2 / 3) -
-          upperIncGammaOnLog (1 / 3) (3 * log p - log 3) / Gamma (1 / 3)) := by
+          (upperIncompleteGammaOnLog (2 / 3) (3 * log p - log 3) / Gamma (2 / 3) -
+          upperIncompleteGammaOnLog (1 / 3) (3 * log p - log 3) / Gamma (1 / 3)) := by
   have hp0 : p ≠ 0 := by intro h; rw [h] at hp; simp at hp
   exact ⟨(airyLapB_integrableOn hp).1, (airyLapNB_eq hp).trans (airyLapRB_eq_printed hp0)⟩
 
@@ -1007,7 +1010,7 @@ theorem airyBi_stieltjes_principalValue {x : ℝ} (hx : 0 < x) :
 
 /-- For a solution `w` of Airy's equation on the real line,
 `∫₀ˣ ∫₀ᵛ w = x ∫₀ˣ w - w'(x) + w'(0)`. -/
-theorem airySol_double_integral {w w' : ℂ → ℂ} (hw : IsAirySol w w') (x : ℝ) :
+theorem airySol_double_integral {w w' : ℂ → ℂ} (hw : IsAirySolution w w') (x : ℝ) :
     (∫ v : ℝ in 0..x, ∫ t : ℝ in 0..v, w t) =
       (x : ℂ) * (∫ t : ℝ in 0..x, w t) - w' x + w' 0 := by
   have hc : Continuous fun t : ℝ => w t :=
@@ -1033,14 +1036,14 @@ theorem airySol_double_integral {w w' : ℂ → ℂ} (hw : IsAirySol w w') (x : 
 theorem airyAi_double_integral (x : ℝ) :
     (∫ v : ℝ in 0..x, ∫ t : ℝ in 0..v, airyAi t) =
       (x : ℂ) * (∫ t : ℝ in 0..x, airyAi t) - airyAiDeriv x + airyAiDeriv 0 := by
-  exact airySol_double_integral isAirySol_airyAi x
+  exact airySol_double_integral isAirySolution_airyAi x
 
 /-- `∫₀^x ∫₀^v Bi(t) dt dv = x ∫₀^x Bi - Bi'(x) + Bi'(0)` (DLMF 9.10.21). -/
 @[dlmf 9.10.E21]
 theorem airyBi_double_integral (x : ℝ) :
     (∫ v : ℝ in 0..x, ∫ t : ℝ in 0..v, airyBi t) =
       (x : ℂ) * (∫ t : ℝ in 0..x, airyBi t) - airyBiDeriv x + airyBiDeriv 0 := by
-  exact airySol_double_integral isAirySol_airyBi x
+  exact airySol_double_integral isAirySolution_airyBi x
 
 /-- Repeated upper ordinary improper integrals, including the unintegrated base function. -/
 def airyRepeatedTail : ℕ → ℝ → ℂ

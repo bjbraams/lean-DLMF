@@ -18,11 +18,11 @@ continuation, proves the real form of the integrand, and derives Aomoto's extens
 
 * `integrable_mul_rpow_of_analytic`: Landau's theorem for Mellin transforms of positive
   measures, in the form needed here.
-* `integrableOn_weightR_mul_vdmSq_rpow`: integrability of the Selberg integrand on its full
-  domain of convergence.
-* `differentiableOn_selbergInt_cDomain`: holomorphy in `c` on the full domain.
-* `selbergInt_eq`: Selberg's integral on its full domain of convergence.
-* `aomotoInt_eq`: Aomoto's formula for `Re c > 0`.
+* `integrableOn_selbergWeightReal_mul_vandermondeSq_rpow`: integrability of the Selberg integrand on
+  its full domain of convergence.
+* `differentiableOn_selbergIntegral_selbergConvergenceDomain`: holomorphy in `c` on the full domain.
+* `selbergIntegral_eq`: Selberg's integral on its full domain of convergence.
+* `aomotoIntegral_eq`: Aomoto's formula for `Re c > 0`.
 * `selberg_integral`: Selberg's integral (AAR Theorem 8.1.1, DLMF 5.14.4).
 * `selberg_integral_one`: the `n = 1` case is the Beta integral (DLMF 5.12.1).
 * `aomoto_integral`: Aomoto's extension (AAR §8.1, §8.3).
@@ -32,15 +32,15 @@ continuation, proves the real form of the integrand, and derives Aomoto's extens
 The evaluation follows Aomoto's proof (AAR §8.1), completed by Carlson's theorem and a
 recursion in the dimension, and extended to the full domain by analytic continuation.
 
-1. Integration by parts in one coordinate (`integral_cube_ibp`), with the Vandermonde factor
+1. Integration by parts in one coordinate (`integral_unitCube_ibp`), with the Vandermonde factor
    handled off the diagonal, gives Aomoto's recurrence (`aomoto_step`) for `Re c ≥ 1/2`, and
-   hence the shift `S(a+1) = ∏ⱼ (a+(n-1-j)c)/(a+b+(2n-2-j)c) · S(a)` (`selbergInt_add_one`).
+   hence the shift `S(a+1) = ∏ⱼ (a+(n-1-j)c)/(a+b+(2n-2-j)c) · S(a)` (`selbergIntegral_add_one`).
 2. `S/R` is therefore `1`-periodic in `a`; it is holomorphic and of polynomial growth on
    vertical strips, so it is constant by Carlson's theorem (`selbergRatio_eq_one_left`). By
    the symmetry `a ↔ b` it depends on `c` only.
 3. A boundary integration by parts gives the dimension recursion
-   `(a + n c) S_{n+1}(a, 1, c) = S_n(a, 1 + 2c, c)` (`selbergInt_succ_one`), which the
-   right-hand side also satisfies, so the constant is `1` (`selbergInt_eq_of_half_le`).
+   `(a + n c) S_{n+1}(a, 1, c) = S_n(a, 1 + 2c, c)` (`selbergIntegral_succ_one`), which the
+   right-hand side also satisfies, so the constant is `1` (`selbergIntegral_eq_of_half_le`).
 4. The identity extends to `Re c > 0` by analytic continuation in `c`. Integrability on the
    full domain `Re c > -min(1/n, Re a/(n-1), Re b/(n-1))` follows from the Landau-type theorem
    `integrable_mul_rpow_of_analytic`, after which the identity theorem gives
@@ -331,24 +331,26 @@ theorem integrable_mul_rpow_of_analytic {α : Type*} [MeasurableSpace α] {μ : 
 /-! ### Real forms of the integrand -/
 
 /-- The squared Vandermonde product is measurable. -/
-theorem measurable_vdmSq (N : ℕ) : Measurable (vdmSq N) := by
-  unfold vdmSq; fun_prop
+theorem measurable_vandermondeSq (N : ℕ) : Measurable (vandermondeSq N) := by
+  unfold vandermondeSq; fun_prop
 
-/-- The real Selberg weight is measurable. -/
-theorem measurable_weightR (N : ℕ) (α β : ℝ) : Measurable (weightR N α β) := by
-  unfold weightR; fun_prop
+/-- The real Selberg selbergWeight is measurable. -/
+theorem measurable_selbergWeightReal (N : ℕ) (α β : ℝ) : Measurable (selbergWeightReal N α β) := by
+  unfold selbergWeightReal; fun_prop
 
 /-- The squared Vandermonde product is positive at points with distinct coordinates. -/
-theorem vdmSq_pos {N : ℕ} {t : Fin N → ℝ} (ht : ∀ i j, i ≠ j → t i ≠ t j) : 0 < vdmSq N t := by
-  unfold vdmSq
+theorem vandermondeSq_pos {N : ℕ} {t : Fin N → ℝ} (ht : ∀ i j, i ≠ j → t i ≠ t j) : 0 <
+    vandermondeSq N t := by
+  unfold vandermondeSq
   refine Finset.prod_pos fun i _ => Finset.prod_pos fun j _ => ?_
   split_ifs with hij
   · have := sub_ne_zero.mpr (ht i j (Fin.ne_of_lt hij)); positivity
   · exact one_pos
 
-/-- On the cube, the squared Vandermonde product is at most `1`. -/
-theorem vdmSq_le_one {N : ℕ} {t : Fin N → ℝ} (ht : t ∈ cube N) : vdmSq N t ≤ 1 := by
-  unfold vdmSq
+/-- On the unitCube, the squared Vandermonde product is at most `1`. -/
+theorem vandermondeSq_le_one {N : ℕ} {t : Fin N → ℝ} (ht : t ∈ unitCube N) :
+    vandermondeSq N t ≤ 1 := by
+  unfold vandermondeSq
   refine Finset.prod_le_one₀ (fun i _ => Finset.prod_nonneg fun j _ => by split_ifs <;> positivity)
     fun i _ => Finset.prod_le_one₀ (fun j _ => by split_ifs <;> positivity) fun j _ => ?_
   split_ifs
@@ -360,9 +362,9 @@ theorem vdmSq_le_one {N : ℕ} {t : Fin N → ℝ} (ht : t ∈ cube N) : vdmSq N
   · exact le_rfl
 
 /-- At points with distinct coordinates, `‖Δ(t)^{2c}‖ = (Δ(t)²)^{Re c}`. -/
-theorem norm_vdm_eq {N : ℕ} (c : ℂ) {t : Fin N → ℝ} (ht : ∀ i j, i ≠ j → t i ≠ t j) :
-    ‖vdm N c t‖ = vdmSq N t ^ c.re := by
-  unfold vdm vdmSq
+theorem norm_vandermondeAbsPow_eq {N : ℕ} (c : ℂ) {t : Fin N → ℝ} (ht : ∀ i j, i ≠ j → t i ≠ t j) :
+    ‖vandermondeAbsPow N c t‖ = vandermondeSq N t ^ c.re := by
+  unfold vandermondeAbsPow vandermondeSq
   rw [norm_prod, ← Real.finsetProd_rpow _ _ fun i _ => Finset.prod_nonneg fun j _ => by
     split_ifs <;> positivity]
   refine Finset.prod_congr rfl fun i _ => ?_
@@ -375,14 +377,16 @@ theorem norm_vdm_eq {N : ℕ} (c : ℂ) {t : Fin N → ℝ} (ht : ∀ i j, i ≠
     simp
   · simp
 
-/-- On `(0,1)ᴺ`, the norm of the complex weight is the real weight at `Re a`, `Re b`. -/
-theorem norm_prod_weight_eq {N : ℕ} (a b : ℂ) {t : Fin N → ℝ} (ht : ∀ i, t i ∈ Ioo (0 : ℝ) 1) :
-    ‖∏ i, weight a b (t i)‖ = weightR N a.re b.re t := by
-  unfold weightR
+/-- On `(0,1)ᴺ`, the norm of the complex selbergWeight is the real selbergWeight at `Re a`, `Re b`.
+-/
+theorem norm_prod_selbergWeight_eq {N : ℕ} (a b : ℂ) {t : Fin N → ℝ}
+    (ht : ∀ i, t i ∈ Ioo (0 : ℝ) 1) :
+    ‖∏ i, selbergWeight a b (t i)‖ = selbergWeightReal N a.re b.re t := by
+  unfold selbergWeightReal
   rw [norm_prod]
   refine Finset.prod_congr rfl fun i _ => ?_
   have h1 : 0 < 1 - t i := by linarith [(ht i).2]
-  unfold weight
+  unfold selbergWeight
   rw [norm_mul, Complex.norm_cpow_eq_rpow_re_of_pos (ht i).1, one_sub_ofReal,
     Complex.norm_cpow_eq_rpow_re_of_pos h1]
   simp
@@ -391,19 +395,20 @@ theorem norm_prod_weight_eq {N : ℕ} (a b : ℂ) {t : Fin N → ℝ} (ht : ∀ 
 real integrand at `Re a`, `Re b`, `Re c`. -/
 theorem norm_selbergIntegrand_eq {N : ℕ} (a b c : ℂ) {t : Fin N → ℝ}
     (ht : ∀ i, t i ∈ Ioo (0 : ℝ) 1) (ht' : ∀ i j, i ≠ j → t i ≠ t j) :
-    ‖selbergIntegrand N a b c t‖ = weightR N a.re b.re t * vdmSq N t ^ c.re := by
-  rw [selbergIntegrand_eq, norm_mul, norm_prod_weight_eq a b ht, norm_vdm_eq c ht']
+    ‖selbergIntegrand N a b c t‖ = selbergWeightReal N a.re b.re t * vandermondeSq N t ^ c.re := by
+  rw [selbergIntegrand_eq, norm_mul, norm_prod_selbergWeight_eq a b ht,
+      norm_vandermondeAbsPow_eq c ht']
 
-/-- The real weight is nonnegative on `(0,1)ᴺ`. -/
-theorem weightR_nonneg {N : ℕ} (α β : ℝ) {t : Fin N → ℝ} (ht : ∀ i, t i ∈ Ioo (0 : ℝ) 1) :
-    0 ≤ weightR N α β t :=
+/-- The real selbergWeight is nonnegative on `(0,1)ᴺ`. -/
+theorem selbergWeightReal_nonneg {N : ℕ} (α β : ℝ) {t : Fin N → ℝ} (ht : ∀ i, t i ∈ Ioo (0 : ℝ) 1) :
+    0 ≤ selbergWeightReal N α β t :=
   Finset.prod_nonneg fun i _ => mul_nonneg (Real.rpow_nonneg (ht i).1.le _)
     (Real.rpow_nonneg (by linarith [(ht i).2]) _)
 
 /-- For real parameters the integrand is the real nonnegative integrand. -/
 theorem selbergIntegrand_ofReal {N : ℕ} (α β σ : ℝ) {t : Fin N → ℝ}
     (ht : ∀ i, t i ∈ Ioo (0 : ℝ) 1) (ht' : ∀ i j, i ≠ j → t i ≠ t j) :
-    selbergIntegrand N α β σ t = ((weightR N α β t * vdmSq N t ^ σ : ℝ) : ℂ) := by
+    selbergIntegrand N α β σ t = ((selbergWeightReal N α β t * vandermondeSq N t ^ σ : ℝ) : ℂ) := by
   have h := norm_selbergIntegrand_eq (α : ℂ) β σ ht ht'
   simp only [Complex.ofReal_re] at h
   rw [← h]
@@ -427,51 +432,56 @@ theorem selbergIntegrand_ofReal {N : ℕ} (α β σ : ℝ) {t : Fin N → ℝ}
     (Real.rpow_nonneg (by linarith [(ht i).2]) _)) (Finset.prod_nonneg fun i _ =>
     Finset.prod_nonneg fun j _ => by split_ifs <;> positivity)
 
-/-- For `α, β > 0`, the real weight is integrable on the cube. -/
-theorem integrableOn_weightR {N : ℕ} {α β : ℝ} (hα : 0 < α) (hβ : 0 < β) :
-    IntegrableOn (weightR N α β) (cube N) := by
-  have h := (integrableOn_prod_cube (n := N) (integrableOn_weight (a := (α : ℂ)) (b := (β : ℂ))
+/-- For `α, β > 0`, the real selbergWeight is integrable on the unitCube. -/
+theorem integrableOn_selbergWeightReal {N : ℕ} {α β : ℝ} (hα : 0 < α) (hβ : 0 < β) :
+    IntegrableOn (selbergWeightReal N α β) (unitCube N) := by
+  have h := (integrableOn_prod_unitCube (n := N)
+      (integrableOn_selbergWeight (a := (α : ℂ)) (b := (β : ℂ))
     (by simpa using hα) (by simpa using hβ))).norm
   refine Integrable.congr h ?_
-  filter_upwards [(ae_restrict_iff' (measurableSet_cube N)).2 (ae_cube_coords_Ioo N)] with t ht
-  rw [norm_prod_weight_eq _ _ ht]
+  filter_upwards [(ae_restrict_iff' (measurableSet_unitCube N)).2
+      (ae_unitCube_coords_Ioo N)] with t ht
+  rw [norm_prod_selbergWeight_eq _ _ ht]
   simp
 
-/-- Almost every point of the cube has coordinates in `(0,1)` that are pairwise distinct. -/
-theorem ae_cube_good (N : ℕ) : ∀ᵐ t ∂(volume.restrict (cube N)),
-    (∀ i, t i ∈ Ioo (0 : ℝ) 1) ∧ (∀ i j, i ≠ j → t i ≠ t j) ∧ t ∈ cube N := by
-  filter_upwards [(ae_restrict_iff' (measurableSet_cube N)).2 (ae_cube_coords_Ioo N),
-    ae_restrict_of_ae (ae_coords_ne N), ae_restrict_mem (measurableSet_cube N)] with t h1 h2 h3
+/-- Almost every point of the unitCube has coordinates in `(0,1)` that are pairwise distinct. -/
+theorem ae_unitCube_good (N : ℕ) : ∀ᵐ t ∂(volume.restrict (unitCube N)),
+    (∀ i, t i ∈ Ioo (0 : ℝ) 1) ∧ (∀ i j, i ≠ j → t i ≠ t j) ∧ t ∈ unitCube N := by
+  filter_upwards [(ae_restrict_iff' (measurableSet_unitCube N)).2 (ae_unitCube_coords_Ioo N),
+    ae_restrict_of_ae (ae_coords_ne N), ae_restrict_mem (measurableSet_unitCube N)] with t h1 h2 h3
   exact ⟨h1, h2, h3⟩
 
 /-- For real parameters, the Selberg integral is the cast of the real integral. -/
-theorem selbergInt_ofReal {N : ℕ} (α β σ : ℝ) :
-    selbergInt N α β σ = ((∫ t in cube N, weightR N α β t * vdmSq N t ^ σ : ℝ) : ℂ) := by
-  rw [selbergInt, ← integral_complex_ofReal]
+theorem selbergIntegral_ofReal {N : ℕ} (α β σ : ℝ) :
+    selbergIntegral N α β σ =
+        ((∫ t in unitCube N, selbergWeightReal N α β t * vandermondeSq N t ^ σ : ℝ) : ℂ) := by
+  rw [selbergIntegral, ← integral_complex_ofReal]
   refine integral_congr_ae ?_
-  filter_upwards [ae_cube_good N] with t ht
+  filter_upwards [ae_unitCube_good N] with t ht
   exact selbergIntegrand_ofReal α β σ ht.1 ht.2.1
 
 /-- **Integrability of the Selberg integrand** on its full domain of convergence, by Landau's
 theorem. -/
-theorem integrableOn_weightR_mul_vdmSq_rpow {N : ℕ} {α β σ : ℝ} (hα : 0 < α) (hβ : 0 < β)
-    (hσ : (σ : ℂ) ∈ cDomain N α β) :
-    IntegrableOn (fun t => weightR N α β t * vdmSq N t ^ σ) (cube N) := by
-  have hW := integrableOn_weightR (N := N) hα hβ
-  have hmeas : AEStronglyMeasurable (fun t => weightR N α β t * vdmSq N t ^ σ)
-      (volume.restrict (cube N)) :=
-    ((measurable_weightR N α β).mul ((measurable_vdmSq N).pow_const σ)).aestronglyMeasurable
+theorem integrableOn_selbergWeightReal_mul_vandermondeSq_rpow {N : ℕ} {α β σ : ℝ}
+    (hα : 0 < α) (hβ : 0 < β)
+    (hσ : (σ : ℂ) ∈ selbergConvergenceDomain N α β) :
+    IntegrableOn (fun t => selbergWeightReal N α β t * vandermondeSq N t ^ σ) (unitCube N) := by
+  have hW := integrableOn_selbergWeightReal (N := N) hα hβ
+  have hmeas : AEStronglyMeasurable (fun t => selbergWeightReal N α β t * vandermondeSq N t ^ σ)
+      (volume.restrict (unitCube N)) :=
+    ((measurable_selbergWeightReal N α β).mul
+        ((measurable_vandermondeSq N).pow_const σ)).aestronglyMeasurable
   rcases le_or_gt 0 σ with h0 | h0
   · refine hW.mono' hmeas ?_
-    filter_upwards [ae_cube_good N] with t ht
-    have hW0 := weightR_nonneg α β ht.1
+    filter_upwards [ae_unitCube_good N] with t ht
+    have hW0 := selbergWeightReal_nonneg α β ht.1
     rw [Real.norm_eq_abs, abs_of_nonneg (mul_nonneg hW0 (Real.rpow_nonneg
-      (vdmSq_pos ht.2.1).le _))]
-    exact mul_le_of_le_one_right hW0 (Real.rpow_le_one (vdmSq_pos ht.2.1).le
-      (vdmSq_le_one ht.2.2) h0)
+      (vandermondeSq_pos ht.2.1).le _))]
+    exact mul_le_of_le_one_right hW0 (Real.rpow_le_one (vandermondeSq_pos ht.2.1).le
+      (vandermondeSq_le_one ht.2.2) h0)
   rcases Nat.eq_zero_or_pos N with rfl | hN
   · refine hW.mono' hmeas (Eventually.of_forall fun t => ?_)
-    simp [vdmSq, weightR]
+    simp [vandermondeSq, selbergWeightReal]
   obtain ⟨h1, h2, h3⟩ := hσ
   simp only [Complex.ofReal_re] at h1 h2 h3
   set m := min (1 + N * σ) (min (α + ((N - 1 : ℕ) : ℝ) * σ) (β + ((N - 1 : ℕ) : ℝ) * σ))
@@ -483,7 +493,7 @@ theorem integrableOn_weightR_mul_vdmSq_rpow {N : ℕ} {α β σ : ℝ} (hα : 0 
     nlinarith
   set s := σ - m / (2 * (N + 1)) with hs
   have hN1 : (((N - 1 : ℕ) : ℝ)) ≤ N := by exact_mod_cast Nat.sub_le N 1
-  have hsdom : ∀ z : ℂ, s < z.re → z ∈ cDomain N α β := by
+  have hsdom : ∀ z : ℂ, s < z.re → z ∈ selbergConvergenceDomain N α β := by
     intro z hz
     have hd : 0 ≤ m / (2 * (N + 1)) := by positivity
     refine ⟨?_, ?_, ?_⟩
@@ -510,7 +520,7 @@ theorem integrableOn_weightR_mul_vdmSq_rpow {N : ℕ} {α β σ : ℝ} (hα : 0 
   have hs0 : s < 0 := by
     have : 0 < m / (2 * (N + 1)) := by positivity
     linarith
-  have hball : Metric.ball ((1 : ℝ) : ℂ) (1 - s) ⊆ cDomain N α β := by
+  have hball : Metric.ball ((1 : ℝ) : ℂ) (1 - s) ⊆ selbergConvergenceDomain N α β := by
     intro z hz
     refine hsdom z ?_
     rw [Metric.mem_ball, dist_eq_norm] at hz
@@ -519,53 +529,57 @@ theorem integrableOn_weightR_mul_vdmSq_rpow {N : ℕ} {α β σ : ℝ} (hα : 0 
     linarith
   have hR := (differentiableOn_selbergRHS_c (a := α) (b := β) (by simpa using hα)
     (by simpa using hβ) hN).mono hball
-  have hYm : AEMeasurable (vdmSq N) (volume.restrict (cube N)) :=
-    (measurable_vdmSq N).aemeasurable
+  have hYm : AEMeasurable (vandermondeSq N) (volume.restrict (unitCube N)) :=
+    (measurable_vandermondeSq N).aemeasurable
   have hsσ : s < σ := by
     have : 0 < m / (2 * (N + 1)) := by positivity
     linarith
   refine integrable_mul_rpow_of_analytic hW ?_ hYm ?_ one_pos hR ?_ (by linarith)
-  · filter_upwards [ae_cube_good N] with t ht
-    exact weightR_nonneg α β ht.1
-  · filter_upwards [ae_cube_good N] with t ht
-    exact ⟨vdmSq_pos ht.2.1, vdmSq_le_one ht.2.2⟩
+  · filter_upwards [ae_unitCube_good N] with t ht
+    exact selbergWeightReal_nonneg α β ht.1
+  · filter_upwards [ae_unitCube_good N] with t ht
+    exact ⟨vandermondeSq_pos ht.2.1, vandermondeSq_le_one ht.2.2⟩
   · intro σ' hσ' _
-    rw [← selbergInt_ofReal, selbergInt_eq_of_re_pos (by simpa using hα) (by simpa using hβ)
+    rw [← selbergIntegral_ofReal,
+        selbergIntegral_eq_of_re_pos (by simpa using hα) (by simpa using hβ)
       (by simpa using hσ')]
 
 /-- The domain of convergence depends only on real parts. -/
-theorem mem_cDomain_re {N : ℕ} {a b c : ℂ} (hc : c ∈ cDomain N a b) :
-    (c.re : ℂ) ∈ cDomain N (a.re : ℂ) (b.re : ℂ) := by
+theorem mem_selbergConvergenceDomain_re {N : ℕ} {a b c : ℂ}
+    (hc : c ∈ selbergConvergenceDomain N a b) :
+    (c.re : ℂ) ∈ selbergConvergenceDomain N (a.re : ℂ) (b.re : ℂ) := by
   obtain ⟨h1, h2, h3⟩ := hc
   exact ⟨by simpa using h1, by simpa using h2, by simpa using h3⟩
 
 /-- For `Re a, Re b > 0`, the Selberg integral is holomorphic in `c` on the full
 domain of convergence. -/
-theorem differentiableOn_selbergInt_cDomain (N : ℕ) {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) :
-    DifferentiableOn ℂ (fun c => selbergInt N a b c) (cDomain N a b) := by
-  unfold selbergInt
-  refine DLMF.Gamma.VerticalBeta.differentiableOn_integral (isOpen_cDomain N a b)
+theorem differentiableOn_selbergIntegral_selbergConvergenceDomain (N : ℕ) {a b : ℂ} (ha : 0 < a.re)
+    (hb : 0 < b.re) :
+    DifferentiableOn ℂ (fun c => selbergIntegral N a b c) (selbergConvergenceDomain N a b) := by
+  unfold selbergIntegral
+  refine DLMF.Gamma.VerticalBeta.differentiableOn_integral (isOpen_selbergConvergenceDomain N a b)
     (fun c _ => (measurable_selbergIntegrand N a b c).aestronglyMeasurable) ?_ ?_
   · filter_upwards [ae_restrict_of_ae (ae_coords_ne N)] with t ht
     exact fun c _ => (differentiableAt_selbergIntegrand_c a b ht c).differentiableWithinAt
   · intro c₀ hc₀
-    obtain ⟨ε', hε', hball⟩ := Metric.isOpen_iff.mp (isOpen_cDomain N a b) c₀ hc₀
+    obtain ⟨ε', hε', hball⟩ := Metric.isOpen_iff.mp (isOpen_selbergConvergenceDomain N a b) c₀ hc₀
     set ε := ε' / 2 with hε
     have hε0 : 0 < ε := by positivity
-    have hcl : Metric.closedBall c₀ ε ⊆ cDomain N a b :=
+    have hcl : Metric.closedBall c₀ ε ⊆ selbergConvergenceDomain N a b :=
       (Metric.closedBall_subset_ball (by linarith)).trans hball
     set σm := c₀.re - ε with hσm
-    have hmem : (σm : ℂ) ∈ cDomain N (a.re : ℂ) (b.re : ℂ) := by
-      have h := mem_cDomain_re (hcl (show c₀ - (ε : ℂ) ∈ Metric.closedBall c₀ ε by
+    have hmem : (σm : ℂ) ∈ selbergConvergenceDomain N (a.re : ℂ) (b.re : ℂ) := by
+      have h := mem_selbergConvergenceDomain_re (hcl (show c₀ - (ε : ℂ) ∈ Metric.closedBall c₀ ε by
         rw [Metric.mem_closedBall, dist_eq_norm, sub_sub_cancel_left, norm_neg,
           Complex.norm_real, Real.norm_eq_abs, abs_of_pos hε0]))
       simpa [hσm] using h
-    refine ⟨ε, hε0, hcl, fun t => weightR N a.re b.re t * vdmSq N t ^ σm,
-      integrableOn_weightR_mul_vdmSq_rpow ha hb hmem, ?_⟩
-    filter_upwards [ae_cube_good N] with t ht z hz
+    refine ⟨ε, hε0, hcl, fun t => selbergWeightReal N a.re b.re t * vandermondeSq N t ^ σm,
+      integrableOn_selbergWeightReal_mul_vandermondeSq_rpow ha hb hmem, ?_⟩
+    filter_upwards [ae_unitCube_good N] with t ht z hz
     rw [norm_selbergIntegrand_eq a b z ht.1 ht.2.1]
-    refine mul_le_mul_of_nonneg_left ?_ (weightR_nonneg _ _ ht.1)
-    refine Real.rpow_le_rpow_of_exponent_ge (vdmSq_pos ht.2.1) (vdmSq_le_one ht.2.2) ?_
+    refine mul_le_mul_of_nonneg_left ?_ (selbergWeightReal_nonneg _ _ ht.1)
+    refine Real.rpow_le_rpow_of_exponent_ge (vandermondeSq_pos ht.2.1)
+        (vandermondeSq_le_one ht.2.2) ?_
     have := Complex.abs_re_le_norm (z - c₀)
     rw [Metric.mem_closedBall, dist_eq_norm] at hz
     have h2 : |(z - c₀).re| ≤ ε := this.trans hz
@@ -573,26 +587,27 @@ theorem differentiableOn_selbergInt_cDomain (N : ℕ) {a b : ℂ} (ha : 0 < a.re
     linarith
 
 /-- **Selberg's integral** on its full domain of convergence. -/
-theorem selbergInt_eq {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re)
-    (hc : c ∈ cDomain N a b) : selbergInt N a b c = selbergRHS N a b c := by
+theorem selbergIntegral_eq {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re)
+    (hc : c ∈ selbergConvergenceDomain N a b) : selbergIntegral N a b c = selbergRHS N a b c := by
   rcases Nat.eq_zero_or_pos N with rfl | hN
-  · rw [selbergInt_zero, selbergRHS_zero]
-  have hU := isOpen_cDomain N a b
-  have hf := (differentiableOn_selbergInt_cDomain N ha hb).analyticOnNhd hU
+  · rw [selbergIntegral_zero, selbergRHS_zero]
+  have hU := isOpen_selbergConvergenceDomain N a b
+  have hf := (differentiableOn_selbergIntegral_selbergConvergenceDomain N ha hb).analyticOnNhd hU
   have hg := (differentiableOn_selbergRHS_c ha hb hN).analyticOnNhd hU
-  refine hf.eqOn_of_preconnected_of_eventuallyEq hg (convex_cDomain N a b).isPreconnected
-    (z₀ := 1) (pos_mem_cDomain N ha hb (by simp)) ?_ hc
+  refine hf.eqOn_of_preconnected_of_eventuallyEq hg
+      (convex_selbergConvergenceDomain N a b).isPreconnected
+    (z₀ := 1) (pos_mem_selbergConvergenceDomain N ha hb (by simp)) ?_ hc
   have hV : IsOpen {c : ℂ | 0 < c.re} := isOpen_lt continuous_const Complex.continuous_re
   filter_upwards [hV.mem_nhds (by simp : (0 : ℝ) < (1 : ℂ).re)] with c hc'
-  exact selbergInt_eq_of_re_pos ha hb hc'
+  exact selbergIntegral_eq_of_re_pos ha hb hc'
 
 /-! ### Aomoto's integral -/
 
 /-- For bounded measurable `h`, `c ↦ ∫ h · Φ` is holomorphic on `Re c > 0`. -/
 theorem differentiableOn_integral_mul_selbergIntegrand_c (N : ℕ) {a b : ℂ} (ha : 0 < a.re)
     (hb : 0 < b.re) {h : (Fin N → ℝ) → ℂ} (hh : Measurable h)
-    (hh1 : ∀ t ∈ cube N, ‖h t‖ ≤ 1) :
-    DifferentiableOn ℂ (fun c => ∫ t in cube N, h t * selbergIntegrand N a b c t)
+    (hh1 : ∀ t ∈ unitCube N, ‖h t‖ ≤ 1) :
+    DifferentiableOn ℂ (fun c => ∫ t in unitCube N, h t * selbergIntegrand N a b c t)
       {c | 0 < c.re} := by
   refine DLMF.Gamma.VerticalBeta.differentiableOn_integral
       (isOpen_lt continuous_const Complex.continuous_re)
@@ -609,9 +624,9 @@ theorem differentiableOn_integral_mul_selbergIntegrand_c (N : ℕ) {a b : ℂ} (
       have h2 : |(z - c₀).re| ≤ c₀.re / 2 := this.trans hz
       rw [Complex.sub_re, abs_le] at h2
       linarith
-    refine ⟨fun t => ‖∏ i, weight a b (t i)‖,
-      (integrableOn_prod_cube (n := N) (integrableOn_weight ha hb)).norm, ?_⟩
-    filter_upwards [ae_restrict_mem (measurableSet_cube N)] with t ht z hz
+    refine ⟨fun t => ‖∏ i, selbergWeight a b (t i)‖,
+      (integrableOn_prod_unitCube (n := N) (integrableOn_selbergWeight ha hb)).norm, ?_⟩
+    filter_upwards [ae_restrict_mem (measurableSet_unitCube N)] with t ht z hz
     rw [norm_mul]
     have hz' : 0 ≤ z.re := by
       have := Complex.abs_re_le_norm (z - c₀)
@@ -619,7 +634,7 @@ theorem differentiableOn_integral_mul_selbergIntegrand_c (N : ℕ) {a b : ℂ} (
       have h2 : |(z - c₀).re| ≤ c₀.re / 2 := this.trans hz
       rw [Complex.sub_re, abs_le] at h2
       linarith
-    calc ‖h t‖ * ‖selbergIntegrand N a b z t‖ ≤ 1 * ‖∏ i, weight a b (t i)‖ :=
+    calc ‖h t‖ * ‖selbergIntegrand N a b z t‖ ≤ 1 * ‖∏ i, selbergWeight a b (t i)‖ :=
           mul_le_mul (hh1 t ht) (norm_selbergIntegrand_le hz' ht) (norm_nonneg _) zero_le_one
       _ = _ := one_mul _
 
@@ -633,18 +648,18 @@ theorem differentiableAt_aomotoFactor {N : ℕ} {a b : ℂ} (ha : 0 < a.re) (hb 
   rw [h] at this; simp at this
 
 /-- Aomoto's formula for `Re c > 0`. -/
-theorem aomotoInt_eq {N m : ℕ} {a b c : ℂ} (hm : m ≤ N) (ha : 0 < a.re) (hb : 0 < b.re)
+theorem aomotoIntegral_eq {N m : ℕ} {a b c : ℂ} (hm : m ≤ N) (ha : 0 < a.re) (hb : 0 < b.re)
     (hc : 0 < c.re) :
-    aomotoInt N a b c (iseg N m) =
-      (∏ j ∈ Finset.range m, aomotoFactor N a b c j) * selbergInt N a b c := by
+    aomotoIntegral N a b c (initialSegment N m) =
+      (∏ j ∈ Finset.range m, aomotoFactor N a b c j) * selbergIntegral N a b c := by
   have hV : IsOpen {c : ℂ | 0 < c.re} := isOpen_lt continuous_const Complex.continuous_re
-  have hf : AnalyticOnNhd ℂ (fun c => aomotoInt N a b c (iseg N m)) {c | 0 < c.re} :=
-    (differentiableOn_integral_mul_selbergIntegrand_c N ha hb (measurable_mono _)
-      (fun t ht => norm_mono_le _ ht)).analyticOnNhd hV
+  have hf : AnalyticOnNhd ℂ (fun c => aomotoIntegral N a b c (initialSegment N m)) {c | 0 < c.re} :=
+    (differentiableOn_integral_mul_selbergIntegrand_c N ha hb (measurable_monomialProduct _)
+      (fun t ht => norm_monomialProduct_le _ ht)).analyticOnNhd hV
   have hg : AnalyticOnNhd ℂ (fun c => (∏ j ∈ Finset.range m, aomotoFactor N a b c j) *
-      selbergInt N a b c) {c | 0 < c.re} := by
+      selbergIntegral N a b c) {c | 0 < c.re} := by
     refine DifferentiableOn.analyticOnNhd ?_ hV
-    refine DifferentiableOn.mul ?_ (differentiableOn_selbergInt_c N ha hb)
+    refine DifferentiableOn.mul ?_ (differentiableOn_selbergIntegral_c N ha hb)
     intro c hc'
     exact (DifferentiableAt.fun_finsetProd fun j _ =>
       differentiableAt_aomotoFactor ha hb j (le_of_lt hc')).differentiableWithinAt
@@ -666,7 +681,7 @@ theorem selberg_integral {n : ℕ} {a b c : ℂ}
       ∏ j : Fin n,
         Gamma (a + (j : ℕ) * c) * Gamma (b + (j : ℕ) * c) * Gamma (1 + ((j : ℕ) + 1) * c) /
           (Gamma (a + b + (n + j - 1 : ℕ) * c) * Gamma (1 + c)) :=
-  selbergInt_eq ha hb ⟨hc, hca, hcb⟩
+  selbergIntegral_eq ha hb ⟨hc, hca, hcb⟩
 
 /-- The `n = 1` case is the Beta integral (independent of `c`). -/
 @[dlmf 5.12.E1]
@@ -688,18 +703,18 @@ theorem aomoto_integral {n m : ℕ} {a b c : ℂ} (hm : m ≤ n)
         ∏ j : Fin n,
           Gamma (a + (j : ℕ) * c) * Gamma (b + (j : ℕ) * c) * Gamma (1 + ((j : ℕ) + 1) * c) /
             (Gamma (a + b + (n + j - 1 : ℕ) * c) * Gamma (1 + c)) := by
-  have h := aomotoInt_eq hm ha hb hc
-  rw [selbergInt_eq ha hb (pos_mem_cDomain n ha hb hc)] at h
+  have h := aomotoIntegral_eq hm ha hb hc
+  rw [selbergIntegral_eq ha hb (pos_mem_selbergConvergenceDomain n ha hb hc)] at h
   have hP : ∏ j : Fin m, (a + ((n - 1 - j : ℕ) : ℂ) * c) / (a + b + ((2 * n - 2 - j : ℕ) : ℂ) * c) =
       ∏ j ∈ Finset.range m, aomotoFactor n a b c j :=
     Fin.prod_univ_eq_prod_range (fun j => aomotoFactor n a b c j) m
   rw [hP]
   change _ = _ * selbergRHS n a b c
   rw [← h]
-  refine setIntegral_congr_fun (measurableSet_cube n) fun t _ => ?_
+  refine setIntegral_congr_fun (measurableSet_unitCube n) fun t _ => ?_
   rw [mul_comm]
   congr 1
-  unfold mono iseg
+  unfold monomialProduct initialSegment
   have hset : (Finset.univ.filter fun i : Fin n => i.val < m) =
       Finset.univ.map (Fin.castLEEmb hm) := by
     ext i

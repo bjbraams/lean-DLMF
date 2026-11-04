@@ -18,21 +18,21 @@ remainder bound of DLMF §8.11(i).
 
 ## Main results
 
-* `IncompleteGammaRealIntegrals.upperIncGamma_re_eq`,
-  `IncompleteGammaRealIntegrals.lowerIncGamma_re_eq`: the real integral forms of `Γ(a,x)` and
+* `IncompleteGammaRealIntegrals.upperIncompleteGamma_re_eq`,
+  `IncompleteGammaRealIntegrals.lowerIncompleteGamma_re_eq`: the real integral forms of `Γ(a,x)` and
   `γ(a,x)`.
-* `IncompleteGammaRealIntegrals.upperIncGamma_re_le`,
-  `IncompleteGammaRealIntegrals.upperIncGamma_re_ge`: `Γ(a,x) ≤ x^{a-1} e^{-x}` for `a ≤ 1` and the
-  reverse inequality for `a ≥ 1` (DLMF 8.10.1).
-* `IncompleteGammaRealIntegrals.upperIncGamma_re_pos`: positivity of the real upper incomplete Gamma
-  function.
-* `lowerIncGamma_bound_ge`,
-  `lowerIncGamma_bound_le`: DLMF 8.10.2 for `0 < a ≤ 1` and its reverse
+* `IncompleteGammaRealIntegrals.upperIncompleteGamma_re_le`,
+  `IncompleteGammaRealIntegrals.upperIncompleteGamma_re_ge`: `Γ(a,x) ≤ x^{a-1} e^{-x}` for `a ≤ 1`
+  and the reverse inequality for `a ≥ 1` (DLMF 8.10.1).
+* `IncompleteGammaRealIntegrals.upperIncompleteGamma_re_pos`: positivity of the real upper
+  incomplete Gamma function.
+* `lowerIncompleteGamma_bound_ge`,
+  `lowerIncompleteGamma_bound_le`: DLMF 8.10.2 for `0 < a ≤ 1` and its reverse
   for `a ≥ 1`.
-* `IncompleteGammaRealIntegrals.upperIncGamma_expansion`: `N` integrations by parts,
+* `IncompleteGammaRealIntegrals.upperIncompleteGamma_expansion`: `N` integrations by parts,
   `Γ(a,z) = ∑_{k<N} (-1)^k (1-a)_k z^{a-1-k} e^{-z} + (-1)^N (1-a)_N Γ(a-N,z)`.
-* `IncompleteGammaRealIntegrals.upperIncGamma_ofReal_re`: for real `b` and `x > 0`, `Γ(b,x)` is
-  real.
+* `IncompleteGammaRealIntegrals.upperIncompleteGamma_ofReal_re`: for real `b` and `x > 0`, `Γ(b,x)`
+  is real.
 -/
 
 @[expose] public noncomputable section
@@ -43,9 +43,9 @@ namespace DLMF.Confluent
 open DLMF.Statistical
 
 /-- Real form of `Γ(a,x) = ∫ₓ^∞ t^{a-1} e^{-t} dt` for real `a` and `x > 0`. -/
-theorem IncompleteGammaRealIntegrals.upperIncGamma_re_eq (a : ℝ) {x : ℝ} (hx : 0 < x) :
-    (upperIncGamma a x).re = ∫ t in Ioi x, t^(a-1)*Real.exp (-t) := by
-  rw [upperIncGamma_eq_integral (a:ℂ) hx]
+theorem IncompleteGammaRealIntegrals.upperIncompleteGamma_re_eq (a : ℝ) {x : ℝ} (hx : 0 < x) :
+    (upperIncompleteGamma a x).re = ∫ t in Ioi x, t^(a-1)*Real.exp (-t) := by
+  rw [upperIncompleteGamma_eq_integral (a:ℂ) hx]
   have : (∫ t in Ioi x, (t : ℂ) ^ ((a:ℂ) - 1) * Real.exp (-t)) =
       ((∫ t in Ioi x, t^(a-1)*Real.exp (-t) : ℝ) : ℂ) := by
     rw [show ((∫ t in Ioi x, t^(a-1)*Real.exp (-t) : ℝ) : ℂ) =
@@ -78,9 +78,10 @@ theorem IncompleteGammaRealIntegrals.integrableOn_rpow_exp_of_pos {a : ℝ} (ha 
   refine this.congr_fun (fun t _ => by ring) measurableSet_Ioi
 
 /-- `Γ(a,x) ≤ x^{a-1} e^{-x}` for real `a ≤ 1` (any sign) and `x > 0`. -/
-theorem IncompleteGammaRealIntegrals.upperIncGamma_re_le {a : ℝ} (ha : a ≤ 1) {x : ℝ} (hx : 0 < x) :
-    (upperIncGamma a x).re ≤ x^(a-1)*Real.exp (-x) := by
-  rw [IncompleteGammaRealIntegrals.upperIncGamma_re_eq a hx, ← integral_exp_neg_Ioi,
+theorem IncompleteGammaRealIntegrals.upperIncompleteGamma_re_le {a : ℝ} (ha : a ≤ 1)
+    {x : ℝ} (hx : 0 < x) :
+    (upperIncompleteGamma a x).re ≤ x^(a-1)*Real.exp (-x) := by
+  rw [IncompleteGammaRealIntegrals.upperIncompleteGamma_re_eq a hx, ← integral_exp_neg_Ioi,
       ← integral_const_mul]
   refine setIntegral_mono_on (IncompleteGammaRealIntegrals.integrableOn_rpow_exp_of_le_one ha hx)
     ((integrableOn_exp_neg_Ioi x).const_mul _) measurableSet_Ioi fun t ht => ?_
@@ -88,9 +89,10 @@ theorem IncompleteGammaRealIntegrals.upperIncGamma_re_le {a : ℝ} (ha : a ≤ 1
       (Real.exp_pos _).le
 
 /-- `x^{a-1} e^{-x} ≤ Γ(a,x)` for real `a ≥ 1` and `x > 0`. -/
-theorem IncompleteGammaRealIntegrals.upperIncGamma_re_ge {a : ℝ} (ha : 1 ≤ a) {x : ℝ} (hx : 0 < x) :
-    x^(a-1)*Real.exp (-x) ≤ (upperIncGamma a x).re := by
-  rw [IncompleteGammaRealIntegrals.upperIncGamma_re_eq a hx, ← integral_exp_neg_Ioi,
+theorem IncompleteGammaRealIntegrals.upperIncompleteGamma_re_ge {a : ℝ} (ha : 1 ≤ a)
+    {x : ℝ} (hx : 0 < x) :
+    x^(a-1)*Real.exp (-x) ≤ (upperIncompleteGamma a x).re := by
+  rw [IncompleteGammaRealIntegrals.upperIncompleteGamma_re_eq a hx, ← integral_exp_neg_Ioi,
       ← integral_const_mul]
   refine setIntegral_mono_on ((integrableOn_exp_neg_Ioi x).const_mul _)
     (IncompleteGammaRealIntegrals.integrableOn_rpow_exp_of_pos (by linarith) hx)
@@ -99,10 +101,10 @@ theorem IncompleteGammaRealIntegrals.upperIncGamma_re_ge {a : ℝ} (ha : 1 ≤ a
       (Real.exp_pos _).le
 
 /-- Positivity of the real upper incomplete Gamma function when its integral converges. -/
-theorem IncompleteGammaRealIntegrals.upperIncGamma_re_pos {a : ℝ} {x : ℝ} (hx : 0 < x)
+theorem IncompleteGammaRealIntegrals.upperIncompleteGamma_re_pos {a : ℝ} {x : ℝ} (hx : 0 < x)
     (hi : IntegrableOn (fun t => t^(a-1)*Real.exp (-t)) (Ioi x)) :
-    0 < (upperIncGamma a x).re := by
-  rw [IncompleteGammaRealIntegrals.upperIncGamma_re_eq a hx]
+    0 < (upperIncompleteGamma a x).re := by
+  rw [IncompleteGammaRealIntegrals.upperIncompleteGamma_re_eq a hx]
   rw [setIntegral_pos_iff_support_of_nonneg_ae _ hi]
   · have : Function.support (fun t : ℝ => t^(a-1)*Real.exp (-t)) ∩ Ioi x = Ioi x := by
       refine inter_eq_right.mpr fun t ht => ?_
@@ -114,9 +116,10 @@ theorem IncompleteGammaRealIntegrals.upperIncGamma_re_pos {a : ℝ} {x : ℝ} (h
     exact (mul_pos (Real.rpow_pos_of_pos ht0 _) (Real.exp_pos _)).le
 
 /-- Real form of `γ(a,x) = ∫₀ˣ t^{a-1} e^{-t} dt` for `a > 0`, `x > 0`. -/
-theorem IncompleteGammaRealIntegrals.lowerIncGamma_re_eq {a : ℝ} (ha : 0 < a) {x : ℝ} (hx : 0 < x) :
-    (lowerIncGamma a x).re = ∫ t in (0:ℝ)..x, t^(a-1)*Real.exp (-t) := by
-  rw [lowerIncGamma_eq_integral (by simpa using ha) hx]
+theorem IncompleteGammaRealIntegrals.lowerIncompleteGamma_re_eq {a : ℝ} (ha : 0 < a)
+    {x : ℝ} (hx : 0 < x) :
+    (lowerIncompleteGamma a x).re = ∫ t in (0:ℝ)..x, t^(a-1)*Real.exp (-t) := by
+  rw [lowerIncompleteGamma_eq_integral (by simpa using ha) hx]
   have : (∫ t in (0:ℝ)..x, (t : ℂ) ^ ((a:ℂ) - 1) * Real.exp (-t)) =
       ((∫ t in (0:ℝ)..x, t^(a-1)*Real.exp (-t) : ℝ) : ℂ) := by
     rw [show ((∫ t in (0:ℝ)..x, t^(a-1)*Real.exp (-t) : ℝ) : ℂ) =
@@ -144,34 +147,35 @@ theorem IncompleteGammaRealIntegrals.integral_mul_exp_neg (x : ℝ) :
   simp; ring
 
 /-- The two-sided comparison behind DLMF 8.10.2. -/
-theorem IncompleteGammaRealIntegrals.lowerIncGamma_compare {a : ℝ} (ha : 0 < a)
+theorem IncompleteGammaRealIntegrals.lowerIncompleteGamma_compare {a : ℝ} (ha : 0 < a)
     {x : ℝ} (hx : 0 < x) :
-    a*(lowerIncGamma a x).re = (∫ t in (0:ℝ)..x, t^a*Real.exp (-t)) + x^a*Real.exp (-x) ∧
+    a*(lowerIncompleteGamma a x).re = (∫ t in (0:ℝ)..x, t^a*Real.exp (-t)) + x^a*Real.exp (-x) ∧
     x^(a-1)*(1-Real.exp (-x)) = (∫ t in (0:ℝ)..x, x^(a-1)*(t*Real.exp (-t))) +
         x^a*Real.exp (-x) := by
   have hx0 : (x:ℂ) ≠ 0 := ofReal_ne_zero.mpr hx.ne'
   have ha' : ∀ k : ℕ, (a:ℂ) ≠ -k := fun k hk => by
     have := congrArg Complex.re hk; simp at this; linarith [(Nat.cast_nonneg k : (0:ℝ) ≤ k)]
   constructor
-  · have h := lowerIncGamma_add_one ha' hx0
-    have hr := IncompleteGammaRealIntegrals.lowerIncGamma_re_eq (a := a+1) (by linarith) hx
+  · have h := lowerIncompleteGamma_add_one ha' hx0
+    have hr := IncompleteGammaRealIntegrals.lowerIncompleteGamma_re_eq (a := a+1) (by linarith) hx
     push_cast at hr
     rw [h, add_sub_cancel_right] at hr
     have e : ((x:ℂ)^(a:ℂ)*exp (-(x:ℂ))).re = x^a*Real.exp (-x) := by
       rw [← ofReal_cpow hx.le, ← ofReal_neg, ← ofReal_exp, ← ofReal_mul, ofReal_re]
-    rw [sub_re, e, show ((a:ℂ)*lowerIncGamma a x).re = a*(lowerIncGamma a x).re by simp] at hr
+    rw [sub_re, e, show ((a:ℂ)*lowerIncompleteGamma a x).re =
+        a*(lowerIncompleteGamma a x).re by simp] at hr
     linarith
   · rw [intervalIntegral.integral_const_mul, IncompleteGammaRealIntegrals.integral_mul_exp_neg]
     have : x^a = x^(a-1)*x := by
       rw [← Real.rpow_add_one hx.ne']; ring_nf
     rw [this]; ring
 
-/-- The stated relation follows from the given hypotheses: `(lowerIncGamma a x).re ≥
+/-- The stated relation follows from the given hypotheses: `(lowerIncompleteGamma a x).re ≥
 x^(a-1)/a*(1-Real.exp (-x))`. -/
 @[dlmf 8.10.E2]
-theorem lowerIncGamma_bound_ge {a x : ℝ} (ha : 0 < a) (ha1 : a ≤ 1) (hx : 0 < x) :
-    (lowerIncGamma a x).re ≥ x^(a-1)/a*(1-Real.exp (-x)) := by
-  obtain ⟨h1, h2⟩ := IncompleteGammaRealIntegrals.lowerIncGamma_compare ha hx
+theorem lowerIncompleteGamma_bound_ge {a x : ℝ} (ha : 0 < a) (ha1 : a ≤ 1) (hx : 0 < x) :
+    (lowerIncompleteGamma a x).re ≥ x^(a-1)/a*(1-Real.exp (-x)) := by
+  obtain ⟨h1, h2⟩ := IncompleteGammaRealIntegrals.lowerIncompleteGamma_compare ha hx
   have hm : (∫ t in (0:ℝ)..x, x^(a-1)*(t*Real.exp (-t))) ≤ ∫ t in (0:ℝ)..x, t^a*Real.exp (-t) := by
     refine intervalIntegral.integral_mono_on hx.le
         (by apply Continuous.intervalIntegrable; fun_prop)
@@ -188,13 +192,13 @@ theorem lowerIncGamma_bound_ge {a x : ℝ} (ha : 0 < a) (ha1 : a ≤ 1) (hx : 0 
   rw [ge_iff_le, div_mul_eq_mul_div, div_le_iff₀ ha]
   linarith
 
-/-- Estimate under the stated parameter and domain assumptions: `(lowerIncGamma a x).re ≤
+/-- Estimate under the stated parameter and domain assumptions: `(lowerIncompleteGamma a x).re ≤
 x^(a-1)/a*(1-Real.exp (-x))`. -/
 @[dlmf 8.10.E2]
-theorem lowerIncGamma_bound_le {a x : ℝ} (ha : 1 ≤ a) (hx : 0 < x) :
-    (lowerIncGamma a x).re ≤ x^(a-1)/a*(1-Real.exp (-x)) := by
+theorem lowerIncompleteGamma_bound_le {a x : ℝ} (ha : 1 ≤ a) (hx : 0 < x) :
+    (lowerIncompleteGamma a x).re ≤ x^(a-1)/a*(1-Real.exp (-x)) := by
   have ha0 : 0 < a := by linarith
-  obtain ⟨h1, h2⟩ := IncompleteGammaRealIntegrals.lowerIncGamma_compare ha0 hx
+  obtain ⟨h1, h2⟩ := IncompleteGammaRealIntegrals.lowerIncompleteGamma_compare ha0 hx
   have hm : (∫ t in (0:ℝ)..x, t^a*Real.exp (-t)) ≤ ∫ t in (0:ℝ)..x, x^(a-1)*(t*Real.exp (-t)) := by
     refine intervalIntegral.integral_mono_on hx.le
       (by apply Continuous.intervalIntegrable;
@@ -213,24 +217,27 @@ theorem lowerIncGamma_bound_le {a x : ℝ} (ha : 1 ≤ a) (hx : 0 < x) :
 
 /-- `N` integrations by parts: `Γ(a,z) = ∑_{k<N} (-1)^k (1-a)_k z^{a-1-k} e^{-z}
 + (-1)^N (1-a)_N Γ(a-N,z)`. -/
-theorem IncompleteGammaRealIntegrals.upperIncGamma_expansion (a : ℂ) {z : ℂ} (hz : z ≠ 0) (N : ℕ) :
-    upperIncGamma a z = (∑ k ∈ Finset.range N, (-1:ℂ)^k*poch (1-a) k*(z^(a-1-k)*exp (-z))) +
-      (-1:ℂ)^N*poch (1-a) N*upperIncGamma (a-N) z := by
+theorem IncompleteGammaRealIntegrals.upperIncompleteGamma_expansion (a : ℂ) {z : ℂ}
+    (hz : z ≠ 0) (N : ℕ) :
+    upperIncompleteGamma a z =
+        (∑ k ∈ Finset.range N, (-1:ℂ)^k*pochhammer (1-a) k*(z^(a-1-k)*exp (-z))) +
+      (-1:ℂ)^N*pochhammer (1-a) N*upperIncompleteGamma (a-N) z := by
   induction N with
-  | zero => simp [poch]
+  | zero => simp [pochhammer]
   | succ N ih =>
-    have h := upperIncGamma_add_one (a-N-1) hz
+    have h := upperIncompleteGamma_add_one (a-N-1) hz
     rw [show a-N-1+1 = a-N by ring] at h
     rw [ih, h, Finset.sum_range_succ, add_assoc]
     congr 1
-    rw [poch_succ]
+    rw [pochhammer_succ]
     push_cast
     ring_nf
 
 /-- Real form: for real `b` and `x > 0`, `Γ(b,x)` is the real number `Re Γ(b,x)`. -/
-theorem IncompleteGammaRealIntegrals.upperIncGamma_ofReal_re (b : ℝ) {x : ℝ} (hx : 0 < x) :
-    upperIncGamma b x = ((upperIncGamma b x).re : ℂ) := by
-  rw [IncompleteGammaRealIntegrals.upperIncGamma_re_eq b hx, upperIncGamma_eq_integral (b:ℂ) hx]
+theorem IncompleteGammaRealIntegrals.upperIncompleteGamma_ofReal_re (b : ℝ) {x : ℝ} (hx : 0 < x) :
+    upperIncompleteGamma b x = ((upperIncompleteGamma b x).re : ℂ) := by
+  rw [IncompleteGammaRealIntegrals.upperIncompleteGamma_re_eq b hx,
+      upperIncompleteGamma_eq_integral (b:ℂ) hx]
   rw [show ((∫ t in Ioi x, t^(b-1)*Real.exp (-t) : ℝ) : ℂ) =
       ∫ t in Ioi x, ((t^(b-1)*Real.exp (-t) : ℝ) : ℂ) from integral_ofReal.symm]
   refine setIntegral_congr_fun measurableSet_Ioi fun t ht => ?_

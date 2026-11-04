@@ -17,10 +17,10 @@ expansion holds for `b^{m+1}_ν(k²)` because the difference is exponentially sm
 
 ## Main results
 
-* `Real.lameAk_asymptotic`: the Poincaré expansion DLMF 29.7.1 of `a^m_ν(k²)`.
-* `Real.lameBk_sub_lameAk_isBigO`: `b^{m+1}_ν(k²) - a^m_ν(k²) = O(ν^{m + 3/2} ((1 - k)/(1 + k))^ν)`
+* `Real.lameA_asymptotic`: the Poincaré expansion DLMF 29.7.1 of `a^m_ν(k²)`.
+* `Real.lameB_sub_lameA_isBigO`: `b^{m+1}_ν(k²) - a^m_ν(k²) = O(ν^{m + 3/2} ((1 - k)/(1 + k))^ν)`
   (DLMF 29.7.5).
-* `Real.lameBk_asymptotic`: the same Poincaré expansion for `b^{m+1}_ν(k²)` (DLMF §29.7(i)).
+* `Real.lameB_asymptotic`: the same Poincaré expansion for `b^{m+1}_ν(k²)` (DLMF §29.7(i)).
 
 ## Implementation notes
 
@@ -44,11 +44,11 @@ namespace DLMF.Lame
 /-- 29.7.1: the Poincaré expansion `a^m_ν(k²) ~ pκ - ∑ⱼ τⱼ κ^{-j}` as `ν → ∞`, `p = 2m + 1`,
 with `τ₀, …, τ₄` as in 29.7.3, 29.7.4, 29.7.6–29.7.8. Admitted. -/
 @[dlmf 29.7.E1]
-theorem Real.lameAk_asymptotic {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
+theorem Real.lameA_asymptotic {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
     ∃ τ : ℕ → ℝ, τ 0 = lameTau0 (2 * m + 1) k ∧ τ 1 = lameTau1 (2 * m + 1) k ∧
       τ 2 = lameTau2 (2 * m + 1) k ∧ τ 3 = lameTau3 (2 * m + 1) k ∧
       τ 4 = lameTau4 (2 * m + 1) k ∧
-      ∀ N : ℕ, (fun ν => Real.lameAk ν m k - ((2 * m + 1) * lameKappa ν k -
+      ∀ N : ℕ, (fun ν => Real.lameA ν m k - ((2 * m + 1) * lameKappa ν k -
           ∑ j ∈ Finset.range N, τ j * lameKappa ν k ^ (-(j : ℤ)))) =O[atTop]
         fun ν => lameKappa ν k ^ (-(N : ℤ)) := by
   sorry
@@ -56,18 +56,18 @@ theorem Real.lameAk_asymptotic {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
 /-- 29.7.5: `b^{m+1}_ν(k²) - a^m_ν(k²) = O(ν^{m + 3/2} ((1 - k)/(1 + k))^ν)` as `ν → ∞`.
 Admitted. -/
 @[dlmf 29.7.E5]
-theorem Real.lameBk_sub_lameAk_isBigO {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
-    (fun ν => Real.lameBk ν (m + 1) k - Real.lameAk ν m k) =O[atTop]
+theorem Real.lameB_sub_lameA_isBigO {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
+    (fun ν => Real.lameB ν (m + 1) k - Real.lameA ν m k) =O[atTop]
       fun ν => ν ^ ((m : ℝ) + 3 / 2) * ((1 - k) / (1 + k)) ^ ν := by
   sorry
 
 /-- §29.7(i): the same Poincaré expansion holds for `b^{m+1}_ν(k²)`. Admitted. -/
 @[dlmf 29.7.i]
-theorem Real.lameBk_asymptotic {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
+theorem Real.lameB_asymptotic {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
     ∃ τ : ℕ → ℝ, τ 0 = lameTau0 (2 * m + 1) k ∧ τ 1 = lameTau1 (2 * m + 1) k ∧
       τ 2 = lameTau2 (2 * m + 1) k ∧ τ 3 = lameTau3 (2 * m + 1) k ∧
       τ 4 = lameTau4 (2 * m + 1) k ∧
-      ∀ N : ℕ, (fun ν => Real.lameBk ν (m + 1) k - ((2 * m + 1) * lameKappa ν k -
+      ∀ N : ℕ, (fun ν => Real.lameB ν (m + 1) k - ((2 * m + 1) * lameKappa ν k -
           ∑ j ∈ Finset.range N, τ j * lameKappa ν k ^ (-(j : ℤ)))) =O[atTop]
         fun ν => lameKappa ν k ^ (-(N : ℤ)) := by
   sorry

@@ -22,10 +22,10 @@ DLMF §7.2.
 
 * `erf`: the entire error function `erf z = (2z/√π) M(1/2, 3/2, -z²)` (DLMF 13.6.7).
 * `erfc`: the complementary error function `1 - erf z`.
-* `Real.fresnelCosInt`, `Real.fresnelSinInt`: the Fresnel integrals `C(x)` and `S(x)`
+* `Real.fresnelC`, `Real.fresnelS`: the Fresnel integrals `C(x)` and `S(x)`
   (DLMF 7.2.7, 7.2.8).
 * `Real.dawsonF`: Dawson's integral `F(x)` (DLMF 7.2.5).
-* `fresnelAuxF`, `fresnelAuxG`: the auxiliary Fresnel functions `f(x)` and `g(x)`
+* `fresnelAuxiliaryF`, `fresnelAuxiliaryG`: the auxiliary Fresnel functions `f(x)` and `g(x)`
   (DLMF 7.2.10, 7.2.11).
 * `fresnelZeta`: the Fresnel variable `ζ = √π (1 - i) x / 2` of DLMF 7.5.7.
 
@@ -55,11 +55,11 @@ def erfc (z : ℂ) : ℂ := 1 - erf z
 
 /-- The Fresnel cosine integral `C(x) = ∫₀ˣ cos(π t²/2) dt` (DLMF 7.2.7). -/
 @[dlmf 7.2.E7]
-def Real.fresnelCosInt (x : ℝ) : ℝ := ∫ t in (0 : ℝ)..x, Real.cos (π * t ^ 2 / 2)
+def Real.fresnelC (x : ℝ) : ℝ := ∫ t in (0 : ℝ)..x, Real.cos (π * t ^ 2 / 2)
 
 /-- The Fresnel sine integral `S(x) = ∫₀ˣ sin(π t²/2) dt` (DLMF 7.2.8). -/
 @[dlmf 7.2.E8]
-def Real.fresnelSinInt (x : ℝ) : ℝ := ∫ t in (0 : ℝ)..x, Real.sin (π * t ^ 2 / 2)
+def Real.fresnelS (x : ℝ) : ℝ := ∫ t in (0 : ℝ)..x, Real.sin (π * t ^ 2 / 2)
 
 /-- Dawson's integral `F(x) = e^{-x²} ∫₀ˣ e^{t²} dt` (DLMF 7.2.5). -/
 @[dlmf 7.2.E5]
@@ -68,15 +68,15 @@ def Real.dawsonF (x : ℝ) : ℝ := Real.exp (-x ^ 2) * ∫ t in (0 : ℝ)..x, R
 /-- The auxiliary Fresnel function `f(x) = (1/2 - S(x)) cos(πx²/2) - (1/2 - C(x)) sin(πx²/2)`
 (DLMF 7.2.10). -/
 @[dlmf 7.2.E10]
-def fresnelAuxF (x : ℝ) : ℝ :=
-  (1 / 2 - Real.fresnelSinInt x) * Real.cos (π * x ^ 2 / 2) - (1 / 2 - Real.fresnelCosInt x)
+def fresnelAuxiliaryF (x : ℝ) : ℝ :=
+  (1 / 2 - Real.fresnelS x) * Real.cos (π * x ^ 2 / 2) - (1 / 2 - Real.fresnelC x)
       * Real.sin (π * x ^ 2 / 2)
 
 /-- The auxiliary Fresnel function `g(x) = (1/2 - C(x)) cos(πx²/2) + (1/2 - S(x)) sin(πx²/2)`
 (DLMF 7.2.11). -/
 @[dlmf 7.2.E11]
-def fresnelAuxG (x : ℝ) : ℝ :=
-  (1 / 2 - Real.fresnelCosInt x) * Real.cos (π * x ^ 2 / 2) + (1 / 2 - Real.fresnelSinInt x)
+def fresnelAuxiliaryG (x : ℝ) : ℝ :=
+  (1 / 2 - Real.fresnelC x) * Real.cos (π * x ^ 2 / 2) + (1 / 2 - Real.fresnelS x)
       * Real.sin (π * x ^ 2 / 2)
 
 /-- The Fresnel variable `ζ = √π (1 - i) x / 2` of DLMF 7.5.7. -/

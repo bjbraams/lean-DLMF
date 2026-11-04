@@ -85,7 +85,7 @@ congruences are stated in DLMF 27.14(v); both remain in the DLMF priority scope.
   (even in its own area), a non-foundational `DLMF.Core` module, or a lean-codes module.
   The import closure of `DLMF.Basic` must contain no lean-codes module, so a `DLMFMathlib`
   module imported by a foundational file must not import lean-codes either. A definition
-  that needs lean-codes (for example `symEllIntR`, built on Carlson's `R`-function) lives in
+  that needs lean-codes (for example `symmetricEllipticR`, built on Carlson's `R`-function) lives in
   the theorem layer. `DLMF.Core.Basic` holds the shared conventions (improper integrals,
   principal values, segment primitives, sector filters, continued fractions); the other
   `DLMF.Core` modules are theorem-layer modules.
@@ -110,7 +110,7 @@ and the meaning of totalized series and integrals when adopting upstream stateme
 ## Namespaces and upstream functions (adopted 2026-11-02)
 
 - Every declaration under `DLMF/` lives in `DLMF.<Area>`; real-variable forms go in the
-  `Real` sub-namespace of the area (`DLMF.Gamma.Real.digamma`, `DLMF.Confluent.Real.sinInt`).
+  `Real` sub-namespace of the area (`DLMF.Gamma.Real.digamma`, `DLMF.Confluent.Real.sinIntegral`).
   An area namespace may span several directories: `DLMF.Confluent` covers `Confluent/`,
   `ParabolicCylinder/`, `IncompleteGamma/`, `ErrorFunctions/` and `ExpIntegrals/`, and
   `DLMF.Hypergeometric` covers `Hypergeometric/` and `GeneralizedHypergeometric/`. The shared
@@ -120,7 +120,7 @@ and the meaning of totalized series and integrals when adopting upstream stateme
   (`DLMF.Bessel.SphericalSeries`, `DLMF.Hypergeometric.DixonWZ`), never behind an abbreviated
   name prefix (`sphSeries_`) and never in an `…Aux` namespace. The only exception to the
   area namespace is a dot-notation lemma whose namespace is fixed by the head symbol of its
-  conclusion (`DifferentiableOn.regularizedGaussHG`, `DirichletCharacter.…`). Never declare a
+  conclusion (`DifferentiableOn.regularizedGaussHypergeometric`, `DirichletCharacter.…`). Never declare a
   new name in a Mathlib or TauCeti namespace from `DLMF/`: a later upstream declaration of the
   same name breaks the build.
 - Every declaration name is spelled out: predicates and structures (`HasParityDegreeSupport`,

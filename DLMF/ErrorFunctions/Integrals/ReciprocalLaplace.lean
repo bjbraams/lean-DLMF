@@ -26,9 +26,9 @@ transforms of the Fresnel integrals, obtained by integration by parts.
   DLMF 7.14.4.
 * `ErrorFunctionIntegrals.laplace_plus`, `ErrorFunctionIntegrals.laplace_minus`: the two transforms
   for `Re a > 0`, `Re b > 0`, `Re c ≥ 0`, by continuity from `Re c > 0`.
-* `fresnelCosInt_laplace`, `fresnelSinInt_laplace`: Laplace transforms of `C(t)` and `S(t)`
+* `fresnelC_laplace`, `fresnelS_laplace`: Laplace transforms of `C(t)` and `S(t)`
   (DLMF 7.14.5, 7.14.6).
-* `fresnelCosInt_sqrt_laplace`, `fresnelSinInt_sqrt_laplace`: Laplace transforms of
+* `fresnelC_sqrt_laplace`, `fresnelS_sqrt_laplace`: Laplace transforms of
   `C(√(2t/π))` and `S(√(2t/π))` (DLMF 7.14.7, 7.14.8).
 * `integral_exp_mul_eq_of_deriv`: integration by parts for Laplace transforms of bounded
   functions.
@@ -977,7 +977,7 @@ theorem integral_exp_mul_eq_of_deriv {a : ℂ} (ha : 0 < a.re) {u u' : ℝ → �
 
 /-- Laplace transform of `cos(πt²/2)`. -/
 theorem laplace_cos_pi_sq {a : ℂ} (ha : 0 < a.re) :
-    (∫ t : ℝ in Ioi 0, exp (-a*t)*cos (π*(t:ℂ)^2/2)) = fresnelAuxFComplex (a/π) := by
+    (∫ t : ℝ in Ioi 0, exp (-a*t)*cos (π*(t:ℂ)^2/2)) = fresnelAuxiliaryFComplex (a/π) := by
   set c : ℝ := Real.sqrt (π/2)
   have hc : 0 < c := Real.sqrt_pos.mpr (by positivity)
   have hc0 : (c:ℂ) ≠ 0 := by exact_mod_cast hc.ne'
@@ -985,7 +985,7 @@ theorem laplace_cos_pi_sq {a : ℂ} (ha : 0 < a.re) :
     have := Real.sq_sqrt (by positivity : (0:ℝ) ≤ π/2); exact_mod_cast this
   have hre : 0 < (a/c).re := by rw [div_ofReal_re]; exact div_pos ha hc
   have h := integral_comp_mul_left_Ioi (fun x : ℝ => exp (-(a/c)*x)*cos ((x:ℂ)^2)) 0 hc
-  rw [mul_zero, fresnelAuxFComplex_laplace_square hre] at h
+  rw [mul_zero, fresnelAuxiliaryFComplex_laplace_square hre] at h
   have e : (fun x : ℝ => exp (-(a/c)*((c*x:ℝ):ℂ))*cos (((c*x:ℝ):ℂ)^2)) =
       fun t : ℝ => exp (-a*t)*cos (π*(t:ℂ)^2/2) := by
     funext t; push_cast
@@ -1003,7 +1003,7 @@ theorem laplace_cos_pi_sq {a : ℂ} (ha : 0 < a.re) :
 
 /-- Laplace transform of `sin(πt²/2)`. -/
 theorem laplace_sin_pi_sq {a : ℂ} (ha : 0 < a.re) :
-    (∫ t : ℝ in Ioi 0, exp (-a*t)*sin (π*(t:ℂ)^2/2)) = fresnelAuxGComplex (a/π) := by
+    (∫ t : ℝ in Ioi 0, exp (-a*t)*sin (π*(t:ℂ)^2/2)) = fresnelAuxiliaryGComplex (a/π) := by
   set c : ℝ := Real.sqrt (π/2)
   have hc : 0 < c := Real.sqrt_pos.mpr (by positivity)
   have hc0 : (c:ℂ) ≠ 0 := by exact_mod_cast hc.ne'
@@ -1011,7 +1011,7 @@ theorem laplace_sin_pi_sq {a : ℂ} (ha : 0 < a.re) :
     have := Real.sq_sqrt (by positivity : (0:ℝ) ≤ π/2); exact_mod_cast this
   have hre : 0 < (a/c).re := by rw [div_ofReal_re]; exact div_pos ha hc
   have h := integral_comp_mul_left_Ioi (fun x : ℝ => exp (-(a/c)*x)*sin ((x:ℂ)^2)) 0 hc
-  rw [mul_zero, fresnelAuxGComplex_laplace_square hre] at h
+  rw [mul_zero, fresnelAuxiliaryGComplex_laplace_square hre] at h
   have e : (fun x : ℝ => exp (-(a/c)*((c*x:ℝ):ℂ))*sin (((c*x:ℝ):ℂ)^2)) =
       fun t : ℝ => exp (-a*t)*sin (π*(t:ℂ)^2/2) := by
     funext t; push_cast
@@ -1028,14 +1028,14 @@ theorem laplace_sin_pi_sq {a : ℂ} (ha : 0 < a.re) :
   rw [h2]; push_cast; field_simp; rfl
 
 /-- Identity under the stated parameter and domain assumptions: `(∫ t : ℝ in Ioi 0, exp
-(-a*t)*fresnelCosInt t)=fresnelAuxFComplex (a/π)/a`. -/
+(-a*t)*fresnelC t)=fresnelAuxiliaryFComplex (a/π)/a`. -/
 @[dlmf 7.14.E5]
-theorem fresnelCosInt_laplace {a : ℂ} (ha : 0 < a.re) :
-    (∫ t : ℝ in Ioi 0, exp (-a*t)*fresnelCosInt t)=fresnelAuxFComplex (a/π)/a := by
+theorem fresnelC_laplace {a : ℂ} (ha : 0 < a.re) :
+    (∫ t : ℝ in Ioi 0, exp (-a*t)*fresnelC t)=fresnelAuxiliaryFComplex (a/π)/a := by
   obtain ⟨B, hB⟩ := exists_bound_Ici_of_tendsto (L := ((1/2:ℝ):ℂ))
-    (g := fun t : ℝ => fresnelCosInt (t:ℂ)) (fresnelCosInt_entire.continuous.comp continuous_ofReal)
-    (((continuous_ofReal.tendsto _).comp Real.tendsto_fresnelCosInt_atTop).congr
-      fun t => (fresnelCosInt_ofReal t).symm)
+    (g := fun t : ℝ => fresnelC (t:ℂ)) (fresnelC_entire.continuous.comp continuous_ofReal)
+    (((continuous_ofReal.tendsto _).comp Real.tendsto_fresnelC_atTop).congr
+      fun t => (fresnelC_ofReal t).symm)
   have hi : IntegrableOn (fun t : ℝ => exp (-a*t)*cos (π*(t:ℂ)^2/2)) (Ioi 0) := by
     refine (exp_neg_integrableOn_Ioi 0 ha).mono' (by fun_prop : Continuous fun t : ℝ =>
       exp (-a*t)*cos (π*(t:ℂ)^2/2)).aestronglyMeasurable (Eventually.of_forall fun t => ?_)
@@ -1047,18 +1047,18 @@ theorem fresnelCosInt_laplace {a : ℂ} (ha : 0 < a.re) :
         Real.norm_eq_abs]
       exact Real.abs_cos_le_one _
     simpa using mul_le_mul_of_nonneg_left h1 (Real.exp_pos (-a.re*t)).le
-  rw [integral_exp_mul_eq_of_deriv ha (u := fun t : ℝ => fresnelCosInt (t:ℂ))
-      (fresnelCosInt_entire.continuous.comp continuous_ofReal)
-    (by simpa using (fresnelCosInt_ofReal 0).trans (by simp [Real.fresnelCosInt])) hB
-    (fun t _ => (hasDerivAt_fresnelCosInt_complex t).comp_ofReal) (by fun_prop) hi,
+  rw [integral_exp_mul_eq_of_deriv ha (u := fun t : ℝ => fresnelC (t:ℂ))
+      (fresnelC_entire.continuous.comp continuous_ofReal)
+    (by simpa using (fresnelC_ofReal 0).trans (by simp [Real.fresnelC])) hB
+    (fun t _ => (hasDerivAt_fresnelC_complex t).comp_ofReal) (by fun_prop) hi,
     laplace_cos_pi_sq ha]
 
 /-- Identity under the stated parameter and domain assumptions: `(∫ t : ℝ in Ioi 0, exp
-(-a*t)*fresnelCosInt (Real.sqrt (2*t/π)))=(((a^2+1)^(1/2 : ℂ))+a)^(1/2 : ℂ)/(2*a*(a^2+1)^(1/2
+(-a*t)*fresnelC (Real.sqrt (2*t/π)))=(((a^2+1)^(1/2 : ℂ))+a)^(1/2 : ℂ)/(2*a*(a^2+1)^(1/2
 : ℂ))`. -/
 @[dlmf 7.14.E7]
-theorem fresnelCosInt_sqrt_laplace {a : ℂ} (ha : 0 < a.re) :
-    (∫ t : ℝ in Ioi 0, exp (-a*t)*fresnelCosInt (Real.sqrt (2*t/π)))=(((a^2+1)^(1/2 : ℂ))+a)^(1/2 :
+theorem fresnelC_sqrt_laplace {a : ℂ} (ha : 0 < a.re) :
+    (∫ t : ℝ in Ioi 0, exp (-a*t)*fresnelC (Real.sqrt (2*t/π)))=(((a^2+1)^(1/2 : ℂ))+a)^(1/2 :
         ℂ)/(2*a*(a^2+1)^(1/2 : ℂ)) := by
   have ha0 : a ≠ 0 := fun h => by simp [h] at ha
   have hm : (0:ℝ) < (a-I).re := by simpa using ha
@@ -1075,18 +1075,18 @@ theorem fresnelCosInt_sqrt_laplace {a : ℂ} (ha : 0 < a.re) :
   have hs2 : (Real.sqrt 2:ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr two_pos).ne'
   have hsp : (Real.sqrt π:ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hec : Continuous erf := differentiable_erf_complex.continuous
-  obtain ⟨B, hB⟩ := exists_bound_fresnel_sqrt fresnelCosInt_entire fresnelCosInt_ofReal
-    Real.tendsto_fresnelCosInt_atTop
+  obtain ⟨B, hB⟩ := exists_bound_fresnel_sqrt fresnelC_entire fresnelC_ofReal
+    Real.tendsto_fresnelC_atTop
   set k : ℂ := 1/(2*a*Real.sqrt 2)
   have key := integral_exp_mul_eq_of_antideriv (a := a) (B := B) ha
-    (u := fun t : ℝ => fresnelCosInt ((Real.sqrt (2*t/π):ℝ):ℂ))
+    (u := fun t : ℝ => fresnelC ((Real.sqrt (2*t/π):ℝ):ℂ))
     (u' := fun t : ℝ => cos (t:ℂ)*(((1/(π*Real.sqrt (2*t/π))):ℝ):ℂ))
     (G := fun t : ℝ => k*(u1⁻¹*erf (u1*(Real.sqrt t:ℂ)) + v1⁻¹*erf (v1*(Real.sqrt t:ℂ))))
     (L := k*(u1⁻¹*1 + v1⁻¹*1))
-    (fresnelCosInt_entire.continuous.comp (by fun_prop))
-    (by have h0 := fresnelCosInt_ofReal 0; simp [Real.fresnelCosInt] at h0; simpa using h0) hB
+    (fresnelC_entire.continuous.comp (by fun_prop))
+    (by have h0 := fresnelC_ofReal 0; simp [Real.fresnelC] at h0; simpa using h0) hB
     (fun t ht => by
-      have h := (hasDerivAt_fresnelCosInt_complex _).comp t (hasDerivAt_sqrt_two_mul_div_pi ht)
+      have h := (hasDerivAt_fresnelC_complex _).comp t (hasDerivAt_sqrt_two_mul_div_pi ht)
       rw [pi_mul_sqrt_two_mul_div_pi_sq ht.le] at h
       exact h)
     ((by fun_prop : Continuous fun t : ℝ =>
@@ -1125,14 +1125,14 @@ theorem fresnelCosInt_sqrt_laplace {a : ℂ} (ha : 0 < a.re) :
   ring
 
 /-- Identity under the stated parameter and domain assumptions: `(∫ t : ℝ in Ioi 0, exp
-(-a*t)*fresnelSinInt t)=fresnelAuxGComplex (a/π)/a`. -/
+(-a*t)*fresnelS t)=fresnelAuxiliaryGComplex (a/π)/a`. -/
 @[dlmf 7.14.E6]
-theorem fresnelSinInt_laplace {a : ℂ} (ha : 0 < a.re) :
-    (∫ t : ℝ in Ioi 0, exp (-a*t)*fresnelSinInt t)=fresnelAuxGComplex (a/π)/a := by
+theorem fresnelS_laplace {a : ℂ} (ha : 0 < a.re) :
+    (∫ t : ℝ in Ioi 0, exp (-a*t)*fresnelS t)=fresnelAuxiliaryGComplex (a/π)/a := by
   obtain ⟨B, hB⟩ := exists_bound_Ici_of_tendsto (L := ((1/2:ℝ):ℂ))
-    (g := fun t : ℝ => fresnelSinInt (t:ℂ)) (fresnelSinInt_entire.continuous.comp continuous_ofReal)
-    (((continuous_ofReal.tendsto _).comp Real.tendsto_fresnelSinInt_atTop).congr
-      fun t => (fresnelSinInt_ofReal t).symm)
+    (g := fun t : ℝ => fresnelS (t:ℂ)) (fresnelS_entire.continuous.comp continuous_ofReal)
+    (((continuous_ofReal.tendsto _).comp Real.tendsto_fresnelS_atTop).congr
+      fun t => (fresnelS_ofReal t).symm)
   have hi : IntegrableOn (fun t : ℝ => exp (-a*t)*sin (π*(t:ℂ)^2/2)) (Ioi 0) := by
     refine (exp_neg_integrableOn_Ioi 0 ha).mono' (by fun_prop : Continuous fun t : ℝ =>
       exp (-a*t)*sin (π*(t:ℂ)^2/2)).aestronglyMeasurable (Eventually.of_forall fun t => ?_)
@@ -1144,18 +1144,18 @@ theorem fresnelSinInt_laplace {a : ℂ} (ha : 0 < a.re) :
         Real.norm_eq_abs]
       exact Real.abs_sin_le_one _
     simpa using mul_le_mul_of_nonneg_left h1 (Real.exp_pos (-a.re*t)).le
-  rw [integral_exp_mul_eq_of_deriv ha (u := fun t : ℝ => fresnelSinInt (t:ℂ))
-      (fresnelSinInt_entire.continuous.comp continuous_ofReal)
-    (by simpa using (fresnelSinInt_ofReal 0).trans (by simp [Real.fresnelSinInt])) hB
-    (fun t _ => (hasDerivAt_fresnelSinInt_complex t).comp_ofReal) (by fun_prop) hi,
+  rw [integral_exp_mul_eq_of_deriv ha (u := fun t : ℝ => fresnelS (t:ℂ))
+      (fresnelS_entire.continuous.comp continuous_ofReal)
+    (by simpa using (fresnelS_ofReal 0).trans (by simp [Real.fresnelS])) hB
+    (fun t _ => (hasDerivAt_fresnelS_complex t).comp_ofReal) (by fun_prop) hi,
     laplace_sin_pi_sq ha]
 
 /-- Identity under the stated parameter and domain assumptions: `(∫ t : ℝ in Ioi 0, exp
-(-a*t)*fresnelSinInt (Real.sqrt (2*t/π)))=(((a^2+1)^(1/2 : ℂ))-a)^(1/2 : ℂ)/(2*a*(a^2+1)^(1/2
+(-a*t)*fresnelS (Real.sqrt (2*t/π)))=(((a^2+1)^(1/2 : ℂ))-a)^(1/2 : ℂ)/(2*a*(a^2+1)^(1/2
 : ℂ))`. -/
 @[dlmf 7.14.E8]
-theorem fresnelSinInt_sqrt_laplace {a : ℂ} (ha : 0 < a.re) :
-    (∫ t : ℝ in Ioi 0, exp (-a*t)*fresnelSinInt (Real.sqrt (2*t/π)))=(((a^2+1)^(1/2 : ℂ))-a)^(1/2 :
+theorem fresnelS_sqrt_laplace {a : ℂ} (ha : 0 < a.re) :
+    (∫ t : ℝ in Ioi 0, exp (-a*t)*fresnelS (Real.sqrt (2*t/π)))=(((a^2+1)^(1/2 : ℂ))-a)^(1/2 :
         ℂ)/(2*a*(a^2+1)^(1/2 : ℂ)) := by
   have ha0 : a ≠ 0 := fun h => by simp [h] at ha
   have hm : (0:ℝ) < (a-I).re := by simpa using ha
@@ -1172,18 +1172,18 @@ theorem fresnelSinInt_sqrt_laplace {a : ℂ} (ha : 0 < a.re) :
   have hs2 : (Real.sqrt 2:ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr two_pos).ne'
   have hsp : (Real.sqrt π:ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hec : Continuous erf := differentiable_erf_complex.continuous
-  obtain ⟨B, hB⟩ := exists_bound_fresnel_sqrt fresnelSinInt_entire fresnelSinInt_ofReal
-    Real.tendsto_fresnelSinInt_atTop
+  obtain ⟨B, hB⟩ := exists_bound_fresnel_sqrt fresnelS_entire fresnelS_ofReal
+    Real.tendsto_fresnelS_atTop
   set k : ℂ := 1/(2*a*Real.sqrt 2*I)
   have key := integral_exp_mul_eq_of_antideriv (a := a) (B := B) ha
-    (u := fun t : ℝ => fresnelSinInt ((Real.sqrt (2*t/π):ℝ):ℂ))
+    (u := fun t : ℝ => fresnelS ((Real.sqrt (2*t/π):ℝ):ℂ))
     (u' := fun t : ℝ => sin (t:ℂ)*(((1/(π*Real.sqrt (2*t/π))):ℝ):ℂ))
     (G := fun t : ℝ => k*(u1⁻¹*erf (u1*(Real.sqrt t:ℂ)) - v1⁻¹*erf (v1*(Real.sqrt t:ℂ))))
     (L := k*(u1⁻¹*1 - v1⁻¹*1))
-    (fresnelSinInt_entire.continuous.comp (by fun_prop))
-    (by have h0 := fresnelSinInt_ofReal 0; simp [Real.fresnelSinInt] at h0; simpa using h0) hB
+    (fresnelS_entire.continuous.comp (by fun_prop))
+    (by have h0 := fresnelS_ofReal 0; simp [Real.fresnelS] at h0; simpa using h0) hB
     (fun t ht => by
-      have h := (hasDerivAt_fresnelSinInt_complex _).comp t (hasDerivAt_sqrt_two_mul_div_pi ht)
+      have h := (hasDerivAt_fresnelS_complex _).comp t (hasDerivAt_sqrt_two_mul_div_pi ht)
       rw [pi_mul_sqrt_two_mul_div_pi_sq ht.le] at h
       exact h)
     ((by fun_prop : Continuous fun t : ℝ =>

@@ -21,12 +21,13 @@ Laplace integral representations of the Gegenbauer, Legendre and Hermite polynom
 
 ## Main results
 
-* `ultrasphPoly_laplace_integral`, `legendre_laplace_integral`: DLMF 18.10.4 and 18.10.5.
-* `hermitePolyH_laplace_integral`, `hermitePolyH_fourier_integral`: DLMF 18.10.7 and
+* `ultrasphericalPolynomial_laplace_integral`, `legendre_laplace_integral`: DLMF 18.10.4 and
+  18.10.5.
+* `hermitePolynomialH_laplace_integral`, `hermitePolynomialH_fourier_integral`: DLMF 18.10.7 and
   18.10.10.
-* `hermitePolyH_integral`, `hermitePolyH_weighted_integral`: DLMF 18.17.3 and 18.17.4.
+* `hermitePolynomialH_integral`, `hermitePolynomialH_weighted_integral`: DLMF 18.17.3 and 18.17.4.
 * `legendre_product_integral`: DLMF 18.17.6.
-* `hermitePolyH_laplace_transform`: DLMF 18.17.35.
+* `hermitePolynomialH_laplace_transform`: DLMF 18.17.35.
 * `integral_cexp_gauss`: `∫ e^{-xz} e^{-x²} dx = √π e^{z²/4}`.
 -/
 
@@ -42,7 +43,7 @@ open DLMF.Confluent
 
 open DLMF.Bessel
 
-open DLMF.Hypergeometric (Gamma_add_nat_eq_poch_mul_Gamma)
+open DLMF.Hypergeometric (Gamma_add_nat_eq_pochhammer_mul_Gamma)
 
 noncomputable section
 
@@ -166,13 +167,13 @@ theorem gegenbauerLaplace_recurrence {lam : ℝ} (hlam : 0 < lam) (θ : ℝ) (n 
   simp only [gegenbauerLaplace]
   linear_combination h0
 
-/-- Identity under the stated parameter and domain assumptions: `ultrasphPoly lam n (Real.cos θ) /
-ultrasphPoly lam n 1 = Gamma (lam + 1 / 2 : ℂ) / (Real.sqrt Real.pi * Gamma (lam : ℂ)) * ∫ phi
-: ℝ in (0 : ℝ)..Real.pi, (Real.cos θ + I * Real.sin θ * Real.cos phi) ^ n * (Real.rpow
-(Real.sin phi) (2 * lam - 1) : ℂ)`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`ultrasphericalPolynomial lam n (Real.cos θ) / ultrasphericalPolynomial lam n 1 = Gamma (lam + 1 / 2
+: ℂ) / (Real.sqrt Real.pi * Gamma (lam : ℂ)) * ∫ phi : ℝ in (0 : ℝ)..Real.pi, (Real.cos θ + I *
+Real.sin θ * Real.cos phi) ^ n * (Real.rpow (Real.sin phi) (2 * lam - 1) : ℂ)`. -/
 @[dlmf 18.10.E4]
-theorem ultrasphPoly_laplace_integral {lam : ℝ} (hlam : 0 < lam) (n : ℕ) (θ : ℝ) :
-    ultrasphPoly lam n (Real.cos θ) / ultrasphPoly lam n 1 =
+theorem ultrasphericalPolynomial_laplace_integral {lam : ℝ} (hlam : 0 < lam) (n : ℕ) (θ : ℝ) :
+    ultrasphericalPolynomial lam n (Real.cos θ) / ultrasphericalPolynomial lam n 1 =
       Gamma (lam + 1 / 2 : ℂ) / (Real.sqrt Real.pi * Gamma (lam : ℂ)) *
         ∫ phi : ℝ in (0 : ℝ)..Real.pi, (Real.cos θ + I * Real.sin θ * Real.cos phi) ^ n *
           (Real.rpow (Real.sin phi) (2 * lam - 1) : ℂ) := by
@@ -184,7 +185,8 @@ theorem ultrasphPoly_laplace_integral {lam : ℝ} (hlam : 0 < lam) (n : ℕ) (θ
   have hK0 : K ≠ 0 := Complex.ofReal_ne_zero.mpr (by positivity)
   have hlamC : 0 < (lam : ℂ).re := by simpa using hlam
   -- the normalized polynomials
-  set R : ℕ → ℂ := fun n => ultrasphPoly lam n (Real.cos θ) / ultrasphPoly lam n 1 with hR
+  set R : ℕ → ℂ := fun n => ultrasphericalPolynomial lam n (Real.cos θ) /
+      ultrasphericalPolynomial lam n 1 with hR
   have hbase0 : gegenbauerLaplace lam θ 0 = K := by
     simp only [gegenbauerLaplace, pow_zero, one_mul, hK]
     rw [intervalIntegral.integral_ofReal, hρint]
@@ -227,12 +229,12 @@ theorem ultrasphPoly_laplace_integral {lam : ℝ} (hlam : 0 < lam) (n : ℕ) (θ
     induction n with
     | zero =>
       refine ⟨?_, ?_⟩
-      · rw [hbase0]; simp [hR, ultrasphPoly_zero]
-      · rw [hbase1]; simp only [hR, zero_add, ultrasphPoly_normalized_one hlamC]; ring
+      · rw [hbase0]; simp [hR, ultrasphericalPolynomial_zero]
+      · rw [hbase1]; simp only [hR, zero_add, ultrasphericalPolynomial_normalized_one hlamC]; ring
     | succ n ih =>
       refine ⟨ih.2, ?_⟩
       have hr := gegenbauerLaplace_recurrence hlam θ n
-      have hP := ultrasphPoly_normalized_recurrence hlamC n (Real.cos θ)
+      have hP := ultrasphericalPolynomial_normalized_recurrence hlamC n (Real.cos θ)
       rw [ih.1, ih.2] at hr
       have hn : (n + 1 + 2 * lam : ℂ) ≠ 0 := by
         intro h; have := congrArg Complex.re h; simp at this; linarith
@@ -308,16 +310,16 @@ theorem legendreLaplace_recurrence (θ : ℝ) (n : ℕ) :
   simp only [legendreLaplace]
   linear_combination h0
 
-/-- Identity under the stated parameter and domain assumptions: `legendrePolyP n (Real.cos θ) =
-(Real.pi : ℂ)⁻¹ * ∫ phi : ℝ in (0 : ℝ)..Real.pi, (Real.cos θ + I * Real.sin θ * Real.cos phi)
-^ n`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`legendrePolynomialP n (Real.cos θ) = (Real.pi : ℂ)⁻¹ * ∫ phi : ℝ in (0 : ℝ)..Real.pi, (Real.cos θ +
+I * Real.sin θ * Real.cos phi) ^ n`. -/
 @[dlmf 18.10.E5]
 theorem legendre_laplace_integral (n : ℕ) (θ : ℝ) :
-    legendrePolyP n (Real.cos θ) = (Real.pi : ℂ)⁻¹ *
+    legendrePolynomialP n (Real.cos θ) = (Real.pi : ℂ)⁻¹ *
       ∫ phi : ℝ in (0 : ℝ)..Real.pi, (Real.cos θ + I * Real.sin θ * Real.cos phi) ^ n := by
   have hπ : (π : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
-  suffices h : ∀ n : ℕ, legendreLaplace θ n = π * legendrePolyP n (Real.cos θ) ∧
-      legendreLaplace θ (n + 1) = π * legendrePolyP (n + 1) (Real.cos θ) by
+  suffices h : ∀ n : ℕ, legendreLaplace θ n = π * legendrePolynomialP n (Real.cos θ) ∧
+      legendreLaplace θ (n + 1) = π * legendrePolynomialP (n + 1) (Real.cos θ) by
     rw [show (∫ t : ℝ in (0 : ℝ)..Real.pi, ((Real.cos θ : ℂ) + I * Real.sin θ * Real.cos t) ^ n)
       = legendreLaplace θ n from rfl, (h n).1]
     field_simp
@@ -325,8 +327,8 @@ theorem legendre_laplace_integral (n : ℕ) (θ : ℝ) :
   induction n with
   | zero =>
     refine ⟨?_, ?_⟩
-    · simp [legendreLaplace, legendrePolyP_zero]
-    · simp only [legendreLaplace, zero_add, pow_one, legendrePolyP_one]
+    · simp [legendreLaplace, legendrePolynomialP_zero]
+    · simp only [legendreLaplace, zero_add, pow_one, legendrePolynomialP_one]
       rw [intervalIntegral.integral_add intervalIntegrable_const
         ((by fun_prop : Continuous fun t : ℝ => I * (Real.sin θ : ℂ) * Real.cos t
           ).intervalIntegrable 0 π), intervalIntegral.integral_const_mul,
@@ -336,7 +338,7 @@ theorem legendre_laplace_integral (n : ℕ) (θ : ℝ) :
   | succ n ih =>
     refine ⟨ih.2, ?_⟩
     have hr := legendreLaplace_recurrence θ n
-    have hP := legendrePolyP_recurrence n (Real.cos θ)
+    have hP := legendrePolynomialP_recurrence n (Real.cos θ)
     rw [ih.1, ih.2] at hr
     have hn : (n + 2 : ℂ) ≠ 0 := by norm_cast
     apply mul_left_cancel₀ hn
@@ -445,14 +447,15 @@ theorem integral_cexp_gauss (z : ℂ) :
 /-- The Laplace transform of `Hₙ(x) e^{-x²}` over `ℝ` is `√π (-z)ⁿ e^{z²/4}`
 (DLMF 18.17.35). -/
 @[dlmf 18.17.E35]
-theorem hermitePolyH_laplace_transform (n : ℕ) (z : ℂ) :
-    ∫ x : ℝ, exp (-x * z) * (aeval (x : ℂ) (hermitePolyH n) : ℂ) * exp (-(x : ℂ) ^ 2) =
+theorem hermitePolynomialH_laplace_transform (n : ℕ) (z : ℂ) :
+    ∫ x : ℝ, exp (-x * z) * (aeval (x : ℂ) (hermitePolynomialH n) : ℂ) * exp (-(x : ℂ) ^ 2) =
       Real.sqrt Real.pi * (-z) ^ n * exp (z ^ 2 / 4) := by
-  have heq : ∀ x : ℝ, exp (-x * z) * (aeval (x : ℂ) (hermitePolyH n) : ℂ) * exp (-(x : ℂ) ^ 2) =
+  have heq : ∀ x : ℝ, exp (-x * z) * (aeval (x : ℂ) (hermitePolynomialH n) : ℂ) *
+      exp (-(x : ℂ) ^ 2) =
       cexp (-x * z) * (((hermitePolyHR n).eval x * Real.exp (-(x ^ 2)) : ℝ) : ℂ) := fun x => by
-    have : (aeval (x : ℂ) (hermitePolyH n) : ℂ) = (((hermitePolyHR n).eval x : ℝ) : ℂ) := by
-      rw [← aeval_hermitePolyH_eq_eval]
-      exact aeval_algebraMap_apply ℂ x (hermitePolyH n)
+    have : (aeval (x : ℂ) (hermitePolynomialH n) : ℂ) = (((hermitePolyHR n).eval x : ℝ) : ℂ) := by
+      rw [← aeval_hermitePolynomialH_eq_eval]
+      exact aeval_algebraMap_apply ℂ x (hermitePolynomialH n)
     rw [this, ofReal_mul, ofReal_exp]; push_cast; ring
   simp_rw [heq]
   rw [integral_cexp_mul_hermite_gauss, integral_cexp_gauss]
@@ -510,11 +513,12 @@ theorem integral_t_mul_add_I_pow (x : ℂ) (n : ℕ) :
       (Eventually.of_forall fun t => ?_)
     simp only [Pi.mul_apply]; push_cast; ring
 
-/-- Identity under the stated parameter and domain assumptions: `aeval x (hermitePolyH n) = (2 :
-ℂ) ^ n / Real.sqrt Real.pi * ∫ t : ℝ, (x + I * t) ^ n * Real.exp (-(t ^ 2))`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`aeval x (hermitePolynomialH n) = (2 : ℂ) ^ n / Real.sqrt Real.pi * ∫ t : ℝ, (x + I * t) ^ n *
+Real.exp (-(t ^ 2))`. -/
 @[dlmf 18.10.E7]
-theorem hermitePolyH_laplace_integral (n : ℕ) (x : ℂ) :
-    aeval x (hermitePolyH n) = (2 : ℂ) ^ n / Real.sqrt Real.pi *
+theorem hermitePolynomialH_laplace_integral (n : ℕ) (x : ℂ) :
+    aeval x (hermitePolynomialH n) = (2 : ℂ) ^ n / Real.sqrt Real.pi *
       ∫ t : ℝ, (x + I * t) ^ n * Real.exp (-(t ^ 2)) := by
   set F : ℕ → ℂ := fun n => ∫ t : ℝ, (x + I * t) ^ n * ((Real.exp (-(t ^ 2)) : ℝ) : ℂ) with hF
   have hπ : (Real.sqrt Real.pi : ℂ) ≠ 0 :=
@@ -553,13 +557,13 @@ theorem hermitePolyH_laplace_integral (n : ℕ) (x : ℂ) :
       ((Real.exp (-(t ^ 2)) : ℝ) : ℂ)) = I ^ 2 * (((n : ℂ) + 1) / 2) * ∫ t : ℝ, (x + I * t) ^ n *
       ((Real.exp (-(t ^ 2)) : ℝ) : ℂ) by ring, I_sq]
     ring
-  have key : ∀ n : ℕ, (2 : ℂ) ^ n * F n = Real.sqrt Real.pi * aeval x (hermitePolyH n) := by
+  have key : ∀ n : ℕ, (2 : ℂ) ^ n * F n = Real.sqrt Real.pi * aeval x (hermitePolynomialH n) := by
     intro n
     induction n using Nat.twoStepInduction with
     | zero => simp [hF0]
-    | one => rw [hF1, hermitePolyH_one, map_mul, aeval_X, map_ofNat]; ring
+    | one => rw [hF1, hermitePolynomialH_one, map_mul, aeval_X, map_ofNat]; ring
     | more n ih0 ih1 =>
-      rw [hrec, aeval_hermitePolyH_succ_succ]
+      rw [hrec, aeval_hermitePolynomialH_succ_succ]
       linear_combination 2 * x * ih1 - 2 * ((n : ℂ) + 1) * ih0
   have hn := key n
   simp only [hF] at hn
@@ -666,12 +670,13 @@ theorem integral_K_one (x : ℝ) :
       funext t; push_cast; ring, integral_const_mul]
   ring
 
-/-- Identity under the stated parameter and domain assumptions: `(aeval (x : ℂ) (hermitePolyH n) :
-ℂ) = (-2 * I) ^ n * exp ((x : ℂ) ^ 2) / Real.sqrt Real.pi * ∫ t : ℝ, Real.exp (-(t ^ 2)) * (t
-: ℂ) ^ n * exp (2 * I * x * t)`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`(aeval (x : ℂ) (hermitePolynomialH n) : ℂ) = (-2 * I) ^ n * exp ((x : ℂ) ^ 2) / Real.sqrt Real.pi *
+∫ t : ℝ, Real.exp (-(t ^ 2)) * (t : ℂ) ^ n * exp (2 * I * x * t)`. -/
 @[dlmf 18.10.E10]
-theorem hermitePolyH_fourier_integral (n : ℕ) (x : ℝ) :
-    (aeval (x : ℂ) (hermitePolyH n) : ℂ) = (-2 * I) ^ n * exp ((x : ℂ) ^ 2) / Real.sqrt Real.pi *
+theorem hermitePolynomialH_fourier_integral (n : ℕ) (x : ℝ) :
+    (aeval (x : ℂ) (hermitePolynomialH n) : ℂ) = (-2 * I) ^ n * exp ((x : ℂ) ^ 2) /
+        Real.sqrt Real.pi *
       ∫ t : ℝ, Real.exp (-(t ^ 2)) * (t : ℂ) ^ n * exp (2 * I * x * t) := by
   set K : ℕ → ℂ := fun n => ∫ t : ℝ, ((Real.exp (-(t ^ 2)) : ℝ) : ℂ) * (t : ℂ) ^ n *
     cexp (2 * I * x * t) with hK
@@ -679,7 +684,7 @@ theorem hermitePolyH_fourier_integral (n : ℕ) (x : ℝ) :
     ofReal_ne_zero.mpr (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hE : cexp ((x : ℂ) ^ 2) * cexp (-(x : ℂ) ^ 2) = 1 := by rw [← Complex.exp_add]; simp
   have key : ∀ n : ℕ, (-2 * I) ^ n * cexp ((x : ℂ) ^ 2) / Real.sqrt Real.pi * K n =
-      aeval (x : ℂ) (hermitePolyH n) := by
+      aeval (x : ℂ) (hermitePolynomialH n) := by
     intro n
     induction n using Nat.twoStepInduction with
     | zero =>
@@ -689,13 +694,13 @@ theorem hermitePolyH_fourier_integral (n : ℕ) (x : ℝ) :
       simp [hE]
     | one =>
       simp only [hK]
-      rw [integral_K_one, integral_K_zero, hermitePolyH_one, map_mul, aeval_X, map_ofNat]
+      rw [integral_K_one, integral_K_zero, hermitePolynomialH_one, map_mul, aeval_X, map_ofNat]
       generalize (Real.sqrt Real.pi : ℂ) = sp at hπ ⊢
       field_simp
       linear_combination (-(x : ℂ) * I ^ 2) * hE + (-(x : ℂ)) * I_sq
     | more n ih0 ih1 =>
       simp only [hK] at ih0 ih1 ⊢
-      rw [integral_K_succ_succ, aeval_hermitePolyH_succ_succ, ← ih0, ← ih1]
+      rw [integral_K_succ_succ, aeval_hermitePolynomialH_succ_succ, ← ih0, ← ih1]
       generalize (∫ t : ℝ, ((Real.exp (-(t ^ 2)) : ℝ) : ℂ) * (t : ℂ) ^ (n + 1) *
         cexp (2 * I * x * t)) = A
       generalize (∫ t : ℝ, ((Real.exp (-(t ^ 2)) : ℝ) : ℂ) * (t : ℂ) ^ n *
@@ -710,15 +715,16 @@ theorem hermitePolyH_fourier_integral (n : ℕ) (x : ℝ) :
 
 /-- An interval antiderivative of the physicists’ Hermite polynomial. -/
 @[dlmf 18.17.E3]
-theorem hermitePolyH_integral (n : ℕ) (x : ℝ) :
-    ∫ y : ℝ in (0 : ℝ)..x, (aeval y (hermitePolyH n) : ℝ) =
-      (aeval x (hermitePolyH (n + 1)) - aeval (0 : ℝ) (hermitePolyH (n + 1))) / (2 * (n + 1)) := by
-  have hd (t : ℝ) : HasDerivAt (fun y : ℝ => aeval y (hermitePolyH (n + 1)))
-      (2 * (n + 1) * aeval t (hermitePolyH n)) t := by
-    have h := (hermitePolyH (n + 1)).hasDerivAt_aeval t
-    rw [hermitePolyH_derivative] at h
+theorem hermitePolynomialH_integral (n : ℕ) (x : ℝ) :
+    ∫ y : ℝ in (0 : ℝ)..x, (aeval y (hermitePolynomialH n) : ℝ) =
+      (aeval x (hermitePolynomialH (n + 1)) - aeval (0 : ℝ) (hermitePolynomialH (n + 1))) /
+          (2 * (n + 1)) := by
+  have hd (t : ℝ) : HasDerivAt (fun y : ℝ => aeval y (hermitePolynomialH (n + 1)))
+      (2 * (n + 1) * aeval t (hermitePolynomialH n)) t := by
+    have h := (hermitePolynomialH (n + 1)).hasDerivAt_aeval t
+    rw [hermitePolynomialH_derivative] at h
     simpa only [map_mul, aeval_C, map_ofNat, map_add, map_natCast, map_one] using h
-  have hi : IntervalIntegrable (fun t : ℝ => 2 * (n + 1) * aeval t (hermitePolyH n))
+  have hi : IntervalIntegrable (fun t : ℝ => 2 * (n + 1) * aeval t (hermitePolynomialH n))
       volume 0 x := (by fun_prop : Continuous _).intervalIntegrable _ _
   have h := intervalIntegral.integral_eq_sub_of_hasDerivAt (fun t _ => hd t) hi
   rw [intervalIntegral.integral_const_mul] at h
@@ -727,21 +733,23 @@ theorem hermitePolyH_integral (n : ℕ) (x : ℝ) :
 
 /-- An interval antiderivative of a Gaussian-weighted physicists’ Hermite polynomial. -/
 @[dlmf 18.17.E4]
-theorem hermitePolyH_weighted_integral (n : ℕ) (x : ℝ) :
-    ∫ y : ℝ in (0 : ℝ)..x, Real.exp (-(y ^ 2)) * (aeval y (hermitePolyH (n + 1)) : ℝ) =
-      aeval (0 : ℝ) (hermitePolyH n) - Real.exp (-(x ^ 2)) * aeval x (hermitePolyH n) := by
-  let g : ℝ → ℝ := fun t => Real.exp (-(t ^ 2)) * aeval t (hermitePolyH n)
+theorem hermitePolynomialH_weighted_integral (n : ℕ) (x : ℝ) :
+    ∫ y : ℝ in (0 : ℝ)..x, Real.exp (-(y ^ 2)) * (aeval y (hermitePolynomialH (n + 1)) : ℝ) =
+      aeval (0 : ℝ) (hermitePolynomialH n) - Real.exp (-(x ^ 2)) *
+          aeval x (hermitePolynomialH n) := by
+  let g : ℝ → ℝ := fun t => Real.exp (-(t ^ 2)) * aeval t (hermitePolynomialH n)
   have hd (t : ℝ) : HasDerivAt (fun y => -g y)
-      (Real.exp (-(t ^ 2)) * aeval t (hermitePolyH (n + 1))) t := by
+      (Real.exp (-(t ^ 2)) * aeval t (hermitePolynomialH (n + 1))) t := by
     have hg : DifferentiableAt ℝ g t :=
       (by fun_prop : DifferentiableAt ℝ (fun t : ℝ => Real.exp (-(t ^ 2))) t).mul
-        ((hermitePolyH n).hasDerivAt_aeval t).differentiableAt
+        ((hermitePolynomialH n).hasDerivAt_aeval t).differentiableAt
     have ht := hg.hasDerivAt.neg
     change HasDerivAt (fun y => -g y) (-deriv g t) t at ht
-    simpa only [g, DLMF.OrthogonalPolynomials.hermitePolyH_weighted_derivative, neg_mul, neg_neg]
+    simpa only [g, DLMF.OrthogonalPolynomials.hermitePolynomialH_weighted_derivative,
+        neg_mul, neg_neg]
       using ht
   have hi : IntervalIntegrable
-      (fun y : ℝ => Real.exp (-(y ^ 2)) * (aeval y (hermitePolyH (n + 1)) : ℝ)) volume 0 x :=
+      (fun y : ℝ => Real.exp (-(y ^ 2)) * (aeval y (hermitePolynomialH (n + 1)) : ℝ)) volume 0 x :=
     (by fun_prop : Continuous _).intervalIntegrable _ _
   have h := intervalIntegral.integral_eq_sub_of_hasDerivAt (fun t _ => hd t) hi
   simpa only [g, zero_pow (by decide : 2 ≠ 0), neg_zero, Real.exp_zero, one_mul,
@@ -760,20 +768,21 @@ theorem integral_cos_nat_pi {k : ℕ} (hk : 0 < k) :
   simpa only [mul_zero, sin_zero, zero_div, sub_zero, ← ofReal_natCast, ← ofReal_mul,
     ← ofReal_sin, Real.sin_nat_mul_pi, ofReal_zero, zero_div] using hh
 
-/-- Identity under the stated parameter and domain assumptions: `legendrePolyP n (Real.cos θ) *
-legendrePolyP n (Real.cos ψ) = (Real.pi : ℂ)⁻¹ * ∫ phi : ℝ in (0 : ℝ)..Real.pi, legendrePolyP
-n (Real.cos θ * Real.cos ψ + Real.sin θ * Real.sin ψ * Real.cos phi)`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`legendrePolynomialP n (Real.cos θ) * legendrePolynomialP n (Real.cos ψ) = (Real.pi : ℂ)⁻¹ * ∫ phi :
+ℝ in (0 : ℝ)..Real.pi, legendrePolynomialP n (Real.cos θ * Real.cos ψ + Real.sin θ * Real.sin ψ *
+Real.cos phi)`. -/
 @[dlmf 18.17.E6]
 theorem legendre_product_integral (n : ℕ) (θ ψ : ℝ) :
-    legendrePolyP n (Real.cos θ) * legendrePolyP n (Real.cos ψ) = (Real.pi : ℂ)⁻¹ *
-      ∫ phi : ℝ in (0 : ℝ)..Real.pi, legendrePolyP n
+    legendrePolynomialP n (Real.cos θ) * legendrePolynomialP n (Real.cos ψ) = (Real.pi : ℂ)⁻¹ *
+      ∫ phi : ℝ in (0 : ℝ)..Real.pi, legendrePolynomialP n
         (Real.cos θ * Real.cos ψ + Real.sin θ * Real.sin ψ * Real.cos phi) := by
   let c (k : ℕ) : ℂ := ((n-k)! : ℂ) * (n+k)! / (2^(2*k)*(n ! : ℂ)^2) *
-    (Real.sin θ : ℂ)^k * jacobiPolyP k k (n-k) (Real.cos θ) *
-    (Real.sin ψ : ℂ)^k * jacobiPolyP k k (n-k) (Real.cos ψ)
-  have he : (fun phi : ℝ => legendrePolyP n
+    (Real.sin θ : ℂ)^k * jacobiPolynomialP k k (n-k) (Real.cos θ) *
+    (Real.sin ψ : ℂ)^k * jacobiPolynomialP k k (n-k) (Real.cos ψ)
+  have he : (fun phi : ℝ => legendrePolynomialP n
       (Real.cos θ*Real.cos ψ + Real.sin θ*Real.sin ψ*Real.cos phi)) =
-      fun phi => legendrePolyP n (Real.cos θ)*legendrePolyP n (Real.cos ψ) +
+      fun phi => legendrePolynomialP n (Real.cos θ)*legendrePolynomialP n (Real.cos ψ) +
         2*∑ k ∈ Finset.Icc 1 n, c k*(Real.cos (k*phi) : ℂ) := by
     funext phi
     exact legendre_addition n θ ψ phi

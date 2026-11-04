@@ -315,12 +315,12 @@ theorem legCon_tendsto_P (ν μ : ℂ) :
     Tendsto (fun x : ℝ => (1-(x:ℂ)^2)^(μ/2) * ferrersP ν μ x) (𝓝[<] 1)
       (𝓝 ((2:ℂ)^μ * (Gamma (1-μ))⁻¹)) := by
   have hc : ContinuousAt (fun x : ℝ => (1+(x:ℂ))^μ *
-      regularizedGaussHG (ν+1) (-ν) (1-μ) ((1-(x:ℂ))/2)) 1 :=
+      regularizedGaussHypergeometric (ν+1) (-ν) (1-μ) ((1-(x:ℂ))/2)) 1 :=
     (ContinuousAt.cpow (by fun_prop) continuousAt_const (Or.inl (by norm_num))).mul
-      (continuousAt_regularizedGaussHG_half_one _ _ _)
-  have h1 : (1+((1:ℝ):ℂ))^μ * regularizedGaussHG (ν+1) (-ν) (1-μ) ((1-((1:ℝ):ℂ))/2) =
+      (continuousAt_regularizedGaussHypergeometric_half_one _ _ _)
+  have h1 : (1+((1:ℝ):ℂ))^μ * regularizedGaussHypergeometric (ν+1) (-ν) (1-μ) ((1-((1:ℝ):ℂ))/2) =
       (2:ℂ)^μ * (Gamma (1-μ))⁻¹ := by
-    rw [show (1-((1:ℝ):ℂ))/2 = 0 by simp, regularizedGaussHG_at_zero]; norm_num
+    rw [show (1-((1:ℝ):ℂ))/2 = 0 by simp, regularizedGaussHypergeometric_at_zero]; norm_num
   rw [← h1]
   refine (hc.tendsto.mono_left nhdsWithin_le_nhds).congr' ?_
   filter_upwards [Ioo_mem_nhdsLT (show (-1:ℝ) < 1 by norm_num)] with x hx
@@ -340,7 +340,7 @@ theorem legCon_tendsto_P (ν μ : ℂ) :
 theorem legCon_tendsto_P_neg (ν : ℂ) {μ : ℝ} (hμ : 0 < μ) :
     Tendsto (fun x : ℝ => (1-(x:ℂ)^2)^((μ:ℂ)/2) * ferrersP ν (-(μ:ℂ)) (-x)) (𝓝[<] 1)
       (𝓝 ((2:ℂ)^(μ:ℂ) * (Gamma (μ:ℂ) * ((Gamma ((μ:ℂ)-ν))⁻¹ * (Gamma ((μ:ℂ)+ν+1))⁻¹)))) := by
-  have hF := BoundaryAsymptotics.tendsto_regularizedGaussHG_one (a := ν+1) (b := -ν)
+  have hF := BoundaryAsymptotics.tendsto_regularizedGaussHypergeometric_one (a := ν+1) (b := -ν)
       (c := 1-(-(μ:ℂ)))
     (by simp only [sub_re, neg_re, add_re, one_re, ofReal_re]; linarith)
   rw [show 1-(-(μ:ℂ))-(ν+1)-(-ν) = (μ:ℂ) by ring, show 1-(-(μ:ℂ))-(ν+1) = (μ:ℂ)-ν by ring,
@@ -591,14 +591,15 @@ theorem conical_mehler_integral (τ : ℝ) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < 
   linear_combination J * (π:ℂ) * hs - 2 * J * hp
 
 /-- The conical Pochhammer product `(1/2+iτ)ₖ(1/2-iτ)ₖ = ∏ (4τ²+(2j+1)²)/4ᵏ`. -/
-theorem poch_conical (τ : ℝ) (k : ℕ) :
-    poch (1/2+I*τ) k * poch (1/2-I*τ) k = (∏ j ∈ Finset.range k, (4*τ^2+(2*j+1)^2:ℂ))/4^k := by
+theorem pochhammer_conical (τ : ℝ) (k : ℕ) :
+    pochhammer (1/2+I*τ) k * pochhammer (1/2-I*τ) k =
+        (∏ j ∈ Finset.range k, (4*τ^2+(2*j+1)^2:ℂ))/4^k := by
   induction k with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ k ih =>
-    rw [poch_succ, poch_succ, Finset.prod_range_succ, pow_succ,
-      show poch (1/2+I*τ) k * (1/2+I*τ+k) * (poch (1/2-I*τ) k * (1/2-I*τ+k)) =
-        (poch (1/2+I*τ) k * poch (1/2-I*τ) k) * ((1/2+I*τ+k)*(1/2-I*τ+k)) by ring, ih]
+    rw [pochhammer_succ, pochhammer_succ, Finset.prod_range_succ, pow_succ,
+      show pochhammer (1/2+I*τ) k * (1/2+I*τ+k) * (pochhammer (1/2-I*τ) k * (1/2-I*τ+k)) =
+        (pochhammer (1/2+I*τ) k * pochhammer (1/2-I*τ) k) * ((1/2+I*τ+k)*(1/2-I*τ+k)) by ring, ih]
     have : (1/2+I*τ+k)*(1/2-I*τ+k) = (4*τ^2+(2*k+1)^2:ℂ)/4 := by
       linear_combination (-(τ:ℂ)^2) * I_sq
     rw [this]; field_simp; ring
@@ -624,16 +625,16 @@ theorem conical_power_series (τ : ℝ) {θ : ℝ} (h0 : 0 ≤ θ) (hπ : θ < �
       exact Real.sin_lt_sin_of_lt_of_le_pi_div_two (by linarith) (by linarith) (by linarith)
     have h2 : 0 ≤ Real.sin (θ/2) := Real.sin_nonneg_of_nonneg_of_le_pi (by linarith) (by linarith)
     nlinarith
-  have h := hasSum_regularizedGaussHGFun_coeff (1/2+I*τ) (1/2-I*τ) 1 hw
+  have h := hasSum_regularizedGaussHypergeometricFun_coeff (1/2+I*τ) (1/2-I*τ) 1 hw
   have e : conicalP τ 0 (Real.cos θ) =
       regularizedGaussHGFun (1/2+I*τ) (1/2-I*τ) 1 ((Real.sin (θ/2):ℂ)^2) := by
     unfold conicalP ferrersP
-    rw [hs, regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hw]
+    rw [hs, regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hw]
     simp only [ofReal_zero, neg_zero, zero_div, cpow_zero, one_mul, sub_zero]
     congr 1 <;> ring
   rw [e]
   refine h.congr_fun fun k => ?_
-  rw [poch_conical, add_comm (1:ℂ), Gamma_nat_eq_factorial, ← pow_mul]
+  rw [pochhammer_conical, add_comm (1:ℂ), Gamma_nat_eq_factorial, ← pow_mul]
   field_simp
 
 /-- Positivity stated in DLMF 14.20(v). -/

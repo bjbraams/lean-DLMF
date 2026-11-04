@@ -24,7 +24,7 @@ partial sums and error terms are described in `DLMF.NumberTheory.Asymptotics`.
 
 * `sum_sigma_zero_asymptotic`, `sum_sigma_zero_huxley`, `sum_sigma_zero_div_asymptotic`:
   Dirichlet's divisor sum DLMF 27.11.2 with Huxley's bound on its error term, and DLMF 27.11.3.
-* `sum_sigma_one_asymptotic`, `sum_sigmaC_asymptotic`: the sums of `σ₁` and `σ_α`
+* `sum_sigma_one_asymptotic`, `sum_sigmaCpow_asymptotic`: the sums of `σ₁` and `σ_α`
   (DLMF 27.11.4 and 27.11.5).
 * `sum_totient_asymptotic`, `sum_totient_div_asymptotic`: DLMF 27.11.6 and 27.11.7.
 * `sum_prime_inv_asymptotic`, `sum_prime_inv_ap_asymptotic`: Mertens' sum of `1/p`, also over an
@@ -790,27 +790,27 @@ private lemma riemannZeta_add_one_eq_realZetaSucc {α : ℝ} (hα : 0 < α) :
   push_cast; rfl
 
 /-- `σ_α(n)` for real `α` is the real divisor sum. -/
-private lemma sigmaC_ofReal (α : ℝ) (n : ℕ) :
-    sigmaC α n = ((∑ d ∈ n.divisors, (d : ℝ) ^ α : ℝ) : ℂ) := by
-  rw [sigmaC_apply, Complex.ofReal_sum]
+private lemma sigmaCpow_ofReal (α : ℝ) (n : ℕ) :
+    sigmaCpow α n = ((∑ d ∈ n.divisors, (d : ℝ) ^ α : ℝ) : ℂ) := by
+  rw [sigmaCpow_apply, Complex.ofReal_sum]
   refine sum_congr rfl fun d _ ↦ ?_
   rw [Complex.ofReal_cpow (by positivity)]
   rfl
 
 /-- DLMF 27.11.5 (proof). -/
-private lemma hasPartialSumAsymptotic_sigmaC {α : ℝ} (hα : 0 < α) (hα1 : α ≠ 1) :
-    HasPartialSumAsymptotic (fun n ↦ sigmaC α n)
+private lemma hasPartialSumAsymptotic_sigmaCpow {α : ℝ} (hα : 0 < α) (hα1 : α ≠ 1) :
+    HasPartialSumAsymptotic (fun n ↦ sigmaCpow α n)
       (fun x ↦ riemannZeta (α + 1) / (α + 1) * ((x ^ (α + 1) : ℝ) : ℂ))
       (fun x ↦ ((x ^ max 1 α : ℝ) : ℂ)) := by
   unfold HasPartialSumAsymptotic
   obtain ⟨K, hK0, hK⟩ := exists_abs_sum_sum_divisors_rpow_sub_le hα hα1
   have hp : 0 < α + 1 := by linarith
-  have he : (fun x : ℝ ↦ ∑ n ∈ Finset.Icc 1 ⌊x⌋₊, sigmaC α n -
+  have he : (fun x : ℝ ↦ ∑ n ∈ Finset.Icc 1 ⌊x⌋₊, sigmaCpow α n -
       riemannZeta (α + 1) / (α + 1) * ((x ^ (α + 1) : ℝ) : ℂ)) =
       fun x ↦ ((∑ n ∈ Finset.Icc 1 ⌊x⌋₊, ∑ d ∈ n.divisors, (d : ℝ) ^ α -
         realZetaSucc α * x ^ (α + 1) / (α + 1) : ℝ) : ℂ) := by
     funext x
-    simp only [sigmaC_ofReal, riemannZeta_add_one_eq_realZetaSucc hα]
+    simp only [sigmaCpow_ofReal, riemannZeta_add_one_eq_realZetaSucc hα]
     push_cast; ring
   rw [he]
   refine isBigO_ofReal_of_abs_le (K + realZetaSucc α) ?_
@@ -897,11 +897,11 @@ theorem sum_sigma_one_asymptotic :
 /-- DLMF 27.11.5: `∑_{n≤x} σ_α(n) = ζ(α + 1)/(α + 1) x^{α+1} + O(x^β)`, `α > 0`, `α ≠ 1`,
 `β = max(1, α)`. -/
 @[dlmf 27.11.E5]
-theorem sum_sigmaC_asymptotic {α : ℝ} (hα : 0 < α) (hα1 : α ≠ 1) :
-    HasPartialSumAsymptotic (fun n ↦ sigmaC α n)
+theorem sum_sigmaCpow_asymptotic {α : ℝ} (hα : 0 < α) (hα1 : α ≠ 1) :
+    HasPartialSumAsymptotic (fun n ↦ sigmaCpow α n)
       (fun x ↦ riemannZeta (α + 1) / (α + 1) * ((x ^ (α + 1) : ℝ) : ℂ))
       (fun x ↦ ((x ^ max 1 α : ℝ) : ℂ)) :=
-  hasPartialSumAsymptotic_sigmaC hα hα1
+  hasPartialSumAsymptotic_sigmaCpow hα hα1
 
 /-- DLMF 27.11.6: `∑_{n≤x} φ(n) = (3/π²) x² + O(x ln x)`. -/
 @[dlmf 27.11.E6]

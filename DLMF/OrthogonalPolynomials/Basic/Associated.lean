@@ -83,12 +83,12 @@ def pollaczek (lam a b : ℂ) (c : ℝ) : ℕ → ℂ → ℂ :=
 /-- The Bessel polynomial `y_n(x; a) = ₂F₀(-n, n+a-1; ; -x/2)` (DLMF 18.34.1). -/
 @[dlmf 18.34.E1]
 def besselPolynomial (a : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
-  terminatingHG n [-(n : ℂ), n + a - 1] [] (-x / 2)
+  terminatingHypergeometric n [-(n : ℂ), n + a - 1] [] (-x / 2)
 
 /-- Polynomial form of the reversal, valid also at zero. -/
 @[dlmf 18.34.E2]
 def reverseBesselPolynomial (n : ℕ) (x : ℂ) : ℂ :=
-  ∑ k ∈ Finset.range (n + 1), poch (-(n : ℂ)) k * poch (n + 1) k *
+  ∑ k ∈ Finset.range (n + 1), pochhammer (-(n : ℂ)) k * pochhammer (n + 1) k *
     (-1 / 2 : ℂ) ^ k * x ^ (n - k) / k.factorial
 
 /-- Identity under the stated parameter and domain assumptions: `associated A B C c 0 x = 1`. -/

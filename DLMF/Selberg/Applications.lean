@@ -37,7 +37,7 @@ of Selberg's integral.
 ## Implementation notes
 
 Mathlib already defines `gaussSum`. The discriminant of a Jacobi polynomial (AAR
-Theorem 8.5.3) is `DLMF.OrthogonalPolynomials.jacobiPolyP_prod_sq_sub`.
+Theorem 8.5.3) is `DLMF.OrthogonalPolynomials.jacobiPolynomialP_prod_sq_sub`.
 -/
 
 @[expose] public section
@@ -110,40 +110,41 @@ two Beta integrals. Dividing by the `r = 0` term gives the nearly poised series.
 namespace NearlyPoised
 
 open MeasureTheory Set
-open DLMF.Gamma (poch_neg_eq)
-open DLMF.Hypergeometric (Gamma_add_nat_eq_poch_mul_Gamma)
+open DLMF.Gamma (pochhammer_neg_eq)
+open DLMF.Hypergeometric (Gamma_add_nat_eq_pochhammer_mul_Gamma)
 
 /-- The binomial theorem with Pochhammer coefficients. -/
-theorem sub_pow_eq_sum_poch (x y : ℂ) (n : ℕ) :
-    (x - y) ^ n = ∑ r ∈ Finset.range (n + 1), poch (-(n : ℂ)) r / r ! * (x ^ (n - r) * y ^ r) := by
+theorem sub_pow_eq_sum_pochhammer (x y : ℂ) (n : ℕ) :
+    (x - y) ^ n = ∑ r ∈ Finset.range (n + 1), pochhammer (-(n : ℂ)) r / r ! *
+        (x ^ (n - r) * y ^ r) := by
   rw [sub_eq_neg_add, add_pow]
   refine Finset.sum_congr rfl fun r _ => ?_
   have hr : (r ! : ℂ) ≠ 0 := by exact_mod_cast r.factorial_ne_zero
-  rw [poch_neg_coe_nat, Nat.descFactorial_eq_factorial_mul_choose, neg_pow]
+  rw [pochhammer_neg_coe_nat, Nat.descFactorial_eq_factorial_mul_choose, neg_pow]
   push_cast
   field_simp
 
-/-- For `x > 0`, multiplying the Selberg weight by `xᵖ` shifts `a` to `a + p`. -/
-theorem weight_mul_pow_eq {a b : ℂ} (p : ℕ) {x : ℝ} (hx : 0 < x) :
-    weight a b x * (x : ℂ) ^ p = weight (a + p) b x := by
+/-- For `x > 0`, multiplying the Selberg selbergWeight by `xᵖ` shifts `a` to `a + p`. -/
+theorem selbergWeight_mul_pow_eq {a b : ℂ} (p : ℕ) {x : ℝ} (hx : 0 < x) :
+    selbergWeight a b x * (x : ℂ) ^ p = selbergWeight (a + p) b x := by
   have hx0 : (x : ℂ) ≠ 0 := by exact_mod_cast hx.ne'
-  unfold weight
+  unfold selbergWeight
   rw [mul_right_comm, ← cpow_natCast, ← cpow_add _ _ hx0]
   ring_nf
 
 /-- For `Re a, Re b > 0`, `x^{a-1}(1-x)^{b-1} xᵖ` is integrable on `[0,1]`. -/
-theorem integrableOn_weight_mul_pow {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (p : ℕ) :
-    IntegrableOn (fun x : ℝ => weight a b x * (x : ℂ) ^ p) (Icc (0 : ℝ) 1) := by
+theorem integrableOn_selbergWeight_mul_pow {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (p : ℕ) :
+    IntegrableOn (fun x : ℝ => selbergWeight a b x * (x : ℂ) ^ p) (Icc (0 : ℝ) 1) := by
   rw [integrableOn_Icc_iff_integrableOn_Ioc]
-  have h : IntegrableOn (weight (a + p) b) (Ioc (0 : ℝ) 1) :=
-    (integrableOn_weight (by simp; positivity) hb).mono_set Ioc_subset_Icc_self
-  exact h.congr_fun (fun x hx => (weight_mul_pow_eq p hx.1).symm) measurableSet_Ioc
+  have h : IntegrableOn (selbergWeight (a + p) b) (Ioc (0 : ℝ) 1) :=
+    (integrableOn_selbergWeight (by simp; positivity) hb).mono_set Ioc_subset_Icc_self
+  exact h.congr_fun (fun x hx => (selbergWeight_mul_pow_eq p hx.1).symm) measurableSet_Ioc
 
 /-- `∫₀¹ x^{a-1}(1-x)^{b-1} xᵖ dx = B(a + p, b)`. -/
-theorem integral_weight_mul_pow {a b : ℂ} (p : ℕ) :
-    ∫ x in Icc (0 : ℝ) 1, weight a b x * (x : ℂ) ^ p = betaIntegral (a + p) b := by
+theorem integral_selbergWeight_mul_pow {a b : ℂ} (p : ℕ) :
+    ∫ x in Icc (0 : ℝ) 1, selbergWeight a b x * (x : ℂ) ^ p = betaIntegral (a + p) b := by
   rw [integral_Icc_eq_integral_Ioc, betaIntegral, intervalIntegral.integral_of_le zero_le_one]
-  exact setIntegral_congr_fun measurableSet_Ioc fun x hx => weight_mul_pow_eq p hx.1
+  exact setIntegral_congr_fun measurableSet_Ioc fun x hx => selbergWeight_mul_pow_eq p hx.1
 
 /-- `f(t₀) g(t₁)` written as a product over `Fin 2`. -/
 theorem prod_fin_two_eq {f g : ℝ → ℂ} (t : Fin 2 → ℝ) :
@@ -151,9 +152,9 @@ theorem prod_fin_two_eq {f g : ℝ → ℂ} (t : Fin 2 → ℝ) :
   simp [Fin.prod_univ_two]
 
 /-- A product `f(t₀) g(t₁)` of integrable functions is integrable on `[0,1]²`. -/
-theorem integrableOn_cube_two {f g : ℝ → ℂ} (hf : IntegrableOn f (Icc (0 : ℝ) 1))
+theorem integrableOn_unitCube_two {f g : ℝ → ℂ} (hf : IntegrableOn f (Icc (0 : ℝ) 1))
     (hg : IntegrableOn g (Icc (0 : ℝ) 1)) :
-    IntegrableOn (fun t : Fin 2 → ℝ => f (t 0) * g (t 1)) (cube 2) := by
+    IntegrableOn (fun t : Fin 2 → ℝ => f (t 0) * g (t 1)) (unitCube 2) := by
   simp_rw [prod_fin_two_eq]
   rw [IntegrableOn, volume_pi, Measure.restrict_pi_pi]
   refine Integrable.fintype_prod_dep fun i => ?_
@@ -162,17 +163,17 @@ theorem integrableOn_cube_two {f g : ℝ → ℂ} (hf : IntegrableOn f (Icc (0 :
   · exact hg
 
 /-- Fubini on `[0,1]²` for a product `f(t₀) g(t₁)`. -/
-theorem integral_cube_two {f g : ℝ → ℂ} :
-    ∫ t in cube 2, f (t 0) * g (t 1) =
+theorem integral_unitCube_two {f g : ℝ → ℂ} :
+    ∫ t in unitCube 2, f (t 0) * g (t 1) =
       (∫ x in Icc (0 : ℝ) 1, f x) * ∫ x in Icc (0 : ℝ) 1, g x := by
   simp_rw [prod_fin_two_eq]
   rw [volume_pi, Measure.restrict_pi_pi, integral_fintype_prod_eq_prod]
   simp [Fin.prod_univ_two]
 
 /-- For `c = k` natural, the two-variable Vandermonde factor is `(t₀ - t₁)^{2k}`. -/
-theorem vdm_two (k : ℕ) (t : Fin 2 → ℝ) :
-    vdm 2 (k : ℂ) t = ((t 0 : ℂ) - t 1) ^ (2 * k) := by
-  simp only [vdm, Fin.prod_univ_two, Fin.val_zero, Fin.val_one, lt_irrefl, ite_false,
+theorem vandermondeAbsPow_two (k : ℕ) (t : Fin 2 → ℝ) :
+    vandermondeAbsPow 2 (k : ℂ) t = ((t 0 : ℂ) - t 1) ^ (2 * k) := by
+  simp only [vandermondeAbsPow, Fin.prod_univ_two, Fin.val_zero, Fin.val_one, lt_irrefl, ite_false,
     zero_lt_one, ite_true, not_lt_zero, one_mul, mul_one]
   rw [show (2 * (k : ℂ)) = ((2 * k : ℕ) : ℂ) by push_cast; ring, cpow_natCast]
   rw [← ofReal_pow, (Even.pow_abs ⟨k, by ring⟩ _), ofReal_pow]
@@ -180,11 +181,11 @@ theorem vdm_two (k : ℕ) (t : Fin 2 → ℝ) :
 
 /-- One term of the expanded Aomoto integral. -/
 theorem term_eq {α β : ℂ} (hα : 0 < α.re) (hβ : 0 < β.re) (k r : ℕ) (hr : r ≤ 2 * k) :
-    poch (-((2 * k : ℕ) : ℂ)) r / r ! *
+    pochhammer (-((2 * k : ℕ) : ℂ)) r / r ! *
         (betaIntegral (α + ((2 * k - r + 1 : ℕ) : ℂ)) β * betaIntegral (α + r) β) =
       betaIntegral (α + 2 * k + 1) β * betaIntegral α β *
-        (poch (-(2 * k : ℂ)) r * poch α r * poch (-α - β - 2 * k) r /
-          (poch (-α - 2 * k) r * poch (α + β) r * (r ! : ℂ))) := by
+        (pochhammer (-(2 * k : ℂ)) r * pochhammer α r * pochhammer (-α - β - 2 * k) r /
+          (pochhammer (-α - 2 * k) r * pochhammer (α + β) r * (r ! : ℂ))) := by
   have hk : (0 : ℝ) ≤ k := Nat.cast_nonneg k
   set A : ℂ := α + ((2 * k - r + 1 : ℕ) : ℂ) with hAdef
   have hA : A = α + 2 * k + 1 - r := by
@@ -195,25 +196,25 @@ theorem term_eq {α β : ℂ} (hα : 0 < α.re) (hβ : 0 < β.re) (k r : ℕ) (h
   have hαr : 0 < (α + r).re := by simp; positivity
   have hαβ : 0 < (α + β).re := by simp only [add_re]; linarith
   have h1 : α + 2 * k + 1 = A + r := by rw [hA]; ring
-  have hP1 : poch (-α - 2 * k) r = (-1) ^ r * poch A r := by
-    rw [show -α - 2 * (k : ℂ) = -(α + 2 * k) by ring, poch_neg_eq, hA]; ring_nf
-  have hP2 : poch (-α - β - 2 * k) r = (-1) ^ r * poch (A + β) r := by
-    rw [show -α - β - 2 * (k : ℂ) = -(α + β + 2 * k) by ring, poch_neg_eq, hA]; ring_nf
+  have hP1 : pochhammer (-α - 2 * k) r = (-1) ^ r * pochhammer A r := by
+    rw [show -α - 2 * (k : ℂ) = -(α + 2 * k) by ring, pochhammer_neg_eq, hA]; ring_nf
+  have hP2 : pochhammer (-α - β - 2 * k) r = (-1) ^ r * pochhammer (A + β) r := by
+    rw [show -α - β - 2 * (k : ℂ) = -(α + β + 2 * k) by ring, pochhammer_neg_eq, hA]; ring_nf
   rw [betaIntegral_eq_Gamma_mul_div _ _ hAre hβ, betaIntegral_eq_Gamma_mul_div _ _ hαr hβ,
     betaIntegral_eq_Gamma_mul_div _ _ (by rw [h1]; simp; positivity) hβ,
     betaIntegral_eq_Gamma_mul_div _ _ hα hβ, h1, show A + (r : ℂ) + β = (A + β) + r by ring,
-    Gamma_add_nat_eq_poch_mul_Gamma hAre, Gamma_add_nat_eq_poch_mul_Gamma hABre,
-    show α + r + β = (α + β) + r by ring, Gamma_add_nat_eq_poch_mul_Gamma (k := r) hα,
-    Gamma_add_nat_eq_poch_mul_Gamma (k := r) hαβ, hP1, hP2]
+    Gamma_add_nat_eq_pochhammer_mul_Gamma hAre, Gamma_add_nat_eq_pochhammer_mul_Gamma hABre,
+    show α + r + β = (α + β) + r by ring, Gamma_add_nat_eq_pochhammer_mul_Gamma (k := r) hα,
+    Gamma_add_nat_eq_pochhammer_mul_Gamma (k := r) hαβ, hP1, hP2]
   have hGA := Gamma_ne_zero_of_re_pos hAre
   have hGAB := Gamma_ne_zero_of_re_pos hABre
   have hGb := Gamma_ne_zero_of_re_pos hβ
   have hGa := Gamma_ne_zero_of_re_pos hα
   have hGab := Gamma_ne_zero_of_re_pos hαβ
-  have hpA := poch_ne_zero_of_re_pos hAre r
-  have hpAB := poch_ne_zero_of_re_pos hABre r
-  have hpa := poch_ne_zero_of_re_pos hα r
-  have hpab := poch_ne_zero_of_re_pos hαβ r
+  have hpA := pochhammer_ne_zero_of_re_pos hAre r
+  have hpAB := pochhammer_ne_zero_of_re_pos hABre r
+  have hpa := pochhammer_ne_zero_of_re_pos hα r
+  have hpab := pochhammer_ne_zero_of_re_pos hαβ r
   have hf : (r ! : ℂ) ≠ 0 := by exact_mod_cast r.factorial_ne_zero
   push_cast
   field_simp
@@ -223,36 +224,38 @@ theorem: a sum of products of two Beta integrals. -/
 theorem aomoto_two_expand {α β : ℂ} (hα : 0 < α.re) (hβ : 0 < β.re) (k : ℕ) :
     ∫ t : Fin 2 → ℝ in Set.pi Set.univ fun _ => Set.Icc (0 : ℝ) 1,
         selbergIntegrand 2 α β k t * ∏ i : Fin 1, (t (Fin.castLE (by norm_num) i) : ℂ) =
-      ∑ r ∈ Finset.range (2 * k + 1), poch (-((2 * k : ℕ) : ℂ)) r / r ! *
+      ∑ r ∈ Finset.range (2 * k + 1), pochhammer (-((2 * k : ℕ) : ℂ)) r / r ! *
         (betaIntegral (α + ((2 * k - r + 1 : ℕ) : ℂ)) β * betaIntegral (α + r) β) := by
   have hpt : ∀ t : Fin 2 → ℝ,
       selbergIntegrand 2 α β k t * ∏ i : Fin 1, (t (Fin.castLE (by norm_num) i) : ℂ) =
-        ∑ r ∈ Finset.range (2 * k + 1), poch (-((2 * k : ℕ) : ℂ)) r / r ! *
-          ((weight α β (t 0) * (t 0 : ℂ) ^ (2 * k - r + 1)) *
-            (weight α β (t 1) * (t 1 : ℂ) ^ r)) := by
+        ∑ r ∈ Finset.range (2 * k + 1), pochhammer (-((2 * k : ℕ) : ℂ)) r / r ! *
+          ((selbergWeight α β (t 0) * (t 0 : ℂ) ^ (2 * k - r + 1)) *
+            (selbergWeight α β (t 1) * (t 1 : ℂ) ^ r)) := by
     intro t
-    rw [selbergIntegrand_eq, vdm_two, sub_pow_eq_sum_poch, Finset.mul_sum, Finset.sum_mul]
+    rw [selbergIntegrand_eq, vandermondeAbsPow_two, sub_pow_eq_sum_pochhammer, Finset.mul_sum,
+        Finset.sum_mul]
     refine Finset.sum_congr rfl fun r _ => ?_
     simp only [Fin.prod_univ_two, Fin.prod_univ_one]
     have : (Fin.castLE (by norm_num : 1 ≤ 2) (0 : Fin 1)) = 0 := rfl
     rw [this, pow_succ]
     ring
-  change ∫ t in cube 2, _ = _
-  rw [setIntegral_congr_fun (measurableSet_cube 2) fun t _ => hpt t]
+  change ∫ t in unitCube 2, _ = _
+  rw [setIntegral_congr_fun (measurableSet_unitCube 2) fun t _ => hpt t]
   rw [integral_finsetSum]
   · refine Finset.sum_congr rfl fun r _ => ?_
     rw [integral_const_mul,
-      integral_cube_two (f := fun x => weight α β x * (x : ℂ) ^ (2 * k - r + 1))
-      (g := fun x => weight α β x * (x : ℂ) ^ r), integral_weight_mul_pow, integral_weight_mul_pow]
+      integral_unitCube_two (f := fun x => selbergWeight α β x * (x : ℂ) ^ (2 * k - r + 1))
+      (g := fun x => selbergWeight α β x * (x : ℂ) ^ r), integral_selbergWeight_mul_pow,
+          integral_selbergWeight_mul_pow]
   · intro r _
-    exact (integrableOn_cube_two (integrableOn_weight_mul_pow hα hβ _)
-      (integrableOn_weight_mul_pow hα hβ r)).const_mul _
+    exact (integrableOn_unitCube_two (integrableOn_selbergWeight_mul_pow hα hβ _)
+      (integrableOn_selbergWeight_mul_pow hα hβ r)).const_mul _
 
 /-- The Aomoto evaluation divided by the two Beta factors. -/
 theorem final_identity {α β : ℂ} (hα : 0 < α.re) (hβ : 0 < β.re) (k : ℕ) :
     betaIntegral (α + 2 * k + 1) β * betaIntegral α β *
-      (poch (α + 1) k * poch β k * poch 1 (2 * k) /
-        (poch (α + β) k * poch 1 k * poch (α + 1) (2 * k))) =
+      (pochhammer (α + 1) k * pochhammer β k * pochhammer 1 (2 * k) /
+        (pochhammer (α + β) k * pochhammer 1 k * pochhammer (α + 1) (2 * k))) =
     (∏ j : Fin 1, (α + ((2 - 1 - j : ℕ) : ℂ) * k) / (α + β + ((2 * 2 - 2 - j : ℕ) : ℂ) * k)) *
       ∏ j : Fin 2,
         Gamma (α + (j : ℕ) * k) * Gamma (β + (j : ℕ) * k) * Gamma (1 + ((j : ℕ) + 1) * k) /
@@ -266,18 +269,18 @@ theorem final_identity {α β : ℂ} (hα : 0 < α.re) (hβ : 0 < β.re) (k : �
   have hak : 0 < (α + k).re := by simp; linarith
   have hb1 : 0 < (α + 2 * k + 1).re := by simp; linarith
   rw [betaIntegral_eq_Gamma_mul_div _ _ hb1 hβ, betaIntegral_eq_Gamma_mul_div _ _ hα hβ]
-  have e1 : Gamma (α + 2 * k + 1) = poch (α + 1) (2 * k) * (α * Gamma α) := by
-    rw [← Gamma_add_one α (ne_zero_of_re_pos hα), ← Gamma_add_nat_eq_poch_mul_Gamma ha1]
+  have e1 : Gamma (α + 2 * k + 1) = pochhammer (α + 1) (2 * k) * (α * Gamma α) := by
+    rw [← Gamma_add_one α (ne_zero_of_re_pos hα), ← Gamma_add_nat_eq_pochhammer_mul_Gamma ha1]
     push_cast; ring_nf
   have e2 : Gamma (α + 2 * k + 1 + β) = (α + β + 2 * k) * Gamma (α + β + 2 * k) := by
     rw [← Gamma_add_one _ (ne_zero_of_re_pos hab2)]; ring_nf
-  have e3 : Gamma (α + k) = poch (α + 1) k * (α * Gamma α) / (α + k) := by
+  have e3 : Gamma (α + k) = pochhammer (α + 1) k * (α * Gamma α) / (α + k) := by
     rw [eq_div_iff (ne_zero_of_re_pos hak), mul_comm, ← Gamma_add_one _ (ne_zero_of_re_pos hak),
-      ← Gamma_add_one α (ne_zero_of_re_pos hα), ← Gamma_add_nat_eq_poch_mul_Gamma ha1]
+      ← Gamma_add_one α (ne_zero_of_re_pos hα), ← Gamma_add_nat_eq_pochhammer_mul_Gamma ha1]
     ring_nf
-  have e4 : Gamma (β + k) = poch β k * Gamma β := Gamma_add_nat_eq_poch_mul_Gamma hβ k
-  have e5 : Gamma (α + β + k) = poch (α + β) k * Gamma (α + β) :=
-    Gamma_add_nat_eq_poch_mul_Gamma hab k
+  have e4 : Gamma (β + k) = pochhammer β k * Gamma β := Gamma_add_nat_eq_pochhammer_mul_Gamma hβ k
+  have e5 : Gamma (α + β + k) = pochhammer (α + β) k * Gamma (α + β) :=
+    Gamma_add_nat_eq_pochhammer_mul_Gamma hab k
   have e6 : Gamma (1 + k) = k ! := by
     rw [add_comm, Gamma_nat_eq_factorial]
   have e7 : Gamma (1 + 2 * k) = ((2 * k) ! : ℕ) := by
@@ -290,9 +293,9 @@ theorem final_identity {α β : ℂ} (hα : 0 < α.re) (hβ : 0 < β.re) (k : �
   have := ne_zero_of_re_pos hα
   have := ne_zero_of_re_pos hak
   have := ne_zero_of_re_pos hab2
-  have := poch_ne_zero_of_re_pos ha1 k
-  have := poch_ne_zero_of_re_pos ha1 (2 * k)
-  have := poch_ne_zero_of_re_pos hab k
+  have := pochhammer_ne_zero_of_re_pos ha1 k
+  have := pochhammer_ne_zero_of_re_pos ha1 (2 * k)
+  have := pochhammer_ne_zero_of_re_pos hab k
   have : ((k ! : ℕ) : ℂ) ≠ 0 := by exact_mod_cast k.factorial_ne_zero
   have : (((2 * k) ! : ℕ) : ℂ) ≠ 0 := by exact_mod_cast (2 * k).factorial_ne_zero
   field_simp
@@ -310,21 +313,21 @@ Gupta, "Generalized Selberg Integral and Nearly Poised 3F2 Series" (2015). -/
 theorem nearly_poised_3F2 {α β : ℂ} (k : ℕ)
     (hα : 0 < α.re) (hβ : 0 < β.re) :
     (∑ r ∈ Finset.range (2 * k + 1),
-      poch (-(2 * k : ℂ)) r * poch α r * poch (-α - β - 2 * k) r /
-        (poch (-α - 2 * k) r * poch (α + β) r * (r.factorial : ℂ))) =
-      poch (α + 1) k * poch β k * poch 1 (2 * k) /
-        (poch (α + β) k * poch 1 k * poch (α + 1) (2 * k)) := by
+      pochhammer (-(2 * k : ℂ)) r * pochhammer α r * pochhammer (-α - β - 2 * k) r /
+        (pochhammer (-α - 2 * k) r * pochhammer (α + β) r * (r.factorial : ℂ))) =
+      pochhammer (α + 1) k * pochhammer β k * pochhammer 1 (2 * k) /
+        (pochhammer (α + β) k * pochhammer 1 k * pochhammer (α + 1) (2 * k)) := by
   rcases Nat.eq_zero_or_pos k with rfl | hk
-  · simp [poch_zero]
+  · simp [pochhammer_zero]
   have hA := aomoto_integral (n := 2) (m := 1) (a := α) (b := β) (c := (k : ℂ)) (by norm_num)
     hα hβ (by simp; exact_mod_cast hk)
   rw [NearlyPoised.aomoto_two_expand hα hβ k, ← NearlyPoised.final_identity hα hβ k] at hA
-  have hsum : ∑ r ∈ Finset.range (2 * k + 1), poch (-((2 * k : ℕ) : ℂ)) r / r ! *
+  have hsum : ∑ r ∈ Finset.range (2 * k + 1), pochhammer (-((2 * k : ℕ) : ℂ)) r / r ! *
       (betaIntegral (α + ((2 * k - r + 1 : ℕ) : ℂ)) β * betaIntegral (α + r) β) =
       betaIntegral (α + 2 * k + 1) β * betaIntegral α β *
         ∑ r ∈ Finset.range (2 * k + 1),
-          poch (-(2 * k : ℂ)) r * poch α r * poch (-α - β - 2 * k) r /
-            (poch (-α - 2 * k) r * poch (α + β) r * (r.factorial : ℂ)) := by
+          pochhammer (-(2 * k : ℂ)) r * pochhammer α r * pochhammer (-α - β - 2 * k) r /
+            (pochhammer (-α - 2 * k) r * pochhammer (α + β) r * (r.factorial : ℂ)) := by
     rw [Finset.mul_sum]
     exact Finset.sum_congr rfl fun r hr =>
       NearlyPoised.term_eq hα hβ k r (Nat.lt_succ_iff.mp (Finset.mem_range.mp hr))

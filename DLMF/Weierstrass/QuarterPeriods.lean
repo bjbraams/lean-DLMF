@@ -83,7 +83,7 @@ theorem weierstrassP_half_ω₁ :
   obtain ⟨n2, n3, n4⟩ := jacobiThetaNullTau_ne_zero H.tau_im_pos
   simp only [jacobiThetaTwoNullTau, jacobiThetaThreeNullTau, jacobiThetaFourNullTau] at n2 n3 n4
   rw [show H.weierstrassP (H.ω₁ / 2) = (H.weierstrassP (H.ω₁ / 2) - H.e 1) + H.e 1 by ring, h,
-    quarterK, comodulus, compEllIntKTau, jacobiComodulusTau]
+    quarterK, comodulus, completeEllipticKOfTau, jacobiComodulusOfTau]
   field_simp
   ring
 
@@ -111,7 +111,7 @@ theorem weierstrassP_half_ω₂ :
   obtain ⟨n2, n3, n4⟩ := jacobiThetaNullTau_ne_zero H.tau_im_pos
   simp only [jacobiThetaTwoNullTau, jacobiThetaThreeNullTau, jacobiThetaFourNullTau] at n2 n3 n4
   rw [show H.weierstrassP (H.ω₂ / 2) = (H.weierstrassP (H.ω₂ / 2) - H.e 2) + H.e 2 by ring, h,
-    quarterK, modulus, comodulus, compEllIntKTau, jacobiModulusTau, jacobiComodulusTau]
+    quarterK, modulus, comodulus, completeEllipticKOfTau, jacobiModulusOfTau, jacobiComodulusOfTau]
   generalize cexp (I * -d + π * I * H.tau / 4) = M at *
   generalize jacobiThetaOneTau d H.tau = T at *
   field_simp
@@ -142,7 +142,7 @@ theorem weierstrassP_half_ω₃ :
       I * jacobiThetaFourTau (π * H.tau / 4) H.tau := by
     linear_combination -a
   rw [show H.weierstrassP (H.ω₃ / 2) = (H.weierstrassP (H.ω₃ / 2) - H.e 3) + H.e 3 by ring, h, h1,
-    quarterK, modulus, compEllIntKTau, jacobiModulusTau]
+    quarterK, modulus, completeEllipticKOfTau, jacobiModulusOfTau]
   have h4 : jacobiThetaFourTau (π * H.tau / 4) H.tau ≠ 0 := by
     intro h0; apply hθ; rw [h1, h0, mul_zero]
   field_simp

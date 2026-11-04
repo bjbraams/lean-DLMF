@@ -41,7 +41,7 @@ Along `S = 2√(κx)` this gives `u_κ(S) - u₀(S) = O(κ^{-1/2})`.
   `x^{(c-1)/2} e^{-x/2} U(a, c, x)/Γ(c/2 - a + 1/2) - (cos(aπ) J_{c-1}(S) - sin(aπ) Y_{c-1}(S))
   = O(S^{-1/2} |a|^{-1/2})`, from the connection formula 13.2.42, two instances of 13.8.9 and
   `J_{-ν} = cos(νπ) J_ν - sin(νπ) Y_ν`.
-* `laguerrePolyL_fejer_isBigO` (DLMF 18.15.14 with `M = 1`): Fejér's formula with error
+* `laguerrePolynomialL_fejer_isBigO` (DLMF 18.15.14 with `M = 1`): Fejér's formula with error
   `O(n^{-1/2})`.
 
 In 13.8.9 and 13.8.10 DLMF writes the error as `env J_{c-1}(S) O(|a|^{-1/2})` and
@@ -71,19 +71,19 @@ theorem one_le_ascPochhammer_eval {x : ℝ} (hx : 1 ≤ x) (n : ℕ) :
     nlinarith
 
 /-- `‖(d - κ)_n / κⁿ - (-1)ⁿ‖ ≤ n (1 + |d|)_n / κ` for `κ ≥ 1`. -/
-theorem norm_poch_sub_div_pow_sub_le (d : ℝ) {κ : ℝ} (hκ : 1 ≤ κ) (n : ℕ) :
-    ‖poch ((d - κ : ℝ) : ℂ) n / (κ : ℂ) ^ n - (-1 : ℂ) ^ n‖ ≤
+theorem norm_pochhammer_sub_div_pow_sub_le (d : ℝ) {κ : ℝ} (hκ : 1 ≤ κ) (n : ℕ) :
+    ‖pochhammer ((d - κ : ℝ) : ℂ) n / (κ : ℂ) ^ n - (-1 : ℂ) ^ n‖ ≤
       n * (ascPochhammer ℝ n).eval (1 + |d|) / κ := by
   have hκ0 : 0 < κ := by linarith
   have hκ' : (κ : ℂ) ≠ 0 := by exact_mod_cast hκ0.ne'
   induction n with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ n ih =>
-    set P := poch ((d - κ : ℝ) : ℂ) n / (κ : ℂ) ^ n
+    set P := pochhammer ((d - κ : ℝ) : ℂ) n / (κ : ℂ) ^ n
     set r : ℂ := (((d - κ : ℝ) : ℂ) + n) / κ
-    have hsplit : poch ((d - κ : ℝ) : ℂ) (n + 1) / (κ : ℂ) ^ (n + 1) = P * r := by
+    have hsplit : pochhammer ((d - κ : ℝ) : ℂ) (n + 1) / (κ : ℂ) ^ (n + 1) = P * r := by
       simp only [P, r]
-      rw [poch_succ, pow_succ]
+      rw [pochhammer_succ, pow_succ]
       field_simp
     have hr1 : r + 1 = (((d + n) / κ : ℝ) : ℂ) := by
       simp only [r]
@@ -140,7 +140,7 @@ theorem isBigO_regularizedConfluent_sub_div (d : ℝ) (b w : ℂ) :
   set x : ℝ := 1 + |d| with hx
   have hx1 : 1 ≤ x := by simp only [hx]; linarith [abs_nonneg d]
   have hL : ∀ κ : ℝ, κ ≠ 0 → regularizedHGFun {((d - κ : ℝ) : ℂ)} {b} (w / κ) =
-      ∑' n : ℕ, poch ((d - κ : ℝ) : ℂ) n / (κ : ℂ) ^ n * T n := by
+      ∑' n : ℕ, pochhammer ((d - κ : ℝ) : ℂ) n / (κ : ℂ) ^ n * T n := by
     intro κ hκ
     have hκ' : (κ : ℂ) ≠ 0 := by exact_mod_cast hκ
     rw [regularizedConfluent_eq_tsum]
@@ -157,7 +157,7 @@ theorem isBigO_regularizedConfluent_sub_div (d : ℝ) (b w : ℂ) :
     have hs := summable_norm_iff.mpr
       (summable_regularizedConfluent_term (((x + 1 : ℝ)) : ℂ) b (‖w‖ : ℂ))
     refine hs.congr fun n => ?_
-    rw [poch_ofReal]
+    rw [pochhammer_ofReal]
     simp only [hT, norm_mul, norm_div, norm_pow, Complex.norm_real, Real.norm_eq_abs,
       norm_inv, Complex.norm_natCast, abs_norm]
     rw [abs_of_nonneg ((ascPochhammer_pos n _ (by linarith)).le)]
@@ -182,19 +182,19 @@ theorem isBigO_regularizedConfluent_sub_div (d : ℝ) (b w : ℂ) :
   refine Asymptotics.IsBigO.of_bound K ?_
   filter_upwards [eventually_ge_atTop (1 : ℝ)] with κ hκ
   have hκ0 : 0 < κ := by linarith
-  have hsκ : Summable fun n : ℕ => poch ((d - κ : ℝ) : ℂ) n / (κ : ℂ) ^ n * T n := by
+  have hsκ : Summable fun n : ℕ => pochhammer ((d - κ : ℝ) : ℂ) n / (κ : ℂ) ^ n * T n := by
     refine Summable.of_norm_bounded (g := fun n => (ascPochhammer ℝ n).eval x * ‖T n‖) ?_
       fun n => ?_
     · have hs := summable_norm_iff.mpr
         (summable_regularizedConfluent_term (((x : ℝ)) : ℂ) b (‖w‖ : ℂ))
       refine hs.congr fun n => ?_
-      rw [poch_ofReal]
+      rw [pochhammer_ofReal]
       simp only [hT, norm_mul, norm_div, norm_pow, Complex.norm_real, Real.norm_eq_abs,
         norm_inv, Complex.norm_natCast, abs_norm]
       rw [abs_of_nonneg ((ascPochhammer_pos n _ (by linarith)).le)]
       ring
     · rw [norm_mul]
-      exact mul_le_mul_of_nonneg_right (norm_poch_sub_div_pow_le d hκ n) (norm_nonneg _)
+      exact mul_le_mul_of_nonneg_right (norm_pochhammer_sub_div_pow_le d hκ n) (norm_nonneg _)
   have hs1 : Summable fun n : ℕ => (-1 : ℂ) ^ n * T n := by
     refine Summable.of_norm_bounded (g := fun n => ‖T n‖) ?_ fun n => ?_
     · refine Summable.of_nonneg_of_le (fun n => norm_nonneg _) (fun n => ?_) hsumB
@@ -202,15 +202,15 @@ theorem isBigO_regularizedConfluent_sub_div (d : ℝ) (b w : ℂ) :
         (one_le_ascPochhammer_eval (by linarith) n)
     · rw [norm_mul, norm_pow, norm_neg, norm_one, one_pow, one_mul]
   rw [hL κ hκ0.ne', hR, ← hsκ.tsum_sub hs1, Real.norm_eq_abs, abs_inv, abs_of_pos hκ0]
-  have hb : ∀ n : ℕ, ‖poch ((d - κ : ℝ) : ℂ) n / (κ : ℂ) ^ n * T n - (-1 : ℂ) ^ n * T n‖ ≤
+  have hb : ∀ n : ℕ, ‖pochhammer ((d - κ : ℝ) : ℂ) n / (κ : ℂ) ^ n * T n - (-1 : ℂ) ^ n * T n‖ ≤
       (n : ℝ) * (ascPochhammer ℝ n).eval x * ‖T n‖ * κ⁻¹ := by
     intro n
     rw [← sub_mul, norm_mul]
-    have := norm_poch_sub_div_pow_sub_le d hκ n
+    have := norm_pochhammer_sub_div_pow_sub_le d hκ n
     calc _ ≤ (n * (ascPochhammer ℝ n).eval (1 + |d|) / κ) * ‖T n‖ :=
           mul_le_mul_of_nonneg_right this (norm_nonneg _)
       _ = _ := by rw [hx]; field_simp
-  calc ‖∑' n : ℕ, (poch ((d - κ : ℝ) : ℂ) n / (κ : ℂ) ^ n * T n - (-1 : ℂ) ^ n * T n)‖
+  calc ‖∑' n : ℕ, (pochhammer ((d - κ : ℝ) : ℂ) n / (κ : ℂ) ^ n * T n - (-1 : ℂ) ^ n * T n)‖
       ≤ ∑' n : ℕ, (n : ℝ) * (ascPochhammer ℝ n).eval x * ‖T n‖ * κ⁻¹ :=
         tsum_of_norm_bounded (hsum.mul_right κ⁻¹).hasSum hb
     _ = K * κ⁻¹ := tsum_mul_right
@@ -873,9 +873,9 @@ for `α > -1` and fixed `x > 0`,
 `L_n^{(α)}(x) = n^{α/2-1/4} e^{x/2} π^{-1/2} x^{-α/2-1/4} (cos θ_n + O(n^{-1/2}))` with
 `θ_n = 2√(nx) - (α/2 + 1/4)π`. -/
 @[dlmf 18.15.E14]
-theorem laguerrePolyL_fejer_isBigO {α : ℝ} (hα : -1 < α) {x : ℝ} (hx : 0 < x) :
+theorem laguerrePolynomialL_fejer_isBigO {α : ℝ} (hα : -1 < α) {x : ℝ} (hx : 0 < x) :
     (fun n : ℕ => (((n : ℝ) ^ (1 / 4 - α / 2) : ℝ) : ℂ) *
-        DLMF.OrthogonalPolynomials.laguerrePolyL (α : ℂ) n (x : ℂ) -
+        DLMF.OrthogonalPolynomials.laguerrePolynomialL (α : ℂ) n (x : ℂ) -
       ((Real.exp (x / 2) * x ^ (-(α / 2) - 1 / 4) / Real.sqrt π *
         Real.cos (2 * Real.sqrt (n * x) - α * π / 2 - π / 4) : ℝ) : ℂ))
       =O[atTop] (fun n : ℕ => (n : ℝ) ^ (-(1 / 2 : ℝ))) := by
@@ -1006,16 +1006,16 @@ theorem laguerrePolyL_fejer_isBigO {α : ℝ} (hα : -1 < α) {x : ℝ} (hx : 0 
     have := congrArg Complex.re hk
     simp at this
     linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
-  have hL : DLMF.OrthogonalPolynomials.laguerrePolyL (α : ℂ) n (x : ℂ) =
+  have hL : DLMF.OrthogonalPolynomials.laguerrePolynomialL (α : ℂ) n (x : ℂ) =
       Complex.Gamma ((n : ℂ) + c) / (n ! : ℂ) *
         regularizedHGFun {((-(n : ℝ) : ℝ) : ℂ)} {(c : ℂ)} (x : ℂ) := by
-    rw [DLMF.OrthogonalPolynomials.laguerrePolyL, kummerM_eq_mul_regularizedHGFun hcpole]
+    rw [DLMF.OrthogonalPolynomials.laguerrePolynomialL, kummerM_eq_mul_regularizedHGFun hcpole]
     have hG := Complex.Gamma_add_nat_div_Gamma_eq (n := n) ((α : ℂ) + 1) hcpole
     have hG0 : Complex.Gamma ((α : ℂ) + 1) ≠ 0 := Complex.Gamma_ne_zero hcpole
     rw [show ((-(n : ℝ) : ℝ) : ℂ) = -(n : ℂ) by push_cast; ring,
       show ((c : ℝ) : ℂ) = (α : ℂ) + 1 by rw [hcdef]; push_cast; ring,
       show (n : ℂ) + ((α : ℂ) + 1) = (α : ℂ) + 1 + n by ring]
-    rw [poch, ← hG]
+    rw [pochhammer, ← hG]
     field_simp
   have hpow : (n : ℝ) ^ (1 / 4 - α / 2) * (n : ℝ) ^ α = Q n * K *
       (Real.sqrt π * ((c / 2 - -(n : ℝ)) * x) ^ (c / 2 - 1 / 4) * Real.exp (-(x / 2))) := by

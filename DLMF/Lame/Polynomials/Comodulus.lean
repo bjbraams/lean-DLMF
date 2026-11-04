@@ -16,16 +16,16 @@ modulus `k' = √(1 - k²)` are related by `a^m_n(k²) + a^{n-m}_n(k'²) = n(n+1
 
 ## Main results
 
-* `lameEigenvalue_comodulus_lamePolyType`: along `K + i[0, K']` the Lamé polynomial
-  `lamePolyEk t n j` is the `(n - j)`th eigenfunction of the problem of modulus `k'`.
-* `Real.lameAk_add_lameAk_comodulus`, `Real.lameBk_add_lameBk_comodulus`: DLMF 29.3.7, 29.3.8.
+* `lameEigenvalue_comodulus_lamePolynomialType`: along `K + i[0, K']` the Lamé polynomial
+  `lamePolynomialE t n j` is the `(n - j)`th eigenfunction of the problem of modulus `k'`.
+* `Real.lameA_add_lameA_comodulus`, `Real.lameB_add_lameB_comodulus`: DLMF 29.3.7, 29.3.8.
 
 ## Implementation notes
 
 The Lamé polynomial `E` of type `t` has eigenvalue `h = ½(H_j + ν(ν+1)k²)`. Along the vertical
 side, `g(y) = E(K + iy)` solves `g'' = (V(y) + h) g` with
 `V(y) = -ν(ν+1)k²/dn²(y, k') = ν(ν+1)k'² sn²(K' - y, k') - ν(ν+1)`
-(`lamePolyEk_vertical_spectrum`), so `x ↦ g(K' - x)` solves Lamé's equation of modulus `k'`
+(`lamePolynomialE_vertical_spectrum`), so `x ↦ g(K' - x)` solves Lamé's equation of modulus `k'`
 with eigenvalue `ν(ν+1) - h` and has `n - j` zeros in `(0, K')`; Sturm's oscillation theorem
 identifies the eigenvalue.
 -/
@@ -89,37 +89,38 @@ private lemma mem_separatedSpectrum_reflect {V : ℝ → ℝ} {L c μ : ℝ} {a 
 `-ν(ν+1)k²/dn²(y, k') = ν(ν+1)k'² sn²(K' - y, k') - ν(ν+1)`. -/
 private lemma verticalPotential_eq (hk0 : 0 < k) (hk1 : k < 1) (ν y : ℝ) :
     verticalPotential ν k y = lamePotential ν (Real.sqrt (1 - k ^ 2))
-      (Real.compEllIntKm (1 - k ^ 2) - y) - ν * (ν + 1) := by
+      (Real.completeEllipticKOfParameter (1 - k ^ 2) - y) - ν * (ν + 1) := by
   have hm : 1 - k ^ 2 < 1 := by nlinarith
   have hs : Real.sqrt (1 - k ^ 2) ^ 2 = 1 - k ^ 2 := Real.sq_sqrt (by nlinarith)
-  have e := (Real.jacobi_add_compEllIntKm hm (-y)).1
+  have e := (Real.jacobi_add_completeEllipticKOfParameter hm (-y)).1
   rw [(jacobi_neg hm y).2.1, (jacobi_neg hm y).2.2, neg_add_eq_sub] at e
-  have hd := Real.jacobiDnm_pos hm y
-  have h1 := Real.mul_jacobiSnm_sq_add_jacobiDnm_sq hm y
-  have h2 := Real.jacobiSnm_sq_add_jacobiCnm_sq y (1 - k ^ 2)
+  have hd := Real.jacobiDnOfParameter_pos hm y
+  have h1 := Real.mul_jacobiSnOfParameter_sq_add_jacobiDnOfParameter_sq hm y
+  have h2 := Real.jacobiSnOfParameter_sq_add_jacobiCnOfParameter_sq y (1 - k ^ 2)
   rw [verticalPotential, lamePotential, hs, e]
   field_simp
   linear_combination (-(ν * (ν + 1))) * ((1 - k ^ 2) * h2 - h1)
 
 
 /-- **The comodulus eigenvalue of a Lamé polynomial.** Along the vertical side the Lamé
-polynomial `lamePolyEk t n j` is, after `y ↦ K' - y`, the `(n - j)`th eigenfunction of the
+polynomial `lamePolynomialE t n j` is, after `y ↦ K' - y`, the `(n - j)`th eigenfunction of the
 Lamé problem of modulus `k' = √(1 - k²)` with the boundary types `lamePolyOddKiK t` at `0` and
 `lamePolyOddK t` at `K'`, with eigenvalue `ν(ν+1) - ½(H_j + ν(ν+1)k²)`. -/
-theorem lameEigenvalue_comodulus_lamePolyType (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType)
+theorem lameEigenvalue_comodulus_lamePolynomialType (hk0 : 0 < k) (hk1 : k < 1)
+    (t : LamePolynomialType)
     {n j : ℕ} (hj : j ≤ n) :
     Real.lameEigenvalue (t.order n : ℝ) (Real.sqrt (1 - k ^ 2)) (lamePolyOddKiK t)
         (lamePolyOddK t) (n - j) =
       (t.order n : ℝ) * ((t.order n : ℝ) + 1) -
-        (lamePolyH t n j k + (t.order n : ℝ) * ((t.order n : ℝ) + 1) * k ^ 2) / 2 := by
+        (lamePolynomialH t n j k + (t.order n : ℝ) * ((t.order n : ℝ) + 1) * k ^ 2) / 2 := by
   set ν : ℝ := (t.order n : ℝ)
   set c : ℝ := ν * (ν + 1)
-  set hv : ℝ := (lamePolyH t n j k + ν * (ν + 1) * k ^ 2) / 2
-  set L := Real.compEllIntKm (1 - k ^ 2)
+  set hv : ℝ := (lamePolynomialH t n j k + ν * (ν + 1) * k ^ 2) / 2
+  set L := Real.completeEllipticKOfParameter (1 - k ^ 2)
   obtain ⟨hk0', hk1', hk2'⟩ := comodulus_mem_Ioo hk0 hk1
   set k' := Real.sqrt (1 - k ^ 2)
-  have hL : 0 < L := Real.compEllIntKm_pos (by nlinarith)
-  obtain ⟨hmem, hcnt⟩ := lamePolyEk_vertical_spectrum hk0 hk1 t hj
+  have hL : 0 < L := Real.completeEllipticKOfParameter_pos (by nlinarith)
+  obtain ⟨hmem, hcnt⟩ := lamePolynomialE_vertical_spectrum hk0 hk1 t hj
   set Sv := ODE.separatedSpectrum (verticalPotential ν k) L (lamePolyOddK t) (lamePolyOddKiK t)
   set SL := Real.lameSpectrum ν k' (lamePolyOddKiK t) (lamePolyOddK t)
   have hSL : SL = ODE.separatedSpectrum (lamePotential ν k') L (lamePolyOddKiK t)
@@ -156,104 +157,109 @@ theorem lameEigenvalue_comodulus_lamePolyType (hk0 : 0 < k) (hk1 : k < 1) (t : L
 `m = 0, 1, …, n` (the second eigenvalue has modulus `k' = √(1 - k²)`). Proved from the
 Lamé polynomials: `a^m_n(k)` is the eigenvalue of a Lamé polynomial of type `uE`, `sE`, `dE`
 or `sdE`, which along `K + i[0, K']` is the eigenfunction for `n(n+1) - a^m_n(k)` of the
-problem of modulus `k'` with `n - m` as superscript (`lameEigenvalue_comodulus_lamePolyType`). -/
+problem of modulus `k'` with `n - m` as superscript (`lameEigenvalue_comodulus_lamePolynomialType`).
+-/
 @[dlmf 29.3.E7]
-theorem Real.lameAk_add_lameAk_comodulus (hk0 : 0 < k) (hk1 : k < 1) {n m : ℕ} (hm : m ≤ n) :
-    Real.lameAk n m k + Real.lameAk n (n - m) (Real.sqrt (1 - k ^ 2)) = n * (n + 1) := by
+theorem Real.lameA_add_lameA_comodulus (hk0 : 0 < k) (hk1 : k < 1) {n m : ℕ} (hm : m ≤ n) :
+    Real.lameA n m k + Real.lameA n (n - m) (Real.sqrt (1 - k ^ 2)) = n * (n + 1) := by
   rcases Nat.even_or_odd' n with ⟨N, rfl | rfl⟩ <;> rcases Nat.even_or_odd' m with ⟨j, rfl | rfl⟩
-  · have h1 := Real.lameAk_eq_lamePolyH_uE hk0 hk1 (n := N) (m := j) (by omega)
-    have h2 := lameEigenvalue_comodulus_lamePolyType hk0 hk1 .uE (n := N) (j := j) (by omega)
-    have h3 : Real.lameAk ((2 * N : ℕ) : ℝ) (2 * N - 2 * j) (Real.sqrt (1 - k ^ 2)) =
-        Real.lameEigenvalue ((LamePolyType.uE.order N : ℕ) : ℝ) (Real.sqrt (1 - k ^ 2))
+  · have h1 := Real.lameA_eq_lamePolynomialH_uE hk0 hk1 (n := N) (m := j) (by omega)
+    have h2 := lameEigenvalue_comodulus_lamePolynomialType hk0 hk1 .uE (n := N) (j := j) (by omega)
+    have h3 : Real.lameA ((2 * N : ℕ) : ℝ) (2 * N - 2 * j) (Real.sqrt (1 - k ^ 2)) =
+        Real.lameEigenvalue ((LamePolynomialType.uE.order N : ℕ) : ℝ) (Real.sqrt (1 - k ^ 2))
           (lamePolyOddKiK .uE) (lamePolyOddK .uE) (N - j) := by
-      rw [Real.lameAk, show 2 * N - 2 * j = 2 * (N - j) by omega]
-      simp [Nat.bodd_mul, LamePolyType.order, lamePolyOddKiK, lamePolyOddK]
-    rw [h1, h3, h2]; simp only [LamePolyType.order]; push_cast; ring
+      rw [Real.lameA, show 2 * N - 2 * j = 2 * (N - j) by omega]
+      simp [Nat.bodd_mul, LamePolynomialType.order, lamePolyOddKiK, lamePolyOddK]
+    rw [h1, h3, h2]; simp only [LamePolynomialType.order]; push_cast; ring
   · obtain ⟨N', rfl⟩ : ∃ N', N = N' + 1 := ⟨N - 1, by omega⟩
     rw [show 2 * (N' + 1) = 2 * N' + 2 by ring] at hm ⊢
-    have h1 := Real.lameAk_eq_lamePolyH_sdE hk0 hk1 (n := N') (m := j) (by omega)
-    have h2 := lameEigenvalue_comodulus_lamePolyType hk0 hk1 .sdE (n := N') (j := j) (by omega)
-    have h3 : Real.lameAk ((2 * N' + 2 : ℕ) : ℝ) (2 * N' + 2 - (2 * j + 1))
+    have h1 := Real.lameA_eq_lamePolynomialH_sdE hk0 hk1 (n := N') (m := j) (by omega)
+    have h2 := lameEigenvalue_comodulus_lamePolynomialType hk0 hk1 .sdE (n := N')
+        (j := j) (by omega)
+    have h3 : Real.lameA ((2 * N' + 2 : ℕ) : ℝ) (2 * N' + 2 - (2 * j + 1))
         (Real.sqrt (1 - k ^ 2)) =
-        Real.lameEigenvalue ((LamePolyType.sdE.order N' : ℕ) : ℝ) (Real.sqrt (1 - k ^ 2))
+        Real.lameEigenvalue ((LamePolynomialType.sdE.order N' : ℕ) : ℝ) (Real.sqrt (1 - k ^ 2))
           (lamePolyOddKiK .sdE) (lamePolyOddK .sdE) (N' - j) := by
-      rw [Real.lameAk, show 2 * N' + 2 - (2 * j + 1) = 2 * (N' - j) + 1 by omega]
-      simp [Nat.bodd_mul, LamePolyType.order, lamePolyOddKiK, lamePolyOddK]
+      rw [Real.lameA, show 2 * N' + 2 - (2 * j + 1) = 2 * (N' - j) + 1 by omega]
+      simp [Nat.bodd_mul, LamePolynomialType.order, lamePolyOddKiK, lamePolyOddK]
       congr 1; omega
-    rw [h1, h3, h2]; simp only [LamePolyType.order]; push_cast; ring
-  · have h1 := Real.lameAk_eq_lamePolyH_dE hk0 hk1 (n := N) (m := j) (by omega)
-    have h2 := lameEigenvalue_comodulus_lamePolyType hk0 hk1 .dE (n := N) (j := j) (by omega)
-    have h3 : Real.lameAk ((2 * N + 1 : ℕ) : ℝ) (2 * N + 1 - 2 * j) (Real.sqrt (1 - k ^ 2)) =
-        Real.lameEigenvalue ((LamePolyType.dE.order N : ℕ) : ℝ) (Real.sqrt (1 - k ^ 2))
+    rw [h1, h3, h2]; simp only [LamePolynomialType.order]; push_cast; ring
+  · have h1 := Real.lameA_eq_lamePolynomialH_dE hk0 hk1 (n := N) (m := j) (by omega)
+    have h2 := lameEigenvalue_comodulus_lamePolynomialType hk0 hk1 .dE (n := N) (j := j) (by omega)
+    have h3 : Real.lameA ((2 * N + 1 : ℕ) : ℝ) (2 * N + 1 - 2 * j) (Real.sqrt (1 - k ^ 2)) =
+        Real.lameEigenvalue ((LamePolynomialType.dE.order N : ℕ) : ℝ) (Real.sqrt (1 - k ^ 2))
           (lamePolyOddKiK .dE) (lamePolyOddK .dE) (N - j) := by
-      rw [Real.lameAk, show 2 * N + 1 - 2 * j = 2 * (N - j) + 1 by omega]
-      simp [Nat.bodd_mul, LamePolyType.order, lamePolyOddKiK, lamePolyOddK]
+      rw [Real.lameA, show 2 * N + 1 - 2 * j = 2 * (N - j) + 1 by omega]
+      simp [Nat.bodd_mul, LamePolynomialType.order, lamePolyOddKiK, lamePolyOddK]
       congr 1; omega
-    rw [h1, h3, h2]; simp only [LamePolyType.order]; push_cast; ring
-  · have h1 := Real.lameAk_eq_lamePolyH_sE hk0 hk1 (n := N) (m := j) (by omega)
-    have h2 := lameEigenvalue_comodulus_lamePolyType hk0 hk1 .sE (n := N) (j := j) (by omega)
-    have h3 : Real.lameAk ((2 * N + 1 : ℕ) : ℝ) (2 * N + 1 - (2 * j + 1))
+    rw [h1, h3, h2]; simp only [LamePolynomialType.order]; push_cast; ring
+  · have h1 := Real.lameA_eq_lamePolynomialH_sE hk0 hk1 (n := N) (m := j) (by omega)
+    have h2 := lameEigenvalue_comodulus_lamePolynomialType hk0 hk1 .sE (n := N) (j := j) (by omega)
+    have h3 : Real.lameA ((2 * N + 1 : ℕ) : ℝ) (2 * N + 1 - (2 * j + 1))
         (Real.sqrt (1 - k ^ 2)) =
-        Real.lameEigenvalue ((LamePolyType.sE.order N : ℕ) : ℝ) (Real.sqrt (1 - k ^ 2))
+        Real.lameEigenvalue ((LamePolynomialType.sE.order N : ℕ) : ℝ) (Real.sqrt (1 - k ^ 2))
           (lamePolyOddKiK .sE) (lamePolyOddK .sE) (N - j) := by
-      rw [Real.lameAk, show 2 * N + 1 - (2 * j + 1) = 2 * (N - j) by omega]
-      simp [Nat.bodd_mul, LamePolyType.order, lamePolyOddKiK, lamePolyOddK]
-    rw [h1, h3, h2]; simp only [LamePolyType.order]; push_cast; ring
+      rw [Real.lameA, show 2 * N + 1 - (2 * j + 1) = 2 * (N - j) by omega]
+      simp [Nat.bodd_mul, LamePolynomialType.order, lamePolyOddKiK, lamePolyOddK]
+    rw [h1, h3, h2]; simp only [LamePolynomialType.order]; push_cast; ring
 
 
 /-- 29.3.8: for a nonnegative integer `ν = n`, `b^m_n(k²) + b^{n-m+1}_n(1 - k²) = n(n+1)`,
 `m = 1, …, n`. Proved like 29.3.7 from the Lamé polynomials of types `cE`, `scE`, `cdE`,
-`scdE` (`lameEigenvalue_comodulus_lamePolyType`). -/
+`scdE` (`lameEigenvalue_comodulus_lamePolynomialType`). -/
 @[dlmf 29.3.E8]
-theorem Real.lameBk_add_lameBk_comodulus (hk0 : 0 < k) (hk1 : k < 1) {n m : ℕ} (hm1 : 1 ≤ m)
+theorem Real.lameB_add_lameB_comodulus (hk0 : 0 < k) (hk1 : k < 1) {n m : ℕ} (hm1 : 1 ≤ m)
     (hm : m ≤ n) :
-    Real.lameBk n m k + Real.lameBk n (n - m + 1) (Real.sqrt (1 - k ^ 2)) = n * (n + 1) := by
+    Real.lameB n m k + Real.lameB n (n - m + 1) (Real.sqrt (1 - k ^ 2)) = n * (n + 1) := by
   rcases Nat.even_or_odd' n with ⟨N, rfl | rfl⟩ <;> rcases Nat.even_or_odd' m with ⟨j, rfl | rfl⟩
   · obtain ⟨N', rfl⟩ : ∃ N', N = N' + 1 := ⟨N - 1, by omega⟩
     obtain ⟨j, rfl⟩ : ∃ j', j = j' + 1 := ⟨j - 1, by omega⟩
     rw [show 2 * (N' + 1) = 2 * N' + 2 by ring, show 2 * (j + 1) = 2 * j + 2 by ring] at hm ⊢
-    have h1 := Real.lameBk_eq_lamePolyH_scE hk0 hk1 (n := N') (m := j) (by omega)
-    have h2 := lameEigenvalue_comodulus_lamePolyType hk0 hk1 .scE (n := N') (j := j) (by omega)
-    have h3 : Real.lameBk ((2 * N' + 2 : ℕ) : ℝ) (2 * N' + 2 - (2 * j + 2) + 1)
+    have h1 := Real.lameB_eq_lamePolynomialH_scE hk0 hk1 (n := N') (m := j) (by omega)
+    have h2 := lameEigenvalue_comodulus_lamePolynomialType hk0 hk1 .scE (n := N')
+        (j := j) (by omega)
+    have h3 : Real.lameB ((2 * N' + 2 : ℕ) : ℝ) (2 * N' + 2 - (2 * j + 2) + 1)
         (Real.sqrt (1 - k ^ 2)) =
-        Real.lameEigenvalue ((LamePolyType.scE.order N' : ℕ) : ℝ) (Real.sqrt (1 - k ^ 2))
+        Real.lameEigenvalue ((LamePolynomialType.scE.order N' : ℕ) : ℝ) (Real.sqrt (1 - k ^ 2))
           (lamePolyOddKiK .scE) (lamePolyOddK .scE) (N' - j) := by
-      rw [Real.lameBk, show 2 * N' + 2 - (2 * j + 2) + 1 = 2 * (N' - j) + 1 by omega]
-      simp [Nat.bodd_mul, LamePolyType.order, lamePolyOddKiK, lamePolyOddK]
-    rw [h1, h3, h2]; simp only [LamePolyType.order]; push_cast; ring
+      rw [Real.lameB, show 2 * N' + 2 - (2 * j + 2) + 1 = 2 * (N' - j) + 1 by omega]
+      simp [Nat.bodd_mul, LamePolynomialType.order, lamePolyOddKiK, lamePolyOddK]
+    rw [h1, h3, h2]; simp only [LamePolynomialType.order]; push_cast; ring
   · obtain ⟨N', rfl⟩ : ∃ N', N = N' + 1 := ⟨N - 1, by omega⟩
     rw [show 2 * (N' + 1) = 2 * N' + 2 by ring] at hm ⊢
-    have h1 := Real.lameBk_eq_lamePolyH_cdE hk0 hk1 (n := N') (m := j) (by omega)
-    have h2 := lameEigenvalue_comodulus_lamePolyType hk0 hk1 .cdE (n := N') (j := j) (by omega)
-    have h3 : Real.lameBk ((2 * N' + 2 : ℕ) : ℝ) (2 * N' + 2 - (2 * j + 1) + 1)
+    have h1 := Real.lameB_eq_lamePolynomialH_cdE hk0 hk1 (n := N') (m := j) (by omega)
+    have h2 := lameEigenvalue_comodulus_lamePolynomialType hk0 hk1 .cdE (n := N')
+        (j := j) (by omega)
+    have h3 : Real.lameB ((2 * N' + 2 : ℕ) : ℝ) (2 * N' + 2 - (2 * j + 1) + 1)
         (Real.sqrt (1 - k ^ 2)) =
-        Real.lameEigenvalue ((LamePolyType.cdE.order N' : ℕ) : ℝ) (Real.sqrt (1 - k ^ 2))
+        Real.lameEigenvalue ((LamePolynomialType.cdE.order N' : ℕ) : ℝ) (Real.sqrt (1 - k ^ 2))
           (lamePolyOddKiK .cdE) (lamePolyOddK .cdE) (N' - j) := by
-      rw [Real.lameBk, show 2 * N' + 2 - (2 * j + 1) + 1 = 2 * (N' - j) + 2 by omega]
-      simp [Nat.bodd_mul, LamePolyType.order, lamePolyOddKiK, lamePolyOddK]
+      rw [Real.lameB, show 2 * N' + 2 - (2 * j + 1) + 1 = 2 * (N' - j) + 2 by omega]
+      simp [Nat.bodd_mul, LamePolynomialType.order, lamePolyOddKiK, lamePolyOddK]
       congr 1; omega
-    rw [h1, h3, h2]; simp only [LamePolyType.order]; push_cast; ring
+    rw [h1, h3, h2]; simp only [LamePolynomialType.order]; push_cast; ring
   · obtain ⟨N', rfl⟩ : ∃ N', N = N' + 1 := ⟨N - 1, by omega⟩
     obtain ⟨j, rfl⟩ : ∃ j', j = j' + 1 := ⟨j - 1, by omega⟩
     rw [show 2 * (N' + 1) + 1 = 2 * N' + 3 by ring, show 2 * (j + 1) = 2 * j + 2 by ring] at hm ⊢
-    have h1 := Real.lameBk_eq_lamePolyH_scdE hk0 hk1 (n := N') (m := j) (by omega)
-    have h2 := lameEigenvalue_comodulus_lamePolyType hk0 hk1 .scdE (n := N') (j := j) (by omega)
-    have h3 : Real.lameBk ((2 * N' + 3 : ℕ) : ℝ) (2 * N' + 3 - (2 * j + 2) + 1)
+    have h1 := Real.lameB_eq_lamePolynomialH_scdE hk0 hk1 (n := N') (m := j) (by omega)
+    have h2 := lameEigenvalue_comodulus_lamePolynomialType hk0 hk1 .scdE (n := N')
+        (j := j) (by omega)
+    have h3 : Real.lameB ((2 * N' + 3 : ℕ) : ℝ) (2 * N' + 3 - (2 * j + 2) + 1)
         (Real.sqrt (1 - k ^ 2)) =
-        Real.lameEigenvalue ((LamePolyType.scdE.order N' : ℕ) : ℝ) (Real.sqrt (1 - k ^ 2))
+        Real.lameEigenvalue ((LamePolynomialType.scdE.order N' : ℕ) : ℝ) (Real.sqrt (1 - k ^ 2))
           (lamePolyOddKiK .scdE) (lamePolyOddK .scdE) (N' - j) := by
-      rw [Real.lameBk, show 2 * N' + 3 - (2 * j + 2) + 1 = 2 * (N' - j) + 2 by omega]
-      simp [Nat.bodd_mul, LamePolyType.order, lamePolyOddKiK, lamePolyOddK]
+      rw [Real.lameB, show 2 * N' + 3 - (2 * j + 2) + 1 = 2 * (N' - j) + 2 by omega]
+      simp [Nat.bodd_mul, LamePolynomialType.order, lamePolyOddKiK, lamePolyOddK]
       congr 1; omega
-    rw [h1, h3, h2]; simp only [LamePolyType.order]; push_cast; ring
-  · have h1 := Real.lameBk_eq_lamePolyH_cE hk0 hk1 (n := N) (m := j) (by omega)
-    have h2 := lameEigenvalue_comodulus_lamePolyType hk0 hk1 .cE (n := N) (j := j) (by omega)
-    have h3 : Real.lameBk ((2 * N + 1 : ℕ) : ℝ) (2 * N + 1 - (2 * j + 1) + 1)
+    rw [h1, h3, h2]; simp only [LamePolynomialType.order]; push_cast; ring
+  · have h1 := Real.lameB_eq_lamePolynomialH_cE hk0 hk1 (n := N) (m := j) (by omega)
+    have h2 := lameEigenvalue_comodulus_lamePolynomialType hk0 hk1 .cE (n := N) (j := j) (by omega)
+    have h3 : Real.lameB ((2 * N + 1 : ℕ) : ℝ) (2 * N + 1 - (2 * j + 1) + 1)
         (Real.sqrt (1 - k ^ 2)) =
-        Real.lameEigenvalue ((LamePolyType.cE.order N : ℕ) : ℝ) (Real.sqrt (1 - k ^ 2))
+        Real.lameEigenvalue ((LamePolynomialType.cE.order N : ℕ) : ℝ) (Real.sqrt (1 - k ^ 2))
           (lamePolyOddKiK .cE) (lamePolyOddK .cE) (N - j) := by
-      rw [Real.lameBk, show 2 * N + 1 - (2 * j + 1) + 1 = 2 * (N - j) + 1 by omega]
-      simp [Nat.bodd_mul, LamePolyType.order, lamePolyOddKiK, lamePolyOddK]
-    rw [h1, h3, h2]; simp only [LamePolyType.order]; push_cast; ring
+      rw [Real.lameB, show 2 * N + 1 - (2 * j + 1) + 1 = 2 * (N - j) + 1 by omega]
+      simp [Nat.bodd_mul, LamePolynomialType.order, lamePolyOddKiK, lamePolyOddK]
+    rw [h1, h3, h2]; simp only [LamePolynomialType.order]; push_cast; ring
 
 end DLMF.Lame

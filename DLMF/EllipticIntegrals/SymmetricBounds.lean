@@ -19,12 +19,12 @@ Analytic infrastructure for DLMF §19.16, stated for the explicit integrands `s(
 
 * `exists_mul_add_one_le_norm_ofReal_add`: the lower bound `‖t + w‖ ≥ c (t + 1)` for
   `w ∈ ℂ \ (-∞, 0]`, `t ≥ 0`, from `|t + w|² ≥ ((|w| + ℜw)/(2|w|)) (t + |w|)²`.
-* `integrableOn_symEllIntRF_integrand`, `integrableOn_symEllIntRJ_integrand`: integrability on
-  `(0, ∞)` of the integrands of `R_F` and `R_J` (hence `R_D`) when one variable is admissible
-  (slit plane or `0`) and the others lie in the slit plane, by domination with
+* `integrableOn_symmetricEllipticRF_integrand`, `integrableOn_symmetricEllipticRJ_integrand`:
+  integrability on `(0, ∞)` of the integrands of `R_F` and `R_J` (hence `R_D`) when one variable is
+  admissible (slit plane or `0`) and the others lie in the slit plane, by domination with
   `(√t (t + 1))⁻¹` (`integrableOn_Ioi_of_norm_le_inv_sqrt_mul`).
 * `hasDerivAt_ofReal_add_cpow_half`: the derivative of `t ↦ (t + w)^{1/2}`.
-* `symEllIntRG_integral_identity`: the integral identity behind DLMF 19.21.10, by the exact
+* `symmetricEllipticRG_integral_identity`: the integral identity behind DLMF 19.21.10, by the exact
   antiderivative `(t (x + y) + xy)/s(t)`, valid also for `x = 0`.
 -/
 
@@ -238,7 +238,7 @@ private lemma continuousOn_inv_sqrt_product {a b c : ℂ} (ha : a ∈ slitPlane 
         (ofReal_pos_add_cpow_half_ne_zero ht hc)
 
 /-- Integrability of `R_F`'s integrand: `a` admissible, `b, c` in the slit plane. -/
-theorem integrableOn_symEllIntRF_integrand {a b c : ℂ} (ha : a ∈ slitPlane ∨ a = 0)
+theorem integrableOn_symmetricEllipticRF_integrand {a b c : ℂ} (ha : a ∈ slitPlane ∨ a = 0)
     (hb : b ∈ slitPlane)
     (hc : c ∈ slitPlane) :
     IntegrableOn (fun t : ℝ => (((t : ℂ) + a) ^ (1 / 2 : ℂ) * ((t : ℂ) + b) ^ (1 / 2 : ℂ) *
@@ -248,7 +248,7 @@ theorem integrableOn_symEllIntRF_integrand {a b c : ℂ} (ha : a ∈ slitPlane �
       (continuousOn_inv_sqrt_product ha (Or.inl hb) (Or.inl hc)) hC
 
 /-- Integrability of `R_J`'s integrand: `a` admissible, `b, c, p` in the slit plane. -/
-theorem integrableOn_symEllIntRJ_integrand {a b c p : ℂ} (ha : a ∈ slitPlane ∨ a = 0)
+theorem integrableOn_symmetricEllipticRJ_integrand {a b c p : ℂ} (ha : a ∈ slitPlane ∨ a = 0)
     (hb : b ∈ slitPlane)
     (hc : c ∈ slitPlane) (hp : p ∈ slitPlane) :
     IntegrableOn (fun t : ℝ => (((t : ℂ) + a) ^ (1 / 2 : ℂ) * ((t : ℂ) + b) ^ (1 / 2 : ℂ) *
@@ -269,7 +269,7 @@ theorem integrableOn_symEllIntRJ_integrand {a b c p : ℂ} (ha : a ∈ slitPlane
       _ = _ := by ring
 
 /-- Integrability of `R_G`'s integrand: `a` admissible, `b, c` in the slit plane. -/
-private lemma integrableOn_symEllIntRG_integrand {a b c : ℂ} (ha : a ∈ slitPlane ∨ a = 0)
+private lemma integrableOn_symmetricEllipticRG_integrand {a b c : ℂ} (ha : a ∈ slitPlane ∨ a = 0)
     (hb : b ∈ slitPlane)
     (hc : c ∈ slitPlane) :
     IntegrableOn (fun t : ℝ => (((t : ℂ) + a) ^ (1 / 2 : ℂ) * ((t : ℂ) + b) ^ (1 / 2 : ℂ) *
@@ -299,8 +299,8 @@ private lemma integrableOn_symEllIntRG_integrand {a b c : ℂ} (ha : a ∈ slitP
           mul_le_mul h1 h2 (by positivity) (le_trans (norm_nonneg _) h1)
       _ = _ := by ring
 
-/-- The algebraic identity behind `symEllIntRG_integral_identity`, with `u² = t + x` etc. -/
-private lemma symEllIntRG_derivative_identity (t u v w x y z : ℂ) (hu : u ^ 2 = t + x)
+/-- The algebraic identity behind `symmetricEllipticRG_integral_identity`, with `u² = t + x` etc. -/
+private lemma symmetricEllipticRG_derivative_identity (t u v w x y z : ℂ) (hu : u ^ 2 = t + x)
     (hv : v ^ 2 = t + y)
     (hw : w ^ 2 = t + z) (hu0 : u ≠ 0) (hv0 : v ≠ 0) (hw0 : w ≠ 0) :
     (x + y) * (u * v * w)⁻¹ + (t * (x + y) + x * y) *
@@ -319,7 +319,8 @@ private lemma symEllIntRG_derivative_identity (t u v w x y z : ℂ) (hu : u ^ 2 
 `h(t) = (t (x + y) + xy)/s(t)`: with `s(t) = √(t+x) √(t+y) √(t+z)`, `x` admissible (possibly
 `0`) and `y, z` in the slit plane,
 `∫ s⁻¹ (∑ x/(t+x)) t - z ∫ s⁻¹ + (x - z)(y - z) ∫ (s (t + z))⁻¹ = 2 x^{1/2} y^{1/2} z^{-1/2}`. -/
-theorem symEllIntRG_integral_identity {x y z : ℂ} (hx : x ∈ slitPlane ∨ x = 0) (hy : y ∈ slitPlane)
+theorem symmetricEllipticRG_integral_identity {x y z : ℂ} (hx : x ∈ slitPlane ∨ x = 0)
+    (hy : y ∈ slitPlane)
     (hz : z ∈ slitPlane) :
     (∫ t in Ioi (0 : ℝ), (((t : ℂ) + x) ^ (1 / 2 : ℂ) * ((t : ℂ) + y) ^ (1 / 2 : ℂ) *
         ((t : ℂ) + z) ^ (1 / 2 : ℂ))⁻¹ *
@@ -335,9 +336,9 @@ theorem symEllIntRG_integral_identity {x y z : ℂ} (hx : x ∈ slitPlane ∨ x 
     (x / ((t : ℂ) + x) + y / ((t : ℂ) + y) + z / ((t : ℂ) + z)) * t with hG
   set F : ℝ → ℂ := fun t => (S t)⁻¹ with hF
   set D : ℝ → ℂ := fun t => (S t * ((t : ℂ) + z))⁻¹ with hD
-  have iG : IntegrableOn G (Ioi 0) := integrableOn_symEllIntRG_integrand hx hy hz
-  have iF : IntegrableOn F (Ioi 0) := integrableOn_symEllIntRF_integrand hx hy hz
-  have iD : IntegrableOn D (Ioi 0) := integrableOn_symEllIntRJ_integrand hx hy hz hz
+  have iG : IntegrableOn G (Ioi 0) := integrableOn_symmetricEllipticRG_integrand hx hy hz
+  have iF : IntegrableOn F (Ioi 0) := integrableOn_symmetricEllipticRF_integrand hx hy hz
+  have iD : IntegrableOn D (Ioi 0) := integrableOn_symmetricEllipticRJ_integrand hx hy hz hz
   set f : ℝ → ℂ := fun t => -(1 / 2) * (G t - z * F t + (x - z) * (y - z) * D t) with hf
   set h : ℝ → ℂ := fun t => ((t : ℂ) * (x + y) + x * y) * (S t)⁻¹ with hh
   have iff : IntegrableOn f (Ioi 0) :=
@@ -359,7 +360,7 @@ theorem symEllIntRG_integral_identity {x y z : ℂ} (hx : x ∈ slitPlane ∨ x 
     rw [one_mul] at this
     convert this using 1
     simp only [hf, hG, hF, hD, hS, Pi.mul_apply, Pi.inv_apply]
-    exact (symEllIntRG_derivative_identity (t : ℂ) _ _ _ x y z (Carlson.cpow_half_sq _)
+    exact (symmetricEllipticRG_derivative_identity (t : ℂ) _ _ _ x y z (Carlson.cpow_half_sq _)
         (Carlson.cpow_half_sq _)
       (Carlson.cpow_half_sq _) hu0 hv0 hw0).symm
   obtain ⟨C, hC⟩ := exists_norm_inv_sqrt_product_le hx hy hz

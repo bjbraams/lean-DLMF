@@ -22,22 +22,22 @@ lattice form (parameter `τ`) and in DLMF's literal modulus form.
   attached theta index.
 * `jacobiLetterTheta`: the normalized theta functions of DLMF 22.2.4–22.2.9.
 * `jacobiGlaisher`: Glaisher's quotient `pq = θ_p/θ_q` in the theta argument `ζ`.
-* `compEllIntKTau`, `compEllIntKpTau`, `jacobiModulusTau`, `jacobiComodulusTau`,
-  `jacobiZetaTau`: `K`, `K'`, `k`, `k'` and `ζ` as functions of the lattice parameter
-  (DLMF 22.2.2, 22.2.3, 22.2.12).
-* `jacobiPQTau`: Glaisher's function `pq(z)` for the lattice parameter `τ`, with the named
-  functions `jacobiSnTau`, …, `jacobiCsTau`.
-* `jacobiComodulusk`: `k' = √(1 - k²)`; `K(k)`, `K'(k)` are
-  `DLMF.EllipticIntegrals.compEllIntKk`, `compEllIntKpk` (DLMF 19.2.8, 19.2.9).
-* `jacobiTauk`, `jacobiNomek`, `jacobiZetak`: `τ = iK'/K`, the nome and `ζ` of the modulus `k`
+* `completeEllipticKOfTau`, `completeEllipticKPrimeOfTau`, `jacobiModulusOfTau`,
+  `jacobiComodulusOfTau`, `jacobiThetaArgumentOfTau`: `K`, `K'`, `k`, `k'` and `ζ` as functions of
+  the lattice parameter (DLMF 22.2.2, 22.2.3, 22.2.12).
+* `jacobiPQOfTau`: Glaisher's function `pq(z)` for the lattice parameter `τ`, with the named
+  functions `jacobiSnOfTau`, …, `jacobiCsOfTau`.
+* `jacobiComodulus`: `k' = √(1 - k²)`; `K(k)`, `K'(k)` are
+  `DLMF.EllipticIntegrals.completeEllipticK`, `completeEllipticKPrime` (DLMF 19.2.8, 19.2.9).
+* `jacobiTau`, `jacobiNome`, `jacobiThetaArgument`: `τ = iK'/K`, the nome and `ζ` of the modulus `k`
   (DLMF 22.2.12, 22.2.1, 22.2.3).
 * `jacobiModulusDomain`: the moduli `Re k > 0`, `k ∉ [1, ∞)`, on which DLMF's formulas hold.
-* `jacobiPQk`: Glaisher's function `pq(z, k)` for complex `z` and `k`, with the twelve named
-  functions `jacobiSnk`, `jacobiCnk`, `jacobiDnk`, `jacobiSdk`, `jacobiCdk`, `jacobiSck`,
-  `jacobiNsk`, `jacobiNck`, `jacobiNdk`, `jacobiDsk`, `jacobiDck`, `jacobiCsk`
+* `jacobiPQ`: Glaisher's function `pq(z, k)` for complex `z` and `k`, with the twelve named
+  functions `jacobiSn`, `jacobiCn`, `jacobiDn`, `jacobiSd`, `jacobiCd`, `jacobiSc`,
+  `jacobiNs`, `jacobiNc`, `jacobiNd`, `jacobiDs`, `jacobiDc`, `jacobiCs`
   (DLMF 22.2.4–22.2.9).
-* `JacobiRegulark`: `z` is not a zero of `θ_r(ζ)`, so that the functions `pr(z, k)` are finite.
-* `jacobiNevilleTau`: Neville's theta functions (DLMF §20.1) in the Jacobi argument `z`.
+* `IsJacobiRegular`: `z` is not a zero of `θ_r(ζ)`, so that the functions `pr(z, k)` are finite.
+* `nevilleThetaOfTau`: Neville's theta functions (DLMF §20.1) in the Jacobi argument `z`.
 
 ## Implementation notes
 
@@ -49,20 +49,20 @@ lattice form (parameter `τ`) and in DLMF's literal modulus form.
   constants reproduce DLMF 22.2.4–22.2.9 exactly. Each `pq` is a *reduced* theta quotient, so
   its removable singularities are filled in (e.g. `sd` is finite where `sn` and `dn` have
   poles). Poles carry Lean's junk value `x / 0 = 0`.
-* **Lattice form.** `jacobiPQTau p q z τ` uses `τ` (`Im τ > 0`) as the primary parameter, with
+* **Lattice form.** `jacobiPQOfTau p q z τ` uses `τ` (`Im τ > 0`) as the primary parameter, with
   `k = θ₂²(0|τ)/θ₃²(0|τ)`, `k' = θ₄²/θ₃²`, `K = (π/2)θ₃²(0|τ)`, `K' = -iτK` (DLMF 22.2.2,
   22.2.12) and `ζ = πz/(2K)`. Identities that follow from theta-function identities are
   proved in this form.
-* **Modulus form.** `jacobiPQk p q z k` is DLMF's literal definition for complex `z` and `k`:
-  `K(k) = compEllIntKk k` is the principal-branch integral 19.2.8,
-  `K'(k) = compEllIntKpk k = K(√(1-k²))`, `τ = iK'/K` (22.2.12), `q = e^{iπτ}` (22.2.1) and
+* **Modulus form.** `jacobiPQ p q z k` is DLMF's literal definition for complex `z` and `k`:
+  `K(k) = completeEllipticK k` is the principal-branch integral 19.2.8,
+  `K'(k) = completeEllipticKPrime k = K(√(1-k²))`, `τ = iK'/K` (22.2.12), `q = e^{iπτ}` (22.2.1) and
   `ζ = πz/(2K)` (22.2.3). DLMF's identities (with literal `k`, `k' = √(1-k²)`) hold on
   `jacobiModulusDomain = {Re k > 0} \ [1, ∞)`, where `k² ∈ ℂ \ ((-∞, 0] ∪ [1, ∞))`; there the
   inversion 22.2.2 is the theorem `jacobi_inversion_k`. On the other side of the imaginary
   axis the definition depends only on `k²`, so it gives the functions of `-k`.
-* **Real functions.** The real-variable `DLMF.Elliptic.Real.jacobiSnm/Cnm/Dnm` (in the
+* **Real functions.** The real-variable `DLMF.Elliptic.Real.jacobiSnOfParameter/Cnm/Dnm` (in the
   parameter `m = k²`, defined through the amplitude) are bridged to the modulus form by
-  `jacobiSnk_ofReal` and its companions for `0 < k < 1`, by ODE uniqueness.
+  `jacobiSn_ofReal` and its companions for `0 < k < 1`, by ODE uniqueness.
 
 Mathlib and TauCeti have no Jacobian elliptic functions.
 -/
@@ -77,7 +77,7 @@ noncomputable section
 
 namespace DLMF.JacobiElliptic
 
-open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
+open DLMF.EllipticIntegrals (completeEllipticK completeEllipticKPrime)
 
 /-- The four letters `s, c, d, n` of Glaisher's notation (DLMF 22.2.10). They label the four
 lattice points `0, K, K + iK', iK'` of the fundamental unit cell (DLMF §22.4(ii)). -/
@@ -117,45 +117,46 @@ def jacobiGlaisher (p q : JacobiLetter) (ζ τ : ℂ) : ℂ :=
 /-- The quarter period `K = (π/2) θ₃²(0|τ)` as a function of the lattice parameter
 (DLMF 22.2.2, third formula). -/
 @[dlmf 22.2.E2]
-def compEllIntKTau (τ : ℂ) : ℂ := π / 2 * jacobiThetaThreeTau 0 τ ^ 2
+def completeEllipticKOfTau (τ : ℂ) : ℂ := π / 2 * jacobiThetaThreeTau 0 τ ^ 2
 
 /-- The complementary quarter period `K' = -iτK`, i.e. `τ = iK'/K` (DLMF 22.2.12). -/
 @[dlmf 22.2.E12]
-def compEllIntKpTau (τ : ℂ) : ℂ := -I * τ * compEllIntKTau τ
+def completeEllipticKPrimeOfTau (τ : ℂ) : ℂ := -I * τ * completeEllipticKOfTau τ
 
 /-- The modulus `k = θ₂²(0|τ)/θ₃²(0|τ)` (DLMF 22.2.2, first formula). -/
 @[dlmf 22.2.E2]
-def jacobiModulusTau (τ : ℂ) : ℂ := jacobiThetaTwoTau 0 τ ^ 2 / jacobiThetaThreeTau 0 τ ^ 2
+def jacobiModulusOfTau (τ : ℂ) : ℂ := jacobiThetaTwoTau 0 τ ^ 2 / jacobiThetaThreeTau 0 τ ^ 2
 
 /-- The complementary modulus `k' = θ₄²(0|τ)/θ₃²(0|τ)` (DLMF 22.2.2, second formula). -/
 @[dlmf 22.2.E2]
-def jacobiComodulusTau (τ : ℂ) : ℂ := jacobiThetaFourTau 0 τ ^ 2 / jacobiThetaThreeTau 0 τ ^ 2
+def jacobiComodulusOfTau (τ : ℂ) : ℂ := jacobiThetaFourTau 0 τ ^ 2 / jacobiThetaThreeTau 0 τ ^ 2
 
 /-- The theta argument `ζ = πz/(2K)` (DLMF 22.2.3) in the lattice parametrization; it equals
 `z/θ₃²(0|τ)`. -/
 @[dlmf 22.2.E3]
-def jacobiZetaTau (z τ : ℂ) : ℂ := π * z / (2 * compEllIntKTau τ)
+def jacobiThetaArgumentOfTau (z τ : ℂ) : ℂ := π * z / (2 * completeEllipticKOfTau τ)
 
 /-- Glaisher's function `pq(z)` for the lattice parameter `τ` (`Im τ > 0`), DLMF 22.2.4–22.2.11
-with `k = jacobiModulusTau τ`. -/
-def jacobiPQTau (p q : JacobiLetter) (z τ : ℂ) : ℂ := jacobiGlaisher p q (jacobiZetaTau z τ) τ
+with `k = jacobiModulusOfTau τ`. -/
+def jacobiPQOfTau (p q : JacobiLetter) (z τ : ℂ) : ℂ :=
+    jacobiGlaisher p q (jacobiThetaArgumentOfTau z τ) τ
 
 /-! ### The modulus (`k`) parametrization -/
 
 /-- The complementary modulus `k' = √(1 - k²)` (principal square root, DLMF §22.1). -/
-def jacobiComodulusk (k : ℂ) : ℂ := (1 - k ^ 2) ^ (1 / 2 : ℂ)
+def jacobiComodulus (k : ℂ) : ℂ := (1 - k ^ 2) ^ (1 / 2 : ℂ)
 
 /-- The lattice parameter `τ = iK'(k)/K(k)` of the modulus `k` (DLMF 22.2.12). -/
 @[dlmf 22.2.E12]
-def jacobiTauk (k : ℂ) : ℂ := I * compEllIntKpk k / compEllIntKk k
+def jacobiTau (k : ℂ) : ℂ := I * completeEllipticKPrime k / completeEllipticK k
 
 /-- The nome `q = exp(-πK'(k)/K(k))` (DLMF 22.2.1). -/
 @[dlmf 22.2.E1]
-def jacobiNomek (k : ℂ) : ℂ := cexp (-(π * compEllIntKpk k / compEllIntKk k))
+def jacobiNome (k : ℂ) : ℂ := cexp (-(π * completeEllipticKPrime k / completeEllipticK k))
 
 /-- The theta argument `ζ = πz/(2K(k))` (DLMF 22.2.3). -/
 @[dlmf 22.2.E3]
-def jacobiZetak (z k : ℂ) : ℂ := π * z / (2 * compEllIntKk k)
+def jacobiThetaArgument (z k : ℂ) : ℂ := π * z / (2 * completeEllipticK k)
 
 /-- The domain of moduli on which DLMF's formulas hold with literal `k` and the principal
 `k' = √(1 - k²)`: `Re k > 0` and `k ∉ [1, ∞)`, equivalently `k² ∈ ℂ \ ((-∞, 0] ∪ [1, ∞))` with
@@ -164,84 +165,84 @@ def jacobiModulusDomain : Set ℂ := {k | 0 < k.re ∧ (k.im = 0 → k.re < 1)}
 
 /-- Glaisher's function `pq(z, k)` of DLMF 22.2.4–22.2.10 for complex `z` and `k`: the theta
 quotient with `τ = iK'/K` (nome `q = e^{iπτ}`) at `ζ = πz/(2K)`. -/
-def jacobiPQk (p q : JacobiLetter) (z k : ℂ) : ℂ :=
-  jacobiGlaisher p q (jacobiZetak z k) (jacobiTauk k)
+def jacobiPQ (p q : JacobiLetter) (z k : ℂ) : ℂ :=
+  jacobiGlaisher p q (jacobiThetaArgument z k) (jacobiTau k)
 
 /-! ### The twelve functions in the modulus `k` -/
 
 /-- `sn(z, k)` (DLMF 22.2.4). -/
 @[dlmf 22.2.E4]
-def jacobiSnk (z k : ℂ) : ℂ := jacobiPQk .s .n z k
+def jacobiSn (z k : ℂ) : ℂ := jacobiPQ .s .n z k
 /-- `cn(z, k)` (DLMF 22.2.5). -/
 @[dlmf 22.2.E5]
-def jacobiCnk (z k : ℂ) : ℂ := jacobiPQk .c .n z k
+def jacobiCn (z k : ℂ) : ℂ := jacobiPQ .c .n z k
 /-- `dn(z, k)` (DLMF 22.2.6). -/
 @[dlmf 22.2.E6]
-def jacobiDnk (z k : ℂ) : ℂ := jacobiPQk .d .n z k
+def jacobiDn (z k : ℂ) : ℂ := jacobiPQ .d .n z k
 /-- `sd(z, k)` (DLMF 22.2.7). -/
 @[dlmf 22.2.E7]
-def jacobiSdk (z k : ℂ) : ℂ := jacobiPQk .s .d z k
+def jacobiSd (z k : ℂ) : ℂ := jacobiPQ .s .d z k
 /-- `cd(z, k)` (DLMF 22.2.8). -/
 @[dlmf 22.2.E8]
-def jacobiCdk (z k : ℂ) : ℂ := jacobiPQk .c .d z k
+def jacobiCd (z k : ℂ) : ℂ := jacobiPQ .c .d z k
 /-- `sc(z, k)` (DLMF 22.2.9). -/
 @[dlmf 22.2.E9]
-def jacobiSck (z k : ℂ) : ℂ := jacobiPQk .s .c z k
+def jacobiSc (z k : ℂ) : ℂ := jacobiPQ .s .c z k
 /-- `ns(z, k) = 1/sn(z, k)` (DLMF 22.2.4). -/
 @[dlmf 22.2.E4]
-def jacobiNsk (z k : ℂ) : ℂ := jacobiPQk .n .s z k
+def jacobiNs (z k : ℂ) : ℂ := jacobiPQ .n .s z k
 /-- `nc(z, k) = 1/cn(z, k)` (DLMF 22.2.5). -/
 @[dlmf 22.2.E5]
-def jacobiNck (z k : ℂ) : ℂ := jacobiPQk .n .c z k
+def jacobiNc (z k : ℂ) : ℂ := jacobiPQ .n .c z k
 /-- `nd(z, k) = 1/dn(z, k)` (DLMF 22.2.6). -/
 @[dlmf 22.2.E6]
-def jacobiNdk (z k : ℂ) : ℂ := jacobiPQk .n .d z k
+def jacobiNd (z k : ℂ) : ℂ := jacobiPQ .n .d z k
 /-- `ds(z, k) = 1/sd(z, k)` (DLMF 22.2.7). -/
 @[dlmf 22.2.E7]
-def jacobiDsk (z k : ℂ) : ℂ := jacobiPQk .d .s z k
+def jacobiDs (z k : ℂ) : ℂ := jacobiPQ .d .s z k
 /-- `dc(z, k) = 1/cd(z, k)` (DLMF 22.2.8). -/
 @[dlmf 22.2.E8]
-def jacobiDck (z k : ℂ) : ℂ := jacobiPQk .d .c z k
+def jacobiDc (z k : ℂ) : ℂ := jacobiPQ .d .c z k
 /-- `cs(z, k) = 1/sc(z, k)` (DLMF 22.2.9). -/
 @[dlmf 22.2.E9]
-def jacobiCsk (z k : ℂ) : ℂ := jacobiPQk .c .s z k
+def jacobiCs (z k : ℂ) : ℂ := jacobiPQ .c .s z k
 
 /-! ### The twelve functions in the lattice parameter `τ` -/
 
 /-- `sn(z|τ)`: `sn` with modulus `k = θ₂²(0|τ)/θ₃²(0|τ)` (DLMF 22.2.4). -/
-def jacobiSnTau (z τ : ℂ) : ℂ := jacobiPQTau .s .n z τ
+def jacobiSnOfTau (z τ : ℂ) : ℂ := jacobiPQOfTau .s .n z τ
 /-- `cn(z|τ)` (DLMF 22.2.5). -/
-def jacobiCnTau (z τ : ℂ) : ℂ := jacobiPQTau .c .n z τ
+def jacobiCnOfTau (z τ : ℂ) : ℂ := jacobiPQOfTau .c .n z τ
 /-- `dn(z|τ)` (DLMF 22.2.6). -/
-def jacobiDnTau (z τ : ℂ) : ℂ := jacobiPQTau .d .n z τ
+def jacobiDnOfTau (z τ : ℂ) : ℂ := jacobiPQOfTau .d .n z τ
 /-- `sd(z|τ)` (DLMF 22.2.7). -/
-def jacobiSdTau (z τ : ℂ) : ℂ := jacobiPQTau .s .d z τ
+def jacobiSdOfTau (z τ : ℂ) : ℂ := jacobiPQOfTau .s .d z τ
 /-- `cd(z|τ)` (DLMF 22.2.8). -/
-def jacobiCdTau (z τ : ℂ) : ℂ := jacobiPQTau .c .d z τ
+def jacobiCdOfTau (z τ : ℂ) : ℂ := jacobiPQOfTau .c .d z τ
 /-- `sc(z|τ)` (DLMF 22.2.9). -/
-def jacobiScTau (z τ : ℂ) : ℂ := jacobiPQTau .s .c z τ
+def jacobiScOfTau (z τ : ℂ) : ℂ := jacobiPQOfTau .s .c z τ
 /-- `ns(z|τ)`. -/
-def jacobiNsTau (z τ : ℂ) : ℂ := jacobiPQTau .n .s z τ
+def jacobiNsOfTau (z τ : ℂ) : ℂ := jacobiPQOfTau .n .s z τ
 /-- `nc(z|τ)`. -/
-def jacobiNcTau (z τ : ℂ) : ℂ := jacobiPQTau .n .c z τ
+def jacobiNcOfTau (z τ : ℂ) : ℂ := jacobiPQOfTau .n .c z τ
 /-- `nd(z|τ)`. -/
-def jacobiNdTau (z τ : ℂ) : ℂ := jacobiPQTau .n .d z τ
+def jacobiNdOfTau (z τ : ℂ) : ℂ := jacobiPQOfTau .n .d z τ
 /-- `ds(z|τ)`. -/
-def jacobiDsTau (z τ : ℂ) : ℂ := jacobiPQTau .d .s z τ
+def jacobiDsOfTau (z τ : ℂ) : ℂ := jacobiPQOfTau .d .s z τ
 /-- `dc(z|τ)`. -/
-def jacobiDcTau (z τ : ℂ) : ℂ := jacobiPQTau .d .c z τ
+def jacobiDcOfTau (z τ : ℂ) : ℂ := jacobiPQOfTau .d .c z τ
 /-- `cs(z|τ)`. -/
-def jacobiCsTau (z τ : ℂ) : ℂ := jacobiPQTau .c .s z τ
+def jacobiCsOfTau (z τ : ℂ) : ℂ := jacobiPQOfTau .c .s z τ
 
 /-- `z` is not congruent to the corner of letter `r` (the zeros of `θ_r(ζ)`); equivalently, the
 functions `pr(z, k)` are finite at `z`. -/
-def JacobiRegulark (r : JacobiLetter) (z k : ℂ) : Prop :=
-  jacobiLetterTheta r (jacobiZetak z k) (jacobiTauk k) ≠ 0
+def IsJacobiRegular (r : JacobiLetter) (z k : ℂ) : Prop :=
+  jacobiLetterTheta r (jacobiThetaArgument z k) (jacobiTau k) ≠ 0
 
 /-- Neville's theta functions (DLMF §20.1) as functions of the Jacobi argument `z`, with
 `u = z/θ₃²(0|τ)`: `θ_s = θ₃²(0) θ₁(u)/θ₁'(0)`, `θ_c = θ₂(u)/θ₂(0)`, `θ_d = θ₃(u)/θ₃(0)`,
 `θ_n = θ₄(u)/θ₄(0)`. -/
-def jacobiNevilleTau (p : JacobiLetter) (z τ : ℂ) : ℂ :=
+def nevilleThetaOfTau (p : JacobiLetter) (z τ : ℂ) : ℂ :=
   let u := z / jacobiThetaThreeTau 0 τ ^ 2
   match p with
   | .s => jacobiThetaThreeTau 0 τ ^ 2 * jacobiThetaOneTau u τ /

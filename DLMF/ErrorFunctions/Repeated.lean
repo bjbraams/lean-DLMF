@@ -31,8 +31,8 @@ expansion.
 * `iteratedErfc_recurrence`: the three-term recurrence (DLMF 7.18.7).
 * `iteratedErfc_hermite`: the relation to Hermite polynomials (DLMF 7.18.8).
 * `iteratedErfc_kummerM`, `iteratedErfc_kummerU`, `iteratedErfc_kummerUOnLog`,
-  `iteratedErfc_pcfU`, `iteratedErfc_probability`: confluent hypergeometric, parabolic cylinder
-  and probability-function representations (DLMF 7.18.9–7.18.12).
+  `iteratedErfc_parabolicCylinderU`, `iteratedErfc_probability`: confluent hypergeometric, parabolic
+  cylinder and probability-function representations (DLMF 7.18.9–7.18.12).
 * `iteratedErfc_continuedFraction`: the continued fraction (DLMF 7.18.13).
 * `iteratedErfc_asymptotic`: the asymptotic expansion in the sector `|ph z| ≤ 3π/4 - δ`
   (DLMF 7.18.14).
@@ -58,9 +58,9 @@ def gaussianProbabilityHh (n : ℕ) (z : ℂ) : ℂ :=
   ∫ t : ℝ in Ioi 0, (t : ℂ)^n/(n.factorial : ℂ)*exp (-(z+t)^2/2)
 
 /-- Completing the square identifies the Gaussian probability moments with cylinder U. -/
-theorem gaussianProbabilityHh_eq_pcfU (n : ℕ) (z : ℂ) :
-    gaussianProbabilityHh n z=exp (-z^2/4)*pcfU (n+1/2) z := by
-  rw [pcfU_eq_integral
+theorem gaussianProbabilityHh_eq_parabolicCylinderU (n : ℕ) (z : ℂ) :
+    gaussianProbabilityHh n z=exp (-z^2/4)*parabolicCylinderU (n+1/2) z := by
+  rw [parabolicCylinderU_eq_integral
       (by simp only [add_re, natCast_re]; norm_num; linarith [(Nat.cast_nonneg n : (0:ℝ)≤n)])]
   rw [show (1/2:ℂ)+(n+1/2)=(n:ℂ)+1 by ring, Gamma_nat_eq_factorial,
     show (n:ℂ)+1/2-1/2=n by ring]
@@ -104,12 +104,12 @@ theorem gaussianProbabilityHh_sqrt_two (n : ℕ) (z : ℂ) :
     _ = _ := by rw [integral_const_mul, pow_succ]; ring
 
 /-- A natural-power normalization of the repeated complementary Gaussian integral. -/
-theorem iteratedErfc_eq_pcfU_nat (n : ℕ) (z : ℂ) :
+theorem iteratedErfc_eq_parabolicCylinderU_nat (n : ℕ) (z : ℂ) :
     iteratedErfc n z=2/((Real.sqrt π:ℂ)*(Real.sqrt 2:ℂ)^(n+1))*
-      exp (-z^2/2)*pcfU (n+1/2) ((Real.sqrt 2:ℂ)*z) := by
+      exp (-z^2/2)*parabolicCylinderU (n+1/2) ((Real.sqrt 2:ℂ)*z) := by
   have hs0 : (Real.sqrt 2:ℂ)≠0 := by exact_mod_cast (Real.sqrt_pos.mpr (by norm_num : (0:ℝ)<2)).ne'
   have hs : (Real.sqrt 2:ℂ)^2=2 := by exact_mod_cast Real.sq_sqrt (by norm_num : (0:ℝ)≤2)
-  have hH := gaussianProbabilityHh_eq_pcfU n ((Real.sqrt 2:ℂ)*z)
+  have hH := gaussianProbabilityHh_eq_parabolicCylinderU n ((Real.sqrt 2:ℂ)*z)
   have hS := gaussianProbabilityHh_sqrt_two n z
   rw [mul_pow, hs, show -(2*z^2)/4=-z^2/2 by ring] at hH
   rw [iteratedErfc, if_neg (by omega), if_neg (by omega)]
@@ -153,9 +153,9 @@ theorem iteratedErfc_normalization (n : ℕ) :
 theorem iteratedErfc_initial (z : ℂ) :
     iteratedErfc (-1) z=2/Real.sqrt π*exp (-z^2) ∧ iteratedErfc 0 z=erfc z := by
   refine ⟨by simp [iteratedErfc], ?_⟩
-  have h0 := iteratedErfc_eq_pcfU_nat 0 z
+  have h0 := iteratedErfc_eq_parabolicCylinderU_nat 0 z
   norm_num only [Nat.cast_zero] at h0
-  rw [h0, pcfU_half]
+  rw [h0, parabolicCylinderU_half]
   have hs0 : (Real.sqrt 2:ℂ)≠0 := by exact_mod_cast (Real.sqrt_pos.mpr (by norm_num : (0:ℝ)<2)).ne'
   have hπ0 : (Real.sqrt π:ℂ)≠0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hs : (Real.sqrt 2:ℂ)^2=2 := by exact_mod_cast Real.sq_sqrt (by norm_num : (0:ℝ)≤2)
@@ -170,13 +170,13 @@ theorem iteratedErfc_initial (z : ℂ) :
   simp
 
 /-- Integer-index form of the Gaussian-cylinder bridge, including the initial index -1. -/
-theorem iteratedErfc_eq_pcfU_int (n : ℤ) (hn : -1≤n) (z : ℂ) :
+theorem iteratedErfc_eq_parabolicCylinderU_int (n : ℤ) (hn : -1≤n) (z : ℂ) :
     iteratedErfc n z=2/((Real.sqrt π:ℂ)*(Real.sqrt 2:ℂ)^(n+1))*
-      exp (-z^2/2)*pcfU ((n:ℂ)+1/2) ((Real.sqrt 2:ℂ)*z) := by
+      exp (-z^2/2)*parabolicCylinderU ((n:ℂ)+1/2) ((Real.sqrt 2:ℂ)*z) := by
   by_cases h : n = -1
   · subst n
     norm_num only [Int.cast_neg, Int.cast_one, neg_add_cancel, zpow_zero, mul_one]
-    rw [show -(1/2:ℂ)= -1/2 by ring, pcfU_neg_half, (iteratedErfc_initial z).1,
+    rw [show -(1/2:ℂ)= -1/2 by ring, parabolicCylinderU_neg_half, (iteratedErfc_initial z).1,
       mul_pow, show (Real.sqrt 2:ℂ)^2=2 by exact_mod_cast Real.sq_sqrt (by norm_num : (0:ℝ)≤2)]
     rw [mul_assoc, ← Complex.exp_add]
     congr 2
@@ -184,13 +184,14 @@ theorem iteratedErfc_eq_pcfU_int (n : ℤ) (hn : -1≤n) (z : ℂ) :
   · have hn0 : 0≤n := by omega
     lift n to ℕ using hn0 with m
     simpa only [Int.cast_natCast, ← Int.natCast_add_one, zpow_natCast] using
-        iteratedErfc_eq_pcfU_nat m z
+        iteratedErfc_eq_parabolicCylinderU_nat m z
 
 /-- Entire differentiability of every nonnegative repeated erfc integral. -/
 theorem differentiable_iteratedErfc (n : ℕ) : Differentiable ℂ (iteratedErfc n) := by
-  have he := funext (iteratedErfc_eq_pcfU_nat n)
+  have he := funext (iteratedErfc_eq_parabolicCylinderU_nat n)
   rw [he]
-  have hU : Differentiable ℂ (pcfU ((n:ℂ)+1/2)) := fun z => (hasDerivAt_pcfU _ z).differentiableAt
+  have hU : Differentiable ℂ (parabolicCylinderU ((n:ℂ)+1/2)) := fun z =>
+      (hasDerivAt_parabolicCylinderU _ z).differentiableAt
   fun_prop
 
 /-- At `z`, the function `(iteratedErfc n)` has derivative `(-iteratedErfc ((n : ℤ)-1) z)`. -/
@@ -205,20 +206,21 @@ theorem hasDerivAt_iteratedErfc (n : ℕ) (z : ℂ) :
     dsimp [c]
     rw [sub_add_cancel, zpow_add₀ hs0, zpow_one]
     field_simp
-  have he : iteratedErfc n = fun w => c n*exp (-w^2/2)*pcfU ((n:ℂ)+1/2) (s*w) := by
+  have he : iteratedErfc n = fun w => c n*exp (-w^2/2)*parabolicCylinderU ((n:ℂ)+1/2) (s*w) := by
     funext w
-    exact iteratedErfc_eq_pcfU_int n (by omega) w
+    exact iteratedErfc_eq_parabolicCylinderU_int n (by omega) w
   rw [he]
   have hd : HasDerivAt (fun w : ℂ => exp (-w^2/2)) (-z*exp (-z^2/2)) z := by
     convert (((hasDerivAt_pow 2 z).neg).div_const 2).cexp using 1 <;>
         simp only [Pi.neg_apply, Function.comp_apply] <;> ring
-  have hu := (hasDerivAt_pcfU ((n:ℂ)+1/2) (s*z)).comp z ((hasDerivAt_id z).const_mul s)
+  have hu := (hasDerivAt_parabolicCylinderU ((n:ℂ)+1/2) (s*z)).comp z
+      ((hasDerivAt_id z).const_mul s)
   refine (((hd.const_mul (c n)).mul hu).congr_of_eventuallyEq
       (Eventually.of_forall fun w=>rfl)).congr_deriv ?_
-  rw [iteratedErfc_eq_pcfU_int ((n:ℤ)-1) (by omega), ← deriv_pcfU]
-  change _ = -(c ((n:ℤ)-1)*exp (-z^2/2)*pcfU (((n:ℤ)-1:ℤ)+1/2) (s*z))
+  rw [iteratedErfc_eq_parabolicCylinderU_int ((n:ℤ)-1) (by omega), ← deriv_parabolicCylinderU]
+  change _ = -(c ((n:ℤ)-1)*exp (-z^2/2)*parabolicCylinderU (((n:ℤ)-1:ℤ)+1/2) (s*z))
   rw [hc]
-  have hr := pcfU_recurrence_sub ((n:ℂ)+1/2) (s*z)
+  have hr := parabolicCylinderU_recurrence_sub ((n:ℂ)+1/2) (s*z)
   norm_num only [Int.cast_sub, Int.cast_natCast, Int.cast_one] at *
   rw [show (n:ℂ)-1+1/2=n+1/2-1 by ring]
   simp only [Function.comp_apply, id_eq]
@@ -321,9 +323,10 @@ theorem iteratedErfc_recurrence {n : ℕ} (hn : 1 ≤ n) (z : ℂ) :
   have hs : s^2=2 := by dsimp [s]; exact_mod_cast Real.sq_sqrt (by norm_num : (0:ℝ)≤2)
   have hs0 : s≠0 := by intro h; rw [h] at hs; norm_num at hs
   have hn0 : (n:ℂ)≠0 := Nat.cast_ne_zero.mpr (by omega)
-  rw [iteratedErfc_eq_pcfU_int n (by omega), iteratedErfc_eq_pcfU_int ((n:ℤ)-1) (by omega),
-    iteratedErfc_eq_pcfU_int ((n:ℤ)-2) (by omega)]
-  change 2/((Real.sqrt π:ℂ)*s^((n:ℤ)+1))*exp (-z^2/2)*pcfU ((n:ℂ)+1/2) (s*z) = _
+  rw [iteratedErfc_eq_parabolicCylinderU_int n (by omega),
+      iteratedErfc_eq_parabolicCylinderU_int ((n:ℤ)-1) (by omega),
+    iteratedErfc_eq_parabolicCylinderU_int ((n:ℤ)-2) (by omega)]
+  change 2/((Real.sqrt π:ℂ)*s^((n:ℤ)+1))*exp (-z^2/2)*parabolicCylinderU ((n:ℂ)+1/2) (s*z) = _
   have hp : s^((n:ℤ)+1)=s^((n:ℤ)-1)*2 := by
     rw [show (n:ℤ)+1=(n-1)+2 by ring, zpow_add₀ hs0, zpow_ofNat, hs]
   have hq : s^(n:ℤ)=s^((n:ℤ)-1)*s := by
@@ -332,10 +335,10 @@ theorem iteratedErfc_recurrence {n : ℕ} (hn : 1 ≤ n) (z : ℂ) :
       _ = _ := by rw [zpow_add₀ hs0, zpow_one]
   simp only [Int.cast_sub, Int.cast_natCast, Int.cast_ofNat, Int.cast_one, sub_add_cancel,
     show (n:ℤ)-2+1=n-1 by ring]
-  change _ = -z/n*(2/((Real.sqrt π:ℂ)*s^(n:ℤ))*exp (-z^2/2)*pcfU ((n:ℂ)-1+1/2) (s*z))+
-    1/(2*n)*(2/((Real.sqrt π:ℂ)*s^((n:ℤ)-1))*exp (-z^2/2)*pcfU ((n:ℂ)-2+1/2) (s*z))
+  change _ = -z/n*(2/((Real.sqrt π:ℂ)*s^(n:ℤ))*exp (-z^2/2)*parabolicCylinderU ((n:ℂ)-1+1/2) (s*z))+
+    1/(2*n)*(2/((Real.sqrt π:ℂ)*s^((n:ℤ)-1))*exp (-z^2/2)*parabolicCylinderU ((n:ℂ)-2+1/2) (s*z))
   rw [hp,hq]
-  have hr := pcfU_three_term ((n:ℂ)-1/2) (s*z)
+  have hr := parabolicCylinderU_three_term ((n:ℂ)-1/2) (s*z)
   rw [show (n:ℂ)-1/2-1=n-2+1/2 by ring, show (n:ℂ)-1/2+1=n+1/2 by ring,
     show (n:ℂ)-1/2+1/2=n by ring, show (n:ℂ)-1/2=n-1+1/2 by ring] at hr
   have hπ0 : (Real.sqrt π:ℂ)≠0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
@@ -458,7 +461,7 @@ theorem iteratedErfc_ne_zero_at_zero (k : ℤ) (hk : -1≤k) : iteratedErfc k 0�
   have hg : 0<(3/4+((k:ℂ)+1/2)/2).re := by
     norm_num
     linarith
-  rw [iteratedErfc_eq_pcfU_int k hk, mul_zero,pcfU_zero']
+  rw [iteratedErfc_eq_parabolicCylinderU_int k hk, mul_zero,parabolicCylinderU_zero']
   simp only [zero_pow (by norm_num : (2:ℕ)≠0),neg_zero,zero_div,Complex.exp_zero,mul_one]
   apply mul_ne_zero
   · exact div_ne_zero (by norm_num) (mul_ne_zero hπ0 (zpow_ne_zero _ hs0))
@@ -522,24 +525,26 @@ theorem iteratedDeriv_iteratedErfc_zero (n k : ℕ) :
     iteratedDeriv k (iteratedErfc n) 0=
       (-1:ℂ)^k/((2:ℂ)^((n:ℤ)-k)*Gamma (1+((n:ℂ)-k)/2)) := by
   let s : ℂ := Real.sqrt 2
-  let F : ℂ → ℂ := fun w => exp (-1*w^2/4)*pcfU ((n:ℂ)+1/2) w
+  let F : ℂ → ℂ := fun w => exp (-1*w^2/4)*parabolicCylinderU ((n:ℂ)+1/2) w
   have hs : s^2=2 := by dsimp [s]; exact_mod_cast Real.sq_sqrt (by norm_num : (0:ℝ)≤2)
   have hs0 : s≠0 := by intro h; rw [h] at hs; norm_num at hs
   have hp0 : (Real.sqrt π:ℂ)≠0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hF : Differentiable ℂ F := by
-    have hu : Differentiable ℂ (pcfU ((n:ℂ)+1/2)) := fun w => (hasDerivAt_pcfU _ w).differentiableAt
+    have hu : Differentiable ℂ (parabolicCylinderU ((n:ℂ)+1/2)) := fun w =>
+        (hasDerivAt_parabolicCylinderU _ w).differentiableAt
     dsimp [F]; fun_prop
   have he : iteratedErfc n=fun z => 2/((Real.sqrt π:ℂ)*s^(n+1))*F (s*z) := by
     funext z
-    rw [iteratedErfc_eq_pcfU_nat]
+    rw [iteratedErfc_eq_parabolicCylinderU_nat]
     have hexp : -1*(s*z)^2/4= -z^2/2 := by rw [mul_pow,hs]; ring
     simp only [F,hexp,s]
     ring
   rw [he,iteratedDeriv_const_mul_field,
     iteratedDeriv_comp_const_mul (contDiffOn_univ.mp (hF.differentiableOn.contDiffOn isOpen_univ))]
   dsimp only [F]
-  rw [pcfU_iterated_deriv_10, mul_zero,zero_pow two_ne_zero,mul_zero,zero_div,Complex.exp_zero,
-    mul_one,pcfU_zero]
+  rw [parabolicCylinderU_iterated_deriv_10, mul_zero, zero_pow two_ne_zero, mul_zero, zero_div,
+      Complex.exp_zero,
+    mul_one,parabolicCylinderU_zero]
   rw [show ((n:ℂ)+1/2-k)/2+1/4=(((n:ℤ)-k+1:ℤ):ℂ)/2 by push_cast; ring,
     show 3/4+((n:ℂ)+1/2-k)/2=1+((n:ℂ)-k)/2 by ring,two_cpow_int_half]
   change 2/((Real.sqrt π:ℂ)*s^(n+1)) *
@@ -569,12 +574,13 @@ theorem iteratedErfc_hasSum (n : ℕ) (z : ℂ) :
   ring
 
 /-- Identity under the stated parameter and domain assumptions: `(-1 : ℂ)^n*iteratedErfc n
-z+iteratedErfc n (-z)=I^(-(n : ℤ))/((2 : ℂ)^((n : ℤ)-1)*(n.factorial : ℂ))*hermitePolyHEval n
+z+iteratedErfc n (-z)=I^(-(n : ℤ))/((2 : ℂ)^((n : ℤ)-1)*(n.factorial : ℂ))*hermitePolynomialHEval n
 (I*z)`. -/
 @[dlmf 7.18.E8]
 theorem iteratedErfc_hermite (n : ℕ) (z : ℂ) :
     (-1 : ℂ)^n*iteratedErfc n z+iteratedErfc n
-        (-z)=I^(-(n : ℤ))/((2 : ℂ)^((n : ℤ)-1)*(n.factorial : ℂ))*hermitePolyHEval n (I*z) := by
+        (-z)=I^(-(n : ℤ))/((2 : ℂ)^((n : ℤ)-1)*(n.factorial :
+            ℂ))*hermitePolynomialHEval n (I*z) := by
   let J (k : ℕ) : ℂ := (-1:ℂ)^k*iteratedErfc k z+iteratedErfc k (-z)
   have hstep (k : ℕ) : 2*(k+2)*J (k+2)=2*z*J (k+1)+J k := by
     have hp := iteratedErfc_recurrence (n:=k+2) (by omega) z
@@ -587,13 +593,13 @@ theorem iteratedErfc_hermite (n : ℕ) (z : ℂ) :
     simp only [pow_add,pow_one,neg_one_sq,mul_one,Nat.cast_add,Nat.cast_one,Nat.cast_ofNat,
       Int.natCast_add,Int.natCast_one]
     linear_combination (-1:ℂ)^k*hp+hm
-  have hmain (k : ℕ) : (2:ℂ)^k*(k.factorial:ℂ)*J k=2*(-I)^k*hermitePolyHEval k (I*z) := by
+  have hmain (k : ℕ) : (2:ℂ)^k*(k.factorial:ℂ)*J k=2*(-I)^k*hermitePolynomialHEval k (I*z) := by
     induction k using Nat.twoStepInduction with
     | zero =>
       dsimp only [J]
       norm_num only [Nat.cast_zero]
       rw [(iteratedErfc_initial z).2,(iteratedErfc_initial (-z)).2,erfc_negative]
-      simp [hermitePolyHEval_zero]
+      simp [hermitePolynomialHEval_zero]
     | one =>
       have hp := iteratedErfc_recurrence (n:=1) (by omega) z
       have hm := iteratedErfc_recurrence (n:=1) (by omega) (-z)
@@ -601,11 +607,11 @@ theorem iteratedErfc_hermite (n : ℕ) (z : ℂ) :
       rw [(iteratedErfc_initial z).2,(iteratedErfc_initial z).1] at hp
       rw [(iteratedErfc_initial (-z)).2,(iteratedErfc_initial (-z)).1,erfc_negative,neg_sq] at hm
       dsimp only [J]
-      norm_num only [pow_one,Nat.factorial_one,Nat.cast_one,one_mul,hermitePolyHEval_one]
+      norm_num only [pow_one,Nat.factorial_one,Nat.cast_one,one_mul,hermitePolynomialHEval_one]
       linear_combination (norm := ring_nf) -2*hp+2*hm
       simp [I_sq]
     | more k ih0 ih1 =>
-      rw [hermitePolyHEval_succ_succ]
+      rw [hermitePolynomialHEval_succ_succ]
       have hs := hstep k
       rw [show k+2=(k+1)+1 by omega, Nat.factorial_succ, Nat.factorial_succ, pow_succ, pow_succ,
                                 pow_succ, pow_succ]
@@ -649,7 +655,8 @@ theorem iteratedErfc_kummerM (n : ℕ) (z : ℂ) :
     linear_combination (norm := ring_nf) 2*hA
     simp only [hs]
     ring
-  rw [iteratedErfc_eq_pcfU_nat,pcfU,pcfEven,pcfOdd]
+  rw [iteratedErfc_eq_parabolicCylinderU_nat, parabolicCylinderU, parabolicCylinderEven,
+      parabolicCylinderOdd]
   change 2/((Real.sqrt π:ℂ)*s^(n+1))*exp (-z^2/2)*
     ((Real.sqrt π:ℂ)*2^(-(((n:ℂ)+1/2)/2+1/4))*(Gamma (3/4+((n:ℂ)+1/2)/2))⁻¹*
       (exp (-(s*z)^2/4)*kummerM (((n:ℂ)+1/2)/2+1/4) (1/2) ((s*z)^2/2))-
@@ -681,8 +688,8 @@ theorem iteratedErfc_kummerU (n : ℕ) {z : ℂ} (hz : 0 < z.re) :
   have hs : s^2=2 := by dsimp [s]; exact_mod_cast Real.sq_sqrt (by norm_num : (0:ℝ)≤2)
   have hspos : 0<Real.sqrt 2 := Real.sqrt_pos.mpr (by norm_num)
   have hs0 : s≠0 := by dsimp [s]; exact_mod_cast hspos.ne'
-  rw [iteratedErfc_eq_pcfU_nat,
-      pcfU_eq_kummerU _ (by
+  rw [iteratedErfc_eq_parabolicCylinderU_nat,
+      parabolicCylinderU_eq_kummerU _ (by
                            simp only [mul_re, ofReal_re, ofReal_im, zero_mul,
                              sub_zero]; positivity)]
   change 2/((Real.sqrt π:ℂ)*s^(n+1))*exp (-z^2/2)*
@@ -730,12 +737,13 @@ theorem iteratedErfc_kummerUOnLog (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
   ring
 
 /-- Identity under the stated parameter and domain assumptions: `iteratedErfc n z=exp (-z^2/2)/((2
-: ℂ)^((n : ℤ)-1)*π)^(1/2 : ℂ)*pcfU (n+1/2) (z*Real.sqrt 2)`. -/
+: ℂ)^((n : ℤ)-1)*π)^(1/2 : ℂ)*parabolicCylinderU (n+1/2) (z*Real.sqrt 2)`. -/
 @[dlmf 7.18.E11]
-theorem iteratedErfc_pcfU (n : ℕ) (z : ℂ) :
-    iteratedErfc n z=exp (-z^2/2)/((2 : ℂ)^((n : ℤ)-1)*π)^(1/2 : ℂ)*pcfU (n+1/2)
+theorem iteratedErfc_parabolicCylinderU (n : ℕ) (z : ℂ) :
+    iteratedErfc n z=exp (-z^2/2)/((2 : ℂ)^((n : ℤ)-1)*π)^(1/2 : ℂ)*parabolicCylinderU (n+1/2)
         (z*Real.sqrt 2) := by
-  rw [iteratedErfc_normalization, iteratedErfc_eq_pcfU_nat, mul_comm z (Real.sqrt 2:ℂ)]
+  rw [iteratedErfc_normalization, iteratedErfc_eq_parabolicCylinderU_nat,
+      mul_comm z (Real.sqrt 2:ℂ)]
   ring
 
 /-- Identity under the stated parameter and domain assumptions: `iteratedErfc n

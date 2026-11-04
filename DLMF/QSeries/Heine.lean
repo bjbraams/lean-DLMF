@@ -43,14 +43,18 @@ noncomputable section
 namespace DLMF.QSeries
 
 /-- Swapping the numerator parameters of `₂φ₁`. -/
-theorem basicHG_swap (a b c q z : ℂ) : basicHG [a, b] [c] q z = basicHG [b, a] [c] q z := by
-  simp only [basicHG, List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one]
+theorem basicHypergeometric_swap (a b c q z : ℂ) : basicHypergeometric [a, b] [c] q z =
+    basicHypergeometric [b, a] [c] q z := by
+  simp only [basicHypergeometric, List.map_cons, List.map_nil, List.prod_cons,
+      List.prod_nil, mul_one]
   congr 1; funext n; ring
 
 /-- `₂φ₁(d, w; d; q, z)` collapses to `₁φ₀(w; q, z)`. -/
-theorem basicHG_cancel {d w q z : ℂ} (hd : ∀ n : ℕ, qPochhammer d q n ≠ 0) :
-    basicHG [d, w] [d] q z = ∑' n : ℕ, qPochhammer w q n / qPochhammer q q n * z ^ n := by
-  simp only [basicHG, List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one]
+theorem basicHypergeometric_cancel {d w q z : ℂ} (hd : ∀ n : ℕ, qPochhammer d q n ≠ 0) :
+    basicHypergeometric [d, w] [d] q z = ∑' n : ℕ, qPochhammer w q n /
+        qPochhammer q q n * z ^ n := by
+  simp only [basicHypergeometric, List.map_cons, List.map_nil, List.prod_cons,
+      List.prod_nil, mul_one]
   congr 1; funext n; field [hd n]
 
 /-- `(0;q)_∞ = 1`. -/
@@ -83,13 +87,14 @@ theorem one_phi_zero_mul {a b q x : ℂ} (hq : ‖q‖ < 1) (hx : ‖x‖ < 1) (
 theorem q_gauss_summation {a b c q : ℂ} (hq : ‖q‖ < 1) (ha : a ≠ 0) (hb : ‖b‖ < 1)
     (hb0 : b ≠ 0) (hz : ‖c / (a * b)‖ < 1) (hc : ∀ k : ℕ, c * q ^ k ≠ 1)
     (hcb : ∀ k : ℕ, c / b * q ^ k ≠ 1) :
-    basicHG [a, b] [c] q (c / (a * b)) =
+    basicHypergeometric [a, b] [c] q (c / (a * b)) =
       qPochhammerInf (c / a) q * qPochhammerInf (c / b) q /
         (qPochhammerInf c q * qPochhammerInf (c / (a * b)) q) := by
   have haz : ∀ k : ℕ, a * (c / (a * b)) * q ^ k ≠ 1 := by
     intro k; rw [show a * (c / (a * b)) = c / b by field]; exact hcb k
   rw [heine_transformation hq hz hb hb0 hc haz, show a * (c / (a * b)) = c / b by field,
-    basicHG_cancel (qPochhammer_ne_zero_of_factors hq fun k h => hcb k (sub_eq_zero.mp h).symm),
+    basicHypergeometric_cancel
+        (qPochhammer_ne_zero_of_factors hq fun k h => hcb k (sub_eq_zero.mp h).symm),
     ← q_binomial_theorem hq hb, show c / (a * b) * b = c / a by field]
   have h1 := qPochhammerInf_ne_zero_of_norm_lt_one hb hq
   field
@@ -101,11 +106,11 @@ theorem heine_transformation_two {a b c q z : ℂ} (hq : ‖q‖ < 1) (hz : ‖z
     (hb : ‖b‖ < 1) (hb0 : b ≠ 0) (hcb : ‖c / b‖ < 1) (hc0 : c ≠ 0)
     (hc : ∀ k : ℕ, c * q ^ k ≠ 1) (haz : ∀ k : ℕ, a * z * q ^ k ≠ 1)
     (hbz : ∀ k : ℕ, z * b * q ^ k ≠ 1) :
-    basicHG [a, b] [c] q z =
+    basicHypergeometric [a, b] [c] q z =
       qPochhammerInf (c / b) q * qPochhammerInf (b * z) q /
           (qPochhammerInf c q * qPochhammerInf z q) *
-        basicHG [a * b * z / c, b] [b * z] q (c / b) := by
-  rw [heine_transformation hq hz hb hb0 hc haz, basicHG_swap,
+        basicHypergeometric [a * b * z / c, b] [b * z] q (c / b) := by
+  rw [heine_transformation hq hz hb hb0 hc haz, basicHypergeometric_swap,
     heine_transformation hq hb hcb (div_ne_zero hc0 hb0) haz hbz]
   have h1 := qPochhammerInf_ne_zero_of_norm_lt_one hb hq
   have h2 := qPochhammerInf_ne_zero hq fun k h => haz k (sub_eq_zero.mp h).symm
@@ -119,13 +124,13 @@ theorem heine_transformation_three {a b c q z : ℂ} (hq : ‖q‖ < 1) (hz : �
     (hb : ‖b‖ < 1) (hb0 : b ≠ 0) (ha0 : a ≠ 0) (hz0 : z ≠ 0) (hcb : ‖c / b‖ < 1) (hc0 : c ≠ 0)
     (habz : ‖a * b * z / c‖ < 1) (hc : ∀ k : ℕ, c * q ^ k ≠ 1)
     (haz : ∀ k : ℕ, a * z * q ^ k ≠ 1) (hbz : ∀ k : ℕ, z * b * q ^ k ≠ 1) :
-    basicHG [a, b] [c] q z =
+    basicHypergeometric [a, b] [c] q z =
       qPochhammerInf (a * b * z / c) q / qPochhammerInf z q *
-        basicHG [c / a, c / b] [c] q (a * b * z / c) := by
+        basicHypergeometric [c / a, c / b] [c] q (a * b * z / c) := by
   have hbz' : ∀ k : ℕ, b * z * q ^ k ≠ 1 := fun k => by rw [mul_comm b z]; exact hbz k
   have hcc : ∀ k : ℕ, b * (c / b) * q ^ k ≠ 1 := fun k => by
     rw [show b * (c / b) = c by field]; exact hc k
-  rw [heine_transformation_two hq hz hb hb0 hcb hc0 hc haz hbz, basicHG_swap,
+  rw [heine_transformation_two hq hz hb hb0 hcb hc0 hc haz hbz, basicHypergeometric_swap,
     heine_transformation hq hcb habz (by simp [ha0, hb0, hz0, hc0]) hbz' hcc]
   have h1 := qPochhammerInf_ne_zero hq fun k h => hbz' k (sub_eq_zero.mp h).symm
   have h2 := qPochhammerInf_ne_zero_of_norm_lt_one hcb hq
@@ -147,10 +152,11 @@ theorem q_chu_vandermonde {b c q : ℂ} (n : ℕ) (hq : ‖q‖ < 1) (hq0 : q �
   have hz' : ‖c / ((q ^ n)⁻¹ * b)‖ < 1 := by
     rwa [show c / ((q ^ n)⁻¹ * b) = c * q ^ n / b by field]
   have h := q_gauss_summation hq hqn hb hb0 hz' hc hcb
-  have hfin : basicHG [(q ^ n)⁻¹, b] [c] q (c / ((q ^ n)⁻¹ * b)) =
+  have hfin : basicHypergeometric [(q ^ n)⁻¹, b] [c] q (c / ((q ^ n)⁻¹ * b)) =
       ∑ k ∈ range (n + 1), qPochhammer (q ^ n)⁻¹ q k * qPochhammer b q k /
         (qPochhammer c q k * qPochhammer q q k) * (c * q ^ n / b) ^ k := by
-    simp only [basicHG, List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one]
+    simp only [basicHypergeometric, List.map_cons, List.map_nil, List.prod_cons,
+        List.prod_nil, mul_one]
     rw [show c / ((q ^ n)⁻¹ * b) = c * q ^ n / b by field]
     refine tsum_eq_sum fun k hk => ?_
     rw [qPochhammer_recip_pow_eq_zero hq0 (by simpa using hk)]

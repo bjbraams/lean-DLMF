@@ -29,7 +29,7 @@ phenomenon), in the namespace `DLMF.AsymptoticApproximations`.
 ## Implementation notes
 
 The terminant `F_{n+p}(z) = Γ(n+p)/(2π) E_{n+p}(z)/z^{n+p-1}` of DLMF 2.11.11 is written out
-in the statements of `Remainders/Stokes`, since `E_p` (`DLMF.Confluent.genExpIntE`) lives in a
+in the statements of `Remainders/Stokes`, since `E_p` (`DLMF.Confluent.expIntegralE`) lives in a
 theorem file of the confluent area.
 -/
 

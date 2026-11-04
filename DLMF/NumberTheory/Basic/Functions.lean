@@ -34,8 +34,8 @@ multiplicative and completely multiplicative functions (DLMF 27.3.1, 27.3.9).
 * `totientPowerSum`: the power sums `φ_k(n)` of the reduced residues (DLMF 27.2.6).
 * `IsPrimitiveRootMod`: primitive roots mod `n` (DLMF §27.2(i)).
 * `divisorCountK`: `d_k(n)`, the number of ordered factorizations of `n` into `k` factors.
-* `powC`, `sigmaC`: the arithmetic function `n ↦ n^α` and the divisor function `σ_α(n)` for
-  complex `α` (DLMF 27.2.10).
+* `cpowArithmeticFunction`, `sigmaCpow`: the arithmetic function `n ↦ n^α` and the divisor function
+  `σ_α(n)` for complex `α` (DLMF 27.2.10).
 * `jordanTotient`: Jordan's function `J_k(n)` (DLMF 27.2.11).
 * `IsMultiplicativeFn`, `IsCompletelyMultiplicativeFn`: multiplicative and completely
   multiplicative functions on the positive integers (DLMF 27.3.1, 27.3.9).
@@ -48,9 +48,10 @@ multiplicative and completely multiplicative functions (DLMF 27.3.1, 27.3.9).
   prime number theorem in the forms DLMF 27.2.3 and 27.2.4.
 * `floor_one_div`: DLMF 27.2.5.
 * `totientPowerSum_zero`, `IsPrimitiveRootMod.reduced_residue_system`,
-  `sigma_zero_eq_card_divisors`, `divisorCountK_two`, `sigmaC_apply`, `sigmaC_natCast`,
+  `sigma_zero_eq_card_divisors`, `divisorCountK_two`, `sigmaCpow_apply`, `sigmaCpow_natCast`,
   `jordanTotient_one`: the defining formulas DLMF 27.2.7–27.2.11.
-* `isMultiplicative_powC`, `isMultiplicative_sigmaC`: `n ↦ n^α` and `σ_α` are multiplicative.
+* `isMultiplicative_cpowArithmeticFunction`, `isMultiplicative_sigmaCpow`: `n ↦ n^α` and `σ_α` are
+  multiplicative.
 * `moebius_eq_cases`, `liouville_eq_cases`, `vonMangoldt_eq_cases`: DLMF 27.2.12–27.2.14 for
   Mathlib's `μ`, `λ` and `Λ`.
 * `isMultiplicative_iff_isMultiplicativeFn`: Mathlib's multiplicativity is DLMF's.
@@ -223,48 +224,54 @@ theorem divisorCountK_two (n : ℕ) : divisorCountK 2 n = σ 0 n := by
       (Equiv.injective _)]
 
 /-- `n ↦ n^α` as an arithmetic function (with value `0` at `0`), `α ∈ ℂ`. -/
-def powC (α : ℂ) : ArithmeticFunction ℂ :=
+def cpowArithmeticFunction (α : ℂ) : ArithmeticFunction ℂ :=
   ⟨fun n ↦ if n = 0 then 0 else (n : ℂ) ^ α, by simp⟩
 
-/-- Identity under the stated parameter and domain assumptions: `powC α n = (n : ℂ) ^ α`. -/
-theorem powC_apply {α : ℂ} {n : ℕ} (hn : n ≠ 0) : powC α n = (n : ℂ) ^ α := by
-  simp [powC, hn]
+/-- Identity under the stated parameter and domain assumptions:
+`cpowArithmeticFunction α n = (n : ℂ) ^ α`. -/
+theorem cpowArithmeticFunction_apply {α : ℂ} {n : ℕ} (hn : n ≠ 0) : cpowArithmeticFunction α n =
+    (n : ℂ) ^ α := by
+  simp [cpowArithmeticFunction, hn]
 
-/-- The stated relation follows from the given hypotheses: `IsMultiplicative (powC α)`. -/
-theorem isMultiplicative_powC (α : ℂ) : IsMultiplicative (powC α) := by
-  refine ⟨by simp [powC], fun {m n} _ ↦ ?_⟩
+/-- The stated relation follows from the given hypotheses:
+`IsMultiplicative (cpowArithmeticFunction α)`. -/
+theorem isMultiplicative_cpowArithmeticFunction (α : ℂ) : IsMultiplicative
+    (cpowArithmeticFunction α) := by
+  refine ⟨by simp [cpowArithmeticFunction], fun {m n} _ ↦ ?_⟩
   by_cases hm : m = 0
-  · simp [powC, hm]
+  · simp [cpowArithmeticFunction, hm]
   by_cases hn : n = 0
-  · simp [powC, hn]
-  rw [powC_apply hm, powC_apply hn, powC_apply (mul_ne_zero hm hn), Nat.cast_mul,
+  · simp [cpowArithmeticFunction, hn]
+  rw [cpowArithmeticFunction_apply hm, cpowArithmeticFunction_apply hn,
+      cpowArithmeticFunction_apply (mul_ne_zero hm hn), Nat.cast_mul,
     Complex.natCast_mul_natCast_cpow]
 
 /-- DLMF 27.2.10: the divisor function `σ_α(n) = ∑_{d∣n} d^α` for complex `α`, as the
 arithmetic function `ζ * (n ↦ n^α)`. -/
-def sigmaC (α : ℂ) : ArithmeticFunction ℂ := (zeta : ArithmeticFunction ℂ) * powC α
+def sigmaCpow (α : ℂ) : ArithmeticFunction ℂ := (zeta : ArithmeticFunction ℂ) *
+    cpowArithmeticFunction α
 
 /-- DLMF 27.2.10: `σ_α(n) = ∑_{d∣n} d^α`, `α ∈ ℂ`. -/
 @[dlmf 27.2.E10]
-theorem sigmaC_apply (α : ℂ) (n : ℕ) : sigmaC α n = ∑ d ∈ n.divisors, (d : ℂ) ^ α := by
-  rw [sigmaC, coe_zeta_mul_apply]
+theorem sigmaCpow_apply (α : ℂ) (n : ℕ) : sigmaCpow α n = ∑ d ∈ n.divisors, (d : ℂ) ^ α := by
+  rw [sigmaCpow, coe_zeta_mul_apply]
   refine Finset.sum_congr rfl fun d hd ↦ ?_
-  rw [powC_apply (Nat.ne_of_gt (Nat.pos_of_mem_divisors hd))]
+  rw [cpowArithmeticFunction_apply (Nat.ne_of_gt (Nat.pos_of_mem_divisors hd))]
 
 /-- `σ_α` is multiplicative. -/
-theorem isMultiplicative_sigmaC (α : ℂ) : IsMultiplicative (sigmaC α) :=
-  isMultiplicative_zeta.natCast.mul (isMultiplicative_powC α)
+theorem isMultiplicative_sigmaCpow (α : ℂ) : IsMultiplicative (sigmaCpow α) :=
+  isMultiplicative_zeta.natCast.mul (isMultiplicative_cpowArithmeticFunction α)
 
-/-- For natural exponents, `sigmaC` is Mathlib's `σ`. -/
-theorem sigmaC_natCast (k n : ℕ) : sigmaC k n = (σ k n : ℂ) := by
-  rw [sigmaC_apply, sigma_apply]
+/-- For natural exponents, `sigmaCpow` is Mathlib's `σ`. -/
+theorem sigmaCpow_natCast (k n : ℕ) : sigmaCpow k n = (σ k n : ℂ) := by
+  rw [sigmaCpow_apply, sigma_apply]
   push_cast
   simp_rw [Complex.cpow_natCast]
 
 /-- §27.2(i) after 27.2.10: `σ₀(n) = d(n)`. -/
 @[dlmf 27.2.E10]
-theorem sigmaC_zero (n : ℕ) : sigmaC 0 n = (σ 0 n : ℂ) := by
-  exact_mod_cast sigmaC_natCast 0 n
+theorem sigmaCpow_zero (n : ℕ) : sigmaCpow 0 n = (σ 0 n : ℂ) := by
+  exact_mod_cast sigmaCpow_natCast 0 n
 
 /-- DLMF 27.2.11: Jordan's function `J_k(n)`, the number of `k`-tuples of integers in
 `[1, n]` whose greatest common divisor is relatively prime to `n`. -/

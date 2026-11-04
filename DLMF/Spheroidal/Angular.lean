@@ -193,20 +193,21 @@ private lemma mem_spheroidalSpectrum_zero (m j : ℕ) :
   set lamC : ℂ := (m : ℂ) + 1 / 2
   have hl : -1 / 2 < lamC.re := by
     simp [lamC]; linarith [(by positivity : (0 : ℝ) ≤ m)]
-  refine ⟨fun z => DLMF.OrthogonalPolynomials.ultrasphPoly lamC j z, ⟨?_, fun z => ?_⟩, ?_⟩
+  refine ⟨fun z => DLMF.OrthogonalPolynomials.ultrasphericalPolynomial lamC j z,
+      ⟨?_, fun z => ?_⟩, ?_⟩
   · intro z
-    exact (DLMF.OrthogonalPolynomials.analyticOnNhd_ultrasphPoly lamC j z
+    exact (DLMF.OrthogonalPolynomials.analyticOnNhd_ultrasphericalPolynomial lamC j z
       (mem_univ _)).differentiableAt
-  · have h := DLMF.OrthogonalPolynomials.ultrasphPoly_differential_equation hl j z
+  · have h := DLMF.OrthogonalPolynomials.ultrasphericalPolynomial_differential_equation hl j z
     simp only [lamC] at h
     push_cast
     linear_combination h
   · intro h0
     have h1 := congrFun h0 1
     simp only [Pi.zero_apply] at h1
-    rw [DLMF.OrthogonalPolynomials.ultrasphPoly_at_one] at h1
-    have hp : DLMF.Hypergeometric.poch (2 * lamC) j ≠ 0 := by
-      apply DLMF.Hypergeometric.poch_ne_zero_of_lt
+    rw [DLMF.OrthogonalPolynomials.ultrasphericalPolynomial_at_one] at h1
+    have hp : DLMF.Hypergeometric.pochhammer (2 * lamC) j ≠ 0 := by
+      apply DLMF.Hypergeometric.pochhammer_ne_zero_of_lt
       intro i _ h
       have := congrArg Complex.re h
       simp [lamC] at this
@@ -347,36 +348,36 @@ private lemma neg_one_pow_mul_Gamma_half_sub_pos (s : ℕ) :
   rw [this]; positivity
 
 /-- `dᵐP_n/dzᵐ` is entire. -/
-private lemma differentiable_iteratedDeriv_legendrePolyP (n m : ℕ) :
-    Differentiable ℂ (iteratedDeriv m (DLMF.OrthogonalPolynomials.legendrePolyP n)) :=
-  ((DLMF.Legendre.differentiable_legendrePolyP n).contDiff
+private lemma differentiable_iteratedDeriv_legendrePolynomialP (n m : ℕ) :
+    Differentiable ℂ (iteratedDeriv m (DLMF.OrthogonalPolynomials.legendrePolynomialP n)) :=
+  ((DLMF.Legendre.differentiable_legendrePolynomialP n).contDiff
     (n := ((m + 1 : ℕ) : WithTop ℕ∞))).differentiable_iteratedDeriv' m
 
 /-- `𝖯^m_n(x) = (1-x²)^{m/2} (-1)^m dᵐP_n(x)/dxᵐ` on `(-1, 1)` (DLMF 14.6.1). -/
-private lemma ferrersP_eq_rpow_mul_iteratedDeriv_legendrePolyP (n m : ℕ) {x : ℝ}
+private lemma ferrersP_eq_rpow_mul_iteratedDeriv_legendrePolynomialP (n m : ℕ) {x : ℝ}
     (hx : x ∈ Ioo (-1 : ℝ) 1) :
     ferrersP n m x = (((1 - x ^ 2) ^ ((m : ℝ) / 2) : ℝ) : ℂ) *
-      ((-1) ^ m * iteratedDeriv m (DLMF.OrthogonalPolynomials.legendrePolyP n) x) := by
+      ((-1) ^ m * iteratedDeriv m (DLMF.OrthogonalPolynomials.legendrePolynomialP n) x) := by
   rw [ferrersP_nat (n : ℂ) m hx]
-  have : DLMF.Legendre.legendreP (n : ℂ) = DLMF.OrthogonalPolynomials.legendrePolyP n :=
-    funext fun z => DLMF.Legendre.GeneratingSeries.legendreP_nat_eq_legendrePolyP n z
+  have : DLMF.Legendre.legendreP (n : ℂ) = DLMF.OrthogonalPolynomials.legendrePolynomialP n :=
+    funext fun z => DLMF.Legendre.GeneratingSeries.legendreP_nat_eq_legendrePolynomialP n z
   rw [this]
   ring
 
 /-- The factor `(-1)^m dᵐP_n/dzᵐ` is real on `ℝ`. -/
-private lemma im_neg_one_pow_mul_iteratedDeriv_legendrePolyP (n m : ℕ) (x : ℝ) :
-    ((-1) ^ m * iteratedDeriv m (DLMF.OrthogonalPolynomials.legendrePolyP n) x).im = 0 := by
+private lemma im_neg_one_pow_mul_iteratedDeriv_legendrePolynomialP (n m : ℕ) (x : ℝ) :
+    ((-1) ^ m * iteratedDeriv m (DLMF.OrthogonalPolynomials.legendrePolynomialP n) x).im = 0 := by
   have hG : Differentiable ℂ
-      (fun z => (-1) ^ m * iteratedDeriv m (DLMF.OrthogonalPolynomials.legendrePolyP n) z) :=
-    (differentiable_const _).mul (differentiable_iteratedDeriv_legendrePolyP n m)
-  set G := fun z => (-1) ^ m * iteratedDeriv m (DLMF.OrthogonalPolynomials.legendrePolyP n) z
+      (fun z => (-1) ^ m * iteratedDeriv m (DLMF.OrthogonalPolynomials.legendrePolynomialP n) z) :=
+    (differentiable_const _).mul (differentiable_iteratedDeriv_legendrePolynomialP n m)
+  set G := fun z => (-1) ^ m * iteratedDeriv m (DLMF.OrthogonalPolynomials.legendrePolynomialP n) z
     with hGdef
   show (G x).im = 0
   have hIoo : ∀ x ∈ Ioo (-1 : ℝ) 1, (G x).im = 0 := by
     intro x hx
     have h1 := ferrersP_real (n : ℝ) (m : ℝ) hx
     simp only [Complex.ofReal_natCast] at h1
-    rw [ferrersP_eq_rpow_mul_iteratedDeriv_legendrePolyP n m hx, Complex.im_ofReal_mul] at h1
+    rw [ferrersP_eq_rpow_mul_iteratedDeriv_legendrePolynomialP n m hx, Complex.im_ofReal_mul] at h1
     have hpos : 0 < (1 - x ^ 2) ^ ((m : ℝ) / 2) :=
       Real.rpow_pos_of_pos (by nlinarith [hx.1, hx.2]) _
     rcases mul_eq_zero.mp h1 with h | h
@@ -395,9 +396,10 @@ private lemma im_neg_one_pow_mul_iteratedDeriv_legendrePolyP (n m : ℕ) (x : �
   exact Complex.conj_eq_iff_im.mp h0.symm
 
 /-- Solutions of 30.2.1 on `(-1, 1)` depend only on the values on `(-1, 1)`. -/
-private lemma isSpheroidalSolutionReal_congr {lam γ2 μ : ℝ} {f g : ℝ → ℝ}
-    (h : IsSpheroidalSolutionReal lam γ2 μ f) (hfg : ∀ x ∈ Ioo (-1 : ℝ) 1, f x = g x) :
-    IsSpheroidalSolutionReal lam γ2 μ g := by
+private lemma Real.isSpheroidalSolution_congr {lam γ2 μ : ℝ} {f g : ℝ → ℝ}
+    (h : DLMF.Spheroidal.Real.IsSpheroidalSolution lam γ2 μ f)
+        (hfg : ∀ x ∈ Ioo (-1 : ℝ) 1, f x = g x) :
+    DLMF.Spheroidal.Real.IsSpheroidalSolution lam γ2 μ g := by
   have hev : ∀ x ∈ Ioo (-1 : ℝ) 1, f =ᶠ[𝓝 x] g := fun x hx =>
     Filter.eventually_of_mem (isOpen_Ioo.mem_nhds hx) hfg
   refine ⟨fun x hx => (h.differentiableAt x hx).congr_of_eventuallyEq (hev x hx).symm,
@@ -412,24 +414,26 @@ private lemma isSpheroidalSolutionReal_congr {lam γ2 μ : ℝ} {f g : ℝ → �
 private lemma isSpheroidalPsFactor_zero {n m : ℕ} (hmn : m ≤ n)
     (hev : spheroidalEigenvalue n m 0 = (n : ℝ) * (n + 1)) :
     IsSpheroidalPsFactor n m 0
-      (fun z => (-1) ^ m * iteratedDeriv m (DLMF.OrthogonalPolynomials.legendrePolyP n) z) := by
-  set G := fun z => (-1) ^ m * iteratedDeriv m (DLMF.OrthogonalPolynomials.legendrePolyP n) z
+      (fun z => (-1) ^ m *
+          iteratedDeriv m (DLMF.OrthogonalPolynomials.legendrePolynomialP n) z) := by
+  set G := fun z => (-1) ^ m * iteratedDeriv m (DLMF.OrthogonalPolynomials.legendrePolynomialP n) z
     with hGdef
   have hG : Differentiable ℂ G :=
-    (differentiable_const _).mul (differentiable_iteratedDeriv_legendrePolyP n m)
-  have hreal : ∀ x : ℝ, (G x).im = 0 := im_neg_one_pow_mul_iteratedDeriv_legendrePolyP n m
+    (differentiable_const _).mul (differentiable_iteratedDeriv_legendrePolynomialP n m)
+  have hreal : ∀ x : ℝ, (G x).im = 0 := im_neg_one_pow_mul_iteratedDeriv_legendrePolynomialP n m
   have hGre : ∀ x : ℝ, G x = ((G x).re : ℂ) := fun x => Complex.ext (by simp) (by simp [hreal])
   have hFG : ∀ x ∈ Ioo (-1 : ℝ) 1,
       ferrersP n m x = (((1 - x ^ 2) ^ ((m : ℝ) / 2) : ℝ) : ℂ) * G x :=
-    fun x hx => ferrersP_eq_rpow_mul_iteratedDeriv_legendrePolyP n m hx
+    fun x hx => ferrersP_eq_rpow_mul_iteratedDeriv_legendrePolynomialP n m hx
   have h0 : (0 : ℝ) ∈ Ioo (-1 : ℝ) 1 := by norm_num
   have hG0 : G 0 = ferrersP n m 0 := by
     have := hFG 0 h0; simp at this; simpa using this.symm
   refine ⟨?_, hreal, ?_, fun he => ?_, fun ho => ?_⟩
   · -- the factor equation
     rw [hev]
-    refine (isSpheroidalSolutionReal_iff_isSpheroidalFactor hG hreal).mp ?_
-    refine isSpheroidalSolutionReal_congr (isSpheroidalSolutionReal_ferrersP n m) ?_
+    refine (DLMF.Spheroidal.Real.isSpheroidalSolution_iff_isSpheroidalFactor hG hreal).mp ?_
+    refine DLMF.Spheroidal.Real.isSpheroidalSolution_congr
+        (DLMF.Spheroidal.Real.isSpheroidalSolution_ferrersP n m) ?_
     intro x hx
     rw [hFG x hx, Complex.re_ofReal_mul]
   · -- the normalization
@@ -531,9 +535,9 @@ theorem spheroidalPs_gamma_zero {n m : ℕ} (hmn : m ≤ n) {x : ℝ} (hx : x �
     (spheroidalPs n m x 0 : ℂ) = ferrersP n m x := by
   have hGf := isSpheroidalPsFactor_zero hmn (spheroidalEigenvalue_gamma_zero hmn)
   have hu := (existsUnique_isSpheroidalPsFactor hmn 0).unique (spheroidalPsFactor_spec hmn 0) hGf
-  have hre := im_neg_one_pow_mul_iteratedDeriv_legendrePolyP n m x
+  have hre := im_neg_one_pow_mul_iteratedDeriv_legendrePolynomialP n m x
   simp only [spheroidalPs]
-  rw [hu, ferrersP_eq_rpow_mul_iteratedDeriv_legendrePolyP n m hx]
+  rw [hu, ferrersP_eq_rpow_mul_iteratedDeriv_legendrePolynomialP n m hx]
   push_cast
   congr 1
   exact Complex.ext (by simp) (by simp [hre])
@@ -573,9 +577,9 @@ theorem hasSum_spheroidalPs {n m : ℕ} (hmn : m ≤ n) (γ2 x : ℝ) :
 @[dlmf 30.4.E5]
 theorem spheroidalPs_coeff_recurrence {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
     let g : ℕ → ℝ := fun k => (iteratedDeriv k (spheroidalPsFactor n m γ2) 0).re / (k ! : ℝ)
-    (∀ k : ℕ, spheroidalCFAlpha m γ2 k * g (k + 2) +
-        (spheroidalCFBeta m γ2 k - spheroidalEigenvalue n m γ2) * g k +
-          (if 2 ≤ k then spheroidalCFGamma m γ2 k * g (k - 2) else 0) = 0) ∧
+    (∀ k : ℕ, spheroidalPowerAlpha m γ2 k * g (k + 2) +
+        (spheroidalPowerBeta m γ2 k - spheroidalEigenvalue n m γ2) * g k +
+          (if 2 ≤ k then spheroidalPowerGamma m γ2 k * g (k - 2) else 0) = 0) ∧
       ∀ k : ℕ, (k + (n - m)) % 2 = 1 → g k = 0 := by
   intro g
   have hG := spheroidalPsFactor_spec hmn γ2
@@ -591,7 +595,7 @@ theorem spheroidalPs_coeff_recurrence {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
     have h' : a (k + 2) - ((k : ℝ) * (k - 1 : ℕ) + 2 * ((m : ℝ) + 1) * k -
         (spheroidalEigenvalue n m γ2 - m * ((m : ℝ) + 1) + γ2)) * a k -
         γ2 * ((k : ℝ) * (k - 1 : ℕ) * a (k - 2)) = 0 := by exact_mod_cast h
-    simp only [g, spheroidalCFAlpha, spheroidalCFBeta, spheroidalCFGamma]
+    simp only [g, spheroidalPowerAlpha, spheroidalPowerBeta, spheroidalPowerGamma]
     change -((k : ℝ) + 1) * ((k : ℝ) + 2) * (a (k + 2) / ((k + 2) ! : ℝ)) +
       (((m : ℝ) + k) * ((m : ℝ) + k + 1) - γ2 - spheroidalEigenvalue n m γ2) * (a k / (k ! : ℝ)) +
       (if 2 ≤ k then γ2 * (a (k - 2) / ((k - 2) ! : ℝ)) else 0) = 0
@@ -759,9 +763,9 @@ theorem tendstoUniformlyOn_spheroidalExpansion_sub_ferrers (m : ℕ) (γ2 : ℝ)
 /-- `𝖰s^m_n(x, γ²)` solves 30.2.1 on `(-1, 1)` with `μ = m`, `λ = λ^m_n(γ²)` (DLMF 30.5.1).
 Proved from `exists_isSpheroidalQs`. -/
 @[dlmf 30.5.E1]
-theorem isSpheroidalSolutionReal_spheroidalQs {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ)
+theorem Real.isSpheroidalSolution_spheroidalQs {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ)
     (hf : spheroidalFwd n m γ2 ((n + m) / 2 - (n - m) / 2 + 1) ≠ 0) :
-    IsSpheroidalSolutionReal (spheroidalEigenvalue n m γ2) γ2 m
+    DLMF.Spheroidal.Real.IsSpheroidalSolution (spheroidalEigenvalue n m γ2) γ2 m
       (fun x => spheroidalQs n m x γ2) :=
   (spheroidalQs_spec hmn γ2 hf).ode
 
@@ -839,7 +843,7 @@ private lemma spheroidalCoeff_gamma_zero {n m : ℕ} (hmn : m ≤ n) (k : ℤ) :
         obtain ⟨j, hj⟩ : ∃ j, (n + m) / 2 - (n - m) / 2 + 1 = j + 2 :=
           ⟨(n + m) / 2 - (n - m) / 2 - 1, by omega⟩
         rw [hj, spheroidalFwd]
-        simp [spheroidalRecC]
+        simp [spheroidalRecurrenceC]
       rw [hF, div_zero]
     · simp only [h2, ↓reduceIte]
 
@@ -867,8 +871,8 @@ private lemma spheroidalANeg_gamma_zero {n m : ℕ} (hmn : m ≤ n) : spheroidal
   field_simp
 
 /-- Solutions of 30.2.1 on `(-1, 1)` in second-order form `f'' = p f' + q f`. -/
-private lemma isSpheroidalSolutionReal_hasDerivAt_deriv {lam γ2 μ : ℝ} {f : ℝ → ℝ}
-    (hf : IsSpheroidalSolutionReal lam γ2 μ f) :
+private lemma Real.isSpheroidalSolution_hasDerivAt_deriv {lam γ2 μ : ℝ} {f : ℝ → ℝ}
+    (hf : DLMF.Spheroidal.Real.IsSpheroidalSolution lam γ2 μ f) :
     ∀ t ∈ Ioo (-1 : ℝ) 1, HasDerivAt f (deriv f t) t ∧ HasDerivAt (deriv f)
       ((2 * t / (1 - t ^ 2)) • deriv f t +
         (-(lam + γ2 * (1 - t ^ 2) - μ ^ 2 / (1 - t ^ 2)) / (1 - t ^ 2)) • f t) t := by
@@ -890,9 +894,9 @@ private lemma isSpheroidalSolutionReal_hasDerivAt_deriv {lam γ2 μ : ℝ} {f : 
 
 /-- **Uniqueness** for 30.2.1 on `(-1, 1)`: two solutions with the same value and derivative at a
 point of `(-1, 1)` coincide there. -/
-private lemma isSpheroidalSolutionReal_eqOn_of_eq_of_deriv_eq {lam γ2 μ : ℝ} {f g : ℝ → ℝ}
-    (hf : IsSpheroidalSolutionReal lam γ2 μ f)
-    (hg : IsSpheroidalSolutionReal lam γ2 μ g) {x0 : ℝ} (hx0 : x0 ∈ Ioo (-1 : ℝ) 1)
+private lemma Real.isSpheroidalSolution_eqOn_of_eq_of_deriv_eq {lam γ2 μ : ℝ} {f g : ℝ → ℝ}
+    (hf : DLMF.Spheroidal.Real.IsSpheroidalSolution lam γ2 μ f)
+    (hg : DLMF.Spheroidal.Real.IsSpheroidalSolution lam γ2 μ g) {x0 : ℝ} (hx0 : x0 ∈ Ioo (-1 : ℝ) 1)
     (h0 : f x0 = g x0) (h1 : deriv f x0 = deriv g x0) : EqOn f g (Ioo (-1 : ℝ) 1) := by
   have hp : ContinuousOn (fun t : ℝ => 2 * t / (1 - t ^ 2)) (Ioo (-1 : ℝ) 1) :=
     ContinuousOn.div (by fun_prop) (by fun_prop) fun t ht => by nlinarith [ht.1, ht.2]
@@ -903,14 +907,14 @@ private lemma isSpheroidalSolutionReal_eqOn_of_eq_of_deriv_eq {lam γ2 μ : ℝ}
     exact ((continuousOn_const.add (continuousOn_const.mul (by fun_prop))).sub
       (continuousOn_const.div (by fun_prop) hne)).neg
   exact (ODE.eqOn_of_linear_ode isOpen_Ioo ordConnected_Ioo hx0 hp hq
-      (isSpheroidalSolutionReal_hasDerivAt_deriv hf)
-    (isSpheroidalSolutionReal_hasDerivAt_deriv hg) h0 h1).1
+      (DLMF.Spheroidal.Real.isSpheroidalSolution_hasDerivAt_deriv hf)
+    (DLMF.Spheroidal.Real.isSpheroidalSolution_hasDerivAt_deriv hg) h0 h1).1
 
 /-- Solutions of 30.2.1 on `(-1, 1)` form a vector space: `f + c g` is a solution. -/
-private lemma isSpheroidalSolutionReal_add_mul {lam γ2 μ : ℝ} {f g : ℝ → ℝ}
-    (hf : IsSpheroidalSolutionReal lam γ2 μ f)
-    (hg : IsSpheroidalSolutionReal lam γ2 μ g) (c : ℝ) :
-    IsSpheroidalSolutionReal lam γ2 μ (fun x => f x + c * g x) := by
+private lemma Real.isSpheroidalSolution_add_mul {lam γ2 μ : ℝ} {f g : ℝ → ℝ}
+    (hf : DLMF.Spheroidal.Real.IsSpheroidalSolution lam γ2 μ f)
+    (hg : DLMF.Spheroidal.Real.IsSpheroidalSolution lam γ2 μ g) (c : ℝ) :
+    DLMF.Spheroidal.Real.IsSpheroidalSolution lam γ2 μ (fun x => f x + c * g x) := by
   have hd : ∀ t ∈ Ioo (-1 : ℝ) 1, deriv (fun x => f x + c * g x) t = deriv f t + c * deriv g t :=
     fun t ht => ((hf.differentiableAt t ht).hasDerivAt.add
       ((hg.differentiableAt t ht).hasDerivAt.const_mul c)).deriv
@@ -928,7 +932,7 @@ private lemma isSpheroidalQs_eqOn {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} {f g :
     (hf : IsSpheroidalQs n m γ2 f) (hg : IsSpheroidalQs n m γ2 g) :
     EqOn f g (Ioo (-1 : ℝ) 1) := by
   set P : ℝ → ℝ := fun t => spheroidalPs n m t γ2 with hP
-  have hPs := isSpheroidalSolutionReal_spheroidalPs hmn γ2
+  have hPs := DLMF.Spheroidal.Real.isSpheroidalSolution_spheroidalPs hmn γ2
   obtain ⟨x0, hx0, hP0⟩ : ∃ x0 ∈ Ioo (-1 : ℝ) 1, P x0 ≠ 0 := by
     by_contra hcon
     push Not at hcon
@@ -942,14 +946,14 @@ private lemma isSpheroidalQs_eqOn {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} {f g :
   set c := (f x0 - g x0) / P x0 with hc
   have hcP : c * P x0 = f x0 - g x0 := by simp only [hc]; field_simp
   clear_value c
-  have hG := isSpheroidalSolutionReal_add_mul hg.ode hPs c
+  have hG := DLMF.Spheroidal.Real.isSpheroidalSolution_add_mul hg.ode hPs c
   have hdG : deriv (fun x => g x + c * P x) x0 = deriv g x0 + c * deriv P x0 :=
     ((hg.ode.differentiableAt x0 hx0).hasDerivAt.add
       ((hPs.differentiableAt x0 hx0).hasDerivAt.const_mul c)).deriv
   have hW := (hf.wronskian x0 hx0).trans (hg.wronskian x0 hx0).symm
   change P x0 * deriv f x0 - deriv P x0 * f x0 = P x0 * deriv g x0 - deriv P x0 * g x0 at hW
   have hfG : EqOn f (fun x => g x + c * P x) (Ioo (-1 : ℝ) 1) := by
-    refine isSpheroidalSolutionReal_eqOn_of_eq_of_deriv_eq hf.ode hG hx0
+    refine DLMF.Spheroidal.Real.isSpheroidalSolution_eqOn_of_eq_of_deriv_eq hf.ode hG hx0
         (by show f x0 = g x0 + c * P x0; linarith) ?_
     rw [hdG]
     have : P x0 * (deriv f x0 - deriv g x0 - c * deriv P x0) = 0 := by
@@ -978,9 +982,9 @@ private lemma isSpheroidalQs_eqOn {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} {f g :
   simp
 
 /-- The real part of a real-valued Ferrers solution solves 30.2.1 with `γ = 0`. -/
-private lemma isSpheroidalSolutionReal_re_of_isFerrersSolution {ν μ : ℝ} {F : ℝ → ℂ}
+private lemma Real.isSpheroidalSolution_re_of_isFerrersSolution {ν μ : ℝ} {F : ℝ → ℂ}
     (hF : IsFerrersSolution ν μ F) :
-    IsSpheroidalSolutionReal (ν * (ν + 1)) 0 μ (fun x => (F x).re) := by
+    DLMF.Spheroidal.Real.IsSpheroidalSolution (ν * (ν + 1)) 0 μ (fun x => (F x).re) := by
   have hd : ∀ x ∈ Ioo (-1 : ℝ) 1, HasDerivAt (fun t => (F t).re) (deriv F x).re x :=
     fun x hx => by
       simpa only [Function.comp_def, Complex.reCLM_apply] using
@@ -1061,7 +1065,8 @@ theorem spheroidalQs_gamma_zero {n m : ℕ} (hmn : m ≤ n) {x : ℝ} (hx : x �
   have hQs : IsSpheroidalQs n m 0 f₀ := by
     refine ⟨?_, fun y hy => ?_, fun y hy => ?_, fun y hy => by simp only [hf₀, hy, ↓reduceIte]⟩
     · rw [spheroidalEigenvalue_gamma_zero hmn]
-      exact isSpheroidalSolutionReal_congr (isSpheroidalSolutionReal_re_of_isFerrersSolution hQsol)
+      exact DLMF.Spheroidal.Real.isSpheroidalSolution_congr
+          (DLMF.Spheroidal.Real.isSpheroidalSolution_re_of_isFerrersSolution hQsol)
         (fun y hy => (hf₀I y hy).symm)
     · have hy' : -y ∈ Ioo (-1 : ℝ) 1 := ⟨by linarith [hy.2], by linarith [hy.1]⟩
       rw [hf₀I _ hy', hf₀I _ hy, ferrersQ_neg_of_add_eq_nat (N := n + m) (by push_cast; ring) y,
@@ -1336,7 +1341,7 @@ theorem wronskian_spheroidalPsC_spheroidalQsC' {n m : ℕ} (hmn : m ≤ n) (γ2 
         deriv (fun t => spheroidalPsC n m t γ2) z * spheroidalQsC n m z γ2 =
       (-1) ^ m * ((n + m).factorial : ℂ) / ((1 - z ^ 2) * (n - m).factorial) *
         spheroidalA n m γ2 * spheroidalANeg n m γ2 := by
-  have hP := isSpheroidalSolutionReal_spheroidalPs hmn γ2
+  have hP := DLMF.Spheroidal.Real.isSpheroidalSolution_spheroidalPs hmn γ2
   have hQs := spheroidalQs_spec' hmn γ2
   have hQC := spheroidalQsC_spec' hmn γ2
   have hPC : IsSpheroidalSolutionOn (spheroidalEigenvalue n m γ2 : ℝ) (γ2 : ℝ) ((m : ℝ) : ℂ)

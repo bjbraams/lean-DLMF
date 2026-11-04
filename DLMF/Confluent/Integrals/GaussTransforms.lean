@@ -200,7 +200,8 @@ theorem KummerGaussTransform.gauss_inner {a b : ℂ} (hb : (1 / 2 : ℝ) < b.re)
     ∫ t : ℝ in Ioi 0, exp (-(t : ℂ) ^ 2) * (t : ℂ) ^ (2 * b - 2) *
         regularizedHGFun {a} {b} ((t : ℂ) ^ 2) * exp (-((t : ℂ) ^ 2 * u)) =
       1 / 2 * (Gamma (b - 1 / 2) * (((1 + u : ℝ)) : ℂ) ^ (-(b - 1 / 2)) *
-        DLMF.Hypergeometric.regularizedGaussHG a (b - 1 / 2) b (1 / ((1 + u : ℝ) : ℂ))) := by
+        DLMF.Hypergeometric.regularizedGaussHypergeometric a (b - 1 / 2) b
+            (1 / ((1 + u : ℝ) : ℂ))) := by
   have hL := laplace_regularizedHGFun (a := a) (b := b - 1 / 2) (c := b) (k := 1)
     (z := ((1 + u : ℝ) : ℂ)) (by simp; linarith) (by simp; linarith) (by simp; linarith)
   rw [← hL, ← integral_const_mul]
@@ -230,9 +231,10 @@ theorem KummerGaussTransform.gauss_inner {a b : ℂ} (hb : (1 / 2 : ℝ) < b.re)
 /-- Pfaff's transformation in the form used for 13.10.6. -/
 theorem KummerGaussTransform.gauss_pfaff (a b : ℂ) {u : ℝ} (hu : 0 < u) :
     (((1 + u : ℝ)) : ℂ) ^ (-(b - 1 / 2)) *
-        DLMF.Hypergeometric.regularizedGaussHG a (b - 1 / 2) b (1 / ((1 + u : ℝ) : ℂ)) =
+        DLMF.Hypergeometric.regularizedGaussHypergeometric a (b - 1 / 2) b (1 / ((1 + u : ℝ) : ℂ)) =
       (u : ℂ) ^ (-(b - 1 / 2)) *
-        DLMF.Hypergeometric.regularizedGaussHG (b - 1 / 2) (b - a) b (-(1 / (u : ℂ))) := by
+        DLMF.Hypergeometric.regularizedGaussHypergeometric (b - 1 / 2) (b - a) b
+            (-(1 / (u : ℂ))) := by
   have h1u : (0:ℝ) < 1 + u := by linarith
   have hw : (1 / ((1 + u : ℝ) : ℂ)) ∈ DLMF.Hypergeometric.cutPlane := by
     rw [DLMF.Hypergeometric.mem_cutPlane]
@@ -240,8 +242,8 @@ theorem KummerGaussTransform.gauss_pfaff (a b : ℂ) {u : ℝ} (hu : 0 < u) :
     rw [show (1 : ℂ) - 1 / ((1 + u : ℝ) : ℂ) = ((u / (1 + u) : ℝ) : ℂ) by
       push_cast; field_simp [h1c']; ring]
     exact ofReal_mem_slitPlane.mpr (by positivity)
-  rw [DLMF.Hypergeometric.regularizedGaussHG_symm _ _ _ hw,
-    DLMF.Hypergeometric.regularizedGaussHG_pfaff _ _ _ hw]
+  rw [DLMF.Hypergeometric.regularizedGaussHypergeometric_symm _ _ _ hw,
+    DLMF.Hypergeometric.regularizedGaussHypergeometric_pfaff _ _ _ hw]
   have huc : (u : ℂ) ≠ 0 := ofReal_ne_zero.mpr hu.ne'
   have h1c : ((1 + u : ℝ) : ℂ) ≠ 0 := ofReal_ne_zero.mpr h1u.ne'
   have h1c' : (1 : ℂ) + u ≠ 0 := by exact_mod_cast h1u.ne'
@@ -264,7 +266,8 @@ theorem KummerGaussTransform.gauss_pfaff (a b : ℂ) {u : ℝ} (hu : 0 < u) :
 theorem KummerGaussTransform.gauss_outer {a b : ℂ} (hb : (1 / 2 : ℝ) < b.re) {ζ : ℝ} (hζ : 0 < ζ) :
     ∫ u : ℝ in Ioi 0, exp (-(ζ : ℂ) ^ 2 / (4 * u)) * (u : ℂ) ^ (-(3 / 2 : ℂ)) *
         ((u : ℂ) ^ (-(b - 1 / 2)) *
-          DLMF.Hypergeometric.regularizedGaussHG (b - 1 / 2) (b - a) b (-(1 / (u : ℂ)))) =
+          DLMF.Hypergeometric.regularizedGaussHypergeometric (b - 1 / 2) (b - a) b
+              (-(1 / (u : ℂ)))) =
       2 / ζ * kummerU (b - 1 / 2) (a + 1 / 2) ((ζ : ℂ) ^ 2 / 4) := by
   set y : ℂ := (ζ : ℂ) ^ 2 / 4 with hy
   have hyr : y = (((ζ / 2) ^ 2 : ℝ) : ℂ) := by rw [hy]; push_cast; ring
@@ -279,14 +282,16 @@ theorem KummerGaussTransform.gauss_outer {a b : ℂ} (hb : (1 / 2 : ℝ) < b.re)
   rw [hU, hsq]
   set g : ℝ → ℂ := fun u => exp (-(ζ : ℂ) ^ 2 / (4 * u)) * (u : ℂ) ^ (-(3 / 2 : ℂ)) *
         ((u : ℂ) ^ (-(b - 1 / 2)) *
-          DLMF.Hypergeometric.regularizedGaussHG (b - 1 / 2) (b - a) b (-(1 / (u : ℂ)))) with hg
+          DLMF.Hypergeometric.regularizedGaussHypergeometric (b - 1 / 2) (b - a) b
+              (-(1 / (u : ℂ)))) with hg
   have hsub := integral_comp_rpow_Ioi g (p := -1) (by norm_num)
   rw [← hsub]
   have hζc : (ζ : ℂ) ≠ 0 := ofReal_ne_zero.mpr hζ.ne'
   rw [show 2 / (ζ : ℂ) * ((ζ : ℂ) / 2 * ∫ t : ℝ in Ioi 0, exp (-y * t) * (t : ℂ) ^ (b - 1) *
-      DLMF.Hypergeometric.regularizedGaussHG (b - 1 / 2) (b - a) b (-(t : ℂ))) =
+      DLMF.Hypergeometric.regularizedGaussHypergeometric (b - 1 / 2) (b - a) b (-(t : ℂ))) =
       ∫ t : ℝ in Ioi 0, exp (-y * t) * (t : ℂ) ^ (b - 1) *
-      DLMF.Hypergeometric.regularizedGaussHG (b - 1 / 2) (b - a) b (-(t : ℂ)) by field_simp]
+      DLMF.Hypergeometric.regularizedGaussHypergeometric (b - 1 / 2) (b - a) b
+          (-(t : ℂ)) by field_simp]
   refine setIntegral_congr_fun measurableSet_Ioi fun v hv => ?_
   have hv0 : (0:ℝ) < v := hv
   have hvc : (v : ℂ) ≠ 0 := ofReal_ne_zero.mpr hv0.ne'
@@ -379,7 +384,8 @@ theorem KummerGaussTransform.gauss_real {a b : ℂ} (hb : (1 / 2 : ℝ) < b.re) 
   have hinner : ∀ u ∈ Ioi (0:ℝ), ∫ t : ℝ in Ioi 0, G t u =
       1 / 2 * Gamma (b - 1 / 2) * (exp (-(ζ : ℂ) ^ 2 / (4 * u)) * (u : ℂ) ^ (-(3 / 2 : ℂ)) *
         ((u : ℂ) ^ (-(b - 1 / 2)) *
-          DLMF.Hypergeometric.regularizedGaussHG (b - 1 / 2) (b - a) b (-(1 / (u : ℂ))))) := by
+          DLMF.Hypergeometric.regularizedGaussHypergeometric (b - 1 / 2) (b - a) b
+              (-(1 / (u : ℂ))))) := by
     intro u hu
     have hu0 : (0:ℝ) < u := hu
     have h := KummerGaussTransform.gauss_inner (a := a) hb hu0

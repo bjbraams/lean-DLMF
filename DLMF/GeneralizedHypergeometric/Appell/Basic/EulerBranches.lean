@@ -16,8 +16,9 @@ of their double series. All powers in the kernels are principal on the stated do
 ## Main definitions
 
 * `appellEulerDomain`, `AppellSquareSlit`, `appellTriangle`: the domains of the Euler integrals.
-* `appF1EulerKernel`, `appF2EulerKernel`, `appF3EulerKernel`, `appF4EulerKernel`: the kernels.
-* `appF1Euler`, `appF2Euler`, `appF3Euler`, `appF4Euler`: the Euler-integral branches,
+* `appellF1EulerKernel`, `appellF2EulerKernel`, `appellF3EulerKernel`, `appellF4EulerKernel`: the
+  kernels.
+* `appellF1Euler`, `appellF2Euler`, `appellF3Euler`, `appellF4Euler`: the Euler-integral branches,
   DLMF 16.15.1–16.15.4.
 -/
 
@@ -40,46 +41,46 @@ def AppellSquareSlit (p : ℂ × ℂ) : Prop :=
 def appellTriangle : Set (ℝ × ℝ) := {p | 0≤p.1 ∧ 0≤p.2 ∧ p.1+p.2≤1}
 
 /-- The Euler kernel for F1, with all powers principal on their stated domain. -/
-def appF1EulerKernel (a b b' c x y : ℂ) (u : ℝ) : ℂ :=
+def appellF1EulerKernel (a b b' c x y : ℂ) (u : ℝ) : ℂ :=
   (u:ℂ)^(a-1)*((1-u:ℝ):ℂ)^(c-a-1)/(1-u*x)^b/(1-u*y)^b'
 
 /-- The Euler kernel for F2. -/
-def appF2EulerKernel (a b b' c c' x y : ℂ) (p : ℝ × ℝ) : ℂ :=
+def appellF2EulerKernel (a b b' c c' x y : ℂ) (p : ℝ × ℝ) : ℂ :=
   (p.1:ℂ)^(b-1)*(p.2:ℂ)^(b'-1)*((1-p.1:ℝ):ℂ)^(c-b-1)*
     ((1-p.2:ℝ):ℂ)^(c'-b'-1)/(1-p.1*x-p.2*y)^a
 
 /-- The simplex Euler kernel for F3. -/
-def appF3EulerKernel (a a' b b' c x y : ℂ) (p : ℝ × ℝ) : ℂ :=
+def appellF3EulerKernel (a a' b b' c x y : ℂ) (p : ℝ × ℝ) : ℂ :=
   (p.1:ℂ)^(b-1)*(p.2:ℂ)^(b'-1)*((1-p.1-p.2:ℝ):ℂ)^(c-b-b'-1)/
     (1-p.1*x)^a/(1-p.2*y)^a'
 
 /-- The transformed Euler kernel for F4. -/
-def appF4EulerKernel (a b c c' x y : ℂ) (p : ℝ × ℝ) : ℂ :=
+def appellF4EulerKernel (a b c c' x y : ℂ) (p : ℝ × ℝ) : ℂ :=
   (p.1:ℂ)^(a-1)*(p.2:ℂ)^(b-1)*((1-p.1:ℝ):ℂ)^(c-a-1)*
     ((1-p.2:ℝ):ℂ)^(c'-b-1)/(1-p.1*x)^(c+c'-a-1)/(1-p.2*y)^(c+c'-b-1)/
     (1-p.1*x-p.2*y)^(a+b-c-c'+1)
 
 /-- The Euler integral branch of F1, distinct from its totalized double series. -/
 @[dlmf 16.15.E1]
-def appF1Euler (a b b' c x y : ℂ) : ℂ :=
-  Gamma c/(Gamma a*Gamma (c-a))*∫ u in (0:ℝ)..1,appF1EulerKernel a b b' c x y u
+def appellF1Euler (a b b' c x y : ℂ) : ℂ :=
+  Gamma c/(Gamma a*Gamma (c-a))*∫ u in (0:ℝ)..1,appellF1EulerKernel a b b' c x y u
 
 /-- The Euler square-integral branch of F2. -/
 @[dlmf 16.15.E2]
-def appF2Euler (a b b' c c' x y : ℂ) : ℂ :=
+def appellF2Euler (a b b' c c' x y : ℂ) : ℂ :=
   Gamma c*Gamma c'/(Gamma b*Gamma b'*Gamma (c-b)*Gamma (c'-b'))*
-    ∫ p in Icc (0:ℝ) 1×ˢIcc (0:ℝ) 1,appF2EulerKernel a b b' c c' x y p
+    ∫ p in Icc (0:ℝ) 1×ˢIcc (0:ℝ) 1,appellF2EulerKernel a b b' c c' x y p
 
 /-- The Euler simplex-integral branch of F3. -/
 @[dlmf 16.15.E3]
-def appF3Euler (a a' b b' c x y : ℂ) : ℂ :=
+def appellF3Euler (a a' b b' c x y : ℂ) : ℂ :=
   Gamma c/(Gamma b*Gamma b'*Gamma (c-b-b'))*
-    ∫ p in appellTriangle,appF3EulerKernel a a' b b' c x y p
+    ∫ p in appellTriangle,appellF3EulerKernel a a' b b' c x y p
 
 /-- The Euler branch at the transformed arguments x(1-y),y(1-x). -/
 @[dlmf 16.15.E4]
-def appF4Euler (a b c c' x y : ℂ) : ℂ :=
+def appellF4Euler (a b c c' x y : ℂ) : ℂ :=
   Gamma c*Gamma c'/(Gamma a*Gamma b*Gamma (c-a)*Gamma (c'-b))*
-    ∫ p in Icc (0:ℝ) 1×ˢIcc (0:ℝ) 1,appF4EulerKernel a b c c' x y p
+    ∫ p in Icc (0:ℝ) 1×ˢIcc (0:ℝ) 1,appellF4EulerKernel a b c c' x y p
 
 end DLMF.Hypergeometric

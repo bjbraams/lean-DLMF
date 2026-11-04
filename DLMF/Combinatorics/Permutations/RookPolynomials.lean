@@ -23,7 +23,7 @@ squares of the `n × n` board. The rook and hit numbers and polynomials (`IsNona
 
 ## Main results
 
-* `dlmfExamplePerm_permMatrix`, `inversionNumber_eq_sum_permMatrix`: the permutation matrix of
+* `examplePermutation_permMatrix`, `inversionNumber_eq_sum_permMatrix`: the permutation matrix of
   the example and the inversion number in matrix form (DLMF 26.15.1, 26.15.2).
 * `hitNumber_diagonalBoard_zero`, `rookNumber_diagonalBoard`: derangements (DLMF §26.15).
 * `rookPolynomial_union`, `rookPolynomial_delete`: the product and deletion rules
@@ -55,8 +55,8 @@ namespace DLMF.Combinatorics
 /-- (26.15.1): the matrix of the example permutation `35247816`: a `1` in row `j`, column
 `σ(j)`. -/
 @[dlmf 26.15.E1]
-theorem dlmfExamplePerm_permMatrix :
-    dlmfExamplePerm.permMatrix ℤ = !![0, 0, 1, 0, 0, 0, 0, 0; 0, 0, 0, 0, 1, 0, 0, 0;
+theorem examplePermutation_permMatrix :
+    examplePermutation.permMatrix ℤ = !![0, 0, 1, 0, 0, 0, 0, 0; 0, 0, 0, 0, 1, 0, 0, 0;
       0, 1, 0, 0, 0, 0, 0, 0; 0, 0, 0, 1, 0, 0, 0, 0; 0, 0, 0, 0, 0, 0, 1, 0;
       0, 0, 0, 0, 0, 0, 0, 1; 1, 0, 0, 0, 0, 0, 0, 0; 0, 0, 0, 0, 0, 1, 0, 0] := by
   decide +kernel

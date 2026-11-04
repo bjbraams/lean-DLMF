@@ -20,12 +20,12 @@ sums and Gauss sums of §27.10, with their bridges to Mathlib's `DirichletCharac
 
 * `IsDirichletCharacterFn`: DLMF's definition of a Dirichlet character mod `k` by the
   properties DLMF 27.8.1–27.8.4.
-* `IsPrimitiveDLMF`, `IsInducedModulus`: DLMF's primitive characters and induced moduli
+* `IsPrimitiveByDivisors`, `IsInducedModulus`: DLMF's primitive characters and induced moduli
   (DLMF 27.8.7).
 * `IsPeriodicFn`: periodic functions mod `k` (DLMF 27.10.1).
 * `expFrac`: the exponential `e^{2πimn/k}`.
 * `ramanujanSum`: Ramanujan's sum `c_k(n)` (DLMF 27.10.4).
-* `gaussSumDLMF`, `GaussSumSeparable`: the Gauss sum `G(n, χ)` (DLMF 27.10.9) and its
+* `dirichletGaussSum`, `GaussSumSeparable`: the Gauss sum `G(n, χ)` (DLMF 27.10.9) and its
   separability (DLMF 27.10.10).
 
 ## Main results
@@ -34,15 +34,15 @@ sums and Gauss sums of §27.10, with their bridges to Mathlib's `DirichletCharac
   DLMF 27.8.1–27.8.4.
 * `principalCharacter_apply`: the principal character (DLMF 27.8.5).
 * `isPeriodicFn_examples`: characters and `n ↦ (n, k)` are periodic mod `k`.
-* `gaussSumDLMF_one`: `G(n, χ₁) = c_k(n)`.
-* `gaussSumDLMF_eq_gaussSum`: DLMF's `G(n, χ)` is Mathlib's `gaussSum`.
+* `dirichletGaussSum_one`: `G(n, χ₁) = c_k(n)`.
+* `dirichletGaussSum_eq_gaussSum`: DLMF's `G(n, χ)` is Mathlib's `gaussSum`.
 
 ## Implementation notes
 
 Mathlib's `DirichletCharacter ℂ k` (a multiplicative character of `ZMod k`) is DLMF's object;
 the converse of `DirichletCharacter.isDirichletCharacterFn`
 (`IsDirichletCharacterFn.exists_dirichletCharacter`) and the further properties are in
-`DLMF.NumberTheory.Characters`. `gaussSumDLMF χ n` is DLMF's sum over `m = 1, …, k`; Mathlib's
+`DLMF.NumberTheory.Characters`. `dirichletGaussSum χ n` is DLMF's sum over `m = 1, …, k`; Mathlib's
 `gaussSum χ ψ` sums over `ZMod k` with an additive character `ψ`.
 -/
 
@@ -83,7 +83,7 @@ theorem principalCharacter_apply (k n : ℕ) :
 /-- §27.8 after 27.8.6: DLMF's definition of a primitive character mod `k`: for every divisor
 `d < k` of `k` there is `a ≡ 1 (mod d)` with `(a, k) = 1` and `χ(a) ≠ 1`. -/
 @[dlmf 27.8]
-def IsPrimitiveDLMF {k : ℕ} (χ : DirichletCharacter ℂ k) : Prop :=
+def IsPrimitiveByDivisors {k : ℕ} (χ : DirichletCharacter ℂ k) : Prop :=
   ∀ d, d ∣ k → d < k → ∃ a : ℕ, a ≡ 1 [MOD d] ∧ a.Coprime k ∧ χ a ≠ 1
 
 /-- DLMF 27.8.7: a divisor `d` of `k` is an induced modulus for `χ` if `χ(a) = 1` for all
@@ -144,23 +144,23 @@ def ramanujanSum (k n : ℕ) : ℂ :=
 
 /-- DLMF 27.10.9: the Gauss sum `G(n, χ) = ∑_{m=1}^k χ(m) e^{2πimn/k}`. -/
 @[dlmf 27.10.E9]
-def gaussSumDLMF {k : ℕ} (χ : DirichletCharacter ℂ k) (n : ℕ) : ℂ :=
+def dirichletGaussSum {k : ℕ} (χ : DirichletCharacter ℂ k) (n : ℕ) : ℂ :=
   ∑ m ∈ Finset.Icc 1 k, χ m * expFrac m n k
 
 /-- §27.10 after 27.10.9: `G(n, χ₁) = c_k(n)`. -/
 @[dlmf 27.10.E9]
-theorem gaussSumDLMF_one (k n : ℕ) : gaussSumDLMF (1 : DirichletCharacter ℂ k) n =
+theorem dirichletGaussSum_one (k n : ℕ) : dirichletGaussSum (1 : DirichletCharacter ℂ k) n =
     ramanujanSum k n := by
-  rw [gaussSumDLMF, ramanujanSum, Finset.sum_filter]
+  rw [dirichletGaussSum, ramanujanSum, Finset.sum_filter]
   refine Finset.sum_congr rfl fun m _ ↦ ?_
   rw [principalCharacter_apply]
   split_ifs <;> simp
 
 /-- DLMF 27.10.9 bridge to Mathlib (proof). -/
-private lemma gaussSumDLMF_eq_gaussSum_mulShift {k : ℕ} [NeZero k] (χ : DirichletCharacter ℂ k)
+private lemma dirichletGaussSum_eq_gaussSum_mulShift {k : ℕ} [NeZero k] (χ : DirichletCharacter ℂ k)
     (n : ℕ) :
-    gaussSumDLMF χ n = gaussSum χ ((ZMod.stdAddChar (N := k)).mulShift (n : ZMod k)) := by
-  rw [gaussSumDLMF, gaussSum, ← sum_Icc_one_eq_sum_zmod]
+    dirichletGaussSum χ n = gaussSum χ ((ZMod.stdAddChar (N := k)).mulShift (n : ZMod k)) := by
+  rw [dirichletGaussSum, gaussSum, ← sum_Icc_one_eq_sum_zmod]
   refine sum_congr rfl fun m _ ↦ ?_
   have h := ZMod.stdAddChar_coe (N := k) ((n * m : ℕ) : ℤ)
   rw [Int.cast_natCast] at h
@@ -172,13 +172,13 @@ private lemma gaussSumDLMF_eq_gaussSum_mulShift {k : ℕ} [NeZero k] (χ : Diric
 /-- DLMF's `G(n, χ)` is Mathlib's `gaussSum χ (ψ.mulShift n)` with the standard additive
 character `ψ = ZMod.stdAddChar` of `ZMod k`. -/
 @[dlmf 27.10.E9]
-theorem gaussSumDLMF_eq_gaussSum {k : ℕ} [NeZero k] (χ : DirichletCharacter ℂ k) (n : ℕ) :
-    gaussSumDLMF χ n = gaussSum χ ((ZMod.stdAddChar (N := k)).mulShift (n : ZMod k)) := by
-  exact gaussSumDLMF_eq_gaussSum_mulShift χ n
+theorem dirichletGaussSum_eq_gaussSum {k : ℕ} [NeZero k] (χ : DirichletCharacter ℂ k) (n : ℕ) :
+    dirichletGaussSum χ n = gaussSum χ ((ZMod.stdAddChar (N := k)).mulShift (n : ZMod k)) := by
+  exact dirichletGaussSum_eq_gaussSum_mulShift χ n
 
 /-- DLMF 27.10.10: `G(n, χ)` is separable for `n` if `G(n, χ) = χ̄(n) G(1, χ)`. -/
 @[dlmf 27.10.E10]
 def GaussSumSeparable {k : ℕ} (χ : DirichletCharacter ℂ k) (n : ℕ) : Prop :=
-  gaussSumDLMF χ n = starRingEnd ℂ (χ n) * gaussSumDLMF χ 1
+  dirichletGaussSum χ n = starRingEnd ℂ (χ n) * dirichletGaussSum χ 1
 
 end DLMF.NumberTheory

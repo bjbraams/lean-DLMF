@@ -38,7 +38,7 @@ open DLMF.OrthogonalPolynomials
 
 /-- Polynomial definition extends integral-degree Ferrers P continuously to both endpoints. -/
 def ferrersPNat (l m : ℕ) (x : ℝ) : ℂ :=
-  (-1)^m*(Real.sqrt (1-x^2):ℂ)^m*iteratedDeriv m (legendrePolyP l) x
+  (-1)^m*(Real.sqrt (1-x^2):ℂ)^m*iteratedDeriv m (legendrePolynomialP l) x
 
 /-- DLMF 14.30.1 for `m ≥ 0`: the spherical harmonic `Y_{l,m}(θ, φ) = √((l-m)! (2l+1)/(4π (l+m)!))
 e^{imφ} 𝖯^m_l(cos θ)`. -/

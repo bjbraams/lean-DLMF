@@ -24,8 +24,8 @@ quadratic Gaussian integrals and their tails, and Laplace-type representations.
 * `gaussian_quadratic_tail`, `gaussian_reciprocal_tail`, `gaussian_reciprocal_integral`:
   Gaussian integrals with quadratic and reciprocal exponents (DLMF 7.7.6–7.7.8).
 * `erf_primitive`: the primitive of `erf` (DLMF 7.7.9).
-* `fresnelAuxFComplex_laplace_integral`, `fresnelAuxGComplex_laplace_integral`: Laplace forms of
-  the Fresnel auxiliary functions (DLMF 7.7.10, 7.7.11).
+* `fresnelAuxiliaryFComplex_laplace_integral`, `fresnelAuxiliaryGComplex_laplace_integral`: Laplace
+  forms of the Fresnel auxiliary functions (DLMF 7.7.10, 7.7.11).
 * `FresnelAuxiliary.contour_tail`: the contour representation of `g + i f` (DLMF 7.7.12).
 * `goodwinStatonG_dawson`: the Goodwin–Staton integral in terms of Dawson's function and the
   exponential integral (DLMF 7.5.13).
@@ -466,7 +466,7 @@ theorem faddeevaW_cauchy_integral {z : ℂ} (hz : 0 < z.im) :
 /-- The Gaussian rational integral with numerator `2t` is an exponential integral. -/
 theorem ErrorFunctionIntegrals.goodwin_gaussian_e1 {z : ℂ} (hr : 0 < z.re) (hi : 0 < z.im) :
     (∫ t : ℝ in Ioi 0, (2*(t:ℂ))*exp (-(t:ℂ)^2)/((t:ℂ)^2-z^2)) =
-      exp (-z^2)*genExpIntE 1 (-z^2) := by
+      exp (-z^2)*expIntegralE 1 (-z^2) := by
   have hzi : 0 < (z^2).im := by
     simp only [pow_two, mul_im]
     positivity
@@ -487,7 +487,7 @@ theorem ErrorFunctionIntegrals.goodwin_gaussian_e1 {z : ℂ} (hr : 0 < z.re) (hi
       simpa using div_le_div_of_nonneg_left (Real.exp_pos (-u)).le hzi (hbound u)
   have hH := (expIntE1_horizontal_integral hm).const_mul (exp (-z^2))
   have hH' : HasIntegralAtTop (fun u : ℝ => exp (-(u:ℂ))/((u:ℂ)-z^2)) 0
-      (exp (-z^2)*genExpIntE 1 (-z^2)) := hH.congr fun u _ => by
+      (exp (-z^2)*expIntegralE 1 (-z^2)) := hH.congr fun u _ => by
     rw [← mul_div_assoc, ← Complex.exp_add,
       show -z^2 + -(-z^2+(u:ℂ)) = -(u:ℂ) by ring,
       show -z^2+(u:ℂ) = (u:ℂ)-z^2 by ring]
@@ -502,7 +502,7 @@ theorem ErrorFunctionIntegrals.goodwin_gaussian_e1 {z : ℂ} (hr : 0 < z.re) (hi
 
 /-- Splitting the nonsingular upper-half-plane kernels gives the Goodwin integral. -/
 theorem goodwinStatonG_eq_E1_of_re_pos_of_im_pos {z : ℂ} (hr : 0 < z.re) (hi : 0 < z.im) :
-    goodwinStatonG z = exp (-z^2)/2*genExpIntE 1 (-z^2)-π*I/2*faddeevaW z := by
+    goodwinStatonG z = exp (-z^2)/2*expIntegralE 1 (-z^2)-π*I/2*faddeevaW z := by
   let A := ∫ t : ℝ in Ioi 0, exp (-(t:ℂ)^2)/((t:ℂ)-z)
   have hA := (ErrorFunctionIntegrals.integrable_gauss_div hi).integrableOn (s := Ioi (0:ℝ))
   have hB := goodwinStatonG_integrable (z := z) (Or.inl hr)
@@ -516,7 +516,7 @@ theorem goodwinStatonG_eq_E1_of_re_pos_of_im_pos {z : ℂ} (hr : 0 < z.re) (hi :
     have := congrArg im h
     simp at this
     exact hi.ne' this
-  have hsum : A + goodwinStatonG z = exp (-z^2)*genExpIntE 1 (-z^2) := by
+  have hsum : A + goodwinStatonG z = exp (-z^2)*expIntegralE 1 (-z^2) := by
     dsimp only [A]
     rw [goodwinStatonG, ← integral_add hA hB, ← ErrorFunctionIntegrals.goodwin_gaussian_e1 hr hi]
     refine setIntegral_congr_fun measurableSet_Ioi fun t ht => ?_
@@ -557,7 +557,7 @@ theorem ErrorFunctionIntegrals.goodwin_log_neg_sq {z : ℂ} (hr : 0 < z.re) (hi 
 /-- Goodwin's logarithmic expression before taking the real boundary value. -/
 theorem goodwinStatonG_eq_Ein_of_re_pos_of_im_pos {z : ℂ} (hr : 0 < z.re) (hi : 0 < z.im) :
     goodwinStatonG z = Real.sqrt π*dawsonF z - exp (-z^2)/2*
-      (Real.eulerMascheroniConstant+2*log z-expIntEin (-z^2)) := by
+      (Real.eulerMascheroniConstant+2*log z-expIntegralEin (-z^2)) := by
   have hz : z ≠ 0 := fun h => by simp [h] at hr
   rw [goodwinStatonG_eq_E1_of_re_pos_of_im_pos hr hi,
       expIntE1_eq_Ein_complex (neg_ne_zero.mpr (pow_ne_zero 2 hz)),
@@ -596,10 +596,10 @@ theorem tendsto_goodwinStatonG_vertical {x : ℝ} (hx : 0 < x) :
 /-- The Goodwin–Staton integral in terms of Dawson's function and the exponential integral. -/
 @[dlmf 7.5.E13]
 theorem goodwinStatonG_dawson {x : ℝ} (hx : 0 < x) :
-    goodwinStatonG x=Real.sqrt π*dawsonF x-Real.exp (-x^2)/2*Real.expIntEi (x^2) := by
+    goodwinStatonG x=Real.sqrt π*dawsonF x-Real.exp (-x^2)/2*Real.expIntegralEi (x^2) := by
   let p : ℝ → ℂ := fun ε => (x:ℂ)+I*ε
   let F : ℂ → ℂ := fun z => Real.sqrt π*dawsonF z - exp (-z^2)/2*
-    (Real.eulerMascheroniConstant+2*log z-expIntEin (-z^2))
+    (Real.eulerMascheroniConstant+2*log z-expIntegralEin (-z^2))
   have hp : Continuous p := by dsimp [p]; fun_prop
   have hlog : ContinuousAt (fun ε => log (p ε)) 0 := by
     apply ContinuousAt.comp (g := log) ?_ hp.continuousAt
@@ -608,8 +608,8 @@ theorem goodwinStatonG_dawson {x : ℝ} (hx : 0 < x) :
     simpa [p] using hx
   have hc : ContinuousAt (fun ε => F (p ε)) 0 := by
     have hD : Continuous (fun ε => dawsonF (p ε)) := dawsonF_entire.continuous.comp hp
-    have hE : Continuous (fun ε => expIntEin (-(p ε)^2)) :=
-      expIntEin_entire.continuous.comp (by fun_prop)
+    have hE : Continuous (fun ε => expIntegralEin (-(p ε)^2)) :=
+      expIntegralEin_entire.continuous.comp (by fun_prop)
     dsimp only [F]
     exact (continuousAt_const.mul hD.continuousAt).sub
       ((show ContinuousAt (fun ε => exp (-(p ε)^2)/2) 0 by fun_prop).mul
@@ -623,13 +623,13 @@ theorem goodwinStatonG_dawson {x : ℝ} (hx : 0 < x) :
     · simpa [p] using hε
   have h := tendsto_nhds_unique ((tendsto_goodwinStatonG_vertical hx).mono_left nhdsWithin_le_nhds)
     ((hR.mono_left nhdsWithin_le_nhds).congr' he.symm)
-  have hEi : (Real.expIntEi (x^2):ℂ) =
-      Real.eulerMascheroniConstant+2*log (x:ℂ)-expIntEin (-(x:ℂ)^2) := by
-    have he := Real.expIntEi_Ein (sq_pos_of_pos hx) (ε := 1) (Or.inl rfl)
+  have hEi : (Real.expIntegralEi (x^2):ℂ) =
+      Real.eulerMascheroniConstant+2*log (x:ℂ)-expIntegralEin (-(x:ℂ)^2) := by
+    have he := Real.expIntegralEi_Ein (sq_pos_of_pos hx) (ε := 1) (Or.inl rfl)
     simp only [one_mul, neg_one_mul] at he
     rw [Real.log_pow] at he
     rw [← ofReal_log hx.le]
-    rw [show -(x:ℂ)^2 = ((-x^2:ℝ):ℂ) by push_cast; rfl, expIntEin_ofReal]
+    rw [show -(x:ℂ)^2 = ((-x^2:ℝ):ℂ) by push_cast; rfl, expIntegralEin_ofReal]
     push_cast at he ⊢
     linear_combination he
   rw [h]
@@ -1076,11 +1076,11 @@ theorem erf_primitive (z : ℂ) :
   rw [primitive_eq_sub hd]
   simp
 
-/-- Identity under the stated parameter and domain assumptions: `fresnelAuxFComplex
+/-- Identity under the stated parameter and domain assumptions: `fresnelAuxiliaryFComplex
 z=1/(π*Real.sqrt 2)*(∫ t : ℝ in Ioi 0, (t : ℂ)^(-1/2 : ℂ)*exp (-π*z^2*t/2)/((t : ℂ)^2+1))`. -/
 @[dlmf 7.7.E10]
-theorem fresnelAuxFComplex_laplace_integral {z : ℂ} (hz : |arg z| ≤ π/4) :
-    fresnelAuxFComplex z=1/(π*Real.sqrt 2)*(∫ t : ℝ in Ioi 0,
+theorem fresnelAuxiliaryFComplex_laplace_integral {z : ℂ} (hz : |arg z| ≤ π/4) :
+    fresnelAuxiliaryFComplex z=1/(π*Real.sqrt 2)*(∫ t : ℝ in Ioi 0,
         (t : ℂ)^(-1/2 : ℂ)*exp (-π*z^2*t/2)/((t : ℂ)^2+1)) := by
   have h := ErrorFunctionIntegrals.fresnelAux_laplace false hz
   simp only [Bool.false_eq_true, ite_false, Nat.cast_zero, zero_sub] at h
@@ -1088,11 +1088,11 @@ theorem fresnelAuxFComplex_laplace_integral {z : ℂ} (hz : |arg z| ≤ π/4) :
   refine setIntegral_congr_fun measurableSet_Ioi fun t _ => ?_
   rw [show (-1/2 : ℂ) = -(1/2) by ring]; ring
 
-/-- Identity under the stated parameter and domain assumptions: `fresnelAuxGComplex
+/-- Identity under the stated parameter and domain assumptions: `fresnelAuxiliaryGComplex
 z=1/(π*Real.sqrt 2)*(∫ t : ℝ in Ioi 0, (t : ℂ)^(1/2 : ℂ)*exp (-π*z^2*t/2)/((t : ℂ)^2+1))`. -/
 @[dlmf 7.7.E11]
-theorem fresnelAuxGComplex_laplace_integral {z : ℂ} (hz : |arg z| ≤ π/4) :
-    fresnelAuxGComplex z=1/(π*Real.sqrt 2)*(∫ t : ℝ in Ioi 0,
+theorem fresnelAuxiliaryGComplex_laplace_integral {z : ℂ} (hz : |arg z| ≤ π/4) :
+    fresnelAuxiliaryGComplex z=1/(π*Real.sqrt 2)*(∫ t : ℝ in Ioi 0,
         (t : ℂ)^(1/2 : ℂ)*exp (-π*z^2*t/2)/((t : ℂ)^2+1)) := by
   have h := ErrorFunctionIntegrals.fresnelAux_laplace true hz
   simp only [ite_true, Nat.cast_one] at h
@@ -1101,18 +1101,18 @@ theorem fresnelAuxGComplex_laplace_integral {z : ℂ} (hz : |arg z| ≤ π/4) :
   rw [show (1 : ℂ) - 1/2 = 1/2 by ring]; ring
 
 /-- The map `(fun R : ℝ => exp (-π*I*z^2/2)*segmentIntegral (fun t => exp (π*I*t^2/2)) z R)` tends
-to `(𝓝 (fresnelAuxGComplex z+I*fresnelAuxFComplex z))` along `atTop`. -/
+to `(𝓝 (fresnelAuxiliaryGComplex z+I*fresnelAuxiliaryFComplex z))` along `atTop`. -/
 @[dlmf 7.7.E12]
 theorem FresnelAuxiliary.contour_tail (z : ℂ) :
     Tendsto (fun R : ℝ => exp (-π*I*z^2/2)*segmentIntegral (fun t => exp (π*I*t^2/2)) z R) atTop
-        (𝓝 (fresnelAuxGComplex z+I*fresnelAuxFComplex z)) := by
+        (𝓝 (fresnelAuxiliaryGComplex z+I*fresnelAuxiliaryFComplex z)) := by
   have h := (fresnelTail_horizontal_integral z).const_mul (exp (-π*I*z^2/2))
   convert h using 2
   have he : exp (-π*I*z^2/2) = cos (π*z^2/2) - sin (π*z^2/2)*I := by
     rw [show -π*I*z^2/2 = -(π*z^2/2)*I by ring, Complex.exp_mul_I, Complex.cos_neg,
       Complex.sin_neg]
     ring
-  rw [he, fresnelAuxGComplex, fresnelAuxFComplex, fresnelTail]
+  rw [he, fresnelAuxiliaryGComplex, fresnelAuxiliaryFComplex, fresnelTail]
   ring_nf
   rw [I_sq]
   ring

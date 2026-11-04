@@ -14,7 +14,7 @@ public import Mathlib.RingTheory.Polynomial.ShiftedLegendre
 The `dlmf_upstream` commands below are checked pointers to Mathlib declarations,
 deliberately not duplicate local theorems. The affine normalization between Mathlib's
 shifted Legendre polynomial and `P_n` is the project theorem
-`DLMF.OrthogonalPolynomials.aeval_shiftedLegendre_eq_legendrePolyP`.
+`DLMF.OrthogonalPolynomials.aeval_shiftedLegendre_eq_legendrePolynomialP`.
 -/
 
 -- DLMF 14.7.13: Rodrigues' formula, for the shifted Legendre polynomial `P_n(1-2x)`.

@@ -44,31 +44,31 @@ open scoped Real Topology Nat
 namespace DLMF.Legendre
 
 /-- The balanced upper-parameter contiguous relation, including zero upper parameters. -/
-theorem regularizedGaussHG_balanced_ab (a c : ℂ) {w : ℂ} (hw : w ∈ cutPlane) :
-    2*regularizedGaussHG (-a) a c w-regularizedGaussHG (1-a) a c w-
-      regularizedGaussHG (-a) (a+1) c w=0 := by
+theorem regularizedGaussHypergeometric_balanced_ab (a c : ℂ) {w : ℂ} (hw : w ∈ cutPlane) :
+    2*regularizedGaussHypergeometric (-a) a c w-regularizedGaussHypergeometric (1-a) a c w-
+      regularizedGaussHypergeometric (-a) (a+1) c w=0 := by
   by_cases ha : a=0
   · subst a
-    have h := regularizedGaussHG_contiguous_shift_b 0 0 c hw
-    have hs := regularizedGaussHG_symm 1 0 c hw
+    have h := regularizedGaussHypergeometric_contiguous_shift_b 0 0 c hw
+    have hs := regularizedGaussHypergeometric_symm 1 0 c hw
     norm_num at h ⊢
     linear_combination 2*h-hs
-  · have h := regularizedGaussHG_contiguous_ab (-a) a c hw
+  · have h := regularizedGaussHypergeometric_contiguous_ab (-a) a c hw
     rw [show -a+1=1-a by ring] at h
     apply (mul_left_cancel₀ ha)
     linear_combination h
 
 /-- The degree recurrence before multiplying by the associated or Ferrers gauge. -/
-theorem regularizedGaussHG_legendre_degree (ν c : ℂ) {w : ℂ} (hw : w ∈ cutPlane) :
-    (ν+c)*regularizedGaussHG (-ν-1) (ν+2) c w-
-      (2*ν+1)*(1-2*w)*regularizedGaussHG (-ν) (ν+1) c w+
-      (ν+1-c)*regularizedGaussHG (-ν+1) ν c w=0 := by
-  have E1 := regularizedGaussHG_contiguous_ab (-ν-1) (ν+1) c hw
-  have E2 := regularizedGaussHG_contiguous_ab (-ν) ν c hw
-  have E3 := regularizedGaussHG_contiguous_a (-ν) (ν+1) c hw
-  have E4 := regularizedGaussHG_contiguous_a_b_pred (-ν) (ν+1) c hw
-  have B1 := regularizedGaussHG_balanced_ab (ν+1) c hw
-  have B2 := regularizedGaussHG_balanced_ab ν c hw
+theorem regularizedGaussHypergeometric_legendre_degree (ν c : ℂ) {w : ℂ} (hw : w ∈ cutPlane) :
+    (ν+c)*regularizedGaussHypergeometric (-ν-1) (ν+2) c w-
+      (2*ν+1)*(1-2*w)*regularizedGaussHypergeometric (-ν) (ν+1) c w+
+      (ν+1-c)*regularizedGaussHypergeometric (-ν+1) ν c w=0 := by
+  have E1 := regularizedGaussHypergeometric_contiguous_ab (-ν-1) (ν+1) c hw
+  have E2 := regularizedGaussHypergeometric_contiguous_ab (-ν) ν c hw
+  have E3 := regularizedGaussHypergeometric_contiguous_a (-ν) (ν+1) c hw
+  have E4 := regularizedGaussHypergeometric_contiguous_a_b_pred (-ν) (ν+1) c hw
+  have B1 := regularizedGaussHypergeometric_balanced_ab (ν+1) c hw
+  have B2 := regularizedGaussHypergeometric_balanced_ab ν c hw
   rw [show -ν-1+1= -ν by ring,show ν+1+1=ν+2 by ring] at E1
   rw [show ν+1-1=ν by ring] at E4
   rw [show -(ν+1)= -ν-1 by ring,show 1-(ν+1)= -ν by ring,
@@ -77,40 +77,41 @@ theorem regularizedGaussHG_legendre_degree (ν c : ℂ) {w : ℂ} (hw : w ∈ cu
   linear_combination -E1-E2+2*E3+2*E4-(c-1)*(B1-B2)
 
 /-- The derivative recurrence before multiplying by its gauge. -/
-theorem regularizedGaussHG_legendre_derivative (ν c : ℂ) {w : ℂ} (hw : w ∈ cutPlane) :
-    (1-c)*regularizedGaussHG (-ν) (ν+1) c w+
-      2*w*(1-w)*ν*(ν+1)*regularizedGaussHG (-ν+1) (ν+2) (c+1) w-
-      (ν+1-c)*regularizedGaussHG (-ν+1) ν c w+
-      ν*(1-2*w)*regularizedGaussHG (-ν) (ν+1) c w=0 := by
-  have R1 := regularizedGaussHG_contiguous_c_succ_deriv (-ν) (ν+1) c hw
-  have R2 := regularizedGaussHG_contiguous_a_c_succ (-ν) (ν+1) c hw
-  have E2 := regularizedGaussHG_contiguous_ab (-ν) ν c hw
-  have E4 := regularizedGaussHG_contiguous_a_b_pred (-ν) (ν+1) c hw
-  have B2 := regularizedGaussHG_balanced_ab ν c hw
+theorem regularizedGaussHypergeometric_legendre_derivative (ν c : ℂ) {w : ℂ} (hw : w ∈ cutPlane) :
+    (1-c)*regularizedGaussHypergeometric (-ν) (ν+1) c w+
+      2*w*(1-w)*ν*(ν+1)*regularizedGaussHypergeometric (-ν+1) (ν+2) (c+1) w-
+      (ν+1-c)*regularizedGaussHypergeometric (-ν+1) ν c w+
+      ν*(1-2*w)*regularizedGaussHypergeometric (-ν) (ν+1) c w=0 := by
+  have R1 := regularizedGaussHypergeometric_contiguous_c_succ_deriv (-ν) (ν+1) c hw
+  have R2 := regularizedGaussHypergeometric_contiguous_a_c_succ (-ν) (ν+1) c hw
+  have E2 := regularizedGaussHypergeometric_contiguous_ab (-ν) ν c hw
+  have E4 := regularizedGaussHypergeometric_contiguous_a_b_pred (-ν) (ν+1) c hw
+  have B2 := regularizedGaussHypergeometric_balanced_ab ν c hw
   rw [show ν+1-1=ν by ring] at E4
   rw [show 1-ν= -ν+1 by ring] at B2
   rw [show ν+1+1=ν+2 by ring] at R1
   linear_combination (-2*w)*R1-2*R2+E2-2*E4-(c-1)*B2
 
 /-- The simultaneous degree/order contiguous relation before applying either gauge. -/
-theorem regularizedGaussHG_legendre_order (ν c : ℂ) {w : ℂ} (hw : w∈cutPlane) :
-    (2-2*w)*regularizedGaussHG (ν+1) (-ν) (c-1) w-
-      (ν+c)*regularizedGaussHG (ν+2) (-ν-1) c w+
-      (ν+2-c)*(1-2*w)*regularizedGaussHG (ν+1) (-ν) c w=0 := by
-  have he := regularizedGaussHG_contiguous_a_pred_c_pred (-ν) (ν+1) c hw
-  have hb := regularizedGaussHG_balanced_ab (ν+1) c hw
+theorem regularizedGaussHypergeometric_legendre_order (ν c : ℂ) {w : ℂ} (hw : w∈cutPlane) :
+    (2-2*w)*regularizedGaussHypergeometric (ν+1) (-ν) (c-1) w-
+      (ν+c)*regularizedGaussHypergeometric (ν+2) (-ν-1) c w+
+      (ν+2-c)*(1-2*w)*regularizedGaussHypergeometric (ν+1) (-ν) c w=0 := by
+  have he := regularizedGaussHypergeometric_contiguous_a_pred_c_pred (-ν) (ν+1) c hw
+  have hb := regularizedGaussHypergeometric_balanced_ab (ν+1) c hw
   rw [show -(ν+1)= -ν-1 by ring,show 1-(ν+1)= -ν by ring,
     show ν+1+1=ν+2 by ring] at hb
-  rw [regularizedGaussHG_symm (ν+1) (-ν) (c-1) hw,
-    regularizedGaussHG_symm (ν+2) (-ν-1) c hw,regularizedGaussHG_symm (ν+1) (-ν) c hw]
+  rw [regularizedGaussHypergeometric_symm (ν+1) (-ν) (c-1) hw,
+    regularizedGaussHypergeometric_symm (ν+2) (-ν-1) c hw,
+        regularizedGaussHypergeometric_symm (ν+1) (-ν) c hw]
   linear_combination -2*he+(ν+c)*hb
 
 /-- The three-order relation retains all reciprocal-Gamma exceptional values. -/
-theorem regularizedGaussHG_legendre_orders (ν c : ℂ) {w : ℂ} (hw : w∈cutPlane) :
-    (2-2*w)*regularizedGaussHG (ν+1) (-ν) (c-2) w+
-      2*(2-c)*(1-2*w)*regularizedGaussHG (ν+1) (-ν) (c-1) w+
-      (ν+c-1)*(ν+2-c)*(2*w)*regularizedGaussHG (ν+1) (-ν) c w=0 := by
-  have he := regularizedGaussHG_contiguous_c_three (ν+1) (-ν) (c-1) hw
+theorem regularizedGaussHypergeometric_legendre_orders (ν c : ℂ) {w : ℂ} (hw : w∈cutPlane) :
+    (2-2*w)*regularizedGaussHypergeometric (ν+1) (-ν) (c-2) w+
+      2*(2-c)*(1-2*w)*regularizedGaussHypergeometric (ν+1) (-ν) (c-1) w+
+      (ν+c-1)*(ν+2-c)*(2*w)*regularizedGaussHypergeometric (ν+1) (-ν) c w=0 := by
+  have he := regularizedGaussHypergeometric_contiguous_c_three (ν+1) (-ν) (c-1) hw
   rw [show c-1-1=c-2 by ring,show c-1+1=c by ring] at he
   linear_combination -2*he
 
@@ -199,7 +200,7 @@ theorem ferrersP_recurrence_1 (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1
   have hs : 1+(x:ℂ)∈slitPlane := Or.inl (by simp; linarith [hx.1])
   have hw := mem_cutPlane_of_one_add hs
   have hg := ferrers_gauge_shifts μ hx
-  have he := regularizedGaussHG_legendre_orders ν (1-μ) hw
+  have he := regularizedGaussHypergeometric_legendre_orders ν (1-μ) hw
   dsimp only at hg
   simp only [ferrersP]
   rw [show (1:ℂ)-(μ+1)=1-μ-1 by ring,show (1:ℂ)-(μ+2)=1-μ-2 by ring]
@@ -208,8 +209,8 @@ theorem ferrersP_recurrence_1 (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1
   rw [hg.2.2]
   linear_combination (norm := (field_simp [hm]; ring))
     (((((1+x)/(1-x):ℝ):ℂ)^(μ/2))/(1-x))*he+
-    2*(μ+1)*x*regularizedGaussHG (ν+1) (-ν) (1-μ-1) ((1-(x:ℂ))/2)*hg.2.1+
-    ((((1+x)/(1-x):ℝ):ℂ)^(μ/2))*regularizedGaussHG (ν+1) (-ν) (1-μ-2) ((1-(x:ℂ))/2)*hr
+    2*(μ+1)*x*regularizedGaussHypergeometric (ν+1) (-ν) (1-μ-1) ((1-(x:ℂ))/2)*hg.2.1+
+    ((((1+x)/(1-x):ℝ):ℂ)^(μ/2))*regularizedGaussHypergeometric (ν+1) (-ν) (1-μ-2) ((1-(x:ℂ))/2)*hr
 
 /-- DLMF 14.10.2: for `-1 < x < 1`, `(1-x²)^{1/2} 𝖯^{μ+1}_ν(x) - (ν-μ+1) 𝖯^μ_{ν+1}(x) + (ν+μ+1) x
 𝖯^μ_ν(x) = 0`. -/
@@ -219,13 +220,13 @@ theorem ferrersP_recurrence_2 (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1
   have hs : 1+(x:ℂ)∈slitPlane := Or.inl (by simp; linarith [hx.1])
   have hw := mem_cutPlane_of_one_add hs
   have hg := ferrers_gauge_shifts μ hx
-  have he := regularizedGaussHG_legendre_order ν (1-μ) hw
+  have he := regularizedGaussHypergeometric_legendre_order ν (1-μ) hw
   dsimp only at hg
   simp only [ferrersP]
   rw [show (1:ℂ)-(μ+1)=1-μ-1 by ring,
     show ν+1+1=ν+2 by ring,show -(ν+1)= -ν-1 by ring]
   linear_combination ((((1+x)/(1-x):ℝ):ℂ)^(μ/2))*he+
-    regularizedGaussHG (ν+1) (-ν) (1-μ-1) ((1-(x:ℂ))/2)*hg.1
+    regularizedGaussHypergeometric (ν+1) (-ν) (1-μ-1) ((1-(x:ℂ))/2)*hg.1
 
 /-- DLMF 14.10.3: for `-1 < x < 1`, `(ν-μ+2) 𝖯^μ_{ν+2}(x) - (2ν+3) x 𝖯^μ_{ν+1}(x) + (ν+μ+1) 𝖯^μ_ν(x)
 = 0`. -/
@@ -234,11 +235,11 @@ theorem ferrersP_recurrence_3 (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1
     (ν-μ+2)*ferrersP (ν+2) μ x-(2*ν+3)*x*ferrersP (ν+1) μ x+(ν+μ+1)*ferrersP ν μ x=0 := by
   have hs : 1+(x:ℂ) ∈ slitPlane := Or.inl (by simp; linarith [hx.1])
   have hw := mem_cutPlane_of_one_add hs
-  have he := regularizedGaussHG_legendre_degree (ν+1) (1-μ) hw
+  have he := regularizedGaussHypergeometric_legendre_degree (ν+1) (1-μ) hw
   simp only [ferrersP]
-  rw [regularizedGaussHG_symm (ν+2+1) (-(ν+2)) (1-μ) hw,
-    regularizedGaussHG_symm (ν+1+1) (-(ν+1)) (1-μ) hw,
-    regularizedGaussHG_symm (ν+1) (-ν) (1-μ) hw]
+  rw [regularizedGaussHypergeometric_symm (ν+2+1) (-(ν+2)) (1-μ) hw,
+    regularizedGaussHypergeometric_symm (ν+1+1) (-(ν+1)) (1-μ) hw,
+    regularizedGaussHypergeometric_symm (ν+1) (-ν) (1-μ) hw]
   rw [show -(ν+2)= -(ν+1)-1 by ring,show ν+2+1=(ν+1)+2 by ring,
     show -ν= -(ν+1)+1 by ring,show ν+1+1=ν+2 by ring] at *
   linear_combination ((((1+x)/(1-x):ℝ):ℂ)^(μ/2))*he
@@ -252,14 +253,14 @@ theorem ferrersP_recurrence_5 (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1
   have hd : HasDerivAt (ferrersP ν μ) _ x :=
     hasDerivAt_ferrers_aux (ν+1) (-ν) (1-μ) (μ/2) hx
   rw [hd.deriv]
-  have he := regularizedGaussHG_legendre_derivative ν (1-μ) hw
+  have he := regularizedGaussHypergeometric_legendre_derivative ν (1-μ) hw
   have hn : 1-(x:ℂ)^2≠0 := by
     rw [show 1-(x:ℂ)^2=((1-x^2:ℝ):ℂ) by push_cast; ring,ofReal_ne_zero]
     nlinarith [hx.1,hx.2]
   simp only [ferrersP]
-  rw [regularizedGaussHG_symm (ν+1) (-ν) (1-μ) hw,
-    regularizedGaussHG_symm (ν-1+1) (-(ν-1)) (1-μ) hw,
-    regularizedGaussHG_symm (ν+1+1) (-ν+1) (1-μ+1) hw]
+  rw [regularizedGaussHypergeometric_symm (ν+1) (-ν) (1-μ) hw,
+    regularizedGaussHypergeometric_symm (ν-1+1) (-(ν-1)) (1-μ) hw,
+    regularizedGaussHypergeometric_symm (ν+1+1) (-ν+1) (1-μ+1) hw]
   rw [show -(ν-1)= -ν+1 by ring,show ν-1+1=ν by ring]
   rw [show ν+1+1=ν+2 by ring] at *
   generalize (((1+x)/(1-x):ℝ):ℂ)^(μ/2)=A
@@ -315,25 +316,27 @@ theorem eq_zero_of_im_ne_zero {G : ℂ → ℂ} {ν₀ μ : ℂ} (hG : Continuou
 /-- Explicit derivative of the even quadratic solution. -/
 theorem hasDerivAt_ferrersEven (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     HasDerivAt (ferrersEven ν μ) ((1-(x:ℂ)^2)^(-μ/2)*(μ*x/(1-(x:ℂ)^2)*
-      regularizedGaussHG (-(ν+μ)/2) ((ν-μ+1)/2) (1/2) ((x:ℂ)^2)+2*x*((-(ν+μ)/2)*((ν-μ+1)/2)*
-      regularizedGaussHG (-(ν+μ)/2+1) ((ν-μ+1)/2+1) (1/2+1) ((x:ℂ)^2)))) x := by
+      regularizedGaussHypergeometric (-(ν+μ)/2) ((ν-μ+1)/2) (1/2)
+          ((x:ℂ)^2)+2*x*((-(ν+μ)/2)*((ν-μ+1)/2)*
+      regularizedGaussHypergeometric (-(ν+μ)/2+1) ((ν-μ+1)/2+1) (1/2+1) ((x:ℂ)^2)))) x := by
   have h := (quadratic_gauss_gauge_jets (-(ν+μ)/2) ((ν-μ+1)/2) (1/2) μ
     (ferrers_one_sub_sq_mem_slitPlane hx)).1.comp_ofReal
   beta_reduce at h
-  rw [deriv_regularizedGaussHG _ _ _ (ferrers_sq_mem_cutPlane hx)] at h
+  rw [deriv_regularizedGaussHypergeometric _ _ _ (ferrers_sq_mem_cutPlane hx)] at h
   exact h
 
 /-- Explicit derivative of the odd quadratic solution. -/
 theorem hasDerivAt_ferrersOdd (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     HasDerivAt (ferrersOdd ν μ)
-        ((1-(x:ℂ)^2)^(-μ/2)*regularizedGaussHG ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2) ((x:ℂ)^2)+
+        ((1-(x:ℂ)^2)^(-μ/2)*regularizedGaussHypergeometric ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2) ((x:ℂ)^2)+
       x*((1-(x:ℂ)^2)^(-μ/2)*(μ*x/(1-(x:ℂ)^2)*
-      regularizedGaussHG ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2) ((x:ℂ)^2)+2*x*(((1-ν-μ)/2)*((ν-μ+2)/2)*
-      regularizedGaussHG ((1-ν-μ)/2+1) ((ν-μ+2)/2+1) (3/2+1) ((x:ℂ)^2))))) x := by
+      regularizedGaussHypergeometric ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2)
+          ((x:ℂ)^2)+2*x*(((1-ν-μ)/2)*((ν-μ+2)/2)*
+      regularizedGaussHypergeometric ((1-ν-μ)/2+1) ((ν-μ+2)/2+1) (3/2+1) ((x:ℂ)^2))))) x := by
   have h := (quadratic_gauss_gauge_jets ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2) μ
     (ferrers_one_sub_sq_mem_slitPlane hx)).1.comp_ofReal
   beta_reduce at h
-  rw [deriv_regularizedGaussHG _ _ _ (ferrers_sq_mem_cutPlane hx)] at h
+  rw [deriv_regularizedGaussHypergeometric _ _ _ (ferrers_sq_mem_cutPlane hx)] at h
   exact ((hasDerivAt_id x).ofReal_comp.mul h).congr_deriv (by simp)
 
 /-- The two Gamma numerators of `𝖰^μ_ν` are continuous at a regular degree. -/
@@ -356,9 +359,9 @@ theorem continuousAt_ferrersQ_degree {ν₀ μ : ℂ} (h : LegendreQRegular ν�
   have hr2 := (continuous_recip_Gamma.comp
       (by fun_prop : Continuous fun ν : ℂ => (ν-μ+2)/2)).continuousAt (x := ν₀)
   have hE : Continuous fun ν => ferrersEven ν μ x := continuous_const.mul
-    (continuous_regularizedGaussHG_sq (by fun_prop) (by fun_prop) (by fun_prop) hx)
+    (continuous_regularizedGaussHypergeometric_sq (by fun_prop) (by fun_prop) (by fun_prop) hx)
   have hO : Continuous fun ν => ferrersOdd ν μ x := continuous_const.mul (continuous_const.mul
-    (continuous_regularizedGaussHG_sq (by fun_prop) (by fun_prop) (by fun_prop) hx))
+    (continuous_regularizedGaussHypergeometric_sq (by fun_prop) (by fun_prop) (by fun_prop) hx))
   have hs : Continuous fun ν : ℂ => sin ((ν+μ)*π/2) := by fun_prop
   have hc : Continuous fun ν : ℂ => cos ((ν+μ)*π/2) := by fun_prop
   simp only [ferrersQ_even_odd]
@@ -387,7 +390,7 @@ theorem continuousAt_deriv_ferrersQ_degree {ν₀ μ : ℂ} (h : LegendreQRegula
   simp only [hd, (hasDerivAt_ferrersEven _ μ hx).deriv, (hasDerivAt_ferrersOdd _ μ hx).deriv]
   have hF := fun (A B C : ℂ → ℂ) (hA : Differentiable ℂ A) (hB : Differentiable ℂ B)
       (hC : Differentiable ℂ C) =>
-    (continuous_regularizedGaussHG_sq hA hB hC hx).continuousAt (x := ν₀)
+    (continuous_regularizedGaussHypergeometric_sq hA hB hC hx).continuousAt (x := ν₀)
   have hs : Continuous fun ν : ℂ => sin ((ν+μ)*π/2) := by fun_prop
   have hc : Continuous fun ν : ℂ => cos ((ν+μ)*π/2) := by fun_prop
   refine (continuousAt_const.mul (((hs.continuousAt.neg.mul c1).mul hr2))).mul ?_ |>.add
@@ -640,7 +643,7 @@ theorem ferrers_wronskian_5 (ν μ : ℂ) (h : LegendreQRegular ν μ) {x : ℝ}
   have hPc : Continuous fun v : ℂ => ferrersP v μ x := by
     unfold ferrersP
     exact continuous_const.mul
-        (differentiable_regularizedGaussHG_comp (A := fun v => v+1) (B := fun v => -v)
+        (differentiable_regularizedGaussHypergeometric_comp (A := fun v => v+1) (B := fun v => -v)
       (C := fun _ => 1-μ) (by fun_prop) (by fun_prop) (by fun_prop) ht).continuous
   have h1 : LegendreQRegular (ν+1) μ := fun n hn => h (n+1) (by push_cast; linear_combination hn)
   have hQ0 := continuousAt_ferrersQ_degree h hx
@@ -681,7 +684,7 @@ theorem associatedP_recurrence_6 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane
         z-(ν-μ)*(ν+μ+1)*associatedP ν μ z=0 := by
   have hw := mem_cutPlane_of_one_add (one_add_mem_slitPlane_of_sub_one hz)
   have hg := associated_gauge_shifts μ hz
-  have he := regularizedGaussHG_legendre_orders ν (1-μ) hw
+  have he := regularizedGaussHypergeometric_legendre_orders ν (1-μ) hw
   dsimp only at hg
   simp only [associatedP]
   rw [show (1:ℂ)-(μ+1)=1-μ-1 by ring,show (1:ℂ)-(μ+2)=1-μ-2 by ring]
@@ -689,7 +692,7 @@ theorem associatedP_recurrence_6 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane
   rw [hg.1]
   linear_combination (norm := (field_simp [hm]; ring))
     ((exp (μ/2*(log (z+1)-log (z-1))))/(z-1))*he+
-    2*(μ+1)*z*regularizedGaussHG (ν+1) (-ν) (1-μ-1) ((1-z)/2)*hg.2.1
+    2*(μ+1)*z*regularizedGaussHypergeometric (ν+1) (-ν) (1-μ-1) ((1-z)/2)*hg.2.1
 
 /-- DLMF 14.10.7: for `z-1` in the slit plane (`z ∉ (-∞, 1]`), `(z²-1)^{1/2} P^{μ+1}_ν(z) - (ν-μ+1)
 P^μ_{ν+1}(z) + (ν+μ+1) z P^μ_ν(z) = 0`, with `(z²-1)^{1/2}` continued from `z > 1`. -/
@@ -699,13 +702,13 @@ theorem associatedP_recurrence_7 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane
         z+(ν+μ+1)*z*associatedP ν μ z=0 := by
   have hw := mem_cutPlane_of_one_add (one_add_mem_slitPlane_of_sub_one hz)
   have hg := associated_gauge_shifts μ hz
-  have he := regularizedGaussHG_legendre_order ν (1-μ) hw
+  have he := regularizedGaussHypergeometric_legendre_order ν (1-μ) hw
   dsimp only at hg
   simp only [associatedP]
   rw [show (1:ℂ)-(μ+1)=1-μ-1 by ring,
     show ν+1+1=ν+2 by ring,show -(ν+1)= -ν-1 by ring]
   linear_combination (exp (μ/2*(log (z+1)-log (z-1))))*he+
-    regularizedGaussHG (ν+1) (-ν) (1-μ-1) ((1-z)/2)*hg.2.2
+    regularizedGaussHypergeometric (ν+1) (-ν) (1-μ-1) ((1-z)/2)*hg.2.2
 
 /-- DLMF 14.10.3 for `P` (§14.10(ii)): for `z-1` in the slit plane (`z ∉ (-∞, 1]`), `(ν-μ+2)
 P^μ_{ν+2}(z) - (2ν+3) z P^μ_{ν+1}(z) + (ν+μ+1) P^μ_ν(z) = 0`. -/
@@ -713,11 +716,11 @@ P^μ_{ν+2}(z) - (2ν+3) z P^μ_{ν+1}(z) + (ν+μ+1) P^μ_ν(z) = 0`. -/
 theorem associatedP_recurrence_3 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     (ν-μ+2)*associatedP (ν+2) μ z-(2*ν+3)*z*associatedP (ν+1) μ z+(ν+μ+1)*associatedP ν μ z=0 := by
   have hw := mem_cutPlane_of_one_add (one_add_mem_slitPlane_of_sub_one hz)
-  have he := regularizedGaussHG_legendre_degree (ν+1) (1-μ) hw
+  have he := regularizedGaussHypergeometric_legendre_degree (ν+1) (1-μ) hw
   simp only [associatedP]
-  rw [regularizedGaussHG_symm (ν+2+1) (-(ν+2)) (1-μ) hw,
-    regularizedGaussHG_symm (ν+1+1) (-(ν+1)) (1-μ) hw,
-    regularizedGaussHG_symm (ν+1) (-ν) (1-μ) hw]
+  rw [regularizedGaussHypergeometric_symm (ν+2+1) (-(ν+2)) (1-μ) hw,
+    regularizedGaussHypergeometric_symm (ν+1+1) (-(ν+1)) (1-μ) hw,
+    regularizedGaussHypergeometric_symm (ν+1) (-ν) (1-μ) hw]
   rw [show -(ν+2)= -(ν+1)-1 by ring,show ν+2+1=(ν+1)+2 by ring,
     show -ν= -(ν+1)+1 by ring,show ν+1+1=ν+2 by ring] at *
   linear_combination (exp (μ/2*(log (z+1)-log (z-1))))*he
@@ -731,15 +734,15 @@ theorem associatedP_recurrence_5 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane
   have hd : HasDerivAt (associatedP ν μ) _ z :=
     hasDerivAt_associatedP_aux (ν+1) (-ν) (1-μ) μ hz
   rw [hd.deriv]
-  have he := regularizedGaussHG_legendre_derivative ν (1-μ) hw
+  have he := regularizedGaussHypergeometric_legendre_derivative ν (1-μ) hw
   have hm := slitPlane_ne_zero hz
   have hp := slitPlane_ne_zero (one_add_mem_slitPlane_of_sub_one hz)
   have hn : 1-z^2≠0 := by
     intro h; apply mul_ne_zero hm hp; linear_combination -h
   simp only [associatedP]
-  rw [regularizedGaussHG_symm (ν+1) (-ν) (1-μ) hw,
-    regularizedGaussHG_symm (ν-1+1) (-(ν-1)) (1-μ) hw,
-    regularizedGaussHG_symm (ν+1+1) (-ν+1) (1-μ+1) hw]
+  rw [regularizedGaussHypergeometric_symm (ν+1) (-ν) (1-μ) hw,
+    regularizedGaussHypergeometric_symm (ν-1+1) (-(ν-1)) (1-μ) hw,
+    regularizedGaussHypergeometric_symm (ν+1+1) (-ν+1) (1-μ+1) hw]
   rw [show -(ν-1)= -ν+1 by ring,show ν-1+1=ν by ring]
   rw [show ν+1+1=ν+2 by ring] at *
   generalize exp (μ/2*(log (z+1)-log (z-1)))=A
@@ -1187,18 +1190,21 @@ theorem associatedP_nat_order_derivative (ν : ℂ) (m : ℕ) {z : ℂ} (hz : z-
       with w hw using associatedP_zero_order ν hw
   rw [hev.iteratedDeriv_eq, iteratedDeriv_legendreP ν m hz']
   rcases m with _ | k
-  · simp [associatedP, legendreBranchPower, poch_zero, regularizedGaussHG_symm _ _ _ hw]
+  · simp [associatedP, legendreBranchPower, pochhammer_zero,
+        regularizedGaussHypergeometric_symm _ _ _ hw]
   have hg := associated_gauge_nat (k+1) hz
   have hsq : (-1:ℂ)^(k+1)*(-1)^(k+1) = 1 := by rw [← mul_pow]; norm_num
   unfold associatedP
-  rw [show 1-((k+1:ℕ):ℂ) = -(k:ℂ) by push_cast; ring, regularizedGaussHG_neg_nat _ _ _ hw,
-    regularizedGaussHG_symm (-ν+((k+1:ℕ):ℂ)) _ _ hw,
+  rw [show 1-((k+1:ℕ):ℂ) = -(k:ℂ) by push_cast; ring,
+                                       regularizedGaussHypergeometric_neg_nat _ _ _ hw,
+    regularizedGaussHypergeometric_symm (-ν+((k+1:ℕ):ℂ)) _ _ hw,
     show ν+1+k+1 = ν+1+((k+1:ℕ):ℂ) by push_cast; ring,
     show -ν+k+1 = -ν+((k+1:ℕ):ℂ) by push_cast; ring,
     show (k:ℂ)+2 = 1+((k+1:ℕ):ℂ) by push_cast; ring, div_pow (-1:ℂ) 2]
-  set G := regularizedGaussHG (ν+1+((k+1:ℕ):ℂ)) (-ν+((k+1:ℕ):ℂ)) (1+((k+1:ℕ):ℂ)) ((1-z)/2)
+  set G := regularizedGaussHypergeometric (ν+1+((k+1:ℕ):ℂ)) (-ν+((k+1:ℕ):ℂ))
+      (1+((k+1:ℕ):ℂ)) ((1-z)/2)
   set E := exp (((k+1:ℕ):ℂ)/2*(log (z+1)-log (z-1)))
-  linear_combination (poch (ν+1) (k+1) * poch (-ν) (k+1) * G) * ((-1)^(k+1) * hg -
+  linear_combination (pochhammer (ν+1) (k+1) * pochhammer (-ν) (k+1) * G) * ((-1)^(k+1) * hg -
     E * ((1-z)/2)^(k+1) * hsq)
 
 /-- For `z - 1` in the slit plane, `(z²-1)^{c/2}` (as `legendreBranchPower c`) has derivative `c
@@ -1237,26 +1243,28 @@ theorem legendreBranchPower_two {z : ℂ} (hz : z-1 ∈ slitPlane) : legendreBra
 (-1)^m (z²-1)^{m/2} d^m 𝑸_ν(z)/dz^m`. -/
 @[dlmf 14.6.E5]
 theorem olverQ_nat_order_derivative (ν : ℂ) (m : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    poch (ν+1) m*olverQ ν m z=(-1)^m*legendreBranchPower m z*iteratedDeriv m (olverQ ν 0) z := by
-  set R : ℕ → ℂ → ℂ := fun k w => poch (ν+1) k*olverQ ν k w with hR
+    pochhammer (ν+1) m*olverQ ν m z=(-1)^m*legendreBranchPower m z*iteratedDeriv m
+        (olverQ ν 0) z := by
+  set R : ℕ → ℂ → ℂ := fun k w => pochhammer (ν+1) k*olverQ ν k w with hR
   have hRd : ∀ (k : ℕ) w, w-1 ∈ slitPlane →
-      HasDerivAt (R k) (poch (ν+1) k*deriv (olverQ ν k) w) w :=
+      HasDerivAt (R k) (pochhammer (ν+1) k*deriv (olverQ ν k) w) w :=
     fun k w hw => (olverQ_analytic ν k w hw).differentiableAt.hasDerivAt.const_mul _
   have hraise : ∀ (k : ℕ) w, w-1 ∈ slitPlane →
       legendreBranchPower 1 w*R (k+1) w =
-          (1-w^2)*(poch (ν+1) k*deriv (olverQ ν k) w)+k*w*R k w := by
+          (1-w^2)*(pochhammer (ν+1) k*deriv (olverQ ν k) w)+k*w*R k w := by
     intro k w hw
     have h7 := olverQ_recurrence_7 ν k hw
     have h4 := olverQ_recurrence_4 ν k hw
     simp only [hR]
-    rw [show poch (ν+1) (k+1) = poch (ν+1) k*(ν+1+k) by simp only [poch, ascPochhammer_succ_eval]]
+    rw [show pochhammer (ν+1) (k+1) = pochhammer (ν+1) k*(ν+1+k) by
+        simp only [pochhammer, ascPochhammer_succ_eval]]
     push_cast
-    linear_combination (-(poch (ν+1) k)*(ν+k+1))*h7 - poch (ν+1) k*h4
+    linear_combination (-(pochhammer (ν+1) k)*(ν+k+1))*h7 - pochhammer (ν+1) k*h4
   have key : ∀ k : ℕ, ∀ w, w-1 ∈ slitPlane →
       R k w = (-1)^k*legendreBranchPower k w*iteratedDeriv k (olverQ ν 0) w := by
     intro k
     induction k with
-    | zero => intro w _; simp [hR, poch, legendreBranchPower]
+    | zero => intro w _; simp [hR, pochhammer, legendreBranchPower]
     | succ k ih =>
       intro w hw
       have hs : (-1:ℂ)^k*(-1)^k = 1 := by rw [← mul_pow]; norm_num
@@ -1284,7 +1292,7 @@ theorem olverQ_nat_order_derivative (ν : ℂ) (m : ℕ) {z : ℂ} (hz : z-1 ∈
       generalize legendreBranchPower (-(k:ℂ)) w = Bmk at e1 ⊢
       generalize legendreBranchPower 1 w = B1 at e1 e2 hr ⊢
       generalize (-1:ℂ)^k = s at hs ⊢
-      generalize poch (ν+1) k*deriv (olverQ ν k) w = Dp at hr ⊢
+      generalize pochhammer (ν+1) k*deriv (olverQ ν k) w = Dp at hr ⊢
       generalize R (k+1) w = Rk1 at hr ⊢
       generalize R k w = Rk at hr ⊢
       linear_combination (norm := (field_simp; ring)) (Bk1*Bmk*(Dp-k*w*Rk/(w^2-1)))*hs +

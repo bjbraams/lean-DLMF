@@ -24,15 +24,15 @@ public import DLMFMathlib.Analysis.Calculus.InverseSeries
 
 ## Main results
 
-* `upperIncGamma_log_asymptotic`: the large-`z` expansion of `Γ(a, z)`, DLMF 8.11.3, with the
+* `upperIncompleteGamma_log_asymptotic`: the large-`z` expansion of `Γ(a, z)`, DLMF 8.11.3, with the
   real remainder bound `incGammaAsymptoticRemainder_real_bound` (§8.11(i)).
-* `lowerIncGamma_large_parameter_hasSum`, `lowerIncGamma_large_parameter_asymptotic`:
+* `lowerIncompleteGamma_large_parameter_hasSum`, `lowerIncompleteGamma_large_parameter_asymptotic`:
   DLMF 8.11.4.
-* `normIncGammaP_large_parameter_equivalent`: DLMF 8.11.5.
-* `lowerIncGamma_fixed_ratio_asymptotic`, `upperIncGamma_fixed_ratio_asymptotic`,
-  `upperIncGamma_negative_parameter_ratio_asymptotic`: expansions for `z = λa`,
+* `regularizedGamma_large_parameter_equivalent`: DLMF 8.11.5.
+* `lowerIncompleteGamma_fixed_ratio_asymptotic`, `upperIncompleteGamma_fixed_ratio_asymptotic`,
+  `upperIncompleteGamma_negative_parameter_ratio_asymptotic`: expansions for `z = λa`,
   DLMF 8.11.6–8.11.9.
-* `upperIncGamma_diagonal_asymptotic`: DLMF 8.11.12.
+* `upperIncompleteGamma_diagonal_asymptotic`: DLMF 8.11.12.
 
 See `DLMF.IncompleteGamma.Asymptotics` for the overview.
 -/
@@ -52,26 +52,27 @@ open DLMF.Statistical
 /-- Falling-factorial incomplete-Gamma coefficients. -/
 @[dlmf 8.11.E1]
 def incGammaAsymptoticCoeff (a : ℂ) (k : ℕ) : ℂ :=
-  (-1 : ℂ)^k*poch (1-a) k
+  (-1 : ℂ)^k*pochhammer (1-a) k
 
 /-- Normalized finite upper-Gamma remainder on the logarithmic plane. -/
 @[dlmf 8.11.E2]
 def incGammaAsymptoticRemainder (a : ℂ) (N : ℕ) (w : ℂ) : ℂ :=
-  exp ((1-a)*w+exp w)*upperIncGammaOnLog a w-∑ k ∈ Finset.range N,
+  exp ((1-a)*w+exp w)*upperIncompleteGammaOnLog a w-∑ k ∈ Finset.range N,
       incGammaAsymptoticCoeff a k*exp (-(k : ℂ)*w)
 
 /-- Identity under the stated parameter and domain assumptions: `HasAsymptoticExpansion (logSector
 (3*π/2-δ)) (fun k w => exp ((a-1-k)*w-exp w)) (incGammaAsymptoticCoeff a) (fun w =>
-upperIncGammaOnLog a w)`. -/
+upperIncompleteGammaOnLog a w)`. -/
 @[dlmf 8.11.E3]
-theorem upperIncGamma_log_asymptotic (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < 3*π/2) :
+theorem upperIncompleteGamma_log_asymptotic (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < 3*π/2) :
     HasAsymptoticExpansion (logSector (3*π/2-δ)) (fun k w => exp ((a-1-k)*w-exp w))
-        (incGammaAsymptoticCoeff a) (fun w => upperIncGammaOnLog a w) := by
-  have h := (genExpIntE_log_sector_asymptotic (1-a) hδ hδ1).mul_left (fun w => exp (a*w))
+        (incGammaAsymptoticCoeff a) (fun w => upperIncompleteGammaOnLog a w) := by
+  have h := (expIntegralE_log_sector_asymptotic (1-a) hδ hδ1).mul_left (fun w => exp (a*w))
   have hφ : (fun (k : ℕ) (w : ℂ) => exp (a*w) * exp (-exp w-(k+1 : ℂ)*w)) =
       fun (k : ℕ) w => exp ((a-1-k)*w-exp w) := by
     funext k w; rw [← Complex.exp_add]; congr 1; ring
-  have hf : (fun w => exp (a*w) • genExpIntEOnLog (1-a) w) = fun w => upperIncGammaOnLog a w := by
+  have hf : (fun w => exp (a*w) • genExpIntEOnLog (1-a) w) = fun w =>
+      upperIncompleteGammaOnLog a w := by
     funext w
     rw [smul_eq_mul, genExpIntEOnLog, show (1:ℂ) - (1 - a) = a by ring, ← mul_assoc,
       ← Complex.exp_add, show a*w + (1-a-1)*w = 0 by ring, Complex.exp_zero, one_mul]
@@ -84,21 +85,22 @@ theorem incGammaAsymptoticRemainder_real_bound {a x : ℝ} (hx : 0 < x) {N : ℕ
         (incGammaAsymptoticRemainder a N (Real.log x)).re*(incGammaAsymptoticCoeff a
         N/(x : ℂ)^N).re := by
   have hx0 : (x:ℂ) ≠ 0 := ofReal_ne_zero.mpr hx.ne'
-  set θ : ℝ := x^((N:ℝ)+1-a)*Real.exp x*(upperIncGamma ((a-N:ℝ):ℂ) x).re
+  set θ : ℝ := x^((N:ℝ)+1-a)*Real.exp x*(upperIncompleteGamma ((a-N:ℝ):ℂ) x).re
   have hθ0 : 0 < θ := by
-    have := IncompleteGammaRealIntegrals.upperIncGamma_re_pos (a := a-N) hx
+    have := IncompleteGammaRealIntegrals.upperIncompleteGamma_re_pos (a := a-N) hx
         (IncompleteGammaRealIntegrals.integrableOn_rpow_exp_of_le_one (by linarith) hx)
     positivity
   have hθ1 : θ ≤ 1 := by
-    have hle := IncompleteGammaRealIntegrals.upperIncGamma_re_le (a := a-N) (by linarith) hx
+    have hle := IncompleteGammaRealIntegrals.upperIncompleteGamma_re_le (a := a-N) (by linarith) hx
     calc θ ≤ x^((N:ℝ)+1-a)*Real.exp x*(x^(a-N-1)*Real.exp (-x)) := by
           simp only [θ]; gcongr
       _ = 1 := by
         rw [show x^((N:ℝ)+1-a)*Real.exp x*(x^(a-N-1)*Real.exp (-x)) =
           (x^((N:ℝ)+1-a)*x^(a-N-1))*(Real.exp x*Real.exp (-x)) by ring,
           ← Real.rpow_add hx, ← Real.exp_add]; ring_nf; simp
-  have hlog : upperIncGammaOnLog a (Real.log x) = upperIncGamma a x := by
-    rw [DLMF.Confluent.upperIncGammaOnLog_eq_upperIncGamma a (by simpa using Real.pi_pos)
+  have hlog : upperIncompleteGammaOnLog a (Real.log x) = upperIncompleteGamma a x := by
+    rw [DLMF.Confluent.upperIncompleteGammaOnLog_eq_upperIncompleteGamma a
+        (by simpa using Real.pi_pos)
         (by simpa using Real.pi_pos.le),
       ← ofReal_exp, Real.exp_log hx]
   have hR : incGammaAsymptoticRemainder a N (Real.log x) =
@@ -109,22 +111,22 @@ theorem incGammaAsymptoticRemainder_real_bound {a x : ℝ} (hx : 0 < x) {N : ℕ
         mul_comm (log X)]
     have hk : ∀ k : ℕ, exp (-(k:ℂ)*(Real.log x : ℂ)) = X^(-(k:ℂ)) := by
       intro k; rw [ofReal_log hx.le, cpow_def_of_ne_zero hx0, mul_comm]
-    have hU := IncompleteGammaRealIntegrals.upperIncGamma_expansion (a:ℂ) hx0 N
-    have hθc : ((θ:ℝ):ℂ) = X^((N:ℂ)+1-a)*exp X*upperIncGamma ((a-N:ℝ):ℂ) x := by
+    have hU := IncompleteGammaRealIntegrals.upperIncompleteGamma_expansion (a:ℂ) hx0 N
+    have hθc : ((θ:ℝ):ℂ) = X^((N:ℂ)+1-a)*exp X*upperIncompleteGamma ((a-N:ℝ):ℂ) x := by
       simp only [θ]
-      conv_rhs => rw [IncompleteGammaRealIntegrals.upperIncGamma_ofReal_re (a-N) hx]
+      conv_rhs => rw [IncompleteGammaRealIntegrals.upperIncompleteGamma_ofReal_re (a-N) hx]
       push_cast
       rw [ofReal_cpow hx.le]; push_cast; simp only [X]
     have hsum : ∀ k ∈ Finset.range N,
-        X^(1-(a:ℂ))*exp X*((-1:ℂ)^k*poch (1-a) k*(X^((a:ℂ)-1-k)*exp (-X))) =
+        X^(1-(a:ℂ))*exp X*((-1:ℂ)^k*pochhammer (1-a) k*(X^((a:ℂ)-1-k)*exp (-X))) =
         incGammaAsymptoticCoeff a k*X^(-(k:ℂ)) := by
       intro k _
       have he : exp X*exp (-X) = 1 := by rw [← Complex.exp_add]; simp
       have hc : X^(1-(a:ℂ))*X^((a:ℂ)-1-k) = X^(-(k:ℂ)) := by
         rw [← cpow_add _ _ hx0]; ring_nf
       rw [incGammaAsymptoticCoeff]
-      linear_combination ((-1:ℂ)^k*poch (1-a) k)*(X^(1-(a:ℂ))*X^((a:ℂ)-1-k))*he +
-        ((-1:ℂ)^k*poch (1-a) k)*hc
+      linear_combination ((-1:ℂ)^k*pochhammer (1-a) k)*(X^(1-(a:ℂ))*X^((a:ℂ)-1-k))*he +
+        ((-1:ℂ)^k*pochhammer (1-a) k)*hc
     have hpow : X^(1-(a:ℂ)) = X^((N:ℂ)+1-a)*(X^N)⁻¹ := by
       rw [← cpow_natCast, ← cpow_neg, ← cpow_add _ _ hx0]; ring_nf
     unfold incGammaAsymptoticRemainder
@@ -140,19 +142,19 @@ theorem incGammaAsymptoticRemainder_real_bound {a x : ℝ} (hx : 0 < x) {N : ℕ
     exact mul_le_of_le_one_right (norm_nonneg _) hθ1
   · rw [re_mul_ofReal]; nlinarith [sq_nonneg (incGammaAsymptoticCoeff a N/(x : ℂ)^N).re]
 
-/-- The series with terms `(fun k : ℕ => z^a*exp (-z)*z^k/poch a (k+1))` converges to
-`(lowerIncGamma a z)`. -/
+/-- The series with terms `(fun k : ℕ => z^a*exp (-z)*z^k/pochhammer a (k+1))` converges to
+`(lowerIncompleteGamma a z)`. -/
 @[dlmf 8.11.E4]
-theorem lowerIncGamma_large_parameter_hasSum {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (z : ℂ) :
-    HasSum (fun k : ℕ => z^a*exp (-z)*z^k/poch a (k+1)) (lowerIncGamma a z) := by
-  have hs := (scIncGamma_hasSum_exponential a z).mul_left (Gamma a*z^a)
-  have he : Gamma a*z^a*scIncGamma a z=lowerIncGamma a z := by
-    rw [(scIncGamma_regularized_pair a z).2,lowerIncGamma_eq_regularized ha]
+theorem lowerIncompleteGamma_large_parameter_hasSum {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (z : ℂ) :
+    HasSum (fun k : ℕ => z^a*exp (-z)*z^k/pochhammer a (k+1)) (lowerIncompleteGamma a z) := by
+  have hs := (tricomiIncompleteGamma_hasSum_exponential a z).mul_left (Gamma a*z^a)
+  have he : Gamma a*z^a*tricomiIncompleteGamma a z=lowerIncompleteGamma a z := by
+    rw [(tricomiIncompleteGamma_regularized_pair a z).2,lowerIncompleteGamma_eq_regularized ha]
     ring
   rw [he] at hs
   refine hs.congr_fun fun k => ?_
   have hg := Gamma_add_nat_div_Gamma_eq (n:=k+1) a ha
-  rw [← poch,div_eq_iff (Gamma_ne_zero ha)] at hg
+  rw [← pochhammer,div_eq_iff (Gamma_ne_zero ha)] at hg
   rw [show a+(k:ℂ)+1=a+((k+1:ℕ):ℂ) by push_cast; ring,hg]
   field_simp [Gamma_ne_zero ha]
 
@@ -178,27 +180,28 @@ theorem sin_mul_norm_le_norm_add_of_abs_arg_le {δ : ℝ} (hδ : 0 < δ) (hδ1 :
       mul_nonneg hm (by linarith : 0 ≤ a.re + ‖a‖ * Real.cos δ)]
 
 /-- Pochhammer lower bound in the sector: `(sin δ · ‖a‖)^k ≤ ‖(a + m)_k‖` for `m ≥ 0`. -/
-theorem pow_le_norm_poch_of_abs_arg_le {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π) {a : ℂ}
+theorem pow_le_norm_pochhammer_of_abs_arg_le {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π) {a : ℂ}
     (harg : |arg a| ≤ π - δ) {m : ℝ} (hm : 0 ≤ m) (k : ℕ) :
-    (Real.sin δ * ‖a‖)^k ≤ ‖poch (a + m) k‖ := by
+    (Real.sin δ * ‖a‖)^k ≤ ‖pochhammer (a + m) k‖ := by
   have hs : 0 ≤ Real.sin δ := Real.sin_nonneg_of_nonneg_of_le_pi hδ.le hδ1.le
   induction k with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ k ih =>
-    rw [poch_succ, norm_mul, pow_succ]
+    rw [pochhammer_succ, norm_mul, pow_succ]
     have h := sin_mul_norm_le_norm_add_of_abs_arg_le hδ hδ1 harg (m := m + k) (by positivity)
     rw [show a + ((m + k : ℝ) : ℂ) = a + m + k by push_cast; ring] at h
     exact mul_le_mul ih h (by positivity) (norm_nonneg _)
 
-/-- Formula under the stated hypotheses: `IsBigO (sector (π-δ)) (fun a => lowerIncGamma a
-z-z^a*exp (-z)*∑ k ∈ Finset.range N, z^k/poch a (k+1)) (fun a => z^a*exp (-z)*z^N/poch a
+/-- Formula under the stated hypotheses: `IsBigO (sector (π-δ)) (fun a => lowerIncompleteGamma a
+z-z^a*exp (-z)*∑ k ∈ Finset.range N, z^k/pochhammer a (k+1)) (fun a => z^a*exp (-z)*z^N/pochhammer a
 (N+1))`. -/
 @[dlmf 8.11.E4]
-theorem lowerIncGamma_large_parameter_asymptotic {z : ℂ} (hz : z ≠ 0) {δ : ℝ} (hδ : 0 < δ)
+theorem lowerIncompleteGamma_large_parameter_asymptotic {z : ℂ} (hz : z ≠ 0) {δ : ℝ} (hδ : 0 < δ)
     (hδ1 : δ < π) (N : ℕ) :
     IsBigO (sector (π-δ))
-        (fun a => lowerIncGamma a z-z^a*exp (-z)*∑ k ∈ Finset.range N, z^k/poch a (k+1))
-        (fun a => z^a*exp (-z)*z^N/poch a (N+1)) := by
+        (fun a => lowerIncompleteGamma a z-z^a*exp (-z)*∑ k ∈ Finset.range N,
+            z^k/pochhammer a (k+1))
+        (fun a => z^a*exp (-z)*z^N/pochhammer a (N+1)) := by
   set c := Real.sin δ with hc
   have hc0 : 0 < c := Real.sin_pos_of_pos_of_lt_pi hδ hδ1
   have hev : ∀ᶠ a in sector (π-δ), 2*‖z‖/c ≤ ‖a‖ ∧ a ≠ 0 ∧ |arg a| ≤ π-δ := by
@@ -219,22 +222,23 @@ theorem lowerIncGamma_large_parameter_asymptotic {z : ℂ} (hz : z ≠ 0) {δ : 
         exact Complex.arg_ofReal_of_neg (by linarith)
       rw [this, abs_of_pos Real.pi_pos] at harg
       linarith
-  set B : ℂ := z^a*exp (-z)*z^N/poch a (N+1) with hB
-  have hs := lowerIncGamma_large_parameter_hasSum hnp z
+  set B : ℂ := z^a*exp (-z)*z^N/pochhammer a (N+1) with hB
+  have hs := lowerIncompleteGamma_large_parameter_hasSum hnp z
   have htail := (hasSum_nat_add_iff' N).mpr hs
-  have hterm : ∀ k : ℕ, z^a*exp (-z)*z^(k+N)/poch a (k+N+1) = B * (z^k/poch (a+((N+1:ℕ):ℝ)) k) := by
+  have hterm : ∀ k : ℕ, z^a*exp (-z)*z^(k+N)/pochhammer a (k+N+1) = B *
+      (z^k/pochhammer (a+((N+1:ℕ):ℝ)) k) := by
     intro k
-    rw [show k+N+1 = (N+1)+k by ring, poch_add, hB]
+    rw [show k+N+1 = (N+1)+k by ring, pochhammer_add, hB]
     push_cast
     rw [div_eq_mul_inv, div_eq_mul_inv, div_eq_mul_inv, mul_inv, pow_add]
     ring
   simp only [hterm] at htail
   clear_value B
-  have hbound : ∀ k : ℕ, ‖B * (z^k/poch (a+((N+1:ℕ):ℝ)) k)‖ ≤ ‖B‖ * (1/2)^k := by
+  have hbound : ∀ k : ℕ, ‖B * (z^k/pochhammer (a+((N+1:ℕ):ℝ)) k)‖ ≤ ‖B‖ * (1/2)^k := by
     intro k
     rw [norm_mul, norm_div, norm_pow]
     refine mul_le_mul_of_nonneg_left ?_ (norm_nonneg _)
-    have hp := pow_le_norm_poch_of_abs_arg_le hδ hδ1 harg (m := ((N+1:ℕ):ℝ)) (by positivity) k
+    have hp := pow_le_norm_pochhammer_of_abs_arg_le hδ hδ1 harg (m := ((N+1:ℕ):ℝ)) (by positivity) k
     have hca : 2*‖z‖ ≤ c*‖a‖ := by
       rw [div_le_iff₀ hc0] at hR; linarith
     have hzpos : 0 < ‖z‖ := norm_pos_iff.mpr hz
@@ -242,14 +246,14 @@ theorem lowerIncGamma_large_parameter_asymptotic {z : ℂ} (hz : z ≠ 0) {δ : 
     rw [div_le_iff₀ (lt_of_lt_of_le hpos hp)]
     calc ‖z‖^k = (1/2)^k * (2*‖z‖)^k := by rw [← mul_pow]; ring_nf
       _ ≤ (1/2)^k * (c*‖a‖)^k := by gcongr
-      _ ≤ (1/2)^k * ‖poch (a+((N+1:ℕ):ℝ)) k‖ := by gcongr
+      _ ≤ (1/2)^k * ‖pochhammer (a+((N+1:ℕ):ℝ)) k‖ := by gcongr
   have hgeom : HasSum (fun k : ℕ => ‖B‖ * (1/2:ℝ)^k) (‖B‖ * 2) := by
     have := (hasSum_geometric_two).mul_left ‖B‖
     simpa [one_div] using this
   have hle := htail.norm_le_of_bounded hgeom hbound
   rw [Finset.mul_sum]
-  have hsum : ∑ k ∈ Finset.range N, z^a*exp (-z)*(z^k/poch a (k+1)) =
-      ∑ k ∈ Finset.range N, z^a*exp (-z)*z^k/poch a (k+1) :=
+  have hsum : ∑ k ∈ Finset.range N, z^a*exp (-z)*(z^k/pochhammer a (k+1)) =
+      ∑ k ∈ Finset.range N, z^a*exp (-z)*z^k/pochhammer a (k+1) :=
     Finset.sum_congr rfl fun k _ => by ring
   rw [hsum]
   linarith
@@ -288,10 +292,11 @@ theorem ne_neg_nat {δ : ℝ} (hδ : 0 < δ) {a : ℂ} (ha0 : a ≠ 0) (harg : |
     linarith
 
 /-- First half of 8.11.5 on the principal sector. -/
-theorem normIncGammaP_equiv_sector {z : ℂ} (hz : z ≠ 0) {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π) :
-    IsEquivalent (sector (π-δ)) (fun a => normIncGammaPContinued a z)
+theorem regularizedGamma_equiv_sector {z : ℂ} (hz : z ≠ 0) {δ : ℝ} (hδ : 0 < δ)
+    (hδ1 : δ < π) :
+    IsEquivalent (sector (π-δ)) (fun a => regularizedGamma a z)
       (fun a => z^a*exp (-z)/Gamma (1+a)) := by
-  have H := lowerIncGamma_large_parameter_asymptotic hz hδ hδ1 1
+  have H := lowerIncompleteGamma_large_parameter_asymptotic hz hδ hδ1 1
   have hev : ∀ᶠ a in sector (π-δ), a ≠ 0 ∧ |arg a| ≤ π-δ :=
     mem_inf_of_right (mem_principal_self _)
   have hnorm : Tendsto (fun a : ℂ => ‖a‖) (sector (π-δ)) atTop :=
@@ -319,15 +324,15 @@ theorem normIncGammaP_equiv_sector {z : ℂ} (hz : z ≠ 0) {δ : ℝ} (hδ : 0 
   · filter_upwards [hev] with a ⟨ha0, harg⟩
     have hnp := ne_neg_nat hδ ha0 harg
     simp only [Pi.sub_apply]
-    rw [normIncGammaPContinued_eq hnp, normIncGammaP, add_comm 1 a,
+    rw [regularizedGamma_eq hnp, add_comm 1 a,
       Complex.Gamma_add_one a ha0]
-    simp [poch_one]
+    simp [pochhammer_one]
     field_simp
   · filter_upwards [hev] with a ⟨ha0, harg⟩
     have hnp := ne_neg_nat hδ ha0 harg
     have ha1 : a + 1 ≠ 0 := by simpa [add_eq_zero_iff_eq_neg] using hnp 1
     rw [add_comm 1 a, Complex.Gamma_add_one a ha0, show (1:ℕ)+1 = 2 by rfl]
-    simp [poch_succ, poch_zero]
+    simp [pochhammer_succ, pochhammer_zero]
     field_simp
 
 /-- Stirling's formula in the form used for 8.11.5. -/
@@ -396,17 +401,18 @@ end IncompleteGammaAsymptotics
 open IncompleteGammaAsymptotics
 
 /-- Identity under the stated parameter and domain assumptions: `IsEquivalent (logSector (π-δ))
-(fun w => normIncGammaPContinued (exp w) z) (fun w => z^(exp w)*exp (-z)/Gamma (1+exp w)) ∧
-IsEquivalent (logSector (π-δ)) (fun w => normIncGammaPContinued (exp w) z) (fun w => exp (exp
+(fun w => regularizedGamma (exp w) z) (fun w => z^(exp w)*exp (-z)/Gamma (1+exp w)) ∧
+IsEquivalent (logSector (π-δ)) (fun w => regularizedGamma (exp w) z) (fun w => exp (exp
 w-z+exp w*(log z-w)-w/2)/Real.sqrt (2*π))`. -/
 @[dlmf 8.11.E5]
-theorem normIncGammaP_large_parameter_equivalent {z : ℂ} (hz : z ≠ 0) {δ : ℝ} (hδ : 0 < δ)
+theorem regularizedGamma_large_parameter_equivalent {z : ℂ} (hz : z ≠ 0)
+    {δ : ℝ} (hδ : 0 < δ)
     (hδ1 : δ < π) :
-    IsEquivalent (logSector (π-δ)) (fun w => normIncGammaPContinued (exp w) z)
+    IsEquivalent (logSector (π-δ)) (fun w => regularizedGamma (exp w) z)
         (fun w => z^(exp w)*exp (-z)/Gamma (1+exp w)) ∧
-        IsEquivalent (logSector (π-δ)) (fun w => normIncGammaPContinued (exp w) z)
+        IsEquivalent (logSector (π-δ)) (fun w => regularizedGamma (exp w) z)
         (fun w => exp (exp w-z+exp w*(log z-w)-w/2)/Real.sqrt (2*π)) := by
-  have h1 := (normIncGammaP_equiv_sector hz hδ hδ1).comp_tendsto
+  have h1 := (regularizedGamma_equiv_sector hz hδ hδ1).comp_tendsto
     (tendsto_exp_logSector (by linarith : π-δ < π))
   refine ⟨h1, h1.trans ?_⟩
   have hmu := tendsto_binetMu_logSector hδ hδ1
@@ -706,14 +712,15 @@ end IncompleteGammaAsymptotics
 /-- Identity under the stated parameter and domain assumptions: `HasAsymptoticExpansion (logSector
 (π/2-δ)) (fun k w => exp (exp w*(w+Real.log lam)-lam*exp w-(k+1 : ℂ)*w)/(lam-1 : ℂ)^(2*k+1))
 (fun k => -(-1 : ℂ)^k*(incGammaLambdaPolynomial k).eval (lam : ℂ)) (fun w =>
-lowerIncGammaOnLog (exp w) (w+Real.log lam))`. -/
+lowerIncompleteGammaOnLog (exp w) (w+Real.log lam))`. -/
 @[dlmf 8.11.E6]
-theorem lowerIncGamma_fixed_ratio_asymptotic {lam : ℝ} (hlam : 0 < lam) (hlam1 : lam < 1) {δ : ℝ}
+theorem lowerIncompleteGamma_fixed_ratio_asymptotic {lam : ℝ} (hlam : 0 < lam)
+    (hlam1 : lam < 1) {δ : ℝ}
     (hδ : 0 < δ) (hδ1 : δ < π/2) :
     HasAsymptoticExpansion (logSector (π/2-δ))
         (fun k w => exp (exp w*(w+Real.log lam)-lam*exp w-(k+1 : ℂ)*w)/(lam-1 : ℂ)^(2*k+1))
         (fun k => -(-1 : ℂ)^k*(incGammaLambdaPolynomial k).eval (lam : ℂ))
-        (fun w => lowerIncGammaOnLog (exp w) (w+Real.log lam)) := by
+        (fun w => lowerIncompleteGammaOnLog (exp w) (w+Real.log lam)) := by
   intro N
   obtain ⟨K, hK⟩ : ∃ K, ∀ t ∈ Icc (0:ℝ) 1, |coeffRational N (lam*t)| ≤ K := by
     obtain ⟨K, hK⟩ := isCompact_Icc.exists_bound_of_continuousOn
@@ -749,10 +756,10 @@ theorem lowerIncGamma_fixed_ratio_asymptotic {lam : ℝ} (hlam : 0 < lam) (hlam1
   set E := exp (a*(w+Real.log lam) - lam*a) with hE
   have hw' : exp (w + (Real.log lam : ℂ)) = a * lam := by
     rw [Complex.exp_add, ← ofReal_exp, Real.exp_log hlam]
-  have hf : lowerIncGammaOnLog a (w+Real.log lam) = E * ∫ t in (0:ℝ)..1,
+  have hf : lowerIncompleteGammaOnLog a (w+Real.log lam) = E * ∫ t in (0:ℝ)..1,
       powMulExpIntegrand lam a t := by
-    unfold lowerIncGammaOnLog
-    rw [hw', scIncGamma_integral (by linarith)]
+    unfold lowerIncompleteGammaOnLog
+    rw [hw', tricomiIncompleteGamma_integral (by linarith)]
     have hG := Complex.Gamma_ne_zero_of_re_pos (by linarith : 0 < a.re)
     rw [show Gamma a * exp (a*(w+Real.log lam)) * (1/Gamma a * ∫ t in (0:ℝ)..1,
         (t:ℂ)^(a-1) * exp (-(a*lam)*t)) = exp (a*(w+Real.log lam)) * ∫ t in (0:ℝ)..1,
@@ -802,39 +809,39 @@ theorem lowerIncGamma_fixed_ratio_asymptotic {lam : ℝ} (hlam : 0 < lam) (hlam1
 
 /-- Identity under the stated parameter and domain assumptions: `HasAsymptoticExpansion (logSector
 (3*π/2-δ)) (fun k w => exp (exp w*(w+Real.log lam)-lam*exp w-(k+1 : ℂ)*w)/(lam-1 : ℂ)^(2*k+1))
-(fun k => (-1 : ℂ)^k*(incGammaLambdaPolynomial k).eval (lam : ℂ)) (fun w => upperIncGammaOnLog
-(exp w) (w+Real.log lam))`. -/
+(fun k => (-1 : ℂ)^k*(incGammaLambdaPolynomial k).eval (lam : ℂ)) (fun w =>
+upperIncompleteGammaOnLog (exp w) (w+Real.log lam))`. -/
 @[dlmf 8.11.E7]
-theorem upperIncGamma_fixed_ratio_asymptotic {lam : ℝ} (hlam : 1 < lam) {δ : ℝ} (hδ : 0 < δ)
+theorem upperIncompleteGamma_fixed_ratio_asymptotic {lam : ℝ} (hlam : 1 < lam) {δ : ℝ} (hδ : 0 < δ)
     (hδ1 : δ < 3*π/2) :
     HasAsymptoticExpansion (logSector (3*π/2-δ))
         (fun k w => exp (exp w*(w+Real.log lam)-lam*exp w-(k+1 : ℂ)*w)/(lam-1 : ℂ)^(2*k+1))
         (fun k => (-1 : ℂ)^k*(incGammaLambdaPolynomial k).eval (lam : ℂ))
-        (fun w => upperIncGammaOnLog (exp w) (w+Real.log lam)) := by
+        (fun w => upperIncompleteGammaOnLog (exp w) (w+Real.log lam)) := by
   sorry
 
 /-- The negative-parameter continuation stated after DLMF 8.11.9. -/
 @[dlmf 8.11.E7]
-theorem upperIncGamma_negative_parameter_ratio_asymptotic {lam : ℝ} (hlam : lam < 0) {δ : ℝ}
+theorem upperIncompleteGamma_negative_parameter_ratio_asymptotic {lam : ℝ} (hlam : lam < 0) {δ : ℝ}
     (hδ : 0 < δ) (hδ1 : δ < 3*π/2-arg ((-lam+Real.log (-lam) : ℝ)+π*I)) :
     HasAsymptoticExpansion (logSector (3*π/2-arg ((-lam+Real.log (-lam) : ℝ)+π*I)-δ))
         (fun k w => exp (-exp w*(w+Real.log (-lam))+lam*exp w-(k+1 : ℂ)*w)/(1-lam : ℂ)^(2*k+1))
         (fun k => (incGammaLambdaPolynomial k).eval (lam : ℂ))
-        (fun w => upperIncGammaOnLog (-exp w) (w+Real.log (-lam))) := by
+        (fun w => upperIncompleteGammaOnLog (-exp w) (w+Real.log (-lam))) := by
   sorry
 
 /-- Estimate under the stated parameter and domain assumptions: `∃ c : ℕ → ℂ, (∀ n < 6, c
 n=([Real.sqrt (π/2),-1/3,Real.sqrt (2*π)/24,-4/135,Real.sqrt (2*π)/576,8/2835] : List ℂ)[n]!)
 ∧ ∀ δ : ℝ, 0 < δ → δ < 2*π → HasAsymptoticExpansion (logSector (2*π-δ)) (fun n w => exp ((exp
-w-1)*w-exp w+(1-(n : ℂ))*w/2)) c (fun w => upperIncGammaOnLog (exp w) w)`. -/
+w-1)*w-exp w+(1-(n : ℂ))*w/2)) c (fun w => upperIncompleteGammaOnLog (exp w) w)`. -/
 @[dlmf 8.11.E12]
-theorem upperIncGamma_diagonal_asymptotic  :
+theorem upperIncompleteGamma_diagonal_asymptotic  :
     ∃ c : ℕ → ℂ, (∀ n < 6,
         c n=([Real.sqrt (π/2), -1/3, Real.sqrt (2*π)/24, -4/135, Real.sqrt (2*π)/576, 8/2835] : List
         ℂ)[n]!) ∧ ∀ δ : ℝ, 0 < δ → δ < 2*π →
         HasAsymptoticExpansion (logSector (2*π-δ))
         (fun n w => exp ((exp w-1)*w-exp w+(1-(n : ℂ))*w/2)) c
-        (fun w => upperIncGammaOnLog (exp w) w) := by
+        (fun w => upperIncompleteGammaOnLog (exp w) w) := by
   sorry
 
 namespace IncompleteGammaAsymptotics
@@ -1071,8 +1078,9 @@ theorem ibpRational_bound (N : ℕ) {δ : ℝ} (hδ : 0 < δ) :
     _ ≤ A * (1-y)^(2*N) := by gcongr
 
 /-- `γ(n+1, nx)/((nx)^n e^{-nx}) = n x ∫₀¹ s^n e^{n x (1-s)} ds` with `n = m+1`. -/
-theorem lowerIncGamma_ratio_eq (m : ℕ) (x : ℝ) :
-    lowerIncGamma (((m+1:ℕ):ℂ)+1) (((m+1:ℕ):ℂ)*x)/((((m+1:ℕ):ℂ)*x)^(m+1)*exp (-((m+1:ℕ):ℂ)*x)) =
+theorem lowerIncompleteGamma_ratio_eq (m : ℕ) (x : ℝ) :
+    lowerIncompleteGamma (((m+1:ℕ):ℂ)+1)
+        (((m+1:ℕ):ℂ)*x)/((((m+1:ℕ):ℂ)*x)^(m+1)*exp (-((m+1:ℕ):ℂ)*x)) =
       (((m+1)*x * ∫ s in (0:ℝ)..1, laplaceIntegrand m x s : ℝ) : ℂ) := by
   push_cast
   by_cases hx : x = 0
@@ -1082,12 +1090,12 @@ theorem lowerIncGamma_ratio_eq (m : ℕ) (x : ℝ) :
   have hnp := natCast_add_one_ne_neg_nat (m+1)
   push_cast at hnp
   have hre : 0 < ((m:ℂ)+1+1).re := by simp; positivity
-  have hL : lowerIncGamma ((m:ℂ)+1+1) z =
+  have hL : lowerIncompleteGamma ((m:ℂ)+1+1) z =
       z^(m+2) * ∫ t in (0:ℝ)..1, (t:ℂ)^(m+1) * exp (-z*t) := by
-    rw [lowerIncGamma_eq_regularized hnp, show (m:ℂ)+1+1+1 = 1 + ((m:ℂ)+1+1) by ring,
-      ← (scIncGamma_regularized_pair _ z).2,
-      scIncGamma_integral hre z, show ((m:ℂ)+1+1) = ((m+2 : ℕ) : ℂ) by push_cast;
-                                                                       ring, cpow_natCast,
+    rw [lowerIncompleteGamma_eq_regularized hnp, show (m:ℂ)+1+1+1 = 1 + ((m:ℂ)+1+1) by ring,
+      ← (tricomiIncompleteGamma_regularized_pair _ z).2,
+      tricomiIncompleteGamma_integral hre z,
+      show ((m:ℂ)+1+1) = ((m+2 : ℕ) : ℂ) by push_cast; ring, cpow_natCast,
       show ((m+2 : ℕ) : ℂ) - 1 = ((m+1 : ℕ) : ℂ) by push_cast; ring]
     simp only [cpow_natCast]
     have hG : Gamma ((m+2 : ℕ) : ℂ) ≠ 0 := Gamma_ne_zero (by

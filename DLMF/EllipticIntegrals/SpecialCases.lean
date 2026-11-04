@@ -18,7 +18,7 @@ public import Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics
 # Special cases of Legendre's integrals and of `R_C` (DLMF §19.6)
 
 Statements of DLMF 19.6.1–19.6.15: special values and limits of the complete and incomplete
-Legendre integrals and of `R_C = symEllIntRC` (DLMF 19.2.17, a principal value for `y < 0`).
+Legendre integrals and of `R_C = symmetricEllipticRC` (DLMF 19.2.17, a principal value for `y < 0`).
 
 ## Main definitions
 
@@ -26,21 +26,23 @@ Legendre integrals and of `R_C = symEllIntRC` (DLMF 19.2.17, a principal value f
 
 ## Main results
 
-* `compEllInt_special_pi_div_two`, `compEllInt_special_one`, `tendsto_norm_compEllIntKk_one'`,
-  `tendsto_norm_cCompEllIntKk_zero`: the values and infinities of DLMF 19.6.1.
-* `compEllIntPik_sq_self`, `compEllIntPik_neg_self`: DLMF 19.6.2.
-* `compEllIntPik_special`, `tendsto_compEllIntPik`: DLMF 19.6.3, 19.6.4.
-* `compEllIntPik_of_one_lt`, `compEllIntPik_of_one_lt_special`: principal values for
+* `compEllInt_special_pi_div_two`, `compEllInt_special_one`, `tendsto_norm_completeEllipticK_one'`,
+  `tendsto_norm_complementaryEllipticK_zero`: the values and infinities of DLMF 19.6.1.
+* `completeEllipticPi_sq_self`, `completeEllipticPi_neg_self`: DLMF 19.6.2.
+* `completeEllipticPi_special`, `tendsto_completeEllipticPi`: DLMF 19.6.3, 19.6.4.
+* `completeEllipticPi_of_one_lt`, `completeEllipticPi_of_one_lt_special`: principal values for
   `α² > 1` (DLMF 19.6.5, 19.6.6).
-* `incEllIntFk_special`, `incEllIntFk_limits`: DLMF 19.6.7.
-* `incEllIntFk_one`, `incEllIntFk_one_eq_integral_sec`: `F(φ, 1) = gd⁻¹(φ)` (DLMF 19.6.8).
-* `incEllIntEk_special`, `incEllIntEk_one`, `incEllIntEk_one_complex`,
-  `tendsto_incEllIntEk_div`: DLMF 19.6.9, 19.6.10.
-* `incEllIntPik_special`, `incEllIntPik_one_zero`, `incEllIntPik_special_RC`,
-  `incEllIntPik_special_k`, `incEllIntPik_zero`: DLMF 19.6.11–19.6.13.
-* `incEllIntPik_pi_div_two`, `tendsto_incEllIntPik_div`: DLMF 19.6.14.
-* `symEllIntRC_special`, `tendsto_symEllIntRC_zero`: DLMF 19.6.15, including the homogeneity
-  of the principal value `R_C(x, y)`, `y < 0`, for complex `x ∈ ℂ \ (-∞, 0]`.
+* `incompleteEllipticF_special`, `incompleteEllipticF_limits`: DLMF 19.6.7.
+* `incompleteEllipticF_one`, `incompleteEllipticF_one_eq_integral_sec`: `F(φ, 1) = gd⁻¹(φ)` (DLMF
+  19.6.8).
+* `incompleteEllipticE_special`, `incompleteEllipticE_one`, `incompleteEllipticE_one_complex`,
+  `tendsto_incompleteEllipticE_div`: DLMF 19.6.9, 19.6.10.
+* `incompleteEllipticPi_special`, `incompleteEllipticPi_one_zero`,
+  `incompleteEllipticPi_special_RC`, `incompleteEllipticPi_special_k`, `incompleteEllipticPi_zero`:
+  DLMF 19.6.11–19.6.13.
+* `incompleteEllipticPi_pi_div_two`, `tendsto_incompleteEllipticPi_div`: DLMF 19.6.14.
+* `symmetricEllipticRC_special`, `tendsto_symmetricEllipticRC_zero`: DLMF 19.6.15, including the
+  homogeneity of the principal value `R_C(x, y)`, `y < 0`, for complex `x ∈ ℂ \ (-∞, 0]`.
 * `tendsto_setIntegral_diff_Icc_nhdsGT`: excising a shrinking interval from an integrable
   function does not change the limit of its integral.
 * `integral_inv_ellDelta_cube`: `∫₀^φ Δ⁻³ dθ` in terms of `E(φ, k)`.
@@ -74,15 +76,15 @@ open DLMF.JacobiElliptic
 
 /-! ### §19.6(i) Complete elliptic integrals -/
 
-/-- Identity under the stated parameter and domain assumptions: `jacobiComodulusk 0 = 1`. -/
-private lemma jacobiComodulusk_zero : jacobiComodulusk 0 = 1 := by simp [jacobiComodulusk]
+/-- Identity under the stated parameter and domain assumptions: `jacobiComodulus 0 = 1`. -/
+private lemma jacobiComodulus_zero : jacobiComodulus 0 = 1 := by simp [jacobiComodulus]
 
-/-- Identity under the stated parameter and domain assumptions: `jacobiComodulusk 1 = 0`. -/
-private lemma jacobiComodulusk_one : jacobiComodulusk 1 = 0 := by simp [jacobiComodulusk]
+/-- Identity under the stated parameter and domain assumptions: `jacobiComodulus 1 = 0`. -/
+private lemma jacobiComodulus_one : jacobiComodulus 1 = 0 := by simp [jacobiComodulus]
 
-/-- `segmentIntegral f φ / φ → f 0` as `φ → 0` when `f` is continuous near `0`. -/
-private lemma tendsto_segmentIntegral_div {f : ℂ → ℂ} (hf : ∀ᶠ z in 𝓝 0, ContinuousAt f z) :
-    Tendsto (fun φ => segmentIntegral f φ / φ) (𝓝[≠] 0) (𝓝 (f 0)) := by
+/-- `Core.primitive f φ / φ → f 0` as `φ → 0` when `f` is continuous near `0`. -/
+private lemma tendsto_primitive_div {f : ℂ → ℂ} (hf : ∀ᶠ z in 𝓝 0, ContinuousAt f z) :
+    Tendsto (fun φ => Core.primitive f φ / φ) (𝓝[≠] 0) (𝓝 (f 0)) := by
   rw [Metric.tendsto_nhdsWithin_nhds]
   intro ε hε
   obtain ⟨r, hr, hfr⟩ := Metric.eventually_nhds_iff_ball.1 hf
@@ -105,8 +107,8 @@ private lemma tendsto_segmentIntegral_div {f : ℂ → ℂ} (hf : ∀ᶠ z in �
     exact (ContinuousAt.comp (g := f) (f := fun t : ℝ => (t : ℂ) * φ) h1 h2).continuousWithinAt
   have hint : IntervalIntegrable (fun t : ℝ => f (t * φ)) MeasureTheory.volume 0 1 :=
     (hcont.mono (by rw [uIcc_of_le zero_le_one])).intervalIntegrable
-  have heq : segmentIntegral f φ / φ = ∫ t in (0 : ℝ)..1, f (t * φ) := by
-    rw [segmentIntegral, intervalIntegral.integral_const_mul]
+  have heq : Core.primitive f φ / φ = ∫ t in (0 : ℝ)..1, f (t * φ) := by
+    rw [primitive_eq_integral, intervalIntegral.integral_const_mul]
     field_simp
   rw [heq, dist_eq_norm]
   have h2 : (∫ t in (0 : ℝ)..1, f (t * φ)) - f 0 = ∫ t in (0 : ℝ)..1, (f (t * φ) - f 0) := by
@@ -169,40 +171,42 @@ private lemma re_cos_eq_cos_mul_cosh (z : ℂ) : (Complex.cos z).re = Real.cos z
 /-- DLMF 19.6.1: `K(0) = E(0) = K'(1) = E'(1) = π/2`. -/
 @[dlmf 19.6.E1]
 theorem compEllInt_special_pi_div_two :
-    compEllIntKk 0 = π / 2 ∧ compEllIntEk 0 = π / 2 ∧ cCompEllIntKk 1 = π / 2 ∧
-      cCompEllIntEk 1 = π / 2 := by
-  have hE0 : compEllIntEk 0 = π / 2 := by
-    rw [compEllIntEk_eq_integral]; simp
-  refine ⟨by simp [compEllIntKk], hE0, ?_, ?_⟩
-  · rw [(cCompEllIntKk_of_re_pos (k := 1) (Or.inl (by simp))).1, compEllIntKk_jacobiComodulusk]
-    simp [compEllIntKpk]
-  · rw [(cCompEllIntKk_of_re_pos (k := 1) (Or.inl (by simp))).2, jacobiComodulusk_one, hE0]
+    completeEllipticK 0 = π / 2 ∧ completeEllipticE 0 = π / 2 ∧ complementaryEllipticK 1 = π / 2 ∧
+      complementaryEllipticE 1 = π / 2 := by
+  have hE0 : completeEllipticE 0 = π / 2 := by
+    rw [completeEllipticE_eq_integral]; simp
+  refine ⟨by simp [completeEllipticK], hE0, ?_, ?_⟩
+  · rw [(complementaryEllipticK_of_re_pos (k := 1) (Or.inl (by simp))).1,
+        completeEllipticK_jacobiComodulusk]
+    simp [completeEllipticKPrime]
+  · rw [(complementaryEllipticK_of_re_pos (k := 1) (Or.inl (by simp))).2, jacobiComodulus_one, hE0]
 
 /-- DLMF 19.6.1: `E(1) = E'(0) = 1`. -/
 @[dlmf 19.6.E1]
-theorem compEllInt_special_one : compEllIntEk 1 = 1 ∧ cCompEllIntEk 0 = 1 := by
-  have h1 : compEllIntEk 1 = 1 := by
-    rw [compEllIntEk_eq_ofReal (m := 1) (by simp) le_rfl, DLMF.Elliptic.Real.compEllIntEm_one,
+theorem compEllInt_special_one : completeEllipticE 1 = 1 ∧ complementaryEllipticE 0 = 1 := by
+  have h1 : completeEllipticE 1 = 1 := by
+    rw [completeEllipticE_eq_ofReal (m := 1) (by simp) le_rfl,
+        DLMF.Elliptic.Real.completeEllipticEOfParameter_one,
       ofReal_one]
   refine ⟨h1, ?_⟩
-  rw [(cCompEllIntKk_of_re_pos (k := 0) (Or.inr (by simp))).2, jacobiComodulusk_zero, h1]
+  rw [(complementaryEllipticK_of_re_pos (k := 0) (Or.inr (by simp))).2, jacobiComodulus_zero, h1]
 
 /-- DLMF 19.6.1: `K(1) = ∞`, as `|K(k)| → ∞` for `k → 1-` (from the admitted
-`DLMF.JacobiElliptic.tendsto_norm_compEllIntKk_one`). -/
+`DLMF.JacobiElliptic.tendsto_norm_completeEllipticK_one`). -/
 @[dlmf 19.6.E1]
-theorem tendsto_norm_compEllIntKk_one' :
-    Tendsto (fun k : ℝ => ‖compEllIntKk k‖) (𝓝[<] 1) atTop :=
-  tendsto_norm_compEllIntKk_one
+theorem tendsto_norm_completeEllipticK_one' :
+    Tendsto (fun k : ℝ => ‖completeEllipticK k‖) (𝓝[<] 1) atTop :=
+  tendsto_norm_completeEllipticK_one
 
 /-- DLMF 19.6.1: `K'(0) = ∞`, as `|K'(k)| → ∞` for `k → 0+` (from the admitted
-`DLMF.JacobiElliptic.tendsto_norm_compEllIntKpk_zero`). -/
+`DLMF.JacobiElliptic.tendsto_norm_completeEllipticKPrime_zero`). -/
 @[dlmf 19.6.E1]
-theorem tendsto_norm_cCompEllIntKk_zero :
-    Tendsto (fun k : ℝ => ‖cCompEllIntKk k‖) (𝓝[>] 0) atTop := by
-  refine tendsto_norm_compEllIntKpk_zero.congr' ?_
+theorem tendsto_norm_complementaryEllipticK_zero :
+    Tendsto (fun k : ℝ => ‖complementaryEllipticK k‖) (𝓝[>] 0) atTop := by
+  refine tendsto_norm_completeEllipticKPrime_zero.congr' ?_
   filter_upwards [self_mem_nhdsWithin] with k hk
-  rw [(cCompEllIntKk_of_re_pos (k := k) (Or.inl (by simpa using hk))).1,
-    compEllIntKk_jacobiComodulusk]
+  rw [(complementaryEllipticK_of_re_pos (k := k) (Or.inl (by simpa using hk))).1,
+    completeEllipticK_jacobiComodulusk]
 
 /-- `Δ(θ) = (1 - k² sin²θ)^{1/2}` for real `θ`. -/
 abbrev ellDelta (k : ℂ) (θ : ℝ) : ℂ := (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (1 / 2 : ℂ)
@@ -242,7 +246,7 @@ theorem continuous_ellDelta {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) : Continuou
 theorem integral_inv_ellDelta_cube {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) (φ : ℝ) :
     ∫ θ in (0 : ℝ)..φ, (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2)⁻¹ *
         (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) =
-      (incEllIntEk φ k - k ^ 2 * Real.sin φ * Real.cos φ / ellDelta k φ) / (1 - k ^ 2) := by
+      (incompleteEllipticE φ k - k ^ 2 * Real.sin φ * Real.cos φ / ellDelta k φ) / (1 - k ^ 2) := by
   have hk0 : (1 - k ^ 2) ≠ 0 := slitPlane_ne_zero hk
   set A : ℝ → ℂ := fun θ => ((∫ x in (0 : ℝ)..θ, ellDelta k x) -
     k ^ 2 * ((Real.sin θ : ℂ) * Real.cos θ / ellDelta k θ)) / (1 - k ^ 2) with hA
@@ -275,7 +279,7 @@ theorem integral_inv_ellDelta_cube {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) (φ 
   rw [intervalIntegral.integral_eq_sub_of_hasDerivAt (fun θ _ => hd θ)
     (by rw [hfun]; exact hcont.intervalIntegrable _ _)]
   simp only [hA, intervalIntegral.integral_same, Real.sin_zero, ofReal_zero, zero_mul, zero_div,
-    mul_zero, sub_zero, incEllIntEk_ofReal_eq_integral]
+    mul_zero, sub_zero, incompleteEllipticE_ofReal_eq_integral]
   ring
 
 /-- `∫₀^φ sec²θ Δ⁻¹ dθ = F(φ, k) - (E(φ, k) - Δ(φ) tan φ)/k′²` for real `|φ| < π/2`. -/
@@ -283,7 +287,8 @@ private lemma integral_sec_sq_mul_inv_ellDelta {k : ℂ} (hk : 1 - k ^ 2 ∈ sli
     (hφ : |φ| < π / 2) :
     ∫ θ in (0 : ℝ)..φ, (1 - 1 * (Real.sin θ : ℂ) ^ 2)⁻¹ *
         (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) =
-      incEllIntFk φ k - (incEllIntEk φ k - ellDelta k φ * Real.tan φ) / (1 - k ^ 2) := by
+      incompleteEllipticF φ k - (incompleteEllipticE φ k - ellDelta k φ * Real.tan φ) /
+          (1 - k ^ 2) := by
   have hk0 : (1 - k ^ 2) ≠ 0 := slitPlane_ne_zero hk
   have hsub : ∀ θ ∈ uIcc (0 : ℝ) φ, Real.cos θ ≠ 0 := by
     intro θ hθ
@@ -337,18 +342,18 @@ private lemma integral_sec_sq_mul_inv_ellDelta {k : ℂ} (hk : 1 - k ^ 2 ∈ sli
     exact ContinuousOn.inv₀ (by fun_prop) fun θ hθ => pow_ne_zero 2 (by exact_mod_cast hsub θ hθ)
   rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hd hint]
   simp only [hB, intervalIntegral.integral_same, Real.sin_zero, Real.cos_zero, ofReal_zero,
-    ofReal_one, zero_div, mul_zero, sub_zero, incEllIntEk_ofReal_eq_integral,
-    incEllIntFk_ofReal_eq_integral, one_sub_sq_mul_sin_sq_cpow_neg_half,
+    ofReal_one, zero_div, mul_zero, sub_zero, incompleteEllipticE_ofReal_eq_integral,
+    incompleteEllipticF_ofReal_eq_integral, one_sub_sq_mul_sin_sq_cpow_neg_half,
         Real.tan_eq_sin_div_cos, ofReal_div]
 
 /-- For real `φ`, `Π(φ, α², k)` is the interval integral when `1 - α² sin²θ` is bounded away from
 `0`. -/
-theorem incEllIntPik_ofReal_eq_integral_of_norm_ge {φ : ℝ} {α2 k : ℂ} {δ : ℝ} (hδ : 0 < δ)
+theorem incompleteEllipticPi_ofReal_eq_integral_of_norm_ge {φ : ℝ} {α2 k : ℂ} {δ : ℝ} (hδ : 0 < δ)
     (h : ∀ t ∈ Icc (0 : ℝ) 1, δ ≤ ‖1 - α2 * (Real.sin (t * φ) : ℂ) ^ 2‖) :
-    incEllIntPik φ α2 k = ∫ θ in (0 : ℝ)..φ, (1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹ *
+    incompleteEllipticPi φ α2 k = ∫ θ in (0 : ℝ)..φ, (1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹ *
         (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) := by
-  rw [incEllIntPik_eq_segmentIntegral hδ (fun t ht => by
-    rw [← ofReal_mul, ← ofReal_sin]; exact h t ht), segmentIntegral_ofReal]
+  rw [incompleteEllipticPi_eq_primitive hδ (fun t ht => by
+    rw [← ofReal_mul, ← ofReal_sin]; exact h t ht), primitive_ofReal]
   simp only [← Complex.ofReal_sin]
 
 /-- In the principal domain `1 - k² sin²θ` is bounded away from `0` for real `θ`. -/
@@ -365,25 +370,27 @@ private lemma exists_le_norm_one_sub_sq_mul_sin_sq {k : ℂ} (hk : 1 - k ^ 2 ∈
 /-- DLMF 19.6.2: `Π(k², k) = E(k)/k'²` (DLMF: `k² < 1`; here the principal domain
 `1 - k² ∈ ℂ \ (-∞, 0]`). -/
 @[dlmf 19.6.E2]
-theorem compEllIntPik_sq_self {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) :
-    compEllIntPik (k ^ 2) k = compEllIntEk k / (1 - k ^ 2) := by
+theorem completeEllipticPi_sq_self {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) :
+    completeEllipticPi (k ^ 2) k = completeEllipticE k / (1 - k ^ 2) := by
   obtain ⟨δ, hδ, h⟩ := exists_le_norm_one_sub_sq_mul_sin_sq hk
-  rw [compEllIntPik, show ((π : ℂ) / 2) = ((π / 2 : ℝ) : ℂ) by push_cast; ring,
-    incEllIntPik_ofReal_eq_integral_of_norm_ge hδ (fun t _ => h _),
-        integral_inv_ellDelta_cube hk, compEllIntEk]
+  rw [completeEllipticPi, show ((π : ℂ) / 2) = ((π / 2 : ℝ) : ℂ) by push_cast; ring,
+    incompleteEllipticPi_ofReal_eq_integral_of_norm_ge hδ (fun t _ => h _),
+        integral_inv_ellDelta_cube hk, completeEllipticE]
   simp
 
-/-- Identity under the stated parameter and domain assumptions: `incEllIntPik φ (k ^ 2) k =
-(incEllIntEk φ k - k ^ 2 * Real.sin φ * Real.cos φ / (1 - k ^ 2 * (Real.sin φ : ℂ) ^ 2) ^ (1 /
-2 : ℂ)) / (1 - k ^ 2) ∧ incEllIntPik φ 1 k = incEllIntFk φ k - (incEllIntEk φ k - (1 - k ^ 2 *
-(Real.sin φ : ℂ) ^ 2) ^ (1 / 2 : ℂ) * Real.tan φ) / (1 - k ^ 2)`. -/
-theorem incEllIntPik_special_k' {φ : ℝ} (hφ : |φ| < π / 2) {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) :
-    incEllIntPik φ (k ^ 2) k = (incEllIntEk φ k - k ^ 2 * Real.sin φ * Real.cos φ /
+/-- Identity under the stated parameter and domain assumptions: `incompleteEllipticPi φ (k ^ 2) k =
+(incompleteEllipticE φ k - k ^ 2 * Real.sin φ * Real.cos φ / (1 - k ^ 2 * (Real.sin φ : ℂ) ^ 2) ^ (1
+/ 2 : ℂ)) / (1 - k ^ 2) ∧ incompleteEllipticPi φ 1 k = incompleteEllipticF φ k -
+(incompleteEllipticE φ k - (1 - k ^ 2 * (Real.sin φ : ℂ) ^ 2) ^ (1 / 2 : ℂ) * Real.tan φ) / (1 - k ^
+2)`. -/
+theorem incompleteEllipticPi_special_k' {φ : ℝ} (hφ : |φ| < π / 2) {k : ℂ}
+    (hk : 1 - k ^ 2 ∈ slitPlane) :
+    incompleteEllipticPi φ (k ^ 2) k = (incompleteEllipticE φ k - k ^ 2 * Real.sin φ * Real.cos φ /
         (1 - k ^ 2 * (Real.sin φ : ℂ) ^ 2) ^ (1 / 2 : ℂ)) / (1 - k ^ 2) ∧
-      incEllIntPik φ 1 k = incEllIntFk φ k - (incEllIntEk φ k -
+      incompleteEllipticPi φ 1 k = incompleteEllipticF φ k - (incompleteEllipticE φ k -
         (1 - k ^ 2 * (Real.sin φ : ℂ) ^ 2) ^ (1 / 2 : ℂ) * Real.tan φ) / (1 - k ^ 2) := by
   obtain ⟨δ, hδ, h⟩ := exists_le_norm_one_sub_sq_mul_sin_sq hk
-  refine ⟨by rw [incEllIntPik_ofReal_eq_integral_of_norm_ge hδ (fun t _ => h _),
+  refine ⟨by rw [incompleteEllipticPi_ofReal_eq_integral_of_norm_ge hδ (fun t _ => h _),
                integral_inv_ellDelta_cube hk], ?_⟩
   have hc : 0 < Real.cos φ :=
     Real.cos_pos_of_mem_Ioo ⟨by linarith [neg_abs_le φ], by linarith [le_abs_self φ]⟩
@@ -392,7 +399,7 @@ theorem incEllIntPik_special_k' {φ : ℝ} (hφ : |φ| < π / 2) {k : ℂ} (hk :
     rw [← Real.cos_abs (t * φ), ← Real.cos_abs φ]
     refine Real.cos_le_cos_of_nonneg_of_le_pi (abs_nonneg _) (by linarith [Real.pi_pos]) ?_
     rw [abs_mul, abs_of_nonneg ht.1]; exact mul_le_of_le_one_left (abs_nonneg _) ht.2
-  rw [incEllIntPik_ofReal_eq_integral_of_norm_ge (δ := Real.cos φ ^ 2) (by positivity),
+  rw [incompleteEllipticPi_ofReal_eq_integral_of_norm_ge (δ := Real.cos φ ^ 2) (by positivity),
       integral_sec_sq_mul_inv_ellDelta hk hφ]
   intro t ht
   have : (1 - 1 * (Real.sin (t * φ) : ℂ) ^ 2) = ((Real.cos (t * φ) ^ 2 : ℝ) : ℂ) := by
@@ -481,8 +488,8 @@ private lemma integral_neg_self_aux {k : ℝ} (hk : k ^ 2 < 1) :
 
 /-- DLMF 19.6.2: `Π(-k, k) = π/(4(1 + k)) + K(k)/2` for real `k` with `k² < 1`. -/
 @[dlmf 19.6.E2]
-theorem compEllIntPik_neg_self {k : ℝ} (hk : k ^ 2 < 1) :
-    compEllIntPik (-k) k = π / (4 * (1 + k)) + compEllIntKk k / 2 := by
+theorem completeEllipticPi_neg_self {k : ℝ} (hk : k ^ 2 < 1) :
+    completeEllipticPi (-k) k = π / (4 * (1 + k)) + completeEllipticK k / 2 := by
   have hk1 : -k < 1 := by nlinarith
   have hD : ∀ θ : ℝ, 0 < 1 - k ^ 2 * Real.sin θ ^ 2 := fun θ => by
     nlinarith [Real.sin_sq_le_one θ, sq_nonneg (Real.sin θ)]
@@ -492,13 +499,14 @@ theorem compEllIntPik_neg_self {k : ℝ} (hk : k ^ 2 < 1) :
       ((1 + k * Real.sin θ ^ 2) * √(1 - k ^ 2 * Real.sin θ ^ 2)) := by
     exact Continuous.div (by fun_prop) (by fun_prop) fun θ =>
       mul_ne_zero (one_add_mul_sin_sq_pos hk θ).ne' (Real.sqrt_pos.mpr (hD θ)).ne'
-  rw [compEllIntPik, show (π : ℂ) / 2 = ((π / 2 : ℝ) : ℂ) by push_cast; ring, ← ofReal_neg,
-    incEllIntPik_eq_ofReal (m := k ^ 2) (by push_cast; rfl) hk.le hk1, compEllIntKk_ofReal hk]
-  have e : DLMF.Elliptic.Real.incEllIntPim (π / 2) (-k) (k ^ 2) =
+  rw [completeEllipticPi, show (π : ℂ) / 2 = ((π / 2 : ℝ) : ℂ) by push_cast; ring, ← ofReal_neg,
+    incompleteEllipticPi_eq_ofReal (m := k ^ 2) (by push_cast; rfl) hk.le hk1,
+        completeEllipticK_ofReal hk]
+  have e : DLMF.Elliptic.Real.incompleteEllipticPiOfParameter (π / 2) (-k) (k ^ 2) =
       ∫ θ in (0 : ℝ)..(π / 2), ((1 / 2) * (1 - k ^ 2 * Real.sin θ ^ 2) ^ (-(1 / 2) : ℝ) +
         (1 / 2) * ((1 - k * Real.sin θ ^ 2) /
           ((1 + k * Real.sin θ ^ 2) * √(1 - k ^ 2 * Real.sin θ ^ 2)))) := by
-    rw [DLMF.Elliptic.Real.incEllIntPim]
+    rw [DLMF.Elliptic.Real.incompleteEllipticPiOfParameter]
     refine intervalIntegral.integral_congr fun θ _ => ?_
     simp only [DLMF.Elliptic.piIntegrand]
     rw [Real.rpow_neg (hD θ).le, ← Real.sqrt_eq_rpow]
@@ -510,7 +518,7 @@ theorem compEllIntPik_neg_self {k : ℝ} (hk : k ^ 2 < 1) :
   rw [e, intervalIntegral.integral_add ((hc1.const_mul _).intervalIntegrable _ _)
     ((hc2.const_mul _).intervalIntegrable _ _), intervalIntegral.integral_const_mul,
     intervalIntegral.integral_const_mul, integral_neg_self_aux hk,
-    ← DLMF.Elliptic.Real.compEllIntKm]
+    ← DLMF.Elliptic.Real.completeEllipticKOfParameter]
   have h1k : (1 + (k : ℂ)) ≠ 0 := by
     rw [← ofReal_one, ← ofReal_add]; exact ofReal_ne_zero.mpr (by nlinarith)
   push_cast
@@ -519,35 +527,39 @@ theorem compEllIntPik_neg_self {k : ℝ} (hk : k ^ 2 < 1) :
 
 /-- DLMF 19.6.13 (first relation): `Π(φ, 0, k) = F(φ, k)` for all complex `φ`, `k`. -/
 @[dlmf 19.6.E13]
-theorem incEllIntPik_zero (φ k : ℂ) : incEllIntPik φ 0 k = incEllIntFk φ k := by
-  rw [incEllIntPik_eq_segmentIntegral (δ := 1) one_pos (fun t _ => by simp), incEllIntFk]
+theorem incompleteEllipticPi_zero (φ k : ℂ) : incompleteEllipticPi φ 0 k =
+    incompleteEllipticF φ k := by
+  rw [incompleteEllipticPi_eq_primitive (δ := 1) one_pos (fun t _ => by simp),
+      incompleteEllipticF]
   simp
 
 /-- DLMF 19.6.3: `Π(α², 0) = π/(2√(1 - α²))` for real `α² < 1`, and `Π(0, k) = K(k)`. -/
 @[dlmf 19.6.E3]
-theorem compEllIntPik_special {α2 : ℝ} (hα : α2 < 1) (k : ℂ) :
-    compEllIntPik α2 0 = π / (2 * Real.sqrt (1 - α2)) ∧ compEllIntPik 0 k = compEllIntKk k := by
+theorem completeEllipticPi_special {α2 : ℝ} (hα : α2 < 1) (k : ℂ) :
+    completeEllipticPi α2 0 = π / (2 * Real.sqrt (1 - α2)) ∧ completeEllipticPi 0 k =
+        completeEllipticK k := by
   constructor
-  · rw [compEllIntPik, show ((π : ℂ) / 2) = ((π / 2 : ℝ) : ℂ) by push_cast; ring,
-      incEllIntPik_eq_ofReal (m := 0) (by simp) zero_le_one hα,
-      ← DLMF.Elliptic.Real.compEllIntPim, DLMF.Elliptic.Real.compEllIntPim_param_zero hα]
+  · rw [completeEllipticPi, show ((π : ℂ) / 2) = ((π / 2 : ℝ) : ℂ) by push_cast; ring,
+      incompleteEllipticPi_eq_ofReal (m := 0) (by simp) zero_le_one hα,
+      ← DLMF.Elliptic.Real.completeEllipticPiOfParameter,
+          DLMF.Elliptic.Real.completeEllipticPiOfParameter_param_zero hα]
     push_cast; ring
-  · rw [compEllIntPik, incEllIntPik_zero, compEllIntKk_eq_incEllIntFk]
+  · rw [completeEllipticPi, incompleteEllipticPi_zero, completeEllipticK_eq_incompleteEllipticF]
 
 /-- On real characteristics below one and real modulus with `k²<1`, the real part
 of the complex complete integral is the real integral in parameter `k²`. -/
-private lemma compEllIntPik_re_ofReal {n k : ℝ} (hn : n < 1) (hk : k ^ 2 < 1) :
-    (compEllIntPik n k).re = DLMF.Elliptic.Real.compEllIntPim n (k ^ 2) := by
-  rw [compEllIntPik, show (π : ℂ) / 2 = ((π / 2 : ℝ) : ℂ) by push_cast; ring,
-    incEllIntPik_eq_ofReal (m:=k ^ 2) (by push_cast; rfl) hk.le hn, ofReal_re]
+private lemma completeEllipticPi_re_ofReal {n k : ℝ} (hn : n < 1) (hk : k ^ 2 < 1) :
+    (completeEllipticPi n k).re = DLMF.Elliptic.Real.completeEllipticPiOfParameter n (k ^ 2) := by
+  rw [completeEllipticPi, show (π : ℂ) / 2 = ((π / 2 : ℝ) : ℂ) by push_cast; ring,
+    incompleteEllipticPi_eq_ofReal (m:=k ^ 2) (by push_cast; rfl) hk.le hn, ofReal_re]
   rfl
 
 /-- DLMF 19.6.4: for real `k` with `k² < 1`, `Π(α², k) → +∞` as `α² → 1-`; for real
 `α² < 1`, `Π(α², k) → +∞` as `k² → 1-` (`∞ · sign(1 - α²)`; the case `α² > 1` is in 19.6.6). -/
 @[dlmf 19.6.E4]
-theorem tendsto_compEllIntPik {k α2 : ℝ} (hk : k ^ 2 < 1) (hα : α2 < 1) :
-    Tendsto (fun a : ℝ => (compEllIntPik a k).re) (𝓝[<] 1) atTop ∧
-      Tendsto (fun k : ℝ => (compEllIntPik α2 k).re) (𝓝[<] 1) atTop := by
+theorem tendsto_completeEllipticPi {k α2 : ℝ} (hk : k ^ 2 < 1) (hα : α2 < 1) :
+    Tendsto (fun a : ℝ => (completeEllipticPi a k).re) (𝓝[<] 1) atTop ∧
+      Tendsto (fun k : ℝ => (completeEllipticPi α2 k).re) (𝓝[<] 1) atTop := by
   constructor
   · have hs : Tendsto (fun a : ℝ => 1 - a) (𝓝[<] 1) (𝓝[>] 0) := by
       refine tendsto_nhdsWithin_iff.mpr ⟨?_, ?_⟩
@@ -561,9 +573,9 @@ theorem tendsto_compEllIntPik {k α2 : ℝ} (hk : k ^ 2 < 1) (hα : α2 < 1) :
     have hlim := hpow.const_mul_atTop (by positivity : (0 : ℝ) < π / 2)
     refine tendsto_atTop_mono' _ ?_ hlim
     filter_upwards [self_mem_nhdsWithin] with a (ha : a < 1)
-    rw [compEllIntPik_re_ofReal ha hk]
-    have hb := DLMF.Elliptic.Real.compEllIntPim_param_zero_le ha (sq_nonneg k) hk
-    rw [DLMF.Elliptic.Real.compEllIntPim_param_zero ha] at hb
+    rw [completeEllipticPi_re_ofReal ha hk]
+    have hb := DLMF.Elliptic.Real.completeEllipticPiOfParameter_param_zero_le ha (sq_nonneg k) hk
+    rw [DLMF.Elliptic.Real.completeEllipticPiOfParameter_param_zero ha] at hb
     convert hb using 1
     dsimp only [Function.comp_def]
     rw [show (-1 / 2 : ℝ)=-(1 / 2) by norm_num, Real.rpow_neg (by linarith : 0 ≤ 1 - a),
@@ -571,47 +583,50 @@ theorem tendsto_compEllIntPik {k α2 : ℝ} (hk : k ^ 2 < 1) (hα : α2 < 1) :
     ring
   · let c : ℝ := min 1 ((1 - α2)⁻¹)
     have hc : 0 < c := lt_min zero_lt_one (inv_pos.mpr (sub_pos.mpr hα))
-    have hlim := tendsto_norm_compEllIntKk_one.const_mul_atTop hc
+    have hlim := tendsto_norm_completeEllipticK_one.const_mul_atTop hc
     refine tendsto_atTop_mono' _ ?_ hlim
     filter_upwards [Ioo_mem_nhdsLT (show (0 : ℝ) < 1 by norm_num)] with r hr
     have hr2 : r ^ 2 < 1 := by nlinarith [hr.1, hr.2]
-    rw [compEllIntPik_re_ofReal hα hr2, compEllIntKk_ofReal hr2, Complex.norm_real,
-      Real.norm_of_nonneg (DLMF.Elliptic.Real.compEllIntKm_pos hr2).le]
-    exact DLMF.Elliptic.Real.compEllIntPim_ge_min_mul_compEllIntKm hα hr2
+    rw [completeEllipticPi_re_ofReal hα hr2, completeEllipticK_ofReal hr2, Complex.norm_real,
+      Real.norm_of_nonneg (DLMF.Elliptic.Real.completeEllipticKOfParameter_pos hr2).le]
+    exact DLMF.Elliptic.Real.completeEllipticPiOfParameter_ge_min_mul_completeEllipticKOfParameter
+        hα hr2
 
 /-- **Admitted.** DLMF 19.6.5: for real `1 < α²` and real `k` with `k² < 1`, the Cauchy principal
 value satisfies `Π(α², k) = K(k) - Π(k²/α², k)`. -/
 @[dlmf 19.6.E5]
-theorem compEllIntPik_of_one_lt {α2 k : ℝ} (hα : 1 < α2) (hk : k ^ 2 < 1) :
-    compEllIntPik α2 k = compEllIntKk k - compEllIntPik (k ^ 2 / α2 : ℝ) k := by
+theorem completeEllipticPi_of_one_lt {α2 k : ℝ} (hα : 1 < α2) (hk : k ^ 2 < 1) :
+    completeEllipticPi α2 k = completeEllipticK k - completeEllipticPi (k ^ 2 / α2 : ℝ) k := by
   sorry
 
 /-- **Admitted.** DLMF 19.6.6: for real `1 < α²` (Cauchy principal values), `Π(α², 0) = 0`;
 for real `k` with `k² < 1`, `Π(α², k) → K(k) - E(k)/k'²` as `α² → 1+`; and for `1 < α²`,
 `Π(α², k) → -∞` as `k² → 1-`. -/
 @[dlmf 19.6.E6]
-theorem compEllIntPik_of_one_lt_special {α2 k : ℝ} (hα : 1 < α2) (hk : k ^ 2 < 1) :
-    compEllIntPik α2 0 = 0 ∧
-      Tendsto (fun a : ℝ => compEllIntPik a k) (𝓝[>] 1)
-        (𝓝 (compEllIntKk k - compEllIntEk k / (1 - k ^ 2))) ∧
-      Tendsto (fun k : ℝ => (compEllIntPik α2 k).re) (𝓝[<] 1) atBot := by
+theorem completeEllipticPi_of_one_lt_special {α2 k : ℝ} (hα : 1 < α2) (hk : k ^ 2 < 1) :
+    completeEllipticPi α2 0 = 0 ∧
+      Tendsto (fun a : ℝ => completeEllipticPi a k) (𝓝[>] 1)
+        (𝓝 (completeEllipticK k - completeEllipticE k / (1 - k ^ 2))) ∧
+      Tendsto (fun k : ℝ => (completeEllipticPi α2 k).re) (𝓝[<] 1) atBot := by
   sorry
 
 /-! ### §19.6(ii) `F(φ, k)` -/
 
 /-- DLMF 19.6.7: `F(0, k) = 0`, `F(φ, 0) = φ` and `F(π/2, k) = K(k)` for all complex `φ`, `k`. -/
 @[dlmf 19.6.E7]
-theorem incEllIntFk_special (φ k : ℂ) :
-    incEllIntFk 0 k = 0 ∧ incEllIntFk φ 0 = φ ∧ incEllIntFk (π / 2) k = compEllIntKk k := by
-  refine ⟨by simp [incEllIntFk, segmentIntegral], by simp [incEllIntFk,
-    segmentIntegral], (compEllIntKk_eq_incEllIntFk k).symm⟩
+theorem incompleteEllipticF_special (φ k : ℂ) :
+    incompleteEllipticF 0 k = 0 ∧ incompleteEllipticF φ 0 = φ ∧ incompleteEllipticF (π / 2) k =
+        completeEllipticK k := by
+  refine ⟨by simp [incompleteEllipticF, primitive_eq_integral], by simp [incompleteEllipticF,
+    primitive_eq_integral], (completeEllipticK_eq_incompleteEllipticF k).symm⟩
 
 /-- For real `|φ| < π/2`, `F(φ, 1) = ∫₀^φ sec θ dθ = gd⁻¹(φ)` (DLMF 19.6.8, second equality, with
 DLMF's definition 4.23.41 of `gd⁻¹`). -/
 @[dlmf 19.6.E8]
-theorem incEllIntFk_one_eq_integral_sec {φ : ℝ} (hφ : |φ| < π / 2) :
-    incEllIntFk φ 1 = ((∫ θ in (0 : ℝ)..φ, (Real.cos θ)⁻¹ : ℝ) : ℂ) := by
-  rw [incEllIntFk_eq_ofReal (m := 1) (by simp) le_rfl, DLMF.Elliptic.Real.incEllIntFm]
+theorem incompleteEllipticF_one_eq_integral_sec {φ : ℝ} (hφ : |φ| < π / 2) :
+    incompleteEllipticF φ 1 = ((∫ θ in (0 : ℝ)..φ, (Real.cos θ)⁻¹ : ℝ) : ℂ) := by
+  rw [incompleteEllipticF_eq_ofReal (m := 1) (by simp) le_rfl,
+      DLMF.Elliptic.Real.incompleteEllipticFOfParameter]
   congr 1
   refine intervalIntegral.integral_congr fun θ hθ => ?_
   have hθ' : |θ| < π / 2 := by
@@ -628,11 +643,11 @@ theorem incEllIntFk_one_eq_integral_sec {φ : ℝ} (hφ : |φ| < π / 2) :
 /-- DLMF 19.6.8: `F(φ, 1) = (sin φ) R_C(1, cos²φ) = gd⁻¹(φ) = arsinh(tan φ)` for
 real `|φ| < π/2`. -/
 @[dlmf 19.6.E8]
-theorem incEllIntFk_one {φ : ℝ} (hφ : |φ| < π / 2) :
-    incEllIntFk φ 1 = Real.sin φ * symEllIntRC 1 ((Real.cos φ : ℂ) ^ 2) ∧
-      incEllIntFk φ 1 = (Real.arsinh (Real.tan φ) : ℂ) := by
-  have h2 : incEllIntFk φ 1 = (Real.arsinh (Real.tan φ) : ℂ) := by
-    rw [incEllIntFk_one_eq_integral_sec hφ, integral_inv_cos_eq_arsinh_tan hφ]
+theorem incompleteEllipticF_one {φ : ℝ} (hφ : |φ| < π / 2) :
+    incompleteEllipticF φ 1 = Real.sin φ * symmetricEllipticRC 1 ((Real.cos φ : ℂ) ^ 2) ∧
+      incompleteEllipticF φ 1 = (Real.arsinh (Real.tan φ) : ℂ) := by
+  have h2 : incompleteEllipticF φ 1 = (Real.arsinh (Real.tan φ) : ℂ) := by
+    rw [incompleteEllipticF_one_eq_integral_sec hφ, integral_inv_cos_eq_arsinh_tan hφ]
   refine ⟨?_, h2⟩
   have hc := cos_pos_of_abs_lt_pi_div_two hφ
   set c := Real.cos φ
@@ -650,7 +665,7 @@ theorem incEllIntFk_one {φ : ℝ} (hφ : |φ| < π / 2) :
   have e3 : ((c ^ 2 : ℝ) : ℂ) ^ (-1 / 2 : ℂ) = ((c⁻¹ : ℝ) : ℂ) := by
     rw [show (-1 / 2 : ℂ) = ((-(1 / 2) : ℝ) : ℂ) by push_cast; ring, ← ofReal_cpow hl.le,
       Real.rpow_neg hl.le, ← Real.sqrt_eq_rpow, Real.sqrt_sq hc.le]
-  rw [symEllIntRC_eq_carlsonRC one_mem_slitPlane (by
+  rw [symmetricEllipticRC_eq_carlsonRC one_mem_slitPlane (by
       rw [← ofReal_pow]; exact ofReal_mem_slitPlane.2 hl), hRC, e3, h2,
     Carlson.TwoVariable.arsinh_eq_mul_carlsonRC (Real.tan φ), Real.tan_eq_sin_div_cos]
   push_cast
@@ -660,9 +675,9 @@ theorem incEllIntFk_one {φ : ℝ} (hφ : |φ| < π / 2) :
 /-- DLMF 19.6.7: `F(π/2, 1) = ∞`, as `|F(φ, 1)| → ∞` for real `φ → π/2-`; and
 `lim_{φ→0} F(φ, k)/φ = 1`. -/
 @[dlmf 19.6.E7]
-theorem incEllIntFk_limits (k : ℂ) :
-    Tendsto (fun φ : ℝ => ‖incEllIntFk φ 1‖) (𝓝[<] (π / 2)) atTop ∧
-      Tendsto (fun φ : ℂ => incEllIntFk φ k / φ) (𝓝[≠] 0) (𝓝 1) := by
+theorem incompleteEllipticF_limits (k : ℂ) :
+    Tendsto (fun φ : ℝ => ‖incompleteEllipticF φ 1‖) (𝓝[<] (π / 2)) atTop ∧
+      Tendsto (fun φ : ℂ => incompleteEllipticF φ k / φ) (𝓝[≠] 0) (𝓝 1) := by
   refine ⟨?_, ?_⟩
   · have hA : Tendsto (fun φ : ℝ => Real.arsinh (Real.tan φ)) (𝓝[<] (π / 2)) atTop := by
       have hB : Tendsto Real.arsinh atTop atTop := by
@@ -673,26 +688,30 @@ theorem incEllIntFk_limits (k : ℂ) :
     have hmem : Ioo (0 : ℝ) (π / 2) ∈ 𝓝[<] (π / 2) := Ioo_mem_nhdsLT (by positivity)
     filter_upwards [hmem] with φ hφ
     have habs : |φ| < π / 2 := by rw [abs_of_pos hφ.1]; exact hφ.2
-    rw [(incEllIntFk_one habs).2, Complex.norm_real, Real.norm_eq_abs]
+    rw [(incompleteEllipticF_one habs).2, Complex.norm_real, Real.norm_eq_abs]
     exact le_abs_self _
-  · have := tendsto_segmentIntegral_div
+  · have := tendsto_primitive_div
       (eventually_continuousAt_one_sub_mul_sin_sq_cpow (k ^ 2) (-(1 / 2)))
-    simpa [incEllIntFk] using this
+    simpa [incompleteEllipticF] using this
 
 /-! ### §19.6(iii) `E(φ, k)` -/
 
 /-- DLMF 19.6.9: `E(0, k) = 0`, `E(φ, 0) = φ`, `E(π/2, k) = E(k)` for all complex `φ`, `k`. -/
 @[dlmf 19.6.E9]
-theorem incEllIntEk_special (φ k : ℂ) :
-    incEllIntEk 0 k = 0 ∧ incEllIntEk φ 0 = φ ∧ incEllIntEk (π / 2) k = compEllIntEk k :=
-  ⟨by simp [incEllIntEk, segmentIntegral], by simp [incEllIntEk, segmentIntegral], rfl⟩
+theorem incompleteEllipticE_special (φ k : ℂ) :
+    incompleteEllipticE 0 k = 0 ∧ incompleteEllipticE φ 0 = φ ∧ incompleteEllipticE (π / 2) k =
+        completeEllipticE k :=
+  ⟨by simp [incompleteEllipticE, primitive_eq_integral], by
+        simp [incompleteEllipticE, primitive_eq_integral], rfl⟩
 
 /-- DLMF 19.6.9: `E(φ, 1) = sin φ` for real `|φ| ≤ π/2` (for larger real `φ`, `E(φ, 1)` is
 `∫₀^φ |cos θ| dθ ≠ sin φ`: the printed identity holds on DLMF's principal range); in particular
 `E(π/2, 1) = 1`. -/
 @[dlmf 19.6.E9]
-theorem incEllIntEk_one {φ : ℝ} (hφ : |φ| ≤ π / 2) : incEllIntEk φ 1 = Real.sin φ := by
-  rw [incEllIntEk_eq_ofReal (m := 1) (by simp) le_rfl, DLMF.Elliptic.Real.incEllIntEm]
+theorem incompleteEllipticE_one {φ : ℝ} (hφ : |φ| ≤ π / 2) : incompleteEllipticE φ 1 =
+    Real.sin φ := by
+  rw [incompleteEllipticE_eq_ofReal (m := 1) (by simp) le_rfl,
+      DLMF.Elliptic.Real.incompleteEllipticEOfParameter]
   have h : ∀ θ ∈ uIcc (0 : ℝ) φ, (1 - 1 * Real.sin θ ^ 2) ^ (1 / 2 : ℝ) = Real.cos θ := by
     intro θ hθ
     have hθ' : |θ| ≤ π / 2 := by
@@ -708,15 +727,15 @@ theorem incEllIntEk_one {φ : ℝ} (hφ : |φ| ≤ π / 2) : incEllIntEk φ 1 = 
 
 /-- DLMF 19.6.9: `E(π/2, 1) = 1`. -/
 @[dlmf 19.6.E9]
-theorem incEllIntEk_pi_div_two_one : incEllIntEk (π / 2) 1 = 1 := by
-  have h := incEllIntEk_one (φ := π / 2) (by rw [abs_of_pos (by positivity)])
+theorem incompleteEllipticE_pi_div_two_one : incompleteEllipticE (π / 2) 1 = 1 := by
+  have h := incompleteEllipticE_one (φ := π / 2) (by rw [abs_of_pos (by positivity)])
   rw [show ((π : ℂ) / 2) = ((π / 2 : ℝ) : ℂ) by push_cast; ring, h, Real.sin_pi_div_two,
     ofReal_one]
 
 /-- DLMF 19.6.9 for complex amplitude: `E(φ, 1) = sin φ` when `|Re φ| < π/2`. -/
 @[dlmf 19.6.E9]
-theorem incEllIntEk_one_complex {φ : ℂ} (hφ : |φ.re| < π / 2) :
-    incEllIntEk φ 1 = Complex.sin φ := by
+theorem incompleteEllipticE_one_complex {φ : ℂ} (hφ : |φ.re| < π / 2) :
+    incompleteEllipticE φ 1 = Complex.sin φ := by
   have hpt : ∀ t ∈ uIcc (0 : ℝ) 1,
       φ * (1 - (1 : ℂ) ^ 2 * Complex.sin (t * φ) ^ 2) ^ (1 / 2 : ℂ) = Complex.cos (t * φ) * φ := by
     intro t ht
@@ -731,7 +750,7 @@ theorem incEllIntEk_one_complex {φ : ℂ} (hφ : |φ.re| < π / 2) :
       constructor <;> linarith [neg_abs_le (t * φ.re), le_abs_self (t * φ.re)]
     rw [one_pow, one_mul, ← Complex.cos_sq', show (1 / 2 : ℂ) = 2⁻¹ by norm_num,
       sq_cpow_two_inv hre, mul_comm]
-  rw [incEllIntEk, segmentIntegral, intervalIntegral.integral_congr hpt]
+  rw [incompleteEllipticE, primitive_eq_integral, intervalIntegral.integral_congr hpt]
   have hd : ∀ t ∈ uIcc (0 : ℝ) 1,
       HasDerivAt (fun s : ℝ => Complex.sin (s * φ)) (Complex.cos (t * φ) * φ) t := by
     intro t _
@@ -744,24 +763,25 @@ theorem incEllIntEk_one_complex {φ : ℂ} (hφ : |φ.re| < π / 2) :
 
 /-- DLMF 19.6.10: `lim_{φ→0} E(φ, k)/φ = 1`. -/
 @[dlmf 19.6.E10]
-theorem tendsto_incEllIntEk_div (k : ℂ) :
-    Tendsto (fun φ : ℂ => incEllIntEk φ k / φ) (𝓝[≠] 0) (𝓝 1) := by
-  have := tendsto_segmentIntegral_div
+theorem tendsto_incompleteEllipticE_div (k : ℂ) :
+    Tendsto (fun φ : ℂ => incompleteEllipticE φ k / φ) (𝓝[≠] 0) (𝓝 1) := by
+  have := tendsto_primitive_div
       (eventually_continuousAt_one_sub_mul_sin_sq_cpow (k ^ 2) (1/2))
-  simpa [incEllIntEk] using this
+  simpa [incompleteEllipticE] using this
 
 /-! ### §19.6(iv) `Π(φ, α², k)` -/
 
 /-- DLMF 19.6.11: `Π(0, α², k) = 0` and `Π(φ, 0, 0) = φ` for all complex `φ`, `α²`, `k`. -/
 @[dlmf 19.6.E11]
-theorem incEllIntPik_special (φ α2 k : ℂ) : incEllIntPik 0 α2 k = 0 ∧ incEllIntPik φ 0 0 = φ := by
-  refine ⟨pvSegmentIntegral_zero _ _, ?_⟩
-  rw [incEllIntPik_zero, (incEllIntFk_special φ 0).2.1]
+theorem incompleteEllipticPi_special (φ α2 k : ℂ) : incompleteEllipticPi 0 α2 k = 0 ∧
+    incompleteEllipticPi φ 0 0 = φ := by
+  refine ⟨principalValueSegmentIntegral_zero _ _, ?_⟩
+  rw [incompleteEllipticPi_zero, (incompleteEllipticF_special φ 0).2.1]
 
 /-- DLMF 19.6.11: `Π(φ, 1, 0) = tan φ` for real `|φ| < π/2`. -/
 @[dlmf 19.6.E11]
-theorem incEllIntPik_one_zero {φ : ℝ} (hφ : |φ| < π / 2) :
-    incEllIntPik φ 1 0 = Real.tan φ := by
+theorem incompleteEllipticPi_one_zero {φ : ℝ} (hφ : |φ| < π / 2) :
+    incompleteEllipticPi φ 1 0 = Real.tan φ := by
   have hc : 0 < Real.cos φ :=
     Real.cos_pos_of_mem_Ioo ⟨by linarith [neg_abs_le φ], by linarith [le_abs_self φ]⟩
   have hsub : ∀ θ ∈ uIcc (0 : ℝ) φ, |θ| ≤ |φ| := by
@@ -776,8 +796,8 @@ theorem incEllIntPik_one_zero {φ : ℝ} (hφ : |φ| < π / 2) :
     rw [← Real.cos_abs θ, ← Real.cos_abs φ]
     exact Real.cos_le_cos_of_nonneg_of_le_pi (abs_nonneg _) (by linarith [Real.pi_pos])
       (hsub θ hθ)
-  rw [incEllIntPik_eq_segmentIntegral (δ := Real.cos φ ^ 2) (by positivity)]
-  · rw [segmentIntegral_ofReal]
+  rw [incompleteEllipticPi_eq_primitive (δ := Real.cos φ ^ 2) (by positivity)]
+  · rw [primitive_ofReal]
     have hpt : ∀ θ ∈ uIcc (0 : ℝ) φ, (1 - (1 : ℂ) * Complex.sin (θ : ℂ) ^ 2)⁻¹ *
         (1 - (0 : ℂ) ^ 2 * Complex.sin (θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) =
           ((1 / Real.cos θ ^ 2 : ℝ) : ℂ) := by
@@ -812,14 +832,16 @@ theorem incEllIntPik_one_zero {φ : ℝ} (hφ : |φ| < π / 2) :
 `Π(φ, α², 1) = (R_C(c, c - 1) - α² R_C(c, c - α²))/(1 - α²)` (`α² ≠ 1`), and
 `Π(φ, 1, 1) = (R_C(c, c - 1) + √c/(c - 1))/2`. -/
 @[dlmf 19.6.E12]
-theorem incEllIntPik_special_RC {φ α2 : ℝ} (h0 : 0 < φ) (h1 : φ < π / 2)
+theorem incompleteEllipticPi_special_RC {φ α2 : ℝ} (h0 : 0 < φ) (h1 : φ < π / 2)
     (hα : α2 ≠ 1 / Real.sin φ ^ 2) :
-    incEllIntPik φ α2 0 =
-        symEllIntRC (1 / Real.sin φ ^ 2 - 1 : ℝ) (1 / Real.sin φ ^ 2 - α2 : ℝ) ∧
-      (α2 ≠ 1 → incEllIntPik φ α2 1 =
-        (symEllIntRC (1 / Real.sin φ ^ 2 : ℝ) (1 / Real.sin φ ^ 2 - 1 : ℝ) -
-          α2 * symEllIntRC (1 / Real.sin φ ^ 2 : ℝ) (1 / Real.sin φ ^ 2 - α2 : ℝ)) / (1 - α2)) ∧
-      incEllIntPik φ 1 1 = (symEllIntRC (1 / Real.sin φ ^ 2 : ℝ) (1 / Real.sin φ ^ 2 - 1 : ℝ) +
+    incompleteEllipticPi φ α2 0 =
+        symmetricEllipticRC (1 / Real.sin φ ^ 2 - 1 : ℝ) (1 / Real.sin φ ^ 2 - α2 : ℝ) ∧
+      (α2 ≠ 1 → incompleteEllipticPi φ α2 1 =
+        (symmetricEllipticRC (1 / Real.sin φ ^ 2 : ℝ) (1 / Real.sin φ ^ 2 - 1 : ℝ) -
+          α2 * symmetricEllipticRC (1 / Real.sin φ ^ 2 : ℝ)
+              (1 / Real.sin φ ^ 2 - α2 : ℝ)) / (1 - α2)) ∧
+      incompleteEllipticPi φ 1 1 =
+          (symmetricEllipticRC (1 / Real.sin φ ^ 2 : ℝ) (1 / Real.sin φ ^ 2 - 1 : ℝ) +
         (Real.sqrt (1 / Real.sin φ ^ 2) / (1 / Real.sin φ ^ 2 - 1) : ℝ)) / 2 := by
   sorry
 
@@ -828,13 +850,14 @@ principal domain `1 - k² ∈ ℂ \ (-∞, 0]`,
 `Π(φ, k², k) = (E(φ, k) - k² sin φ cos φ/Δ)/k'²` and
 `Π(φ, 1, k) = F(φ, k) - (E(φ, k) - Δ tan φ)/k'²`. -/
 @[dlmf 19.6.E13]
-theorem incEllIntPik_special_k {φ : ℝ} (hφ : |φ| < π / 2) {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) :
-    incEllIntPik φ (k ^ 2) k = (incEllIntEk φ k - k ^ 2 * Real.sin φ * Real.cos φ /
+theorem incompleteEllipticPi_special_k {φ : ℝ} (hφ : |φ| < π / 2) {k : ℂ}
+    (hk : 1 - k ^ 2 ∈ slitPlane) :
+    incompleteEllipticPi φ (k ^ 2) k = (incompleteEllipticE φ k - k ^ 2 * Real.sin φ * Real.cos φ /
         (1 - k ^ 2 * (Real.sin φ : ℂ) ^ 2) ^ (1 / 2 : ℂ)) / (1 - k ^ 2) ∧
-      incEllIntPik φ 1 k = incEllIntFk φ k - (incEllIntEk φ k -
+      incompleteEllipticPi φ 1 k = incompleteEllipticF φ k - (incompleteEllipticE φ k -
         (1 - k ^ 2 * (Real.sin φ : ℂ) ^ 2) ^ (1 / 2 : ℂ) * Real.tan φ) / (1 - k ^ 2) := by
   obtain ⟨δ, hδ, h⟩ := exists_le_norm_one_sub_sq_mul_sin_sq hk
-  refine ⟨by rw [incEllIntPik_ofReal_eq_integral_of_norm_ge hδ (fun t _ => h _),
+  refine ⟨by rw [incompleteEllipticPi_ofReal_eq_integral_of_norm_ge hδ (fun t _ => h _),
                integral_inv_ellDelta_cube hk], ?_⟩
   have hc : 0 < Real.cos φ :=
     Real.cos_pos_of_mem_Ioo ⟨by linarith [neg_abs_le φ], by linarith [le_abs_self φ]⟩
@@ -843,7 +866,7 @@ theorem incEllIntPik_special_k {φ : ℝ} (hφ : |φ| < π / 2) {k : ℂ} (hk : 
     rw [← Real.cos_abs (t * φ), ← Real.cos_abs φ]
     refine Real.cos_le_cos_of_nonneg_of_le_pi (abs_nonneg _) (by linarith [Real.pi_pos]) ?_
     rw [abs_mul, abs_of_nonneg ht.1]; exact mul_le_of_le_one_left (abs_nonneg _) ht.2
-  rw [incEllIntPik_ofReal_eq_integral_of_norm_ge (δ := Real.cos φ ^ 2) (by positivity),
+  rw [incompleteEllipticPi_ofReal_eq_integral_of_norm_ge (δ := Real.cos φ ^ 2) (by positivity),
       integral_sec_sq_mul_inv_ellDelta hk hφ]
   intro t ht
   have : (1 - 1 * (Real.sin (t * φ) : ℂ) ^ 2) = ((Real.cos (t * φ) ^ 2 : ℝ) : ℂ) := by
@@ -857,12 +880,13 @@ theorem incEllIntPik_special_k {φ : ℝ} (hφ : |φ| < π / 2) {k : ℂ} (hk : 
 
 /-- DLMF 19.6.14: `Π(π/2, α², k) = Π(α², k)`. -/
 @[dlmf 19.6.E14]
-theorem incEllIntPik_pi_div_two (α2 k : ℂ) : incEllIntPik (π / 2) α2 k = compEllIntPik α2 k := rfl
+theorem incompleteEllipticPi_pi_div_two (α2 k : ℂ) : incompleteEllipticPi (π / 2) α2 k =
+    completeEllipticPi α2 k := rfl
 
 /-- DLMF 19.6.14: `lim_{φ→0} Π(φ, α², k)/φ = 1`. -/
 @[dlmf 19.6.E14]
-theorem tendsto_incEllIntPik_div (α2 k : ℂ) :
-    Tendsto (fun φ : ℂ => incEllIntPik φ α2 k / φ) (𝓝[≠] 0) (𝓝 1) := by
+theorem tendsto_incompleteEllipticPi_div (α2 k : ℂ) :
+    Tendsto (fun φ : ℂ => incompleteEllipticPi φ α2 k / φ) (𝓝[≠] 0) (𝓝 1) := by
   have hf : ∀ᶠ z in 𝓝 (0 : ℂ), ContinuousAt (fun θ => (1 - α2 * Complex.sin θ ^ 2)⁻¹ *
       (1 - k ^ 2 * Complex.sin θ ^ 2) ^ (-(1 / 2 : ℂ))) z := by
     have hc : Continuous fun θ : ℂ => 1 - α2 * Complex.sin θ ^ 2 := by fun_prop
@@ -870,7 +894,7 @@ theorem tendsto_incEllIntPik_div (α2 k : ℂ) :
       hc.continuousAt.preimage_mem_nhds (isOpen_ne.mem_nhds (by simp : (fun θ : ℂ =>
         1 - α2 * Complex.sin θ ^ 2) 0 ≠ 0))] with z h1 h2
     exact (hc.continuousAt.inv₀ h2).mul h1
-  have := tendsto_segmentIntegral_div hf
+  have := tendsto_primitive_div hf
   simp only [Complex.sin_zero, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, mul_zero,
     sub_zero, inv_one, one_cpow, mul_one] at this
   refine this.congr' ?_
@@ -880,7 +904,7 @@ theorem tendsto_incEllIntPik_div (α2 k : ℂ) :
     (hc.continuousAt.preimage_mem_nhds (Ioi_mem_nhds (by norm_num : (1 / 2 : ℝ) <
       ‖1 - α2 * Complex.sin 0 ^ 2‖)))
   filter_upwards [nhdsWithin_le_nhds (Metric.ball_mem_nhds 0 hr)] with φ hφ
-  rw [incEllIntPik_eq_segmentIntegral (δ := 1 / 2) (by norm_num)]
+  rw [incompleteEllipticPi_eq_primitive (δ := 1 / 2) (by norm_num)]
   intro t ht
   refine le_of_lt (hfr _ ?_)
   rw [Metric.mem_ball, dist_zero_right] at hφ ⊢
@@ -960,7 +984,7 @@ private lemma integrableOn_mul_add_one_div_sub {k : ℝ → ℂ} (hk : Integrabl
 private lemma integrableOn_rc_kernel_one {x : ℂ} (hx : x ∈ slitPlane ∨ x = 0) :
     IntegrableOn (fun t : ℝ => (((t : ℂ) + x) ^ (1 / 2 : ℂ) * ((t : ℂ) + 1))⁻¹) (Ioi 0) := by
   have h1 : (1 : ℂ) ∈ slitPlane := one_mem_slitPlane
-  refine (integrableOn_symEllIntRF_integrand hx h1 h1).congr_fun (fun t _ => ?_)
+  refine (integrableOn_symmetricEllipticRF_integrand hx h1 h1).congr_fun (fun t _ => ?_)
     measurableSet_Ioi
   simp only [mul_assoc, cpow_half_mul_cpow_half]
 
@@ -1042,9 +1066,9 @@ private lemma exists_tendsto_integral_rc_truncated {x : ℂ} (hx : x ∈ slitPla
     by_cases h' : t ∈ Icc (q - q / 2) (q + q / 2)
     · right; exact ⟨by linarith [h'.1], by linarith [h'.2]⟩
     · left; exact ⟨ht, h'⟩
-  have hlh := tendsto_integral_symEllIntRC_truncated (x := 0) (y := -q) le_rfl (by linarith)
+  have hlh := tendsto_integral_symmetricEllipticRC_truncated (x := 0) (y := -q) le_rfl (by linarith)
   simp only [neg_neg, ofReal_zero, ofReal_neg, ← sub_eq_add_neg] at hlh
-  refine ⟨(∫ t in Ioi (0 : ℝ), g t) + c * (2 * symEllIntRC 0 (-(q : ℂ))), ?_⟩
+  refine ⟨(∫ t in Ioi (0 : ℝ), g t) + c * (2 * symmetricEllipticRC 0 (-(q : ℂ))), ?_⟩
   refine ((tendsto_setIntegral_diff_Icc_nhdsGT hgi q).add (hlh.const_mul c)).congr' ?_
   filter_upwards [self_mem_nhdsWithin] with ε hε
   rw [← integral_const_mul, ← integral_add (hgi.mono_set sdiff_subset)
@@ -1107,13 +1131,14 @@ private lemma integral_rc_truncated_mul {l : ℝ} (hl : 0 < l) (x : ℂ) (q ε :
 
 
 /-- The principal-value truncations of `R_C(x, -q)` converge for admissible `x`. -/
-private lemma exists_tendsto_integral_rc_truncated' {x : ℂ} (hx : SymEllIntArg x) {q : ℝ}
+private lemma exists_tendsto_integral_rc_truncated' {x : ℂ} (hx : IsCarlsonArgument x) {q : ℝ}
     (hq : 0 < q) :
     ∃ L : ℂ, Tendsto (fun ε : ℝ => ∫ t in Ioi (0 : ℝ) \ Icc (q - ε) (q + ε),
       (((t : ℂ) + x) ^ (1 / 2 : ℂ) * ((t : ℂ) - q))⁻¹) (𝓝[>] 0) (𝓝 L) := by
   rcases hx with hx | rfl
   · exact exists_tendsto_integral_rc_truncated hx hq
-  · have hlh := tendsto_integral_symEllIntRC_truncated (x := 0) (y := -q) le_rfl (by linarith)
+  · have hlh := tendsto_integral_symmetricEllipticRC_truncated (x := 0) (y := -q)
+        le_rfl (by linarith)
     simp only [neg_neg, ofReal_zero, ofReal_neg, ← sub_eq_add_neg] at hlh
     exact ⟨_, hlh⟩
 
@@ -1127,26 +1152,27 @@ private lemma ofReal_mul_mem_slitPlane {l : ℝ} (hl : 0 < l) {x : ℂ} (hx : x 
   · exact Or.inr (mul_ne_zero hl.ne' h)
 
 /-- DLMF 19.6.15, homogeneity of `R_C` (including the principal-value case). -/
-private lemma symEllIntRC_ofReal_mul {l : ℝ} (hl : 0 < l) {x y : ℂ} (hx : SymEllIntArg x)
+private lemma symmetricEllipticRC_ofReal_mul {l : ℝ} (hl : 0 < l) {x y : ℂ}
+    (hx : IsCarlsonArgument x)
     (hy : y ≠ 0) :
-    symEllIntRC (l * x) (l * y) = (l : ℂ) ^ (-(1 / 2 : ℂ)) * symEllIntRC x y := by
+    symmetricEllipticRC (l * x) (l * y) = (l : ℂ) ^ (-(1 / 2 : ℂ)) * symmetricEllipticRC x y := by
   by_cases hys : y ∈ slitPlane
   · rcases hx with hx | rfl
-    · rw [symEllIntRC_eq_carlsonRC (ofReal_mul_mem_slitPlane hl hx)
-        (ofReal_mul_mem_slitPlane hl hys), symEllIntRC_eq_carlsonRC hx hys,
+    · rw [symmetricEllipticRC_eq_carlsonRC (ofReal_mul_mem_slitPlane hl hx)
+        (ofReal_mul_mem_slitPlane hl hys), symmetricEllipticRC_eq_carlsonRC hx hys,
         Carlson.TwoVariable.carlsonRC_mul_of_pos hl hx hys]
       norm_num
-    · rw [mul_zero, symEllIntRC_eq_symEllIntRF 0
+    · rw [mul_zero, symmetricEllipticRC_eq_symmetricEllipticRF 0
           (not_isNegReal_of_mem_slitPlane (ofReal_mul_mem_slitPlane hl hys)),
-        symEllIntRF_zero_left (ofReal_mul_mem_slitPlane hl hys)
+        symmetricEllipticRF_zero_left (ofReal_mul_mem_slitPlane hl hys)
           (ofReal_mul_mem_slitPlane hl hys),
-        symEllIntRC_eq_symEllIntRF 0 (not_isNegReal_of_mem_slitPlane hys),
-        symEllIntRF_zero_left hys hys]
+        symmetricEllipticRC_eq_symmetricEllipticRF 0 (not_isNegReal_of_mem_slitPlane hys),
+        symmetricEllipticRF_zero_left hys hys]
       have h1 : (![(l : ℂ) * y, (l : ℂ) * y] : Fin 2 → ℂ) = fun _ => (l : ℂ) * y := by
         funext i; fin_cases i <;> rfl
       have h2 : (![y, y] : Fin 2 → ℂ) = fun _ => y := by funext i; fin_cases i <;> rfl
-      rw [h1, h2, symEllIntR_const _ _ (ofReal_mul_mem_slitPlane hl hys) (by norm_num),
-        symEllIntR_const _ _ hys (by norm_num), TauCeti.ofReal_mul_cpow hl.le]
+      rw [h1, h2, symmetricEllipticR_const _ _ (ofReal_mul_mem_slitPlane hl hys) (by norm_num),
+        symmetricEllipticR_const _ _ hys (by norm_num), TauCeti.ofReal_mul_cpow hl.le]
       ring
   · have hneg : IsNegReal y := by
       rw [mem_slitPlane_iff] at hys
@@ -1191,7 +1217,9 @@ private lemma symEllIntRC_ofReal_mul {l : ℝ} (hl : 0 < l) {x y : ℂ} (hx : Sy
     have hL1 : Tendsto (fun ε : ℝ => ∫ t in Ioi (0 : ℝ) \ Icc (-y.re - ε) (-y.re + ε),
         (((t : ℂ) + x) ^ (1 / 2 : ℂ) * ((t : ℂ) + y))⁻¹) (𝓝[>] 0) (𝓝 L) := by
       simp only [hT1]; exact hL
-    rw [symEllIntRC_eq_cauchyPV hneg', symEllIntRC_eq_cauchyPV hneg, cauchyPVIoi, cauchyPVIoi,
+    rw [symmetricEllipticRC_eq_cauchyPV hneg', symmetricEllipticRC_eq_cauchyPV hneg,
+        principalValueIoi,
+        principalValueIoi,
       hLl.limUnder_eq, hL1.limUnder_eq, cpow_neg]
     ring
 
@@ -1202,31 +1230,31 @@ end PrincipalValue
 `R_C(0, y) = (π/2) y^{-1/2}` for `|ph y| < π`; and `R_C(0, y) = 0` for `y < 0` (principal
 value). -/
 @[dlmf 19.6.E15]
-theorem symEllIntRC_special :
-    (∀ x : ℂ, x ∈ slitPlane → symEllIntRC x x = x ^ (-(1 / 2 : ℂ))) ∧
-      (∀ (l : ℝ) (x y : ℂ), 0 < l → SymEllIntArg x → y ≠ 0 →
-        symEllIntRC (l * x) (l * y) = (l : ℂ) ^ (-(1 / 2 : ℂ)) * symEllIntRC x y) ∧
-      (∀ y : ℂ, y ∈ slitPlane → symEllIntRC 0 y = π / 2 * y ^ (-(1 / 2 : ℂ))) ∧
-      (∀ y : ℝ, y < 0 → symEllIntRC 0 y = 0) := by
-  refine ⟨fun x hx => ?_, fun l x y hl hx hy => symEllIntRC_ofReal_mul hl hx hy,
+theorem symmetricEllipticRC_special :
+    (∀ x : ℂ, x ∈ slitPlane → symmetricEllipticRC x x = x ^ (-(1 / 2 : ℂ))) ∧
+      (∀ (l : ℝ) (x y : ℂ), 0 < l → IsCarlsonArgument x → y ≠ 0 →
+        symmetricEllipticRC (l * x) (l * y) = (l : ℂ) ^ (-(1 / 2 : ℂ)) * symmetricEllipticRC x y) ∧
+      (∀ y : ℂ, y ∈ slitPlane → symmetricEllipticRC 0 y = π / 2 * y ^ (-(1 / 2 : ℂ))) ∧
+      (∀ y : ℝ, y < 0 → symmetricEllipticRC 0 y = 0) := by
+  refine ⟨fun x hx => ?_, fun l x y hl hx hy => symmetricEllipticRC_ofReal_mul hl hx hy,
     fun y hy => ?_, fun y hy => ?_⟩
-  · rw [symEllIntRC_eq_symEllIntR hx hx]
+  · rw [symmetricEllipticRC_eq_symmetricEllipticR hx hx]
     have : (![x, x] : Fin 2 → ℂ) = fun _ => x := by funext i; fin_cases i <;> rfl
-    rw [this, symEllIntR_const _ _ hx]
+    rw [this, symmetricEllipticR_const _ _ hx]
     norm_num
     rw [show (3/2 : ℂ) = 1/2 + 1 by norm_num, Complex.Gamma_add_one _ (by norm_num)]
     exact mul_ne_zero (by norm_num) Gamma_one_half_ne_zero
-  · rw [symEllIntRC_eq_symEllIntRF 0 (not_isNegReal_of_mem_slitPlane hy),
-      symEllIntRF_zero_left hy hy]
+  · rw [symmetricEllipticRC_eq_symmetricEllipticRF 0 (not_isNegReal_of_mem_slitPlane hy),
+      symmetricEllipticRF_zero_left hy hy]
     have : (![y, y] : Fin 2 → ℂ) = fun _ => y := by funext i; fin_cases i <;> rfl
-    rw [this, symEllIntR_const _ _ hy (by norm_num)]
-  · rw [← ofReal_zero, (symEllIntRC_of_neg hy le_rfl).2.2]
+    rw [this, symmetricEllipticR_const _ _ hy (by norm_num)]
+  · rw [← ofReal_zero, (symmetricEllipticRC_of_neg hy le_rfl).2.2]
     simp
 
 /-- DLMF 19.6.15: `R_C(x, y) → +∞` as `y → 0+` or `y → 0-`, for real `x > 0`. -/
 @[dlmf 19.6.E15]
-theorem tendsto_symEllIntRC_zero {x : ℝ} (hx : 0 < x) :
-    Tendsto (fun y : ℝ => (symEllIntRC x y).re) (𝓝[≠] 0) atTop := by
+theorem tendsto_symmetricEllipticRC_zero {x : ℝ} (hx : 0 < x) :
+    Tendsto (fun y : ℝ => (symmetricEllipticRC x y).re) (𝓝[≠] 0) atTop := by
   have hi : Tendsto (fun y : ℝ => y) (𝓝[≠] 0) (𝓝 0) := nhdsWithin_le_nhds
   have hs : Tendsto (fun y : ℝ => Real.sqrt (x - y)) (𝓝[≠] 0) (𝓝 (Real.sqrt x)) := by
     simpa using ((tendsto_const_nhds (x := x)).sub hi).sqrt
@@ -1243,12 +1271,12 @@ theorem tendsto_symEllIntRC_zero {x : ℝ} (hx : 0 < x) :
   have hy0 : y ≠ 0 := by simpa using hy0
   have hxy : 0 < x - y := by linarith
   have hyabs : 0 < |y| := abs_pos.mpr hy0
-  have hr : symEllIntRC x y =
+  have hr : symmetricEllipticRC x y =
       ((Real.log ((Real.sqrt x + Real.sqrt (x - y)) / Real.sqrt |y|) /
           Real.sqrt (x - y) : ℝ) : ℂ) := by
     rcases hy0.lt_or_gt with hy | hy
-    · simpa only [abs_of_neg hy] using (symEllIntRC_of_neg hy hx.le).2.2
-    · simpa only [abs_of_pos hy] using (symEllIntRC_of_gt hy hyx).2
+    · simpa only [abs_of_neg hy] using (symmetricEllipticRC_of_neg hy hx.le).2.2
+    · simpa only [abs_of_pos hy] using (symmetricEllipticRC_of_gt hy hyx).2
   rw [hr, ofReal_re, Real.log_div (by positivity) (by positivity), Real.log_sqrt hyabs.le,
     Real.log_abs]
   dsimp only [Function.comp_def]

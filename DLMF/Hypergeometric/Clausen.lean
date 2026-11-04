@@ -91,7 +91,7 @@ theorem thetaPS_X_mul (g : PowerSeries ℂ) : thetaPS (X * g) = X * g + X * thet
   · simp only [coeff_thetaPS, map_add, coeff_succ_X_mul]; push_cast; ring
 
 /-- The Gauss series as a formal power series. -/
-def gaussPS (a b c : ℂ) : PowerSeries ℂ := PowerSeries.mk (gaussHGCoeff a b c)
+def gaussPS (a b c : ℂ) : PowerSeries ℂ := PowerSeries.mk (gaussHypergeometricCoeff a b c)
 
 /-- The hypergeometric equation in `θ`-form for the formal Gauss series:
 `θ(θ+c-1) F = X (θ+a)(θ+b) F`. -/
@@ -106,7 +106,7 @@ theorem gaussPS_ode {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) :
     push_cast; ring
   · simp only [LinearMap.map_sub, LinearMap.map_add, coeff_thetaPS, coeff_C_mul,
       coeff_succ_X_mul, gaussPS, coeff_mk, map_zero]
-    have h := gaussHGCoeff_recurrence (a := a) (b := b) hc n
+    have h := gaussHypergeometricCoeff_recurrence (a := a) (b := b) hc n
     push_cast
     linear_combination h
 
@@ -154,36 +154,36 @@ theorem clausen_recurrence {a b : ℂ} (hc : ∀ k : ℕ, a + b + 1 / 2 ≠ -k) 
 
 /-- The coefficients of `₃F₂(2a, 2b, a+b; a+b+1/2, 2a+2b; z)`. -/
 def clausenCoeff (a b : ℂ) (n : ℕ) : ℂ :=
-  poch (2 * a) n * poch (2 * b) n * poch (a + b) n /
-    (poch (a + b + 1 / 2) n * poch (2 * a + 2 * b) n * n.factorial)
+  pochhammer (2 * a) n * pochhammer (2 * b) n * pochhammer (a + b) n /
+    (pochhammer (a + b + 1 / 2) n * pochhammer (2 * a + 2 * b) n * n.factorial)
 
 /-- The coefficients of `F(a,b;a+b+1/2;·)²` are those of the Clausen `₃F₂`. -/
 theorem coeff_gaussPS_sq_eq_clausenCoeff {a b : ℂ} (hc : ∀ k : ℕ, a + b + 1 / 2 ≠ -k)
     (hd : ∀ k : ℕ, 2 * a + 2 * b ≠ -k) (n : ℕ) :
     coeff n (gaussPS a b (a + b + 1 / 2) * gaussPS a b (a + b + 1 / 2)) = clausenCoeff a b n := by
   induction n with
-  | zero => simp [gaussPS, clausenCoeff, gaussHGCoeff, poch_zero, coeff_mul]
+  | zero => simp [gaussPS, clausenCoeff, gaussHypergeometricCoeff, pochhammer_zero, coeff_mul]
   | succ n ih =>
     have hr := clausen_recurrence hc n
     rw [ih] at hr
     have h1 : ((n : ℂ) + 1) ≠ 0 := by exact_mod_cast Nat.succ_ne_zero n
     have h2 : (n : ℂ) + (a + b + 1 / 2) ≠ 0 := fun h => hc n (by linear_combination h)
     have h3 : (n : ℂ) + (2 * a + 2 * b) ≠ 0 := fun h => hd n (by linear_combination h)
-    have hp1 := poch_ne_zero_of_not_neg_nat hc n
-    have hp2 := poch_ne_zero_of_not_neg_nat hd n
+    have hp1 := pochhammer_ne_zero_of_not_neg_nat hc n
+    have hp2 := pochhammer_ne_zero_of_not_neg_nat hd n
     have hf : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
     have h2' : a + b + 1 / 2 + (n : ℂ) ≠ 0 := by rw [add_comm]; exact h2
     have h3' : 2 * a + 2 * b + (n : ℂ) ≠ 0 := by rw [add_comm]; exact h3
     have hB : clausenCoeff a b (n + 1) * (((n : ℂ) + 1) * (n + (a + b + 1 / 2)) *
         (n + (2 * a + 2 * b))) =
           (n + 2 * a) * (n + 2 * b) * (n + (a + b)) * clausenCoeff a b n := by
-      simp only [clausenCoeff, poch_succ, Nat.factorial_succ, Nat.cast_mul, Nat.cast_add,
+      simp only [clausenCoeff, pochhammer_succ, Nat.factorial_succ, Nat.cast_mul, Nat.cast_add,
         Nat.cast_one]
-      generalize poch (a + b + 1 / 2) n = q1 at *
-      generalize poch (2 * a + 2 * b) n = q2 at *
-      generalize poch (2 * a) n = p1
-      generalize poch (2 * b) n = p2
-      generalize poch (a + b) n = p3
+      generalize pochhammer (a + b + 1 / 2) n = q1 at *
+      generalize pochhammer (2 * a + 2 * b) n = q2 at *
+      generalize pochhammer (2 * a) n = p1
+      generalize pochhammer (2 * b) n = p2
+      generalize pochhammer (a + b) n = p3
       generalize (n.factorial : ℂ) = F at *
       rw [div_mul_eq_mul_div, mul_div_assoc', div_eq_div_iff
         (mul_ne_zero (mul_ne_zero (mul_ne_zero hp1 h2') (mul_ne_zero hp2 h3')) (mul_ne_zero h1 hf))
@@ -212,8 +212,8 @@ theorem clausen_formula {a b : ℂ} (hc : ∀ k : ℕ, a + b + 1 / 2 ≠ -k)
   ring
 
 /-- `(3/2)ₙ = (2n+1)!/(4ⁿ n!)`. -/
-theorem poch_three_halves' (n : ℕ) :
-    poch (3 / 2 : ℂ) n = ((2 * n + 1)! : ℂ) / (4 ^ n * n !) := by
+theorem pochhammer_three_halves' (n : ℕ) :
+    pochhammer (3 / 2 : ℂ) n = ((2 * n + 1)! : ℂ) / (4 ^ n * n !) := by
   have hG : ∀ k : ℕ, (3 / 2 : ℂ) ≠ -(k : ℂ) := fun k hk => by
     have := congrArg re hk; simp at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
   have hs : Gamma (1 / 2 : ℂ) ≠ 0 := Gamma_ne_zero (fun k hk => by
@@ -224,7 +224,7 @@ theorem poch_three_halves' (n : ℕ) :
     rw [show (3 / 2 : ℂ) + n = 1 / 2 + ((n + 1 : ℕ) : ℂ) by push_cast; ring, Gamma_nat_add_half]
   have e0 : Gamma (3 / 2 : ℂ) = Gamma (1 / 2) / 2 := by
     rw [show (3 / 2 : ℂ) = 1 / 2 + 1 by norm_num, Gamma_add_one _ (by norm_num)]; ring
-  rw [poch, ← h1, e1, e0, show 2 * (n + 1) = (2 * n + 1) + 1 by ring, Nat.factorial_succ,
+  rw [pochhammer, ← h1, e1, e0, show 2 * (n + 1) = (2 * n + 1) + 1 by ring, Nat.factorial_succ,
     Nat.factorial_succ n]
   have hf : ((2 * n + 1)! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
   have hf' : (n ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
@@ -238,7 +238,7 @@ theorem clausenCoeff_half (n : ℕ) :
     clausenCoeff (1 / 2) (1 / 2) n = 4 ^ n * (n ! : ℂ) ^ 2 / (((n : ℂ) + 1) * (2 * n + 1)!) := by
   rw [clausenCoeff, show 2 * (1 / 2 : ℂ) = 1 by norm_num, show (1 / 2 : ℂ) + 1 / 2 = 1 by norm_num,
     show (1 : ℂ) + 1 / 2 = 3 / 2 by norm_num, show (1 : ℂ) + 1 = 2 by norm_num,
-    poch_nat_one, poch_three_halves', poch_nat_two, Nat.factorial_succ n]
+    pochhammer_nat_one, pochhammer_three_halves', pochhammer_nat_two, Nat.factorial_succ n]
   have hf : ((2 * n + 1)! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
   have hf' : (n ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
   have hn1 : ((n : ℂ) + 1) ≠ 0 := by exact_mod_cast Nat.succ_ne_zero n
@@ -253,7 +253,7 @@ theorem ordinaryHypergeometric_half_im {x : ℝ} (hx : |x| < 1) :
   have hs := ((hasFPowerSeriesOnBall_ordinaryHypergeometric (1 / 2 : ℂ) (1 / 2)
     (3 / 2)).hasSum_mul_pow (mem_eball_one_of_norm_lt_one hz)).mapL Complex.imCLM
   refine hs.unique (hasSum_zero.congr_fun fun n => ?_)
-  simp only [imCLM_apply, gaussHGCoeff, poch]
+  simp only [imCLM_apply, gaussHypergeometricCoeff, pochhammer]
   rw [show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring,
     show (3 / 2 : ℂ) = ((3 / 2 : ℝ) : ℂ) by push_cast; ring, ascPochhammer_eval_ofReal,
     ascPochhammer_eval_ofReal, ← ofReal_pow, ← ofReal_pow]

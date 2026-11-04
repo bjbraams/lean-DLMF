@@ -41,44 +41,49 @@ open scoped Topology Real
 
 namespace DLMF.Lame
 
-open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
+open DLMF.EllipticIntegrals (completeEllipticK completeEllipticKPrime)
 
 variable {k : ℝ}
 
 /-- `sn²` has the periods `2K` and `2iK'` (all integer combinations). -/
-private lemma jacobiSnk_sq_add_lattice (hk0 : 0 < k) (hk1 : k < 1) (z : ℂ) (m n : ℤ) :
-    jacobiSnk (z + m * (2 * (Real.compEllIntKm (k ^ 2) : ℂ)) +
-      n * (2 * (I * Real.compEllIntKm (1 - k ^ 2)))) k ^ 2 = jacobiSnk z k ^ 2 := by
-  obtain ⟨⟨s1, -, -⟩, ⟨s2, -, -⟩, -⟩ := jacobiSnk_cnk_dnk_add_periods hk0 hk1 z
-  have p1 : Function.Periodic (fun z => jacobiSnk z k ^ 2) (2 * (Real.compEllIntKm (k ^ 2) : ℂ)) :=
+private lemma jacobiSn_sq_add_lattice (hk0 : 0 < k) (hk1 : k < 1) (z : ℂ) (m n : ℤ) :
+    jacobiSn (z + m * (2 * (Real.completeEllipticKOfParameter (k ^ 2) : ℂ)) +
+      n * (2 * (I * Real.completeEllipticKOfParameter (1 - k ^ 2)))) k ^ 2 = jacobiSn z k ^ 2 := by
+  obtain ⟨⟨s1, -, -⟩, ⟨s2, -, -⟩, -⟩ := jacobiSn_cnk_dnk_add_periods hk0 hk1 z
+  have p1 : Function.Periodic (fun z => jacobiSn z k ^ 2)
+      (2 * (Real.completeEllipticKOfParameter (k ^ 2) : ℂ)) :=
     fun z => by
-      obtain ⟨⟨s1, -, -⟩, -⟩ := jacobiSnk_cnk_dnk_add_periods hk0 hk1 z
+      obtain ⟨⟨s1, -, -⟩, -⟩ := jacobiSn_cnk_dnk_add_periods hk0 hk1 z
       simp only [s1, neg_sq]
-  have p2 : Function.Periodic (fun z => jacobiSnk z k ^ 2)
-      (2 * (I * Real.compEllIntKm (1 - k ^ 2))) := fun z => by
-    obtain ⟨-, ⟨s2, -, -⟩, -⟩ := jacobiSnk_cnk_dnk_add_periods hk0 hk1 z
+  have p2 : Function.Periodic (fun z => jacobiSn z k ^ 2)
+      (2 * (I * Real.completeEllipticKOfParameter (1 - k ^ 2))) := fun z => by
+    obtain ⟨-, ⟨s2, -, -⟩, -⟩ := jacobiSn_cnk_dnk_add_periods hk0 hk1 z
     simp only [← mul_assoc, s2]
-  have := (p2.int_mul n) (z + m * (2 * (Real.compEllIntKm (k ^ 2) : ℂ)))
+  have := (p2.int_mul n) (z + m * (2 * (Real.completeEllipticKOfParameter (k ^ 2) : ℂ)))
   rw [this]
   exact (p1.int_mul m) z
 
 /-- At the poles `z₀ = 2mK + (2n+1)iK'` of `sn`: `sn²(z₀ + u) = 1/(k² sn²(u))` for all `u`
 (both sides are Lean's `0` where `sn(u) = 0`). -/
-private lemma jacobiSnk_sq_lattice_pole_add (hk0 : 0 < k) (hk1 : k < 1) (m n : ℤ) (u : ℂ) :
-    jacobiSnk (m * (2 * (Real.compEllIntKm (k ^ 2) : ℂ)) +
-      n * (2 * (I * Real.compEllIntKm (1 - k ^ 2))) + I * Real.compEllIntKm (1 - k ^ 2) + u) k ^ 2 =
-      ((k : ℂ) ^ 2 * jacobiSnk u k ^ 2)⁻¹ := by
+private lemma jacobiSn_sq_lattice_pole_add (hk0 : 0 < k) (hk1 : k < 1) (m n : ℤ) (u : ℂ) :
+    jacobiSn (m * (2 * (Real.completeEllipticKOfParameter (k ^ 2) : ℂ)) +
+      n * (2 * (I * Real.completeEllipticKOfParameter (1 - k ^ 2))) + I *
+          Real.completeEllipticKOfParameter (1 - k ^ 2) + u) k ^ 2 =
+      ((k : ℂ) ^ 2 * jacobiSn u k ^ 2)⁻¹ := by
   have hkD := ofReal_mem_jacobiModulusDomain hk0 hk1
-  have hK' : compEllIntKpk (k : ℂ) = Real.compEllIntKm (1 - k ^ 2) :=
-    compEllIntKpk_ofReal (by positivity)
-  have e := jacobiSnk_sq_add_lattice hk0 hk1 (u + I * Real.compEllIntKm (1 - k ^ 2)) m n
-  rw [show (m : ℂ) * (2 * (Real.compEllIntKm (k ^ 2) : ℂ)) +
-      n * (2 * (I * Real.compEllIntKm (1 - k ^ 2))) + I * Real.compEllIntKm (1 - k ^ 2) + u =
-      u + I * Real.compEllIntKm (1 - k ^ 2) + m * (2 * (Real.compEllIntKm (k ^ 2) : ℂ)) +
-      n * (2 * (I * Real.compEllIntKm (1 - k ^ 2))) by ring, e]
-  have s := (jacobiSnk_shift hkD u).2.2.1
+  have hK' : completeEllipticKPrime (k : ℂ) = Real.completeEllipticKOfParameter (1 - k ^ 2) :=
+    completeEllipticKPrime_ofReal (by positivity)
+  have e := jacobiSn_sq_add_lattice hk0 hk1
+      (u + I * Real.completeEllipticKOfParameter (1 - k ^ 2)) m n
+  rw [show (m : ℂ) * (2 * (Real.completeEllipticKOfParameter (k ^ 2) : ℂ)) +
+      n * (2 * (I * Real.completeEllipticKOfParameter (1 - k ^ 2))) + I *
+          Real.completeEllipticKOfParameter (1 - k ^ 2) + u =
+      u + I * Real.completeEllipticKOfParameter (1 - k ^ 2) + m *
+          (2 * (Real.completeEllipticKOfParameter (k ^ 2) : ℂ)) +
+      n * (2 * (I * Real.completeEllipticKOfParameter (1 - k ^ 2))) by ring, e]
+  have s := (jacobiSn_shift hkD u).2.2.1
   rw [hK'] at s
-  rw [s, jacobiNsk, jacobiPQk_eq_one_div, ← jacobiSnk]
+  rw [s, jacobiNs, jacobiPQ_eq_one_div, ← jacobiSn]
   rw [mul_pow, inv_pow, div_pow, one_pow, mul_inv, one_div]
 
 /-- **At a pole of `sn`, a solution of Lamé's equation satisfies `ν(ν+1) w(z₀) = 0`**: near
@@ -86,7 +91,7 @@ private lemma jacobiSnk_sq_lattice_pole_add (hk0 : 0 < k) (hk1 : k < 1) (m n : �
 private lemma mul_eq_zero_at_pole_of_isLameSolutionOn (hk0 : 0 < k) (hk1 : k < 1) {h ν : ℂ}
     {w : ℂ → ℂ} {U : Set ℂ}
     (hU : IsOpen U) (hw : IsLameSolutionOn h ν k w U) {z₀ : ℂ} (hz₀ : z₀ ∈ U)
-    (hpole : ∀ u, jacobiSnk (z₀ + u) k ^ 2 = ((k : ℂ) ^ 2 * jacobiSnk u k ^ 2)⁻¹) :
+    (hpole : ∀ u, jacobiSn (z₀ + u) k ^ 2 = ((k : ℂ) ^ 2 * jacobiSn u k ^ 2)⁻¹) :
     ν * (ν + 1) * w z₀ = 0 := by
   have hkD := ofReal_mem_jacobiModulusDomain hk0 hk1
   have hk : (k : ℂ) ≠ 0 := by exact_mod_cast hk0.ne'
@@ -95,12 +100,12 @@ private lemma mul_eq_zero_at_pole_of_isLameSolutionOn (hk0 : 0 < k) (hk1 : k < 1
   have hA2 : AnalyticAt ℂ (deriv w) z₀ := DifferentiableOn.analyticAt
     (fun z hz => (hw.hasDerivAt_deriv z hz).differentiableAt.differentiableWithinAt)
     (hU.mem_nhds hz₀)
-  have hsn : HasDerivAt (fun u => jacobiSnk u k) 1 0 := by
-    have := hasDerivAt_jacobiSnk hkD
-      (by have := jacobiRegulark_ofReal hk0 hk1 0; simpa [JacobiRegulark] using this)
-    simpa [jacobiCnk_zero hkD, jacobiDnk_zero hkD] using this
+  have hsn : HasDerivAt (fun u => jacobiSn u k) 1 0 := by
+    have := hasDerivAt_jacobiSn hkD
+      (by have := isJacobiRegular_ofReal hk0 hk1 0; simpa [IsJacobiRegular] using this)
+    simpa [jacobiCn_zero hkD, jacobiDn_zero hkD] using this
   set F : ℂ → ℂ := fun u => ν * (ν + 1) * w (z₀ + u)
-  set G : ℂ → ℂ := fun u => (deriv (deriv w) (z₀ + u) + h * w (z₀ + u)) * jacobiSnk u k ^ 2
+  set G : ℂ → ℂ := fun u => (deriv (deriv w) (z₀ + u) + h * w (z₀ + u)) * jacobiSn u k ^ 2
   have hcF : ContinuousAt F 0 := by
     have : ContinuousAt (fun u : ℂ => w (z₀ + u)) 0 :=
       (by simpa using hA.continuousAt : ContinuousAt w (z₀ + 0)).comp
@@ -115,9 +120,9 @@ private lemma mul_eq_zero_at_pole_of_isLameSolutionOn (hk0 : 0 < k) (hk1 : k < 1
         (continuous_const.add continuous_id).continuousAt
     exact (c2.add (continuousAt_const.mul c1)).mul (hsn.continuousAt.pow 2)
   have hev : F =ᶠ[𝓝[≠] 0] G := by
-    have h1 : ∀ᶠ u in 𝓝[≠] (0 : ℂ), jacobiSnk u k ≠ 0 := by
+    have h1 : ∀ᶠ u in 𝓝[≠] (0 : ℂ), jacobiSn u k ≠ 0 := by
       have := hsn.eventually_ne (c := 0) one_ne_zero
-      simpa [jacobiSnk_zero hkD] using this
+      simpa [jacobiSn_zero hkD] using this
     have h2 : ∀ᶠ u in 𝓝[≠] (0 : ℂ), z₀ + u ∈ U := by
       refine nhdsWithin_le_nhds ?_
       have : Tendsto (fun u : ℂ => z₀ + u) (𝓝 0) (𝓝 z₀) := by
@@ -126,9 +131,9 @@ private lemma mul_eq_zero_at_pole_of_isLameSolutionOn (hk0 : 0 < k) (hk1 : k < 1
     filter_upwards [h1, h2] with u hu hU'
     have hd := (hw.hasDerivAt_deriv _ hU').deriv
     have hp := hpole u
-    have hs : (k : ℂ) ^ 2 * jacobiSnk u k ^ 2 ≠ 0 :=
+    have hs : (k : ℂ) ^ 2 * jacobiSn u k ^ 2 ≠ 0 :=
       mul_ne_zero (pow_ne_zero _ hk) (pow_ne_zero _ hu)
-    have hq : (k : ℂ) ^ 2 * jacobiSnk (z₀ + u) k ^ 2 * jacobiSnk u k ^ 2 = 1 := by
+    have hq : (k : ℂ) ^ 2 * jacobiSn (z₀ + u) k ^ 2 * jacobiSn u k ^ 2 = 1 := by
       rw [hp]; field_simp
     simp only [F, G]
     rw [hd]
@@ -137,37 +142,39 @@ private lemma mul_eq_zero_at_pole_of_isLameSolutionOn (hk0 : 0 < k) (hk1 : k < 1
   have t2 : Tendsto F (𝓝[≠] 0) (𝓝 (G 0)) :=
     (hcG.tendsto.mono_left nhdsWithin_le_nhds).congr' hev.symm
   have := tendsto_nhds_unique t1 t2
-  simpa [F, G, jacobiSnk_zero hkD] using this
+  simpa [F, G, jacobiSn_zero hkD] using this
 
 /-- The Weierstrass half-periods `ω₁ = K/a`, `ω₃ = iK'/a` attached to a real modulus and a
 scale `a > 0`. -/
 def weierstrassHalfPeriods (hk0 : 0 < k) (hk1 : k < 1) {a : ℝ} (ha : 0 < a) :
     Weierstrass.HalfPeriods where
-  ω₁ := ((Real.compEllIntKm (k ^ 2) / a : ℝ) : ℂ)
-  ω₃ := I * ((Real.compEllIntKm (1 - k ^ 2) / a : ℝ) : ℂ)
+  ω₁ := ((Real.completeEllipticKOfParameter (k ^ 2) / a : ℝ) : ℂ)
+  ω₃ := I * ((Real.completeEllipticKOfParameter (1 - k ^ 2) / a : ℝ) : ℂ)
   ω₁_ne_zero := by
-    have := Real.compEllIntKm_pos (show k ^ 2 < 1 by nlinarith)
+    have := Real.completeEllipticKOfParameter_pos (show k ^ 2 < 1 by nlinarith)
     exact_mod_cast (div_pos this ha).ne'
   im_div_pos := by
-    have h1 := Real.compEllIntKm_pos (show k ^ 2 < 1 by nlinarith)
-    have h2 := Real.compEllIntKm_pos (show 1 - k ^ 2 < 1 by nlinarith)
-    rw [show I * ((Real.compEllIntKm (1 - k ^ 2) / a : ℝ) : ℂ) /
-        ((Real.compEllIntKm (k ^ 2) / a : ℝ) : ℂ) =
-        I * (((Real.compEllIntKm (1 - k ^ 2) / a) / (Real.compEllIntKm (k ^ 2) / a) : ℝ) : ℂ) by
+    have h1 := Real.completeEllipticKOfParameter_pos (show k ^ 2 < 1 by nlinarith)
+    have h2 := Real.completeEllipticKOfParameter_pos (show 1 - k ^ 2 < 1 by nlinarith)
+    rw [show I * ((Real.completeEllipticKOfParameter (1 - k ^ 2) / a : ℝ) : ℂ) /
+        ((Real.completeEllipticKOfParameter (k ^ 2) / a : ℝ) : ℂ) =
+        I * (((Real.completeEllipticKOfParameter (1 - k ^ 2) / a) /
+            (Real.completeEllipticKOfParameter (k ^ 2) / a) : ℝ) : ℂ) by
       push_cast; ring]
     simp only [mul_im, I_re, ofReal_im, mul_zero, I_im, ofReal_re, one_mul, zero_add]
     positivity
 
 /-- The lattice parameter of `weierstrassHalfPeriods` is `τ = iK'/K`. -/
 private lemma weierstrassHalfPeriods_tau (hk0 : 0 < k) (hk1 : k < 1) {a : ℝ} (ha : 0 < a) :
-    (weierstrassHalfPeriods hk0 hk1 ha).tau = jacobiTauk k := by
-  have h1 := Real.compEllIntKm_pos (show k ^ 2 < 1 by nlinarith)
-  have hK : compEllIntKk (k : ℂ) = Real.compEllIntKm (k ^ 2) := compEllIntKk_ofReal (by nlinarith)
-  have hK' : compEllIntKpk (k : ℂ) = Real.compEllIntKm (1 - k ^ 2) :=
-    compEllIntKpk_ofReal (by positivity)
-  have h1' : (Real.compEllIntKm (k ^ 2) : ℂ) ≠ 0 := by exact_mod_cast h1.ne'
+    (weierstrassHalfPeriods hk0 hk1 ha).tau = jacobiTau k := by
+  have h1 := Real.completeEllipticKOfParameter_pos (show k ^ 2 < 1 by nlinarith)
+  have hK : completeEllipticK (k : ℂ) = Real.completeEllipticKOfParameter (k ^ 2) :=
+      completeEllipticK_ofReal (by nlinarith)
+  have hK' : completeEllipticKPrime (k : ℂ) = Real.completeEllipticKOfParameter (1 - k ^ 2) :=
+    completeEllipticKPrime_ofReal (by positivity)
+  have h1' : (Real.completeEllipticKOfParameter (k ^ 2) : ℂ) ≠ 0 := by exact_mod_cast h1.ne'
   have ha' : (a : ℂ) ≠ 0 := by exact_mod_cast ha.ne'
-  rw [Weierstrass.HalfPeriods.tau, jacobiTauk, hK, hK']
+  rw [Weierstrass.HalfPeriods.tau, jacobiTau, hK, hK']
   simp only [weierstrassHalfPeriods]
   push_cast
   field_simp
@@ -180,23 +187,24 @@ theorem lameWeierstrassForm_of_isLameSolutionOn {h ν : ℝ} (hk0 : 0 < k) (hk1 
     (hw : IsLameSolutionOn h ν k w U) :
     IsLameWeierstrassSolutionOn ((e₁ - e₃) * h + ν * (ν + 1) * e₃) ν
       (-4 * (e₂ * e₃ + e₃ * e₁ + e₁ * e₂)) (4 * e₁ * e₂ * e₃)
-      (fun η => w (Real.sqrt (e₁ - e₃) * η + I * Real.compEllIntKm (1 - k ^ 2)))
-      {η | (Real.sqrt (e₁ - e₃) : ℂ) * η + I * Real.compEllIntKm (1 - k ^ 2) ∈ U} := by
+      (fun η => w (Real.sqrt (e₁ - e₃) * η + I * Real.completeEllipticKOfParameter (1 - k ^ 2)))
+      {η | (Real.sqrt (e₁ - e₃) : ℂ) * η + I *
+          Real.completeEllipticKOfParameter (1 - k ^ 2) ∈ U} := by
   have hkD := ofReal_mem_jacobiModulusDomain hk0 hk1
   have h13 : 0 < e₁ - e₃ := by linarith
   set a : ℝ := Real.sqrt (e₁ - e₃)
   have ha : 0 < a := Real.sqrt_pos.2 h13
   have ha2 : (a : ℂ) ^ 2 = ((e₁ - e₃ : ℝ) : ℂ) := by
     rw [← Complex.ofReal_pow, Real.sq_sqrt h13.le]
-  set K := Real.compEllIntKm (k ^ 2)
-  set K' := Real.compEllIntKm (1 - k ^ 2)
-  have hKpos : 0 < K := Real.compEllIntKm_pos (by nlinarith)
+  set K := Real.completeEllipticKOfParameter (k ^ 2)
+  set K' := Real.completeEllipticKOfParameter (1 - k ^ 2)
+  have hKpos : 0 < K := Real.completeEllipticKOfParameter_pos (by nlinarith)
   have hK0 : (K : ℂ) ≠ 0 := by exact_mod_cast hKpos.ne'
   have ha0 : (a : ℂ) ≠ 0 := by exact_mod_cast ha.ne'
   set H := weierstrassHalfPeriods hk0 hk1 ha
   have hτ := weierstrassHalfPeriods_tau hk0 hk1 ha
   obtain ⟨hmodk, -, hKt⟩ := jacobi_inversion_k hkD
-  have hKk : compEllIntKk (k : ℂ) = K := compEllIntKk_ofReal (by nlinarith)
+  have hKk : completeEllipticK (k : ℂ) = K := completeEllipticK_ofReal (by nlinarith)
   have hQ : H.quarterK = K := by
     rw [Weierstrass.HalfPeriods.quarterK, hτ, hKt, hKk]
   have hmod : H.modulus = k := by rw [Weierstrass.HalfPeriods.modulus, hτ, hmodk]
@@ -232,14 +240,14 @@ theorem lameWeierstrassForm_of_isLameSolutionOn {h ν : ℝ} (hk0 : 0 < k) (hk1 
     rw [← hg₂, ← hg₃]; exact Weierstrass.weierstrassPInvariants_eq H.periodPair η
   -- the key identity, or `ν(ν+1) w = 0` at the poles
   have key : ∀ η : ℂ, (a : ℂ) * η + I * K' ∈ U →
-      (H.weierstrassP η - e₃ = (a : ℂ) ^ 2 * k ^ 2 * jacobiSnk ((a : ℂ) * η + I * K') k ^ 2) ∨
+      (H.weierstrassP η - e₃ = (a : ℂ) ^ 2 * k ^ 2 * jacobiSn ((a : ℂ) * η + I * K') k ^ 2) ∨
         (ν : ℂ) * (ν + 1) * w ((a : ℂ) * η + I * K') = 0 := by
     intro η hη
     by_cases hL : η ∈ H.lattice
     · right
       obtain ⟨m, n, rfl⟩ := H.mem_lattice_iff.1 hL
       refine mul_eq_zero_at_pole_of_isLameSolutionOn hk0 hk1 hU hw hη fun u => ?_
-      have := jacobiSnk_sq_lattice_pole_add hk0 hk1 m n u
+      have := jacobiSn_sq_lattice_pole_add hk0 hk1 m n u
       rw [hω₁, hω₃] at *
       rw [← this]
       congr 2
@@ -248,13 +256,13 @@ theorem lameWeierstrassForm_of_isLameSolutionOn {h ν : ℝ} (hk0 : 0 < k) (hk1 
     · left
       have hz : η - H.ω₃ + H.ω₃ ∉ H.lattice := by simpa using hL
       have := H.weierstrassP_add_ω₃_sub_e_three_eq_sn hz
-      rw [sub_add_cancel, he3, hQ, hmod, hτ, jacobiSnTau,
-        ← jacobiPQk_eq_jacobiPQTau hkD, ← jacobiSnk] at this
+      rw [sub_add_cancel, he3, hQ, hmod, hτ, jacobiSnOfTau,
+        ← jacobiPQ_eq_jacobiPQOfTau hkD, ← jacobiSn] at this
       rw [this]
       have e1 : (K : ℂ) * (η - H.ω₃) / H.ω₁ = (a : ℂ) * η + I * K' + ((0 : ℤ) : ℂ) * (2 * (K : ℂ)) +
           ((-1 : ℤ) : ℂ) * (2 * (I * K')) := by
         rw [hω₁, hω₃]; field_simp; push_cast; ring
-      rw [e1, jacobiSnk_sq_add_lattice hk0 hk1 _ 0 (-1), hω₁]
+      rw [e1, jacobiSn_sq_add_lattice hk0 hk1 _ 0 (-1), hω₁]
       field_simp
   -- the equation
   have hγ : ∀ η : ℂ, HasDerivAt (fun η => (a : ℂ) * η + I * K') (a : ℂ) η := fun η => by
@@ -273,9 +281,9 @@ theorem lameWeierstrassForm_of_isLameSolutionOn {h ν : ℝ} (hk0 : 0 < k) (hk1 
   have ha2' : (a : ℂ) ^ 2 = (e₁ : ℂ) - e₃ := by rw [ha2]; push_cast; ring
   rcases key η hη with hk | hk
   · rw [show H.weierstrassP η = e₃ + (a : ℂ) ^ 2 * k ^ 2 *
-      jacobiSnk ((a : ℂ) * η + I * K') k ^ 2 by linear_combination hk]
+      jacobiSn ((a : ℂ) * η + I * K') k ^ 2 by linear_combination hk]
     linear_combination (-((h : ℂ) * w ((a : ℂ) * η + I * K'))) * ha2'
   · linear_combination (-((h : ℂ) * w ((a : ℂ) * η + I * K'))) * ha2' +
-      ((a : ℂ) ^ 2 * k ^ 2 * jacobiSnk ((a : ℂ) * η + I * K') k ^ 2 + e₃ - H.weierstrassP η) * hk
+      ((a : ℂ) ^ 2 * k ^ 2 * jacobiSn ((a : ℂ) * η + I * K') k ^ 2 + e₃ - H.weierstrassP η) * hk
 
 end DLMF.Lame

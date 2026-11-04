@@ -32,7 +32,7 @@ segments). Completeness is stated as: a continuous function `g` on the closed re
 orthogonal to every member of the system vanishes on the rectangle.
 
 For orthogonality, the Lamé polynomials solve Lamé's equation
-(`DLMF.Lame.lamePolyEk_isLameSolutionOn`), Green's identity on the segments `[0, K]` and
+(`DLMF.Lame.lamePolynomialE_isLameSolutionOn`), Green's identity on the segments `[0, K]` and
 `K + i[0, K']` (the boundary Wronskians vanish by the parities of Table 29.12.1) gives two
 linear relations between the one-dimensional integrals, and the eigenvalue pairs `(h, ν(ν+1))`
 of distinct members differ (29.15.3). For 29.14.11 a symmetry argument handles products of
@@ -55,38 +55,42 @@ variable {k : ℝ}
 product 29.14.2 on `[0, K] × [0, K']`. Proved by Green's identity on the two segments. -/
 @[dlmf 29.14.E1, dlmf 29.14.E2, dlmf 29.14.E3, dlmf 29.14.E4, dlmf 29.14.E5, dlmf 29.14.E6,
   dlmf 29.14.E7, dlmf 29.14.E8, dlmf 29.14.E9, dlmf 29.14.E10]
-theorem lameProduct_orthogonal (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType)
+theorem lameProduct_orthogonal (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolynomialType)
     {n m n' m' : ℕ} (hm : m ≤ n) (hm' : m' ≤ n') (hne : (n, m) ≠ (n', m')) :
-    lameInner k (Real.compEllIntKm (k ^ 2)) (Real.compEllIntKm (1 - k ^ 2))
+    lameInner k (Real.completeEllipticKOfParameter (k ^ 2))
+        (Real.completeEllipticKOfParameter (1 - k ^ 2))
       (lameProduct t n m k) (lameProduct t n' m' k) = 0 := by
-  obtain ⟨s1, s2, s3, -, -, -⟩ := lamePolyEk_reflection_period hk0 hk1 t n m
-  obtain ⟨s1', s2', s3', -, -, -⟩ := lamePolyEk_reflection_period hk0 hk1 t n' m'
+  obtain ⟨s1, s2, s3, -, -, -⟩ := lamePolynomialE_reflection_period hk0 hk1 t n m
+  obtain ⟨s1', s2', s3', -, -, -⟩ := lamePolynomialE_reflection_period hk0 hk1 t n' m'
   obtain ⟨cs, cc, cd⟩ := lamePolySign_eq_one_or_neg_one t
   refine lameInner_lameProduct_eq_zero_of_wronskian hk0 hk1 hm hm' _ _ (fun z hz => ?_)
     (lamePoly_eigenvalue_ne hk0 hk1 hm hm' (by simpa using hne) rfl rfl)
   simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hz
   rcases hz with rfl | rfl | rfl | rfl
-  · exact lamePolyEk_wronskian_eq_zero_of_reflection hk0 hk1 hm hm'
-        (by simpa using jacobiRegulark_ofReal hk0 hk1 0) cs s1 s1'
-  · exact lamePolyEk_wronskian_eq_zero_of_reflection hk0 hk1 hm hm'
-        (by simpa using jacobiRegulark_K_add_I_mul hk0 hk1 0) cc s2 s2'
-  · exact lamePolyEk_wronskian_eq_zero_of_reflection hk0 hk1 hm hm'
-        (by simpa using jacobiRegulark_K_add_I_mul hk0 hk1 0) cc s2 s2'
-  · exact lamePolyEk_wronskian_eq_zero_of_reflection hk0 hk1 hm hm'
-        (jacobiRegulark_K_add_I_mul hk0 hk1 _) cd s3 s3'
+  · exact lamePolynomialE_wronskian_eq_zero_of_reflection hk0 hk1 hm hm'
+        (by simpa using isJacobiRegular_ofReal hk0 hk1 0) cs s1 s1'
+  · exact lamePolynomialE_wronskian_eq_zero_of_reflection hk0 hk1 hm hm'
+        (by simpa using isJacobiRegular_K_add_I_mul hk0 hk1 0) cc s2 s2'
+  · exact lamePolynomialE_wronskian_eq_zero_of_reflection hk0 hk1 hm hm'
+        (by simpa using isJacobiRegular_K_add_I_mul hk0 hk1 0) cc s2 s2'
+  · exact lamePolynomialE_wronskian_eq_zero_of_reflection hk0 hk1 hm hm'
+        (isJacobiRegular_K_add_I_mul hk0 hk1 _) cd s3 s3'
 
 /-- 29.14.1–29.14.10, completeness: for each type `t`, a function `g` continuous on
 `[0, K] × [0, K']` that is orthogonal (29.14.2) to every `lameProduct t n m`, `m ≤ n`,
 vanishes on that rectangle. Admitted. -/
 @[dlmf 29.14.E1, dlmf 29.14.E2, dlmf 29.14.E4, dlmf 29.14.E5, dlmf 29.14.E6, dlmf 29.14.E7,
   dlmf 29.14.E8, dlmf 29.14.E9, dlmf 29.14.E10]
-theorem lameProduct_complete (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType) {g : ℝ → ℝ → ℂ}
+theorem lameProduct_complete (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolynomialType) {g : ℝ → ℝ → ℂ}
     (hg : ContinuousOn (Function.uncurry g)
-      (Icc 0 (Real.compEllIntKm (k ^ 2)) ×ˢ Icc 0 (Real.compEllIntKm (1 - k ^ 2))))
+      (Icc 0 (Real.completeEllipticKOfParameter (k ^ 2)) ×ˢ Icc 0
+          (Real.completeEllipticKOfParameter (1 - k ^ 2))))
     (horth : ∀ n m : ℕ, m ≤ n →
-      lameInner k (Real.compEllIntKm (k ^ 2)) (Real.compEllIntKm (1 - k ^ 2)) g
+      lameInner k (Real.completeEllipticKOfParameter (k ^ 2))
+          (Real.completeEllipticKOfParameter (1 - k ^ 2)) g
         (lameProduct t n m k) = 0) :
-    ∀ s ∈ Icc 0 (Real.compEllIntKm (k ^ 2)), ∀ τ ∈ Icc 0 (Real.compEllIntKm (1 - k ^ 2)),
+    ∀ s ∈ Icc 0 (Real.completeEllipticKOfParameter (k ^ 2)), ∀ τ ∈
+        Icc 0 (Real.completeEllipticKOfParameter (1 - k ^ 2)),
       g s τ = 0 := by
   sorry
 
@@ -97,12 +101,13 @@ single type (the boundary Wronskians at `0, 4K` and `K, K + 2iK'` vanish by the 
 periods of Table 29.12.1), and distinct members have distinct pairs `(h, ν(ν+1))`, since equal
 orders and parities force equal types. -/
 @[dlmf 29.14.E11]
-theorem lameProduct_orthogonal_all (hk0 : 0 < k) (hk1 : k < 1) {t t' : LamePolyType}
+theorem lameProduct_orthogonal_all (hk0 : 0 < k) (hk1 : k < 1) {t t' : LamePolynomialType}
     {n m n' m' : ℕ} (hm : m ≤ n) (hm' : m' ≤ n') (hne : (t, n, m) ≠ (t', n', m')) :
-    lameInner k (4 * Real.compEllIntKm (k ^ 2)) (2 * Real.compEllIntKm (1 - k ^ 2))
+    lameInner k (4 * Real.completeEllipticKOfParameter (k ^ 2))
+        (2 * Real.completeEllipticKOfParameter (1 - k ^ 2))
       (lameProduct t n m k) (lameProduct t' n' m' k) = 0 := by
-  obtain ⟨s1, s2, -, -, s5, s6⟩ := lamePolyEk_reflection_period hk0 hk1 t n m
-  obtain ⟨s1', s2', -, -, s5', s6'⟩ := lamePolyEk_reflection_period hk0 hk1 t' n' m'
+  obtain ⟨s1, s2, -, -, s5, s6⟩ := lamePolynomialE_reflection_period hk0 hk1 t n m
+  obtain ⟨s1', s2', -, -, s5', s6'⟩ := lamePolynomialE_reflection_period hk0 hk1 t' n' m'
   obtain ⟨cs, cc, -⟩ := lamePolySign_eq_one_or_neg_one t
   obtain ⟨cs', cc', -⟩ := lamePolySign_eq_one_or_neg_one t'
   by_cases hs : lamePolySignSn t = lamePolySignSn t'
@@ -113,35 +118,36 @@ theorem lameProduct_orthogonal_all (hk0 : 0 < k) (hk1 : k < 1) {t t' : LamePolyT
         (lamePoly_eigenvalue_ne hk0 hk1 hm hm' hne hs hc)
       simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hz
       rcases hz with rfl | rfl | rfl | rfl
-      · exact lamePolyEk_wronskian_eq_zero_of_reflection hk0 hk1 hm hm'
-            (by simpa using jacobiRegulark_ofReal hk0 hk1 0) cs s1 s1'
-      · have hr := jacobiRegulark_ofReal hk0 hk1 (4 * Real.compEllIntKm (k ^ 2))
+      · exact lamePolynomialE_wronskian_eq_zero_of_reflection hk0 hk1 hm hm'
+            (by simpa using isJacobiRegular_ofReal hk0 hk1 0) cs s1 s1'
+      · have hr := isJacobiRegular_ofReal hk0 hk1 (4 * Real.completeEllipticKOfParameter (k ^ 2))
         push_cast at hr ⊢
-        exact lamePolyEk_wronskian_eq_zero_of_reflection hk0 hk1 hm hm' hr cs s5 s5'
-      · exact lamePolyEk_wronskian_eq_zero_of_reflection hk0 hk1 hm hm'
-            (by simpa using jacobiRegulark_K_add_I_mul hk0 hk1 0) cc s2 s2'
-      · have hr := jacobiRegulark_K_add_I_mul hk0 hk1 (2 * Real.compEllIntKm (1 - k ^ 2))
+        exact lamePolynomialE_wronskian_eq_zero_of_reflection hk0 hk1 hm hm' hr cs s5 s5'
+      · exact lamePolynomialE_wronskian_eq_zero_of_reflection hk0 hk1 hm hm'
+            (by simpa using isJacobiRegular_K_add_I_mul hk0 hk1 0) cc s2 s2'
+      · have hr := isJacobiRegular_K_add_I_mul hk0 hk1
+            (2 * Real.completeEllipticKOfParameter (1 - k ^ 2))
         push_cast at hr ⊢
-        exact lamePolyEk_wronskian_eq_zero_of_reflection hk0 hk1 hm hm' hr cc s6 s6'
+        exact lamePolynomialE_wronskian_eq_zero_of_reflection hk0 hk1 hm hm' hr cc s6 s6'
     · have hmul := sign_mul_eq_neg_one_of_ne cc cc' hc
-      obtain ⟨h0, h1⟩ := integral_lamePolyEk_mul_eq_zero_of_odd hk0 hk1 (t := t) (t' := t')
+      obtain ⟨h0, h1⟩ := integral_lamePolynomialE_mul_eq_zero_of_odd hk0 hk1 (t := t) (t' := t')
           (n := n) (m := m)
         (n' := n') (m' := m') _ (Or.inr rfl) fun z => by
           have a := s2 z
           have b := s2' z
           simp only at a b
-          rw [a, b]; linear_combination (lamePolyEk t n m (_ + z) k *
-            lamePolyEk t' n' m' (_ + z) k) * hmul
+          rw [a, b]; linear_combination (lamePolynomialE t n m (_ + z) k *
+            lamePolynomialE t' n' m' (_ + z) k) * hmul
       rw [lameInner_lameProduct_eq hk0 hk1 hm hm', h0, h1]; ring
   · have hmul := sign_mul_eq_neg_one_of_ne cs cs' hs
-    obtain ⟨h0, h1⟩ := integral_lamePolyEk_mul_eq_zero_of_odd hk0 hk1 (t := t) (t' := t')
+    obtain ⟨h0, h1⟩ := integral_lamePolynomialE_mul_eq_zero_of_odd hk0 hk1 (t := t) (t' := t')
         (n := n) (m := m)
       (n' := n') (m' := m') 0 (Or.inl rfl) fun z => by
         have a := s1 z
         have b := s1' z
         simp only [Complex.ofReal_zero] at a b ⊢
-        rw [a, b]; linear_combination (lamePolyEk t n m (0 + z) k *
-          lamePolyEk t' n' m' (0 + z) k) * hmul
+        rw [a, b]; linear_combination (lamePolynomialE t n m (0 + z) k *
+          lamePolynomialE t' n' m' (0 + z) k) * hmul
     rw [lameInner_lameProduct_eq hk0 hk1 hm hm', h0, h1]; ring
 
 /-- 29.14.11, completeness: a function continuous on `[0, 4K] × [0, 2K']` orthogonal to all
@@ -149,12 +155,14 @@ products of all eight types vanishes there. Admitted. -/
 @[dlmf 29.14.E11]
 theorem lameProduct_complete_all (hk0 : 0 < k) (hk1 : k < 1) {g : ℝ → ℝ → ℂ}
     (hg : ContinuousOn (Function.uncurry g)
-      (Icc 0 (4 * Real.compEllIntKm (k ^ 2)) ×ˢ Icc 0 (2 * Real.compEllIntKm (1 - k ^ 2))))
-    (horth : ∀ (t : LamePolyType) (n m : ℕ), m ≤ n →
-      lameInner k (4 * Real.compEllIntKm (k ^ 2)) (2 * Real.compEllIntKm (1 - k ^ 2)) g
+      (Icc 0 (4 * Real.completeEllipticKOfParameter (k ^ 2)) ×ˢ Icc 0
+          (2 * Real.completeEllipticKOfParameter (1 - k ^ 2))))
+    (horth : ∀ (t : LamePolynomialType) (n m : ℕ), m ≤ n →
+      lameInner k (4 * Real.completeEllipticKOfParameter (k ^ 2))
+          (2 * Real.completeEllipticKOfParameter (1 - k ^ 2)) g
         (lameProduct t n m k) = 0) :
-    ∀ s ∈ Icc 0 (4 * Real.compEllIntKm (k ^ 2)),
-      ∀ τ ∈ Icc 0 (2 * Real.compEllIntKm (1 - k ^ 2)), g s τ = 0 := by
+    ∀ s ∈ Icc 0 (4 * Real.completeEllipticKOfParameter (k ^ 2)),
+      ∀ τ ∈ Icc 0 (2 * Real.completeEllipticKOfParameter (1 - k ^ 2)), g s τ = 0 := by
   sorry
 
 end DLMF.Lame

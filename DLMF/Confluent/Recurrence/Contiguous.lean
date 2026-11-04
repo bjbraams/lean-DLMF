@@ -510,13 +510,13 @@ theorem kummerU_ode_contiguous (a b z : ℂ) (hz : z ≠ 0) :
       (tendsto_kummerU a b hz)
 
 /-- Identity under the stated parameter and domain assumptions: `iteratedDeriv n (kummerM a b) =
-fun z => poch a n / poch b n * kummerM (a + n) (b + n) z`. -/
+fun z => pochhammer a n / pochhammer b n * kummerM (a + n) (b + n) z`. -/
 @[dlmf 13.3.E16]
 theorem iteratedDeriv_kummerM {a b : ℂ} (n : ℕ) (hb : ∀ k : ℕ, b ≠ -k) :
     iteratedDeriv n (kummerM a b) =
-      fun z => poch a n / poch b n * kummerM (a + n) (b + n) z := by
+      fun z => pochhammer a n / pochhammer b n * kummerM (a + n) (b + n) z := by
   induction n with
-  | zero => simp [iteratedDeriv_zero, poch_zero]
+  | zero => simp [iteratedDeriv_zero, pochhammer_zero]
   | succ n ih =>
     have hb' : ∀ k : ℕ, b + n ≠ -k := not_neg_nat_add_nat hb n
     have hb0 : b + n ≠ 0 := by
@@ -524,7 +524,7 @@ theorem iteratedDeriv_kummerM {a b : ℂ} (n : ℕ) (hb : ∀ k : ℕ, b ≠ -k)
       exact hb n ((eq_neg_iff_add_eq_zero).2 h)
     funext z
     rw [iteratedDeriv_succ, ih, deriv_const_mul_field, deriv_kummerM hb' hb0]
-    simp only [poch_succ, Nat.cast_add, Nat.cast_one, div_eq_mul_inv, mul_inv_rev]
+    simp only [pochhammer_succ, Nat.cast_add, Nat.cast_one, div_eq_mul_inv, mul_inv_rev]
     ring
 
 /-- `z z^{s-1} = z^s` for `z ≠ 0`. -/
@@ -577,17 +577,17 @@ private lemma deriv_cpow_mul_exp_neg_mul_kummerM {a b : ℂ} (s : ℂ) (hb : ∀
   ring
 
 /-- Identity under the stated parameter and domain assumptions: `mulDerivMul^[n] (fun w => w ^ (a
-- 1) * kummerM a b w) z = poch a n * z ^ (a + n - 1) * kummerM (a + n) b z`. -/
+- 1) * kummerM a b w) z = pochhammer a n * z ^ (a + n - 1) * kummerM (a + n) b z`. -/
 @[dlmf 13.3.E17]
 theorem iterate_mulDerivMul_kummerM {a b : ℂ} (n : ℕ) {z : ℂ}
     (hb : ∀ k : ℕ, b ≠ -k) (hz : z ∈ slitPlane) :
     mulDerivMul^[n] (fun w => w ^ (a - 1) * kummerM a b w) z =
-      poch a n * z ^ (a + n - 1) * kummerM (a + n) b z := by
+      pochhammer a n * z ^ (a + n - 1) * kummerM (a + n) b z := by
   induction n generalizing z with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ n ih =>
     have heq : (fun w => w * mulDerivMul^[n] (fun t => t ^ (a - 1) * kummerM a b t) w)
-        =ᶠ[𝓝 z] (fun w => poch a n * (w ^ (a + n) * kummerM (a + n) b w)) := by
+        =ᶠ[𝓝 z] (fun w => pochhammer a n * (w ^ (a + n) * kummerM (a + n) b w)) := by
       filter_upwards [isOpen_slitPlane.mem_nhds hz] with w hw
       rw [ih hw, ← mul_cpow_pred' (slitPlane_ne_zero hw) (a + n)]
       ring
@@ -598,18 +598,18 @@ theorem iterate_mulDerivMul_kummerM {a b : ℂ} (n : ℕ) {z : ℂ}
     have e1 : z ^ (a + ((n + 1 : ℕ) : ℂ) - 1) = z ^ (a + n) := by congr 1; push_cast; ring
     have e2 : a + ((n + 1 : ℕ) : ℂ) = a + n + 1 := by push_cast; ring
     have e4 : z ^ (a + n) = z * z ^ (a + n - 1) := (mul_cpow_pred' hz0 _).symm
-    rw [e1, e2, poch_succ, e4]
-    linear_combination (poch a n * z * z ^ (a + n - 1)) * hA
+    rw [e1, e2, pochhammer_succ, e4]
+    linear_combination (pochhammer a n * z * z ^ (a + n - 1)) * hA
 
 /-- Identity under the stated parameter and domain assumptions: `iteratedDeriv n (fun w => w ^ (b
-- 1) * kummerM a b w) z = poch (b - n) n * z ^ (b - n - 1) * kummerM a (b - n) z`. -/
+- 1) * kummerM a b w) z = pochhammer (b - n) n * z ^ (b - n - 1) * kummerM a (b - n) z`. -/
 @[dlmf 13.3.E18]
 theorem iteratedDeriv_mul_cpow_kummerM {a b : ℂ} (n : ℕ) {z : ℂ}
     (hb : ∀ k : ℕ, b - n ≠ -k) (hz : z ∈ slitPlane) :
     iteratedDeriv n (fun w => w ^ (b - 1) * kummerM a b w) z =
-      poch (b - n) n * z ^ (b - n - 1) * kummerM a (b - n) z := by
+      pochhammer (b - n) n * z ^ (b - n - 1) * kummerM a (b - n) z := by
   induction n generalizing b with
-  | zero => simp [iteratedDeriv_zero, poch_zero]
+  | zero => simp [iteratedDeriv_zero, pochhammer_zero]
   | succ n ih =>
     have hb0 : ∀ k : ℕ, b ≠ -k := by
       intro k hk
@@ -636,24 +636,24 @@ theorem iteratedDeriv_mul_cpow_kummerM {a b : ℂ} (n : ℕ) {z : ℂ}
       rw [e]
       linear_combination (w ^ (b - 1 - 1)) * hB
     rw [iteratedDeriv_succ', heq.iteratedDeriv_eq n, iteratedDeriv_const_mul_field, ih hbn']
-    rw [show b - 1 - (n : ℂ) = b - ((n + 1 : ℕ) : ℂ) by push_cast; ring, poch_succ,
+    rw [show b - 1 - (n : ℂ) = b - ((n + 1 : ℕ) : ℂ) by push_cast; ring, pochhammer_succ,
       show b - ((n + 1 : ℕ) : ℂ) + (n : ℂ) = b - 1 by push_cast; ring]
     ring
 
 /-- Identity under the stated parameter and domain assumptions: `mulDerivMul^[n] (fun w => w ^ (b
-- a - 1) * exp (-w) * kummerM a b w) z = poch (b - a) n * z ^ (b - a + n - 1) * exp (-z) *
+- a - 1) * exp (-w) * kummerM a b w) z = pochhammer (b - a) n * z ^ (b - a + n - 1) * exp (-z) *
 kummerM (a - n) b z`. -/
 @[dlmf 13.3.E19]
 theorem iterate_mulDerivMul_exp_neg_kummerM {a b : ℂ} (n : ℕ) {z : ℂ}
     (hb : ∀ k : ℕ, b ≠ -k) (hz : z ∈ slitPlane) :
     mulDerivMul^[n] (fun w => w ^ (b - a - 1) * exp (-w) * kummerM a b w) z =
-      poch (b - a) n * z ^ (b - a + n - 1) * exp (-z) * kummerM (a - n) b z := by
+      pochhammer (b - a) n * z ^ (b - a + n - 1) * exp (-z) * kummerM (a - n) b z := by
   induction n generalizing z with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ n ih =>
     have heq : (fun w => w * mulDerivMul^[n]
           (fun t => t ^ (b - a - 1) * exp (-t) * kummerM a b t) w) =ᶠ[𝓝 z]
-        (fun w => poch (b - a) n * (w ^ (b - a + n) * exp (-w) * kummerM (a - n) b w)) := by
+        (fun w => pochhammer (b - a) n * (w ^ (b - a + n) * exp (-w) * kummerM (a - n) b w)) := by
       filter_upwards [isOpen_slitPlane.mem_nhds hz] with w hw
       rw [ih hw, ← mul_cpow_pred' (slitPlane_ne_zero hw) (b - a + n)]
       ring
@@ -665,21 +665,21 @@ theorem iterate_mulDerivMul_exp_neg_kummerM {a b : ℂ} (n : ℕ) {z : ℂ}
       congr 1; push_cast; ring
     have e2 : a - ((n + 1 : ℕ) : ℂ) = a - n - 1 := by push_cast; ring
     have e4 : z ^ (b - a + n) = z * z ^ (b - a + n - 1) := (mul_cpow_pred' hz0 _).symm
-    rw [e1, e2, poch_succ, e4]
-    linear_combination (poch (b - a) n * z * z ^ (b - a + n - 1) * exp (-z)) * hC
+    rw [e1, e2, pochhammer_succ, e4]
+    linear_combination (pochhammer (b - a) n * z * z ^ (b - a + n - 1) * exp (-z)) * hC
 
 /-- Identity under the stated parameter and domain assumptions: `iteratedDeriv n (fun w => exp
-(-w) * kummerM a b w) = fun z => (-1 : ℂ) ^ n * poch (b - a) n / poch b n * exp (-z) * kummerM
-a (b + n) z`. -/
+(-w) * kummerM a b w) = fun z => (-1 : ℂ) ^ n * pochhammer (b - a) n / pochhammer b n * exp (-z) *
+kummerM a (b + n) z`. -/
 @[dlmf 13.3.E20]
 theorem iteratedDeriv_exp_neg_kummerM {a b : ℂ} (n : ℕ) (hb : ∀ k : ℕ, b ≠ -k) :
     iteratedDeriv n (fun w => exp (-w) * kummerM a b w) =
-      fun z => (-1 : ℂ) ^ n * poch (b - a) n / poch b n * exp (-z) *
+      fun z => (-1 : ℂ) ^ n * pochhammer (b - a) n / pochhammer b n * exp (-z) *
         kummerM a (b + n) z := by
   induction n generalizing b with
   | zero =>
     funext z
-    simp [iteratedDeriv_zero, poch_zero]
+    simp [iteratedDeriv_zero, pochhammer_zero]
   | succ n ih =>
     have hb1 : ∀ k : ℕ, b + 1 ≠ -k := by simpa using not_neg_nat_add_nat hb 1
     have hb0 : b ≠ 0 := by simpa using hb 0
@@ -693,21 +693,22 @@ theorem iteratedDeriv_exp_neg_kummerM {a b : ℂ} (n : ℕ) (hb : ∀ k : ℕ, b
     funext z
     rw [iteratedDeriv_succ', hd, iteratedDeriv_const_mul_field, ih hb1]
     beta_reduce
-    have hp : poch (b + 1) n ≠ 0 := poch_ne_zero_of_not_neg_nat hb1 n
+    have hp : pochhammer (b + 1) n ≠ 0 := pochhammer_ne_zero_of_not_neg_nat hb1 n
     rw [show b + 1 + (n : ℂ) = b + ((n + 1 : ℕ) : ℂ) by push_cast; ring,
-      show b + 1 - a = b - a + 1 by ring, poch_succ_left (b - a), poch_succ_left b, pow_succ]
+      show b + 1 - a = b - a + 1 by ring, pochhammer_succ_left (b - a),
+                                      pochhammer_succ_left b, pow_succ]
     field_simp
 
 /-- Identity under the stated parameter and domain assumptions: `iteratedDeriv n (fun w => w ^ (b
-- 1) * exp (-w) * kummerM a b w) z = poch (b - n) n * z ^ (b - n - 1) * exp (-z) * kummerM (a
+- 1) * exp (-w) * kummerM a b w) z = pochhammer (b - n) n * z ^ (b - n - 1) * exp (-z) * kummerM (a
 - n) (b - n) z`. -/
 @[dlmf 13.3.E21]
 theorem iteratedDeriv_mul_cpow_exp_neg_kummerM {a b : ℂ} (n : ℕ) {z : ℂ}
     (hb : ∀ k : ℕ, b - n ≠ -k) (hz : z ∈ slitPlane) :
     iteratedDeriv n (fun w => w ^ (b - 1) * exp (-w) * kummerM a b w) z =
-      poch (b - n) n * z ^ (b - n - 1) * exp (-z) * kummerM (a - n) (b - n) z := by
+      pochhammer (b - n) n * z ^ (b - n - 1) * exp (-z) * kummerM (a - n) (b - n) z := by
   induction n generalizing a b with
-  | zero => simp [iteratedDeriv_zero, poch_zero]
+  | zero => simp [iteratedDeriv_zero, pochhammer_zero]
   | succ n ih =>
     have hb0 : ∀ k : ℕ, b ≠ -k := by
       intro k hk
@@ -737,7 +738,7 @@ theorem iteratedDeriv_mul_cpow_exp_neg_kummerM {a b : ℂ} (n : ℕ) {z : ℂ}
       linear_combination (w ^ (b - 1 - 1) * exp (-w)) * hB + (w ^ (b - 1 - 1) * exp (-w)) * h4
     rw [iteratedDeriv_succ', heq.iteratedDeriv_eq n, iteratedDeriv_const_mul_field, ih hbn']
     rw [show b - 1 - (n : ℂ) = b - ((n + 1 : ℕ) : ℂ) by push_cast; ring,
-      show a - 1 - (n : ℂ) = a - ((n + 1 : ℕ) : ℂ) by push_cast; ring, poch_succ,
+      show a - 1 - (n : ℂ) = a - ((n + 1 : ℕ) : ℂ) by push_cast; ring, pochhammer_succ,
       show b - ((n + 1 : ℕ) : ℂ) + (n : ℂ) = b - 1 by push_cast; ring]
     ring
 

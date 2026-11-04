@@ -46,7 +46,7 @@ not duplicate local theorems. Conventions:
 * the binomial coefficient of 1.2.1 is `Nat.choose`, the one of 1.2.6 for complex `z` is
   `Ring.choose`;
 * matrices are `Matrix m n R`; DLMF's `Aᴴ` is `Matrix.conjTranspose`, `\overline{A}` is
-  `A.map star`, `etr(A)` is `exp (trace A)`;
+  `A.map star`, `expTrace(A)` is `exp (trace A)`;
 * DLMF's scalar product `⟨u, v⟩` (linear in `u`) is Mathlib's `⟪v, u⟫` (linear in the second
   argument), see `DLMF/AlgebraicAnalytic/Algebra/Matrices.lean`;
 * the matrix norm 1.2.67 is the `l²` operator norm, a scoped instance

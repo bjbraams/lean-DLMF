@@ -594,23 +594,25 @@ private theorem harmonic_remainder_eq_integral (m n : ℕ) (hn : 1 ≤ n) :
 
 /-- Later inverse-power scales are bounded by earlier ones on the positive integers. -/
 private theorem invScale_isBigO_of_le {N M : ℕ} (hNM : N ≤ M) :
-    invPowScaleReal M =O[atTop] invPowScaleReal N := by
+    DLMF.AsymptoticApproximations.Real.invPowScale M =O[atTop]
+        DLMF.AsymptoticApproximations.Real.invPowScale N := by
   refine IsBigO.of_bound 1 ?_
   filter_upwards [eventually_ge_atTop (1 : ℕ)] with n hn
   have hn' : (1 : ℝ) ≤ n := by exact_mod_cast hn
-  simp only [invPowScaleReal, Real.norm_eq_abs, abs_inv, abs_pow,
+  simp only [DLMF.AsymptoticApproximations.Real.invPowScale, Real.norm_eq_abs, abs_inv, abs_pow,
     abs_of_nonneg (Nat.cast_nonneg n : (0 : ℝ) ≤ n), one_mul]
   exact inv_anti₀ (by positivity) (pow_le_pow_right₀ hn' hNM)
 
 /-- Pairing consecutive Bernoulli coefficients recovers the customary harmonic
 polynomial with only even powers after the first term. -/
 private theorem sum_harmonicCoeff_even (m n : ℕ) (hm : 1 ≤ m) :
-    ∑ s ∈ range (2 * m), invPowScaleReal s n * harmonicAsymptoticCoeff s =
+    ∑ s ∈ range (2 * m), DLMF.AsymptoticApproximations.Real.invPowScale s n *
+        harmonicAsymptoticCoeff s =
       -1 / (2 * n) - ∑ k ∈ Ico 1 m, (bernoulli (2 * k) : ℝ) / (2 * k) /
         (n : ℝ) ^ (2 * k) := by
   induction m, hm using Nat.le_induction with
   | base =>
-    simp [invPowScaleReal, harmonicAsymptoticCoeff, sum_range_succ]
+    simp [DLMF.AsymptoticApproximations.Real.invPowScale, harmonicAsymptoticCoeff, sum_range_succ]
     ring
   | succ m hm ih =>
     have hodd : (bernoulli (2 * m + 1) : ℝ) = 0 := by
@@ -618,7 +620,8 @@ private theorem sum_harmonicCoeff_even (m n : ℕ) (hm : 1 ≤ m) :
       simp
     rw [show 2 * (m + 1) = (2 * m + 1) + 1 by omega, sum_range_succ,
       sum_range_succ, ih, sum_Ico_succ_top (by omega : 1 ≤ m)]
-    simp only [invPowScaleReal, harmonicAsymptoticCoeff, show 2 * m ≠ 0 by omega,
+    simp only [DLMF.AsymptoticApproximations.Real.invPowScale, harmonicAsymptoticCoeff, show 2 *
+        m ≠ 0 by omega,
       show 2 * m ≠ 1 by omega, show 2 * m + 1 ≠ 0 by omega,
       show 2 * m + 1 ≠ 1 by omega, ite_false, hodd, neg_zero, zero_div, mul_zero, add_zero]
     push_cast
@@ -685,12 +688,14 @@ theorem harmonic_remainder_bound {m n : ℕ} (hm : 1 ≤ m) (hn : 1 ≤ n) :
 `∑_{j=1}^{n-1} 1/j ∼ ln n + γ - 1/(2n) - ∑_{s ≥ 1} B_{2s}/(2s) n^{-2s}`. -/
 @[dlmf 2.10.E8]
 theorem harmonic_asymptotic :
-    HasAsymptoticExpansion atTop invPowScaleReal harmonicAsymptoticCoeff
+    HasAsymptoticExpansion atTop DLMF.AsymptoticApproximations.Real.invPowScale
+        harmonicAsymptoticCoeff
       (fun n : ℕ => (harmonic (n - 1) : ℝ) - Real.log n - Real.eulerMascheroniConstant) := by
   have hR (m : ℕ) (hm : 1 ≤ m) :
       (fun n : ℕ => (harmonic (n - 1) : ℝ) - Real.log n - Real.eulerMascheroniConstant -
-        ∑ s ∈ range (2 * m), invPowScaleReal s n * harmonicAsymptoticCoeff s) =O[atTop]
-        invPowScaleReal (2 * m) := by
+        ∑ s ∈ range (2 * m), DLMF.AsymptoticApproximations.Real.invPowScale s n *
+            harmonicAsymptoticCoeff s) =O[atTop]
+        DLMF.AsymptoticApproximations.Real.invPowScale (2 * m) := by
     refine IsBigO.of_bound |(bernoulli (2 * m) : ℝ) / (2 * m)| ?_
     filter_upwards [eventually_ge_atTop (1 : ℕ)] with n hn
     have hb := (harmonic_remainder_bound hm hn).2
@@ -702,23 +707,27 @@ theorem harmonic_asymptotic :
           ring
       _ ≤ |-(bernoulli (2 * m) : ℝ) / (2 * m) / (n : ℝ) ^ (2 * m)| := hb
       _ = _ := by
-          simp only [invPowScaleReal, Real.norm_eq_abs, abs_inv, abs_pow,
+          simp only [DLMF.AsymptoticApproximations.Real.invPowScale, Real.norm_eq_abs,
+              abs_inv, abs_pow,
             abs_div, abs_neg, abs_of_nonneg (Nat.cast_nonneg n : (0 : ℝ) ≤ n)]
           ring
   intro N
   let M := 2 * (N + 1)
   have hNM : N ≤ M := by dsimp [M]; omega
   have hr := (hR (N + 1) (by omega)).trans (invScale_isBigO_of_le hNM)
-  have htail : (fun n => ∑ s ∈ Ico N M, invPowScaleReal s n * harmonicAsymptoticCoeff s) =O[atTop]
-      invPowScaleReal N := by
+  have htail : (fun n => ∑ s ∈ Ico N M, DLMF.AsymptoticApproximations.Real.invPowScale s n *
+      harmonicAsymptoticCoeff s) =O[atTop]
+      DLMF.AsymptoticApproximations.Real.invPowScale N := by
     have h := IsBigO.sum (s := Ico N M)
-        (A := fun s n => invPowScaleReal s n * harmonicAsymptoticCoeff s)
+        (A := fun s n => DLMF.AsymptoticApproximations.Real.invPowScale s n *
+            harmonicAsymptoticCoeff s)
       fun s hs => ((invScale_isBigO_of_le (mem_Ico.mp hs).1).const_mul_left
         (harmonicAsymptoticCoeff s)).congr_left (fun n => mul_comm _ _)
     exact h.congr_left fun n => by simp only [Finset.sum_apply]
   simp only [smul_eq_mul]
   refine (hr.add htail).congr_left fun n => ?_
-  have hsum := sum_range_add_sum_Ico (fun s => invPowScaleReal s n * harmonicAsymptoticCoeff s) hNM
+  have hsum := sum_range_add_sum_Ico
+      (fun s => DLMF.AsymptoticApproximations.Real.invPowScale s n * harmonicAsymptoticCoeff s) hNM
   dsimp only [M] at hsum ⊢
   rw [← hsum]
   ring

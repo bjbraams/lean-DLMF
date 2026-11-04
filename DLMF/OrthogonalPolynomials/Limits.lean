@@ -16,15 +16,15 @@ and the Mehler–Heine formulas (DLMF 18.11.5–18.11.8).
 
 ## Main results
 
-* `jacobi_limit_alpha`, `jacobi_limit_beta`, `ultrasphPoly_limit_monomial`,
-  `laguerrePolyL_limit_monomial`: DLMF 18.6.2–18.6.5.
-* `jacobi_limit_laguerrePolyL`, `jacobi_limit_laguerrePolyL_reflected`: DLMF 18.7.21 and
+* `jacobi_limit_alpha`, `jacobi_limit_beta`, `ultrasphericalPolynomial_limit_monomial`,
+  `laguerrePolynomialL_limit_monomial`: DLMF 18.6.2–18.6.5.
+* `jacobi_limit_laguerrePolynomialL`, `jacobi_limit_laguerrePolynomialL_reflected`: DLMF 18.7.21 and
   18.7.22.
-* `jacobi_limit_hermite`, `ultrasphPoly_limit_hermite`: DLMF 18.7.23 and 18.7.24.
-* `ultrasphPoly_limit_chebyshev`: DLMF 18.7.25.
-* `laguerrePolyL_limit_hermite`: DLMF 18.7.26.
+* `jacobi_limit_hermite`, `ultrasphericalPolynomial_limit_hermite`: DLMF 18.7.23 and 18.7.24.
+* `ultrasphericalPolynomial_limit_chebyshev`: DLMF 18.7.25.
+* `laguerrePolynomialL_limit_hermite`: DLMF 18.7.26.
 * `jacobi_mehler_heine`, `jacobi_mehler_heine_regularized`: DLMF 18.11.5.
-* `laguerrePolyL_mehler_heine`, `laguerrePolyL_mehler_heine_regularized`: DLMF 18.11.6.
+* `laguerrePolynomialL_mehler_heine`, `laguerrePolynomialL_mehler_heine_regularized`: DLMF 18.11.6.
 * `hermite_even_mehler_heine`, `hermite_odd_mehler_heine`: DLMF 18.11.7 and 18.11.8.
 
 ## Implementation notes
@@ -54,24 +54,26 @@ namespace DLMF.OrthogonalPolynomials
 tends to its top-degree term. -/
 theorem tendsto_jacobiSeries_div_pow {α : ℂ} (n : ℕ) (u : ℂ) :
     Tendsto (fun b : ℝ => (∑ k ∈ Finset.range (n + 1),
-      gaussHGCoeff (-(n : ℂ)) (n + α + b + 1) (α + 1) k * u ^ k) / (b : ℂ) ^ n) atTop
-      (𝓝 (poch (-(n : ℂ)) n / (poch (α + 1) n * n !) * u ^ n)) := by
+      gaussHypergeometricCoeff (-(n : ℂ)) (n + α + b + 1) (α + 1) k * u ^ k) / (b : ℂ) ^ n) atTop
+      (𝓝 (pochhammer (-(n : ℂ)) n / (pochhammer (α + 1) n * n !) * u ^ n)) := by
   have hinv : Tendsto (fun b : ℝ => (b : ℂ)⁻¹) atTop (𝓝 0) := by
     have := (continuous_ofReal.tendsto 0).comp tendsto_inv_atTop_zero
     rw [ofReal_zero] at this
     exact this.congr fun b => by simp
   have hlow : Tendsto (fun b : ℝ => ∑ k ∈ Finset.range n,
-      poch (-(n : ℂ)) k / (poch (α + 1) k * k !) * u ^ k *
-        (poch ((n : ℂ) + α + 1 + b) k / (b : ℂ) ^ k) * ((b : ℂ)⁻¹) ^ (n - k)) atTop (𝓝 0) := by
-    rw [show (0 : ℂ) = ∑ k ∈ Finset.range n, poch (-(n : ℂ)) k / (poch (α + 1) k * k !) * u ^ k *
+      pochhammer (-(n : ℂ)) k / (pochhammer (α + 1) k * k !) * u ^ k *
+        (pochhammer ((n : ℂ) + α + 1 + b) k / (b : ℂ) ^ k) *
+            ((b : ℂ)⁻¹) ^ (n - k)) atTop (𝓝 0) := by
+    rw [show (0 : ℂ) = ∑ k ∈ Finset.range n, pochhammer (-(n : ℂ)) k /
+        (pochhammer (α + 1) k * k !) * u ^ k *
       1 * 0 ^ (n - k) by
         refine (Finset.sum_eq_zero fun k hk => ?_).symm
         rw [zero_pow (by simp at hk; omega), mul_zero]]
     apply tendsto_finsetSum
     intro k _
-    exact ((tendsto_poch_add_div_pow _ k).const_mul _).mul (hinv.pow _)
-  have htop := (tendsto_poch_add_div_pow ((n : ℂ) + α + 1) n).const_mul
-    (poch (-(n : ℂ)) n / (poch (α + 1) n * n !) * u ^ n)
+    exact ((tendsto_pochhammer_add_div_pow _ k).const_mul _).mul (hinv.pow _)
+  have htop := (tendsto_pochhammer_add_div_pow ((n : ℂ) + α + 1) n).const_mul
+    (pochhammer (-(n : ℂ)) n / (pochhammer (α + 1) n * n !) * u ^ n)
   have := hlow.add htop
   rw [zero_add, mul_one] at this
   refine this.congr' ?_
@@ -81,194 +83,199 @@ theorem tendsto_jacobiSeries_div_pow {α : ℂ} (n : ℕ) (u : ℂ) :
   congr 1
   · refine Finset.sum_congr rfl fun k hk => ?_
     have hkn : k ≤ n := by simp at hk; omega
-    unfold gaussHGCoeff
+    unfold gaussHypergeometricCoeff
     rw [show (n : ℂ) + α + b + 1 = n + α + 1 + b by ring, inv_pow,
       show (b : ℂ) ^ n = b ^ k * b ^ (n - k) by rw [← pow_add]; congr 1; omega]
     field_simp
-  · unfold gaussHGCoeff
+  · unfold gaussHypergeometricCoeff
     rw [show (n : ℂ) + α + b + 1 = n + α + 1 + b by ring]
     field_simp
 
-/-- The map `(fun a : ℝ => jacobiPolyP a β n x / jacobiPolyP a β n 1)` tends to `(𝓝 (((1 + x) / 2)
-^ n))` along `atTop`. -/
+/-- The map `(fun a : ℝ => jacobiPolynomialP a β n x / jacobiPolynomialP a β n 1)` tends to
+`(𝓝 (((1 + x) / 2) ^ n))` along `atTop`. -/
 @[dlmf 18.6.E2]
 theorem jacobi_limit_alpha {β : ℂ} (n : ℕ) (x : ℂ) :
-    Tendsto (fun a : ℝ => jacobiPolyP a β n x / jacobiPolyP a β n 1) atTop
+    Tendsto (fun a : ℝ => jacobiPolynomialP a β n x / jacobiPolynomialP a β n 1) atTop
         (𝓝 (((1 + x) / 2) ^ n)) := by
   have hx : ((1 + x) / 2) ^ n = (1 - (1 - x) / 2) ^ n := by ring_nf
-  rw [hx, ← sum_poch_neg_nat_div_factorial_mul_pow]
+  rw [hx, ← sum_pochhammer_neg_nat_div_factorial_mul_pow]
   have hlim : Tendsto (fun a : ℝ => ∑ k ∈ Finset.range (n + 1),
-      poch (-(n : ℂ)) k / k ! * ((1 - x) / 2) ^ k *
-        ((poch ((n : ℂ) + β + 1 + a) k / (a : ℂ) ^ k) * (poch (1 + (a : ℂ)) k / (a : ℂ) ^ k)⁻¹))
-      atTop (𝓝 (∑ k ∈ Finset.range (n + 1), poch (-(n : ℂ)) k / k ! * ((1 - x) / 2) ^ k *
+      pochhammer (-(n : ℂ)) k / k ! * ((1 - x) / 2) ^ k *
+        ((pochhammer ((n : ℂ) + β + 1 + a) k / (a : ℂ) ^ k) *
+            (pochhammer (1 + (a : ℂ)) k / (a : ℂ) ^ k)⁻¹))
+      atTop (𝓝 (∑ k ∈ Finset.range (n + 1), pochhammer (-(n : ℂ)) k / k ! * ((1 - x) / 2) ^ k *
         (1 * 1⁻¹))) := by
     apply tendsto_finsetSum
     intro k _
-    exact ((tendsto_poch_add_div_pow _ k).mul
-      ((tendsto_poch_add_div_pow 1 k).inv₀ one_ne_zero)).const_mul _
+    exact ((tendsto_pochhammer_add_div_pow _ k).mul
+      ((tendsto_pochhammer_add_div_pow 1 k).inv₀ one_ne_zero)).const_mul _
   simp only [inv_one, mul_one] at hlim
   refine hlim.congr' ?_
   filter_upwards [eventually_gt_atTop 0] with a ha
   have ha' : (a : ℂ) ≠ 0 := ofReal_ne_zero.mpr ha.ne'
   have hc : ∀ k : ℕ, (a : ℂ) + 1 ≠ -k := not_neg_nat_of_re_pos (by simp; linarith)
-  have hp : poch ((a : ℂ) + 1) n / n ! ≠ 0 :=
-    div_ne_zero (poch_ne_zero_of_not_neg_nat hc n) (Nat.cast_ne_zero.mpr n.factorial_ne_zero)
+  have hp : pochhammer ((a : ℂ) + 1) n / n ! ≠ 0 :=
+    div_ne_zero (pochhammer_ne_zero_of_not_neg_nat hc n) (Nat.cast_ne_zero.mpr n.factorial_ne_zero)
   have h0 : ₂F₁ (-(n : ℂ)) (n + a + β + 1) (a + 1) (0 : ℂ) = 1 := by
     rw [ordinaryHypergeometric_eq_sum_neg_nat, Finset.sum_range_succ']
-    simp [gaussHGCoeff, poch_zero]
-  unfold jacobiPolyP
+    simp [gaussHypergeometricCoeff, pochhammer_zero]
+  unfold jacobiPolynomialP
   rw [show ((1 : ℂ) - 1) / 2 = 0 by ring, h0, mul_one, mul_div_cancel_left₀ _ hp,
     ordinaryHypergeometric_eq_sum_neg_nat]
   refine Finset.sum_congr rfl fun k _ => ?_
   have hk : (k ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr k.factorial_ne_zero
-  have hpk : poch ((a : ℂ) + 1) k ≠ 0 := poch_ne_zero_of_not_neg_nat hc k
-  unfold gaussHGCoeff
+  have hpk : pochhammer ((a : ℂ) + 1) k ≠ 0 := pochhammer_ne_zero_of_not_neg_nat hc k
+  unfold gaussHypergeometricCoeff
   rw [add_comm (1 : ℂ) (a : ℂ), show (n : ℂ) + a + β + 1 = n + β + 1 + a by ring]
   field_simp
 
-/-- The map `(fun b : ℝ => jacobiPolyP α b n x / jacobiPolyP α b n (-1))` tends to `(𝓝 (((1 - x) /
-2) ^ n))` along `atTop`. -/
+/-- The map `(fun b : ℝ => jacobiPolynomialP α b n x / jacobiPolynomialP α b n (-1))` tends to
+`(𝓝 (((1 - x) / 2) ^ n))` along `atTop`. -/
 @[dlmf 18.6.E3]
 theorem jacobi_limit_beta {α : ℂ} (hα : -1 < α.re) (n : ℕ) (x : ℂ) :
-    Tendsto (fun b : ℝ => jacobiPolyP α b n x / jacobiPolyP α b n (-1)) atTop
+    Tendsto (fun b : ℝ => jacobiPolynomialP α b n x / jacobiPolynomialP α b n (-1)) atTop
         (𝓝 (((1 - x) / 2) ^ n)) := by
   have hc : ∀ k : ℕ, α + 1 ≠ -k := not_neg_nat_of_re_pos (by simp; linarith)
-  have hG : poch (-(n : ℂ)) n / (poch (α + 1) n * n !) ≠ 0 := by
-    refine div_ne_zero ?_ (mul_ne_zero (poch_ne_zero_of_not_neg_nat hc n)
+  have hG : pochhammer (-(n : ℂ)) n / (pochhammer (α + 1) n * n !) ≠ 0 := by
+    refine div_ne_zero ?_ (mul_ne_zero (pochhammer_ne_zero_of_not_neg_nat hc n)
       (Nat.cast_ne_zero.mpr n.factorial_ne_zero))
-    rw [poch_neg_coe_nat, Nat.descFactorial_self]
+    rw [pochhammer_neg_coe_nat, Nat.descFactorial_self]
     exact mul_ne_zero (pow_ne_zero _ (by norm_num)) (Nat.cast_ne_zero.mpr n.factorial_ne_zero)
-  have hp : poch (α + 1) n / n ! ≠ 0 :=
-    div_ne_zero (poch_ne_zero_of_not_neg_nat hc n) (Nat.cast_ne_zero.mpr n.factorial_ne_zero)
+  have hp : pochhammer (α + 1) n / n ! ≠ 0 :=
+    div_ne_zero (pochhammer_ne_zero_of_not_neg_nat hc n) (Nat.cast_ne_zero.mpr n.factorial_ne_zero)
   have h := (tendsto_jacobiSeries_div_pow (α := α) n ((1 - x) / 2)).div
     (tendsto_jacobiSeries_div_pow (α := α) n 1) (by simpa using hG)
   rw [one_pow, mul_one, mul_div_cancel_left₀ _ hG] at h
   refine h.congr' ?_
   filter_upwards [eventually_gt_atTop 0] with b hb
   have hb' : (b : ℂ) ^ n ≠ 0 := pow_ne_zero _ (ofReal_ne_zero.mpr hb.ne')
-  unfold jacobiPolyP
+  unfold jacobiPolynomialP
   rw [Pi.div_apply, show (1 - (-1 : ℂ)) / 2 = 1 by norm_num, ordinaryHypergeometric_eq_sum_neg_nat,
     ordinaryHypergeometric_eq_sum_neg_nat, mul_div_mul_left _ _ hp, div_div_div_cancel_right₀ hb']
 
-/-- The map `(fun a : ℝ => ultrasphPoly a n x / ultrasphPoly a n 1)` tends to `(𝓝 (x ^ n))` along
-`atTop`. -/
+/-- The map `(fun a : ℝ => ultrasphericalPolynomial a n x / ultrasphericalPolynomial a n 1)` tends
+to `(𝓝 (x ^ n))` along `atTop`. -/
 @[dlmf 18.6.E4]
-theorem ultrasphPoly_limit_monomial (n : ℕ) (x : ℂ) :
-    Tendsto (fun a : ℝ => ultrasphPoly a n x / ultrasphPoly a n 1) atTop (𝓝 (x ^ n)) := by
+theorem ultrasphericalPolynomial_limit_monomial (n : ℕ) (x : ℂ) :
+    Tendsto (fun a : ℝ => ultrasphericalPolynomial a n x / ultrasphericalPolynomial a n 1) atTop
+        (𝓝 (x ^ n)) := by
   have hx : x ^ n = (1 - (1 - x)) ^ n := by ring
-  rw [hx, ← sum_poch_neg_nat_div_factorial_mul_pow]
+  rw [hx, ← sum_pochhammer_neg_nat_div_factorial_mul_pow]
   have h2 : Tendsto (fun a : ℝ => 2 * a) atTop atTop := tendsto_id.const_mul_atTop two_pos
   have hlim : Tendsto (fun a : ℝ => ∑ k ∈ Finset.range (n + 1),
-      poch (-(n : ℂ)) k / k ! * (1 - x) ^ k *
-        ((poch ((n : ℂ) + ((2 * a : ℝ) : ℂ)) k / ((2 * a : ℝ) : ℂ) ^ k) *
-          (poch (1 / 2 + (a : ℂ)) k / (a : ℂ) ^ k)⁻¹)) atTop
-      (𝓝 (∑ k ∈ Finset.range (n + 1), poch (-(n : ℂ)) k / k ! * (1 - x) ^ k * (1 * 1⁻¹))) := by
+      pochhammer (-(n : ℂ)) k / k ! * (1 - x) ^ k *
+        ((pochhammer ((n : ℂ) + ((2 * a : ℝ) : ℂ)) k / ((2 * a : ℝ) : ℂ) ^ k) *
+          (pochhammer (1 / 2 + (a : ℂ)) k / (a : ℂ) ^ k)⁻¹)) atTop
+      (𝓝 (∑ k ∈ Finset.range (n + 1), pochhammer (-(n : ℂ)) k / k ! * (1 - x) ^ k *
+          (1 * 1⁻¹))) := by
     apply tendsto_finsetSum
     intro k _
-    exact (((tendsto_poch_add_div_pow n k).comp h2).mul
-      ((tendsto_poch_add_div_pow (1 / 2) k).inv₀ one_ne_zero)).const_mul _
+    exact (((tendsto_pochhammer_add_div_pow n k).comp h2).mul
+      ((tendsto_pochhammer_add_div_pow (1 / 2) k).inv₀ one_ne_zero)).const_mul _
   simp only [inv_one, mul_one] at hlim
   refine hlim.congr' ?_
   filter_upwards [eventually_gt_atTop 0] with a ha
   have ha' : (a : ℂ) ≠ 0 := ofReal_ne_zero.mpr ha.ne'
   have h2a : ∀ k : ℕ, 2 * (a : ℂ) ≠ -k := not_neg_nat_of_re_pos (by simp; linarith)
   have hc : ∀ k : ℕ, (a : ℂ) + 1 / 2 ≠ -k := not_neg_nat_of_re_pos (by simp; linarith)
-  have hp : poch (2 * (a : ℂ)) n / n ! ≠ 0 :=
-    div_ne_zero (poch_ne_zero_of_not_neg_nat h2a n) (Nat.cast_ne_zero.mpr n.factorial_ne_zero)
-  unfold ultrasphPoly
+  have hp : pochhammer (2 * (a : ℂ)) n / n ! ≠ 0 :=
+    div_ne_zero (pochhammer_ne_zero_of_not_neg_nat h2a n) (Nat.cast_ne_zero.mpr n.factorial_ne_zero)
+  unfold ultrasphericalPolynomial
   have h0 : ₂F₁ (-(n : ℂ)) (n + 2 * a) (a + 1 / 2) (0 : ℂ) = 1 := by
     rw [ordinaryHypergeometric_eq_sum_neg_nat, Finset.sum_range_succ']
-    simp [gaussHGCoeff, poch_zero]
+    simp [gaussHypergeometricCoeff, pochhammer_zero]
   rw [show ((1 : ℂ) - 1) / 2 = 0 by ring, h0, mul_one, mul_div_cancel_left₀ _ hp,
     ordinaryHypergeometric_eq_sum_neg_nat]
   refine Finset.sum_congr rfl fun k _ => ?_
   have hk : (k ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr k.factorial_ne_zero
-  have hpk : poch ((a : ℂ) + 1 / 2) k ≠ 0 := poch_ne_zero_of_not_neg_nat hc k
-  unfold gaussHGCoeff
+  have hpk : pochhammer ((a : ℂ) + 1 / 2) k ≠ 0 := pochhammer_ne_zero_of_not_neg_nat hc k
+  unfold gaussHypergeometricCoeff
   push_cast
   rw [add_comm (1 / 2 : ℂ), div_pow]
   field_simp
   ring
 
-/-- The map `(fun a : ℝ => laguerrePolyL a n (a * x) / laguerrePolyL a n 0)` tends to `(𝓝 ((1 - x)
-^ n))` along `atTop`. -/
+/-- The map `(fun a : ℝ => laguerrePolynomialL a n (a * x) / laguerrePolynomialL a n 0)` tends to
+`(𝓝 ((1 - x) ^ n))` along `atTop`. -/
 @[dlmf 18.6.E5]
-theorem laguerrePolyL_limit_monomial (n : ℕ) (x : ℂ) :
-    Tendsto (fun a : ℝ => laguerrePolyL a n (a * x) / laguerrePolyL a n 0) atTop
+theorem laguerrePolynomialL_limit_monomial (n : ℕ) (x : ℂ) :
+    Tendsto (fun a : ℝ => laguerrePolynomialL a n (a * x) / laguerrePolynomialL a n 0) atTop
         (𝓝 ((1 - x) ^ n)) := by
-  rw [← sum_poch_neg_nat_div_factorial_mul_pow]
+  rw [← sum_pochhammer_neg_nat_div_factorial_mul_pow]
   have hlim : Tendsto (fun a : ℝ => ∑ k ∈ Finset.range (n + 1),
-      poch (-(n : ℂ)) k / k ! * x ^ k * (poch (1 + a) k / (a : ℂ) ^ k)⁻¹) atTop
-      (𝓝 (∑ k ∈ Finset.range (n + 1), poch (-(n : ℂ)) k / k ! * x ^ k * 1⁻¹)) := by
+      pochhammer (-(n : ℂ)) k / k ! * x ^ k * (pochhammer (1 + a) k / (a : ℂ) ^ k)⁻¹) atTop
+      (𝓝 (∑ k ∈ Finset.range (n + 1), pochhammer (-(n : ℂ)) k / k ! * x ^ k * 1⁻¹)) := by
     apply tendsto_finsetSum
     intro k _
-    exact ((tendsto_poch_add_div_pow 1 k).inv₀ one_ne_zero).const_mul _
+    exact ((tendsto_pochhammer_add_div_pow 1 k).inv₀ one_ne_zero).const_mul _
   simp only [inv_one, mul_one] at hlim
   refine hlim.congr' ?_
   filter_upwards [eventually_gt_atTop 0] with a ha
   have ha' : (a : ℂ) ≠ 0 := ofReal_ne_zero.mpr ha.ne'
   have hα : ∀ k : ℕ, (a : ℂ) + 1 ≠ -k := not_neg_nat_of_re_pos (by simp; linarith)
-  have hp : poch ((a : ℂ) + 1) n / n ! ≠ 0 :=
-    div_ne_zero (poch_ne_zero_of_not_neg_nat hα n) (Nat.cast_ne_zero.mpr n.factorial_ne_zero)
-  unfold laguerrePolyL
+  have hp : pochhammer ((a : ℂ) + 1) n / n ! ≠ 0 :=
+    div_ne_zero (pochhammer_ne_zero_of_not_neg_nat hα n) (Nat.cast_ne_zero.mpr n.factorial_ne_zero)
+  unfold laguerrePolynomialL
   rw [kummerM_zero, mul_one, mul_div_cancel_left₀ _ hp, kummerM_eq_sum_neg_nat]
   refine Finset.sum_congr rfl fun k _ => ?_
   have hk : (k ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr k.factorial_ne_zero
-  have hpk : poch ((a : ℂ) + 1) k ≠ 0 := poch_ne_zero_of_not_neg_nat hα k
+  have hpk : pochhammer ((a : ℂ) + 1) k ≠ 0 := pochhammer_ne_zero_of_not_neg_nat hα k
   rw [add_comm (1 : ℂ)]
   field_simp
   ring
 
-/-- The map `(fun b : ℝ => jacobiPolyP α b n (1 - 2 * x / b))` tends to `(𝓝 (laguerrePolyL α n
-x))` along `atTop`. -/
+/-- The map `(fun b : ℝ => jacobiPolynomialP α b n (1 - 2 * x / b))` tends to
+`(𝓝 (laguerrePolynomialL α n x))` along `atTop`. -/
 @[dlmf 18.7.E21]
-theorem jacobi_limit_laguerrePolyL {α : ℂ} (n : ℕ) (x : ℂ) :
-    Tendsto (fun b : ℝ => jacobiPolyP α b n (1 - 2 * x / b)) atTop (𝓝 (laguerrePolyL α n x)) := by
-  unfold laguerrePolyL
+theorem jacobi_limit_laguerrePolynomialL {α : ℂ} (n : ℕ) (x : ℂ) :
+    Tendsto (fun b : ℝ => jacobiPolynomialP α b n (1 - 2 * x / b)) atTop
+        (𝓝 (laguerrePolynomialL α n x)) := by
+  unfold laguerrePolynomialL
   rw [kummerM_eq_sum_neg_nat]
-  unfold jacobiPolyP
+  unfold jacobiPolynomialP
   apply Tendsto.const_mul
   have hlim : Tendsto (fun b : ℝ => ∑ k ∈ Finset.range (n + 1),
-      poch (-(n : ℂ)) k / (poch (α + 1) k * k !) * x ^ k *
-        (poch ((n : ℂ) + α + 1 + b) k / (b : ℂ) ^ k))
-      atTop (𝓝 (∑ k ∈ Finset.range (n + 1), poch (-(n : ℂ)) k / (poch (α + 1) k * k !) * x ^ k *
+      pochhammer (-(n : ℂ)) k / (pochhammer (α + 1) k * k !) * x ^ k *
+        (pochhammer ((n : ℂ) + α + 1 + b) k / (b : ℂ) ^ k))
+      atTop (𝓝 (∑ k ∈ Finset.range (n + 1), pochhammer (-(n : ℂ)) k /
+          (pochhammer (α + 1) k * k !) * x ^ k *
         1)) := by
     apply tendsto_finsetSum
     intro k _
-    exact (tendsto_poch_add_div_pow _ k).const_mul _
+    exact (tendsto_pochhammer_add_div_pow _ k).const_mul _
   simp only [mul_one] at hlim
   refine hlim.congr' ?_
   filter_upwards [eventually_gt_atTop 0] with b hb
   have hb' : (b : ℂ) ≠ 0 := ofReal_ne_zero.mpr hb.ne'
   rw [ordinaryHypergeometric_eq_sum_neg_nat]
   refine Finset.sum_congr rfl fun k _ => ?_
-  unfold gaussHGCoeff
+  unfold gaussHypergeometricCoeff
   rw [show (1 - (1 - 2 * x / b)) / 2 = x / b by ring,
     show (n : ℂ) + α + b + 1 = n + α + 1 + b by ring, div_pow]
   field_simp
 
-/-- The map `(fun a : ℝ => jacobiPolyP a β n (2 * x / a - 1))` tends to `(𝓝 ((-1 : ℂ) ^ n *
-laguerrePolyL β n x))` along `atTop`. -/
+/-- The map `(fun a : ℝ => jacobiPolynomialP a β n (2 * x / a - 1))` tends to `(𝓝 ((-1 : ℂ) ^ n *
+laguerrePolynomialL β n x))` along `atTop`. -/
 @[dlmf 18.7.E22]
-theorem jacobi_limit_laguerrePolyL_reflected {β : ℂ} (hβ : -1 < β.re) (n : ℕ) (x : ℂ) :
-    Tendsto (fun a : ℝ => jacobiPolyP a β n (2 * x / a - 1)) atTop
-        (𝓝 ((-1 : ℂ) ^ n * laguerrePolyL β n x)) := by
-  refine ((jacobi_limit_laguerrePolyL (α := β) n x).const_mul ((-1 : ℂ) ^ n)).congr' ?_
+theorem jacobi_limit_laguerrePolynomialL_reflected {β : ℂ} (hβ : -1 < β.re) (n : ℕ) (x : ℂ) :
+    Tendsto (fun a : ℝ => jacobiPolynomialP a β n (2 * x / a - 1)) atTop
+        (𝓝 ((-1 : ℂ) ^ n * laguerrePolynomialL β n x)) := by
+  refine ((jacobi_limit_laguerrePolynomialL (α := β) n x).const_mul ((-1 : ℂ) ^ n)).congr' ?_
   filter_upwards [eventually_gt_atTop 0] with a ha
   rw [show 2 * x / (a : ℂ) - 1 = -(1 - 2 * x / a) by ring,
     jacobi_reflection (by simp; linarith) hβ]
 
-/-- The map `(fun a : ℝ => (Real.sqrt a : ℂ)⁻¹ ^ n * jacobiPolyP a a n (x / Real.sqrt a))` tends
-to `(𝓝 (aeval x (hermitePolyH n) / ((2 : ℂ) ^ n * n.factorial)))` along `atTop`. -/
+/-- The map `(fun a : ℝ => (Real.sqrt a : ℂ)⁻¹ ^ n * jacobiPolynomialP a a n (x / Real.sqrt a))`
+tends to `(𝓝 (aeval x (hermitePolynomialH n) / ((2 : ℂ) ^ n * n.factorial)))` along `atTop`. -/
 @[dlmf 18.7.E23]
 theorem jacobi_limit_hermite (n : ℕ) (x : ℂ) :
-    Tendsto (fun a : ℝ => (Real.sqrt a : ℂ)⁻¹ ^ n * jacobiPolyP a a n (x / Real.sqrt a)) atTop
-      (𝓝 (aeval x (hermitePolyH n) / ((2 : ℂ) ^ n * n.factorial))) := by
+    Tendsto (fun a : ℝ => (Real.sqrt a : ℂ)⁻¹ ^ n * jacobiPolynomialP a a n (x / Real.sqrt a)) atTop
+      (𝓝 (aeval x (hermitePolynomialH n) / ((2 : ℂ) ^ n * n.factorial))) := by
   have hc (c : ℂ) (d : ℂ) : Tendsto (fun a : ℝ => d + c / (a : ℂ)) atTop (𝓝 d) := by
     simpa using (tendsto_const_div_ofReal_atTop c).const_add d
   refine tendsto_of_three_term (f := fun n a => (Real.sqrt a : ℂ)⁻¹ ^ n *
-      jacobiPolyP a a n (x / Real.sqrt a))
-    (g := fun n => aeval x (hermitePolyH n) / ((2 : ℂ) ^ n * (n ! : ℂ)))
+      jacobiPolynomialP a a n (x / Real.sqrt a))
+    (g := fun n => aeval x (hermitePolynomialH n) / ((2 : ℂ) ^ n * (n ! : ℂ)))
     (A := fun n a => x * ((2 + (2 * n + 3) / (a : ℂ)) * (1 + (n + 2) / (a : ℂ))) /
       ((n + 2) * (2 + (n + 2) / (a : ℂ))))
     (B := fun n a => -((1 + (n + 1) / (a : ℂ)) * (1 + (n + 2) / (a : ℂ))) /
@@ -283,7 +290,7 @@ theorem jacobi_limit_hermite (n : ℕ) (x : ℂ) :
     have hs : (Real.sqrt a : ℂ) ≠ 0 := ofReal_ne_zero.mpr (Real.sqrt_pos.mpr ha).ne'
     have hs2 : (a : ℂ) = (Real.sqrt a : ℂ) ^ 2 := by
       rw [← ofReal_pow, Real.sq_sqrt ha.le]
-    rw [jacobiPolyP_one_eq (by simp; linarith), hs2]
+    rw [jacobiPolynomialP_one_eq (by simp; linarith), hs2]
     field_simp
     ring
   · intro n
@@ -316,20 +323,22 @@ theorem jacobi_limit_hermite (n : ℕ) (x : ℂ) :
     have hn1 : (n : ℂ) + 1 ≠ 0 := by exact_mod_cast (by omega : n + 1 ≠ 0)
     have hf : (n ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
     have hn2 : (n : ℂ) + 1 + 1 ≠ 0 := by exact_mod_cast (by omega : n + 1 + 1 ≠ 0)
-    simp only [hermitePolyH_recurrence, map_sub, map_mul, aeval_X, aeval_C, map_ofNat,
+    simp only [hermitePolynomialH_recurrence, map_sub, map_mul, aeval_X, aeval_C, map_ofNat,
       Nat.factorial_succ]
     push_cast
     field_simp
     ring
 
-/-- The map `(fun a : ℝ => (Real.sqrt a : ℂ)⁻¹ ^ n * ultrasphPoly a n (x / Real.sqrt a))` tends to
-`(𝓝 (aeval x (hermitePolyH n) / (n.factorial : ℂ)))` along `atTop`. -/
+/-- The map `(fun a : ℝ => (Real.sqrt a : ℂ)⁻¹ ^ n * ultrasphericalPolynomial a n (x / Real.sqrt
+a))` tends to `(𝓝 (aeval x (hermitePolynomialH n) / (n.factorial : ℂ)))` along `atTop`. -/
 @[dlmf 18.7.E24]
-theorem ultrasphPoly_limit_hermite (n : ℕ) (x : ℂ) :
-    Tendsto (fun a : ℝ => (Real.sqrt a : ℂ)⁻¹ ^ n * ultrasphPoly a n (x / Real.sqrt a)) atTop
-      (𝓝 (aeval x (hermitePolyH n) / (n.factorial : ℂ))) := by
+theorem ultrasphericalPolynomial_limit_hermite (n : ℕ) (x : ℂ) :
+    Tendsto (fun a : ℝ => (Real.sqrt a : ℂ)⁻¹ ^ n *
+        ultrasphericalPolynomial a n (x / Real.sqrt a)) atTop
+      (𝓝 (aeval x (hermitePolynomialH n) / (n.factorial : ℂ))) := by
   refine tendsto_of_three_term (f := fun n a => (Real.sqrt a : ℂ)⁻¹ ^ n *
-      ultrasphPoly a n (x / Real.sqrt a)) (g := fun n => aeval x (hermitePolyH n) / (n ! : ℂ))
+      ultrasphericalPolynomial a n (x / Real.sqrt a))
+          (g := fun n => aeval x (hermitePolynomialH n) / (n ! : ℂ))
     (A := fun n a => 2 * x / (n + 2) * (1 + (n + 1) / (a : ℂ)))
     (B := fun n a => -(1 / (n + 2)) * (2 + n / (a : ℂ)))
     (A' := fun n => 2 * x / (n + 2)) (B' := fun n => -(1 / (n + 2)) * 2) ?_ ?_ ?_ ?_ ?_ ?_ n
@@ -339,8 +348,8 @@ theorem ultrasphPoly_limit_hermite (n : ℕ) (x : ℂ) :
     have hs : (Real.sqrt a : ℂ) ≠ 0 := ofReal_ne_zero.mpr (Real.sqrt_pos.mpr ha).ne'
     have hs2 : (Real.sqrt a : ℂ) ^ 2 = a := by
       rw [← ofReal_pow, Real.sq_sqrt ha.le]
-    rw [ultrasphPoly_one_eq (by simp; linarith)]
-    simp only [hermitePolyH_one, map_mul, aeval_X, Nat.factorial_one, Nat.cast_one, div_one,
+    rw [ultrasphericalPolynomial_one_eq (by simp; linarith)]
+    simp only [hermitePolynomialH_one, map_mul, aeval_X, Nat.factorial_one, Nat.cast_one, div_one,
       pow_one]
     rw [← hs2]
     field_simp
@@ -358,7 +367,8 @@ theorem ultrasphPoly_limit_hermite (n : ℕ) (x : ℂ) :
     have hs2 : (a : ℂ) = (Real.sqrt a : ℂ) ^ 2 := by
       rw [← ofReal_pow, Real.sq_sqrt ha.le]
     have hn : (n : ℂ) + 2 ≠ 0 := by exact_mod_cast (by omega : n + 2 ≠ 0)
-    have hr := ultrasphPoly_recurrence (lam := a) (by simp; linarith) n (x / Real.sqrt a)
+    have hr := ultrasphericalPolynomial_recurrence (lam := a) (by simp; linarith) n
+        (x / Real.sqrt a)
     rw [hs2] at hr ⊢
     simp only [inv_pow]
     field_simp
@@ -369,17 +379,18 @@ theorem ultrasphPoly_limit_hermite (n : ℕ) (x : ℂ) :
     have hn1 : (n : ℂ) + 1 ≠ 0 := by exact_mod_cast (by omega : n + 1 ≠ 0)
     have hf : (n ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
     have hn2 : (n : ℂ) + 1 + 1 ≠ 0 := by exact_mod_cast (by omega : n + 1 + 1 ≠ 0)
-    simp only [hermitePolyH_recurrence, map_sub, map_mul, aeval_X, aeval_C, map_ofNat,
+    simp only [hermitePolynomialH_recurrence, map_sub, map_mul, aeval_X, aeval_C, map_ofNat,
       Nat.factorial_succ]
     push_cast
     field_simp
     ring
 
-/-- The map `(fun a : ℂ => (n + a) / a * ultrasphPoly a n x)` tends to `(𝓝 (if n = 0 then 1 else 2
+/-- The map `(fun a : ℂ => (n + a) / a * ultrasphericalPolynomial a n x)` tends to
+`(𝓝 (if n = 0 then 1 else 2
 * (Chebyshev.T ℂ n).eval x))` along `(𝓝[≠] 0)`. -/
 @[dlmf 18.7.E25]
-theorem ultrasphPoly_limit_chebyshev (n : ℕ) (x : ℂ) :
-    Tendsto (fun a : ℂ => (n + a) / a * ultrasphPoly a n x) (𝓝[≠] 0)
+theorem ultrasphericalPolynomial_limit_chebyshev (n : ℕ) (x : ℂ) :
+    Tendsto (fun a : ℂ => (n + a) / a * ultrasphericalPolynomial a n x) (𝓝[≠] 0)
       (𝓝 (if n = 0 then 1 else 2 * (Chebyshev.T ℂ n).eval x)) := by
   -- a punctured neighbourhood on which the recurrence is valid
   have hev : ∀ᶠ a : ℂ in 𝓝[≠] 0, a ≠ 0 ∧ ‖a‖ < 1 / 2 := by
@@ -398,7 +409,7 @@ theorem ultrasphPoly_limit_chebyshev (n : ℕ) (x : ℂ) :
     rw [h', norm_neg, Complex.norm_natCast] at ha
     have : (1 : ℝ) ≤ k := by exact_mod_cast hk
     linarith
-  refine tendsto_of_three_term (f := fun n a => (n + a) / a * ultrasphPoly a n x)
+  refine tendsto_of_three_term (f := fun n a => (n + a) / a * ultrasphericalPolynomial a n x)
     (g := fun n => if n = 0 then 1 else 2 * (Chebyshev.T ℂ n).eval x)
     (A := fun n a => (n + 2 + a) / (n + 2) * (2 * x))
     (B := fun n a => -((n + 2 + a) / (n + 2) * ((n + 2 * a) / (n + a))))
@@ -411,7 +422,7 @@ theorem ultrasphPoly_limit_chebyshev (n : ℕ) (x : ℂ) :
         continuous_const).tendsto 0 |>.mono_left nhdsWithin_le_nhds
     refine (h.congr' ?_).trans (by simp)
     filter_upwards [hev] with a ⟨ha0, ha⟩
-    rw [ultrasphPoly_one_eq (hre a ha)]
+    rw [ultrasphericalPolynomial_one_eq (hre a ha)]
     field_simp
     push_cast
     ring
@@ -446,7 +457,7 @@ theorem ultrasphPoly_limit_chebyshev (n : ℕ) (x : ℂ) :
     have hn : (n : ℂ) + 2 ≠ 0 := by exact_mod_cast (by omega : n + 2 ≠ 0)
     have h1 := hk a ha (n + 1) (by omega)
     have h2 := hk a ha (n + 2) (by omega)
-    have hr := ultrasphPoly_recurrence (hre a ha) n x
+    have hr := ultrasphericalPolynomial_recurrence (hre a ha) n x
     push_cast at h1 h2
     rcases Nat.eq_zero_or_pos n with rfl | hpos
     · simp only [CharP.cast_eq_zero, zero_add] at hr h1 h2 ⊢
@@ -467,14 +478,14 @@ theorem ultrasphPoly_limit_chebyshev (n : ℕ) (x : ℂ) :
       simp
       ring
 
-/-- The map `(fun a : ℝ => (Real.sqrt (2 / a) : ℂ) ^ n * laguerrePolyL a n ((Real.sqrt (2 * a) :
-ℂ) * x + a))` tends to `(𝓝 ((-1 : ℂ) ^ n / n.factorial * aeval x (hermitePolyH n)))` along
+/-- The map `(fun a : ℝ => (Real.sqrt (2 / a) : ℂ) ^ n * laguerrePolynomialL a n ((Real.sqrt (2 * a)
+: ℂ) * x + a))` tends to `(𝓝 ((-1 : ℂ) ^ n / n.factorial * aeval x (hermitePolynomialH n)))` along
 `atTop`. -/
 @[dlmf 18.7.E26]
-theorem laguerrePolyL_limit_hermite (n : ℕ) (x : ℂ) :
+theorem laguerrePolynomialL_limit_hermite (n : ℕ) (x : ℂ) :
     Tendsto (fun a : ℝ => (Real.sqrt (2 / a) : ℂ) ^ n
-        * laguerrePolyL a n ((Real.sqrt (2 * a) : ℂ) * x + a)) atTop
-      (𝓝 ((-1 : ℂ) ^ n / n.factorial * aeval x (hermitePolyH n))) := by
+        * laguerrePolynomialL a n ((Real.sqrt (2 * a) : ℂ) * x + a)) atTop
+      (𝓝 ((-1 : ℂ) ^ n / n.factorial * aeval x (hermitePolynomialH n))) := by
   have hr0 : Tendsto (fun a : ℝ => (Real.sqrt (2 / a) : ℂ)) atTop (𝓝 0) := by
     have h1 : Tendsto (fun a : ℝ => 2 / a) atTop (𝓝 0) :=
       tendsto_const_nhds.div_atTop tendsto_id
@@ -493,16 +504,16 @@ theorem laguerrePolyL_limit_hermite (n : ℕ) (x : ℂ) :
       all_goals norm_num
     · rw [← ofReal_pow, Real.sq_sqrt (by positivity), ← ofReal_mul, div_mul_cancel₀ _ ha.ne']
       all_goals norm_num
-  have hlag1 : ∀ α y : ℂ, α + 1 ≠ 0 → laguerrePolyL α 1 y = α + 1 - y := by
+  have hlag1 : ∀ α y : ℂ, α + 1 ≠ 0 → laguerrePolynomialL α 1 y = α + 1 - y := by
     intro α y hα
-    unfold laguerrePolyL
+    unfold laguerrePolynomialL
     rw [kummerM_eq_sum_neg_nat]
-    simp [Finset.sum_range_succ, poch_one, poch_zero]
+    simp [Finset.sum_range_succ, pochhammer_one, pochhammer_zero]
     field_simp
     ring
   refine tendsto_of_three_term (f := fun n a => (Real.sqrt (2 / a) : ℂ) ^ n *
-      laguerrePolyL a n ((Real.sqrt (2 * a) : ℂ) * x + a))
-    (g := fun n => (-1 : ℂ) ^ n / (n ! : ℂ) * aeval x (hermitePolyH n))
+      laguerrePolynomialL a n ((Real.sqrt (2 * a) : ℂ) * x + a))
+    (g := fun n => (-1 : ℂ) ^ n / (n ! : ℂ) * aeval x (hermitePolynomialH n))
     (A := fun n a => ((2 * n + 3) * (Real.sqrt (2 / a) : ℂ) - 2 * x) / (n + 2))
     (B := fun n a => -(2 + 2 * (n + 1) / (a : ℂ)) / (n + 2))
     (A' := fun n => -(2 * x) / (n + 2)) (B' := fun n => -2 / (n + 2)) ?_ ?_ ?_ ?_ ?_ ?_ n
@@ -528,41 +539,41 @@ theorem laguerrePolyL_limit_hermite (n : ℕ) (x : ℂ) :
     filter_upwards [eventually_gt_atTop 0] with a ha
     have ha' : (a : ℂ) ≠ 0 := ofReal_ne_zero.mpr ha.ne'
     have hn : (n : ℂ) + 2 ≠ 0 := by exact_mod_cast (by omega : n + 2 ≠ 0)
-    have hl := laguerrePolyL_recurrence (α := a) (by simp; linarith) n
+    have hl := laguerrePolynomialL_recurrence (α := a) (by simp; linarith) n
       ((Real.sqrt (2 * a) : ℂ) * x + a)
     obtain ⟨h1, h2⟩ := hsq a ha
     set r : ℂ := (Real.sqrt (2 / a) : ℂ)
     set s : ℂ := (Real.sqrt (2 * a) : ℂ)
     field_simp
     linear_combination r ^ (n + 2) * a * hl -
-      a * r ^ (n + 1) * x * laguerrePolyL a (n + 1) (s * x + a) * h1 -
-      (n + a + 1) * r ^ n * laguerrePolyL a n (s * x + a) * h2
+      a * r ^ (n + 1) * x * laguerrePolynomialL a (n + 1) (s * x + a) * h1 -
+      (n + a + 1) * r ^ n * laguerrePolynomialL a n (s * x + a) * h2
   · intro n
     have hn : (n : ℂ) + 2 ≠ 0 := by exact_mod_cast (by omega : n + 2 ≠ 0)
     have hn1 : (n : ℂ) + 1 ≠ 0 := by exact_mod_cast (by omega : n + 1 ≠ 0)
     have hf : (n ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
     have hn2 : (n : ℂ) + 1 + 1 ≠ 0 := by exact_mod_cast (by omega : n + 1 + 1 ≠ 0)
-    simp only [hermitePolyH_recurrence, map_sub, map_mul, aeval_X, aeval_C, map_ofNat,
+    simp only [hermitePolynomialH_recurrence, map_sub, map_mul, aeval_X, aeval_C, map_ofNat,
       Nat.factorial_succ]
     push_cast
     field_simp
     ring
 
 /-- The normalized terminating numerator Pochhammer symbol has norm at most one. -/
-private lemma norm_poch_neg_nat_div_pow_le_one {n : ℕ} (hn : 0 < n) (k : ℕ) :
-    ‖poch (-(n : ℂ)) k / (n : ℂ) ^ k‖ ≤ 1 := by
-  simp only [poch_neg_coe_nat, norm_div, norm_mul, norm_pow, norm_neg, norm_one, one_pow,
+private lemma norm_pochhammer_neg_nat_div_pow_le_one {n : ℕ} (hn : 0 < n) (k : ℕ) :
+    ‖pochhammer (-(n : ℂ)) k / (n : ℂ) ^ k‖ ≤ 1 := by
+  simp only [pochhammer_neg_coe_nat, norm_div, norm_mul, norm_pow, norm_neg, norm_one, one_pow,
     one_mul, Complex.norm_natCast]
   apply (div_le_one (pow_pos (by exact_mod_cast hn) k)).mpr
   exact_mod_cast Nat.descFactorial_le_pow n k
 
 /-- A bound for the other Jacobi numerator, restricted to its terminating range. -/
-private lemma norm_poch_nat_add_div_pow_le (c : ℂ) {n : ℕ} (hn : 0 < n) {k : ℕ} (hk : k ≤ n) :
-    ‖poch ((n : ℂ) + c) k / (n : ℂ) ^ k‖ ≤ (2 + ‖c‖) ^ k := by
+private lemma norm_pochhammer_nat_add_div_pow_le (c : ℂ) {n : ℕ} (hn : 0 < n) {k : ℕ} (hk : k ≤ n) :
+    ‖pochhammer ((n : ℂ) + c) k / (n : ℂ) ^ k‖ ≤ (2 + ‖c‖) ^ k := by
   have hnR : (1 : ℝ) ≤ n := by exact_mod_cast hn
   have hn0 : (0 : ℝ) < n := by exact_mod_cast hn
   induction k with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ k ih =>
     have hkn : k ≤ n := by omega
     have hb : ‖((n : ℂ) + c + k) / n‖ ≤ 2 + ‖c‖ := by
@@ -572,9 +583,9 @@ private lemma norm_poch_nat_add_div_pow_le (c : ℂ) {n : ℕ} (hn : 0 < n) {k :
       simp only [Complex.norm_natCast] at ht ht'
       have hkR : (k : ℝ) ≤ n := by exact_mod_cast hkn
       nlinarith [norm_nonneg c]
-    have he : poch ((n : ℂ) + c) (k + 1) / (n : ℂ) ^ (k + 1) =
-        (poch ((n : ℂ) + c) k / (n : ℂ) ^ k) * (((n : ℂ) + c + k) / n) := by
-      rw [poch_succ, pow_succ]
+    have he : pochhammer ((n : ℂ) + c) (k + 1) / (n : ℂ) ^ (k + 1) =
+        (pochhammer ((n : ℂ) + c) k / (n : ℂ) ^ k) * (((n : ℂ) + c + k) / n) := by
+      rw [pochhammer_succ, pow_succ]
       ring
     rw [he, norm_mul, pow_succ]
     exact mul_le_mul (ih hkn) hb (norm_nonneg _) (by positivity)
@@ -583,8 +594,8 @@ private lemma norm_poch_nat_add_div_pow_le (c : ℂ) {n : ℕ} (hn : 0 < n) {k :
 private lemma tendsto_jacobi_scaled_series (c b : ℂ) {wseq : ℕ → ℂ} {w : ℂ}
     (hw : Tendsto wseq atTop (𝓝 w)) :
     Tendsto (fun n : ℕ => ∑' k : ℕ,
-      (poch (-(n : ℂ)) k / (n : ℂ) ^ k) *
-      (poch ((n : ℂ) + c) k / (n : ℂ) ^ k) *
+      (pochhammer (-(n : ℂ)) k / (n : ℂ) ^ k) *
+      (pochhammer ((n : ℂ) + c) k / (n : ℂ) ^ k) *
       wseq n ^ k * regularizedHGFunCoeff ∅ {b} k) atTop
       (𝓝 (regularizedHGFun ∅ {b} (-w))) := by
   let D : ℝ := 2 + ‖c‖
@@ -598,30 +609,30 @@ private lemma tendsto_jacobi_scaled_series (c b : ℂ) {wseq : ℕ → ℂ} {w :
       abs_of_nonneg (by dsimp [D, R]; positivity)]
     ring
   have hpoint (k : ℕ) : Tendsto (fun n : ℕ =>
-      (poch (-(n : ℂ)) k / (n : ℂ) ^ k) *
-      (poch ((n : ℂ) + c) k / (n : ℂ) ^ k) *
+      (pochhammer (-(n : ℂ)) k / (n : ℂ) ^ k) *
+      (pochhammer ((n : ℂ) + c) k / (n : ℂ) ^ k) *
       wseq n ^ k * regularizedHGFunCoeff ∅ {b} k) atTop
       (𝓝 ((-1 : ℂ) ^ k * w ^ k * regularizedHGFunCoeff ∅ {b} k)) := by
-    have hn := (tendsto_poch_sub_div_pow 0 k).comp
+    have hn := (tendsto_pochhammer_sub_div_pow 0 k).comp
       (tendsto_natCast_atTop_atTop (R := ℝ))
-    have hp := (tendsto_poch_add_div_pow c k).comp
+    have hp := (tendsto_pochhammer_add_div_pow c k).comp
       (tendsto_natCast_atTop_atTop (R := ℝ))
     simp only [zero_sub, ofReal_neg] at hn hp
     have h := ((hn.mul hp).mul (hw.pow k)).mul_const (regularizedHGFunCoeff ∅ {b} k)
     simpa only [Function.comp_apply, ofReal_natCast, mul_one, add_comm c] using h
   have hbnd : ∀ᶠ (n : ℕ) in atTop, ∀ k : ℕ,
-      ‖(poch (-(n : ℂ)) k / (n : ℂ) ^ k) *
-        (poch ((n : ℂ) + c) k / (n : ℂ) ^ k) *
+      ‖(pochhammer (-(n : ℂ)) k / (n : ℂ) ^ k) *
+        (pochhammer ((n : ℂ) + c) k / (n : ℂ) ^ k) *
         wseq n ^ k * regularizedHGFunCoeff ∅ {b} k‖ ≤
         (D * R) ^ k * ‖regularizedHGFunCoeff ∅ {b} k‖ := by
     have hwB : ∀ᶠ n in atTop, ‖wseq n‖ < R :=
       hw.norm.eventually (gt_mem_nhds (by dsimp [R]; linarith))
     filter_upwards [eventually_gt_atTop (0 : ℕ), hwB] with n hn hwB k
     by_cases hk : k ≤ n
-    · have hneg := norm_poch_neg_nat_div_pow_le_one hn k
-      have hpos := norm_poch_nat_add_div_pow_le c hn hk
-      have hprod : ‖poch (-(n : ℂ)) k / (n : ℂ) ^ k‖ *
-          ‖poch ((n : ℂ) + c) k / (n : ℂ) ^ k‖ ≤ D ^ k := by
+    · have hneg := norm_pochhammer_neg_nat_div_pow_le_one hn k
+      have hpos := norm_pochhammer_nat_add_div_pow_le c hn hk
+      have hprod : ‖pochhammer (-(n : ℂ)) k / (n : ℂ) ^ k‖ *
+          ‖pochhammer ((n : ℂ) + c) k / (n : ℂ) ^ k‖ ≤ D ^ k := by
         exact (mul_le_mul hneg hpos (norm_nonneg _) zero_le_one).trans_eq (one_mul _)
       simp only [norm_mul, norm_pow]
       calc
@@ -630,7 +641,7 @@ private lemma tendsto_jacobi_scaled_series (c b : ℂ) {wseq : ℕ → ℂ} {w :
             (mul_le_mul hprod (pow_le_pow_left₀ (norm_nonneg _) hwB.le k)
               (by positivity) (by dsimp [D]; positivity)) (norm_nonneg _)
         _ = _ := by rw [mul_pow]
-    · rw [poch_neg_nat_eq_zero (by omega : n < k)]
+    · rw [pochhammer_neg_nat_eq_zero (by omega : n < k)]
       simp only [zero_div, zero_mul, norm_zero]
       positivity
   -- Mathlib’s Tannery theorem applies with an entire regularized Bessel series majorant.
@@ -645,27 +656,27 @@ private lemma tendsto_jacobi_scaled_series (c b : ℂ) {wseq : ℕ → ℂ} {w :
 /-- The finite Jacobi series with reciprocal Gamma coefficients. -/
 private lemma jacobi_eq_Gamma_mul_scaled_series {α : ℝ} (hα : -1 < α) (β : ℂ)
     {n : ℕ} (hn : 0 < n) (w : ℂ) :
-    jacobiPolyP α β n (1 - 2 * w / (n : ℂ) ^ 2) =
+    jacobiPolynomialP α β n (1 - 2 * w / (n : ℂ) ^ 2) =
       Gamma ((n : ℂ) + α + 1) / n.factorial *
-        ∑' k : ℕ, (poch (-(n : ℂ)) k / (n : ℂ) ^ k) *
-          (poch ((n : ℂ) + (α + β + 1)) k / (n : ℂ) ^ k) *
+        ∑' k : ℕ, (pochhammer (-(n : ℂ)) k / (n : ℂ) ^ k) *
+          (pochhammer ((n : ℂ) + (α + β + 1)) k / (n : ℂ) ^ k) *
           w ^ k * regularizedHGFunCoeff ∅ {(α : ℂ) + 1} k := by
   have hnC : (n : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
   have ha : 0 < ((α : ℂ) + 1).re := by simp; linarith
   have hG : Gamma ((α : ℂ) + 1) ≠ 0 := Gamma_ne_zero_of_re_pos ha
-  have hp (k : ℕ) : poch ((α : ℂ) + 1) k ≠ 0 :=
-    poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos ha) k
-  have hGn : Gamma ((n : ℂ) + α + 1) = poch ((α : ℂ) + 1) n * Gamma ((α : ℂ) + 1) := by
+  have hp (k : ℕ) : pochhammer ((α : ℂ) + 1) k ≠ 0 :=
+    pochhammer_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos ha) k
+  have hGn : Gamma ((n : ℂ) + α + 1) = pochhammer ((α : ℂ) + 1) n * Gamma ((α : ℂ) + 1) := by
     rw [show (n : ℂ) + α + 1 = ((α : ℂ) + 1) + n by ring]
-    exact DLMF.Hypergeometric.Gamma_add_nat_eq_poch_mul_Gamma ha n
+    exact DLMF.Hypergeometric.Gamma_add_nat_eq_pochhammer_mul_Gamma ha n
   rw [tsum_eq_sum (s := Finset.range (n + 1)) (fun k hk => by
-    rw [poch_neg_nat_eq_zero (by simp only [Finset.mem_range, not_lt] at hk; omega)]
-    simp), jacobiPolyP, ordinaryHypergeometric_eq_sum_neg_nat,
+    rw [pochhammer_neg_nat_eq_zero (by simp only [Finset.mem_range, not_lt] at hk; omega)]
+    simp), jacobiPolynomialP, ordinaryHypergeometric_eq_sum_neg_nat,
     Finset.mul_sum, Finset.mul_sum]
   apply Finset.sum_congr rfl
   intro k hk
-  rw [regularizedHGFunCoeff_empty, gaussHGCoeff, hGn,
-    DLMF.Hypergeometric.Gamma_add_nat_eq_poch_mul_Gamma ha k,
+  rw [regularizedHGFunCoeff_empty, gaussHypergeometricCoeff, hGn,
+    DLMF.Hypergeometric.Gamma_add_nat_eq_pochhammer_mul_Gamma ha k,
     show (1 - (1 - 2 * w / (n : ℂ) ^ 2)) / 2 = w / (n : ℂ) ^ 2 by ring,
     show (n : ℂ) + α + β + 1 = n + (α + β + 1) by ring,
     div_pow, show ((n : ℂ) ^ 2) ^ k = ((n : ℂ) ^ k) ^ 2 by ring]
@@ -675,7 +686,7 @@ private lemma jacobi_eq_Gamma_mul_scaled_series {α : ℝ} (hα : -1 < α) (β :
 theorem jacobi_mehler_heine_regularized {α : ℝ} (hα : -1 < α) (β : ℂ)
     {wseq : ℕ → ℂ} {w : ℂ} (hw : Tendsto wseq atTop (𝓝 w)) :
     Tendsto (fun n : ℕ => (Real.rpow (n : ℝ) (-α) : ℂ) *
-      jacobiPolyP α β n (1 - 2 * wseq n / (n : ℂ) ^ 2)) atTop
+      jacobiPolynomialP α β n (1 - 2 * wseq n / (n : ℂ) ^ 2)) atTop
       (𝓝 (regularizedHGFun ∅ {(α : ℂ) + 1} (-w))) := by
   have hR := (DLMF.Gamma.Gamma_ratio_power (a := (α : ℂ) + 1) (b := 1)).comp
     (tendsto_natCast_atTop_atTop (R := ℝ))
@@ -696,7 +707,8 @@ theorem jacobi_mehler_heine_regularized {α : ℝ} (hα : -1 < α) (β : ℂ)
 /-- The Jacobi Mehler–Heine formula with the original Bessel normalization. -/
 @[dlmf 18.11.E5]
 theorem jacobi_mehler_heine {α β : ℝ} (hα : -1 < α) {z : ℝ} (hz : 0 < z) :
-    Tendsto (fun n : ℕ => (Real.rpow (n : ℝ) (-α) : ℂ) * jacobiPolyP α β n (cos ((z : ℂ) / n)))
+    Tendsto (fun n : ℕ => (Real.rpow (n : ℝ) (-α) : ℂ) *
+        jacobiPolynomialP α β n (cos ((z : ℂ) / n)))
         atTop
       (𝓝 ((Real.rpow (2 / z) α : ℂ) * besselJ α z)) := by
   let wseq (n : ℕ) : ℂ := (n : ℂ) ^ 2 * ((1 - cos ((z : ℂ) / n)) / 2)
@@ -750,8 +762,8 @@ theorem jacobi_mehler_heine {α β : ℝ} (hα : -1 < α) {z : ℝ} (hz : 0 < z)
   rfl
 
 /-- The complex scaled Laguerre limit, without choosing a square-root branch. -/
-theorem laguerrePolyL_mehler_heine_regularized {α : ℝ} (hα : -1 < α) (z : ℂ) :
-    Tendsto (fun n : ℕ => (Real.rpow (n : ℝ) (-α) : ℂ) * laguerrePolyL α n (z / n))
+theorem laguerrePolynomialL_mehler_heine_regularized {α : ℝ} (hα : -1 < α) (z : ℂ) :
+    Tendsto (fun n : ℕ => (Real.rpow (n : ℝ) (-α) : ℂ) * laguerrePolynomialL α n (z / n))
       atTop (𝓝 (regularizedHGFun ∅ {(α : ℂ) + 1} (-z))) := by
   have hc : ∀ k : ℕ, (α : ℂ) + 1 ≠ -(k : ℂ) := by
     intro k hk
@@ -768,7 +780,7 @@ theorem laguerrePolyL_mehler_heine_regularized {α : ℝ} (hα : -1 < α) (z : �
   filter_upwards [eventually_gt_atTop (0 : ℕ)] with n hn
   have hnR : (0 : ℝ) < n := by exact_mod_cast hn
   have hnC : (n : ℂ) ≠ 0 := by exact_mod_cast hn.ne'
-  rw [laguerrePolyL_eq_Gamma_mul_regularized hc]
+  rw [laguerrePolynomialL_eq_Gamma_mul_regularized hc]
   simp only [Function.comp_apply, ofReal_natCast, zero_sub, ofReal_neg]
   have hp : (Real.rpow (n : ℝ) (-α) : ℂ) = (n : ℂ) ^ (-(α : ℂ)) := by
     change (((n : ℝ) ^ (-α) : ℝ) : ℂ) = _
@@ -777,13 +789,14 @@ theorem laguerrePolyL_mehler_heine_regularized {α : ℝ} (hα : -1 < α) (z : �
     show (n : ℂ) + ((α : ℂ) + 1) = n + α + 1 by ring]
   ring
 
-/-- The map `(fun n : ℕ => (Real.rpow (n : ℝ) (-α) : ℂ) * laguerrePolyL α n ((z : ℂ) / n))` tends
-to `(𝓝 ((Real.rpow z (-α / 2) : ℂ) * besselJ α (2 * Real.sqrt z)))` along `atTop`. -/
+/-- The map `(fun n : ℕ => (Real.rpow (n : ℝ) (-α) : ℂ) * laguerrePolynomialL α n ((z : ℂ) / n))`
+tends to `(𝓝 ((Real.rpow z (-α / 2) : ℂ) * besselJ α (2 * Real.sqrt z)))` along `atTop`. -/
 @[dlmf 18.11.E6]
-theorem laguerrePolyL_mehler_heine {α : ℝ} (hα : -1 < α) {z : ℝ} (hz : 0 < z) :
-    Tendsto (fun n : ℕ => (Real.rpow (n : ℝ) (-α) : ℂ) * laguerrePolyL α n ((z : ℂ) / n)) atTop
+theorem laguerrePolynomialL_mehler_heine {α : ℝ} (hα : -1 < α) {z : ℝ} (hz : 0 < z) :
+    Tendsto (fun n : ℕ => (Real.rpow (n : ℝ) (-α) : ℂ) *
+        laguerrePolynomialL α n ((z : ℂ) / n)) atTop
       (𝓝 ((Real.rpow z (-α / 2) : ℂ) * besselJ α (2 * Real.sqrt z))) := by
-  have h := laguerrePolyL_mehler_heine_regularized hα (z : ℂ)
+  have h := laguerrePolynomialL_mehler_heine_regularized hα (z : ℂ)
   convert h using 1
   have hs : 0 < 2 * Real.sqrt z := by positivity
   have hJ := besselJ_ofReal_eq α hs
@@ -803,14 +816,14 @@ theorem laguerrePolyL_mehler_heine {α : ℝ} (hα : -1 < α) {z : ℝ} (hz : 0 
   rw [hp, ofReal_one, one_mul]
 
 /-- The map `(fun n : ℕ => (-1 : ℂ) ^ n * Real.sqrt n / (2 ^ (2 * n) * (n.factorial : ℂ)) * aeval
-(z / (2 * (Real.sqrt n : ℂ))) (hermitePolyH (2 * n)))` tends to `(𝓝 (cos z / (Real.sqrt
+(z / (2 * (Real.sqrt n : ℂ))) (hermitePolynomialH (2 * n)))` tends to `(𝓝 (cos z / (Real.sqrt
 Real.pi : ℂ)))` along `atTop`. -/
 @[dlmf 18.11.E7]
 theorem hermite_even_mehler_heine (z : ℂ) :
     Tendsto (fun n : ℕ => (-1 : ℂ) ^ n * Real.sqrt n / (2 ^ (2 * n) * (n.factorial : ℂ)) *
-      aeval (z / (2 * (Real.sqrt n : ℂ))) (hermitePolyH (2 * n))) atTop
+      aeval (z / (2 * (Real.sqrt n : ℂ))) (hermitePolynomialH (2 * n))) atTop
       (𝓝 (cos z / (Real.sqrt Real.pi : ℂ))) := by
-  have h := laguerrePolyL_mehler_heine_regularized (α := -1 / 2) (by norm_num) (z ^ 2 / 4)
+  have h := laguerrePolynomialL_mehler_heine_regularized (α := -1 / 2) (by norm_num) (z ^ 2 / 4)
   norm_num only [ofReal_neg, ofReal_div, ofReal_one, ofReal_ofNat] at h
   have hΓ : Gamma (1 / 2 : ℂ) = (Real.sqrt Real.pi : ℂ) := by
     rw [show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by norm_num, Gamma_ofReal, Real.Gamma_one_half_eq]
@@ -824,7 +837,7 @@ theorem hermite_even_mehler_heine (z : ℂ) :
   have hf : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
   have harg : (z / (2 * (Real.sqrt n : ℂ))) ^ 2 = (z ^ 2 / 4) / n := by
     rw [div_pow, mul_pow, hs]; ring
-  rw [hermitePolyH_even_eq_laguerrePolyL, harg]
+  rw [hermitePolynomialH_even_eq_laguerrePolynomialL, harg]
   have hnPow : Real.rpow (n : ℝ) (1 / 2) = Real.sqrt n := by
     change (n : ℝ) ^ (1 / 2 : ℝ) = Real.sqrt n
     exact (Real.sqrt_eq_rpow _).symm
@@ -838,14 +851,14 @@ theorem hermite_even_mehler_heine (z : ℂ) :
   simp only [hsgn2, mul_one]
 
 /-- The map `(fun n : ℕ => (-1 : ℂ) ^ n / (2 ^ (2 * n) * (n.factorial : ℂ)) * aeval (z / (2 *
-(Real.sqrt n : ℂ))) (hermitePolyH (2 * n + 1)))` tends to `(𝓝 (2 * sin z / (Real.sqrt Real.pi
+(Real.sqrt n : ℂ))) (hermitePolynomialH (2 * n + 1)))` tends to `(𝓝 (2 * sin z / (Real.sqrt Real.pi
 : ℂ)))` along `atTop`. -/
 @[dlmf 18.11.E8]
 theorem hermite_odd_mehler_heine (z : ℂ) :
     Tendsto (fun n : ℕ => (-1 : ℂ) ^ n / (2 ^ (2 * n) * (n.factorial : ℂ)) *
-      aeval (z / (2 * (Real.sqrt n : ℂ))) (hermitePolyH (2 * n + 1))) atTop
+      aeval (z / (2 * (Real.sqrt n : ℂ))) (hermitePolynomialH (2 * n + 1))) atTop
       (𝓝 (2 * sin z / (Real.sqrt Real.pi : ℂ))) := by
-  have h := (laguerrePolyL_mehler_heine_regularized (α := 1 / 2) (by norm_num)
+  have h := (laguerrePolynomialL_mehler_heine_regularized (α := 1 / 2) (by norm_num)
       (z ^ 2 / 4)).const_mul z
   norm_num only [ofReal_div, ofReal_one, ofReal_ofNat] at h
   have hΓ : Gamma (1 / 2 : ℂ) = (Real.sqrt Real.pi : ℂ) := by
@@ -868,7 +881,7 @@ theorem hermite_odd_mehler_heine (z : ℂ) :
   have hnPow : Real.rpow (n : ℝ) (-(1 / 2)) = (Real.sqrt n)⁻¹ := by
     change (n : ℝ) ^ (-(1 / 2 : ℝ)) = (Real.sqrt n)⁻¹
     rw [Real.rpow_neg hnR.le, Real.sqrt_eq_rpow]
-  rw [hermitePolyH_odd_eq_laguerrePolyL, harg, hnPow, ofReal_inv,
+  rw [hermitePolynomialH_odd_eq_laguerrePolynomialL, harg, hnPow, ofReal_inv,
     pow_succ (2 : ℂ) (2 * n)]
   have hsgn : (-1 : ℂ) ^ n * (-1) ^ n = 1 := by rw [← mul_pow]; norm_num
   have htwo : (2 : ℂ) ^ (2 * n) ≠ 0 := pow_ne_zero _ (by norm_num)

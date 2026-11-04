@@ -45,10 +45,12 @@ parameter `m = k² < 1`:
 
 Names follow Miller's DLMF content dictionaries, with the argument convention as the last letter:
 `k` for the modulus, `m = k²` for the parameter, `Tau` or `Q` for the theta functions in `τ` or in
-the nome `q`. The real-variable functions live in `DLMF.Elliptic.Real`: `Real.compEllIntKm`,
-`Real.compEllIntEm`, `Real.compEllIntPim`, `Real.incEllIntFm`, `Real.incEllIntEm`,
-`Real.incEllIntPim`, `Real.jacobiAmm`, `Real.jacobiSnm`, `Real.jacobiCnm`, `Real.jacobiDnm`,
-`Real.jacobiArcsnm`, and the theta constants `Real.jacobiThetaThreeNullQ`,
-`Real.jacobiThetaFourNullQ`. The complex theta functions are `jacobiThetaOneTau`, …,
-`jacobiThetaFourTau`. The argument order is DLMF's, e.g. `Π(φ, n, m)`.
+the nome `q`. The real-variable functions live in `DLMF.Elliptic.Real`:
+`Real.completeEllipticKOfParameter`, `Real.completeEllipticEOfParameter`,
+`Real.completeEllipticPiOfParameter`, `Real.incompleteEllipticFOfParameter`,
+`Real.incompleteEllipticEOfParameter`, `Real.incompleteEllipticPiOfParameter`,
+`Real.jacobiAmOfParameter`, `Real.jacobiSnOfParameter`, `Real.jacobiCnOfParameter`,
+`Real.jacobiDnOfParameter`, `Real.jacobiArcsnOfParameter`, and the theta constants
+`Real.jacobiThetaThreeNullQ`, `Real.jacobiThetaFourNullQ`. The complex theta functions are
+`jacobiThetaOneTau`, …, `jacobiThetaFourTau`. The argument order is DLMF's, e.g. `Π(φ, n, m)`.
 -/

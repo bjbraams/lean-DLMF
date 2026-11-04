@@ -48,10 +48,11 @@ noncomputable section
 namespace DLMF.Hypergeometric
 
 /-- The coefficients of `₂F₁(1, 1; 2; z)` are `1/(n + 1)`. -/
-theorem gaussHGCoeff_one_one_two (n : ℕ) : gaussHGCoeff 1 1 2 n = 1 / (n + 1 : ℂ) := by
+theorem gaussHypergeometricCoeff_one_one_two (n : ℕ) : gaussHypergeometricCoeff 1 1 2 n = 1 /
+    (n + 1 : ℂ) := by
   have hfact : ((n + 1)! : ℂ) = (n ! : ℂ) * (n + 1) := by
     rw [Nat.factorial_succ, Nat.cast_mul, Nat.cast_add, Nat.cast_one, mul_comm]
-  rw [gaussHGCoeff, poch_nat_one, poch_nat_two, hfact]
+  rw [gaussHypergeometricCoeff, pochhammer_nat_one, pochhammer_nat_two, hfact]
   field [Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero n)]
 
 /-- The series `₂F₁(1, 1; 2; z)` has radius of convergence `1`. -/
@@ -83,7 +84,7 @@ theorem hasSum_ordinaryHypergeometric_one_one_two {x : ℂ} (hx : ‖x‖ < 1) :
     refine funext fun (n : ℕ) => ?_
     rw [ordinaryHypergeometricSeries_apply_eq]
     change ordinaryHypergeometricCoefficient 1 1 2 n • (-x) ^ n = _
-    rw [ordinaryHypergeometricCoefficient_eq, gaussHGCoeff_one_one_two, smul_eq_mul]
+    rw [ordinaryHypergeometricCoefficient_eq, gaussHypergeometricCoeff_one_one_two, smul_eq_mul]
     ring
   rwa [heq] at hs
 
@@ -106,19 +107,19 @@ theorem log_one_add_eq_ordinaryHypergeometric {x : ℂ} (hx : ‖x‖ < 1) :
   exact hlog.unique hF
 
 /-- Helper lemma for `arctan_eq_ordinaryHypergeometric`. -/
-theorem gaussHGCoeff_half_one_three_halves (n : ℕ) :
-    gaussHGCoeff (1 / 2) 1 (3 / 2) n = 1 / (2 * n + 1 : ℂ) := by
+theorem gaussHypergeometricCoeff_half_one_three_halves (n : ℕ) :
+    gaussHypergeometricCoeff (1 / 2) 1 (3 / 2) n = 1 / (2 * n + 1 : ℂ) := by
   have hne : (2 * n + 1 : ℂ) ≠ 0 := by
     have : (0 : ℝ) ≤ n := Nat.cast_nonneg n
     intro h
     have : (2 * n + 1 : ℝ) = 0 := by simpa using congrArg Complex.re h
     linarith
-  have hp : poch (1 / 2 : ℂ) n ≠ 0 :=
-    poch_ne_zero_of_not_neg_nat (fun k hk => by
+  have hp : pochhammer (1 / 2 : ℂ) n ≠ 0 :=
+    pochhammer_ne_zero_of_not_neg_nat (fun k hk => by
       have : ((1 : ℝ) / 2) = -k := by simpa using congrArg Complex.re hk
       have : (0 : ℝ) ≤ k := Nat.cast_nonneg k
       linarith) n
-  rw [gaussHGCoeff, poch_nat_one, poch_three_halves_eq]
+  rw [gaussHypergeometricCoeff, pochhammer_nat_one, pochhammer_three_halves_eq]
   field [Nat.cast_ne_zero.mpr n.factorial_ne_zero, hne, hp]
 
 /-- Helper lemma for `arctan_eq_ordinaryHypergeometric`. -/
@@ -159,7 +160,8 @@ theorem hasSum_ordinaryHypergeometric_half_one_three_halves {x : ℂ} (hx : ‖x
     refine funext fun (n : ℕ) => ?_
     rw [ordinaryHypergeometricSeries_apply_eq]
     change ordinaryHypergeometricCoefficient (1 / 2) 1 (3 / 2) n • (-(x ^ 2)) ^ n = _
-    rw [ordinaryHypergeometricCoefficient_eq, gaussHGCoeff_half_one_three_halves, smul_eq_mul]
+    rw [ordinaryHypergeometricCoefficient_eq,
+        gaussHypergeometricCoeff_half_one_three_halves, smul_eq_mul]
     ring
   rwa [heq] at hs
 

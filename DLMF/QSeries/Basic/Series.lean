@@ -13,7 +13,7 @@ public import DLMF.QSeries.Basic.Pochhammer
 ## Main definitions
 
 * `qPochhammerInt`: the integer-index `q`-Pochhammer symbol (AAR (10.5.2)).
-* `basicHG`: the basic hypergeometric series `ᵣφₛ` with `r = s + 1` (AAR §10.9).
+* `basicHypergeometric`: the basic hypergeometric series `ᵣφₛ` with `r = s + 1` (AAR §10.9).
 * `qGegenbauer`: the Laurent form of the `q`-ultraspherical polynomials (DLMF 18.28.13,
   AAR (10.11.1)).
 * `TripleProduct.tri`, `TripleProduct.term`: the exponent `n(n-1)/2` as an integer and the
@@ -34,7 +34,7 @@ def qPochhammerInt (a q : ℂ) : ℤ → ℂ
   | .negSucc n => (qPochhammer (a * q ^ (-(n + 1 : ℤ))) q (n + 1))⁻¹
 
 /-- Basic hypergeometric series `ᵣφₛ` with `r = s + 1` (AAR §10.9). -/
-def basicHG (a b : List ℂ) (q z : ℂ) : ℂ :=
+def basicHypergeometric (a b : List ℂ) (q z : ℂ) : ℂ :=
   ∑' n : ℕ,
     (a.map fun ai => qPochhammer ai q n).prod /
         ((b.map fun bi => qPochhammer bi q n).prod * qPochhammer q q n) * z ^ n

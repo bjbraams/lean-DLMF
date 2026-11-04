@@ -14,6 +14,6 @@ public import DLMF.EllipticIntegrals.Connection.ParameterChanges
 
 This umbrella collects DLMF 19.7.1–19.7.10: Legendre's relation and the modulus changes of the
 complete integrals, the reciprocal- and imaginary-modulus transformations of the incomplete
-integrals, and the imaginary-argument and parameter changes. Here `k' = jacobiComodulusk k`
-(principal), `c = csc²φ` and `R_C = symEllIntRC`.
+integrals, and the imaginary-argument and parameter changes. Here `k' = jacobiComodulus k`
+(principal), `c = csc²φ` and `R_C = symmetricEllipticRC`.
 -/

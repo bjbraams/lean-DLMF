@@ -15,12 +15,12 @@ modulus `k` with `k² < 1`.
 
 ## Main definitions
 
-* `Real.jacobiEpsilonk`: `ℰ(x, k) = ∫₀ˣ dn²(t, k) dt` (DLMF 22.16.17).
-* `Real.jacobiZetaFunctionk`: `Z(x|k) = ℰ(x, k) - (E(k)/K(k)) x` (DLMF 22.16.32).
+* `Real.jacobiEpsilon`: `ℰ(x, k) = ∫₀ˣ dn²(t, k) dt` (DLMF 22.16.17).
+* `Real.jacobiZeta`: `Z(x|k) = ℰ(x, k) - (E(k)/K(k)) x` (DLMF 22.16.32).
 
 ## Main results
 
-* `Real.jacobiEpsilonk_zero`, `Real.jacobiZetaFunctionk_zero`: `ℰ(0, k) = Z(0|k) = 0`.
+* `Real.jacobiEpsilon_zero`, `Real.jacobiZeta_zero`: `ℰ(0, k) = Z(0|k) = 0`.
 
 ## Implementation notes
 
@@ -40,22 +40,23 @@ namespace DLMF.JacobiElliptic
 with `k² < 1` (DLMF 22.16.17, valid for all real `x`; DLMF's 22.16.14 is the equivalent form for
 `-K < x < K`). Miller's `JacobiEpsilon`. -/
 @[dlmf 22.16.E17]
-def Real.jacobiEpsilonk (x k : ℝ) : ℝ := ∫ t in (0 : ℝ)..x, Real.jacobiDnm t (k ^ 2) ^ 2
+def Real.jacobiEpsilon (x k : ℝ) : ℝ := ∫ t in (0 : ℝ)..x, Real.jacobiDnOfParameter t (k ^ 2) ^ 2
 
 /-- Jacobi's Zeta function `Z(x|k) = ℰ(x, k) - (E(k)/K(k)) x` for real `x` (DLMF 22.16.32);
 Miller's `JacobiZeta`. -/
 @[dlmf 22.16.E32]
-def Real.jacobiZetaFunctionk (x k : ℝ) : ℝ :=
-  Real.jacobiEpsilonk x k - Real.compEllIntEm (k ^ 2) / Real.compEllIntKm (k ^ 2) * x
+def Real.jacobiZeta (x k : ℝ) : ℝ :=
+  Real.jacobiEpsilon x k - Real.completeEllipticEOfParameter (k ^ 2) /
+      Real.completeEllipticKOfParameter (k ^ 2) * x
 
 /-- `ℰ(0, k) = 0`. -/
 @[simp]
-theorem Real.jacobiEpsilonk_zero (k : ℝ) : Real.jacobiEpsilonk 0 k = 0 := by
-  simp [Real.jacobiEpsilonk]
+theorem Real.jacobiEpsilon_zero (k : ℝ) : Real.jacobiEpsilon 0 k = 0 := by
+  simp [Real.jacobiEpsilon]
 
 /-- `Z(0|k) = 0`. -/
 @[simp]
-theorem Real.jacobiZetaFunctionk_zero (k : ℝ) : Real.jacobiZetaFunctionk 0 k = 0 := by
-  simp [Real.jacobiZetaFunctionk]
+theorem Real.jacobiZeta_zero (k : ℝ) : Real.jacobiZeta 0 k = 0 := by
+  simp [Real.jacobiZeta]
 
 end DLMF.JacobiElliptic

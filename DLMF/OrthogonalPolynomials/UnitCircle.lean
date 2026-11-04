@@ -7,6 +7,7 @@ module
 
 public import DLMF.QSeries.Pochhammer
 public import DLMF.Hypergeometric.Basic.SpecialValues
+public import DLMF.OrthogonalPolynomials.SzegoAskeyOrthogonality
 public import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
 public import Mathlib.Analysis.SpecialFunctions.Bernstein
 /-!
@@ -23,8 +24,8 @@ Verblunsky's theorem, and the Szegő–Askey polynomials and their `q`-analogue.
 * `reflectedPolynomial`: reverse-conjugation at a given degree (DLMF 18.33.22).
 * `verblunskyCoefficient`: the Verblunsky coefficient `α_n = -conj(φ_{n+1}(0))`
   (DLMF 18.33.25).
-* `szegoAskey`, `szegoAskeyQ`: the Szegő–Askey polynomials and their `q`-analogue
-  (DLMF 18.33.13, 18.33.15).
+* `szegoAskeyQ`: the `q`-analogue (DLMF 18.33.15) of the Szegő–Askey polynomials
+  `szegoAskey` (DLMF 18.33.13, defined in `DLMF.OrthogonalPolynomials.SzegoAskeyOrthogonality`).
 * `ip`: the `L²(μ)` inner product of two polynomials.
 
 ## Main results
@@ -71,12 +72,6 @@ def IsUnitCircleOP (μ : Measure ℂ) (p : ℕ → ℂ[X]) : Prop :=
 (DLMF 18.33.25). -/
 @[dlmf 18.33.E25]
 def verblunskyCoefficient (p : ℕ → ℂ[X]) (n : ℕ) : ℂ := -star ((p (n + 1)).eval 0)
-
-/-- The Szegő–Askey polynomials `∑_k (λ+1)_k (λ)_{n-k} / (k! (n-k)!) zᵏ` (DLMF 18.33.13). -/
-@[dlmf 18.33.E13]
-def szegoAskey (lam : ℂ) (n : ℕ) (z : ℂ) : ℂ :=
-  ∑ k ∈ Finset.range (n + 1), poch (lam + 1) k * poch lam (n - k) /
-    ((k.factorial : ℂ) * (n - k).factorial) * z ^ k
 
 /-- The `q`-analogue of the Szegő–Askey polynomials (DLMF 18.33.15). -/
 @[dlmf 18.33.E15]
@@ -560,8 +555,8 @@ unit circle (DLMF 18.33.14). -/
 @[dlmf 18.33.E14]
 theorem szegoAskey_orthogonal {lam : ℝ} (hlam : -1 / 2 < lam) {m n : ℕ} (hmn : m ≠ n) :
     ∫ θ : ℝ in (0 : ℝ)..(2 * Real.pi), szegoAskey lam m (exp (I * θ)) *
-      star (szegoAskey lam n (exp (I * θ))) * (Real.rpow (1 - Real.cos θ) lam : ℂ) = 0 := by
-  sorry
+      star (szegoAskey lam n (exp (I * θ))) * (Real.rpow (1 - Real.cos θ) lam : ℂ) = 0 :=
+  SzegoAskeyOrthogonality.integral_szegoAskey_mul_star_szegoAskey hlam hmn
 
 /-- Orthogonality of the `q`-Szegő–Askey polynomials on the unit circle (DLMF 18.33.16). -/
 @[dlmf 18.33.E16]

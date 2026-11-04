@@ -40,7 +40,7 @@ namespace DLMF.MatrixArgument
 /-! ### The beta integral 35.3.3
 
 Congruence by a Cholesky factor of `T` scales the beta integrand on `0 < X < T` to the one on
-`0 < X < I`; Fubini applied to `∫∫ etr(-X)|X|^{a-(m+1)/2} etr(-Y)|Y|^{b-(m+1)/2}` with the
+`0 < X < I`; Fubini applied to `∫∫ expTrace(-X)|X|^{a-(m+1)/2} expTrace(-Y)|Y|^{b-(m+1)/2}` with the
 translation `T = X + Y` then gives `Γ_m(a) Γ_m(b) = Γ_m(a + b) B_m(a, b)`. -/
 
 /-- Integrability of the indicated kernel: `Integrable (fun A => f
@@ -240,7 +240,7 @@ private lemma hasIntegralOn_matrixInterval_multivariateBeta {m : ℕ} (hm : 1 �
   have hmr : (1 : ℝ) ≤ m := by exact_mod_cast hm
   have hab : ((m : ℝ) - 1) / 2 < (a + b).re := by rw [Complex.add_re]; linarith
   set g : ℂ → SymMatrix m → ℂ := fun s => (posDefCone m).indicator (fun X : SymMatrix m =>
-    (etr (-(X : Matrix (Fin m) (Fin m) ℝ)) : ℂ) *
+    (expTrace (-(X : Matrix (Fin m) (Fin m) ℝ)) : ℂ) *
       (((X : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ (s - P))) with hg
   have hgint : ∀ s : ℂ, ((m : ℝ) - 1) / 2 < s.re → Integrable (g s) Λ :=
     fun s hs => (integrable_indicator_iff hmc).mpr (multivariateGamma_eq_integral hs).1
@@ -251,7 +251,7 @@ private lemma hasIntegralOn_matrixInterval_multivariateBeta {m : ℕ} (hm : 1 �
   have hgm : ∀ s : ℂ, Measurable (g s) := by
     intro s
     refine Measurable.indicator ?_ hmc
-    unfold etr
+    unfold expTrace
     exact (Complex.measurable_ofReal.comp (Real.measurable_exp.comp
       continuous_subtype_val.neg.matrix_trace.measurable)).mul (measurable_det_cpow _)
   set K : SymMatrix m → SymMatrix m → ℂ := fun X T => g a X * g b (T - X) with hKdef
@@ -270,7 +270,7 @@ private lemma hasIntegralOn_matrixInterval_multivariateBeta {m : ℕ} (hm : 1 �
       (((X : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ (a - P)) *
       (((T - (X : Matrix (Fin m) (Fin m) ℝ)).det : ℂ) ^ (b - P))) X with hβ
   have hKβ : ∀ X T : SymMatrix m,
-      K X T = (etr (-(T : Matrix (Fin m) (Fin m) ℝ)) : ℂ) * β T X := by
+      K X T = (expTrace (-(T : Matrix (Fin m) (Fin m) ℝ)) : ℂ) * β T X := by
     intro X T
     simp only [hKdef, hg, hβ]
     by_cases hX : X ∈ posDefCone m
@@ -279,10 +279,10 @@ private lemma hasIntegralOn_matrixInterval_multivariateBeta {m : ℕ} (hm : 1 �
           (mem_matrixInterval_zero_iff _ X).mpr ⟨hX, hTX⟩
         rw [Set.indicator_of_mem hX, Set.indicator_of_mem hTX, Set.indicator_of_mem hXI,
           Submodule.coe_sub]
-        have he : (etr (-(X : Matrix (Fin m) (Fin m) ℝ)) : ℂ) *
-            (etr (-((T : Matrix (Fin m) (Fin m) ℝ) - (X : Matrix (Fin m) (Fin m) ℝ))) : ℂ) =
-            (etr (-(T : Matrix (Fin m) (Fin m) ℝ)) : ℂ) := by
-          unfold etr
+        have he : (expTrace (-(X : Matrix (Fin m) (Fin m) ℝ)) : ℂ) *
+            (expTrace (-((T : Matrix (Fin m) (Fin m) ℝ) - (X : Matrix (Fin m) (Fin m) ℝ))) : ℂ) =
+            (expTrace (-(T : Matrix (Fin m) (Fin m) ℝ)) : ℂ) := by
+          unfold expTrace
           rw [← Complex.ofReal_mul, ← Real.exp_add, Matrix.trace_neg, Matrix.trace_neg,
             Matrix.trace_neg, Matrix.trace_sub]
           ring_nf
@@ -307,9 +307,9 @@ private lemma hasIntegralOn_matrixInterval_multivariateBeta {m : ℕ} (hm : 1 �
     (ae_restrict_mem hmc)).exists
   have hTpos : (T : Matrix (Fin m) (Fin m) ℝ).PosDef := hTΩ
   have hβT : Integrable (β T) Λ := by
-    have he : (etr (-(T : Matrix (Fin m) (Fin m) ℝ)) : ℂ) ≠ 0 := by
-      unfold etr; exact Complex.ofReal_ne_zero.mpr (Real.exp_pos _).ne'
-    have := hTint.const_mul (etr (-(T : Matrix (Fin m) (Fin m) ℝ)) : ℂ)⁻¹
+    have he : (expTrace (-(T : Matrix (Fin m) (Fin m) ℝ)) : ℂ) ≠ 0 := by
+      unfold expTrace; exact Complex.ofReal_ne_zero.mpr (Real.exp_pos _).ne'
+    have := hTint.const_mul (expTrace (-(T : Matrix (Fin m) (Fin m) ℝ)) : ℂ)⁻¹
     refine this.congr (Filter.Eventually.of_forall fun X => ?_)
     simp only [Function.uncurry_apply_pair]
     rw [hKβ, ← mul_assoc, inv_mul_cancel₀ he, one_mul]
@@ -326,7 +326,7 @@ private lemma hasIntegralOn_matrixInterval_multivariateBeta {m : ℕ} (hm : 1 �
     rw [integral_mul_const, hgval a ha]
   have hright : ∫ T, ∫ X, K X T ∂Λ ∂Λ = J * multivariateGamma m (a + b) := by
     have : ∀ T : SymMatrix m, ∫ X, K X T ∂Λ = (posDefCone m).indicator (fun T : SymMatrix m =>
-        (etr (-(T : Matrix (Fin m) (Fin m) ℝ)) : ℂ) *
+        (expTrace (-(T : Matrix (Fin m) (Fin m) ℝ)) : ℂ) *
           (((T : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ (a + b - P)) * J) T := by
       intro T
       simp_rw [hKβ]
@@ -378,7 +378,7 @@ theorem multivariateBeta_eq_integral {m : ℕ} {a b : ℂ} (ha : ((m : ℝ) - 1)
       simp [multivariateBeta, multivariateGamma]
     rw [hv, hset]
     refine hasIntegralOn_posDefCone_congr h fun X _ => ?_
-    simp [etr, Matrix.det_isEmpty, Matrix.trace]
+    simp [expTrace, Matrix.det_isEmpty, Matrix.trace]
   · exact hasIntegralOn_matrixInterval_multivariateBeta hm ha hb
 
 /-- DLMF 35.3.6: `Γ_m(a, …, a) = Γ_m(a)`. -/

@@ -26,16 +26,16 @@ Gauss's arithmetic-geometric mean and its use for computing the complete integra
 * `agmSeq_succ`, `tendsto_agmSeq`: the recursion 19.8.1 and convergence to `M(a₀, g₀)`.
 * `agmSeqC_succ`: DLMF 19.8.3.
 * `inv_agm_eq_integral`: `1/M(a₀, g₀)` as an integral (DLMF 19.8.4).
-* `compEllIntKk_eq_pi_div_agm`, `compEllIntEk_eq_agm`: `K` and `E` by the AGM
+* `completeEllipticK_eq_pi_div_agm`, `completeEllipticE_eq_agm`: `K` and `E` by the AGM
   (DLMF 19.8.5, 19.8.6).
-* `compEllIntPik_eq_agm`, `compEllIntPik_eq_agm_of_one_lt`: `Π(α², k)` by the AGM
+* `completeEllipticPi_eq_agm`, `completeEllipticPi_eq_agm_of_one_lt`: `Π(α², k)` by the AGM
   (DLMF 19.8.7, 19.8.9–19.8.10).
 * `landen_descending_amplitude`: the descending Landen modulus and amplitude (DLMF 19.8.11).
 * `compEllInt_landen_descending_ofReal`, `compEllInt_landen_descending`: the descending Landen
   transformation of `K` and `E` for real and complex `k` (DLMF 19.8.12).
-* `incEllInt_landen_descending`, `incEllIntPik_landen_descending`: DLMF 19.8.13–19.8.15.
+* `incEllInt_landen_descending`, `incompleteEllipticPi_landen_descending`: DLMF 19.8.13–19.8.15.
 * `incEllInt_landen_ascending`: the ascending Landen transformation (DLMF 19.8.16–19.8.17).
-* `incEllInt_gauss`, `incEllIntPik_gauss`: the descending Gauss transformation
+* `incEllInt_gauss`, `incompleteEllipticPi_gauss`: the descending Gauss transformation
   (DLMF 19.8.18–19.8.21).
 
 ## Implementation notes
@@ -43,14 +43,15 @@ Gauss's arithmetic-geometric mean and its use for computing the complete integra
 * The sequences `agmSeqA`, `agmSeqG` are read off Mathlib's `NNReal.agmSequences` (which lists
   `(g_{n+1}, a_{n+1})`), and `M(a₀, g₀)` is Mathlib's `NNReal.agm`.
 * DLMF 19.8.5 for complex `k` with real `k² < 1` follows from the real
-  `DLMF.Elliptic.Real.compEllIntKm_eq_pi_div_agm`. DLMF 19.8.6 is proved from `lean-codes`'
-  `Carlson.hasSum_agmA_zero` and `Carlson.carlsonRE_eq_agm` (Carlson, Exercises 9.5-3/9.5-4),
-  with `E(k) = (π/2) R_E(1, k'²)` and `K(k) = (π/2) R_K(1, k'²)` from 19.25.1, for all real
-  `k² < 1`.
+  `DLMF.Elliptic.Real.completeEllipticKOfParameter_eq_pi_div_agm`. DLMF 19.8.6 is proved from
+  `lean-codes`' `Carlson.hasSum_agmA_zero` and `Carlson.carlsonRE_eq_agm` (Carlson, Exercises
+  9.5-3/9.5-4), with `E(k) = (π/2) R_E(1, k'²)` and `K(k) = (π/2) R_K(1, k'²)` from 19.25.1, for all
+  real `k² < 1`.
 * The Landen and Gauss transformations are stated for real `0 < k < 1` and real amplitudes, as
   in DLMF's notes. DLMF 19.8.12 for real `k² < 1` comes from the real
-  `Real.compEllIntKm_landen_descending` and `Real.compEllIntEm_landen_descending`, and for
-  complex `k` with `1 - k² ∈ ℂ \ (-∞, 0]` from the real case by the identity theorem.
+  `Real.completeEllipticKOfParameter_landen_descending` and
+  `Real.completeEllipticEOfParameter_landen_descending`, and for complex `k` with
+  `1 - k² ∈ ℂ \ (-∞, 0]` from the real case by the identity theorem.
 
 ## References
 
@@ -166,20 +167,21 @@ theorem inv_agm_eq_integral {a₀ g₀ : ℝ≥0} (ha : 0 < a₀) (hg : 0 < g₀
   have hz : (((g₀ : ℝ) : ℂ) ^ 2) ∈ slitPlane := by
     rw [← ofReal_pow]; exact ofReal_mem_slitPlane.2 (by positivity)
   have hK := Carlson.TwoVariable.carlsonRK_sq_eq_inv_agm ha hg
-  have hRF := symEllIntRF_zero_left hy hz
-  rw [symEllIntR_of_mem _ _ (vec2_mem_carlsonRSlitDomain hy hz)] at hRF
+  have hRF := symmetricEllipticRF_zero_left hy hz
+  rw [symmetricEllipticR_of_mem _ _ (vec2_mem_carlsonRSlitDomain hy hz)] at hRF
   have hRK : Carlson.carlsonR (-(1 / 2)) ![1 / 2, 1 / 2] ![((a₀ : ℝ) : ℂ) ^ 2, ((g₀ : ℝ) : ℂ) ^ 2] =
       Carlson.TwoVariable.carlsonRK (((a₀ : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) := by
     unfold Carlson.TwoVariable.carlsonRK Carlson.TwoVariable.pair
     congr 1; ring
-  rw [hRK, hK, symEllIntRF] at hRF
-  have hint : ∫ t in Ioi (0 : ℝ), (symEllIntS 0 (((a₀ : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) t)⁻¹ =
+  rw [hRK, hK, symmetricEllipticRF] at hRF
+  have hint : ∫ t in Ioi (0 : ℝ),
+      (carlsonRootProduct 0 (((a₀ : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) t)⁻¹ =
       ((∫ t in Ioi (0 : ℝ),
         (t * (t + (a₀ : ℝ) ^ 2) * (t + (g₀ : ℝ) ^ 2)) ^ (-(1 / 2) : ℝ) : ℝ) : ℂ) := by
     rw [← integral_complex_ofReal]
     refine setIntegral_congr_fun measurableSet_Ioi fun t ht => ?_
     have ht' : (0 : ℝ) < t := ht
-    simp only [symEllIntS, add_zero]
+    simp only [carlsonRootProduct, add_zero]
     rw [show (((a₀ : ℝ) : ℂ) ^ 2) = (((a₀ : ℝ) ^ 2 : ℝ) : ℂ) by push_cast; rfl,
       show (((g₀ : ℝ) : ℂ) ^ 2) = (((g₀ : ℝ) ^ 2 : ℝ) : ℂ) by push_cast; rfl,
       ← ofReal_add, ← ofReal_add,
@@ -200,9 +202,10 @@ theorem inv_agm_eq_integral {a₀ g₀ : ℝ≥0} (ha : 0 < a₀) (hg : 0 < g₀
 /-- DLMF 19.8.5: `K(k) = π/(2M(1, k'))` for `-∞ < k² < 1` (complex `k` with real `k² = m < 1`,
 `k' = √(1 - m)`). -/
 @[dlmf 19.8.E5]
-theorem compEllIntKk_eq_pi_div_agm {k : ℂ} {m : ℝ} (hk : k ^ 2 = m) (hm : m < 1) :
-    compEllIntKk k = π / (2 * (NNReal.agm 1 (NNReal.sqrt (1 - m).toNNReal) : ℝ)) := by
-  rw [compEllIntKk_eq_ofReal hk hm.le, DLMF.Elliptic.Real.compEllIntKm_eq_pi_div_agm hm]
+theorem completeEllipticK_eq_pi_div_agm {k : ℂ} {m : ℝ} (hk : k ^ 2 = m) (hm : m < 1) :
+    completeEllipticK k = π / (2 * (NNReal.agm 1 (NNReal.sqrt (1 - m).toNNReal) : ℝ)) := by
+  rw [completeEllipticK_eq_ofReal hk hm.le,
+      DLMF.Elliptic.Real.completeEllipticKOfParameter_eq_pi_div_agm hm]
   push_cast; rfl
 
 /-- Bridge between lean-codes' `Carlson.agmSeq` and DLMF's `agmSeqA`, `agmSeqG`. -/
@@ -231,12 +234,12 @@ The sum is written with `cₙ² = aₙ² - gₙ²` (DLMF 19.8.2), so that `c₀�
 Corrected 2026-10-25: the earlier `agmSeqC 1 g₀ n ^ 2` is a real square root and gave `c₀ = 0`
 for `m < 0`, which made the first identity false (mpmath at `m = -1`). -/
 @[dlmf 19.8.E6]
-theorem compEllIntEk_eq_agm {k : ℂ} {m : ℝ} (hk : k ^ 2 = m) (hm : m < 1) :
+theorem completeEllipticE_eq_agm {k : ℂ} {m : ℝ} (hk : k ^ 2 = m) (hm : m < 1) :
     let g₀ : ℝ≥0 := NNReal.sqrt (1 - m).toNNReal
     HasSum (fun n : ℕ => (2 : ℝ) ^ ((n : ℤ) - 1) *
         ((agmSeqA 1 g₀ n : ℝ) ^ 2 - (agmSeqG 1 g₀ n : ℝ) ^ 2))
-        (1 - (compEllIntEk k).re * (2 * (NNReal.agm 1 g₀ : ℝ)) / π) ∧
-      compEllIntEk k = compEllIntKk k * ((agmSeqA 1 g₀ 1 : ℝ) ^ 2 -
+        (1 - (completeEllipticE k).re * (2 * (NNReal.agm 1 g₀ : ℝ)) / π) ∧
+      completeEllipticE k = completeEllipticK k * ((agmSeqA 1 g₀ 1 : ℝ) ^ 2 -
         ∑' n : ℕ, (2 : ℝ) ^ (n + 1) * agmSeqC 1 g₀ (n + 2) ^ 2 : ℝ) := by
   intro g₀
   have hm1 : 0 < 1 - m := by linarith
@@ -250,16 +253,16 @@ theorem compEllIntEk_eq_agm {k : ℂ} {m : ℝ} (hk : k ^ 2 = m) (hm : m < 1) :
   have hg2s : ((g₀ : ℝ) : ℂ) ^ 2 ∈ slitPlane := hg2 ▸ hslit
   have h1s : ((1 : ℝ) : ℂ) ^ 2 ∈ slitPlane := by simp
   -- `E = (π/2) R_E(1, g₀²)` and `K = (π/2) R_K(1, g₀²)`
-  have hE : compEllIntEk k = (π / 2) *
+  have hE : completeEllipticE k = (π / 2) *
       Carlson.carlsonRE (((1 : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) := by
-    rw [(compEllIntEk_eq_symEllInt hslit).1, ← hg2,
-      symEllIntRG_zero_eq_carlsonRE hg2s one_mem_slitPlane,
+    rw [(completeEllipticE_eq_symmetricElliptic hslit).1, ← hg2,
+      symmetricEllipticRG_zero_eq_carlsonRE hg2s one_mem_slitPlane,
       carlsonRE_comm_of_mem_slitPlane hg2s one_mem_slitPlane]
     push_cast; ring_nf
-  have hK : compEllIntKk k =
+  have hK : completeEllipticK k =
       (π / 2) * Carlson.TwoVariable.carlsonRK (((1 : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) := by
-    rw [compEllIntKk_eq_symEllIntRF hslit, ← hg2,
-      symEllIntRF_zero_eq_carlsonRK hg2s one_mem_slitPlane,
+    rw [completeEllipticK_eq_symmetricEllipticRF hslit, ← hg2,
+      symmetricEllipticRF_zero_eq_carlsonRK hg2s one_mem_slitPlane,
       Carlson.TwoVariable.carlsonRK_comm hg2s one_mem_slitPlane]
     push_cast; rw [one_pow]
   have hRK : Carlson.TwoVariable.carlsonRK (((1 : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) =
@@ -284,7 +287,7 @@ theorem compEllIntEk_eq_agm {k : ℂ} {m : ℝ} (hk : k ^ 2 = m) (hm : m < 1) :
     have h2 := h.mul_left (-(((NNReal.agm 1 g₀ : ℝ) : ℂ)) / 2)
     have h3 : HasSum (fun n : ℕ => (((2 : ℝ) ^ ((n : ℤ) - 1) *
         ((agmSeqA 1 g₀ n : ℝ) ^ 2 - (agmSeqG 1 g₀ n : ℝ) ^ 2) : ℝ) : ℂ))
-        (1 - compEllIntEk k * (2 * ((NNReal.agm 1 g₀ : ℝ) : ℂ)) / π) := by
+        (1 - completeEllipticE k * (2 * ((NNReal.agm 1 g₀ : ℝ) : ℂ)) / π) := by
       convert h2 using 1
       · funext n
         have e : (1 : ℝ) = ((1 : ℝ≥0) : ℝ) := rfl
@@ -337,29 +340,29 @@ def agmPiEps (g₀ : ℝ≥0) (p₀ : ℝ) (n : ℕ) : ℝ :=
 `a₀ = 1`, `g₀ = k'`, `p₀² = 1 - α²` (`p₀ = √(1 - α²)`) and `Q₀ = 1`,
 `Π(α², k) = (π/(4M(1, k')))(2 + (α²/(1 - α²)) ∑ₙ Qₙ)`. -/
 @[dlmf 19.8.E7]
-theorem compEllIntPik_eq_agm {k : ℂ} {m α2 : ℝ} (hk : k ^ 2 = m) (hm : m < 1) (hα : α2 < 1) :
+theorem completeEllipticPi_eq_agm {k : ℂ} {m α2 : ℝ} (hk : k ^ 2 = m) (hm : m < 1) (hα : α2 < 1) :
     let g₀ : ℝ≥0 := NNReal.sqrt (1 - m).toNNReal
     ∃ S : ℝ, HasSum (fun n => (agmPiSeq g₀ (Real.sqrt (1 - α2)) n).2) S ∧
-      compEllIntPik α2 k = π / (4 * (NNReal.agm 1 g₀ : ℝ)) * (2 + α2 / (1 - α2) * S) := by
+      completeEllipticPi α2 k = π / (4 * (NNReal.agm 1 g₀ : ℝ)) * (2 + α2 / (1 - α2) * S) := by
   sorry
 
 /-- **Admitted.** DLMF 19.8.9–19.8.10: for `-∞ < k² < 1` (`k² = m` real) and real
 `1 < α²`, the Cauchy principal value is `Π(α², k) = (π/(4M(1, k'))) (k²/(k² - α²)) ∑ₙ Qₙ`,
 with 19.8.8 started at `p₀² = 1 - k²/α²`. -/
 @[dlmf 19.8.E9, dlmf 19.8.E10]
-theorem compEllIntPik_eq_agm_of_one_lt {k : ℂ} {m α2 : ℝ} (hk : k ^ 2 = m) (hm : m < 1)
+theorem completeEllipticPi_eq_agm_of_one_lt {k : ℂ} {m α2 : ℝ} (hk : k ^ 2 = m) (hm : m < 1)
     (hα : 1 < α2) :
     let g₀ : ℝ≥0 := NNReal.sqrt (1 - m).toNNReal
     ∃ S : ℝ, HasSum (fun n => (agmPiSeq g₀ (Real.sqrt (1 - m / α2)) n).2) S ∧
-      compEllIntPik α2 k = π / (4 * (NNReal.agm 1 g₀ : ℝ)) * (m / (m - α2)) * S := by
+      completeEllipticPi α2 k = π / (4 * (NNReal.agm 1 g₀ : ℝ)) * (m / (m - α2)) * S := by
   sorry
 
 /-! ### §19.8(ii) Landen transformations -/
 
 /-- For real `k` with `k² ≤ 1`, the principal `k' = √(1 - k²)` is the real square root. -/
-private lemma jacobiComodulusk_ofReal_of_sq_le {k : ℝ} (hk : k ^ 2 ≤ 1) :
-    jacobiComodulusk k = (Real.sqrt (1 - k ^ 2) : ℂ) := by
-  rw [jacobiComodulusk, Real.sqrt_eq_rpow, show (1 : ℂ) - (k : ℂ) ^ 2 = ((1 - k ^ 2 : ℝ) : ℂ) by
+private lemma jacobiComodulus_ofReal_of_sq_le {k : ℝ} (hk : k ^ 2 ≤ 1) :
+    jacobiComodulus k = (Real.sqrt (1 - k ^ 2) : ℂ) := by
+  rw [jacobiComodulus, Real.sqrt_eq_rpow, show (1 : ℂ) - (k : ℂ) ^ 2 = ((1 - k ^ 2 : ℝ) : ℂ) by
     push_cast; ring, show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring,
     ← ofReal_cpow (by linarith)]
 
@@ -400,27 +403,27 @@ theorem landen_descending_amplitude {k φ : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (h�
 `k₁ = (1 - k')/(1 + k')`. -/
 @[dlmf 19.8.E12]
 theorem compEllInt_landen_descending_ofReal {k : ℝ} (hk : k ^ 2 < 1) :
-    let kp := jacobiComodulusk k
+    let kp := jacobiComodulus k
     let k₁ := (1 - kp) / (1 + kp)
-    compEllIntKk k = (1 + k₁) * compEllIntKk k₁ ∧
-      compEllIntEk k = (1 + kp) * compEllIntEk k₁ - kp * compEllIntKk k := by
+    completeEllipticK k = (1 + k₁) * completeEllipticK k₁ ∧
+      completeEllipticE k = (1 + kp) * completeEllipticE k₁ - kp * completeEllipticK k := by
   intro kp k₁
   set s := Real.sqrt (1 - k ^ 2) with hs
   have hs0 : 0 < s := Real.sqrt_pos.mpr (by linarith)
   have hs1 : s ≤ 1 := Real.sqrt_le_one.mpr (by nlinarith [sq_nonneg k])
-  have hkp : kp = s := jacobiComodulusk_ofReal_of_sq_le hk.le
+  have hkp : kp = s := jacobiComodulus_ofReal_of_sq_le hk.le
   have hk₁ : k₁ = (((1 - s) / (1 + s) : ℝ) : ℂ) := by
     simp only [k₁, hkp]; push_cast; rfl
   have hr : ((1 - s) / (1 + s)) ^ 2 ≤ 1 := by
     rw [div_pow, div_le_one (by positivity)]; nlinarith
   have hm : 1 - (k ^ 2) = s ^ 2 := by rw [hs, Real.sq_sqrt (by linarith)]
   have hsq : Real.sqrt (1 - k ^ 2) = s := rfl
-  rw [hk₁, hkp, compEllIntKk_eq_ofReal (m := k ^ 2) (by push_cast; ring) hk.le,
-    compEllIntKk_eq_ofReal (m := ((1 - s) / (1 + s)) ^ 2) (by push_cast; ring) hr,
-    compEllIntEk_eq_ofReal (m := k ^ 2) (by push_cast; ring) hk.le,
-    compEllIntEk_eq_ofReal (m := ((1 - s) / (1 + s)) ^ 2) (by push_cast; ring) hr]
-  have h1 := DLMF.Elliptic.Real.compEllIntKm_landen_descending hk
-  have h2 := DLMF.Elliptic.Real.compEllIntEm_landen_descending hk
+  rw [hk₁, hkp, completeEllipticK_eq_ofReal (m := k ^ 2) (by push_cast; ring) hk.le,
+    completeEllipticK_eq_ofReal (m := ((1 - s) / (1 + s)) ^ 2) (by push_cast; ring) hr,
+    completeEllipticE_eq_ofReal (m := k ^ 2) (by push_cast; ring) hk.le,
+    completeEllipticE_eq_ofReal (m := ((1 - s) / (1 + s)) ^ 2) (by push_cast; ring) hr]
+  have h1 := DLMF.Elliptic.Real.completeEllipticKOfParameter_landen_descending hk
+  have h2 := DLMF.Elliptic.Real.completeEllipticEOfParameter_landen_descending hk
   rw [hsq] at h1 h2
   constructor
   · rw [h1]; push_cast; ring
@@ -451,29 +454,30 @@ theorem one_sub_landen_sq_mem_slitPlane {c : ℂ} (hc : 0 < c.re) :
 `K(k) = (1 + k₁)K(k₁)`, `E(k) = (1 + k')E(k₁) - k'K(k)`. -/
 @[dlmf 19.8.E12]
 theorem compEllInt_landen_descending {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) :
-    let kp := jacobiComodulusk k
+    let kp := jacobiComodulus k
     let k₁ := (1 - kp) / (1 + kp)
-    compEllIntKk k = (1 + k₁) * compEllIntKk k₁ ∧
-      compEllIntEk k = (1 + kp) * compEllIntEk k₁ - kp * compEllIntKk k := by
+    completeEllipticK k = (1 + k₁) * completeEllipticK k₁ ∧
+      completeEllipticE k = (1 + kp) * completeEllipticE k₁ - kp * completeEllipticK k := by
   intro kp k₁
   set U := {k : ℂ | 1 - k ^ 2 ∈ slitPlane} with hU
-  have hD := differentiableOn_compEllIntKk_compEllIntEk
-  have hre : ∀ k ∈ U, 0 < (jacobiComodulusk k).re := fun k hk => Carlson.re_cpow_half_pos hk
-  have hne : ∀ k ∈ U, 1 + jacobiComodulusk k ≠ 0 := fun k hk h => by
+  have hD := differentiableOn_completeEllipticK_completeEllipticE
+  have hre : ∀ k ∈ U, 0 < (jacobiComodulus k).re := fun k hk => Carlson.re_cpow_half_pos hk
+  have hne : ∀ k ∈ U, 1 + jacobiComodulus k ≠ 0 := fun k hk h => by
     have := congrArg re h; simp at this; linarith [hre k hk]
-  have hc : DifferentiableOn ℂ jacobiComodulusk U := fun k hk =>
-    (differentiableAt_jacobiComodulusk hk).differentiableWithinAt
-  set φ : ℂ → ℂ := fun k => (1 - jacobiComodulusk k) / (1 + jacobiComodulusk k) with hφ
+  have hc : DifferentiableOn ℂ jacobiComodulus U := fun k hk =>
+    (differentiableAt_jacobiComodulus hk).differentiableWithinAt
+  set φ : ℂ → ℂ := fun k => (1 - jacobiComodulus k) / (1 + jacobiComodulus k) with hφ
   have hφd : DifferentiableOn ℂ φ U :=
     ((differentiableOn_const 1).sub hc).div ((differentiableOn_const 1).add hc) hne
   have hmaps : MapsTo φ U U := fun k hk => one_sub_landen_sq_mem_slitPlane (hre k hk)
   constructor
-  · exact eq_of_differentiableOn_of_eq_on_Ioo hD.1 (g := fun k => (1 + φ k) * compEllIntKk (φ k))
+  · exact eq_of_differentiableOn_of_eq_on_Ioo hD.1
+        (g := fun k => (1 + φ k) * completeEllipticK (φ k))
       (((differentiableOn_const 1).add hφd).mul (hD.1.comp hφd hmaps))
       (fun x h0 h1 => (compEllInt_landen_descending_ofReal (k := x) (by nlinarith)).1) hk
   · exact eq_of_differentiableOn_of_eq_on_Ioo hD.2
-      (g := fun k => (1 + jacobiComodulusk k) * compEllIntEk (φ k) -
-        jacobiComodulusk k * compEllIntKk k)
+      (g := fun k => (1 + jacobiComodulus k) * completeEllipticE (φ k) -
+        jacobiComodulus k * completeEllipticK k)
       ((((differentiableOn_const 1).add hc).mul (hD.2.comp hφd hmaps)).sub (hc.mul hD.1))
       (fun x h0 h1 => (compEllInt_landen_descending_ofReal (k := x) (by nlinarith)).2) hk
 
@@ -487,8 +491,9 @@ theorem incEllInt_landen_descending {k φ : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (h�
     let kp := Real.sqrt (1 - k ^ 2)
     let k₁ := (1 - kp) / (1 + kp)
     let φ₁ := φ + Real.arctan (kp * Real.tan φ)
-    incEllIntFk φ k = (1 + k₁ : ℝ) / 2 * incEllIntFk φ₁ k₁ ∧
-      incEllIntEk φ k = (1 + kp : ℝ) / 2 * incEllIntEk φ₁ k₁ - kp * incEllIntFk φ k +
+    incompleteEllipticF φ k = (1 + k₁ : ℝ) / 2 * incompleteEllipticF φ₁ k₁ ∧
+      incompleteEllipticE φ k = (1 + kp : ℝ) / 2 * incompleteEllipticE φ₁ k₁ - kp *
+          incompleteEllipticF φ k +
         ((1 - kp) / 2 * Real.sin φ₁ : ℝ) := by
   sorry
 
@@ -498,7 +503,8 @@ theorem incEllInt_landen_descending {k φ : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (h�
 `2(k² - α²)Π(φ, α², k) = ((ω² - α²)/(1 + k'))Π(φ₁, α₁², k₁) + k²F(φ, k)
 - (1 + k')α₁² R_C(c₁, c₁ - α₁²)`. -/
 @[dlmf 19.8.E14, dlmf 19.8.E15]
-theorem incEllIntPik_landen_descending {k φ α2 : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hφ0 : 0 < φ)
+theorem incompleteEllipticPi_landen_descending {k φ α2 : ℝ} (hk0 : 0 < k)
+    (hk1 : k < 1) (hφ0 : 0 < φ)
     (hφ1 : φ < π / 2) (hα1 : α2 ≠ 1) (hαk : α2 ≠ k ^ 2) :
     let kp := Real.sqrt (1 - k ^ 2)
     let k₁ := (1 - kp) / (1 + kp)
@@ -506,23 +512,10 @@ theorem incEllIntPik_landen_descending {k φ α2 : ℝ} (hk0 : 0 < k) (hk1 : k <
     let ω2 : ℝ := (k ^ 2 - α2) / (1 - α2)
     let α12 : ℝ := α2 * ω2 / (1 + kp) ^ 2
     let c₁ : ℝ := 1 / Real.sin φ₁ ^ 2
-    (2 * (k ^ 2 - α2) : ℝ) * incEllIntPik φ α2 k =
-      ((ω2 - α2) / (1 + kp) : ℝ) * incEllIntPik φ₁ α12 k₁ + (k ^ 2 : ℝ) * incEllIntFk φ k -
-        ((1 + kp) * α12 : ℝ) * symEllIntRC c₁ (c₁ - α12 : ℝ) := by
-  sorry
-
-/-- **Admitted.** DLMF 19.8.16–19.8.17 (ascending Landen transformation): for real `0 < k < 1`
-and `0 < φ ≤ π/2`, with `k₂ = 2√k/(1 + k)` and `2φ₂ = φ + arcsin(k sin φ)`:
-`F(φ, k) = (2/(1 + k))F(φ₂, k₂)` and
-`E(φ, k) = (1 + k)E(φ₂, k₂) + (1 - k)F(φ₂, k₂) - k sin φ`. -/
-@[dlmf 19.8.E16, dlmf 19.8.E17]
-theorem incEllInt_landen_ascending {k φ : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hφ0 : 0 < φ)
-    (hφ1 : φ ≤ π / 2) :
-    let k₂ := 2 * Real.sqrt k / (1 + k)
-    let φ₂ := (φ + Real.arcsin (k * Real.sin φ)) / 2
-    incEllIntFk φ k = (2 / (1 + k) : ℝ) * incEllIntFk φ₂ k₂ ∧
-      incEllIntEk φ k = (1 + k : ℝ) * incEllIntEk φ₂ k₂ + (1 - k : ℝ) * incEllIntFk φ₂ k₂ -
-        (k * Real.sin φ : ℝ) := by
+    (2 * (k ^ 2 - α2) : ℝ) * incompleteEllipticPi φ α2 k =
+      ((ω2 - α2) / (1 + kp) : ℝ) * incompleteEllipticPi φ₁ α12 k₁ + (k ^ 2 : ℝ) *
+          incompleteEllipticF φ k -
+        ((1 + kp) * α12 : ℝ) * symmetricEllipticRC c₁ (c₁ - α12 : ℝ) := by
   sorry
 
 /-! ### §19.8(iii) Gauss transformation -/
@@ -534,13 +527,14 @@ private lemma inv_sq_cpow_half {s : ℝ} (hs : 0 < s) :
     Real.sqrt_one, Real.sqrt_sq hs.le]
 
 /-- `F(φ, k) = sin φ R_F(cos²φ, Δ², 1)` for real `0 < φ < π/2` and `k² sin²φ < 1`. -/
-private lemma incEllIntFk_eq_sin_mul_symEllIntRF {φ k : ℝ} (hφ0 : 0 < φ) (hφ1 : φ < π / 2) :
-    incEllIntFk φ k = (Real.sin φ : ℂ) *
-      symEllIntRF ((Real.cos φ ^ 2 : ℝ) : ℂ) ((1 - k ^ 2 * Real.sin φ ^ 2 : ℝ) : ℂ) 1 := by
+private lemma incompleteEllipticF_eq_sin_mul_symmetricEllipticRF {φ k : ℝ} (hφ0 : 0 < φ)
+    (hφ1 : φ < π / 2) :
+    incompleteEllipticF φ k = (Real.sin φ : ℂ) *
+      symmetricEllipticRF ((Real.cos φ ^ 2 : ℝ) : ℂ) ((1 - k ^ 2 * Real.sin φ ^ 2 : ℝ) : ℂ) 1 := by
   have hs : 0 < Real.sin φ := Real.sin_pos_of_pos_of_lt_pi hφ0 (by linarith)
-  rw [incEllIntFk_eq_symEllIntRF' hφ0 hφ1.le]
+  rw [incompleteEllipticF_eq_symmetricEllipticRF' hφ0 hφ1.le]
   have hsc := Real.sin_sq_add_cos_sq φ
-  have h := symEllIntRF_scale (l := 1 / Real.sin φ ^ 2) (by positivity)
+  have h := symmetricEllipticRF_scale (l := 1 / Real.sin φ ^ 2) (by positivity)
     ((Real.cos φ ^ 2 : ℝ) : ℂ) ((1 - k ^ 2 * Real.sin φ ^ 2 : ℝ) : ℂ) 1
   rw [inv_sq_cpow_half hs] at h
   have e1 : (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - 1) =
@@ -554,13 +548,14 @@ private lemma incEllIntFk_eq_sin_mul_symEllIntRF {φ k : ℝ} (hφ0 : 0 < φ) (h
 
 /-- `E(φ, k) = (2/sin φ) R_G(cos²φ, Δ², 1) - (cos²φ/sin φ) R_F(cos²φ, Δ², 1) - cos φ Δ/sin φ`
 for real `0 < φ < π/2` and `k² sin²φ < 1`, `Δ = √(1 - k² sin²φ)`. -/
-private lemma incEllIntEk_eq_symEllIntRG_sin {φ k : ℝ} (hφ0 : 0 < φ) (hφ1 : φ < π / 2)
+private lemma incompleteEllipticE_eq_symmetricEllipticRG_sin {φ k : ℝ} (hφ0 : 0 < φ)
+    (hφ1 : φ < π / 2)
     (hk : k ^ 2 * Real.sin φ ^ 2 < 1) :
-    incEllIntEk φ k =
+    incompleteEllipticE φ k =
       ((2 / Real.sin φ : ℝ) : ℂ) *
-          symEllIntRG ((Real.cos φ ^ 2 : ℝ) : ℂ) ((1 - k ^ 2 * Real.sin φ ^ 2 : ℝ) : ℂ) 1 -
+          symmetricEllipticRG ((Real.cos φ ^ 2 : ℝ) : ℂ) ((1 - k ^ 2 * Real.sin φ ^ 2 : ℝ) : ℂ) 1 -
         ((Real.cos φ ^ 2 / Real.sin φ : ℝ) : ℂ) *
-          symEllIntRF ((Real.cos φ ^ 2 : ℝ) : ℂ) ((1 - k ^ 2 * Real.sin φ ^ 2 : ℝ) : ℂ) 1 -
+          symmetricEllipticRF ((Real.cos φ ^ 2 : ℝ) : ℂ) ((1 - k ^ 2 * Real.sin φ ^ 2 : ℝ) : ℂ) 1 -
         ((Real.cos φ * √(1 - k ^ 2 * Real.sin φ ^ 2) / Real.sin φ : ℝ) : ℂ) := by
   have hs : 0 < Real.sin φ := Real.sin_pos_of_pos_of_lt_pi hφ0 (by linarith)
   have hc : 0 < Real.cos φ := Real.cos_pos_of_mem_Ioo ⟨by linarith, hφ1⟩
@@ -569,10 +564,10 @@ private lemma incEllIntEk_eq_symEllIntRG_sin {φ k : ℝ} (hφ0 : 0 < φ) (hφ1 
   have hkc : 1 - (k : ℂ) ^ 2 * (Real.sin φ : ℂ) ^ 2 ∈ slitPlane := by
     rw [← ofReal_pow, ← ofReal_pow, ← ofReal_mul, ← ofReal_one, ← ofReal_sub]
     exact ofReal_mem_slitPlane.mpr hD
-  rw [incEllIntEk_eq_symEllIntRG hφ0 hφ1.le hkc]
-  have hG := symEllIntRG_scale (l := 1 / Real.sin φ ^ 2) (by positivity)
+  rw [incompleteEllipticE_eq_symmetricEllipticRG hφ0 hφ1.le hkc]
+  have hG := symmetricEllipticRG_scale (l := 1 / Real.sin φ ^ 2) (by positivity)
     ((Real.cos φ ^ 2 : ℝ) : ℂ) ((1 - k ^ 2 * Real.sin φ ^ 2 : ℝ) : ℂ) 1
-  have hF := symEllIntRF_scale (l := 1 / Real.sin φ ^ 2) (by positivity)
+  have hF := symmetricEllipticRF_scale (l := 1 / Real.sin φ ^ 2) (by positivity)
     ((Real.cos φ ^ 2 : ℝ) : ℂ) ((1 - k ^ 2 * Real.sin φ ^ 2 : ℝ) : ℂ) 1
   rw [inv_sq_cpow_half hs, mul_one] at hG hF
   have e1 : (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - 1) =
@@ -599,21 +594,22 @@ private lemma incEllIntEk_eq_symEllIntRG_sin {φ k : ℝ} (hφ0 : 0 < φ) (hφ1 
 
 /-- Landen's transformation of `R_F` and `R_G` (Carlson, Theorem 9.5-1 and Exercise 9.5-5) for
 DLMF's integrals: for positive `x, y, z, v, w` with `v² + w² = z² + xy`, `vw = z(x + y)/2`. -/
-private lemma symEllInt_landen {x y z v w : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z)
+private lemma symmetricElliptic_landen {x y z v w : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z)
     (hv : 0 < v) (hw : 0 < w) (hv2 : v ^ 2 + w ^ 2 = z ^ 2 + x * y)
     (hvw : v * w = z * ((x + y) / 2)) :
-    symEllIntRF ((x ^ 2 : ℝ) : ℂ) ((y ^ 2 : ℝ) : ℂ) ((z ^ 2 : ℝ) : ℂ) =
-        symEllIntRF ((((x + y) / 2) ^ 2 : ℝ) : ℂ) ((v ^ 2 : ℝ) : ℂ) ((w ^ 2 : ℝ) : ℂ) ∧
-      2 * symEllIntRG ((x ^ 2 : ℝ) : ℂ) ((y ^ 2 : ℝ) : ℂ) ((z ^ 2 : ℝ) : ℂ) =
-        4 * symEllIntRG ((((x + y) / 2) ^ 2 : ℝ) : ℂ) ((v ^ 2 : ℝ) : ℂ) ((w ^ 2 : ℝ) : ℂ) -
-          x * y * symEllIntRF ((x ^ 2 : ℝ) : ℂ) ((y ^ 2 : ℝ) : ℂ) ((z ^ 2 : ℝ) : ℂ) - z := by
+    symmetricEllipticRF ((x ^ 2 : ℝ) : ℂ) ((y ^ 2 : ℝ) : ℂ) ((z ^ 2 : ℝ) : ℂ) =
+        symmetricEllipticRF ((((x + y) / 2) ^ 2 : ℝ) : ℂ) ((v ^ 2 : ℝ) : ℂ) ((w ^ 2 : ℝ) : ℂ) ∧
+      2 * symmetricEllipticRG ((x ^ 2 : ℝ) : ℂ) ((y ^ 2 : ℝ) : ℂ) ((z ^ 2 : ℝ) : ℂ) =
+        4 * symmetricEllipticRG ((((x + y) / 2) ^ 2 : ℝ) : ℂ) ((v ^ 2 : ℝ) : ℂ) ((w ^ 2 : ℝ) : ℂ) -
+          x * y * symmetricEllipticRF ((x ^ 2 : ℝ) : ℂ) ((y ^ 2 : ℝ) : ℂ)
+              ((z ^ 2 : ℝ) : ℂ) - z := by
   have sl : ∀ {r : ℝ}, 0 < r → ((r ^ 2 : ℝ) : ℂ) ∈ slitPlane := fun hr =>
     ofReal_mem_slitPlane.mpr (by positivity)
   have hu : 0 < (x + y) / 2 := by positivity
-  rw [symEllIntRF_eq_carlsonRF (sl hx) (sl hy) (sl hz),
-    symEllIntRF_eq_carlsonRF (sl hu) (sl hv) (sl hw),
-    symEllIntRG_eq_carlsonRG (sl hx) (sl hy) (sl hz),
-    symEllIntRG_eq_carlsonRG (sl hu) (sl hv) (sl hw)]
+  rw [symmetricEllipticRF_eq_carlsonRF (sl hx) (sl hy) (sl hz),
+    symmetricEllipticRF_eq_carlsonRF (sl hu) (sl hv) (sl hw),
+    symmetricEllipticRG_eq_carlsonRG (sl hx) (sl hy) (sl hz),
+    symmetricEllipticRG_eq_carlsonRG (sl hu) (sl hv) (sl hw)]
   exact ⟨Carlson.carlsonRF_landen hx hy hz hv hw hv2 hvw,
     Carlson.carlsonRG_landen hx hy hz hv hw hv2 hvw⟩
 
@@ -627,8 +623,9 @@ theorem incEllInt_gauss {k φ : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hφ0 : 0 < φ)
     let k₁ := (1 - kp) / (1 + kp)
     let Δ := Real.sqrt (1 - k ^ 2 * Real.sin φ ^ 2)
     let ψ₁ := Real.arcsin ((1 + kp) * Real.sin φ / (1 + Δ))
-    incEllIntFk φ k = (1 + k₁ : ℝ) * incEllIntFk ψ₁ k₁ ∧
-      incEllIntEk φ k = (1 + kp : ℝ) * incEllIntEk ψ₁ k₁ - kp * incEllIntFk φ k +
+    incompleteEllipticF φ k = (1 + k₁ : ℝ) * incompleteEllipticF ψ₁ k₁ ∧
+      incompleteEllipticE φ k = (1 + kp : ℝ) * incompleteEllipticE ψ₁ k₁ - kp *
+          incompleteEllipticF φ k +
         ((1 - Δ) * Real.cot φ : ℝ) := by
   intro kp k₁ Δ ψ₁
   set s := Real.sin φ with hsdef
@@ -698,28 +695,30 @@ theorem incEllInt_gauss {k φ : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hφ0 : 0 < φ)
   have hvw : v * w = c * ((Δ + 1) / 2) := by
     rw [hvdef, hwdef, ← hudef, show u * √C1 * (u * √D1) = u * u * (√C1 * √D1) by ring, hCD]
     field_simp
-  obtain ⟨hLF, hLG⟩ := symEllInt_landen hΔ0 one_pos hc hv hw hsum hvw
+  obtain ⟨hLF, hLG⟩ := symmetricElliptic_landen hΔ0 one_pos hc hv hw hsum hvw
   simp only [hv2', hw2', one_pow, ofReal_one, mul_one, ofReal_mul] at hLF hLG
   -- scaling
-  have hFs := symEllIntRF_scale (l := u ^ 2) (by positivity) 1 (C1 : ℂ) (D1 : ℂ)
-  have hGs := symEllIntRG_scale (l := u ^ 2) (by positivity) 1 (C1 : ℂ) (D1 : ℂ)
+  have hFs := symmetricEllipticRF_scale (l := u ^ 2) (by positivity) 1 (C1 : ℂ) (D1 : ℂ)
+  have hGs := symmetricEllipticRG_scale (l := u ^ 2) (by positivity) 1 (C1 : ℂ) (D1 : ℂ)
   rw [mul_one, Carlson.ofReal_cpow_half (by positivity), Real.sqrt_sq hu.le] at hFs hGs
-  have eF1 : symEllIntRF 1 (C1 : ℂ) (D1 : ℂ) = symEllIntRF (C1 : ℂ) (D1 : ℂ) 1 :=
-    (symEllIntRF_comm_left _ _ _).trans (symEllIntRF_comm_right _ _ _)
-  have eG1 : symEllIntRG 1 (C1 : ℂ) (D1 : ℂ) = symEllIntRG (C1 : ℂ) (D1 : ℂ) 1 :=
-    (symEllIntRG_comm_left _ _ _).trans (symEllIntRG_comm_right _ _ _)
+  have eF1 : symmetricEllipticRF 1 (C1 : ℂ) (D1 : ℂ) = symmetricEllipticRF (C1 : ℂ) (D1 : ℂ) 1 :=
+    (symmetricEllipticRF_comm_left _ _ _).trans (symmetricEllipticRF_comm_right _ _ _)
+  have eG1 : symmetricEllipticRG 1 (C1 : ℂ) (D1 : ℂ) = symmetricEllipticRG (C1 : ℂ) (D1 : ℂ) 1 :=
+    (symmetricEllipticRG_comm_left _ _ _).trans (symmetricEllipticRG_comm_right _ _ _)
   rw [hFs, eF1] at hLF
   rw [← hudef, hGs, eG1, hLF] at hLG
-  have eF0 : symEllIntRF ((c ^ 2 : ℝ) : ℂ) ((1 - k ^ 2 * s ^ 2 : ℝ) : ℂ) 1 =
-      symEllIntRF ((Δ ^ 2 : ℝ) : ℂ) 1 ((c ^ 2 : ℝ) : ℂ) := by
-    rw [hΔ2]; exact (symEllIntRF_comm_left _ _ _).trans (symEllIntRF_comm_right _ _ _)
-  have eG0 : symEllIntRG ((c ^ 2 : ℝ) : ℂ) ((1 - k ^ 2 * s ^ 2 : ℝ) : ℂ) 1 =
-      symEllIntRG ((Δ ^ 2 : ℝ) : ℂ) 1 ((c ^ 2 : ℝ) : ℂ) := by
-    rw [hΔ2]; exact (symEllIntRG_comm_left _ _ _).trans (symEllIntRG_comm_right _ _ _)
-  have hF0 := incEllIntFk_eq_sin_mul_symEllIntRF (k := k) hφ0 hφ1
-  have hE0 := incEllIntEk_eq_symEllIntRG_sin (k := k) hφ0 hφ1 (by linarith)
-  have hF1 := incEllIntFk_eq_sin_mul_symEllIntRF (k := k₁) hψ0 hψ1
-  have hE1 := incEllIntEk_eq_symEllIntRG_sin (k := k₁) hψ0 hψ1
+  have eF0 : symmetricEllipticRF ((c ^ 2 : ℝ) : ℂ) ((1 - k ^ 2 * s ^ 2 : ℝ) : ℂ) 1 =
+      symmetricEllipticRF ((Δ ^ 2 : ℝ) : ℂ) 1 ((c ^ 2 : ℝ) : ℂ) := by
+    rw [hΔ2]; exact (symmetricEllipticRF_comm_left _ _ _).trans
+        (symmetricEllipticRF_comm_right _ _ _)
+  have eG0 : symmetricEllipticRG ((c ^ 2 : ℝ) : ℂ) ((1 - k ^ 2 * s ^ 2 : ℝ) : ℂ) 1 =
+      symmetricEllipticRG ((Δ ^ 2 : ℝ) : ℂ) 1 ((c ^ 2 : ℝ) : ℂ) := by
+    rw [hΔ2]; exact (symmetricEllipticRG_comm_left _ _ _).trans
+        (symmetricEllipticRG_comm_right _ _ _)
+  have hF0 := incompleteEllipticF_eq_sin_mul_symmetricEllipticRF (k := k) hφ0 hφ1
+  have hE0 := incompleteEllipticE_eq_symmetricEllipticRG_sin (k := k) hφ0 hφ1 (by linarith)
+  have hF1 := incompleteEllipticF_eq_sin_mul_symmetricEllipticRF (k := k₁) hψ0 hψ1
+  have hE1 := incompleteEllipticE_eq_symmetricEllipticRG_sin (k := k₁) hψ0 hψ1
     (by have h := hD1; rw [hD1def] at h; rw [hsinψ]; linarith)
   have hcosψ' : Real.cos ψ₁ = √C1 := Real.cos_arcsin _
   rw [hsinψ, hcosψ, ← hD1def] at hF1 hE1
@@ -729,9 +728,9 @@ theorem incEllInt_gauss {k φ : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hφ0 : 0 < φ)
   have hΔdef : √(1 - k ^ 2 * s ^ 2) = Δ := rfl
   rw [← hsdef] at hF0
   rw [← hsdef, ← hcdef, hΔdef] at hE0
-  have hG0 : symEllIntRG ((Δ ^ 2 : ℝ) : ℂ) 1 ((c ^ 2 : ℝ) : ℂ) =
-      (4 * ((u : ℂ) * symEllIntRG (C1 : ℂ) (D1 : ℂ) 1) -
-        (Δ : ℂ) * ((u : ℂ)⁻¹ * symEllIntRF (C1 : ℂ) (D1 : ℂ) 1) - c) / 2 := by
+  have hG0 : symmetricEllipticRG ((Δ ^ 2 : ℝ) : ℂ) 1 ((c ^ 2 : ℝ) : ℂ) =
+      (4 * ((u : ℂ) * symmetricEllipticRG (C1 : ℂ) (D1 : ℂ) 1) -
+        (Δ : ℂ) * ((u : ℂ)⁻¹ * symmetricEllipticRF (C1 : ℂ) (D1 : ℂ) 1) - c) / 2 := by
     linear_combination hLG / 2
   rw [hG0] at hE0
   have hkey : s * u⁻¹ = (1 + k₁) * a := by
@@ -758,20 +757,248 @@ theorem incEllInt_gauss {k φ : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hφ0 : 0 < φ)
   have hB' : ((Δ + c ^ 2) / (s * u) : ℂ) = (1 + kp) * C1 / a + kp * s / u := by
     exact_mod_cast hB
   have hC' : ((1 + kp) * ((√C1 : ℝ) * (√D1 : ℝ)) / a : ℂ) = 2 * c / s := by exact_mod_cast hC
-  have hF : incEllIntFk φ k = ((1 + k₁ : ℝ) : ℂ) * incEllIntFk ψ₁ k₁ := by
+  have hF : incompleteEllipticF φ k = ((1 + k₁ : ℝ) : ℂ) * incompleteEllipticF ψ₁ k₁ := by
     rw [hF0, hF1, ← mul_assoc, ← mul_assoc, ← ofReal_inv, ← ofReal_mul, ← ofReal_mul, hkey]
   refine ⟨hF, ?_⟩
   rw [hE0, hE1, hF0, Real.cot_eq_cos_div_sin, ← hsdef, ← hcdef]
   push_cast
-  linear_combination symEllIntRG (C1 : ℂ) (D1 : ℂ) 1 * hA' -
-    symEllIntRF (C1 : ℂ) (D1 : ℂ) 1 * hB' + hC'
+  linear_combination symmetricEllipticRG (C1 : ℂ) (D1 : ℂ) 1 * hA' -
+    symmetricEllipticRF (C1 : ℂ) (D1 : ℂ) 1 * hB' + hC'
+
+/-- The ascending Landen transformation for `0 < φ < π/2`, from Landen's transformation of
+`R_F`, `R_G` with the assignment `(cos φ, Δ, 1)`. -/
+private theorem incEllInt_landen_ascending_of_lt {k φ : ℝ} (hk0 : 0 < k) (hk1 : k < 1)
+    (hφ0 : 0 < φ) (hφ1 : φ < π / 2) :
+    let k₂ := 2 * Real.sqrt k / (1 + k)
+    let φ₂ := (φ + Real.arcsin (k * Real.sin φ)) / 2
+    incompleteEllipticF φ k = (2 / (1 + k) : ℝ) * incompleteEllipticF φ₂ k₂ ∧
+      incompleteEllipticE φ k = (1 + k : ℝ) * incompleteEllipticE φ₂ k₂ + (1 - k : ℝ) *
+          incompleteEllipticF φ₂ k₂ -
+        (k * Real.sin φ : ℝ) := by
+  intro k₂ φ₂
+  set s := Real.sin φ with hsdef
+  set c := Real.cos φ with hcdef
+  have hs : 0 < s := Real.sin_pos_of_pos_of_lt_pi hφ0 (by linarith)
+  have hc : 0 < c := Real.cos_pos_of_mem_Ioo ⟨by linarith, hφ1⟩
+  have hsc : s ^ 2 + c ^ 2 = 1 := Real.sin_sq_add_cos_sq φ
+  have hs1 : s < 1 := by nlinarith
+  have hks0 : 0 < k * s := by positivity
+  have hks1 : k * s < 1 := by nlinarith
+  have hD0 : 0 < 1 - k ^ 2 * s ^ 2 := by nlinarith
+  set Δ := √(1 - k ^ 2 * s ^ 2) with hΔdef
+  have hΔ2 : Δ ^ 2 = 1 - k ^ 2 * s ^ 2 := Real.sq_sqrt hD0.le
+  have hΔ0 : 0 < Δ := Real.sqrt_pos.mpr hD0
+  set θ := Real.arcsin (k * s) with hθdef
+  have hθs : Real.sin θ = k * s := Real.sin_arcsin (by linarith) hks1.le
+  have hθc : Real.cos θ = Δ := by
+    rw [hθdef, Real.cos_arcsin, hΔdef]; ring_nf
+  have hθ0 : 0 < θ := Real.arcsin_pos.mpr hks0
+  have hθ1 : θ < π / 2 := Real.arcsin_lt_pi_div_two.mpr hks1
+  have hφ₂0 : 0 < φ₂ := by simp only [φ₂]; linarith
+  have hφ₂1 : φ₂ < π / 2 := by simp only [φ₂]; linarith
+  have hcos2 : Real.cos (2 * φ₂) = c * Δ - k * s ^ 2 := by
+    rw [show 2 * φ₂ = φ + θ by simp only [φ₂]; ring, Real.cos_add, hθs, hθc]; ring
+  set A := (1 - c * Δ + k * s ^ 2) / 2 with hAdef
+  set B := (1 + c * Δ - k * s ^ 2) / 2 with hBdef
+  set s₂ := Real.sin φ₂ with hs₂def
+  set c₂ := Real.cos φ₂ with hc₂def
+  have hs₂ : 0 < s₂ := Real.sin_pos_of_pos_of_lt_pi hφ₂0 (by linarith)
+  have hc₂ : 0 < c₂ := Real.cos_pos_of_mem_Ioo ⟨by linarith, hφ₂1⟩
+  have hsc₂ : s₂ ^ 2 + c₂ ^ 2 = 1 := Real.sin_sq_add_cos_sq φ₂
+  have hc22 : c₂ ^ 2 = B := by
+    have := Real.cos_two_mul φ₂
+    rw [hcos2] at this
+    rw [hBdef]; linarith
+  have hs22 : s₂ ^ 2 = A := by rw [hAdef]; linarith
+  have hB : 0 < B := by rw [← hc22]; positivity
+  have hA : 0 < A := by rw [← hs22]; positivity
+  have hk₂ : k₂ ^ 2 = 4 * k / (1 + k) ^ 2 := by
+    simp only [k₂]; rw [div_pow, mul_pow, Real.sq_sqrt hk0.le]; ring
+  set u := (c + Δ) / 2 with hudef
+  have hu : 0 < u := by positivity
+  set D2 := 1 - k₂ ^ 2 * s₂ ^ 2 with hD2def
+  have hD2' : D2 = 1 - 4 * k * A / (1 + k) ^ 2 := by rw [hD2def, hk₂, hs22]; ring
+  have hk1' : (1 + k) ^ 2 ≠ 0 := by positivity
+  have I1 : u ^ 2 * D2 = B ^ 2 := by
+    rw [hD2']
+    have h : u ^ 2 * ((1 + k) ^ 2 - 4 * k * A) = B ^ 2 * (1 + k) ^ 2 := by
+      rw [hudef, hAdef, hBdef]
+      linear_combination
+        (-(Δ ^ 2 * k ^ 2 - 2 * Δ ^ 2 * k + Δ ^ 2 - 2 * Δ * c * k + 2 * k ^ 2 * s ^ 2 - k ^ 2 - 1)
+          / 4) * hsc +
+        (-(-2 * Δ * c * k + k ^ 2 * s ^ 2 + 2 * k * s ^ 2 - 2 * k - s ^ 2) / 4) * hΔ2
+    field_simp
+    linear_combination h
+  have I2 : 4 * u ^ 2 * A = B * s ^ 2 * (1 + k) ^ 2 := by
+    rw [hudef, hAdef, hBdef]
+    linear_combination ((-2 * Δ ^ 2 - Δ * c + k * s ^ 2 + 1) / 2) * hsc +
+      ((-Δ * c + k * s ^ 2 + 2 * s ^ 2 - 1) / 2) * hΔ2
+  have I3 : 2 * c * (c + Δ) * A = s ^ 2 * (1 + k) * ((1 + k) * B - (1 - k) * A) := by
+    rw [hAdef, hBdef]
+    linear_combination (-Δ ^ 2 - Δ * c + k * s ^ 2 + 1) * hsc + ((s - 1) * (s + 1)) * hΔ2
+  have hD2 : 0 < D2 := by
+    by_contra h; push Not at h; nlinarith [mul_nonpos_of_nonneg_of_nonpos (sq_nonneg u) h]
+  have hΔ₂ : √D2 = B / u := by
+    rw [show D2 = (B / u) ^ 2 by field_simp; linarith, Real.sqrt_sq (by positivity)]
+  set l := u ^ 2 / B with hldef
+  have hl : 0 < l := by positivity
+  set μ := √l with hμdef
+  have hμ : 0 < μ := Real.sqrt_pos.mpr hl
+  have hμ2 : μ ^ 2 = l := Real.sq_sqrt hl.le
+  set w := μ * (B / u) with hwdef
+  have hw : 0 < w := by positivity
+  have hv2 : μ ^ 2 + w ^ 2 = 1 ^ 2 + c * Δ := by
+    rw [hwdef, mul_pow, hμ2, ← hΔ₂, Real.sq_sqrt hD2.le, hldef, hD2']
+    have h : u ^ 2 * (2 * (1 + k) ^ 2 - 4 * k * A) = (1 + c * Δ) * B * (1 + k) ^ 2 := by
+      rw [hudef, hAdef, hBdef]
+      linear_combination
+        (-(Δ ^ 2 * k ^ 2 + Δ ^ 2 - Δ * c * k + k ^ 2 * s ^ 2 - k ^ 2 - k - 1) / 2) * hsc +
+        ((Δ * c * k + k + s ^ 2) / 2) * hΔ2
+    field_simp
+    linear_combination h
+  have hvw : μ * w = 1 * ((c + Δ) / 2) := by
+    rw [hwdef, ← mul_assoc, ← sq, hμ2, hldef, ← hudef]
+    field_simp
+  -- key relations
+  have hK : 2 * s₂ * μ = s * (1 + k) := by
+    rw [← pow_left_inj₀ (by positivity) (by positivity) two_ne_zero, mul_pow, mul_pow, hμ2,
+      hs22, hldef, mul_pow]
+    field_simp
+    linear_combination I2
+  have hK2 : 2 * u * s₂ = s * (1 + k) * c₂ := by
+    rw [← pow_left_inj₀ (by positivity) (by positivity) two_ne_zero, mul_pow, mul_pow, mul_pow,
+      mul_pow, hs22, hc22]
+    linear_combination I2
+  obtain ⟨hLF, hLG⟩ := symmetricElliptic_landen hc hΔ0 one_pos hμ hw hv2 hvw
+  have eu : ((c + Δ) / 2) ^ 2 = l * B := by rw [hldef, ← hudef]; field_simp
+  have ew : w ^ 2 = l * D2 := by
+    rw [hwdef, mul_pow, hμ2, ← hΔ₂, Real.sq_sqrt hD2.le]
+  rw [eu, hμ2, ew, hΔ2] at hLF hLG
+  simp only [one_pow, ofReal_one, ofReal_mul] at hLF hLG
+  have hFs := symmetricEllipticRF_scale hl (B : ℂ) 1 (D2 : ℂ)
+  have hGs := symmetricEllipticRG_scale hl (B : ℂ) 1 (D2 : ℂ)
+  rw [mul_one, Carlson.ofReal_cpow_half hl.le, ← hμdef,
+    symmetricEllipticRF_comm_right (B : ℂ) (D2 : ℂ) 1] at hFs
+  rw [mul_one, Carlson.ofReal_cpow_half hl.le, ← hμdef,
+    symmetricEllipticRG_comm_right (B : ℂ) (D2 : ℂ) 1] at hGs
+  rw [hFs] at hLF
+  rw [hGs, hLF] at hLG
+  have hF0 := incompleteEllipticF_eq_sin_mul_symmetricEllipticRF (k := k) hφ0 hφ1
+  have hE0 := incompleteEllipticE_eq_symmetricEllipticRG_sin (k := k) hφ0 hφ1 (by linarith)
+  have hF1 := incompleteEllipticF_eq_sin_mul_symmetricEllipticRF (k := k₂) hφ₂0 hφ₂1
+  have hE1 := incompleteEllipticE_eq_symmetricEllipticRG_sin (k := k₂) hφ₂0 hφ₂1 (by
+    have h := hD2; rw [hD2def] at h; linarith)
+  rw [← hs₂def, ← hc₂def, hc22, ← hD2def] at hF1 hE1
+  rw [← hsdef, ← hcdef] at hF0 hE0
+  rw [hLF] at hF0
+  rw [hΔ₂] at hE1
+  have hcoef : s * μ⁻¹ = 2 / (1 + k) * s₂ := by
+    field_simp; linear_combination -hK
+  constructor
+  · rw [hF0, hF1, ← mul_assoc, ← mul_assoc, ← ofReal_inv, ← ofReal_mul, ← ofReal_mul, hcoef]
+  have hμi : μ⁻¹ = 2 * s₂ / (s * (1 + k)) := by
+    rw [← hK]; field_simp
+  have hG' : 4 * μ / s = 2 * (1 + k) / s₂ := by
+    field_simp; linear_combination 2 * hK
+  have hF' : (c * Δ + c ^ 2) * μ⁻¹ / s = (1 + k) * B / s₂ - (1 - k) * s₂ := by
+    rw [hμi]
+    have key : 2 * (c * Δ + c ^ 2) * s₂ ^ 2 =
+        s ^ 2 * (1 + k) * ((1 + k) * B - (1 - k) * s₂ ^ 2) := by
+      rw [hs22]; linear_combination I3
+    field_simp
+    linear_combination key
+  have hC' : (1 + c * Δ) / s = (1 + k) * (c₂ * (B / u)) / s₂ + k * s := by
+    field_simp
+    rw [hBdef]
+    linear_combination ((1 + c * Δ - k * s ^ 2) / 2) * hK2
+  rw [hE0, hE1, hF1, ← hΔdef]
+  have hGc : (4 * μ / s : ℂ) = 2 * (1 + k) / s₂ := by exact_mod_cast hG'
+  have hFc : ((c * Δ + c ^ 2) * (μ : ℂ)⁻¹ / s : ℂ) = (1 + k) * B / s₂ - (1 - k) * s₂ := by
+    exact_mod_cast hF'
+  have hCc : ((1 + c * Δ) / s : ℂ) = (1 + k) * (c₂ * (B / u)) / s₂ + k * s := by
+    exact_mod_cast hC'
+  push_cast at hLF hLG ⊢
+  linear_combination (1 / (s : ℂ)) * hLG - ((c : ℂ) ^ 2 / s) * hLF +
+    symmetricEllipticRG (B : ℂ) (D2 : ℂ) 1 * hGc -
+        symmetricEllipticRF (B : ℂ) (D2 : ℂ) 1 * hFc - hCc
+
+/-- For real `k` with `k² < 1`, `φ ↦ ∫₀^φ (1 - k² sin²θ)^e dθ` is continuous. -/
+private lemma continuous_integral_one_sub_sq_mul_sin_sq_cpow {k : ℝ} (hk : k ^ 2 < 1) (e : ℂ) :
+    Continuous fun φ : ℝ =>
+      ∫ θ in (0 : ℝ)..φ, (1 - (k : ℂ) ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ e := by
+  have hc : Continuous fun θ : ℝ => (1 - (k : ℂ) ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ e := by
+    refine continuous_iff_continuousAt.2 fun θ => ?_
+    refine (continuousAt_cpow_const ?_).comp (f := fun θ : ℝ =>
+      1 - (k : ℂ) ^ 2 * (Real.sin θ : ℂ) ^ 2) (by fun_prop)
+    have h1 : 1 - (k : ℂ) ^ 2 * (Real.sin θ : ℂ) ^ 2 = ((1 - k ^ 2 * Real.sin θ ^ 2 : ℝ) : ℂ) := by
+      push_cast; ring
+    rw [h1]
+    exact ofReal_mem_slitPlane.mpr (by nlinarith [Real.sin_sq_le_one θ, sq_nonneg k])
+  exact intervalIntegral.continuous_primitive (fun a b => hc.intervalIntegrable a b) 0
+
+/-- Two functions continuous at `b` that agree on `(a, b)` agree at `b`. -/
+private lemma eq_of_continuousAt_of_eqOn_Ioo {f g : ℝ → ℂ} {a b : ℝ} (hab : a < b)
+    (hf : ContinuousAt f b) (hg : ContinuousAt g b) (h : ∀ x ∈ Ioo a b, f x = g x) :
+    f b = g b := by
+  have h1 : Tendsto f (𝓝[<] b) (𝓝 (f b)) := hf.tendsto.mono_left nhdsWithin_le_nhds
+  have h2 : Tendsto f (𝓝[<] b) (𝓝 (g b)) :=
+    (hg.tendsto.mono_left nhdsWithin_le_nhds).congr'
+      (eventually_of_mem (Ioo_mem_nhdsLT hab) fun x hx => (h x hx).symm)
+  exact tendsto_nhds_unique h1 h2
+
+/-- DLMF 19.8.16–19.8.17 (ascending Landen transformation): for real `0 < k < 1`
+and `0 < φ ≤ π/2`, with `k₂ = 2√k/(1 + k)` and `2φ₂ = φ + arcsin(k sin φ)`:
+`F(φ, k) = (2/(1 + k))F(φ₂, k₂)` and
+`E(φ, k) = (1 + k)E(φ₂, k₂) + (1 - k)F(φ₂, k₂) - k sin φ`. -/
+@[dlmf 19.8.E16, dlmf 19.8.E17]
+theorem incEllInt_landen_ascending {k φ : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hφ0 : 0 < φ)
+    (hφ1 : φ ≤ π / 2) :
+    let k₂ := 2 * Real.sqrt k / (1 + k)
+    let φ₂ := (φ + Real.arcsin (k * Real.sin φ)) / 2
+    incompleteEllipticF φ k = (2 / (1 + k) : ℝ) * incompleteEllipticF φ₂ k₂ ∧
+      incompleteEllipticE φ k = (1 + k : ℝ) * incompleteEllipticE φ₂ k₂ + (1 - k : ℝ) *
+          incompleteEllipticF φ₂ k₂ -
+        (k * Real.sin φ : ℝ) := by
+  intro k₂ φ₂
+  rcases hφ1.lt_or_eq with h | h
+  · exact incEllInt_landen_ascending_of_lt hk0 hk1 hφ0 h
+  have hk : k ^ 2 < 1 := by nlinarith
+  have hk₂ : k₂ ^ 2 < 1 := by
+    simp only [k₂]
+    rw [div_pow, mul_pow, Real.sq_sqrt hk0.le, div_lt_one (by positivity)]
+    nlinarith
+  have hFc := continuous_integral_one_sub_sq_mul_sin_sq_cpow hk (-(1 / 2 : ℂ))
+  have hEc := continuous_integral_one_sub_sq_mul_sin_sq_cpow hk (1 / 2 : ℂ)
+  have hFc₂ := continuous_integral_one_sub_sq_mul_sin_sq_cpow hk₂ (-(1 / 2 : ℂ))
+  have hEc₂ := continuous_integral_one_sub_sq_mul_sin_sq_cpow hk₂ (1 / 2 : ℂ)
+  have hψ : Continuous fun x : ℝ => (x + Real.arcsin (k * Real.sin x)) / 2 := by fun_prop
+  have hpi : (0 : ℝ) < π / 2 := by positivity
+  subst h
+  constructor
+  · refine eq_of_continuousAt_of_eqOn_Ioo (f := fun x : ℝ => incompleteEllipticF x k)
+      (g := fun x : ℝ => ((2 / (1 + k) : ℝ) : ℂ) *
+        incompleteEllipticF ((x + Real.arcsin (k * Real.sin x)) / 2 : ℝ) k₂) hpi ?_ ?_
+      (fun x hx => (incEllInt_landen_ascending_of_lt hk0 hk1 hx.1 hx.2).1)
+    · simp only [incompleteEllipticF_ofReal_eq_integral]; exact hFc.continuousAt
+    · simp only [incompleteEllipticF_ofReal_eq_integral]
+      exact (continuous_const.mul (hFc₂.comp hψ)).continuousAt
+  · refine eq_of_continuousAt_of_eqOn_Ioo (f := fun x : ℝ => incompleteEllipticE x k)
+      (g := fun x : ℝ => ((1 + k : ℝ) : ℂ) *
+        incompleteEllipticE ((x + Real.arcsin (k * Real.sin x)) / 2 : ℝ) k₂ + ((1 - k : ℝ) : ℂ) *
+        incompleteEllipticF ((x + Real.arcsin (k * Real.sin x)) / 2 : ℝ) k₂ -
+            ((k * Real.sin x : ℝ) : ℂ))
+      hpi ?_ ?_ (fun x hx => (incEllInt_landen_ascending_of_lt hk0 hk1 hx.1 hx.2).2)
+    · simp only [incompleteEllipticE_ofReal_eq_integral]; exact hEc.continuousAt
+    · simp only [incompleteEllipticF_ofReal_eq_integral, incompleteEllipticE_ofReal_eq_integral]
+      exact ((continuous_const.mul (hEc₂.comp hψ)).add (continuous_const.mul (hFc₂.comp hψ))
+        |>.sub (by fun_prop)).continuousAt
 
 /-- **Admitted.** DLMF 19.8.20–19.8.21: for real `0 < k < 1`, `0 < φ < π/2` and real `α² ≠ 0`
 with `α² ≠ c = csc²φ`, with `ρ = √(1 - k²/α²)` (pure imaginary if `0 < α² < k²`),
 `α₁² = α²(1 + ρ)²/(1 + k')²` and the Gauss data of 19.8.18:
 `ρΠ(φ, α², k) = (4/(1 + k'))Π(ψ₁, α₁², k₁) + (ρ - 1)F(φ, k) - R_C(c - 1, c - α²)`. -/
 @[dlmf 19.8.E20, dlmf 19.8.E21]
-theorem incEllIntPik_gauss {k φ α2 : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hφ0 : 0 < φ)
+theorem incompleteEllipticPi_gauss {k φ α2 : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hφ0 : 0 < φ)
     (hφ1 : φ < π / 2) (hα0 : α2 ≠ 0) (hαc : α2 ≠ 1 / Real.sin φ ^ 2) :
     let kp := Real.sqrt (1 - k ^ 2)
     let k₁ := (1 - kp) / (1 + kp)
@@ -780,8 +1007,8 @@ theorem incEllIntPik_gauss {k φ α2 : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hφ0 : 
     let c := 1 / Real.sin φ ^ 2
     let ρ : ℂ := (1 - ((k ^ 2 / α2 : ℝ) : ℂ)) ^ (1 / 2 : ℂ)
     let α12 : ℂ := α2 * (1 + ρ) ^ 2 / (1 + kp) ^ 2
-    ρ * incEllIntPik φ α2 k = (4 / (1 + kp) : ℝ) * incEllIntPik ψ₁ α12 k₁ +
-      (ρ - 1) * incEllIntFk φ k - symEllIntRC (c - 1 : ℝ) (c - α2 : ℝ) := by
+    ρ * incompleteEllipticPi φ α2 k = (4 / (1 + kp) : ℝ) * incompleteEllipticPi ψ₁ α12 k₁ +
+      (ρ - 1) * incompleteEllipticF φ k - symmetricEllipticRC (c - 1 : ℝ) (c - α2 : ℝ) := by
   sorry
 
 end DLMF.EllipticIntegrals

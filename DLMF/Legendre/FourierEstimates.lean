@@ -45,19 +45,19 @@ theorem FerrersFourier.gamma_ratio_le (a b : ℂ) :
   exact hk.le
 
 /-- Eventual bound `‖(a)_k/k!‖ ≤ C k^{Re a - 1}`. -/
-theorem FerrersFourier.poch_div_factorial_le (a : ℂ) : ∃ C : ℝ, 0 ≤ C ∧
-    ∀ᶠ k : ℕ in atTop, ‖poch a k/(k.factorial:ℂ)‖ ≤ C * (k:ℝ)^(a.re-1) := by
+theorem FerrersFourier.pochhammer_div_factorial_le (a : ℂ) : ∃ C : ℝ, 0 ≤ C ∧
+    ∀ᶠ k : ℕ in atTop, ‖pochhammer a k/(k.factorial:ℂ)‖ ≤ C * (k:ℝ)^(a.re-1) := by
   by_cases ha : ∃ m : ℕ, a = -m
   · obtain ⟨m, rfl⟩ := ha
     refine ⟨0, le_rfl, ?_⟩
     filter_upwards [eventually_gt_atTop m] with k hk
-    simp [poch, ascPochhammer_eval_neg_coe_nat_of_lt hk]
+    simp [pochhammer, ascPochhammer_eval_neg_coe_nat_of_lt hk]
   · push Not at ha
     refine ⟨2/‖Gamma a‖, by positivity, ?_⟩
     filter_upwards [FerrersFourier.gamma_ratio_le a 1] with k hk
     have hG : Gamma a ≠ 0 := Gamma_ne_zero ha
-    have e : poch a k/(k.factorial:ℂ) = Gamma (k+a)/Gamma (k+1) / Gamma a := by
-      rw [poch, ← Gamma_add_nat_div_Gamma_eq a ha, ← Complex.Gamma_nat_eq_factorial,
+    have e : pochhammer a k/(k.factorial:ℂ) = Gamma (k+a)/Gamma (k+1) / Gamma a := by
+      rw [pochhammer, ← Gamma_add_nat_div_Gamma_eq a ha, ← Complex.Gamma_nat_eq_factorial,
         add_comm (k:ℂ) a]
       ring
     rw [e, norm_div]
@@ -97,17 +97,17 @@ theorem FerrersFourier.norm_cos_le (w : ℂ) : ‖cos w‖ ≤ Real.exp |w.im| :
 `Re μ < 0`: the coefficients are `O(k^{2 Re μ - 1})`. -/
 theorem FerrersFourier.summable {ν μ : ℂ} (hμ : μ.re < 0) (s : ℕ → ℂ) {B : ℝ}
     (hs : ∀ k, ‖s k‖ ≤ B) :
-    Summable (fun k : ℕ => ‖Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*poch (μ+1/2) k/
+    Summable (fun k : ℕ => ‖Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*pochhammer (μ+1/2) k/
       (k.factorial:ℂ)*s k‖) := by
-  obtain ⟨C, hC, hP⟩ := FerrersFourier.poch_div_factorial_le (μ+1/2)
+  obtain ⟨C, hC, hP⟩ := FerrersFourier.pochhammer_div_factorial_le (μ+1/2)
   have hB : 0 ≤ B := (norm_nonneg _).trans (hs 0)
   refine Summable.of_norm_bounded_eventually_nat
     (g := fun k : ℕ => 2*C*B * (k:ℝ)^(2*μ.re-1))
     ((Real.summable_nat_rpow.mpr (by linarith)).mul_left _) ?_
   filter_upwards [FerrersFourier.gamma_ratio_le (ν+μ+1) (ν+3/2), hP, eventually_gt_atTop 0]
     with k hA hk hk0
-  have e : Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*poch (μ+1/2) k/(k.factorial:ℂ)*s k =
-      Gamma (k+(ν+μ+1))/Gamma (k+(ν+3/2)) * (poch (μ+1/2) k/(k.factorial:ℂ)) * s k := by
+  have e : Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*pochhammer (μ+1/2) k/(k.factorial:ℂ)*s k =
+      Gamma (k+(ν+μ+1))/Gamma (k+(ν+3/2)) * (pochhammer (μ+1/2) k/(k.factorial:ℂ)) * s k := by
     rw [show ν+μ+k+1 = k+(ν+μ+1) by ring, show ν+k+3/2 = k+(ν+3/2) by ring]; ring
   have hre : (ν+μ+1-(ν+3/2)).re = μ.re - 1/2 := by simp; ring
   have hre2 : (μ+1/2).re - 1 = μ.re - 1/2 := by simp; ring
@@ -118,7 +118,7 @@ theorem FerrersFourier.summable {ν μ : ℂ} (hμ : μ.re < 0) (s : ℕ → ℂ
     rw [← Real.rpow_add hkp]; ring_nf
   rw [norm_norm, e, norm_mul, norm_mul, hpow]
   have h0 : 0 ≤ (k:ℝ)^(μ.re-1/2) := (Real.rpow_pos_of_pos hkp _).le
-  calc ‖Gamma (k+(ν+μ+1))/Gamma (k+(ν+3/2))‖ * ‖poch (μ+1/2) k/(k.factorial:ℂ)‖ * ‖s k‖
+  calc ‖Gamma (k+(ν+μ+1))/Gamma (k+(ν+3/2))‖ * ‖pochhammer (μ+1/2) k/(k.factorial:ℂ)‖ * ‖s k‖
       ≤ (2 * (k:ℝ)^(μ.re-1/2)) * (C * (k:ℝ)^(μ.re-1/2)) * B := by
         gcongr
         exact hs k
@@ -140,10 +140,10 @@ theorem FerrersFourier.gamma_ratio_ge (a b : ℂ) :
 small at two consecutive indices, when `Re μ ≥ 0`. -/
 theorem FerrersFourier.not_summable {ν μ : ℂ} (hμ : 0 ≤ μ.re) (s : ℕ → ℂ) {δ : ℝ} (hδ : 0 < δ)
     (hs : ∀ k, δ ≤ ‖s k‖ + ‖s (k+1)‖) :
-    ¬Summable (fun k : ℕ => ‖Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*poch (μ+1/2) k/
+    ¬Summable (fun k : ℕ => ‖Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*pochhammer (μ+1/2) k/
       (k.factorial:ℂ)*s k‖) := by
   intro hsum
-  set a : ℕ → ℝ := fun k => ‖Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*poch (μ+1/2) k/
+  set a : ℕ → ℝ := fun k => ‖Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*pochhammer (μ+1/2) k/
       (k.factorial:ℂ)*s k‖ with ha
   have hpole : ∀ m : ℕ, μ+1/2 ≠ -m := fun m h => by
     have := congrArg Complex.re h; simp at this; linarith [(m.cast_nonneg : (0:ℝ) ≤ m)]
@@ -155,10 +155,10 @@ theorem FerrersFourier.not_summable {ν μ : ℂ} (hμ : 0 ≤ μ.re) (s : ℕ �
     filter_upwards [FerrersFourier.gamma_ratio_ge (ν+μ+1) (ν+3/2),
         FerrersFourier.gamma_ratio_ge (μ+1/2) 1,
       eventually_gt_atTop 0] with k hA hP hk0
-    have e : Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*poch (μ+1/2) k/(k.factorial:ℂ)*s k =
+    have e : Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*pochhammer (μ+1/2) k/(k.factorial:ℂ)*s k =
         Gamma (k+(ν+μ+1))/Gamma (k+(ν+3/2)) * (Gamma (k+(μ+1/2))/Gamma (k+1) /
           Gamma (μ+1/2)) * s k := by
-      rw [poch, ← Gamma_add_nat_div_Gamma_eq (μ+1/2) hpole, ← Complex.Gamma_nat_eq_factorial,
+      rw [pochhammer, ← Gamma_add_nat_div_Gamma_eq (μ+1/2) hpole, ← Complex.Gamma_nat_eq_factorial,
         show ν+μ+k+1 = k+(ν+μ+1) by ring, show ν+k+3/2 = k+(ν+3/2) by ring,
         add_comm (μ+1/2) (k:ℂ)]
       ring

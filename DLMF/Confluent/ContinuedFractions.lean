@@ -106,26 +106,26 @@ theorem KummerContinuedFraction.coeff_I {c d : ℂ} (hd : ∀ k : ℕ, d ≠ -k)
     d * (d + 1) * (kummerMCoeff c d n - kummerMCoeff (c + 1) (d + 1) n) =
       (c - d) * (if n = 0 then 0 else kummerMCoeff (c + 1) (d + 2) (n - 1)) := by
   rcases n with _ | m
-  · simp [kummerMCoeff, poch_zero]
+  · simp [kummerMCoeff, pochhammer_zero]
   · simp only [Nat.add_one_ne_zero, ↓reduceIte, Nat.add_sub_cancel, kummerMCoeff]
     have hd0 : d ≠ 0 := by simpa using hd 0
     have hd1 : d + 1 ≠ 0 := by have := hd 1; intro h; apply this; push_cast; linear_combination h
-    have hQ := poch_ne_zero_of_not_neg_nat (a := d + 2) (by
+    have hQ := pochhammer_ne_zero_of_not_neg_nat (a := d + 2) (by
       intro k h; apply hd (k + 2); push_cast; linear_combination h) m
     have hdm : d + (m : ℂ) + 1 ≠ 0 := by
       intro h; apply hd (m + 1); push_cast; linear_combination h
-    have e1 : poch c (m + 1) = c * poch (c + 1) m := poch_succ_left c m
-    have e2 : poch (c + 1) (m + 1) = poch (c + 1) m * (c + 1 + m) := poch_succ _ m
-    have e3 : poch (d + 1) (m + 1) = (d + 1) * poch (d + 2) m := by
-      rw [poch_succ_left]; ring_nf
-    have e4 : poch d (m + 1) * (d + m + 1) = d * ((d + 1) * poch (d + 2) m) := by
-      rw [← e3, ← poch_succ_left d (m + 1), poch_succ d (m + 1)]; push_cast; ring
-    have hpd : poch d (m + 1) ≠ 0 := by
+    have e1 : pochhammer c (m + 1) = c * pochhammer (c + 1) m := pochhammer_succ_left c m
+    have e2 : pochhammer (c + 1) (m + 1) = pochhammer (c + 1) m * (c + 1 + m) := pochhammer_succ _ m
+    have e3 : pochhammer (d + 1) (m + 1) = (d + 1) * pochhammer (d + 2) m := by
+      rw [pochhammer_succ_left]; ring_nf
+    have e4 : pochhammer d (m + 1) * (d + m + 1) = d * ((d + 1) * pochhammer (d + 2) m) := by
+      rw [← e3, ← pochhammer_succ_left d (m + 1), pochhammer_succ d (m + 1)]; push_cast; ring
+    have hpd : pochhammer d (m + 1) ≠ 0 := by
       intro h; rw [h, zero_mul] at e4; exact (mul_ne_zero hd0 (mul_ne_zero hd1 hQ)) e4.symm
     have hf : ((m + 1)! : ℂ) ≠ 0 := by exact_mod_cast (m + 1).factorial_ne_zero
     have hf' : ((m)! : ℂ) ≠ 0 := by exact_mod_cast (m).factorial_ne_zero
     rw [e1, e2, e3, Nat.factorial_succ]
-    have hpd' : poch d (m + 1) = d * ((d + 1) * poch (d + 2) m) / (d + m + 1) := by
+    have hpd' : pochhammer d (m + 1) = d * ((d + 1) * pochhammer (d + 2) m) / (d + m + 1) := by
       rw [← e4]; field_simp
     rw [hpd']
     push_cast
@@ -137,23 +137,23 @@ theorem KummerContinuedFraction.coeff_II {c d : ℂ} (hd : ∀ k : ℕ, d ≠ -k
     d * (d + 1) * (kummerMCoeff c d n - kummerMCoeff c (d + 1) n) =
       c * (if n = 0 then 0 else kummerMCoeff (c + 1) (d + 2) (n - 1)) := by
   rcases n with _ | m
-  · simp [kummerMCoeff, poch_zero]
+  · simp [kummerMCoeff, pochhammer_zero]
   · simp only [Nat.add_one_ne_zero, ↓reduceIte, Nat.add_sub_cancel, kummerMCoeff]
     have hd0 : d ≠ 0 := by simpa using hd 0
     have hd1 : d + 1 ≠ 0 := by have := hd 1; intro h; apply this; push_cast; linear_combination h
-    have hQ := poch_ne_zero_of_not_neg_nat (a := d + 2) (by
+    have hQ := pochhammer_ne_zero_of_not_neg_nat (a := d + 2) (by
       intro k h; apply hd (k + 2); push_cast; linear_combination h) m
     have hdm : d + (m : ℂ) + 1 ≠ 0 := by
       intro h; apply hd (m + 1); push_cast; linear_combination h
-    have e1 : poch c (m + 1) = c * poch (c + 1) m := poch_succ_left c m
-    have e3 : poch (d + 1) (m + 1) = (d + 1) * poch (d + 2) m := by
-      rw [poch_succ_left]; ring_nf
-    have e4 : poch d (m + 1) * (d + m + 1) = d * ((d + 1) * poch (d + 2) m) := by
-      rw [← e3, ← poch_succ_left d (m + 1), poch_succ d (m + 1)]; push_cast; ring
+    have e1 : pochhammer c (m + 1) = c * pochhammer (c + 1) m := pochhammer_succ_left c m
+    have e3 : pochhammer (d + 1) (m + 1) = (d + 1) * pochhammer (d + 2) m := by
+      rw [pochhammer_succ_left]; ring_nf
+    have e4 : pochhammer d (m + 1) * (d + m + 1) = d * ((d + 1) * pochhammer (d + 2) m) := by
+      rw [← e3, ← pochhammer_succ_left d (m + 1), pochhammer_succ d (m + 1)]; push_cast; ring
     have hf : ((m + 1)! : ℂ) ≠ 0 := by exact_mod_cast (m + 1).factorial_ne_zero
     have hf' : ((m)! : ℂ) ≠ 0 := by exact_mod_cast (m).factorial_ne_zero
     rw [e1, e3, Nat.factorial_succ]
-    have hpd' : poch d (m + 1) = d * ((d + 1) * poch (d + 2) m) / (d + m + 1) := by
+    have hpd' : pochhammer d (m + 1) = d * ((d + 1) * pochhammer (d + 2) m) / (d + m + 1) := by
       rw [← e4]; field_simp
     rw [hpd']
     push_cast
@@ -171,13 +171,13 @@ theorem KummerContinuedFraction.one_sub {d : ℂ} (hd : ∀ k : ℕ, d + 1 ≠ -
   convert h' using 1
   funext n
   rcases n with _ | m
-  · simp [kummerMCoeff, poch_zero]
+  · simp [kummerMCoeff, pochhammer_zero]
   · simp only [Nat.add_one_ne_zero, ↓reduceIte, Nat.add_sub_cancel, kummerMCoeff, sub_zero,
-      poch_nat_one]
+      pochhammer_nat_one]
     have hd0 : d + 1 ≠ 0 := by simpa using hd 0
-    have hQ := poch_ne_zero_of_not_neg_nat hd2 m
-    have e3 : poch (d + 1) (m + 1) = (d + 1) * poch (d + 2) m := by
-      rw [poch_succ_left]; ring_nf
+    have hQ := pochhammer_ne_zero_of_not_neg_nat hd2 m
+    have e3 : pochhammer (d + 1) (m + 1) = (d + 1) * pochhammer (d + 2) m := by
+      rw [pochhammer_succ_left]; ring_nf
     have hf : ((m + 1)! : ℂ) ≠ 0 := by exact_mod_cast (m + 1).factorial_ne_zero
     have hf' : ((m)! : ℂ) ≠ 0 := by exact_mod_cast (m).factorial_ne_zero
     rw [e3]
@@ -228,23 +228,24 @@ theorem KummerContinuedFraction.ratio_tendsto (c d : ℂ) (n : ℕ) :
   ring_nf
 
 /-- `(c+m)_n / (d+2m)_n → 2^{-n}` as `m → ∞`. -/
-theorem KummerContinuedFraction.poch_ratio_tendsto (c d : ℂ) (n : ℕ) :
-    Tendsto (fun m : ℕ => poch (c + m) n / poch (d + 2 * m) n) atTop (𝓝 ((1 / 2) ^ n)) := by
+theorem KummerContinuedFraction.pochhammer_ratio_tendsto (c d : ℂ) (n : ℕ) :
+    Tendsto (fun m : ℕ => pochhammer (c + m) n / pochhammer (d + 2 * m) n) atTop
+        (𝓝 ((1 / 2) ^ n)) := by
   induction n with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ n ih =>
     have := ih.mul (KummerContinuedFraction.ratio_tendsto c d n)
     rw [← pow_succ] at this
     refine this.congr fun m => ?_
-    rw [poch_succ, poch_succ, mul_div_mul_comm]
+    rw [pochhammer_succ, pochhammer_succ, mul_div_mul_comm]
 
 /-- If `|c| + |d| ≤ m`, then `|(c+m)_n| ≤ |(d+2m)_n|`. -/
-theorem KummerContinuedFraction.norm_poch_le {c d : ℂ} {m : ℕ} (hm : ‖c‖ + ‖d‖ ≤ m) (n : ℕ) :
-    ‖poch (c + m) n‖ ≤ ‖poch (d + 2 * m) n‖ := by
+theorem KummerContinuedFraction.norm_pochhammer_le {c d : ℂ} {m : ℕ} (hm : ‖c‖ + ‖d‖ ≤ m) (n : ℕ) :
+    ‖pochhammer (c + m) n‖ ≤ ‖pochhammer (d + 2 * m) n‖ := by
   induction n with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ n ih =>
-    rw [poch_succ, poch_succ, norm_mul, norm_mul]
+    rw [pochhammer_succ, pochhammer_succ, norm_mul, norm_mul]
     refine mul_le_mul ih ?_ (norm_nonneg _) (norm_nonneg _)
     have e1 : ‖c + m + n‖ ≤ ‖c‖ + m + n := by
       refine (norm_add_le _ _).trans ?_
@@ -269,7 +270,7 @@ theorem KummerContinuedFraction.tendsto_exp_half (c d z : ℂ) :
   unfold kummerM
   refine tendsto_tsum_of_dominated_convergence (bound := fun n => ‖z‖ ^ n / n !)
     (Real.summable_pow_div_factorial ‖z‖) (fun n => ?_) ?_
-  · have := ((KummerContinuedFraction.poch_ratio_tendsto c d n).div_const
+  · have := ((KummerContinuedFraction.pochhammer_ratio_tendsto c d n).div_const
         (n ! : ℂ)).mul_const (z ^ n)
     refine this.congr fun m => ?_
     rw [div_div]
@@ -280,10 +281,10 @@ theorem KummerContinuedFraction.tendsto_exp_half (c d z : ℂ) :
     have hf : (0 : ℝ) < ‖(n ! : ℂ)‖ := by
       rw [Complex.norm_natCast]; exact_mod_cast n.factorial_pos
     rw [Complex.norm_natCast]
-    have hr : ‖poch (c + m) n‖ / ‖poch (d + 2 * m) n‖ ≤ 1 :=
-      div_le_one_of_le₀ (KummerContinuedFraction.norm_poch_le hcm n) (norm_nonneg _)
+    have hr : ‖pochhammer (c + m) n‖ / ‖pochhammer (d + 2 * m) n‖ ≤ 1 :=
+      div_le_one_of_le₀ (KummerContinuedFraction.norm_pochhammer_le hcm n) (norm_nonneg _)
     rw [div_mul_eq_mul_div, div_le_div_iff_of_pos_right (by exact_mod_cast n.factorial_pos)]
-    calc ‖poch (c + m) n‖ / ‖poch (d + 2 * m) n‖ * ‖z‖ ^ n ≤ 1 * ‖z‖ ^ n := by gcongr
+    calc ‖pochhammer (c + m) n‖ / ‖pochhammer (d + 2 * m) n‖ * ‖z‖ ^ n ≤ 1 * ‖z‖ ^ n := by gcongr
       _ = _ := one_mul _
 
 /-- `1/(d + 2m + n) → 0` as `m → ∞`. -/

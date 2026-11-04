@@ -30,9 +30,9 @@ Associated orthogonal polynomials (DLMF §18.30), Freud weights (§18.32), Besse
 
 ## Main results
 
-* `associatedPollaczek_limit_laguerrePolyL`, `associatedPollaczek_limit_hermite`: limits of
+* `associatedPollaczek_limit_laguerrePolynomialL`, `associatedPollaczek_limit_hermite`: limits of
   associated Meixner–Pollaczek polynomials (DLMF 18.30.19–18.30.20).
-* `besselPolynomial_eq_laguerrePolyL`, `besselPolynomial_recurrence`,
+* `besselPolynomial_eq_laguerrePolynomialL`, `besselPolynomial_recurrence`,
   `besselPolynomial_differential_equation`: Bessel polynomials as Laguerre polynomials, their
   recurrence and differential equation (DLMF 18.34.1, 18.34.4, 18.34.7).
 * `besselPolynomial_finite_orthogonality`, `jacobi_limit_besselPolynomial`: finite orthogonality
@@ -41,9 +41,9 @@ Associated orthogonal polynomials (DLMF §18.30), Freud weights (§18.32), Besse
 * `pollaczek_finite_sum`, `pollaczek_orthogonality`, `pollaczek_generating_function`: explicit
   sum, orthogonality and generating function of the Pollaczek polynomials (DLMF 18.35.4,
   18.35.5, 18.35.7).
-* `pollaczek_eq_ultrasphPoly`, `pollaczek_eq_meixnerPollaczek`,
+* `pollaczek_eq_ultrasphericalPolynomial`, `pollaczek_eq_meixnerPollaczek`,
   `pollaczek_eq_associatedMeixnerPollaczek`: special cases DLMF 18.35.8–18.35.10.
-* `laguerrePolyL_negative_integer_parameter`: Laguerre polynomials with negative integer
+* `laguerrePolynomialL_negative_integer_parameter`: Laguerre polynomials with negative integer
   parameter (DLMF 18.36.2).
 * `exceptionalLaguerre_differential_equation`: DLMF 18.36.7; the exceptional orthogonality
   relations 18.36.6 and 18.36.10 are in `DLMF.OrthogonalPolynomials.ExceptionalOrthogonality`.
@@ -78,7 +78,7 @@ def freudWeight (α : ℝ) (Q : ℝ → ℝ) (x : ℝ) : ℝ :=
 /-- Degree `n + 1`: exceptional Laguerre has no degree-zero member. -/
 @[dlmf 18.36.E5]
 def exceptionalLaguerre (k : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
-  -(x + k + 1) * laguerrePolyL k n x + if n = 0 then 0 else laguerrePolyL k (n - 1) x
+  -(x + k + 1) * laguerrePolynomialL k n x + if n = 0 then 0 else laguerrePolynomialL k (n - 1) x
 
 /-- The exceptional Laguerre weight `x^k e^{-x}/(x+k)²` (DLMF 18.36.3). -/
 @[dlmf 18.36.E3]
@@ -88,14 +88,15 @@ def exceptionalLaguerreWeight (k x : ℝ) : ℝ := x ^ k * Real.exp (-x) / (x + 
 @[dlmf 18.36.E9]
 def exceptionalHermite : Option ℕ → ℝ → ℝ
   | none, _ => (2 : ℝ) ^ (3 / 2 : ℝ) * Real.pi ^ (-1 / 4 : ℝ)
-  | some n, x => ((4 * x ^ 2 + 2) * aeval x (hermitePolyH (n + 1)) +
-      8 * x * aeval x (hermitePolyH n)) /
+  | some n, x => ((4 * x ^ 2 + 2) * aeval x (hermitePolynomialH (n + 1)) +
+      8 * x * aeval x (hermitePolynomialH n)) /
       (Real.pi ^ (1 / 4 : ℝ) * Real.sqrt (2 ^ (n + 1) * (n + 3) * n.factorial))
 
 /-- The map `(fun phi : ℝ => associatedMeixnerPollaczek ((lam + 1) / 2) phi c n (-x / (2 * sin
 (phi : ℂ))))` tends to `(𝓝 (associatedLaguerre lam c n x))` along `(𝓝[>] 0)`. -/
 @[dlmf 18.30.E19]
-theorem associatedPollaczek_limit_laguerrePolyL (lam : ℂ) {c : ℝ} (hc : 0 ≤ c) (n : ℕ) (x : ℂ) :
+theorem associatedPollaczek_limit_laguerrePolynomialL (lam : ℂ) {c : ℝ} (hc : 0 ≤ c)
+    (n : ℕ) (x : ℂ) :
     Tendsto (fun phi : ℝ =>
         associatedMeixnerPollaczek ((lam + 1) / 2) phi c n (-x / (2 * sin (phi : ℂ))))
       (𝓝[>] 0) (𝓝 (associatedLaguerre lam c n x)) := by
@@ -153,30 +154,31 @@ theorem associatedPollaczek_limit_laguerrePolyL (lam : ℂ) {c : ℝ} (hc : 0 �
     field_simp
     ring
 
-/-- The map `(fun lam : ℝ => poch (c + 1) n * (Real.sqrt lam : ℂ)⁻¹ ^ n *
+/-- The map `(fun lam : ℝ => pochhammer (c + 1) n * (Real.sqrt lam : ℂ)⁻¹ ^ n *
 associatedMeixnerPollaczek lam (Real.pi / 2) c n (x * Real.sqrt lam))` tends to `(𝓝
 (associatedHermite c n x))` along `atTop`. -/
 @[dlmf 18.30.E20]
 theorem associatedPollaczek_limit_hermite {c : ℝ} (hc : 0 ≤ c) (n : ℕ) (x : ℂ) :
-    Tendsto (fun lam : ℝ => poch (c + 1) n * (Real.sqrt lam : ℂ)⁻¹ ^ n *
+    Tendsto (fun lam : ℝ => pochhammer (c + 1) n * (Real.sqrt lam : ℂ)⁻¹ ^ n *
       associatedMeixnerPollaczek lam (Real.pi / 2) c n (x * Real.sqrt lam)) atTop
       (𝓝 (associatedHermite c n x)) := by
   have hsc : sin ((Real.pi : ℂ) / 2) = 1 := Complex.sin_pi_div_two
   have hcc : cos ((Real.pi : ℂ) / 2) = 0 := Complex.cos_pi_div_two
-  refine tendsto_of_three_term (f := fun n (lam : ℝ) => poch (c + 1) n * (Real.sqrt lam : ℂ)⁻¹ ^ n *
+  refine tendsto_of_three_term
+      (f := fun n (lam : ℝ) => pochhammer (c + 1) n * (Real.sqrt lam : ℂ)⁻¹ ^ n *
       associatedMeixnerPollaczek lam (Real.pi / 2) c n (x * Real.sqrt lam))
     (g := fun n => associatedHermite c n x)
     (A := fun _ _ => 2 * x)
     (B := fun n (lam : ℝ) => -(((n : ℂ) + c + 1) * (2 + (n + c) / (lam : ℂ))))
     (A' := fun _ => 2 * x) (B' := fun n => -(((n : ℂ) + c + 1) * 2)) ?_ ?_ ?_ ?_ ?_ ?_ n
-  · simp [associatedMeixnerPollaczek, associatedHermite, associated, poch_zero]
+  · simp [associatedMeixnerPollaczek, associatedHermite, associated, pochhammer_zero]
   · refine tendsto_const_nhds.congr' ?_
     filter_upwards [eventually_gt_atTop 0] with lam hl
     have hs : (Real.sqrt lam : ℂ) ≠ 0 := ofReal_ne_zero.mpr (Real.sqrt_pos.mpr hl).ne'
     have hc1 : (c : ℂ) + 1 ≠ 0 := by
       have : (0 : ℝ) < c + 1 := by positivity
       exact_mod_cast this.ne'
-    simp only [associatedMeixnerPollaczek, associatedHermite, associated, hsc, hcc, poch_one]
+    simp only [associatedMeixnerPollaczek, associatedHermite, associated, hsc, hcc, pochhammer_one]
     field_simp
     ring
   · intro n; exact tendsto_const_nhds
@@ -192,7 +194,7 @@ theorem associatedPollaczek_limit_hermite {c : ℝ} (hc : 0 ≤ c) (n : ℕ) (x 
     have ht : ((n + 1 + c : ℝ) : ℂ) + 1 ≠ 0 := by
       have : (0 : ℝ) < n + 1 + c + 1 := by positivity
       exact_mod_cast this.ne'
-    simp only [associatedMeixnerPollaczek, associated, hsc, hcc, poch_succ, inv_pow]
+    simp only [associatedMeixnerPollaczek, associated, hsc, hcc, pochhammer_succ, inv_pow]
     rw [hs2]
     push_cast at ht ⊢
     field_simp
@@ -203,9 +205,9 @@ theorem associatedPollaczek_limit_hermite {c : ℝ} (hc : 0 ≤ c) (n : ℕ) (x 
     ring
 
 /-- `(a+1)_b = (a+b)!/a!` for natural `a`, in factorial form. -/
-theorem poch_nat_succ_mul_factorial (a b : ℕ) :
-    (a ! : ℂ) * poch ((a : ℂ) + 1) b = ((a + b) ! : ℂ) := by
-  rw [poch_nat_succ_eq_choose_mul_factorial]
+theorem pochhammer_nat_succ_mul_factorial (a b : ℕ) :
+    (a ! : ℂ) * pochhammer ((a : ℂ) + 1) b = ((a + b) ! : ℂ) := by
+  rw [pochhammer_nat_succ_eq_choose_mul_factorial]
   have h := Nat.choose_mul_factorial_mul_factorial (Nat.le_add_right a b)
   rw [Nat.add_sub_cancel_left] at h
   have h' : ((a + b).choose a : ℂ) * a ! * b ! = (a + b)! := by exact_mod_cast h
@@ -214,10 +216,10 @@ theorem poch_nat_succ_mul_factorial (a b : ℕ) :
 /-- Identity under the stated parameter and domain assumptions: `besselPolynomial a n x =
 (n.factorial : ℂ) * (-x / 2) ^ n * laguerreExtended (1 - a - 2 * n) n (2 / x)`. -/
 @[dlmf 18.34.E1]
-theorem besselPolynomial_eq_laguerrePolyL (a : ℂ) (n : ℕ) {x : ℂ} (hx : x ≠ 0) :
+theorem besselPolynomial_eq_laguerrePolynomialL (a : ℂ) (n : ℕ) {x : ℂ} (hx : x ≠ 0) :
     besselPolynomial a n x = (n.factorial : ℂ) * (-x / 2) ^ n *
         laguerreExtended (1 - a - 2 * n) n (2 / x) := by
-  unfold besselPolynomial terminatingHG laguerreExtended
+  unfold besselPolynomial terminatingHypergeometric laguerreExtended
   simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, div_one]
   rw [Finset.mul_sum]
   conv_rhs => rw [← Finset.sum_range_reflect]
@@ -226,25 +228,26 @@ theorem besselPolynomial_eq_laguerrePolyL (a : ℂ) (n : ℕ) {x : ℂ} (hx : x 
   rw [show n + 1 - 1 - k = n - k by omega, Nat.sub_sub_self hkn]
   have e : (1 - a - 2 * n + ((n - k : ℕ) : ℂ) + 1) = 1 - (n + a - 1) - k := by
     push_cast [Nat.cast_sub hkn]; ring
-  rw [e, poch_reflect]
-  have p1 := poch_neg_nat_mul_factorial hkn
+  rw [e, pochhammer_reflect]
+  have p1 := pochhammer_neg_nat_mul_factorial hkn
   have f1 : ((n - k) ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
   have f2 : (k ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
   have hpow : (-x / 2) ^ n * (-(2 / x)) ^ (n - k) = (-x / 2) ^ k := by
     rw [show n = k + (n - k) by omega, pow_add, show k + (n - k) - k = n - k by omega, mul_assoc,
       ← mul_pow]
     rw [show -x / 2 * -(2 / x) = 1 by field_simp, one_pow, mul_one]
-  have q1 : poch (-(n : ℂ)) k = (-1) ^ k * (n ! : ℂ) / (n - k) ! := by
+  have q1 : pochhammer (-(n : ℂ)) k = (-1) ^ k * (n ! : ℂ) / (n - k) ! := by
     field_simp; linear_combination p1
   rw [q1]
-  linear_combination (-(n ! : ℂ) * ((-1) ^ k * poch (n + a - 1) k / ((k ! : ℂ) * (n - k) !))) * hpow
+  linear_combination (-(n ! : ℂ) *
+      ((-1) ^ k * pochhammer (n + a - 1) k / ((k ! : ℂ) * (n - k) !))) * hpow
 
 /-- Identity under the stated parameter and domain assumptions: `reverseBesselPolynomial n x = x ^
 n * besselPolynomial 2 n x⁻¹`. -/
 @[dlmf 18.34.E2]
 theorem reverseBesselPolynomial_eq (n : ℕ) {x : ℂ} (hx : x ≠ 0) :
     reverseBesselPolynomial n x = x ^ n * besselPolynomial 2 n x⁻¹ := by
-  unfold reverseBesselPolynomial besselPolynomial terminatingHG
+  unfold reverseBesselPolynomial besselPolynomial terminatingHypergeometric
   simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, div_one]
   rw [Finset.mul_sum]
   apply Finset.sum_congr rfl
@@ -258,7 +261,7 @@ theorem reverseBesselPolynomial_eq (n : ℕ) {x : ℂ} (hx : x ≠ 0) :
 
 /-- Coefficients of the Bessel polynomial in powers of `-x/2`. -/
 def besselCoeff (a : ℂ) (m k : ℕ) : ℂ :=
-  poch (-(m : ℂ)) k * poch ((m : ℂ) + a - 1) k / k.factorial
+  pochhammer (-(m : ℂ)) k * pochhammer ((m : ℂ) + a - 1) k / k.factorial
 
 /-- The termwise form of the Bessel polynomial recurrence. -/
 theorem besselCoeff_rec (a : ℂ) (n j : ℕ) :
@@ -266,41 +269,41 @@ theorem besselCoeff_rec (a : ℂ) (n j : ℕ) :
       -2 * ((2 * n + a + 2) * (2 * n + a + 1) * (2 * n + a)) * besselCoeff a (n + 1) j +
         2 * (a - 2) * (2 * n + a + 1) * besselCoeff a (n + 1) (j + 1) +
         2 * (n + 1) * (2 * n + a + 2) * besselCoeff a n (j + 1) := by
-  set X := poch (-(n : ℂ) - 1) j with hX
-  set Y := poch ((n : ℂ) + a) j with hY
-  have e1 : poch (-((n + 2 : ℕ) : ℂ)) (j + 1) = (-(n : ℂ) - 2) * X := by
-    rw [poch_succ_left, hX]; push_cast; congr 1 <;> ring_nf
-  have e2 : poch (-((n + 1 : ℕ) : ℂ)) j = X := by rw [hX]; push_cast; congr 1; ring_nf
-  have e3 : poch (-((n + 1 : ℕ) : ℂ)) (j + 1) = X * (-(n : ℂ) - 1 + j) := by
-    rw [poch_succ, hX]; push_cast; congr 1 <;> ring_nf
-  have e4 : ((n : ℂ) + 1) * poch (-(n : ℂ)) (j + 1) =
+  set X := pochhammer (-(n : ℂ) - 1) j with hX
+  set Y := pochhammer ((n : ℂ) + a) j with hY
+  have e1 : pochhammer (-((n + 2 : ℕ) : ℂ)) (j + 1) = (-(n : ℂ) - 2) * X := by
+    rw [pochhammer_succ_left, hX]; push_cast; congr 1 <;> ring_nf
+  have e2 : pochhammer (-((n + 1 : ℕ) : ℂ)) j = X := by rw [hX]; push_cast; congr 1; ring_nf
+  have e3 : pochhammer (-((n + 1 : ℕ) : ℂ)) (j + 1) = X * (-(n : ℂ) - 1 + j) := by
+    rw [pochhammer_succ, hX]; push_cast; congr 1 <;> ring_nf
+  have e4 : ((n : ℂ) + 1) * pochhammer (-(n : ℂ)) (j + 1) =
       -(X * (-(n : ℂ) - 1 + j) * (-(n : ℂ) + j)) := by
-    have h1 := poch_succ_left (-(n : ℂ) - 1) (j + 1)
-    have h2 := poch_succ (-(n : ℂ) - 1) j
-    have h3 := poch_succ (-(n : ℂ) - 1) (j + 1)
+    have h1 := pochhammer_succ_left (-(n : ℂ) - 1) (j + 1)
+    have h2 := pochhammer_succ (-(n : ℂ) - 1) j
+    have h3 := pochhammer_succ (-(n : ℂ) - 1) (j + 1)
     rw [show -(n : ℂ) - 1 + 1 = -(n : ℂ) by ring] at h1
     rw [← hX] at h2
     push_cast at h3
     linear_combination h1 - h3 - (-(n : ℂ) + j) * h2
-  have f1 : ((n : ℂ) + a) * poch (((n + 2 : ℕ) : ℂ) + a - 1) (j + 1) =
+  have f1 : ((n : ℂ) + a) * pochhammer (((n + 2 : ℕ) : ℂ) + a - 1) (j + 1) =
       Y * ((n : ℂ) + a + j) * ((n : ℂ) + a + (j + 1)) := by
-    have h1 := poch_succ_left ((n : ℂ) + a) (j + 1)
-    have h2 := poch_succ ((n : ℂ) + a) (j + 1)
-    have h3 := poch_succ ((n : ℂ) + a) j
+    have h1 := pochhammer_succ_left ((n : ℂ) + a) (j + 1)
+    have h2 := pochhammer_succ ((n : ℂ) + a) (j + 1)
+    have h3 := pochhammer_succ ((n : ℂ) + a) j
     rw [← hY] at h3
     push_cast at h2 ⊢
     rw [show (n : ℂ) + 2 + a - 1 = (n : ℂ) + a + 1 by ring, ← h1, h2, h3]
-  have f2 : poch (((n + 1 : ℕ) : ℂ) + a - 1) j = Y := by rw [hY]; push_cast; congr 1; ring_nf
-  have f3 : poch (((n + 1 : ℕ) : ℂ) + a - 1) (j + 1) = Y * ((n : ℂ) + a + j) := by
-    rw [poch_succ, ← f2]; push_cast; ring_nf
-  have f4 : poch ((n : ℂ) + a - 1) (j + 1) = ((n : ℂ) + a - 1) * Y := by
-    rw [poch_succ_left, hY]; congr 1; ring_nf
+  have f2 : pochhammer (((n + 1 : ℕ) : ℂ) + a - 1) j = Y := by rw [hY]; push_cast; congr 1; ring_nf
+  have f3 : pochhammer (((n + 1 : ℕ) : ℂ) + a - 1) (j + 1) = Y * ((n : ℂ) + a + j) := by
+    rw [pochhammer_succ, ← f2]; push_cast; ring_nf
+  have f4 : pochhammer ((n : ℂ) + a - 1) (j + 1) = ((n : ℂ) + a - 1) * Y := by
+    rw [pochhammer_succ_left, hY]; congr 1; ring_nf
   unfold besselCoeff
   rw [e1, e2, e3, f2, f3, f4, Nat.factorial_succ]
   have hj : (j.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
   have hj1 : ((j : ℂ) + 1) ≠ 0 := by exact_mod_cast Nat.succ_ne_zero j
-  set P0 := poch (-(n : ℂ)) (j + 1)
-  set P1 := poch (((n + 2 : ℕ) : ℂ) + a - 1) (j + 1)
+  set P0 := pochhammer (-(n : ℂ)) (j + 1)
+  set P1 := pochhammer (((n + 2 : ℕ) : ℂ) + a - 1) (j + 1)
   push_cast
   field_simp
   linear_combination ((2 * (n : ℂ) + a) * (-(n : ℂ) - 2) * X) * f1 -
@@ -310,22 +313,22 @@ theorem besselCoeff_rec (a : ℂ) (n j : ℕ) :
 /-- The Bessel polynomial as a sum over any sufficiently long range. -/
 theorem besselPolynomial_eq_sum (a : ℂ) {m M : ℕ} (hM : m + 1 ≤ M) (x : ℂ) :
     besselPolynomial a m x = ∑ k ∈ Finset.range M, besselCoeff a m k * (-x / 2) ^ k := by
-  unfold besselPolynomial terminatingHG besselCoeff
+  unfold besselPolynomial terminatingHypergeometric besselCoeff
   simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, div_one]
   obtain ⟨d, rfl⟩ : ∃ d, M = m + 1 + d := ⟨M - (m + 1), by omega⟩
   conv_rhs => rw [Finset.sum_range_add]
   rw [Finset.sum_eq_zero (s := Finset.range d) (fun k _ => by
-    rw [poch_neg_nat_eq_zero (by omega)]; simp), add_zero]
+    rw [pochhammer_neg_nat_eq_zero (by omega)]; simp), add_zero]
   refine Finset.sum_congr rfl fun k _ => ?_
   ring
 
 /-- The constant coefficient. -/
 theorem besselCoeff_zero (a : ℂ) (m : ℕ) : besselCoeff a m 0 = 1 := by
-  simp [besselCoeff, poch_zero]
+  simp [besselCoeff, pochhammer_zero]
 
 /-- Coefficients beyond the degree vanish. -/
 theorem besselCoeff_eq_zero (a : ℂ) {m k : ℕ} (hk : m < k) : besselCoeff a m k = 0 := by
-  simp [besselCoeff, poch_neg_nat_eq_zero hk]
+  simp [besselCoeff, pochhammer_neg_nat_eq_zero hk]
 
 /-- Identity under the stated parameter and domain assumptions: `2 * (n + a) * (2 * n + a) *
 besselPolynomial a (n + 2) x = ((2 * n + a + 2) * (2 * n + a + 1) * (2 * n + a) * x + 2 * (a -
@@ -379,11 +382,11 @@ theorem besselPolynomial_differential_equation (a : ℂ) (n : ℕ) (x : ℂ) :
     x ^ 2 * deriv (deriv (besselPolynomial a n)) x + (a * x + 2) * deriv (besselPolynomial a n) x -
       n * (n + a - 1) * besselPolynomial a n x = 0 := by
   set c : ℕ → ℂ := fun k =>
-    poch (-(n : ℂ)) k * poch (n + a - 1) k * (-1 / 2) ^ k / (k.factorial : ℂ)
+    pochhammer (-(n : ℂ)) k * pochhammer (n + a - 1) k * (-1 / 2) ^ k / (k.factorial : ℂ)
   set p : ℂ[X] := ∑ k ∈ Finset.range (n + 1), C (c k) * X ^ k
   have hp : besselPolynomial a n = fun x => p.eval x := by
     funext x
-    unfold besselPolynomial terminatingHG
+    unfold besselPolynomial terminatingHypergeometric
     simp only [p, eval_finsetSum, eval_mul, eval_C, eval_pow, eval_X, c, List.map_cons,
       List.map_nil, List.prod_cons, List.prod_nil, mul_one, div_one]
     refine Finset.sum_congr rfl fun k _ => ?_
@@ -395,10 +398,10 @@ theorem besselPolynomial_differential_equation (a : ℂ) (n : ℕ) (x : ℂ) :
     split_ifs with h
     · rfl
     · simp only [Finset.mem_range, not_lt] at h
-      simp [c, poch_neg_nat_eq_zero (by omega : n < j)]
+      simp [c, pochhammer_neg_nat_eq_zero (by omega : n < j)]
   have hc : ∀ k, 2 * (k + 1) * c (k + 1) = -((k - n) * (k + n + a - 1)) * c k := by
     intro k
-    simp only [c, poch_succ, pow_succ, Nat.factorial_succ]
+    simp only [c, pochhammer_succ, pow_succ, Nat.factorial_succ]
     have : (k.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
     push_cast
     field_simp
@@ -507,18 +510,18 @@ theorem bessel_weight_moment {a : ℝ} (j : ℕ) (ha : a + j < 1) :
 /-- Binomial form of the finite Bessel polynomial. -/
 theorem bessel_binomial_sum (a : ℂ) (n : ℕ) (x : ℂ) :
     besselPolynomial a n x = ∑ k ∈ Finset.range (n + 1),
-      (n.choose k : ℂ) * poch (n + a - 1) k * (x / 2) ^ k := by
-  unfold besselPolynomial terminatingHG
+      (n.choose k : ℂ) * pochhammer (n + a - 1) k * (x / 2) ^ k := by
+  unfold besselPolynomial terminatingHypergeometric
   simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, div_one]
   apply Finset.sum_congr rfl
   intro k _
-  rw [poch_neg_coe_nat, Nat.descFactorial_eq_factorial_mul_choose]
+  rw [pochhammer_neg_coe_nat, Nat.descFactorial_eq_factorial_mul_choose]
   push_cast
   rw [neg_div, neg_pow]
   have hs : (-1 : ℂ) ^ k * (-1) ^ k = 1 := by rw [← mul_pow]; simp
   have hf : (k ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr k.factorial_ne_zero
   calc
-    _ = ((-1 : ℂ) ^ k * (-1) ^ k) * (n.choose k : ℂ) * poch (n + a - 1) k * (x / 2) ^ k := by
+    _ = ((-1 : ℂ) ^ k * (-1) ^ k) * (n.choose k : ℂ) * pochhammer (n + a - 1) k * (x / 2) ^ k := by
       field_simp
       simp only [one_pow, neg_pow (x / 2 : ℂ) k]
       ring
@@ -530,12 +533,13 @@ theorem bessel_monomial_moment {a : ℝ} (m j : ℕ) (ha : a + j + m < 1) :
       (Real.rpow x (a - 2) * Real.exp (-2 / x) : ℝ)) (Ioi 0) ∧
     (∫ x : ℝ in Ioi 0, besselPolynomial a m x * (x : ℂ) ^ j *
       (Real.rpow x (a - 2) * Real.exp (-2 / x) : ℝ)) =
-      (2 : ℂ) ^ (a + j - 1 : ℂ) * Gamma (1 - a - j - m : ℂ) * poch (-(j : ℂ)) m := by
+      (2 : ℂ) ^ (a + j - 1 : ℂ) * Gamma (1 - a - j - m : ℂ) * pochhammer (-(j : ℂ)) m := by
   let W : ℝ → ℂ := fun x => (Real.rpow x (a - 2) * Real.exp (-2 / x) : ℝ)
   have hpos : 0 < 1 - a - j - m := by linarith
   have heq : (fun x : ℝ => besselPolynomial a m x * (x : ℂ) ^ j * W x) =
       fun x : ℝ => ∑ k ∈ Finset.range (m + 1),
-        ((m.choose k : ℂ) * poch (m + (a : ℂ) - 1) k / 2 ^ k) * ((x : ℂ) ^ (j + k) * W x) := by
+        ((m.choose k : ℂ) * pochhammer (m + (a : ℂ) - 1) k / 2 ^ k) *
+            ((x : ℂ) ^ (j + k) * W x) := by
     funext x
     rw [bessel_binomial_sum]
     simp only [Finset.sum_mul, div_pow]
@@ -557,14 +561,15 @@ theorem bessel_monomial_moment {a : ℝ} (m j : ℕ) (ha : a + j + m < 1) :
     rw [heq, integral_finsetSum _ fun k hk => (hM k hk).1.const_mul _]
     simp only [integral_const_mul]
     have hterm (k : ℕ) (hk : k ∈ Finset.range (m + 1)) :
-        ((m.choose k : ℂ) * poch (m + (a : ℂ) - 1) k / 2 ^ k) *
+        ((m.choose k : ℂ) * pochhammer (m + (a : ℂ) - 1) k / 2 ^ k) *
           (∫ x : ℝ in Ioi 0, (x : ℂ) ^ (j + k) * W x) =
         ((2 : ℂ) ^ (a + j - 1 : ℂ) * Gamma (1 - a - j - m : ℂ)) *
-          ((m.choose k : ℂ) * poch (m + (a : ℂ) - 1) k * poch (1 - a - j - m : ℂ) (m - k)) := by
+          ((m.choose k : ℂ) * pochhammer (m + (a : ℂ) - 1) k *
+              pochhammer (1 - a - j - m : ℂ) (m - k)) := by
       have hkm : k ≤ m := Nat.le_of_lt_succ (Finset.mem_range.mp hk)
       rw [(hM k hk).2]
       have hg : Gamma (1 - a - (j + k : ℕ) : ℂ) =
-          poch (1 - a - j - m : ℂ) (m - k) * Gamma (1 - a - j - m : ℂ) := by
+          pochhammer (1 - a - j - m : ℂ) (m - k) * Gamma (1 - a - j - m : ℂ) := by
         have hp : 0 < (1 - (a : ℂ) - j - m).re := by simpa using hpos
         have h := Complex.Gamma_add_nat_div_Gamma_eq (n := m - k) (1 - a - j - m : ℂ)
           (not_neg_nat_of_re_pos hp)
@@ -576,7 +581,7 @@ theorem bessel_monomial_moment {a : ℝ} (m j : ℕ) (ha : a + j + m < 1) :
           cpow_add _ _ two_ne_zero, cpow_natCast]
       rw [hg, hp]
       field_simp
-    rw [Finset.sum_congr rfl hterm, ← Finset.mul_sum, ← poch_add_eq_sum]
+    rw [Finset.sum_congr rfl hterm, ← Finset.mul_sum, ← pochhammer_add_eq_sum]
     rw [show (m : ℂ) + a - 1 + (1 - a - j - m) = -j by ring]
 
 /-- Product moments reduce to the top monomial after finite orthogonality. -/
@@ -584,11 +589,11 @@ theorem bessel_product_integral_of_le {a : ℝ} (m n : ℕ) (hnm : n ≤ m) (ha 
     (∫ x : ℝ in Ioi 0, besselPolynomial a m x * besselPolynomial a n x *
       (Real.rpow x (a - 2) * Real.exp (-2 / x) : ℝ)) =
       if m = n then (2 : ℂ) ^ (a - 1 : ℂ) * Gamma (1 - a - 2 * n : ℂ) *
-        poch (2 - a - 2 * n : ℂ) n * n ! else 0 := by
+        pochhammer (2 - a - 2 * n : ℂ) n * n ! else 0 := by
   let W : ℝ → ℂ := fun x => (Real.rpow x (a - 2) * Real.exp (-2 / x) : ℝ)
   have heq : (fun x : ℝ => besselPolynomial a m x * besselPolynomial a n x * W x) =
       fun x : ℝ => ∑ k ∈ Finset.range (n + 1),
-        ((n.choose k : ℂ) * poch (n + (a : ℂ) - 1) k / 2 ^ k) *
+        ((n.choose k : ℂ) * pochhammer (n + (a : ℂ) - 1) k / 2 ^ k) *
           (besselPolynomial a m x * (x : ℂ) ^ k * W x) := by
     funext x
     conv_lhs => arg 1; arg 2; rw [bessel_binomial_sum]
@@ -606,56 +611,58 @@ theorem bessel_product_integral_of_le {a : ℝ} (m n : ℕ) (hnm : n ≤ m) (ha 
   rw [heq, integral_finsetSum _ fun k hk => (hM k hk).1.const_mul _]
   simp only [integral_const_mul]
   rw [Finset.sum_congr rfl (g := fun k =>
-    ((n.choose k : ℂ) * poch (n + (a : ℂ) - 1) k / 2 ^ k) *
-      ((2 : ℂ) ^ (a + k - 1 : ℂ) * Gamma (1 - a - k - m : ℂ) * poch (-(k : ℂ)) m))
+    ((n.choose k : ℂ) * pochhammer (n + (a : ℂ) - 1) k / 2 ^ k) *
+      ((2 : ℂ) ^ (a + k - 1 : ℂ) * Gamma (1 - a - k - m : ℂ) * pochhammer (-(k : ℂ)) m))
     (fun k hk => by rw [(hM k hk).2])]
   split_ifs with hmn
   · subst m
     rw [Finset.sum_eq_single n]
     · simp only [Nat.choose_self, Nat.cast_one, one_mul]
-      rw [poch_neg_coe_nat, Nat.descFactorial_self]
+      rw [pochhammer_neg_coe_nat, Nat.descFactorial_self]
       have hp : (2 : ℂ) ^ (a + n - 1 : ℂ) = (2 : ℂ) ^ (a - 1 : ℂ) * 2 ^ n := by
         rw [show (a : ℂ) + n - 1 = ((a : ℂ) - 1) + n by ring,
           cpow_add _ _ two_ne_zero, cpow_natCast]
-      have hpoch : poch (2 - a - 2 * n : ℂ) n = (-1 : ℂ) ^ n * poch (n + (a : ℂ) - 1) n := by
-        convert poch_reflect ((n : ℂ) + a - 1) n using 1 ; congr 1 ; ring
+      have hpoch : pochhammer (2 - a - 2 * n : ℂ) n = (-1 : ℂ) ^ n *
+          pochhammer (n + (a : ℂ) - 1) n := by
+        convert pochhammer_reflect ((n : ℂ) + a - 1) n using 1 ; congr 1 ; ring
       rw [hp, hpoch]
       field_simp
       ; ring
     · intro k hk hkn
       have hlt : k < n := by have := Finset.mem_range.mp hk; omega
-      rw [poch_neg_nat_eq_zero hlt]
+      rw [pochhammer_neg_nat_eq_zero hlt]
       simp
     · simp
   · apply Finset.sum_eq_zero
     intro k hk
     have hlt : k < m := by have := Finset.mem_range.mp hk; omega
-    rw [poch_neg_nat_eq_zero hlt]
+    rw [pochhammer_neg_nat_eq_zero hlt]
     simp
 
 /-- The Pochhammer cancellation in the finite Bessel squared norm. -/
 theorem bessel_norm_pochhammer (s : ℂ) (n : ℕ) :
-    s * poch (s + 1) n * poch (s + n + 1) n = (s + 2 * n) * poch s (2 * n) := by
+    s * pochhammer (s + 1) n * pochhammer (s + n + 1) n = (s + 2 * n) * pochhammer s (2 * n) := by
   calc
-    _ = s * poch (s + 1) (n + n) := by
-      rw [poch_add, show s + 1 + (n : ℂ) = s + n + 1 by ring]
+    _ = s * pochhammer (s + 1) (n + n) := by
+      rw [pochhammer_add, show s + 1 + (n : ℂ) = s + n + 1 by ring]
       ring
     _ = _ := by
-      rw [← two_mul n, ← poch_succ_left, poch_succ]
+      rw [← two_mul n, ← pochhammer_succ_left, pochhammer_succ]
       push_cast
       ring
 
 /-- Gamma form of the finite Bessel norm cancellation. -/
 theorem bessel_norm_gamma {s : ℝ} (hs : 0 < s) (n : ℕ) :
-    Gamma (s : ℂ) * poch (s + 1 : ℂ) n / Gamma (s + 2 * n : ℂ) =
-      (s + 2 * n : ℂ) / ((s : ℂ) * poch (s + n + 1 : ℂ) n) := by
+    Gamma (s : ℂ) * pochhammer (s + 1 : ℂ) n / Gamma (s + 2 * n : ℂ) =
+      (s + 2 * n : ℂ) / ((s : ℂ) * pochhammer (s + n + 1 : ℂ) n) := by
   have hp : 0 < (s : ℂ).re := by simpa using hs
   have hG := Gamma_ne_zero_of_re_pos hp
-  have hP : poch (s : ℂ) (2 * n) ≠ 0 := poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos hp) _
-  have hQ : poch (s + n + 1 : ℂ) n ≠ 0 :=
-    poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; positivity)) _
+  have hP : pochhammer (s : ℂ) (2 * n) ≠ 0 :=
+      pochhammer_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos hp) _
+  have hQ : pochhammer (s + n + 1 : ℂ) n ≠ 0 :=
+    pochhammer_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; positivity)) _
   have hs0 : (s : ℂ) ≠ 0 := ofReal_ne_zero.mpr hs.ne'
-  have hg : Gamma (s + 2 * n : ℂ) = poch (s : ℂ) (2 * n) * Gamma (s : ℂ) := by
+  have hg : Gamma (s + 2 * n : ℂ) = pochhammer (s : ℂ) (2 * n) * Gamma (s : ℂ) := by
     have h := Gamma_add_nat_div_Gamma_eq (n := 2 * n) (s : ℂ) (not_neg_nat_of_re_pos hp)
     rw [div_eq_iff hG] at h
     push_cast at h
@@ -667,13 +674,14 @@ theorem bessel_norm_gamma {s : ℝ} (hs : 0 < s) (n : ℕ) :
 /-- Identity under the stated parameter and domain assumptions: `(2 : ℂ) ^ (1 - (a : ℂ)) / Gamma
 (1 - (a : ℂ)) * (∫ x : ℝ in Set.Ioi 0, besselPolynomial a m x * besselPolynomial a n x *
 (Real.rpow x (a - 2) * Real.exp (-2 / x) : ℝ)) = if m = n then (1 - a) / (1 - a - 2 * (n : ℂ))
-* n.factorial / poch (2 - a - n) n else 0`. -/
+* n.factorial / pochhammer (2 - a - n) n else 0`. -/
 @[dlmf 18.34.E5_5]
 theorem besselPolynomial_finite_orthogonality {a : ℝ} (m n : ℕ) (ha : a < 1 - 2 * max m n) :
     (2 : ℂ) ^ (1 - (a : ℂ)) / Gamma (1 - (a : ℂ)) *
       (∫ x : ℝ in Set.Ioi 0, besselPolynomial a m x * besselPolynomial a n x *
         (Real.rpow x (a - 2) * Real.exp (-2 / x) : ℝ)) =
-      if m = n then (1 - a) / (1 - a - 2 * (n : ℂ)) * n.factorial / poch (2 - a - n) n else 0 := by
+      if m = n then (1 - a) / (1 - a - 2 * (n : ℂ)) * n.factorial /
+          pochhammer (2 - a - n) n else 0 := by
   have hm : a + 2 * m < 1 := by
     have hmax : (m : ℝ) ≤ max m n := by exact_mod_cast le_max_left m n
     linarith
@@ -683,7 +691,7 @@ theorem besselPolynomial_finite_orthogonality {a : ℝ} (m n : ℕ) (ha : a < 1 
   have hi : (∫ x : ℝ in Ioi 0, besselPolynomial a m x * besselPolynomial a n x *
       (Real.rpow x (a - 2) * Real.exp (-2 / x) : ℝ)) =
       if m = n then (2 : ℂ) ^ (a - 1 : ℂ) * Gamma (1 - a - 2 * n : ℂ) *
-        poch (2 - a - 2 * n : ℂ) n * n ! else 0 := by
+        pochhammer (2 - a - 2 * n : ℂ) n * n ! else 0 := by
     rcases le_total n m with hnm | hmn
     · exact bessel_product_integral_of_le m n hnm hm
     · have heq : (∫ x : ℝ in Ioi 0, besselPolynomial a m x * besselPolynomial a n x *
@@ -710,46 +718,48 @@ theorem besselPolynomial_finite_orthogonality {a : ℝ} (m n : ℕ) (ha : a < 1 
     rw [h0, h1, h2] at hratio
     calc
       _ = ((2 : ℂ) ^ (1 - (a : ℂ)) * (2 : ℂ) ^ (a - 1 : ℂ)) *
-          (Gamma (1 - a - 2 * n : ℂ) * poch (2 - a - 2 * n : ℂ) n / Gamma (1 - a : ℂ))
+          (Gamma (1 - a - 2 * n : ℂ) * pochhammer (2 - a - 2 * n : ℂ) n / Gamma (1 - a : ℂ))
               * n ! := by ring
       _ = _ := by rw [hpow, one_mul, hratio]; simp only [div_eq_mul_inv, mul_inv]; ring
   · simp
 
 end FiniteBesselOrthogonality
 
-/-- The map `(fun α : ℝ => jacobiPolyP α (a - α - 2) n (1 + α * x) / jacobiPolyP α (a - α - 2) n
-1)` tends to `(𝓝 (besselPolynomial a n x))` along `atTop`. -/
+/-- The map `(fun α : ℝ => jacobiPolynomialP α (a - α - 2) n (1 + α * x) / jacobiPolynomialP α (a -
+α - 2) n 1)` tends to `(𝓝 (besselPolynomial a n x))` along `atTop`. -/
 @[dlmf 18.34.E8]
 theorem jacobi_limit_besselPolynomial (a : ℂ) (n : ℕ) (x : ℂ) :
-    Tendsto (fun α : ℝ => jacobiPolyP α (a - α - 2) n (1 + α * x) / jacobiPolyP α (a - α - 2) n 1)
+    Tendsto (fun α : ℝ => jacobiPolynomialP α (a - α - 2) n (1 + α * x) /
+        jacobiPolynomialP α (a - α - 2) n 1)
         atTop
       (𝓝 (besselPolynomial a n x)) := by
-  unfold besselPolynomial terminatingHG
+  unfold besselPolynomial terminatingHypergeometric
   have hlim : Tendsto (fun α : ℝ => ∑ k ∈ Finset.range (n + 1),
-      poch (-(n : ℂ)) k * poch (n + a - 1) k * (-x / 2) ^ k / k ! *
-        (poch (1 + (α : ℂ)) k / (α : ℂ) ^ k)⁻¹) atTop
+      pochhammer (-(n : ℂ)) k * pochhammer (n + a - 1) k * (-x / 2) ^ k / k ! *
+        (pochhammer (1 + (α : ℂ)) k / (α : ℂ) ^ k)⁻¹) atTop
       (𝓝 (∑ k ∈ Finset.range (n + 1),
-        poch (-(n : ℂ)) k * poch (n + a - 1) k * (-x / 2) ^ k / k ! * 1⁻¹)) := by
+        pochhammer (-(n : ℂ)) k * pochhammer (n + a - 1) k * (-x / 2) ^ k / k ! * 1⁻¹)) := by
     apply tendsto_finsetSum
     intro k _
-    exact ((tendsto_poch_add_div_pow 1 k).inv₀ one_ne_zero).const_mul _
+    exact ((tendsto_pochhammer_add_div_pow 1 k).inv₀ one_ne_zero).const_mul _
   simp only [inv_one, mul_one] at hlim
   refine (hlim.congr' ?_).trans ?_
   · filter_upwards [eventually_gt_atTop 0] with α hα
     have hα' : (α : ℂ) ≠ 0 := ofReal_ne_zero.mpr hα.ne'
     have hc : ∀ k : ℕ, (α : ℂ) + 1 ≠ -k := not_neg_nat_of_re_pos (by simp; linarith)
-    have hp : poch ((α : ℂ) + 1) n / n ! ≠ 0 :=
-      div_ne_zero (poch_ne_zero_of_not_neg_nat hc n) (Nat.cast_ne_zero.mpr n.factorial_ne_zero)
+    have hp : pochhammer ((α : ℂ) + 1) n / n ! ≠ 0 :=
+      div_ne_zero (pochhammer_ne_zero_of_not_neg_nat hc n)
+          (Nat.cast_ne_zero.mpr n.factorial_ne_zero)
     have h0 : ₂F₁ (-(n : ℂ)) (n + α + (a - α - 2) + 1) (α + 1) (0 : ℂ) = 1 := by
       rw [ordinaryHypergeometric_eq_sum_neg_nat, Finset.sum_range_succ']
-      simp [gaussHGCoeff, poch_zero]
-    unfold jacobiPolyP
+      simp [gaussHypergeometricCoeff, pochhammer_zero]
+    unfold jacobiPolynomialP
     rw [show ((1 : ℂ) - 1) / 2 = 0 by ring, h0, mul_one, mul_div_cancel_left₀ _ hp,
       ordinaryHypergeometric_eq_sum_neg_nat]
     refine Finset.sum_congr rfl fun k _ => ?_
     have hk : (k ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr k.factorial_ne_zero
-    have hpk : poch ((α : ℂ) + 1) k ≠ 0 := poch_ne_zero_of_not_neg_nat hc k
-    unfold gaussHGCoeff
+    have hpk : pochhammer ((α : ℂ) + 1) k ≠ 0 := pochhammer_ne_zero_of_not_neg_nat hc k
+    unfold gaussHypergeometricCoeff
     rw [show (n : ℂ) + α + (a - α - 2) + 1 = n + a - 1 by ring,
       show (1 - (1 + (α : ℂ) * x)) / 2 = α * (-x / 2) by ring, mul_pow, add_comm (1 : ℂ)]
     field_simp
@@ -792,13 +802,13 @@ theorem pollaczek_eq_coeff_binomProductSeries (lam a b : ℂ) {θ : ℂ} (hθ : 
       (2 * Φ * sin θ * P) * I_sq - (2 * P) * hΦs
 
 /-- Formula under the stated hypotheses: `pollaczek lam a b 0 n (cos θ) = ∑ k ∈ Finset.range (n +
-1), poch (lam + I * (a * cos θ + b) / sin θ) k / k.factorial * (poch (lam - I * (a * cos θ +
-b) / sin θ) (n - k) / (n - k).factorial) * exp (I * ((n : ℂ) - 2 * k) * θ)`. -/
+1), pochhammer (lam + I * (a * cos θ + b) / sin θ) k / k.factorial * (pochhammer (lam - I * (a * cos
+θ + b) / sin θ) (n - k) / (n - k).factorial) * exp (I * ((n : ℂ) - 2 * k) * θ)`. -/
 @[dlmf 18.35.E4]
 theorem pollaczek_finite_sum (lam a b : ℂ) (n : ℕ) {θ : ℂ} (hθ : sin θ ≠ 0) :
     pollaczek lam a b 0 n (cos θ) = ∑ k ∈ Finset.range (n + 1),
-      poch (lam + I * (a * cos θ + b) / sin θ) k / k.factorial *
-      (poch (lam - I * (a * cos θ + b) / sin θ) (n - k) / (n - k).factorial) *
+      pochhammer (lam + I * (a * cos θ + b) / sin θ) k / k.factorial *
+      (pochhammer (lam - I * (a * cos θ + b) / sin θ) (n - k) / (n - k).factorial) *
       exp (I * ((n : ℂ) - 2 * k) * θ) := by
   rw [pollaczek_eq_coeff_binomProductSeries lam a b hθ, coeff_binomProductSeries,
     ← Finset.sum_range_reflect]
@@ -839,15 +849,15 @@ theorem pollaczek_generating_function (lam a b : ℂ) (θ : ℝ) (hθ : Real.sin
     congr 2 <;> ring
 
 /-- Identity under the stated parameter and domain assumptions: `pollaczek lam 0 0 0 n x =
-ultrasphPoly lam n x`. -/
+ultrasphericalPolynomial lam n x`. -/
 @[dlmf 18.35.E8]
-theorem pollaczek_eq_ultrasphPoly {lam : ℂ} (hlam : -1 / 2 < lam.re) (n : ℕ) (x : ℂ) :
-    pollaczek lam 0 0 0 n x = ultrasphPoly lam n x := by
+theorem pollaczek_eq_ultrasphericalPolynomial {lam : ℂ} (hlam : -1 / 2 < lam.re) (n : ℕ) (x : ℂ) :
+    pollaczek lam 0 0 0 n x = ultrasphericalPolynomial lam n x := by
   induction n using Nat.twoStepInduction with
   | zero => simp [pollaczek, associated]
-  | one => simp [pollaczek, associated, ultrasphPoly_one_eq hlam]
+  | one => simp [pollaczek, associated, ultrasphericalPolynomial_one_eq hlam]
   | more n ih0 ih1 =>
-    have hr := ultrasphPoly_recurrence hlam n x
+    have hr := ultrasphericalPolynomial_recurrence hlam n x
     have hn : (n : ℂ) + 2 ≠ 0 := by exact_mod_cast (by omega : n + 2 ≠ 0)
     simp only [pollaczek, associated] at ih0 ih1 ⊢
     rw [ih0, ih1]
@@ -865,7 +875,8 @@ theorem pollaczek_eq_meixnerPollaczek {lam : ℂ} (hlam : 0 < lam.re) (phi x : �
     pollaczek lam 0 (x * sin phi) 0 n (cos phi) = meixnerPollaczek lam phi n x := by
   have hl : lam ≠ 0 := fun h => by simp [h] at hlam
   induction n using Nat.twoStepInduction with
-  | zero => simp [pollaczek, associated, meixnerPollaczek, terminatingHG, poch_zero]
+  | zero => simp [pollaczek, associated, meixnerPollaczek, terminatingHypergeometric,
+              pochhammer_zero]
   | one =>
     simp [pollaczek, associated, meixnerPollaczek_one hl]
     ring
@@ -899,25 +910,25 @@ theorem pollaczek_eq_associatedMeixnerPollaczek (lam phi x : ℂ) (c : ℝ) (n :
     ring
 
 /-- Identity under the stated parameter and domain assumptions: `laguerreExtended (-(k : ℂ)) n x =
-(-1 : ℂ) ^ k * (n - k).factorial / n.factorial * x ^ k * laguerrePolyL k (n - k) x`. -/
+(-1 : ℂ) ^ k * (n - k).factorial / n.factorial * x ^ k * laguerrePolynomialL k (n - k) x`. -/
 @[dlmf 18.36.E2]
-theorem laguerrePolyL_negative_integer_parameter {n k : ℕ} (hk : k ≤ n) (x : ℂ) :
+theorem laguerrePolynomialL_negative_integer_parameter {n k : ℕ} (hk : k ≤ n) (x : ℂ) :
     laguerreExtended (-(k : ℂ)) n x = (-1 : ℂ) ^ k * (n - k).factorial / n.factorial * x ^ k
-        * laguerrePolyL k (n - k) x := by
+        * laguerrePolynomialL k (n - k) x := by
   have hα : ∀ j : ℕ, (k : ℂ) + 1 ≠ -(j : ℂ) := by
     intro j h
     have : ((k + 1 + j : ℕ) : ℂ) = 0 := by push_cast; linear_combination h
     exact absurd (by exact_mod_cast this : k + 1 + j = 0) (by omega)
-  rw [laguerrePolyL_eq_sum hα]
+  rw [laguerrePolynomialL_eq_sum hα]
   unfold laguerreExtended
   obtain ⟨N, rfl⟩ : ∃ N, n = k + N := ⟨n - k, by omega⟩
   rw [show k + N + 1 = k + (N + 1) by ring, Finset.sum_range_add, Nat.add_sub_cancel_left]
-  have hzero : ∑ j ∈ Finset.range k, poch (-(k : ℂ) + j + 1) (k + N - j) /
+  have hzero : ∑ j ∈ Finset.range k, pochhammer (-(k : ℂ) + j + 1) (k + N - j) /
       ((j.factorial : ℂ) * (k + N - j).factorial) * (-x) ^ j = 0 := by
     refine Finset.sum_eq_zero fun j hj => ?_
     have hjk := Finset.mem_range.mp hj
-    have : poch (-(k : ℂ) + j + 1) (k + N - j) = 0 := by
-      rw [poch, ascPochhammer_eval_eq_zero_iff]
+    have : pochhammer (-(k : ℂ) + j + 1) (k + N - j) = 0 := by
+      rw [pochhammer, ascPochhammer_eval_eq_zero_iff]
       refine ⟨k - 1 - j, by omega, ?_⟩
       push_cast [show 1 + j ≤ k by omega, Nat.sub_sub]
       ring
@@ -929,42 +940,43 @@ theorem laguerrePolyL_negative_integer_parameter {n k : ℕ} (hk : k ≤ n) (x :
   have e2 : -(k : ℂ) + ((k + m : ℕ) : ℂ) + 1 = (m : ℂ) + 1 := by push_cast; ring
   have e3 : (k : ℂ) + 1 + (m : ℂ) = ((k + m : ℕ) : ℂ) + 1 := by push_cast; ring
   rw [e1, e2, e3]
-  have p1 := poch_nat_succ_mul_factorial m (N - m)
-  have p2 := poch_nat_succ_mul_factorial (k + m) (N - m)
+  have p1 := pochhammer_nat_succ_mul_factorial m (N - m)
+  have p2 := pochhammer_nat_succ_mul_factorial (k + m) (N - m)
   rw [show m + (N - m) = N by omega] at p1
   rw [show k + m + (N - m) = k + N by omega] at p2
   have f1 : (m ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
   have f2 : ((k + m) ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
   have f3 : ((N - m) ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
   have f4 : ((k + N) ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
-  have q1 : poch ((m : ℂ) + 1) (N - m) = (N ! : ℂ) / m ! := by
+  have q1 : pochhammer ((m : ℂ) + 1) (N - m) = (N ! : ℂ) / m ! := by
     field_simp; linear_combination p1
-  have q2 : poch (((k + m : ℕ) : ℂ) + 1) (N - m) = ((k + N) ! : ℂ) / (k + m) ! := by
+  have q2 : pochhammer (((k + m : ℕ) : ℂ) + 1) (N - m) = ((k + N) ! : ℂ) / (k + m) ! := by
     field_simp; linear_combination p2
   rw [q1, q2, pow_add, show (-x) ^ k = (-1) ^ k * x ^ k by ring]
   field_simp
 
 /-- The Laguerre polynomial `L_n^{(α)}` is analytic at every point. -/
-theorem analyticAt_laguerrePolyL {α : ℂ} (hα : -1 < α.re) (n : ℕ) (x : ℂ) :
-    AnalyticAt ℂ (laguerrePolyL α n) x := by
+theorem analyticAt_laguerrePolynomialL {α : ℂ} (hα : -1 < α.re) (n : ℕ) (x : ℂ) :
+    AnalyticAt ℂ (laguerrePolynomialL α n) x := by
   have hc : ∀ k : ℕ, α + 1 ≠ -(k : ℂ) := not_neg_nat_of_re_pos (by
     simp only [Complex.add_re, Complex.one_re]; linarith)
-  have he : laguerrePolyL α n = fun z => poch (α + 1) n / (n.factorial : ℂ) *
+  have he : laguerrePolynomialL α n = fun z => pochhammer (α + 1) n / (n.factorial : ℂ) *
       kummerM (-(n : ℂ)) (α + 1) z := rfl
   rw [he]
   exact analyticAt_const.mul ((hasFPowerSeriesOnBall_kummerM (a := -(n : ℂ)) hc).analyticAt_of_mem
     (by simp))
 
 /-- `L'_{m+1} - L'_m + L_m = 0`. -/
-theorem laguerrePolyL_deriv_succ_sub {α : ℂ} (hα : -1 < α.re) (m : ℕ) (x : ℂ) :
-    deriv (laguerrePolyL α (m + 1)) x - deriv (laguerrePolyL α m) x + laguerrePolyL α m x = 0 := by
+theorem laguerrePolynomialL_deriv_succ_sub {α : ℂ} (hα : -1 < α.re) (m : ℕ) (x : ℂ) :
+    deriv (laguerrePolynomialL α (m + 1)) x - deriv (laguerrePolynomialL α m) x +
+        laguerrePolynomialL α m x = 0 := by
   rcases m with _ | j
-  · have h0 : laguerrePolyL α 0 = fun _ => 1 := funext fun x => laguerrePolyL_zero α x
-    rw [laguerrePolyL_derivative hα 0, h0, deriv_const, laguerrePolyL_zero]
+  · have h0 : laguerrePolynomialL α 0 = fun _ => 1 := funext fun x => laguerrePolynomialL_zero α x
+    rw [laguerrePolynomialL_derivative hα 0, h0, deriv_const, laguerrePolynomialL_zero]
     simp
   · have hα1 : -1 < (α + 1).re := by simp; linarith
-    rw [laguerrePolyL_derivative hα (j + 1), laguerrePolyL_derivative hα j,
-        laguerrePolyL_raise_parameter hα j]
+    rw [laguerrePolynomialL_derivative hα (j + 1), laguerrePolynomialL_derivative hα j,
+        laguerrePolynomialL_raise_parameter hα j]
     ring
 
 /-- Identity under the stated parameter and domain assumptions: `-x * deriv (deriv
@@ -978,14 +990,16 @@ theorem exceptionalLaguerre_differential_equation {k : ℝ} (hk : 0 < k) (n : �
       n * exceptionalLaguerre k n x := by
   have hα : -1 < (k : ℂ).re := by simp; linarith
   have hL : ∀ j y,
-      HasDerivAt (laguerrePolyL (k : ℂ) j) (deriv (laguerrePolyL (k : ℂ) j) y) y := fun j y =>
-    (analyticAt_laguerrePolyL hα j y).differentiableAt.hasDerivAt
+      HasDerivAt (laguerrePolynomialL (k : ℂ) j) (deriv (laguerrePolynomialL (k : ℂ) j) y)
+          y := fun j y =>
+    (analyticAt_laguerrePolynomialL hα j y).differentiableAt.hasDerivAt
   have hL' : ∀ j y,
-      HasDerivAt (deriv (laguerrePolyL (k : ℂ) j)) (deriv (deriv (laguerrePolyL (k : ℂ) j)) y) y :=
-    fun j y => (analyticAt_laguerrePolyL hα j y).deriv.differentiableAt.hasDerivAt
+      HasDerivAt (deriv (laguerrePolynomialL (k : ℂ) j))
+          (deriv (deriv (laguerrePolynomialL (k : ℂ) j)) y) y :=
+    fun j y => (analyticAt_laguerrePolynomialL hα j y).deriv.differentiableAt.hasDerivAt
   rcases n with _ | m
   · have he : exceptionalLaguerre k 0 = fun y : ℂ => -(y + (k : ℂ) + 1) := by
-      funext y; simp [exceptionalLaguerre, laguerrePolyL_zero]
+      funext y; simp [exceptionalLaguerre, laguerrePolynomialL_zero]
     have hd : deriv (exceptionalLaguerre k 0) = fun _ => -1 := by
       rw [he]; funext y
       have := ((hasDerivAt_id y).add_const ((k : ℂ) + 1)).neg
@@ -993,12 +1007,13 @@ theorem exceptionalLaguerre_differential_equation {k : ℝ} (hk : 0 < k) (n : �
     rw [hd, he, deriv_const]
     push_cast; ring
   · have he : exceptionalLaguerre k (m + 1) = fun y => -(y + k + 1)
-      * laguerrePolyL (k : ℂ) (m + 1) y +
-        laguerrePolyL (k : ℂ) m y := by
+      * laguerrePolynomialL (k : ℂ) (m + 1) y +
+        laguerrePolynomialL (k : ℂ) m y := by
       funext y; simp [exceptionalLaguerre]
     have hd1 : ∀ y, HasDerivAt (exceptionalLaguerre k (m + 1))
-        (-laguerrePolyL (k : ℂ) (m + 1) y - (y + k + 1) * deriv (laguerrePolyL (k : ℂ) (m + 1)) y +
-          deriv (laguerrePolyL (k : ℂ) m) y) y := by
+        (-laguerrePolynomialL (k : ℂ) (m + 1) y - (y + k + 1) *
+            deriv (laguerrePolynomialL (k : ℂ) (m + 1)) y +
+          deriv (laguerrePolynomialL (k : ℂ) m) y) y := by
       intro y
       rw [he]
       have := ((((hasDerivAt_id y).add_const ((k : ℂ) + 1)).neg).mul (hL (m + 1) y)).add (hL m y)
@@ -1006,18 +1021,20 @@ theorem exceptionalLaguerre_differential_equation {k : ℝ} (hk : 0 < k) (n : �
       · funext z; simp only [Pi.add_apply, Pi.mul_apply, Pi.neg_apply, id]; ring
       · simp; ring
     have hd : deriv (exceptionalLaguerre k (m + 1)) = fun y =>
-        -laguerrePolyL (k : ℂ) (m + 1) y - (y + k + 1) * deriv (laguerrePolyL (k : ℂ) (m + 1)) y +
-          deriv (laguerrePolyL (k : ℂ) m) y := funext fun y => (hd1 y).deriv
+        -laguerrePolynomialL (k : ℂ) (m + 1) y - (y + k + 1) *
+            deriv (laguerrePolynomialL (k : ℂ) (m + 1)) y +
+          deriv (laguerrePolynomialL (k : ℂ) m) y := funext fun y => (hd1 y).deriv
     have hd2 : deriv (deriv (exceptionalLaguerre k (m + 1))) x =
-        -2 * deriv (laguerrePolyL (k : ℂ) (m + 1)) x -
-          (x + k + 1) * deriv (deriv (laguerrePolyL (k : ℂ) (m + 1))) x +
-          deriv (deriv (laguerrePolyL (k : ℂ) m)) x := by
+        -2 * deriv (laguerrePolynomialL (k : ℂ) (m + 1)) x -
+          (x + k + 1) * deriv (deriv (laguerrePolynomialL (k : ℂ) (m + 1))) x +
+          deriv (deriv (laguerrePolynomialL (k : ℂ) m)) x := by
       rw [hd]
-      have h2 : HasDerivAt (fun y => -laguerrePolyL (k : ℂ) (m + 1) y -
-          (y + k + 1) * deriv (laguerrePolyL (k : ℂ) (m + 1)) y + deriv (laguerrePolyL (k : ℂ) m) y)
-          (-2 * deriv (laguerrePolyL (k : ℂ) (m + 1)) x -
-          (x + k + 1) * deriv (deriv (laguerrePolyL (k : ℂ) (m + 1))) x +
-          deriv (deriv (laguerrePolyL (k : ℂ) m)) x) x := by
+      have h2 : HasDerivAt (fun y => -laguerrePolynomialL (k : ℂ) (m + 1) y -
+          (y + k + 1) * deriv (laguerrePolynomialL (k : ℂ) (m + 1)) y +
+              deriv (laguerrePolynomialL (k : ℂ) m) y)
+          (-2 * deriv (laguerrePolynomialL (k : ℂ) (m + 1)) x -
+          (x + k + 1) * deriv (deriv (laguerrePolynomialL (k : ℂ) (m + 1))) x +
+          deriv (deriv (laguerrePolynomialL (k : ℂ) m)) x) x := by
         have := (((hL (m + 1) x).neg.sub (((hasDerivAt_id x).add_const ((k : ℂ) + 1)).mul
           (hL' (m + 1) x))).add (hL' m x))
         convert this using 1
@@ -1025,9 +1042,9 @@ theorem exceptionalLaguerre_differential_equation {k : ℝ} (hk : 0 < k) (n : �
         · simp; ring
       exact h2.deriv
     rw [hd2, (hd1 x).deriv, he]
-    have E1 := laguerrePolyL_differential_equation hα (m + 1) x
-    have E2 := laguerrePolyL_differential_equation hα m x
-    have R2 := laguerrePolyL_deriv_succ_sub hα m x
+    have E1 := laguerrePolynomialL_differential_equation hα (m + 1) x
+    have E2 := laguerrePolynomialL_differential_equation hα m x
+    have R2 := laguerrePolynomialL_deriv_succ_sub hα m x
     field_simp
     push_cast at E1 E2 ⊢
     linear_combination (x + k) * (x + k + 1) * E1 - (x + k) * E2 - 2 * x * R2
@@ -1062,10 +1079,10 @@ def morsePolynomialFunction (lam : ℝ) (n : ℕ) (x : ℝ) : ℂ :=
 /-- The Bessel polynomial is the evaluation of a polynomial. -/
 theorem exists_besselPolynomial_eq_eval (a : ℂ) (n : ℕ) :
     ∃ p : ℂ[X], besselPolynomial a n = fun x => p.eval x := by
-  refine ⟨∑ k ∈ Finset.range (n + 1), C (poch (-(n : ℂ)) k * poch (n + a - 1) k *
+  refine ⟨∑ k ∈ Finset.range (n + 1), C (pochhammer (-(n : ℂ)) k * pochhammer (n + a - 1) k *
     (-1 / 2) ^ k / (k.factorial : ℂ)) * X ^ k, ?_⟩
   funext x
-  unfold besselPolynomial terminatingHG
+  unfold besselPolynomial terminatingHypergeometric
   simp only [eval_finsetSum, eval_mul, eval_C, eval_pow, eval_X, List.map_cons,
     List.map_nil, List.prod_cons, List.prod_nil, mul_one, div_one]
   refine Finset.sum_congr rfl fun k _ => ?_
@@ -1297,7 +1314,7 @@ theorem morsePolynomialFunction_orthogonality {lam : ℝ} (m n : ℕ) (hm : (m :
       Gamma (2 * lam - 1 : ℂ) / ((m ! : ℂ) * n !) *
         (if m = n then (1 - ((2 - 2 * lam : ℝ) : ℂ)) /
           (1 - ((2 - 2 * lam : ℝ) : ℂ) - 2 * n) * n ! /
-          poch (2 - ((2 - 2 * lam : ℝ) : ℂ) - n) n else 0) := by
+          pochhammer (2 - ((2 - 2 * lam : ℝ) : ℂ) - n) n else 0) := by
     rw [he1, ← hB]
     field_simp
   rw [hprod]
@@ -1305,9 +1322,9 @@ theorem morsePolynomialFunction_orthogonality {lam : ℝ} (m n : ℕ) (hm : (m :
   · subst m
     have hs : 0 < 2 * lam - n := by linarith [Nat.cast_nonneg (α := ℝ) n]
     have hG2 : Gamma (2 * lam - n : ℂ) ≠ 0 := Gamma_ne_zero_of_re_pos (by simpa using hs)
-    have hP : poch (2 * lam - n : ℂ) n ≠ 0 :=
-      poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simpa using hs)) n
-    have hΓ : Gamma (2 * lam : ℂ) = poch (2 * lam - n : ℂ) n * Gamma (2 * lam - n : ℂ) := by
+    have hP : pochhammer (2 * lam - n : ℂ) n ≠ 0 :=
+      pochhammer_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simpa using hs)) n
+    have hΓ : Gamma (2 * lam : ℂ) = pochhammer (2 * lam - n : ℂ) n * Gamma (2 * lam - n : ℂ) := by
       have h := Complex.Gamma_add_nat_div_Gamma_eq (n := n) (2 * lam - n : ℂ)
         (not_neg_nat_of_re_pos (by simpa using hs))
       rw [div_eq_iff hG2] at h
@@ -1322,10 +1339,10 @@ theorem morsePolynomialFunction_orthogonality {lam : ℝ} (m n : ℕ) (hm : (m :
       show (2 * lam - 1 - 2 * n : ℂ) = 2 * lam - 2 * n - 1 by ring]
     have hf : (n ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
     have hGammaProduct : (2 * lam - 1 : ℂ) * Gamma (2 * lam - 1 : ℂ) =
-        poch (2 * lam - n : ℂ) n * Gamma (2 * lam - n : ℂ) := hΓ1.symm.trans hΓ
+        pochhammer (2 * lam - n : ℂ) n * Gamma (2 * lam - n : ℂ) := hΓ1.symm.trans hΓ
     calc
       _ = ((2 * lam - 1 : ℂ) * Gamma (2 * lam - 1 : ℂ)) /
-          (poch (2 * lam - n : ℂ) n * ((2 * lam - 2 * n - 1 : ℂ) * n !)) := by
+          (pochhammer (2 * lam - n : ℂ) n * ((2 * lam - 2 * n - 1 : ℂ) * n !)) := by
         simp only [div_eq_mul_inv, mul_inv]
         field_simp [hf]
 

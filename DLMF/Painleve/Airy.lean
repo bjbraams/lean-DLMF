@@ -26,7 +26,7 @@ reduction at `c = 1/2` and applies the Bäcklund transformations.
 ## Main results
 
 * `isPIIOn_of_riccati`: the Riccati reduction `u' = -u² - x/2` gives `PII(1/2)`.
-* `isPIIOn_airyPII`, `exists_airy_scale`: the Airy solution of `PII(1/2)` with a cube-root
+* `isPIIOn_airyPII`, `exists_airy_scale`: the Airy solution of `PII(1/2)` with a unitCube-root
   scale `k³ = -1/2`.
 * `meromorphic_airyPII`, `meromorphic_airyPIIJet`, `meromorphic_airyPIIHierarchy`: these
   solutions are meromorphic on the plane.
@@ -94,7 +94,7 @@ theorem hasDerivAt_airyPII {k : ℂ} (hk : k ^ 3 = -1 / 2) (a b : ℂ) {z : ℂ}
   ring
 
 /-- An Airy-based solution of `PII(1/2)` on its full regular set, with the corrected
-cube-root scale. Negation supplies `PII(-1/2)`. -/
+unitCube-root scale. Negation supplies `PII(-1/2)`. -/
 theorem isPIIOn_airyPII {k : ℂ} (hk : k ^ 3 = -1 / 2) (a b : ℂ) :
     IsPIIOn (1 / 2) (airyPII k a b) {z | airySeed k a b z ≠ 0} := by
   have hc : Continuous (airySeed k a b) :=
@@ -102,7 +102,7 @@ theorem isPIIOn_airyPII {k : ℂ} (hk : k ^ 3 = -1 / 2) (a b : ℂ) :
   exact isPIIOn_of_riccati (isOpen_ne_fun hc continuous_const)
     (fun _ hz => hasDerivAt_airyPII hk a b hz)
 
-/-- A valid complex Airy scale exists; it is a cube root of `-1/2`. -/
+/-- A valid complex Airy scale exists; it is a unitCube root of `-1/2`. -/
 theorem exists_airy_scale : ∃ k : ℂ, k ^ 3 = -1 / 2 :=
   IsAlgClosed.exists_pow_nat_eq (-1 / 2) (by norm_num)
 

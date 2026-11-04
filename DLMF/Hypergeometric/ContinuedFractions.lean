@@ -91,16 +91,16 @@ theorem GaussContinuedFraction.term_ofReal (α β γ x : ℝ) (n : ℕ) :
     ((GaussContinuedFraction.term α β γ x n : ℝ) : ℂ) = (ascPochhammer ℂ n).eval (α : ℂ) *
       (ascPochhammer ℂ n).eval (β : ℂ) * (x : ℂ) ^ n / n.factorial *
         (Gamma ((γ : ℂ) + n))⁻¹ := by
-  have h1 := poch_ofReal α n
-  have h2 := poch_ofReal β n
-  simp only [poch] at h1 h2
+  have h1 := pochhammer_ofReal α n
+  have h2 := pochhammer_ofReal β n
+  simp only [pochhammer] at h1 h2
   rw [h1, h2, show (γ : ℂ) + n = ((γ + n : ℝ) : ℂ) by push_cast; ring, Gamma_ofReal]
   simp [GaussContinuedFraction.term]
 
 /-- Summability of the real regularized series for `|x| < 1`. -/
 theorem GaussContinuedFraction.summable (α β γ : ℝ) {x : ℝ} (hx : |x| < 1) :
     Summable (GaussContinuedFraction.term α β γ x) := by
-  have h := summable_regularizedGaussHGFun_term (α : ℂ) β γ (z := x)
+  have h := summable_regularizedGaussHypergeometricFun_term (α : ℂ) β γ (z := x)
     (by rwa [Complex.norm_real, Real.norm_eq_abs])
   simp_rw [← GaussContinuedFraction.term_ofReal] at h
   exact Complex.summable_ofReal.mp h
@@ -109,14 +109,15 @@ theorem GaussContinuedFraction.summable (α β γ : ℝ) {x : ℝ} (hx : |x| < 1
 -/
 theorem GaussContinuedFraction.ofReal (α β γ x : ℝ) :
     regularizedGaussHGFun (α : ℂ) β γ x = ((GaussContinuedFraction.realSum α β γ x : ℝ) : ℂ) := by
-  rw [regularizedGaussHGFun_eq_tsum, GaussContinuedFraction.realSum, Complex.ofReal_tsum]
+  rw [regularizedGaussHypergeometricFun_eq_tsum, GaussContinuedFraction.realSum,
+      Complex.ofReal_tsum]
   simp_rw [GaussContinuedFraction.term_ofReal]
 
 /-- The terms are nonnegative for nonnegative parameters and argument. -/
 theorem GaussContinuedFraction.term_nonneg {α β γ x : ℝ} (hα : 0 ≤ α) (hβ : 0 ≤ β) (hγ : 0 < γ)
     (hx : 0 ≤ x) (n : ℕ) : 0 ≤ GaussContinuedFraction.term α β γ x n := by
-  have := poch_eval_nonneg hα n
-  have := poch_eval_nonneg hβ n
+  have := pochhammer_eval_nonneg hα n
+  have := pochhammer_eval_nonneg hβ n
   have : 0 < Real.Gamma (γ + n) := Real.Gamma_pos_of_pos (by positivity)
   unfold GaussContinuedFraction.term
   positivity
@@ -203,8 +204,8 @@ theorem GaussContinuedFraction.realSum_shift_c_le {α β γ x : ℝ} (hα : 0 �
 theorem GaussContinuedFraction.relation_one (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     regularizedGaussHGFun a b c z = c * regularizedGaussHGFun a (b + 1) (c + 1) z -
       a * (c - b) * z * regularizedGaussHGFun (a + 1) (b + 1) (c + 2) z := by
-  have h1 := regularizedGaussHGFun_contiguous_c b a c hz
-  have h2 := regularizedGaussHGFun_contiguous_shift_b a b (c + 1) hz
+  have h1 := regularizedGaussHypergeometricFun_contiguous_c b a c hz
+  have h2 := regularizedGaussHypergeometricFun_contiguous_shift_b a b (c + 1) hz
   have s1 := congrFun (regularizedGaussHGFun_symm b a c) z
   have s2 := congrFun (regularizedGaussHGFun_symm b a (c + 1)) z
   have s3 := congrFun (regularizedGaussHGFun_symm (b + 1) a (c + 1)) z
@@ -416,13 +417,13 @@ theorem GaussContinuedFraction.relation_three (a β γ : ℂ) {z : ℂ} (hz : �
     regularizedGaussHGFun a β γ z =
       (γ + (β - a + 1) * z) * regularizedGaussHGFun a (β + 1) (γ + 1) z -
         (β + 1) * (γ - a + 1) * z * regularizedGaussHGFun a (β + 2) (γ + 2) z := by
-  have h1 := regularizedGaussHGFun_contiguous_c β a γ hz
+  have h1 := regularizedGaussHypergeometricFun_contiguous_c β a γ hz
   rw [congrFun (regularizedGaussHGFun_symm β a γ) z,
     congrFun (regularizedGaussHGFun_symm β a (γ + 1)) z,
     congrFun (regularizedGaussHGFun_symm (β + 1) a (γ + 1)) z] at h1
-  have h2 := regularizedGaussHGFun_contiguous_shift_b a β (γ + 1) hz
-  have h3 := regularizedGaussHGFun_contiguous_c a (β + 1) (γ + 1) hz
-  have h4 := regularizedGaussHGFun_contiguous_c (β + 1) a (γ + 1) hz
+  have h2 := regularizedGaussHypergeometricFun_contiguous_shift_b a β (γ + 1) hz
+  have h3 := regularizedGaussHypergeometricFun_contiguous_c a (β + 1) (γ + 1) hz
+  have h4 := regularizedGaussHypergeometricFun_contiguous_c (β + 1) a (γ + 1) hz
   rw [congrFun (regularizedGaussHGFun_symm (β + 1) a (γ + 1)) z,
     congrFun (regularizedGaussHGFun_symm (β + 1) a (γ + 1 + 1)) z,
     congrFun (regularizedGaussHGFun_symm (β + 1 + 1) a (γ + 1 + 1)) z] at h4
@@ -499,7 +500,8 @@ theorem GaussContinuedFraction.fullyShiftedSum_rec (a b c : ℝ) {x : ℝ} (hx :
         GaussContinuedFraction.fullyShiftedSum a b c x (j + 1) +
       (a + j + 1) * (b + j + 1) * (x * (1 - x)) *
           GaussContinuedFraction.fullyShiftedSum a b c x (j + 2) := by
-  have e := regularizedGaussHGFun_contiguous_diagonal ((a + j : ℝ) : ℂ) ((b + j : ℝ) : ℂ)
+  have e := regularizedGaussHypergeometricFun_contiguous_diagonal ((a + j : ℝ) : ℂ)
+      ((b + j : ℝ) : ℂ)
     ((c + j : ℝ) : ℂ) (z := x) (by rwa [Complex.norm_real, Real.norm_eq_abs])
   have r1 : ∀ y : ℝ, (y : ℂ) + 1 = ((y + 1 : ℝ) : ℂ) := fun y => by push_cast; ring
   have r2 : ∀ y : ℝ, (y : ℂ) + 2 = ((y + 2 : ℝ) : ℂ) := fun y => by push_cast; ring
@@ -522,7 +524,7 @@ theorem GaussContinuedFraction.fullyShiftedSum_rec (a b c : ℝ) {x : ℝ} (hx :
 theorem GaussContinuedFraction.realSum_euler (α β γ : ℝ) {x : ℝ} (hx0 : 0 ≤ x) (hx1 : x < 1) :
     GaussContinuedFraction.realSum α β γ x = (1 - x) ^ (γ - α - β) *
         GaussContinuedFraction.realSum (γ - α) (γ - β) γ x := by
-  have e := regularizedGaussHGFun_euler (α : ℂ) β γ (z := x)
+  have e := regularizedGaussHypergeometricFun_euler (α : ℂ) β γ (z := x)
     (by rw [Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hx0]; exact hx1)
   rw [show (γ : ℂ) - α - β = ((γ - α - β : ℝ) : ℂ) by push_cast; ring,
     show (γ : ℂ) - α = ((γ - α : ℝ) : ℂ) by push_cast; ring,

@@ -27,7 +27,8 @@ This file proves the convergence, splitting, termination and classical limits of
 series `rφs` and `rψs` of DLMF §17.4, and their analyticity, including the power-series
 interface used for continuation statements. The identities for `q`-shifted factorials of
 DLMF §17.2 are in `DLMF.QHypergeometric.Basic.ShiftedFactorials`, and the value at the origin
-and the bridge to `DLMF.QSeries.basicHG` in `DLMF.QHypergeometric.Basic.SeriesProperties`.
+and the bridge to `DLMF.QSeries.basicHypergeometric` in
+`DLMF.QHypergeometric.Basic.SeriesProperties`.
 
 ## Main results
 
@@ -443,14 +444,14 @@ lemma tendsto_cpow_increment (a : ℂ) :
 /-- A normalized finite q-Pochhammer symbol tends to the ordinary rising factorial. -/
 lemma tendsto_qPochhammer_normalized (a : ℂ) (n : ℕ) :
     Tendsto (fun q : ℝ => qPochhammer ((q : ℂ) ^ a) q n / (1 - (q : ℂ)) ^ n)
-      (𝓝[<] 1) (𝓝 (DLMF.Hypergeometric.poch a n)) := by
+      (𝓝[<] 1) (𝓝 (DLMF.Hypergeometric.pochhammer a n)) := by
   induction n with
   | zero =>
-    simp only [qPochhammer_zero, pow_zero, div_one, DLMF.Hypergeometric.poch_zero]
+    simp only [qPochhammer_zero, pow_zero, div_one, DLMF.Hypergeometric.pochhammer_zero]
     exact tendsto_const_nhds
   | succ n ih =>
     have h := ih.mul (tendsto_cpow_increment (a + n))
-    rw [DLMF.Hypergeometric.poch_succ]
+    rw [DLMF.Hypergeometric.pochhammer_succ]
     refine h.congr' ?_
     filter_upwards [Ioo_mem_nhdsLT (by norm_num : (0 : ℝ) < 1)] with q hq
     have hq0 : (q : ℂ) ≠ 0 := by exact_mod_cast hq.1.ne'
@@ -461,11 +462,11 @@ lemma tendsto_qPochhammer_normalized (a : ℂ) (n : ℕ) :
 private lemma tendsto_qPochhammerList_normalized (a : List ℂ) (n : ℕ) :
     Tendsto (fun q : ℝ =>
       (a.map fun x => qPochhammer ((q : ℂ) ^ x) q n / (1 - (q : ℂ)) ^ n).prod)
-      (𝓝[<] 1) (𝓝 (DLMF.Hypergeometric.genPoch (a : Multiset ℂ) n)) := by
+      (𝓝[<] 1) (𝓝 (DLMF.Hypergeometric.pochhammerProduct (a : Multiset ℂ) n)) := by
   induction a with
-  | nil => simp [DLMF.Hypergeometric.genPoch]
+  | nil => simp [DLMF.Hypergeometric.pochhammerProduct]
   | cons a l ih =>
-    simpa only [List.map_cons, List.prod_cons, DLMF.Hypergeometric.genPoch,
+    simpa only [List.map_cons, List.prod_cons, DLMF.Hypergeometric.pochhammerProduct,
       Multiset.map_cons, Multiset.prod_cons] using! (tendsto_qPochhammer_normalized a n).mul ih
 
 /-- Normalizing each shifted factorial divides the product by the corresponding power. -/
@@ -506,9 +507,9 @@ private lemma qPhi_scaling_phase (q z : ℂ) (n : ℕ) (e : ℤ) :
   rw [mul_zpow, ← zpow_mul, ← zpow_natCast (1 - q) n, ← zpow_mul]
 
 /-- A finite ordinary denominator product is nonzero when its retained factors avoid poles. -/
-private lemma genPoch_list_ne_zero {b : List ℂ} {n : ℕ}
+private lemma pochhammerProduct_list_ne_zero {b : List ℂ} {n : ℕ}
     (hb : ∀ x ∈ b, ∀ j < n, x ≠ -(j : ℂ)) :
-    DLMF.Hypergeometric.genPoch (b : Multiset ℂ) n ≠ 0 := by
+    DLMF.Hypergeometric.pochhammerProduct (b : Multiset ℂ) n ≠ 0 := by
   apply Multiset.prod_ne_zero
   intro hv
   obtain ⟨x, hx, hz⟩ := Multiset.mem_map.mp hv
@@ -520,16 +521,17 @@ private lemma qPhiTerm_classical_limit (a b : List ℂ) (z : ℂ) (n : ℕ)
     (hb : ∀ x ∈ b, ∀ j < n, x ≠ -(j : ℂ)) :
     Tendsto (fun q : ℝ => qPhiTerm (a.map fun x => (q : ℂ) ^ x)
       (b.map fun x => (q : ℂ) ^ x) q (((q : ℂ) - 1) ^ qPhiExponent a b * z) n)
-      (𝓝[<] 1) (𝓝 (DLMF.Hypergeometric.genCoeff (a : Multiset ℂ) (b : Multiset ℂ) n * z ^ n)) := by
+      (𝓝[<] 1) (𝓝 (DLMF.Hypergeometric.generalizedHypergeometricCoeff (a : Multiset ℂ)
+          (b : Multiset ℂ) n * z ^ n)) := by
   let A (q : ℝ) := (a.map fun x => qPochhammer ((q : ℂ) ^ x) q n / (1 - (q : ℂ)) ^ n).prod
   let B (q : ℝ) := (b.map fun x => qPochhammer ((q : ℂ) ^ x) q n / (1 - (q : ℂ)) ^ n).prod
   let Q (q : ℝ) := qPochhammer q q n / (1 - (q : ℂ)) ^ n
   have hQ : Tendsto Q (𝓝[<] 1) (𝓝 (n.factorial : ℂ)) := by
-    simpa only [Complex.cpow_one, DLMF.Hypergeometric.poch_nat_one] using
+    simpa only [Complex.cpow_one, DLMF.Hypergeometric.pochhammer_nat_one] using
       tendsto_qPochhammer_normalized 1 n
   have hD := (tendsto_qPochhammerList_normalized b n).mul hQ
-  have hDn : DLMF.Hypergeometric.genPoch (b : Multiset ℂ) n * (n.factorial : ℂ) ≠ 0 :=
-    mul_ne_zero (genPoch_list_ne_zero hb) (Nat.cast_ne_zero.mpr n.factorial_ne_zero)
+  have hDn : DLMF.Hypergeometric.pochhammerProduct (b : Multiset ℂ) n * (n.factorial : ℂ) ≠ 0 :=
+    mul_ne_zero (pochhammerProduct_list_ne_zero hb) (Nat.cast_ne_zero.mpr n.factorial_ne_zero)
   have hq : Tendsto (fun q : ℝ => (q : ℂ)) (𝓝[<] 1) (𝓝 1) :=
     Complex.continuous_ofReal.continuousAt.tendsto.mono_left nhdsWithin_le_nhds
   have h := (((tendsto_qPochhammerList_normalized a n).div hD hDn).mul
@@ -570,20 +572,22 @@ private lemma qPhiTerm_classical_limit (a b : List ℂ) (z : ℂ) (n : ℕ)
 /-- Formal coefficient limit in 17.4.2, with its integer phase/scaling exponent. -/
 @[dlmf 17.4.E2]
 theorem qPhi_coefficient_classical_limit (a b : List ℂ) (z : ℂ) (n : ℕ)
-    (hb : DLMF.Hypergeometric.GenDenRegular (b:Multiset ℂ)) :
+    (hb : DLMF.Hypergeometric.LowerParametersRegular (b:Multiset ℂ)) :
     Tendsto (fun q : ℝ => qPhiTerm (a.map fun ai => (q:ℂ)^ai)
       (b.map fun bi => (q:ℂ)^bi) q (((q:ℂ)-1)^qPhiExponent a b*z) n)
-      (𝓝[<] 1) (𝓝 (DLMF.Hypergeometric.genCoeff (a:Multiset ℂ) (b:Multiset ℂ) n*z^n)) := by
+      (𝓝[<] 1) (𝓝 (DLMF.Hypergeometric.generalizedHypergeometricCoeff (a:Multiset ℂ)
+          (b:Multiset ℂ) n*z^n)) := by
   exact qPhiTerm_classical_limit a b z n fun x hx j _ => hb x (by simpa using hx) j
 
 /-- The analytic unilateral limit on the genuine classical convergence domain. -/
 @[dlmf 17.4.E2]
 theorem qPhi_classical_limit (a b : List ℂ) (z : ℂ)
-    (hb : DLMF.Hypergeometric.GenDenRegular (b:Multiset ℂ))
+    (hb : DLMF.Hypergeometric.LowerParametersRegular (b:Multiset ℂ))
     (hr : a.length≤b.length+1) (hz : a.length=b.length+1 → ‖z‖<1) :
     Tendsto (fun q : ℝ => qPhi (a.map fun ai => (q:ℂ)^ai)
       (b.map fun bi => (q:ℂ)^bi) q (((q:ℂ)-1)^qPhiExponent a b*z))
-      (𝓝[<] 1) (𝓝 (DLMF.Hypergeometric.genHG (a:Multiset ℂ) (b:Multiset ℂ) z)) := by
+      (𝓝[<] 1) (𝓝 (DLMF.Hypergeometric.generalizedHypergeometric (a:Multiset ℂ)
+          (b:Multiset ℂ) z)) := by
   sorry
 
 /-- The finite limit retains bottom poles that occur only after the final retained term. -/
@@ -592,7 +596,8 @@ theorem qPhi_finite_classical_limit (a b : List ℂ) (z : ℂ) (N : ℕ)
     (hb : ∀ bi∈b, ∀ j<N, bi≠ -(j:ℂ)) :
     Tendsto (fun q : ℝ => qPhiPartial (a.map fun ai => (q:ℂ)^ai)
       (b.map fun bi => (q:ℂ)^bi) q (((q:ℂ)-1)^qPhiExponent a b*z) N)
-      (𝓝[<] 1) (𝓝 (DLMF.Hypergeometric.genFiniteHG N (a:Multiset ℂ) (b:Multiset ℂ) z)) := by
+      (𝓝[<] 1) (𝓝 (DLMF.Hypergeometric.generalizedHypergeometricTruncated N (a:Multiset ℂ)
+          (b:Multiset ℂ) z)) := by
   apply tendsto_finsetSum
   intro n hn
   exact qPhiTerm_classical_limit a b z n fun x hx j hj => hb x hx j
@@ -604,10 +609,10 @@ lemma tendsto_qPochhammerList_ratio (a b : List ℂ) (n : ℕ) (hlen : a.length 
     (hb : ∀ x ∈ b, ∀ j < n, x ≠ -(j : ℂ)) :
     Tendsto (fun q : ℝ => qPochhammerList (a.map fun x => (q : ℂ) ^ x) q n /
       qPochhammerList (b.map fun x => (q : ℂ) ^ x) q n) (𝓝[<] 1)
-      (𝓝 (DLMF.Hypergeometric.genPoch (a : Multiset ℂ) n /
-        DLMF.Hypergeometric.genPoch (b : Multiset ℂ) n)) := by
+      (𝓝 (DLMF.Hypergeometric.pochhammerProduct (a : Multiset ℂ) n /
+        DLMF.Hypergeometric.pochhammerProduct (b : Multiset ℂ) n)) := by
   have h := (tendsto_qPochhammerList_normalized a n).div
-    (tendsto_qPochhammerList_normalized b n) (genPoch_list_ne_zero hb)
+    (tendsto_qPochhammerList_normalized b n) (pochhammerProduct_list_ne_zero hb)
   refine h.congr' ?_
   filter_upwards [self_mem_nhdsWithin] with q (hq : q < 1)
   have hD : 1 - (q : ℂ) ≠ 0 := by
@@ -634,17 +639,19 @@ private lemma qPochhammerListInt_neg (l : List ℂ) (q : ℂ) (m : ℕ) :
 theorem qPsi_coefficient_classical_limit (a b : List ℂ) (n : ℤ)
     (hlen : a.length=b.length)
     (ha : ∀ ai∈a, ∀ m : ℕ, ai≠(m+1:ℂ))
-    (hb : DLMF.Hypergeometric.GenDenRegular (b:Multiset ℂ)) :
+    (hb : DLMF.Hypergeometric.LowerParametersRegular (b:Multiset ℂ)) :
     Tendsto (fun q : ℝ => qPsiTerm (a.map fun ai => (q:ℂ)^ai)
       (b.map fun bi => (q:ℂ)^bi) q 1 n)
-      (𝓝[<] 1) (𝓝 (DLMF.Hypergeometric.genBilateralCoeff (a:Multiset ℂ) (b:Multiset ℂ) n)) := by
+      (𝓝[<] 1) (𝓝 (DLMF.Hypergeometric.bilateralHypergeometricCoeff (a:Multiset ℂ)
+          (b:Multiset ℂ) n)) := by
   have he : qPsiExponent a b = 0 := by unfold qPsiExponent; rw [hlen]; omega
   cases n with
   | ofNat n =>
     have h := tendsto_qPochhammerList_ratio a b n hlen fun x hx j _ => hb x (by simpa using hx) j
     simpa only [qPsiTerm, List.length_map, qPsiExponent, hlen, sub_self, zpow_zero, mul_one,
-      one_zpow, qPochhammerListInt_natCast, DLMF.Hypergeometric.genBilateralCoeff,
-      DLMF.Hypergeometric.genIntPoch, Int.natCast_nonneg, ↓reduceIte, Int.toNat_natCast] using! h
+      one_zpow, qPochhammerListInt_natCast, DLMF.Hypergeometric.bilateralHypergeometricCoeff,
+      DLMF.Hypergeometric.pochhammerOfInt, Int.natCast_nonneg, ↓reduceIte,
+          Int.toNat_natCast] using! h
   | negSucc m =>
     let N := m + 1
     let A := a.map fun x => x - (N : ℂ)
@@ -662,15 +669,15 @@ theorem qPsi_coefficient_classical_limit (a b : List ℂ) (n : ℤ)
         exact_mod_cast (show N - j = (N - j - 1) + 1 by omega))
     have h := tendsto_qPochhammerList_ratio B A N
       (by simp only [A, B, List.length_map]; exact hlen.symm) hA
-    have hlim : DLMF.Hypergeometric.genBilateralCoeff (a : Multiset ℂ) (b : Multiset ℂ)
+    have hlim : DLMF.Hypergeometric.bilateralHypergeometricCoeff (a : Multiset ℂ) (b : Multiset ℂ)
         (Int.negSucc m) =
-      DLMF.Hypergeometric.genPoch (B : Multiset ℂ) N /
-        DLMF.Hypergeometric.genPoch (A : Multiset ℂ) N := by
+      DLMF.Hypergeometric.pochhammerProduct (B : Multiset ℂ) N /
+        DLMF.Hypergeometric.pochhammerProduct (A : Multiset ℂ) N := by
       have hinv (l : List ℂ) (f : ℂ → ℂ) :
           (l.map fun x => (f x)⁻¹).prod = (l.map f).prod⁻¹ := by
         simpa only [List.map_map, Function.comp_def] using (List.prod_inv (l.map f)).symm
-      simp [DLMF.Hypergeometric.genBilateralCoeff, DLMF.Hypergeometric.genIntPoch,
-        DLMF.Hypergeometric.genPoch, A, B, N, Multiset.map_coe, Multiset.prod_coe,
+      simp [DLMF.Hypergeometric.bilateralHypergeometricCoeff, DLMF.Hypergeometric.pochhammerOfInt,
+        DLMF.Hypergeometric.pochhammerProduct, A, B, N, Multiset.map_coe, Multiset.prod_coe,
         List.map_map, Function.comp_def, div_eq_mul_inv, sub_eq_add_neg]
       rw [hinv, hinv, inv_inv]
       ring

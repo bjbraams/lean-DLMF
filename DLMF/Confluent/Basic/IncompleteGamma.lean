@@ -12,9 +12,9 @@ public import DLMF.Confluent.Basic.Tricomi
 
 ## Main definitions
 
-* `lowerIncGamma`: the lower incomplete gamma function `γ(s,z) = z^s / s · M(s, s+1, -z)`
+* `lowerIncompleteGamma`: the lower incomplete gamma function `γ(s,z) = z^s / s · M(s, s+1, -z)`
   (DLMF 13.6.5).
-* `upperIncGamma`: the upper incomplete gamma function `Γ(s,z) = e^{-z} U(1-s, 1-s, z)`
+* `upperIncompleteGamma`: the upper incomplete gamma function `Γ(s,z) = e^{-z} U(1-s, 1-s, z)`
   (DLMF 13.6.6).
 -/
 
@@ -29,9 +29,9 @@ namespace DLMF.Confluent
 /-- Lower incomplete gamma via `₁F₁`, AAR §4.4:
 `γ(s,z) = z^s / s · M(s, s+1, -z)`. -/
 @[dlmf 13.6.E5]
-def lowerIncGamma (s z : ℂ) : ℂ :=
+def lowerIncompleteGamma (s z : ℂ) : ℂ :=
   z ^ s / s * kummerM s (s + 1) (-z)
 /-- Upper incomplete gamma via Tricomi's `U`, from DLMF 13.6.6. -/
-def upperIncGamma (s z : ℂ) : ℂ := exp (-z) * kummerU (1 - s) (1 - s) z
+def upperIncompleteGamma (s z : ℂ) : ℂ := exp (-z) * kummerU (1 - s) (1 - s) z
 
 end DLMF.Confluent

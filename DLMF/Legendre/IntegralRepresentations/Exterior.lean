@@ -275,15 +275,15 @@ theorem ExteriorIntegral.ratio_mem_cutPlane {z : ℂ} (hz : z+1 ∈ slitPlane) :
 /-- Pfaff's transformation in the form needed for DLMF 14.25.1. -/
 theorem ExteriorIntegral.associatedP_pfaff (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     associatedP ν (-μ) z = exp (-μ/2*(log (z+1)-log (z-1))) * ((z+1)/2)^(-(ν+1)) *
-      regularizedGaussHG (ν+μ+1) (ν+1) (μ+1) ((z-1)/(z+1)) := by
+      regularizedGaussHypergeometric (ν+μ+1) (ν+1) (μ+1) ((z-1)/(z+1)) := by
   have hz1 := one_add_mem_slitPlane_of_sub_one hz
   have hz1' : z+1 ∈ slitPlane := by simpa [add_comm] using hz1
   have hA0 : z + 1 ≠ 0 := slitPlane_ne_zero hz1'
   have hw := mem_cutPlane_of_one_add hz1
-  rw [associatedP, regularizedGaussHG_pfaff _ _ _ hw,
+  rw [associatedP, regularizedGaussHypergeometric_pfaff _ _ _ hw,
     show (1-z)/2/((1-z)/2-1) = (z-1)/(z+1) by
       rw [show (1-z)/2 - 1 = -((z+1)/2) by ring]; field_simp; ring,
-    regularizedGaussHG_symm _ _ _ (ExteriorIntegral.ratio_mem_cutPlane hz1'),
+    regularizedGaussHypergeometric_symm _ _ _ (ExteriorIntegral.ratio_mem_cutPlane hz1'),
     show (1:ℂ) - (1-z)/2 = (z+1)/2 by ring, show (1:ℂ) - -μ - -ν = ν+μ+1 by ring,
     show (1:ℂ) - -μ = μ+1 by ring, show -μ/2 = (-μ)/2 by ring]
   ring
@@ -316,19 +316,22 @@ theorem associatedP_complex_integral {ν μ : ℂ} (h0 : -1 < ν.re) (h1 : ν.re
   have hint := IntegrableOn.congr_fun (hI.const_mul K) hf measurableSet_Ioi
   have hval := setIntegral_congr_fun (μ := volume) measurableSet_Ioi hf
   rw [integral_const_mul, hE] at hval
-  have hG := regularizedGaussHG_eq_regularizedGaussHGIntegral (a := ν+μ+1) hb hcb hx
-  rw [regularizedGaussHGIntegral, intervalIntegral.integral_of_le zero_le_one,
+  have hG := regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricIntegral
+      (a := ν+μ+1) hb hcb hx
+  rw [regularizedGaussHypergeometricIntegral, intervalIntegral.integral_of_le zero_le_one,
     integral_Ioc_eq_integral_Ioo] at hG
   have hG1 : Gamma (ν+1) ≠ 0 := Gamma_ne_zero_of_re_pos hb
   have hG2 : Gamma (μ-ν) ≠ 0 := Gamma_ne_zero_of_re_pos (by simpa using hcb)
   have hint' : ∫ s in Ioo (0:ℝ) 1, eulerKernel (ν+μ+1) (ν+1) (μ+1) ((z-1)/(z+1)) s =
-      Gamma (ν+1) * Gamma (μ-ν) * regularizedGaussHG (ν+μ+1) (ν+1) (μ+1) ((z-1)/(z+1)) := by
+      Gamma (ν+1) * Gamma (μ-ν) *
+          regularizedGaussHypergeometric (ν+μ+1) (ν+1) (μ+1) ((z-1)/(z+1)) := by
     rw [hG, show μ+1-(ν+1) = μ-ν by ring]; field_simp
   rw [hint'] at hval
   have hlim := intervalIntegral_tendsto_integral_Ioi 0 hint tendsto_id
   rw [← hval] at hlim
   suffices hv : K * (Gamma (ν + 1) * Gamma (μ - ν) *
-      regularizedGaussHG (ν + μ + 1) (ν + 1) (μ + 1) ((z - 1) / (z + 1))) = associatedP ν (-μ) z by
+      regularizedGaussHypergeometric (ν + μ + 1) (ν + 1) (μ + 1) ((z - 1) / (z + 1))) =
+          associatedP ν (-μ) z by
     rw [hv] at hlim; exact hlim
   rw [ExteriorIntegral.associatedP_pfaff ν μ hz]
   simp only [K]
@@ -609,7 +612,7 @@ theorem ExteriorIntegral.kernel_Q {ν μ z : ℂ} (hz : z-1 ∈ slitPlane) {t : 
 `√π (z²-1)^{μ/2} 2^μ ζ^{ν+μ+1} 𝐅(ν+μ+1, μ+1/2; ν+3/2; ζ²)`. -/
 noncomputable def ExteriorIntegral.zetaForm (ν μ z : ℂ) : ℂ :=
   Real.sqrt π * legendreBranchPower μ z * 2^μ * (ExteriorIntegral.invJoukowski z)^(ν+μ+1) *
-    regularizedGaussHG (ν+μ+1) (μ+1/2) (ν+3/2) ((ExteriorIntegral.invJoukowski z)^2)
+    regularizedGaussHypergeometric (ν+μ+1) (μ+1/2) (ν+3/2) ((ExteriorIntegral.invJoukowski z)^2)
 
 /-- `ExteriorIntegral.zetaForm ν μ` is analytic on `ℂ ∖ (-∞, 1]`. -/
 theorem ExteriorIntegral.zetaForm_analyticAt (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
@@ -624,9 +627,9 @@ theorem ExteriorIntegral.zetaForm_analyticAt (ν μ : ℂ) {z : ℂ} (hz : z-1 �
     rw [norm_pow]; have := ExteriorIntegral.norm_invJoukowski_lt_one hz;
         nlinarith [norm_nonneg (ExteriorIntegral.invJoukowski z)]
   have hF : AnalyticAt ℂ
-      (fun w => regularizedGaussHG (ν+μ+1) (μ+1/2) (ν+3/2)
+      (fun w => regularizedGaussHypergeometric (ν+μ+1) (μ+1/2) (ν+3/2)
           ((ExteriorIntegral.invJoukowski w)^2)) z :=
-    (analyticAt_regularizedGaussHG _ _ _ hc).comp_of_eq (hζ.pow 2) rfl
+    (analyticAt_regularizedGaussHypergeometric _ _ _ hc).comp_of_eq (hζ.pow 2) rfl
   have hP : AnalyticAt ℂ (fun w => (ExteriorIntegral.invJoukowski w)^(ν+μ+1)) z :=
     hζ.cpow analyticAt_const (ExteriorIntegral.invJoukowski_mem_slitPlane hz)
   unfold ExteriorIntegral.zetaForm
@@ -662,9 +665,10 @@ theorem ExteriorIntegral.olverQ_eq_zetaForm_real (ν μ : ℂ) (hc : ∀ k : ℕ
   rw [show ν + μ + 1 - (μ + 1/2) + 1 = ν + 3/2 by ring] at hqt
   unfold olverQ ExteriorIntegral.zetaForm
   rw [hζ, harg, show ((q:ℂ))^2 = ((q^2:ℝ):ℂ) by push_cast; ring,
-    regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hn1,
-    regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hn2,
-    regularizedGaussHGFun_eq_div_Gamma hc, regularizedGaussHGFun_eq_div_Gamma hc, hqt,
+    regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hn1,
+    regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hn2,
+    regularizedGaussHypergeometricFun_eq_div_Gamma hc,
+        regularizedGaussHypergeometricFun_eq_div_Gamma hc, hqt,
     ordinaryHypergeometric_symm, show (ν+μ+2)/2 = (ν+μ+1+1)/2 by ring]
   -- powers of positive reals
   have h1q : (1:ℂ) + ((q^2:ℝ):ℂ) = ((1+q^2:ℝ):ℂ) := by push_cast; ring
@@ -738,8 +742,9 @@ theorem olverQ_complex_integral {ν μ : ℂ} (h0 : -1/2 < μ.re) (h1 : μ.re < 
   have hint := IntegrableOn.congr_fun (hI.const_mul K) hf measurableSet_Ioi
   have hval := setIntegral_congr_fun (μ := volume) measurableSet_Ioi hf
   rw [integral_const_mul, hE] at hval
-  have hG := regularizedGaussHG_eq_regularizedGaussHGIntegral (a := ν+μ+1) hb hcb hx
-  rw [regularizedGaussHGIntegral, intervalIntegral.integral_of_le zero_le_one,
+  have hG := regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricIntegral
+      (a := ν+μ+1) hb hcb hx
+  rw [regularizedGaussHypergeometricIntegral, intervalIntegral.integral_of_le zero_le_one,
     integral_Ioc_eq_integral_Ioo] at hG
   have hG1 : Gamma (μ+1/2) ≠ 0 := Gamma_ne_zero_of_re_pos hb
   have hG2 : Gamma (ν-μ+1) ≠ 0 := Gamma_ne_zero_of_re_pos (by
@@ -747,7 +752,8 @@ theorem olverQ_complex_integral {ν μ : ℂ} (h0 : -1/2 < μ.re) (h1 : μ.re < 
   have hint' : ∫ s in Ioo (0:ℝ) 1,
       eulerKernel (ν+μ+1) (μ+1/2) (ν+3/2) ((ExteriorIntegral.invJoukowski z)^2) s =
       Gamma (μ+1/2) * Gamma (ν-μ+1) *
-          regularizedGaussHG (ν+μ+1) (μ+1/2) (ν+3/2) ((ExteriorIntegral.invJoukowski z)^2) := by
+          regularizedGaussHypergeometric (ν+μ+1) (μ+1/2) (ν+3/2)
+              ((ExteriorIntegral.invJoukowski z)^2) := by
     rw [hG, show ν+3/2-(μ+1/2) = ν-μ+1 by ring, ← mul_assoc, mul_inv_cancel₀ (mul_ne_zero hG1 hG2),
       one_mul]
   rw [hint'] at hval
@@ -758,7 +764,8 @@ theorem olverQ_complex_integral {ν μ : ℂ} (h0 : -1/2 < μ.re) (h1 : μ.re < 
     have := congrArg re hk; simp at this h1
     linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
   suffices hv : K * (Gamma (μ+1/2) * Gamma (ν-μ+1) *
-      regularizedGaussHG (ν+μ+1) (μ+1/2) (ν+3/2) ((ExteriorIntegral.invJoukowski z)^2)) =
+      regularizedGaussHypergeometric (ν+μ+1) (μ+1/2) (ν+3/2)
+          ((ExteriorIntegral.invJoukowski z)^2)) =
           olverQ ν μ z by
     rw [hv] at hlim; exact hlim
   rw [ExteriorIntegral.olverQ_eq_zetaForm ν μ hc hz, ExteriorIntegral.zetaForm]
@@ -889,10 +896,10 @@ theorem ExteriorIntegral.exp_split {q : ℝ} (hq : 0 < q) {K : ℝ → ℂ} (hK 
 theorem ExteriorIntegral.cosh_hypergeometric (ν μ : ℂ) (hμ : -1/2 < μ.re) {x q : ℝ}
     (hq0 : 0 < q) (hq1 : q < 1)
     (hqx : 1 + q^2 = 2*q*x) :
-    regularizedGaussHG (μ+1/2) (μ-ν) (2*μ+1) (1 - (((q^2)⁻¹:ℝ):ℂ)) =
+    regularizedGaussHypergeometric (μ+1/2) (μ-ν) (2*μ+1) (1 - (((q^2)⁻¹:ℝ):ℂ)) =
       exp (Real.log q * (2*(μ-ν))) * exp ((Real.log q + Real.log x) * (ν-μ)) *
         (Gamma (μ+1) / Gamma (2*μ+1)) *
-        regularizedGaussHG ((μ-ν)/2) ((μ-ν+1)/2) (μ+1) (1 - 1/(x:ℂ)^2) := by
+        regularizedGaussHypergeometric ((μ-ν)/2) ((μ-ν+1)/2) (μ+1) (1 - 1/(x:ℂ)^2) := by
   have hx0 : 0 < x := by nlinarith
   have hx1 : 1 < x := by
     by_contra h; push Not at h
@@ -927,15 +934,16 @@ theorem ExteriorIntegral.cosh_hypergeometric (ν μ : ℂ) (hμ : -1/2 < μ.re) 
   have hquad := quadratic_double_denominator (a := μ-ν) (b := μ+1/2)
       (z := ((1-q^2:ℝ):ℂ)) hc2 hc3 hz1
   rw [hratio, show μ+1/2+1/2 = μ+1 by ring, show 2*(μ+1/2) = 2*μ+1 by ring] at hquad
-  rw [regularizedGaussHG_symm _ _ _ hw, regularizedGaussHG_pfaff _ _ _ hw,
+  rw [regularizedGaussHypergeometric_symm _ _ _ hw, regularizedGaussHypergeometric_pfaff _ _ _ hw,
     show 2*μ+1-(μ+1/2) = μ+1/2 by ring, sub_sub_cancel,
     show (1 - (((q^2)⁻¹:ℝ):ℂ))/((1 - (((q^2)⁻¹:ℝ):ℂ)) - 1) = ((1-q^2:ℝ):ℂ) by
       push_cast
       have : (q:ℂ) ≠ 0 := by exact_mod_cast hq0.ne'
       field_simp; ring,
-    regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hz1, regularizedGaussHGFun_eq_div_Gamma hc,
-    hquad, regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hz2,
-        regularizedGaussHGFun_eq_div_Gamma hc4,
+    regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hz1,
+        regularizedGaussHypergeometricFun_eq_div_Gamma hc,
+    hquad, regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hz2,
+        regularizedGaussHypergeometricFun_eq_div_Gamma hc4,
     Complex.ofReal_cpow_eq_exp hq2,
     show (1:ℂ) - ((1-q^2:ℝ):ℂ)/2 = ((q*x:ℝ):ℂ) by
       rw [← show 1 - (1-q^2)/2 = q*x by linarith]; push_cast; ring,
@@ -1052,14 +1060,15 @@ theorem associatedP_cosh_integral {ν μ : ℂ} (h : 0 < (μ-ν).re) (hconv : -1
       Cst / (2 * C) * (Gamma (ν + μ + 1) * Gamma (μ - ν) *
       (cexp (↑(Real.log q) * (2 * (μ - ν))) * cexp ((↑(Real.log q) + ↑(Real.log x)) * (ν - μ)) *
           (Gamma (μ + 1) / Gamma (2 * μ + 1)) *
-        regularizedGaussHG ((μ - ν) / 2) ((μ - ν + 1) / 2) (μ + 1) (1 - 1 / ↑x ^ 2))) := by
+        regularizedGaussHypergeometric ((μ - ν) / 2) ((μ - ν + 1) / 2) (μ + 1)
+            (1 - 1 / ↑x ^ 2))) := by
     rw [← setIntegral_congr_fun measurableSet_Ioi hf, integral_const_mul, hsum, hKv]
   have hlim := intervalIntegral_tendsto_integral_Ioi 0 hint tendsto_id
   rw [hval] at hlim
   suffices hv : Cst / (2 * C) * (Gamma (ν + μ + 1) * Gamma (μ - ν) *
       (cexp (↑(Real.log q) * (2 * (μ - ν))) * cexp ((↑(Real.log q) + ↑(Real.log x)) * (ν - μ)) *
           (Gamma (μ + 1) / Gamma (2 * μ + 1)) *
-        regularizedGaussHG ((μ - ν) / 2) ((μ - ν + 1) / 2) (μ + 1) (1 - 1 / ↑x ^ 2))) =
+        regularizedGaussHypergeometric ((μ - ν) / 2) ((μ - ν + 1) / 2) (μ + 1) (1 - 1 / ↑x ^ 2))) =
       associatedP ν (-μ) x by
     rw [hv] at hlim; exact hlim
   have hx0 : 0 < x := by linarith

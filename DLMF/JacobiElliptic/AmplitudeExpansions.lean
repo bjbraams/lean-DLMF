@@ -20,9 +20,9 @@ the second-order Taylor bound of the Gudermannian.
 
 ## Main results
 
-* `Real.abs_jacobiAmm_sub_le_of_small_param`:
+* `Real.abs_jacobiAmOfParameter_sub_le_of_small_param`:
   `|am(x|m) - (x - (m/4)(x - sin x cos x))| ≤ 8|x|m²` for `0 ≤ m ≤ 1/4`.
-* `Real.exists_abs_jacobiAmm_sub_le_comodulus`: for fixed `x` there are `φ₀ < π/2` and `K`
+* `Real.exists_abs_jacobiAmOfParameter_sub_le_comodulus`: for fixed `x` there are `φ₀ < π/2` and `K`
   with `|am(x,k) - (gd x - k'²(x - sinh x cosh x) sech x/4)| ≤ K k'⁴` whenever `0 < k < 1`
   and `|am(x,k)| ≤ φ₀`.
 -/
@@ -52,18 +52,20 @@ private lemma abs_rpow_neg_half_sub_le {u : ℝ} (hu0 : 0 ≤ u) (hu : u ≤ 1 /
       mul_nonneg (mul_nonneg hu0 hu0) hu0]
 
 /-- `|F(φ|m) - φ - (m/4)(φ - sin φ cos φ)| ≤ 3m²|φ|` for `0 ≤ m ≤ 1/2`. -/
-private lemma abs_incEllIntFm_sub_le {m : ℝ} (hm0 : 0 ≤ m) (hm : m ≤ 1 / 2) (φ : ℝ) :
-    |Real.incEllIntFm φ m - φ - m / 4 * (φ - sin φ * cos φ)| ≤ 3 * m ^ 2 * |φ| := by
+private lemma abs_incompleteEllipticFOfParameter_sub_le {m : ℝ} (hm0 : 0 ≤ m)
+    (hm : m ≤ 1 / 2) (φ : ℝ) :
+    |Real.incompleteEllipticFOfParameter φ m - φ - m / 4 * (φ - sin φ * cos φ)| ≤ 3 *
+        m ^ 2 * |φ| := by
   have hpos : ∀ θ, 0 < 1 - m * sin θ ^ 2 := fun θ => by
     nlinarith [sin_sq_le_one θ, sq_nonneg (sin θ)]
   have hc : Continuous fun θ => (1 - m * sin θ ^ 2) ^ (-(1 / 2) : ℝ) :=
     (by fun_prop : Continuous fun θ => 1 - m * sin θ ^ 2).rpow_const
       fun θ => Or.inl (hpos θ).ne'
   have hint : ∫ θ in (0 : ℝ)..φ, ((1 - m * sin θ ^ 2) ^ (-(1 / 2) : ℝ) - 1 - m / 2 * sin θ ^ 2) =
-      Real.incEllIntFm φ m - φ - m / 4 * (φ - sin φ * cos φ) := by
+      Real.incompleteEllipticFOfParameter φ m - φ - m / 4 * (φ - sin φ * cos φ) := by
     rw [intervalIntegral.integral_sub, intervalIntegral.integral_sub,
       intervalIntegral.integral_const_mul, integral_sin_sq]
-    · simp [Real.incEllIntFm]; ring
+    · simp [Real.incompleteEllipticFOfParameter]; ring
     · exact hc.intervalIntegrable _ _
     · exact intervalIntegrable_const
     · exact (hc.sub continuous_const).intervalIntegrable _ _
@@ -108,11 +110,13 @@ private lemma abs_sub_sin_mul_cos_sub_le (a b : ℝ) :
 
 /-- Quantitative form of DLMF 22.16.7: `|am(x|m) - (x - (m/4)(x - sin x cos x))| ≤ 8|x|m²`
 for `0 ≤ m ≤ 1/4` (parameter `m = k²`). -/
-theorem Real.abs_jacobiAmm_sub_le_of_small_param {m : ℝ} (hm0 : 0 ≤ m) (hm : m ≤ 1 / 4) (x : ℝ) :
-    |Real.jacobiAmm x m - (x - m / 4 * (x - sin x * cos x))| ≤ 8 * |x| * m ^ 2 := by
-  set φ := Real.jacobiAmm x m
-  have hF : Real.incEllIntFm φ m = x := Real.incEllIntFm_jacobiAmm (by linarith) x
-  have hE := abs_incEllIntFm_sub_le hm0 (by linarith) φ
+theorem Real.abs_jacobiAmOfParameter_sub_le_of_small_param {m : ℝ} (hm0 : 0 ≤ m)
+    (hm : m ≤ 1 / 4) (x : ℝ) :
+    |Real.jacobiAmOfParameter x m - (x - m / 4 * (x - sin x * cos x))| ≤ 8 * |x| * m ^ 2 := by
+  set φ := Real.jacobiAmOfParameter x m
+  have hF : Real.incompleteEllipticFOfParameter φ m = x :=
+      Real.incompleteEllipticFOfParameter_jacobiAmOfParameter (by linarith) x
+  have hE := abs_incompleteEllipticFOfParameter_sub_le hm0 (by linarith) φ
   rw [hF] at hE
   have hg := abs_sub_sin_mul_cos_le φ
   have hφ : |φ| ≤ 2 * |x| := by
@@ -264,9 +268,9 @@ private lemma cos_le_cos_of_abs_le {θ φ₀ : ℝ} (h : |θ| ≤ φ₀) (hφ₀
 
 open DLMF.Elementary in
 /-- `F(φ|1 - m') = gd⁻¹φ - (m'/4)(sin φ/cos² φ - gd⁻¹φ) + O(m'²)` for `|φ| ≤ φ₀ < π/2`. -/
-private lemma abs_incEllIntFm_comodulus_sub_le {m' φ₀ φ : ℝ} (hm0 : 0 ≤ m')
+private lemma abs_incompleteEllipticFOfParameter_comodulus_sub_le {m' φ₀ φ : ℝ} (hm0 : 0 ≤ m')
     (hφ₀ : φ₀ < π / 2) (hφ : |φ| ≤ φ₀) :
-    |Real.incEllIntFm φ (1 - m') - (inverseGudermannian φ -
+    |Real.incompleteEllipticFOfParameter φ (1 - m') - (inverseGudermannian φ -
         m' / 4 * (sin φ / cos φ ^ 2 - inverseGudermannian φ))| ≤ m' ^ 2 / cos φ₀ ^ 5 * |φ| := by
   have hφ₀0 : 0 ≤ φ₀ := (abs_nonneg φ).trans hφ
   have hc₀ : 0 < cos φ₀ := cos_pos_of_mem_Ioo ⟨by linarith [pi_pos], hφ₀⟩
@@ -317,12 +321,12 @@ private lemma abs_incEllIntFm_comodulus_sub_le {m' φ₀ φ : ℝ} (hm0 : 0 ≤ 
     linarith
   have hint : ∫ θ in (0 : ℝ)..φ, ((1 - (1 - m') * sin θ ^ 2) ^ (-(1 / 2) : ℝ) - (cos θ)⁻¹ +
       m' / 2 * ((cos θ)⁻¹ * (sin θ / cos θ) ^ 2)) =
-      Real.incEllIntFm φ (1 - m') - (inverseGudermannian φ -
+      Real.incompleteEllipticFOfParameter φ (1 - m') - (inverseGudermannian φ -
         m' / 4 * (sin φ / cos φ ^ 2 - inverseGudermannian φ)) := by
     rw [intervalIntegral.integral_add irs im,
       intervalIntegral.integral_sub cr.intervalIntegrable csec.intervalIntegrable,
       intervalIntegral.integral_const_mul, htan, hsec]
-    simp only [Real.incEllIntFm]
+    simp only [Real.incompleteEllipticFOfParameter]
     ring
   rw [← hint, ← Real.norm_eq_abs]
   have := intervalIntegral.norm_integral_le_of_norm_le_const (a := 0) (b := φ)
@@ -385,10 +389,10 @@ open DLMF.Elementary in
 /-- Quantitative form of DLMF 22.16.8: for fixed `x` there are `φ₀ < π/2` with `|gd x| < φ₀`
 and a constant `K` such that `|am(x,k) - (gd x - k'²(x - sinh x cosh x) sech x/4)| ≤ K k'⁴`
 (`k'² = 1 - k²`) for every `0 < k < 1` with `|am(x,k)| ≤ φ₀`. -/
-theorem Real.exists_abs_jacobiAmm_sub_le_comodulus (x : ℝ) :
+theorem Real.exists_abs_jacobiAmOfParameter_sub_le_comodulus (x : ℝ) :
     ∃ φ₀ : ℝ, |gudermannian x| < φ₀ ∧ φ₀ < π / 2 ∧ ∃ K : ℝ, ∀ k : ℝ, 0 < k → k < 1 →
-      |Real.jacobiAmm x (k ^ 2)| ≤ φ₀ →
-      |Real.jacobiAmm x (k ^ 2) - (gudermannian x -
+      |Real.jacobiAmOfParameter x (k ^ 2)| ≤ φ₀ →
+      |Real.jacobiAmOfParameter x (k ^ 2) - (gudermannian x -
         (1 - k ^ 2) / 4 * (x - sinh x * cosh x) / cosh x)| ≤ K * (1 - k ^ 2) ^ 2 := by
   set ψ := gudermannian x
   have hψ : |ψ| < π / 2 := by
@@ -409,14 +413,14 @@ theorem Real.exists_abs_jacobiAmm_sub_le_comodulus (x : ℝ) :
   set m' := 1 - k ^ 2
   have hm0 : 0 ≤ m' := by simp only [m']; nlinarith [hk.1, hk.2]
   have hm1 : m' ≤ 1 := by simp only [m']; nlinarith
-  set φ := Real.jacobiAmm x (k ^ 2)
+  set φ := Real.jacobiAmOfParameter x (k ^ 2)
   have hφ : |φ| ≤ φ₀ := hφk
   have hφ' : |φ| < π / 2 := hφ.trans_lt hφ₀
-  have hF : Real.incEllIntFm φ (1 - m') = x := by
+  have hF : Real.incompleteEllipticFOfParameter φ (1 - m') = x := by
     rw [show 1 - m' = k ^ 2 by simp only [m']; ring]
-    exact Real.incEllIntFm_jacobiAmm (by nlinarith [hk.1, hk.2]) x
+    exact Real.incompleteEllipticFOfParameter_jacobiAmOfParameter (by nlinarith [hk.1, hk.2]) x
   set h : ℝ → ℝ := fun y => sin y / cos y ^ 2 - inverseGudermannian y
-  have hE := abs_incEllIntFm_comodulus_sub_le hm0 hφ₀ hφ
+  have hE := abs_incompleteEllipticFOfParameter_comodulus_sub_le hm0 hφ₀ hφ
   rw [hF] at hE
   set E := x - (inverseGudermannian φ - m' / 4 * h φ)
   have hEb : |E| ≤ m' ^ 2 * C₁ := by

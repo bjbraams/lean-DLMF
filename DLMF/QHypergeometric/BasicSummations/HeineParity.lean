@@ -39,15 +39,16 @@ private lemma q_even_heine_direct {b c q : ℂ} (hb : b≠0) (hc0 : c≠0) (hq :
   have hb2 : ‖b^2‖<1 := by rw [norm_pow]; exact pow_lt_one₀ (norm_nonneg b) hb1 two_ne_zero
   have hZ : ‖c*q/b^2‖<1 := by
     rw [norm_div, div_lt_one (norm_pos_iff.mpr (pow_ne_zero 2 hb))]; exact hz
-  rw [qPhi_eq_basicHG (by simp), basicHG_swap,
+  rw [qPhi_eq_basicHypergeometric (by simp), basicHypergeometric_swap,
     heine_transformation hQ hZ hb2 (pow_ne_zero 2 hb) (fun k h => hc c (by simp) k h) (fun k h =>
       one_sub_mul_pow_ne_zero_of_norm hq hQ k (by
         rw [show b^2/c*(c*q/b^2) = q by field_simp] at h; rw [h]; ring))]
   rw [show b^2/c*(c*q/b^2) = q by field_simp, show c/b^2 = c/b^2 from rfl]
   -- the remaining `₂φ₁` is the even part of a `q`-binomial series
   set g : ℕ → ℂ := fun m => qPochhammer (c/b^2) q m/qPochhammer q q m*b^m
-  have hsum : basicHG [c/b^2, c*q/b^2] [q] (q^2) (b^2) = ∑' n : ℕ, g (2*n) := by
-    simp only [basicHG, List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, g]
+  have hsum : basicHypergeometric [c/b^2, c*q/b^2] [q] (q^2) (b^2) = ∑' n : ℕ, g (2*n) := by
+    simp only [basicHypergeometric, List.map_cons, List.map_nil, List.prod_cons,
+        List.prod_nil, mul_one, g]
     refine tsum_congr fun n => ?_
     have h1 := qPochhammer_even (c/b^2) q n
     have h2 := qPochhammer_even q q n
@@ -102,7 +103,7 @@ private lemma q_odd_heine_direct {b c q : ℂ} (hb : b≠0) (hc0 : c≠0) (hq : 
   have hb2 : ‖b^2‖<1 := by rw [norm_pow]; exact pow_lt_one₀ (norm_nonneg b) hb1 two_ne_zero
   have hZ : ‖c*q^3/b^2‖<1 := by
     rw [norm_div, div_lt_one (norm_pos_iff.mpr (pow_ne_zero 2 hb))]; exact hz
-  rw [qPhi_eq_basicHG (by simp), basicHG_swap,
+  rw [qPhi_eq_basicHypergeometric (by simp), basicHypergeometric_swap,
     heine_transformation hQ hZ hb2 (pow_ne_zero 2 hb) (fun k h => hc (c*q^2) (by simp) k h)
       (fun k h => one_sub_mul_pow_ne_zero_of_norm hq3 hQ k (by
         rw [show b^2/c*(c*q^3/b^2) = q^3 by field_simp] at h; rw [h]; ring))]
@@ -112,10 +113,11 @@ private lemma q_odd_heine_direct {b c q : ℂ} (hb : b≠0) (hc0 : c≠0) (hq : 
     intro h; apply hd; rw [qPochhammerInf_shift hQ, h, zero_mul]
   set g : ℕ → ℂ := fun m => qPochhammer x q m/qPochhammer q q m*b^m
   have hq1 : (1:ℂ)-q ≠ 0 := one_sub_ne_zero_of_norm_lt_one hq
-  have hsum : basicHG [c*q^2/b^2, c*q^3/b^2] [q^3] (q^2) (b^2) =
+  have hsum : basicHypergeometric [c*q^2/b^2, c*q^3/b^2] [q^3] (q^2) (b^2) =
       (1-q)/((1-x)*b)*∑' n : ℕ, g (2*n+1) := by
     rw [← tsum_mul_left]
-    simp only [basicHG, List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, g]
+    simp only [basicHypergeometric, List.map_cons, List.map_nil, List.prod_cons,
+        List.prod_nil, mul_one, g]
     refine tsum_congr fun n => ?_
     have h1 := qPochhammer_even (x*q) q n
     have h2 := qPochhammer_even (q*q) q n

@@ -38,32 +38,32 @@ namespace ExceptionalLaguerre
 
 /-- `L_n^{(k-1)}` as a complex polynomial. -/
 private def laguerrePoly (k : ℝ) (n : ℕ) : ℂ[X] :=
-  ∑ j ∈ Finset.range (n + 1), C (poch (((k - 1 : ℝ) : ℂ) + 1) n / n.factorial *
+  ∑ j ∈ Finset.range (n + 1), C (pochhammer (((k - 1 : ℝ) : ℂ) + 1) n / n.factorial *
     kummerMCoeff (-(n : ℂ)) (((k - 1 : ℝ) : ℂ) + 1) j) * X ^ j
 
 /-- Evaluation of `laguerrePoly` is `L_n^{(k-1)}`. -/
 private lemma eval_laguerrePoly (k : ℝ) (n : ℕ) (z : ℂ) :
-    (laguerrePoly k n).eval z = laguerrePolyL ((k - 1 : ℝ) : ℂ) n z := by
-  rw [laguerrePolyL_eq_sum_coeff, laguerrePoly, eval_finsetSum]
+    (laguerrePoly k n).eval z = laguerrePolynomialL ((k - 1 : ℝ) : ℂ) n z := by
+  rw [laguerrePolynomialL_eq_sum_coeff, laguerrePoly, eval_finsetSum]
   simp
 
 /-- `L_n^{(k-1)}` as a polynomial function. -/
-private lemma laguerrePolyL_eq_eval (k : ℝ) (n : ℕ) :
-    laguerrePolyL ((k - 1 : ℝ) : ℂ) n = fun z => (laguerrePoly k n).eval z :=
+private lemma laguerrePolynomialL_eq_eval (k : ℝ) (n : ℕ) :
+    laguerrePolynomialL ((k - 1 : ℝ) : ℂ) n = fun z => (laguerrePoly k n).eval z :=
   funext fun z => (eval_laguerrePoly k n z).symm
 
 /-- The derivative of `L_n^{(k-1)}` as a polynomial evaluation. -/
-private lemma deriv_laguerrePolyL_eq (k : ℝ) (n : ℕ) (z : ℂ) :
-    deriv (laguerrePolyL ((k - 1 : ℝ) : ℂ) n) z = (derivative (laguerrePoly k n)).eval z := by
-  rw [laguerrePolyL_eq_eval]; exact Polynomial.deriv _
+private lemma deriv_laguerrePolynomialL_eq (k : ℝ) (n : ℕ) (z : ℂ) :
+    deriv (laguerrePolynomialL ((k - 1 : ℝ) : ℂ) n) z = (derivative (laguerrePoly k n)).eval z := by
+  rw [laguerrePolynomialL_eq_eval]; exact Polynomial.deriv _
 
 /-- The second derivative of `L_n^{(k-1)}` as a polynomial evaluation. -/
-private lemma deriv_deriv_laguerrePolyL_eq (k : ℝ) (n : ℕ) (z : ℂ) :
-    deriv (deriv (laguerrePolyL ((k - 1 : ℝ) : ℂ) n)) z =
+private lemma deriv_deriv_laguerrePolynomialL_eq (k : ℝ) (n : ℕ) (z : ℂ) :
+    deriv (deriv (laguerrePolynomialL ((k - 1 : ℝ) : ℂ) n)) z =
       (derivative (derivative (laguerrePoly k n))).eval z := by
-  have h : deriv (laguerrePolyL ((k - 1 : ℝ) : ℂ) n) =
+  have h : deriv (laguerrePolynomialL ((k - 1 : ℝ) : ℂ) n) =
       fun z => (derivative (laguerrePoly k n)).eval z :=
-    funext (deriv_laguerrePolyL_eq k n)
+    funext (deriv_laguerrePolynomialL_eq k n)
   rw [h]; exact Polynomial.deriv _
 
 /-- Laguerre's differential equation for `L_n^{(k-1)}` as a polynomial identity. -/
@@ -71,9 +71,9 @@ private lemma laguerrePoly_ode {k : ℝ} (hk : 0 < k) (n : ℕ) :
     X * derivative (derivative (laguerrePoly k n)) + (C (k : ℂ) - X) *
       derivative (laguerrePoly k n) + C (n : ℂ) * laguerrePoly k n = 0 := by
   apply Polynomial.funext; intro z
-  have h := laguerrePolyL_differential_equation (α := ((k - 1 : ℝ) : ℂ))
+  have h := laguerrePolynomialL_differential_equation (α := ((k - 1 : ℝ) : ℂ))
     (by simp; linarith) n z
-  rw [deriv_deriv_laguerrePolyL_eq, deriv_laguerrePolyL_eq, ← eval_laguerrePoly] at h
+  rw [deriv_deriv_laguerrePolynomialL_eq, deriv_laguerrePolynomialL_eq, ← eval_laguerrePoly] at h
   simp only [eval_add, eval_mul, eval_X, eval_sub, eval_C, eval_zero]
   push_cast at h
   linear_combination h
@@ -88,15 +88,15 @@ private lemma exceptionalLaguerre_eq_eval {k : ℝ} (hk : 0 < k) (n : ℕ) (z : 
   have hα : -1 < (((k - 1 : ℝ) : ℂ)).re := by simp; linarith
   have e : ((k - 1 : ℝ) : ℂ) + 1 = k := by push_cast; ring
   simp only [excPoly, eval_sub, eval_mul, eval_add, eval_X, eval_C,
-    ← deriv_laguerrePolyL_eq, eval_laguerrePoly]
+    ← deriv_laguerrePolynomialL_eq, eval_laguerrePoly]
   rcases n with _ | j
-  · have h0 : laguerrePolyL ((k - 1 : ℝ) : ℂ) 0 = fun _ => 1 :=
-      funext fun x => laguerrePolyL_zero _ x
+  · have h0 : laguerrePolynomialL ((k - 1 : ℝ) : ℂ) 0 = fun _ => 1 :=
+      funext fun x => laguerrePolynomialL_zero _ x
     rw [h0, deriv_const]
-    simp [exceptionalLaguerre, laguerrePolyL_zero]
+    simp [exceptionalLaguerre, laguerrePolynomialL_zero]
     ring
-  · have raise := laguerrePolyL_raise_parameter hα j z
-    have der := laguerrePolyL_derivative hα j z
+  · have raise := laguerrePolynomialL_raise_parameter hα j z
+    have der := laguerrePolynomialL_derivative hα j z
     rw [e] at raise der
     simp only [exceptionalLaguerre, Nat.add_one_ne_zero, ite_false, Nat.add_sub_cancel]
     linear_combination (z + k + 1) * raise - (z + k) * der
@@ -119,7 +119,7 @@ private lemma integrable_eval_mul_weight (p : ℂ[X]) {α : ℝ} (hα : -1 < α)
   have hp : Integrable (fun x : ℝ => p.eval (x : ℂ) * (x : ℂ) ^ (α : ℂ) * exp (-(x : ℂ)))
       (volume.restrict (Set.Ioi 0)) := by
     have := integrable_finsetSum (Finset.range (p.natDegree + 1)) fun i _ =>
-      (laguerrePolyL_weight_moment hα i).1.const_mul (p.coeff i)
+      (laguerrePolynomialL_weight_moment hα i).1.const_mul (p.coeff i)
     refine this.congr (Eventually.of_forall fun x => ?_)
     simp only
     rw [eval_eq_sum_range, Finset.sum_mul, Finset.sum_mul]
@@ -272,8 +272,9 @@ theorem exceptionalLaguerre_orthogonality {k : ℝ} (hk : 0 < k) (m n : ℕ) :
     ring
   have hR : ∫ x : ℝ in Set.Ioi 0, -((m : ℂ) + k + 1) * ((x : ℂ) + k) *
       ((x ^ (k - 1) : ℝ) : ℂ) * (laguerrePoly k m).eval (x : ℂ) * rightFactor k n x =
-      -((m : ℂ) + k + 1) * ∫ x : ℝ in Set.Ioi 0, laguerrePolyL ((k - 1 : ℝ) : ℂ) m x *
-        laguerrePolyL ((k - 1 : ℝ) : ℂ) n x * (x : ℂ) ^ (((k - 1 : ℝ)) : ℂ) * exp (-(x : ℂ)) := by
+      -((m : ℂ) + k + 1) * ∫ x : ℝ in Set.Ioi 0, laguerrePolynomialL ((k - 1 : ℝ) : ℂ) m x *
+        laguerrePolynomialL ((k - 1 : ℝ) : ℂ) n x * (x : ℂ) ^ (((k - 1 : ℝ)) : ℂ) *
+            exp (-(x : ℂ)) := by
     rw [← integral_const_mul]
     refine setIntegral_congr_fun measurableSet_Ioi fun x (hx : 0 < x) => ?_
     have hx' : (x : ℂ) + k ≠ 0 := by exact_mod_cast (by positivity : x + k ≠ 0)
@@ -283,14 +284,15 @@ theorem exceptionalLaguerre_orthogonality {k : ℝ} (hk : 0 < k) (m n : ℕ) :
   rw [hL, hibp, hR]
   split_ifs with hmn
   · subst hmn
-    have hN := laguerrePolyL_norm hα m
-    rw [show (fun x : ℝ => laguerrePolyL ((k - 1 : ℝ) : ℂ) m x *
-        laguerrePolyL ((k - 1 : ℝ) : ℂ) m x * (x : ℂ) ^ (((k - 1 : ℝ)) : ℂ) * exp (-(x : ℂ))) =
-      fun x : ℝ => laguerrePolyL ((k - 1 : ℝ) : ℂ) m x ^ 2 * exp (-(x : ℂ)) *
+    have hN := laguerrePolynomialL_norm hα m
+    rw [show (fun x : ℝ => laguerrePolynomialL ((k - 1 : ℝ) : ℂ) m x *
+        laguerrePolynomialL ((k - 1 : ℝ) : ℂ) m x * (x : ℂ) ^ (((k - 1 : ℝ)) : ℂ) *
+            exp (-(x : ℂ))) =
+      fun x : ℝ => laguerrePolynomialL ((k - 1 : ℝ) : ℂ) m x ^ 2 * exp (-(x : ℂ)) *
         (x : ℂ) ^ (((k - 1 : ℝ)) : ℂ) by funext x; ring, hN]
     push_cast
     ring_nf
-  · rw [laguerrePolyL_orthogonal hα hmn]
+  · rw [laguerrePolynomialL_orthogonal hα hmn]
     simp
 
 namespace ExceptionalHermite
@@ -308,7 +310,7 @@ private abbrev num (n : ℕ) : ℝ[X] :=
 /-- `H_{n+1}' = 2(n+1) H_n` for the real Hermite polynomials. -/
 private lemma derivative_hermitePolyHR_succ (n : ℕ) :
     derivative (hermitePolyHR (n + 1)) = C (2 * (n + 1) : ℝ) * hermitePolyHR n := by
-  rw [hermitePolyHR, derivative_map, hermitePolyH_derivative, Polynomial.map_mul, map_C]
+  rw [hermitePolyHR, derivative_map, hermitePolynomialH_derivative, Polynomial.map_mul, map_C]
   simp
 
 /-- Hermite's differential equation `H_n'' = 2x H_n' - 2n H_n`. -/
@@ -372,7 +374,7 @@ private lemma integrable_eval_gauss_div (p : ℝ[X]) (k : ℕ) :
 private lemma exceptionalHermite_some_eq (n : ℕ) (x : ℝ) :
     exceptionalHermite (some n) x = (num n).eval x /
       (Real.pi ^ (1 / 4 : ℝ) * Real.sqrt (2 ^ (n + 1) * (n + 3) * n.factorial)) := by
-  simp only [exceptionalHermite, aeval_hermitePolyH_eq_eval, hermitePolyHR_succ]
+  simp only [exceptionalHermite, aeval_hermitePolynomialH_eq_eval, hermitePolyHR_succ]
   congr 1
   simp only [num, eta, eval_sub, eval_mul, eval_add, eval_pow, eval_X, eval_ofNat, eval_one]
   ring
@@ -380,7 +382,7 @@ private lemma exceptionalHermite_some_eq (n : ℕ) (x : ℝ) :
 /-- The integration by parts reducing to Hermite orthogonality. -/
 private lemma integral_num_mul_num (m n : ℕ) :
     ∫ x : ℝ, (num m).eval x * (num n).eval x * Real.exp (-(x ^ 2)) / (4 * eta.eval x ^ 2) =
-      2 * (m + 3) * ∫ x : ℝ, (aeval x (hermitePolyH m) : ℝ) * aeval x (hermitePolyH n) *
+      2 * (m + 3) * ∫ x : ℝ, (aeval x (hermitePolynomialH m) : ℝ) * aeval x (hermitePolynomialH n) *
         Real.exp (-(x ^ 2)) := by
   have hibp := integral_mul_deriv_eq_deriv_mul_of_integrable
     (u := fun x => (num m).eval x)
@@ -409,11 +411,11 @@ private lemma integral_num_mul_num (m n : ℕ) :
         (-((num n).eval x * Real.exp (-(x ^ 2))) / (2 * eta.eval x ^ 2)) := by
     rw [← integral_const_mul]; congr 1; funext x; ring
   have h2 : ∫ x : ℝ, (C (4 * (m + 3) : ℝ) * eta * hermitePolyHR m).eval x * gaussQuotient n x =
-      4 * (m + 3) * ∫ x : ℝ, (aeval x (hermitePolyH m) : ℝ) * aeval x (hermitePolyH n) *
+      4 * (m + 3) * ∫ x : ℝ, (aeval x (hermitePolynomialH m) : ℝ) * aeval x (hermitePolynomialH n) *
         Real.exp (-(x ^ 2)) := by
     rw [← integral_const_mul]; congr 1; funext x
     have hη := (eta_eval_pos x).ne'
-    simp only [eval_mul, eval_C, gaussQuotient, aeval_hermitePolyH_eq_eval]
+    simp only [eval_mul, eval_C, gaussQuotient, aeval_hermitePolynomialH_eq_eval]
     field_simp
   rw [h1, hibp, h2]; ring
 
@@ -528,7 +530,7 @@ theorem exceptionalHermite_orthonormal (m n : Option ℕ) :
         (Real.exp (-(x ^ 2)) / (4 * eta.eval x ^ 2))) = fun x => (cm * cn)⁻¹ *
         ((num m).eval x * (num n).eval x * Real.exp (-(x ^ 2)) / (4 * eta.eval x ^ 2)) by
       funext x; field_simp, integral_const_mul, integral_num_mul_num,
-      hermitePolyH_orthogonality]
+      hermitePolynomialH_orthogonality]
     split_ifs with hmn
     · subst hmn
       have hcm : cm ^ 2 = Real.sqrt π * (2 ^ (m + 1) * (m + 3) * m.factorial) := by

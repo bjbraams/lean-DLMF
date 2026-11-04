@@ -138,13 +138,13 @@ theorem weberE_lommel {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) {z : ℂ} :
 /-- The sum of the complex Fresnel cosine and sine integrals used in half-integer Anger formulas. -/
 @[dlmf 11.10.E21]
 def angerFresnelPlus (z : ℂ) : ℂ :=
-  fresnelCosInt z+fresnelSinInt z
+  fresnelC z+fresnelS z
 
 /-- The difference of the complex Fresnel cosine and sine integrals used in half-integer Anger
 formulas. -/
 @[dlmf 11.10.E21]
 def angerFresnelMinus (z : ℂ) : ℂ :=
-  fresnelCosInt z-fresnelSinInt z
+  fresnelC z-fresnelS z
 
 /-- Weighted derivative identity `z 𝐉_ν' + ν 𝐉_ν = z 𝐉_{ν-1} + sin(πν)/π` away from the origin. -/
 theorem angerHalf_weighted_add (ν : ℂ) {z : ℂ} (hz : z ≠ 0) :
@@ -198,9 +198,9 @@ theorem hasDerivAt_sqrt_mul (c : ℝ) (hc : 0 < c) {x : ℝ} (hx : 0 < x) :
 
 /-- Derivatives of `C(√(2x/π))` and `S(√(2x/π))`. -/
 theorem hasDerivAt_fresnel_sqrt {x : ℝ} (hx : 0 < x) :
-    HasDerivAt (fun x : ℝ => fresnelCosInt (Real.sqrt (2 * x / π)))
+    HasDerivAt (fun x : ℝ => fresnelC (Real.sqrt (2 * x / π)))
         (cos x * ((Real.sqrt (2 * x / π) : ℂ) / (2 * x))) x ∧
-      HasDerivAt (fun x : ℝ => fresnelSinInt (Real.sqrt (2 * x / π)))
+      HasDerivAt (fun x : ℝ => fresnelS (Real.sqrt (2 * x / π)))
         (sin x * ((Real.sqrt (2 * x / π) : ℂ) / (2 * x))) x := by
   have hw := hasDerivAt_sqrt_mul (2 / π) (by positivity) hx
   simp only [show ∀ y : ℝ, 2 / π * y = 2 * y / π from fun y => by ring] at hw
@@ -211,9 +211,9 @@ theorem hasDerivAt_fresnel_sqrt {x : ℝ} (hx : 0 < x) :
     have : (π : ℂ) ≠ 0 := ofReal_ne_zero.2 Real.pi_ne_zero
     field_simp
   constructor
-  · have := (hasDerivAt_fresnelCosInt_complex _).comp x hw
+  · have := (hasDerivAt_fresnelC_complex _).comp x hw
     rwa [hw2] at this
-  · have := (hasDerivAt_fresnelSinInt_complex _).comp x hw
+  · have := (hasDerivAt_fresnelS_complex _).comp x hw
     rwa [hw2] at this
 
 /-- `sin(π/2) = 1` in complex form. -/
@@ -299,8 +299,8 @@ theorem continuous_angerHalfDefectF : Continuous angerHalfDefectF := by
       (angerJ_entire _).continuous.comp continuous_ofReal
   have hw : Continuous fun x : ℝ => ((Real.sqrt (2 * x / π) : ℝ) : ℂ) :=
     continuous_ofReal.comp (by fun_prop)
-  have hC := fresnelCosInt_entire.continuous.comp hw
-  have hS := fresnelSinInt_entire.continuous.comp hw
+  have hC := fresnelC_entire.continuous.comp hw
+  have hS := fresnelS_entire.continuous.comp hw
   unfold angerHalfDefectF angerFresnelPlus angerFresnelMinus
   exact ((continuous_ofReal.comp (by fun_prop)).mul h1).sub
     (((hC.add hS).mul (by fun_prop)).add ((hC.sub hS).mul (by fun_prop)))
@@ -311,8 +311,8 @@ theorem continuous_angerHalfDefectG : Continuous angerHalfDefectG := by
     (angerJ_entire _).continuous.comp continuous_ofReal
   have hw : Continuous fun x : ℝ => ((Real.sqrt (2 * x / π) : ℝ) : ℂ) :=
     continuous_ofReal.comp (by fun_prop)
-  have hC := fresnelCosInt_entire.continuous.comp hw
-  have hS := fresnelSinInt_entire.continuous.comp hw
+  have hC := fresnelC_entire.continuous.comp hw
+  have hS := fresnelS_entire.continuous.comp hw
   unfold angerHalfDefectG angerFresnelPlus angerFresnelMinus
   exact ((continuous_ofReal.comp (by fun_prop)).mul h1).sub
     (((hC.add hS).mul (by fun_prop)).sub ((hC.sub hS).mul (by fun_prop)))
@@ -320,7 +320,7 @@ theorem continuous_angerHalfDefectG : Continuous angerHalfDefectG := by
 /-- Both defects vanish at the origin. -/
 theorem angerHalfDefect_zero : angerHalfDefectF 0 = 0 ∧ angerHalfDefectG 0 = 0 := by
   simp [angerHalfDefectF, angerHalfDefectG, angerFresnelPlus, angerFresnelMinus,
-    fresnelCosInt, fresnelSinInt]
+    fresnelC, fresnelS]
 
 /-- A function on `[0, ∞)` with zero derivative on `(0, ∞)` and continuous at `0` is constant. -/
 theorem angerHalf_eq_of_hasDerivAt_zero {u : ℝ → ℂ} (hu : Continuous u)
@@ -408,10 +408,10 @@ theorem differentiableOn_angerHalf_rhs (A B : ℂ → ℂ) (hA : Differentiable 
     DifferentiableAt.cpow (by fun_prop) (differentiableAt_const _) h2
   have hP : DifferentiableAt ℂ (fun z : ℂ => angerFresnelPlus ((2*z/π)^(1/2:ℂ))) z := by
     unfold angerFresnelPlus
-    exact ((fresnelCosInt_entire _).comp z hc2).add ((fresnelSinInt_entire _).comp z hc2)
+    exact ((fresnelC_entire _).comp z hc2).add ((fresnelS_entire _).comp z hc2)
   have hM : DifferentiableAt ℂ (fun z : ℂ => angerFresnelMinus ((2*z/π)^(1/2:ℂ))) z := by
     unfold angerFresnelMinus
-    exact ((fresnelCosInt_entire _).comp z hc2).sub ((fresnelSinInt_entire _).comp z hc2)
+    exact ((fresnelC_entire _).comp z hc2).sub ((fresnelS_entire _).comp z hc2)
   exact (hc1.mul ((hP.mul (hA z)).sub (hM.mul (hB z)))).differentiableWithinAt
 
 /-- The slit plane is preconnected. -/

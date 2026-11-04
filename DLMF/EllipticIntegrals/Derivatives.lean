@@ -24,15 +24,18 @@ a complex amplitude `φ` whose path `[0, φ]` keeps `1 - k² sin²θ` in `ℂ \ 
 
 ## Main results
 
-* `hasDerivAt_compEllIntKk`, `hasDerivAt_compEllIntEk_sub`: the two relations of DLMF 19.4.1.
-* `hasDerivAt_compEllIntEk`, `hasDerivAt_compEllIntEk_sub_compEllIntKk`: the two relations of
-  DLMF 19.4.2.
-* `deriv_deriv_compEllIntEk`: the second derivative of `E` (DLMF 19.4.3).
-* `hasDerivAt_compEllIntPik`: the `k`-derivative of `Π(α², k)` (DLMF 19.4.4).
-* `hasDerivAt_incEllIntFk`, `hasDerivAt_incEllIntEk`, `hasDerivAt_incEllIntPik`: the
-  `k`-derivatives of the incomplete integrals (DLMF 19.4.5–19.4.7).
-* `incEllIntFk_ode`, `incEllIntEk_ode`: the differential equations in `k` (DLMF 19.4.8, 19.4.9).
-* `compEllIntKk_compEllIntEk_ode`: the hypergeometric equations of `K` and `E`
+* `hasDerivAt_completeEllipticK`, `hasDerivAt_completeEllipticE_sub`: the two relations of DLMF
+  19.4.1.
+* `hasDerivAt_completeEllipticE`, `hasDerivAt_completeEllipticE_sub_completeEllipticK`: the two
+  relations of DLMF 19.4.2.
+* `deriv_deriv_completeEllipticE`: the second derivative of `E` (DLMF 19.4.3).
+* `hasDerivAt_completeEllipticPi`: the `k`-derivative of `Π(α², k)` (DLMF 19.4.4).
+* `hasDerivAt_incompleteEllipticF`, `hasDerivAt_incompleteEllipticE`,
+  `hasDerivAt_incompleteEllipticPi`: the `k`-derivatives of the incomplete integrals (DLMF
+  19.4.5–19.4.7).
+* `incompleteEllipticF_ode`, `incompleteEllipticE_ode`: the differential equations in `k` (DLMF
+  19.4.8, 19.4.9).
+* `completeEllipticK_completeEllipticE_ode`: the hypergeometric equations of `K` and `E`
   (DLMF §19.4(ii), prose).
 
 ## Implementation notes
@@ -42,8 +45,9 @@ the integral sign (`hasDerivAt_integral_mul_cpow` for real paths,
 `hasDerivAt_integral_unit_mul_cpow` along the segment `[0, φ]`) together with the closed form of
 `∫ Δ⁻³` (`integral_inv_ellDelta_cube`, `pathIntegral_inv_ellDeltaComplex_cube`); the second
 relations, 19.4.3 and the differential equations follow. The real-parameter forms (in `m = k²`)
-are `DLMF.Elliptic.Real.hasDerivAt_compEllIntKm`, `Real.hasDerivAt_compEllIntEm`,
-`Real.hasDerivAt_compEllIntKm_sq` and `Real.hasDerivAt_compEllIntEm_sq` (tagged 19.4.E1–E2).
+are `DLMF.Elliptic.Real.hasDerivAt_completeEllipticKOfParameter`,
+`Real.hasDerivAt_completeEllipticEOfParameter`, `Real.hasDerivAt_completeEllipticKOfParameter_sq`
+and `Real.hasDerivAt_completeEllipticEOfParameter_sq` (tagged 19.4.E1–E2).
 
 ## References
 
@@ -190,11 +194,11 @@ theorem exists_le_norm_one_sub_mul_sin_sq {a : ℂ} (ha : 1 - a ∈ slitPlane) :
 /-- DLMF 19.4.1 (first relation): `dK/dk = (E - k'²K)/(k k'²)` on the principal
 domain. -/
 @[dlmf 19.4.E1]
-theorem hasDerivAt_compEllIntKk {k : ℂ} (hk : k ∈ compEllIntDomain) :
-    HasDerivAt compEllIntKk
-      ((compEllIntEk k - (1 - k ^ 2) * compEllIntKk k) / (k * (1 - k ^ 2))) k := by
+theorem hasDerivAt_completeEllipticK {k : ℂ} (hk : k ∈ compEllIntDomain) :
+    HasDerivAt completeEllipticK
+      ((completeEllipticE k - (1 - k ^ 2) * completeEllipticK k) / (k * (1 - k ^ 2))) k := by
   have h := hasDerivAt_integral_cpow (-(1 / 2) : ℂ) (π / 2) hk.2
-  refine (show compEllIntKk = _ from rfl) ▸ h.congr_deriv ?_
+  refine (show completeEllipticK = _ from rfl) ▸ h.congr_deriv ?_
   have hk0 := hk.1
   have hk1 : 1 - k ^ 2 ≠ 0 := slitPlane_ne_zero hk.2
   have hb0 : ∀ θ : ℝ, 1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2 ≠ 0 := fun θ =>
@@ -217,18 +221,18 @@ theorem hasDerivAt_compEllIntKk {k : ℂ} (hk : k ∈ compEllIntDomain) :
     ((by fun_prop : Continuous fun θ : ℝ => 1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2).inv₀ hb0).mul hc1
   simp only [hpt, intervalIntegral.integral_const_mul]
   rw [intervalIntegral.integral_sub (hc2.intervalIntegrable _ _) (hc1.intervalIntegrable _ _),
-    integral_inv_ellDelta_cube hk.2, ← compEllIntKk]
+    integral_inv_ellDelta_cube hk.2, ← completeEllipticK]
   simp only [Real.sin_pi_div_two, Real.cos_pi_div_two, ofReal_zero, mul_zero, zero_div,
-    sub_zero, compEllIntEk]
+    sub_zero, completeEllipticE]
   push_cast
   field_simp
 
 /-- DLMF 19.4.2 (first relation): `dE/dk = (E - K)/k` on the principal domain. -/
 @[dlmf 19.4.E2]
-theorem hasDerivAt_compEllIntEk {k : ℂ} (hk : k ∈ compEllIntDomain) :
-    HasDerivAt compEllIntEk ((compEllIntEk k - compEllIntKk k) / k) k := by
-  have hE : compEllIntEk = fun k : ℂ => ∫ θ in (0 : ℝ)..(π / 2),
-      (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (1 / 2 : ℂ) := funext compEllIntEk_eq_integral
+theorem hasDerivAt_completeEllipticE {k : ℂ} (hk : k ∈ compEllIntDomain) :
+    HasDerivAt completeEllipticE ((completeEllipticE k - completeEllipticK k) / k) k := by
+  have hE : completeEllipticE = fun k : ℂ => ∫ θ in (0 : ℝ)..(π / 2),
+      (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (1 / 2 : ℂ) := funext completeEllipticE_eq_integral
   have h := hasDerivAt_integral_cpow (1 / 2 : ℂ) (π / 2) hk.2
   rw [← hE] at h
   refine h.congr_deriv ?_
@@ -236,8 +240,8 @@ theorem hasDerivAt_compEllIntEk {k : ℂ} (hk : k ∈ compEllIntDomain) :
       (-(2 * k * (Real.sin θ : ℂ) ^ 2)) = (-k) * ((Real.sin θ : ℂ) ^ 2 *
         (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ))) := fun θ => by
     rw [show (1 / 2 : ℂ) - 1 = -(1 / 2) by norm_num]; ring
-  simp only [hpt, intervalIntegral.integral_const_mul, ← compEllIntDk_eq_integral,
-    compEllIntDk_eq hk.1 hk.2]
+  simp only [hpt, intervalIntegral.integral_const_mul, ← completeEllipticD_eq_integral,
+    completeEllipticD_eq hk.1 hk.2]
   have := hk.1
   field_simp
   ring
@@ -249,10 +253,11 @@ private lemma one_sub_sq_ne_zero_of_mem_compEllIntDomain {k : ℂ} (hk : k ∈ c
 
 /-- DLMF 19.4.1 (second relation): `d(E - k'²K)/dk = kK`. -/
 @[dlmf 19.4.E1]
-theorem hasDerivAt_compEllIntEk_sub {k : ℂ} (hk : k ∈ compEllIntDomain) :
-    HasDerivAt (fun k => compEllIntEk k - (1 - k ^ 2) * compEllIntKk k) (k * compEllIntKk k) k := by
-  have h := (hasDerivAt_compEllIntEk hk).sub
-    (((hasDerivAt_pow 2 k).const_sub 1).mul (hasDerivAt_compEllIntKk hk))
+theorem hasDerivAt_completeEllipticE_sub {k : ℂ} (hk : k ∈ compEllIntDomain) :
+    HasDerivAt (fun k => completeEllipticE k - (1 - k ^ 2) * completeEllipticK k)
+        (k * completeEllipticK k) k := by
+  have h := (hasDerivAt_completeEllipticE hk).sub
+    (((hasDerivAt_pow 2 k).const_sub 1).mul (hasDerivAt_completeEllipticK hk))
   convert h using 1
   have h0 := hk.1
   have h1 := one_sub_sq_ne_zero_of_mem_compEllIntDomain hk
@@ -261,10 +266,10 @@ theorem hasDerivAt_compEllIntEk_sub {k : ℂ} (hk : k ∈ compEllIntDomain) :
 
 /-- DLMF 19.4.2 (second relation): `d(E - K)/dk = -kE/k'²`. -/
 @[dlmf 19.4.E2]
-theorem hasDerivAt_compEllIntEk_sub_compEllIntKk {k : ℂ} (hk : k ∈ compEllIntDomain) :
-    HasDerivAt (fun k => compEllIntEk k - compEllIntKk k)
-      (-(k * compEllIntEk k) / (1 - k ^ 2)) k := by
-  have h := (hasDerivAt_compEllIntEk hk).sub (hasDerivAt_compEllIntKk hk)
+theorem hasDerivAt_completeEllipticE_sub_completeEllipticK {k : ℂ} (hk : k ∈ compEllIntDomain) :
+    HasDerivAt (fun k => completeEllipticE k - completeEllipticK k)
+      (-(k * completeEllipticE k) / (1 - k ^ 2)) k := by
+  have h := (hasDerivAt_completeEllipticE hk).sub (hasDerivAt_completeEllipticK hk)
   convert h using 1
   have h0 := hk.1
   have h1 := one_sub_sq_ne_zero_of_mem_compEllIntDomain hk
@@ -273,18 +278,20 @@ theorem hasDerivAt_compEllIntEk_sub_compEllIntKk {k : ℂ} (hk : k ∈ compEllIn
 
 /-- DLMF 19.4.3: `d²E/dk² = -(1/k) dK/dk = (k'²K - E)/(k²k'²)` on the principal domain. -/
 @[dlmf 19.4.E3]
-theorem deriv_deriv_compEllIntEk {k : ℂ} (hk : k ∈ compEllIntDomain) :
-    deriv (deriv compEllIntEk) k = -(1 / k) * deriv compEllIntKk k ∧
-      deriv (deriv compEllIntEk) k =
-        ((1 - k ^ 2) * compEllIntKk k - compEllIntEk k) / (k ^ 2 * (1 - k ^ 2)) := by
-  have hev : deriv compEllIntEk =ᶠ[𝓝 k] fun k => (compEllIntEk k - compEllIntKk k) / k :=
+theorem deriv_deriv_completeEllipticE {k : ℂ} (hk : k ∈ compEllIntDomain) :
+    deriv (deriv completeEllipticE) k = -(1 / k) * deriv completeEllipticK k ∧
+      deriv (deriv completeEllipticE) k =
+        ((1 - k ^ 2) * completeEllipticK k - completeEllipticE k) / (k ^ 2 * (1 - k ^ 2)) := by
+  have hev : deriv completeEllipticE =ᶠ[𝓝 k] fun k =>
+      (completeEllipticE k - completeEllipticK k) / k :=
     Filter.eventually_of_mem (isOpen_compEllIntDomain.mem_nhds hk) fun z hz =>
-      (hasDerivAt_compEllIntEk hz).deriv
-  have hd : HasDerivAt (fun k => (compEllIntEk k - compEllIntKk k) / k)
-      ((-(k * compEllIntEk k) / (1 - k ^ 2) * k - (compEllIntEk k - compEllIntKk k) * 1) /
+      (hasDerivAt_completeEllipticE hz).deriv
+  have hd : HasDerivAt (fun k => (completeEllipticE k - completeEllipticK k) / k)
+      ((-(k * completeEllipticE k) / (1 - k ^ 2) * k -
+          (completeEllipticE k - completeEllipticK k) * 1) /
         k ^ 2) k :=
-    (hasDerivAt_compEllIntEk_sub_compEllIntKk hk).div (hasDerivAt_id k) hk.1
-  rw [hev.deriv_eq, hd.deriv, (hasDerivAt_compEllIntKk hk).deriv]
+    (hasDerivAt_completeEllipticE_sub_completeEllipticK hk).div (hasDerivAt_id k) hk.1
+  rw [hev.deriv_eq, hd.deriv, (hasDerivAt_completeEllipticK hk).deriv]
   have h0 := hk.1
   have h1 := one_sub_sq_ne_zero_of_mem_compEllIntDomain hk
   constructor <;> (field_simp; ring)
@@ -293,20 +300,20 @@ theorem deriv_deriv_compEllIntEk {k : ℂ} (hk : k ∈ compEllIntDomain) :
 `∂Π(α², k)/∂k = k/(k'²(k² - α²)) (E(k) - k'²Π(α², k))` on the principal domain, for `α² ≠ k²`
 with `1 - α² ∈ ℂ \ (-∞, 0]` (no principal value). -/
 @[dlmf 19.4.E4]
-theorem hasDerivAt_compEllIntPik {α2 k : ℂ} (hk : k ∈ compEllIntDomain)
+theorem hasDerivAt_completeEllipticPi {α2 k : ℂ} (hk : k ∈ compEllIntDomain)
     (hα : 1 - α2 ∈ slitPlane) (hαk : k ^ 2 ≠ α2) :
-    HasDerivAt (fun k => compEllIntPik α2 k) (k / ((1 - k ^ 2) * (k ^ 2 - α2)) *
-      (compEllIntEk k - (1 - k ^ 2) * compEllIntPik α2 k)) k := by
+    HasDerivAt (fun k => completeEllipticPi α2 k) (k / ((1 - k ^ 2) * (k ^ 2 - α2)) *
+      (completeEllipticE k - (1 - k ^ 2) * completeEllipticPi α2 k)) k := by
   obtain ⟨δ, hδ, hlow⟩ := exists_le_norm_one_sub_mul_sin_sq hα
   have ha0 : ∀ θ : ℝ, 1 - α2 * (Real.sin θ : ℂ) ^ 2 ≠ 0 := fun θ =>
     norm_pos_iff.1 (hδ.trans_le (hlow θ))
   have hw : Continuous fun θ : ℝ => (1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹ :=
     (by fun_prop : Continuous fun θ : ℝ => 1 - α2 * (Real.sin θ : ℂ) ^ 2).inv₀ ha0
-  have hPi : ∀ k : ℂ, compEllIntPik α2 k = ∫ θ in (0 : ℝ)..(π / 2),
+  have hPi : ∀ k : ℂ, completeEllipticPi α2 k = ∫ θ in (0 : ℝ)..(π / 2),
       (1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹ * (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) := by
     intro k
-    rw [compEllIntPik, show ((π : ℂ) / 2) = ((π / 2 : ℝ) : ℂ) by push_cast; ring,
-      incEllIntPik_ofReal_eq_integral_of_norm_ge hδ (fun t _ => hlow _)]
+    rw [completeEllipticPi, show ((π : ℂ) / 2) = ((π / 2 : ℝ) : ℂ) by push_cast; ring,
+      incompleteEllipticPi_ofReal_eq_integral_of_norm_ge hδ (fun t _ => hlow _)]
   have h := hasDerivAt_integral_mul_cpow hw (-(1 / 2) : ℂ) (π / 2) hk.2
   rw [← funext hPi] at h
   refine h.congr_deriv ?_
@@ -343,7 +350,7 @@ theorem hasDerivAt_compEllIntPik {α2 k : ℂ} (hk : k ∈ compEllIntDomain)
       (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) from hw.mul hc1).intervalIntegrable _ _),
     integral_inv_ellDelta_cube hk.2, ← hPi]
   simp only [Real.sin_pi_div_two, Real.cos_pi_div_two, ofReal_zero, mul_zero, zero_div,
-    sub_zero, compEllIntEk]
+    sub_zero, completeEllipticE]
   push_cast
   field_simp
 
@@ -445,7 +452,7 @@ private lemma pathIntegral_inv_ellDeltaComplex_cube {φ k : ℂ} (hk1 : k ^ 2 �
     (hφ : LegendrePathInSlitPlane φ k) :
     ∫ t in (0 : ℝ)..1, φ * ((1 - k ^ 2 * Complex.sin (t * φ) ^ 2)⁻¹ *
         (1 - k ^ 2 * Complex.sin (t * φ) ^ 2) ^ (-(1 / 2 : ℂ))) =
-      (incEllIntEk φ k - k ^ 2 * Complex.sin φ * Complex.cos φ / ellDeltaComplex k φ) /
+      (incompleteEllipticE φ k - k ^ 2 * Complex.sin φ * Complex.cos φ / ellDeltaComplex k φ) /
           (1 - k ^ 2) := by
   have hk1' : 1 - k ^ 2 ≠ 0 := sub_ne_zero.2 (Ne.symm hk1)
   set G : ℂ → ℂ := fun z => Complex.sin z * Complex.cos z / ellDeltaComplex k z with hG
@@ -505,7 +512,8 @@ private lemma pathIntegral_inv_ellDeltaComplex_cube {φ k : ℂ} (hk1 : k ^ 2 �
     intervalIntegral.integral_const_mul (k ^ 2) (fun x : ℝ => G' (x * φ) * φ),
     intervalIntegral.integral_eq_sub_of_hasDerivAt
       (fun t ht => hGt t (by rwa [uIcc_of_le zero_le_one] at ht)) hG'c.intervalIntegrable]
-  simp only [hG, incEllIntEk, segmentIntegral, ofReal_one, one_mul, ofReal_zero, zero_mul,
+  simp only [hG, incompleteEllipticE, primitive_eq_integral, ofReal_one, one_mul,
+      ofReal_zero, zero_mul,
     Complex.sin_zero, zero_mul, zero_div, sub_zero]
   ring
 
@@ -513,16 +521,20 @@ private lemma pathIntegral_inv_ellDeltaComplex_cube {φ k : ℂ} (hk1 : k ^ 2 �
 `∂F(φ, k)/∂k = (E(φ, k) - k'²F(φ, k))/(k k'²) - k sin φ cos φ/(k'² Δ)`, `Δ = √(1 - k² sin²φ)`,
 for `k ≠ 0`, `k² ≠ 1` and a path `[0, φ]` satisfying `LegendrePathInSlitPlane`. -/
 @[dlmf 19.4.E5]
-theorem hasDerivAt_incEllIntFk {φ k : ℂ} (hk0 : k ≠ 0) (hk1 : k ^ 2 ≠ 1)
+theorem hasDerivAt_incompleteEllipticF {φ k : ℂ} (hk0 : k ≠ 0) (hk1 : k ^ 2 ≠ 1)
     (hφ : LegendrePathInSlitPlane φ k) :
-    HasDerivAt (fun k => incEllIntFk φ k)
-      ((incEllIntEk φ k - (1 - k ^ 2) * incEllIntFk φ k) / (k * (1 - k ^ 2)) -
+    HasDerivAt (fun k => incompleteEllipticF φ k)
+      ((incompleteEllipticE φ k - (1 - k ^ 2) * incompleteEllipticF φ k) / (k * (1 - k ^ 2)) -
         k * Complex.sin φ * Complex.cos φ /
           ((1 - k ^ 2) * (1 - k ^ 2 * Complex.sin φ ^ 2) ^ (1 / 2 : ℂ))) k := by
   have hk1' : 1 - k ^ 2 ≠ 0 := sub_ne_zero.2 (Ne.symm hk1)
   have hg : Continuous fun t : ℝ => Complex.sin (t * φ) ^ 2 := by fun_prop
   have h := hasDerivAt_integral_unit_mul_cpow hg continuousOn_const (-(1 / 2) : ℂ)
       (w := fun _ => φ) hφ
+  have hfun : (fun k => incompleteEllipticF φ k) = fun k => ∫ t in (0 : ℝ)..1,
+      φ * (1 - k ^ 2 * Complex.sin (t * φ) ^ 2) ^ (-(1 / 2) : ℂ) := by
+    funext k; simp only [incompleteEllipticF, primitive_eq_integral]
+  rw [hfun]
   refine h.congr_deriv ?_
   have hpt : ∀ t ∈ uIcc (0 : ℝ) 1, φ * ((-(1 / 2) : ℂ) *
       (1 - k ^ 2 * Complex.sin (t * φ) ^ 2) ^ ((-(1 / 2) : ℂ) - 1) *
@@ -551,8 +563,9 @@ theorem hasDerivAt_incEllIntFk {φ k : ℂ} (hk0 : k ≠ 0) (hk1 : k ^ 2 ≠ 1)
   rw [intervalIntegral.integral_congr hpt, intervalIntegral.integral_const_mul,
     intervalIntegral.integral_sub hc2.intervalIntegrable hc1.intervalIntegrable,
     pathIntegral_inv_ellDeltaComplex_cube hk1 hφ]
-  have hF : incEllIntFk φ k = ∫ t in (0 : ℝ)..1,
-      φ * (1 - k ^ 2 * Complex.sin (t * φ) ^ 2) ^ (-(1 / 2 : ℂ)) := rfl
+  have hF : incompleteEllipticF φ k = ∫ t in (0 : ℝ)..1,
+      φ * (1 - k ^ 2 * Complex.sin (t * φ) ^ 2) ^ (-(1 / 2 : ℂ)) := by
+    simp only [incompleteEllipticF, primitive_eq_integral]
   rw [← hF]
   field_simp
   ring
@@ -560,10 +573,15 @@ theorem hasDerivAt_incEllIntFk {φ k : ℂ} (hk0 : k ≠ 0) (hk1 : k ^ 2 ≠ 1)
 /-- DLMF 19.4.6: `∂E(φ, k)/∂k = (E(φ, k) - F(φ, k))/k` for `k ≠ 0` and a path
 satisfying `LegendrePathInSlitPlane`. -/
 @[dlmf 19.4.E6]
-theorem hasDerivAt_incEllIntEk {φ k : ℂ} (hk0 : k ≠ 0) (hφ : LegendrePathInSlitPlane φ k) :
-    HasDerivAt (fun k => incEllIntEk φ k) ((incEllIntEk φ k - incEllIntFk φ k) / k) k := by
+theorem hasDerivAt_incompleteEllipticE {φ k : ℂ} (hk0 : k ≠ 0) (hφ : LegendrePathInSlitPlane φ k) :
+    HasDerivAt (fun k => incompleteEllipticE φ k)
+        ((incompleteEllipticE φ k - incompleteEllipticF φ k) / k) k := by
   have hg : Continuous fun t : ℝ => Complex.sin (t * φ) ^ 2 := by fun_prop
   have h := hasDerivAt_integral_unit_mul_cpow hg continuousOn_const (1 / 2 : ℂ) (w := fun _ => φ) hφ
+  have hfun : (fun k => incompleteEllipticE φ k) = fun k => ∫ t in (0 : ℝ)..1,
+      φ * (1 - k ^ 2 * Complex.sin (t * φ) ^ 2) ^ (1 / 2 : ℂ) := by
+    funext k; simp only [incompleteEllipticE, primitive_eq_integral]
+  rw [hfun]
   refine h.congr_deriv ?_
   have hF : IntervalIntegrable
       (fun t : ℝ => φ * (1 - k ^ 2 * Complex.sin (t * φ) ^ 2) ^ (-(1 / 2 : ℂ))) volume 0 1 := by
@@ -575,8 +593,8 @@ theorem hasDerivAt_incEllIntEk {φ k : ℂ} (hk0 : k ≠ 0) (hφ : LegendrePathI
         (1 - k ^ 2 * Complex.sin (t * φ) ^ 2) ^ (-(1 / 2 : ℂ)))) := fun t => by
     rw [show (1 / 2 : ℂ) - 1 = -(1 / 2) by norm_num]; ring
   simp only [hpt, intervalIntegral.integral_const_mul]
-  have hD := incEllIntDk_eq hk0 hF
-  rw [incEllIntDk, segmentIntegral, intervalIntegral.integral_const_mul] at hD
+  have hD := incompleteEllipticD_eq hk0 hF
+  rw [incompleteEllipticD, primitive_eq_integral, intervalIntegral.integral_const_mul] at hD
   rw [hD]
   field_simp
   ring
@@ -585,11 +603,12 @@ theorem hasDerivAt_incEllIntEk {φ k : ℂ} (hk0 : k ≠ 0) (hφ : LegendrePathI
 `∂Π(φ, α², k)/∂k = k/(k'²(k² - α²)) (E(φ, k) - k'²Π(φ, α², k) - k² sin φ cos φ/Δ)`, for `k ≠ 0`,
 `k² ≠ 1`, `k² ≠ α²`, a path satisfying `LegendrePathInSlitPlane` on which `1 - α² sin²θ ≠ 0`. -/
 @[dlmf 19.4.E7]
-theorem hasDerivAt_incEllIntPik {φ α2 k : ℂ} (hk0 : k ≠ 0) (hk1 : k ^ 2 ≠ 1) (hαk : k ^ 2 ≠ α2)
+theorem hasDerivAt_incompleteEllipticPi {φ α2 k : ℂ} (hk0 : k ≠ 0) (hk1 : k ^ 2 ≠ 1)
+    (hαk : k ^ 2 ≠ α2)
     (hφ : LegendrePathInSlitPlane φ k)
         (hα : ∀ t ∈ Icc (0 : ℝ) 1, 1 - α2 * Complex.sin (t * φ) ^ 2 ≠ 0) :
-    HasDerivAt (fun k => incEllIntPik φ α2 k) (k / ((1 - k ^ 2) * (k ^ 2 - α2)) *
-      (incEllIntEk φ k - (1 - k ^ 2) * incEllIntPik φ α2 k -
+    HasDerivAt (fun k => incompleteEllipticPi φ α2 k) (k / ((1 - k ^ 2) * (k ^ 2 - α2)) *
+      (incompleteEllipticE φ k - (1 - k ^ 2) * incompleteEllipticPi φ α2 k -
         k ^ 2 * Complex.sin φ * Complex.cos φ /
           (1 - k ^ 2 * Complex.sin φ ^ 2) ^ (1 / 2 : ℂ))) k := by
   have hk1' : 1 - k ^ 2 ≠ 0 := sub_ne_zero.2 (Ne.symm hk1)
@@ -598,10 +617,11 @@ theorem hasDerivAt_incEllIntPik {φ α2 k : ℂ} (hk0 : k ≠ 0) (hk1 : k ^ 2 �
   obtain ⟨t0, ht0, hmin⟩ := (isCompact_Icc (a := (0 : ℝ)) (b := 1)).exists_isMinOn
     (nonempty_Icc.2 zero_le_one) hAc.continuousOn
   have hδ : 0 < ‖1 - α2 * Complex.sin (t0 * φ) ^ 2‖ := norm_pos_iff.2 (hα t0 ht0)
-  have hPi : ∀ k : ℂ, incEllIntPik φ α2 k = ∫ t in (0 : ℝ)..1,
+  have hPi : ∀ k : ℂ, incompleteEllipticPi φ α2 k = ∫ t in (0 : ℝ)..1,
       φ * ((1 - α2 * Complex.sin (t * φ) ^ 2)⁻¹ *
         (1 - k ^ 2 * Complex.sin (t * φ) ^ 2) ^ (-(1 / 2 : ℂ))) := fun k => by
-    rw [incEllIntPik_eq_segmentIntegral hδ (fun t ht => hmin ht), segmentIntegral]
+    rw [incompleteEllipticPi_eq_primitive hδ (fun t ht => hmin ht),
+        primitive_eq_integral]
   have hw : ContinuousOn (fun t : ℝ => φ * (1 - α2 * Complex.sin (t * φ) ^ 2)⁻¹) (Icc 0 1) :=
     continuousOn_const.mul ((by fun_prop : Continuous fun t : ℝ =>
       1 - α2 * Complex.sin (t * φ) ^ 2).continuousOn.inv₀ hα)
@@ -663,24 +683,25 @@ private lemma eventually_legendrePathInSlitPlane {φ k : ℂ} (hk0 : k ≠ 0) (h
 `(k k'² D_k² + (1 - 3k²) D_k - k) F(φ, k) = -k sin φ cos φ/(1 - k² sin²φ)^{3/2}`, for `k ≠ 0`,
 `k² ≠ 1` and a path satisfying `LegendrePathInSlitPlane`. -/
 @[dlmf 19.4.E8]
-theorem incEllIntFk_ode {φ k : ℂ} (hk0 : k ≠ 0) (hk1 : k ^ 2 ≠ 1)
+theorem incompleteEllipticF_ode {φ k : ℂ} (hk0 : k ≠ 0) (hk1 : k ^ 2 ≠ 1)
     (hφ : LegendrePathInSlitPlane φ k) :
-    k * (1 - k ^ 2) * deriv (deriv fun k => incEllIntFk φ k) k +
-        (1 - 3 * k ^ 2) * deriv (fun k => incEllIntFk φ k) k - k * incEllIntFk φ k =
+    k * (1 - k ^ 2) * deriv (deriv fun k => incompleteEllipticF φ k) k +
+        (1 - 3 * k ^ 2) * deriv (fun k => incompleteEllipticF φ k) k - k * incompleteEllipticF φ k =
       -(k * Complex.sin φ * Complex.cos φ) / (1 - k ^ 2 * Complex.sin φ ^ 2) ^ (3 / 2 : ℂ) := by
-  have hev : deriv (fun k => incEllIntFk φ k) =ᶠ[𝓝 k]
-      fun k => (incEllIntEk φ k - (1 - k ^ 2) * incEllIntFk φ k) / (k * (1 - k ^ 2)) -
+  have hev : deriv (fun k => incompleteEllipticF φ k) =ᶠ[𝓝 k]
+      fun k => (incompleteEllipticE φ k - (1 - k ^ 2) * incompleteEllipticF φ k) /
+          (k * (1 - k ^ 2)) -
         k * Complex.sin φ * Complex.cos φ /
           ((1 - k ^ 2) * (1 - k ^ 2 * Complex.sin φ ^ 2) ^ (1 / 2 : ℂ)) := by
     filter_upwards [eventually_legendrePathInSlitPlane hk0 hk1 hφ] with z hz
-    exact (hasDerivAt_incEllIntFk hz.1 hz.2.1 hz.2.2).deriv
+    exact (hasDerivAt_incompleteEllipticF hz.1 hz.2.1 hz.2.2).deriv
   have hk1' : 1 - k ^ 2 ≠ 0 := sub_ne_zero.2 (Ne.symm hk1)
   have hb : 1 - k ^ 2 * Complex.sin φ ^ 2 ∈ slitPlane := by
     have := hφ 1 ⟨zero_le_one, le_rfl⟩
     simpa using this
   have hb0 := slitPlane_ne_zero hb
-  have hE := hasDerivAt_incEllIntEk hk0 hφ
-  have hF := hasDerivAt_incEllIntFk hk0 hk1 hφ
+  have hE := hasDerivAt_incompleteEllipticE hk0 hφ
+  have hF := hasDerivAt_incompleteEllipticF hk0 hk1 hφ
   set S := Complex.sin φ
   set C := Complex.cos φ
   have hΔ : HasDerivAt (fun z : ℂ => (1 - z ^ 2 * S ^ 2) ^ (1 / 2 : ℂ))
@@ -694,7 +715,7 @@ theorem incEllIntFk_ode {φ k : ℂ} (hk0 : k ≠ 0) (hk1 : k ^ 2 ≠ 1)
   have hp : HasDerivAt (fun z : ℂ => 1 - z ^ 2) (-(2 * k)) k := by
     have := (hasDerivAt_pow 2 k).const_sub 1
     convert this using 1; ring
-  have hd : HasDerivAt (fun z => (incEllIntEk φ z - (1 - z ^ 2) * incEllIntFk φ z) /
+  have hd : HasDerivAt (fun z => (incompleteEllipticE φ z - (1 - z ^ 2) * incompleteEllipticF φ z) /
       (z * (1 - z ^ 2)) - z * S * C / ((1 - z ^ 2) * (1 - z ^ 2 * S ^ 2) ^ (1 / 2 : ℂ))) _ k :=
     ((hE.sub (hp.mul hF)).div ((hasDerivAt_id k).mul hp) (mul_ne_zero hk0 hk1')).sub
       ((((hasDerivAt_id k).mul_const S).mul_const C).div (hp.mul hΔ) (mul_ne_zero hk1' hD0))
@@ -713,19 +734,19 @@ theorem incEllIntFk_ode {φ k : ℂ} (hk0 : k ≠ 0) (hk1 : k ^ 2 ≠ 1)
 `(k k'² D_k² + k'² D_k + k) E(φ, k) = k sin φ cos φ/√(1 - k² sin²φ)`, for `k ≠ 0`, `k² ≠ 1` and a
 path satisfying `LegendrePathInSlitPlane`. -/
 @[dlmf 19.4.E9]
-theorem incEllIntEk_ode {φ k : ℂ} (hk0 : k ≠ 0) (hk1 : k ^ 2 ≠ 1)
+theorem incompleteEllipticE_ode {φ k : ℂ} (hk0 : k ≠ 0) (hk1 : k ^ 2 ≠ 1)
     (hφ : LegendrePathInSlitPlane φ k) :
-    k * (1 - k ^ 2) * deriv (deriv fun k => incEllIntEk φ k) k +
-        (1 - k ^ 2) * deriv (fun k => incEllIntEk φ k) k + k * incEllIntEk φ k =
+    k * (1 - k ^ 2) * deriv (deriv fun k => incompleteEllipticE φ k) k +
+        (1 - k ^ 2) * deriv (fun k => incompleteEllipticE φ k) k + k * incompleteEllipticE φ k =
       k * Complex.sin φ * Complex.cos φ / (1 - k ^ 2 * Complex.sin φ ^ 2) ^ (1 / 2 : ℂ) := by
-  have hev : deriv (fun k => incEllIntEk φ k) =ᶠ[𝓝 k]
-      fun k => (incEllIntEk φ k - incEllIntFk φ k) / k := by
+  have hev : deriv (fun k => incompleteEllipticE φ k) =ᶠ[𝓝 k]
+      fun k => (incompleteEllipticE φ k - incompleteEllipticF φ k) / k := by
     filter_upwards [eventually_legendrePathInSlitPlane hk0 hk1 hφ] with z hz
-    exact (hasDerivAt_incEllIntEk hz.1 hz.2.2).deriv
-  have hd : HasDerivAt (fun k => (incEllIntEk φ k - incEllIntFk φ k) / k) _ k :=
-    ((hasDerivAt_incEllIntEk hk0 hφ).sub (hasDerivAt_incEllIntFk hk0 hk1 hφ)).div
+    exact (hasDerivAt_incompleteEllipticE hz.1 hz.2.2).deriv
+  have hd : HasDerivAt (fun k => (incompleteEllipticE φ k - incompleteEllipticF φ k) / k) _ k :=
+    ((hasDerivAt_incompleteEllipticE hk0 hφ).sub (hasDerivAt_incompleteEllipticF hk0 hk1 hφ)).div
       (hasDerivAt_id k) hk0
-  rw [hev.deriv_eq, hd.deriv, (hasDerivAt_incEllIntEk hk0 hφ).deriv]
+  rw [hev.deriv_eq, hd.deriv, (hasDerivAt_incompleteEllipticE hk0 hφ).deriv]
   have hk1' : 1 - k ^ 2 ≠ 0 := sub_ne_zero.2 (Ne.symm hk1)
   have hD : (1 - k ^ 2 * Complex.sin φ ^ 2) ^ (1 / 2 : ℂ) ≠ 0 := by
     have := hφ 1 ⟨zero_le_one, le_rfl⟩
@@ -741,11 +762,13 @@ theorem incEllIntEk_ode {φ k : ℂ} (hk0 : k ≠ 0) (hk1 : k ^ 2 ≠ 1)
 `k k'² K'' + (1 - 3k²) K' - kK = 0` and `k k'² E'' + k'² E' + kE = 0` on the principal domain
 (from 19.4.8–19.4.9). -/
 @[dlmf 19.4.ii]
-theorem compEllIntKk_compEllIntEk_ode {k : ℂ} (hk : k ∈ compEllIntDomain) :
-    k * (1 - k ^ 2) * deriv (deriv compEllIntKk) k + (1 - 3 * k ^ 2) * deriv compEllIntKk k -
-        k * compEllIntKk k = 0 ∧
-      k * (1 - k ^ 2) * deriv (deriv compEllIntEk) k + (1 - k ^ 2) * deriv compEllIntEk k +
-        k * compEllIntEk k = 0 := by
+theorem completeEllipticK_completeEllipticE_ode {k : ℂ} (hk : k ∈ compEllIntDomain) :
+    k * (1 - k ^ 2) * deriv (deriv completeEllipticK) k + (1 - 3 * k ^ 2) *
+        deriv completeEllipticK k -
+        k * completeEllipticK k = 0 ∧
+      k * (1 - k ^ 2) * deriv (deriv completeEllipticE) k + (1 - k ^ 2) *
+          deriv completeEllipticE k +
+        k * completeEllipticE k = 0 := by
   have hk1 : k ^ 2 ≠ 1 := fun h => one_sub_sq_ne_zero_of_mem_compEllIntDomain hk (by rw [h]; ring)
   have hp : LegendrePathInSlitPlane (π / 2) k := by
     have := legendrePathInSlitPlane_ofReal hk.2 (π / 2)
@@ -753,14 +776,15 @@ theorem compEllIntKk_compEllIntEk_ode {k : ℂ} (hk : k ∈ compEllIntDomain) :
   have hcos : Complex.cos (π / 2) = 0 := by
     rw [show ((π : ℂ) / 2) = ((π / 2 : ℝ) : ℂ) by push_cast; ring, ← Complex.ofReal_cos,
       Real.cos_pi_div_two, ofReal_zero]
-  have hK : compEllIntKk = fun k => incEllIntFk (π / 2) k := funext compEllIntKk_eq_incEllIntFk
-  have hE : compEllIntEk = fun k => incEllIntEk (π / 2) k := rfl
+  have hK : completeEllipticK = fun k => incompleteEllipticF (π / 2) k :=
+      funext completeEllipticK_eq_incompleteEllipticF
+  have hE : completeEllipticE = fun k => incompleteEllipticE (π / 2) k := rfl
   constructor
-  · have h := incEllIntFk_ode hk.1 hk1 hp
+  · have h := incompleteEllipticF_ode hk.1 hk1 hp
     rw [hcos] at h
     rw [hK]
     simpa using h
-  · have h := incEllIntEk_ode hk.1 hk1 hp
+  · have h := incompleteEllipticE_ode hk.1 hk1 hp
     rw [hcos] at h
     rw [hE]
     simpa using h

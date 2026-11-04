@@ -18,16 +18,16 @@ public import TauCeti.Analysis.SpecialFunctions.MultivariateGamma.Integral
 /-!
 # The matrix Laplace transform (DLMF §35.2)
 
-The Laplace kernel `etr(-ZX)` on the cone `Ω` of positive definite matrices and the
+The Laplace kernel `expTrace(-ZX)` on the cone `Ω` of positive definite matrices and the
 absolute convergence of the Laplace transform 35.2.1 for `ℜZ > X₀`.
 
 ## Main results
 
-* `laplaceTransform_integrableOn_analyticOnNhd`: absolute convergence and analyticity of 35.2.1,
-  via locally dominated integration and Tau Ceti's finite-dimensional analyticity.
-* `laplaceTransform_inversion`: the inversion formula 35.2.2, with the corrected
+* `matrixLaplaceTransform_integrableOn_analyticOnNhd`: absolute convergence and analyticity of
+  35.2.1, via locally dominated integration and Tau Ceti's finite-dimensional analyticity.
+* `matrixLaplaceTransform_inversion`: the inversion formula 35.2.2, with the corrected
   factor `2^{m(m-1)/2}` explained in `DLMF.MatrixArgument.GammaBeta`.
-* `laplaceTransform_matrixConvolution`: the convolution theorem 35.2.3, by Fubini and
+* `matrixLaplaceTransform_matrixConvolution`: the convolution theorem 35.2.3, by Fubini and
   translation invariance of `dX`.
 -/
 
@@ -64,12 +64,12 @@ private lemma exp_neg_trace_mul_add {m : ℕ} (Z : Matrix (Fin m) (Fin m) ℂ) (
     neg_add]
 
 /-- Identity under the stated parameter and domain assumptions: `‖Complex.exp (-(Z * (X : Matrix
-(Fin m) (Fin m) ℝ).map (fun x : ℝ => (x : ℂ))).trace)‖ = etr (-(Z.map Complex.re * (X : Matrix
+(Fin m) (Fin m) ℝ).map (fun x : ℝ => (x : ℂ))).trace)‖ = expTrace (-(Z.map Complex.re * (X : Matrix
 (Fin m) (Fin m) ℝ)))`. -/
 private lemma norm_exp_neg_trace_mul {m : ℕ} (Z : Matrix (Fin m) (Fin m) ℂ) (X : SymMatrix m) :
     ‖Complex.exp (-(Z * (X : Matrix (Fin m) (Fin m) ℝ).map (fun x : ℝ => (x : ℂ))).trace)‖ =
-      etr (-(Z.map Complex.re * (X : Matrix (Fin m) (Fin m) ℝ))) := by
-  unfold etr
+      expTrace (-(Z.map Complex.re * (X : Matrix (Fin m) (Fin m) ℝ))) := by
+  unfold expTrace
   rw [Complex.norm_exp, Complex.neg_re, re_trace_mul_map_ofReal, Matrix.trace_neg]
 
 /-- Continuity of the indicated function: `Continuous fun X : SymMatrix m => Complex.exp (-(Z * (X
@@ -80,12 +80,13 @@ private lemma continuous_exp_neg_trace_mul {m : ℕ} (Z : Matrix (Fin m) (Fin m)
   exact Complex.continuous_exp.comp ((continuous_const.matrix_mul
     (continuous_subtype_val.matrix_map Complex.continuous_ofReal)).matrix_trace.neg)
 
-/-- Under the bound of 35.2, `etr(-𝐙X) f(X)` is integrable on `Ω` for `ℜ𝐙 > X₀`. -/
-private lemma integrableOn_exp_neg_trace_mul_of_lt_etr {m : ℕ} {f : Matrix (Fin m) (Fin m) ℝ → ℂ}
+/-- Under the bound of 35.2, `expTrace(-𝐙X) f(X)` is integrable on `Ω` for `ℜ𝐙 > X₀`. -/
+private lemma integrableOn_exp_neg_trace_mul_of_lt_expTrace {m : ℕ}
+    {f : Matrix (Fin m) (Fin m) ℝ → ℂ}
     (hf : AEStronglyMeasurable (fun X : SymMatrix m => f X)
       ((TauCeti.symmetricLebesgue m).restrict (posDefCone m)))
     {X₀ : Matrix (Fin m) (Fin m) ℝ} (hX₀ : X₀.PosDef)
-    (hbound : ∀ X ∈ posDefCone m, ‖f X‖ < etr (-(X₀ * (X : Matrix (Fin m) (Fin m) ℝ))))
+    (hbound : ∀ X ∈ posDefCone m, ‖f X‖ < expTrace (-(X₀ * (X : Matrix (Fin m) (Fin m) ℝ))))
     {Z : Matrix (Fin m) (Fin m) ℂ} (hZX : (Z.map Complex.re - X₀).PosDef) :
     IntegrableOn (fun X : SymMatrix m =>
         Complex.exp (-(Z * (X : Matrix (Fin m) (Fin m) ℝ).map (fun x : ℝ => (x : ℂ))).trace) * f X)
@@ -98,44 +99,45 @@ private lemma integrableOn_exp_neg_trace_mul_of_lt_etr {m : ℕ} {f : Matrix (Fi
     rw [this]; exact hZX.add (hX₀.add hX₀)
   have hRint := Matrix.PosDef.integrableOn_posDef_det_rpow_mul_exp_neg_trace_mul hR
     (a := ((m : ℝ) + 1) / 2) (by linarith)
-  refine Integrable.mono' (g := fun X : SymMatrix m => etr (-(R * (X : Matrix (Fin m) (Fin m) ℝ))))
+  refine Integrable.mono'
+      (g := fun X : SymMatrix m => expTrace (-(R * (X : Matrix (Fin m) (Fin m) ℝ))))
     ?_ (((continuous_exp_neg_trace_mul Z).aestronglyMeasurable).mul hf) ?_
   · refine hRint.congr (Filter.Eventually.of_forall fun X => ?_)
     simp only [sub_self, Real.rpow_zero, one_mul]
-    unfold etr
+    unfold expTrace
     rw [Matrix.trace_neg]
   · filter_upwards [ae_restrict_mem hmc] with X hX
     rw [norm_mul, norm_exp_neg_trace_mul]
-    calc etr (-(Z.map Complex.re * (X : Matrix (Fin m) (Fin m) ℝ))) * ‖f X‖
-        ≤ etr (-(Z.map Complex.re * (X : Matrix (Fin m) (Fin m) ℝ))) *
-          etr (-(X₀ * (X : Matrix (Fin m) (Fin m) ℝ))) :=
+    calc expTrace (-(Z.map Complex.re * (X : Matrix (Fin m) (Fin m) ℝ))) * ‖f X‖
+        ≤ expTrace (-(Z.map Complex.re * (X : Matrix (Fin m) (Fin m) ℝ))) *
+          expTrace (-(X₀ * (X : Matrix (Fin m) (Fin m) ℝ))) :=
           mul_le_mul_of_nonneg_left (hbound X hX).le (Real.exp_pos _).le
-      _ = etr (-(R * (X : Matrix (Fin m) (Fin m) ℝ))) := by
-          unfold etr
+      _ = expTrace (-(R * (X : Matrix (Fin m) (Fin m) ℝ))) := by
+          unfold expTrace
           rw [← Real.exp_add, Matrix.add_mul, Matrix.trace_neg, Matrix.trace_neg,
             Matrix.trace_neg, Matrix.trace_add]
           ring_nf
 
 open scoped MatrixOrder in
-/-- DLMF 35.2 (paragraph after 35.2.1): if `|f(X)| < etr(-X₀X)` on `Ω` for some `X₀ ∈ Ω`, the
+/-- DLMF 35.2 (paragraph after 35.2.1): if `|f(X)| < expTrace(-X₀X)` on `Ω` for some `X₀ ∈ Ω`, the
 Laplace transform 35.2.1 converges absolutely for every complex symmetric `𝐙` with
 `ℜ𝐙 > X₀`, and `g(𝐙)` is a holomorphic function of the independent entries `z_{j,k}`
 (`j ≤ k`) on that region. Measurability of `f` is an added (implicit) hypothesis. -/
 @[dlmf 35.2]
-theorem laplaceTransform_integrableOn_analyticOnNhd {m : ℕ} (f : Matrix (Fin m) (Fin m) ℝ → ℂ)
+theorem matrixLaplaceTransform_integrableOn_analyticOnNhd {m : ℕ} (f : Matrix (Fin m) (Fin m) ℝ → ℂ)
     (hf : AEStronglyMeasurable (fun X : SymMatrix m => f X)
       ((TauCeti.symmetricLebesgue m).restrict (posDefCone m)))
     {X₀ : Matrix (Fin m) (Fin m) ℝ} (hX₀ : X₀.PosDef)
-    (hbound : ∀ X ∈ posDefCone m, ‖f X‖ < etr (-(X₀ * (X : Matrix (Fin m) (Fin m) ℝ)))) :
+    (hbound : ∀ X ∈ posDefCone m, ‖f X‖ < expTrace (-(X₀ * (X : Matrix (Fin m) (Fin m) ℝ)))) :
     (∀ Z : Matrix (Fin m) (Fin m) ℂ, Zᵀ = Z → (Z.map Complex.re - X₀).PosDef →
       IntegrableOn (fun X : SymMatrix m =>
           Complex.exp (-(Z * (X : Matrix (Fin m) (Fin m) ℝ).map (fun x : ℝ => (x : ℂ))).trace) *
             f X)
         (posDefCone m) (TauCeti.symmetricLebesgue m)) ∧
-    AnalyticOnNhd ℂ (fun z => laplaceTransform f (complexSymmetricOfCoords z))
+    AnalyticOnNhd ℂ (fun z => matrixLaplaceTransform f (complexSymmetricOfCoords z))
       {z | ((complexSymmetricOfCoords z).map Complex.re - X₀).PosDef} := by
   constructor
-  · intro Z _ hZ; exact integrableOn_exp_neg_trace_mul_of_lt_etr hf hX₀ hbound hZ
+  · intro Z _ hZ; exact integrableOn_exp_neg_trace_mul_of_lt_expTrace hf hX₀ hbound hZ
   · let R := fun z : TauCeti.upperTriangle m → ℂ =>
       (TauCeti.symmetricCoordinates m).symm (fun ij => (z ij).re) - ⟨X₀, hX₀.isHermitian⟩
     have hR z : (R z : Matrix (Fin m) (Fin m) ℝ) =
@@ -179,29 +181,29 @@ theorem laplaceTransform_integrableOn_analyticOnNhd {m : ℕ} (f : Matrix (Fin m
             (CFC.sqrt_nonneg (X : Matrix (Fin m) (Fin m) ℝ))).isHermitian
         simpa only [hsq.eq] using (hY.posSemidef.mul_mul_conjTranspose_same
           (CFC.sqrt (X : Matrix (Fin m) (Fin m) ℝ))).trace_nonneg
-      rw [norm_mul, norm_exp_neg_trace_mul, etr, Matrix.trace_neg]
+      rw [norm_mul, norm_exp_neg_trace_mul, expTrace, Matrix.trace_neg]
       apply (mul_le_of_le_one_left (norm_nonneg _)
           (Real.exp_le_one_iff.mpr (neg_nonpos.mpr htrace))).trans
-      simpa only [etr, Matrix.trace_neg] using (hbound X hX).le
+      simpa only [expTrace, Matrix.trace_neg] using (hbound X hX).le
 
 /-- DLMF 35.2.2 (**corrected**): the inversion formula. Let `f` satisfy the bound of
 35.2 with `X₀ ∈ Ω`, let `U ∈ 𝓢` with `U > X₀`, and suppose `V ↦ g(U + iV)` is integrable over
 `𝓢`. Then for every `X ∈ Ω` at which `f` is continuous,
-`f(X) = 2^{m(m-1)/2} (2π)^{-m(m+1)/2} ∫_𝓢 etr((U + iV)X) g(U + iV) dV`,
-which is DLMF's `(2πi)^{-m(m+1)/2} ∫ etr(𝐙X) g(𝐙) d𝐙` (with `d𝐙 = i^{m(m+1)/2} dV`) multiplied by
-the missing factor `2^{m(m-1)/2}` (see the module docstring). Continuity of `f` on `Ω` is an
+`f(X) = 2^{m(m-1)/2} (2π)^{-m(m+1)/2} ∫_𝓢 expTrace((U + iV)X) g(U + iV) dV`,
+which is DLMF's `(2πi)^{-m(m+1)/2} ∫ expTrace(𝐙X) g(𝐙) d𝐙` (with `d𝐙 = i^{m(m+1)/2} dV`) multiplied
+by the missing factor `2^{m(m-1)/2}` (see the module docstring). Continuity of `f` on `Ω` is an
 added hypothesis (pointwise inversion); DLMF's condition that the `V`-integral tends to `0` as
 `U → ∞` is not needed for the formula and is omitted. -/
 @[dlmf 35.2.E2 "corrected: missing factor 2^(m(m-1)/2) restored"]
-theorem laplaceTransform_inversion {m : ℕ} (f : Matrix (Fin m) (Fin m) ℝ → ℂ)
+theorem matrixLaplaceTransform_inversion {m : ℕ} (f : Matrix (Fin m) (Fin m) ℝ → ℂ)
     (hf : AEStronglyMeasurable (fun X : SymMatrix m => f X)
       ((TauCeti.symmetricLebesgue m).restrict (posDefCone m)))
     (hfc : ContinuousOn f {X | X.PosDef})
     {X₀ : Matrix (Fin m) (Fin m) ℝ} (hX₀ : X₀.PosDef)
-    (hbound : ∀ X ∈ posDefCone m, ‖f X‖ < etr (-(X₀ * (X : Matrix (Fin m) (Fin m) ℝ))))
+    (hbound : ∀ X ∈ posDefCone m, ‖f X‖ < expTrace (-(X₀ * (X : Matrix (Fin m) (Fin m) ℝ))))
     (U : SymMatrix m) (hU : ((U : Matrix (Fin m) (Fin m) ℝ) - X₀).PosDef)
     (hint : Integrable (fun V : SymMatrix m =>
-      laplaceTransform f ((U : Matrix (Fin m) (Fin m) ℝ).map (fun x : ℝ => (x : ℂ)) +
+      matrixLaplaceTransform f ((U : Matrix (Fin m) (Fin m) ℝ).map (fun x : ℝ => (x : ℂ)) +
         Complex.I • (V : Matrix (Fin m) (Fin m) ℝ).map (fun x : ℝ => (x : ℂ))))
       (TauCeti.symmetricLebesgue m))
     (X : Matrix (Fin m) (Fin m) ℝ) (hX : X.PosDef) :
@@ -210,7 +212,7 @@ theorem laplaceTransform_inversion {m : ℕ} (f : Matrix (Fin m) (Fin m) ℝ →
         Complex.exp (((U : Matrix (Fin m) (Fin m) ℝ).map (fun x : ℝ => (x : ℂ)) +
             Complex.I • (V : Matrix (Fin m) (Fin m) ℝ).map (fun x : ℝ => (x : ℂ))) *
               X.map (fun x : ℝ => (x : ℂ))).trace *
-          laplaceTransform f ((U : Matrix (Fin m) (Fin m) ℝ).map (fun x : ℝ => (x : ℂ)) +
+          matrixLaplaceTransform f ((U : Matrix (Fin m) (Fin m) ℝ).map (fun x : ℝ => (x : ℂ)) +
             Complex.I • (V : Matrix (Fin m) (Fin m) ℝ).map (fun x : ℝ => (x : ℂ)))
         ∂TauCeti.symmetricLebesgue m := by
   sorry
@@ -219,14 +221,14 @@ theorem laplaceTransform_inversion {m : ℕ} (f : Matrix (Fin m) (Fin m) ℝ →
 then for complex `𝐙` (DLMF: symmetric) with `ℜ𝐙 > X₀` the Laplace transform of the convolution
 `f₁ * f₂` is the product of the Laplace transforms. -/
 @[dlmf 35.2.E3]
-theorem laplaceTransform_matrixConvolution {m : ℕ} (f₁ f₂ : Matrix (Fin m) (Fin m) ℝ → ℂ)
+theorem matrixLaplaceTransform_matrixConvolution {m : ℕ} (f₁ f₂ : Matrix (Fin m) (Fin m) ℝ → ℂ)
     (hf₁ : Measurable f₁) (hf₂ : Measurable f₂)
     {X₀ : Matrix (Fin m) (Fin m) ℝ} (hX₀ : X₀.PosDef)
-    (hb₁ : ∀ X ∈ posDefCone m, ‖f₁ X‖ < etr (-(X₀ * (X : Matrix (Fin m) (Fin m) ℝ))))
-    (hb₂ : ∀ X ∈ posDefCone m, ‖f₂ X‖ < etr (-(X₀ * (X : Matrix (Fin m) (Fin m) ℝ))))
+    (hb₁ : ∀ X ∈ posDefCone m, ‖f₁ X‖ < expTrace (-(X₀ * (X : Matrix (Fin m) (Fin m) ℝ))))
+    (hb₂ : ∀ X ∈ posDefCone m, ‖f₂ X‖ < expTrace (-(X₀ * (X : Matrix (Fin m) (Fin m) ℝ))))
     (Z : Matrix (Fin m) (Fin m) ℂ) (hZX : (Z.map Complex.re - X₀).PosDef) :
-    laplaceTransform (matrixConvolution f₁ f₂) Z =
-      laplaceTransform f₁ Z * laplaceTransform f₂ Z := by
+    matrixLaplaceTransform (matrixConvolution f₁ f₂) Z =
+      matrixLaplaceTransform f₁ Z * matrixLaplaceTransform f₂ Z := by
   set Λ := TauCeti.symmetricLebesgue m
   have hmc : MeasurableSet (posDefCone m) := TauCeti.measurableSet_posDefMatrix m
   set e := fun X : SymMatrix m =>
@@ -237,12 +239,12 @@ theorem laplaceTransform_matrixConvolution {m : ℕ} (f₁ f₂ : Matrix (Fin m)
   have hg₁m : Measurable g₁ := (hem.mul (hf₁.comp measurable_subtype_coe)).indicator hmc
   have hg₂m : Measurable g₂ := (hem.mul (hf₂.comp measurable_subtype_coe)).indicator hmc
   have hg₁ : Integrable g₁ Λ := (integrable_indicator_iff hmc).mpr
-    (integrableOn_exp_neg_trace_mul_of_lt_etr
+    (integrableOn_exp_neg_trace_mul_of_lt_expTrace
         (hf₁.comp measurable_subtype_coe).aestronglyMeasurable hX₀ hb₁ hZX)
   have hg₂ : Integrable g₂ Λ := (integrable_indicator_iff hmc).mpr
-    (integrableOn_exp_neg_trace_mul_of_lt_etr
+    (integrableOn_exp_neg_trace_mul_of_lt_expTrace
         (hf₂.comp measurable_subtype_coe).aestronglyMeasurable hX₀ hb₂ hZX)
-  have hL : ∀ f : Matrix (Fin m) (Fin m) ℝ → ℂ, laplaceTransform f Z =
+  have hL : ∀ f : Matrix (Fin m) (Fin m) ℝ → ℂ, matrixLaplaceTransform f Z =
       ∫ X, (posDefCone m).indicator (fun X : SymMatrix m => e X * f X) X ∂Λ :=
     fun f => (integral_indicator hmc).symm
   set K : SymMatrix m → SymMatrix m → ℂ := fun X T => g₂ X * g₁ (T - X) with hKdef
@@ -307,7 +309,7 @@ theorem laplaceTransform_matrixConvolution {m : ℕ} (f₁ f₂ : Matrix (Fin m)
       exact this
     unfold matrixConvolution
     rw [hempty, Measure.restrict_empty, integral_zero_measure, mul_zero]
-  calc laplaceTransform (matrixConvolution f₁ f₂) Z
+  calc matrixLaplaceTransform (matrixConvolution f₁ f₂) Z
       = ∫ T, e T * matrixConvolution f₁ f₂ (T : Matrix (Fin m) (Fin m) ℝ) ∂Λ :=
         setIntegral_eq_integral_of_forall_compl_eq_zero hconv0
     _ = ∫ T, ∫ X, K X T ∂Λ ∂Λ := by simp_rw [hA]
@@ -316,7 +318,7 @@ theorem laplaceTransform_matrixConvolution {m : ℕ} (f₁ f₂ : Matrix (Fin m)
         refine integral_congr_ae (Filter.Eventually.of_forall fun X => ?_)
         simp only [hKdef]
         rw [integral_const_mul, integral_sub_right_eq_self g₁ X]
-    _ = laplaceTransform f₁ Z * laplaceTransform f₂ Z := by
+    _ = matrixLaplaceTransform f₁ Z * matrixLaplaceTransform f₂ Z := by
         rw [integral_mul_const, hL, hL, mul_comm]
 
 end DLMF.MatrixArgument

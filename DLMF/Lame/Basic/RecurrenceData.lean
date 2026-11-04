@@ -19,7 +19,8 @@ variable `φ`, stability (DLMF §29.9) and the asymptotic coefficients of DLMF �
 * `LameRecurrence`: the eight three-term recurrences of DLMF 29.3.11–29.3.17 and 29.6.11,
   29.6.26, 29.6.41, 29.6.56, with coefficients `LameRecurrence.alpha`, `LameRecurrence.beta`,
   `LameRecurrence.gamma` and the predicate `LameRecurrence.Satisfies`.
-* `lameCFLeft`, `lameCFRight`: the finite continued fractions of DLMF 29.3.10.
+* `lameContinuedFractionLeft`, `lameContinuedFractionRight`: the finite continued fractions of DLMF
+  29.3.10.
 * `Real.lameCosCoeff`, `Real.lameSinCoeff`: the Fourier coefficients of a real function in
   `φ = π/2 - am(x, k)`, defined by the Fourier integrals.
 * `Real.IsLameStable`: all real solutions are bounded (DLMF §29.9).
@@ -110,17 +111,18 @@ end LameRecurrence
 /-- The left side of the continued-fraction equation 29.3.10 (finite):
 `β_p - H - α_{p-1}γ_p/(β_{p-1} - H - ⋯ - α₀γ₁/(β₀ - H))`. -/
 @[dlmf 29.3.E10]
-def lameCFLeft (r : LameRecurrence) (ν k H : ℝ) : ℕ → ℝ
+def lameContinuedFractionLeft (r : LameRecurrence) (ν k H : ℝ) : ℕ → ℝ
   | 0 => r.beta ν k 0 - H
-  | p + 1 => r.beta ν k (p + 1) - H - r.alpha ν k p * r.gamma ν k (p + 1) / lameCFLeft r ν k H p
+  | p + 1 => r.beta ν k (p + 1) - H - r.alpha ν k p * r.gamma ν k (p + 1) /
+               lameContinuedFractionLeft r ν k H p
 
 /-- The truncation at depth `d` of the right side of 29.3.10:
 `α_pγ_{p+1}/(β_{p+1} - H - α_{p+1}γ_{p+2}/(β_{p+2} - H - ⋯))` with `d` partial denominators. -/
 @[dlmf 29.3.E10]
-def lameCFRight (r : LameRecurrence) (ν k H : ℝ) : ℕ → ℕ → ℝ
+def lameContinuedFractionRight (r : LameRecurrence) (ν k H : ℝ) : ℕ → ℕ → ℝ
   | _, 0 => 0
   | p, d + 1 => r.alpha ν k p * r.gamma ν k (p + 1) /
-      (r.beta ν k (p + 1) - H - lameCFRight r ν k H (p + 1) d)
+      (r.beta ν k (p + 1) - H - lameContinuedFractionRight r ν k H (p + 1) d)
 
 /-! ### Fourier coefficients (§29.6) -/
 
@@ -129,14 +131,16 @@ of 29.2.5, `(4/π) ∫₀^K w(x) cos(jφ(x)) ρ(x) dx` with `ρ = dn(x, k)` (`we
 `(4/π) ∫₀^{π/2} w cos(jφ) dφ`, giving `A_j` in 29.6.1 and 29.6.16) or `ρ = 1` (giving `C_j` in
 29.6.8 and 29.6.23, where `w/dn` is expanded). -/
 def Real.lameCosCoeff (w : ℝ → ℝ) (k : ℝ) (weighted : Bool) (j : ℕ) : ℝ :=
-  4 / π * ∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2),
-    w x * Real.cos (j * Real.lamePhi x k) * (if weighted then Real.jacobiDnm x (k ^ 2) else 1)
+  4 / π * ∫ x in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2),
+    w x * Real.cos (j * Real.lamePhi x k) *
+        (if weighted then Real.jacobiDnOfParameter x (k ^ 2) else 1)
 
 /-- The sine Fourier coefficient `(4/π) ∫₀^K w(x) sin(jφ(x)) ρ(x) dx` (`ρ = dn` if `weighted`,
 giving `B_j` in 29.6.31 and 29.6.46; `ρ = 1` giving `D_j` in 29.6.38 and 29.6.53). -/
 def Real.lameSinCoeff (w : ℝ → ℝ) (k : ℝ) (weighted : Bool) (j : ℕ) : ℝ :=
-  4 / π * ∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2),
-    w x * Real.sin (j * Real.lamePhi x k) * (if weighted then Real.jacobiDnm x (k ^ 2) else 1)
+  4 / π * ∫ x in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2),
+    w x * Real.sin (j * Real.lamePhi x k) *
+        (if weighted then Real.jacobiDnOfParameter x (k ^ 2) else 1)
 
 /-! ### Stability (§29.9) -/
 
@@ -181,6 +185,6 @@ def lameTau4 (p k : ℝ) : ℝ :=
 /-- The coefficients of Lamé's equation 29.2.1 in the form of `Complex.linearODEValue`
 (index `0`: coefficient of `w`, index `1`: coefficient of `w'`). -/
 def lameODECoeff (h ν k : ℂ) : Fin 2 → ℂ → ℂ :=
-  ![fun z => h - ν * (ν + 1) * k ^ 2 * jacobiSnk z k ^ 2, fun _ => 0]
+  ![fun z => h - ν * (ν + 1) * k ^ 2 * jacobiSn z k ^ 2, fun _ => 0]
 
 end DLMF.Lame

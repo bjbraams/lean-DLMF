@@ -19,7 +19,7 @@ public import Mathlib.Analysis.Complex.CauchyIntegral
 We construct, for all complex parameters with `p = q + 1`, a continuation of the regularized
 series `𝐅(a; b; z)` to the cut plane `ℂ ∖ [1, ∞)` whose restriction to the upper half-plane
 continues analytically across every point of `(1, ∞)`. This gives the existence of the
-normalized principal continuation `GenPrincipalContinuation`.
+normalized principal continuation `PrincipalContinuation`.
 
 ## Main definitions
 
@@ -35,11 +35,12 @@ normalized principal continuation `GenPrincipalContinuation`.
 * `hasUpperExtension_eulerTransform`: the Euler transform preserves continuation across the cut.
 * `regularizedHGFun_contiguous_pair`, `regularizedHGFun_raise_numerator`: two contiguous
   relations of `𝐅` on the unit disk, for all parameters.
-* `nonempty_genPrincipalContinuation`, `genPrincipalContinuation_exists`: existence of the
+* `nonempty_principalContinuation`, `principalContinuation_exists`: existence of the
   normalized principal continuation, for all complex parameters with `p = q + 1`.
-* `genRegularizedHG_eq_original`: the guarded definition agrees with the unguarded choice.
-* `analyticOnNhd_genRegularizedHG`: the regularized principal function is analytic on the cut
-  plane.
+* `regularizedGeneralizedHypergeometric_eq_original`: the guarded definition agrees with the
+  unguarded choice.
+* `analyticOnNhd_regularizedGeneralizedHypergeometric`: the regularized principal function is
+  analytic on the cut plane.
 
 ## Implementation notes
 
@@ -200,15 +201,15 @@ theorem regularizedHGFun_singleton_zero (a : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     regularizedHGFun {a} 0 z = (1 - z) ^ (-a) := by
   rw [regularizedHGFun_eq_tsum']
   refine (HasSum.tsum_eq ?_)
-  convert hasSum_poch_div_factorial (β := a) hz using 2 with n
-  simp [regularizedHGFunCoeff, poch]
+  convert hasSum_pochhammer_div_factorial (β := a) hz using 2 with n
+  simp [regularizedHGFunCoeff, pochhammer]
 
 /-! ### Contiguous relations on the unit disk -/
 
 /-- Adding a numerator parameter `α` multiplies the coefficients by `(α)ₙ`. -/
 theorem regularizedHGFunCoeff_cons_left (α : ℂ) (a b : Multiset ℂ) (n : ℕ) :
-    regularizedHGFunCoeff (α ::ₘ a) b n = poch α n * regularizedHGFunCoeff a b n := by
-  simp only [regularizedHGFunCoeff, Multiset.map_cons, Multiset.prod_cons, poch]
+    regularizedHGFunCoeff (α ::ₘ a) b n = pochhammer α n * regularizedHGFunCoeff a b n := by
+  simp only [regularizedHGFunCoeff, Multiset.map_cons, Multiset.prod_cons, pochhammer]
   ring
 
 /-- For `p = q + 1` the series converges to `𝐅` on the unit disk. -/
@@ -239,7 +240,7 @@ theorem regularizedHGFun_contiguous_pair (α β : ℂ) (a b : Multiset ℂ)
   simp only [regularizedHGFunCoeff_cons]
   have hΓ : (Gamma (β + n))⁻¹ = (β + n) * (Gamma (β + n + 1))⁻¹ := by
     simpa [one_div] using one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (β + n)
-  have hp := poch_succ_left_mul α n
+  have hp := pochhammer_succ_left_mul α n
   rw [show β + 1 + (n : ℂ) = β + n + 1 by ring, div_eq_mul_inv, div_eq_mul_inv,
     div_eq_mul_inv, hΓ]
   linear_combination (-(Gamma (β + n + 1))⁻¹ * regularizedHGFunCoeff a b n * z ^ n) * hp
@@ -257,7 +258,7 @@ theorem regularizedHGFun_raise_numerator (α : ℂ) (a b : Multiset ℂ)
     (hasSum_regularizedHGFun_of_card_eq hc' hz)
   set f := fun n => regularizedHGFunCoeff (α ::ₘ a) b n * z ^ n -
     regularizedHGFunCoeff ((α + 1) ::ₘ a) b n * z ^ n with hf
-  have h0 : f 0 = 0 := by simp [hf, regularizedHGFunCoeff_cons_left, poch_zero]
+  have h0 : f 0 = 0 := by simp [hf, regularizedHGFunCoeff_cons_left, pochhammer_zero]
   have hshift := (hasSum_nat_add_iff' 1).mpr hd
   simp only [Finset.range_one, Finset.sum_singleton, h0, sub_zero] at hshift
   have hR := ((hasSum_regularizedHGFun_of_card_eq hc'' hz).mul_left (-(z * a.prod)))
@@ -266,10 +267,10 @@ theorem regularizedHGFun_raise_numerator (α : ℂ) (a b : Multiset ℂ)
     funext n
     simp only [hf, regularizedHGFunCoeff_cons_left]
     have h1 := regularizedHGFunCoeff_succ_deriv a b n
-    have h2 := poch_succ_left α n
-    have h3 := poch_succ (α + 1) n
+    have h2 := pochhammer_succ_left α n
+    have h3 := pochhammer_succ (α + 1) n
     rw [h2, h3, pow_succ]
-    linear_combination (-(poch (α + 1) n) * z ^ n * z) * h1
+    linear_combination (-(pochhammer (α + 1) n) * z ^ n * z) * h1
   rw [heq] at hshift
   have := hshift.unique hR
   linear_combination this
@@ -707,8 +708,8 @@ private theorem exists_continuationInvariant (q : ℕ) :
     exact continuationInvariant_step ih _ α β a' b' le_rfl (by simpa using hb) (by simpa using ha)
 
 /-- Existence of the normalized principal continuation of `q+1Fq`, for all parameters. -/
-theorem nonempty_genPrincipalContinuation (a b : Multiset ℂ) (h : a.card = b.card + 1) :
-    Nonempty (GenPrincipalContinuation a b) := by
+theorem nonempty_principalContinuation (a b : Multiset ℂ) (h : a.card = b.card + 1) :
+    Nonempty (PrincipalContinuation a b) := by
   classical
   obtain ⟨V, hVd, hVg, hVu⟩ := exists_continuationInvariant b.card a b rfl h
   let value : ℂ → ℂ := fun z =>
@@ -743,30 +744,31 @@ theorem nonempty_genPrincipalContinuation (a b : Multiset ℂ) (h : a.card = b.c
     simp [value, h1]
 
 /-- Existence of principal continuation for all regularized parameters, including Gamma zeros. -/
-theorem genPrincipalContinuation_exists (a b : Multiset ℂ) (h : a.card = b.card + 1) :
-    Nonempty (GenPrincipalContinuation a b) :=
-  nonempty_genPrincipalContinuation a b h
+theorem principalContinuation_exists (a b : Multiset ℂ) (h : a.card = b.card + 1) :
+    Nonempty (PrincipalContinuation a b) :=
+  nonempty_principalContinuation a b h
 
 /-- The guarded definition preserves the previous choice of continuation, assuming
 exactly the recorded existence theorem. This does not prove existence. -/
-theorem genRegularizedHG_eq_original (a b : Multiset ℂ) (z : ℂ) :
-    genRegularizedHG a b z =
+theorem regularizedGeneralizedHypergeometric_eq_original (a b : Multiset ℂ) (z : ℂ) :
+    regularizedGeneralizedHypergeometric a b z =
       if h : a.card = b.card + 1 then
-        (Classical.choice (genPrincipalContinuation_exists a b h)).value z
+        (Classical.choice (principalContinuation_exists a b h)).value z
       else Complex.regularizedHGFun a b z := by
   classical
-  unfold genRegularizedHG
+  unfold regularizedGeneralizedHypergeometric
   split_ifs with h hF
   · rfl
-  · exact False.elim (hF (genPrincipalContinuation_exists a b h))
+  · exact False.elim (hF (principalContinuation_exists a b h))
   · rfl
 
 /-- The regularized principal function is analytic on the cut plane for `p = q + 1`. -/
-theorem analyticOnNhd_genRegularizedHG {a b : Multiset ℂ} (h : a.card = b.card + 1) :
-    AnalyticOnNhd ℂ (genRegularizedHG a b) cutPlane := by
-  have hF := genPrincipalContinuation_exists a b h
-  have heq : genRegularizedHG a b = (Classical.choice hF).value :=
-    funext (genRegularizedHG_eq_choice h hF)
+theorem analyticOnNhd_regularizedGeneralizedHypergeometric {a b : Multiset ℂ}
+    (h : a.card = b.card + 1) :
+    AnalyticOnNhd ℂ (regularizedGeneralizedHypergeometric a b) cutPlane := by
+  have hF := principalContinuation_exists a b h
+  have heq : regularizedGeneralizedHypergeometric a b = (Classical.choice hF).value :=
+    funext (regularizedGeneralizedHypergeometric_eq_choice h hF)
   rw [heq]
   exact (Classical.choice hF).analytic
 

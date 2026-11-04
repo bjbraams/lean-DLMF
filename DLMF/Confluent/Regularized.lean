@@ -46,7 +46,7 @@ namespace DLMF.Confluent
 /-- The regularized Kummer function as a series with explicit terms. -/
 theorem regularizedConfluent_eq_tsum (a b z : ℂ) :
     regularizedHGFun {a} {b} z =
-      ∑' n : ℕ, poch a n * z ^ n / n.factorial * (Gamma (b + n))⁻¹ := by
+      ∑' n : ℕ, pochhammer a n * z ^ n / n.factorial * (Gamma (b + n))⁻¹ := by
   rw [regularizedHGFun_eq_tsum]
   congr 1
   funext n
@@ -69,7 +69,7 @@ theorem hasFPowerSeriesOnBall_regularizedConfluent (a b : ℂ) :
 
 /-- The series `∑ (a)_n zⁿ / (n! Γ(b+n))` converges for all `a, b, z`. -/
 theorem summable_regularizedConfluent_term (a b z : ℂ) :
-    Summable fun n : ℕ => poch a n * z ^ n / n.factorial * (Gamma (b + n))⁻¹ := by
+    Summable fun n : ℕ => pochhammer a n * z ^ n / n.factorial * (Gamma (b + n))⁻¹ := by
   have h := (hasFPowerSeriesOnBall_regularizedConfluent a b).hasSum_mul_pow
     (by simp : z ∈ Metric.eball (0 : ℂ) ⊤)
   refine h.summable.congr fun n => ?_
@@ -80,7 +80,7 @@ theorem summable_regularizedConfluent_term (a b z : ℂ) :
 (n-N)!)`. -/
 theorem norm_regularizedConfluentSeries_apply_ofReal (α : ℝ) (N n : ℕ) (hn : N ≤ n) :
     ‖regularizedHGFunSeries {(α : ℂ)} {1 - (N : ℂ)} n‖ =
-      ‖poch (α : ℂ) n‖ / (n.factorial * (n - N).factorial) := by
+      ‖pochhammer (α : ℂ) n‖ / (n.factorial * (n - N).factorial) := by
   have hΓ : Gamma ((1 : ℂ) - N + n) = ((n - N).factorial : ℂ) := by
     rw [show (1 : ℂ) - N + n = ((n - N : ℕ) : ℂ) + 1 by push_cast [Nat.cast_sub hn]; ring]
     exact Complex.Gamma_nat_eq_factorial _
@@ -92,16 +92,16 @@ series `𝐌(α, 1 - N, ‖z‖)`. -/
 theorem norm_confluent_term_le_majorant {a b z : ℂ} {α : ℝ} (ha : ‖a‖ ≤ α) {N : ℕ}
     (hre : 1 ≤ (b + N).re) {m : ℝ} (hm : 0 < m) (hΓ : m ≤ ‖Gamma (b + N)‖) {n : ℕ}
     (hn : N ≤ n) :
-    ‖poch a n * z ^ n / n.factorial * (Gamma (b + n))⁻¹‖ ≤
+    ‖pochhammer a n * z ^ n / n.factorial * (Gamma (b + n))⁻¹‖ ≤
       m⁻¹ * (‖regularizedHGFunSeries {(α : ℂ)} {1 - (N : ℂ)} n‖ * ‖z‖ ^ n) := by
   rw [norm_regularizedConfluentSeries_apply_ofReal α N n hn, norm_mul, norm_div, norm_mul,
     norm_pow, Complex.norm_natCast]
-  have hA : ‖poch a n‖ ≤ ‖poch (α : ℂ) n‖ := norm_ascPochhammer_eval_le ha n
+  have hA : ‖pochhammer a n‖ ≤ ‖pochhammer (α : ℂ) n‖ := norm_ascPochhammer_eval_le ha n
   have hG := norm_recip_Gamma_add_nat_le hre hm hΓ hn
   have hf : (0 : ℝ) < n.factorial := by positivity
   have hf' : (0 : ℝ) < (n - N).factorial := by positivity
-  calc ‖poch a n‖ * ‖z‖ ^ n / n.factorial * ‖(Gamma (b + n))⁻¹‖
-      ≤ ‖poch (α : ℂ) n‖ * ‖z‖ ^ n / n.factorial * (((n - N).factorial : ℝ)⁻¹ * m⁻¹) := by
+  calc ‖pochhammer a n‖ * ‖z‖ ^ n / n.factorial * ‖(Gamma (b + n))⁻¹‖
+      ≤ ‖pochhammer (α : ℂ) n‖ * ‖z‖ ^ n / n.factorial * (((n - N).factorial : ℝ)⁻¹ * m⁻¹) := by
         gcongr
     _ = _ := by field_simp
 
@@ -115,7 +115,7 @@ theorem analyticOnNhd_regularizedConfluent_comp {A B : ℂ → ℂ} (hA : Differ
   simp_rw [regularizedConfluent_eq_tsum]
   refine analyticOnNhd_tsum_of_eventually_dominated ?_ ?_ ?_
   · intro n
-    have h1 : Differentiable ℂ fun w => poch (A w) n :=
+    have h1 : Differentiable ℂ fun w => pochhammer (A w) n :=
       (Polynomial.differentiable (ascPochhammer ℂ n)).comp hA
     exact ((h1.mul_const _).div_const _).mul (differentiable_one_div_Gamma.comp (hB.add_const _))
   · intro w
@@ -184,7 +184,7 @@ theorem differentiable_regularizedConfluent_comp {A B : ℂ → ℂ} (hA : Diffe
 theorem regularizedHGFunCoeff_singleton_succ (a b : ℂ) (n : ℕ) :
     (n + 1 : ℂ) * regularizedHGFunCoeff {a} {b} (n + 1) =
       a * regularizedHGFunCoeff {a + 1} {b + 1} n := by
-  rw [regularizedHGFunCoeff_singleton, regularizedHGFunCoeff_singleton, poch_succ_left,
+  rw [regularizedHGFunCoeff_singleton, regularizedHGFunCoeff_singleton, pochhammer_succ_left,
     show b + ((n + 1 : ℕ) : ℂ) = b + 1 + n by push_cast; ring, Nat.factorial_succ]
   push_cast
   have hf : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
@@ -218,7 +218,7 @@ theorem continuous_regularizedConfluent :
   simp_rw [regularizedConfluent_eq_tsum]
   refine continuous_tsum_of_eventually_dominated (fun n => ?_)
     (fun p => summable_regularizedConfluent_term _ _ _) fun p₀ => ?_
-  · have h1 : Continuous fun p : ℂ × ℂ × ℂ => poch p.1 n :=
+  · have h1 : Continuous fun p : ℂ × ℂ × ℂ => pochhammer p.1 n :=
       (Polynomial.differentiable (ascPochhammer ℂ n)).continuous.comp continuous_fst
     exact ((h1.mul (by fun_prop)).div_const _).mul
       (differentiable_one_div_Gamma.continuous.comp (by fun_prop))

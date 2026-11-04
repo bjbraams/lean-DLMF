@@ -23,14 +23,15 @@ confluent hypergeometric functions (DLMF §6.11).
 
 ## Main results
 
-* `Real.hasSum_expIntEi`, `expIntE1_hasSum`, `expIntE1_digamma_series`, `hasSum_Ci_complex`:
+* `Real.hasSum_expIntegralEi`, `expIntE1_hasSum`, `expIntE1_digamma_series`, `hasSum_Ci_complex`:
   power series (DLMF 6.6.1–6.6.3, 6.6.6).
 * `expIntE1_reciprocal_factorial_series`, `expIntReciprocalFactorialCoeff_initial`: the
   reciprocal-factorial series of `E₁` and its first coefficients (DLMF 6.10.1, 6.10.2).
-* `sinInt_spherical_series`, `cosIntCin_spherical_series`, `expIntEi_spherical_series`,
-  `Ein_spherical_series`: series of spherical Bessel functions (DLMF 6.10.4–6.10.6, 6.10.8).
-* `expIntE1_eq_upperIncGamma`, `expIntE1_eq_kummerU`, `ExpIntegralAuxiliary.eq_kummerU`: relations
-  to `Γ(0, z)` and Kummer's `U` (DLMF 6.11.1–6.11.3).
+* `sinIntegral_spherical_series`, `cosIntegralCin_spherical_series`,
+  `expIntegralEi_spherical_series`, `Ein_spherical_series`: series of spherical Bessel functions
+  (DLMF 6.10.4–6.10.6, 6.10.8).
+* `expIntE1_eq_upperIncompleteGamma`, `expIntE1_eq_kummerU`, `ExpIntegralAuxiliary.eq_kummerU`:
+  relations to `Γ(0, z)` and Kummer's `U` (DLMF 6.11.1–6.11.3).
 -/
 
 @[expose] public noncomputable section
@@ -41,16 +42,16 @@ open DLMF.Core
 namespace DLMF.Confluent
 
 /-- The series with terms `(fun k : ℕ => x^(k+1)/((k+1).factorial*(k+1 : ℝ)))` converges to
-`(Real.expIntEi x - Real.eulerMascheroniConstant - Real.log x)`. -/
+`(Real.expIntegralEi x - Real.eulerMascheroniConstant - Real.log x)`. -/
 @[dlmf 6.6.E1]
-theorem Real.hasSum_expIntEi {x : ℝ} (hx : 0 < x) :
+theorem Real.hasSum_expIntegralEi {x : ℝ} (hx : 0 < x) :
     HasSum (fun k : ℕ => x^(k+1)/((k+1).factorial*(k+1 : ℝ)))
-        (Real.expIntEi x - Real.eulerMascheroniConstant - Real.log x) := by
-  have h := (DLMF.Confluent.Real.hasSum_expIntEin (-x)).neg
-  have he : Real.expIntEi x - Real.eulerMascheroniConstant - Real.log x =
-      -DLMF.Confluent.Real.expIntEin (-x) := by
-    rw [Real.expIntEi, abs_of_pos hx, show -(x:ℂ) = ((-x:ℝ):ℂ) by push_cast; ring,
-      DLMF.Confluent.expIntEin_ofReal, Complex.ofReal_re]
+        (Real.expIntegralEi x - Real.eulerMascheroniConstant - Real.log x) := by
+  have h := (DLMF.Confluent.Real.hasSum_expIntegralEin (-x)).neg
+  have he : Real.expIntegralEi x - Real.eulerMascheroniConstant - Real.log x =
+      -DLMF.Confluent.Real.expIntegralEin (-x) := by
+    rw [Real.expIntegralEi, abs_of_pos hx, show -(x:ℂ) = ((-x:ℝ):ℂ) by push_cast; ring,
+      DLMF.Confluent.expIntegralEin_ofReal, Complex.ofReal_re]
     ring
   rw [he]
   refine h.congr_fun fun k => ?_
@@ -61,11 +62,11 @@ theorem Real.hasSum_expIntEi {x : ℝ} (hx : 0 < x) :
   ring
 
 /-- The series with terms `(fun k : ℕ => (-z)^(k+1)/((k+1).factorial*(k+1 : ℂ)))` converges to
-`(-genExpIntE 1 z - Real.eulerMascheroniConstant - log z)`. -/
+`(-expIntegralE 1 z - Real.eulerMascheroniConstant - log z)`. -/
 @[dlmf 6.6.E2]
 theorem expIntE1_hasSum {z : ℂ} (hz : z ≠ 0) :
     HasSum (fun k : ℕ => (-z)^(k+1)/((k+1).factorial*(k+1 : ℂ)))
-        (-genExpIntE 1 z - Real.eulerMascheroniConstant - log z) := by
+        (-expIntegralE 1 z - Real.eulerMascheroniConstant - log z) := by
   have h := (hasSum_Ein_complex z).neg
   rw [expIntE1_eq_Ein_complex hz]
   convert h using 1
@@ -75,11 +76,11 @@ theorem expIntE1_hasSum {z : ℂ} (hz : z ≠ 0) :
   · ring
 
 /-- The series with terms `(fun k : ℕ => (-1 : ℂ)^(k+1)*z^(2*k+2)/((2*k+2).factorial*(2*k+2 :
-ℂ)))` converges to `(cosInt z-Real.eulerMascheroniConstant-log z)`. -/
+ℂ)))` converges to `(cosIntegral z-Real.eulerMascheroniConstant-log z)`. -/
 @[dlmf 6.6.E6]
 theorem hasSum_Ci_complex (z : ℂ) :
     HasSum (fun k : ℕ => (-1 : ℂ)^(k+1)*z^(2*k+2)/((2*k+2).factorial*(2*k+2 : ℂ)))
-        (cosInt z-Real.eulerMascheroniConstant-log z) := by
+        (cosIntegral z-Real.eulerMascheroniConstant-log z) := by
   have hs := (summable_factorial_div_nat (c := fun k => (-1:ℂ)^k)
     (d := fun k => 2*k+2) (by intro k; simp)
     (by intro i j hij; dsimp at hij; omega) (by intro k; omega) z).hasSum.neg
@@ -88,7 +89,7 @@ theorem hasSum_Ci_complex (z : ℂ) :
   · funext k
     rw [pow_succ]
     ring
-  · simp only [cosInt, cosIntCin]
+  · simp only [cosIntegral, cosIntegralCin]
     ring
 
 /-- Reciprocal factorial coefficients, with the recurrence of DLMF 6.10.3. -/
@@ -441,39 +442,40 @@ theorem ReciprocalFactorialSeries.coeff_eq_moment (k : ℕ) : expIntReciprocalFa
       ring
 
 /-- Estimate under the stated parameter and domain assumptions: `∏ j ∈ Finset.range n, (z.re + j)
-≤ ‖poch z n‖`. -/
-theorem ReciprocalFactorialSeries.norm_poch_ge {z : ℂ} (hz : 0 < z.re) (n : ℕ) :
-    ∏ j ∈ Finset.range n, (z.re + j) ≤ ‖poch z n‖ := by
+≤ ‖pochhammer z n‖`. -/
+theorem ReciprocalFactorialSeries.norm_pochhammer_ge {z : ℂ} (hz : 0 < z.re) (n : ℕ) :
+    ∏ j ∈ Finset.range n, (z.re + j) ≤ ‖pochhammer z n‖ := by
   induction n with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ n ih =>
-    rw [Finset.prod_range_succ, poch_succ, norm_mul]
+    rw [Finset.prod_range_succ, pochhammer_succ, norm_mul]
     have h1 : z.re + n ≤ ‖z + n‖ := by
       have := Complex.re_le_norm (z + n); simpa using this
     exact mul_le_mul ih h1 (by positivity) (norm_nonneg _)
 
-/-- Nonvanishing under the stated hypotheses: `poch z n ≠ 0`. -/
-theorem ReciprocalFactorialSeries.poch_ne_zero {z : ℂ} (hz : 0 < z.re) (n : ℕ) : poch z n ≠ 0 := by
-  have h := ReciprocalFactorialSeries.norm_poch_ge hz n
+/-- Nonvanishing under the stated hypotheses: `pochhammer z n ≠ 0`. -/
+theorem ReciprocalFactorialSeries.pochhammer_ne_zero {z : ℂ} (hz : 0 < z.re) (n : ℕ) :
+    pochhammer z n ≠ 0 := by
+  have h := ReciprocalFactorialSeries.norm_pochhammer_ge hz n
   have : 0 < ∏ j ∈ Finset.range n, (z.re + j) :=
     Finset.prod_pos fun j _ => by positivity
   exact norm_pos_iff.1 (this.trans_le h)
 
 /-- Estimate under the stated parameter and domain assumptions: `∃ C : ℝ, 0 ≤ C ∧ ∀ k : ℕ,
-‖(((k+1).factorial : ℕ) : ℂ) / poch z (k+2)‖ ≤ C * ((k:ℝ)+1) ^ (-z.re)`. -/
-theorem ReciprocalFactorialSeries.poch_bound {z : ℂ} (hz : 0 < z.re) :
+‖(((k+1).factorial : ℕ) : ℂ) / pochhammer z (k+2)‖ ≤ C * ((k:ℝ)+1) ^ (-z.re)`. -/
+theorem ReciprocalFactorialSeries.pochhammer_bound {z : ℂ} (hz : 0 < z.re) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ k : ℕ,
-      ‖(((k+1).factorial : ℕ) : ℂ) / poch z (k+2)‖ ≤ C * ((k:ℝ)+1) ^ (-z.re) := by
+      ‖(((k+1).factorial : ℕ) : ℂ) / pochhammer z (k+2)‖ ≤ C * ((k:ℝ)+1) ^ (-z.re) := by
   obtain ⟨C, hC⟩ := (Real.GammaSeq_tendsto_Gamma z.re).bddAbove_range
   refine ⟨max C 0, le_max_right _ _, fun k => ?_⟩
   have hprod : 0 < ∏ j ∈ Finset.range (k+2), (z.re + j) :=
     Finset.prod_pos fun j _ => by positivity
   have hk : (0:ℝ) < (k:ℝ) + 1 := by positivity
   rw [norm_div, Complex.norm_natCast]
-  calc (((k+1).factorial : ℕ) : ℝ) / ‖poch z (k+2)‖
+  calc (((k+1).factorial : ℕ) : ℝ) / ‖pochhammer z (k+2)‖
       ≤ (((k+1).factorial : ℕ) : ℝ) / ∏ j ∈ Finset.range (k+2), (z.re + j) :=
         div_le_div_of_nonneg_left (by positivity) hprod
-            (ReciprocalFactorialSeries.norm_poch_ge hz _)
+            (ReciprocalFactorialSeries.norm_pochhammer_ge hz _)
     _ = Real.GammaSeq z.re (k+1) * ((k:ℝ)+1) ^ (-z.re) := by
         rw [Real.GammaSeq, Real.rpow_neg hk.le]
         push_cast
@@ -486,13 +488,13 @@ theorem ReciprocalFactorialSeries.poch_bound {z : ℂ} (hz : 0 < z.re) :
 /-- The integrand terms of the reciprocal factorial series. -/
 noncomputable def ReciprocalFactorialSeries.term (z : ℂ) (k : ℕ) (t : ℝ) : ℂ :=
   ((Real.exp (-t) * ReciprocalFactorialSeries.normalizedFalling k t : ℝ) : ℂ) *
-      ((k.factorial : ℂ) / poch z (k+1))
+      ((k.factorial : ℂ) / pochhammer z (k+1))
 
 /-- Estimate under the stated parameter and domain assumptions:
 `‖ReciprocalFactorialSeries.term z (k+1) t‖ ≤ Real.exp (-t) * ReciprocalFactorialSeries.fallingBound
 t * (C * ((k:ℝ)+1) ^ (-z.re - 1))`. -/
 theorem ReciprocalFactorialSeries.norm_term_succ_le {z : ℂ} {C : ℝ}
-    (hC : ∀ k : ℕ, ‖(((k+1).factorial : ℕ) : ℂ) / poch z (k+2)‖ ≤ C * ((k:ℝ)+1) ^ (-z.re))
+    (hC : ∀ k : ℕ, ‖(((k+1).factorial : ℕ) : ℂ) / pochhammer z (k+2)‖ ≤ C * ((k:ℝ)+1) ^ (-z.re))
     {t : ℝ} (ht : 0 ≤ t) (k : ℕ) :
     ‖ReciprocalFactorialSeries.term z (k+1) t‖ ≤ Real.exp (-t) *
         ReciprocalFactorialSeries.fallingBound t * (C * ((k:ℝ)+1) ^ (-z.re - 1)) := by
@@ -506,7 +508,7 @@ theorem ReciprocalFactorialSeries.norm_term_succ_le {z : ℂ} {C : ℝ}
       abs_mul, Real.abs_exp,
     Real.rpow_sub_one hk.ne']
   calc Real.exp (-t) * |ReciprocalFactorialSeries.normalizedFalling (k+1) t| *
-         ‖(((k+1).factorial : ℕ) : ℂ) / poch z (k+1+1)‖
+         ‖(((k+1).factorial : ℕ) : ℂ) / pochhammer z (k+1+1)‖
       ≤ Real.exp (-t) * (ReciprocalFactorialSeries.fallingBound t / ((k:ℝ)+1)) *
           (C * ((k:ℝ)+1) ^ (-z.re)) := by
         have hB : 0 ≤ ReciprocalFactorialSeries.fallingBound t :=
@@ -526,7 +528,7 @@ theorem ReciprocalFactorialSeries.summable_majorant {z : ℂ} (hz : 0 < z.re) (C
 theorem ReciprocalFactorialSeries.hasSum_term {z : ℂ} (hz : 0 < z.re) {t : ℝ} (ht : 0 ≤ t) :
     HasSum (fun k => ReciprocalFactorialSeries.term z k t)
         (Complex.exp (-(t:ℂ)) / ((t:ℂ) + z)) := by
-  obtain ⟨C, hC0, hC⟩ := ReciprocalFactorialSeries.poch_bound hz
+  obtain ⟨C, hC0, hC⟩ := ReciprocalFactorialSeries.pochhammer_bound hz
   have hsum : Summable (fun k => ReciprocalFactorialSeries.term z k t) := by
     rw [← summable_nat_add_iff 1]
     refine Summable.of_norm_bounded ((ReciprocalFactorialSeries.summable_majorant hz C).mul_left
@@ -538,14 +540,15 @@ theorem ReciprocalFactorialSeries.hasSum_term {z : ℂ} (hz : 0 < z.re) {t : ℝ
     simp at this; linarith
   -- telescoping
   set T : ℕ → ℂ := fun n =>
-      ((n.factorial : ℂ) * (ReciprocalFactorialSeries.normalizedFalling n t : ℂ)) / poch z n with hT
+      ((n.factorial : ℂ) * (ReciprocalFactorialSeries.normalizedFalling n t : ℂ)) /
+          pochhammer z n with hT
   have htel : ∀ k, ReciprocalFactorialSeries.term z k t = (Real.exp (-t) : ℂ) *
       ((T k - T (k+1)) / ((t:ℂ) + z)) := by
     intro k
-    have h1 := ReciprocalFactorialSeries.poch_ne_zero hz k
+    have h1 := ReciprocalFactorialSeries.pochhammer_ne_zero hz k
     have h2 : z + k ≠ 0 := by
       intro h; have := congrArg Complex.re h; simp at this; linarith
-    simp only [ReciprocalFactorialSeries.term, hT, poch_succ,
+    simp only [ReciprocalFactorialSeries.term, hT, pochhammer_succ,
         ReciprocalFactorialSeries.normalizedFalling_succ, Nat.factorial_succ]
     push_cast
     field_simp
@@ -554,7 +557,7 @@ theorem ReciprocalFactorialSeries.hasSum_term {z : ℂ} (hz : 0 < z.re) {t : ℝ
       (Real.exp (-t) : ℂ) * ((1 - T N) / ((t:ℂ) + z)) := by
     intro N
     simp only [htel, ← Finset.mul_sum, ← Finset.sum_div, Finset.sum_range_sub']
-    simp [hT, ReciprocalFactorialSeries.normalizedFalling_zero, poch_zero]
+    simp [hT, ReciprocalFactorialSeries.normalizedFalling_zero, pochhammer_zero]
   have hTlim : Tendsto T atTop (𝓝 0) := by
     rw [← tendsto_add_atTop_iff_nat 2]
     have hlim : Tendsto (fun k : ℕ => ReciprocalFactorialSeries.fallingBound t *
@@ -568,7 +571,8 @@ theorem ReciprocalFactorialSeries.hasSum_term {z : ℂ} (hz : 0 < z.re) {t : ℝ
     rw [norm_div, norm_mul, Complex.norm_natCast, Complex.norm_real, Real.norm_eq_abs]
     have hb := hC k
     rw [norm_div, Complex.norm_natCast] at hb
-    have hp : 0 < ‖poch z (k+2)‖ := norm_pos_iff.2 (ReciprocalFactorialSeries.poch_ne_zero hz _)
+    have hp : 0 < ‖pochhammer z (k+2)‖ :=
+        norm_pos_iff.2 (ReciprocalFactorialSeries.pochhammer_ne_zero hz _)
     rw [div_le_iff₀ hp] at hb ⊢
     have e : (((k+2).factorial : ℕ) : ℝ) * |ReciprocalFactorialSeries.normalizedFalling (k+2) t| =
         ((k+1).factorial : ℕ) *
@@ -580,7 +584,7 @@ theorem ReciprocalFactorialSeries.hasSum_term {z : ℂ} (hz : 0 < z.re) {t : ℝ
         ≤ ((k+1).factorial : ℕ) * ReciprocalFactorialSeries.fallingBound t := by gcongr
       _ = ReciprocalFactorialSeries.fallingBound t * ((k+1).factorial : ℕ) := mul_comm _ _
       _ ≤ ReciprocalFactorialSeries.fallingBound t *
-          (C * ((k:ℝ)+1) ^ (-z.re) * ‖poch z (k+2)‖) := by
+          (C * ((k:ℝ)+1) ^ (-z.re) * ‖pochhammer z (k+2)‖) := by
           have : 0 ≤ ReciprocalFactorialSeries.fallingBound t :=
               ((abs_nonneg _).trans (ReciprocalFactorialSeries.abs_normalizedFalling_le ht 0))
           gcongr
@@ -592,13 +596,14 @@ theorem ReciprocalFactorialSeries.hasSum_term {z : ℂ} (hz : 0 < z.re) {t : ℝ
   convert this using 2
   rw [sub_zero, Complex.ofReal_exp, Complex.ofReal_neg]; ring
 
-/-- The series with terms `(fun k : ℕ => (k.factorial : ℂ)*expIntReciprocalFactorialCoeff k / poch
-z (k+1))` converges to `(exp z*genExpIntE 1 z)`. -/
+/-- The series with terms
+`(fun k : ℕ => (k.factorial : ℂ)*expIntReciprocalFactorialCoeff k / pochhammer z (k+1))` converges
+to `(exp z*expIntegralE 1 z)`. -/
 @[dlmf 6.10.E1]
 theorem expIntE1_reciprocal_factorial_series {z : ℂ} (hz : 0 < z.re) :
-    HasSum (fun k : ℕ => (k.factorial : ℂ)*expIntReciprocalFactorialCoeff k / poch z (k+1))
-        (exp z*genExpIntE 1 z) := by
-  obtain ⟨C, hC0, hC⟩ := ReciprocalFactorialSeries.poch_bound hz
+    HasSum (fun k : ℕ => (k.factorial : ℂ)*expIntReciprocalFactorialCoeff k / pochhammer z (k+1))
+        (exp z*expIntegralE 1 z) := by
+  obtain ⟨C, hC0, hC⟩ := ReciprocalFactorialSeries.pochhammer_bound hz
   have hint : ∀ k, Integrable (ReciprocalFactorialSeries.term z k)
       (volume.restrict (Ioi 0)) := fun k =>
     ((ReciprocalFactorialSeries.integrable_normalizedFalling k).ofReal).mul_const _
@@ -618,7 +623,7 @@ theorem expIntE1_reciprocal_factorial_series {z : ℂ} (hz : 0 < z.re) :
     setIntegral_congr_fun measurableSet_Ioi fun t ht =>
         (ReciprocalFactorialSeries.hasSum_term hz (le_of_lt ht)).tsum_eq
   rw [hI] at h
-  have hE : exp z * genExpIntE 1 z = ∫ t : ℝ in Ioi 0, exp (-t : ℂ)/(t+z) := by
+  have hE : exp z * expIntegralE 1 z = ∫ t : ℝ in Ioi 0, exp (-t : ℂ)/(t+z) := by
     rw [expIntE1_stieltjes (Complex.mem_slitPlane_iff.2 (Or.inl hz)), ← mul_assoc,
         ← Complex.exp_add,
       add_neg_cancel, Complex.exp_zero, one_mul]
@@ -634,15 +639,16 @@ theorem expIntE1_reciprocal_factorial_series {z : ℂ} (hz : 0 < z.re) :
 def expIntSphericalCoeff (n : ℕ) : ℂ :=
   (2*n+1 : ℂ)*(1-(-1 : ℂ)^n+digamma (n+1)-digamma 1)
 
-/-- The series with terms `(fun n : ℕ => z*Bessel.sphericalJ n (z/2)^2)` converges to `(sinInt z)`.
+/-- The series with terms `(fun n : ℕ => z*Bessel.sphericalJ n (z/2)^2)` converges to
+`(sinIntegral z)`.
 -/
 @[dlmf 6.10.E4]
-theorem sinInt_spherical_series (z : ℂ) :
-    HasSum (fun n : ℕ => z*Bessel.sphericalJ n (z/2)^2) (sinInt z) := by
+theorem sinIntegral_spherical_series (z : ℂ) :
+    HasSum (fun n : ℕ => z*Bessel.sphericalJ n (z/2)^2) (sinIntegral z) := by
   refine Bessel.SphericalSeries.hasSum_of_hasDerivAt
     (f := fun n w => w * Bessel.sphericalJ n (w/2)^2)
     (g := fun n w => if n = 0 then Bessel.sphericalJ 0 (w/2) * cos (w/2) else
-      w/2 * Bessel.sphericalJ (n-1) (w/2) * Bessel.sphericalJ n (w/2)) (F := sinInt)
+      w/2 * Bessel.sphericalJ (n-1) (w/2) * Bessel.sphericalJ n (w/2)) (F := sinIntegral)
     (fun n w => by
       rcases n with _ | n
       · simpa using Bessel.SphericalSeries.hasDerivAt_mul_sphericalJ_zero_half_sq w
@@ -655,8 +661,8 @@ theorem sinInt_spherical_series (z : ℂ) :
       simpa [Function.comp_def, mul_assoc] using h)
     Bessel.SphericalSeries.bound_mul_sphericalJ_half_sq
     (fun w => by
-      have he : sinInt = primitive (dslope sin 0) := by
-        funext v; rw [sinInt_segment_integral, primitive_dslope_zero Complex.sin_zero]
+      have he : sinIntegral = primitive (dslope sin 0) := by
+        funext v; rw [sinIntegral_segment_integral, primitive_dslope_zero Complex.sin_zero]
       rw [he]
       have h := hasDerivAt_primitive (differentiable_dslope_entire Complex.differentiable_sin 0) w
       convert h using 1
@@ -670,7 +676,7 @@ theorem sinInt_spherical_series (z : ℂ) :
           rw [← Complex.sin_two_mul]; ring_nf
         apply mul_left_cancel₀ hw
         linear_combination -h1 - h3 + 2 * cos (w/2) * h2)
-    (by simp [sinInt]) z
+    (by simp [sinIntegral]) z
 
 /-- Summation by parts for a sequence `q` with `q 0 = 0`. -/
 theorem CinSphericalSeries.hasSum_by_parts {c q : ℕ → ℂ} {L : ℂ} (hq0 : q 0 = 0)
@@ -870,15 +876,15 @@ theorem CinSphericalSeries.hasSum_prod {x : ℂ} (hx : x ≠ 0) :
       have : ‖w‖ ≤ |R| := hw.le.trans (le_abs_self R)
       calc 2 * (‖w‖ * ‖Bessel.sphericalJ n w ^ 2‖) ≤ 2 * (|R| * u n) := by gcongr
         _ = _ := by ring)
-  have hY : (fun w => ∑' n, f n w) = fun w => sinInt (2*w) := by
+  have hY : (fun w => ∑' n, f n w) = fun w => sinIntegral (2*w) := by
     funext w
-    have := (sinInt_spherical_series (2*w)).tsum_eq
+    have := (sinIntegral_spherical_series (2*w)).tsum_eq
     rw [show 2*w/2 = w by ring] at this
     exact this
   have h2x : (2:ℂ)*x ≠ 0 := mul_ne_zero two_ne_zero hx
   have hd : deriv (fun w => ∑' n, f n w) x = 2*(sin (2*x)/(2*x)) := by
     rw [hY]
-    have := (hasDerivAt_sinInt_complex h2x).comp x ((hasDerivAt_id x).const_mul 2)
+    have := (hasDerivAt_sinIntegral_complex h2x).comp x ((hasDerivAt_id x).const_mul 2)
     simpa [Function.comp_def, mul_comm] using this.deriv
   have h := hS x
   rw [hd] at h
@@ -941,20 +947,20 @@ theorem CinSphericalSeries.euler {x : ℂ} (hx : x ≠ 0) :
 
 /-- DLMF 6.10.5 in the form `∑ₙ aₙ jₙ(x)² = Cin(2x)`, including the vanishing term `n = 0`. -/
 theorem CinSphericalSeries.hasSum (x : ℂ) :
-    HasSum (fun n => expIntSphericalCoeff n * Bessel.sphericalJ n x^2) (cosIntCin (2*x)) := by
+    HasSum (fun n => expIntSphericalCoeff n * Bessel.sphericalJ n x^2) (cosIntegralCin (2*x)) := by
   set S : ℂ → ℂ := fun w => ∑' n, expIntSphericalCoeff n * Bessel.sphericalJ n w^2 with hS
   have hDS : Differentiable ℂ S := (CinSphericalSeries.euler one_ne_zero).1
-  have hC : Differentiable ℂ (fun w => cosIntCin (2*w)) :=
-    cosIntCin_entire.comp (differentiable_id.const_mul 2)
-  have hode : ∀ w, w * deriv (fun w => S w - cosIntCin (2*w)) w +
-      0 * (S w - cosIntCin (2*w)) = 0 := by
+  have hC : Differentiable ℂ (fun w => cosIntegralCin (2*w)) :=
+    cosIntegralCin_entire.comp (differentiable_id.const_mul 2)
+  have hode : ∀ w, w * deriv (fun w => S w - cosIntegralCin (2*w)) w +
+      0 * (S w - cosIntegralCin (2*w)) = 0 := by
     intro w
     rcases eq_or_ne w 0 with rfl | hw
     · simp
     rw [deriv_fun_sub (hDS w) (hC w)]
     have h2w : (2:ℂ)*w ≠ 0 := mul_ne_zero two_ne_zero hw
-    have hd : deriv (fun w => cosIntCin (2*w)) w = 2*((1-cos (2*w))/(2*w)) := by
-      have := (hasDerivAt_cosIntCin_complex h2w).comp w ((hasDerivAt_id w).const_mul 2)
+    have hd : deriv (fun w => cosIntegralCin (2*w)) w = 2*((1-cos (2*w))/(2*w)) := by
+      have := (hasDerivAt_cosIntegralCin_complex h2w).comp w ((hasDerivAt_id w).const_mul 2)
       simpa [Function.comp_def, mul_comm] using this.deriv
     rw [hd]
     have he := (CinSphericalSeries.euler hw).2
@@ -962,7 +968,8 @@ theorem CinSphericalSeries.hasSum (x : ℂ) :
     field_simp
     rw [mul_comm w 2]
     linear_combination he
-  have h0 : ∀ m : ℕ, (0:ℂ) + m = 0 → iteratedDeriv m (fun w => S w - cosIntCin (2*w)) 0 = 0 := by
+  have h0 : ∀ m : ℕ, (0:ℂ) + m = 0 →
+      iteratedDeriv m (fun w => S w - cosIntegralCin (2*w)) 0 = 0 := by
     intro m hm
     have hm0 : m = 0 := by exact_mod_cast (by simpa using hm : (m:ℂ) = 0)
     subst hm0
@@ -972,46 +979,46 @@ theorem CinSphericalSeries.hasSum (x : ℂ) :
       rcases n with _ | n
       · simp [expIntSphericalCoeff]
       · simp [Bessel.SphericalProduct.sphericalJ_succ_zero]
-    simp [ht, cosIntCin]
+    simp [ht, cosIntegralCin]
   have hz := Bessel.SphericalSeries.eq_zero_of_euler (hDS.sub hC) 0 hode h0 x
   obtain ⟨u, hu, h⟩ :=
       CinSphericalSeries.bound_sq _ (C := 6) (ρ := 4) (by norm_num) CinSphericalSeries.norm_coeff_le
     (‖x‖+1)
   have hs : Summable (fun n => expIntSphericalCoeff n * Bessel.sphericalJ n x^2) :=
     Summable.of_norm_bounded hu (fun n => h n x (by linarith))
-  have : S x = cosIntCin (2*x) := by simp only [Pi.sub_apply] at hz; linear_combination hz
+  have : S x = cosIntegralCin (2*x) := by simp only [Pi.sub_apply] at hz; linear_combination hz
   rw [← this]
   exact hs.hasSum
 
 /-- The series with terms
 `(fun n : ℕ => expIntSphericalCoeff (n+1)*Bessel.sphericalJ (n+1) (z/2)^2)` converges to
-`(cosIntCin z)`. -/
+`(cosIntegralCin z)`. -/
 @[dlmf 6.10.E5]
-theorem cosIntCin_spherical_series (z : ℂ) :
+theorem cosIntegralCin_spherical_series (z : ℂ) :
     HasSum (fun n : ℕ => expIntSphericalCoeff (n+1)*Bessel.sphericalJ (n+1) (z/2)^2)
-        (cosIntCin z) := by
+        (cosIntegralCin z) := by
   have h := CinSphericalSeries.hasSum (z/2)
   rw [show 2*(z/2) = z by ring, ← hasSum_nat_add_iff' 1] at h
   simpa [expIntSphericalCoeff] using h
 
 /-- The series with terms
 `(fun n : ℕ => (-1 : ℂ)^n*((x : ℂ)-expIntSphericalCoeff n)*Bessel.sphericalI n (x/2)^2)` converges
-to `((Real.expIntEi x : ℂ)-Real.eulerMascheroniConstant-Real.log |x|)`. -/
+to `((Real.expIntegralEi x : ℂ)-Real.eulerMascheroniConstant-Real.log |x|)`. -/
 @[dlmf 6.10.E6]
-theorem expIntEi_spherical_series {x : ℝ} :
+theorem expIntegralEi_spherical_series {x : ℝ} :
     HasSum (fun n : ℕ => (-1 : ℂ)^n*((x : ℂ)-expIntSphericalCoeff n)*Bessel.sphericalI n (x/2)^2)
-        ((Real.expIntEi x : ℂ)-Real.eulerMascheroniConstant-Real.log |x|) := by
-  have hE : ((Real.expIntEi x : ℂ) - Real.eulerMascheroniConstant - Real.log |x|) =
-      -cosIntCin (I*x) - I*sinInt (I*x) := by
-    have h := expIntEin_mul_I (I*x)
+        ((Real.expIntegralEi x : ℂ)-Real.eulerMascheroniConstant-Real.log |x|) := by
+  have hE : ((Real.expIntegralEi x : ℂ) - Real.eulerMascheroniConstant - Real.log |x|) =
+      -cosIntegralCin (I*x) - I*sinIntegral (I*x) := by
+    have h := expIntegralEin_mul_I (I*x)
     rw [show I*(I*(x:ℂ)) = ((-x:ℝ):ℂ) by push_cast; ring_nf; rw [I_sq]; ring,
-      expIntEin_ofReal] at h
-    rw [Real.expIntEi, show -(x:ℂ) = ((-x:ℝ):ℂ) by push_cast; ring, expIntEin_ofReal,
+      expIntegralEin_ofReal] at h
+    rw [Real.expIntegralEi, show -(x:ℂ) = ((-x:ℝ):ℂ) by push_cast; ring, expIntegralEin_ofReal,
       Complex.ofReal_re]
     push_cast
     linear_combination -h
   rw [hE]
-  have hS := (sinInt_spherical_series (I*x)).mul_left (-I)
+  have hS := (sinIntegral_spherical_series (I*x)).mul_left (-I)
   have hC := CinSphericalSeries.hasSum (I*x/2)
   rw [show 2*(I*(x:ℂ)/2) = I*x by ring] at hC
   convert hS.sub hC using 1
@@ -1027,12 +1034,12 @@ theorem expIntEi_spherical_series {x : ℝ} :
 
 /-- The series with terms
 `(fun n : ℕ => z*exp (-z/2)*(2*(n+1)+1 : ℂ)/((n+1 : ℂ)*(n+2))*Bessel.sphericalI (n+1) (z/2))`
-converges to `(expIntEin z-z*exp (-z/2)*Bessel.sphericalI 0 (z/2))`. -/
+converges to `(expIntegralEin z-z*exp (-z/2)*Bessel.sphericalI 0 (z/2))`. -/
 @[dlmf 6.10.E8]
 theorem Ein_spherical_series (z : ℂ) :
     HasSum (fun n : ℕ =>
         z*exp (-z/2)*(2*(n+1)+1 : ℂ)/((n+1 : ℂ)*(n+2))*Bessel.sphericalI (n+1) (z/2))
-        (expIntEin z-z*exp (-z/2)*Bessel.sphericalI 0 (z/2)) := by
+        (expIntegralEin z-z*exp (-z/2)*Bessel.sphericalI 0 (z/2)) := by
   have hx : ∀ w : ℂ, HasDerivAt (fun w : ℂ => w/2) (1/2) w := fun w => by
     simpa using (hasDerivAt_id w).div_const 2
   have he : ∀ w : ℂ, HasDerivAt (fun w : ℂ => exp (-w/2)) (exp (-w/2) * (-1/2)) w := fun w => by
@@ -1042,7 +1049,7 @@ theorem Ein_spherical_series (z : ℂ) :
     (f := fun n w => w*exp (-w/2)*(2*(n+1)+1 : ℂ)/((n+1 : ℂ)*(n+2))*Bessel.sphericalI (n+1) (w/2))
     (g := fun n w => exp (-w/2) * (w/2) *
         (Bessel.sphericalI n (w/2) - Bessel.sphericalI (n+1) (w/2)) / (n+1))
-    (F := fun w => expIntEin w-w*exp (-w/2)*Bessel.sphericalI 0 (w/2))
+    (F := fun w => expIntegralEin w-w*exp (-w/2)*Bessel.sphericalI 0 (w/2))
     (fun n w => ?_) (fun w => ?_) (fun R => ?_) (fun w => ?_) ?_ z
   · have h := ((((hasDerivAt_id w).mul (he w)).mul_const ((2*(n+1)+1 : ℂ))).div_const
       ((n+1 : ℂ)*(n+2))).mul
@@ -1096,8 +1103,8 @@ theorem Ein_spherical_series (z : ℂ) :
     rw [e, norm_mul, norm_mul, norm_mul]
     have := h (n+1) (w/2) hw2
     gcongr
-  · have hEin : expIntEin = primitive (dslope (fun t => 1 - exp (-t)) 0) := by
-      funext v; rw [expIntEin_segment_integral, primitive_dslope_zero (by simp)]
+  · have hEin : expIntegralEin = primitive (dslope (fun t => 1 - exp (-t)) 0) := by
+      funext v; rw [expIntegralEin_segment_integral, primitive_dslope_zero (by simp)]
     have h0 := hasDerivAt_primitive (differentiable_dslope_entire
       (f := fun t => 1 - exp (-t)) (by fun_prop) 0) w
     rw [← hEin] at h0
@@ -1124,27 +1131,27 @@ theorem Ein_spherical_series (z : ℂ) :
     simp only [id, Function.comp_apply, Pi.mul_apply]
     rw [hd]
     ring
-  · simp [expIntEin]
+  · simp [expIntegralEin]
 
-/-- Identity under the stated parameter and domain assumptions: `genExpIntE 1 z = upperIncGamma 0
-z`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`expIntegralE 1 z = upperIncompleteGamma 0 z`. -/
 @[dlmf 6.11.E1]
-theorem expIntE1_eq_upperIncGamma {z : ℂ} :
-    genExpIntE 1 z = upperIncGamma 0 z := by
-  simp [genExpIntE]
+theorem expIntE1_eq_upperIncompleteGamma {z : ℂ} :
+    expIntegralE 1 z = upperIncompleteGamma 0 z := by
+  simp [expIntegralE]
 
-/-- Identity under the stated parameter and domain assumptions: `genExpIntE 1 z = exp (-z)*kummerU
+/-- Identity under the stated parameter and domain assumptions: `expIntegralE 1 z = exp (-z)*kummerU
 1 1 z`. -/
 @[dlmf 6.11.E2]
 theorem expIntE1_eq_kummerU {z : ℂ} (hz : z ≠ 0) :
-    genExpIntE 1 z = exp (-z)*kummerU 1 1 z := by
-  simpa only [show (2 : ℂ)-1=1 by norm_num] using genExpIntE_eq_exp_mul_kummerU 1 hz
+    expIntegralE 1 z = exp (-z)*kummerU 1 1 z := by
+  simpa only [show (2 : ℂ)-1=1 by norm_num] using expIntegralE_eq_exp_mul_kummerU 1 hz
 
-/-- Identity under the stated parameter and domain assumptions: `expIntAuxG z+I*expIntAuxF z =
-kummerU 1 1 (-I*z)`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`sinIntegralAuxiliaryG z+I*sinIntegralAuxiliaryF z = kummerU 1 1 (-I*z)`. -/
 @[dlmf 6.11.E3]
 theorem ExpIntegralAuxiliary.eq_kummerU {z : ℂ} (hz : 0 < z.re) :
-    expIntAuxG z+I*expIntAuxF z = kummerU 1 1 (-I*z) := by
+    sinIntegralAuxiliaryG z+I*sinIntegralAuxiliaryF z = kummerU 1 1 (-I*z) := by
   have h := ExpIntegralAuxiliary.eq_E1 hz (ε:=1) (Or.inl rfl)
   simp only [Complex.ofReal_one,one_mul,neg_mul] at h
   have hz0 : -I*z≠0 := mul_ne_zero (neg_ne_zero.mpr I_ne_zero) (ne_zero_of_re_pos hz)

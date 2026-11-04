@@ -24,10 +24,10 @@ Behaviour of the Ferrers functions `𝖯^μ_ν`, `𝖰^μ_ν` as `x → 1⁻` an
 
 ## Main results
 
-* `BoundaryAsymptotics.tendsto_regularizedGaussHG_one`,
-  `BoundaryAsymptotics.tendsto_regularizedGaussHG_one_neg`,
-  `BoundaryAsymptotics.tendsto_regularizedGaussHG_log`: Abelian limits for the regularized Gauss
-  function valid for every `c` (DLMF 15.4.20, 15.4.23, 15.4.21).
+* `BoundaryAsymptotics.tendsto_regularizedGaussHypergeometric_one`,
+  `BoundaryAsymptotics.tendsto_regularizedGaussHypergeometric_one_neg`,
+  `BoundaryAsymptotics.tendsto_regularizedGaussHypergeometric_log`: Abelian limits for the
+  regularized Gauss function valid for every `c` (DLMF 15.4.20, 15.4.23, 15.4.21).
 * `BoundaryAsymptotics.ferrersQ_tendsto`, `BoundaryAsymptotics.ferrersQ_neg_tendsto`: the boundary
   limits behind DLMF 14.8.4 and 14.8.6 for `Re μ > 0`.
 * `BoundaryAsymptotics.olverQ_tendsto`: the boundary limit behind DLMF 14.8.11.
@@ -42,10 +42,10 @@ Behaviour of the Ferrers functions `𝖯^μ_ν`, `𝖰^μ_ν` as `x → 1⁻` an
 
 ## Implementation notes
 
-The Abelian limit `BoundaryAsymptotics.tendsto_regularizedGaussHG_one` comes from the shared
-regularized Gauss summation and Mathlib's Abel limit theorem, including nonpositive integer `c`.
-Applied to the defining hypergeometric representations (DLMF 14.3.11–14.3.14 for `𝖰`, 14.3.7 for
-`𝑸`, 14.3.18 for `P`) these limits give the leading behaviour at every order with `Re μ > 0`,
+The Abelian limit `BoundaryAsymptotics.tendsto_regularizedGaussHypergeometric_one` comes from the
+shared regularized Gauss summation and Mathlib's Abel limit theorem, including nonpositive integer
+`c`. Applied to the defining hypergeometric representations (DLMF 14.3.11–14.3.14 for `𝖰`, 14.3.7
+for `𝑸`, 14.3.18 for `P`) these limits give the leading behaviour at every order with `Re μ > 0`,
 integer orders included, without any connection formula.
 
 For order `0` the logarithmic expansions DLMF 14.8.3 and 14.8.9 rest on DLMF 15.8.10 at
@@ -68,25 +68,27 @@ theorem BoundaryAsymptotics.eventually_norm_lt_one :
 
 /-- DLMF 15.4.20 as an Abelian limit for the regularized function, valid for every `c`:
 `𝐅(a,b;c;x) → Γ(c-a-b)/(Γ(c-a)Γ(c-b))` as `x → 1⁻` when `Re(c-a-b) > 0`. -/
-theorem BoundaryAsymptotics.tendsto_regularizedGaussHG_one {a b c : ℂ} (h : 0 < (c-a-b).re) :
-    Tendsto (fun x : ℝ => regularizedGaussHG a b c x) (𝓝[<] 1)
+theorem BoundaryAsymptotics.tendsto_regularizedGaussHypergeometric_one {a b c : ℂ}
+    (h : 0 < (c-a-b).re) :
+    Tendsto (fun x : ℝ => regularizedGaussHypergeometric a b c x) (𝓝[<] 1)
       (𝓝 (Gamma (c-a-b) * ((Gamma (c-a))⁻¹ * (Gamma (c-b))⁻¹))) := by
-  simpa only [div_eq_mul_inv, mul_inv] using tendsto_regularizedGaussHG_left_one h
+  simpa only [div_eq_mul_inv, mul_inv] using tendsto_regularizedGaussHypergeometric_left_one h
 
 /-- DLMF 15.4.23 for the regularized function, valid for every `c`: when `Re(c-a-b) < 0`,
 `(1-x)^(a+b-c) 𝐅(a,b;c;x) → Γ(a+b-c)/(Γ(a)Γ(b))` as `x → 1⁻`. -/
-theorem BoundaryAsymptotics.tendsto_regularizedGaussHG_one_neg {a b c : ℂ} (h : (c-a-b).re < 0) :
-    Tendsto (fun x : ℝ => ((1-x:ℝ):ℂ)^(a+b-c) * regularizedGaussHG a b c x) (𝓝[<] 1)
+theorem BoundaryAsymptotics.tendsto_regularizedGaussHypergeometric_one_neg {a b c : ℂ}
+    (h : (c-a-b).re < 0) :
+    Tendsto (fun x : ℝ => ((1-x:ℝ):ℂ)^(a+b-c) * regularizedGaussHypergeometric a b c x) (𝓝[<] 1)
       (𝓝 (Gamma (a+b-c) * ((Gamma a)⁻¹ * (Gamma b)⁻¹))) := by
   have h' : 0 < (c-(c-a)-(c-b)).re := by
     rw [show c-(c-a)-(c-b) = -(c-a-b) by ring, neg_re]; linarith
-  have hT := BoundaryAsymptotics.tendsto_regularizedGaussHG_one h'
+  have hT := BoundaryAsymptotics.tendsto_regularizedGaussHypergeometric_one h'
   rw [show c-(c-a)-(c-b) = a+b-c by ring, sub_sub_cancel, sub_sub_cancel] at hT
   refine hT.congr' ?_
   filter_upwards [BoundaryAsymptotics.eventually_norm_lt_one, self_mem_nhdsWithin] with x hx hx1
   have hpos : (0:ℝ) < 1-x := by simp only [mem_Iio] at hx1; linarith
   have hne : ((1-x:ℝ):ℂ) ≠ 0 := ofReal_ne_zero.mpr hpos.ne'
-  rw [regularizedGaussHG_euler a b c (mem_cutPlane_of_norm_lt_one hx),
+  rw [regularizedGaussHypergeometric_euler a b c (mem_cutPlane_of_norm_lt_one hx),
     show (1:ℂ)-x = ((1-x:ℝ):ℂ) by push_cast; ring, ← mul_assoc, ← cpow_add _ _ hne,
     show a+b-c+(c-a-b) = 0 by ring, cpow_zero, one_mul]
 
@@ -108,10 +110,11 @@ theorem BoundaryAsymptotics.one_sub_sq_cpow_mul_neg (μ : ℂ) {x : ℝ} (hx : x
   rw [← cpow_add _ _ hne, show μ/2+(-μ/2) = 0 by ring, cpow_zero]
 
 /-- The regularized pullbacks in `ferrersQ` tend to their Gauss values as `x → 1⁻`. -/
-theorem BoundaryAsymptotics.tendsto_regularizedGaussHG_sq {a b c : ℂ} (h : 0 < (c-a-b).re) :
-    Tendsto (fun x : ℝ => regularizedGaussHG a b c ((x:ℂ)^2)) (𝓝[<] 1)
+theorem BoundaryAsymptotics.tendsto_regularizedGaussHypergeometric_sq {a b c : ℂ}
+    (h : 0 < (c-a-b).re) :
+    Tendsto (fun x : ℝ => regularizedGaussHypergeometric a b c ((x:ℂ)^2)) (𝓝[<] 1)
       (𝓝 (Gamma (c-a-b) * ((Gamma (c-a))⁻¹ * (Gamma (c-b))⁻¹))) := by
-  have := (BoundaryAsymptotics.tendsto_regularizedGaussHG_one h).comp
+  have := (BoundaryAsymptotics.tendsto_regularizedGaussHypergeometric_one h).comp
       BoundaryAsymptotics.tendsto_sq_nhdsLT
   simpa [Function.comp_def] using this
 
@@ -121,10 +124,10 @@ theorem BoundaryAsymptotics.ferrersQ_tendsto {ν μ : ℂ} (h : LegendreQRegular
     Tendsto (fun x : ℝ => (1-(x:ℂ)^2)^(μ/2) * ferrersQ ν μ x) (𝓝[<] 1)
       (𝓝 (2^(μ-1) * Gamma μ * cos (μ*π))) := by
   obtain ⟨hg1, hg2⟩ := legendre_Gamma_half_ne_zero h
-  have h1 := BoundaryAsymptotics.tendsto_regularizedGaussHG_sq (a := -(ν+μ)/2)
+  have h1 := BoundaryAsymptotics.tendsto_regularizedGaussHypergeometric_sq (a := -(ν+μ)/2)
       (b := (ν-μ+1)/2) (c := 1/2)
     (by rw [show (1/2:ℂ)-(-(ν+μ)/2)-((ν-μ+1)/2) = μ by ring]; exact hμ)
-  have h2 := BoundaryAsymptotics.tendsto_regularizedGaussHG_sq (a := (1-ν-μ)/2)
+  have h2 := BoundaryAsymptotics.tendsto_regularizedGaussHypergeometric_sq (a := (1-ν-μ)/2)
       (b := (ν-μ+2)/2) (c := 3/2)
     (by rw [show (3/2:ℂ)-((1-ν-μ)/2)-((ν-μ+2)/2) = μ by ring]; exact hμ)
   rw [show (1/2:ℂ)-(-(ν+μ)/2)-((ν-μ+1)/2) = μ by ring,
@@ -162,15 +165,17 @@ theorem BoundaryAsymptotics.ferrersQ_tendsto {ν μ : ℂ} (h : LegendreQRegular
   have hc := BoundaryAsymptotics.one_sub_sq_cpow_mul_neg μ hx
   simp only [ferrersQ, ferrersW1, ferrersW2]
   linear_combination (-(-π/2*sin ((ν+μ)*π/2)*(2^μ*Gamma ((ν+μ+1)/2)/Gamma ((ν-μ+2)/2)) *
-    regularizedGaussHG (-(ν+μ)/2) ((ν-μ+1)/2) (1/2) ((x:ℂ)^2)) -
+    regularizedGaussHypergeometric (-(ν+μ)/2) ((ν-μ+1)/2) (1/2) ((x:ℂ)^2)) -
     π/2*cos ((ν+μ)*π/2)*(2^μ*Gamma ((ν+μ+2)/2)/Gamma ((ν-μ+1)/2)) *
-          ((x:ℂ) * regularizedGaussHG ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2) ((x:ℂ)^2))) * hc
+          ((x:ℂ) * regularizedGaussHypergeometric ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2) ((x:ℂ)^2))) * hc
 
 /-- The regularized pullbacks with negative balance, `(1-x²)^(a+b-c) 𝐅(a,b;c;x²)`, as `x → 1⁻`. -/
-theorem BoundaryAsymptotics.tendsto_regularizedGaussHG_sq_neg {a b c : ℂ} (h : (c-a-b).re < 0) :
-    Tendsto (fun x : ℝ => (1-(x:ℂ)^2)^(a+b-c) * regularizedGaussHG a b c ((x:ℂ)^2)) (𝓝[<] 1)
+theorem BoundaryAsymptotics.tendsto_regularizedGaussHypergeometric_sq_neg {a b c : ℂ}
+    (h : (c-a-b).re < 0) :
+    Tendsto (fun x : ℝ => (1-(x:ℂ)^2)^(a+b-c) *
+        regularizedGaussHypergeometric a b c ((x:ℂ)^2)) (𝓝[<] 1)
       (𝓝 (Gamma (a+b-c) * ((Gamma a)⁻¹ * (Gamma b)⁻¹))) := by
-  have := (BoundaryAsymptotics.tendsto_regularizedGaussHG_one_neg h).comp
+  have := (BoundaryAsymptotics.tendsto_regularizedGaussHypergeometric_one_neg h).comp
       BoundaryAsymptotics.tendsto_sq_nhdsLT
   simpa [Function.comp_def] using this
 
@@ -198,10 +203,10 @@ theorem BoundaryAsymptotics.ferrersQ_neg_tendsto {ν μ : ℂ} (hp : LegendreQRe
       (𝓝 (2^(μ-1) * Gamma μ * Gamma (ν-μ+1) / Gamma (ν+μ+1))) := by
   obtain ⟨hg1, hg2⟩ := legendre_Gamma_half_ne_zero hp
   obtain ⟨hg3, hg4⟩ := legendre_Gamma_half_ne_zero_neg hm
-  have h1 := BoundaryAsymptotics.tendsto_regularizedGaussHG_sq_neg (a := -(ν+-μ)/2)
+  have h1 := BoundaryAsymptotics.tendsto_regularizedGaussHypergeometric_sq_neg (a := -(ν+-μ)/2)
       (b := (ν-(-μ)+1)/2) (c := 1/2)
     (by rw [show (1/2:ℂ)-(-(ν+-μ)/2)-((ν-(-μ)+1)/2) = -μ by ring, neg_re]; linarith)
-  have h2 := BoundaryAsymptotics.tendsto_regularizedGaussHG_sq_neg (a := (1-ν-(-μ))/2)
+  have h2 := BoundaryAsymptotics.tendsto_regularizedGaussHypergeometric_sq_neg (a := (1-ν-(-μ))/2)
       (b := (ν-(-μ)+2)/2) (c := 3/2)
     (by rw [show (3/2:ℂ)-((1-ν-(-μ))/2)-((ν-(-μ)+2)/2) = -μ by ring, neg_re]; linarith)
   rw [show -(ν+-μ)/2+(ν-(-μ)+1)/2-1/2 = μ by ring, show -(ν+-μ)/2 = -(ν-μ)/2 by ring,
@@ -255,9 +260,9 @@ theorem BoundaryAsymptotics.ferrersQ_neg_tendsto {ν μ : ℂ} (hp : LegendreQRe
   simp only [show ν+-μ = ν-μ by ring, show ν-(-μ) = ν+μ by ring, show -(-μ)/2 = μ/2 by ring]
   rw [show (1-ν-(-μ))/2 = (1-(ν-μ))/2 by ring]
   linear_combination (-(-π/2*sin ((ν-μ)*π/2)*(2^(-μ)*Gamma ((ν-μ+1)/2)/Gamma ((ν+μ+2)/2)) *
-    regularizedGaussHG (-(ν-μ)/2) ((ν+μ+1)/2) (1/2) ((x:ℂ)^2)) -
+    regularizedGaussHypergeometric (-(ν-μ)/2) ((ν+μ+1)/2) (1/2) ((x:ℂ)^2)) -
     π/2*cos ((ν-μ)*π/2)*(2^(-μ)*Gamma ((ν-μ+2)/2)/Gamma ((ν+μ+1)/2)) *
-          ((x:ℂ) * regularizedGaussHG ((1-(ν-μ))/2) ((ν+μ+2)/2) (3/2) ((x:ℂ)^2))) * hc
+          ((x:ℂ) * regularizedGaussHypergeometric ((1-(ν-μ))/2) ((ν+μ+2)/2) (3/2) ((x:ℂ)^2))) * hc
 
 /-- `u ~ v` when `u = v g` eventually and `g → 1`. -/
 theorem BoundaryAsymptotics.isEquivalent_of_eventuallyEq_mul {l : Filter ℝ} {u v g : ℝ → ℂ}
@@ -394,7 +399,7 @@ theorem BoundaryAsymptotics.recip_half_Gammas (t : ℂ) :
 theorem BoundaryAsymptotics.olverQ_tendsto (ν : ℂ) {μ : ℂ} (hμ : 0 < μ.re) :
     Tendsto (fun x : ℝ => (1-1/(x:ℂ)^2)^(μ/2) * olverQ ν μ x) (𝓝[>] 1)
       (𝓝 (2^(μ-1) * Gamma μ * (Gamma (ν+μ+1))⁻¹)) := by
-  have h1 := (BoundaryAsymptotics.tendsto_regularizedGaussHG_one_neg (a := (ν+μ+2)/2)
+  have h1 := (BoundaryAsymptotics.tendsto_regularizedGaussHypergeometric_one_neg (a := (ν+μ+2)/2)
       (b := (ν+μ+1)/2) (c := ν+3/2)
     (by rw [show ν+3/2-(ν+μ+2)/2-(ν+μ+1)/2 = -μ by ring, neg_re]; linarith)).comp
     BoundaryAsymptotics.tendsto_recip_sq_nhdsGT
@@ -469,7 +474,7 @@ theorem BoundaryAsymptotics.tendsto_weight_right (μ : ℂ) :
 theorem BoundaryAsymptotics.associatedP_tendsto_atTop {ν : ℂ} (hν : -1/2 < ν.re) (μ : ℂ) :
     Tendsto (fun x : ℝ => (x:ℂ)^(-ν) * associatedP ν μ x) atTop
       (𝓝 (2^ν * Gamma (ν+1/2) * (Gamma (ν-μ+1))⁻¹ / (Real.sqrt π : ℂ))) := by
-  have h1 := (BoundaryAsymptotics.tendsto_regularizedGaussHG_one (a := (-μ-ν)/2)
+  have h1 := (BoundaryAsymptotics.tendsto_regularizedGaussHypergeometric_one (a := (-μ-ν)/2)
       (b := (-μ-ν+1)/2) (c := -μ+1)
     (by rw [show -μ+1-(-μ-ν)/2-(-μ-ν+1)/2 = ν+1/2 by ring, add_re]; norm_num; linarith)).comp
     BoundaryAsymptotics.tendsto_one_sub_recip_sq_atTop
@@ -508,12 +513,13 @@ theorem BoundaryAsymptotics.associatedP_tendsto_atTop {ν : ℂ} (hν : -1/2 < �
     rw [← cpow_add _ _ hx0, ← cpow_add _ _ hx0]; ring_nf; simp
   push_cast
   linear_combination (-(2:ℂ)^μ * ((1-1/(x:ℂ)^2)^((-μ)/2)) *
-    regularizedGaussHG ((-μ-ν)/2) ((-μ-ν+1)/2) (-μ+1) (1-1/(x:ℂ)^2)) * hp
+    regularizedGaussHypergeometric ((-μ-ν)/2) ((-μ-ν+1)/2) (-μ+1) (1-1/(x:ℂ)^2)) * hp
 
 /-- Regular-`c` case of the zero-balanced logarithmic limit. -/
-theorem BoundaryAsymptotics.tendsto_regularizedGaussHG_log_of_regular {a b : ℂ}
+theorem BoundaryAsymptotics.tendsto_regularizedGaussHypergeometric_log_of_regular {a b : ℂ}
     (hc : ∀ k : ℕ, a + b ≠ -(k : ℂ)) :
-    Tendsto (fun x : ℝ => regularizedGaussHG a b (a+b) x / (-Real.log (1 - x) : ℂ)) (𝓝[<] 1)
+    Tendsto (fun x : ℝ => regularizedGaussHypergeometric a b (a+b) x /
+        (-Real.log (1 - x) : ℂ)) (𝓝[<] 1)
       (𝓝 ((Gamma a)⁻¹ * (Gamma b)⁻¹)) := by
   have hΓ : Gamma (a+b) ≠ 0 := Gamma_ne_zero fun k hk => hc k hk
   have hA := (zero_balanced_limit hc).div_const (Gamma (a+b))
@@ -523,32 +529,34 @@ theorem BoundaryAsymptotics.tendsto_regularizedGaussHG_log_of_regular {a b : ℂ
   rw [e] at hA
   refine hA.congr' ?_
   filter_upwards [BoundaryAsymptotics.eventually_norm_lt_one] with x hx
-  rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hx, regularizedGaussHGFun_eq_div_Gamma hc]
+  rw [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hx,
+      regularizedGaussHypergeometricFun_eq_div_Gamma hc]
   ring
 
 /-- DLMF 15.4.21 for the regularized function, valid for all `a, b`:
 `𝐅(a,b;a+b;x) / (-ln(1-x)) → 1/(Γ(a)Γ(b))` as `x → 1⁻`. -/
-theorem BoundaryAsymptotics.tendsto_regularizedGaussHG_log (a b : ℂ) :
-    Tendsto (fun x : ℝ => regularizedGaussHG a b (a+b) x / (-Real.log (1 - x) : ℂ)) (𝓝[<] 1)
+theorem BoundaryAsymptotics.tendsto_regularizedGaussHypergeometric_log (a b : ℂ) :
+    Tendsto (fun x : ℝ => regularizedGaussHypergeometric a b (a+b) x /
+        (-Real.log (1 - x) : ℂ)) (𝓝[<] 1)
       (𝓝 ((Gamma a)⁻¹ * (Gamma b)⁻¹)) := by
   by_cases hc : ∀ k : ℕ, a + b ≠ -(k : ℂ)
-  · exact BoundaryAsymptotics.tendsto_regularizedGaussHG_log_of_regular hc
+  · exact BoundaryAsymptotics.tendsto_regularizedGaussHypergeometric_log_of_regular hc
   push Not at hc
   obtain ⟨n, hn⟩ := hc
   have hc2 : ∀ k : ℕ, (a+n+1) + (b+n+1) ≠ -(k : ℂ) := fun k hk => by
     have e : (a+n+1) + (b+n+1) = (n:ℂ)+2 := by linear_combination hn
     rw [e] at hk
     have := congrArg re hk; simp at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
-  have hT := BoundaryAsymptotics.tendsto_regularizedGaussHG_log_of_regular hc2
+  have hT := BoundaryAsymptotics.tendsto_regularizedGaussHypergeometric_log_of_regular hc2
   have hx : Tendsto (fun x : ℝ => (x:ℂ)^(n+1)) (𝓝[<] 1) (𝓝 1) := by
     have := ((by fun_prop : Continuous fun x : ℝ => (x:ℂ)^(n+1)).tendsto 1).mono_left
       (nhdsWithin_le_nhds (s := Iio 1))
     simpa using this
-  have hT2 := (hx.const_mul (poch a (n+1) * poch b (n+1))).mul hT
-  have e : poch a (n+1) * poch b (n+1) * 1 * ((Gamma (a+n+1))⁻¹ * (Gamma (b+n+1))⁻¹) =
+  have hT2 := (hx.const_mul (pochhammer a (n+1) * pochhammer b (n+1))).mul hT
+  have e : pochhammer a (n+1) * pochhammer b (n+1) * 1 * ((Gamma (a+n+1))⁻¹ * (Gamma (b+n+1))⁻¹) =
       (Gamma a)⁻¹ * (Gamma b)⁻¹ := by
-    have ha := DLMF.Gamma.poch_mul_recip_Gamma_add_nat a (n+1)
-    have hb := DLMF.Gamma.poch_mul_recip_Gamma_add_nat b (n+1)
+    have ha := DLMF.Gamma.pochhammer_mul_recip_Gamma_add_nat a (n+1)
+    have hb := DLMF.Gamma.pochhammer_mul_recip_Gamma_add_nat b (n+1)
     push_cast at ha hb
     rw [show a+(n+1) = a+n+1 by ring] at ha
     rw [show b+(n+1) = b+n+1 by ring] at hb
@@ -556,7 +564,7 @@ theorem BoundaryAsymptotics.tendsto_regularizedGaussHG_log (a b : ℂ) :
   rw [e] at hT2
   refine hT2.congr' ?_
   filter_upwards [BoundaryAsymptotics.eventually_norm_lt_one] with x hx
-  rw [hn, regularizedGaussHG_neg_nat _ _ _ (mem_cutPlane_of_norm_lt_one hx),
+  rw [hn, regularizedGaussHypergeometric_neg_nat _ _ _ (mem_cutPlane_of_norm_lt_one hx),
     show (n:ℂ)+2 = (a+n+1)+(b+n+1) by linear_combination -hn]
   ring
 
@@ -565,7 +573,8 @@ theorem BoundaryAsymptotics.tendsto_regularizedGaussHG_log (a b : ℂ) :
 theorem BoundaryAsymptotics.associatedP_half_tendsto_atTop (μ : ℂ) :
     Tendsto (fun x : ℝ => (x:ℂ)^(1/2:ℂ) / (Real.log x : ℂ) * associatedP (-1/2) μ x) atTop
       (𝓝 (2^(1/2:ℂ) * (Gamma (1/2-μ))⁻¹ / (Real.sqrt π : ℂ))) := by
-  have h1 := (BoundaryAsymptotics.tendsto_regularizedGaussHG_log ((1/2-μ)/2) ((3/2-μ)/2)).comp
+  have h1 := (BoundaryAsymptotics.tendsto_regularizedGaussHypergeometric_log ((1/2-μ)/2)
+      ((3/2-μ)/2)).comp
     BoundaryAsymptotics.tendsto_one_sub_recip_sq_atTop
   have hw : Tendsto (fun x : ℝ => (1-1/(x:ℂ)^2)^((-μ)/2)) atTop (𝓝 1) := by
     have hc : ContinuousAt (fun w : ℂ => (1-w)^((-μ)/2)) 0 :=
@@ -610,7 +619,7 @@ theorem BoundaryAsymptotics.associatedP_half_tendsto_atTop (μ : ℂ) :
                                                 (3/2-μ)/2 by ring,
     show (-μ + 1 : ℂ) = (1/2-μ)/2 + (3/2-μ)/2 by ring]
   linear_combination (-(2:ℂ)^μ * ((1-1/(x:ℂ)^2)^((-μ)/2)) *
-    regularizedGaussHG ((1/2-μ)/2) ((3/2-μ)/2) ((1/2-μ)/2 + (3/2-μ)/2) (1-1/(x:ℂ)^2) /
+    regularizedGaussHypergeometric ((1/2-μ)/2) ((3/2-μ)/2) ((1/2-μ)/2 + (3/2-μ)/2) (1-1/(x:ℂ)^2) /
       (Real.log x : ℂ)) * hp
 
 /-- `2^(1/2)/√π = (2/π)^(1/2)` in complex powers. -/
@@ -661,7 +670,8 @@ theorem BoundaryAsymptotics.zeroBalanced_eq (a b : ℂ) {z : ℂ} (hz : ‖z‖ 
     simp only [div_eq_mul_inv, mul_inv]
     ring
   have hπ : (Real.pi : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
-  have hRc := (analyticOnNhd_regularizedGaussHGFun_c a b hz c₀ (Set.mem_univ _)).differentiableAt
+  have hRc := (analyticOnNhd_regularizedGaussHypergeometricFun_c a b hz c₀
+      (Set.mem_univ _)).differentiableAt
   have hsin : HasDerivAt (fun c : ℂ => sin (Real.pi * (c - a - b)) / Real.pi)
       (cos (Real.pi * (c₀ - a - b)) * (Real.pi * 1) / Real.pi) c₀ :=
     ((((hasDerivAt_id c₀).sub_const a).sub_const b).const_mul (Real.pi : ℂ)).csin.div_const _
@@ -672,12 +682,13 @@ theorem BoundaryAsymptotics.zeroBalanced_eq (a b : ℂ) {z : ℂ} (hz : ‖z‖ 
   have hwn : ‖w‖ < 1 := hw
   set S : ℂ → ℂ := fun c => regularizedGaussHGFun a b (a + b - c + 1) w with hSdef
   have hSa : DifferentiableAt ℂ S c₀ :=
-    (analyticOnNhd_regularizedGaussHGFun_comp (A := fun _ => a) (B := fun _ => b)
+    (analyticOnNhd_regularizedGaussHypergeometricFun_comp (A := fun _ => a) (B := fun _ => b)
       (C := fun c => a + b - c + 1) (differentiable_const _) (differentiable_const _)
       (by fun_prop) hwn c₀ (Set.mem_univ _)).differentiableAt
   set Q : ℂ → ℂ := fun c => regularizedGaussHGFun (c - a) (c - b) (c - a - b + 1) w with hQdef
   have hQa : DifferentiableAt ℂ Q c₀ :=
-    (analyticOnNhd_regularizedGaussHGFun_comp (A := fun c => c - a) (B := fun c => c - b)
+    (analyticOnNhd_regularizedGaussHypergeometricFun_comp (A := fun c => c - a)
+        (B := fun c => c - b)
       (C := fun c => c - a - b + 1) (by fun_prop) (by fun_prop) (by fun_prop) hwn c₀
       (Set.mem_univ _)).differentiableAt
   have e1 : c₀ - a = b := by rw [hc₀]; ring
@@ -709,9 +720,9 @@ theorem BoundaryAsymptotics.zeroBalanced_eq (a b : ℂ) {z : ℂ} (hz : ‖z‖ 
     simp only [hSdef]; congr 1; rw [hc₀]; ring
   have hQ0 : Q c₀ = regularizedGaussHGFun a b 1 w := by
     simp only [hQdef]; rw [show c₀ - a - b + 1 = 1 by rw [hc₀]; ring, e1, e2,
-      ← regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hwn,
-      ← regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hwn,
-      regularizedGaussHG_symm _ _ _ (mem_cutPlane_of_norm_lt_one hwn)]
+      ← regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hwn,
+      ← regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hwn,
+      regularizedGaussHypergeometric_symm _ _ _ (mem_cutPlane_of_norm_lt_one hwn)]
   rw [hS0, hQ0] at hkey
   rw [hkey, BoundaryAsymptotics.zeroBalancedAnalytic, BoundaryAsymptotics.zeroBalancedConst,
       BoundaryAsymptotics.zeroBalancedConstDeriv, ← hSdef, ← hQdef, ← hc₀]
@@ -723,11 +734,11 @@ theorem BoundaryAsymptotics.zeroBalanced_eq (a b : ℂ) {z : ℂ} (hz : ‖z‖ 
 /-- Power-series coefficients of `BoundaryAsymptotics.zeroBalancedAnalytic`. -/
 def BoundaryAsymptotics.zeroBalancedCoeff (a b : ℂ) (n : ℕ) : ℂ :=
   BoundaryAsymptotics.zeroBalancedConst a b *
-      deriv (fun c => poch a n * poch b n / n.factorial * (Gamma (a+b-c+1+n))⁻¹) (a+b) +
+      deriv (fun c => pochhammer a n * pochhammer b n / n.factorial * (Gamma (a+b-c+1+n))⁻¹) (a+b) +
     BoundaryAsymptotics.zeroBalancedConstDeriv a b *
-        (poch a n * poch b n / n.factorial * (Gamma (1+n))⁻¹) -
+        (pochhammer a n * pochhammer b n / n.factorial * (Gamma (1+n))⁻¹) -
     BoundaryAsymptotics.zeroBalancedConst a b *
-        deriv (fun c => poch (c-a) n * poch (c-b) n / n.factorial *
+        deriv (fun c => pochhammer (c-a) n * pochhammer (c-b) n / n.factorial *
       (Gamma (c-a-b+1+n))⁻¹) (a+b)
 
 /-- `deriv (f · w^n) = deriv f · w^n` for a differentiable `f`. -/
@@ -740,36 +751,41 @@ theorem BoundaryAsymptotics.deriv_mul_pow {f : ℂ → ℂ} {c₀ : ℂ} (hf : D
 theorem BoundaryAsymptotics.zeroBalancedAnalytic_hasSum (a b : ℂ) {w : ℂ} (hw : ‖w‖ < 1) :
     HasSum (fun n => BoundaryAsymptotics.zeroBalancedCoeff a b n * w^n)
         (BoundaryAsymptotics.zeroBalancedAnalytic a b w) := by
-  have hS := hasSum_deriv_regularizedGaussHGFun_comp (A := fun _ => a) (B := fun _ => b)
+  have hS := hasSum_deriv_regularizedGaussHypergeometricFun_comp (A := fun _ => a) (B := fun _ => b)
     (C := fun c => a + b - c + 1) (differentiable_const _) (differentiable_const _)
     (by fun_prop) hw (a+b)
-  have hQ := hasSum_deriv_regularizedGaussHGFun_comp (A := fun c => c - a) (B := fun c => c - b)
+  have hQ := hasSum_deriv_regularizedGaussHypergeometricFun_comp (A := fun c => c - a)
+      (B := fun c => c - b)
     (C := fun c => c - a - b + 1) (by fun_prop) (by fun_prop) (by fun_prop) hw (a+b)
-  have hF : HasSum (fun n : ℕ => poch a n * poch b n * w ^ n / n.factorial * (Gamma (1 + n))⁻¹)
+  have hF : HasSum (fun n : ℕ => pochhammer a n * pochhammer b n * w ^ n / n.factorial *
+      (Gamma (1 + n))⁻¹)
       (regularizedGaussHGFun a b 1 w) := by
-    have h := (summable_regularizedGaussHGFun_term a b 1 hw).hasSum
-    rwa [← regularizedGaussHGFun_eq_tsum] at h
+    have h := (summable_regularizedGaussHypergeometricFun_term a b 1 hw).hasSum
+    rwa [← regularizedGaussHypergeometricFun_eq_tsum] at h
   have hsum := ((hS.mul_left (BoundaryAsymptotics.zeroBalancedConst a b)).add
       (hF.mul_left (BoundaryAsymptotics.zeroBalancedConstDeriv a b))).sub
     (hQ.mul_left (BoundaryAsymptotics.zeroBalancedConst a b))
   convert hsum using 1
   · funext n
-    have hd1 : DifferentiableAt ℂ (fun c => poch a n * poch b n / n.factorial *
+    have hd1 : DifferentiableAt ℂ (fun c => pochhammer a n * pochhammer b n / n.factorial *
         (Gamma (a+b-c+1+n))⁻¹) (a+b) :=
       (differentiableAt_const _).mul (DLMF.Gamma.differentiable_recip_Gamma.comp (by fun_prop) _)
-    have hd2 : DifferentiableAt ℂ (fun c => poch (c-a) n * poch (c-b) n / n.factorial *
+    have hd2 : DifferentiableAt ℂ (fun c => pochhammer (c-a) n * pochhammer (c-b) n / n.factorial *
         (Gamma (c-a-b+1+n))⁻¹) (a+b) := by
-      have hp : Differentiable ℂ fun y : ℂ => poch y n := Polynomial.differentiable _
+      have hp : Differentiable ℂ fun y : ℂ => pochhammer y n := Polynomial.differentiable _
       exact ((((hp.comp (by fun_prop : Differentiable ℂ fun c : ℂ => c - a)) _).mul
         ((hp.comp (by fun_prop : Differentiable ℂ fun c : ℂ => c - b)) _)).div_const _).mul
         (DLMF.Gamma.differentiable_recip_Gamma.comp (by fun_prop) _)
     have e1 := BoundaryAsymptotics.deriv_mul_pow hd1 w n
     have e2 := BoundaryAsymptotics.deriv_mul_pow hd2 w n
-    have r1 : (fun c => poch a n * poch b n * w ^ n / n.factorial * (Gamma (a+b-c+1+n))⁻¹) =
-        fun c => poch a n * poch b n / n.factorial * (Gamma (a+b-c+1+n))⁻¹ * w^n := by
+    have r1 : (fun c => pochhammer a n * pochhammer b n * w ^ n / n.factorial *
+        (Gamma (a+b-c+1+n))⁻¹) =
+        fun c => pochhammer a n * pochhammer b n / n.factorial * (Gamma (a+b-c+1+n))⁻¹ * w^n := by
       funext c; ring
-    have r2 : (fun c => poch (c-a) n * poch (c-b) n * w ^ n / n.factorial * (Gamma (c-a-b+1+n))⁻¹) =
-        fun c => poch (c-a) n * poch (c-b) n / n.factorial * (Gamma (c-a-b+1+n))⁻¹ * w^n := by
+    have r2 : (fun c => pochhammer (c-a) n * pochhammer (c-b) n * w ^ n / n.factorial *
+        (Gamma (c-a-b+1+n))⁻¹) =
+        fun c => pochhammer (c-a) n * pochhammer (c-b) n / n.factorial *
+            (Gamma (c-a-b+1+n))⁻¹ * w^n := by
       funext c; ring
     rw [r1, r2, e1, e2, BoundaryAsymptotics.zeroBalancedCoeff]
     ring
@@ -795,7 +811,8 @@ theorem BoundaryAsymptotics.zeroBalancedCoeff_zero (a b : ℂ) :
     have hi : HasDerivAt (fun c : ℂ => c-a-b+1) 1 (a+b) := by
       simpa using (((hasDerivAt_id (a+b)).sub_const a).sub_const b).add_const (1:ℂ)
     exact (hasDerivAt_recip_Gamma' (1:ℂ)).comp_of_eq (a+b) hi (by ring)
-  simp only [BoundaryAsymptotics.zeroBalancedCoeff, poch_zero, Nat.factorial_zero, Nat.cast_one,
+  simp only [BoundaryAsymptotics.zeroBalancedCoeff, pochhammer_zero,
+      Nat.factorial_zero, Nat.cast_one,
       div_one, one_mul,
     Nat.cast_zero, add_zero, Complex.Gamma_one, inv_one, mul_one]
   rw [h1.deriv, h2.deriv, BoundaryAsymptotics.recipGammaDeriv_one_one]
@@ -863,7 +880,7 @@ theorem BoundaryAsymptotics.isBigO_self_mul_log :
 `𝐅(a,b;a+b;1-t) = -Γ(a)⁻¹Γ(b)⁻¹ (ln t + 2γ) + K' + O(t ln t)` as `t → 0⁺`, where
 `K' = (1/Γ)'(a)/Γ(b) + (1/Γ)'(b)/Γ(a)`. -/
 theorem BoundaryAsymptotics.zeroBalanced_isBigO (a b : ℂ) :
-    (fun t : ℝ => regularizedGaussHG a b (a+b) (1-t) +
+    (fun t : ℝ => regularizedGaussHypergeometric a b (a+b) (1-t) +
         BoundaryAsymptotics.zeroBalancedConst a b * Real.log t -
       (BoundaryAsymptotics.zeroBalancedConstDeriv a b - 2 * Real.eulerMascheroniConstant *
           BoundaryAsymptotics.zeroBalancedConst a b)) =O[𝓝[>] 0]
@@ -873,16 +890,16 @@ theorem BoundaryAsymptotics.zeroBalanced_isBigO (a b : ℂ) :
       (H := BoundaryAsymptotics.zeroBalancedAnalytic a b)
     fun w hw => BoundaryAsymptotics.zeroBalancedAnalytic_hasSum a b hw).comp_tendsto
         BoundaryAsymptotics.tendsto_ofReal_nhdsGT_zero
-  have hFs : ∀ w : ℂ, ‖w‖ < 1 → HasSum (fun n => (poch a n * poch b n / n.factorial *
+  have hFs : ∀ w : ℂ, ‖w‖ < 1 → HasSum (fun n => (pochhammer a n * pochhammer b n / n.factorial *
       (Gamma (1+n))⁻¹) * w^n) (regularizedGaussHGFun a b 1 w) := by
     intro w hw
-    have h := (summable_regularizedGaussHGFun_term a b 1 hw).hasSum
-    rw [← regularizedGaussHGFun_eq_tsum] at h
+    have h := (summable_regularizedGaussHypergeometricFun_term a b 1 hw).hasSum
+    rw [← regularizedGaussHypergeometricFun_eq_tsum] at h
     convert h using 2 with n
     ring
   have hQ := (BoundaryAsymptotics.hasSum_sub_isBigO hFs).comp_tendsto
       BoundaryAsymptotics.tendsto_ofReal_nhdsGT_zero
-  simp only [poch_zero, Nat.factorial_zero, Nat.cast_one, div_one, one_mul, Nat.cast_zero,
+  simp only [pochhammer_zero, Nat.factorial_zero, Nat.cast_one, div_one, one_mul, Nat.cast_zero,
     add_zero, Complex.Gamma_one, inv_one] at hQ
   rw [BoundaryAsymptotics.zeroBalancedCoeff_zero] at hH
   have hlog : (fun t : ℝ => BoundaryAsymptotics.zeroBalancedConst a b * (Real.log t : ℂ) *
@@ -906,7 +923,7 @@ theorem BoundaryAsymptotics.zeroBalanced_isBigO (a b : ℂ) :
   rw [show 1 - ((1-t:ℝ):ℂ) = ((t:ℝ):ℂ) by push_cast; ring, ← ofReal_log ht.1.le] at e
   simp only [Function.comp_apply]
   rw [show (1:ℂ) - (t:ℂ) = ((1-t:ℝ):ℂ) by push_cast; ring,
-    regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hz, e]
+    regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hz, e]
   ring
 
 /-- The derivative of the duplication formula for `1/Γ`:
@@ -1065,7 +1082,7 @@ theorem BoundaryAsymptotics.olverQ_log_isBigO (ν : ℂ) :
     simp only [Function.comp_apply, Complex.norm_real] at this
     exact Asymptotics.isBigO_norm_left.mp this
   set L : ℝ → ℂ := fun x => (Real.log (1 - 1/x^2) : ℂ) with hL
-  set E : ℝ → ℂ := fun x => regularizedGaussHG a b (a+b) (1 - ((1-1/x^2:ℝ):ℂ)) +
+  set E : ℝ → ℂ := fun x => regularizedGaussHypergeometric a b (a+b) (1 - ((1-1/x^2:ℝ):ℂ)) +
     K * Real.log (1 - 1/x^2) - (K' - 2 * γ * K) with hE
   have hEO : E =O[𝓝[>] (1:ℝ)] (fun x : ℝ => (x-1)*Real.log (x-1)) := hZ.trans hcmp.2
   set R : ℝ → ℝ := fun x => (x-1)*Real.log (x-1) with hR
@@ -1087,7 +1104,8 @@ theorem BoundaryAsymptotics.olverQ_log_isBigO (ν : ℂ) :
     rw [show (x:ℂ)-1 = ((x-1:ℝ):ℂ) by push_cast; ring, ofReal_log h1.le]
   have hl2 : log (2:ℂ) = (Real.log 2 : ℂ) := by
     rw [show (2:ℂ) = ((2:ℝ):ℂ) by norm_num, ofReal_log (by norm_num)]
-  have hO : olverQ ν 0 x = p x * regularizedGaussHG a b (a+b) (1 - ((1-1/x^2:ℝ):ℂ)) := by
+  have hO : olverQ ν 0 x = p x *
+      regularizedGaussHypergeometric a b (a+b) (1 - ((1-1/x^2:ℝ):ℂ)) := by
     simp only [olverQ, legendreBranchPower, zero_div, zero_mul, Complex.exp_zero, mul_one, hp]
     rw [show (1:ℂ) - ((1-1/x^2:ℝ):ℂ) = 1/(x:ℂ)^2 by push_cast; ring,
       show a + b = ν + 3/2 by rw [ha, hb]; ring, ha, hb]
@@ -1245,11 +1263,11 @@ theorem BoundaryAsymptotics.ferrersQ_log_isBigO {ν : ℂ} (hν : LegendreQRegul
       filter_upwards [self_mem_nhdsWithin, Ioo_mem_nhdsLT (show (0:ℝ) < 1 by norm_num)] with x
         (hx : x < 1) hx0
       refine ⟨by linarith, by nlinarith [hx0.1], by nlinarith [hx0.1], by nlinarith [hx0.1]⟩)
-  have hZ1 : (fun x : ℝ => regularizedGaussHG a1 b1 (a1+b1) (1 - ((1-x^2:ℝ):ℂ)) +
+  have hZ1 : (fun x : ℝ => regularizedGaussHypergeometric a1 b1 (a1+b1) (1 - ((1-x^2:ℝ):ℂ)) +
       K1 * Real.log (1-x^2) - (K1' - 2*γ*K1)) =O[l] R :=
     ((BoundaryAsymptotics.zeroBalanced_isBigO a1 b1).comp_tendsto
         BoundaryAsymptotics.tendsto_one_sub_sq_nhdsLT).trans hcmp.2
-  have hZ2 : (fun x : ℝ => regularizedGaussHG a2 b2 (a2+b2) (1 - ((1-x^2:ℝ):ℂ)) +
+  have hZ2 : (fun x : ℝ => regularizedGaussHypergeometric a2 b2 (a2+b2) (1 - ((1-x^2:ℝ):ℂ)) +
       K2 * Real.log (1-x^2) - (K2' - 2*γ*K2)) =O[l] R :=
     ((BoundaryAsymptotics.zeroBalanced_isBigO a2 b2).comp_tendsto
         BoundaryAsymptotics.tendsto_one_sub_sq_nhdsLT).trans hcmp.2
@@ -1278,7 +1296,7 @@ theorem BoundaryAsymptotics.ferrersQ_log_isBigO {ν : ℂ} (hν : LegendreQRegul
     refine Asymptotics.IsBigO.of_bound 1 (Eventually.of_forall fun x => ?_)
     rw [Real.norm_eq_abs, Real.norm_eq_abs, one_mul, abs_sub_comm]
   set L : ℝ → ℂ := fun x => (Real.log (1 - x^2) : ℂ) with hL
-  set E2 : ℝ → ℂ := fun x => regularizedGaussHG a2 b2 (a2+b2) (1 - ((1-x^2:ℝ):ℂ)) +
+  set E2 : ℝ → ℂ := fun x => regularizedGaussHypergeometric a2 b2 (a2+b2) (1 - ((1-x^2:ℝ):ℂ)) +
       K2 * Real.log (1-x^2) - (K2' - 2*γ*K2) with hE2
   have t1 := hZ1.const_mul_left A1
   have t2 := hZ2.const_mul_left A2
@@ -1296,8 +1314,8 @@ theorem BoundaryAsymptotics.ferrersQ_log_isBigO {ν : ℂ} (hν : LegendreQRegul
   have h1x : (0:ℝ) < 1 - x := by linarith
   have h1x' : (0:ℝ) < 1 + x := by linarith [hx0.1]
   have hsq : ((1 - ((1-x^2:ℝ):ℂ))) = ((x:ℂ))^2 := by push_cast; ring
-  have hQ : ferrersQ ν 0 x = A1 * regularizedGaussHG a1 b1 (a1+b1) (1 - ((1-x^2:ℝ):ℂ)) +
-      A2 * (x:ℂ) * regularizedGaussHG a2 b2 (a2+b2) (1 - ((1-x^2:ℝ):ℂ)) := by
+  have hQ : ferrersQ ν 0 x = A1 * regularizedGaussHypergeometric a1 b1 (a1+b1) (1 - ((1-x^2:ℝ):ℂ)) +
+      A2 * (x:ℂ) * regularizedGaussHypergeometric a2 b2 (a2+b2) (1 - ((1-x^2:ℝ):ℂ)) := by
     rw [hsq, show a1 + b1 = 1/2 by rw [ha1, hb1]; ring, show a2 + b2 = 3/2 by rw [ha2, hb2]; ring]
     simp only [ferrersQ, ferrersW1, ferrersW2, add_zero, sub_zero, neg_zero, zero_div,
       cpow_zero, mul_one, ha1, hb1, ha2, hb2, hA1, hA2, neg_div]

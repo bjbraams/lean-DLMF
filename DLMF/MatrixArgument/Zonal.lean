@@ -31,8 +31,8 @@ This file develops their properties.
   compact), so integrals over `O(m)` are invariant under `H ↦ H H₀`.
 * `multivariateGammaVec_add_div`: `Γ_m(a + κ) / Γ_m(a) = [a]_κ` (DLMF 35.4.1).
 * `zonalPolynomial_one`: `Z_κ(I)` is the value `zonalPolynomialAtOne κ` (DLMF 35.4.2).
-* `zonalPolynomial_eq_dlmf`: DLMF 35.4.3 in DLMF's form, with the factor `|T|^{k_m}` outside
-  the integral.
+* `zonalPolynomial_eq_integral_leadingMinor`: DLMF 35.4.3 in DLMF's form, with the factor
+  `|T|^{k_m}` outside the integral.
 * `zonalPolynomial_zero`: `Z_κ(0) = 1` for `κ = 0` and `0` otherwise (DLMF 35.4.4).
 * `zonalPolynomial_conj`: orthogonal invariance (DLMF 35.4.5).
 * `zonalPolynomial_exists_symmetric`: `Z_κ` is a symmetric homogeneous polynomial in the
@@ -170,7 +170,7 @@ theorem zonalPolynomial_one {m : ℕ} (κ : Fin m → ℕ) :
 `Z_κ(T) = Z_κ(I) |T|^{k_m} ∫_{O(m)} ∏_{j=1}^{m-1} |(HTH⁻¹)_j|^{k_j - k_{j+1}} dH`
 (with `H⁻¹ = Hᵀ`). -/
 @[dlmf 35.4.E3]
-theorem zonalPolynomial_eq_dlmf {m : ℕ} (κ : Fin (m + 1) → ℕ)
+theorem zonalPolynomial_eq_integral_leadingMinor {m : ℕ} (κ : Fin (m + 1) → ℕ)
     (T : Matrix (Fin (m + 1)) (Fin (m + 1)) ℝ) :
     zonalPolynomial κ T = zonalPolynomialAtOne κ * T.det ^ κ (Fin.last m) *
       ∫ H, ∏ j : Fin m,
@@ -626,7 +626,7 @@ theorem integral_zonalPolynomial_conj {m : ℕ} (κ : Fin m → ℕ) (hκ : Anti
 
 The leading-minor product `φ_κ(Y) = ∏_j |(Y)_j|^{k_j - k_{j+1}}` satisfies
 `φ_κ(L Z Lᵀ) = φ_κ(L Lᵀ) φ_κ(Z)` for lower-triangular `L`, so the Cholesky substitution gives
-`∫_Ω etr(-SY) |Y|^{a-(m+1)/2} φ_κ(Y) dY = Γ_m(a + κ) |S|^{-a} φ_κ(S⁻¹)`; averaging over `O(m)`
+`∫_Ω expTrace(-SY) |Y|^{a-(m+1)/2} φ_κ(Y) dY = Γ_m(a + κ) |S|^{-a} φ_κ(S⁻¹)`; averaging over `O(m)`
 (Fubini) gives 35.4.8. -/
 
 section LaplaceTransform
@@ -658,12 +658,13 @@ private lemma posDef_orthogonalGroup_conj {m : ℕ} (H : Matrix.orthogonalGroup 
   have := hX.conjTranspose_mul_mul_same hinj
   rwa [Matrix.conjTranspose_eq_transpose_of_trivial, Matrix.transpose_transpose] at this
 
-/-- Measurability of the indicated function: `Measurable fun X : SymMatrix m => (etr (-(T * (X :
-Matrix (Fin m) (Fin m) ℝ))) : ℂ) * (((X : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ p)`. -/
-private lemma measurable_etr_neg_mul_det_cpow {m : ℕ} (T : Matrix (Fin m) (Fin m) ℝ) (p : ℂ) :
-    Measurable fun X : SymMatrix m => (etr (-(T * (X : Matrix (Fin m) (Fin m) ℝ))) : ℂ) *
+/-- Measurability of the indicated function:
+`Measurable fun X : SymMatrix m => (expTrace (-(T * (X : Matrix (Fin m) (Fin m) ℝ))) : ℂ) * (((X :
+Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ p)`. -/
+private lemma measurable_expTrace_neg_mul_det_cpow {m : ℕ} (T : Matrix (Fin m) (Fin m) ℝ) (p : ℂ) :
+    Measurable fun X : SymMatrix m => (expTrace (-(T * (X : Matrix (Fin m) (Fin m) ℝ))) : ℂ) *
       (((X : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ p) := by
-  unfold etr
+  unfold expTrace
   refine (Complex.measurable_ofReal.comp ?_).mul
     ((Complex.measurable_ofReal.comp continuous_subtype_val.matrix_det.measurable).pow_const _)
   exact Real.measurable_exp.comp
@@ -674,7 +675,7 @@ private lemma hasIntegralOn_laplace_leadingMinorPowProd_orthogonal_conj {m : ℕ
     (hκ : Antitone κ)
     {T : Matrix (Fin m) (Fin m) ℝ} (hT : T.PosDef) {a : ℂ} (ha : ((m : ℝ) - 1) / 2 < a.re)
     (H : Matrix.orthogonalGroup (Fin m) ℝ) :
-    HasIntegralOn (posDefCone m) (fun X => (etr (-(T * X)) : ℂ) *
+    HasIntegralOn (posDefCone m) (fun X => (expTrace (-(T * X)) : ℂ) *
       ((X.det : ℂ) ^ (a - ((m : ℂ) + 1) / 2)) *
         (leadingMinorPowProd κ
             ((H : Matrix (Fin m) (Fin m) ℝ) * X * (H : Matrix (Fin m) (Fin m) ℝ)ᵀ) : ℂ))
@@ -693,14 +694,16 @@ private lemma hasIntegralOn_laplace_leadingMinorPowProd_orthogonal_conj {m : ℕ
     rw [Matrix.det_transpose]; intro h; rw [h, zero_mul] at hdetK; exact zero_ne_one hdetK
   set C := Matrix.GeneralLinearGroup.mkOfDetNeZero Kᵀ hdetKt
   have hC : (C : Matrix (Fin m) (Fin m) ℝ) = Kᵀ := rfl
-  have hF : Measurable fun X : SymMatrix m => (etr (-(T * (X : Matrix (Fin m) (Fin m) ℝ))) : ℂ) *
+  have hF : Measurable fun X : SymMatrix m =>
+      (expTrace (-(T * (X : Matrix (Fin m) (Fin m) ℝ))) : ℂ) *
       (((X : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ (a - ((m : ℂ) + 1) / 2)) *
       (leadingMinorPowProd κ (K * (X : Matrix (Fin m) (Fin m) ℝ) * Kᵀ) : ℂ) :=
-    (measurable_etr_neg_mul_det_cpow T _).mul
+    (measurable_expTrace_neg_mul_det_cpow T _).mul
         (Complex.measurable_ofReal.comp ((continuous_leadingMinorPowProd κ).comp
       ((continuous_const.matrix_mul continuous_subtype_val).matrix_mul
         continuous_const)).measurable)
-  have h2 : HasIntegralOn (posDefCone m) (fun Y => (etr (-(T * ((C : Matrix (Fin m) (Fin m) ℝ) *
+  have h2 : HasIntegralOn (posDefCone m)
+      (fun Y => (expTrace (-(T * ((C : Matrix (Fin m) (Fin m) ℝ) *
       Y * (C : Matrix (Fin m) (Fin m) ℝ)ᵀ))) : ℂ) * ((((C : Matrix (Fin m) (Fin m) ℝ) * Y *
         (C : Matrix (Fin m) (Fin m) ℝ)ᵀ).det : ℂ) ^ (a - ((m : ℂ) + 1) / 2)) *
       (leadingMinorPowProd κ
@@ -723,9 +726,9 @@ private lemma hasIntegralOn_laplace_leadingMinorPowProd_orthogonal_conj {m : ℕ
       rw [Matrix.det_mul, Matrix.det_mul, Matrix.det_transpose]
       linear_combination (Y : Matrix (Fin m) (Fin m) ℝ).det * hdetK
     rw [h1, hdY]
-    unfold etr
+    unfold expTrace
     rw [Matrix.trace_neg, Matrix.trace_neg, htr]
-  have h3 := hasIntegralOn_posDefCone_of_congruence (F := fun X => (etr (-(T * X)) : ℂ) *
+  have h3 := hasIntegralOn_posDefCone_of_congruence (F := fun X => (expTrace (-(T * X)) : ℂ) *
       ((X.det : ℂ) ^ (a - ((m : ℂ) + 1) / 2)) * (leadingMinorPowProd κ (K * X * Kᵀ) : ℂ)) C hF h2
   convert h3 using 1
   have habs : |(C : Matrix (Fin m) (Fin m) ℝ).det| ^ (m + 1) = 1 := by
@@ -748,13 +751,13 @@ private lemma hasIntegralOn_laplace_leadingMinorPowProd_orthogonal_conj {m : ℕ
 
 end LaplaceTransform
 /-- DLMF 35.4.8 (Laplace integral): for `T ∈ Ω` and `ℜa > (m-1)/2`,
-`∫_Ω etr(-TX) |X|^{a-(m+1)/2} Z_κ(X) dX = Γ_m(a + κ) |T|^{-a} Z_κ(T⁻¹)`, with
+`∫_Ω expTrace(-TX) |X|^{a-(m+1)/2} Z_κ(X) dX = Γ_m(a + κ) |T|^{-a} Z_κ(T⁻¹)`, with
 `Γ_m(a + κ) = Γ_m(a + k₁, …, a + k_m)` (35.3.5). -/
 @[dlmf 35.4.E8]
 theorem hasIntegralOn_zonalPolynomial_laplace {m : ℕ} (κ : Fin m → ℕ) (hκ : Antitone κ)
     {T : Matrix (Fin m) (Fin m) ℝ} (hT : T.PosDef) {a : ℂ} (ha : ((m : ℝ) - 1) / 2 < a.re) :
     HasIntegralOn (posDefCone m)
-      (fun X => (etr (-(T * X)) : ℂ) * ((X.det : ℂ) ^ (a - ((m : ℂ) + 1) / 2)) *
+      (fun X => (expTrace (-(T * X)) : ℂ) * ((X.det : ℂ) ^ (a - ((m : ℂ) + 1) / 2)) *
         (zonalPolynomial κ X : ℂ))
       (multivariateGammaVec m (fun j => a + κ j) * (T.det : ℂ) ^ (-a) *
         (zonalPolynomial κ T⁻¹ : ℂ)) := by
@@ -763,7 +766,7 @@ theorem hasIntegralOn_zonalPolynomial_laplace {m : ℕ} (κ : Fin m → ℕ) (h�
   have hmc : MeasurableSet (posDefCone m) := TauCeti.measurableSet_posDefMatrix m
   set p : ℂ := a - ((m : ℂ) + 1) / 2
   set F : Matrix.orthogonalGroup (Fin m) ℝ → SymMatrix m → ℂ := fun H X =>
-    (etr (-(T * (X : Matrix (Fin m) (Fin m) ℝ))) : ℂ) *
+    (expTrace (-(T * (X : Matrix (Fin m) (Fin m) ℝ))) : ℂ) *
       (((X : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ p) *
       (leadingMinorPowProd κ ((H : Matrix (Fin m) (Fin m) ℝ) * (X : Matrix (Fin m) (Fin m) ℝ) *
         (H : Matrix (Fin m) (Fin m) ℝ)ᵀ) : ℂ) with hFdef
@@ -774,13 +777,13 @@ theorem hasIntegralOn_zonalPolynomial_laplace {m : ℕ} (κ : Fin m → ℕ) (h�
       (continuous_subtype_val.comp continuous_snd)).matrix_mul
       (continuous_subtype_val.comp continuous_fst).matrix_transpose
   have hFm : Measurable (Function.uncurry F) :=
-    ((measurable_etr_neg_mul_det_cpow T p).comp measurable_snd).mul
+    ((measurable_expTrace_neg_mul_det_cpow T p).comp measurable_snd).mul
       (Complex.measurable_ofReal.comp ((continuous_leadingMinorPowProd κ).comp hconj).measurable)
   -- the real version
   set a' : ℂ := (a.re : ℂ)
   have ha' : ((m : ℝ) - 1) / 2 < a'.re := by simpa [a'] using ha
   have hnorm : ∀ H : Matrix.orthogonalGroup (Fin m) ℝ, ∀ X ∈ posDefCone m,
-      ((‖F H X‖ : ℝ) : ℂ) = (etr (-(T * (X : Matrix (Fin m) (Fin m) ℝ))) : ℂ) *
+      ((‖F H X‖ : ℝ) : ℂ) = (expTrace (-(T * (X : Matrix (Fin m) (Fin m) ℝ))) : ℂ) *
         (((X : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ (a' - ((m : ℂ) + 1) / 2)) *
         (leadingMinorPowProd κ ((H : Matrix (Fin m) (Fin m) ℝ) * (X : Matrix (Fin m) (Fin m) ℝ) *
           (H : Matrix (Fin m) (Fin m) ℝ)ᵀ) : ℂ) := by
@@ -788,7 +791,7 @@ theorem hasIntegralOn_zonalPolynomial_laplace {m : ℕ} (κ : Fin m → ℕ) (h�
     have hX : (X : Matrix (Fin m) (Fin m) ℝ).PosDef := hX
     have hd := hX.det_pos
     have hφ := (leadingMinorPowProd_pos κ (posDef_orthogonalGroup_conj H hX)).le
-    have he : 0 ≤ etr (-(T * (X : Matrix (Fin m) (Fin m) ℝ))) := (Real.exp_pos _).le
+    have he : 0 ≤ expTrace (-(T * (X : Matrix (Fin m) (Fin m) ℝ))) := (Real.exp_pos _).le
     simp only [hFdef, norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hφ,
       abs_of_nonneg he, Complex.norm_cpow_eq_rpow_re_of_pos hd]
     have : a' - ((m : ℂ) + 1) / 2 = (((a.re - ((m : ℝ) + 1) / 2 : ℝ)) : ℂ) := by
@@ -821,7 +824,7 @@ theorem hasIntegralOn_zonalPolynomial_laplace {m : ℕ} (κ : Fin m → ℕ) (h�
   set A := zonalPolynomialAtOne κ
   have hZ : ∀ Y : Matrix (Fin m) (Fin m) ℝ, zonalPolynomial κ Y = A * ∫ H, leadingMinorPowProd κ
       ((H : Matrix (Fin m) (Fin m) ℝ) * Y * (H : Matrix (Fin m) (Fin m) ℝ)ᵀ) ∂μ := fun Y => rfl
-  have htgt : ∀ X : SymMatrix m, (etr (-(T * (X : Matrix (Fin m) (Fin m) ℝ))) : ℂ) *
+  have htgt : ∀ X : SymMatrix m, (expTrace (-(T * (X : Matrix (Fin m) (Fin m) ℝ))) : ℂ) *
       (((X : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ p) *
       (zonalPolynomial κ (X : Matrix (Fin m) (Fin m) ℝ) : ℂ) = (A : ℂ) * ∫ H, F H X ∂μ := by
     intro X
@@ -834,7 +837,7 @@ theorem hasIntegralOn_zonalPolynomial_laplace {m : ℕ} (κ : Fin m → ℕ) (h�
   · have := (hfi.integral_prod_right).const_mul (A : ℂ)
     refine Integrable.congr this (Filter.Eventually.of_forall fun X => ?_)
     exact (htgt X).symm
-  · rw [show (∫ X in posDefCone m, (etr (-(T * (X : Matrix (Fin m) (Fin m) ℝ))) : ℂ) *
+  · rw [show (∫ X in posDefCone m, (expTrace (-(T * (X : Matrix (Fin m) (Fin m) ℝ))) : ℂ) *
         (((X : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ (a - ((m : ℂ) + 1) / 2)) *
         (zonalPolynomial κ (X : Matrix (Fin m) (Fin m) ℝ) : ℂ) ∂TauCeti.symmetricLebesgue m) =
         ∫ X, (A : ℂ) * ∫ H, F H X ∂μ ∂ν from integral_congr_ae

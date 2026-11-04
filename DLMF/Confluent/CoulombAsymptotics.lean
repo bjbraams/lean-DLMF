@@ -71,7 +71,7 @@ sector. -/
 theorem hasAsymptoticExpansion_ray_cpow_mul_kummerU (a b : ℂ) {c : ℂ} (hc : c ≠ 0) {δ α : ℝ}
     (hδ : 0 < δ) (hα : |α| < π / 2) (h : δ * ‖c‖ ≤ (c * exp (α * I)).re) :
     HasAsymptoticExpansion atTop (fun (k : ℕ) (ρ : ℝ) => ((ρ : ℂ) ^ k)⁻¹)
-      (fun k => poch a k * poch (a - b + 1) k / (k ! * (-c) ^ k))
+      (fun k => pochhammer a k * pochhammer (a - b + 1) k / (k ! * (-c) ^ k))
       (fun ρ : ℝ => ((ρ : ℂ) * c) ^ a * kummerU a b ((ρ : ℂ) * c)) := by
   refine ((hasAsymptoticExpansion_cpow_mul_kummerU_rotSector a b hδ hα).comp_tendsto
     (tendsto_ofReal_mul_rotSectorAtTop hc h)).smul_scale (κ := fun k => (c ^ k)⁻¹)
@@ -91,7 +91,7 @@ theorem two_I_ne_zero : (2 * I : ℂ) ≠ 0 := mul_ne_zero two_ne_zero I_ne_zero
 @[dlmf 33.11.E1]
 theorem hasAsymptoticExpansion_coulombHPlus (ℓ : ℕ) (η : ℝ) :
     HasAsymptoticExpansion atTop (fun (k : ℕ) (ρ : ℝ) => ((ρ : ℂ) ^ k)⁻¹)
-      (fun k => poch (I * η - ℓ) k * poch (I * η + ℓ + 1) k / (k ! * (2 * I) ^ k))
+      (fun k => pochhammer (I * η - ℓ) k * pochhammer (I * η + ℓ + 1) k / (k ! * (2 * I) ^ k))
       (fun ρ => exp (-I * coulombTheta ℓ η ρ) * coulombHPlus ℓ η ρ) := by
   have h := hasAsymptoticExpansion_ray_cpow_mul_kummerU ((ℓ : ℂ) + 1 + I * η) (2 * ℓ + 2)
     (c := -2 * I) (by simp [I_ne_zero]) (δ := 1 / 2) (α := π / 4) (by norm_num)
@@ -121,7 +121,7 @@ theorem hasAsymptoticExpansion_coulombHPlus (ℓ : ℕ) (η : ℝ) :
 @[dlmf 33.11.E1]
 theorem hasAsymptoticExpansion_coulombHMinus (ℓ : ℕ) (η : ℝ) :
     HasAsymptoticExpansion atTop (fun (k : ℕ) (ρ : ℝ) => ((ρ : ℂ) ^ k)⁻¹)
-      (fun k => poch (-I * η - ℓ) k * poch (-I * η + ℓ + 1) k / (k ! * (-2 * I) ^ k))
+      (fun k => pochhammer (-I * η - ℓ) k * pochhammer (-I * η + ℓ + 1) k / (k ! * (-2 * I) ^ k))
       (fun ρ => exp (I * coulombTheta ℓ η ρ) * coulombHMinus ℓ η ρ) := by
   have h := hasAsymptoticExpansion_ray_cpow_mul_kummerU ((ℓ : ℂ) + 1 - I * η) (2 * ℓ + 2)
     (c := 2 * I) two_I_ne_zero (δ := 1 / 2) (α := -(π / 4)) (by norm_num)

@@ -45,7 +45,7 @@ namespace DLMF.Hypergeometric
 theorem regularized_euler (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     regularizedGaussHGFun a b c z =
       (1 - z) ^ (c - a - b) * regularizedGaussHGFun (c - a) (c - b) c z :=
-  regularizedGaussHGFun_euler a b c hz
+  regularizedGaussHypergeometricFun_euler a b c hz
 
 /-- Identity under the stated parameter and domain assumptions: `regularizedGaussHGFun a b c z =
 (1 - z) ^ (-a) * regularizedGaussHGFun a (c - b) c (z / (z - 1))`. -/
@@ -53,7 +53,7 @@ theorem regularized_euler (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
 theorem regularized_pfaff (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (ht : ‖z / (z - 1)‖ < 1) :
     regularizedGaussHGFun a b c z =
       (1 - z) ^ (-a) * regularizedGaussHGFun a (c - b) c (z / (z - 1)) :=
-  regularizedGaussHGFun_pfaff a b c hz ht
+  regularizedGaussHypergeometricFun_pfaff a b c hz ht
 
 /-- Identity under the stated parameter and domain assumptions: `sin (Real.pi * (c - a - b)) /
 Real.pi * regularizedGaussHGFun a b c z = regularizedGaussHGFun a b (a + b - c + 1) (1 - z) /
@@ -167,11 +167,13 @@ theorem regularized_connection_one_sub_recip
   ring
 
 /-- Reflection of Pochhammer symbols: `(1-y-n)_n = (-1)^n (y)_n`. -/
-theorem poch_one_sub_sub (y : ℂ) (n : ℕ) : poch (1 - y - n) n = (-1 : ℂ) ^ n * poch y n :=
-  poch_reflect y n
+theorem pochhammer_one_sub_sub (y : ℂ) (n : ℕ) : pochhammer (1 - y - n) n = (-1 : ℂ) ^ n *
+    pochhammer y n :=
+  pochhammer_reflect y n
 
-/-- Identity under the stated parameter and domain assumptions: `₂F₁ (-m : ℂ) b c z = poch b m /
-poch c m * (-z) ^ m * ₂F₁ (-m : ℂ) (1 - c - m) (1 - b - m) (1 / z)`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`₂F₁ (-m : ℂ) b c z = pochhammer b m / pochhammer c m * (-z) ^ m * ₂F₁ (-m : ℂ) (1 - c - m) (1 - b -
+m) (1 / z)`. -/
 @[dlmf 15.8.E6]
 theorem terminating_reciprocal
     {b c z : ℂ}
@@ -180,20 +182,22 @@ theorem terminating_reciprocal
     (ht : ∀ k : ℕ, 1 - b - m ≠ -(k : ℂ))
     (hz : z ≠ 0) :
     ₂F₁ (-m : ℂ) b c z =
-      poch b m / poch c m * (-z) ^ m * ₂F₁ (-m : ℂ) (1 - c - m) (1 - b - m) (1 / z) := by
-  have hcm := poch_ne_zero_of_not_neg_nat hc m
+      pochhammer b m / pochhammer c m * (-z) ^ m *
+          ₂F₁ (-m : ℂ) (1 - c - m) (1 - b - m) (1 / z) := by
+  have hcm := pochhammer_ne_zero_of_not_neg_nat hc m
   rw [ordinaryHypergeometric_eq_sum_neg_nat, ordinaryHypergeometric_eq_sum_neg_nat,
     Finset.mul_sum, ← Finset.sum_range_reflect]
   refine Finset.sum_congr rfl fun k hk => ?_
   have hkm : k ≤ m := Nat.lt_succ_iff.mp (Finset.mem_range.mp hk)
-  rw [show m + 1 - 1 - k = m - k by omega, gaussHGCoeff_neg_nat, gaussHGCoeff_neg_nat,
+  rw [show m + 1 - 1 - k = m - k by omega, gaussHypergeometricCoeff_neg_nat,
+                                      gaussHypergeometricCoeff_neg_nat,
     Nat.choose_symm hkm]
   have hmk : m - (m - k) = k := by omega
-  have hc1 := poch_one_sub_sub_mul (x := c) (Nat.sub_le m k)
-  have hb1 := poch_one_sub_sub_mul (x := b) (Nat.sub_le m k)
+  have hc1 := pochhammer_one_sub_sub_mul (x := c) (Nat.sub_le m k)
+  have hb1 := pochhammer_one_sub_sub_mul (x := b) (Nat.sub_le m k)
   rw [hmk] at hc1 hb1
-  have hbk : poch (1 - b - m) k ≠ 0 := poch_ne_zero_of_not_neg_nat ht k
-  have hck : poch c (m - k) ≠ 0 := poch_ne_zero_of_not_neg_nat hc (m - k)
+  have hbk : pochhammer (1 - b - m) k ≠ 0 := pochhammer_ne_zero_of_not_neg_nat ht k
+  have hck : pochhammer c (m - k) ≠ 0 := pochhammer_ne_zero_of_not_neg_nat hc (m - k)
   have hpm : (-1 : ℂ) ^ m = (-1) ^ (m - k) * (-1) ^ k := by
     rw [← pow_add, Nat.sub_add_cancel hkm]
   have hzm : z ^ m = z ^ (m - k) * z ^ k := by
@@ -201,15 +205,15 @@ theorem terminating_reciprocal
   have hsq : ((-1 : ℂ) ^ k) ^ 2 = 1 := by rw [← pow_mul, mul_comm, pow_mul, neg_one_sq, one_pow]
   rw [neg_pow z, hpm, hzm, one_div, inv_pow]
   field_simp
-  linear_combination (m.choose k : ℂ) * poch c m * hb1 -
-    (m.choose k : ℂ) * poch b m * ((-1 : ℂ) ^ k) ^ 2 * hc1 -
-    (m.choose k : ℂ) * (-1 : ℂ) ^ k * poch b m * poch c m * hsq
+  linear_combination (m.choose k : ℂ) * pochhammer c m * hb1 -
+    (m.choose k : ℂ) * pochhammer b m * ((-1 : ℂ) ^ k) ^ 2 * hc1 -
+    (m.choose k : ℂ) * (-1 : ℂ) ^ k * pochhammer b m * pochhammer c m * hsq
 
 /-- Pfaff's transformation for a terminating series, for every `w ≠ 1`. -/
 theorem terminating_pfaff (m : ℕ) {b c w : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (hw : w ≠ 1) :
     ₂F₁ (-m : ℂ) b c w = (1 - w) ^ m * ₂F₁ (-m : ℂ) (c - b) c (w / (w - 1)) := by
   set Q : ℂ → ℂ := fun v => ∑ k ∈ Finset.range (m + 1),
-    gaussHGCoeff (-m : ℂ) (c - b) c k * (-1 : ℂ) ^ k * v ^ k * (1 - v) ^ (m - k) with hQ
+    gaussHypergeometricCoeff (-m : ℂ) (c - b) c k * (-1 : ℂ) ^ k * v ^ k * (1 - v) ^ (m - k) with hQ
   have hQeq (v : ℂ) (hv : v ≠ 1) :
       (1 - v) ^ m * ₂F₁ (-m : ℂ) (c - b) c (v / (v - 1)) = Q v := by
     have hv1 : 1 - v ≠ 0 := sub_ne_zero.mpr (Ne.symm hv)
@@ -222,7 +226,7 @@ theorem terminating_pfaff (m : ℕ) {b c w : ℂ} (hc : ∀ k : ℕ, c ≠ -(k :
     field_simp
   have hP : AnalyticOnNhd ℂ (fun v : ℂ => ₂F₁ (-m : ℂ) b c v) Set.univ := by
     have : (fun v : ℂ => ₂F₁ (-m : ℂ) b c v) =
-        fun v => ∑ k ∈ Finset.range (m + 1), gaussHGCoeff (-(m : ℂ)) b c k * v ^ k := by
+        fun v => ∑ k ∈ Finset.range (m + 1), gaussHypergeometricCoeff (-(m : ℂ)) b c k * v ^ k := by
       funext v
       exact ordinaryHypergeometric_eq_sum_neg_nat m b c v
     rw [this]
@@ -249,8 +253,9 @@ theorem terminating_pfaff (m : ℕ) {b c w : ℂ} (hc : ∀ k : ℕ, c ≠ -(k :
   rw [hQeq w hw]
   exact congrFun hall w
 
-/-- Identity under the stated parameter and domain assumptions: `₂F₁ (-m : ℂ) b c z = poch b m /
-poch c m * (1 - z) ^ m * ₂F₁ (-m : ℂ) (c - b) (1 - b - m) (1 / (1 - z))`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`₂F₁ (-m : ℂ) b c z = pochhammer b m / pochhammer c m * (1 - z) ^ m * ₂F₁ (-m : ℂ) (c - b) (1 - b -
+m) (1 / (1 - z))`. -/
 @[dlmf 15.8.E6]
 theorem terminating_reciprocal_one_sub
     {b c z : ℂ}
@@ -259,16 +264,17 @@ theorem terminating_reciprocal_one_sub
     (ht : ∀ k : ℕ, 1 - b - m ≠ -(k : ℂ))
     (hz : z ≠ 1) :
     ₂F₁ (-m : ℂ) b c z =
-      poch b m / poch c m * (1 - z) ^ m * ₂F₁ (-m : ℂ) (c - b) (1 - b - m) (1 / (1 - z)) := by
+      pochhammer b m / pochhammer c m * (1 - z) ^ m *
+          ₂F₁ (-m : ℂ) (c - b) (1 - b - m) (1 / (1 - z)) := by
   by_cases hz0 : z = 0
   · subst hz0
-    have hbm : poch b m ≠ 0 := by
+    have hbm : pochhammer b m ≠ 0 := by
       intro h
-      apply poch_ne_zero_of_not_neg_nat ht m
-      rw [poch_one_sub_sub, h, mul_zero]
+      apply pochhammer_ne_zero_of_not_neg_nat ht m
+      rw [pochhammer_one_sub_sub, h, mul_zero]
     rw [ordinaryHypergeometric_zero, sub_zero, div_one, one_pow, mul_one, chu_vandermonde m ht,
-      show 1 - b - m - (c - b) = 1 - c - m by ring, poch_one_sub_sub, poch_one_sub_sub]
-    field_simp [poch_ne_zero_of_not_neg_nat hc m]
+      show 1 - b - m - (c - b) = 1 - c - m by ring, pochhammer_one_sub_sub, pochhammer_one_sub_sub]
+    field_simp [pochhammer_ne_zero_of_not_neg_nat hc m]
   · rw [terminating_reciprocal m hc ht hz0,
       terminating_pfaff m ht (by
         intro h
@@ -279,11 +285,12 @@ theorem terminating_reciprocal_one_sub
       show 1 / z / (1 / z - 1) = 1 / (1 - z) by
         have : 1 - z ≠ 0 := sub_ne_zero.mpr (Ne.symm hz)
         field_simp]
-    rw [← mul_assoc, mul_assoc (poch b m / poch c m), ← mul_pow,
+    rw [← mul_assoc, mul_assoc (pochhammer b m / pochhammer c m), ← mul_pow,
       show -z * (1 - 1 / z) = 1 - z by field_simp; ring]
 
-/-- Identity under the stated parameter and domain assumptions: `₂F₁ (-m : ℂ) b c z = poch (c - b)
-m / poch c m * z ^ m * ₂F₁ (-m : ℂ) (1 - c - m) (b - c - m + 1) (1 - 1 / z)`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`₂F₁ (-m : ℂ) b c z = pochhammer (c - b) m / pochhammer c m * z ^ m * ₂F₁ (-m : ℂ) (1 - c - m) (b -
+c - m + 1) (1 - 1 / z)`. -/
 @[dlmf 15.8.E7]
 theorem terminating_one_sub_recip
     {b c z : ℂ}
@@ -292,7 +299,8 @@ theorem terminating_one_sub_recip
     (ht : ∀ k : ℕ, b - c - m + 1 ≠ -(k : ℂ))
     (hz : z ≠ 0) :
     ₂F₁ (-m : ℂ) b c z =
-      poch (c - b) m / poch c m * z ^ m * ₂F₁ (-m : ℂ) (1 - c - m) (b - c - m + 1) (1 - 1 / z) := by
+      pochhammer (c - b) m / pochhammer c m * z ^ m *
+          ₂F₁ (-m : ℂ) (1 - c - m) (b - c - m + 1) (1 - 1 / z) := by
   by_cases hz1 : z = 1
   · subst hz1
     rw [chu_vandermonde m hc, div_one, sub_self, ordinaryHypergeometric_zero, one_pow]
@@ -304,17 +312,18 @@ theorem terminating_one_sub_recip
     rw [terminating_pfaff m hc hz1, terminating_reciprocal m hc ht' hu0,
       show 1 - (c - b) - m = b - c - m + 1 by ring,
       show 1 / (z / (z - 1)) = 1 - 1 / z by field_simp,
-      show (1 - z) ^ m * (poch (c - b) m / poch c m * (-(z / (z - 1))) ^ m *
+      show (1 - z) ^ m * (pochhammer (c - b) m / pochhammer c m * (-(z / (z - 1))) ^ m *
           ₂F₁ (-(m : ℂ)) (1 - c - m) (b - c - m + 1) (1 - 1 / z)) =
-        poch (c - b) m / poch c m * ((1 - z) * -(z / (z - 1))) ^ m *
+        pochhammer (c - b) m / pochhammer c m * ((1 - z) * -(z / (z - 1))) ^ m *
           ₂F₁ (-(m : ℂ)) (1 - c - m) (b - c - m + 1) (1 - 1 / z) by rw [mul_pow]; ring,
       show (1 - z) * -(z / (z - 1)) = z by
         have : z - 1 ≠ 0 := sub_ne_zero.mpr hz1
         field_simp
         ring]
 
-/-- Identity under the stated parameter and domain assumptions: `₂F₁ (-m : ℂ) b c z = poch (c - b)
-m / poch c m * ₂F₁ (-m : ℂ) b (b - c - m + 1) (1 - z)`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`₂F₁ (-m : ℂ) b c z = pochhammer (c - b) m / pochhammer c m * ₂F₁ (-m : ℂ) b (b - c - m + 1) (1 -
+z)`. -/
 @[dlmf 15.8.E7]
 theorem terminating_one_sub
     {b c z : ℂ}
@@ -322,17 +331,17 @@ theorem terminating_one_sub
     (hc : ∀ k : ℕ, c ≠ -(k : ℂ))
     (ht : ∀ k : ℕ, b - c - m + 1 ≠ -(k : ℂ)) :
     ₂F₁ (-m : ℂ) b c z =
-      poch (c - b) m / poch c m * ₂F₁ (-m : ℂ) b (b - c - m + 1) (1 - z) := by
-  have hCm : poch (c - b) m ≠ 0 := by
+      pochhammer (c - b) m / pochhammer c m * ₂F₁ (-m : ℂ) b (b - c - m + 1) (1 - z) := by
+  have hCm : pochhammer (c - b) m ≠ 0 := by
     intro h
-    apply poch_ne_zero_of_not_neg_nat ht m
-    rw [show b - c - m + 1 = 1 - (c - b) - m by ring, poch_one_sub_sub, h, mul_zero]
+    apply pochhammer_ne_zero_of_not_neg_nat ht m
+    rw [show b - c - m + 1 = 1 - (c - b) - m by ring, pochhammer_one_sub_sub, h, mul_zero]
   by_cases hz0 : z = 0
   · subst hz0
     rw [ordinaryHypergeometric_zero, sub_zero, chu_vandermonde m ht,
       show b - c - m + 1 - b = 1 - c - m by ring, show b - c - m + 1 = 1 - (c - b) - m by ring,
-      poch_one_sub_sub, poch_one_sub_sub]
-    field_simp [poch_ne_zero_of_not_neg_nat hc m]
+      pochhammer_one_sub_sub, pochhammer_one_sub_sub]
+    field_simp [pochhammer_ne_zero_of_not_neg_nat hc m]
   · rw [terminating_one_sub_recip m hc ht hz0, terminating_pfaff m ht (by
         intro h
         have h' : (1 : ℂ) / z = 0 := by linear_combination -h
@@ -340,8 +349,9 @@ theorem terminating_one_sub
       show b - c - m + 1 - (1 - c - m) = b by ring,
       show (1 - 1 / z) / (1 - 1 / z - 1) = 1 - z by field_simp; ring,
       show (1 : ℂ) - (1 - 1 / z) = 1 / z by ring]
-    rw [show poch (c - b) m / poch c m * z ^ m * ((1 / z) ^ m * ₂F₁ (-(m : ℂ)) b (b - c - m + 1)
-        (1 - z)) = poch (c - b) m / poch c m * (z * (1 / z)) ^ m *
+    rw [show pochhammer (c - b) m / pochhammer c m * z ^ m *
+        ((1 / z) ^ m * ₂F₁ (-(m : ℂ)) b (b - c - m + 1)
+        (1 - z)) = pochhammer (c - b) m / pochhammer c m * (z * (1 / z)) ^ m *
           ₂F₁ (-(m : ℂ)) b (b - c - m + 1) (1 - z) by rw [mul_pow]; ring,
       mul_one_div_cancel hz0, one_pow, mul_one]
 

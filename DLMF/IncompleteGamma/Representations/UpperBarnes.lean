@@ -35,7 +35,7 @@ the poles crossed by the separating contour.
   `Re a < 1 + c`, from the Barnes integral for `U` (DLMF 13.4.17).
 * `IncompleteGammaBarnes.canonicalIntegral_differentiableAt`: holomorphy of the residue-corrected
   integral in `a`.
-* `upperIncGamma_mellinBarnes_continued`: DLMF 8.6.12 on the logarithmic plane with explicit
+* `upperIncompleteGamma_mellinBarnes_continued`: DLMF 8.6.12 on the logarithmic plane with explicit
   separating-contour residues.
 -/
 
@@ -467,7 +467,7 @@ theorem IncompleteGammaBarnes.sin_ne_zero_strip {c : ℝ} (h0 : -1 < c) (h1 : c 
 
 /-- The right-hand side of DLMF 8.6.12 (without residues). -/
 def IncompleteGammaBarnes.upperRhs (a w : ℂ) : ℂ :=
-    -Gamma (1-a)*exp ((1-a)*w+exp w)*upperIncGammaOnLog a w
+    -Gamma (1-a)*exp ((1-a)*w+exp w)*upperIncompleteGammaOnLog a w
 
 /-- DLMF 8.6.12 for real `w` and `Re a < 1 + c`, from the Barnes integral for `U` (13.4.17). -/
 theorem IncompleteGammaBarnes.base_real {a : ℂ} (ha : ∀ n : ℕ, a ≠ n+1) {c : ℝ}
@@ -502,8 +502,9 @@ theorem IncompleteGammaBarnes.base_real {a : ℂ} (ha : ∀ n : ℕ, a ≠ n+1) 
     field_simp
   simp only [hpt] at hb
   rw [integral_const_mul] at hb
-  rw [IncompleteGammaBarnes.upperRhs, upperIncGammaOnLog_eq_upperIncGamma a (by simp [Real.pi_pos])
-    (by simp [Real.pi_pos.le]), upperIncGamma, ← ofReal_exp, ← hx, hb, hxc]
+  rw [IncompleteGammaBarnes.upperRhs,
+      upperIncompleteGammaOnLog_eq_upperIncompleteGamma a (by simp [Real.pi_pos])
+    (by simp [Real.pi_pos.le]), upperIncompleteGamma, ← ofReal_exp, ← hx, hb, hxc]
   have hpi : (π:ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
   have he : exp (-(1-a)*w) * exp ((1-a)*w) = 1 := by rw [← Complex.exp_add]; ring_nf; simp
   have he2 : exp (-(x:ℂ)) * exp (x:ℂ) = 1 := by rw [← Complex.exp_add]; simp
@@ -576,7 +577,8 @@ theorem IncompleteGammaBarnes.base {a : ℂ} (ha : ∀ n : ℕ, a ≠ n+1) {c : 
     refine DifferentiableOn.analyticOnNhd (fun w _ => ?_) hUo
     unfold IncompleteGammaBarnes.upperRhs
     exact (((differentiableAt_const _).mul (by fun_prop)).mul
-      (hasDerivAt_upperIncGammaOnLog a w).differentiableAt).const_mul _ |>.differentiableWithinAt
+      (hasDerivAt_upperIncompleteGammaOnLog a w).differentiableAt).const_mul
+          _ |>.differentiableWithinAt
   have h0 : (0:ℂ) ∈ U := by simp [U, Real.pi_pos]
   have hfreq : ∃ᶠ v in 𝓝[≠] (0:ℂ), (∫ y : ℝ, IncompleteGammaBarnes.integrand a v (c + y*I)) =
       2*π*IncompleteGammaBarnes.upperRhs a v := by
@@ -948,10 +950,10 @@ theorem IncompleteGammaBarnes.residueSum_eq {a : ℂ} (ha : ∀ n : ℕ, a ≠ n
 
 /-- Logarithmic-plane formula with explicit separating-contour residues. -/
 @[dlmf 8.6.E12]
-theorem upperIncGamma_mellinBarnes_continued {a : ℂ} (ha : ∀ n : ℕ, a ≠ n+1) (w : ℂ)
+theorem upperIncompleteGamma_mellinBarnes_continued {a : ℂ} (ha : ∀ n : ℕ, a ≠ n+1) (w : ℂ)
     (hw : |w.im| < 3*π/2) {c : ℝ} (hc0 : -1 < c) (hc1 : c < 0) (hca : ∀ n : ℕ, a.re-1-n ≠ c) :
     HasIntegralWholeLine (fun y : ℝ => let s : ℂ := c+y*I; Gamma (s+1-a)*π/sin (π*s)*exp (-s*w))
-        (2*π*(-Gamma (1-a)*exp ((1-a)*w+exp w)*upperIncGammaOnLog a
+        (2*π*(-Gamma (1-a)*exp ((1-a)*w+exp w)*upperIncompleteGammaOnLog a
         w-gammaBarnesResidueSum a w c)) := by
   set D : Set ℂ := {a : ℂ | ∀ n : ℕ, a ≠ n+1}
   set E : Set ℂ := {b : ℂ | ∀ n : ℕ, b ≠ 0 - n}
@@ -978,7 +980,7 @@ theorem upperIncGamma_mellinBarnes_continued {a : ℂ} (ha : ∀ n : ℕ, a ≠ 
     have hG : ∀ m : ℕ, 1 - b ≠ -m := fun m h => hb m (by linear_combination -h)
     unfold IncompleteGammaBarnes.upperRhs
     exact ((((differentiableAt_Gamma _ hG).comp b (by fun_prop)).neg.mul (by fun_prop)).mul
-      (upperIncGammaOnLog_parameter_entire w b)).const_mul _ |>.differentiableWithinAt
+      (upperIncompleteGammaOnLog_parameter_entire w b)).const_mul _ |>.differentiableWithinAt
   have hpos : ∀ b : ℂ, b.re < 1/2 → IncompleteGammaBarnes.canonicalIntegral w b =
       2*π*IncompleteGammaBarnes.upperRhs b w := by
     intro b hb
@@ -1009,7 +1011,7 @@ theorem upperIncGamma_mellinBarnes_continued {a : ℂ} (ha : ∀ n : ℕ, a ≠ 
       (IncompleteGammaBarnes.sin_ne_zero_strip hc0 hc1) hca
   have hv : ∫ y : ℝ, IncompleteGammaBarnes.integrand a w (c + y*I) =
       2*π*(-Gamma (1-a)*exp ((1-a)*w+exp w)*
-      upperIncGammaOnLog a w - ∑ n ∈ Finset.range ⌈a.re-1-c⌉₊,
+      upperIncompleteGammaOnLog a w - ∑ n ∈ Finset.range ⌈a.re-1-c⌉₊,
           IncompleteGammaBarnes.residue a w n) := by
     unfold IncompleteGammaBarnes.correctedIntegral at hJ;
         unfold IncompleteGammaBarnes.upperRhs at hJ

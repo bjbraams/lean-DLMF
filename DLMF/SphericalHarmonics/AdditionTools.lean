@@ -15,9 +15,9 @@ files.
 
 ## Main results
 
-* `conj_regularizedGaussHG`: conjugation symmetry of the regularized Gauss function
+* `conj_regularizedGaussHypergeometric`: conjugation symmetry of the regularized Gauss function
   `𝐅(a,b;c;z)` on the whole cut plane, by the identity theorem from the disk case
-  `DLMF.Legendre.regularizedGaussHG_conj`.
+  `DLMF.Legendre.regularizedGaussHypergeometric_conj`.
 * `conj_eval_map_ofReal`, `iteratedDeriv_even_neg`: real polynomials commute
   with conjugation, and derivatives of even functions have parity `(-1)^k`.
 * `legendreBranchPower_I_mul`: the principal-branch value of the Legendre branch power
@@ -35,27 +35,27 @@ namespace DLMF.SphericalHarmonics
 open DLMF.Legendre
 
 /-- Conjugation symmetry of the regularized Gauss function on the whole cut plane
-`ℂ \ [1, ∞)`, extending `DLMF.Legendre.regularizedGaussHG_conj` from the unit disk by the
-identity theorem. -/
-theorem conj_regularizedGaussHG (a b c : ℂ) {z : ℂ} (hz : z ∈ cutPlane) :
-    conj (regularizedGaussHG a b c z) =
-      regularizedGaussHG (conj a) (conj b) (conj c) (conj z) := by
+`ℂ \ [1, ∞)`, extending `DLMF.Legendre.regularizedGaussHypergeometric_conj` from the unit disk by
+the identity theorem. -/
+theorem conj_regularizedGaussHypergeometric (a b c : ℂ) {z : ℂ} (hz : z ∈ cutPlane) :
+    conj (regularizedGaussHypergeometric a b c z) =
+      regularizedGaussHypergeometric (conj a) (conj b) (conj c) (conj z) := by
   have hconjCut : ∀ w ∈ cutPlane, conj w ∈ cutPlane := by
     intro w hw
     simp only [cutPlane, mem_ofPred_eq] at hw ⊢
     rw [show 1 - conj w = conj (1 - w) by simp]
     rw [mem_slitPlane_iff] at hw ⊢
     simp only [conj_re, conj_im, neg_ne_zero]; exact hw
-  have hg : AnalyticOnNhd ℂ (conj ∘ regularizedGaussHG a b c ∘ conj) cutPlane := by
+  have hg : AnalyticOnNhd ℂ (conj ∘ regularizedGaussHypergeometric a b c ∘ conj) cutPlane := by
     refine DifferentiableOn.analyticOnNhd (fun w hw => ?_) isOpen_cutPlane
-    have h := (differentiableAt_regularizedGaussHG a b c (hconjCut w hw)).conj_conj
+    have h := (differentiableAt_regularizedGaussHypergeometric a b c (hconjCut w hw)).conj_conj
     rw [conj_conj] at h
     exact h.differentiableWithinAt
   have hEq := eqOn_cutPlane_of_eqOn_ball hg
-      (analyticOnNhd_regularizedGaussHG (conj a) (conj b) (conj c))
+      (analyticOnNhd_regularizedGaussHypergeometric (conj a) (conj b) (conj c))
     one_pos (fun w hw => by
       have hw' : ‖conj w‖ < 1 := by rw [RCLike.norm_conj]; simpa using hw
-      simp only [Function.comp, regularizedGaussHG_conj hw', conj_conj])
+      simp only [Function.comp, regularizedGaussHypergeometric_conj hw', conj_conj])
   have := hEq (hconjCut z hz)
   simpa only [Function.comp, conj_conj] using this
 

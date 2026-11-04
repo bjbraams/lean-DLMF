@@ -19,8 +19,8 @@ properties.
   momenta and projections (DLMF §34.1, 34.2.1–34.2.2).
 * `IsAdmissible3j`, `IsAdmissible6j`: the admissibility conditions of the `3j` and `6j`
   symbols.
-* `factQ`, `invFactQ`, `signPow`: factorials, reciprocal factorials and signs of rational
-  arguments.
+* `ratFactorial`, `ratInvFactorial`, `signPow`: factorials, reciprocal factorials and signs of
+  rational arguments.
 * `triangleDelta`: the triangle coefficient of DLMF 34.2.5.
 * `wigner3j`: the `3j` symbol by Racah's formula (DLMF 34.2.4). It is `0` unless
   `IsAdmissible3j` holds: the triangle conditions (34.2.1), the projection conditions (34.2.2)
@@ -40,7 +40,7 @@ properties.
 
 * `wigner3j_of_not`, `wigner6j_of_not`: the symbols vanish outside the admissible range.
 * `IsTriad.symm12`, `IsTriad.cycle`, `IsTriad.symm23`: symmetries of triads.
-* `invFactQ_eq_zero_iff_neg`: `invFactQ x = 0` exactly when `x < 0`.
+* `ratInvFactorial_eq_zero_iff_neg`: `ratInvFactorial x = 0` exactly when `x < 0`.
 
 ## Implementation notes
 
@@ -105,12 +105,12 @@ def IsAdmissible6j (j₁ j₂ j₃ l₁ l₂ l₃ : ℚ) : Prop :=
 
 /-- The factorial `x!` of a rational argument, `⌊x⌋.toNat !`. Only used where `x` is a
 nonnegative integer. -/
-def factQ (x : ℚ) : ℝ := ((⌊x⌋).toNat.factorial : ℝ)
+def ratFactorial (x : ℚ) : ℝ := ((⌊x⌋).toNat.factorial : ℝ)
 
 /-- The reciprocal factorial `1/x!` of a rational argument, `0` for `x < 0` (the convention
 `1/Γ(1 + x) = 0` at negative integers). It implements DLMF's "summation over all
 nonnegative integers `s` such that the arguments in the factorials are nonnegative". -/
-def invFactQ (x : ℚ) : ℝ := if 0 ≤ x then (factQ x)⁻¹ else 0
+def ratInvFactorial (x : ℚ) : ℝ := if 0 ≤ x then (ratFactorial x)⁻¹ else 0
 
 /-- The sign `(-1)^x`, as `(-1)^⌊x⌋`. Only used where `x` is an integer. -/
 def signPow (x : ℚ) : ℝ := (-1 : ℝ) ^ ⌊x⌋
@@ -121,17 +121,20 @@ def signPow (x : ℚ) : ℝ := (-1 : ℝ) ^ ⌊x⌋
 `Δ(j₁ j₂ j₃) = ((j₁+j₂-j₃)! (j₁-j₂+j₃)! (-j₁+j₂+j₃)! / (j₁+j₂+j₃+1)!)^{1/2}`. -/
 @[dlmf 34.2.E5]
 def triangleDelta (j₁ j₂ j₃ : ℚ) : ℝ :=
-  Real.sqrt (factQ (j₁ + j₂ - j₃) * factQ (j₁ - j₂ + j₃) * factQ (-j₁ + j₂ + j₃) /
-    factQ (j₁ + j₂ + j₃ + 1))
+  Real.sqrt (ratFactorial (j₁ + j₂ - j₃) * ratFactorial (j₁ - j₂ + j₃) *
+      ratFactorial (-j₁ + j₂ + j₃) /
+    ratFactorial (j₁ + j₂ + j₃ + 1))
 
 /-- The summand of Racah's formula 34.2.4 at the summation index `s`. -/
 def racahTerm3j (j₁ j₂ j₃ m₁ m₂ : ℚ) (s : ℕ) : ℝ :=
-  (-1 : ℝ) ^ s * invFactQ s * invFactQ (j₁ + j₂ - j₃ - s) * invFactQ (j₁ - m₁ - s) *
-    invFactQ (j₂ + m₂ - s) * invFactQ (j₃ - j₂ + m₁ + s) * invFactQ (j₃ - j₁ - m₂ + s)
+  (-1 : ℝ) ^ s * ratInvFactorial s * ratInvFactorial (j₁ + j₂ - j₃ - s) *
+      ratInvFactorial (j₁ - m₁ - s) *
+    ratInvFactorial (j₂ + m₂ - s) * ratInvFactorial (j₃ - j₂ + m₁ + s) *
+        ratInvFactorial (j₃ - j₁ - m₂ + s)
 
 /-- DLMF 34.2.4: the Wigner `3j` symbol
 `(j₁ j₂ j₃; m₁ m₂ m₃)`, by Racah's finite sum. The summation index `s` runs over the
-nonnegative integers with `s ≤ j₁ + j₂ - j₃`; the reciprocal factorials `invFactQ` vanish
+nonnegative integers with `s ≤ j₁ + j₂ - j₃`; the reciprocal factorials `ratInvFactorial` vanish
 where an argument is negative, so this is DLMF's sum over all `s` with nonnegative factorial
 arguments. The symbol is `0` unless `IsAdmissible3j` (34.2.1–34.2.3) holds. -/
 @[dlmf 34.2.E4]
@@ -139,8 +142,9 @@ def wigner3j (j₁ j₂ j₃ m₁ m₂ m₃ : ℚ) : ℝ := by
   classical
   exact if IsAdmissible3j j₁ j₂ j₃ m₁ m₂ m₃ then
     signPow (j₁ - j₂ - m₃) * triangleDelta j₁ j₂ j₃ *
-      Real.sqrt (factQ (j₁ + m₁) * factQ (j₁ - m₁) * factQ (j₂ + m₂) * factQ (j₂ - m₂) *
-        factQ (j₃ + m₃) * factQ (j₃ - m₃)) *
+      Real.sqrt (ratFactorial (j₁ + m₁) * ratFactorial (j₁ - m₁) * ratFactorial (j₂ + m₂) *
+          ratFactorial (j₂ - m₂) *
+        ratFactorial (j₃ + m₃) * ratFactorial (j₃ - m₃)) *
       ∑ s ∈ range (⌊j₁ + j₂ - j₃⌋.toNat + 1), racahTerm3j j₁ j₂ j₃ m₁ m₂ s
   else 0
 
@@ -151,20 +155,22 @@ def clebschGordan (j₁ m₁ j₂ m₂ j₃ m₃ : ℚ) : ℝ :=
   signPow (j₁ - j₂ + m₃) * Real.sqrt (2 * (j₃ : ℝ) + 1) * wigner3j j₁ j₂ j₃ m₁ m₂ (-m₃)
 
 /-- Racah's sum 34.2.4 in symmetric form: `∑_s (-1)^s / ∏ᵢ (xᵢ - s)! ∏ₖ (s - yₖ)!` over all
-integers `s` (finitely many nonzero terms; `invFactQ` vanishes at negative arguments). A helper
-for the symmetry relations of the `3j` symbol. -/
+integers `s` (finitely many nonzero terms; `ratInvFactorial` vanishes at negative arguments). A
+helper for the symmetry relations of the `3j` symbol. -/
 def symmetricRacahSum (x₁ x₂ x₃ y₁ y₂ y₃ : ℚ) : ℝ :=
-  ∑ᶠ s : ℤ, (-1 : ℝ) ^ s * (invFactQ (x₁ - s) * invFactQ (x₂ - s) * invFactQ (x₃ - s) *
-    (invFactQ (s - y₁) * invFactQ (s - y₂) * invFactQ (s - y₃)))
+  ∑ᶠ s : ℤ, (-1 : ℝ) ^ s *
+      (ratInvFactorial (x₁ - s) * ratInvFactorial (x₂ - s) * ratInvFactorial (x₃ - s) *
+    (ratInvFactorial (s - y₁) * ratInvFactorial (s - y₂) * ratInvFactorial (s - y₃)))
 
 /-! ## The `6j` symbol -/
 
 /-- The summand of the single-sum formula 34.4.2 at the summation index `s`. -/
 def racahTerm6j (j₁ j₂ j₃ l₁ l₂ l₃ : ℚ) (s : ℕ) : ℝ :=
   (-1 : ℝ) ^ s * ((s + 1).factorial : ℝ) *
-    invFactQ (s - j₁ - j₂ - j₃) * invFactQ (s - j₁ - l₂ - l₃) * invFactQ (s - l₁ - j₂ - l₃) *
-    invFactQ (s - l₁ - l₂ - j₃) * invFactQ (j₁ + j₂ + l₁ + l₂ - s) *
-    invFactQ (j₂ + j₃ + l₂ + l₃ - s) * invFactQ (j₃ + j₁ + l₃ + l₁ - s)
+    ratInvFactorial (s - j₁ - j₂ - j₃) * ratInvFactorial (s - j₁ - l₂ - l₃) *
+        ratInvFactorial (s - l₁ - j₂ - l₃) *
+    ratInvFactorial (s - l₁ - l₂ - j₃) * ratInvFactorial (j₁ + j₂ + l₁ + l₂ - s) *
+    ratInvFactorial (j₂ + j₃ + l₂ + l₃ - s) * ratInvFactorial (j₃ + j₁ + l₃ + l₁ - s)
 
 /-- DLMF 34.4.2: the Wigner `6j` symbol `{j₁ j₂ j₃; l₁ l₂ l₃}`, by the single finite sum
 (Racah). The index `s` runs over `0 ≤ s ≤ j₁ + j₂ + l₁ + l₂`, and the reciprocal factorials
@@ -226,29 +232,30 @@ def largeParameterAngle (j₁ j₂ j₃ : ℝ) : ℝ :=
 
 /-! ## API for the rational factorials and signs -/
 
-/-- `factQ` at a natural number is the factorial. -/
-@[simp] theorem factQ_natCast (n : ℕ) : factQ n = (n.factorial : ℝ) := by
-  simp [factQ]
+/-- `ratFactorial` at a natural number is the factorial. -/
+@[simp] theorem ratFactorial_natCast (n : ℕ) : ratFactorial n = (n.factorial : ℝ) := by
+  simp [ratFactorial]
 
-/-- `factQ x = n!` when `x = n`. -/
-theorem factQ_of_eq {x : ℚ} {n : ℕ} (h : x = n) : factQ x = (n.factorial : ℝ) := by
-  rw [h, factQ_natCast]
+/-- `ratFactorial x = n!` when `x = n`. -/
+theorem ratFactorial_of_eq {x : ℚ} {n : ℕ} (h : x = n) : ratFactorial x = (n.factorial : ℝ) := by
+  rw [h, ratFactorial_natCast]
 
-/-- `invFactQ` at a natural number is the reciprocal factorial. -/
-@[simp] theorem invFactQ_natCast (n : ℕ) : invFactQ n = ((n.factorial : ℝ))⁻¹ := by
-  simp [invFactQ]
+/-- `ratInvFactorial` at a natural number is the reciprocal factorial. -/
+@[simp] theorem ratInvFactorial_natCast (n : ℕ) : ratInvFactorial n = ((n.factorial : ℝ))⁻¹ := by
+  simp [ratInvFactorial]
 
-/-- `invFactQ x = 1/n!` when `x = n`. -/
-theorem invFactQ_of_eq {x : ℚ} {n : ℕ} (h : x = n) : invFactQ x = ((n.factorial : ℝ))⁻¹ := by
-  rw [h, invFactQ_natCast]
+/-- `ratInvFactorial x = 1/n!` when `x = n`. -/
+theorem ratInvFactorial_of_eq {x : ℚ} {n : ℕ} (h : x = n) : ratInvFactorial x =
+    ((n.factorial : ℝ))⁻¹ := by
+  rw [h, ratInvFactorial_natCast]
 
-/-- `invFactQ` vanishes at negative arguments. -/
-theorem invFactQ_of_neg {x : ℚ} (h : x < 0) : invFactQ x = 0 := by
-  simp [invFactQ, not_le.mpr h]
+/-- `ratInvFactorial` vanishes at negative arguments. -/
+theorem ratInvFactorial_of_neg {x : ℚ} (h : x < 0) : ratInvFactorial x = 0 := by
+  simp [ratInvFactorial, not_le.mpr h]
 
-/-- `invFactQ x = 0` exactly when `x < 0`. -/
-theorem invFactQ_eq_zero_iff_neg {x : ℚ} : invFactQ x = 0 ↔ x < 0 := by
-  unfold invFactQ factQ
+/-- `ratInvFactorial x = 0` exactly when `x < 0`. -/
+theorem ratInvFactorial_eq_zero_iff_neg {x : ℚ} : ratInvFactorial x = 0 ↔ x < 0 := by
+  unfold ratInvFactorial ratFactorial
   split_ifs with h
   · simp only [inv_eq_zero, Nat.cast_eq_zero]
     exact ⟨fun h' => absurd h' (Nat.factorial_ne_zero _), fun h' => absurd h' (not_lt.mpr h)⟩
@@ -361,12 +368,13 @@ theorem sqrt_mul_eq_sqrt_of_eq {A B C : ℝ} (hA : 0 ≤ A) (hB : 0 ≤ B) (h : 
 theorem one_add_natCast_eq (n : ℕ) : (1 : ℚ) + n = ((1 + n : ℕ) : ℚ) := by push_cast; ring
 
 /-- `0! = 1`. -/
-@[simp] theorem factQ_zero : factQ 0 = 1 := by simp [factQ]
+@[simp] theorem ratFactorial_zero : ratFactorial 0 = 1 := by simp [ratFactorial]
 /-- `1/0! = 1`. -/
-@[simp] theorem invFactQ_zero : invFactQ 0 = 1 := by simp [invFactQ, factQ]
+@[simp] theorem ratInvFactorial_zero : ratInvFactorial 0 = 1 := by
+    simp [ratInvFactorial, ratFactorial]
 
 /-- Reciprocal factorials are nonnegative. -/
-theorem invFactQ_nonneg (x : ℚ) : 0 ≤ invFactQ x := by
-  unfold invFactQ factQ; split_ifs <;> positivity
+theorem ratInvFactorial_nonneg (x : ℚ) : 0 ≤ ratInvFactorial x := by
+  unfold ratInvFactorial ratFactorial; split_ifs <;> positivity
 
 end DLMF.WignerSymbols

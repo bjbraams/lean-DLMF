@@ -23,14 +23,14 @@ and away from the poles.
 
 ## Main results
 
-* `hasDerivAt_jacobiPQk`: the derivative of a general quotient `pq(z, k)`.
-* `jacobiCdk_sq_add_jacobiComodulusk_sq_mul_jacobiSdk_sq`, `jacobiNck_sq_sub_jacobiSck_sq`,
-  `jacobiNsk_sq_sub_jacobiCsk_sq` and companions: sums of squares for the quotient functions.
-* `hasDerivAt_jacobiSnk`, `hasDerivAt_jacobiCnk`, `hasDerivAt_jacobiDnk`: `sn' = cn dn`,
+* `hasDerivAt_jacobiPQ`: the derivative of a general quotient `pq(z, k)`.
+* `jacobiCd_sq_add_jacobiComodulus_sq_mul_jacobiSd_sq`, `jacobiNc_sq_sub_jacobiSc_sq`,
+  `jacobiNs_sq_sub_jacobiCs_sq` and companions: sums of squares for the quotient functions.
+* `hasDerivAt_jacobiSn`, `hasDerivAt_jacobiCn`, `hasDerivAt_jacobiDn`: `sn' = cn dn`,
   `cn' = -sn dn`, `dn' = -k² sn cn`.
-* `hasDerivAt_jacobiCdk`, `hasDerivAt_jacobiSdk`, `hasDerivAt_jacobiNdk`,
-  `hasDerivAt_jacobiDck`, `hasDerivAt_jacobiNck`, `hasDerivAt_jacobiSck`,
-  `hasDerivAt_jacobiNsk`, `hasDerivAt_jacobiDsk`, `hasDerivAt_jacobiCsk`: the remaining entries
+* `hasDerivAt_jacobiCd`, `hasDerivAt_jacobiSd`, `hasDerivAt_jacobiNd`,
+  `hasDerivAt_jacobiDc`, `hasDerivAt_jacobiNc`, `hasDerivAt_jacobiSc`,
+  `hasDerivAt_jacobiNs`, `hasDerivAt_jacobiDs`, `hasDerivAt_jacobiCs`: the remaining entries
   of Table 22.13.1.
 -/
 
@@ -44,7 +44,7 @@ noncomputable section
 
 namespace DLMF.JacobiElliptic
 
-open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
+open DLMF.EllipticIntegrals (completeEllipticK completeEllipticKPrime)
 
 local notation "θ₁" => jacobiThetaOneTau
 
@@ -306,43 +306,45 @@ theorem differentiable_jacobiLetterThetaRaw (p : JacobiLetter) {τ : ℂ} (hτ :
   · exact DLMF.Theta.differentiable_jacobiThetaTau 3 hτ
   · exact DLMF.Theta.differentiable_jacobiThetaTau 4 hτ
 
-/-- At `z`, the function `(fun z => jacobiPQk p q z k)` has derivative
-`(jacobiLetterThetaConst p (jacobiTauk k) / jacobiLetterThetaConst q (jacobiTauk k) * (π / (2 *
-compEllIntKk k)) * (deriv (fun w => jacobiLetterThetaRaw p w (jacobiTauk k)) (jacobiZetak z k) *
-jacobiLetterThetaRaw q (jacobiZetak z k) (jacobiTauk k) - jacobiLetterThetaRaw p (jacobiZetak z k)
-(jacobiTauk k) * deriv (fun w => jacobiLetterThetaRaw q w (jacobiTauk k)) (jacobiZetak z k)) /
-jacobiLetterThetaRaw q (jacobiZetak z k) (jacobiTauk k) ^ 2)`. -/
-theorem hasDerivAt_jacobiPQk {k : ℂ} (hk : k ∈ jacobiModulusDomain) {p q : JacobiLetter}
-    (hpq : p ≠ q) {z : ℂ} (hz : jacobiLetterTheta q (jacobiZetak z k) (jacobiTauk k) ≠ 0) :
-    HasDerivAt (fun z => jacobiPQk p q z k)
-      (jacobiLetterThetaConst p (jacobiTauk k) / jacobiLetterThetaConst q (jacobiTauk k) *
-          (π / (2 * compEllIntKk k)) *
-        (deriv (fun w => jacobiLetterThetaRaw p w (jacobiTauk k)) (jacobiZetak z k) *
-            jacobiLetterThetaRaw q (jacobiZetak z k) (jacobiTauk k) -
-          jacobiLetterThetaRaw p (jacobiZetak z k) (jacobiTauk k) *
-            deriv (fun w => jacobiLetterThetaRaw q w (jacobiTauk k)) (jacobiZetak z k)) /
-        jacobiLetterThetaRaw q (jacobiZetak z k) (jacobiTauk k) ^ 2) z := by
-  have hτ := jacobiTauk_im_pos hk
-  have hK := compEllIntKk_ne_zero_of_mem_jacobiModulusDomain hk
-  have hfun : (fun z => jacobiPQk p q z k) = fun z =>
-      (jacobiLetterThetaConst p (jacobiTauk k) *
-          jacobiLetterThetaRaw p (jacobiZetak z k) (jacobiTauk k)) /
-        (jacobiLetterThetaConst q (jacobiTauk k) *
-            jacobiLetterThetaRaw q (jacobiZetak z k) (jacobiTauk k)) := by
-    funext w; simp [jacobiPQk, jacobiGlaisher, hpq, jacobiLetterTheta_eq_const_mul_raw]
+/-- At `z`, the function `(fun z => jacobiPQ p q z k)` has derivative
+`(jacobiLetterThetaConst p (jacobiTau k) / jacobiLetterThetaConst q (jacobiTau k) * (π / (2 *
+completeEllipticK k)) * (deriv (fun w => jacobiLetterThetaRaw p w (jacobiTau k))
+(jacobiThetaArgument z k) * jacobiLetterThetaRaw q (jacobiThetaArgument z k) (jacobiTau k) -
+jacobiLetterThetaRaw p (jacobiThetaArgument z k) (jacobiTau k) * deriv (fun w =>
+jacobiLetterThetaRaw q w (jacobiTau k)) (jacobiThetaArgument z k)) / jacobiLetterThetaRaw q
+(jacobiThetaArgument z k) (jacobiTau k) ^ 2)`. -/
+theorem hasDerivAt_jacobiPQ {k : ℂ} (hk : k ∈ jacobiModulusDomain) {p q : JacobiLetter}
+    (hpq : p ≠ q) {z : ℂ} (hz : jacobiLetterTheta q (jacobiThetaArgument z k) (jacobiTau k) ≠ 0) :
+    HasDerivAt (fun z => jacobiPQ p q z k)
+      (jacobiLetterThetaConst p (jacobiTau k) / jacobiLetterThetaConst q (jacobiTau k) *
+          (π / (2 * completeEllipticK k)) *
+        (deriv (fun w => jacobiLetterThetaRaw p w (jacobiTau k)) (jacobiThetaArgument z k) *
+            jacobiLetterThetaRaw q (jacobiThetaArgument z k) (jacobiTau k) -
+          jacobiLetterThetaRaw p (jacobiThetaArgument z k) (jacobiTau k) *
+            deriv (fun w => jacobiLetterThetaRaw q w (jacobiTau k)) (jacobiThetaArgument z k)) /
+        jacobiLetterThetaRaw q (jacobiThetaArgument z k) (jacobiTau k) ^ 2) z := by
+  have hτ := jacobiTau_im_pos hk
+  have hK := completeEllipticK_ne_zero_of_mem_jacobiModulusDomain hk
+  have hfun : (fun z => jacobiPQ p q z k) = fun z =>
+      (jacobiLetterThetaConst p (jacobiTau k) *
+          jacobiLetterThetaRaw p (jacobiThetaArgument z k) (jacobiTau k)) /
+        (jacobiLetterThetaConst q (jacobiTau k) *
+            jacobiLetterThetaRaw q (jacobiThetaArgument z k) (jacobiTau k)) := by
+    funext w; simp [jacobiPQ, jacobiGlaisher, hpq, jacobiLetterTheta_eq_const_mul_raw]
   rw [hfun]
   rw [jacobiLetterTheta_eq_const_mul_raw] at hz
-  have hζ : HasDerivAt (fun z => jacobiZetak z k) (π / (2 * compEllIntKk k)) z := by
-    have := ((hasDerivAt_id z).const_mul (π : ℂ)).div_const (2 * compEllIntKk k)
-    simpa [jacobiZetak] using this
+  have hζ : HasDerivAt (fun z => jacobiThetaArgument z k) (π / (2 * completeEllipticK k)) z := by
+    have := ((hasDerivAt_id z).const_mul (π : ℂ)).div_const (2 * completeEllipticK k)
+    simpa [jacobiThetaArgument] using this
   have hp := (((differentiable_jacobiLetterThetaRaw p hτ) _).hasDerivAt.comp z hζ).const_mul
-    (jacobiLetterThetaConst p (jacobiTauk k))
+    (jacobiLetterThetaConst p (jacobiTau k))
   have hq := (((differentiable_jacobiLetterThetaRaw q hτ) _).hasDerivAt.comp z hζ).const_mul
-    (jacobiLetterThetaConst q (jacobiTauk k))
+    (jacobiLetterThetaConst q (jacobiTau k))
   convert hp.div hq hz using 1
   · funext y; rfl
-  have hN : jacobiLetterThetaConst q (jacobiTauk k) ≠ 0 := left_ne_zero_of_mul hz
-  have hT : jacobiLetterThetaRaw q (jacobiZetak z k) (jacobiTauk k) ≠ 0 := right_ne_zero_of_mul hz
+  have hN : jacobiLetterThetaConst q (jacobiTau k) ≠ 0 := left_ne_zero_of_mul hz
+  have hT : jacobiLetterThetaRaw q (jacobiThetaArgument z k) (jacobiTau k) ≠ 0 :=
+      right_ne_zero_of_mul hz
   simp only [Function.comp_def]
   field_simp
 
@@ -352,21 +354,21 @@ section Complex
 
 variable {k : ℂ}
 
-/-- Identity under the stated parameter and domain assumptions: `jacobiCdk z k ^ 2 +
-jacobiComodulusk k ^ 2 * jacobiSdk z k ^ 2 = 1`. -/
-lemma jacobiCdk_sq_add_jacobiComodulusk_sq_mul_jacobiSdk_sq (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hz : jacobiLetterTheta .d (jacobiZetak z k) (jacobiTauk k) ≠ 0) :
-    jacobiCdk z k ^ 2 + jacobiComodulusk k ^ 2 * jacobiSdk z k ^ 2 = 1 := by
-  have hτ := jacobiTauk_im_pos hk
+/-- Identity under the stated parameter and domain assumptions: `jacobiCd z k ^ 2 +
+jacobiComodulus k ^ 2 * jacobiSd z k ^ 2 = 1`. -/
+lemma jacobiCd_sq_add_jacobiComodulus_sq_mul_jacobiSd_sq (hk : k ∈ jacobiModulusDomain) {z : ℂ}
+    (hz : jacobiLetterTheta .d (jacobiThetaArgument z k) (jacobiTau k) ≠ 0) :
+    jacobiCd z k ^ 2 + jacobiComodulus k ^ 2 * jacobiSd z k ^ 2 = 1 := by
+  have hτ := jacobiTau_im_pos hk
   have hmod := (jacobi_inversion_k hk).1
   rw [← (jacobi_inversion_k hk).2.1]
-  have hz' : θ₃ (jacobiZetak z k) (jacobiTauk k) ≠ 0 := by
+  have hz' : θ₃ (jacobiThetaArgument z k) (jacobiTau k) ≠ 0 := by
     intro h'; apply hz; simp [jacobiLetterTheta, h']
-  simp only [jacobiSdk, jacobiCdk, 
-    jacobiPQk, jacobiGlaisher, jacobiLetterTheta, jacobiComodulusTau, reduceCtorEq, ↓reduceIte]
-  rw [jacobiModulusTau] at hmod
-  generalize jacobiZetak z k = x at hz' ⊢
-  generalize jacobiTauk k = τ at hτ hz' hmod ⊢
+  simp only [jacobiSd, jacobiCd, 
+    jacobiPQ, jacobiGlaisher, jacobiLetterTheta, jacobiComodulusOfTau, reduceCtorEq, ↓reduceIte]
+  rw [jacobiModulusOfTau] at hmod
+  generalize jacobiThetaArgument z k = x at hz' ⊢
+  generalize jacobiTau k = τ at hτ hz' hmod ⊢
   subst hmod
   obtain ⟨h2, h3, h4, -⟩ := jacobiThetaTau_zero_ne_zero_and_pow_four τ hτ
   have e := DLMF.Theta.jacobiTheta_sq_two_three x τ hτ
@@ -375,20 +377,20 @@ lemma jacobiCdk_sq_add_jacobiComodulusk_sq_mul_jacobiSdk_sq (hk : k ∈ jacobiMo
   field_simp
   linear_combination -e
 
-/-- Identity under the stated parameter and domain assumptions: `jacobiNdk z k ^ 2 - k ^ 2 *
-jacobiSdk z k ^ 2 = 1`. -/
-lemma jacobiNdk_sq_sub_sq_mul_jacobiSdk_sq (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hz : jacobiLetterTheta .d (jacobiZetak z k) (jacobiTauk k) ≠ 0) :
-    jacobiNdk z k ^ 2 - k ^ 2 * jacobiSdk z k ^ 2 = 1 := by
-  have hτ := jacobiTauk_im_pos hk
+/-- Identity under the stated parameter and domain assumptions: `jacobiNd z k ^ 2 - k ^ 2 *
+jacobiSd z k ^ 2 = 1`. -/
+lemma jacobiNd_sq_sub_sq_mul_jacobiSd_sq (hk : k ∈ jacobiModulusDomain) {z : ℂ}
+    (hz : jacobiLetterTheta .d (jacobiThetaArgument z k) (jacobiTau k) ≠ 0) :
+    jacobiNd z k ^ 2 - k ^ 2 * jacobiSd z k ^ 2 = 1 := by
+  have hτ := jacobiTau_im_pos hk
   have hmod := (jacobi_inversion_k hk).1
-  have hz' : θ₃ (jacobiZetak z k) (jacobiTauk k) ≠ 0 := by
+  have hz' : θ₃ (jacobiThetaArgument z k) (jacobiTau k) ≠ 0 := by
     intro h'; apply hz; simp [jacobiLetterTheta, h']
-  simp only [jacobiSdk, jacobiNdk, 
-    jacobiPQk, jacobiGlaisher, jacobiLetterTheta, reduceCtorEq, ↓reduceIte]
-  rw [jacobiModulusTau] at hmod
-  generalize jacobiZetak z k = x at hz' ⊢
-  generalize jacobiTauk k = τ at hτ hz' hmod ⊢
+  simp only [jacobiSd, jacobiNd, 
+    jacobiPQ, jacobiGlaisher, jacobiLetterTheta, reduceCtorEq, ↓reduceIte]
+  rw [jacobiModulusOfTau] at hmod
+  generalize jacobiThetaArgument z k = x at hz' ⊢
+  generalize jacobiTau k = τ at hτ hz' hmod ⊢
   subst hmod
   obtain ⟨h2, h3, h4, -⟩ := jacobiThetaTau_zero_ne_zero_and_pow_four τ hτ
   have e := DLMF.Theta.jacobiTheta_sq_three_four x τ hτ
@@ -397,20 +399,20 @@ lemma jacobiNdk_sq_sub_sq_mul_jacobiSdk_sq (hk : k ∈ jacobiModulusDomain) {z :
   field_simp
   linear_combination e
 
-/-- Identity under the stated parameter and domain assumptions: `jacobiNck z k ^ 2 - jacobiSck z k
+/-- Identity under the stated parameter and domain assumptions: `jacobiNc z k ^ 2 - jacobiSc z k
 ^ 2 = 1`. -/
-lemma jacobiNck_sq_sub_jacobiSck_sq (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hz : jacobiLetterTheta .c (jacobiZetak z k) (jacobiTauk k) ≠ 0) :
-    jacobiNck z k ^ 2 - jacobiSck z k ^ 2 = 1 := by
-  have hτ := jacobiTauk_im_pos hk
+lemma jacobiNc_sq_sub_jacobiSc_sq (hk : k ∈ jacobiModulusDomain) {z : ℂ}
+    (hz : jacobiLetterTheta .c (jacobiThetaArgument z k) (jacobiTau k) ≠ 0) :
+    jacobiNc z k ^ 2 - jacobiSc z k ^ 2 = 1 := by
+  have hτ := jacobiTau_im_pos hk
   have hmod := (jacobi_inversion_k hk).1
-  have hz' : θ₂ (jacobiZetak z k) (jacobiTauk k) ≠ 0 := by
+  have hz' : θ₂ (jacobiThetaArgument z k) (jacobiTau k) ≠ 0 := by
     intro h'; apply hz; simp [jacobiLetterTheta, h']
-  simp only [jacobiSck, jacobiNck, 
-    jacobiPQk, jacobiGlaisher, jacobiLetterTheta, reduceCtorEq, ↓reduceIte]
-  rw [jacobiModulusTau] at hmod
-  generalize jacobiZetak z k = x at hz' ⊢
-  generalize jacobiTauk k = τ at hτ hz' hmod ⊢
+  simp only [jacobiSc, jacobiNc, 
+    jacobiPQ, jacobiGlaisher, jacobiLetterTheta, reduceCtorEq, ↓reduceIte]
+  rw [jacobiModulusOfTau] at hmod
+  generalize jacobiThetaArgument z k = x at hz' ⊢
+  generalize jacobiTau k = τ at hτ hz' hmod ⊢
   subst hmod
   obtain ⟨h2, h3, h4, -⟩ := jacobiThetaTau_zero_ne_zero_and_pow_four τ hτ
   have e := DLMF.Theta.jacobiTheta_sq_two_four x τ hτ
@@ -419,21 +421,21 @@ lemma jacobiNck_sq_sub_jacobiSck_sq (hk : k ∈ jacobiModulusDomain) {z : ℂ}
   field_simp
   linear_combination e
 
-/-- Identity under the stated parameter and domain assumptions: `jacobiDck z k ^ 2 -
-jacobiComodulusk k ^ 2 * jacobiSck z k ^ 2 = 1`. -/
-lemma jacobiDck_sq_sub_jacobiComodulusk_sq_mul_jacobiSck_sq (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hz : jacobiLetterTheta .c (jacobiZetak z k) (jacobiTauk k) ≠ 0) :
-    jacobiDck z k ^ 2 - jacobiComodulusk k ^ 2 * jacobiSck z k ^ 2 = 1 := by
-  have hτ := jacobiTauk_im_pos hk
+/-- Identity under the stated parameter and domain assumptions: `jacobiDc z k ^ 2 -
+jacobiComodulus k ^ 2 * jacobiSc z k ^ 2 = 1`. -/
+lemma jacobiDc_sq_sub_jacobiComodulus_sq_mul_jacobiSc_sq (hk : k ∈ jacobiModulusDomain) {z : ℂ}
+    (hz : jacobiLetterTheta .c (jacobiThetaArgument z k) (jacobiTau k) ≠ 0) :
+    jacobiDc z k ^ 2 - jacobiComodulus k ^ 2 * jacobiSc z k ^ 2 = 1 := by
+  have hτ := jacobiTau_im_pos hk
   have hmod := (jacobi_inversion_k hk).1
   rw [← (jacobi_inversion_k hk).2.1]
-  have hz' : θ₂ (jacobiZetak z k) (jacobiTauk k) ≠ 0 := by
+  have hz' : θ₂ (jacobiThetaArgument z k) (jacobiTau k) ≠ 0 := by
     intro h'; apply hz; simp [jacobiLetterTheta, h']
-  simp only [jacobiSck, jacobiDck, 
-    jacobiPQk, jacobiGlaisher, jacobiLetterTheta, jacobiComodulusTau, reduceCtorEq, ↓reduceIte]
-  rw [jacobiModulusTau] at hmod
-  generalize jacobiZetak z k = x at hz' ⊢
-  generalize jacobiTauk k = τ at hτ hz' hmod ⊢
+  simp only [jacobiSc, jacobiDc, 
+    jacobiPQ, jacobiGlaisher, jacobiLetterTheta, jacobiComodulusOfTau, reduceCtorEq, ↓reduceIte]
+  rw [jacobiModulusOfTau] at hmod
+  generalize jacobiThetaArgument z k = x at hz' ⊢
+  generalize jacobiTau k = τ at hτ hz' hmod ⊢
   subst hmod
   obtain ⟨h2, h3, h4, -⟩ := jacobiThetaTau_zero_ne_zero_and_pow_four τ hτ
   have e := DLMF.Theta.jacobiTheta_sq_two_three x τ hτ
@@ -442,20 +444,20 @@ lemma jacobiDck_sq_sub_jacobiComodulusk_sq_mul_jacobiSck_sq (hk : k ∈ jacobiMo
   field_simp
   linear_combination e
 
-/-- Identity under the stated parameter and domain assumptions: `jacobiNsk z k ^ 2 - jacobiCsk z k
+/-- Identity under the stated parameter and domain assumptions: `jacobiNs z k ^ 2 - jacobiCs z k
 ^ 2 = 1`. -/
-lemma jacobiNsk_sq_sub_jacobiCsk_sq (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hz : jacobiLetterTheta .s (jacobiZetak z k) (jacobiTauk k) ≠ 0) :
-    jacobiNsk z k ^ 2 - jacobiCsk z k ^ 2 = 1 := by
-  have hτ := jacobiTauk_im_pos hk
+lemma jacobiNs_sq_sub_jacobiCs_sq (hk : k ∈ jacobiModulusDomain) {z : ℂ}
+    (hz : jacobiLetterTheta .s (jacobiThetaArgument z k) (jacobiTau k) ≠ 0) :
+    jacobiNs z k ^ 2 - jacobiCs z k ^ 2 = 1 := by
+  have hτ := jacobiTau_im_pos hk
   have hmod := (jacobi_inversion_k hk).1
-  have hz' : θ₁ (jacobiZetak z k) (jacobiTauk k) ≠ 0 := by
+  have hz' : θ₁ (jacobiThetaArgument z k) (jacobiTau k) ≠ 0 := by
     intro h'; apply hz; simp [jacobiLetterTheta, h']
-  simp only [jacobiNsk, jacobiCsk,
-    jacobiPQk, jacobiGlaisher, jacobiLetterTheta, reduceCtorEq, ↓reduceIte]
-  rw [jacobiModulusTau] at hmod
-  generalize jacobiZetak z k = x at hz' ⊢
-  generalize jacobiTauk k = τ at hτ hz' hmod ⊢
+  simp only [jacobiNs, jacobiCs,
+    jacobiPQ, jacobiGlaisher, jacobiLetterTheta, reduceCtorEq, ↓reduceIte]
+  rw [jacobiModulusOfTau] at hmod
+  generalize jacobiThetaArgument z k = x at hz' ⊢
+  generalize jacobiTau k = τ at hτ hz' hmod ⊢
   subst hmod
   obtain ⟨h2, h3, h4, -⟩ := jacobiThetaTau_zero_ne_zero_and_pow_four τ hτ
   have e := DLMF.Theta.jacobiTheta_sq_two_four x τ hτ
@@ -464,22 +466,22 @@ lemma jacobiNsk_sq_sub_jacobiCsk_sq (hk : k ∈ jacobiModulusDomain) {z : ℂ}
   field_simp
   linear_combination e
 
-/-- Identity under the stated parameter and domain assumptions: `jacobiDsk z k ^ 2 - jacobiCsk z k
-^ 2 = jacobiComodulusk k ^ 2`. -/
-lemma jacobiDsk_sq_sub_jacobiCsk_sq (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hz : jacobiLetterTheta .s (jacobiZetak z k) (jacobiTauk k) ≠ 0) :
-    jacobiDsk z k ^ 2 - jacobiCsk z k ^ 2 = jacobiComodulusk k ^ 2 := by
-  have hτ := jacobiTauk_im_pos hk
+/-- Identity under the stated parameter and domain assumptions: `jacobiDs z k ^ 2 - jacobiCs z k
+^ 2 = jacobiComodulus k ^ 2`. -/
+lemma jacobiDs_sq_sub_jacobiCs_sq (hk : k ∈ jacobiModulusDomain) {z : ℂ}
+    (hz : jacobiLetterTheta .s (jacobiThetaArgument z k) (jacobiTau k) ≠ 0) :
+    jacobiDs z k ^ 2 - jacobiCs z k ^ 2 = jacobiComodulus k ^ 2 := by
+  have hτ := jacobiTau_im_pos hk
   have hmod := (jacobi_inversion_k hk).1
   rw [← (jacobi_inversion_k hk).2.1]
-  have hz' : θ₁ (jacobiZetak z k) (jacobiTauk k) ≠ 0 := by
+  have hz' : θ₁ (jacobiThetaArgument z k) (jacobiTau k) ≠ 0 := by
     intro h'; apply hz; simp [jacobiLetterTheta, h']
-  simp only [jacobiCsk,
-    jacobiDsk, jacobiPQk, jacobiGlaisher, jacobiLetterTheta, jacobiComodulusTau, reduceCtorEq,
+  simp only [jacobiCs,
+    jacobiDs, jacobiPQ, jacobiGlaisher, jacobiLetterTheta, jacobiComodulusOfTau, reduceCtorEq,
     ↓reduceIte]
-  rw [jacobiModulusTau] at hmod
-  generalize jacobiZetak z k = x at hz' ⊢
-  generalize jacobiTauk k = τ at hτ hz' hmod ⊢
+  rw [jacobiModulusOfTau] at hmod
+  generalize jacobiThetaArgument z k = x at hz' ⊢
+  generalize jacobiTau k = τ at hτ hz' hmod ⊢
   subst hmod
   obtain ⟨h2, h3, h4, -⟩ := jacobiThetaTau_zero_ne_zero_and_pow_four τ hτ
   have e := DLMF.Theta.jacobiTheta_sq_two_three x τ hτ
@@ -488,38 +490,38 @@ lemma jacobiDsk_sq_sub_jacobiCsk_sq (hk : k ∈ jacobiModulusDomain) {z : ℂ}
   field_simp
   linear_combination e
 
-/-- Nonvanishing under the stated hypotheses: `∀ᶠ w in 𝓝 z, jacobiLetterTheta p (jacobiZetak w k)
-(jacobiTauk k) ≠ 0`. -/
+/-- Nonvanishing under the stated hypotheses:
+`∀ᶠ w in 𝓝 z, jacobiLetterTheta p (jacobiThetaArgument w k) (jacobiTau k) ≠ 0`. -/
 theorem eventually_jacobiLetterTheta_ne_zero (hk : k ∈ jacobiModulusDomain)
     {p : JacobiLetter} {z : ℂ}
-    (hz : jacobiLetterTheta p (jacobiZetak z k) (jacobiTauk k) ≠ 0) :
-    ∀ᶠ w in 𝓝 z, jacobiLetterTheta p (jacobiZetak w k) (jacobiTauk k) ≠ 0 := by
-  have hτ := jacobiTauk_im_pos hk
-  have hc : Continuous fun w => jacobiLetterTheta p (jacobiZetak w k) (jacobiTauk k) := by
+    (hz : jacobiLetterTheta p (jacobiThetaArgument z k) (jacobiTau k) ≠ 0) :
+    ∀ᶠ w in 𝓝 z, jacobiLetterTheta p (jacobiThetaArgument w k) (jacobiTau k) ≠ 0 := by
+  have hτ := jacobiTau_im_pos hk
+  have hc : Continuous fun w => jacobiLetterTheta p (jacobiThetaArgument w k) (jacobiTau k) := by
     simp only [jacobiLetterTheta_eq_const_mul_raw]
     exact continuous_const.mul ((differentiable_jacobiLetterThetaRaw p hτ).continuous.comp
-      (by unfold jacobiZetak; fun_prop))
+      (by unfold jacobiThetaArgument; fun_prop))
   exact hc.continuousAt.eventually_ne hz
 
 /-- DLMF Table 22.13.1: `d sn(z,k)/dz = cn(z,k) dn(z,k)`, for `k ∈ jacobiModulusDomain` and `z`
 not a pole of `sn` (`θ₄(πz/(2K)) ≠ 0`). -/
 @[dlmf 22.13.T1 "domain: k ∈ jacobiModulusDomain, z not a pole"]
-theorem hasDerivAt_jacobiSnk (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hz : jacobiLetterTheta .n (jacobiZetak z k) (jacobiTauk k) ≠ 0) :
-    HasDerivAt (fun z => jacobiSnk z k) (jacobiCnk z k * jacobiDnk z k) z := by
-  have h := hasDerivAt_jacobiPQk hk (p := .s) (q := .n) (by decide) hz
+theorem hasDerivAt_jacobiSn (hk : k ∈ jacobiModulusDomain) {z : ℂ}
+    (hz : jacobiLetterTheta .n (jacobiThetaArgument z k) (jacobiTau k) ≠ 0) :
+    HasDerivAt (fun z => jacobiSn z k) (jacobiCn z k * jacobiDn z k) z := by
+  have h := hasDerivAt_jacobiPQ hk (p := .s) (q := .n) (by decide) hz
   refine h.congr_deriv ?_
-  have hτ := jacobiTauk_im_pos hk
+  have hτ := jacobiTau_im_pos hk
   have hmod := (jacobi_inversion_k hk).1
   rw [← (jacobi_inversion_k hk).2.2]
   rw [jacobiLetterTheta_eq_const_mul_raw] at hz
-  simp only [jacobiCnk, jacobiDnk, jacobiPQk, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw,
+  simp only [jacobiCn, jacobiDn, jacobiPQ, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw,
       jacobiLetterThetaConst, jacobiLetterThetaRaw,
       reduceCtorEq, ↓reduceIte] at hz ⊢
-  rw [jacobiThetaTau_wronskian_one_four hτ, compEllIntKTau]
-  rw [jacobiModulusTau] at hmod
-  generalize jacobiZetak z k = x at hz ⊢
-  generalize jacobiTauk k = τ at hτ hz hmod ⊢
+  rw [jacobiThetaTau_wronskian_one_four hτ, completeEllipticKOfTau]
+  rw [jacobiModulusOfTau] at hmod
+  generalize jacobiThetaArgument z k = x at hz ⊢
+  generalize jacobiTau k = τ at hτ hz hmod ⊢
   subst hmod
   obtain ⟨h2, h3, h4, -⟩ := jacobiThetaTau_zero_ne_zero_and_pow_four τ hτ
   have hx := right_ne_zero_of_mul hz
@@ -527,22 +529,22 @@ theorem hasDerivAt_jacobiSnk (hk : k ∈ jacobiModulusDomain) {z : ℂ}
 
 /-- DLMF Table 22.13.1: `d cn(z,k)/dz = -sn(z,k) dn(z,k)`, away from the poles. -/
 @[dlmf 22.13.T1 "domain: k ∈ jacobiModulusDomain, z not a pole"]
-theorem hasDerivAt_jacobiCnk (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hz : jacobiLetterTheta .n (jacobiZetak z k) (jacobiTauk k) ≠ 0) :
-    HasDerivAt (fun z => jacobiCnk z k) (-(jacobiSnk z k * jacobiDnk z k)) z := by
-  have h := hasDerivAt_jacobiPQk hk (p := .c) (q := .n) (by decide) hz
+theorem hasDerivAt_jacobiCn (hk : k ∈ jacobiModulusDomain) {z : ℂ}
+    (hz : jacobiLetterTheta .n (jacobiThetaArgument z k) (jacobiTau k) ≠ 0) :
+    HasDerivAt (fun z => jacobiCn z k) (-(jacobiSn z k * jacobiDn z k)) z := by
+  have h := hasDerivAt_jacobiPQ hk (p := .c) (q := .n) (by decide) hz
   refine h.congr_deriv ?_
-  have hτ := jacobiTauk_im_pos hk
+  have hτ := jacobiTau_im_pos hk
   have hmod := (jacobi_inversion_k hk).1
   rw [← (jacobi_inversion_k hk).2.2]
   rw [jacobiLetterTheta_eq_const_mul_raw] at hz
-  simp only [jacobiDnk, jacobiSnk, jacobiPQk, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw,
+  simp only [jacobiDn, jacobiSn, jacobiPQ, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw,
       jacobiLetterThetaConst, jacobiLetterThetaRaw,
       reduceCtorEq, ↓reduceIte] at hz ⊢
-  rw [jacobiThetaTau_wronskian_two_four hτ, compEllIntKTau]
-  rw [jacobiModulusTau] at hmod
-  generalize jacobiZetak z k = x at hz ⊢
-  generalize jacobiTauk k = τ at hτ hz hmod ⊢
+  rw [jacobiThetaTau_wronskian_two_four hτ, completeEllipticKOfTau]
+  rw [jacobiModulusOfTau] at hmod
+  generalize jacobiThetaArgument z k = x at hz ⊢
+  generalize jacobiTau k = τ at hτ hz hmod ⊢
   subst hmod
   obtain ⟨h2, h3, h4, -⟩ := jacobiThetaTau_zero_ne_zero_and_pow_four τ hτ
   have hx := right_ne_zero_of_mul hz
@@ -550,22 +552,22 @@ theorem hasDerivAt_jacobiCnk (hk : k ∈ jacobiModulusDomain) {z : ℂ}
 
 /-- DLMF Table 22.13.1: `d dn(z,k)/dz = -k² sn(z,k) cn(z,k)`, away from the poles. -/
 @[dlmf 22.13.T1 "domain: k ∈ jacobiModulusDomain, z not a pole"]
-theorem hasDerivAt_jacobiDnk (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hz : jacobiLetterTheta .n (jacobiZetak z k) (jacobiTauk k) ≠ 0) :
-    HasDerivAt (fun z => jacobiDnk z k) (-(k ^ 2 * jacobiSnk z k * jacobiCnk z k)) z := by
-  have h := hasDerivAt_jacobiPQk hk (p := .d) (q := .n) (by decide) hz
+theorem hasDerivAt_jacobiDn (hk : k ∈ jacobiModulusDomain) {z : ℂ}
+    (hz : jacobiLetterTheta .n (jacobiThetaArgument z k) (jacobiTau k) ≠ 0) :
+    HasDerivAt (fun z => jacobiDn z k) (-(k ^ 2 * jacobiSn z k * jacobiCn z k)) z := by
+  have h := hasDerivAt_jacobiPQ hk (p := .d) (q := .n) (by decide) hz
   refine h.congr_deriv ?_
-  have hτ := jacobiTauk_im_pos hk
+  have hτ := jacobiTau_im_pos hk
   have hmod := (jacobi_inversion_k hk).1
   rw [← (jacobi_inversion_k hk).2.2]
   rw [jacobiLetterTheta_eq_const_mul_raw] at hz
-  simp only [jacobiCnk, jacobiSnk, jacobiPQk, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw,
+  simp only [jacobiCn, jacobiSn, jacobiPQ, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw,
       jacobiLetterThetaConst, jacobiLetterThetaRaw,
       reduceCtorEq, ↓reduceIte] at hz ⊢
-  rw [jacobiThetaTau_wronskian_three_four hτ, compEllIntKTau]
-  rw [jacobiModulusTau] at hmod
-  generalize jacobiZetak z k = x at hz ⊢
-  generalize jacobiTauk k = τ at hτ hz hmod ⊢
+  rw [jacobiThetaTau_wronskian_three_four hτ, completeEllipticKOfTau]
+  rw [jacobiModulusOfTau] at hmod
+  generalize jacobiThetaArgument z k = x at hz ⊢
+  generalize jacobiTau k = τ at hτ hz hmod ⊢
   subst hmod
   obtain ⟨h2, h3, h4, -⟩ := jacobiThetaTau_zero_ne_zero_and_pow_four τ hτ
   have hx := right_ne_zero_of_mul hz
@@ -574,24 +576,24 @@ theorem hasDerivAt_jacobiDnk (hk : k ∈ jacobiModulusDomain) {z : ℂ}
 /-- DLMF Table 22.13.1: `d cd(z,k)/dz = -k'² sd(z,k) nd(z,k)`, away from the poles
 (`θ₃(πz/(2K)) ≠ 0`). -/
 @[dlmf 22.13.T1 "domain: k ∈ jacobiModulusDomain, z not a pole"]
-theorem hasDerivAt_jacobiCdk (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hz : jacobiLetterTheta .d (jacobiZetak z k) (jacobiTauk k) ≠ 0) :
-    HasDerivAt (fun z => jacobiCdk z k)
-      (-(jacobiComodulusk k ^ 2 * jacobiSdk z k * jacobiNdk z k)) z := by
-  have h := hasDerivAt_jacobiPQk hk (p := .c) (q := .d) (by decide) hz
+theorem hasDerivAt_jacobiCd (hk : k ∈ jacobiModulusDomain) {z : ℂ}
+    (hz : jacobiLetterTheta .d (jacobiThetaArgument z k) (jacobiTau k) ≠ 0) :
+    HasDerivAt (fun z => jacobiCd z k)
+      (-(jacobiComodulus k ^ 2 * jacobiSd z k * jacobiNd z k)) z := by
+  have h := hasDerivAt_jacobiPQ hk (p := .c) (q := .d) (by decide) hz
   refine h.congr_deriv ?_
-  have hτ := jacobiTauk_im_pos hk
+  have hτ := jacobiTau_im_pos hk
   have hmod := (jacobi_inversion_k hk).1
   rw [← (jacobi_inversion_k hk).2.2]
   rw [← (jacobi_inversion_k hk).2.1]
   rw [jacobiLetterTheta_eq_const_mul_raw] at hz
-  simp only [jacobiNdk, jacobiSdk, jacobiPQk, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw,
+  simp only [jacobiNd, jacobiSd, jacobiPQ, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw,
       jacobiLetterThetaConst, jacobiLetterThetaRaw,
-      jacobiComodulusTau, reduceCtorEq, ↓reduceIte] at hz ⊢
-  rw [jacobiThetaTau_wronskian_two_three hτ, compEllIntKTau]
-  rw [jacobiModulusTau] at hmod
-  generalize jacobiZetak z k = x at hz ⊢
-  generalize jacobiTauk k = τ at hτ hz hmod ⊢
+      jacobiComodulusOfTau, reduceCtorEq, ↓reduceIte] at hz ⊢
+  rw [jacobiThetaTau_wronskian_two_three hτ, completeEllipticKOfTau]
+  rw [jacobiModulusOfTau] at hmod
+  generalize jacobiThetaArgument z k = x at hz ⊢
+  generalize jacobiTau k = τ at hτ hz hmod ⊢
   subst hmod
   obtain ⟨h2, h3, h4, -⟩ := jacobiThetaTau_zero_ne_zero_and_pow_four τ hτ
   have hx := right_ne_zero_of_mul hz
@@ -599,22 +601,22 @@ theorem hasDerivAt_jacobiCdk (hk : k ∈ jacobiModulusDomain) {z : ℂ}
 
 /-- DLMF Table 22.13.1: `d sd(z,k)/dz = cd(z,k) nd(z,k)`, away from the poles. -/
 @[dlmf 22.13.T1 "domain: k ∈ jacobiModulusDomain, z not a pole"]
-theorem hasDerivAt_jacobiSdk (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hz : jacobiLetterTheta .d (jacobiZetak z k) (jacobiTauk k) ≠ 0) :
-    HasDerivAt (fun z => jacobiSdk z k) (jacobiCdk z k * jacobiNdk z k) z := by
-  have h := hasDerivAt_jacobiPQk hk (p := .s) (q := .d) (by decide) hz
+theorem hasDerivAt_jacobiSd (hk : k ∈ jacobiModulusDomain) {z : ℂ}
+    (hz : jacobiLetterTheta .d (jacobiThetaArgument z k) (jacobiTau k) ≠ 0) :
+    HasDerivAt (fun z => jacobiSd z k) (jacobiCd z k * jacobiNd z k) z := by
+  have h := hasDerivAt_jacobiPQ hk (p := .s) (q := .d) (by decide) hz
   refine h.congr_deriv ?_
-  have hτ := jacobiTauk_im_pos hk
+  have hτ := jacobiTau_im_pos hk
   have hmod := (jacobi_inversion_k hk).1
   rw [← (jacobi_inversion_k hk).2.2]
   rw [jacobiLetterTheta_eq_const_mul_raw] at hz
-  simp only [jacobiCdk, jacobiNdk, jacobiPQk, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw,
+  simp only [jacobiCd, jacobiNd, jacobiPQ, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw,
       jacobiLetterThetaConst, jacobiLetterThetaRaw,
       reduceCtorEq, ↓reduceIte] at hz ⊢
-  rw [jacobiThetaTau_wronskian_one_three hτ, compEllIntKTau]
-  rw [jacobiModulusTau] at hmod
-  generalize jacobiZetak z k = x at hz ⊢
-  generalize jacobiTauk k = τ at hτ hz hmod ⊢
+  rw [jacobiThetaTau_wronskian_one_three hτ, completeEllipticKOfTau]
+  rw [jacobiModulusOfTau] at hmod
+  generalize jacobiThetaArgument z k = x at hz ⊢
+  generalize jacobiTau k = τ at hτ hz hmod ⊢
   subst hmod
   obtain ⟨h2, h3, h4, -⟩ := jacobiThetaTau_zero_ne_zero_and_pow_four τ hτ
   have hx := right_ne_zero_of_mul hz
@@ -622,22 +624,22 @@ theorem hasDerivAt_jacobiSdk (hk : k ∈ jacobiModulusDomain) {z : ℂ}
 
 /-- DLMF Table 22.13.1: `d nd(z,k)/dz = k² sd(z,k) cd(z,k)`, away from the poles. -/
 @[dlmf 22.13.T1 "domain: k ∈ jacobiModulusDomain, z not a pole"]
-theorem hasDerivAt_jacobiNdk (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hz : jacobiLetterTheta .d (jacobiZetak z k) (jacobiTauk k) ≠ 0) :
-    HasDerivAt (fun z => jacobiNdk z k) (k ^ 2 * jacobiSdk z k * jacobiCdk z k) z := by
-  have h := hasDerivAt_jacobiPQk hk (p := .n) (q := .d) (by decide) hz
+theorem hasDerivAt_jacobiNd (hk : k ∈ jacobiModulusDomain) {z : ℂ}
+    (hz : jacobiLetterTheta .d (jacobiThetaArgument z k) (jacobiTau k) ≠ 0) :
+    HasDerivAt (fun z => jacobiNd z k) (k ^ 2 * jacobiSd z k * jacobiCd z k) z := by
+  have h := hasDerivAt_jacobiPQ hk (p := .n) (q := .d) (by decide) hz
   refine h.congr_deriv ?_
-  have hτ := jacobiTauk_im_pos hk
+  have hτ := jacobiTau_im_pos hk
   have hmod := (jacobi_inversion_k hk).1
   rw [← (jacobi_inversion_k hk).2.2]
   rw [jacobiLetterTheta_eq_const_mul_raw] at hz
-  simp only [jacobiCdk, jacobiSdk, jacobiPQk, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw,
+  simp only [jacobiCd, jacobiSd, jacobiPQ, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw,
       jacobiLetterThetaConst, jacobiLetterThetaRaw,
       reduceCtorEq, ↓reduceIte] at hz ⊢
-  rw [jacobiThetaTau_wronskian_four_three hτ, compEllIntKTau]
-  rw [jacobiModulusTau] at hmod
-  generalize jacobiZetak z k = x at hz ⊢
-  generalize jacobiTauk k = τ at hτ hz hmod ⊢
+  rw [jacobiThetaTau_wronskian_four_three hτ, completeEllipticKOfTau]
+  rw [jacobiModulusOfTau] at hmod
+  generalize jacobiThetaArgument z k = x at hz ⊢
+  generalize jacobiTau k = τ at hτ hz hmod ⊢
   subst hmod
   obtain ⟨h2, h3, h4, -⟩ := jacobiThetaTau_zero_ne_zero_and_pow_four τ hτ
   have hx := right_ne_zero_of_mul hz
@@ -646,24 +648,24 @@ theorem hasDerivAt_jacobiNdk (hk : k ∈ jacobiModulusDomain) {z : ℂ}
 /-- DLMF Table 22.13.1: `d dc(z,k)/dz = k'² sc(z,k) nc(z,k)`, away from the poles
 (`θ₂(πz/(2K)) ≠ 0`). -/
 @[dlmf 22.13.T1 "domain: k ∈ jacobiModulusDomain, z not a pole"]
-theorem hasDerivAt_jacobiDck (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hz : jacobiLetterTheta .c (jacobiZetak z k) (jacobiTauk k) ≠ 0) :
-    HasDerivAt (fun z => jacobiDck z k)
-      (jacobiComodulusk k ^ 2 * jacobiSck z k * jacobiNck z k) z := by
-  have h := hasDerivAt_jacobiPQk hk (p := .d) (q := .c) (by decide) hz
+theorem hasDerivAt_jacobiDc (hk : k ∈ jacobiModulusDomain) {z : ℂ}
+    (hz : jacobiLetterTheta .c (jacobiThetaArgument z k) (jacobiTau k) ≠ 0) :
+    HasDerivAt (fun z => jacobiDc z k)
+      (jacobiComodulus k ^ 2 * jacobiSc z k * jacobiNc z k) z := by
+  have h := hasDerivAt_jacobiPQ hk (p := .d) (q := .c) (by decide) hz
   refine h.congr_deriv ?_
-  have hτ := jacobiTauk_im_pos hk
+  have hτ := jacobiTau_im_pos hk
   have hmod := (jacobi_inversion_k hk).1
   rw [← (jacobi_inversion_k hk).2.2]
   rw [← (jacobi_inversion_k hk).2.1]
   rw [jacobiLetterTheta_eq_const_mul_raw] at hz
-  simp only [jacobiNck, jacobiSck, jacobiPQk, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw,
+  simp only [jacobiNc, jacobiSc, jacobiPQ, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw,
       jacobiLetterThetaConst, jacobiLetterThetaRaw,
-      jacobiComodulusTau, reduceCtorEq, ↓reduceIte] at hz ⊢
-  rw [jacobiThetaTau_wronskian_three_two hτ, compEllIntKTau]
-  rw [jacobiModulusTau] at hmod
-  generalize jacobiZetak z k = x at hz ⊢
-  generalize jacobiTauk k = τ at hτ hz hmod ⊢
+      jacobiComodulusOfTau, reduceCtorEq, ↓reduceIte] at hz ⊢
+  rw [jacobiThetaTau_wronskian_three_two hτ, completeEllipticKOfTau]
+  rw [jacobiModulusOfTau] at hmod
+  generalize jacobiThetaArgument z k = x at hz ⊢
+  generalize jacobiTau k = τ at hτ hz hmod ⊢
   subst hmod
   obtain ⟨h2, h3, h4, -⟩ := jacobiThetaTau_zero_ne_zero_and_pow_four τ hτ
   have hx := right_ne_zero_of_mul hz
@@ -671,22 +673,22 @@ theorem hasDerivAt_jacobiDck (hk : k ∈ jacobiModulusDomain) {z : ℂ}
 
 /-- DLMF Table 22.13.1: `d nc(z,k)/dz = sc(z,k) dc(z,k)`, away from the poles. -/
 @[dlmf 22.13.T1 "domain: k ∈ jacobiModulusDomain, z not a pole"]
-theorem hasDerivAt_jacobiNck (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hz : jacobiLetterTheta .c (jacobiZetak z k) (jacobiTauk k) ≠ 0) :
-    HasDerivAt (fun z => jacobiNck z k) (jacobiSck z k * jacobiDck z k) z := by
-  have h := hasDerivAt_jacobiPQk hk (p := .n) (q := .c) (by decide) hz
+theorem hasDerivAt_jacobiNc (hk : k ∈ jacobiModulusDomain) {z : ℂ}
+    (hz : jacobiLetterTheta .c (jacobiThetaArgument z k) (jacobiTau k) ≠ 0) :
+    HasDerivAt (fun z => jacobiNc z k) (jacobiSc z k * jacobiDc z k) z := by
+  have h := hasDerivAt_jacobiPQ hk (p := .n) (q := .c) (by decide) hz
   refine h.congr_deriv ?_
-  have hτ := jacobiTauk_im_pos hk
+  have hτ := jacobiTau_im_pos hk
   have hmod := (jacobi_inversion_k hk).1
   rw [← (jacobi_inversion_k hk).2.2]
   rw [jacobiLetterTheta_eq_const_mul_raw] at hz
-  simp only [jacobiDck, jacobiSck, jacobiPQk, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw,
+  simp only [jacobiDc, jacobiSc, jacobiPQ, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw,
       jacobiLetterThetaConst, jacobiLetterThetaRaw,
       reduceCtorEq, ↓reduceIte] at hz ⊢
-  rw [jacobiThetaTau_wronskian_four_two hτ, compEllIntKTau]
-  rw [jacobiModulusTau] at hmod
-  generalize jacobiZetak z k = x at hz ⊢
-  generalize jacobiTauk k = τ at hτ hz hmod ⊢
+  rw [jacobiThetaTau_wronskian_four_two hτ, completeEllipticKOfTau]
+  rw [jacobiModulusOfTau] at hmod
+  generalize jacobiThetaArgument z k = x at hz ⊢
+  generalize jacobiTau k = τ at hτ hz hmod ⊢
   subst hmod
   obtain ⟨h2, h3, h4, -⟩ := jacobiThetaTau_zero_ne_zero_and_pow_four τ hτ
   have hx := right_ne_zero_of_mul hz
@@ -694,22 +696,22 @@ theorem hasDerivAt_jacobiNck (hk : k ∈ jacobiModulusDomain) {z : ℂ}
 
 /-- DLMF Table 22.13.1: `d sc(z,k)/dz = dc(z,k) nc(z,k)`, away from the poles. -/
 @[dlmf 22.13.T1 "domain: k ∈ jacobiModulusDomain, z not a pole"]
-theorem hasDerivAt_jacobiSck (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hz : jacobiLetterTheta .c (jacobiZetak z k) (jacobiTauk k) ≠ 0) :
-    HasDerivAt (fun z => jacobiSck z k) (jacobiDck z k * jacobiNck z k) z := by
-  have h := hasDerivAt_jacobiPQk hk (p := .s) (q := .c) (by decide) hz
+theorem hasDerivAt_jacobiSc (hk : k ∈ jacobiModulusDomain) {z : ℂ}
+    (hz : jacobiLetterTheta .c (jacobiThetaArgument z k) (jacobiTau k) ≠ 0) :
+    HasDerivAt (fun z => jacobiSc z k) (jacobiDc z k * jacobiNc z k) z := by
+  have h := hasDerivAt_jacobiPQ hk (p := .s) (q := .c) (by decide) hz
   refine h.congr_deriv ?_
-  have hτ := jacobiTauk_im_pos hk
+  have hτ := jacobiTau_im_pos hk
   have hmod := (jacobi_inversion_k hk).1
   rw [← (jacobi_inversion_k hk).2.2]
   rw [jacobiLetterTheta_eq_const_mul_raw] at hz
-  simp only [jacobiDck, jacobiNck, jacobiPQk, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw,
+  simp only [jacobiDc, jacobiNc, jacobiPQ, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw,
       jacobiLetterThetaConst, jacobiLetterThetaRaw,
       reduceCtorEq, ↓reduceIte] at hz ⊢
-  rw [jacobiThetaTau_wronskian_one_two hτ, compEllIntKTau]
-  rw [jacobiModulusTau] at hmod
-  generalize jacobiZetak z k = x at hz ⊢
-  generalize jacobiTauk k = τ at hτ hz hmod ⊢
+  rw [jacobiThetaTau_wronskian_one_two hτ, completeEllipticKOfTau]
+  rw [jacobiModulusOfTau] at hmod
+  generalize jacobiThetaArgument z k = x at hz ⊢
+  generalize jacobiTau k = τ at hτ hz hmod ⊢
   subst hmod
   obtain ⟨h2, h3, h4, -⟩ := jacobiThetaTau_zero_ne_zero_and_pow_four τ hτ
   have hx := right_ne_zero_of_mul hz
@@ -718,22 +720,22 @@ theorem hasDerivAt_jacobiSck (hk : k ∈ jacobiModulusDomain) {z : ℂ}
 /-- DLMF Table 22.13.1: `d ns(z,k)/dz = -ds(z,k) cs(z,k)`, away from the poles
 (`θ₁(πz/(2K)) ≠ 0`). -/
 @[dlmf 22.13.T1 "domain: k ∈ jacobiModulusDomain, z not a pole"]
-theorem hasDerivAt_jacobiNsk (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hz : jacobiLetterTheta .s (jacobiZetak z k) (jacobiTauk k) ≠ 0) :
-    HasDerivAt (fun z => jacobiNsk z k) (-(jacobiDsk z k * jacobiCsk z k)) z := by
-  have h := hasDerivAt_jacobiPQk hk (p := .n) (q := .s) (by decide) hz
+theorem hasDerivAt_jacobiNs (hk : k ∈ jacobiModulusDomain) {z : ℂ}
+    (hz : jacobiLetterTheta .s (jacobiThetaArgument z k) (jacobiTau k) ≠ 0) :
+    HasDerivAt (fun z => jacobiNs z k) (-(jacobiDs z k * jacobiCs z k)) z := by
+  have h := hasDerivAt_jacobiPQ hk (p := .n) (q := .s) (by decide) hz
   refine h.congr_deriv ?_
-  have hτ := jacobiTauk_im_pos hk
+  have hτ := jacobiTau_im_pos hk
   have hmod := (jacobi_inversion_k hk).1
   rw [← (jacobi_inversion_k hk).2.2]
   rw [jacobiLetterTheta_eq_const_mul_raw] at hz
-  simp only [jacobiCsk, jacobiDsk, jacobiPQk, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw,
+  simp only [jacobiCs, jacobiDs, jacobiPQ, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw,
       jacobiLetterThetaConst, jacobiLetterThetaRaw,
       reduceCtorEq, ↓reduceIte] at hz ⊢
-  rw [jacobiThetaTau_wronskian_four_one hτ, compEllIntKTau]
-  rw [jacobiModulusTau] at hmod
-  generalize jacobiZetak z k = x at hz ⊢
-  generalize jacobiTauk k = τ at hτ hz hmod ⊢
+  rw [jacobiThetaTau_wronskian_four_one hτ, completeEllipticKOfTau]
+  rw [jacobiModulusOfTau] at hmod
+  generalize jacobiThetaArgument z k = x at hz ⊢
+  generalize jacobiTau k = τ at hτ hz hmod ⊢
   subst hmod
   obtain ⟨h2, h3, h4, -⟩ := jacobiThetaTau_zero_ne_zero_and_pow_four τ hτ
   have hx := right_ne_zero_of_mul hz
@@ -741,22 +743,22 @@ theorem hasDerivAt_jacobiNsk (hk : k ∈ jacobiModulusDomain) {z : ℂ}
 
 /-- DLMF Table 22.13.1: `d ds(z,k)/dz = -cs(z,k) ns(z,k)`, away from the poles. -/
 @[dlmf 22.13.T1 "domain: k ∈ jacobiModulusDomain, z not a pole"]
-theorem hasDerivAt_jacobiDsk (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hz : jacobiLetterTheta .s (jacobiZetak z k) (jacobiTauk k) ≠ 0) :
-    HasDerivAt (fun z => jacobiDsk z k) (-(jacobiCsk z k * jacobiNsk z k)) z := by
-  have h := hasDerivAt_jacobiPQk hk (p := .d) (q := .s) (by decide) hz
+theorem hasDerivAt_jacobiDs (hk : k ∈ jacobiModulusDomain) {z : ℂ}
+    (hz : jacobiLetterTheta .s (jacobiThetaArgument z k) (jacobiTau k) ≠ 0) :
+    HasDerivAt (fun z => jacobiDs z k) (-(jacobiCs z k * jacobiNs z k)) z := by
+  have h := hasDerivAt_jacobiPQ hk (p := .d) (q := .s) (by decide) hz
   refine h.congr_deriv ?_
-  have hτ := jacobiTauk_im_pos hk
+  have hτ := jacobiTau_im_pos hk
   have hmod := (jacobi_inversion_k hk).1
   rw [← (jacobi_inversion_k hk).2.2]
   rw [jacobiLetterTheta_eq_const_mul_raw] at hz
-  simp only [jacobiCsk, jacobiNsk, jacobiPQk, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw,
+  simp only [jacobiCs, jacobiNs, jacobiPQ, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw,
       jacobiLetterThetaConst, jacobiLetterThetaRaw,
       reduceCtorEq, ↓reduceIte] at hz ⊢
-  rw [jacobiThetaTau_wronskian_three_one hτ, compEllIntKTau]
-  rw [jacobiModulusTau] at hmod
-  generalize jacobiZetak z k = x at hz ⊢
-  generalize jacobiTauk k = τ at hτ hz hmod ⊢
+  rw [jacobiThetaTau_wronskian_three_one hτ, completeEllipticKOfTau]
+  rw [jacobiModulusOfTau] at hmod
+  generalize jacobiThetaArgument z k = x at hz ⊢
+  generalize jacobiTau k = τ at hτ hz hmod ⊢
   subst hmod
   obtain ⟨h2, h3, h4, -⟩ := jacobiThetaTau_zero_ne_zero_and_pow_four τ hτ
   have hx := right_ne_zero_of_mul hz
@@ -764,22 +766,22 @@ theorem hasDerivAt_jacobiDsk (hk : k ∈ jacobiModulusDomain) {z : ℂ}
 
 /-- DLMF Table 22.13.1: `d cs(z,k)/dz = -ns(z,k) ds(z,k)`, away from the poles. -/
 @[dlmf 22.13.T1 "domain: k ∈ jacobiModulusDomain, z not a pole"]
-theorem hasDerivAt_jacobiCsk (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hz : jacobiLetterTheta .s (jacobiZetak z k) (jacobiTauk k) ≠ 0) :
-    HasDerivAt (fun z => jacobiCsk z k) (-(jacobiNsk z k * jacobiDsk z k)) z := by
-  have h := hasDerivAt_jacobiPQk hk (p := .c) (q := .s) (by decide) hz
+theorem hasDerivAt_jacobiCs (hk : k ∈ jacobiModulusDomain) {z : ℂ}
+    (hz : jacobiLetterTheta .s (jacobiThetaArgument z k) (jacobiTau k) ≠ 0) :
+    HasDerivAt (fun z => jacobiCs z k) (-(jacobiNs z k * jacobiDs z k)) z := by
+  have h := hasDerivAt_jacobiPQ hk (p := .c) (q := .s) (by decide) hz
   refine h.congr_deriv ?_
-  have hτ := jacobiTauk_im_pos hk
+  have hτ := jacobiTau_im_pos hk
   have hmod := (jacobi_inversion_k hk).1
   rw [← (jacobi_inversion_k hk).2.2]
   rw [jacobiLetterTheta_eq_const_mul_raw] at hz
-  simp only [jacobiDsk, jacobiNsk, jacobiPQk, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw,
+  simp only [jacobiDs, jacobiNs, jacobiPQ, jacobiGlaisher, jacobiLetterTheta_eq_const_mul_raw,
       jacobiLetterThetaConst, jacobiLetterThetaRaw,
       reduceCtorEq, ↓reduceIte] at hz ⊢
-  rw [jacobiThetaTau_wronskian_two_one hτ, compEllIntKTau]
-  rw [jacobiModulusTau] at hmod
-  generalize jacobiZetak z k = x at hz ⊢
-  generalize jacobiTauk k = τ at hτ hz hmod ⊢
+  rw [jacobiThetaTau_wronskian_two_one hτ, completeEllipticKOfTau]
+  rw [jacobiModulusOfTau] at hmod
+  generalize jacobiThetaArgument z k = x at hz ⊢
+  generalize jacobiTau k = τ at hτ hz hmod ⊢
   subst hmod
   obtain ⟨h2, h3, h4, -⟩ := jacobiThetaTau_zero_ne_zero_and_pow_four τ hτ
   have hx := right_ne_zero_of_mul hz

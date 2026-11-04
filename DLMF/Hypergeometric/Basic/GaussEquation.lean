@@ -32,8 +32,8 @@ the same equation, with the Wronskians given by DLMF.
 * `hasDerivAt_ordinaryHypergeometric`, `deriv_ordinaryHypergeometric`: DLMF 15.5.1.
 * `ordinaryHypergeometric_ode`, `gaussOperator_ordinaryHypergeometric`: the hypergeometric
   equation, DLMF 15.10.1.
-* `regularizedGaussHGFun_ode`: the hypergeometric equation for the regularized function `𝐅`,
-  for all parameters.
+* `regularizedGaussHypergeometricFun_ode`: the hypergeometric equation for the regularized function
+  `𝐅`, for all parameters.
 * `zero_second_ode`, `one_first_ode`, `one_second_ode`, `infinity_first_ode`: the local
   solutions solve the Gauss equation.
 * `zero_wronskian`, `one_wronskian`, `infinity_wronskian`: Wronskians, DLMF 15.10.3, 15.10.5,
@@ -66,26 +66,26 @@ theorem ordinaryHypergeometric_symm (a b c : ℂ) : (₂F₁ a b c : ℂ → ℂ
 
 /-- The coefficient identity underlying termwise differentiation. No nonvanishing
 condition on the numerator parameters is needed. -/
-theorem gaussHGCoeff_shift {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
-    (n + 1 : ℂ) * gaussHGCoeff a b c (n + 1) =
-      a * b / c * gaussHGCoeff (a + 1) (b + 1) (c + 1) n := by
+theorem gaussHypergeometricCoeff_shift {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
+    (n + 1 : ℂ) * gaussHypergeometricCoeff a b c (n + 1) =
+      a * b / c * gaussHypergeometricCoeff (a + 1) (b + 1) (c + 1) n := by
   have hc0 : c ≠ 0 := by simpa using hc 0
-  have hcp : poch (c + 1) n ≠ 0 :=
-    poch_ne_zero_of_not_neg_nat (by simpa using not_neg_nat_add_nat hc 1) n
+  have hcp : pochhammer (c + 1) n ≠ 0 :=
+    pochhammer_ne_zero_of_not_neg_nat (by simpa using not_neg_nat_add_nat hc 1) n
   have hn : (n + 1 : ℂ) ≠ 0 := by exact_mod_cast Nat.succ_ne_zero n
-  simp only [gaussHGCoeff, poch_succ_left, Nat.factorial_succ,
+  simp only [gaussHypergeometricCoeff, pochhammer_succ_left, Nat.factorial_succ,
     Nat.cast_mul, Nat.cast_add, Nat.cast_one]
   field [hc0, hcp, hn, Nat.cast_ne_zero.mpr n.factorial_ne_zero]
 
 /-- The coefficient recurrence underlying the Gauss differential equation. -/
-theorem gaussHGCoeff_recurrence {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
-    (n + 1 : ℂ) * (c + n) * gaussHGCoeff a b c (n + 1) =
-      (a + n) * (b + n) * gaussHGCoeff a b c n := by
-  have hcp := poch_ne_zero_of_not_neg_nat hc n
+theorem gaussHypergeometricCoeff_recurrence {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
+    (n + 1 : ℂ) * (c + n) * gaussHypergeometricCoeff a b c (n + 1) =
+      (a + n) * (b + n) * gaussHypergeometricCoeff a b c n := by
+  have hcp := pochhammer_ne_zero_of_not_neg_nat hc n
   have hcn : c + (n : ℂ) ≠ 0 := by
     simpa only [ne_eq, eq_neg_iff_add_eq_zero] using hc n
   have hn : (n + 1 : ℂ) ≠ 0 := by exact_mod_cast Nat.succ_ne_zero n
-  simp only [gaussHGCoeff, poch_succ, Nat.factorial_succ,
+  simp only [gaussHypergeometricCoeff, pochhammer_succ, Nat.factorial_succ,
     Nat.cast_mul, Nat.cast_add, Nat.cast_one]
   field [hcp, hcn, hn, Nat.cast_ne_zero.mpr n.factorial_ne_zero]
 
@@ -99,10 +99,10 @@ theorem hasDerivAt_ordinaryHypergeometric {a b c z : ℂ}
   have hd := hf.deriv_ofScalars.hasSum_mul_pow hz'
   have hs := ((hasFPowerSeriesOnBall_ordinaryHypergeometric
     (a + 1) (b + 1) (c + 1)).hasSum_mul_pow hz').mul_left (a * b / c)
-  have heq : (fun n : ℕ => (n + 1 : ℂ) * gaussHGCoeff a b c (n + 1) * z ^ n) =
-      (fun n : ℕ => a * b / c * (gaussHGCoeff (a + 1) (b + 1) (c + 1) n * z ^ n)) := by
+  have heq : (fun n : ℕ => (n + 1 : ℂ) * gaussHypergeometricCoeff a b c (n + 1) * z ^ n) =
+      (fun n : ℕ => a * b / c * (gaussHypergeometricCoeff (a + 1) (b + 1) (c + 1) n * z ^ n)) := by
     funext n
-    rw [gaussHGCoeff_shift hc]
+    rw [gaussHypergeometricCoeff_shift hc]
     ring
   rw [heq] at hd
   rw [← hd.unique hs]
@@ -127,7 +127,7 @@ theorem ordinaryHypergeometric_ode {a b c z : ℂ}
     (A := 1) (B := a + b + 1) (C := a * b) (D := c) (fun n => ?_)
     (mem_eball_one_of_norm_lt_one hz)
   · simpa [iteratedDeriv_succ, iteratedDeriv_zero] using h
-  · rw [gaussHGCoeff_recurrence hc]
+  · rw [gaussHypergeometricCoeff_recurrence hc]
     ring
 
 /-- The Gauss differential operator, without division at its singular points. -/
@@ -257,7 +257,7 @@ theorem gaussOperator_ordinaryHypergeometric {a b c w : ℂ} (hc : ∀ k : ℕ, 
     (A := 1) (B := a + b + 1) (C := a * b) (D := c) (fun n => ?_)
     (mem_eball_one_of_norm_lt_one hw)
   · simpa [gaussOperator, iteratedDeriv_succ, iteratedDeriv_zero] using h
-  · rw [gaussHGCoeff_recurrence hc]
+  · rw [gaussHypergeometricCoeff_recurrence hc]
     ring
 
 /-- Identity under the stated parameter and domain assumptions: `gaussOperator a b c (oneFirst a b
@@ -647,7 +647,7 @@ theorem infinity_wronskian
 /-- The hypergeometric equation (DLMF 15.10.1) for Olver's regularized function
 `𝐅(a,b;c;z) = regularizedGaussHGFun a b c z` on the unit disk, for all parameters. -/
 @[dlmf 15.10.E1]
-theorem regularizedGaussHGFun_ode (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem regularizedGaussHypergeometricFun_ode (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     z * (1 - z) * deriv (deriv (regularizedGaussHGFun a b c)) z +
         (c - (a + b + 1) * z) * deriv (regularizedGaussHGFun a b c) z -
         a * b * regularizedGaussHGFun a b c z = 0 := by

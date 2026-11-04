@@ -19,8 +19,8 @@ public import DLMF.Weierstrass.Relations
 
 * `heun_jacobiForm`: Jacobi's elliptic form, DLMF 31.2.7–31.2.8. With `a = k^{-2}` and
   `z = sn²(ζ, k)`, Heun's equation becomes an equation with coefficients in `sn, cn, dn` (the
-  project's `DLMF.JacobiElliptic.jacobiSnk` etc., for `k` in `jacobiModulusDomain`).
-* `jacobiSnk_sq_eq_weierstrassP`: for lattice data with roots `e₁, e₂, e₃`,
+  project's `DLMF.JacobiElliptic.jacobiSn` etc., for `k` in `jacobiModulusDomain`).
+* `jacobiSn_sq_eq_weierstrassP`: for lattice data with roots `e₁, e₂, e₃`,
   `sn²(iK' + ξ(e₁ - e₃)^{1/2}, k) = (℘(ξ) - e₃)/(e₂ - e₃)` with `k² = (e₂ - e₃)/(e₁ - e₃)`,
   DLMF 31.2.9.
 * `heun_weierstrassForm`: Weierstrass's form, DLMF 31.2.9–31.2.12. Heun's equation with
@@ -47,7 +47,7 @@ noncomputable section
 
 namespace DLMF.Heun
 
-open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
+open DLMF.EllipticIntegrals (completeEllipticK completeEllipticKPrime)
 
 variable {a q α β γ δ ε : ℂ}
 
@@ -55,17 +55,18 @@ variable {a q α β γ δ ε : ℂ}
 theorem IsLinearODE2On.congr_coeff {p r p' r' w : ℂ → ℂ} {s : Set ℂ}
     (h : IsLinearODE2On p r w s) (hp : ∀ z ∈ s, p z = p' z) (hr : ∀ z ∈ s, r z = r' z) :
     IsLinearODE2On p' r' w s :=
-  ⟨h.1, fun z hz => by rw [← hp z hz, ← hr z hz]; exact h.2 z hz⟩
+  IsLinearODE2On.mk (h.differentiableAt)
+      (fun z hz => by rw [← hp z hz, ← hr z hz]; exact h.hasDerivAt_deriv z hz)
 
 /-! ### Jacobi's elliptic form -/
 
 /-- `sn(z, k) ≠ 0` forces `z` to be a regular point (`θ₄ ≠ 0`): at a pole the totalized
 quotient is `0`. -/
-private lemma jacobiRegular_of_jacobiSnk_ne_zero {k z : ℂ} (h : jacobiSnk z k ≠ 0) :
-    jacobiLetterTheta .n (jacobiZetak z k) (jacobiTauk k) ≠ 0 := by
+private lemma jacobiRegular_of_jacobiSn_ne_zero {k z : ℂ} (h : jacobiSn z k ≠ 0) :
+    jacobiLetterTheta .n (jacobiThetaArgument z k) (jacobiTau k) ≠ 0 := by
   intro h0
   apply h
-  simp [jacobiSnk, jacobiPQk, jacobiGlaisher, h0]
+  simp [jacobiSn, jacobiPQ, jacobiGlaisher, h0]
 
 /-- DLMF 31.2.7–31.2.8, Jacobi's elliptic form: with `a = k^{-2}` and `z = sn²(ζ, k)`, a
 solution `W` of Heun's equation gives a solution `w(ζ) = W(sn²(ζ, k))` of
@@ -73,43 +74,43 @@ solution `W` of Heun's equation gives a solution `w(ζ) = W(sn²(ζ, k))` of
 @[dlmf 31.2.E7, dlmf 31.2.E8]
 theorem heun_jacobiForm {k : ℂ} (hk : k ∈ jacobiModulusDomain)
     {U V : Set ℂ} (hV : IsOpen V) {W : ℂ → ℂ}
-    (hW : IsHeunSolOn (k ^ 2)⁻¹ q α β γ δ ε W U)
-    (hVU : ∀ ζ ∈ V, jacobiSnk ζ k ^ 2 ∈ U ∧ jacobiSnk ζ k ≠ 0 ∧ jacobiCnk ζ k ≠ 0 ∧
-      jacobiDnk ζ k ≠ 0) :
+    (hW : IsHeunSolutionOn (k ^ 2)⁻¹ q α β γ δ ε W U)
+    (hVU : ∀ ζ ∈ V, jacobiSn ζ k ^ 2 ∈ U ∧ jacobiSn ζ k ≠ 0 ∧ jacobiCn ζ k ≠ 0 ∧
+      jacobiDn ζ k ≠ 0) :
     IsLinearODE2On
-      (fun ζ => (2 * γ - 1) * (jacobiCnk ζ k * jacobiDnk ζ k / jacobiSnk ζ k) -
-        (2 * δ - 1) * (jacobiSnk ζ k * jacobiDnk ζ k / jacobiCnk ζ k) -
-        (2 * ε - 1) * k ^ 2 * (jacobiSnk ζ k * jacobiCnk ζ k / jacobiDnk ζ k))
-      (fun ζ => 4 * k ^ 2 * (α * β * jacobiSnk ζ k ^ 2 - q))
-      (fun ζ => W (jacobiSnk ζ k ^ 2)) V := by
+      (fun ζ => (2 * γ - 1) * (jacobiCn ζ k * jacobiDn ζ k / jacobiSn ζ k) -
+        (2 * δ - 1) * (jacobiSn ζ k * jacobiDn ζ k / jacobiCn ζ k) -
+        (2 * ε - 1) * k ^ 2 * (jacobiSn ζ k * jacobiCn ζ k / jacobiDn ζ k))
+      (fun ζ => 4 * k ^ 2 * (α * β * jacobiSn ζ k ^ 2 - q))
+      (fun ζ => W (jacobiSn ζ k ^ 2)) V := by
   have hk0 : k ≠ 0 := fun h => by rw [h] at hk; exact lt_irrefl _ hk.1
   refine isLinearODE2On_comp
-    (φ₁ := fun ζ => 2 * (jacobiSnk ζ k * jacobiCnk ζ k * jacobiDnk ζ k))
-    (φ₂ := fun ζ => 2 * (jacobiCnk ζ k ^ 2 * jacobiDnk ζ k ^ 2 -
-      jacobiSnk ζ k ^ 2 * jacobiDnk ζ k ^ 2 - k ^ 2 * jacobiSnk ζ k ^ 2 * jacobiCnk ζ k ^ 2))
+    (φ₁ := fun ζ => 2 * (jacobiSn ζ k * jacobiCn ζ k * jacobiDn ζ k))
+    (φ₂ := fun ζ => 2 * (jacobiCn ζ k ^ 2 * jacobiDn ζ k ^ 2 -
+      jacobiSn ζ k ^ 2 * jacobiDn ζ k ^ 2 - k ^ 2 * jacobiSn ζ k ^ 2 * jacobiCn ζ k ^ 2))
     hV (fun ζ hζ => ?_) (fun ζ hζ => ?_) (fun ζ hζ => (hVU ζ hζ).1) (fun ζ hζ => ?_)
     (fun ζ hζ => ?_) hW
-  · have hr := jacobiRegular_of_jacobiSnk_ne_zero (hVU ζ hζ).2.1
-    convert (hasDerivAt_jacobiSnk hk hr).pow 2 using 1
+  · have hr := jacobiRegular_of_jacobiSn_ne_zero (hVU ζ hζ).2.1
+    convert (hasDerivAt_jacobiSn hk hr).pow 2 using 1
     simp; ring
-  · have hr := jacobiRegular_of_jacobiSnk_ne_zero (hVU ζ hζ).2.1
-    convert (((hasDerivAt_jacobiSnk hk hr).mul (hasDerivAt_jacobiCnk hk hr)).mul
-      (hasDerivAt_jacobiDnk hk hr)).const_mul 2 using 1
+  · have hr := jacobiRegular_of_jacobiSn_ne_zero (hVU ζ hζ).2.1
+    convert (((hasDerivAt_jacobiSn hk hr).mul (hasDerivAt_jacobiCn hk hr)).mul
+      (hasDerivAt_jacobiDn hk hr)).const_mul 2 using 1
     simp only [Pi.mul_apply]; ring
   · obtain ⟨-, hs, hc, hd⟩ := hVU ζ hζ
-    have hr := jacobiRegular_of_jacobiSnk_ne_zero hs
+    have hr := jacobiRegular_of_jacobiSn_ne_zero hs
     obtain ⟨e1, e2⟩ := jacobi_sq_sum hk hr
-    have f1 : jacobiSnk ζ k ^ 2 - 1 = -jacobiCnk ζ k ^ 2 := by linear_combination e1
-    have f2 : jacobiSnk ζ k ^ 2 - (k ^ 2)⁻¹ = -(jacobiDnk ζ k ^ 2 / k ^ 2) := by
+    have f1 : jacobiSn ζ k ^ 2 - 1 = -jacobiCn ζ k ^ 2 := by linear_combination e1
+    have f2 : jacobiSn ζ k ^ 2 - (k ^ 2)⁻¹ = -(jacobiDn ζ k ^ 2 / k ^ 2) := by
       field_simp; linear_combination e2
     simp only [heunCoeffP, f1, f2]
     field_simp
     ring
   · obtain ⟨-, hs, hc, hd⟩ := hVU ζ hζ
-    have hr := jacobiRegular_of_jacobiSnk_ne_zero hs
+    have hr := jacobiRegular_of_jacobiSn_ne_zero hs
     obtain ⟨e1, e2⟩ := jacobi_sq_sum hk hr
-    have f1 : jacobiSnk ζ k ^ 2 - 1 = -jacobiCnk ζ k ^ 2 := by linear_combination e1
-    have f2 : jacobiSnk ζ k ^ 2 - (k ^ 2)⁻¹ = -(jacobiDnk ζ k ^ 2 / k ^ 2) := by
+    have f1 : jacobiSn ζ k ^ 2 - 1 = -jacobiCn ζ k ^ 2 := by linear_combination e1
+    have f2 : jacobiSn ζ k ^ 2 - (k ^ 2)⁻¹ = -(jacobiDn ζ k ^ 2 / k ^ 2) := by
       field_simp; linear_combination e2
     simp only [heunCoeffR, f1, f2]
     field_simp
@@ -119,27 +120,28 @@ theorem heun_jacobiForm {k : ℂ} (hk : k ∈ jacobiModulusDomain)
 
 /-- DLMF 23.6.26 in the modulus form: if `e₁ - e₃ = c²` and `k² = (e₂ - e₃)/(e₁ - e₃)`, then
 `sn²(iK' + cξ, k) = (℘(ξ) - e₃)/(e₂ - e₃)`. -/
-private lemma jacobiSnk_sq_eq_weierstrassP_of_sq_eq (H : HalfPeriods) {k : ℂ}
+private lemma jacobiSn_sq_eq_weierstrassP_of_sq_eq (H : HalfPeriods) {k : ℂ}
     (hk : k ∈ jacobiModulusDomain)
     (hk2 : k ^ 2 = (H.e 2 - H.e 3) / (H.e 1 - H.e 3)) {c : ℂ} (hc : c ≠ 0)
     (hc2 : c ^ 2 = H.e 1 - H.e 3) {ξ : ℂ} (hξ : ξ ∉ H.lattice) :
-    jacobiSnk (I * compEllIntKpk k + ξ * c) k ^ 2 =
+    jacobiSn (I * completeEllipticKPrime k + ξ * c) k ^ 2 =
       (H.weierstrassP ξ - H.e 3) / (H.e 2 - H.e 3) := by
   obtain ⟨hmod, -, hKK⟩ := jacobi_inversion_k hk
-  have hK : compEllIntKk k ≠ 0 := by
-    rw [← hKK, compEllIntKTau]
+  have hK : completeEllipticK k ≠ 0 := by
+    rw [← hKK, completeEllipticKOfTau]
     exact mul_ne_zero (by simp [Real.pi_ne_zero])
-      (pow_ne_zero _ (jacobiThetaThreeTau_zero_ne_zero (jacobiTauk_im_pos hk)))
-  set H' : HalfPeriods := ⟨compEllIntKk k / c, I * compEllIntKpk k / c, div_ne_zero hK hc, by
-    rw [div_div_div_cancel_right₀ hc]; exact jacobiTauk_im_pos hk⟩
+      (pow_ne_zero _ (jacobiThetaThreeTau_zero_ne_zero (jacobiTau_im_pos hk)))
+  set H' : HalfPeriods :=
+      ⟨completeEllipticK k / c, I * completeEllipticKPrime k / c, div_ne_zero hK hc, by
+    rw [div_div_div_cancel_right₀ hc]; exact jacobiTau_im_pos hk⟩
   obtain ⟨d12, d23, d13⟩ := H.e_distinct
-  have htau : H'.tau = jacobiTauk k := by
-    simp only [H', HalfPeriods.tau, jacobiTauk]
+  have htau : H'.tau = jacobiTau k := by
+    simp only [H', HalfPeriods.tau, jacobiTau]
     rw [div_div_div_cancel_right₀ hc]
-  have hqK : H'.quarterK = compEllIntKk k := by
+  have hqK : H'.quarterK = completeEllipticK k := by
     rw [HalfPeriods.quarterK, htau, hKK]
-  have hω1 : H'.ω₁ = compEllIntKk k / c := rfl
-  have hω3 : H'.ω₃ = I * compEllIntKpk k / c := rfl
+  have hω1 : H'.ω₁ = completeEllipticK k / c := rfl
+  have hω3 : H'.ω₃ = I * completeEllipticKPrime k / c := rfl
   -- the roots of `H'` agree with those of `H`
   have hm := H'.modulus_sq_eq.1
   have hq := H'.quarterK_sq_eq.1
@@ -174,13 +176,14 @@ private lemma jacobiSnk_sq_eq_weierstrassP_of_sq_eq (H : HalfPeriods) {k : ℂ}
   have hper := H'.weierstrassP_add_two_mul_halfPeriod ξ (j := 3) (by simp)
   simp only [HalfPeriods.halfPeriod_three] at hper
   rw [add_assoc, ← two_mul, hper, hwp, b3, hqK, HalfPeriods.modulus, htau, hmod, hω1] at key
-  have harg : compEllIntKk k * (ξ + H'.ω₃) / (compEllIntKk k / c) =
-      I * compEllIntKpk k + ξ * c := by
+  have harg : completeEllipticK k * (ξ + H'.ω₃) / (completeEllipticK k / c) =
+      I * completeEllipticKPrime k + ξ * c := by
     rw [hω3]; field_simp; ring
   rw [harg] at key
-  have hsn : jacobiSnTau (I * compEllIntKpk k + ξ * c) (jacobiTauk k) =
-      jacobiSnk (I * compEllIntKpk k + ξ * c) k := by
-    simp only [jacobiSnTau, jacobiSnk, jacobiPQTau, jacobiPQk, jacobiZetaTau, jacobiZetak, hKK]
+  have hsn : jacobiSnOfTau (I * completeEllipticKPrime k + ξ * c) (jacobiTau k) =
+      jacobiSn (I * completeEllipticKPrime k + ξ * c) k := by
+    simp only [jacobiSnOfTau, jacobiSn, jacobiPQOfTau, jacobiPQ, jacobiThetaArgumentOfTau,
+        jacobiThetaArgument, hKK]
   rw [hsn] at key
   have h23 : H.e 2 - H.e 3 ≠ 0 := sub_ne_zero.mpr d23
   have h13 : H.e 1 - H.e 3 ≠ 0 := sub_ne_zero.mpr d13
@@ -193,12 +196,12 @@ private lemma jacobiSnk_sq_eq_weierstrassP_of_sq_eq (H : HalfPeriods) {k : ℂ}
 variable `z = sn²(ζ, k)` of 31.2.7 is `(℘(ξ) - e₃)/(e₂ - e₃)`; `e_j = ℘(ω_j)`,
 `e₁ + e₂ + e₃ = 0`. Stated for `k` in `jacobiModulusDomain` and `ξ` off the lattice. -/
 @[dlmf 31.2.E9]
-theorem jacobiSnk_sq_eq_weierstrassP (H : HalfPeriods) {k : ℂ} (hk : k ∈ jacobiModulusDomain)
+theorem jacobiSn_sq_eq_weierstrassP (H : HalfPeriods) {k : ℂ} (hk : k ∈ jacobiModulusDomain)
     (hk2 : k ^ 2 = (H.e 2 - H.e 3) / (H.e 1 - H.e 3)) {ξ : ℂ} (hξ : ξ ∉ H.lattice) :
-    jacobiSnk (I * compEllIntKpk k + ξ * (H.e 1 - H.e 3) ^ (1 / 2 : ℂ)) k ^ 2 =
+    jacobiSn (I * completeEllipticKPrime k + ξ * (H.e 1 - H.e 3) ^ (1 / 2 : ℂ)) k ^ 2 =
       (H.weierstrassP ξ - H.e 3) / (H.e 2 - H.e 3) := by
   have h13 : H.e 1 - H.e 3 ≠ 0 := sub_ne_zero.mpr H.e_distinct.2.2
-  refine jacobiSnk_sq_eq_weierstrassP_of_sq_eq H hk hk2 ?_ ?_ hξ
+  refine jacobiSn_sq_eq_weierstrassP_of_sq_eq H hk hk2 ?_ ?_ hξ
   · exact (cpow_ne_zero_iff_of_exponent_ne_zero (by norm_num)).mpr h13
   · rw [one_div]; exact cpow_ofNat_inv_pow _ 2
 
@@ -297,7 +300,7 @@ principal powers) satisfies
 @[dlmf 31.2.E9, dlmf 31.2.E10, dlmf 31.2.E11, dlmf 31.2.E12]
 theorem heun_weierstrassForm (L : HalfPeriods) (hF : α + β + 1 = γ + δ + ε) {U V : Set ℂ}
     (hV : IsOpen V) {u : ℂ → ℂ}
-    (hu : IsHeunSolOn ((L.e 1 - L.e 3) / (L.e 2 - L.e 3)) q α β γ δ ε u U)
+    (hu : IsHeunSolutionOn ((L.e 1 - L.e 3) / (L.e 2 - L.e 3)) q α β γ δ ε u U)
     (hVU : ∀ ξ ∈ V, ξ ∉ L.lattice ∧ (L.weierstrassP ξ - L.e 3) / (L.e 2 - L.e 3) ∈ U ∧
       L.weierstrassP ξ - L.e 1 ∈ slitPlane ∧ L.weierstrassP ξ - L.e 2 ∈ slitPlane ∧
       L.weierstrassP ξ - L.e 3 ∈ slitPlane) :
@@ -404,12 +407,12 @@ theorem heun_weierstrassForm (L : HalfPeriods) (hF : α + β + 1 = γ + δ + ε)
 @[dlmf 31.7.E5, dlmf 31.7.ii]
 theorem heun_lame {k h ν : ℂ} (hk : k ∈ jacobiModulusDomain) (hk0 : k ≠ 0) {U V : Set ℂ}
     (hV : IsOpen V) {W : ℂ → ℂ}
-    (hW : IsHeunSolOn (k ^ 2)⁻¹ (-((k ^ 2)⁻¹ * h / 4)) (-ν / 2) ((ν + 1) / 2) (1 / 2) (1 / 2)
+    (hW : IsHeunSolutionOn (k ^ 2)⁻¹ (-((k ^ 2)⁻¹ * h / 4)) (-ν / 2) ((ν + 1) / 2) (1 / 2) (1 / 2)
       (1 / 2) W U)
-    (hVU : ∀ ζ ∈ V, jacobiSnk ζ k ^ 2 ∈ U ∧ jacobiSnk ζ k ≠ 0 ∧ jacobiCnk ζ k ≠ 0 ∧
-      jacobiDnk ζ k ≠ 0) :
-    IsLinearODE2On 0 (fun ζ => h - ν * (ν + 1) * k ^ 2 * jacobiSnk ζ k ^ 2)
-      (fun ζ => W (jacobiSnk ζ k ^ 2)) V := by
+    (hVU : ∀ ζ ∈ V, jacobiSn ζ k ^ 2 ∈ U ∧ jacobiSn ζ k ≠ 0 ∧ jacobiCn ζ k ≠ 0 ∧
+      jacobiDn ζ k ≠ 0) :
+    IsLinearODE2On 0 (fun ζ => h - ν * (ν + 1) * k ^ 2 * jacobiSn ζ k ^ 2)
+      (fun ζ => W (jacobiSn ζ k ^ 2)) V := by
   refine (heun_jacobiForm hk hV hW hVU).congr_coeff (fun ζ _ => ?_)
     (fun ζ _ => ?_)
   · simp only [Pi.zero_apply]; ring
@@ -421,7 +424,7 @@ coefficients are continuous at `ζ₀`, and the equation holds on `V \ {ζ₀}`,
 private lemma isLinearODE2On_of_diff_singleton {p r w : ℂ → ℂ} {V : Set ℂ} {ζ₀ : ℂ} (hV : IsOpen V)
     (hw : AnalyticOnNhd ℂ w V) (hp : ContinuousAt p ζ₀) (hr : ContinuousAt r ζ₀)
     (h : IsLinearODE2On p r w (V \ {ζ₀})) : IsLinearODE2On p r w V := by
-  refine ⟨fun z hz => (hw z hz).differentiableAt, fun z hz => ?_⟩
+  refine IsLinearODE2On.mk (fun z hz => (hw z hz).differentiableAt) (fun z hz => ?_)
   by_cases hz0 : z = ζ₀
   · subst hz0
     have hd : AnalyticAt ℂ (deriv w) z := (hw z hz).deriv
@@ -433,10 +436,10 @@ private lemma isLinearODE2On_of_diff_singleton {p r w : ℂ → ℂ} {V : Set �
       have h1 : ∀ᶠ y in 𝓝[≠] z, y ∈ V :=
         eventually_nhdsWithin_of_eventually_nhds (hV.mem_nhds hz)
       filter_upwards [h1, self_mem_nhdsWithin] with y hy hy'
-      exact (h.2 y ⟨hy, hy'⟩).deriv
+      exact (h.hasDerivAt_deriv y ⟨hy, hy'⟩).deriv
     exact tendsto_nhds_unique (hc1.tendsto.mono_left nhdsWithin_le_nhds)
       ((hc2.tendsto.mono_left nhdsWithin_le_nhds).congr' hev.symm)
-  · exact h.2 z ⟨hz, hz0⟩
+  · exact h.hasDerivAt_deriv z ⟨hz, hz0⟩
 
 /-- A parameter with positive real part is not in `{0, -1, -2, …}`. -/
 private lemma ne_neg_nat_of_re_pos {c : ℂ} (hc : 0 < c.re) : ∀ n : ℕ, c ≠ -(n : ℂ) := by
@@ -454,43 +457,44 @@ private lemma ne_neg_nat_of_re_pos {c : ℂ} (hc : 0 < c.re) : ∀ n : ℕ, c �
 @[dlmf 31.7.ii]
 theorem heunLocal_lame_even_odd {k h ν : ℂ} (hk : k ∈ jacobiModulusDomain) (hk0 : k ≠ 0) :
     ∃ V ∈ 𝓝 (0 : ℂ),
-      (IsLinearODE2On 0 (fun ζ => h - ν * (ν + 1) * k ^ 2 * jacobiSnk ζ k ^ 2)
+      (IsLinearODE2On 0 (fun ζ => h - ν * (ν + 1) * k ^ 2 * jacobiSn ζ k ^ 2)
         (fun ζ => heunLocal (k ^ 2)⁻¹ (-((k ^ 2)⁻¹ * h / 4)) (-ν / 2) ((ν + 1) / 2) (1 / 2)
-          (1 / 2) (jacobiSnk ζ k ^ 2)) V ∧
-      IsLinearODE2On 0 (fun ζ => h - ν * (ν + 1) * k ^ 2 * jacobiSnk ζ k ^ 2)
-        (fun ζ => jacobiSnk ζ k * heunLocal (k ^ 2)⁻¹ (((k ^ 2)⁻¹ + 1) / 4 - (k ^ 2)⁻¹ * h / 4)
-          ((1 - ν) / 2) ((ν + 2) / 2) (3 / 2) (1 / 2) (jacobiSnk ζ k ^ 2)) V) ∧
+          (1 / 2) (jacobiSn ζ k ^ 2)) V ∧
+      IsLinearODE2On 0 (fun ζ => h - ν * (ν + 1) * k ^ 2 * jacobiSn ζ k ^ 2)
+        (fun ζ => jacobiSn ζ k * heunLocal (k ^ 2)⁻¹ (((k ^ 2)⁻¹ + 1) / 4 - (k ^ 2)⁻¹ * h / 4)
+          ((1 - ν) / 2) ((ν + 2) / 2) (3 / 2) (1 / 2) (jacobiSn ζ k ^ 2)) V) ∧
       ∀ ζ ∈ V, -ζ ∈ V →
         heunLocal (k ^ 2)⁻¹ (-((k ^ 2)⁻¹ * h / 4)) (-ν / 2) ((ν + 1) / 2) (1 / 2) (1 / 2)
-            (jacobiSnk (-ζ) k ^ 2) =
+            (jacobiSn (-ζ) k ^ 2) =
           heunLocal (k ^ 2)⁻¹ (-((k ^ 2)⁻¹ * h / 4)) (-ν / 2) ((ν + 1) / 2) (1 / 2) (1 / 2)
-            (jacobiSnk ζ k ^ 2) ∧
-        jacobiSnk (-ζ) k = -jacobiSnk ζ k := by
-  have hτ := jacobiTauk_im_pos hk
+            (jacobiSn ζ k ^ 2) ∧
+        jacobiSn (-ζ) k = -jacobiSn ζ k := by
+  have hτ := jacobiTau_im_pos hk
   have ha : (k ^ 2)⁻¹ ≠ 0 := inv_ne_zero (pow_ne_zero 2 hk0)
   have hR : 0 < heunLocalRadius (k ^ 2)⁻¹ := heunLocalRadius_pos ha
-  have hθc : ContinuousAt (fun ζ => jacobiLetterTheta .n (jacobiZetak ζ k) (jacobiTauk k)) 0 := by
-    simp only [jacobiLetterTheta, jacobiZetak]
+  have hθc : ContinuousAt
+      (fun ζ => jacobiLetterTheta .n (jacobiThetaArgument ζ k) (jacobiTau k)) 0 := by
+    simp only [jacobiLetterTheta, jacobiThetaArgument]
     exact (((hasDerivAt_jacobiThetaFourTau hτ _).continuousAt).comp
-      (by fun_prop : ContinuousAt (fun ζ : ℂ => π * ζ / (2 * compEllIntKk k)) 0)).div_const _
-  have hθ0 : jacobiLetterTheta .n (jacobiZetak 0 k) (jacobiTauk k) ≠ 0 := by
-    rw [show jacobiZetak 0 k = 0 by simp [jacobiZetak], jacobiLetterTheta_zero hτ]
+      (by fun_prop : ContinuousAt (fun ζ : ℂ => π * ζ / (2 * completeEllipticK k)) 0)).div_const _
+  have hθ0 : jacobiLetterTheta .n (jacobiThetaArgument 0 k) (jacobiTau k) ≠ 0 := by
+    rw [show jacobiThetaArgument 0 k = 0 by simp [jacobiThetaArgument], jacobiLetterTheta_zero hτ]
     simp
-  have hsn0 := hasDerivAt_jacobiSnk hk hθ0
-  have hcn0 := hasDerivAt_jacobiCnk hk hθ0
-  have hdn0 := hasDerivAt_jacobiDnk hk hθ0
-  rw [jacobiCnk_zero hk, jacobiDnk_zero hk] at hsn0
-  have ev_cn : ∀ᶠ ζ in 𝓝 (0 : ℂ), jacobiCnk ζ k ≠ 0 :=
-    hcn0.continuousAt.eventually_ne (by rw [jacobiCnk_zero hk]; exact one_ne_zero)
-  have ev_dn : ∀ᶠ ζ in 𝓝 (0 : ℂ), jacobiDnk ζ k ≠ 0 :=
-    hdn0.continuousAt.eventually_ne (by rw [jacobiDnk_zero hk]; exact one_ne_zero)
+  have hsn0 := hasDerivAt_jacobiSn hk hθ0
+  have hcn0 := hasDerivAt_jacobiCn hk hθ0
+  have hdn0 := hasDerivAt_jacobiDn hk hθ0
+  rw [jacobiCn_zero hk, jacobiDn_zero hk] at hsn0
+  have ev_cn : ∀ᶠ ζ in 𝓝 (0 : ℂ), jacobiCn ζ k ≠ 0 :=
+    hcn0.continuousAt.eventually_ne (by rw [jacobiCn_zero hk]; exact one_ne_zero)
+  have ev_dn : ∀ᶠ ζ in 𝓝 (0 : ℂ), jacobiDn ζ k ≠ 0 :=
+    hdn0.continuousAt.eventually_ne (by rw [jacobiDn_zero hk]; exact one_ne_zero)
   have ev_sm : ∀ᶠ ζ in 𝓝 (0 : ℂ),
-      jacobiSnk ζ k ^ 2 ∈ Metric.ball 0 (heunLocalRadius (k ^ 2)⁻¹) := by
-    have ht : Tendsto (fun ζ => jacobiSnk ζ k ^ 2) (𝓝 0) (𝓝 0) := by
-      have h2 : ContinuousAt (fun ζ => jacobiSnk ζ k ^ 2) 0 := hsn0.continuousAt.pow 2
-      simpa [jacobiSnk_zero hk] using h2.tendsto
+      jacobiSn ζ k ^ 2 ∈ Metric.ball 0 (heunLocalRadius (k ^ 2)⁻¹) := by
+    have ht : Tendsto (fun ζ => jacobiSn ζ k ^ 2) (𝓝 0) (𝓝 0) := by
+      have h2 : ContinuousAt (fun ζ => jacobiSn ζ k ^ 2) 0 := hsn0.continuousAt.pow 2
+      simpa [jacobiSn_zero hk] using h2.tendsto
     exact ht.eventually (Metric.ball_mem_nhds 0 hR)
-  have ev_ne : ∀ᶠ ζ in 𝓝 (0 : ℂ), ζ ≠ 0 → jacobiSnk ζ k ≠ 0 := by
+  have ev_ne : ∀ᶠ ζ in 𝓝 (0 : ℂ), ζ ≠ 0 → jacobiSn ζ k ≠ 0 := by
     have := hsn0.eventually_ne (c := 0) (by norm_num : (1 : ℂ) * 1 ≠ 0)
     exact eventually_nhdsWithin_iff.1 this
   obtain ⟨ρ, hρ, hball⟩ := Metric.eventually_nhds_iff_ball.1
@@ -501,52 +505,53 @@ theorem heunLocal_lame_even_odd {k h ν : ℂ} (hk : k ∈ jacobiModulusDomain) 
   have hV'o : IsOpen (V \ {0}) := hVo.sdiff isClosed_singleton
   have hUo : IsOpen (Metric.ball (0 : ℂ) (heunLocalRadius (k ^ 2)⁻¹) \ {0}) :=
     Metric.isOpen_ball.sdiff isClosed_singleton
-  have hsnA : AnalyticOnNhd ℂ (fun ζ => jacobiSnk ζ k) V :=
+  have hsnA : AnalyticOnNhd ℂ (fun ζ => jacobiSn ζ k) V :=
     DifferentiableOn.analyticOnNhd (fun ζ hζ =>
-      (hasDerivAt_jacobiSnk hk (hball ζ hζ).1).differentiableAt.differentiableWithinAt) hVo
-  have hVU : ∀ ζ ∈ V \ {0}, jacobiSnk ζ k ^ 2 ∈
-      Metric.ball (0 : ℂ) (heunLocalRadius (k ^ 2)⁻¹) \ {0} ∧ jacobiSnk ζ k ≠ 0 ∧
-        jacobiCnk ζ k ≠ 0 ∧ jacobiDnk ζ k ≠ 0 := fun ζ hζ => by
+      (hasDerivAt_jacobiSn hk (hball ζ hζ).1).differentiableAt.differentiableWithinAt) hVo
+  have hVU : ∀ ζ ∈ V \ {0}, jacobiSn ζ k ^ 2 ∈
+      Metric.ball (0 : ℂ) (heunLocalRadius (k ^ 2)⁻¹) \ {0} ∧ jacobiSn ζ k ≠ 0 ∧
+        jacobiCn ζ k ≠ 0 ∧ jacobiDn ζ k ≠ 0 := fun ζ hζ => by
     obtain ⟨-, hc, hd, hs, hn⟩ := hball ζ hζ.1
     exact ⟨⟨hs, pow_ne_zero 2 (hn hζ.2)⟩, hn hζ.2, hc, hd⟩
-  have hrc : ContinuousAt (fun ζ => h - ν * (ν + 1) * k ^ 2 * jacobiSnk ζ k ^ 2) 0 :=
+  have hrc : ContinuousAt (fun ζ => h - ν * (ν + 1) * k ^ 2 * jacobiSn ζ k ^ 2) 0 :=
     continuousAt_const.sub (continuousAt_const.mul
-      (hsn0.continuousAt.pow 2 : ContinuousAt (fun ζ => jacobiSnk ζ k ^ 2) 0))
+      (hsn0.continuousAt.pow 2 : ContinuousAt (fun ζ => jacobiSn ζ k ^ 2) 0))
   have hcomp : ∀ {H : ℂ → ℂ}, AnalyticOnNhd ℂ H (Metric.ball 0 (heunLocalRadius (k ^ 2)⁻¹)) →
-      AnalyticOnNhd ℂ (fun ζ => H (jacobiSnk ζ k ^ 2)) V := fun {H} hH ζ hζ => by
-    have h2 : AnalyticAt ℂ (fun ζ => jacobiSnk ζ k ^ 2) ζ := (hsnA ζ hζ).pow 2
-    exact AnalyticAt.comp (g := H) (f := fun ζ => jacobiSnk ζ k ^ 2)
+      AnalyticOnNhd ℂ (fun ζ => H (jacobiSn ζ k ^ 2)) V := fun {H} hH ζ hζ => by
+    have h2 : AnalyticAt ℂ (fun ζ => jacobiSn ζ k ^ 2) ζ := (hsnA ζ hζ).pow 2
+    exact AnalyticAt.comp (g := H) (f := fun ζ => jacobiSn ζ k ^ 2)
       (hH _ (hball ζ hζ).2.2.2.1) h2
   have hγ1 := ne_neg_nat_of_re_pos (c := 1 / 2) (by norm_num)
   have hγ3 := ne_neg_nat_of_re_pos (c := 3 / 2) (by norm_num)
-  have hsneg : ∀ ζ, jacobiSnk (-ζ) k = -jacobiSnk ζ k := fun ζ => by
-    simp [jacobiSnk, jacobiPQk_neg]
+  have hsneg : ∀ ζ, jacobiSn (-ζ) k = -jacobiSn ζ k := fun ζ => by
+    simp [jacobiSn, jacobiPQ_neg]
   refine ⟨V, Metric.ball_mem_nhds 0 hρ, ⟨?_, ?_⟩, fun ζ _ _ => ⟨by rw [hsneg, neg_sq], hsneg ζ⟩⟩
-  · obtain ⟨hA, hW⟩ := heunLocal_isHeunSolOn (q := -((k ^ 2)⁻¹ * h / 4)) (α := -ν / 2)
+  · obtain ⟨hA, hW⟩ := heunLocal_isHeunSolutionOn (q := -((k ^ 2)⁻¹ * h / 4)) (α := -ν / 2)
       (β := (ν + 1) / 2) (δ := 1 / 2) ha hγ1
-    rw [show heunEps (-ν / 2) ((ν + 1) / 2) (1 / 2) (1 / 2) = 1 / 2 by unfold heunEps; ring]
+    rw [show heunEpsilon (-ν / 2) ((ν + 1) / 2) (1 / 2) (1 / 2) = 1 / 2 by unfold heunEpsilon; ring]
       at hW
     exact isLinearODE2On_of_diff_singleton hVo (hcomp hA) continuousAt_const hrc
       (heun_lame hk hk0 hV'o hW hVU)
-  · obtain ⟨hA, hW⟩ := heunLocal_isHeunSolOn (q := ((k ^ 2)⁻¹ + 1) / 4 - (k ^ 2)⁻¹ * h / 4)
+  · obtain ⟨hA, hW⟩ := heunLocal_isHeunSolutionOn (q := ((k ^ 2)⁻¹ + 1) / 4 - (k ^ 2)⁻¹ * h / 4)
       (α := (1 - ν) / 2) (β := (ν + 2) / 2) (δ := 1 / 2) ha hγ3
-    rw [show heunEps ((1 - ν) / 2) ((ν + 2) / 2) (3 / 2) (1 / 2) = 1 / 2 by unfold heunEps; ring]
+    rw [show heunEpsilon ((1 - ν) / 2) ((ν + 2) / 2) (3 / 2) (1 / 2) = 1 / 2 by
+        unfold heunEpsilon; ring]
       at hW
     have J := heun_jacobiForm hk hV'o hW hVU
     refine isLinearODE2On_of_diff_singleton hVo
       (fun ζ hζ => (hsnA ζ hζ).mul (hcomp hA ζ hζ)) continuousAt_const hrc ?_
-    refine isLinearODE2On_gauge_mul hV'o (g := fun ζ => jacobiSnk ζ k)
-      (L := fun ζ => jacobiCnk ζ k * jacobiDnk ζ k / jacobiSnk ζ k)
-      (L' := fun ζ => -(jacobiDnk ζ k ^ 2 + k ^ 2 * jacobiCnk ζ k ^ 2) -
-        jacobiCnk ζ k ^ 2 * jacobiDnk ζ k ^ 2 / jacobiSnk ζ k ^ 2)
+    refine isLinearODE2On_gauge_mul hV'o (g := fun ζ => jacobiSn ζ k)
+      (L := fun ζ => jacobiCn ζ k * jacobiDn ζ k / jacobiSn ζ k)
+      (L' := fun ζ => -(jacobiDn ζ k ^ 2 + k ^ 2 * jacobiCn ζ k ^ 2) -
+        jacobiCn ζ k ^ 2 * jacobiDn ζ k ^ 2 / jacobiSn ζ k ^ 2)
       (fun ζ hζ => ?_) (fun ζ hζ => ?_) (fun ζ hζ => ?_) (fun ζ hζ => ?_) J
     · have hs := (hVU ζ hζ).2.1
-      refine (hasDerivAt_jacobiSnk hk (hball ζ hζ.1).1).congr_deriv ?_
+      refine (hasDerivAt_jacobiSn hk (hball ζ hζ.1).1).congr_deriv ?_
       field_simp
     · have hs := (hVU ζ hζ).2.1
       have hr := (hball ζ hζ.1).1
-      refine (((hasDerivAt_jacobiCnk hk hr).mul (hasDerivAt_jacobiDnk hk hr)).div
-        (hasDerivAt_jacobiSnk hk hr) hs).congr_deriv ?_
+      refine (((hasDerivAt_jacobiCn hk hr).mul (hasDerivAt_jacobiDn hk hr)).div
+        (hasDerivAt_jacobiSn hk hr) hs).congr_deriv ?_
       simp only [Pi.mul_apply]
       field_simp
       ring
@@ -556,6 +561,6 @@ theorem heunLocal_lame_even_odd {k h ν : ℂ} (hk : k ∈ jacobiModulusDomain) 
       obtain ⟨e1, e2⟩ := jacobi_sq_sum hk (hball ζ hζ.1).1
       simp only [Pi.zero_apply]
       field_simp
-      linear_combination 4 * jacobiSnk ζ k ^ 2 * e2 + 4 * k ^ 2 * jacobiSnk ζ k ^ 2 * e1
+      linear_combination 4 * jacobiSn ζ k ^ 2 * e2 + 4 * k ^ 2 * jacobiSn ζ k ^ 2 * e1
 
 end DLMF.Heun

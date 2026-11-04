@@ -22,6 +22,7 @@ public import DLMFMathlib.Analysis.Calculus.DifferentialOperators
 public import DLMFMathlib.Analysis.Calculus.DoubleZeroSqrt
 public import DLMFMathlib.Analysis.Calculus.InverseSeries
 public import DLMFMathlib.Analysis.Calculus.LHopitalInfinity
+public import DLMFMathlib.Analysis.Calculus.Deriv.MulComp
 public import DLMFMathlib.Analysis.Complex.BarnesResidue
 public import DLMFMathlib.Analysis.Complex.BivariateCalculus
 public import DLMFMathlib.Analysis.Complex.BivariateDerivatives
@@ -29,6 +30,7 @@ public import DLMFMathlib.Analysis.Complex.BivariateSeries
 public import DLMFMathlib.Analysis.Complex.EntireFiniteZeros
 public import DLMFMathlib.Analysis.Complex.FactorialSeries
 public import DLMFMathlib.Analysis.Complex.GeometricNewtonSeries
+public import DLMFMathlib.Analysis.Complex.KeyholeIntegral
 public import DLMFMathlib.Analysis.Complex.LagrangeBurmann
 public import DLMFMathlib.Analysis.Complex.LagrangeInversion
 public import DLMFMathlib.Analysis.Complex.MittagLeffler
@@ -66,6 +68,7 @@ public import DLMFMathlib.Analysis.Integral.Frullani
 public import DLMFMathlib.Analysis.Integral.Improper
 public import DLMFMathlib.Analysis.Integral.LaplaceRay
 public import DLMFMathlib.Analysis.Integral.PrincipalValue
+public import DLMFMathlib.Analysis.Integral.PrincipalValueExcision
 public import DLMFMathlib.Analysis.Integral.RepeatedIntegrationByParts
 public import DLMFMathlib.Analysis.MellinConvolution
 public import DLMFMathlib.Analysis.MellinParseval
@@ -84,6 +87,7 @@ public import DLMFMathlib.Analysis.ODE.PowerSeriesUniqueness
 public import DLMFMathlib.Analysis.ODE.SoninePolya
 public import DLMFMathlib.Analysis.ODE.SturmComparison
 public import DLMFMathlib.Analysis.ODE.SturmCount
+public import DLMFMathlib.Analysis.ODE.SturmDeformationContinuity
 public import DLMFMathlib.Analysis.ODE.SturmDeformation
 public import DLMFMathlib.Analysis.ODE.SymmetricSquare
 public import DLMFMathlib.Analysis.ODE.Volterra
@@ -96,9 +100,11 @@ public import DLMFMathlib.Analysis.SpecialFunctions.Trigonometric.OneSubCosInteg
 public import DLMFMathlib.Analysis.SpecificLimits.Oscillation
 public import DLMFMathlib.Analysis.SpecificLimits.PowMulPowChoose
 public import DLMFMathlib.Analysis.SpecificLimits.Pincherle
+public import DLMFMathlib.Analysis.SpecificLimits.PoincarePerron
 public import DLMFMathlib.Analysis.SpecificLimits.QuarterRecurrence
 public import DLMFMathlib.MeasureTheory.Function.JacobianSqrt
 public import DLMFMathlib.MeasureTheory.Function.L2Space
+public import DLMFMathlib.MeasureTheory.Integral.ApproximateIdentity
 public import DLMFMathlib.MeasureTheory.Integral.HalfLine
 public import DLMFMathlib.MeasureTheory.Integral.PathParametric
 public import DLMFMathlib.MeasureTheory.Integral.Trigonometric
@@ -154,6 +160,9 @@ the namespaces of the Mathlib APIs they extend. These modules do not import `DLM
 * `DLMFMathlib.Analysis.Asymptotics.PowerSums`: integral-comparison bounds for real power sums.
 * `DLMFMathlib.Analysis.Asymptotics.ExponentialGrowth`: exponential bounds for primitives.
 * `DLMFMathlib.Analysis.Complex.Sector`: uniform discs inside sectors and Cauchy derivative bounds.
+* `DLMFMathlib.Analysis.Complex.KeyholeIntegral`: keyhole contour integrals reduced to the negative
+  real axis, and their holomorphy in the exponent.
+* `DLMFMathlib.Analysis.Calculus.Deriv.MulComp`: first and second derivatives of `P · F(u) · G(v)`.
 * `DLMFMathlib.Analysis.Fourier.AddCircle`: complex Parseval pairings on circles and intervals.
 * `DLMFMathlib.Analysis.Fourier.GaussianSeries`: absolute convergence of complex Gaussian sums.
 * `DLMFMathlib.Analysis.Fourier.Pairing`: bilinear pairings of forward and inverse transforms.
@@ -281,4 +290,12 @@ the namespaces of the Mathlib APIs they extend. These modules do not import `DLM
   `∫_{f(s)} du/√Q(u) = 2 · vol(s)` when `|f'| = 2√(Q ∘ f)`.
 * `DLMFMathlib.Analysis.Complex.IdentityTheoremStrip`: the identity theorem on the strip
   `0 < Re z < 1` from agreement on `(0, 1)`.
+* `DLMFMathlib.Analysis.Integral.PrincipalValueExcision`: principal values under asymmetric
+  excision; the change of variables `t ↦ K/t`.
+* `DLMFMathlib.Analysis.ODE.SturmDeformationContinuity`: continuity of the `k`-th zero of a family
+  of functions with simple zeros.
+* `DLMFMathlib.Analysis.SpecificLimits.PoincarePerron`: Perron's theorem for three-term
+  recurrences (ratio limit of the minimal solution) and Pincherle's theorem for nested fractions.
+* `DLMFMathlib.MeasureTheory.Integral.ApproximateIdentity`: `L¹` convergence of approximate
+  identities `∫ k(u) f(x - εu) du → f`.
 -/

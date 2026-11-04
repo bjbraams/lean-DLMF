@@ -29,9 +29,9 @@ used for DLMF 8.10.5.
 
 ## Main results
 
-* `IncompleteGammaFractions.cfTail_eq`: when no partial numerator `a_k`, `k ≥ 1`, vanishes, the
-  project's finite continued fraction `cfTail a b 0 N` (which freezes at a vanishing numerator) is
-  the Mathlib convergent of `GenContFract.ofFun 0 a b`.
+* `IncompleteGammaFractions.continuedFractionTail_eq`: when no partial numerator `a_k`, `k ≥ 1`,
+  vanishes, the project's finite continued fraction `continuedFractionTail a b 0 N` (which freezes
+  at a vanishing numerator) is the Mathlib convergent of `GenContFract.ofFun 0 a b`.
 * `IncompleteGammaFractions.hasContinuedFraction_iff`: the corresponding description of
   `HasContinuedFraction`.
 * `IncompleteGammaFractions.pade_lt`, `IncompleteGammaFractions.lt_pade`: the even and odd
@@ -64,25 +64,28 @@ open scoped Topology
 namespace DLMF.Confluent
 
 /-- Without vanishing partial numerators the project's continuants are Mathlib's. -/
-theorem IncompleteGammaFractions.cfContinuants_eq {a b : ℕ → ℂ}
+theorem IncompleteGammaFractions.continuedFractionContinuants_eq {a b : ℕ → ℂ}
     (ha : ∀ k, 1 ≤ k → a k ≠ 0) (n : ℕ) :
-    DLMF.Core.cfContinuants a b 0 n =
+    DLMF.Core.continuedFractionContinuants a b 0 n =
       ((ofFun 0 a b).nums n, (ofFun 0 a b).dens n, false) := by
   induction n using Nat.strong_induction_on with
   | _ n ih =>
     rcases n with _ | _ | n
-    · simp [DLMF.Core.cfContinuants]; rfl
-    · simp [DLMF.Core.cfContinuants, ofFun_nums_one, ofFun_dens_one]
+    · simp [DLMF.Core.continuedFractionContinuants]; rfl
+    · simp [DLMF.Core.continuedFractionContinuants, ofFun_nums_one, ofFun_dens_one]
     · have h1 := ih (n + 1) (by omega)
       have h0 := ih n (by omega)
       have han : a (n + 1) ≠ 0 := ha (n + 1) (by omega)
-      rw [DLMF.Core.cfContinuants, h1, h0, ofFun_nums_add_two, ofFun_dens_add_two]
+      rw [DLMF.Core.continuedFractionContinuants, h1, h0, ofFun_nums_add_two, ofFun_dens_add_two]
       simp [han, GenContFract.nextConts, GenContFract.nextNum, GenContFract.nextDen]
 
-/-- `cfTail a b 0 N` is the `N`-th Mathlib convergent when no `a_k` (`k ≥ 1`) vanishes. -/
-theorem IncompleteGammaFractions.cfTail_eq {a b : ℕ → ℂ} (ha : ∀ k, 1 ≤ k → a k ≠ 0) (N : ℕ) :
-    DLMF.Core.cfTail a b 0 N = (ofFun 0 a b).convs N := by
-  simp only [DLMF.Core.cfTail, IncompleteGammaFractions.cfContinuants_eq ha]
+/-- `continuedFractionTail a b 0 N` is the `N`-th Mathlib convergent when no `a_k` (`k ≥ 1`)
+vanishes. -/
+theorem IncompleteGammaFractions.continuedFractionTail_eq {a b : ℕ → ℂ}
+    (ha : ∀ k, 1 ≤ k → a k ≠ 0) (N : ℕ) :
+    DLMF.Core.continuedFractionTail a b 0 N = (ofFun 0 a b).convs N := by
+  simp only [DLMF.Core.continuedFractionTail,
+      IncompleteGammaFractions.continuedFractionContinuants_eq ha]
   rfl
 
 /-- `HasContinuedFraction` in terms of Mathlib convergents. -/
@@ -91,17 +94,18 @@ theorem IncompleteGammaFractions.hasContinuedFraction_iff {a b : ℕ → ℂ}
     DLMF.Core.HasContinuedFraction a b v ↔
       Tendsto (ofFun 0 a b).convs atTop (𝓝 v) := by
   unfold DLMF.Core.HasContinuedFraction
-  have : DLMF.Core.cfTail a b 0 = fun N => (ofFun 0 a b).convs N :=
-    funext (IncompleteGammaFractions.cfTail_eq ha)
+  have : DLMF.Core.continuedFractionTail a b 0 = fun N => (ofFun 0 a b).convs N :=
+    funext (IncompleteGammaFractions.continuedFractionTail_eq ha)
   rw [this]
 
 /-- A continued fraction with real elements: its finite values are the real convergents. -/
-theorem IncompleteGammaFractions.cfTail_ofReal {A B : ℕ → ℂ} {a b : ℕ → ℝ} (hA : ∀ k, A k = a k)
+theorem IncompleteGammaFractions.continuedFractionTail_ofReal {A B : ℕ → ℂ} {a b : ℕ → ℝ}
+    (hA : ∀ k, A k = a k)
     (hB : ∀ k, B k = b k) (ha : ∀ k, 1 ≤ k → a k ≠ 0) (N : ℕ) :
-    DLMF.Core.cfTail A B 0 N = ((ofFun 0 a b).convs N : ℂ) := by
+    DLMF.Core.continuedFractionTail A B 0 N = ((ofFun 0 a b).convs N : ℂ) := by
   have hA' : A = fun k => Complex.ofRealHom (a k) := funext hA
   have hB' : B = fun k => Complex.ofRealHom (b k) := funext hB
-  rw [IncompleteGammaFractions.cfTail_eq
+  rw [IncompleteGammaFractions.continuedFractionTail_eq
       (fun k hk => by rw [hA k]; exact_mod_cast ha k hk), hA', hB',
     show (0 : ℂ) = Complex.ofRealHom 0 from (map_zero _).symm, ofFun_convs_map]
   rfl
@@ -124,8 +128,8 @@ theorem IncompleteGammaFractions.padeNumerator_pos {a x : ℝ} (ha : a < 1) (hx 
 theorem IncompleteGammaFractions.pade_value {a x : ℝ} (hx : 0 < x) :
     0 + IncompleteGammaFractions.padeNumerator a x 0 * DLMF.Statistical.gammaIncCFTail a x 1 /
         DLMF.Statistical.gammaIncCFTail a x 0 =
-      x ^ (1 - a) * Real.exp x * (upperIncGamma a x).re := by
-  rw [DLMF.Statistical.upperIncGamma_eq_gammaTail a hx, ofReal_re]
+      x ^ (1 - a) * Real.exp x * (upperIncompleteGamma a x).re := by
+  rw [DLMF.Statistical.upperIncompleteGamma_eq_gammaTail a hx, ofReal_re]
   have h1 := DLMF.Statistical.gammaIncCFTail_even a x 0
   simp only [mul_zero, zero_add] at h1
   rw [h1]
@@ -150,7 +154,7 @@ theorem IncompleteGammaFractions.pade_rec {a x : ℝ} (hx : 0 < x) (k : ℕ) :
 theorem IncompleteGammaFractions.pade_lt {a x : ℝ} (ha : a < 1) (hx : 0 < x) {n : ℕ} (hn : 1 ≤ n) :
     (ofFun 0 (IncompleteGammaFractions.padeNumerator a x)
         (DLMF.Statistical.gammaIncCFDen x)).convs (2 * n) <
-      x ^ (1 - a) * Real.exp x * (upperIncGamma a x).re := by
+      x ^ (1 - a) * Real.exp x * (upperIncompleteGamma a x).re := by
   rw [← IncompleteGammaFractions.pade_value (a := a) hx]
   exact ofFun_convs_even_lt_of_pos (IncompleteGammaFractions.padeNumerator_pos ha hx)
     (DLMF.Statistical.gammaIncCFDen_pos hx) (DLMF.Statistical.gammaIncCFTail_pos hx)
@@ -158,7 +162,7 @@ theorem IncompleteGammaFractions.pade_lt {a x : ℝ} (ha : a < 1) (hx : 0 < x) {
 
 /-- Odd convergents lie strictly above `x^{1-a} e^x Γ(a,x)`. -/
 theorem IncompleteGammaFractions.lt_pade {a x : ℝ} (ha : a < 1) (hx : 0 < x) (n : ℕ) :
-    x ^ (1 - a) * Real.exp x * (upperIncGamma a x).re <
+    x ^ (1 - a) * Real.exp x * (upperIncompleteGamma a x).re <
       (ofFun 0 (IncompleteGammaFractions.padeNumerator a x)
           (DLMF.Statistical.gammaIncCFDen x)).convs
         (2 * n + 1) := by
@@ -170,22 +174,24 @@ theorem IncompleteGammaFractions.lt_pade {a x : ℝ} (ha : a < 1) (hx : 0 < x) (
 /-! ### The fraction 8.9.1 -/
 
 /-- If `a₁ = 0` the project's finite continued fraction freezes at `a₀/b₀`. -/
-theorem IncompleteGammaFractions.cfContinuants_freeze {a b : ℕ → ℂ} (h1 : a 1 = 0) (n : ℕ) :
-    DLMF.Core.cfContinuants a b 0 (n + 2) = (a 0, b 0, true) := by
+theorem IncompleteGammaFractions.continuedFractionContinuants_freeze {a b : ℕ → ℂ}
+    (h1 : a 1 = 0) (n : ℕ) :
+    DLMF.Core.continuedFractionContinuants a b 0 (n + 2) = (a 0, b 0, true) := by
   induction n with
-  | zero => simp [DLMF.Core.cfContinuants, h1]
+  | zero => simp [DLMF.Core.continuedFractionContinuants, h1]
   | succ n ih =>
-    rw [DLMF.Core.cfContinuants, ih]
+    rw [DLMF.Core.continuedFractionContinuants, ih]
     simp
 
 /-- A vanishing first partial numerator freezes the finite continued fractions. -/
-theorem IncompleteGammaFractions.cfTail_freeze {a b : ℕ → ℂ} (h1 : a 1 = 0) {n : ℕ} (hn : 1 ≤ n) :
-    DLMF.Core.cfTail a b 0 n = a 0 / b 0 := by
+theorem IncompleteGammaFractions.continuedFractionTail_freeze {a b : ℕ → ℂ} (h1 : a 1 = 0)
+    {n : ℕ} (hn : 1 ≤ n) :
+    DLMF.Core.continuedFractionTail a b 0 n = a 0 / b 0 := by
   obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
   rcases m with _ | m
-  · simp [DLMF.Core.cfTail, DLMF.Core.cfContinuants]
-  · simp only [DLMF.Core.cfTail, show m + 1 + 1 = m + 2 by
-        ring, IncompleteGammaFractions.cfContinuants_freeze h1]
+  · simp [DLMF.Core.continuedFractionTail, DLMF.Core.continuedFractionContinuants]
+  · simp only [DLMF.Core.continuedFractionTail, show m + 1 + 1 = m + 2 by
+        ring, IncompleteGammaFractions.continuedFractionContinuants_freeze h1]
 
 /-- The product `∏_{j<k} (a+1+j)`. -/
 def IncompleteGammaFractions.risingProduct (a : ℂ) (k : ℕ) : ℂ := ∏ j ∈ range k, (a + 1 + j)
@@ -496,7 +502,7 @@ theorem IncompleteGammaFractions.normalizedConvergent_differentiableOn (α : ℝ
 
 /-- The target `z^{1-a} e^z Γ(a,z)` of the normalized fraction. -/
 def IncompleteGammaFractions.normalizedTarget (α : ℝ) (z : ℂ) : ℂ := z ^ (1 - (α : ℂ)) * exp z *
-    upperIncGamma α z
+    upperIncompleteGamma α z
 
 /-- The target `z^{1-α} e^z Γ(α,z)` is holomorphic on the slit plane. -/
 theorem IncompleteGammaFractions.normalizedTarget_differentiableOn (α : ℝ) : DifferentiableOn ℂ
@@ -504,7 +510,7 @@ theorem IncompleteGammaFractions.normalizedTarget_differentiableOn (α : ℝ) : 
   intro z hz
   refine DifferentiableAt.differentiableWithinAt ?_
   exact ((differentiableAt_id.cpow_const hz).mul differentiableAt_exp).mul
-    (hasDerivAt_upperIncGamma_complex α hz).differentiableAt
+    (hasDerivAt_upperIncompleteGamma_complex α hz).differentiableAt
 
 /-- The real case: Legendre's fraction converges for real `a < 1`, `x > 0` (from
 `DLMF.Statistical.tendsto_gammaIncContFract`). -/
@@ -559,7 +565,7 @@ theorem IncompleteGammaFractions.normalizedConvergent_tendsto_real {α : ℝ} (h
     simp only [r, DLMF.Statistical.gammaIncCFDen]
     split_ifs <;> field_simp
   have hreal : Tendsto (ofFun 0 aR (fun _ => 1)).convs atTop
-      (𝓝 ((DLMF.Confluent.upperIncGamma α t).re / C)) := by
+      (𝓝 ((DLMF.Confluent.upperIncompleteGamma α t).re / C)) := by
     have h := DLMF.Statistical.tendsto_gammaIncContFract hα ht
     have e : ∀ n, (ofFun 0 aR (fun _ => 1)).convs n =
         (DLMF.Statistical.gammaIncContFract α t).convs n / C := by
@@ -574,10 +580,10 @@ theorem IncompleteGammaFractions.normalizedConvergent_tendsto_real {α : ℝ} (h
     show Tendsto (fun n => (ofFun 0 aR fun _ => 1).convs n) atTop _
     exact (h.div_const C).congr fun n => (e n).symm
   have hval : IncompleteGammaFractions.normalizedTarget α t =
-      (((DLMF.Confluent.upperIncGamma α t).re / C : ℝ) : ℂ) := by
-    set G := (DLMF.Confluent.upperIncGamma (α : ℂ) (t : ℂ)).re with hG
-    have hU := DLMF.Statistical.upperIncGamma_eq_gammaTail α ht
-    have hUr : DLMF.Confluent.upperIncGamma (α : ℂ) (t : ℂ) = (G : ℂ) := by
+      (((DLMF.Confluent.upperIncompleteGamma α t).re / C : ℝ) : ℂ) := by
+    set G := (DLMF.Confluent.upperIncompleteGamma (α : ℂ) (t : ℂ)).re with hG
+    have hU := DLMF.Statistical.upperIncompleteGamma_eq_gammaTail α ht
+    have hUr : DLMF.Confluent.upperIncompleteGamma (α : ℂ) (t : ℂ) = (G : ℂ) := by
       rw [hG, hU, ofReal_re]
     rw [IncompleteGammaFractions.normalizedTarget, hUr, show (1 : ℂ) - α = ((1 - α : ℝ) : ℂ) by
         push_cast; ring,
@@ -640,7 +646,7 @@ theorem IncompleteGammaFractions.formB_tendsto {α : ℝ} (hα : α < 1) (A0 : �
     {a : ℕ → ℂ} (ha0 : a 0 = A0)
         (ha : ∀ k, 1 ≤ k → a k = (IncompleteGammaFractions.legendreNumerator α k : ℂ)) :
     Tendsto (ofFun 0 a (fun k => if Even k then z else 1)).convs atTop
-      (𝓝 (A0 * z ^ (-(α : ℂ)) * exp z * upperIncGamma α z)) := by
+      (𝓝 (A0 * z ^ (-(α : ℂ)) * exp z * upperIncompleteGamma α z)) := by
   have hz0 : z ≠ 0 := slitPlane_ne_zero hz
   set r : ℕ → ℂ := fun k => if Even k then z⁻¹ else 1 with hr
   have hr0 : ∀ k, r k ≠ 0 := fun k => by
@@ -672,7 +678,7 @@ theorem IncompleteGammaFractions.formB_tendsto {α : ℝ} (hα : α < 1) (A0 : �
     else (IncompleteGammaFractions.legendreNumerator α k : ℂ) /
         z) (by simp) (fun k hk => by simp [show k ≠ 0 by omega])
   have hval : A0 * z⁻¹ * IncompleteGammaFractions.normalizedTarget α z = A0 * z ^ (-(α : ℂ)) *
-      exp z * upperIncGamma α z := by
+      exp z * upperIncompleteGamma α z := by
     rw [IncompleteGammaFractions.normalizedTarget, cpow_sub _ _ hz0, cpow_one, cpow_neg]
     field_simp
   rw [← hval]

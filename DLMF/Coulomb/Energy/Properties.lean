@@ -23,22 +23,23 @@ Wronskians 33.14.16.
 
 ## Main results
 
-* `coulombfKummer_neg`, `conj_coulombfKummer`, `ofReal_coulombf`: the sign of `κ` is
-  immaterial and `f` is real; `(f : ℂ)` is the Kummer expression 33.14.5 (proved).
-* `coulombf_eq_whittakerM`: 33.14.4 (proved).
-* `analyticAt_coulombf`: `f` is analytic in `r` and in `ε`, including `ε = 0` (§33.14(ii),
+* `coulombEnergyFKummer_neg`, `conj_coulombEnergyFKummer`, `ofReal_coulombEnergyF`: the sign of `κ`
+  is immaterial and `f` is real; `(f : ℂ)` is the Kummer expression 33.14.5 (proved).
+* `coulombEnergyF_eq_whittakerM`: 33.14.4 (proved).
+* `analyticAt_coulombEnergyF`: `f` is analytic in `r` and in `ε`, including `ε = 0` (§33.14(ii),
   proved).
-* `coulombhKappa_I_mul_neg_eq_coulombG`, `coulombhKappa_I_mul_eq_coulombG`: for `ε > 0` the
-  bracketed form 33.14.7 is a real multiple of `G_ℓ` (proved).
-* `ofReal_coulombh`: the Whittaker form 33.14.7 of `h` away from its removable points (proved).
-* `coulombhKappa_neg`: the sign of `κ` is immaterial in 33.14.7 (proved).
+* `coulombEnergyHKappa_I_mul_neg_eq_coulombG`, `coulombEnergyHKappa_I_mul_eq_coulombG`: for `ε > 0`
+  the bracketed form 33.14.7 is a real multiple of `G_ℓ` (proved).
+* `ofReal_coulombEnergyH`: the Whittaker form 33.14.7 of `h` away from its removable points
+  (proved).
+* `coulombEnergyHKappa_neg`: the sign of `κ` is immaterial in 33.14.7 (proved).
 * `turningPointR_spec`: `r_tp` is a zero of `ε + 2/r - ℓ(ℓ+1)/r²` (proved).
 * `coulomb_potential_substitution`: the substitution 33.14.2 maps 33.2.1 to 33.14.1 (proved).
 * `coulombAProd_eq_Gamma`: 33.14.12 (proved).
-* `hydrogenRadial_eq_coulombs`: the first equality of 33.14.14 (proved).
+* `hydrogenRadial_eq_coulombEnergyS`: the first equality of 33.14.14 (proved).
 * `hydrogenRadial_orthonormal`: 33.14.15, from the radial equation (off-diagonal) and the
   Laguerre recurrence moment (diagonal) (proved).
-* `coulombs_re_eq_zero_of_neg`: `s`, `c` are imaginary when `B < 0` (proved).
+* `coulombEnergyS_re_eq_zero_of_neg`: `s`, `c` are imaginary when `B < 0` (proved).
 -/
 
 @[expose] public section
@@ -65,34 +66,35 @@ theorem conj_coulombKappa (ε r : ℝ) :
     simp [map_mul, Complex.conj_I, Complex.conj_ofReal]
 
 /-- Complex conjugation of the Kummer form 33.14.5. -/
-theorem conj_coulombfKummer (κ : ℂ) (ℓ : ℕ) (r : ℝ) :
-    conj (coulombfKummer κ ℓ r) = coulombfKummer (conj κ) ℓ r := by
-  unfold coulombfKummer
+theorem conj_coulombEnergyFKummer (κ : ℂ) (ℓ : ℕ) (r : ℝ) :
+    conj (coulombEnergyFKummer κ ℓ r) = coulombEnergyFKummer (conj κ) ℓ r := by
+  unfold coulombEnergyFKummer
   rw [map_div₀, map_mul, map_mul, map_pow, ← Complex.exp_conj, conj_kummerM]
   simp [map_div₀, map_neg, map_sub, map_add, map_mul, Complex.conj_ofReal, map_natCast,
     map_ofNat]
 
 /-- The Kummer expression 33.14.5 at `κ` of 33.14.6 is real. -/
-theorem conj_coulombfKummer_kappa (ε : ℝ) (ℓ : ℕ) (r : ℝ) :
-    conj (coulombfKummer (coulombKappa ε r) ℓ r) = coulombfKummer (coulombKappa ε r) ℓ r := by
-  rw [conj_coulombfKummer]
+theorem conj_coulombEnergyFKummer_kappa (ε : ℝ) (ℓ : ℕ) (r : ℝ) :
+    conj (coulombEnergyFKummer (coulombKappa ε r) ℓ r) =
+        coulombEnergyFKummer (coulombKappa ε r) ℓ r := by
+  rw [conj_coulombEnergyFKummer]
   rcases conj_coulombKappa ε r with h | h <;> rw [h]
-  exact coulombfKummer_neg _ ℓ r
+  exact coulombEnergyFKummer_neg _ ℓ r
 
 /-- **`f(ε,ℓ;r)` is real and equals the Kummer form 33.14.5** for `ε ≠ 0`,
 `f = (2r)^{ℓ+1} e^{-r/κ} M(ℓ+1-κ,2ℓ+2,2r/κ)/(2ℓ+1)!` (DLMF 33.14.5, §33.14(ii)). -/
 @[dlmf 33.14.E5]
-theorem ofReal_coulombf {ε : ℝ} (hε : ε ≠ 0) (ℓ : ℕ) (r : ℝ) :
-    (coulombf ε ℓ r : ℂ) = coulombfKummer (coulombKappa ε r) ℓ r := by
-  simp only [coulombf, hε, ↓reduceIte]
-  exact Complex.conj_eq_iff_re.mp (conj_coulombfKummer_kappa ε ℓ r)
+theorem ofReal_coulombEnergyF {ε : ℝ} (hε : ε ≠ 0) (ℓ : ℕ) (r : ℝ) :
+    (coulombEnergyF ε ℓ r : ℂ) = coulombEnergyFKummer (coulombKappa ε r) ℓ r := by
+  simp only [coulombEnergyF, hε, ↓reduceIte]
+  exact Complex.conj_eq_iff_re.mp (conj_coulombEnergyFKummer_kappa ε ℓ r)
 
 /-- **DLMF 33.14.4**: `f(ε,ℓ;r) = κ^{ℓ+1} M_{κ,ℓ+1/2}(2r/κ)/(2ℓ+1)!` for `ε ≠ 0`. -/
 @[dlmf 33.14.E4]
-theorem coulombf_eq_whittakerM {ε : ℝ} (hε : ε ≠ 0) (ℓ : ℕ) (r : ℝ) :
-    (coulombf ε ℓ r : ℂ) = coulombKappa ε r ^ (ℓ + 1) *
+theorem coulombEnergyF_eq_whittakerM {ε : ℝ} (hε : ε ≠ 0) (ℓ : ℕ) (r : ℝ) :
+    (coulombEnergyF ε ℓ r : ℂ) = coulombKappa ε r ^ (ℓ + 1) *
       whittakerM (coulombKappa ε r) (ℓ + 1 / 2) (2 * r / coulombKappa ε r) / (2 * ℓ + 1)! := by
-  rw [ofReal_coulombf hε, coulombfKummer, whittakerM]
+  rw [ofReal_coulombEnergyF hε, coulombEnergyFKummer, whittakerM]
   have hk := coulombKappa_ne_zero hε r
   set κ := coulombKappa ε r
   rw [show (ℓ : ℂ) + 1 / 2 + 1 / 2 = ((ℓ + 1 : ℕ) : ℂ) by push_cast; ring, cpow_natCast,
@@ -200,8 +202,8 @@ private lemma norm_coulombAlphaC_le (ℓ : ℕ) {R : ℝ} (hR : 0 ≤ R) {ε : �
 
 /-- `f(ε,ℓ;r)` is analytic in `ε ∈ ℝ`, as the real part of a power series in `ε` with
 locally uniformly convergent polynomial terms. -/
-private lemma analyticAt_coulombf_eps (ℓ : ℕ) (ε r : ℝ) :
-    AnalyticAt ℝ (fun e => coulombf e ℓ r) ε := by
+private lemma analyticAt_coulombEnergyF_eps (ℓ : ℕ) (ε r : ℝ) :
+    AnalyticAt ℝ (fun e => coulombEnergyF e ℓ r) ε := by
   set R : ℝ := |ε| + 1
   have hR : 0 ≤ R := by positivity
   set F : ℕ → ℂ → ℂ := fun k e => coulombAlphaC e ℓ k * (r : ℂ) ^ (k + ℓ + 1)
@@ -228,9 +230,9 @@ private lemma analyticAt_coulombf_eps (ℓ : ℕ) (ε r : ℝ) :
     rw [Metric.mem_ball, dist_zero_right, norm_real, Real.norm_eq_abs]; simp only [R]; linarith
   have hA : AnalyticAt ℂ (fun e => ∑' k, F k e) ε :=
     hD.analyticAt (Metric.isOpen_ball.mem_nhds hmem)
-  have heq : (fun e : ℝ => coulombf e ℓ r) = fun e : ℝ => (∑' k, F k (e : ℂ)).re := by
+  have heq : (fun e : ℝ => coulombEnergyF e ℓ r) = fun e : ℝ => (∑' k, F k (e : ℂ)).re := by
     funext e
-    rw [coulombf_eq_re_coulombfComplex, ← (hasSum_coulombfComplex e ℓ r).tsum_eq]
+    rw [coulombEnergyF_eq_re_coulombfComplex, ← (hasSum_coulombfComplex e ℓ r).tsum_eq]
     simp only [F, coulombAlphaC_ofReal]
   rw [heq]
   exact (reCLM.analyticAt _).comp ((hA.restrictScalars (𝕜 := ℝ)).comp (ofRealCLM.analyticAt ε))
@@ -238,11 +240,12 @@ private lemma analyticAt_coulombf_eps (ℓ : ℕ) (ε r : ℝ) :
 /-- **DLMF §33.14(ii)**: `f(ε,ℓ;r)` is an analytic function of `r ∈ ℝ` and of `ε ∈ ℝ`, including
 `ε = 0`. -/
 @[dlmf 33.14.ii]
-theorem analyticAt_coulombf (ℓ : ℕ) (ε r : ℝ) :
-    AnalyticAt ℝ (fun x => coulombf ε ℓ x) r ∧ AnalyticAt ℝ (fun e => coulombf e ℓ r) ε := by
-  refine ⟨?_, analyticAt_coulombf_eps ℓ ε r⟩
-  have heq : (fun x : ℝ => coulombf ε ℓ x) = fun x : ℝ => (coulombfComplex ε ℓ x).re :=
-    funext (coulombf_eq_re_coulombfComplex ε ℓ)
+theorem analyticAt_coulombEnergyF (ℓ : ℕ) (ε r : ℝ) :
+    AnalyticAt ℝ (fun x => coulombEnergyF ε ℓ x) r ∧
+        AnalyticAt ℝ (fun e => coulombEnergyF e ℓ r) ε := by
+  refine ⟨?_, analyticAt_coulombEnergyF_eps ℓ ε r⟩
+  have heq : (fun x : ℝ => coulombEnergyF ε ℓ x) = fun x : ℝ => (coulombfComplex ε ℓ x).re :=
+    funext (coulombEnergyF_eq_re_coulombfComplex ε ℓ)
   rw [heq]
   exact (reCLM.analyticAt _).comp
     ((((differentiable_coulombfComplex ε ℓ).analyticAt (r : ℂ)).restrictScalars (𝕜 := ℝ)).comp
@@ -253,33 +256,33 @@ theorem analyticAt_coulombf (ℓ : ℕ) (ε r : ℝ) :
 /-- **The Coulomb wave equation in `r`, `ε`** (DLMF 33.14.1): `f(ε,ℓ;r)` satisfies
 `w'' + (ε + 2/r - ℓ(ℓ+1)/r²) w = 0` at every `r ≠ 0`. -/
 @[dlmf 33.14.E1]
-theorem coulombf_ode (ε : ℝ) (ℓ : ℕ) {r : ℝ} (hr : r ≠ 0) :
-    HasDerivAt (coulombf ε ℓ) (deriv (coulombf ε ℓ) r) r ∧
-      HasDerivAt (deriv (coulombf ε ℓ))
-        (-(ε + 2 / r - ℓ * (ℓ + 1) / r ^ 2) * coulombf ε ℓ r) r := by
-  have hf : coulombf ε ℓ = fun x : ℝ => (coulombfComplex ε ℓ x).re :=
-    funext (coulombf_eq_re_coulombfComplex ε ℓ)
-  have hd : ∀ x : ℝ, HasDerivAt (coulombf ε ℓ) (deriv (coulombfComplex ε ℓ) x).re x := by
+theorem coulombEnergyF_ode (ε : ℝ) (ℓ : ℕ) {r : ℝ} (hr : r ≠ 0) :
+    HasDerivAt (coulombEnergyF ε ℓ) (deriv (coulombEnergyF ε ℓ) r) r ∧
+      HasDerivAt (deriv (coulombEnergyF ε ℓ))
+        (-(ε + 2 / r - ℓ * (ℓ + 1) / r ^ 2) * coulombEnergyF ε ℓ r) r := by
+  have hf : coulombEnergyF ε ℓ = fun x : ℝ => (coulombfComplex ε ℓ x).re :=
+    funext (coulombEnergyF_eq_re_coulombfComplex ε ℓ)
+  have hd : ∀ x : ℝ, HasDerivAt (coulombEnergyF ε ℓ) (deriv (coulombfComplex ε ℓ) x).re x := by
     intro x
     rw [hf]
     exact ((differentiable_coulombfComplex ε ℓ x).hasDerivAt).real_of_complex
-  have hd' : deriv (coulombf ε ℓ) = fun x : ℝ => (deriv (coulombfComplex ε ℓ) x).re :=
+  have hd' : deriv (coulombEnergyF ε ℓ) = fun x : ℝ => (deriv (coulombfComplex ε ℓ) x).re :=
     funext fun x => (hd x).deriv
   refine ⟨(hd r).deriv ▸ hd r, ?_⟩
   rw [hd']
   have h := (hasDerivAt_deriv_coulombfComplex ε ℓ (z := (r : ℂ))
       (by exact_mod_cast hr)).real_of_complex
   convert h using 1
-  rw [coulombf_eq_re_coulombfComplex, ← Complex.re_ofReal_mul]
+  rw [coulombEnergyF_eq_re_coulombfComplex, ← Complex.re_ofReal_mul]
   push_cast
   rfl
 
 /-- **The Coulomb wave equation in `r`, `ε`** (DLMF 33.14.1) for `h(ε,ℓ;r)`, at every `r ≠ 0`. -/
 @[dlmf 33.14.E1]
-theorem coulombh_ode (ε : ℝ) (ℓ : ℕ) {r : ℝ} (hr : r ≠ 0) :
-    HasDerivAt (coulombh ε ℓ) (deriv (coulombh ε ℓ) r) r ∧
-      HasDerivAt (deriv (coulombh ε ℓ))
-        (-(ε + 2 / r - ℓ * (ℓ + 1) / r ^ 2) * coulombh ε ℓ r) r := by
+theorem coulombEnergyH_ode (ε : ℝ) (ℓ : ℕ) {r : ℝ} (hr : r ≠ 0) :
+    HasDerivAt (coulombEnergyH ε ℓ) (deriv (coulombEnergyH ε ℓ) r) r ∧
+      HasDerivAt (deriv (coulombEnergyH ε ℓ))
+        (-(ε + 2 / r - ℓ * (ℓ + 1) / r ^ 2) * coulombEnergyH ε ℓ r) r := by
   sorry
 
 /-- **The substitution 33.14.2** `r = -ηρ`, `ε = 1/η²` turns the coefficient of 33.2.1 into that
@@ -323,17 +326,17 @@ theorem turningPointR_pos {ε : ℝ} (hε : 0 < ε) {ℓ : ℕ} (hℓ : 1 ≤ �
 /-- **The regular singularity at `r = 0`** (DLMF §33.14(i)): the indices are `ℓ+1` and `-ℓ`;
 `f(ε,ℓ;r) ~ (2r)^{ℓ+1}/(2ℓ+1)!` and `h(ε,ℓ;r) ~ (2ℓ)!/(π (2r)^ℓ)` as `r → 0`. -/
 @[dlmf 33.14.i]
-theorem coulombf_coulombh_isEquivalent_zero (ε : ℝ) (ℓ : ℕ) :
-    (fun r => coulombf ε ℓ r) ~[𝓝[≠] 0] (fun r => (2 * r) ^ (ℓ + 1) / (2 * ℓ + 1)!) ∧
-      (fun r => coulombh ε ℓ r) ~[𝓝[≠] 0] (fun r => (2 * ℓ)! / (π * (2 * r) ^ ℓ)) := by
+theorem coulombEnergyF_coulombEnergyH_isEquivalent_zero (ε : ℝ) (ℓ : ℕ) :
+    (fun r => coulombEnergyF ε ℓ r) ~[𝓝[≠] 0] (fun r => (2 * r) ^ (ℓ + 1) / (2 * ℓ + 1)!) ∧
+      (fun r => coulombEnergyH ε ℓ r) ~[𝓝[≠] 0] (fun r => (2 * ℓ)! / (π * (2 * r) ^ ℓ)) := by
   sorry
 
 /-! ### The irregular solution -/
 
 /-- The bracketed form 33.14.7 at `κ = -iη`, `r = -ηρ` (`η ≠ 0`, `ρ > 0`) in terms of
 `H^+_ℓ(η,ρ)` and the (real) Coulomb wave. -/
-theorem coulombhKappa_I_mul_neg_eq (ℓ : ℕ) {η : ℝ} (hη : η ≠ 0) {ρ : ℝ} (hρ : 0 < ρ) (S : ℝ) :
-    coulombhKappa (I * (-η : ℝ)) S ℓ (-η * ρ) =
+theorem coulombEnergyHKappa_I_mul_neg_eq (ℓ : ℕ) {η : ℝ} (hη : η ≠ 0) {ρ : ℝ} (hρ : 0 < ρ) (S : ℝ) :
+    coulombEnergyHKappa (I * (-η : ℝ)) S ℓ (-η * ρ) =
       (((-1) ^ ℓ * ‖Gamma (ℓ + 1 + I * η)‖ * Real.exp (-π * η / 2) / (π * η ^ ℓ) : ℝ) : ℂ) *
         coulombHPlus ℓ η ρ -
       I * ((S * (‖Gamma (ℓ + 1 + I * η)‖ ^ 2 * (-1) ^ ℓ * 2 ^ ℓ * (coulombWave ℓ η ρ).re /
@@ -345,7 +348,7 @@ theorem coulombhKappa_I_mul_neg_eq (ℓ : ℕ) {η : ℝ} (hη : η ≠ 0) {ρ :
   have hb : (ℓ : ℂ) + 1 + I * ((-η : ℝ) : ℂ) = conj ((ℓ : ℂ) + 1 + I * η) := by
     simp
   have he : exp (-(-2 * I * ρ) / 2) = exp (I * ρ) := by congr 1; ring
-  unfold coulombhKappa
+  unfold coulombEnergyHKappa
   rw [hz, ha, hb, Gamma_conj, he]
   set g := Gamma ((ℓ : ℂ) + 1 + I * η) with hg
   have hw := coulombWave_eq_conj_form ℓ η ρ
@@ -402,8 +405,8 @@ theorem coulombhKappa_I_mul_neg_eq (ℓ : ℕ) {η : ℝ} (hη : η ≠ 0) {ρ :
 
 /-- The bracketed form 33.14.7 at `κ = iη`, `r = -ηρ` (`η ≠ 0`, `ρ > 0`) in terms of
 `H^-_ℓ(η,ρ)` and the (real) Coulomb wave. -/
-theorem coulombhKappa_I_mul_eq (ℓ : ℕ) {η : ℝ} (hη : η ≠ 0) {ρ : ℝ} (hρ : 0 < ρ) (S : ℝ) :
-    coulombhKappa (I * (η : ℝ)) S ℓ (-η * ρ) =
+theorem coulombEnergyHKappa_I_mul_eq (ℓ : ℕ) {η : ℝ} (hη : η ≠ 0) {ρ : ℝ} (hρ : 0 < ρ) (S : ℝ) :
+    coulombEnergyHKappa (I * (η : ℝ)) S ℓ (-η * ρ) =
       (((-1) ^ ℓ * ‖Gamma (ℓ + 1 + I * η)‖ * Real.exp (-π * η / 2) / (π * η ^ ℓ) : ℝ) : ℂ) *
         coulombHMinus ℓ η ρ +
       I * ((S * (‖Gamma (ℓ + 1 + I * η)‖ ^ 2 * (-1) ^ ℓ * 2 ^ ℓ * (coulombWave ℓ η ρ).re /
@@ -414,7 +417,7 @@ theorem coulombhKappa_I_mul_eq (ℓ : ℕ) {η : ℝ} (hη : η ≠ 0) {ρ : ℝ
   have ha : (ℓ : ℂ) + 1 - I * (η : ℂ) = conj ((ℓ : ℂ) + 1 + I * η) := by
     simp; ring
   have he : exp (-(2 * I * ρ) / 2) = exp (-I * ρ) := by congr 1; ring
-  unfold coulombhKappa
+  unfold coulombEnergyHKappa
   rw [hz, he]
   have hU : kummerU ((ℓ : ℂ) + 1 - I * η) (2 * ℓ + 2) (2 * I * ρ) =
     kummerU ((ℓ : ℂ) + 1 - I * η) (2 * ℓ + 2) (2 * I * ρ) := rfl
@@ -477,8 +480,8 @@ theorem coulombhKappa_I_mul_eq (ℓ : ℕ) {η : ℝ} (hη : η ≠ 0) {ρ : ℝ
   ring
 
 
-/-- The two coefficients of `coulombhKappa_I_mul_neg_eq` are linked through `F_ℓ`. -/
-private lemma coulombhKappa_coeff_mul_coulombF (ℓ : ℕ) (η ρ : ℝ) :
+/-- The two coefficients of `coulombEnergyHKappa_I_mul_neg_eq` are linked through `F_ℓ`. -/
+private lemma coulombEnergyHKappa_coeff_mul_coulombF (ℓ : ℕ) (η ρ : ℝ) :
     (-1) ^ ℓ * ‖Gamma (ℓ + 1 + I * η)‖ * Real.exp (-π * η / 2) / (π * η ^ ℓ) * coulombF ℓ η ρ =
       Real.exp (-π * η) * (‖Gamma (ℓ + 1 + I * η)‖ ^ 2 * (-1) ^ ℓ * 2 ^ ℓ *
         (coulombWave ℓ η ρ).re / ((2 * ℓ + 1)! * π * η ^ ℓ)) := by
@@ -491,46 +494,47 @@ private lemma coulombhKappa_coeff_mul_coulombF (ℓ : ℕ) (η ρ : ℝ) :
 
 /-- For `ρ > 0`, `η ≠ 0`, the bracketed form 33.14.7 at `κ = -iη`, `r = -ηρ` and
 `S = e^{-πη}` is a real multiple of `G_ℓ(η,ρ)`. -/
-theorem coulombhKappa_I_mul_neg_eq_coulombG (ℓ : ℕ) {η : ℝ} (hη : η ≠ 0) {ρ : ℝ} (hρ : 0 < ρ) :
-    coulombhKappa (I * (-η : ℝ)) (Real.exp (-π * η)) ℓ (-η * ρ) =
+theorem coulombEnergyHKappa_I_mul_neg_eq_coulombG (ℓ : ℕ) {η : ℝ} (hη : η ≠ 0)
+    {ρ : ℝ} (hρ : 0 < ρ) :
+    coulombEnergyHKappa (I * (-η : ℝ)) (Real.exp (-π * η)) ℓ (-η * ρ) =
       (((-1) ^ ℓ * ‖Gamma (ℓ + 1 + I * η)‖ * Real.exp (-π * η / 2) / (π * η ^ ℓ) *
         coulombG ℓ η ρ : ℝ) : ℂ) := by
-  rw [coulombhKappa_I_mul_neg_eq ℓ hη hρ, (coulombH_eq_G_add_I_mul_F ℓ η hρ).1,
-    ← coulombhKappa_coeff_mul_coulombF]
+  rw [coulombEnergyHKappa_I_mul_neg_eq ℓ hη hρ, (coulombH_eq_G_add_I_mul_F ℓ η hρ).1,
+    ← coulombEnergyHKappa_coeff_mul_coulombF]
   push_cast
   ring
 
 /-- For `ρ > 0`, `η ≠ 0`, the bracketed form 33.14.7 at `κ = iη`, `r = -ηρ` and
 `S = e^{-πη}` is a real multiple of `G_ℓ(η,ρ)`. -/
-theorem coulombhKappa_I_mul_eq_coulombG (ℓ : ℕ) {η : ℝ} (hη : η ≠ 0) {ρ : ℝ} (hρ : 0 < ρ) :
-    coulombhKappa (I * (η : ℝ)) (Real.exp (-π * η)) ℓ (-η * ρ) =
+theorem coulombEnergyHKappa_I_mul_eq_coulombG (ℓ : ℕ) {η : ℝ} (hη : η ≠ 0) {ρ : ℝ} (hρ : 0 < ρ) :
+    coulombEnergyHKappa (I * (η : ℝ)) (Real.exp (-π * η)) ℓ (-η * ρ) =
       (((-1) ^ ℓ * ‖Gamma (ℓ + 1 + I * η)‖ * Real.exp (-π * η / 2) / (π * η ^ ℓ) *
         coulombG ℓ η ρ : ℝ) : ℂ) := by
-  rw [coulombhKappa_I_mul_eq ℓ hη hρ, (coulombH_eq_G_add_I_mul_F ℓ η hρ).2,
-    ← coulombhKappa_coeff_mul_coulombF]
+  rw [coulombEnergyHKappa_I_mul_eq ℓ hη hρ, (coulombH_eq_G_add_I_mul_F ℓ η hρ).2,
+    ← coulombEnergyHKappa_coeff_mul_coulombF]
   push_cast
   ring
 
 
 /-- For real `k ≠ 0` with `2r/k > 0`, the bracketed form 33.14.7 is real. -/
-private lemma conj_coulombhKappa_ofReal {k S r : ℝ} (ℓ : ℕ) (h : 0 < 2 * r / k) :
-    conj (coulombhKappa (k : ℂ) S ℓ r) = coulombhKappa (k : ℂ) S ℓ r := by
+private lemma conj_coulombEnergyHKappa_ofReal {k S r : ℝ} (ℓ : ℕ) (h : 0 < 2 * r / k) :
+    conj (coulombEnergyHKappa (k : ℂ) S ℓ r) = coulombEnergyHKappa (k : ℂ) S ℓ r := by
   have hz : (2 * (r : ℂ) / (k : ℂ)) = ((2 * r / k : ℝ) : ℂ) := by push_cast; ring
   have hs : ((2 * r / k : ℝ) : ℂ) ∈ slitPlane := ofReal_mem_slitPlane.mpr h
-  unfold coulombhKappa
+  unfold coulombEnergyHKappa
   rw [hz]
   simp only [map_mul, map_div₀, map_add, map_pow, map_neg, map_sub, ← exp_conj,
     conj_kummerU _ _ hs, conj_kummerM, ← Gamma_conj, conj_ofReal, map_natCast, map_one,
     map_ofNat]
 
-/-- The Whittaker form of 33.14.7 is `coulombhFormula`. -/
-private lemma whittaker_form_eq_coulombhFormula (ε : ℝ) (ℓ : ℕ) (r : ℝ) :
+/-- The Whittaker form of 33.14.7 is `coulombEnergyHFormula`. -/
+private lemma whittaker_form_eq_coulombEnergyHFormula (ε : ℝ) (ℓ : ℕ) (r : ℝ) :
     Gamma (ℓ + 1 - coulombKappa ε r) / (π * coulombKappa ε r ^ ℓ) *
       (whittakerW (coulombKappa ε r) (ℓ + 1 / 2) (2 * r / coulombKappa ε r) +
         (-1) ^ ℓ * coulombSFactor ε r * Gamma (ℓ + 1 + coulombKappa ε r) / (2 * (2 * ℓ + 1)!) *
           whittakerM (coulombKappa ε r) (ℓ + 1 / 2) (2 * r / coulombKappa ε r)) =
-      coulombhFormula ε ℓ r := by
-  unfold coulombhFormula coulombhKappa whittakerW whittakerM
+      coulombEnergyHFormula ε ℓ r := by
+  unfold coulombEnergyHFormula coulombEnergyHKappa whittakerW whittakerM
   set κ := coulombKappa ε r
   rw [show (1 / 2 : ℂ) + (ℓ + 1 / 2) - κ = ℓ + 1 - κ by ring,
     show (ℓ : ℂ) + 1 / 2 - κ + 1 / 2 = ℓ + 1 - κ by ring,
@@ -545,9 +549,9 @@ private lemma coulombKappa_of_pos {ε : ℝ} (hε : 0 < ε) (r : ℝ) :
 
 /-- For `ε > 0` and `r ≠ 0`, the bracketed form 33.14.7 is a real multiple of a value of `G_ℓ`:
 both for `κ` and for `-κ`, which gives the same value. -/
-private lemma coulombhKappa_pm_eq {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ} (hr : r ≠ 0) :
-    ∃ x : ℝ, coulombhKappa (coulombKappa ε r) (coulombSFactor ε r) ℓ r = x ∧
-      coulombhKappa (-coulombKappa ε r) (coulombSFactor ε r) ℓ r = x := by
+private lemma coulombEnergyHKappa_pm_eq {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ} (hr : r ≠ 0) :
+    ∃ x : ℝ, coulombEnergyHKappa (coulombKappa ε r) (coulombSFactor ε r) ℓ r = x ∧
+      coulombEnergyHKappa (-coulombKappa ε r) (coulombSFactor ε r) ℓ r = x := by
   set t := ε ^ (-(1 / 2 : ℝ)) with ht
   have htp : 0 < t := Real.rpow_pos_of_pos hε _
   rw [coulombKappa_of_pos hε]
@@ -559,9 +563,9 @@ private lemma coulombhKappa_pm_eq {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ
     have hρ : 0 < -r / t := div_pos (neg_pos.mpr hneg) htp
     have hrr : r = -t * (-r / t) := by field_simp
     rw [hS, hrr]
-    refine ⟨_, coulombhKappa_I_mul_eq_coulombG ℓ htp.ne' hρ, ?_⟩
+    refine ⟨_, coulombEnergyHKappa_I_mul_eq_coulombG ℓ htp.ne' hρ, ?_⟩
     rw [show -(I * (t : ℂ)) = I * ((-t : ℝ) : ℂ) by push_cast; ring]
-    exact coulombhKappa_I_mul_neg_eq_coulombG ℓ htp.ne' hρ
+    exact coulombEnergyHKappa_I_mul_neg_eq_coulombG ℓ htp.ne' hρ
   · -- `η = -t`, `ρ = r/t`
     have hS : coulombSFactor ε r = Real.exp (-π * (-t)) := by
       simp only [coulombSFactor, not_lt.mpr hε.le, hpos, ↓reduceIte]
@@ -570,25 +574,25 @@ private lemma coulombhKappa_pm_eq {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ
     have hrr : r = -(-t) * (r / t) := by field_simp
     have ht0 : -t ≠ 0 := by linarith
     rw [hS, hrr]
-    have h1 := coulombhKappa_I_mul_neg_eq_coulombG ℓ ht0 hρ
+    have h1 := coulombEnergyHKappa_I_mul_neg_eq_coulombG ℓ ht0 hρ
     rw [show ((-(-t) : ℝ) : ℂ) = (t : ℂ) by push_cast; ring] at h1
     exact ⟨_, h1, by
       rw [show -(I * (t : ℂ)) = I * ((-t : ℝ) : ℂ) by push_cast; ring]
-      exact coulombhKappa_I_mul_eq_coulombG ℓ ht0 hρ⟩
+      exact coulombEnergyHKappa_I_mul_eq_coulombG ℓ ht0 hρ⟩
 
 /-- **DLMF 33.14.7 (Whittaker form)**: away from `ε = 0` and from the poles of `Γ(ℓ+1-κ)`,
 `h(ε,ℓ;r) = Γ(ℓ+1-κ)/(πκ^ℓ) (W_{κ,ℓ+1/2}(2r/κ) + (-1)^ℓ S(ε,r) Γ(ℓ+1+κ)/(2(2ℓ+1)!)
 M_{κ,ℓ+1/2}(2r/κ))`, the right-hand side being real (`r ≠ 0`). -/
 @[dlmf 33.14.E7]
-theorem ofReal_coulombh {ε : ℝ} (hε : ε ≠ 0) (ℓ : ℕ) {r : ℝ} (hr : r ≠ 0)
+theorem ofReal_coulombEnergyH {ε : ℝ} (hε : ε ≠ 0) (ℓ : ℕ) {r : ℝ} (hr : r ≠ 0)
     (hpole : ∀ m : ℕ, (ℓ : ℂ) + 1 - coulombKappa ε r ≠ -(m : ℂ)) :
-    (coulombh ε ℓ r : ℂ) = Gamma (ℓ + 1 - coulombKappa ε r) / (π * coulombKappa ε r ^ ℓ) *
+    (coulombEnergyH ε ℓ r : ℂ) = Gamma (ℓ + 1 - coulombKappa ε r) / (π * coulombKappa ε r ^ ℓ) *
       (whittakerW (coulombKappa ε r) (ℓ + 1 / 2) (2 * r / coulombKappa ε r) +
         (-1) ^ ℓ * coulombSFactor ε r * Gamma (ℓ + 1 + coulombKappa ε r) / (2 * (2 * ℓ + 1)!) *
           whittakerM (coulombKappa ε r) (ℓ + 1 / 2) (2 * r / coulombKappa ε r)) := by
-  rw [whittaker_form_eq_coulombhFormula]
-  have hre : coulombh ε ℓ r = (coulombhFormula ε ℓ r).re := by
-    unfold coulombh
+  rw [whittaker_form_eq_coulombEnergyHFormula]
+  have hre : coulombEnergyH ε ℓ r = (coulombEnergyHFormula ε ℓ r).re := by
+    unfold coulombEnergyH
     split_ifs with h
     · exfalso
       rcases h with h | ⟨m, hm⟩
@@ -598,39 +602,40 @@ theorem ofReal_coulombh {ε : ℝ} (hε : ε ≠ 0) (ℓ : ℕ) {r : ℝ} (hr : 
   rw [hre]
   refine Complex.conj_eq_iff_re.mp ?_
   rcases hε.lt_or_gt with hneg | hpos
-  · unfold coulombhFormula
+  · unfold coulombEnergyHFormula
     set t := (-ε) ^ (-(1 / 2 : ℝ))
     have htp : 0 < t := Real.rpow_pos_of_pos (neg_pos.mpr hneg) _
     rcases hr.lt_or_gt with hr' | hr'
     · have hk : coulombKappa ε r = ((-t : ℝ) : ℂ) := by
         simp only [coulombKappa, hneg, not_lt.mpr hr'.le, ↓reduceIte, t]
       rw [hk]
-      exact conj_coulombhKappa_ofReal ℓ (div_pos_of_neg_of_neg (by linarith) (by linarith))
+      exact conj_coulombEnergyHKappa_ofReal ℓ (div_pos_of_neg_of_neg (by linarith) (by linarith))
     · have hk : coulombKappa ε r = ((t : ℝ) : ℂ) := by
         simp only [coulombKappa, hneg, hr', ↓reduceIte, t]
       rw [hk]
-      exact conj_coulombhKappa_ofReal ℓ (by positivity)
-  · obtain ⟨x, h1, -⟩ := coulombhKappa_pm_eq hpos ℓ hr
-    rw [coulombhFormula, h1, conj_ofReal]
+      exact conj_coulombEnergyHKappa_ofReal ℓ (by positivity)
+  · obtain ⟨x, h1, -⟩ := coulombEnergyHKappa_pm_eq hpos ℓ hr
+    rw [coulombEnergyHFormula, h1, conj_ofReal]
 
 /-- **The sign of `κ` is immaterial in 33.14.7** (DLMF §33.14(iii)): for `ε > 0` the bracketed
 form with `-κ = -iε^{-1/2}` gives the same value. -/
 @[dlmf 33.14.iii]
-theorem coulombhKappa_neg {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ} (hr : r ≠ 0) :
-    coulombhKappa (-coulombKappa ε r) (coulombSFactor ε r) ℓ r =
-      coulombhKappa (coulombKappa ε r) (coulombSFactor ε r) ℓ r := by
-  obtain ⟨x, h1, h2⟩ := coulombhKappa_pm_eq hε ℓ hr
+theorem coulombEnergyHKappa_neg {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) {r : ℝ} (hr : r ≠ 0) :
+    coulombEnergyHKappa (-coulombKappa ε r) (coulombSFactor ε r) ℓ r =
+      coulombEnergyHKappa (coulombKappa ε r) (coulombSFactor ε r) ℓ r := by
+  obtain ⟨x, h1, h2⟩ := coulombEnergyHKappa_pm_eq hε ℓ hr
   rw [h1, h2]
 
 /-- **DLMF §33.14(iii)**: `h(ε,ℓ;r)` is an analytic function of `r` for `r ≠ 0` and of `ε` for
 `ε ≠ 0`; it is continuous in `ε` at `ε = 0` and at the poles of `Γ(ℓ+1-κ)`, so that the limits
 in the definition exist. -/
 @[dlmf 33.14.iii]
-theorem analyticAt_coulombh (ℓ : ℕ) :
-    (∀ ε r : ℝ, r ≠ 0 → AnalyticAt ℝ (fun x => coulombh ε ℓ x) r) ∧
-      (∀ ε r : ℝ, ε ≠ 0 → r ≠ 0 → AnalyticAt ℝ (fun e => coulombh e ℓ r) ε) ∧
+theorem analyticAt_coulombEnergyH (ℓ : ℕ) :
+    (∀ ε r : ℝ, r ≠ 0 → AnalyticAt ℝ (fun x => coulombEnergyH ε ℓ x) r) ∧
+      (∀ ε r : ℝ, ε ≠ 0 → r ≠ 0 → AnalyticAt ℝ (fun e => coulombEnergyH e ℓ r) ε) ∧
       (∀ ε r : ℝ, r ≠ 0 →
-        Tendsto (fun e => (coulombhFormula e ℓ r).re) (𝓝[≠] ε) (𝓝 (coulombh ε ℓ r))) := by
+        Tendsto (fun e => (coulombEnergyHFormula e ℓ r).re) (𝓝[≠] ε)
+            (𝓝 (coulombEnergyH ε ℓ r))) := by
   sorry
 
 /-! ### `A(ε,ℓ)`, `s` and `c` -/
@@ -699,17 +704,17 @@ theorem coulombAProd_eq_Gamma {ε : ℝ} (hε : ε ≠ 0) (ℓ : ℕ) (r : ℝ)
 /-- **DLMF §33.14(iv)**: when `B(ε,ℓ) < 0` (possible for `ε < 0`, `ℓ > (-ε)^{-1/2}`), the
 functions `s(ε,ℓ;r)` and `c(ε,ℓ;r)` are purely imaginary. -/
 @[dlmf 33.14.iv]
-theorem coulombs_re_eq_zero_of_neg {ε : ℝ} {ℓ : ℕ} (hB : coulombBFactor ε ℓ < 0) (r : ℝ) :
-    (coulombs ε ℓ r).re = 0 ∧ (coulombc ε ℓ r).re = 0 := by
+theorem coulombEnergyS_re_eq_zero_of_neg {ε : ℝ} {ℓ : ℕ} (hB : coulombBFactor ε ℓ < 0) (r : ℝ) :
+    (coulombEnergyS ε ℓ r).re = 0 ∧ (coulombEnergyC ε ℓ r).re = 0 := by
   constructor
-  · rw [coulombs, ofReal_cpow_of_nonpos (by linarith : coulombBFactor ε ℓ / 2 ≤ 0),
+  · rw [coulombEnergyS, ofReal_cpow_of_nonpos (by linarith : coulombBFactor ε ℓ / 2 ≤ 0),
       ← Complex.ofReal_neg, show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring,
       ← Complex.ofReal_cpow (by linarith : (0 : ℝ) ≤ -(coulombBFactor ε ℓ / 2)),
       show (π : ℂ) * I * ((1 / 2 : ℝ) : ℂ) = ((π / 2 : ℝ) : ℂ) * I by push_cast; ring,
       Complex.exp_mul_I, ← Complex.ofReal_cos, ← Complex.ofReal_sin, Real.cos_pi_div_two,
       Real.sin_pi_div_two]
     simp
-  · rw [coulombc, ofReal_cpow_of_nonpos (by linarith : 2 * coulombBFactor ε ℓ ≤ 0),
+  · rw [coulombEnergyC, ofReal_cpow_of_nonpos (by linarith : 2 * coulombBFactor ε ℓ ≤ 0),
       ← Complex.ofReal_neg, show (-(1 / 2) : ℂ) = ((-(1 / 2) : ℝ) : ℂ) by push_cast; ring,
       ← Complex.ofReal_cpow (by linarith : (0 : ℝ) ≤ -(2 * coulombBFactor ε ℓ)),
       show (π : ℂ) * I * ((-(1 / 2) : ℝ) : ℂ) = ((-(π / 2) : ℝ) : ℂ) * I by push_cast; ring,
@@ -721,10 +726,10 @@ theorem coulombs_re_eq_zero_of_neg {ε : ℝ} {ℓ : ℕ} (hB : coulombBFactor �
 distributional sense of DLMF §1.17: for every smooth test function `g` with compact support in
 `(0,∞)`, `∫ g(ε₁) ∫₀^R s(ε₁,ℓ;r) s(ε₂,ℓ;r) dr dε₁ → g(ε₂)` as `R → ∞`. -/
 @[dlmf 33.14.E13]
-theorem coulombs_orthogonality_dirac (ℓ : ℕ) {ε₂ : ℝ} (hε₂ : 0 < ε₂) {g : ℝ → ℂ}
-    (hg : ContDiff ℝ ⊤ g) (hgc : HasCompactSupport g) (hgs : tsupport g ⊆ Ioi 0) :
+theorem coulombEnergyS_orthogonality_dirac (ℓ : ℕ) {ε₂ : ℝ} (hε₂ : 0 < ε₂) {g : ℝ → ℂ}
+    (hg : ContDiff ℝ (⊤ : ℕ∞) g) (hgc : HasCompactSupport g) (hgs : tsupport g ⊆ Ioi 0) :
     Tendsto (fun R : ℝ => ∫ ε₁ in Ioi (0 : ℝ),
-        g ε₁ * ∫ r in (0 : ℝ)..R, coulombs ε₁ ℓ r * coulombs ε₂ ℓ r)
+        g ε₁ * ∫ r in (0 : ℝ)..R, coulombEnergyS ε₁ ℓ r * coulombEnergyS ε₂ ℓ r)
       atTop (𝓝 (g ε₂)) := by
   sorry
 
@@ -749,16 +754,16 @@ private lemma coulombAProd_neg_one_div_sq_nonneg {n ℓ : ℕ} (hn : ℓ + 1 ≤
 /-- **DLMF 33.14.14 (first equality)**: for `n ≥ ℓ+1`,
 `φ_{n,ℓ}(r) = (-1)^{ℓ+1+n} (2/n³)^{1/2} s(-1/n², ℓ; r)`. -/
 @[dlmf 33.14.E14]
-theorem hydrogenRadial_eq_coulombs {n ℓ : ℕ} (hn : ℓ + 1 ≤ n) (r : ℝ) :
+theorem hydrogenRadial_eq_coulombEnergyS {n ℓ : ℕ} (hn : ℓ + 1 ≤ n) (r : ℝ) :
     (hydrogenRadial n ℓ r : ℂ) =
       (((-1) ^ (ℓ + 1 + n) * Real.sqrt (2 / (n : ℝ) ^ 3) : ℝ) : ℂ) *
-        coulombs (-1 / (n : ℝ) ^ 2) ℓ r := by
+        coulombEnergyS (-1 / (n : ℝ) ^ 2) ℓ r := by
   have hB : coulombBFactor (-1 / (n : ℝ) ^ 2) ℓ = coulombAProd (-1 / (n : ℝ) ^ 2) ℓ := by
     have : (0 : ℝ) ≤ 1 / (n : ℝ) ^ 2 := by positivity
     have h : ¬ (0 < -1 / (n : ℝ) ^ 2) := by rw [neg_div]; linarith
     simp only [coulombBFactor, h, ↓reduceIte]
   have hA := coulombAProd_neg_one_div_sq_nonneg hn
-  rw [hydrogenRadial, coulombs, hB, Real.sqrt_eq_rpow (coulombAProd _ ℓ / 2),
+  rw [hydrogenRadial, coulombEnergyS, hB, Real.sqrt_eq_rpow (coulombAProd _ ℓ / 2),
     show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring,
     ← Complex.ofReal_cpow (by positivity)]
   push_cast
@@ -822,7 +827,7 @@ theorem hydrogenRadial_eq_laguerre {n ℓ : ℕ} (hn : ℓ + 1 ≤ n) (r : ℝ) 
     (hydrogenRadial n ℓ r : ℂ) =
       (((-1) ^ (ℓ + 1 + n) / (n : ℝ) ^ (ℓ + 2) *
         Real.sqrt ((n - ℓ - 1)! / (n + ℓ)!) * (2 * r) ^ (ℓ + 1) * Real.exp (-r / n) : ℝ) : ℂ) *
-        laguerrePolyL (2 * ℓ + 1) (n - ℓ - 1) (2 * r / n) := by
+        laguerrePolynomialL (2 * ℓ + 1) (n - ℓ - 1) (2 * r / n) := by
   obtain ⟨N, rfl⟩ := Nat.exists_eq_add_of_le hn
   rw [show ℓ + 1 + N - ℓ - 1 = N by omega, show ℓ + 1 + N + ℓ = 2 * ℓ + 1 + N by ring]
   set n : ℕ := ℓ + 1 + N with hn_def
@@ -836,17 +841,18 @@ theorem hydrogenRadial_eq_laguerre {n ℓ : ℕ} (hn : ℓ + 1 ≤ n) (r : ℝ) 
   have hA := coulombAProd_neg_one_div_sq_nonneg (n := n) (ℓ := ℓ) (by omega)
   have hAe := coulombAProd_hydrogen ℓ N
   rw [← hn_def, ← hε_def] at hAe
-  have hf : (coulombf ε ℓ r : ℂ) = coulombfKummer (n : ℂ) ℓ r := by
-    rw [ofReal_coulombf hε0]
+  have hf : (coulombEnergyF ε ℓ r : ℂ) = coulombEnergyFKummer (n : ℂ) ℓ r := by
+    rw [ofReal_coulombEnergyF hε0]
     rcases coulombKappa_eq_or_eq_neg ε r with h | h
     · rw [h, hε_def, coulombKappa_hydrogen (by omega)]
-    · rw [h, coulombfKummer_neg, hε_def, coulombKappa_hydrogen (by omega)]
-  have hK : coulombfKummer (n : ℂ) ℓ r = (((2 * r) ^ (ℓ + 1) * Real.exp (-r / n) *
-      (N ! / (2 * ℓ + 1 + N)!) : ℝ) : ℂ) * laguerrePolyL (2 * ℓ + 1) N (2 * r / n) := by
-    unfold coulombfKummer laguerrePolyL
+    · rw [h, coulombEnergyFKummer_neg, hε_def, coulombKappa_hydrogen (by omega)]
+  have hK : coulombEnergyFKummer (n : ℂ) ℓ r = (((2 * r) ^ (ℓ + 1) * Real.exp (-r / n) *
+      (N ! / (2 * ℓ + 1 + N)!) : ℝ) : ℂ) * laguerrePolynomialL (2 * ℓ + 1) N (2 * r / n) := by
+    unfold coulombEnergyFKummer laguerrePolynomialL
     have hM : (ℓ : ℂ) + 1 - n = -(N : ℂ) := by rw [hn_def]; push_cast; ring
     rw [hM, show (2 * ℓ + 1 : ℂ) + 1 = 2 * ℓ + 2 by ring]
-    have hP : ((2 * ℓ + 1)! : ℂ) * DLMF.Hypergeometric.poch (2 * ℓ + 2) N = (2 * ℓ + 1 + N)! := by
+    have hP : ((2 * ℓ + 1)! : ℂ) * DLMF.Hypergeometric.pochhammer (2 * ℓ + 2) N =
+        (2 * ℓ + 1 + N)! := by
       have := factorial_mul_ascPochhammer ℂ (2 * ℓ + 1) N
       push_cast at this
       rw [show (2 * ℓ + 2 : ℂ) = 2 * ℓ + 1 + 1 by ring]
@@ -854,9 +860,9 @@ theorem hydrogenRadial_eq_laguerre {n ℓ : ℕ} (hn : ℓ + 1 ≤ n) (r : ℝ) 
     have h1 : ((2 * ℓ + 1)! : ℂ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero _
     have h2 : ((2 * ℓ + 1 + N)! : ℂ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero _
     have h3 : (N ! : ℂ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero _
-    have hp0 : DLMF.Hypergeometric.poch (2 * ℓ + 2) N ≠ 0 := by
+    have hp0 : DLMF.Hypergeometric.pochhammer (2 * ℓ + 2) N ≠ 0 := by
       intro h; rw [h, mul_zero] at hP; exact h2 hP.symm
-    have hp0' : DLMF.Hypergeometric.poch (2 * ((ℓ : ℂ) + 1)) N ≠ 0 := by
+    have hp0' : DLMF.Hypergeometric.pochhammer (2 * ((ℓ : ℂ) + 1)) N ≠ 0 := by
       rw [show 2 * ((ℓ : ℂ) + 1) = 2 * ℓ + 2 by ring]; exact hp0
     push_cast
     rw [← hP]
@@ -883,7 +889,7 @@ theorem hydrogenRadial_eq_laguerre {n ℓ : ℕ} (hn : ℓ + 1 ≤ n) (r : ℝ) 
   have hk := congrArg (fun x : ℝ => (x : ℂ)) hkey
   push_cast at hk ⊢
   linear_combination ((-1) ^ (ℓ + 1 + n) * (2 * (r : ℂ)) ^ (ℓ + 1) * Complex.exp (-(r : ℂ) / n) *
-    laguerrePolyL (2 * ℓ + 1) N (2 * r / n)) * hk
+    laguerrePolynomialL (2 * ℓ + 1) N (2 * r / n)) * hk
 
 /-! ### Orthonormality of the hydrogen radial functions -/
 
@@ -934,7 +940,7 @@ private lemma hydrogenRadial_eq_eval (ℓ : ℕ) {n : ℕ} (hn : ℓ + 1 ≤ n) 
     hydrogenRadial n ℓ r = (hydrogenPoly n ℓ).eval r * Real.exp (-r / n) := by
   apply Complex.ofReal_injective
   rw [hydrogenRadial_eq_laguerre hn]
-  have hL : laguerrePolyL (2 * ℓ + 1) (n - ℓ - 1) (2 * r / n) =
+  have hL : laguerrePolynomialL (2 * ℓ + 1) (n - ℓ - 1) (2 * r / n) =
       (((laguerrePolyLR (2 * ℓ + 1) (n - ℓ - 1)).eval (2 * r / n) : ℝ) : ℂ) := by
     have h1 := eval_map_laguerrePolyLR (2 * ℓ + 1) (n - ℓ - 1) ((2 * r / n : ℝ) : ℂ)
     rw [Polynomial.eval_map, show ((2 * r / n : ℝ) : ℂ) = algebraMap ℝ ℂ (2 * r / n) from rfl,
@@ -969,13 +975,14 @@ private lemma hasDerivAt_deriv_hydrogenRadial (ℓ n : ℕ) {r : ℝ} (hr : r �
       (-(-1 / (n : ℝ) ^ 2 + 2 / r - ℓ * (ℓ + 1) / r ^ 2) * hydrogenRadial n ℓ r) r := by
   set K := (-1) ^ (ℓ + 1 + n) * Real.sqrt (2 / (n : ℝ) ^ 3) *
     Real.sqrt (coulombBFactor (-1 / (n : ℝ) ^ 2) ℓ / 2)
-  have he : hydrogenRadial n ℓ = fun r => K * coulombf (-1 / (n : ℝ) ^ 2) ℓ r := rfl
-  have hd : deriv (hydrogenRadial n ℓ) = fun r => K * deriv (coulombf (-1 / (n : ℝ) ^ 2) ℓ) r := by
+  have he : hydrogenRadial n ℓ = fun r => K * coulombEnergyF (-1 / (n : ℝ) ^ 2) ℓ r := rfl
+  have hd : deriv (hydrogenRadial n ℓ) = fun r => K *
+      deriv (coulombEnergyF (-1 / (n : ℝ) ^ 2) ℓ) r := by
     funext x
     rw [he]
-    exact deriv_const_mul K (hasDerivAt_coulombf _ ℓ x).differentiableAt
+    exact deriv_const_mul K (hasDerivAt_coulombEnergyF _ ℓ x).differentiableAt
   rw [hd]
-  have h := ((coulombf_ode (-1 / (n : ℝ) ^ 2) ℓ hr).2).const_mul K
+  have h := ((coulombEnergyF_ode (-1 / (n : ℝ) ^ 2) ℓ hr).2).const_mul K
   convert h using 1
   rw [he]
   ring
@@ -1048,24 +1055,25 @@ private lemma integral_hydrogenRadial_mul_of_ne {m n ℓ : ℕ} (hm : ℓ + 1 �
   exact (mul_eq_zero.mp hFTC).resolve_left he
 
 /-- `∫₀^∞ (L_N^{(α)})² x^{α+1} e^{-x} dx = (2N+α+1) Γ(N+α+1)/N!`. -/
-private lemma integral_laguerrePolyL_sq_mul_id {α : ℝ} (hα : -1 < α) (N : ℕ) :
-    ∫ x : ℝ in Ioi 0, laguerrePolyL α N x * laguerrePolyL α N x * (x : ℂ) *
+private lemma integral_laguerrePolynomialL_sq_mul_id {α : ℝ} (hα : -1 < α) (N : ℕ) :
+    ∫ x : ℝ in Ioi 0, laguerrePolynomialL α N x * laguerrePolynomialL α N x * (x : ℂ) *
       (x : ℂ) ^ (α : ℂ) * exp (-(x : ℂ)) =
       (2 * N + α + 1) * Gamma (N + α + 1) / N ! := by
-  set a : ℕ → ℂ := fun j => poch ((α : ℂ) + 1) N / N ! * kummerMCoeff (-(N : ℂ)) (α + 1) j
-  have hexp : (fun x : ℝ => laguerrePolyL α N x * laguerrePolyL α N x * (x : ℂ) *
+  set a : ℕ → ℂ := fun j => pochhammer ((α : ℂ) + 1) N / N ! * kummerMCoeff (-(N : ℂ)) (α + 1) j
+  have hexp : (fun x : ℝ => laguerrePolynomialL α N x * laguerrePolynomialL α N x * (x : ℂ) *
       (x : ℂ) ^ (α : ℂ) * exp (-(x : ℂ))) = fun x : ℝ => ∑ j ∈ Finset.range (N + 1),
-        a j * (laguerrePolyL α N x * (x : ℂ) ^ (j + 1) * (x : ℂ) ^ (α : ℂ) * exp (-(x : ℂ))) := by
+        a j * (laguerrePolynomialL α N x * (x : ℂ) ^ (j + 1) * (x : ℂ) ^ (α : ℂ) *
+            exp (-(x : ℂ))) := by
     funext x
-    have h := laguerrePolyL_eq_sum_coeff (α : ℂ) N x
-    calc _ = (laguerrePolyL α N x * (x : ℂ) * (x : ℂ) ^ (α : ℂ) * exp (-(x : ℂ))) *
+    have h := laguerrePolynomialL_eq_sum_coeff (α : ℂ) N x
+    calc _ = (laguerrePolynomialL α N x * (x : ℂ) * (x : ℂ) ^ (α : ℂ) * exp (-(x : ℂ))) *
           ∑ j ∈ Finset.range (N + 1), a j * (x : ℂ) ^ j := by
           rw [← h]; ring
       _ = _ := by
           rw [Finset.mul_sum]; exact Finset.sum_congr rfl fun j _ => by ring
   rw [hexp, integral_finsetSum _ (fun j _ =>
-    (integrable_laguerrePolyL_mul_monomial hα N (j + 1)).const_mul _)]
-  simp_rw [integral_const_mul, integral_laguerrePolyL_mul_monomial hα]
+    (integrable_laguerrePolynomialL_mul_monomial hα N (j + 1)).const_mul _)]
+  simp_rw [integral_const_mul, integral_laguerrePolynomialL_mul_monomial hα]
   have hc : ∀ j : ℕ, (α : ℂ) + 1 ≠ -j := not_neg_nat_of_re_pos (by
     simp only [add_re, ofReal_re, one_re]; linarith)
   have hG : ∀ k : ℕ, (α : ℂ) + k + 1 ≠ 0 := fun k h => by
@@ -1074,14 +1082,15 @@ private lemma integral_laguerrePolyL_sq_mul_id {α : ℝ} (hα : -1 < α) (N : �
     have := Nat.cast_nonneg (α := ℝ) k
     linarith
   rcases N with _ | M
-  · simp [a, kummerMCoeff, poch_zero]
+  · simp [a, kummerMCoeff, pochhammer_zero]
     exact Gamma_add_one _ (by simpa using hG 0)
   · rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_eq_zero (fun j hj => by
       have hj := Finset.mem_range.mp hj
       rw [show ((j + 1 : ℕ) : ℂ) = ((j + 1 : ℕ) : ℂ) from rfl]
-      simp only [poch_neg_coe_nat, Nat.descFactorial_eq_zero_iff_lt.mpr (by omega : j + 1 < M + 1)]
+      simp only [pochhammer_neg_coe_nat,
+          Nat.descFactorial_eq_zero_iff_lt.mpr (by omega : j + 1 < M + 1)]
       simp)]
-    have hp := poch_ne_zero_of_not_neg_nat hc M
+    have hp := pochhammer_ne_zero_of_not_neg_nat hc M
     have g1 : Gamma ((α : ℂ) + ((M + 1 : ℕ) : ℂ) + 1) = (α + M + 1) * Gamma (α + M + 1) := by
       rw [show (α : ℂ) + ((M + 1 : ℕ) : ℂ) + 1 = (α + M + 1) + 1 by push_cast; ring]
       exact Gamma_add_one _ (hG M)
@@ -1100,13 +1109,13 @@ private lemma integral_laguerrePolyL_sq_mul_id {α : ℝ} (hα : -1 < α) (N : �
       have := Nat.factorial_mul_descFactorial (show M + 1 ≤ M + 1 + 1 by omega)
       rw [show M + 1 + 1 - (M + 1) = 1 by omega] at this
       simpa using this
-    have p1 : poch (-((M + 1 : ℕ) : ℂ)) M = (-1) ^ M * ((M + 1)! : ℂ) := by
-      rw [poch_neg_coe_nat, d1]
-    have p2 : poch (-((M + 1 : ℕ) : ℂ)) (M + 1) = (-1) ^ (M + 1) * ((M + 1)! : ℂ) := by
-      rw [poch_neg_coe_nat, Nat.descFactorial_self]
-    have p3 : poch (-((M + 1 + 1 : ℕ) : ℂ)) (M + 1) = (-1) ^ (M + 1) * ((M + 2)! : ℂ) := by
-      rw [poch_neg_coe_nat, d2]
-    simp only [a, kummerMCoeff, p1, p2, p3, g1, g2, g0, poch_succ _ M]
+    have p1 : pochhammer (-((M + 1 : ℕ) : ℂ)) M = (-1) ^ M * ((M + 1)! : ℂ) := by
+      rw [pochhammer_neg_coe_nat, d1]
+    have p2 : pochhammer (-((M + 1 : ℕ) : ℂ)) (M + 1) = (-1) ^ (M + 1) * ((M + 1)! : ℂ) := by
+      rw [pochhammer_neg_coe_nat, Nat.descFactorial_self]
+    have p3 : pochhammer (-((M + 1 + 1 : ℕ) : ℂ)) (M + 1) = (-1) ^ (M + 1) * ((M + 2)! : ℂ) := by
+      rw [pochhammer_neg_coe_nat, d2]
+    simp only [a, kummerMCoeff, p1, p2, p3, g1, g2, g0, pochhammer_succ _ M]
     have hpa : (α : ℂ) + 1 + M ≠ 0 := by
       have := hG M; rwa [add_right_comm] at this
     push_cast [Nat.factorial_succ]
@@ -1124,8 +1133,8 @@ private lemma integral_hydrogenRadial_sq {n ℓ : ℕ} (hn : ℓ + 1 ≤ n) :
   set K : ℝ := (-1) ^ (ℓ + 1 + (ℓ + 1 + N)) / m ^ (ℓ + 2) *
     Real.sqrt ((ℓ + 1 + N - ℓ - 1)! / (ℓ + 1 + N + ℓ)!) with hK
   clear_value m
-  set g : ℝ → ℂ := fun x => laguerrePolyL ((2 * ℓ + 1 : ℝ) : ℂ) N x *
-    laguerrePolyL ((2 * ℓ + 1 : ℝ) : ℂ) N x * (x : ℂ) * (x : ℂ) ^ (((2 * ℓ + 1 : ℝ)) : ℂ) *
+  set g : ℝ → ℂ := fun x => laguerrePolynomialL ((2 * ℓ + 1 : ℝ) : ℂ) N x *
+    laguerrePolynomialL ((2 * ℓ + 1 : ℝ) : ℂ) N x * (x : ℂ) * (x : ℂ) ^ (((2 * ℓ + 1 : ℝ)) : ℂ) *
       exp (-(x : ℂ)) with hg
   have hpt : ∀ r : ℝ, ((hydrogenRadial (ℓ + 1 + N) ℓ r * hydrogenRadial (ℓ + 1 + N) ℓ r : ℝ) : ℂ) =
       ((K ^ 2 * m ^ (2 * ℓ + 2) : ℝ) : ℂ) * g ((2 / m) * r) := by
@@ -1151,7 +1160,7 @@ private lemma integral_hydrogenRadial_sq {n ℓ : ℕ} (hn : ℓ + 1 ≤ n) :
       mul_pow, div_pow, Real.sq_sqrt (by positivity), ← pow_mul,
       Even.neg_one_pow ⟨ℓ + 1 + (ℓ + 1 + N), by ring⟩, ← pow_mul]
     ring_nf
-  have hJ := integral_laguerrePolyL_sq_mul_id (α := 2 * ℓ + 1)
+  have hJ := integral_laguerrePolynomialL_sq_mul_id (α := 2 * ℓ + 1)
     (by have := (Nat.cast_nonneg ℓ : (0 : ℝ) ≤ ℓ); linarith) N
   apply Complex.ofReal_injective
   rw [← integral_complex_ofReal]
@@ -1194,7 +1203,8 @@ theorem hydrogenRadial_not_complete (ℓ : ℕ) :
 /-- **DLMF 33.14.16**: `𝒲{h, f} = h f' - h' f = 2/π` for `r ≠ 0`. -/
 @[dlmf 33.14.E16]
 theorem coulomb_wronskian_hf (ε : ℝ) (ℓ : ℕ) {r : ℝ} (hr : r ≠ 0) :
-    coulombh ε ℓ r * deriv (coulombf ε ℓ) r - deriv (coulombh ε ℓ) r * coulombf ε ℓ r =
+    coulombEnergyH ε ℓ r * deriv (coulombEnergyF ε ℓ) r - deriv (coulombEnergyH ε ℓ) r *
+        coulombEnergyF ε ℓ r =
       2 / π := by
   sorry
 
@@ -1202,7 +1212,8 @@ theorem coulomb_wronskian_hf (ε : ℝ) (ℓ : ℕ) {r : ℝ} (hr : r ≠ 0) :
 `s` and `c` are imaginary and the principal powers multiply to `1/2`). -/
 @[dlmf 33.14.E16]
 theorem coulomb_wronskian_cs {ε : ℝ} {ℓ : ℕ} (hB : coulombBFactor ε ℓ ≠ 0) {r : ℝ} (hr : r ≠ 0) :
-    coulombc ε ℓ r * deriv (coulombs ε ℓ) r - deriv (coulombc ε ℓ) r * coulombs ε ℓ r =
+    coulombEnergyC ε ℓ r * deriv (coulombEnergyS ε ℓ) r - deriv (coulombEnergyC ε ℓ) r *
+        coulombEnergyS ε ℓ r =
       1 / π := by
   sorry
 

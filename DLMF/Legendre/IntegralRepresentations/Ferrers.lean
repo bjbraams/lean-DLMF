@@ -137,7 +137,7 @@ theorem MehlerDirichlet.substitution_point (ν μ : ℂ) {θ s : ℝ} (hs0 : 0 <
     have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
   have hF := sin_sq_cos_quotient (ν+1) (x := s/2) (by rw [abs_of_pos (by linarith)]; linarith)
   rw [show (1:ℂ) - (ν+1) = -ν by ring, ← hc2] at hF
-  rw [hz, regularizedGaussHGFun_eq_div_Gamma hc12, hF, legendre_Gamma_one_half,
+  rw [hz, regularizedGaussHypergeometricFun_eq_div_Gamma hc12, hF, legendre_Gamma_one_half,
     show (1 - (MehlerDirichlet.substitution θ s : ℂ)) =
         ((1 - MehlerDirichlet.substitution θ s : ℝ):ℂ) by rw [ofReal_sub, ofReal_one], hmd1,
     Complex.ofReal_cpow_eq_exp (div_pos hB hD),
@@ -187,7 +187,7 @@ theorem ferrersP_mehler_dirichlet {μ : ℂ} (hμ : μ.re < 1/2) (ν : ℂ) {θ 
     linarith
   have hcd : 0 < ((1-μ) - 1/2).re := by simp; linarith
   unfold ferrersP
-  rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hz,
+  rw [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hz,
     fractional_integral (d := 1/2) (by norm_num) hcd hz,
     intervalIntegral.integral_of_le zero_le_one, integral_Ioc_eq_integral_Ioo,
     ← MehlerDirichlet.substitution_changeOfVariables h0 hπ, setIntegral_congr_fun measurableSet_Ioo
@@ -248,7 +248,7 @@ theorem ferrersP_fractional_integral {μ : ℂ} (hμ : 0 < μ.re) (ν : ℂ) {x 
         _ < 1 := by rw [mul_one]; exact hzn
     have hF : ferrersP ν 0 (1-(1-x)*s) = regularizedGaussHGFun (ν+1) (-ν) 1 (z*s) := by
       simp only [ferrersP, zero_div, cpow_zero, one_mul, sub_zero]
-      rw [← regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hzs, hz]
+      rw [← regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hzs, hz]
       congr 1; push_cast; ring
     have hp : (((1-(1-x)*s : ℝ):ℂ)-x)^(μ-1) = ((1-x:ℝ):ℂ)^(μ-1) * (1-(s:ℂ))^(μ-1) := by
       rw [show (((1-(1-x)*s : ℝ):ℂ)-x) = (((1-x)*(1-s):ℝ):ℂ) by push_cast; ring,
@@ -271,7 +271,8 @@ theorem ferrersP_fractional_integral {μ : ℂ} (hμ : 0 < μ.re) (ν : ℂ) {x 
           Real.log_mul h1.ne' h2.ne']
     congr 1; push_cast; ring
   rw [hsub, hI, ferrersP, show (1:ℂ) - -μ = 1+μ by ring,
-    regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hzn, show -μ/2 = (-μ)/2 by ring]
+    regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hzn, show -μ/2 =
+        (-μ)/2 by ring]
   rw [show (-μ)/2 = -μ/2 by ring, hpow]
   field_simp
 
@@ -288,7 +289,7 @@ theorem associatedP_fractional_integral {μ : ℂ} (hμ : 0 < μ.re) (ν : ℂ) 
     rw [mem_cutPlane, hz]; left; simp; linarith
   have hsub : (∫ t : ℝ in (1:ℝ)..x, associatedP ν 0 t*(x-t:ℂ)^(μ-1)) =
       ((x-1:ℝ):ℂ)^μ * ∫ s : ℝ in (0:ℝ)..1,
-        (1-(s:ℂ))^(μ-1) * regularizedGaussHG (ν+1) (-ν) 1 (z * s) := by
+        (1-(s:ℂ))^(μ-1) * regularizedGaussHypergeometric (ν+1) (-ν) 1 (z * s) := by
     have hc : (x-1) ≠ 0 := h1.ne'
     have h := intervalIntegral.integral_comp_add_mul
       (fun t : ℝ => associatedP ν 0 t*(x-t:ℂ)^(μ-1)) (a := 0) (b := 1) hc 1
@@ -300,7 +301,8 @@ theorem associatedP_fractional_integral {μ : ℂ} (hμ : 0 < μ.re) (ν : ℂ) 
     rw [real_smul, ← intervalIntegral.integral_const_mul, ← intervalIntegral.integral_const_mul]
     refine intervalIntegral.integral_congr fun s hs => ?_
     rw [uIcc_of_le zero_le_one] at hs
-    have hF : associatedP ν 0 ((1+(x-1)*s : ℝ)) = regularizedGaussHG (ν+1) (-ν) 1 (z*s) := by
+    have hF : associatedP ν 0 ((1+(x-1)*s : ℝ)) =
+        regularizedGaussHypergeometric (ν+1) (-ν) 1 (z*s) := by
       simp only [associatedP, zero_div, zero_mul, exp_zero, one_mul, sub_zero]
       rw [hz]; congr 1; push_cast; ring
     have hp : ((x:ℂ)-((1+(x-1)*s : ℝ)))^(μ-1) = ((x-1:ℝ):ℂ)^(μ-1) * (1-(s:ℂ))^(μ-1) := by
@@ -351,7 +353,7 @@ theorem olverQ_real_integral {ν μ : ℂ} (h0 : -1/2 < μ.re) (h1 : μ.re < (ν
 cos(mθ) dθ`. -/
 @[dlmf 14.12.E7]
 theorem associatedP_fourier_integral (ν : ℂ) (m : ℕ) {x : ℝ} (hx : 1 < x) :
-    associatedP ν m x=poch (ν+1) m/π*∫ θ : ℝ in 0..π,
+    associatedP ν m x=pochhammer (ν+1) m/π*∫ θ : ℝ in 0..π,
         (x+Real.sqrt (x^2-1)*Real.cos θ:ℂ)^ν*Real.cos (m*θ) := by
   have hx1 : ((x:ℂ)-1) ∈ slitPlane := LaplaceIntegrals.one_lt_mem hx
   set s := Real.sqrt (x^2-1) with hs_def
@@ -367,12 +369,14 @@ theorem associatedP_fourier_integral (ν : ℂ) (m : ℕ) {x : ℝ} (hx : 1 < x)
   have h0 : ∀ μ : ℂ, associatedP μ 0 x = 1/π * LaplaceIntegrals.fourierMoment μ x 0 := fun μ => by
     rw [associatedP_zero_order _ hx1, legendreP_laplace _ hx.le, LaplaceIntegrals.fourierMoment]
     simp
-  have key : ∀ k : ℕ, associatedP ν k x = poch (ν+1) k/π * LaplaceIntegrals.fourierMoment ν x k ∧
-      associatedP ν (k+1:ℕ) x = poch (ν+1) (k+1)/π * LaplaceIntegrals.fourierMoment ν x (k+1) := by
+  have key : ∀ k : ℕ, associatedP ν k x = pochhammer (ν+1) k/π *
+      LaplaceIntegrals.fourierMoment ν x k ∧
+      associatedP ν (k+1:ℕ) x = pochhammer (ν+1) (k+1)/π *
+          LaplaceIntegrals.fourierMoment ν x (k+1) := by
     intro k
     induction k with
     | zero =>
-      refine ⟨by rw [Nat.cast_zero, h0 ν]; simp [poch], ?_⟩
+      refine ⟨by rw [Nat.cast_zero, h0 ν]; simp [pochhammer], ?_⟩
       have h7 := associatedP_recurrence_7 ν 0 hx1
       have hL : LaplaceIntegrals.fourierMoment (ν+1) x 0 = x *
           LaplaceIntegrals.fourierMoment ν x 0 + s * LaplaceIntegrals.fourierMoment ν x 1 := by
@@ -393,7 +397,7 @@ theorem associatedP_fourier_integral (ν : ℂ) (m : ℕ) {x : ℝ} (hx : 1 < x)
               _ _).const_mul _
       rw [h0 ν, h0 (ν+1), hb1, hL, zero_add] at h7
       apply mul_left_cancel₀ hs
-      simp only [Nat.cast_zero, zero_add, Nat.cast_one, poch_succ, poch_zero, one_mul]
+      simp only [Nat.cast_zero, zero_add, Nat.cast_one, pochhammer_succ, pochhammer_zero, one_mul]
       linear_combination h7
     | succ k ih =>
       refine ⟨ih.2, ?_⟩
@@ -402,12 +406,13 @@ theorem associatedP_fourier_integral (ν : ℂ) (m : ℕ) {x : ℝ} (hx : 1 < x)
       rw [show (k:ℂ)+1 = ((k+1:ℕ):ℂ) by push_cast; ring, ih.2,
         show (k:ℂ)+2 = ((k+1+1:ℕ):ℂ) by push_cast; ring, ih.1] at h6
       apply mul_left_cancel₀ hs
-      simp only [poch_succ] at h6 ⊢
+      simp only [pochhammer_succ] at h6 ⊢
       simp only [show k+1+1 = k+2 by ring] at h6 hr ⊢
       push_cast at h6 hr ⊢
       linear_combination (s:ℂ) * h6 -
-          2*((k:ℂ)+1)*x*(poch (ν+1) k*(ν+1+k)/π*LaplaceIntegrals.fourierMoment ν x (k+1)) * hbm
-        - poch (ν+1) k*(ν+1+k)/π * hr
+          2*((k:ℂ)+1)*x*(pochhammer (ν+1) k*(ν+1+k)/π*LaplaceIntegrals.fourierMoment
+              ν x (k+1)) * hbm
+        - pochhammer (ν+1) k*(ν+1+k)/π * hr
   rw [(key m).1, LaplaceIntegrals.fourierMoment]; push_cast; rfl
 
 /-- DLMF 14.12.8: for integers `0 ≤ m ≤ n` and `x > 1`, `P^m_n(x) = 2^m m! (n+m)!
@@ -584,15 +589,16 @@ theorem olverQ_nat_interval_integral (n m : ℕ) {x : ℝ} (hx : 1 < x) :
 
 /-- A terminating `₂F₁(-N,-n;c+1;w)` sum with `w ≥ 0` has real part at least `1`. -/
 theorem legIR_sum_re_ge (N n c : ℕ) {w : ℝ} (hw : 0 ≤ w) :
-    1 ≤ (∑ k ∈ Finset.range (N+1), gaussHGCoeff (-(N:ℂ)) (-(n:ℂ)) ((c:ℂ)+1) k * (w:ℂ)^k).re := by
-  have hterm : ∀ k, gaussHGCoeff (-(N:ℂ)) (-(n:ℂ)) ((c:ℂ)+1) k * (w:ℂ)^k =
+    1 ≤ (∑ k ∈ Finset.range (N+1), gaussHypergeometricCoeff (-(N:ℂ)) (-(n:ℂ)) ((c:ℂ)+1) k *
+        (w:ℂ)^k).re := by
+  have hterm : ∀ k, gaussHypergeometricCoeff (-(N:ℂ)) (-(n:ℂ)) ((c:ℂ)+1) k * (w:ℂ)^k =
       ((((N.descFactorial k * n.descFactorial k : ℕ):ℝ) / (((c+1).ascFactorial k * k ! : ℕ):ℝ) *
           w^k : ℝ) : ℂ) := by
     intro k
     have h1 : ((-1:ℂ))^k * (-1)^k = 1 := by rw [← mul_pow]; norm_num
-    rw [gaussHGCoeff, poch_neg_coe_nat, poch_neg_coe_nat, show (c:ℂ)+1 =
+    rw [gaussHypergeometricCoeff, pochhammer_neg_coe_nat, pochhammer_neg_coe_nat, show (c:ℂ)+1 =
         ((c+1:ℕ):ℂ) by push_cast; ring,
-      poch, ascPochhammer_nat_eq_natCast_ascFactorial]
+      pochhammer, ascPochhammer_nat_eq_natCast_ascFactorial]
     push_cast
     linear_combination ((N.descFactorial k:ℂ) * n.descFactorial k /
         (((c+1).ascFactorial k:ℂ) * k !) * (w:ℂ)^k) * h1
@@ -618,9 +624,9 @@ terminating series with nonnegative terms. -/
 theorem legIR_norm_associatedP_ge (n m : ℕ) (hmn : m ≤ n) : ∃ C > 0, ∀ t : ℝ, 1 < t →
     C * ‖legendreBranchPower m t‖ ≤ ‖associatedP n m t‖ := by
   obtain ⟨N, rfl⟩ := Nat.exists_eq_add_of_le hmn
-  set K := poch (((m+N:ℕ):ℂ) - m + 1) (2*m) / 2^m with hKdef
+  set K := pochhammer (((m+N:ℕ):ℂ) - m + 1) (2*m) / 2^m with hKdef
   have hK : K ≠ 0 := by
-    rw [hKdef, show ((m+N:ℕ):ℂ) - m + 1 = ((N+1:ℕ):ℂ) by push_cast; ring, poch,
+    rw [hKdef, show ((m+N:ℕ):ℂ) - m + 1 = ((N+1:ℕ):ℂ) by push_cast; ring, pochhammer,
       ascPochhammer_nat_eq_natCast_ascFactorial]
     have : (N+1).ascFactorial (2*m) ≠ 0 := (Nat.ascFactorial_pos _ _).ne'
     exact div_ne_zero (by exact_mod_cast this) (pow_ne_zero _ two_ne_zero)
@@ -645,8 +651,9 @@ theorem legIR_norm_associatedP_ge (n m : ℕ) (hmn : m ≤ n) : ∃ C > 0, ∀ t
     constructor
     · rw [lt_div_iff₀ (by linarith)]; linarith
     · rw [div_lt_iff₀ (by linarith)]; linarith
-  rw [regularizedGaussHG_symm _ _ _ hz, regularizedGaussHG_pfaff _ _ _ hz,
-    regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hwn, regularizedGaussHGFun_eq_div_Gamma hc,
+  rw [regularizedGaussHypergeometric_symm _ _ _ hz, regularizedGaussHypergeometric_pfaff _ _ _ hz,
+    regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hwn,
+        regularizedGaussHypergeometricFun_eq_div_Gamma hc,
     show (m:ℂ) - ((m+N:ℕ):ℂ) = -(N:ℂ) by push_cast; ring,
     show (m:ℂ) + 1 - (((m+N:ℕ):ℂ) + m + 1) = -((m+N:ℕ):ℂ) by push_cast; ring,
     ordinaryHypergeometric_eq_sum_neg_nat, hw, h1z]
@@ -765,7 +772,7 @@ theorem olverQ_nat_neumann (n : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     have := congrArg re hk; simp at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
   have hf : (n.factorial:ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
   have hi : ∫ t : ℝ in -1..1, legendreP n t/(z-t) =
-      ∫ t : ℝ in -1..1, DLMF.OrthogonalPolynomials.legendrePolyP n t/(z-t) := by
+      ∫ t : ℝ in -1..1, DLMF.OrthogonalPolynomials.legendrePolynomialP n t/(z-t) := by
     refine intervalIntegral.integral_congr_ae ?_
     have : ∀ᵐ t : ℝ ∂volume, t ≠ -1 := by
       simp [ae_iff]

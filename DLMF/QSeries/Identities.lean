@@ -333,9 +333,9 @@ theorem ramanujan_1psi1 {a b q z : ℂ}
 theorem heine_transformation {a b c q z : ℂ}
     (hq : ‖q‖ < 1) (hz : ‖z‖ < 1) (hb : ‖b‖ < 1) (hb0 : b ≠ 0)
     (hc : ∀ k : ℕ, c * q ^ k ≠ 1) (haz : ∀ k : ℕ, a * z * q ^ k ≠ 1) :
-    basicHG [a, b] [c] q z =
+    basicHypergeometric [a, b] [c] q z =
       qPochhammerInf b q * qPochhammerInf (a * z) q / (qPochhammerInf c q * qPochhammerInf z q) *
-        basicHG [c / b, z] [a * z] q b := by
+        basicHypergeometric [c / b, z] [a * z] q b := by
   let A (n : ℕ) := qPochhammer a q n / qPochhammer q q n
   let B (m : ℕ) := qPochhammer (c / b) q m / qPochhammer q q m
   let K := qPochhammerInf b q / qPochhammerInf c q
@@ -394,10 +394,11 @@ theorem heine_transformation {a b c q z : ℂ}
     dsimp only [D]
     rw [mul_pow, ← pow_mul, Nat.mul_comm m n]
     ring
-  have hlhs : basicHG [a, b] [c] q z = K * ∑' n : ℕ, ∑' m : ℕ, D n m := by
+  have hlhs : basicHypergeometric [a, b] [c] q z = K * ∑' n : ℕ, ∑' m : ℕ, D n m := by
     calc
       _ = ∑' n : ℕ, A n * z ^ n * (qPochhammer b q n / qPochhammer c q n) := by
-        simp only [basicHG, List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one]
+        simp only [basicHypergeometric, List.map_cons, List.map_nil, List.prod_cons,
+            List.prod_nil, mul_one]
         apply tsum_congr
         intro n
         dsimp only [A]
@@ -408,9 +409,10 @@ theorem heine_transformation {a b c q z : ℂ}
         intro n
         rw [hleft, hrow]
         ring
-  have hrhs : basicHG [c / b, z] [a * z] q b =
+  have hrhs : basicHypergeometric [c / b, z] [a * z] q b =
       ∑' m : ℕ, B m * b ^ m * qPochhammer z q m / qPochhammer (a * z) q m := by
-    simp only [basicHG, List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one]
+    simp only [basicHypergeometric, List.map_cons, List.map_nil, List.prod_cons,
+        List.prod_nil, mul_one]
     apply tsum_congr
     intro m
     dsimp only [B]

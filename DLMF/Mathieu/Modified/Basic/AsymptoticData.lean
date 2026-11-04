@@ -18,10 +18,10 @@ The coefficients, prefactors and filters of the asymptotic expansions of `M^{(3)
 
 ## Main definitions
 
-* `modMathieuAsympD`: the coefficients `D^±_m` of DLMF 28.25.1, defined by 28.25.2 and the
-  recurrence 28.25.3 (via the pair `modMathieuAsympDPair`).
-* `modMathieuAsympPrefactor`, `modMathieuAsympFilter`: the prefactor of DLMF 28.25.1 and the
-  sector filter of 28.25.4–28.25.5.
+* `modMathieuAsymptoticD`: the coefficients `D^±_m` of DLMF 28.25.1, defined by 28.25.2 and the
+  recurrence 28.25.3 (via the pair `modMathieuAsymptoticDPair`).
+* `modMathieuAsymptoticPrefactor`, `modMathieuAsymptoticFilter`: the prefactor of DLMF 28.25.1 and
+  the sector filter of 28.25.4–28.25.5.
 * `goldsteinPhase`: the phase `φ` of DLMF 28.26.3.
 * `goldsteinFc`, `goldsteinGc`, `goldsteinFs`, `goldsteinGs`: Goldstein's functions, defined
   so that 28.26.1–28.26.2 hold.
@@ -39,10 +39,10 @@ namespace DLMF.Mathieu
 /-! ### Coefficients of the expansion for large `Re z` (§28.25) -/
 
 /-- The pair `(D_{m-1}, D_m)` of the recurrence 28.25.3 with sign `σ = ±1`. -/
-def modMathieuAsympDPair (σ a h : ℂ) : ℕ → ℂ × ℂ
+def modMathieuAsymptoticDPair (σ a h : ℂ) : ℕ → ℂ × ℂ
   | 0 => (0, 1)
   | m + 1 =>
-    let p := modMathieuAsympDPair σ a h m
+    let p := modMathieuAsymptoticDPair σ a h m
     (p.2, -((((m : ℂ) + 1 / 2) ^ 2 + σ * ((m : ℂ) + 1 / 4) * (8 * I * h) + 2 * h ^ 2 - a) *
       p.2 + σ * ((m : ℂ) - 1 / 2) * (8 * I * h * m) * p.1) / ((m : ℂ) + 1))
 
@@ -50,18 +50,18 @@ def modMathieuAsympDPair (σ a h : ℂ) : ℕ → ℂ × ℂ
 the recurrence 28.25.3; `σ = 1` gives `D^+_m` (for `M^{(3)}_ν`), `σ = -1` gives `D^-_m` (for
 `M^{(4)}_ν`); `a = λ_ν(h²)`. -/
 @[dlmf 28.25.E2, dlmf 28.25.E3]
-def modMathieuAsympD (σ a h : ℂ) (m : ℕ) : ℂ :=
-  (modMathieuAsympDPair σ a h m).2
+def modMathieuAsymptoticD (σ a h : ℂ) (m : ℕ) : ℂ :=
+  (modMathieuAsymptoticDPair σ a h m).2
 
 /-- The prefactor `e^{±i(2h cosh z - (ν/2 + 1/4)π)} / (π h (cosh z + 1))^{1/2}` of DLMF 28.25.1,
 `σ = ±1`; the square root is continued in `z` as `(2πh)^{1/2} cosh(z/2)`. -/
-def modMathieuAsympPrefactor (σ ν h z : ℂ) : ℂ :=
+def modMathieuAsymptoticPrefactor (σ ν h z : ℂ) : ℂ :=
   Complex.exp (σ * I * (2 * h * Complex.cosh z - (ν / 2 + 1 / 4) * π)) /
     ((2 * π * h) ^ (1 / 2 : ℂ) * Complex.cosh (z / 2))
 
 /-- The sector filter of DLMF 28.25.4–28.25.5: `Re z → +∞` with
 `a ≤ ph h + Im z ≤ b`. -/
-def modMathieuAsympFilter (h : ℂ) (a b : ℝ) : Filter ℂ :=
+def modMathieuAsymptoticFilter (h : ℂ) (a b : ℝ) : Filter ℂ :=
   comap Complex.re atTop ⊓ 𝓟 {z : ℂ | a ≤ Complex.arg h + z.im ∧ Complex.arg h + z.im ≤ b}
 
 /-! ### Goldstein's functions (§28.26(i)) -/

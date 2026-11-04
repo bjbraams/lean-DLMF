@@ -47,6 +47,7 @@ public import DLMF.Legendre.FourierCoefficients
 public import DLMF.Legendre.AdditionTools
 public import DLMF.Legendre.QAdditionTools
 public import DLMF.Legendre.FourierTools
+public import DLMF.Legendre.ZonalSeries
 
 /-!
 # Legendre and related functions (DLMF Chapter 14; Temme Chapter 8)

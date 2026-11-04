@@ -40,22 +40,22 @@ namespace DLMF.Confluent
 
 /-- The coefficient of `z^n` in Kummer's confluent series. -/
 abbrev kummerMCoeff (a c : ℂ) (n : ℕ) : ℂ :=
-  poch a n / (poch c n * n !)
+  pochhammer a n / (pochhammer c n * n !)
 
 /-- Kummer's function `M(a,c,z) = ₁F₁(a;c;z)`. -/
 @[dlmf 13.2.E2]
 def kummerM (a c z : ℂ) : ℂ :=
-  ∑' n : ℕ, poch a n / (poch c n * n !) * z ^ n
+  ∑' n : ℕ, pochhammer a n / (pochhammer c n * n !) * z ^ n
 
 /-- `M(a,c,0) = 1`. -/
 @[simp]
 theorem kummerM_zero (a c : ℂ) : kummerM a c 0 = 1 := by
   unfold kummerM
-  have h0 : (fun n : ℕ => poch a n / (poch c n * n !) * (0 : ℂ) ^ n) =
+  have h0 : (fun n : ℕ => pochhammer a n / (pochhammer c n * n !) * (0 : ℂ) ^ n) =
       fun n => if n = 0 then 1 else 0 := by
     ext n
     cases n with
-    | zero => simp [poch_zero]
+    | zero => simp [pochhammer_zero]
     | succ n => simp [pow_succ]
   rw [h0, tsum_eq_single 0]
   · simp
@@ -66,11 +66,11 @@ theorem kummerM_zero (a c : ℂ) : kummerM a c 0 = 1 := by
 @[dlmf 13.6.E3]
 theorem kummerM_of_zero_param (c z : ℂ) : kummerM 0 c z = 1 := by
   unfold kummerM
-  have h0 : (fun n : ℕ => poch 0 n / (poch c n * n !) * z ^ n) =
+  have h0 : (fun n : ℕ => pochhammer 0 n / (pochhammer c n * n !) * z ^ n) =
       fun n => if n = 0 then 1 else 0 := by
     ext n
     cases n with
-    | zero => simp [poch_zero]
+    | zero => simp [pochhammer_zero]
     | succ n => simp
   rw [h0, tsum_eq_single 0]
   · simp

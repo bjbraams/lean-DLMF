@@ -20,7 +20,7 @@ Euler products and the Dirichlet series of the classical arithmetic functions (D
 * `riemannZeta_hasSum_hasProd`: `ζ(s) = ∑ n^{-s} = ∏_p (1 - p^{-s})⁻¹` (DLMF 27.4.3).
 * `LSeriesHasSum_moebius`, `LSeriesHasSum_totient`, `LSeriesHasSum_liouville`,
   `LSeriesHasSum_abs_moebius`, `LSeriesHasSum_two_pow_cardDistinctFactors`: DLMF 27.4.5–27.4.9.
-* `LSeriesHasSum_divisorCountK`, `LSeriesHasSum_sigmaC`: DLMF 27.4.10 and 27.4.11.
+* `LSeriesHasSum_divisorCountK`, `LSeriesHasSum_sigmaCpow`: DLMF 27.4.10 and 27.4.11.
 * `LSeriesHasSum_vonMangoldt`, `LSeriesHasSum_log`: DLMF 27.4.12 and 27.4.13.
 * `sum_divisors_sq_dvd_moebius`: `∑_{d²∣n} μ(d) = |μ(n)|`, used for DLMF 27.4.8.
 
@@ -81,15 +81,16 @@ theorem LSeriesHasSum_moebius {s : ℂ} (hs : 1 < s.re) :
   exact (LSeriesSummable_moebius_iff.mpr hs).LSeriesHasSum
 
 /-- The Dirichlet series of `n ↦ n^α` is `ζ(s - α)`, `ℜs > 1 + ℜα`. -/
-private lemma LSeriesHasSum_powC_riemannZeta_sub (α : ℂ) {s : ℂ} (hs : 1 + α.re < s.re) :
-    LSeriesHasSum ↗(powC α) s (riemannZeta (s - α)) := by
+private lemma LSeriesHasSum_cpowArithmeticFunction_riemannZeta_sub (α : ℂ) {s : ℂ}
+    (hs : 1 + α.re < s.re) :
+    LSeriesHasSum ↗(cpowArithmeticFunction α) s (riemannZeta (s - α)) := by
   have h := LSeriesHasSum_one (s := s - α) (by simp; linarith)
   unfold LSeriesHasSum at h ⊢
   convert h using 1
   funext n
   rcases eq_or_ne n 0 with rfl | hn
   · simp
-  rw [LSeries.term_of_ne_zero hn, LSeries.term_of_ne_zero hn, powC_apply hn,
+  rw [LSeries.term_of_ne_zero hn, LSeries.term_of_ne_zero hn, cpowArithmeticFunction_apply hn,
     Complex.cpow_sub _ _ (by exact_mod_cast hn)]
   simp [div_div_eq_mul_div]
 
@@ -156,11 +157,12 @@ private lemma LSeriesHasSum_squareLift {g : ℕ → ℂ} {s a : ℂ} (h : LSerie
 def totientC : ArithmeticFunction ℂ := ⟨fun n ↦ (n.totient : ℂ), by simp⟩
 
 /-- `∑_{d∣n} φ(d) = n` as a Dirichlet convolution. -/
-private lemma zeta_mul_totientC : (ζ : ArithmeticFunction ℂ) * totientC = powC 1 := by
+private lemma zeta_mul_totientC : (ζ : ArithmeticFunction ℂ) * totientC =
+    cpowArithmeticFunction 1 := by
   ext n
   rcases eq_or_ne n 0 with rfl | hn
   · simp
-  rw [coe_zeta_mul_apply, powC_apply hn, Complex.cpow_one]
+  rw [coe_zeta_mul_apply, cpowArithmeticFunction_apply hn, Complex.cpow_one]
   change ∑ i ∈ n.divisors, ((i.totient : ℕ) : ℂ) = _
   exact_mod_cast Nat.sum_totient n
 
@@ -173,8 +175,9 @@ private lemma LSeriesHasSum_totient_riemannZeta_div {s : ℂ} (hs : 2 < s.re) :
     change ‖((n.totient : ℕ) : ℂ)‖ ≤ 1 * (n : ℝ) ^ ((2 : ℝ) - 1)
     rw [Complex.norm_natCast, one_mul, show (2 : ℝ) - 1 = 1 by norm_num, Real.rpow_one]
     exact_mod_cast Nat.totient_le n
-  have hpow : LSeriesHasSum ↗(powC 1) s (riemannZeta (s - 1)) :=
-    LSeriesHasSum_powC_riemannZeta_sub 1 (s := s) (by rw [Complex.one_re]; linarith)
+  have hpow : LSeriesHasSum ↗(cpowArithmeticFunction 1) s (riemannZeta (s - 1)) :=
+    LSeriesHasSum_cpowArithmeticFunction_riemannZeta_sub 1 (s := s)
+        (by rw [Complex.one_re]; linarith)
   have hfun : (fun n ↦ (n.totient : ℂ)) = ↗totientC := rfl
   rw [hfun]
   exact LSeriesHasSum_div_of_mul_eq zeta_mul_totientC (LSeriesHasSum_zeta h1)
@@ -453,11 +456,12 @@ theorem LSeriesHasSum_divisorCountK (k : ℕ) {s : ℂ} (hs : 1 < s.re) :
 
 /-- DLMF 27.4.11: `∑ σ_α(n) n^{-s} = ζ(s) ζ(s - α)`, `ℜs > max(1, 1 + ℜα)`. -/
 @[dlmf 27.4.E11]
-theorem LSeriesHasSum_sigmaC (α : ℂ) {s : ℂ} (hs : max 1 (1 + α.re) < s.re) :
-    LSeriesHasSum ↗(sigmaC α) s (riemannZeta s * riemannZeta (s - α)) := by
+theorem LSeriesHasSum_sigmaCpow (α : ℂ) {s : ℂ} (hs : max 1 (1 + α.re) < s.re) :
+    LSeriesHasSum ↗(sigmaCpow α) s (riemannZeta s * riemannZeta (s - α)) := by
   have h1 : 1 < s.re := lt_of_le_of_lt (le_max_left _ _) hs
   have h2 : 1 + α.re < s.re := lt_of_le_of_lt (le_max_right _ _) hs
-  exact LSeriesHasSum_mul (LSeriesHasSum_zeta h1) (LSeriesHasSum_powC_riemannZeta_sub α h2)
+  exact LSeriesHasSum_mul (LSeriesHasSum_zeta h1)
+      (LSeriesHasSum_cpowArithmeticFunction_riemannZeta_sub α h2)
 
 /-- DLMF 27.4.12: `∑ Λ(n) n^{-s} = -ζ'(s)/ζ(s)`, `ℜs > 1`. -/
 @[dlmf 27.4.E12]

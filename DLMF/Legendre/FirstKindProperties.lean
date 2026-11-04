@@ -36,17 +36,17 @@ namespace DLMF.Legendre
 
 /-- For `n ∈ ℕ`, `P_n` is the Legendre polynomial (DLMF 14.7.1 with `μ = 0`). -/
 theorem legendreP_nat (n : ℕ) {z : ℂ} (hz : 1 + z ∈ slitPlane) :
-    legendreP n z = legendrePolyP n z := by
+    legendreP n z = legendrePolynomialP n z := by
   have h1 : ∀ k : ℕ, (1 : ℂ) ≠ -(k : ℂ) := fun k h => by
     have := congrArg re h; simp at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
   have hpoly : AnalyticOnNhd ℂ (fun w => ₂F₁ (-(n : ℂ)) ((n : ℂ) + 1) 1 w) cutPlane := by
     intro w _
     simp_rw [ordinaryHypergeometric_eq_sum_neg_nat]
     fun_prop
-  have heq := regularizedGaussHG_unique hpoly (fun w hw => by
-    rw [regularizedGaussHGFun_eq_div_Gamma h1, Gamma_one, div_one])
-  rw [legendreP, ← heq (mem_cutPlane_of_one_add hz), legendrePolyP, jacobiPolyP]
-  simp only [zero_add, add_zero, poch_nat_one]
+  have heq := regularizedGaussHypergeometric_unique hpoly (fun w hw => by
+    rw [regularizedGaussHypergeometricFun_eq_div_Gamma h1, Gamma_one, div_one])
+  rw [legendreP, ← heq (mem_cutPlane_of_one_add hz), legendrePolynomialP, jacobiPolynomialP]
+  simp only [zero_add, add_zero, pochhammer_nat_one]
   rw [div_self (Nat.cast_ne_zero.mpr n.factorial_ne_zero), one_mul]
 
 end DLMF.Legendre

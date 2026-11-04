@@ -19,11 +19,11 @@ integral defining `R_F`: `s = t² - x²` for `arcps` (19.25.32), `s = x²/t² - 
 
 ## Main results
 
-* `jacobiArcps_eq_symEllIntRF`, `jacobiArcps_eq_symEllIntRF'`: `arccs`, `arcds`, `arcns`
-  (DLMF 19.25.32).
-* `jacobiArcsp_eq_symEllIntRF`, `jacobiArcsp_eq_symEllIntRF'`: `arcsc`, `arcsd`, `arcsn`
-  (DLMF 19.25.33).
-* `jacobiArcpq_eq_symEllIntRF`: `arccd`, `arccn`, `arcdc`, `arcnc`, `arcdn`, `arcnd`
+* `jacobiArcps_eq_symmetricEllipticRF`, `jacobiArcps_eq_symmetricEllipticRF'`: `arccs`, `arcds`,
+  `arcns` (DLMF 19.25.32).
+* `jacobiArcsp_eq_symmetricEllipticRF`, `jacobiArcsp_eq_symmetricEllipticRF'`: `arcsc`, `arcsd`,
+  `arcsn` (DLMF 19.25.33).
+* `jacobiArcpq_eq_symmetricEllipticRF`: `arccd`, `arccn`, `arcdc`, `arcnc`, `arcdn`, `arcnd`
   (DLMF 19.25.34).
 
 ## Implementation notes
@@ -53,9 +53,9 @@ private lemma ofReal_cpow_half_eq_sqrt {r : ℝ} (hr : 0 ≤ r) :
 
 /-- The substitution `s = x²/t² - 1`: for `x > 0`,
 `x R_F(1, 1 + a x², 1 + b x²) = ∫₀ˣ dt/√((1 + a t²)(1 + b t²))`. -/
-private lemma mul_symEllIntRF_one_eq_integral_of_pos {x a b : ℝ} (hx : 0 < x)
+private lemma mul_symmetricEllipticRF_one_eq_integral_of_pos {x a b : ℝ} (hx : 0 < x)
     (ha : 0 ≤ 1 + a * x ^ 2) (hb : 0 ≤ 1 + b * x ^ 2) :
-    (x : ℂ) * symEllIntRF 1 ((1 + a * x ^ 2 : ℝ) : ℂ) ((1 + b * x ^ 2 : ℝ) : ℂ) =
+    (x : ℂ) * symmetricEllipticRF 1 ((1 + a * x ^ 2 : ℝ) : ℂ) ((1 + b * x ^ 2 : ℝ) : ℂ) =
       ((∫ t in (0 : ℝ)..x, 1 / √((1 + a * t ^ 2) * (1 + b * t ^ 2)) : ℝ) : ℂ) := by
   set f : ℝ → ℝ := fun t => x ^ 2 / t ^ 2 - 1 with hf
   have hderiv : ∀ t ∈ Ioo 0 x, HasDerivWithinAt f (-(2 * x ^ 2 / t ^ 3)) (Ioo 0 x) t := by
@@ -90,9 +90,9 @@ private lemma mul_symEllIntRF_one_eq_integral_of_pos {x a b : ℝ} (hx : 0 < x)
         field_simp
         ring
   have h := integral_image_eq_integral_abs_deriv_smul measurableSet_Ioo hderiv hinj
-    (fun t => (symEllIntS 1 ((1 + a * x ^ 2 : ℝ) : ℂ) ((1 + b * x ^ 2 : ℝ) : ℂ) t)⁻¹)
+    (fun t => (carlsonRootProduct 1 ((1 + a * x ^ 2 : ℝ) : ℂ) ((1 + b * x ^ 2 : ℝ) : ℂ) t)⁻¹)
   rw [himg] at h
-  rw [symEllIntRF, h, intervalIntegral.integral_of_le hx.le, integral_Ioc_eq_integral_Ioo,
+  rw [symmetricEllipticRF, h, intervalIntegral.integral_of_le hx.le, integral_Ioc_eq_integral_Ioo,
     ← integral_complex_ofReal, ← integral_const_mul, ← integral_const_mul]
   refine setIntegral_congr_fun measurableSet_Ioo fun t ht => ?_
   have ht0 : 0 < t := ht.1
@@ -114,7 +114,7 @@ private lemma mul_symEllIntRF_one_eq_integral_of_pos {x a b : ℝ} (hx : 0 < x)
   have e2 : ((f t : ℝ) : ℂ) + ((1 + b * x ^ 2 : ℝ) : ℂ) =
       (((x / t) ^ 2 * (1 + b * t ^ 2) : ℝ) : ℂ) := by
     simp only [hf]; push_cast; field_simp; ring
-  simp only [symEllIntS]
+  simp only [carlsonRootProduct]
   rw [e0, e1, e2, ofReal_cpow_half_eq_sqrt (sq_nonneg _),
     ofReal_cpow_half_eq_sqrt (by positivity), ofReal_cpow_half_eq_sqrt (by positivity),
     Real.sqrt_mul (sq_nonneg _), Real.sqrt_mul (sq_nonneg _), Real.sqrt_sq (by positivity),
@@ -129,12 +129,12 @@ private lemma mul_symEllIntRF_one_eq_integral_of_pos {x a b : ℝ} (hx : 0 < x)
 
 /-- `x R_F(1, 1 + a x², 1 + b x²) = ∫₀ˣ dt/√((1 + a t²)(1 + b t²))` for every real `x` with
 `1 + a x² ≥ 0`, `1 + b x² ≥ 0`. -/
-private lemma mul_symEllIntRF_one_eq_integral {x a b : ℝ}
+private lemma mul_symmetricEllipticRF_one_eq_integral {x a b : ℝ}
     (ha : 0 ≤ 1 + a * x ^ 2) (hb : 0 ≤ 1 + b * x ^ 2) :
-    (x : ℂ) * symEllIntRF 1 ((1 + a * x ^ 2 : ℝ) : ℂ) ((1 + b * x ^ 2 : ℝ) : ℂ) =
+    (x : ℂ) * symmetricEllipticRF 1 ((1 + a * x ^ 2 : ℝ) : ℂ) ((1 + b * x ^ 2 : ℝ) : ℂ) =
       ((∫ t in (0 : ℝ)..x, 1 / √((1 + a * t ^ 2) * (1 + b * t ^ 2)) : ℝ) : ℂ) := by
   rcases lt_trichotomy x 0 with hx | rfl | hx
-  · have h := mul_symEllIntRF_one_eq_integral_of_pos (neg_pos.mpr hx)
+  · have h := mul_symmetricEllipticRF_one_eq_integral_of_pos (neg_pos.mpr hx)
       (a := a) (b := b) (by simpa using ha) (by simpa using hb)
     simp only [neg_sq] at h
     have hc := intervalIntegral.integral_comp_neg (a := 0) (b := -x)
@@ -146,7 +146,7 @@ private lemma mul_symEllIntRF_one_eq_integral {x a b : ℝ}
     rw [this, ofReal_neg, ← h]
     push_cast; ring
   · simp
-  · exact mul_symEllIntRF_one_eq_integral_of_pos hx ha hb
+  · exact mul_symmetricEllipticRF_one_eq_integral_of_pos hx ha hb
 
 /-- `(y²)^{1/2} = y` for real `y ≥ 0`. -/
 private lemma ofReal_sq_cpow_half' {y : ℝ} (hy : 0 ≤ y) : ((y ^ 2 : ℝ) : ℂ) ^ (1 / 2 : ℂ) = y := by
@@ -154,9 +154,9 @@ private lemma ofReal_sq_cpow_half' {y : ℝ} (hy : 0 ≤ y) : ((y ^ 2 : ℝ) : �
 
 /-- The substitution `s = (t² - x²)/(1 - t²)` on `(x, 1)`: for `0 ≤ x < 1` and `1 + C ≥ 0`,
 `R_F(x², 1, 1 + C) = ∫ₓ¹ dt/√((1 - t²)(1 - x² + C(1 - t²)))`. -/
-private lemma symEllIntRF_sq_one_eq_integral_of_lt_one {x C : ℝ} (hx : 0 ≤ x) (hx1 : x < 1)
+private lemma symmetricEllipticRF_sq_one_eq_integral_of_lt_one {x C : ℝ} (hx : 0 ≤ x) (hx1 : x < 1)
     (hC : 0 ≤ 1 + C) :
-    symEllIntRF ((x ^ 2 : ℝ) : ℂ) 1 ((1 + C : ℝ) : ℂ) =
+    symmetricEllipticRF ((x ^ 2 : ℝ) : ℂ) 1 ((1 + C : ℝ) : ℂ) =
       ((∫ t in x..1, 1 / √((1 - t ^ 2) * (1 - x ^ 2 + C * (1 - t ^ 2))) : ℝ) : ℂ) := by
   have hx2 : x ^ 2 < 1 := by nlinarith
   set f : ℝ → ℝ := fun t => (t ^ 2 - x ^ 2) / (1 - t ^ 2) with hf
@@ -203,9 +203,9 @@ private lemma symEllIntRF_sq_one_eq_integral_of_lt_one {x C : ℝ} (hx : 0 ≤ x
         field_simp
         ring
   have h := integral_image_eq_integral_abs_deriv_smul measurableSet_Ioo hderiv hinj
-    (fun t => (symEllIntS ((x ^ 2 : ℝ) : ℂ) 1 ((1 + C : ℝ) : ℂ) t)⁻¹)
+    (fun t => (carlsonRootProduct ((x ^ 2 : ℝ) : ℂ) 1 ((1 + C : ℝ) : ℂ) t)⁻¹)
   rw [himg] at h
-  rw [symEllIntRF, h, intervalIntegral.integral_of_le hx1.le, integral_Ioc_eq_integral_Ioo,
+  rw [symmetricEllipticRF, h, intervalIntegral.integral_of_le hx1.le, integral_Ioc_eq_integral_Ioo,
     ← integral_complex_ofReal, ← integral_const_mul]
   refine setIntegral_congr_fun measurableSet_Ioo fun t ht => ?_
   have ht0 : 0 < t := hx.trans_lt ht.1
@@ -229,7 +229,7 @@ private lemma symEllIntRF_sq_one_eq_integral_of_lt_one {x C : ℝ} (hx : 0 ≤ x
     congr 1; simp only [hf]; rw [div_pow, hp2, hq2]; field_simp; ring
   have e2 : ((f t : ℝ) : ℂ) + ((1 + C : ℝ) : ℂ) = (((r / q) ^ 2 : ℝ) : ℂ) := by
     rw [← ofReal_add]; congr 1; simp only [hf]; rw [div_pow, hr2, hq2]; field_simp; ring
-  simp only [symEllIntS]
+  simp only [carlsonRootProduct]
   rw [e0, e1, e2, ofReal_sq_cpow_half' (by positivity), ofReal_sq_cpow_half' (by positivity),
     ofReal_sq_cpow_half' (by positivity), abs_of_pos (by positivity), real_smul,
     Real.sqrt_mul hD.le, ← hq, ← hr, ← hp2, ← hq2]
@@ -242,9 +242,9 @@ private lemma symEllIntRF_sq_one_eq_integral_of_lt_one {x C : ℝ} (hx : 0 ≤ x
 
 /-- The substitution `s = (x² - t²)/(t² - 1)` on `(1, x)`: for `1 < x` and `1 + C ≥ 0`,
 `R_F(x², 1, 1 + C) = ∫₁ˣ dt/√((t² - 1)(x² - 1 + C(t² - 1)))`. -/
-private lemma symEllIntRF_sq_one_eq_integral_of_one_lt {x C : ℝ} (hx1 : 1 < x)
+private lemma symmetricEllipticRF_sq_one_eq_integral_of_one_lt {x C : ℝ} (hx1 : 1 < x)
     (hC : 0 ≤ 1 + C) :
-    symEllIntRF ((x ^ 2 : ℝ) : ℂ) 1 ((1 + C : ℝ) : ℂ) =
+    symmetricEllipticRF ((x ^ 2 : ℝ) : ℂ) 1 ((1 + C : ℝ) : ℂ) =
       ((∫ t in (1 : ℝ)..x, 1 / √((t ^ 2 - 1) * (x ^ 2 - 1 + C * (t ^ 2 - 1))) : ℝ) : ℂ) := by
   have hx2 : 1 < x ^ 2 := by nlinarith
   set f : ℝ → ℝ := fun t => (x ^ 2 - t ^ 2) / (t ^ 2 - 1) with hf
@@ -291,9 +291,9 @@ private lemma symEllIntRF_sq_one_eq_integral_of_one_lt {x C : ℝ} (hx1 : 1 < x)
         field_simp
         ring
   have h := integral_image_eq_integral_abs_deriv_smul measurableSet_Ioo hderiv hinj
-    (fun t => (symEllIntS ((x ^ 2 : ℝ) : ℂ) 1 ((1 + C : ℝ) : ℂ) t)⁻¹)
+    (fun t => (carlsonRootProduct ((x ^ 2 : ℝ) : ℂ) 1 ((1 + C : ℝ) : ℂ) t)⁻¹)
   rw [himg] at h
-  rw [symEllIntRF, h, intervalIntegral.integral_of_le hx1.le, integral_Ioc_eq_integral_Ioo,
+  rw [symmetricEllipticRF, h, intervalIntegral.integral_of_le hx1.le, integral_Ioc_eq_integral_Ioo,
     ← integral_complex_ofReal, ← integral_const_mul]
   refine setIntegral_congr_fun measurableSet_Ioo fun t ht => ?_
   have ht0 : 0 < t := one_pos.trans ht.1
@@ -317,7 +317,7 @@ private lemma symEllIntRF_sq_one_eq_integral_of_one_lt {x C : ℝ} (hx1 : 1 < x)
     congr 1; simp only [hf]; rw [div_pow, hp2, hq2]; field_simp; ring
   have e2 : ((f t : ℝ) : ℂ) + ((1 + C : ℝ) : ℂ) = (((r / q) ^ 2 : ℝ) : ℂ) := by
     rw [← ofReal_add]; congr 1; simp only [hf]; rw [div_pow, hr2, hq2]; field_simp; ring
-  simp only [symEllIntS]
+  simp only [carlsonRootProduct]
   rw [e0, e1, e2, ofReal_sq_cpow_half' (by positivity), ofReal_sq_cpow_half' (by positivity),
     ofReal_sq_cpow_half' (by positivity), abs_neg, abs_of_pos (by positivity), real_smul,
     Real.sqrt_mul hD.le, ← hq, ← hr, ← hp2, ← hq2]
@@ -339,9 +339,10 @@ private lemma sqrt_mul_integral_one_div_sqrt {w : ℝ} (hw : 0 < w) (a b : ℝ) 
     div_mul_cancel_left₀ (Real.sqrt_pos.mpr hw).ne', one_div]
 
 /-- The substitution `s = t² - x²`: `R_F(x², x² + a, x² + b) = ∫ₓ^∞ dt/√((t² + a)(t² + b))`. -/
-private lemma symEllIntRF_sq_add_eq_integral_Ioi {x a b : ℝ} (hx : 0 ≤ x) (ha : 0 ≤ x ^ 2 + a)
+private lemma symmetricEllipticRF_sq_add_eq_integral_Ioi {x a b : ℝ} (hx : 0 ≤ x)
+    (ha : 0 ≤ x ^ 2 + a)
     (hb : 0 ≤ x ^ 2 + b) :
-    symEllIntRF ((x ^ 2 : ℝ) : ℂ) ((x ^ 2 + a : ℝ) : ℂ) ((x ^ 2 + b : ℝ) : ℂ) =
+    symmetricEllipticRF ((x ^ 2 : ℝ) : ℂ) ((x ^ 2 + a : ℝ) : ℂ) ((x ^ 2 + b : ℝ) : ℂ) =
       ((∫ t in Ioi x, 1 / √((t ^ 2 + a) * (t ^ 2 + b)) : ℝ) : ℂ) := by
   set f : ℝ → ℝ := fun t => t ^ 2 - x ^ 2 with hf
   have hderiv : ∀ t ∈ Ioi x, HasDerivWithinAt f (2 * t) (Ioi x) t := by
@@ -368,9 +369,10 @@ private lemma symEllIntRF_sq_add_eq_integral_Ioi {x a b : ℝ} (hx : 0 ≤ x) (h
       · simp only [hf]
         rw [Real.sq_sqrt (by positivity)]; ring
   have h := integral_image_eq_integral_abs_deriv_smul measurableSet_Ioi hderiv hinj
-    (fun t => (symEllIntS ((x ^ 2 : ℝ) : ℂ) ((x ^ 2 + a : ℝ) : ℂ) ((x ^ 2 + b : ℝ) : ℂ) t)⁻¹)
+    (fun t => (carlsonRootProduct ((x ^ 2 : ℝ) : ℂ) ((x ^ 2 + a : ℝ) : ℂ)
+        ((x ^ 2 + b : ℝ) : ℂ) t)⁻¹)
   rw [himg] at h
-  rw [symEllIntRF, h, ← integral_complex_ofReal, ← integral_const_mul]
+  rw [symmetricEllipticRF, h, ← integral_complex_ofReal, ← integral_const_mul]
   refine setIntegral_congr_fun measurableSet_Ioi fun t ht => ?_
   have ht : x < t := ht
   have ht0 : 0 < t := hx.trans_lt ht
@@ -383,7 +385,7 @@ private lemma symEllIntRF_sq_add_eq_integral_Ioi {x a b : ℝ} (hx : 0 ≤ x) (h
     simp only [hf]; push_cast; ring
   have e2 : ((f t : ℝ) : ℂ) + ((x ^ 2 + b : ℝ) : ℂ) = ((t ^ 2 + b : ℝ) : ℂ) := by
     simp only [hf]; push_cast; ring
-  simp only [symEllIntS]
+  simp only [carlsonRootProduct]
   rw [e0, e1, e2, ofReal_cpow_half_eq_sqrt (sq_nonneg t), ofReal_cpow_half_eq_sqrt hA.le,
     ofReal_cpow_half_eq_sqrt hB.le, Real.sqrt_sq ht0.le, abs_of_pos (by positivity), real_smul,
     Real.sqrt_mul hA.le]
@@ -398,15 +400,16 @@ private lemma symEllIntRF_sq_add_eq_integral_Ioi {x a b : ℝ} (hx : 0 ≤ x) (h
 /-- DLMF 19.25.32 (`arccs`, `arcds`, `arcns` as `R_F`); stronger than DLMF, which assumes
 `0 ≤ k²`: only `k² < 1` is needed. -/
 @[dlmf 19.25.E32]
-theorem jacobiArcps_eq_symEllIntRF' {m x : ℝ} (hm : m < 1) :
-    (0 ≤ x → (Real.jacobiArccsm x m : ℂ) =
-        symEllIntRF ((x ^ 2 : ℝ) : ℂ) ((x ^ 2 + (1 - m) : ℝ) : ℂ) ((x ^ 2 + 1 : ℝ) : ℂ)) ∧
-      (√(1 - m) ≤ x → (Real.jacobiArcdsm x m : ℂ) =
-        symEllIntRF ((x ^ 2 : ℝ) : ℂ) ((x ^ 2 - (1 - m) : ℝ) : ℂ) ((x ^ 2 + m : ℝ) : ℂ)) ∧
-      (1 ≤ x → (Real.jacobiArcnsm x m : ℂ) =
-        symEllIntRF ((x ^ 2 : ℝ) : ℂ) ((x ^ 2 - 1 : ℝ) : ℂ) ((x ^ 2 - m : ℝ) : ℂ)) := by
+theorem jacobiArcps_eq_symmetricEllipticRF' {m x : ℝ} (hm : m < 1) :
+    (0 ≤ x → (Real.jacobiArccs x m : ℂ) =
+        symmetricEllipticRF ((x ^ 2 : ℝ) : ℂ) ((x ^ 2 + (1 - m) : ℝ) : ℂ) ((x ^ 2 + 1 : ℝ) : ℂ)) ∧
+      (√(1 - m) ≤ x → (Real.jacobiArcds x m : ℂ) =
+        symmetricEllipticRF ((x ^ 2 : ℝ) : ℂ) ((x ^ 2 - (1 - m) : ℝ) : ℂ) ((x ^ 2 + m : ℝ) : ℂ)) ∧
+      (1 ≤ x → (Real.jacobiArcns x m : ℂ) =
+        symmetricEllipticRF ((x ^ 2 : ℝ) : ℂ) ((x ^ 2 - 1 : ℝ) : ℂ) ((x ^ 2 - m : ℝ) : ℂ)) := by
   refine ⟨fun hx => ?_, fun hx => ?_, fun hx => ?_⟩
-  · rw [symEllIntRF_sq_add_eq_integral_Ioi hx (by nlinarith) (by nlinarith), Real.jacobiArccsm]
+  · rw [symmetricEllipticRF_sq_add_eq_integral_Ioi hx (by nlinarith) (by nlinarith),
+        Real.jacobiArccs]
     congr 1
     refine setIntegral_congr_fun measurableSet_Ioi fun t _ => ?_
     ring_nf
@@ -415,13 +418,14 @@ theorem jacobiArcps_eq_symEllIntRF' {m x : ℝ} (hm : m < 1) :
       have := pow_le_pow_left₀ (Real.sqrt_nonneg _) hx 2
       rwa [Real.sq_sqrt (by linarith)] at this
     rw [show x ^ 2 - (1 - m) = x ^ 2 + -(1 - m) by ring,
-      symEllIntRF_sq_add_eq_integral_Ioi hx0 (by linarith) (by nlinarith), Real.jacobiArcdsm]
+      symmetricEllipticRF_sq_add_eq_integral_Ioi hx0 (by linarith) (by nlinarith), Real.jacobiArcds]
     congr 1
     refine setIntegral_congr_fun measurableSet_Ioi fun t _ => ?_
     ring_nf
   · have hx0 : 0 ≤ x := zero_le_one.trans hx
     rw [show x ^ 2 - 1 = x ^ 2 + -1 by ring, show x ^ 2 - m = x ^ 2 + -m by ring,
-      symEllIntRF_sq_add_eq_integral_Ioi hx0 (by nlinarith) (by nlinarith), Real.jacobiArcnsm]
+      symmetricEllipticRF_sq_add_eq_integral_Ioi hx0 (by nlinarith) (by nlinarith),
+          Real.jacobiArcns]
     rfl
 
 /-- DLMF 19.25.32 for `ps = cs, ds, ns` (with `Δ(d, c) = k'²`, `Δ(n, c) = 1`, `Δ(n, d) = k²`,
@@ -430,33 +434,33 @@ theorem jacobiArcps_eq_symEllIntRF' {m x : ℝ} (hm : m < 1) :
 side is not even in `x`), `arcds x = R_F(x², x² - k'², x² + k²)` for `x ≥ k'`, and
 `arcns x = R_F(x², x² - 1, x² - k²)` for `x ≥ 1`; real parameter `0 ≤ m = k² < 1`. -/
 @[dlmf 19.25.E32]
-theorem jacobiArcps_eq_symEllIntRF {m x : ℝ} (_hm0 : 0 ≤ m) (hm : m < 1) :
-    (0 ≤ x → (Real.jacobiArccsm x m : ℂ) =
-        symEllIntRF ((x ^ 2 : ℝ) : ℂ) ((x ^ 2 + (1 - m) : ℝ) : ℂ) ((x ^ 2 + 1 : ℝ) : ℂ)) ∧
-      (√(1 - m) ≤ x → (Real.jacobiArcdsm x m : ℂ) =
-        symEllIntRF ((x ^ 2 : ℝ) : ℂ) ((x ^ 2 - (1 - m) : ℝ) : ℂ) ((x ^ 2 + m : ℝ) : ℂ)) ∧
-      (1 ≤ x → (Real.jacobiArcnsm x m : ℂ) =
-        symEllIntRF ((x ^ 2 : ℝ) : ℂ) ((x ^ 2 - 1 : ℝ) : ℂ) ((x ^ 2 - m : ℝ) : ℂ)) := by
-  exact jacobiArcps_eq_symEllIntRF' hm
+theorem jacobiArcps_eq_symmetricEllipticRF {m x : ℝ} (_hm0 : 0 ≤ m) (hm : m < 1) :
+    (0 ≤ x → (Real.jacobiArccs x m : ℂ) =
+        symmetricEllipticRF ((x ^ 2 : ℝ) : ℂ) ((x ^ 2 + (1 - m) : ℝ) : ℂ) ((x ^ 2 + 1 : ℝ) : ℂ)) ∧
+      (√(1 - m) ≤ x → (Real.jacobiArcds x m : ℂ) =
+        symmetricEllipticRF ((x ^ 2 : ℝ) : ℂ) ((x ^ 2 - (1 - m) : ℝ) : ℂ) ((x ^ 2 + m : ℝ) : ℂ)) ∧
+      (1 ≤ x → (Real.jacobiArcns x m : ℂ) =
+        symmetricEllipticRF ((x ^ 2 : ℝ) : ℂ) ((x ^ 2 - 1 : ℝ) : ℂ) ((x ^ 2 - m : ℝ) : ℂ)) := by
+  exact jacobiArcps_eq_symmetricEllipticRF' hm
 
 /-- DLMF 19.25.33 (`arcsc`, `arcsd`, `arcsn` as `R_F`); stronger than DLMF, which assumes
 `0 ≤ k²`: only `k² < 1` is needed. -/
 @[dlmf 19.25.E33]
-theorem jacobiArcsp_eq_symEllIntRF' {m x : ℝ} (hm : m < 1) :
-    ((Real.jacobiArcscm x m : ℂ) =
-        x * symEllIntRF 1 ((1 + (1 - m) * x ^ 2 : ℝ) : ℂ) ((1 + x ^ 2 : ℝ) : ℂ)) ∧
-      ((1 - m) * x ^ 2 ≤ 1 → (Real.jacobiArcsdm x m : ℂ) =
-        x * symEllIntRF 1 ((1 - (1 - m) * x ^ 2 : ℝ) : ℂ) ((1 + m * x ^ 2 : ℝ) : ℂ)) ∧
-      (x ^ 2 ≤ 1 → (DLMF.Elliptic.Real.jacobiArcsnm x m : ℂ) =
-        x * symEllIntRF 1 ((1 - x ^ 2 : ℝ) : ℂ) ((1 - m * x ^ 2 : ℝ) : ℂ)) := by
+theorem jacobiArcsp_eq_symmetricEllipticRF' {m x : ℝ} (hm : m < 1) :
+    ((Real.jacobiArcsc x m : ℂ) =
+        x * symmetricEllipticRF 1 ((1 + (1 - m) * x ^ 2 : ℝ) : ℂ) ((1 + x ^ 2 : ℝ) : ℂ)) ∧
+      ((1 - m) * x ^ 2 ≤ 1 → (Real.jacobiArcsd x m : ℂ) =
+        x * symmetricEllipticRF 1 ((1 - (1 - m) * x ^ 2 : ℝ) : ℂ) ((1 + m * x ^ 2 : ℝ) : ℂ)) ∧
+      (x ^ 2 ≤ 1 → (DLMF.Elliptic.Real.jacobiArcsnOfParameter x m : ℂ) =
+        x * symmetricEllipticRF 1 ((1 - x ^ 2 : ℝ) : ℂ) ((1 - m * x ^ 2 : ℝ) : ℂ)) := by
   refine ⟨?_, fun hx => ?_, fun hx => ?_⟩
   · rw [show (1 + x ^ 2 : ℝ) = 1 + 1 * x ^ 2 by ring,
-      mul_symEllIntRF_one_eq_integral (by nlinarith) (by nlinarith), Real.jacobiArcscm]
+      mul_symmetricEllipticRF_one_eq_integral (by nlinarith) (by nlinarith), Real.jacobiArcsc]
     congr 1
     refine intervalIntegral.integral_congr fun t _ => ?_
     ring_nf
   · rw [show (1 - (1 - m) * x ^ 2 : ℝ) = 1 + -(1 - m) * x ^ 2 by ring,
-      mul_symEllIntRF_one_eq_integral (by nlinarith) (by nlinarith), Real.jacobiArcsdm]
+      mul_symmetricEllipticRF_one_eq_integral (by nlinarith) (by nlinarith), Real.jacobiArcsd]
     congr 1
     refine intervalIntegral.integral_congr fun t _ => ?_
     ring_nf
@@ -464,8 +468,8 @@ theorem jacobiArcsp_eq_symEllIntRF' {m x : ℝ} (hm : m < 1) :
       rw [← abs_one, ← sq_le_sq]; simpa using hx
     rw [show (1 - x ^ 2 : ℝ) = 1 + -1 * x ^ 2 by ring,
       show (1 - m * x ^ 2 : ℝ) = 1 + -m * x ^ 2 by ring,
-      mul_symEllIntRF_one_eq_integral (by nlinarith) (by nlinarith),
-      Real.jacobiArcsnm_eq_integral hm (abs_le.mp hx1).1 (abs_le.mp hx1).2]
+      mul_symmetricEllipticRF_one_eq_integral (by nlinarith) (by nlinarith),
+      Real.jacobiArcsnOfParameter_eq_integral hm (abs_le.mp hx1).1 (abs_le.mp hx1).2]
     congr 1
     refine intervalIntegral.integral_congr fun t _ => ?_
     ring_nf
@@ -475,14 +479,14 @@ i.e. `arcsc x = x R_F(1, 1 + k'² x², 1 + x²)` for real `x`,
 `arcsd x = x R_F(1, 1 - k'² x², 1 + k² x²)` for `0 ≤ x² ≤ 1/k'²`, and
 `arcsn x = x R_F(1, 1 - x², 1 - k² x²)` for `0 ≤ x² ≤ 1`; real `0 ≤ m = k² < 1`. -/
 @[dlmf 19.25.E33]
-theorem jacobiArcsp_eq_symEllIntRF {m x : ℝ} (_hm0 : 0 ≤ m) (hm : m < 1) :
-    ((Real.jacobiArcscm x m : ℂ) =
-        x * symEllIntRF 1 ((1 + (1 - m) * x ^ 2 : ℝ) : ℂ) ((1 + x ^ 2 : ℝ) : ℂ)) ∧
-      ((1 - m) * x ^ 2 ≤ 1 → (Real.jacobiArcsdm x m : ℂ) =
-        x * symEllIntRF 1 ((1 - (1 - m) * x ^ 2 : ℝ) : ℂ) ((1 + m * x ^ 2 : ℝ) : ℂ)) ∧
-      (x ^ 2 ≤ 1 → (DLMF.Elliptic.Real.jacobiArcsnm x m : ℂ) =
-        x * symEllIntRF 1 ((1 - x ^ 2 : ℝ) : ℂ) ((1 - m * x ^ 2 : ℝ) : ℂ)) := by
-  exact jacobiArcsp_eq_symEllIntRF' hm
+theorem jacobiArcsp_eq_symmetricEllipticRF {m x : ℝ} (_hm0 : 0 ≤ m) (hm : m < 1) :
+    ((Real.jacobiArcsc x m : ℂ) =
+        x * symmetricEllipticRF 1 ((1 + (1 - m) * x ^ 2 : ℝ) : ℂ) ((1 + x ^ 2 : ℝ) : ℂ)) ∧
+      ((1 - m) * x ^ 2 ≤ 1 → (Real.jacobiArcsd x m : ℂ) =
+        x * symmetricEllipticRF 1 ((1 - (1 - m) * x ^ 2 : ℝ) : ℂ) ((1 + m * x ^ 2 : ℝ) : ℂ)) ∧
+      (x ^ 2 ≤ 1 → (DLMF.Elliptic.Real.jacobiArcsnOfParameter x m : ℂ) =
+        x * symmetricEllipticRF 1 ((1 - x ^ 2 : ℝ) : ℂ) ((1 - m * x ^ 2 : ℝ) : ℂ)) := by
+  exact jacobiArcsp_eq_symmetricEllipticRF' hm
 
 /-- DLMF 19.25.34 for the six `pq` with `p, q ∈ {c, d, n}`:
 `arcpq(x, k) = √w R_F(x², 1, 1 + Δ(r, q) w)`, `w = (1 - x²)/Δ(q, p)`, with `0 < m = k² < 1`:
@@ -490,50 +494,52 @@ theorem jacobiArcsp_eq_symEllIntRF {m x : ℝ} (_hm0 : 0 ≤ m) (hm : m < 1) :
 are not even in `x`), `arcdc` and `arcnc` for `x ≥ 1`, `arcdn` for `k' ≤ x ≤ 1`, `arcnd` for
 `1 ≤ x ≤ 1/k'`. -/
 @[dlmf 19.25.E34]
-theorem jacobiArcpq_eq_symEllIntRF {m x : ℝ} (hm0 : 0 < m) (hm : m < 1) :
+theorem jacobiArcpq_eq_symmetricEllipticRF {m x : ℝ} (hm0 : 0 < m) (hm : m < 1) :
     -- `cd`: `p = c, q = d, r = n`, `w = (1 - x²)/k'²`, `Δ(n, d) = k²`
-    (0 ≤ x → x ≤ 1 → (Real.jacobiArccdm x m : ℂ) =
+    (0 ≤ x → x ≤ 1 → (Real.jacobiArccd x m : ℂ) =
         ((√((1 - x ^ 2) / (1 - m)) : ℝ) : ℂ) *
-          symEllIntRF ((x ^ 2 : ℝ) : ℂ) 1 ((1 + m * ((1 - x ^ 2) / (1 - m)) : ℝ) : ℂ)) ∧
+          symmetricEllipticRF ((x ^ 2 : ℝ) : ℂ) 1 ((1 + m * ((1 - x ^ 2) / (1 - m)) : ℝ) : ℂ)) ∧
     -- `cn`: `p = c, q = n, r = d`, `w = 1 - x²`, `Δ(d, n) = -k²`
-    (0 ≤ x → x ≤ 1 → (Real.jacobiArccnm x m : ℂ) =
-        ((√(1 - x ^ 2) : ℝ) : ℂ) * symEllIntRF ((x ^ 2 : ℝ) : ℂ) 1 ((1 - m * (1 - x ^ 2) : ℝ) : ℂ))
+    (0 ≤ x → x ≤ 1 → (Real.jacobiArccn x m : ℂ) =
+        ((√(1 - x ^ 2) : ℝ) : ℂ) *
+            symmetricEllipticRF ((x ^ 2 : ℝ) : ℂ) 1 ((1 - m * (1 - x ^ 2) : ℝ) : ℂ))
           ∧
     -- `dc`: `p = d, q = c, r = n`, `w = (x² - 1)/k'²`, `Δ(n, c) = 1`
-    (1 ≤ x → (Real.jacobiArcdcm x m : ℂ) =
+    (1 ≤ x → (Real.jacobiArcdc x m : ℂ) =
         ((√((x ^ 2 - 1) / (1 - m)) : ℝ) : ℂ) *
-          symEllIntRF ((x ^ 2 : ℝ) : ℂ) 1 ((1 + (x ^ 2 - 1) / (1 - m) : ℝ) : ℂ)) ∧
+          symmetricEllipticRF ((x ^ 2 : ℝ) : ℂ) 1 ((1 + (x ^ 2 - 1) / (1 - m) : ℝ) : ℂ)) ∧
     -- `nc`: `p = n, q = c, r = d`, `w = x² - 1`, `Δ(d, c) = k'²`
-    (1 ≤ x → (Real.jacobiArcncm x m : ℂ) =
-        ((√(x ^ 2 - 1) : ℝ) : ℂ) * symEllIntRF ((x ^ 2 : ℝ) : ℂ) 1
+    (1 ≤ x → (Real.jacobiArcnc x m : ℂ) =
+        ((√(x ^ 2 - 1) : ℝ) : ℂ) * symmetricEllipticRF ((x ^ 2 : ℝ) : ℂ) 1
           ((1 + (1 - m) * (x ^ 2 - 1) : ℝ) : ℂ)) ∧
     -- `dn`: `p = d, q = n, r = c`, `w = (1 - x²)/k²`, `Δ(c, n) = -1`
-    (√(1 - m) ≤ x → x ≤ 1 → (Real.jacobiArcdnm x m : ℂ) =
-        ((√((1 - x ^ 2) / m) : ℝ) : ℂ) * symEllIntRF ((x ^ 2 : ℝ) : ℂ) 1
+    (√(1 - m) ≤ x → x ≤ 1 → (Real.jacobiArcdn x m : ℂ) =
+        ((√((1 - x ^ 2) / m) : ℝ) : ℂ) * symmetricEllipticRF ((x ^ 2 : ℝ) : ℂ) 1
           ((1 - (1 - x ^ 2) / m : ℝ) : ℂ)) ∧
     -- `nd`: `p = n, q = d, r = c`, `w = (x² - 1)/k²`, `Δ(c, d) = -k'²`
-    (1 ≤ x → x * √(1 - m) ≤ 1 → (Real.jacobiArcndm x m : ℂ) =
+    (1 ≤ x → x * √(1 - m) ≤ 1 → (Real.jacobiArcnd x m : ℂ) =
         ((√((x ^ 2 - 1) / m) : ℝ) : ℂ) *
-          symEllIntRF ((x ^ 2 : ℝ) : ℂ) 1 ((1 - (1 - m) * ((x ^ 2 - 1) / m) : ℝ) : ℂ)) := by
+          symmetricEllipticRF ((x ^ 2 : ℝ) : ℂ) 1 ((1 - (1 - m) * ((x ^ 2 - 1) / m) : ℝ) : ℂ)) := by
   have hm1 : 0 < 1 - m := by linarith
   refine ⟨fun hx0 hx1 => ?_, fun hx0 hx1 => ?_, fun hx1 => ?_, fun hx1 => ?_,
     fun hx0 hx1 => ?_, fun hx1 hxm => ?_⟩
   · -- `cd`
     rcases hx1.lt_or_eq with hx1 | rfl
     · have hw : 0 < (1 - x ^ 2) / (1 - m) := div_pos (by nlinarith) hm1
-      rw [symEllIntRF_sq_one_eq_integral_of_lt_one hx0 hx1 (by positivity), ← ofReal_mul,
+      rw [symmetricEllipticRF_sq_one_eq_integral_of_lt_one hx0 hx1 (by positivity), ← ofReal_mul,
         sqrt_mul_integral_one_div_sqrt hw x 1 (fun t => 1 - t ^ 2)
           (fun t => 1 - x ^ 2 + m * ((1 - x ^ 2) / (1 - m)) * (1 - t ^ 2))
-          (fun t => 1 - m * t ^ 2) (fun t => by field_simp; ring), Real.jacobiArccdm]
-    · simp [Real.jacobiArccdm]
+          (fun t => 1 - m * t ^ 2) (fun t => by field_simp; ring), Real.jacobiArccd]
+    · simp [Real.jacobiArccd]
   · -- `cn`
     have hw : 0 ≤ 1 - x ^ 2 := by nlinarith
-    have hB := mul_symEllIntRF_one_eq_integral (x := √(1 - x ^ 2)) (a := -1) (b := -m)
+    have hB := mul_symmetricEllipticRF_one_eq_integral (x := √(1 - x ^ 2)) (a := -1) (b := -m)
       (by rw [Real.sq_sqrt hw]; nlinarith) (by rw [Real.sq_sqrt hw]; nlinarith)
     rw [Real.sq_sqrt hw, show (1 + -1 * (1 - x ^ 2) : ℝ) = x ^ 2 by ring,
       show (1 + -m * (1 - x ^ 2) : ℝ) = 1 - m * (1 - x ^ 2) by ring] at hB
-    rw [symEllIntRF_comm_left, hB, Real.jacobiArccnm, Real.arccos_eq_arcsin hx0,
-      ← DLMF.Elliptic.Real.integral_recip_sqrt_eq_incEllIntFm hm (Real.sqrt_nonneg _)
+    rw [symmetricEllipticRF_comm_left, hB, Real.jacobiArccn, Real.arccos_eq_arcsin hx0,
+      ← DLMF.Elliptic.Real.integral_recip_sqrt_eq_incompleteEllipticFOfParameter hm
+          (Real.sqrt_nonneg _)
         (Real.sqrt_le_one.mpr (by nlinarith))]
     congr 1
     refine intervalIntegral.integral_congr fun t _ => ?_
@@ -541,19 +547,19 @@ theorem jacobiArcpq_eq_symEllIntRF {m x : ℝ} (hm0 : 0 < m) (hm : m < 1) :
   · -- `dc`
     rcases hx1.lt_or_eq with hx1 | rfl
     · have hw : 0 < (x ^ 2 - 1) / (1 - m) := div_pos (by nlinarith) hm1
-      rw [symEllIntRF_sq_one_eq_integral_of_one_lt hx1 (by positivity), ← ofReal_mul,
+      rw [symmetricEllipticRF_sq_one_eq_integral_of_one_lt hx1 (by positivity), ← ofReal_mul,
         sqrt_mul_integral_one_div_sqrt hw 1 x (fun t => t ^ 2 - 1)
           (fun t => x ^ 2 - 1 + (x ^ 2 - 1) / (1 - m) * (t ^ 2 - 1))
-          (fun t => t ^ 2 - m) (fun t => by field_simp; ring), Real.jacobiArcdcm]
-    · simp [Real.jacobiArcdcm]
+          (fun t => t ^ 2 - m) (fun t => by field_simp; ring), Real.jacobiArcdc]
+    · simp [Real.jacobiArcdc]
   · -- `nc`
     rcases hx1.lt_or_eq with hx1 | rfl
     · have hw : 0 < x ^ 2 - 1 := by nlinarith
-      rw [symEllIntRF_sq_one_eq_integral_of_one_lt hx1 (by nlinarith), ← ofReal_mul,
+      rw [symmetricEllipticRF_sq_one_eq_integral_of_one_lt hx1 (by nlinarith), ← ofReal_mul,
         sqrt_mul_integral_one_div_sqrt hw 1 x (fun t => t ^ 2 - 1)
           (fun t => x ^ 2 - 1 + (1 - m) * (x ^ 2 - 1) * (t ^ 2 - 1))
-          (fun t => m + (1 - m) * t ^ 2) (fun t => by ring), Real.jacobiArcncm]
-    · simp [Real.jacobiArcncm]
+          (fun t => m + (1 - m) * t ^ 2) (fun t => by ring), Real.jacobiArcnc]
+    · simp [Real.jacobiArcnc]
   · -- `dn`
     have hx0' : 0 ≤ x := (Real.sqrt_nonneg _).trans hx0
     have hx2 : 1 - m ≤ x ^ 2 := by
@@ -561,12 +567,13 @@ theorem jacobiArcpq_eq_symEllIntRF {m x : ℝ} (hm0 : 0 < m) (hm : m < 1) :
       rwa [Real.sq_sqrt hm1.le] at this
     have hw : 0 ≤ (1 - x ^ 2) / m := div_nonneg (by nlinarith) hm0.le
     have hw1 : (1 - x ^ 2) / m ≤ 1 := by rw [div_le_one hm0]; linarith
-    have hB := mul_symEllIntRF_one_eq_integral (x := √((1 - x ^ 2) / m)) (a := -m) (b := -1)
+    have hB := mul_symmetricEllipticRF_one_eq_integral (x := √((1 - x ^ 2) / m)) (a := -m) (b := -1)
       (by rw [Real.sq_sqrt hw]; field_simp; nlinarith) (by rw [Real.sq_sqrt hw]; linarith)
     rw [Real.sq_sqrt hw, show (1 + -m * ((1 - x ^ 2) / m) : ℝ) = x ^ 2 by field_simp; ring,
       show (1 + -1 * ((1 - x ^ 2) / m) : ℝ) = 1 - (1 - x ^ 2) / m by ring] at hB
-    rw [symEllIntRF_comm_left, hB, Real.jacobiArcdnm,
-      ← DLMF.Elliptic.Real.integral_recip_sqrt_eq_incEllIntFm hm (Real.sqrt_nonneg _)
+    rw [symmetricEllipticRF_comm_left, hB, Real.jacobiArcdn,
+      ← DLMF.Elliptic.Real.integral_recip_sqrt_eq_incompleteEllipticFOfParameter hm
+          (Real.sqrt_nonneg _)
         (Real.sqrt_le_one.mpr hw1)]
     congr 1
     refine intervalIntegral.integral_congr fun t _ => ?_
@@ -580,12 +587,12 @@ theorem jacobiArcpq_eq_symEllIntRF {m x : ℝ} (hm0 : 0 < m) (hm : m < 1) :
     rcases hx1.lt_or_eq with hx1 | rfl
     · have hw : 0 < (x ^ 2 - 1) / m := div_pos (by nlinarith) hm0
       rw [show (1 - (1 - m) * ((x ^ 2 - 1) / m) : ℝ) = 1 + -((1 - m) * ((x ^ 2 - 1) / m)) by ring,
-        symEllIntRF_sq_one_eq_integral_of_one_lt hx1
+        symmetricEllipticRF_sq_one_eq_integral_of_one_lt hx1
           (by rw [← sub_eq_add_neg, sub_nonneg, ← mul_div_assoc, div_le_one hm0]; nlinarith),
         ← ofReal_mul,
         sqrt_mul_integral_one_div_sqrt hw 1 x (fun t => t ^ 2 - 1)
           (fun t => x ^ 2 - 1 + -((1 - m) * ((x ^ 2 - 1) / m)) * (t ^ 2 - 1))
-          (fun t => 1 - (1 - m) * t ^ 2) (fun t => by field_simp; ring), Real.jacobiArcndm]
-    · simp [Real.jacobiArcndm]
+          (fun t => 1 - (1 - m) * t ^ 2) (fun t => by field_simp; ring), Real.jacobiArcnd]
+    · simp [Real.jacobiArcnd]
 
 end DLMF.EllipticIntegrals

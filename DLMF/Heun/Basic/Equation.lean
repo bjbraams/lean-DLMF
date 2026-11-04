@@ -16,7 +16,7 @@ public import Mathlib.MeasureTheory.Covering.Besicovitch
 /-!
 # Heun's equation and its automorphisms (DLMF §31.2)
 
-Heun's equation (31.2.1) is `IsHeunSolOn` (`DLMF.Heun.Basic`). The doubly-periodic forms
+Heun's equation (31.2.1) is `IsHeunSolutionOn` (`DLMF.Heun.Basic`). The doubly-periodic forms
 (§31.2(iv)) are in `DLMF.Heun.DoublyPeriodic`.
 
 ## Main results
@@ -25,7 +25,7 @@ Heun's equation (31.2.1) is `IsHeunSolOn` (`DLMF.Heun.Basic`). The doubly-period
   others (§31.2(i)), stated through `DLMFMathlib.Analysis.ODE.Singularities`.
 * `heun_exponents_zero`, `heun_exponents_one`, `heun_exponents_a`, `heun_exponents_infinity`,
   `heun_indicial_infinity`: the exponents `{0, 1-γ}`, `{0, 1-δ}`, `{0, 1-ε}`, `{α, β}`.
-* `isHeunSolOn_iff_heunOperator`: equivalence with Heun's operator form `𝒟_z w = q w`
+* `isHeunSolutionOn_iff_heunOperator`: equivalence with Heun's operator form `𝒟_z w = q w`
   (31.10.4).
 * `heun_normalForm`, `heunNormal_A_add_B_add_C`: the normal form, DLMF 31.2.2–31.2.4.
 * `heun_trigonometricForm`: the trigonometric form, DLMF 31.2.5–31.2.6.
@@ -59,9 +59,11 @@ private lemma isLinearODE2On_congr {p r w w' : ℂ → ℂ} {U : Set ℂ} (hU : 
     Filter.eventually_of_mem (hU.mem_nhds hz) fun y hy => h hy
   have hdev : ∀ z ∈ U, deriv w =ᶠ[𝓝 z] deriv w' := fun z hz =>
     Filter.eventually_of_mem (hU.mem_nhds hz) fun y hy => (hev y hy).deriv_eq
-  refine ⟨fun z hz => (hw.1 z hz).congr_of_eventuallyEq (hev z hz).symm, fun z hz => ?_⟩
+  refine IsLinearODE2On.mk
+      (fun z hz => (hw.differentiableAt z hz).congr_of_eventuallyEq (hev z hz).symm)
+      (fun z hz => ?_)
   rw [← (hev z hz).deriv_eq, ← h hz]
-  exact (hw.2 z hz).congr_of_eventuallyEq (hdev z hz).symm
+  exact (hw.hasDerivAt_deriv z hz).congr_of_eventuallyEq (hdev z hz).symm
 
 /-- Gauge transformation: if `g' = L g` and `w₁` solves `w'' + p₁ w' + r₁ w = 0` with
 `p₁ = p + 2L`, `r₁ = r + pL + L² + L'`, then `g w₁` solves `w'' + p w' + r w = 0`. -/
@@ -72,12 +74,13 @@ theorem isLinearODE2On_gauge_mul {p r p₁ r₁ g L L' w₁ : ℂ → ℂ} {U : 
     (hw : IsLinearODE2On p₁ r₁ w₁ U) : IsLinearODE2On p r (fun z => g z * w₁ z) U := by
   have hd : ∀ z ∈ U, HasDerivAt (fun z => g z * w₁ z) (g z * (L z * w₁ z + deriv w₁ z)) z :=
     fun z hz => by
-      convert (hg z hz).mul (hw.1 z hz).hasDerivAt using 1; ring
-  refine ⟨fun z hz => (hd z hz).differentiableAt, fun z hz => ?_⟩
+      convert (hg z hz).mul (hw.differentiableAt z hz).hasDerivAt using 1; ring
+  refine IsLinearODE2On.mk (fun z hz => (hd z hz).differentiableAt) (fun z hz => ?_)
   have hev : deriv (fun z => g z * w₁ z) =ᶠ[𝓝 z]
       fun z => g z * (L z * w₁ z + deriv w₁ z) :=
     Filter.eventually_of_mem (hU.mem_nhds hz) fun y hy => (hd y hy).deriv
-  have h2 := (hg z hz).mul (((hL z hz).mul (hw.1 z hz).hasDerivAt).add (hw.2 z hz))
+  have h2 := (hg z hz).mul
+      (((hL z hz).mul (hw.differentiableAt z hz).hasDerivAt).add (hw.hasDerivAt_deriv z hz))
   refine (h2.congr_of_eventuallyEq hev).congr_deriv ?_
   rw [(hd z hz).deriv, hp z hz, hr z hz]
   simp only [Pi.add_apply, Pi.mul_apply]
@@ -92,11 +95,11 @@ theorem isLinearODE2On_comp {p r P R φ φ₁ φ₂ H : ℂ → ℂ} {U V : Set 
     (hr : ∀ z ∈ U, r z = R (φ z) * φ₁ z ^ 2)
     (hH : IsLinearODE2On P R H V) : IsLinearODE2On p r (fun z => H (φ z)) U := by
   have hd : ∀ z ∈ U, HasDerivAt (fun z => H (φ z)) (deriv H (φ z) * φ₁ z) z :=
-    fun z hz => (hH.1 _ (hmaps z hz)).hasDerivAt.comp z (hφ z hz)
-  refine ⟨fun z hz => (hd z hz).differentiableAt, fun z hz => ?_⟩
+    fun z hz => (hH.differentiableAt _ (hmaps z hz)).hasDerivAt.comp z (hφ z hz)
+  refine IsLinearODE2On.mk (fun z hz => (hd z hz).differentiableAt) (fun z hz => ?_)
   have hev : deriv (fun z => H (φ z)) =ᶠ[𝓝 z] fun z => deriv H (φ z) * φ₁ z :=
     Filter.eventually_of_mem (hU.mem_nhds hz) fun y hy => (hd y hy).deriv
-  have h2 := ((hH.2 _ (hmaps z hz)).comp z (hφ z hz)).mul (hφ₁ z hz)
+  have h2 := ((hH.hasDerivAt_deriv _ (hmaps z hz)).comp z (hφ z hz)).mul (hφ₁ z hz)
   refine (h2.congr_of_eventuallyEq hev).congr_deriv ?_
   rw [(hd z hz).deriv]
   have := hp z hz
@@ -125,22 +128,22 @@ theorem hasDerivAt_const_div_sub (k c z : ℂ) (h : z - c ≠ 0) :
 /-- DLMF 31.10.4 and 31.2.1: away from the singular points, Heun's equation is
 `𝒟_z w = q w` for Heun's operator `𝒟_z`. -/
 @[dlmf 31.10.E4]
-theorem isHeunSolOn_iff_heunOperator {w : ℂ → ℂ} {s : Set ℂ}
+theorem isHeunSolutionOn_iff_heunOperator {w : ℂ → ℂ} {s : Set ℂ}
     (hs : ∀ z ∈ s, z ≠ 0 ∧ z ≠ 1 ∧ z ≠ a) :
-    IsHeunSolOn a q α β γ δ ε w s ↔ ∀ z ∈ s, DifferentiableAt ℂ w z ∧
+    IsHeunSolutionOn a q α β γ δ ε w s ↔ ∀ z ∈ s, DifferentiableAt ℂ w z ∧
       DifferentiableAt ℂ (deriv w) z ∧ heunOperator a α β γ δ ε w z = q * w z := by
   constructor
   · intro h z hz
     obtain ⟨h0, h1, ha⟩ := hs z hz
     have h1' : z - 1 ≠ 0 := sub_ne_zero.2 h1
     have ha' : z - a ≠ 0 := sub_ne_zero.2 ha
-    refine ⟨h.1 z hz, (h.2 z hz).differentiableAt, ?_⟩
-    rw [heunOperator, (h.2 z hz).deriv]
+    refine ⟨h.differentiableAt z hz, (h.hasDerivAt_deriv z hz).differentiableAt, ?_⟩
+    rw [heunOperator, (h.hasDerivAt_deriv z hz).deriv]
     unfold heunCoeffP heunCoeffR
     field_simp
     ring
   · intro h
-    refine ⟨fun z hz => (h z hz).1, fun z hz => ?_⟩
+    refine IsLinearODE2On.mk (fun z hz => (h z hz).1) (fun z hz => ?_)
     obtain ⟨h0, h1, ha⟩ := hs z hz
     have h1' : z - 1 ≠ 0 := sub_ne_zero.2 h1
     have ha' : z - a ≠ 0 := sub_ne_zero.2 ha
@@ -494,7 +497,7 @@ theorem heun_normalForm (ha0 : a ≠ 0) (ha1 : a ≠ 1) (hF : α + β + 1 = γ +
     {U : Set ℂ} (hU : IsOpen U)
     (hUs : ∀ z ∈ U, z ∈ slitPlane ∧ z - 1 ∈ slitPlane ∧ z - a ∈ slitPlane) {w W : ℂ → ℂ}
     (hwW : ∀ z ∈ U, w z = z ^ (-γ / 2) * (z - 1) ^ (-δ / 2) * (z - a) ^ (-ε / 2) * W z) :
-    IsHeunSolOn a q α β γ δ ε w U ↔
+    IsHeunSolutionOn a q α β γ δ ε w U ↔
       IsLinearODE2On 0 (fun z => -heunNormalCoeff a q α β γ δ ε z) W U := by
   have hε : ε = α + β + 1 - γ - δ := by linear_combination -hF
   have ha1' : a - 1 ≠ 0 := sub_ne_zero.2 ha1
@@ -564,7 +567,7 @@ theorem heun_normalForm (ha0 : a ≠ 0) (ha1 : a ≠ 1) (hF : α + β + 1 = γ +
 -/
 @[dlmf 31.2.E5, dlmf 31.2.E6]
 theorem heun_trigonometricForm {U V : Set ℂ}
-    (hV : IsOpen V) {W : ℂ → ℂ} (hW : IsHeunSolOn a q α β γ δ ε W U)
+    (hV : IsOpen V) {W : ℂ → ℂ} (hW : IsHeunSolutionOn a q α β γ δ ε W U)
     (hVU : ∀ θ ∈ V, Complex.sin θ ^ 2 ∈ U ∧ Complex.sin θ ≠ 0 ∧ Complex.cos θ ≠ 0 ∧
       a - Complex.sin θ ^ 2 ≠ 0) :
     IsLinearODE2On
@@ -604,8 +607,9 @@ unchanged), then `z^{1-γ} w₁(z)` solves it with the original parameters. -/
 @[dlmf 31.2.v]
 theorem heun_fHomotopic_zero (hF : α + β + 1 = γ + δ + ε) {U : Set ℂ} (hU : IsOpen U)
     (hUs : ∀ z ∈ U, z ∈ slitPlane ∧ z ≠ 1 ∧ z ≠ a) {w₁ : ℂ → ℂ}
-    (hw₁ : IsHeunSolOn a (q + (a * δ + ε) * (1 - γ)) (α + 1 - γ) (β + 1 - γ) (2 - γ) δ ε w₁ U) :
-    IsHeunSolOn a q α β γ δ ε (fun z => z ^ (1 - γ) * w₁ z) U := by
+    (hw₁ : IsHeunSolutionOn a (q + (a * δ + ε) * (1 - γ)) (α + 1 - γ) (β + 1 - γ)
+        (2 - γ) δ ε w₁ U) :
+    IsHeunSolutionOn a q α β γ δ ε (fun z => z ^ (1 - γ) * w₁ z) U := by
   have hε : ε = α + β + 1 - γ - δ := by linear_combination -hF
   subst hε
   refine isLinearODE2On_gauge_mul (L := fun z => (1 - γ) / z) (L' := fun z => -(1 - γ) / z ^ 2)
@@ -633,8 +637,8 @@ theorem heun_fHomotopic_zero (hF : α + β + 1 = γ + δ + ε) {U : Set ℂ} (hU
 @[dlmf 31.2.v]
 theorem heun_fHomotopic_one (hF : α + β + 1 = γ + δ + ε) {U : Set ℂ} (hU : IsOpen U)
     (hUs : ∀ z ∈ U, z - 1 ∈ slitPlane ∧ z ≠ 0 ∧ z ≠ a) {w₂ : ℂ → ℂ}
-    (hw₂ : IsHeunSolOn a (q + a * γ * (1 - δ)) (α + 1 - δ) (β + 1 - δ) γ (2 - δ) ε w₂ U) :
-    IsHeunSolOn a q α β γ δ ε (fun z => (z - 1) ^ (1 - δ) * w₂ z) U := by
+    (hw₂ : IsHeunSolutionOn a (q + a * γ * (1 - δ)) (α + 1 - δ) (β + 1 - δ) γ (2 - δ) ε w₂ U) :
+    IsHeunSolutionOn a q α β γ δ ε (fun z => (z - 1) ^ (1 - δ) * w₂ z) U := by
   have hε : ε = α + β + 1 - γ - δ := by linear_combination -hF
   subst hε
   refine isLinearODE2On_gauge_mul (L := fun z => (1 - δ) / (z - 1))
@@ -660,8 +664,8 @@ theorem heun_fHomotopic_one (hF : α + β + 1 = γ + δ + ε) {U : Set ℂ} (hU 
 @[dlmf 31.2.v]
 theorem heun_fHomotopic_a (hF : α + β + 1 = γ + δ + ε) {U : Set ℂ} (hU : IsOpen U)
     (hUs : ∀ z ∈ U, z - a ∈ slitPlane ∧ z ≠ 0 ∧ z ≠ 1) {w₃ : ℂ → ℂ}
-    (hw₃ : IsHeunSolOn a (q + γ * (1 - ε)) (α + 1 - ε) (β + 1 - ε) γ δ (2 - ε) w₃ U) :
-    IsHeunSolOn a q α β γ δ ε (fun z => (z - a) ^ (1 - ε) * w₃ z) U := by
+    (hw₃ : IsHeunSolutionOn a (q + γ * (1 - ε)) (α + 1 - ε) (β + 1 - ε) γ δ (2 - ε) w₃ U) :
+    IsHeunSolutionOn a q α β γ δ ε (fun z => (z - a) ^ (1 - ε) * w₃ z) U := by
   have hε : ε = α + β + 1 - γ - δ := by linear_combination -hF
   subst hε
   refine isLinearODE2On_gauge_mul (L := fun z => (1 - (α + β + 1 - γ - δ)) / (z - a))
@@ -688,8 +692,8 @@ equation with `ã = 1/a`, `q̃ = q/a`, `δ̃ = ε`, `ε̃ = δ`, then `w̃(z/a)`
 @[dlmf 31.2.v]
 theorem heun_homography_div (ha0 : a ≠ 0) {U V : Set ℂ}
     (hU : IsOpen U) (hUs : ∀ z ∈ U, z ≠ 0 ∧ z ≠ 1 ∧ z ≠ a) {w : ℂ → ℂ}
-    (hw : IsHeunSolOn (1 / a) (q / a) α β γ ε δ w V) (hUV : ∀ z ∈ U, z / a ∈ V) :
-    IsHeunSolOn a q α β γ δ ε (fun z => w (z / a)) U := by
+    (hw : IsHeunSolutionOn (1 / a) (q / a) α β γ ε δ w V) (hUV : ∀ z ∈ U, z / a ∈ V) :
+    IsHeunSolutionOn a q α β γ δ ε (fun z => w (z / a)) U := by
   refine isLinearODE2On_comp (φ₁ := fun _ => 1 / a) (φ₂ := fun _ => 0) hU
     (fun z hz => ?_) (fun z hz => hasDerivAt_const _ _) hUV (fun z hz => ?_) (fun z hz => ?_) hw
   · simpa [div_eq_mul_inv, mul_comm] using (hasDerivAt_id z).mul_const a⁻¹
@@ -717,9 +721,9 @@ if `w̃` solves Heun's equation with `ã = a/(a-1)`, `q̃ = -(q - aαγ)/(a-1)`,
 theorem heun_homography_mobius (ha1 : a ≠ 1) (hF : α + β + 1 = γ + δ + ε) {U V : Set ℂ}
     (hU : IsOpen U)
     (hUs : ∀ z ∈ U, 1 - z ∈ slitPlane ∧ z ≠ 0 ∧ z ≠ a ∧ z / (z - 1) ∈ V) {w : ℂ → ℂ}
-    (hw : IsHeunSolOn (a / (a - 1)) (-(q - a * α * γ) / (a - 1)) α (α + 1 - δ) γ
+    (hw : IsHeunSolutionOn (a / (a - 1)) (-(q - a * α * γ) / (a - 1)) α (α + 1 - δ) γ
       (α + 1 - β) ε w V) :
-    IsHeunSolOn a q α β γ δ ε (fun z => (1 - z) ^ (-α) * w (z / (z - 1))) U := by
+    IsHeunSolutionOn a q α β γ δ ε (fun z => (1 - z) ^ (-α) * w (z / (z - 1))) U := by
   have hε : ε = α + β + 1 - γ - δ := by linear_combination -hF
   subst hε
   have ha1' : a - 1 ≠ 0 := sub_ne_zero.2 ha1

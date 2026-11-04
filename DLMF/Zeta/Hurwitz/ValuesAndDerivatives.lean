@@ -13,7 +13,7 @@ public import DLMF.Gamma.PolygammaHurwitz
 # Hurwitz zeta values and derivatives
 
 Special values of the Hurwitz zeta function, the multiplication formula and rational
-parameters, and derivatives with respect to `a` and `s` (DLMF 25.11.11–25.11.24).
+parameters, and derivatives with respect to `a` and `s` (DLMF 25.11.11–25.11.24, except 25.11.20).
 
 ## Main results
 
@@ -27,8 +27,8 @@ parameters, and derivatives with respect to `a` and `s` (DLMF 25.11.11–25.11.2
 * `hurwitzZeta_one_sub_rat`: rational parameters, DLMF 25.11.16.
 * `hasDerivAt_hurwitzZetaComplex_param`: the `a`-derivative, DLMF 25.11.17.
 * `deriv_hurwitzZetaComplex_zero`: Lerch's formula, DLMF 25.11.18.
-* `deriv_hurwitzZetaComplex_eulerMaclaurin`, `iteratedDeriv_hurwitzZetaComplex`:
-  `s`-derivatives, DLMF 25.11.19–25.11.20.
+* `deriv_hurwitzZetaComplex_eulerMaclaurin`: the `s`-derivative, DLMF 25.11.19 (the higher
+  derivatives 25.11.20 are in `DLMF.Zeta.Hurwitz.IteratedDerivatives`).
 * `deriv_hurwitzZeta_one_sub_two_mul_rat`, `deriv_hurwitzZeta_one_sub_two_mul_half`,
   `deriv_hurwitzZeta_one_sub_two_mul_third`: DLMF 25.11.21–25.11.23, the last corrected.
 * `sum_deriv_hurwitzZeta_rat`: DLMF 25.11.24.
@@ -50,7 +50,7 @@ noncomputable section
 namespace DLMF.Zeta
 
 
-open DLMF.Hypergeometric (poch)
+open DLMF.Hypergeometric (pochhammer)
 
 /-! ### Sums of Hurwitz zeta functions over rational parameters -/
 
@@ -162,11 +162,12 @@ private lemma eval_add_one_map_bernoulli (n : ℕ) (x : ℂ) :
   rw [add_comm x 1, h]
   simp
 
-/-- Identity under the stated parameter and domain assumptions: `poch (-(n : ℂ)) j = (-1) ^ j *
-(n.descFactorial j : ℂ)`. -/
-private lemma poch_neg_natCast (n j : ℕ) : poch (-(n : ℂ)) j = (-1) ^ j * (n.descFactorial j : ℂ) :=
+/-- Identity under the stated parameter and domain assumptions:
+`pochhammer (-(n : ℂ)) j = (-1) ^ j * (n.descFactorial j : ℂ)`. -/
+private lemma pochhammer_neg_natCast (n j : ℕ) : pochhammer (-(n : ℂ)) j = (-1) ^ j *
+    (n.descFactorial j : ℂ) :=
     by
-  rw [poch, ascPochhammer_eval_neg_eq_descPochhammer, descPochhammer_eval_eq_descFactorial]
+  rw [pochhammer, ascPochhammer_eval_neg_eq_descPochhammer, descPochhammer_eval_eq_descFactorial]
 
 /-- Sum over `range (2 (M+1))` as a sum over pairs. -/
 private lemma sum_range_two_mul_eq_sum_pairs {M : Type*} [AddCommMonoid M] (T : ℕ → M) (K : ℕ) :
@@ -190,7 +191,7 @@ private lemma eval_map_bernoulli_eq_sum (n : ℕ) (w : ℂ) :
 private lemma eulerMaclaurinCorrection_neg_natCast (n : ℕ) (w : ℂ) {M : ℕ} (hM : n ≤ 2 * M) :
     w ^ (1 - -(n : ℂ)) / (-(n : ℂ) - 1) + w ^ (-(-(n : ℂ))) / 2 +
       ∑ k ∈ Finset.range M, (bernoulli (2 * k + 2) : ℂ) / ((2 * k + 2).factorial : ℂ) *
-        poch (-(n : ℂ)) (2 * k + 1) * w ^ (-(-(n : ℂ)) - (2 * k + 1)) =
+        pochhammer (-(n : ℂ)) (2 * k + 1) * w ^ (-(-(n : ℂ)) - (2 * k + 1)) =
       -((Polynomial.bernoulli (n + 1)).map (algebraMap ℚ ℂ)).eval w / (n + 1) := by
   set T : ℕ → ℂ := fun i => (bernoulli i : ℂ) * ((n + 1).choose i : ℂ) * w ^ (n + 1 - i) with hT
   have hn1 : (n : ℂ) + 1 ≠ 0 := by exact_mod_cast Nat.succ_ne_zero n
@@ -215,9 +216,10 @@ private lemma eulerMaclaurinCorrection_neg_natCast (n : ℕ) (w : ℂ) {M : ℕ}
     simp [T, bernoulli_one]
     ring
   have hterm : ∀ k : ℕ, (bernoulli (2 * k + 2) : ℂ) / ((2 * k + 2).factorial : ℂ) *
-      poch (-(n : ℂ)) (2 * k + 1) * w ^ (-(-(n : ℂ)) - (2 * k + 1)) = -T (2 * k + 2) / (n + 1) := by
+      pochhammer (-(n : ℂ)) (2 * k + 1) * w ^ (-(-(n : ℂ)) - (2 * k + 1)) =
+          -T (2 * k + 2) / (n + 1) := by
     intro k
-    rw [poch_neg_natCast]
+    rw [pochhammer_neg_natCast]
     simp only [T]
     rcases le_or_gt (2 * k + 1) n with hk | hk
     · rw [show -(-(n : ℂ)) - (2 * k + 1) = ((n - (2 * k + 1) : ℕ) : ℂ) by
@@ -301,19 +303,19 @@ theorem hurwitzZeta_zero_eq_one_half_sub {x : ℝ} (hx : 0 < x) (hx1 : x ≤ 1) 
 
 /-- **`hasSum_hurwitzZetaComplex_taylor` is false at `s = 0`** (and, similarly, at every
 `s = 0, -1, -2, …`): the terms with `n + s = 1` involve the pole of `ζ`, where DLMF's product
-`(s)_n ζ(n+s)` is a limit but Lean's `poch 0 n · ζ(1)` is `0`. At `s = 0`, `a = 1/2` the series
-sums to `ζ(0) = -1/2`, while `ζ(0, 1/2) = 0`. -/
+`(s)_n ζ(n+s)` is a limit but Lean's `pochhammer 0 n · ζ(1)` is `0`. At `s = 0`, `a = 1/2` the
+series sums to `ζ(0) = -1/2`, while `ζ(0, 1/2) = 0`. -/
 lemma not_hasSum_hurwitzZetaComplex_taylor_zero :
-    ¬ HasSum (fun n : ℕ => poch 0 n / n ! * riemannZeta (n + 0) * (1 - 1 / 2 : ℂ) ^ n)
+    ¬ HasSum (fun n : ℕ => pochhammer 0 n / n ! * riemannZeta (n + 0) * (1 - 1 / 2 : ℂ) ^ n)
       (hurwitzZetaComplex 0 (1 / 2)) := by
   intro h
   have h0 : hurwitzZetaComplex 0 (1 / 2) = 0 := by
     rw [hurwitzZetaComplex_zero (by norm_num)]; ring
-  have hs : HasSum (fun n : ℕ => poch 0 n / n ! * riemannZeta (n + 0) * (1 - 1 / 2 : ℂ) ^ n)
+  have hs : HasSum (fun n : ℕ => pochhammer 0 n / n ! * riemannZeta (n + 0) * (1 - 1 / 2 : ℂ) ^ n)
       (-1 / 2) := by
-    convert hasSum_single (f := fun n : ℕ => poch 0 n / n ! * riemannZeta (n + 0) *
-      (1 - 1 / 2 : ℂ) ^ n) 0 (fun n hn => by simp [poch, hn]) using 1
-    simp [poch, riemannZeta_zero]
+    convert hasSum_single (f := fun n : ℕ => pochhammer 0 n / n ! * riemannZeta (n + 0) *
+      (1 - 1 / 2 : ℂ) ^ n) 0 (fun n hn => by simp [pochhammer, hn]) using 1
+    simp [pochhammer, riemannZeta_zero]
   rw [h0] at h
   have := h.unique hs
   norm_num at this
@@ -780,24 +782,6 @@ theorem deriv_hurwitzZetaComplex_zero {a : ℝ} (ha : 0 < a) :
   rw [hG0]
   push_cast
   ring
-
-/-- **Higher `s`-derivatives** (DLMF 25.11.20): for `k ≥ 1` (for `k = 1` the last integral has
-coefficient `0`), `Re s > -1`, `s ≠ 1`, real `a > 0`,
-`(-1)^k ζ^{(k)}(s,a) = (ln a)^k a^{-s}(1/2 + a/(s-1)) + k! a^{1-s} ∑_{r=0}^{k-1}
-(ln a)^r/(r!(s-1)^{k-r+1}) - (s(s+1)/2) I_k + (k(2s+1)/2) I_{k-1} - (k(k-1)/2) I_{k-2}`,
-`I_j = ∫_0^∞ (B̃₂(x) - B₂)(ln(x+a))^j/(x+a)^{s+2} dx`. -/
-@[dlmf 25.11.E20]
-theorem iteratedDeriv_hurwitzZetaComplex {k : ℕ} (hk : 1 ≤ k) {s : ℂ} (hs : s ≠ 1)
-    (hs0 : -1 < s.re) {a : ℝ} (ha : 0 < a) :
-    let I : ℕ → ℂ := fun j => ∫ x in Ioi (0 : ℝ), ((periodicBernoulli 2 x - bernoulli 2 : ℝ) : ℂ) *
-      (Real.log (x + a) : ℂ) ^ j / (((x + a : ℝ)) : ℂ) ^ (s + 2)
-    (-1) ^ k * iteratedDeriv k (fun t => hurwitzZetaComplex t a) s =
-      (Real.log a : ℂ) ^ k / (a : ℂ) ^ s * (1 / 2 + a / (s - 1)) +
-      k ! * (a : ℂ) ^ (1 - s) * ∑ r ∈ Finset.range k,
-        (Real.log a : ℂ) ^ r / (r ! * (s - 1) ^ (k - r + 1)) -
-      s * (s + 1) / 2 * I k + k * (2 * s + 1) / 2 * I (k - 1) -
-      k * (k - 1 : ℂ) / 2 * I (k - 2) := by
-  sorry
 
 /-- **`ζ'(1-2n, 1/2)`** (DLMF 25.11.22), `n ≥ 1`. -/
 @[dlmf 25.11.E22]

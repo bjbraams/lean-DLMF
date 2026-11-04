@@ -26,7 +26,7 @@ Euler's product `∏ (1 - xᵐ)` (§27.14(ii)), the discriminant and Ramanujan's
   (DLMF 27.13.3).
 * `jacobiThetaSeries`: `ϑ(x) = 1 + 2 ∑_{m≥1} x^{m²}` (DLMF 27.13.4).
 * `eulerReciprocal`: Euler's reciprocal function `f(x) = ∏_{m≥1} (1 - xᵐ)` (DLMF 27.14.2).
-* `discriminantDLMF`: the discriminant `Δ(τ) = (2π)¹² η(τ)²⁴` (DLMF 27.14.16).
+* `modularDiscriminant`: the discriminant `Δ(τ) = (2π)¹² η(τ)²⁴` (DLMF 27.14.16).
 * `ramanujanTau`: Ramanujan's `τ(n)` (DLMF 27.14.18).
 
 ## Main results
@@ -34,7 +34,7 @@ Euler's product `∏ (1 - xᵐ)` (§27.14(ii)), the discriminant and Ramanujan's
 * `jacobiTheta_eq_jacobiThetaSeries`: `ϑ(e^{πiτ})` is Mathlib's `jacobiTheta τ`.
 * `eulerReciprocal_eq_qPochhammerInf`, `hasProd_eulerReciprocal`: `f(x) = (x; x)_∞`, and for
   `|x| < 1` the product converges to Mathlib's `eulerFunction x`.
-* `discriminantDLMF_eq`, `discriminantDLMF_transform`: `Δ` is `(2π)¹²` times Mathlib's
+* `modularDiscriminant_eq`, `modularDiscriminant_transform`: `Δ` is `(2π)¹²` times Mathlib's
   `ModularForm.discriminant`, and its modular transformation (DLMF 27.14.17).
 
 ## Implementation notes
@@ -109,25 +109,25 @@ theorem hasProd_eulerReciprocal {x : ℂ} (hx : ‖x‖ < 1) :
 
 /-- DLMF 27.14.16: the discriminant `Δ(τ) = (2π)¹² η(τ)²⁴`, `ℑτ > 0`. -/
 @[dlmf 27.14.E16]
-def discriminantDLMF (τ : ℂ) : ℂ := (2 * π) ^ 12 * η τ ^ 24
+def modularDiscriminant (τ : ℂ) : ℂ := (2 * π) ^ 12 * η τ ^ 24
 
 /-- DLMF 27.14.16: `Δ_DLMF = (2π)¹² Δ_Mathlib`. -/
 @[dlmf 27.14.E16]
-theorem discriminantDLMF_eq (τ : ℍ) :
-    discriminantDLMF τ = (2 * π) ^ 12 * ModularForm.discriminant τ := rfl
+theorem modularDiscriminant_eq (τ : ℍ) :
+    modularDiscriminant τ = (2 * π) ^ 12 * ModularForm.discriminant τ := rfl
 
 /-- DLMF 27.14.17: `Δ((aτ + b)/(cτ + d)) = (cτ + d)¹² Δ(τ)` for all `𝒜 ∈ SL(2, ℤ)`
 (stronger than DLMF, which assumes `c > 0`). -/
 @[dlmf 27.14.E17]
-theorem discriminantDLMF_transform (A : SL(2, ℤ)) (τ : ℍ) :
-    discriminantDLMF (A • τ : ℍ) = ((A 1 0 : ℂ) * τ + A 1 1) ^ 12 * discriminantDLMF τ := by
+theorem modularDiscriminant_transform (A : SL(2, ℤ)) (τ : ℍ) :
+    modularDiscriminant (A • τ : ℍ) = ((A 1 0 : ℂ) * τ + A 1 1) ^ 12 * modularDiscriminant τ := by
   have h := SlashInvariantForm.slash_action_eqn' CuspForm.discriminant (Γ := 𝒮ℒ)
     (γ := Matrix.SpecialLinearGroup.mapGL ℝ A) (MonoidHom.mem_range.mpr ⟨A, rfl⟩) τ
   simp only [CuspForm.coe_discriminant] at h
   have h' : ModularForm.discriminant (A • τ : ℍ) =
       ((A 1 0 : ℂ) * τ + A 1 1) ^ 12 * ModularForm.discriminant τ := by
     convert h using 2 <;> rfl
-  rw [discriminantDLMF_eq, discriminantDLMF_eq, h']
+  rw [modularDiscriminant_eq, modularDiscriminant_eq, h']
   ring
 
 /-- DLMF 27.14.18: Ramanujan's `τ(n)`, the `n`th coefficient of `x ∏_{m≥1} (1 - xᵐ)²⁴`. -/

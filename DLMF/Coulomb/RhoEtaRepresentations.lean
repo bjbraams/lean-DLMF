@@ -592,25 +592,25 @@ private lemma norm_ratio_factor_le_one (η : ℝ) (n : ℕ) {m : ℕ} (hm : |η|
   nlinarith
 
 /-- `(m+1-iη)_n/(2m+2)_n → 2^{-n}` as `m → ∞`. -/
-private lemma tendsto_poch_div_poch_atTop (η : ℝ) (n : ℕ) :
-    Tendsto (fun m : ℕ => poch ((m : ℂ) + 1 - I * η) n / poch (2 * (m : ℂ) + 2) n) atTop
+private lemma tendsto_pochhammer_div_pochhammer_atTop (η : ℝ) (n : ℕ) :
+    Tendsto (fun m : ℕ => pochhammer ((m : ℂ) + 1 - I * η) n / pochhammer (2 * (m : ℂ) + 2) n) atTop
       (𝓝 ((1 / 2) ^ n)) := by
   induction n with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ n ih =>
     rw [pow_succ]
     refine (ih.mul (tendsto_ratio_factor_one_half η n)).congr fun m => ?_
-    rw [poch_succ, poch_succ, mul_div_mul_comm]
+    rw [pochhammer_succ, pochhammer_succ, mul_div_mul_comm]
 
 /-- `|(m+1-iη)_n/(2m+2)_n| ≤ 1` when `|η| ≤ m`. -/
-private lemma norm_poch_div_poch_le_one (η : ℝ) (n : ℕ) {m : ℕ} (hm : |η| ≤ m) :
-    ‖poch ((m : ℂ) + 1 - I * η) n / poch (2 * (m : ℂ) + 2) n‖ ≤ 1 := by
+private lemma norm_pochhammer_div_pochhammer_le_one (η : ℝ) (n : ℕ) {m : ℕ} (hm : |η| ≤ m) :
+    ‖pochhammer ((m : ℂ) + 1 - I * η) n / pochhammer (2 * (m : ℂ) + 2) n‖ ≤ 1 := by
   induction n with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ n ih =>
-    rw [poch_succ, poch_succ, mul_div_mul_comm, norm_mul]
+    rw [pochhammer_succ, pochhammer_succ, mul_div_mul_comm, norm_mul]
     have := norm_ratio_factor_le_one η n hm
-    nlinarith [norm_nonneg (poch ((m : ℂ) + 1 - I * η) n / poch (2 * (m : ℂ) + 2) n)]
+    nlinarith [norm_nonneg (pochhammer ((m : ℂ) + 1 - I * η) n / pochhammer (2 * (m : ℂ) + 2) n)]
 
 /-- `M(m+1-iη, 2m+2, z) → e^{z/2}` as `m → ∞`. -/
 private lemma tendsto_kummerM_atTop_exp_div_two (η : ℝ) (z : ℂ) :
@@ -623,7 +623,7 @@ private lemma tendsto_kummerM_atTop_exp_div_two (η : ℝ) (z : ℂ) :
   unfold kummerM
   refine tendsto_tsum_of_dominated_convergence (bound := fun n => ‖z‖ ^ n / n !)
     (Real.summable_pow_div_factorial ‖z‖) (fun n => ?_) ?_
-  · have := ((tendsto_poch_div_poch_atTop η n).div_const (n ! : ℂ)).mul_const (z ^ n)
+  · have := ((tendsto_pochhammer_div_pochhammer_atTop η n).div_const (n ! : ℂ)).mul_const (z ^ n)
     have he : (1 / 2 : ℂ) ^ n / (n ! : ℂ) * z ^ n = (z / 2) ^ n / (n ! : ℂ) := by
       rw [div_pow, div_pow, one_pow]; ring
     rw [he] at this
@@ -631,9 +631,9 @@ private lemma tendsto_kummerM_atTop_exp_div_two (η : ℝ) (z : ℂ) :
     field_simp
   · filter_upwards [eventually_ge_atTop (Nat.ceil |η|)] with m hm n
     have hm' : |η| ≤ m := (Nat.le_ceil _).trans (by exact_mod_cast hm)
-    have hb := norm_poch_div_poch_le_one η n hm'
-    rw [show poch ((m : ℂ) + 1 - I * η) n / (poch (2 * (m : ℂ) + 2) n * n !) * z ^ n =
-      poch ((m : ℂ) + 1 - I * η) n / poch (2 * (m : ℂ) + 2) n * (z ^ n / n !) by ring,
+    have hb := norm_pochhammer_div_pochhammer_le_one η n hm'
+    rw [show pochhammer ((m : ℂ) + 1 - I * η) n / (pochhammer (2 * (m : ℂ) + 2) n * n !) * z ^ n =
+      pochhammer ((m : ℂ) + 1 - I * η) n / pochhammer (2 * (m : ℂ) + 2) n * (z ^ n / n !) by ring,
       norm_mul]
     have : ‖z ^ n / (n ! : ℂ)‖ = ‖z‖ ^ n / n ! := by
       rw [norm_div, norm_pow, Complex.norm_natCast]
@@ -833,7 +833,8 @@ theorem coulombF_logDeriv_contFrac (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < 
   have ha : ∀ k, 1 ≤ k → -(recurrenceR (ℓ + 1 + k) η ^ 2) ≠ 0 := fun k _ =>
     neg_ne_zero.mpr (pow_ne_zero _ (recurrenceR_pos _ η).ne')
   unfold DLMF.Core.HasContinuedFraction
-  rw [funext (IncompleteGammaFractions.cfTail_ofReal (fun _ => rfl) (fun _ => rfl) ha)]
+  rw [funext (IncompleteGammaFractions.continuedFractionTail_ofReal (fun _ => rfl)
+      (fun _ => rfl) ha)]
   exact (continuous_ofReal.tendsto _).comp (tendsto_convs_deriv_coulombF_div_coulombF ℓ η hρ hF)
 
 /-- **DLMF 33.8.2–33.8.3**, upper sign: `H^+_ℓ'/H^+_ℓ = c + (i/ρ) ab/(2(ρ-η+i) +

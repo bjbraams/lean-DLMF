@@ -481,7 +481,7 @@ theorem airyBi_real_error {x : ℝ} (hx : 0 < x) {N : ℕ} :
 /-- For `x > 0`, `Ai(x) ≤ e^{-ζ}/(2√π x^{1/4})` (DLMF 9.7.15). -/
 @[dlmf 9.7.E15]
 theorem airyAi_bound {x : ℝ} (hx : 0 < x) :
-    airyAiReal x ≤ Real.exp (-airyZeta x) / (2 * Real.sqrt π * x ^ (1 / 4 : ℝ)) := by
+    DLMF.Airy.Real.airyAi x ≤ Real.exp (-airyZeta x) / (2 * Real.sqrt π * x ^ (1 / 4 : ℝ)) := by
   have h := (RealRemainders.pack (a := 5 / 6) (β := -1 / 6) (N := 0) (by norm_num) (by norm_num) hx
     (f := fun z => airyAi z / airyPrefactor .ai z) (RealRemainders.ai_representation hx)
         RotatedExpansions.coeff_ai).1
@@ -489,7 +489,7 @@ theorem airyAi_bound {x : ℝ} (hx : 0 < x) :
     airyExpansionCoeff, RealRemainders.airyU_zero, ofReal_one, mul_one, norm_one] at h
   have hp : airyPrefactor .ai x ≠ 0 :=
     RotatedExpansions.prefactor_ne_zero .ai (ofReal_ne_zero.mpr hx.ne')
-  calc airyAiReal x ≤ ‖airyAi x‖ := Complex.re_le_norm _
+  calc DLMF.Airy.Real.airyAi x ≤ ‖airyAi x‖ := Complex.re_le_norm _
     _ = ‖airyPrefactor .ai x‖ * ‖airyAi x / airyPrefactor .ai x‖ := by
       rw [← norm_mul, mul_div_cancel₀ _ hp]
     _ ≤ ‖airyPrefactor .ai x‖ * 1 := by gcongr
@@ -498,7 +498,7 @@ theorem airyAi_bound {x : ℝ} (hx : 0 < x) :
 /-- For `x > 0`, `|Ai'(x)| ≤ x^{1/4} e^{-ζ}/(2√π) (1 + 7/(72ζ))` (DLMF 9.7.15). -/
 @[dlmf 9.7.E15]
 theorem airyAiDeriv_bound {x : ℝ} (hx : 0 < x) :
-    |airyAiDerivReal x| ≤ x ^ (1 / 4 : ℝ) * Real.exp (-airyZeta x) / (2 * Real.sqrt π) *
+    |DLMF.Airy.Real.airyAiDeriv x| ≤ x ^ (1 / 4 : ℝ) * Real.exp (-airyZeta x) / (2 * Real.sqrt π) *
         (1 + 7 / (72 * airyZeta x)) := by
   have h := (RealRemainders.pack (a := 7 / 6) (β := 1 / 6) (N := 1) (by norm_num) (by norm_num) hx
     (f := fun z => airyAiDeriv z / airyPrefactor .aiDeriv z)
@@ -523,7 +523,7 @@ theorem airyAiDeriv_bound {x : ℝ} (hx : 0 < x) :
       _ ≤ ‖airyAiDeriv x / airyPrefactor .aiDeriv x - 1‖ + ‖(1 : ℂ)‖ := norm_add_le _ _
       _ ≤ 7 / (72 * airyZeta x) + 1 := by rw [norm_one]; gcongr
       _ = _ := by ring
-  calc |airyAiDerivReal x| ≤ ‖airyAiDeriv x‖ := Complex.abs_re_le_norm _
+  calc |DLMF.Airy.Real.airyAiDeriv x| ≤ ‖airyAiDeriv x‖ := Complex.abs_re_le_norm _
     _ = ‖airyPrefactor .aiDeriv x‖ * ‖airyAiDeriv x / airyPrefactor .aiDeriv x‖ := by
       rw [← norm_mul, mul_div_cancel₀ _ hp]
     _ ≤ ‖airyPrefactor .aiDeriv x‖ * (1 + 7 / (72 * airyZeta x)) := by gcongr
@@ -532,7 +532,7 @@ theorem airyAiDeriv_bound {x : ℝ} (hx : 0 < x) :
 /-- For `x > 0`, `Bi(x) ≤ e^{ζ}/(√π x^{1/4}) (1 + (χ(7/6) + 1) · 5/(72ζ))` (DLMF 9.7.16). -/
 @[dlmf 9.7.E16]
 theorem airyBi_bound {x : ℝ} (hx : 0 < x) :
-    airyBiReal x ≤ Real.exp (airyZeta x) / (Real.sqrt π * x ^ (1 / 4 : ℝ)) *
+    DLMF.Airy.Real.airyBi x ≤ Real.exp (airyZeta x) / (Real.sqrt π * x ^ (1 / 4 : ℝ)) *
         (1 + (airyChi (7 / 6) + 1) * 5 / (72 * airyZeta x)) := by
   have h := airyBi_real_error hx (N := 1)
   have hz := airyZeta_pos hx
@@ -555,7 +555,7 @@ theorem airyBi_bound {x : ℝ} (hx : 0 < x) :
     calc ‖1 + airyRemainder .bi 1 x‖ ≤ ‖(1 : ℂ)‖ + ‖airyRemainder .bi 1 x‖ := norm_add_le _ _
       _ ≤ 1 + (airyChi (7 / 6) + 1) * (5 / (72 * airyZeta x)) := by rw [norm_one]; gcongr
       _ = _ := by ring
-  calc airyBiReal x ≤ ‖airyBi x‖ := Complex.re_le_norm _
+  calc DLMF.Airy.Real.airyBi x ≤ ‖airyBi x‖ := Complex.re_le_norm _
     _ = ‖airyPrefactor .bi x‖ * ‖airyBi x / airyPrefactor .bi x‖ := by
       rw [← norm_mul, mul_div_cancel₀ _ hp]
     _ ≤ ‖airyPrefactor .bi x‖ * (1 + (airyChi (7 / 6) + 1) * 5 / (72 * airyZeta x)) := by gcongr
@@ -637,13 +637,14 @@ theorem DerivativeRemainders.Gamma_third : (5/2:ℝ) ≤ Real.Gamma (1/3) := by
 
 /-- The Airy energy on the positive axis is bounded by its initial value. -/
 theorem DerivativeRemainders.energy {x : ℝ} (hx : 0 ≤ x) :
-    airyBiDerivReal x^2 ≤ x*airyBiReal x^2 + airyBiDerivReal 0^2 := by
-  have hf (t : ℝ) : HasDerivAt airyBiReal (airyBiDerivReal t) t :=
+    DLMF.Airy.Real.airyBiDeriv x^2 ≤ x*DLMF.Airy.Real.airyBi x^2 +
+        DLMF.Airy.Real.airyBiDeriv 0^2 := by
+  have hf (t : ℝ) : HasDerivAt DLMF.Airy.Real.airyBi (DLMF.Airy.Real.airyBiDeriv t) t :=
     (hasDerivAt_airyBi t).real_of_complex
-  have hg (t : ℝ) : HasDerivAt airyBiDerivReal (t*airyBiReal t) t := by
-    exact ((hasDerivAt_airyBiDeriv t).real_of_complex).congr_deriv (by simp [airyBiReal])
-  have hd (t : ℝ) : HasDerivAt (fun t => airyBiDerivReal t^2-t*airyBiReal t^2)
-      (-airyBiReal t^2) t := by
+  have hg (t : ℝ) : HasDerivAt DLMF.Airy.Real.airyBiDeriv (t*DLMF.Airy.Real.airyBi t) t := by
+    exact ((hasDerivAt_airyBiDeriv t).real_of_complex).congr_deriv (by simp [DLMF.Airy.Real.airyBi])
+  have hd (t : ℝ) : HasDerivAt (fun t => DLMF.Airy.Real.airyBiDeriv t^2-t*DLMF.Airy.Real.airyBi t^2)
+      (-DLMF.Airy.Real.airyBi t^2) t := by
     convert ((hg t).pow 2).sub ((hasDerivAt_id t).mul ((hf t).pow 2)) using 1
     · funext u; rfl
     · simp only [Pi.pow_apply, id_eq]; ring
@@ -654,7 +655,7 @@ theorem DerivativeRemainders.energy {x : ℝ} (hx : 0 ≤ x) :
   linarith
 
 /-- A coarse bound on the initial derivative. -/
-theorem DerivativeRemainders.initial_sq : airyBiDerivReal 0^2 ≤ (52/225:ℝ) := by
+theorem DerivativeRemainders.initial_sq : DLMF.Airy.Real.airyBiDeriv 0^2 ≤ (52/225:ℝ) := by
   have hG := DerivativeRemainders.Gamma_third
   have hG0 := Real.Gamma_pos_of_pos (show (0:ℝ)<1/3 by norm_num)
   have hr : ((3:ℝ)^(1/3:ℝ))^3 = 3 := by
@@ -666,8 +667,8 @@ theorem DerivativeRemainders.initial_sq : airyBiDerivReal 0^2 ≤ (52/225:ℝ) :
     rw [hr]; norm_num
   have hq : ((3:ℝ)^(1/6:ℝ))^2 = (3:ℝ)^(1/3:ℝ) := by
     rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]; congr 1; norm_num
-  have hz : airyBiDerivReal 0 = (3:ℝ)^(1/6:ℝ)/Real.Gamma (1/3) := by
-    rw [airyBiDerivReal, ofReal_zero, airyBiDeriv_zero,
+  have hz : DLMF.Airy.Real.airyBiDeriv 0 = (3:ℝ)^(1/6:ℝ)/Real.Gamma (1/3) := by
+    rw [DLMF.Airy.Real.airyBiDeriv, ofReal_zero, airyBiDeriv_zero,
       show (1/3:ℂ)=((1/3:ℝ):ℂ) by norm_num, Complex.Gamma_ofReal, ← ofReal_div, ofReal_re]
   rw [hz, div_pow, hq, div_le_iff₀ (pow_pos hG0 2)]
   nlinarith
@@ -766,7 +767,7 @@ theorem DerivativeRemainders.envelope_gap {x : ℝ} (hx : 0 < x) :
 /-- The real-axis Bi derivative bound, DLMF 9.7.16. -/
 @[dlmf 9.7.E16]
 theorem airyBiDeriv_bound {x : ℝ} (hx : 0 < x) :
-    airyBiDerivReal x ≤ x^(1/4:ℝ)*Real.exp (airyZeta x)/Real.sqrt π *
+    DLMF.Airy.Real.airyBiDeriv x ≤ x^(1/4:ℝ)*Real.exp (airyZeta x)/Real.sqrt π *
       (1+(π/2+1)*7/(72*airyZeta x)) := by
   have hz := airyZeta_pos hx
   have hπ := Real.pi_pos
@@ -782,7 +783,7 @@ theorem airyBiDeriv_bound {x : ℝ} (hx : 0 < x) :
     (1+(85/432:ℝ)/airyZeta x)
   have hP0 : 0 < P := by dsimp [P]; positivity
   have hB0 : 0 < B := by dsimp [B]; positivity
-  have hB : airyBiReal x ≤ B := by
+  have hB : DLMF.Airy.Real.airyBi x ≤ B := by
     have h := airyBi_bound hx
     have he : (airyChi (7/6)+1)*5/(72*airyZeta x) =
         ((airyChi (7/6)+1)*5/72)/airyZeta x := by ring
@@ -791,10 +792,10 @@ theorem airyBiDeriv_bound {x : ℝ} (hx : 0 < x) :
     dsimp only [B]
     apply mul_le_mul_of_nonneg_left _ (by positivity)
     linarith [div_le_div_of_nonneg_right hc hz.le]
-  have hBi0 : 0 ≤ airyBiReal x := by
+  have hBi0 : 0 ≤ DLMF.Airy.Real.airyBi x := by
     obtain ⟨r, hr, he⟩ := airyBi_ofReal_pos hx.le
-    simpa [airyBiReal, he] using hr.le
-  have hBiSq : airyBiReal x^2 ≤ B^2 := by nlinarith
+    simpa [DLMF.Airy.Real.airyBi, he] using hr.le
+  have hBiSq : DLMF.Airy.Real.airyBi x^2 ≤ B^2 := by nlinarith
   have hq4 : (x^(1/4:ℝ))^4=x := by
     calc (x^(1/4:ℝ))^4 = ((x^(1/4:ℝ))^2)^2 := by ring
       _ = x := by rw [(DerivativeRemainders.power_data hx).2, Real.sq_sqrt hx.le]
@@ -813,14 +814,14 @@ theorem airyBiDeriv_bound {x : ℝ} (hx : 0 < x) :
     ring
   have hgap := DerivativeRemainders.envelope_gap hx
   rw [← hPsq] at hgap
-  have hsquares : airyBiDerivReal x^2 ≤ (P*(1+(287/1152:ℝ)/airyZeta x))^2 := by
+  have hsquares : DLMF.Airy.Real.airyBiDeriv x^2 ≤ (P*(1+(287/1152:ℝ)/airyZeta x))^2 := by
     have henergy := DerivativeRemainders.energy hx.le
     have hzero := DerivativeRemainders.initial_sq
     have hBB := mul_le_mul_of_nonneg_left hBiSq hx.le
     rw [hBsq] at hBB
     nlinarith
   have hR0 : 0 ≤ P*(1+(287/1152:ℝ)/airyZeta x) := by positivity
-  have hresult : airyBiDerivReal x ≤ P*(1+(287/1152:ℝ)/airyZeta x) := by nlinarith
+  have hresult : DLMF.Airy.Real.airyBiDeriv x ≤ P*(1+(287/1152:ℝ)/airyZeta x) := by nlinarith
   refine hresult.trans ?_
   change P*(1+(287/1152:ℝ)/airyZeta x) ≤ P*(1+(π/2+1)*7/(72*airyZeta x))
   have he : (π/2+1)*7/(72*airyZeta x) = ((π/2+1)*7/72)/airyZeta x := by ring

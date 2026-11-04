@@ -200,15 +200,18 @@ theorem exists_coefficients (x y : ℂ) :
 
 /-- The products of Hermite polynomials, with their exponential generating normalization. -/
 def coeff (x y : ℂ) (n : ℕ) : ℂ :=
-  (aeval x (hermitePolyH n) : ℂ) * aeval y (hermitePolyH n) / (2 ^ n * (n.factorial : ℂ))
+  (aeval x (hermitePolynomialH n) : ℂ) * aeval y (hermitePolynomialH n) /
+      (2 ^ n * (n.factorial : ℂ))
 
 /-- The Hermite three-term recurrence implies the Mehler coefficient recurrence. -/
 theorem rec_coeff (x y : ℂ) (n : ℕ) : Rec x y (coeff x y) n := by
   rcases n with _ | _ | _ | n
-  · norm_num [Rec, coeff, hermitePolyH_zero, hermitePolyH_one, map_ofNat]; ring
-  · norm_num [Rec, coeff, aeval_hermitePolyH_succ_succ, hermitePolyH_zero, hermitePolyH_one,
+  · norm_num [Rec, coeff, hermitePolynomialH_zero, hermitePolynomialH_one, map_ofNat]; ring
+  · norm_num [Rec, coeff, aeval_hermitePolynomialH_succ_succ, hermitePolynomialH_zero,
+        hermitePolynomialH_one,
         map_ofNat]; ring
-  · norm_num [Rec, coeff, aeval_hermitePolyH_succ_succ, hermitePolyH_zero, hermitePolyH_one,
+  · norm_num [Rec, coeff, aeval_hermitePolynomialH_succ_succ, hermitePolynomialH_zero,
+        hermitePolynomialH_one,
         map_ofNat]; ring
   · simp only [Rec, show 1 ≤ n + 3 by omega, show 2 ≤ n + 3 by omega,
       show 3 ≤ n + 3 by omega, ite_true, show n + 3 - 1 = n + 2 by omega,
@@ -224,7 +227,7 @@ theorem rec_coeff (x y : ℂ) (n : ℕ) : Rec x y (coeff x y) n := by
     have h3 : (n + 3 : ℂ) ≠ 0 := by exact_mod_cast (show n + 3 ≠ 0 by omega)
     have h4 : (n + 4 : ℂ) ≠ 0 := by exact_mod_cast (show n + 4 ≠ 0 by omega)
     field_simp [h1, h2, h3, h4, Nat.cast_ne_zero.mpr n.factorial_ne_zero]
-    simp only [aeval_hermitePolyH_succ_succ]
+    simp only [aeval_hermitePolynomialH_succ_succ]
     push_cast
     ring
 
@@ -233,7 +236,7 @@ theorem hasSum_kernel (x y : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     HasSum (fun n => coeff x y n * z ^ n) (kernel x y z) := by
   obtain ⟨c, hc0, hc, hs⟩ := exists_coefficients x y
   have he : c = coeff x y :=
-      rec_unique (by simpa [coeff, hermitePolyH_zero] using hc0) hc (rec_coeff x y)
+      rec_unique (by simpa [coeff, hermitePolynomialH_zero] using hc0) hc (rec_coeff x y)
   rw [← he]
   exact hs z hz
 

@@ -20,26 +20,26 @@ public import Carlson.TwoVariable.RPolynomial.Hypergeometric
 * `heunLocal_one_eq_hypergeometric`, `heunLocal_eps_zero_eq_hypergeometric`: the reductions
   31.7.1, for every `z` (the Maclaurin coefficients of `Hl` are the hypergeometric
   coefficients).
-* `tendsto_heunLocal_zero_eq_hypergeometric`, `hypergeometric_isHeunSolOn_zero`: two readings of
-  the degenerate middle member `Hl(0, 0; α, β, γ, α + β + 1 - γ; z)` of 31.7.1, as the limit
+* `tendsto_heunLocal_zero_eq_hypergeometric`, `hypergeometric_isHeunSolutionOn_zero`: two readings
+  of the degenerate middle member `Hl(0, 0; α, β, γ, α + β + 1 - γ; z)` of 31.7.1, as the limit
   `a → 0` along `q = aαβ` and as the exponent-`0` solution of Heun's equation with `a = q = 0`.
 * `heunLocal_two_eq_hypergeometric`, `heunLocal_four_eq_hypergeometric`,
   `heunLocal_cubic_eq_hypergeometric`: the quadratic and cubic reductions 31.7.2–31.7.4, where
   both series converge.
-* `heunHypP5_P6_riemann`: the P-symbol property 31.11.2 of `P_j^5`, `P_j^6` (Riemann's equation
-  with singularities `0, 1, ∞`, the project's `riemannNormalOperator`).
-* `heunHyp_typeI_add`, `heunHyp_typeII_add`, `heunHypM_neg_one_eq_zero`: the parameter
+* `heunHypergeometricP5_P6_riemann`: the P-symbol property 31.11.2 of `P_j^5`, `P_j^6` (Riemann's
+  equation with singularities `0, 1, ∞`, the project's `riemannNormalOperator`).
+* `heunHyp_typeI_add`, `heunHyp_typeII_add`, `heunHypergeometricM_neg_one_eq_zero`: the parameter
   conditions 31.11.3, 31.11.9–31.11.11, 31.11.14–31.11.17.
 * `hasSum_heunHyp_typeI`, `hasSum_heunHyp_typeI'`: Type I expansions 31.11.12 of the solutions
   31.3.10 and 31.3.11.
-* `tendsto_heunHypCFApprox`: the continued fraction 31.11.13.
-* `heunHypP6_typeII_polynomial`, `hasSum_heunHyp_typeII`: the Type II expansion of
+* `tendsto_heunHypergeometricContinuedFractionApprox`: the continued fraction 31.11.13.
+* `heunHypergeometricP6_typeII_polynomial`, `hasSum_heunHyp_typeII`: the Type II expansion of
   `(0,1)`-Heun functions for the pair 31.11.14.
 
 ## Implementation notes
 
 The middle member of 31.7.1 is degenerate (the recurrence divides by `a`), hence the two
-readings. The domain of 31.7.4 has three components (the preimage of the disk under the cube)
+readings. The domain of 31.7.4 has three components (the preimage of the disk under the unitCube)
 and the identity holds only on the one containing `0`. The coefficients `K_j`, `M_j` follow the
 corrections of DLMF 1.1.7.
 
@@ -95,7 +95,7 @@ private lemma ordinaryHypergeometricCoefficient_succ_mul (hγ : ∀ n : ℕ, γ 
 `j`, the Maclaurin coefficients of `Hl` are the hypergeometric coefficients. -/
 private lemma heunLocalCoeff_eq_ordinaryHypergeometricCoefficient (ha : a ≠ 0)
     (hγ : ∀ n : ℕ, γ ≠ -(n : ℂ)) (hq : q = a * α * β)
-    (hQ : ∀ j : ℕ, heunRecQ a α β γ δ (j + 1) + q - ((j : ℂ) + 1) * ((j : ℂ) + γ) =
+    (hQ : ∀ j : ℕ, heunRecurrenceQ a α β γ δ (j + 1) + q - ((j : ℂ) + 1) * ((j : ℂ) + γ) =
       a * ((j : ℂ) + 1 + α) * ((j : ℂ) + 1 + β)) (j : ℕ) :
     heunLocalCoeff a q α β γ δ j = ordinaryHypergeometricCoefficient α β γ j := by
   induction j using Nat.strong_induction_on with
@@ -110,8 +110,8 @@ private lemma heunLocalCoeff_eq_ordinaryHypergeometricCoefficient (ha : a ≠ 0)
       field_simp
     | k + 2, ih =>
       rw [heunLocalCoeff, ih (k + 1) (by omega), ih k (by omega)]
-      have hR : heunRecR a γ (k + 1) ≠ 0 := by
-        unfold heunRecR
+      have hR : heunRecurrenceR a γ (k + 1) ≠ 0 := by
+        unfold heunRecurrenceR
         refine mul_ne_zero (mul_ne_zero ha (by exact_mod_cast (k + 1).succ_ne_zero)) ?_
         intro h
         push_cast at h
@@ -123,8 +123,8 @@ private lemma heunLocalCoeff_eq_ordinaryHypergeometricCoefficient (ha : a ≠ 0)
       generalize ordinaryHypergeometricCoefficient α β γ (k + 1 + 1) = F2 at e2 ⊢
       generalize ordinaryHypergeometricCoefficient α β γ (k + 1) = F1 at e1 e2 ⊢
       generalize ordinaryHypergeometricCoefficient α β γ k = F0 at e1 ⊢
-      generalize heunRecQ a α β γ δ (k + 1) = Q at hk ⊢
-      unfold heunRecP heunRecR
+      generalize heunRecurrenceQ a α β γ δ (k + 1) = Q at hk ⊢
+      unfold heunRecurrenceP heunRecurrenceR
       push_cast at e2 ⊢
       linear_combination F1 * hk + e1 - a * e2
 
@@ -136,7 +136,7 @@ theorem heunLocal_one_eq_hypergeometric (hγ : ∀ n : ℕ, γ ≠ -(n : ℂ)) (
   rw [heunLocal, ordinaryHypergeometric_eq_tsum]
   refine tsum_congr fun j => ?_
   rw [heunLocalCoeff_eq_ordinaryHypergeometricCoefficient one_ne_zero hγ (by ring) (fun j => by
-    unfold heunRecQ heunEps; push_cast; ring) j, smul_eq_mul]
+    unfold heunRecurrenceQ heunEpsilon; push_cast; ring) j, smul_eq_mul]
 
 /-- DLMF 31.7.1 (third equality): `₂F₁(α, β; γ; z) = Hl(a, aαβ; α, β, γ, α + β + 1 - γ; z)` for
 `a ≠ 0`, `γ ∉ {0, -1, …}` (then `ε = 0` and the singularity at `a` disappears). Stronger than
@@ -148,7 +148,7 @@ theorem heunLocal_eps_zero_eq_hypergeometric (ha : a ≠ 0) (hγ : ∀ n : ℕ, 
   rw [heunLocal, ordinaryHypergeometric_eq_tsum]
   refine tsum_congr fun j => ?_
   rw [heunLocalCoeff_eq_ordinaryHypergeometricCoefficient ha hγ rfl (fun j => by
-    unfold heunRecQ heunEps; push_cast; ring) j, smul_eq_mul]
+    unfold heunRecurrenceQ heunEpsilon; push_cast; ring) j, smul_eq_mul]
 
 /-- DLMF 31.7.1 (second equality, first reading): `Hl(0, 0; α, β, γ, α + β + 1 - γ; z)` as the
 limit `a → 0` of `Hl(a, aαβ; α, β, γ, α + β + 1 - γ; z)` is `₂F₁(α, β; γ; z)`. -/
@@ -164,10 +164,10 @@ theorem tendsto_heunLocal_zero_eq_hypergeometric (hγ : ∀ n : ℕ, γ ≠ -(n 
 `δ = α + β + 1 - γ`, `ε = 0`, Heun's equation is Gauss's hypergeometric equation and
 `₂F₁(α, β; γ; ·)` is its solution on the punctured unit disk. -/
 @[dlmf 31.7.E1]
-theorem hypergeometric_isHeunSolOn_zero (hγ : ∀ n : ℕ, γ ≠ -(n : ℂ)) :
-    IsHeunSolOn 0 0 α β γ (α + β + 1 - γ) 0 (ordinaryHypergeometric α β γ)
+theorem hypergeometric_isHeunSolutionOn_zero (hγ : ∀ n : ℕ, γ ≠ -(n : ℂ)) :
+    IsHeunSolutionOn 0 0 α β γ (α + β + 1 - γ) 0 (ordinaryHypergeometric α β γ)
       (Metric.ball 0 1 \ {0}) := by
-  refine ⟨fun z hz => ?_, fun z hz => ?_⟩
+  refine IsLinearODE2On.mk (fun z hz => ?_) (fun z hz => ?_)
   · exact (DLMF.Hypergeometric.analyticAt_ordinaryHypergeometric
       (mem_ball_zero_iff.1 hz.1)).differentiableAt
   · obtain ⟨hz1, hz0⟩ := hz
@@ -275,7 +275,7 @@ theorem heunLocal_two_eq_hypergeometric (hγ : ∀ n : ℕ, γ ≠ -(n : ℂ)) {
         refine (norm_mul_two_sub_le ht ht1 hy.1.le).trans_lt ?_
         rw [← hψeq]; exact hy.2
     exact (hstar.isPathConnected h0D).isConnected.isPreconnected
-  have hHH := heunLocal_isHeunSolOn (a := 2) (q := α * β) (α := α) (β := β) (δ := δ)
+  have hHH := heunLocal_isHeunSolutionOn (a := 2) (q := α * β) (α := α) (β := β) (δ := δ)
     two_ne_zero hγ
   rw [hrad] at hHH
   have hHl : AnalyticOnNhd ℂ (heunLocal 2 (α * β) α β γ δ) D := fun u hu =>
@@ -285,8 +285,8 @@ theorem heunLocal_two_eq_hypergeometric (hγ : ∀ n : ℕ, γ ≠ -(n : ℂ)) {
     have h2 : AnalyticAt ℂ F (ψ u) :=
       DLMF.Hypergeometric.analyticAt_ordinaryHypergeometric hu.2
     exact AnalyticAt.comp (g := F) (f := ψ) h2 h1
-  have hFsol := hypergeometric_isHeunSolOn_zero (α := α / 2) (β := β / 2) hγ
-  have hε : heunEps α β γ δ = γ := by simp only [heunEps, hδ]; ring
+  have hFsol := hypergeometric_isHeunSolutionOn_zero (α := α / 2) (β := β / 2) hγ
+  have hε : heunEpsilon α β γ δ = γ := by simp only [heunEpsilon, hδ]; ring
   have hfacts : ∀ u ∈ D \ {0}, u ≠ 0 ∧ u - 1 ≠ 0 ∧ u - 2 ≠ 0 ∧ 2 - u ≠ 0 ∧ 1 - u ≠ 0 := by
     rintro u ⟨hu, hu0⟩
     have h1 : ‖u‖ < 1 := hu.1
@@ -296,7 +296,7 @@ theorem heunLocal_two_eq_hypergeometric (hγ : ∀ n : ℕ, γ ≠ -(n : ℂ)) {
       fun h => hne 1 (by simp) ?_⟩
     · linear_combination -h
     · linear_combination -h
-  have hsol : IsHeunSolOn 2 (α * β) α β γ δ (heunEps α β γ δ) G (D \ {0}) := by
+  have hsol : IsHeunSolutionOn 2 (α * β) α β γ δ (heunEpsilon α β γ δ) G (D \ {0}) := by
     rw [hε]
     refine isLinearODE2On_comp («φ» := ψ) (φ₁ := fun u => 2 * (1 - u)) (φ₂ := fun _ => -2)
       (hDopen.sdiff isClosed_singleton) (fun u _ => ?_) (fun u _ => ?_) (fun u hu => ?_)
@@ -381,7 +381,7 @@ theorem heunLocal_four_eq_hypergeometric {z : ℂ} (hz : ‖z‖ < 1)
         exact (div_le_div_of_nonneg_right (norm_mul_three_sub_sq_le ht ht1 hy.1.le)
           (norm_nonneg _)).trans_lt h2
     exact (hstar.isPathConnected h0D).isConnected.isPreconnected
-  have hHH := heunLocal_isHeunSolOn (a := 4) (q := α * β) (α := α) (β := β) (δ := δ)
+  have hHH := heunLocal_isHeunSolutionOn (a := 4) (q := α * β) (α := α) (β := β) (δ := δ)
     h4c hγ
   rw [hrad] at hHH
   have hHl : AnalyticOnNhd ℂ (heunLocal 4 (α * β) α β (1 / 2) δ) D := fun u hu =>
@@ -391,8 +391,8 @@ theorem heunLocal_four_eq_hypergeometric {z : ℂ} (hz : ‖z‖ < 1)
     have h2 : AnalyticAt ℂ F (ψ u) :=
       DLMF.Hypergeometric.analyticAt_ordinaryHypergeometric hu.2
     exact AnalyticAt.comp (g := F) (f := ψ) h2 h1
-  have hFsol := hypergeometric_isHeunSolOn_zero (α := α / 3) (β := β / 3) hγ
-  have hε : heunEps α β (1 / 2) δ = (α + β) / 3 + 1 / 2 := by simp only [heunEps, hδ]; ring
+  have hFsol := hypergeometric_isHeunSolutionOn_zero (α := α / 3) (β := β / 3) hγ
+  have hε : heunEpsilon α β (1 / 2) δ = (α + β) / 3 + 1 / 2 := by simp only [heunEpsilon, hδ]; ring
   have hfacts : ∀ u ∈ D \ {0}, u ≠ 0 ∧ 1 - u ≠ 0 ∧ 3 - u ≠ 0 ∧ 4 - u ≠ 0 ∧ u - 1 ≠ 0 ∧
       u - 4 ≠ 0 := by
     rintro u ⟨hu, hu0⟩
@@ -404,7 +404,7 @@ theorem heunLocal_four_eq_hypergeometric {z : ℂ} (hz : ‖z‖ < 1)
     · linear_combination -h
     · linear_combination -h
     · linear_combination -h
-  have hsol : IsHeunSolOn 4 (α * β) α β (1 / 2) δ (heunEps α β (1 / 2) δ) G (D \ {0}) := by
+  have hsol : IsHeunSolutionOn 4 (α * β) α β (1 / 2) δ (heunEpsilon α β (1 / 2) δ) G (D \ {0}) := by
     rw [hε]
     refine isLinearODE2On_comp («φ» := ψ) (φ₁ := fun u => 3 / 4 * (1 - u) * (3 - u))
       (φ₂ := fun u => -3 + 3 / 2 * u)
@@ -597,7 +597,7 @@ theorem heunLocal_cubic_eq_hypergeometric
     have h' : ContinuousAt (fun x : ℂ => (1 - x ^ ((3 : ℂ)⁻¹)) / c) v :=
       (hca.const_sub 1).div_const c
     exact h'.continuousWithinAt
-  have hHH := heunLocal_isHeunSolOn (a := a) (q := α * β * b) (α := α) (β := β) (γ := g)
+  have hHH := heunLocal_isHeunSolutionOn (a := a) (q := α * β * b) (α := α) (β := β) (γ := g)
     (δ := g) ha0 hγ
   rw [hrad] at hHH
   have hHl : AnalyticOnNhd ℂ (heunLocal a (α * β * b) α β g g) D := fun u hu =>
@@ -607,8 +607,8 @@ theorem heunLocal_cubic_eq_hypergeometric
     have h2 : AnalyticAt ℂ F (ψ u) :=
       DLMF.Hypergeometric.analyticAt_ordinaryHypergeometric hu.2.1
     exact AnalyticAt.comp (g := F) (f := ψ) h2 h1
-  have hFsol := hypergeometric_isHeunSolOn_zero (α := α / 3) (β := β / 3) hγ
-  have hε : heunEps α β g g = g := by simp only [heunEps, hg]; ring
+  have hFsol := hypergeometric_isHeunSolutionOn_zero (α := α / 3) (β := β / 3) hγ
+  have hε : heunEpsilon α β g g = g := by simp only [heunEpsilon, hg]; ring
   have hfacts : ∀ u ∈ D \ {0}, u ≠ 0 ∧ u - 1 ≠ 0 ∧ u - a ≠ 0 ∧ 1 - c * u ≠ 0 := by
     rintro u ⟨hu, hu0⟩
     have h1 : ‖u‖ < 1 := hu.1
@@ -617,7 +617,7 @@ theorem heunLocal_cubic_eq_hypergeometric
     refine ⟨hu0, hne 1 (by simp), hne a hnorma.ge, fun h => ?_⟩
     have := hu.2.1
     rw [h] at this; norm_num at this
-  have hsol : IsHeunSolOn a (α * β * b) α β g g (heunEps α β g g) G (D \ {0}) := by
+  have hsol : IsHeunSolutionOn a (α * β * b) α β g g (heunEpsilon α β g g) G (D \ {0}) := by
     rw [hε]
     refine isLinearODE2On_comp («φ» := ψ) (φ₁ := fun u => 3 * c * (1 - c * u) ^ 2)
       (φ₂ := fun u => -6 * c ^ 2 * (1 - c * u))
@@ -702,9 +702,9 @@ theorem heunHyp_typeII_add :
 /-- DLMF 31.11.9 for Type I (§31.11(iii)): with `λ = α` or `λ = β` the coefficient `M_{-1}`
 vanishes, so `M_{-1}P_{-1} = 0`. -/
 @[dlmf 31.11.E9, dlmf 31.11.iii]
-theorem heunHypM_neg_one_eq_zero (μ : ℂ) :
-    heunHypM α β γ α μ (-1) = 0 ∧ heunHypM α β γ β μ (-1) = 0 := by
-  constructor <;> simp [heunHypM]
+theorem heunHypergeometricM_neg_one_eq_zero (μ : ℂ) :
+    heunHypergeometricM α β γ α μ (-1) = 0 ∧ heunHypergeometricM α β γ β μ (-1) = 0 := by
+  constructor <;> simp [heunHypergeometricM]
 
 /-- `₂F₁(a, b; 0; x) = 1` with Mathlib's junk convention: every term past the constant one
 divides by `(0)_n = 0`, which is taken to be `0`. -/
@@ -764,24 +764,24 @@ with these exponents (`riemannNormalOperator`), for `|z| > 1` off the branch cut
 Correction (2026-10-26): the hypotheses `h5`, `h6` that the third Gauss parameters
 `1 + λ - μ + 2j` and `1 - λ + μ - 2j` of `P_j^5`, `P_j^6` are not in `{0, -1, -2, …}` were
 added. Without them Mathlib's `₂F₁` takes its junk value there and the statement fails:
-`not_heunHypP5_P6_riemann_of_degenerate` (`γ = 1, δ = -1, λ = -1, μ = 0, j = 0, z = 2`, where
-`P_0^5(z) = z`). -/
+`not_heunHypergeometricP5_P6_riemann_of_degenerate` (`γ = 1, δ = -1, λ = -1, μ = 0, j = 0, z = 2`,
+where `P_0^5(z) = z`). -/
 @[dlmf 31.11.E2, dlmf 31.11.E3_1, dlmf 31.11.E3_2]
-theorem heunHypP5_P6_riemann {lam μ : ℂ} (h : lam + μ = γ + δ - 1) (j : ℕ)
+theorem heunHypergeometricP5_P6_riemann {lam μ : ℂ} (h : lam + μ = γ + δ - 1) (j : ℕ)
     (h5 : ∀ k : ℕ, 1 + lam - μ + 2 * j ≠ -(k : ℂ))
     (h6 : ∀ k : ℕ, 1 - lam + μ - 2 * j ≠ -(k : ℂ)) {z : ℂ}
     (hz : 1 < ‖z‖) (hz' : z ∈ slitPlane) :
     DLMF.Hypergeometric.riemannNormalOperator 0 (1 - γ) 0 (1 - δ) (lam + j) (μ - j)
-        (heunHypP5 γ lam μ j) z = 0 ∧
+        (heunHypergeometricP5 γ lam μ j) z = 0 ∧
       DLMF.Hypergeometric.riemannNormalOperator 0 (1 - γ) 0 (1 - δ) (lam + j) (μ - j)
-        (heunHypP6 γ lam μ j) z = 0 := by
+        (heunHypergeometricP6 γ lam μ j) z = 0 := by
   constructor
-  · have hP : heunHypP5 γ lam μ j = fun w =>
+  · have hP : heunHypergeometricP5 γ lam μ j = fun w =>
         ((ascPochhammer ℂ j).eval lam * (ascPochhammer ℂ j).eval (1 - γ + lam) /
           (ascPochhammer ℂ (2 * j)).eval (1 + lam - μ)) *
         DLMF.Hypergeometric.infinityFirst (lam + j) (μ - j) γ w := by
       funext w
-      simp only [heunHypP5, DLMF.Hypergeometric.infinityFirst]
+      simp only [heunHypergeometricP5, DLMF.Hypergeometric.infinityFirst]
       rw [show -lam - (j : ℂ) = -(lam + j) by ring,
         show 1 - γ + lam + (j : ℂ) = lam + j - γ + 1 by ring,
         show 1 + lam - μ + 2 * (j : ℂ) = lam + j - (μ - j) + 1 by ring]
@@ -791,12 +791,12 @@ theorem heunHypP5_P6_riemann {lam μ : ℂ} (h : lam + μ = γ + δ - 1) (j : �
       riemannNormalOperator_infinityFirst (fun k => by
         rw [show lam + (j : ℂ) - (μ - j) + 1 = 1 + lam - μ + 2 * j by ring]; exact h5 k)
         hz hz', mul_zero]
-  · have hP : heunHypP6 γ lam μ j = fun w =>
+  · have hP : heunHypergeometricP6 γ lam μ j = fun w =>
         ((ascPochhammer ℂ (2 * j)).eval (lam - μ) /
           ((ascPochhammer ℂ j).eval (1 - μ) * (ascPochhammer ℂ j).eval (γ - μ))) *
         DLMF.Hypergeometric.infinityFirst (μ - j) (lam + j) γ w := by
       funext w
-      simp only [heunHypP6, DLMF.Hypergeometric.infinityFirst]
+      simp only [heunHypergeometricP6, DLMF.Hypergeometric.infinityFirst]
       rw [show -μ + (j : ℂ) = -(μ - j) by ring,
         show 1 - γ + μ - (j : ℂ) = μ - j - γ + 1 by ring,
         show 1 - lam + μ - 2 * (j : ℂ) = μ - j - (lam + j) + 1 by ring]
@@ -807,20 +807,20 @@ theorem heunHypP5_P6_riemann {lam μ : ℂ} (h : lam + μ = γ + δ - 1) (j : �
         rw [show μ - (j : ℂ) - (lam + j) + 1 = 1 - lam + μ - 2 * j by ring]; exact h6 k)
         hz hz', mul_zero]
 
-/-- Without `h5`, `h6` the statement of DLMF 31.11.2 (`heunHypP5_P6_riemann`) fails in the
-degenerate case `γ = 1, δ = -1, λ = -1, μ = 0, j = 0`: the third Gauss parameter of `P_0^5` is
+/-- Without `h5`, `h6` the statement of DLMF 31.11.2 (`heunHypergeometricP5_P6_riemann`) fails in
+the degenerate case `γ = 1, δ = -1, λ = -1, μ = 0, j = 0`: the third Gauss parameter of `P_0^5` is
 `0`, Mathlib's `₂F₁(-1, -1; 0; 1/z)` is the junk value `1`, so `P_0^5(z) = z`, and the Riemann
 operator at `z = 2` is `-1/2 ≠ 0`. -/
-private lemma not_heunHypP5_P6_riemann_of_degenerate :
+private lemma not_heunHypergeometricP5_P6_riemann_of_degenerate :
     ¬ ∀ (γ δ lam μ : ℂ) (j : ℕ) (z : ℂ), lam + μ = γ + δ - 1 → 1 < ‖z‖ → z ∈ slitPlane →
       DLMF.Hypergeometric.riemannNormalOperator 0 (1 - γ) 0 (1 - δ) (lam + j) (μ - j)
-          (heunHypP5 γ lam μ j) z = 0 ∧
+          (heunHypergeometricP5 γ lam μ j) z = 0 ∧
         DLMF.Hypergeometric.riemannNormalOperator 0 (1 - γ) 0 (1 - δ) (lam + j) (μ - j)
-          (heunHypP6 γ lam μ j) z = 0 := by
+          (heunHypergeometricP6 γ lam μ j) z = 0 := by
   intro H
-  have hP : heunHypP5 1 (-1) 0 0 = fun w => w := by
+  have hP : heunHypergeometricP5 1 (-1) 0 0 = fun w => w := by
     funext w
-    simp [heunHypP5, ordinaryHypergeometric_c_zero]
+    simp [heunHypergeometricP5, ordinaryHypergeometric_c_zero]
   have h2 := (H 1 (-1) (-1) 0 0 2 (by norm_num) (by simp) (by simp)).1
   rw [hP] at h2
   simp only [DLMF.Hypergeometric.riemannNormalOperator, iteratedDeriv_succ, iteratedDeriv_zero,
@@ -836,7 +836,8 @@ by its series. -/
 theorem hasSum_heunHyp_typeI (ha : a ≠ 0) (hF : α + β + 1 = γ + δ + ε) {z : ℂ}
     (hz : ‖1 / z‖ < heunLocalRadius (1 / a)) (hz' : z ∈ slitPlane)
     (hE : ‖a‖ + ‖a - 1‖ < ‖z‖ + ‖z - 1‖) :
-    HasSum (fun j => heunHypCoeff a q α β γ α (β - ε) j * heunHypP5 γ α (β - ε) j z)
+    HasSum (fun j => heunHypergeometricCoeff a q α β γ α (β - ε) j *
+        heunHypergeometricP5 γ α (β - ε) j z)
       (z ^ (-α) * heunLocal (1 / a) (q / a - α * (β - ε) - α / a * (β - δ)) α (α - γ + 1)
         (α - β + 1) δ (1 / z)) := by
   sorry
@@ -847,7 +848,8 @@ at `∞` is `∑_j c_j P_j^5(z)` with `λ = β`, `μ = α - ε`. -/
 theorem hasSum_heunHyp_typeI' (ha : a ≠ 0) (hF : α + β + 1 = γ + δ + ε) {z : ℂ}
     (hz : ‖1 / z‖ < heunLocalRadius (1 / a)) (hz' : z ∈ slitPlane)
     (hE : ‖a‖ + ‖a - 1‖ < ‖z‖ + ‖z - 1‖) :
-    HasSum (fun j => heunHypCoeff a q α β γ β (α - ε) j * heunHypP5 γ β (α - ε) j z)
+    HasSum (fun j => heunHypergeometricCoeff a q α β γ β (α - ε) j *
+        heunHypergeometricP5 γ β (α - ε) j z)
       (z ^ (-β) * heunLocal (1 / a) (q / a - β * (α - ε) - β / a * (α - δ)) β (β - γ + 1)
         (β - α + 1) δ (1 / z)) := by
   sorry
@@ -858,24 +860,25 @@ accessory parameter `q` is a root of the continued fraction
 `L₀/M₀ - (K₁/M₁)/(L₁/M₁ - (K₂/M₂)/(L₂/M₂ - ⋯)) = 0` (with `λ = α`, `μ = β - ε`): the
 approximants tend to `0`. Hypotheses: no `K_j`, `M_j` and no coefficient `c_j` vanishes. -/
 @[dlmf 31.11.E13, dlmf 31.11.iii]
-theorem tendsto_heunHypCFApprox (ha : a ≠ 0) (hF : α + β + 1 = γ + δ + ε)
-    (hK : ∀ j : ℕ, heunHypK α β γ α (β - ε) j ≠ 0) (hM : ∀ j : ℕ, heunHypM α β γ α (β - ε) j ≠ 0)
-    (hc : ∀ j, heunHypCoeff a q α β γ α (β - ε) j ≠ 0)
+theorem tendsto_heunHypergeometricContinuedFractionApprox (ha : a ≠ 0) (hF : α + β + 1 = γ + δ + ε)
+    (hK : ∀ j : ℕ, heunHypergeometricK α β γ α (β - ε) j ≠ 0)
+        (hM : ∀ j : ℕ, heunHypergeometricM α β γ α (β - ε) j ≠ 0)
+    (hc : ∀ j, heunHypergeometricCoeff a q α β γ α (β - ε) j ≠ 0)
     (hq : ∃ (U : Set ℂ) (f : ℂ → ℂ) (R : ℝ), IsOpen U ∧ IsPreconnected U ∧ a ∈ U ∧
       {z | R < ‖z‖ ∧ z ∈ slitPlane} ⊆ U ∧ AnalyticOnNhd ℂ f U ∧
       ∀ z, R < ‖z‖ → z ∈ slitPlane → f z = z ^ (-α) *
         heunLocal (1 / a) (q / a - α * (β - ε) - α / a * (β - δ)) α (α - γ + 1) (α - β + 1) δ
           (1 / z)) :
-    Tendsto (heunHypCFApprox a q α β γ α (β - ε)) atTop (𝓝 0) := by
+    Tendsto (heunHypergeometricContinuedFractionApprox a q α β γ α (β - ε)) atTop (𝓝 0) := by
   sorry
 
 /-- DLMF §31.11(iv) with 31.11.14 (Type II): for `λ = γ + δ - 1`, `μ = 0` each `P_j^6` is a
 polynomial of degree at most `j` (a multiple of the Jacobi polynomial
 `P_j^{(γ-1, δ-1)}(1 - 2z)`). -/
 @[dlmf 31.11.iv, dlmf 31.11.E14]
-theorem heunHypP6_typeII_polynomial (j : ℕ) :
+theorem heunHypergeometricP6_typeII_polynomial (j : ℕ) :
     ∃ p : Polynomial ℂ, p.natDegree ≤ j ∧
-      ∀ z : ℂ, z ≠ 0 → heunHypP6 γ (γ + δ - 1) 0 j z = p.eval z := by
+      ∀ z : ℂ, z ≠ 0 → heunHypergeometricP6 γ (γ + δ - 1) 0 j z = p.eval z := by
   set K : ℂ := (ascPochhammer ℂ (2 * j)).eval (γ + δ - 1 - 0) /
       ((ascPochhammer ℂ j).eval (1 - 0) * (ascPochhammer ℂ j).eval (γ - 0)) with hK
   set b : ℂ := 1 - γ + 0 - j
@@ -888,7 +891,7 @@ theorem heunHypP6_typeII_polynomial (j : ℕ) :
     refine (Polynomial.natDegree_C_mul_le _ _).trans ?_
     rw [Polynomial.natDegree_X_pow]
     omega
-  · unfold heunHypP6
+  · unfold heunHypergeometricP6
     rw [show (0 : ℂ) - j = -(j : ℂ) by ring,
       Carlson.TwoVariable.ordinaryHypergeometric_neg_natCast, neg_zero, zero_add,
       Complex.cpow_natCast, Polynomial.eval_finsetSum, Finset.mul_sum]
@@ -908,7 +911,8 @@ sum is a constant multiple of the Heun function. Stated where `(0,1)Hf` is defin
 theorem hasSum_heunHyp_typeII (ha : 1 < ‖a‖) (hγ : ∀ n : ℕ, γ ≠ -(n : ℂ))
     (hδ : ∀ n : ℤ, δ ≠ n) (hq : IsHeunEigenvalue01 a q α β γ δ) :
     ∃ C : ℂ, ∀ z : ℂ, ‖z‖ + ‖z - 1‖ < ‖a‖ + ‖a - 1‖ → ‖z‖ < ‖a‖ →
-      HasSum (fun j => heunHypCoeff a q α β γ (γ + δ - 1) 0 j * heunHypP6 γ (γ + δ - 1) 0 j z)
+      HasSum (fun j => heunHypergeometricCoeff a q α β γ (γ + δ - 1) 0 j *
+          heunHypergeometricP6 γ (γ + δ - 1) 0 j z)
         (C * heunFunction01 a q α β γ δ z) := by
   sorry
 

@@ -48,7 +48,7 @@ Whittaker and hypergeometric functions) solve the Riccati equations.
 ## Implementation notes
 
 The Airy solutions of `PII` are bridged to the Beals–Wong construction of
-`DLMF.Painleve.Airy` (`airyPII`, with the cube-root scale `k = -2^{-1/3}`, `k³ = -1/2`); the
+`DLMF.Painleve.Airy` (`airyPII`, with the unitCube-root scale `k = -2^{-1/3}`, `k³ = -1/2`); the
 existence statement for `α = n + 1/2` is the Airy hierarchy `airyPIIHierarchy`. The Bessel,
 parabolic cylinder and hypergeometric solutions of the Riccati equations come from the linear
 ODEs of `J_ν`, `Y_ν`, `U`, `V` and `₂F₁`.
@@ -96,7 +96,7 @@ theorem painleveII_of_riccati {ε : ℂ} (hε : ε = 1 ∨ ε = -1) {w : ℂ →
   simp only [painleveIIRhs, Nat.cast_ofNat]
   linear_combination (2 * w z ^ 3 + z * w z) * hε2
 
-/-- The DLMF cube-root scale `k = -2^{-1/3}` of 32.10.5 satisfies `k³ = -1/2`. -/
+/-- The DLMF unitCube-root scale `k = -2^{-1/3}` of 32.10.5 satisfies `k³ = -1/2`. -/
 private lemma neg_two_cpow_neg_third_cube : (-(2 : ℂ) ^ (-1 / 3 : ℂ)) ^ 3 = -1 / 2 := by
   have h : ((2 : ℂ) ^ (-1 / 3 : ℂ)) ^ 3 = 2 ^ (-1 : ℂ) := by
     rw [← cpow_nat_mul]; norm_num
@@ -458,8 +458,8 @@ theorem painleveIV_of_riccati {ε α : ℂ} (hε : ε = 1 ∨ ε = -1) {w : ℂ 
 Riccati equation 32.10.17 wherever `φ ≠ 0`. -/
 @[dlmf 32.10.E18, dlmf 32.10.E19]
 theorem painleveIV_pcf_riccati {ε α C₁ C₂ : ℂ} (hε : ε = 1 ∨ ε = -1) :
-    let φ := fun z : ℂ => (C₁ * pcfU (α + ε / 2) (Real.sqrt 2 * z) +
-      C₂ * pcfV (α + ε / 2) (Real.sqrt 2 * z)) * exp (ε * z ^ 2 / 2)
+    let φ := fun z : ℂ => (C₁ * parabolicCylinderU (α + ε / 2) (Real.sqrt 2 * z) +
+      C₂ * parabolicCylinderV (α + ε / 2) (Real.sqrt 2 * z)) * exp (ε * z ^ 2 / 2)
     ∀ z, φ z ≠ 0 →
       HasDerivAt (fun z => -ε * deriv φ z / φ z)
         (ε * ((-ε * deriv φ z / φ z) ^ 2 + 2 * z * (-ε * deriv φ z / φ z)) -
@@ -470,12 +470,15 @@ theorem painleveIV_pcf_riccati {ε α C₁ C₂ : ℂ} (hε : ε = 1 ∨ ε = -1
   set r : ℂ := (Real.sqrt 2 : ℂ) with hr
   have hr2 : r ^ 2 = 2 := by
     rw [hr, ← ofReal_pow, Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 2)]; norm_num
-  set Y : ℂ → ℂ := fun x => C₁ * pcfU a x + C₂ * pcfV a x with hY
-  set Y1 : ℂ → ℂ := fun x => C₁ * pcfUDeriv a x + C₂ * pcfVDeriv a x with hY1
+  set Y : ℂ → ℂ := fun x => C₁ * parabolicCylinderU a x + C₂ * parabolicCylinderV a x with hY
+  set Y1 : ℂ → ℂ := fun x => C₁ * parabolicCylinderUDeriv a x + C₂ *
+      parabolicCylinderVDeriv a x with hY1
   have hYd : ∀ x, HasDerivAt Y (Y1 x) x := fun x =>
-    ((hasDerivAt_pcfU a x).const_mul C₁).add ((hasDerivAt_pcfV a x).const_mul C₂)
+    ((hasDerivAt_parabolicCylinderU a x).const_mul C₁).add
+        ((hasDerivAt_parabolicCylinderV a x).const_mul C₂)
   have hY1d : ∀ x, HasDerivAt Y1 ((x ^ 2 / 4 + a) * Y x) x := fun x => by
-    have := ((hasDerivAt_pcfUDeriv a x).const_mul C₁).add ((hasDerivAt_pcfVDeriv a x).const_mul C₂)
+    have := ((hasDerivAt_parabolicCylinderUDeriv a x).const_mul C₁).add
+        ((hasDerivAt_parabolicCylinderVDeriv a x).const_mul C₂)
     exact this.congr_deriv (by simp only [hY]; ring)
   have hlin : ∀ x, HasDerivAt (fun x => r * x) r x := fun x => by
     simpa using (hasDerivAt_id x).const_mul r
@@ -512,11 +515,12 @@ theorem painleveIV_pcf_riccati {ε α C₁ C₂ : ℂ} (hε : ε = 1 ∨ ε = -1
       16 * Y (r * z) * Y1 (r * z) * ε ^ 2 * r * z - 16 * Y1 (r * z) ^ 2 * ε) * he2
 
 /-- The Hermite differential equation `H_n'' = 2zH_n' - 2nH_n` over `ℂ`. -/
-private lemma hermitePolyH_ode (n : ℕ) :
-    let H : ℂ[X] := (hermitePolyH n).map (Int.castRingHom ℂ)
+private lemma hermitePolynomialH_ode (n : ℕ) :
+    let H : ℂ[X] := (hermitePolynomialH n).map (Int.castRingHom ℂ)
     derivative (derivative H) = 2 * X * derivative H - C (2 * n : ℂ) * H := by
   intro H
-  have h := congrArg (Polynomial.map (Int.castRingHom ℂ)) (hermitePolyH_differential_equation n)
+  have h := congrArg (Polynomial.map (Int.castRingHom ℂ))
+      (hermitePolynomialH_differential_equation n)
   simp only [Polynomial.map_add, Polynomial.map_sub, Polynomial.map_mul,
     Polynomial.map_ofNat, Polynomial.map_X, Polynomial.map_C, Polynomial.map_zero] at h
   rw [← sub_eq_zero, ← h]
@@ -526,10 +530,10 @@ private lemma hermitePolyH_ode (n : ℕ) :
 /-- DLMF 32.10.20: for `m = 1, 2, …`, `w(z; -m, -2(m - 1)²) = -H_{m-1}'(z)/H_{m-1}(z)` solves
 `PIV` with `(α, β) = (-m, -2(m - 1)²)` wherever `H_{m-1}(z) ≠ 0` and `H_{m-1}'(z) ≠ 0`
 (`PIV` divides by `w`; for `m = 1` the solution `w ≡ 0` is excluded and the set is empty).
-`H_n` is the physicists' Hermite polynomial `hermitePolyH n`, mapped to `ℂ[X]`. -/
+`H_n` is the physicists' Hermite polynomial `hermitePolynomialH n`, mapped to `ℂ[X]`. -/
 @[dlmf 32.10.E20]
 theorem painleveIV_hermite (m : ℕ) (hm : 1 ≤ m) :
-    let H : ℂ[X] := (hermitePolyH (m - 1)).map (Int.castRingHom ℂ)
+    let H : ℂ[X] := (hermitePolynomialH (m - 1)).map (Int.castRingHom ℂ)
     IsPainleveIVOn (-(m : ℂ)) (-2 * ((m : ℂ) - 1) ^ 2)
       (fun z => -(derivative H).eval z / H.eval z)
       {z | H.eval z ≠ 0 ∧ (derivative H).eval z ≠ 0} := by
@@ -544,7 +548,7 @@ theorem painleveIV_hermite (m : ℕ) (hm : 1 ≤ m) :
     (fun z hz => div_ne_zero (neg_ne_zero.mpr hz.2) hz.1) (fun z hz => ?_)
   · convert h using 1
     push_cast; ring
-  · have hode := congrArg (eval z) (hermitePolyH_ode k)
+  · have hode := congrArg (eval z) (hermitePolynomialH_ode k)
     simp only [eval_sub, eval_mul, eval_X, eval_C, eval_ofNat] at hode
     change (derivative (derivative H)).eval z =
       2 * z * (derivative H).eval z - 2 * (k : ℂ) * H.eval z at hode
@@ -562,7 +566,7 @@ theorem painleveIV_hermite (m : ℕ) (hm : 1 ≤ m) :
 `PIV` with `(α, β) = (-m, -2(m + 1)²)` wherever `H_m(z) ≠ 0` and `w(z) ≠ 0`. -/
 @[dlmf 32.10.E21]
 theorem painleveIV_hermite' (m : ℕ) :
-    let H : ℂ[X] := (hermitePolyH m).map (Int.castRingHom ℂ)
+    let H : ℂ[X] := (hermitePolynomialH m).map (Int.castRingHom ℂ)
     IsPainleveIVOn (-(m : ℂ)) (-2 * ((m : ℂ) + 1) ^ 2)
       (fun z => -2 * z + (derivative H).eval z / H.eval z)
       {z | H.eval z ≠ 0 ∧ -2 * z + (derivative H).eval z / H.eval z ≠ 0} := by
@@ -579,7 +583,7 @@ theorem painleveIV_hermite' (m : ℕ) :
     (w := fun z => -2 * z + (derivative H).eval z / H.eval z)
     (fun z hz => hz.2) (fun z hz => ?_)
   · convert h using 1 <;> first | rfl | ring
-  · have hode := congrArg (eval z) (hermitePolyH_ode m)
+  · have hode := congrArg (eval z) (hermitePolynomialH_ode m)
     simp only [eval_sub, eval_mul, eval_X, eval_C, eval_ofNat] at hode
     change (derivative (derivative H)).eval z =
       2 * z * (derivative H).eval z - 2 * (m : ℂ) * H.eval z at hode

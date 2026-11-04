@@ -61,13 +61,13 @@ throughout the right half-plane in the Laplace variable. -/
 private lemma besselLaplace_quadratic {b c s : ℂ} (hc : (1 / 2 : ℝ) < c.re)
     (hs : 0 < s.re) {w : ℝ} (hw : 0 < w) :
     Gamma (2 * c - 1) / Gamma c * (s + I * w) ^ (-b) *
-        regularizedGaussHG (c - 1 / 2) b (2 * c - 1) (2 * I * w / (s + I * w)) =
-      s ^ (-b) * regularizedGaussHG (b / 2) ((b + 1) / 2) c (-(w : ℂ) ^ 2 / s ^ 2) := by
+        regularizedGaussHypergeometric (c - 1 / 2) b (2 * c - 1) (2 * I * w / (s + I * w)) =
+      s ^ (-b) * regularizedGaussHypergeometric (b / 2) ((b + 1) / 2) c (-(w : ℂ) ^ 2 / s ^ 2) := by
   let V : Set ℂ := {s | 0 < s.re}
   let L (s : ℂ) := Gamma (2 * c - 1) / Gamma c * (s + I * w) ^ (-b) *
-    regularizedGaussHG (c - 1 / 2) b (2 * c - 1) (2 * I * w / (s + I * w))
+    regularizedGaussHypergeometric (c - 1 / 2) b (2 * c - 1) (2 * I * w / (s + I * w))
   let R (s : ℂ) := s ^ (-b) *
-    regularizedGaussHG (b / 2) ((b + 1) / 2) c (-(w : ℂ) ^ 2 / s ^ 2)
+    regularizedGaussHypergeometric (b / 2) ((b + 1) / 2) c (-(w : ℂ) ^ 2 / s ^ 2)
   have hVo : IsOpen V := isOpen_lt continuous_const continuous_re
   have hL : AnalyticOnNhd ℂ L V := by
     apply DifferentiableOn.analyticOnNhd _ hVo
@@ -83,7 +83,8 @@ private lemma besselLaplace_quadratic {b c s : ℂ} (hc : (1 / 2 : ℝ) < c.re)
       ((differentiableAt_id : DifferentiableAt ℂ (fun z : ℂ => z) z).add_const (I * w)).cpow
         (differentiableAt_const (-b)) (Or.inl hzp)
     exact ((hp.const_mul _).mul
-      ((differentiableAt_regularizedGaussHG _ _ _ harg).comp z hφ)).differentiableWithinAt
+      ((differentiableAt_regularizedGaussHypergeometric _ _ _ harg).comp z
+          hφ)).differentiableWithinAt
   have hR : AnalyticOnNhd ℂ R V := by
     apply DifferentiableOn.analyticOnNhd _ hVo
     intro z hz
@@ -93,7 +94,7 @@ private lemma besselLaplace_quadratic {b c s : ℂ} (hc : (1 / 2 : ℝ) < c.re)
       fun_prop (disch := exact pow_ne_zero 2 hz0)
     have hp : DifferentiableAt ℂ (fun z : ℂ => z ^ (-b)) z :=
       differentiableAt_id.cpow (differentiableAt_const (-b)) (Or.inl hz)
-    exact (hp.mul ((differentiableAt_regularizedGaussHG _ _ _
+    exact (hp.mul ((differentiableAt_regularizedGaussHypergeometric _ _ _
       (besselLaplace_argument_mem_cutPlane hz hw)).comp z hφ)).differentiableWithinAt
   let z₀ : ℂ := (2 * w + 1 : ℝ)
   have hz₀ : z₀ ∈ V := by change 0 < (2 * w + 1 : ℝ); linarith
@@ -132,9 +133,9 @@ private lemma besselLaplace_quadratic {b c s : ℂ} (hc : (1 / 2 : ℝ) < c.re)
     have hq := quadratic_double_denominator (a := b) (b := c - 1 / 2) h2c hct hu
     rw [show 2 * (c - 1 / 2) = 2 * c - 1 by ring,
       show c - 1 / 2 + 1 / 2 = c by ring, hmap,
-      ordinaryHypergeometric_eq_Gamma_mul_regularizedGaussHG
+      ordinaryHypergeometric_eq_Gamma_mul_regularizedGaussHypergeometric
         (by simpa only [show 2 * (c - 1 / 2) = 2 * c - 1 by ring] using h2c) hu,
-      ordinaryHypergeometric_eq_Gamma_mul_regularizedGaussHG hc0 hy] at hq
+      ordinaryHypergeometric_eq_Gamma_mul_regularizedGaussHypergeometric hc0 hy] at hq
     have hargA := abs_lt.mp (abs_arg_lt_pi_div_two_iff.mpr (Or.inl hAp))
     have hargZ := abs_lt.mp (abs_arg_lt_pi_div_two_iff.mpr (Or.inl hzp))
     have hargAπ : (z + I * w).arg ≠ Real.pi := by linarith [Real.pi_pos]
@@ -151,13 +152,13 @@ private lemma besselLaplace_quadratic {b c s : ℂ} (hc : (1 / 2 : ℝ) < c.re)
       congr 1
       ring
     dsimp [L, R]
-    rw [regularizedGaussHG_symm _ _ _ (mem_cutPlane_of_norm_lt_one hu)]
+    rw [regularizedGaussHypergeometric_symm _ _ _ (mem_cutPlane_of_norm_lt_one hu)]
     have hGc : Gamma c ≠ 0 := Gamma_ne_zero hc0
     calc
       _ = ((z + I * w) ^ (-b) * (Gamma (2 * c - 1) *
-          regularizedGaussHG b (c - 1 / 2) (2 * c - 1) u)) / Gamma c := by ring
+          regularizedGaussHypergeometric b (c - 1 / 2) (2 * c - 1) u)) / Gamma c := by ring
       _ = ((z + I * w) ^ (-b) * ((1 - u / 2) ^ (-b) * (Gamma c *
-          regularizedGaussHG (b / 2) ((b + 1) / 2) c (-(w : ℂ) ^ 2 / z ^ 2)))) /
+          regularizedGaussHypergeometric (b / 2) ((b + 1) / 2) c (-(w : ℂ) ^ 2 / z ^ 2)))) /
               Gamma c := by rw [hq]
       _ = _ := by rw [← mul_assoc, hphase]; field_simp
   exact hL.eqOn_of_preconnected_of_eventuallyEq hR
@@ -171,7 +172,7 @@ private lemma laplace_regularized0F1_of_re_pos {b c s : ℂ}
       regularizedHGFun ∅ {c} (-(w : ℂ) ^ 2 / 4 * (t : ℂ) ^ 2)) (Ioi 0) ∧
     (∫ t : ℝ in Ioi 0, exp (-s * t) * (t : ℂ) ^ (b - 1) *
       regularizedHGFun ∅ {c} (-(w : ℂ) ^ 2 / 4 * (t : ℂ) ^ 2)) =
-      Gamma b * s ^ (-b) * regularizedGaussHG (b / 2) ((b + 1) / 2) c
+      Gamma b * s ^ (-b) * regularizedGaussHypergeometric (b / 2) ((b + 1) / 2) c
         (-(w : ℂ) ^ 2 / s ^ 2) := by
   have hcpos : 0 < c.re := by linarith
   have h2cpos : 0 < (2 * c - 1).re := by simp; linarith
@@ -225,13 +226,14 @@ private lemma laplace_regularized0F1_of_re_pos {b c s : ℂ}
 
 /-- The contiguous relation that lowers a regularized Gauss denominator by one, without
 any exclusions on its parameters. -/
-private lemma regularizedGaussHG_lower_c (a b c : ℂ) {z : ℂ} (hz : z ∈ cutPlane) :
-    regularizedGaussHG a b c z = c * regularizedGaussHG a b (c + 1) z +
-      a * b * z * regularizedGaussHG (a + 1) (b + 1) (c + 1 + 1) z := by
-  have h1 := regularizedGaussHG_contiguous_c a b c hz
-  have h2 := regularizedGaussHG_contiguous_shift_b b a (c + 1) hz
-  rw [regularizedGaussHG_symm b a _ hz, regularizedGaussHG_symm b (a + 1) _ hz,
-    regularizedGaussHG_symm (b + 1) (a + 1) _ hz] at h2
+private lemma regularizedGaussHypergeometric_lower_c (a b c : ℂ) {z : ℂ} (hz : z ∈ cutPlane) :
+    regularizedGaussHypergeometric a b c z = c * regularizedGaussHypergeometric a b (c + 1) z +
+      a * b * z * regularizedGaussHypergeometric (a + 1) (b + 1) (c + 1 + 1) z := by
+  have h1 := regularizedGaussHypergeometric_contiguous_c a b c hz
+  have h2 := regularizedGaussHypergeometric_contiguous_shift_b b a (c + 1) hz
+  rw [regularizedGaussHypergeometric_symm b a _ hz,
+      regularizedGaussHypergeometric_symm b (a + 1) _ hz,
+    regularizedGaussHypergeometric_symm (b + 1) (a + 1) _ hz] at h2
   linear_combination h1 - a * h2
 
 /-- The convergence and evaluation assertion used in lowering the `₀F₁` denominator. -/
@@ -241,7 +243,7 @@ private def Laplace0F1Formula (c : ℂ) (w : ℝ) : Prop :=
       regularizedHGFun ∅ {c} (-(w : ℂ) ^ 2 / 4 * (t : ℂ) ^ 2)) (Ioi 0) ∧
     (∫ t : ℝ in Ioi 0, exp (-s * t) * (t : ℂ) ^ (b - 1) *
       regularizedHGFun ∅ {c} (-(w : ℂ) ^ 2 / 4 * (t : ℂ) ^ 2)) =
-      Gamma b * s ^ (-b) * regularizedGaussHG (b / 2) ((b + 1) / 2) c
+      Gamma b * s ^ (-b) * regularizedGaussHypergeometric (b / 2) ((b + 1) / 2) c
         (-(w : ℂ) ^ 2 / s ^ 2)
 
 /-- Lower the denominator by the regularized contiguous relations, transporting absolute
@@ -281,7 +283,7 @@ private lemma laplace0F1Formula_lower {c : ℂ} {w : ℝ} (hw : 0 < w)
     rw [show -(b + 2) = -b + -(2 : ℕ) by push_cast; ring, cpow_add _ _ hs0,
       ]
     simp only [cpow_neg, cpow_natCast, div_eq_mul_inv]
-  have hq := regularizedGaussHG_lower_c (b / 2) ((b + 1) / 2) c
+  have hq := regularizedGaussHypergeometric_lower_c (b / 2) ((b + 1) / 2) c
     (besselLaplace_argument_mem_cutPlane hs hw)
   rw [hG, hpow, show (b + 2) / 2 = b / 2 + 1 by ring,
     show ((b + 2) + 1) / 2 = (b + 1) / 2 + 1 by ring]
@@ -295,7 +297,7 @@ theorem laplace_regularized0F1 {b c s : ℂ} (hb : 0 < b.re) (hs : 0 < s.re)
       regularizedHGFun ∅ {c} (-(w : ℂ) ^ 2 / 4 * (t : ℂ) ^ 2)) (Ioi 0) ∧
     (∫ t : ℝ in Ioi 0, exp (-s * t) * (t : ℂ) ^ (b - 1) *
       regularizedHGFun ∅ {c} (-(w : ℂ) ^ 2 / 4 * (t : ℂ) ^ 2)) =
-      Gamma b * s ^ (-b) * regularizedGaussHG (b / 2) ((b + 1) / 2) c
+      Gamma b * s ^ (-b) * regularizedGaussHypergeometric (b / 2) ((b + 1) / 2) c
         (-(w : ℂ) ^ 2 / s ^ 2) := by
   have hshift : ∀ M : ℕ, ∀ c : ℂ, (1 / 2 : ℝ) < c.re + M → Laplace0F1Formula c w := by
     intro M
@@ -349,7 +351,7 @@ theorem besselJ_laplace_integral {μ ν s : ℂ} {w : ℝ}
     (hμν : 0 < (μ + ν).re) (hs : 0 < s.re) (hw : 0 < w) :
     (∫ t : ℝ in Ioi 0, (t : ℂ) ^ (μ - 1) * exp (-s * t) * besselJ ν (w * t)) =
       (w / 2 : ℂ) ^ ν * Gamma (μ + ν) * s ^ (-(μ + ν)) *
-        regularizedGaussHG ((μ + ν) / 2) ((μ + ν + 1) / 2) (ν + 1)
+        regularizedGaussHypergeometric ((μ + ν) / 2) ((μ + ν + 1) / 2) (ν + 1)
           (-(w : ℂ) ^ 2 / s ^ 2) := by
   calc
     _ = (w / 2 : ℂ) ^ ν * ∫ t : ℝ in Ioi 0, exp (-s * t) * (t : ℂ) ^ (μ + ν - 1) *

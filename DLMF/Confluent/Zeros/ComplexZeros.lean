@@ -112,7 +112,7 @@ theorem KummerZeros.sector_bound (a b : ℂ) :
   obtain ⟨R, hR⟩ := hb
   refine ⟨K₁, hK₁, R, fun z hzR h1 h2 => ?_⟩
   have := hR ‖z‖ hzR z rfl ⟨h1, h2⟩
-  simpa [DLMF.Hypergeometric.poch_zero,
+  simpa [DLMF.Hypergeometric.pochhammer_zero,
       abs_of_nonneg (add_nonneg (mul_nonneg (norm_nonneg _) (norm_nonneg _))
     (norm_nonneg _))] using this
 

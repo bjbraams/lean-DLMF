@@ -78,7 +78,7 @@ private lemma hasContinuedFraction_of_one_eq_zero {a b : ℕ → ℂ} (h1 : a 1 
   unfold DLMF.Core.HasContinuedFraction
   refine tendsto_const_nhds.congr' ?_
   filter_upwards [eventually_ge_atTop 1] with n hn
-  exact (IncompleteGammaFractions.cfTail_freeze h1 hn).symm
+  exact (IncompleteGammaFractions.continuedFractionTail_freeze h1 hn).symm
 
 /-- The elements of the fraction DLMF 8.9.1 for `M(1, a+1, z)`. -/
 private lemma tendsto_convs_kummer {a z : ℂ} (ha : ∀ n : ℕ, a ≠ -(n + 1)) (hz : z ≠ 0) :
@@ -94,12 +94,13 @@ private lemma tendsto_convs_kummer {a z : ℂ} (ha : ∀ n : ℕ, a ≠ -(n + 1)
   · simp only [show 2 * m ≠ 0 by omega, show 2 * m ≠ 1 by omega, ↓reduceIte,
       show (2 * m) % 2 = 0 by omega, show (2 * m) / 2 = m by omega]
 
-private lemma poch_nat_add_one_mul_factorial (n k : ℕ) :
-    poch ((n : ℂ) + 1) k * n ! = ((n + k)! : ℕ) := by
+private lemma pochhammer_nat_add_one_mul_factorial (n k : ℕ) :
+    pochhammer ((n : ℂ) + 1) k * n ! = ((n + k)! : ℕ) := by
   induction k with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ k ih =>
-    rw [poch_succ, mul_right_comm, ih, show n + (k + 1) = n + k + 1 by ring, Nat.factorial_succ]
+    rw [pochhammer_succ, mul_right_comm, ih, show n + (k + 1) = n + k + 1 by ring,
+                                                                               Nat.factorial_succ]
     push_cast; ring
 
 /-- `zⁿ M(1, n+1, z)/n! = eᶻ - ∑_{j<n} zʲ/j!`. -/
@@ -110,12 +111,12 @@ private lemma pow_mul_kummerM_one_div_factorial (n : ℕ) (z : ℂ) :
   have hs := (hasSum_nat_add_iff' n).mpr he
   rw [kummerM, ← tsum_mul_left, ← hs.tsum_eq]
   congr 1; funext k
-  have h := poch_nat_add_one_mul_factorial n k
+  have h := pochhammer_nat_add_one_mul_factorial n k
   have hf : (n ! : ℂ) ≠ 0 := by exact_mod_cast (Nat.factorial_pos n).ne'
   have hk : (k ! : ℂ) ≠ 0 := by exact_mod_cast (Nat.factorial_pos k).ne'
-  have hp : poch ((n : ℂ) + 1) k ≠ 0 := by
+  have hp : pochhammer ((n : ℂ) + 1) k ≠ 0 := by
     intro h0; rw [h0, zero_mul] at h; exact (Nat.cast_ne_zero.mpr (Nat.factorial_pos _).ne') h.symm
-  rw [poch_nat_one, add_comm k n, ← h, pow_add]
+  rw [pochhammer_nat_one, add_comm k n, ← h, pow_add]
   field_simp
 
 private lemma natCast_ne_neg_succ (n : ℕ) : ∀ j : ℕ, (n : ℂ) ≠ -(j + 1) := fun j h => by
@@ -182,7 +183,7 @@ theorem exp_continuedFraction_one (z : ℂ) :
 /-- Second exponential continued fraction, valid for every complex argument. -/
 @[dlmf 4.9.E3]
 theorem exp_continuedFraction_two (z : ℂ) :
-    Tendsto (fun N => 1 + DLMF.Core.cfTail
+    Tendsto (fun N => 1 + DLMF.Core.continuedFractionTail
       (fun k => if k = 0 then z else (-1 : ℂ) ^ k * z)
       (fun k => if k = 0 then 1 else if k % 2 = 1 then 2 else (k + 1 : ℂ)) 0 N)
       atTop (𝓝 (Complex.exp z)) := by
@@ -211,7 +212,7 @@ theorem exp_continuedFraction_two (z : ℂ) :
   rw [add_sub_cancel] at key3
   refine key3.congr fun N => ?_
   congr 1
-  rw [IncompleteGammaFractions.cfTail_eq ha, ← ofFun_convs_equiv r hr N,
+  rw [IncompleteGammaFractions.continuedFractionTail_eq ha, ← ofFun_convs_equiv r hr N,
       ← ofFun_convs_mul_first_num]
   congr 2
   · funext k
@@ -249,10 +250,10 @@ theorem exp_continuedFraction_two (z : ℂ) :
 /-- Third exponential continued fraction, valid for every complex argument. -/
 @[dlmf 4.9.E3]
 theorem exp_continuedFraction_three (z : ℂ) :
-    Tendsto (fun N => 1 + DLMF.Core.cfTail
+    Tendsto (fun N => 1 + DLMF.Core.continuedFractionTail
       (fun k => if k = 0 then z else z ^ 2 / (4 * (4 * (k : ℂ) ^ 2 - 1)))
       (fun k => if k = 0 then 1 - z / 2 else 1) 0 N) atTop (𝓝 (Complex.exp z)) :=
-  tendsto_one_add_cfTail_exp z
+  tendsto_one_add_continuedFractionTail_exp z
 
 /-- The exponential polynomial of degree `n`, `eₙ(z) = ∑_{k ≤ n} zᵏ/k!` (DLMF 4.9.5; the finite
 exponential sum of DLMF 8.4.11). -/

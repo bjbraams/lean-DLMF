@@ -27,7 +27,7 @@ the scaled Laplace integrals over `Ω` used for 35.3.8 and 35.4.8. The bridge to
 
 * `multivariateGamma_eq_integral`, `multivariateGammaVec_eq_integral`: 35.3.1 and 35.3.2.
 * `hasIntegralOn_laplace_leadingMinorPowProd`:
-  `∫_Ω etr(-SY) |Y|^{a-(m+1)/2} φ_κ(Y) dY = Γ_m(a + κ) |S|^{-a} φ_κ(S⁻¹)` for the leading-minor
+  `∫_Ω expTrace(-SY) |Y|^{a-(m+1)/2} φ_κ(Y) dY = Γ_m(a + κ) |S|^{-a} φ_κ(S⁻¹)` for the leading-minor
   product `φ_κ`.
 * `hasIntegralOn_posDefCone_multivariateBeta`: the double integral over `Ω × Ω` behind 35.3.8.
 -/
@@ -41,13 +41,13 @@ namespace DLMF.MatrixArgument
 
 /-! ## §35.3 Multivariate gamma and beta functions -/
 
-/-- DLMF 35.3.1: `Γ_m(a) = ∫_Ω etr(-X) |X|^{a-(m+1)/2} dX` for `ℜa > (m-1)/2`, the integral
+/-- DLMF 35.3.1: `Γ_m(a) = ∫_Ω expTrace(-X) |X|^{a-(m+1)/2} dX` for `ℜa > (m-1)/2`, the integral
 converging absolutely. For real `a` this is Tau Ceti's `TauCeti.integral_posDef_multivariateGamma`
 (see `DLMF.MatrixArgument.multivariateGamma_ofReal`). -/
 @[dlmf 35.3.E1]
 theorem multivariateGamma_eq_integral {m : ℕ} {a : ℂ} (ha : ((m : ℝ) - 1) / 2 < a.re) :
     HasIntegralOn (posDefCone m)
-      (fun X => (etr (-X) : ℂ) * ((X.det : ℂ) ^ (a - ((m : ℂ) + 1) / 2)))
+      (fun X => (expTrace (-X) : ℂ) * ((X.det : ℂ) ^ (a - ((m : ℂ) + 1) / 2)))
       (multivariateGamma m a) := by
   have hs : ∀ j : Fin m, (j : ℝ) / 2 < ((fun _ : Fin m => a) j).re := by
     intro j
@@ -70,7 +70,7 @@ theorem multivariateGamma_eq_integral {m : ℕ} {a : ℂ} (ha : ((m : ℝ) - 1) 
     rw [multivariateGammaVecExponent, dite_eq_right (by simp), leadingMinor, dite_eq_left (by simp)]
     simp
 
-/-- DLMF 35.3.2: `Γ_m(s₁, …, s_m) = ∫_Ω etr(-X) |X|^{s_m-(m+1)/2} ∏_{j=1}^{m-1}
+/-- DLMF 35.3.2: `Γ_m(s₁, …, s_m) = ∫_Ω expTrace(-X) |X|^{s_m-(m+1)/2} ∏_{j=1}^{m-1}
 |(X)_j|^{s_j - s_{j+1}} dX` for `ℜs_j > (j-1)/2`. In Lean the indices are zero-based and the
 factors are combined as `∏_{j=1}^{m} |(X)_j|^{s_j - s_{j+1}}` with `s_{m+1} = (m+1)/2`
 (the factor `j = m` is `|X|^{s_m - (m+1)/2}`). -/
@@ -78,7 +78,7 @@ factors are combined as `∏_{j=1}^{m} |(X)_j|^{s_j - s_{j+1}}` with `s_{m+1} = 
 theorem multivariateGammaVec_eq_integral {m : ℕ} {s : Fin m → ℂ}
     (hs : ∀ j : Fin m, (j : ℝ) / 2 < (s j).re) :
     HasIntegralOn (posDefCone m)
-      (fun X => (etr (-X) : ℂ) * ∏ j : Fin m, ((leadingMinor X (j.1 + 1) : ℝ) : ℂ) ^
+      (fun X => (expTrace (-X) : ℂ) * ∏ j : Fin m, ((leadingMinor X (j.1 + 1) : ℝ) : ℂ) ^
         (s j - if h : j.1 + 1 < m then s ⟨j.1 + 1, h⟩ else ((m : ℂ) + 1) / 2))
       (multivariateGammaVec m s) := by
   exact hasIntegralOn_multivariateGammaVecIntegrand hs
@@ -86,9 +86,9 @@ theorem multivariateGammaVec_eq_integral {m : ℕ} {s : Fin m → ℂ}
 /-! ### Laplace integrals over `Ω` and the beta integral 35.3.8
 
 The Cholesky substitution turns 35.3.2 into the scaled form
-`∫_Ω etr(-SY) |Y|^{a-(m+1)/2} φ_κ(Y) dY = Γ_m(a + κ) |S|^{-a} φ_κ(S⁻¹)` for the leading-minor
+`∫_Ω expTrace(-SY) |Y|^{a-(m+1)/2} φ_κ(Y) dY = Γ_m(a + κ) |S|^{-a} φ_κ(S⁻¹)` for the leading-minor
 product `φ_κ` (used for 35.4.8), and the case `κ = 0` gives
-`∫_Ω etr(-SY) |Y|^{a-(m+1)/2} dY = Γ_m(a) |S|^{-a}`. Fubini then gives 35.3.8. -/
+`∫_Ω expTrace(-SY) |Y|^{a-(m+1)/2} dY = Γ_m(a) |S|^{-a}`. Fubini then gives 35.3.8. -/
 
 section LaplaceTransform
 /-- The stated relation follows from the given hypotheses: `HasIntegralOn (posDefCone m) g I`. -/
@@ -164,11 +164,12 @@ theorem leadingMinorPowProd_pos {m : ℕ} (κ : Fin m → ℕ) {X : Matrix (Fin 
     0 < leadingMinorPowProd κ X :=
   Finset.prod_pos fun j _ => pow_pos (leadingMinor_pos_of_posDef hX j) _
 
-/-- 35.3.2 with `s_j = a + k_j`: `∫_Ω etr(-X) |X|^{a-(m+1)/2} φ_κ(X) dX = Γ_m(a + κ)`. -/
-private lemma hasIntegralOn_etr_neg_mul_leadingMinorPowProd {m : ℕ} (κ : Fin m → ℕ)
+/-- 35.3.2 with `s_j = a + k_j`: `∫_Ω expTrace(-X) |X|^{a-(m+1)/2} φ_κ(X) dX = Γ_m(a + κ)`. -/
+private lemma hasIntegralOn_expTrace_neg_mul_leadingMinorPowProd {m : ℕ} (κ : Fin m → ℕ)
     (hκ : Antitone κ) {a : ℂ}
     (ha : ((m : ℝ) - 1) / 2 < a.re) :
-    HasIntegralOn (posDefCone m) (fun Z => (etr (-Z) : ℂ) * ((Z.det : ℂ) ^ (a - ((m : ℂ) + 1) / 2))
+    HasIntegralOn (posDefCone m)
+        (fun Z => (expTrace (-Z) : ℂ) * ((Z.det : ℂ) ^ (a - ((m : ℂ) + 1) / 2))
       * (leadingMinorPowProd κ Z : ℂ)) (multivariateGammaVec m (fun j => a + κ j)) := by
   have hs : ∀ j : Fin m, (j : ℝ) / 2 < ((fun j => a + (κ j : ℂ)) j).re := by
     intro j
@@ -269,10 +270,10 @@ theorem continuous_leadingMinorPowProd {m : ℕ} (κ : Fin m → ℕ) :
   exact (continuous_id.matrix_submatrix _ _).matrix_det
 
 /-- The Laplace integral of `φ_κ`: for `S ∈ Ω`,
-`∫_Ω etr(-SY) |Y|^{a-(m+1)/2} φ_κ(Y) dY = Γ_m(a + κ) |S|^{-a} φ_κ(S⁻¹)`. -/
+`∫_Ω expTrace(-SY) |Y|^{a-(m+1)/2} φ_κ(Y) dY = Γ_m(a + κ) |S|^{-a} φ_κ(S⁻¹)`. -/
 theorem hasIntegralOn_laplace_leadingMinorPowProd {m : ℕ} (κ : Fin m → ℕ) (hκ : Antitone κ)
     {S : Matrix (Fin m) (Fin m) ℝ} (hS : S.PosDef) {a : ℂ} (ha : ((m : ℝ) - 1) / 2 < a.re) :
-    HasIntegralOn (posDefCone m) (fun Y => (etr (-(S * Y)) : ℂ) *
+    HasIntegralOn (posDefCone m) (fun Y => (expTrace (-(S * Y)) : ℂ) *
       ((Y.det : ℂ) ^ (a - ((m : ℂ) + 1) / 2)) * (leadingMinorPowProd κ Y : ℂ))
       (multivariateGammaVec m (fun j => a + κ j) * (S.det : ℂ) ^ (-a) *
         (leadingMinorPowProd κ S⁻¹ : ℂ)) := by
@@ -294,10 +295,11 @@ theorem hasIntegralOn_laplace_leadingMinorPowProd {m : ℕ} (κ : Fin m → ℕ)
   have hLSL : Lᵀ * (S * L) = 1 := by
     have : S * L * Lᵀ = 1 := by rw [Matrix.mul_assoc, hLL, Matrix.mul_nonsing_inv _ hSu]
     exact mul_eq_one_comm.mp this
-  have hF : Measurable fun Y : SymMatrix m => (etr (-(S * (Y : Matrix (Fin m) (Fin m) ℝ))) : ℂ) *
+  have hF : Measurable fun Y : SymMatrix m =>
+      (expTrace (-(S * (Y : Matrix (Fin m) (Fin m) ℝ))) : ℂ) *
       (((Y : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ (a - ((m : ℂ) + 1) / 2)) *
       (leadingMinorPowProd κ (Y : Matrix (Fin m) (Fin m) ℝ) : ℂ) := by
-    unfold etr
+    unfold expTrace
     refine ((Complex.measurable_ofReal.comp ?_).mul
       ((Complex.measurable_ofReal.comp continuous_subtype_val.matrix_det.measurable).pow_const
         _)).mul (Complex.measurable_ofReal.comp
@@ -306,8 +308,9 @@ theorem hasIntegralOn_laplace_leadingMinorPowProd {m : ℕ} (κ : Fin m → ℕ)
       (continuous_const.matrix_mul continuous_subtype_val).neg.matrix_trace.measurable
   set c : ℂ := ((S.det⁻¹ : ℝ) : ℂ) ^ (a - ((m : ℂ) + 1) / 2) * (leadingMinorPowProd κ S⁻¹ : ℂ)
   have h1 := hasIntegralOn_posDefCone_const_mul
-      (hasIntegralOn_etr_neg_mul_leadingMinorPowProd κ hκ ha) c
-  have h2 : HasIntegralOn (posDefCone m) (fun Z => (etr (-(S * ((C : Matrix (Fin m) (Fin m) ℝ) *
+      (hasIntegralOn_expTrace_neg_mul_leadingMinorPowProd κ hκ ha) c
+  have h2 : HasIntegralOn (posDefCone m)
+      (fun Z => (expTrace (-(S * ((C : Matrix (Fin m) (Fin m) ℝ) *
       Z * (C : Matrix (Fin m) (Fin m) ℝ)ᵀ))) : ℂ) * ((((C : Matrix (Fin m) (Fin m) ℝ) * Z *
         (C : Matrix (Fin m) (Fin m) ℝ)ᵀ).det : ℂ) ^ (a - ((m : ℂ) + 1) / 2)) *
       (leadingMinorPowProd κ
@@ -323,11 +326,11 @@ theorem hasIntegralOn_laplace_leadingMinorPowProd {m : ℕ} (κ : Fin m → ℕ)
     have hdet : (L * (Z : Matrix (Fin m) (Fin m) ℝ) * Lᵀ).det =
         S.det⁻¹ * (Z : Matrix (Fin m) (Fin m) ℝ).det := by
       rw [Matrix.det_mul, Matrix.det_mul, Matrix.det_transpose, ← hdetLL]; ring
-    unfold etr
+    unfold expTrace
     rw [Matrix.trace_neg, Matrix.trace_neg, htr, hdet, Complex.ofReal_mul,
       Complex.mul_cpow_ofReal_nonneg (inv_pos.mpr hSd).le hZ.det_pos.le, Complex.ofReal_mul]
     ring
-  have h3 := hasIntegralOn_posDefCone_of_congruence (F := fun Y => (etr (-(S * Y)) : ℂ) *
+  have h3 := hasIntegralOn_posDefCone_of_congruence (F := fun Y => (expTrace (-(S * Y)) : ℂ) *
     ((Y.det : ℂ) ^ (a - ((m : ℂ) + 1) / 2)) * (leadingMinorPowProd κ Y : ℂ)) C hF h2
   convert h3 using 1
   -- the scalar
@@ -352,11 +355,11 @@ theorem hasIntegralOn_laplace_leadingMinorPowProd {m : ℕ} (κ : Fin m → ℕ)
   ring
 
 /-- Identity under the stated parameter and domain assumptions: `HasIntegralOn (posDefCone m) (fun
-Y => (etr (-(S * Y)) : ℂ) * ((Y.det : ℂ) ^ (a - ((m : ℂ) + 1) / 2))) (multivariateGamma m a *
+Y => (expTrace (-(S * Y)) : ℂ) * ((Y.det : ℂ) ^ (a - ((m : ℂ) + 1) / 2))) (multivariateGamma m a *
 (S.det : ℂ) ^ (-a))`. -/
 theorem hasIntegralOn_laplace_det_cpow {m : ℕ} {S : Matrix (Fin m) (Fin m) ℝ} (hS : S.PosDef)
     {a : ℂ} (ha : ((m : ℝ) - 1) / 2 < a.re) :
-    HasIntegralOn (posDefCone m) (fun Y => (etr (-(S * Y)) : ℂ) *
+    HasIntegralOn (posDefCone m) (fun Y => (expTrace (-(S * Y)) : ℂ) *
       ((Y.det : ℂ) ^ (a - ((m : ℂ) + 1) / 2))) (multivariateGamma m a * (S.det : ℂ) ^ (-a)) := by
   have h := hasIntegralOn_laplace_leadingMinorPowProd (fun _ : Fin m => 0)
       (fun _ _ _ => le_rfl) hS ha
@@ -398,25 +401,27 @@ lemma hasIntegralOn_posDefCone_multivariateBeta {m : ℕ} (hm : 1 ≤ m) {a b : 
   have hc : ((m : ℝ) - 1) / 2 < c.re := by simp only [c, Complex.add_re]; linarith
   -- the double integrand, `Y` first
   set f : SymMatrix m → SymMatrix m → ℂ := fun Y X =>
-    ((etr (-(Y : Matrix (Fin m) (Fin m) ℝ)) : ℂ) *
+    ((expTrace (-(Y : Matrix (Fin m) (Fin m) ℝ)) : ℂ) *
       (((Y : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ (c - p))) *
-    ((etr (-((Y : Matrix (Fin m) (Fin m) ℝ) * (X : Matrix (Fin m) (Fin m) ℝ))) : ℂ) *
+    ((expTrace (-((Y : Matrix (Fin m) (Fin m) ℝ) * (X : Matrix (Fin m) (Fin m) ℝ))) : ℂ) *
       (((X : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ (a - p))) with hfdef
-  have hetr : ∀ Y X : Matrix (Fin m) (Fin m) ℝ, (etr (-Y) : ℂ) * (etr (-(Y * X)) : ℂ) =
-      (etr (-((1 + X) * Y)) : ℂ) := by
+  have hetr : ∀ Y X : Matrix (Fin m) (Fin m) ℝ, (expTrace (-Y) : ℂ) * (expTrace (-(Y * X)) : ℂ) =
+      (expTrace (-((1 + X) * Y)) : ℂ) := by
     intro Y X
-    unfold etr
+    unfold expTrace
     rw [← Complex.ofReal_mul, ← Real.exp_add, Matrix.add_mul, Matrix.one_mul, neg_add,
       Matrix.trace_add, Matrix.trace_neg, Matrix.trace_neg, Matrix.trace_neg,
       Matrix.trace_mul_comm X Y]
   have hfm : Measurable (Function.uncurry f) := by
-    have hY : Measurable fun Y : SymMatrix m => (etr (-(Y : Matrix (Fin m) (Fin m) ℝ)) : ℂ) := by
-      unfold etr
+    have hY : Measurable fun Y : SymMatrix m =>
+        (expTrace (-(Y : Matrix (Fin m) (Fin m) ℝ)) : ℂ) := by
+      unfold expTrace
       exact Complex.measurable_ofReal.comp (Real.measurable_exp.comp
         continuous_subtype_val.neg.matrix_trace.measurable)
     have hYX : Measurable fun q : SymMatrix m × SymMatrix m =>
-        (etr (-((q.1 : Matrix (Fin m) (Fin m) ℝ) * (q.2 : Matrix (Fin m) (Fin m) ℝ))) : ℂ) := by
-      unfold etr
+        (expTrace (-((q.1 : Matrix (Fin m) (Fin m) ℝ) *
+            (q.2 : Matrix (Fin m) (Fin m) ℝ))) : ℂ) := by
+      unfold expTrace
       exact Complex.measurable_ofReal.comp (Real.measurable_exp.comp
         ((continuous_subtype_val.comp continuous_fst).matrix_mul
           (continuous_subtype_val.comp continuous_snd)).neg.matrix_trace.measurable)
@@ -424,7 +429,7 @@ lemma hasIntegralOn_posDefCone_multivariateBeta {m : ℕ} (hm : 1 ≤ m) {a b : 
       (hYX.mul ((measurable_det_cpow _).comp measurable_snd))
   -- inner integrals over `X`
   have hinX : ∀ Y ∈ posDefCone m, HasIntegralOn (posDefCone m)
-      (fun X => (etr (-((Y : Matrix (Fin m) (Fin m) ℝ) * X)) : ℂ) * ((X.det : ℂ) ^ (a - p)))
+      (fun X => (expTrace (-((Y : Matrix (Fin m) (Fin m) ℝ) * X)) : ℂ) * ((X.det : ℂ) ^ (a - p)))
       (multivariateGamma m a * ((Y : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ (-a)) :=
     fun Y hY => hasIntegralOn_laplace_det_cpow hY ha
   set a' : ℂ := (a.re : ℂ)
@@ -435,11 +440,11 @@ lemma hasIntegralOn_posDefCone_multivariateBeta {m : ℕ} (hm : 1 ≤ m) {a b : 
       (x : ℂ) ^ ((q.re : ℝ) : ℂ) := by
     intro x hx q
     rw [Complex.norm_cpow_eq_rpow_re_of_pos hx, Complex.ofReal_cpow hx.le]
-  set r : SymMatrix m → ℝ := fun Y => etr (-(Y : Matrix (Fin m) (Fin m) ℝ)) *
+  set r : SymMatrix m → ℝ := fun Y => expTrace (-(Y : Matrix (Fin m) (Fin m) ℝ)) *
     (Y : Matrix (Fin m) (Fin m) ℝ).det ^ ((c - p).re) with hr
   have hnormX : ∀ Y X : SymMatrix m, Y ∈ posDefCone m → X ∈ posDefCone m →
       ((‖f Y X‖ : ℝ) : ℂ) = (r Y : ℂ) *
-        ((etr (-((Y : Matrix (Fin m) (Fin m) ℝ) * (X : Matrix (Fin m) (Fin m) ℝ))) : ℂ) *
+        ((expTrace (-((Y : Matrix (Fin m) (Fin m) ℝ) * (X : Matrix (Fin m) (Fin m) ℝ))) : ℂ) *
           (((X : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ (a' - p))) := by
     intro Y X hY hX
     have hY : (Y : Matrix (Fin m) (Fin m) ℝ).PosDef := hY
@@ -448,7 +453,7 @@ lemma hasIntegralOn_posDefCone_multivariateBeta {m : ℕ} (hm : 1 ≤ m) {a b : 
       simp [a', p]
     rw [hre]
     simp only [hfdef, hr, norm_mul, Complex.norm_real, Real.norm_eq_abs,
-      abs_of_nonneg (Real.exp_pos _).le, etr, Complex.ofReal_mul]
+      abs_of_nonneg (Real.exp_pos _).le, expTrace, Complex.ofReal_mul]
     rw [hcpow_re _ hY.det_pos, hcpow_re _ hX.det_pos, Complex.ofReal_cpow hY.det_pos.le]
   have hnormInt : ∀ Y ∈ posDefCone m, ∫ X, ‖f Y X‖ ∂ν =
       ((r Y : ℂ) *
@@ -463,7 +468,7 @@ lemma hasIntegralOn_posDefCone_multivariateBeta {m : ℕ} (hm : 1 ≤ m) {a b : 
     rw [integrable_prod_iff hfm.aestronglyMeasurable]
     refine ⟨?_, ?_⟩
     · filter_upwards [ae_restrict_mem hmc] with Y hY
-      refine (((hinX Y hY).1).const_mul ((etr (-(Y : Matrix (Fin m) (Fin m) ℝ)) : ℂ) *
+      refine (((hinX Y hY).1).const_mul ((expTrace (-(Y : Matrix (Fin m) (Fin m) ℝ)) : ℂ) *
         (((Y : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ (c - p)))).congr ?_
       exact Filter.Eventually.of_forall fun X => rfl
     · simp only [Function.uncurry_apply_pair]
@@ -517,7 +522,7 @@ lemma hasIntegralOn_posDefCone_multivariateBeta {m : ℕ} (hm : 1 ≤ m) {a b : 
       rw [hinY X hX, ← mul_assoc, inv_mul_cancel₀ hΓc, one_mul]
     rw [h1, integral_const_mul, ← integral_integral_swap hfi]
     have h2 : ∫ Y, ∫ X, f Y X ∂ν ∂ν = ∫ Y, multivariateGamma m a *
-        ((etr (-(Y : Matrix (Fin m) (Fin m) ℝ)) : ℂ) *
+        ((expTrace (-(Y : Matrix (Fin m) (Fin m) ℝ)) : ℂ) *
           (((Y : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ (b - p))) ∂ν := by
       refine setIntegral_congr_fun hmc fun Y hY => ?_
       have hY' : (Y : Matrix (Fin m) (Fin m) ℝ).PosDef := hY
@@ -543,7 +548,7 @@ lemma hasIntegralOn_posDefCone_multivariateBeta_zero {a b : ℂ} :
     simp [multivariateBeta, multivariateGamma]
   rw [hv]
   refine hasIntegralOn_posDefCone_congr h fun X _ => ?_
-  simp [etr, Matrix.det_isEmpty, Matrix.trace]
+  simp [expTrace, Matrix.det_isEmpty, Matrix.trace]
 
 end LaplaceTransform
 end DLMF.MatrixArgument

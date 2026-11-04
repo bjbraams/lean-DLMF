@@ -25,7 +25,7 @@ Laplacian, but not these finite-dimensional spaces.
 
 ## Main definitions
 
-* `laplacianMv`: the Laplacian on multivariate polynomials.
+* `laplacianEuclidean`: the Laplacian on multivariate polynomials.
 * `IsHarmonicHomogeneous`: homogeneous harmonic polynomials of degree `k` in `n` variables.
 * `sphericalHarmonicInner`: the surface inner product on the unit sphere (AAR (9.4)).
 * `harmonicHomogeneousDim`: the dimension of the space of harmonic homogeneous polynomials.
@@ -58,12 +58,12 @@ noncomputable section
 namespace DLMF.SphericalHarmonics
 
 /-- Laplacian on multivariate polynomials. -/
-def laplacianMv {n : ℕ} (p : MvPolynomial (Fin n) ℝ) : MvPolynomial (Fin n) ℝ :=
+def laplacianEuclidean {n : ℕ} (p : MvPolynomial (Fin n) ℝ) : MvPolynomial (Fin n) ℝ :=
   ∑ i : Fin n, pderiv i (pderiv i p)
 
 /-- Homogeneous harmonic polynomials of degree `k` in `n` variables. -/
 def IsHarmonicHomogeneous {n : ℕ} (k : ℕ) (p : MvPolynomial (Fin n) ℝ) : Prop :=
-  p.IsHomogeneous k ∧ laplacianMv p = 0
+  p.IsHomogeneous k ∧ laplacianEuclidean p = 0
 
 /-- The real surface inner product of polynomial restrictions to the Euclidean unit sphere,
 AAR (9.4.4), p. 452. Mathlib's `Measure.toSphere` supplies surface measure from Lebesgue
@@ -104,13 +104,14 @@ theorem harmonicHomogeneousDim_three (k : ℕ) :
     rcases this with rfl | rfl <;> norm_num
 
 /-- Constants are harmonic. -/
-theorem laplacianMv_C {n : ℕ} (r : ℝ) : laplacianMv (C r : MvPolynomial (Fin n) ℝ) = 0 := by
-  simp [laplacianMv]
+theorem laplacianEuclidean_C {n : ℕ} (r : ℝ) : laplacianEuclidean
+    (C r : MvPolynomial (Fin n) ℝ) = 0 := by
+  simp [laplacianEuclidean]
 
 /-- Every constant polynomial is a homogeneous harmonic polynomial of degree `0`. -/
 theorem isHarmonicHomogeneous_C (n : ℕ) (r : ℝ) :
     IsHarmonicHomogeneous (n := n) 0 (C r) := by
-  refine ⟨?_, laplacianMv_C r⟩
+  refine ⟨?_, laplacianEuclidean_C r⟩
   exact MvPolynomial.isHomogeneous_C (σ := Fin n) (R := ℝ) r
 
 section Orthogonality
@@ -233,8 +234,8 @@ private lemma hhOrth_eval_smul {n m : ℕ} {P : MvPolynomial (Fin n) ℝ} (hP : 
 /-- The polynomial identity behind the Gaussian integration by parts. -/
 private lemma hhOrth_div {n : ℕ} (p q : MvPolynomial (Fin n) ℝ) :
     ∑ i : Fin n, pderiv i (q * pderiv i p - p * pderiv i q) =
-      q * laplacianMv p - p * laplacianMv q := by
-  simp only [laplacianMv, map_sub, Derivation.leibniz, smul_eq_mul, Finset.mul_sum,
+      q * laplacianEuclidean p - p * laplacianEuclidean q := by
+  simp only [laplacianEuclidean, map_sub, Derivation.leibniz, smul_eq_mul, Finset.mul_sum,
     ← Finset.sum_sub_distrib]
   refine Finset.sum_congr rfl fun i _ => ?_
   ring

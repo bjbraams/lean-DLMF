@@ -33,13 +33,13 @@ Asymptotic formulas and bounds for the `n`th prime `p_n` and the prime counting 
   infinitely often.
 * `riemannHypothesis_iff_primePi`: the Riemann hypothesis in terms of `π(x)` (DLMF 27.12.7).
 * `primeCounting_ap_siegelWalfisz`: the Siegel–Walfisz theorem (DLMF 27.12.8).
-* `not_prime_of_two_pow_not_modEq`, `isCarmichael_iff_dlmf`, `infinite_setOf_isCarmichael`:
-  the pseudoprime test and Carmichael numbers.
+* `not_prime_of_two_pow_not_modEq`, `isCarmichael_iff_composite_pow_modEq`,
+  `infinite_setOf_isCarmichael`: the pseudoprime test and Carmichael numbers.
 
 ## Implementation notes
 
 `p_n` is `nthPrime n` (`p₁ = 2`), `π(x)` is `primePi x`, and the logarithmic integral `li(x)`
-(DLMF 6.2.8) is the project's `DLMF.Confluent.Real.logIntLi` (a principal value at `t = 1`).
+(DLMF 6.2.8) is the project's `DLMF.Confluent.Real.logIntegralLi` (a principal value at `t = 1`).
 Statements equivalent to or conditional on the Riemann hypothesis use Mathlib's
 `RiemannHypothesis`.
 
@@ -59,8 +59,9 @@ open scoped Real
 
 namespace DLMF.NumberTheory
 
-/-- The logarithmic integral `li(x)` (DLMF 6.2.8), the project's `DLMF.Confluent.Real.logIntLi`. -/
-abbrev li (x : ℝ) : ℝ := DLMF.Confluent.Real.logIntLi x
+/-- The logarithmic integral `li(x)` (DLMF 6.2.8), the project's
+`DLMF.Confluent.Real.logIntegralLi`. -/
+abbrev li (x : ℝ) : ℝ := DLMF.Confluent.Real.logIntegralLi x
 
 /-- DLMF 27.12.1: `lim_{n→∞} p_n/(n ln n) = 1`. -/
 @[dlmf 27.12.E1]
@@ -286,7 +287,7 @@ private lemma isCarmichael_iff_pow_modEq {n : ℕ} :
 /-- §27.12: a Carmichael number is a composite `n` with `b^n ≡ b (mod n)` for all `b ∈ ℕ`; this is
 Mathlib's `Nat.IsCarmichael` (Korselt's criterion). -/
 @[dlmf 27.12]
-theorem isCarmichael_iff_dlmf {n : ℕ} :
+theorem isCarmichael_iff_composite_pow_modEq {n : ℕ} :
     n.IsCarmichael ↔ 1 < n ∧ ¬ n.Prime ∧ ∀ b : ℕ, b ^ n ≡ b [MOD n] :=
   isCarmichael_iff_pow_modEq
 

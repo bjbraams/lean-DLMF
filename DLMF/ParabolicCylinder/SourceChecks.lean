@@ -15,8 +15,9 @@ At `n = 0` and `z = 0` the printed formula DLMF 12.13.6 would give `U(1/2, 0) = 
 
 ## Main results
 
-* `pcfU_half_zero_ne_one`: `U(1/2, 0) ≠ 1`.
-* `dlmf_12_13_6_counterexample`: the printed formula DLMF 12.13.6 fails at `n = 0`, `z = 0`.
+* `parabolicCylinderU_half_zero_ne_one`: `U(1/2, 0) ≠ 1`.
+* `parabolicCylinderU_half_zero_ne_erfc_mul`: the printed formula DLMF 12.13.6 fails at `n = 0`,
+  `z = 0`.
 -/
 
 @[expose] public noncomputable section
@@ -25,10 +26,10 @@ open scoped Real Topology Nat
 namespace DLMF.Confluent
 
 /-- At n=0 and z=0, DLMF 12.13.6 would incorrectly assert this value equals one. -/
-theorem pcfU_half_zero_ne_one  :
-    pcfU (1/2) 0 ≠ 1 := by
+theorem parabolicCylinderU_half_zero_ne_one  :
+    parabolicCylinderU (1/2) 0 ≠ 1 := by
   intro h
-  rw [pcfU_zero] at h
+  rw [parabolicCylinderU_zero] at h
   norm_num at h
   have hp : (2:ℂ)^(1/2:ℂ)=(Real.sqrt 2:ℂ) := by
     have hh := (Complex.ofReal_cpow (by norm_num : 0 ≤ (2:ℝ)) (1/2:ℝ)).symm
@@ -45,8 +46,9 @@ theorem pcfU_half_zero_ne_one  :
 
 /-- Counterexample to the printed formula, using only the pre-existing cylinder and error-function
 theory. -/
-theorem dlmf_12_13_6_counterexample  :
-    pcfU (1/2) 0 ≠ exp (-(0:ℂ)^2/2)*erfc (0/Real.sqrt 2)*pcfU (-1/2) (I*0) := by
-  simpa [erfc,erf_zero,pcfU_neg_half] using pcfU_half_zero_ne_one
+theorem parabolicCylinderU_half_zero_ne_erfc_mul  :
+    parabolicCylinderU (1/2) 0 ≠
+        exp (-(0:ℂ)^2/2)*erfc (0/Real.sqrt 2)*parabolicCylinderU (-1/2) (I*0) := by
+  simpa [erfc,erf_zero,parabolicCylinderU_neg_half] using parabolicCylinderU_half_zero_ne_one
 
 end DLMF.Confluent

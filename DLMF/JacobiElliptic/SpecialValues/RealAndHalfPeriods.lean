@@ -21,15 +21,15 @@ DLMF §22.5(ii).
 
 ## Main results
 
-* `jacobiSnk_ofReal`, `jacobiCnk_ofReal`, `jacobiDnk_ofReal`: for `0 < k < 1` and real `u`,
+* `jacobiSn_ofReal`, `jacobiCn_ofReal`, `jacobiDn_ofReal`: for `0 < k < 1` and real `u`,
   the complex `sn, cn, dn` are the real-variable functions defined through the amplitude.
 * `jacobi_specialValues_HalfK`, `jacobi_specialValues_ThreeHalfK`,
   `jacobi_specialValues_HalfKp`, `jacobi_specialValues_ThreeHalfKp`,
   `jacobi_specialValues_HalfKKp`, `jacobi_specialValues_ThreeHalfKKp`: Table 22.5.2.
-* `tendsto_compEllIntKk_zero`, `tendsto_compEllIntKpk_one`: `K(k) → π/2` as `k → 0+` and
-  `K'(k) → π/2` as `k → 1-`.
-* `tendsto_norm_compEllIntKpk_zero`, `tendsto_norm_compEllIntKk_one`: `K'(k) → ∞` as `k → 0+`
-  and `K(k) → ∞` as `k → 1-`.
+* `tendsto_completeEllipticK_zero`, `tendsto_completeEllipticKPrime_one`: `K(k) → π/2` as `k → 0+`
+  and `K'(k) → π/2` as `k → 1-`.
+* `tendsto_norm_completeEllipticKPrime_zero`, `tendsto_norm_completeEllipticK_one`: `K'(k) → ∞` as
+  `k → 0+` and `K(k) → ∞` as `k → 1-`.
 
 ## Implementation notes
 
@@ -50,56 +50,58 @@ noncomputable section
 
 namespace DLMF.JacobiElliptic
 
-open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
+open DLMF.EllipticIntegrals (completeEllipticK completeEllipticKPrime)
 
 macro "jacobi_value_tac " hk:term:max : tactic => `(tactic|
-  (simp only [jacobiSnk_zero $hk, jacobiCnk_zero $hk, jacobiDnk_zero $hk, jacobiCdk_zero $hk,
-    jacobiSdk_zero $hk, jacobiNdk_zero $hk, jacobiDck_zero $hk, jacobiNck_zero $hk,
-    jacobiSck_zero $hk, mul_one, mul_zero, neg_zero] <;> try ring))
+  (simp only [jacobiSn_zero $hk, jacobiCn_zero $hk, jacobiDn_zero $hk, jacobiCd_zero $hk,
+    jacobiSd_zero $hk, jacobiNd_zero $hk, jacobiDc_zero $hk, jacobiNc_zero $hk,
+    jacobiSc_zero $hk, mul_one, mul_zero, neg_zero] <;> try ring))
 
 /-! ### Real bridges (DLMF 22.2.4–22.2.6 on the real line)
 
 For `0 < k < 1` and real `u`, the theta-quotient `sn, cn, dn` agree with the amplitude-based
-`Real.jacobiSnm, Real.jacobiCnm, Real.jacobiDnm` of parameter `m = k²`: both triples solve
-`s' = cd, c' = -sd, d' = -k²sc` with `(s, c, d)(0) = (0, 1, 1)`, so they agree by ODE
-uniqueness (`ODE_solution_unique_of_mem_Ioo`). (Moved here from `Basic`.) -/
+`Real.jacobiSnOfParameter, Real.jacobiCnOfParameter, Real.jacobiDnOfParameter` of parameter
+`m = k²`: both triples solve `s' = cd, c' = -sd, d' = -k²sc` with `(s, c, d)(0) = (0, 1, 1)`, so
+they agree by ODE uniqueness (`ODE_solution_unique_of_mem_Ioo`). (Moved here from `Basic`.) -/
 
 /-- For real `0 < k < 1`, the complex `sn, cn, dn` have no pole on the real line. -/
 theorem jacobiLetterTheta_n_ne_zero_of_real {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (u : ℝ) :
-    jacobiLetterTheta .n (jacobiZetak u k) (jacobiTauk k) ≠ 0 := by
+    jacobiLetterTheta .n (jacobiThetaArgument u k) (jacobiTau k) ≠ 0 := by
   have hk := ofReal_mem_jacobiModulusDomain hk0 hk1
-  have hτ := jacobiTauk_im_pos hk
-  have hK := compEllIntKk_ofReal (k := k) (by nlinarith)
-  have hKpos : 0 < Real.compEllIntKm (k ^ 2) := Real.compEllIntKm_pos (by nlinarith)
-  have hz : jacobiZetak u k = ((u / (2 * Real.compEllIntKm (k ^ 2)) : ℝ) : ℂ) * π := by
-    rw [jacobiZetak, hK]; push_cast; field_simp
+  have hτ := jacobiTau_im_pos hk
+  have hK := completeEllipticK_ofReal (k := k) (by nlinarith)
+  have hKpos : 0 < Real.completeEllipticKOfParameter (k ^ 2) :=
+      Real.completeEllipticKOfParameter_pos (by nlinarith)
+  have hz : jacobiThetaArgument u k =
+      ((u / (2 * Real.completeEllipticKOfParameter (k ^ 2)) : ℝ) : ℂ) * π := by
+    rw [jacobiThetaArgument, hK]; push_cast; field_simp
   rw [hz, jacobiLetterTheta]
   exact div_ne_zero (jacobiThetaTau_real_mul_pi_ne_zero hτ _).1
       (by simpa using (jacobiThetaTau_real_mul_pi_ne_zero hτ 0).1)
 
 open Set in
 /-- Joint real-line identification of the complex and real `sn, cn, dn` (ODE uniqueness). -/
-private lemma jacobiSnk_cnk_dnk_ofReal {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (u : ℝ) :
-    jacobiSnk u k = (Real.jacobiSnm u (k ^ 2) : ℂ) ∧
-      jacobiCnk u k = (Real.jacobiCnm u (k ^ 2) : ℂ) ∧
-      jacobiDnk u k = (Real.jacobiDnm u (k ^ 2) : ℂ) := by
+private lemma jacobiSn_cnk_dnk_ofReal {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (u : ℝ) :
+    jacobiSn u k = (Real.jacobiSnOfParameter u (k ^ 2) : ℂ) ∧
+      jacobiCn u k = (Real.jacobiCnOfParameter u (k ^ 2) : ℂ) ∧
+      jacobiDn u k = (Real.jacobiDnOfParameter u (k ^ 2) : ℂ) := by
   have hk := ofReal_mem_jacobiModulusDomain hk0 hk1
   have hm : k ^ 2 < 1 := by nlinarith
-  set f : ℝ → ℂ × ℂ × ℂ := fun t => (jacobiSnk t k, jacobiCnk t k, jacobiDnk t k) with hf
+  set f : ℝ → ℂ × ℂ × ℂ := fun t => (jacobiSn t k, jacobiCn t k, jacobiDn t k) with hf
   set g : ℝ → ℂ × ℂ × ℂ := fun t =>
-    ((Real.jacobiSnm t (k ^ 2) : ℂ), (Real.jacobiCnm t (k ^ 2) : ℂ),
-      (Real.jacobiDnm t (k ^ 2) : ℂ)) with hg
+    ((Real.jacobiSnOfParameter t (k ^ 2) : ℂ), (Real.jacobiCnOfParameter t (k ^ 2) : ℂ),
+      (Real.jacobiDnOfParameter t (k ^ 2) : ℂ)) with hg
   set v : ℝ → ℂ × ℂ × ℂ → ℂ × ℂ × ℂ := fun _ x =>
     (x.2.1 * x.2.2, -(x.1 * x.2.2), -((k : ℂ) ^ 2 * x.1 * x.2.1)) with hv
   have hf' : ∀ t : ℝ, HasDerivAt f (v t (f t)) t := fun t => by
     have hz := jacobiLetterTheta_n_ne_zero_of_real hk0 hk1 t
-    exact ((hasDerivAt_jacobiSnk hk hz).comp_ofReal).prodMk
-      (((hasDerivAt_jacobiCnk hk hz).comp_ofReal).prodMk
-        ((hasDerivAt_jacobiDnk hk hz).comp_ofReal))
+    exact ((hasDerivAt_jacobiSn hk hz).comp_ofReal).prodMk
+      (((hasDerivAt_jacobiCn hk hz).comp_ofReal).prodMk
+        ((hasDerivAt_jacobiDn hk hz).comp_ofReal))
   have hg' : ∀ t : ℝ, HasDerivAt g (v t (g t)) t := fun t => by
-    have h1 := (Real.hasDerivAt_jacobiSnm hm t).ofReal_comp
-    have h2 := (Real.hasDerivAt_jacobiCnm hm t).ofReal_comp
-    have h3 := (Real.hasDerivAt_jacobiDnm hm t).ofReal_comp
+    have h1 := (Real.hasDerivAt_jacobiSnOfParameter hm t).ofReal_comp
+    have h2 := (Real.hasDerivAt_jacobiCnOfParameter hm t).ofReal_comp
+    have h3 := (Real.hasDerivAt_jacobiDnOfParameter hm t).ofReal_comp
     refine (HasDerivAt.prodMk h1 (HasDerivAt.prodMk h2 h3)).congr_deriv ?_
     simp only [hv, hg]; push_cast; rfl
   have hfc : Continuous f := continuous_iff_continuousAt.mpr fun t => (hf' t).continuousAt
@@ -118,8 +120,9 @@ private lemma jacobiSnk_cnk_dnk_ofReal {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (u 
       (s := Metric.closedBall 0 R)).exists_lipschitzOnWith_of_compact
     (isCompact_closedBall 0 R)
   have h0 : f 0 = g 0 := by
-    simp only [hf, hg, ofReal_zero, jacobiSnk_zero hk, jacobiCnk_zero hk, jacobiDnk_zero hk,
-      Real.jacobiSnm, Real.jacobiCnm, Real.jacobiDnm, Real.jacobiAmm_zero hm]
+    simp only [hf, hg, ofReal_zero, jacobiSn_zero hk, jacobiCn_zero hk, jacobiDn_zero hk,
+      Real.jacobiSnOfParameter, Real.jacobiCnOfParameter, Real.jacobiDnOfParameter,
+          Real.jacobiAmOfParameter_zero hm]
     norm_num
   have hu : u ∈ Ioo a b := ⟨by simp only [a]; linarith [neg_abs_le u], by
     simp only [b]; linarith [le_abs_self u]⟩
@@ -134,25 +137,25 @@ private lemma jacobiSnk_cnk_dnk_ofReal {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (u 
   exact key
 
 /-- Bridge to the real-variable `sn` (defined through the amplitude):
-for `0 < k < 1` and real `u`, `sn(u, k) = Real.jacobiSnm u (k²)`. -/
+for `0 < k < 1` and real `u`, `sn(u, k) = Real.jacobiSnOfParameter u (k²)`. -/
 @[dlmf 22.2.E4 "real bridge: 0 < k < 1, real argument; parameter m = k²"]
-theorem jacobiSnk_ofReal {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (u : ℝ) :
-    jacobiSnk u k = (Real.jacobiSnm u (k ^ 2) : ℂ) :=
-  (jacobiSnk_cnk_dnk_ofReal hk0 hk1 u).1
+theorem jacobiSn_ofReal {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (u : ℝ) :
+    jacobiSn u k = (Real.jacobiSnOfParameter u (k ^ 2) : ℂ) :=
+  (jacobiSn_cnk_dnk_ofReal hk0 hk1 u).1
 
 /-- Bridge to the real-variable `cn`: for `0 < k < 1` and real `u`,
-`cn(u, k) = Real.jacobiCnm u (k²)`. -/
+`cn(u, k) = Real.jacobiCnOfParameter u (k²)`. -/
 @[dlmf 22.2.E5 "real bridge: 0 < k < 1, real argument; parameter m = k²"]
-theorem jacobiCnk_ofReal {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (u : ℝ) :
-    jacobiCnk u k = (Real.jacobiCnm u (k ^ 2) : ℂ) :=
-  (jacobiSnk_cnk_dnk_ofReal hk0 hk1 u).2.1
+theorem jacobiCn_ofReal {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (u : ℝ) :
+    jacobiCn u k = (Real.jacobiCnOfParameter u (k ^ 2) : ℂ) :=
+  (jacobiSn_cnk_dnk_ofReal hk0 hk1 u).2.1
 
 /-- Bridge to the real-variable `dn`: for `0 < k < 1` and real `u`,
-`dn(u, k) = Real.jacobiDnm u (k²)`. -/
+`dn(u, k) = Real.jacobiDnOfParameter u (k²)`. -/
 @[dlmf 22.2.E6 "real bridge: 0 < k < 1, real argument; parameter m = k²"]
-theorem jacobiDnk_ofReal {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (u : ℝ) :
-    jacobiDnk u k = (Real.jacobiDnm u (k ^ 2) : ℂ) :=
-  (jacobiSnk_cnk_dnk_ofReal hk0 hk1 u).2.2
+theorem jacobiDn_ofReal {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (u : ℝ) :
+    jacobiDn u k = (Real.jacobiDnOfParameter u (k ^ 2) : ℂ) :=
+  (jacobiSn_cnk_dnk_ofReal hk0 hk1 u).2.2
 
 /-- Estimate under the stated parameter and domain assumptions: `0 < (w ^ (1 / 2 : ℂ)).re`. -/
 private lemma re_cpow_one_half_pos {w : ℂ} (hw : 0 < w.re) : 0 < (w ^ (1 / 2 : ℂ)).re :=
@@ -180,13 +183,13 @@ private lemma re_div_one_add_pos {a : ℂ} (ha : 0 < a.re) : 0 < (a / (1 + a)).r
 private lemma cpow_neg_one_half_sq (w : ℂ) : (w ^ (-(1 / 2) : ℂ)) ^ 2 = w⁻¹ := by
   rw [cpow_neg, inv_pow, Carlson.cpow_half_sq]
 
-/-- Estimate under the stated parameter and domain assumptions: `0 < (jacobiComodulusk k).re`. -/
-private lemma re_jacobiComodulusk_pos {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
-    0 < (jacobiComodulusk k).re := (jacobiComodulusk_mem_jacobiModulusDomain hk).1
+/-- Estimate under the stated parameter and domain assumptions: `0 < (jacobiComodulus k).re`. -/
+private lemma re_jacobiComodulus_pos {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
+    0 < (jacobiComodulus k).re := (jacobiComodulus_mem_jacobiModulusDomain hk).1
 
-/-- Differentiability at the specified argument: `DifferentiableAt ℂ jacobiComodulusk k`. -/
-private lemma differentiableAt_jacobiComodulusk {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
-    DifferentiableAt ℂ jacobiComodulusk k := by
+/-- Differentiability at the specified argument: `DifferentiableAt ℂ jacobiComodulus k`. -/
+private lemma differentiableAt_jacobiComodulus {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
+    DifferentiableAt ℂ jacobiComodulus k := by
   have hk' := hk
   rw [jacobiModulusDomain_eq] at hk'
   exact (by fun_prop : DifferentiableAt ℂ (fun k : ℂ => 1 - k ^ 2) k).cpow_const hk'.2
@@ -207,10 +210,10 @@ private lemma eqOn_of_sq_eq_of_re_pos {f g : ℂ → ℂ} (hf : DifferentiableOn
     linarith [hfr x h0 h1, hgr x h0 h1]
 
 /-- Composition of Glaisher's quotient at a constant real theta argument with `τ(k)`. -/
-private lemma differentiableOn_jacobiGlaisher_comp_jacobiTauk (p q : JacobiLetter) (c : ℂ)
+private lemma differentiableOn_jacobiGlaisher_comp_jacobiTau (p q : JacobiLetter) (c : ℂ)
     (hq : ∀ τ : ℂ, 0 < τ.im → jacobiLetterTheta q c τ ≠ 0) :
-    DifferentiableOn ℂ (fun k => jacobiGlaisher p q c (jacobiTauk k)) jacobiModulusDomain := by
-  refine differentiableOn_comp_jacobiTauk fun τ hτ => ?_
+    DifferentiableOn ℂ (fun k => jacobiGlaisher p q c (jacobiTau k)) jacobiModulusDomain := by
+  refine differentiableOn_comp_jacobiTau fun τ hτ => ?_
   have hl : ∀ r : JacobiLetter, DifferentiableAt ℂ (fun σ => jacobiLetterTheta r c σ) τ :=
     fun r => (differentiableAt_jacobiLetterTheta_uncurry r (x := (c, τ)) hτ).comp τ
       (f := fun σ : ℂ => (c, σ)) (by fun_prop)
@@ -219,12 +222,12 @@ private lemma differentiableOn_jacobiGlaisher_comp_jacobiTauk (p q : JacobiLette
   · simp only [hpq, ↓reduceIte]; exact differentiableAt_const _
   · simp only [hpq, ↓reduceIte]; exact (hl p).div (hl q) (hq τ hτ)
 
-/-- Identity under the stated parameter and domain assumptions: `jacobiZetak (compEllIntKk k / 2)
-k = ((1 / 4 : ℝ) : ℂ) * π`. -/
-private lemma jacobiZetak_compEllIntKk_div_two {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
-    jacobiZetak (compEllIntKk k / 2) k = ((1 / 4 : ℝ) : ℂ) * π := by
-  have := compEllIntKk_ne_zero hk
-  rw [jacobiZetak]; push_cast; field_simp; ring
+/-- Identity under the stated parameter and domain assumptions:
+`jacobiThetaArgument (completeEllipticK k / 2) k = ((1 / 4 : ℝ) : ℂ) * π`. -/
+private lemma jacobiThetaArgument_completeEllipticK_div_two {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
+    jacobiThetaArgument (completeEllipticK k / 2) k = ((1 / 4 : ℝ) : ℂ) * π := by
+  have := completeEllipticK_ne_zero hk
+  rw [jacobiThetaArgument]; push_cast; field_simp; ring
 
 /-- Nonvanishing under the stated hypotheses: `jacobiLetterTheta r (((1 / 4 : ℝ) : ℂ) * π) τ ≠ 0`.
 -/
@@ -260,146 +263,154 @@ private lemma jacobiLetterTheta_pi_div_four_ne_zero {τ : ℂ} (hτ : 0 < τ.im)
   · exact div_ne_zero h4 n4
 
 /-- Identity under the stated parameter and domain assumptions: `StrictMono fun u =>
-Real.jacobiAmm u m`. -/
-theorem strictMono_jacobiAmm {m : ℝ} (hm : m < 1) : StrictMono fun u => Real.jacobiAmm u m := by
-  simp only [Real.jacobiAmm, hm, ↓reduceDIte]
-  exact (Real.incEllIntFmOrderIso hm).symm.strictMono
+Real.jacobiAmOfParameter u m`. -/
+theorem strictMono_jacobiAmOfParameter {m : ℝ} (hm : m < 1) : StrictMono fun u =>
+    Real.jacobiAmOfParameter u m := by
+  simp only [Real.jacobiAmOfParameter, hm, ↓reduceDIte]
+  exact (Real.incompleteEllipticFOfParameterOrderIso hm).symm.strictMono
 
 /-- The values at `K/2` up to the choice of square roots. -/
-private lemma jacobi_compEllIntKk_div_two_relations {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
-    jacobiDnk (compEllIntKk k / 2) k ^ 2 = jacobiComodulusk k ∧
-      jacobiSnk (compEllIntKk k / 2) k ^ 2 * (1 + jacobiComodulusk k) = 1 ∧
-      jacobiCnk (compEllIntKk k / 2) k =
-        jacobiSnk (compEllIntKk k / 2) k * jacobiDnk (compEllIntKk k / 2) k := by
-  have hτ := jacobiTauk_im_pos hk
-  set u := compEllIntKk k / 2 with hu
-  have hreg : ∀ r, JacobiRegulark r u k := fun r => by
-    unfold JacobiRegulark; rw [hu, jacobiZetak_compEllIntKk_div_two hk];
+private lemma jacobi_completeEllipticK_div_two_relations {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
+    jacobiDn (completeEllipticK k / 2) k ^ 2 = jacobiComodulus k ∧
+      jacobiSn (completeEllipticK k / 2) k ^ 2 * (1 + jacobiComodulus k) = 1 ∧
+      jacobiCn (completeEllipticK k / 2) k =
+        jacobiSn (completeEllipticK k / 2) k * jacobiDn (completeEllipticK k / 2) k := by
+  have hτ := jacobiTau_im_pos hk
+  set u := completeEllipticK k / 2 with hu
+  have hreg : ∀ r, IsJacobiRegular r u k := fun r => by
+    unfold IsJacobiRegular; rw [hu, jacobiThetaArgument_completeEllipticK_div_two hk];
         exact jacobiLetterTheta_pi_div_four_ne_zero hτ r
-  have hd : jacobiDnk u k ≠ 0 := jacobiPQk_ne_zero (by decide) (hreg .d) (hreg .n)
-  have hm : -u + compEllIntKk k = u := by rw [hu]; ring
-  have e1 := (jacobiSnk_shift hk (-u)).1
-  have e3 := (jacobiDnk_shift hk (-u)).1
+  have hd : jacobiDn u k ≠ 0 := jacobiPQ_ne_zero (by decide) (hreg .d) (hreg .n)
+  have hm : -u + completeEllipticK k = u := by rw [hu]; ring
+  have e1 := (jacobiSn_shift hk (-u)).1
+  have e3 := (jacobiDn_shift hk (-u)).1
   rw [hm] at e1 e3
-  rw [jacobiCdk, jacobiPQk_neg, ← jacobiCdk] at e1
-  rw [jacobiNdk, jacobiPQk_neg, ← jacobiNdk] at e3
+  rw [jacobiCd, jacobiPQ_neg, ← jacobiCd] at e1
+  rw [jacobiNd, jacobiPQ_neg, ← jacobiNd] at e3
   simp only [ne_eq, reduceCtorEq, not_false_eq_true, decide_true, not_true_eq_false,
     ↓reduceIte, Bool.not_eq_true, eq_self_iff_true] at e1 e3
-  obtain ⟨-, -, -, -, -, -, hsd, hcd, hnd⟩ := jacobiPQk_eq_div_of_regular_n (hreg .n)
+  obtain ⟨-, -, -, -, -, -, hsd, hcd, hnd⟩ := jacobiPQ_eq_div_of_regular_n (hreg .n)
   rw [hcd] at e1; rw [hnd] at e3
   obtain ⟨hsc, -⟩ := jacobi_sq_sum hk (hreg .n)
-  have hdd : jacobiDnk u k ^ 2 = jacobiComodulusk k := by
+  have hdd : jacobiDn u k ^ 2 = jacobiComodulus k := by
     field_simp at e3; linear_combination e3
   refine ⟨hdd, ?_, ?_⟩
   · field_simp at e1
-    have hc : jacobiCnk u k = jacobiSnk u k * jacobiDnk u k := by linear_combination -e1
+    have hc : jacobiCn u k = jacobiSn u k * jacobiDn u k := by linear_combination -e1
     rw [hc] at hsc
-    linear_combination hsc - jacobiSnk u k ^ 2 * hdd
+    linear_combination hsc - jacobiSn u k ^ 2 * hdd
   · field_simp at e1; linear_combination -e1
 
 /-- Table 22.5.2: `sn`, `cn`, `dn` at `z = K/2` (principal powers). -/
 @[dlmf 22.5.T2]
 theorem jacobi_specialValues_HalfK {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
-    jacobiSnk (compEllIntKk k / 2) k = (1 + jacobiComodulusk k) ^ (-(1 / 2) : ℂ) ∧
-      jacobiCnk (compEllIntKk k / 2) k = (jacobiComodulusk k / (1 + jacobiComodulusk k)) ^
+    jacobiSn (completeEllipticK k / 2) k = (1 + jacobiComodulus k) ^ (-(1 / 2) : ℂ) ∧
+      jacobiCn (completeEllipticK k / 2) k = (jacobiComodulus k / (1 + jacobiComodulus k)) ^
           (1 / 2 : ℂ) ∧
-      jacobiDnk (compEllIntKk k / 2) k = jacobiComodulusk k ^ (1 / 2 : ℂ) := by
+      jacobiDn (completeEllipticK k / 2) k = jacobiComodulus k ^ (1 / 2 : ℂ) := by
   -- holomorphy of the three left-hand sides
   have hL : ∀ p q : JacobiLetter, q ≠ .s → DifferentiableOn ℂ
-      (fun k => jacobiPQk p q (compEllIntKk k / 2) k) jacobiModulusDomain := by
+      (fun k => jacobiPQ p q (completeEllipticK k / 2) k) jacobiModulusDomain := by
     intro p q _
-    refine (differentiableOn_jacobiGlaisher_comp_jacobiTauk p q _
+    refine (differentiableOn_jacobiGlaisher_comp_jacobiTau p q _
       fun τ hτ => jacobiLetterTheta_pi_div_four_ne_zero hτ q).congr fun k hk => ?_
-    simp only [jacobiPQk, jacobiZetak_compEllIntKk_div_two hk]
-  have hkd : DifferentiableOn ℂ jacobiComodulusk jacobiModulusDomain := fun k hk =>
-    (differentiableAt_jacobiComodulusk hk).differentiableWithinAt
+    simp only [jacobiPQ, jacobiThetaArgument_completeEllipticK_div_two hk]
+  have hkd : DifferentiableOn ℂ jacobiComodulus jacobiModulusDomain := fun k hk =>
+    (differentiableAt_jacobiComodulus hk).differentiableWithinAt
   have hslit : ∀ {w : ℂ}, 0 < w.re → w ∈ slitPlane := fun h => Or.inl h
-  have h1re : ∀ k ∈ jacobiModulusDomain, 0 < (1 + jacobiComodulusk k).re := fun k hk => by
-    simp only [add_re, one_re]; linarith [re_jacobiComodulusk_pos hk]
+  have h1re : ∀ k ∈ jacobiModulusDomain, 0 < (1 + jacobiComodulus k).re := fun k hk => by
+    simp only [add_re, one_re]; linarith [re_jacobiComodulus_pos hk]
   -- real positivity of the left-hand sides
   have hreal : ∀ x : ℝ, 0 < x → x < 1 → ∀ p : JacobiLetter, p ≠ .s → ∀ q : JacobiLetter,
-      jacobiPQk q .n (compEllIntKk x / 2) x = jacobiPQk q .n
-        ((Real.compEllIntKm (x ^ 2) / 2 : ℝ) : ℂ) x := by
+      jacobiPQ q .n (completeEllipticK x / 2) x = jacobiPQ q .n
+        ((Real.completeEllipticKOfParameter (x ^ 2) / 2 : ℝ) : ℂ) x := by
     intro x h0 h1 _ _ q
-    rw [compEllIntKk_ofReal (by nlinarith)]; push_cast; rfl
+    rw [completeEllipticK_ofReal (by nlinarith)]; push_cast; rfl
   have hm : ∀ x : ℝ, 0 < x → x < 1 → x ^ 2 < 1 := fun x h0 h1 => by nlinarith
   have hamm : ∀ x : ℝ, 0 < x → x < 1 →
-      0 < Real.jacobiAmm (Real.compEllIntKm (x ^ 2) / 2) (x ^ 2) ∧
-        Real.jacobiAmm (Real.compEllIntKm (x ^ 2) / 2) (x ^ 2) < π / 2 := by
+      0 < Real.jacobiAmOfParameter (Real.completeEllipticKOfParameter (x ^ 2) / 2) (x ^ 2) ∧
+        Real.jacobiAmOfParameter (Real.completeEllipticKOfParameter (x ^ 2) / 2)
+            (x ^ 2) < π / 2 := by
     intro x h0 h1
-    have hK := Real.compEllIntKm_pos (hm x h0 h1)
-    have a := strictMono_jacobiAmm (hm x h0 h1) (show 0 < Real.compEllIntKm (x ^ 2) / 2 by
+    have hK := Real.completeEllipticKOfParameter_pos (hm x h0 h1)
+    have a := strictMono_jacobiAmOfParameter (hm x h0 h1)
+        (show 0 < Real.completeEllipticKOfParameter (x ^ 2) / 2 by
       positivity)
-    have b := strictMono_jacobiAmm (hm x h0 h1)
-      (show Real.compEllIntKm (x ^ 2) / 2 < Real.compEllIntKm (x ^ 2) by linarith)
-    simp only [Real.jacobiAmm_zero (hm x h0 h1), Real.jacobiAmm_compEllIntKm (hm x h0 h1)] at a b
+    have b := strictMono_jacobiAmOfParameter (hm x h0 h1)
+      (show Real.completeEllipticKOfParameter (x ^ 2) / 2 <
+          Real.completeEllipticKOfParameter (x ^ 2) by linarith)
+    simp only [Real.jacobiAmOfParameter_zero (hm x h0 h1),
+        Real.jacobiAmOfParameter_completeEllipticKOfParameter (hm x h0 h1)] at a b
     exact ⟨a, b⟩
   refine ⟨?_, ?_, ?_⟩
-  · refine eqOn_of_sq_eq_of_re_pos (f := fun k => jacobiSnk (compEllIntKk k / 2) k)
-      (g := fun k => (1 + jacobiComodulusk k) ^ (-(1 / 2) : ℂ)) (hL .s .n (by decide))
+  · refine eqOn_of_sq_eq_of_re_pos (f := fun k => jacobiSn (completeEllipticK k / 2) k)
+      (g := fun k => (1 + jacobiComodulus k) ^ (-(1 / 2) : ℂ)) (hL .s .n (by decide))
       ?_ (fun x h0 h1 => ?_) (fun x h0 h1 => ?_) (fun x h0 h1 => ?_) hk
     · intro k hk
       exact ((hkd k hk).const_add 1).cpow_const (hslit (h1re k hk))
         |>.differentiableAt (isOpen_jacobiModulusDomain.mem_nhds hk) |>.differentiableWithinAt
-    · have h := (jacobi_compEllIntKk_div_two_relations (ofReal_mem_jacobiModulusDomain h0 h1)).2.1
-      have hne : (1 + jacobiComodulusk x) ≠ 0 := fun h' => by
+    · have h := (jacobi_completeEllipticK_div_two_relations
+          (ofReal_mem_jacobiModulusDomain h0 h1)).2.1
+      have hne : (1 + jacobiComodulus x) ≠ 0 := fun h' => by
         have := h1re x (ofReal_mem_jacobiModulusDomain h0 h1); rw [h'] at this; simp at this
       rw [cpow_neg_one_half_sq]
       field_simp
       linear_combination h
-    · simp only [jacobiSnk]
-      rw [hreal x h0 h1 .c (by decide) .s, ← jacobiSnk, jacobiSnk_ofReal h0 h1, ofReal_re,
-        Real.jacobiSnm]
+    · simp only [jacobiSn]
+      rw [hreal x h0 h1 .c (by decide) .s, ← jacobiSn, jacobiSn_ofReal h0 h1, ofReal_re,
+        Real.jacobiSnOfParameter]
       exact Real.sin_pos_of_pos_of_lt_pi (hamm x h0 h1).1 (by linarith [(hamm x h0 h1).2,
         Real.pi_pos])
     · exact re_cpow_neg_one_half_pos (h1re x (ofReal_mem_jacobiModulusDomain h0 h1))
-  · have hne : ∀ k ∈ jacobiModulusDomain, (1 + jacobiComodulusk k) ≠ 0 := fun k hk h' => by
+  · have hne : ∀ k ∈ jacobiModulusDomain, (1 + jacobiComodulus k) ≠ 0 := fun k hk h' => by
       have := h1re k hk; rw [h'] at this; simp at this
-    refine eqOn_of_sq_eq_of_re_pos (f := fun k => jacobiCnk (compEllIntKk k / 2) k)
-      (g := fun k => (jacobiComodulusk k / (1 + jacobiComodulusk k)) ^ (1 / 2 : ℂ))
+    refine eqOn_of_sq_eq_of_re_pos (f := fun k => jacobiCn (completeEllipticK k / 2) k)
+      (g := fun k => (jacobiComodulus k / (1 + jacobiComodulus k)) ^ (1 / 2 : ℂ))
       (hL .c .n (by decide)) ?_ (fun x h0 h1 => ?_) (fun x h0 h1 => ?_) (fun x h0 h1 => ?_) hk
     · intro k hk
       exact ((hkd k hk).div ((hkd k hk).const_add 1) (hne k hk)).cpow_const
-        (hslit (re_div_one_add_pos (re_jacobiComodulusk_pos hk)))
+        (hslit (re_div_one_add_pos (re_jacobiComodulus_pos hk)))
         |>.differentiableAt (isOpen_jacobiModulusDomain.mem_nhds hk) |>.differentiableWithinAt
     · obtain ⟨hd, hs, hc⟩ :=
-          jacobi_compEllIntKk_div_two_relations (ofReal_mem_jacobiModulusDomain h0 h1)
+          jacobi_completeEllipticK_div_two_relations (ofReal_mem_jacobiModulusDomain h0 h1)
       have hn := hne x (ofReal_mem_jacobiModulusDomain h0 h1)
       rw [Carlson.cpow_half_sq, hc, mul_pow, hd]
       field_simp
-      linear_combination jacobiComodulusk x * hs
-    · simp only [jacobiCnk]
-      rw [hreal x h0 h1 .c (by decide) .c, ← jacobiCnk, jacobiCnk_ofReal h0 h1, ofReal_re,
-        Real.jacobiCnm]
+      linear_combination jacobiComodulus x * hs
+    · simp only [jacobiCn]
+      rw [hreal x h0 h1 .c (by decide) .c, ← jacobiCn, jacobiCn_ofReal h0 h1, ofReal_re,
+        Real.jacobiCnOfParameter]
       exact Real.cos_pos_of_mem_Ioo ⟨by linarith [(hamm x h0 h1).1, Real.pi_pos],
         (hamm x h0 h1).2⟩
     · exact re_cpow_one_half_pos (re_div_one_add_pos
-        (re_jacobiComodulusk_pos (ofReal_mem_jacobiModulusDomain h0 h1)))
-  · refine eqOn_of_sq_eq_of_re_pos (f := fun k => jacobiDnk (compEllIntKk k / 2) k)
-      (g := fun k => jacobiComodulusk k ^ (1 / 2 : ℂ))
+        (re_jacobiComodulus_pos (ofReal_mem_jacobiModulusDomain h0 h1)))
+  · refine eqOn_of_sq_eq_of_re_pos (f := fun k => jacobiDn (completeEllipticK k / 2) k)
+      (g := fun k => jacobiComodulus k ^ (1 / 2 : ℂ))
       (hL .d .n (by decide)) ?_ (fun x h0 h1 => ?_) (fun x h0 h1 => ?_) (fun x h0 h1 => ?_) hk
     · intro k hk
-      exact (hkd k hk).cpow_const (hslit (re_jacobiComodulusk_pos hk))
+      exact (hkd k hk).cpow_const (hslit (re_jacobiComodulus_pos hk))
         |>.differentiableAt (isOpen_jacobiModulusDomain.mem_nhds hk) |>.differentiableWithinAt
     · rw [Carlson.cpow_half_sq];
-          exact (jacobi_compEllIntKk_div_two_relations (ofReal_mem_jacobiModulusDomain h0 h1)).1
-    · simp only [jacobiDnk]
-      rw [hreal x h0 h1 .c (by decide) .d, ← jacobiDnk, jacobiDnk_ofReal h0 h1, ofReal_re]
-      exact Real.jacobiDnm_pos (hm x h0 h1) _
-    · exact re_cpow_one_half_pos (re_jacobiComodulusk_pos (ofReal_mem_jacobiModulusDomain h0 h1))
+          exact (jacobi_completeEllipticK_div_two_relations
+              (ofReal_mem_jacobiModulusDomain h0 h1)).1
+    · simp only [jacobiDn]
+      rw [hreal x h0 h1 .c (by decide) .d, ← jacobiDn, jacobiDn_ofReal h0 h1, ofReal_re]
+      exact Real.jacobiDnOfParameter_pos (hm x h0 h1) _
+    · exact re_cpow_one_half_pos (re_jacobiComodulus_pos (ofReal_mem_jacobiModulusDomain h0 h1))
 
 /-- Table 22.5.2: `sn`, `cn`, `dn` at `z = 3K/2` (principal powers). -/
 @[dlmf 22.5.T2]
 theorem jacobi_specialValues_ThreeHalfK {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
-    jacobiSnk (3 * compEllIntKk k / 2) k = (1 + jacobiComodulusk k) ^ (-(1 / 2) : ℂ) ∧
-      jacobiCnk (3 * compEllIntKk k / 2) k = -(jacobiComodulusk k / (1 + jacobiComodulusk k)) ^
+    jacobiSn (3 * completeEllipticK k / 2) k = (1 + jacobiComodulus k) ^ (-(1 / 2) : ℂ) ∧
+      jacobiCn (3 * completeEllipticK k / 2) k = -(jacobiComodulus k / (1 + jacobiComodulus k)) ^
           (1 / 2 : ℂ) ∧
-      jacobiDnk (3 * compEllIntKk k / 2) k = jacobiComodulusk k ^ (1 / 2 : ℂ) := by
+      jacobiDn (3 * completeEllipticK k / 2) k = jacobiComodulus k ^ (1 / 2 : ℂ) := by
   obtain ⟨h1, h2, h3⟩ := jacobi_specialValues_HalfK hk
-  have e : 3 * compEllIntKk k / 2 = -(compEllIntKk k / 2) + 2 * compEllIntKk k := by ring
-  rw [e, (jacobiSnk_shift hk _).2.2.2.1, (jacobiCnk_shift hk _).2.2.2.1,
-    (jacobiDnk_shift hk _).2.2.2.1, jacobiSnk, jacobiCnk, jacobiDnk, jacobiPQk_neg,
-    jacobiPQk_neg, jacobiPQk_neg, ← jacobiSnk, ← jacobiCnk, ← jacobiDnk, h1, h2, h3]
+  have e : 3 * completeEllipticK k / 2 = -(completeEllipticK k / 2) + 2 *
+      completeEllipticK k := by ring
+  rw [e, (jacobiSn_shift hk _).2.2.2.1, (jacobiCn_shift hk _).2.2.2.1,
+    (jacobiDn_shift hk _).2.2.2.1, jacobiSn, jacobiCn, jacobiDn, jacobiPQ_neg,
+    jacobiPQ_neg, jacobiPQ_neg, ← jacobiSn, ← jacobiCn, ← jacobiDn, h1, h2, h3]
   simp
 
 /-- `|Im a| < Re a` (argument in `(-π/4, π/4)`). -/
@@ -444,36 +455,37 @@ private lemma eq_of_sq_eq_of_re_pos {a b : ℂ} (h : a ^ 2 = b ^ 2) (ha : 0 < a.
   · exact sub_eq_zero.mp h'
   · have := congrArg re h'; simp only [add_re, zero_re] at this; linarith
 
-/-- Identity under the stated parameter and domain assumptions: `jacobiComodulusk
-(jacobiComodulusk k) = k`. -/
-private lemma jacobiComodulusk_jacobiComodulusk {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
-    jacobiComodulusk (jacobiComodulusk k) = k := by
+/-- Identity under the stated parameter and domain assumptions: `jacobiComodulus
+(jacobiComodulus k) = k`. -/
+private lemma jacobiComodulus_jacobiComodulus {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
+    jacobiComodulus (jacobiComodulus k) = k := by
   have hsl : k ^ 2 ∈ slitPlane := by
     rcases sq_im_ne_zero_or_mem_Ioo_of_mem_jacobiModulusDomain hk with h | ⟨-, h, -⟩
     · exact Or.inr h
     · exact Or.inl h
-  rw [jacobiComodulusk, jacobiComodulusk_sq, sub_sub_cancel]
+  rw [jacobiComodulus, jacobiComodulus_sq, sub_sub_cancel]
   exact eq_of_sq_eq_of_re_pos (Carlson.cpow_half_sq _) (Carlson.re_cpow_half_pos hsl) hk.1
 
 /-- Table 22.5.2: `sn`, `cn`, `dn` at `z = iK'/2` (principal powers). -/
 @[dlmf 22.5.T2]
 theorem jacobi_specialValues_HalfKp {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
-    jacobiSnk (I * compEllIntKpk k / 2) k = I * k ^ (-(1 / 2) : ℂ) ∧
-      jacobiCnk (I * compEllIntKpk k / 2) k = (1 + k) ^ (1 / 2 : ℂ) * k ^ (-(1 / 2) : ℂ) ∧
-      jacobiDnk (I * compEllIntKpk k / 2) k = (1 + k) ^ (1 / 2 : ℂ) := by
-  have hk' := jacobiComodulusk_mem_jacobiModulusDomain hk
-  have hkk := jacobiComodulusk_jacobiComodulusk hk
+    jacobiSn (I * completeEllipticKPrime k / 2) k = I * k ^ (-(1 / 2) : ℂ) ∧
+      jacobiCn (I * completeEllipticKPrime k / 2) k = (1 + k) ^ (1 / 2 : ℂ) * k ^ (-(1 / 2) : ℂ) ∧
+      jacobiDn (I * completeEllipticKPrime k / 2) k = (1 + k) ^ (1 / 2 : ℂ) := by
+  have hk' := jacobiComodulus_mem_jacobiModulusDomain hk
+  have hkk := jacobiComodulus_jacobiComodulus hk
   obtain ⟨s1, c1, d1⟩ := jacobi_specialValues_HalfK hk'
   rw [hkk] at s1 c1 d1
-  have hτ' := jacobiTauk_im_pos hk'
-  have hreg : JacobiRegulark .n (compEllIntKk (jacobiComodulusk k) / 2) (jacobiComodulusk k) := by
-    unfold JacobiRegulark; rw [jacobiZetak_compEllIntKk_div_two hk'];
+  have hτ' := jacobiTau_im_pos hk'
+  have hreg : IsJacobiRegular .n (completeEllipticK (jacobiComodulus k) / 2)
+      (jacobiComodulus k) := by
+    unfold IsJacobiRegular; rw [jacobiThetaArgument_completeEllipticK_div_two hk'];
         exact jacobiLetterTheta_pi_div_four_ne_zero hτ' _
-  obtain ⟨-, -, -, hsc, hdc, hnc, -, -, -⟩ := jacobiPQk_eq_div_of_regular_n hreg
+  obtain ⟨-, -, -, hsc, hdc, hnc, -, -, -⟩ := jacobiPQ_eq_div_of_regular_n hreg
   obtain ⟨t1, t2, t3, -⟩ := jacobi_imaginary_transformation hk
-    (compEllIntKk (jacobiComodulusk k) / 2)
-  have e : I * compEllIntKpk k / 2 = I * (compEllIntKk (jacobiComodulusk k) / 2) := by
-    rw [compEllIntKk_jacobiComodulusk_eq_compEllIntKpk]; ring
+    (completeEllipticK (jacobiComodulus k) / 2)
+  have e : I * completeEllipticKPrime k / 2 = I * (completeEllipticK (jacobiComodulus k) / 2) := by
+    rw [completeEllipticK_jacobiComodulus_eq_completeEllipticKPrime]; ring
   rw [e, t1, t2, t3, hsc, hdc, hnc, s1, c1, d1]
   have hk0 : k ≠ 0 := fun h => by have := hk.1; rw [h] at this; simp at this
   have hre1 : 0 < (1 + k).re := by simp only [add_re, one_re]; linarith [hk.1]
@@ -505,15 +517,16 @@ theorem jacobi_specialValues_HalfKp {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
 /-- Table 22.5.2: `sn`, `cn`, `dn` at `z = 3iK'/2` (principal powers). -/
 @[dlmf 22.5.T2]
 theorem jacobi_specialValues_ThreeHalfKp {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
-    jacobiSnk (3 * (I * compEllIntKpk k) / 2) k = -(I * k ^ (-(1 / 2) : ℂ)) ∧
-      jacobiCnk (3 * (I * compEllIntKpk k) / 2) k = -((1 + k) ^ (1 / 2 : ℂ) * k ^ (-(1 / 2) : ℂ)) ∧
-      jacobiDnk (3 * (I * compEllIntKpk k) / 2) k = -(1 + k) ^ (1 / 2 : ℂ) := by
+    jacobiSn (3 * (I * completeEllipticKPrime k) / 2) k = -(I * k ^ (-(1 / 2) : ℂ)) ∧
+      jacobiCn (3 * (I * completeEllipticKPrime k) / 2) k =
+          -((1 + k) ^ (1 / 2 : ℂ) * k ^ (-(1 / 2) : ℂ)) ∧
+      jacobiDn (3 * (I * completeEllipticKPrime k) / 2) k = -(1 + k) ^ (1 / 2 : ℂ) := by
   obtain ⟨h1, h2, h3⟩ := jacobi_specialValues_HalfKp hk
-  have e : 3 * (I * compEllIntKpk k) / 2 = -(I * compEllIntKpk k / 2) +
-      2 * (I * compEllIntKpk k) := by ring
-  rw [e, (jacobiSnk_shift hk _).2.2.2.2.2, (jacobiCnk_shift hk _).2.2.2.2.2,
-    (jacobiDnk_shift hk _).2.2.2.2.2, jacobiSnk, jacobiCnk, jacobiDnk, jacobiPQk_neg,
-    jacobiPQk_neg, jacobiPQk_neg, ← jacobiSnk, ← jacobiCnk, ← jacobiDnk, h1, h2, h3]
+  have e : 3 * (I * completeEllipticKPrime k) / 2 = -(I * completeEllipticKPrime k / 2) +
+      2 * (I * completeEllipticKPrime k) := by ring
+  rw [e, (jacobiSn_shift hk _).2.2.2.2.2, (jacobiCn_shift hk _).2.2.2.2.2,
+    (jacobiDn_shift hk _).2.2.2.2.2, jacobiSn, jacobiCn, jacobiDn, jacobiPQ_neg,
+    jacobiPQ_neg, jacobiPQ_neg, ← jacobiSn, ← jacobiCn, ← jacobiDn, h1, h2, h3]
   simp
 
 /-- Nonvanishing under the stated hypotheses: `jacobiThetaFourTau (((a : ℂ) + b * τ) * π) τ ≠ 0`. -/
@@ -529,16 +542,17 @@ private lemma jacobiThetaFourTau_ne_zero_of_ne_half {τ : ℂ} (hτ : 0 < τ.im)
     (by rw [h', zero_mul])
   exact hb n (by linarith [this.2])
 
-/-- The stated relation follows from the given hypotheses: `JacobiRegulark .n (I * compEllIntKpk k
-/ 2) k`. -/
-private lemma jacobiRegulark_n_I_mul_compEllIntKpk_div_two {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
-    JacobiRegulark .n (I * compEllIntKpk k / 2) k := by
-  have hτ := jacobiTauk_im_pos hk
-  have hK := compEllIntKk_ne_zero hk
-  unfold JacobiRegulark
-  have hz : jacobiZetak (I * compEllIntKpk k / 2) k =
-      (((0 : ℝ) : ℂ) + ((1 / 4 : ℝ) : ℂ) * jacobiTauk k) * π := by
-    rw [jacobiZetak, jacobiTauk]; push_cast; field_simp; ring
+/-- The stated relation follows from the given hypotheses:
+`IsJacobiRegular .n (I * completeEllipticKPrime k / 2) k`. -/
+private lemma isJacobiRegular_n_I_mul_completeEllipticKPrime_div_two {k : ℂ}
+    (hk : k ∈ jacobiModulusDomain) :
+    IsJacobiRegular .n (I * completeEllipticKPrime k / 2) k := by
+  have hτ := jacobiTau_im_pos hk
+  have hK := completeEllipticK_ne_zero hk
+  unfold IsJacobiRegular
+  have hz : jacobiThetaArgument (I * completeEllipticKPrime k / 2) k =
+      (((0 : ℝ) : ℂ) + ((1 / 4 : ℝ) : ℂ) * jacobiTau k) * π := by
+    rw [jacobiThetaArgument, jacobiTau]; push_cast; field_simp; ring
   rw [hz, jacobiLetterTheta]
   refine div_ne_zero (jacobiThetaFourTau_ne_zero_of_ne_half hτ 0 (1 / 4) fun n h => ?_)
     (jacobiThetaFourTau_zero_ne_zero hτ)
@@ -546,20 +560,20 @@ private lemma jacobiRegulark_n_I_mul_compEllIntKpk_div_two {k : ℂ} (hk : k ∈
   have h2 : (4 * n + 1 : ℤ) = 0 := by exact_mod_cast h1
   omega
 
-/-- The stated relation follows from the given hypotheses: `JacobiRegulark r (compEllIntKk k / 2)
-k`. -/
-private lemma jacobiRegulark_compEllIntKk_div_two {k : ℂ} (hk : k ∈ jacobiModulusDomain)
+/-- The stated relation follows from the given hypotheses:
+`IsJacobiRegular r (completeEllipticK k / 2) k`. -/
+private lemma isJacobiRegular_completeEllipticK_div_two {k : ℂ} (hk : k ∈ jacobiModulusDomain)
     (r : JacobiLetter) :
-    JacobiRegulark r (compEllIntKk k / 2) k := by
-  unfold JacobiRegulark; rw [jacobiZetak_compEllIntKk_div_two hk]
-  exact jacobiLetterTheta_pi_div_four_ne_zero (jacobiTauk_im_pos hk) r
+    IsJacobiRegular r (completeEllipticK k / 2) k := by
+  unfold IsJacobiRegular; rw [jacobiThetaArgument_completeEllipticK_div_two hk]
+  exact jacobiLetterTheta_pi_div_four_ne_zero (jacobiTau_im_pos hk) r
 
 /-- `k + k' ≠ -1`, so `1 + k + k' ≠ 0`. -/
-private lemma one_add_add_jacobiComodulusk_ne_zero {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
-    1 + k + jacobiComodulusk k ≠ 0 := fun h => by
+private lemma one_add_add_jacobiComodulus_ne_zero {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
+    1 + k + jacobiComodulus k ≠ 0 := fun h => by
   have := congrArg re h
   simp only [add_re, one_re, zero_re] at this
-  linarith [hk.1, re_jacobiComodulusk_pos hk]
+  linarith [hk.1, re_jacobiComodulus_pos hk]
 
 /-- Positive reals. -/
 def IsPosReal (a : ℂ) : Prop := a.im = 0 ∧ 0 < a.re
@@ -599,11 +613,11 @@ private lemma isPosReal_one : IsPosReal 1 := ⟨by simp, by simp⟩
 /-- The stated relation follows from the given hypotheses: `IsPosReal (x : ℂ)`. -/
 private lemma isPosReal_ofReal {x : ℝ} (hx : 0 < x) : IsPosReal (x : ℂ) := ⟨ofReal_im _, by simpa⟩
 
-/-- The stated relation follows from the given hypotheses: `IsPosReal (jacobiComodulusk x)`. -/
-private lemma isPosReal_jacobiComodulusk {x : ℝ} (h0 : 0 < x) (h1 : x < 1) :
-    IsPosReal (jacobiComodulusk x) := by
+/-- The stated relation follows from the given hypotheses: `IsPosReal (jacobiComodulus x)`. -/
+private lemma isPosReal_jacobiComodulus {x : ℝ} (h0 : 0 < x) (h1 : x < 1) :
+    IsPosReal (jacobiComodulus x) := by
   have : (1 - (x : ℂ) ^ 2) = ((1 - x ^ 2 : ℝ) : ℂ) := by push_cast; ring
-  rw [jacobiComodulusk, this, show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring]
+  rw [jacobiComodulus, this, show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring]
   exact isPosReal_cpow_ofReal (isPosReal_ofReal (by nlinarith)) _
 
 /-- Identity under the stated parameter and domain assumptions: `(a + I * b).re = a.re`. -/
@@ -612,50 +626,50 @@ private lemma re_add_I_mul_of_isPosReal {a b : ℂ} (hb : IsPosReal b) :
   simp [hb.1]
 
 /-- The values at `(K + iK')/2` from the addition theorem, in terms of the half-period values. -/
-private lemma jacobi_compEllIntKk_add_I_mul_compEllIntKpk_div_two {k : ℂ}
+private lemma jacobi_completeEllipticK_add_I_mul_completeEllipticKPrime_div_two {k : ℂ}
     (hk : k ∈ jacobiModulusDomain) :
-    let κ := jacobiComodulusk k
+    let κ := jacobiComodulus k
     let S := (1 + κ) ^ (-(1 / 2) : ℂ)
     let Q := k ^ (-(1 / 2) : ℂ)
     let A := (1 + k) ^ (1 / 2 : ℂ)
     let D := κ ^ (1 / 2 : ℂ)
-    jacobiSnk ((compEllIntKk k + I * compEllIntKpk k) / 2) k =
+    jacobiSn ((completeEllipticK k + I * completeEllipticKPrime k) / 2) k =
         S * Q * (1 + k) * (1 + κ) / (1 + k + κ) + I * (S * Q * κ * (1 + κ) / (1 + k + κ)) ∧
-      jacobiCnk ((compEllIntKk k + I * compEllIntKpk k) / 2) k =
+      jacobiCn ((completeEllipticK k + I * completeEllipticKPrime k) / 2) k =
         S * D * A * Q * (1 + κ) / (1 + k + κ) - I * (S * D * A * Q * (1 + κ) / (1 + k + κ)) ∧
-      jacobiDnk ((compEllIntKk k + I * compEllIntKpk k) / 2) k =
+      jacobiDn ((completeEllipticK k + I * completeEllipticKPrime k) / 2) k =
         D * A * (1 + κ) / (1 + k + κ) - I * (D * A * k / (1 + k + κ)) := by
   intro κ S Q A D
   obtain ⟨s1, -, d1⟩ := jacobi_specialValues_HalfK hk
-  obtain ⟨-, -, hc1⟩ := jacobi_compEllIntKk_div_two_relations hk
+  obtain ⟨-, -, hc1⟩ := jacobi_completeEllipticK_div_two_relations hk
   obtain ⟨s2, c2, d2⟩ := jacobi_specialValues_HalfKp hk
-  have hu := jacobiRegulark_compEllIntKk_div_two hk .n
-  have hv := jacobiRegulark_n_I_mul_compEllIntKpk_div_two hk
-  have e : (compEllIntKk k + I * compEllIntKpk k) / 2 =
-      compEllIntKk k / 2 + I * compEllIntKpk k / 2 := by ring
+  have hu := isJacobiRegular_completeEllipticK_div_two hk .n
+  have hv := isJacobiRegular_n_I_mul_completeEllipticKPrime_div_two hk
+  have e : (completeEllipticK k + I * completeEllipticKPrime k) / 2 =
+      completeEllipticK k / 2 + I * completeEllipticKPrime k / 2 := by ring
   have hk0 : k ≠ 0 := fun h => by have := hk.1; rw [h] at this; simp at this
-  have hre1 : 0 < (1 + κ).re := by simp only [add_re, one_re]; linarith [re_jacobiComodulusk_pos hk]
+  have hre1 : 0 < (1 + κ).re := by simp only [add_re, one_re]; linarith [re_jacobiComodulus_pos hk]
   have h1κ : 1 + κ ≠ 0 := fun h => by rw [h] at hre1; simp at hre1
   have hSS : S ^ 2 * (1 + κ) = 1 := by
     simp only [S]; rw [cpow_neg_one_half_sq]; field_simp
   have hQQ : Q ^ 2 * k = 1 := by simp only [Q]; rw [cpow_neg_one_half_sq]; field_simp
   have hAA : A ^ 2 = 1 + k := Carlson.cpow_half_sq _
   have hDD : D ^ 2 = κ := Carlson.cpow_half_sq _
-  have hκκ : κ ^ 2 = 1 - k ^ 2 := jacobiComodulusk_sq k
+  have hκκ : κ ^ 2 = 1 - k ^ 2 := jacobiComodulus_sq k
   have hI : I ^ 2 = -1 := I_sq
-  have h3 := one_add_add_jacobiComodulusk_ne_zero hk
-  have s1' : jacobiSnk (compEllIntKk k / 2) k = S := s1
-  have d1' : jacobiDnk (compEllIntKk k / 2) k = D := d1
-  have s2' : jacobiSnk (I * compEllIntKpk k / 2) k = I * Q := s2
-  have c2' : jacobiCnk (I * compEllIntKpk k / 2) k = A * Q := c2
-  have d2' : jacobiDnk (I * compEllIntKpk k / 2) k = A := d2
+  have h3 := one_add_add_jacobiComodulus_ne_zero hk
+  have s1' : jacobiSn (completeEllipticK k / 2) k = S := s1
+  have d1' : jacobiDn (completeEllipticK k / 2) k = D := d1
+  have s2' : jacobiSn (I * completeEllipticKPrime k / 2) k = I * Q := s2
+  have c2' : jacobiCn (I * completeEllipticKPrime k / 2) k = A * Q := c2
+  have d2' : jacobiDn (I * completeEllipticKPrime k / 2) k = A := d2
   rw [s1', d1'] at hc1
   have hden0 : (1 - k ^ 2 * S ^ 2 * (I * Q) ^ 2) * (1 + κ) = 1 + k + κ := by
     linear_combination (-k ^ 2 * Q ^ 2 * I ^ 2) * hSS - k ^ 2 * Q ^ 2 * hI + k * hQQ
-  have hden : 1 - k ^ 2 * jacobiSnk (compEllIntKk k / 2) k ^ 2 *
-      jacobiSnk (I * compEllIntKpk k / 2) k ^ 2 ≠ 0 := by
+  have hden : 1 - k ^ 2 * jacobiSn (completeEllipticK k / 2) k ^ 2 *
+      jacobiSn (I * completeEllipticKPrime k / 2) k ^ 2 ≠ 0 := by
     rw [s1', s2']; intro h; rw [h, zero_mul] at hden0; exact h3 hden0.symm
-  rw [e, jacobiSnk_add hk hu hv hden, jacobiCnk_add hk hu hv hden, jacobiDnk_add hk hu hv hden,
+  rw [e, jacobiSn_add hk hu hv hden, jacobiCn_add hk hu hv hden, jacobiDn_add hk hu hv hden,
     s1', d1', hc1, s2', c2', d2']
   have hd2 : 1 - k ^ 2 * S ^ 2 * (I * Q) ^ 2 = (1 + k + κ) / (1 + κ) := by
     rw [← hden0]; field_simp
@@ -679,7 +693,7 @@ private lemma isPosReal_cpow_half {a : ℂ} (ha : IsPosReal a) :
 
 /-- Real data at a real modulus `0 < x < 1`. -/
 private lemma isPosReal_half_period_data {x : ℝ} (h0 : 0 < x) (h1 : x < 1) :
-    let κ := jacobiComodulusk x
+    let κ := jacobiComodulus x
     IsPosReal (x : ℂ) ∧ IsPosReal κ ∧ IsPosReal ((1 + κ) ^ (-(1 / 2) : ℂ)) ∧
       IsPosReal ((x : ℂ) ^ (-(1 / 2) : ℂ)) ∧ IsPosReal ((1 + (x : ℂ)) ^ (1 / 2 : ℂ)) ∧
       IsPosReal (κ ^ (1 / 2 : ℂ)) ∧ IsPosReal ((1 - (x : ℂ)) ^ (1 / 2 : ℂ)) ∧
@@ -687,7 +701,7 @@ private lemma isPosReal_half_period_data {x : ℝ} (h0 : 0 < x) (h1 : x < 1) :
       (1 + (x : ℂ)) ^ (1 / 2 : ℂ) * (1 - (x : ℂ)) ^ (1 / 2 : ℂ) = κ := by
   intro κ
   have hx := isPosReal_ofReal h0
-  have hκ := isPosReal_jacobiComodulusk h0 h1
+  have hκ := isPosReal_jacobiComodulus h0 h1
   have h1x : IsPosReal (1 + (x : ℂ)) := isPosReal_add isPosReal_one hx
   have h1mx : IsPosReal (1 - (x : ℂ)) := by
     rw [show (1 - (x : ℂ)) = ((1 - x : ℝ) : ℂ) by push_cast; ring]
@@ -701,7 +715,7 @@ private lemma isPosReal_half_period_data {x : ℝ} (h0 : 0 < x) (h1 : x < 1) :
     (isPosReal_cpow_half h2x).1, ?_⟩
   refine eq_of_sq_eq_of_re_pos ?_
       (isPosReal_mul (isPosReal_cpow_half h1x).1 (isPosReal_cpow_half h1mx).1).2 hκ.2
-  rw [mul_pow, Carlson.cpow_half_sq, Carlson.cpow_half_sq, jacobiComodulusk_sq]; ring
+  rw [mul_pow, Carlson.cpow_half_sq, Carlson.cpow_half_sq, jacobiComodulus_sq]; ring
 
 /-- Identity under the stated parameter and domain assumptions: `(a + I * b).re = a.re`. -/
 private lemma re_add_I_mul_of_im_eq_zero {a b : ℂ} (hb : b.im = 0) : (a + I * b).re =
@@ -729,53 +743,55 @@ private lemma one_sub_mem_slitPlane {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
 /-- Table 22.5.2: `sn`, `cn`, `dn` at `z = (K + iK')/2` (principal powers). -/
 @[dlmf 22.5.T2]
 theorem jacobi_specialValues_HalfKKp {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
-    jacobiSnk ((compEllIntKk k + I * compEllIntKpk k) / 2) k =
+    jacobiSn ((completeEllipticK k + I * completeEllipticKPrime k) / 2) k =
         ((1 + k) ^ (1 / 2 : ℂ) + I * (1 - k) ^ (1 / 2 : ℂ)) / (2 * k) ^ (1 / 2 : ℂ) ∧
-      jacobiCnk ((compEllIntKk k + I * compEllIntKpk k) / 2) k = (1 - I) * jacobiComodulusk k ^
+      jacobiCn ((completeEllipticK k + I * completeEllipticKPrime k) / 2) k = (1 - I) *
+          jacobiComodulus k ^
           (1 / 2 : ℂ) / (2 * k) ^ (1 / 2 : ℂ) ∧
-      jacobiDnk ((compEllIntKk k + I * compEllIntKpk k) / 2) k = (1 - I) / 2 * jacobiComodulusk k ^
+      jacobiDn ((completeEllipticK k + I * completeEllipticKPrime k) / 2) k = (1 - I) / 2 *
+          jacobiComodulus k ^
           (1 / 2 : ℂ) * ((1 + k) ^ (1 / 2 : ℂ) + I * (1 - k) ^ (1 / 2 : ℂ)) := by
-  obtain ⟨e1, e2, e3⟩ := jacobi_compEllIntKk_add_I_mul_compEllIntKpk_div_two hk
+  obtain ⟨e1, e2, e3⟩ := jacobi_completeEllipticK_add_I_mul_completeEllipticKPrime_div_two hk
   rw [e1, e2, e3]
   have Dom := jacobiModulusDomain
   -- differentiability of the building blocks
-  have dκ : ∀ k ∈ jacobiModulusDomain, DifferentiableAt ℂ jacobiComodulusk k :=
-    fun k hk => differentiableAt_jacobiComodulusk hk
+  have dκ : ∀ k ∈ jacobiModulusDomain, DifferentiableAt ℂ jacobiComodulus k :=
+    fun k hk => differentiableAt_jacobiComodulus hk
   have slit_re : ∀ {w : ℂ}, 0 < w.re → w ∈ slitPlane := fun h => Or.inl h
-  have re1κ : ∀ k ∈ jacobiModulusDomain, 0 < (1 + jacobiComodulusk k).re := fun k hk => by
-    simp only [add_re, one_re]; linarith [re_jacobiComodulusk_pos hk]
+  have re1κ : ∀ k ∈ jacobiModulusDomain, 0 < (1 + jacobiComodulus k).re := fun k hk => by
+    simp only [add_re, one_re]; linarith [re_jacobiComodulus_pos hk]
   have re1k : ∀ k ∈ jacobiModulusDomain, 0 < (1 + k).re := fun k hk => by
     simp only [add_re, one_re]; linarith [hk.1]
   have re2k : ∀ k ∈ jacobiModulusDomain, 0 < (2 * k).re := fun k hk => by
     simp only [mul_re, re_ofNat, im_ofNat, zero_mul, sub_zero]; linarith [hk.1]
   have dS := differentiableOn_cpow_of_mem_slitPlane
-      (h := fun k => 1 + jacobiComodulusk k) (-(1 / 2))
+      (h := fun k => 1 + jacobiComodulus k) (-(1 / 2))
     (fun k hk => (dκ k hk).const_add 1) fun k hk => slit_re (re1κ k hk)
   have dQ := differentiableOn_cpow_of_mem_slitPlane (h := fun k => k) (-(1 / 2))
     (fun k _ => differentiableAt_id) fun k hk => slit_re hk.1
   have dA := differentiableOn_cpow_of_mem_slitPlane (h := fun k => 1 + k) (1 / 2)
     (fun k _ => differentiableAt_id.const_add 1) fun k hk => slit_re (re1k k hk)
-  have dD := differentiableOn_cpow_of_mem_slitPlane (h := jacobiComodulusk) (1 / 2) dκ
-    fun k hk => slit_re (re_jacobiComodulusk_pos hk)
+  have dD := differentiableOn_cpow_of_mem_slitPlane (h := jacobiComodulus) (1 / 2) dκ
+    fun k hk => slit_re (re_jacobiComodulus_pos hk)
   have dB := differentiableOn_cpow_of_mem_slitPlane (h := fun k => 1 - k) (1 / 2)
     (fun k _ => (differentiableAt_const _).sub differentiableAt_id) fun k hk =>
         one_sub_mem_slitPlane hk
   have dC := differentiableOn_cpow_of_mem_slitPlane (h := fun k => 2 * k) (1 / 2)
     (fun k _ => differentiableAt_id.const_mul 2) fun k hk => slit_re (re2k k hk)
-  have dK : DifferentiableOn ℂ jacobiComodulusk jacobiModulusDomain :=
+  have dK : DifferentiableOn ℂ jacobiComodulus jacobiModulusDomain :=
     fun k hk => (dκ k hk).differentiableWithinAt
   have dId : DifferentiableOn ℂ (fun k : ℂ => k) jacobiModulusDomain := differentiableOn_id
-  have dN : DifferentiableOn ℂ (fun k => 1 + k + jacobiComodulusk k) jacobiModulusDomain :=
+  have dN : DifferentiableOn ℂ (fun k => 1 + k + jacobiComodulus k) jacobiModulusDomain :=
     (dId.const_add 1).add dK
-  have hN := fun k (hk : k ∈ jacobiModulusDomain) => one_add_add_jacobiComodulusk_ne_zero hk
+  have hN := fun k (hk : k ∈ jacobiModulusDomain) => one_add_add_jacobiComodulus_ne_zero hk
   have hC0 : ∀ k ∈ jacobiModulusDomain, (2 * k) ^ (1 / 2 : ℂ) ≠ 0 := fun k hk h => by
     have := re_cpow_one_half_pos (re2k k hk); rw [h] at this; simp at this
   refine ⟨?_, ?_, ?_⟩
   · refine eqOn_of_sq_eq_of_re_pos
-      (f := fun k => (1 + jacobiComodulusk k) ^ (-(1 / 2) : ℂ) * k ^ (-(1 / 2) : ℂ) * (1 + k) *
-        (1 + jacobiComodulusk k) / (1 + k + jacobiComodulusk k) +
-        I * ((1 + jacobiComodulusk k) ^ (-(1 / 2) : ℂ) * k ^ (-(1 / 2) : ℂ) * jacobiComodulusk k *
-        (1 + jacobiComodulusk k) / (1 + k + jacobiComodulusk k)))
+      (f := fun k => (1 + jacobiComodulus k) ^ (-(1 / 2) : ℂ) * k ^ (-(1 / 2) : ℂ) * (1 + k) *
+        (1 + jacobiComodulus k) / (1 + k + jacobiComodulus k) +
+        I * ((1 + jacobiComodulus k) ^ (-(1 / 2) : ℂ) * k ^ (-(1 / 2) : ℂ) * jacobiComodulus k *
+        (1 + jacobiComodulus k) / (1 + k + jacobiComodulus k)))
       (g := fun k => ((1 + k) ^ (1 / 2 : ℂ) + I * (1 - k) ^ (1 / 2 : ℂ)) / (2 * k) ^ (1 / 2 : ℂ))
       ?_ ?_ (fun x h0 h1 => ?_) (fun x h0 h1 => ?_) (fun x h0 h1 => ?_) hk
     · exact ((((dS.mul dQ).mul (dId.const_add 1)).mul (dK.const_add 1)).div dN hN).add
@@ -784,8 +800,8 @@ theorem jacobi_specialValues_HalfKKp {k : ℂ} (hk : k ∈ jacobiModulusDomain) 
     · obtain ⟨hx, hκ, hS, hQ, hA, hD, hB, hC, hAB⟩ := isPosReal_half_period_data h0 h1
       have hN0 := hN x (ofReal_mem_jacobiModulusDomain h0 h1)
       have hC00 := hC0 x (ofReal_mem_jacobiModulusDomain h0 h1)
-      have hSS : ((1 + jacobiComodulusk x) ^ (-(1 / 2) : ℂ)) ^ 2 *
-          (1 + jacobiComodulusk x) = 1 := by
+      have hSS : ((1 + jacobiComodulus x) ^ (-(1 / 2) : ℂ)) ^ 2 *
+          (1 + jacobiComodulus x) = 1 := by
         rw [cpow_neg_one_half_sq]; exact inv_mul_cancel₀ (fun h => by
           have := (isPosReal_add isPosReal_one hκ).2; rw [h] at this; simp at this)
       have hQQ : ((x : ℂ) ^ (-(1 / 2) : ℂ)) ^ 2 * x = 1 := by
@@ -793,14 +809,14 @@ theorem jacobi_specialValues_HalfKKp {k : ℂ} (hk : k ∈ jacobiModulusDomain) 
       have hBB := Carlson.cpow_half_sq (1 - (x : ℂ))
       have hCC := Carlson.cpow_half_sq (2 * (x : ℂ))
       have hAA := Carlson.cpow_half_sq (1 + (x : ℂ))
-      have hκκ := jacobiComodulusk_sq (x : ℂ)
+      have hκκ := jacobiComodulus_sq (x : ℂ)
       have hI : I ^ 2 = -1 := I_sq
-      generalize (1 + jacobiComodulusk x) ^ (-(1 / 2) : ℂ) = S at *
+      generalize (1 + jacobiComodulus x) ^ (-(1 / 2) : ℂ) = S at *
       generalize (x : ℂ) ^ (-(1 / 2) : ℂ) = Q at *
       generalize (1 + (x : ℂ)) ^ (1 / 2 : ℂ) = A at *
       generalize (1 - (x : ℂ)) ^ (1 / 2 : ℂ) = B at *
       generalize (2 * (x : ℂ)) ^ (1 / 2 : ℂ) = C at *
-      generalize jacobiComodulusk x = κ at *
+      generalize jacobiComodulus x = κ at *
       generalize (x : ℂ) = k at *
       field_simp
       linear_combination (-4*k^3*I+4*κ*k^2+4*κ*k*I-4*k^2*I+4*κ*k+4*k^2+4*κ*I+4*k*I+4*k+4*I) * hSS +
@@ -828,12 +844,12 @@ theorem jacobi_specialValues_HalfKKp {k : ℂ} (hk : k ∈ jacobiModulusDomain) 
       rw [add_div, mul_div_assoc, re_add_I_mul_of_im_eq_zero (isPosReal_div hB hC).1]
       exact (isPosReal_div hA hC).2
   · refine eqOn_of_sq_eq_of_re_pos
-      (f := fun k => (1 + jacobiComodulusk k) ^ (-(1 / 2) : ℂ) * jacobiComodulusk k ^ (1 / 2 : ℂ) *
-        (1 + k) ^ (1 / 2 : ℂ) * k ^ (-(1 / 2) : ℂ) * (1 + jacobiComodulusk k) /
-        (1 + k + jacobiComodulusk k) - I * ((1 + jacobiComodulusk k) ^ (-(1 / 2) : ℂ) *
-        jacobiComodulusk k ^ (1 / 2 : ℂ) * (1 + k) ^ (1 / 2 : ℂ) * k ^ (-(1 / 2) : ℂ) *
-        (1 + jacobiComodulusk k) / (1 + k + jacobiComodulusk k)))
-      (g := fun k => (1 - I) * jacobiComodulusk k ^ (1 / 2 : ℂ) / (2 * k) ^ (1 / 2 : ℂ))
+      (f := fun k => (1 + jacobiComodulus k) ^ (-(1 / 2) : ℂ) * jacobiComodulus k ^ (1 / 2 : ℂ) *
+        (1 + k) ^ (1 / 2 : ℂ) * k ^ (-(1 / 2) : ℂ) * (1 + jacobiComodulus k) /
+        (1 + k + jacobiComodulus k) - I * ((1 + jacobiComodulus k) ^ (-(1 / 2) : ℂ) *
+        jacobiComodulus k ^ (1 / 2 : ℂ) * (1 + k) ^ (1 / 2 : ℂ) * k ^ (-(1 / 2) : ℂ) *
+        (1 + jacobiComodulus k) / (1 + k + jacobiComodulus k)))
+      (g := fun k => (1 - I) * jacobiComodulus k ^ (1 / 2 : ℂ) / (2 * k) ^ (1 / 2 : ℂ))
       ?_ ?_ (fun x h0 h1 => ?_) (fun x h0 h1 => ?_) (fun x h0 h1 => ?_) hk
     · have h := (((((dS.mul dD).mul dA).mul dQ).mul (dK.const_add 1)).div dN hN)
       exact h.sub (h.const_mul I)
@@ -841,8 +857,8 @@ theorem jacobi_specialValues_HalfKKp {k : ℂ} (hk : k ∈ jacobiModulusDomain) 
     · obtain ⟨hx, hκ, hS, hQ, hA, hD, hB, hC, hAB⟩ := isPosReal_half_period_data h0 h1
       have hN0 := hN x (ofReal_mem_jacobiModulusDomain h0 h1)
       have hC00 := hC0 x (ofReal_mem_jacobiModulusDomain h0 h1)
-      have hSS : ((1 + jacobiComodulusk x) ^ (-(1 / 2) : ℂ)) ^ 2 *
-          (1 + jacobiComodulusk x) = 1 := by
+      have hSS : ((1 + jacobiComodulus x) ^ (-(1 / 2) : ℂ)) ^ 2 *
+          (1 + jacobiComodulus x) = 1 := by
         rw [cpow_neg_one_half_sq]; exact inv_mul_cancel₀ (fun h => by
           have := (isPosReal_add isPosReal_one hκ).2; rw [h] at this; simp at this)
       have hQQ : ((x : ℂ) ^ (-(1 / 2) : ℂ)) ^ 2 * x = 1 := by
@@ -850,16 +866,16 @@ theorem jacobi_specialValues_HalfKKp {k : ℂ} (hk : k ∈ jacobiModulusDomain) 
       have hBB := Carlson.cpow_half_sq (1 - (x : ℂ))
       have hCC := Carlson.cpow_half_sq (2 * (x : ℂ))
       have hAA := Carlson.cpow_half_sq (1 + (x : ℂ))
-      have hDD := Carlson.cpow_half_sq (jacobiComodulusk x)
-      have hκκ := jacobiComodulusk_sq (x : ℂ)
+      have hDD := Carlson.cpow_half_sq (jacobiComodulus x)
+      have hκκ := jacobiComodulus_sq (x : ℂ)
       have hI : I ^ 2 = -1 := I_sq
-      generalize (1 + jacobiComodulusk x) ^ (-(1 / 2) : ℂ) = S at *
+      generalize (1 + jacobiComodulus x) ^ (-(1 / 2) : ℂ) = S at *
       generalize (x : ℂ) ^ (-(1 / 2) : ℂ) = Q at *
       generalize (1 + (x : ℂ)) ^ (1 / 2 : ℂ) = A at *
       generalize (1 - (x : ℂ)) ^ (1 / 2 : ℂ) = B at *
       generalize (2 * (x : ℂ)) ^ (1 / 2 : ℂ) = C at *
-      generalize jacobiComodulusk x ^ (1 / 2 : ℂ) = D at *
-      generalize jacobiComodulusk x = κ at *
+      generalize jacobiComodulus x ^ (1 / 2 : ℂ) = D at *
+      generalize jacobiComodulus x = κ at *
       generalize (x : ℂ) = k at *
       field_simp
       linear_combination (4*k^3*I-4*κ*k*I+4*k^2*I-4*κ*I-4*k*I-4*I) * hSS +
@@ -881,11 +897,11 @@ theorem jacobi_specialValues_HalfKKp {k : ℂ} (hk : k ∈ jacobiModulusDomain) 
         re_sub_I_mul_of_im_eq_zero (isPosReal_div hD hC).1]
       exact (isPosReal_div hD hC).2
   · refine eqOn_of_sq_eq_of_re_pos
-      (f := fun k => jacobiComodulusk k ^ (1 / 2 : ℂ) * (1 + k) ^ (1 / 2 : ℂ) *
-        (1 + jacobiComodulusk k) / (1 + k + jacobiComodulusk k) -
-        I * (jacobiComodulusk k ^ (1 / 2 : ℂ) * (1 + k) ^ (1 / 2 : ℂ) * k /
-        (1 + k + jacobiComodulusk k)))
-      (g := fun k => (1 - I) / 2 * jacobiComodulusk k ^ (1 / 2 : ℂ) *
+      (f := fun k => jacobiComodulus k ^ (1 / 2 : ℂ) * (1 + k) ^ (1 / 2 : ℂ) *
+        (1 + jacobiComodulus k) / (1 + k + jacobiComodulus k) -
+        I * (jacobiComodulus k ^ (1 / 2 : ℂ) * (1 + k) ^ (1 / 2 : ℂ) * k /
+        (1 + k + jacobiComodulus k)))
+      (g := fun k => (1 - I) / 2 * jacobiComodulus k ^ (1 / 2 : ℂ) *
         ((1 + k) ^ (1 / 2 : ℂ) + I * (1 - k) ^ (1 / 2 : ℂ)))
       ?_ ?_ (fun x h0 h1 => ?_) (fun x h0 h1 => ?_) (fun x h0 h1 => ?_) hk
     · exact ((((dD.mul dA).mul (dK.const_add 1)).div dN hN)).sub
@@ -894,8 +910,8 @@ theorem jacobi_specialValues_HalfKKp {k : ℂ} (hk : k ∈ jacobiModulusDomain) 
     · obtain ⟨hx, hκ, hS, hQ, hA, hD, hB, hC, hAB⟩ := isPosReal_half_period_data h0 h1
       have hN0 := hN x (ofReal_mem_jacobiModulusDomain h0 h1)
       have hC00 := hC0 x (ofReal_mem_jacobiModulusDomain h0 h1)
-      have hSS : ((1 + jacobiComodulusk x) ^ (-(1 / 2) : ℂ)) ^ 2 *
-          (1 + jacobiComodulusk x) = 1 := by
+      have hSS : ((1 + jacobiComodulus x) ^ (-(1 / 2) : ℂ)) ^ 2 *
+          (1 + jacobiComodulus x) = 1 := by
         rw [cpow_neg_one_half_sq]; exact inv_mul_cancel₀ (fun h => by
           have := (isPosReal_add isPosReal_one hκ).2; rw [h] at this; simp at this)
       have hQQ : ((x : ℂ) ^ (-(1 / 2) : ℂ)) ^ 2 * x = 1 := by
@@ -903,16 +919,16 @@ theorem jacobi_specialValues_HalfKKp {k : ℂ} (hk : k ∈ jacobiModulusDomain) 
       have hBB := Carlson.cpow_half_sq (1 - (x : ℂ))
       have hCC := Carlson.cpow_half_sq (2 * (x : ℂ))
       have hAA := Carlson.cpow_half_sq (1 + (x : ℂ))
-      have hDD := Carlson.cpow_half_sq (jacobiComodulusk x)
-      have hκκ := jacobiComodulusk_sq (x : ℂ)
+      have hDD := Carlson.cpow_half_sq (jacobiComodulus x)
+      have hκκ := jacobiComodulus_sq (x : ℂ)
       have hI : I ^ 2 = -1 := I_sq
-      generalize (1 + jacobiComodulusk x) ^ (-(1 / 2) : ℂ) = S at *
+      generalize (1 + jacobiComodulus x) ^ (-(1 / 2) : ℂ) = S at *
       generalize (x : ℂ) ^ (-(1 / 2) : ℂ) = Q at *
       generalize (1 + (x : ℂ)) ^ (1 / 2 : ℂ) = A at *
       generalize (1 - (x : ℂ)) ^ (1 / 2 : ℂ) = B at *
       generalize (2 * (x : ℂ)) ^ (1 / 2 : ℂ) = C at *
-      generalize jacobiComodulusk x ^ (1 / 2 : ℂ) = D at *
-      generalize jacobiComodulusk x = κ at *
+      generalize jacobiComodulus x ^ (1 / 2 : ℂ) = D at *
+      generalize jacobiComodulus x = κ at *
       generalize (x : ℂ) = k at *
       field_simp
       linear_combination (4*k^3*I-8*κ*k^2-4*κ*k*I-4*k^2*I-8*k^2+4*κ*I-4*k*I+8*κ+4*I+8) * hAA +
@@ -947,66 +963,70 @@ theorem jacobi_specialValues_HalfKKp {k : ℂ} (hk : k ∈ jacobiModulusDomain) 
 /-- Table 22.5.2: `sn`, `cn`, `dn` at `z = 3(K + iK')/2` (principal powers). -/
 @[dlmf 22.5.T2]
 theorem jacobi_specialValues_ThreeHalfKKp {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
-    jacobiSnk (3 * (compEllIntKk k + I * compEllIntKpk k) / 2) k =
+    jacobiSn (3 * (completeEllipticK k + I * completeEllipticKPrime k) / 2) k =
         ((1 + k) ^ (1 / 2 : ℂ) + I * (1 - k) ^ (1 / 2 : ℂ)) / (2 * k) ^ (1 / 2 : ℂ) ∧
-      jacobiCnk (3 * (compEllIntKk k + I * compEllIntKpk k) / 2) k = (1 - I) * jacobiComodulusk k ^
+      jacobiCn (3 * (completeEllipticK k + I * completeEllipticKPrime k) / 2) k = (1 - I) *
+          jacobiComodulus k ^
           (1 / 2 : ℂ) / (2 * k) ^ (1 / 2 : ℂ) ∧
-      jacobiDnk (3 * (compEllIntKk k + I * compEllIntKpk k) / 2) k = (I - 1) / 2 * jacobiComodulusk
+      jacobiDn (3 * (completeEllipticK k + I * completeEllipticKPrime k) / 2) k = (I - 1) / 2 *
+          jacobiComodulus
           k ^ (1 / 2 : ℂ) * ((1 + k) ^ (1 / 2 : ℂ) + I * (1 - k) ^ (1 / 2 : ℂ)) := by
   obtain ⟨h1, h2, h3⟩ := jacobi_specialValues_HalfKKp hk
-  have e : 3 * (compEllIntKk k + I * compEllIntKpk k) / 2 =
-      -((compEllIntKk k + I * compEllIntKpk k) / 2) + 2 * compEllIntKk k +
-        2 * (I * compEllIntKpk k) := by ring
-  rw [e, (jacobiSnk_shift hk _).2.2.2.2.1, (jacobiCnk_shift hk _).2.2.2.2.1,
-    (jacobiDnk_shift hk _).2.2.2.2.1, jacobiSnk, jacobiCnk, jacobiDnk, jacobiPQk_neg,
-    jacobiPQk_neg, jacobiPQk_neg, ← jacobiSnk, ← jacobiCnk, ← jacobiDnk, h1, h2, h3]
+  have e : 3 * (completeEllipticK k + I * completeEllipticKPrime k) / 2 =
+      -((completeEllipticK k + I * completeEllipticKPrime k) / 2) + 2 * completeEllipticK k +
+        2 * (I * completeEllipticKPrime k) := by ring
+  rw [e, (jacobiSn_shift hk _).2.2.2.2.1, (jacobiCn_shift hk _).2.2.2.2.1,
+    (jacobiDn_shift hk _).2.2.2.2.1, jacobiSn, jacobiCn, jacobiDn, jacobiPQ_neg,
+    jacobiPQ_neg, jacobiPQ_neg, ← jacobiSn, ← jacobiCn, ← jacobiDn, h1, h2, h3]
   refine ⟨by simp, by simp, ?_⟩
   simp only [ne_eq, reduceCtorEq, not_false_eq_true, not_true_eq_false, ↓reduceIte]
   ring
 
 /-- §22.5(ii): `K(k) → π/2` as real `k → 0+`. -/
 @[dlmf 22.5.ii]
-theorem tendsto_compEllIntKk_zero :
-    Tendsto (fun k : ℝ => compEllIntKk k) (𝓝[>] 0) (𝓝 (π / 2)) := by
-  have hc : ContinuousAt (fun k : ℝ => (Real.compEllIntKm (k ^ 2) : ℂ)) 0 := by
+theorem tendsto_completeEllipticK_zero :
+    Tendsto (fun k : ℝ => completeEllipticK k) (𝓝[>] 0) (𝓝 (π / 2)) := by
+  have hc : ContinuousAt (fun k : ℝ => (Real.completeEllipticKOfParameter (k ^ 2) : ℂ)) 0 := by
     refine Complex.continuous_ofReal.continuousAt.comp ?_
-    have h1 : ContinuousAt Real.compEllIntKm ((0 : ℝ) ^ 2) :=
-      Real.continuousAt_compEllIntKm (by norm_num)
+    have h1 : ContinuousAt Real.completeEllipticKOfParameter ((0 : ℝ) ^ 2) :=
+      Real.continuousAt_completeEllipticKOfParameter (by norm_num)
     exact h1.comp (f := fun k : ℝ => k ^ 2) (continuous_pow 2).continuousAt
   have h := hc.tendsto
-  simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, Real.compEllIntKm_zero,
+  simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow,
+      Real.completeEllipticKOfParameter_zero,
     ofReal_div, ofReal_ofNat] at h
   refine (h.mono_left nhdsWithin_le_nhds).congr' ?_
   filter_upwards [Ioo_mem_nhdsGT (show (0 : ℝ) < 1 by norm_num)] with k hk
-  rw [compEllIntKk_ofReal (by nlinarith [hk.1, hk.2])]
+  rw [completeEllipticK_ofReal (by nlinarith [hk.1, hk.2])]
 
 /-- §22.5(ii): `K'(k) → π/2` as real `k → 1-`. -/
 @[dlmf 22.5.ii]
-theorem tendsto_compEllIntKpk_one :
-    Tendsto (fun k : ℝ => compEllIntKpk k) (𝓝[<] 1) (𝓝 (π / 2)) := by
-  have hc : ContinuousAt (fun k : ℝ => (Real.compEllIntKm (1 - k ^ 2) : ℂ)) 1 := by
+theorem tendsto_completeEllipticKPrime_one :
+    Tendsto (fun k : ℝ => completeEllipticKPrime k) (𝓝[<] 1) (𝓝 (π / 2)) := by
+  have hc : ContinuousAt (fun k : ℝ => (Real.completeEllipticKOfParameter (1 - k ^ 2) : ℂ)) 1 := by
     refine Complex.continuous_ofReal.continuousAt.comp ?_
-    have h1 : ContinuousAt Real.compEllIntKm (1 - (1 : ℝ) ^ 2) :=
-      Real.continuousAt_compEllIntKm (by norm_num)
+    have h1 : ContinuousAt Real.completeEllipticKOfParameter (1 - (1 : ℝ) ^ 2) :=
+      Real.continuousAt_completeEllipticKOfParameter (by norm_num)
     exact h1.comp (f := fun k : ℝ => 1 - k ^ 2)
         (continuous_const.sub (continuous_pow 2)).continuousAt
   have h := hc.tendsto
-  simp only [one_pow, sub_self, Real.compEllIntKm_zero, ofReal_div, ofReal_ofNat] at h
+  simp only [one_pow, sub_self, Real.completeEllipticKOfParameter_zero, ofReal_div,
+      ofReal_ofNat] at h
   refine (h.mono_left nhdsWithin_le_nhds).congr' ?_
   filter_upwards [Ioo_mem_nhdsLT (show (0 : ℝ) < 1 by norm_num)] with k hk
-  rw [compEllIntKpk_ofReal (by nlinarith [hk.1, hk.2])]
+  rw [completeEllipticKPrime_ofReal (by nlinarith [hk.1, hk.2])]
 
 /-- Logarithmic lower bound `K(1 - δ²) ≥ log(π/(2δ))/√2` for `0 < δ < π/2`. -/
-lemma log_div_sqrt_two_le_compEllIntKm {δ : ℝ} (h0 : 0 < δ) (h1 : δ < π / 2) :
-    Real.log (π / 2 / δ) / √2 ≤ Real.compEllIntKm (1 - δ ^ 2) := by
+lemma log_div_sqrt_two_le_completeEllipticKOfParameter {δ : ℝ} (h0 : 0 < δ) (h1 : δ < π / 2) :
+    Real.log (π / 2 / δ) / √2 ≤ Real.completeEllipticKOfParameter (1 - δ ^ 2) := by
   have hm : 1 - δ ^ 2 < 1 := by nlinarith
   set f : ℝ → ℝ := fun θ => (1 - (1 - δ ^ 2) * Real.sin θ ^ 2) ^ (-(1 / 2) : ℝ) with hf
   have hfc : Continuous f := continuous_one_sub_mul_sin_sq_rpow hm _
   have hfpos : ∀ θ, 0 ≤ f θ := fun θ => Real.rpow_nonneg (one_sub_mul_sin_sq_pos hm θ).le _
   have hs2 : 0 < √2 := by positivity
   -- restrict to `[0, π/2 - δ]`
-  have hsub : ∫ θ in (0 : ℝ)..(π / 2 - δ), f θ ≤ Real.compEllIntKm (1 - δ ^ 2) := by
-    rw [Real.compEllIntKm]
+  have hsub : ∫ θ in (0 : ℝ)..(π / 2 - δ), f θ ≤ Real.completeEllipticKOfParameter (1 - δ ^ 2) := by
+    rw [Real.completeEllipticKOfParameter]
     have := intervalIntegral.integral_add_adjacent_intervals (μ := MeasureTheory.volume)
       (hfc.intervalIntegrable 0 (π / 2 - δ)) (hfc.intervalIntegrable (π / 2 - δ) (π / 2))
     rw [← this]
@@ -1060,19 +1080,20 @@ lemma tendsto_log_pi_div_two_div_div_sqrt_two :
 
 /-- §22.5(ii): `K'(k) → ∞` as real `k → 0+`. -/
 @[dlmf 22.5.ii]
-theorem tendsto_norm_compEllIntKpk_zero :
-    Tendsto (fun k : ℝ => ‖compEllIntKpk k‖) (𝓝[>] 0) Filter.atTop := by
+theorem tendsto_norm_completeEllipticKPrime_zero :
+    Tendsto (fun k : ℝ => ‖completeEllipticKPrime k‖) (𝓝[>] 0) Filter.atTop := by
   refine tendsto_atTop_mono' _ ?_ tendsto_log_pi_div_two_div_div_sqrt_two
   filter_upwards [Ioo_mem_nhdsGT (show (0 : ℝ) < 1 by norm_num)] with k hk
   have hk2 : 0 < k ^ 2 := by nlinarith [hk.1]
-  rw [compEllIntKpk_ofReal hk2, Complex.norm_real, Real.norm_eq_abs]
-  exact (log_div_sqrt_two_le_compEllIntKm hk.1 (by linarith [hk.2, Real.pi_gt_three])).trans
+  rw [completeEllipticKPrime_ofReal hk2, Complex.norm_real, Real.norm_eq_abs]
+  exact (log_div_sqrt_two_le_completeEllipticKOfParameter hk.1
+      (by linarith [hk.2, Real.pi_gt_three])).trans
       (le_abs_self _)
 
 /-- §22.5(ii): `K(k) → ∞` as real `k → 1-`. -/
 @[dlmf 22.5.ii]
-theorem tendsto_norm_compEllIntKk_one :
-    Tendsto (fun k : ℝ => ‖compEllIntKk k‖) (𝓝[<] 1) Filter.atTop := by
+theorem tendsto_norm_completeEllipticK_one :
+    Tendsto (fun k : ℝ => ‖completeEllipticK k‖) (𝓝[<] 1) Filter.atTop := by
   have hδ : Tendsto (fun k : ℝ => √(1 - k ^ 2)) (𝓝[<] 1) (𝓝[>] 0) := by
     refine tendsto_nhdsWithin_iff.mpr ⟨?_, ?_⟩
     · have : Tendsto (fun k : ℝ => √(1 - k ^ 2)) (𝓝 1) (𝓝 (√(1 - 1 ^ 2))) :=
@@ -1088,9 +1109,9 @@ theorem tendsto_norm_compEllIntKk_one :
   have hd1 : √(1 - k ^ 2) < π / 2 := by
     have : √(1 - k ^ 2) ≤ 1 := Real.sqrt_le_one.mpr (by nlinarith)
     linarith [Real.pi_gt_three]
-  have h := log_div_sqrt_two_le_compEllIntKm hd0 hd1
+  have h := log_div_sqrt_two_le_completeEllipticKOfParameter hd0 hd1
   rw [Real.sq_sqrt hpos.le, show 1 - (1 - k ^ 2) = k ^ 2 by ring] at h
-  rw [compEllIntKk_ofReal hk2, Complex.norm_real, Real.norm_eq_abs]
+  rw [completeEllipticK_ofReal hk2, Complex.norm_real, Real.norm_eq_abs]
   exact h.trans (le_abs_self _)
 
 end DLMF.JacobiElliptic

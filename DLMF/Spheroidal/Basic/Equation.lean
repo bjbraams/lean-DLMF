@@ -23,8 +23,8 @@ factor equation, and the reduction of the generalized equations.
 * `isSpheroidalZetaSolution_of_isSpheroidalSolutionOn`: the form 30.2.4 in `ζ = γz`.
 * `spheroidalLiouville_coeff_mathieu`, `IsSpheroidalLiouvilleSolution.mathieu`: the case
   `μ² = 1/4` (Mathieu's equation 28.2.1).
-* `isSpheroidalSolutionReal_iff_isSpheroidalFactor`: `(1-z²)^{m/2} g(z)` solves 30.2.1 with
-  `μ = m` iff `g` solves the factor equation (§30.3(i)).
+* `DLMF.Spheroidal.Real.isSpheroidalSolution_iff_isSpheroidalFactor`: `(1-z²)^{m/2} g(z)` solves
+  30.2.1 with `μ = m` iff `g` solves the factor equation (§30.3(i)).
 * `isGenSpheroidalSolutionOn_zero_iff`, `isSpheroidalSolutionOn₂_zero_iff`: the generalized
   equations 30.12.1 and 30.12.2 reduce to 30.2.1 at `α = 0`.
 
@@ -299,9 +299,10 @@ theorem IsSpheroidalLiouvilleSolution.mathieu {lam γ2 μ : ℂ} {T : Set ℂ} {
 `γ²`, the function `(1-x²)^{m/2} g(x)` with `g` entire and real on `ℝ` solves 30.2.1 with `μ = m`
 iff `g` solves `IsSpheroidalFactor` (the equation holds on `ℂ` by analytic continuation). -/
 @[dlmf 30.3.i]
-theorem isSpheroidalSolutionReal_iff_isSpheroidalFactor {m : ℕ} {γ2 lam : ℝ} {g : ℂ → ℂ}
+theorem Real.isSpheroidalSolution_iff_isSpheroidalFactor {m : ℕ} {γ2 lam : ℝ} {g : ℂ → ℂ}
     (hg : Differentiable ℂ g) (hreal : ∀ x : ℝ, (g x).im = 0) :
-    IsSpheroidalSolutionReal lam γ2 m (fun x => (1 - x ^ 2) ^ ((m : ℝ) / 2) * (g x).re) ↔
+    DLMF.Spheroidal.Real.IsSpheroidalSolution lam γ2 m
+        (fun x => (1 - x ^ 2) ^ ((m : ℝ) / 2) * (g x).re) ↔
       IsSpheroidalFactor m γ2 lam g := by
   have hg1 := differentiable_deriv_of_differentiable hg
   set h : ℝ → ℝ := fun x => (1 - x ^ 2) ^ ((m : ℝ) / 2)

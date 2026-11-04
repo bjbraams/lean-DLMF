@@ -70,12 +70,12 @@ private lemma whipple_exp_base_ne : ∀ᶠ t : ℂ in 𝓝[≠] 0, 1-exp t ≠ 0
 /-- Finite q-Pochhammer symbols have the classical Pochhammer limit for complex exponents. -/
 private lemma whipple_exp_qpoch (a : ℂ) (k : ℕ) :
     Tendsto (fun t : ℂ => qPochhammer (exp (a*t)) (exp t) k/(1-exp t)^k)
-      (𝓝[≠] 0) (𝓝 (poch a k)) := by
+      (𝓝[≠] 0) (𝓝 (pochhammer a k)) := by
   induction k with
-  | zero => simp [qPochhammer_zero,poch_zero]
+  | zero => simp [qPochhammer_zero,pochhammer_zero]
   | succ k ih =>
     have h := ih.mul (whipple_exp_ratio (a+k))
-    rw [poch_succ]
+    rw [pochhammer_succ]
     refine h.congr' ?_
     filter_upwards [whipple_exp_base_ne] with t ht
     rw [qPochhammer_succ,pow_succ]
@@ -87,7 +87,7 @@ private lemma whipple_exp_qpoch (a : ℂ) (k : ℕ) :
 /-- The very-well-poised classical numerator after cancelling its half-parameter ratio. -/
 private noncomputable def whippleUnit (a : ℂ) : ℕ → ℂ
   | 0 => 1
-  | k+1 => poch (a+1) k*(a+2*(k+1))
+  | k+1 => pochhammer (a+1) k*(a+2*(k+1))
 
 /-- The cancelled very-well-poised factor has its classical limit. -/
 private lemma whipple_unit_limit (a : ℂ) (k : ℕ) :
@@ -108,26 +108,26 @@ private lemma whipple_unit_limit (a : ℂ) (k : ℕ) :
 
 /-- The cancelled numerator equals the standard half-parameter Pochhammer ratio. -/
 private lemma whippleUnit_eq (a : ℂ) (ha : ∀ j : ℕ, a/2 ≠ -j) (k : ℕ) :
-    whippleUnit a k=poch a k*poch (a/2+1) k/poch (a/2) k := by
+    whippleUnit a k=pochhammer a k*pochhammer (a/2+1) k/pochhammer (a/2) k := by
   cases k with
-  | zero => simp [whippleUnit,poch_zero]
+  | zero => simp [whippleUnit,pochhammer_zero]
   | succ k =>
     have ha0 : a ≠ 0 := by intro h;simpa [h] using ha 0
-    have hP := poch_ne_zero_of_not_neg_nat ha (k+1)
-    have hs : (a/2)*poch (a/2+1) (k+1)=poch (a/2) (k+1)*(a/2+(k+1)) := by
-      rw [←poch_succ_left,poch_succ]
+    have hP := pochhammer_ne_zero_of_not_neg_nat ha (k+1)
+    have hs : (a/2)*pochhammer (a/2+1) (k+1)=pochhammer (a/2) (k+1)*(a/2+(k+1)) := by
+      rw [←pochhammer_succ_left,pochhammer_succ]
       push_cast
       ring
-    rw [whippleUnit,poch_succ_left a k]
-    generalize poch (a/2+1) (k+1)=X at hs ⊢
-    generalize poch (a/2) (k+1)=Y at hP hs ⊢
+    rw [whippleUnit,pochhammer_succ_left a k]
+    generalize pochhammer (a/2+1) (k+1)=X at hs ⊢
+    generalize pochhammer (a/2) (k+1)=Y at hP hs ⊢
     field_simp
-    linear_combination -2*poch (a+1) k*hs
+    linear_combination -2*pochhammer (a+1) k*hs
 
 /-- A finite product of normalized q-Pochhammer factors has its termwise limit. -/
 private lemma whipple_qprod_limit (xs : List ℂ) (k : ℕ) :
     Tendsto (fun t : ℂ => (xs.map (fun a => qPochhammer (exp (a*t)) (exp t) k/(1-exp t)^k)).prod)
-      (𝓝[≠] 0) (𝓝 ((xs.map (fun a => poch a k)).prod)) := by
+      (𝓝[≠] 0) (𝓝 ((xs.map (fun a => pochhammer a k)).prod)) := by
   induction xs with
   | nil => simp
   | cons a xs ih => simpa only [List.map_cons,List.prod_cons] using (whipple_exp_qpoch a k).mul ih
@@ -146,11 +146,12 @@ private lemma whipple_qprod_normalize (xs : List ℂ) (k : ℕ) (t : ℂ) :
 
 /-- Ratios with equally many finite q-Pochhammer factors have classical limits. -/
 private lemma whipple_qratio_limit (xs ys : List ℂ) (hlen : xs.length=ys.length) (k : ℕ)
-    (hy : ∀ a ∈ ys, poch a k ≠ 0) :
+    (hy : ∀ a ∈ ys, pochhammer a k ≠ 0) :
     Tendsto (fun t : ℂ => (xs.map (fun a => qPochhammer (exp (a*t)) (exp t) k)).prod /
       (ys.map (fun a => qPochhammer (exp (a*t)) (exp t) k)).prod)
-      (𝓝[≠] 0) (𝓝 ((xs.map (fun a => poch a k)).prod/(ys.map (fun a => poch a k)).prod)) := by
-  have hY : (ys.map (fun a => poch a k)).prod ≠ 0 := by
+      (𝓝[≠] 0) (𝓝 ((xs.map (fun a => pochhammer a k)).prod/(ys.map
+          (fun a => pochhammer a k)).prod)) := by
+  have hY : (ys.map (fun a => pochhammer a k)).prod ≠ 0 := by
     apply List.prod_ne_zero
     intro hx
     obtain ⟨a,ha,h0⟩ := List.mem_map.mp hx
@@ -164,13 +165,13 @@ private lemma whipple_qratio_limit (xs ys : List ℂ) (hlen : xs.length=ys.lengt
 /-- Include the cancelled very-well-poised factor in the finite product limit. -/
 private lemma whipple_unit_ratio_limit (a : ℂ) (xs ys : List ℂ)
     (hlen : xs.length+1=ys.length) (k : ℕ)
-    (hy : ∀ b ∈ ys, poch b k ≠ 0) :
+    (hy : ∀ b ∈ ys, pochhammer b k ≠ 0) :
     Tendsto (fun t : ℂ => DLMF.Bailey.unitD (exp (a*t)) (exp t) k *
       (xs.map (fun b => qPochhammer (exp (b*t)) (exp t) k)).prod /
       (ys.map (fun b => qPochhammer (exp (b*t)) (exp t) k)).prod)
-      (𝓝[≠] 0) (𝓝 (whippleUnit a k*(xs.map (fun b => poch b k)).prod/
-        (ys.map (fun b => poch b k)).prod)) := by
-  have hY : (ys.map (fun b => poch b k)).prod ≠ 0 := by
+      (𝓝[≠] 0) (𝓝 (whippleUnit a k*(xs.map (fun b => pochhammer b k)).prod/
+        (ys.map (fun b => pochhammer b k)).prod)) := by
+  have hY : (ys.map (fun b => pochhammer b k)).prod ≠ 0 := by
     apply List.prod_ne_zero
     intro hx
     obtain ⟨b,hb,h0⟩ := List.mem_map.mp hx
@@ -216,9 +217,10 @@ private lemma whipple_watson8_limit (a b c d e : ℂ) (n k : ℕ)
     (hden : ∀ p ∈ [a-b+1,a-c+1,a-d+1,a-e+1,a+n+1,1], ∀ j : ℕ, p ≠ -j) :
     Tendsto (fun t : ℂ => DLMF.Bailey.watsonR8 (exp (a*t)) (exp (b*t))
       (exp (c*t)) (exp (d*t)) (exp (e*t)) (exp t) n k) (𝓝[≠] 0)
-      (𝓝 (whippleUnit a k*poch b k*poch c k*poch d k*poch e k*poch (-(n:ℂ)) k/
-        (poch (a-b+1) k*poch (a-c+1) k*poch (a-d+1) k*poch (a-e+1) k*
-          poch (a+n+1) k*poch 1 k))) := by
+      (𝓝 (whippleUnit a k*pochhammer b k*pochhammer c k*pochhammer d k*pochhammer e
+          k*pochhammer (-(n:ℂ)) k/
+        (pochhammer (a-b+1) k*pochhammer (a-c+1) k*pochhammer (a-d+1) k*pochhammer (a-e+1) k*
+          pochhammer (a+n+1) k*pochhammer 1 k))) := by
   have hscale := (((((whipple_exp_tendsto a).pow 2).mul
     ((whipple_exp_tendsto 1).pow 2)).mul ((whipple_exp_tendsto 1).pow n)).div
     ((((whipple_exp_tendsto b).mul (whipple_exp_tendsto c)).mul
@@ -226,7 +228,7 @@ private lemma whipple_watson8_limit (a b c d e : ℂ) (n k : ℕ)
   simp only [one_mul,one_pow,one_div,inv_one] at hscale
   have h := (whipple_unit_ratio_limit a [b,c,d,e,-(n:ℂ)]
     [a-b+1,a-c+1,a-d+1,a-e+1,a+n+1,1] rfl k
-    (fun p hp => poch_ne_zero_of_not_neg_nat (hden p hp) k)).mul hscale
+    (fun p hp => pochhammer_ne_zero_of_not_neg_nat (hden p hp) k)).mul hscale
   convert h using 1
   · funext t
     simp only [Pi.div_apply,neg_mul,DLMF.Bailey.watsonR8,List.map_cons,List.map_nil,List.prod_cons,
@@ -240,11 +242,11 @@ private lemma whipple_watson4_limit (a b c d e : ℂ) (n k : ℕ)
     (hden : ∀ p ∈ [a-b+1,a-c+1,d+e-a-n,1], ∀ j : ℕ, p ≠ -j) :
     Tendsto (fun t : ℂ => DLMF.Bailey.watsonR4 (exp (a*t)) (exp (b*t))
       (exp (c*t)) (exp (d*t)) (exp (e*t)) (exp t) n k) (𝓝[≠] 0)
-      (𝓝 (poch (a-b-c+1) k*poch d k*poch e k*poch (-(n:ℂ)) k/
-        (poch (a-b+1) k*poch (a-c+1) k*poch (d+e-a-n) k*poch 1 k))) := by
+      (𝓝 (pochhammer (a-b-c+1) k*pochhammer d k*pochhammer e k*pochhammer (-(n:ℂ)) k/
+        (pochhammer (a-b+1) k*pochhammer (a-c+1) k*pochhammer (d+e-a-n) k*pochhammer 1 k))) := by
   have h := (whipple_qratio_limit [-(n:ℂ),d,e,a-b-c+1]
     [a-b+1,a-c+1,d+e-a-n,1] rfl k
-    (fun p hp => poch_ne_zero_of_not_neg_nat (hden p hp) k)).mul
+    (fun p hp => pochhammer_ne_zero_of_not_neg_nat (hden p hp) k)).mul
       ((whipple_exp_tendsto 1).pow k)
   convert h using 1
   · funext t
@@ -261,7 +263,7 @@ private lemma whipple_exp_oneparam (a t : ℂ) : exp (a*t)*exp t=exp ((a+1)*t) :
   rw [←exp_add];congr 1;ring
 
 /-- A nonzero classical Pochhammer limit ensures nonzero nearby q-Pochhammer factors. -/
-private lemma whipple_qpoch_eventually_ne (a : ℂ) (k : ℕ) (ha : poch a k ≠ 0) :
+private lemma whipple_qpoch_eventually_ne (a : ℂ) (k : ℕ) (ha : pochhammer a k ≠ 0) :
     ∀ᶠ t : ℂ in 𝓝[≠] 0,qPochhammer (exp (a*t)) (exp t) k ≠ 0 := by
   filter_upwards [(whipple_exp_qpoch a k).eventually_ne ha] with t ht
   intro h0
@@ -277,16 +279,18 @@ theorem whipple_7F6 {a b c d e : ℂ} (m : ℕ)
     (hden : ∀ z ∈ [a / 2, a - b + 1, a - c + 1, a - d + 1,
       a - e + 1, a + m + 1, d + e - a - m], ∀ k : ℕ, z ≠ -k) :
     (∑ n ∈ Finset.range (m + 1),
-      poch a n * poch (a / 2 + 1) n * poch b n * poch c n * poch d n * poch e n *
-        poch (-m : ℂ) n /
-        (poch (a / 2) n * poch (a - b + 1) n * poch (a - c + 1) n *
-          poch (a - d + 1) n * poch (a - e + 1) n * poch (a + m + 1) n * n.factorial)) =
-      poch (a + 1) m * poch (a - d - e + 1) m /
-        (poch (a - d + 1) m * poch (a - e + 1) m) *
+      pochhammer a n * pochhammer (a / 2 + 1) n * pochhammer b n * pochhammer c n * pochhammer d n *
+          pochhammer e n *
+        pochhammer (-m : ℂ) n /
+        (pochhammer (a / 2) n * pochhammer (a - b + 1) n * pochhammer (a - c + 1) n *
+          pochhammer (a - d + 1) n * pochhammer (a - e + 1) n * pochhammer (a + m + 1) n *
+              n.factorial)) =
+      pochhammer (a + 1) m * pochhammer (a - d - e + 1) m /
+        (pochhammer (a - d + 1) m * pochhammer (a - e + 1) m) *
       (∑ n ∈ Finset.range (m + 1),
-        poch (a - b - c + 1) n * poch d n * poch e n * poch (-m : ℂ) n /
-          (poch (a - b + 1) n * poch (a - c + 1) n *
-            poch (d + e - a - m) n * n.factorial)) := by
+        pochhammer (a - b - c + 1) n * pochhammer d n * pochhammer e n * pochhammer (-m : ℂ) n /
+          (pochhammer (a - b + 1) n * pochhammer (a - c + 1) n *
+            pochhammer (d + e - a - m) n * n.factorial)) := by
   have hA := hden (a/2) (by simp)
   have hB := hden (a-b+1) (by simp)
   have hC := hden (a-c+1) (by simp)
@@ -309,14 +313,15 @@ theorem whipple_7F6 {a b c d e : ℂ} (m : ℕ)
     intro p hp
     simp only [List.mem_cons,List.not_mem_nil,or_false] at hp
     rcases hp with rfl | rfl
-    · exact poch_ne_zero_of_not_neg_nat hD m
-    · exact poch_ne_zero_of_not_neg_nat hE m)
+    · exact pochhammer_ne_zero_of_not_neg_nat hD m
+    · exact pochhammer_ne_zero_of_not_neg_nat hE m)
   have hPref : Tendsto (fun t : ℂ =>
       qPochhammer (exp (a*t)*exp t) (exp t) m*
         qPochhammer (exp (a*t)*exp t/(exp (d*t)*exp (e*t))) (exp t) m/
       (qPochhammer (exp (a*t)*exp t/exp (d*t)) (exp t) m*
         qPochhammer (exp (a*t)*exp t/exp (e*t)) (exp t) m)) (𝓝[≠] 0)
-      (𝓝 (poch (a+1) m*poch (a-d-e+1) m/(poch (a-d+1) m*poch (a-e+1) m))) := by
+      (𝓝 (pochhammer (a+1) m*pochhammer (a-d-e+1)
+          m/(pochhammer (a-d+1) m*pochhammer (a-e+1) m))) := by
     convert hPref0 using 1
     · funext t
       rw [whipple_exp_xparam,whipple_exp_param,whipple_exp_param,whipple_exp_oneparam]
@@ -324,17 +329,17 @@ theorem whipple_7F6 {a b c d e : ℂ} (m : ℕ)
     · simp only [List.map_cons,List.map_nil,List.prod_cons,List.prod_nil,mul_one]
   have hR := hPref.mul (tendsto_finsetSum (Finset.range (m+1)) fun k _ =>
     whipple_watson4_limit a b c d e m k hden4)
-  have hQB := whipple_qpoch_eventually_ne (a-b+1) m (poch_ne_zero_of_not_neg_nat hB m)
-  have hQC := whipple_qpoch_eventually_ne (a-c+1) m (poch_ne_zero_of_not_neg_nat hC m)
-  have hQD := whipple_qpoch_eventually_ne (a-d+1) m (poch_ne_zero_of_not_neg_nat hD m)
-  have hQE := whipple_qpoch_eventually_ne (a-e+1) m (poch_ne_zero_of_not_neg_nat hE m)
-  have hQN := whipple_qpoch_eventually_ne (a+m+1) m (poch_ne_zero_of_not_neg_nat hN m)
-  have hQY := whipple_qpoch_eventually_ne (d+e-a-m) m (poch_ne_zero_of_not_neg_nat hY m)
+  have hQB := whipple_qpoch_eventually_ne (a-b+1) m (pochhammer_ne_zero_of_not_neg_nat hB m)
+  have hQC := whipple_qpoch_eventually_ne (a-c+1) m (pochhammer_ne_zero_of_not_neg_nat hC m)
+  have hQD := whipple_qpoch_eventually_ne (a-d+1) m (pochhammer_ne_zero_of_not_neg_nat hD m)
+  have hQE := whipple_qpoch_eventually_ne (a-e+1) m (pochhammer_ne_zero_of_not_neg_nat hE m)
+  have hQN := whipple_qpoch_eventually_ne (a+m+1) m (pochhammer_ne_zero_of_not_neg_nat hN m)
+  have hQY := whipple_qpoch_eventually_ne (d+e-a-m) m (pochhammer_ne_zero_of_not_neg_nat hY m)
   have hQQ : ∀ᶠ t : ℂ in 𝓝[≠] 0,∀ k ∈ Finset.range (m+1),
       qPochhammer (exp t) (exp t) k ≠ 0 := by
     refine (Filter.eventually_all_finset _).mpr fun k _ => ?_
     simpa only [one_mul] using
-      whipple_qpoch_eventually_ne 1 k (poch_ne_zero_of_not_neg_nat h1 k)
+      whipple_qpoch_eventually_ne 1 k (pochhammer_ne_zero_of_not_neg_nat h1 k)
   have heq : (fun t : ℂ => ∑ k ∈ Finset.range (m+1),DLMF.Bailey.watsonR8
       (exp (a*t)) (exp (b*t)) (exp (c*t)) (exp (d*t)) (exp (e*t)) (exp t) m k) =ᶠ[𝓝[≠] 0]
       (fun t : ℂ =>
@@ -356,7 +361,7 @@ theorem whipple_7F6 {a b c d e : ℂ} (m : ℕ)
     · simpa only [whipple_exp_yparam] using hY
     · simpa only [whipple_exp_nparam] using hN
   have h := tendsto_nhds_unique hL (hR.congr' heq.symm)
-  simp only [poch_nat_one] at h
+  simp only [pochhammer_nat_one] at h
   rw [← h]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [whippleUnit_eq a hA]
@@ -393,7 +398,7 @@ theorem dougall_bilateral {a b c d : ℂ}
 
 /-- The complete elliptic integral of the first kind as the hypergeometric series of AAR §3.2,
 in the modulus `k`: `K = (π/2) ₂F₁(1/2, 1/2; 1; k²)`, meaningful for `‖k‖ < 1`. The real integral
-form in the parameter `m = k²` is `DLMF.Elliptic.Real.compEllIntKm`. -/
+form in the parameter `m = k²` is `DLMF.Elliptic.Real.completeEllipticKOfParameter`. -/
 @[dlmf 19.5.E1]
 def compEllIntKkSeries (k : ℂ) : ℂ :=
   (π / 2) * ₂F₁ (1 / 2 : ℂ) (1 / 2) 1 (k ^ 2)

@@ -7,6 +7,7 @@ module
 
 public import Mathlib.Analysis.InnerProductSpace.LinearPMap
 public import Mathlib.RingTheory.Polynomial.Hermite.Basic
+public import TauCeti.Analysis.SpecialFunctions.Hermite.Function.Basic
 public import Mathlib.Analysis.Calculus.ContDiff.Defs
 public import Mathlib.MeasureTheory.Integral.Bochner.Basic
 public import Mathlib.MeasureTheory.Measure.Haar.OfBasis
@@ -20,15 +21,15 @@ Mathlib's. This file adds the operators, eigenfunctions and spectral notions of 
 
 ## Main definitions
 
-* `schrodingerOp q` (1.18.28), `hermiteOp` (1.18.41), `besselOp ν` (1.18.55) and the radial
-  operator `radialSchrodingerOp ℓ V` (1.18.67), acting on functions `ℝ → ℂ`.
+* `schrodingerOperator q` (1.18.28), `hermiteOperator` (1.18.41), `besselOperator ν` (1.18.55) and
+  the radial operator `radialSchrodingerOperator ℓ V` (1.18.67), acting on functions `ℝ → ℂ`.
 * `sinEigenfunction`, `cosEigenfunction`, `expEigenfunction` (1.18.36–1.18.38) and the Hermite
-  functions `hermiteFunction` (1.18.42), via Mathlib's `Polynomial.hermite`.
-* For an unbounded operator `T : E →ₗ.[ℂ] E`: `IsSymmetricOp` (1.18.70),
-  `IsEssentiallySelfAdjoint`, `opResolventSet`, `opSpectrum`, `opPointSpectrum`,
-  `opContinuousSpectrum`, `opResidualSpectrum`, `deficiencySubspace` and `deficiencyIndices`
-  (§1.18(ix)).
-* For the Weyl theory of `-d²/dx² + q`: `IsSchrodingerSolOn`, `AllSolutionsL2Left`,
+  functions (1.18.42) as Tau Ceti's `TauCeti.hermiteFunction` (`ofReal_hermiteFunction`).
+* For an unbounded operator `T : E →ₗ.[ℂ] E`: `IsSymmetricOperator` (1.18.70),
+  `IsEssentiallySelfAdjoint`, `operatorResolventSet`, `operatorSpectrum`, `operatorPointSpectrum`,
+  `operatorContinuousSpectrum`, `operatorResidualSpectrum`, `deficiencySubspace` and
+  `deficiencyIndices` (§1.18(ix)).
+* For the Weyl theory of `-d²/dx² + q`: `IsSchrodingerSolutionOn`, `AllSolutionsL2Left`,
   `AllSolutionsL2Right`, `IsLimitCircleLeft`, `IsLimitCircleRight`, the `L²` solution space
   `l2SolutionSpace` and the boundary value `boundaryValueLeft` (1.18.71).
 * `eigenCoeff` (1.18.32, 1.18.47) and `IsEigenfunctionTransform` (1.18.44–1.18.47,
@@ -54,21 +55,21 @@ namespace DLMF.AlgebraicAnalytic
 /-- DLMF 1.18.28: the formally self-adjoint operator `𝓛 f = -f'' + q f` on functions
 `f : ℝ → ℂ`, with a real potential `q`. -/
 @[dlmf 1.18.E28]
-def schrodingerOp (q : ℝ → ℝ) (f : ℝ → ℂ) (x : ℝ) : ℂ :=
+def schrodingerOperator (q : ℝ → ℝ) (f : ℝ → ℂ) (x : ℝ) : ℂ :=
   -deriv (deriv f) x + (q x : ℂ) * f x
 
 /-- DLMF 1.18.41: the Hermite operator `-d²/dx² + x²` on `ℝ`. -/
 @[dlmf 1.18.E41]
-def hermiteOp : (ℝ → ℂ) → ℝ → ℂ := schrodingerOp fun x => x ^ 2
+def hermiteOperator : (ℝ → ℂ) → ℝ → ℂ := schrodingerOperator fun x => x ^ 2
 
 /-- DLMF 1.18.55: the Bessel operator `-d²/dx² + (ν² - ¼)/x²` on `(0, ∞)` (real `ν`). -/
 @[dlmf 1.18.E55]
-def besselOp (ν : ℝ) : (ℝ → ℂ) → ℝ → ℂ := schrodingerOp fun x => (ν ^ 2 - 1 / 4) / x ^ 2
+def besselOperator (ν : ℝ) : (ℝ → ℂ) → ℝ → ℂ := schrodingerOperator fun x => (ν ^ 2 - 1 / 4) / x ^ 2
 
 /-- DLMF 1.18.67: the radial Schrödinger operator
 `𝓛_ℓ = -½ d²/dr² + ℓ(ℓ+1)/(2r²) + V(r)` on `(0, ∞)`. -/
 @[dlmf 1.18.E67]
-def radialSchrodingerOp (ℓ : ℕ) (V : ℝ → ℝ) (f : ℝ → ℂ) (r : ℝ) : ℂ :=
+def radialSchrodingerOperator (ℓ : ℕ) (V : ℝ → ℝ) (f : ℝ → ℂ) (r : ℝ) : ℂ :=
   -(1 / 2 : ℂ) * deriv (deriv f) r + ((ℓ * (ℓ + 1) / (2 * r ^ 2) + V r : ℝ) : ℂ) * f r
 
 /-- DLMF 1.18.36: the Dirichlet eigenfunctions `√(2/π) sin(nx)` on `[0, π]`. -/
@@ -87,14 +88,31 @@ def cosEigenfunction (n : ℕ) (x : ℝ) : ℂ :=
 def expEigenfunction (n : ℤ) (x : ℝ) : ℂ := exp (2 * I * n * x) / Real.sqrt Real.pi
 
 /-- DLMF 1.18.42: the normalized Hermite functions
-`φₙ(x) = (π^{1/2} 2ⁿ n!)^{-1/2} e^{-x²/2} Hₙ(x)`. DLMF's (physicists') `Hₙ` is written
-through Mathlib's probabilists' `Polynomial.hermite n = Heₙ` as `Hₙ(x) = 2^{n/2} Heₙ(√2 x)`
-(DLMF 18.7.11–18.7.12; `DLMF.OrthogonalPolynomials.hermitePolyH` is the same polynomial). -/
+`φₙ(x) = (π^{1/2} 2ⁿ n!)^{-1/2} e^{-x²/2} Hₙ(x)` are Tau Ceti's real Hermite functions
+`TauCeti.hermiteFunction`, cast to `ℂ`. DLMF's (physicists') `Hₙ` is written through Mathlib's
+probabilists' `Polynomial.hermite n = Heₙ` as `Hₙ(x) = 2^{n/2} Heₙ(√2 x)` (DLMF 18.7.11–18.7.12;
+`DLMF.OrthogonalPolynomials.hermitePolynomialH` is the same polynomial). -/
 @[dlmf 1.18.E42]
-def hermiteFunction (n : ℕ) (x : ℝ) : ℂ :=
-  ((Real.sqrt (Real.sqrt Real.pi * 2 ^ n * n.factorial))⁻¹ * Real.exp (-x ^ 2 / 2) *
-    (Real.sqrt 2 ^ n * ((Polynomial.hermite n).map (Int.castRingHom ℝ)).eval
-      (Real.sqrt 2 * x)) : ℝ)
+theorem ofReal_hermiteFunction (n : ℕ) (x : ℝ) :
+    (TauCeti.hermiteFunction n x : ℂ) =
+      ((Real.sqrt (Real.sqrt Real.pi * 2 ^ n * n.factorial))⁻¹ * Real.exp (-x ^ 2 / 2) *
+        (Real.sqrt 2 ^ n * ((Polynomial.hermite n).map (Int.castRingHom ℝ)).eval
+          (Real.sqrt 2 * x)) : ℝ) := by
+  have hnorm : Real.sqrt (Real.sqrt Real.pi * 2 ^ n * n.factorial) =
+      Real.sqrt 2 ^ n * Real.sqrt (n.factorial * Real.sqrt Real.pi) := by
+    apply (sq_eq_sq₀ (Real.sqrt_nonneg _) (by positivity)).mp
+    rw [Real.sq_sqrt (by positivity), mul_pow, Real.sq_sqrt (by positivity)]
+    have hs : (Real.sqrt 2 ^ n) ^ 2 = (2 : ℝ) ^ n := by
+      rw [← pow_mul, Nat.mul_comm n 2, pow_mul, Real.sq_sqrt (by positivity)]
+    rw [hs]
+    ring
+  simp only [TauCeti.hermiteFunction_def, hnorm]
+  congr 1
+  simp only [Polynomial.aeval_def, Polynomial.eval_map]
+  rw [show -(x ^ 2 / 2) = -x ^ 2 / 2 by ring]
+  rw [mul_comm x (Real.sqrt 2)]
+  field_simp
+  rw [show Int.castRingHom ℝ = algebraMap ℤ ℝ from Subsingleton.elim _ _]
 
 /-! ## §1.18(iii), §1.18(ix): unbounded operators and their spectra -/
 
@@ -105,45 +123,46 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℂ E] [CompleteS
 /-- DLMF 1.18.70: a densely defined operator `T` is symmetric if `⟨Tv, w⟩ = ⟨v, Tw⟩` for
 `v, w ∈ 𝓓(T)` (Mathlib: `T.IsFormalAdjoint T`). -/
 @[dlmf 1.18.E70]
-def IsSymmetricOp (T : E →ₗ.[ℂ] E) : Prop :=
+def IsSymmetricOperator (T : E →ₗ.[ℂ] E) : Prop :=
   Dense (T.domain : Set E) ∧ T.IsFormalAdjoint T
 
 /-- §1.18(ix): a symmetric operator is essentially self-adjoint if `T** = T*`. -/
 @[dlmf 1.18.ix]
 def IsEssentiallySelfAdjoint (T : E →ₗ.[ℂ] E) : Prop :=
-  IsSymmetricOp T ∧ T.adjoint.adjoint = T.adjoint
+  IsSymmetricOperator T ∧ T.adjoint.adjoint = T.adjoint
 
 /-- The map `v ↦ z v - T v` on the domain of `T`. -/
-def shiftedOp (T : E →ₗ.[ℂ] E) (z : ℂ) : T.domain →ₗ[ℂ] E :=
+def shiftedOperator (T : E →ₗ.[ℂ] E) (z : ℂ) : T.domain →ₗ[ℂ] E :=
   z • T.domain.subtype - T.toFun
 
 /-- §1.18(ix): the resolvent set `ρ(T)`: the `z` for which `z - T` is injective with dense
 range and bounded inverse on its range. -/
 @[dlmf 1.18.ix]
-def opResolventSet (T : E →ₗ.[ℂ] E) : Set ℂ :=
-  {z | Function.Injective (shiftedOp T z) ∧ Dense (Set.range (shiftedOp T z)) ∧
-    ∃ C : ℝ, ∀ v : T.domain, ‖(v : E)‖ ≤ C * ‖shiftedOp T z v‖}
+def operatorResolventSet (T : E →ₗ.[ℂ] E) : Set ℂ :=
+  {z | Function.Injective (shiftedOperator T z) ∧ Dense (Set.range (shiftedOperator T z)) ∧
+    ∃ C : ℝ, ∀ v : T.domain, ‖(v : E)‖ ≤ C * ‖shiftedOperator T z v‖}
 
 /-- §1.18(ix): the spectrum `σ(T) = ℂ \ ρ(T)`. -/
 @[dlmf 1.18.ix]
-def opSpectrum (T : E →ₗ.[ℂ] E) : Set ℂ := (opResolventSet T)ᶜ
+def operatorSpectrum (T : E →ₗ.[ℂ] E) : Set ℂ := (operatorResolventSet T)ᶜ
 
 /-- §1.18(ix): the point spectrum, the `z` for which `z - T` is not injective (the
 eigenvalues). -/
 @[dlmf 1.18.ix]
-def opPointSpectrum (T : E →ₗ.[ℂ] E) : Set ℂ := {z | ¬ Function.Injective (shiftedOp T z)}
+def operatorPointSpectrum (T : E →ₗ.[ℂ] E) : Set ℂ :=
+    {z | ¬ Function.Injective (shiftedOperator T z)}
 
 /-- §1.18(ix): the continuous spectrum: `z - T` injective with dense range but unbounded
 inverse. -/
 @[dlmf 1.18.ix]
-def opContinuousSpectrum (T : E →ₗ.[ℂ] E) : Set ℂ :=
-  {z | Function.Injective (shiftedOp T z) ∧ Dense (Set.range (shiftedOp T z)) ∧
-    ¬ ∃ C : ℝ, ∀ v : T.domain, ‖(v : E)‖ ≤ C * ‖shiftedOp T z v‖}
+def operatorContinuousSpectrum (T : E →ₗ.[ℂ] E) : Set ℂ :=
+  {z | Function.Injective (shiftedOperator T z) ∧ Dense (Set.range (shiftedOperator T z)) ∧
+    ¬ ∃ C : ℝ, ∀ v : T.domain, ‖(v : E)‖ ≤ C * ‖shiftedOperator T z v‖}
 
 /-- §1.18(ix): the residual spectrum: `z - T` injective without dense range. -/
 @[dlmf 1.18.ix]
-def opResidualSpectrum (T : E →ₗ.[ℂ] E) : Set ℂ :=
-  {z | Function.Injective (shiftedOp T z) ∧ ¬ Dense (Set.range (shiftedOp T z))}
+def operatorResidualSpectrum (T : E →ₗ.[ℂ] E) : Set ℂ :=
+  {z | Function.Injective (shiftedOperator T z) ∧ ¬ Dense (Set.range (shiftedOperator T z))}
 
 /-- §1.18(ix): the deficiency subspace `N_z`, the `z`-eigenspace of the adjoint `T*`. -/
 @[dlmf 1.18.ix]
@@ -162,21 +181,21 @@ end Operators
 
 /-- `f` solves `-f'' + q f = z f` on `S`: `f` and `f'` are differentiable at every point of
 `S` and `f'' = (q - z) f` there. -/
-def IsSchrodingerSolOn (q : ℝ → ℝ) (z : ℂ) (f : ℝ → ℂ) (S : Set ℝ) : Prop :=
+def IsSchrodingerSolutionOn (q : ℝ → ℝ) (z : ℂ) (f : ℝ → ℂ) (S : Set ℝ) : Prop :=
   ∀ x ∈ S, HasDerivAt f (deriv f x) x ∧ HasDerivAt (deriv f) (((q x : ℂ) - z) * f x) x
 
 /-- All solutions of `-f'' + q f = z f` on `(a, c]` are square integrable near `a`. -/
 def AllSolutionsL2Left (q : ℝ → ℝ) (z : ℂ) (a c : ℝ) : Prop :=
-  ∀ f, IsSchrodingerSolOn q z f (Ioc a c) → MemLp f 2 (volume.restrict (Ioc a c))
+  ∀ f, IsSchrodingerSolutionOn q z f (Ioc a c) → MemLp f 2 (volume.restrict (Ioc a c))
 
 /-- All solutions of `-f'' + q f = z f` on `[c, b)` are square integrable near `b`
 (`b = ∞` is `AllSolutionsL2Ici`). -/
 def AllSolutionsL2Right (q : ℝ → ℝ) (z : ℂ) (c b : ℝ) : Prop :=
-  ∀ f, IsSchrodingerSolOn q z f (Ico c b) → MemLp f 2 (volume.restrict (Ico c b))
+  ∀ f, IsSchrodingerSolutionOn q z f (Ico c b) → MemLp f 2 (volume.restrict (Ico c b))
 
 /-- All solutions on `[c, ∞)` are square integrable at `+∞`. -/
 def AllSolutionsL2Ici (q : ℝ → ℝ) (z : ℂ) (c : ℝ) : Prop :=
-  ∀ f, IsSchrodingerSolOn q z f (Ici c) → MemLp f 2 (volume.restrict (Ici c))
+  ∀ f, IsSchrodingerSolutionOn q z f (Ici c) → MemLp f 2 (volume.restrict (Ici c))
 
 /-- §1.18(ix): the limit circle case at the left end point `a` (all solutions square
 integrable near `a`, for every `z`); otherwise `a` is in the limit point case. -/
@@ -206,7 +225,7 @@ def boundaryValueLeft (α β : ℝ → ℂ) (a : ℝ) (f : ℝ → ℂ) : ℂ :=
 statements made here). -/
 def schrodingerMaxDomainC2 (q : ℝ → ℝ) (a b : ℝ) : Set (ℝ → ℂ) :=
   {f | ContDiffOn ℝ 2 f (Ioo a b) ∧ MemLp f 2 (volume.restrict (Ioo a b)) ∧
-    MemLp (schrodingerOp q f) 2 (volume.restrict (Ioo a b))}
+    MemLp (schrodingerOperator q f) 2 (volume.restrict (Ioo a b))}
 
 /-- The Wronskian (Lagrange bracket) `W(f, g)(x) = f(x) g'(x) - f'(x) g(x)`. -/
 def wronskianC (f g : ℝ → ℂ) (x : ℝ) : ℂ := f x * deriv g x - deriv f x * g x

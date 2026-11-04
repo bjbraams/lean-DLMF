@@ -578,27 +578,29 @@ lemma CylinderUniformExpansion.Q_coeff (s : ℕ) : (CylinderUniformExpansion.Q s
 
 /-- `U(μ²/2, μt√2)` as a function of `t`: first derivative. -/
 lemma CylinderUniformExpansion.hasDerivAt_posU (μ t : ℝ) :
-    HasDerivAt (fun t : ℝ => pcfU (μ^2/2) (μ*t*Real.sqrt 2))
-      ((μ:ℂ) * Real.sqrt 2 * pcfUDeriv (μ^2/2) (μ*t*Real.sqrt 2)) t := by
+    HasDerivAt (fun t : ℝ => parabolicCylinderU (μ^2/2) (μ*t*Real.sqrt 2))
+      ((μ:ℂ) * Real.sqrt 2 * parabolicCylinderUDeriv (μ^2/2) (μ*t*Real.sqrt 2)) t := by
   have h1 : HasDerivAt (fun w : ℂ => (μ:ℂ) * w * Real.sqrt 2) ((μ:ℂ) * Real.sqrt 2) (t:ℂ) := by
     simpa using ((hasDerivAt_id (t:ℂ)).const_mul (μ:ℂ)).mul_const ((Real.sqrt 2 : ℝ) : ℂ)
-  have := ((hasDerivAt_pcfU ((μ:ℂ)^2/2) ((μ:ℂ) * t * Real.sqrt 2)).comp (t:ℂ) h1).comp_ofReal
+  have := ((hasDerivAt_parabolicCylinderU ((μ:ℂ)^2/2) ((μ:ℂ) * t * Real.sqrt 2)).comp (t:ℂ)
+      h1).comp_ofReal
   exact this.congr_deriv (by ring)
 
 /-- `U(μ²/2, μt√2)` as a function of `t`: Weber's equation `w'' = μ⁴(t²+1) w`. -/
 lemma CylinderUniformExpansion.hasDerivAt_posU' (μ t : ℝ) :
-    HasDerivAt (fun t : ℝ => (μ:ℂ) * Real.sqrt 2 * pcfUDeriv (μ^2/2) (μ*t*Real.sqrt 2))
-      (((μ^4*(t^2+1) : ℝ) : ℂ) * pcfU (μ^2/2) (μ*t*Real.sqrt 2)) t := by
+    HasDerivAt (fun t : ℝ => (μ:ℂ) * Real.sqrt 2 *
+        parabolicCylinderUDeriv (μ^2/2) (μ*t*Real.sqrt 2))
+      (((μ^4*(t^2+1) : ℝ) : ℂ) * parabolicCylinderU (μ^2/2) (μ*t*Real.sqrt 2)) t := by
   have h1 : HasDerivAt (fun w : ℂ => (μ:ℂ) * w * Real.sqrt 2) ((μ:ℂ) * Real.sqrt 2) (t:ℂ) := by
     simpa using ((hasDerivAt_id (t:ℂ)).const_mul (μ:ℂ)).mul_const ((Real.sqrt 2 : ℝ) : ℂ)
-  have := (((hasDerivAt_pcfUDeriv ((μ:ℂ)^2/2) ((μ:ℂ) * t * Real.sqrt 2)).comp (t:ℂ)
+  have := (((hasDerivAt_parabolicCylinderUDeriv ((μ:ℂ)^2/2) ((μ:ℂ) * t * Real.sqrt 2)).comp (t:ℂ)
     h1).comp_ofReal).const_mul ((μ:ℂ) * Real.sqrt 2)
   have hs2 : ((Real.sqrt 2 : ℝ) : ℂ)^2 = 2 := by
     exact_mod_cast Real.sq_sqrt (by norm_num : (0:ℝ) ≤ 2)
   refine this.congr_deriv ?_
   push_cast
   linear_combination (((μ:ℂ)^4*(t:ℂ)^2/4) * (((Real.sqrt 2 : ℝ) : ℂ)^2 + 2) + (μ:ℂ)^4/2) *
-    pcfU ((μ:ℂ)^2/2) ((μ:ℂ) * t * Real.sqrt 2) * hs2
+    parabolicCylinderU ((μ:ℂ)^2/2) ((μ:ℂ) * t * Real.sqrt 2) * hs2
 
 /-- `√(t²+1)/t → 1`. -/
 lemma CylinderUniformExpansion.tendsto_sqrt_div : Tendsto (fun t : ℝ => Real.sqrt (t^2+1) / t)
@@ -680,11 +682,11 @@ lemma CylinderUniformExpansion.tendsto_posNormalization {μ : ℝ} (hμ : 0 < μ
 /-- **The normalization of `U` at `+∞` for positive parameter** (from DLMF 12.9.1):
 `U(μ²/2, μ t √2) / (A(t) e^{-μ² ξ̄(t)}) → 1/(μ√2 h(μ))` as `t → ∞`. -/
 lemma CylinderUniformExpansion.tendsto_posU_div {μ : ℝ} (hμ : 0 < μ) :
-    Tendsto (fun t : ℝ => pcfU (μ^2/2) (μ*t*Real.sqrt 2) /
+    Tendsto (fun t : ℝ => parabolicCylinderU (μ^2/2) (μ*t*Real.sqrt 2) /
       ((CylinderUniformExpansion.posAmplitude t * Real.exp (-(μ^2 * pcfXiBar t)) : ℝ) : ℂ)) atTop
       (𝓝 (((μ * Real.sqrt 2 * CylinderLiouvilleGreen.normalizer μ)⁻¹ : ℝ) : ℂ)) := by
   set a : ℂ := (μ:ℂ)^2/2
-  have hO := pcfU_sector_asymptotic a (δ := π/4) (by positivity) 1
+  have hO := parabolicCylinderU_sector_asymptotic a (δ := π/4) (by positivity) 1
   have hz2 : Tendsto (fun z : ℂ => z ^ (-(2*(1:ℕ):ℤ))) (sector (3*π/4-π/4)) (𝓝 0) := by
     have : Tendsto (fun z : ℂ => ‖z‖) (sector (3*π/4-π/4)) atTop :=
       tendsto_comap.mono_left inf_le_left
@@ -694,10 +696,11 @@ lemma CylinderUniformExpansion.tendsto_posU_div {μ : ℝ} (hμ : 0 < μ) :
     simp
   have hE := (hO.trans_tendsto hz2).add_const 1
   simp only [zero_add, Finset.sum_range_one] at hE
-  have hE' : Tendsto (fun z : ℂ => cexp (z^2/4) * z^(a+1/2) * pcfU a z) (sector (3*π/4-π/4))
+  have hE' : Tendsto (fun z : ℂ => cexp (z^2/4) * z^(a+1/2) * parabolicCylinderU a z)
+      (sector (3*π/4-π/4))
       (𝓝 1) := by
     refine hE.congr fun z => ?_
-    simp [pcfUTerm, poch_zero]
+    simp [pcfUTerm, pochhammer_zero]
   have hT := hE'.comp (CylinderLiouvilleGreen.tendsto_sector (α := 3*π/4-π/4)
       (by linarith [Real.pi_pos]) hμ)
   have hR := (Complex.continuous_ofReal.tendsto _).comp
@@ -822,11 +825,12 @@ lemma CylinderUniformExpansion.tendsto_posNormalizationV {μ : ℝ} (hμ : 0 < �
 
 /-- `V(μ²/2, μ s √2) / (A(s) e^{μ²ξ̄(s)}) → h(μ)/√(π/2)` as `s → ∞` (from DLMF 12.9.2). -/
 lemma CylinderUniformExpansion.tendsto_posV_div {μ : ℝ} (hμ : 0 < μ) :
-    Tendsto (fun t : ℝ => pcfV (μ^2/2) (μ*t*Real.sqrt 2) /
+    Tendsto (fun t : ℝ => parabolicCylinderV (μ^2/2) (μ*t*Real.sqrt 2) /
       ((CylinderUniformExpansion.posAmplitude t * Real.exp (μ^2 * pcfXiBar t)) : ℝ)) atTop
       (𝓝 ((CylinderLiouvilleGreen.normalizer μ / Real.sqrt (π/2) : ℝ) : ℂ)) := by
   set a : ℂ := (μ:ℂ)^2/2
-  have hO := pcfV_sector_asymptotic a (δ := π/8) (by positivity) (by linarith [Real.pi_pos]) 1
+  have hO := parabolicCylinderV_sector_asymptotic a (δ := π/8) (by positivity)
+      (by linarith [Real.pi_pos]) 1
   have hz2 : Tendsto (fun z : ℂ => z ^ (-(2*(1:ℕ):ℤ))) (sector (π/4-π/8)) (𝓝 0) := by
     have : Tendsto (fun z : ℂ => ‖z‖) (sector (π/4-π/8)) atTop :=
       tendsto_comap.mono_left inf_le_left
@@ -836,10 +840,11 @@ lemma CylinderUniformExpansion.tendsto_posV_div {μ : ℝ} (hμ : 0 < μ) :
     simp
   have hE := (hO.trans_tendsto hz2).add_const 1
   simp only [zero_add, Finset.sum_range_one] at hE
-  have hE' : Tendsto (fun z : ℂ => (Real.sqrt (π/2):ℂ) * cexp (-z^2/4) * z^(-a+1/2) * pcfV a z)
+  have hE' : Tendsto (fun z : ℂ => (Real.sqrt (π/2):ℂ) * cexp (-z^2/4) * z^(-a+1/2) *
+      parabolicCylinderV a z)
       (sector (π/4-π/8)) (𝓝 1) := by
     refine hE.congr fun z => ?_
-    simp [pcfVTerm, poch_zero]
+    simp [pcfVTerm, pochhammer_zero]
   have hT := hE'.comp (CylinderLiouvilleGreen.tendsto_sector (α := π/4-π/8)
       (by linarith [Real.pi_pos]) hμ)
   have hR := (Complex.continuous_ofReal.tendsto _).comp
@@ -877,7 +882,7 @@ lemma CylinderUniformExpansion.tendsto_posV_div {μ : ℝ} (hμ : 0 < μ) :
 /-- **The behaviour of `U(μ²/2, μt√2)` at `-∞`** (from DLMF 12.2.15 and 12.9.1–12.9.2):
 `U / (A e^{-μ²ξ̄}) → √(2π) h(μ)/Γ(1/2+μ²/2)` as `t → -∞`. -/
 lemma CylinderUniformExpansion.tendsto_posU_div_atBot {μ : ℝ} (hμ : 0 < μ) :
-    Tendsto (fun t : ℝ => pcfU (μ^2/2) (μ*t*Real.sqrt 2) /
+    Tendsto (fun t : ℝ => parabolicCylinderU (μ^2/2) (μ*t*Real.sqrt 2) /
       ((CylinderUniformExpansion.posAmplitude t * Real.exp (-(μ^2 * pcfXiBar t)) : ℝ) : ℂ)) atBot
       (𝓝 (((Real.sqrt (2*π) * CylinderLiouvilleGreen.normalizer μ : ℝ) : ℂ) /
           Gamma (1/2 + (μ:ℂ)^2/2))) := by
@@ -907,7 +912,7 @@ lemma CylinderUniformExpansion.tendsto_posU_div_atBot {μ : ℝ} (hμ : 0 < μ) 
     push_cast
     field_simp
   rw [hval] at hsum
-  have key : Tendsto (fun s : ℝ => pcfU a (-((μ*s*Real.sqrt 2 : ℝ) : ℂ)) /
+  have key : Tendsto (fun s : ℝ => parabolicCylinderU a (-((μ*s*Real.sqrt 2 : ℝ) : ℂ)) /
       ((CylinderUniformExpansion.posAmplitude s * Real.exp (μ^2 * pcfXiBar s) : ℝ) : ℂ)) atTop
       (𝓝 (((Real.sqrt (2*π) * CylinderLiouvilleGreen.normalizer μ : ℝ) : ℂ) /
           Gamma (1/2 + (μ:ℂ)^2/2))) := by
@@ -919,7 +924,7 @@ lemma CylinderUniformExpansion.tendsto_posU_div_atBot {μ : ℝ} (hμ : 0 < μ) 
         Real.exp (-(μ^2 * pcfXiBar s)) : ℝ) : ℂ) ≠ 0 := by
       exact_mod_cast (mul_pos (CylinderUniformExpansion.posAmplitude_pos s) (Real.exp_pos _)).ne'
     beta_reduce
-    rw [pcfU_neg_eq]
+    rw [parabolicCylinderU_neg_eq]
     have hx : ((μ*s*Real.sqrt 2 : ℝ) : ℂ) = (μ:ℂ) * s * Real.sqrt 2 := by push_cast; ring
     rw [hx]
     have hexp : Real.exp (-(2*μ^2 * pcfXiBar s)) =
@@ -955,14 +960,14 @@ lemma CylinderUniformExpansion.pos_core {N : ℕ} (hN : 1 ≤ N) : ∃ C μ₀ :
       |CylinderUniformExpansion.truncSeries CylinderUniformExpansion.posCoeff N (μ^2) t - 1| ≤
           1/2 ∧ ∃ e e' : ℝ,
       |e| ≤ C / (μ^2)^N ∧ |CylinderUniformExpansion.posAmplitude t ^ 2 * e'| ≤ 2 * C / (μ^2)^(N-1) ∧
-      pcfU (μ^2/2) (μ*t*Real.sqrt 2) =
+      parabolicCylinderU (μ^2/2) (μ*t*Real.sqrt 2) =
           (((μ * Real.sqrt 2 * CylinderLiouvilleGreen.normalizer μ)⁻¹ : ℝ) : ℂ) /
         (CylinderUniformExpansion.truncSeries (fun s _ => CylinderUniformExpansion.barLimitCoeff s)
             N (μ^2) 0 : ℂ) *
         ((CylinderUniformExpansion.posAmplitude t * Real.exp (-(μ^2 * pcfXiBar t)) *
             (CylinderUniformExpansion.truncSeries CylinderUniformExpansion.posCoeff N (μ^2) t
                 + e) : ℝ) : ℂ) ∧
-      (μ:ℂ) * Real.sqrt 2 * pcfUDeriv (μ^2/2) (μ*t*Real.sqrt 2) =
+      (μ:ℂ) * Real.sqrt 2 * parabolicCylinderUDeriv (μ^2/2) (μ*t*Real.sqrt 2) =
         (((μ * Real.sqrt 2 * CylinderLiouvilleGreen.normalizer μ)⁻¹ : ℝ) : ℂ) /
         (CylinderUniformExpansion.truncSeries (fun s _ => CylinderUniformExpansion.barLimitCoeff s)
             N (μ^2) 0 : ℂ) *
@@ -1033,8 +1038,8 @@ lemma CylinderUniformExpansion.pos_core {N : ℕ} (hN : 1 ≤ N) : ∃ C μ₀ :
     (fun t _ => CylinderUniformExpansion.tail_le hcPad hKd t) (K := K)
     (fun s _ t _ => CylinderUniformExpansion.abs_posCoeff_le s t)
     (fun s _ => CylinderUniformExpansion.tendsto_posCoeff s)
-    (U := fun μ t => pcfU (μ^2/2) (μ*t*Real.sqrt 2))
-    (U' := fun μ t => (μ:ℂ) * Real.sqrt 2 * pcfUDeriv (μ^2/2) (μ*t*Real.sqrt 2))
+    (U := fun μ t => parabolicCylinderU (μ^2/2) (μ*t*Real.sqrt 2))
+    (U' := fun μ t => (μ:ℂ) * Real.sqrt 2 * parabolicCylinderUDeriv (μ^2/2) (μ*t*Real.sqrt 2))
     (H := fun μ => (((μ * Real.sqrt 2 * CylinderLiouvilleGreen.normalizer μ)⁻¹ : ℝ) : ℂ))
         (fun μ t _ => CylinderUniformExpansion.hasDerivAt_posU μ t)
     (fun μ t _ => (CylinderUniformExpansion.hasDerivAt_posU' μ t).congr_deriv

@@ -49,6 +49,8 @@ public import DLMF.Mathieu.SmallQCeSe
 public import DLMF.Mathieu.SmallQCeSeGeneral
 public import DLMF.Mathieu.ContinuedFractionTails
 public import DLMF.Mathieu.SmallQContinuedFractions
+public import DLMF.Mathieu.SpectralContinuity
+public import DLMF.Mathieu.EigenvalueInterlacing
 
 /-!
 # Mathieu functions and Hill's equation (DLMF Chapter 28)

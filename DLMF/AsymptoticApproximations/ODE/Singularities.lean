@@ -7,6 +7,8 @@ module
 
 public import DLMF.AsymptoticApproximations.ODE.Basic
 public import DLMFMathlib.Analysis.ODE.Singularities
+public import DLMFMathlib.Analysis.ODE.BallLinear
+public import DLMFMathlib.Analysis.ODE.PowerSeriesUniqueness
 public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
 
 public import DLMFMathlib.Analysis.Asymptotics.AsymptoticExpansion
@@ -33,7 +35,7 @@ public import DLMFMathlib.Analysis.Asymptotics.AsymptoticExpansion
 ## Implementation notes
 
 Solutions near an irregular singularity at infinity live on sectors of opening up to `3π`, so
-they are stated on the logarithmic plane (`IsLogPlaneSolOn`, `z = e^ζ`, `ph z = ℑζ`). The
+they are stated on the logarithmic plane (`IsLogPlaneSolutionOn`, `z = e^ζ`, `ph z = ℑζ`). The
 phase of `(λ₂ - λ₁) z` in 2.7.15–2.7.16 is `ℑ(ζ + Log(λ₂ - λ₁))`, and the power
 `((λ₂ - λ₁) z)^{μ}` is `exp(μ (ζ + Log(λ₂ - λ₁)))`. Sector conditions `θ₁ ≤ ph ≤ θ₂` as `|z| → ∞`
 are expressed by the filter `logSectorFilter θ₁ θ₂ c`.
@@ -56,11 +58,31 @@ convergence is at least the distance to the nearest singularity, 2.7.i.p5). -/
 theorem exists_unique_solution_of_ordinary {f g : ℂ → ℂ} {z₀ : ℂ} {R : ℝ} (hR : 0 < R)
     (hf : DifferentiableOn ℂ f (Metric.ball z₀ R)) (hg : DifferentiableOn ℂ g (Metric.ball z₀ R))
     (w₀ w₁ : ℂ) :
-    ∃ w : ℂ → ℂ, IsLinearODE2SolOn f g w (Metric.ball z₀ R) ∧ w z₀ = w₀ ∧ deriv w z₀ = w₁ ∧
+    ∃ w : ℂ → ℂ, AlgebraicAnalytic.IsLinearODE2SolutionOn f g 0 w (Metric.ball z₀ R) ∧ w z₀ = w₀ ∧
+        deriv w z₀ = w₁ ∧
       AnalyticOnNhd ℂ w (Metric.ball z₀ R) ∧
-      ∀ v : ℂ → ℂ, IsLinearODE2SolOn f g v (Metric.ball z₀ R) → v z₀ = w₀ → deriv v z₀ = w₁ →
+      ∀ v : ℂ → ℂ, AlgebraicAnalytic.IsLinearODE2SolutionOn f g 0 v (Metric.ball z₀ R) → v z₀ = w₀ →
+          deriv v z₀ = w₁ →
         EqOn v w (Metric.ball z₀ R) := by
-  sorry
+  obtain ⟨w, hwd, hw2, hw0, hw1⟩ := ODE.exists_ball_solution_linear_ode
+    (p := fun z => -f z) (q := fun z => -g z) hf.neg hg.neg w₀ w₁
+  have hwa : AnalyticOnNhd ℂ w (Metric.ball z₀ R) := hwd.analyticOnNhd Metric.isOpen_ball
+  have hz₀ : z₀ ∈ Metric.ball z₀ R := Metric.mem_ball_self hR
+  refine ⟨w, AlgebraicAnalytic.IsLinearODE2SolutionOn.of_homogeneous
+    (fun z hz => hwd.differentiableAt (Metric.isOpen_ball.mem_nhds hz))
+    (fun z hz => ?_), hw0, hw1, hwa, fun v hv hv0 hv1 => ?_⟩
+  · convert hw2 z hz using 1
+    ring
+  · have hvd : DifferentiableOn ℂ v (Metric.ball z₀ R) := fun z hz =>
+      (hv.differentiableAt z hz).differentiableWithinAt
+    have hva : AnalyticOnNhd ℂ v (Metric.ball z₀ R) := hvd.analyticOnNhd Metric.isOpen_ball
+    refine ODE.eqOn_of_ode (p := fun z => -f z) (q := fun z => -g z) Metric.isOpen_ball
+      (convex_ball z₀ R).isPreconnected hva hwa hz₀
+      ((hf.analyticOnNhd Metric.isOpen_ball z₀ hz₀).neg.contDiffAt)
+      ((hg.analyticOnNhd Metric.isOpen_ball z₀ hz₀).neg.contDiffAt)
+      (fun z hz => ?_) (fun z hz => ?_) (hv0.trans hw0.symm) (hv1.trans hw1.symm)
+    · rw [(hv.hasDerivAt_deriv_of_homogeneous z hz).deriv]; ring
+    · rw [(hw2 z hz).deriv]
 
 /-- DLMF 2.7.i: `z₀` is a regular singularity of 2.7.1 iff it is not an ordinary point and both
 `(z - z₀) f(z)` and `(z - z₀)² g(z)` are analytic at `z₀` (after removal of a removable
@@ -95,9 +117,9 @@ theorem frobenius_solutions {f g : ℂ → ℂ} {z₀ : ℂ} {R : ℝ} (hR : 0 <
     (h₁₂ : ∀ k : ℤ, α₁ - α₂ ≠ k) :
     (∀ z, ‖z - z₀‖ < R → Summable (fun s => frobeniusCoeff fs gs α₁ s * (z - z₀) ^ s) ∧
       Summable (fun s => frobeniusCoeff fs gs α₂ s * (z - z₀) ^ s)) ∧
-    IsLinearODE2SolOn f g (fun z => (z - z₀) ^ α₁ *
+    AlgebraicAnalytic.IsLinearODE2SolutionOn f g 0 (fun z => (z - z₀) ^ α₁ *
       ∑' s, frobeniusCoeff fs gs α₁ s * (z - z₀) ^ s) (slitDisc z₀ R) ∧
-    IsLinearODE2SolOn f g (fun z => (z - z₀) ^ α₂ *
+    AlgebraicAnalytic.IsLinearODE2SolutionOn f g 0 (fun z => (z - z₀) ^ α₂ *
       ∑' s, frobeniusCoeff fs gs α₂ s * (z - z₀) ^ s) (slitDisc z₀ R) ∧
     ¬ ∃ c : ℂ, ∀ z ∈ slitDisc z₀ R,
       (z - z₀) ^ α₁ * ∑' s, frobeniusCoeff fs gs α₁ s * (z - z₀) ^ s =
@@ -116,10 +138,10 @@ theorem frobenius_log_solution {f g : ℂ → ℂ} {z₀ : ℂ} {R : ℝ} (hR : 
     {α₁ α₂ : ℂ} (h₁ : indicialPoly (fs 0) (gs 0) α₁ = 0) (h₂ : indicialPoly (fs 0) (gs 0) α₂ = 0)
     {N : ℕ} (hN : α₁ - α₂ = N) :
     let w₁ : ℂ → ℂ := fun z => (z - z₀) ^ α₁ * ∑' s, frobeniusCoeff fs gs α₁ s * (z - z₀) ^ s
-    IsLinearODE2SolOn f g w₁ (slitDisc z₀ R) ∧
+    AlgebraicAnalytic.IsLinearODE2SolutionOn f g 0 w₁ (slitDisc z₀ R) ∧
     ∃ (b : ℕ → ℂ) (c : ℂ), (N = 0 → c = 1) ∧ (1 ≤ N → b 0 = 1) ∧
       (∀ z, ‖z - z₀‖ < R → Summable (fun s => b s * (z - z₀) ^ s)) ∧
-      IsLinearODE2SolOn f g (fun z => (z - z₀) ^ α₂ *
+      AlgebraicAnalytic.IsLinearODE2SolutionOn f g 0 (fun z => (z - z₀) ^ α₂ *
           ∑' s, (if s = N then 0 else b s) * (z - z₀) ^ s + c * w₁ z * log (z - z₀))
         (slitDisc z₀ R) ∧
       ¬ ∃ d : ℂ, ∀ z ∈ slitDisc z₀ R, (z - z₀) ^ α₂ *
@@ -165,16 +187,16 @@ theorem rankOne_exists_unique_solutions {f g : ℂ → ℂ} {fs gs : ℕ → ℂ
     let μ₁ := rankOneExponent fs gs l₁
     let μ₂ := rankOneExponent fs gs l₂
     ∃ W₁ W₂ : ℂ → ℂ,
-      IsLogPlaneSolOn f g W₁ (logExterior a) ∧ IsLogPlaneSolOn f g W₂ (logExterior a) ∧
+      IsLogPlaneSolutionOn f g W₁ (logExterior a) ∧ IsLogPlaneSolutionOn f g W₂ (logExterior a) ∧
       (∀ δ : ℝ, 0 < δ → δ < π →
         HasAsymptoticExpansion (logSectorFilter (-(3 * π / 2) + δ) (3 * π / 2 - δ) c)
           (rankOneScale l₁ μ₁ c) (rankOneCoeff fs gs l₁) W₁ ∧
         HasAsymptoticExpansion (logSectorFilter (-(π / 2) + δ) (5 * π / 2 - δ) c)
           (rankOneScale l₂ μ₂ c) (rankOneCoeff fs gs l₂) W₂) ∧
-      (∀ δ : ℝ, 0 < δ → δ < π → ∀ V : ℂ → ℂ, IsLogPlaneSolOn f g V (logExterior a) →
+      (∀ δ : ℝ, 0 < δ → δ < π → ∀ V : ℂ → ℂ, IsLogPlaneSolutionOn f g V (logExterior a) →
         HasAsymptoticExpansion (logSectorFilter (-(3 * π / 2) + δ) (3 * π / 2 - δ) c)
           (rankOneScale l₁ μ₁ c) (rankOneCoeff fs gs l₁) V → EqOn V W₁ (logExterior a)) ∧
-      (∀ δ : ℝ, 0 < δ → δ < π → ∀ V : ℂ → ℂ, IsLogPlaneSolOn f g V (logExterior a) →
+      (∀ δ : ℝ, 0 < δ → δ < π → ∀ V : ℂ → ℂ, IsLogPlaneSolutionOn f g V (logExterior a) →
         HasAsymptoticExpansion (logSectorFilter (-(π / 2) + δ) (5 * π / 2 - δ) c)
           (rankOneScale l₂ μ₂ c) (rankOneCoeff fs gs l₂) V → EqOn V W₂ (logExterior a)) := by
   sorry
@@ -186,8 +208,8 @@ theorem rankOne_exists_unique_solutions {f g : ℂ → ℂ} {fs gs : ℕ → ℂ
 @[dlmf 2.7.E17]
 theorem rankOne_stokes_multipliers {f g : ℂ → ℂ} {fs gs : ℕ → ℂ} {a : ℝ} {l₁ l₂ : ℂ}
     (h : IsRankOneAtInfinity f g fs gs a l₁ l₂) {W₁ W₂ : ℂ → ℂ}
-    (hW₁ : IsLogPlaneSolOn f g W₁ (logExterior a))
-    (hW₂ : IsLogPlaneSolOn f g W₂ (logExterior a))
+    (hW₁ : IsLogPlaneSolutionOn f g W₁ (logExterior a))
+    (hW₂ : IsLogPlaneSolutionOn f g W₂ (logExterior a))
     (hE₁ : HasAsymptoticExpansion (logSectorFilter (-π) π (Complex.log (l₂ - l₁)))
       (rankOneScale l₁ (rankOneExponent fs gs l₁) (Complex.log (l₂ - l₁)))
       (rankOneCoeff fs gs l₁) W₁)
@@ -207,8 +229,8 @@ multipliers `C₁, C₂` of 2.7.17 and `Λ₁ = -i e^{(μ₂-μ₁)πi} C₁/(2�
 @[dlmf 2.7.E12, dlmf 2.7.E13, dlmf 2.7.E18]
 theorem rankOne_late_coefficients {f g : ℂ → ℂ} {fs gs : ℕ → ℂ} {a : ℝ} {l₁ l₂ : ℂ}
     (h : IsRankOneAtInfinity f g fs gs a l₁ l₂) {W₁ W₂ : ℂ → ℂ}
-    (hW₁ : IsLogPlaneSolOn f g W₁ (logExterior a))
-    (hW₂ : IsLogPlaneSolOn f g W₂ (logExterior a))
+    (hW₁ : IsLogPlaneSolutionOn f g W₁ (logExterior a))
+    (hW₂ : IsLogPlaneSolutionOn f g W₂ (logExterior a))
     (hE₁ : HasAsymptoticExpansion (logSectorFilter (-π) π (Complex.log (l₂ - l₁)))
       (rankOneScale l₁ (rankOneExponent fs gs l₁) (Complex.log (l₂ - l₁)))
       (rankOneCoeff fs gs l₁) W₁)
@@ -238,9 +260,9 @@ theorem rankOne_late_coefficients {f g : ℂ → ℂ} {fs gs : ℕ → ℂ} {a :
 `G(t) = 4t² (g(t²) - f₀ f(t²)/2 + f₀²/4)`, on `{t ≠ 0 : t² ∈ U}`. -/
 @[dlmf 2.7.E19]
 theorem fabry_transformation {f g w : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
-    (hw : IsLinearODE2SolOn f g w U) (f₀ : ℂ) :
-    IsLinearODE2SolOn (fun t => 2 * t * (f (t ^ 2) - f₀) - 1 / t)
-      (fun t => 4 * t ^ 2 * (g (t ^ 2) - f₀ * f (t ^ 2) / 2 + f₀ ^ 2 / 4))
+    (hw : AlgebraicAnalytic.IsLinearODE2SolutionOn f g 0 w U) (f₀ : ℂ) :
+    AlgebraicAnalytic.IsLinearODE2SolutionOn (fun t => 2 * t * (f (t ^ 2) - f₀) - 1 / t)
+      (fun t => 4 * t ^ 2 * (g (t ^ 2) - f₀ * f (t ^ 2) / 2 + f₀ ^ 2 / 4)) 0
       (fun t => exp (f₀ * t ^ 2 / 2) * w (t ^ 2)) {t : ℂ | t ≠ 0 ∧ t ^ 2 ∈ U} := by
   have hT : IsOpen {t : ℂ | t ≠ 0 ∧ t ^ 2 ∈ U} :=
     isOpen_ne_fun continuous_id continuous_const |>.inter
@@ -250,7 +272,7 @@ theorem fabry_transformation {f g w : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
   have he (t : ℂ) : HasDerivAt (fun t : ℂ => exp (f₀ * t ^ 2 / 2))
       (exp (f₀ * t ^ 2 / 2) * (f₀ * t)) t := by
     convert (((hs t).const_mul f₀).div_const 2).cexp using 1 <;> ring
-  unfold IsLinearODE2SolOn at hw ⊢
+  rw [isLinearODE2SolutionOn_iff_isODE2SolutionOn] at hw ⊢
   refine DLMF.Painleve.isODE2SolutionOn_of_hasDerivAt hT
     (v := fun t => exp (f₀ * t ^ 2 / 2) *
       (f₀ * t * w (t ^ 2) + 2 * t * deriv w (t ^ 2))) ?_ ?_
@@ -322,7 +344,8 @@ theorem fabry_coefficients {f g : ℂ → ℂ} {fs gs : ℕ → ℂ} {a : ℝ}
 /-- DLMF 2.7.35–2.7.36: `e^z` and `e^{-z}` solve `w'' = w`, and every entire solution is
 `w = A e^z + B e^{-z}`. -/
 @[dlmf 2.7.E35, dlmf 2.7.E36]
-theorem eq_exp_combination {w : ℂ → ℂ} (hw : IsLinearODE2SolOn (fun _ => 0) (fun _ => -1) w univ) :
+theorem eq_exp_combination {w : ℂ → ℂ}
+    (hw : AlgebraicAnalytic.IsLinearODE2SolutionOn (fun _ => 0) (fun _ => -1) 0 w univ) :
     ∃ A B : ℂ, ∀ z, w z = A * exp z + B * exp (-z) := by
   have hd : ∀ z, HasDerivAt w (deriv w z) z := fun z => (hw.differentiableAt z trivial).hasDerivAt
   have hdd : ∀ z, HasDerivAt (deriv w) (w z) z := fun z => by
@@ -355,7 +378,7 @@ theorem eq_exp_combination {w : ℂ → ℂ} (hw : IsLinearODE2SolOn (fun _ => 0
 `w'' = w` is `w = C cosh z + D sinh z`. -/
 @[dlmf 2.7.E37]
 theorem eq_cosh_sinh_combination {w : ℂ → ℂ}
-    (hw : IsLinearODE2SolOn (fun _ => 0) (fun _ => -1) w univ) :
+    (hw : AlgebraicAnalytic.IsLinearODE2SolutionOn (fun _ => 0) (fun _ => -1) 0 w univ) :
     ∃ C D : ℂ, ∀ z, w z = C * cosh z + D * sinh z := by
   obtain ⟨A, B, h⟩ := eq_exp_combination hw
   refine ⟨A + B, A - B, fun z => ?_⟩

@@ -22,8 +22,8 @@ imaginary parts are DLMF 7.12.2 and 7.12.3.
 
 ## Main results
 
-* `fresnelAuxG_add_I_mul_fresnelAuxF`: DLMF 7.5.10.
-* `hasAsymptoticExpansion_fresnelAuxG_add_I_mul_fresnelAuxF`:
+* `fresnelAuxiliaryG_add_I_mul_fresnelAuxiliaryF`: DLMF 7.5.10.
+* `hasAsymptoticExpansion_fresnelAuxiliaryG_add_I_mul_fresnelAuxiliaryF`:
   `g(x) + i f(x) ~ ∑ i (-i)^m (1/2)_m (2/π)^m / (π x^{2m+1})`.
 -/
 
@@ -49,20 +49,20 @@ theorem fresnelZeta_sq (x : ℝ) : fresnelZeta x ^ 2 = -(I * (π * x ^ 2 / 2)) :
 /-- **The auxiliary functions through `erfc`** (DLMF 7.5.10, upper signs):
 `g(x) + i f(x) = (1+i)/2 · e^{ζ²} erfc ζ`. -/
 @[dlmf 7.5.E10]
-theorem fresnelAuxG_add_I_mul_fresnelAuxF (x : ℝ) :
-    (fresnelAuxG x : ℂ) + I * fresnelAuxF x =
+theorem fresnelAuxiliaryG_add_I_mul_fresnelAuxiliaryF (x : ℝ) :
+    (fresnelAuxiliaryG x : ℂ) + I * fresnelAuxiliaryF x =
       (1 + I) / 2 * exp (fresnelZeta x ^ 2) * erfc (fresnelZeta x) := by
-  have hCS := Real.fresnelCosInt_add_I_mul_fresnelSinInt x
+  have hCS := Real.fresnelC_add_I_mul_fresnelS x
   rw [show (Real.sqrt π : ℂ) * (1 - I) / 2 * x = fresnelZeta x from rfl] at hCS
   rw [erfc, fresnelZeta_sq, show -(I * ((π : ℂ) * (x : ℂ) ^ 2 / 2)) =
     ((-(π * x ^ 2 / 2) : ℝ) : ℂ) * I by push_cast; ring, Complex.exp_mul_I,
-    ← Complex.ofReal_cos, ← Complex.ofReal_sin, Real.cos_neg, Real.sin_neg, fresnelAuxG,
-    fresnelAuxF]
+    ← Complex.ofReal_cos, ← Complex.ofReal_sin, Real.cos_neg, Real.sin_neg, fresnelAuxiliaryG,
+    fresnelAuxiliaryF]
   simp only [Complex.ofReal_sub, Complex.ofReal_mul, Complex.ofReal_add, Complex.ofReal_div,
     Complex.ofReal_one, Complex.ofReal_ofNat, Complex.ofReal_neg]
   generalize (Real.cos (π * x ^ 2 / 2) : ℂ) = c at *
   generalize (Real.sin (π * x ^ 2 / 2) : ℂ) = sn at *
-  linear_combination (-(c - I * sn)) * hCS + (sn / 2 - sn * Real.fresnelSinInt x) * Complex.I_sq
+  linear_combination (-(c - I * sn)) * hCS + (sn / 2 - sn * Real.fresnelS x) * Complex.I_sq
 
 /-- `Re ζ(x) = √π x / 2`. -/
 theorem re_fresnelZeta (x : ℝ) : (fresnelZeta x).re = Real.sqrt π / 2 * x := by
@@ -103,10 +103,10 @@ theorem tendsto_fresnelZeta_sq :
 /-- **Asymptotic expansion of the auxiliary Fresnel functions** (DLMF 7.12.2–7.12.3, combined):
 `g(x) + i f(x) ~ ∑ i (-i)^m (1/2)_m (2/π)^m / (π x^{2m+1})` as `x → +∞`. -/
 @[dlmf 7.12.E2]
-theorem hasAsymptoticExpansion_fresnelAuxG_add_I_mul_fresnelAuxF :
+theorem hasAsymptoticExpansion_fresnelAuxiliaryG_add_I_mul_fresnelAuxiliaryF :
     HasAsymptoticExpansion atTop (fun (m : ℕ) (x : ℝ) => (((x : ℂ) ^ (2 * m + 1))⁻¹))
-      (fun m => I * (-I) ^ m * poch (1 / 2) m * (2 / π) ^ m / π)
-      (fun x => (fresnelAuxG x : ℂ) + I * fresnelAuxF x) := by
+      (fun m => I * (-I) ^ m * pochhammer (1 / 2) m * (2 / π) ^ m / π)
+      (fun x => (fresnelAuxiliaryG x : ℂ) + I * fresnelAuxiliaryF x) := by
   set c : ℂ := (Real.sqrt π : ℂ) * (1 - I) / 2 with hc
   have hsπ : (Real.sqrt π : ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hsπ2 : (Real.sqrt π : ℂ) ^ 2 = π := by
@@ -128,11 +128,11 @@ theorem hasAsymptoticExpansion_fresnelAuxG_add_I_mul_fresnelAuxF :
       have hre : 0 < (fresnelZeta x).re := by rw [re_fresnelZeta]; positivity
       simp only [Function.comp_apply, Pi.smul_apply, smul_eq_mul]
       rw [kummerU_erfc (Complex.mem_slitPlane_iff.mpr (Or.inl hre)) hre,
-        fresnelAuxG_add_I_mul_fresnelAuxF]
+        fresnelAuxiliaryG_add_I_mul_fresnelAuxiliaryF]
       field_simp
     · funext m
       simp only [Pi.smul_apply, smul_eq_mul, tricomiCoeff]
-      rw [show (1 / 2 : ℂ) - 1 / 2 + 1 = 1 by ring, poch_nat_one, pow_succ, pow_mul, hc2]
+      rw [show (1 / 2 : ℂ) - 1 / 2 + 1 = 1 by ring, pochhammer_nat_one, pow_succ, pow_mul, hc2]
       have hf : (m.factorial : ℂ) ≠ 0 := by exact_mod_cast m.factorial_ne_zero
       have h1 : (-(I * (π / 2 : ℂ)))⁻¹ = 2 * I / π := by
         refine inv_eq_of_mul_eq_one_right ?_
@@ -141,9 +141,9 @@ theorem hasAsymptoticExpansion_fresnelAuxG_add_I_mul_fresnelAuxF :
         have h1I : (1 - I) ≠ 0 := by intro h; have := congrArg im h; simp at this
         rw [hc, ← hsπ2]; field_simp; ring_nf; rw [Complex.I_sq]; ring
       calc (1 + I) / (2 * Real.sqrt π) * ((((-(I * (π / 2 : ℂ))) ^ m) * c)⁻¹ *
-            ((-1) ^ m * poch (1 / 2) m * m.factorial / m.factorial))
+            ((-1) ^ m * pochhammer (1 / 2) m * m.factorial / m.factorial))
           = ((1 + I) / (2 * Real.sqrt π) * c⁻¹) * ((-(I * (π / 2 : ℂ)))⁻¹ * (-1)) ^ m *
-              poch (1 / 2) m := by
+              pochhammer (1 / 2) m := by
             rw [mul_inv, mul_pow, inv_pow]; field_simp
         _ = _ := by
             rw [h2, h1, show 2 * I / (π : ℂ) * -1 = -I * (2 / π) by ring, mul_pow]; ring

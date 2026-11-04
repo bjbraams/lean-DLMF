@@ -7,6 +7,10 @@ module
 
 public import DLMF.EllipticIntegrals.Symmetric
 public import Dirichlet.Average.TwoNode
+public import Carlson.R.IntegerParameters
+public import Carlson.RPolynomial.Coefficients
+public import Mathlib.Analysis.SpecialFunctions.Arsinh
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.ArctanDeriv
 public import DLMFMathlib.MeasureTheory.Integral.Trigonometric
 
 /-!
@@ -23,30 +27,35 @@ Trigonometric, hyperbolic, spherical-average and unit-interval representations o
 
 ## Main results
 
-* `symEllIntRF_zero_eq_integral_trig`, `symEllIntRG_zero_eq_integral_trig`,
-  `symEllIntRD_zero_eq_integral_trig`: the complete cases as integrals over `[0, π/2]` of
+* `symmetricEllipticRF_zero_eq_integral_trig`, `symmetricEllipticRG_zero_eq_integral_trig`,
+  `symmetricEllipticRD_zero_eq_integral_trig`: the complete cases as integrals over `[0, π/2]` of
   powers of `y cos² θ + z sin² θ`, for `ℜ y, ℜ z > 0` (DLMF 19.23.1–19.23.3).
-* `symEllIntRF_zero_eq_integral_symEllIntRC`, `symEllIntRF_eq_integral_symEllIntRC`: `R_F` as
-  an average of `R_C` (DLMF 19.23.4, 19.23.5).
-* `symEllIntRF_eq_sphere_integral`, `symEllIntRG_eq_sphere_integral`: `R_F` and `R_G` as
-  averages over the unit sphere (DLMF 19.23.6, 19.23.6_5).
-* `symEllIntR_two_eq_integral_trig`, `symEllIntR_three_eq_integral_sphere`: `R_{-a}(𝐛; 𝐳)` for
-  `n = 2` and `n = 3` (DLMF 19.23.8, 19.23.9).
-* `symEllIntR_eq_integral_unitInterval`: Euler's integral over `[0, 1]` for general `n`
+* `symmetricEllipticRF_zero_eq_integral_symmetricEllipticRC`,
+  `symmetricEllipticRF_eq_integral_symmetricEllipticRC`: `R_F` as an average of `R_C` (DLMF 19.23.4,
+  19.23.5).
+* `symmetricEllipticRF_eq_sphere_integral`, `symmetricEllipticRG_eq_sphere_integral`: `R_F` and
+  `R_G` as averages over the unit sphere (DLMF 19.23.6, 19.23.6_5).
+* `symmetricEllipticR_two_eq_integral_trig`, `symmetricEllipticR_three_eq_integral_sphere`:
+  `R_{-a}(𝐛; 𝐳)` for `n = 2` and `n = 3` (DLMF 19.23.8, 19.23.9).
+* `symmetricEllipticR_eq_integral_unitInterval`: Euler's integral over `[0, 1]` for general `n`
   (DLMF 19.23.10, stronger than DLMF).
 
 ## Implementation notes
 
-All functions are DLMF's (`DLMF.EllipticIntegrals.symEllIntRF` etc.); principal powers are used
-throughout, and on the stated domains every base lies in the open right half-plane, so no branch
-question arises. The two-node trigonometric formula uses `lean-codes`'
+All functions are DLMF's (`DLMF.EllipticIntegrals.symmetricEllipticRF` etc.); principal powers are
+used throughout, and on the stated domains every base lies in the open right half-plane, so no
+branch question arises. The two-node trigonometric formula uses `lean-codes`'
 `Dirichlet.regCarlsonDirichletAverage_fin_two` and a change of variables by `cos² θ`. The Euler
 integral (19.23.10) comes from `lean-codes`' unit-interval representation
 `Carlson.regCarlsonR_eq_unitIntervalIntegral` (Carlson 1977, (6.8-6)).
 
 The equation (19.23.7) was moved by DLMF to (19.16.2_5), which is the definition
-`DLMF.EllipticIntegrals.symEllIntRG`. The final sentence of the section (19.23.p6) is a
+`DLMF.EllipticIntegrals.symmetricEllipticRG`. The final sentence of the section (19.23.p6) is a
 bibliographic pointer.
+
+The averages (19.23.4)–(19.23.5) follow from the integral (19.2.17) of `R_C` by Fubini's theorem
+and `∫₀^{π/2} (A cos² θ + B sin² θ)⁻¹ dθ = (π/2) (√A √B)⁻¹` (19.23.8 with `a = 1`); the second
+form of (19.23.4) uses the substitution `θ = arctan (sinh t)`.
 
 ## References
 
@@ -73,9 +82,9 @@ def CarlsonRightHalfDomain (x y z : ℂ) : Prop :=
 `ℜ z₁, ℜ z₂ > 0`. The exponent `a` is any complex number (`R_{-a}` is Carlson's continuation in
 `a`; both sides are entire in `a`). -/
 @[dlmf 19.23.E8]
-theorem symEllIntR_two_eq_integral_trig (a : ℂ) {b₁ b₂ : ℝ} (hb₁ : 0 < b₁) (hb₂ : 0 < b₂)
+theorem symmetricEllipticR_two_eq_integral_trig (a : ℂ) {b₁ b₂ : ℝ} (hb₁ : 0 < b₁) (hb₂ : 0 < b₂)
     {z₁ z₂ : ℂ} (hz₁ : 0 < z₁.re) (hz₂ : 0 < z₂.re) :
-    symEllIntR a ![(b₁ : ℂ), b₂] ![z₁, z₂] = 2 / betaIntegral b₁ b₂ *
+    symmetricEllipticR a ![(b₁ : ℂ), b₂] ![z₁, z₂] = 2 / betaIntegral b₁ b₂ *
       ∫ θ in (0 : ℝ)..(π / 2), (z₁ * (Real.cos θ : ℂ) ^ 2 + z₂ * (Real.sin θ : ℂ) ^ 2) ^ (-a) *
         ((Real.cos θ ^ (2 * b₁ - 1) * Real.sin θ ^ (2 * b₂ - 1) : ℝ) : ℂ) := by
   have hzs : ![z₁, z₂] ∈ Carlson.carlsonRSlitDomain :=
@@ -84,7 +93,7 @@ theorem symEllIntR_two_eq_integral_trig (a : ℂ) {b₁ b₂ : ℝ} (hb₁ : 0 <
     intro i; fin_cases i <;> assumption
   have hb : ![(b₁ : ℂ), (b₂ : ℂ)] ∈ Complex.mvBetaConvergent := by
     intro i; fin_cases i <;> assumption
-  rw [symEllIntR_of_mem _ _ hzs, Carlson.carlsonR,
+  rw [symmetricEllipticR_of_mem _ _ hzs, Carlson.carlsonR,
     Carlson.regCarlsonR_eq_regCarlsonRIntegral _ hb hzr, Carlson.regCarlsonRIntegral,
     Dirichlet.regCarlsonDirichletAverage_fin_two, Dirichlet.regEulerIntegral]
   simp only [Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one]
@@ -133,39 +142,39 @@ theorem symEllIntR_two_eq_integral_trig (a : ℂ) {b₁ b₂ : ℝ} (hb₁ : 0 <
 /-- DLMF 19.23.1: `R_F(0, y, z) = ∫₀^{π/2} (y cos² θ + z sin² θ)^{-1/2} dθ`, for `ℜ y > 0`,
 `ℜ z > 0` (19.23.p1). -/
 @[dlmf 19.23.E1]
-theorem symEllIntRF_zero_eq_integral_trig {y z : ℂ} (hy : 0 < y.re) (hz : 0 < z.re) :
-    symEllIntRF 0 y z = ∫ θ in (0 : ℝ)..(π / 2),
+theorem symmetricEllipticRF_zero_eq_integral_trig {y z : ℂ} (hy : 0 < y.re) (hz : 0 < z.re) :
+    symmetricEllipticRF 0 y z = ∫ θ in (0 : ℝ)..(π / 2),
       (y * (Real.cos θ : ℂ) ^ 2 + z * (Real.sin θ : ℂ) ^ 2) ^ (-1 / 2 : ℂ) := by
   have hB : betaIntegral (1 / 2 : ℂ) (1 / 2) = π := by
     rw [Complex.betaIntegral_eq_Gamma_mul_div _ _ (by norm_num) (by norm_num)]
     norm_num [Gamma_one_half_mul_self]
-  have H := symEllIntR_two_eq_integral_trig (1 / 2) (b₁ := 1 / 2) (b₂ := 1 / 2)
+  have H := symmetricEllipticR_two_eq_integral_trig (1 / 2) (b₁ := 1 / 2) (b₂ := 1 / 2)
     (by norm_num) (by norm_num) hy hz
   simp only [ofReal_div, ofReal_one, ofReal_ofNat,
     show 2 * (1 / 2 : ℝ) - 1 = 0 by norm_num, Real.rpow_zero,
     mul_one] at H
   rw [hB] at H
-  rw [symEllIntRF_zero_left (Or.inl hy) (Or.inl hz), H]
+  rw [symmetricEllipticRF_zero_left (Or.inl hy) (Or.inl hz), H]
   have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
   field_simp
 
 /-- DLMF 19.23.2: `R_G(0, y, z) = (1/2) ∫₀^{π/2} (y cos² θ + z sin² θ)^{1/2} dθ`, for `ℜ y > 0`,
 `ℜ z > 0` (19.23.p1). -/
 @[dlmf 19.23.E2]
-theorem symEllIntRG_zero_eq_integral_trig {y z : ℂ} (hy : 0 < y.re) (hz : 0 < z.re) :
-    symEllIntRG 0 y z = (1 / 2) * ∫ θ in (0 : ℝ)..(π / 2),
+theorem symmetricEllipticRG_zero_eq_integral_trig {y z : ℂ} (hy : 0 < y.re) (hz : 0 < z.re) :
+    symmetricEllipticRG 0 y z = (1 / 2) * ∫ θ in (0 : ℝ)..(π / 2),
       (y * (Real.cos θ : ℂ) ^ 2 + z * (Real.sin θ : ℂ) ^ 2) ^ (1 / 2 : ℂ) := by
   have hB : betaIntegral (1 / 2 : ℂ) (1 / 2) = π := by
     rw [Complex.betaIntegral_eq_Gamma_mul_div _ _ (by norm_num) (by norm_num)]
     norm_num [Gamma_one_half_mul_self]
-  have H := symEllIntR_two_eq_integral_trig (-1 / 2) (b₁ := 1 / 2) (b₂ := 1 / 2)
+  have H := symmetricEllipticR_two_eq_integral_trig (-1 / 2) (b₁ := 1 / 2) (b₂ := 1 / 2)
     (by norm_num) (by norm_num) hy hz
   simp only [ofReal_div, ofReal_one, ofReal_ofNat,
     show 2 * (1 / 2 : ℝ) - 1 = 0 by norm_num, Real.rpow_zero,
     mul_one] at H
   rw [hB] at H
   rw [show -(-1 / 2 : ℂ) = 1 / 2 by ring] at H
-  rw [(symEllIntRG_zero_left (Or.inl hy) (Or.inl hz)).1, H]
+  rw [(symmetricEllipticRG_zero_left (Or.inl hy) (Or.inl hz)).1, H]
   have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
   field_simp
   ring
@@ -173,8 +182,8 @@ theorem symEllIntRG_zero_eq_integral_trig {y z : ℂ} (hy : 0 < y.re) (hz : 0 < 
 /-- DLMF 19.23.3: `R_D(0, y, z) = 3 ∫₀^{π/2} (y cos² θ + z sin² θ)^{-3/2} sin² θ dθ`, for
 `ℜ y > 0`, `ℜ z > 0` (19.23.p1). -/
 @[dlmf 19.23.E3]
-theorem symEllIntRD_zero_eq_integral_trig {y z : ℂ} (hy : 0 < y.re) (hz : 0 < z.re) :
-    symEllIntRD 0 y z = 3 * ∫ θ in (0 : ℝ)..(π / 2),
+theorem symmetricEllipticRD_zero_eq_integral_trig {y z : ℂ} (hy : 0 < y.re) (hz : 0 < z.re) :
+    symmetricEllipticRD 0 y z = 3 * ∫ θ in (0 : ℝ)..(π / 2),
       (y * (Real.cos θ : ℂ) ^ 2 + z * (Real.sin θ : ℂ) ^ 2) ^ (-3 / 2 : ℂ) *
         (Real.sin θ : ℂ) ^ 2 := by
   have hB : betaIntegral (1 / 2 : ℂ) (3 / 2) = π / 2 := by
@@ -182,14 +191,14 @@ theorem symEllIntRD_zero_eq_integral_trig {y z : ℂ} (hy : 0 < y.re) (hz : 0 < 
     norm_num
     rw [Carlson.Gamma_three_halves]
     linear_combination (1 / 2 : ℂ) * Gamma_one_half_mul_self
-  have H := symEllIntR_two_eq_integral_trig (3 / 2) (b₁ := 1 / 2) (b₂ := 3 / 2)
+  have H := symmetricEllipticR_two_eq_integral_trig (3 / 2) (b₁ := 1 / 2) (b₂ := 3 / 2)
     (by norm_num) (by norm_num) hy hz
   simp only [ofReal_div, ofReal_one, ofReal_ofNat,
     show 2 * (1 / 2 : ℝ) - 1 = 0 by norm_num,
     show 2 * (3 / 2 : ℝ) - 1 = 2 by norm_num, Real.rpow_zero, Real.rpow_two,
     one_mul, ofReal_pow] at H
   rw [hB] at H
-  rw [symEllIntRD_zero_left (Or.inl hy) (Or.inl hz), H]
+  rw [symmetricEllipticRD_zero_left (Or.inl hy) (Or.inl hz), H]
   have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
   simp only [show (-3 / 2 : ℂ) = -(3 / 2) by ring]
   field_simp
@@ -197,26 +206,321 @@ theorem symEllIntRD_zero_eq_integral_trig {y z : ℂ} (hy : 0 < y.re) (hz : 0 < 
 
 /-! ### `R_F` as an average of `R_C` (19.23.4), (19.23.5) -/
 
+/-- `∫₀^{π/2} (A cos² θ + B sin² θ)⁻¹ dθ = (π/2) (√A √B)⁻¹` for `ℜ A, ℜ B > 0`, from
+(19.23.8) with `a = 1`, `b₁ = b₂ = 1/2`. -/
+private lemma integral_inv_cos_sq_add_sin_sq {A B : ℂ} (hA : 0 < A.re) (hB : 0 < B.re) :
+    ∫ θ in (0 : ℝ)..(π / 2), (A * (Real.cos θ : ℂ) ^ 2 + B * (Real.sin θ : ℂ) ^ 2)⁻¹ =
+      (π / 2 : ℂ) * (A ^ (1 / 2 : ℂ) * B ^ (1 / 2 : ℂ))⁻¹ := by
+  have hβ : betaIntegral (1 / 2 : ℂ) (1 / 2) = π := by
+    rw [Complex.betaIntegral_eq_Gamma_mul_div _ _ (by norm_num) (by norm_num)]
+    norm_num [Gamma_one_half_mul_self]
+  have H := symmetricEllipticR_two_eq_integral_trig 1 (b₁ := 1 / 2) (b₂ := 1 / 2)
+    (by norm_num) (by norm_num) hA hB
+  simp only [ofReal_div, ofReal_one, ofReal_ofNat,
+    show 2 * (1 / 2 : ℝ) - 1 = 0 by norm_num, Real.rpow_zero, mul_one, ofReal_one] at H
+  rw [hβ] at H
+  have hz : (![A, B] : Fin 2 → ℂ) ∈ Carlson.carlsonRSlitDomain :=
+    vec2_mem_carlsonRSlitDomain (Or.inl hA) (Or.inl hB)
+  have hP := Carlson.regCarlsonR_neg_sum_sub_nat 0 (![1 / 2, 1 / 2] : Fin 2 → ℂ) hz
+  rw [symmetricEllipticR_of_mem _ _ hz, Carlson.carlsonR] at H
+  simp only [Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one,
+    Matrix.cons_val_fin_one, Fin.prod_univ_two, Carlson.regCarlsonRPolynomial_zero,
+    Nat.cast_zero, sub_zero] at hP H
+  rw [show -(1 / 2 + 1 / 2 : ℂ) = -1 by norm_num] at hP
+  rw [hP] at H
+  simp only [cpow_neg_one] at H
+  have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
+  have hG : Gamma (1 / 2 + 1 / 2 : ℂ) = 1 := by norm_num
+  rw [hG] at H
+  simp only [cpow_neg, inv_one, mul_one, one_mul] at H
+  rw [mul_inv, H]
+  field_simp
+
+
+
+/-- The real form of `integral_inv_cos_sq_add_sin_sq`. -/
+private lemma integral_inv_cos_sq_add_sin_sq_real {A B : ℝ} (hA : 0 < A) (hB : 0 < B) :
+    ∫ θ in (0 : ℝ)..(π / 2), (A * Real.cos θ ^ 2 + B * Real.sin θ ^ 2)⁻¹ =
+      π / 2 * (√A * √B)⁻¹ := by
+  have H := integral_inv_cos_sq_add_sin_sq (A := A) (B := B) (by simpa using hA) (by simpa using hB)
+  rw [Carlson.ofReal_cpow_half hA.le, Carlson.ofReal_cpow_half hB.le] at H
+  apply ofReal_injective
+  rw [intervalIntegral.integral_ofReal.symm]
+  push_cast at H ⊢
+  exact H
+
+/-- The first form of (19.23.4), by Fubini's theorem and (19.23.8) with `a = 1`. -/
+private lemma symmetricEllipticRF_zero_eq_integral_symmetricEllipticRC_cos {y z : ℂ} (hy : 0 < y.re)
+    (hz : 0 < z.re) :
+    symmetricEllipticRF 0 y z =
+        (2 / π) * ∫ θ in (0 : ℝ)..(π / 2), symmetricEllipticRC y (z * (Real.cos θ : ℂ) ^ 2) := by
+  set m : ℝ := z.re with hm
+  set F : ℝ → ℝ → ℂ := fun θ t =>
+    (((t : ℂ) + y) ^ (1 / 2 : ℂ) * ((t : ℂ) + z * (Real.cos θ : ℂ) ^ 2))⁻¹ with hF
+  have hre : ∀ θ t : ℝ, ((t : ℂ) + z * (Real.cos θ : ℂ) ^ 2).re = t + m * Real.cos θ ^ 2 := by
+    intro θ t; simp only [add_re, ofReal_re, ← ofReal_pow, re_mul_ofReal, hm]
+  have hRC : ∀ θ, symmetricEllipticRC y (z * (Real.cos θ : ℂ) ^ 2) =
+      (1 / 2) * ∫ t in Ioi (0 : ℝ), F θ t := by
+    intro θ
+    have hn : ¬ IsNegReal (z * (Real.cos θ : ℂ) ^ 2) := fun h => by
+      have := hre θ 0; simp only [ofReal_zero, zero_add] at this
+      nlinarith [h.2, sq_nonneg (Real.cos θ)]
+    simp only [symmetricEllipticRC, hn, ↓reduceIte, F]
+  have hys : y ∈ slitPlane := Or.inl hy
+  have hy0 : IsCarlsonArgument y := Or.inl hys
+  have hmeas : Measurable (Function.uncurry F) := by
+    simp only [hF, Function.uncurry_def]; fun_prop
+  have hprod : Integrable (Function.uncurry F)
+      ((volume.restrict (Ioc (0 : ℝ) (π / 2))).prod (volume.restrict (Ioi (0 : ℝ)))) := by
+    have hne : ∀ θ t : ℝ, 0 < t → (t : ℂ) + z * (Real.cos θ : ℂ) ^ 2 ≠ 0 := by
+      intro θ t ht h
+      have := hre θ t
+      rw [h, zero_re] at this
+      nlinarith [sq_nonneg (Real.cos θ)]
+    have hcont : ∀ t : ℝ, 0 < t → Continuous fun θ => F θ t := by
+      intro t ht
+      simp only [hF, mul_inv]
+      exact continuous_const.mul ((by fun_prop : Continuous fun θ : ℝ =>
+        (t : ℂ) + z * (Real.cos θ : ℂ) ^ 2).inv₀ fun θ => hne θ t ht)
+    set G : ℝ → ℝ → ℝ := fun θ t =>
+      ‖((t : ℂ) + y) ^ (1 / 2 : ℂ)‖⁻¹ * ((t + m) * Real.cos θ ^ 2 + t * Real.sin θ ^ 2)⁻¹
+      with hG
+    have hFG : ∀ θ t : ℝ, 0 < t → ‖F θ t‖ ≤ G θ t := by
+      intro θ t ht
+      have h0 : ((t : ℂ) + y) ^ (1 / 2 : ℂ) ≠ 0 := ofReal_pos_add_cpow_half_ne_zero ht hy0
+      have hpos : 0 < (t + m) * Real.cos θ ^ 2 + t * Real.sin θ ^ 2 := by
+        nlinarith [Real.cos_sq_add_sin_sq θ, sq_nonneg (Real.cos θ), sq_nonneg (Real.sin θ)]
+      simp only [hF, hG, norm_inv, norm_mul, mul_inv]
+      refine mul_le_mul_of_nonneg_left ?_ (inv_nonneg.mpr (norm_nonneg _))
+      apply inv_anti₀ hpos
+      refine le_trans (le_of_eq ?_) (re_le_norm _)
+      rw [hre]
+      nlinarith [Real.cos_sq_add_sin_sq θ]
+    have hGint : ∀ t : ℝ, 0 < t → ∫ θ in Ioc 0 (π / 2), G θ t =
+        ‖((t : ℂ) + y) ^ (1 / 2 : ℂ)‖⁻¹ * (π / 2 * (√(t + m) * √t)⁻¹) := by
+      intro t ht
+      simp only [hG]
+      rw [MeasureTheory.integral_const_mul, ← intervalIntegral.integral_of_le (by positivity),
+        integral_inv_cos_sq_add_sin_sq_real (by linarith) ht]
+    rw [integrable_prod_iff' hmeas.aestronglyMeasurable]
+    constructor
+    · filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
+      exact ((hcont t ht).integrableOn_Icc).mono_set Ioc_subset_Icc_self
+    · have hms : (m : ℂ) ∈ slitPlane := ofReal_mem_slitPlane.mpr hz
+      have hg := (integrableOn_symmetricEllipticRF_integrand (Or.inr rfl) hys
+          hms).norm.const_mul (π / 2)
+      refine Integrable.mono' hg ?_ ?_
+      · exact (hmeas.norm.stronglyMeasurable.integral_prod_left').aestronglyMeasurable
+      · filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
+        have ht0 : 0 < t := ht
+        rw [Real.norm_of_nonneg (integral_nonneg fun _ => norm_nonneg _)]
+        refine (integral_mono_of_nonneg (Filter.Eventually.of_forall fun _ => norm_nonneg _) ?_
+          ((ae_restrict_mem measurableSet_Ioc).mono fun θ _ => hFG θ t ht0)).trans
+          (le_of_eq ?_)
+        · have hc : Continuous fun θ => G θ t := by
+            simp only [hG]
+            refine continuous_const.mul (Continuous.inv₀ (by fun_prop) fun θ => ?_)
+            nlinarith [Real.cos_sq_add_sin_sq θ, sq_nonneg (Real.cos θ),
+              sq_nonneg (Real.sin θ)]
+          exact (hc.integrableOn_Icc).mono_set Ioc_subset_Icc_self
+        · rw [hGint t ht0, add_zero, show (t : ℂ) + (m : ℂ) = ((t + m : ℝ) : ℂ) by push_cast; ring,
+            Carlson.ofReal_cpow_half ht0.le, Carlson.ofReal_cpow_half (by linarith),
+            norm_inv, norm_mul, norm_mul, norm_real, norm_real, Real.norm_of_nonneg (by positivity),
+            Real.norm_of_nonneg (by positivity)]
+          ring
+  rw [intervalIntegral.integral_congr (g := fun θ => (1 / 2) * ∫ t in Ioi (0 : ℝ), F θ t)
+    (fun θ _ => hRC θ), intervalIntegral.integral_of_le (by positivity : (0 : ℝ) ≤ π / 2),
+    MeasureTheory.integral_const_mul, integral_integral_swap hprod]
+  have hin : ∀ t ∈ Ioi (0 : ℝ), ∫ θ in Ioc 0 (π / 2), F θ t =
+      (π / 2 : ℂ) * (carlsonRootProduct 0 y z t)⁻¹ := by
+    intro t ht
+    have ht0 : 0 < t := ht
+    have hA : 0 < ((t : ℂ) + z).re := by simp only [add_re, ofReal_re]; linarith
+    have hB : 0 < ((t : ℂ)).re := by simpa using ht0
+    have hpt : ∀ θ, F θ t = (((t : ℂ) + y) ^ (1 / 2 : ℂ))⁻¹ *
+        (((t : ℂ) + z) * (Real.cos θ : ℂ) ^ 2 + (t : ℂ) * (Real.sin θ : ℂ) ^ 2)⁻¹ := by
+      intro θ
+      have h1 : (Real.cos θ : ℂ) ^ 2 + (Real.sin θ : ℂ) ^ 2 = 1 := by
+        exact_mod_cast Real.cos_sq_add_sin_sq θ
+      simp only [hF, mul_inv]
+      congr 2
+      linear_combination (-(t : ℂ)) * h1
+    simp_rw [hpt]
+    rw [MeasureTheory.integral_const_mul, ← intervalIntegral.integral_of_le (by positivity),
+      integral_inv_cos_sq_add_sin_sq hA hB, carlsonRootProduct, add_zero, mul_inv, mul_inv, mul_inv]
+    ring
+  rw [setIntegral_congr_fun measurableSet_Ioi hin, MeasureTheory.integral_const_mul,
+      symmetricEllipticRF]
+  have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
+  field_simp
+
+
+/-- `R_C(l a, l b) = l^{-1/2} R_C(a, b)` for real `l > 0` and slit-plane `a, b`. -/
+private lemma symmetricEllipticRC_mul_ofReal {l : ℝ} (hl : 0 < l) {a b : ℂ} (ha : a ∈ slitPlane)
+    (hb : b ∈ slitPlane) :
+    symmetricEllipticRC ((l : ℂ) * a) ((l : ℂ) * b) = (l : ℂ) ^ (-(1 / 2) : ℂ) *
+        symmetricEllipticRC a b := by
+  have hls : (l : ℂ) ∈ slitPlane := ofReal_mem_slitPlane.mpr hl
+  have hmem : ∀ w : ℂ, w ∈ slitPlane → (l : ℂ) * w ∈ slitPlane := fun w hw => by
+    rw [mem_slitPlane_iff_arg] at hw ⊢
+    rw [arg_real_mul _ hl]
+    exact ⟨hw.1, mul_ne_zero (ofReal_ne_zero.mpr hl.ne') hw.2⟩
+  have harg : ∀ i, arg (l : ℂ) + arg ((![a, b] : Fin 2 → ℂ) i) ∈ Ioo (-π) π := by
+    intro i
+    rw [arg_ofReal_of_nonneg hl.le, zero_add]
+    have hi : (![a, b] : Fin 2 → ℂ) i ∈ slitPlane := by fin_cases i <;> assumption
+    exact ⟨neg_pi_lt_arg _, lt_of_le_of_ne (arg_le_pi _) (mem_slitPlane_iff_arg.mp hi).1⟩
+  have H := symmetricEllipticR_mul (1 / 2) ![1 / 2, 1] (vec2_mem_carlsonRSlitDomain ha hb) hls harg
+  rw [symmetricEllipticRC_eq_symmetricEllipticR (hmem a ha) (hmem b hb),
+      symmetricEllipticRC_eq_symmetricEllipticR ha hb, ← H]
+  congr 1
+  funext i; fin_cases i <;> rfl
+
+
+/-- The substitution `θ = arctan (sinh t)` (the Gudermannian) in (19.23.4). -/
+private lemma integral_symmetricEllipticRC_cos_eq_integral_cosh {y z : ℂ} (hy : 0 < y.re)
+    (hz : 0 < z.re) :
+    ∫ θ in (0 : ℝ)..(π / 2), symmetricEllipticRC y (z * (Real.cos θ : ℂ) ^ 2) =
+      ∫ t in Ioi (0 : ℝ), symmetricEllipticRC (y * (Real.cosh t : ℂ) ^ 2) z := by
+  set g : ℝ → ℝ := fun t => Real.arctan (Real.sinh t) with hg
+  set g' : ℝ → ℝ := fun t => (1 + Real.sinh t ^ 2)⁻¹ * Real.cosh t with hg'
+  have hderiv : ∀ t ∈ Ioi (0 : ℝ), HasDerivWithinAt g (g' t) (Ioi 0) t := by
+    intro t _
+    have H := (Real.hasDerivAt_arctan (Real.sinh t)).comp t (Real.hasDerivAt_sinh t)
+    simp only [one_div] at H
+    exact H.hasDerivWithinAt
+  have hinj : InjOn g (Ioi 0) := fun a _ b _ hab =>
+    Real.sinh_injective (Real.arctan_injective hab)
+  have himg : g '' Ioi 0 = Ioo 0 (π / 2) := by
+    ext θ
+    constructor
+    · rintro ⟨t, ht, rfl⟩
+      exact ⟨Real.arctan_pos.mpr (Real.sinh_pos_iff.mpr ht), Real.arctan_lt_pi_div_two _⟩
+    · intro hθ
+      have htan : 0 < Real.tan θ := Real.tan_pos_of_pos_of_lt_pi_div_two hθ.1 hθ.2
+      refine ⟨Real.arsinh (Real.tan θ), Real.arsinh_pos_iff.mpr htan, ?_⟩
+      simp only [hg, Real.sinh_arsinh]
+      exact Real.arctan_tan (by linarith [hθ.1, Real.pi_pos]) hθ.2
+  rw [intervalIntegral.integral_of_le (by positivity), integral_Ioc_eq_integral_Ioo, ← himg,
+    integral_image_eq_integral_abs_deriv_smul measurableSet_Ioi hderiv hinj]
+  refine setIntegral_congr_fun measurableSet_Ioi fun t ht => ?_
+  have hch : 0 < Real.cosh t := Real.cosh_pos t
+  have hc2 : 1 + Real.sinh t ^ 2 = Real.cosh t ^ 2 := by rw [Real.cosh_sq]; ring
+  have hcos : Real.cos (g t) ^ 2 = (Real.cosh t ^ 2)⁻¹ := by
+    simp only [hg, Real.cos_arctan, one_div, inv_pow]
+    rw [Real.sq_sqrt (by positivity), hc2]
+  have hgabs : |g' t| = (Real.cosh t)⁻¹ := by
+    simp only [hg', hc2]
+    rw [abs_of_pos (by positivity)]
+    field_simp
+  rw [hgabs, ← ofReal_pow, hcos]
+  have hl : 0 < Real.cosh t ^ 2 := by positivity
+  have hb : z * (((Real.cosh t ^ 2)⁻¹ : ℝ) : ℂ) ∈ slitPlane := by
+    left; rw [re_mul_ofReal]; exact mul_pos hz (inv_pos.mpr hl)
+  have H := symmetricEllipticRC_mul_ofReal hl (Or.inl hy) hb
+  rw [show ((Real.cosh t ^ 2 : ℝ) : ℂ) * y = y * ((Real.cosh t : ℝ) : ℂ) ^ 2 by push_cast; ring,
+    show ((Real.cosh t ^ 2 : ℝ) : ℂ) * (z * (((Real.cosh t ^ 2)⁻¹ : ℝ) : ℂ)) = z by
+      rw [mul_left_comm, ← ofReal_mul, mul_inv_cancel₀ hl.ne', ofReal_one, mul_one]] at H
+  rw [H, real_smul]
+  congr 1
+  rw [show (-(1 / 2) : ℂ) = ((-(1 / 2) : ℝ) : ℂ) by push_cast; rfl, ← ofReal_cpow hl.le]
+  congr 1
+  rw [← Real.rpow_natCast, ← Real.rpow_mul hch.le]
+  norm_num [Real.rpow_neg_one]
+
 /-- DLMF 19.23.4: `R_F(0, y, z) = (2/π) ∫₀^{π/2} R_C(y, z cos² θ) dθ
 = (2/π) ∫₀^∞ R_C(y cosh² t, z) dt`, for `ℜ y > 0`, `ℜ z > 0` (DLMF states no domain for this
 formula; the notes derive it from (19.23.5) at `x = 0`, whose hypotheses are these). The
 integrand of the first integral has an integrable logarithmic singularity at `θ = π/2`. -/
 @[dlmf 19.23.E4]
-theorem symEllIntRF_zero_eq_integral_symEllIntRC {y z : ℂ} (hy : 0 < y.re) (hz : 0 < z.re) :
-    symEllIntRF 0 y z =
-        (2 / π) * ∫ θ in (0 : ℝ)..(π / 2), symEllIntRC y (z * (Real.cos θ : ℂ) ^ 2) ∧
-      symEllIntRF 0 y z =
-        (2 / π) * ∫ t in Ioi (0 : ℝ), symEllIntRC (y * (Real.cosh t : ℂ) ^ 2) z := by
-  sorry
+theorem symmetricEllipticRF_zero_eq_integral_symmetricEllipticRC {y z : ℂ} (hy : 0 < y.re)
+    (hz : 0 < z.re) :
+    symmetricEllipticRF 0 y z =
+        (2 / π) * ∫ θ in (0 : ℝ)..(π / 2), symmetricEllipticRC y (z * (Real.cos θ : ℂ) ^ 2) ∧
+      symmetricEllipticRF 0 y z =
+        (2 / π) * ∫ t in Ioi (0 : ℝ), symmetricEllipticRC (y * (Real.cosh t : ℂ) ^ 2) z := by
+  have h1 := symmetricEllipticRF_zero_eq_integral_symmetricEllipticRC_cos hy hz
+  exact ⟨h1, h1.trans (by rw [integral_symmetricEllipticRC_cos_eq_integral_cosh hy hz])⟩
 
 /-- DLMF 19.23.5: `R_F(x, y, z) = (2/π) ∫₀^{π/2} R_C(x, y cos² θ + z sin² θ) dθ`, for
 `ℜ y > 0`, `ℜ z > 0` and `x ∈ ℂ \ (-∞, 0)` (the domain of `R_C`'s first argument). -/
 @[dlmf 19.23.E5]
-theorem symEllIntRF_eq_integral_symEllIntRC {x y z : ℂ} (hx : SymEllIntArg x) (hy : 0 < y.re)
+theorem symmetricEllipticRF_eq_integral_symmetricEllipticRC {x y z : ℂ} (hx : IsCarlsonArgument x)
+    (hy : 0 < y.re)
     (hz : 0 < z.re) :
-    symEllIntRF x y z = (2 / π) * ∫ θ in (0 : ℝ)..(π / 2),
-      symEllIntRC x (y * (Real.cos θ : ℂ) ^ 2 + z * (Real.sin θ : ℂ) ^ 2) := by
-  sorry
+    symmetricEllipticRF x y z = (2 / π) * ∫ θ in (0 : ℝ)..(π / 2),
+      symmetricEllipticRC x (y * (Real.cos θ : ℂ) ^ 2 + z * (Real.sin θ : ℂ) ^ 2) := by
+  set w : ℝ → ℂ := fun θ => y * (Real.cos θ : ℂ) ^ 2 + z * (Real.sin θ : ℂ) ^ 2 with hwdef
+  set m : ℝ := min y.re z.re with hm
+  have hm0 : 0 < m := lt_min hy hz
+  have hwre : ∀ θ, m ≤ (w θ).re := by
+    intro θ
+    have h1 : (w θ).re = y.re * Real.cos θ ^ 2 + z.re * Real.sin θ ^ 2 := by
+      simp only [hwdef, add_re, ← ofReal_pow, re_mul_ofReal]
+    rw [h1]
+    nlinarith [min_le_left y.re z.re, min_le_right y.re z.re, Real.sin_sq_add_cos_sq θ,
+      sq_nonneg (Real.cos θ), sq_nonneg (Real.sin θ)]
+  set F : ℝ → ℝ → ℂ := fun θ t => (((t : ℂ) + x) ^ (1 / 2 : ℂ) * ((t : ℂ) + w θ))⁻¹ with hF
+  have hRC : ∀ θ, symmetricEllipticRC x (w θ) = (1 / 2) * ∫ t in Ioi (0 : ℝ), F θ t := by
+    intro θ
+    have hn : ¬ IsNegReal (w θ) := fun h => by linarith [h.2, hwre θ]
+    simp [symmetricEllipticRC, hn, F]
+  have key : ∀ θ t, 0 < t → ‖F θ t‖ ≤
+      ‖(((t : ℂ) + x) ^ (1 / 2 : ℂ) * ((t : ℂ) + m) ^ (1 / 2 : ℂ) *
+        ((t : ℂ) + m) ^ (1 / 2 : ℂ))⁻¹‖ := by
+    intro θ t ht
+    rw [mul_assoc _ (((t : ℂ) + m) ^ (1 / 2 : ℂ)), cpow_half_mul_cpow_half]
+    simp only [hF, norm_inv]
+    have h0 : ((t : ℂ) + x) ^ (1 / 2 : ℂ) ≠ 0 := ofReal_pos_add_cpow_half_ne_zero ht hx
+    have htm : ‖(t : ℂ) + m‖ = t + m := by
+      rw [← ofReal_add, norm_real, Real.norm_eq_abs, abs_of_pos (by linarith)]
+    rw [norm_mul, norm_mul]
+    apply inv_anti₀ (mul_pos (norm_pos_iff.mpr h0) (by rw [htm]; linarith))
+    refine mul_le_mul_of_nonneg_left ?_ (norm_nonneg _)
+    rw [htm]
+    refine le_trans ?_ (re_le_norm _)
+    simp only [add_re, ofReal_re]
+    linarith [hwre θ]
+  -- integrability on the product
+  have hms : ((m : ℂ)) ∈ slitPlane := ofReal_mem_slitPlane.mpr hm0
+  have hg := integrableOn_symmetricEllipticRF_integrand hx hms hms
+  have hprod : Integrable (Function.uncurry F)
+      ((volume.restrict (Ioc (0 : ℝ) (π / 2))).prod (volume.restrict (Ioi (0 : ℝ)))) := by
+    have H1 := Integrable.mul_prod
+      (integrable_const (1 : ℝ) (μ := volume.restrict (Ioc (0 : ℝ) (π / 2)))) hg.norm
+    refine H1.mono' ?_ ?_
+    · refine Measurable.aestronglyMeasurable ?_
+      simp only [hF, hwdef, Function.uncurry_def]
+      fun_prop
+    · rw [Measure.prod_restrict]
+      filter_upwards [ae_restrict_mem (measurableSet_Ioc.prod measurableSet_Ioi)] with p hp
+      rw [one_mul]
+      exact key p.1 p.2 hp.2
+  rw [intervalIntegral.integral_congr (g := fun θ => (1 / 2) * ∫ t in Ioi (0 : ℝ), F θ t)
+    (fun θ _ => hRC θ), intervalIntegral.integral_of_le (by positivity : (0 : ℝ) ≤ π / 2)]
+  rw [MeasureTheory.integral_const_mul, integral_integral_swap hprod]
+  have hin : ∀ t ∈ Ioi (0 : ℝ), ∫ θ in Ioc 0 (π / 2), F θ t =
+      (π / 2 : ℂ) * (carlsonRootProduct x y z t)⁻¹ := by
+    intro t ht
+    have hA : 0 < ((t : ℂ) + y).re := by simp only [add_re, ofReal_re]; linarith [ht.out]
+    have hB : 0 < ((t : ℂ) + z).re := by simp only [add_re, ofReal_re]; linarith [ht.out]
+    have hpt : ∀ θ, F θ t = (((t : ℂ) + x) ^ (1 / 2 : ℂ))⁻¹ *
+        (((t : ℂ) + y) * (Real.cos θ : ℂ) ^ 2 + ((t : ℂ) + z) * (Real.sin θ : ℂ) ^ 2)⁻¹ := by
+      intro θ
+      have h1 : (Real.cos θ : ℂ) ^ 2 + (Real.sin θ : ℂ) ^ 2 = 1 := by
+        exact_mod_cast Real.cos_sq_add_sin_sq θ
+      simp only [hF, hwdef, mul_inv]
+      congr 2
+      linear_combination (-(t : ℂ)) * h1
+    simp_rw [hpt]
+    rw [MeasureTheory.integral_const_mul, ← intervalIntegral.integral_of_le (by positivity),
+      integral_inv_cos_sq_add_sin_sq hA hB, carlsonRootProduct, mul_inv, mul_inv, mul_inv]
+    ring
+  rw [setIntegral_congr_fun measurableSet_Ioi hin, MeasureTheory.integral_const_mul,
+      symmetricEllipticRF]
+  have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
+  field_simp
+
 
 /-! ### Averages over the sphere (19.23.6), (19.23.6_5) -/
 
@@ -230,8 +534,8 @@ def sphereQuadraticForm (x y z : ℂ) (θ φ : ℝ) : ℂ :=
 (x sin² θ cos² φ + y sin² θ sin² φ + z cos² θ)^{1/2}`, for `x, y, z` with positive real parts,
 at most one of them `0` (19.23.p3). -/
 @[dlmf 19.23.E6]
-theorem symEllIntRF_eq_sphere_integral {x y z : ℂ} (h : CarlsonRightHalfDomain x y z) :
-    4 * π * symEllIntRF x y z = ∫ φ in (0 : ℝ)..(2 * π), ∫ θ in (0 : ℝ)..π,
+theorem symmetricEllipticRF_eq_sphere_integral {x y z : ℂ} (h : CarlsonRightHalfDomain x y z) :
+    4 * π * symmetricEllipticRF x y z = ∫ φ in (0 : ℝ)..(2 * π), ∫ θ in (0 : ℝ)..π,
       (Real.sin θ : ℂ) / sphereQuadraticForm x y z θ φ ^ (1 / 2 : ℂ) := by
   sorry
 
@@ -239,8 +543,8 @@ theorem symEllIntRF_eq_sphere_integral {x y z : ℂ} (h : CarlsonRightHalfDomain
 (x sin² θ cos² φ + y sin² θ sin² φ + z cos² θ)^{1/2} sin θ dθ dφ`, for `x, y, z` with positive
 real parts, at most one of them `0` (19.23.p3). -/
 @[dlmf 19.23.E6_5]
-theorem symEllIntRG_eq_sphere_integral {x y z : ℂ} (h : CarlsonRightHalfDomain x y z) :
-    symEllIntRG x y z = (1 / (4 * π)) * ∫ φ in (0 : ℝ)..(2 * π), ∫ θ in (0 : ℝ)..π,
+theorem symmetricEllipticRG_eq_sphere_integral {x y z : ℂ} (h : CarlsonRightHalfDomain x y z) :
+    symmetricEllipticRG x y z = (1 / (4 * π)) * ∫ φ in (0 : ℝ)..(2 * π), ∫ θ in (0 : ℝ)..π,
       sphereQuadraticForm x y z θ φ ^ (1 / 2 : ℂ) * (Real.sin θ : ℂ) := by
   sorry
 
@@ -256,9 +560,9 @@ def directionCosines (θ φ : ℝ) : Fin 3 → ℝ :=
 (∑ⱼ zⱼ lⱼ²)^{-a} ∏ⱼ lⱼ^{2bⱼ-1} sin θ dθ dφ`, for `bⱼ > 0`, `ℜ zⱼ > 0`; `a` any complex
 number. -/
 @[dlmf 19.23.E9]
-theorem symEllIntR_three_eq_integral_sphere (a : ℂ) {b : Fin 3 → ℝ} (hb : ∀ j, 0 < b j)
+theorem symmetricEllipticR_three_eq_integral_sphere (a : ℂ) {b : Fin 3 → ℝ} (hb : ∀ j, 0 < b j)
     {z : Fin 3 → ℂ} (hz : ∀ j, 0 < (z j).re) (σ : Equiv.Perm (Fin 3)) :
-    symEllIntR a (fun j => (b j : ℂ)) z =
+    symmetricEllipticR a (fun j => (b j : ℂ)) z =
       4 * Gamma (∑ j, (b j : ℂ)) / ∏ j, Gamma (b j : ℂ) *
         ∫ φ in (0 : ℝ)..(π / 2), ∫ θ in (0 : ℝ)..(π / 2),
           (∑ j, z j * ((directionCosines θ φ (σ j) : ℝ) : ℂ) ^ 2) ^ (-a) *
@@ -271,12 +575,12 @@ theorem symEllIntR_three_eq_integral_sphere (a : ℂ) {b : Fin 3 → ℝ} (hb : 
 `a + a' = ∑ bⱼ`, `zⱼ ∈ ℂ \ (-∞, 0]`. DLMF assumes `a, a' > 0`; here `a, a'` and `𝐛` are complex
 with `ℜ a, ℜ a' > 0`. From `lean-codes`' `Carlson.regCarlsonR_eq_unitIntervalIntegral`. -/
 @[dlmf 19.23.E10]
-theorem symEllIntR_eq_integral_unitInterval {ι : Type*} [Fintype ι] {a a' : ℂ} {b z : ι → ℂ}
+theorem symmetricEllipticR_eq_integral_unitInterval {ι : Type*} [Fintype ι] {a a' : ℂ} {b z : ι → ℂ}
     (ha : 0 < a.re) (ha' : 0 < a'.re) (hsum : a + a' = ∑ i, b i)
     (hz : z ∈ Carlson.carlsonRSlitDomain) :
-    symEllIntR a b z = (betaIntegral a a')⁻¹ * ∫ u in (0 : ℝ)..1,
+    symmetricEllipticR a b z = (betaIntegral a a')⁻¹ * ∫ u in (0 : ℝ)..1,
       (u : ℂ) ^ (a - 1) * (1 - u : ℂ) ^ (a' - 1) * ∏ i, ((1 - u : ℂ) + (u : ℂ) * z i) ^ (-b i) := by
-  rw [symEllIntR_of_mem _ _ hz]
+  rw [symmetricEllipticR_of_mem _ _ hz]
   unfold Carlson.carlsonR
   have hct : 0 < ((∑ i, b i) + -a).re := by
     rw [← hsum]; simp only [add_re, neg_re]; linarith

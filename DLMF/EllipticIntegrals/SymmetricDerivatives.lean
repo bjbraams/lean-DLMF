@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.EllipticIntegrals.SymmetricSpecialCases
+public import DLMF.EllipticIntegrals.SymmetricSpecialCasesRD
 public import Carlson.R.EulerPoisson
 public import DLMF.EllipticIntegrals.SymmetricNodeDerivatives
 
@@ -18,21 +18,23 @@ the second-order equations of the complete case `R_{-a}(½, ½; z₁, z₂)`.
 
 ## Main definitions
 
-* `symEllIntRFVec`, `symEllIntRGVec`: `R_F` and `R_G` as functions on `ℂ³ = Fin 3 → ℂ`.
+* `symmetricEllipticRFVec`, `symmetricEllipticRGVec`: `R_F` and `R_G` as functions on
+  `ℂ³ = Fin 3 → ℂ`.
 
 ## Main results
 
-* `hasDerivAt_symEllIntR_translate`, `sum_mul_partialDeriv_symEllIntR`: the translation and
-  Euler identities for `R_{-a}` (DLMF 19.18.8, 19.18.11).
-* `mul_partialDeriv_add_symEllIntR`: the node derivative relation (DLMF 19.18.5).
-* `eulerPoisson_symEllIntR'`, `eulerPoisson_symEllIntR`: the Euler–Poisson system
+* `hasDerivAt_symmetricEllipticR_translate`, `sum_mul_partialDeriv_symmetricEllipticR`: the
+  translation and Euler identities for `R_{-a}` (DLMF 19.18.8, 19.18.11).
+* `mul_partialDeriv_add_symmetricEllipticR`: the node derivative relation (DLMF 19.18.5).
+* `eulerPoisson_symmetricEllipticR'`, `eulerPoisson_symmetricEllipticR`: the Euler–Poisson system
   (DLMF 19.18.12, 19.18.13).
-* `hasDerivAt_symEllIntRG_translate`, `hasDerivAt_symEllIntRF_translate`,
-  `hasDerivAt_symEllIntRG_translate_zero`: DLMF 19.18.2, 19.18.6, 19.18.7.
-* `sum_mul_partialDeriv_symEllIntRF`, `eulerPoisson_symEllIntRF`: DLMF 19.18.9, 19.18.10.
-* `eulerPoissonDarboux_symEllIntR`, `wave_symEllIntR`, `axialPotential_symEllIntR`,
-  `laplace_symEllIntR`: the second-order equations of the complete case
-  (DLMF 19.18.14–19.18.17).
+* `hasDerivAt_symmetricEllipticRG_translate`, `hasDerivAt_symmetricEllipticRF_translate`,
+  `hasDerivAt_symmetricEllipticRG_translate_zero`: DLMF 19.18.2, 19.18.6, 19.18.7.
+* `sum_mul_partialDeriv_symmetricEllipticRF`, `eulerPoisson_symmetricEllipticRF`: DLMF 19.18.9,
+  19.18.10.
+* `eulerPoissonDarboux_symmetricEllipticR`, `wave_symmetricEllipticR`,
+  `axialPotential_symmetricEllipticR`, `laplace_symmetricEllipticR`: the second-order equations of
+  the complete case (DLMF 19.18.14–19.18.17).
 
 ## Implementation notes
 
@@ -62,40 +64,41 @@ variable {ι : Type*} [Fintype ι]
 /-- DLMF 19.18.8: `∑ⱼ ∂ⱼ R_{-a}(𝐛; 𝐳) = -a R_{-a-1}(𝐛; 𝐳)`, as the derivative along the diagonal
 translation `s ↦ 𝐳 + s𝟏` at `s = x` (slit-plane nodes `x + zⱼ`; all complex `a, 𝐛`). -/
 @[dlmf 19.18.E8]
-theorem hasDerivAt_symEllIntR_translate (a : ℂ) (b z : ι → ℂ) {x : ℂ}
+theorem hasDerivAt_symmetricEllipticR_translate (a : ℂ) (b z : ι → ℂ) {x : ℂ}
     (hx : (fun i => x + z i) ∈ Carlson.carlsonRSlitDomain) :
-    HasDerivAt (fun s => symEllIntR a b (fun i => s + z i))
-      (-a * symEllIntR (a + 1) b (fun i => x + z i)) x := by
+    HasDerivAt (fun s => symmetricEllipticR a b (fun i => s + z i))
+      (-a * symmetricEllipticR (a + 1) b (fun i => x + z i)) x := by
   have hc : Tendsto (fun s : ℂ => fun i => s + z i) (𝓝 x) (𝓝 fun i => x + z i) :=
     (continuous_pi fun i => continuous_id.add continuous_const).tendsto x
-  have hev := hc.eventually (symEllIntR_eventuallyEq_carlsonR a b hx)
+  have hev := hc.eventually (symmetricEllipticR_eventuallyEq_carlsonR a b hx)
   have h := (Carlson.hasDerivAt_regCarlsonR_translate (-a) b z hx).const_mul (Gamma (∑ i, b i))
   refine (h.congr_of_eventuallyEq hev).congr_deriv ?_
-  rw [symEllIntR_of_mem _ _ hx]
+  rw [symmetricEllipticR_of_mem _ _ hx]
   unfold Carlson.carlsonR
   rw [show -a - 1 = -(a + 1) by ring]
   ring
 
 /-- Identity under the stated parameter and domain assumptions: `Dirichlet.carlsonPartialDeriv j
-(symEllIntR a b) z = Gamma (∑ i, b i) * (-a * b j * Carlson.regCarlsonR (-a - 1)
+(symmetricEllipticR a b) z = Gamma (∑ i, b i) * (-a * b j * Carlson.regCarlsonR (-a - 1)
 (Dirichlet.addDirichletUnit b j) z)`. -/
-private lemma carlsonPartialDeriv_symEllIntR (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
+private lemma carlsonPartialDeriv_symmetricEllipticR (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
     (hz : z ∈ Carlson.carlsonRSlitDomain) (j : ι) :
-    Dirichlet.carlsonPartialDeriv j (symEllIntR a b) z =
+    Dirichlet.carlsonPartialDeriv j (symmetricEllipticR a b) z =
       Gamma (∑ i, b i) * (-a * b j *
         Carlson.regCarlsonR (-a - 1) (Dirichlet.addDirichletUnit b j) z) :=
-  (hasDerivAt_symEllIntR_update_regCarlsonR a b hz j).deriv
+  (hasDerivAt_symmetricEllipticR_update_regCarlsonR a b hz j).deriv
 
 /-- DLMF 19.18.11: Euler's homogeneity relation `∑ⱼ zⱼ ∂ⱼ v = -a v` for
 `v = R_{-a}(𝐛; 𝐳)` (slit-plane nodes; all complex `a, 𝐛`). -/
 @[dlmf 19.18.E11]
-theorem sum_mul_partialDeriv_symEllIntR (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
+theorem sum_mul_partialDeriv_symmetricEllipticR (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
     (hz : z ∈ Carlson.carlsonRSlitDomain) :
-    ∑ j, z j * Dirichlet.carlsonPartialDeriv j (symEllIntR a b) z = -a * symEllIntR a b z := by
-  simp_rw [carlsonPartialDeriv_symEllIntR a b hz]
+    ∑ j, z j * Dirichlet.carlsonPartialDeriv j (symmetricEllipticR a b) z = -a *
+        symmetricEllipticR a b z := by
+  simp_rw [carlsonPartialDeriv_symmetricEllipticR a b hz]
   have h := Carlson.regCarlsonR_add_one_eq_sum_mul_addDirichletUnit (-a - 1) b hz
   rw [sub_add_cancel] at h
-  rw [symEllIntR_of_mem _ _ hz]
+  rw [symmetricEllipticR_of_mem _ _ hz]
   unfold Carlson.carlsonR
   rw [h, Finset.mul_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
@@ -104,12 +107,14 @@ theorem sum_mul_partialDeriv_symEllIntR (a : ℂ) (b : ι → ℂ) {z : ι → �
 /-- DLMF 19.18.5: `(zⱼ ∂ⱼ + bⱼ) R_{-a}(𝐛; 𝐳) = wⱼ a' R_{-a}(𝐛 + 𝐞ⱼ; 𝐳)`, `a' = -a + ∑ bₖ`,
 `wⱼ = bⱼ / ∑ bₖ` (slit-plane nodes, `∑ bₖ ≠ 0`). -/
 @[dlmf 19.18.E5]
-theorem mul_partialDeriv_add_symEllIntR (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
+theorem mul_partialDeriv_add_symmetricEllipticR (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
     (hz : z ∈ Carlson.carlsonRSlitDomain) (j : ι) (hb : ∑ i, b i ≠ 0) :
-    z j * Dirichlet.carlsonPartialDeriv j (symEllIntR a b) z + b j * symEllIntR a b z =
+    z j * Dirichlet.carlsonPartialDeriv j (symmetricEllipticR a b) z + b j *
+        symmetricEllipticR a b z =
       b j / (∑ i, b i) * (-a + ∑ i, b i) *
-        symEllIntR a (Dirichlet.addDirichletUnit b j) z := by
-  rw [carlsonPartialDeriv_symEllIntR a b hz, symEllIntR_of_mem _ _ hz, symEllIntR_of_mem _ _ hz]
+        symmetricEllipticR a (Dirichlet.addDirichletUnit b j) z := by
+  rw [carlsonPartialDeriv_symmetricEllipticR a b hz, symmetricEllipticR_of_mem _ _ hz,
+      symmetricEllipticR_of_mem _ _ hz]
   have h1 := Carlson.mul_carlsonPartialDeriv_add_mul_regCarlsonR (-a) b hz j
   rw [Carlson.carlsonPartialDeriv_regCarlsonR (-a) b hz j] at h1
   unfold Carlson.carlsonR
@@ -148,10 +153,10 @@ private lemma carlsonEulerPoissonOperator_congr {F G : (ι → ℂ) → ℂ} {z 
 `((zⱼ - zₗ) ∂ⱼ ∂ₗ + bⱼ ∂ₗ - bₗ ∂ⱼ) v = 0` for `v = R_{-a}(𝐛; 𝐳)` (slit-plane nodes; all complex
 `a, 𝐛`; also for `j = l`). From `Carlson.carlsonEulerPoissonOperator_carlsonR`. -/
 @[dlmf 19.18.E13]
-theorem eulerPoisson_symEllIntR (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
+theorem eulerPoisson_symmetricEllipticR (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
     (hz : z ∈ Carlson.carlsonRSlitDomain) (j l : ι) :
-    Dirichlet.carlsonEulerPoissonOperator j l b z (symEllIntR a b) = 0 := by
-  rw [carlsonEulerPoissonOperator_congr (symEllIntR_eventuallyEq_carlsonR a b hz)]
+    Dirichlet.carlsonEulerPoissonOperator j l b z (symmetricEllipticR a b) = 0 := by
+  rw [carlsonEulerPoissonOperator_congr (symmetricEllipticR_eventuallyEq_carlsonR a b hz)]
   exact Carlson.carlsonEulerPoissonOperator_carlsonR (-a) b hz j l
 
 /-- `R_{-a}(𝐛; ·)` is holomorphic on the slit-plane node domain. -/
@@ -164,15 +169,16 @@ private lemma analyticOnNhd_carlsonR_slitDomain (t : ℂ) (b : ι → ℂ) :
 
 open scoped Classical in
 /-- Mixed coordinate derivatives of `R_{-a}(𝐛; 𝐳)` commute (slit-plane nodes). -/
-private lemma carlsonPartialDeriv_comm_symEllIntR (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
+private lemma carlsonPartialDeriv_comm_symmetricEllipticR (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
     (hz : z ∈ Carlson.carlsonRSlitDomain) (j l : ι) :
-    Dirichlet.carlsonPartialDeriv j (Dirichlet.carlsonPartialDeriv l (symEllIntR a b)) z =
-      Dirichlet.carlsonPartialDeriv l (Dirichlet.carlsonPartialDeriv j (symEllIntR a b)) z := by
-  have h := symEllIntR_eventuallyEq_carlsonR a b hz
-  have hl : Dirichlet.carlsonPartialDeriv l (symEllIntR a b) =ᶠ[𝓝 z]
+    Dirichlet.carlsonPartialDeriv j (Dirichlet.carlsonPartialDeriv l (symmetricEllipticR a b)) z =
+      Dirichlet.carlsonPartialDeriv l
+          (Dirichlet.carlsonPartialDeriv j (symmetricEllipticR a b)) z := by
+  have h := symmetricEllipticR_eventuallyEq_carlsonR a b hz
+  have hl : Dirichlet.carlsonPartialDeriv l (symmetricEllipticR a b) =ᶠ[𝓝 z]
       Dirichlet.carlsonPartialDeriv l (Carlson.carlsonR (-a) b) :=
     h.eventually_nhds.mono fun w hw => SeveralComplexVariables.partialDeriv_congr hw l
-  have hj : Dirichlet.carlsonPartialDeriv j (symEllIntR a b) =ᶠ[𝓝 z]
+  have hj : Dirichlet.carlsonPartialDeriv j (symmetricEllipticR a b) =ᶠ[𝓝 z]
       Dirichlet.carlsonPartialDeriv j (Carlson.carlsonR (-a) b) :=
     h.eventually_nhds.mono fun w hw => SeveralComplexVariables.partialDeriv_congr hw j
   rw [carlsonPartialDeriv_congr hl j, carlsonPartialDeriv_congr hj l]
@@ -182,88 +188,95 @@ private lemma carlsonPartialDeriv_comm_symEllIntR (a : ℂ) (b : ι → ℂ) {z 
 /-- DLMF 19.18.12: `(zⱼ ∂ⱼ + bⱼ) ∂ₗ v = (zₗ ∂ₗ + bₗ) ∂ⱼ v` for `v = R_{-a}(𝐛; 𝐳)` (slit-plane
 nodes). -/
 @[dlmf 19.18.E12]
-theorem eulerPoisson_symEllIntR' (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
+theorem eulerPoisson_symmetricEllipticR' (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
     (hz : z ∈ Carlson.carlsonRSlitDomain) (j l : ι) :
-    z j * Dirichlet.carlsonPartialDeriv j (Dirichlet.carlsonPartialDeriv l (symEllIntR a b)) z +
-        b j * Dirichlet.carlsonPartialDeriv l (symEllIntR a b) z =
-      z l * Dirichlet.carlsonPartialDeriv l (Dirichlet.carlsonPartialDeriv j (symEllIntR a b)) z +
-        b l * Dirichlet.carlsonPartialDeriv j (symEllIntR a b) z := by
-  have hEP := eulerPoisson_symEllIntR a b hz j l
+    z j * Dirichlet.carlsonPartialDeriv j
+        (Dirichlet.carlsonPartialDeriv l (symmetricEllipticR a b)) z +
+        b j * Dirichlet.carlsonPartialDeriv l (symmetricEllipticR a b) z =
+      z l * Dirichlet.carlsonPartialDeriv l
+          (Dirichlet.carlsonPartialDeriv j (symmetricEllipticR a b)) z +
+        b l * Dirichlet.carlsonPartialDeriv j (symmetricEllipticR a b) z := by
+  have hEP := eulerPoisson_symmetricEllipticR a b hz j l
   unfold Dirichlet.carlsonEulerPoissonOperator at hEP
-  have hc := carlsonPartialDeriv_comm_symEllIntR a b hz j l
+  have hc := carlsonPartialDeriv_comm_symmetricEllipticR a b hz j l
   linear_combination hEP + z l * hc
 
 /-! ### `R_F`, `R_G` as functions of the vector `(x, y, z)` -/
 
 /-- `R_F` as a function on `ℂ³ = Fin 3 → ℂ`. -/
-def symEllIntRFVec (v : Fin 3 → ℂ) : ℂ := symEllIntRF (v 0) (v 1) (v 2)
+def symmetricEllipticRFVec (v : Fin 3 → ℂ) : ℂ := symmetricEllipticRF (v 0) (v 1) (v 2)
 
 /-- `R_G` as a function on `ℂ³ = Fin 3 → ℂ`. -/
-def symEllIntRGVec (v : Fin 3 → ℂ) : ℂ := symEllIntRG (v 0) (v 1) (v 2)
+def symmetricEllipticRGVec (v : Fin 3 → ℂ) : ℂ := symmetricEllipticRG (v 0) (v 1) (v 2)
 
 /-- Identity under the stated parameter and domain assumptions: `(![v 0, v 1, v 2] : Fin 3 → ℂ) =
 v`. -/
 private lemma vecCons_three_eq_self (v : Fin 3 → ℂ) : (![v 0, v 1, v 2] : Fin 3 → ℂ) = v := by
   funext i; fin_cases i <;> rfl
 
-/-- Identity under the stated parameter and domain assumptions: `symEllIntRFVec =ᶠ[𝓝 v] symEllIntR
-(1 / 2) (fun _ : Fin 3 => 1 / 2)`. -/
-private lemma symEllIntRFVec_eventuallyEq {v : Fin 3 → ℂ} (hv : v ∈ Carlson.carlsonRSlitDomain) :
-    symEllIntRFVec =ᶠ[𝓝 v] symEllIntR (1 / 2) (fun _ : Fin 3 => 1 / 2) := by
+/-- Identity under the stated parameter and domain assumptions:
+`symmetricEllipticRFVec =ᶠ[𝓝 v] symmetricEllipticR (1 / 2) (fun _ : Fin 3 => 1 / 2)`. -/
+private lemma symmetricEllipticRFVec_eventuallyEq {v : Fin 3 → ℂ}
+    (hv : v ∈ Carlson.carlsonRSlitDomain) :
+    symmetricEllipticRFVec =ᶠ[𝓝 v] symmetricEllipticR (1 / 2) (fun _ : Fin 3 => 1 / 2) := by
   filter_upwards [Carlson.isOpen_carlsonRSlitDomain.mem_nhds hv] with w hw
-  rw [symEllIntRFVec, symEllIntRF_eq_symEllIntR (hw 0) (hw 1) (hw 2), vecCons_three_eq_self]
+  rw [symmetricEllipticRFVec, symmetricEllipticRF_eq_symmetricEllipticR (hw 0) (hw 1) (hw 2),
+      vecCons_three_eq_self]
 
-/-- Identity under the stated parameter and domain assumptions: `symEllIntRGVec =ᶠ[𝓝 v] symEllIntR
-(-1 / 2) (fun _ : Fin 3 => 1 / 2)`. -/
-private lemma symEllIntRGVec_eventuallyEq {v : Fin 3 → ℂ} (hv : v ∈ Carlson.carlsonRSlitDomain) :
-    symEllIntRGVec =ᶠ[𝓝 v] symEllIntR (-1 / 2) (fun _ : Fin 3 => 1 / 2) := by
+/-- Identity under the stated parameter and domain assumptions:
+`symmetricEllipticRGVec =ᶠ[𝓝 v] symmetricEllipticR (-1 / 2) (fun _ : Fin 3 => 1 / 2)`. -/
+private lemma symmetricEllipticRGVec_eventuallyEq {v : Fin 3 → ℂ}
+    (hv : v ∈ Carlson.carlsonRSlitDomain) :
+    symmetricEllipticRGVec =ᶠ[𝓝 v] symmetricEllipticR (-1 / 2) (fun _ : Fin 3 => 1 / 2) := by
   filter_upwards [Carlson.isOpen_carlsonRSlitDomain.mem_nhds hv] with w hw
-  rw [symEllIntRGVec, symEllIntRG_eq_symEllIntR (hw 0) (hw 1) (hw 2), vecCons_three_eq_self]
+  rw [symmetricEllipticRGVec, symmetricEllipticRG_eq_symmetricEllipticR (hw 0) (hw 1) (hw 2),
+      vecCons_three_eq_self]
 
 /-- DLMF 19.18.2: `d/dx R_G(x + a, x + b, x + c) = (1/2) R_F(x + a, x + b, x + c)`
 (`x + a, x + b, x + c ∈ ℂ \ (-∞, 0]`). -/
 @[dlmf 19.18.E2]
-theorem hasDerivAt_symEllIntRG_translate {a b c x : ℂ} (ha : x + a ∈ slitPlane)
+theorem hasDerivAt_symmetricEllipticRG_translate {a b c x : ℂ} (ha : x + a ∈ slitPlane)
     (hb : x + b ∈ slitPlane) (hc : x + c ∈ slitPlane) :
-    HasDerivAt (fun s => symEllIntRG (s + a) (s + b) (s + c))
-      ((1 / 2) * symEllIntRF (x + a) (x + b) (x + c)) x := by
+    HasDerivAt (fun s => symmetricEllipticRG (s + a) (s + b) (s + c))
+      ((1 / 2) * symmetricEllipticRF (x + a) (x + b) (x + c)) x := by
   have hv : (fun i => x + (![a, b, c] : Fin 3 → ℂ) i) ∈ Carlson.carlsonRSlitDomain := by
     intro i; fin_cases i <;> assumption
-  have h := hasDerivAt_symEllIntR_translate (-1 / 2) (fun _ : Fin 3 => 1 / 2) ![a, b, c] hv
+  have h := hasDerivAt_symmetricEllipticR_translate (-1 / 2) (fun _ : Fin 3 => 1 / 2) ![a, b, c] hv
   have hc' : Tendsto (fun s : ℂ => fun i => s + (![a, b, c] : Fin 3 → ℂ) i) (𝓝 x)
       (𝓝 fun i => x + (![a, b, c] : Fin 3 → ℂ) i) :=
     (continuous_pi fun i => continuous_id.add continuous_const).tendsto x
-  have hev := hc'.eventually (symEllIntRGVec_eventuallyEq hv)
+  have hev := hc'.eventually (symmetricEllipticRGVec_eventuallyEq hv)
   refine (h.congr_of_eventuallyEq ?_).congr_deriv ?_
   · filter_upwards [hev] with s hs
     rw [← hs]; rfl
   · rw [show (-1 / 2 : ℂ) + 1 = 1 / 2 by norm_num,
       show (fun i => x + (![a, b, c] : Fin 3 → ℂ) i) = ![x + a, x + b, x + c] by
-        funext i; fin_cases i <;> rfl, ← symEllIntRF_eq_symEllIntR ha hb hc]
+        funext i; fin_cases i <;> rfl, ← symmetricEllipticRF_eq_symmetricEllipticR ha hb hc]
     ring
 
 /-- DLMF 19.18.6: `(∂ₓ + ∂_y + ∂_z) R_F(x, y, z) = -1/(2√x√y√z)`, as the derivative along the
 diagonal translation (slit-plane variables). -/
 @[dlmf 19.18.E6]
-theorem hasDerivAt_symEllIntRF_translate {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane)
+theorem hasDerivAt_symmetricEllipticRF_translate {x y z : ℂ} (hx : x ∈ slitPlane)
+    (hy : y ∈ slitPlane)
     (hz : z ∈ slitPlane) :
-    HasDerivAt (fun s => symEllIntRF (x + s) (y + s) (z + s))
+    HasDerivAt (fun s => symmetricEllipticRF (x + s) (y + s) (z + s))
       (-1 / (2 * x ^ (1 / 2 : ℂ) * y ^ (1 / 2 : ℂ) * z ^ (1 / 2 : ℂ))) 0 := by
   have hv : (fun i => (0 : ℂ) + (![x, y, z] : Fin 3 → ℂ) i) ∈ Carlson.carlsonRSlitDomain := by
     intro i; fin_cases i <;> simpa
-  have h := hasDerivAt_symEllIntR_translate (1 / 2) (fun _ : Fin 3 => 1 / 2) ![x, y, z] hv
+  have h := hasDerivAt_symmetricEllipticR_translate (1 / 2) (fun _ : Fin 3 => 1 / 2) ![x, y, z] hv
   have hc' : Tendsto (fun s : ℂ => fun i => s + (![x, y, z] : Fin 3 → ℂ) i) (𝓝 0)
       (𝓝 fun i => 0 + (![x, y, z] : Fin 3 → ℂ) i) :=
     (continuous_pi fun i => continuous_id.add continuous_const).tendsto 0
-  have hev := hc'.eventually (symEllIntRFVec_eventuallyEq hv)
+  have hev := hc'.eventually (symmetricEllipticRFVec_eventuallyEq hv)
   refine (h.congr_of_eventuallyEq ?_).congr_deriv ?_
   · filter_upwards [hev] with s hs
-    rw [← hs]; simp [symEllIntRFVec, add_comm]
+    rw [← hs]; simp [symmetricEllipticRFVec, add_comm]
   · have h3 : (1 / 2 : ℂ) + 1 = ∑ _i : Fin 3, (1 / 2 : ℂ) := by simp; norm_num
     have hv' : (![x, y, z] : Fin 3 → ℂ) ∈ Carlson.carlsonRSlitDomain :=
         vec3_mem_carlsonRSlitDomain hx hy hz
     simp only [zero_add]
-    rw [h3, symEllIntR_sum _ hv' (Complex.Gamma_ne_zero_of_re_pos (by simp))]
+    rw [h3, symmetricEllipticR_sum _ hv' (Complex.Gamma_ne_zero_of_re_pos (by simp))]
     simp only [Fin.prod_univ_three, Matrix.cons_val_zero, Matrix.cons_val_one,
       Matrix.cons_val_two, Matrix.head_cons, Matrix.tail_cons]
     rw [show -(1 / 2 : ℂ) = -1 / 2 by ring, ← inv_cpow_half_eq_cpow_neg_half,
@@ -280,10 +293,11 @@ theorem hasDerivAt_symEllIntRF_translate {x y z : ℂ} (hx : x ∈ slitPlane) (h
 /-- DLMF 19.18.7: `(∂ₓ + ∂_y + ∂_z) R_G(x, y, z) = (1/2) R_F(x, y, z)`, as the derivative along
 the diagonal translation (slit-plane variables). -/
 @[dlmf 19.18.E7]
-theorem hasDerivAt_symEllIntRG_translate_zero {x y z : ℂ} (hx : x ∈ slitPlane)
+theorem hasDerivAt_symmetricEllipticRG_translate_zero {x y z : ℂ} (hx : x ∈ slitPlane)
     (hy : y ∈ slitPlane) (hz : z ∈ slitPlane) :
-    HasDerivAt (fun s => symEllIntRG (x + s) (y + s) (z + s)) ((1 / 2) * symEllIntRF x y z) 0 := by
-  have h := hasDerivAt_symEllIntRG_translate (x := 0) (a := x) (b := y) (c := z)
+    HasDerivAt (fun s => symmetricEllipticRG (x + s) (y + s) (z + s))
+        ((1 / 2) * symmetricEllipticRF x y z) 0 := by
+  have h := hasDerivAt_symmetricEllipticRG_translate (x := 0) (a := x) (b := y) (c := z)
     (by simpa using hx) (by simpa using hy) (by simpa using hz)
   simp only [zero_add] at h
   refine h.congr_of_eventuallyEq (Eventually.of_forall fun s => ?_)
@@ -293,23 +307,25 @@ open scoped Classical in
 /-- DLMF 19.18.9: `(x∂ₓ + y∂_y + z∂_z) R_F(x, y, z) = -(1/2) R_F(x, y, z)` (slit-plane
 variables; `v = (x, y, z)`). -/
 @[dlmf 19.18.E9]
-theorem sum_mul_partialDeriv_symEllIntRF {v : Fin 3 → ℂ} (hv : v ∈ Carlson.carlsonRSlitDomain) :
-    ∑ j, v j * Dirichlet.carlsonPartialDeriv j symEllIntRFVec v = -(1 / 2) * symEllIntRFVec v := by
-  have h := symEllIntRFVec_eventuallyEq hv
-  have hp : ∀ j, Dirichlet.carlsonPartialDeriv j symEllIntRFVec v =
-      Dirichlet.carlsonPartialDeriv j (symEllIntR (1 / 2) (fun _ : Fin 3 => 1 / 2)) v := by
+theorem sum_mul_partialDeriv_symmetricEllipticRF {v : Fin 3 → ℂ}
+    (hv : v ∈ Carlson.carlsonRSlitDomain) :
+    ∑ j, v j * Dirichlet.carlsonPartialDeriv j symmetricEllipticRFVec v = -(1 / 2) *
+        symmetricEllipticRFVec v := by
+  have h := symmetricEllipticRFVec_eventuallyEq hv
+  have hp : ∀ j, Dirichlet.carlsonPartialDeriv j symmetricEllipticRFVec v =
+      Dirichlet.carlsonPartialDeriv j (symmetricEllipticR (1 / 2) (fun _ : Fin 3 => 1 / 2)) v := by
     exact fun j => carlsonPartialDeriv_congr h j
   simp_rw [hp, h.eq_of_nhds]
-  exact sum_mul_partialDeriv_symEllIntR _ _ hv
+  exact sum_mul_partialDeriv_symmetricEllipticR _ _ hv
 
 /-- DLMF 19.18.10: `((x - y) ∂²/∂x∂y + (1/2)(∂_y - ∂ₓ)) R_F(x, y, z) = 0` (and its permutations:
 any pair `j, l` of coordinates), slit-plane variables, `v = (x, y, z)`. -/
 @[dlmf 19.18.E10]
-theorem eulerPoisson_symEllIntRF {v : Fin 3 → ℂ} (hv : v ∈ Carlson.carlsonRSlitDomain)
+theorem eulerPoisson_symmetricEllipticRF {v : Fin 3 → ℂ} (hv : v ∈ Carlson.carlsonRSlitDomain)
     (j l : Fin 3) :
-    Dirichlet.carlsonEulerPoissonOperator j l (fun _ => 1 / 2) v symEllIntRFVec = 0 := by
-  rw [carlsonEulerPoissonOperator_congr (symEllIntRFVec_eventuallyEq hv)]
-  exact eulerPoisson_symEllIntR _ _ hv j l
+    Dirichlet.carlsonEulerPoissonOperator j l (fun _ => 1 / 2) v symmetricEllipticRFVec = 0 := by
+  rw [carlsonEulerPoissonOperator_congr (symmetricEllipticRFVec_eventuallyEq hv)]
+  exact eulerPoisson_symmetricEllipticR _ _ hv j l
 
 /-! ### Real line derivatives of holomorphic functions of several variables (helpers) -/
 
@@ -377,15 +393,15 @@ private lemma deriv_deriv_comp_line [DecidableEq ι] {H G : (ι → ℂ) → ℂ
 /-- DLMF 19.18.14: `w = R_{-a}(½, ½; x + y, x - y)` satisfies the Euler–Poisson–Darboux equation
 `w_xx = w_yy + (1/y) w_y`, for real `x > |y|`, `y ≠ 0`. -/
 @[dlmf 19.18.E14]
-theorem eulerPoissonDarboux_symEllIntR (a : ℂ) {x y : ℝ} (hxy : |y| < x) (hy : y ≠ 0) :
-    let w : ℝ → ℝ → ℂ := fun x y => symEllIntR a ![1 / 2, 1 / 2] ![(x + y : ℝ), (x - y : ℝ)]
+theorem eulerPoissonDarboux_symmetricEllipticR (a : ℂ) {x y : ℝ} (hxy : |y| < x) (hy : y ≠ 0) :
+    let w : ℝ → ℝ → ℂ := fun x y => symmetricEllipticR a ![1 / 2, 1 / 2] ![(x + y : ℝ), (x - y : ℝ)]
     deriv (fun s => deriv (fun r => w r y) s) x =
       deriv (fun s => deriv (fun r => w x r) s) y + (1 / y : ℂ) * deriv (fun r => w x r) y := by
   intro w
   have hH := analyticOnNhd_carlsonR_slitDomain (-a) (![1 / 2, 1 / 2] : Fin 2 → ℂ)
   have hU := Carlson.isOpen_carlsonRSlitDomain (ι := Fin 2)
-  have hGH : EqOn (symEllIntR a ![1 / 2, 1 / 2]) (Carlson.carlsonR (-a) ![1 / 2, 1 / 2])
-      Carlson.carlsonRSlitDomain := fun z hz => symEllIntR_of_mem _ _ hz
+  have hGH : EqOn (symmetricEllipticR a ![1 / 2, 1 / 2]) (Carlson.carlsonR (-a) ![1 / 2, 1 / 2])
+      Carlson.carlsonRSlitDomain := fun z hz => symmetricEllipticR_of_mem _ _ hz
   have e1 : ∀ r : ℝ, (![((r + y : ℝ) : ℂ), ((r - y : ℝ) : ℂ)] : Fin 2 → ℂ) =
       ![(y : ℂ), -y] + (r : ℂ) • ![1, 1] := by
     intro r; funext i; fin_cases i <;> simp <;> ring
@@ -510,10 +526,10 @@ private lemma contDiffAt_of_eqOn_analytic_comp_affine {H G : (ι → ℂ) → �
 /-- DLMF 19.18.15: `W = R_{-a}(½, ½; t + r, t - r)`, `r = √(x² + y²)`, satisfies the wave
 equation `W_tt = W_xx + W_yy`, for real `t > r > 0`. -/
 @[dlmf 19.18.E15]
-theorem wave_symEllIntR (a : ℂ) {t x y : ℝ} (hr : 0 < x ^ 2 + y ^ 2)
+theorem wave_symmetricEllipticR (a : ℂ) {t x y : ℝ} (hr : 0 < x ^ 2 + y ^ 2)
     (ht : Real.sqrt (x ^ 2 + y ^ 2) < t) :
     let W : ℝ → ℝ → ℝ → ℂ := fun t x y =>
-      symEllIntR a ![1 / 2, 1 / 2]
+      symmetricEllipticR a ![1 / 2, 1 / 2]
         ![(t + Real.sqrt (x ^ 2 + y ^ 2) : ℝ), (t - Real.sqrt (x ^ 2 + y ^ 2) : ℝ)]
     deriv (fun s => deriv (fun r => W r x y) s) t =
       deriv (fun s => deriv (fun r => W t r y) s) x +
@@ -521,12 +537,12 @@ theorem wave_symEllIntR (a : ℂ) {t x y : ℝ} (hr : 0 < x ^ 2 + y ^ 2)
   intro W
   let r := Real.sqrt (x ^ 2 + y ^ 2)
   let w : ℝ → ℝ → ℂ := fun t r =>
-      symEllIntR a ![1 / 2, 1 / 2] ![((t + r : ℝ) : ℂ), ((t - r : ℝ) : ℂ)]
+      symmetricEllipticR a ![1 / 2, 1 / 2] ![((t + r : ℝ) : ℂ), ((t - r : ℝ) : ℂ)]
   have hr0 : 0 < r := Real.sqrt_pos.mpr hr
   have hH := analyticOnNhd_carlsonR_slitDomain (-a) (![1 / 2, 1 / 2] : Fin 2 → ℂ)
   have hU := Carlson.isOpen_carlsonRSlitDomain (ι := Fin 2)
-  have hGH : EqOn (symEllIntR a ![1 / 2, 1 / 2]) (Carlson.carlsonR (-a) ![1 / 2, 1 / 2])
-      Carlson.carlsonRSlitDomain := fun z hz => symEllIntR_of_mem _ _ hz
+  have hGH : EqOn (symmetricEllipticR a ![1 / 2, 1 / 2]) (Carlson.carlsonR (-a) ![1 / 2, 1 / 2])
+      Carlson.carlsonRSlitDomain := fun z hz => symmetricEllipticR_of_mem _ _ hz
   have he (s : ℝ) : (![((t + s : ℝ) : ℂ), ((t - s : ℝ) : ℂ)] : Fin 2 → ℂ) =
       ![(t : ℂ), t] + (s : ℂ) • ![1, -1] := by
     funext i; fin_cases i <;> simp; ring
@@ -538,9 +554,9 @@ theorem wave_symEllIntR (a : ℂ) {t x y : ℝ} (hr : 0 < x ^ 2 + y ^ 2)
     have H := contDiffAt_of_eqOn_analytic_comp_affine hH hU hGH hp
     convert H using 1
     funext s
-    exact congrArg (symEllIntR a ![1 / 2, 1 / 2]) (he s)
+    exact congrArg (symmetricEllipticR a ![1 / 2, 1 / 2]) (he s)
   have Hrad := sum_deriv2_comp_sqrt_sq_add hr hf
-  have Hep := eulerPoissonDarboux_symEllIntR a (x := t) (y := r)
+  have Hep := eulerPoissonDarboux_symmetricEllipticR a (x := t) (y := r)
     (by simpa only [abs_of_pos hr0] using ht) hr0.ne'
   change deriv (fun s => deriv (fun q => w q r) s) t =
     deriv (fun s => deriv (fun q => w t (Real.sqrt (q ^ 2 + y ^ 2))) s) x +
@@ -551,15 +567,15 @@ theorem wave_symEllIntR (a : ℂ) {t x y : ℝ} (hr : 0 < x ^ 2 + y ^ 2)
 /-- DLMF 19.18.16: `u = R_{-a}(½, ½; x + iy, x - iy)` satisfies the equation of axially
 symmetric potential theory `u_xx + u_yy + (1/y) u_y = 0`, for real `x`, `y ≠ 0`. -/
 @[dlmf 19.18.E16]
-theorem axialPotential_symEllIntR (a : ℂ) {x y : ℝ} (hy : y ≠ 0) :
-    let u : ℝ → ℝ → ℂ := fun x y => symEllIntR a ![1 / 2, 1 / 2] ![x + y * I, x - y * I]
+theorem axialPotential_symmetricEllipticR (a : ℂ) {x y : ℝ} (hy : y ≠ 0) :
+    let u : ℝ → ℝ → ℂ := fun x y => symmetricEllipticR a ![1 / 2, 1 / 2] ![x + y * I, x - y * I]
     deriv (fun s => deriv (fun r => u r y) s) x + deriv (fun s => deriv (fun r => u x r) s) y +
       (1 / y : ℂ) * deriv (fun r => u x r) y = 0 := by
   intro u
   have hH := analyticOnNhd_carlsonR_slitDomain (-a) (![1 / 2, 1 / 2] : Fin 2 → ℂ)
   have hU := Carlson.isOpen_carlsonRSlitDomain (ι := Fin 2)
-  have hGH : EqOn (symEllIntR a ![1 / 2, 1 / 2]) (Carlson.carlsonR (-a) ![1 / 2, 1 / 2])
-      Carlson.carlsonRSlitDomain := fun z hz => symEllIntR_of_mem _ _ hz
+  have hGH : EqOn (symmetricEllipticR a ![1 / 2, 1 / 2]) (Carlson.carlsonR (-a) ![1 / 2, 1 / 2])
+      Carlson.carlsonRSlitDomain := fun z hz => symmetricEllipticR_of_mem _ _ hz
   have e1 : ∀ r : ℝ, (![(r : ℂ) + y * I, r - y * I] : Fin 2 → ℂ) =
       ![(y : ℂ) * I, -(y * I)] + (r : ℂ) • ![1, 1] := by
     intro r; funext i; fin_cases i <;> simp <;> ring
@@ -601,21 +617,21 @@ theorem axialPotential_symEllIntR (a : ℂ) {x y : ℝ} (hy : y ≠ 0) :
 /-- DLMF 19.18.17: `U = R_{-a}(½, ½; z + iρ, z - iρ)`, `ρ = √(x² + y²)`, satisfies Laplace's
 equation `U_xx + U_yy + U_zz = 0`, for real `x, y, z` with `ρ > 0`. -/
 @[dlmf 19.18.E17]
-theorem laplace_symEllIntR (a : ℂ) {x y z : ℝ} (hρ : 0 < x ^ 2 + y ^ 2) :
+theorem laplace_symmetricEllipticR (a : ℂ) {x y z : ℝ} (hρ : 0 < x ^ 2 + y ^ 2) :
     let U : ℝ → ℝ → ℝ → ℂ := fun x y z =>
-      symEllIntR a ![1 / 2, 1 / 2]
+      symmetricEllipticR a ![1 / 2, 1 / 2]
         ![z + Real.sqrt (x ^ 2 + y ^ 2) * I, z - Real.sqrt (x ^ 2 + y ^ 2) * I]
     deriv (fun s => deriv (fun r => U r y z) s) x + deriv (fun s => deriv (fun r => U x r z) s) y +
       deriv (fun s => deriv (fun r => U x y r) s) z = 0 := by
   intro U
   let r := Real.sqrt (x ^ 2 + y ^ 2)
-  let u : ℝ → ℝ → ℂ := fun z r => symEllIntR a ![1 / 2, 1 / 2]
+  let u : ℝ → ℝ → ℂ := fun z r => symmetricEllipticR a ![1 / 2, 1 / 2]
     ![(z : ℂ) + r * I, z - r * I]
   have hr0 : 0 < r := Real.sqrt_pos.mpr hρ
   have hH := analyticOnNhd_carlsonR_slitDomain (-a) (![1 / 2, 1 / 2] : Fin 2 → ℂ)
   have hO := Carlson.isOpen_carlsonRSlitDomain (ι := Fin 2)
-  have hGH : EqOn (symEllIntR a ![1 / 2, 1 / 2]) (Carlson.carlsonR (-a) ![1 / 2, 1 / 2])
-      Carlson.carlsonRSlitDomain := fun z hz => symEllIntR_of_mem _ _ hz
+  have hGH : EqOn (symmetricEllipticR a ![1 / 2, 1 / 2]) (Carlson.carlsonR (-a) ![1 / 2, 1 / 2])
+      Carlson.carlsonRSlitDomain := fun z hz => symmetricEllipticR_of_mem _ _ hz
   have he (s : ℝ) : (![(z : ℂ) + s * I, z - s * I] : Fin 2 → ℂ) =
       ![(z : ℂ), z] + (s : ℂ) • ![I, -I] := by
     funext i; fin_cases i <;> simp; ring
@@ -626,9 +642,9 @@ theorem laplace_symEllIntR (a : ℂ) {x y z : ℝ} (hρ : 0 < x ^ 2 + y ^ 2) :
     have H := contDiffAt_of_eqOn_analytic_comp_affine hH hO hGH hp
     convert H using 1
     funext s
-    exact congrArg (symEllIntR a ![1 / 2, 1 / 2]) (he s)
+    exact congrArg (symmetricEllipticR a ![1 / 2, 1 / 2]) (he s)
   have Hrad := sum_deriv2_comp_sqrt_sq_add hρ hf
-  have Hax := axialPotential_symEllIntR a (x := z) (y := r) hr0.ne'
+  have Hax := axialPotential_symmetricEllipticR a (x := z) (y := r) hr0.ne'
   change deriv (fun s => deriv (fun q => u z (Real.sqrt (q ^ 2 + y ^ 2))) s) x +
     deriv (fun s => deriv (fun q => u z (Real.sqrt (x ^ 2 + q ^ 2))) s) y +
     deriv (fun s => deriv (fun q => u q r) s) z = 0

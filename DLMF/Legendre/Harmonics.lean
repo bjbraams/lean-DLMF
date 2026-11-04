@@ -58,7 +58,7 @@ P_l(x)/dx^m` agrees with the Ferrers function `𝖯^m_l(x)`. -/
 theorem ferrersPNat_eq (l m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersPNat l m x=ferrersP l m x := by
   have hs : 1+(x:ℂ) ∈ slitPlane := Or.inl (by simp; linarith [hx.1])
-  have hev : legendreP (l:ℂ) =ᶠ[𝓝 (x:ℂ)] legendrePolyP l := by
+  have hev : legendreP (l:ℂ) =ᶠ[𝓝 (x:ℂ)] legendrePolynomialP l := by
     filter_upwards [isOpen_one_add_mem_slitPlane.mem_nhds hs] with w hw
     rw [legendreP_nat l hw]
   rw [ferrersP_nat (l:ℂ) m hx, hev.iteratedDeriv_eq, ferrersPNat]
@@ -68,17 +68,17 @@ theorem ferrersPNat_eq (l m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
   congr 2; ring
 
 /-- Derivatives of the Legendre polynomial are real on the real axis. -/
-theorem iteratedDeriv_legendrePolyP_ofReal (l m : ℕ) (x : ℝ) :
-    iteratedDeriv m (legendrePolyP l) (x:ℂ) =
+theorem iteratedDeriv_legendrePolynomialP_ofReal (l m : ℕ) (x : ℝ) :
+    iteratedDeriv m (legendrePolynomialP l) (x:ℂ) =
       (((Polynomial.derivative^[m] (legendrePolyR l)).eval x : ℝ) : ℂ) := by
-  have hf : legendrePolyP l = fun z => ((legendrePolyR l).map ofRealHom).eval z :=
-    funext (legendrePolyP_eq_eval l)
+  have hf : legendrePolynomialP l = fun z => ((legendrePolyR l).map ofRealHom).eval z :=
+    funext (legendrePolynomialP_eq_eval l)
   rw [hf, iteratedDeriv_eval_polynomial, Polynomial.iterate_derivative_map]
   exact eval_ofReal_map_ofRealHom _ _
 
 /-- The polynomial Ferrers function is real-valued. -/
 theorem star_ferrersPNat (l m : ℕ) (x : ℝ) : star (ferrersPNat l m x) = ferrersPNat l m x := by
-  rw [ferrersPNat, iteratedDeriv_legendrePolyP_ofReal]
+  rw [ferrersPNat, iteratedDeriv_legendrePolynomialP_ofReal]
   simp only [star_mul', star_pow, star_neg, star_one, Complex.star_def, Complex.conj_ofReal]
 
 /-- DLMF 14.30.1: for `|m| ≤ l` (`m` of either sign) and `0 < θ < π`, `Y_{l,m}(θ, φ) = √((l-m)!
@@ -163,7 +163,7 @@ private lemma rod_ode (n k : ℕ) (z : ℂ) :
       2*(k+1)*z*iteratedDeriv (n+k+1) (fun z : ℂ => (z^2-1)^n) z =
       ((n:ℂ)-k)*(n+k+1) * iteratedDeriv (n+k) (fun z : ℂ => (z^2-1)^n) z := by
   have h := OrthogonalityIntegrals.ode n k z
-  simp only [LegendreAddition.jet, iteratedDeriv_legendrePolyP_rodrigues] at h
+  simp only [LegendreAddition.jet, iteratedDeriv_legendrePolynomialP_rodrigues] at h
   have hc : (2^n*(n.factorial:ℂ))⁻¹ ≠ 0 := by
     apply inv_ne_zero; exact mul_ne_zero (pow_ne_zero _ two_ne_zero)
         (by exact_mod_cast n.factorial_ne_zero)
@@ -305,7 +305,7 @@ theorem sphericalHarmonic_rodrigues (l : ℕ) (m : ℤ) (hm : m.natAbs ≤ l) {�
 theorem ferrersPNat_one (l m : ℕ) : ferrersPNat l m 1 = if m = 0 then 1 else 0 := by
   rcases m with _ | k
   · simp only [ferrersPNat, pow_zero, one_mul, iteratedDeriv_zero, ite_true, ofReal_one]
-    rw [legendrePolyP, jacobiPolyP_one ]
+    rw [legendrePolynomialP, jacobiPolynomialP_one ]
     simp [Nat.cast_ne_zero.mpr l.factorial_ne_zero]
   · simp [ferrersPNat]
 
@@ -437,14 +437,14 @@ theorem sphericalHarmonic_negative_order (l : ℕ) (m : ℤ) (θ phi : ℝ) :
 /-- Parity of the polynomial Ferrers function. -/
 theorem ferrersPNat_neg (l m : ℕ) (x : ℝ) :
     ferrersPNat l m (-x) = (-1)^(l+m) * ferrersPNat l m x := by
-  have hP : legendrePolyP l = fun z => (-1:ℂ)^l * legendrePolyP l (-z) := by
+  have hP : legendrePolynomialP l = fun z => (-1:ℂ)^l * legendrePolynomialP l (-z) := by
     funext z
     have h := jacobi_reflection (α := 0) (β := 0) (by norm_num) (by norm_num) l (-z)
     rw [neg_neg] at h
-    change jacobiPolyP 0 0 l z = (-1)^l * jacobiPolyP 0 0 l (-z)
+    change jacobiPolynomialP 0 0 l z = (-1)^l * jacobiPolynomialP 0 0 l (-z)
     rw [h]
-  have hD : iteratedDeriv m (legendrePolyP l) (-(x:ℂ)) =
-      (-1:ℂ)^(l+m) * iteratedDeriv m (legendrePolyP l) (x:ℂ) := by
+  have hD : iteratedDeriv m (legendrePolynomialP l) (-(x:ℂ)) =
+      (-1:ℂ)^(l+m) * iteratedDeriv m (legendrePolynomialP l) (x:ℂ) := by
     conv_lhs => rw [hP]
     rw [iteratedDeriv_const_mul_field, iteratedDeriv_comp_neg, neg_neg, smul_eq_mul]
     ring
@@ -642,19 +642,19 @@ theorem star_mul_sphericalHarmonicNonneg (l k : ℕ) {θ₁ θ₂ : ℝ} (h1 : �
   set Sq := (Real.sqrt (((l-k).factorial:ℝ)*(2*l+1)/(4*π*(l+k).factorial)) : ℂ)
   linear_combination
     ((-1:ℂ)^k*(-1)^k * (exp (-I*k*phi₁) * exp (I*k*phi₂) * (Real.sin θ₁:ℂ)^k * (Real.sin θ₂:ℂ)^k *
-      iteratedDeriv k (legendrePolyP l) (Real.cos θ₁) *
-          iteratedDeriv k (legendrePolyP l) (Real.cos θ₂))) * hcC +
+      iteratedDeriv k (legendrePolynomialP l) (Real.cos θ₁) *
+          iteratedDeriv k (legendrePolynomialP l) (Real.cos θ₂))) * hcC +
     (((l-k).factorial:ℂ)*(2*l+1)/(4*π*(l+k).factorial) * (exp (-I*k*phi₁) * exp (I*k*phi₂) *
       (Real.sin θ₁:ℂ)^k * (Real.sin θ₂:ℂ)^k *
-      iteratedDeriv k (legendrePolyP l) (Real.cos θ₁) *
-          iteratedDeriv k (legendrePolyP l) (Real.cos θ₂))) * hs
+      iteratedDeriv k (legendrePolynomialP l) (Real.cos θ₁) *
+          iteratedDeriv k (legendrePolynomialP l) (Real.cos θ₂))) * hs
 
 /-- DLMF 14.30.9 (addition theorem): for `θ₁, θ₂ ∈ [0, π]`, `P_l(cos θ₁ cos θ₂ + sin θ₁ sin θ₂
 cos(φ₁-φ₂)) = (4π/(2l+1)) Σ_{m=-l}^{l} conj(Y_{l,m}(θ₁, φ₁)) Y_{l,m}(θ₂, φ₂)`. -/
 @[dlmf 14.30.E9]
 theorem sphericalHarmonic_addition (l : ℕ) (θ₁ θ₂ phi₁ phi₂ : ℝ) (h1 : θ₁ ∈ Icc 0 π)
     (h2 : θ₂ ∈ Icc 0 π) :
-    legendrePolyP l (Real.cos θ₁*Real.cos θ₂+Real.sin θ₁*Real.sin θ₂*Real.cos
+    legendrePolynomialP l (Real.cos θ₁*Real.cos θ₂+Real.sin θ₁*Real.sin θ₂*Real.cos
         (phi₁-phi₂))=4*π/(2*l+1:ℂ)*∑ m ∈ Finset.Icc (-(l:ℤ)) l,
         star (sphericalHarmonic l m θ₁ phi₁)*sphericalHarmonic l m θ₂ phi₂ := by
   have hsin : ∀ θ ∈ Icc 0 π, Real.sqrt (1 - Real.cos θ^2) = Real.sin θ := fun θ h =>
@@ -716,8 +716,8 @@ private lemma herg_E0 (n : ℕ) (z : ℂ) :
         (z * LegendreAddition.jet n 0 z - LegendreAddition.jet (n+1) 0 z) := by
   have h := jacobi_raising_derivative (α := 0) (β := 0) (by norm_num) n z
   simp only [LegendreAddition.jet, iteratedDeriv_one, iteratedDeriv_zero]
-  change (1 - z^2) * deriv (jacobiPolyP 0 0 n) z = (n+1) *
-      (z * jacobiPolyP 0 0 n z - jacobiPolyP 0 0 (n+1) z)
+  change (1 - z^2) * deriv (jacobiPolynomialP 0 0 n) z = (n+1) *
+      (z * jacobiPolynomialP 0 0 n z - jacobiPolynomialP 0 0 (n+1) z)
   have h2 : (2*(n:ℂ)+2) ≠ 0 := by exact_mod_cast (show (2*n+2:ℕ) ≠ 0 by omega)
   apply mul_left_cancel₀ h2
   simp only [add_zero, sub_self] at h
@@ -791,7 +791,7 @@ private lemma herg_core (n k : ℕ) (z : ℂ) :
 
 /-- `P_n^{(k)} = 0` for `k > n`. -/
 private lemma herg_D_eq_zero (n k : ℕ) (hk : n < k) (z : ℂ) : LegendreAddition.jet n k z = 0 := by
-  rw [LegendreAddition.jet, iteratedDeriv_legendrePolyP_rodrigues]
+  rw [LegendreAddition.jet, iteratedDeriv_legendrePolynomialP_rodrigues]
   set Pc : Polynomial ℂ := (Polynomial.X^2 - 1)^n
   have hf : (fun z : ℂ => (z^2-1)^n) = fun z => Pc.eval z := by funext w; simp [Pc]
   rw [hf, iteratedDeriv_eval_polynomial]
@@ -877,7 +877,7 @@ private lemma herg_sum (x s : ℂ) (hs : s^2 = 1 - x^2) {w : ℂ} (hw : w ≠ 0)
     ∑ k ∈ Finset.Icc (-(n:ℤ)) n, hergC x s n k * w^k = (x + s/2*(w⁻¹ - w))^n / n.factorial := by
   induction n with
   | zero =>
-    simp [hergC, LegendreAddition.jet, legendrePolyP_zero]
+    simp [hergC, LegendreAddition.jet, legendrePolynomialP_zero]
   | succ n ih =>
     set A := x + s/2*(w⁻¹ - w)
     have hz : ∀ (g : ℤ → ℂ) (k : ℤ), n < k.natAbs → hergC x s n k * g k = 0 := fun g k hk => by
@@ -1066,7 +1066,8 @@ theorem scaledOblate_real (n m : ℕ) {x : ℝ} (hx : 0 < x) :
         pow_succ, pow_add]
     have harg : (1:ℂ)/(I*x)^2 = ((-1/x^2 : ℝ) : ℂ) := by
       push_cast; rw [mul_pow, I_sq]; ring
-    set F := regularizedGaussHG (((n:ℂ)+(m:ℂ)+2)/2) (((n:ℂ)+(m:ℂ)+1)/2) ((n:ℂ)+3/2) (1/(I*(x:ℂ))^2)
+    set F := regularizedGaussHypergeometric (((n:ℂ)+(m:ℂ)+2)/2) (((n:ℂ)+(m:ℂ)+1)/2) ((n:ℂ)+3/2)
+        (1/(I*(x:ℂ))^2)
       with hFdef
     have hF : F.im = 0 := by
       rw [← conj_eq_iff_im, hFdef, harg]
@@ -1076,7 +1077,7 @@ theorem scaledOblate_real (n m : ℕ) {x : ℝ} (hx : 0 < x) :
         simp only [sub_re, one_re, ofReal_re]
         have : 0 < 1/x^2 := by positivity
         rw [show -1/x^2 = -(1/x^2) by ring]; linarith
-      rw [conj_regularizedGaussHG _ _ _ hcut]
+      rw [conj_regularizedGaussHypergeometric _ _ _ hcut]
       simp [map_div₀, conj_ofReal, map_ofNat]
     have hx0 : (x:ℂ) ≠ 0 := by exact_mod_cast hx.ne'
     have hT : I * exp (I*π*n/2) * (exp ((m:ℂ)*π*I) * Gamma ((n:ℂ)+(m:ℂ)+1) *

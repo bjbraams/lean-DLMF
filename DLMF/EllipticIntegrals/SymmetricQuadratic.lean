@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.EllipticIntegrals.SymmetricSpecialCases
+public import DLMF.EllipticIntegrals.SymmetricSpecialCasesRD
 public import Carlson.Elliptic.AGMSecondKind
 public import DLMF.EllipticIntegrals.SymmetricConnection
 
@@ -18,28 +18,31 @@ the incomplete transformations (§19.22(iii)).
 
 ## Main definitions
 
-* `symEllIntPm`: `p±` of DLMF 19.22.5.
+* `quadraticTransformationP`: `p±` of DLMF 19.22.5.
 * `agmA`, `agmG`: the AGM sequences `aₙ`, `gₙ` of §19.8(i), indexed from `a₀`, `g₀`.
 * `agmQ`: the sequence `Qₙ` of DLMF 19.22.11.
 * `agmP`, `agmQJ`: the sequences `pₙ, εₙ, Qₙ` of DLMF 19.22.13.
 
 ## Main results
 
-* `symEllIntRF_zero_sq`, `symEllIntRG_zero_sq`, `symEllIntRD_zero_sq`, `symEllIntRJ_zero_sq`:
-  quadratic transformations of the complete integrals (DLMF 19.22.1–19.22.5).
-* `symEllIntPm_mul_add`, `symEllIntPm_sub_real`: the identities of DLMF 19.22.6.
-* `symEllIntRJ_zero_sq_bartky`: Bartky's transformation (DLMF 19.22.7).
-* `symEllIntRF_zero_eq_inv_agm`, `symEllIntRG_zero_agm`, `symEllIntRD_zero_agm`,
-  `symEllIntRJ_zero_agm`, `symEllIntRJ_zero_agm_neg`: the AGM algorithms
-  (DLMF 19.22.8–19.22.15).
+* `symmetricEllipticRF_zero_sq`, `symmetricEllipticRG_zero_sq`, `symmetricEllipticRD_zero_sq`,
+  `symmetricEllipticRJ_zero_sq`: quadratic transformations of the complete integrals (DLMF
+  19.22.1–19.22.5).
+* `quadraticTransformationP_mul_add`, `quadraticTransformationP_sub_real`: the identities of DLMF
+  19.22.6.
+* `symmetricEllipticRJ_zero_sq_bartky`: Bartky's transformation (DLMF 19.22.7).
+* `symmetricEllipticRF_zero_eq_inv_agm`, `symmetricEllipticRG_zero_agm`,
+  `symmetricEllipticRD_zero_agm`, `symmetricEllipticRJ_zero_agm`,
+  `symmetricEllipticRJ_zero_agm_neg`: the AGM algorithms (DLMF 19.22.8–19.22.15).
 * `agmQ_sign`, `tendsto_agmP`: sign and convergence statements of DLMF 19.22.11, 19.22.13.
-* `symEllIntRF_sq_landen`, `symEllIntRF_sq_landen_real`, `symEllIntRF_sq_landen_conj`: the
-  incomplete transformation of `R_F` (DLMF 19.22.16, 19.22.18).
-* `symEllIntPm_mul_add_z`: DLMF 19.22.17.
-* `symEllIntRD_sq_landen`, `symEllIntRJ_sq_landen`, `symEllIntRG_sq_landen`, `symEllIntRC_sq`:
-  DLMF 19.22.19–19.22.22.
-* `symEllIntPm_inverse`, `symEllIntPm_inverse_sub_real`: the inverse relations
-  (DLMF 19.22.23).
+* `symmetricEllipticRF_sq_landen`, `symmetricEllipticRF_sq_landen_real`,
+  `symmetricEllipticRF_sq_landen_conj`: the incomplete transformation of `R_F` (DLMF 19.22.16,
+  19.22.18).
+* `quadraticTransformationP_mul_add_z`: DLMF 19.22.17.
+* `symmetricEllipticRD_sq_landen`, `symmetricEllipticRJ_sq_landen`, `symmetricEllipticRG_sq_landen`,
+  `symmetricEllipticRC_sq`: DLMF 19.22.19–19.22.22.
+* `quadraticTransformationP_inverse`, `quadraticTransformationP_inverse_sub_real`: the inverse
+  relations (DLMF 19.22.23).
 
 ## Implementation notes
 
@@ -89,16 +92,17 @@ private lemma re_half_add_pos {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) : 0 < 
 
 /-- DLMF 19.22.1: `R_F(0, x², y²) = R_F(0, xy, a²)`, `a = (x + y)/2`, `Re x, Re y > 0`. -/
 @[dlmf 19.22.E1]
-theorem symEllIntRF_zero_sq {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) :
-    symEllIntRF 0 (x ^ 2) (y ^ 2) = symEllIntRF 0 (x * y) (((x + y) / 2) ^ 2) := by
+theorem symmetricEllipticRF_zero_sq {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) :
+    symmetricEllipticRF 0 (x ^ 2) (y ^ 2) = symmetricEllipticRF 0 (x * y) (((x + y) / 2) ^ 2) := by
   have ha := re_half_add_pos hx hy
-  rw [symEllIntRF_zero_left (sq_mem_slitPlane_of_zero_lt_re hx) (sq_mem_slitPlane_of_zero_lt_re hy),
-    symEllIntRF_zero_left (Carlson.mul_mem_slitPlane_of_re_pos hx hy)
+  rw [symmetricEllipticRF_zero_left (sq_mem_slitPlane_of_zero_lt_re hx)
+      (sq_mem_slitPlane_of_zero_lt_re hy),
+    symmetricEllipticRF_zero_left (Carlson.mul_mem_slitPlane_of_re_pos hx hy)
         (sq_mem_slitPlane_of_zero_lt_re ha),
-    symEllIntR_of_mem _ _
+    symmetricEllipticR_of_mem _ _
         (vec2_mem_carlsonRSlitDomain (sq_mem_slitPlane_of_zero_lt_re hx)
         (sq_mem_slitPlane_of_zero_lt_re hy)),
-    symEllIntR_of_mem _ _
+    symmetricEllipticR_of_mem _ _
         (vec2_mem_carlsonRSlitDomain (Carlson.mul_mem_slitPlane_of_re_pos hx hy)
         (sq_mem_slitPlane_of_zero_lt_re ha))]
   have h := Carlson.TwoVariable.carlsonRK_sq_eq x y hx hy
@@ -108,16 +112,18 @@ theorem symEllIntRF_zero_sq {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) :
   rw [show (-(1 / 2) : ℂ) = -1 / 2 by ring, h]
 
 /-- Round-1 helper: `R_G(0, y, z) = (π/4) R_E(y, z)` on the slit plane. -/
-theorem symEllIntRG_zero_eq_carlsonRE {y z : ℂ} (hy : y ∈ slitPlane) (hz : z ∈ slitPlane) :
-    symEllIntRG 0 y z = (π / 4) * Carlson.carlsonRE y z := by
-  rw [(symEllIntRG_zero_left hy hz).1, symEllIntR_of_mem _ _ (vec2_mem_carlsonRSlitDomain hy hz),
+theorem symmetricEllipticRG_zero_eq_carlsonRE {y z : ℂ} (hy : y ∈ slitPlane) (hz : z ∈ slitPlane) :
+    symmetricEllipticRG 0 y z = (π / 4) * Carlson.carlsonRE y z := by
+  rw [(symmetricEllipticRG_zero_left hy hz).1,
+      symmetricEllipticR_of_mem _ _ (vec2_mem_carlsonRSlitDomain hy hz),
     Carlson.carlsonRE]
   congr 2; norm_num
 
 /-- Round-1 helper: `R_F(0, y, z) = (π/2) R_K(y, z)` on the slit plane. -/
-theorem symEllIntRF_zero_eq_carlsonRK {y z : ℂ} (hy : y ∈ slitPlane) (hz : z ∈ slitPlane) :
-    symEllIntRF 0 y z = (π / 2) * Carlson.TwoVariable.carlsonRK y z := by
-  rw [symEllIntRF_zero_left hy hz, symEllIntR_of_mem _ _ (vec2_mem_carlsonRSlitDomain hy hz),
+theorem symmetricEllipticRF_zero_eq_carlsonRK {y z : ℂ} (hy : y ∈ slitPlane) (hz : z ∈ slitPlane) :
+    symmetricEllipticRF 0 y z = (π / 2) * Carlson.TwoVariable.carlsonRK y z := by
+  rw [symmetricEllipticRF_zero_left hy hz,
+      symmetricEllipticR_of_mem _ _ (vec2_mem_carlsonRSlitDomain hy hz),
     Carlson.TwoVariable.carlsonRK]
   congr 2; norm_num
 
@@ -130,33 +136,33 @@ theorem carlsonRE_comm_of_mem_slitPlane {y z : ℂ} (hy : y ∈ slitPlane) (hz :
 
 /-- DLMF 19.22.2: `2R_G(0, x², y²) = 4R_G(0, xy, a²) - xy R_F(0, xy, a²)`, `Re x, Re y > 0`. -/
 @[dlmf 19.22.E2]
-theorem symEllIntRG_zero_sq {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) :
-    2 * symEllIntRG 0 (x ^ 2) (y ^ 2) =
-      4 * symEllIntRG 0 (x * y) (((x + y) / 2) ^ 2) - x * y *
-          symEllIntRF 0 (x * y) (((x + y) / 2) ^ 2) := by
+theorem symmetricEllipticRG_zero_sq {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) :
+    2 * symmetricEllipticRG 0 (x ^ 2) (y ^ 2) =
+      4 * symmetricEllipticRG 0 (x * y) (((x + y) / 2) ^ 2) - x * y *
+          symmetricEllipticRF 0 (x * y) (((x + y) / 2) ^ 2) := by
   have ha := re_half_add_pos hx hy
   have hx2 := sq_mem_slitPlane_of_zero_lt_re hx
   have hy2 := sq_mem_slitPlane_of_zero_lt_re hy
   have hxy := Carlson.mul_mem_slitPlane_of_re_pos hx hy
   have ha2 := sq_mem_slitPlane_of_zero_lt_re ha
-  have hF := symEllIntRF_zero_sq hx hy
-  rw [symEllIntRG_zero_eq_carlsonRE hx2 hy2, symEllIntRG_zero_eq_carlsonRE hxy ha2,
-    ← hF, symEllIntRF_zero_eq_carlsonRK hx2 hy2, Carlson.carlsonRE_sq_eq hx hy,
+  have hF := symmetricEllipticRF_zero_sq hx hy
+  rw [symmetricEllipticRG_zero_eq_carlsonRE hx2 hy2, symmetricEllipticRG_zero_eq_carlsonRE hxy ha2,
+    ← hF, symmetricEllipticRF_zero_eq_carlsonRK hx2 hy2, Carlson.carlsonRE_sq_eq hx hy,
     carlsonRE_comm_of_mem_slitPlane ha2 hxy]
   ring
 
 /-- DLMF 19.22.3: `2y² R_D(0, x², y²) = (1/4)(y² - x²) R_D(0, xy, a²) + 3R_F(0, xy, a²)`. -/
 @[dlmf 19.22.E3]
-theorem symEllIntRD_zero_sq {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) :
-    2 * y ^ 2 * symEllIntRD 0 (x ^ 2) (y ^ 2) =
-      (1 / 4) * (y ^ 2 - x ^ 2) * symEllIntRD 0 (x * y) (((x + y) / 2) ^ 2) +
-        3 * symEllIntRF 0 (x * y) (((x + y) / 2) ^ 2) := by
+theorem symmetricEllipticRD_zero_sq {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) :
+    2 * y ^ 2 * symmetricEllipticRD 0 (x ^ 2) (y ^ 2) =
+      (1 / 4) * (y ^ 2 - x ^ 2) * symmetricEllipticRD 0 (x * y) (((x + y) / 2) ^ 2) +
+        3 * symmetricEllipticRF 0 (x * y) (((x + y) / 2) ^ 2) := by
   have ha := re_half_add_pos hx hy
   have hx2 := sq_mem_slitPlane_of_zero_lt_re hx
   have hy2 := sq_mem_slitPlane_of_zero_lt_re hy
   have hxy := Carlson.mul_mem_slitPlane_of_re_pos hx hy
   have ha2 := sq_mem_slitPlane_of_zero_lt_re ha
-  have F1 := symEllIntRF_zero_sq hx hy
+  have F1 := symmetricEllipticRF_zero_sq hx hy
   by_cases hne : x ^ 2 - y ^ 2 = 0
   · have hxy' : x = y := by
       have : (x - y) * (x + y) = 0 := by linear_combination hne
@@ -164,41 +170,43 @@ theorem symEllIntRD_zero_sq {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) :
       · exact sub_eq_zero.mp h
       · have := congrArg re h; simp at this; linarith
     subst hxy'
-    have hc := symEllIntRF_zero_eq_symEllIntRD hx2 hx2
+    have hc := symmetricEllipticRF_zero_eq_symmetricEllipticRD hx2 hx2
     rw [show (x + x) / 2 = x by ring, ← sq] at *
     rw [show x ^ 2 - x ^ 2 = 0 by ring]
     linear_combination -hc
-  · have A1 := (symEllIntRG_zero_eq hx2 hy2).2
-    have A2 := (symEllIntRG_zero_eq hxy ha2).2
-    have L := symEllIntRG_zero_sq hx hy
+  · have A1 := (symmetricEllipticRG_zero_eq hx2 hy2).2
+    have A2 := (symmetricEllipticRG_zero_eq hxy ha2).2
+    have L := symmetricEllipticRG_zero_sq hx hy
     apply mul_left_cancel₀ hne
     linear_combination (-2 : ℂ) * A1 + 6 * L + 4 * A2 + (-6 * y ^ 2) * F1
 
 /-- DLMF 19.22.5: `2p± = √((p + x)(p + y)) ± √((p - x)(p - y))` (principal roots); `s = ±1`. -/
-def symEllIntPm (s x y p : ℂ) : ℂ :=
+def quadraticTransformationP (s x y p : ℂ) : ℂ :=
   ((((p + x) * (p + y)) ^ (1 / 2 : ℂ)) + s * (((p - x) * (p - y)) ^ (1 / 2 : ℂ))) / 2
 
 /-- DLMF 19.22.4 with 19.22.5: `(p±² - p∓²) R_J(0, x², y², p²) = 2(p±² - a²) R_J(0, xy, a², p±²)
 - 3R_F(0, xy, a²) + 3π/(2p)`, `Re x, Re y > 0`, `p ≠ 0`; `s = ±1` selects the sign. We assume
 `Re p > 0` so that `p²` is in the slit plane. -/
 @[dlmf 19.22.E4, dlmf 19.22.E5]
-theorem symEllIntRJ_zero_sq {x y p s : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) (hp : 0 < p.re)
+theorem symmetricEllipticRJ_zero_sq {x y p s : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) (hp : 0 < p.re)
     (hs : s = 1 ∨ s = -1) :
-    (symEllIntPm s x y p ^ 2 - symEllIntPm (-s) x y p ^ 2) * symEllIntRJ 0 (x ^ 2) (y ^ 2) (p ^ 2) =
-      2 * (symEllIntPm s x y p ^ 2 - ((x + y) / 2) ^ 2) *
-          symEllIntRJ 0 (x * y) (((x + y) / 2) ^ 2) (symEllIntPm s x y p ^ 2) -
-        3 * symEllIntRF 0 (x * y) (((x + y) / 2) ^ 2) + 3 * π / (2 * p) := by
+    (quadraticTransformationP s x y p ^ 2 - quadraticTransformationP (-s) x y p ^ 2) *
+        symmetricEllipticRJ 0 (x ^ 2) (y ^ 2) (p ^ 2) =
+      2 * (quadraticTransformationP s x y p ^ 2 - ((x + y) / 2) ^ 2) *
+          symmetricEllipticRJ 0 (x * y) (((x + y) / 2) ^ 2) (quadraticTransformationP s x y p ^ 2) -
+        3 * symmetricEllipticRF 0 (x * y) (((x + y) / 2) ^ 2) + 3 * π / (2 * p) := by
   sorry
 
 /-- DLMF 19.22.6 (first two identities, all complex values): `p₊ p₋ = pa`,
 `p₊² + p₋² = p² + xy`, `a = (x + y)/2`. -/
 @[dlmf 19.22.E6]
-theorem symEllIntPm_mul_add (x y p : ℂ) :
-    symEllIntPm 1 x y p * symEllIntPm (-1) x y p = p * ((x + y) / 2) ∧
-      symEllIntPm 1 x y p ^ 2 + symEllIntPm (-1) x y p ^ 2 = p ^ 2 + x * y := by
+theorem quadraticTransformationP_mul_add (x y p : ℂ) :
+    quadraticTransformationP 1 x y p * quadraticTransformationP (-1) x y p = p * ((x + y) / 2) ∧
+      quadraticTransformationP 1 x y p ^ 2 + quadraticTransformationP (-1) x y p ^ 2 =
+          p ^ 2 + x * y := by
   have h1 := cpow_half_mul_cpow_half ((p + x) * (p + y))
   have h2 := cpow_half_mul_cpow_half ((p - x) * (p - y))
-  unfold symEllIntPm
+  unfold quadraticTransformationP
   constructor
   · linear_combination (1 / 4 : ℂ) * h1 - (1 / 4 : ℂ) * h2
   · linear_combination (1 / 2 : ℂ) * h1 + (1 / 2 : ℂ) * h2
@@ -206,7 +214,8 @@ theorem symEllIntPm_mul_add (x y p : ℂ) :
 /-- DLMF 19.22.6 (last two identities), real case `p ≥ x > 0`, `p ≥ y > 0`:
 `p₊² - p₋² = √((p² - x²)(p² - y²))`, `4(p±² - a²) = (√(p² - x²) ± √(p² - y²))²`. -/
 @[dlmf 19.22.E6]
-theorem symEllIntPm_sub_real {x y p : ℝ} (hx : 0 < x) (hy : 0 < y) (hpx : x ≤ p) (hpy : y ≤ p)
+theorem quadraticTransformationP_sub_real {x y p : ℝ} (hx : 0 < x) (hy : 0 < y)
+    (hpx : x ≤ p) (hpy : y ≤ p)
     {s : ℝ} (hs : s = 1 ∨ s = -1) :
     let P : ℝ := (Real.sqrt ((p + x) * (p + y)) + s * Real.sqrt ((p - x) * (p - y))) / 2
     let Q : ℝ := (Real.sqrt ((p + x) * (p + y)) - s * Real.sqrt ((p - x) * (p - y))) / 2
@@ -237,11 +246,12 @@ theorem symEllIntPm_sub_real {x y p : ℝ} (hx : 0 < x) (hy : 0 < y) (hpx : x �
 /-- DLMF 19.22.7 (Bartky's transformation): `2p² R_J(0, x², y², p²) = v₊ v₋ R_J(0, xy, a², v₊²)
 + 3R_F(0, xy, a²)`, `v± = (p² ± xy)/(2p)`; `Re x, Re y, Re p > 0`. -/
 @[dlmf 19.22.E7]
-theorem symEllIntRJ_zero_sq_bartky {x y p : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) (hp : 0 < p.re) :
-    2 * p ^ 2 * symEllIntRJ 0 (x ^ 2) (y ^ 2) (p ^ 2) =
+theorem symmetricEllipticRJ_zero_sq_bartky {x y p : ℂ} (hx : 0 < x.re) (hy : 0 < y.re)
+    (hp : 0 < p.re) :
+    2 * p ^ 2 * symmetricEllipticRJ 0 (x ^ 2) (y ^ 2) (p ^ 2) =
       (p ^ 2 + x * y) / (2 * p) * ((p ^ 2 - x * y) / (2 * p)) *
-          symEllIntRJ 0 (x * y) (((x + y) / 2) ^ 2) (((p ^ 2 + x * y) / (2 * p)) ^ 2) +
-        3 * symEllIntRF 0 (x * y) (((x + y) / 2) ^ 2) := by
+          symmetricEllipticRJ 0 (x * y) (((x + y) / 2) ^ 2) (((p ^ 2 + x * y) / (2 * p)) ^ 2) +
+        3 * symmetricEllipticRF 0 (x * y) (((x + y) / 2) ^ 2) := by
   sorry
 
 /-! ### §19.22(ii) The AGM -/
@@ -249,13 +259,14 @@ theorem symEllIntRJ_zero_sq_bartky {x y p : ℂ} (hx : 0 < x.re) (hy : 0 < y.re)
 /-- DLMF 19.22.8: `(2/π) R_F(0, a₀², g₀²) = 1/M(a₀, g₀)` for `a₀, g₀ > 0` (DLMF assumes
 `a₀ ≥ g₀`; not needed). -/
 @[dlmf 19.22.E8]
-theorem symEllIntRF_zero_eq_inv_agm {a₀ g₀ : ℝ≥0} (ha : 0 < a₀) (hg : 0 < g₀) :
-    (2 / π) * symEllIntRF 0 (((a₀ : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) =
+theorem symmetricEllipticRF_zero_eq_inv_agm {a₀ g₀ : ℝ≥0} (ha : 0 < a₀) (hg : 0 < g₀) :
+    (2 / π) * symmetricEllipticRF 0 (((a₀ : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) =
       ((NNReal.agm a₀ g₀ : ℝ) : ℂ)⁻¹ := by
   have hx : (0 : ℝ) < (((a₀ : ℝ) : ℂ)).re := by simpa using ha
   have hy : (0 : ℝ) < (((g₀ : ℝ) : ℂ)).re := by simpa using hg
-  rw [symEllIntRF_zero_left (sq_mem_slitPlane_of_zero_lt_re hx) (sq_mem_slitPlane_of_zero_lt_re hy),
-    symEllIntR_of_mem _ _
+  rw [symmetricEllipticRF_zero_left (sq_mem_slitPlane_of_zero_lt_re hx)
+      (sq_mem_slitPlane_of_zero_lt_re hy),
+    symmetricEllipticR_of_mem _ _
         (vec2_mem_carlsonRSlitDomain (sq_mem_slitPlane_of_zero_lt_re hx)
         (sq_mem_slitPlane_of_zero_lt_re hy)),
     ← Carlson.TwoVariable.carlsonRK_sq_eq_inv_agm ha hg]
@@ -310,11 +321,11 @@ private lemma agmSeq_eq_agmA_agmG (a₀ g₀ : ℝ≥0) (n : ℕ) :
 /-- DLMF 19.22.9: `(4/π) R_G(0, a₀², g₀²) = (1/M)(a₀² - ∑_{n≥0} 2^{n-1} cₙ²)
 = (1/M)(a₁² - ∑_{n≥2} 2^{n-1} cₙ²)`, `cₙ² = aₙ² - gₙ²`, `a₀ ≥ g₀ > 0`. -/
 @[dlmf 19.22.E9]
-theorem symEllIntRG_zero_agm {a₀ g₀ : ℝ≥0} (hg : 0 < g₀) (hag : g₀ ≤ a₀) :
-    (4 / π) * symEllIntRG 0 (((a₀ : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) =
+theorem symmetricEllipticRG_zero_agm {a₀ g₀ : ℝ≥0} (hg : 0 < g₀) (hag : g₀ ≤ a₀) :
+    (4 / π) * symmetricEllipticRG 0 (((a₀ : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) =
         ((((NNReal.agm a₀ g₀ : ℝ))⁻¹ * ((a₀ : ℝ) ^ 2 -
           ∑' n : ℕ, (2 : ℝ) ^ ((n : ℤ) - 1) * (agmA a₀ g₀ n ^ 2 - agmG a₀ g₀ n ^ 2)) : ℝ) : ℂ) ∧
-      (4 / π) * symEllIntRG 0 (((a₀ : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) =
+      (4 / π) * symmetricEllipticRG 0 (((a₀ : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) =
         ((((NNReal.agm a₀ g₀ : ℝ))⁻¹ * (agmA a₀ g₀ 1 ^ 2 -
           ∑' n : ℕ, (2 : ℝ) ^ ((n : ℤ) + 1) *
               (agmA a₀ g₀ (n + 2) ^ 2 - agmG a₀ g₀ (n + 2) ^ 2)) : ℝ) : ℂ) := by
@@ -332,8 +343,8 @@ theorem symEllIntRG_zero_agm {a₀ g₀ : ℝ≥0} (hg : 0 < g₀) (hag : g₀ �
   have hY : ∀ n, Carlson.agmY a₀ g₀ n = (agmG a₀ g₀ n : ℂ) := fun n => by
     simp [Carlson.agmY, agmSeq_eq_agmA_agmG]
   set RE := Carlson.carlsonRE (((a₀ : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) with hRE
-  have hRG : (4 / π) * symEllIntRG 0 (((a₀ : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) = RE := by
-    rw [symEllIntRG_zero_eq_carlsonRE (sq_mem_slitPlane_of_zero_lt_re (by simpa using ha))
+  have hRG : (4 / π) * symmetricEllipticRG 0 (((a₀ : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) = RE := by
+    rw [symmetricEllipticRG_zero_eq_carlsonRE (sq_mem_slitPlane_of_zero_lt_re (by simpa using ha))
       (sq_mem_slitPlane_of_zero_lt_re (by simpa using hg'))]
     have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
     rw [hRE]
@@ -358,7 +369,7 @@ theorem symEllIntRG_zero_agm {a₀ g₀ : ℝ≥0} (hg : 0 < g₀) (hag : g₀ �
   have hT : ((∑' n : ℕ, (2 : ℝ) ^ ((n : ℤ) - 1) * (agmA a₀ g₀ n ^ 2 - agmG a₀ g₀ n ^ 2) : ℝ) : ℂ)
       = ((a₀ : ℝ) : ℂ) ^ 2 - RE * M := by
     rw [Complex.ofReal_tsum]; exact hS.tsum_eq
-  have h1 : (4 / π) * symEllIntRG 0 (((a₀ : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) =
+  have h1 : (4 / π) * symmetricEllipticRG 0 (((a₀ : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) =
       ((((NNReal.agm a₀ g₀ : ℝ))⁻¹ * ((a₀ : ℝ) ^ 2 -
         ∑' n : ℕ, (2 : ℝ) ^ ((n : ℤ) - 1) * (agmA a₀ g₀ n ^ 2 - agmG a₀ g₀ n ^ 2)) : ℝ) : ℂ) := by
     rw [hRG, ← hM_def, ofReal_mul, ofReal_sub, hT, ofReal_inv]
@@ -391,10 +402,11 @@ def agmQ (a₀ g₀ : ℝ≥0) : ℕ → ℝ
 
 /-- Helper for 19.22.9/19.22.10 (any `a₀, g₀ > 0`):
 `∑ₙ 2^{n-1} cₙ² = a₀² - (4/π) M R_G(0, a₀², g₀²)`. -/
-private lemma hasSum_agm_symEllIntRG {a₀ g₀ : ℝ≥0} (ha₀ : 0 < a₀) (hg : 0 < g₀) :
+private lemma hasSum_agm_symmetricEllipticRG {a₀ g₀ : ℝ≥0} (ha₀ : 0 < a₀) (hg : 0 < g₀) :
     HasSum (fun n : ℕ => (((2 : ℝ) ^ ((n : ℤ) - 1) *
       (agmA a₀ g₀ n ^ 2 - agmG a₀ g₀ n ^ 2) : ℝ) : ℂ))
-      (((a₀ : ℝ) : ℂ) ^ 2 - (4 / π) * symEllIntRG 0 (((a₀ : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) *
+      (((a₀ : ℝ) : ℂ) ^ 2 - (4 / π) *
+          symmetricEllipticRG 0 (((a₀ : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) *
         (NNReal.agm a₀ g₀ : ℝ)) := by
   have ha : (0 : ℝ) < a₀ := by exact_mod_cast ha₀
   have hg' : (0 : ℝ) < g₀ := by exact_mod_cast hg
@@ -409,8 +421,8 @@ private lemma hasSum_agm_symEllIntRG {a₀ g₀ : ℝ≥0} (ha₀ : 0 < a₀) (h
   have hY : ∀ n, Carlson.agmY a₀ g₀ n = (agmG a₀ g₀ n : ℂ) := fun n => by
     simp [Carlson.agmY, agmSeq_eq_agmA_agmG]
   set RE := Carlson.carlsonRE (((a₀ : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) with hRE
-  have hRG : (4 / π) * symEllIntRG 0 (((a₀ : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) = RE := by
-    rw [symEllIntRG_zero_eq_carlsonRE (sq_mem_slitPlane_of_zero_lt_re (by simpa using ha))
+  have hRG : (4 / π) * symmetricEllipticRG 0 (((a₀ : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) = RE := by
+    rw [symmetricEllipticRG_zero_eq_carlsonRE (sq_mem_slitPlane_of_zero_lt_re (by simpa using ha))
       (sq_mem_slitPlane_of_zero_lt_re (by simpa using hg'))]
     have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
     rw [hRE]
@@ -473,9 +485,9 @@ private lemma agmQ_mul {a₀ g₀ : ℝ≥0} (ha₀ : 0 < a₀) (hg : 0 < g₀) 
 /-- DLMF 19.22.10 with 19.22.11: `R_D(0, g₀², a₀²) = 3π/(4 M a₀²) ∑ Qₙ`, `a₀, g₀ > 0`
 (here DLMF does not need `a₀ ≥ g₀`). -/
 @[dlmf 19.22.E10, dlmf 19.22.E11]
-theorem symEllIntRD_zero_agm {a₀ g₀ : ℝ≥0} (ha : 0 < a₀) (hg : 0 < g₀) :
+theorem symmetricEllipticRD_zero_agm {a₀ g₀ : ℝ≥0} (ha : 0 < a₀) (hg : 0 < g₀) :
     HasSum (fun n => ((3 * π / (4 * (NNReal.agm a₀ g₀ : ℝ) * (a₀ : ℝ) ^ 2) * agmQ a₀ g₀ n : ℝ) : ℂ))
-      (symEllIntRD 0 (((g₀ : ℝ) : ℂ) ^ 2) (((a₀ : ℝ) : ℂ) ^ 2)) := by
+      (symmetricEllipticRD 0 (((g₀ : ℝ) : ℂ) ^ 2) (((a₀ : ℝ) : ℂ) ^ 2)) := by
   have ha' : (0 : ℝ) < a₀ := ha
   have hg' : (0 : ℝ) < g₀ := hg
   set M : ℝ := (NNReal.agm a₀ g₀ : ℝ) with hM_def
@@ -492,7 +504,7 @@ theorem symEllIntRD_zero_agm {a₀ g₀ : ℝ≥0} (ha : 0 < a₀) (hg : 0 < g�
       induction n with
       | zero => simp [agmQ, agmA, agmG]
       | succ n ih => rw [agmQ, ih]; ring
-    rw [symEllIntRD_zero_self hz]
+    rw [symmetricEllipticRD_zero_self hz]
     have hpow : (((a₀ : ℝ) : ℂ) ^ 2) ^ (-3 / 2 : ℂ) = (((a₀ : ℝ) ^ 3 : ℝ) : ℂ)⁻¹ := by
       rw [show (((a₀ : ℝ) : ℂ) ^ 2) = (((a₀ : ℝ) ^ 2 : ℝ) : ℂ) by push_cast; ring,
         show (-3 / 2 : ℂ) = ((-3 / 2 : ℝ) : ℂ) by push_cast; ring,
@@ -511,7 +523,7 @@ theorem symEllIntRD_zero_agm {a₀ g₀ : ℝ≥0} (ha : 0 < a₀) (hg : 0 < g�
       apply hag
       have : (a₀ : ℝ) = g₀ := by nlinarith [sq_nonneg ((a₀ : ℝ) - g₀), sq_nonneg ((a₀ : ℝ) + g₀)]
       exact_mod_cast this
-    have H := (hasSum_agm_symEllIntRG ha hg).mul_left
+    have H := (hasSum_agm_symmetricEllipticRG ha hg).mul_left
       (((3 * π / (4 * M * (a₀ : ℝ) ^ 2) * (2 / ((a₀ : ℝ) ^ 2 - (g₀ : ℝ) ^ 2)) : ℝ) : ℂ))
     convert H using 1
     · funext n
@@ -523,23 +535,23 @@ theorem symEllIntRD_zero_agm {a₀ g₀ : ℝ≥0} (ha : 0 < a₀) (hg : 0 < g�
       rw [← ofReal_mul, hq']
       congr 1
       ring
-    · have h2 := two_mul_symEllIntRG (x := 0) (Or.inr rfl) hy hz
+    · have h2 := two_mul_symmetricEllipticRG (x := 0) (Or.inr rfl) hy hz
       rw [zero_cpow (by norm_num), zero_mul, zero_mul, add_zero] at h2
-      have hF := symEllIntRF_zero_eq_inv_agm ha hg
+      have hF := symmetricEllipticRF_zero_eq_inv_agm ha hg
       have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
       have hM0 : (M : ℂ) ≠ 0 := ofReal_ne_zero.mpr hMpos.ne'
       have hc0' : (((a₀ : ℝ) : ℂ) ^ 2 - ((g₀ : ℝ) : ℂ) ^ 2) ≠ 0 := by exact_mod_cast hc0
       have ha0 : ((a₀ : ℝ) : ℂ) ≠ 0 := ofReal_ne_zero.mpr ha'.ne'
-      have hFv : symEllIntRF 0 (((a₀ : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) = π / (2 * M) := by
+      have hFv : symmetricEllipticRF 0 (((a₀ : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) = π / (2 * M) := by
         have h' := hF
         rw [div_mul_eq_mul_div, div_eq_iff hπ] at h'
         have hMinv : (M : ℂ) * (M : ℂ)⁻¹ = 1 := mul_inv_cancel₀ hM0
         rw [eq_div_iff (mul_ne_zero two_ne_zero hM0)]
         linear_combination (M : ℂ) * h' + π * hMinv
-      rw [symEllIntRF_comm_right, hFv, symEllIntRG_comm_right] at h2
-      have hRD : symEllIntRD 0 (((g₀ : ℝ) : ℂ) ^ 2) (((a₀ : ℝ) : ℂ) ^ 2) =
+      rw [symmetricEllipticRF_comm_right, hFv, symmetricEllipticRG_comm_right] at h2
+      have hRD : symmetricEllipticRD 0 (((g₀ : ℝ) : ℂ) ^ 2) (((a₀ : ℝ) : ℂ) ^ 2) =
           3 * (((a₀ : ℝ) : ℂ) ^ 2 * (π / (2 * M)) -
-            2 * symEllIntRG 0 (((a₀ : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2)) /
+            2 * symmetricEllipticRG 0 (((a₀ : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2)) /
           (((a₀ : ℝ) : ℂ) ^ 2 * (((a₀ : ℝ) : ℂ) ^ 2 - ((g₀ : ℝ) : ℂ) ^ 2)) := by
         rw [eq_div_iff (mul_ne_zero (pow_ne_zero 2 ha0) hc0')]
         linear_combination 3 * h2
@@ -619,9 +631,10 @@ def agmQJ (a₀ g₀ : ℝ≥0) (p₀ : ℝ) : ℕ → ℝ
 
 /-- DLMF 19.22.12 with 19.22.13: `R_J(0, g₀², a₀², p₀²) = 3π/(4 M p₀²) ∑ Qₙ`, `p₀ > 0`. -/
 @[dlmf 19.22.E12, dlmf 19.22.E13]
-theorem symEllIntRJ_zero_agm {a₀ g₀ : ℝ≥0} (ha : 0 < a₀) (hg : 0 < g₀) {p₀ : ℝ} (hp : 0 < p₀) :
+theorem symmetricEllipticRJ_zero_agm {a₀ g₀ : ℝ≥0} (ha : 0 < a₀) (hg : 0 < g₀) {p₀ : ℝ}
+    (hp : 0 < p₀) :
     HasSum (fun n => ((3 * π / (4 * (NNReal.agm a₀ g₀ : ℝ) * p₀ ^ 2) * agmQJ a₀ g₀ p₀ n : ℝ) : ℂ))
-      (symEllIntRJ 0 (((g₀ : ℝ) : ℂ) ^ 2) (((a₀ : ℝ) : ℂ) ^ 2) ((p₀ : ℂ) ^ 2)) := by
+      (symmetricEllipticRJ 0 (((g₀ : ℝ) : ℂ) ^ 2) (((a₀ : ℝ) : ℂ) ^ 2) ((p₀ : ℂ) ^ 2)) := by
   sorry
 
 /-- Helper for 19.22.13: the Heron-type iteration `pₙ₊₁ = (pₙ² + aₙgₙ)/(2pₙ)` along a genuine
@@ -741,9 +754,10 @@ theorem tendsto_agmP {a₀ g₀ : ℝ≥0} (ha : 0 < a₀) (hg : 0 < g₀) {p₀
 `R_J(0, g₀², a₀², -q₀²) = -3π/(4M(q₀² + a₀²)) (2 + (a₀² - g₀²)/(q₀² + g₀²) ∑ Qₙ)`, with (19.22.13)
 started from `p₀² = a₀²(q₀² + g₀²)/(q₀² + a₀²)`, `q₀ > 0`. -/
 @[dlmf 19.22.E14, dlmf 19.22.E15]
-theorem symEllIntRJ_zero_agm_neg {a₀ g₀ : ℝ≥0} (ha : 0 < a₀) (hg : 0 < g₀) {q₀ : ℝ} (hq : 0 < q₀) :
+theorem symmetricEllipticRJ_zero_agm_neg {a₀ g₀ : ℝ≥0} (ha : 0 < a₀) (hg : 0 < g₀) {q₀ : ℝ}
+    (hq : 0 < q₀) :
     let p₀ : ℝ := Real.sqrt ((a₀ : ℝ) ^ 2 * (q₀ ^ 2 + (g₀ : ℝ) ^ 2) / (q₀ ^ 2 + (a₀ : ℝ) ^ 2))
-    symEllIntRJ 0 (((g₀ : ℝ) : ℂ) ^ 2) (((a₀ : ℝ) : ℂ) ^ 2) ((-q₀ ^ 2 : ℝ) : ℂ) =
+    symmetricEllipticRJ 0 (((g₀ : ℝ) : ℂ) ^ 2) (((a₀ : ℝ) : ℂ) ^ 2) ((-q₀ ^ 2 : ℝ) : ℂ) =
       ((-3 * π / (4 * (NNReal.agm a₀ g₀ : ℝ) * (q₀ ^ 2 + (a₀ : ℝ) ^ 2)) *
         (2 + ((a₀ : ℝ) ^ 2 - (g₀ : ℝ) ^ 2) / (q₀ ^ 2 + (g₀ : ℝ) ^ 2) *
           ∑' n, agmQJ a₀ g₀ p₀ n) : ℝ) : ℂ) := by
@@ -754,18 +768,19 @@ theorem symEllIntRJ_zero_agm_neg {a₀ g₀ : ℝ≥0} (ha : 0 < a₀) (hg : 0 <
 /-- DLMF 19.22.18: `R_F(x², y², z²) = R_F(a², z₋², z₊²)` with (19.22.16)
 `2z± = √((z + x)(z + y)) ± √((z - x)(z - y))`; `Re x, Re y, Re z > 0`. -/
 @[dlmf 19.22.E18, dlmf 19.22.E16]
-theorem symEllIntRF_sq_landen {x y z : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) (hz : 0 < z.re) :
-    symEllIntRF (x ^ 2) (y ^ 2) (z ^ 2) =
-      symEllIntRF (((x + y) / 2) ^ 2) (symEllIntPm (-1) x y z ^ 2) (symEllIntPm 1 x y z ^ 2) := by
+theorem symmetricEllipticRF_sq_landen {x y z : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) (hz : 0 < z.re) :
+    symmetricEllipticRF (x ^ 2) (y ^ 2) (z ^ 2) =
+      symmetricEllipticRF (((x + y) / 2) ^ 2) (quadraticTransformationP (-1) x y z ^ 2)
+          (quadraticTransformationP 1 x y z ^ 2) := by
   sorry
 
 /-- DLMF 19.22.18, real case `x, y, z > 0`, `(z - x)(z - y) ≥ 0` (ascending Landen for
 `x, y < z`, descending Gauss for `z < x, y`). From `Carlson.carlsonRF_landen_explicit`. -/
 @[dlmf 19.22.E18]
-theorem symEllIntRF_sq_landen_real {x y z : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z)
+theorem symmetricEllipticRF_sq_landen_real {x y z : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z)
     (hzxy : 0 ≤ (z - x) * (z - y)) :
-    symEllIntRF ((x ^ 2 : ℝ) : ℂ) ((y ^ 2 : ℝ) : ℂ) ((z ^ 2 : ℝ) : ℂ) =
-      symEllIntRF ((((x + y) / 2) ^ 2 : ℝ) : ℂ)
+    symmetricEllipticRF ((x ^ 2 : ℝ) : ℂ) ((y ^ 2 : ℝ) : ℂ) ((z ^ 2 : ℝ) : ℂ) =
+      symmetricEllipticRF ((((x + y) / 2) ^ 2 : ℝ) : ℂ)
         ((((Real.sqrt ((z + x) * (z + y)) - Real.sqrt ((z - x) * (z - y))) / 2) ^ 2 : ℝ) : ℂ)
         ((((Real.sqrt ((z + x) * (z + y)) + Real.sqrt ((z - x) * (z - y))) / 2) ^ 2 : ℝ) : ℂ) := by
   have hpos : ∀ {w : ℝ}, 0 < w → ((w ^ 2 : ℝ) : ℂ) ∈ slitPlane := fun hw =>
@@ -777,17 +792,18 @@ theorem symEllIntRF_sq_landen_real {x y z : ℝ} (hx : 0 < x) (hy : 0 < y) (hz :
   have hQ0 : 0 ≤ Q := Real.sqrt_nonneg _
   have hPQ : Q < P := Real.sqrt_lt_sqrt hzxy (by nlinarith)
   have h := Carlson.carlsonRF_landen_explicit hx hy hz hzxy
-  rw [symEllIntRF_eq_carlsonRF (hpos hx) (hpos hy) (hpos hz), h,
-    symEllIntRF_comm_right, symEllIntRF_eq_carlsonRF (hpos (by positivity)) (hpos (by linarith))
+  rw [symmetricEllipticRF_eq_carlsonRF (hpos hx) (hpos hy) (hpos hz), h,
+    symmetricEllipticRF_comm_right,
+        symmetricEllipticRF_eq_carlsonRF (hpos (by positivity)) (hpos (by linarith))
       (hpos (by linarith))]
 
 /-- DLMF 19.22.18, real case `x < z < y` (then `z±` are complex conjugates). From
 `Carlson.carlsonRF_landen_conj`. -/
 @[dlmf 19.22.E18]
-theorem symEllIntRF_sq_landen_conj {x y z : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z)
+theorem symmetricEllipticRF_sq_landen_conj {x y z : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z)
     (hxz : x < z) (hzy : z < y) :
-    symEllIntRF ((x ^ 2 : ℝ) : ℂ) ((y ^ 2 : ℝ) : ℂ) ((z ^ 2 : ℝ) : ℂ) =
-      symEllIntRF ((((x + y) / 2) ^ 2 : ℝ) : ℂ)
+    symmetricEllipticRF ((x ^ 2 : ℝ) : ℂ) ((y ^ 2 : ℝ) : ℂ) ((z ^ 2 : ℝ) : ℂ) =
+      symmetricEllipticRF ((((x + y) / 2) ^ 2 : ℝ) : ℂ)
         ((((Real.sqrt ((z + x) * (z + y)) : ℂ) + I * Real.sqrt ((z - x) * (y - z))) / 2) ^ 2)
         ((((Real.sqrt ((z + x) * (z + y)) : ℂ) - I * Real.sqrt ((z - x) * (y - z))) / 2) ^ 2) := by
   have h := Carlson.carlsonRF_landen_conj hx hy hz hxz hzy
@@ -798,76 +814,87 @@ theorem symEllIntRF_sq_landen_conj {x y z : ℝ} (hx : 0 < x) (hy : 0 < y) (hz :
       ∈ slitPlane := sq_mem_slitPlane_of_zero_lt_re (by simp; positivity)
   have h2 : (((Real.sqrt ((z + x) * (z + y)) : ℂ) - I * Real.sqrt ((z - x) * (y - z))) / 2) ^ 2
       ∈ slitPlane := sq_mem_slitPlane_of_zero_lt_re (by simp; positivity)
-  rw [symEllIntRF_eq_carlsonRF (hpos hx) (hpos hy) (hpos hz), h,
-    symEllIntRF_eq_carlsonRF (hpos (by positivity)) h1 h2]
+  rw [symmetricEllipticRF_eq_carlsonRF (hpos hx) (hpos hy) (hpos hz), h,
+    symmetricEllipticRF_eq_carlsonRF (hpos (by positivity)) h1 h2]
 
 /-- DLMF 19.22.17 (first two identities, all complex values): `z₊ z₋ = za`,
-`z₊² + z₋² = z² + xy`. (The other two are those of `symEllIntPm_sub_real` with `p := z`.) -/
+`z₊² + z₋² = z² + xy`. (The other two are those of `quadraticTransformationP_sub_real` with
+`p := z`.) -/
 @[dlmf 19.22.E17]
-theorem symEllIntPm_mul_add_z (x y z : ℂ) :
-    symEllIntPm 1 x y z * symEllIntPm (-1) x y z = z * ((x + y) / 2) ∧
-      symEllIntPm 1 x y z ^ 2 + symEllIntPm (-1) x y z ^ 2 = z ^ 2 + x * y :=
-  symEllIntPm_mul_add x y z
+theorem quadraticTransformationP_mul_add_z (x y z : ℂ) :
+    quadraticTransformationP 1 x y z * quadraticTransformationP (-1) x y z = z * ((x + y) / 2) ∧
+      quadraticTransformationP 1 x y z ^ 2 + quadraticTransformationP (-1) x y z ^ 2 =
+          z ^ 2 + x * y :=
+  quadraticTransformationP_mul_add x y z
 
 /-- DLMF 19.22.19: `(z±² - z∓²) R_D(x², y², z²) = 2(z±² - a²) R_D(a², z∓², z±²)
 - 3R_F(x², y², z²) + 3/z`; `Re x, Re y, Re z > 0`, `s = ±1`. -/
 @[dlmf 19.22.E19]
-theorem symEllIntRD_sq_landen {x y z s : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) (hz : 0 < z.re)
+theorem symmetricEllipticRD_sq_landen {x y z s : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) (hz : 0 < z.re)
     (hs : s = 1 ∨ s = -1) :
-    (symEllIntPm s x y z ^ 2 - symEllIntPm (-s) x y z ^ 2) * symEllIntRD (x ^ 2) (y ^ 2) (z ^ 2) =
-      2 * (symEllIntPm s x y z ^ 2 - ((x + y) / 2) ^ 2) *
-          symEllIntRD (((x + y) / 2) ^ 2) (symEllIntPm (-s) x y z ^ 2) (symEllIntPm s x y z ^ 2) -
-        3 * symEllIntRF (x ^ 2) (y ^ 2) (z ^ 2) + 3 / z := by
+    (quadraticTransformationP s x y z ^ 2 - quadraticTransformationP (-s) x y z ^ 2) *
+        symmetricEllipticRD (x ^ 2) (y ^ 2) (z ^ 2) =
+      2 * (quadraticTransformationP s x y z ^ 2 - ((x + y) / 2) ^ 2) *
+          symmetricEllipticRD (((x + y) / 2) ^ 2) (quadraticTransformationP (-s) x y z ^ 2)
+              (quadraticTransformationP s x y z ^ 2) -
+        3 * symmetricEllipticRF (x ^ 2) (y ^ 2) (z ^ 2) + 3 / z := by
   sorry
 
 /-- DLMF 19.22.20: `(p±² - p∓²) R_J(x², y², z², p²) = 2(p±² - a²) R_J(a², z₊², z₋², p±²)
 - 3R_F(x², y², z²) + 3R_C(z², p²)`; `Re x, Re y, Re z, Re p > 0`, `s = ±1`. -/
 @[dlmf 19.22.E20]
-theorem symEllIntRJ_sq_landen {x y z p s : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) (hz : 0 < z.re)
+theorem symmetricEllipticRJ_sq_landen {x y z p s : ℂ} (hx : 0 < x.re) (hy : 0 < y.re)
+    (hz : 0 < z.re)
     (hp : 0 < p.re) (hs : s = 1 ∨ s = -1) :
-    (symEllIntPm s x y p ^ 2 - symEllIntPm (-s) x y p ^ 2) *
-        symEllIntRJ (x ^ 2) (y ^ 2) (z ^ 2) (p ^ 2) =
-      2 * (symEllIntPm s x y p ^ 2 - ((x + y) / 2) ^ 2) *
-          symEllIntRJ (((x + y) / 2) ^ 2) (symEllIntPm 1 x y z ^ 2) (symEllIntPm (-1) x y z ^ 2)
-            (symEllIntPm s x y p ^ 2) -
-        3 * symEllIntRF (x ^ 2) (y ^ 2) (z ^ 2) + 3 * symEllIntRC (z ^ 2) (p ^ 2) := by
+    (quadraticTransformationP s x y p ^ 2 - quadraticTransformationP (-s) x y p ^ 2) *
+        symmetricEllipticRJ (x ^ 2) (y ^ 2) (z ^ 2) (p ^ 2) =
+      2 * (quadraticTransformationP s x y p ^ 2 - ((x + y) / 2) ^ 2) *
+          symmetricEllipticRJ (((x + y) / 2) ^ 2) (quadraticTransformationP 1 x y z ^ 2)
+              (quadraticTransformationP (-1) x y z ^ 2)
+            (quadraticTransformationP s x y p ^ 2) -
+        3 * symmetricEllipticRF (x ^ 2) (y ^ 2) (z ^ 2) + 3 *
+            symmetricEllipticRC (z ^ 2) (p ^ 2) := by
   sorry
 
 /-- DLMF 19.22.21: `2R_G(x², y², z²) = 4R_G(a², z₊², z₋²) - xy R_F(x², y², z²) - z`;
 `Re x, Re y, Re z > 0`. -/
 @[dlmf 19.22.E21]
-theorem symEllIntRG_sq_landen {x y z : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) (hz : 0 < z.re) :
-    2 * symEllIntRG (x ^ 2) (y ^ 2) (z ^ 2) =
-      4 * symEllIntRG (((x + y) / 2) ^ 2) (symEllIntPm 1 x y z ^ 2) (symEllIntPm (-1) x y z ^ 2) -
-        x * y * symEllIntRF (x ^ 2) (y ^ 2) (z ^ 2) - z := by
+theorem symmetricEllipticRG_sq_landen {x y z : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) (hz : 0 < z.re) :
+    2 * symmetricEllipticRG (x ^ 2) (y ^ 2) (z ^ 2) =
+      4 * symmetricEllipticRG (((x + y) / 2) ^ 2) (quadraticTransformationP 1 x y z ^ 2)
+          (quadraticTransformationP (-1) x y z ^ 2) -
+        x * y * symmetricEllipticRF (x ^ 2) (y ^ 2) (z ^ 2) - z := by
   sorry
 
 /-- DLMF 19.22.22: `R_C(x², y²) = R_C(a², ay)`, `a = (x + y)/2`, `Re x, Re y > 0`. From
 `Carlson.TwoVariable.carlsonRC_sq_eq`. -/
 @[dlmf 19.22.E22]
-theorem symEllIntRC_sq {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) :
-    symEllIntRC (x ^ 2) (y ^ 2) = symEllIntRC (((x + y) / 2) ^ 2) ((x + y) / 2 * y) := by
+theorem symmetricEllipticRC_sq {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) :
+    symmetricEllipticRC (x ^ 2) (y ^ 2) =
+        symmetricEllipticRC (((x + y) / 2) ^ 2) ((x + y) / 2 * y) := by
   have ha := re_half_add_pos hx hy
-  rw [symEllIntRC_eq_carlsonRC (sq_mem_slitPlane_of_zero_lt_re hx)
+  rw [symmetricEllipticRC_eq_carlsonRC (sq_mem_slitPlane_of_zero_lt_re hx)
       (sq_mem_slitPlane_of_zero_lt_re hy),
-    symEllIntRC_eq_carlsonRC (sq_mem_slitPlane_of_zero_lt_re ha)
+    symmetricEllipticRC_eq_carlsonRC (sq_mem_slitPlane_of_zero_lt_re ha)
         (Carlson.mul_mem_slitPlane_of_re_pos ha hy),
     Carlson.TwoVariable.carlsonRC_sq_eq x y hx hy]
 
 /-- DLMF 19.22.23 (first and third equations, all complex values with `a ≠ 0`):
 `x + y = 2a` and `z = z₊ z₋ / a`, `a = (x + y)/2`. -/
 @[dlmf 19.22.E23]
-theorem symEllIntPm_inverse (x y z : ℂ) (ha : (x + y) / 2 ≠ 0) :
+theorem quadraticTransformationP_inverse (x y z : ℂ) (ha : (x + y) / 2 ≠ 0) :
     x + y = 2 * ((x + y) / 2) ∧
-      z = symEllIntPm 1 x y z * symEllIntPm (-1) x y z / ((x + y) / 2) := by
+      z = quadraticTransformationP 1 x y z * quadraticTransformationP (-1) x y z /
+          ((x + y) / 2) := by
   refine ⟨by ring, ?_⟩
   have h2 : x + y ≠ 0 := by intro h; apply ha; simp [h]
-  rw [(symEllIntPm_mul_add x y z).1]; field_simp
+  rw [(quadraticTransformationP_mul_add x y z).1]; field_simp
 
 /-- DLMF 19.22.23 (second equation), real case `x ≥ y > 0`, `z ≥ x`:
 `x - y = (2/a) √((a² - z₊²)(a² - z₋²))`. -/
 @[dlmf 19.22.E23]
-theorem symEllIntPm_inverse_sub_real {x y z : ℝ} (hy : 0 < y) (hxy : y ≤ x) (hzx : x ≤ z) :
+theorem quadraticTransformationP_inverse_sub_real {x y z : ℝ} (hy : 0 < y) (hxy : y ≤ x)
+    (hzx : x ≤ z) :
     let zp : ℝ := (Real.sqrt ((z + x) * (z + y)) + Real.sqrt ((z - x) * (z - y))) / 2
     let zm : ℝ := (Real.sqrt ((z + x) * (z + y)) - Real.sqrt ((z - x) * (z - y))) / 2
     x - y = 2 / ((x + y) / 2) *

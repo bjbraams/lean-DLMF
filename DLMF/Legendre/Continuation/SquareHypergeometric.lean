@@ -36,17 +36,20 @@ namespace DLMF.Legendre
 
 /-- The bracket of DLMF 14.3.17 as a function of `z`, with `z²` the hypergeometric argument. -/
 private noncomputable def squareHypBracket (ν μ z : ℂ) : ℂ :=
-  regularizedGaussHG ((μ-ν)/2) ((ν+μ+1)/2) (1/2) (z^2)/(Gamma ((μ-ν+1)/2)*Gamma ((ν+μ+2)/2)) -
-    z*regularizedGaussHG ((μ-ν+1)/2) ((ν+μ+2)/2) (3/2) (z^2)/(Gamma ((μ-ν)/2)*Gamma ((ν+μ+1)/2))
+  regularizedGaussHypergeometric ((μ-ν)/2) ((ν+μ+1)/2) (1/2)
+      (z^2)/(Gamma ((μ-ν+1)/2)*Gamma ((ν+μ+2)/2)) -
+    z*regularizedGaussHypergeometric ((μ-ν+1)/2) ((ν+μ+2)/2) (3/2)
+        (z^2)/(Gamma ((μ-ν)/2)*Gamma ((ν+μ+1)/2))
 
 /-- The bracket is analytic wherever `z²` lies in the cut plane. -/
 private lemma squareHypBracket_analyticAt (ν μ : ℂ) {z : ℂ} (hz : z^2 ∈ cutPlane) :
     AnalyticAt ℂ (squareHypBracket ν μ) z := by
-  have h1 : AnalyticAt ℂ (fun w : ℂ => regularizedGaussHG ((μ-ν)/2) ((ν+μ+1)/2) (1/2) (w^2)) z :=
-    (analyticAt_regularizedGaussHG _ _ _ hz).comp_of_eq (by fun_prop) rfl
+  have h1 : AnalyticAt ℂ
+      (fun w : ℂ => regularizedGaussHypergeometric ((μ-ν)/2) ((ν+μ+1)/2) (1/2) (w^2)) z :=
+    (analyticAt_regularizedGaussHypergeometric _ _ _ hz).comp_of_eq (by fun_prop) rfl
   have h2 : AnalyticAt ℂ
-      (fun w : ℂ => regularizedGaussHG ((μ-ν+1)/2) ((ν+μ+2)/2) (3/2) (w^2)) z :=
-    (analyticAt_regularizedGaussHG _ _ _ hz).comp_of_eq (by fun_prop) rfl
+      (fun w : ℂ => regularizedGaussHypergeometric ((μ-ν+1)/2) ((ν+μ+2)/2) (3/2) (w^2)) z :=
+    (analyticAt_regularizedGaussHypergeometric _ _ _ hz).comp_of_eq (by fun_prop) rfl
   unfold squareHypBracket
   simp only [div_eq_mul_inv]
   exact (h1.mul analyticAt_const).sub ((analyticAt_id.mul h2).mul analyticAt_const)
@@ -172,10 +175,12 @@ private lemma olverQSideHyp_analyticAt (ν μ : ℂ) {z : ℂ} (hsl : 1 - z^2 �
     (hc : z^2 ∈ cutPlane) : AnalyticAt ℂ (olverQSideHyp 1 ν μ) z := by
   have hW : AnalyticAt ℂ (fun w : ℂ => (1-w^2)^(μ/2)) z :=
     (by fun_prop : AnalyticAt ℂ (fun w : ℂ => 1-w^2) z).cpow analyticAt_const hsl
-  have hG1 : AnalyticAt ℂ (fun w : ℂ => regularizedGaussHG ((μ-ν+1)/2) ((ν+μ+2)/2) (3/2) (w^2)) z :=
-    (analyticAt_regularizedGaussHG _ _ _ hc).comp_of_eq (by fun_prop) rfl
-  have hG2 : AnalyticAt ℂ (fun w : ℂ => regularizedGaussHG ((μ-ν)/2) ((ν+μ+1)/2) (1/2) (w^2)) z :=
-    (analyticAt_regularizedGaussHG _ _ _ hc).comp_of_eq (by fun_prop) rfl
+  have hG1 : AnalyticAt ℂ
+      (fun w : ℂ => regularizedGaussHypergeometric ((μ-ν+1)/2) ((ν+μ+2)/2) (3/2) (w^2)) z :=
+    (analyticAt_regularizedGaussHypergeometric _ _ _ hc).comp_of_eq (by fun_prop) rfl
+  have hG2 : AnalyticAt ℂ
+      (fun w : ℂ => regularizedGaussHypergeometric ((μ-ν)/2) ((ν+μ+1)/2) (1/2) (w^2)) z :=
+    (analyticAt_regularizedGaussHypergeometric _ _ _ hc).comp_of_eq (by fun_prop) rfl
   unfold olverQSideHyp
   exact ((analyticAt_const.mul hW).mul analyticAt_const).mul
     (((analyticAt_id.mul hG1).mul analyticAt_const).sub
@@ -241,8 +246,9 @@ used. -/
 theorem associatedP_square_hypergeometric (ν μ : ℂ) {x : ℝ} (hx : 1 < x) :
     Tendsto (fun ε : ℝ => let u : ℂ := x^2+I*ε;
         π*legendreBranchPower μ
-        x/2^μ*(regularizedGaussHG ((μ-ν)/2) ((ν+μ+1)/2) (1/2)
-        u/(Gamma ((μ-ν+1)/2)*Gamma ((ν+μ+2)/2))-x*regularizedGaussHG ((μ-ν+1)/2) ((ν+μ+2)/2) (3/2)
+        x/2^μ*(regularizedGaussHypergeometric ((μ-ν)/2) ((ν+μ+1)/2) (1/2)
+        u/(Gamma ((μ-ν+1)/2)*Gamma ((ν+μ+2)/2))-x*regularizedGaussHypergeometric ((μ-ν+1)/2)
+            ((ν+μ+2)/2) (3/2)
         u/(Gamma ((μ-ν)/2)*Gamma ((ν+μ+1)/2)))) (𝓝[>] 0) (𝓝 (associatedP ν (-μ) x)) := by
   have hx0 : (0:ℝ) < x := by linarith
   set u : ℝ → ℂ := fun ε => (x:ℂ)^2+I*ε with hu
@@ -293,8 +299,10 @@ theorem associatedP_square_hypergeometric (ν μ : ℂ) {x : ℝ} (hx : 1 < x) :
   have hπ : (π:ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
   have h2μ : (2:ℂ)^μ ≠ 0 := by
     rw [cpow_def_of_ne_zero two_ne_zero]; exact exp_ne_zero _
-  set F1 : ℝ → ℂ := fun ε => regularizedGaussHG ((μ-ν)/2) ((ν+μ+1)/2) (1/2) (u ε) with hF1
-  set F2 : ℝ → ℂ := fun ε => regularizedGaussHG ((μ-ν+1)/2) ((ν+μ+2)/2) (3/2) (u ε) with hF2
+  set F1 : ℝ → ℂ := fun ε =>
+      regularizedGaussHypergeometric ((μ-ν)/2) ((ν+μ+1)/2) (1/2) (u ε) with hF1
+  set F2 : ℝ → ℂ := fun ε =>
+      regularizedGaussHypergeometric ((μ-ν+1)/2) ((ν+μ+2)/2) (3/2) (u ε) with hF2
   set A : ℂ := (Gamma ((μ-ν+1)/2)*Gamma ((ν+μ+2)/2))⁻¹ with hA
   set B : ℂ := (Gamma ((μ-ν)/2)*Gamma ((ν+μ+1)/2))⁻¹ with hB
   set BP : ℂ → ℂ := legendreBranchPower μ with hBP

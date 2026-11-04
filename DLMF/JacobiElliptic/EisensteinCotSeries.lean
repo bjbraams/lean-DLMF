@@ -31,7 +31,7 @@ cosecant-square series of the Weierstrass functions (DLMF 23.8.3–23.8.4).
 * `eq_eisensteinCotSeries_of_quasiPeriodic`,
   `eq_eisensteinCotSeries_of_quasiPeriodic_off_lattice`: the Liouville identification of a
   meromorphic function with the same periods, oddness and principal parts.
-* `jacobiCsk_eq_eisensteinCotSeries`: `2K cs(2Kt) = ∑ₙ (-1)ⁿ π cot(π(t - nτ))` (regularized).
+* `jacobiCs_eq_eisensteinCotSeries`: `2K cs(2Kt) = ∑ₙ (-1)ⁿ π cot(π(t - nτ))` (regularized).
 * `tendsto_sum_Icc_one_div_sub`: `∑_{|m| ≤ M} 1/(w - m) → π cot(πw)`.
 * `hasSum_fourier_eisensteinCotSeries`, `hasSum_fourier_eisensteinCotSeries_sub_half`: the
   Fourier expansions of `C(t)` and `C(t - τ/2)` (used for DLMF 22.11.3, 22.11.9).
@@ -54,7 +54,7 @@ noncomputable section
 
 namespace DLMF.JacobiElliptic
 
-open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
+open DLMF.EllipticIntegrals (completeEllipticK completeEllipticKPrime)
 
 /-- The regularized terms `εⁿ (π cot(π(t - nτ)) - iπ sgn n)` of the cotangent series. -/
 def eisensteinCotTerm (ε τ : ℂ) (n : ℤ) (t : ℂ) : ℂ :=
@@ -572,54 +572,54 @@ lemma exists_analyticAt_pi_mul_cot_sub_one_div :
 
 /-- The cotangent series identity for `cs`: `2K cs(2Kt) = ∑ₙ (-1)ⁿ π cot(π(t - nτ))`
 (regularized) off the lattice. -/
-theorem jacobiCsk_eq_eisensteinCotSeries {k : ℂ} (hk : k ∈ jacobiModulusDomain) {t : ℂ}
-    (ht : t ∉ eisensteinSinLattice (jacobiTauk k)) :
-    2 * compEllIntKk k * jacobiCsk (2 * compEllIntKk k * t) k =
-        eisensteinCotSeries (-1) (jacobiTauk k) t := by
-  have hτ := jacobiTauk_im_pos hk
-  have hK := compEllIntKk_ne_zero_of_mem_jacobiModulusDomain hk
-  have hK2 : 2 * compEllIntKk k ≠ 0 := mul_ne_zero two_ne_zero hK
-  set K := compEllIntKk k
-  set f : ℂ → ℂ := fun t => 2 * K * jacobiPQk .c .s (2 * K * t) k with hfdef
-  have hlat : ∀ t, t ∉ eisensteinSinLattice (jacobiTauk k) → 2 * K * t ∉ jacobiCongruentk 0 k := by
+theorem jacobiCs_eq_eisensteinCotSeries {k : ℂ} (hk : k ∈ jacobiModulusDomain) {t : ℂ}
+    (ht : t ∉ eisensteinSinLattice (jacobiTau k)) :
+    2 * completeEllipticK k * jacobiCs (2 * completeEllipticK k * t) k =
+        eisensteinCotSeries (-1) (jacobiTau k) t := by
+  have hτ := jacobiTau_im_pos hk
+  have hK := completeEllipticK_ne_zero_of_mem_jacobiModulusDomain hk
+  have hK2 : 2 * completeEllipticK k ≠ 0 := mul_ne_zero two_ne_zero hK
+  set K := completeEllipticK k
+  set f : ℂ → ℂ := fun t => 2 * K * jacobiPQ .c .s (2 * K * t) k with hfdef
+  have hlat : ∀ t, t ∉ eisensteinSinLattice (jacobiTau k) → 2 * K * t ∉ jacobiCongruentk 0 k := by
     rintro t ht ⟨m, n, hmn⟩
     apply ht
     refine ⟨m, n, ?_⟩
-    have h2 := two_mul_compEllIntKk_mul_jacobiTauk hk
+    have h2 := two_mul_completeEllipticK_mul_jacobiTau hk
     apply mul_left_cancel₀ hK2
     rw [hmn]; linear_combination (-(n : ℂ)) * h2
   have hdich : HasPoleDichotomy f := by
-    have := (poleDichotomy_jacobiPQk hk (p := .c) (q := .s) (by decide)).comp
+    have := (poleDichotomy_jacobiPQ hk (p := .c) (q := .s) (by decide)).comp
       (a := (2 * K)⁻¹) (inv_ne_zero hK2) hK2
     convert this using 2 with w
     rw [div_inv_eq_mul, mul_comm w]
   have hf1 : ∀ t, f (t + 1) = f t := by
     intro t
     simp only [hfdef, show 2 * K * (t + 1) = 2 * K * t + 2 * K by ring]
-    have hs : jacobiPQk .c .s (2 * K * t + 2 * K) k = jacobiPQk .c .s (2 * K * t) k :=
-      (jacobiCsk_shift hk _).2.2.2.1
+    have hs : jacobiPQ .c .s (2 * K * t + 2 * K) k = jacobiPQ .c .s (2 * K * t) k :=
+      (jacobiCs_shift hk _).2.2.2.1
     rw [hs]
-  have hfτ : ∀ t, f (t + jacobiTauk k) = -1 * f t - I * π * (1 + -1) := by
+  have hfτ : ∀ t, f (t + jacobiTau k) = -1 * f t - I * π * (1 + -1) := by
     intro t
-    have h2 : 2 * K * jacobiTauk k = 2 * (I * compEllIntKpk k) :=
-        two_mul_compEllIntKk_mul_jacobiTauk hk
-    simp only [hfdef, show 2 * K * (t + jacobiTauk k) = 2 * K * t + 2 * K * jacobiTauk k by ring,
+    have h2 : 2 * K * jacobiTau k = 2 * (I * completeEllipticKPrime k) :=
+        two_mul_completeEllipticK_mul_jacobiTau hk
+    simp only [hfdef, show 2 * K * (t + jacobiTau k) = 2 * K * t + 2 * K * jacobiTau k by ring,
       h2]
-    have hs : jacobiPQk .c .s (2 * K * t + 2 * (I * compEllIntKpk k)) k =
-        -jacobiPQk .c .s (2 * K * t) k := (jacobiCsk_shift hk _).2.2.2.2.2
+    have hs : jacobiPQ .c .s (2 * K * t + 2 * (I * completeEllipticKPrime k)) k =
+        -jacobiPQ .c .s (2 * K * t) k := (jacobiCs_shift hk _).2.2.2.2.2
     rw [hs]; ring
   have hfodd : ∀ t, f (-t) = -f t := by
     intro t
-    simp only [hfdef, show 2 * K * -t = -(2 * K * t) by ring, jacobiPQk_neg]
+    simp only [hfdef, show 2 * K * -t = -(2 * K * t) by ring, jacobiPQ_neg]
     simp
-  have hfan : ∀ t ∉ eisensteinSinLattice (jacobiTauk k), AnalyticAt ℂ f t := by
+  have hfan : ∀ t ∉ eisensteinSinLattice (jacobiTau k), AnalyticAt ℂ f t := by
     intro t ht
-    have h := analyticAt_jacobiPQk_s hk (p := .c) (by decide) (hlat t ht)
+    have h := analyticAt_jacobiPQ_s hk (p := .c) (by decide) (hlat t ht)
     have hl : AnalyticAt ℂ (fun t : ℂ => 2 * K * t) t := by fun_prop
     exact analyticAt_const.mul (h.comp hl)
   have hf0 : ∃ A : ℂ → ℂ, AnalyticAt ℂ A 0 ∧
       (fun t => f t - π * cot (π * t)) =ᶠ[𝓝[≠] 0] A := by
-    obtain ⟨A, hA, hev⟩ := exists_analyticAt_jacobiPQk_s_sub_one_div hk (p := .c) (by decide)
+    obtain ⟨A, hA, hev⟩ := exists_analyticAt_jacobiPQ_s_sub_one_div hk (p := .c) (by decide)
     obtain ⟨B, hB, hevB⟩ := exists_analyticAt_pi_mul_cot_sub_one_div
     have hlin : AnalyticAt ℂ (fun t : ℂ => 2 * K * t) 0 := by fun_prop
     refine ⟨fun t => 2 * K * A (2 * K * t) - B t,

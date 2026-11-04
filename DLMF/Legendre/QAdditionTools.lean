@@ -121,20 +121,22 @@ theorem SecondKindAddition.ferrersArg_reflect (θ₁ θ₂ t : ℝ) :
 /-- `𝖰_ν` of order zero in the even/odd basis. -/
 theorem SecondKindAddition.ferrersQ_zero_eq (ν : ℂ) (x : ℝ) :
     ferrersQ ν 0 x = π / 2 * (-sin (ν * π / 2) * Gamma ((ν + 1) / 2) * (Gamma ((ν + 2) / 2))⁻¹ *
-      regularizedGaussHG (-ν / 2) ((ν + 1) / 2) (1 / 2) ((x:ℂ) ^ 2) +
+      regularizedGaussHypergeometric (-ν / 2) ((ν + 1) / 2) (1 / 2) ((x:ℂ) ^ 2) +
       cos (ν * π / 2) * Gamma ((ν + 2) / 2) * (Gamma ((ν + 1) / 2))⁻¹ *
-      ((x:ℂ) * regularizedGaussHG ((1 - ν) / 2) ((ν + 2) / 2) (3 / 2) ((x:ℂ) ^ 2))) := by
+      ((x:ℂ) * regularizedGaussHypergeometric ((1 - ν) / 2) ((ν + 2) / 2) (3 / 2)
+          ((x:ℂ) ^ 2))) := by
   rw [ferrersQ_even_odd]
   simp only [ferrersEven, ferrersOdd, add_zero, sub_zero, neg_zero, zero_div, cpow_zero, one_mul]
 
 /-- Real `C²` regularity of `t ↦ 𝐅(a, b; c; y(t)²)` along a smooth path in `(-1, 1)`. -/
 theorem SecondKindAddition.contDiff_gaussHG_sq (a b c : ℂ) {y : ℝ → ℝ} (hy : ContDiff ℝ 2 y)
     (hy1 : ∀ t, y t ^ 2 < 1) :
-    ContDiff ℝ 2 (fun t => regularizedGaussHG a b c ((y t : ℂ) ^ 2)) := by
-  have hG : DifferentiableOn ℂ (fun z => regularizedGaussHG a b c z) cutPlane :=
-    DifferentiableOn.regularizedGaussHG (differentiableOn_const _) (differentiableOn_const _)
+    ContDiff ℝ 2 (fun t => regularizedGaussHypergeometric a b c ((y t : ℂ) ^ 2)) := by
+  have hG : DifferentiableOn ℂ (fun z => regularizedGaussHypergeometric a b c z) cutPlane :=
+    DifferentiableOn.regularizedGaussHypergeometric (differentiableOn_const _)
+        (differentiableOn_const _)
       (differentiableOn_const _) differentiableOn_id fun w hw => hw
-  have hG2 : ContDiffOn ℝ 2 (fun z => regularizedGaussHG a b c z) cutPlane :=
+  have hG2 : ContDiffOn ℝ 2 (fun z => regularizedGaussHypergeometric a b c z) cutPlane :=
     (hG.contDiffOn isOpen_cutPlane).restrict_scalars ℝ
   have hh : ContDiff ℝ 2 (fun t : ℝ => ((y t ^ 2 : ℝ) : ℂ)) :=
     ofRealCLM.contDiff.comp (hy.pow 2)
@@ -158,12 +160,13 @@ theorem SecondKindAddition.gaussHG_sq_bound {A B : ℂ → ℂ} (hA : Continuous
     (hB : Continuous B) (c ν₀ : ℂ)
     {a b : ℝ} (ha : -1 < a) (hb : b < 1) :
     ∃ C, ∀ ν ∈ Metric.closedBall ν₀ 1, ∀ x ∈ Icc a b,
-      ‖regularizedGaussHG (A ν) (B ν) c ((x:ℂ) ^ 2)‖ ≤ C := by
+      ‖regularizedGaussHypergeometric (A ν) (B ν) c ((x:ℂ) ^ 2)‖ ≤ C := by
   have hK : IsCompact (Metric.closedBall ν₀ 1 ×ˢ Icc a b) :=
     (isCompact_closedBall _ _).prod isCompact_Icc
-  have hc : ContinuousOn (fun p : ℂ × ℝ => regularizedGaussHG (A p.1) (B p.1) c ((p.2:ℂ) ^ 2))
+  have hc : ContinuousOn
+      (fun p : ℂ × ℝ => regularizedGaussHypergeometric (A p.1) (B p.1) c ((p.2:ℂ) ^ 2))
       (Metric.closedBall ν₀ 1 ×ˢ Icc a b) :=
-    differentiableOn_regularizedGaussHG_joint.continuousOn.comp
+    differentiableOn_regularizedGaussHypergeometric_joint.continuousOn.comp
       (f := fun p : ℂ × ℝ => (A p.1, B p.1, c, ((p.2:ℂ) ^ 2)))
       (by fun_prop : Continuous _).continuousOn
       (fun p hp => ferrers_sq_mem_cutPlane ⟨by linarith [hp.2.1], by linarith [hp.2.2]⟩)
@@ -204,10 +207,13 @@ theorem SecondKindAddition.ferrersQ_bound {ν₀ : ℂ} (hr : LegendreQRegular �
   rw [SecondKindAddition.ferrersQ_zero_eq]
   have hπ : ‖(π:ℂ) / 2‖ = π / 2 := by
     rw [norm_div, Complex.norm_real, Real.norm_eq_abs, abs_of_pos Real.pi_pos]; simp
-  calc ‖(π:ℂ) / 2 * (g1 ν * regularizedGaussHG (-ν / 2) ((ν + 1) / 2) (1 / 2) ((x:ℂ) ^ 2) +
-        g2 ν * ((x:ℂ) * regularizedGaussHG ((1 - ν) / 2) ((ν + 2) / 2) (3 / 2) ((x:ℂ) ^ 2)))‖
-      ≤ π / 2 * (‖g1 ν‖ * ‖regularizedGaussHG (-ν / 2) ((ν + 1) / 2) (1 / 2) ((x:ℂ) ^ 2)‖ +
-        ‖g2 ν‖ * (‖(x:ℂ)‖ * ‖regularizedGaussHG ((1 - ν) / 2) ((ν + 2) / 2) (3 / 2)
+  calc ‖(π:ℂ) / 2 * (g1 ν *
+         regularizedGaussHypergeometric (-ν / 2) ((ν + 1) / 2) (1 / 2) ((x:ℂ) ^ 2) +
+        g2 ν * ((x:ℂ) * regularizedGaussHypergeometric ((1 - ν) / 2) ((ν + 2) / 2)
+            (3 / 2) ((x:ℂ) ^ 2)))‖
+      ≤ π / 2 * (‖g1 ν‖ * ‖regularizedGaussHypergeometric (-ν / 2) ((ν + 1) / 2)
+          (1 / 2) ((x:ℂ) ^ 2)‖ +
+        ‖g2 ν‖ * (‖(x:ℂ)‖ * ‖regularizedGaussHypergeometric ((1 - ν) / 2) ((ν + 2) / 2) (3 / 2)
             ((x:ℂ) ^ 2)‖)) := by
         rw [norm_mul, hπ]
         gcongr
@@ -217,8 +223,10 @@ theorem SecondKindAddition.ferrersQ_bound {ν₀ : ℂ} (hr : LegendreQRegular �
         have hO' := hO ν h3 x hx
         have hE' := hE ν h3 x hx
         gcongr
-        calc ‖(x:ℂ)‖ * ‖regularizedGaussHG ((1 - ν) / 2) ((ν + 2) / 2) (3 / 2) ((x:ℂ) ^ 2)‖
-            ≤ 1 * ‖regularizedGaussHG ((1 - ν) / 2) ((ν + 2) / 2) (3 / 2) ((x:ℂ) ^ 2)‖ := by gcongr
+        calc ‖(x:ℂ)‖ * ‖regularizedGaussHypergeometric ((1 - ν) / 2) ((ν + 2) / 2)
+               (3 / 2) ((x:ℂ) ^ 2)‖
+            ≤ 1 * ‖regularizedGaussHypergeometric ((1 - ν) / 2) ((ν + 2) / 2) (3 / 2)
+                ((x:ℂ) ^ 2)‖ := by gcongr
           _ ≤ O := by rw [one_mul]; exact hO'
 
 /-- The Fourier coefficients of `t ↦ 𝖰_ν(y(t))` are continuous in the degree at a regular `ν₀`. -/
@@ -580,8 +588,10 @@ theorem SecondKindAddition.continuousOn_joint (ν : ℂ) {z₂ : ℂ}
     (hz₂ : z₂ ∈ SecondKindAddition.domain) :
     ContinuousOn (fun p : ℂ × ℝ => associatedP ν 0 (SecondKindAddition.combinedArg p.1 z₂ p.2))
         (SecondKindAddition.domain ×ˢ univ) := by
-  have hF : DifferentiableOn ℂ (fun w => regularizedGaussHG (ν + 1) (-ν) 1 w) cutPlane :=
-    DifferentiableOn.regularizedGaussHG (differentiableOn_const _) (differentiableOn_const _)
+  have hF : DifferentiableOn ℂ
+      (fun w => regularizedGaussHypergeometric (ν + 1) (-ν) 1 w) cutPlane :=
+    DifferentiableOn.regularizedGaussHypergeometric (differentiableOn_const _)
+        (differentiableOn_const _)
       (differentiableOn_const _) differentiableOn_id fun w hw => hw
   simp only [ExteriorGreen.associatedP_eq]
   refine hF.continuousOn.comp
@@ -618,7 +628,7 @@ theorem SecondKindAddition.coeff_differentiableOn (ν : ℂ) {z₂ : ℂ}
         (hct z hz)).aestronglyMeasurable
     · refine ae_of_all _ fun t => ?_
       simp only [ExteriorGreen.associatedP_eq]
-      refine (differentiableOn_const _).mul (DifferentiableOn.regularizedGaussHG
+      refine (differentiableOn_const _).mul (DifferentiableOn.regularizedGaussHypergeometric
         (differentiableOn_const _) (differentiableOn_const _) (differentiableOn_const _) ?_
         (fun z hz => SecondKindAddition.combinedArg_mem hz hz₂ t))
       have hsd : DifferentiableOn ℂ SecondKindAddition.sqrtSqSubOne
@@ -734,10 +744,11 @@ theorem SecondKindAddition.extend {F G : ℂ → ℂ}
 exceptional degrees, by continuation in `ν`). -/
 theorem SecondKindAddition.associatedP_nat_eq (ν : ℂ) (m : ℕ) {z : ℂ} (hz : z - 1 ∈ slitPlane)
     (hz' : (1 - z) / 2 ∈ cutPlane) :
-    associatedP ν m z = poch (ν - m + 1) (2 * m) * associatedP ν (-(m:ℂ)) z := by
-  set D : ℂ → ℂ := fun ν => associatedP ν m z - poch (ν - m + 1) (2 * m) * associatedP ν (-(m:ℂ)) z
+    associatedP ν m z = pochhammer (ν - m + 1) (2 * m) * associatedP ν (-(m:ℂ)) z := by
+  set D : ℂ → ℂ := fun ν => associatedP ν m z - pochhammer (ν - m + 1) (2 * m) *
+      associatedP ν (-(m:ℂ)) z
   have hD : Differentiable ℂ D := by
-    have hp : Differentiable ℂ (fun ν : ℂ => poch (ν - m + 1) (2 * m)) := by
+    have hp : Differentiable ℂ (fun ν : ℂ => pochhammer (ν - m + 1) (2 * m)) := by
       show Differentiable ℂ (fun ν : ℂ => (ascPochhammer ℂ (2 * m)).eval (ν - m + 1))
       exact ((ascPochhammer ℂ (2 * m)).differentiable).comp (by fun_prop)
     exact (AdditionTheorem.differentiable_associatedP _ hz').sub (hp.mul
@@ -747,14 +758,15 @@ theorem SecondKindAddition.associatedP_nat_eq (ν : ℂ) (m : ℕ) {z : ℂ} (hz
     have hh : ∀ n : ℕ, ν - m + 1 ≠ -n := fun n h => by
       have := congrArg Complex.re h; simp at this; linarith [(n.cast_nonneg : (0:ℝ) ≤ n)]
     have hGa : Gamma (ν - m + 1) ≠ 0 := Gamma_ne_zero_of_re_pos (by simp; linarith)
-    have hP := DLMF.Gamma.poch_mul_recip_Gamma_add_nat (ν - m + 1) (2 * m)
+    have hP := DLMF.Gamma.pochhammer_mul_recip_Gamma_add_nat (ν - m + 1) (2 * m)
     rw [show ν - m + 1 + ((2 * m : ℕ) : ℂ) = ν + m + 1 by push_cast; ring] at hP
     simp only [D]
     rw [associatedP_negative_integer_order ν m hh hz]
-    have : poch (ν - m + 1) (2 * m) * Gamma (ν - m + 1) / Gamma (ν + m + 1) = 1 := by
+    have : pochhammer (ν - m + 1) (2 * m) * Gamma (ν - m + 1) / Gamma (ν + m + 1) = 1 := by
       rw [mul_div_assoc, div_eq_mul_inv, mul_comm (Gamma _), ← mul_assoc, hP, inv_mul_cancel₀ hGa]
-    rw [show poch (ν - m + 1) (2 * m) * (Gamma (ν - m + 1) / Gamma (ν + m + 1) *
-        associatedP ν m z) = (poch (ν - m + 1) (2 * m) * Gamma (ν - m + 1) / Gamma (ν + m + 1)) *
+    rw [show pochhammer (ν - m + 1) (2 * m) * (Gamma (ν - m + 1) / Gamma (ν + m + 1) *
+        associatedP ν m z) =
+            (pochhammer (ν - m + 1) (2 * m) * Gamma (ν - m + 1) / Gamma (ν + m + 1)) *
         associatedP ν m z by ring, this]
     ring
   have han : AnalyticOnNhd ℂ D univ := hD.differentiableOn.analyticOnNhd isOpen_univ
@@ -774,7 +786,7 @@ theorem SecondKindAddition.hyperbolic_coeff_eq' (ν : ℂ) {ξ₁ ξ₂ : ℝ} (
     AdditionTheorem.coeff
         (fun t => associatedP ν 0
         (SecondKindAddition.combinedArg (Real.cosh ξ₁) (Real.cosh ξ₂) t)) m =
-      (-1:ℂ) ^ m / poch (ν - m + 1) (2 * m) * associatedP ν m (Real.cosh ξ₁) *
+      (-1:ℂ) ^ m / pochhammer (ν - m + 1) (2 * m) * associatedP ν m (Real.cosh ξ₁) *
         associatedP ν m (Real.cosh ξ₂) := by
   have hfun : (fun t =>
       associatedP ν 0 (SecondKindAddition.combinedArg (Real.cosh ξ₁) (Real.cosh ξ₂) t)) =
@@ -789,7 +801,7 @@ theorem SecondKindAddition.hyperbolic_coeff_eq' (ν : ℂ) {ξ₁ ξ₂ : ℝ} (
     exact AdditionTheorem.ofReal_mem_cutPlane (by linarith)
   have e1 := SecondKindAddition.associatedP_nat_eq ν m (hz ξ₁ h1).1 (hz ξ₁ h1).2
   have e2 := SecondKindAddition.associatedP_nat_eq ν m (hz ξ₂ h2).1 (hz ξ₂ h2).2
-  by_cases hp : poch (ν - m + 1) (2 * m) = 0
+  by_cases hp : pochhammer (ν - m + 1) (2 * m) = 0
   · rw [e2, hp]; simp
   · rw [e1]; field_simp
 
@@ -799,7 +811,7 @@ theorem SecondKindAddition.complex_coeff_eq (ν : ℂ) {z₁ z₂ : ℂ}
     (hz₁ : z₁ ∈ SecondKindAddition.domain)
     (hz₂ : z₂ ∈ SecondKindAddition.domain) (m : ℕ) :
     AdditionTheorem.coeff (fun t => associatedP ν 0 (SecondKindAddition.combinedArg z₁ z₂ t)) m =
-      (-1:ℂ) ^ m / poch (ν - m + 1) (2 * m) * associatedP ν m z₁ * associatedP ν m z₂ := by
+      (-1:ℂ) ^ m / pochhammer (ν - m + 1) (2 * m) * associatedP ν m z₁ * associatedP ν m z₂ := by
   have hP : DifferentiableOn ℂ (associatedP ν m) SecondKindAddition.domain := fun z hz =>
     (associatedP_analytic ν m z hz.2).differentiableAt.differentiableWithinAt
   have hcD : ∀ ξ : ℝ, 0 < ξ → ((Real.cosh ξ : ℝ) : ℂ) ∈ SecondKindAddition.domain := fun ξ hξ =>
@@ -808,7 +820,7 @@ theorem SecondKindAddition.complex_coeff_eq (ν : ℂ) {z₁ z₂ : ℂ}
   have step1 : ∀ ξ₂ : ℝ, 0 < ξ₂ → ∀ z ∈ SecondKindAddition.domain,
       AdditionTheorem.coeff
           (fun t => associatedP ν 0 (SecondKindAddition.combinedArg z (Real.cosh ξ₂) t)) m =
-        (-1:ℂ) ^ m / poch (ν - m + 1) (2 * m) * associatedP ν m z *
+        (-1:ℂ) ^ m / pochhammer (ν - m + 1) (2 * m) * associatedP ν m z *
           associatedP ν m (Real.cosh ξ₂) := fun ξ₂ h2 z hz =>
     SecondKindAddition.extend (SecondKindAddition.coeff_differentiableOn ν (hcD ξ₂ h2) m)
       ((hP.const_mul _).mul_const _)
@@ -819,7 +831,8 @@ theorem SecondKindAddition.complex_coeff_eq (ν : ℂ) {z₁ z₂ : ℂ}
   have := SecondKindAddition.extend
       (F := fun w => AdditionTheorem.coeff
           (fun t => associatedP ν 0 (SecondKindAddition.combinedArg w z₁ t)) m)
-    (G := fun w => (-1:ℂ) ^ m / poch (ν - m + 1) (2 * m) * associatedP ν m z₁ * associatedP ν m w)
+    (G := fun w => (-1:ℂ) ^ m / pochhammer (ν - m + 1) (2 * m) * associatedP ν m z₁ *
+        associatedP ν m w)
     (SecondKindAddition.coeff_differentiableOn ν hz₁ m) ((differentiableOn_const _).mul hP)
     (fun ξ₂ h2 => by
       rw [← hsym]
@@ -831,10 +844,12 @@ theorem SecondKindAddition.complex_coeff_eq (ν : ℂ) {z₁ z₂ : ℂ}
 theorem SecondKindAddition.combinedArg_contDiff (ν : ℂ) {z₁ z₂ : ℂ}
     (hz₁ : z₁ ∈ SecondKindAddition.domain) (hz₂ : z₂ ∈ SecondKindAddition.domain) :
     ContDiff ℝ 2 (fun t : ℝ => associatedP ν 0 (SecondKindAddition.combinedArg z₁ z₂ t)) := by
-  have hG : DifferentiableOn ℂ (fun z => regularizedGaussHG (ν + 1) (-ν) 1 z) cutPlane :=
-    DifferentiableOn.regularizedGaussHG (differentiableOn_const _) (differentiableOn_const _)
+  have hG : DifferentiableOn ℂ
+      (fun z => regularizedGaussHypergeometric (ν + 1) (-ν) 1 z) cutPlane :=
+    DifferentiableOn.regularizedGaussHypergeometric (differentiableOn_const _)
+        (differentiableOn_const _)
       (differentiableOn_const _) differentiableOn_id fun w hw => hw
-  have hG2 : ContDiffOn ℝ 2 (fun z => regularizedGaussHG (ν + 1) (-ν) 1 z) cutPlane :=
+  have hG2 : ContDiffOn ℝ 2 (fun z => regularizedGaussHypergeometric (ν + 1) (-ν) 1 z) cutPlane :=
     (hG.contDiffOn isOpen_cutPlane).restrict_scalars ℝ
   have hh : ContDiff ℝ 2 (fun t : ℝ => (1 - SecondKindAddition.combinedArg z₁ z₂ t) / 2) := by
     unfold SecondKindAddition.combinedArg
@@ -854,7 +869,7 @@ cos(mφ)/(ν-m+1)_{2m}`, as a convergent series. -/
 theorem associatedP_complex_addition (ν : ℂ) {z₁ z₂ : ℂ} (h1 : 0 < z₁.re) (h2 : 0 < z₂.re)
     (hz1 : z₁-1 ∈ slitPlane) (hz2 : z₂-1 ∈ slitPlane) (phi : ℝ) :
     HasSum (fun j : ℕ => let m:=j+1;
-        2*(-1)^m*1/poch (ν-m+1) (2*m)*associatedP ν m z₁*associatedP ν m z₂*Real.cos (m*phi))
+        2*(-1)^m*1/pochhammer (ν-m+1) (2*m)*associatedP ν m z₁*associatedP ν m z₂*Real.cos (m*phi))
         (associatedP ν 0 (z₁*z₂-exp ((log (z₁-1)+log (z₁+1))/2)*exp
         ((log (z₂-1)+log (z₂+1))/2)*Real.cos phi)-associatedP ν 0 z₁*associatedP ν 0 z₂) := by
   have hz₁ : z₁ ∈ SecondKindAddition.domain := ⟨h1, hz1⟩
@@ -869,7 +884,7 @@ theorem associatedP_complex_addition (ν : ℂ) {z₁ z₂ : ℂ} (h1 : 0 < z₁
       (SecondKindAddition.combinedArg_contDiff ν hz₁ hz₂) hper hev phi
   have h0 := SecondKindAddition.complex_coeff_eq ν hz₁ hz₂ 0
   simp only [pow_zero, Nat.cast_zero, mul_zero, sub_zero] at h0
-  rw [show poch (ν + 1) 0 = 1 from by simp [poch], div_one, one_mul] at h0
+  rw [show pochhammer (ν + 1) 0 = 1 from by simp [pochhammer], div_one, one_mul] at h0
   convert hF using 1
   · funext j
     rw [SecondKindAddition.complex_coeff_eq ν hz₁ hz₂ (j + 1)]

@@ -381,7 +381,7 @@ lemma CylinderUniformExpansion.connection_relation {N : ℕ} (hN : 1 ≤ N) : �
     have := CylinderLiouvilleGreen.normalizer_pos hμ0
     simp only [Hp]; exact_mod_cast
         (by positivity : (0:ℝ) < (μ * Real.sqrt 2 * CylinderLiouvilleGreen.normalizer μ)⁻¹).ne'
-  set F : ℝ → ℂ := fun t => pcfU (μ^2/2) (μ*t*Real.sqrt 2) /
+  set F : ℝ → ℂ := fun t => parabolicCylinderU (μ^2/2) (μ*t*Real.sqrt 2) /
     ((CylinderUniformExpansion.posAmplitude t * Real.exp (-(μ^2 * pcfXiBar t)) : ℝ) : ℂ) * L / Hp -
       (CylinderUniformExpansion.truncSeries CylinderUniformExpansion.posCoeff N (μ^2)
           t : ℂ) with hFdef
@@ -665,7 +665,8 @@ obtained from the whole-line expansion for positive parameter. This is the `U`-p
 @[dlmf 12.10.E3, dlmf 12.10.E14]
 theorem pcf_negative_parameter_uniform_U_normalizer :
     ∃ g : ℝ → ℂ, IsCylinderGNormalizer g ∧ ∀ δ : ℝ, 0 < δ → HasCylinderUniformExpansion
-      (fun μ t => pcfU (-μ^2/2) (μ*t*Real.sqrt 2)/(g μ*exp (-μ^2*pcfXi t)/(t^2-1:ℂ)^(1/4:ℂ)))
+      (fun μ t => parabolicCylinderU (-μ^2/2)
+          (μ*t*Real.sqrt 2)/(g μ*exp (-μ^2*pcfXi t)/(t^2-1:ℂ)^(1/4:ℂ)))
       (fun s t => pcfOlverA s t) (Ici (1+δ)) := by
   obtain ⟨g, hg, hexp⟩ := pcf_negative_parameter_uniform_U
   refine ⟨g, fun N => ?_, hexp⟩

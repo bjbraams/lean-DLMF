@@ -1,11 +1,13 @@
 module -- shake: keep-all
 
+public import DLMF.IncompleteGamma.Regularized
 public import DLMF.IncompleteGamma.ContinuedProperties
 public import DLMF.Core.MathlibCoverage
 public import DLMF.IncompleteGamma.SpecialValues
 public import DLMF.IncompleteGamma.BetaAsymptotics
 public import DLMF.IncompleteGamma.UniformAsymptotics
 public import DLMF.IncompleteGamma.Beta
+public import DLMF.IncompleteGamma.BetaContinuedFraction
 public import DLMF.IncompleteGamma.ZerosIntegrals
 public import DLMF.IncompleteGamma.SineCosine
 public import DLMF.IncompleteGamma.ExponentialIntegral

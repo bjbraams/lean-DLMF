@@ -19,8 +19,8 @@ need the Ferrers functions are in `DLMF.Spheroidal.Basic.Ferrers`.
 
 ## Main definitions
 
-* `IsSpheroidalSolutionOn`, `IsSpheroidalSolutionReal`: the spheroidal equation 30.2.1 on an
-  open set avoiding `±1` and on `(-1, 1)`, with genuine differentiability.
+* `IsSpheroidalSolutionOn`, `DLMF.Spheroidal.Real.IsSpheroidalSolution`: the spheroidal equation
+  30.2.1 on an open set avoiding `±1` and on `(-1, 1)`, with genuine differentiability.
 * `IsSpheroidalLiouvilleSolution`, `IsSpheroidalZetaSolution`: the Liouville normal form 30.2.2
   and the form 30.2.4 in `ζ = γz`.
 * `IsGenSpheroidalSolutionOn`, `IsSpheroidalSolutionOn₂`: the generalized equations 30.12.1 and
@@ -34,13 +34,13 @@ need the Ferrers functions are in `DLMF.Spheroidal.Basic.Ferrers`.
 * `spheroidalPs`, `spheroidalPsC`: the angular functions of the first kind `𝖯s^m_n(x, γ²)`
   (§30.4) and `𝑃s^m_n(z, γ²)` (§30.6).
 * `spheroidalExpansionCoeff`: the expansion coefficients `c_n` of DLMF 30.4.8.
-* `spheroidalCFAlpha`, `spheroidalCFBeta`, `spheroidalCFGamma` and their `Alt` variants: the
-  continued-fraction coefficients of DLMF 30.3.6 and 30.3.7.
-* `spheroidalRecA`, `spheroidalRecB`, `spheroidalRecC`, `spheroidalFwd`, `spheroidalCPrime`: the
-  recurrence coefficients of 30.8.3, the forward solution of 30.8.4 and the constant `C'` of
-  30.8.11.
-* `spheroidalEll`: the Taylor coefficients `ℓ_{2k}` of 30.3.8, with `spheroidalEllA`–
-  `spheroidalEllD` of 30.3.12.
+* `spheroidalPowerAlpha`, `spheroidalPowerBeta`, `spheroidalPowerGamma` and their `Alt` variants:
+  the continued-fraction coefficients of DLMF 30.3.6 and 30.3.7.
+* `spheroidalRecurrenceA`, `spheroidalRecurrenceB`, `spheroidalRecurrenceC`, `spheroidalFwd`,
+  `spheroidalCPrime`: the recurrence coefficients of 30.8.3, the forward solution of 30.8.4 and the
+  constant `C'` of 30.8.11.
+* `spheroidalEigenvalueCoeff`: the Taylor coefficients `ℓ_{2k}` of 30.3.8, with
+  `spheroidalEigenvalueAuxA`– `spheroidalEigenvalueAuxD` of 30.3.12.
 * `spheroidalProlateBeta`, `spheroidalOblateQ`, `spheroidalOblateC`: the coefficients of the
   large-`γ` expansions 30.9.1–30.9.6.
 * `spheroidalCylinder`, `spheroidalPsi`: the functions
@@ -99,7 +99,7 @@ structure IsSpheroidalSolutionOn (lam γ2 μ : ℂ) (U : Set ℂ) (w : ℂ → �
 real parameters), for real-valued `f`: `f` is differentiable on `(-1, 1)` and `(1-x²) f'(x)` has
 derivative `-(λ + γ²(1-x²) - μ²/(1-x²)) f(x)` there. -/
 @[dlmf 30.2.E1]
-structure IsSpheroidalSolutionReal (lam γ2 μ : ℝ) (f : ℝ → ℝ) : Prop where
+structure Real.IsSpheroidalSolution (lam γ2 μ : ℝ) (f : ℝ → ℝ) : Prop where
   /-- `f` is differentiable on `(-1, 1)`. -/
   differentiableAt : ∀ x ∈ Ioo (-1 : ℝ) 1, DifferentiableAt ℝ f x
   /-- The equation 30.2.1 in divergence form. -/
@@ -231,50 +231,50 @@ def spheroidalExpansionCoeff (m : ℕ) (γ2 : ℝ) (f : ℝ → ℝ) (n : ℕ) :
 
 /-- `α_k = -(k+1)(k+2)` (DLMF 30.3.6), the coefficients of the power-series recurrence 30.4.5. -/
 @[dlmf 30.3.E6]
-def spheroidalCFAlpha (_m : ℕ) (_γ2 : ℝ) (k : ℕ) : ℝ := -((k : ℝ) + 1) * ((k : ℝ) + 2)
+def spheroidalPowerAlpha (_m : ℕ) (_γ2 : ℝ) (k : ℕ) : ℝ := -((k : ℝ) + 1) * ((k : ℝ) + 2)
 
 /-- `β_k = (m+k)(m+k+1) - γ²` (DLMF 30.3.6). -/
 @[dlmf 30.3.E6]
-def spheroidalCFBeta (m : ℕ) (γ2 : ℝ) (k : ℕ) : ℝ := ((m : ℝ) + k) * ((m : ℝ) + k + 1) - γ2
+def spheroidalPowerBeta (m : ℕ) (γ2 : ℝ) (k : ℕ) : ℝ := ((m : ℝ) + k) * ((m : ℝ) + k + 1) - γ2
 
 /-- `γ_k = γ²` (DLMF 30.3.6). -/
 @[dlmf 30.3.E6]
-def spheroidalCFGamma (_m : ℕ) (γ2 : ℝ) (_k : ℕ) : ℝ := γ2
+def spheroidalPowerGamma (_m : ℕ) (γ2 : ℝ) (_k : ℕ) : ℝ := γ2
 
 /-- `α_k = γ² (k+2m+1)(k+2m+2)/((2k+2m+3)(2k+2m+5))` (DLMF 30.3.7). -/
 @[dlmf 30.3.E7]
-def spheroidalCFAlphaAlt (m : ℕ) (γ2 : ℝ) (k : ℕ) : ℝ :=
+def spheroidalLegendreAlpha (m : ℕ) (γ2 : ℝ) (k : ℕ) : ℝ :=
   γ2 * (((k : ℝ) + 2 * m + 1) * ((k : ℝ) + 2 * m + 2)) /
     ((2 * (k : ℝ) + 2 * m + 3) * (2 * (k : ℝ) + 2 * m + 5))
 
 /-- `β_k = (k+m)(k+m+1) - 2γ² ((k+m)(k+m+1) - 1 + m²)/((2k+2m-1)(2k+2m+3))` (DLMF 30.3.7). -/
 @[dlmf 30.3.E7]
-def spheroidalCFBetaAlt (m : ℕ) (γ2 : ℝ) (k : ℕ) : ℝ :=
+def spheroidalLegendreBeta (m : ℕ) (γ2 : ℝ) (k : ℕ) : ℝ :=
   ((k : ℝ) + m) * ((k : ℝ) + m + 1) - 2 * γ2 * (((k : ℝ) + m) * ((k : ℝ) + m + 1) - 1 + m ^ 2) /
     ((2 * (k : ℝ) + 2 * m - 1) * (2 * (k : ℝ) + 2 * m + 3))
 
 /-- `γ_k = γ² (k-1)k/((2k+2m-3)(2k+2m-1))` (DLMF 30.3.7). -/
 @[dlmf 30.3.E7]
-def spheroidalCFGammaAlt (m : ℕ) (γ2 : ℝ) (k : ℕ) : ℝ :=
+def spheroidalLegendreGamma (m : ℕ) (γ2 : ℝ) (k : ℕ) : ℝ :=
   γ2 * (((k : ℝ) - 1) * k) / ((2 * (k : ℝ) + 2 * m - 3) * (2 * (k : ℝ) + 2 * m - 1))
 
 /-- `A_k = -γ² (n-m+2k-1)(n-m+2k)/((2n+4k-3)(2n+4k-1))` (DLMF 30.8.3), `k ∈ ℤ`. -/
 @[dlmf 30.8.E3]
-def spheroidalRecA (n m : ℕ) (γ2 : ℝ) (k : ℤ) : ℝ :=
+def spheroidalRecurrenceA (n m : ℕ) (γ2 : ℝ) (k : ℤ) : ℝ :=
   -γ2 * (((n : ℝ) - m + 2 * k - 1) * ((n : ℝ) - m + 2 * k)) /
     ((2 * (n : ℝ) + 4 * k - 3) * (2 * (n : ℝ) + 4 * k - 1))
 
 /-- `B_k = (n+2k)(n+2k+1) - 2γ² ((n+2k)(n+2k+1) - 1 + m²)/((2n+4k-1)(2n+4k+3))`
 (DLMF 30.8.3), `k ∈ ℤ`. -/
 @[dlmf 30.8.E3]
-def spheroidalRecB (n m : ℕ) (γ2 : ℝ) (k : ℤ) : ℝ :=
+def spheroidalRecurrenceB (n m : ℕ) (γ2 : ℝ) (k : ℤ) : ℝ :=
   ((n : ℝ) + 2 * k) * ((n : ℝ) + 2 * k + 1) -
     2 * γ2 * (((n : ℝ) + 2 * k) * ((n : ℝ) + 2 * k + 1) - 1 + m ^ 2) /
       ((2 * (n : ℝ) + 4 * k - 1) * (2 * (n : ℝ) + 4 * k + 3))
 
 /-- `C_k = -γ² (n+m+2k+1)(n+m+2k+2)/((2n+4k+3)(2n+4k+5))` (DLMF 30.8.3), `k ∈ ℤ`. -/
 @[dlmf 30.8.E3]
-def spheroidalRecC (n m : ℕ) (γ2 : ℝ) (k : ℤ) : ℝ :=
+def spheroidalRecurrenceC (n m : ℕ) (γ2 : ℝ) (k : ℤ) : ℝ :=
   -γ2 * (((n : ℝ) + m + 2 * k + 1) * ((n : ℝ) + m + 2 * k + 2)) /
     ((2 * (n : ℝ) + 4 * k + 3) * (2 * (n : ℝ) + 4 * k + 5))
 
@@ -286,10 +286,11 @@ def spheroidalFwd (n m : ℕ) (γ2 : ℝ) : ℕ → ℝ
   | 0 => 0
   | 1 => 1
   | j + 2 =>
-    -(spheroidalRecA n m γ2 (-(((n + m) / 2 : ℕ) : ℤ) + j) * spheroidalFwd n m γ2 j +
-        (spheroidalRecB n m γ2 (-(((n + m) / 2 : ℕ) : ℤ) + j) - spheroidalEigenvalue n m γ2) *
+    -(spheroidalRecurrenceA n m γ2 (-(((n + m) / 2 : ℕ) : ℤ) + j) * spheroidalFwd n m γ2 j +
+        (spheroidalRecurrenceB n m γ2 (-(((n + m) / 2 : ℕ) : ℤ) + j) -
+            spheroidalEigenvalue n m γ2) *
           spheroidalFwd n m γ2 (j + 1)) /
-      spheroidalRecC n m γ2 (-(((n + m) / 2 : ℕ) : ℤ) + j)
+      spheroidalRecurrenceC n m γ2 (-(((n + m) / 2 : ℕ) : ℤ) + j)
 
 /-- The constant `C'` of DLMF 30.8.11: `γ²/(4m²-1)` for `n - m` even and
 `-γ²/((2m-1)(2m-3))` for `n - m` odd. -/
@@ -302,12 +303,12 @@ def spheroidalCPrime (n m : ℕ) (γ2 : ℝ) : ℝ :=
 /-- The coefficient `ℓ_{2k}` of `γ^{2k}` in the expansion 30.3.8 of `λ^m_n(γ²)`: the `k`-th
 Taylor coefficient at `0` of `γ² ↦ λ^m_n(γ²)`. -/
 @[dlmf 30.3.E8]
-def spheroidalEll (n m k : ℕ) : ℝ :=
+def spheroidalEigenvalueCoeff (n m k : ℕ) : ℝ :=
   iteratedDeriv k (fun t => spheroidalEigenvalue n m t) 0 / k.factorial
 
 /-- The auxiliary quantity `A` of DLMF 30.3.12 (entering `ℓ_8`, 30.3.11). -/
 @[dlmf 30.3.E12]
-def spheroidalEllA (n m : ℕ) : ℝ :=
+def spheroidalEigenvalueAuxA (n m : ℕ) : ℝ :=
   let a : ℝ := n
   let b : ℝ := m
   (a - b - 1) * (a - b) * (a + b - 1) * (a + b) /
@@ -317,7 +318,7 @@ def spheroidalEllA (n m : ℕ) : ℝ :=
 
 /-- The auxiliary quantity `B` of DLMF 30.3.12. -/
 @[dlmf 30.3.E12]
-def spheroidalEllB (n m : ℕ) : ℝ :=
+def spheroidalEigenvalueAuxB (n m : ℕ) : ℝ :=
   let a : ℝ := n
   let b : ℝ := m
   (a - b - 3) * (a - b - 2) * (a - b - 1) * (a - b) * (a + b - 3) * (a + b - 2) * (a + b - 1) *
@@ -329,7 +330,7 @@ def spheroidalEllB (n m : ℕ) : ℝ :=
 
 /-- The auxiliary quantity `C` of DLMF 30.3.12. -/
 @[dlmf 30.3.E12]
-def spheroidalEllC (n m : ℕ) : ℝ :=
+def spheroidalEigenvalueAuxC (n m : ℕ) : ℝ :=
   let a : ℝ := n
   let b : ℝ := m
   (a - b + 1) ^ 2 * (a - b + 2) ^ 2 * (a + b + 1) ^ 2 * (a + b + 2) ^ 2 /
@@ -339,7 +340,7 @@ def spheroidalEllC (n m : ℕ) : ℝ :=
 
 /-- The auxiliary quantity `D` of DLMF 30.3.12. -/
 @[dlmf 30.3.E12]
-def spheroidalEllD (n m : ℕ) : ℝ :=
+def spheroidalEigenvalueAuxD (n m : ℕ) : ℝ :=
   let a : ℝ := n
   let b : ℝ := m
   (a - b - 1) * (a - b) * (a - b + 1) * (a - b + 2) * (a + b - 1) * (a + b) * (a + b + 1) *

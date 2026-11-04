@@ -33,9 +33,9 @@ and 30.8.1 would give `𝖯s = 0`); with `|a_{j+1}| ≤ (|a_j| + |a_{j+2}|)/8` a
 this forces `|a_{j+1}| ≤ |a_j|/4` eventually. -/
 
 /-- `A_k ≠ 0` for `k > -R` when `γ² ≠ 0`. -/
-private lemma spheroidalRecA_ne_zero {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} (hγ : γ2 ≠ 0) {k : ℤ}
-    (hk : -(((n - m) / 2 : ℕ) : ℤ) < k) : spheroidalRecA n m γ2 k ≠ 0 := by
-  unfold spheroidalRecA
+private lemma spheroidalRecurrenceA_ne_zero {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} (hγ : γ2 ≠ 0) {k : ℤ}
+    (hk : -(((n - m) / 2 : ℕ) : ℤ) < k) : spheroidalRecurrenceA n m γ2 k ≠ 0 := by
+  unfold spheroidalRecurrenceA
   have h1 : ((n : ℤ) - m + 2 * k - 1) ≠ 0 := by omega
   have h2 : ((n : ℤ) - m + 2 * k) ≠ 0 := by omega
   have h3 : (2 * (n : ℤ) + 4 * k - 3) ≠ 0 := by omega
@@ -69,7 +69,7 @@ private lemma not_eventually_spheroidalCoeff_eq_zero {n m : ℕ} (hmn : m ≤ n)
         show ((j + 1 : ℕ) : ℤ) - ((n - m) / 2 : ℕ) + 1 = ((j + 2 : ℕ) : ℤ) - ((n - m) / 2 : ℕ) by
           push_cast; ring, h1, h2] at hrec
       simp only [mul_zero, add_zero] at hrec
-      exact (mul_eq_zero.mp hrec).resolve_left (spheroidalRecA_ne_zero hmn hγ (by omega))
+      exact (mul_eq_zero.mp hrec).resolve_left (spheroidalRecurrenceA_ne_zero hmn hγ (by omega))
   have hz : ∀ j : ℕ, spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ)) = 0 :=
     fun j => hall J j (by omega)
   have hG : ∀ x ∈ Ioo (-1 : ℝ) 1, (spheroidalPsFactor n m γ2 x).re = 0 := by
@@ -145,13 +145,13 @@ private lemma eventually_abs_spheroidalCoeff_succ_le {n m : ℕ} (hmn : m ≤ n)
   nlinarith
 
 /-- `|B_k - (n+2k)(n+2k+1)| ≤ 2|γ²|(1+m²)` for `k ≥ 1`. -/
-private lemma abs_spheroidalRecB_sub_le {n m : ℕ} (γ2 : ℝ) {k : ℤ} (hk : 1 ≤ k) :
-    |spheroidalRecB n m γ2 k - ((n : ℝ) + 2 * k) * ((n : ℝ) + 2 * k + 1)| ≤
+private lemma abs_spheroidalRecurrenceB_sub_le {n m : ℕ} (γ2 : ℝ) {k : ℤ} (hk : 1 ≤ k) :
+    |spheroidalRecurrenceB n m γ2 k - ((n : ℝ) + 2 * k) * ((n : ℝ) + 2 * k + 1)| ≤
       2 * |γ2| * (1 + m ^ 2) := by
   have kr : (1 : ℝ) ≤ k := by exact_mod_cast hk
   have hn0 : (0 : ℝ) ≤ n := Nat.cast_nonneg n
   have hm0 : (0 : ℝ) ≤ m := Nat.cast_nonneg m
-  unfold spheroidalRecB
+  unfold spheroidalRecurrenceB
   set F := (((n : ℝ) + 2 * k) * ((n : ℝ) + 2 * k + 1) - 1 + m ^ 2) /
     ((2 * (n : ℝ) + 4 * k - 1) * (2 * (n : ℝ) + 4 * k + 3)) with hF
   have hQ : 0 < (2 * (n : ℝ) + 4 * k - 1) * (2 * (n : ℝ) + 4 * k + 3) := by nlinarith
@@ -169,14 +169,14 @@ private lemma abs_spheroidalRecB_sub_le {n m : ℕ} (γ2 : ℝ) {k : ℤ} (hk : 
   gcongr
 
 /-- `|-4A_k - γ²| ≤ |γ²|(4m²+12m+7)/k` for `k ≥ 2`. -/
-private lemma abs_neg_four_mul_spheroidalRecA_sub_le {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ)
+private lemma abs_neg_four_mul_spheroidalRecurrenceA_sub_le {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ)
     {k : ℤ} (hk : 2 ≤ k) :
-    |-4 * spheroidalRecA n m γ2 k - γ2| ≤ |γ2| * (4 * m ^ 2 + 12 * m + 7) / k := by
+    |-4 * spheroidalRecurrenceA n m γ2 k - γ2| ≤ |γ2| * (4 * m ^ 2 + 12 * m + 7) / k := by
   have kr : (2 : ℝ) ≤ k := by exact_mod_cast hk
   have hn0 : (0 : ℝ) ≤ n := Nat.cast_nonneg n
   have hm0 : (0 : ℝ) ≤ m := Nat.cast_nonneg m
   have hmr : (m : ℝ) ≤ n := by exact_mod_cast hmn
-  unfold spheroidalRecA
+  unfold spheroidalRecurrenceA
   set ν : ℝ := (n : ℝ) + 2 * k with hν
   have hν4 : 4 ≤ ν := by rw [hν]; linarith
   have hkν : (k : ℝ) ≤ ν := by rw [hν]; linarith
@@ -257,10 +257,10 @@ theorem spheroidalCoeff_ratio_isBigO {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
     refine (isBigO_zero (fun k : ℕ => (k : ℝ)⁻¹) atTop).congr' ?_ EventuallyEq.rfl
     filter_upwards [eventually_ge_atTop 1] with k hk
     have hrec := spheroidalCoeff_recurrence_of_le hmn 0 (k := (k : ℤ)) (by omega)
-    have hA : spheroidalRecA n m 0 k = 0 := by simp [spheroidalRecA]
-    have hC : spheroidalRecC n m 0 k = 0 := by simp [spheroidalRecC]
-    have hB : spheroidalRecB n m 0 k = ((n : ℝ) + 2 * k) * ((n : ℝ) + 2 * k + 1) := by
-      simp [spheroidalRecB]
+    have hA : spheroidalRecurrenceA n m 0 k = 0 := by simp [spheroidalRecurrenceA]
+    have hC : spheroidalRecurrenceC n m 0 k = 0 := by simp [spheroidalRecurrenceC]
+    have hB : spheroidalRecurrenceB n m 0 k = ((n : ℝ) + 2 * k) * ((n : ℝ) + 2 * k + 1) := by
+      simp [spheroidalRecurrenceB]
     rw [hA, hC, hB, spheroidalEigenvalue_gamma_zero hmn] at hrec
     have hk1 : (1 : ℝ) ≤ k := by exact_mod_cast hk
     have hn0 : (0 : ℝ) ≤ n := Nat.cast_nonneg n
@@ -302,14 +302,14 @@ theorem spheroidalCoeff_ratio_isBigO {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
   have hrec := spheroidalCoeff_recurrence_of_le hmn γ2 (k := (k : ℤ)) (by omega)
   simp only [show -(((n - m) / 2 : ℕ) : ℤ) ≤ (k : ℤ) - 1 by omega, ↓reduceIte] at hrec
   obtain ⟨hA, hC, -⟩ := spheroidalRec_bounds hmn γ2 hk1
-  have hBc := abs_spheroidalRecB_sub_le (n := n) (m := m) γ2 hk1
-  have hX := abs_neg_four_mul_spheroidalRecA_sub_le hmn γ2 hk2
+  have hBc := abs_spheroidalRecurrenceB_sub_le (n := n) (m := m) γ2 hk1
+  have hX := abs_neg_four_mul_spheroidalRecurrenceA_sub_le hmn γ2 hk2
   set a0 := spheroidalCoeff n m γ2 ((k : ℤ) - 1)
   set a1 := spheroidalCoeff n m γ2 (k : ℤ)
   set a2 := spheroidalCoeff n m γ2 ((k : ℤ) + 1)
-  set A := spheroidalRecA n m γ2 k
-  set B := spheroidalRecB n m γ2 k
-  set C := spheroidalRecC n m γ2 k
+  set A := spheroidalRecurrenceA n m γ2 k
+  set B := spheroidalRecurrenceB n m γ2 k
+  set C := spheroidalRecurrenceC n m γ2 k
   set sr := a2 / a1 with hsr
   have hsr4 : |sr| ≤ 1 / 4 := by
     rw [hsr, abs_div, div_le_iff₀ (abs_pos.mpr ha1)]; linarith
@@ -394,14 +394,14 @@ private lemma eventually_abs_spheroidalCoeff_ratio_le {n m : ℕ} (hmn : m ≤ n
   have hrec := spheroidalCoeff_recurrence_of_le hmn γ2 (k := (k : ℤ)) (by omega)
   simp only [show -(((n - m) / 2 : ℕ) : ℤ) ≤ (k : ℤ) - 1 by omega, ↓reduceIte] at hrec
   obtain ⟨hA, hC, -⟩ := spheroidalRec_bounds hmn γ2 hk1
-  have hBc := abs_spheroidalRecB_sub_le (n := n) (m := m) γ2 hk1
-  have hX := abs_neg_four_mul_spheroidalRecA_sub_le hmn γ2 hk2
+  have hBc := abs_spheroidalRecurrenceB_sub_le (n := n) (m := m) γ2 hk1
+  have hX := abs_neg_four_mul_spheroidalRecurrenceA_sub_le hmn γ2 hk2
   set a0 := spheroidalCoeff n m γ2 ((k : ℤ) - 1)
   set a1 := spheroidalCoeff n m γ2 (k : ℤ)
   set a2 := spheroidalCoeff n m γ2 ((k : ℤ) + 1)
-  set A := spheroidalRecA n m γ2 k
-  set B := spheroidalRecB n m γ2 k
-  set C := spheroidalRecC n m γ2 k
+  set A := spheroidalRecurrenceA n m γ2 k
+  set B := spheroidalRecurrenceB n m γ2 k
+  set C := spheroidalRecurrenceC n m γ2 k
   set sr := a2 / a1 with hsr
   have hsr4 : |sr| ≤ 1 / 4 := by
     rw [hsr, abs_div, div_le_iff₀ (abs_pos.mpr ha1)]; linarith
@@ -445,11 +445,12 @@ private lemma eventually_abs_spheroidalCoeff_ratio_le {n m : ℕ} (hmn : m ≤ n
     _ ≤ |γ2| := hA
 
 /-- `|A_k| ≥ |γ²|/16` when `n + 2k ≥ 2m + 2`. -/
-private lemma abs_spheroidalRecA_ge {n m : ℕ} (γ2 : ℝ) {k : ℤ} (hk : 2 * (m : ℤ) + 2 ≤ n + 2 * k) :
-    |γ2| / 16 ≤ |spheroidalRecA n m γ2 k| := by
+private lemma abs_spheroidalRecurrenceA_ge {n m : ℕ} (γ2 : ℝ) {k : ℤ}
+    (hk : 2 * (m : ℤ) + 2 ≤ n + 2 * k) :
+    |γ2| / 16 ≤ |spheroidalRecurrenceA n m γ2 k| := by
   have hkr : 2 * (m : ℝ) + 2 ≤ n + 2 * k := by exact_mod_cast hk
   have hm0 : (0 : ℝ) ≤ m := Nat.cast_nonneg m
-  unfold spheroidalRecA
+  unfold spheroidalRecurrenceA
   have hQ : 0 < (2 * (n : ℝ) + 4 * k - 3) * (2 * (n : ℝ) + 4 * k - 1) := by nlinarith
   have hP : (0 : ℝ) ≤ ((n : ℝ) - m + 2 * k - 1) * ((n : ℝ) - m + 2 * k) := by nlinarith
   rw [mul_div_assoc, abs_mul, abs_neg, abs_div, abs_of_pos hQ, abs_of_nonneg hP,
@@ -465,8 +466,8 @@ Corrected: the hypothesis `γ2 ≠ 0` was added (2026-10-26), since at `γ² = 0
 `C_k (a_k/a_{k-1})(a_{k+1}/a_k)/A_k`, and both ratios are `O(k⁻²)` while `|A_k| ≥ |γ²|/16`. -/
 @[dlmf 30.8.E8]
 theorem spheroidalCoeff_ratio_isBigO_four {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} (hγ : γ2 ≠ 0) :
-    (fun k : ℕ => (spheroidalEigenvalue n m γ2 - spheroidalRecB n m γ2 k) /
-        spheroidalRecA n m γ2 k *
+    (fun k : ℕ => (spheroidalEigenvalue n m γ2 - spheroidalRecurrenceB n m γ2 k) /
+        spheroidalRecurrenceA n m γ2 k *
           (spheroidalCoeff n m γ2 k / spheroidalCoeff n m γ2 ((k : ℤ) - 1)) - 1)
       =O[atTop] (fun k : ℕ => ((k : ℝ) ^ 4)⁻¹) := by
   obtain ⟨K, hK⟩ := eventually_abs_spheroidalCoeff_ratio_le hmn hγ
@@ -477,17 +478,17 @@ theorem spheroidalCoeff_ratio_isBigO_four {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ
   push_cast at ha2' hs
   rw [show ((k : ℤ) + 1 - 1) = (k : ℤ) by ring] at hs
   have hk1 : (1 : ℤ) ≤ (k : ℤ) := by omega
-  have hA0 := spheroidalRecA_ne_zero hmn hγ (k := (k : ℤ)) (by omega)
-  have hAge := abs_spheroidalRecA_ge (n := n) (m := m) γ2 (k := (k : ℤ)) (by omega)
+  have hA0 := spheroidalRecurrenceA_ne_zero hmn hγ (k := (k : ℤ)) (by omega)
+  have hAge := abs_spheroidalRecurrenceA_ge (n := n) (m := m) γ2 (k := (k : ℤ)) (by omega)
   obtain ⟨-, hC, -⟩ := spheroidalRec_bounds hmn γ2 hk1
   have hrec := spheroidalCoeff_recurrence_of_le hmn γ2 (k := (k : ℤ)) (by omega)
   simp only [show -(((n - m) / 2 : ℕ) : ℤ) ≤ (k : ℤ) - 1 by omega, ↓reduceIte] at hrec
   set a0 := spheroidalCoeff n m γ2 ((k : ℤ) - 1)
   set a1 := spheroidalCoeff n m γ2 (k : ℤ)
   set a2 := spheroidalCoeff n m γ2 ((k : ℤ) + 1)
-  set A := spheroidalRecA n m γ2 k
-  set B := spheroidalRecB n m γ2 k
-  set C := spheroidalRecC n m γ2 k
+  set A := spheroidalRecurrenceA n m γ2 k
+  set B := spheroidalRecurrenceB n m γ2 k
+  set C := spheroidalRecurrenceC n m γ2 k
   have e : (spheroidalEigenvalue n m γ2 - B) / A * (a1 / a0) - 1 =
       C * (a1 / a0) * (a2 / a1) / A := by
     field_simp
@@ -509,12 +510,12 @@ theorem spheroidalCoeff_ratio_isBigO_four {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ
 /-- **30.8.8 fails at `γ² = 0`** as stated: then `A_k = 0`, the Lean quotient
 `(λ - B_k)/A_k` is `0`, and the expression is the constant `-1`, which is not `O(k⁻⁴)`. -/
 private lemma not_spheroidalCoeff_ratio_isBigO_zero (n m : ℕ) :
-    ¬ (fun k : ℕ => (spheroidalEigenvalue n m 0 - spheroidalRecB n m 0 k) /
-        spheroidalRecA n m 0 k *
+    ¬ (fun k : ℕ => (spheroidalEigenvalue n m 0 - spheroidalRecurrenceB n m 0 k) /
+        spheroidalRecurrenceA n m 0 k *
           (spheroidalCoeff n m 0 k / spheroidalCoeff n m 0 ((k : ℤ) - 1)) - 1)
       =O[atTop] (fun k : ℕ => ((k : ℝ) ^ 4)⁻¹) := by
   intro h
-  have hA : ∀ k : ℕ, spheroidalRecA n m 0 k = 0 := fun k => by simp [spheroidalRecA]
+  have hA : ∀ k : ℕ, spheroidalRecurrenceA n m 0 k = 0 := fun k => by simp [spheroidalRecurrenceA]
   simp only [hA, div_zero, zero_mul, zero_sub] at h
   have ht : Tendsto (fun k : ℕ => ((k : ℝ) ^ 4)⁻¹) atTop (𝓝 0) :=
     (tendsto_pow_atTop (by norm_num : (4 : ℕ) ≠ 0)).comp tendsto_natCast_atTop_atTop
@@ -571,9 +572,9 @@ vanish at `k = -R`. Proved from `spheroidalCoeff_recurrence_of_le` and the forwa
 @[dlmf 30.8.E4]
 theorem spheroidalCoeff_recurrence {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ)
     (hf : spheroidalFwd n m γ2 ((n + m) / 2 - (n - m) / 2 + 1) ≠ 0) (k : ℤ) :
-    spheroidalRecA n m γ2 k * spheroidalCoeff n m γ2 (k - 1) +
-        (spheroidalRecB n m γ2 k - spheroidalEigenvalue n m γ2) * spheroidalCoeff n m γ2 k +
-      spheroidalRecC n m γ2 k * spheroidalCoeff n m γ2 (k + 1) = 0 := by
+    spheroidalRecurrenceA n m γ2 k * spheroidalCoeff n m γ2 (k - 1) +
+        (spheroidalRecurrenceB n m γ2 k - spheroidalEigenvalue n m γ2) * spheroidalCoeff n m γ2 k +
+      spheroidalRecurrenceC n m γ2 k * spheroidalCoeff n m γ2 (k + 1) = 0 := by
   set R := (n - m) / 2 with hR
   set N := (n + m) / 2 with hN
   have hRN : R ≤ N := Nat.div_le_div_right (by omega)
@@ -597,8 +598,8 @@ theorem spheroidalCoeff_recurrence {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ)
     · rw [show (-(R : ℤ) + N + 1).toNat = N - R + 1 by omega]
       field_simp
   -- `C_k` vanishes at `k = -N - 1`
-  have hC : spheroidalRecC n m γ2 (-(N : ℤ) - 1) = 0 := by
-    unfold spheroidalRecC
+  have hC : spheroidalRecurrenceC n m γ2 (-(N : ℤ) - 1) = 0 := by
+    unfold spheroidalRecurrenceC
     have hpar := Nat.div_add_mod (n + m) 2
     have hnum : ((n : ℝ) + m + 2 * ((-(N : ℤ) - 1 : ℤ) : ℝ) + 1) *
         ((n : ℝ) + m + 2 * ((-(N : ℤ) - 1 : ℤ) : ℝ) + 2) = 0 := by
@@ -620,11 +621,11 @@ theorem spheroidalCoeff_recurrence {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ)
       intro h0
       apply hf
       rw [show N - R + 1 = (m - 1) + 2 by omega]
-      simp only [spheroidalFwd, spheroidalRecC, h0]
+      simp only [spheroidalFwd, spheroidalRecurrenceC, h0]
       simp
     obtain ⟨j, hj⟩ : ∃ j : ℕ, k = -(N : ℤ) + j := ⟨(k + N).toNat, by omega⟩
-    have hCk : spheroidalRecC n m γ2 k ≠ 0 := by
-      unfold spheroidalRecC
+    have hCk : spheroidalRecurrenceC n m γ2 k ≠ 0 := by
+      unfold spheroidalRecurrenceC
       have h1 : ((n : ℝ) + m + 2 * k + 1) ≠ 0 := by
         have : (0 : ℤ) < n + m + 2 * k + 1 := by omega
         exact_mod_cast this.ne'
@@ -642,9 +643,11 @@ theorem spheroidalCoeff_recurrence {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ)
       hext (k + 1) (by omega) (by omega)]
     rw [show (k - 1 + N + 1).toNat = j by omega, show (k + N + 1).toNat = j + 1 by omega,
       show (k + 1 + N + 1).toNat = j + 2 by omega]
-    have hrec : spheroidalFwd n m γ2 (j + 2) = -(spheroidalRecA n m γ2 k * spheroidalFwd n m γ2 j +
-        (spheroidalRecB n m γ2 k - spheroidalEigenvalue n m γ2) * spheroidalFwd n m γ2 (j + 1)) /
-          spheroidalRecC n m γ2 k := by
+    have hrec : spheroidalFwd n m γ2 (j + 2) =
+        -(spheroidalRecurrenceA n m γ2 k * spheroidalFwd n m γ2 j +
+        (spheroidalRecurrenceB n m γ2 k - spheroidalEigenvalue n m γ2) *
+            spheroidalFwd n m γ2 (j + 1)) /
+          spheroidalRecurrenceC n m γ2 k := by
       rw [hj]; rfl
     rw [hrec]
     field_simp
@@ -654,7 +657,7 @@ theorem spheroidalCoeff_recurrence {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ)
     have h := spheroidalCoeff_recurrence_of_le hmn γ2 (k := -(R : ℤ)) le_rfl
     split_ifs at h with hh
     · omega
-    · rw [spheroidalRecA_neg_R hmn γ2]
+    · rw [spheroidalRecurrenceA_neg_R hmn γ2]
       linear_combination h
   · -- `k > -R`
     have h := spheroidalCoeff_recurrence_of_le hmn γ2 (k := k) hk.le

@@ -19,7 +19,7 @@ recurrence for `P_n` and `∫₋₁¹ P_{n+1} = 0`. Together these give Neumann'
 ## Main results
 
 * `integral_recip_sub`: `½ ∫₋₁¹ dt/(z - t) = Q₀(z)`.
-* `integral_legendrePolyP_succ`: `∫₋₁¹ P_{n+1} = 0`.
+* `integral_legendrePolynomialP_succ`: `∫₋₁¹ P_{n+1} = 0`.
 * `legendreQPoly_eq_integral`: `R_n(z) = ½ ∫₋₁¹ (P_n(z) - P_n(t))/(z - t) dt`.
 * `legendreQ_nat_eq_integral`: Neumann's integral (Temme (8.33)).
 -/
@@ -97,24 +97,26 @@ theorem integral_recip_sub {z : ℂ} (hz : z - 1 ∈ slitPlane) :
 
 /-- The difference quotient `(P_n(z) - P_n(t))/(z - t)` is continuous in `t ∈ [-1, 1]`. -/
 theorem continuousOn_legendre_dq (n : ℕ) {z : ℂ} (hz : z - 1 ∈ slitPlane) :
-    ContinuousOn (fun t : ℝ => (legendrePolyP n z - legendrePolyP n t) / (z - t))
+    ContinuousOn (fun t : ℝ => (legendrePolynomialP n z - legendrePolynomialP n t) / (z - t))
         (uIcc (-1 : ℝ) 1) := by
   intro t ht
   have ht1 : t ≤ 1 := by rw [uIcc_of_le (by norm_num)] at ht; exact ht.2
-  exact ((continuousAt_const.sub ((differentiable_legendrePolyP n).continuous.continuousAt.comp
+  exact ((continuousAt_const.sub
+      ((differentiable_legendrePolynomialP n).continuous.continuousAt.comp
     continuous_ofReal.continuousAt)).div (continuousAt_const.sub continuous_ofReal.continuousAt)
     (slitPlane_ne_zero (sub_ofReal_mem_slitPlane hz ht1))).continuousWithinAt
 
 /-- `∫₋₁¹ P_{n+1} = 0`, by orthogonality to `P₀`. -/
-theorem integral_legendrePolyP_succ (n : ℕ) :
-    ∫ t in (-1 : ℝ)..1, legendrePolyP (n + 1) (t : ℂ) = 0 := by
+theorem integral_legendrePolynomialP_succ (n : ℕ) :
+    ∫ t in (-1 : ℝ)..1, legendrePolynomialP (n + 1) (t : ℂ) = 0 := by
   have h := DLMF.OrthogonalPolynomials.legendre_orthogonality 0 (n + 1)
-  simpa [legendrePolyP_zero] using h
+  simpa [legendrePolynomialP_zero] using h
 
 /-- `R_n(z) = ½ ∫₋₁¹ (P_n(z) - P_n(t))/(z - t) dt` (Temme, proof of (8.33)). -/
 theorem legendreQPoly_eq_integral (n : ℕ) {z : ℂ} (hz : z - 1 ∈ slitPlane) :
     (legendreQPoly n).eval z =
-      1 / 2 * ∫ t in (-1 : ℝ)..1, (legendrePolyP n z - legendrePolyP n t) / (z - t) := by
+      1 / 2 * ∫ t in (-1 : ℝ)..1,
+          (legendrePolynomialP n z - legendrePolynomialP n t) / (z - t) := by
   have hne (t : ℝ) (ht : t ∈ uIcc (-1 : ℝ) 1) : z - t ≠ 0 := by
     have ht1 : t ≤ 1 := by rw [uIcc_of_le (by norm_num)] at ht; exact ht.2
     exact slitPlane_ne_zero (sub_ofReal_mem_slitPlane hz ht1)
@@ -122,27 +124,28 @@ theorem legendreQPoly_eq_integral (n : ℕ) {z : ℂ} (hz : z - 1 ∈ slitPlane)
   induction n using Nat.strong_induction_on with
   | _ n ih =>
     match n, ih with
-    | 0, _ => simp [legendreQPoly, legendrePolyP_zero]
+    | 0, _ => simp [legendreQPoly, legendrePolynomialP_zero]
     | 1, _ =>
       rw [legendreQPoly, Polynomial.eval_one,
         intervalIntegral.integral_congr (g := fun _ => (1 : ℂ)) (fun t ht => by
-          simp only [legendrePolyP_one]; exact div_self (hne t ht))]
+          simp only [legendrePolynomialP_one]; exact div_self (hne t ht))]
       simp; norm_num
     | n + 2, ih =>
       have h1 := ih (n + 1) (by omega)
       have h0 := ih n (by omega)
-      have hLc : Continuous fun t : ℝ => legendrePolyP (n + 1) (t : ℂ) :=
-        (differentiable_legendrePolyP _).continuous.comp continuous_ofReal
+      have hLc : Continuous fun t : ℝ => legendrePolynomialP (n + 1) (t : ℂ) :=
+        (differentiable_legendrePolynomialP _).continuous.comp continuous_ofReal
       have hrec : ∀ t ∈ uIcc (-1 : ℝ) 1,
-          (legendrePolyP (n + 2) z - legendrePolyP (n + 2) t) / (z - t) =
-            ((2 * n + 3) * (z * ((legendrePolyP (n + 1) z - legendrePolyP (n + 1) t) / (z - t)) +
-              legendrePolyP (n + 1) t) - (n + 1)
-                  * ((legendrePolyP n z - legendrePolyP n t) / (z - t))) /
+          (legendrePolynomialP (n + 2) z - legendrePolynomialP (n + 2) t) / (z - t) =
+            ((2 * n + 3) * (z * ((legendrePolynomialP (n + 1) z -
+                legendrePolynomialP (n + 1) t) / (z - t)) +
+              legendrePolynomialP (n + 1) t) - (n + 1)
+                  * ((legendrePolynomialP n z - legendrePolynomialP n t) / (z - t))) /
               (n + 2) := by
         intro t ht
         have hn : (n : ℂ) + 2 ≠ 0 := by exact_mod_cast Nat.succ_ne_zero (n + 1)
-        have rz := legendrePolyP_recurrence n z
-        have rt := legendrePolyP_recurrence n (t : ℂ)
+        have rz := legendrePolynomialP_recurrence n z
+        have rt := legendrePolynomialP_recurrence n (t : ℂ)
         have := hne t ht
         field_simp
         linear_combination rz - rt
@@ -154,7 +157,7 @@ theorem legendreQPoly_eq_integral (n : ℕ) {z : ℂ} (hz : z - 1 ∈ slitPlane)
         intervalIntegral.integral_add ((hI (n + 1)).const_mul z)
           (hLc.intervalIntegrable _ _),
         intervalIntegral.integral_const_mul, intervalIntegral.integral_const_mul,
-        integral_legendrePolyP_succ]
+        integral_legendrePolynomialP_succ]
       simp only [legendreQPoly, Polynomial.eval_mul, Polynomial.eval_sub, Polynomial.eval_C,
         Polynomial.eval_X]
       rw [h1, h0]
@@ -165,12 +168,13 @@ theorem legendreQPoly_eq_integral (n : ℕ) {z : ℂ} (hz : z - 1 ∈ slitPlane)
 /-- **Neumann's integral** `Q_n(z) = ½ ∫₋₁¹ P_n(t)/(z - t) dt` for `z ∉ (-∞, 1]`
 (Temme (8.33)). -/
 theorem legendreQ_nat_eq_integral (n : ℕ) {z : ℂ} (hz : z - 1 ∈ slitPlane) :
-    legendreQ n z = 1 / 2 * ∫ t in (-1 : ℝ)..1, legendrePolyP n t / (z - t) := by
+    legendreQ n z = 1 / 2 * ∫ t in (-1 : ℝ)..1, legendrePolynomialP n t / (z - t) := by
   have hne (t : ℝ) (ht : t ∈ uIcc (-1 : ℝ) 1) : z - t ≠ 0 := by
     have ht1 : t ≤ 1 := by rw [uIcc_of_le (by norm_num)] at ht; exact ht.2
     exact slitPlane_ne_zero (sub_ofReal_mem_slitPlane hz ht1)
-  have hsplit : ∀ t ∈ uIcc (-1 : ℝ) 1, legendrePolyP n t / (z - t) =
-      legendrePolyP n z * (1 / (z - t)) - (legendrePolyP n z - legendrePolyP n t) / (z - t) := by
+  have hsplit : ∀ t ∈ uIcc (-1 : ℝ) 1, legendrePolynomialP n t / (z - t) =
+      legendrePolynomialP n z * (1 / (z - t)) -
+          (legendrePolynomialP n z - legendrePolynomialP n t) / (z - t) := by
     intro t ht; have := hne t ht; field_simp; ring
   have hinv : IntervalIntegrable (fun t : ℝ => 1 / (z - t)) MeasureTheory.volume (-1) 1 := by
     refine ContinuousOn.intervalIntegrable fun t ht => ?_

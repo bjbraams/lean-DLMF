@@ -26,7 +26,7 @@ representation of the remainder and a shift argument in the parameter `a`.
 * `ratioThree_isBigO_of_re_pos`, `ratioThree_isBigO_shift`: the case `Re (c - a) > 0`, via the
   Beta-integral remainder, and the shift that removes this condition.
 * `isBigO_Gamma_add_div_Gamma_add`: `Γ(t+u)/Γ(t+v) = O(t^{u-v})`.
-* `Gamma_add_nat_eq_poch_mul_Gamma`: `Γ(α + k) = (α)ₖ Γ(α)`.
+* `Gamma_add_nat_eq_pochhammer_mul_Gamma`: `Γ(α + k) = (α)ₖ Γ(α)`.
 -/
 
 @[expose] public section
@@ -56,19 +56,20 @@ section RatioThree
 open Set
 
 /-- The binomial coefficient `β(β-1)⋯(β-k+1)/k!`, written with a Pochhammer symbol. -/
-def recipFacBinom (β : ℂ) (k : ℕ) : ℂ := (-1) ^ k * poch (-β) k / k.factorial
+def recipFacBinom (β : ℂ) (k : ℕ) : ℂ := (-1) ^ k * pochhammer (-β) k / k.factorial
 
 /-- The remainder of the binomial series of `(1+s)^β` after `n` terms. -/
 def recipFacRem (β : ℂ) (n : ℕ) (s : ℝ) : ℂ :=
   (1 + (s : ℂ)) ^ β - ∑ k ∈ Finset.range n, recipFacBinom β k * (s : ℂ) ^ k
 
 /-- The zeroth binomial coefficient `C(β, 0) = 1`. -/
-theorem recipFacBinom_zero (β : ℂ) : recipFacBinom β 0 = 1 := by simp [recipFacBinom, poch_zero]
+theorem recipFacBinom_zero (β : ℂ) : recipFacBinom β 0 = 1 := by
+    simp [recipFacBinom, pochhammer_zero]
 
 /-- `C(β, k + 1)(k + 1) = β C(β - 1, k)`. -/
 theorem recipFacBinom_succ (β : ℂ) (k : ℕ) :
     recipFacBinom β (k + 1) * (k + 1) = β * recipFacBinom (β - 1) k := by
-  simp only [recipFacBinom, poch_succ_left, Nat.factorial_succ]
+  simp only [recipFacBinom, pochhammer_succ_left, Nat.factorial_succ]
   rw [show -β + 1 = -(β - 1) by ring]
   push_cast
   have hk : (k.factorial : ℂ) ≠ 0 := by exact_mod_cast k.factorial_ne_zero
@@ -194,7 +195,7 @@ theorem ratioThree_rem_eq {a b c : ℂ} (n : ℕ) (hα : 0 < (c - a).re) {t : �
     (hta : 0 < (t + a).re) (htb : (c - a).re + n < (t + b).re) :
     Complex.Gamma (t + a) * Complex.Gamma (t + b) / Complex.Gamma (t + c) -
         ∑ k ∈ Finset.range n,
-          (-1 : ℂ) ^ k * poch (c - a) k * poch (c - b) k / k.factorial *
+          (-1 : ℂ) ^ k * pochhammer (c - a) k * pochhammer (c - b) k / k.factorial *
             Complex.Gamma (a + b - c + t - k) =
       Complex.Gamma (t + b) / Complex.Gamma (c - a) *
         ∫ s in Ioi (0 : ℝ), (s : ℂ) ^ (c - a - 1) * ((1 + s : ℝ) : ℂ) ^ (-(t + b)) *
@@ -263,7 +264,7 @@ theorem ratioThree_rem_eq {a b c : ℂ} (n : ℕ) (hα : 0 < (c - a).re) {t : �
   · rw [show t + c - α = t + a by rw [hαdef]; ring]
     field_simp
   · refine Finset.sum_congr rfl fun k hk' => ?_
-    rw [hK k hk', Gamma_add_nat_eq_poch_mul_Gamma hα, recipFacBinom,
+    rw [hK k hk', Gamma_add_nat_eq_pochhammer_mul_Gamma hα, recipFacBinom,
       show -(b - c) = c - b by ring, show t + b - (α + k) = a + b - c + t - k by
         simp [hαdef]; ring]
     field_simp
@@ -300,13 +301,13 @@ theorem norm_integral_recipFacRem_le {α β B : ℂ} {n : ℕ} {K M : ℝ}
 
 /-- The partial sum of the reciprocal-factorial expansion 5.11.19. -/
 def ratioThreeSum (a b c : ℂ) (n : ℕ) (t : ℝ) : ℂ :=
-  ∑ k ∈ Finset.range n, (-1 : ℂ) ^ k * poch (c - a) k * poch (c - b) k / k.factorial *
+  ∑ k ∈ Finset.range n, (-1 : ℂ) ^ k * pochhammer (c - a) k * pochhammer (c - b) k / k.factorial *
     Complex.Gamma (a + b - c + t - k)
 
 /-- The boundary coefficient in the shift identity `ratioThreeSum_shift`. -/
 def ratioThreeShiftCoeff (a b c : ℂ) : ℕ → ℂ
   | 0 => 0
-  | j + 1 => (-1 : ℂ) ^ j * poch (c - a + 1) j * poch (c - b) (j + 1) / j.factorial
+  | j + 1 => (-1 : ℂ) ^ j * pochhammer (c - a + 1) j * pochhammer (c - b) (j + 1) / j.factorial
 
 /-- Shift identity for the partial sums of 5.11.19 in the parameter `a`. -/
 theorem ratioThreeSum_shift (a b c : ℂ) (t : ℝ) (n : ℕ)
@@ -330,13 +331,14 @@ theorem ratioThreeSum_shift (a b c : ℂ) (t : ℝ) (n : ℕ)
     rw [hc]
     have hf : (n.factorial : ℂ) ≠ 0 := by exact_mod_cast n.factorial_ne_zero
     rcases n with _ | j
-    · simp only [ratioThreeShiftCoeff, poch_zero, poch_one, pow_zero, Nat.factorial_zero,
+    · simp only [ratioThreeShiftCoeff, pochhammer_zero, pochhammer_one, pow_zero,
+          Nat.factorial_zero,
         Nat.cast_one, div_one, one_mul, zero_mul, add_zero, Finset.range_zero,
         Finset.sum_empty, zero_add, Nat.cast_zero] at hY ⊢
       rw [hY]; ring
     · simp only [ratioThreeShiftCoeff]
-      rw [poch_succ_left (c - a) j, poch_succ (c - a + 1) j,
-        poch_succ (c - b) (j + 1), Nat.factorial_succ]
+      rw [pochhammer_succ_left (c - a) j, pochhammer_succ (c - a + 1) j,
+        pochhammer_succ (c - b) (j + 1), Nat.factorial_succ]
       rw [hY]
       have hj : (j.factorial : ℂ) ≠ 0 := by exact_mod_cast j.factorial_ne_zero
       push_cast
@@ -510,7 +512,7 @@ theorem Gamma_ratio_three {a b c : ℂ} (n : ℕ) :
     Asymptotics.IsBigO atTop
       (fun t : ℝ => Complex.Gamma (t + a) * Complex.Gamma (t + b) / Complex.Gamma (t + c) -
         ∑ k ∈ Finset.range n,
-          (-1 : ℂ) ^ k * poch (c - a) k * poch (c - b) k / k.factorial *
+          (-1 : ℂ) ^ k * pochhammer (c - a) k * pochhammer (c - b) k / k.factorial *
             Complex.Gamma (a + b - c + t - k))
       (fun t : ℝ => Complex.Gamma t * (t : ℂ) ^ (a + b - c - n)) := by
   obtain ⟨m, hm⟩ := exists_nat_gt (-(c - a).re)

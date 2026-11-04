@@ -69,7 +69,7 @@ theorem hermitePolyHR_ode (n : ℕ) (x : ℝ) :
     (hermitePolyHR n).derivative.derivative.eval x -
         2 * x * (hermitePolyHR n).derivative.eval x + 2 * n * (hermitePolyHR n).eval x = 0 := by
   have h := congrArg (fun p : ℤ[X] => (p.map (Int.castRingHom ℝ)).eval x)
-    (hermitePolyH_differential_equation n)
+    (hermitePolynomialH_differential_equation n)
   simpa [Polynomial.derivative_map, hermitePolyHR] using h
 
 /-- The derivative of `e^{-x²/2}` is `-x e^{-x²/2}`. -/
@@ -148,24 +148,24 @@ theorem abs_u_sub_oscFree_le (n : ℕ) (x : ℝ) :
 /-! ### The data at `0` -/
 
 /-- `H_{2m+1}(0) = 0`. -/
-theorem hermitePolyH_odd_at_zero (m : ℕ) : (hermitePolyH (2 * m + 1)).eval 0 = 0 := by
+theorem hermitePolynomialH_odd_at_zero (m : ℕ) : (hermitePolynomialH (2 * m + 1)).eval 0 = 0 := by
   induction m with
   | zero => simp
   | succ m ih =>
-    rw [show 2 * (m + 1) + 1 = 2 * m + 1 + 1 + 1 by ring, hermitePolyH_succ,
-      hermitePolyH_derivative]
+    rw [show 2 * (m + 1) + 1 = 2 * m + 1 + 1 + 1 by ring, hermitePolynomialH_succ,
+      hermitePolynomialH_derivative]
     simp only [eval_sub, eval_mul, eval_ofNat, eval_X, eval_C, ih, mul_zero, zero_mul,
       sub_zero]
 
 /-- The real Hermite polynomial at `0` is the cast of the integer value. -/
 theorem hermitePolyHR_eval_zero (n : ℕ) :
-    (hermitePolyHR n).eval 0 = ((hermitePolyH n).eval 0 : ℤ) :=
+    (hermitePolyHR n).eval 0 = ((hermitePolynomialH n).eval 0 : ℤ) :=
   eval_zero_map _ _
 
 /-- `H_{k+1}'(0) = 2(k+1) H_k(0)`. -/
 theorem hermitePolyHR_derivative_eval_zero (k : ℕ) :
     (hermitePolyHR (k + 1)).derivative.eval 0 = 2 * (k + 1) * (hermitePolyHR k).eval 0 := by
-  rw [hermitePolyHR, Polynomial.derivative_map, hermitePolyH_derivative, Polynomial.map_mul,
+  rw [hermitePolyHR, Polynomial.derivative_map, hermitePolynomialH_derivative, Polynomial.map_mul,
     Polynomial.map_C, eval_mul, eval_C]
   simp [hermitePolyHR]
 
@@ -173,7 +173,7 @@ theorem hermitePolyHR_derivative_eval_zero (k : ℕ) :
 theorem hermitePolyHR_even_eval_zero (m : ℕ) :
     (hermitePolyHR (2 * m)).eval 0 =
       (-1) ^ m * ((2 * m).factorial / m.factorial : ℝ) := by
-  rw [hermitePolyHR_eval_zero, hermitePolyH_even_at_zero, Int.cast_mul, Int.cast_pow,
+  rw [hermitePolyHR_eval_zero, hermitePolynomialH_even_at_zero, Int.cast_mul, Int.cast_pow,
     Int.cast_neg, Int.cast_one, Int.cast_natCast,
     Nat.cast_div (Nat.factorial_dvd_factorial (by omega)) (by positivity)]
 
@@ -227,7 +227,7 @@ theorem data_zero (n : ℕ) :
       rcases m with _ | k
       · simp
       · rw [show 2 * (k + 1) = 2 * k + 1 + 1 by ring, hermitePolyHR_derivative_eval_zero,
-          hermitePolyHR_eval_zero, hermitePolyH_odd_at_zero]
+          hermitePolyHR_eval_zero, hermitePolynomialH_odd_at_zero]
         simp
     rw [hd, harg, Real.cos_nat_mul_pi, Real.sin_nat_mul_pi, hermiteLambda_even, u_zero,
       hermitePolyHR_even_eval_zero]
@@ -238,7 +238,7 @@ theorem data_zero (n : ℕ) :
       positivity
     have harg : ((2 * m + 1 : ℕ) : ℝ) * π / 2 = (m : ℝ) * π + π / 2 := by push_cast; ring
     have h0 : u (2 * m + 1) 0 = 0 := by
-      rw [u_zero, hermitePolyHR_eval_zero, hermitePolyH_odd_at_zero]
+      rw [u_zero, hermitePolyHR_eval_zero, hermitePolynomialH_odd_at_zero]
       simp
     have hd : u' (2 * m + 1) 0 =
         2 * (2 * m + 1) * ((-1) ^ m * ((2 * m).factorial / m.factorial : ℝ)) := by
@@ -308,17 +308,17 @@ with an explicit error bound:
 `|e^{-x²/2} H_n(x) / λ_n - cos (√(2n+1) x - nπ/2)| ≤ |x|³ e^{|x|³/3} / (3 √(2n+1))`. -/
 @[dlmf 18.15.E27]
 theorem abs_hermite_div_lambda_sub_cos_le (n : ℕ) (x : ℝ) :
-    |Real.exp (-x ^ 2 / 2) * aeval x (hermitePolyH n) / hermiteLambda n -
+    |Real.exp (-x ^ 2 / 2) * aeval x (hermitePolynomialH n) / hermiteLambda n -
         Real.cos (√(2 * n + 1) * x - n * π / 2)| ≤
       |x| ^ 3 * Real.exp (|x| ^ 3 / 3) / (3 * √(2 * n + 1)) := by
   have h := abs_u_div_sub_cos_le n x
-  rwa [u, ← aeval_hermitePolyH_eq_eval] at h
+  rwa [u, ← aeval_hermitePolynomialH_eq_eval] at h
 
 /-- DLMF 18.15.27 with `M = 1`: `e^{-x²/2} H_n(x) = λ_n (cos (√(2n+1) x - nπ/2) + O(n^{-1/2}))`
 as `n → ∞`, for fixed real `x`. -/
 @[dlmf 18.15.E27]
 theorem hermite_div_lambda_isBigO (x : ℝ) :
-    (fun n : ℕ => Real.exp (-x ^ 2 / 2) * aeval x (hermitePolyH n) / hermiteLambda n -
+    (fun n : ℕ => Real.exp (-x ^ 2 / 2) * aeval x (hermitePolynomialH n) / hermiteLambda n -
         Real.cos (√(2 * n + 1) * x - n * π / 2)) =O[atTop]
       fun n : ℕ => (√(2 * n + 1))⁻¹ := by
   refine IsBigO.of_bound (|x| ^ 3 * Real.exp (|x| ^ 3 / 3) / 3) (Eventually.of_forall fun n => ?_)
@@ -414,7 +414,7 @@ end HermiteFixedX
 `|Γ(n/2+1)/Γ(n+1) e^{-x²/2} H_n(x) - cos (√(2n+1) x - nπ/2)| ≤
 (3 + |x|³ e^{|x|³/3}) / √(2n+1)`. -/
 theorem abs_hermite_scaled_sub_cos_le (n : ℕ) (x : ℝ) :
-    |Real.exp (-x ^ 2 / 2) * aeval x (hermitePolyH n) * Real.Gamma (n / 2 + 1) /
+    |Real.exp (-x ^ 2 / 2) * aeval x (hermitePolynomialH n) * Real.Gamma (n / 2 + 1) /
           Real.Gamma (n + 1) - Real.cos (√(2 * n + 1) * x - n * π / 2)| ≤
       (3 + |x| ^ 3 * Real.exp (|x| ^ 3 / 3)) / √(2 * n + 1) := by
   obtain ⟨hρ2, hρ1⟩ := lambda_div_szegoConst n
@@ -423,12 +423,12 @@ theorem abs_hermite_scaled_sub_cos_le (n : ℕ) (x : ℝ) :
   have hC := szegoConst_pos n
   have hω : 0 < √(2 * (n : ℝ) + 1) := Real.sqrt_pos.2 (by positivity)
   have hω1 : 1 ≤ √(2 * (n : ℝ) + 1) := one_le_freq n
-  set A := Real.exp (-x ^ 2 / 2) * aeval x (hermitePolyH n) / hermiteLambda n -
+  set A := Real.exp (-x ^ 2 / 2) * aeval x (hermitePolynomialH n) / hermiteLambda n -
     Real.cos (√(2 * n + 1) * x - n * π / 2) with hAdef
   set c := Real.cos (√(2 * n + 1) * x - n * π / 2) with hc
   set ρ := hermiteLambda n / szegoConst n with hρ
   have hρpos : 0 < ρ := div_pos hlam hC
-  have hexpr : Real.exp (-x ^ 2 / 2) * aeval x (hermitePolyH n) * Real.Gamma (n / 2 + 1) /
+  have hexpr : Real.exp (-x ^ 2 / 2) * aeval x (hermitePolynomialH n) * Real.Gamma (n / 2 + 1) /
       Real.Gamma (n + 1) - c = A * ρ + c * (ρ - 1) := by
     rw [hAdef, hρ, szegoConst]
     have h1 : 0 < Real.Gamma ((n : ℝ) + 1) := Real.Gamma_pos_of_pos (by positivity)
@@ -458,7 +458,7 @@ theorem abs_hermite_scaled_sub_cos_le (n : ℕ) (x : ℝ) :
 /-- Szegő's form (8.22.8): `Γ(n/2+1)/Γ(n+1) e^{-x²/2} H_n(x) = cos (√(2n+1) x - nπ/2) +
 O(n^{-1/2})` as `n → ∞`, for fixed real `x`. -/
 theorem hermite_scaled_isBigO (x : ℝ) :
-    (fun n : ℕ => Real.exp (-x ^ 2 / 2) * aeval x (hermitePolyH n) * Real.Gamma (n / 2 + 1) /
+    (fun n : ℕ => Real.exp (-x ^ 2 / 2) * aeval x (hermitePolynomialH n) * Real.Gamma (n / 2 + 1) /
           Real.Gamma (n + 1) - Real.cos (√(2 * n + 1) * x - n * π / 2)) =O[atTop]
       fun n : ℕ => (√(2 * n + 1))⁻¹ := by
   refine IsBigO.of_bound (3 + |x| ^ 3 * Real.exp (|x| ^ 3 / 3))

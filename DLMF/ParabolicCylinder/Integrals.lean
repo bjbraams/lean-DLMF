@@ -22,13 +22,14 @@ integrals of DLMF §12.12.
 
 ## Main results
 
-* `pcfU_integral_2`, `pcfU_integral_3`, `pcfU_integral_4`: the horizontal-ray integrals
-  DLMF 12.5.2–12.5.4.
-* `pcfU_hankel_integral`: the Hankel-loop integral DLMF 12.5.5.
-* `pcfU_vertical_integral`: the vertical-line integral DLMF 12.5.6.
-* `pcfV_horizontal_integral`: the horizontal-line integral DLMF 12.5.7.
-* `pcfU_barnes_integral`, `pcfU_barnes_integral'`, `pcfV_barnes_integral`, `pcfV_barnes_integral'`:
-  the Barnes integrals DLMF 12.5.8–12.5.9 on a straight separating contour.
+* `parabolicCylinderU_integral_2`, `parabolicCylinderU_integral_3`, `parabolicCylinderU_integral_4`:
+  the horizontal-ray integrals DLMF 12.5.2–12.5.4.
+* `parabolicCylinderU_hankel_integral`: the Hankel-loop integral DLMF 12.5.5.
+* `parabolicCylinderU_vertical_integral`: the vertical-line integral DLMF 12.5.6.
+* `parabolicCylinderV_horizontal_integral`: the horizontal-line integral DLMF 12.5.7.
+* `parabolicCylinderU_barnes_integral`, `parabolicCylinderU_barnes_integral'`,
+  `parabolicCylinderV_barnes_integral`, `parabolicCylinderV_barnes_integral'`: the Barnes integrals
+  DLMF 12.5.8–12.5.9 on a straight separating contour.
 * `pcf_integral_1`, `pcf_integral_2`, `pcf_integral_3`: the integrals DLMF 12.12.1–12.12.3.
 * `weber_product_ode`: products of Weber solutions satisfy the symmetric-square equation.
 * `pcf_integral_4_integrable`, `pcf_integral_4`: absolute convergence and value of the square
@@ -53,19 +54,20 @@ open DLMF.Core
 namespace DLMF.Confluent
 
 /-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => z*exp (-z^2/4)/Gamma
-(a/2+1/4)*((t:ℂ)^(a/2-3/4)*exp (-t)*(z^2+2*t)^(-a/2-3/4))) 0 (pcfU a z)`. -/
+(a/2+1/4)*((t:ℂ)^(a/2-3/4)*exp (-t)*(z^2+2*t)^(-a/2-3/4))) 0 (parabolicCylinderU a z)`. -/
 @[dlmf 12.5.E2]
-theorem pcfU_integral_2 {a z : ℂ} (ha : -1/2 < a.re) (hz : 0 < z.re) :
+theorem parabolicCylinderU_integral_2 {a z : ℂ} (ha : -1/2 < a.re) (hz : 0 < z.re) :
     HasIntegralAtTop (fun t : ℝ => z*exp (-z^2/4)/Gamma
-        (a/2+1/4)*((t:ℂ)^(a/2-3/4)*exp (-t)*(z^2+2*t)^(-a/2-3/4))) 0 (pcfU a z) := by
+        (a/2+1/4)*((t:ℂ)^(a/2-3/4)*exp (-t)*(z^2+2*t)^(-a/2-3/4))) 0 (parabolicCylinderU a z) := by
   have hα : 0 < (a/2+1/4).re := by simp; linarith
-  have hv : pcfU a z = z * exp (-z^2/4) / Gamma (a/2+1/4) *
+  have hv : parabolicCylinderU a z = z * exp (-z^2/4) / Gamma (a/2+1/4) *
       CylinderIntegrals.laplaceIntegral (a/2+1/4) (-a/2-3/4) (z^2) :=
       by
-    refine CylinderIntegrals.eq_of_real (f := pcfU a)
+    refine CylinderIntegrals.eq_of_real (f := parabolicCylinderU a)
       (g := fun z => z * exp (-z^2/4) / Gamma (a/2+1/4) *
           CylinderIntegrals.laplaceIntegral (a/2+1/4) (-a/2-3/4) (z^2))
-      (pcfU_entire a).differentiableOn ?_ (fun x hx => CylinderIntegrals.U_real_2 ha hx) hz
+      (parabolicCylinderU_entire a).differentiableOn ?_
+          (fun x hx => CylinderIntegrals.U_real_2 ha hx) hz
     exact ((differentiableOn_id.mul
         (differentiableOn_id.pow 2 |>.neg.div_const 4 |>.cexp)).div_const _).mul
       (CylinderIntegrals.differentiableOn_comp hα _)
@@ -82,18 +84,19 @@ theorem pcfU_integral_2 {a z : ℂ} (ha : -1/2 < a.re) (hz : 0 < z.re) :
   exact T
 
 /-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => exp (-z^2/4)/Gamma
-(a/2+3/4)*((t:ℂ)^(a/2-1/4)*exp (-t)*(z^2+2*t)^(-a/2-1/4))) 0 (pcfU a z)`. -/
+(a/2+3/4)*((t:ℂ)^(a/2-1/4)*exp (-t)*(z^2+2*t)^(-a/2-1/4))) 0 (parabolicCylinderU a z)`. -/
 @[dlmf 12.5.E3]
-theorem pcfU_integral_3 {a z : ℂ} (ha : -3/2 < a.re) (hz : 0 < z.re) :
+theorem parabolicCylinderU_integral_3 {a z : ℂ} (ha : -3/2 < a.re) (hz : 0 < z.re) :
     HasIntegralAtTop (fun t : ℝ => exp (-z^2/4)/Gamma
-        (a/2+3/4)*((t:ℂ)^(a/2-1/4)*exp (-t)*(z^2+2*t)^(-a/2-1/4))) 0 (pcfU a z) := by
+        (a/2+3/4)*((t:ℂ)^(a/2-1/4)*exp (-t)*(z^2+2*t)^(-a/2-1/4))) 0 (parabolicCylinderU a z) := by
   have hα : 0 < (a/2+3/4).re := by simp; linarith
-  have hv : pcfU a z = exp (-z^2/4) / Gamma (a/2+3/4) *
+  have hv : parabolicCylinderU a z = exp (-z^2/4) / Gamma (a/2+3/4) *
       CylinderIntegrals.laplaceIntegral (a/2+3/4) (-a/2-1/4) (z^2) := by
-    refine CylinderIntegrals.eq_of_real (f := pcfU a)
+    refine CylinderIntegrals.eq_of_real (f := parabolicCylinderU a)
       (g := fun z => exp (-z^2/4) / Gamma (a/2+3/4) *
           CylinderIntegrals.laplaceIntegral (a/2+3/4) (-a/2-1/4) (z^2))
-      (pcfU_entire a).differentiableOn ?_ (fun x hx => CylinderIntegrals.U_real_3 ha hx) hz
+      (parabolicCylinderU_entire a).differentiableOn ?_
+          (fun x hx => CylinderIntegrals.U_real_3 ha hx) hz
     exact ((differentiableOn_id.pow 2 |>.neg.div_const 4 |>.cexp).div_const _).mul
       (CylinderIntegrals.differentiableOn_comp hα _)
   have hI := CylinderIntegrals.integrableOn_laplaceIntegrand hα (-a/2-1/4)
@@ -109,11 +112,13 @@ theorem pcfU_integral_3 {a z : ℂ} (ha : -3/2 < a.re) (hz : 0 < z.re) :
   exact T
 
 /-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => (Real.sqrt
-(2/π):ℂ)*exp (z^2/4)*((t:ℂ)^(-a-1/2)*exp (-t^2/2)*cos (z*t+(a/2+1/4)*π))) 0 (pcfU a z)`. -/
+(2/π):ℂ)*exp (z^2/4)*((t:ℂ)^(-a-1/2)*exp (-t^2/2)*cos (z*t+(a/2+1/4)*π))) 0 (parabolicCylinderU a
+z)`. -/
 @[dlmf 12.5.E4]
-theorem pcfU_integral_4 {a : ℂ} (ha : a.re < 1/2) (z : ℂ) :
+theorem parabolicCylinderU_integral_4 {a : ℂ} (ha : a.re < 1/2) (z : ℂ) :
     HasIntegralAtTop (fun t : ℝ => (Real.sqrt (2/π):ℂ)*exp
-        (z^2/4)*((t:ℂ)^(-a-1/2)*exp (-t^2/2)*cos (z*t+(a/2+1/4)*π))) 0 (pcfU a z) := by
+        (z^2/4)*((t:ℂ)^(-a-1/2)*exp (-t^2/2)*cos (z*t+(a/2+1/4)*π))) 0
+            (parabolicCylinderU a z) := by
   have hc : -1 < (-a-1/2).re := by simp; linarith
   have ha' : -1/2 < (-a).re := by simp; linarith
   have han : ∀ n : ℕ, a ≠ n+1/2 := fun n h => by
@@ -137,19 +142,19 @@ theorem pcfU_integral_4 {a : ℂ} (ha : a.re < 1/2) (z : ℂ) :
         (-(z*t+(a/2+1/4)*π)*I) := by
       rw [← Complex.exp_add, ← Complex.exp_add]; congr 1; ring
     linear_combination (-(Real.sqrt (2/π):ℂ)*exp (z^2/4)/2 * (t:ℂ)^(-a-1/2)) * (e1 + e2)
-  have hp := pcfU_eq_integral ha' (-I*z)
-  have hm := pcfU_eq_integral ha' (I*z)
+  have hp := parabolicCylinderU_eq_integral ha' (-I*z)
+  have hm := parabolicCylinderU_eq_integral ha' (I*z)
   rw [show (1/2:ℂ) + -a = 1/2 - a by ring, show (-a) - 1/2 = -a-1/2 by ring] at hp hm
   have hsq : (-I*z)^2 = -z^2 := by rw [mul_pow, neg_pow, I_sq]; ring
   have hsq' : (I*z)^2 = -z^2 := by rw [mul_pow, I_sq]; ring
   rw [hsq] at hp; rw [hsq'] at hm
-  have hconn := pcfU_rotated_connection_pos han z
+  have hconn := parabolicCylinderU_rotated_connection_pos han z
   unfold HasIntegralAtTop
   rw [hf]
   have H : IntegrableOn (fun t => K*(exp (I*θ)*gp t + exp (-I*θ)*gm t)) (Ioi 0) :=
     ((ip.const_mul (exp (I*θ))).add (im.const_mul (exp (-I*θ)))).const_mul K
   have T := intervalIntegral_tendsto_integral_Ioi 0 H tendsto_id
-  suffices hv : ∫ t in Ioi (0:ℝ), K*(exp (I*θ)*gp t + exp (-I*θ)*gm t) = pcfU a z by
+  suffices hv : ∫ t in Ioi (0:ℝ), K*(exp (I*θ)*gp t + exp (-I*θ)*gm t) = parabolicCylinderU a z by
     rw [← hv]; exact T
   rw [integral_const_mul, integral_add (ip.const_mul _) (im.const_mul _), integral_const_mul,
       integral_const_mul]
@@ -158,11 +163,13 @@ theorem pcfU_integral_4 {a : ℂ} (ha : a.re < 1/2) (z : ℂ) :
       Real.sqrt_sq (by norm_num)]; norm_num
   have he : exp (-(-z^2)/4) * exp (-z^2/4) = 1 := by rw [← Complex.exp_add]; ring_nf; simp
   have he2 : exp (z^2/4) * exp (-z^2/4) = 1 := by rw [← Complex.exp_add]; ring_nf; simp
-  have hIp : ∫ t in Ioi (0:ℝ), gp t = Gamma (1/2-a) * exp (-z^2/4) * pcfU (-a) (-I*z) := by
+  have hIp : ∫ t in Ioi (0:ℝ), gp t = Gamma (1/2-a) * exp (-z^2/4) *
+      parabolicCylinderU (-a) (-I*z) := by
     rw [hp, show ∀ X : ℂ, Gamma (1/2-a) * exp (-z^2/4) * (exp (- -z^2/4) / Gamma (1/2-a) * X) =
       (exp (- -z^2/4) * exp (-z^2/4)) * X from fun X => by
         rw [div_mul_eq_mul_div, mul_div_assoc', div_eq_iff hΓ]; ring, he, one_mul]
-  have hIm : ∫ t in Ioi (0:ℝ), gm t = Gamma (1/2-a) * exp (-z^2/4) * pcfU (-a) (I*z) := by
+  have hIm : ∫ t in Ioi (0:ℝ), gm t = Gamma (1/2-a) * exp (-z^2/4) *
+      parabolicCylinderU (-a) (I*z) := by
     rw [hm, show ∀ X : ℂ, Gamma (1/2-a) * exp (-z^2/4) * (exp (- -z^2/4) / Gamma (1/2-a) * X) =
       (exp (- -z^2/4) * exp (-z^2/4)) * X from fun X => by
         rw [div_mul_eq_mul_div, mul_div_assoc', div_eq_iff hΓ]; ring, he, one_mul]
@@ -171,16 +178,18 @@ theorem pcfU_integral_4 {a : ℂ} (ha : a.re < 1/2) (z : ℂ) :
   have q2 : exp (I*θ) = exp (1*I*π*(a/2+1/4)) := by rw [hθ]; congr 1; ring
   rw [q1, q2, show (1:ℂ)*I*z = I*z by ring, show (-1:ℂ)*I*z = -I*z by ring] at *
   linear_combination (Real.sqrt (2/π):ℂ)/2 *
-      (Gamma (1/2-a) * (exp (1*I*π*(a/2+1/4)) * pcfU (-a) (-I*z) + exp (-1*I*π*(a/2+1/4)) * pcfU
-      (-a) (I*z))) * he2 - (Real.sqrt (2/π):ℂ)/2 * hconn + pcfU a z / 2 * hs
+      (Gamma (1/2-a) * (exp (1*I*π*(a/2+1/4)) * parabolicCylinderU (-a) (-I*z) +
+          exp (-1*I*π*(a/2+1/4)) * parabolicCylinderU
+      (-a) (I*z))) * he2 - (Real.sqrt (2/π):ℂ)/2 * hconn + parabolicCylinderU a z / 2 * hs
 
 /-- Identity under the stated parameter and domain assumptions: `HasIntegralWholeLine (fun y : ℝ
-=> let t : ℂ := c+y*I; exp (z^2/4)/Real.sqrt (2*π)*exp (-z*t+t^2/2)*t^(-a-1/2)) (pcfU a z)`. -/
+=> let t : ℂ := c+y*I; exp (z^2/4)/Real.sqrt (2*π)*exp (-z*t+t^2/2)*t^(-a-1/2)) (parabolicCylinderU
+a z)`. -/
 @[dlmf 12.5.E6]
-theorem pcfU_vertical_integral (a z : ℂ) {c : ℝ} (hc : 0 < c) :
+theorem parabolicCylinderU_vertical_integral (a z : ℂ) {c : ℝ} (hc : 0 < c) :
     HasIntegralWholeLine
         (fun y : ℝ => let t : ℂ := c+y*I; exp (z^2/4)/Real.sqrt (2*π)*exp (-z*t+t^2/2)*t^(-a-1/2))
-        (pcfU a z) := by
+        (parabolicCylinderU a z) := by
   set K : ℂ := exp (z^2/4)/Real.sqrt (2*π)
   have hfun : (fun y : ℝ => let t : ℂ := c+y*I; exp (z^2/4)/Real.sqrt (2*π)*exp
       (-z*t+t^2/2)*t^(-a-1/2)) =
@@ -194,21 +203,23 @@ theorem pcfU_vertical_integral (a z : ℂ) {c : ℝ} (hc : 0 < c) :
   rw [integral_const_mul, CylinderContour.vertical a z hc] at h
   rw [hfun]
   convert h using 1
-  rw [show K * ((Real.sqrt (2*π) : ℂ) * exp (-z^2/4) * pcfU a z) =
-      (exp (z^2/4) * exp (-z^2/4)) * pcfU a z * ((Real.sqrt (2*π) : ℂ) / Real.sqrt (2*π)) by
+  rw [show K * ((Real.sqrt (2*π) : ℂ) * exp (-z^2/4) * parabolicCylinderU a z) =
+      (exp (z^2/4) * exp (-z^2/4)) * parabolicCylinderU a z *
+          ((Real.sqrt (2*π) : ℂ) / Real.sqrt (2*π)) by
     simp only [K]; ring, he, div_self hs]
   ring
 
 /-- Identity under the stated parameter and domain assumptions: `∃ u v : ℂ, HasIntegralWholeLine
 (fun x : ℝ => let t : ℂ := x-c*I; exp (-z^2/4)/(2*π)*exp (z*t-t^2/2)*t^(a-1/2)) u ∧
 HasIntegralWholeLine (fun x : ℝ => let t : ℂ := x+c*I; exp (-z^2/4)/(2*π)*exp
-(z*t-t^2/2)*t^(a-1/2)) v ∧ u+v=pcfV a z`. -/
+(z*t-t^2/2)*t^(a-1/2)) v ∧ u+v=parabolicCylinderV a z`. -/
 @[dlmf 12.5.E7]
-theorem pcfV_horizontal_integral (a z : ℂ) {c : ℝ} (hc : 0 < c) :
+theorem parabolicCylinderV_horizontal_integral (a z : ℂ) {c : ℝ} (hc : 0 < c) :
     ∃ u v : ℂ, HasIntegralWholeLine
         (fun x : ℝ => let t : ℂ := x-c*I; exp (-z^2/4)/(2*π)*exp (z*t-t^2/2)*t^(a-1/2)) u ∧
         HasIntegralWholeLine
-        (fun x : ℝ => let t : ℂ := x+c*I; exp (-z^2/4)/(2*π)*exp (z*t-t^2/2)*t^(a-1/2)) v ∧ u+v=pcfV
+        (fun x : ℝ => let t : ℂ := x+c*I; exp (-z^2/4)/(2*π)*exp (z*t-t^2/2)*t^(a-1/2)) v ∧
+            u+v=parabolicCylinderV
         a z := by
   set K : ℂ := exp (-z^2/4)/(2*π)
   obtain ⟨hiu, hvu⟩ := CylinderContour.horizontal_upper a z hc
@@ -222,10 +233,11 @@ theorem pcfV_horizontal_integral (a z : ℂ) {c : ℝ} (hc : 0 < c) :
   refine ⟨_, _, fl ▸ CylinderIntegrals.hasIntegralWholeLine (hil.const_mul K),
     fu ▸ CylinderIntegrals.hasIntegralWholeLine (hiu.const_mul K), ?_⟩
   rw [fl, fu, integral_const_mul, integral_const_mul, hvl, hvu]
-  have hV1 := pcfV_eq_mul_I a z
-  have hV2 := pcfV_eq_mul_neg_I a z
-  have hsum : 2 * pcfV a z = (Real.sqrt (2/π):ℂ) * (exp (-I*π*(a/2-1/4)) * pcfU (-a) (I*z) +
-      exp (I*π*(a/2-1/4)) * pcfU (-a) (-I*z)) := by
+  have hV1 := parabolicCylinderV_eq_mul_I a z
+  have hV2 := parabolicCylinderV_eq_mul_neg_I a z
+  have hsum : 2 * parabolicCylinderV a z = (Real.sqrt (2/π):ℂ) *
+      (exp (-I*π*(a/2-1/4)) * parabolicCylinderU (-a) (I*z) +
+      exp (I*π*(a/2-1/4)) * parabolicCylinderU (-a) (-I*z)) := by
     linear_combination hV1 + hV2
   have hs : (Real.sqrt (2*π) : ℂ) * (Real.sqrt (2/π) : ℂ) = 2 := by
     rw [← ofReal_mul, ← Real.sqrt_mul (by positivity), show 2*π*(2/π) = 2^2 by field_simp,
@@ -237,10 +249,13 @@ theorem pcfV_horizontal_integral (a z : ℂ) {c : ℝ} (hc : 0 < c) :
   have hc' : (Real.sqrt (2*π) : ℂ)/(2*π) = (Real.sqrt (2/π) : ℂ)/2 := by
     rw [div_eq_div_iff (by simp) two_ne_zero]
     linear_combination (-(Real.sqrt (2*π) : ℂ)) * hs + (Real.sqrt (2/π) : ℂ) * hsq
-  rw [show K * (exp (-I*π*(a/2-1/4)) * ((Real.sqrt (2*π) : ℂ) * exp (z^2/4) * pcfU (-a) (I*z))) +
-      K * (exp (I*π*(a/2-1/4)) * ((Real.sqrt (2*π) : ℂ) * exp (z^2/4) * pcfU (-a) (-I*z))) =
+  rw [show K * (exp (-I*π*(a/2-1/4)) *
+      ((Real.sqrt (2*π) : ℂ) * exp (z^2/4) * parabolicCylinderU (-a) (I*z))) +
+      K * (exp (I*π*(a/2-1/4)) *
+          ((Real.sqrt (2*π) : ℂ) * exp (z^2/4) * parabolicCylinderU (-a) (-I*z))) =
       (exp (-z^2/4) * exp (z^2/4)) * ((Real.sqrt (2*π) : ℂ)/(2*π)) *
-        (exp (-I*π*(a/2-1/4)) * pcfU (-a) (I*z) + exp (I*π*(a/2-1/4)) * pcfU (-a) (-I*z)) by
+        (exp (-I*π*(a/2-1/4)) * parabolicCylinderU (-a) (I*z) + exp (I*π*(a/2-1/4)) *
+            parabolicCylinderU (-a) (-I*z)) by
     simp only [K]; ring, he, one_mul, hc']
   linear_combination (-1/2:ℂ) * hsum
 
@@ -251,11 +266,12 @@ def pcfNegativeLoop (a z : ℂ) (r R : ℝ) : ℂ :=
       (∫ t : ℝ in r..R, exp (-z*t-t^2/2)*exp ((a-1/2)*(Real.log t+π*I)))
 
 /-- The map `(fun R => Gamma (1/2-a)/(2*π*I)*exp (-z^2/4)*pcfNegativeLoop a z r R)` tends to `(𝓝
-(pcfU a z))` along `atTop`. -/
+(parabolicCylinderU a z))` along `atTop`. -/
 @[dlmf 12.5.E5]
-theorem pcfU_hankel_integral {a : ℂ} (ha : ∀ n : ℕ, a ≠ n+1/2) (z : ℂ) {r : ℝ} (hr : 0 < r) :
+theorem parabolicCylinderU_hankel_integral {a : ℂ} (ha : ∀ n : ℕ, a ≠ n+1/2) (z : ℂ)
+    {r : ℝ} (hr : 0 < r) :
     Tendsto (fun R => Gamma (1/2-a)/(2*π*I)*exp (-z^2/4)*pcfNegativeLoop a z r R) atTop
-        (𝓝 (pcfU a z)) := by
+        (𝓝 (parabolicCylinderU a z)) := by
   have hΓ : Gamma (1/2 - a) ≠ 0 := Complex.Gamma_ne_zero fun n h => ha n (by linear_combination -h)
   have hT := ((intervalIntegral_tendsto_integral_Ioi r
       (CylinderContour.laplaceIntegrand_integrableOn a z hr)
@@ -269,13 +285,14 @@ theorem pcfU_hankel_integral {a : ℂ} (ha : ∀ n : ℕ, a ≠ n+1/2) (z : ℂ)
     exact (CylinderContour.loop_eq a z hr hR).symm
   have hT' := (hT.congr' hev).const_mul (Gamma (1/2-a)/(2*π*I)*exp (-z^2/4))
   have hv : Gamma (1/2-a)/(2*π*I)*exp (-z^2/4) *
-      (2*π*I * exp (z^2/4) * pcfU a z * (Gamma (1/2-a))⁻¹) =
-      pcfU a z := by
+      (2*π*I * exp (z^2/4) * parabolicCylinderU a z * (Gamma (1/2-a))⁻¹) =
+      parabolicCylinderU a z := by
     have he : exp (-z^2/4) * exp (z^2/4) = 1 := by rw [← Complex.exp_add]; ring_nf; simp
     have hπ : (2*π*I : ℂ) ≠ 0 := by simp [Real.pi_ne_zero, I_ne_zero]
     rw [show Gamma (1/2-a)/(2*π*I)*exp (-z^2/4) *
-        (2*π*I * exp (z^2/4) * pcfU a z * (Gamma (1/2-a))⁻¹) =
-      (Gamma (1/2-a) * (Gamma (1/2-a))⁻¹) * ((2*π*I)/(2*π*I)) * (exp (-z^2/4) * exp (z^2/4)) * pcfU
+        (2*π*I * exp (z^2/4) * parabolicCylinderU a z * (Gamma (1/2-a))⁻¹) =
+      (Gamma (1/2-a) * (Gamma (1/2-a))⁻¹) * ((2*π*I)/(2*π*I)) * (exp (-z^2/4) * exp (z^2/4)) *
+          parabolicCylinderU
           a z by
         ring, mul_inv_cancel₀ hΓ, div_self hπ, he]
     ring
@@ -286,11 +303,11 @@ theorem pcfU_hankel_integral {a : ℂ} (ha : ∀ n : ℕ, a ≠ n+1/2) (z : ℂ)
 This is stronger than DLMF, which assumes `a + 1/2 ≠ 0, -1, -2, …` (implied here by `0 < c` and
 `2c < 1/2 + ℜ a`). -/
 @[dlmf 12.5.E8]
-theorem pcfU_barnes_integral' {a z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c : ℝ}
+theorem parabolicCylinderU_barnes_integral' {a z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c : ℝ}
     (hc : 0 < c) (hca : 2*c < 1/2+1*a.re) :
     HasIntegralWholeLine
       (fun y : ℝ => let t : ℂ := c+y*I; Gamma t*Gamma (1/2+1*a-2*t)*2^t*z^(2*t)*1)
-      (2*π*Gamma (1/2+1*a)*(exp (z^2/4)*z^(a+1/2))*pcfU a z) := by
+      (2*π*Gamma (1/2+1*a)*(exp (z^2/4)*z^(a+1/2))*parabolicCylinderU a z) := by
   have hca' : 2*c < 1/2 + a.re := by simpa using hca
   have hfun : (fun y : ℝ => let t : ℂ := c+y*I; Gamma t*Gamma (1/2+1*a-2*t)*2^t*z^(2*t)*1) =
       CylinderIntegrals.barnesIntegrand a z c := rfl
@@ -301,12 +318,12 @@ theorem pcfU_barnes_integral' {a z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4
 /-- Straight separating Barnes contour; exceptional-parameter deformations need residue
 corrections. -/
 @[dlmf 12.5.E8]
-theorem pcfU_barnes_integral {a z : ℂ} (_ha : ∀ n : ℕ, 1*a ≠ -n-1/2) (hz0 : z ≠ 0)
+theorem parabolicCylinderU_barnes_integral {a z : ℂ} (_ha : ∀ n : ℕ, 1*a ≠ -n-1/2) (hz0 : z ≠ 0)
     (hz : |arg z| < 3*π/4) {c : ℝ} (hc : 0 < c) (hca : 2*c < 1/2+1*a.re) :
     HasIntegralWholeLine
       (fun y : ℝ => let t : ℂ := c+y*I; Gamma t*Gamma (1/2+1*a-2*t)*2^t*z^(2*t)*1)
-      (2*π*Gamma (1/2+1*a)*(exp (z^2/4)*z^(a+1/2))*pcfU a z) :=
-  pcfU_barnes_integral' hz0 hz hc hca
+      (2*π*Gamma (1/2+1*a)*(exp (z^2/4)*z^(a+1/2))*parabolicCylinderU a z) :=
+  parabolicCylinderU_barnes_integral' hz0 hz hc hca
 
 /-- `arg (±i z) = arg z ± π/2` for `|arg z| < π/2`. -/
 theorem CylinderIntegrals.arg_I_mul {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/2) :
@@ -339,11 +356,12 @@ theorem CylinderIntegrals.I_mul_cpow {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < �
 This is stronger than DLMF, which assumes `-a + 1/2 ≠ 0, -1, -2, …` (implied here by `0 < c` and
 `2c < 1/2 - ℜ a`). -/
 @[dlmf 12.5.E9]
-theorem pcfV_barnes_integral' {a z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/4) {c : ℝ}
+theorem parabolicCylinderV_barnes_integral' {a z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/4) {c : ℝ}
     (hc : 0 < c) (hca : 2*c < 1/2+-1*a.re) :
     HasIntegralWholeLine
       (fun y : ℝ => let t : ℂ := c+y*I; Gamma t*Gamma (1/2+-1*a-2*t)*2^t*z^(2*t)*cos (π*t))
-      (2*π*Gamma (1/2+-1*a)*((Real.sqrt (π/2):ℂ)*exp (-z^2/4)*z^(-a+1/2))*pcfV a z) := by
+      (2*π*Gamma (1/2+-1*a)*((Real.sqrt (π/2):ℂ)*exp
+          (-z^2/4)*z^(-a+1/2))*parabolicCylinderV a z) := by
   have hca' : 2*c < 1/2 + (-a).re := by simpa using hca
   have hz2 : |arg z| < π/2 := by linarith [Real.pi_pos]
   obtain ⟨ha1, ha2⟩ := CylinderIntegrals.arg_I_mul hz0 hz2
@@ -369,13 +387,13 @@ theorem pcfV_barnes_integral' {a z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/4) 
   rw [hfun]
   suffices hI : ∫ y, (CylinderIntegrals.barnesIntegrand (-a) (I*z) c y +
       CylinderIntegrals.barnesIntegrand (-a) (-I*z) c y)/2 =
-      2*π*Gamma (1/2+-1*a)*((Real.sqrt (π/2):ℂ)*exp (-z^2/4)*z^(-a+1/2))*pcfV a z by
+      2*π*Gamma (1/2+-1*a)*((Real.sqrt (π/2):ℂ)*exp (-z^2/4)*z^(-a+1/2))*parabolicCylinderV a z by
     rw [← hI]; exact CylinderIntegrals.hasIntegralWholeLine ((i1.add i2).div_const 2)
   rw [integral_div, integral_add i1 i2,
       CylinderIntegrals.barnesIntegrand_integral (-a) hp0 hpa hc hca',
     CylinderIntegrals.barnesIntegrand_integral (-a) hm0 hma hc hca']
-  have hV1 := pcfV_eq_mul_I a z
-  have hV2 := pcfV_eq_mul_neg_I a z
+  have hV1 := parabolicCylinderV_eq_mul_I a z
+  have hV2 := parabolicCylinderV_eq_mul_neg_I a z
   obtain ⟨f1, f2⟩ := CylinderIntegrals.I_mul_cpow hz0 hz2 (-a+1/2)
   rw [f1, f2, show (I*z)^2 = -z^2 by rw [mul_pow, I_sq]; ring,
     show (-I*z)^2 = -z^2 by rw [mul_pow, neg_sq, I_sq]; ring, show (1/2:ℂ)+1*(-a) = 1/2+-1*a by
@@ -385,42 +403,45 @@ theorem pcfV_barnes_integral' {a z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/4) 
   have hq1 : exp (π/2*I*(-a+1/2)) = exp (-I*π*(a/2-1/4)) := by congr 1; ring
   have hq2 : exp (-(π/2)*I*(-a+1/2)) = exp (I*π*(a/2-1/4)) := by congr 1; ring
   rw [hq1, hq2]
-  have hsum : 2 * pcfV a z = (Real.sqrt (2/π):ℂ) * (exp (-I*π*(a/2-1/4)) * pcfU (-a) (I*z) +
-      exp (I*π*(a/2-1/4)) * pcfU (-a) (-I*z)) := by
+  have hsum : 2 * parabolicCylinderV a z = (Real.sqrt (2/π):ℂ) *
+      (exp (-I*π*(a/2-1/4)) * parabolicCylinderU (-a) (I*z) +
+      exp (I*π*(a/2-1/4)) * parabolicCylinderU (-a) (-I*z)) := by
     linear_combination hV1 + hV2
   linear_combination (-(π * Gamma (1/2+-1*a) * exp (-z^2/4) * z^(-a+1/2) * (Real.sqrt (π/2):ℂ))) *
       hsum -
-    (π * Gamma (1/2+-1*a) * exp (-z^2/4) * z^(-a+1/2) * (exp (-I*π*(a/2-1/4)) * pcfU (-a) (I*z) +
-      exp (I*π*(a/2-1/4)) * pcfU (-a) (-I*z))) * hs
+    (π * Gamma (1/2+-1*a) * exp (-z^2/4) * z^(-a+1/2) *
+        (exp (-I*π*(a/2-1/4)) * parabolicCylinderU (-a) (I*z) +
+      exp (I*π*(a/2-1/4)) * parabolicCylinderU (-a) (-I*z))) * hs
 
 /-- Straight separating Barnes contour; exceptional-parameter deformations need residue
 corrections. -/
 @[dlmf 12.5.E9]
-theorem pcfV_barnes_integral {a z : ℂ} (_ha : ∀ n : ℕ, -1*a ≠ -n-1/2) (hz0 : z ≠ 0)
+theorem parabolicCylinderV_barnes_integral {a z : ℂ} (_ha : ∀ n : ℕ, -1*a ≠ -n-1/2) (hz0 : z ≠ 0)
     (hz : |arg z| < π/4) {c : ℝ} (hc : 0 < c) (hca : 2*c < 1/2+-1*a.re) :
     HasIntegralWholeLine
       (fun y : ℝ => let t : ℂ := c+y*I; Gamma t*Gamma (1/2+-1*a-2*t)*2^t*z^(2*t)*cos (π*t))
-      (2*π*Gamma (1/2+-1*a)*((Real.sqrt (π/2):ℂ)*exp (-z^2/4)*z^(-a+1/2))*pcfV a z) :=
-  pcfV_barnes_integral' hz0 hz hc hca
+      (2*π*Gamma (1/2+-1*a)*((Real.sqrt (π/2):ℂ)*exp (-z^2/4)*z^(-a+1/2))*parabolicCylinderV a z) :=
+  parabolicCylinderV_barnes_integral' hz0 hz hc hca
 
 /-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => exp
-(-t^2/4)*(t:ℂ)^(μ-1)*pcfU a t) 0 (Real.sqrt π*2^(-(μ+a+1/2)/2)*Gamma μ/Gamma ((μ+a+3/2)/2))`. -/
+(-t^2/4)*(t:ℂ)^(μ-1)*parabolicCylinderU a t) 0 (Real.sqrt π*2^(-(μ+a+1/2)/2)*Gamma μ/Gamma
+((μ+a+3/2)/2))`. -/
 @[dlmf 12.12.E1]
 theorem pcf_integral_1 {μ : ℂ} (hμ : 0 < μ.re) (a : ℂ) :
-    HasIntegralAtTop (fun t : ℝ => exp (-t^2/4)*(t:ℂ)^(μ-1)*pcfU a t) 0
+    HasIntegralAtTop (fun t : ℝ => exp (-t^2/4)*(t:ℂ)^(μ-1)*parabolicCylinderU a t) 0
         (Real.sqrt π*2^(-(μ+a+1/2)/2)*Gamma μ/Gamma ((μ+a+3/2)/2)) := by
   obtain ⟨hI, hV⟩ := laplace_kummerU_gauss (a := a/2+1/4) (b := μ/2) (c := 1/2) (z := 1)
     (by simp; linarith) (by simp; linarith) (by simp)
   obtain ⟨hI2, hV2⟩ := CylinderIntegrals.sq_half_subst hI
   set C : ℂ := (2:ℂ)^(-(1/4)-a/2) * (2:ℂ)^(μ/2-1)
   have heq : EqOn (fun t : ℝ => C * ((t:ℂ) * tricomiLaplaceKernel (a/2+1/4) (μ/2) (1/2) 1 (t^2/2)))
-      (fun t : ℝ => exp (-t^2/4)*(t:ℂ)^(μ-1)*pcfU a t) (Ioi 0) :=
+      (fun t : ℝ => exp (-t^2/4)*(t:ℂ)^(μ-1)*parabolicCylinderU a t) (Ioi 0) :=
     fun t ht => (CylinderIntegrals.integrand_1 μ a ht).symm
   have H := IntegrableOn.congr_fun (hI2.const_mul C) heq measurableSet_Ioi
   unfold HasIntegralAtTop
   have T := intervalIntegral_tendsto_integral_Ioi 0 H tendsto_id
   rw [← setIntegral_congr_fun measurableSet_Ioi heq, integral_const_mul, hV2, hV, sub_self,
-    CylinderIntegrals.regularizedGaussHG_zero] at T
+    CylinderIntegrals.regularizedGaussHypergeometric_zero] at T
   have hd := Complex.Gamma_mul_Gamma_add_half (μ/2)
   rw [show 2*(μ/2) = μ by ring] at hd
   have h2 : C * (2:ℂ)^(1-μ) = (2:ℂ)^(-(μ+a+1/2)/2) := by
@@ -437,10 +458,11 @@ theorem pcf_integral_1 {μ : ℂ} (hμ : 0 < μ.re) (a : ℂ) :
   exact T
 
 /-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => exp
-(-3*t^2/4)*(t:ℂ)^(-a-3/2)*pcfU a t) 0 (2^(1/4+a/2)*Gamma (-a-1/2)*cos ((a/4+1/8)*π))`. -/
+(-3*t^2/4)*(t:ℂ)^(-a-3/2)*parabolicCylinderU a t) 0 (2^(1/4+a/2)*Gamma (-a-1/2)*cos
+((a/4+1/8)*π))`. -/
 @[dlmf 12.12.E2]
 theorem pcf_integral_2 {a : ℂ} (ha : a.re < -1/2) :
-    HasIntegralAtTop (fun t : ℝ => exp (-3*t^2/4)*(t:ℂ)^(-a-3/2)*pcfU a t) 0
+    HasIntegralAtTop (fun t : ℝ => exp (-3*t^2/4)*(t:ℂ)^(-a-3/2)*parabolicCylinderU a t) 0
         (2^(1/4+a/2)*Gamma (-a-1/2)*cos ((a/4+1/8)*π)) := by
   set μ : ℂ := -a-1/2 with hμ
   have hb : 0 < (μ/2).re := by simp [hμ]; linarith
@@ -450,7 +472,7 @@ theorem pcf_integral_2 {a : ℂ} (ha : a.re < -1/2) :
   obtain ⟨hI2, hV2⟩ := CylinderIntegrals.sq_half_subst hI
   set C : ℂ := (2:ℂ)^(-(1/4)-a/2) * (2:ℂ)^(μ/2-1)
   have heq : EqOn (fun t : ℝ => C * ((t:ℂ) * tricomiLaplaceKernel (a/2+1/4) (μ/2) (1/2) 2 (t^2/2)))
-      (fun t : ℝ => exp (-3*t^2/4)*(t:ℂ)^(-a-3/2)*pcfU a t) (Ioi 0) := fun t ht => by
+      (fun t : ℝ => exp (-3*t^2/4)*(t:ℂ)^(-a-3/2)*parabolicCylinderU a t) (Ioi 0) := fun t ht => by
     rw [show -a-3/2 = μ - 1 by rw [hμ]; ring]
     exact (CylinderIntegrals.integrand_2 μ a ht).symm
   have H := IntegrableOn.congr_fun (hI2.const_mul C) heq measurableSet_Ioi
@@ -494,7 +516,7 @@ cos(ts + (a/2+1/4)π) ds` for `re a < 1/2`, real `t`. -/
 theorem CylinderContour.U_cos {a : ℂ} (ha : a.re < 1/2) (t : ℝ) :
     IntegrableOn (fun s : ℝ => (s:ℂ)^(-a-1/2) * exp (-(s:ℂ)^2/2) * cos (t*s + (a/2+1/4)*π)) (Ioi 0)
         ∧
-    exp (-(t:ℂ)^2/4) * pcfU a t =
+    exp (-(t:ℂ)^2/4) * parabolicCylinderU a t =
       (Real.sqrt (2/π):ℂ) * ∫ s in Ioi (0:ℝ), (s:ℂ)^(-a-1/2) * exp (-(s:ℂ)^2/2) * cos
           (t*s + (a/2+1/4)*π) := by
   have hc : -1 < (-a-1/2).re := by simp; linarith
@@ -514,7 +536,7 @@ theorem CylinderContour.U_cos {a : ℂ} (ha : a.re < 1/2) (t : ℝ) :
           (norm_nonneg _)
       congr 2; simp
   refine ⟨hI, ?_⟩
-  have h4 := pcfU_integral_4 ha (t:ℂ)
+  have h4 := parabolicCylinderU_integral_4 ha (t:ℂ)
   have hT := intervalIntegral_tendsto_integral_Ioi 0
     (hI.const_mul ((Real.sqrt (2/π):ℂ)*exp ((t:ℂ)^2/4))) tendsto_id
   unfold HasIntegralAtTop at h4
@@ -530,9 +552,10 @@ theorem CylinderContour.U_cos {a : ℂ} (ha : a.re < 1/2) (t : ℝ) :
 12.5.4 and the kernel `CylinderContour.kernel`). -/
 theorem CylinderContour.integral_3_strip {a : ℂ} (ha1 : -1/2 < a.re) (ha2 : a.re < 1/2)
     {x : ℝ} (hx : 0 < x) :
-    IntegrableOn (fun t : ℝ => exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*pcfU a t) (Ioi 0) ∧
-    ∫ t in Ioi (0:ℝ), exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*pcfU a t =
-      (Real.sqrt (π/2):ℂ)*Gamma (1/2-a)*(x:ℂ)^(-a-3/2)*exp (x^2/4)*pcfU (-a) x := by
+    IntegrableOn (fun t : ℝ =>
+        exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*parabolicCylinderU a t) (Ioi 0) ∧
+    ∫ t in Ioi (0:ℝ), exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*parabolicCylinderU a t =
+      (Real.sqrt (π/2):ℂ)*Gamma (1/2-a)*(x:ℂ)^(-a-3/2)*exp (x^2/4)*parabolicCylinderU (-a) x := by
   set μ : ℂ := 1/2 - a with hμ
   have hm0 : 0 < μ.re := by simp [hμ]; linarith
   have hm2 : μ.re < 2 := by simp [hμ]; linarith
@@ -565,16 +588,18 @@ theorem CylinderContour.integral_3_strip {a : ℂ} (ha1 : -1/2 < a.re) (ha2 : a.
       calc ‖G1 q.1‖ * (‖G2 q.2‖ * ‖cos ((q.1:ℂ)*q.2 + θ)‖)
           ≤ ‖G1 q.1‖ * (‖G2 q.2‖ * Real.exp |θ.im|) := by gcongr
         _ = _ := by ring
-  have hfeq : ∀ t : ℝ, exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*pcfU a t =
+  have hfeq : ∀ t : ℝ, exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*parabolicCylinderU a t =
       (Real.sqrt (2/π):ℂ) * ∫ s in Ioi (0:ℝ), F (t, s) := by
     intro t
     have h := (CylinderContour.U_cos ha2 t).2
-    rw [show exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*pcfU a t =
-      G1 t * (exp (-(t:ℂ)^2/4) * pcfU a t) by simp only [G1]; ring, h, ← integral_const_mul,
+    rw [show exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*parabolicCylinderU a t =
+      G1 t * (exp (-(t:ℂ)^2/4) * parabolicCylinderU a t) by simp only [G1]; ring, h,
+                                                              ← integral_const_mul,
       ← integral_const_mul, ← integral_const_mul]
     refine integral_congr_ae (Eventually.of_forall fun s => ?_)
     simp only [hF, G2, hθ]; ring
-  have hint : IntegrableOn (fun t : ℝ => exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*pcfU a t)
+  have hint : IntegrableOn
+      (fun t : ℝ => exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*parabolicCylinderU a t)
       (Ioi 0) := by
     rw [funext hfeq]; exact hprod.integral_prod_left.const_mul _
   refine ⟨hint, ?_⟩
@@ -592,7 +617,7 @@ theorem CylinderContour.integral_3_strip {a : ℂ} (ha1 : -1/2 < a.re) (ha2 : a.
     simp only [G2]
     rw [show -(s:ℂ)^2/2 - x*s = -(s:ℂ)^2/2 + -(x*s) by ring, Complex.exp_add]; ring
   rw [setIntegral_congr_fun measurableSet_Ioi hin, integral_const_mul]
-  have hU := pcfU_eq_integral (a := -a) (by simp; linarith) (x:ℂ)
+  have hU := parabolicCylinderU_eq_integral (a := -a) (by simp; linarith) (x:ℂ)
   rw [show (-a) - 1/2 = -a-1/2 by ring, show (1/2:ℂ) + -a = 1/2 - a by ring] at hU
   have hΓ : Gamma (1/2 - a) ≠ 0 := Complex.Gamma_ne_zero_of_re_pos (by simp; linarith)
   have he : exp ((x:ℂ)^2/4) * exp (-(x:ℂ)^2/4) = 1 := by rw [← Complex.exp_add]; ring_nf; simp
@@ -624,7 +649,7 @@ theorem CylinderContour.rpow_le_add {t q1 q2 r : ℝ} (ht : 0 < t) (h1 : q1 ≤ 
 /-- Local domination for the integrand of 12.12.3 in the parameter `a`. -/
 theorem CylinderContour.integral_3_gaussMajorant {a0 : ℂ} (ha0 : a0.re < 1/2) {x : ℝ} (hx : 0 < x) :
     ∃ V ∈ 𝓝 a0, ∃ g : ℝ → ℝ, IntegrableOn g (Ioi 0) ∧ ∀ t ∈ Ioi (0:ℝ), ∀ a ∈ V,
-      ‖exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*pcfU a t‖ ≤ g t := by
+      ‖exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*parabolicCylinderU a t‖ ≤ g t := by
   set δ := (1/2 - a0.re)/2 with hδ
   have hδ0 : 0 < δ := by rw [hδ]; linarith
   obtain ⟨M, hM⟩ := CylinderContour.U_decay (‖a0‖ + δ + 1/2)
@@ -658,8 +683,8 @@ theorem CylinderContour.integral_3_gaussMajorant {a0 : ℂ} (ha0 : a0.re < 1/2) 
           (by simp only [q2]; linarith [(abs_lt.mp hre).1])
     have hx2 : 0 < x^2 := by positivity
     simp only [add_sub_cancel_right]
-    calc ‖exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*pcfU a t‖
-        = ‖(t:ℂ)^(-a-1/2)‖ / ‖((x:ℂ)^2+(t:ℂ)^2)‖ * ‖exp (-(t:ℂ)^2/4) * pcfU a t‖ := by
+    calc ‖exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*parabolicCylinderU a t‖
+        = ‖(t:ℂ)^(-a-1/2)‖ / ‖((x:ℂ)^2+(t:ℂ)^2)‖ * ‖exp (-(t:ℂ)^2/4) * parabolicCylinderU a t‖ := by
           rw [norm_mul, norm_div, norm_mul, norm_mul]; ring
       _ ≤ (t ^ q1 + t ^ q2) / x^2 * (M * Real.exp (-t)) := by
           rw [hc]
@@ -668,13 +693,14 @@ theorem CylinderContour.integral_3_gaussMajorant {a0 : ℂ} (ha0 : a0.re < 1/2) 
       _ = _ := by ring
 /-- DLMF 12.12.3 as a Lebesgue integral on `(0,∞)`, for all `Re a < 1/2`. -/
 theorem CylinderContour.integral_3_all {a : ℂ} (ha : a.re < 1/2) {x : ℝ} (hx : 0 < x) :
-    IntegrableOn (fun t : ℝ => exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*pcfU a t) (Ioi 0) ∧
-    ∫ t in Ioi (0:ℝ), exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*pcfU a t =
-      (Real.sqrt (π/2):ℂ)*Gamma (1/2-a)*(x:ℂ)^(-a-3/2)*exp (x^2/4)*pcfU (-a) x := by
+    IntegrableOn (fun t : ℝ =>
+        exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*parabolicCylinderU a t) (Ioi 0) ∧
+    ∫ t in Ioi (0:ℝ), exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*parabolicCylinderU a t =
+      (Real.sqrt (π/2):ℂ)*Gamma (1/2-a)*(x:ℂ)^(-a-3/2)*exp (x^2/4)*parabolicCylinderU (-a) x := by
   set Ω : Set ℂ := {a | a.re < 1/2} with hΩ
   have hΩo : IsOpen Ω := isOpen_lt Complex.continuous_re continuous_const
   have hint : ∀ b ∈ Ω, IntegrableOn
-      (fun t : ℝ => exp (-t^2/4)*(t:ℂ)^(-b-1/2)/(x^2+t^2:ℂ)*pcfU b t) (Ioi 0) := by
+      (fun t : ℝ => exp (-t^2/4)*(t:ℂ)^(-b-1/2)/(x^2+t^2:ℂ)*parabolicCylinderU b t) (Ioi 0) := by
     intro b hb
     obtain ⟨V, hV, g, hg, hle⟩ := CylinderContour.integral_3_gaussMajorant (a0 := b) hb hx
     refine Integrable.mono' hg ?_ ?_
@@ -688,17 +714,17 @@ theorem CylinderContour.integral_3_all {a : ℂ} (ha : a.re < 1/2) {x : ℝ} (hx
       have hcp : ContinuousAt (fun s : ℝ => (s:ℂ)^(-b-1/2)) t :=
         Complex.continuous_ofReal.continuousAt.cpow continuousAt_const
           (Complex.ofReal_mem_slitPlane.mpr ht)
-      have hU : ContinuousAt (fun s : ℝ => pcfU b s) t :=
-        ((pcfU_entire b).continuous.comp Complex.continuous_ofReal).continuousAt
+      have hU : ContinuousAt (fun s : ℝ => parabolicCylinderU b s) t :=
+        ((parabolicCylinderU_entire b).continuous.comp Complex.continuous_ofReal).continuousAt
       exact (((by fun_prop : Continuous fun s : ℝ => exp (-(s:ℂ)^2/4)).continuousAt.mul hcp).div
         (by fun_prop) hden).mul hU
     · exact (ae_restrict_iff' measurableSet_Ioi).mpr
         (Eventually.of_forall fun t ht => hle t ht b (mem_of_mem_nhds hV))
   refine ⟨hint a ha, ?_⟩
   set Λ : ℂ → ℂ := fun b => ∫ t in Ioi (0:ℝ),
-    exp (-t^2/4)*(t:ℂ)^(-b-1/2)/(x^2+t^2:ℂ)*pcfU b t
+    exp (-t^2/4)*(t:ℂ)^(-b-1/2)/(x^2+t^2:ℂ)*parabolicCylinderU b t
   set R : ℂ → ℂ := fun b =>
-    (Real.sqrt (π/2):ℂ)*Gamma (1/2-b)*(x:ℂ)^(-b-3/2)*exp (x^2/4)*pcfU (-b) x
+    (Real.sqrt (π/2):ℂ)*Gamma (1/2-b)*(x:ℂ)^(-b-3/2)*exp (x^2/4)*parabolicCylinderU (-b) x
   have hΛ : DifferentiableOn ℂ Λ Ω := by
     refine differentiableOn_integral_of_locally_dominated hΩo
       (fun b hb => (hint b hb).aestronglyMeasurable) ?_ ?_
@@ -708,7 +734,7 @@ theorem CylinderContour.integral_3_all {a : ℂ} (ha : a.re < 1/2) {x : ℝ} (hx
       refine Differentiable.differentiableOn ?_
       exact (((differentiable_const _).mul
         ((by fun_prop : Differentiable ℂ fun b : ℂ => -b-1/2).const_cpow (Or.inl htc))).div_const
-        _).mul (pcfU_entire_order (t:ℂ))
+        _).mul (parabolicCylinderU_entire_order (t:ℂ))
     · intro b hb
       obtain ⟨V, hV, g, hg, hle⟩ := CylinderContour.integral_3_gaussMajorant (a0 := b) hb hx
       exact ⟨V, hV, g, hg, (ae_restrict_iff' measurableSet_Ioi).mpr
@@ -728,7 +754,8 @@ theorem CylinderContour.integral_3_all {a : ℂ} (ha : a.re < 1/2) {x : ℝ} (hx
     exact ((((differentiableAt_const _).mul hG).mul
       ((by fun_prop : Differentiable ℂ fun c : ℂ => -c-3/2).const_cpow (Or.inl hxc) b)).mul
       (differentiableAt_const _)).mul
-      ((pcfU_entire_order (x:ℂ)).comp (by fun_prop : Differentiable ℂ fun c : ℂ => -c) b)
+      ((parabolicCylinderU_entire_order (x:ℂ)).comp
+          (by fun_prop : Differentiable ℂ fun c : ℂ => -c) b)
   have h0 : (0:ℂ) ∈ Ω := by simp [hΩ]
   have hev : Λ =ᶠ[𝓝 (0:ℂ)] R := by
     filter_upwards [Metric.ball_mem_nhds (0:ℂ) (by norm_num : (0:ℝ) < 1/2)] with b hb
@@ -741,12 +768,13 @@ theorem CylinderContour.integral_3_all {a : ℂ} (ha : a.re < 1/2) {x : ℝ} (hx
     (convex_halfSpace_re_lt (1/2)).isPreconnected h0 hev ha
 
 /-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => exp
-(-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*pcfU a t) 0 ((Real.sqrt (π/2):ℂ)*Gamma
-(1/2-a)*(x:ℂ)^(-a-3/2)*exp (x^2/4)*pcfU (-a) x)`. -/
+(-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*parabolicCylinderU a t) 0 ((Real.sqrt (π/2):ℂ)*Gamma
+(1/2-a)*(x:ℂ)^(-a-3/2)*exp (x^2/4)*parabolicCylinderU (-a) x)`. -/
 @[dlmf 12.12.E3]
 theorem pcf_integral_3 {a : ℂ} (ha : a.re < 1/2) {x : ℝ} (hx : 0 < x) :
-    HasIntegralAtTop (fun t : ℝ => exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*pcfU a t) 0
-        ((Real.sqrt (π/2):ℂ)*Gamma (1/2-a)*(x:ℂ)^(-a-3/2)*exp (x^2/4)*pcfU (-a) x) := by
+    HasIntegralAtTop (fun t : ℝ => exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*parabolicCylinderU a t) 0
+        ((Real.sqrt (π/2):ℂ)*Gamma (1/2-a)*(x:ℂ)^(-a-3/2)*exp
+            (x^2/4)*parabolicCylinderU (-a) x) := by
   obtain ⟨hI, hv⟩ := CylinderContour.integral_3_all ha hx
   unfold HasIntegralAtTop
   rw [← hv]
@@ -878,7 +906,7 @@ theorem pcf_integral_4_integrable {a : ℂ} (ha : a.re < 1/2) (z : ℂ) :
 /-- Products of Weber solutions obey the common symmetric-square equation.
 This is the ODE needed to identify the convergent integral in DLMF 12.12.4. -/
 theorem weber_product_ode {a : ℂ} {f f' g g' : ℂ → ℂ}
-    (hf : IsWeberSol a f f') (hg : IsWeberSol a g g') (z : ℂ) :
+    (hf : IsWeberSolution a f f') (hg : IsWeberSolution a g g') (z : ℂ) :
     iteratedDeriv 3 (fun t => f t * g t) z -
       (z^2 + 4*a) * deriv (fun t => f t * g t) z - z * f z * g z = 0 := by
   have hq (w : ℂ) : HasDerivAt (fun t : ℂ => t^2/4 + a) (w/2) w := by
@@ -1137,8 +1165,8 @@ lemma CylinderSquareIntegral.kernel_differentiable {a : ℂ} (ha : a.re < 1/2) :
 
 /-- A pole-safe sine/cosine factorization of the two cylinder solutions at the origin. -/
 theorem pcfProduct_zero_pair_v {v : ℂ} (hv : 0 < v.re) :
-    pcfU (1/2-2*v) 0 = ((2 : ℂ)^(v-1/2)*Gamma v/(Real.sqrt π))*sin (π*v) ∧
-    pcfUBar (1/2-2*v) 0 = ((2 : ℂ)^(v-1/2)*Gamma v/(Real.sqrt π))*cos (π*v) := by
+    parabolicCylinderU (1/2-2*v) 0 = ((2 : ℂ)^(v-1/2)*Gamma v/(Real.sqrt π))*sin (π*v) ∧
+    parabolicCylinderUBar (1/2-2*v) 0 = ((2 : ℂ)^(v-1/2)*Gamma v/(Real.sqrt π))*cos (π*v) := by
   have hG : Gamma v ≠ 0 := Gamma_ne_zero_of_re_pos hv
   have hG1 : Gamma (v+1/2) ≠ 0 := Gamma_ne_zero_of_re_pos (by simp; linarith)
   have hp : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
@@ -1146,8 +1174,8 @@ theorem pcfProduct_zero_pair_v {v : ℂ} (hv : 0 < v.re) :
   have hs2 : (Real.sqrt π : ℂ)^2 = π := by norm_cast; exact Real.sq_sqrt Real.pi_pos.le
   have h2 : (2 : ℂ) ≠ 0 := by norm_num
   let C : ℂ := (2 : ℂ)^(v-1/2)*Gamma v/(Real.sqrt π)
-  have hU : pcfU (1/2-2*v) 0 = C * sin (π*v) := by
-    rw [pcfU_zero', show -((1/2-2*v)/2+1/4) = v-1/2 by ring,
+  have hU : parabolicCylinderU (1/2-2*v) 0 = C * sin (π*v) := by
+    rw [parabolicCylinderU_zero', show -((1/2-2*v)/2+1/4) = v-1/2 by ring,
       show 3/4+(1/2-2*v)/2 = 1-v by ring, recip_Gamma_one_sub_eq hG]
     dsimp only [C]
     field_simp
@@ -1155,8 +1183,8 @@ theorem pcfProduct_zero_pair_v {v : ℂ} (hv : 0 < v.re) :
   have hdup := Gamma_mul_Gamma_add_half v
   have hpows : (2 : ℂ)^(1-2*v)*(2 : ℂ)^(v-1/2) = (2 : ℂ)^(1/2-v) := by
     rw [← cpow_add _ _ h2]; congr 1; ring
-  have hV : pcfUBar (1/2-2*v) 0 = C * cos (π*v) := by
-    rw [pcfUBar, pcfV_zero', pcfVZero,
+  have hV : parabolicCylinderUBar (1/2-2*v) 0 = C * cos (π*v) := by
+    rw [parabolicCylinderUBar, parabolicCylinderV_zero', parabolicCylinderVZero,
       show (1/2:ℂ)-(1/2-2*v) = 2*v by ring,
       show (1/2-2*v)/2+1/4 = 1/2-v by ring,
       show 3/4-(1/2-2*v)/2 = v+1/2 by ring,
@@ -1176,7 +1204,7 @@ theorem pcfProduct_zero_pair_v {v : ℂ} (hv : 0 < v.re) :
 /-- The cylinder-square initial value expressed through a beta integral. -/
 theorem pcfProduct_zero_beta_v {v : ℂ} (hv : 0 < v.re) :
     Gamma (2*v) * betaIntegral v (1/2) / π =
-      (pcfU (1/2-2*v) 0)^2 + (pcfUBar (1/2-2*v) 0)^2 := by
+      (parabolicCylinderU (1/2-2*v) 0)^2 + (parabolicCylinderUBar (1/2-2*v) 0)^2 := by
   have hG : Gamma v ≠ 0 := Gamma_ne_zero_of_re_pos hv
   have hG1 : Gamma (v+1/2) ≠ 0 := Gamma_ne_zero_of_re_pos (by simp; linarith)
   have hp : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
@@ -1213,11 +1241,10 @@ theorem pcfProduct_zero_beta_v {v : ℂ} (hv : 0 < v.re) :
 lemma CylinderSquareIntegral.initial_value {a : ℂ} (ha : a.re < 1/2) :
     (2 : ℂ)^(3/2 : ℂ)/π*Gamma (1/2-a) *
       (∫ t : ℝ in Ioi 0, exp (2*a*t)/(Real.sqrt (Real.sinh (2*t)) : ℂ)) =
-      (pcfU a 0)^2+(pcfUBar a 0)^2 := by
+      (parabolicCylinderU a 0)^2+(parabolicCylinderUBar a 0)^2 := by
   have hv : 0 < (1/4-a/2).re := by simp; linarith
   have h := pcfProduct_zero_beta_v hv
-  rw [show (2 : ℂ)*(1/4-a/2)=1/2-a by ring,
-    show (1/2 : ℂ)-(1/2-a)=a by ring] at h
+  rw [show (2 : ℂ)*(1/4-a/2)=1/2-a by ring, show (1/2 : ℂ)-(1/2-a)=a by ring] at h
   rw [CylinderSquareIntegral.base_beta]
   have h2 : (2 : ℂ)^(3/2 : ℂ)=2*(Real.sqrt 2 : ℂ) := by
     rw [show (3/2 : ℂ)=1+1/2 by norm_num, cpow_add _ _ (by norm_num : (2 : ℂ) ≠ 0), cpow_one,
@@ -1231,41 +1258,45 @@ lemma CylinderSquareIntegral.initial_value {a : ℂ} (ha : a.re < 1/2) :
 /-- The normalized squared cylinder combination solves the symmetric-square equation. -/
 lemma CylinderSquareIntegral.product_isThirdOrderSolution (a : ℂ) :
     ODE.IsThirdOrderSolution (fun z : ℂ => z^2+4*a) (fun z => z)
-      (fun z => (pcfU a z)^2+(pcfUBar a z)^2)
-      (fun z => 2*(pcfU a z*pcfUDeriv a z+pcfUBar a z*pcfUBarDeriv a z))
-      (fun z => 2*(z^2/4+a)*((pcfU a z)^2+(pcfUBar a z)^2)+
-        2*((pcfUDeriv a z)^2+(pcfUBarDeriv a z)^2)) := by
+      (fun z => (parabolicCylinderU a z)^2+(parabolicCylinderUBar a z)^2)
+      (fun z => 2*(parabolicCylinderU a z*parabolicCylinderUDeriv a z+parabolicCylinderUBar a
+          z*parabolicCylinderUBarDeriv a z))
+      (fun z => 2*(z^2/4+a)*((parabolicCylinderU a z)^2+(parabolicCylinderUBar a z)^2)+
+        2*((parabolicCylinderUDeriv a z)^2+(parabolicCylinderUBarDeriv a z)^2)) := by
   have hq (w : ℂ) : HasDerivAt (fun t : ℂ => t^2/4+a) (w/2) w := by
     exact ((((hasDerivAt_id w).pow 2).div_const 4).add_const a).congr_deriv (by
       simp only [id_eq, Nat.cast_ofNat, Nat.reduceSub, pow_one, mul_one]
       ring)
-  have hB : IsWeberSol a (pcfUBar a) (pcfUBarDeriv a) := fun z => by
-    refine ⟨(hasDerivAt_pcfV a z).const_mul _, ?_⟩
-    exact ((hasDerivAt_pcfVDeriv a z).const_mul (Gamma (1/2-a))).congr_deriv (by
-      simp only [pcfUBar]
+  have hB : IsWeberSolution a (parabolicCylinderUBar a)
+      (parabolicCylinderUBarDeriv a) := fun z => by
+    refine ⟨(hasDerivAt_parabolicCylinderV a z).const_mul _, ?_⟩
+    exact ((hasDerivAt_parabolicCylinderVDeriv a z).const_mul (Gamma (1/2-a))).congr_deriv (by
+      simp only [parabolicCylinderUBar]
       ring)
-  have hU := ODE.product_isThirdOrderSolution (isWeberSol_pcfU a) (isWeberSol_pcfU a) hq
+  have hU := ODE.product_isThirdOrderSolution (isWeberSolution_parabolicCylinderU a)
+      (isWeberSolution_parabolicCylinderU a) hq
   have hV := ODE.product_isThirdOrderSolution hB hB hq
   convert hU.add hV using 1 <;> funext z <;> ring
 
 /-- Lowering the parameter identifies both initial derivatives, including
 negative half-integral parameters of the barred solution. -/
 lemma CylinderSquareIntegral.deriv_zero_shift {a : ℂ} (ha : a.re < 1/2) :
-    pcfUDeriv a 0 = -pcfU (a-1) 0 ∧ pcfUBarDeriv a 0 = -pcfUBar (a-1) 0 := by
+    parabolicCylinderUDeriv a 0 = -parabolicCylinderU (a-1) 0 ∧ parabolicCylinderUBarDeriv a 0 =
+        -parabolicCylinderUBar (a-1) 0 := by
   constructor
-  · have h := pcfU_recurrence_sub a 0
-    rw [(hasDerivAt_pcfU a 0).deriv] at h
+  · have h := parabolicCylinderU_recurrence_sub a 0
+    rw [(hasDerivAt_parabolicCylinderU a 0).deriv] at h
     simp only [zero_div, zero_mul, sub_zero] at h
     linear_combination h
-  · have h := pcfV_recurrence_sub a 0
-    rw [(hasDerivAt_pcfV a 0).deriv] at h
+  · have h := parabolicCylinderV_recurrence_sub a 0
+    rw [(hasDerivAt_parabolicCylinderV a 0).deriv] at h
     simp only [zero_div, zero_mul, sub_zero] at h
     have hg : (1/2:ℂ)-a ≠ 0 := by
       intro he
       have := congrArg Complex.re he
       simp at this
       linarith
-    simp only [pcfUBarDeriv, pcfUBar]
+    simp only [parabolicCylinderUBarDeriv, parabolicCylinderUBar]
     rw [show (1/2:ℂ)-(a-1)=(1/2-a)+1 by ring, Gamma_add_one _ hg]
     linear_combination Gamma (1/2-a)*h
 
@@ -1278,21 +1309,23 @@ theorem pcfProduct_eq_of_initial {a : ℂ} {y y1 y2 z z1 z2 : ℂ → ℂ}
     exact ((((hasDerivAt_id x).pow 2).div_const 4).add_const a).congr_deriv (by
       simp only [id_eq, Nat.cast_ofNat, Nat.reduceSub, pow_one, mul_one]
       ring)
-  have hp {f f' g g' : ℂ → ℂ} (hf : IsWeberSol a f f') (hg : IsWeberSol a g g') :=
+  have hp {f f' g g' : ℂ → ℂ} (hf : IsWeberSolution a f f') (hg : IsWeberSolution a g g') :=
     ODE.product_isThirdOrderSolution hf hg hq
   have hp_eq : (fun x : ℂ => 4*(x^2/4+a)) = fun x => x^2+4*a := by funext x; ring
   have hq_eq : (fun x : ℂ => 2*(x/2)) = fun x => x := by funext x; ring
   simp only [hp_eq, hq_eq] at hp
-  have hu := hp (isWeberSol_pcfEven a) (isWeberSol_pcfEven a)
-  have hv := hp (isWeberSol_pcfEven a) (isWeberSol_pcfOdd a)
-  have hw := hp (isWeberSol_pcfOdd a) (isWeberSol_pcfOdd a)
+  have hu := hp (isWeberSolution_parabolicCylinderEven a) (isWeberSolution_parabolicCylinderEven a)
+  have hv := hp (isWeberSolution_parabolicCylinderEven a) (isWeberSolution_parabolicCylinderOdd a)
+  have hw := hp (isWeberSolution_parabolicCylinderOdd a) (isWeberSolution_parabolicCylinderOdd a)
   apply ODE.thirdOrder_eq_of_initial hy hz hu hv hw (x₀ := 0) _ h0 h1 h2
-  norm_num [ODE.thirdOrderWronskian, pcfEven_zero, pcfEvenDeriv_zero, pcfOdd_zero,
-    pcfOddDeriv_zero]
+  norm_num [ODE.thirdOrderWronskian, parabolicCylinderEven_zero, parabolicCylinderEvenDeriv_zero,
+      parabolicCylinderOdd_zero,
+    parabolicCylinderOddDeriv_zero]
 
 /-- The squared cylinder combination has zero first derivative at the origin. -/
 lemma CylinderSquareIntegral.initial_deriv {a : ℂ} (ha : a.re < 1/2) :
-    pcfU a 0 * pcfUDeriv a 0 + pcfUBar a 0 * pcfUBarDeriv a 0 = 0 := by
+    parabolicCylinderU a 0 * parabolicCylinderUDeriv a 0 + parabolicCylinderUBar a 0 *
+        parabolicCylinderUBarDeriv a 0 = 0 := by
   let v : ℂ := 1/4-a/2
   have hv : 0 < v.re := by dsimp [v]; simp; linarith
   obtain ⟨hU, hB⟩ := pcfProduct_zero_pair_v hv
@@ -1413,11 +1446,12 @@ lemma CylinderSquareIntegral.first_moment {a : ℂ} (ha : a.re < 1/2) :
 /-- The second initial value of the normalized cylinder square integral. -/
 lemma CylinderSquareIntegral.initial_second {a : ℂ} (ha : a.re < 1/2) :
     (2:ℂ)^(3/2:ℂ)/π*Gamma (1/2-a)*pcfIntegral4Moment a 1 0 =
-      2*a*((pcfU a 0)^2+(pcfUBar a 0)^2)+
-        2*((pcfUDeriv a 0)^2+(pcfUBarDeriv a 0)^2) := by
+      2*a*((parabolicCylinderU a 0)^2+(parabolicCylinderUBar a 0)^2)+
+        2*((parabolicCylinderUDeriv a 0)^2+(parabolicCylinderUBarDeriv a 0)^2) := by
   let C (b : ℂ) := (2:ℂ)^(3/2:ℂ)/π*Gamma (1/2-b)
   have hM (b : ℂ) (hb : b.re < 1/2) :
-      C b * pcfIntegral4Moment b 0 0 = (pcfU b 0)^2+(pcfUBar b 0)^2 := by
+      C b * pcfIntegral4Moment b 0 0 =
+          (parabolicCylinderU b 0)^2+(parabolicCylinderUBar b 0)^2 := by
     simpa only [C, pcfIntegral4Moment, pcfIntegral4Kernel, pow_zero, one_mul,
       zero_pow (by norm_num : 2 ≠ 0), zero_div, zero_mul, add_zero]
       using CylinderSquareIntegral.initial_value hb
@@ -1442,7 +1476,7 @@ lemma CylinderSquareIntegral.initial_second {a : ℂ} (ha : a.re < 1/2) :
 theorem pcf_integral_4 {a : ℂ} (ha : a.re < 1/2) (z : ℂ) :
     HasIntegralAtTop (fun t : ℝ => 2^(3/2:ℂ)/π*Gamma (1/2-a)*
       exp (2*a*t+z^2/2*Real.tanh t)/(Real.sqrt (Real.sinh (2*t)):ℂ)) 0
-        ((pcfU a z)^2+(pcfUBar a z)^2) := by
+        ((parabolicCylinderU a z)^2+(parabolicCylinderUBar a z)^2) := by
   let C : ℂ := (2:ℂ)^(3/2:ℂ)/π*Gamma (1/2-a)
   have he := pcfProduct_eq_of_initial
     ((CylinderSquareIntegral.isThirdOrderSolution ha).const_mul C)
@@ -1455,7 +1489,7 @@ theorem pcf_integral_4 {a : ℂ} (ha : a.re < 1/2) (z : ℂ) :
       using CylinderSquareIntegral.initial_second ha)
   have hv : (∫ t : ℝ in Ioi 0, (2:ℂ)^(3/2:ℂ)/π*Gamma (1/2-a)*
       exp (2*a*t+z^2/2*Real.tanh t)/(Real.sqrt (Real.sinh (2*t)):ℂ)) =
-        (pcfU a z)^2+(pcfUBar a z)^2 := by
+        (parabolicCylinderU a z)^2+(parabolicCylinderUBar a z)^2 := by
     rw [← congrFun he z]
     simp only [pcfIntegral4Moment, pow_zero, one_mul, C, pcfIntegral4Kernel,
       mul_div_assoc, integral_const_mul]

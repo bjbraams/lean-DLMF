@@ -65,13 +65,13 @@ theorem tendsto_kummerM_div_Gamma_at_neg_nat (a : ℂ) (n : ℕ) (z : ℂ) :
 `𝐌⁽ⁿ⁾(a,b,z) = (a)ₙ 𝐌(a+n,b+n,z)`. -/
 theorem iteratedDeriv_regularizedConfluent (a b : ℂ) (n : ℕ) (z : ℂ) :
     iteratedDeriv n (regularizedHGFun {a} {b}) z =
-      poch a n * regularizedHGFun {a + n} {b + n} z := by
+      pochhammer a n * regularizedHGFun {a + n} {b + n} z := by
   induction n generalizing z with
-  | zero => simp [iteratedDeriv_zero, poch_zero]
+  | zero => simp [iteratedDeriv_zero, pochhammer_zero]
   | succ n ih =>
     rw [iteratedDeriv_succ, funext ih,
         deriv_const_mul _ (differentiableAt_regularizedConfluent _ _ _),
-      deriv_regularizedConfluent, poch_succ,
+      deriv_regularizedConfluent, pochhammer_succ,
       show a + ((n + 1 : ℕ) : ℂ) = a + n + 1 by push_cast; ring,
       show b + ((n + 1 : ℕ) : ℂ) = b + n + 1 by push_cast; ring]
     ring

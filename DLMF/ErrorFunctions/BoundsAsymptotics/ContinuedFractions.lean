@@ -882,7 +882,7 @@ theorem erfc_continuedFraction_one {z : ℂ} (hz : 0 < z.re) :
   convert h using 2
   have hp : (Real.sqrt π : ℂ) ≠ 0 := by
     exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
-  rw [erfc_upperIncGamma hz, sq_cpow_of_re_pos hz]
+  rw [erfc_upperIncompleteGamma hz, sq_cpow_of_re_pos hz]
   push_cast
   rw [show (2 : ℂ) * -(1/2) = -1 by norm_num, cpow_neg_one]
   field_simp
@@ -963,13 +963,16 @@ theorem erfc_continuedFraction_two {z : ℂ} (hz : 0 < z.re) :
       rw [GenContFract.ofFun_dens_one, show g1.dens 2 = g1.dens (0 + 2) from rfl, hXd,
         GenContFract.ofFun_dens_one, GenContFract.ofFun_dens_zero]
       simp [a1, a2, b1, b2]; ring)
-  have htail : ∀ N, DLMF.Core.cfTail a2 b2 0 N = DLMF.Core.cfTail a1 b1 0 (2 * N) := by
+  have htail : ∀ N, DLMF.Core.continuedFractionTail a2 b2 0 N =
+      DLMF.Core.continuedFractionTail a1 b1 0 (2 * N) := by
     intro N
-    rw [IncompleteGammaFractions.cfTail_eq hn2, IncompleteGammaFractions.cfTail_eq hn1]
+    rw [IncompleteGammaFractions.continuedFractionTail_eq hn2,
+        IncompleteGammaFractions.continuedFractionTail_eq hn1]
     change g2.nums N / g2.dens N = g1.nums (2 * N) / g1.dens (2 * N)
     rw [hNum, hDen, mul_div_mul_left _ _ (pow_ne_zero _ two_ne_zero)]
   unfold HasContinuedFraction at h1 ⊢
-  rw [show DLMF.Core.cfTail a2 b2 0 = fun N => DLMF.Core.cfTail a1 b1 0 (2 * N) from funext htail]
+  rw [show DLMF.Core.continuedFractionTail a2 b2 0 = fun N =>
+      DLMF.Core.continuedFractionTail a1 b1 0 (2 * N) from funext htail]
   exact h1.comp (tendsto_atTop_mono (fun n => show n ≤ 2 * n by omega) tendsto_id)
 
 end DLMF.Confluent

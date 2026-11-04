@@ -17,6 +17,7 @@ public import DLMF.Weierstrass.Addition
 public import DLMF.Weierstrass.Integrals
 public import DLMF.Weierstrass.Asymptotics
 public import DLMF.Weierstrass.ModularFunctions
+public import DLMF.Weierstrass.ModularExpansions
 public import DLMF.Weierstrass.MathlibCoverage
 
 /-!

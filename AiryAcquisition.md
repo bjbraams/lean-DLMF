@@ -128,7 +128,7 @@ proofs have no transitive `sorryAx` dependency. The batch also adds three proved
 supporting product/initial-value lemmas.
 
 - [Asymptotics.lean](DLMF/Airy/Asymptotics.lean): `airyU_recurrence`, `airyHyperR_reexpansion`, `airyHyperS_reexpansion`, `airyAiDeriv_exact_remainder`, `airyAi_exact_remainder`.
-- [Equation.lean](DLMF/Airy/Equation.lean): `airyAi_neg_connection`, `airyBi_neg_connection`, `airy_general_solution`, `airy_log_derivative_riccati`, `isAirySol_rotated`, `wronskian_airyAi_rotated`, `wronskian_airyAi_rotations`.
+- [Equation.lean](DLMF/Airy/Equation.lean): `airyAi_neg_connection`, `airyBi_neg_connection`, `airy_general_solution`, `airy_log_derivative_riccati`, `isAirySolution_rotated`, `wronskian_airyAi_rotated`, `wronskian_airyAi_rotations`.
 - [Generalized.lean](DLMF/Airy/Generalized.lean): `generalizedAiryA_entire`, `generalizedAiryB_entire`.
 - [GeneralizedContours.lean](DLMF/Airy/GeneralizedContours.lean): `reidAiryB_ordinary_ray`.
 - [Integrals.lean](DLMF/Airy/Integrals.lean): `airy_linear_antiderivative`, `airy_moment_antiderivative_recurrence`, `airy_quadratic_antiderivative`.
@@ -146,7 +146,7 @@ Definitions record source notation and do not replace the accompanying theorem.
 ### §9.2: Differential equation and connection formulas (16 equations)
 
 - [9.2.E1](https://dlmf.nist.gov/9.2.E1): [airyAi_ode](DLMF/Airy/Basic.lean#L201) (proved); [airyBi_ode](DLMF/Airy/Basic.lean#L206) (proved).
-- [9.2.E2](https://dlmf.nist.gov/9.2.E2): [isAirySol_rotated](DLMF/Airy/Equation.lean#L24) (proved).
+- [9.2.E2](https://dlmf.nist.gov/9.2.E2): [isAirySolution_rotated](DLMF/Airy/Equation.lean#L24) (proved).
 - [9.2.E3](https://dlmf.nist.gov/9.2.E3): [airyAi_zero](DLMF/Airy/Basic.lean#L224) (proved).
 - [9.2.E4](https://dlmf.nist.gov/9.2.E4): [airyAiDeriv_zero](DLMF/Airy/Basic.lean#L231) (proved).
 - [9.2.E5](https://dlmf.nist.gov/9.2.E5): [airyBi_zero](DLMF/Airy/Basic.lean#L246) (proved).
@@ -237,12 +237,12 @@ Definitions record source notation and do not replace the accompanying theorem.
 
 ### §9.8: Modulus and phase (23 equations)
 
-- [9.8.E1](https://dlmf.nist.gov/9.8.E1): [airyAiReal_modulus_phase](DLMF/Airy/ModulusPhase.lean#L610) (proved).
-- [9.8.E2](https://dlmf.nist.gov/9.8.E2): [airyBiReal_modulus_phase](DLMF/Airy/ModulusPhase.lean#L616) (proved).
+- [9.8.E1](https://dlmf.nist.gov/9.8.E1): [DLMF.Airy.Real.airyAi_modulus_phase](DLMF/Airy/ModulusPhase.lean#L610) (proved).
+- [9.8.E2](https://dlmf.nist.gov/9.8.E2): [DLMF.Airy.Real.airyBi_modulus_phase](DLMF/Airy/ModulusPhase.lean#L616) (proved).
 - [9.8.E3](https://dlmf.nist.gov/9.8.E3): [airyModulus](DLMF/Airy/ModulusPhase.lean#L24) (definition).
 - [9.8.E4](https://dlmf.nist.gov/9.8.E4): [airyPhase_atan_branch](DLMF/Airy/ModulusPhase.lean#L634) (proved).
-- [9.8.E5](https://dlmf.nist.gov/9.8.E5): [airyAiDerivReal_modulus_phase](DLMF/Airy/ModulusPhase.lean#L622) (proved).
-- [9.8.E6](https://dlmf.nist.gov/9.8.E6): [airyBiDerivReal_modulus_phase](DLMF/Airy/ModulusPhase.lean#L628) (proved).
+- [9.8.E5](https://dlmf.nist.gov/9.8.E5): [DLMF.Airy.Real.airyAiDeriv_modulus_phase](DLMF/Airy/ModulusPhase.lean#L622) (proved).
+- [9.8.E6](https://dlmf.nist.gov/9.8.E6): [DLMF.Airy.Real.airyBiDeriv_modulus_phase](DLMF/Airy/ModulusPhase.lean#L628) (proved).
 - [9.8.E7](https://dlmf.nist.gov/9.8.E7): [airyDerivModulus](DLMF/Airy/ModulusPhase.lean#L27) (definition).
 - [9.8.E8](https://dlmf.nist.gov/9.8.E8): [airyDerivPhase_atan_branch](DLMF/Airy/ModulusPhase.lean#L654) (proved).
 - [9.8.E9](https://dlmf.nist.gov/9.8.E9): [airyModulus_bessel](DLMF/Airy/ModulusPhase.lean#L675) (proved).

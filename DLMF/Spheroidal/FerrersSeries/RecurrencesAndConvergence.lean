@@ -20,7 +20,7 @@ This file proves the recurrence, decay bounds and normalization of the coefficie
 
 * `spheroidalCoeff_of_le`, `spheroidalCoeff_of_lt`: the integral formula 30.8.2 for `k ≥ -R` and
   the extended coefficients of §30.8(ii) for `-N ≤ k < -R`.
-* `spheroidalRecA_neg_R`: `A_{-R} = 0` (note after DLMF 30.8.4).
+* `spheroidalRecurrenceA_neg_R`: `A_{-R} = 0` (note after DLMF 30.8.4).
 * `spheroidalCoeff_recurrence`, `spheroidalCoeff_recurrence_of_le`: the recurrence DLMF 30.8.4.
 * `spheroidalCoeffNeg_of_le`: the coefficients `a^{-m}_{n,k}` (DLMF 30.8.6).
 * `hasSum_spheroidalPs_ferrers`: the Ferrers expansion DLMF 30.8.1.
@@ -49,16 +49,16 @@ theorem spheroidalCoeff_of_le {n m : ℕ} (γ2 : ℝ) {k : ℤ} (hk : -(((n - m)
 
 /-- `A_{-R} = 0` (DLMF §30.8(i), note after 30.8.4). Proved. -/
 @[dlmf 30.8.E4]
-theorem spheroidalRecA_neg_R {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
-    spheroidalRecA n m γ2 (-(((n - m) / 2 : ℕ) : ℤ)) = 0 := by
-  have key : ∀ R : ℕ, (n - m) / 2 = R → spheroidalRecA n m γ2 (-(R : ℤ)) = 0 := by
+theorem spheroidalRecurrenceA_neg_R {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
+    spheroidalRecurrenceA n m γ2 (-(((n - m) / 2 : ℕ) : ℤ)) = 0 := by
+  have key : ∀ R : ℕ, (n - m) / 2 = R → spheroidalRecurrenceA n m γ2 (-(R : ℤ)) = 0 := by
     intro R hR
     have h := Nat.div_add_mod (n - m) 2
     rw [hR] at h
     have hcast : (n : ℝ) - m = 2 * R + ((n - m) % 2 : ℕ) := by
       have : ((n - m : ℕ) : ℝ) = (n : ℝ) - m := by rw [Nat.cast_sub hmn]
       rw [← this]; exact_mod_cast h.symm
-    unfold spheroidalRecA
+    unfold spheroidalRecurrenceA
     have hnum : ((n : ℝ) - m + 2 * ((-(R : ℤ) : ℤ) : ℝ) - 1) *
         ((n : ℝ) - m + 2 * ((-(R : ℤ) : ℤ) : ℝ)) = 0 := by
       rw [hcast]
@@ -241,7 +241,7 @@ private lemma ferrersP_neg_natCast_sub_one (N : ℕ) (μ : ℂ) {x : ℝ} (hx : 
   have hs : 1 + (x : ℂ) ∈ slitPlane := Or.inl (by simp; linarith [hx.1])
   unfold ferrersP
   rw [show -(N : ℂ) - 1 + 1 = -N by ring, show -(-(N : ℂ) - 1) = N + 1 by ring,
-    DLMF.Hypergeometric.regularizedGaussHG_symm _ _ _ (mem_cutPlane_of_one_add hs)]
+    DLMF.Hypergeometric.regularizedGaussHypergeometric_symm _ _ _ (mem_cutPlane_of_one_add hs)]
 
 /-- The core identity behind 30.8.4: self-adjointness and the recurrence of `(1-x²)𝖯^m_ν`. -/
 private lemma spheroidalPs_ferrersP_integral_recurrence {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) (N : ℕ) :
@@ -460,10 +460,10 @@ equation from `k = -R` on (no hypothesis needed). Proved from the eigenfunction 
 @[dlmf 30.8.E4]
 theorem spheroidalCoeff_recurrence_of_le {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {k : ℤ}
     (hk : -(((n - m) / 2 : ℕ) : ℤ) ≤ k) :
-    spheroidalRecA n m γ2 k * (if -(((n - m) / 2 : ℕ) : ℤ) ≤ k - 1 then
+    spheroidalRecurrenceA n m γ2 k * (if -(((n - m) / 2 : ℕ) : ℤ) ≤ k - 1 then
         spheroidalCoeff n m γ2 (k - 1) else 0) +
-        (spheroidalRecB n m γ2 k - spheroidalEigenvalue n m γ2) * spheroidalCoeff n m γ2 k +
-      spheroidalRecC n m γ2 k * spheroidalCoeff n m γ2 (k + 1) = 0 := by
+        (spheroidalRecurrenceB n m γ2 k - spheroidalEigenvalue n m γ2) * spheroidalCoeff n m γ2 k +
+      spheroidalRecurrenceC n m γ2 k * spheroidalCoeff n m γ2 (k + 1) = 0 := by
   obtain ⟨N, hN⟩ : ∃ N : ℕ, (N : ℤ) = n + 2 * k := ⟨(n + 2 * k).toNat, by omega⟩
   obtain ⟨a, ha⟩ : ∃ a : ℕ, (a : ℤ) = n - m + 2 * k := ⟨(n - m + 2 * k : ℤ).toNat, by omega⟩
   obtain ⟨b, hb⟩ : ∃ b : ℕ, (b : ℤ) = n + m + 2 * k := ⟨(n + m + 2 * k : ℤ).toNat, by omega⟩
@@ -521,7 +521,7 @@ theorem spheroidalCoeff_recurrence_of_le {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ)
         zpow_add_one₀ (by norm_num : (-1 : ℝ) ≠ 0)]
     have hbf : (b.factorial : ℝ) ≠ 0 := by positivity
     rw [hNr] at core hTm'
-    unfold spheroidalRecA spheroidalRecB spheroidalRecC
+    unfold spheroidalRecurrenceA spheroidalRecurrenceB spheroidalRecurrenceC
     push_cast
     rw [har, hbr]
     exact spheroidalCoeff_recurrence_algebra_low _ _ _ _ _ _ _ _ _ _ _ hbf hd1 hdm3 hd3 hd5 hd1'
@@ -546,7 +546,7 @@ theorem spheroidalCoeff_recurrence_of_le {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ)
       factorial_add_two_cast b₀, zpow_add_one₀ (by norm_num : (-1 : ℝ) ≠ 0),
       zpow_sub_one₀ (by norm_num : (-1 : ℝ) ≠ 0)]
     rw [hNr] at core
-    unfold spheroidalRecA spheroidalRecB spheroidalRecC
+    unfold spheroidalRecurrenceA spheroidalRecurrenceB spheroidalRecurrenceC
     push_cast
     rw [har0, hbr0]
     exact spheroidalCoeff_recurrence_algebra_high _ _ _ _ _ _ _ _ _ _ _ hbf hd1 hdm3 hd3 hd5 hd1'
@@ -751,26 +751,26 @@ lemma exists_abs_spheroidalCoeff_le_linear {n m : ℕ} (hmn : m ≤ n) (γ2 : �
 /-- Bounds for the coefficients of 30.8.4 for `k ≥ 1`: `|A_k|, |C_k| ≤ |γ²|` and
 `B_k ≥ (n+2k)(n+2k+1) - 2|γ²|(1+m²)`. -/
 lemma spheroidalRec_bounds {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {k : ℤ} (hk : 1 ≤ k) :
-    |spheroidalRecA n m γ2 k| ≤ |γ2| ∧ |spheroidalRecC n m γ2 k| ≤ |γ2| ∧
+    |spheroidalRecurrenceA n m γ2 k| ≤ |γ2| ∧ |spheroidalRecurrenceC n m γ2 k| ≤ |γ2| ∧
       ((n : ℝ) + 2 * k) * ((n : ℝ) + 2 * k + 1) - 2 * |γ2| * (1 + m ^ 2) ≤
-        spheroidalRecB n m γ2 k := by
+        spheroidalRecurrenceB n m γ2 k := by
   have kr : (1 : ℝ) ≤ k := by exact_mod_cast hk
   have hmr : (m : ℝ) ≤ n := by exact_mod_cast hmn
   have hm0 : (0 : ℝ) ≤ m := Nat.cast_nonneg m
   refine ⟨?_, ?_, ?_⟩
-  · unfold spheroidalRecA
+  · unfold spheroidalRecurrenceA
     rw [mul_div_assoc, abs_mul, abs_neg]
     refine mul_le_of_le_one_right (abs_nonneg _) ?_
     rw [abs_div, abs_of_nonneg (by nlinarith), abs_of_pos (by nlinarith), div_le_one
       (by nlinarith)]
     nlinarith
-  · unfold spheroidalRecC
+  · unfold spheroidalRecurrenceC
     rw [mul_div_assoc, abs_mul, abs_neg]
     refine mul_le_of_le_one_right (abs_nonneg _) ?_
     rw [abs_div, abs_of_nonneg (by nlinarith), abs_of_pos (by nlinarith), div_le_one
       (by nlinarith)]
     nlinarith
-  · unfold spheroidalRecB
+  · unfold spheroidalRecurrenceB
     set F := (((n : ℝ) + 2 * k) * ((n : ℝ) + 2 * k + 1) - 1 + m ^ 2) /
       ((2 * (n : ℝ) + 4 * k - 1) * (2 * (n : ℝ) + 4 * k + 3)) with hF
     have hQ : 0 < (2 * (n : ℝ) + 4 * k - 1) * (2 * (n : ℝ) + 4 * k + 3) := by nlinarith
@@ -812,32 +812,33 @@ lemma eventually_abs_spheroidalCoeff_succ_le_eps {n m : ℕ} (hmn : m ≤ n) (γ
   have hk0 : (1 : ℝ) ≤ k := by exact_mod_cast hk1
   have hn0 : (0 : ℝ) ≤ n := Nat.cast_nonneg n
   have hνbig : T ≤ ((n : ℝ) + 2 * k) * ((n : ℝ) + 2 * k + 1) := by nlinarith
-  have hBl : |γ2| / ε + 1 ≤ spheroidalRecB n m γ2 k - lam := by
+  have hBl : |γ2| / ε + 1 ≤ spheroidalRecurrenceB n m γ2 k - lam := by
     have := le_abs_self lam
     linarith
-  have hpos : 0 < spheroidalRecB n m γ2 k - lam := by
+  have hpos : 0 < spheroidalRecurrenceB n m γ2 k - lam := by
     have : 0 ≤ |γ2| / ε := by positivity
     linarith
-  have hge : |γ2| ≤ ε * (spheroidalRecB n m γ2 k - lam) := by
+  have hge : |γ2| ≤ ε * (spheroidalRecurrenceB n m γ2 k - lam) := by
     have h1 := mul_le_mul_of_nonneg_left hBl hε.le
     rw [mul_add, mul_div_cancel₀ _ hε.ne', mul_one] at h1
     linarith
-  have e : (spheroidalRecB n m γ2 k - lam) * a1 = -(spheroidalRecA n m γ2 k * a0 +
-      spheroidalRecC n m γ2 k * a2) := by linear_combination hrec
-  have h2 : (spheroidalRecB n m γ2 k - lam) * |a1| ≤ |γ2| * (|a0| + |a2|) := by
+  have e : (spheroidalRecurrenceB n m γ2 k - lam) * a1 = -(spheroidalRecurrenceA n m γ2 k * a0 +
+      spheroidalRecurrenceC n m γ2 k * a2) := by linear_combination hrec
+  have h2 : (spheroidalRecurrenceB n m γ2 k - lam) * |a1| ≤ |γ2| * (|a0| + |a2|) := by
     have := congrArg abs e
     rw [abs_mul, abs_of_pos hpos, abs_neg] at this
     rw [this]
-    calc _ ≤ |spheroidalRecA n m γ2 k * a0| + |spheroidalRecC n m γ2 k * a2| := abs_add_le _ _
+    calc _ ≤ |spheroidalRecurrenceA n m γ2 k * a0| + |spheroidalRecurrenceC n m γ2 k *
+           a2| := abs_add_le _ _
       _ ≤ |γ2| * |a0| + |γ2| * |a2| := by
           rw [abs_mul, abs_mul]
           exact add_le_add (mul_le_mul_of_nonneg_right hA (abs_nonneg _))
             (mul_le_mul_of_nonneg_right hC (abs_nonneg _))
       _ = _ := by ring
-  have h3 : (spheroidalRecB n m γ2 k - lam) * |a1| ≤
-      (spheroidalRecB n m γ2 k - lam) * (ε * (|a0| + |a2|)) := by
+  have h3 : (spheroidalRecurrenceB n m γ2 k - lam) * |a1| ≤
+      (spheroidalRecurrenceB n m γ2 k - lam) * (ε * (|a0| + |a2|)) := by
     calc _ ≤ |γ2| * (|a0| + |a2|) := h2
-      _ ≤ ε * (spheroidalRecB n m γ2 k - lam) * (|a0| + |a2|) :=
+      _ ≤ ε * (spheroidalRecurrenceB n m γ2 k - lam) * (|a0| + |a2|) :=
           mul_le_mul_of_nonneg_right hge (by positivity)
       _ = _ := by ring
   exact le_of_mul_le_mul_left h3 hpos

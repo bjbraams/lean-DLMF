@@ -23,9 +23,9 @@ shifts of the theta functions and the nome are in `DLMF.JacobiElliptic.Basic.The
 * `jacobiThetaTwoTau_zero_ne_zero`, `jacobiThetaThreeTau_zero_ne_zero`,
   `jacobiThetaFourTau_zero_ne_zero`: `θ_j(0|τ) ≠ 0` for `Im τ > 0`, by the Jacobi triple
   product.
-* `jacobiTauk_im_pos`: `Im τ > 0` for `k ∈ jacobiModulusDomain`.
-* `compEllIntKk_ofReal`, `compEllIntKpk_ofReal`: for real `k` the complex `K(k)`, `K'(k)` are
-  the real complete integrals.
+* `jacobiTau_im_pos`: `Im τ > 0` for `k ∈ jacobiModulusDomain`.
+* `completeEllipticK_ofReal`, `completeEllipticKPrime_ofReal`: for real `k` the complex `K(k)`,
+  `K'(k)` are the real complete integrals.
 -/
 
 @[expose] public section
@@ -38,7 +38,7 @@ noncomputable section
 
 namespace DLMF.JacobiElliptic
 
-open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
+open DLMF.EllipticIntegrals (completeEllipticK completeEllipticKPrime)
 
 /-! ### Theta toolkit: nonvanishing of the theta constants and half-period shifts -/
 
@@ -275,7 +275,7 @@ upper half-plane (`|q| < 1`). Proof: `Re(K' conj K) = ∫∫ Re(F(θ) conj G(φ)
 `F`, `G` are the integrands of `K'`, `K`; the pointwise positivity follows from
 `Im(w₁ conj w₂) = Im(k²)(t(1-s)+s)` for `w₁ = 1-(1-k²)s`, `w₂ = 1-k²t`. -/
 @[dlmf 22.2.E1 "domain: Re k > 0, k ∉ [1, ∞), so |q| < 1"]
-theorem jacobiTauk_im_pos {k : ℂ} (hk : k ∈ jacobiModulusDomain) : 0 < (jacobiTauk k).im := by
+theorem jacobiTau_im_pos {k : ℂ} (hk : k ∈ jacobiModulusDomain) : 0 < (jacobiTau k).im := by
   have hm := sq_im_ne_zero_or_mem_Ioo_of_mem_jacobiModulusDomain hk
   set m := k ^ 2 with hmdef
   set F : ℝ → ℂ := fun θ => (1 - (1 - m) * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) with hFdef
@@ -287,10 +287,10 @@ theorem jacobiTauk_im_pos {k : ℂ} (hk : k ∈ jacobiModulusDomain) : 0 < (jaco
     rw [hsq]; exact (one_sub_mul_mem_slitPlane hm (hs0 θ) (hs1 θ)).1
   have hG : Continuous G := Continuous.cpow (by fun_prop) continuous_const fun θ => by
     rw [hsq]; exact (one_sub_mul_mem_slitPlane hm (hs0 θ) (hs1 θ)).2
-  have hKp : compEllIntKpk k = ∫ θ in (0 : ℝ)..(π / 2), F θ := rfl
-  have hK : compEllIntKk k = ∫ θ in (0 : ℝ)..(π / 2), G θ := rfl
-  set K := compEllIntKk k
-  set K' := compEllIntKpk k
+  have hKp : completeEllipticKPrime k = ∫ θ in (0 : ℝ)..(π / 2), F θ := rfl
+  have hK : completeEllipticK k = ∫ θ in (0 : ℝ)..(π / 2), G θ := rfl
+  set K := completeEllipticK k
+  set K' := completeEllipticKPrime k
   have hpi : (0 : ℝ) < π / 2 := by positivity
   have hpt (θ φ : ℝ) : 0 < (F θ * (starRingEnd ℂ) (G φ)).re := by
     have h := re_sqrt_mul_conj_pos hm (hs0 θ) (hs1 θ) (hs0 φ) (hs1 φ)
@@ -321,17 +321,17 @@ theorem jacobiTauk_im_pos {k : ℂ} (hk : k ∈ jacobiModulusDomain) : 0 < (jaco
       ((Complex.continuous_re.comp hc2).intervalIntegrable _ _) (fun φ _ => hpt θ φ) hpi
   have hK0 : K ≠ 0 := fun h0 => by simp [h0] at key
   have hns : 0 < normSq K := normSq_pos.mpr hK0
-  have : (jacobiTauk k).im = (K' * (starRingEnd ℂ) K).re / normSq K := by
-    simp only [jacobiTauk, div_eq_mul_inv, inv_def, mul_im, mul_re, I_re, I_im, conj_re, conj_im]
+  have : (jacobiTau k).im = (K' * (starRingEnd ℂ) K).re / normSq K := by
+    simp only [jacobiTau, div_eq_mul_inv, inv_def, mul_im, mul_re, I_re, I_im, conj_re, conj_im]
     simp
     ring
   rw [this]
   exact div_pos key hns
 
 /-- For real `k` with `k² < 1` the complex integral `K(k)` is the real `K(m)`, `m = k²`. -/
-theorem compEllIntKk_ofReal {k : ℝ} (hk : k ^ 2 < 1) :
-    compEllIntKk k = (Real.compEllIntKm (k ^ 2) : ℂ) := by
-  rw [compEllIntKk, Real.compEllIntKm, ← intervalIntegral.integral_ofReal]
+theorem completeEllipticK_ofReal {k : ℝ} (hk : k ^ 2 < 1) :
+    completeEllipticK k = (Real.completeEllipticKOfParameter (k ^ 2) : ℂ) := by
+  rw [completeEllipticK, Real.completeEllipticKOfParameter, ← intervalIntegral.integral_ofReal]
   refine intervalIntegral.integral_congr fun θ _ => ?_
   have hpos : 0 ≤ 1 - k ^ 2 * Real.sin θ ^ 2 := (one_sub_mul_sin_sq_pos hk θ).le
   rw [ofReal_cpow hpos]
@@ -339,9 +339,9 @@ theorem compEllIntKk_ofReal {k : ℝ} (hk : k ^ 2 < 1) :
   ring_nf
 
 /-- For real `k` with `0 < k²` the complex `K'(k)` is the real `K(1 - m)`, `m = k²`. -/
-theorem compEllIntKpk_ofReal {k : ℝ} (hk : 0 < k ^ 2) :
-    compEllIntKpk k = (Real.compEllIntKm (1 - k ^ 2) : ℂ) := by
-  rw [compEllIntKpk, Real.compEllIntKm, ← intervalIntegral.integral_ofReal]
+theorem completeEllipticKPrime_ofReal {k : ℝ} (hk : 0 < k ^ 2) :
+    completeEllipticKPrime k = (Real.completeEllipticKOfParameter (1 - k ^ 2) : ℂ) := by
+  rw [completeEllipticKPrime, Real.completeEllipticKOfParameter, ← intervalIntegral.integral_ofReal]
   refine intervalIntegral.integral_congr fun θ _ => ?_
   have hpos : 0 ≤ 1 - (1 - k ^ 2) * Real.sin θ ^ 2 :=
     (one_sub_mul_sin_sq_pos (by linarith) θ).le

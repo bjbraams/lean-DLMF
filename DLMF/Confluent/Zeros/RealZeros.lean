@@ -73,10 +73,10 @@ theorem kummerM_re_pos_of_nonneg {a b x : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b)
   · have h : kummerM (a : ℂ) 0 x = 1 := by
       unfold kummerM
       rw [tsum_eq_single 0]
-      · simp [poch_zero]
+      · simp [pochhammer_zero]
       · intro n hn
         obtain ⟨n, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hn
-        simp only [Nat.succ_eq_add_one, poch_zero_succ, zero_mul, div_zero]
+        simp only [Nat.succ_eq_add_one, pochhammer_zero_succ, zero_mul, div_zero]
     simp [h]
   · have hb' : ∀ k : ℕ, (b : ℂ) ≠ -k := not_neg_nat_of_re_pos (by simpa using hb)
     have hs := (hasFPowerSeriesOnBall_kummerM (a := (a : ℂ)) hb').hasSum_mul_pow
@@ -86,12 +86,12 @@ theorem kummerM_re_pos_of_nonneg {a b x : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b)
       ((ascPochhammer ℝ n).eval b * n.factorial) * x ^ n
     have ht : ∀ n : ℕ, (kummerMCoeff (a : ℂ) b n * (x : ℂ) ^ n).re = t n := by
       intro n
-      simp [t, kummerMCoeff, poch_ofReal, ← ofReal_natCast, ← ofReal_mul,
+      simp [t, kummerMCoeff, pochhammer_ofReal, ← ofReal_natCast, ← ofReal_mul,
         ← ofReal_div, ← ofReal_pow]
     simp only [ht] at hr
     have hnonneg : ∀ n, 0 ≤ t n := fun n => mul_nonneg
-      (div_nonneg (poch_eval_nonneg ha n)
-        (mul_nonneg (poch_eval_nonneg hb.le n) (Nat.cast_nonneg _)))
+      (div_nonneg (pochhammer_eval_nonneg ha n)
+        (mul_nonneg (pochhammer_eval_nonneg hb.le n) (Nat.cast_nonneg _)))
       (pow_nonneg hx.le n)
     have hle := hr.summable.sum_le_tsum ({0} : Finset ℕ) (fun n _ => hnonneg n)
     have h0 : t 0 = 1 := by simp [t]
@@ -122,7 +122,7 @@ theorem kummerM_ofReal_hasSum {a b : ℝ} (hb : ∀ k : ℕ, (b : ℂ) ≠ -k) (
     (z := (x : ℂ)) (by simp)
   have ht : ∀ n : ℕ, kummerMCoeff (a : ℂ) b n * (x : ℂ) ^ n = (t n : ℂ) := by
     intro n
-    simp [t, kummerMCoeff, poch_ofReal]
+    simp [t, kummerMCoeff, pochhammer_ofReal]
   simp only [ht] at hs
   have hr : HasSum t (kummerM a b x).re := by
     simpa using Complex.hasSum_re hs
@@ -647,8 +647,8 @@ theorem KummerZeros.realM_one_le {a b : ℝ} (ha : 0 ≤ a) (hb : 0 < b) {x : �
   obtain ⟨hr, -⟩ := kummerM_ofReal_hasSum (a := a) (KummerZeros.not_neg_nat hb) x
   have hnonneg : ∀ n : ℕ, 0 ≤ (ascPochhammer ℝ n).eval a /
       ((ascPochhammer ℝ n).eval b * n.factorial) * x ^ n := fun n => mul_nonneg
-    (div_nonneg (poch_eval_nonneg ha n)
-      (mul_nonneg (poch_eval_nonneg hb.le n) (Nat.cast_nonneg _))) (pow_nonneg hx n)
+    (div_nonneg (pochhammer_eval_nonneg ha n)
+      (mul_nonneg (pochhammer_eval_nonneg hb.le n) (Nat.cast_nonneg _))) (pow_nonneg hx n)
   have hle := hr.summable.sum_le_tsum ({0} : Finset ℕ) (fun n _ => hnonneg n)
   rw [Finset.sum_singleton, hr.tsum_eq] at hle
   simpa [KummerZeros.realM] using hle

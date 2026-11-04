@@ -129,11 +129,13 @@ theorem cpow_shift_down_prefactor {r : ℂ} (hr : 0 < r.re) (μ : ℂ) :
   congr 1; ring
 
 /-- Reflection of a Pochhammer symbol: `(b - n)_n = (-1)^n (1 - b)_n`. -/
-theorem poch_sub_nat_self (b : ℂ) (n : ℕ) : poch (b - n) n = (-1 : ℂ) ^ n * poch (1 - b) n := by
+theorem pochhammer_sub_nat_self (b : ℂ) (n : ℕ) : pochhammer (b - n) n = (-1 : ℂ) ^ n *
+    pochhammer (1 - b) n := by
   induction n with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ n ih =>
-    rw [poch_succ_left, show b - ((n + 1 : ℕ) : ℂ) + 1 = b - n by push_cast; ring, ih, poch_succ]
+    rw [pochhammer_succ_left, show b - ((n + 1 : ℕ) : ℂ) + 1 = b - n by push_cast; ring, ih,
+                                                                          pochhammer_succ]
     push_cast
     ring
 
@@ -324,11 +326,12 @@ theorem kummerM_product {a b z : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (hb1 : ∀ k 
     show (2 : ℂ) + b = b + 2 by ring, div_mul_eq_mul_div, mul_assoc] using he
 
 /-- Identity under the stated parameter and domain assumptions: `kummerM a b (x + y) = ∑' n : ℕ,
-poch a n * y ^ n / (poch b n * n.factorial) * kummerM (a + n) (b + n) x`. -/
+pochhammer a n * y ^ n / (pochhammer b n * n.factorial) * kummerM (a + n) (b + n) x`. -/
 @[dlmf 13.13.E1]
 theorem kummerM_addition {a b x y : ℂ} (hb : ∀ k : ℕ, b ≠ -k) :
     kummerM a b (x + y) =
-      ∑' n : ℕ, poch a n * y ^ n / (poch b n * n.factorial) * kummerM (a + n) (b + n) x := by
+      ∑' n : ℕ, pochhammer a n * y ^ n / (pochhammer b n * n.factorial) *
+          kummerM (a + n) (b + n) x := by
   have hd : Differentiable ℂ (kummerM a b) := fun w =>
     ((analyticOnNhd_kummerM (a := a) hb) w (Set.mem_univ _)).differentiableAt
   rw [← Complex.taylorSeries_eq_of_entire' (c := x) (z := x + y) hd]
@@ -343,7 +346,7 @@ theorem kummerM_addition_shift_b {a b x y : ℂ} (hx : x ∈ slitPlane)
     (hyx : ‖y‖ < ‖x‖) (hb : ∀ k : ℤ, b ≠ k) :
     kummerM a b (x + y) =
       ((x + y) / x) ^ (1 - b) *
-        ∑' n : ℕ, poch (1 - b) n * (-y / x) ^ n / n.factorial * kummerM a (b - n) x := by
+        ∑' n : ℕ, pochhammer (1 - b) n * (-y / x) ^ n / n.factorial * kummerM a (b - n) x := by
   have hx0 := slitPlane_ne_zero hx
   have hr0 := slitPlane_ne_zero (Or.inl (re_add_div_pos hyx) : (x + y) / x ∈ slitPlane)
   have hbN : ∀ k : ℕ, b ≠ -k := fun k hk => hb (-k) (by push_cast; exact hk)
@@ -358,18 +361,18 @@ theorem kummerM_addition_shift_b {a b x y : ℂ} (hx : x ∈ slitPlane)
     hb ((n : ℤ) - k) (by push_cast; linear_combination hk)
   have hs0 : x ^ (b - 1) ≠ 0 := cpow_ne_zero_iff.mpr (Or.inl hx0)
   rw [iteratedDeriv_mul_cpow_kummerM n hbn hx, show b - n - 1 = (b - 1) - n by ring,
-    cpow_sub (x := x) (b - 1) (n : ℂ) hx0, cpow_natCast, poch_sub_nat_self, div_pow]
+    cpow_sub (x := x) (b - 1) (n : ℂ) hx0, cpow_natCast, pochhammer_sub_nat_self, div_pow]
   field_simp
   rw [neg_pow y]; ring
 
 /-- Identity under the stated parameter and domain assumptions: `kummerM a b (x + y) = (x / (x +
-y)) ^ a * ∑' n : ℕ, poch a n * y ^ n / (n.factorial * (x + y) ^ n) * kummerM (a + n) b x`. -/
+y)) ^ a * ∑' n : ℕ, pochhammer a n * y ^ n / (n.factorial * (x + y) ^ n) * kummerM (a + n) b x`. -/
 @[dlmf 13.13.E3]
 theorem kummerM_addition_shift_a {a b x y : ℂ} (hx : x ∈ slitPlane)
     (hxy : x + y ∈ slitPlane) (hy : -1 / 2 < (y / x).re) (hb : ∀ k : ℕ, b ≠ -k) :
     kummerM a b (x + y) =
       (x / (x + y)) ^ a *
-        ∑' n : ℕ, poch a n * y ^ n / (n.factorial * (x + y) ^ n) * kummerM (a + n) b x := by
+        ∑' n : ℕ, pochhammer a n * y ^ n / (n.factorial * (x + y) ^ n) * kummerM (a + n) b x := by
   have hx0 := slitPlane_ne_zero hx
   have hxy0 := slitPlane_ne_zero hxy
   have ht := kummerM_mobius_taylor (a := a) (x := x) hb (norm_div_add_lt_one hx0 hxy0 hy)
@@ -377,11 +380,11 @@ theorem kummerM_addition_shift_a {a b x y : ℂ} (hx : x ∈ slitPlane)
     (of_mobius_taylor (F := fun n => kummerM (a + n) b) hx0 hxy0 (by simpa using ht))
 
 /-- Identity under the stated parameter and domain assumptions: `kummerM a b (x + y) = exp y * ∑'
-n : ℕ, poch (b - a) n * (-y) ^ n / (poch b n * n.factorial) * kummerM a (b + n) x`. -/
+n : ℕ, pochhammer (b - a) n * (-y) ^ n / (pochhammer b n * n.factorial) * kummerM a (b + n) x`. -/
 @[dlmf 13.13.E4]
 theorem kummerM_addition_exp {a b x y : ℂ} (hb : ∀ k : ℕ, b ≠ -k) :
     kummerM a b (x + y) =
-      exp y * ∑' n : ℕ, poch (b - a) n * (-y) ^ n / (poch b n * n.factorial) *
+      exp y * ∑' n : ℕ, pochhammer (b - a) n * (-y) ^ n / (pochhammer b n * n.factorial) *
         kummerM a (b + n) x := by
   set f : ℂ → ℂ := fun w => exp (-w) * kummerM a b w with hf
   have hd : Differentiable ℂ f := fun w =>
@@ -401,14 +404,14 @@ theorem kummerM_addition_exp {a b x y : ℂ} (hb : ∀ k : ℕ, b ≠ -k) :
   field_simp
 
 /-- Identity under the stated parameter and domain assumptions: `kummerM a b (x + y) = exp y * (x
-/ (x + y)) ^ (b - a) * ∑' n : ℕ, poch (b - a) n * y ^ n / (n.factorial * (x + y) ^ n) *
+/ (x + y)) ^ (b - a) * ∑' n : ℕ, pochhammer (b - a) n * y ^ n / (n.factorial * (x + y) ^ n) *
 kummerM (a - n) b x`. -/
 @[dlmf 13.13.E5]
 theorem kummerM_addition_exp_shift_a {a b x y : ℂ} (hx : x ∈ slitPlane)
     (hxy : x + y ∈ slitPlane) (hy : 1 / 2 < ((y + x) / x).re) (hb : ∀ k : ℕ, b ≠ -k) :
     kummerM a b (x + y) =
       exp y * (x / (x + y)) ^ (b - a) *
-        ∑' n : ℕ, poch (b - a) n * y ^ n / (n.factorial * (x + y) ^ n) *
+        ∑' n : ℕ, pochhammer (b - a) n * y ^ n / (n.factorial * (x + y) ^ n) *
           kummerM (a - n) b x := by
   have hx0 := slitPlane_ne_zero hx
   have hxy0 := slitPlane_ne_zero hxy
@@ -417,7 +420,7 @@ theorem kummerM_addition_exp_shift_a {a b x y : ℂ} (hx : x ∈ slitPlane)
     simp only [add_re, one_re] at hy
     linarith
   have ht := kummerM_exp_mobius_taylor (a := a) (x := x) hb (norm_div_add_lt_one hx0 hxy0 hy')
-  have he := of_mobius_taylor (s := b - a) (C := poch (b - a))
+  have he := of_mobius_taylor (s := b - a) (C := pochhammer (b - a))
     (F := fun n z => exp (-z) * kummerM (a - n) b z)
     hx0 hxy0 (by simpa using ht)
   simp only [Nat.cast_zero, sub_zero] at he
@@ -429,7 +432,7 @@ theorem kummerM_addition_exp_shift_a {a b x y : ℂ} (hx : x ∈ slitPlane)
   intro n
   have hex : exp (x + y) * exp (-x) = exp y := by rw [← exp_add]; congr 1; ring
   linear_combination ((x / (x + y)) ^ (b - a) *
-    (poch (b - a) n * y ^ n / (n.factorial * (x + y) ^ n)) * kummerM (a - n) b x) * hex
+    (pochhammer (b - a) n * y ^ n / (n.factorial * (x + y) ^ n)) * kummerM (a - n) b x) * hex
 
 /-- Addition theorem; the series converges for `‖y‖ < ‖x‖`. -/
 @[dlmf 13.13.E6]
@@ -437,7 +440,7 @@ theorem kummerM_addition_exp_shift_both {a b x y : ℂ} (hx : x ∈ slitPlane)
     (hyx : ‖y‖ < ‖x‖) (hb : ∀ k : ℤ, b ≠ k) :
     kummerM a b (x + y) =
       exp y * ((x + y) / x) ^ (1 - b) *
-        ∑' n : ℕ, poch (1 - b) n * (-y) ^ n / (n.factorial * x ^ n) *
+        ∑' n : ℕ, pochhammer (1 - b) n * (-y) ^ n / (n.factorial * x ^ n) *
           kummerM (a - n) (b - n) x := by
   have hx0 := slitPlane_ne_zero hx
   have hr0 := slitPlane_ne_zero (Or.inl (re_add_div_pos hyx) : (x + y) / x ∈ slitPlane)
@@ -460,7 +463,8 @@ theorem kummerM_addition_exp_shift_both {a b x y : ℂ} (hx : x ∈ slitPlane)
   rw [show (fun w => w ^ (b - 1) * (cexp (-w) * kummerM a b w)) =
       fun w => w ^ (b - 1) * cexp (-w) * kummerM a b w by funext w; ring,
     iteratedDeriv_mul_cpow_exp_neg_kummerM n hbn hx, show b - n - 1 = (b - 1) - n by ring,
-    cpow_sub (x := x) (b - 1) (n : ℂ) hx0, cpow_natCast, poch_sub_nat_self, exp_add, exp_neg x]
+    cpow_sub (x := x) (b - 1) (n : ℂ) hx0, cpow_natCast, pochhammer_sub_nat_self,
+        exp_add, exp_neg x]
   field_simp
   rw [neg_pow y]; ring
 
@@ -469,7 +473,7 @@ theorem kummerM_addition_exp_shift_both {a b x y : ℂ} (hx : x ∈ slitPlane)
 theorem kummerU_addition (a b : ℂ) {x y : ℂ} (hx : 0 < x.re)
     (hyx : ‖y‖ < ‖x‖) :
     kummerU a b (x + y) =
-      ∑' n : ℕ, poch a n * (-y) ^ n / n.factorial * kummerU (a + n) (b + n) x := by
+      ∑' n : ℕ, pochhammer a n * (-y) ^ n / n.factorial * kummerU (a + n) (b + n) x := by
   have hx' : x ∈ slitPlane := Or.inl hx
   have hd : DifferentiableOn ℂ (kummerU a b) (Metric.ball x ‖x‖) :=
     fun w hw => (differentiableAt_kummerU a b
@@ -487,7 +491,7 @@ theorem kummerU_addition_shift_b {a b x y : ℂ} (hx : 0 < x.re)
     (hxy : x + y ∈ slitPlane) (hyx : ‖y‖ < ‖x‖) :
     kummerU a b (x + y) =
       ((x + y) / x) ^ (1 - b) *
-        ∑' n : ℕ, poch (1 + a - b) n * (-y / x) ^ n / n.factorial * kummerU a (b - n) x := by
+        ∑' n : ℕ, pochhammer (1 + a - b) n * (-y / x) ^ n / n.factorial * kummerU a (b - n) x := by
   have hx0 := slitPlane_ne_zero (Or.inl hx : x ∈ slitPlane)
   rw [kummerU_kummer_transform_all a b (slitPlane_ne_zero hxy),
     kummerU_addition (a - b + 1) (2 - b) hx hyx,
@@ -500,17 +504,17 @@ theorem kummerU_addition_shift_b {a b x y : ℂ} (hx : 0 < x.re)
     show 1 - (2 - b + (n : ℂ)) = b - n - 1 by ring]
   have hp := cpow_add_shift_factor hx hyx b n
   rw [div_pow, show (1 : ℂ) + a - b = a - b + 1 by ring]
-  linear_combination (poch (a - b + 1) n * (-y) ^ n / n.factorial * kummerU a (b - n) x) * hp
+  linear_combination (pochhammer (a - b + 1) n * (-y) ^ n / n.factorial * kummerU a (b - n) x) * hp
 
 /-- Identity under the stated parameter and domain assumptions: `kummerU a b (x + y) = (x / (x +
-y)) ^ a * ∑' n : ℕ, poch a n * poch (1 + a - b) n * y ^ n / (n.factorial * (x + y) ^ n) *
-kummerU (a + n) b x`. -/
+y)) ^ a * ∑' n : ℕ, pochhammer a n * pochhammer (1 + a - b) n * y ^ n / (n.factorial * (x + y) ^ n)
+* kummerU (a + n) b x`. -/
 @[dlmf 13.13.E9]
 theorem kummerU_addition_shift_a {a b x y : ℂ} (hx : 0 < x.re)
     (hxy : x + y ∈ slitPlane) (hy : -1 / 2 < (y / x).re) :
     kummerU a b (x + y) =
       (x / (x + y)) ^ a *
-        ∑' n : ℕ, poch a n * poch (1 + a - b) n * y ^ n / (n.factorial * (x + y) ^ n) *
+        ∑' n : ℕ, pochhammer a n * pochhammer (1 + a - b) n * y ^ n / (n.factorial * (x + y) ^ n) *
           kummerU (a + n) b x := by
   have hx0 := slitPlane_ne_zero (Or.inl hx : x ∈ slitPlane)
   have hxy0 := slitPlane_ne_zero hxy
@@ -671,7 +675,7 @@ theorem whittakerM_addition {κ μ x y : ℂ} (hx : 0 < x.re)
     (hμ : ∀ k : ℤ, 1 + 2 * μ ≠ k) :
     whittakerM κ μ (x + y) =
       exp (-y / 2) * (x / (x + y)) ^ (μ - 1 / 2) *
-        ∑' n : ℕ, poch (-2 * μ) n / n.factorial * (-y / x ^ (1 / 2 : ℂ)) ^ n *
+        ∑' n : ℕ, pochhammer (-2 * μ) n / n.factorial * (-y / x ^ (1 / 2 : ℂ)) ^ n *
           whittakerM (κ - n / 2) (μ - n / 2) x := by
   have hx' : x ∈ slitPlane := Or.inl hx
   have hx0 := slitPlane_ne_zero hx'
@@ -697,7 +701,7 @@ theorem whittakerM_addition_shift_mu {κ μ x y : ℂ} (hx : 0 < x.re)
     (hyx : ‖y‖ < ‖x‖) (hμ : ∀ k : ℕ, 1 + 2 * μ ≠ -k) :
     whittakerM κ μ (x + y) =
       exp (-y / 2) * ((x + y) / x) ^ (μ + 1 / 2) *
-        ∑' n : ℕ, poch (1 / 2 + μ - κ) n / (poch (1 + 2 * μ) n * n.factorial) *
+        ∑' n : ℕ, pochhammer (1 / 2 + μ - κ) n / (pochhammer (1 + 2 * μ) n * n.factorial) *
           (y / x ^ (1 / 2 : ℂ)) ^ n * whittakerM (κ - n / 2) (μ + n / 2) x := by
   have hx0 := slitPlane_ne_zero (Or.inl hx : x ∈ slitPlane)
   have hh := cpow_half_ne_zero hx0
@@ -713,7 +717,7 @@ theorem whittakerM_addition_shift_mu {κ μ x y : ℂ} (hx : 0 < x.re)
   field_simp
 
 /-- Identity under the stated parameter and domain assumptions: `whittakerM κ μ (x + y) = exp (-y
-/ 2) * ((x + y) / x) ^ κ * ∑' n : ℕ, poch (1 / 2 + μ - κ) n * y ^ n / (n.factorial * (x + y) ^
+/ 2) * ((x + y) / x) ^ κ * ∑' n : ℕ, pochhammer (1 / 2 + μ - κ) n * y ^ n / (n.factorial * (x + y) ^
 n) * whittakerM (κ - n) μ x`. -/
 @[dlmf 13.26.E3]
 theorem whittakerM_addition_shift_kappa {κ μ x y : ℂ} (hx : 0 < x.re)
@@ -721,7 +725,7 @@ theorem whittakerM_addition_shift_kappa {κ μ x y : ℂ} (hx : 0 < x.re)
     (hμ : ∀ k : ℕ, 1 + 2 * μ ≠ -k) :
     whittakerM κ μ (x + y) =
       exp (-y / 2) * ((x + y) / x) ^ κ *
-        ∑' n : ℕ, poch (1 / 2 + μ - κ) n * y ^ n / (n.factorial * (x + y) ^ n) *
+        ∑' n : ℕ, pochhammer (1 / 2 + μ - κ) n * y ^ n / (n.factorial * (x + y) ^ n) *
           whittakerM (κ - n) μ x := by
   simp only [whittakerM]
   rw [kummerM_addition_shift_a (Or.inl hx) hxy hy hμ]
@@ -736,7 +740,7 @@ theorem whittakerM_addition_shift_kappa {κ μ x y : ℂ} (hx : 0 < x.re)
     rw [← exp_add]; congr 1; ring
   rw [he]
   linear_combination (exp (-y / 2) * exp (-x / 2) *
-    (poch (μ - κ + 1 / 2) n * y ^ n / (n.factorial * (x + y) ^ n)) *
+    (pochhammer (μ - κ + 1 / 2) n * y ^ n / (n.factorial * (x + y) ^ n)) *
       kummerM (μ - κ + 1 / 2 + n) (1 + 2 * μ) x) * hp
 
 /-- Addition theorem; the series converges for `‖y‖ < ‖x‖`. -/
@@ -745,7 +749,7 @@ theorem whittakerM_addition_exp {κ μ x y : ℂ} (hx : 0 < x.re)
     (hyx : ‖y‖ < ‖x‖) (hμ : ∀ k : ℤ, 1 + 2 * μ ≠ k) :
     whittakerM κ μ (x + y) =
       exp (y / 2) * (x / (x + y)) ^ (μ - 1 / 2) *
-        ∑' n : ℕ, poch (-2 * μ) n / n.factorial * (-y / x ^ (1 / 2 : ℂ)) ^ n *
+        ∑' n : ℕ, pochhammer (-2 * μ) n / n.factorial * (-y / x ^ (1 / 2 : ℂ)) ^ n *
           whittakerM (κ + n / 2) (μ - n / 2) x := by
   have hx' : x ∈ slitPlane := Or.inl hx
   have hx0 := slitPlane_ne_zero hx'
@@ -772,7 +776,7 @@ theorem whittakerM_addition_exp_shift_mu {κ μ x y : ℂ} (hx : 0 < x.re)
     (hyx : ‖y‖ < ‖x‖) (hμ : ∀ k : ℕ, 1 + 2 * μ ≠ -k) :
     whittakerM κ μ (x + y) =
       exp (y / 2) * ((x + y) / x) ^ (μ + 1 / 2) *
-        ∑' n : ℕ, poch (1 / 2 + μ + κ) n / (poch (1 + 2 * μ) n * n.factorial) *
+        ∑' n : ℕ, pochhammer (1 / 2 + μ + κ) n / (pochhammer (1 + 2 * μ) n * n.factorial) *
           (-y / x ^ (1 / 2 : ℂ)) ^ n * whittakerM (κ + n / 2) (μ + n / 2) x := by
   have hx0 := slitPlane_ne_zero (Or.inl hx : x ∈ slitPlane)
   have hh := cpow_half_ne_zero hx0
@@ -790,7 +794,7 @@ theorem whittakerM_addition_exp_shift_mu {κ μ x y : ℂ} (hx : 0 < x.re)
   field_simp
 
 /-- Identity under the stated parameter and domain assumptions: `whittakerM κ μ (x + y) = exp (y /
-2) * (x / (x + y)) ^ κ * ∑' n : ℕ, poch (1 / 2 + μ + κ) n * y ^ n / (n.factorial * (x + y) ^
+2) * (x / (x + y)) ^ κ * ∑' n : ℕ, pochhammer (1 / 2 + μ + κ) n * y ^ n / (n.factorial * (x + y) ^
 n) * whittakerM (κ + n) μ x`. -/
 @[dlmf 13.26.E6]
 theorem whittakerM_addition_exp_shift_kappa {κ μ x y : ℂ} (hx : 0 < x.re)
@@ -798,7 +802,7 @@ theorem whittakerM_addition_exp_shift_kappa {κ μ x y : ℂ} (hx : 0 < x.re)
     (hμ : ∀ k : ℕ, 1 + 2 * μ ≠ -k) :
     whittakerM κ μ (x + y) =
       exp (y / 2) * (x / (x + y)) ^ κ *
-        ∑' n : ℕ, poch (1 / 2 + μ + κ) n * y ^ n / (n.factorial * (x + y) ^ n) *
+        ∑' n : ℕ, pochhammer (1 / 2 + μ + κ) n * y ^ n / (n.factorial * (x + y) ^ n) *
           whittakerM (κ + n) μ x := by
   have hx0 := slitPlane_ne_zero (Or.inl hx : x ∈ slitPlane)
   have hy' : -1 / 2 < (y / x).re := by
@@ -816,10 +820,10 @@ theorem whittakerM_addition_exp_shift_kappa {κ μ x y : ℂ} (hx : 0 < x.re)
   have he : exp (-(x + y) / 2) * exp y = exp (y / 2) * exp (-x / 2) := by
     rw [← exp_add, ← exp_add]; congr 1; ring
   linear_combination (exp (-(x + y) / 2) * exp y *
-    (poch (1 / 2 + μ + κ) n * y ^ n / (n.factorial * (x + y) ^ n)) *
+    (pochhammer (1 / 2 + μ + κ) n * y ^ n / (n.factorial * (x + y) ^ n)) *
       kummerM (μ - κ + 1 / 2 - n) (1 + 2 * μ) x) * hp +
     ((x / (x + y)) ^ κ * x ^ (μ + 1 / 2) *
-      (poch (1 / 2 + μ + κ) n * y ^ n / (n.factorial * (x + y) ^ n)) *
+      (pochhammer (1 / 2 + μ + κ) n * y ^ n / (n.factorial * (x + y) ^ n)) *
       kummerM (μ - κ + 1 / 2 - n) (1 + 2 * μ) x) * he
 
 /-- Addition theorem; the series converges for `‖y‖ < ‖x‖`. -/
@@ -828,7 +832,7 @@ theorem whittakerW_addition {κ μ x y : ℂ} (hx : 0 < x.re) (hxy : x + y ∈ s
     (hyx : ‖y‖ < ‖x‖) :
     whittakerW κ μ (x + y) =
       exp (-y / 2) * (x / (x + y)) ^ (μ - 1 / 2) *
-        ∑' n : ℕ, poch (1 / 2 - μ - κ) n / n.factorial * (-y / x ^ (1 / 2 : ℂ)) ^ n *
+        ∑' n : ℕ, pochhammer (1 / 2 - μ - κ) n / n.factorial * (-y / x ^ (1 / 2 : ℂ)) ^ n *
           whittakerW (κ - n / 2) (μ - n / 2) x := by
   have hx0 := slitPlane_ne_zero (Or.inl hx : x ∈ slitPlane)
   have hh := cpow_half_ne_zero hx0
@@ -855,7 +859,7 @@ theorem whittakerW_addition_shift_mu {κ μ x y : ℂ} (hx : 0 < x.re)
     (hyx : ‖y‖ < ‖x‖) :
     whittakerW κ μ (x + y) =
       exp (-y / 2) * ((x + y) / x) ^ (μ + 1 / 2) *
-        ∑' n : ℕ, poch (1 / 2 + μ - κ) n / n.factorial * (-y / x ^ (1 / 2 : ℂ)) ^ n *
+        ∑' n : ℕ, pochhammer (1 / 2 + μ - κ) n / n.factorial * (-y / x ^ (1 / 2 : ℂ)) ^ n *
           whittakerW (κ - n / 2) (μ + n / 2) x := by
   have hx0 := slitPlane_ne_zero (Or.inl hx : x ∈ slitPlane)
   have hh := cpow_half_ne_zero hx0
@@ -872,14 +876,14 @@ theorem whittakerW_addition_shift_mu {κ μ x y : ℂ} (hx : 0 < x.re)
   field_simp
 
 /-- Identity under the stated parameter and domain assumptions: `whittakerW κ μ (x + y) = exp (-y
-/ 2) * ((x + y) / x) ^ κ * ∑' n : ℕ, poch (1 / 2 + μ - κ) n * poch (1 / 2 - μ - κ) n /
+/ 2) * ((x + y) / x) ^ κ * ∑' n : ℕ, pochhammer (1 / 2 + μ - κ) n * pochhammer (1 / 2 - μ - κ) n /
 n.factorial * (y / (x + y)) ^ n * whittakerW (κ - n) μ x`. -/
 @[dlmf 13.26.E9]
 theorem whittakerW_addition_shift_kappa {κ μ x y : ℂ} (hx : 0 < x.re)
     (hxy : x + y ∈ slitPlane) (hy : -1 / 2 < (y / x).re) :
     whittakerW κ μ (x + y) =
       exp (-y / 2) * ((x + y) / x) ^ κ *
-        ∑' n : ℕ, poch (1 / 2 + μ - κ) n * poch (1 / 2 - μ - κ) n / n.factorial *
+        ∑' n : ℕ, pochhammer (1 / 2 + μ - κ) n * pochhammer (1 / 2 - μ - κ) n / n.factorial *
           (y / (x + y)) ^ n * whittakerW (κ - n) μ x := by
   simp only [whittakerW]
   rw [kummerU_addition_shift_a hx hxy hy]
@@ -894,7 +898,7 @@ theorem whittakerW_addition_shift_kappa {κ μ x y : ℂ} (hx : 0 < x.re)
     rw [← exp_add]; congr 1; ring
   rw [he]
   linear_combination (exp (-y / 2) * exp (-x / 2) *
-    (poch (1 / 2 + μ - κ) n * poch (1 / 2 - μ - κ) n * y ^ n /
+    (pochhammer (1 / 2 + μ - κ) n * pochhammer (1 / 2 - μ - κ) n * y ^ n /
       (n.factorial * (x + y) ^ n)) * kummerU (1 / 2 + μ - κ + n) (1 + 2 * μ) x) * hp
 
 /-- Addition theorem; the series converges for `‖y‖ < ‖x‖`. -/

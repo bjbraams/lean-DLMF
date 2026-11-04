@@ -32,8 +32,9 @@ behind the hypergeometric differential equations is in
   DLMF 15.2.4.
 * `ordinaryHypergeometric_eq_one_sub_neg_cpow`: `₂F₁(a,c;c;z) = (1-z)^{-a}`, DLMF 15.4.6.
 * `regularizedHGFun_eq_tsum'`: Mathlib's regularized `ₚF_q` as a `tsum` of its coefficients.
-* `hasSum_poch_div_factorial`: the binomial series `∑ (β)_n / n! z^n = (1-z)^{-β}`.
-* `tendsto_gaussHGCoeff_div_cpow`: the normalized Gauss coefficients have a Gamma-ratio limit.
+* `hasSum_pochhammer_div_factorial`: the binomial series `∑ (β)_n / n! z^n = (1-z)^{-β}`.
+* `tendsto_gaussHypergeometricCoeff_div_cpow`: the normalized Gauss coefficients have a Gamma-ratio
+  limit.
 * `ordinaryHypergeometric_summable_of_mem_sphere`: absolute convergence on the unit circle,
   §15.2(i).
 
@@ -90,29 +91,29 @@ theorem ordinaryHypergeometricSeries_radius_ge_one (a b c : ℂ) :
 
 /-- The Gauss series represents `₂F₁` throughout the open unit disk. -/
 theorem hasFPowerSeriesOnBall_ordinaryHypergeometric (a b c : ℂ) :
-    HasFPowerSeriesOnBall (₂F₁ a b c) (ofScalars ℂ (gaussHGCoeff a b c)) 0 1 := by
+    HasFPowerSeriesOnBall (₂F₁ a b c) (ofScalars ℂ (gaussHypergeometricCoeff a b c)) 0 1 := by
   have hr := ordinaryHypergeometricSeries_radius_ge_one a b c
   have h := ((ordinaryHypergeometricSeries ℂ a b c).hasFPowerSeriesOnBall
     (lt_of_lt_of_le (by simp) hr)).mono (by simp) hr
   change HasFPowerSeriesOnBall (₂F₁ a b c) (ordinaryHypergeometricSeries ℂ a b c) 0 1 at h
-  have heq : ordinaryHypergeometricCoefficient a b c = gaussHGCoeff a b c :=
+  have heq : ordinaryHypergeometricCoefficient a b c = gaussHypergeometricCoeff a b c :=
     funext (ordinaryHypergeometricCoefficient_eq a b c)
   simpa only [ordinaryHypergeometricSeries, heq] using h
 
 /-- Absolute summability of the Gauss series inside the unit disk. -/
-theorem summable_norm_gaussHGCoeff_mul_pow (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
-    Summable fun n : ℕ => ‖gaussHGCoeff a b c n * z ^ n‖ := by
+theorem summable_norm_gaussHypergeometricCoeff_mul_pow (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+    Summable fun n : ℕ => ‖gaussHypergeometricCoeff a b c n * z ^ n‖ := by
   have h := hasFPowerSeriesOnBall_ordinaryHypergeometric a b c
-  have hr : (‖z‖₊ : ENNReal) < (ofScalars ℂ (gaussHGCoeff a b c)).radius := by
+  have hr : (‖z‖₊ : ENNReal) < (ofScalars ℂ (gaussHypergeometricCoeff a b c)).radius := by
     refine lt_of_lt_of_le ?_ h.r_le
     rw [← ENNReal.coe_one, ENNReal.coe_lt_coe, ← NNReal.coe_lt_coe, coe_nnnorm, NNReal.coe_one]
     exact hz
-  refine ((ofScalars ℂ (gaussHGCoeff a b c)).summable_norm_mul_pow hr).congr
+  refine ((ofScalars ℂ (gaussHypergeometricCoeff a b c)).summable_norm_mul_pow hr).congr
     fun n => ?_
   rw [ofScalars_norm, norm_mul, norm_pow, coe_nnnorm]
 
 /-- Helper lemma for generating-function estimates. -/
-theorem poch_eval_nonneg {x : ℝ} (hx : 0 ≤ x) (n : ℕ) :
+theorem pochhammer_eval_nonneg {x : ℝ} (hx : 0 ≤ x) (n : ℕ) :
     0 ≤ (ascPochhammer ℝ n).eval x := by
   induction n with
   | zero => simp
@@ -121,28 +122,28 @@ theorem poch_eval_nonneg {x : ℝ} (hx : 0 ≤ x) (n : ℕ) :
     exact mul_nonneg ih (add_nonneg hx (Nat.cast_nonneg n))
 
 /-- Helper lemma for generating-function estimates. -/
-theorem norm_poch_le (z : ℂ) (n : ℕ) :
-    ‖poch z n‖ ≤ (ascPochhammer ℝ n).eval ‖z‖ := by
+theorem norm_pochhammer_le (z : ℂ) (n : ℕ) :
+    ‖pochhammer z n‖ ≤ (ascPochhammer ℝ n).eval ‖z‖ := by
   induction n with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ n ih =>
-    rw [poch_succ, norm_mul, ascPochhammer_succ_eval]
+    rw [pochhammer_succ, norm_mul, ascPochhammer_succ_eval]
     have hle : ‖z + n‖ ≤ ‖z‖ + n := by
       calc
         ‖z + (n : ℂ)‖ ≤ ‖z‖ + ‖(n : ℂ)‖ := norm_add_le _ _
         _ = ‖z‖ + n := by simp
-    have hnn : 0 ≤ (ascPochhammer ℝ n).eval ‖z‖ := poch_eval_nonneg (norm_nonneg z) n
+    have hnn : 0 ≤ (ascPochhammer ℝ n).eval ‖z‖ := pochhammer_eval_nonneg (norm_nonneg z) n
     exact mul_le_mul ih hle (norm_nonneg _) hnn
 
 /-- Helper lemma for generating-function estimates. -/
-theorem poch_eval_mono {x y : ℝ} (hx : 0 ≤ x) (hxy : x ≤ y) (n : ℕ) :
+theorem pochhammer_eval_mono {x y : ℝ} (hx : 0 ≤ x) (hxy : x ≤ y) (n : ℕ) :
     (ascPochhammer ℝ n).eval x ≤ (ascPochhammer ℝ n).eval y := by
   induction n with
   | zero => simp
   | succ n ih =>
     rw [ascPochhammer_succ_eval, ascPochhammer_succ_eval]
     exact mul_le_mul ih (add_le_add hxy le_rfl)
-      (add_nonneg hx (Nat.cast_nonneg n)) (poch_eval_nonneg (le_trans hx hxy) n)
+      (add_nonneg hx (Nat.cast_nonneg n)) (pochhammer_eval_nonneg (le_trans hx hxy) n)
 
 /-- `₂F₁(a, b; c; ·)` is analytic on the open unit disk. -/
 theorem analyticAt_ordinaryHypergeometric {a b c z : ℂ} (hz : ‖z‖ < 1) :
@@ -168,11 +169,11 @@ theorem ordinaryHypergeometric_zero_left (b c z : ℂ) : ₂F₁ (0 : ℂ) b c z
     simp [hn]
 
 /-- Helper lemma for Chu–Vandermonde and the shifted Legendre evaluation. -/
-theorem gaussHGCoeff_neg_nat (n : ℕ) (b c : ℂ) (k : ℕ) :
-    gaussHGCoeff (-(n : ℂ)) b c k =
-      (-1 : ℂ) ^ k * n.choose k * poch b k / poch c k := by
+theorem gaussHypergeometricCoeff_neg_nat (n : ℕ) (b c : ℂ) (k : ℕ) :
+    gaussHypergeometricCoeff (-(n : ℂ)) b c k =
+      (-1 : ℂ) ^ k * n.choose k * pochhammer b k / pochhammer c k := by
   have hk : (k ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr k.factorial_ne_zero
-  rw [gaussHGCoeff, poch_neg_coe_nat, Nat.descFactorial_eq_factorial_mul_choose]
+  rw [gaussHypergeometricCoeff, pochhammer_neg_coe_nat, Nat.descFactorial_eq_factorial_mul_choose]
   push_cast
   field [hk]
 
@@ -180,21 +181,21 @@ theorem gaussHGCoeff_neg_nat (n : ℕ) (b c : ℂ) (k : ℕ) :
 @[dlmf 15.2.E4]
 theorem ordinaryHypergeometric_eq_sum_neg_nat (n : ℕ) (b c z : ℂ) :
     ₂F₁ (-(n : ℂ)) b c z =
-      ∑ k ∈ Finset.range (n + 1), gaussHGCoeff (-(n : ℂ)) b c k * z ^ k := by
+      ∑ k ∈ Finset.range (n + 1), gaussHypergeometricCoeff (-(n : ℂ)) b c k * z ^ k := by
   rw [ordinaryHypergeometric_eq_tsum]
   simp only [smul_eq_mul]
   have hterm : (fun k : ℕ =>
       (k !⁻¹ : ℂ) * (ascPochhammer ℂ k).eval (-(n : ℂ)) *
         (ascPochhammer ℂ k).eval b * ((ascPochhammer ℂ k).eval c)⁻¹ * z ^ k) =
-      fun k => gaussHGCoeff (-(n : ℂ)) b c k * z ^ k := by
+      fun k => gaussHypergeometricCoeff (-(n : ℂ)) b c k * z ^ k := by
     funext k
-    simp [gaussHGCoeff, poch, div_eq_mul_inv, mul_assoc, mul_left_comm, mul_comm]
+    simp [gaussHypergeometricCoeff, pochhammer, div_eq_mul_inv, mul_assoc, mul_left_comm, mul_comm]
   rw [hterm]
   refine tsum_eq_sum fun k hk => ?_
   have hkn : n < k := by
     rw [Finset.mem_range] at hk
     omega
-  simp [gaussHGCoeff, poch_neg_nat_eq_zero hkn]
+  simp [gaussHypergeometricCoeff, pochhammer_neg_nat_eq_zero hkn]
 
 /-- Cancelling equal upper and lower parameters identifies the hypergeometric power series
 with the binomial series composed with negation. -/
@@ -232,18 +233,18 @@ theorem ordinaryHypergeometric_eq_one_sub_neg_cpow {a c z : ℂ}
   exact ((ordinaryHypergeometricSeries ℂ a c c).hasSum hmem).unique hs
 
 /-- Euler's Gamma approximants written using Pochhammer symbols. -/
-theorem GammaSeq_eq_poch (s : ℂ) (n : ℕ) :
-    GammaSeq s n = (n : ℂ) ^ s * n.factorial / (poch s n * (s + n)) := by
-  have hp (k : ℕ) : (∏ j ∈ Finset.range k, (s + j)) = poch s k := by
+theorem GammaSeq_eq_pochhammer (s : ℂ) (n : ℕ) :
+    GammaSeq s n = (n : ℂ) ^ s * n.factorial / (pochhammer s n * (s + n)) := by
+  have hp (k : ℕ) : (∏ j ∈ Finset.range k, (s + j)) = pochhammer s k := by
     induction k with
-    | zero => simp [poch_zero]
-    | succ k ih => rw [Finset.prod_range_succ, ih, poch_succ]
-  rw [GammaSeq, hp, poch_succ]
+    | zero => simp [pochhammer_zero]
+    | succ k ih => rw [Finset.prod_range_succ, ih, pochhammer_succ]
+  rw [GammaSeq, hp, pochhammer_succ]
 
 /-- The normalized Gauss coefficients have a finite Gamma-ratio limit. -/
-theorem tendsto_gaussHGCoeff_div_cpow {a b c : ℂ}
+theorem tendsto_gaussHypergeometricCoeff_div_cpow {a b c : ℂ}
     (ha : ∀ k : ℕ, a ≠ -k) (hb : ∀ k : ℕ, b ≠ -k) (hc : ∀ k : ℕ, c ≠ -k) :
-    Tendsto (fun n : ℕ => gaussHGCoeff a b c n / (n : ℂ) ^ (a + b - c - 1))
+    Tendsto (fun n : ℕ => gaussHypergeometricCoeff a b c n / (n : ℂ) ^ (a + b - c - 1))
       atTop (𝓝 (Gamma c / (Gamma a * Gamma b))) := by
   have hlim (s : ℂ) : Tendsto (fun n : ℕ => 1 + s / (n : ℂ)) atTop (𝓝 1) := by
     simpa using (tendsto_const_div_atTop_nhds_zero_nat s).const_add 1
@@ -259,39 +260,40 @@ theorem tendsto_gaussHGCoeff_div_cpow {a b c : ℂ}
     simpa only [ne_eq, eq_neg_iff_add_eq_zero] using h n
   have hp (s : ℂ) : (n : ℂ) ^ s ≠ 0 := cpow_ne_zero_iff.mpr (Or.inl hn0)
   simp only [Pi.div_apply]
-  rw [GammaSeq_eq_poch, GammaSeq_eq_poch, GammaSeq_eq_poch,
-    gaussHGCoeff, cpow_sub _ _ hn0, cpow_sub _ _ hn0, cpow_add _ _ hn0, cpow_one]
+  rw [GammaSeq_eq_pochhammer, GammaSeq_eq_pochhammer, GammaSeq_eq_pochhammer,
+    gaussHypergeometricCoeff, cpow_sub _ _ hn0, cpow_sub _ _ hn0, cpow_add _ _ hn0, cpow_one]
   field [hn0, hs a ha, hs b hb, hs c hc,
     show (n : ℂ) + a ≠ 0 by simpa only [add_comm] using hs a ha,
     show (n : ℂ) + b ≠ 0 by simpa only [add_comm] using hs b hb, hp a, hp b, hp c,
-    poch_ne_zero_of_not_neg_nat ha n, poch_ne_zero_of_not_neg_nat hb n,
-    poch_ne_zero_of_not_neg_nat hc n, Nat.cast_ne_zero.mpr n.factorial_ne_zero]
+    pochhammer_ne_zero_of_not_neg_nat ha n, pochhammer_ne_zero_of_not_neg_nat hb n,
+    pochhammer_ne_zero_of_not_neg_nat hc n, Nat.cast_ne_zero.mpr n.factorial_ne_zero]
 
 /-- AAR Theorem 2.1.2 (absolute convergence on the unit circle). -/
 @[dlmf 15.2.i]
 theorem ordinaryHypergeometric_summable_of_mem_sphere {a b c z : ℂ}
     (hz : ‖z‖ = 1) (h : 0 < (c - a - b).re) :
-    Summable fun n : ℕ => gaussHGCoeff a b c n * z ^ n := by
+    Summable fun n : ℕ => gaussHypergeometricCoeff a b c n * z ^ n := by
   have hfinite (k : ℕ) (hk : a = -k ∨ b = -k ∨ c = -k) :
-      Summable fun n : ℕ => gaussHGCoeff a b c n * z ^ n := by
+      Summable fun n : ℕ => gaussHypergeometricCoeff a b c n * z ^ n := by
     apply (summable_nat_add_iff (k + 1)).mp
-    have he : (fun n : ℕ => gaussHGCoeff a b c (n + (k + 1)) * z ^ (n + (k + 1))) =
+    have he : (fun n : ℕ => gaussHypergeometricCoeff a b c (n + (k + 1)) * z ^ (n + (k + 1))) =
         fun _ => (0 : ℂ) := by
       funext n
       have hn : k < n + (k + 1) := by omega
-      rcases hk with rfl | rfl | rfl <;> simp [gaussHGCoeff, poch_neg_nat_eq_zero hn]
+      rcases hk with rfl | rfl | rfl <;>
+          simp [gaussHypergeometricCoeff, pochhammer_neg_nat_eq_zero hn]
     rw [he]
     exact summable_zero
   by_cases ha : ∀ k : ℕ, a ≠ -k
   · by_cases hb : ∀ k : ℕ, b ≠ -k
     · by_cases hc : ∀ k : ℕ, c ≠ -k
-      · have ht := (tendsto_gaussHGCoeff_div_cpow ha hb hc).norm
-        have hlim : Tendsto (fun n : ℕ => ‖gaussHGCoeff a b c n‖ /
+      · have ht := (tendsto_gaussHypergeometricCoeff_div_cpow ha hb hc).norm
+        have hlim : Tendsto (fun n : ℕ => ‖gaussHypergeometricCoeff a b c n‖ /
             (n : ℝ) ^ (a + b - c - 1).re) atTop (𝓝 ‖Gamma c / (Gamma a * Gamma b)‖) := by
           apply ht.congr'
           filter_upwards [eventually_gt_atTop 0] with n hn
           rw [norm_div, norm_natCast_cpow_of_pos hn]
-        have hs : Summable (fun n : ℕ => ‖gaussHGCoeff a b c n‖) :=
+        have hs : Summable (fun n : ℕ => ‖gaussHypergeometricCoeff a b c n‖) :=
           summable_of_isBigO_nat (Real.summable_nat_rpow.mpr (by
             simp only [sub_re, add_re, one_re] at h ⊢; linarith))
             (Asymptotics.isBigO_atTop_natCast_rpow_of_tendsto_div_rpow hlim)
@@ -308,11 +310,11 @@ theorem ordinaryHypergeometric_summable_of_mem_sphere {a b c z : ℂ}
     exact hfinite k (Or.inl hk)
 
 /-- Helper lemma for binomial expansions of `(1-z)^{-β}`. -/
-theorem gaussHGCoeff_self_right (β : ℂ) (n : ℕ) :
-    gaussHGCoeff β 1 1 n = poch β n / n.factorial := by
-  have h1 : poch (1 : ℂ) n = n.factorial := poch_nat_one n
+theorem gaussHypergeometricCoeff_self_right (β : ℂ) (n : ℕ) :
+    gaussHypergeometricCoeff β 1 1 n = pochhammer β n / n.factorial := by
+  have h1 : pochhammer (1 : ℂ) n = n.factorial := pochhammer_nat_one n
   have hf : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
-  simp [gaussHGCoeff, h1]
+  simp [gaussHypergeometricCoeff, h1]
   field [hf]
 
 /-- Helper lemma for binomial expansions of `(1-z)^{-β}`. -/
@@ -323,17 +325,17 @@ theorem one_not_neg_nat : ∀ k : ℕ, (1 : ℂ) ≠ -k := by
   linarith
 
 /-- The binomial series `∑ (β)_n / n! z^n = (1-z)^{-β}` for `|z| < 1`. -/
-theorem hasSum_poch_div_factorial {β z : ℂ} (hz : ‖z‖ < 1) :
-    HasSum (fun n : ℕ => poch β n / n.factorial * z ^ n) ((1 - z) ^ (-β)) := by
+theorem hasSum_pochhammer_div_factorial {β z : ℂ} (hz : ‖z‖ < 1) :
+    HasSum (fun n : ℕ => pochhammer β n / n.factorial * z ^ n) ((1 - z) ^ (-β)) := by
   have hc : ∀ k : ℕ, (k : ℂ) ≠ -(1 : ℂ) := fun k hk =>
     one_not_neg_nat k (neg_eq_iff_eq_neg.mp hk.symm)
   have hval := ordinaryHypergeometric_eq_one_sub_neg_cpow (a := β) (c := 1) hc hz
   have hs := (hasFPowerSeriesOnBall_ordinaryHypergeometric β 1 1).hasSum_mul_pow
     (mem_eball_one_of_norm_lt_one hz)
-  have hfun : (fun n : ℕ => gaussHGCoeff β 1 1 n * z ^ n) =
-      fun n => poch β n / n.factorial * z ^ n := by
+  have hfun : (fun n : ℕ => gaussHypergeometricCoeff β 1 1 n * z ^ n) =
+      fun n => pochhammer β n / n.factorial * z ^ n := by
     funext n
-    rw [gaussHGCoeff_self_right]
+    rw [gaussHypergeometricCoeff_self_right]
   rwa [hfun, hval] at hs
 
 /-- The regularized function as a `tsum` of its coefficients. -/

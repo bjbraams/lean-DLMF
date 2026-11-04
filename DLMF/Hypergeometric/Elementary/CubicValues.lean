@@ -183,17 +183,17 @@ theorem value_sixth_root
   · field_simp
 
 /-- Coefficient form of `z F'(a,b;c+1;z) = c (F(a,b;c;z) - F(a,b;c+1;z))`. -/
-theorem SpecialValues.gaussHGCoeff_shift_c {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
-    (n : ℂ) * gaussHGCoeff a b (c + 1) n =
-      c * (gaussHGCoeff a b c n - gaussHGCoeff a b (c + 1) n) := by
+theorem SpecialValues.gaussHypergeometricCoeff_shift_c {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
+    (n : ℂ) * gaussHypergeometricCoeff a b (c + 1) n =
+      c * (gaussHypergeometricCoeff a b c n - gaussHypergeometricCoeff a b (c + 1) n) := by
   have hc1 : ∀ k : ℕ, c + 1 ≠ -k := fun k h => hc (k + 1) (by push_cast; linear_combination h)
-  have hcp := poch_ne_zero_of_not_neg_nat hc n
-  have hcp1 := poch_ne_zero_of_not_neg_nat hc1 n
+  have hcp := pochhammer_ne_zero_of_not_neg_nat hc n
+  have hcp1 := pochhammer_ne_zero_of_not_neg_nat hc1 n
   have hf : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
-  have hpoch := poch_succ_left_mul c n
-  simp only [gaussHGCoeff]
+  have hpoch := pochhammer_succ_left_mul c n
+  simp only [gaussHypergeometricCoeff]
   field_simp
-  linear_combination (-(poch a n * poch b n)) * hpoch
+  linear_combination (-(pochhammer a n * pochhammer b n)) * hpoch
 
 /-- `z F'(a,b;c+1;z) = c (F(a,b;c;z) - F(a,b;c+1;z))` (DLMF 15.5.4 with `n = 1`). -/
 theorem SpecialValues.mul_deriv_shift_c {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (hz : ‖z‖ < 1) :
@@ -204,10 +204,11 @@ theorem SpecialValues.mul_deriv_shift_c {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠
   have hs1 := (hasFPowerSeriesOnBall_ordinaryHypergeometric a b c).hasSum_mul_pow hz'
   have hs0 := hf.hasSum_mul_pow hz'
   have hR := (hs1.sub hs0).mul_left c
-  have hfun : (fun n : ℕ => (n : ℂ) * gaussHGCoeff a b (c + 1) n * z ^ n) =
-      fun n => c * (gaussHGCoeff a b c n * z ^ n - gaussHGCoeff a b (c + 1) n * z ^ n) := by
+  have hfun : (fun n : ℕ => (n : ℂ) * gaussHypergeometricCoeff a b (c + 1) n * z ^ n) =
+      fun n => c * (gaussHypergeometricCoeff a b c n * z ^ n -
+          gaussHypergeometricCoeff a b (c + 1) n * z ^ n) := by
     funext n
-    have hcoeff := SpecialValues.gaussHGCoeff_shift_c (a := a) (b := b) hc n
+    have hcoeff := SpecialValues.gaussHypergeometricCoeff_shift_c (a := a) (b := b) hc n
     linear_combination hcoeff * z ^ n
   rw [hfun] at hL
   exact hL.unique (by simpa [mul_sub] using hR)
@@ -666,27 +667,27 @@ theorem hasSum_altPair {a : ℂ} (ha : 0 < a.re) :
   rwa [heq] at this
 
 /-- The coefficients of `₂F₁(1, a; a + 1; z)` are `a/(a + k)`. -/
-theorem gaussHGCoeff_one_self_add_one {a : ℂ} (ha : 0 < a.re) (k : ℕ) :
-    gaussHGCoeff 1 a (a + 1) k = a / (a + k) := by
-  have hp : poch (a + 1) k ≠ 0 :=
-    poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith)) k
+theorem gaussHypergeometricCoeff_one_self_add_one {a : ℂ} (ha : 0 < a.re) (k : ℕ) :
+    gaussHypergeometricCoeff 1 a (a + 1) k = a / (a + k) := by
+  have hp : pochhammer (a + 1) k ≠ 0 :=
+    pochhammer_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith)) k
   have hak : a + k ≠ 0 := by
     intro h; have := congrArg re h; simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
   have hf : (k.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr k.factorial_ne_zero
-  have e1 := poch_succ a k
-  have e2 := poch_succ_left a k
-  rw [gaussHGCoeff, poch_nat_one, div_eq_div_iff (mul_ne_zero hp hf) hak]
+  have e1 := pochhammer_succ a k
+  have e2 := pochhammer_succ_left a k
+  rw [gaussHypergeometricCoeff, pochhammer_nat_one, div_eq_div_iff (mul_ne_zero hp hf) hak]
   linear_combination (k.factorial : ℂ) * (e1.symm.trans e2)
 
 /-- Ordered partial sums are essential here: the series is only conditionally convergent. -/
 @[dlmf 15.4.E27]
 theorem alternating_digamma {a : ℂ} (ha : 0 < a.re) :
     Tendsto (fun n : ℕ => ∑ k ∈ Finset.range n,
-      gaussHGCoeff 1 a (a + 1) k * (-1 : ℂ) ^ k) atTop
+      gaussHypergeometricCoeff 1 a (a + 1) k * (-1 : ℂ) ^ k) atTop
       (𝓝 (a / 2 * (digamma ((a + 1) / 2) - digamma (a / 2)))) := by
-  set t : ℕ → ℂ := fun k => gaussHGCoeff 1 a (a + 1) k * (-1 : ℂ) ^ k with ht
+  set t : ℕ → ℂ := fun k => gaussHypergeometricCoeff 1 a (a + 1) k * (-1 : ℂ) ^ k with ht
   have htk : ∀ k : ℕ, t k = (-1) ^ k * (a / (a + k)) := fun k => by
-    simp only [ht]; rw [gaussHGCoeff_one_self_add_one ha]; ring
+    simp only [ht]; rw [gaussHypergeometricCoeff_one_self_add_one ha]; ring
   have h2N : ∀ N : ℕ, ∑ k ∈ Finset.range (2 * N), t k = ∑ j ∈ Finset.range N, altPair a j := by
     intro N
     induction N with
@@ -748,7 +749,8 @@ theorem half_argument_digamma {a : ℂ} (ha : 0 < a.re) :
   rw [tendsto_map'_iff] at habel
   -- the same function through Pfaff's transformation
   have hF : ∀ x : ℝ, 0 < x → x < 1 →
-      ((fun z : ℂ => ∑' n, gaussHGCoeff 1 a (a + 1) n * (-1 : ℂ) ^ n * z ^ n) ∘ ofReal) x =
+      ((fun z : ℂ => ∑' n, gaussHypergeometricCoeff 1 a (a + 1) n * (-1 : ℂ) ^ n *
+          z ^ n) ∘ ofReal) x =
         (1 + (x : ℂ)) ^ (-a) * ₂F₁ a a (a + 1) ((x : ℂ) / (1 + x)) := by
     intro x hx0 hx1
     have hxn : ‖-(x : ℂ)‖ < 1 := by
@@ -768,7 +770,7 @@ theorem half_argument_digamma {a : ℂ} (ha : 0 < a.re) :
     rw [← hP, ordinaryHypergeometric_eq_tsum]
     simp only [smul_eq_mul]
     refine tsum_congr fun n => ?_
-    simp [gaussHGCoeff, poch, div_eq_mul_inv]
+    simp [gaussHypergeometricCoeff, pochhammer, div_eq_mul_inv]
     ring
   have hlim : Tendsto (fun x : ℝ => (1 + (x : ℂ)) ^ (-a) * ₂F₁ a a (a + 1) ((x : ℂ) / (1 + x)))
       (𝓝[<] 1) (𝓝 ((2 : ℂ) ^ (-a) * ₂F₁ a a (a + 1) (1 / 2))) := by

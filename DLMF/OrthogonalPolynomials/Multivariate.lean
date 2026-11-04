@@ -50,31 +50,32 @@ namespace DLMF.OrthogonalPolynomials
 /-- The disk polynomials `R_{m,n}^{(α)}(z)` in `z` and `z̄` (DLMF 18.37.6). -/
 @[dlmf 18.37.E6]
 def diskPolynomial (α : ℂ) (m n : ℕ) (z : ℂ) : ℂ :=
-  ∑ j ∈ Finset.range (min m n + 1), (-1 : ℂ) ^ j * poch (α + 1) (m + n - j) *
-    poch (-(m : ℂ)) j * poch (-(n : ℂ)) j /
-    (poch (α + 1) m * poch (α + 1) n * j.factorial) * z ^ (m - j) * star z ^ (n - j)
+  ∑ j ∈ Finset.range (min m n + 1), (-1 : ℂ) ^ j * pochhammer (α + 1) (m + n - j) *
+    pochhammer (-(m : ℂ)) j * pochhammer (-(n : ℂ)) j /
+    (pochhammer (α + 1) m * pochhammer (α + 1) n * j.factorial) * z ^ (m - j) * star z ^ (n - j)
 
 /-- Triangle polynomials: the meaningful degree range is `n ≤ m`. The product
 at `x = 0` is used only off the boundary in the integral statements below. -/
 @[dlmf 18.37.E7]
 def trianglePolynomial (α β γ : ℂ) (m n : ℕ) (x y : ℂ) : ℂ :=
-  jacobiPolyP α (β + γ + 2 * n + 1) (m - n) (2 * x - 1) * x ^ n *
-    jacobiPolyP β γ n (2 * y / x - 1)
+  jacobiPolynomialP α (β + γ + 2 * n + 1) (m - n) (2 * x - 1) * x ^ n *
+    jacobiPolynomialP β γ n (2 * y / x - 1)
 
 /-- Reversed Jacobi coefficients in the normalization of the disk polynomials. -/
 theorem jacobi_disk_coefficients {α : ℂ} (hα : -1 < α.re) {m n : ℕ} (hmn : n ≤ m) (s : ℂ) :
-    jacobiPolyP α ((m - n : ℕ) : ℂ) n (2 * s - 1) / jacobiPolyP α ((m - n : ℕ) : ℂ) n 1 =
-      ∑ j ∈ Finset.range (n + 1), (-1 : ℂ) ^ j * poch (α + 1) (m + n - j) *
-        poch (-(m : ℂ)) j * poch (-(n : ℂ)) j /
-          (poch (α + 1) m * poch (α + 1) n * j.factorial) * s ^ (n - j) := by
+    jacobiPolynomialP α ((m - n : ℕ) : ℂ) n (2 * s - 1) /
+        jacobiPolynomialP α ((m - n : ℕ) : ℂ) n 1 =
+      ∑ j ∈ Finset.range (n + 1), (-1 : ℂ) ^ j * pochhammer (α + 1) (m + n - j) *
+        pochhammer (-(m : ℂ)) j * pochhammer (-(n : ℂ)) j /
+          (pochhammer (α + 1) m * pochhammer (α + 1) n * j.factorial) * s ^ (n - j) := by
   have hd : -1 < ((m - n : ℕ) : ℂ).re := by
     simp only [natCast_re]
     linarith [Nat.cast_nonneg (α := ℝ) (m - n)]
   have hnp : ∀ k : ℕ, α + 1 ≠ -(k : ℂ) := not_neg_nat_of_re_pos (by simp; linarith)
-  have hp (k : ℕ) := poch_ne_zero_of_not_neg_nat hnp k
+  have hp (k : ℕ) := pochhammer_ne_zero_of_not_neg_nat hnp k
   have hf (k : ℕ) : (k.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr k.factorial_ne_zero
   rw [show 2 * s - 1 = -(1 - 2 * s) by ring, jacobi_reflection hα hd,
-    jacobi_finite_sum hd, jacobiPolyP_one,
+    jacobi_finite_sum hd, jacobiPolynomialP_one,
     show (1 - 2 * s - 1) / 2 = -s by ring, Finset.mul_sum, Finset.sum_div]
   conv_lhs => rw [← Finset.sum_range_reflect]
   apply Finset.sum_congr rfl
@@ -86,21 +87,22 @@ theorem jacobi_disk_coefficients {α : ℂ} (hα : -1 < α.re) {m n : ℕ} (hmn 
   have hbase : (n : ℂ) + (m - n : ℕ) + α + 1 = α + 1 + m := by
     rw [Nat.cast_sub hmn]; ring
   rw [hbase]
-  have hpos : poch ((m - n : ℕ) + (n - j : ℕ) + 1 : ℂ) j =
+  have hpos : pochhammer ((m - n : ℕ) + (n - j : ℕ) + 1 : ℂ) j =
       (m.factorial : ℂ) / (m - j).factorial := by
     rw [show ((m - n : ℕ) : ℂ) + (n - j : ℕ) + 1 = ((m - j + 1 : ℕ) : ℂ) by
       push_cast; rw [Nat.cast_sub hmn, Nat.cast_sub hjn, Nat.cast_sub hjm]; ring,
-      poch, ascPochhammer_nat_eq_natCast_descFactorial,
+      pochhammer, ascPochhammer_nat_eq_natCast_descFactorial,
       show m - j + 1 + j - 1 = m by omega]
     rw [Nat.descFactorial_eq_div hjm, Nat.cast_div
       (Nat.factorial_dvd_factorial (Nat.sub_le m j)) (hf _)]
-  have hsplit : poch (α + 1) (m + n - j) = poch (α + 1) m * poch (α + 1 + m) (n - j) := by
-    rw [show m + n - j = m + (n - j) by omega, poch_add]
-  have hpm := poch_neg_nat_mul_factorial hjm
-  have hpn := poch_neg_nat_mul_factorial hjn
-  have hm' : poch (-(m : ℂ)) j = (-1) ^ j * m.factorial / (m - j).factorial :=
+  have hsplit : pochhammer (α + 1) (m + n - j) = pochhammer (α + 1) m *
+      pochhammer (α + 1 + m) (n - j) := by
+    rw [show m + n - j = m + (n - j) by omega, pochhammer_add]
+  have hpm := pochhammer_neg_nat_mul_factorial hjm
+  have hpn := pochhammer_neg_nat_mul_factorial hjn
+  have hm' : pochhammer (-(m : ℂ)) j = (-1) ^ j * m.factorial / (m - j).factorial :=
     (eq_div_iff (hf _)).mpr hpm
-  have hn' : poch (-(n : ℂ)) j = (-1) ^ j * n.factorial / (n - j).factorial :=
+  have hn' : pochhammer (-(n : ℂ)) j = (-1) ^ j * n.factorial / (n - j).factorial :=
     (eq_div_iff (hf _)).mpr hpn
   rw [hpos, hsplit, hm', hn', neg_pow]
   have hsgn : (-1 : ℂ) ^ n = (-1) ^ j * (-1) ^ (n - j) := by
@@ -115,8 +117,8 @@ theorem jacobi_disk_coefficients {α : ℂ} (hα : -1 < α.re) {m n : ℕ} (hmn 
 /-- Factor the larger holomorphic degree from the finite disk polynomial. -/
 theorem diskPolynomial_eq_jacobi_of_le {α : ℂ} (hα : -1 < α.re) {m n : ℕ} (hmn : n ≤ m) (z : ℂ) :
     diskPolynomial α m n z = z ^ (m - n) *
-      (jacobiPolyP α ((m - n : ℕ) : ℂ) n (2 * (z * star z) - 1) /
-          jacobiPolyP α ((m - n : ℕ) : ℂ) n 1) := by
+      (jacobiPolynomialP α ((m - n : ℕ) : ℂ) n (2 * (z * star z) - 1) /
+          jacobiPolynomialP α ((m - n : ℕ) : ℂ) n 1) := by
   rw [jacobi_disk_coefficients hα hmn, Finset.mul_sum, diskPolynomial, min_eq_right hmn]
   apply Finset.sum_congr rfl
   intro j hj
@@ -139,14 +141,14 @@ theorem diskPolynomial_swap (α : ℂ) (m n : ℕ) (z : ℂ) :
 
 /-- Identity under the stated parameter and domain assumptions: `diskPolynomial α m n ((r : ℂ) *
 exp (I * θ)) = exp (I * ((m : ℂ) - n) * θ) * (r : ℂ) ^ (Int.natAbs ((m : ℤ) - n)) *
-jacobiPolyP α (Int.natAbs ((m : ℤ) - n)) (min m n) (2 * (r : ℂ) ^ 2 - 1) / jacobiPolyP α
+jacobiPolynomialP α (Int.natAbs ((m : ℤ) - n)) (min m n) (2 * (r : ℂ) ^ 2 - 1) / jacobiPolynomialP α
 (Int.natAbs ((m : ℤ) - n)) (min m n) 1`. -/
 @[dlmf 18.37.E1]
 theorem diskPolynomial_polar {α : ℝ} (hα : -1 < α) (m n : ℕ) (r θ : ℝ) :
     diskPolynomial α m n ((r : ℂ) * exp (I * θ)) =
       exp (I * ((m : ℂ) - n) * θ) * (r : ℂ) ^ (Int.natAbs ((m : ℤ) - n)) *
-      jacobiPolyP α (Int.natAbs ((m : ℤ) - n)) (min m n) (2 * (r : ℂ) ^ 2 - 1) /
-      jacobiPolyP α (Int.natAbs ((m : ℤ) - n)) (min m n) 1 := by
+      jacobiPolynomialP α (Int.natAbs ((m : ℤ) - n)) (min m n) (2 * (r : ℂ) ^ 2 - 1) /
+      jacobiPolynomialP α (Int.natAbs ((m : ℤ) - n)) (min m n) 1 := by
   have hα' : -1 < (α : ℂ).re := by simpa using hα
   have hstar : star ((r : ℂ) * exp (I * θ)) = (r : ℂ) * exp (-(I * θ)) := by
     simp [star_mul, ← exp_conj, mul_comm]
@@ -183,56 +185,61 @@ theorem diskPolynomial_polar {α : ℝ} (hα : -1 < α) (m n : ℕ) (r θ : ℝ)
 theorem diskPolynomial_at_one {α : ℂ} (hα : -1 < α.re) (m n : ℕ) : diskPolynomial α m n 1 = 1 := by
   have hnp : ∀ k : ℕ, α + 1 ≠ -(k : ℂ) := fun k h => by
     have := congrArg re h; simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
-  have hm := poch_ne_zero_of_not_neg_nat hnp m
-  have hn := poch_ne_zero_of_not_neg_nat hnp n
+  have hm := pochhammer_ne_zero_of_not_neg_nat hnp m
+  have hn := pochhammer_ne_zero_of_not_neg_nat hnp n
   unfold diskPolynomial
   simp only [one_pow, mul_one, star_one]
-  have hsub : ∑ j ∈ Finset.range (min m n + 1), (-1 : ℂ) ^ j * poch (α + 1) (m + n - j) *
-      poch (-(m : ℂ)) j * poch (-(n : ℂ)) j / (poch (α + 1) m * poch (α + 1) n * j.factorial) =
-      ∑ j ∈ Finset.range (n + 1), (-1 : ℂ) ^ j * poch (α + 1) (m + n - j) *
-      poch (-(m : ℂ)) j * poch (-(n : ℂ)) j / (poch (α + 1) m * poch (α + 1) n * j.factorial) := by
+  have hsub : ∑ j ∈ Finset.range (min m n + 1), (-1 : ℂ) ^ j * pochhammer (α + 1) (m + n - j) *
+      pochhammer (-(m : ℂ)) j * pochhammer (-(n : ℂ)) j /
+          (pochhammer (α + 1) m * pochhammer (α + 1) n * j.factorial) =
+      ∑ j ∈ Finset.range (n + 1), (-1 : ℂ) ^ j * pochhammer (α + 1) (m + n - j) *
+      pochhammer (-(m : ℂ)) j * pochhammer (-(n : ℂ)) j /
+          (pochhammer (α + 1) m * pochhammer (α + 1) n * j.factorial) := by
     apply Finset.sum_subset
     · intro j hj; simp at hj ⊢; omega
     · intro j hj hj'
       simp at hj hj'
       have : m < j := by omega
-      rw [poch_neg_nat_eq_zero this]; simp
+      rw [pochhammer_neg_nat_eq_zero this]; simp
   rw [hsub]
-  have key : ∑ j ∈ Finset.range (n + 1), (-1 : ℂ) ^ j * poch (α + 1) (m + n - j) *
-      poch (-(m : ℂ)) j * poch (-(n : ℂ)) j / (poch (α + 1) m * poch (α + 1) n * j.factorial) =
-      (∑ j ∈ Finset.range (n + 1), (n.choose j : ℂ) * poch (-(m : ℂ)) j *
-          poch (α + 1 + m) (n - j)) /
-        poch (α + 1) n := by
+  have key : ∑ j ∈ Finset.range (n + 1), (-1 : ℂ) ^ j * pochhammer (α + 1) (m + n - j) *
+      pochhammer (-(m : ℂ)) j * pochhammer (-(n : ℂ)) j /
+          (pochhammer (α + 1) m * pochhammer (α + 1) n * j.factorial) =
+      (∑ j ∈ Finset.range (n + 1), (n.choose j : ℂ) * pochhammer (-(m : ℂ)) j *
+          pochhammer (α + 1 + m) (n - j)) /
+        pochhammer (α + 1) n := by
     rw [Finset.sum_div]
     refine Finset.sum_congr rfl fun j hj => ?_
     have hjn : j ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hj)
-    have hsplit : poch (α + 1) (m + n - j) = poch (α + 1) m * poch (α + 1 + m) (n - j) := by
-      rw [show m + n - j = m + (n - j) by omega, poch_add]
-    have hpn : poch (-(n : ℂ)) j = (-1) ^ j * (j.factorial * n.choose j : ℕ) := by
-      rw [poch_neg_coe_nat, Nat.descFactorial_eq_factorial_mul_choose]
+    have hsplit : pochhammer (α + 1) (m + n - j) = pochhammer (α + 1) m *
+        pochhammer (α + 1 + m) (n - j) := by
+      rw [show m + n - j = m + (n - j) by omega, pochhammer_add]
+    have hpn : pochhammer (-(n : ℂ)) j = (-1) ^ j * (j.factorial * n.choose j : ℕ) := by
+      rw [pochhammer_neg_coe_nat, Nat.descFactorial_eq_factorial_mul_choose]
     have hf : (j.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr j.factorial_ne_zero
     have hs : ((-1 : ℂ) ^ j) ^ 2 = 1 := by rw [← pow_mul, mul_comm, pow_mul]; simp
     rw [hsplit, hpn]
     push_cast
     field_simp
-    linear_combination (poch (α + 1 + m) (n - j) * poch (-(m : ℂ)) j * (n.choose j : ℂ)) * hs
-  rw [key, poch_add_binomial_sum, show -(m : ℂ) + (α + 1 + m) = α + 1 by ring, div_self hn]
+    linear_combination (pochhammer (α + 1 + m) (n - j) * pochhammer (-(m : ℂ)) j *
+        (n.choose j : ℂ)) * hs
+  rw [key, pochhammer_add_binomial_sum, show -(m : ℂ) + (α + 1 + m) = α + 1 by ring, div_self hn]
 
 /-- Shifted Jacobi orthogonality on the open unit interval. -/
 theorem jacobi_unit_orthogonal {α β : ℝ} (hα : -1 < α) (hβ : -1 < β)
     {m n : ℕ} (hmn : m ≠ n) :
     (∫ t : ℝ in Ioo 0 1,
-      jacobiPolyP α β m (2 * t - 1) * jacobiPolyP α β n (2 * t - 1) *
+      jacobiPolynomialP α β m (2 * t - 1) * jacobiPolynomialP α β n (2 * t - 1) *
         ((1 - t) ^ α * t ^ β : ℝ)) = 0 := by
   have hlt (m n : ℕ) (hmn : m < n) :
       (∫ t : ℝ in Ioo 0 1,
-        jacobiPolyP α β m (2 * t - 1) * jacobiPolyP α β n (2 * t - 1) *
+        jacobiPolynomialP α β m (2 * t - 1) * jacobiPolynomialP α β n (2 * t - 1) *
           ((1 - t) ^ α * t ^ β : ℝ)) = 0 := by
     have hi := jacobi_shifted_orthogonal hβ hα hmn
     rw [intervalIntegral.integral_of_le (by norm_num : (0 : ℝ) ≤ 1),
       integral_Ioc_eq_integral_Ioo] at hi
     let C : ℂ := (-1) ^ m * (-1) ^ n *
-      (poch ((β : ℂ) + 1) m / m.factorial) * (poch ((β : ℂ) + 1) n / n.factorial)
+      (pochhammer ((β : ℂ) + 1) m / m.factorial) * (pochhammer ((β : ℂ) + 1) n / n.factorial)
     calc
       _ = C * ∫ t : ℝ in Ioo 0 1,
           (t : ℂ) ^ (β : ℂ) * (1 - (t : ℂ)) ^ (α : ℂ) *
@@ -245,7 +252,7 @@ theorem jacobi_unit_orthogonal {α β : ℝ} (hα : -1 < α) (hβ : -1 < β)
         have he : (2 : ℂ) * t - 1 = -(1 - 2 * t) := by ring
         rw [he, jacobi_reflection (by simpa using hα) (by simpa using hβ),
           jacobi_reflection (by simpa using hα) (by simpa using hβ)]
-        simp only [jacobiPolyP, show (1 - (1 - 2 * (t : ℂ))) / 2 = t by ring]
+        simp only [jacobiPolynomialP, show (1 - (1 - 2 * (t : ℂ))) / 2 = t by ring]
         rw [ofReal_mul, ofReal_cpow ht.1.le, ofReal_cpow (sub_nonneg.mpr ht.2.le)]
         simp only [ofReal_sub, ofReal_one]
         dsimp [C]
@@ -255,7 +262,7 @@ theorem jacobi_unit_orthogonal {α β : ℝ} (hα : -1 < α) (hβ : -1 < β)
   · exact hlt m n h
   · calc
       _ = ∫ t : ℝ in Ioo 0 1,
-          jacobiPolyP α β n (2 * t - 1) * jacobiPolyP α β m (2 * t - 1) *
+          jacobiPolynomialP α β n (2 * t - 1) * jacobiPolynomialP α β m (2 * t - 1) *
             ((1 - t) ^ α * t ^ β : ℝ) :=
           setIntegral_congr_fun measurableSet_Ioo fun t _ => by ring
       _ = 0 := hlt n m h
@@ -407,11 +414,11 @@ theorem diskPolynomial_orthogonal {α : ℝ} (hα : -1 < α) (m n j k : ℕ) (hn
   let d := Int.natAbs ((m : ℤ) - n)
   let e := Int.natAbs ((j : ℤ) - k)
   let l : ℤ := (m : ℤ) - n - ((j : ℤ) - k)
-  let A : ℂ := jacobiPolyP α d (min m n) 1
-  let B : ℂ := jacobiPolyP α e (min j k) 1
+  let A : ℂ := jacobiPolynomialP α d (min m n) 1
+  let B : ℂ := jacobiPolynomialP α e (min j k) 1
   let F (r : ℝ) : ℂ := (r : ℂ) ^ (d + e + 1) *
-    jacobiPolyP α d (min m n) (2 * (r : ℂ) ^ 2 - 1) *
-    jacobiPolyP α e (min j k) (2 * (r : ℂ) ^ 2 - 1) *
+    jacobiPolynomialP α d (min m n) (2 * (r : ℂ) ^ 2 - 1) *
+    jacobiPolynomialP α e (min j k) (2 * (r : ℂ) ^ 2 - 1) *
     ((1 - r ^ 2) ^ α : ℝ) / (A * B)
   let G (θ : ℝ) : ℂ := exp (I * (l : ℂ) * θ)
   have hsep : (∫ p : ℝ × ℝ in {p | p.1 ^ 2 + p.2 ^ 2 < 1},
@@ -465,8 +472,8 @@ theorem diskPolynomial_orthogonal {α : ℝ} (hα : -1 < α) (m n j k : ℕ) (hn
       have hmj : m = j := by omega
       have hnk : n = k := by omega
       exact Prod.ext hmj hnk
-    let H (t : ℝ) : ℂ := jacobiPolyP α d (min m n) (2 * t - 1) *
-      jacobiPolyP α d (min j k) (2 * t - 1) * ((1 - t) ^ α * t ^ (d : ℝ) : ℝ)
+    let H (t : ℝ) : ℂ := jacobiPolynomialP α d (min m n) (2 * t - 1) *
+      jacobiPolynomialP α d (min j k) (2 * t - 1) * ((1 - t) ^ α * t ^ (d : ℝ) : ℝ)
     have hrad : (∫ r in Ioo (0 : ℝ) 1, F r) =
         (1 / (A * B) : ℂ) * (1 / 2 : ℂ) * ∫ t in Ioo (0 : ℝ) 1, H t := by
       rw [mul_assoc, ← integral_radius_sq, ← integral_const_mul]
@@ -490,11 +497,11 @@ theorem trianglePolynomial_orthogonal {α β γ : ℝ} (hα : -1 < α) (hβ : -1
       trianglePolynomial α β γ m n p.1 p.2 * trianglePolynomial α β γ j k p.1 p.2 *
       (Real.rpow (1 - p.1) α * Real.rpow (p.1 - p.2) β * Real.rpow p.2 γ : ℝ) = 0 := by
   let B (l : ℕ) : ℝ := β + γ + 2 * l + 1
-  let F (x : ℝ) : ℂ := jacobiPolyP α (B n) (m - n) (2 * x - 1) *
-    jacobiPolyP α (B k) (j - k) (2 * x - 1) *
+  let F (x : ℝ) : ℂ := jacobiPolynomialP α (B n) (m - n) (2 * x - 1) *
+    jacobiPolynomialP α (B k) (j - k) (2 * x - 1) *
     ((1 - x) ^ α * x ^ (β + γ + (n : ℝ) + k + 1) : ℝ)
-  let G (u : ℝ) : ℂ := jacobiPolyP β γ n (2 * u - 1) *
-    jacobiPolyP β γ k (2 * u - 1) * ((1 - u) ^ β * u ^ γ : ℝ)
+  let G (u : ℝ) : ℂ := jacobiPolynomialP β γ n (2 * u - 1) *
+    jacobiPolynomialP β γ k (2 * u - 1) * ((1 - u) ^ β * u ^ γ : ℝ)
   have he : (∫ p : ℝ × ℝ in {p | 0 < p.2 ∧ p.2 < p.1 ∧ p.1 < 1},
       trianglePolynomial α β γ m n p.1 p.2 * trianglePolynomial α β γ j k p.1 p.2 *
       (Real.rpow (1 - p.1) α * Real.rpow (p.1 - p.2) β * Real.rpow p.2 γ : ℝ)) =

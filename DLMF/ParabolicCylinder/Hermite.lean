@@ -16,9 +16,9 @@ probabilists' normalization `He_n`.
 
 ## Main results
 
-* `aeval_hermitePolyH_eq_hermite_complex`: `H_n(x) = (√2)^n He_n(√2 x)` over `ℂ`.
-* `pcfU_physicists_hermite`: `U(-n - 1/2, z)` in terms of `H_n(z/√2)` (DLMF 12.7.2).
-* `pcfV_physicists_hermite`: `V(n + 1/2, z)` in terms of `H_n(iz/√2)` (DLMF 12.7.3).
+* `aeval_hermitePolynomialH_eq_hermite_complex`: `H_n(x) = (√2)^n He_n(√2 x)` over `ℂ`.
+* `parabolicCylinderU_physicists_hermite`: `U(-n - 1/2, z)` in terms of `H_n(z/√2)` (DLMF 12.7.2).
+* `parabolicCylinderV_physicists_hermite`: `V(n + 1/2, z)` in terms of `H_n(iz/√2)` (DLMF 12.7.3).
 -/
 
 @[expose] public noncomputable section
@@ -29,8 +29,8 @@ namespace DLMF.Confluent
 open Polynomial
 
 /-- Complex form of `H_n(x) = (√2)^n He_n(√2 x)`. -/
-theorem aeval_hermitePolyH_eq_hermite_complex (n : ℕ) (x : ℂ) :
-    aeval x (DLMF.OrthogonalPolynomials.hermitePolyH n) =
+theorem aeval_hermitePolynomialH_eq_hermite_complex (n : ℕ) (x : ℂ) :
+    aeval x (DLMF.OrthogonalPolynomials.hermitePolynomialH n) =
       (Real.sqrt 2 : ℂ) ^ n * aeval ((Real.sqrt 2 : ℂ) * x) (hermite n) := by
   have hs : (Real.sqrt 2:ℂ)^2=2 := by exact_mod_cast Real.sq_sqrt (by norm_num : (0:ℝ)≤2)
   induction n generalizing x with
@@ -43,7 +43,7 @@ theorem aeval_hermitePolyH_eq_hermite_complex (n : ℕ) (x : ℂ) :
         ((hasDerivAt_id x).const_mul (Real.sqrt 2 : ℂ))
     rw [deriv_const_mul_field, hcomp.deriv, Polynomial.deriv_aeval] at hd
     simp only [mul_one] at hd
-    simp only [DLMF.OrthogonalPolynomials.hermitePolyH_succ, hermite_succ, map_sub, map_mul,
+    simp only [DLMF.OrthogonalPolynomials.hermitePolynomialH_succ, hermite_succ, map_sub, map_mul,
       map_ofNat, aeval_X, ih, hd, pow_succ]
     linear_combination (-(Real.sqrt 2:ℂ)^n * x * aeval ((Real.sqrt 2 : ℂ) * x) (hermite n)) * hs
 
@@ -53,29 +53,32 @@ theorem two_cpow_neg_half_mul_sqrt_two_pow (n : ℕ) :
   rw [← two_cpow_half, ← Complex.cpow_nat_mul, ← Complex.cpow_add _ _ two_ne_zero]
   ring_nf; simp
 
-/-- Identity under the stated parameter and domain assumptions: `pcfU (-n-1/2) z=2^(-(n:ℂ)/2)*exp
-(-z^2/4)*Polynomial.aeval (z/Real.sqrt 2) (DLMF.OrthogonalPolynomials.hermitePolyH n)`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`parabolicCylinderU (-n-1/2) z=2^(-(n:ℂ)/2)*exp (-z^2/4)*Polynomial.aeval (z/Real.sqrt 2)
+(DLMF.OrthogonalPolynomials.hermitePolynomialH n)`. -/
 @[dlmf 12.7.E2]
-theorem pcfU_physicists_hermite (n : ℕ) (z : ℂ) :
-    pcfU (-n-1/2) z=2^(-(n:ℂ)/2)*exp (-z^2/4)*Polynomial.aeval (z/Real.sqrt 2)
-        (DLMF.OrthogonalPolynomials.hermitePolyH n) := by
+theorem parabolicCylinderU_physicists_hermite (n : ℕ) (z : ℂ) :
+    parabolicCylinderU (-n-1/2) z=2^(-(n:ℂ)/2)*exp (-z^2/4)*Polynomial.aeval (z/Real.sqrt 2)
+        (DLMF.OrthogonalPolynomials.hermitePolynomialH n) := by
   have hs0 : (Real.sqrt 2:ℂ) ≠ 0 := by
                                       exact_mod_cast (Real.sqrt_pos.mpr (by norm_num : (0:ℝ)<2)).ne'
-  have h := pcfD_nat n z
-  rw [pcfD] at h
-  rw [h, aeval_hermitePolyH_eq_hermite_complex, mul_div_cancel₀ _ hs0]
+  have h := parabolicCylinderD_nat n z
+  rw [parabolicCylinderD] at h
+  rw [h, aeval_hermitePolynomialH_eq_hermite_complex, mul_div_cancel₀ _ hs0]
   linear_combination (-(exp (-z^2/4) * aeval z (hermite n))) * two_cpow_neg_half_mul_sqrt_two_pow n
 
-/-- Identity under the stated parameter and domain assumptions: `pcfV (n+1/2) z=(Real.sqrt
-(2/π):ℂ)*exp (z^2/4)*(-I)^n*2^(-(n:ℂ)/2)*Polynomial.aeval (I*z/Real.sqrt 2)
-(DLMF.OrthogonalPolynomials.hermitePolyH n)`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`parabolicCylinderV (n+1/2) z=(Real.sqrt (2/π):ℂ)*exp (z^2/4)*(-I)^n*2^(-(n:ℂ)/2)*Polynomial.aeval
+(I*z/Real.sqrt 2) (DLMF.OrthogonalPolynomials.hermitePolynomialH n)`. -/
 @[dlmf 12.7.E3]
-theorem pcfV_physicists_hermite (n : ℕ) (z : ℂ) :
-    pcfV (n+1/2) z=(Real.sqrt (2/π):ℂ)*exp (z^2/4)*(-I)^n*2^(-(n:ℂ)/2)*Polynomial.aeval
-        (I*z/Real.sqrt 2) (DLMF.OrthogonalPolynomials.hermitePolyH n) := by
+theorem parabolicCylinderV_physicists_hermite (n : ℕ) (z : ℂ) :
+    parabolicCylinderV (n+1/2) z=(Real.sqrt (2/π):ℂ)*exp
+        (z^2/4)*(-I)^n*2^(-(n:ℂ)/2)*Polynomial.aeval
+        (I*z/Real.sqrt 2) (DLMF.OrthogonalPolynomials.hermitePolynomialH n) := by
   have hs0 : (Real.sqrt 2:ℂ) ≠ 0 := by
                                       exact_mod_cast (Real.sqrt_pos.mpr (by norm_num : (0:ℝ)<2)).ne'
-  rw [pcfV_nat_add_half, aeval_hermitePolyH_eq_hermite_complex, mul_div_cancel₀ _ hs0]
+  rw [parabolicCylinderV_nat_add_half, aeval_hermitePolynomialH_eq_hermite_complex,
+      mul_div_cancel₀ _ hs0]
   linear_combination (-((Real.sqrt (2/π):ℂ)*exp (z^2/4)*(-I)^n * aeval (I*z) (hermite n))) *
     two_cpow_neg_half_mul_sqrt_two_pow n
 

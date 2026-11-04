@@ -29,7 +29,7 @@ and the Mellin–Laplace transform of Hermite polynomials (DLMF 18.17.41, correc
   18.17.26.
 * `hermite_linearization`: the product formula for probabilists' Hermite polynomials.
 * `jacobi_laplace_transform`: DLMF 18.17.33.
-* `laguerrePolyL_product_laplace_transform`: DLMF 18.17.34–35.
+* `laguerrePolynomialL_product_laplace_transform`: DLMF 18.17.34–35.
 * `hermite_mellin_laplace_transform`: DLMF 18.17.41 in a corrected finite-sum form.
 
 ## Implementation notes
@@ -60,7 +60,7 @@ open DLMF.Confluent
 
 open DLMF.Bessel
 
-open DLMF.Hypergeometric (Gamma_add_nat_eq_poch_mul_Gamma)
+open DLMF.Hypergeometric (Gamma_add_nat_eq_pochhammer_mul_Gamma)
 
 noncomputable section
 
@@ -71,11 +71,11 @@ namespace DLMF.OrthogonalPolynomials
 /-- Moments of `P_n(1 - 2x²)` on `[0, 1]`, from the substitution `s = 1 - 2x²` and the
 Jacobi moments: `∫₀¹ x^{2k+1} P_n(1-2x²) dx = k! (-k)_n / (2 (k+n+1)!)`. -/
 private lemma lbsq_moment (n k : ℕ) :
-    ∫ x : ℝ in (0 : ℝ)..1, (x : ℂ) ^ (2 * k + 1) * legendrePolyP n (1 - 2 * (x : ℂ) ^ 2) =
-      (1 / 2 : ℂ) * k ! * poch (-(k : ℂ)) n / ((k + n + 1) ! : ℂ) := by
-  set F : ℝ → ℂ := fun s => legendrePolyP n (s : ℂ) * ((1 - (s : ℂ)) / 2) ^ k with hF
+    ∫ x : ℝ in (0 : ℝ)..1, (x : ℂ) ^ (2 * k + 1) * legendrePolynomialP n (1 - 2 * (x : ℂ) ^ 2) =
+      (1 / 2 : ℂ) * k ! * pochhammer (-(k : ℂ)) n / ((k + n + 1) ! : ℂ) := by
+  set F : ℝ → ℂ := fun s => legendrePolynomialP n (s : ℂ) * ((1 - (s : ℂ)) / 2) ^ k with hF
   have h1 : (∫ x : ℝ in (0 : ℝ)..1, (x : ℂ) ^ (2 * k + 1) *
-      legendrePolyP n (1 - 2 * (x : ℂ) ^ 2)) =
+      legendrePolynomialP n (1 - 2 * (x : ℂ) ^ 2)) =
         ∫ x : ℝ in (0 : ℝ)..1, (x : ℂ) * F (1 - 2 * x ^ 2) := by
     refine intervalIntegral.integral_congr fun x _ => ?_
     simp only [hF]; push_cast
@@ -86,13 +86,13 @@ private lemma lbsq_moment (n k : ℕ) :
   norm_num only [neg_neg] at hneg
   have h2 : (∫ s : ℝ in (-1 : ℝ)..1, F s) = (2 : ℂ)⁻¹ ^ k * (-1 : ℂ) ^ n *
       ∫ x : ℝ in (-1 : ℝ)..1, ((x : ℂ) + 1) ^ k *
-        (jacobiPolyP ((0:ℝ):ℂ) ((0:ℝ):ℂ) n x * (1 - (x : ℂ)) ^ ((0:ℝ) : ℂ) *
+        (jacobiPolynomialP ((0:ℝ):ℂ) ((0:ℝ):ℂ) n x * (1 - (x : ℂ)) ^ ((0:ℝ) : ℂ) *
           (1 + (x : ℂ)) ^ ((0:ℝ) : ℂ)) := by
     rw [← hneg, ← intervalIntegral.integral_const_mul]
     refine intervalIntegral.integral_congr fun s _ => ?_
     simp only [hF, ofReal_zero, cpow_zero, mul_one]
     push_cast
-    rw [legendrePolyP, jacobi_reflection (by norm_num) (by norm_num)]
+    rw [legendrePolynomialP, jacobi_reflection (by norm_num) (by norm_num)]
     rw [show ((1 : ℂ) - -(s : ℂ)) / 2 = 2⁻¹ * ((s : ℂ) + 1) by ring, mul_pow]
     ring
   rw [h1, integral_mul_comp_one_sub_two_sq, h2, hJ]
@@ -119,25 +119,26 @@ private lemma lbsq_moment (n k : ℕ) :
 
 /-- `x ↦ P_n(1 - 2x²)` is continuous. -/
 private lemma lbsq_continuous (n : ℕ) :
-    Continuous fun x : ℝ => legendrePolyP n (1 - 2 * (x : ℂ) ^ 2) := by
-  simp_rw [legendre_eq_ultrasphPoly]
-  exact (continuousOn_univ.1 (analyticOnNhd_ultrasphPoly _ n).continuousOn).comp (by fun_prop)
+    Continuous fun x : ℝ => legendrePolynomialP n (1 - 2 * (x : ℂ) ^ 2) := by
+  simp_rw [legendre_eq_ultrasphericalPolynomial]
+  exact (continuousOn_univ.1
+      (analyticOnNhd_ultrasphericalPolynomial _ n).continuousOn).comp (by fun_prop)
 
 /-- Termwise integration of the sine series against `P_n(1 - 2x²)` on `[0, 1]`. -/
 private lemma lbsq_hasSum_integral (n : ℕ) (y : ℝ) :
     HasSum (fun k : ℕ => (-1 : ℂ) ^ k * (y : ℂ) ^ (2 * k + 1) / ((2 * k + 1) ! : ℂ) *
-        ∫ x : ℝ in (0 : ℝ)..1, (x : ℂ) ^ (2 * k + 1) * legendrePolyP n (1 - 2 * (x : ℂ) ^ 2))
-      (∫ x : ℝ in (0 : ℝ)..1, legendrePolyP n (1 - 2 * (x : ℂ) ^ 2) * Real.sin (x * y)) := by
+        ∫ x : ℝ in (0 : ℝ)..1, (x : ℂ) ^ (2 * k + 1) * legendrePolynomialP n (1 - 2 * (x : ℂ) ^ 2))
+      (∫ x : ℝ in (0 : ℝ)..1, legendrePolynomialP n (1 - 2 * (x : ℂ) ^ 2) * Real.sin (x * y)) := by
   obtain ⟨B, hB⟩ := isCompact_Icc.exists_bound_of_continuousOn
     (lbsq_continuous n).continuousOn (s := Set.Icc (0 : ℝ) 1)
   set F : ℕ → ℝ → ℂ := fun k x => (-1 : ℂ) ^ k * (y : ℂ) ^ (2 * k + 1) / ((2 * k + 1) ! : ℂ) *
-    ((x : ℂ) ^ (2 * k + 1) * legendrePolyP n (1 - 2 * (x : ℂ) ^ 2)) with hF
+    ((x : ℂ) ^ (2 * k + 1) * legendrePolynomialP n (1 - 2 * (x : ℂ) ^ 2)) with hF
   have hc : ∀ k, Continuous (F k) := fun k => by
     simp only [hF]; exact continuous_const.mul ((by fun_prop : Continuous fun x : ℝ =>
       (x : ℂ) ^ (2 * k + 1)).mul (lbsq_continuous n))
   have h := intervalIntegral.hasSum_integral_of_dominated_convergence
     (F := F) (a := 0) (b := 1) (μ := volume)
-    (f := fun x => legendrePolyP n (1 - 2 * (x : ℂ) ^ 2) * Real.sin (x * y))
+    (f := fun x => legendrePolynomialP n (1 - 2 * (x : ℂ) ^ 2) * Real.sin (x * y))
     (fun k _ => |y| ^ (2 * k + 1) / ((2 * k + 1) ! : ℝ) * B)
     (fun k => (hc k).aestronglyMeasurable)
     (fun k => ae_of_all _ fun x hx => by
@@ -150,7 +151,7 @@ private lemma lbsq_hasSum_integral (n : ℕ) (y : ℝ) :
       have h2 := hB x hx1
       have hf : (0 : ℝ) < ((2 * k + 1) ! : ℝ) := by positivity
       rw [div_mul_eq_mul_div, div_mul_eq_mul_div, div_le_div_iff_of_pos_right hf]
-      calc |y| ^ (2 * k + 1) * (|x| ^ (2 * k + 1) * ‖legendrePolyP n (1 - 2 * (x : ℂ) ^ 2)‖)
+      calc |y| ^ (2 * k + 1) * (|x| ^ (2 * k + 1) * ‖legendrePolynomialP n (1 - 2 * (x : ℂ) ^ 2)‖)
           ≤ |y| ^ (2 * k + 1) * (1 * B) := by
             gcongr
       _ = _ := by ring)
@@ -158,7 +159,7 @@ private lemma lbsq_hasSum_integral (n : ℕ) (y : ℝ) :
     intervalIntegrable_const
     (ae_of_all _ fun x _ => by
       have hs := (Complex.hasSum_ofReal.mpr (Real.hasSum_sin (x * y))).mul_left
-        (legendrePolyP n (1 - 2 * (x : ℂ) ^ 2))
+        (legendrePolynomialP n (1 - 2 * (x : ℂ) ^ 2))
       refine hs.congr_fun fun k => ?_
       simp only [hF]; push_cast; ring)
   refine h.congr_fun fun k => ?_
@@ -169,21 +170,22 @@ private lemma lbsq_hasSum_integral (n : ℕ) (y : ℝ) :
 (DLMF 10.8.3). -/
 private lemma lbsq_coeff (n m : ℕ) (y : ℝ) :
     (-1 : ℂ) ^ (m + n) * (y : ℂ) ^ (2 * (m + n) + 1) / ((2 * (m + n) + 1) ! : ℂ) *
-      ((1 / 2 : ℂ) * (m + n) ! * poch (-((m + n : ℕ) : ℂ)) n / ((m + n + n + 1) ! : ℂ)) =
+      ((1 / 2 : ℂ) * (m + n) ! * pochhammer (-((m + n : ℕ) : ℂ)) n / ((m + n + n + 1) ! : ℂ)) =
     (Real.pi : ℂ) / 2 * ((y : ℂ) / 2 / 2) ^ ((n + 1 / 2 : ℂ) + (n + 1 / 2 : ℂ)) *
-      (poch ((n + 1 / 2 : ℂ) + (n + 1 / 2 : ℂ) + m + 1) m * (-(((y : ℂ) / 2) ^ 2 / 4)) ^ m /
+      (pochhammer ((n + 1 / 2 : ℂ) + (n + 1 / 2 : ℂ) + m + 1) m * (-(((y : ℂ) / 2) ^ 2 / 4)) ^ m /
         (m ! : ℂ) * (Gamma ((n + 1 / 2 : ℂ) + m + 1))⁻¹ * (Gamma ((n + 1 / 2 : ℂ) + m + 1))⁻¹) := by
   set k := m + n with hk
   have hexp : (n + 1 / 2 : ℂ) + (n + 1 / 2 : ℂ) = ((2 * n + 1 : ℕ) : ℂ) := by push_cast; ring
   rw [hexp, cpow_natCast]
-  have hP : poch (-((k : ℕ) : ℂ)) n * (m ! : ℂ) = (-1) ^ n * (k ! : ℂ) := by
-    rw [poch_neg_coe_nat]
+  have hP : pochhammer (-((k : ℕ) : ℂ)) n * (m ! : ℂ) = (-1) ^ n * (k ! : ℂ) := by
+    rw [pochhammer_neg_coe_nat]
     have h := Nat.factorial_mul_descFactorial (show n ≤ k by omega)
     rw [show k - n = m by omega] at h
     have h' : (m ! : ℂ) * (k.descFactorial n : ℂ) = k ! := by exact_mod_cast h
     linear_combination (-1 : ℂ) ^ n * h'
-  have hQ : poch (((2 * n + 1 : ℕ) : ℂ) + m + 1) m * ((2 * n + m + 1) ! : ℂ) = (2 * k + 1) ! := by
-    have h := poch_nat_succ_eq_choose_mul_factorial (2 * n + m + 1) m
+  have hQ : pochhammer (((2 * n + 1 : ℕ) : ℂ) + m + 1) m * ((2 * n + m + 1) ! : ℂ) =
+      (2 * k + 1) ! := by
+    have h := pochhammer_nat_succ_eq_choose_mul_factorial (2 * n + m + 1) m
     push_cast at h ⊢
     rw [show (2 * (n : ℂ) + 1 + m + 1) = 2 * n + m + 1 + 1 by ring, h]
     have hc := Nat.choose_mul_factorial_mul_factorial
@@ -227,13 +229,13 @@ private lemma lbsq_coeff (n m : ℕ) (y : ℝ) :
 
 /-- DLMF 18.17.21 for `y > 0`. -/
 private lemma lbsq_pos (n : ℕ) {y : ℝ} (hy : 0 < y) :
-    ∫ x : ℝ in (0 : ℝ)..1, legendrePolyP n (1 - 2 * (x : ℂ) ^ 2) * Real.sin (x * y) =
+    ∫ x : ℝ in (0 : ℝ)..1, legendrePolynomialP n (1 - 2 * (x : ℂ) ^ 2) * Real.sin (x * y) =
       Real.pi / 2 * besselJ (n + 1 / 2 : ℂ) ((y : ℂ) / 2) ^ 2 := by
   have hL := lbsq_hasSum_integral n y
   simp_rw [lbsq_moment] at hL
   rw [← hasSum_nat_add_iff' n] at hL
   rw [Finset.sum_eq_zero (fun k hk => by
-    rw [poch_neg_nat_eq_zero (Finset.mem_range.mp hk)]; simp), sub_zero] at hL
+    rw [pochhammer_neg_nat_eq_zero (Finset.mem_range.mp hk)]; simp), sub_zero] at hL
   have hz : ((y : ℂ) / 2) ∈ slitPlane := by
     rw [mem_slitPlane_iff]; left; simp; linarith
   rw [sq, besselJ_mul_besselJ _ _ hz]
@@ -248,17 +250,19 @@ private lemma lbsq_bessel_sq (n : ℕ) (w : ℂ) :
     show ((2 : ℕ) : ℂ) * (n + 1 / 2 : ℂ) = ((2 * n + 1 : ℕ) : ℂ) by push_cast; ring, cpow_natCast]
 
 /-- Identity under the stated parameter and domain assumptions: `∫ x : ℝ in (0 : ℝ)..1,
-legendrePolyP n (1 - 2 * (x : ℂ) ^ 2) * Real.sin (x * y) = Real.pi / 2 * besselJ (n + 1 / 2 :
+legendrePolynomialP n (1 - 2 * (x : ℂ) ^ 2) * Real.sin (x * y) = Real.pi / 2 * besselJ (n + 1 / 2 :
 ℂ) ((y : ℂ) / 2) ^ 2`. -/
 @[dlmf 18.17.E21]
 theorem legendre_bessel_square_integral (n : ℕ) (y : ℝ) :
-    ∫ x : ℝ in (0 : ℝ)..1, legendrePolyP n (1 - 2 * (x : ℂ) ^ 2) * Real.sin (x * y) =
+    ∫ x : ℝ in (0 : ℝ)..1, legendrePolynomialP n (1 - 2 * (x : ℂ) ^ 2) * Real.sin (x * y) =
       Real.pi / 2 * besselJ (n + 1 / 2 : ℂ) ((y : ℂ) / 2) ^ 2 := by
   rcases lt_trichotomy y 0 with hy | rfl | hy
   · have h := lbsq_pos n (neg_pos.mpr hy)
     rw [lbsq_bessel_sq] at h ⊢
-    have hl : (∫ x : ℝ in (0 : ℝ)..1, legendrePolyP n (1 - 2 * (x : ℂ) ^ 2) * Real.sin (x * y)) =
-        -∫ x : ℝ in (0 : ℝ)..1, legendrePolyP n (1 - 2 * (x : ℂ) ^ 2) * Real.sin (x * -y) := by
+    have hl : (∫ x : ℝ in (0 : ℝ)..1, legendrePolynomialP n (1 - 2 * (x : ℂ) ^ 2) *
+        Real.sin (x * y)) =
+        -∫ x : ℝ in (0 : ℝ)..1, legendrePolynomialP n (1 - 2 * (x : ℂ) ^ 2) *
+            Real.sin (x * -y) := by
       rw [← intervalIntegral.integral_neg]
       refine intervalIntegral.integral_congr fun x _ => ?_
       simp only [mul_neg, Real.sin_neg]; push_cast; ring
@@ -507,23 +511,23 @@ theorem hermite_linearization (m n : ℕ) (x : ℝ) :
   let s := Real.sqrt 2
   have hs : 0 < s := by dsimp [s]; positivity
   have hs2 : s ^ 2 = 2 := by simp [s]
-  have hscale (j : ℕ) : (aeval (x / s) (hermitePolyH j) : ℝ) =
+  have hscale (j : ℕ) : (aeval (x / s) (hermitePolynomialH j) : ℝ) =
       s ^ j * aeval x (hermite j) := by
-    rw [aeval_hermitePolyH_eq_hermite]
+    rw [aeval_hermitePolynomialH_eq_hermite]
     have hpow : (2 : ℝ) ^ (j / 2 : ℝ) = s ^ j := by
       rw [show s = (2 : ℝ) ^ (1 / 2 : ℝ) by dsimp [s]; rw [Real.sqrt_eq_rpow],
         ← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 2)]
       congr 1
       ring
     rw [hpow, show Real.sqrt 2 * (x / s) = x by dsimp [s]; field_simp]
-  have hcast (j : ℕ) : (aeval ((x / s : ℝ) : ℂ) (hermitePolyH j) : ℂ) =
-      ((aeval (x / s) (hermitePolyH j) : ℝ) : ℂ) :=
-    aeval_algHom_apply (IsScalarTower.toAlgHom ℤ ℝ ℂ) (x / s) (hermitePolyH j)
-  have hc := hermitePolyH_linearization m n ((x / s : ℝ) : ℂ)
+  have hcast (j : ℕ) : (aeval ((x / s : ℝ) : ℂ) (hermitePolynomialH j) : ℂ) =
+      ((aeval (x / s) (hermitePolynomialH j) : ℝ) : ℂ) :=
+    aeval_algHom_apply (IsScalarTower.toAlgHom ℤ ℝ ℂ) (x / s) (hermitePolynomialH j)
+  have hc := hermitePolynomialH_linearization m n ((x / s : ℝ) : ℂ)
   simp_rw [hcast] at hc
-  have hr : (aeval (x / s) (hermitePolyH m) : ℝ) * aeval (x / s) (hermitePolyH n) =
+  have hr : (aeval (x / s) (hermitePolynomialH m) : ℝ) * aeval (x / s) (hermitePolynomialH n) =
       ∑ k ∈ Finset.range (min m n + 1), (m.choose k : ℝ) * n.choose k * 2 ^ k * k.factorial *
-        aeval (x / s) (hermitePolyH (m + n - 2 * k)) := by exact_mod_cast hc
+        aeval (x / s) (hermitePolynomialH (m + n - 2 * k)) := by exact_mod_cast hc
   simp_rw [hscale] at hr
   have hpow (k : ℕ) (hk : k ∈ Finset.range (min m n + 1)) :
       (2 : ℝ) ^ k * s ^ (m + n - 2 * k) = s ^ (m + n) := by
@@ -543,13 +547,13 @@ theorem hermite_linearization (m n : ℕ) (x : ℝ) :
         (aeval x (hermite (m + n - 2 * k)) : ℝ) * this
 
 /-- The finite contraction sum in a Hermite transform is a Laguerre polynomial. -/
-theorem hermite_laguerrePolyL_sum (n l : ℕ) (u : ℂ) :
+theorem hermite_laguerrePolynomialL_sum (n l : ℕ) (u : ℂ) :
     ∑ k ∈ Finset.range (n + 1), (n.choose k : ℂ) * (n + l).choose k * k.factorial *
       (-1 : ℂ) ^ (n - k) * u ^ (2 * (n - k) + l) =
-      n.factorial * u ^ l * laguerrePolyL l n (u ^ 2) := by
+      n.factorial * u ^ l * laguerrePolynomialL l n (u ^ 2) := by
   have hl : ∀ k : ℕ, (l : ℂ) + 1 ≠ -k :=
     not_neg_nat_of_re_pos (by simp; positivity)
-  rw [laguerrePolyL_eq_sum hl, Finset.mul_sum, ← Finset.sum_range_reflect]
+  rw [laguerrePolynomialL_eq_sum hl, Finset.mul_sum, ← Finset.sum_range_reflect]
   apply Finset.sum_congr rfl
   intro j hj
   have hjn : j ≤ n := by have := Finset.mem_range.mp hj; omega
@@ -561,13 +565,13 @@ theorem hermite_laguerrePolyL_sum (n l : ℕ) (u : ℂ) :
       (n + l).factorial := by
     exact_mod_cast (by simpa [show n + l - (n - j) = l + j by omega] using
       Nat.choose_mul_factorial_mul_factorial (show n - j ≤ n + l by omega))
-  have hP : ((l + j).factorial : ℂ) * poch ((l : ℂ) + 1 + j) (n - j) = (n + l).factorial := by
+  have hP : ((l + j).factorial : ℂ) * pochhammer ((l : ℂ) + 1 + j) (n - j) = (n + l).factorial := by
     have he := factorial_mul_ascPochhammer ℂ (l + j) (n - j)
-    simpa only [poch, Nat.add_sub_of_le (show j ≤ n + l by omega),
+    simpa only [pochhammer, Nat.add_sub_of_le (show j ≤ n + l by omega),
       show l + j + (n - j) = n + l by omega, Nat.cast_add,
       show (l : ℂ) + j + 1 = l + 1 + j by ring] using he
   have hcoeff : (n.choose (n - j) : ℂ) * (n + l).choose (n - j) * (n - j).factorial =
-      n.factorial * (poch ((l : ℂ) + 1 + j) (n - j) /
+      n.factorial * (pochhammer ((l : ℂ) + 1 + j) (n - j) /
         ((n - j).factorial * j.factorial : ℂ)) := by
     rw [← mul_div_assoc]
     apply (eq_div_iff (mul_ne_zero (Nat.cast_ne_zero.mpr (n - j).factorial_ne_zero)
@@ -575,7 +579,7 @@ theorem hermite_laguerrePolyL_sum (n l : ℕ) (u : ℂ) :
     calc
       _ = ((n.choose (n - j) : ℂ) * (n - j).factorial * j.factorial) *
           (((n + l).choose (n - j) : ℂ) * (n - j).factorial) := by ring
-      _ = n.factorial * poch ((l : ℂ) + 1 + j) (n - j) := by
+      _ = n.factorial * pochhammer ((l : ℂ) + 1 + j) (n - j) := by
         rw [hN]
         congr 1
         apply mul_right_cancel₀ (Nat.cast_ne_zero.mpr (l + j).factorial_ne_zero)
@@ -587,13 +591,13 @@ theorem hermite_laguerrePolyL_sum (n l : ℕ) (u : ℂ) :
 /-- Identity under the stated parameter and domain assumptions: `∫ x : ℝ in Set.Ioi 0, exp (-(x :
 ℂ) ^ 2 / 2) * (aeval (x : ℂ) (hermite n) : ℂ) * aeval (x : ℂ) (hermite (n + 2 * m)) * Real.cos
 (x * y) = (-1 : ℂ) ^ m * Real.sqrt (Real.pi / 2) * n.factorial * (y : ℂ) ^ (2 * m) * exp (-(y
-: ℂ) ^ 2 / 2) * laguerrePolyL (2 * m) n ((y : ℂ) ^ 2)`. -/
+: ℂ) ^ 2 / 2) * laguerrePolynomialL (2 * m) n ((y : ℂ) ^ 2)`. -/
 @[dlmf 18.17.E25]
 theorem hermite_product_cosine_transform (m n : ℕ) (y : ℝ) :
     ∫ x : ℝ in Set.Ioi 0, exp (-(x : ℂ) ^ 2 / 2) * (aeval (x : ℂ) (hermite n) : ℂ) *
       aeval (x : ℂ) (hermite (n + 2 * m)) * Real.cos (x * y) =
       (-1 : ℂ) ^ m * Real.sqrt (Real.pi / 2) * n.factorial * (y : ℂ) ^ (2 * m) *
-        exp (-(y : ℂ) ^ 2 / 2) * laguerrePolyL (2 * m) n ((y : ℂ) ^ 2) := by
+        exp (-(y : ℂ) ^ 2 / 2) * laguerrePolynomialL (2 * m) n ((y : ℂ) ^ 2) := by
   have hcast (j : ℕ) (x : ℝ) : (aeval (x : ℂ) (hermite j) : ℂ) =
       ((aeval x (hermite j) : ℝ) : ℂ) :=
     aeval_algHom_apply (IsScalarTower.toAlgHom ℤ ℝ ℂ) x (hermite j)
@@ -648,7 +652,7 @@ theorem hermite_product_cosine_transform (m n : ℕ) (y : ℝ) :
     push_cast
     ring
   rw [he]
-  have hsum := hermite_laguerrePolyL_sum n (2 * m) (y : ℂ)
+  have hsum := hermite_laguerrePolynomialL_sum n (2 * m) (y : ℂ)
   calc
     _ = ((-1 : ℂ) ^ m * Real.sqrt (Real.pi / 2) * exp (-(y : ℂ) ^ 2 / 2)) *
         ∑ k ∈ Finset.range (n + 1), (n.choose k : ℂ) * (n + 2 * m).choose k * k.factorial *
@@ -669,13 +673,13 @@ theorem hermite_product_cosine_transform (m n : ℕ) (y : ℝ) :
 /-- Identity under the stated parameter and domain assumptions: `∫ x : ℝ in Set.Ioi 0, exp (-(x :
 ℂ) ^ 2 / 2) * (aeval (x : ℂ) (hermite n) : ℂ) * aeval (x : ℂ) (hermite (n + 2 * m + 1)) *
 Real.sin (x * y) = (-1 : ℂ) ^ m * Real.sqrt (Real.pi / 2) * n.factorial * (y : ℂ) ^ (2 * m +
-1) * exp (-(y : ℂ) ^ 2 / 2) * laguerrePolyL (2 * m + 1) n ((y : ℂ) ^ 2)`. -/
+1) * exp (-(y : ℂ) ^ 2 / 2) * laguerrePolynomialL (2 * m + 1) n ((y : ℂ) ^ 2)`. -/
 @[dlmf 18.17.E26]
 theorem hermite_product_sine_transform (m n : ℕ) (y : ℝ) :
     ∫ x : ℝ in Set.Ioi 0, exp (-(x : ℂ) ^ 2 / 2) * (aeval (x : ℂ) (hermite n) : ℂ) *
       aeval (x : ℂ) (hermite (n + 2 * m + 1)) * Real.sin (x * y) =
       (-1 : ℂ) ^ m * Real.sqrt (Real.pi / 2) * n.factorial * (y : ℂ) ^ (2 * m + 1) *
-        exp (-(y : ℂ) ^ 2 / 2) * laguerrePolyL (2 * m + 1) n ((y : ℂ) ^ 2) := by
+        exp (-(y : ℂ) ^ 2 / 2) * laguerrePolynomialL (2 * m + 1) n ((y : ℂ) ^ 2) := by
   have hcast (j : ℕ) (x : ℝ) : (aeval (x : ℂ) (hermite j) : ℂ) =
       ((aeval x (hermite j) : ℝ) : ℂ) :=
     aeval_algHom_apply (IsScalarTower.toAlgHom ℤ ℝ ℂ) x (hermite j)
@@ -730,7 +734,7 @@ theorem hermite_product_sine_transform (m n : ℕ) (y : ℝ) :
     push_cast
     ring
   rw [he]
-  have hsum := hermite_laguerrePolyL_sum n (2 * m + 1) (y : ℂ)
+  have hsum := hermite_laguerrePolynomialL_sum n (2 * m + 1) (y : ℂ)
   calc
     _ = ((-1 : ℂ) ^ m * Real.sqrt (Real.pi / 2) * exp (-(y : ℂ) ^ 2 / 2)) *
         ∑ k ∈ Finset.range (n + 1), (n.choose k : ℂ) * (n + 2 * m + 1).choose k * k.factorial *
@@ -749,13 +753,13 @@ theorem hermite_product_sine_transform (m n : ℕ) (y : ℝ) :
       ring
 
 /-- Identity under the stated parameter and domain assumptions: `∫ x : ℝ in (-1 : ℝ)..1, exp (-((x
-: ℂ) + 1) * z) * jacobiPolyP α β n x * (1 - (x : ℂ)) ^ (α : ℂ) * (1 + (x : ℂ)) ^ (β : ℂ) = (-1
+: ℂ) + 1) * z) * jacobiPolynomialP α β n x * (1 - (x : ℂ)) ^ (α : ℂ) * (1 + (x : ℂ)) ^ (β : ℂ) = (-1
 : ℂ) ^ n * (2 : ℂ) ^ (α + β + n + 1 : ℂ) * Gamma (α + n + 1 : ℂ) * Gamma (β + n + 1 : ℂ) /
 (Gamma (α + β + 2 * n + 2 : ℂ) * n.factorial) * z ^ n * kummerM (β + n + 1 : ℂ) (α + β + 2 * n
 + 2 : ℂ) (-2 * z)`. -/
 @[dlmf 18.17.E33]
 theorem jacobi_laplace_transform {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n : ℕ) (z : ℂ) :
-    ∫ x : ℝ in (-1 : ℝ)..1, exp (-((x : ℂ) + 1) * z) * jacobiPolyP α β n x *
+    ∫ x : ℝ in (-1 : ℝ)..1, exp (-((x : ℂ) + 1) * z) * jacobiPolynomialP α β n x *
       (1 - (x : ℂ)) ^ (α : ℂ) * (1 + (x : ℂ)) ^ (β : ℂ) =
       (-1 : ℂ) ^ n * (2 : ℂ) ^ (α + β + n + 1 : ℂ) * Gamma (α + n + 1 : ℂ) *
       Gamma (β + n + 1 : ℂ) / (Gamma (α + β + 2 * n + 2 : ℂ) * n.factorial) *
@@ -806,7 +810,7 @@ theorem scaled_polynomial_moment {α : ℝ} (hα : -1 < α) {w : ℂ} (hw : 0 < 
       ring
     | monomial n c =>
       simpa only [IntegrableOn, eval_monomial, mul_assoc] using
-          ((laguerrePolyL_weight_moment hα n).1.const_mul c)
+          ((laguerrePolynomialL_weight_moment hα n).1.const_mul c)
   -- Mathlib's monomial induction reduces complex scaling to the Gamma moments.
   induction p using Polynomial.induction_on' with
   | add p q hp hq =>
@@ -824,24 +828,24 @@ theorem scaled_polynomial_moment {α : ℝ} (hα : -1 < α) {w : ℂ} (hw : 0 < 
     simp only [eval_monomial, mul_assoc]
     rw [integral_const_mul, integral_const_mul]
     have h1 := (scaled_monomial_moment hα hw n).2
-    have h2 := (laguerrePolyL_weight_moment hα n).2
+    have h2 := (laguerrePolynomialL_weight_moment hα n).2
     simp only [mul_assoc] at h1 h2
     rw [h1, h2]
     ring
 
 /-- The finite Laguerre expansion is a complex polynomial. -/
 theorem laguerre_exists_poly (α : ℂ) (n : ℕ) :
-    ∃ p : ℂ[X], ∀ x, p.eval x = laguerrePolyL α n x := by
+    ∃ p : ℂ[X], ∀ x, p.eval x = laguerrePolynomialL α n x := by
   refine ⟨∑ j ∈ Finset.range (n + 1), monomial j
-    (poch (α + 1) n / n.factorial * kummerMCoeff (-(n : ℂ)) (α + 1) j), ?_⟩
+    (pochhammer (α + 1) n / n.factorial * kummerMCoeff (-(n : ℂ)) (α + 1) j), ?_⟩
   intro x
-  simp [eval_finsetSum, laguerrePolyL_eq_sum_coeff]
+  simp [eval_finsetSum, laguerrePolynomialL_eq_sum_coeff]
 
 /-- Scaled Laguerre orthogonality for a complex Laplace rate. -/
 theorem scaled_laguerre_inner {α : ℝ} (hα : -1 < α) {w : ℂ} (hw : 0 < w.re) (m n : ℕ) :
-    IntegrableOn (fun x : ℝ => laguerrePolyL α m (w * x) * laguerrePolyL α n (w * x) *
+    IntegrableOn (fun x : ℝ => laguerrePolynomialL α m (w * x) * laguerrePolynomialL α n (w * x) *
       (x : ℂ) ^ (α : ℂ) * exp (-(w * x))) (Set.Ioi 0) ∧
-    (∫ x : ℝ in Set.Ioi 0, laguerrePolyL α m (w * x) * laguerrePolyL α n (w * x) *
+    (∫ x : ℝ in Set.Ioi 0, laguerrePolynomialL α m (w * x) * laguerrePolynomialL α n (w * x) *
       (x : ℂ) ^ (α : ℂ) * exp (-(w * x))) =
       if m = n then w ^ (-((α : ℂ) + 1)) * Gamma (n + (α : ℂ) + 1) / n ! else 0 := by
   obtain ⟨p, hp⟩ := laguerre_exists_poly α m
@@ -852,29 +856,30 @@ theorem scaled_laguerre_inner {α : ℝ} (hα : -1 < α) {w : ℂ} (hw : 0 < w.r
   rw [h.2]
   split_ifs with he
   · subst m
-    have hn := laguerrePolyL_norm hα n
-    have heq : (∫ x : ℝ in Set.Ioi 0, laguerrePolyL α n x * laguerrePolyL α n x *
+    have hn := laguerrePolynomialL_norm hα n
+    have heq : (∫ x : ℝ in Set.Ioi 0, laguerrePolynomialL α n x * laguerrePolynomialL α n x *
         (x : ℂ) ^ (α : ℂ) * exp (-x)) = Gamma (n + (α : ℂ) + 1) / n ! := by
       convert hn using 1
       apply integral_congr_ae
       exact Filter.Eventually.of_forall fun x => by ring
     rw [heq]; ring
-  · rw [laguerrePolyL_orthogonal hα he, mul_zero]
+  · rw [laguerrePolynomialL_orthogonal hα he, mul_zero]
 
 /-- Finite change-of-scale coefficient for the Laguerre basis. -/
 def laguerreScaleCoeff (α w : ℂ) (n k : ℕ) : ℂ :=
-  laguerrePolyL α n 0 * (n.choose k : ℂ) * (w⁻¹) ^ k * (1 - w⁻¹) ^ (n - k) /
-    laguerrePolyL α k 0
+  laguerrePolynomialL α n 0 * (n.choose k : ℂ) * (w⁻¹) ^ k * (1 - w⁻¹) ^ (n - k) /
+    laguerrePolynomialL α k 0
 
 /-- Expansion in the Laguerre basis evaluated at a scaled argument. -/
 theorem laguerre_scale_sum {α w : ℂ} (hα : -1 < α.re) (hw : w ≠ 0) (n : ℕ) (x : ℂ) :
-    laguerrePolyL α n x = ∑ k ∈ Finset.range (n + 1),
-      laguerreScaleCoeff α w n k * laguerrePolyL α k (w * x) := by
-  have he : laguerrePolyL α n 0 ≠ 0 := by
-    rw [laguerrePolyL_at_zero]
-    exact div_ne_zero (poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith)) n)
+    laguerrePolynomialL α n x = ∑ k ∈ Finset.range (n + 1),
+      laguerreScaleCoeff α w n k * laguerrePolynomialL α k (w * x) := by
+  have he : laguerrePolynomialL α n 0 ≠ 0 := by
+    rw [laguerrePolynomialL_at_zero]
+    exact div_ne_zero (pochhammer_ne_zero_of_not_neg_nat
+        (not_neg_nat_of_re_pos (by simp; linarith)) n)
       (Nat.cast_ne_zero.mpr n.factorial_ne_zero)
-  have h := laguerrePolyL_multiplication hα w⁻¹ (w * x) n
+  have h := laguerrePolynomialL_multiplication hα w⁻¹ (w * x) n
   rw [inv_mul_cancel_left₀ hw] at h
   rw [div_eq_iff he] at h
   rw [h, Finset.sum_mul]
@@ -885,16 +890,16 @@ theorem laguerre_scale_sum {α w : ℂ} (hα : -1 < α.re) (hw : w ≠ 0) (n : �
 
 /-- Orthogonality contracts the two finite change-of-scale expansions. -/
 theorem laguerre_product_contraction {α : ℝ} (hα : -1 < α) {w : ℂ} (hw : 0 < w.re) (m n : ℕ) :
-    (∫ x : ℝ in Set.Ioi 0, laguerrePolyL α m x * laguerrePolyL α n x *
+    (∫ x : ℝ in Set.Ioi 0, laguerrePolynomialL α m x * laguerrePolynomialL α n x *
       (x : ℂ) ^ (α : ℂ) * exp (-(w * x))) =
       ∑ k ∈ Finset.range (m + 1), laguerreScaleCoeff α w m k * laguerreScaleCoeff α w n k *
         (w ^ (-((α : ℂ) + 1)) * Gamma (k + (α : ℂ) + 1) / k !) := by
   have hw0 := ne_zero_of_re_pos hw
-  have heq : (fun x : ℝ => laguerrePolyL α m x * laguerrePolyL α n x *
+  have heq : (fun x : ℝ => laguerrePolynomialL α m x * laguerrePolynomialL α n x *
       (x : ℂ) ^ (α : ℂ) * exp (-(w * x))) = fun x : ℝ =>
       ∑ i ∈ Finset.range (m + 1), ∑ j ∈ Finset.range (n + 1),
         (laguerreScaleCoeff α w m i * laguerreScaleCoeff α w n j) *
-        (laguerrePolyL α i (w * x) * laguerrePolyL α j (w * x) *
+        (laguerrePolynomialL α i (w * x) * laguerrePolynomialL α j (w * x) *
           (x : ℂ) ^ (α : ℂ) * exp (-(w * x))) := by
     funext x
     conv_lhs => arg 1; arg 1; arg 1; rw [laguerre_scale_sum (by simpa using hα) hw0 m]
@@ -930,13 +935,14 @@ theorem laguerre_product_contraction {α : ℝ} (hα : -1 < α) {w : ℂ} (hw : 
 
 /-- Terminating Gauss coefficients in binomial form. -/
 theorem gauss_neg_nat_choose (m n k : ℕ) (a : ℂ) :
-    gaussHGCoeff (-(m : ℂ)) (-(n : ℂ)) a k =
-      (m.choose k : ℂ) * (n.choose k : ℂ) * k ! / poch a k := by
-  simp only [gaussHGCoeff, poch_neg_coe_nat, Nat.descFactorial_eq_factorial_mul_choose,
+    gaussHypergeometricCoeff (-(m : ℂ)) (-(n : ℂ)) a k =
+      (m.choose k : ℂ) * (n.choose k : ℂ) * k ! / pochhammer a k := by
+  simp only [gaussHypergeometricCoeff, pochhammer_neg_coe_nat,
+      Nat.descFactorial_eq_factorial_mul_choose,
     Nat.cast_mul]
   have hf : (k ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr k.factorial_ne_zero
   have hs : (-1 : ℂ) ^ k * (-1) ^ k = 1 := by rw [← mul_pow]; simp
-  by_cases hp : poch a k = 0
+  by_cases hp : pochhammer a k = 0
   · simp [hp]
   · field_simp
     ring_nf at hs ⊢
@@ -959,17 +965,18 @@ theorem laguerre_product_contraction_term {α : ℝ} (hα : -1 < α) {z : ℂ}
     (Gamma (α + m + 1 : ℂ) * Gamma (α + n + 1 : ℂ) /
       (Gamma (α + 1 : ℂ) * m ! * n !) * z ^ (m + n) /
       (z + 1) ^ (α + m + n + 1 : ℂ)) *
-      (gaussHGCoeff (-(m : ℂ)) (-(n : ℂ)) (α + 1) k * (z⁻¹ ^ 2) ^ k) := by
+      (gaussHypergeometricCoeff (-(m : ℂ)) (-(n : ℂ)) (α + 1) k * (z⁻¹ ^ 2) ^ k) := by
   by_cases hkn : k ≤ n
   · have hA : 0 < ((α : ℂ) + 1).re := by simp; linarith
-    have hP (j : ℕ) : poch ((α : ℂ) + 1) j ≠ 0 :=
-      poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos hA) j
+    have hP (j : ℕ) : pochhammer ((α : ℂ) + 1) j ≠ 0 :=
+      pochhammer_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos hA) j
     have hG := Gamma_ne_zero_of_re_pos hA
     have hF (j : ℕ) : (j ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr j.factorial_ne_zero
-    have hgamma (j : ℕ) : Gamma ((α : ℂ) + j + 1) = poch ((α : ℂ) + 1) j * Gamma ((α : ℂ) + 1) := by
+    have hgamma (j : ℕ) : Gamma ((α : ℂ) + j + 1) = pochhammer ((α : ℂ) + 1) j *
+        Gamma ((α : ℂ) + 1) := by
       rw [show (α : ℂ) + j + 1 = ((α : ℂ) + 1) + j by ring]
-      exact Gamma_add_nat_eq_poch_mul_Gamma hA j
-    have hgk : Gamma (k + (α : ℂ) + 1) = poch ((α : ℂ) + 1) k * Gamma ((α : ℂ) + 1) := by
+      exact Gamma_add_nat_eq_pochhammer_mul_Gamma hA j
+    have hgk : Gamma (k + (α : ℂ) + 1) = pochhammer ((α : ℂ) + 1) k * Gamma ((α : ℂ) + 1) := by
       rw [add_comm (k : ℂ) (α : ℂ)]; exact hgamma k
     have hwP : (z + 1) ^ ((α : ℂ) + 1) ≠ 0 := cpow_ne_zero_iff.mpr (Or.inl hw)
     have he : (z + 1) ^ (α + m + n + 1 : ℂ) =
@@ -977,13 +984,13 @@ theorem laguerre_product_contraction_term {α : ℝ} (hα : -1 < α) {z : ℂ}
       rw [show (α : ℂ) + m + n + 1 = (((α : ℂ) + 1) + m) + n by ring,
         cpow_add _ _ hw, cpow_add _ _ hw, cpow_natCast, cpow_natCast]
     have hd (j : ℕ) (hkj : k ≤ j) : laguerreScaleCoeff α (z + 1) j k =
-        (poch ((α : ℂ) + 1) j / j !) * (j.choose k : ℂ) *
-          (z ^ j / (z + 1) ^ j / z ^ k) / (poch ((α : ℂ) + 1) k / k !) := by
+        (pochhammer ((α : ℂ) + 1) j / j !) * (j.choose k : ℂ) *
+          (z ^ j / (z + 1) ^ j / z ^ k) / (pochhammer ((α : ℂ) + 1) k / k !) := by
       unfold laguerreScaleCoeff
-      rw [laguerrePolyL_at_zero, laguerrePolyL_at_zero]
-      rw [show (poch ((α : ℂ) + 1) j / j ! * (j.choose k : ℂ) * ((z + 1)⁻¹) ^ k *
+      rw [laguerrePolynomialL_at_zero, laguerrePolynomialL_at_zero]
+      rw [show (pochhammer ((α : ℂ) + 1) j / j ! * (j.choose k : ℂ) * ((z + 1)⁻¹) ^ k *
           (1 - (z + 1)⁻¹) ^ (j - k)) =
-          (poch ((α : ℂ) + 1) j / j ! * (j.choose k : ℂ)) *
+          (pochhammer ((α : ℂ) + 1) j / j ! * (j.choose k : ℂ)) *
           (((z + 1)⁻¹) ^ k * (1 - (z + 1)⁻¹) ^ (j - k)) by ring,
         laguerre_scale_power hz hw hkj]
     rw [hd m hk, hd n hkn, hgk, hgamma m, hgamma n, he, gauss_neg_nat_choose,
@@ -995,21 +1002,23 @@ theorem laguerre_product_contraction_term {α : ℝ} (hα : -1 < α) {z : ℂ}
     simp [laguerreScaleCoeff, Nat.choose_eq_zero_of_lt hnk]
 
 /-- Identity under the stated parameter and domain assumptions: `∫ x : ℝ in Set.Ioi 0, exp (-x *
-z) * laguerrePolyL α m x * laguerrePolyL α n x * exp (-x) * (x : ℂ) ^ (α : ℂ) = Gamma (α + m +
-1 : ℂ) * Gamma (α + n + 1 : ℂ) / (Gamma (α + 1 : ℂ) * m.factorial * n.factorial) * z ^ (m + n)
+z) * laguerrePolynomialL α m x * laguerrePolynomialL α n x * exp (-x) * (x : ℂ) ^ (α : ℂ) = Gamma (α
++ m + 1 : ℂ) * Gamma (α + n + 1 : ℂ) / (Gamma (α + 1 : ℂ) * m.factorial * n.factorial) * z ^ (m + n)
 / (z + 1) ^ (α + m + n + 1 : ℂ) * ₂F₁ (-(m : ℂ)) (-(n : ℂ)) (α + 1 : ℂ) (z⁻¹ ^ 2)`. -/
 @[dlmf 18.17.E34_5]
-theorem laguerrePolyL_product_laplace_transform {α : ℝ} (hα : -1 < α) (m n : ℕ) {z : ℂ}
+theorem laguerrePolynomialL_product_laplace_transform {α : ℝ} (hα : -1 < α) (m n : ℕ) {z : ℂ}
     (hz : -1 < z.re) (hz0 : z ≠ 0) :
     ∫ x : ℝ in Set.Ioi 0,
-        exp (-x * z) * laguerrePolyL α m x * laguerrePolyL α n x * exp (-x) * (x : ℂ) ^ (α : ℂ) =
+        exp (-x * z) * laguerrePolynomialL α m x * laguerrePolynomialL α n x * exp (-x) *
+            (x : ℂ) ^ (α : ℂ) =
       Gamma (α + m + 1 : ℂ) * Gamma (α + n + 1 : ℂ) /
       (Gamma (α + 1 : ℂ) * m.factorial * n.factorial) * z ^ (m + n) /
       (z + 1) ^ (α + m + n + 1 : ℂ) * ₂F₁ (-(m : ℂ)) (-(n : ℂ)) (α + 1 : ℂ) (z⁻¹ ^ 2) := by
   have hw : 0 < (z + 1).re := by simp; linarith
   have heq : (∫ x : ℝ in Set.Ioi 0,
-        exp (-x * z) * laguerrePolyL α m x * laguerrePolyL α n x * exp (-x) * (x : ℂ) ^ (α : ℂ)) =
-      ∫ x : ℝ in Set.Ioi 0, laguerrePolyL α m x * laguerrePolyL α n x *
+        exp (-x * z) * laguerrePolynomialL α m x * laguerrePolynomialL α n x * exp (-x) *
+            (x : ℂ) ^ (α : ℂ)) =
+      ∫ x : ℝ in Set.Ioi 0, laguerrePolynomialL α m x * laguerrePolynomialL α n x *
         (x : ℂ) ^ (α : ℂ) * exp (-((z + 1) * x)) := by
     apply integral_congr_ae
     exact Filter.Eventually.of_forall fun x => by

@@ -49,8 +49,10 @@ noncomputable section
 namespace DLMF.Confluent
 
 /-- `𝐅(a,b;c;0) = 1/Γ(c)`. -/
-theorem regularizedGaussHG_zero_arg (a b c : ℂ) : regularizedGaussHG a b c 0 = (Gamma c)⁻¹ := by
-  rw [regularizedGaussHG_eq_regularizedGaussHGFun a b c (by simp), regularizedGaussHGFun_eq_tsum,
+theorem regularizedGaussHypergeometric_zero_arg (a b c : ℂ) : regularizedGaussHypergeometric a b c 0
+    = (Gamma c)⁻¹ := by
+  rw [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun a b c (by simp),
+      regularizedGaussHypergeometricFun_eq_tsum,
     tsum_eq_single 0 (fun n hn => by simp [zero_pow hn])]
   simp
 
@@ -122,8 +124,8 @@ theorem bessel_kummerU_M {a b ν x : ℂ} (hx : 0 < x.re)
       _ = _ := by
         rw [MeasureTheory.integral_const_mul, ← hC0, regularizedHGFunCoeff_singleton, hd,
           DLMF.Bessel.regularizedHGFunCoeff_empty]
-        have hp : poch (1 : ℂ) n = n ! := by
-          simp [poch, ascPochhammer_eval_one]
+        have hp : pochhammer (1 : ℂ) n = n ! := by
+          simp [pochhammer, ascPochhammer_eval_one]
         have hfac : (n ! : ℝ) ≠ 0 := by positivity
         rw [hp]
         simp only [norm_div, norm_mul, one_div, norm_inv, Complex.norm_natCast, mul_pow]
@@ -140,13 +142,14 @@ theorem bessel_kummerU_M {a b ν x : ℂ} (hx : 0 < x.re)
       (regularizedHGFunCoeff {ν - b + 2} {a - b + ν + 2} n * (-x) ^ n) := by
     intro n
     simp only [hF]
-    rw [MeasureTheory.integral_const_mul, (hL n).2, sub_self, regularizedGaussHG_zero_arg, hd,
+    rw [MeasureTheory.integral_const_mul, (hL n).2, sub_self,
+        regularizedGaussHypergeometric_zero_arg, hd,
       DLMF.Bessel.regularizedHGFunCoeff_empty, regularizedHGFunCoeff_singleton]
     have hp := (Gamma_add_nat_div_Gamma_eq (n := n) (ν - b + 2) (not_neg_nat_of_re_pos hc))
     have hG1 : Gamma (ν + 1 + n) ≠ 0 :=
         Gamma_ne_zero_of_re_pos (by simp; linarith [(Nat.cast_nonneg n : (0:ℝ) ≤ n)])
     have hG2 : Gamma (ν - b + 2) ≠ 0 := Gamma_ne_zero_of_re_pos hc
-    rw [show poch (ν - b + 2) n = Gamma (ν - b + 2 + n) / Gamma (ν - b + 2) from hp.symm,
+    rw [show pochhammer (ν - b + 2) n = Gamma (ν - b + 2 + n) / Gamma (ν - b + 2) from hp.symm,
       show ν + n + 1 = ν + 1 + n by ring, show ν + 1 + n - b + 1 = ν - b + 2 + n by ring,
       show a + (ν + 1 + n) - b + 1 = a - b + ν + 2 + n by ring]
     field_simp
@@ -213,8 +216,9 @@ theorem laplace_whittakerM {κ μ ν z : ℂ}
   · have hl := laplace_regularizedHGFun_of_norm_lt (a := A) (c := C) (k := 1) hB hZ hZ1
     simp only [one_mul] at hl
     have hG := Gamma_ne_zero hC
-    rw [DLMF.Hypergeometric.regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hw,
-      DLMF.Hypergeometric.regularizedGaussHGFun_eq_div_Gamma hC] at hl
+    rw [DLMF.Hypergeometric.regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _
+        _ hw,
+      DLMF.Hypergeometric.regularizedGaussHypergeometricFun_eq_div_Gamma hC] at hl
     simp_rw [kummerM_eq_mul_regularizedHGFun hC]
     have hm : (∫ t : ℝ in Set.Ioi 0,
         exp (-Z * t) * (t : ℂ) ^ (B - 1) * (Gamma C * regularizedHGFun {A} {C} t)) =
@@ -226,29 +230,31 @@ theorem laplace_whittakerM {κ μ ν z : ℂ}
   · push_neg at hC
     obtain ⟨m, hm⟩ := hC
     have hK : ∀ t : ℂ, kummerM A C t =
-        ∑ n ∈ Finset.range (m + 1), poch A n / (poch C n * (n.factorial : ℂ)) * t ^ n := by
+        ∑ n ∈ Finset.range (m + 1), pochhammer A n /
+            (pochhammer C n * (n.factorial : ℂ)) * t ^ n := by
       intro t
       unfold kummerM
       refine tsum_eq_sum fun n hn => ?_
       have hmn : m < n := by rw [Finset.mem_range] at hn; omega
-      simp [hm, poch_neg_nat_eq_zero hmn]
+      simp [hm, pochhammer_neg_nat_eq_zero hmn]
     have hF : ₂F₁ A B C (1 / Z) =
-        ∑ n ∈ Finset.range (m + 1), gaussHGCoeff A B C n * (1 / Z) ^ n := by
+        ∑ n ∈ Finset.range (m + 1), gaussHypergeometricCoeff A B C n * (1 / Z) ^ n := by
       rw [ordinaryHypergeometric_eq_tsum]
       simp only [smul_eq_mul]
       have hterm : (fun k : ℕ =>
           ((k.factorial : ℂ)⁻¹) * (ascPochhammer ℂ k).eval A *
             (ascPochhammer ℂ k).eval B * ((ascPochhammer ℂ k).eval C)⁻¹ * (1 / Z) ^ k) =
-          fun k => gaussHGCoeff A B C k * (1 / Z) ^ k := by
+          fun k => gaussHypergeometricCoeff A B C k * (1 / Z) ^ k := by
         funext k
-        simp [gaussHGCoeff, poch, div_eq_mul_inv, mul_assoc, mul_left_comm, mul_comm]
+        simp [gaussHypergeometricCoeff, pochhammer, div_eq_mul_inv, mul_assoc,
+            mul_left_comm, mul_comm]
       rw [hterm]
       refine tsum_eq_sum fun k hk => ?_
       have hmk : m < k := by rw [Finset.mem_range] at hk; omega
-      simp [gaussHGCoeff, hm, poch_neg_nat_eq_zero hmk]
+      simp [gaussHypergeometricCoeff, hm, pochhammer_neg_nat_eq_zero hmk]
     have hBn (n : ℕ) : 0 < (B + n).re := by simp; positivity
     have hFi (n : ℕ) : IntegrableOn
-        (fun t : ℝ => poch A n / (poch C n * (n.factorial : ℂ)) *
+        (fun t : ℝ => pochhammer A n / (pochhammer C n * (n.factorial : ℂ)) *
           ((t : ℂ) ^ (B + n - 1) * exp (-(Z * t)))) (Set.Ioi 0) := by
       refine Integrable.const_mul ?_ _
       have hreal := integrableOn_rpow_mul_exp_neg_mul_rpow (p := 1)
@@ -261,7 +267,7 @@ theorem laplace_whittakerM {κ μ ν z : ℂ}
       simp
     have hpt : ∀ t ∈ Set.Ioi (0 : ℝ),
         exp (-Z * t) * (t : ℂ) ^ (B - 1) * kummerM A C t =
-          ∑ n ∈ Finset.range (m + 1), poch A n / (poch C n * (n.factorial : ℂ)) *
+          ∑ n ∈ Finset.range (m + 1), pochhammer A n / (pochhammer C n * (n.factorial : ℂ)) *
             ((t : ℂ) ^ (B + n - 1) * exp (-(Z * t))) := by
       intro t ht
       have ht0 : (t : ℂ) ≠ 0 := ofReal_ne_zero.mpr (ne_of_gt ht)
@@ -277,8 +283,8 @@ theorem laplace_whittakerM {κ μ ν z : ℂ}
     have hp := not_neg_nat_of_re_pos hB
     have hGb := (div_eq_iff (Gamma_ne_zero hp)).mp (Gamma_add_nat_div_Gamma_eq (n := n) B hp)
     rw [hGb, show -(B + (n : ℂ)) = -B + -(n : ℂ) by ring, cpow_add _ _ hZ0, cpow_neg Z (n : ℂ),
-      cpow_natCast, gaussHGCoeff, one_div, inv_pow]
-    simp only [poch]
+      cpow_natCast, gaussHypergeometricCoeff, one_div, inv_pow]
+    simp only [pochhammer]
     ring
 
 /-- Identity under the stated parameter and domain assumptions: `∫ t : ℝ in Set.Ioi 0, exp (-z *
@@ -377,14 +383,15 @@ theorem mellin_whittakerM {κ μ ν : ℂ}
 
 /-- Identity under the stated parameter and domain assumptions: `∫ t : ℝ in Set.Ioi 0, exp (-z *
 t) * (t : ℂ) ^ (ν - 1) * whittakerW κ μ t = Gamma (1 / 2 + μ + ν) * Gamma (1 / 2 - μ + ν) *
-DLMF.Hypergeometric.regularizedGaussHG (1 / 2 - μ + ν) (1 / 2 + μ + ν) (ν - κ + 1) (1 / 2 -
-z)`. -/
+DLMF.Hypergeometric.regularizedGaussHypergeometric (1 / 2 - μ + ν) (1 / 2 + μ + ν) (ν - κ + 1) (1 /
+2 - z)`. -/
 @[dlmf 13.23.E4]
 theorem laplace_whittakerW {κ μ ν z : ℂ}
     (h : |μ.re| < ν.re + 1 / 2) (hz : -1 / 2 < z.re) :
     ∫ t : ℝ in Set.Ioi 0, exp (-z * t) * (t : ℂ) ^ (ν - 1) * whittakerW κ μ t =
       Gamma (1 / 2 + μ + ν) * Gamma (1 / 2 - μ + ν) *
-        DLMF.Hypergeometric.regularizedGaussHG (1 / 2 - μ + ν) (1 / 2 + μ + ν) (ν - κ + 1)
+        DLMF.Hypergeometric.regularizedGaussHypergeometric (1 / 2 - μ + ν)
+            (1 / 2 + μ + ν) (ν - κ + 1)
             (1 / 2 - z) := by
   have hμ := abs_le.mp (le_refl |μ.re|)
   have hm := (laplace_kummerU_gauss (a := 1 / 2 + μ - κ) (b := μ + ν + 1 / 2)
@@ -407,7 +414,7 @@ theorem laplace_whittakerW {κ μ ν z : ℂ}
     show (1 / 2 + μ + ν) - (1 + 2 * μ) + 1 = 1 / 2 - μ + ν by ring,
     show (1 / 2 + μ - κ) + (1 / 2 + μ + ν) - (1 + 2 * μ) + 1 = ν - κ + 1 by ring,
     show 1 - (z + 1 / 2) = 1 / 2 - z by ring,
-    DLMF.Hypergeometric.regularizedGaussHG_symm _ _ _ (by
+    DLMF.Hypergeometric.regularizedGaussHypergeometric_symm _ _ _ (by
       change 1 - (1 / 2 - z) ∈ slitPlane
       left; simp; linarith)]
 

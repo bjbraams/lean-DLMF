@@ -110,7 +110,7 @@ theorem kummerU_eq_whittakerW {a b z : ℂ} (hz : z ∈ slitPlane) :
 @[dlmf 13.14.E7]
 theorem tendsto_whittakerM_div_Gamma (κ : ℂ) (n : ℕ) {z : ℂ} (hz : z ∈ slitPlane) :
     Tendsto (fun μ : ℂ => whittakerM κ μ z / Gamma (2 * μ + 1)) (𝓝[≠] (-(n + 1 : ℂ) / 2))
-      (𝓝 (poch (-(n : ℂ) / 2 - κ) (n + 1) / (n + 1).factorial *
+      (𝓝 (pochhammer (-(n : ℂ) / 2 - κ) (n + 1) / (n + 1).factorial *
         whittakerM κ ((n + 1 : ℂ) / 2) z)) := by
   let p : ℂ := -(n + 1 : ℂ) / 2
   have hB : 1 + 2 * p = -(n : ℂ) := by dsimp [p]; ring
@@ -134,7 +134,7 @@ theorem tendsto_whittakerM_div_Gamma (κ : ℂ) (n : ℕ) {z : ℂ} (hz : z ∈ 
   have ht := (hpow.const_mul (exp (-z / 2))).mul hreg
   have hval : exp (-z / 2) * z ^ (p + 1 / 2) *
       regularizedHGFun {p - κ + 1 / 2} {1 + 2 * p} z =
-      poch (-(n : ℂ) / 2 - κ) (n + 1) / (n + 1).factorial *
+      pochhammer (-(n : ℂ) / 2 - κ) (n + 1) / (n + 1).factorial *
         whittakerM κ ((n + 1 : ℂ) / 2) z := by
     rw [hB, hA, regularizedHGFun_of_neg_nat]
     unfold whittakerM
@@ -150,7 +150,7 @@ theorem tendsto_whittakerM_div_Gamma (κ : ℂ) (n : ℕ) {z : ℂ} (hz : z ∈ 
     have hb : (n : ℂ) + 2 = 1 + 2 * ((n + 1 : ℂ) / 2) := by ring
     rw [ha, hb]
     linear_combination exp (-z / 2) *
-      (poch (-(n : ℂ) / 2 - κ) (n + 1) / (n + 1).factorial) *
+      (pochhammer (-(n : ℂ) / 2 - κ) (n + 1) / (n + 1).factorial) *
       kummerM ((n + 1 : ℂ) / 2 - κ + 1 / 2) (1 + 2 * ((n + 1 : ℂ) / 2)) z * hp
   rw [hval] at ht
   apply ht.congr'

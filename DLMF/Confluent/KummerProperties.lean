@@ -62,7 +62,7 @@ theorem kummerMCoeff_kummer_convolution {a c : ℂ} (hc : ∀ k : ℕ, c ≠ -k)
   have hn : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
   have hterm (k : ℕ) (hk : k ∈ Finset.range (n + 1)) :
       kummerMCoeff (c - a) c k * (-1 : ℂ) ^ k / (n - k).factorial =
-        gaussHGCoeff (-(n : ℂ)) (c - a) c k / n.factorial := by
+        gaussHypergeometricCoeff (-(n : ℂ)) (c - a) c k / n.factorial := by
     have hk' : k ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hk)
     have hk0 : (k.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr k.factorial_ne_zero
     have hnk : ((n - k).factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (n - k).factorial_ne_zero
@@ -70,9 +70,9 @@ theorem kummerMCoeff_kummer_convolution {a c : ℂ} (hc : ∀ k : ℕ, c ≠ -k)
       apply (eq_div_iff (mul_ne_zero hk0 hnk)).2
       simpa [mul_assoc] using congrArg (Nat.cast : ℕ → ℂ)
         (Nat.choose_mul_factorial_mul_factorial hk')
-    rw [gaussHGCoeff_neg_nat, hch]
+    rw [gaussHypergeometricCoeff_neg_nat, hch]
     unfold kummerMCoeff
-    field [hn, hk0, hnk, poch_ne_zero_of_not_neg_nat hc k]
+    field [hn, hk0, hnk, pochhammer_ne_zero_of_not_neg_nat hc k]
   rw [Finset.sum_congr rfl hterm, ← Finset.sum_div]
   have hv := chu_vandermonde n (b := c - a) hc
   rw [ordinaryHypergeometric_eq_sum_neg_nat] at hv
@@ -82,28 +82,28 @@ theorem kummerMCoeff_kummer_convolution {a c : ℂ} (hc : ∀ k : ℕ, c ≠ -k)
   ring
 
 /-- The normalized Pochhammer factors have a recurrence with limit multiplier one. -/
-theorem poch_div_pow_succ {b : ℂ} (hb : b ≠ 0) (n : ℕ) :
-    poch b (n + 1) / b ^ (n + 1) = (poch b n / b ^ n) * (1 + (n : ℂ) / b) := by
-  rw [poch_succ, pow_succ]
+theorem pochhammer_div_pow_succ {b : ℂ} (hb : b ≠ 0) (n : ℕ) :
+    pochhammer b (n + 1) / b ^ (n + 1) = (pochhammer b n / b ^ n) * (1 + (n : ℂ) / b) := by
+  rw [pochhammer_succ, pow_succ]
   field_simp
 
 /-- Each normalized Pochhammer symbol tends to one as its parameter tends to infinity. -/
-theorem tendsto_poch_div_pow (n : ℕ) :
-    Tendsto (fun b : ℕ => poch (b : ℂ) n / (b : ℂ) ^ n) atTop (𝓝 1) := by
+theorem tendsto_pochhammer_div_pow (n : ℕ) :
+    Tendsto (fun b : ℕ => pochhammer (b : ℂ) n / (b : ℂ) ^ n) atTop (𝓝 1) := by
   induction n with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ n ih =>
     have ht := ih.mul ((tendsto_const_div_atTop_nhds_zero_nat (n : ℂ)).const_add 1)
     simp only [add_zero, mul_one] at ht
     apply ht.congr'
     filter_upwards [Filter.eventually_ne_atTop 0] with b hb
-    exact (poch_div_pow_succ (Nat.cast_ne_zero.mpr hb) n).symm
+    exact (pochhammer_div_pow_succ (Nat.cast_ne_zero.mpr hb) n).symm
 
 /-- `(c + t)_k / t^k → 1` as the real variable `t → ∞`. -/
-theorem tendsto_poch_add_div_pow (c : ℂ) (k : ℕ) :
-    Tendsto (fun t : ℝ => poch (c + t) k / (t : ℂ) ^ k) atTop (𝓝 1) := by
+theorem tendsto_pochhammer_add_div_pow (c : ℂ) (k : ℕ) :
+    Tendsto (fun t : ℝ => pochhammer (c + t) k / (t : ℂ) ^ k) atTop (𝓝 1) := by
   induction k with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ k ih =>
     have h0 : Tendsto (fun t : ℝ => (c + k) / (t : ℂ)) atTop (𝓝 0) := by
       rw [tendsto_zero_iff_norm_tendsto_zero]
@@ -117,15 +117,15 @@ theorem tendsto_poch_add_div_pow (c : ℂ) (k : ℕ) :
     refine ht.congr' ?_
     filter_upwards [eventually_gt_atTop 0] with t ht
     have htc : (t : ℂ) ≠ 0 := ofReal_ne_zero.mpr ht.ne'
-    rw [poch_succ, pow_succ]
+    rw [pochhammer_succ, pow_succ]
     field_simp
     ring
 
 /-- `(-N)_k / (-N)^k → 1` as the natural number `N → ∞`. -/
-theorem tendsto_poch_neg_div_pow (k : ℕ) :
-    Tendsto (fun N : ℕ => poch (-(N : ℂ)) k / (-(N : ℂ)) ^ k) atTop (𝓝 1) := by
+theorem tendsto_pochhammer_neg_div_pow (k : ℕ) :
+    Tendsto (fun N : ℕ => pochhammer (-(N : ℂ)) k / (-(N : ℂ)) ^ k) atTop (𝓝 1) := by
   induction k with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ k ih =>
     have h0 : Tendsto (fun N : ℕ => -((k : ℂ) / N)) atTop (𝓝 0) := by
       simpa using (tendsto_const_div_atTop_nhds_zero_nat (k : ℂ)).neg
@@ -134,32 +134,32 @@ theorem tendsto_poch_neg_div_pow (k : ℕ) :
     refine ht.congr' ?_
     filter_upwards [eventually_ne_atTop 0] with N hN
     have hN' : (N : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr hN
-    rw [poch_succ, pow_succ]
+    rw [pochhammer_succ, pow_succ]
     field_simp
     ring
 
 /-- Normalized positive Pochhammer symbols decrease as the parameter increases. -/
-theorem norm_poch_div_pow_le {x y : ℝ} (hx : 0 < x) (hxy : x ≤ y) (n : ℕ) :
-    ‖poch (y : ℂ) n / (y : ℂ) ^ n‖ ≤ ‖poch (x : ℂ) n / (x : ℂ) ^ n‖ := by
+theorem norm_pochhammer_div_pow_le {x y : ℝ} (hx : 0 < x) (hxy : x ≤ y) (n : ℕ) :
+    ‖pochhammer (y : ℂ) n / (y : ℂ) ^ n‖ ≤ ‖pochhammer (x : ℂ) n / (x : ℂ) ^ n‖ := by
   have hy : 0 < y := hx.trans_le hxy
   have hnorm (t : ℝ) (ht : 0 < t) (k : ℕ) :
       ‖1 + (k : ℂ) / (t : ℂ)‖ = 1 + (k : ℝ) / t := by
     have he : (1 : ℂ) + k / (t : ℂ) = ((1 + (k : ℝ) / t : ℝ) : ℂ) := by push_cast; rfl
     rw [he, norm_real, Real.norm_eq_abs, abs_of_nonneg (by positivity)]
   induction n with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ n ih =>
-    rw [poch_div_pow_succ (ofReal_ne_zero.mpr (ne_of_gt hy)),
-      poch_div_pow_succ (ofReal_ne_zero.mpr (ne_of_gt hx)), norm_mul, norm_mul,
+    rw [pochhammer_div_pow_succ (ofReal_ne_zero.mpr (ne_of_gt hy)),
+      pochhammer_div_pow_succ (ofReal_ne_zero.mpr (ne_of_gt hx)), norm_mul, norm_mul,
           hnorm y hy, hnorm x hx]
     exact mul_le_mul ih (add_le_add_right (div_le_div_of_nonneg_left (Nat.cast_nonneg n) hx hxy) 1)
       (by positivity) (norm_nonneg _)
 
 /-- Rescaled Gauss coefficients separate into confluent coefficients and a normalized Pochhammer. -/
-theorem gaussHGCoeff_mul_div_pow (a b c z : ℂ) (n : ℕ) :
-    gaussHGCoeff a b c n * (z / b) ^ n =
-      (kummerMCoeff a c n * z ^ n) * (poch b n / b ^ n) := by
-  simp only [gaussHGCoeff, kummerMCoeff, div_eq_mul_inv, mul_inv_rev]
+theorem gaussHypergeometricCoeff_mul_div_pow (a b c z : ℂ) (n : ℕ) :
+    gaussHypergeometricCoeff a b c n * (z / b) ^ n =
+      (kummerMCoeff a c n * z ^ n) * (pochhammer b n / b ^ n) := by
+  simp only [gaussHypergeometricCoeff, kummerMCoeff, div_eq_mul_inv, mul_inv_rev]
   ring
 
 /-- Confluence: `M(a,c,z) = lim_{b→∞} ₂F₁(a,b;c;z/b)`. -/
@@ -170,26 +170,26 @@ theorem tendsto_ordinaryHypergeometric_div_atTop {a c z : ℂ} :
   have harg : ‖z / (B : ℂ)‖ < 1 := by
     rw [norm_div, Complex.norm_natCast, div_lt_one hBpos]
     exact hB
-  let f (b n : ℕ) := gaussHGCoeff a (b : ℂ) c n * (z / b) ^ n
+  let f (b n : ℕ) := gaussHypergeometricCoeff a (b : ℂ) c n * (z / b) ^ n
   let bound (n : ℕ) := ‖f B n‖
   have hsum : Summable bound :=
     ((hasFPowerSeriesOnBall_ordinaryHypergeometric a (B : ℂ) c).hasSum_mul_pow
       (mem_eball_one_of_norm_lt_one harg)).summable.norm
   have hlim (n : ℕ) : Tendsto (fun b => f b n) atTop (𝓝 (kummerMCoeff a c n * z ^ n)) := by
-    simpa only [f, gaussHGCoeff_mul_div_pow, mul_one] using
-      (tendsto_poch_div_pow n).const_mul (kummerMCoeff a c n * z ^ n)
+    simpa only [f, gaussHypergeometricCoeff_mul_div_pow, mul_one] using
+      (tendsto_pochhammer_div_pow n).const_mul (kummerMCoeff a c n * z ^ n)
   have hbound : ∀ᶠ b : ℕ in atTop, ∀ n, ‖f b n‖ ≤ bound n := by
     filter_upwards [eventually_ge_atTop B] with b hb n
     dsimp [bound, f]
-    simp only [gaussHGCoeff_mul_div_pow, norm_mul]
+    simp only [gaussHypergeometricCoeff_mul_div_pow, norm_mul]
     apply mul_le_mul_of_nonneg_left _ (mul_nonneg (norm_nonneg _) (norm_nonneg _))
-    simpa only [ofReal_natCast] using norm_poch_div_pow_le hBpos (Nat.cast_le.mpr hb) n
+    simpa only [ofReal_natCast] using norm_pochhammer_div_pow_le hBpos (Nat.cast_le.mpr hb) n
   have ht := tendsto_tsum_of_dominated_convergence hsum hlim hbound
   have he (b : ℕ) : ₂F₁ a (b : ℂ) c (z / b) = ∑' n, f b n := by
     rw [ordinaryHypergeometric_eq_tsum]
     apply tsum_congr
     intro n
-    simp only [f, gaussHGCoeff, poch, smul_eq_mul, div_eq_mul_inv, mul_inv_rev]
+    simp only [f, gaussHypergeometricCoeff, pochhammer, smul_eq_mul, div_eq_mul_inv, mul_inv_rev]
     ring
   simpa only [← he, kummerM, kummerMCoeff] using ht
 
@@ -233,8 +233,8 @@ theorem kummerM_eq_euler_integral {a c z : ℂ}
     have hscaled (n : ℕ) : Gamma c / (Gamma a * Gamma (c - a)) *
         (∫ t : ℝ in (0 : ℝ)..1, F n t) = kummerMCoeff a c n * z ^ n := by
       have hf : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
-      have he := euler_term_eq_gaussHGCoeff (a := 1) n ha hca
-      simp only [poch_nat_one, div_self hf, one_mul, gaussHGCoeff] at he
+      have he := euler_term_eq_gaussHypergeometricCoeff (a := 1) n ha hca
+      simp only [pochhammer_nat_one, div_self hf, one_mul, gaussHypergeometricCoeff] at he
       rw [hterm]
       dsimp [kummerMCoeff]
       linear_combination (norm := (field_simp; ring)) (z ^ n / n.factorial) * he
@@ -502,7 +502,7 @@ theorem kummerM_ne_zero_of_mem_parabolicRegion {a c α : ℝ} {z : ℂ}
       div_mul_div_comm, div_eq_div_iff (by positivity) (by positivity)]
     ring
   have hcoef : ∀ k, kummerMCoeff a c k = (SaffVarga.seriesCoeff a c k : ℂ) := fun k => by
-    simp only [kummerMCoeff, SaffVarga.seriesCoeff, poch_ofReal]
+    simp only [kummerMCoeff, SaffVarga.seriesCoeff, pochhammer_ofReal]
     push_cast; ring
   set p := FormalMultilinearSeries.ofScalars ℂ (kummerMCoeff a c) with hp
   have hps := hasFPowerSeriesOnBall_kummerM (a := (a : ℂ)) hck

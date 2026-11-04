@@ -238,17 +238,18 @@ theorem lommelCoeff_eq_regularized {μ ν : ℂ} (h : LommelRegular μ ν) (k : 
   obtain ⟨hA,hB⟩ := lommelRegular_half_nonpole h
   have hGA := Gamma_add_nat_div_Gamma_eq (n := k+1) ((μ-ν+1)/2) hA
   have hGB := Gamma_add_nat_div_Gamma_eq (n := k+1) ((μ+ν+1)/2) hB
-  have hpA := poch_ne_zero_of_not_neg_nat hA (k+1)
-  have hpB := poch_ne_zero_of_not_neg_nat hB (k+1)
-  rw [← poch, div_eq_iff (Gamma_ne_zero hA)] at hGA
-  rw [← poch, div_eq_iff (Gamma_ne_zero hB)] at hGB
+  have hpA := pochhammer_ne_zero_of_not_neg_nat hA (k+1)
+  have hpB := pochhammer_ne_zero_of_not_neg_nat hB (k+1)
+  rw [← pochhammer, div_eq_iff (Gamma_ne_zero hA)] at hGA
+  rw [← pochhammer, div_eq_iff (Gamma_ne_zero hB)] at hGB
   rw [regularizedHGFunCoeff]
   simp only [Multiset.map_singleton, Multiset.prod_singleton, Multiset.insert_eq_cons,
     Multiset.map_cons, Multiset.prod_cons]
-  rw [show (ascPochhammer ℂ k).eval 1=(k.factorial:ℂ) by simpa [poch] using poch_nat_one k,
+  rw [show (ascPochhammer ℂ k).eval 1=(k.factorial:ℂ) by
+      simpa [pochhammer] using pochhammer_nat_one k,
     show (μ-ν+3)/2+k=(μ-ν+1)/2+(k+1:ℕ) by push_cast; ring,
     show (μ+ν+3)/2+k=(μ+ν+1)/2+(k+1:ℕ) by push_cast; ring,
-    hGA, hGB, lommelA_poch]
+    hGA, hGB, lommelA_pochhammer]
   field_simp [Gamma_ne_zero hA, Gamma_ne_zero hB, hpA, hpB,
     Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero k)]
   ring
@@ -843,7 +844,7 @@ private lemma lommel_gamma_backward (s : ℂ) (n : ℕ) :
   have h := one_div_Gamma_eq_ascPochhammer_mul_one_div_Gamma_add_nat s (n+1)
   have hi := congrArg Inv.inv h
   have hp : (ascPochhammer ℂ (n+1)).eval s=∏ j ∈ Finset.range (n+1), (s+j) := by
-    simpa [poch] using poch_mul_pow s (1:ℂ) (n+1)
+    simpa [pochhammer] using pochhammer_mul_pow s (1:ℂ) (n+1)
   simp only [inv_inv,mul_inv,hp,Nat.cast_add,Nat.cast_one] at hi
   rw [hi]
   simp only [div_eq_mul_inv]

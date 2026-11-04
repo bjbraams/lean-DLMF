@@ -294,27 +294,27 @@ theorem tsum_at_int (ha : ∀ k : ℤ, a ≠ k) (hb : ∀ k : ℤ, b ≠ k) (m :
   have hGβ : Gamma β ≠ 0 := Complex.Gamma_ne_zero hβn
   have hGγ : Gamma γ ≠ 0 := Complex.Gamma_ne_zero hγ
   have hterm : ∀ k : ℕ, term a b c m (g k) =
-      Gamma α * Gamma β / Gamma γ * gaussHGCoeff α β γ k := by
+      Gamma α * Gamma β / Gamma γ * gaussHypergeometricCoeff α β γ k := by
     intro k
     have e1 : a + ((g k : ℤ) : ℂ) = α + k := by simp only [hg, hα]; push_cast; ring
     have e2 : b + ((g k : ℤ) : ℂ) = β + k := by simp only [hg, hβ]; push_cast; ring
     have e3 : c + ((g k : ℤ) : ℂ) = γ + k := by simp only [hg, hγdef]; push_cast; ring
     have e4 : (m : ℂ) + ((g k : ℤ) : ℂ) = k + 1 := by simp only [hg]; push_cast; ring
-    have pα : Gamma (α + k) = Gamma α * poch α k := by
+    have pα : Gamma (α + k) = Gamma α * pochhammer α k := by
       have h := Complex.Gamma_add_nat_div_Gamma_eq (n := k) α hαn
       rw [div_eq_iff hGα] at h
-      rw [h, poch, mul_comm]
-    have pβ : Gamma (β + k) = Gamma β * poch β k := by
+      rw [h, pochhammer, mul_comm]
+    have pβ : Gamma (β + k) = Gamma β * pochhammer β k := by
       have h := Complex.Gamma_add_nat_div_Gamma_eq (n := k) β hβn
       rw [div_eq_iff hGβ] at h
-      rw [h, poch, mul_comm]
-    have pγ : Gamma (γ + k) = Gamma γ * poch γ k := by
+      rw [h, pochhammer, mul_comm]
+    have pγ : Gamma (γ + k) = Gamma γ * pochhammer γ k := by
       have h := Complex.Gamma_add_nat_div_Gamma_eq (n := k) γ hγ
       rw [div_eq_iff hGγ] at h
-      rw [h, poch, mul_comm]
-    have hpγ : poch γ k ≠ 0 := poch_ne_zero_of_not_neg_nat hγ k
+      rw [h, pochhammer, mul_comm]
+    have hpγ : pochhammer γ k ≠ 0 := pochhammer_ne_zero_of_not_neg_nat hγ k
     have hf : (k.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr k.factorial_ne_zero
-    rw [term, e1, e2, e3, e4, Complex.Gamma_nat_eq_factorial, pα, pβ, pγ, gaussHGCoeff]
+    rw [term, e1, e2, e3, e4, Complex.Gamma_nat_eq_factorial, pα, pβ, pγ, gaussHypergeometricCoeff]
     field_simp
   simp_rw [hterm]
   rw [tsum_mul_left, ← ordinaryHypergeometric_one_eq_tsum]

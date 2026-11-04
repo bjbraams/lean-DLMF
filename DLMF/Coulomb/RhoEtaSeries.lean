@@ -26,7 +26,7 @@ functions `I_k`, `J_k`, with the asymptotic form of `G_ℓ` in functions `K_k` (
   (DLMF 33.6.3).
 * `hasSum_coulombF`, `hasSum_deriv_coulombF`: the power series of `F_ℓ` and `F_ℓ'`
   (DLMF 33.6.1–33.6.2).
-* `powerSeriesCoeff_eq_hyp2F1`: `A_k^ℓ` as a terminating `₂F₁` (DLMF 33.6.4).
+* `powerSeriesCoeff_eq_matrixHypergeometric2F1`: `A_k^ℓ` as a terminating `₂F₁` (DLMF 33.6.4).
 * `hasSum_coulombHPlus_log`, `hasSum_coulombHMinus_log`: the logarithmic series of `H^±_ℓ`
   (DLMF 33.6.5), for `η ≠ 0`.
 * `hasSum_coulombHPlus_log_recipGamma`, `hasSum_coulombHMinus_log_recipGamma`: the pole-free
@@ -72,9 +72,9 @@ open DLMF.Confluent DLMF.Bessel DLMF.Hypergeometric
 theorem powerSeriesCoeff_initial (ℓ : ℕ) (η : ℝ) :
     powerSeriesCoeff ℓ η (ℓ + 1) = 1 ∧ powerSeriesCoeff ℓ η (ℓ + 2) = η / (ℓ + 1) := by
   refine ⟨?_, ?_⟩
-  · simp [powerSeriesCoeff, powerSeriesCoeffAux]
+  · simp [powerSeriesCoeff, powerSeriesCoeffTerm]
   · rw [powerSeriesCoeff, ite_eq_left (by omega), show ℓ + 2 - (ℓ + 1) = 1 by omega,
-      powerSeriesCoeffAux]
+      powerSeriesCoeffTerm]
 
 /-- **The recurrence for `A_k^ℓ`** (DLMF 33.6.3):
 `(k+ℓ)(k-ℓ-1) A_k^ℓ = 2η A_{k-1}^ℓ - A_{k-2}^ℓ` for `k = ℓ+3, ℓ+4, …`. -/
@@ -86,7 +86,7 @@ theorem powerSeriesCoeff_recurrence (ℓ : ℕ) (η : ℝ) {k : ℕ} (hk : ℓ +
   rw [powerSeriesCoeff, powerSeriesCoeff, powerSeriesCoeff, ite_eq_left (by omega),
     ite_eq_left (by omega), ite_eq_left (by omega), show ℓ + 3 + n - (ℓ + 1) = n + 2 by omega,
     show ℓ + 3 + n - 1 - (ℓ + 1) = n + 1 by omega, show ℓ + 3 + n - 2 - (ℓ + 1) = n by omega,
-    powerSeriesCoeffAux]
+    powerSeriesCoeffTerm]
   have h : ((n : ℝ) + 2 * ℓ + 3) * ((n : ℝ) + 2) ≠ 0 := by positivity
   push_cast
   field_simp
@@ -279,7 +279,7 @@ private lemma hasSum_powerSeriesCoeff_coulombWave (ℓ : ℕ) (η : ℝ) (z : �
 private lemma iteratedDeriv_kummerM_mul_exp_zero (ℓ : ℕ) (η : ℂ) (n : ℕ) :
     iteratedDeriv n (fun z : ℂ => kummerM (ℓ + 1 - I * η) (2 * ℓ + 2) (2 * I * z) *
       exp (-I * z)) 0 = ∑ j ∈ Finset.range (n + 1), (n.choose j : ℂ) *
-        ((2 * I) ^ j * (poch ((ℓ : ℂ) + 1 - I * η) j / poch (2 * (ℓ : ℂ) + 2) j)) *
+        ((2 * I) ^ j * (pochhammer ((ℓ : ℂ) + 1 - I * η) j / pochhammer (2 * (ℓ : ℂ) + 2) j)) *
         (-I) ^ (n - j) := by
   have hb := two_mul_nat_add_two_ne_neg_nat ℓ
   have hMd : Differentiable ℂ (kummerM ((ℓ : ℂ) + 1 - I * η) (2 * ℓ + 2)) := fun z =>
@@ -354,10 +354,11 @@ theorem hasSum_deriv_coulombF (ℓ : ℕ) (η ρ : ℝ) :
 `A_k^ℓ(η) = (-i)^{k-ℓ-1}/(k-ℓ-1)! ₂F₁(ℓ+1-k, ℓ+1-iη; 2ℓ+2; 2)`, the `₂F₁` written as its
 finite sum (the series terminates after the term `j = k-ℓ-1`). -/
 @[dlmf 33.6.E4]
-theorem powerSeriesCoeff_eq_hyp2F1 (ℓ : ℕ) (η : ℝ) {k : ℕ} (hk : ℓ + 1 ≤ k) :
+theorem powerSeriesCoeff_eq_matrixHypergeometric2F1 (ℓ : ℕ) (η : ℝ) {k : ℕ} (hk : ℓ + 1 ≤ k) :
     (powerSeriesCoeff ℓ η k : ℂ) = (-I) ^ (k - ℓ - 1) / ((k - ℓ - 1)! : ℂ) *
-      ∑ j ∈ Finset.range (k - ℓ), poch ((ℓ : ℂ) + 1 - k) j * poch ((ℓ : ℂ) + 1 - I * η) j /
-        (poch (2 * (ℓ : ℂ) + 2) j * j !) * 2 ^ j := by
+      ∑ j ∈ Finset.range (k - ℓ), pochhammer ((ℓ : ℂ) + 1 - k) j *
+          pochhammer ((ℓ : ℂ) + 1 - I * η) j /
+        (pochhammer (2 * (ℓ : ℂ) + 2) j * j !) * 2 ^ j := by
   obtain ⟨n, rfl⟩ : ∃ n, k = n + ℓ + 1 := ⟨k - ℓ - 1, by omega⟩
   rw [show n + ℓ + 1 - ℓ - 1 = n by omega, show n + ℓ + 1 - ℓ = n + 1 by omega,
     show (ℓ : ℂ) + 1 - ((n + ℓ + 1 : ℕ) : ℂ) = -(n : ℂ) by push_cast; ring,
@@ -375,7 +376,7 @@ theorem powerSeriesCoeff_eq_hyp2F1 (ℓ : ℕ) (η : ℝ) {k : ℕ} (hk : ℓ + 
       iteratedDeriv_kummerM_mul_exp_zero, Finset.mul_sum, Finset.mul_sum, Finset.sum_div]
     refine Finset.sum_congr rfl fun j hj => ?_
     have hjn : j ≤ n := by simpa [Nat.lt_succ_iff] using hj
-    rw [poch_neg_coe_nat, Nat.descFactorial_eq_factorial_mul_choose]
+    rw [pochhammer_neg_coe_nat, Nat.descFactorial_eq_factorial_mul_choose]
     have hpow : (-I) ^ n = (-I) ^ (n - j) * (-I) ^ j := by
       rw [← pow_add, Nat.sub_add_cancel hjn]
     have hc : ((n + ℓ + 1).choose (ℓ + 1) : ℂ) * (ℓ + 1)! / (n + ℓ + 1)! = 1 / n ! := by
@@ -386,13 +387,13 @@ theorem powerSeriesCoeff_eq_hyp2F1 (ℓ : ℕ) (η : ℝ) {k : ℕ} (hk : ℓ + 
       rw [div_eq_div_iff hk hn, one_mul, ← h]
       push_cast; ring
     have hb := two_mul_nat_add_two_ne_neg_nat ℓ
-    have hq : poch (2 * (ℓ : ℂ) + 2) j ≠ 0 := poch_ne_zero_of_not_neg_nat hb j
+    have hq : pochhammer (2 * (ℓ : ℂ) + 2) j ≠ 0 := pochhammer_ne_zero_of_not_neg_nat hb j
     have hjf : (j ! : ℂ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero _
     have hnf : (n ! : ℂ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero _
     rw [hpow]
     calc _ = ((n + ℓ + 1).choose (ℓ + 1) : ℂ) * (ℓ + 1)! / (n + ℓ + 1)! *
-          ((n.choose j : ℂ) * ((2 * I) ^ j * (poch ((ℓ : ℂ) + 1 - I * η) j /
-            poch (2 * (ℓ : ℂ) + 2) j)) * (-I) ^ (n - j)) := by ring
+          ((n.choose j : ℂ) * ((2 * I) ^ j * (pochhammer ((ℓ : ℂ) + 1 - I * η) j /
+            pochhammer (2 * (ℓ : ℂ) + 2) j)) * (-I) ^ (n - j)) := by ring
       _ = _ := by
         rw [hc]
         field_simp
@@ -407,7 +408,7 @@ theorem powerSeriesCoeff_eq_hyp2F1 (ℓ : ℕ) (η : ℝ) {k : ℕ} (hk : ℓ + 
 
 /-- `Γ(n+1+k) = n! (n+1)_k`. -/
 private lemma Gamma_natCast_add_one_add (n k : ℕ) :
-    Gamma ((n : ℂ) + 1 + k) = (n ! : ℂ) * poch ((n : ℂ) + 1) k := by
+    Gamma ((n : ℂ) + 1 + k) = (n ! : ℂ) * pochhammer ((n : ℂ) + 1) k := by
   have hn' : ∀ j : ℕ, (n : ℂ) + 1 ≠ -(j : ℂ) := by
     intro j hj
     have := congrArg re hj
@@ -424,20 +425,20 @@ private lemma two_mul_add_two_eq (ℓ : ℕ) :
 /-- DLMF 13.2.9 at `b = 2ℓ+2`, multiplied by `(2ℓ+1)! Γ(a-2ℓ-1) z^a`. -/
 private lemma hasSum_log_aux (ℓ : ℕ) {a z : ℂ} (hzs : z ∈ slitPlane)
     (han : ∀ k : ℕ, a - ((2 * ℓ + 1 : ℕ) : ℂ) ≠ -(k : ℂ)) (hare : 0 < a.re) :
-    HasSum (fun k : ℕ => poch a k / (poch (2 * (ℓ : ℂ) + 2) k * k !) * z ^ (a + k) *
+    HasSum (fun k : ℕ => pochhammer a k / (pochhammer (2 * (ℓ : ℂ) + 2) k * k !) * z ^ (a + k) *
         (log z + Complex.digamma (a + k) - Complex.digamma (1 + k) -
           Complex.digamma (2 * ℓ + 2 + k)))
       ((2 * ℓ + 1)! * Gamma (a - ((2 * ℓ + 1 : ℕ) : ℂ)) *
           (z ^ a * kummerU a (2 * ℓ + 2) z) +
         ∑ k ∈ Finset.Icc 1 (2 * ℓ + 1), ((2 * ℓ + 1)! * (k - 1)! : ℂ) /
-          ((2 * ℓ + 1 - k)! * poch (1 - a) k) * z ^ (a - k)) := by
+          ((2 * ℓ + 1 - k)! * pochhammer (1 - a) k) * z ^ (a - k)) := by
   have hb := two_mul_add_two_eq ℓ
   set n := 2 * ℓ + 1 with hn
   have hz0 : z ≠ 0 := slitPlane_ne_zero hzs
   obtain ⟨hsum, -⟩ := tricomi_numerator_nat_series a n hz0 han
   have hU := kummerU_nat_denom a n hzs han
   have hn0 : (n ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero n)
-  set f : ℕ → ℂ := fun k => poch a k / (poch (n + 1 : ℂ) k * k.factorial) * z ^ k *
+  set f : ℕ → ℂ := fun k => pochhammer a k / (pochhammer (n + 1 : ℂ) k * k.factorial) * z ^ k *
     (log z + digamma (a + k) - digamma (1 + k) - digamma (n + k + 1)) with hf_def
   have hf : Summable f := by
     refine (hsum.mul_left (n ! : ℂ)).congr fun k => ?_
@@ -449,27 +450,27 @@ private lemma hasSum_log_aux (ℓ : ℕ) {a z : ℂ} (hzs : z ∈ slitPlane)
     rw [hn, show 2 * ℓ + 1 + 1 = 2 * (ℓ + 1) by ring, pow_mul]; norm_num
   have hGa : Gamma a ≠ 0 := Gamma_ne_zero_of_re_pos hare
   have hGan : Gamma (a - n) ≠ 0 := Gamma_ne_zero han
-  have hpochn : poch (1 - a) n * Gamma (a - n) = - Gamma a := by
-    have h1 := poch_reflect (a - n) n
+  have hpochn : pochhammer (1 - a) n * Gamma (a - n) = - Gamma a := by
+    have h1 := pochhammer_reflect (a - n) n
     rw [show 1 - (a - n) - n = 1 - a by ring] at h1
     have h2 := Gamma_add_nat_div_Gamma_eq (n := n) (a - n) han
     rw [sub_add_cancel, div_eq_iff hGan] at h2
     rw [h1, show (-1 : ℂ) ^ n = -1 by rw [hn, pow_succ, pow_mul]; norm_num]
     linear_combination h2
   have hT : tsum f = n ! * Gamma (a - n) * (kummerU a ((n : ℂ) + 1) z -
-      1 / Gamma a * ∑ k ∈ Finset.Icc 1 n, ((k - 1).factorial : ℂ) * poch (1 - a + k) (n - k) /
+      1 / Gamma a * ∑ k ∈ Finset.Icc 1 n, ((k - 1).factorial : ℂ) * pochhammer (1 - a + k) (n - k) /
         ((n - k).factorial : ℂ) * z ^ (-(k : ℂ))) := by
     rw [hU, hn1]; field_simp; ring
   have hS : ∑ k ∈ Finset.Icc 1 n, ((n ! * (k - 1)! : ℂ)) /
-      (((n - k)! : ℂ) * poch (1 - a) k) * z ^ (a - k) =
+      (((n - k)! : ℂ) * pochhammer (1 - a) k) * z ^ (a - k) =
       -(n ! * Gamma (a - n) / Gamma a) * z ^ a * ∑ k ∈ Finset.Icc 1 n,
-        ((k - 1).factorial : ℂ) * poch (1 - a + k) (n - k) /
+        ((k - 1).factorial : ℂ) * pochhammer (1 - a + k) (n - k) /
         ((n - k).factorial : ℂ) * z ^ (-(k : ℂ)) := by
     rw [Finset.mul_sum]
     refine Finset.sum_congr rfl fun k hk => ?_
-    have hp := poch_add (1 - a) k (n - k)
+    have hp := pochhammer_add (1 - a) k (n - k)
     rw [Nat.add_sub_cancel' (Finset.mem_Icc.mp hk).2] at hp
-    have hpk : poch (1 - a) k ≠ 0 := by
+    have hpk : pochhammer (1 - a) k ≠ 0 := by
       intro h0
       rw [h0, zero_mul] at hp
       rw [hp, zero_mul] at hpochn
@@ -490,23 +491,23 @@ private lemma hasSum_log_aux (ℓ : ℕ) {a z : ℂ} (hzs : z ∈ slitPlane)
 
 /-- DLMF 13.2.9 in the pole-free form, at `b = 2ℓ+2`, multiplied by `(2ℓ+1)! z^a`. -/
 private lemma hasSum_log_recipGamma_aux (ℓ : ℕ) {a z : ℂ} (hzs : z ∈ slitPlane) :
-    HasSum (fun k : ℕ => poch a k / (poch (2 * (ℓ : ℂ) + 2) k * k !) * z ^ (a + k) *
+    HasSum (fun k : ℕ => pochhammer a k / (pochhammer (2 * (ℓ : ℂ) + 2) k * k !) * z ^ (a + k) *
         ((Gamma (a - ((2 * ℓ + 1 : ℕ) : ℂ)))⁻¹ *
             (log z - Complex.digamma (1 + k) - Complex.digamma (2 * ℓ + 2 + k)) -
-          poch (a - ((2 * ℓ + 1 : ℕ) : ℂ)) (2 * ℓ + 1 + k) *
+          pochhammer (a - ((2 * ℓ + 1 : ℕ) : ℂ)) (2 * ℓ + 1 + k) *
             DLMF.Gamma.recipGammaDeriv 1 (a + k)))
       ((2 * ℓ + 1)! * (z ^ a * kummerU a (2 * ℓ + 2) z) -
         ∑ k ∈ Finset.Icc 1 (2 * ℓ + 1), ((2 * ℓ + 1)! * (k - 1)! : ℂ) *
-          poch (1 - a + k) (2 * ℓ + 1 - k) / ((2 * ℓ + 1 - k)! * Gamma a) * z ^ (a - k)) := by
+          pochhammer (1 - a + k) (2 * ℓ + 1 - k) / ((2 * ℓ + 1 - k)! * Gamma a) * z ^ (a - k)) := by
   have hb := two_mul_add_two_eq ℓ
   set n := 2 * ℓ + 1 with hn
   have hz0 : z ≠ 0 := slitPlane_ne_zero hzs
   obtain ⟨hsum, -⟩ := tricomi_numerator_nat_series_recipGamma a n hz0
   have hU := kummerU_nat_denom_recipGamma a n hzs
   have hn0 : (n ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero n)
-  set f : ℕ → ℂ := fun k => poch a k / (poch (n + 1 : ℂ) k * k.factorial) * z ^ k *
+  set f : ℕ → ℂ := fun k => pochhammer a k / (pochhammer (n + 1 : ℂ) k * k.factorial) * z ^ k *
     ((Gamma (a - n))⁻¹ * (log z - digamma (1 + k) - digamma (n + k + 1)) -
-      poch (a - n) (n + k) * DLMF.Gamma.recipGammaDeriv 1 (a + k)) with hf_def
+      pochhammer (a - n) (n + k) * DLMF.Gamma.recipGammaDeriv 1 (a + k)) with hf_def
   have hf : Summable f := by
     refine (hsum.mul_left (n ! : ℂ)).congr fun k => ?_
     rw [Gamma_natCast_add_one_add, hf_def]
@@ -516,7 +517,7 @@ private lemma hasSum_log_recipGamma_aux (ℓ : ℕ) {a z : ℂ} (hzs : z ∈ sli
   have hn1 : (-1 : ℂ) ^ (n + 1) = 1 := by
     rw [hn, show 2 * ℓ + 1 + 1 = 2 * (ℓ + 1) by ring, pow_mul]; norm_num
   have hT : tsum f = n ! * (kummerU a ((n : ℂ) + 1) z -
-      1 / Gamma a * ∑ k ∈ Finset.Icc 1 n, ((k - 1).factorial : ℂ) * poch (1 - a + k) (n - k) /
+      1 / Gamma a * ∑ k ∈ Finset.Icc 1 n, ((k - 1).factorial : ℂ) * pochhammer (1 - a + k) (n - k) /
         ((n - k).factorial : ℂ) * z ^ (-(k : ℂ))) := by
     rw [hU, hn1]; field_simp; ring
   convert (hf.hasSum.mul_left (z ^ a)) using 1
@@ -558,13 +559,13 @@ the convergent series. The formula needs `η ≠ 0`: at `η = 0` it holds only a
 @[dlmf 33.6.E5]
 theorem hasSum_coulombHPlus_log (ℓ : ℕ) (η : ℝ) (hη : η ≠ 0) {ρ : ℝ} (hρ : 0 < ρ)
     {a z : ℂ} (ha : a = 1 + ℓ + I * η) (hz : z = -2 * I * ρ) :
-    HasSum (fun k : ℕ => poch a k / (poch (2 * (ℓ : ℂ) + 2) k * k !) * z ^ (a + k) *
+    HasSum (fun k : ℕ => pochhammer a k / (pochhammer (2 * (ℓ : ℂ) + 2) k * k !) * z ^ (a + k) *
         (log z + Complex.digamma (a + k) - Complex.digamma (1 + k) -
           Complex.digamma (2 * ℓ + 2 + k)))
       ((2 * ℓ + 1)! * Gamma (-(ℓ : ℂ) + I * η) * exp (-(I * coulombTheta ℓ η ρ)) *
           coulombHPlus ℓ η ρ +
         ∑ k ∈ Finset.Icc 1 (2 * ℓ + 1), ((2 * ℓ + 1)! * (k - 1)! : ℂ) /
-          ((2 * ℓ + 1 - k)! * poch (1 - a) k) * z ^ (a - k)) := by
+          ((2 * ℓ + 1 - k)! * pochhammer (1 - a) k) * z ^ (a - k)) := by
   have hzs : z ∈ slitPlane := by
     rw [hz]; refine Or.inr ?_; simp; exact hρ.ne'
   have han : ∀ k : ℕ, a - ((2 * ℓ + 1 : ℕ) : ℂ) ≠ -(k : ℂ) := by
@@ -582,13 +583,13 @@ theorem hasSum_coulombHPlus_log (ℓ : ℕ) (η : ℝ) (hη : η ≠ 0) {ρ : �
 @[dlmf 33.6.E5]
 theorem hasSum_coulombHMinus_log (ℓ : ℕ) (η : ℝ) (hη : η ≠ 0) {ρ : ℝ} (hρ : 0 < ρ)
     {a z : ℂ} (ha : a = 1 + ℓ - I * η) (hz : z = 2 * I * ρ) :
-    HasSum (fun k : ℕ => poch a k / (poch (2 * (ℓ : ℂ) + 2) k * k !) * z ^ (a + k) *
+    HasSum (fun k : ℕ => pochhammer a k / (pochhammer (2 * (ℓ : ℂ) + 2) k * k !) * z ^ (a + k) *
         (log z + Complex.digamma (a + k) - Complex.digamma (1 + k) -
           Complex.digamma (2 * ℓ + 2 + k)))
       ((2 * ℓ + 1)! * Gamma (-(ℓ : ℂ) - I * η) * exp (I * coulombTheta ℓ η ρ) *
           coulombHMinus ℓ η ρ +
         ∑ k ∈ Finset.Icc 1 (2 * ℓ + 1), ((2 * ℓ + 1)! * (k - 1)! : ℂ) /
-          ((2 * ℓ + 1 - k)! * poch (1 - a) k) * z ^ (a - k)) := by
+          ((2 * ℓ + 1 - k)! * pochhammer (1 - a) k) * z ^ (a - k)) := by
   have hzs : z ∈ slitPlane := by
     rw [hz]; refine Or.inr ?_; simp; exact hρ.ne'
   have han : ∀ k : ℕ, a - ((2 * ℓ + 1 : ℕ) : ℂ) ≠ -(k : ℂ) := by
@@ -609,13 +610,13 @@ including `η = 0`, where the series vanishes and the formula gives `H^+_ℓ` as
 @[dlmf 33.6.E5]
 theorem hasSum_coulombHPlus_log_recipGamma (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ)
     {a z : ℂ} (ha : a = 1 + ℓ + I * η) (hz : z = -2 * I * ρ) :
-    HasSum (fun k : ℕ => poch a k / (poch (2 * (ℓ : ℂ) + 2) k * k !) * z ^ (a + k) *
+    HasSum (fun k : ℕ => pochhammer a k / (pochhammer (2 * (ℓ : ℂ) + 2) k * k !) * z ^ (a + k) *
         ((Gamma (-(ℓ : ℂ) + I * η))⁻¹ *
             (log z - Complex.digamma (1 + k) - Complex.digamma (2 * ℓ + 2 + k)) -
-          poch (-(ℓ : ℂ) + I * η) (2 * ℓ + 1 + k) * DLMF.Gamma.recipGammaDeriv 1 (a + k)))
+          pochhammer (-(ℓ : ℂ) + I * η) (2 * ℓ + 1 + k) * DLMF.Gamma.recipGammaDeriv 1 (a + k)))
       ((2 * ℓ + 1)! * exp (-(I * coulombTheta ℓ η ρ)) * coulombHPlus ℓ η ρ -
         ∑ k ∈ Finset.Icc 1 (2 * ℓ + 1), ((2 * ℓ + 1)! * (k - 1)! : ℂ) *
-          poch (1 - a + k) (2 * ℓ + 1 - k) / ((2 * ℓ + 1 - k)! * Gamma a) * z ^ (a - k)) := by
+          pochhammer (1 - a + k) (2 * ℓ + 1 - k) / ((2 * ℓ + 1 - k)! * Gamma a) * z ^ (a - k)) := by
   have hzs : z ∈ slitPlane := by
     rw [hz]; refine Or.inr ?_; simp; exact hρ.ne'
   rw [show -(ℓ : ℂ) + I * η = a - ((2 * ℓ + 1 : ℕ) : ℂ) by rw [ha]; push_cast; ring,
@@ -628,13 +629,13 @@ DLMF: valid for all real `η`, including `η = 0`. -/
 @[dlmf 33.6.E5]
 theorem hasSum_coulombHMinus_log_recipGamma (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ)
     {a z : ℂ} (ha : a = 1 + ℓ - I * η) (hz : z = 2 * I * ρ) :
-    HasSum (fun k : ℕ => poch a k / (poch (2 * (ℓ : ℂ) + 2) k * k !) * z ^ (a + k) *
+    HasSum (fun k : ℕ => pochhammer a k / (pochhammer (2 * (ℓ : ℂ) + 2) k * k !) * z ^ (a + k) *
         ((Gamma (-(ℓ : ℂ) - I * η))⁻¹ *
             (log z - Complex.digamma (1 + k) - Complex.digamma (2 * ℓ + 2 + k)) -
-          poch (-(ℓ : ℂ) - I * η) (2 * ℓ + 1 + k) * DLMF.Gamma.recipGammaDeriv 1 (a + k)))
+          pochhammer (-(ℓ : ℂ) - I * η) (2 * ℓ + 1 + k) * DLMF.Gamma.recipGammaDeriv 1 (a + k)))
       ((2 * ℓ + 1)! * exp (I * coulombTheta ℓ η ρ) * coulombHMinus ℓ η ρ -
         ∑ k ∈ Finset.Icc 1 (2 * ℓ + 1), ((2 * ℓ + 1)! * (k - 1)! : ℂ) *
-          poch (1 - a + k) (2 * ℓ + 1 - k) / ((2 * ℓ + 1 - k)! * Gamma a) * z ^ (a - k)) := by
+          pochhammer (1 - a + k) (2 * ℓ + 1 - k) / ((2 * ℓ + 1 - k)! * Gamma a) * z ^ (a - k)) := by
   have hzs : z ∈ slitPlane := by
     rw [hz]; refine Or.inr ?_; simp; exact hρ.ne'
   rw [show -(ℓ : ℂ) - I * η = a - ((2 * ℓ + 1 : ℕ) : ℂ) by rw [ha]; push_cast; ring,
@@ -686,7 +687,7 @@ theorem hasSum_coulombF_sphericalJ (ℓ : ℕ) (η ρ : ℝ) :
 theorem besselSeriesCoeffB_initial (ℓ : ℕ) (η : ℝ) :
     besselSeriesCoeffB ℓ η (2 * ℓ) = 0 ∧ besselSeriesCoeffB ℓ η (2 * ℓ + 1) = 1 ∧
       besselSeriesCoeffB ℓ η (2 * ℓ + 2) = 0 := by
-  simp [besselSeriesCoeffB, besselSeriesCoeffBAux]
+  simp [besselSeriesCoeffB, besselSeriesCoeffBTerm]
 
 /-- **The recurrence for `b_k`** (DLMF 33.9.5): `4η²(k-2ℓ) b_{k+1} + k b_{k-1} + b_{k-2} = 0`
 for `k = 2ℓ+2, 2ℓ+3, …`, `η ≠ 0`. -/
@@ -698,7 +699,7 @@ theorem besselSeriesCoeffB_recurrence (ℓ : ℕ) {η : ℝ} (hη : η ≠ 0) {k
   rw [besselSeriesCoeffB, besselSeriesCoeffB, besselSeriesCoeffB, ite_eq_left (by omega),
     ite_eq_left (by omega), ite_eq_left (by omega), show 2 * ℓ + 2 + n + 1 - 2 * ℓ = n + 3 by omega,
     show 2 * ℓ + 2 + n - 1 - 2 * ℓ = n + 1 by omega, show 2 * ℓ + 2 + n - 2 - 2 * ℓ = n by omega,
-    besselSeriesCoeffBAux]
+    besselSeriesCoeffBTerm]
   have h : 4 * η ^ 2 * ((n : ℝ) + 2) ≠ 0 := by positivity
   push_cast
   field_simp

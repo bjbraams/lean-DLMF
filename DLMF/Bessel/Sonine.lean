@@ -54,7 +54,7 @@ theorem integral_regularized0F1_gamma {c w : ℂ} (hc : 0 < c.re) :
   have hcoeff (n : ℕ) : Gamma (c.re : ℂ) * regularizedHGFunCoeff {(c.re : ℂ)} {c} n =
       Gamma ((c.re : ℂ) + n) * d n := by
     dsimp only [d]
-    have hp : poch (c.re : ℂ) n = Gamma ((c.re : ℂ) + n) / Gamma (c.re : ℂ) :=
+    have hp : pochhammer (c.re : ℂ) n = Gamma ((c.re : ℂ) + n) / Gamma (c.re : ℂ) :=
       (Gamma_add_nat_div_Gamma_eq (n := n) (c.re : ℂ)
         (not_neg_nat_of_re_pos (by simpa using hc))).symm
     rw [regularizedHGFunCoeff_singleton, regularizedHGFunCoeff_empty, hp]

@@ -27,10 +27,10 @@ coefficients `A_k` are nonzero.
 
 ## Main results
 
-* `mathieuCFTail_succ`: the recursion of the truncations.
-* `tendsto_mathieuCFTail_of_tendsto_zero`: convergence of the truncations.
-* `tendsto_neg_mathieuCFTail_mathieuCFHead`: the continued-fraction equations of
-  DLMF 28.6.16–28.6.19 for a decaying solution of the recurrence.
+* `mathieuContinuedFractionTail_succ`: the recursion of the truncations.
+* `tendsto_mathieuContinuedFractionTail_of_tendsto_zero`: convergence of the truncations.
+* `tendsto_neg_mathieuContinuedFractionTail_mathieuContinuedFractionHead`: the continued-fraction
+  equations of DLMF 28.6.16–28.6.19 for a decaying solution of the recurrence.
 -/
 
 @[expose] public noncomputable section
@@ -40,10 +40,10 @@ open Filter Topology
 namespace DLMF.Mathieu
 
 /-- The recursion of the truncated tails: one more level on top. -/
-theorem mathieuCFTail_succ (q a : ℂ) (s : ℕ → ℂ) (N : ℕ) :
-    mathieuCFTail q a s (N + 1) =
-      q ^ 2 / (s 0 - a - mathieuCFTail q a (fun k => s (k + 1)) N) := by
-  simp only [mathieuCFTail, List.range_succ_eq_map, List.foldr_cons, List.foldr_map]
+theorem mathieuContinuedFractionTail_succ (q a : ℂ) (s : ℕ → ℂ) (N : ℕ) :
+    mathieuContinuedFractionTail q a s (N + 1) =
+      q ^ 2 / (s 0 - a - mathieuContinuedFractionTail q a (fun k => s (k + 1)) N) := by
+  simp only [mathieuContinuedFractionTail, List.range_succ_eq_map, List.foldr_cons, List.foldr_map]
 
 namespace ContinuedFractionTail
 
@@ -114,13 +114,13 @@ lemma fold_eq (L j : ℕ) (T : ℂ) (h : DenominatorsNonzero q a s L j T) :
         field_simp, div_div_eq_mul_div]
 
 /-- The truncations at level `j` with `L` more terms are `fold` of those at level `j + L`. -/
-lemma mathieuCFTail_add (L j N : ℕ) :
-    mathieuCFTail q a (fun k => s (j + k)) (N + L) =
-      fold q a s L j (mathieuCFTail q a (fun k => s (j + L + k)) N) := by
+lemma mathieuContinuedFractionTail_add (L j N : ℕ) :
+    mathieuContinuedFractionTail q a (fun k => s (j + k)) (N + L) =
+      fold q a s L j (mathieuContinuedFractionTail q a (fun k => s (j + L + k)) N) := by
   induction L generalizing j with
   | zero => simp [fold]
   | succ L ih =>
-    rw [show N + (L + 1) = N + L + 1 by ring, mathieuCFTail_succ, fold]
+    rw [show N + (L + 1) = N + L + 1 by ring, mathieuContinuedFractionTail_succ, fold]
     have e1 : (fun k => s (j + (k + 1))) = fun k => s (j + 1 + k) :=
       funext fun k => by rw [show j + (k + 1) = j + 1 + k by ring]
     have e2 : (fun k => s (j + 1 + L + k)) = fun k => s (j + (L + 1) + k) :=
@@ -196,11 +196,11 @@ open ContinuedFractionTail in
 DLMF 28.6.16–28.6.19): let `A` be a solution of `q (A_k + A_{k+2}) = (a - s_k) A_{k+1}` with
 `A_0 ≠ 0` and `A_k → 0`, where `|s_k| → ∞`. Then the truncations
 `q²/(s₀ - a - q²/(s₁ - a - ⋯))` converge to `-q A₁/A₀`. -/
-theorem tendsto_mathieuCFTail_of_tendsto_zero {q a : ℂ} {s A : ℕ → ℂ} (hq : q ≠ 0)
+theorem tendsto_mathieuContinuedFractionTail_of_tendsto_zero {q a : ℂ} {s A : ℕ → ℂ} (hq : q ≠ 0)
     (hrec : ∀ k, q * (A k + A (k + 2)) = (a - s k) * A (k + 1))
     (hA0 : A 0 ≠ 0) (hlim : Tendsto A atTop (𝓝 0))
     (hs : Tendsto (fun k => ‖s k‖) atTop atTop) :
-    Tendsto (fun N => mathieuCFTail q a s N) atTop (𝓝 (-(q * A 1 / A 0))) := by
+    Tendsto (fun N => mathieuContinuedFractionTail q a s N) atTop (𝓝 (-(q * A 1 / A 0))) := by
   have hq0 : 0 < ‖q‖ := norm_pos_iff.2 hq
   -- (a) the region where `|s_k - a| ≥ 4|q|`
   obtain ⟨K, hK⟩ : ∃ K, ∀ k ≥ K, 4 * ‖q‖ ≤ ‖s k - a‖ := by
@@ -270,10 +270,10 @@ theorem tendsto_mathieuCFTail_of_tendsto_zero {q a : ℂ} {s A : ℕ → ℂ} (h
   have hAne : ∀ k ≥ L₀, A k ≠ 0 := fun k hk => by
     obtain ⟨k', rfl⟩ : ∃ k', k = k' + 1 := ⟨k - 1, by omega⟩
     exact hne1 k' (by omega)
-  set T : ℕ → ℕ → ℂ := fun L N => mathieuCFTail q a (fun k => s (L + k)) N with hT
+  set T : ℕ → ℕ → ℂ := fun L N => mathieuContinuedFractionTail q a (fun k => s (L + k)) N with hT
   have hTsucc : ∀ L N, T L (N + 1) = q ^ 2 / (s L - a - T (L + 1) N) := by
     intro L N
-    simp only [hT, mathieuCFTail_succ, add_zero]
+    simp only [hT, mathieuContinuedFractionTail_succ, add_zero]
     congr 3
     funext k; rw [show L + (k + 1) = L + 1 + k by ring]
   -- (e), (f) the contraction region
@@ -284,7 +284,7 @@ theorem tendsto_mathieuCFTail_of_tendsto_zero {q a : ℂ} {s A : ℕ → ℂ} (h
   have hTb : ∀ N, ∀ L ≥ K, ‖T L N‖ ≤ ‖q‖ := by
     intro N
     induction N with
-    | zero => intro L _; simp [hT, mathieuCFTail]
+    | zero => intro L _; simp [hT, mathieuContinuedFractionTail]
     | succ N ih =>
       intro L hL
       rw [hTsucc, norm_div, norm_pow]
@@ -315,7 +315,7 @@ theorem tendsto_mathieuCFTail_of_tendsto_zero {q a : ℂ} {s A : ℕ → ℂ} (h
     induction N with
     | zero =>
       intro L hL
-      have hT0 : T L 0 = 0 := by simp [hT, mathieuCFTail]
+      have hT0 : T L 0 = 0 := by simp [hT, mathieuContinuedFractionTail]
       have hu0 : u L ≠ 0 := neg_ne_zero.2
         (div_ne_zero (mul_ne_zero hq (hAne (L + 1) (by omega))) (hAne L hL))
       rw [hT0, zero_sub, norm_neg, pow_zero, mul_one]
@@ -370,31 +370,33 @@ theorem tendsto_mathieuCFTail_of_tendsto_zero {q a : ℂ} {s A : ℕ → ℂ} (h
   rw [mul_div_mul_left _ _ hc, neg_div] at hlim2
   refine hlim2.congr' ?_
   filter_upwards [hgood] with N hN
-  have := mathieuCFTail_add (q := q) (a := a) (s := s) L₀ 0 N
+  have := mathieuContinuedFractionTail_add (q := q) (a := a) (s := s) L₀ 0 N
   simp only [zero_add] at this
   rw [Pi.div_apply, Function.comp_apply, Function.comp_apply, ← fold_eq _ _ _ hN]
   exact this.symm
 
 
 /-- With `q = 0` all truncations vanish. -/
-theorem mathieuCFTail_zero_left (a : ℂ) (s : ℕ → ℂ) (N : ℕ) : mathieuCFTail 0 a s N = 0 := by
+theorem mathieuContinuedFractionTail_zero_left (a : ℂ) (s : ℕ → ℂ) (N : ℕ) :
+    mathieuContinuedFractionTail 0 a s N = 0 := by
   cases N with
-  | zero => simp [mathieuCFTail]
-  | succ N => rw [mathieuCFTail_succ]; simp
+  | zero => simp [mathieuContinuedFractionTail]
+  | succ N => rw [mathieuContinuedFractionTail_succ]; simp
 
 /-- **The continued-fraction equation from a decaying solution**: if `A` solves
 `e₀ A₀ = q A₁`, `q (c_k A_k + A_{k+2}) = (a - s_k) A_{k+1}` with `c_k = 1` for `k ≥ n`, is not
 identically zero and tends to `0`, and `|s_k| → ∞`, then the finite continued fraction
-`mathieuCFHead q a e₀ c s n` (with nonzero intermediate values) is the limit of the negated tails
-`-q²/(s_n - a - q²/(s_{n+1} - a - ⋯))`. -/
-theorem tendsto_neg_mathieuCFTail_mathieuCFHead {q a e₀ : ℂ} {c s A : ℕ → ℂ} {n : ℕ}
+`mathieuContinuedFractionHead q a e₀ c s n` (with nonzero intermediate values) is the limit of the
+negated tails `-q²/(s_n - a - q²/(s_{n+1} - a - ⋯))`. -/
+theorem tendsto_neg_mathieuContinuedFractionTail_mathieuContinuedFractionHead {q a e₀ : ℂ}
+    {c s A : ℕ → ℂ} {n : ℕ}
     (hq : q ≠ 0) (h0 : e₀ * A 0 = q * A 1)
     (hrec : ∀ k, q * (c k * A k + A (k + 2)) = (a - s k) * A (k + 1))
     (hc : ∀ k, n ≤ k → c k = 1) (hA : ¬ ∀ k, A k = 0) (hlim : Tendsto A atTop (𝓝 0))
     (hs : Tendsto (fun k => ‖s k‖) atTop atTop)
-    (hE : ∀ k < n, mathieuCFHead q a e₀ c s k ≠ 0) :
-    Tendsto (fun N => -mathieuCFTail q a (fun k => s (n + k)) N) atTop
-      (𝓝 (mathieuCFHead q a e₀ c s n)) := by
+    (hE : ∀ k < n, mathieuContinuedFractionHead q a e₀ c s k ≠ 0) :
+    Tendsto (fun N => -mathieuContinuedFractionTail q a (fun k => s (n + k)) N) atTop
+      (𝓝 (mathieuContinuedFractionHead q a e₀ c s n)) := by
   -- `A₀ ≠ 0`
   have hA0 : A 0 ≠ 0 := by
     intro h00
@@ -412,13 +414,14 @@ theorem tendsto_neg_mathieuCFTail_mathieuCFHead {q a e₀ : ℂ} {c s A : ℕ �
         exact (mul_eq_zero.1 hr).resolve_left hq
     exact (this k).1
   -- the head
-  have hhead : ∀ k ≤ n, A k ≠ 0 ∧ mathieuCFHead q a e₀ c s k = q * A (k + 1) / A k := by
+  have hhead : ∀ k ≤ n, A k ≠ 0 ∧ mathieuContinuedFractionHead q a e₀ c s k = q *
+      A (k + 1) / A k := by
     intro k
     induction k with
     | zero =>
       intro _
       refine ⟨hA0, ?_⟩
-      simp only [mathieuCFHead]
+      simp only [mathieuContinuedFractionHead]
       field_simp
       linear_combination h0
     | succ k ih =>
@@ -429,7 +432,7 @@ theorem tendsto_neg_mathieuCFTail_mathieuCFHead {q a e₀ : ℂ} {c s A : ℕ �
         apply hE k (by omega)
         rw [h2, h, mul_zero, zero_div]
       refine ⟨hne, ?_⟩
-      simp only [mathieuCFHead]
+      simp only [mathieuContinuedFractionHead]
       rw [h2]
       have hr := hrec k
       rw [show k + 1 + 1 = k + 2 by ring]
@@ -437,7 +440,8 @@ theorem tendsto_neg_mathieuCFTail_mathieuCFHead {q a e₀ : ℂ} {c s A : ℕ �
       linear_combination -hr
   obtain ⟨hAn, hHn⟩ := hhead n le_rfl
   rw [hHn]
-  have ht := tendsto_mathieuCFTail_of_tendsto_zero (q := q) (a := a) (s := fun k => s (n + k))
+  have ht := tendsto_mathieuContinuedFractionTail_of_tendsto_zero (q := q) (a := a)
+      (s := fun k => s (n + k))
     (A := fun k => A (n + k)) hq (fun k => by
       have := hrec (n + k)
       rw [hc (n + k) (by omega), one_mul] at this

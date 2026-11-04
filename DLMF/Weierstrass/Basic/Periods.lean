@@ -190,6 +190,6 @@ def scalePeriodPairLatticeEquiv (c : ℂ) (hc : c ≠ 0) (L : PeriodPair) :
 def squareHalfPeriods : HalfPeriods := ⟨1, I, one_ne_zero, by simp⟩
 
 /-- The square lattice supplies a complex period pair. -/
-instance : Nonempty PeriodPair := ⟨squareHalfPeriods.periodPair⟩
+instance instNonemptyPeriodPair : Nonempty PeriodPair := ⟨squareHalfPeriods.periodPair⟩
 
 end DLMF.Weierstrass

@@ -18,8 +18,8 @@ both variables. These are used for the Appell functions.
 
 ## Main results
 
-* `norm_poch_le_mul_norm_poch`, `norm_poch_le_mul_factorial`, `factorial_le_mul_norm_poch`:
-  subexponential Pochhammer bounds.
+* `norm_pochhammer_le_mul_norm_pochhammer`, `norm_pochhammer_le_mul_factorial`,
+  `factorial_le_mul_norm_pochhammer`: subexponential Pochhammer bounds.
 * `hasSum_and_analyticOnNhd_doubleSeries`: a locally dominated double power series converges
   and its sum is jointly analytic.
 * `exists_summable_doubleSeries_of_bidisc`, `exists_summable_doubleSeries_of_diamond`,
@@ -49,16 +49,18 @@ theorem exists_one_lt_pow_le {σ : ℝ} (hσ : 1 < σ) (k : ℕ) : ∃ τ : ℝ,
 
 /-- Pochhammer symbols grow at most subexponentially faster than one with a regular
 parameter: `‖(μ)ₘ‖ ≤ C σ^m ‖(ν)ₘ‖` for every `σ > 1`. -/
-theorem norm_poch_le_mul_norm_poch (μ ν : ℂ) (hν : ∀ k : ℕ, ν ≠ -k) {σ : ℝ} (hσ : 1 < σ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ m : ℕ, ‖poch μ m‖ ≤ C * σ ^ m * ‖poch ν m‖ := by
+theorem norm_pochhammer_le_mul_norm_pochhammer (μ ν : ℂ) (hν : ∀ k : ℕ, ν ≠ -k)
+    {σ : ℝ} (hσ : 1 < σ) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ m : ℕ, ‖pochhammer μ m‖ ≤ C * σ ^ m * ‖pochhammer ν m‖ := by
   obtain ⟨K, hK⟩ := exists_nat_ge ((‖μ‖ + σ * ‖ν‖) / (σ - 1))
-  have hpos : ∀ j, 0 < ‖poch ν j‖ := fun j => norm_pos_iff.mpr (poch_ne_zero_of_not_neg_nat hν j)
-  set C := ∑ j ∈ Finset.range (K + 1), ‖poch μ j‖ / ‖poch ν j‖ with hC
+  have hpos : ∀ j, 0 < ‖pochhammer ν j‖ := fun j =>
+      norm_pos_iff.mpr (pochhammer_ne_zero_of_not_neg_nat hν j)
+  set C := ∑ j ∈ Finset.range (K + 1), ‖pochhammer μ j‖ / ‖pochhammer ν j‖ with hC
   have hC0 : 0 ≤ C := Finset.sum_nonneg fun j _ => div_nonneg (norm_nonneg _) (hpos j).le
-  have hsmall : ∀ j ≤ K, ‖poch μ j‖ ≤ C * ‖poch ν j‖ := by
+  have hsmall : ∀ j ≤ K, ‖pochhammer μ j‖ ≤ C * ‖pochhammer ν j‖ := by
     intro j hj
-    have h1 : ‖poch μ j‖ / ‖poch ν j‖ ≤ C :=
-      Finset.single_le_sum (f := fun j => ‖poch μ j‖ / ‖poch ν j‖)
+    have h1 : ‖pochhammer μ j‖ / ‖pochhammer ν j‖ ≤ C :=
+      Finset.single_le_sum (f := fun j => ‖pochhammer μ j‖ / ‖pochhammer ν j‖)
         (fun j _ => div_nonneg (norm_nonneg _) (hpos j).le)
         (Finset.mem_range.mpr (Nat.lt_succ_of_le hj))
     rwa [div_le_iff₀ (hpos j)] at h1
@@ -78,30 +80,30 @@ theorem norm_poch_le_mul_norm_poch (μ ν : ℂ) (hν : ∀ k : ℕ, ν ≠ -k) 
   | zero => simpa using hsmall 0 (Nat.zero_le _)
   | succ m ih =>
     by_cases hm : m + 1 ≤ K
-    · calc ‖poch μ (m + 1)‖ ≤ C * ‖poch ν (m + 1)‖ := hsmall _ hm
-        _ ≤ C * σ ^ (m + 1) * ‖poch ν (m + 1)‖ := by
+    · calc ‖pochhammer μ (m + 1)‖ ≤ C * ‖pochhammer ν (m + 1)‖ := hsmall _ hm
+        _ ≤ C * σ ^ (m + 1) * ‖pochhammer ν (m + 1)‖ := by
           have h1 : C ≤ C * σ ^ (m + 1) := le_mul_of_one_le_right hC0 (one_le_pow₀ hσ.le)
           exact mul_le_mul_of_nonneg_right h1 (norm_nonneg _)
-    · rw [poch_succ, poch_succ, norm_mul, norm_mul]
+    · rw [pochhammer_succ, pochhammer_succ, norm_mul, norm_mul]
       have := hstep m (by omega)
-      calc ‖poch μ m‖ * ‖μ + m‖ ≤ (C * σ ^ m * ‖poch ν m‖) * (σ * ‖ν + m‖) :=
+      calc ‖pochhammer μ m‖ * ‖μ + m‖ ≤ (C * σ ^ m * ‖pochhammer ν m‖) * (σ * ‖ν + m‖) :=
             mul_le_mul ih this (norm_nonneg _) (by positivity)
-        _ = C * σ ^ (m + 1) * (‖poch ν m‖ * ‖ν + m‖) := by ring
+        _ = C * σ ^ (m + 1) * (‖pochhammer ν m‖ * ‖ν + m‖) := by ring
 
 /-- `‖(μ)ₘ‖ ≤ C σ^m m!` for every `σ > 1`. -/
-theorem norm_poch_le_mul_factorial (μ : ℂ) {σ : ℝ} (hσ : 1 < σ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ m : ℕ, ‖poch μ m‖ ≤ C * σ ^ m * (m ! : ℝ) := by
-  obtain ⟨C, hC0, hC⟩ := norm_poch_le_mul_norm_poch μ 1 (fun k h => by
+theorem norm_pochhammer_le_mul_factorial (μ : ℂ) {σ : ℝ} (hσ : 1 < σ) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ m : ℕ, ‖pochhammer μ m‖ ≤ C * σ ^ m * (m ! : ℝ) := by
+  obtain ⟨C, hC0, hC⟩ := norm_pochhammer_le_mul_norm_pochhammer μ 1 (fun k h => by
     have := congrArg Complex.re h; simp at this; linarith [(k.cast_nonneg : (0 : ℝ) ≤ k)]) hσ
   refine ⟨C, hC0, fun m => ?_⟩
-  simpa [poch_nat_one, Complex.norm_natCast] using hC m
+  simpa [pochhammer_nat_one, Complex.norm_natCast] using hC m
 
 /-- `m! ≤ C σ^m ‖(ν)ₘ‖` for a regular `ν` and every `σ > 1`. -/
-theorem factorial_le_mul_norm_poch (ν : ℂ) (hν : ∀ k : ℕ, ν ≠ -k) {σ : ℝ} (hσ : 1 < σ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ m : ℕ, (m ! : ℝ) ≤ C * σ ^ m * ‖poch ν m‖ := by
-  obtain ⟨C, hC0, hC⟩ := norm_poch_le_mul_norm_poch 1 ν hν hσ
+theorem factorial_le_mul_norm_pochhammer (ν : ℂ) (hν : ∀ k : ℕ, ν ≠ -k) {σ : ℝ} (hσ : 1 < σ) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ m : ℕ, (m ! : ℝ) ≤ C * σ ^ m * ‖pochhammer ν m‖ := by
+  obtain ⟨C, hC0, hC⟩ := norm_pochhammer_le_mul_norm_pochhammer 1 ν hν hσ
   refine ⟨C, hC0, fun m => ?_⟩
-  simpa [poch_nat_one, Complex.norm_natCast] using hC m
+  simpa [pochhammer_nat_one, Complex.norm_natCast] using hC m
 
 /-- A single binomial term is bounded by the full binomial power. -/
 lemma choose_mul_pow_mul_pow_le {u v : ℝ} (hu : 0 ≤ u) (hv : 0 ≤ v) (m n : ℕ) :

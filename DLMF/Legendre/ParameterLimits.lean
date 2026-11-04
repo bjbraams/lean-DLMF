@@ -213,7 +213,7 @@ theorem ferrersP_negative_order_parameter_limit (ν : ℂ) (m : ℕ) {x : ℝ} (
   have hc : Continuous fun v : ℂ => ferrersP v (-m) x := by
     unfold ferrersP
     exact continuous_const.mul
-        (differentiable_regularizedGaussHG_comp (A := fun v => v+1) (B := fun v => -v)
+        (differentiable_regularizedGaussHypergeometric_comp (A := fun v => v+1) (B := fun v => -v)
       (C := fun _ => 1-(-(m:ℂ))) (by fun_prop) (by fun_prop) (by fun_prop) ht).continuous
   refine ((hc.tendsto ν).mono_left nhdsWithin_le_nhds).congr' ?_
   filter_upwards [eventually_affine_ne_neg_nat one_ne_zero (-(m:ℂ)+1) ν] with v hv
@@ -229,7 +229,7 @@ theorem associatedP_negative_order_parameter_limit (ν : ℂ) (m : ℕ) {z : ℂ
   have hc : Continuous fun v : ℂ => associatedP v (-m) z := by
     unfold associatedP
     exact continuous_const.mul
-        (differentiable_regularizedGaussHG_comp (A := fun v => v+1) (B := fun v => -v)
+        (differentiable_regularizedGaussHypergeometric_comp (A := fun v => v+1) (B := fun v => -v)
       (C := fun _ => 1-(-(m:ℂ))) (by fun_prop) (by fun_prop) (by fun_prop) ht).continuous
   refine ((hc.tendsto ν).mono_left nhdsWithin_le_nhds).congr' ?_
   filter_upwards [eventually_affine_ne_neg_nat one_ne_zero (-(m:ℂ)+1) ν] with v hv

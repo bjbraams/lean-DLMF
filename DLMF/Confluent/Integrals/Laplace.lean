@@ -91,7 +91,7 @@ theorem deriv_regularizedHGFun_shift {a b z : ℂ} (ha : a ≠ 1) :
       (n + 1 : ℂ) * regularizedHGFunCoeff {a - 1} {b - 1} (n + 1) =
         (a - 1) * regularizedHGFunCoeff {a} {b} n := by
     have hn : (n + 1 : ℂ) ≠ 0 := by exact_mod_cast Nat.succ_ne_zero n
-    rw [regularizedHGFunCoeff_singleton, regularizedHGFunCoeff_singleton, poch_succ_left]
+    rw [regularizedHGFunCoeff_singleton, regularizedHGFunCoeff_singleton, pochhammer_succ_left]
     simp only [Nat.factorial_succ, Nat.cast_mul, Nat.cast_add, Nat.cast_one]
     rw [show (b - 1) + (n + 1) = b + n by ring,
       show a - 1 + 1 = a by ring]
@@ -114,7 +114,7 @@ theorem laplace_regularizedHGFun_of_norm_lt {a b c k z : ℂ}
     (hb : 0 < b.re) (hzpos : 0 < z.re) (hk : ‖k‖ < z.re) :
     (∫ t : ℝ in Set.Ioi 0,
       exp (-z * t) * (t : ℂ) ^ (b - 1) * regularizedHGFun {a} {c} (k * t)) =
-      Gamma b * z ^ (-b) * DLMF.Hypergeometric.regularizedGaussHG a b c (k / z) := by
+      Gamma b * z ^ (-b) * DLMF.Hypergeometric.regularizedGaussHypergeometric a b c (k / z) := by
   let e : ℕ → ℂ := fun n => regularizedHGFunCoeff {a} {c} n * k ^ n
   let F : ℕ → ℝ → ℂ := fun n t => e n * ((t : ℂ) ^ (b + n - 1) * exp (-(z * t)))
   let r : ℝ := z.re⁻¹
@@ -145,7 +145,7 @@ theorem laplace_regularizedHGFun_of_norm_lt {a b c k z : ℂ}
       Real.integral_rpow_mul_exp_neg_mul_Ioi (by positivity) hzpos]
     simp only [r, one_div]
   have hGnorm (n : ℕ) : Real.Gamma (b.re + n) =
-      ‖poch (b.re : ℂ) n‖ * Real.Gamma b.re := by
+      ‖pochhammer (b.re : ℂ) n‖ * Real.Gamma b.re := by
     have hp : ∀ k : ℕ, (b.re : ℂ) ≠ -(k : ℂ) := not_neg_nat_of_re_pos (by simpa using hb)
     have hG := (div_eq_iff (Gamma_ne_zero hp)).mp
       (Gamma_add_nat_div_Gamma_eq (n := n) (b.re : ℂ) hp)
@@ -156,7 +156,7 @@ theorem laplace_regularizedHGFun_of_norm_lt {a b c k z : ℂ}
       Real.norm_of_nonneg (Real.Gamma_pos_of_pos hb).le] at h
     exact h
   have hsum : Summable (fun n => ∫ t : ℝ in Set.Ioi 0, ‖F n t‖) := by
-    have h := DLMF.Hypergeometric.summable_norm_regularizedGaussHGFun_term
+    have h := DLMF.Hypergeometric.summable_norm_regularizedGaussHypergeometricFun_term
       a (b.re : ℂ) c (z := ((r * ‖k‖ : ℝ) : ℂ))
         (by simpa only [norm_real, Real.norm_of_nonneg (mul_nonneg hrpos.le (norm_nonneg k))] using
             hrlt)
@@ -175,7 +175,7 @@ theorem laplace_regularizedHGFun_of_norm_lt {a b c k z : ℂ}
     have hGb := (div_eq_iff (Gamma_ne_zero hp)).mp (Gamma_add_nat_div_Gamma_eq (n := n) b hp)
     rw [hGb, show -(b + (n : ℂ)) = -b + -(n : ℂ) by ring, cpow_add _ _ hz0]
     simp only [cpow_neg, cpow_natCast, e, regularizedHGFunCoeff_singleton, div_pow]
-    simp only [poch]
+    simp only [pochhammer]
     ring
   have ht (t : ℝ) (ht : 0 < t) : (∑' n, F n t) =
       exp (-z * t) * (t : ℂ) ^ (b - 1) * regularizedHGFun {a} {c} (k * t) := by
@@ -196,8 +196,10 @@ theorem laplace_regularizedHGFun_of_norm_lt {a b c k z : ℂ}
     _ = ∑' n, ∫ t : ℝ in Set.Ioi 0, F n t := hs.tsum_eq.symm
     _ = _ := by
       simp_rw [hI]
-      rw [tsum_mul_left, DLMF.Hypergeometric.regularizedGaussHG_eq_regularizedGaussHGFun a b c harg,
-        DLMF.Hypergeometric.regularizedGaussHGFun_eq_tsum]
+      rw [tsum_mul_left,
+        Hypergeometric.regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun
+          a b c harg,
+        DLMF.Hypergeometric.regularizedGaussHypergeometricFun_eq_tsum]
 
 /-- The transformed argument stays on the Gauss cut plane throughout the Laplace half-plane. -/
 theorem kummerLaplace_argument_mem_cutPlane {k z : ℂ}
@@ -223,12 +225,13 @@ theorem laplace_regularizedHGFun {a b c k z : ℂ}
     (hb : 0 < b.re) (hz : z.re > k.re) (hz0 : 0 < z.re) :
     ∫ t : ℝ in Set.Ioi 0,
         exp (-z * t) * (t : ℂ) ^ (b - 1) * regularizedHGFun {a} {c} (k * t) =
-      Gamma b * z ^ (-b) * DLMF.Hypergeometric.regularizedGaussHG a b c (k / z) := by
+      Gamma b * z ^ (-b) * DLMF.Hypergeometric.regularizedGaussHypergeometric a b c (k / z) := by
   let V : Set ℂ := {w | max 0 k.re < w.re}
   have hVo : IsOpen V := isOpen_lt continuous_const continuous_re
   let L (w : ℂ) := ∫ t : ℝ in Set.Ioi 0,
     exp (-w * t) * (t : ℂ) ^ (b - 1) * regularizedHGFun {a} {c} (k * t)
-  let R (w : ℂ) := Gamma b * w ^ (-b) * DLMF.Hypergeometric.regularizedGaussHG a b c (k / w)
+  let R (w : ℂ) := Gamma b * w ^ (-b) *
+      DLMF.Hypergeometric.regularizedGaussHypergeometric a b c (k / w)
   have hL : AnalyticOnNhd ℂ L V :=
     (differentiableOn_laplace_regularizedHGFun a b c k hb).analyticOnNhd hVo
   have hR : AnalyticOnNhd ℂ R V := by
@@ -238,7 +241,7 @@ theorem laplace_regularizedHGFun {a b c k z : ℂ}
     have hwk : k.re < w.re := (le_max_right 0 k.re).trans_lt hw
     have hwN : w ≠ 0 := by intro h; simp [h] at hw0
     have hpow := differentiableAt_id.cpow (differentiableAt_const (-b)) (Or.inl hw0)
-    have hG := (DLMF.Hypergeometric.differentiableAt_regularizedGaussHG a b c
+    have hG := (DLMF.Hypergeometric.differentiableAt_regularizedGaussHypergeometric a b c
       (kummerLaplace_argument_mem_cutPlane hwk hw0)).comp w
       ((differentiableAt_const k).div differentiableAt_id hwN)
     exact ((hpow.const_mul (Gamma b)).mul hG).differentiableWithinAt
@@ -272,8 +275,9 @@ theorem laplace_regularizedHGFun_self {a b z : ℂ} (hb : 0 < b.re) (hz : 1 < z.
   have h := laplace_regularizedHGFun_of_norm_lt (a := a) (b := b) (c := b) (k := 1)
     hb (by linarith) (by simpa using hz)
   simp only [one_mul, one_div] at h
-  rw [h, DLMF.Hypergeometric.regularizedGaussHG_eq_regularizedGaussHGFun a b b harg,
-    DLMF.Hypergeometric.regularizedGaussHGFun_eq_div_Gamma hc,
+  rw [h, DLMF.Hypergeometric.regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun a b
+      b harg,
+    DLMF.Hypergeometric.regularizedGaussHypergeometricFun_eq_div_Gamma hc,
     ordinaryHypergeometric_eq_one_sub_neg_cpow
       (fun k hk => hc k (by linear_combination hk)) harg]
   field [Gamma_ne_zero hc]
@@ -301,7 +305,8 @@ theorem summable_kummer_gamma_moments (a c : ℂ) {b : ℝ} (hb : 0 < b)
     have he : (fun n : ℕ => ‖regularizedHGFunCoeff {-(m : ℂ)} {c} (n + (m + 1))‖ *
         Real.Gamma (b + (n + (m + 1) : ℕ))) = fun _ : ℕ => 0 := by
       funext n
-      simp [regularizedHGFunCoeff_singleton, poch_neg_nat_eq_zero (show m < n + (m + 1) by omega)]
+      simp [regularizedHGFunCoeff_singleton,
+          pochhammer_neg_nat_eq_zero (show m < n + (m + 1) by omega)]
     rw [he]
     exact summable_zero
 
@@ -341,7 +346,7 @@ theorem mellin_regularizedHGFun_exp {a b c : ℂ}
     simp_rw [hInorm]
     exact summable_kummer_gamma_moments a c hb h
   have hI (n : ℕ) : (∫ t : ℝ in Set.Ioi 0, F n t) =
-      Gamma b * (poch a n * poch b n / (n.factorial * Gamma (c + n))) := by
+      Gamma b * (pochhammer a n * pochhammer b n / (n.factorial * Gamma (c + n))) := by
     rw [integral_const_mul]
     have hi := DLMF.Gamma.integral_cpow_mul_exp_neg_mul_Ioi (hbn n) (z := 1) (by simp)
     simp only [one_mul, one_cpow, mul_one] at hi
@@ -379,7 +384,7 @@ theorem laplace_kummerU {a b c z : ℂ}
     ∫ t : ℝ in Set.Ioi 0,
         exp (-z * t) * (t : ℂ) ^ (b - 1) * kummerU a c t =
       Gamma b * Gamma (b - c + 1) * z ^ (-b) *
-        DLMF.Hypergeometric.regularizedGaussHG a b (a + b - c + 1) (1 - z⁻¹) := by
+        DLMF.Hypergeometric.regularizedGaussHypergeometric a b (a + b - c + 1) (1 - z⁻¹) := by
   have hm := (laplace_kummerU_gauss (a := a) hb hbc hz).2
   change (∫ t : ℝ in Set.Ioi 0, tricomiLaplaceKernel a b c z t) = _
   rw [hm]
@@ -387,8 +392,9 @@ theorem laplace_kummerU {a b c z : ℂ}
   have hw : 1 - z ∈ DLMF.Hypergeometric.cutPlane := by
     change 1 - (1 - z) ∈ slitPlane
     rw [sub_sub_cancel]; exact Or.inl hz
-  have hp := DLMF.Hypergeometric.regularizedGaussHG_pfaff b (b - c + 1) (a + b - c + 1) hw
-  have hs := DLMF.Hypergeometric.regularizedGaussHG_symm b a (a + b - c + 1)
+  have hp := DLMF.Hypergeometric.regularizedGaussHypergeometric_pfaff b (b - c + 1)
+      (a + b - c + 1) hw
+  have hs := DLMF.Hypergeometric.regularizedGaussHypergeometric_symm b a (a + b - c + 1)
     (DLMF.Hypergeometric.div_sub_one_mem_cutPlane hw)
   rw [show (1 - z) / (1 - z - 1) = 1 - z⁻¹ by field_simp [hz0]; ring] at hp hs
   rw [sub_sub_cancel, show (a + b - c + 1) - (b - c + 1) = a by ring] at hp

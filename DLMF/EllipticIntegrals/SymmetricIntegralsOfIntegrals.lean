@@ -22,18 +22,18 @@ Mellin transforms on `(0, 1)` of the complete integrals `R_F(0, t, 1)`, `R_G(0, 
 
 ## Main results
 
-* `integral_cpow_mul_symEllIntRF_zero`, `integral_cpow_mul_symEllIntRG_zero`,
-  `integral_cpow_mul_symEllIntRD_zero`, `integral_cpow_mul_symEllIntR_two`: the Mellin
-  transforms (DLMF 19.28.1–19.28.4).
-* `integral_Ioi_symEllIntRD`: `∫_z^∞ R_D(x, y, t) dt = 6 R_F(x, y, z)` (DLMF 19.28.5).
-* `integral_symEllIntRD_interp`: `R_J` as an integral of `R_D` (DLMF 19.28.6).
-* `integral_symEllIntRJ_sq`, `integral_symEllIntRJ_scale`: DLMF 19.28.7, 19.28.8.
-* `integral_symEllIntRF_sin_cos`: DLMF 19.28.9, with the added hypothesis `x + y ≤ π/2`.
-* `integral_symEllIntRF_cosh`: DLMF 19.28.10.
+* `integral_cpow_mul_symmetricEllipticRF_zero`, `integral_cpow_mul_symmetricEllipticRG_zero`,
+  `integral_cpow_mul_symmetricEllipticRD_zero`, `integral_cpow_mul_symmetricEllipticR_two`: the
+  Mellin transforms (DLMF 19.28.1–19.28.4).
+* `integral_Ioi_symmetricEllipticRD`: `∫_z^∞ R_D(x, y, t) dt = 6 R_F(x, y, z)` (DLMF 19.28.5).
+* `integral_symmetricEllipticRD_interp`: `R_J` as an integral of `R_D` (DLMF 19.28.6).
+* `integral_symmetricEllipticRJ_sq`, `integral_symmetricEllipticRJ_scale`: DLMF 19.28.7, 19.28.8.
+* `integral_symmetricEllipticRF_sin_cos`: DLMF 19.28.9, with the added hypothesis `x + y ≤ π/2`.
+* `integral_symmetricEllipticRF_cosh`: DLMF 19.28.10.
 
 ## Implementation notes
 
-All functions are DLMF's (`DLMF.EllipticIntegrals.symEllIntRF` etc.). The integrals are
+All functions are DLMF's (`DLMF.EllipticIntegrals.symmetricEllipticRF` etc.). The integrals are
 Lebesgue integrals; each left side is absolutely convergent under the stated hypotheses (the
 integrands have at worst logarithmic or integrable power singularities), so the Lean statements
 carry DLMF's meaning. The standing assumptions `ℜσ > 0` and `x, y, z, p > 0` (19.28.p1,
@@ -68,41 +68,42 @@ namespace DLMF.EllipticIntegrals
 
 /-- DLMF 19.28.1: `∫₀¹ t^{σ-1} R_F(0, t, 1) dt = (1/2) B(σ, 1/2)²`, `ℜσ > 0`. -/
 @[dlmf 19.28.E1]
-theorem integral_cpow_mul_symEllIntRF_zero {σ : ℂ} (hσ : 0 < σ.re) :
-    ∫ t in Ioo (0 : ℝ) 1, (t : ℂ) ^ (σ - 1) * symEllIntRF 0 t 1 =
+theorem integral_cpow_mul_symmetricEllipticRF_zero {σ : ℂ} (hσ : 0 < σ.re) :
+    ∫ t in Ioo (0 : ℝ) 1, (t : ℂ) ^ (σ - 1) * symmetricEllipticRF 0 t 1 =
       1 / 2 * betaIntegral σ (1 / 2) ^ 2 := by
   sorry
 
 /-- DLMF 19.28.2: `∫₀¹ t^{σ-1} R_G(0, t, 1) dt = σ/(4σ + 2) B(σ, 1/2)²`, `ℜσ > 0`. -/
 @[dlmf 19.28.E2]
-theorem integral_cpow_mul_symEllIntRG_zero {σ : ℂ} (hσ : 0 < σ.re) :
-    ∫ t in Ioo (0 : ℝ) 1, (t : ℂ) ^ (σ - 1) * symEllIntRG 0 t 1 =
+theorem integral_cpow_mul_symmetricEllipticRG_zero {σ : ℂ} (hσ : 0 < σ.re) :
+    ∫ t in Ioo (0 : ℝ) 1, (t : ℂ) ^ (σ - 1) * symmetricEllipticRG 0 t 1 =
       σ / (4 * σ + 2) * betaIntegral σ (1 / 2) ^ 2 := by
   sorry
 
 /-- DLMF 19.28.3: `∫₀¹ t^{σ-1} (1 - t) R_D(0, t, 1) dt = 3/(4σ + 2) B(σ, 1/2)²`, `ℜσ > 0`. -/
 @[dlmf 19.28.E3]
-theorem integral_cpow_mul_symEllIntRD_zero {σ : ℂ} (hσ : 0 < σ.re) :
-    ∫ t in Ioo (0 : ℝ) 1, (t : ℂ) ^ (σ - 1) * (1 - t) * symEllIntRD 0 t 1 =
+theorem integral_cpow_mul_symmetricEllipticRD_zero {σ : ℂ} (hσ : 0 < σ.re) :
+    ∫ t in Ioo (0 : ℝ) 1, (t : ℂ) ^ (σ - 1) * (1 - t) * symmetricEllipticRD 0 t 1 =
       3 / (4 * σ + 2) * betaIntegral σ (1 / 2) ^ 2 := by
   sorry
 
 /-- DLMF 19.28.4: for real `a`, `b₁`, `b₂` with `c = b₁ + b₂ > 0` and `ℜσ > max(0, a - b₂)`,
 `∫₀¹ t^{σ-1} (1 - t)^{c-1} R_{-a}(b₁, b₂; t, 1) dt =
 Γ(c) Γ(σ) Γ(σ + b₂ - a) / (Γ(σ + c - a) Γ(σ + b₂))`. Here `R_{-a}` is DLMF's
-`symEllIntR a` (on `t ∈ (0, 1)` Carlson's `R`-function). -/
+`symmetricEllipticR a` (on `t ∈ (0, 1)` Carlson's `R`-function). -/
 @[dlmf 19.28.E4]
-theorem integral_cpow_mul_symEllIntR_two {a b₁ b₂ : ℝ} {σ : ℂ} (hc : 0 < b₁ + b₂)
+theorem integral_cpow_mul_symmetricEllipticR_two {a b₁ b₂ : ℝ} {σ : ℂ} (hc : 0 < b₁ + b₂)
     (hσ : max 0 (a - b₂) < σ.re) :
     ∫ t in Ioo (0 : ℝ) 1, (t : ℂ) ^ (σ - 1) * ((1 - t : ℝ) : ℂ) ^ ((b₁ + b₂ : ℝ) - 1 : ℂ) *
-        symEllIntR a ![(b₁ : ℂ), b₂] ![(t : ℂ), 1] =
+        symmetricEllipticR a ![(b₁ : ℂ), b₂] ![(t : ℂ), 1] =
       Gamma (b₁ + b₂ : ℝ) * Gamma σ * Gamma (σ + b₂ - a) /
         (Gamma (σ + (b₁ + b₂ : ℝ) - a) * Gamma (σ + b₂)) := by
   sorry
 
 /-- For positive real nodes, `R_D` is real and nonnegative, as a positive Carlson average. -/
-lemma symEllIntRD_real_nonneg {x y z : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z) :
-    symEllIntRD x y z = ((symEllIntRD x y z).re : ℂ) ∧ 0 ≤ (symEllIntRD x y z).re := by
+lemma symmetricEllipticRD_real_nonneg {x y z : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z) :
+    symmetricEllipticRD x y z = ((symmetricEllipticRD x y z).re : ℂ) ∧ 0 ≤
+        (symmetricEllipticRD x y z).re := by
   have hb : (![1 / 2, 1 / 2, 3 / 2] : Fin 3 → ℝ) ∈ ProbabilityTheory.mvRealBetaDomain := by
     intro i; fin_cases i <;> norm_num
   have hv : ∀ i : Fin 3, 0 < (![x, y, z] : Fin 3 → ℝ) i := by
@@ -113,8 +114,9 @@ lemma symEllIntRD_real_nonneg {x y z : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < 
   have hparams : (fun i => ((![1 / 2, 1 / 2, 3 / 2] : Fin 3 → ℝ) i : ℂ)) =
       ![1 / 2, 1 / 2, 3 / 2] := by funext i; fin_cases i <;> norm_num
   rw [hnodes, hparams] at H
-  rw [symEllIntRD_eq_symEllIntR (ofReal_mem_slitPlane.mpr hx) (ofReal_mem_slitPlane.mpr hy)
-    (ofReal_mem_slitPlane.mpr hz), symEllIntR_of_mem _ _
+  rw [symmetricEllipticRD_eq_symmetricEllipticR (ofReal_mem_slitPlane.mpr hx)
+      (ofReal_mem_slitPlane.mpr hy)
+    (ofReal_mem_slitPlane.mpr hz), symmetricEllipticR_of_mem _ _
       (vec3_mem_carlsonRSlitDomain (ofReal_mem_slitPlane.mpr hx) (ofReal_mem_slitPlane.mpr hy)
         (ofReal_mem_slitPlane.mpr hz)), show (-(3 / 2) : ℂ) = ((-3 / 2 : ℝ) : ℂ) by push_cast; ring,
     ← H]
@@ -122,8 +124,8 @@ lemma symEllIntRD_real_nonneg {x y z : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < 
   exact ⟨trivial, (Carlson.carlsonRReal_pos (-3 / 2) hb hv).le⟩
 
 /-- With fixed positive first two nodes, the Carlson asymptotic formula implies `R_F → 0`. -/
-lemma tendsto_symEllIntRF_atTop {x y : ℝ} (hx : 0 < x) (hy : 0 < y) :
-    Tendsto (fun t : ℝ => symEllIntRF x y t) atTop (𝓝 0) := by
+lemma tendsto_symmetricEllipticRF_atTop {x y : ℝ} (hx : 0 < x) (hy : 0 < y) :
+    Tendsto (fun t : ℝ => symmetricEllipticRF x y t) atTop (𝓝 0) := by
   let c := 4 / (Real.sqrt x + Real.sqrt y)
   have hc : 0 < c := by dsimp only [c]; positivity
   have hlog : Tendsto (fun u : ℝ => Real.log u / u) atTop (𝓝 0) :=
@@ -141,47 +143,48 @@ lemma tendsto_symEllIntRF_atTop {x y : ℝ} (hx : 0 < x) (hy : 0 < y) :
   have Hrf := (Carlson.isEquivalent_carlsonRF_atTop hx hy).symm.tendsto_nhds HC
   apply Hrf.congr'
   filter_upwards [eventually_gt_atTop (0 : ℝ)] with t ht
-  exact (symEllIntRF_eq_carlsonRF (ofReal_mem_slitPlane.mpr hx)
+  exact (symmetricEllipticRF_eq_carlsonRF (ofReal_mem_slitPlane.mpr hx)
     (ofReal_mem_slitPlane.mpr hy) (ofReal_mem_slitPlane.mpr ht)).symm
 
 /-- DLMF 19.28.5: `∫_z^∞ R_D(x, y, t) dt = 6 R_F(x, y, z)` for `x, y, z > 0`. -/
 @[dlmf 19.28.E5]
-theorem integral_Ioi_symEllIntRD {x y z : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z) :
-    ∫ t in Ioi z, symEllIntRD x y t = 6 * symEllIntRF x y z := by
-  have hderiv : ∀ t ∈ Ici z, HasDerivAt (fun s : ℝ => (symEllIntRF x y s).re)
-      (-(1 / 6) * (symEllIntRD x y t).re) t := by
+theorem integral_Ioi_symmetricEllipticRD {x y z : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z) :
+    ∫ t in Ioi z, symmetricEllipticRD x y t = 6 * symmetricEllipticRF x y z := by
+  have hderiv : ∀ t ∈ Ici z, HasDerivAt (fun s : ℝ => (symmetricEllipticRF x y s).re)
+      (-(1 / 6) * (symmetricEllipticRD x y t).re) t := by
     intro t ht
-    have H := (hasDerivAt_symEllIntRF_right (ofReal_mem_slitPlane.mpr hx)
+    have H := (hasDerivAt_symmetricEllipticRF_right (ofReal_mem_slitPlane.mpr hx)
       (ofReal_mem_slitPlane.mpr hy) (ofReal_mem_slitPlane.mpr (hz.trans_le ht))).real_of_complex
     convert H using 1
     simp [mul_re]
-  have hnonpos : ∀ t ∈ Ioi z, -(1 / 6) * (symEllIntRD x y t).re ≤ 0 := by
+  have hnonpos : ∀ t ∈ Ioi z, -(1 / 6) * (symmetricEllipticRD x y t).re ≤ 0 := by
     intro t ht
     exact mul_nonpos_of_nonpos_of_nonneg (by norm_num)
-        (symEllIntRD_real_nonneg hx hy (hz.trans ht)).2
-  have hlim := (Complex.continuous_re.tendsto (0 : ℂ)).comp (tendsto_symEllIntRF_atTop hx hy)
+        (symmetricEllipticRD_real_nonneg hx hy (hz.trans ht)).2
+  have hlim := (Complex.continuous_re.tendsto (0 : ℂ)).comp
+      (tendsto_symmetricEllipticRF_atTop hx hy)
   simp only [zero_re, Function.comp_def] at hlim
   have H := integral_Ioi_of_hasDerivAt_of_nonpos' hderiv hnonpos hlim
   rw [integral_const_mul, zero_sub] at H
-  have H' : ∫ t in Ioi z, (symEllIntRD x y t).re = 6 * (symEllIntRF x y z).re := by
+  have H' : ∫ t in Ioi z, (symmetricEllipticRD x y t).re = 6 * (symmetricEllipticRF x y z).re := by
     linarith
   rw [setIntegral_congr_fun measurableSet_Ioi
-      (fun t ht => (symEllIntRD_real_nonneg hx hy (hz.trans ht)).1),
+      (fun t ht => (symmetricEllipticRD_real_nonneg hx hy (hz.trans ht)).1),
     integral_complex_ofReal, H', ofReal_mul, ofReal_ofNat]
   congr 1
   apply Complex.ext
   · simp
-  · rw [ofReal_im, symEllIntRF_eq_carlsonRF (ofReal_mem_slitPlane.mpr hx)
+  · rw [ofReal_im, symmetricEllipticRF_eq_carlsonRF (ofReal_mem_slitPlane.mpr hx)
       (ofReal_mem_slitPlane.mpr hy) (ofReal_mem_slitPlane.mpr hz),
       Carlson.carlsonRF_ofReal_eq_integral hx hy hz, ofReal_im]
 
 /-- DLMF 19.28.6: `∫₀¹ R_D(x, y, v² z + (1 - v²) p) dv = R_J(x, y, z, p)` for
 `x, y, z, p > 0`. -/
 @[dlmf 19.28.E6]
-theorem integral_symEllIntRD_interp {x y z p : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z)
+theorem integral_symmetricEllipticRD_interp {x y z p : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z)
     (hp : 0 < p) :
-    ∫ v in Ioo (0 : ℝ) 1, symEllIntRD x y (v ^ 2 * z + (1 - v ^ 2) * p : ℝ) =
-      symEllIntRJ x y z p := by
+    ∫ v in Ioo (0 : ℝ) 1, symmetricEllipticRD x y (v ^ 2 * z + (1 - v ^ 2) * p : ℝ) =
+      symmetricEllipticRJ x y z p := by
   let b : Fin 4 → ℝ := ![1 / 2, 1 / 2, 1 / 2, 1]
   let Z : Fin 4 → ℂ := ![(x : ℂ), y, z, p]
   have hb : b ∈ ProbabilityTheory.mvRealBetaDomain := by intro i; fin_cases i <;> norm_num [b]
@@ -216,7 +219,7 @@ theorem integral_symEllIntRD_interp {x y z p : ℝ} (hx : 0 < x) (hy : 0 < y) (h
       Dirichlet.regCarlsonDirichletAverage
         (Dirichlet.mergeParam (2 : Fin 4) 3 ![1 / 2, 1 / 2, 1 / 2, 1])
         (Dirichlet.mergeNodes (2 : Fin 4) 3 Z w) (fun v => v ^ (-(3 / 2) : ℂ)) =
-        symEllIntRD x y w / Gamma (5 / 2) := by
+        symmetricEllipticRD x y w / Gamma (5 / 2) := by
     have hdom : Dirichlet.mergeNodes (2 : Fin 4) 3 Z w ∈ Carlson.carlsonRVariableDomain := by
       intro i
       have hi := e.surjective i
@@ -243,8 +246,8 @@ theorem integral_symEllIntRD_interp {x y z p : ℝ} (hx : 0 < x) (hy : 0 < y) (h
       rcases i with ⟨i, hi⟩
       fin_cases i <;> norm_num [Dirichlet.mergeParam] at *
     rw [← Carlson.regCarlsonRIntegral, ← Carlson.regCarlsonR_eq_regCarlsonRIntegral _ hbeta
-      hdom, ← heq, symEllIntRD_eq_symEllIntR (ofReal_mem_slitPlane.mpr hx)
-      (ofReal_mem_slitPlane.mpr hy) (Or.inl hw), symEllIntR_of_mem _ _
+      hdom, ← heq, symmetricEllipticRD_eq_symmetricEllipticR (ofReal_mem_slitPlane.mpr hx)
+      (ofReal_mem_slitPlane.mpr hy) (Or.inl hw), symmetricEllipticR_of_mem _ _
       (vec3_mem_carlsonRSlitDomain (ofReal_mem_slitPlane.mpr hx)
           (ofReal_mem_slitPlane.mpr hy) (Or.inl hw)),
       Carlson.carlsonR]
@@ -252,10 +255,11 @@ theorem integral_symEllIntRD_interp {x y z p : ℝ} (hx : 0 < x) (hy : 0 < y) (h
     norm_num
     apply (eq_div_iff (Gamma_ne_zero_of_re_pos (by norm_num : 0 < (5 / 2 : ℂ).re))).2
     ring
-  have H' : symEllIntRJ x y z p = (1 / 2) * ∫ u in Ioo (0 : ℝ) 1,
-      (u : ℂ) ^ (-(1 / 2) : ℂ) * symEllIntRD x y (u * z + (1 - u) * p : ℝ) := by
-    rw [symEllIntRJ_eq_symEllIntR (ofReal_mem_slitPlane.mpr hx) (ofReal_mem_slitPlane.mpr hy)
-      (ofReal_mem_slitPlane.mpr hz) (ofReal_mem_slitPlane.mpr hp), symEllIntR_of_mem _ _
+  have H' : symmetricEllipticRJ x y z p = (1 / 2) * ∫ u in Ioo (0 : ℝ) 1,
+      (u : ℂ) ^ (-(1 / 2) : ℂ) * symmetricEllipticRD x y (u * z + (1 - u) * p : ℝ) := by
+    rw [symmetricEllipticRJ_eq_symmetricEllipticR (ofReal_mem_slitPlane.mpr hx)
+        (ofReal_mem_slitPlane.mpr hy)
+      (ofReal_mem_slitPlane.mpr hz) (ofReal_mem_slitPlane.mpr hp), symmetricEllipticR_of_mem _ _
       (vec4_mem_carlsonRSlitDomain (ofReal_mem_slitPlane.mpr hx) (ofReal_mem_slitPlane.mpr hy)
         (ofReal_mem_slitPlane.mpr hz) (ofReal_mem_slitPlane.mpr hp)), Carlson.carlsonR,
       Carlson.regCarlsonR_eq_regCarlsonRIntegral _ (fun i => by fin_cases i <;> norm_num) hZ,
@@ -277,10 +281,10 @@ theorem integral_symEllIntRD_interp {x y z p : ℝ} (hx : 0 < x) (hy : 0 < y) (h
     field_simp
     have hcancel := mul_inv_cancel₀ Gamma_one_half_ne_zero
     linear_combination ((u : ℂ) ^ (-(1 / 2) : ℂ) *
-      symEllIntRD x y ((u : ℂ) * z + (1 - u) * p)) * hcancel
+      symmetricEllipticRD x y ((u : ℂ) * z + (1 - u) * p)) * hcancel
   rw [H']
   have HS := Carlson.integral_Ioo_sq_eq
-    (fun u => (u : ℂ) ^ (-(1 / 2) : ℂ) * symEllIntRD x y (u * z + (1 - u) * p : ℝ))
+    (fun u => (u : ℂ) ^ (-(1 / 2) : ℂ) * symmetricEllipticRD x y (u * z + (1 - u) * p : ℝ))
     (x := 0) (y := 1) le_rfl zero_lt_one
   norm_num only [zero_pow two_ne_zero, one_pow] at HS
   rw [HS, ← integral_const_mul]
@@ -296,40 +300,43 @@ theorem integral_symEllIntRD_interp {x y z p : ℝ} (hx : 0 < x) (hy : 0 < y) (h
 
 /-- DLMF 19.28.7: `∫₀^∞ R_J(x, y, z, r²) dr = (3/2) π R_F(xy, xz, yz)` for `x, y, z > 0`. -/
 @[dlmf 19.28.E7]
-theorem integral_symEllIntRJ_sq {x y z : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z) :
-    ∫ r in Ioi (0 : ℝ), symEllIntRJ x y z (r ^ 2 : ℝ) =
-      3 / 2 * π * symEllIntRF (x * y : ℝ) (x * z : ℝ) (y * z : ℝ) := by
+theorem integral_symmetricEllipticRJ_sq {x y z : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z) :
+    ∫ r in Ioi (0 : ℝ), symmetricEllipticRJ x y z (r ^ 2 : ℝ) =
+      3 / 2 * π * symmetricEllipticRF (x * y : ℝ) (x * z : ℝ) (y * z : ℝ) := by
   sorry
 
 /-- DLMF 19.28.8: `∫₀^∞ R_J(tx, y, z, tp) dt = (6/√p) R_C(p, x) R_F(0, y, z)` for
 `x, y, z, p > 0`. -/
 @[dlmf 19.28.E8]
-theorem integral_symEllIntRJ_scale {x y z p : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z)
+theorem integral_symmetricEllipticRJ_scale {x y z p : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z)
     (hp : 0 < p) :
-    ∫ t in Ioi (0 : ℝ), symEllIntRJ (t * x : ℝ) y z (t * p : ℝ) =
-      6 / (√p : ℝ) * symEllIntRC p x * symEllIntRF 0 y z := by
+    ∫ t in Ioi (0 : ℝ), symmetricEllipticRJ (t * x : ℝ) y z (t * p : ℝ) =
+      6 / (√p : ℝ) * symmetricEllipticRC p x * symmetricEllipticRF 0 y z := by
   sorry
 
 /-- DLMF 19.28.9, **with the added hypothesis `x + y ≤ π/2`** (see the module docstring; DLMF
 assumes only `x, y > 0`, under which the identity is false):
 `∫₀^{π/2} R_F(sin²θ cos²(x + y), sin²θ cos²(x - y), 1) dθ = R_F(0, cos²x, 1) R_F(0, cos²y, 1)`. -/
 @[dlmf 19.28.E9]
-theorem integral_symEllIntRF_sin_cos {x y : ℝ} (hx : 0 < x) (hy : 0 < y) (hxy : x + y ≤ π / 2) :
+theorem integral_symmetricEllipticRF_sin_cos {x y : ℝ} (hx : 0 < x) (hy : 0 < y)
+    (hxy : x + y ≤ π / 2) :
     ∫ θ in Ioo (0 : ℝ) (π / 2),
-        symEllIntRF (Real.sin θ ^ 2 * Real.cos (x + y) ^ 2 : ℝ)
+        symmetricEllipticRF (Real.sin θ ^ 2 * Real.cos (x + y) ^ 2 : ℝ)
           (Real.sin θ ^ 2 * Real.cos (x - y) ^ 2 : ℝ) 1 =
-      symEllIntRF 0 (Real.cos x ^ 2 : ℝ) 1 * symEllIntRF 0 (Real.cos y ^ 2 : ℝ) 1 := by
+      symmetricEllipticRF 0 (Real.cos x ^ 2 : ℝ) 1 *
+          symmetricEllipticRF 0 (Real.cos y ^ 2 : ℝ) 1 := by
   sorry
 
 /-- DLMF 19.28.10: for `a, b, c, d > 0`,
 `∫₀^∞ R_F((ac + bd)², (ad + bc)², 4abcd cosh² z) dz = (1/2) R_F(0, a², b²) R_F(0, c², d²)`. -/
 @[dlmf 19.28.E10]
-theorem integral_symEllIntRF_cosh {a b c d : ℝ} (ha : 0 < a) (hb : 0 < b) (hc : 0 < c)
+theorem integral_symmetricEllipticRF_cosh {a b c d : ℝ} (ha : 0 < a) (hb : 0 < b) (hc : 0 < c)
     (hd : 0 < d) :
     ∫ z in Ioi (0 : ℝ),
-        symEllIntRF ((a * c + b * d) ^ 2 : ℝ) ((a * d + b * c) ^ 2 : ℝ)
+        symmetricEllipticRF ((a * c + b * d) ^ 2 : ℝ) ((a * d + b * c) ^ 2 : ℝ)
           (4 * a * b * c * d * Real.cosh z ^ 2 : ℝ) =
-      1 / 2 * symEllIntRF 0 (a ^ 2 : ℝ) (b ^ 2 : ℝ) * symEllIntRF 0 (c ^ 2 : ℝ) (d ^ 2 : ℝ) := by
+      1 / 2 * symmetricEllipticRF 0 (a ^ 2 : ℝ) (b ^ 2 : ℝ) *
+          symmetricEllipticRF 0 (c ^ 2 : ℝ) (d ^ 2 : ℝ) := by
   sorry
 
 end DLMF.EllipticIntegrals

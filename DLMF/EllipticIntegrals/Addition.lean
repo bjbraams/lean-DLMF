@@ -17,8 +17,9 @@ public import DLMF.JacobiElliptic.Related
 This file proves the addition and duplication theorems for Legendre's elliptic integrals of the
 first, second and third kinds (DLMF §19.11), for real modulus `k` with `k² < 1` and real
 amplitudes, the setting of DLMF's qualifications in §19.11(i). The Legendre integrals are the
-complex DLMF integrals `incEllIntFk`, `incEllIntEk`, `incEllIntPik` (and `compEllIntKk`,
-`compEllIntEk`, `compEllIntPik`) at real arguments; `R_C` is `symEllIntRC`.
+complex DLMF integrals `incompleteEllipticF`, `incompleteEllipticE`, `incompleteEllipticPi` (and
+`completeEllipticK`, `completeEllipticE`, `completeEllipticPi`) at real arguments; `R_C` is
+`symmetricEllipticRC`.
 
 ## Main definitions
 
@@ -31,13 +32,15 @@ complex DLMF integrals `incEllIntFk`, `incEllIntEk`, `incEllIntPik` (and `compEl
 ## Main results
 
 * `addition_sin_sq_add_cos_sq`, `addition_tan_half`: consistency of DLMF 19.11.3–19.11.4.
-* `incEllIntFk_add`, `incEllIntEk_add`: DLMF 19.11.1 and 19.11.2.
-* `incEllIntPik_add`: DLMF 19.11.5–19.11.6.
-* `symEllIntRC_addition_eq_arctan`: DLMF 19.11.6_5.
-* `incEllIntFk_eq_compEllIntKk_sub`, `incEllIntEk_eq_compEllIntEk_sub`,
-  `incEllIntPik_eq_compEllIntPik_sub`: the complete-integral cases DLMF 19.11.7–19.11.11.
-* `incEllIntFk_duplication`, `incEllIntEk_duplication`, `incEllIntPik_duplication`: the
-  duplication formulas DLMF 19.11.12–19.11.13 and 19.11.16–19.11.17.
+* `incompleteEllipticF_add`, `incompleteEllipticE_add`: DLMF 19.11.1 and 19.11.2.
+* `incompleteEllipticPi_add`: DLMF 19.11.5–19.11.6.
+* `symmetricEllipticRC_addition_eq_arctan`: DLMF 19.11.6_5.
+* `incompleteEllipticF_eq_completeEllipticK_sub`, `incompleteEllipticE_eq_completeEllipticE_sub`,
+  `incompleteEllipticPi_eq_completeEllipticPi_sub`: the complete-integral cases DLMF
+  19.11.7–19.11.11.
+* `incompleteEllipticF_duplication`, `incompleteEllipticE_duplication`,
+  `incompleteEllipticPi_duplication`: the duplication formulas DLMF 19.11.12–19.11.13 and
+  19.11.16–19.11.17.
 * `duplication_half_angle`, `duplication_half_angle'`: the remaining formulas of DLMF 19.11.15.
 
 ## Implementation notes
@@ -181,71 +184,85 @@ theorem addition_tan_half {k θ φ ψ : ℝ} (hk : k ^ 2 < 1) (hs : Real.sin ψ 
 open DLMF.Elliptic in
 /-- For `θ, φ ∈ [0, π/2]` and `ψ ∈ [0, π]` with `cos ψ` given by (19.11.4),
 `am(F(θ) + F(φ)) = ψ`: the cosine addition formula for `cn` (DLMF 22.8.2). -/
-private lemma jacobiAmm_add_eq_of_additionCos {k θ φ ψ : ℝ} (hk : k ^ 2 < 1)
+private lemma jacobiAmOfParameter_add_eq_of_additionCos {k θ φ ψ : ℝ} (hk : k ^ 2 < 1)
     (hθ : θ ∈ Icc 0 (π / 2)) (hφ : φ ∈ Icc 0 (π / 2)) (hψ : ψ ∈ Icc 0 π)
     (hc : Real.cos ψ = additionCos k θ φ) :
-    Real.jacobiAmm (Real.incEllIntFm θ (k ^ 2) + Real.incEllIntFm φ (k ^ 2)) (k ^ 2) = ψ := by
+    Real.jacobiAmOfParameter
+        (Real.incompleteEllipticFOfParameter θ (k ^ 2) +
+        Real.incompleteEllipticFOfParameter φ (k ^ 2)) (k ^ 2) = ψ := by
   set m := k ^ 2 with hmdef
   have hm : m < 1 := hk
-  have hF := Real.strictMono_incEllIntFm hm
-  set u := Real.incEllIntFm θ m
-  set v := Real.incEllIntFm φ m
-  have hF0 : Real.incEllIntFm 0 m = 0 := by simp [Real.incEllIntFm]
+  have hF := Real.strictMono_incompleteEllipticFOfParameter hm
+  set u := Real.incompleteEllipticFOfParameter θ m
+  set v := Real.incompleteEllipticFOfParameter φ m
+  have hF0 : Real.incompleteEllipticFOfParameter 0 m = 0 := by
+      simp [Real.incompleteEllipticFOfParameter]
   have hu0 : 0 ≤ u := hF0 ▸ hF.monotone hθ.1
   have hv0 : 0 ≤ v := hF0 ▸ hF.monotone hφ.1
-  have huK : u ≤ Real.compEllIntKm m := Real.incEllIntFm_pi_div_two m ▸ hF.monotone hθ.2
-  have hvK : v ≤ Real.compEllIntKm m := Real.incEllIntFm_pi_div_two m ▸ hF.monotone hφ.2
-  have hamle : ∀ a b : ℝ, a ≤ b → Real.jacobiAmm a m ≤ Real.jacobiAmm b m := by
+  have huK : u ≤ Real.completeEllipticKOfParameter m :=
+      Real.incompleteEllipticFOfParameter_pi_div_two m ▸ hF.monotone hθ.2
+  have hvK : v ≤ Real.completeEllipticKOfParameter m :=
+      Real.incompleteEllipticFOfParameter_pi_div_two m ▸ hF.monotone hφ.2
+  have hamle : ∀ a b : ℝ, a ≤ b → Real.jacobiAmOfParameter a m ≤ Real.jacobiAmOfParameter b m := by
     intro a b hab
-    rw [← hF.le_iff_le, Real.incEllIntFm_jacobiAmm hm, Real.incEllIntFm_jacobiAmm hm]
+    rw [← hF.le_iff_le, Real.incompleteEllipticFOfParameter_jacobiAmOfParameter hm,
+        Real.incompleteEllipticFOfParameter_jacobiAmOfParameter hm]
     exact hab
-  have h1 : 0 ≤ Real.jacobiAmm (u + v) m := by
+  have h1 : 0 ≤ Real.jacobiAmOfParameter (u + v) m := by
     have := hamle 0 (u + v) (by linarith)
-    rwa [Real.jacobiAmm_zero hm] at this
-  have h2 : Real.jacobiAmm (u + v) m ≤ π := by
-    have := hamle (u + v) (0 + 2 * Real.compEllIntKm m) (by linarith)
-    rwa [Real.jacobiAmm_add_two_compEllIntKm hm, Real.jacobiAmm_zero hm, zero_add] at this
-  have hamu : Real.jacobiAmm u m = θ := Real.jacobiAmm_incEllIntFm hm θ
-  have hamv : Real.jacobiAmm v m = φ := Real.jacobiAmm_incEllIntFm hm φ
-  have hcos : Real.cos (Real.jacobiAmm (u + v) m) = additionCos k θ φ := by
-    have := Real.jacobiCnm_add hm u v
-    simp only [Real.jacobiCnm, Real.jacobiSnm, Real.jacobiDnm, hamu, hamv] at this
+    rwa [Real.jacobiAmOfParameter_zero hm] at this
+  have h2 : Real.jacobiAmOfParameter (u + v) m ≤ π := by
+    have := hamle (u + v) (0 + 2 * Real.completeEllipticKOfParameter m) (by linarith)
+    rwa [Real.jacobiAmOfParameter_add_two_completeEllipticKOfParameter hm,
+        Real.jacobiAmOfParameter_zero hm, zero_add] at this
+  have hamu : Real.jacobiAmOfParameter u m = θ :=
+      Real.jacobiAmOfParameter_incompleteEllipticFOfParameter hm θ
+  have hamv : Real.jacobiAmOfParameter v m = φ :=
+      Real.jacobiAmOfParameter_incompleteEllipticFOfParameter hm φ
+  have hcos : Real.cos (Real.jacobiAmOfParameter (u + v) m) = additionCos k θ φ := by
+    have := Real.jacobiCnOfParameter_add hm u v
+    simp only [Real.jacobiCnOfParameter, Real.jacobiSnOfParameter, Real.jacobiDnOfParameter,
+        hamu, hamv] at this
     rw [this, additionCos, ellDeltaReal, ellDeltaReal, Real.sqrt_eq_rpow, Real.sqrt_eq_rpow]
   exact Real.injOn_cos ⟨h1, h2⟩ hψ (hcos.trans hc.symm)
 
 /-- DLMF 19.11.1: `F(θ, k) + F(φ, k) = F(ψ, k)` for real `k² < 1`, `θ, φ ∈ [0, π/2]`, with
 `ψ ∈ [0, π]` given by (19.11.3) and (19.11.4). -/
 @[dlmf 19.11.E1, dlmf 19.11.E3]
-theorem incEllIntFk_add {k θ φ ψ : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ Icc 0 (π / 2))
+theorem incompleteEllipticF_add {k θ φ ψ : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ Icc 0 (π / 2))
     (hφ : φ ∈ Icc 0 (π / 2)) (hψ : ψ ∈ Icc 0 π) (hs : Real.sin ψ = additionSin k θ φ)
     (hc : Real.cos ψ = additionCos k θ φ) :
-    incEllIntFk θ k + incEllIntFk φ k = incEllIntFk ψ k := by
+    incompleteEllipticF θ k + incompleteEllipticF φ k = incompleteEllipticF ψ k := by
   have hk' : ((k : ℂ)) ^ 2 = ((k ^ 2 : ℝ) : ℂ) := by push_cast; rfl
-  rw [incEllIntFk_eq_ofReal hk' hk.le, incEllIntFk_eq_ofReal hk' hk.le,
-    incEllIntFk_eq_ofReal hk' hk.le, ← jacobiAmm_add_eq_of_additionCos hk hθ hφ hψ hc,
-    DLMF.Elliptic.Real.incEllIntFm_jacobiAmm hk]
+  rw [incompleteEllipticF_eq_ofReal hk' hk.le, incompleteEllipticF_eq_ofReal hk' hk.le,
+    incompleteEllipticF_eq_ofReal hk' hk.le,
+        ← jacobiAmOfParameter_add_eq_of_additionCos hk hθ hφ hψ hc,
+    DLMF.Elliptic.Real.incompleteEllipticFOfParameter_jacobiAmOfParameter hk]
   push_cast; rfl
 
 /-- DLMF 19.11.2: `E(θ, k) + E(φ, k) = E(ψ, k) + k² sin θ sin φ sin ψ`, hypotheses as in
 (19.11.1). -/
 @[dlmf 19.11.E2, dlmf 19.11.E3]
-theorem incEllIntEk_add {k θ φ ψ : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ Icc 0 (π / 2))
+theorem incompleteEllipticE_add {k θ φ ψ : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ Icc 0 (π / 2))
     (hφ : φ ∈ Icc 0 (π / 2)) (hψ : ψ ∈ Icc 0 π) (hs : Real.sin ψ = additionSin k θ φ)
     (hc : Real.cos ψ = additionCos k θ φ) :
-    incEllIntEk θ k + incEllIntEk φ k =
-      incEllIntEk ψ k + k ^ 2 * Real.sin θ * Real.sin φ * Real.sin ψ := by
+    incompleteEllipticE θ k + incompleteEllipticE φ k =
+      incompleteEllipticE ψ k + k ^ 2 * Real.sin θ * Real.sin φ * Real.sin ψ := by
   have hk' : ((k : ℂ)) ^ 2 = ((k ^ 2 : ℝ) : ℂ) := by push_cast; rfl
-  have hA := jacobiAmm_add_eq_of_additionCos hk hθ hφ hψ hc
+  have hA := jacobiAmOfParameter_add_eq_of_additionCos hk hθ hφ hψ hc
   have hm : k ^ 2 < 1 := hk
-  have H := DLMF.JacobiElliptic.Real.jacobiEpsilonk_add hm
-    (DLMF.Elliptic.Real.incEllIntFm θ (k ^ 2)) (DLMF.Elliptic.Real.incEllIntFm φ (k ^ 2))
-  rw [← DLMF.JacobiElliptic.Real.incEllIntEm_jacobiAmm hm,
-    ← DLMF.JacobiElliptic.Real.incEllIntEm_jacobiAmm hm,
-    ← DLMF.JacobiElliptic.Real.incEllIntEm_jacobiAmm hm, hA,
-    DLMF.Elliptic.Real.jacobiAmm_incEllIntFm hm, DLMF.Elliptic.Real.jacobiAmm_incEllIntFm hm] at H
-  simp only [DLMF.Elliptic.Real.jacobiSnm, hA, DLMF.Elliptic.Real.jacobiAmm_incEllIntFm hm] at H
-  rw [incEllIntEk_eq_ofReal hk' hk.le, incEllIntEk_eq_ofReal hk' hk.le,
-    incEllIntEk_eq_ofReal hk' hk.le, H]
+  have H := DLMF.JacobiElliptic.Real.jacobiEpsilon_add hm
+    (DLMF.Elliptic.Real.incompleteEllipticFOfParameter θ (k ^ 2))
+        (DLMF.Elliptic.Real.incompleteEllipticFOfParameter φ (k ^ 2))
+  rw [← DLMF.JacobiElliptic.Real.incompleteEllipticEOfParameter_jacobiAmOfParameter hm,
+    ← DLMF.JacobiElliptic.Real.incompleteEllipticEOfParameter_jacobiAmOfParameter hm,
+    ← DLMF.JacobiElliptic.Real.incompleteEllipticEOfParameter_jacobiAmOfParameter hm, hA,
+    DLMF.Elliptic.Real.jacobiAmOfParameter_incompleteEllipticFOfParameter hm,
+        DLMF.Elliptic.Real.jacobiAmOfParameter_incompleteEllipticFOfParameter hm] at H
+  simp only [DLMF.Elliptic.Real.jacobiSnOfParameter, hA,
+      DLMF.Elliptic.Real.jacobiAmOfParameter_incompleteEllipticFOfParameter hm] at H
+  rw [incompleteEllipticE_eq_ofReal hk' hk.le, incompleteEllipticE_eq_ofReal hk' hk.le,
+    incompleteEllipticE_eq_ofReal hk' hk.le, H]
   push_cast; ring
 
 /-- DLMF 19.11.5–19.11.6: `Π(θ, α², k) + Π(φ, α², k) = Π(ψ, α², k) - α² R_C(γ - δ, γ)` with
@@ -253,14 +270,14 @@ theorem incEllIntEk_add {k θ φ ψ : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ Icc 0 
 `θ, φ ∈ (0, π/2)`, `ψ` as in (19.11.1), on the branch region `α² < 1`,
 `α²(1 - cos θ cos φ cos ψ) < 1` (see the module docstring). -/
 @[dlmf 19.11.E5, dlmf 19.11.E6]
-theorem incEllIntPik_add {k θ φ ψ α2 : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ Ioo 0 (π / 2))
+theorem incompleteEllipticPi_add {k θ φ ψ α2 : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ Ioo 0 (π / 2))
     (hφ : φ ∈ Ioo 0 (π / 2)) (hψ : ψ ∈ Icc 0 π) (hs : Real.sin ψ = additionSin k θ φ)
     (hc : Real.cos ψ = additionCos k θ φ) (hα : α2 < 1)
     (hαψ : α2 * (1 - Real.cos θ * Real.cos φ * Real.cos ψ) < 1) :
     let γ := (1 / Real.sin θ ^ 2 - α2) * (1 / Real.sin φ ^ 2 - α2) * (1 / Real.sin ψ ^ 2 - α2)
     let δ := α2 * (1 - α2) * (α2 - k ^ 2)
-    incEllIntPik θ α2 k + incEllIntPik φ α2 k =
-      incEllIntPik ψ α2 k - α2 * symEllIntRC ((γ - δ : ℝ) : ℂ) ((γ : ℝ) : ℂ) := by
+    incompleteEllipticPi θ α2 k + incompleteEllipticPi φ α2 k =
+      incompleteEllipticPi ψ α2 k - α2 * symmetricEllipticRC ((γ - δ : ℝ) : ℂ) ((γ : ℝ) : ℂ) := by
   sorry
 
 /-- The symmetric relations of the addition theorem: with `A = sin²θ`, `B = sin²φ`,
@@ -327,14 +344,14 @@ private lemma addition_symmetric_relations {k : ℝ} (hk : k ^ 2 < 1) (θ φ : �
 `R_C(γ - δ, γ) = -δ^{-1/2} arctan(√δ sin θ sin φ sin ψ / (α² - 1 - α² cos θ cos φ cos ψ))`.
 (DLMF allows `k² = α²`, where `δ = 0` and the right side is a limit; here `k² < α²`.) -/
 @[dlmf 19.11.E6_5]
-theorem symEllIntRC_addition_eq_arctan {k θ φ ψ α2 : ℝ} (hk : k ^ 2 < 1)
+theorem symmetricEllipticRC_addition_eq_arctan {k θ φ ψ α2 : ℝ} (hk : k ^ 2 < 1)
     (hθ : θ ∈ Ioo 0 (π / 2)) (hφ : φ ∈ Ioo 0 (π / 2)) (hψ : ψ ∈ Icc 0 π)
     (hs : Real.sin ψ = additionSin k θ φ) (hc : Real.cos ψ = additionCos k θ φ)
     (hkα : k ^ 2 < α2) (hα : α2 < 1)
     (hαψ : α2 * (1 - Real.cos θ * Real.cos φ * Real.cos ψ) < 1) :
     let γ := (1 / Real.sin θ ^ 2 - α2) * (1 / Real.sin φ ^ 2 - α2) * (1 / Real.sin ψ ^ 2 - α2)
     let δ := α2 * (1 - α2) * (α2 - k ^ 2)
-    symEllIntRC ((γ - δ : ℝ) : ℂ) ((γ : ℝ) : ℂ) =
+    symmetricEllipticRC ((γ - δ : ℝ) : ℂ) ((γ : ℝ) : ℂ) =
       ((-1 / Real.sqrt δ * Real.arctan (Real.sqrt δ * Real.sin θ * Real.sin φ * Real.sin ψ /
         (α2 - 1 - α2 * Real.cos θ * Real.cos φ * Real.cos ψ)) : ℝ) : ℂ) := by
   intro γ δ
@@ -371,7 +388,7 @@ theorem symEllIntRC_addition_eq_arctan {k θ φ ψ α2 : ℝ} (hk : k ^ 2 < 1)
   set S := Real.sin θ * Real.sin φ * Real.sin ψ with hS
   have hS0 : 0 < S := by positivity
   have hpos : 0 < γ - δ := by rw [hγδ]; have := hDn0.ne; positivity
-  rw [(symEllIntRC_of_lt (x := γ - δ) (y := γ) hpos.le (by linarith)).2 hpos,
+  rw [(symmetricEllipticRC_of_lt (x := γ - δ) (y := γ) hpos.le (by linarith)).2 hpos,
     show γ - (γ - δ) = δ by ring]
   congr 1
   have hsq : Real.sqrt (δ / (γ - δ)) = Real.sqrt δ * S / -Dn := by
@@ -424,10 +441,13 @@ private lemma complement_subst_integrand_F {m θ : ℝ} (hm : m < 1) (hcos : 0 <
 
 /-- Real form of (19.11.7): `F(φ | m) = K(m) - F(π/2 - arctan(√(1-m) tan φ) | m)` for `m < 1`
 and `0 ≤ φ < π/2`. -/
-private lemma incEllIntFm_eq_compEllIntKm_sub {m φ : ℝ} (hm : m < 1) (hφ0 : 0 ≤ φ)
+private lemma incompleteEllipticFOfParameter_eq_completeEllipticKOfParameter_sub {m φ : ℝ}
+    (hm : m < 1) (hφ0 : 0 ≤ φ)
     (hφ : φ < π / 2) :
-    DLMF.Elliptic.Real.incEllIntFm φ m = DLMF.Elliptic.Real.compEllIntKm m -
-      DLMF.Elliptic.Real.incEllIntFm (π / 2 - Real.arctan (Real.sqrt (1 - m) * Real.tan φ)) m := by
+    DLMF.Elliptic.Real.incompleteEllipticFOfParameter φ m =
+        DLMF.Elliptic.Real.completeEllipticKOfParameter m -
+      DLMF.Elliptic.Real.incompleteEllipticFOfParameter
+          (π / 2 - Real.arctan (Real.sqrt (1 - m) * Real.tan φ)) m := by
   set c := Real.sqrt (1 - m) with hcdef
   set G : ℝ → ℝ := fun θ => (1 - m * Real.sin θ ^ 2) ^ (-(1 / 2) : ℝ) with hG
   have hGc : Continuous G := DLMF.Elliptic.continuous_one_sub_mul_sin_sq_rpow hm _
@@ -460,7 +480,8 @@ private lemma incEllIntFm_eq_compEllIntKm_sub {m φ : ℝ} (hm : m < 1) (hφ0 : 
   have hf0 : f 0 = π / 2 := by simp [hf]
   rw [hf0, ← intervalIntegral.integral_interval_sub_left (hGc.intervalIntegrable 0 (f φ))
     (hGc.intervalIntegrable 0 (π / 2))] at hsub
-  unfold DLMF.Elliptic.Real.incEllIntFm DLMF.Elliptic.Real.compEllIntKm
+  unfold DLMF.Elliptic.Real.incompleteEllipticFOfParameter
+      DLMF.Elliptic.Real.completeEllipticKOfParameter
   simp only [hG, hf] at hsub ⊢
   linarith
 
@@ -533,7 +554,7 @@ private lemma hasDerivAt_mul_sin_mul_cos_div_sqrt {m : ℝ} (hm : m < 1) (θ : �
 /-- `∫₀^φ (1 - m)/Δ³ = E(φ | m) - m sin φ cos φ/Δ(φ)`, `m < 1`. -/
 private lemma integral_one_sub_div_sqrt_cube {m : ℝ} (hm : m < 1) (φ : ℝ) :
     ∫ θ in (0 : ℝ)..φ, (1 - m) * (Real.sqrt (1 - m * Real.sin θ ^ 2))⁻¹ / (1 - m * Real.sin θ ^ 2) =
-      DLMF.Elliptic.Real.incEllIntEm φ m -
+      DLMF.Elliptic.Real.incompleteEllipticEOfParameter φ m -
         m * Real.sin φ * Real.cos φ * (Real.sqrt (1 - m * Real.sin φ ^ 2))⁻¹ := by
   have hpos := DLMF.Elliptic.one_sub_mul_sin_sq_pos hm
   have hc1 : Continuous fun θ : ℝ => Real.sqrt (1 - m * Real.sin θ ^ 2) := by fun_prop
@@ -546,18 +567,21 @@ private lemma integral_one_sub_div_sqrt_cube {m : ℝ} (hm : m < 1) (φ : ℝ) :
   rw [intervalIntegral.integral_sub (hc1.intervalIntegrable 0 φ) (hc2.intervalIntegrable 0 φ)]
     at hftc
   have hE : ∫ θ in (0 : ℝ)..φ, Real.sqrt (1 - m * Real.sin θ ^ 2) =
-      DLMF.Elliptic.Real.incEllIntEm φ m := by
-    unfold DLMF.Elliptic.Real.incEllIntEm
+      DLMF.Elliptic.Real.incompleteEllipticEOfParameter φ m := by
+    unfold DLMF.Elliptic.Real.incompleteEllipticEOfParameter
     exact intervalIntegral.integral_congr fun θ _ => (rpow_half_eq_sqrt _).symm
   simp only [Real.sin_zero, mul_zero, zero_mul, sub_zero] at hftc
   linarith
 
 /-- Real form of (19.11.8): `E(φ | m) = E(m) - E(θ | m) + m sin θ sin φ` with
 `θ = π/2 - arctan(√(1-m) tan φ)`, for `m < 1` and `0 ≤ φ < π/2`. -/
-private lemma incEllIntEm_eq_compEllIntEm_sub {m φ : ℝ} (hm : m < 1) (hφ0 : 0 ≤ φ)
+private lemma incompleteEllipticEOfParameter_eq_completeEllipticEOfParameter_sub {m φ : ℝ}
+    (hm : m < 1) (hφ0 : 0 ≤ φ)
     (hφ : φ < π / 2) :
-    DLMF.Elliptic.Real.incEllIntEm φ m = DLMF.Elliptic.Real.compEllIntEm m -
-      DLMF.Elliptic.Real.incEllIntEm (π / 2 - Real.arctan (Real.sqrt (1 - m) * Real.tan φ)) m +
+    DLMF.Elliptic.Real.incompleteEllipticEOfParameter φ m =
+        DLMF.Elliptic.Real.completeEllipticEOfParameter m -
+      DLMF.Elliptic.Real.incompleteEllipticEOfParameter
+          (π / 2 - Real.arctan (Real.sqrt (1 - m) * Real.tan φ)) m +
       m * Real.sin (π / 2 - Real.arctan (Real.sqrt (1 - m) * Real.tan φ)) * Real.sin φ := by
   set c := Real.sqrt (1 - m) with hcdef
   set G : ℝ → ℝ := fun θ => (1 - m * Real.sin θ ^ 2) ^ (1 / 2 : ℝ) with hG
@@ -609,8 +633,9 @@ private lemma incEllIntEm_eq_compEllIntEm_sub {m φ : ℝ} (hm : m < 1) (hφ0 : 
     rw [Real.sin_pi_div_two_sub, Real.cos_arctan, hx2, Real.sqrt_div' _ (by positivity),
       Real.sqrt_sq hcφ.le]
     field_simp
-  unfold DLMF.Elliptic.Real.incEllIntEm DLMF.Elliptic.Real.compEllIntEm
-  unfold DLMF.Elliptic.Real.incEllIntEm at hsub
+  unfold DLMF.Elliptic.Real.incompleteEllipticEOfParameter
+      DLMF.Elliptic.Real.completeEllipticEOfParameter
+  unfold DLMF.Elliptic.Real.incompleteEllipticEOfParameter at hsub
   rw [hsinθ]
   simp only [hG, hf] at hsub ⊢
   linarith
@@ -618,36 +643,39 @@ private lemma incEllIntEm_eq_compEllIntEm_sub {m φ : ℝ} (hm : m < 1) (hφ0 : 
 /-- DLMF 19.11.7, 19.11.9: `F(φ, k) = K(k) - F(θ, k)` when `tan θ = 1/(k' tan φ)`, for real
 `k² < 1` and `θ, φ ∈ (0, π/2)`. -/
 @[dlmf 19.11.E7, dlmf 19.11.E9]
-theorem incEllIntFk_eq_compEllIntKk_sub {k θ φ : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ Ioo 0 (π / 2))
+theorem incompleteEllipticF_eq_completeEllipticK_sub {k θ φ : ℝ} (hk : k ^ 2 < 1)
+    (hθ : θ ∈ Ioo 0 (π / 2))
     (hφ : φ ∈ Ioo 0 (π / 2)) (hθφ : Real.tan θ = 1 / (Real.sqrt (1 - k ^ 2) * Real.tan φ)) :
-    incEllIntFk φ k = compEllIntKk k - incEllIntFk θ k := by
+    incompleteEllipticF φ k = completeEllipticK k - incompleteEllipticF θ k := by
   have hk' : 0 < Real.sqrt (1 - k ^ 2) := Real.sqrt_pos.mpr (by linarith)
   have htanφ : 0 < Real.tan φ := Real.tan_pos_of_pos_of_lt_pi_div_two hφ.1 hφ.2
   have hθeq : θ = π / 2 - Real.arctan (Real.sqrt (1 - k ^ 2) * Real.tan φ) := by
     rw [← Real.arctan_tan (by linarith [hθ.1, Real.pi_pos]) hθ.2, hθφ, one_div,
       Real.arctan_inv_of_pos (by positivity)]
   have hk2 : ((k : ℂ)) ^ 2 = ((k ^ 2 : ℝ) : ℂ) := by push_cast; ring
-  rw [incEllIntFk_eq_ofReal hk2 hk.le, incEllIntFk_eq_ofReal hk2 hk.le,
-    compEllIntKk_eq_ofReal hk2 hk.le, hθeq,
-    incEllIntFm_eq_compEllIntKm_sub hk hφ.1.le hφ.2]
+  rw [incompleteEllipticF_eq_ofReal hk2 hk.le, incompleteEllipticF_eq_ofReal hk2 hk.le,
+    completeEllipticK_eq_ofReal hk2 hk.le, hθeq,
+    incompleteEllipticFOfParameter_eq_completeEllipticKOfParameter_sub hk hφ.1.le hφ.2]
   push_cast
   ring
 
 /-- DLMF 19.11.8, 19.11.9: `E(φ, k) = E(k) - E(θ, k) + k² sin θ sin φ` when
 `tan θ = 1/(k' tan φ)`, hypotheses as in (19.11.7). -/
 @[dlmf 19.11.E8, dlmf 19.11.E9]
-theorem incEllIntEk_eq_compEllIntEk_sub {k θ φ : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ Ioo 0 (π / 2))
+theorem incompleteEllipticE_eq_completeEllipticE_sub {k θ φ : ℝ} (hk : k ^ 2 < 1)
+    (hθ : θ ∈ Ioo 0 (π / 2))
     (hφ : φ ∈ Ioo 0 (π / 2)) (hθφ : Real.tan θ = 1 / (Real.sqrt (1 - k ^ 2) * Real.tan φ)) :
-    incEllIntEk φ k = compEllIntEk k - incEllIntEk θ k + k ^ 2 * Real.sin θ * Real.sin φ := by
+    incompleteEllipticE φ k = completeEllipticE k - incompleteEllipticE θ k + k ^ 2 * Real.sin θ *
+        Real.sin φ := by
   have hk' : 0 < Real.sqrt (1 - k ^ 2) := Real.sqrt_pos.mpr (by linarith)
   have htanφ : 0 < Real.tan φ := Real.tan_pos_of_pos_of_lt_pi_div_two hφ.1 hφ.2
   have hθeq : θ = π / 2 - Real.arctan (Real.sqrt (1 - k ^ 2) * Real.tan φ) := by
     rw [← Real.arctan_tan (by linarith [hθ.1, Real.pi_pos]) hθ.2, hθφ, one_div,
       Real.arctan_inv_of_pos (by positivity)]
   have hk2 : ((k : ℂ)) ^ 2 = ((k ^ 2 : ℝ) : ℂ) := by push_cast; ring
-  rw [incEllIntEk_eq_ofReal hk2 hk.le, incEllIntEk_eq_ofReal hk2 hk.le,
-    compEllIntEk_eq_ofReal hk2 hk.le, hθeq,
-    incEllIntEm_eq_compEllIntEm_sub hk hφ.1.le hφ.2]
+  rw [incompleteEllipticE_eq_ofReal hk2 hk.le, incompleteEllipticE_eq_ofReal hk2 hk.le,
+    completeEllipticE_eq_ofReal hk2 hk.le, hθeq,
+    incompleteEllipticEOfParameter_eq_completeEllipticEOfParameter_sub hk hφ.1.le hφ.2]
   push_cast
   ring
 
@@ -656,14 +684,14 @@ theorem incEllIntEk_eq_compEllIntEk_sub {k θ φ : ℝ} (hk : k ^ 2 < 1) (hθ : 
 `γ = (1 - α²)(csc²θ - α²)(csc²φ - α²)`, `δ = α²(1 - α²)(α² - k²)`, for real `k² < 1`,
 `α² < 1` and `θ, φ ∈ (0, π/2)` with `tan θ = 1/(k' tan φ)`. -/
 @[dlmf 19.11.E10, dlmf 19.11.E11]
-theorem incEllIntPik_eq_compEllIntPik_sub {k θ φ α2 : ℝ} (hk : k ^ 2 < 1)
+theorem incompleteEllipticPi_eq_completeEllipticPi_sub {k θ φ α2 : ℝ} (hk : k ^ 2 < 1)
     (hθ : θ ∈ Ioo 0 (π / 2)) (hφ : φ ∈ Ioo 0 (π / 2))
     (hθφ : Real.tan θ = 1 / (Real.sqrt (1 - k ^ 2) * Real.tan φ)) (hα : α2 < 1) :
     let γ := (1 - α2) * (1 / Real.sin θ ^ 2 - α2) * (1 / Real.sin φ ^ 2 - α2)
     let δ := α2 * (1 - α2) * (α2 - k ^ 2)
-    incEllIntPik φ α2 k =
-      compEllIntPik α2 k - incEllIntPik θ α2 k -
-        α2 * symEllIntRC ((γ - δ : ℝ) : ℂ) ((γ : ℝ) : ℂ) := by
+    incompleteEllipticPi φ α2 k =
+      completeEllipticPi α2 k - incompleteEllipticPi θ α2 k -
+        α2 * symmetricEllipticRC ((γ - δ : ℝ) : ℂ) ((γ : ℝ) : ℂ) := by
   sorry
 
 /-! ### §19.11(iii) Duplication formulas -/
@@ -698,24 +726,25 @@ private lemma duplicationCos_eq_additionCos {k : ℝ} (hk : k ^ 2 < 1) (θ : ℝ
 /-- DLMF 19.11.12: `F(ψ, k) = 2F(θ, k)` for real `k² < 1`, `θ ∈ [0, π/2]`, with `ψ ∈ [0, π]`
 given by (19.11.14) and the first formula of (19.11.15). -/
 @[dlmf 19.11.E12, dlmf 19.11.E14]
-theorem incEllIntFk_duplication {k θ ψ : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ Icc 0 (π / 2))
+theorem incompleteEllipticF_duplication {k θ ψ : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ Icc 0 (π / 2))
     (hψ : ψ ∈ Icc 0 π) (hs : Real.sin ψ = duplicationSin k θ)
         (hc : Real.cos ψ = duplicationCos k θ) :
-    incEllIntFk ψ k = 2 * incEllIntFk θ k := by
+    incompleteEllipticF ψ k = 2 * incompleteEllipticF θ k := by
   rw [duplicationSin_eq_additionSin] at hs
   rw [duplicationCos_eq_additionCos hk] at hc
-  rw [← incEllIntFk_add hk hθ hθ hψ hs hc]
+  rw [← incompleteEllipticF_add hk hθ hθ hψ hs hc]
   ring
 
 /-- DLMF 19.11.13: `E(ψ, k) = 2E(θ, k) - k² sin²θ sin ψ`, hypotheses as in (19.11.12). -/
 @[dlmf 19.11.E13, dlmf 19.11.E14]
-theorem incEllIntEk_duplication {k θ ψ : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ Icc 0 (π / 2))
+theorem incompleteEllipticE_duplication {k θ ψ : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ Icc 0 (π / 2))
     (hψ : ψ ∈ Icc 0 π) (hs : Real.sin ψ = duplicationSin k θ)
         (hc : Real.cos ψ = duplicationCos k θ) :
-    incEllIntEk ψ k = 2 * incEllIntEk θ k - k ^ 2 * Real.sin θ ^ 2 * Real.sin ψ := by
+    incompleteEllipticE ψ k = 2 * incompleteEllipticE θ k - k ^ 2 * Real.sin θ ^ 2 *
+        Real.sin ψ := by
   rw [duplicationSin_eq_additionSin] at hs
   rw [duplicationCos_eq_additionCos hk] at hc
-  have h := incEllIntEk_add hk hθ hθ hψ hs hc
+  have h := incompleteEllipticE_add hk hθ hθ hψ hs hc
   linear_combination -h
 
 /-- Half-angle tangent: `tan(ψ/2) = sin ψ/(1 + cos ψ)` when `1 + cos ψ ≠ 0`. -/
@@ -826,13 +855,14 @@ theorem duplication_half_angle {k θ ψ : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ Ic
 `θ ∈ (0, π/2)`, `ψ` as in (19.11.12), on the branch region `α² < 1`,
 `α²(1 - cos²θ cos ψ) < 1` (see the module docstring). -/
 @[dlmf 19.11.E16, dlmf 19.11.E17]
-theorem incEllIntPik_duplication {k θ ψ α2 : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ Ioo 0 (π / 2))
+theorem incompleteEllipticPi_duplication {k θ ψ α2 : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ Ioo 0 (π / 2))
     (hψ : ψ ∈ Icc 0 π) (hs : Real.sin ψ = duplicationSin k θ) (hc : Real.cos ψ = duplicationCos k θ)
     (hα : α2 < 1) (hαψ : α2 * (1 - Real.cos θ ^ 2 * Real.cos ψ) < 1) :
     let γ := (1 / Real.sin θ ^ 2 - α2) ^ 2 * (1 / Real.sin ψ ^ 2 - α2)
     let δ := α2 * (1 - α2) * (α2 - k ^ 2)
-    incEllIntPik ψ α2 k =
-      2 * incEllIntPik θ α2 k + α2 * symEllIntRC ((γ - δ : ℝ) : ℂ) ((γ : ℝ) : ℂ) := by
+    incompleteEllipticPi ψ α2 k =
+      2 * incompleteEllipticPi θ α2 k + α2 *
+          symmetricEllipticRC ((γ - δ : ℝ) : ℂ) ((γ : ℝ) : ℂ) := by
   sorry
 
 end DLMF.EllipticIntegrals

@@ -19,26 +19,33 @@ derivatives, periodicity and special values, and defines the inverse function `a
 
 ## Main definitions
 
-* `Real.jacobiArcsnm`: Jacobi's inverse function `arcsn(x|m) = F(arcsin x|m)` (DLMF 22.15.4).
+* `Real.jacobiArcsnOfParameter`: Jacobi's inverse function `arcsn(x|m) = F(arcsin x|m)` (DLMF
+  22.15.4).
 
 ## Main results
 
-* `Real.incEllIntFm_jacobiAmm`, `Real.jacobiAmm_incEllIntFm`: `F(am(u|m)|m) = u` and
+* `Real.incompleteEllipticFOfParameter_jacobiAmOfParameter`,
+  `Real.jacobiAmOfParameter_incompleteEllipticFOfParameter`: `F(am(u|m)|m) = u` and
   `am(F(φ|m)|m) = φ` (DLMF 22.16.11).
-* `Real.hasDerivAt_jacobiAmm`: `am' = dn` (DLMF §22.16(i)).
-* `Real.jacobiAmm_add_two_compEllIntKm`, `Real.jacobiAmm_zero_param`: `am(u + 2K|m) = am(u|m) + π`
-  and `am(u|0) = u` (DLMF 22.16.2, 22.16.4).
-* `Real.jacobiSnm_sq_add_jacobiCnm_sq`, `Real.mul_jacobiSnm_sq_add_jacobiDnm_sq`: DLMF 22.6.1.
-* `Real.hasDerivAt_jacobiSnm`, `Real.hasDerivAt_jacobiCnm`, `Real.hasDerivAt_jacobiDnm`:
-  derivatives (DLMF Table 22.13.1).
-* `Real.continuous_jacobiSnm`, `Real.continuous_jacobiCnm`, `Real.continuous_jacobiDnm`:
-  continuity for `m < 1`.
-* `Real.jacobi_add_two_compEllIntKm`, `Real.jacobiSnm_add_four_compEllIntKm`: half-period shifts
-  and periods (DLMF Tables 22.4.1, 22.4.3).
-* `Real.jacobi_compEllIntKm`, `jacobi_zero`: values at `u = K` and `u = 0` (DLMF Table 22.5.1).
+* `Real.hasDerivAt_jacobiAmOfParameter`: `am' = dn` (DLMF §22.16(i)).
+* `Real.jacobiAmOfParameter_add_two_completeEllipticKOfParameter`,
+  `Real.jacobiAmOfParameter_zero_param`: `am(u + 2K|m) = am(u|m) + π` and `am(u|0) = u` (DLMF
+  22.16.2, 22.16.4).
+* `Real.jacobiSnOfParameter_sq_add_jacobiCnOfParameter_sq`,
+  `Real.mul_jacobiSnOfParameter_sq_add_jacobiDnOfParameter_sq`: DLMF 22.6.1.
+* `Real.hasDerivAt_jacobiSnOfParameter`, `Real.hasDerivAt_jacobiCnOfParameter`,
+  `Real.hasDerivAt_jacobiDnOfParameter`: derivatives (DLMF Table 22.13.1).
+* `Real.continuous_jacobiSnOfParameter`, `Real.continuous_jacobiCnOfParameter`,
+  `Real.continuous_jacobiDnOfParameter`: continuity for `m < 1`.
+* `Real.jacobi_add_two_completeEllipticKOfParameter`,
+  `Real.jacobiSnOfParameter_add_four_completeEllipticKOfParameter`: half-period shifts and periods
+  (DLMF Tables 22.4.1, 22.4.3).
+* `Real.jacobi_completeEllipticKOfParameter`, `jacobi_zero`: values at `u = K` and `u = 0` (DLMF
+  Table 22.5.1).
 * `jacobi_neg`: `sn` is odd and `cn`, `dn` are even.
 * `jacobi_zero_param`: for `m = 0` the functions reduce to `sin`, `cos`, `1` (DLMF §22.5(ii)).
-* `Real.jacobiSnm_jacobiArcsnm`, `Real.jacobiArcsnm_jacobiSnm`, `Real.hasDerivAt_jacobiArcsnm`:
+* `Real.jacobiSnOfParameter_jacobiArcsnOfParameter`,
+  `Real.jacobiArcsnOfParameter_jacobiSnOfParameter`, `Real.hasDerivAt_jacobiArcsnOfParameter`:
   `arcsn` inverts `sn` on `[-K, K]`, with derivative `((1 - x²)(1 - m x²))^{-1/2}`.
 
 ## Implementation notes
@@ -58,104 +65,118 @@ namespace DLMF.Elliptic
 
 /-- `F(am(u|m)|m) = u`. -/
 @[dlmf 22.16.E11]
-theorem Real.incEllIntFm_jacobiAmm {m : ℝ} (hm : m < 1) (u : ℝ) :
-    Real.incEllIntFm (Real.jacobiAmm u m) m = u := by
-  simp only [Real.jacobiAmm, hm, ↓reduceDIte]
-  exact (Real.incEllIntFmOrderIso hm).apply_symm_apply u
+theorem Real.incompleteEllipticFOfParameter_jacobiAmOfParameter {m : ℝ} (hm : m < 1) (u : ℝ) :
+    Real.incompleteEllipticFOfParameter (Real.jacobiAmOfParameter u m) m = u := by
+  simp only [Real.jacobiAmOfParameter, hm, ↓reduceDIte]
+  exact (Real.incompleteEllipticFOfParameterOrderIso hm).apply_symm_apply u
 
 /-- `am(F(φ|m)|m) = φ`. -/
-theorem Real.jacobiAmm_incEllIntFm {m : ℝ} (hm : m < 1) (φ : ℝ) :
-    Real.jacobiAmm (Real.incEllIntFm φ m) m = φ := by
-  simp only [Real.jacobiAmm, hm, ↓reduceDIte]
-  exact (Real.incEllIntFmOrderIso hm).symm_apply_apply φ
+theorem Real.jacobiAmOfParameter_incompleteEllipticFOfParameter {m : ℝ} (hm : m < 1) (φ : ℝ) :
+    Real.jacobiAmOfParameter (Real.incompleteEllipticFOfParameter φ m) m = φ := by
+  simp only [Real.jacobiAmOfParameter, hm, ↓reduceDIte]
+  exact (Real.incompleteEllipticFOfParameterOrderIso hm).symm_apply_apply φ
 
 /-- The amplitude is continuous. -/
-theorem Real.continuous_jacobiAmm {m : ℝ} (hm : m < 1) :
-    Continuous fun u => Real.jacobiAmm u m := by
-  simp only [Real.jacobiAmm, hm, ↓reduceDIte]
-  exact (Real.incEllIntFmOrderIso hm).symm.continuous
+theorem Real.continuous_jacobiAmOfParameter {m : ℝ} (hm : m < 1) :
+    Continuous fun u => Real.jacobiAmOfParameter u m := by
+  simp only [Real.jacobiAmOfParameter, hm, ↓reduceDIte]
+  exact (Real.incompleteEllipticFOfParameterOrderIso hm).symm.continuous
 
 /-- `d am/du = dn(u|m) = (1 - m sin² am)^{1/2}`. -/
 @[dlmf 22.16.i]
-theorem Real.hasDerivAt_jacobiAmm {m : ℝ} (hm : m < 1) (u : ℝ) :
-    HasDerivAt (fun u => Real.jacobiAmm u m)
-      ((1 - m * sin (Real.jacobiAmm u m) ^ 2) ^ (1 / 2 : ℝ)) u := by
-  have hpos := one_sub_mul_sin_sq_pos hm (Real.jacobiAmm u m)
-  have h := HasDerivAt.of_local_left_inverse (f := fun φ => Real.incEllIntFm φ m)
-    (Real.continuous_jacobiAmm hm).continuousAt
-    (Real.hasDerivAt_incEllIntFm hm (Real.jacobiAmm u m))
-    (rpow_pos_of_pos hpos _).ne' (Eventually.of_forall fun y => Real.incEllIntFm_jacobiAmm hm y)
+theorem Real.hasDerivAt_jacobiAmOfParameter {m : ℝ} (hm : m < 1) (u : ℝ) :
+    HasDerivAt (fun u => Real.jacobiAmOfParameter u m)
+      ((1 - m * sin (Real.jacobiAmOfParameter u m) ^ 2) ^ (1 / 2 : ℝ)) u := by
+  have hpos := one_sub_mul_sin_sq_pos hm (Real.jacobiAmOfParameter u m)
+  have h := HasDerivAt.of_local_left_inverse (f := fun φ => Real.incompleteEllipticFOfParameter φ m)
+    (Real.continuous_jacobiAmOfParameter hm).continuousAt
+    (Real.hasDerivAt_incompleteEllipticFOfParameter hm (Real.jacobiAmOfParameter u m))
+    (rpow_pos_of_pos hpos _).ne'
+        (Eventually.of_forall fun y => Real.incompleteEllipticFOfParameter_jacobiAmOfParameter hm y)
   rwa [rpow_neg hpos.le, inv_inv] at h
 
 /-- `am(0|m) = 0`. -/
-theorem Real.jacobiAmm_zero {m : ℝ} (hm : m < 1) : Real.jacobiAmm 0 m = 0 := by
-  simpa [Real.incEllIntFm] using Real.jacobiAmm_incEllIntFm hm 0
+theorem Real.jacobiAmOfParameter_zero {m : ℝ} (hm : m < 1) : Real.jacobiAmOfParameter 0 m = 0 := by
+  simpa [Real.incompleteEllipticFOfParameter] using
+      Real.jacobiAmOfParameter_incompleteEllipticFOfParameter hm 0
 
 /-- `am(K|m) = π/2`. -/
-theorem Real.jacobiAmm_compEllIntKm {m : ℝ} (hm : m < 1) :
-    Real.jacobiAmm (Real.compEllIntKm m) m = π / 2 := by
-  rw [← Real.incEllIntFm_pi_div_two, Real.jacobiAmm_incEllIntFm hm]
+theorem Real.jacobiAmOfParameter_completeEllipticKOfParameter {m : ℝ} (hm : m < 1) :
+    Real.jacobiAmOfParameter (Real.completeEllipticKOfParameter m) m = π / 2 := by
+  rw [← Real.incompleteEllipticFOfParameter_pi_div_two,
+      Real.jacobiAmOfParameter_incompleteEllipticFOfParameter hm]
 
 /-- `am(u + 2K|m) = am(u|m) + π`. -/
 @[dlmf 22.16.E2]
-theorem Real.jacobiAmm_add_two_compEllIntKm {m : ℝ} (hm : m < 1) (u : ℝ) :
-    Real.jacobiAmm (u + 2 * Real.compEllIntKm m) m = Real.jacobiAmm u m + π := by
-  conv_lhs => rw [← Real.incEllIntFm_jacobiAmm hm u, ← Real.incEllIntFm_add_pi hm]
-  exact Real.jacobiAmm_incEllIntFm hm _
+theorem Real.jacobiAmOfParameter_add_two_completeEllipticKOfParameter {m : ℝ} (hm : m < 1) (u : ℝ) :
+    Real.jacobiAmOfParameter (u + 2 * Real.completeEllipticKOfParameter m) m =
+        Real.jacobiAmOfParameter u m + π := by
+  conv_lhs => rw [← Real.incompleteEllipticFOfParameter_jacobiAmOfParameter hm u,
+                ← Real.incompleteEllipticFOfParameter_add_pi hm]
+  exact Real.jacobiAmOfParameter_incompleteEllipticFOfParameter hm _
 
 /-- `am(-u|m) = -am(u|m)`. -/
-theorem Real.jacobiAmm_neg {m : ℝ} (hm : m < 1) (u : ℝ) :
-    Real.jacobiAmm (-u) m = -Real.jacobiAmm u m := by
-  conv_lhs => rw [← Real.incEllIntFm_jacobiAmm hm u, ← Real.incEllIntFm_neg]
-  exact Real.jacobiAmm_incEllIntFm hm _
+theorem Real.jacobiAmOfParameter_neg {m : ℝ} (hm : m < 1) (u : ℝ) :
+    Real.jacobiAmOfParameter (-u) m = -Real.jacobiAmOfParameter u m := by
+  conv_lhs => rw [← Real.incompleteEllipticFOfParameter_jacobiAmOfParameter hm u,
+                ← Real.incompleteEllipticFOfParameter_neg]
+  exact Real.jacobiAmOfParameter_incompleteEllipticFOfParameter hm _
 
 /-- `am(u|0) = u`. -/
 @[dlmf 22.16.E4]
-theorem Real.jacobiAmm_zero_param (u : ℝ) : Real.jacobiAmm u 0 = u := by
-  simpa [Real.incEllIntFm_zero_param] using Real.jacobiAmm_incEllIntFm (m := 0) (by norm_num) u
+theorem Real.jacobiAmOfParameter_zero_param (u : ℝ) : Real.jacobiAmOfParameter u 0 = u := by
+  simpa [Real.incompleteEllipticFOfParameter_zero_param] using
+      Real.jacobiAmOfParameter_incompleteEllipticFOfParameter (m := 0) (by norm_num) u
 
 /-- `sn² + cn² = 1` (DLMF 22.6.1). -/
 @[dlmf 22.6.E1]
-theorem Real.jacobiSnm_sq_add_jacobiCnm_sq (u m : ℝ) :
-    Real.jacobiSnm u m ^ 2 + Real.jacobiCnm u m ^ 2 = 1 :=
+theorem Real.jacobiSnOfParameter_sq_add_jacobiCnOfParameter_sq (u m : ℝ) :
+    Real.jacobiSnOfParameter u m ^ 2 + Real.jacobiCnOfParameter u m ^ 2 = 1 :=
   sin_sq_add_cos_sq _
 
 /-- `m sn² + dn² = 1` (DLMF 22.6.1). -/
 @[dlmf 22.6.E1]
-theorem Real.mul_jacobiSnm_sq_add_jacobiDnm_sq {m : ℝ} (hm : m < 1) (u : ℝ) :
-    m * Real.jacobiSnm u m ^ 2 + Real.jacobiDnm u m ^ 2 = 1 := by
-  have hx : 0 < 1 - m * Real.jacobiSnm u m ^ 2 := one_sub_mul_sin_sq_pos hm (Real.jacobiAmm u m)
-  rw [Real.jacobiDnm, ← rpow_natCast ((1 - m * Real.jacobiSnm u m ^ 2) ^ (1 / 2 : ℝ)) 2,
+theorem Real.mul_jacobiSnOfParameter_sq_add_jacobiDnOfParameter_sq {m : ℝ} (hm : m < 1) (u : ℝ) :
+    m * Real.jacobiSnOfParameter u m ^ 2 + Real.jacobiDnOfParameter u m ^ 2 = 1 := by
+  have hx : 0 < 1 - m * Real.jacobiSnOfParameter u m ^ 2 :=
+      one_sub_mul_sin_sq_pos hm (Real.jacobiAmOfParameter u m)
+  rw [Real.jacobiDnOfParameter,
+      ← rpow_natCast ((1 - m * Real.jacobiSnOfParameter u m ^ 2) ^ (1 / 2 : ℝ)) 2,
       ← rpow_mul hx.le]
   norm_num
 
 /-- `dn > 0` for `m < 1`. -/
-theorem Real.jacobiDnm_pos {m : ℝ} (hm : m < 1) (u : ℝ) : 0 < Real.jacobiDnm u m :=
+theorem Real.jacobiDnOfParameter_pos {m : ℝ} (hm : m < 1) (u : ℝ) : 0 <
+    Real.jacobiDnOfParameter u m :=
   rpow_pos_of_pos (one_sub_mul_sin_sq_pos hm _) _
 
 /-- `d sn/du = cn dn` (DLMF Table 22.13.1). -/
 @[dlmf 22.13.T1]
-theorem Real.hasDerivAt_jacobiSnm {m : ℝ} (hm : m < 1) (u : ℝ) :
-    HasDerivAt (fun u => Real.jacobiSnm u m) (Real.jacobiCnm u m * Real.jacobiDnm u m) u :=
-  (hasDerivAt_sin _).comp u (Real.hasDerivAt_jacobiAmm hm u)
+theorem Real.hasDerivAt_jacobiSnOfParameter {m : ℝ} (hm : m < 1) (u : ℝ) :
+    HasDerivAt (fun u => Real.jacobiSnOfParameter u m)
+        (Real.jacobiCnOfParameter u m * Real.jacobiDnOfParameter u m) u :=
+  (hasDerivAt_sin _).comp u (Real.hasDerivAt_jacobiAmOfParameter hm u)
 
 /-- `d cn/du = -sn dn` (DLMF Table 22.13.1). -/
 @[dlmf 22.13.T1]
-theorem Real.hasDerivAt_jacobiCnm {m : ℝ} (hm : m < 1) (u : ℝ) :
-    HasDerivAt (fun u => Real.jacobiCnm u m) (-(Real.jacobiSnm u m * Real.jacobiDnm u m)) u := by
-  have h := (hasDerivAt_cos _).comp u (Real.hasDerivAt_jacobiAmm hm u)
-  exact h.congr_deriv (by simp [Real.jacobiSnm, Real.jacobiDnm])
+theorem Real.hasDerivAt_jacobiCnOfParameter {m : ℝ} (hm : m < 1) (u : ℝ) :
+    HasDerivAt (fun u => Real.jacobiCnOfParameter u m)
+        (-(Real.jacobiSnOfParameter u m * Real.jacobiDnOfParameter u m)) u := by
+  have h := (hasDerivAt_cos _).comp u (Real.hasDerivAt_jacobiAmOfParameter hm u)
+  exact h.congr_deriv (by simp [Real.jacobiSnOfParameter, Real.jacobiDnOfParameter])
 
 /-- `d dn/du = -m sn cn` (DLMF Table 22.13.1). -/
 @[dlmf 22.13.T1]
-theorem Real.hasDerivAt_jacobiDnm {m : ℝ} (hm : m < 1) (u : ℝ) :
-    HasDerivAt (fun u => Real.jacobiDnm u m)
-      (-(m * Real.jacobiSnm u m * Real.jacobiCnm u m)) u := by
-  have hx : 0 < 1 - m * Real.jacobiSnm u m ^ 2 := one_sub_mul_sin_sq_pos hm (Real.jacobiAmm u m)
-  have h1 := (((Real.hasDerivAt_jacobiSnm hm u).pow 2).const_mul m).const_sub 1
+theorem Real.hasDerivAt_jacobiDnOfParameter {m : ℝ} (hm : m < 1) (u : ℝ) :
+    HasDerivAt (fun u => Real.jacobiDnOfParameter u m)
+      (-(m * Real.jacobiSnOfParameter u m * Real.jacobiCnOfParameter u m)) u := by
+  have hx : 0 < 1 - m * Real.jacobiSnOfParameter u m ^ 2 :=
+      one_sub_mul_sin_sq_pos hm (Real.jacobiAmOfParameter u m)
+  have h1 := (((Real.hasDerivAt_jacobiSnOfParameter hm u).pow 2).const_mul m).const_sub 1
   have h := h1.rpow_const (p := 1 / 2) (Or.inl hx.ne')
-  have hdpos := Real.jacobiDnm_pos hm u
-  have hr : (1 - m * Real.jacobiSnm u m ^ 2) ^ (1 / 2 - 1 : ℝ) = (Real.jacobiDnm u m)⁻¹ := by
+  have hdpos := Real.jacobiDnOfParameter_pos hm u
+  have hr : (1 - m * Real.jacobiSnOfParameter u m ^ 2) ^ (1 / 2 - 1 : ℝ) =
+      (Real.jacobiDnOfParameter u m)⁻¹ := by
     rw [show (1 / 2 - 1 : ℝ) = -(1 / 2) by norm_num, rpow_neg hx.le]
     rfl
   refine h.congr_deriv ?_
@@ -165,99 +186,123 @@ theorem Real.hasDerivAt_jacobiDnm {m : ℝ} (hm : m < 1) (u : ℝ) :
   ring
 
 /-- `sn(·|m)` is continuous for `m < 1`. -/
-theorem Real.continuous_jacobiSnm {m : ℝ} (hm : m < 1) :
-    Continuous fun u => Real.jacobiSnm u m :=
-  continuous_iff_continuousAt.mpr fun u => (Real.hasDerivAt_jacobiSnm hm u).continuousAt
+theorem Real.continuous_jacobiSnOfParameter {m : ℝ} (hm : m < 1) :
+    Continuous fun u => Real.jacobiSnOfParameter u m :=
+  continuous_iff_continuousAt.mpr fun u => (Real.hasDerivAt_jacobiSnOfParameter hm u).continuousAt
 
 /-- `cn(·|m)` is continuous for `m < 1`. -/
-theorem Real.continuous_jacobiCnm {m : ℝ} (hm : m < 1) :
-    Continuous fun u => Real.jacobiCnm u m :=
-  continuous_iff_continuousAt.mpr fun u => (Real.hasDerivAt_jacobiCnm hm u).continuousAt
+theorem Real.continuous_jacobiCnOfParameter {m : ℝ} (hm : m < 1) :
+    Continuous fun u => Real.jacobiCnOfParameter u m :=
+  continuous_iff_continuousAt.mpr fun u => (Real.hasDerivAt_jacobiCnOfParameter hm u).continuousAt
 
 /-- `dn(·|m)` is continuous for `m < 1`. -/
-theorem Real.continuous_jacobiDnm {m : ℝ} (hm : m < 1) :
-    Continuous fun u => Real.jacobiDnm u m :=
-  continuous_iff_continuousAt.mpr fun u => (Real.hasDerivAt_jacobiDnm hm u).continuousAt
+theorem Real.continuous_jacobiDnOfParameter {m : ℝ} (hm : m < 1) :
+    Continuous fun u => Real.jacobiDnOfParameter u m :=
+  continuous_iff_continuousAt.mpr fun u => (Real.hasDerivAt_jacobiDnOfParameter hm u).continuousAt
 
 /-- `sn(0|m) = 0` for `m < 1`. -/
-theorem Real.jacobiSnm_zero {m : ℝ} (hm : m < 1) : Real.jacobiSnm 0 m = 0 := by
-  simp [Real.jacobiSnm, Real.jacobiAmm_zero hm]
+theorem Real.jacobiSnOfParameter_zero {m : ℝ} (hm : m < 1) : Real.jacobiSnOfParameter 0 m = 0 := by
+  simp [Real.jacobiSnOfParameter, Real.jacobiAmOfParameter_zero hm]
 
 /-- `sn(u + 2K) = -sn u`, `cn(u + 2K) = -cn u`, `dn(u + 2K) = dn u` (DLMF Table 22.4.3). -/
 @[dlmf 22.4.T3 "real parameter m < 1 and real argument: the 2K column for sn, cn, dn"]
-theorem Real.jacobi_add_two_compEllIntKm {m : ℝ} (hm : m < 1) (u : ℝ) :
-    Real.jacobiSnm (u + 2 * Real.compEllIntKm m) m = -Real.jacobiSnm u m ∧
-      Real.jacobiCnm (u + 2 * Real.compEllIntKm m) m = -Real.jacobiCnm u m ∧
-      Real.jacobiDnm (u + 2 * Real.compEllIntKm m) m = Real.jacobiDnm u m := by
-  simp only [Real.jacobiDnm, Real.jacobiSnm, Real.jacobiCnm, Real.jacobiAmm_add_two_compEllIntKm hm,
+theorem Real.jacobi_add_two_completeEllipticKOfParameter {m : ℝ} (hm : m < 1) (u : ℝ) :
+    Real.jacobiSnOfParameter (u + 2 * Real.completeEllipticKOfParameter m) m =
+        -Real.jacobiSnOfParameter u m ∧
+      Real.jacobiCnOfParameter (u + 2 * Real.completeEllipticKOfParameter m) m =
+          -Real.jacobiCnOfParameter u m ∧
+      Real.jacobiDnOfParameter (u + 2 * Real.completeEllipticKOfParameter m) m =
+          Real.jacobiDnOfParameter u m := by
+  simp only [Real.jacobiDnOfParameter, Real.jacobiSnOfParameter, Real.jacobiCnOfParameter,
+      Real.jacobiAmOfParameter_add_two_completeEllipticKOfParameter hm,
       sin_add_pi,
     cos_add_pi, neg_sq, and_self]
 
 /-- `sn` and `cn` have period `4K` (DLMF §22.4). -/
 @[dlmf 22.4.T1 "real parameter m < 1 and real argument: the period 4K of sn and cn"]
-theorem Real.jacobiSnm_add_four_compEllIntKm {m : ℝ} (hm : m < 1) (u : ℝ) :
-    Real.jacobiSnm (u + 4 * Real.compEllIntKm m) m = Real.jacobiSnm u m ∧
-      Real.jacobiCnm (u + 4 * Real.compEllIntKm m) m = Real.jacobiCnm u m := by
-  have h := Real.jacobi_add_two_compEllIntKm hm (u + 2 * Real.compEllIntKm m)
-  have h' := Real.jacobi_add_two_compEllIntKm hm u
-  rw [show u + 2 * Real.compEllIntKm m + 2 * Real.compEllIntKm m =
-      u + 4 * Real.compEllIntKm m by ring] at h
+theorem Real.jacobiSnOfParameter_add_four_completeEllipticKOfParameter {m : ℝ}
+    (hm : m < 1) (u : ℝ) :
+    Real.jacobiSnOfParameter (u + 4 * Real.completeEllipticKOfParameter m) m =
+        Real.jacobiSnOfParameter u m ∧
+      Real.jacobiCnOfParameter (u + 4 * Real.completeEllipticKOfParameter m) m =
+          Real.jacobiCnOfParameter u m := by
+  have h := Real.jacobi_add_two_completeEllipticKOfParameter hm
+      (u + 2 * Real.completeEllipticKOfParameter m)
+  have h' := Real.jacobi_add_two_completeEllipticKOfParameter hm u
+  rw [show u + 2 * Real.completeEllipticKOfParameter m + 2 * Real.completeEllipticKOfParameter m =
+      u + 4 * Real.completeEllipticKOfParameter m by ring] at h
   exact ⟨by rw [h.1, h'.1, neg_neg], by rw [h.2.1, h'.2.1, neg_neg]⟩
 
 /-- Special values at `u = K` (DLMF Table 22.5.1): `sn K = 1`, `cn K = 0`, `dn K = (1-m)^{1/2}`. -/
 @[dlmf 22.5.T1 "real parameter m < 1: values of sn, cn, dn at K"]
-theorem Real.jacobi_compEllIntKm {m : ℝ} (hm : m < 1) :
-    Real.jacobiSnm (Real.compEllIntKm m) m = 1 ∧ Real.jacobiCnm (Real.compEllIntKm m) m = 0 ∧
-      Real.jacobiDnm (Real.compEllIntKm m) m = (1 - m) ^ (1 / 2 : ℝ) := by
-  simp [Real.jacobiDnm, Real.jacobiSnm, Real.jacobiCnm, Real.jacobiAmm_compEllIntKm hm]
+theorem Real.jacobi_completeEllipticKOfParameter {m : ℝ} (hm : m < 1) :
+    Real.jacobiSnOfParameter (Real.completeEllipticKOfParameter m) m = 1 ∧
+        Real.jacobiCnOfParameter (Real.completeEllipticKOfParameter m) m = 0 ∧
+      Real.jacobiDnOfParameter (Real.completeEllipticKOfParameter m) m = (1 - m) ^ (1 / 2 : ℝ) := by
+  simp [Real.jacobiDnOfParameter, Real.jacobiSnOfParameter, Real.jacobiCnOfParameter,
+      Real.jacobiAmOfParameter_completeEllipticKOfParameter hm]
 
 /-- Values at `u = 0`: `sn 0 = 0`, `cn 0 = 1`, `dn 0 = 1`. -/
 @[dlmf 22.5.T1 "real parameter m < 1: values of sn, cn, dn at 0"]
 theorem jacobi_zero {m : ℝ} (hm : m < 1) :
-    Real.jacobiSnm 0 m = 0 ∧ Real.jacobiCnm 0 m = 1 ∧ Real.jacobiDnm 0 m = 1 := by
-  simp [Real.jacobiDnm, Real.jacobiSnm, Real.jacobiCnm, Real.jacobiAmm_zero hm]
+    Real.jacobiSnOfParameter 0 m = 0 ∧ Real.jacobiCnOfParameter 0 m = 1 ∧
+        Real.jacobiDnOfParameter 0 m = 1 := by
+  simp [Real.jacobiDnOfParameter, Real.jacobiSnOfParameter, Real.jacobiCnOfParameter,
+      Real.jacobiAmOfParameter_zero hm]
 
 /-- `sn` is odd and `cn`, `dn` are even. -/
 @[dlmf 22.2 "real parameter m < 1: sn odd, cn and dn even"]
 theorem jacobi_neg {m : ℝ} (hm : m < 1) (u : ℝ) :
-    Real.jacobiSnm (-u) m = -Real.jacobiSnm u m ∧ Real.jacobiCnm (-u) m = Real.jacobiCnm u m ∧
-      Real.jacobiDnm (-u) m = Real.jacobiDnm u m := by
-  simp [Real.jacobiDnm, Real.jacobiSnm, Real.jacobiCnm, Real.jacobiAmm_neg hm]
+    Real.jacobiSnOfParameter (-u) m = -Real.jacobiSnOfParameter u m ∧
+        Real.jacobiCnOfParameter (-u) m = Real.jacobiCnOfParameter u m ∧
+      Real.jacobiDnOfParameter (-u) m = Real.jacobiDnOfParameter u m := by
+  simp [Real.jacobiDnOfParameter, Real.jacobiSnOfParameter, Real.jacobiCnOfParameter,
+      Real.jacobiAmOfParameter_neg hm]
 
 /-- For `m = 0` the Jacobi functions reduce to `sin`, `cos`, `1` (DLMF §22.5(ii)). -/
 @[dlmf 22.5.T3 "exact at m = 0 for real argument"]
 theorem jacobi_zero_param (u : ℝ) :
-    Real.jacobiSnm u 0 = sin u ∧ Real.jacobiCnm u 0 = cos u ∧ Real.jacobiDnm u 0 = 1 := by
-  simp [Real.jacobiDnm, Real.jacobiSnm, Real.jacobiCnm, Real.jacobiAmm_zero_param]
+    Real.jacobiSnOfParameter u 0 = sin u ∧ Real.jacobiCnOfParameter u 0 = cos u ∧
+        Real.jacobiDnOfParameter u 0 = 1 := by
+  simp [Real.jacobiDnOfParameter, Real.jacobiSnOfParameter, Real.jacobiCnOfParameter,
+      Real.jacobiAmOfParameter_zero_param]
 
 /-- Jacobi's inverse function `arcsn(x|m) = F(arcsin x|m)` (Duverney (5.56)). -/
 @[dlmf 22.15.E4]
-def Real.jacobiArcsnm (x m : ℝ) : ℝ := Real.incEllIntFm (arcsin x) m
+def Real.jacobiArcsnOfParameter (x m : ℝ) : ℝ := Real.incompleteEllipticFOfParameter (arcsin x) m
 
 /-- `sn(arcsn x) = x` for `|x| ≤ 1`. -/
 @[dlmf 22.15.E1]
-theorem Real.jacobiSnm_jacobiArcsnm {m : ℝ} (hm : m < 1) {x : ℝ} (hx : -1 ≤ x) (hx1 : x ≤ 1) :
-    Real.jacobiSnm (Real.jacobiArcsnm x m) m = x := by
-  rw [Real.jacobiSnm, Real.jacobiArcsnm, Real.jacobiAmm_incEllIntFm hm, sin_arcsin hx hx1]
+theorem Real.jacobiSnOfParameter_jacobiArcsnOfParameter {m : ℝ} (hm : m < 1) {x : ℝ} (hx : -1 ≤ x)
+    (hx1 : x ≤ 1) :
+    Real.jacobiSnOfParameter (Real.jacobiArcsnOfParameter x m) m = x := by
+  rw [Real.jacobiSnOfParameter, Real.jacobiArcsnOfParameter,
+      Real.jacobiAmOfParameter_incompleteEllipticFOfParameter hm, sin_arcsin hx hx1]
 
 /-- `arcsn(sn u) = u` for `|u| ≤ K`. -/
-theorem Real.jacobiArcsnm_jacobiSnm {m : ℝ} (hm : m < 1) {u : ℝ} (hu : |u| ≤ Real.compEllIntKm m) :
-    Real.jacobiArcsnm (Real.jacobiSnm u m) m = u := by
-  have hmono : StrictMono fun u => Real.jacobiAmm u m := by
-    simp only [Real.jacobiAmm, hm, ↓reduceDIte]; exact (Real.incEllIntFmOrderIso hm).symm.strictMono
-  have h1 : Real.jacobiAmm u m ≤ π / 2 := by
-    rw [← Real.jacobiAmm_compEllIntKm hm]; exact hmono.monotone (le_of_abs_le hu)
-  have h2 : -(π / 2) ≤ Real.jacobiAmm u m := by
-    rw [← Real.jacobiAmm_compEllIntKm hm, ← Real.jacobiAmm_neg hm]
+theorem Real.jacobiArcsnOfParameter_jacobiSnOfParameter {m : ℝ} (hm : m < 1) {u : ℝ}
+    (hu : |u| ≤ Real.completeEllipticKOfParameter m) :
+    Real.jacobiArcsnOfParameter (Real.jacobiSnOfParameter u m) m = u := by
+  have hmono : StrictMono fun u => Real.jacobiAmOfParameter u m := by
+    simp only [Real.jacobiAmOfParameter, hm, ↓reduceDIte];
+        exact (Real.incompleteEllipticFOfParameterOrderIso hm).symm.strictMono
+  have h1 : Real.jacobiAmOfParameter u m ≤ π / 2 := by
+    rw [← Real.jacobiAmOfParameter_completeEllipticKOfParameter hm];
+        exact hmono.monotone (le_of_abs_le hu)
+  have h2 : -(π / 2) ≤ Real.jacobiAmOfParameter u m := by
+    rw [← Real.jacobiAmOfParameter_completeEllipticKOfParameter hm,
+        ← Real.jacobiAmOfParameter_neg hm]
     exact hmono.monotone (neg_le_of_abs_le hu)
-  rw [Real.jacobiArcsnm, Real.jacobiSnm, arcsin_sin h2 h1, Real.incEllIntFm_jacobiAmm hm]
+  rw [Real.jacobiArcsnOfParameter, Real.jacobiSnOfParameter, arcsin_sin h2 h1,
+      Real.incompleteEllipticFOfParameter_jacobiAmOfParameter hm]
 
 /-- `d arcsn/dx = ((1-x²)(1-mx²))^{-1/2}` for `|x| < 1` (Duverney (5.57)). -/
-theorem Real.hasDerivAt_jacobiArcsnm {m : ℝ} (hm : m < 1) {x : ℝ} (hx : -1 < x) (hx1 : x < 1) :
-    HasDerivAt (fun x => Real.jacobiArcsnm x m)
+theorem Real.hasDerivAt_jacobiArcsnOfParameter {m : ℝ} (hm : m < 1) {x : ℝ} (hx : -1 < x)
+    (hx1 : x < 1) :
+    HasDerivAt (fun x => Real.jacobiArcsnOfParameter x m)
       (1 / Real.sqrt ((1 - x ^ 2) * (1 - m * x ^ 2))) x := by
   have ha := hasDerivAt_arcsin hx.ne' hx1.ne
-  have h := (Real.hasDerivAt_incEllIntFm hm (arcsin x)).comp x ha
+  have h := (Real.hasDerivAt_incompleteEllipticFOfParameter hm (arcsin x)).comp x ha
   refine h.congr_deriv ?_
   have hp : 0 < 1 - m * x ^ 2 := by
     have := one_sub_mul_sin_sq_pos hm (arcsin x); rwa [sin_arcsin hx.le hx1.le] at this

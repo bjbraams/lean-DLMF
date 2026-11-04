@@ -30,15 +30,16 @@ polynomials (DLMF 18.18.10–18.18.13).
 ## Main results
 
 * `jacobi_generating_function`: DLMF 18.12.1.
-* `ultrasphPoly_generating_function`, `ultrasphPoly_weighted_generating_function`:
-  DLMF 18.12.4 and 18.12.5.
+* `ultrasphericalPolynomial_generating_function`,
+  `ultrasphericalPolynomial_weighted_generating_function`: DLMF 18.12.4 and 18.12.5.
 * `chebyshevT_generating_function`, `chebyshevT_log_generating_function`,
   `chebyshevU_generating_function`: DLMF 18.12.8–18.12.10.
 * `legendre_generating_function`: DLMF 18.12.11.
 * `hermite_generating_function`: DLMF 18.12.16.
-* `laguerrePolyL_addition`, `hermitePolyH_addition`: DLMF 18.18.10 and 18.18.11 (also 18.18.38
-  and 18.18.39).
-* `laguerrePolyL_multiplication`, `hermitePolyH_multiplication`: DLMF 18.18.12 and 18.18.13.
+* `laguerrePolynomialL_addition`, `hermitePolynomialH_addition`: DLMF 18.18.10 and 18.18.11 (also
+  18.18.38 and 18.18.39).
+* `laguerrePolynomialL_multiplication`, `hermitePolynomialH_multiplication`: DLMF 18.18.12 and
+  18.18.13.
 * `hasSum_of_three_term`: the generating function of a sequence with a constant-coefficient
   three-term recurrence.
 
@@ -115,12 +116,12 @@ theorem sum_even_range (f : ℕ → ℂ) (n : ℕ) :
 /-- A quadratic exponential times the Hermite generating function. -/
 theorem hasSum_exp_quadratic_mul_hermite (q lam x z : ℂ) :
     HasSum (fun n : ℕ => (∑ k ∈ Finset.range (n / 2 + 1),
-      q ^ k / k ! * ((aeval x (hermitePolyH (n - 2 * k)) : ℂ) / (n - 2 * k)! *
+      q ^ k / k ! * ((aeval x (hermitePolynomialH (n - 2 * k)) : ℂ) / (n - 2 * k)! *
         lam ^ (n - 2 * k))) * z ^ n)
       (exp (q * z ^ 2 + (2 * x * (lam * z) - (lam * z) ^ 2))) := by
-  have hh : HasSum (fun n => ((aeval x (hermitePolyH n) : ℂ) / n ! * lam ^ n) * z ^ n)
+  have hh : HasSum (fun n => ((aeval x (hermitePolynomialH n) : ℂ) / n ! * lam ^ n) * z ^ n)
       (exp (2 * x * (lam * z) - (lam * z) ^ 2)) := by
-    convert hasSum_hermitePolyH_generating_function x (lam * z) using 1
+    convert hasSum_hermitePolynomialH_generating_function x (lam * z) using 1
     funext n; rw [mul_pow]; ring
   have h := hasSum_scalar_convolution (hasSum_exp_quadratic q z) hh
   rw [← exp_add] at h
@@ -132,9 +133,9 @@ theorem hasSum_exp_quadratic_mul_hermite (q lam x z : ℂ) :
   simp
 
 /-- The factorial ratio in the even-indexed Hermite formulas. -/
-theorem poch_neg_nat_even_mul_factorial {n k : ℕ} (hk : 2 * k ≤ n) :
-    poch (-(n : ℂ)) (2 * k) * ((n - 2 * k)! : ℂ) = n ! := by
-  have h := poch_neg_nat_mul_factorial hk
+theorem pochhammer_neg_nat_even_mul_factorial {n k : ℕ} (hk : 2 * k ≤ n) :
+    pochhammer (-(n : ℂ)) (2 * k) * ((n - 2 * k)! : ℂ) = n ! := by
+  have h := pochhammer_neg_nat_mul_factorial hk
   simpa [pow_mul] using h
 
 section JacobiLagrange
@@ -144,29 +145,30 @@ open Metric Set
 /-- Iterated derivatives of `(1 + a t)^s` on the slit-plane region. -/
 theorem JacobiGenerating.iteratedDeriv_cpow (a s : ℂ) (k : ℕ) {t : ℂ} (ht : 1 + a * t ∈ slitPlane) :
     iteratedDeriv k (fun t => (1 + a * t) ^ s) t =
-      a ^ k * ((-1) ^ k * poch (-s) k) * (1 + a * t) ^ (s - k) := by
+      a ^ k * ((-1) ^ k * pochhammer (-s) k) * (1 + a * t) ^ (s - k) := by
   have hU : IsOpen {t : ℂ | 1 + a * t ∈ slitPlane} :=
     isOpen_slitPlane.preimage (by fun_prop)
   induction k generalizing t with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ k ih =>
     rw [iteratedDeriv_succ]
     have hev : iteratedDeriv k (fun t => (1 + a * t) ^ s) =ᶠ[𝓝 t]
-        fun t => a ^ k * ((-1) ^ k * poch (-s) k) * (1 + a * t) ^ (s - k) :=
+        fun t => a ^ k * ((-1) ^ k * pochhammer (-s) k) * (1 + a * t) ^ (s - k) :=
       Filter.eventually_of_mem (hU.mem_nhds ht) fun y hy => ih hy
     rw [hev.deriv_eq]
     have hd : HasDerivAt (fun t => 1 + a * t) a t := by
       simpa using ((hasDerivAt_id t).const_mul a).const_add 1
-    have := ((hd.cpow_const (c := s - k) ht).const_mul (a ^ k * ((-1) ^ k * poch (-s) k))).deriv
-    rw [this, poch_succ]
+    have := ((hd.cpow_const (c := s - k) ht).const_mul
+        (a ^ k * ((-1) ^ k * pochhammer (-s) k))).deriv
+    rw [this, pochhammer_succ]
     push_cast
     rw [show s - (k : ℂ) - 1 = s - (k + 1) by ring]
     ring
 
 /-- `(-1)^k (-s)_k = (s - k + 1)_k`. -/
-theorem JacobiGenerating.neg_one_pow_mul_poch_neg (s : ℂ) (k : ℕ) :
-    (-1 : ℂ) ^ k * poch (-s) k = poch (s - k + 1) k := by
-  have h := poch_one_sub_sub (s - k + 1) k
+theorem JacobiGenerating.neg_one_pow_mul_pochhammer_neg (s : ℂ) (k : ℕ) :
+    (-1 : ℂ) ^ k * pochhammer (-s) k = pochhammer (s - k + 1) k := by
+  have h := pochhammer_one_sub_sub (s - k + 1) k
   rw [show 1 - (s - k + 1) - (k : ℂ) = -s by ring] at h
   rw [h, ← mul_assoc, ← pow_add, ← two_mul, pow_mul]
   simp
@@ -194,15 +196,16 @@ theorem JacobiGenerating.analyticAt_cpow (a s : ℂ) : AnalyticAt ℂ (fun t => 
 /-- Taylor coefficients of `(1 + a t)^s (1 + b t)^u` at `0`. -/
 theorem JacobiGenerating.coeff_cpow_mul_cpow (a b s u : ℂ) (n : ℕ) :
     iteratedDeriv n (fun t => (1 + a * t) ^ s * (1 + b * t) ^ u) 0 / n ! =
-      ∑ i ∈ Finset.range (n + 1), (poch (s - i + 1) i / i !) *
-        (poch (u - (n - i : ℕ) + 1) (n - i) / (n - i)!) * a ^ i * b ^ (n - i) := by
+      ∑ i ∈ Finset.range (n + 1), (pochhammer (s - i + 1) i / i !) *
+        (pochhammer (u - (n - i : ℕ) + 1) (n - i) / (n - i)!) * a ^ i * b ^ (n - i) := by
   rw [iteratedDeriv_fun_mul (JacobiGenerating.analyticAt_cpow a s).contDiffAt
     (JacobiGenerating.analyticAt_cpow b u).contDiffAt, Finset.sum_div]
   refine Finset.sum_congr rfl fun i hi => ?_
   have hin : i ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)
   rw [JacobiGenerating.iteratedDeriv_cpow a s i (by simp [one_mem_slitPlane]),
     JacobiGenerating.iteratedDeriv_cpow b u (n - i) (by simp [one_mem_slitPlane]),
-    JacobiGenerating.neg_one_pow_mul_poch_neg, JacobiGenerating.neg_one_pow_mul_poch_neg]
+    JacobiGenerating.neg_one_pow_mul_pochhammer_neg,
+        JacobiGenerating.neg_one_pow_mul_pochhammer_neg]
   simp only [mul_zero, add_zero, one_cpow, mul_one]
   rw [Nat.cast_choose ℂ hin]
   have h1 : (i ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr i.factorial_ne_zero
@@ -213,9 +216,9 @@ theorem JacobiGenerating.coeff_cpow_mul_cpow (a b s u : ℂ) (n : ℕ) :
 /-- The Lagrange–Bürmann coefficient `[tⁿ] F φⁿ` for the Jacobi generating function
 (`F = (1 + (x+1)t/2)^α (1 + (x-1)t/2)^β`, `φ = (1 + (x+1)t/2)(1 + (x-1)t/2)`) is
 `P_n^{(α,β)}(x)`, by the binomial form 18.5.8. -/
-theorem JacobiGenerating.coeff_eq_jacobiPolyP {α β : ℂ} (hα : -1 < α.re) (x : ℂ) (n : ℕ) :
+theorem JacobiGenerating.coeff_eq_jacobiPolynomialP {α β : ℂ} (hα : -1 < α.re) (x : ℂ) (n : ℕ) :
     iteratedDeriv n (fun t => (1 + (x + 1) / 2 * t) ^ α * (1 + (x - 1) / 2 * t) ^ β *
-      ((1 + (x + 1) / 2 * t) * (1 + (x - 1) / 2 * t)) ^ n) 0 / n ! = jacobiPolyP α β n x := by
+      ((1 + (x + 1) / 2 * t) * (1 + (x - 1) / 2 * t)) ^ n) 0 / n ! = jacobiPolynomialP α β n x := by
   have hev : (fun t => (1 + (x + 1) / 2 * t) ^ α * (1 + (x - 1) / 2 * t) ^ β *
       ((1 + (x + 1) / 2 * t) * (1 + (x - 1) / 2 * t)) ^ n) =ᶠ[𝓝 0]
       fun t => (1 + (x + 1) / 2 * t) ^ (α + n) * (1 + (x - 1) / 2 * t) ^ (β + n) := by
@@ -308,7 +311,7 @@ private lemma JacobiGenerating.sub_ne_zero {a b c z w t : ℂ} (ha1 : ‖a‖ �
 /-- The Jacobi generating function for small `|z|`, by the Lagrange–Bürmann formula. -/
 theorem JacobiGenerating.hasSum_small {α β : ℂ} (hα : -1 < α.re) {x : ℝ} (hx : |x| ≤ 1) {z : ℂ}
     (hz : ‖z‖ < 1 / 10) :
-    HasSum (fun n : ℕ => jacobiPolyP α β n x * z ^ n) (jacGenRhs α β x z) := by
+    HasSum (fun n : ℕ => jacobiPolynomialP α β n x * z ^ n) (jacGenRhs α β x z) := by
   set a : ℂ := ((x : ℂ) + 1) / 2 with ha
   set b : ℂ := ((x : ℂ) - 1) / 2 with hb
   have hxn : ‖(x : ℂ)‖ ≤ 1 := by rwa [Complex.norm_real, Real.norm_eq_abs]
@@ -380,8 +383,8 @@ theorem JacobiGenerating.hasSum_small {α β : ℂ} (hα : -1 < α.re) {x : ℝ}
     (by norm_num : (1 / 4 : ℝ) < 1 / 2) hzΦ (by linarith) hfac
   -- the coefficients
   have hcoef : ∀ n : ℕ, iteratedDeriv n (fun t => (1 + a * t) ^ α * (1 + b * t) ^ β *
-      ((1 + a * t) * (1 + b * t)) ^ n) 0 / n ! = jacobiPolyP α β n x :=
-    fun n => JacobiGenerating.coeff_eq_jacobiPolyP hα (x : ℂ) n
+      ((1 + a * t) * (1 + b * t)) ^ n) 0 / n ! = jacobiPolynomialP α β n x :=
+    fun n => JacobiGenerating.coeff_eq_jacobiPolynomialP hα (x : ℂ) n
   simp only [hcoef] at key
   -- the value
   have hA : 0 < (1 + R - z).re := by
@@ -446,40 +449,44 @@ theorem JacobiGenerating.differentiableOn (α β : ℂ) {x : ℝ} (hx : |x| ≤ 
 
 end JacobiLagrange
 
-/-- The series with terms `(fun n : ℕ => jacobiPolyP α β n x * z ^ n)` converges to `((2 : ℂ) ^ (α
-+ β) / ((1 - 2 * x * z + z ^ 2) ^ (1 / 2 : ℂ) * (1 + (1 - 2 * x * z + z ^ 2) ^ (1 / 2 : ℂ) -
-z) ^ α * (1 + (1 - 2 * x * z + z ^ 2) ^ (1 / 2 : ℂ) + z) ^ β))`. -/
+/-- The series with terms `(fun n : ℕ => jacobiPolynomialP α β n x * z ^ n)` converges to
+`((2 : ℂ) ^ (α + β) / ((1 - 2 * x * z + z ^ 2) ^ (1 / 2 : ℂ) * (1 + (1 - 2 * x * z + z ^ 2) ^ (1 / 2
+: ℂ) - z) ^ α * (1 + (1 - 2 * x * z + z ^ 2) ^ (1 / 2 : ℂ) + z) ^ β))`. -/
 @[dlmf 18.12.E1]
 theorem jacobi_generating_function {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re)
     {x : ℝ} (hx : |x| ≤ 1) {z : ℂ} (hz : ‖z‖ < 1) :
-    HasSum (fun n : ℕ => jacobiPolyP α β n x * z ^ n)
+    HasSum (fun n : ℕ => jacobiPolynomialP α β n x * z ^ n)
       ((2 : ℂ) ^ (α + β) / ((1 - 2 * x * z + z ^ 2) ^ (1 / 2 : ℂ) *
         (1 + (1 - 2 * x * z + z ^ 2) ^ (1 / 2 : ℂ) - z) ^ α *
         (1 + (1 - 2 * x * z + z ^ 2) ^ (1 / 2 : ℂ) + z) ^ β)) := by
   have _hβ := hβ  -- 18.12.1 holds without a restriction on β
-  exact Complex.lagB_hasSum_of_differentiableOn (c := fun n => jacobiPolyP α β n x)
+  exact Complex.lagB_hasSum_of_differentiableOn (c := fun n => jacobiPolynomialP α β n x)
     (by norm_num : (0 : ℝ) < 1 / 10) (JacobiGenerating.differentiableOn α β hx)
     (fun w hw => JacobiGenerating.hasSum_small hα hx (by simpa using hw)) (by simpa using hz)
 
-/-- The series with terms `(fun n : ℕ => ultrasphPoly lam n x * z ^ n)` converges to `((1 - 2 * x
+/-- The series with terms `(fun n : ℕ => ultrasphericalPolynomial lam n x * z ^ n)` converges to
+`((1 - 2 * x
 * z + z ^ 2) ^ (-lam))`. -/
 @[dlmf 18.12.E4]
-theorem ultrasphPoly_generating_function {lam : ℂ} (hlam : -1 / 2 < lam.re) {x : ℝ} (hx : |x| ≤ 1)
+theorem ultrasphericalPolynomial_generating_function {lam : ℂ} (hlam : -1 / 2 < lam.re)
+    {x : ℝ} (hx : |x| ≤ 1)
     {z : ℂ} (hz : ‖z‖ < 1) :
-    HasSum (fun n : ℕ => ultrasphPoly lam n x * z ^ n) ((1 - 2 * x * z + z ^ 2) ^ (-lam)) := by
+    HasSum (fun n : ℕ => ultrasphericalPolynomial lam n x * z ^ n)
+        ((1 - 2 * x * z + z ^ 2) ^ (-lam)) := by
   have h := hasSum_coeff_gegenbauerSeries_mul_pow lam (Real.arccos x) hz
   rw [Real.cos_arccos (abs_le.mp hx).1 (abs_le.mp hx).2] at h
   refine h.congr_fun fun n => ?_
   rw [ofReal_eq_half_add_recip_of_abs_le_one hx,
-    ultrasphPoly_eq_coeff_gegenbauerSeries hlam (Complex.exp_ne_zero _)]
+    ultrasphericalPolynomial_eq_coeff_gegenbauerSeries hlam (Complex.exp_ne_zero _)]
 
-/-- The series with terms `(fun n : ℕ => (n + 2 * lam) / (2 * lam) * ultrasphPoly lam n x * z ^
-n)` converges to `((1 - x * z) / (1 - 2 * x * z + z ^ 2) ^ (lam + 1))`. -/
+/-- The series with terms
+`(fun n : ℕ => (n + 2 * lam) / (2 * lam) * ultrasphericalPolynomial lam n x * z ^ n)` converges to
+`((1 - x * z) / (1 - 2 * x * z + z ^ 2) ^ (lam + 1))`. -/
 @[dlmf 18.12.E5]
-theorem ultrasphPoly_weighted_generating_function {lam : ℂ} (hlam : -1 / 2 < lam.re)
+theorem ultrasphericalPolynomial_weighted_generating_function {lam : ℂ} (hlam : -1 / 2 < lam.re)
     (hlam0 : lam ≠ 0)
     {x : ℝ} (hx : |x| ≤ 1) {z : ℂ} (hz : ‖z‖ < 1) :
-    HasSum (fun n : ℕ => (n + 2 * lam) / (2 * lam) * ultrasphPoly lam n x * z ^ n)
+    HasSum (fun n : ℕ => (n + 2 * lam) / (2 * lam) * ultrasphericalPolynomial lam n x * z ^ n)
       ((1 - x * z) / (1 - 2 * x * z + z ^ 2) ^ (lam + 1)) := by
   set w := exp (Real.arccos x * I)
   have hw : w ≠ 0 := Complex.exp_ne_zero _
@@ -490,7 +497,7 @@ theorem ultrasphPoly_weighted_generating_function {lam : ℂ} (hlam : -1 / 2 < l
   rw [div_eq_mul_inv, ← Complex.cpow_neg]
   refine h.congr_fun fun n => ?_
   rw [coeff_weightedGegenbauerSeries hlam0, ofReal_eq_half_add_recip_of_abs_le_one hx,
-    ultrasphPoly_eq_coeff_gegenbauerSeries hlam hw]
+    ultrasphericalPolynomial_eq_coeff_gegenbauerSeries hlam hw]
 
 /-- Generating function of a sequence with constant-coefficient three-term recurrence. -/
 theorem hasSum_of_three_term {a : ℕ → ℂ} {p q z : ℂ}
@@ -657,14 +664,15 @@ theorem chebyshevU_generating_function {x : ℝ} (hx : |x| ≤ 1) {z : ℂ} (hz 
   convert h using 2
   simp
 
-/-- The series with terms `(fun n : ℕ => legendrePolyP n x * z ^ n)` converges to `((1 - 2 * x * z
-+ z ^ 2) ^ (-1 / 2 : ℂ))`. -/
+/-- The series with terms `(fun n : ℕ => legendrePolynomialP n x * z ^ n)` converges to
+`((1 - 2 * x * z + z ^ 2) ^ (-1 / 2 : ℂ))`. -/
 @[dlmf 18.12.E11]
 theorem legendre_generating_function {x : ℝ} (hx : |x| ≤ 1) {z : ℂ} (hz : ‖z‖ < 1) :
-    HasSum (fun n : ℕ => legendrePolyP n x * z ^ n) ((1 - 2 * x * z + z ^ 2) ^ (-1 / 2 : ℂ)) := by
-  simp_rw [legendre_eq_ultrasphPoly]
+    HasSum (fun n : ℕ => legendrePolynomialP n x * z ^ n)
+        ((1 - 2 * x * z + z ^ 2) ^ (-1 / 2 : ℂ)) := by
+  simp_rw [legendre_eq_ultrasphericalPolynomial]
   rw [show (-1 / 2 : ℂ) = -(1 / 2) by ring]
-  exact ultrasphPoly_generating_function (by norm_num) hx hz
+  exact ultrasphericalPolynomial_generating_function (by norm_num) hx hz
 
 /-- The series with terms `(fun n : ℕ => aeval x (hermite n) / (n.factorial : ℂ) * z ^ n)`
 converges to `(exp (x * z - z ^ 2 / 2))`. -/
@@ -724,12 +732,12 @@ theorem hermite_generating_function (x z : ℂ) :
   ring
 
 /-- The exponential generating function with an arbitrary starting degree. -/
-theorem hasSum_hermitePolyH_shifted (m : ℕ) (x t : ℂ) :
-    HasSum (fun n : ℕ => (aeval x (hermitePolyH (m + n)) : ℂ) * t ^ n / n !)
-      ((aeval (x - t) (hermitePolyH m) : ℂ) * exp (2 * x * t - t ^ 2)) := by
+theorem hasSum_hermitePolynomialH_shifted (m : ℕ) (x t : ℂ) :
+    HasSum (fun n : ℕ => (aeval x (hermitePolynomialH (m + n)) : ℂ) * t ^ n / n !)
+      ((aeval (x - t) (hermitePolynomialH m) : ℂ) * exp (2 * x * t - t ^ 2)) := by
   have hderiv (n : ℕ) (y : ℂ) :
-      iteratedDeriv n (fun v : ℂ => (aeval v (hermitePolyH m) : ℂ) * exp (-(v ^ 2))) y =
-        (-1 : ℂ) ^ n * (aeval y (hermitePolyH (m + n)) : ℂ) * exp (-(y ^ 2)) := by
+      iteratedDeriv n (fun v : ℂ => (aeval v (hermitePolynomialH m) : ℂ) * exp (-(v ^ 2))) y =
+        (-1 : ℂ) ^ n * (aeval y (hermitePolynomialH (m + n)) : ℂ) * exp (-(y ^ 2)) := by
     rw [iteratedDeriv_eq_iterate, mul_assoc]
     induction n generalizing y with
     | zero => simp
@@ -739,12 +747,13 @@ theorem hasSum_hermitePolyH_shifted (m : ℕ) (x t : ℂ) :
         rw [deriv_cexp (by fun_prop)]
         simp [pow_two]; ring
       rw [Function.iterate_succ_apply', ih, deriv_const_mul_field, deriv_fun_mul,
-        pow_succ, hg, show m + (n + 1) = (m + n) + 1 by omega, hermitePolyH_succ,
+        pow_succ, hg, show m + (n + 1) = (m + n) + 1 by omega, hermitePolynomialH_succ,
         map_sub, map_mul, map_mul, map_ofNat, aeval_X, Polynomial.deriv_aeval]
       · ring
       · apply Polynomial.differentiable_aeval
       · fun_prop
-  have hf : Differentiable ℂ (fun y : ℂ => (aeval y (hermitePolyH m) : ℂ) * exp (-(y ^ 2))) := by
+  have hf : Differentiable ℂ
+      (fun y : ℂ => (aeval y (hermitePolynomialH m) : ℂ) * exp (-(y ^ 2))) := by
     apply Differentiable.mul
     · apply Polynomial.differentiable_aeval
     · fun_prop
@@ -752,8 +761,8 @@ theorem hasSum_hermitePolyH_shifted (m : ℕ) (x t : ℂ) :
   have hs := Complex.hasSum_taylorSeries_of_entire (E := ℂ) hf x (x - t)
   have hterm : (fun n : ℕ =>
       (n ! : ℂ)⁻¹ • ((x - t) - x) ^ n •
-        iteratedDeriv n (fun y : ℂ => (aeval y (hermitePolyH m) : ℂ) * exp (-(y ^ 2))) x) =
-      fun n => (aeval x (hermitePolyH (m + n)) : ℂ) * t ^ n / n ! * exp (-(x ^ 2)) := by
+        iteratedDeriv n (fun y : ℂ => (aeval y (hermitePolynomialH m) : ℂ) * exp (-(y ^ 2))) x) =
+      fun n => (aeval x (hermitePolynomialH (m + n)) : ℂ) * t ^ n / n ! * exp (-(x ^ 2)) := by
     funext n
     simp only [sub_sub_cancel_left, smul_eq_mul]
     rw [hderiv, neg_pow]
@@ -763,9 +772,9 @@ theorem hasSum_hermitePolyH_shifted (m : ℕ) (x t : ℂ) :
   rw [hterm] at hs
   have hs' := hs.mul_right (exp (-(x ^ 2)))⁻¹
   have hsimp : (fun n : ℕ =>
-      (aeval x (hermitePolyH (m + n)) : ℂ) * t ^ n / n ! * exp (-(x ^ 2)) *
+      (aeval x (hermitePolynomialH (m + n)) : ℂ) * t ^ n / n ! * exp (-(x ^ 2)) *
         (exp (-(x ^ 2)))⁻¹) =
-      fun n => (aeval x (hermitePolyH (m + n)) : ℂ) * t ^ n / n ! := by
+      fun n => (aeval x (hermitePolynomialH (m + n)) : ℂ) * t ^ n / n ! := by
     funext n
     field [hne]
   rw [hsimp] at hs'
@@ -777,24 +786,24 @@ theorem hasSum_hermitePolyH_shifted (m : ℕ) (x t : ℂ) :
   simpa only [mul_assoc, hval] using hs'
 
 /-- Translation of a Hermite polynomial by an arbitrary complex number. -/
-theorem hermitePolyH_translation (m : ℕ) (x y : ℂ) :
-    (aeval (x + y) (hermitePolyH m) : ℂ) =
+theorem hermitePolynomialH_translation (m : ℕ) (x y : ℂ) :
+    (aeval (x + y) (hermitePolynomialH m) : ℂ) =
       ∑ k ∈ Finset.range (m + 1), (m.choose k : ℂ) * (2 * y) ^ k *
-        aeval x (hermitePolyH (m - k)) := by
+        aeval x (hermitePolynomialH (m - k)) := by
   have hc := Complex.powerSeries_coefficients_unique
-    (c := fun n => (aeval (x + y) (hermitePolyH n) : ℂ) / n !)
+    (c := fun n => (aeval (x + y) (hermitePolynomialH n) : ℂ) / n !)
     (d := fun n => ∑ k ∈ Finset.range (n + 1),
-      ((2 * y) ^ k / k !) * ((aeval x (hermitePolyH (n - k)) : ℂ) / (n - k)!))
+      ((2 * y) ^ k / k !) * ((aeval x (hermitePolynomialH (n - k)) : ℂ) / (n - k)!))
     (f := fun z => exp (2 * (x + y) * z - z ^ 2))
-    (fun z _ => (hasSum_hermitePolyH_generating_function _ z).congr_fun (by intro n; ring))
+    (fun z _ => (hasSum_hermitePolynomialH_generating_function _ z).congr_fun (by intro n; ring))
     (fun z _ => by
       have he : HasSum (fun k : ℕ => ((2 * y) ^ k / k !) * z ^ k) (exp (2 * y * z)) := by
         convert NormedSpace.expSeries_div_hasSum_exp (2 * y * z) using 1
         · funext k; rw [mul_pow]; ring
         · simp only [Complex.exp_eq_exp_ℂ]
-      have hh : HasSum (fun k => ((aeval x (hermitePolyH k) : ℂ) / k !) * z ^ k)
+      have hh : HasSum (fun k => ((aeval x (hermitePolynomialH k) : ℂ) / k !) * z ^ k)
           (exp (2 * x * z - z ^ 2)) :=
-        (hasSum_hermitePolyH_generating_function x z).congr_fun (by intro k; ring)
+        (hasSum_hermitePolynomialH_generating_function x z).congr_fun (by intro k; ring)
       convert hasSum_scalar_convolution he hh using 1
       rw [← exp_add]; congr 1; ring)
   have h := congrArg (fun c : ℕ → ℂ => c m * m !) hc
@@ -843,7 +852,7 @@ theorem hermite_finite_sum (n : ℕ) (x : ℂ) :
 /-- Formula under the stated hypotheses: `laguerreExtended (α + β + 1) n (x + y) = ∑ k ∈
 Finset.range (n + 1), laguerreExtended α k x * laguerreExtended β (n - k) y`. -/
 @[dlmf 18.18.E10, dlmf 18.18.E38]
-theorem laguerrePolyL_addition (α β x y : ℂ) (n : ℕ) :
+theorem laguerrePolynomialL_addition (α β x y : ℂ) (n : ℕ) :
     laguerreExtended (α + β + 1) n (x + y) =
       ∑ k ∈ Finset.range (n + 1), laguerreExtended α k x * laguerreExtended β (n - k) y := by
   have hdiffL : ∀ β : ℂ, Differentiable ℂ fun α : ℂ => laguerreExtended (α + β + 1) n (x + y) :=
@@ -853,7 +862,7 @@ theorem laguerrePolyL_addition (α β x y : ℂ) (n : ℕ) :
       ∑ k ∈ Finset.range (n + 1), laguerreExtended α k x * laguerreExtended β (n - k) y := by
     intro β hβ
     refine eq_of_differentiable_of_re_gt (hdiffL β) ?_
-      fun α hα => laguerrePolyL_addition_of_re hα hβ x y n
+      fun α hα => laguerrePolynomialL_addition_of_re hα hβ x y n
     exact Differentiable.fun_sum fun k _ =>
       (differentiable_laguerreExtended k x).mul (differentiable_const _)
   refine eq_of_differentiable_of_re_gt (f := fun β => laguerreExtended (α + β + 1) n (x + y))
@@ -864,30 +873,31 @@ theorem laguerrePolyL_addition (α β x y : ℂ) (n : ℕ) :
   · exact Differentiable.fun_sum fun k _ =>
       (differentiable_const _).mul (differentiable_laguerreExtended (n - k) y)
 
-/-- Formula under the stated hypotheses: `(aeval (a * x + b * y) (hermitePolyH n) : ℝ) = ∑ k ∈
-Finset.range (n + 1), (n.choose k : ℝ) * a ^ k * b ^ (n - k) * aeval x (hermitePolyH k) *
-aeval y (hermitePolyH (n - k))`. -/
+/-- Formula under the stated hypotheses: `(aeval (a * x + b * y) (hermitePolynomialH n) : ℝ) = ∑ k ∈
+Finset.range (n + 1), (n.choose k : ℝ) * a ^ k * b ^ (n - k) * aeval x (hermitePolynomialH k) *
+aeval y (hermitePolynomialH (n - k))`. -/
 @[dlmf 18.18.E11, dlmf 18.18.E39]
-theorem hermitePolyH_addition (a b x y : ℝ) (hab : a ^ 2 + b ^ 2 = 1) (n : ℕ) :
-    (aeval (a * x + b * y) (hermitePolyH n) : ℝ) =
+theorem hermitePolynomialH_addition (a b x y : ℝ) (hab : a ^ 2 + b ^ 2 = 1) (n : ℕ) :
+    (aeval (a * x + b * y) (hermitePolynomialH n) : ℝ) =
       ∑ k ∈ Finset.range (n + 1), (n.choose k : ℝ) * a ^ k * b ^ (n - k) *
-        aeval x (hermitePolyH k) * aeval y (hermitePolyH (n - k)) := by
+        aeval x (hermitePolynomialH k) * aeval y (hermitePolynomialH (n - k)) := by
   have hab' : (a : ℂ) ^ 2 + (b : ℂ) ^ 2 = 1 := by exact_mod_cast hab
   have hcoeff := Complex.powerSeries_coefficients_unique
-    (c := fun n => (aeval ((a : ℂ) * x + b * y) (hermitePolyH n) : ℂ) / n !)
+    (c := fun n => (aeval ((a : ℂ) * x + b * y) (hermitePolynomialH n) : ℂ) / n !)
     (d := fun n => ∑ k ∈ Finset.range (n + 1),
-      ((aeval (x : ℂ) (hermitePolyH k) : ℂ) / k ! * (a : ℂ) ^ k) *
-      ((aeval (y : ℂ) (hermitePolyH (n - k)) : ℂ) / (n - k) ! * (b : ℂ) ^ (n - k)))
+      ((aeval (x : ℂ) (hermitePolynomialH k) : ℂ) / k ! * (a : ℂ) ^ k) *
+      ((aeval (y : ℂ) (hermitePolynomialH (n - k)) : ℂ) / (n - k) ! * (b : ℂ) ^ (n - k)))
     (f := fun z => exp (2 * ((a : ℂ) * x + b * y) * z - z ^ 2))
-    (fun z _ => (hasSum_hermitePolyH_generating_function _ z).congr_fun (by intro k; ring))
+    (fun z _ => (hasSum_hermitePolynomialH_generating_function _ z).congr_fun (by intro k; ring))
     (fun z _ => ?_)
   · have h := congrArg (fun c : ℕ → ℂ => c n * n !) hcoeff
     rw [div_mul_cancel₀ _ (Nat.cast_ne_zero.mpr n.factorial_ne_zero), Finset.sum_mul] at h
     have ht (k : ℕ) (hk : k ∈ Finset.range (n + 1)) :
-        ((aeval (x : ℂ) (hermitePolyH k) : ℂ) / k ! * (a : ℂ) ^ k *
-          ((aeval (y : ℂ) (hermitePolyH (n - k)) : ℂ) / (n - k) ! * (b : ℂ) ^ (n - k))) * n ! =
+        ((aeval (x : ℂ) (hermitePolynomialH k) : ℂ) / k ! * (a : ℂ) ^ k *
+          ((aeval (y : ℂ) (hermitePolynomialH (n - k)) : ℂ) / (n - k) ! *
+              (b : ℂ) ^ (n - k))) * n ! =
         (n.choose k : ℂ) * a ^ k * b ^ (n - k) *
-          aeval (x : ℂ) (hermitePolyH k) * aeval (y : ℂ) (hermitePolyH (n - k)) := by
+          aeval (x : ℂ) (hermitePolynomialH k) * aeval (y : ℂ) (hermitePolynomialH (n - k)) := by
       have he : (n.choose k : ℂ) * k ! * (n - k) ! = n ! := by
         exact_mod_cast Nat.choose_mul_factorial_mul_factorial
             (by simpa using Finset.mem_range.mp hk)
@@ -896,73 +906,76 @@ theorem hermitePolyH_addition (a b x y : ℝ) (hab : a ^ 2 + b ^ 2 = 1) (n : ℕ
         Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero (n - k))]
     rw [Finset.sum_congr rfl ht] at h
     have castH (t : ℝ) (j : ℕ) :
-        (aeval (t : ℂ) (hermitePolyH j) : ℂ) = ((aeval t (hermitePolyH j) : ℝ) : ℂ) :=
-      aeval_algHom_apply (IsScalarTower.toAlgHom ℤ ℝ ℂ) t (hermitePolyH j)
+        (aeval (t : ℂ) (hermitePolynomialH j) : ℂ) = ((aeval t (hermitePolynomialH j) : ℝ) : ℂ) :=
+      aeval_algHom_apply (IsScalarTower.toAlgHom ℤ ℝ ℂ) t (hermitePolynomialH j)
     rw [show (a : ℂ) * x + b * y = ((a * x + b * y : ℝ) : ℂ) by push_cast; rfl] at h
     simp_rw [castH] at h
     exact_mod_cast h
-  · have h1 : HasSum (fun k => ((aeval (x : ℂ) (hermitePolyH k) : ℂ) / k ! *
+  · have h1 : HasSum (fun k => ((aeval (x : ℂ) (hermitePolynomialH k) : ℂ) / k ! *
         (a : ℂ) ^ k) * z ^ k) (exp (2 * x * (a * z) - (a * z) ^ 2)) := by
-      convert hasSum_hermitePolyH_generating_function (x : ℂ) (a * z) using 1
+      convert hasSum_hermitePolynomialH_generating_function (x : ℂ) (a * z) using 1
       funext k; rw [mul_pow]; ring
-    have h2 : HasSum (fun k => ((aeval (y : ℂ) (hermitePolyH k) : ℂ) / k ! *
+    have h2 : HasSum (fun k => ((aeval (y : ℂ) (hermitePolynomialH k) : ℂ) / k ! *
         (b : ℂ) ^ k) * z ^ k) (exp (2 * y * (b * z) - (b * z) ^ 2)) := by
-      convert hasSum_hermitePolyH_generating_function (y : ℂ) (b * z) using 1
+      convert hasSum_hermitePolynomialH_generating_function (y : ℂ) (b * z) using 1
       funext k; rw [mul_pow]; ring
     convert hasSum_scalar_convolution h1 h2 using 1
     rw [← exp_add]
     congr 1
     linear_combination z ^ 2 * hab'
 
-/-- Formula under the stated hypotheses: `laguerrePolyL α n (lam * x) / laguerrePolyL α n 0 = ∑ k
-∈ Finset.range (n + 1), (n.choose k : ℂ) * lam ^ k * (1 - lam) ^ (n - k) * laguerrePolyL α k x
-/ laguerrePolyL α k 0`. -/
+/-- Formula under the stated hypotheses:
+`laguerrePolynomialL α n (lam * x) / laguerrePolynomialL α n 0 = ∑ k ∈ Finset.range (n + 1),
+(n.choose k : ℂ) * lam ^ k * (1 - lam) ^ (n - k) * laguerrePolynomialL α k x / laguerrePolynomialL α
+k 0`. -/
 @[dlmf 18.18.E12]
-theorem laguerrePolyL_multiplication {α : ℂ} (hα : -1 < α.re) (lam x : ℂ) (n : ℕ) :
-    laguerrePolyL α n (lam * x) / laguerrePolyL α n 0 = ∑ k ∈ Finset.range (n + 1),
-      (n.choose k : ℂ) * lam ^ k * (1 - lam) ^ (n - k) * laguerrePolyL α k x
-          / laguerrePolyL α k 0 := by
+theorem laguerrePolynomialL_multiplication {α : ℂ} (hα : -1 < α.re) (lam x : ℂ) (n : ℕ) :
+    laguerrePolynomialL α n (lam * x) / laguerrePolynomialL α n 0 = ∑ k ∈ Finset.range (n + 1),
+      (n.choose k : ℂ) * lam ^ k * (1 - lam) ^ (n - k) * laguerrePolynomialL α k x
+          / laguerrePolynomialL α k 0 := by
   have hc : ∀ k : ℕ, α + 1 ≠ -(k : ℂ) := not_neg_nat_of_re_pos (by simp; linarith)
-  have hpk : ∀ k, poch (α + 1) k ≠ 0 := poch_ne_zero_of_not_neg_nat hc
-  have hL : ∀ m ≤ n, ∀ y, laguerrePolyL α m y / laguerrePolyL α m 0 =
-      ∑ j ∈ Finset.range (n + 1), poch (-(m : ℂ)) j / (poch (α + 1) j * j !) * y ^ j := by
+  have hpk : ∀ k, pochhammer (α + 1) k ≠ 0 := pochhammer_ne_zero_of_not_neg_nat hc
+  have hL : ∀ m ≤ n, ∀ y, laguerrePolynomialL α m y / laguerrePolynomialL α m 0 =
+      ∑ j ∈ Finset.range (n + 1), pochhammer (-(m : ℂ)) j /
+          (pochhammer (α + 1) j * j !) * y ^ j := by
     intro m hm y
-    have hp : poch (α + 1) m / m ! ≠ 0 :=
+    have hp : pochhammer (α + 1) m / m ! ≠ 0 :=
       div_ne_zero (hpk m) (Nat.cast_ne_zero.mpr m.factorial_ne_zero)
-    unfold laguerrePolyL
+    unfold laguerrePolynomialL
     rw [kummerM_zero, mul_one, mul_div_cancel_left₀ _ hp, kummerM_eq_sum_neg_nat]
     refine Finset.sum_subset (Finset.range_subset_range.mpr (by omega)) fun j _ hj => ?_
-    rw [poch_neg_nat_eq_zero (by simpa using hj)]; simp
+    rw [pochhammer_neg_nat_eq_zero (by simpa using hj)]; simp
   rw [hL n le_rfl]
-  simp_rw [mul_div_assoc _ (laguerrePolyL α _ x)]
+  simp_rw [mul_div_assoc _ (laguerrePolynomialL α _ x)]
   conv_rhs => rw [Finset.sum_congr rfl fun k hk => by
     rw [hL k (by simpa [Nat.lt_succ_iff] using hk) x]]
   simp_rw [Finset.mul_sum]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun j hj => ?_
   have hjn : j ≤ n := by simp at hj; omega
-  have hb := sum_choose_mul_poch_neg_nat_mul_pow hjn lam (1 - lam)
+  have hb := sum_choose_mul_pochhammer_neg_nat_mul_pow hjn lam (1 - lam)
   rw [add_sub_cancel, one_pow, mul_one] at hb
-  rw [Finset.sum_congr rfl (g := fun k => (n.choose k : ℂ) * poch (-(k : ℂ)) j * lam ^ k *
-    (1 - lam) ^ (n - k) * (x ^ j / (poch (α + 1) j * j !))) (fun k _ => by ring),
+  rw [Finset.sum_congr rfl (g := fun k => (n.choose k : ℂ) * pochhammer (-(k : ℂ)) j * lam ^ k *
+    (1 - lam) ^ (n - k) * (x ^ j / (pochhammer (α + 1) j * j !))) (fun k _ => by ring),
     ← Finset.sum_mul, hb, mul_pow]
   ring
 
-/-- Formula under the stated hypotheses: `aeval (lam * x) (hermitePolyH n) = ∑ k ∈ Finset.range (n
-/ 2 + 1), poch (-(n : ℂ)) (2 * k) / k.factorial * lam ^ (n - 2 * k) * (lam ^ 2 - 1) ^ k *
-aeval x (hermitePolyH (n - 2 * k))`. -/
+/-- Formula under the stated hypotheses:
+`aeval (lam * x) (hermitePolynomialH n) = ∑ k ∈ Finset.range (n / 2 + 1), pochhammer (-(n : ℂ)) (2 *
+k) / k.factorial * lam ^ (n - 2 * k) * (lam ^ 2 - 1) ^ k * aeval x (hermitePolynomialH (n - 2 *
+k))`. -/
 @[dlmf 18.18.E13]
-theorem hermitePolyH_multiplication (lam x : ℂ) (n : ℕ) :
-    aeval (lam * x) (hermitePolyH n) = ∑ k ∈ Finset.range (n / 2 + 1),
-      poch (-(n : ℂ)) (2 * k) / k.factorial * lam ^ (n - 2 * k) * (lam ^ 2 - 1) ^ k *
-        aeval x (hermitePolyH (n - 2 * k)) := by
+theorem hermitePolynomialH_multiplication (lam x : ℂ) (n : ℕ) :
+    aeval (lam * x) (hermitePolynomialH n) = ∑ k ∈ Finset.range (n / 2 + 1),
+      pochhammer (-(n : ℂ)) (2 * k) / k.factorial * lam ^ (n - 2 * k) * (lam ^ 2 - 1) ^ k *
+        aeval x (hermitePolynomialH (n - 2 * k)) := by
   have hc := Complex.powerSeries_coefficients_unique
-    (c := fun j => (aeval (lam * x) (hermitePolyH j) : ℂ) / j !)
+    (c := fun j => (aeval (lam * x) (hermitePolynomialH j) : ℂ) / j !)
     (d := fun j => ∑ k ∈ Finset.range (j / 2 + 1),
       (lam ^ 2 - 1) ^ k / k ! *
-        ((aeval x (hermitePolyH (j - 2 * k)) : ℂ) / (j - 2 * k)! * lam ^ (j - 2 * k)))
+        ((aeval x (hermitePolynomialH (j - 2 * k)) : ℂ) / (j - 2 * k)! * lam ^ (j - 2 * k)))
     (f := fun z => exp (2 * (lam * x) * z - z ^ 2))
-    (fun z _ => (hasSum_hermitePolyH_generating_function _ z).congr_fun (by intro j; ring))
+    (fun z _ => (hasSum_hermitePolynomialH_generating_function _ z).congr_fun (by intro j; ring))
     (fun z _ => by
       convert hasSum_exp_quadratic_mul_hermite (lam ^ 2 - 1) lam x z using 1
       congr 1; ring)
@@ -972,7 +985,7 @@ theorem hermitePolyH_multiplication (lam x : ℂ) (n : ℕ) :
   apply Finset.sum_congr rfl
   intro k hk
   have hk' : 2 * k ≤ n := by have := Finset.mem_range.mp hk; omega
-  rw [← poch_neg_nat_even_mul_factorial hk']
+  rw [← pochhammer_neg_nat_even_mul_factorial hk']
   field_simp [Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero k),
     Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero (n - 2 * k))]
 

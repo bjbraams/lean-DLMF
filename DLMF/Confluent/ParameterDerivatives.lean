@@ -20,7 +20,7 @@ parameters.
 
 * `hasSum_deriv_regularizedConfluent_comp`: termwise differentiation of the regularized Kummer
   series along entire parameter curves.
-* `deriv_poch_mul_recip_Gamma_add_nat`: the derivative of `(x)_m / Γ(x+m)` through the entire
+* `deriv_pochhammer_mul_recip_Gamma_add_nat`: the derivative of `(x)_m / Γ(x+m)` through the entire
   function `(1/Γ)'`, valid for every argument.
 * `deriv_tricomi_numerator_nat`, `tricomi_numerator_nat_series`: the derivative of the
   regularized connection numerator at a positive integer parameter, split into a finite
@@ -30,7 +30,7 @@ parameters.
 
 ## Implementation notes
 
-The domination argument adapts `hasSum_deriv_regularizedGaussHGFun_comp` from
+The domination argument adapts `hasSum_deriv_regularizedGaussHypergeometricFun_comp` from
 `DLMF.Hypergeometric.ConnectionFormulas`, using the entire confluent majorant.
 -/
 
@@ -49,10 +49,10 @@ open DLMF.Gamma
 /-- Termwise differentiation of the regularized Kummer series along entire parameter curves. -/
 theorem hasSum_deriv_regularizedConfluent_comp {A B : ℂ → ℂ} (hA : Differentiable ℂ A)
     (hB : Differentiable ℂ B) (z : ℂ) (w₀ : ℂ) :
-    HasSum (fun n : ℕ => deriv (fun w => poch (A w) n * z ^ n / n.factorial *
+    HasSum (fun n : ℕ => deriv (fun w => pochhammer (A w) n * z ^ n / n.factorial *
         (Gamma (B w + n))⁻¹) w₀)
       (deriv (fun w => regularizedHGFun {A w} {B w} z) w₀) := by
-  set T : ℕ → ℂ → ℂ := fun n w => poch (A w) n * z ^ n / n.factorial *
+  set T : ℕ → ℂ → ℂ := fun n w => pochhammer (A w) n * z ^ n / n.factorial *
     (Gamma (B w + n))⁻¹ with hT
   have hTd : ∀ n, Differentiable ℂ (T n) := by
     intro n
@@ -114,16 +114,16 @@ theorem hasSum_deriv_regularizedConfluent_comp {A B : ℂ → ℂ} (hA : Differe
 
 /-- The derivative of `x ↦ (x)_m` times `1/Γ(x+m)`, through the entire function `(1/Γ)'`.
 Valid for every `y`, including the poles of `Γ`. -/
-theorem deriv_poch_mul_recip_Gamma_add_nat (y : ℂ) (m : ℕ) :
-    deriv (fun x : ℂ => poch x m) y * (Gamma (y + m))⁻¹ =
-      recipGammaDeriv 1 y - poch y m * recipGammaDeriv 1 (y + m) := by
-  have hp : HasDerivAt (fun x : ℂ => poch x m) (deriv (fun x : ℂ => poch x m) y) y :=
+theorem deriv_pochhammer_mul_recip_Gamma_add_nat (y : ℂ) (m : ℕ) :
+    deriv (fun x : ℂ => pochhammer x m) y * (Gamma (y + m))⁻¹ =
+      recipGammaDeriv 1 y - pochhammer y m * recipGammaDeriv 1 (y + m) := by
+  have hp : HasDerivAt (fun x : ℂ => pochhammer x m) (deriv (fun x : ℂ => pochhammer x m) y) y :=
     (Polynomial.differentiable (ascPochhammer ℂ m) y).hasDerivAt
   have hg := (hasDerivAt_recip_Gamma' (y + m)).comp y ((hasDerivAt_id y).add_const (m : ℂ))
   have h := hp.mul hg
-  change HasDerivAt (fun x : ℂ => poch x m * (Gamma (x + m))⁻¹) _ y at h
-  have heq : (fun x : ℂ => poch x m * (Gamma (x + m))⁻¹) = fun x => (Gamma x)⁻¹ :=
-    funext fun x => poch_mul_recip_Gamma_add_nat x m
+  change HasDerivAt (fun x : ℂ => pochhammer x m * (Gamma (x + m))⁻¹) _ y at h
+  have heq : (fun x : ℂ => pochhammer x m * (Gamma (x + m))⁻¹) = fun x => (Gamma x)⁻¹ :=
+    funext fun x => pochhammer_mul_recip_Gamma_add_nat x m
   rw [heq] at h
   have := h.unique (hasDerivAt_recip_Gamma' y)
   simp only [Function.comp_apply, _root_.id] at this
@@ -136,28 +136,28 @@ products `ψ(a+k)/Γ(a-n)` written through the entire function `(1/Γ)'`:
 Stronger than `tricomi_numerator_nat_series`: valid for all `a`. -/
 theorem tricomi_numerator_nat_series_recipGamma (a : ℂ) (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
     Summable (fun k : ℕ =>
-      (poch a k * z ^ k / k.factorial * (Gamma ((n : ℂ) + 1 + k))⁻¹) *
+      (pochhammer a k * z ^ k / k.factorial * (Gamma ((n : ℂ) + 1 + k))⁻¹) *
         ((Gamma (a - n))⁻¹ * (log z - digamma (k + 1) - digamma ((n : ℂ) + 1 + k)) -
-          poch (a - n) (n + k) * recipGammaDeriv 1 (a + k))) ∧
+          pochhammer (a - n) (n + k) * recipGammaDeriv 1 (a + k))) ∧
     deriv (fun c : ℂ =>
       regularizedHGFun {a} {c} z * (Gamma (a - c + 1))⁻¹ -
         z ^ (1 - c) * regularizedHGFun {a - c + 1} {2 - c} z * (Gamma a)⁻¹)
       ((n : ℂ) + 1) =
       ∑' k : ℕ,
-        (poch a k * z ^ k / k.factorial * (Gamma ((n : ℂ) + 1 + k))⁻¹) *
+        (pochhammer a k * z ^ k / k.factorial * (Gamma ((n : ℂ) + 1 + k))⁻¹) *
           ((Gamma (a - n))⁻¹ * (log z - digamma (k + 1) - digamma ((n : ℂ) + 1 + k)) -
-            poch (a - n) (n + k) * recipGammaDeriv 1 (a + k)) +
+            pochhammer (a - n) (n + k) * recipGammaDeriv 1 (a + k)) +
       z ^ (-(n : ℂ)) * (Gamma a)⁻¹ * ∑ j ∈ Finset.range n,
-        poch (a - n) j * z ^ j / j.factorial *
+        pochhammer (a - n) j * z ^ j / j.factorial *
           ((-1 : ℂ) ^ (n - 1 - j) * ((n - 1 - j).factorial : ℂ)) := by
   set c₀ : ℂ := n + 1 with hc₀
   set β : ℂ := a - n with hβ
   set Q : ℂ → ℂ := fun c => regularizedHGFun {a} {c} z with hQ
   set S : ℂ → ℂ := fun c => regularizedHGFun {a - c + 1} {2 - c} z with hS
-  set q : ℕ → ℂ := fun k => poch a k * z ^ k / k.factorial *
+  set q : ℕ → ℂ := fun k => pochhammer a k * z ^ k / k.factorial *
     (Gamma ((n : ℂ) + 1 + k))⁻¹ with hq
-  set P : ℂ := poch β n with hP
-  set D : ℕ → ℂ := fun j => deriv (fun y : ℂ => poch y j) β with hD
+  set P : ℂ := pochhammer β n with hP
+  set D : ℕ → ℂ := fun j => deriv (fun y : ℂ => pochhammer y j) β with hD
   have eβ : a - c₀ + 1 = β := by rw [hc₀, hβ]; ring
   have eC : 2 - c₀ = 1 - (n : ℂ) := by rw [hc₀]; ring
   have hQd : Differentiable ℂ Q :=
@@ -177,23 +177,23 @@ theorem tricomi_numerator_nat_series_recipGamma (a : ℂ) (n : ℕ) {z : ℂ} (h
     simp at this
     linarith [Nat.cast_nonneg n (α := ℝ), Nat.cast_nonneg k (α := ℝ),
       Nat.cast_nonneg j (α := ℝ)]
-  have hqd : ∀ k : ℕ, deriv (fun c : ℂ => poch a k * z ^ k / k.factorial *
+  have hqd : ∀ k : ℕ, deriv (fun c : ℂ => pochhammer a k * z ^ k / k.factorial *
       (Gamma (c + k))⁻¹) c₀ = -q k * digamma ((n : ℂ) + 1 + k) := by
     intro k
     have hg := ((hasDerivAt_recip_Gamma (hmn k)).comp c₀
-      ((hasDerivAt_id c₀).add_const (k : ℂ))).const_mul (poch a k * z ^ k / k.factorial)
-    change HasDerivAt (fun c : ℂ => poch a k * z ^ k / k.factorial *
+      ((hasDerivAt_id c₀).add_const (k : ℂ))).const_mul (pochhammer a k * z ^ k / k.factorial)
+    change HasDerivAt (fun c : ℂ => pochhammer a k * z ^ k / k.factorial *
       (Gamma (c + k))⁻¹) _ c₀ at hg
     rw [hg.deriv]
     simp only [hq]
     ring
-  set dt : ℕ → ℂ := fun j => deriv (fun c : ℂ => poch (a - c + 1) j * z ^ j / j.factorial *
+  set dt : ℕ → ℂ := fun j => deriv (fun c : ℂ => pochhammer (a - c + 1) j * z ^ j / j.factorial *
     (Gamma (2 - c + j))⁻¹) c₀ with hdt
   have htd : ∀ j : ℕ, dt j = z ^ j / j.factorial *
       (-(D j) * (Gamma (1 - (n : ℂ) + j))⁻¹ -
-        poch β j * recipGammaDeriv 1 (1 - (n : ℂ) + j)) := by
+        pochhammer β j * recipGammaDeriv 1 (1 - (n : ℂ) + j)) := by
     intro j
-    have hp : HasDerivAt (fun y => poch y j) (D j) (a - c₀ + 1) := by
+    have hp : HasDerivAt (fun y => pochhammer y j) (D j) (a - c₀ + 1) := by
       rw [eβ]; exact (Polynomial.differentiable (ascPochhammer ℂ j) β).hasDerivAt
     have hl1 : HasDerivAt (fun c : ℂ => a - c + 1) (-1) c₀ := by
       simpa using ((hasDerivAt_id c₀).const_sub a).add_const (1 : ℂ)
@@ -201,9 +201,9 @@ theorem tricomi_numerator_nat_series_recipGamma (a : ℂ) (n : ℕ) {z : ℂ} (h
       simpa using ((hasDerivAt_id c₀).const_sub (2 : ℂ)).add_const (j : ℂ)
     have hg := (hasDerivAt_recip_Gamma' (2 - c₀ + j)).comp c₀ hl2
     have h := (((hp.comp c₀ hl1).mul_const (z ^ j)).div_const (j.factorial : ℂ)).mul hg
-    change HasDerivAt (fun c : ℂ => poch (a - c + 1) j * z ^ j / j.factorial *
+    change HasDerivAt (fun c : ℂ => pochhammer (a - c + 1) j * z ^ j / j.factorial *
       (Gamma (2 - c + j))⁻¹) _ c₀ at h
-    change deriv (fun c : ℂ => poch (a - c + 1) j * z ^ j / j.factorial *
+    change deriv (fun c : ℂ => pochhammer (a - c + 1) j * z ^ j / j.factorial *
       (Gamma (2 - c + j))⁻¹) c₀ = _
     rw [h.deriv]
     simp only [Function.comp_apply, eβ, eC]
@@ -216,7 +216,7 @@ theorem tricomi_numerator_nat_series_recipGamma (a : ℂ) (n : ℕ) {z : ℂ} (h
     intro k
     rw [show 1 - (n : ℂ) + ((k + n : ℕ) : ℂ) = (k : ℂ) + 1 by push_cast; ring,
       Gamma_nat_eq_factorial]
-  set s : ℕ → ℂ := fun j => poch β j * z ^ j / j.factorial *
+  set s : ℕ → ℂ := fun j => pochhammer β j * z ^ j / j.factorial *
     (Gamma (1 - (n : ℂ) + j))⁻¹ with hs
   have hS0 : HasSum s (S c₀) := by
     simpa [hs, hS, eβ, eC, regularizedConfluent_eq_tsum] using
@@ -224,7 +224,7 @@ theorem tricomi_numerator_nat_series_recipGamma (a : ℂ) (n : ℕ) {z : ℂ} (h
   have hs_shift : ∀ k : ℕ, s (k + n) = P * z ^ n * q k := by
     intro k
     simp only [hs, hq, hP, hGk, hG1k]
-    rw [add_comm k n, poch_add β n k, show β + (n : ℂ) = a by rw [hβ]; ring,
+    rw [add_comm k n, pochhammer_add β n k, show β + (n : ℂ) = a by rw [hβ]; ring,
       pow_add, add_comm n k]
     have hk : (k.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr k.factorial_ne_zero
     have hkn : ((k + n).factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
@@ -240,11 +240,12 @@ theorem tricomi_numerator_nat_series_recipGamma (a : ℂ) (n : ℕ) {z : ℂ} (h
     rw [hlow, sub_zero] at h
     exact h.unique ((hQ0.mul_left (P * z ^ n)).congr_fun fun k => (hs_shift k).symm ▸ rfl)
   have hJP : (Gamma a)⁻¹ * P = (Gamma β)⁻¹ := by
-    rw [mul_comm, hP, ← poch_mul_recip_Gamma_add_nat β n, show β + (n : ℂ) = a by rw [hβ]; ring]
+    rw [mul_comm, hP, ← pochhammer_mul_recip_Gamma_add_nat β n, show β + (n : ℂ) =
+        a by rw [hβ]; ring]
   have hZ : z ^ (-(n : ℂ)) * z ^ n = 1 := by
     rw [cpow_neg, cpow_natCast]; exact inv_mul_cancel₀ (pow_ne_zero _ hz)
   have hdt_shift : ∀ k : ℕ, (Gamma a)⁻¹ * z ^ (-(n : ℂ)) * dt (k + n) = q k *
-      (-(recipGammaDeriv 1 β - poch β (n + k) * recipGammaDeriv 1 (a + k)) +
+      (-(recipGammaDeriv 1 β - pochhammer β (n + k) * recipGammaDeriv 1 (a + k)) +
         (Gamma β)⁻¹ * digamma (k + 1)) := by
     intro k
     have hk1 : ∀ j : ℕ, (k : ℂ) + 1 ≠ -(j : ℂ) := by
@@ -253,34 +254,34 @@ theorem tricomi_numerator_nat_series_recipGamma (a : ℂ) (n : ℕ) {z : ℂ} (h
       simp at this
       linarith [Nat.cast_nonneg k (α := ℝ), Nat.cast_nonneg j (α := ℝ)]
     have e0 : 1 - (n : ℂ) + ((k + n : ℕ) : ℂ) = (k : ℂ) + 1 := by push_cast; ring
-    have e1 : (Gamma a)⁻¹ = poch a k * (Gamma (a + k))⁻¹ :=
-      (poch_mul_recip_Gamma_add_nat a k).symm
+    have e1 : (Gamma a)⁻¹ = pochhammer a k * (Gamma (a + k))⁻¹ :=
+      (pochhammer_mul_recip_Gamma_add_nat a k).symm
     have e2 : D (k + n) * (Gamma (a + k))⁻¹ =
-        recipGammaDeriv 1 β - poch β (n + k) * recipGammaDeriv 1 (a + k) := by
-      have h := deriv_poch_mul_recip_Gamma_add_nat β (k + n)
+        recipGammaDeriv 1 β - pochhammer β (n + k) * recipGammaDeriv 1 (a + k) := by
+      have h := deriv_pochhammer_mul_recip_Gamma_add_nat β (k + n)
       rw [show β + ((k + n : ℕ) : ℂ) = a + k by rw [hβ]; push_cast; ring, add_comm k n] at h
       rw [add_comm k n]; exact h
-    have e3 : (Gamma a)⁻¹ * poch β (k + n) = (Gamma β)⁻¹ * poch a k := by
-      rw [add_comm k n, poch_add β n k, show β + (n : ℂ) = a by rw [hβ]; ring, ← hJP, hP]
+    have e3 : (Gamma a)⁻¹ * pochhammer β (k + n) = (Gamma β)⁻¹ * pochhammer a k := by
+      rw [add_comm k n, pochhammer_add β n k, show β + (n : ℂ) = a by rw [hβ]; ring, ← hJP, hP]
       ring
     have e4 : z ^ (-(n : ℂ)) * z ^ (k + n) = z ^ k := by
       rw [pow_add]; linear_combination z ^ k * hZ
     have e5 := recipGammaDeriv_one_eq hk1
     have e6 := Gamma_nat_eq_factorial k
-    have e7 : poch β (n + k) = poch β (k + n) := by rw [add_comm]
+    have e7 : pochhammer β (n + k) = pochhammer β (k + n) := by rw [add_comm]
     rw [htd, e0, e5]
     simp only [hq, hGk]
     rw [e6, add_comm n k]
     linear_combination
       ((Gamma a)⁻¹ * ((k + n).factorial : ℂ)⁻¹ * (-(D (k + n)) * (k.factorial : ℂ)⁻¹ -
-        poch β (k + n) * (-digamma (k + 1) * (k.factorial : ℂ)⁻¹))) * e4 +
+        pochhammer β (k + n) * (-digamma (k + 1) * (k.factorial : ℂ)⁻¹))) * e4 +
       (z ^ k * ((k + n).factorial : ℂ)⁻¹ * (-(D (k + n)) * (k.factorial : ℂ)⁻¹)) * e1 +
-      (z ^ k * ((k + n).factorial : ℂ)⁻¹ * (-(k.factorial : ℂ)⁻¹) * poch a k) * e2 +
+      (z ^ k * ((k + n).factorial : ℂ)⁻¹ * (-(k.factorial : ℂ)⁻¹) * pochhammer a k) * e2 +
       (z ^ k * ((k + n).factorial : ℂ)⁻¹ * (digamma (k + 1) * (k.factorial : ℂ)⁻¹)) * e3 +
-      (z ^ k * ((k + n).factorial : ℂ)⁻¹ * (k.factorial : ℂ)⁻¹ * poch a k *
+      (z ^ k * ((k + n).factorial : ℂ)⁻¹ * (k.factorial : ℂ)⁻¹ * pochhammer a k *
         recipGammaDeriv 1 (a + k)) * e7
   have hdt_low : ∀ j ∈ Finset.range n, dt j =
-      -(poch β j * z ^ j / j.factorial *
+      -(pochhammer β j * z ^ j / j.factorial *
         ((-1 : ℂ) ^ (n - 1 - j) * ((n - 1 - j).factorial : ℂ))) := by
     intro j hj
     rw [htd, hpole j (Finset.mem_range.mp hj), recipGammaDeriv_one_neg_nat,
@@ -312,7 +313,7 @@ theorem tricomi_numerator_nat_series_recipGamma (a : ℂ) (n : ℕ) {z : ℂ} (h
     linear_combination (log z * Q c₀ * (Gamma a)⁻¹ * P) * hZ + log z * Q c₀ * hJP
   have hTail : HasSum (fun k => q k *
       ((Gamma β)⁻¹ * (log z - digamma (k + 1) - digamma ((n : ℂ) + 1 + k)) -
-        poch β (n + k) * recipGammaDeriv 1 (a + k)))
+        pochhammer β (n + k) * recipGammaDeriv 1 (a + k)))
       (deriv Q c₀ * (Gamma β)⁻¹ - Q c₀ * recipGammaDeriv 1 β + log z * (Gamma β)⁻¹ * Q c₀ -
         (Gamma a)⁻¹ * z ^ (-(n : ℂ)) * (deriv S c₀ - ∑ j ∈ Finset.range n, dt j)) := by
     have h := (((hQsum.mul_right (Gamma β)⁻¹).sub (hQ0.mul_left (recipGammaDeriv 1 β))).add
@@ -327,10 +328,10 @@ theorem tricomi_numerator_nat_series_recipGamma (a : ℂ) (n : ℕ) {z : ℂ} (h
   refine ⟨hTail.summable, ?_⟩
   change _ = (∑' k : ℕ, q k *
       ((Gamma β)⁻¹ * (log z - digamma (k + 1) - digamma ((n : ℂ) + 1 + k)) -
-        poch β (n + k) * recipGammaDeriv 1 (a + k))) + _
+        pochhammer β (n + k) * recipGammaDeriv 1 (a + k))) + _
   rw [hTail.tsum_eq]
   have hFin : ∑ j ∈ Finset.range n, dt j = -(∑ j ∈ Finset.range n,
-      poch β j * z ^ j / j.factorial *
+      pochhammer β j * z ^ j / j.factorial *
         ((-1 : ℂ) ^ (n - 1 - j) * ((n - 1 - j).factorial : ℂ))) := by
     simp_rw [← Finset.sum_neg_distrib]
     exact Finset.sum_congr rfl hdt_low
@@ -342,32 +343,32 @@ The finite sum is the singular part; the infinite sum supplies the logarithmic p
 theorem tricomi_numerator_nat_series (a : ℂ) (n : ℕ) {z : ℂ} (hz : z ≠ 0)
     (ha : ∀ k : ℕ, a - n ≠ -(k : ℂ)) :
     Summable (fun k : ℕ =>
-      (poch a k * z ^ k / k.factorial * (Gamma ((n : ℂ) + 1 + k))⁻¹) *
+      (pochhammer a k * z ^ k / k.factorial * (Gamma ((n : ℂ) + 1 + k))⁻¹) *
         (log z + digamma (a + k) - digamma (k + 1) - digamma ((n : ℂ) + 1 + k))) ∧
     deriv (fun c : ℂ =>
       regularizedHGFun {a} {c} z * (Gamma (a - c + 1))⁻¹ -
         z ^ (1 - c) * regularizedHGFun {a - c + 1} {2 - c} z * (Gamma a)⁻¹)
       ((n : ℂ) + 1) =
       (Gamma (a - n))⁻¹ * ∑' k : ℕ,
-        (poch a k * z ^ k / k.factorial * (Gamma ((n : ℂ) + 1 + k))⁻¹) *
+        (pochhammer a k * z ^ k / k.factorial * (Gamma ((n : ℂ) + 1 + k))⁻¹) *
           (log z + digamma (a + k) - digamma (k + 1) - digamma ((n : ℂ) + 1 + k)) +
       z ^ (-(n : ℂ)) * (Gamma a)⁻¹ * ∑ j ∈ Finset.range n,
-        poch (a - n) j * z ^ j / j.factorial *
+        pochhammer (a - n) j * z ^ j / j.factorial *
           ((-1 : ℂ) ^ (n - 1 - j) * ((n - 1 - j).factorial : ℂ)) := by
   obtain ⟨hsum, hderiv⟩ := tricomi_numerator_nat_series_recipGamma a n hz
   have hG : Gamma (a - n) ≠ 0 := Gamma_ne_zero ha
   have hk : ∀ k : ℕ,
-      (poch a k * z ^ k / k.factorial * (Gamma ((n : ℂ) + 1 + k))⁻¹) *
+      (pochhammer a k * z ^ k / k.factorial * (Gamma ((n : ℂ) + 1 + k))⁻¹) *
         ((Gamma (a - n))⁻¹ * (log z - digamma (k + 1) - digamma ((n : ℂ) + 1 + k)) -
-          poch (a - n) (n + k) * recipGammaDeriv 1 (a + k)) =
-      (Gamma (a - n))⁻¹ * ((poch a k * z ^ k / k.factorial * (Gamma ((n : ℂ) + 1 + k))⁻¹) *
+          pochhammer (a - n) (n + k) * recipGammaDeriv 1 (a + k)) =
+      (Gamma (a - n))⁻¹ * ((pochhammer a k * z ^ k / k.factorial * (Gamma ((n : ℂ) + 1 + k))⁻¹) *
         (log z + digamma (a + k) - digamma (k + 1) - digamma ((n : ℂ) + 1 + k))) := by
     intro k
     have hpole : ∀ m : ℕ, a - n + ((n + k : ℕ) : ℂ) ≠ -(m : ℂ) :=
       not_neg_nat_add_nat ha (n + k)
     have h := recip_Gamma_mul_digamma_add_nat (x := a - n) (n + k) hpole
     rw [show a - n + ((n + k : ℕ) : ℂ) = a + k by push_cast; ring] at h
-    linear_combination (-(poch a k * z ^ k / k.factorial * (Gamma ((n : ℂ) + 1 + k))⁻¹)) * h
+    linear_combination (-(pochhammer a k * z ^ k / k.factorial * (Gamma ((n : ℂ) + 1 + k))⁻¹)) * h
   refine ⟨?_, ?_⟩
   · refine (hsum.mul_left (Gamma (a - n))).congr fun k => ?_
     rw [hk, ← mul_assoc, mul_inv_cancel₀ hG, one_mul]
@@ -383,10 +384,10 @@ theorem deriv_tricomi_numerator_nat (a : ℂ) (n : ℕ) {z : ℂ} (hz : z ≠ 0)
         z ^ (1 - c) * regularizedHGFun {a - c + 1} {2 - c} z * (Gamma a)⁻¹)
       ((n : ℂ) + 1) =
       (Gamma (a - n))⁻¹ * ∑' k : ℕ,
-        (poch a k * z ^ k / k.factorial * (Gamma ((n : ℂ) + 1 + k))⁻¹) *
+        (pochhammer a k * z ^ k / k.factorial * (Gamma ((n : ℂ) + 1 + k))⁻¹) *
           (log z + digamma (a + k) - digamma (k + 1) - digamma ((n : ℂ) + 1 + k)) +
       z ^ (-(n : ℂ)) * (Gamma a)⁻¹ * ∑ j ∈ Finset.range n,
-        poch (a - n) j * z ^ j / j.factorial *
+        pochhammer (a - n) j * z ^ j / j.factorial *
           ((-1 : ℂ) ^ (n - 1 - j) * ((n - 1 - j).factorial : ℂ)) :=
   (tricomi_numerator_nat_series a n hz ha).2
 
@@ -398,11 +399,11 @@ theorem deriv_tricomi_numerator_nat_recipGamma (a : ℂ) (n : ℕ) {z : ℂ} (hz
         z ^ (1 - c) * regularizedHGFun {a - c + 1} {2 - c} z * (Gamma a)⁻¹)
       ((n : ℂ) + 1) =
       ∑' k : ℕ,
-        (poch a k * z ^ k / k.factorial * (Gamma ((n : ℂ) + 1 + k))⁻¹) *
+        (pochhammer a k * z ^ k / k.factorial * (Gamma ((n : ℂ) + 1 + k))⁻¹) *
           ((Gamma (a - n))⁻¹ * (log z - digamma (k + 1) - digamma ((n : ℂ) + 1 + k)) -
-            poch (a - n) (n + k) * recipGammaDeriv 1 (a + k)) +
+            pochhammer (a - n) (n + k) * recipGammaDeriv 1 (a + k)) +
       z ^ (-(n : ℂ)) * (Gamma a)⁻¹ * ∑ j ∈ Finset.range n,
-        poch (a - n) j * z ^ j / j.factorial *
+        pochhammer (a - n) j * z ^ j / j.factorial *
           ((-1 : ℂ) ^ (n - 1 - j) * ((n - 1 - j).factorial : ℂ)) :=
   (tricomi_numerator_nat_series_recipGamma a n hz).2
 

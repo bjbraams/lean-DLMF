@@ -369,7 +369,7 @@ theorem arctan_real_imag {z : ℂ} (hz : ‖z‖<1) :
 
 /-- The half-parameter binomial coefficient is a scaled central binomial coefficient; duplication
 uses lean-codes. -/
-private lemma half_poch_coefficient (n : ℕ) :
+private lemma half_pochhammer_coefficient (n : ℕ) :
     (ascPochhammer ℂ n).eval (1/2:ℂ)/(n.factorial:ℂ) = ((2*n).choose n:ℂ)/(4:ℂ)^n := by
   have hd := ascPochhammer_eval_double (1/2:ℂ) n
   norm_num only [show (2:ℂ)*(1/2)=1 by norm_num,
@@ -384,17 +384,17 @@ private lemma half_poch_coefficient (n : ℕ) :
   linear_combination -hd-hc
 /-- The Gauss coefficient for parameters `(1/2, 1/2; 3/2)` equals the arcsine coefficient. -/
 private lemma arcsin_gauss_coefficient (n : ℕ) :
-    DLMF.Hypergeometric.gaussHGCoeff (1/2:ℂ) (1/2) (3/2) n =
+    DLMF.Hypergeometric.gaussHypergeometricCoeff (1/2:ℂ) (1/2) (3/2) n =
       ((2*n).choose n:ℂ)/((4:ℂ)^n*(2*n+1)) := by
-  have hp : DLMF.Hypergeometric.poch (1/2:ℂ) n ≠ 0 := by
-    apply DLMF.Hypergeometric.poch_ne_zero_of_not_neg_nat
+  have hp : DLMF.Hypergeometric.pochhammer (1/2:ℂ) n ≠ 0 := by
+    apply DLMF.Hypergeometric.pochhammer_ne_zero_of_not_neg_nat
     intro k h
     have hh := congrArg Complex.re h
     norm_num at hh
     linarith [(Nat.cast_nonneg k : (0:ℝ) ≤ k)]
-  rw [DLMF.Hypergeometric.gaussHGCoeff, DLMF.Hypergeometric.poch_three_halves_eq]
-  have hhalf := half_poch_coefficient n
-  unfold DLMF.Hypergeometric.poch at *
+  rw [DLMF.Hypergeometric.gaussHypergeometricCoeff, DLMF.Hypergeometric.pochhammer_three_halves_eq]
+  have hhalf := half_pochhammer_coefficient n
+  unfold DLMF.Hypergeometric.pochhammer at *
   have hn : (n.factorial:ℂ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero n
   have h2 : (2*n+1:ℂ) ≠ 0 := by exact_mod_cast (show 2*n+1 ≠ 0 by omega)
   field_simp at hhalf ⊢
@@ -416,7 +416,7 @@ private lemma arcsin_series_open {z : ℂ} (hz : ‖z‖<1) :
     have hw2 : ‖w^2‖<1 := by rw [norm_pow]; nlinarith [norm_nonneg w]
     have h := Complex.hasSum_ascPochhammer_mul_pow_div_factorial (1/2:ℂ) (w^2) hw2
     have hpow (n : ℕ) : (w^2)^n=w^(2*n) := (pow_mul w 2 n).symm
-    simp_rw [half_poch_coefficient, hpow] at h
+    simp_rw [half_pochhammer_coefficient, hpow] at h
     rw [(Trigonometric.hasDerivAt_arcsin (hdom hw)).deriv]
     simpa only [Complex.sqrt, one_div] using h
   have h := Complex.hasSum_even_primitive_on_ball (by norm_num : (0:ℝ)<1)

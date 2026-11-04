@@ -26,8 +26,7 @@ between the spectra, the values at `q = 0` and the relations between `q` and `-q
 * `mathieuA_lt_mathieuA_add_two`, `mathieuB_lt_mathieuB_add_two`: the ordering within each
   spectrum (DLMF §28.2(v)).
 * `mathieuA_zero`, `mathieuB_zero`: `a_n(0) = n²`, `b_n(0) = n²` (DLMF 28.2.23, 28.2.24).
-* `mathieu_eigenvalues_interlace_pos`, `mathieu_eigenvalues_interlace_neg`: the distribution of
-  the eigenvalues for `q > 0` and `q < 0` (DLMF 28.2.25).
+  The distribution 28.2.25 of the eigenvalues is in `DLMF.Mathieu.EigenvalueInterlacing`.
 * `mathieuA_even_neg`, `mathieuA_odd_neg`, `mathieuB_even_neg`: DLMF 28.2.26–28.2.28.
 -/
 
@@ -769,23 +768,6 @@ theorem mathieuB_zero {n : ℕ} (hn : n ≠ 0) : mathieuB n 0 = (n : ℝ) ^ 2 :=
   · simp only [mathieuB, hn, ↓reduceIte]
     rw [mathieuSpecB_odd_q_zero, show (2 * k + 1 - 1) / 2 = k by omega,
       nthLeast_range_of_strictMono (by intro i j h; simp only; gcongr)]
-
-/-- **Distribution of the eigenvalues** (DLMF 28.2.25), `q > 0`:
-`a_0 < b_1 < a_1 < b_2 < a_2 < b_3 < ⋯`. -/
-@[dlmf 28.2.E25]
-theorem mathieu_eigenvalues_interlace_pos {q : ℝ} (hq : 0 < q) (n : ℕ) :
-    mathieuA n q < mathieuB (n + 1) q ∧ mathieuB (n + 1) q < mathieuA (n + 1) q := by
-  sorry
-
-/-- **Distribution of the eigenvalues** (DLMF 28.2.25), `q < 0`:
-`a_0 < a_1 < b_1 < b_2 < a_2 < a_3 < b_3 < b_4 < ⋯`. -/
-@[dlmf 28.2.E25]
-theorem mathieu_eigenvalues_interlace_neg {q : ℝ} (hq : q < 0) (n : ℕ) :
-    mathieuA (2 * n) q < mathieuA (2 * n + 1) q ∧
-      mathieuA (2 * n + 1) q < mathieuB (2 * n + 1) q ∧
-      mathieuB (2 * n + 1) q < mathieuB (2 * n + 2) q ∧
-      mathieuB (2 * n + 2) q < mathieuA (2 * n + 2) q := by
-  sorry
 
 /-- **DLMF 28.2.26**: `a_{2n}(-q) = a_{2n}(q)`. -/
 @[dlmf 28.2.E26]

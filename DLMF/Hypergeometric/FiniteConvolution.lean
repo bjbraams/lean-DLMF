@@ -19,8 +19,8 @@ Wilson generating functions.
 
 * `hasSum_coefficient_convolution`: the Cauchy product of scalar series as a coefficient
   convolution.
-* `poch_ratio_vandermonde`, `poch_binomial_moment`: Chu–Vandermonde and a binomial moment of
-  rising factorials.
+* `pochhammer_ratio_vandermonde`, `pochhammer_binomial_moment`: Chu–Vandermonde and a binomial
+  moment of rising factorials.
 * `terminating_3F2_convolution`: a terminating `₃F₂` transformation.
 * `saalschutz_binomial_convolution`: Euler's transformation as a finite binomial convolution.
 * `wilson_inner_sum`, `balanced_inner_sum`: inner Pfaff–Saalschütz sums.
@@ -44,61 +44,64 @@ theorem hasSum_coefficient_convolution {c d : ℕ → ℂ} {z u v : ℂ}
   exact Complex.hasSum_powerSeries_convolution hc hd
 
 /-- Chu–Vandermonde with a regular denominator, in binomial form. -/
-theorem poch_ratio_vandermonde (Q R : ℂ) (hR : ∀ k : ℕ, poch R k ≠ 0) (n : ℕ) :
-    poch (R - Q) n / poch R n =
-      ∑ k ∈ Finset.range (n + 1), (-1 : ℂ) ^ k * n.choose k * poch Q k / poch R k := by
+theorem pochhammer_ratio_vandermonde (Q R : ℂ) (hR : ∀ k : ℕ, pochhammer R k ≠ 0) (n : ℕ) :
+    pochhammer (R - Q) n / pochhammer R n =
+      ∑ k ∈ Finset.range (n + 1), (-1 : ℂ) ^ k * n.choose k * pochhammer Q k / pochhammer R k := by
   apply (div_eq_iff (hR n)).2
   rw [Finset.sum_mul, ← chu_vandermonde_sum n Q R]
   symm
   apply Finset.sum_congr rfl
   intro k hk
   have hk' : k ≤ n := by simpa using hk
-  have hp : poch R n = poch R k * poch (R + k) (n - k) := by
-    rw [← poch_add, Nat.add_sub_cancel' hk']
+  have hp : pochhammer R n = pochhammer R k * pochhammer (R + k) (n - k) := by
+    rw [← pochhammer_add, Nat.add_sub_cancel' hk']
   rw [hp]
   field_simp [hR k]
 
 /-- A binomial moment of rising factorials. -/
-theorem poch_binomial_moment (P X : ℂ) {n k : ℕ} (hk : k ≤ n) :
-    ∑ j ∈ Finset.range (n + 1), (n.choose j : ℂ) * j.choose k * poch P j * poch X (n - j) =
-      n.choose k * poch P k * poch (P + X + k) (n - k) := by
+theorem pochhammer_binomial_moment (P X : ℂ) {n k : ℕ} (hk : k ≤ n) :
+    ∑ j ∈ Finset.range (n + 1), (n.choose j : ℂ) * j.choose k * pochhammer P j *
+        pochhammer X (n - j) =
+      n.choose k * pochhammer P k * pochhammer (P + X + k) (n - k) := by
   rw [← Finset.sum_range_add_sum_Ico _ (by omega : k ≤ n + 1)]
   have h0 : ∑ j ∈ Finset.range k,
-      (n.choose j : ℂ) * j.choose k * poch P j * poch X (n - j) = 0 := by
+      (n.choose j : ℂ) * j.choose k * pochhammer P j * pochhammer X (n - j) = 0 := by
     apply Finset.sum_eq_zero
     intro j hj
     rw [Nat.choose_eq_zero_of_lt (Finset.mem_range.mp hj)]
     ring
   rw [h0, zero_add, Finset.sum_Ico_eq_sum_range, show n + 1 - k = n - k + 1 by omega,
-    show P + X + k = P + k + X by ring, poch_add_eq_sum, Finset.mul_sum]
+    show P + X + k = P + k + X by ring, pochhammer_add_eq_sum, Finset.mul_sum]
   apply Finset.sum_congr rfl
   intro i hi
   have hc := Nat.choose_mul (n := n) (k := k + i) (s := k) (by omega)
   rw [show k + i - k = i by omega] at hc
   have hc' : (n.choose (k + i) : ℂ) * (k + i).choose k = n.choose k * (n - k).choose i := by
     exact_mod_cast hc
-  rw [poch_add, show n - (k + i) = n - k - i by omega]
-  linear_combination (poch P k * poch (P + k) i * poch X (n - k - i)) * hc'
+  rw [pochhammer_add, show n - (k + i) = n - k - i by omega]
+  linear_combination (pochhammer P k * pochhammer (P + k) i * pochhammer X (n - k - i)) * hc'
 
 /-- A terminating `3F2` transformation as a finite binomial convolution. -/
-theorem terminating_3F2_convolution (P Q R D : ℂ) (hR : ∀ k : ℕ, poch R k ≠ 0) (n : ℕ) :
-    (∑ k ∈ Finset.range (n + 1), (-1 : ℂ) ^ k * n.choose k * poch P k * poch Q k /
-      poch R k * poch (D + k) (n - k)) =
-    ∑ j ∈ Finset.range (n + 1), (n.choose j : ℂ) * poch P j * poch (R - Q) j /
-      poch R j * poch (D - P) (n - j) := by
-  have he (j : ℕ) : (n.choose j : ℂ) * poch P j * poch (R - Q) j /
-      poch R j * poch (D - P) (n - j) =
+theorem terminating_3F2_convolution (P Q R D : ℂ) (hR : ∀ k : ℕ, pochhammer R k ≠ 0) (n : ℕ) :
+    (∑ k ∈ Finset.range (n + 1), (-1 : ℂ) ^ k * n.choose k * pochhammer P k * pochhammer Q k /
+      pochhammer R k * pochhammer (D + k) (n - k)) =
+    ∑ j ∈ Finset.range (n + 1), (n.choose j : ℂ) * pochhammer P j * pochhammer (R - Q) j /
+      pochhammer R j * pochhammer (D - P) (n - j) := by
+  have he (j : ℕ) : (n.choose j : ℂ) * pochhammer P j * pochhammer (R - Q) j /
+      pochhammer R j * pochhammer (D - P) (n - j) =
       ∑ k ∈ Finset.range (n + 1),
-        ((-1 : ℂ) ^ k * poch Q k / poch R k) *
-        ((n.choose j : ℂ) * j.choose k * poch P j * poch (D - P) (n - j)) := by
-    rw [show (n.choose j : ℂ) * poch P j * poch (R - Q) j / poch R j * poch (D - P) (n - j) =
-      (n.choose j * poch P j * poch (D - P) (n - j)) * (poch (R - Q) j / poch R j) by ring,
-      poch_ratio_vandermonde Q R hR, Finset.mul_sum]
+        ((-1 : ℂ) ^ k * pochhammer Q k / pochhammer R k) *
+        ((n.choose j : ℂ) * j.choose k * pochhammer P j * pochhammer (D - P) (n - j)) := by
+    rw [show (n.choose j : ℂ) * pochhammer P j * pochhammer (R - Q) j / pochhammer R j *
+        pochhammer (D - P) (n - j) =
+      (n.choose j * pochhammer P j * pochhammer (D - P) (n - j)) *
+          (pochhammer (R - Q) j / pochhammer R j) by ring,
+      pochhammer_ratio_vandermonde Q R hR, Finset.mul_sum]
     by_cases hj : j ≤ n
     · rw [← Finset.sum_range_add_sum_Ico _ (by omega : j + 1 ≤ n + 1)]
       have hz : ∑ k ∈ Finset.Ico (j + 1) (n + 1),
-          ((-1 : ℂ) ^ k * poch Q k / poch R k) *
-          ((n.choose j : ℂ) * j.choose k * poch P j * poch (D - P) (n - j)) = 0 := by
+          ((-1 : ℂ) ^ k * pochhammer Q k / pochhammer R k) *
+          ((n.choose j : ℂ) * j.choose k * pochhammer P j * pochhammer (D - P) (n - j)) = 0 := by
         apply Finset.sum_eq_zero
         intro k hk
         rw [Nat.choose_eq_zero_of_lt (by simp at hk; omega : j < k)]
@@ -112,20 +115,21 @@ theorem terminating_3F2_convolution (P Q R D : ℂ) (hR : ∀ k : ℕ, poch R k 
   apply Finset.sum_congr rfl
   intro k hk
   have hk' : k ≤ n := by simpa using hk
-  rw [← Finset.mul_sum, poch_binomial_moment P (D - P) hk',
+  rw [← Finset.mul_sum, pochhammer_binomial_moment P (D - P) hk',
     show P + (D - P) + k = D + k by ring]
   ring
 
 /-- Euler's transformation as a finite binomial convolution. -/
 theorem saalschutz_binomial_convolution (a b c : ℂ) (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
-    ∑ k ∈ Finset.range (n + 1), (n.choose k : ℂ) * poch a k * poch b k / poch c k *
-      poch (c - a - b) (n-k) = poch (c-a) n * poch (c-b) n / poch c n := by
+    ∑ k ∈ Finset.range (n + 1), (n.choose k : ℂ) * pochhammer a k * pochhammer b k /
+        pochhammer c k *
+      pochhammer (c - a - b) (n-k) = pochhammer (c-a) n * pochhammer (c-b) n / pochhammer c n := by
   have h := regularized_saalschutz_convolution a b c n
-  have hG (k : ℕ) : Gamma (c+k) = poch c k * Gamma c := by
-    rw [poch, ← Gamma_add_nat_div_Gamma_eq c hc]
+  have hG (k : ℕ) : Gamma (c+k) = pochhammer c k * Gamma c := by
+    rw [pochhammer, ← Gamma_add_nat_div_Gamma_eq c hc]
     field_simp [Gamma_ne_zero hc]
   have hg := Gamma_ne_zero hc
-  have hp := poch_ne_zero_of_not_neg_nat hc
+  have hp := pochhammer_ne_zero_of_not_neg_nat hc
   have hn : (n ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
   rw [hG n, eq_div_iff (mul_ne_zero hn (mul_ne_zero (hp n) hg)), Finset.sum_mul] at h
   apply (eq_div_iff (hp n)).2
@@ -139,16 +143,18 @@ theorem saalschutz_binomial_convolution (a b c : ℂ) (hc : ∀ k : ℕ, c ≠ -
   have hnk : ((n-k)! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (n-k).factorial_ne_zero
   rw [hG k]
   field_simp [hp k, hg, hkf, hnk]
-  linear_combination (poch a k * poch b k * poch (c-a-b) (n-k) * poch c n) * hf
+  linear_combination (pochhammer a k * pochhammer b k * pochhammer (c-a-b) (n-k) *
+      pochhammer c n) * hf
 
 /-- Pfaff–Saalschütz in the inner sum of the Wilson coefficient transformation. -/
 theorem wilson_inner_sum {P Q E F : ℂ}
     (hE : 0 < E.re) (hF : 0 < F.re) (n j : ℕ) (hj : j ≤ n)
     (hbal : Q = E + F - P + n - 1) :
-    ∑ l ∈ Finset.range (n-j+1), poch (-((n-j : ℕ) : ℂ)) l * poch (P+j) l * poch Q l /
-      (poch (E+j) l * poch (F+j) l * l !) =
-    poch (E-P) (n-j) * poch (P-F-n+1+j) (n-j) /
-      (poch (E+j) (n-j) * poch (1-F-n) (n-j)) := by
+    ∑ l ∈ Finset.range (n-j+1), pochhammer (-((n-j : ℕ) : ℂ)) l * pochhammer (P+j) l *
+        pochhammer Q l /
+      (pochhammer (E+j) l * pochhammer (F+j) l * l !) =
+    pochhammer (E-P) (n-j) * pochhammer (P-F-n+1+j) (n-j) /
+      (pochhammer (E+j) (n-j) * pochhammer (1-F-n) (n-j)) := by
   have he : ∀ k : ℕ, E+j ≠ -(k : ℂ) :=
     not_neg_nat_of_re_pos (by simp; linarith [Nat.cast_nonneg (α := ℝ) j])
   have hf : ∀ k : ℕ, F+j ≠ -(k : ℂ) :=
@@ -156,7 +162,7 @@ theorem wilson_inner_sum {P Q E F : ℂ}
   have hh : 1 + (P+j) + Q - (E+j) - (n-j : ℕ) = F+j := by
     rw [hbal]; push_cast [Nat.cast_sub hj]; ring
   have hs := pfaff_saalschutz (n-j) (a := P+j) (b := Q) (c := E+j) he
-    (by rw [hh]; exact poch_ne_zero_of_not_neg_nat hf _)
+    (by rw [hh]; exact pochhammer_ne_zero_of_not_neg_nat hf _)
   rw [hh, show E+j-(P+j) = E-P by ring,
     show E+j-Q = P-F-n+1+j by rw [hbal]; ring,
     show E-P-Q = 1-F-n by rw [hbal]; ring] at hs
@@ -167,39 +173,45 @@ theorem wilson_inner_sum {P Q E F : ℂ}
 theorem balanced_inner_sum {P Q E F : ℂ}
     (hE : 0 < E.re) (hF : 0 < F.re) (n j : ℕ) (hj : j ≤ n)
     (hbal : Q = E + F - P + n - 1) :
-    ∑ l ∈ Finset.range (n-j+1), poch (-((n-j : ℕ) : ℂ)) l * poch (P+j) l * poch Q l /
-      (poch (E+j) l * poch (F+j) l * l !) =
-    poch (E-P) (n-j) * poch (F-P) (n-j) /
-      (poch (E+j) (n-j) * poch (F+j) (n-j)) := by
+    ∑ l ∈ Finset.range (n-j+1), pochhammer (-((n-j : ℕ) : ℂ)) l * pochhammer (P+j) l *
+        pochhammer Q l /
+      (pochhammer (E+j) l * pochhammer (F+j) l * l !) =
+    pochhammer (E-P) (n-j) * pochhammer (F-P) (n-j) /
+      (pochhammer (E+j) (n-j) * pochhammer (F+j) (n-j)) := by
   rw [wilson_inner_sum hE hF n j hj hbal,
     show P-F-n+1+j = 1-(F-P)-(n-j : ℕ) by push_cast [Nat.cast_sub hj]; ring,
     show 1-F-n = 1-(F+j)-(n-j : ℕ) by push_cast [Nat.cast_sub hj]; ring,
-    poch_reflect, poch_reflect]
+    pochhammer_reflect, pochhammer_reflect]
   have hs : (-1 : ℂ) ^ (n-j) ≠ 0 := pow_ne_zero _ (by norm_num)
   field_simp
 
 /-- Reindexing the double convolution arising from Euler's transformation. -/
 theorem balanced_4F3_double_sum (P Q N E F R : ℂ)
     (hE : 0 < E.re) (hF : 0 < F.re) (n : ℕ) :
-    (∑ k ∈ Finset.range (n+1), poch (-(n : ℂ)) k * poch P k /
-      (poch E k * poch F k * k !) *
-      (∑ j ∈ Finset.range (k+1), (k.choose j : ℂ) * poch (R-Q) j * poch (R-N) j /
-        poch R j * poch (Q+N-R) (k-j))) =
+    (∑ k ∈ Finset.range (n+1), pochhammer (-(n : ℂ)) k * pochhammer P k /
+      (pochhammer E k * pochhammer F k * k !) *
+      (∑ j ∈ Finset.range (k+1), (k.choose j : ℂ) * pochhammer (R-Q) j * pochhammer (R-N) j /
+        pochhammer R j * pochhammer (Q+N-R) (k-j))) =
     ∑ j ∈ Finset.range (n+1),
-      (poch (-(n : ℂ)) j * poch P j * poch (R-Q) j * poch (R-N) j /
-        (poch R j * poch E j * poch F j * j !)) *
-      (∑ l ∈ Finset.range (n-j+1), poch (-((n-j : ℕ) : ℂ)) l * poch (P+j) l *
-        poch (Q+N-R) l / (poch (E+j) l * poch (F+j) l * l !)) := by
+      (pochhammer (-(n : ℂ)) j * pochhammer P j * pochhammer (R-Q) j * pochhammer (R-N) j /
+        (pochhammer R j * pochhammer E j * pochhammer F j * j !)) *
+      (∑ l ∈ Finset.range (n-j+1), pochhammer (-((n-j : ℕ) : ℂ)) l * pochhammer (P+j) l *
+        pochhammer (Q+N-R) l / (pochhammer (E+j) l * pochhammer (F+j) l * l !)) := by
   simp_rw [Finset.mul_sum]
   have htri := (Finset.sum_range_diag_flip (n+1) (fun j l =>
-    poch (-(n : ℂ)) (j+l) * poch P (j+l) / (poch E (j+l) * poch F (j+l) * (j+l)!) *
-      ((j+l).choose j * poch (R-Q) j * poch (R-N) j / poch R j * poch (Q+N-R) l))).symm
+    pochhammer (-(n : ℂ)) (j+l) * pochhammer P (j+l) /
+        (pochhammer E (j+l) * pochhammer F (j+l) * (j+l)!) *
+      ((j+l).choose j * pochhammer (R-Q) j * pochhammer (R-N) j / pochhammer R j *
+          pochhammer (Q+N-R) l))).symm
   have he : (∑ k ∈ Finset.range (n+1), ∑ j ∈ Finset.range (k+1),
-      poch (-(n : ℂ)) k * poch P k / (poch E k * poch F k * k !) *
-        ((k.choose j : ℂ) * poch (R-Q) j * poch (R-N) j / poch R j * poch (Q+N-R) (k-j))) =
+      pochhammer (-(n : ℂ)) k * pochhammer P k / (pochhammer E k * pochhammer F k * k !) *
+        ((k.choose j : ℂ) * pochhammer (R-Q) j * pochhammer (R-N) j / pochhammer R j *
+            pochhammer (Q+N-R) (k-j))) =
       ∑ j ∈ Finset.range (n+1), ∑ l ∈ Finset.range (n+1-j),
-        poch (-(n : ℂ)) (j+l) * poch P (j+l) / (poch E (j+l) * poch F (j+l) * (j+l)!) *
-          ((j+l).choose j * poch (R-Q) j * poch (R-N) j / poch R j * poch (Q+N-R) l) := by
+        pochhammer (-(n : ℂ)) (j+l) * pochhammer P (j+l) /
+            (pochhammer E (j+l) * pochhammer F (j+l) * (j+l)!) *
+          ((j+l).choose j * pochhammer (R-Q) j * pochhammer (R-N) j / pochhammer R j *
+              pochhammer (Q+N-R) l) := by
     rw [htri]
     apply Finset.sum_congr rfl
     intro k hk
@@ -216,43 +228,48 @@ theorem balanced_4F3_double_sum (P Q N E F R : ℂ)
   have hl' : l ≤ n-j := by simpa using hl
   have hch : ((j+l).choose j : ℂ) * j ! * l ! = (j+l)! := by
     exact_mod_cast (by simpa using Nat.choose_mul_factorial_mul_factorial (show j ≤ j+l by omega))
-  rw [poch_add, poch_add, show -(n : ℂ)+j = -((n-j : ℕ) : ℂ) by push_cast [Nat.cast_sub hj']; ring,
-    poch_add E, poch_add F]
-  have hp (Z : ℂ) (hZ : 0 < Z.re) (k : ℕ) : poch Z k ≠ 0 :=
-    poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos hZ) k
+  rw [pochhammer_add, pochhammer_add, show -(n : ℂ)+j = -((n-j : ℕ) : ℂ) by
+      push_cast [Nat.cast_sub hj']; ring,
+    pochhammer_add E, pochhammer_add F]
+  have hp (Z : ℂ) (hZ : 0 < Z.re) (k : ℕ) : pochhammer Z k ≠ 0 :=
+    pochhammer_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos hZ) k
   have he : 0 < (E+j).re := by simp; linarith [Nat.cast_nonneg (α := ℝ) j]
   have hf : 0 < (F+j).re := by simp; linarith [Nat.cast_nonneg (α := ℝ) j]
   have hjf : (j ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr j.factorial_ne_zero
   have hlf : (l ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr l.factorial_ne_zero
   have ht : ((j+l)! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (j+l).factorial_ne_zero
   field_simp [hp E hE j, hp F hF j, hp (E+j) he l, hp (F+j) hf l, hjf, hlf, ht]
-  linear_combination (poch (-(n : ℂ)) j * poch (-((n-j : ℕ) : ℂ)) l * poch P j *
-    poch (P+j) l * poch (R-Q) j * poch (R-N) j * poch (Q+N-R) l * (poch R j)⁻¹) * hch
+  linear_combination (pochhammer (-(n : ℂ)) j * pochhammer (-((n-j : ℕ) : ℂ)) l * pochhammer P j *
+    pochhammer (P+j) l * pochhammer (R-Q) j * pochhammer (R-N) j * pochhammer (Q+N-R) l *
+        (pochhammer R j)⁻¹) * hch
 
 /-- Whipple's balanced terminating coefficient transformation in convolution form. -/
 theorem balanced_4F3_convolution (P Q N E F R : ℂ)
     (hE : 0 < E.re) (hF : 0 < F.re) (hR : 0 < R.re) (n : ℕ)
     (hbal : Q+N-R = E+F-P+n-1) :
-    (∑ k ∈ Finset.range (n+1), poch (-(n : ℂ)) k * poch P k * poch Q k * poch N k /
-      (poch R k * poch E k * poch F k * k !)) =
+    (∑ k ∈ Finset.range (n+1), pochhammer (-(n : ℂ)) k * pochhammer P k * pochhammer Q k *
+        pochhammer N k /
+      (pochhammer R k * pochhammer E k * pochhammer F k * k !)) =
     ∑ j ∈ Finset.range (n+1),
-      (poch (-(n : ℂ)) j * poch P j * poch (R-Q) j * poch (R-N) j /
-        (poch R j * poch E j * poch F j * j !)) *
-      (poch (E-P) (n-j) * poch (F-P) (n-j) /
-        (poch (E+j) (n-j) * poch (F+j) (n-j))) := by
+      (pochhammer (-(n : ℂ)) j * pochhammer P j * pochhammer (R-Q) j * pochhammer (R-N) j /
+        (pochhammer R j * pochhammer E j * pochhammer F j * j !)) *
+      (pochhammer (E-P) (n-j) * pochhammer (F-P) (n-j) /
+        (pochhammer (E+j) (n-j) * pochhammer (F+j) (n-j))) := by
   have hr := not_neg_nat_of_re_pos hR
-  have he (k : ℕ) : poch Q k * poch N k / poch R k =
-      ∑ j ∈ Finset.range (k+1), (k.choose j : ℂ) * poch (R-Q) j * poch (R-N) j /
-        poch R j * poch (Q+N-R) (k-j) := by
+  have he (k : ℕ) : pochhammer Q k * pochhammer N k / pochhammer R k =
+      ∑ j ∈ Finset.range (k+1), (k.choose j : ℂ) * pochhammer (R-Q) j * pochhammer (R-N) j /
+        pochhammer R j * pochhammer (Q+N-R) (k-j) := by
     have ht := saalschutz_binomial_convolution (R-Q) (R-N) R hr k
     simpa only [show R-(R-Q) = Q by ring, show R-(R-N) = N by ring,
       show R-(R-Q)-(R-N) = Q+N-R by ring,
       show Q-(R-N) = Q+N-R by ring] using ht.symm
-  have hf : (∑ k ∈ Finset.range (n+1), poch (-(n : ℂ)) k * poch P k * poch Q k * poch N k /
-      (poch R k * poch E k * poch F k * k !)) =
-      ∑ k ∈ Finset.range (n+1), poch (-(n : ℂ)) k * poch P k / (poch E k * poch F k * k !) *
-        (∑ j ∈ Finset.range (k+1), (k.choose j : ℂ) * poch (R-Q) j * poch (R-N) j /
-          poch R j * poch (Q+N-R) (k-j)) := by
+  have hf : (∑ k ∈ Finset.range (n+1), pochhammer (-(n : ℂ)) k * pochhammer P k * pochhammer Q k *
+      pochhammer N k /
+      (pochhammer R k * pochhammer E k * pochhammer F k * k !)) =
+      ∑ k ∈ Finset.range (n+1), pochhammer (-(n : ℂ)) k * pochhammer P k /
+          (pochhammer E k * pochhammer F k * k !) *
+        (∑ j ∈ Finset.range (k+1), (k.choose j : ℂ) * pochhammer (R-Q) j * pochhammer (R-N) j /
+          pochhammer R j * pochhammer (Q+N-R) (k-j)) := by
     apply Finset.sum_congr rfl
     intro k _
     rw [← he]
@@ -267,20 +284,21 @@ integers. -/
 theorem balanced_inner_sum_of_regular {P Q E F : ℂ}
     (hE : ∀ k : ℕ, E ≠ -k) (hF : ∀ k : ℕ, F ≠ -k) (n j : ℕ) (hj : j ≤ n)
     (hbal : Q = E + F - P + n - 1) :
-    ∑ l ∈ Finset.range (n-j+1), poch (-((n-j : ℕ) : ℂ)) l * poch (P+j) l * poch Q l /
-      (poch (E+j) l * poch (F+j) l * l !) =
-    poch (E-P) (n-j) * poch (F-P) (n-j) /
-      (poch (E+j) (n-j) * poch (F+j) (n-j)) := by
+    ∑ l ∈ Finset.range (n-j+1), pochhammer (-((n-j : ℕ) : ℂ)) l * pochhammer (P+j) l *
+        pochhammer Q l /
+      (pochhammer (E+j) l * pochhammer (F+j) l * l !) =
+    pochhammer (E-P) (n-j) * pochhammer (F-P) (n-j) /
+      (pochhammer (E+j) (n-j) * pochhammer (F+j) (n-j)) := by
   have he := not_neg_nat_add_nat hE j
   have hf := not_neg_nat_add_nat hF j
   have hh : 1 + (P+j) + Q - (E+j) - (n-j : ℕ) = F+j := by
     rw [hbal]; push_cast [Nat.cast_sub hj]; ring
   have hs := pfaff_saalschutz (n-j) (a := P+j) (b := Q) (c := E+j) he
-    (by rw [hh]; exact poch_ne_zero_of_not_neg_nat hf _)
+    (by rw [hh]; exact pochhammer_ne_zero_of_not_neg_nat hf _)
   rw [hh, show E+j-(P+j) = E-P by ring,
     show E+j-Q = 1-(F-P)-(n-j : ℕ) by rw [hbal]; push_cast [Nat.cast_sub hj]; ring,
     show E-P-Q = 1-(F+j)-(n-j : ℕ) by rw [hbal]; push_cast [Nat.cast_sub hj]; ring,
-    poch_reflect, poch_reflect] at hs
+    pochhammer_reflect, pochhammer_reflect] at hs
   rw [hs]
   have hs : (-1 : ℂ) ^ (n-j) ≠ 0 := pow_ne_zero _ (by norm_num)
   field_simp
@@ -289,25 +307,30 @@ theorem balanced_inner_sum_of_regular {P Q E F : ℂ}
 off the nonpositive integers. -/
 theorem balanced_4F3_double_sum_of_regular (P Q N E F R : ℂ)
     (hE : ∀ k : ℕ, E ≠ -k) (hF : ∀ k : ℕ, F ≠ -k) (n : ℕ) :
-    (∑ k ∈ Finset.range (n+1), poch (-(n : ℂ)) k * poch P k /
-      (poch E k * poch F k * k !) *
-      (∑ j ∈ Finset.range (k+1), (k.choose j : ℂ) * poch (R-Q) j * poch (R-N) j /
-        poch R j * poch (Q+N-R) (k-j))) =
+    (∑ k ∈ Finset.range (n+1), pochhammer (-(n : ℂ)) k * pochhammer P k /
+      (pochhammer E k * pochhammer F k * k !) *
+      (∑ j ∈ Finset.range (k+1), (k.choose j : ℂ) * pochhammer (R-Q) j * pochhammer (R-N) j /
+        pochhammer R j * pochhammer (Q+N-R) (k-j))) =
     ∑ j ∈ Finset.range (n+1),
-      (poch (-(n : ℂ)) j * poch P j * poch (R-Q) j * poch (R-N) j /
-        (poch R j * poch E j * poch F j * j !)) *
-      (∑ l ∈ Finset.range (n-j+1), poch (-((n-j : ℕ) : ℂ)) l * poch (P+j) l *
-        poch (Q+N-R) l / (poch (E+j) l * poch (F+j) l * l !)) := by
+      (pochhammer (-(n : ℂ)) j * pochhammer P j * pochhammer (R-Q) j * pochhammer (R-N) j /
+        (pochhammer R j * pochhammer E j * pochhammer F j * j !)) *
+      (∑ l ∈ Finset.range (n-j+1), pochhammer (-((n-j : ℕ) : ℂ)) l * pochhammer (P+j) l *
+        pochhammer (Q+N-R) l / (pochhammer (E+j) l * pochhammer (F+j) l * l !)) := by
   simp_rw [Finset.mul_sum]
   have htri := (Finset.sum_range_diag_flip (n+1) (fun j l =>
-    poch (-(n : ℂ)) (j+l) * poch P (j+l) / (poch E (j+l) * poch F (j+l) * (j+l)!) *
-      ((j+l).choose j * poch (R-Q) j * poch (R-N) j / poch R j * poch (Q+N-R) l))).symm
+    pochhammer (-(n : ℂ)) (j+l) * pochhammer P (j+l) /
+        (pochhammer E (j+l) * pochhammer F (j+l) * (j+l)!) *
+      ((j+l).choose j * pochhammer (R-Q) j * pochhammer (R-N) j / pochhammer R j *
+          pochhammer (Q+N-R) l))).symm
   have he : (∑ k ∈ Finset.range (n+1), ∑ j ∈ Finset.range (k+1),
-      poch (-(n : ℂ)) k * poch P k / (poch E k * poch F k * k !) *
-        ((k.choose j : ℂ) * poch (R-Q) j * poch (R-N) j / poch R j * poch (Q+N-R) (k-j))) =
+      pochhammer (-(n : ℂ)) k * pochhammer P k / (pochhammer E k * pochhammer F k * k !) *
+        ((k.choose j : ℂ) * pochhammer (R-Q) j * pochhammer (R-N) j / pochhammer R j *
+            pochhammer (Q+N-R) (k-j))) =
       ∑ j ∈ Finset.range (n+1), ∑ l ∈ Finset.range (n+1-j),
-        poch (-(n : ℂ)) (j+l) * poch P (j+l) / (poch E (j+l) * poch F (j+l) * (j+l)!) *
-          ((j+l).choose j * poch (R-Q) j * poch (R-N) j / poch R j * poch (Q+N-R) l) := by
+        pochhammer (-(n : ℂ)) (j+l) * pochhammer P (j+l) /
+            (pochhammer E (j+l) * pochhammer F (j+l) * (j+l)!) *
+          ((j+l).choose j * pochhammer (R-Q) j * pochhammer (R-N) j / pochhammer R j *
+              pochhammer (Q+N-R) l) := by
     rw [htri]
     apply Finset.sum_congr rfl
     intro k hk
@@ -324,44 +347,49 @@ theorem balanced_4F3_double_sum_of_regular (P Q N E F R : ℂ)
   have hl' : l ≤ n-j := by simpa using hl
   have hch : ((j+l).choose j : ℂ) * j ! * l ! = (j+l)! := by
     exact_mod_cast (by simpa using Nat.choose_mul_factorial_mul_factorial (show j ≤ j+l by omega))
-  rw [poch_add, poch_add, show -(n : ℂ)+j = -((n-j : ℕ) : ℂ) by push_cast [Nat.cast_sub hj']; ring,
-    poch_add E, poch_add F]
-  have hp (Z : ℂ) (hZ : ∀ k : ℕ, Z ≠ -k) (k : ℕ) : poch Z k ≠ 0 :=
-    poch_ne_zero_of_not_neg_nat hZ k
+  rw [pochhammer_add, pochhammer_add, show -(n : ℂ)+j = -((n-j : ℕ) : ℂ) by
+      push_cast [Nat.cast_sub hj']; ring,
+    pochhammer_add E, pochhammer_add F]
+  have hp (Z : ℂ) (hZ : ∀ k : ℕ, Z ≠ -k) (k : ℕ) : pochhammer Z k ≠ 0 :=
+    pochhammer_ne_zero_of_not_neg_nat hZ k
   have he := not_neg_nat_add_nat hE j
   have hf := not_neg_nat_add_nat hF j
   have hjf : (j ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr j.factorial_ne_zero
   have hlf : (l ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr l.factorial_ne_zero
   have ht : ((j+l)! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (j+l).factorial_ne_zero
   field_simp [hp E hE j, hp F hF j, hp (E+j) he l, hp (F+j) hf l, hjf, hlf, ht]
-  linear_combination (poch (-(n : ℂ)) j * poch (-((n-j : ℕ) : ℂ)) l * poch P j *
-    poch (P+j) l * poch (R-Q) j * poch (R-N) j * poch (Q+N-R) l * (poch R j)⁻¹) * hch
+  linear_combination (pochhammer (-(n : ℂ)) j * pochhammer (-((n-j : ℕ) : ℂ)) l * pochhammer P j *
+    pochhammer (P+j) l * pochhammer (R-Q) j * pochhammer (R-N) j * pochhammer (Q+N-R) l *
+        (pochhammer R j)⁻¹) * hch
 
 /-- Whipple's balanced terminating coefficient transformation in convolution form, for lower
 parameters off the nonpositive integers. -/
 theorem balanced_4F3_convolution_of_regular (P Q N E F R : ℂ)
     (hE : ∀ k : ℕ, E ≠ -k) (hF : ∀ k : ℕ, F ≠ -k) (hR : ∀ k : ℕ, R ≠ -k) (n : ℕ)
     (hbal : Q+N-R = E+F-P+n-1) :
-    (∑ k ∈ Finset.range (n+1), poch (-(n : ℂ)) k * poch P k * poch Q k * poch N k /
-      (poch R k * poch E k * poch F k * k !)) =
+    (∑ k ∈ Finset.range (n+1), pochhammer (-(n : ℂ)) k * pochhammer P k * pochhammer Q k *
+        pochhammer N k /
+      (pochhammer R k * pochhammer E k * pochhammer F k * k !)) =
     ∑ j ∈ Finset.range (n+1),
-      (poch (-(n : ℂ)) j * poch P j * poch (R-Q) j * poch (R-N) j /
-        (poch R j * poch E j * poch F j * j !)) *
-      (poch (E-P) (n-j) * poch (F-P) (n-j) /
-        (poch (E+j) (n-j) * poch (F+j) (n-j))) := by
+      (pochhammer (-(n : ℂ)) j * pochhammer P j * pochhammer (R-Q) j * pochhammer (R-N) j /
+        (pochhammer R j * pochhammer E j * pochhammer F j * j !)) *
+      (pochhammer (E-P) (n-j) * pochhammer (F-P) (n-j) /
+        (pochhammer (E+j) (n-j) * pochhammer (F+j) (n-j))) := by
   have hr := hR
-  have he (k : ℕ) : poch Q k * poch N k / poch R k =
-      ∑ j ∈ Finset.range (k+1), (k.choose j : ℂ) * poch (R-Q) j * poch (R-N) j /
-        poch R j * poch (Q+N-R) (k-j) := by
+  have he (k : ℕ) : pochhammer Q k * pochhammer N k / pochhammer R k =
+      ∑ j ∈ Finset.range (k+1), (k.choose j : ℂ) * pochhammer (R-Q) j * pochhammer (R-N) j /
+        pochhammer R j * pochhammer (Q+N-R) (k-j) := by
     have ht := saalschutz_binomial_convolution (R-Q) (R-N) R hr k
     simpa only [show R-(R-Q) = Q by ring, show R-(R-N) = N by ring,
       show R-(R-Q)-(R-N) = Q+N-R by ring,
       show Q-(R-N) = Q+N-R by ring] using ht.symm
-  have hf : (∑ k ∈ Finset.range (n+1), poch (-(n : ℂ)) k * poch P k * poch Q k * poch N k /
-      (poch R k * poch E k * poch F k * k !)) =
-      ∑ k ∈ Finset.range (n+1), poch (-(n : ℂ)) k * poch P k / (poch E k * poch F k * k !) *
-        (∑ j ∈ Finset.range (k+1), (k.choose j : ℂ) * poch (R-Q) j * poch (R-N) j /
-          poch R j * poch (Q+N-R) (k-j)) := by
+  have hf : (∑ k ∈ Finset.range (n+1), pochhammer (-(n : ℂ)) k * pochhammer P k * pochhammer Q k *
+      pochhammer N k /
+      (pochhammer R k * pochhammer E k * pochhammer F k * k !)) =
+      ∑ k ∈ Finset.range (n+1), pochhammer (-(n : ℂ)) k * pochhammer P k /
+          (pochhammer E k * pochhammer F k * k !) *
+        (∑ j ∈ Finset.range (k+1), (k.choose j : ℂ) * pochhammer (R-Q) j * pochhammer (R-N) j /
+          pochhammer R j * pochhammer (Q+N-R) (k-j)) := by
     apply Finset.sum_congr rfl
     intro k _
     rw [← he]

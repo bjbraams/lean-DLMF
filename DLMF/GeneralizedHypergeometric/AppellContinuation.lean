@@ -23,9 +23,9 @@ convergence region in place of a continued value.
 
 ## Main results
 
-* `appF4_infinity_parameter_limit`: the connection terms have a locally uniform limit in the
+* `appellF4_infinity_parameter_limit`: the connection terms have a locally uniform limit in the
   upper parameters.
-* `appF4_infinity_all_parameters`: the limiting expression is a continued `F₄` branch for all
+* `appellF4_infinity_all_parameters`: the limiting expression is a continued `F₄` branch for all
   upper parameters.
 -/
 
@@ -37,9 +37,9 @@ namespace DLMF.Hypergeometric
 /-- The full two-term F4 connection expression, meaningful before its combined parameter limit. -/
 def appF4InfinityExpression (a b c c' : ℂ) (p : ℂ × ℂ) : ℂ :=
   Gamma c'*Gamma (b-a)/(Gamma (c'-a)*Gamma b)*(-p.2)^(-a)*
-    appF4 a (a-c'+1) c (a-b+1) (p.1/p.2) (1/p.2)+
+    appellF4 a (a-c'+1) c (a-b+1) (p.1/p.2) (1/p.2)+
   Gamma c'*Gamma (a-b)/(Gamma (c'-b)*Gamma a)*(-p.2)^(-b)*
-    appF4 b (b-c'+1) c (b-a+1) (p.1/p.2) (1/p.2)
+    appellF4 b (b-c'+1) c (b-a+1) (p.1/p.2) (1/p.2)
 
 /-- The connection branch at every upper parameter, including coalescing integer exponents. -/
 def appF4InfinityBranch (a b c c' : ℂ) (p : ℂ × ℂ) : ℂ :=
@@ -51,7 +51,7 @@ def appellInfinityDomain : Set (ℂ × ℂ) :=
 
 /-- The combined connection terms have an actual locally uniform upper-parameter limit. -/
 @[dlmf 16.16.E10]
-theorem appF4_infinity_parameter_limit (a b c c' : ℂ)
+theorem appellF4_infinity_parameter_limit (a b c c' : ℂ)
     (hc : AppellRegular c) (hc' : AppellRegular c') :
     TendstoLocallyUniformlyOn (fun a' p => appF4InfinityExpression a' b c c' p)
       (appF4InfinityBranch a b c c') (𝓝[≠] a) appellInfinityDomain := by
@@ -59,10 +59,10 @@ theorem appF4_infinity_parameter_limit (a b c c' : ℂ)
 
 /-- The limiting connection expression is a genuine continued F4 branch, at all upper parameters. -/
 @[dlmf 16.16.E10]
-theorem appF4_infinity_all_parameters (a b c c' : ℂ)
+theorem appellF4_infinity_all_parameters (a b c c' : ℂ)
     (hc : AppellRegular c) (hc' : AppellRegular c') {p : ℂ × ℂ}
     (hp : p∈appellInfinityDomain) :
-    IsAppellBranchAt (fun q : ℂ × ℂ => appF4 a b c c' q.1 q.2) p
+    IsAppellBranchAt (fun q : ℂ × ℂ => appellF4 a b c c' q.1 q.2) p
       (appF4InfinityBranch a b c c') := by
   sorry
 

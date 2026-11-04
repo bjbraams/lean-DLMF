@@ -318,10 +318,11 @@ formal identity `(∑ (-1)^s c_s u^{-s}) · ½(1 + ∑ (-1)^s γ_s (u/2)^{-s}) =
 theorem pcf_positive_parameter_uniform :
     ∃ g : ℝ → ℂ, IsCylinderGBarNormalizer g ∧
         HasCylinderUniformExpansion
-        (fun μ t => pcfU (μ^2/2) (μ*t*Real.sqrt 2)/(g μ*exp (-μ^2*pcfXiBar t)/(t^2+1:ℂ)^(1/4:ℂ)))
+        (fun μ t => parabolicCylinderU (μ^2/2)
+            (μ*t*Real.sqrt 2)/(g μ*exp (-μ^2*pcfXiBar t)/(t^2+1:ℂ)^(1/4:ℂ)))
         (fun s t => pcfOlverUBar s t/(t^2+1:ℂ)^(3*(s:ℂ)/2)) univ ∧
         HasCylinderUniformExpansion
-        (fun μ t => pcfUDeriv (μ^2/2)
+        (fun μ t => parabolicCylinderUDeriv (μ^2/2)
         (μ*t*Real.sqrt 2)/(-(μ:ℂ)/Real.sqrt 2*g μ*(t^2+1:ℂ)^(1/4:ℂ)*exp (-μ^2*pcfXiBar t)))
         (fun s t => pcfOlverVBar s t/(t^2+1:ℂ)^(3*(s:ℂ)/2)) univ := by
   obtain ⟨Φ, hΦ⟩ := CylinderLiouvilleGreen.exists_asymptotic CylinderUniformExpansion.barLimitCoeff
@@ -512,7 +513,7 @@ theorem pcf_positive_parameter_uniform :
     simp only
     rw [CylinderUniformExpansion.denominator'_eq, CylinderUniformExpansion.sum_VBar_eq,
         CylinderLiouvilleGreen.norm_ofReal_zpow_neg_two_mul hμ0]
-    have hU'' : pcfUDeriv ((μ:ℂ)^2/2) ((μ:ℂ)*t*Real.sqrt 2) = (H:ℂ)/(L:ℂ) *
+    have hU'' : parabolicCylinderUDeriv ((μ:ℂ)^2/2) ((μ:ℂ)*t*Real.sqrt 2) = (H:ℂ)/(L:ℂ) *
         ((Ex * ((a1 - μ^2 * a⁻¹) * (Sa + e) + a * (Sd + e')) : ℝ) : ℂ) / ((μ:ℂ)*Real.sqrt 2) := by
       rw [← hU']; field_simp
     rw [hU'']
@@ -638,13 +639,13 @@ lemma CylinderUniformExpansion.neg_core {δ : ℝ} (hδ : 0 < δ) {N : ℕ} (hN 
       |CylinderUniformExpansion.truncSeries CylinderLiouvilleGreen.coeff N (μ^2) t - 1| ≤
           1/2 ∧ ∃ e e' : ℝ,
       |e| ≤ C / (μ^2)^N ∧ |CylinderLiouvilleGreen.amplitude t ^ 2 * e'| ≤ 2 * C / (μ^2)^(N-1) ∧
-      pcfU (-μ^2/2) (μ*t*Real.sqrt 2) = pcfH μ /
+      parabolicCylinderU (-μ^2/2) (μ*t*Real.sqrt 2) = pcfH μ /
         (CylinderUniformExpansion.truncSeries (fun s _ => CylinderLiouvilleGreen.limitCoeff s)
             N (μ^2) 0 : ℂ) *
         ((CylinderLiouvilleGreen.amplitude t * Real.exp (-(μ^2 * pcfXi t)) *
             (CylinderUniformExpansion.truncSeries CylinderLiouvilleGreen.coeff N (μ^2) t
                 + e) : ℝ) : ℂ) ∧
-      (μ:ℂ) * Real.sqrt 2 * pcfUDeriv (-μ^2/2) (μ*t*Real.sqrt 2) =
+      (μ:ℂ) * Real.sqrt 2 * parabolicCylinderUDeriv (-μ^2/2) (μ*t*Real.sqrt 2) =
         pcfH μ / (CylinderUniformExpansion.truncSeries
             (fun s _ => CylinderLiouvilleGreen.limitCoeff s) N (μ^2) 0 : ℂ) *
         ((Real.exp (-(μ^2 * pcfXi t)) *
@@ -697,8 +698,8 @@ lemma CylinderUniformExpansion.neg_core {δ : ℝ} (hδ : 0 < δ) {N : ℕ} (hN 
     (K := KA)
     (fun s _ t ht => hKA s t ht.le)
     (fun s _ => CylinderLiouvilleGreen.tendsto_coeff s)
-    (U := fun μ t => pcfU (-μ^2/2) (μ*t*Real.sqrt 2))
-    (U' := fun μ t => (μ:ℂ) * Real.sqrt 2 * pcfUDeriv (-μ^2/2) (μ*t*Real.sqrt 2))
+    (U := fun μ t => parabolicCylinderU (-μ^2/2) (μ*t*Real.sqrt 2))
+    (U' := fun μ t => (μ:ℂ) * Real.sqrt 2 * parabolicCylinderUDeriv (-μ^2/2) (μ*t*Real.sqrt 2))
     (H := fun μ : ℝ => pcfH μ) (fun μ t _ => CylinderLiouvilleGreen.hasDerivAt_U μ t)
     (fun μ t ht => (CylinderLiouvilleGreen.hasDerivAt_U' μ t).congr_deriv (by
       rw [CylinderLiouvilleGreen.amplitude_pow_four_recip (hc.trans ht)]))
@@ -872,7 +873,7 @@ lemma CylinderUniformExpansion.neg_U_expansion {Φ : ℝ → ℝ}
       (fun u : ℝ => (u^N)⁻¹)) {μ₁ : ℝ} (hΦb : ∀ μ, μ₁ ≤ μ → 1/2 ≤ Φ (μ^2) ∧ Φ (μ^2) ≤ 2)
     {δ : ℝ} (hδ : 0 < δ) :
     HasCylinderUniformExpansion
-        (fun μ t => pcfU (-μ^2/2)
+        (fun μ t => parabolicCylinderU (-μ^2/2)
         (μ*t*Real.sqrt 2)/((pcfH μ / (Φ (μ^2) : ℂ))*exp (-μ^2*pcfXi t)/(t^2-1:ℂ)^(1/4:ℂ)))
         (fun s t => pcfOlverA s t) (Ici (1+δ)) := by
   -- the expansion of `U`
@@ -898,10 +899,11 @@ lemma CylinderUniformExpansion.neg_U_expansion {Φ : ℝ → ℝ}
     exact_mod_cast (mul_pos (CylinderLiouvilleGreen.amplitude_pos ht1) (Real.exp_pos _)).ne'
   rw [CylinderLiouvilleGreen.denominator_eq ht1, CylinderLiouvilleGreen.sum_olverA_eq N μ ht1,
       CylinderLiouvilleGreen.norm_ofReal_zpow_neg_two_mul hμ0]
-  set X := pcfU (-μ^2/2) (μ*t*Real.sqrt 2) * (CylinderLiouvilleGreen.limitCoeffSum N (μ^2) : ℂ) /
+  set X := parabolicCylinderU (-μ^2/2) (μ*t*Real.sqrt 2) *
+      (CylinderLiouvilleGreen.limitCoeffSum N (μ^2) : ℂ) /
     (pcfH μ * ((CylinderLiouvilleGreen.amplitude t *
         Real.exp (-(μ^2 * pcfXi t)) : ℝ) : ℂ)) with hXdef
-  have hF : pcfU (-μ^2/2) (μ*t*Real.sqrt 2) / (pcfH μ / (Φ (μ^2) : ℂ) *
+  have hF : parabolicCylinderU (-μ^2/2) (μ*t*Real.sqrt 2) / (pcfH μ / (Φ (μ^2) : ℂ) *
       ((CylinderLiouvilleGreen.amplitude t * Real.exp (-(μ^2 * pcfXi t)) : ℝ) : ℂ)) -
           (CylinderLiouvilleGreen.coeffSum N (μ^2) t : ℂ) =
       (Φ (μ^2) / CylinderLiouvilleGreen.limitCoeffSum N (μ^2) : ℂ) *
@@ -949,7 +951,7 @@ lemma CylinderUniformExpansion.neg_UDeriv_expansion {Φ : ℝ → ℝ}
       (fun u : ℝ => (u^N)⁻¹)) {μ₁ : ℝ} (hΦb : ∀ μ, μ₁ ≤ μ → 1/2 ≤ Φ (μ^2) ∧ Φ (μ^2) ≤ 2)
     {δ : ℝ} (hδ : 0 < δ) :
     HasCylinderUniformExpansion
-        (fun μ t => pcfUDeriv (-μ^2/2)
+        (fun μ t => parabolicCylinderUDeriv (-μ^2/2)
         (μ*t*Real.sqrt 2)/(-(μ:ℂ)/Real.sqrt 2*(pcfH μ / (Φ (μ^2) : ℂ))*(t^2-1:ℂ)^(1/4:ℂ)*exp
         (-μ^2*pcfXi t))) (fun s t => pcfOlverB s t) (Ici (1+δ)) := by
   have hΦ' := hΦ
@@ -1006,7 +1008,7 @@ lemma CylinderUniformExpansion.neg_UDeriv_expansion {Φ : ℝ → ℝ}
           CylinderLiouvilleGreen.norm_ofReal_zpow_neg_two_mul hμ0,
     CylinderLiouvilleGreen.pcfH_eq hμ0]
   rw [CylinderLiouvilleGreen.pcfH_eq hμ0] at hU'
-  have hU'' : pcfUDeriv (-(μ:ℂ)^2/2) ((μ:ℂ)*t*Real.sqrt 2) = (H:ℂ)/(L:ℂ) *
+  have hU'' : parabolicCylinderUDeriv (-(μ:ℂ)^2/2) ((μ:ℂ)*t*Real.sqrt 2) = (H:ℂ)/(L:ℂ) *
       ((Ex * ((a1 - μ^2 * a⁻¹) * (Sa + e) + a * (Sd + e')) : ℝ) : ℂ) / ((μ:ℂ)*Real.sqrt 2) := by
     rw [← hU']; field_simp
   rw [hU'']
@@ -1131,10 +1133,11 @@ Liouville–Green core `CylinderUniformExpansion.core` (via `CylinderUniformExpa
 theorem pcf_negative_parameter_uniform_U_UDeriv :
     ∃ g : ℝ → ℂ, IsCylinderGNormalizer g ∧ ∀ δ : ℝ, 0 < δ →
         HasCylinderUniformExpansion
-        (fun μ t => pcfU (-μ^2/2) (μ*t*Real.sqrt 2)/(g μ*exp (-μ^2*pcfXi t)/(t^2-1:ℂ)^(1/4:ℂ)))
+        (fun μ t => parabolicCylinderU (-μ^2/2)
+            (μ*t*Real.sqrt 2)/(g μ*exp (-μ^2*pcfXi t)/(t^2-1:ℂ)^(1/4:ℂ)))
         (fun s t => pcfOlverA s t) (Ici (1+δ)) ∧
         HasCylinderUniformExpansion
-        (fun μ t => pcfUDeriv (-μ^2/2)
+        (fun μ t => parabolicCylinderUDeriv (-μ^2/2)
         (μ*t*Real.sqrt 2)/(-(μ:ℂ)/Real.sqrt 2*g μ*(t^2-1:ℂ)^(1/4:ℂ)*exp (-μ^2*pcfXi t)))
         (fun s t => pcfOlverB s t) (Ici (1+δ)) := by
   obtain ⟨Φ, hΦ⟩ := CylinderLiouvilleGreen.exists_asymptotic CylinderLiouvilleGreen.limitCoeff

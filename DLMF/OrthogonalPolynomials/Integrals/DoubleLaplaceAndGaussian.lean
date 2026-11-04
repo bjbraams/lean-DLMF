@@ -21,15 +21,15 @@ transforms DLMF 18.17.37 and 18.17.40.
 
 ## Main results
 
-* `jacobi_double_laplace_integral`, `laguerrePolyL_double_laplace_integral`: DLMF 18.10.3
+* `jacobi_double_laplace_integral`, `laguerrePolynomialL_double_laplace_integral`: DLMF 18.10.3
   and 18.10.6.
-* `laguerrePolyL_bessel_integral`: DLMF 18.10.9.
-* `ultrasphPoly_even_cosine_transform`, `ultrasphPoly_odd_sine_transform`: DLMF 18.17.17 and
-  18.17.18.
+* `laguerrePolynomialL_bessel_integral`: DLMF 18.10.9.
+* `ultrasphericalPolynomial_even_cosine_transform`, `ultrasphericalPolynomial_odd_sine_transform`:
+  DLMF 18.17.17 and 18.17.18.
 * `legendre_fourier_transform`: DLMF 18.17.19.
-* `ultrasphPoly_mellin_transform`, `ultrasphPoly_mellin_transform_even`,
-  `ultrasphPoly_mellin_transform_odd`: DLMF 18.17.37.
-* `laguerrePolyL_mellin_laplace_transform`: DLMF 18.17.40 in finite-sum form.
+* `ultrasphericalPolynomial_mellin_transform`, `ultrasphericalPolynomial_mellin_transform_even`,
+  `ultrasphericalPolynomial_mellin_transform_odd`: DLMF 18.17.37.
+* `laguerrePolynomialL_mellin_laplace_transform`: DLMF 18.17.40 in finite-sum form.
 
 ## Implementation notes
 
@@ -51,7 +51,7 @@ open DLMF.Confluent
 
 open DLMF.Bessel
 
-open DLMF.Hypergeometric (Gamma_add_nat_eq_poch_mul_Gamma)
+open DLMF.Hypergeometric (Gamma_add_nat_eq_pochhammer_mul_Gamma)
 
 noncomputable section
 
@@ -67,29 +67,29 @@ set_option maxHeartbeats 1000000
 
 /-- Homogenized symmetric Jacobi coefficients from the binomial formula. -/
 def angularJacobiSum (β : ℂ) (n : ℕ) (x y : ℂ) : ℂ :=
-  ∑ k ∈ Finset.range (n + 1), poch (β + n - k + 1) k / k ! *
-    (poch (β + k + 1) (n - k) / (n - k) !) * (-y ^ 2) ^ (n - k) * (x ^ 2) ^ k
+  ∑ k ∈ Finset.range (n + 1), pochhammer (β + n - k + 1) k / k ! *
+    (pochhammer (β + k + 1) (n - k) / (n - k) !) * (-y ^ 2) ^ (n - k) * (x ^ 2) ^ k
 
 /-- A normalized Gegenbauer polynomial is the corresponding normalized symmetric Jacobi polynomial.
 -/
 theorem gegenbauer_normalized_jacobi {β : ℝ} (hβ : -1 / 2 < β) (n : ℕ) (z : ℂ) :
-    ultrasphPoly (β + 1 / 2) n z / ultrasphPoly (β + 1 / 2) n 1 =
-      jacobiPolyP β β n z / jacobiPolyP β β n 1 := by
+    ultrasphericalPolynomial (β + 1 / 2) n z / ultrasphericalPolynomial (β + 1 / 2) n 1 =
+      jacobiPolynomialP β β n z / jacobiPolynomialP β β n 1 := by
   have hb : -1 < (β : ℂ).re := by simp; linarith
-  have hp : poch ((β : ℂ) + 1) n ≠ 0 :=
-    poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith)) n
-  have hq : poch (2 * ((β : ℂ) + 1 / 2)) n ≠ 0 :=
-    poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith)) n
-  rw [ultrasphPoly_eq_jacobiPolyP n z (by convert hp using 1 ; congr 1 ; ring),
-    ultrasphPoly_eq_jacobiPolyP n 1 (by convert hp using 1 ; congr 1 ; ring)]
+  have hp : pochhammer ((β : ℂ) + 1) n ≠ 0 :=
+    pochhammer_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith)) n
+  have hq : pochhammer (2 * ((β : ℂ) + 1 / 2)) n ≠ 0 :=
+    pochhammer_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith)) n
+  rw [ultrasphericalPolynomial_eq_jacobiPolynomialP n z (by convert hp using 1 ; congr 1 ; ring),
+    ultrasphericalPolynomial_eq_jacobiPolynomialP n 1 (by convert hp using 1 ; congr 1 ; ring)]
   simp only [show (β : ℂ) + 1 / 2 - 1 / 2 = β by ring]
-  have hp' : poch ((β : ℂ) + 1 / 2 + 1 / 2) n ≠ 0 := by convert hp using 1 ; congr 1 ; ring
+  have hp' : pochhammer ((β : ℂ) + 1 / 2 + 1 / 2) n ≠ 0 := by convert hp using 1 ; congr 1 ; ring
   exact mul_div_mul_left _ _ (div_ne_zero hq hp')
 
 /-- Homogenization of the finite Jacobi binomial sum. -/
 theorem angularJacobiSum_eq {β : ℝ} (hβ : -1 / 2 < β) (n : ℕ) {x y : ℝ}
     (hs : 0 < x ^ 2 + y ^ 2) :
-    (x ^ 2 + y ^ 2 : ℂ) ^ n * jacobiPolyP β β n ((x ^ 2 - y ^ 2) / (x ^ 2 + y ^ 2) : ℂ) =
+    (x ^ 2 + y ^ 2 : ℂ) ^ n * jacobiPolynomialP β β n ((x ^ 2 - y ^ 2) / (x ^ 2 + y ^ 2) : ℂ) =
       angularJacobiSum β n x y := by
   have hs0 : (x ^ 2 + y ^ 2 : ℂ) ≠ 0 := by exact_mod_cast hs.ne'
   rw [jacobi_binomial_sum (by simp; linarith), angularJacobiSum, Finset.mul_sum, Finset.mul_sum]
@@ -106,7 +106,7 @@ theorem angularJacobiSum_eq {β : ℝ} (hβ : -1 / 2 < β) (n : ℕ) {x y : ℝ}
     rw [← pow_add, Nat.sub_add_cancel hk']
   field_simp [Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero k),
     Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero (n - k))]
-  linear_combination (poch ((β : ℂ) + n - k + 1) k * poch ((β : ℂ) + k + 1) (n - k) *
+  linear_combination (pochhammer ((β : ℂ) + n - k + 1) k * pochhammer ((β : ℂ) + k + 1) (n - k) *
     (-((y : ℂ) ^ 2)) ^ (n - k) * ((x : ℂ) ^ 2) ^ k) *
     ((x ^ 2 + y ^ 2 : ℂ) ^ n * hpow - (2 : ℂ) ^ n * hspow)
 
@@ -149,13 +149,13 @@ theorem angular_homogeneous {β : ℝ} (hβ : -1 / 2 < β) (n : ℕ) {x y : ℝ}
   have hG0 : Gamma (β + 1 : ℂ) ≠ 0 := Gamma_ne_zero_of_re_pos (by simp; linarith)
   have hG1 : Gamma (β + 1 / 2 : ℂ) ≠ 0 := Gamma_ne_zero_of_re_pos (by simp; linarith)
   have hπ : (Real.sqrt Real.pi : ℂ) ≠ 0 := ofReal_ne_zero.mpr (Real.sqrt_pos.mpr Real.pi_pos).ne'
-  have hP : poch ((β : ℂ) + 1) n ≠ 0 :=
-    poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith)) n
+  have hP : pochhammer ((β : ℂ) + 1) n ≠ 0 :=
+    pochhammer_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith)) n
   have hF : (n ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
-  have hG : Gamma (β + n + 1 : ℂ) = poch ((β : ℂ) + 1) n * Gamma (β + 1 : ℂ) := by
+  have hG : Gamma (β + n + 1 : ℂ) = pochhammer ((β : ℂ) + 1) n * Gamma (β + 1 : ℂ) := by
     rw [show (β : ℂ) + n + 1 = ((β : ℂ) + 1) + n by ring]
-    exact Gamma_add_nat_eq_poch_mul_Gamma (by simp; linarith) n
-  have hL := ultrasphPoly_laplace_integral (lam := β + 1 / 2) (by linarith) n q.arg
+    exact Gamma_add_nat_eq_pochhammer_mul_Gamma (by simp; linarith) n
+  have hL := ultrasphericalPolynomial_laplace_integral (lam := β + 1 / 2) (by linarith) n q.arg
   rw [show ((β + 1 / 2 : ℝ) : ℂ) = (β : ℂ) + 1 / 2 by push_cast; ring,
     gegenbauer_normalized_jacobi hβ] at hL
   have hpow : ∀ phi : ℝ,
@@ -192,7 +192,7 @@ theorem angular_homogeneous {β : ℝ} (hβ : -1 / 2 < β) (n : ℕ) {x y : ℝ}
   have hscaled := angularJacobiSum_eq hβ n hs
   have harg : ((Real.cos q.arg : ℝ) : ℂ) = (x ^ 2 - y ^ 2) / (x ^ 2 + y ^ 2) :=
       by rw [hc]; push_cast; rfl
-  conv_lhs at hL => rw [harg, jacobiPolyP_one ]
+  conv_lhs at hL => rw [harg, jacobiPolynomialP_one ]
   have hGammaArgs : (β + 1 / 2 + 1 / 2 : ℂ) = β + 1 := by ring
   rw [show (β : ℂ) + 1 / 2 + 1 / 2 = β + 1 by ring] at hL
   rw [hG]
@@ -307,9 +307,9 @@ theorem beta_radial_moment {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
 
 /-- Gamma-normalized finite Jacobi expansion at a real angle. -/
 theorem jacobi_half_angle_normalized {α β : ℝ} (hα : -1 < α) (n : ℕ) (θ : ℝ) :
-    jacobiPolyP α β n (Real.cos θ) / jacobiPolyP α β n 1 =
+    jacobiPolynomialP α β n (Real.cos θ) / jacobiPolynomialP α β n 1 =
       Gamma (α + 1 : ℂ) * n ! * ∑ k ∈ Finset.range (n + 1),
-        poch ((β : ℂ) + k + 1) (n - k) /
+        pochhammer ((β : ℂ) + k + 1) (n - k) /
           ((k ! : ℂ) * (n - k) ! * Gamma (α + (n - k : ℕ) + 1 : ℂ)) *
         (-((Real.sin (θ / 2) : ℂ) ^ 2)) ^ (n - k) * ((Real.cos (θ / 2) : ℂ) ^ 2) ^ k := by
   have hm : (Real.cos θ : ℂ) - 1 = 2 * (-((Real.sin (θ / 2) : ℂ) ^ 2)) := by
@@ -321,9 +321,9 @@ theorem jacobi_half_angle_normalized {α β : ℝ} (hα : -1 < α) (n : ℕ) (θ
     have h := Real.cos_two_mul (θ / 2)
     rw [show 2 * (θ / 2) = θ by ring] at h
     exact_mod_cast (by linarith : Real.cos θ + 1 = 2 * Real.cos (θ / 2) ^ 2)
-  have hP : poch ((α : ℂ) + 1) n ≠ 0 :=
-    poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith)) n
-  rw [jacobi_binomial_sum (by simpa using hα), jacobiPolyP_one ]
+  have hP : pochhammer ((α : ℂ) + 1) n ≠ 0 :=
+    pochhammer_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith)) n
+  rw [jacobi_binomial_sum (by simpa using hα), jacobiPolynomialP_one ]
   simp only [Finset.mul_sum, Finset.sum_div]
   apply Finset.sum_congr rfl
   intro k hk
@@ -331,14 +331,14 @@ theorem jacobi_half_angle_normalized {α β : ℝ} (hα : -1 < α) (n : ℕ) (θ
   have hA : 0 < ((α : ℂ) + (n - k : ℕ) + 1).re := by
     simp; linarith [Nat.cast_nonneg (α := ℝ) (n - k)]
   have hG : Gamma (α + (n - k : ℕ) + 1 : ℂ) ≠ 0 := Gamma_ne_zero_of_re_pos hA
-  have h0 : Gamma (α + n + 1 : ℂ) = poch ((α : ℂ) + 1) n * Gamma (α + 1 : ℂ) := by
+  have h0 : Gamma (α + n + 1 : ℂ) = pochhammer ((α : ℂ) + 1) n * Gamma (α + 1 : ℂ) := by
     rw [show (α : ℂ) + n + 1 = ((α : ℂ) + 1) + n by ring]
-    exact Gamma_add_nat_eq_poch_mul_Gamma (by simp; linarith) n
+    exact Gamma_add_nat_eq_pochhammer_mul_Gamma (by simp; linarith) n
   have h1 : Gamma (α + n + 1 : ℂ) =
-      poch ((α : ℂ) + n - k + 1) k * Gamma (α + (n - k : ℕ) + 1 : ℂ) := by
-    have h := Gamma_add_nat_eq_poch_mul_Gamma hA k
+      pochhammer ((α : ℂ) + n - k + 1) k * Gamma (α + (n - k : ℕ) + 1 : ℂ) := by
+    have h := Gamma_add_nat_eq_pochhammer_mul_Gamma hA k
     convert h using 1 <;> push_cast [Nat.cast_sub hk'] <;> congr 1 <;> ring
-  have hratio : poch ((α : ℂ) + n - k + 1) k / poch ((α : ℂ) + 1) n =
+  have hratio : pochhammer ((α : ℂ) + n - k + 1) k / pochhammer ((α : ℂ) + 1) n =
       Gamma (α + 1 : ℂ) / Gamma (α + (n - k : ℕ) + 1 : ℂ) := by
     apply (div_eq_div_iff hP hG).mpr
     linear_combination h0 - h1
@@ -346,21 +346,22 @@ theorem jacobi_half_angle_normalized {α β : ℝ} (hα : -1 < α) (n : ℕ) (θ
     rw [← pow_add, Nat.sub_add_cancel hk']
   rw [hm, hp, mul_pow, mul_pow, htwo]
   calc
-    _ = (poch ((β : ℂ) + k + 1) (n - k) / ((k ! : ℂ) * (n - k) !) * n ! *
+    _ = (pochhammer ((β : ℂ) + k + 1) (n - k) / ((k ! : ℂ) * (n - k) !) * n ! *
         (-((Real.sin (θ / 2) : ℂ) ^ 2)) ^ (n - k) * ((Real.cos (θ / 2) : ℂ) ^ 2) ^ k) *
-        (poch ((α : ℂ) + n - k + 1) k / poch ((α : ℂ) + 1) n) := by
+        (pochhammer ((α : ℂ) + n - k + 1) k / pochhammer ((α : ℂ) + 1) n) := by
       field_simp
     _ = _ := by rw [hratio]; ring
 
-/-- Identity under the stated parameter and domain assumptions: `jacobiPolyP α β n (Real.cos θ) /
-jacobiPolyP α β n 1 = 2 * Gamma (α + 1 : ℂ) / (Real.sqrt Real.pi * Gamma (α - β : ℂ) * Gamma
-(β + 1 / 2 : ℂ)) * ∫ r : ℝ in (0 : ℝ)..1, ∫ phi : ℝ in (0 : ℝ)..Real.pi, ((Real.cos (θ / 2) :
-ℂ) ^ 2 - r ^ 2 * (Real.sin (θ / 2) : ℂ) ^ 2 + I * r * Real.sin θ * Real.cos phi) ^ n * (1 - r
-^ 2 : ℂ) ^ (α - β - 1 : ℂ) * (r : ℂ) ^ (2 * β + 1 : ℂ) * (Real.sin phi : ℂ) ^ (2 * β : ℂ)`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`jacobiPolynomialP α β n (Real.cos θ) / jacobiPolynomialP α β n 1 = 2 * Gamma (α + 1 : ℂ) /
+(Real.sqrt Real.pi * Gamma (α - β : ℂ) * Gamma (β + 1 / 2 : ℂ)) * ∫ r : ℝ in (0 : ℝ)..1, ∫ phi : ℝ
+in (0 : ℝ)..Real.pi, ((Real.cos (θ / 2) : ℂ) ^ 2 - r ^ 2 * (Real.sin (θ / 2) : ℂ) ^ 2 + I * r *
+Real.sin θ * Real.cos phi) ^ n * (1 - r ^ 2 : ℂ) ^ (α - β - 1 : ℂ) * (r : ℂ) ^ (2 * β + 1 : ℂ) *
+(Real.sin phi : ℂ) ^ (2 * β : ℂ)`. -/
 @[dlmf 18.10.E3]
 theorem jacobi_double_laplace_integral {α β : ℝ} (hαβ : β < α) (hβ : -1 / 2 < β)
     (n : ℕ) (θ : ℝ) :
-    jacobiPolyP α β n (Real.cos θ) / jacobiPolyP α β n 1 =
+    jacobiPolynomialP α β n (Real.cos θ) / jacobiPolynomialP α β n 1 =
       2 * Gamma (α + 1 : ℂ) / (Real.sqrt Real.pi * Gamma (α - β : ℂ) * Gamma (β + 1 / 2 : ℂ)) *
       ∫ r : ℝ in (0 : ℝ)..1, ∫ phi : ℝ in (0 : ℝ)..Real.pi,
         ((Real.cos (θ / 2) : ℂ) ^ 2 - r ^ 2 * (Real.sin (θ / 2) : ℂ) ^ 2 +
@@ -370,8 +371,9 @@ theorem jacobi_double_laplace_integral {α β : ℝ} (hαβ : β < α) (hβ : -1
   let c : ℝ := Real.cos (θ / 2)
   let s : ℝ := Real.sin (θ / 2)
   let K : ℂ := Real.sqrt Real.pi * Gamma (β + 1 / 2 : ℂ) * n ! / Gamma (β + n + 1 : ℂ)
-  let D : ℕ → ℂ := fun k => poch ((β : ℂ) + n - k + 1) k / k ! *
-    (poch ((β : ℂ) + k + 1) (n - k) / (n - k) !) * (-((s : ℂ) ^ 2)) ^ (n - k) * ((c : ℂ) ^ 2) ^ k
+  let D : ℕ → ℂ := fun k => pochhammer ((β : ℂ) + n - k + 1) k / k ! *
+    (pochhammer ((β : ℂ) + k + 1) (n - k) / (n - k) !) * (-((s : ℂ) ^ 2)) ^ (n - k) *
+        ((c : ℂ) ^ 2) ^ k
   let F : ℕ → ℝ → ℂ := fun k r => (r : ℂ) ^ (2 * ((β : ℂ) + (n - k : ℕ) + 1) - 1) *
     (1 - (r : ℂ) ^ 2) ^ (α - β - 1 : ℂ)
   have hpos (k : ℕ) : 0 < β + (n - k : ℕ) + 1 := by
@@ -438,8 +440,8 @@ theorem jacobi_double_laplace_integral {α β : ℝ} (hαβ : β < α) (hβ : -1
     rw [mul_pow, neg_pow, mul_pow, ← pow_mul]
     linear_combination
       (Real.sqrt Real.pi * Gamma (β + 1 / 2 : ℂ) * n ! / Gamma (β + n + 1 : ℂ) *
-        (poch ((β : ℂ) + n - k + 1) k / k !) *
-        (poch ((β : ℂ) + k + 1) (n - k) / (n - k) !) * (-1) ^ (n - k) *
+        (pochhammer ((β : ℂ) + n - k + 1) k / k !) *
+        (pochhammer ((β : ℂ) + k + 1) (n - k) / (n - k) !) * (-1) ^ (n - k) *
         ((s : ℂ) ^ 2) ^ (n - k) * ((c : ℂ) ^ 2) ^ k * (1 - (r : ℂ) ^ 2) ^ (α - β - 1 : ℂ)) * hp
   have houter : (∫ r : ℝ in (0 : ℝ)..1, ∫ phi : ℝ in (0 : ℝ)..Real.pi,
         ((c : ℂ) ^ 2 - r ^ 2 * (s : ℂ) ^ 2 + I * r * Real.sin θ * Real.cos phi) ^ n *
@@ -469,8 +471,8 @@ theorem jacobi_double_laplace_integral {α β : ℝ} (hαβ : β < α) (hβ : -1
   have hk' : k ≤ n := Nat.le_of_lt_succ (Finset.mem_range.mp hk)
   have hA : 0 < ((β : ℂ) + (n - k : ℕ) + 1).re := by simpa using hpos k
   have hg : Gamma (β + n + 1 : ℂ) =
-      poch ((β : ℂ) + n - k + 1) k * Gamma (β + (n - k : ℕ) + 1 : ℂ) := by
-    have h := Gamma_add_nat_eq_poch_mul_Gamma hA k
+      pochhammer ((β : ℂ) + n - k + 1) k * Gamma (β + (n - k : ℕ) + 1 : ℂ) := by
+    have h := Gamma_add_nat_eq_pochhammer_mul_Gamma hA k
     convert h using 1 <;> push_cast [Nat.cast_sub hk'] <;> congr 1 <;> ring
   have hG : Gamma (β + n + 1 : ℂ) ≠ 0 := Gamma_ne_zero_of_re_pos (by
     simp; linarith [Nat.cast_nonneg (α := ℝ) n])
@@ -484,23 +486,24 @@ theorem jacobi_double_laplace_integral {α β : ℝ} (hαβ : β < α) (hβ : -1
   have hf (j : ℕ) : (j ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr j.factorial_ne_zero
   dsimp only [K, D, c, s]
   field_simp [hf k, hf (n - k), hf n, hΓ, hΓ', hG, hGr, hΓab, hπ]
-  linear_combination (Gamma (α + 1 : ℂ) * poch ((β : ℂ) + k + 1) (n - k) *
+  linear_combination (Gamma (α + 1 : ℂ) * pochhammer ((β : ℂ) + k + 1) (n - k) *
     (-((Real.sin (θ / 2) : ℂ) ^ 2)) ^ (n - k) * ((Real.cos (θ / 2) : ℂ) ^ 2) ^ k) * hg
 
-/-- Identity under the stated parameter and domain assumptions: `laguerrePolyL α n ((x : ℂ) ^ 2) =
-2 * (-1 : ℂ) ^ n / (Real.sqrt Real.pi * Gamma (α + 1 / 2 : ℂ) * n.factorial) * ∫ r : ℝ in
-Set.Ioi 0, ∫ phi : ℝ in (0 : ℝ)..Real.pi, ((x : ℂ) ^ 2 - r ^ 2 + 2 * I * x * r * Real.cos phi)
-^ n * exp (-(r : ℂ) ^ 2) * (r : ℂ) ^ (2 * α + 1 : ℂ) * (Real.sin phi : ℂ) ^ (2 * α : ℂ)`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`laguerrePolynomialL α n ((x : ℂ) ^ 2) = 2 * (-1 : ℂ) ^ n / (Real.sqrt Real.pi * Gamma (α + 1 / 2 :
+ℂ) * n.factorial) * ∫ r : ℝ in Set.Ioi 0, ∫ phi : ℝ in (0 : ℝ)..Real.pi, ((x : ℂ) ^ 2 - r ^ 2 + 2 *
+I * x * r * Real.cos phi) ^ n * exp (-(r : ℂ) ^ 2) * (r : ℂ) ^ (2 * α + 1 : ℂ) * (Real.sin phi : ℂ)
+^ (2 * α : ℂ)`. -/
 @[dlmf 18.10.E6]
-theorem laguerrePolyL_double_laplace_integral {α : ℝ} (hα : -1 / 2 < α) (n : ℕ) (x : ℝ) :
-    laguerrePolyL α n ((x : ℂ) ^ 2) =
+theorem laguerrePolynomialL_double_laplace_integral {α : ℝ} (hα : -1 / 2 < α) (n : ℕ) (x : ℝ) :
+    laguerrePolynomialL α n ((x : ℂ) ^ 2) =
       2 * (-1 : ℂ) ^ n / (Real.sqrt Real.pi * Gamma (α + 1 / 2 : ℂ) * n.factorial) *
       ∫ r : ℝ in Set.Ioi 0, ∫ phi : ℝ in (0 : ℝ)..Real.pi,
         ((x : ℂ) ^ 2 - r ^ 2 + 2 * I * x * r * Real.cos phi) ^ n * exp (-(r : ℂ) ^ 2) *
         (r : ℂ) ^ (2 * α + 1 : ℂ) * (Real.sin phi : ℂ) ^ (2 * α : ℂ) := by
   let K : ℂ := Real.sqrt Real.pi * Gamma (α + 1 / 2 : ℂ) * n ! / Gamma (α + n + 1 : ℂ)
-  let D : ℕ → ℂ := fun k => poch ((α : ℂ) + n - k + 1) k / k ! *
-    (poch ((α : ℂ) + k + 1) (n - k) / (n - k) !) * (-1) ^ (n - k) * ((x : ℂ) ^ 2) ^ k
+  let D : ℕ → ℂ := fun k => pochhammer ((α : ℂ) + n - k + 1) k / k ! *
+    (pochhammer ((α : ℂ) + k + 1) (n - k) / (n - k) !) * (-1) ^ (n - k) * ((x : ℂ) ^ 2) ^ k
   let F : ℕ → ℝ → ℂ := fun k r => exp (-(r : ℂ) ^ 2) *
     (r : ℂ) ^ (2 * ((α : ℂ) + (n - k : ℕ) + 1) - 1)
   have hpos (k : ℕ) : 0 < α + (n - k : ℕ) + 1 := by
@@ -545,22 +548,22 @@ theorem laguerrePolyL_double_laplace_integral {α : ℝ} (hα : -1 / 2 < α) (n 
     rw [neg_pow, ← pow_mul]
     linear_combination
       (Real.sqrt Real.pi * Gamma (α + 1 / 2 : ℂ) * n ! / Gamma (α + n + 1 : ℂ) *
-        (poch ((α : ℂ) + n - k + 1) k / k !) *
-        (poch ((α : ℂ) + k + 1) (n - k) / (n - k) !) * (-1) ^ (n - k) *
+        (pochhammer ((α : ℂ) + n - k + 1) k / k !) *
+        (pochhammer ((α : ℂ) + k + 1) (n - k) / (n - k) !) * (-1) ^ (n - k) *
         ((x : ℂ) ^ 2) ^ k * exp (-(r : ℂ) ^ 2)) * hp
   rw [setIntegral_congr_fun measurableSet_Ioi hin, integral_const_mul,
     integral_finsetSum _ fun k _ => (hF k).1.const_mul _]
   simp only [integral_const_mul]
   simp_rw [(hF _).2]
-  rw [laguerrePolyL_eq_sum (not_neg_nat_of_re_pos (by simp; linarith)), Finset.mul_sum,
+  rw [laguerrePolynomialL_eq_sum (not_neg_nat_of_re_pos (by simp; linarith)), Finset.mul_sum,
     Finset.mul_sum]
   apply Finset.sum_congr rfl
   intro k hk
   have hk' : k ≤ n := Nat.le_of_lt_succ (Finset.mem_range.mp hk)
   have hA : 0 < ((α : ℂ) + (n - k : ℕ) + 1).re := by simpa using hpos k
   have hg : Gamma (α + n + 1 : ℂ) =
-      poch ((α : ℂ) + n - k + 1) k * Gamma (α + (n - k : ℕ) + 1 : ℂ) := by
-    have h := Gamma_add_nat_eq_poch_mul_Gamma hA k
+      pochhammer ((α : ℂ) + n - k + 1) k * Gamma (α + (n - k : ℕ) + 1 : ℂ) := by
+    have h := Gamma_add_nat_eq_pochhammer_mul_Gamma hA k
     convert h using 1 <;> push_cast [Nat.cast_sub hk'] <;> congr 1 <;> ring
   have hG : Gamma (α + n + 1 : ℂ) ≠ 0 := Gamma_ne_zero_of_re_pos (by
     simp; linarith [Nat.cast_nonneg (α := ℝ) n])
@@ -577,17 +580,18 @@ theorem laguerrePolyL_double_laplace_integral {α : ℝ} (hα : -1 / 2 < α) (n 
   have hΓ' : Gamma (((α : ℂ) * 2 + 1) / 2) ≠ 0 := by
     convert hΓ using 1 ; congr 1 ; ring
   field_simp [hf k, hf (n - k), hf n, hΓ, hΓ', hG, hπ]
-  linear_combination (poch ((α : ℂ) + k + 1) (n - k) * ((x : ℂ) ^ 2) ^ k) *
+  linear_combination (pochhammer ((α : ℂ) + k + 1) (n - k) * ((x : ℂ) ^ 2) ^ k) *
     ((-1 : ℂ) ^ n * (-1) ^ (n - k) * hg - Gamma (α + n + 1 : ℂ) * hsign)
 
 end DoubleLaplaceIntegrals
 
-/-- Identity under the stated parameter and domain assumptions: `laguerrePolyL α n x = exp (x : ℂ)
+/-- Identity under the stated parameter and domain assumptions:
+`laguerrePolynomialL α n x = exp (x : ℂ)
 * (x : ℂ) ^ (-α / 2 : ℂ) / n.factorial * ∫ t : ℝ in Set.Ioi 0, exp (-t : ℂ) * (t : ℂ) ^ (n + α
 / 2 : ℂ) * besselJ α (2 * Real.sqrt (x * t))`. -/
 @[dlmf 18.10.E9]
-theorem laguerrePolyL_bessel_integral {α : ℝ} (hα : -1 < α) (n : ℕ) {x : ℝ} (hx : 0 < x) :
-    laguerrePolyL α n x = exp (x : ℂ) * (x : ℂ) ^ (-α / 2 : ℂ) / n.factorial *
+theorem laguerrePolynomialL_bessel_integral {α : ℝ} (hα : -1 < α) (n : ℕ) {x : ℝ} (hx : 0 < x) :
+    laguerrePolynomialL α n x = exp (x : ℂ) * (x : ℂ) ^ (-α / 2 : ℂ) / n.factorial *
       ∫ t : ℝ in Set.Ioi 0, exp (-t : ℂ) * (t : ℂ) ^ (n + α / 2 : ℂ) *
         besselJ α (2 * Real.sqrt (x * t)) := by
   have hc : ∀ k : ℕ, (α : ℂ) + 1 ≠ -(k : ℂ) := by
@@ -618,7 +622,7 @@ theorem laguerrePolyL_bessel_integral {α : ℝ} (hα : -1 < α) (n : ℕ) {x : 
     rw [show ((n : ℂ) + α + 1 - ((α : ℂ) + 1) / 2 - 1 / 2) = n + α / 2 by ring,
       show (α : ℂ) + 1 - 1 = α by ring, ← ofReal_mul, hs]
   rw [hi] at h
-  rw [laguerrePolyL_eq_Gamma_mul_regularized hc]
+  rw [laguerrePolynomialL_eq_Gamma_mul_regularized hc]
   have hg : Gamma ((n : ℂ) + α + 1) ≠ 0 := Gamma_ne_zero_of_re_pos ha
   have hf : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
   have he : exp (x : ℂ) * exp (-(x : ℂ)) = 1 := by rw [← exp_add]; simp
@@ -691,11 +695,11 @@ theorem integral_mul_exp_of_odd {g : ℝ → ℂ} (hg : IntervalIntegrable g vol
 /-- The Gegenbauer weight times a continuous function is integrable on `[-1, 1]`. -/
 theorem intervalIntegrable_ultrasph_weight_mul {lam : ℝ} (hlam : 0 < lam) (N : ℕ) :
     IntervalIntegrable (fun x : ℝ => (1 - (x : ℂ) ^ 2) ^ (lam - 1 / 2 : ℂ) *
-      ultrasphPoly lam N x) volume (-1) 1 := by
+      ultrasphericalPolynomial lam N x) volume (-1) 1 := by
   have hw := intervalIntegrable_jacobi_weight_cpow (a := (lam : ℂ) - 1 / 2)
     (b := (lam : ℂ) - 1 / 2) (by simp; linarith) (by simp; linarith)
-  have hC : Continuous fun x : ℝ => ultrasphPoly lam N (x : ℂ) :=
-    ((analyticOnNhd_ultrasphPoly (lam : ℂ) N).continuousOn.comp_continuous
+  have hC : Continuous fun x : ℝ => ultrasphericalPolynomial lam N (x : ℂ) :=
+    ((analyticOnNhd_ultrasphericalPolynomial (lam : ℂ) N).continuousOn.comp_continuous
       continuous_ofReal (fun _ => Set.mem_univ _))
   refine (hw.mul_continuousOn hC.continuousOn).congr fun x hx => ?_
   rw [Set.uIoc_of_le (by norm_num)] at hx
@@ -704,24 +708,25 @@ theorem intervalIntegrable_ultrasph_weight_mul {lam : ℝ} (hlam : 0 < lam) (N :
   push_cast; ring
 
 /-- Identity under the stated parameter and domain assumptions: `∫ x : ℝ in (0 : ℝ)..1, (1 - (x :
-ℂ) ^ 2) ^ (lam - 1 / 2 : ℂ) * ultrasphPoly lam (2 * n) x * Real.cos (x * y) = (-1 : ℂ) ^ n *
-Real.pi * Gamma (2 * n + 2 * lam : ℂ) * besselJ (lam + 2 * n) y / ((2 * n).factorial * Gamma
+ℂ) ^ 2) ^ (lam - 1 / 2 : ℂ) * ultrasphericalPolynomial lam (2 * n) x * Real.cos (x * y) = (-1 : ℂ) ^
+n * Real.pi * Gamma (2 * n + 2 * lam : ℂ) * besselJ (lam + 2 * n) y / ((2 * n).factorial * Gamma
 (lam : ℂ) * (2 * y : ℂ) ^ (lam : ℂ))`. -/
 @[dlmf 18.17.E17]
-theorem ultrasphPoly_even_cosine_transform {lam : ℝ} (hlam : 0 < lam) (n : ℕ) {y : ℝ} (hy : 0 < y) :
+theorem ultrasphericalPolynomial_even_cosine_transform {lam : ℝ} (hlam : 0 < lam) (n : ℕ)
+    {y : ℝ} (hy : 0 < y) :
     ∫ x : ℝ in (0 : ℝ)..1, (1 - (x : ℂ) ^ 2) ^ (lam - 1 / 2 : ℂ) *
-      ultrasphPoly lam (2 * n) x * Real.cos (x * y) =
+      ultrasphericalPolynomial lam (2 * n) x * Real.cos (x * y) =
       (-1 : ℂ) ^ n * Real.pi * Gamma (2 * n + 2 * lam : ℂ) * besselJ (lam + 2 * n) y /
         ((2 * n).factorial * Gamma (lam : ℂ) * (2 * y : ℂ) ^ (lam : ℂ)) := by
   have hev : ∀ x : ℝ, (1 - ((-x : ℝ) : ℂ) ^ 2) ^ (lam - 1 / 2 : ℂ) *
-      ultrasphPoly lam (2 * n) ((-x : ℝ) : ℂ) =
-      (1 - (x : ℂ) ^ 2) ^ (lam - 1 / 2 : ℂ) * ultrasphPoly lam (2 * n) x := by
+      ultrasphericalPolynomial lam (2 * n) ((-x : ℝ) : ℂ) =
+      (1 - (x : ℂ) ^ 2) ^ (lam - 1 / 2 : ℂ) * ultrasphericalPolynomial lam (2 * n) x := by
     intro x
-    rw [ofReal_neg, ultrasphPoly_reflection (by simp; linarith), pow_mul]
+    rw [ofReal_neg, ultrasphericalPolynomial_reflection (by simp; linarith), pow_mul]
     norm_num
   have h := integral_mul_exp_of_even (intervalIntegrable_ultrasph_weight_mul hlam (2 * n))
     hev y
-  rw [ultrasphPoly_fourier_transform hlam (2 * n) hy] at h
+  rw [ultrasphericalPolynomial_fourier_transform hlam (2 * n) hy] at h
   apply mul_left_cancel₀ (two_ne_zero : (2 : ℂ) ≠ 0)
   rw [← h, pow_mul, I_sq]
   push_cast
@@ -729,25 +734,27 @@ theorem ultrasphPoly_even_cosine_transform {lam : ℝ} (hlam : 0 < lam) (n : ℕ
   ring
 
 /-- Identity under the stated parameter and domain assumptions: `∫ x : ℝ in (0 : ℝ)..1, (1 - (x :
-ℂ) ^ 2) ^ (lam - 1 / 2 : ℂ) * ultrasphPoly lam (2 * n + 1) x * Real.sin (x * y) = (-1 : ℂ) ^ n
+ℂ) ^ 2) ^ (lam - 1 / 2 : ℂ) * ultrasphericalPolynomial lam (2 * n + 1) x * Real.sin (x * y) = (-1 :
+ℂ) ^ n
 * Real.pi * Gamma (2 * n + 2 * lam + 1 : ℂ) * besselJ (2 * n + lam + 1) y / ((2 * n +
 1).factorial * Gamma (lam : ℂ) * (2 * y : ℂ) ^ (lam : ℂ))`. -/
 @[dlmf 18.17.E18]
-theorem ultrasphPoly_odd_sine_transform {lam : ℝ} (hlam : 0 < lam) (n : ℕ) {y : ℝ} (hy : 0 < y) :
+theorem ultrasphericalPolynomial_odd_sine_transform {lam : ℝ} (hlam : 0 < lam) (n : ℕ)
+    {y : ℝ} (hy : 0 < y) :
     ∫ x : ℝ in (0 : ℝ)..1, (1 - (x : ℂ) ^ 2) ^ (lam - 1 / 2 : ℂ) *
-      ultrasphPoly lam (2 * n + 1) x * Real.sin (x * y) =
+      ultrasphericalPolynomial lam (2 * n + 1) x * Real.sin (x * y) =
       (-1 : ℂ) ^ n * Real.pi * Gamma (2 * n + 2 * lam + 1 : ℂ) * besselJ (2 * n + lam + 1) y /
         ((2 * n + 1).factorial * Gamma (lam : ℂ) * (2 * y : ℂ) ^ (lam : ℂ)) := by
   have hodd : ∀ x : ℝ, (1 - ((-x : ℝ) : ℂ) ^ 2) ^ (lam - 1 / 2 : ℂ) *
-      ultrasphPoly lam (2 * n + 1) ((-x : ℝ) : ℂ) =
-      -((1 - (x : ℂ) ^ 2) ^ (lam - 1 / 2 : ℂ) * ultrasphPoly lam (2 * n + 1) x) := by
+      ultrasphericalPolynomial lam (2 * n + 1) ((-x : ℝ) : ℂ) =
+      -((1 - (x : ℂ) ^ 2) ^ (lam - 1 / 2 : ℂ) * ultrasphericalPolynomial lam (2 * n + 1) x) := by
     intro x
-    rw [ofReal_neg, ultrasphPoly_reflection (by simp; linarith),
+    rw [ofReal_neg, ultrasphericalPolynomial_reflection (by simp; linarith),
       show ((-1 : ℂ)) ^ (2 * n + 1) = -1 by rw [pow_succ, pow_mul]; norm_num, neg_sq]
     ring
   have h := integral_mul_exp_of_odd (intervalIntegrable_ultrasph_weight_mul hlam (2 * n + 1))
     hodd y
-  rw [ultrasphPoly_fourier_transform hlam (2 * n + 1) hy] at h
+  rw [ultrasphericalPolynomial_fourier_transform hlam (2 * n + 1) hy] at h
   apply mul_left_cancel₀ (mul_ne_zero two_ne_zero I_ne_zero : (2 : ℂ) * I ≠ 0)
   rw [← h, pow_succ, pow_mul, I_sq]
   push_cast
@@ -756,16 +763,16 @@ theorem ultrasphPoly_odd_sine_transform {lam : ℝ} (hlam : 0 < lam) (n : ℕ) {
   ring
 
 /-- Identity under the stated parameter and domain assumptions: `∫ x : ℝ in (-1 : ℝ)..1,
-legendrePolyP n x * exp (I * x * y) = I ^ n * Real.sqrt (2 * Real.pi / y) * besselJ (n + 1 / 2
+legendrePolynomialP n x * exp (I * x * y) = I ^ n * Real.sqrt (2 * Real.pi / y) * besselJ (n + 1 / 2
 : ℂ) y`. -/
 @[dlmf 18.17.E19]
 theorem legendre_fourier_transform (n : ℕ) {y : ℝ} (hy : 0 < y) :
-    ∫ x : ℝ in (-1 : ℝ)..1, legendrePolyP n x * exp (I * x * y) =
+    ∫ x : ℝ in (-1 : ℝ)..1, legendrePolynomialP n x * exp (I * x * y) =
       I ^ n * Real.sqrt (2 * Real.pi / y) * besselJ (n + 1 / 2 : ℂ) y := by
-  have h := ultrasphPoly_fourier_transform (lam := 1 / 2) (by norm_num) n hy
+  have h := ultrasphericalPolynomial_fourier_transform (lam := 1 / 2) (by norm_num) n hy
   push_cast at h
   norm_num only [sub_self, cpow_zero, one_mul, mul_one] at h
-  simp only [legendre_eq_ultrasphPoly]
+  simp only [legendre_eq_ultrasphericalPolynomial]
   rw [h, Complex.Gamma_nat_eq_factorial, Complex.Gamma_one_half_eq]
   have hs : ((π : ℂ)) ^ (1 / 2 : ℂ) = ((√π : ℝ) : ℂ) := by
     rw [Real.sqrt_eq_rpow, ofReal_cpow Real.pi_pos.le]; norm_num
@@ -787,45 +794,47 @@ theorem legendre_fourier_transform (n : ℕ) {y : ℝ} (hy : 0 < y) :
   linear_combination (-J) * keyC
 
 /-- `1/Γ(y) = (y)_m/Γ(y+m)` for every `y` and every `m`, including poles. -/
-theorem recip_Gamma_eq_poch_mul_recip_Gamma_add (m : ℕ) (y : ℂ) :
-    (Gamma y)⁻¹ = poch y m * (Gamma (y + m))⁻¹ := by
+theorem recip_Gamma_eq_pochhammer_mul_recip_Gamma_add (m : ℕ) (y : ℂ) :
+    (Gamma y)⁻¹ = pochhammer y m * (Gamma (y + m))⁻¹ := by
   cases m with
-  | zero => simp [poch_zero]
-  | succ p => exact recip_Gamma_eq_poch_mul p y
+  | zero => simp [pochhammer_zero]
+  | succ p => exact recip_Gamma_eq_pochhammer_mul p y
 
 /-- The Mellin transform `∫₀¹ (1-x²)^{λ-1/2} C_{2m}^{(λ)}(x) x^{z-1} dx` in closed form, for
 `λ > 0` and `Re z > 0`. -/
-theorem ultrasphPoly_mellin_transform_even {lam : ℝ} (hlam : 0 < lam) {z : ℂ} (hz : 0 < z.re)
+theorem ultrasphericalPolynomial_mellin_transform_even {lam : ℝ} (hlam : 0 < lam) {z : ℂ}
+    (hz : 0 < z.re)
     (m : ℕ) :
     ∫ x : ℝ in (0 : ℝ)..1, (1 - (x : ℂ) ^ 2) ^ (lam - 1 / 2 : ℂ) *
-      ultrasphPoly lam (2 * m) x * (x : ℂ) ^ (z - 1) =
+      ultrasphericalPolynomial lam (2 * m) x * (x : ℂ) ^ (z - 1) =
       Real.pi * (2 : ℂ) ^ (1 - 2 * lam - z) * Gamma (((2 * m : ℕ) : ℂ) + 2 * lam : ℂ) * Gamma z /
         ((2 * m).factorial * Gamma (lam : ℂ) *
           Gamma (1 / 2 + ((2 * m : ℕ) : ℂ) / 2 + lam + z / 2) *
           Gamma (1 / 2 + z / 2 - ((2 * m : ℕ) : ℂ) / 2)) := by
-  set K0 : ℂ := poch (lam : ℂ) m / poch (1 / 2) m * (-1 : ℂ) ^ m with hK0
-  have hrw : ∀ x : ℝ, (1 - (x : ℂ) ^ 2) ^ (lam - 1 / 2 : ℂ) * ultrasphPoly lam (2 * m) x *
+  set K0 : ℂ := pochhammer (lam : ℂ) m / pochhammer (1 / 2) m * (-1 : ℂ) ^ m with hK0
+  have hrw : ∀ x : ℝ, (1 - (x : ℂ) ^ 2) ^ (lam - 1 / 2 : ℂ) *
+      ultrasphericalPolynomial lam (2 * m) x *
       (x : ℂ) ^ (z - 1) = (1 - (x : ℂ) ^ 2) ^ ((lam : ℂ) - 1 / 2) * (x : ℂ) ^ (z - 1) *
-        (K0 * jacobiPolyP ((-1 / 2 : ℝ) : ℂ) ((lam - 1 / 2 : ℝ) : ℂ) m
+        (K0 * jacobiPolynomialP ((-1 / 2 : ℝ) : ℂ) ((lam - 1 / 2 : ℝ) : ℂ) m
           ((1 - 2 * x ^ 2 : ℝ) : ℂ)) := by
     intro x
-    rw [ultrasphPoly_quadratic_even (by simp; linarith),
+    rw [ultrasphericalPolynomial_quadratic_even (by simp; linarith),
       show 2 * (x : ℂ) ^ 2 - 1 = -((1 - 2 * x ^ 2 : ℝ) : ℂ) by push_cast; ring,
       jacobi_reflection (by simp; linarith) (by norm_num), hK0]
     push_cast
     ring_nf
   rw [intervalIntegral.integral_congr (fun x _ => hrw x),
     integral_one_sub_sq_cpow_mul_cpow ((lam : ℂ) - 1 / 2) (z - 1)
-      (fun s => K0 * jacobiPolyP ((-1 / 2 : ℝ) : ℂ) ((lam - 1 / 2 : ℝ) : ℂ) m s)]
+      (fun s => K0 * jacobiPolynomialP ((-1 / 2 : ℝ) : ℂ) ((lam - 1 / 2 : ℝ) : ℂ) m s)]
   have hz2 : 0 < (z / 2).re := by simp; linarith
   have hJ := jacobi_mellin_transform (α := -1 / 2) (β := lam - 1 / 2) (by norm_num)
     (by linarith) hz2 m
   have hint : (∫ s : ℝ in (-1 : ℝ)..1, (1 - (s : ℂ)) ^ ((z - 1 - 1) / 2) *
       (1 + (s : ℂ)) ^ ((lam : ℂ) - 1 / 2) *
-      (K0 * jacobiPolyP ((-1 / 2 : ℝ) : ℂ) ((lam - 1 / 2 : ℝ) : ℂ) m s)) =
+      (K0 * jacobiPolynomialP ((-1 / 2 : ℝ) : ℂ) ((lam - 1 / 2 : ℝ) : ℂ) m s)) =
       K0 * ∫ s : ℝ in (-1 : ℝ)..1, (1 - (s : ℂ)) ^ (z / 2 - 1) *
         (1 + (s : ℂ)) ^ ((lam - 1 / 2 : ℝ) : ℂ) *
-        jacobiPolyP ((-1 / 2 : ℝ) : ℂ) ((lam - 1 / 2 : ℝ) : ℂ) m s := by
+        jacobiPolynomialP ((-1 / 2 : ℝ) : ℂ) ((lam - 1 / 2 : ℝ) : ℂ) m s := by
     rw [← intervalIntegral.integral_const_mul]
     refine intervalIntegral.integral_congr fun s _ => ?_
     rw [show (z - 1 - 1) / 2 = z / 2 - 1 by ring]
@@ -843,19 +852,19 @@ theorem ultrasphPoly_mellin_transform_even {lam : ℝ} (hlam : 0 < lam) {z : ℂ
     show (1 : ℂ) + ((-1 / 2 : ℝ) : ℂ) - z / 2 = 1 / 2 - z / 2 by push_cast; ring]
   -- the reciprocal of `Γ(1/2 + z/2 - m)`, valid also at poles
   have hE : (Gamma (1 / 2 + z / 2 - m))⁻¹ =
-      (-1 : ℂ) ^ m * poch (1 / 2 - z / 2) m * (Gamma (1 / 2 + z / 2))⁻¹ := by
-    have h := DLMF.Gamma.poch_neg_eq ((m : ℂ) - 1 / 2 - z / 2) m
+      (-1 : ℂ) ^ m * pochhammer (1 / 2 - z / 2) m * (Gamma (1 / 2 + z / 2))⁻¹ := by
+    have h := DLMF.Gamma.pochhammer_neg_eq ((m : ℂ) - 1 / 2 - z / 2) m
     rw [show -((m : ℂ) - 1 / 2 - z / 2) = 1 / 2 + z / 2 - m by ring,
       show (m : ℂ) - 1 / 2 - z / 2 - m + 1 = 1 / 2 - z / 2 by ring] at h
-    rw [recip_Gamma_eq_poch_mul_recip_Gamma_add m, h, show 1 / 2 + z / 2 - (m : ℂ) +
+    rw [recip_Gamma_eq_pochhammer_mul_recip_Gamma_add m, h, show 1 / 2 + z / 2 - (m : ℂ) +
         m = 1 / 2 + z / 2
       by ring]
   have F1 := Complex.Gamma_mul_Gamma_add_half (z / 2)
   rw [show 2 * (z / 2) = z by ring, show z / 2 + 1 / 2 = 1 / 2 + z / 2 by ring] at F1
   have F2 := Complex.Gamma_mul_Gamma_add_half ((m : ℂ) + lam)
-  have F3 : Gamma ((m : ℂ) + lam) = poch (lam : ℂ) m * Gamma lam := by
-    rw [add_comm, Gamma_add_nat_eq_poch_mul_Gamma hl]
-  have F4 := two_pow_mul_poch_half m
+  have F3 : Gamma ((m : ℂ) + lam) = pochhammer (lam : ℂ) m * Gamma lam := by
+    rw [add_comm, Gamma_add_nat_eq_pochhammer_mul_Gamma hl]
+  have F4 := two_pow_mul_pochhammer_half m
   have hpi : (Real.pi : ℂ) = (Real.sqrt Real.pi : ℂ) * (Real.sqrt Real.pi : ℂ) := by
     rw [← ofReal_mul, Real.mul_self_sqrt Real.pi_pos.le]
   have hV : (2 : ℂ) ^ (1 - 2 * (lam : ℂ) - z) * 2 =
@@ -871,7 +880,7 @@ theorem ultrasphPoly_mellin_transform_even {lam : ℝ} (hlam : 0 < lam) {z : ℂ
   have hD : Gamma (lam + 1 / 2 + z / 2 + m) ≠ 0 :=
     Gamma_ne_zero_of_re_pos (by simp; linarith [(Nat.cast_nonneg m : (0 : ℝ) ≤ m)])
   have hGl : Gamma (lam : ℂ) ≠ 0 := Gamma_ne_zero_of_re_pos hl
-  have hph : poch (1 / 2 : ℂ) m ≠ 0 := poch_ne_zero_of_re_pos (by norm_num) m
+  have hph : pochhammer (1 / 2 : ℂ) m ≠ 0 := pochhammer_ne_zero_of_re_pos (by norm_num) m
   have hfm : (m ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr m.factorial_ne_zero
   have hS : (Real.sqrt Real.pi : ℂ) ≠ 0 := ofReal_ne_zero.mpr (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hT : (2 : ℂ) ^ (1 - 2 * ((m : ℂ) + lam)) ≠ 0 := cpow_ne_zero_iff.mpr (Or.inl two_ne_zero)
@@ -895,9 +904,9 @@ theorem ultrasphPoly_mellin_transform_even {lam : ℝ} (hlam : 0 < lam) {z : ℂ
   generalize Gamma ((m : ℂ) + lam + 1 / 2) = Gmlh at F2 ⊢
   generalize Gamma (lam + 1 / 2 + z / 2 + m) = D at hD ⊢
   generalize Gamma (lam : ℂ) = Gl at hGl F3 ⊢
-  generalize poch (1 / 2 : ℂ) m = ph at hph ⊢
-  generalize poch (lam : ℂ) m = pl at F3 ⊢
-  generalize poch (1 / 2 - z / 2) m = R
+  generalize pochhammer (1 / 2 : ℂ) m = ph at hph ⊢
+  generalize pochhammer (lam : ℂ) m = pl at F3 ⊢
+  generalize pochhammer (1 / 2 - z / 2) m = R
   generalize (m ! : ℂ) = fm at hfm ⊢
   have hG2 : G2 = Gml * Gmlh / (T * S) := by field_simp; linear_combination -F2
   have hGz : Gz = Gz2 * W / (U * S) := by field_simp; linear_combination -F1
@@ -908,24 +917,25 @@ theorem ultrasphPoly_mellin_transform_even {lam : ℝ} (hlam : 0 < lam) {z : ℂ
 
 /-- The Mellin transform `∫₀¹ (1-x²)^{λ-1/2} C_{2m+1}^{(λ)}(x) x^{z-1} dx` in closed form, for
 `λ > 0` and `Re z > 0`. -/
-theorem ultrasphPoly_mellin_transform_odd {lam : ℝ} (hlam : 0 < lam) {z : ℂ} (hz : 0 < z.re)
+theorem ultrasphericalPolynomial_mellin_transform_odd {lam : ℝ} (hlam : 0 < lam) {z : ℂ}
+    (hz : 0 < z.re)
     (m : ℕ) :
     ∫ x : ℝ in (0 : ℝ)..1, (1 - (x : ℂ) ^ 2) ^ (lam - 1 / 2 : ℂ) *
-      ultrasphPoly lam (2 * m + 1) x * (x : ℂ) ^ (z - 1) =
+      ultrasphericalPolynomial lam (2 * m + 1) x * (x : ℂ) ^ (z - 1) =
       Real.pi * (2 : ℂ) ^ (1 - 2 * lam - z) * Gamma (((2 * m + 1 : ℕ) : ℂ) + 2 * lam : ℂ) *
         Gamma z / ((2 * m + 1).factorial * Gamma (lam : ℂ) *
           Gamma (1 / 2 + ((2 * m + 1 : ℕ) : ℂ) / 2 + lam + z / 2) *
           Gamma (1 / 2 + z / 2 - ((2 * m + 1 : ℕ) : ℂ) / 2)) := by
-  set K1 : ℂ := poch (lam : ℂ) (m + 1) / poch (1 / 2) (m + 1) * (-1 : ℂ) ^ m with hK1
+  set K1 : ℂ := pochhammer (lam : ℂ) (m + 1) / pochhammer (1 / 2) (m + 1) * (-1 : ℂ) ^ m with hK1
   have hrw : Set.EqOn (fun x : ℝ => (1 - (x : ℂ) ^ 2) ^ (lam - 1 / 2 : ℂ) *
-      ultrasphPoly lam (2 * m + 1) x * (x : ℂ) ^ (z - 1))
+      ultrasphericalPolynomial lam (2 * m + 1) x * (x : ℂ) ^ (z - 1))
       (fun x : ℝ => (1 - (x : ℂ) ^ 2) ^ ((lam : ℂ) - 1 / 2) * (x : ℂ) ^ z *
-        (K1 * jacobiPolyP ((1 / 2 : ℝ) : ℂ) ((lam - 1 / 2 : ℝ) : ℂ) m
+        (K1 * jacobiPolynomialP ((1 / 2 : ℝ) : ℂ) ((lam - 1 / 2 : ℝ) : ℂ) m
           ((1 - 2 * x ^ 2 : ℝ) : ℂ))) (Set.Ioo 0 1) := by
     intro x hx
     have hx0 : (x : ℂ) ≠ 0 := ofReal_ne_zero.mpr hx.1.ne'
     simp only
-    rw [ultrasphPoly_quadratic_odd (by simp; linarith),
+    rw [ultrasphericalPolynomial_quadratic_odd (by simp; linarith),
       show 2 * (x : ℂ) ^ 2 - 1 = -((1 - 2 * x ^ 2 : ℝ) : ℂ) by push_cast; ring,
       jacobi_reflection (by simp; linarith) (by norm_num), hK1,
       show z = (z - 1) + 1 by ring, cpow_add _ _ hx0, cpow_one,
@@ -934,16 +944,16 @@ theorem ultrasphPoly_mellin_transform_odd {lam : ℝ} (hlam : 0 < lam) {z : ℂ}
     ring_nf
   rw [intervalIntegral.integral_congr_Ioo_of_le (by norm_num) hrw,
     integral_one_sub_sq_cpow_mul_cpow ((lam : ℂ) - 1 / 2) z
-      (fun s => K1 * jacobiPolyP ((1 / 2 : ℝ) : ℂ) ((lam - 1 / 2 : ℝ) : ℂ) m s)]
+      (fun s => K1 * jacobiPolynomialP ((1 / 2 : ℝ) : ℂ) ((lam - 1 / 2 : ℝ) : ℂ) m s)]
   have hw : 0 < (1 / 2 + z / 2).re := by simp; linarith
   have hJ := jacobi_mellin_transform (α := 1 / 2) (β := lam - 1 / 2) (by norm_num)
     (by linarith) hw m
   have hint : (∫ s : ℝ in (-1 : ℝ)..1, (1 - (s : ℂ)) ^ ((z - 1) / 2) *
       (1 + (s : ℂ)) ^ ((lam : ℂ) - 1 / 2) *
-      (K1 * jacobiPolyP ((1 / 2 : ℝ) : ℂ) ((lam - 1 / 2 : ℝ) : ℂ) m s)) =
+      (K1 * jacobiPolynomialP ((1 / 2 : ℝ) : ℂ) ((lam - 1 / 2 : ℝ) : ℂ) m s)) =
       K1 * ∫ s : ℝ in (-1 : ℝ)..1, (1 - (s : ℂ)) ^ (1 / 2 + z / 2 - 1) *
         (1 + (s : ℂ)) ^ ((lam - 1 / 2 : ℝ) : ℂ) *
-        jacobiPolyP ((1 / 2 : ℝ) : ℂ) ((lam - 1 / 2 : ℝ) : ℂ) m s := by
+        jacobiPolynomialP ((1 / 2 : ℝ) : ℂ) ((lam - 1 / 2 : ℝ) : ℂ) m s := by
     rw [← intervalIntegral.integral_const_mul]
     refine intervalIntegral.integral_congr fun s _ => ?_
     rw [show (z - 1) / 2 = 1 / 2 + z / 2 - 1 by ring]
@@ -960,19 +970,21 @@ theorem ultrasphPoly_mellin_transform_odd {lam : ℝ} (hlam : 0 < lam) {z : ℂ}
     show (1 / 2 : ℂ) + z / 2 - ((2 * m + 1 : ℕ) : ℂ) / 2 = z / 2 - m by push_cast; ring,
     show (1 : ℂ) + ((1 / 2 : ℝ) : ℂ) - (1 / 2 + z / 2) = 1 - z / 2 by push_cast; ring]
   have hE : (Gamma (z / 2 - m))⁻¹ =
-      (-1 : ℂ) ^ m * poch (1 - z / 2) m * (Gamma (z / 2))⁻¹ := by
-    have h := DLMF.Gamma.poch_neg_eq ((m : ℂ) - z / 2) m
+      (-1 : ℂ) ^ m * pochhammer (1 - z / 2) m * (Gamma (z / 2))⁻¹ := by
+    have h := DLMF.Gamma.pochhammer_neg_eq ((m : ℂ) - z / 2) m
     rw [show -((m : ℂ) - z / 2) = z / 2 - m by ring,
       show (m : ℂ) - z / 2 - m + 1 = 1 - z / 2 by ring] at h
-    rw [recip_Gamma_eq_poch_mul_recip_Gamma_add m, h, show z / 2 - (m : ℂ) + m = z / 2 by ring]
+    rw [recip_Gamma_eq_pochhammer_mul_recip_Gamma_add m, h, show z / 2 - (m : ℂ) +
+        m = z / 2 by ring]
   have F1 := Complex.Gamma_mul_Gamma_add_half (z / 2)
   rw [show 2 * (z / 2) = z by ring, show z / 2 + 1 / 2 = 1 / 2 + z / 2 by ring] at F1
   have F2 := Complex.Gamma_mul_Gamma_add_half ((m : ℂ) + lam + 1 / 2)
   rw [show (m : ℂ) + lam + 1 / 2 + 1 / 2 = lam + (m + 1 : ℕ) by push_cast; ring] at F2
-  have F3 : Gamma ((lam : ℂ) + (m + 1 : ℕ)) = poch (lam : ℂ) (m + 1) * Gamma lam :=
-    Gamma_add_nat_eq_poch_mul_Gamma hl (m + 1)
-  have F4 : (2 : ℂ) ^ (2 * m + 1) * poch (1 / 2) (m + 1) * m ! = (2 * m + 1).factorial := by
-    rw [Nat.factorial_succ, Nat.cast_mul, ← two_pow_mul_poch_half m, poch_succ, pow_succ]
+  have F3 : Gamma ((lam : ℂ) + (m + 1 : ℕ)) = pochhammer (lam : ℂ) (m + 1) * Gamma lam :=
+    Gamma_add_nat_eq_pochhammer_mul_Gamma hl (m + 1)
+  have F4 : (2 : ℂ) ^ (2 * m + 1) * pochhammer (1 / 2) (m + 1) * m ! = (2 * m + 1).factorial := by
+    rw [Nat.factorial_succ, Nat.cast_mul, ← two_pow_mul_pochhammer_half m,
+        pochhammer_succ, pow_succ]
     push_cast
     ring
   have hpi : (Real.pi : ℂ) = (Real.sqrt Real.pi : ℂ) * (Real.sqrt Real.pi : ℂ) := by
@@ -990,7 +1002,7 @@ theorem ultrasphPoly_mellin_transform_odd {lam : ℝ} (hlam : 0 < lam) {z : ℂ}
   have hD : Gamma (lam + 1 + z / 2 + m) ≠ 0 :=
     Gamma_ne_zero_of_re_pos (by simp; linarith [(Nat.cast_nonneg m : (0 : ℝ) ≤ m)])
   have hGl : Gamma (lam : ℂ) ≠ 0 := Gamma_ne_zero_of_re_pos hl
-  have hph : poch (1 / 2 : ℂ) (m + 1) ≠ 0 := poch_ne_zero_of_re_pos (by norm_num) _
+  have hph : pochhammer (1 / 2 : ℂ) (m + 1) ≠ 0 := pochhammer_ne_zero_of_re_pos (by norm_num) _
   have hfm : (m ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr m.factorial_ne_zero
   have hS : (Real.sqrt Real.pi : ℂ) ≠ 0 := ofReal_ne_zero.mpr (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hT : (2 : ℂ) ^ (1 - 2 * ((m : ℂ) + lam + 1 / 2)) ≠ 0 :=
@@ -1015,9 +1027,9 @@ theorem ultrasphPoly_mellin_transform_odd {lam : ℝ} (hlam : 0 < lam) {z : ℂ}
   generalize Gamma ((m : ℂ) + lam + 1 / 2) = Gmlh at F2 ⊢
   generalize Gamma (lam + 1 + z / 2 + m) = D at hD ⊢
   generalize Gamma (lam : ℂ) = Gl at hGl F3 ⊢
-  generalize poch (1 / 2 : ℂ) (m + 1) = ph at hph ⊢
-  generalize poch (lam : ℂ) (m + 1) = pl at F3 ⊢
-  generalize poch (1 - z / 2) m = R
+  generalize pochhammer (1 / 2 : ℂ) (m + 1) = ph at hph ⊢
+  generalize pochhammer (lam : ℂ) (m + 1) = pl at F3 ⊢
+  generalize pochhammer (1 - z / 2) m = R
   generalize (m ! : ℂ) = fm at hfm ⊢
   have hG2 : G2 = Gmlh * Gml1 / (T * S) := by field_simp; linear_combination -F2
   have hGz : Gz = Gz2 * W / (U * S) := by field_simp; linear_combination -F1
@@ -1027,35 +1039,36 @@ theorem ultrasphPoly_mellin_transform_odd {lam : ℝ} (hlam : 0 < lam) {z : ℂ}
   linear_combination 2 * pl * W * Gmlh * R * hPQ
 
 /-- Identity under the stated parameter and domain assumptions: `∫ x : ℝ in (0 : ℝ)..1, (1 - (x :
-ℂ) ^ 2) ^ (lam - 1 / 2 : ℂ) * ultrasphPoly lam n x * (x : ℂ) ^ (z - 1) = Real.pi * (2 : ℂ) ^
-(1 - 2 * lam - z) * Gamma (n + 2 * lam : ℂ) * Gamma z / (n.factorial * Gamma (lam : ℂ) * Gamma
+ℂ) ^ 2) ^ (lam - 1 / 2 : ℂ) * ultrasphericalPolynomial lam n x * (x : ℂ) ^ (z - 1) = Real.pi * (2 :
+ℂ) ^ (1 - 2 * lam - z) * Gamma (n + 2 * lam : ℂ) * Gamma z / (n.factorial * Gamma (lam : ℂ) * Gamma
 (1 / 2 + n / 2 + lam + z / 2) * Gamma (1 / 2 + z / 2 - n / 2))`. -/
 @[dlmf 18.17.E37]
-theorem ultrasphPoly_mellin_transform {lam : ℝ} (hlam : 0 < lam) {z : ℂ} (hz : 0 < z.re) (n : ℕ) :
+theorem ultrasphericalPolynomial_mellin_transform {lam : ℝ} (hlam : 0 < lam) {z : ℂ}
+    (hz : 0 < z.re) (n : ℕ) :
     ∫ x : ℝ in (0 : ℝ)..1, (1 - (x : ℂ) ^ 2) ^ (lam - 1 / 2 : ℂ) *
-      ultrasphPoly lam n x * (x : ℂ) ^ (z - 1) =
+      ultrasphericalPolynomial lam n x * (x : ℂ) ^ (z - 1) =
       Real.pi * (2 : ℂ) ^ (1 - 2 * lam - z) * Gamma (n + 2 * lam : ℂ) * Gamma z /
         (n.factorial * Gamma (lam : ℂ) * Gamma (1 / 2 + n / 2 + lam + z / 2) *
           Gamma (1 / 2 + z / 2 - n / 2)) := by
   rcases Nat.even_or_odd' n with ⟨m, rfl | rfl⟩
-  · exact ultrasphPoly_mellin_transform_even hlam hz m
-  · exact ultrasphPoly_mellin_transform_odd hlam hz m
+  · exact ultrasphericalPolynomial_mellin_transform_even hlam hz m
+  · exact ultrasphericalPolynomial_mellin_transform_odd hlam hz m
 
 /-- Finite-sum version, including parameters where the displayed hypergeometric quotient
 has removable singularities. -/
 @[dlmf 18.17.E40]
-theorem laguerrePolyL_mellin_laplace_transform {a : ℝ} (ha : 0 < a) {α : ℂ} (hα : -1 < α.re)
+theorem laguerrePolynomialL_mellin_laplace_transform {a : ℝ} (ha : 0 < a) {α : ℂ} (hα : -1 < α.re)
     (b : ℂ) {z : ℂ} (hz : 0 < z.re) (n : ℕ) :
-    ∫ x : ℝ in Set.Ioi 0, exp (-a * x) * laguerrePolyL α n (b * x) * (x : ℂ) ^ (z - 1) =
-      ∑ k ∈ Finset.range (n + 1), poch (α + k + 1) (n - k) * (-b) ^ k /
+    ∫ x : ℝ in Set.Ioi 0, exp (-a * x) * laguerrePolynomialL α n (b * x) * (x : ℂ) ^ (z - 1) =
+      ∑ k ∈ Finset.range (n + 1), pochhammer (α + k + 1) (n - k) * (-b) ^ k /
         ((n - k).factorial * (k.factorial : ℂ)) * Gamma (z + k) / (a : ℂ) ^ (z + k) := by
   have hα' : ∀ k : ℕ, α + 1 ≠ -(k : ℂ) :=
     not_neg_nat_of_re_pos (by simp only [add_re, one_re]; linarith)
-  have heq (x : ℝ) : laguerrePolyL α n (b * x) =
+  have heq (x : ℝ) : laguerrePolynomialL α n (b * x) =
       ∑ k ∈ Finset.range (n + 1),
-        (poch (α + k + 1) (n - k) * (-b) ^ k / ((n - k).factorial * (k.factorial : ℂ))) *
+        (pochhammer (α + k + 1) (n - k) * (-b) ^ k / ((n - k).factorial * (k.factorial : ℂ))) *
           (x : ℂ) ^ k := by
-    rw [laguerrePolyL_eq_sum hα']
+    rw [laguerrePolynomialL_eq_sum hα']
     apply Finset.sum_congr rfl
     intro k _
     rw [show -(b * (x : ℂ)) = -b * x by ring, mul_pow]

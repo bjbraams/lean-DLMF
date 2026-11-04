@@ -23,7 +23,7 @@ proved in `DLMF.Airy.Properties`.
   derivatives.
 * `airyAi`, `airyAiDeriv`: `Ai` and `Ai'` (DLMF 9.4.1, 9.4.2).
 * `airyBi`, `airyBiDeriv`: `Bi` and `Bi'` (DLMF 9.4.3, 9.4.4).
-* `IsAirySol`: `w, w'` solve Airy's equation on all of `ℂ`.
+* `IsAirySolution`: `w, w'` solve Airy's equation on all of `ℂ`.
 -/
 
 @[expose] public noncomputable section
@@ -75,6 +75,6 @@ def airyBiDeriv (z : ℂ) : ℂ :=
 
 
 /-- `w, w'` solve Airy's equation `w'' = z w` on all of `ℂ`. -/
-def IsAirySol (w w' : ℂ → ℂ) : Prop := ∀ z, HasDerivAt w (w' z) z ∧ HasDerivAt w' (z * w z) z
+def IsAirySolution (w w' : ℂ → ℂ) : Prop := ∀ z, HasDerivAt w (w' z) z ∧ HasDerivAt w' (z * w z) z
 
 end DLMF.Airy

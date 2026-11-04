@@ -20,10 +20,10 @@ functions.
 
 ## Main results
 
-* `tendsto_jacobiSnk_zero`, `tendsto_jacobiCnk_zero`, `tendsto_jacobiDnk_zero` and the nine
-  companions such as `tendsto_jacobiCsk_zero`: Table 22.5.3.
-* `tendsto_jacobiSnk_one`, `tendsto_jacobiCnk_one`, `tendsto_jacobiDnk_one` and the nine
-  companions such as `tendsto_jacobiCsk_one`: Table 22.5.4.
+* `tendsto_jacobiSn_zero`, `tendsto_jacobiCn_zero`, `tendsto_jacobiDn_zero` and the nine
+  companions such as `tendsto_jacobiCs_zero`: Table 22.5.3.
+* `tendsto_jacobiSn_one`, `tendsto_jacobiCn_one`, `tendsto_jacobiDn_one` and the nine
+  companions such as `tendsto_jacobiCs_one`: Table 22.5.4.
 
 ## Implementation notes
 
@@ -45,9 +45,9 @@ noncomputable section
 namespace DLMF.JacobiElliptic
 
 macro "jacobi_value_tac " hk:term:max : tactic => `(tactic|
-  (simp only [jacobiSnk_zero $hk, jacobiCnk_zero $hk, jacobiDnk_zero $hk, jacobiCdk_zero $hk,
-    jacobiSdk_zero $hk, jacobiNdk_zero $hk, jacobiDck_zero $hk, jacobiNck_zero $hk,
-    jacobiSck_zero $hk, mul_one, mul_zero, neg_zero] <;> try ring))
+  (simp only [jacobiSn_zero $hk, jacobiCn_zero $hk, jacobiDn_zero $hk, jacobiCd_zero $hk,
+    jacobiSd_zero $hk, jacobiNd_zero $hk, jacobiDc_zero $hk, jacobiNc_zero $hk,
+    jacobiSc_zero $hk, mul_one, mul_zero, neg_zero] <;> try ring))
 
 section ModulusLimits
 variable {α : Type*} {l : Filter α} {w τ : α → ℂ} {w0 : ℂ}
@@ -258,42 +258,45 @@ private lemma tendsto_jacobiLetterTheta_limit {ζ : α → ℂ} {z : ℂ} (hζ :
     simpa only [Pi.div_def, div_one, zero_add] using this
 
 end ModulusLimits
-/-- The map `(fun k : ℝ => (jacobiTauk (k : ℂ)).im)` tends to `atTop` along `(𝓝[>] 0)`. -/
-private lemma tendsto_im_jacobiTauk_atTop :
-    Tendsto (fun k : ℝ => (jacobiTauk (k : ℂ)).im) (𝓝[>] 0) atTop := by
-  have hc : Tendsto (fun k : ℝ => Real.compEllIntKm (k ^ 2)) (𝓝 0) (𝓝 (π / 2)) := by
-    have h1 : ContinuousAt Real.compEllIntKm ((0 : ℝ) ^ 2) :=
-      Real.continuousAt_compEllIntKm (by norm_num)
+/-- The map `(fun k : ℝ => (jacobiTau (k : ℂ)).im)` tends to `atTop` along `(𝓝[>] 0)`. -/
+private lemma tendsto_im_jacobiTau_atTop :
+    Tendsto (fun k : ℝ => (jacobiTau (k : ℂ)).im) (𝓝[>] 0) atTop := by
+  have hc : Tendsto (fun k : ℝ => Real.completeEllipticKOfParameter (k ^ 2)) (𝓝 0) (𝓝 (π / 2)) := by
+    have h1 : ContinuousAt Real.completeEllipticKOfParameter ((0 : ℝ) ^ 2) :=
+      Real.continuousAt_completeEllipticKOfParameter (by norm_num)
     have := (h1.comp (f := fun k : ℝ => k ^ 2) (continuous_pow 2).continuousAt).tendsto
-    simpa [Real.compEllIntKm_zero, Function.comp_def] using this
-  have hev : ∀ᶠ k : ℝ in 𝓝[>] 0, Real.compEllIntKm (k ^ 2) < 2 :=
+    simpa [Real.completeEllipticKOfParameter_zero, Function.comp_def] using this
+  have hev : ∀ᶠ k : ℝ in 𝓝[>] 0, Real.completeEllipticKOfParameter (k ^ 2) < 2 :=
     nhdsWithin_le_nhds (hc.eventually (gt_mem_nhds (by linarith [Real.pi_lt_four])))
   have hlog : Tendsto (fun k : ℝ => Real.log (π / 2 / k) / √2 / 2) (𝓝[>] 0) atTop :=
     tendsto_log_pi_div_two_div_div_sqrt_two.atTop_div_const (by norm_num)
   refine tendsto_atTop_mono' _ ?_ hlog
   filter_upwards [hev, Ioo_mem_nhdsGT (show (0 : ℝ) < 1 by norm_num)] with k hK hk
   have hk2 : k ^ 2 < 1 := by nlinarith [hk.1, hk.2]
-  have hKpos := Real.compEllIntKm_pos hk2
-  have hτ : jacobiTauk (k : ℂ) = I * ((Real.compEllIntKm (1 - k ^ 2) /
-      Real.compEllIntKm (k ^ 2) : ℝ) : ℂ) := by
-    rw [jacobiTauk, compEllIntKk_ofReal hk2, compEllIntKpk_ofReal (by nlinarith [hk.1])]
+  have hKpos := Real.completeEllipticKOfParameter_pos hk2
+  have hτ : jacobiTau (k : ℂ) = I * ((Real.completeEllipticKOfParameter (1 - k ^ 2) /
+      Real.completeEllipticKOfParameter (k ^ 2) : ℝ) : ℂ) := by
+    rw [jacobiTau, completeEllipticK_ofReal hk2,
+        completeEllipticKPrime_ofReal (by nlinarith [hk.1])]
     push_cast; ring
   rw [hτ, Complex.mul_im, I_re, I_im, ofReal_re, ofReal_im, zero_mul, one_mul, zero_add]
-  have hge := log_div_sqrt_two_le_compEllIntKm hk.1 (by linarith [hk.2, Real.pi_gt_three])
-  have hKp : 0 ≤ Real.compEllIntKm (1 - k ^ 2) := by
-    rw [Real.compEllIntKm]
+  have hge := log_div_sqrt_two_le_completeEllipticKOfParameter hk.1
+      (by linarith [hk.2, Real.pi_gt_three])
+  have hKp : 0 ≤ Real.completeEllipticKOfParameter (1 - k ^ 2) := by
+    rw [Real.completeEllipticKOfParameter]
     exact intervalIntegral.integral_nonneg (by positivity) fun θ _ =>
       Real.rpow_nonneg (one_sub_mul_sin_sq_pos (by nlinarith [hk.1]) θ).le _
   rw [le_div_iff₀ hKpos]
-  calc Real.log (π / 2 / k) / √2 / 2 * Real.compEllIntKm (k ^ 2)
-      ≤ Real.compEllIntKm (1 - k ^ 2) / 2 * Real.compEllIntKm (k ^ 2) := by
+  calc Real.log (π / 2 / k) / √2 / 2 * Real.completeEllipticKOfParameter (k ^ 2)
+      ≤ Real.completeEllipticKOfParameter (1 - k ^ 2) / 2 *
+          Real.completeEllipticKOfParameter (k ^ 2) := by
         gcongr
-    _ ≤ Real.compEllIntKm (1 - k ^ 2) := by nlinarith
+    _ ≤ Real.completeEllipticKOfParameter (1 - k ^ 2) := by nlinarith
 
-/-- The map `(fun k : ℝ => jacobiZetak z k)` tends to `(𝓝 z)` along `(𝓝[>] 0)`. -/
-private lemma tendsto_jacobiZetak_modulus_zero (z : ℂ) :
-    Tendsto (fun k : ℝ => jacobiZetak z k) (𝓝[>] 0) (𝓝 z) := by
-  have h := (tendsto_compEllIntKk_zero.const_mul (2 : ℂ))
+/-- The map `(fun k : ℝ => jacobiThetaArgument z k)` tends to `(𝓝 z)` along `(𝓝[>] 0)`. -/
+private lemma tendsto_jacobiThetaArgument_modulus_zero (z : ℂ) :
+    Tendsto (fun k : ℝ => jacobiThetaArgument z k) (𝓝[>] 0) (𝓝 z) := by
+  have h := (tendsto_completeEllipticK_zero.const_mul (2 : ℂ))
   have hne : (2 : ℂ) * (π / 2 : ℂ) ≠ 0 := by
     simp [Real.pi_ne_zero]
   have := (tendsto_const_nhds (x := (π : ℂ) * z)).div h hne
@@ -301,138 +304,138 @@ private lemma tendsto_jacobiZetak_modulus_zero (z : ℂ) :
   · rfl
   · field_simp
 
-/-- The map `(fun k : ℝ => jacobiPQk p q z k)` tends to
+/-- The map `(fun k : ℝ => jacobiPQ p q z k)` tends to
 `(𝓝 (jacobiLetterThetaLimit p z / jacobiLetterThetaLimit q z))` along `(𝓝[>] 0)`. -/
-private lemma tendsto_jacobiPQk_modulus_zero {p q : JacobiLetter} (hpq : p ≠ q) (z : ℂ)
+private lemma tendsto_jacobiPQ_modulus_zero {p q : JacobiLetter} (hpq : p ≠ q) (z : ℂ)
     (hq : jacobiLetterThetaLimit q z ≠ 0) :
-    Tendsto (fun k : ℝ => jacobiPQk p q z k) (𝓝[>] 0)
+    Tendsto (fun k : ℝ => jacobiPQ p q z k) (𝓝[>] 0)
         (𝓝 (jacobiLetterThetaLimit p z / jacobiLetterThetaLimit q z)) := by
-  unfold jacobiPQk jacobiGlaisher
+  unfold jacobiPQ jacobiGlaisher
   simp only [hpq, ↓reduceIte]
-  exact (tendsto_jacobiLetterTheta_limit (tendsto_jacobiZetak_modulus_zero z)
-      tendsto_im_jacobiTauk_atTop p).div
-    (tendsto_jacobiLetterTheta_limit (tendsto_jacobiZetak_modulus_zero z)
-        tendsto_im_jacobiTauk_atTop q) hq
+  exact (tendsto_jacobiLetterTheta_limit (tendsto_jacobiThetaArgument_modulus_zero z)
+      tendsto_im_jacobiTau_atTop p).div
+    (tendsto_jacobiLetterTheta_limit (tendsto_jacobiThetaArgument_modulus_zero z)
+        tendsto_im_jacobiTau_atTop q) hq
 
 /-- Table T3: `sn(z, k) → Complex.sin z` as real `k → 0+`. -/
 @[dlmf 22.5.T3]
-theorem tendsto_jacobiSnk_zero (z : ℂ) :
-    Tendsto (fun k : ℝ => jacobiSnk z k) (𝓝[>] 0) (𝓝 (Complex.sin z)) := by
-  simpa [jacobiLetterThetaLimit, jacobiSnk, one_div, Complex.tan_eq_sin_div_cos,
+theorem tendsto_jacobiSn_zero (z : ℂ) :
+    Tendsto (fun k : ℝ => jacobiSn z k) (𝓝[>] 0) (𝓝 (Complex.sin z)) := by
+  simpa [jacobiLetterThetaLimit, jacobiSn, one_div, Complex.tan_eq_sin_div_cos,
       Complex.cot_eq_cos_div_sin] using
-    tendsto_jacobiPQk_modulus_zero (p := .s) (q := .n) (by decide) z
+    tendsto_jacobiPQ_modulus_zero (p := .s) (q := .n) (by decide) z
         (by simp [jacobiLetterThetaLimit])
 
 /-- Table T3: `cd(z, k) → Complex.cos z` as real `k → 0+`. -/
 @[dlmf 22.5.T3]
-theorem tendsto_jacobiCdk_zero (z : ℂ) :
-    Tendsto (fun k : ℝ => jacobiCdk z k) (𝓝[>] 0) (𝓝 (Complex.cos z)) := by
-  simpa [jacobiLetterThetaLimit, jacobiCdk, one_div, Complex.tan_eq_sin_div_cos,
+theorem tendsto_jacobiCd_zero (z : ℂ) :
+    Tendsto (fun k : ℝ => jacobiCd z k) (𝓝[>] 0) (𝓝 (Complex.cos z)) := by
+  simpa [jacobiLetterThetaLimit, jacobiCd, one_div, Complex.tan_eq_sin_div_cos,
       Complex.cot_eq_cos_div_sin] using
-    tendsto_jacobiPQk_modulus_zero (p := .c) (q := .d) (by decide) z
+    tendsto_jacobiPQ_modulus_zero (p := .c) (q := .d) (by decide) z
         (by simp [jacobiLetterThetaLimit])
 
 /-- Table T3: `dc(z, k) → (Complex.cos z)⁻¹` as real `k → 0+`, away from the poles of
 the limit. -/
 @[dlmf 22.5.T3]
-theorem tendsto_jacobiDck_zero (z : ℂ) (hz : Complex.cos z ≠ 0) :
-    Tendsto (fun k : ℝ => jacobiDck z k) (𝓝[>] 0) (𝓝 ((Complex.cos z)⁻¹)) := by
-  simpa [jacobiLetterThetaLimit, jacobiDck, one_div, Complex.tan_eq_sin_div_cos,
+theorem tendsto_jacobiDc_zero (z : ℂ) (hz : Complex.cos z ≠ 0) :
+    Tendsto (fun k : ℝ => jacobiDc z k) (𝓝[>] 0) (𝓝 ((Complex.cos z)⁻¹)) := by
+  simpa [jacobiLetterThetaLimit, jacobiDc, one_div, Complex.tan_eq_sin_div_cos,
       Complex.cot_eq_cos_div_sin] using
-    tendsto_jacobiPQk_modulus_zero (p := .d) (q := .c) (by decide) z
+    tendsto_jacobiPQ_modulus_zero (p := .d) (q := .c) (by decide) z
         (by simpa [jacobiLetterThetaLimit] using hz)
 
 /-- Table T3: `ns(z, k) → (Complex.sin z)⁻¹` as real `k → 0+`, away from the poles of
 the limit. -/
 @[dlmf 22.5.T3]
-theorem tendsto_jacobiNsk_zero (z : ℂ) (hz : Complex.sin z ≠ 0) :
-    Tendsto (fun k : ℝ => jacobiNsk z k) (𝓝[>] 0) (𝓝 ((Complex.sin z)⁻¹)) := by
-  simpa [jacobiLetterThetaLimit, jacobiNsk, one_div, Complex.tan_eq_sin_div_cos,
+theorem tendsto_jacobiNs_zero (z : ℂ) (hz : Complex.sin z ≠ 0) :
+    Tendsto (fun k : ℝ => jacobiNs z k) (𝓝[>] 0) (𝓝 ((Complex.sin z)⁻¹)) := by
+  simpa [jacobiLetterThetaLimit, jacobiNs, one_div, Complex.tan_eq_sin_div_cos,
       Complex.cot_eq_cos_div_sin] using
-    tendsto_jacobiPQk_modulus_zero (p := .n) (q := .s) (by decide) z
+    tendsto_jacobiPQ_modulus_zero (p := .n) (q := .s) (by decide) z
         (by simpa [jacobiLetterThetaLimit] using hz)
 
 /-- Table T3: `cn(z, k) → Complex.cos z` as real `k → 0+`. -/
 @[dlmf 22.5.T3]
-theorem tendsto_jacobiCnk_zero (z : ℂ) :
-    Tendsto (fun k : ℝ => jacobiCnk z k) (𝓝[>] 0) (𝓝 (Complex.cos z)) := by
-  simpa [jacobiLetterThetaLimit, jacobiCnk, one_div, Complex.tan_eq_sin_div_cos,
+theorem tendsto_jacobiCn_zero (z : ℂ) :
+    Tendsto (fun k : ℝ => jacobiCn z k) (𝓝[>] 0) (𝓝 (Complex.cos z)) := by
+  simpa [jacobiLetterThetaLimit, jacobiCn, one_div, Complex.tan_eq_sin_div_cos,
       Complex.cot_eq_cos_div_sin] using
-    tendsto_jacobiPQk_modulus_zero (p := .c) (q := .n) (by decide) z
+    tendsto_jacobiPQ_modulus_zero (p := .c) (q := .n) (by decide) z
         (by simp [jacobiLetterThetaLimit])
 
 /-- Table T3: `sd(z, k) → Complex.sin z` as real `k → 0+`. -/
 @[dlmf 22.5.T3]
-theorem tendsto_jacobiSdk_zero (z : ℂ) :
-    Tendsto (fun k : ℝ => jacobiSdk z k) (𝓝[>] 0) (𝓝 (Complex.sin z)) := by
-  simpa [jacobiLetterThetaLimit, jacobiSdk, one_div, Complex.tan_eq_sin_div_cos,
+theorem tendsto_jacobiSd_zero (z : ℂ) :
+    Tendsto (fun k : ℝ => jacobiSd z k) (𝓝[>] 0) (𝓝 (Complex.sin z)) := by
+  simpa [jacobiLetterThetaLimit, jacobiSd, one_div, Complex.tan_eq_sin_div_cos,
       Complex.cot_eq_cos_div_sin] using
-    tendsto_jacobiPQk_modulus_zero (p := .s) (q := .d) (by decide) z
+    tendsto_jacobiPQ_modulus_zero (p := .s) (q := .d) (by decide) z
         (by simp [jacobiLetterThetaLimit])
 
 /-- Table T3: `nc(z, k) → (Complex.cos z)⁻¹` as real `k → 0+`, away from the poles of
 the limit. -/
 @[dlmf 22.5.T3]
-theorem tendsto_jacobiNck_zero (z : ℂ) (hz : Complex.cos z ≠ 0) :
-    Tendsto (fun k : ℝ => jacobiNck z k) (𝓝[>] 0) (𝓝 ((Complex.cos z)⁻¹)) := by
-  simpa [jacobiLetterThetaLimit, jacobiNck, one_div, Complex.tan_eq_sin_div_cos,
+theorem tendsto_jacobiNc_zero (z : ℂ) (hz : Complex.cos z ≠ 0) :
+    Tendsto (fun k : ℝ => jacobiNc z k) (𝓝[>] 0) (𝓝 ((Complex.cos z)⁻¹)) := by
+  simpa [jacobiLetterThetaLimit, jacobiNc, one_div, Complex.tan_eq_sin_div_cos,
       Complex.cot_eq_cos_div_sin] using
-    tendsto_jacobiPQk_modulus_zero (p := .n) (q := .c) (by decide) z
+    tendsto_jacobiPQ_modulus_zero (p := .n) (q := .c) (by decide) z
         (by simpa [jacobiLetterThetaLimit] using hz)
 
 /-- Table T3: `ds(z, k) → (Complex.sin z)⁻¹` as real `k → 0+`, away from the poles of
 the limit. -/
 @[dlmf 22.5.T3]
-theorem tendsto_jacobiDsk_zero (z : ℂ) (hz : Complex.sin z ≠ 0) :
-    Tendsto (fun k : ℝ => jacobiDsk z k) (𝓝[>] 0) (𝓝 ((Complex.sin z)⁻¹)) := by
-  simpa [jacobiLetterThetaLimit, jacobiDsk, one_div, Complex.tan_eq_sin_div_cos,
+theorem tendsto_jacobiDs_zero (z : ℂ) (hz : Complex.sin z ≠ 0) :
+    Tendsto (fun k : ℝ => jacobiDs z k) (𝓝[>] 0) (𝓝 ((Complex.sin z)⁻¹)) := by
+  simpa [jacobiLetterThetaLimit, jacobiDs, one_div, Complex.tan_eq_sin_div_cos,
       Complex.cot_eq_cos_div_sin] using
-    tendsto_jacobiPQk_modulus_zero (p := .d) (q := .s) (by decide) z
+    tendsto_jacobiPQ_modulus_zero (p := .d) (q := .s) (by decide) z
         (by simpa [jacobiLetterThetaLimit] using hz)
 
 /-- Table T3: `dn(z, k) → 1` as real `k → 0+`. -/
 @[dlmf 22.5.T3]
-theorem tendsto_jacobiDnk_zero (z : ℂ) :
-    Tendsto (fun k : ℝ => jacobiDnk z k) (𝓝[>] 0) (𝓝 (1)) := by
-  simpa [jacobiLetterThetaLimit, jacobiDnk, one_div, Complex.tan_eq_sin_div_cos,
+theorem tendsto_jacobiDn_zero (z : ℂ) :
+    Tendsto (fun k : ℝ => jacobiDn z k) (𝓝[>] 0) (𝓝 (1)) := by
+  simpa [jacobiLetterThetaLimit, jacobiDn, one_div, Complex.tan_eq_sin_div_cos,
       Complex.cot_eq_cos_div_sin] using
-    tendsto_jacobiPQk_modulus_zero (p := .d) (q := .n) (by decide) z
+    tendsto_jacobiPQ_modulus_zero (p := .d) (q := .n) (by decide) z
         (by simp [jacobiLetterThetaLimit])
 
 /-- Table T3: `nd(z, k) → 1` as real `k → 0+`. -/
 @[dlmf 22.5.T3]
-theorem tendsto_jacobiNdk_zero (z : ℂ) :
-    Tendsto (fun k : ℝ => jacobiNdk z k) (𝓝[>] 0) (𝓝 (1)) := by
-  simpa [jacobiLetterThetaLimit, jacobiNdk, one_div, Complex.tan_eq_sin_div_cos,
+theorem tendsto_jacobiNd_zero (z : ℂ) :
+    Tendsto (fun k : ℝ => jacobiNd z k) (𝓝[>] 0) (𝓝 (1)) := by
+  simpa [jacobiLetterThetaLimit, jacobiNd, one_div, Complex.tan_eq_sin_div_cos,
       Complex.cot_eq_cos_div_sin] using
-    tendsto_jacobiPQk_modulus_zero (p := .n) (q := .d) (by decide) z
+    tendsto_jacobiPQ_modulus_zero (p := .n) (q := .d) (by decide) z
         (by simp [jacobiLetterThetaLimit])
 
 /-- Table T3: `sc(z, k) → Complex.tan z` as real `k → 0+`, away from the poles of the
 limit. -/
 @[dlmf 22.5.T3]
-theorem tendsto_jacobiSck_zero (z : ℂ) (hz : Complex.cos z ≠ 0) :
-    Tendsto (fun k : ℝ => jacobiSck z k) (𝓝[>] 0) (𝓝 (Complex.tan z)) := by
-  simpa [jacobiLetterThetaLimit, jacobiSck, one_div, Complex.tan_eq_sin_div_cos,
+theorem tendsto_jacobiSc_zero (z : ℂ) (hz : Complex.cos z ≠ 0) :
+    Tendsto (fun k : ℝ => jacobiSc z k) (𝓝[>] 0) (𝓝 (Complex.tan z)) := by
+  simpa [jacobiLetterThetaLimit, jacobiSc, one_div, Complex.tan_eq_sin_div_cos,
       Complex.cot_eq_cos_div_sin] using
-    tendsto_jacobiPQk_modulus_zero (p := .s) (q := .c) (by decide) z
+    tendsto_jacobiPQ_modulus_zero (p := .s) (q := .c) (by decide) z
         (by simpa [jacobiLetterThetaLimit] using hz)
 
 /-- Table T3: `cs(z, k) → Complex.cot z` as real `k → 0+`, away from the poles of the
 limit. -/
 @[dlmf 22.5.T3]
-theorem tendsto_jacobiCsk_zero (z : ℂ) (hz : Complex.sin z ≠ 0) :
-    Tendsto (fun k : ℝ => jacobiCsk z k) (𝓝[>] 0) (𝓝 (Complex.cot z)) := by
-  simpa [jacobiLetterThetaLimit, jacobiCsk, one_div, Complex.tan_eq_sin_div_cos,
+theorem tendsto_jacobiCs_zero (z : ℂ) (hz : Complex.sin z ≠ 0) :
+    Tendsto (fun k : ℝ => jacobiCs z k) (𝓝[>] 0) (𝓝 (Complex.cot z)) := by
+  simpa [jacobiLetterThetaLimit, jacobiCs, one_div, Complex.tan_eq_sin_div_cos,
       Complex.cot_eq_cos_div_sin] using
-    tendsto_jacobiPQk_modulus_zero (p := .c) (q := .s) (by decide) z
+    tendsto_jacobiPQ_modulus_zero (p := .c) (q := .s) (by decide) z
         (by simpa [jacobiLetterThetaLimit] using hz)
 
-/-- Identity under the stated parameter and domain assumptions: `jacobiComodulusk (x : ℂ) = ((√(1
+/-- Identity under the stated parameter and domain assumptions: `jacobiComodulus (x : ℂ) = ((√(1
 - x ^ 2) : ℝ) : ℂ)`. -/
-lemma jacobiComodulusk_ofReal {x : ℝ} (h0 : 0 < x) (h1 : x < 1) :
-    jacobiComodulusk (x : ℂ) = ((√(1 - x ^ 2) : ℝ) : ℂ) := by
-  rw [jacobiComodulusk, Real.sqrt_eq_rpow, ofReal_cpow (by nlinarith)]
+lemma jacobiComodulus_ofReal {x : ℝ} (h0 : 0 < x) (h1 : x < 1) :
+    jacobiComodulus (x : ℂ) = ((√(1 - x ^ 2) : ℝ) : ℂ) := by
+  rw [jacobiComodulus, Real.sqrt_eq_rpow, ofReal_cpow (by nlinarith)]
   push_cast; ring_nf
 
 /-- The map `(fun k : ℝ => √(1 - k ^ 2))` tends to `(𝓝[>] 0)` along `(𝓝[<] 1)`. -/
@@ -445,27 +448,27 @@ private lemma tendsto_sqrt_one_sub_sq :
   · filter_upwards [Ioo_mem_nhdsLT (show (0 : ℝ) < 1 by norm_num)] with k hk
     exact Real.sqrt_pos.mpr (by nlinarith [hk.1, hk.2])
 
-/-- The map `(fun k : ℝ => jacobiPQk p q z k)` tends to `(𝓝 ((if p = .s then -I else 1) / (if q =
+/-- The map `(fun k : ℝ => jacobiPQ p q z k)` tends to `(𝓝 ((if p = .s then -I else 1) / (if q =
 .s then -I else 1) * ((if p = .s then -1 else 1) * (if q = .s then -1 else 1)) *
 (jacobiLetterThetaLimit (jacobiLetterModularSwap p) (-I * z) / jacobiLetterThetaLimit
 (jacobiLetterModularSwap q) (-I * z))))` along `(𝓝[<] 1)`. -/
-private lemma tendsto_jacobiPQk_modulus_one {p q : JacobiLetter} (hpq : p ≠ q) (z : ℂ)
+private lemma tendsto_jacobiPQ_modulus_one {p q : JacobiLetter} (hpq : p ≠ q) (z : ℂ)
     (hq : jacobiLetterThetaLimit (jacobiLetterModularSwap q) (-I * z) ≠ 0) :
-    Tendsto (fun k : ℝ => jacobiPQk p q z k) (𝓝[<] 1)
+    Tendsto (fun k : ℝ => jacobiPQ p q z k) (𝓝[<] 1)
       (𝓝 ((if p = .s then -I else 1) / (if q = .s then -I else 1) *
         ((if p = .s then -1 else 1) * (if q = .s then -1 else 1)) *
         (jacobiLetterThetaLimit (jacobiLetterModularSwap p) (-I * z) /
             jacobiLetterThetaLimit (jacobiLetterModularSwap q) (-I * z)))) := by
   have hσ : jacobiLetterModularSwap p ≠ jacobiLetterModularSwap q := by
     cases p <;> cases q <;> simp_all [jacobiLetterModularSwap]
-  have h := ((tendsto_jacobiPQk_modulus_zero hσ (-I * z) hq).comp tendsto_sqrt_one_sub_sq).const_mul
+  have h := ((tendsto_jacobiPQ_modulus_zero hσ (-I * z) hq).comp tendsto_sqrt_one_sub_sq).const_mul
     ((if p = .s then -I else 1) / (if q = .s then -I else 1) *
         ((if p = .s then -1 else 1) * (if q = .s then -1 else 1)))
   refine h.congr' ?_
   filter_upwards [Ioo_mem_nhdsLT (show (0 : ℝ) < 1 by norm_num)] with k hk
   have hk' := ofReal_mem_jacobiModulusDomain hk.1 hk.2
   simp only [Function.comp_apply]
-  rw [← jacobiComodulusk_ofReal hk.1 hk.2, ← jacobiPQk_I_mul hk' p q hpq,
+  rw [← jacobiComodulus_ofReal hk.1 hk.2, ← jacobiPQ_I_mul hk' p q hpq,
     show I * (-I * z) = z by ring_nf; rw [I_sq]; ring]
 
 /-- Identity under the stated parameter and domain assumptions: `Complex.sin (I * z) =
@@ -492,9 +495,9 @@ private lemma cos_neg_I_mul_eq_cosh (z : ℂ) : Complex.cos (-I * z) = Complex.c
 /-- Table T4: `sn(z, k) → Complex.tanh z` as real `k → 1-`, away from the poles of the
 limit. -/
 @[dlmf 22.5.T4]
-theorem tendsto_jacobiSnk_one (z : ℂ) (hz : Complex.cosh z ≠ 0) :
-    Tendsto (fun k : ℝ => jacobiSnk z k) (𝓝[<] 1) (𝓝 (Complex.tanh z)) := by
-  have h := tendsto_jacobiPQk_modulus_one (p := .s) (q := .n) (by decide) z
+theorem tendsto_jacobiSn_one (z : ℂ) (hz : Complex.cosh z ≠ 0) :
+    Tendsto (fun k : ℝ => jacobiSn z k) (𝓝[<] 1) (𝓝 (Complex.tanh z)) := by
+  have h := tendsto_jacobiPQ_modulus_one (p := .s) (q := .n) (by decide) z
     (by simp [jacobiLetterThetaLimit, jacobiLetterModularSwap, sin_I_mul_eq_sinh_mul_I,
           cos_I_mul_eq_cosh, hz, I_ne_zero])
   convert h using 2
@@ -510,9 +513,9 @@ theorem tendsto_jacobiSnk_one (z : ℂ) (hz : Complex.cosh z ≠ 0) :
 /-- Table T4: `cd(z, k) → 1` as real `k → 1-`, for every `z`; DLMF excludes
 the poles of the limit, where Lean's division by zero applies. -/
 @[dlmf 22.5.T4]
-theorem tendsto_jacobiCdk_one (z : ℂ) :
-    Tendsto (fun k : ℝ => jacobiCdk z k) (𝓝[<] 1) (𝓝 (1)) := by
-  have h := tendsto_jacobiPQk_modulus_one (p := .c) (q := .d) (by decide) z
+theorem tendsto_jacobiCd_one (z : ℂ) :
+    Tendsto (fun k : ℝ => jacobiCd z k) (𝓝[<] 1) (𝓝 (1)) := by
+  have h := tendsto_jacobiPQ_modulus_one (p := .c) (q := .d) (by decide) z
     (by simp [jacobiLetterThetaLimit, jacobiLetterModularSwap, sin_I_mul_eq_sinh_mul_I,
           cos_I_mul_eq_cosh, I_ne_zero])
   convert h using 2
@@ -528,9 +531,9 @@ theorem tendsto_jacobiCdk_one (z : ℂ) :
 /-- Table T4: `dc(z, k) → 1` as real `k → 1-`, for every `z`; DLMF excludes
 the poles of the limit, where Lean's division by zero applies. -/
 @[dlmf 22.5.T4]
-theorem tendsto_jacobiDck_one (z : ℂ) :
-    Tendsto (fun k : ℝ => jacobiDck z k) (𝓝[<] 1) (𝓝 (1)) := by
-  have h := tendsto_jacobiPQk_modulus_one (p := .d) (q := .c) (by decide) z
+theorem tendsto_jacobiDc_one (z : ℂ) :
+    Tendsto (fun k : ℝ => jacobiDc z k) (𝓝[<] 1) (𝓝 (1)) := by
+  have h := tendsto_jacobiPQ_modulus_one (p := .d) (q := .c) (by decide) z
     (by simp [jacobiLetterThetaLimit, jacobiLetterModularSwap, sin_I_mul_eq_sinh_mul_I,
           cos_I_mul_eq_cosh, I_ne_zero])
   convert h using 2
@@ -546,9 +549,9 @@ theorem tendsto_jacobiDck_one (z : ℂ) :
 /-- Table T4: `ns(z, k) → (Complex.tanh z)⁻¹` as real `k → 1-`, away from the poles of
 the limit. -/
 @[dlmf 22.5.T4]
-theorem tendsto_jacobiNsk_one (z : ℂ) (hz : Complex.sinh z ≠ 0) :
-    Tendsto (fun k : ℝ => jacobiNsk z k) (𝓝[<] 1) (𝓝 ((Complex.tanh z)⁻¹)) := by
-  have h := tendsto_jacobiPQk_modulus_one (p := .n) (q := .s) (by decide) z
+theorem tendsto_jacobiNs_one (z : ℂ) (hz : Complex.sinh z ≠ 0) :
+    Tendsto (fun k : ℝ => jacobiNs z k) (𝓝[<] 1) (𝓝 ((Complex.tanh z)⁻¹)) := by
+  have h := tendsto_jacobiPQ_modulus_one (p := .n) (q := .s) (by decide) z
     (by simp [jacobiLetterThetaLimit, jacobiLetterModularSwap, sin_I_mul_eq_sinh_mul_I,
           cos_I_mul_eq_cosh, hz, I_ne_zero])
   convert h using 2
@@ -564,9 +567,9 @@ theorem tendsto_jacobiNsk_one (z : ℂ) (hz : Complex.sinh z ≠ 0) :
 /-- Table T4: `cn(z, k) → (Complex.cosh z)⁻¹` as real `k → 1-`, away from the poles of
 the limit. -/
 @[dlmf 22.5.T4]
-theorem tendsto_jacobiCnk_one (z : ℂ) (hz : Complex.cosh z ≠ 0) :
-    Tendsto (fun k : ℝ => jacobiCnk z k) (𝓝[<] 1) (𝓝 ((Complex.cosh z)⁻¹)) := by
-  have h := tendsto_jacobiPQk_modulus_one (p := .c) (q := .n) (by decide) z
+theorem tendsto_jacobiCn_one (z : ℂ) (hz : Complex.cosh z ≠ 0) :
+    Tendsto (fun k : ℝ => jacobiCn z k) (𝓝[<] 1) (𝓝 ((Complex.cosh z)⁻¹)) := by
+  have h := tendsto_jacobiPQ_modulus_one (p := .c) (q := .n) (by decide) z
     (by simp [jacobiLetterThetaLimit, jacobiLetterModularSwap, sin_I_mul_eq_sinh_mul_I,
           cos_I_mul_eq_cosh, hz, I_ne_zero])
   convert h using 2
@@ -582,9 +585,9 @@ theorem tendsto_jacobiCnk_one (z : ℂ) (hz : Complex.cosh z ≠ 0) :
 /-- Table T4: `sd(z, k) → Complex.sinh z` as real `k → 1-`, for every `z`; DLMF excludes
 the poles of the limit, where Lean's division by zero applies. -/
 @[dlmf 22.5.T4]
-theorem tendsto_jacobiSdk_one (z : ℂ) :
-    Tendsto (fun k : ℝ => jacobiSdk z k) (𝓝[<] 1) (𝓝 (Complex.sinh z)) := by
-  have h := tendsto_jacobiPQk_modulus_one (p := .s) (q := .d) (by decide) z
+theorem tendsto_jacobiSd_one (z : ℂ) :
+    Tendsto (fun k : ℝ => jacobiSd z k) (𝓝[<] 1) (𝓝 (Complex.sinh z)) := by
+  have h := tendsto_jacobiPQ_modulus_one (p := .s) (q := .d) (by decide) z
     (by simp [jacobiLetterThetaLimit, jacobiLetterModularSwap, sin_I_mul_eq_sinh_mul_I,
           cos_I_mul_eq_cosh, I_ne_zero])
   convert h using 2
@@ -600,9 +603,9 @@ theorem tendsto_jacobiSdk_one (z : ℂ) :
 /-- Table T4: `nc(z, k) → Complex.cosh z` as real `k → 1-`, away from the poles of the
 limit. -/
 @[dlmf 22.5.T4]
-theorem tendsto_jacobiNck_one (z : ℂ) (hz : Complex.cosh z ≠ 0) :
-    Tendsto (fun k : ℝ => jacobiNck z k) (𝓝[<] 1) (𝓝 (Complex.cosh z)) := by
-  have h := tendsto_jacobiPQk_modulus_one (p := .n) (q := .c) (by decide) z
+theorem tendsto_jacobiNc_one (z : ℂ) (hz : Complex.cosh z ≠ 0) :
+    Tendsto (fun k : ℝ => jacobiNc z k) (𝓝[<] 1) (𝓝 (Complex.cosh z)) := by
+  have h := tendsto_jacobiPQ_modulus_one (p := .n) (q := .c) (by decide) z
     (by simp [jacobiLetterThetaLimit, jacobiLetterModularSwap, sin_I_mul_eq_sinh_mul_I,
           cos_I_mul_eq_cosh, hz, I_ne_zero])
   convert h using 2
@@ -618,9 +621,9 @@ theorem tendsto_jacobiNck_one (z : ℂ) (hz : Complex.cosh z ≠ 0) :
 /-- Table T4: `ds(z, k) → (Complex.sinh z)⁻¹` as real `k → 1-`, away from the poles of
 the limit. -/
 @[dlmf 22.5.T4]
-theorem tendsto_jacobiDsk_one (z : ℂ) (hz : Complex.sinh z ≠ 0) :
-    Tendsto (fun k : ℝ => jacobiDsk z k) (𝓝[<] 1) (𝓝 ((Complex.sinh z)⁻¹)) := by
-  have h := tendsto_jacobiPQk_modulus_one (p := .d) (q := .s) (by decide) z
+theorem tendsto_jacobiDs_one (z : ℂ) (hz : Complex.sinh z ≠ 0) :
+    Tendsto (fun k : ℝ => jacobiDs z k) (𝓝[<] 1) (𝓝 ((Complex.sinh z)⁻¹)) := by
+  have h := tendsto_jacobiPQ_modulus_one (p := .d) (q := .s) (by decide) z
     (by simp [jacobiLetterThetaLimit, jacobiLetterModularSwap, sin_I_mul_eq_sinh_mul_I,
           cos_I_mul_eq_cosh, hz, I_ne_zero])
   convert h using 2
@@ -636,9 +639,9 @@ theorem tendsto_jacobiDsk_one (z : ℂ) (hz : Complex.sinh z ≠ 0) :
 /-- Table T4: `dn(z, k) → (Complex.cosh z)⁻¹` as real `k → 1-`, away from the poles of
 the limit. -/
 @[dlmf 22.5.T4]
-theorem tendsto_jacobiDnk_one (z : ℂ) (hz : Complex.cosh z ≠ 0) :
-    Tendsto (fun k : ℝ => jacobiDnk z k) (𝓝[<] 1) (𝓝 ((Complex.cosh z)⁻¹)) := by
-  have h := tendsto_jacobiPQk_modulus_one (p := .d) (q := .n) (by decide) z
+theorem tendsto_jacobiDn_one (z : ℂ) (hz : Complex.cosh z ≠ 0) :
+    Tendsto (fun k : ℝ => jacobiDn z k) (𝓝[<] 1) (𝓝 ((Complex.cosh z)⁻¹)) := by
+  have h := tendsto_jacobiPQ_modulus_one (p := .d) (q := .n) (by decide) z
     (by simp [jacobiLetterThetaLimit, jacobiLetterModularSwap, sin_I_mul_eq_sinh_mul_I,
           cos_I_mul_eq_cosh, hz, I_ne_zero])
   convert h using 2
@@ -654,9 +657,9 @@ theorem tendsto_jacobiDnk_one (z : ℂ) (hz : Complex.cosh z ≠ 0) :
 /-- Table T4: `nd(z, k) → Complex.cosh z` as real `k → 1-`, away from the poles of the
 limit. -/
 @[dlmf 22.5.T4]
-theorem tendsto_jacobiNdk_one (z : ℂ) (hz : Complex.cosh z ≠ 0) :
-    Tendsto (fun k : ℝ => jacobiNdk z k) (𝓝[<] 1) (𝓝 (Complex.cosh z)) := by
-  have h := tendsto_jacobiPQk_modulus_one (p := .n) (q := .d) (by decide) z
+theorem tendsto_jacobiNd_one (z : ℂ) (hz : Complex.cosh z ≠ 0) :
+    Tendsto (fun k : ℝ => jacobiNd z k) (𝓝[<] 1) (𝓝 (Complex.cosh z)) := by
+  have h := tendsto_jacobiPQ_modulus_one (p := .n) (q := .d) (by decide) z
     (by simp [jacobiLetterThetaLimit, jacobiLetterModularSwap, sin_I_mul_eq_sinh_mul_I,
           cos_I_mul_eq_cosh, hz, I_ne_zero])
   convert h using 2
@@ -672,9 +675,9 @@ theorem tendsto_jacobiNdk_one (z : ℂ) (hz : Complex.cosh z ≠ 0) :
 /-- Table T4: `sc(z, k) → Complex.sinh z` as real `k → 1-`, for every `z`; DLMF excludes
 the poles of the limit, where Lean's division by zero applies. -/
 @[dlmf 22.5.T4]
-theorem tendsto_jacobiSck_one (z : ℂ) :
-    Tendsto (fun k : ℝ => jacobiSck z k) (𝓝[<] 1) (𝓝 (Complex.sinh z)) := by
-  have h := tendsto_jacobiPQk_modulus_one (p := .s) (q := .c) (by decide) z
+theorem tendsto_jacobiSc_one (z : ℂ) :
+    Tendsto (fun k : ℝ => jacobiSc z k) (𝓝[<] 1) (𝓝 (Complex.sinh z)) := by
+  have h := tendsto_jacobiPQ_modulus_one (p := .s) (q := .c) (by decide) z
     (by simp [jacobiLetterThetaLimit, jacobiLetterModularSwap, sin_I_mul_eq_sinh_mul_I,
           cos_I_mul_eq_cosh, I_ne_zero])
   convert h using 2
@@ -690,9 +693,9 @@ theorem tendsto_jacobiSck_one (z : ℂ) :
 /-- Table T4: `cs(z, k) → (Complex.sinh z)⁻¹` as real `k → 1-`, away from the poles of
 the limit. -/
 @[dlmf 22.5.T4]
-theorem tendsto_jacobiCsk_one (z : ℂ) (hz : Complex.sinh z ≠ 0) :
-    Tendsto (fun k : ℝ => jacobiCsk z k) (𝓝[<] 1) (𝓝 ((Complex.sinh z)⁻¹)) := by
-  have h := tendsto_jacobiPQk_modulus_one (p := .c) (q := .s) (by decide) z
+theorem tendsto_jacobiCs_one (z : ℂ) (hz : Complex.sinh z ≠ 0) :
+    Tendsto (fun k : ℝ => jacobiCs z k) (𝓝[<] 1) (𝓝 ((Complex.sinh z)⁻¹)) := by
+  have h := tendsto_jacobiPQ_modulus_one (p := .c) (q := .s) (by decide) z
     (by simp [jacobiLetterThetaLimit, jacobiLetterModularSwap, sin_I_mul_eq_sinh_mul_I,
           cos_I_mul_eq_cosh, hz, I_ne_zero])
   convert h using 2

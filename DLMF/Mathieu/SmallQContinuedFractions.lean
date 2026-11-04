@@ -14,8 +14,8 @@ public import DLMF.Mathieu.Properties.Spectra
 
 The continued-fraction equations DLMF 28.6.16–28.6.19 for `a_{2n}(q)`, `a_{2n+1}(q)`,
 `b_{2n+1}(q)`, `b_{2n+2}(q)`. The Fourier coefficients of `ce_n`, `se_n` solve the recurrences
-28.4.5–28.4.8 and decay, so `tendsto_neg_mathieuCFTail_mathieuCFHead` of
-`DLMF.Mathieu.ContinuedFractionTails` applies; for `q = 0` both sides vanish.
+28.4.5–28.4.8 and decay, so `tendsto_neg_mathieuContinuedFractionTail_mathieuContinuedFractionHead`
+of `DLMF.Mathieu.ContinuedFractionTails` applies; for `q = 0` both sides vanish.
 
 ## Main results
 
@@ -50,29 +50,31 @@ private lemma tendsto_norm_two_mul_add_sq (b : ℕ) :
 
 /-- **DLMF 28.6.16** (`n ≥ 1`): for `a = a_{2n}(q)`,
 `a - (2n)² - q²/(a - (2n-2)² - ⋯ q²/(a - 2² - 2q²/a)) = -q²/((2n+2)² - a - q²/((2n+4)² - a - ⋯))`;
-the right side is the limit of the truncations `mathieuCFTail`. The left-side partial
+the right side is the limit of the truncations `mathieuContinuedFractionTail`. The left-side partial
 denominators are assumed nonzero. -/
 @[dlmf 28.6.E16]
 theorem mathieuA_even_contFrac {n : ℕ} (hn : 1 ≤ n) {q : ℝ}
-    (hE : ∀ k < n, mathieuCFHead q (mathieuA (2 * n) q) (mathieuA (2 * n) q)
+    (hE : ∀ k < n, mathieuContinuedFractionHead q (mathieuA (2 * n) q) (mathieuA (2 * n) q)
       (fun k => if k = 0 then 2 else 1) (fun k => (2 * k + 2) ^ 2) k ≠ 0) :
-    Tendsto (fun N => -mathieuCFTail q (mathieuA (2 * n) q) (fun k => (2 * n + 2 * k + 2) ^ 2) N)
-      atTop (𝓝 (mathieuCFHead q (mathieuA (2 * n) q) (mathieuA (2 * n) q)
+    Tendsto (fun N => -mathieuContinuedFractionTail q (mathieuA (2 * n) q)
+        (fun k => (2 * n + 2 * k + 2) ^ 2) N)
+      atTop (𝓝 (mathieuContinuedFractionHead q (mathieuA (2 * n) q) (mathieuA (2 * n) q)
         (fun k => if k = 0 then 2 else 1) (fun k => (2 * k + 2) ^ 2) n)) := by
   rcases eq_or_ne q 0 with rfl | hq
   · obtain ⟨n', rfl⟩ : ∃ n', n = n' + 1 := ⟨n - 1, by omega⟩
-    have h0 : mathieuCFHead ((0 : ℝ) : ℂ) (mathieuA (2 * (n' + 1)) 0) (mathieuA (2 * (n' + 1)) 0)
+    have h0 : mathieuContinuedFractionHead ((0 : ℝ) : ℂ) (mathieuA (2 * (n' + 1)) 0)
+        (mathieuA (2 * (n' + 1)) 0)
         (fun k => if k = 0 then 2 else 1) (fun k => (2 * k + 2) ^ 2) (n' + 1) = 0 := by
-      rw [mathieuCFHead]
+      rw [mathieuContinuedFractionHead]
       simp only [Complex.ofReal_zero, zero_pow two_ne_zero, mul_zero, zero_div, sub_zero]
       rw [mathieuA_zero]
       push_cast
       ring
     rw [h0]
-    simp only [Complex.ofReal_zero, mathieuCFTail_zero_left, neg_zero]
+    simp only [Complex.ofReal_zero, mathieuContinuedFractionTail_zero_left, neg_zero]
     exact tendsto_const_nhds
   set A : ℕ → ℂ := fun k => mathieuFourierA (2 * n) (2 * k) q
-  have hlim := tendsto_neg_mathieuCFTail_mathieuCFHead (A := A)
+  have hlim := tendsto_neg_mathieuContinuedFractionTail_mathieuContinuedFractionHead (A := A)
     (s := fun k : ℕ => ((2 * k + 2) ^ 2 : ℂ)) (c := fun k : ℕ => if k = 0 then (2 : ℂ) else 1)
     (e₀ := (mathieuA (2 * n) q : ℂ)) (a := (mathieuA (2 * n) q : ℂ)) (n := n)
     (Complex.ofReal_ne_zero.2 hq) ?_ ?_ ?_ ?_ ?_ ?_ hE
@@ -108,17 +110,18 @@ theorem mathieuA_even_contFrac {n : ℕ} (hn : 1 ≤ n) {q : ℝ}
 pattern degenerates at `n = 0`; the factor 2 comes from 28.4.5). -/
 @[dlmf 28.6.E16]
 theorem mathieuA_zero_contFrac (q : ℝ) :
-    Tendsto (fun N => -2 * mathieuCFTail q (mathieuA 0 q) (fun k => (2 * k + 2) ^ 2) N)
+    Tendsto (fun N => -2 *
+        mathieuContinuedFractionTail q (mathieuA 0 q) (fun k => (2 * k + 2) ^ 2) N)
       atTop (𝓝 (mathieuA 0 q : ℂ)) := by
   rcases eq_or_ne q 0 with rfl | hq
-  · simp only [Complex.ofReal_zero, mathieuCFTail_zero_left, mul_zero, mathieuA_zero]
+  · simp only [Complex.ofReal_zero, mathieuContinuedFractionTail_zero_left, mul_zero, mathieuA_zero]
     simp
   set A : ℕ → ℂ := fun k => (if k = 0 then 2 else 1) * mathieuFourierA 0 (2 * k) q
-  have hlim := tendsto_neg_mathieuCFTail_mathieuCFHead (A := A)
+  have hlim := tendsto_neg_mathieuContinuedFractionTail_mathieuContinuedFractionHead (A := A)
     (s := fun k : ℕ => ((2 * k + 2) ^ 2 : ℂ)) (c := fun _ => 1)
     (e₀ := (mathieuA 0 q : ℂ) / 2) (a := (mathieuA 0 q : ℂ)) (n := 0)
     (Complex.ofReal_ne_zero.2 hq) ?_ ?_ (fun _ _ => rfl) ?_ ?_ ?_ (fun k hk => absurd hk (by omega))
-  · simp only [mathieuCFHead, zero_add] at hlim
+  · simp only [mathieuContinuedFractionHead, zero_add] at hlim
     have := hlim.const_mul 2
     simp only [mul_div_cancel₀ _ (two_ne_zero' ℂ)] at this
     refine this.congr fun N => ?_
@@ -159,22 +162,24 @@ theorem mathieuA_zero_contFrac (q : ℝ) :
 = -q²/((2n+3)² - a - q²/((2n+5)² - a - ⋯))`. -/
 @[dlmf 28.6.E17]
 theorem mathieuA_odd_contFrac (n : ℕ) {q : ℝ}
-    (hE : ∀ k < n, mathieuCFHead q (mathieuA (2 * n + 1) q) (mathieuA (2 * n + 1) q - 1 - q)
+    (hE : ∀ k < n, mathieuContinuedFractionHead q (mathieuA (2 * n + 1) q)
+        (mathieuA (2 * n + 1) q - 1 - q)
       (fun _ => 1) (fun k => (2 * k + 3) ^ 2) k ≠ 0) :
-    Tendsto (fun N => -mathieuCFTail q (mathieuA (2 * n + 1) q)
+    Tendsto (fun N => -mathieuContinuedFractionTail q (mathieuA (2 * n + 1) q)
         (fun k => (2 * n + 2 * k + 3) ^ 2) N)
-      atTop (𝓝 (mathieuCFHead q (mathieuA (2 * n + 1) q) (mathieuA (2 * n + 1) q - 1 - q)
+      atTop (𝓝 (mathieuContinuedFractionHead q (mathieuA (2 * n + 1) q)
+          (mathieuA (2 * n + 1) q - 1 - q)
         (fun _ => 1) (fun k => (2 * k + 3) ^ 2) n)) := by
   rcases eq_or_ne q 0 with rfl | hq
-  · simp only [Complex.ofReal_zero, mathieuCFTail_zero_left, neg_zero]
+  · simp only [Complex.ofReal_zero, mathieuContinuedFractionTail_zero_left, neg_zero]
     convert tendsto_const_nhds using 2
     rcases n with _ | n'
-    · rw [mathieuCFHead, mathieuA_zero]; push_cast; ring
-    · rw [mathieuCFHead]
+    · rw [mathieuContinuedFractionHead, mathieuA_zero]; push_cast; ring
+    · rw [mathieuContinuedFractionHead]
       simp only [zero_pow two_ne_zero, mul_zero, zero_div, sub_zero]
       rw [mathieuA_zero]; push_cast; ring
   set A : ℕ → ℂ := fun k => mathieuFourierA (2 * n + 1) (2 * k + 1) q
-  have hlim := tendsto_neg_mathieuCFTail_mathieuCFHead (A := A)
+  have hlim := tendsto_neg_mathieuContinuedFractionTail_mathieuContinuedFractionHead (A := A)
     (s := fun k : ℕ => ((2 * k + 3) ^ 2 : ℂ)) (c := fun _ => 1)
     (e₀ := (mathieuA (2 * n + 1) q : ℂ) - 1 - q) (a := (mathieuA (2 * n + 1) q : ℂ)) (n := n)
     (Complex.ofReal_ne_zero.2 hq) ?_ ?_ (fun _ _ => rfl) ?_ ?_ ?_ hE
@@ -205,22 +210,24 @@ theorem mathieuA_odd_contFrac (n : ℕ) {q : ℝ}
 = -q²/((2n+3)² - a - q²/((2n+5)² - a - ⋯))`. -/
 @[dlmf 28.6.E18]
 theorem mathieuB_odd_contFrac (n : ℕ) {q : ℝ}
-    (hE : ∀ k < n, mathieuCFHead q (mathieuB (2 * n + 1) q) (mathieuB (2 * n + 1) q - 1 + q)
+    (hE : ∀ k < n, mathieuContinuedFractionHead q (mathieuB (2 * n + 1) q)
+        (mathieuB (2 * n + 1) q - 1 + q)
       (fun _ => 1) (fun k => (2 * k + 3) ^ 2) k ≠ 0) :
-    Tendsto (fun N => -mathieuCFTail q (mathieuB (2 * n + 1) q)
+    Tendsto (fun N => -mathieuContinuedFractionTail q (mathieuB (2 * n + 1) q)
         (fun k => (2 * n + 2 * k + 3) ^ 2) N)
-      atTop (𝓝 (mathieuCFHead q (mathieuB (2 * n + 1) q) (mathieuB (2 * n + 1) q - 1 + q)
+      atTop (𝓝 (mathieuContinuedFractionHead q (mathieuB (2 * n + 1) q)
+          (mathieuB (2 * n + 1) q - 1 + q)
         (fun _ => 1) (fun k => (2 * k + 3) ^ 2) n)) := by
   rcases eq_or_ne q 0 with rfl | hq
-  · simp only [Complex.ofReal_zero, mathieuCFTail_zero_left, neg_zero]
+  · simp only [Complex.ofReal_zero, mathieuContinuedFractionTail_zero_left, neg_zero]
     convert tendsto_const_nhds using 2
     rcases n with _ | n'
-    · rw [mathieuCFHead, mathieuB_zero (by omega)]; push_cast; ring
-    · rw [mathieuCFHead]
+    · rw [mathieuContinuedFractionHead, mathieuB_zero (by omega)]; push_cast; ring
+    · rw [mathieuContinuedFractionHead]
       simp only [zero_pow two_ne_zero, mul_zero, zero_div, sub_zero]
       rw [mathieuB_zero (by omega)]; push_cast; ring
   set A : ℕ → ℂ := fun k => mathieuFourierB (2 * n + 1) (2 * k + 1) q
-  have hlim := tendsto_neg_mathieuCFTail_mathieuCFHead (A := A)
+  have hlim := tendsto_neg_mathieuContinuedFractionTail_mathieuContinuedFractionHead (A := A)
     (s := fun k : ℕ => ((2 * k + 3) ^ 2 : ℂ)) (c := fun _ => 1)
     (e₀ := (mathieuB (2 * n + 1) q : ℂ) - 1 + q) (a := (mathieuB (2 * n + 1) q : ℂ)) (n := n)
     (Complex.ofReal_ne_zero.2 hq) ?_ ?_ (fun _ _ => rfl) ?_ ?_ ?_ hE
@@ -250,22 +257,23 @@ theorem mathieuB_odd_contFrac (n : ℕ) {q : ℝ}
 `a - (2n+2)² - q²/(a - (2n)² - ⋯ q²/(a - 2²)) = -q²/((2n+4)² - a - q²/((2n+6)² - a - ⋯))`. -/
 @[dlmf 28.6.E19]
 theorem mathieuB_even_contFrac (n : ℕ) {q : ℝ}
-    (hE : ∀ k < n, mathieuCFHead q (mathieuB (2 * n + 2) q) (mathieuB (2 * n + 2) q - 4)
+    (hE : ∀ k < n, mathieuContinuedFractionHead q (mathieuB (2 * n + 2) q)
+        (mathieuB (2 * n + 2) q - 4)
       (fun _ => 1) (fun k => (2 * k + 4) ^ 2) k ≠ 0) :
-    Tendsto (fun N => -mathieuCFTail q (mathieuB (2 * n + 2) q)
+    Tendsto (fun N => -mathieuContinuedFractionTail q (mathieuB (2 * n + 2) q)
         (fun k => (2 * n + 2 * k + 4) ^ 2) N)
-      atTop (𝓝 (mathieuCFHead q (mathieuB (2 * n + 2) q) (mathieuB (2 * n + 2) q - 4)
+      atTop (𝓝 (mathieuContinuedFractionHead q (mathieuB (2 * n + 2) q) (mathieuB (2 * n + 2) q - 4)
         (fun _ => 1) (fun k => (2 * k + 4) ^ 2) n)) := by
   rcases eq_or_ne q 0 with rfl | hq
-  · simp only [Complex.ofReal_zero, mathieuCFTail_zero_left, neg_zero]
+  · simp only [Complex.ofReal_zero, mathieuContinuedFractionTail_zero_left, neg_zero]
     convert tendsto_const_nhds using 2
     rcases n with _ | n'
-    · rw [mathieuCFHead, mathieuB_zero (by omega)]; push_cast; ring
-    · rw [mathieuCFHead]
+    · rw [mathieuContinuedFractionHead, mathieuB_zero (by omega)]; push_cast; ring
+    · rw [mathieuContinuedFractionHead]
       simp only [zero_pow two_ne_zero, mul_zero, zero_div, sub_zero]
       rw [mathieuB_zero (by omega)]; push_cast; ring
   set A : ℕ → ℂ := fun k => mathieuFourierB (2 * n + 2) (2 * k + 2) q
-  have hlim := tendsto_neg_mathieuCFTail_mathieuCFHead (A := A)
+  have hlim := tendsto_neg_mathieuContinuedFractionTail_mathieuContinuedFractionHead (A := A)
     (s := fun k : ℕ => ((2 * k + 4) ^ 2 : ℂ)) (c := fun _ => 1)
     (e₀ := (mathieuB (2 * n + 2) q : ℂ) - 4) (a := (mathieuB (2 * n + 2) q : ℂ)) (n := n)
     (Complex.ofReal_ne_zero.2 hq) ?_ ?_ (fun _ _ => rfl) ?_ ?_ ?_ hE

@@ -46,7 +46,7 @@ Gamma-shift formula come from `DLMF.OrthogonalPolynomials.HahnMoments`.
 
 open Complex Filter Set MeasureTheory
 open scoped Real Topology Nat
-open DLMF.Hypergeometric (Gamma_add_nat_eq_poch_mul_Gamma)
+open DLMF.Hypergeometric (Gamma_add_nat_eq_pochhammer_mul_Gamma)
 noncomputable section
 namespace DLMF.OrthogonalPolynomials.PollaczekMoments
 /-- A rescaled Gamma pair, suited to the existing half-plane Mellin--Barnes API. -/
@@ -304,24 +304,25 @@ theorem scale_ne_zero {θ : ℝ} (hθ : |θ| < π) : scale θ ≠ 0 := by
   exact ne_of_gt (mul_pos (by norm_num) hc)
 /-- Polynomial factors shift the two Gamma parameters. -/
 theorem mixed_moment {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (k j : ℕ) :
-    Integrable (fun x : ℝ => poch ((lam:ℂ)+I*x) k * poch ((lam:ℂ)-I*x) j * weight lam θ x) ∧
-    (∫ x : ℝ, poch ((lam:ℂ)+I*x) k * poch ((lam:ℂ)-I*x) j * weight lam θ x) =
-      reversedMoment lam θ j * poch (2*(lam:ℂ)+j) k * (phase θ / scale θ)^k := by
-  have he (x : ℝ) : poch ((lam:ℂ)+I*x) k * poch ((lam:ℂ)-I*x) j * weight lam θ x =
+    Integrable (fun x : ℝ => pochhammer ((lam:ℂ)+I*x) k * pochhammer ((lam:ℂ)-I*x) j *
+        weight lam θ x) ∧
+    (∫ x : ℝ, pochhammer ((lam:ℂ)+I*x) k * pochhammer ((lam:ℂ)-I*x) j * weight lam θ x) =
+      reversedMoment lam θ j * pochhammer (2*(lam:ℂ)+j) k * (phase θ / scale θ)^k := by
+  have he (x : ℝ) : pochhammer ((lam:ℂ)+I*x) k * pochhammer ((lam:ℂ)-I*x) j * weight lam θ x =
       Gamma (((lam+k:ℝ):ℂ)+I*x)*Gamma (((lam+j:ℝ):ℂ)-I*x)*exp (θ*x) := by
     dsimp only [weight]
     push_cast
     rw [show (lam:ℂ)+k+I*x = ((lam:ℂ)+I*x)+k by ring,
       show (lam:ℂ)+j-I*x = ((lam:ℂ)-I*x)+j by ring,
-      Gamma_add_nat_eq_poch_mul_Gamma (by simpa using hlam),
-      Gamma_add_nat_eq_poch_mul_Gamma (by simpa using hlam)]
+      Gamma_add_nat_eq_pochhammer_mul_Gamma (by simpa using hlam),
+      Gamma_add_nat_eq_pochhammer_mul_Gamma (by simpa using hlam)]
     ring
   simp_rw [he]
   refine ⟨integrable_tilted_Gamma (by positivity) (by positivity) hθ, ?_⟩
   rw [tilted_Gamma_integral (by positivity) (by positivity) hθ]
   push_cast
   rw [show (lam:ℂ)+k+((lam:ℂ)+j) = (2*(lam:ℂ)+j)+k by ring,
-    Gamma_add_nat_eq_poch_mul_Gamma (by simp; positivity)]
+    Gamma_add_nat_eq_pochhammer_mul_Gamma (by simp; positivity)]
   have hexp : exp (I*θ*((lam:ℂ)+k-((lam:ℂ)+j))/2) =
       exp (-I*θ*j/2)*phase θ^k := by
     dsimp only [phase]
@@ -335,55 +336,56 @@ theorem mixed_moment {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (k j : �
   ring
 /-- A terminating Pollaczek sum with its transform-adapted argument. -/
 def poly (lam θ : ℝ) (n : ℕ) (x : ℝ) : ℂ :=
-  ∑ k ∈ Finset.range (n+1), ((-1:ℂ)^k*n.choose k/poch (2*(lam:ℂ)) k)*
-    (scale θ / phase θ)^k * poch ((lam:ℂ)+I*x) k
+  ∑ k ∈ Finset.range (n+1), ((-1:ℂ)^k*n.choose k/pochhammer (2*(lam:ℂ)) k)*
+    (scale θ / phase θ)^k * pochhammer ((lam:ℂ)+I*x) k
 /-- Absolute integrability of every polynomial against a reversed rising factorial. -/
 theorem integrable_poly_basis {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (n j : ℕ) :
-    Integrable (fun x : ℝ => poly lam θ n x * poch ((lam:ℂ)-I*x) j * weight lam θ x) := by
+    Integrable (fun x : ℝ => poly lam θ n x * pochhammer ((lam:ℂ)-I*x) j * weight lam θ x) := by
   simp only [poly, Finset.sum_mul]
   apply integrable_finsetSum
   intro k hk
   simpa only [mul_assoc] using ((mixed_moment hlam hθ k j).1.const_mul
-    (((-1:ℂ)^k*n.choose k/poch (2*(lam:ℂ)) k)*(scale θ/phase θ)^k))
+    (((-1:ℂ)^k*n.choose k/pochhammer (2*(lam:ℂ)) k)*(scale θ/phase θ)^k))
 /-- Chu--Vandermonde evaluates all reversed moments of a Pollaczek polynomial. -/
 theorem integral_poly_basis {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (n j : ℕ) :
-    (∫ x : ℝ, poly lam θ n x * poch ((lam:ℂ)-I*x) j * weight lam θ x) =
-      reversedMoment lam θ j * poch (-(j:ℂ)) n / poch (2*(lam:ℂ)) n := by
-  have hP (k : ℕ) : poch (2*(lam:ℂ)) k ≠ 0 :=
-    poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; positivity)) k
+    (∫ x : ℝ, poly lam θ n x * pochhammer ((lam:ℂ)-I*x) j * weight lam θ x) =
+      reversedMoment lam θ j * pochhammer (-(j:ℂ)) n / pochhammer (2*(lam:ℂ)) n := by
+  have hP (k : ℕ) : pochhammer (2*(lam:ℂ)) k ≠ 0 :=
+    pochhammer_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; positivity)) k
   have hr : phase θ ≠ 0 := Complex.exp_ne_zero _
   have hs := scale_ne_zero hθ
-  have he : (fun x : ℝ => poly lam θ n x * poch ((lam:ℂ)-I*x) j * weight lam θ x) =
+  have he : (fun x : ℝ => poly lam θ n x * pochhammer ((lam:ℂ)-I*x) j * weight lam θ x) =
       fun x : ℝ => ∑ k ∈ Finset.range (n+1),
-        (((-1:ℂ)^k*n.choose k/poch (2*(lam:ℂ)) k)*(scale θ/phase θ)^k)*
-        (poch ((lam:ℂ)+I*x) k*poch ((lam:ℂ)-I*x) j*weight lam θ x) := by
+        (((-1:ℂ)^k*n.choose k/pochhammer (2*(lam:ℂ)) k)*(scale θ/phase θ)^k)*
+        (pochhammer ((lam:ℂ)+I*x) k*pochhammer ((lam:ℂ)-I*x) j*weight lam θ x) := by
     funext x
     simp only [poly, Finset.sum_mul, mul_assoc]
   rw [he, integral_finsetSum _ (fun k hk => (mixed_moment hlam hθ k j).1.const_mul _)]
   simp_rw [integral_const_mul, (mixed_moment hlam hθ _ j).2]
-  have ht (k : ℕ) : (((-1:ℂ)^k*n.choose k/poch (2*(lam:ℂ)) k)*(scale θ/phase θ)^k)*
-      (reversedMoment lam θ j*poch (2*(lam:ℂ)+j) k*(phase θ/scale θ)^k) =
-      reversedMoment lam θ j*((-1:ℂ)^k*n.choose k*poch (2*(lam:ℂ)+j) k/poch (2*(lam:ℂ)) k) := by
+  have ht (k : ℕ) : (((-1:ℂ)^k*n.choose k/pochhammer (2*(lam:ℂ)) k)*(scale θ/phase θ)^k)*
+      (reversedMoment lam θ j*pochhammer (2*(lam:ℂ)+j) k*(phase θ/scale θ)^k) =
+      reversedMoment lam θ
+          j*((-1:ℂ)^k*n.choose k*pochhammer (2*(lam:ℂ)+j) k/pochhammer (2*(lam:ℂ)) k) := by
     rw [div_pow, div_pow]
     field_simp
   simp_rw [ht]
-  rw [← Finset.mul_sum, ← poch_ratio_vandermonde _ _ hP,
+  rw [← Finset.mul_sum, ← pochhammer_ratio_vandermonde _ _ hP,
     show 2*(lam:ℂ)-(2*(lam:ℂ)+j) = -(j:ℂ) by ring]
   ring
 
 /-- A same-direction moment reduces to the finite reversed-basis expansion. -/
 theorem poly_same_basis {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (n k : ℕ) :
-    Integrable (fun x : ℝ => poly lam θ n x*poch ((lam:ℂ)+I*x) k*weight lam θ x) ∧
-    (∫ x : ℝ, poly lam θ n x*poch ((lam:ℂ)+I*x) k*weight lam θ x) =
-      ∑ j ∈ Finset.range (k+1), ((-1:ℂ)^k*k.choose j*poch (-2*(lam:ℂ)-k+1) (k-j))*
-        (reversedMoment lam θ j*poch (-(j:ℂ)) n/poch (2*(lam:ℂ)) n) := by
-  let C (j : ℕ) : ℂ := (-1:ℂ)^k*k.choose j*poch (-2*(lam:ℂ)-k+1) (k-j)
-  have he : (fun x : ℝ => poly lam θ n x*poch ((lam:ℂ)+I*x) k*weight lam θ x) =
+    Integrable (fun x : ℝ => poly lam θ n x*pochhammer ((lam:ℂ)+I*x) k*weight lam θ x) ∧
+    (∫ x : ℝ, poly lam θ n x*pochhammer ((lam:ℂ)+I*x) k*weight lam θ x) =
+      ∑ j ∈ Finset.range (k+1), ((-1:ℂ)^k*k.choose j*pochhammer (-2*(lam:ℂ)-k+1) (k-j))*
+        (reversedMoment lam θ j*pochhammer (-(j:ℂ)) n/pochhammer (2*(lam:ℂ)) n) := by
+  let C (j : ℕ) : ℂ := (-1:ℂ)^k*k.choose j*pochhammer (-2*(lam:ℂ)-k+1) (k-j)
+  have he : (fun x : ℝ => poly lam θ n x*pochhammer ((lam:ℂ)+I*x) k*weight lam θ x) =
       fun x : ℝ => ∑ j ∈ Finset.range (k+1),
-          C j*(poly lam θ n x*poch ((lam:ℂ)-I*x) j*weight lam θ x) := by
+          C j*(poly lam θ n x*pochhammer ((lam:ℂ)-I*x) j*weight lam θ x) := by
     funext x
     rw [show (lam:ℂ)+I*x = 2*(lam:ℂ)-((lam:ℂ)-I*x) by ring,
-      HahnMoments.poch_reverse_basis, Finset.mul_sum, Finset.sum_mul]
+      HahnMoments.pochhammer_reverse_basis, Finset.mul_sum, Finset.sum_mul]
     apply Finset.sum_congr rfl
     intro j hj
     dsimp only [C]
@@ -397,31 +399,32 @@ theorem poly_same_basis {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (n k :
 /-- A Pollaczek polynomial annihilates each lower-degree rising factorial. -/
 theorem integral_poly_same_basis_zero {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π)
     {n k : ℕ} (hk : k < n) :
-    (∫ x : ℝ, poly lam θ n x*poch ((lam:ℂ)+I*x) k*weight lam θ x) = 0 := by
+    (∫ x : ℝ, poly lam θ n x*pochhammer ((lam:ℂ)+I*x) k*weight lam θ x) = 0 := by
   rw [(poly_same_basis hlam hθ n k).2]
   apply Finset.sum_eq_zero
   intro j hj
-  rw [poch_neg_nat_eq_zero (show j < n by have := Finset.mem_range.mp hj; omega)]
+  rw [pochhammer_neg_nat_eq_zero (show j < n by have := Finset.mem_range.mp hj; omega)]
   ring
 /-- Only the leading reversed rising factorial contributes in equal degree. -/
 theorem integral_poly_same_basis_self {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (n : ℕ) :
-    (∫ x : ℝ, poly lam θ n x*poch ((lam:ℂ)+I*x) n*weight lam θ x) =
-      (-1:ℂ)^n*(reversedMoment lam θ n*poch (-(n:ℂ)) n/poch (2*(lam:ℂ)) n) := by
+    (∫ x : ℝ, poly lam θ n x*pochhammer ((lam:ℂ)+I*x) n*weight lam θ x) =
+      (-1:ℂ)^n*(reversedMoment lam θ n*pochhammer (-(n:ℂ)) n/pochhammer (2*(lam:ℂ)) n) := by
   rw [(poly_same_basis hlam hθ n n).2, Finset.sum_eq_single n]
-  · simp [poch_zero]
+  · simp [pochhammer_zero]
   · intro j hj hjn
-    rw [poch_neg_nat_eq_zero (show j < n by have := Finset.mem_range.mp hj; omega)]
+    rw [pochhammer_neg_nat_eq_zero (show j < n by have := Finset.mem_range.mp hj; omega)]
     ring
   · simp
 /-- The finite sum defining a second polynomial can be integrated term by term. -/
 theorem integral_poly_mul_poly {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (m n : ℕ) :
     (∫ x : ℝ, poly lam θ m x*poly lam θ n x*weight lam θ x) =
-      ∑ k ∈ Finset.range (m+1), (((-1:ℂ)^k*m.choose k/poch (2*(lam:ℂ)) k)*(scale θ/phase θ)^k)*
-        (∫ x : ℝ, poly lam θ n x*poch ((lam:ℂ)+I*x) k*weight lam θ x) := by
+      ∑ k ∈ Finset.range (m+1),
+          (((-1:ℂ)^k*m.choose k/pochhammer (2*(lam:ℂ)) k)*(scale θ/phase θ)^k)*
+        (∫ x : ℝ, poly lam θ n x*pochhammer ((lam:ℂ)+I*x) k*weight lam θ x) := by
   have he : (fun x : ℝ => poly lam θ m x*poly lam θ n x*weight lam θ x) =
       fun x : ℝ => ∑ k ∈ Finset.range (m+1),
-        (((-1:ℂ)^k*m.choose k/poch (2*(lam:ℂ)) k)*(scale θ/phase θ)^k)*
-        (poly lam θ n x*poch ((lam:ℂ)+I*x) k*weight lam θ x) := by
+        (((-1:ℂ)^k*m.choose k/pochhammer (2*(lam:ℂ)) k)*(scale θ/phase θ)^k)*
+        (poly lam θ n x*pochhammer ((lam:ℂ)+I*x) k*weight lam θ x) := by
     funext x
     rw [poly, Finset.sum_mul, Finset.sum_mul]
     apply Finset.sum_congr rfl
@@ -447,13 +450,14 @@ theorem poly_orthogonal {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) {m n :
 /-- The exact square norm of the unnormalized terminating sum. -/
 theorem poly_square {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (n : ℕ) :
     (∫ x : ℝ, poly lam θ n x*poly lam θ n x*weight lam θ x) =
-      (scale θ/phase θ)^n*reversedMoment lam θ n*poch (-(n:ℂ)) n/poch (2*(lam:ℂ)) n^2 := by
+      (scale θ/phase θ)^n*reversedMoment lam θ n*pochhammer (-(n:ℂ)) n/pochhammer
+          (2*(lam:ℂ)) n^2 := by
   rw [integral_poly_mul_poly hlam hθ, Finset.sum_eq_single n]
   · rw [integral_poly_same_basis_self hlam hθ]
     simp only [Nat.choose_self, Nat.cast_one, mul_one]
     have hn : ((-1:ℂ)^n)^2 = 1 := by rw [← pow_mul, mul_comm n 2, pow_mul]; simp
     calc _ = ((-1:ℂ)^n)^2 *
-           ((scale θ/phase θ)^n*reversedMoment lam θ n*poch (-(n:ℂ)) n/poch (2*(lam:ℂ))
+           ((scale θ/phase θ)^n*reversedMoment lam θ n*pochhammer (-(n:ℂ)) n/pochhammer (2*(lam:ℂ))
                n^2) := by ring
       _ = _ := by rw [hn, one_mul]
   · intro k hk hkn
@@ -463,18 +467,18 @@ theorem poly_square {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (n : ℕ) 
 
 /-- The standard Pollaczek normalization cancels the phase in the square norm. -/
 theorem normalized_square {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (n : ℕ) :
-    (poch (2*(lam:ℂ)) n/n.factorial*(I*phase θ)^n)^2 *
+    (pochhammer (2*(lam:ℂ)) n/n.factorial*(I*phase θ)^n)^2 *
       (∫ x : ℝ, poly lam θ n x*poly lam θ n x*weight lam θ x) =
       2*π*Gamma (2*(lam:ℂ)+n)/(scale θ^(2*(lam:ℂ))*n.factorial) := by
-  have hP : poch (2*(lam:ℂ)) n ≠ 0 :=
-    poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; positivity)) n
+  have hP : pochhammer (2*(lam:ℂ)) n ≠ 0 :=
+    pochhammer_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; positivity)) n
   have hf : (n.factorial:ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
   have hs := scale_ne_zero hθ
   have hr : phase θ ≠ 0 := Complex.exp_ne_zero _
   have hpow : ((I*phase θ)^n)^2 = (-1:ℂ)^n*(phase θ^n)^2 := by
     rw [mul_pow, mul_pow, ← pow_mul I, mul_comm n 2, pow_mul, I_sq]
-  have hneg : poch (-(n:ℂ)) n = (-1:ℂ)^n*n.factorial := by
-    rw [poch_neg_coe_nat, Nat.descFactorial_self]
+  have hneg : pochhammer (-(n:ℂ)) n = (-1:ℂ)^n*n.factorial := by
+    rw [pochhammer_neg_coe_nat, Nat.descFactorial_self]
   have he : exp (-I*θ*n/2) = (phase θ^n)⁻¹ := by
     dsimp only [phase]
     rw [← Complex.exp_nat_mul, ← Complex.exp_neg]

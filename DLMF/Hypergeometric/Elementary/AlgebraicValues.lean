@@ -151,13 +151,14 @@ theorem log_add_sqrt {z : ℂ} (hz : ‖z‖ < 1) :
   exact sub_eq_zero.mp h0
 
 /-- Duplication for rising factorials: `(2a)_{2m} = 4^m (a)_m (a + 1/2)_m`. -/
-theorem poch_two_mul_two_mul (a : ℂ) (m : ℕ) :
-    poch (2 * a) (2 * m) = 4 ^ m * poch a m * poch (a + 1 / 2) m := by
+theorem pochhammer_two_mul_two_mul (a : ℂ) (m : ℕ) :
+    pochhammer (2 * a) (2 * m) = 4 ^ m * pochhammer a m * pochhammer (a + 1 / 2) m := by
   induction m with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ m ih =>
-    rw [show 2 * (m + 1) = 2 * m + 1 + 1 by ring, poch_succ, poch_succ, ih, poch_succ a,
-      poch_succ (a + 1 / 2), pow_succ]
+    rw [show 2 * (m + 1) = 2 * m + 1 + 1 by ring, pochhammer_succ, pochhammer_succ, ih,
+                                              pochhammer_succ a,
+      pochhammer_succ (a + 1 / 2), pow_succ]
     push_cast
     ring
 
@@ -185,27 +186,27 @@ theorem even_binomial (a : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     ₂F₁ a (a + 1 / 2) (1 / 2) (z ^ 2) =
       ((1 + z) ^ (-2 * a) + (1 - z) ^ (-2 * a)) / 2 := by
   have hz' : ‖-z‖ < 1 := by rwa [norm_neg]
-  have hf := hasSum_poch_div_factorial (β := 2 * a) hz
-  have hg := hasSum_poch_div_factorial (β := 2 * a) hz'
+  have hf := hasSum_pochhammer_div_factorial (β := 2 * a) hz
+  have hg := hasSum_pochhammer_div_factorial (β := 2 * a) hz'
   have hh := ((hf.add hg).div_const 2)
   have heven := hasSum_even_of_odd_eq_zero hh fun m => by
     rw [Odd.neg_pow ⟨m, rfl⟩]; ring
   have hz2 : ‖z ^ 2‖ < 1 := by rw [norm_pow]; exact pow_lt_one₀ (norm_nonneg z) hz (by norm_num)
   have hF := (hasFPowerSeriesOnBall_ordinaryHypergeometric a (a + 1 / 2) (1 / 2)).hasSum_mul_pow
     (mem_eball_one_of_norm_lt_one hz2)
-  have hfac : ∀ m : ℕ, ((2 * m) ! : ℂ) = 4 ^ m * poch (1 / 2) m * m ! := by
+  have hfac : ∀ m : ℕ, ((2 * m) ! : ℂ) = 4 ^ m * pochhammer (1 / 2) m * m ! := by
     intro m
-    have := poch_two_mul_two_mul (1 / 2 : ℂ) m
+    have := pochhammer_two_mul_two_mul (1 / 2 : ℂ) m
     rw [show (2 : ℂ) * (1 / 2) = 1 by norm_num, show (1 / 2 : ℂ) + 1 / 2 = 1 by norm_num,
-      poch_nat_one, poch_nat_one] at this
+      pochhammer_nat_one, pochhammer_nat_one] at this
     exact_mod_cast this
   refine hF.unique (heven.congr_fun fun m => ?_) |>.trans ?_
   · have h1 : ((2 * m) ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
-    have h2 : poch (1 / 2 : ℂ) m ≠ 0 := by
+    have h2 : pochhammer (1 / 2 : ℂ) m ≠ 0 := by
       intro h; apply h1; rw [hfac, h]; simp
     have h3 : (m ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
-    unfold gaussHGCoeff
-    rw [Even.neg_pow ⟨m, by ring⟩, poch_two_mul_two_mul, hfac, pow_mul]
+    unfold gaussHypergeometricCoeff
+    rw [Even.neg_pow ⟨m, by ring⟩, pochhammer_two_mul_two_mul, hfac, pow_mul]
     field_simp
     ring
   · rw [sub_neg_eq_add, neg_mul]
@@ -272,27 +273,28 @@ theorem odd_binomial (a : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     (2 - 4 * a) * z * ₂F₁ a (a + 1 / 2) (3 / 2) (z ^ 2) =
       (1 + z) ^ (1 - 2 * a) - (1 - z) ^ (1 - 2 * a) := by
   have hz' : ‖-z‖ < 1 := by rwa [norm_neg]
-  have hf := hasSum_poch_div_factorial (β := 2 * a - 1) hz
-  have hg := hasSum_poch_div_factorial (β := 2 * a - 1) hz'
+  have hf := hasSum_pochhammer_div_factorial (β := 2 * a - 1) hz
+  have hg := hasSum_pochhammer_div_factorial (β := 2 * a - 1) hz'
   have hh := hg.sub hf
   have hodd := hasSum_odd_of_even_eq_zero hh fun m => by
     rw [Even.neg_pow ⟨m, by ring⟩]; ring
   have hz2 : ‖z ^ 2‖ < 1 := by rw [norm_pow]; exact pow_lt_one₀ (norm_nonneg z) hz (by norm_num)
   have hF := ((hasFPowerSeriesOnBall_ordinaryHypergeometric a (a + 1 / 2) (3 / 2)).hasSum_mul_pow
     (mem_eball_one_of_norm_lt_one hz2)).mul_left ((2 - 4 * a) * z)
-  have hfac : ∀ m : ℕ, ((2 * m + 1) ! : ℂ) = 4 ^ m * poch (3 / 2) m * m ! := by
+  have hfac : ∀ m : ℕ, ((2 * m + 1) ! : ℂ) = 4 ^ m * pochhammer (3 / 2) m * m ! := by
     intro m
-    have := poch_two_mul_two_mul (1 : ℂ) m
-    rw [mul_one, poch_nat_two, show (1 : ℂ) + 1 / 2 = 3 / 2 by norm_num, poch_nat_one] at this
+    have := pochhammer_two_mul_two_mul (1 : ℂ) m
+    rw [mul_one, pochhammer_nat_two, show (1 : ℂ) + 1 / 2 = 3 / 2 by norm_num,
+                                                                       pochhammer_nat_one] at this
     linear_combination this
   refine hF.unique (hodd.congr_fun fun m => ?_) |>.trans ?_
   · have h1 : ((2 * m + 1) ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
-    have h2 : poch (3 / 2 : ℂ) m ≠ 0 := by
+    have h2 : pochhammer (3 / 2 : ℂ) m ≠ 0 := by
       intro h; apply h1; rw [hfac, h]; simp
     have h3 : (m ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
-    unfold gaussHGCoeff
-    rw [Odd.neg_pow ⟨m, rfl⟩, show 2 * m + 1 = 1 + 2 * m by ring, poch_add, poch_one,
-      show 2 * a - 1 + (1 : ℕ) = 2 * a by push_cast; ring, poch_two_mul_two_mul,
+    unfold gaussHypergeometricCoeff
+    rw [Odd.neg_pow ⟨m, rfl⟩, show 2 * m + 1 = 1 + 2 * m by ring, pochhammer_add, pochhammer_one,
+      show 2 * a - 1 + (1 : ℕ) = 2 * a by push_cast; ring, pochhammer_two_mul_two_mul,
       show 1 + 2 * m = 2 * m + 1 by ring, hfac, pow_succ z (2 * m), pow_mul z 2 m]
     field_simp
     ring

@@ -22,16 +22,19 @@ This file treats the large-argument expansions of `U(a,z)` and `V(a,z)` in secto
 
 ## Main results
 
-* `pcfU_sector_asymptotic`, `pcfV_sector_asymptotic`: the Poincaré expansions
-  DLMF 12.9.1–12.9.2.
-* `pcfU_adjacent_asymptotic_pos`, `pcfU_adjacent_asymptotic_neg`: the two-exponential
-  expansion of `U` (DLMF 12.9.3).
-* `pcfV_adjacent_asymptotic_pos`, `pcfV_adjacent_asymptotic_neg`: the two-exponential
-  expansion of `V` (DLMF 12.9.4).
-* `pcfU_no_real_zero`, `pcfU_no_positive_zero`, `pcfU_positive_zero_count`,
-  `pcfU_hermite_zero_count`: real zeros of `U(a,x)` (DLMF §12.11(i)).
-* `pcfV_no_positive_zero`, `pcfV_integer_zero`: real zeros of `V(a,x)` (DLMF §12.11(i)).
-* `pcfU_complex_zero_strings`: the strings of complex zeros of `U(a,z)` (DLMF 12.11.1).
+* `parabolicCylinderU_sector_asymptotic`, `parabolicCylinderV_sector_asymptotic`: the Poincaré
+  expansions DLMF 12.9.1–12.9.2.
+* `parabolicCylinderU_adjacent_asymptotic_pos`, `parabolicCylinderU_adjacent_asymptotic_neg`: the
+  two-exponential expansion of `U` (DLMF 12.9.3).
+* `parabolicCylinderV_adjacent_asymptotic_pos`, `parabolicCylinderV_adjacent_asymptotic_neg`: the
+  two-exponential expansion of `V` (DLMF 12.9.4).
+* `parabolicCylinderU_no_real_zero`, `parabolicCylinderU_no_positive_zero`,
+  `parabolicCylinderU_positive_zero_count`, `parabolicCylinderU_hermite_zero_count`: real zeros of
+  `U(a,x)` (DLMF §12.11(i)).
+* `parabolicCylinderV_no_positive_zero`, `parabolicCylinderV_integer_zero`: real zeros of `V(a,x)`
+  (DLMF §12.11(i)).
+* `parabolicCylinderU_complex_zero_strings`: the strings of complex zeros of `U(a,z)` (DLMF
+  12.11.1).
 -/
 
 @[expose] public noncomputable section
@@ -44,35 +47,37 @@ namespace DLMF.Confluent
 /-- The order-`s` term `(-1)^s (a+1/2)_{2s}/(s! (2z²)^s)` in the large-argument expansion of the
 cylinder function U. -/
 def pcfUTerm (a z : ℂ) (s : ℕ) : ℂ :=
-  (-1)^s*poch (1/2+a) (2*s)/((s.factorial:ℂ)*(2*z^2)^s)
+  (-1)^s*pochhammer (1/2+a) (2*s)/((s.factorial:ℂ)*(2*z^2)^s)
 
 /-- The order-`s` term `(1/2-a)_{2s}/(s! (2z²)^s)` in the large-argument expansion of the cylinder
 function V. -/
 def pcfVTerm (a z : ℂ) (s : ℕ) : ℂ :=
-  poch (1/2-a) (2*s)/((s.factorial:ℂ)*(2*z^2)^s)
+  pochhammer (1/2-a) (2*s)/((s.factorial:ℂ)*(2*z^2)^s)
 
 /-- Asymptotic bound with the indicated comparison function: `(fun z : ℂ => exp
-(z^2/4)*z^(a+1/2)*pcfU a z-∑ s ∈ Finset.range N, pcfUTerm a z s) =O[sector (3*π/4-δ)] (fun z :
-ℂ => z^(-(2*N:ℤ)))`. -/
+(z^2/4)*z^(a+1/2)*parabolicCylinderU a z-∑ s ∈ Finset.range N, pcfUTerm a z s) =O[sector (3*π/4-δ)]
+(fun z : ℂ => z^(-(2*N:ℤ)))`. -/
 @[dlmf 12.9.E1]
-theorem pcfU_sector_asymptotic (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (N : ℕ) :
-    (fun z : ℂ => exp (z^2/4)*z^(a+1/2)*pcfU a z-∑ s ∈ Finset.range N, pcfUTerm a z s)
+theorem parabolicCylinderU_sector_asymptotic (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (N : ℕ) :
+    (fun z : ℂ => exp (z^2/4)*z^(a+1/2)*parabolicCylinderU a z-∑ s ∈ Finset.range N, pcfUTerm a z s)
         =O[sector (3*π/4-δ)] (fun z : ℂ => z^(-(2*N:ℤ))) := by
   exact CylinderSectorAsymptotics.U_sector a hδ N
 
 /-- Asymptotic bound with the indicated comparison function: `(fun z : ℂ => (Real.sqrt
-(π/2):ℂ)*exp (-z^2/4)*z^(-a+1/2)*pcfV a z-∑ s ∈ Finset.range N, pcfVTerm a z s) =O[sector
-(π/4-δ)] (fun z : ℂ => z^(-(2*N:ℤ)))`. -/
+(π/2):ℂ)*exp (-z^2/4)*z^(-a+1/2)*parabolicCylinderV a z-∑ s ∈ Finset.range N, pcfVTerm a z s)
+=O[sector (π/4-δ)] (fun z : ℂ => z^(-(2*N:ℤ)))`. -/
 @[dlmf 12.9.E2]
-theorem pcfV_sector_asymptotic (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π/4) (N : ℕ) :
-    (fun z : ℂ => (Real.sqrt (π/2):ℂ)*exp (-z^2/4)*z^(-a+1/2)*pcfV a z-∑ s ∈ Finset.range N,
+theorem parabolicCylinderV_sector_asymptotic (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π/4) (N : ℕ) :
+    (fun z : ℂ => (Real.sqrt (π/2):ℂ)*exp (-z^2/4)*z^(-a+1/2)*parabolicCylinderV a z-∑ s ∈
+        Finset.range N,
         pcfVTerm a z s) =O[sector (π/4-δ)] (fun z : ℂ => z^(-(2*N:ℤ))) := by
   exact CylinderSectorAsymptotics.V_sector a hδ hδπ N
 
 /-- Two-exponential expansion with an absolute sum-of-envelopes remainder and inherited powers. -/
 @[dlmf 12.9.E3]
-theorem pcfU_adjacent_asymptotic_pos (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π/2) (N : ℕ) :
-    (fun w : ℂ => pcfU a
+theorem parabolicCylinderU_adjacent_asymptotic_pos (a : ℂ) {δ : ℝ} (hδ : 0 < δ)
+    (hδπ : δ < π/2) (N : ℕ) :
+    (fun w : ℂ => parabolicCylinderU a
         (exp w)-(exp (-exp (2*w)/4-(a+1/2)*w)*(∑ j ∈ Finset.range N,
         pcfUTerm a (exp w) j)+(1:ℂ)*I*Real.sqrt (2*π)/Gamma (1/2+a)*exp (-(1:ℂ)*I*π*a)*exp
         (exp (2*w)/4+(a-1/2)*w)*(∑ j ∈ Finset.range N, pcfVTerm a (exp w) j)))
@@ -150,14 +155,15 @@ theorem pcfU_adjacent_asymptotic_pos (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ 
     Finset.sum_congr rfl fun s _ => by
       rw [z2]; exact CylinderSectorAsymptotics.uTerm_neg_eq_vTerm a (by ring_nf; rw [I_sq]; ring) s
   dsimp only
-  rw [s1, s2, pcfU_rotated_connection_entire_neg a (exp w), ← z1, ← z2]
+  rw [s1, s2, parabolicCylinderU_rotated_connection_entire_neg a (exp w), ← z1, ← z2]
   linear_combination (-(∑ j ∈ Finset.range N, pcfUTerm a (exp w) j)) * hA w -
     (∑ j ∈ Finset.range N, pcfVTerm a (exp w) j) * hB w
 
 /-- Two-exponential expansion with an absolute sum-of-envelopes remainder and inherited powers. -/
 @[dlmf 12.9.E3]
-theorem pcfU_adjacent_asymptotic_neg (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π/2) (N : ℕ) :
-    (fun w : ℂ => pcfU a
+theorem parabolicCylinderU_adjacent_asymptotic_neg (a : ℂ) {δ : ℝ} (hδ : 0 < δ)
+    (hδπ : δ < π/2) (N : ℕ) :
+    (fun w : ℂ => parabolicCylinderU a
         (exp w)-(exp (-exp (2*w)/4-(a+1/2)*w)*(∑ j ∈ Finset.range N,
         pcfUTerm a (exp w) j)+(-1:ℂ)*I*Real.sqrt (2*π)/Gamma (1/2+a)*exp (-(-1:ℂ)*I*π*a)*exp
         (exp (2*w)/4+(a-1/2)*w)*(∑ j ∈ Finset.range N, pcfVTerm a (exp w) j)))
@@ -234,14 +240,15 @@ theorem pcfU_adjacent_asymptotic_neg (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ 
     Finset.sum_congr rfl fun s _ => by
       rw [z2]; exact CylinderSectorAsymptotics.uTerm_neg_eq_vTerm a (by ring_nf; rw [I_sq]; ring) s
   dsimp only
-  rw [s1, s2, pcfU_rotated_connection_entire_pos a (exp w), ← z1, ← z2]
+  rw [s1, s2, parabolicCylinderU_rotated_connection_entire_pos a (exp w), ← z1, ← z2]
   linear_combination (-(∑ j ∈ Finset.range N, pcfUTerm a (exp w) j)) * hA w -
     (∑ j ∈ Finset.range N, pcfVTerm a (exp w) j) * hB w
 
 /-- Two-exponential expansion with an absolute sum-of-envelopes remainder and inherited powers. -/
 @[dlmf 12.9.E4]
-theorem pcfV_adjacent_asymptotic_pos (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π/2) (N : ℕ) :
-    (fun w : ℂ => pcfV a
+theorem parabolicCylinderV_adjacent_asymptotic_pos (a : ℂ) {δ : ℝ} (hδ : 0 < δ)
+    (hδπ : δ < π/2) (N : ℕ) :
+    (fun w : ℂ => parabolicCylinderV a
         (exp w)-((Real.sqrt (2/π):ℂ)*exp
         (exp (2*w)/4+(a-1/2)*w)*(∑ j ∈ Finset.range N, pcfVTerm a (exp w) j)+(1:ℂ)*I/Gamma
         (1/2-a)*exp (-exp (2*w)/4-(a+1/2)*w)*(∑ j ∈ Finset.range N, pcfUTerm a (exp w) j)))
@@ -296,7 +303,7 @@ theorem pcfV_adjacent_asymptotic_pos (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ 
     Finset.sum_congr rfl fun s _ => by
       rw [z2]; exact CylinderSectorAsymptotics.uTerm_neg_eq_vTerm a (by ring_nf; rw [I_sq]; ring) s
   dsimp only
-  rw [z1, s2, pcfV_eq_mul_neg_I a (exp w), ← z2]
+  rw [z1, s2, parabolicCylinderV_eq_mul_neg_I a (exp w), ← z2]
   simp only [C1, C2]
   have hu : ∑ s ∈ Finset.range N, CylinderSectorAsymptotics.uTerm a (exp w) s =
       ∑ j ∈ Finset.range N, pcfUTerm a (exp w) j := rfl
@@ -305,8 +312,9 @@ theorem pcfV_adjacent_asymptotic_pos (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ 
 
 /-- Two-exponential expansion with an absolute sum-of-envelopes remainder and inherited powers. -/
 @[dlmf 12.9.E4]
-theorem pcfV_adjacent_asymptotic_neg (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π/2) (N : ℕ) :
-    (fun w : ℂ => pcfV a
+theorem parabolicCylinderV_adjacent_asymptotic_neg (a : ℂ) {δ : ℝ} (hδ : 0 < δ)
+    (hδπ : δ < π/2) (N : ℕ) :
+    (fun w : ℂ => parabolicCylinderV a
         (exp w)-((Real.sqrt (2/π):ℂ)*exp
         (exp (2*w)/4+(a-1/2)*w)*(∑ j ∈ Finset.range N, pcfVTerm a (exp w) j)+(-1:ℂ)*I/Gamma
         (1/2-a)*exp (-exp (2*w)/4-(a+1/2)*w)*(∑ j ∈ Finset.range N, pcfUTerm a (exp w) j)))
@@ -361,7 +369,7 @@ theorem pcfV_adjacent_asymptotic_neg (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ 
     Finset.sum_congr rfl fun s _ => by
       rw [z2]; exact CylinderSectorAsymptotics.uTerm_neg_eq_vTerm a (by ring_nf; rw [I_sq]; ring) s
   dsimp only
-  rw [z1, s2, pcfV_eq_mul_I a (exp w), ← z2]
+  rw [z1, s2, parabolicCylinderV_eq_mul_I a (exp w), ← z2]
   simp only [C1, C2]
   have hu : ∑ s ∈ Finset.range N, CylinderSectorAsymptotics.uTerm a (exp w) s =
       ∑ j ∈ Finset.range N, pcfUTerm a (exp w) j := rfl
@@ -379,12 +387,12 @@ theorem integral_Ioi_ofReal_ne_zero {g : ℝ → ℝ} (hpos : ∀ t ∈ Ioi (0:�
       (measure_mono (s := Ioi (0:ℝ)) fun t ht => ⟨(hpos t ht).ne', ht⟩)
 
 /-- DLMF 12.11(i): absence of real zeros. -/
-theorem pcfU_no_real_zero {a : ℝ} (ha : -1/2 ≤ a) (x : ℝ) :
-    pcfU a x ≠ 0 := by
+theorem parabolicCylinderU_no_real_zero {a : ℝ} (ha : -1/2 ≤ a) (x : ℝ) :
+    parabolicCylinderU a x ≠ 0 := by
   rcases ha.eq_or_lt with h | h
-  · rw [← h, show ((-1/2:ℝ):ℂ) = -1/2 by push_cast; ring, pcfU_neg_half];
+  · rw [← h, show ((-1/2:ℝ):ℂ) = -1/2 by push_cast; ring, parabolicCylinderU_neg_half];
         exact Complex.exp_ne_zero _
-  · rw [pcfU_eq_integral (by simpa using h)]
+  · rw [parabolicCylinderU_eq_integral (by simpa using h)]
     refine mul_ne_zero (div_ne_zero (Complex.exp_ne_zero _)
       (Complex.Gamma_ne_zero_of_re_pos (by simp; linarith))) ?_
     have hc : -1 < ((a:ℂ) - 1/2).re := by simp; linarith
@@ -398,12 +406,12 @@ theorem pcfU_no_real_zero {a : ℝ} (ha : -1/2 ≤ a) (x : ℝ) :
     exact (integrableOn_pcfIntegrand hc x).congr_fun heq measurableSet_Ioi
 
 /-- DLMF 12.11(i): the first real zero lies on the negative axis. -/
-theorem pcfU_no_positive_zero {a : ℝ} (h0 : -3/2 < a) {x : ℝ} (hx : 0 < x) :
-    pcfU a x ≠ 0 := by
+theorem parabolicCylinderU_no_positive_zero {a : ℝ} (h0 : -3/2 < a) {x : ℝ} (hx : 0 < x) :
+    parabolicCylinderU a x ≠ 0 := by
   have hz : 0 < ((x:ℂ)^2/2).re := by
     rw [show (x:ℂ)^2/2 = ((x^2/2 : ℝ) : ℂ) by push_cast; ring, Complex.ofReal_re]; positivity
   have hα : 0 < ((a:ℂ)/2+3/4).re := by simp; linarith
-  rw [pcfU_kummerU_odd (a:ℂ) (by simpa using hx), kummerU_laplace hα hz]
+  rw [parabolicCylinderU_kummerU_odd (a:ℂ) (by simpa using hx), kummerU_laplace hα hz]
   refine mul_ne_zero (mul_ne_zero (mul_ne_zero ?_ (by exact_mod_cast hx.ne'))
     (Complex.exp_ne_zero _)) (mul_ne_zero (one_div_ne_zero (Complex.Gamma_ne_zero_of_re_pos hα)) ?_)
   · exact Complex.cpow_ne_zero_iff.mpr (Or.inl two_ne_zero)
@@ -422,15 +430,17 @@ theorem pcfU_no_positive_zero {a : ℝ} (h0 : -3/2 < a) {x : ℝ} (hx : 0 < x) :
     exact (kummerU_laplace_integrable (b := 3/2) hα hz).congr_fun heq measurableSet_Ioi
 
 /-- Hermite specialization and enclosure of all real zeros. -/
-theorem pcfU_hermite_zero_count (n : ℕ) :
-    Set.Finite {x : ℝ | pcfU (-n-1/2) x=0} ∧ ({x : ℝ | pcfU (-n-1/2) x=0}:Set ℝ).ncard=n ∧ ∀ x : ℝ,
-        pcfU (-n-1/2) x=0 → |x| ≤ 2*Real.sqrt (n+1/2) := by
-  obtain ⟨r, hr, hb, hz⟩ := DLMF.OrthogonalPolynomials.hermitePolyH_zeros_bound n
+theorem parabolicCylinderU_hermite_zero_count (n : ℕ) :
+    Set.Finite {x : ℝ | parabolicCylinderU (-n-1/2) x=0} ∧
+        ({x : ℝ | parabolicCylinderU (-n-1/2) x=0}:Set ℝ).ncard=n ∧ ∀ x : ℝ,
+        parabolicCylinderU (-n-1/2) x=0 → |x| ≤ 2*Real.sqrt (n+1/2) := by
+  obtain ⟨r, hr, hb, hz⟩ := DLMF.OrthogonalPolynomials.hermitePolynomialH_zeros_bound n
   have hs : (0 : ℝ) < Real.sqrt 2 := Real.sqrt_pos.mpr (by norm_num)
   have hs0 : (Real.sqrt 2 : ℂ) ≠ 0 := by exact_mod_cast hs.ne'
-  have hset : {x : ℝ | pcfU (-n-1/2) x=0} = Set.range (fun i => Real.sqrt 2 * r i) := by
+  have hset : {x : ℝ | parabolicCylinderU (-n-1/2) x=0} =
+      Set.range (fun i => Real.sqrt 2 * r i) := by
     ext x
-    simp only [mem_ofPred_eq, mem_range, pcfU_physicists_hermite]
+    simp only [mem_ofPred_eq, mem_range, parabolicCylinderU_physicists_hermite]
     have h2 : (2 : ℂ) ^ (-(n : ℂ) / 2) ≠ 0 := cpow_ne_zero_iff.mpr (Or.inl two_ne_zero)
     rw [mul_eq_zero, or_iff_right (mul_ne_zero h2 (exp_ne_zero _)), hz]
     constructor
@@ -446,7 +456,7 @@ theorem pcfU_hermite_zero_count (n : ℕ) :
   · rw [hset, ← Set.image_univ, Set.ncard_image_of_injective _ hinj, Set.ncard_univ,
       Nat.card_eq_fintype_card, Fintype.card_fin]
   · intro x hx
-    have hx' : x ∈ {x : ℝ | pcfU (-n-1/2) x=0} := hx
+    have hx' : x ∈ {x : ℝ | parabolicCylinderU (-n-1/2) x=0} := hx
     rw [hset] at hx'
     obtain ⟨i, rfl⟩ := hx'
     have e : 2 * Real.sqrt (n + 1/2) = Real.sqrt 2 * Real.sqrt (2 * n + 1) := by
@@ -471,9 +481,9 @@ theorem CylinderRealZeros.kummerM_continuous {c : ℂ} (hc : ∀ k : ℕ, c ≠ 
     (isOpen_lt (continuous_snd.norm) continuous_const)
   have hmem : (a₀, z₀) ∈ s := ⟨by simp [α], by simp [R]⟩
   have hc' : ContinuousOn
-      (fun p : ℂ × ℂ => ∑' n : ℕ, poch p.1 n / (poch c n * n !) * p.2 ^ n) s := by
+      (fun p : ℂ × ℂ => ∑' n : ℕ, pochhammer p.1 n / (pochhammer c n * n !) * p.2 ^ n) s := by
     refine continuousOn_tsum (fun n => ?_) hsum ?_
-    · have : Continuous fun p : ℂ × ℂ => poch p.1 n :=
+    · have : Continuous fun p : ℂ × ℂ => pochhammer p.1 n :=
         (Polynomial.continuous _).comp continuous_fst
       exact ((this.div_const _).mul (continuous_snd.pow n)).continuousOn
     · intro n p hp
@@ -498,10 +508,11 @@ theorem CylinderRealZeros.recipGamma_comp {f : ℂ × ℂ → ℂ} (hf : Continu
   differentiable_one_div_Gamma.continuous.comp hf |>.congr fun p => by simp
 
 /-- `U(a,z)` is jointly continuous in `(a,z)`. -/
-theorem CylinderRealZeros.pcfU_continuous : Continuous (fun p : ℂ × ℂ => pcfU p.1 p.2) := by
+theorem CylinderRealZeros.parabolicCylinderU_continuous : Continuous
+    (fun p : ℂ × ℂ => parabolicCylinderU p.1 p.2) := by
   have hb1 : ∀ k : ℕ, (1 / 2 : ℂ) ≠ -k := Complex.one_div_two_ne_neg_natCast
   have hb3 : ∀ k : ℕ, (3 / 2 : ℂ) ≠ -k := Complex.three_div_two_ne_neg_natCast
-  unfold pcfU pcfEven pcfOdd
+  unfold parabolicCylinderU parabolicCylinderEven parabolicCylinderOdd
   have k1 := CylinderRealZeros.kummerM_comp hb1 (f := fun p : ℂ × ℂ => p.1 / 2 + 1 / 4)
     (g := fun p => p.2 ^ 2 / 2) (by fun_prop) (by fun_prop)
   have k3 := CylinderRealZeros.kummerM_comp hb3 (f := fun p : ℂ × ℂ => p.1 / 2 + 3 / 4)
@@ -515,14 +526,14 @@ theorem CylinderRealZeros.pcfU_continuous : Continuous (fun p : ℂ × ℂ => pc
   fun_prop
 
 /-- `U'(a,z)` is jointly continuous in `(a,z)`. -/
-theorem CylinderRealZeros.pcfUDeriv_continuous : Continuous
-    (fun p : ℂ × ℂ => pcfUDeriv p.1 p.2) := by
+theorem CylinderRealZeros.parabolicCylinderUDeriv_continuous : Continuous
+    (fun p : ℂ × ℂ => parabolicCylinderUDeriv p.1 p.2) := by
   have hb1 : ∀ k : ℕ, (1 / 2 : ℂ) ≠ -k := Complex.one_div_two_ne_neg_natCast
   have hb3 : ∀ k : ℕ, (3 / 2 : ℂ) ≠ -k := Complex.three_div_two_ne_neg_natCast
   have hb3' : ∀ k : ℕ, (1 / 2 + 1 : ℂ) ≠ -k := by norm_num;
                                                   exact Complex.three_div_two_ne_neg_natCast
   have hb5 : ∀ k : ℕ, (3 / 2 + 1 : ℂ) ≠ -k := by norm_num; exact five_halves_ne_neg_nat
-  unfold pcfUDeriv pcfEvenDeriv pcfOddDeriv
+  unfold parabolicCylinderUDeriv parabolicCylinderEvenDeriv parabolicCylinderOddDeriv
   have k1 := CylinderRealZeros.kummerM_comp hb1 (f := fun p : ℂ × ℂ => p.1 / 2 + 1 / 4)
     (g := fun p => p.2 ^ 2 / 2) (by fun_prop) (by fun_prop)
   have k3 := CylinderRealZeros.kummerM_comp hb3 (f := fun p : ℂ × ℂ => p.1 / 2 + 3 / 4)
@@ -596,8 +607,9 @@ theorem CylinderRealZeros.no_zero_of_decay {f f' q : ℝ → ℝ} {X : ℝ}
   exact hs x₀ hx₀ h0 (tendsto_nhds_unique hsl hc)
 
 /-- `U(a,x) → 0` as `x → +∞` for real `a`. -/
-theorem CylinderRealZeros.tendsto_pcfU (a : ℝ) : Tendsto (fun x : ℝ => pcfU a x) atTop (𝓝 0) := by
-  have h0 := hasAsymptoticExpansion_pcfU (a : ℂ) 0
+theorem CylinderRealZeros.tendsto_parabolicCylinderU (a : ℝ) : Tendsto
+    (fun x : ℝ => parabolicCylinderU a x) atTop (𝓝 0) := by
+  have h0 := hasAsymptoticExpansion_parabolicCylinderU (a : ℂ) 0
   simp only [Finset.range_zero, Finset.sum_empty, sub_zero, CharP.cast_eq_zero, mul_zero,
     sub_zero] at h0
   refine h0.trans_tendsto ?_
@@ -619,74 +631,82 @@ theorem CylinderRealZeros.tendsto_pcfU (a : ℝ) : Tendsto (fun x : ℝ => pcfU 
 
 /-- The real derivative family of `U` along real arguments. -/
 theorem CylinderRealZeros.hasDerivAt_re (t x : ℝ) :
-    HasDerivAt (fun y : ℝ => (pcfU t y).re) (pcfUDeriv t x).re x :=
-  (hasDerivAt_pcfU t x).real_of_complex
+    HasDerivAt (fun y : ℝ => (parabolicCylinderU t y).re) (parabolicCylinderUDeriv t x).re x :=
+  (hasDerivAt_parabolicCylinderU t x).real_of_complex
 
 /-- Weber's equation for the real parts. -/
 theorem CylinderRealZeros.hasDerivAt_deriv_re (t x : ℝ) :
-    HasDerivAt (fun y : ℝ => (pcfUDeriv t y).re) ((x ^ 2 / 4 + t) * (pcfU t x).re) x := by
-  have h := (hasDerivAt_pcfUDeriv t x).real_of_complex
+    HasDerivAt (fun y : ℝ => (parabolicCylinderUDeriv t y).re)
+        ((x ^ 2 / 4 + t) * (parabolicCylinderU t x).re) x := by
+  have h := (hasDerivAt_parabolicCylinderUDeriv t x).real_of_complex
   rwa [show ((x : ℂ) ^ 2 / 4 + t) = ((x ^ 2 / 4 + t : ℝ) : ℂ) by push_cast; ring,
     Complex.re_ofReal_mul] at h
 
 /-- `U(t,x)` is real for real `t, x`. -/
-theorem CylinderRealZeros.eq_re (t x : ℝ) : pcfU t x = ((pcfU t x).re : ℂ) :=
-  Complex.ext (by simp) (by simp [pcfU_real])
+theorem CylinderRealZeros.eq_re (t x : ℝ) : parabolicCylinderU t x =
+    ((parabolicCylinderU t x).re : ℂ) :=
+  Complex.ext (by simp) (by simp [parabolicCylinderU_real])
 
 /-- `U'(t,x)` is real for real `t, x`. -/
-theorem CylinderRealZeros.deriv_eq_re (t x : ℝ) : pcfUDeriv t x = ((pcfUDeriv t x).re : ℂ) := by
-  have h1 : HasDerivAt (fun y : ℝ => pcfU t y) (pcfUDeriv t x) x :=
-      (hasDerivAt_pcfU t x).comp_ofReal
-  have h2 : HasDerivAt (fun y : ℝ => (((pcfU t y).re : ℝ) : ℂ)) ((pcfUDeriv t x).re : ℂ) x :=
+theorem CylinderRealZeros.deriv_eq_re (t x : ℝ) : parabolicCylinderUDeriv t x =
+    ((parabolicCylinderUDeriv t x).re : ℂ) := by
+  have h1 : HasDerivAt (fun y : ℝ => parabolicCylinderU t y) (parabolicCylinderUDeriv t x) x :=
+      (hasDerivAt_parabolicCylinderU t x).comp_ofReal
+  have h2 : HasDerivAt (fun y : ℝ => (((parabolicCylinderU t y).re : ℝ) : ℂ))
+      ((parabolicCylinderUDeriv t x).re : ℂ) x :=
     (CylinderRealZeros.hasDerivAt_re t x).ofReal_comp
-  have he : (fun y : ℝ => (((pcfU t y).re : ℝ) : ℂ)) = fun y : ℝ => pcfU t y :=
+  have he : (fun y : ℝ => (((parabolicCylinderU t y).re : ℝ) : ℂ)) = fun y : ℝ =>
+      parabolicCylinderU t y :=
     funext fun y => (CylinderRealZeros.eq_re t y).symm
   rw [he] at h2
   exact h1.unique h2
 
 /-- Real zeros of `U(t,·)` are simple (Wronskian with `V`). -/
-theorem CylinderRealZeros.zero_simple (t x : ℝ) (h : (pcfU t x).re = 0) :
-    (pcfUDeriv t x).re ≠ 0 := by
+theorem CylinderRealZeros.zero_simple (t x : ℝ) (h : (parabolicCylinderU t x).re = 0) :
+    (parabolicCylinderUDeriv t x).re ≠ 0 := by
   intro h'
-  have hU : pcfU t x = 0 := by rw [CylinderRealZeros.eq_re, h, Complex.ofReal_zero]
-  have hU' : pcfUDeriv t x = 0 := by rw [CylinderRealZeros.deriv_eq_re, h', Complex.ofReal_zero]
-  have hW := pcfV_wronskian (t : ℂ) (x : ℂ)
-  rw [deriv_pcfU, hU, hU'] at hW
+  have hU : parabolicCylinderU t x = 0 := by rw [CylinderRealZeros.eq_re, h, Complex.ofReal_zero]
+  have hU' : parabolicCylinderUDeriv t x = 0 := by
+      rw [CylinderRealZeros.deriv_eq_re, h', Complex.ofReal_zero]
+  have hW := parabolicCylinderV_wronskian (t : ℂ) (x : ℂ)
+  rw [deriv_parabolicCylinderU, hU, hU'] at hW
   have : (0 : ℝ) < Real.sqrt (2 / π) := Real.sqrt_pos.mpr (by positivity)
   have h0 : ((Real.sqrt (2 / π) : ℝ) : ℂ) ≠ 0 := by exact_mod_cast this.ne'
   exact h0 (by rw [← hW]; ring)
 
 /-- `U(t,0) ≠ 0` away from the poles of `Γ(3/4 + t/2)`. -/
 theorem CylinderRealZeros.zero_ne {t : ℝ} (h : ∀ m : ℕ, (3 / 4 + t / 2 : ℂ) ≠ -m) :
-    pcfU t 0 ≠ 0 := by
-  rw [pcfU_zero]
+    parabolicCylinderU t 0 ≠ 0 := by
+  rw [parabolicCylinderU_zero]
   refine div_ne_zero ?_ (mul_ne_zero ?_ (Complex.Gamma_ne_zero h))
   · exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
   · exact (Complex.cpow_ne_zero_iff.mpr (Or.inl two_ne_zero))
 
 /-- No zeros of `U(t,x)` where `x²/4 + t ≥ 0` beyond `X`. -/
 theorem CylinderRealZeros.no_zero_far {t : ℝ} {X : ℝ} (hX : ∀ x, X ≤ x → 0 ≤ x ^ 2 / 4 + t) :
-    ∀ x, X ≤ x → (pcfU t x).re ≠ 0 :=
-  CylinderRealZeros.no_zero_of_decay (f := fun y : ℝ => (pcfU t y).re)
-      (f' := fun y : ℝ => (pcfUDeriv t y).re)
+    ∀ x, X ≤ x → (parabolicCylinderU t x).re ≠ 0 :=
+  CylinderRealZeros.no_zero_of_decay (f := fun y : ℝ => (parabolicCylinderU t y).re)
+      (f' := fun y : ℝ => (parabolicCylinderUDeriv t y).re)
     (q := fun y => y ^ 2 / 4 + t) (fun x _ => CylinderRealZeros.hasDerivAt_re t x)
     (fun x _ => CylinderRealZeros.hasDerivAt_deriv_re t x) hX
-    (by have h := (Complex.continuous_re.tendsto 0).comp (CylinderRealZeros.tendsto_pcfU t);
+    (by have h := (Complex.continuous_re.tendsto 0).comp
+          (CylinderRealZeros.tendsto_parabolicCylinderU t);
         rw [Complex.zero_re] at h; exact h)
     (fun x _ h => CylinderRealZeros.zero_simple t x h)
 
 /-- Vanishing of `U(t,x)` through its real part. -/
-theorem CylinderRealZeros.re_eq_zero_iff (t x : ℝ) : (pcfU t x).re = 0 ↔ pcfU t x = 0 := by
+theorem CylinderRealZeros.re_eq_zero_iff (t x : ℝ) : (parabolicCylinderU t x).re = 0 ↔
+    parabolicCylinderU t x = 0 := by
   constructor
   · intro h; rw [CylinderRealZeros.eq_re, h, Complex.ofReal_zero]
   · intro h; rw [h, Complex.zero_re]
 
 /-- Base count: `U(-2n-1/2, x)` has exactly `n` positive zeros. -/
 theorem CylinderRealZeros.zero_count_base (n : ℕ) :
-    {x : ℝ | x ∈ Ici 0 ∧ (pcfU ((-2 * n - 1 / 2 : ℝ) : ℂ) x).re = 0}.ncard = n := by
-  obtain ⟨hfin, hcard, -⟩ := pcfU_hermite_zero_count (2 * n)
+    {x : ℝ | x ∈ Ici 0 ∧ (parabolicCylinderU ((-2 * n - 1 / 2 : ℝ) : ℂ) x).re = 0}.ncard = n := by
+  obtain ⟨hfin, hcard, -⟩ := parabolicCylinderU_hermite_zero_count (2 * n)
   have hc : ((-2 * n - 1 / 2 : ℝ) : ℂ) = -((2 * n : ℕ) : ℂ) - 1 / 2 := by push_cast; ring
-  set Z := {x : ℝ | pcfU (-((2 * n : ℕ) : ℂ) - 1 / 2) x = 0} with hZ
+  set Z := {x : ℝ | parabolicCylinderU (-((2 * n : ℕ) : ℂ) - 1 / 2) x = 0} with hZ
   have h0 : (0 : ℝ) ∉ Z := by
     have := CylinderRealZeros.zero_ne (t := -2 * n - 1 / 2) (fun m h => by
       have h' := congrArg Complex.re h
@@ -699,10 +719,11 @@ theorem CylinderRealZeros.zero_count_base (n : ℕ) :
   have hsymm : ∀ x, x ∈ Z ↔ -x ∈ Z := by
     intro x
     simp only [hZ, mem_ofPred_eq, Complex.ofReal_neg]
-    rw [pcfU_neg_nat_sub_half_neg (2 * n) (x : ℂ), pow_mul]
+    rw [parabolicCylinderU_neg_nat_sub_half_neg (2 * n) (x : ℂ), pow_mul]
     simp
   set P := {x : ℝ | 0 < x ∧ x ∈ Z}
-  have hset : {x : ℝ | x ∈ Ici 0 ∧ (pcfU ((-2 * n - 1 / 2 : ℝ) : ℂ) x).re = 0} = P := by
+  have hset : {x : ℝ | x ∈ Ici 0 ∧
+                 (parabolicCylinderU ((-2 * n - 1 / 2 : ℝ) : ℂ) x).re = 0} = P := by
     ext x
     simp only [mem_ofPred_eq, mem_Ici, P]
     rw [show (((-2 * n - 1 / 2 : ℝ) : ℂ)) = (((-2 * n - 1 / 2 : ℝ) : ℝ) : ℂ) from rfl,
@@ -739,20 +760,23 @@ theorem CylinderRealZeros.zero_count_base (n : ℕ) :
   omega
 
 /-- Exact positive real zero count in DLMF 12.11(i). -/
-theorem pcfU_positive_zero_count {a : ℝ} (n : ℕ) (hn : 0 < n) (h0 : -2*n-3/2 < a)
+theorem parabolicCylinderU_positive_zero_count {a : ℝ} (n : ℕ) (hn : 0 < n) (h0 : -2*n-3/2 < a)
     (h1 : a < -2*n+1/2) :
-    Set.Finite {x : ℝ | 0 < x ∧ pcfU a x=0} ∧ ({x : ℝ | 0 < x ∧ pcfU a x=0}:Set ℝ).ncard=n := by
+    Set.Finite {x : ℝ | 0 < x ∧ parabolicCylinderU a x=0} ∧
+        ({x : ℝ | 0 < x ∧ parabolicCylinderU a x=0}:Set ℝ).ncard=n := by
   set S : Set ℝ := Ioo (-2 * n - 3 / 2) (-2 * n + 1 / 2) with hS
-  set Y : ℝ → ℝ → ℝ := fun t x => (pcfU t x).re with hY
-  set Y' : ℝ → ℝ → ℝ := fun t x => (pcfUDeriv t x).re with hY'
+  set Y : ℝ → ℝ → ℝ := fun t x => (parabolicCylinderU t x).re with hY
+  set Y' : ℝ → ℝ → ℝ := fun t x => (parabolicCylinderUDeriv t x).re with hY'
   have hcR : Continuous (fun p : ℝ × ℝ => ((p.1 : ℂ), (p.2 : ℂ))) := by fun_prop
   have hcY : ContinuousOn (Function.uncurry Y) (S ×ˢ univ) :=
-    (Complex.continuous_re.comp (CylinderRealZeros.pcfU_continuous.comp hcR)).continuousOn
+    (Complex.continuous_re.comp
+        (CylinderRealZeros.parabolicCylinderU_continuous.comp hcR)).continuousOn
   have hcY' : ContinuousOn (Function.uncurry Y') (S ×ˢ univ) :=
-    (Complex.continuous_re.comp (CylinderRealZeros.pcfUDeriv_continuous.comp hcR)).continuousOn
+    (Complex.continuous_re.comp
+        (CylinderRealZeros.parabolicCylinderUDeriv_continuous.comp hcR)).continuousOn
   have hY0 : ∀ t ∈ S, Y t 0 ≠ 0 := by
     intro t ht h
-    have h' : pcfU t 0 = 0 := by
+    have h' : parabolicCylinderU t 0 = 0 := by
       have := (CylinderRealZeros.re_eq_zero_iff t 0).mp h
       simpa using this
     refine CylinderRealZeros.zero_ne (t := t) (fun m hm => ?_) h'
@@ -775,7 +799,7 @@ theorem pcfU_positive_zero_count {a : ℝ} (n : ℕ) (hn : 0 < n) (h0 : -2*n-3/2
         (fun t _ x _ h => CylinderRealZeros.zero_simple t x h)
     isPreconnected_Ioo subset_rfl hY0 hfar (t₁ := a) (t₂ := -2 * n - 1 / 2) ⟨h0, h1⟩ hmem
   have hbase := CylinderRealZeros.zero_count_base n
-  have hset : {x : ℝ | 0 < x ∧ pcfU a x = 0} = {x | x ∈ Ici 0 ∧ Y a x = 0} := by
+  have hset : {x : ℝ | 0 < x ∧ parabolicCylinderU a x = 0} = {x | x ∈ Ici 0 ∧ Y a x = 0} := by
     ext x
     simp only [mem_ofPred_eq, mem_Ici, hY, CylinderRealZeros.re_eq_zero_iff]
     constructor
@@ -784,14 +808,14 @@ theorem pcfU_positive_zero_count {a : ℝ} (n : ℕ) (hn : 0 < n) (h0 : -2*n-3/2
       refine ⟨lt_of_le_of_ne hx ?_, hz⟩
       rintro rfl
       exact hY0 a ⟨h0, h1⟩ ((CylinderRealZeros.re_eq_zero_iff a 0).mpr (by simpa using hz))
-  have hcard : ({x : ℝ | 0 < x ∧ pcfU a x = 0} : Set ℝ).ncard = n := by
+  have hcard : ({x : ℝ | 0 < x ∧ parabolicCylinderU a x = 0} : Set ℝ).ncard = n := by
     rw [hset, heq]
     exact hbase
   exact ⟨Set.finite_of_ncard_ne_zero (by omega), hcard⟩
 
 /-- DLMF 12.11(i): absence of positive real zeros of V. -/
-theorem pcfV_no_positive_zero {a : ℝ} (ha : -1/2 < a) {x : ℝ} (hx : 0 < x) :
-    pcfV a x ≠ 0 := by
+theorem parabolicCylinderV_no_positive_zero {a : ℝ} (ha : -1/2 < a) {x : ℝ} (hx : 0 < x) :
+    parabolicCylinderV a x ≠ 0 := by
   have hn : ∀ n : ℕ, 1 / 2 + (a : ℂ) ≠ -n := fun n h => by
     have := congrArg re h
     simp at this
@@ -800,7 +824,8 @@ theorem pcfV_no_positive_zero {a : ℝ} (ha : -1/2 < a) {x : ℝ} (hx : 0 < x) :
   have hΓ : Gamma (1 / 2 + (a : ℂ)) ≠ 0 := Complex.Gamma_ne_zero hn
   have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
   have hc : -1 < ((a : ℂ) - 1 / 2).re := by simp; linarith
-  rw [pcfV_eq hn, pcfU_eq_integral ha', pcfU_eq_integral ha', neg_sq]
+  rw [parabolicCylinderV_eq hn, parabolicCylinderU_eq_integral ha',
+      parabolicCylinderU_eq_integral ha', neg_sq]
   set E := exp (-(x : ℂ) ^ 2 / 4)
   set f1 := fun t : ℝ => (t : ℂ) ^ ((a : ℂ) - 1 / 2) * exp (-(t : ℂ) ^ 2 / 2 - (x : ℂ) * t)
   set f2 := fun t : ℝ => (t : ℂ) ^ ((a : ℂ) - 1 / 2) * exp (-(t : ℂ) ^ 2 / 2 - (-(x : ℂ)) * t)
@@ -836,9 +861,9 @@ theorem pcfV_no_positive_zero {a : ℝ} (ha : -1/2 < a) {x : ℝ} (hx : 0 < x) :
   · exact IntegrableOn.congr_fun ((h1.const_mul _).add h2) heq measurableSet_Ioi
 
 /-- DLMF 12.11(i): zeros of V at the origin. -/
-theorem pcfV_integer_zero (n : ℤ) :
-    pcfV (3/2-2*n) 0=0 := by
-  rw [pcfV_zero', pcfVZero]
+theorem parabolicCylinderV_integer_zero (n : ℤ) :
+    parabolicCylinderV (3/2-2*n) 0=0 := by
+  rw [parabolicCylinderV_zero', parabolicCylinderVZero]
   rcases le_or_gt 1 n with hn | hn
   · obtain ⟨m, rfl⟩ : ∃ m : ℕ, n = m + 1 := ⟨(n-1).toNat, by omega⟩
     rw [show (1/4:ℂ) + (3/2 - 2*((m+1:ℤ):ℂ))/2 = -(m:ℂ) by push_cast; ring,
@@ -861,14 +886,15 @@ cylinder zeros. -/
 def pcfZeroLambda (a : ℝ) (s : ℕ) : ℂ :=
   log (pcfZeroTau a s)-π*I/2
 
-/-- Asymptotic bound with the indicated comparison function: `∃ Z : ℕ → ℂ, (∀ᶠ s in atTop, pcfU a
-(Z s)=0 ∧ pcfU a (star (Z s))=0 ∧ 0 < (Z s).im) ∧ (fun s => Z s/(exp (3*π*I/4)*(2*pcfZeroTau a
-s)^(1/2:ℂ))-1+I*a*pcfZeroLambda a s/(2*pcfZeroTau a s)-(2*a^2*(pcfZeroLambda a
-s)^2-8*a^2*pcfZeroLambda a s+4*a^2+3)/(16*(pcfZeroTau a s)^2)) =O[atTop] (fun s =>
-(pcfZeroLambda a s)^3/(pcfZeroTau a s)^3)`. -/
+/-- Asymptotic bound with the indicated comparison function:
+`∃ Z : ℕ → ℂ, (∀ᶠ s in atTop, parabolicCylinderU a (Z s)=0 ∧ parabolicCylinderU a (star (Z s))=0 ∧ 0
+< (Z s).im) ∧ (fun s => Z s/(exp (3*π*I/4)*(2*pcfZeroTau a s)^(1/2:ℂ))-1+I*a*pcfZeroLambda a
+s/(2*pcfZeroTau a s)-(2*a^2*(pcfZeroLambda a s)^2-8*a^2*pcfZeroLambda a s+4*a^2+3)/(16*(pcfZeroTau a
+s)^2)) =O[atTop] (fun s => (pcfZeroLambda a s)^3/(pcfZeroTau a s)^3)`. -/
 @[dlmf 12.11.E1]
-theorem pcfU_complex_zero_strings {a : ℝ} (ha : -1/2 < a) :
-    ∃ Z : ℕ → ℂ, (∀ᶠ s in atTop, pcfU a (Z s)=0 ∧ pcfU a (star (Z s))=0 ∧ 0 < (Z s).im) ∧
+theorem parabolicCylinderU_complex_zero_strings {a : ℝ} (ha : -1/2 < a) :
+    ∃ Z : ℕ → ℂ, (∀ᶠ s in atTop, parabolicCylinderU a (Z s)=0 ∧
+        parabolicCylinderU a (star (Z s))=0 ∧ 0 < (Z s).im) ∧
         (fun s => Z s/(exp (3*π*I/4)*(2*pcfZeroTau a s)^(1/2:ℂ))-1+I*a*pcfZeroLambda a
         s/(2*pcfZeroTau a s)-(2*a^2*(pcfZeroLambda a s)^2-8*a^2*pcfZeroLambda a
         s+4*a^2+3)/(16*(pcfZeroTau a s)^2)) =O[atTop]

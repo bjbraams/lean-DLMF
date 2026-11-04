@@ -62,8 +62,8 @@ private lemma hasDerivAt_cpow_of_mem_slitPlane {a z : ℂ} (hz : z ∈ slitPlane
 /-! ## `PIII` (§32.9(i)) -/
 
 /-- DLMF 32.9.1: `w = κz^{1/3}` solves `PIII` with parameters `(μ, 0, 0, -μκ³)` on every open
-subset of the slit plane, for `κ ≠ 0` (principal cube root; another branch multiplies `κ` by a
-cube root of unity, which leaves `κ³` unchanged). -/
+subset of the slit plane, for `κ ≠ 0` (principal unitCube root; another branch multiplies `κ` by a
+unitCube root of unity, which leaves `κ³` unchanged). -/
 @[dlmf 32.9.E1]
 theorem painleveIII_cbrt {κ μ : ℂ} {U : Set ℂ} (hU : IsOpen U) (hUs : U ⊆ slitPlane)
     (hκ : κ ≠ 0) :
@@ -180,7 +180,7 @@ theorem painleveIII_power {κ l μ ν : ℂ} {U : Set ℂ} (hU : IsOpen U) (hUs 
 /-- DLMF §32.9(i), 32.9.4–32.9.5: with `γ = 0`, `α = 1`, `δ = -1` (the normalization of
 §32.2(ii) when `γ = 0`, `αδ ≠ 0`), `PIII` has algebraic solutions iff `β = 2n`, `n ∈ ℤ`; these
 are rational in `ζ = z^{1/3}`, `w = P_{n²+1}(ζ)/Q_{n²}(ζ)` with polynomials of degrees `n² + 1`
-and `n²` without common zeros (for some holomorphic cube root `ζ` on the domain). -/
+and `n²` without common zeros (for some holomorphic unitCube root `ζ` on the domain). -/
 @[dlmf 32.9.E4, dlmf 32.9.E5]
 theorem painleveIII_algebraic_iff (β : ℂ) :
     ((∃ (w : ℂ → ℂ) (U : Set ℂ), IsOpen U ∧ U.Nonempty ∧ IsAlgebraicOn w U ∧

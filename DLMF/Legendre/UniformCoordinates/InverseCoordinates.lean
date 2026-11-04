@@ -7,6 +7,7 @@ module
 
 public import DLMF.Legendre.UniformCoordinates.TurningPointMaps
 public import DLMF.AsymptoticApproximations.ODE.Basic
+public import DLMF.Legendre.UniformCoordinates.CylinderCrossing
 
 /-!
 # Inverse uniform coordinates for Legendre functions
@@ -236,15 +237,17 @@ def legendreBesselEnvelope (second : Bool) (ν x : ℝ) : ℝ :=
 that separates the two branches of the parabolic-cylinder envelopes. -/
 @[dlmf 14.15.E23]
 def cylinderEnvelopeCross (c : ℝ) : ℝ :=
-  sSup {x : ℝ | 0 < x ∧ pcfU (-c) x=pcfUBar (-c) x}
+  sSup {x : ℝ | 0 < x ∧ parabolicCylinderU (-c) x=parabolicCylinderUBar (-c) x}
 
 /-- DLMF 14.15.23: the envelope functions `env U(−c, x)` (or `env Ū(−c, x)` when `barred`),
 equal to `(U(−c,x)² + Ū(−c,x)²)^{1/2}` for `x ≤ X_c` and to `√2 U(−c,x)` (resp. `√2 Ū(−c,x)`)
 for `x > X_c`. -/
 @[dlmf 14.15.E23]
 def legendreCylinderEnvelope (barred : Bool) (c x : ℝ) : ℝ :=
-  if x ≤ cylinderEnvelopeCross c then Real.sqrt (‖pcfU (-c) x‖^2+‖pcfUBar (-c) x‖^2) else
-      Real.sqrt 2*(if barred then (pcfUBar (-c) x).re else (pcfU (-c) x).re)
+  if x ≤ cylinderEnvelopeCross c then
+      Real.sqrt (‖parabolicCylinderU (-c) x‖^2+‖parabolicCylinderUBar (-c) x‖^2) else
+      Real.sqrt 2*(if barred then (parabolicCylinderUBar (-c) x).re else
+          (parabolicCylinderU (-c) x).re)
 
 /-- DLMF 14.15.26: the turning-point parameter `a = ((ν+μ+1/2)|ν−μ+1/2|)^{1/2}/(ν+1/2)` of the
 parabolic-cylinder expansions 14.15.24–14.15.31. -/
@@ -1114,11 +1117,12 @@ is asserted only for `c > 0` (corrected 2026-10-22). -/
 @[dlmf 14.15.E23]
 theorem cylinderEnvelopeCross_spec {c : ℝ} (hc : 0 ≤ c) :
     (0 < c → 0 < cylinderEnvelopeCross c) ∧
-      DLMF.Confluent.pcfU (-c) (cylinderEnvelopeCross c)=DLMF.Confluent.pcfUBar (-c)
+      DLMF.Confluent.parabolicCylinderU (-c)
+          (cylinderEnvelopeCross c)=DLMF.Confluent.parabolicCylinderUBar (-c)
           (cylinderEnvelopeCross c) ∧
-      ∀ x : ℝ, cylinderEnvelopeCross c < x → DLMF.Confluent.pcfU (-c) x ≠
-          DLMF.Confluent.pcfUBar (-c) x := by
-  sorry
+      ∀ x : ℝ, cylinderEnvelopeCross c < x → DLMF.Confluent.parabolicCylinderU (-c) x ≠
+          DLMF.Confluent.parabolicCylinderUBar (-c) x :=
+  CylinderCrossing.sSup_spec hc
 
 end DLMF.Legendre
 

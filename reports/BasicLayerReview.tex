@@ -43,7 +43,7 @@ directories. \module{DLMF.Basic} imports all of them. They hold 1{,}611 public d
 \paragraph{Imports.} \resolved{2026-11-01} Every Basic file now imports only Mathlib, TauCeti,
 \module{DLMFMathlib} and other Basic files, and the import closure of \module{DLMF.Basic}
 contains no lean-codes module. \module{DLMF.Core.Framework} was renamed
-\module{DLMF.Core.Basic}, \lean{symEllIntR} moved to the theorem layer, and the import survey
+\module{DLMF.Core.Basic}, \lean{symmetricEllipticR} moved to the theorem layer, and the import survey
 now fails on any violation of either rule (\S\ref{sec:imports}). Two small items remain: 13
 Basic files import \module{DLMF.Core.Basic} without using it, and \module{DLMF.Core.Basic} has
 not yet been split into \module{DLMFMathlib} and the areas.
@@ -124,7 +124,7 @@ The file (232 lines) fixes shared conventions. It defines improper integrals
 (\lean{HasIntegralAtTop}, \lean{improperAtTop} and siblings), the principal value
 \lean{HasPrincipalValueIoi}, straight-segment integrals and primitives (\lean{segmentIntegral},
 \lean{primitive}), the sector filters \lean{sector} and \lean{logSector}, finite continued
-fractions (\lean{cfContinuants}, \lean{cfTail}, \lean{HasContinuedFraction}),
+fractions (\lean{continuedFractionContinuants}, \lean{continuedFractionTail}, \lean{HasContinuedFraction}),
 \lean{oddProduct}, the spherical Bessel functions \lean{sphericalJ} and \lean{sphericalI},
 \lean{orderedZero} and \lean{asymptoticCoeff}.
 
@@ -150,11 +150,11 @@ AsymptoticApproximations. The namespace part is resolved later on 2026-11-02:
 
 \subsection{The Carlson imports}
 
-\resolved{2026-11-01} \lean{symEllIntR} (DLMF 19.16.8), the only definition in a Basic file
+\resolved{2026-11-01} \lean{symmetricEllipticR} (DLMF 19.16.8), the only definition in a Basic file
 built on Carlson's \(R\)-function, moved unchanged into
 \file{DLMF/EllipticIntegrals/Symmetric.lean}. \file{EllipticIntegrals/Basic/Symmetric.lean} now
-imports Mathlib only and keeps the integral definitions \lean{symEllIntRF}, \lean{symEllIntRJ},
-\lean{symEllIntRG}, \lean{symEllIntRD}, \lean{symEllIntRC} and \lean{symEllIntS}. The survey
+imports Mathlib only and keeps the integral definitions \lean{symmetricEllipticRF}, \lean{symmetricEllipticRJ},
+\lean{symmetricEllipticRG}, \lean{symmetricEllipticRD}, \lean{symmetricEllipticRC} and \lean{carlsonRootProduct}. The survey
 fails if a lean-codes module re-enters the closure of \module{DLMF.Basic}.
 
 Outside the Basic layer, lean-codes still sits low in many theorem stacks. Most theorem modules
@@ -205,7 +205,7 @@ uniform expansions (\lean{pcfOlverA}, \lean{ellAsymA}, \lean{gammaUniformS}), er
 multipliers, the reduction data of \S19.29 (\lean{SymmetricReduction.quarticProduct}, \lean{quadraticPairU}),
 argument-reduction data for computation (\lean{expReductionIndex}), continued-fraction data,
 zero-counting functions, and the predicates for conjectures (\lean{GoldbachConjecture},
-\lean{LehmerConjecture}). \lean{symEllIntR} stays in the theorem layer by design.
+\lean{LehmerConjecture}). \lean{symmetricEllipticR} stays in the theorem layer by design.
 
 \resolved{2026-11-01} Of the central functions listed in the first version, all but four now
 have their home in the Basic layer: Barnes' \(G\) and Glaisher--Kinkelin, the real digamma and
@@ -261,13 +261,13 @@ The overlaps of the first version are settled:
     \lean{Zeta.polylog\_two\_ofReal\_eq\_dilog}.
   \item Spherical harmonics and Jacobi polynomials. \resolved{2026-11-01} Not duplicates; the
     docstrings now cross-reference \file{SphericalHarmonics/Basic.lean} and
-    \lean{Legendre.sphericalHarmonic}, and \lean{MatrixArgument.jacobiP} and
-    \lean{OrthogonalPolynomials.jacobiPolyP}.
+    \lean{Legendre.sphericalHarmonic}, and \lean{MatrixArgument.matrixJacobiP} and
+    \lean{OrthogonalPolynomials.jacobiPolynomialP}.
   \item Klein's \(J\). \resolved{2026-11-01} \lean{ModularForm.kleinJ} in
     \module{DLMFMathlib} is the one definition; \lean{Weierstrass.kleinJ} is removed and
     23.15.7 is the theorem \lean{Weierstrass.kleinJ\_eq\_jacobiTheta}.
   \item Complete elliptic integrals. \resolved{2026-11-01} \lean{compEllIntKk} and
-    \lean{compEllIntKpk} moved to \file{EllipticIntegrals/Basic/Complete.lean}, beside their
+    \lean{completeEllipticKPrime} moved to \file{EllipticIntegrals/Basic/Complete.lean}, beside their
     siblings.
   \item \lean{arctanCutPlane} and \lean{arcsinhDomain}: \resolved{2026-11-01} by the
     \lean{rfl} theorem \lean{arcsinhDomain\_eq\_arctanCutPlane}. \lean{cbinom}:
@@ -306,7 +306,7 @@ from Mathlib's \lean{Real} and \lean{Complex} namespaces into \lean{DLMF.Gamma} 
 \open{} A reviewer will notice that the namespace does not always name the directory. 22 Basic
 files declare, wholly or partly, into another area: the error functions, exponential integrals,
 incomplete gamma functions, parabolic cylinder functions, the Coulomb functions and the helper
-\lean{hermitePolyHEval} of \file{OrthogonalPolynomials/Basic/Definitions.lean} live in
+\lean{hermitePolynomialHEval} of \file{OrthogonalPolynomials/Basic/Definitions.lean} live in
 \lean{DLMF.Confluent} (the arrangement of Temme's book); the generalized hypergeometric and
 Appell files in \lean{DLMF.Hypergeometric}; the complex incomplete beta function of
 \file{IncompleteGamma/Basic/IncompleteBeta.lean} in \lean{DLMF.Statistical}; and
@@ -320,7 +320,7 @@ of \module{DLMF.Core.Basic} moved to \lean{DLMF.Core}.
 \resolved{2026-11-02} New foundational bridges: \lean{DLMF.Bessel.besselI\_ofReal} and
 \lean{re\_besselI\_ofReal} to TauCeti's \lean{Real.besselI}, beside the existing
 \lean{DLMF.Confluent.erf\_ofReal} (TauCeti's \lean{TauCeti.Real.erf}),
-\lean{DLMF.Statistical.normIncBetaI\_ofReal} (\lean{TauCeti.regularizedIncompleteBeta}) and the
+\lean{DLMF.Statistical.regularizedIncompleteBeta\_ofReal} (\lean{TauCeti.regularizedIncompleteBeta}) and the
 thin wrapper \lean{DLMF.Confluent.Real.invErf} of \lean{Real.erfInv}.
 
 \open{} Bridges that the policy places in the foundational layer but that are still in theorem
@@ -330,12 +330,12 @@ files:
     \lean{TauCeti.multivariateGamma}), in \file{MatrixArgument/GammaBeta/GammaIntegrals.lean};
     its proof only unfolds both definitions. \emph{Resolved later on 2026-11-02:} it moved to
     \file{MatrixArgument/Basic.lean} unchanged, with \lean{multivariateGamma\_one}.
-  \item \lean{DLMF.Confluent.lowerIncGamma\_ofReal} (to \lean{TauCeti.lowerIncompleteGamma}) in
-    \file{Confluent/IncompleteGamma.lean}, and \lean{normIncGammaP\_ofReal},
-    \lean{normIncGammaQ\_ofReal} (to \lean{TauCeti.regularizedGamma}) in
-    \file{Statistical/IncompleteGamma.lean}. Their proofs use the integral 8.2.1, so they wait
+  \item \lean{DLMF.Confluent.lowerIncompleteGamma\_ofReal} (to \lean{TauCeti.lowerIncompleteGamma}) in
+    \file{Confluent/IncompleteGamma.lean}, and \lean{regularizedGamma\_ofReal},
+    \lean{regularizedIncompleteGammaQ\_ofReal} (to \lean{TauCeti.regularizedGamma}) in
+    \file{IncompleteGamma/Regularized.lean}. Their proofs use the integral 8.2.1, so they wait
     for the \S8.2 results to become foundational.
-  \item \lean{Real.logIntLi\_eq\_logIntLi\_two\_add\_logIntegral} (to
+  \item \lean{Real.logIntegralLi\_eq\_logIntLi\_two\_add\_logIntegral} (to
     \lean{TauCeti.Real.logIntegral}) in \file{ExpIntegrals/AnalyticProperties.lean}; it needs
     the derivative of \(\operatorname{li}\) from foundational imports.
 \end{itemize}
@@ -344,8 +344,8 @@ files:
 \subsection{Definitions a Mathlib reviewer will question}
 
 \begin{itemize}
-  \item Parameter restrictions. \open{} \lean{laguerrePolyL}, \lean{jacobiPolyP} and
-    \lean{ultrasphPoly} are still defined through \({}_1F_1\) and \({}_2F_1\) with a
+  \item Parameter restrictions. \open{} \lean{laguerrePolynomialL}, \lean{jacobiPolynomialP} and
+    \lean{ultrasphericalPolynomial} are still defined through \({}_1F_1\) and \({}_2F_1\) with a
     Pochhammer prefactor, ``for \(\alpha+1\) (resp.\ \(\lambda+\tfrac12\)) not a nonpositive
     integer'', so at the excluded parameters the value is not the polynomial. Mathlib would
     expect a definition valid for every parameter, preferably as a \lean{Polynomial} with an
@@ -361,8 +361,8 @@ files:
     choice: a real-only form lives in the \lean{Real} sub-namespace of its area, beside a
     complex form or an upstream function, with a bridge. \lean{DLMF.Gamma.Real.digamma}
     is bridged to \lean{Complex.digamma}, \lean{Polylog.Real.dilog} to
-    \lean{Zeta.polylog}, and \lean{Statistical.Real.incBeta} has the complex
-    \lean{Statistical.incBeta} beside it.
+    \lean{Zeta.polylog}, and \lean{Statistical.Real.incompleteBeta} has the complex
+    \lean{Statistical.incompleteBeta} beside it.
   \item Definitions by choice. \open{} Mathieu, Lam\'e and spheroidal characteristic values
     and functions are defined by choice from spectral data. Their existence theorems are in
     the theorem layer: \lean{mathieuSpecA\_exists}, \lean{mathieuSpecB\_exists},
@@ -392,7 +392,7 @@ properties in separate files below \file{Basic/}. The largest theorem files are
 \({}_{q+1}F_q\) for all complex parameters are foundational
 (\file{GeneralizedHypergeometric/Basic/PrincipalContinuationExistence.lean}), together with the
 generalized-series modules it needs, which moved to \file{Hypergeometric/Basic/}. The
-definition \lean{genRegularizedHG} therefore no longer depends on a theorem-layer existence
+definition \lean{regularizedGeneralizedHypergeometric} therefore no longer depends on a theorem-layer existence
 proof.
 
 \open{} Areas whose Basic layer has definitions but almost no theorems: IncompleteGamma (8
@@ -532,7 +532,7 @@ or the Carlson-based Hypergeometric files) for a few lemmas.
 
 \section{Recommended order of work}
 
-Done since 2026-11-01: the import changes (rename of Framework, \lean{symEllIntR}, survey
+Done since 2026-11-01: the import changes (rename of Framework, \lean{symmetricEllipticR}, survey
 checks); Basic files for Elementary, Constants, Zeta and NumberTheory and the moves of the
 central definitions; the overlaps of the first version; the key-properties layer for most core
 families; Lambert \(W\) and the \({}_{q+1}F_q\) continuation in the foundational layer; the

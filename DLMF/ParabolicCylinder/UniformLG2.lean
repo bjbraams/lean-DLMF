@@ -34,7 +34,7 @@ Since the even `c_s`, `s ≥ 2`, vanish, this yields DLMF 12.10.14 for the norma
 ## Main results
 
 * `CylinderUniformExpansion.core`: the general recessive Liouville–Green core.
-* `pcfU_temme_uniform`: DLMF 12.10.31.
+* `parabolicCylinderU_temme_uniform`: DLMF 12.10.31.
 * `CylinderUniformExpansion.gamma_identity`: the normalizer identity in formal form.
 * `pcf_negative_parameter_uniform_U_normalizer`: DLMF 12.10.3 with a normalizer satisfying
   DLMF 12.10.14 (`IsCylinderGNormalizer`).

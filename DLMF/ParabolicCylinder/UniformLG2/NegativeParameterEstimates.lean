@@ -26,7 +26,7 @@ applies it to Temme's form DLMF 12.10.31 of the uniform expansion of `U(-μ²/2,
 * `CylinderUniformExpansion.core`: the general recessive Liouville–Green core.
 * `CylinderUniformExpansion.temme_recursion`: Temme's coefficients satisfy the Liouville–Green
   recursion.
-* `pcfU_temme_uniform`: Temme's form of the uniform expansion (DLMF 12.10.31).
+* `parabolicCylinderU_temme_uniform`: Temme's form of the uniform expansion (DLMF 12.10.31).
 
 ## Implementation notes
 
@@ -580,13 +580,15 @@ lemma CylinderUniformExpansion.abs_temmeCoeffDeriv_le {N : ℕ} {M K' : ℝ}
 /-- **Temme's form of the uniform expansion** (DLMF 12.10.31), proved through the general
 recessive core with coefficients `φ_s(τ(t))`. -/
 @[dlmf 12.10.E31]
-theorem pcfU_temme_uniform {δ : ℝ} (hδ : 0 < δ) :
+theorem parabolicCylinderU_temme_uniform {δ : ℝ} (hδ : 0 < δ) :
     HasCylinderUniformExpansion
-        (fun μ t => pcfU (-μ^2/2) (μ*t*Real.sqrt 2)/(pcfH μ*exp (-μ^2*pcfXi t)/(t^2-1:ℂ)^(1/4:ℂ)))
+        (fun μ t => parabolicCylinderU (-μ^2/2)
+            (μ*t*Real.sqrt 2)/(pcfH μ*exp (-μ^2*pcfXi t)/(t^2-1:ℂ)^(1/4:ℂ)))
         (fun s t => (((pcfTemmePoly s).eval (pcfTau t):ℝ):ℂ)) (Ici (1+δ)) := by
   set b : ℝ := 1 + δ/2 with hbdef
   have hb : 1 < b := by linarith
-  have key : ∀ N : ℕ, 1 ≤ N → (fun p : ℝ × ℝ => pcfU (-p.1^2/2) (p.1*p.2*Real.sqrt 2) /
+  have key : ∀ N : ℕ, 1 ≤ N →
+      (fun p : ℝ × ℝ => parabolicCylinderU (-p.1^2/2) (p.1*p.2*Real.sqrt 2) /
       (pcfH p.1 * exp (-p.1^2*pcfXi p.2) / (p.2^2-1:ℂ)^(1/4:ℂ)) -
       ∑ s ∈ Finset.range N, (((pcfTemmePoly s).eval (pcfTau p.2):ℝ):ℂ) / (p.1:ℂ)^(2*s))
       =O[pcfUniformFilter (Ici (1+δ))] (fun p : ℝ × ℝ => (p.1:ℂ)^(-(2*N:ℤ))) := by
@@ -667,8 +669,8 @@ theorem pcfU_temme_uniform {δ : ℝ} (hδ : 0 < δ) :
       (fun s _ t ht => CylinderUniformExpansion.temme_recursion s (hb.trans ht)) hNi hI (K := K)
       (fun s _ t ht => hK s _ (hτb t ht))
       (fun s _ => ((pcfTemmePoly s).continuous.tendsto 0).comp CylinderUniformExpansion.tendsto_tau)
-      (U := fun μ t => pcfU (-μ^2/2) (μ*t*Real.sqrt 2))
-      (U' := fun μ t => (μ:ℂ) * Real.sqrt 2 * pcfUDeriv (-μ^2/2) (μ*t*Real.sqrt 2))
+      (U := fun μ t => parabolicCylinderU (-μ^2/2) (μ*t*Real.sqrt 2))
+      (U' := fun μ t => (μ:ℂ) * Real.sqrt 2 * parabolicCylinderUDeriv (-μ^2/2) (μ*t*Real.sqrt 2))
       (H := fun μ => pcfH μ) (fun μ t _ => CylinderLiouvilleGreen.hasDerivAt_U μ t)
       (fun μ t ht => (CylinderLiouvilleGreen.hasDerivAt_U' μ t).congr_deriv (by
         rw [CylinderLiouvilleGreen.amplitude_pow_four_recip (hb.trans ht)]))

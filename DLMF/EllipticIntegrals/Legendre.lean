@@ -19,8 +19,8 @@ the companion library `lean-codes` (Carlson).
 
 ## Main results
 
-* `incEllIntFk_ofReal`, `incEllIntEk_ofReal`, `incEllIntPik_ofReal`,
-  `compEllIntKk_ofReal_carlson`, `compEllIntEk_ofReal`: bridges to the real integrals of
+* `incompleteEllipticF_ofReal`, `incompleteEllipticE_ofReal`, `incompleteEllipticPi_ofReal`,
+  `completeEllipticK_ofReal_carlson`, `completeEllipticE_ofReal`: bridges to the real integrals of
   `lean-codes`.
 
 ## References
@@ -40,37 +40,40 @@ open DLMF.JacobiElliptic
 
 /-- Bridge to `lean-codes`: for real `φ` and real `k` with `k² ≤ 1`,
 `F(φ, k) = Carlson.Real.incEllIntFk φ k`. -/
-theorem incEllIntFk_ofReal {φ k : ℝ} (hk : k ^ 2 ≤ 1) :
-    incEllIntFk φ k = (Carlson.Real.incEllIntFk φ k : ℂ) := by
-  rw [incEllIntFk_eq_ofReal (m := k ^ 2) (by push_cast; ring) hk, DLMF.Elliptic.Real.incEllIntFm,
+theorem incompleteEllipticF_ofReal {φ k : ℝ} (hk : k ^ 2 ≤ 1) :
+    incompleteEllipticF φ k = (Carlson.Real.incEllIntFk φ k : ℂ) := by
+  rw [incompleteEllipticF_eq_ofReal (m := k ^ 2) (by push_cast; ring) hk,
+      DLMF.Elliptic.Real.incompleteEllipticFOfParameter,
     Carlson.Real.incEllIntFk]
   norm_num
 
 /-- Bridge to `lean-codes`: for real `φ` and real `k` with `k² ≤ 1`,
 `E(φ, k) = Carlson.Real.incEllIntEk φ k`. -/
-theorem incEllIntEk_ofReal {φ k : ℝ} (hk : k ^ 2 ≤ 1) :
-    incEllIntEk φ k = (Carlson.Real.incEllIntEk φ k : ℂ) := by
-  rw [incEllIntEk_eq_ofReal (m := k ^ 2) (by push_cast; ring) hk, DLMF.Elliptic.Real.incEllIntEm,
+theorem incompleteEllipticE_ofReal {φ k : ℝ} (hk : k ^ 2 ≤ 1) :
+    incompleteEllipticE φ k = (Carlson.Real.incEllIntEk φ k : ℂ) := by
+  rw [incompleteEllipticE_eq_ofReal (m := k ^ 2) (by push_cast; ring) hk,
+      DLMF.Elliptic.Real.incompleteEllipticEOfParameter,
     Carlson.Real.incEllIntEk]
 
 /-- Bridge to `lean-codes`: `K(k) = Carlson.Real.compEllIntKk k` for real `k`, `k² ≤ 1`. -/
-theorem compEllIntKk_ofReal_carlson {k : ℝ} (hk : k ^ 2 ≤ 1) :
-    compEllIntKk k = (Carlson.Real.compEllIntKk k : ℂ) := by
-  rw [compEllIntKk_eq_incEllIntFk, show ((π : ℂ) / 2) = ((π / 2 : ℝ) : ℂ) by push_cast; ring,
-    incEllIntFk_ofReal hk, Carlson.Real.compEllIntKk]
+theorem completeEllipticK_ofReal_carlson {k : ℝ} (hk : k ^ 2 ≤ 1) :
+    completeEllipticK k = (Carlson.Real.compEllIntKk k : ℂ) := by
+  rw [completeEllipticK_eq_incompleteEllipticF, show ((π : ℂ) / 2) = ((π / 2 : ℝ) : ℂ) by
+      push_cast; ring,
+    incompleteEllipticF_ofReal hk, Carlson.Real.compEllIntKk]
 
 /-- Bridge to `lean-codes`: `E(k) = Carlson.Real.compEllIntEk k` for real `k`, `k² ≤ 1`. -/
-theorem compEllIntEk_ofReal {k : ℝ} (hk : k ^ 2 ≤ 1) :
-    compEllIntEk k = (Carlson.Real.compEllIntEk k : ℂ) := by
-  rw [compEllIntEk, show ((π : ℂ) / 2) = ((π / 2 : ℝ) : ℂ) by push_cast; ring,
-    incEllIntEk_ofReal hk, Carlson.Real.compEllIntEk]
+theorem completeEllipticE_ofReal {k : ℝ} (hk : k ^ 2 ≤ 1) :
+    completeEllipticE k = (Carlson.Real.compEllIntEk k : ℂ) := by
+  rw [completeEllipticE, show ((π : ℂ) / 2) = ((π / 2 : ℝ) : ℂ) by push_cast; ring,
+    incompleteEllipticE_ofReal hk, Carlson.Real.compEllIntEk]
 
 /-- Bridge to `lean-codes`: for real `φ`, real `α² < 1` and real `k` with `k² ≤ 1`,
 `Π(φ, α², k) = Carlson.Real.incEllIntPik φ α² k`. -/
-theorem incEllIntPik_ofReal {φ α2 k : ℝ} (hα : α2 < 1) (hk : k ^ 2 ≤ 1) :
-    incEllIntPik φ α2 k = (Carlson.Real.incEllIntPik φ α2 k : ℂ) := by
-  rw [incEllIntPik_eq_ofReal (m := k ^ 2) (by push_cast; ring) hk hα,
-    DLMF.Elliptic.Real.incEllIntPim, Carlson.Real.incEllIntPik]
+theorem incompleteEllipticPi_ofReal {φ α2 k : ℝ} (hα : α2 < 1) (hk : k ^ 2 ≤ 1) :
+    incompleteEllipticPi φ α2 k = (Carlson.Real.incEllIntPik φ α2 k : ℂ) := by
+  rw [incompleteEllipticPi_eq_ofReal (m := k ^ 2) (by push_cast; ring) hk hα,
+    DLMF.Elliptic.Real.incompleteEllipticPiOfParameter, Carlson.Real.incEllIntPik]
   simp only [DLMF.Elliptic.piIntegrand]
   norm_num
 

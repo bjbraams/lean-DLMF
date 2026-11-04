@@ -24,12 +24,13 @@ Hermite polynomials (DLMF §§18.27–18.28), the Askey–Wilson q-difference eq
 ## Main results
 
 * `qHahn_limit_hahn`: DLMF 18.27.4_2.
-* `littleQJacobi_limit_jacobi`, `littleQLaguerre_limit_laguerrePolyL`: DLMF 18.27.14_4 and
+* `littleQJacobi_limit_jacobi`, `littleQLaguerre_limit_laguerrePolynomialL`: DLMF 18.27.14_4 and
   18.27.14_6.
-* `qLaguerre_limit_laguerrePolyL`: DLMF 18.27.17_3.
+* `qLaguerre_limit_laguerrePolynomialL`: DLMF 18.27.17_3.
 * `discreteQHermiteI_limit_hermite`, `discreteQHermiteII_limit_hermite`: DLMF 18.27.25 and
   18.27.26.
-* `askeyWilson_limit_wilson`, `qGegenbauer_limit_ultrasphPoly`: DLMF 18.28.29 and 18.28.31.
+* `askeyWilson_limit_wilson`, `qGegenbauer_limit_ultrasphericalPolynomial`: DLMF 18.28.29 and
+  18.28.31.
 * `askeyWilson_difference_equation`: DLMF 18.28.6_1.
 * `askeyWilson_asymptotic`: DLMF 18.29.1.
 * `tendsto_qPochhammer_rpow_div`: `(q^t;q)_k / (1-q)^k → (t)_k` as `q → 1⁻`.
@@ -79,14 +80,14 @@ theorem eventually_pos_nhdsWithin_lt_one : ∀ᶠ q : ℝ in 𝓝[<] 1, 0 < q :=
 /-- `(q^t;q)_k / (1-q)^k → (t)_k` as `q → 1⁻`. -/
 theorem tendsto_qPochhammer_rpow_div (t : ℝ) (k : ℕ) :
     Tendsto (fun q : ℝ => qPochhammer ((q ^ t : ℝ) : ℂ) (q : ℂ) k / (1 - (q : ℂ)) ^ k)
-      (𝓝[<] 1) (𝓝 (poch (t : ℂ) k)) := by
+      (𝓝[<] 1) (𝓝 (pochhammer (t : ℂ) k)) := by
   induction k with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ k ih =>
     have hf : Tendsto (fun q : ℝ => (((1 - q ^ (t + k)) / (1 - q) : ℝ) : ℂ)) (𝓝[<] 1)
         (𝓝 ((t + k : ℝ) : ℂ)) :=
       (continuous_ofReal.tendsto _).comp (tendsto_one_sub_rpow_div (t + k))
-    rw [poch_succ]
+    rw [pochhammer_succ]
     refine ((ih.mul hf).congr' ?_).trans (by push_cast; rfl)
     filter_upwards [eventually_pos_nhdsWithin_lt_one, self_mem_nhdsWithin] with q hq hq1
     have h1 : (1 : ℂ) - q ≠ 0 := by
@@ -113,12 +114,13 @@ theorem ofReal_recip_pow_eq_rpow {q : ℝ} (hq : 0 < q) (m : ℕ) :
   rw [Real.rpow_neg hq.le, Real.rpow_natCast]; push_cast; ring
 
 /-- The ratio limit for the four `q`-Pochhammer symbols of a `₂φ₁`-type term. -/
-theorem tendsto_qPoch_two_two (t₁ t₂ s₁ s₂ : ℝ) (k : ℕ) (hs₁ : poch (s₁ : ℂ) k ≠ 0)
-    (hs₂ : poch (s₂ : ℂ) k ≠ 0) :
+theorem tendsto_qPoch_two_two (t₁ t₂ s₁ s₂ : ℝ) (k : ℕ) (hs₁ : pochhammer (s₁ : ℂ) k ≠ 0)
+    (hs₂ : pochhammer (s₂ : ℂ) k ≠ 0) :
     Tendsto (fun q : ℝ => qPochhammer ((q ^ t₁ : ℝ) : ℂ) (q : ℂ) k *
         qPochhammer ((q ^ t₂ : ℝ) : ℂ) (q : ℂ) k /
         (qPochhammer ((q ^ s₁ : ℝ) : ℂ) (q : ℂ) k * qPochhammer ((q ^ s₂ : ℝ) : ℂ) (q : ℂ) k))
-      (𝓝[<] 1) (𝓝 (poch (t₁ : ℂ) k * poch (t₂ : ℂ) k / (poch (s₁ : ℂ) k * poch (s₂ : ℂ) k))) := by
+      (𝓝[<] 1) (𝓝 (pochhammer (t₁ : ℂ) k * pochhammer (t₂ : ℂ) k /
+          (pochhammer (s₁ : ℂ) k * pochhammer (s₂ : ℂ) k))) := by
   have h := ((tendsto_qPochhammer_rpow_div t₁ k).mul (tendsto_qPochhammer_rpow_div t₂ k)).div
     ((tendsto_qPochhammer_rpow_div s₁ k).mul (tendsto_qPochhammer_rpow_div s₂ k))
     (mul_ne_zero hs₁ hs₂)
@@ -186,18 +188,20 @@ theorem tendsto_askeyWilson_prod (a : ℝ) (x : ℂ) (k : ℕ) :
 
 /-- The Wilson polynomial as a sum with the normalising Pochhammer products shifted into
 the summand, valid when no `(a+b)_k`, `(a+c)_k`, `(a+d)_k` vanishes. -/
-theorem wilson_eq_sum_shifted {a b c d : ℂ} (hab : ∀ k : ℕ, poch (a + b) k ≠ 0)
-    (hac : ∀ k : ℕ, poch (a + c) k ≠ 0) (had : ∀ k : ℕ, poch (a + d) k ≠ 0) (n : ℕ) (x : ℂ) :
+theorem wilson_eq_sum_shifted {a b c d : ℂ} (hab : ∀ k : ℕ, pochhammer (a + b) k ≠ 0)
+    (hac : ∀ k : ℕ, pochhammer (a + c) k ≠ 0) (had : ∀ k : ℕ, pochhammer (a + d) k ≠ 0)
+        (n : ℕ) (x : ℂ) :
     wilson a b c d n x = ∑ k ∈ Finset.range (n + 1),
-      poch (a + b + k) (n - k) * poch (a + c + k) (n - k) * poch (a + d + k) (n - k) *
-        (poch (-(n : ℂ)) k * poch (n + a + b + c + d - 1) k / k.factorial *
+      pochhammer (a + b + k) (n - k) * pochhammer (a + c + k) (n - k) *
+          pochhammer (a + d + k) (n - k) *
+        (pochhammer (-(n : ℂ)) k * pochhammer (n + a + b + c + d - 1) k / k.factorial *
           ∏ j ∈ Finset.range k, ((a + j) ^ 2 + x)) := by
   unfold wilson
   rw [Finset.mul_sum]
   refine Finset.sum_congr rfl fun k hk => ?_
   have hkn : k ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hk)
-  have hsplit : ∀ u : ℂ, poch u n = poch u k * poch (u + k) (n - k) := fun u => by
-    rw [← poch_add, Nat.add_sub_cancel' hkn]
+  have hsplit : ∀ u : ℂ, pochhammer u n = pochhammer u k * pochhammer (u + k) (n - k) := fun u => by
+    rw [← pochhammer_add, Nat.add_sub_cancel' hkn]
   rw [hsplit (a + b), hsplit (a + c), hsplit (a + d)]
   have hf : (k ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr k.factorial_ne_zero
   have := hab k; have := hac k; have := had k
@@ -229,7 +233,7 @@ theorem tendsto_qPochhammer_self_div (k : ℕ) :
       (𝓝 (k ! : ℂ)) := by
   have h := tendsto_qPochhammer_rpow_div 1 k
   push_cast at h
-  rw [poch_nat_one] at h
+  rw [pochhammer_nat_one] at h
   refine h.congr' (Eventually.of_forall fun q => ?_)
   simp [Real.rpow_one]
 
@@ -258,18 +262,18 @@ theorem qHahn_limit_hahn {α β : ℝ} (hα : -1 < α) {N n : ℕ} (hn : n ≤ N
         (𝓝 (hahn α β N n x)) := by
   have hα' : ∀ k : ℕ, (α : ℂ) + 1 ≠ -(k : ℂ) := fun k h => by
     have := congrArg re h; simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
-  unfold qHahn hahn terminatingBasicHG terminatingHG
+  unfold qHahn hahn terminatingBasicHypergeometric terminatingHypergeometric
   refine tendsto_finsetSum _ fun k hk => ?_
   have hkN : k ≤ N := (Nat.lt_succ_iff.mp (Finset.mem_range.mp hk)).trans hn
-  have hs₁ : poch (((α + 1 : ℝ)) : ℂ) k ≠ 0 := by
-    push_cast; exact poch_ne_zero_of_not_neg_nat hα' k
-  have hs₂ : poch ((-(N : ℝ) : ℝ) : ℂ) k ≠ 0 := by
+  have hs₁ : pochhammer (((α + 1 : ℝ)) : ℂ) k ≠ 0 := by
+    push_cast; exact pochhammer_ne_zero_of_not_neg_nat hα' k
+  have hs₂ : pochhammer ((-(N : ℝ) : ℝ) : ℂ) k ≠ 0 := by
     push_cast
-    rw [poch_neg_coe_nat]
+    rw [pochhammer_neg_coe_nat]
     refine mul_ne_zero (pow_ne_zero _ (by norm_num)) ?_
     exact Nat.cast_ne_zero.mpr (Nat.descFactorial_pos.mpr hkN).ne'
-  have hs₃ : poch (((1 : ℝ)) : ℂ) k ≠ 0 := by
-    push_cast; rw [poch_nat_one]; exact Nat.cast_ne_zero.mpr k.factorial_ne_zero
+  have hs₃ : pochhammer (((1 : ℝ)) : ℂ) k ≠ 0 := by
+    push_cast; rw [pochhammer_nat_one]; exact Nat.cast_ne_zero.mpr k.factorial_ne_zero
   have hq := tendsto_ofReal_nhdsWithin_lt_one
   have h := (((tendsto_qPochhammer_rpow_div (-(n : ℝ)) k).mul
     (tendsto_qPochhammer_rpow_div (α + β + (n + 1 : ℕ)) k)).mul
@@ -280,7 +284,7 @@ theorem qHahn_limit_hahn {α β : ℝ} (hα : -1 < α) {N n : ℕ} (hn : n ≤ N
   convert h.congr' ?_ using 2
   · simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, one_pow]
     push_cast
-    rw [poch_nat_one]
+    rw [pochhammer_nat_one]
     ring_nf
   · filter_upwards [eventually_pos_nhdsWithin_lt_one, self_mem_nhdsWithin] with q hq0 hq1
     have h1 := one_sub_ofReal_pow_ne_zero (q := q) hq1 k
@@ -301,27 +305,29 @@ theorem qHahn_limit_hahn {α β : ℝ} (hα : -1 < α) {N n : ℕ} (hn : n ≤ N
     simp
 
 /-- The map `(fun q : ℝ => littleQJacobi (Real.rpow q α) (Real.rpow q β) q n x)` tends to `(𝓝
-((n.factorial : ℂ) / poch (α + 1) n * jacobiPolyP α β n (1 - 2 * x)))` along `(𝓝[<] 1)`. -/
+((n.factorial : ℂ) / pochhammer (α + 1) n * jacobiPolynomialP α β n (1 - 2 * x)))` along `(𝓝[<]
+1)`. -/
 @[dlmf 18.27.E14_4]
 theorem littleQJacobi_limit_jacobi {α β : ℝ} (hα : -1 < α) (n : ℕ) (x : ℂ) :
     Tendsto (fun q : ℝ => littleQJacobi (Real.rpow q α) (Real.rpow q β) q n x) (𝓝[<] 1)
-        (𝓝 ((n.factorial : ℂ) / poch (α + 1) n * jacobiPolyP α β n (1 - 2 * x))) := by
+        (𝓝 ((n.factorial : ℂ) / pochhammer (α + 1) n * jacobiPolynomialP α β n (1 - 2 * x))) := by
   have hα' : ∀ k : ℕ, (α : ℂ) + 1 ≠ -(k : ℂ) := fun k h => by
     have := congrArg re h; simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
-  have hP := poch_ne_zero_of_not_neg_nat hα' n
-  have hJ : (n.factorial : ℂ) / poch (α + 1) n * jacobiPolyP α β n (1 - 2 * x) =
-      ∑ k ∈ Finset.range (n + 1), gaussHGCoeff (-(n : ℂ)) (n + α + β + 1) (α + 1) k * x ^ k := by
-    unfold jacobiPolyP
+  have hP := pochhammer_ne_zero_of_not_neg_nat hα' n
+  have hJ : (n.factorial : ℂ) / pochhammer (α + 1) n * jacobiPolynomialP α β n (1 - 2 * x) =
+      ∑ k ∈ Finset.range (n + 1),
+          gaussHypergeometricCoeff (-(n : ℂ)) (n + α + β + 1) (α + 1) k * x ^ k := by
+    unfold jacobiPolynomialP
     rw [show (1 - (1 - 2 * x)) / 2 = x by ring, ordinaryHypergeometric_eq_sum_neg_nat]
     have hf : (n ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
     field_simp
   rw [hJ]
-  unfold littleQJacobi terminatingBasicHG
+  unfold littleQJacobi terminatingBasicHypergeometric
   refine tendsto_finsetSum _ fun k _ => ?_
-  have hs₁ : poch (((α + 1 : ℝ)) : ℂ) k ≠ 0 := by
-    push_cast; exact poch_ne_zero_of_not_neg_nat hα' k
-  have hs₂ : poch (((1 : ℝ)) : ℂ) k ≠ 0 := by
-    push_cast; rw [poch_nat_one]; exact Nat.cast_ne_zero.mpr k.factorial_ne_zero
+  have hs₁ : pochhammer (((α + 1 : ℝ)) : ℂ) k ≠ 0 := by
+    push_cast; exact pochhammer_ne_zero_of_not_neg_nat hα' k
+  have hs₂ : pochhammer (((1 : ℝ)) : ℂ) k ≠ 0 := by
+    push_cast; rw [pochhammer_nat_one]; exact Nat.cast_ne_zero.mpr k.factorial_ne_zero
   have hx : Tendsto (fun q : ℝ => ((q : ℂ) * x) ^ k) (𝓝[<] 1) (𝓝 (x ^ k)) := by
     have : Tendsto (fun q : ℝ => (q : ℂ) * x) (𝓝[<] 1) (𝓝 x) := by
       have := ((continuous_ofReal.tendsto (1 : ℝ)).mono_left
@@ -330,9 +336,9 @@ theorem littleQJacobi_limit_jacobi {α β : ℝ} (hα : -1 < α) (n : ℕ) (x : 
     exact this.pow k
   have h := (tendsto_qPoch_two_two (-(n : ℝ)) (α + β + (n + 1 : ℕ)) (α + 1) 1 k hs₁ hs₂).mul hx
   convert h.congr' ?_ using 2
-  · rw [gaussHGCoeff]
+  · rw [gaussHypergeometricCoeff]
     push_cast
-    rw [poch_nat_one]
+    rw [pochhammer_nat_one]
     ring_nf
   · filter_upwards [eventually_pos_nhdsWithin_lt_one] with q hq
     simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one,
@@ -348,27 +354,28 @@ theorem littleQJacobi_limit_jacobi {α β : ℝ} (hα : -1 < α) (n : ℕ) (x : 
     norm_num
 
 /-- The map `(fun q : ℝ => littleQLaguerre (Real.rpow q α) q n ((1 - q : ℂ) * x))` tends to `(𝓝
-((n.factorial : ℂ) / poch (α + 1) n * laguerrePolyL α n x))` along `(𝓝[<] 1)`. -/
+((n.factorial : ℂ) / pochhammer (α + 1) n * laguerrePolynomialL α n x))` along `(𝓝[<] 1)`. -/
 @[dlmf 18.27.E14_6]
-theorem littleQLaguerre_limit_laguerrePolyL {α : ℝ} (hα : -1 < α) (n : ℕ) (x : ℂ) :
+theorem littleQLaguerre_limit_laguerrePolynomialL {α : ℝ} (hα : -1 < α) (n : ℕ) (x : ℂ) :
     Tendsto (fun q : ℝ => littleQLaguerre (Real.rpow q α) q n ((1 - q : ℂ) * x)) (𝓝[<] 1)
-        (𝓝 ((n.factorial : ℂ) / poch (α + 1) n * laguerrePolyL α n x)) := by
+        (𝓝 ((n.factorial : ℂ) / pochhammer (α + 1) n * laguerrePolynomialL α n x)) := by
   have hα' : ∀ k : ℕ, (α : ℂ) + 1 ≠ -(k : ℂ) := fun k h => by
     have := congrArg re h; simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
-  have hP := poch_ne_zero_of_not_neg_nat hα' n
-  have hL : (n.factorial : ℂ) / poch (α + 1) n * laguerrePolyL α n x =
-      ∑ k ∈ Finset.range (n + 1), poch (-(n : ℂ)) k / (poch (α + 1) k * k.factorial) * x ^ k := by
-    unfold laguerrePolyL
+  have hP := pochhammer_ne_zero_of_not_neg_nat hα' n
+  have hL : (n.factorial : ℂ) / pochhammer (α + 1) n * laguerrePolynomialL α n x =
+      ∑ k ∈ Finset.range (n + 1), pochhammer (-(n : ℂ)) k /
+          (pochhammer (α + 1) k * k.factorial) * x ^ k := by
+    unfold laguerrePolynomialL
     rw [kummerM_eq_sum_neg_nat]
     have hf : (n ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
     field_simp
   rw [hL]
-  unfold littleQLaguerre littleQJacobi terminatingBasicHG
+  unfold littleQLaguerre littleQJacobi terminatingBasicHypergeometric
   refine tendsto_finsetSum _ fun k _ => ?_
-  have hs₁ : poch (((α + 1 : ℝ)) : ℂ) k ≠ 0 := by
-    push_cast; exact poch_ne_zero_of_not_neg_nat hα' k
-  have hs₂ : poch (((1 : ℝ)) : ℂ) k ≠ 0 := by
-    push_cast; rw [poch_nat_one]; exact Nat.cast_ne_zero.mpr k.factorial_ne_zero
+  have hs₁ : pochhammer (((α + 1 : ℝ)) : ℂ) k ≠ 0 := by
+    push_cast; exact pochhammer_ne_zero_of_not_neg_nat hα' k
+  have hs₂ : pochhammer (((1 : ℝ)) : ℂ) k ≠ 0 := by
+    push_cast; rw [pochhammer_nat_one]; exact Nat.cast_ne_zero.mpr k.factorial_ne_zero
   have hx : Tendsto (fun q : ℝ => ((q : ℂ) * x) ^ k) (𝓝[<] 1) (𝓝 (x ^ k)) := by
     simpa using (tendsto_ofReal_nhdsWithin_lt_one.mul_const x).pow k
   have h := ((tendsto_qPochhammer_rpow_div (-(n : ℝ)) k).div
@@ -376,7 +383,7 @@ theorem littleQLaguerre_limit_laguerrePolyL {α : ℝ} (hα : -1 < α) (n : ℕ)
     (mul_ne_zero hs₁ hs₂)).mul hx
   convert h.congr' ?_ using 2
   · push_cast
-    rw [poch_nat_one]
+    rw [pochhammer_nat_one]
   · filter_upwards [eventually_pos_nhdsWithin_lt_one, self_mem_nhdsWithin] with q hq hq1
     have h1 := one_sub_ofReal_pow_ne_zero (q := q) hq1 k
     simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one,
@@ -391,35 +398,35 @@ theorem littleQLaguerre_limit_laguerrePolyL {α : ℝ} (hα : -1 < α) (n : ℕ)
     simp only [mul_pow]
     ring
 
-/-- The map `(fun q : ℝ => qLaguerre α q n ((1 - q : ℂ) * x))` tends to `(𝓝 (laguerrePolyL α n
+/-- The map `(fun q : ℝ => qLaguerre α q n ((1 - q : ℂ) * x))` tends to `(𝓝 (laguerrePolynomialL α n
 x))` along `(𝓝[<] 1)`. -/
 @[dlmf 18.27.E17_3]
-theorem qLaguerre_limit_laguerrePolyL {α : ℝ} (hα : -1 < α) (n : ℕ) (x : ℂ) :
+theorem qLaguerre_limit_laguerrePolynomialL {α : ℝ} (hα : -1 < α) (n : ℕ) (x : ℂ) :
     Tendsto (fun q : ℝ => qLaguerre α q n ((1 - q : ℂ) * x)) (𝓝[<] 1)
-        (𝓝 (laguerrePolyL α n x)) := by
+        (𝓝 (laguerrePolynomialL α n x)) := by
   have hα' : ∀ k : ℕ, (α : ℂ) + 1 ≠ -(k : ℂ) := fun k h => by
     have := congrArg re h; simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
-  have hs : ∀ k : ℕ, poch (((α + 1 : ℝ)) : ℂ) k ≠ 0 := fun k => by
-    push_cast; exact poch_ne_zero_of_not_neg_nat hα' k
-  have h1s : ∀ k : ℕ, poch (((1 : ℝ)) : ℂ) k ≠ 0 := fun k => by
-    push_cast; rw [poch_nat_one]; exact Nat.cast_ne_zero.mpr k.factorial_ne_zero
-  have hL : laguerrePolyL α n x = poch (α + 1) n / n ! *
-      ∑ k ∈ Finset.range (n + 1), poch (-(n : ℂ)) k / (poch (α + 1) k * k.factorial) *
+  have hs : ∀ k : ℕ, pochhammer (((α + 1 : ℝ)) : ℂ) k ≠ 0 := fun k => by
+    push_cast; exact pochhammer_ne_zero_of_not_neg_nat hα' k
+  have h1s : ∀ k : ℕ, pochhammer (((1 : ℝ)) : ℂ) k ≠ 0 := fun k => by
+    push_cast; rw [pochhammer_nat_one]; exact Nat.cast_ne_zero.mpr k.factorial_ne_zero
+  have hL : laguerrePolynomialL α n x = pochhammer (α + 1) n / n ! *
+      ∑ k ∈ Finset.range (n + 1), pochhammer (-(n : ℂ)) k / (pochhammer (α + 1) k * k.factorial) *
         ((-1) ^ k * (-x) ^ k) := by
-    unfold laguerrePolyL
+    unfold laguerrePolynomialL
     rw [kummerM_eq_sum_neg_nat]
     congr 1
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [← mul_pow]; ring_nf
   rw [hL]
-  unfold qLaguerre terminatingBasicHG
+  unfold qLaguerre terminatingBasicHypergeometric
   have hpre : Tendsto (fun q : ℝ => qPochhammer ((q : ℂ) ^ ((α : ℂ) + 1)) q n /
-      qPochhammer (q : ℂ) q n) (𝓝[<] 1) (𝓝 (poch (α + 1) n / n !)) := by
+      qPochhammer (q : ℂ) q n) (𝓝[<] 1) (𝓝 (pochhammer (α + 1) n / n !)) := by
     have h := (tendsto_qPochhammer_rpow_div (α + 1) n).div (tendsto_qPochhammer_rpow_div 1 n)
       (h1s n)
     convert h.congr' ?_ using 2
     · push_cast
-      rw [poch_nat_one]
+      rw [pochhammer_nat_one]
     · filter_upwards [eventually_pos_nhdsWithin_lt_one, self_mem_nhdsWithin] with q hq hq1
       have h1 := one_sub_ofReal_pow_ne_zero (q := q) hq1 n
       rw [ofReal_cpow_add_one hq, show qPochhammer (q : ℂ) (q : ℂ) n =
@@ -444,7 +451,7 @@ theorem qLaguerre_limit_laguerrePolyL {α : ℝ} (hα : -1 < α) (n : ℕ) (x : 
     (mul_ne_zero (hs k) (h1s k))).mul hz
   convert h.congr' ?_ using 2
   · push_cast
-    rw [poch_nat_one]
+    rw [pochhammer_nat_one]
   · filter_upwards [eventually_pos_nhdsWithin_lt_one, self_mem_nhdsWithin] with q hq hq1
     have h1 := one_sub_ofReal_pow_ne_zero (q := q) hq1 k
     simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one,
@@ -467,22 +474,22 @@ theorem askeyWilson_limit_wilson {a b c d : ℝ} (ha : 0 < a) (hb : 0 < b) (hc :
         askeyWilson (Real.rpow q a) (Real.rpow q b) (Real.rpow q c) (Real.rpow q d) q n
         (1 - x * (1 - q : ℂ) ^ 2 / 2) /
         (1 - q : ℂ) ^ (3 * n)) (𝓝[<] 1) (𝓝 (wilson a b c d n x)) := by
-  have hpos : ∀ (u : ℝ), 0 < u → ∀ k : ℕ, poch (u : ℂ) k ≠ 0 := fun u hu k =>
-    poch_ne_zero_of_not_neg_nat (fun j h => by
+  have hpos : ∀ (u : ℝ), 0 < u → ∀ k : ℕ, pochhammer (u : ℂ) k ≠ 0 := fun u hu k =>
+    pochhammer_ne_zero_of_not_neg_nat (fun j h => by
       have := congrArg re h; simp at this; linarith [(Nat.cast_nonneg j : (0 : ℝ) ≤ j)]) k
-  have hab : ∀ k : ℕ, poch ((a : ℂ) + b) k ≠ 0 := fun k => by
+  have hab : ∀ k : ℕ, pochhammer ((a : ℂ) + b) k ≠ 0 := fun k => by
     have := hpos (a + b) (by linarith) k; push_cast at this; exact this
-  have hac : ∀ k : ℕ, poch ((a : ℂ) + c) k ≠ 0 := fun k => by
+  have hac : ∀ k : ℕ, pochhammer ((a : ℂ) + c) k ≠ 0 := fun k => by
     have := hpos (a + c) (by linarith) k; push_cast at this; exact this
-  have had : ∀ k : ℕ, poch ((a : ℂ) + d) k ≠ 0 := fun k => by
+  have had : ∀ k : ℕ, pochhammer ((a : ℂ) + d) k ≠ 0 := fun k => by
     have := hpos (a + d) (by linarith) k; push_cast at this; exact this
   rw [wilson_eq_sum_shifted hab hac had]
   unfold askeyWilson
   simp_rw [Finset.mul_sum, Finset.sum_div]
   refine tendsto_finsetSum _ fun k hk => ?_
   have hkn : k ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hk)
-  have hk1 : poch ((1 : ℝ) : ℂ) k ≠ 0 := by
-    push_cast; rw [poch_nat_one]; exact Nat.cast_ne_zero.mpr k.factorial_ne_zero
+  have hk1 : pochhammer ((1 : ℝ) : ℂ) k ≠ 0 := by
+    push_cast; rw [pochhammer_nat_one]; exact Nat.cast_ne_zero.mpr k.factorial_ne_zero
   have hq := tendsto_ofReal_nhdsWithin_lt_one
   have hA : Tendsto (fun q : ℝ => ((Real.rpow q a : ℝ) : ℂ)⁻¹ ^ n) (𝓝[<] 1) (𝓝 1) := by
     simpa using ((tendsto_rpow_nhdsWithin_lt_one a).inv₀ one_ne_zero).pow n
@@ -495,7 +502,7 @@ theorem askeyWilson_limit_wilson {a b c d : ℝ} (ha : 0 < a) (hb : 0 < b) (hc :
     (tendsto_qPochhammer_rpow_div 1 k) hk1).mul (tendsto_askeyWilson_prod a x k))
   convert h.congr' ?_ using 2
   · push_cast
-    rw [poch_nat_one]
+    rw [pochhammer_nat_one]
     generalize ∏ j ∈ Finset.range k, (((a : ℂ) + j) ^ 2 + x) = P
     ring_nf
   · filter_upwards [eventually_pos_nhdsWithin_lt_one, self_mem_nhdsWithin] with q hq0 hq1
@@ -523,11 +530,11 @@ theorem askeyWilson_limit_wilson {a b c d : ℝ} (ha : 0 < a) (hb : 0 < b) (hc :
     exact aw_algebra _ _ _ _ _ _ _ _ _ _ _ _ _ h1
 
 /-- The map `(fun q : ℝ => qGegenbauer (Real.rpow q lam) q n (exp (I * θ)))` tends to `(𝓝
-(ultrasphPoly lam n (Real.cos θ)))` along `(𝓝[<] 1)`. -/
+(ultrasphericalPolynomial lam n (Real.cos θ)))` along `(𝓝[<] 1)`. -/
 @[dlmf 18.28.E31]
-theorem qGegenbauer_limit_ultrasphPoly {lam : ℝ} (hlam : -1 / 2 < lam) (n : ℕ) (θ : ℝ) :
+theorem qGegenbauer_limit_ultrasphericalPolynomial {lam : ℝ} (hlam : -1 / 2 < lam) (n : ℕ) (θ : ℝ) :
     Tendsto (fun q : ℝ => qGegenbauer (Real.rpow q lam) q n (exp (I * θ))) (𝓝[<] 1)
-        (𝓝 (ultrasphPoly lam n (Real.cos θ))) := by
+        (𝓝 (ultrasphericalPolynomial lam n (Real.cos θ))) := by
   let w : ℂ := exp (-I * θ)
   have hw : w ≠ 0 := exp_ne_zero _
   have hwi : w⁻¹ = exp (I * θ) := by
@@ -540,7 +547,7 @@ theorem qGegenbauer_limit_ultrasphPoly {lam : ℝ} (hlam : -1 / 2 < lam) (n : �
     dsimp [w]
     rw [Complex.cos]
     congr 1; ring
-  rw [← hcos, ultrasphPoly_eq_coeff_gegenbauerSeries (by simpa using hlam) hw,
+  rw [← hcos, ultrasphericalPolynomial_eq_coeff_gegenbauerSeries (by simpa using hlam) hw,
     coeff_gegenbauerSeries]
   unfold qGegenbauer
   refine tendsto_finsetSum _ fun k hk => ?_
@@ -569,13 +576,14 @@ theorem qGegenbauer_limit_ultrasphPoly {lam : ℝ} (hlam : -1 / 2 < lam) (n : �
   simp only [Real.rpow_eq_pow]
 
 /-- The map `(fun q : ℝ => discreteQHermiteI q n ((Real.sqrt (1 - q ^ 2) : ℂ) * x) / (Real.sqrt (1
-- q ^ 2) : ℂ) ^ n)` tends to `(𝓝 ((2 : ℂ)⁻¹ ^ n * aeval x (hermitePolyH n)))` along `(𝓝[<]
+- q ^ 2) : ℂ) ^ n)` tends to `(𝓝 ((2 : ℂ)⁻¹ ^ n * aeval x (hermitePolynomialH n)))` along `(𝓝[<]
 1)`. -/
 @[dlmf 18.27.E25]
 theorem discreteQHermiteI_limit_hermite (n : ℕ) (x : ℂ) :
     Tendsto (fun q : ℝ => discreteQHermiteI q n ((Real.sqrt (1 - q ^ 2) : ℂ) * x) /
-      (Real.sqrt (1 - q ^ 2) : ℂ) ^ n) (𝓝[<] 1) (𝓝 ((2 : ℂ)⁻¹ ^ n * aeval x (hermitePolyH n))) := by
-  rw [hermitePolyH_finite_sum, Finset.mul_sum, Finset.mul_sum]
+      (Real.sqrt (1 - q ^ 2) : ℂ) ^ n) (𝓝[<] 1)
+          (𝓝 ((2 : ℂ)⁻¹ ^ n * aeval x (hermitePolynomialH n))) := by
+  rw [hermitePolynomialH_finite_sum, Finset.mul_sum, Finset.mul_sum]
   unfold discreteQHermiteI
   simp_rw [Finset.mul_sum, Finset.sum_div]
   refine tendsto_finsetSum _ fun k hk => ?_
@@ -615,13 +623,14 @@ theorem discreteQHermiteI_limit_hermite (n : ℕ) (x : ℂ) :
     rw [hq2, dqh_algebra _ _ _ _ _ _ _ _ m k hu hv0 hs hs2]
 
 /-- The map `(fun q : ℝ => discreteQHermiteII q n ((Real.sqrt (1 - q ^ 2) : ℂ) * x) / (Real.sqrt
-(1 - q ^ 2) : ℂ) ^ n)` tends to `(𝓝 ((2 : ℂ)⁻¹ ^ n * aeval x (hermitePolyH n)))` along `(𝓝[<]
+(1 - q ^ 2) : ℂ) ^ n)` tends to `(𝓝 ((2 : ℂ)⁻¹ ^ n * aeval x (hermitePolynomialH n)))` along `(𝓝[<]
 1)`. -/
 @[dlmf 18.27.E26]
 theorem discreteQHermiteII_limit_hermite (n : ℕ) (x : ℂ) :
     Tendsto (fun q : ℝ => discreteQHermiteII q n ((Real.sqrt (1 - q ^ 2) : ℂ) * x) /
-      (Real.sqrt (1 - q ^ 2) : ℂ) ^ n) (𝓝[<] 1) (𝓝 ((2 : ℂ)⁻¹ ^ n * aeval x (hermitePolyH n))) := by
-  rw [hermitePolyH_finite_sum, Finset.mul_sum, Finset.mul_sum]
+      (Real.sqrt (1 - q ^ 2) : ℂ) ^ n) (𝓝[<] 1)
+          (𝓝 ((2 : ℂ)⁻¹ ^ n * aeval x (hermitePolynomialH n))) := by
+  rw [hermitePolynomialH_finite_sum, Finset.mul_sum, Finset.mul_sum]
   unfold discreteQHermiteII
   simp_rw [Finset.mul_sum, Finset.sum_div]
   refine tendsto_finsetSum _ fun k hk => ?_
@@ -835,7 +844,7 @@ theorem askeyWilson_difference_equation {a b c d q : ℂ} (hq0 : q ≠ 0) (hq : 
     ring
   have hpoly (w : ℂ) : askeyWilsonLaurent a b c d q n w =
       ∑ k ∈ Finset.range (n+1),c₀ k*B k w := by
-    unfold askeyWilsonLaurent terminatingBasicHG
+    unfold askeyWilsonLaurent terminatingBasicHypergeometric
     simp only [List.map_cons,List.map_nil,List.prod_cons,List.prod_nil,List.length_cons,
       List.length_nil,mul_one]
     norm_num only [Nat.cast_add,Nat.cast_one,Nat.cast_zero,

@@ -143,7 +143,8 @@ def airyErrorMultiplier (n : ℕ) (σ : ℝ) (z : ℂ) : ℝ :=
     Real.sqrt (2 * π * (n + σ)) / |Real.cos (3 * arg z / 2)| ^ ((n : ℝ) + σ) + airyChi (n + σ) + 1
 /-- The terminant, with an explicit logarithmic argument to retain the Gamma branch. -/
 @[dlmf 9.7.E22]
-def airyTerminator (p w : ℂ) : ℂ := exp (exp w) / (2 * π) * Gamma p * upperIncGammaOnLog (1 - p) w
+def airyTerminator (p w : ℂ) : ℂ := exp (exp w) / (2 * π) * Gamma p *
+    upperIncompleteGammaOnLog (1 - p) w
 /-- The near-optimal exponential truncation index. -/
 def airyOptimalIndex (z : ℂ) : ℕ := ⌊2 * ‖airyZetaComplex z‖⌋₊
 /-- Exact second-level remainder after re-expanding the normalized Ai remainder. -/
@@ -731,7 +732,7 @@ theorem RotatedExpansions.gamma_ratio (n : ℕ) {x : ℝ} (hx : 0 < x) :
 theorem RotatedExpansions.choose_ofReal_neg (n : ℕ) (x : ℝ) :
     Ring.choose ((-x : ℝ) : ℂ) n =
       (-1) ^ n * (((ascPochhammer ℝ n).eval x : ℝ) : ℂ) / n.factorial := by
-  rw [ofReal_neg, ring_choose_neg_eq_poch, poch, RotatedExpansions.ascPochhammer_ofReal]
+  rw [ofReal_neg, ring_choose_neg_eq_pochhammer, pochhammer, RotatedExpansions.ascPochhammer_ofReal]
 
 /-- The Ai coefficients: `Γ(n+5/6)/Γ(5/6) · binom(-1/6, n) / 2^n = (-1)^n u_n`. -/
 theorem RotatedExpansions.coeff_ai (n : ℕ) :
@@ -751,14 +752,14 @@ theorem RotatedExpansions.coeff_ai (n : ℕ) :
   field_simp
 
 /-- `(7/6)_n = (6n + 1) (1/6)_n`. -/
-theorem RotatedExpansions.poch_seven_sixths (n : ℕ) :
+theorem RotatedExpansions.pochhammer_seven_sixths (n : ℕ) :
     (ascPochhammer ℝ n).eval (7 / 6) = (6 * n + 1) * (ascPochhammer ℝ n).eval (1 / 6) := by
   induction n with
   | zero => simp
   | succ n ih => rw [ascPochhammer_succ_eval, ascPochhammer_succ_eval, ih]; push_cast; ring
 
 /-- `(-1/6)_n (1 - 6n) = (5/6)_n`. -/
-theorem RotatedExpansions.poch_neg_sixth (n : ℕ) :
+theorem RotatedExpansions.pochhammer_neg_sixth (n : ℕ) :
     (ascPochhammer ℝ n).eval (-1 / 6) * (1 - 6 * n) = (ascPochhammer ℝ n).eval (5 / 6) := by
   induction n with
   | zero => simp
@@ -776,7 +777,7 @@ theorem RotatedExpansions.coeff_aiDeriv (n : ℕ) :
   rw [show ((1 / 6 : ℝ)) = -(-1 / 6 : ℝ) by ring, h2]
   rw [div_eq_iff hG] at h1
   simp only [airyExpansionCoeff, airyV, airyU]
-  rw [h1, RotatedExpansions.poch_seven_sixths, ← RotatedExpansions.poch_neg_sixth]
+  rw [h1, RotatedExpansions.pochhammer_seven_sixths, ← RotatedExpansions.pochhammer_neg_sixth]
   have hf : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
   have h6 : (1 - 6 * (n : ℂ)) ≠ 0 := by
     intro h

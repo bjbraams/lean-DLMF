@@ -13,6 +13,9 @@ public import DLMF.WignerSymbols.SixJ
 public import DLMF.WignerSymbols.NineJ
 public import DLMF.WignerSymbols.ThreeJLegendre
 public import DLMF.WignerSymbols.LargeParameters
+public import DLMF.WignerSymbols.RacahPochhammer
+public import DLMF.WignerSymbols.ThreeJRecursion
+public import DLMF.WignerSymbols.SixJRecursion
 
 /-!
 # Wigner `3j`, `6j` and `9j` symbols

@@ -21,7 +21,7 @@ public import DLMF.Hypergeometric.Basic.Pochhammer
 
 ## Main results
 
-* `lommelA_poch`: DLMF 11.9.4.
+* `lommelA_pochhammer`: DLMF 11.9.4.
 * `lommelS_neg_order`, `lommelCapitalRegular_neg_order`: evenness in `ν` (DLMF 11.9.6).
 * `LommelRegular.add_two`, `lommelA_add_two`: the shift `μ ↦ μ + 2`.
 
@@ -76,17 +76,17 @@ theorem lommelCapitalRegular_neg_order (μ ν : ℂ) {z : ℂ} (hz : z ∈ slitP
   linear_combination (2^(μ-1)*Gamma ((μ-ν+1)/2)*Gamma ((μ+ν+1)/2)*
     (sin ((μ-ν)*π/2)*besselJ ν z-cos ((μ-ν)*π/2)*besselY ν z))*sin_sq_add_cos_sq (ν*π)
 
-/-- Identity under the stated parameter and domain assumptions: `lommelA μ ν k = 4^k*poch
-((μ-ν+1)/2) k*poch ((μ+ν+1)/2) k`. -/
+/-- Identity under the stated parameter and domain assumptions: `lommelA μ ν k = 4^k*pochhammer
+((μ-ν+1)/2) k*pochhammer ((μ+ν+1)/2) k`. -/
 @[dlmf 11.9.E4]
-theorem lommelA_poch (μ ν : ℂ) (k : ℕ) :
-    lommelA μ ν k = 4^k*poch ((μ-ν+1)/2) k*poch ((μ+ν+1)/2) k := by
+theorem lommelA_pochhammer (μ ν : ℂ) (k : ℕ) :
+    lommelA μ ν k = 4^k*pochhammer ((μ-ν+1)/2) k*pochhammer ((μ+ν+1)/2) k := by
   induction k with
-  | zero => simp [lommelA, poch_zero]
+  | zero => simp [lommelA, pochhammer_zero]
   | succ k ih =>
     have h : lommelA μ ν (k+1) = lommelA μ ν k*((μ+2*k+1)^2-ν^2) := by
       simp [lommelA, Finset.prod_range_succ]
-    rw [h, ih, poch_succ, poch_succ, pow_succ]
+    rw [h, ih, pochhammer_succ, pochhammer_succ, pow_succ]
     push_cast
     ring
 

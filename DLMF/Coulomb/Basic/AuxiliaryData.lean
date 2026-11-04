@@ -73,17 +73,17 @@ def phaseShift (ℓ : ℕ) (η : ℝ) : ℝ :=
 
 /-- The coefficients `A_{ℓ+1+n}^ℓ(η)` of DLMF 33.6.1 indexed by `n`: `1`, `η/(ℓ+1)`, and the
 recurrence DLMF 33.6.3, `(k+ℓ)(k-ℓ-1) A_k = 2η A_{k-1} - A_{k-2}` with `k = ℓ+3+n`. -/
-def powerSeriesCoeffAux (ℓ : ℕ) (η : ℝ) : ℕ → ℝ
+def powerSeriesCoeffTerm (ℓ : ℕ) (η : ℝ) : ℕ → ℝ
   | 0 => 1
   | 1 => η / (ℓ + 1)
-  | n + 2 => (2 * η * powerSeriesCoeffAux ℓ η (n + 1) - powerSeriesCoeffAux ℓ η n) /
+  | n + 2 => (2 * η * powerSeriesCoeffTerm ℓ η (n + 1) - powerSeriesCoeffTerm ℓ η n) /
       (((n : ℝ) + 2 * ℓ + 3) * ((n : ℝ) + 2))
 
 /-- The coefficient `A_k^ℓ(η)` of the power series `F_ℓ = C_ℓ ∑_{k ≥ ℓ+1} A_k^ℓ ρ^k`
 (DLMF 33.6.1, 33.6.3), extended by `0` for `k ≤ ℓ`. -/
 @[dlmf 33.6.E3]
 def powerSeriesCoeff (ℓ : ℕ) (η : ℝ) (k : ℕ) : ℝ :=
-  if ℓ + 1 ≤ k then powerSeriesCoeffAux ℓ η (k - (ℓ + 1)) else 0
+  if ℓ + 1 ≤ k then powerSeriesCoeffTerm ℓ η (k - (ℓ + 1)) else 0
 
 /-- The coefficients `a_k` of the spherical Bessel series DLMF 33.9.1:
 `a_0 = (2ℓ+1)!! C_ℓ(η)`, `a_{-1} = 0` and the recurrence DLMF 33.9.2,
@@ -99,17 +99,17 @@ def besselSeriesCoeffA (ℓ : ℕ) (η : ℝ) : ℕ → ℝ
 /-- The coefficients `b_{2ℓ+n}` of DLMF 33.9.3–33.9.4 indexed by `n`: `b_{2ℓ} = 0`,
 `b_{2ℓ+1} = 1`, `b_{2ℓ+2} = 0` and the recurrence DLMF 33.9.5,
 `4η²(k-2ℓ) b_{k+1} + k b_{k-1} + b_{k-2} = 0` with `k = 2ℓ+2+n`. -/
-def besselSeriesCoeffBAux (ℓ : ℕ) (η : ℝ) : ℕ → ℝ
+def besselSeriesCoeffBTerm (ℓ : ℕ) (η : ℝ) : ℕ → ℝ
   | 0 => 0
   | 1 => 1
   | 2 => 0
-  | n + 3 => -(((n : ℝ) + 2 + 2 * ℓ) * besselSeriesCoeffBAux ℓ η (n + 1) +
-      besselSeriesCoeffBAux ℓ η n) / (4 * η ^ 2 * ((n : ℝ) + 2))
+  | n + 3 => -(((n : ℝ) + 2 + 2 * ℓ) * besselSeriesCoeffBTerm ℓ η (n + 1) +
+      besselSeriesCoeffBTerm ℓ η n) / (4 * η ^ 2 * ((n : ℝ) + 2))
 
 /-- The coefficient `b_k` of DLMF 33.9.3–33.9.5 (`η ≠ 0`), extended by `0` for `k < 2ℓ`. -/
 @[dlmf 33.9.E5]
 def besselSeriesCoeffB (ℓ : ℕ) (η : ℝ) (k : ℕ) : ℝ :=
-  if 2 * ℓ ≤ k then besselSeriesCoeffBAux ℓ η (k - 2 * ℓ) else 0
+  if 2 * ℓ ≤ k then besselSeriesCoeffBTerm ℓ η (k - 2 * ℓ) else 0
 
 /-- The amplitude `f(η,ρ) = G_ℓ cos θ_ℓ + F_ℓ sin θ_ℓ` of DLMF 33.11.2 (the unique `f` with
 33.11.2 together with `largeRhoG`). -/

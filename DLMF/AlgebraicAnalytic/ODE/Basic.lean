@@ -24,7 +24,7 @@ public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
   `ODE.wronskian w₁ w₂`.
 * `schwarzian z ζ` (1.13.20): `{z, ζ} = z'''/z' - (3/2)(z''/z')²`, derivatives with respect
   to `ζ`.
-* `IsSturmLiouvilleSolOn` (1.13.26), `SLUnmixedBC`, `SLPeriodicBC` (1.13.27–1.13.28),
+* `IsSturmLiouvilleSolutionOn` (1.13.26), `SLUnmixedBC`, `SLPeriodicBC` (1.13.27–1.13.28),
   `IsRegularSLEigenvalue`, `IsPeriodicSLEigenvalue`: the Sturm–Liouville equation, its boundary
   conditions and the eigenvalues of a regular Sturm–Liouville system (§1.13(viii)).
 -/
@@ -43,6 +43,33 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 def IsLinearODE2SolutionOn (f g r : 𝕜 → 𝕜) (w : 𝕜 → 𝕜) (D : Set 𝕜) : Prop :=
   ∀ z ∈ D, DifferentiableAt 𝕜 w z ∧
     HasDerivAt (deriv w) (r z - f z * deriv w z - g z * w z) z
+
+namespace IsLinearODE2SolutionOn
+
+variable {f g r w : 𝕜 → 𝕜} {D : Set 𝕜}
+
+/-- A solution is differentiable at every point of the domain. -/
+theorem differentiableAt (h : IsLinearODE2SolutionOn f g r w D) :
+    ∀ z ∈ D, DifferentiableAt 𝕜 w z :=
+  fun z hz => (h z hz).1
+
+/-- The first derivative of a solution has the derivative `r - f w' - g w`. -/
+theorem hasDerivAt_deriv (h : IsLinearODE2SolutionOn f g r w D) :
+    ∀ z ∈ D, HasDerivAt (deriv w) (r z - f z * deriv w z - g z * w z) z :=
+  fun z hz => (h z hz).2
+
+/-- For the homogeneous equation the first derivative has the derivative `-(f w') - g w`. -/
+theorem hasDerivAt_deriv_of_homogeneous (h : IsLinearODE2SolutionOn f g 0 w D) :
+    ∀ z ∈ D, HasDerivAt (deriv w) (-(f z * deriv w z) - g z * w z) z :=
+  fun z hz => by simpa only [Pi.zero_apply, zero_sub] using (h z hz).2
+
+/-- A solution of the homogeneous equation from differentiability and the second derivative. -/
+theorem of_homogeneous (hd : ∀ z ∈ D, DifferentiableAt 𝕜 w z)
+    (h2 : ∀ z ∈ D, HasDerivAt (deriv w) (-(f z * deriv w z) - g z * w z) z) :
+    IsLinearODE2SolutionOn f g 0 w D :=
+  fun z hz => ⟨hd z hz, by simpa only [Pi.zero_apply, zero_sub] using h2 z hz⟩
+
+end IsLinearODE2SolutionOn
 
 /-- DLMF 1.13.2: `w₁`, `w₂` are a **fundamental pair** of the homogeneous equation 1.13.1 on
 `D`: both are solutions and every solution is `A w₁ + B w₂` on `D` for constants `A`, `B`. -/
@@ -66,7 +93,7 @@ def schwarzian (z : 𝕜 → 𝕜) (ζ : 𝕜) : 𝕜 :=
 /-- DLMF 1.13.26: `u` solves the **Sturm–Liouville equation** `(p u')' + (λρ - q) u = 0` on `s`:
 `u` is differentiable and `p u'` has derivative `(q - λρ) u` at every point of `s`. -/
 @[dlmf 1.13.E26]
-def IsSturmLiouvilleSolOn (p q ρ : ℝ → ℝ) (lam : ℝ) (u : ℝ → ℝ) (s : Set ℝ) : Prop :=
+def IsSturmLiouvilleSolutionOn (p q ρ : ℝ → ℝ) (lam : ℝ) (u : ℝ → ℝ) (s : Set ℝ) : Prop :=
   ∀ x ∈ s, DifferentiableAt ℝ u x ∧
     HasDerivAt (fun t => p t * deriv u t) ((q x - lam * ρ x) * u x) x
 
@@ -89,7 +116,7 @@ eigenfunction. The equation is required on the closed interval (`u` is defined o
 @[dlmf 1.13.viii]
 def IsRegularSLEigenvalue (p q ρ : ℝ → ℝ) (a b α α' β β' lam : ℝ) : Prop :=
   a < b ∧ (∀ x ∈ Icc a b, 0 < p x ∧ 0 < ρ x) ∧ (α ≠ 0 ∨ α' ≠ 0) ∧ (β ≠ 0 ∨ β' ≠ 0) ∧
-    ∃ u : ℝ → ℝ, (∃ x ∈ Icc a b, u x ≠ 0) ∧ IsSturmLiouvilleSolOn p q ρ lam u (Icc a b) ∧
+    ∃ u : ℝ → ℝ, (∃ x ∈ Icc a b, u x ≠ 0) ∧ IsSturmLiouvilleSolutionOn p q ρ lam u (Icc a b) ∧
       SLUnmixedBC α α' β β' a b u
 
 /-- DLMF §1.13(viii): `λ` is an eigenvalue of the regular Sturm–Liouville system 1.13.26 with
@@ -97,7 +124,7 @@ periodic boundary conditions 1.13.28 on `[a, b]`. -/
 @[dlmf 1.13.viii]
 def IsPeriodicSLEigenvalue (p q ρ : ℝ → ℝ) (a b lam : ℝ) : Prop :=
   a < b ∧ (∀ x ∈ Icc a b, 0 < p x ∧ 0 < ρ x) ∧
-    ∃ u : ℝ → ℝ, (∃ x ∈ Icc a b, u x ≠ 0) ∧ IsSturmLiouvilleSolOn p q ρ lam u (Icc a b) ∧
+    ∃ u : ℝ → ℝ, (∃ x ∈ Icc a b, u x ≠ 0) ∧ IsSturmLiouvilleSolutionOn p q ρ lam u (Icc a b) ∧
       SLPeriodicBC a b u
 
 end DLMF.AlgebraicAnalytic

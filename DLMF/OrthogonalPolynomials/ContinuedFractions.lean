@@ -22,8 +22,8 @@ fractions (DLMF §18.13), using Mathlib's generalized continued fractions and co
 
 * `chebyshevT_continued_fraction`, `chebyshevU_continued_fraction`: DLMF 18.13.1 and 18.13.2.
 * `legendre_continued_fraction`: DLMF 18.13.3.
-* `laguerrePolyL_continued_fraction`: DLMF 18.13.4.
-* `hermitePolyH_continued_fraction`: DLMF 18.13.5.
+* `laguerrePolynomialL_continued_fraction`: DLMF 18.13.4.
+* `hermitePolynomialH_continued_fraction`: DLMF 18.13.5.
 -/
 
 @[expose] public section
@@ -92,13 +92,13 @@ theorem chebyshevU_continued_fraction (n : ℕ) (x : ℂ) :
 
 /-- Identity under the stated parameter and domain assumptions: `(polynomialFraction (fun k => if
 k = 0 then a else -(k : ℂ) / (k + 1)) (fun k => (2 * k + 1 : ℂ) / (k + 1) * x)).dens n =
-legendrePolyP n x`. -/
+legendrePolynomialP n x`. -/
 @[dlmf 18.13.E3]
 theorem legendre_continued_fraction (a : ℂ) (n : ℕ) (x : ℂ) :
     (polynomialFraction (fun k => if k = 0 then a else -(k : ℂ) / (k + 1))
-      (fun k => (2 * k + 1 : ℂ) / (k + 1) * x)).dens n = legendrePolyP n x := by
+      (fun k => (2 * k + 1 : ℂ) / (k + 1) * x)).dens n = legendrePolynomialP n x := by
   induction n using Nat.twoStepInduction with
-  | zero => simp [legendrePolyP_zero]
+  | zero => simp [legendrePolynomialP_zero]
   | one => simp [polynomialFraction_dens_one]
   | more n ih0 ih1 =>
     rw [polynomialFraction_dens_step, ih0, ih1]
@@ -106,24 +106,25 @@ theorem legendre_continued_fraction (a : ℂ) (n : ℕ) (x : ℂ) :
     push_cast
     have hn : (n + 2 : ℂ) ≠ 0 := by exact_mod_cast (by omega : n + 2 ≠ 0)
     calc
-      _ = ((2 * n + 3) * x * legendrePolyP (n + 1) x - (n + 1) * legendrePolyP n x) / (n + 2)
+      _ = ((2 * n + 3) * x * legendrePolynomialP (n + 1) x - (n + 1) *
+          legendrePolynomialP n x) / (n + 2)
           := by ring
-      _ = _ := (div_eq_iff hn).mpr (by linear_combination -(legendrePolyP_recurrence n x))
+      _ = _ := (div_eq_iff hn).mpr (by linear_combination -(legendrePolynomialP_recurrence n x))
 
 /-- Identity under the stated parameter and domain assumptions: `(polynomialFraction (fun k => if
 k = 0 then a else -(k : ℂ) / (k + 1)) (fun k => (2 * k + 1 - x) / (k + 1))).dens n =
-laguerrePolyL 0 n x`. -/
+laguerrePolynomialL 0 n x`. -/
 @[dlmf 18.13.E4]
-theorem laguerrePolyL_continued_fraction (a : ℂ) (n : ℕ) (x : ℂ) :
+theorem laguerrePolynomialL_continued_fraction (a : ℂ) (n : ℕ) (x : ℂ) :
     (polynomialFraction (fun k => if k = 0 then a else -(k : ℂ) / (k + 1))
-      (fun k => (2 * k + 1 - x) / (k + 1))).dens n = laguerrePolyL 0 n x := by
+      (fun k => (2 * k + 1 - x) / (k + 1))).dens n = laguerrePolynomialL 0 n x := by
   induction n using Nat.twoStepInduction with
   | zero => simp
   | one =>
-    have h1 : laguerrePolyL 0 1 x = 1 - x := by
-      rw [laguerrePolyL, show -((1 : ℕ) : ℂ) = -(1 : ℂ) by norm_num,
+    have h1 : laguerrePolynomialL 0 1 x = 1 - x := by
+      rw [laguerrePolynomialL, show -((1 : ℕ) : ℂ) = -(1 : ℂ) by norm_num,
         show -(1 : ℂ) = -((1 : ℕ) : ℂ) by norm_num, kummerM_eq_sum_neg_nat]
-      simp [Finset.sum_range_succ, poch_one, poch_zero]
+      simp [Finset.sum_range_succ, pochhammer_one, pochhammer_zero]
       ring
     rw [polynomialFraction_dens_one, h1]
     simp
@@ -132,23 +133,25 @@ theorem laguerrePolyL_continued_fraction (a : ℂ) (n : ℕ) (x : ℂ) :
     simp only [Nat.add_eq_zero_iff, Nat.one_ne_zero, and_false, ite_false]
     push_cast
     have hn : (n + 2 : ℂ) ≠ 0 := by exact_mod_cast (by omega : n + 2 ≠ 0)
-    have hrec := laguerrePolyL_recurrence (α := 0) (by simp) n x
+    have hrec := laguerrePolynomialL_recurrence (α := 0) (by simp) n x
     calc
-      _ = ((2 * n + 3 - x) * laguerrePolyL 0 (n + 1) x - (n + 1) * laguerrePolyL 0 n x) / (n + 2)
+      _ = ((2 * n + 3 - x) * laguerrePolynomialL 0 (n + 1) x - (n + 1) *
+          laguerrePolynomialL 0 n x) / (n + 2)
           := by ring
       _ = _ := (div_eq_iff hn).mpr (by linear_combination -hrec)
 
 /-- Identity under the stated parameter and domain assumptions: `(polynomialFraction (fun k => if
-k = 0 then 1 else -2 * (k : ℂ)) (fun _ => 2 * x)).dens n = aeval x (hermitePolyH n)`. -/
+k = 0 then 1 else -2 * (k : ℂ)) (fun _ => 2 * x)).dens n = aeval x (hermitePolynomialH n)`. -/
 @[dlmf 18.13.E5]
-theorem hermitePolyH_continued_fraction (n : ℕ) (x : ℂ) :
+theorem hermitePolynomialH_continued_fraction (n : ℕ) (x : ℂ) :
     (polynomialFraction (fun k => if k = 0 then 1 else -2 * (k : ℂ))
-      (fun _ => 2 * x)).dens n = aeval x (hermitePolyH n) := by
+      (fun _ => 2 * x)).dens n = aeval x (hermitePolynomialH n) := by
   induction n using Nat.twoStepInduction with
   | zero => simp
-  | one => simp only [polynomialFraction_dens_one, hermitePolyH_one, map_mul, map_ofNat, aeval_X]
+  | one => simp only [polynomialFraction_dens_one, hermitePolynomialH_one, map_mul,
+             map_ofNat, aeval_X]
   | more n ih0 ih1 =>
-    rw [polynomialFraction_dens_step, ih0, ih1, hermitePolyH_recurrence]
+    rw [polynomialFraction_dens_step, ih0, ih1, hermitePolynomialH_recurrence]
     simp only [Nat.add_eq_zero_iff, Nat.one_ne_zero, and_false, ite_false,
       map_sub, map_mul, map_ofNat, aeval_X, aeval_C]
     push_cast

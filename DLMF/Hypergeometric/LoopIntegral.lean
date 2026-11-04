@@ -27,7 +27,7 @@ taking their principal values where the loop crosses the positive real axis beyo
 * `hypergeometricLoop_eq`: the loop integral does not depend on `ρ`.
 * `hypergeometricLoop_eq_euler`: for `re (c-b) > 0` the loop integral is `-2i sin(π(c-b-1))`
   times Euler's integral 15.6.1.
-* `regularizedGaussHGFun_eq_loop`: the loop integral representation, DLMF 15.6.2.
+* `regularizedGaussHypergeometricFun_eq_loop`: the loop integral representation, DLMF 15.6.2.
 
 ## Implementation notes
 
@@ -601,7 +601,7 @@ theorem exp_neg_sub_exp_loop (x : ℂ) :
 `c - b ∉ {1, 2, …}`, and the loop of radius `ρ` about `1` with `|z|(1+ρ) < 1`,
 `F(a,b;c;z)/Γ(c) = Γ(1+b-c)/(2πi Γ(b)) ∫₀^{(1+)} t^{b-1} (t-1)^{c-b-1} (1-zt)^{-a} dt`. -/
 @[dlmf 15.6.E2]
-theorem regularizedGaussHGFun_eq_loop (a b c z : ℂ) (hb : 0 < b.re)
+theorem regularizedGaussHypergeometricFun_eq_loop (a b c z : ℂ) (hb : 0 < b.re)
     (hcb : ∀ n : ℕ, c - b ≠ n + 1) {ρ : ℝ} (hρ : 0 < ρ) (hρ1 : ρ < 1)
     (hz : ‖z‖ * (1 + ρ) < 1) :
     regularizedGaussHGFun a b c z =
@@ -616,7 +616,7 @@ theorem regularizedGaussHGFun_eq_loop (a b c z : ℂ) (hb : 0 < b.re)
     (f := fun c => (Gamma (1 + b - c))⁻¹ * regularizedGaussHGFun a b c z)
     (g := fun c => (2 * π * I * Gamma b)⁻¹ * hypergeometricLoop a b c z ρ)
     (fun c _ => ((hinvG.comp (by fun_prop : Differentiable ℂ fun c : ℂ => 1 + b - c)).analyticAt
-      c).mul (analyticOnNhd_regularizedGaussHGFun_c a b hz1 c trivial))
+      c).mul (analyticOnNhd_regularizedGaussHypergeometricFun_c a b hz1 c trivial))
     (fun c _ => ((differentiable_hypergeometricLoop a b z hb hρ hρ1 hz).const_mul _).analyticAt c)
     (U := Metric.ball (b + 1 / 2) (1 / 4)) Metric.isOpen_ball ⟨b + 1 / 2, by simp⟩
     (fun c hc => by
@@ -650,7 +650,8 @@ theorem regularizedGaussHGFun_eq_loop (a b c z : ℂ) (hb : 0 < b.re)
       have hloop := hypergeometricLoop_eq_euler a b c z hb hcb' hρ hρ1 hz
       rw [show c - b - 1 = (c - b) - 1 by ring, exp_neg_sub_exp_loop] at hloop
       simp only
-      rw [regularizedGaussHGFun_eq_div_Gamma hc0, ordinaryHypergeometric_eq_integral hb hcb' hz1,
+      rw [regularizedGaussHypergeometricFun_eq_div_Gamma hc0,
+          ordinaryHypergeometric_eq_integral hb hcb' hz1,
         hloop]
       have hG1 : Gamma (1 + b - c) = π / (sin (π * (c - b)) * Gamma (c - b)) := by
         rw [eq_div_iff (mul_ne_zero hsin hGcb)]

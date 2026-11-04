@@ -9,6 +9,7 @@ public import DLMFMathlib.Analysis.EulerMaclaurin
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
 public import Mathlib.MeasureTheory.Integral.CircleIntegral
 public import Mathlib.RingTheory.Binomial
+public import DLMF.AlgebraicAnalytic.Complex.Basic
 
 /-!
 # Sums and sequences: definitions
@@ -27,7 +28,8 @@ sequences), in the namespace `DLMF.AsymptoticApproximations`.
 * `arcPathIntegral`, `imagSegmentPathIntegral`, `contourIntegralC`, `contourIntegralC₁`,
   `contourIntegralC₂`: the contour `𝒞` of Figure 2.10.1 (two semicircles and two pieces of the
   imaginary axis) and its halves, as sums of parametrized path integrals (DLMF 2.10.20, 2.10.22).
-* `laurentCoeff`: Laurent coefficients by Cauchy's integral formula (DLMF 2.10.26).
+* `laurentCoeff_zero_eq`: the Laurent coefficients of DLMF 2.10.26 are
+  `AlgebraicAnalytic.laurentCoeff` about `0`.
 * `legendreComparison`: Darboux's comparison function for `P_n(cos α)` (DLMF 2.10.34).
 * `powSumCoeff`, `harmonicAsymptoticCoeff`: the coefficients of DLMF 2.10.7 and 2.10.8.
 -/
@@ -95,10 +97,13 @@ def contourIntegralC₂ (F : ℂ → ℂ) (n : ℕ) : ℂ :=
     arcPathIntegral F (n - 1 / 2) (-(π / 2)) 0
 
 /-- DLMF 2.10.26: the Laurent coefficient `f_n = (2πi)⁻¹ ∮_{|z|=ρ} f(z) z^{-n-1} dz`, `n ∈ ℤ`,
-for `f` analytic on an annulus containing the circle `|z| = ρ`. -/
+for `f` analytic on an annulus containing the circle `|z| = ρ`, is the coefficient
+`AlgebraicAnalytic.laurentCoeff f 0 ρ n` of DLMF 1.10.7 about `z₀ = 0`. -/
 @[dlmf 2.10.E26]
-def laurentCoeff (f : ℂ → ℂ) (ρ : ℝ) (n : ℤ) : ℂ :=
-  (2 * π * I)⁻¹ * ∮ z in C(0, ρ), f z * z ^ (-(n + 1))
+theorem laurentCoeff_zero_eq (f : ℂ → ℂ) (ρ : ℝ) (n : ℤ) :
+    AlgebraicAnalytic.laurentCoeff f 0 ρ n = (2 * π * I)⁻¹ * ∮ z in C(0, ρ), f z *
+        z ^ (-(n + 1)) := by
+  simp only [AlgebraicAnalytic.laurentCoeff, sub_zero, neg_add']
 
 /-- DLMF 2.10.34: the comparison function
 `g(z) = e^{-πi/4}(2 sin α)^{-1/2}(e^{-iα} - z)^{-1/2} + e^{πi/4}(2 sin α)^{-1/2}(e^{iα} - z)^{-1/2}`
@@ -128,7 +133,7 @@ def powSumScale (α : ℝ) (s n : ℕ) : ℝ := (n : ℝ) ^ (α + 1 - s)
 def powSumCoeff (α : ℝ) (s : ℕ) : ℝ := Ring.choose (α + 1) s * bernoulli s / (α + 1)
 
 /-- The scale `n ↦ n^{-s}` of DLMF 2.10.8. -/
-def invPowScaleReal (s n : ℕ) : ℝ := ((n : ℝ) ^ s)⁻¹
+def Real.invPowScale (s n : ℕ) : ℝ := ((n : ℝ) ^ s)⁻¹
 
 /-- The coefficients of DLMF 2.10.8: `0`, `-1/2`, and `-B_s/s` for `s ≥ 2` (zero for odd `s`). -/
 def harmonicAsymptoticCoeff (s : ℕ) : ℝ :=

@@ -295,7 +295,7 @@ theorem besselK_ray_isBigO (ν : ℂ) {c : ℂ} (hc : ‖c‖ = 1) {α : ℝ} (h
   have h := (hasAsymptoticExpansion_besselK ν (by norm_num : (0 : ℝ) < 1 / 2) hα
     1).comp_tendsto
     (tendsto_mul_ofReal_rotSectorAtTop hc hre)
-  simp only [Finset.sum_range_one, tricomiCoeff, pow_zero, poch_zero, Nat.factorial_zero,
+  simp only [Finset.sum_range_one, tricomiCoeff, pow_zero, pochhammer_zero, Nat.factorial_zero,
     Nat.cast_one, Nat.cast_zero, zero_add, smul_eq_mul, mul_one, div_one] at h
   refine h.trans (IsBigO.of_bound 1 ?_)
   filter_upwards [eventually_gt_atTop 0] with x hx

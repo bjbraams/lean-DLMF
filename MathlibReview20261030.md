@@ -87,11 +87,11 @@ and acquisition mistakes are in [reports/DLMFErrata.tex](reports/DLMFErrata.tex)
   exponential expressions are nonzero. Existing proof-round records contain Lean-checked
   counterexamples. Do not keep the same radius merely to give these four formulas a
   uniform interface.
-- [symEllIntR_half_hasSum_mean](DLMF/EllipticIntegrals/SymmetricSeries.lean#L269) needs
+- [symmetricEllipticR_half_hasSum_mean](DLMF/EllipticIntegrals/SymmetricSeries.lean#L269) needs
   additional branch compatibility: the mean being in the slit plane and the normalized
   deviations having norm less than one do not suffice. There is a recorded exact Lean
   counterexample. Repair the homogeneity/branch hypotheses before attempting the sum.
-- [symEllIntRC_sq_eq](DLMF/EllipticIntegrals/SymmetricAddition.lean#L730) allows
+- [symmetricEllipticRC_sq_eq](DLMF/EllipticIntegrals/SymmetricAddition.lean#L730) allows
   `x = -I`, `y = 1`, which is incompatible with the claimed principal-value identity.
   The first squared argument is then outside the relevant DLMF domain. This is a problem
   with the acquired extension of the formula; do not report this example as a DLMF erratum.
@@ -121,10 +121,10 @@ every name, binder, source location and narrowed type.
 Examples with a clear API benefit:
 
 - [jacobi_at_one](DLMF/OrthogonalPolynomials/Explicit.lean#L272) does not need
-  `-1 < α.re`: its proof is `simp [jacobiPolyP]`. The evaluation holds for every complex
+  `-1 < α.re`: its proof is `simp [jacobiPolynomialP]`. The evaluation holds for every complex
   `α, β`. Keep the positivity-type hypothesis on the subsequent nonvanishing theorem,
-  where it serves a real purpose. Rename the general evaluation `jacobiPolyP_one`.
-- [whittakerW_laguerrePolyL](DLMF/Confluent/Relations.lean#L1151) does not need its
+  where it serves a real purpose. Rename the general evaluation `jacobiPolynomialP_one`.
+- [whittakerW_laguerrePolynomialL](DLMF/Confluent/Relations.lean#L1151) does not need its
   `z ∈ slitPlane` hypothesis. The denominator regularity hypothesis remains a separate
   matter; the audit does not remove it.
 - [tendsto_contourIntegral_tsum](DLMF/AlgebraicAnalytic/Complex/Calculus.lean#L1023)
@@ -271,9 +271,9 @@ The main special-function names usually follow the expected lower-camel conventi
 There remain substantial exceptions in auxiliary APIs:
 
 - **76 public predicate definitions start with a lowercase letter.** Examples are
-  `genDenRegular`, `genTerminates`, `genSeriesConvergesTo`, `qWellPoised`, `symEllIntArg`,
+  `genDenRegular`, `genTerminates`, `genSeriesConvergesTo`, `qWellPoised`, `isCarlsonArgument`,
   `Complex.separatesPoleSets` and `Complex.hasVerticalTails`. Prefer names such as
-  `GenDenRegular`, `GenTerminates`, `GenSeriesConvergesTo`, `QWellPoised`, `SymEllIntArg`,
+  `LowerParametersRegular`, `IsTerminating`, `HypergeometricSeriesConvergesTo`, `QWellPoised`, `IsCarlsonArgument`,
   `SeparatesPoleSets` and `HasVerticalTails`, adjusting the surrounding API consistently.
   These are actual `Prop`-valued definitions, not theorem names.
 - `LegendreWronskian` is a data-valued function and should not use type-style capitalization.
@@ -285,7 +285,7 @@ There remain substantial exceptions in auxiliary APIs:
 - Names such as `airyAi_real_error` and `airyAiDeriv_real_error` are inconsistent with
   the existing `airyAi`/`airyAiDeriv` vocabulary. Choose one vocabulary for the family.
   Where names like `jacobi_at_one` omit the actual function name, improve searchability
-  with `jacobiPolyP_one` rather than preserving an informal abbreviation.
+  with `jacobiPolynomialP_one` rather than preserving an informal abbreviation.
 
 There are 25,382 public named declarations and 880 private ones. Many one-use algebraic
 steps are exported through public sections. An API pass should make implementation details
@@ -318,7 +318,7 @@ Semantic quality is less uniform:
 
 - Some docstrings explain only a dependency, for example
   [ordinaryHypergeometricSeries_eq_binomialSeries_comp](DLMF/Hypergeometric/Basic/SpecialValues.lean#L177)
-  and [poch_three_halves_factorial](DLMF/OrthogonalPolynomials/Classical.lean#L763).
+  and [pochhammer_three_halves_factorial](DLMF/OrthogonalPolynomials/Classical.lean#L763).
   State the series identification or factorial identity first; mention the consuming
   theorem second.
 - There are 1,833 docstrings containing boilerplate such as “under the stated hypotheses”.

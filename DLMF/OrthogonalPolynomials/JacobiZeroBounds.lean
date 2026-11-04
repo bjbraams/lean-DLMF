@@ -299,14 +299,14 @@ The conclusion also identifies all complex zeros and includes degree zero vacuou
 theorem jacobi_zero_angle_bounds {α β : ℝ} (hαsq : α ^ 2 ≤ 1 / 4) (hβsq : β ^ 2 ≤ 1 / 4)
     (n : ℕ) :
     ∃ θ : Fin n → ℝ, StrictMono θ ∧ (∀ i, θ i ∈ Ioo 0 π) ∧
-      (∀ z : ℂ, jacobiPolyP α β n z = 0 ↔ ∃ i, z = (cos (θ i) : ℂ)) ∧
+      (∀ z : ℂ, jacobiPolynomialP α β n z = 0 ↔ ∃ i, z = (cos (θ i) : ℂ)) ∧
       ∀ i : Fin n, ((i : ℝ) + (α + β + 1) / 2) * π / (n + (α + β + 1) / 2) ≤ θ i ∧
         θ i ≤ ((i : ℝ) + 1) * π / (n + (α + β + 1) / 2) := by
   have hαlo : -(1 / 2 : ℝ) ≤ α := by nlinarith [sq_nonneg (α + 1 / 2)]
   have hβlo : -(1 / 2 : ℝ) ≤ β := by nlinarith [sq_nonneg (β + 1 / 2)]
   have hα : -1 < α := by linarith
   have hβ : -1 < β := by linarith
-  obtain ⟨r, hr, hrange, hroots⟩ := jacobiPolyP_zeros_Ioo hα hβ n
+  obtain ⟨r, hr, hrange, hroots⟩ := jacobiPolynomialP_zeros_Ioo hα hβ n
   let θ : Fin n → ℝ := fun i => arccos (r i.rev)
   have hθ : StrictMono θ := by
     intro i j hij
@@ -315,7 +315,7 @@ theorem jacobi_zero_angle_bounds {α β : ℝ} (hαsq : α ^ 2 ≤ 1 / 4) (hβsq
     ⟨arccos_pos.mpr (hrange i.rev).2, arccos_lt_pi.mpr (hrange i.rev).1⟩
   have hcos (i : Fin n) : cos (θ i) = r i.rev :=
     cos_arccos (hrange i.rev).1.le (hrange i.rev).2.le
-  have hroots' (z : ℂ) : jacobiPolyP α β n z = 0 ↔ ∃ i, z = (cos (θ i) : ℂ) := by
+  have hroots' (z : ℂ) : jacobiPolynomialP α β n z = 0 ↔ ∃ i, z = (cos (θ i) : ℂ) := by
     constructor
     · intro hz
       obtain ⟨i, hi⟩ := (hroots z).mp hz
@@ -333,7 +333,7 @@ theorem jacobi_zero_angle_bounds {α β : ℝ} (hαsq : α ^ 2 ≤ 1 / 4) (hβsq
     linarith
   have hcomplete (t : ℝ) (ht : t ∈ Ioo 0 π) :
       JacobiZeroBounds.u α β n t = 0 ↔ ∃ i, t = θ i := by
-    have he : JacobiZeroBounds.u α β n t = 0 ↔ jacobiPolyP α β n (cos t) = 0 := by
+    have he : JacobiZeroBounds.u α β n t = 0 ↔ jacobiPolynomialP α β n (cos t) = 0 := by
       rw [JacobiZeroBounds.u, JacobiZeroBounds.weight, mul_eq_zero, or_iff_right (exp_ne_zero _),
         ← eval_jacobiPolyPR hα, Complex.ofReal_eq_zero]
     rw [he, hroots']
@@ -365,7 +365,7 @@ theorem jacobi_zero_angle_bounds_strict {α β : ℝ}
     (hαsq : α ^ 2 ≤ 1 / 4) (hβsq : β ^ 2 ≤ 1 / 4)
     (hstrict : α ^ 2 < 1 / 4 ∨ β ^ 2 < 1 / 4) (n : ℕ) :
     ∃ θ : Fin n → ℝ, StrictMono θ ∧ (∀ i, θ i ∈ Ioo 0 π) ∧
-      (∀ z : ℂ, jacobiPolyP α β n z = 0 ↔ ∃ i, z = (cos (θ i) : ℂ)) ∧
+      (∀ z : ℂ, jacobiPolynomialP α β n z = 0 ↔ ∃ i, z = (cos (θ i) : ℂ)) ∧
       ∀ i : Fin n, ((i : ℝ) + (α + β + 1) / 2) * π / (n + (α + β + 1) / 2) < θ i ∧
         θ i < ((i : ℝ) + 1) * π / (n + (α + β + 1) / 2) := by
   obtain ⟨θ, hθ, hrange, hroots, _⟩ := jacobi_zero_angle_bounds hαsq hβsq n
@@ -389,7 +389,7 @@ theorem jacobi_zero_angle_bounds_strict {α β : ℝ}
   have hωκ : ω < κ := by nlinarith
   have hcomplete (t : ℝ) (ht : t ∈ Ioo 0 π) :
       JacobiZeroBounds.u α β n t = 0 ↔ ∃ i, t = θ i := by
-    have he : JacobiZeroBounds.u α β n t = 0 ↔ jacobiPolyP α β n (cos t) = 0 := by
+    have he : JacobiZeroBounds.u α β n t = 0 ↔ jacobiPolynomialP α β n (cos t) = 0 := by
       rw [JacobiZeroBounds.u, JacobiZeroBounds.weight, mul_eq_zero,
         or_iff_right (exp_ne_zero _), ← eval_jacobiPolyPR hα, Complex.ofReal_eq_zero]
     rw [he, hroots]

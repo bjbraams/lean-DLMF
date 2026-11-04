@@ -11,6 +11,7 @@ public import DLMF.Mathieu.SmallQContinuedFractions
 public import DLMF.Mathieu.SmallQCeSe
 public import DLMF.Mathieu.SmallQCeSeGeneral
 public import DLMF.Mathieu.Basic.SpectralExistence
+public import DLMF.Mathieu.EigenvalueInterlacing
 
 /-!
 # Expansions for small `q`
@@ -1146,8 +1147,8 @@ In particular (§28.6(i)) the power series of `a_m` and `b_m` agree up to the te
 theorem mathieuA_sub_mathieuB_small_q {m : ℕ} (hm : 1 ≤ m) :
     ∃ ε : ℝ → ℝ, ε =O[𝓝 0] (fun q => q ^ 2) ∧ ∀ q : ℝ,
       mathieuA m q - mathieuB m q =
-        2 * q ^ m / (2 ^ (m - 1) * ((m - 1).factorial : ℝ)) ^ 2 * (1 + ε q) := by
-  sorry
+        2 * q ^ m / (2 ^ (m - 1) * ((m - 1).factorial : ℝ)) ^ 2 * (1 + ε q) :=
+  exists_mathieuA_sub_mathieuB_eq (by omega)
 
 /-- **DLMF 28.6.20**: the radii of convergence `ρ_n^{(j)}` of the power series of `a_{2n}`
 (`j = 1`), `b_{2n+2}` (`j = 2`), `a_{2n+1}` and `b_{2n+1}` (`j = 3`) satisfy
@@ -1156,8 +1157,10 @@ theorem mathieuA_sub_mathieuB_small_q {m : ℕ} (hm : 1 ≤ m) :
 eigenvalues extends analytically from the real interval `(-cn², cn²)` to the disc `|q| < cn²`. -/
 @[dlmf 28.6.E20]
 theorem mathieu_radius_liminf {k : ℝ} (hk : k ∈ Ioo (0 : ℝ) 1)
-    (hEK : 2 * DLMF.EllipticIntegrals.compEllIntEk k = DLMF.EllipticIntegrals.compEllIntKk k)
-    {c : ℝ} (hc : c < k * Real.sqrt (1 - k ^ 2) * (DLMF.EllipticIntegrals.compEllIntKk k).re ^ 2) :
+    (hEK : 2 * DLMF.EllipticIntegrals.completeEllipticE k =
+        DLMF.EllipticIntegrals.completeEllipticK k)
+    {c : ℝ} (hc : c < k * Real.sqrt (1 - k ^ 2) *
+        (DLMF.EllipticIntegrals.completeEllipticK k).re ^ 2) :
     ∀ᶠ n : ℕ in atTop, ∀ e : ℕ → ℝ → ℝ, e ∈ ({fun n => mathieuA (2 * n),
         fun n => mathieuB (2 * n + 2), fun n => mathieuA (2 * n + 1),
         fun n => mathieuB (2 * n + 1)} : Set (ℕ → ℝ → ℝ)) →

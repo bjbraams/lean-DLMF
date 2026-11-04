@@ -21,9 +21,9 @@ remainders.
 
 ## Main results
 
-* `fresnelAuxFComplex_sector_asymptotic`, `fresnelAuxGComplex_sector_asymptotic`: the
+* `fresnelAuxiliaryFComplex_sector_asymptotic`, `fresnelAuxiliaryGComplex_sector_asymptotic`: the
   asymptotic expansions of `f(z)` and `g(z)` (DLMF 7.12.2, 7.12.3).
-* `fresnelAuxFComplex_remainder_integral`, `fresnelAuxGComplex_remainder_integral`: the
+* `fresnelAuxiliaryFComplex_remainder_integral`, `fresnelAuxiliaryGComplex_remainder_integral`: the
   remainders as Laplace-type integrals (DLMF 7.12.6, 7.12.7).
 * `FresnelAuxiliary.laplace_open`: the Laplace forms of `f` and `g` on the open sector
   `|ph z| < π/4` (DLMF 7.7.10–7.7.11).
@@ -45,18 +45,18 @@ namespace DLMF.Confluent
 
 /-- The n-th auxiliary Fresnel asymptotic term. -/
 def fresnelAsymptoticTerm (aux : Bool) (n : ℕ) (z : ℂ) : ℂ :=
-  (-1 : ℂ)^n*poch (1/2) (2*n+if aux then 1 else 0)/(π*z*(π*z^2/2)^(2*n+if aux then 1 else 0))
+  (-1 : ℂ)^n*pochhammer (1/2) (2*n+if aux then 1 else 0)/(π*z*(π*z^2/2)^(2*n+if aux then 1 else 0))
 
 /-- Finite Fresnel auxiliary remainder. -/
 @[dlmf 7.12.E4, dlmf 7.12.E5]
 def fresnelAsymptoticRemainder (aux : Bool) (N : ℕ) (z : ℂ) : ℂ :=
-  (if aux then fresnelAuxGComplex z else fresnelAuxFComplex z)-∑ n ∈ Finset.range N,
+  (if aux then fresnelAuxiliaryGComplex z else fresnelAuxiliaryFComplex z)-∑ n ∈ Finset.range N,
       fresnelAsymptoticTerm aux n z
 
 /-- `e^{ζ²} erfc ζ ~ π^{-1/2} ∑ (-1)^m (1/2)_m ζ^{-2m-1}` in the sector `|arg ζ| ≤ 3π/4 - δ`. -/
 theorem exp_sq_mul_erfc_sector_asymptotic {δ : ℝ} (hδ : 0 < δ) :
     HasAsymptoticExpansion (sector (3*π/4-δ)) (fun (n : ℕ) (z : ℂ) => z^(-(2*(n : ℂ)+1)))
-      (fun n => (-1 : ℂ)^n*poch (1/2) n/Real.sqrt π) (fun z => exp (z^2) * erfc z) := by
+      (fun n => (-1 : ℂ)^n*pochhammer (1/2) n/Real.sqrt π) (fun z => exp (z^2) * erfc z) := by
   have h := (erfc_sector_asymptotic hδ).1.mul_left (fun z => exp (z^2))
   have hφ : (fun (n : ℕ) (z : ℂ) => exp (z^2) * (exp (-z^2) * z^(-(2*(n : ℂ)+1)))) =
       fun (n : ℕ) (z : ℂ) => z^(-(2*(n : ℂ)+1)) := by
@@ -170,8 +170,8 @@ theorem fresnel_coeff_algebra {w : ℂ} (hw : w ^ 2 = -1) (p : ℂ) (m : ℕ) :
 lemma FresnelAuxiliary.signed_sector_asymptotic {ε : ℝ} (hε : ε = 1 ∨ ε = -1) {δ : ℝ} (hδ : 0 < δ)
     (hδ1 : δ < π/2) :
     HasAsymptoticExpansion (sector (π/2-δ)) (fun n z => z^(-(2*(n : ℂ)+1)))
-      (fun n => (-1 : ℂ)^n * poch (1/2) n * (ε*I)^(n+1) * (2/π)^n / π)
-      (fun z => fresnelAuxGComplex z + ε*I*fresnelAuxFComplex z) := by
+      (fun n => (-1 : ℂ)^n * pochhammer (1/2) n * (ε*I)^(n+1) * (2/π)^n / π)
+      (fun z => fresnelAuxiliaryGComplex z + ε*I*fresnelAuxiliaryFComplex z) := by
   have h1 := (exp_sq_mul_erfc_sector_asymptotic (δ := δ) hδ).comp_tendsto
     (tendsto_fresnelZetaComplex_sector hε hδ hδ1)
   have h2 := h1.smul_scale (ψ := fun (n : ℕ) (z : ℂ) => z^(-(2*(n : ℂ)+1)))
@@ -185,13 +185,13 @@ lemma FresnelAuxiliary.signed_sector_asymptotic {ε : ℝ} (hε : ε = 1 ∨ ε 
     rcases hε with rfl | rfl <;> simp
   have hcoef : (((1 + (ε : ℂ) * I) / 2) • fun n =>
       (((Real.sqrt π : ℂ) / 2 * (1 - ε * I)) ^ (2 * n + 1))⁻¹ •
-      ((-1 : ℂ)^n*poch (1/2) n/Real.sqrt π)) =
-      fun n => (-1 : ℂ)^n * poch (1/2) n * (ε*I)^(n+1) * (2/π)^n / π := by
+      ((-1 : ℂ)^n*pochhammer (1/2) n/Real.sqrt π)) =
+      fun n => (-1 : ℂ)^n * pochhammer (1/2) n * (ε*I)^(n+1) * (2/π)^n / π := by
     funext n
     simp only [Pi.smul_apply, smul_eq_mul]
     exact fresnel_coeff_algebra hw _ n
   have hfun : (((1 + (ε : ℂ) * I) / 2) • ((fun z => exp (z^2) * erfc z) ∘ fresnelZetaComplex ε)) =
-      fun z => fresnelAuxGComplex z + ε*I*fresnelAuxFComplex z := by
+      fun z => fresnelAuxiliaryGComplex z + ε*I*fresnelAuxiliaryFComplex z := by
     funext z
     simp only [Pi.smul_apply, smul_eq_mul, Function.comp]
     rw [FresnelAuxiliary.signed_erfc z hε]; ring
@@ -199,18 +199,20 @@ lemma FresnelAuxiliary.signed_sector_asymptotic {ε : ℝ} (hε : ε = 1 ∨ ε 
   exact h3
 
 /-- Identity under the stated parameter and domain assumptions: `HasAsymptoticExpansion (sector
-(π/2-δ)) (fun n z => z^(-(4*(n : ℂ)+1))) (fun n => (-1 : ℂ)^n*poch (1/2)
-(2*n+0)*(2/π)^(2*n+0)/π) fresnelAuxFComplex`. -/
+(π/2-δ)) (fun n z => z^(-(4*(n : ℂ)+1))) (fun n => (-1 : ℂ)^n*pochhammer (1/2)
+(2*n+0)*(2/π)^(2*n+0)/π) fresnelAuxiliaryFComplex`. -/
 @[dlmf 7.12.E2]
-theorem fresnelAuxFComplex_sector_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π/2) :
+theorem fresnelAuxiliaryFComplex_sector_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π/2) :
     HasAsymptoticExpansion (sector (π/2-δ)) (fun n z => z^(-(4*(n : ℂ)+1)))
-        (fun n => (-1 : ℂ)^n*poch (1/2) (2*n+0)*(2/π)^(2*n+0)/π) fresnelAuxFComplex := by
+        (fun n => (-1 : ℂ)^n*pochhammer (1/2) (2*n+0)*(2/π)^(2*n+0)/π)
+            fresnelAuxiliaryFComplex := by
   have hp := FresnelAuxiliary.signed_sector_asymptotic (Or.inl rfl) hδ hδ1
   have hm := FresnelAuxiliary.signed_sector_asymptotic (Or.inr rfl) hδ hδ1
   have h := (hp.sub hm).const_smul (1 / (2 * I))
-  have hf : ((1 / (2 * I)) • ((fun z => fresnelAuxGComplex z + ((1:ℝ):ℂ)*I*fresnelAuxFComplex z) -
-      (fun z => fresnelAuxGComplex z + ((-1:ℝ):ℂ)*I*fresnelAuxFComplex z))) =
-          fresnelAuxFComplex := by
+  have hf : ((1 / (2 * I)) •
+      ((fun z => fresnelAuxiliaryGComplex z + ((1:ℝ):ℂ)*I*fresnelAuxiliaryFComplex z) -
+      (fun z => fresnelAuxiliaryGComplex z + ((-1:ℝ):ℂ)*I*fresnelAuxiliaryFComplex z))) =
+          fresnelAuxiliaryFComplex := by
     funext z
     simp only [Pi.smul_apply, Pi.sub_apply, smul_eq_mul]
     push_cast
@@ -261,7 +263,7 @@ theorem exp_sign_mul_pi_div_two_mul_I' {ε : ℝ} (hε : ε = 1 ∨ ε = -1) :
 `g(z) + εi f(z) = εi √2/(2π) ∫₀^∞ e^{-πz²r/2} r^{-1/2}/(1 + εir) dr`. -/
 lemma FresnelAuxiliary.signed_laplace {ε : ℝ} (hε : ε = 1 ∨ ε = -1) {z : ℂ} (hz0 : z ≠ 0)
     (hz : |arg z| < π/4) :
-    fresnelAuxGComplex z + ε*I*fresnelAuxFComplex z = ε*I*(Real.sqrt 2/(2*π)) *
+    fresnelAuxiliaryGComplex z + ε*I*fresnelAuxiliaryFComplex z = ε*I*(Real.sqrt 2/(2*π)) *
       ∫ r in Ioi (0:ℝ), cexp (-(π*z^2/2*r)) * ((r:ℂ)^(-1/2:ℂ) * (1 + ε*I*r)⁻¹) := by
   have hε2 : (ε : ℂ)^2 = 1 := by rcases hε with rfl | rfl <;> norm_num
   set θ : ℝ := ε * π / 2 with hθ
@@ -352,7 +354,7 @@ theorem fresnel_moment_integrable {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/4
 `1/(π√2) ∫₀^∞ e^{-πz²t/2} t^{M-1/2} dt = (1/2)_M/(π z (πz²/2)^M)` for `|arg z| < π/4`. -/
 theorem fresnel_moment {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/4) (M : ℕ) :
     1/(π*Real.sqrt 2) * ∫ t in Ioi (0:ℝ), exp (-π*z^2*t/2) * (t:ℂ)^((M:ℂ) - 1/2) =
-      poch (1/2) M / (π*z*(π*z^2/2)^M) := by
+      pochhammer (1/2) M / (π*z*(π*z^2/2)^M) := by
   have hre : 0 < (π*z^2/2 : ℂ).re := by
     have h := abs_im_lt_re_of_abs_arg_lt hz0 hz
     have : (π*z^2/2 : ℂ).re = π/2 * (z.re^2 - z.im^2) := by
@@ -390,8 +392,8 @@ theorem fresnel_moment {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/4) (M : ℕ)
         rw [← hyarg]; norm_num [mul_im, log_im]; try ring
       rw [him]; have := abs_lt.mp hz; nlinarith [Real.pi_pos]
   rw [hcp] at h
-  have hG : Gamma ((M:ℂ) + 1/2) = Real.sqrt π * poch (1/2) M := by
-    rw [poch_half_eq_Gamma, show ((M:ℂ) + 1/2) = (((M:ℝ) + 1/2 : ℝ) : ℂ) by push_cast; ring,
+  have hG : Gamma ((M:ℂ) + 1/2) = Real.sqrt π * pochhammer (1/2) M := by
+    rw [pochhammer_half_eq_Gamma, show ((M:ℂ) + 1/2) = (((M:ℝ) + 1/2 : ℝ) : ℂ) by push_cast; ring,
       Complex.Gamma_ofReal]
     have : (Real.sqrt π) ≠ 0 := (Real.sqrt_pos.mpr Real.pi_pos).ne'
     push_cast; field_simp
@@ -466,7 +468,7 @@ theorem integrableOn_fresnel_signed (s : ℝ) {z : ℂ} (hz0 : z ≠ 0)
 /-- **Laplace forms of `f` and `g`** (DLMF 7.7.10–7.7.11, on the open sector `|arg z| < π/4`):
 `f(z), g(z) = 1/(π√2) ∫₀^∞ e^{-πz²t/2} t^{∓1/2}/(t²+1) dt`. -/
 theorem FresnelAuxiliary.laplace_open (aux : Bool) {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/4) :
-    (if aux then fresnelAuxGComplex z else fresnelAuxFComplex z) = 1/(π*Real.sqrt 2) *
+    (if aux then fresnelAuxiliaryGComplex z else fresnelAuxiliaryFComplex z) = 1/(π*Real.sqrt 2) *
       ∫ t in Ioi (0:ℝ), exp (-π*z^2*t/2) * (t:ℂ)^(((if aux then 1 else 0 : ℕ) : ℂ) - 1/2) /
         ((t:ℂ)^2+1) := by
   have hp := FresnelAuxiliary.signed_laplace (ε := 1) (Or.inl rfl) hz0 hz
@@ -492,7 +494,7 @@ theorem FresnelAuxiliary.laplace_open (aux : Bool) {z : ℂ} (hz0 : z ≠ 0) (hz
     exact ofReal_ne_zero.mpr (by positivity)
   cases aux
   · simp only [Bool.false_eq_true, ite_false, Nat.cast_zero, zero_sub]
-    have hF : fresnelAuxFComplex z = (Real.sqrt 2 / (2*π)) / 2 *
+    have hF : fresnelAuxiliaryFComplex z = (Real.sqrt 2 / (2*π)) / 2 *
         ((∫ r in Ioi (0:ℝ), fp r) + ∫ r in Ioi (0:ℝ), fm r) := by
       push_cast at hp hm ⊢
       apply mul_left_cancel₀ (show (2:ℂ) * I ≠ 0 by simp)
@@ -506,7 +508,7 @@ theorem FresnelAuxiliary.laplace_open (aux : Bool) {z : ℂ} (hz0 : z ≠ 0) (hz
       show (-1/2:ℂ) = -(1/2) by ring]
     field_simp
   · simp only [ite_true, Nat.cast_one]
-    have hG : fresnelAuxGComplex z = I * (Real.sqrt 2 / (2*π)) / 2 *
+    have hG : fresnelAuxiliaryGComplex z = I * (Real.sqrt 2 / (2*π)) / 2 *
         ((∫ r in Ioi (0:ℝ), fp r) - ∫ r in Ioi (0:ℝ), fm r) := by
       push_cast at hp hm ⊢
       linear_combination (hp + hm) / 2
@@ -586,7 +588,8 @@ theorem fresnel_remainder_eq (aux : Bool) {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z
 N z=(-1 : ℂ)^N/(π*Real.sqrt 2)*(∫ t : ℝ in Ioi 0, exp (-π*z^2*t/2)*(t : ℂ)^(2*N+0-1/2 : ℂ)/((t
 : ℂ)^2+1))`. -/
 @[dlmf 7.12.E6]
-theorem fresnelAuxFComplex_remainder_integral {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/4) (N : ℕ) :
+theorem fresnelAuxiliaryFComplex_remainder_integral {z : ℂ} (hz0 : z ≠ 0)
+    (hz : |arg z| < π/4) (N : ℕ) :
     fresnelAsymptoticRemainder false N
         z=(-1 : ℂ)^N/(π*Real.sqrt 2)*(∫ t : ℝ in Ioi 0,
         exp (-π*z^2*t/2)*(t : ℂ)^(2*N+0-1/2 : ℂ)/((t : ℂ)^2+1)) := by
@@ -594,18 +597,20 @@ theorem fresnelAuxFComplex_remainder_integral {z : ℂ} (hz0 : z ≠ 0) (hz : |a
   simp
 
 /-- Identity under the stated parameter and domain assumptions: `HasAsymptoticExpansion (sector
-(π/2-δ)) (fun n z => z^(-(4*(n : ℂ)+3))) (fun n => (-1 : ℂ)^n*poch (1/2)
-(2*n+1)*(2/π)^(2*n+1)/π) fresnelAuxGComplex`. -/
+(π/2-δ)) (fun n z => z^(-(4*(n : ℂ)+3))) (fun n => (-1 : ℂ)^n*pochhammer (1/2)
+(2*n+1)*(2/π)^(2*n+1)/π) fresnelAuxiliaryGComplex`. -/
 @[dlmf 7.12.E3]
-theorem fresnelAuxGComplex_sector_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π/2) :
+theorem fresnelAuxiliaryGComplex_sector_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π/2) :
     HasAsymptoticExpansion (sector (π/2-δ)) (fun n z => z^(-(4*(n : ℂ)+3)))
-        (fun n => (-1 : ℂ)^n*poch (1/2) (2*n+1)*(2/π)^(2*n+1)/π) fresnelAuxGComplex := by
+        (fun n => (-1 : ℂ)^n*pochhammer (1/2) (2*n+1)*(2/π)^(2*n+1)/π)
+            fresnelAuxiliaryGComplex := by
   have hp := FresnelAuxiliary.signed_sector_asymptotic (Or.inl rfl) hδ hδ1
   have hm := FresnelAuxiliary.signed_sector_asymptotic (Or.inr rfl) hδ hδ1
   have h := (hp.add hm).const_smul (1 / 2 : ℂ)
-  have hf : ((1 / 2 : ℂ) • ((fun z => fresnelAuxGComplex z + ((1:ℝ):ℂ)*I*fresnelAuxFComplex z) +
-      (fun z => fresnelAuxGComplex z + ((-1:ℝ):ℂ)*I*fresnelAuxFComplex z))) =
-          fresnelAuxGComplex := by
+  have hf : ((1 / 2 : ℂ) •
+      ((fun z => fresnelAuxiliaryGComplex z + ((1:ℝ):ℂ)*I*fresnelAuxiliaryFComplex z) +
+      (fun z => fresnelAuxiliaryGComplex z + ((-1:ℝ):ℂ)*I*fresnelAuxiliaryFComplex z))) =
+          fresnelAuxiliaryGComplex := by
     funext z
     simp only [Pi.smul_apply, Pi.add_apply, smul_eq_mul]
     push_cast
@@ -633,7 +638,8 @@ theorem fresnelAuxGComplex_sector_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ1 : �
 z=(-1 : ℂ)^N/(π*Real.sqrt 2)*(∫ t : ℝ in Ioi 0, exp (-π*z^2*t/2)*(t : ℂ)^(2*N+1-1/2 : ℂ)/((t :
 ℂ)^2+1))`. -/
 @[dlmf 7.12.E7]
-theorem fresnelAuxGComplex_remainder_integral {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/4) (N : ℕ) :
+theorem fresnelAuxiliaryGComplex_remainder_integral {z : ℂ} (hz0 : z ≠ 0)
+    (hz : |arg z| < π/4) (N : ℕ) :
     fresnelAsymptoticRemainder true N
         z=(-1 : ℂ)^N/(π*Real.sqrt 2)*(∫ t : ℝ in Ioi 0,
         exp (-π*z^2*t/2)*(t : ℂ)^(2*N+1-1/2 : ℂ)/((t : ℂ)^2+1)) := by
@@ -783,7 +789,8 @@ lemma FresnelAuxiliary.remainder_bound (aux : Bool) {z : ℂ} (hz0 : z ≠ 0)
   rw [hc1]
   have hterm : ‖fresnelAsymptoticTerm aux N z‖ =
       Real.Gamma ((M:ℝ) + 1/2) / Real.sqrt π / (π * s * A ^ M) := by
-    rw [fresnelAsymptoticTerm, ← hM, poch_half_eq_Gamma, norm_div, norm_mul, norm_pow, norm_neg,
+    rw [fresnelAsymptoticTerm, ← hM, pochhammer_half_eq_Gamma, norm_div, norm_mul,
+        norm_pow, norm_neg,
       norm_one, one_pow, one_mul, Complex.norm_real, Real.norm_of_nonneg
       (div_nonneg (Real.Gamma_pos_of_pos hs1).le (Real.sqrt_nonneg _)), norm_mul, norm_mul,
       Complex.norm_real, Real.norm_of_nonneg Real.pi_pos.le, ← hs, ← ha]

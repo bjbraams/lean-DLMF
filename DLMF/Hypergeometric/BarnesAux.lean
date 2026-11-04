@@ -180,7 +180,8 @@ theorem barnes_integral_of_re_sub_pos {a b c : ℂ} {x σ : ℝ} (hx : -1 < x) (
           congr 1
           rw [eq_div_iff hGcs, hB]; ring
   -- assemble
-  rw [regularizedGaussHGFun_eq_div_Gamma hcn, ordinaryHypergeometric_eq_integral hb0 hcb hxn,
+  rw [regularizedGaussHypergeometricFun_eq_div_Gamma hcn,
+      ordinaryHypergeometric_eq_integral hb0 hcb hxn,
     intervalIntegral.integral_of_le zero_le_one, integral_Ioc_eq_integral_Ioo,
     setIntegral_congr_fun measurableSet_Ioo hpt, integral_const_mul]
   change Gamma c / (Gamma b * Gamma (c - b)) *
@@ -271,7 +272,8 @@ theorem barnes_integral_all {a b c : ℂ} {x σ : ℝ} (hx : -1 < x) (hx0 : x < 
       Gamma (-((σ : ℂ) + I * y)) / Gamma (c + σ + I * y) * (-(x : ℂ)) ^ ((σ : ℂ) + I * y) =
       ∫ y : ℝ, A y * (Gamma (c + σ + I * y))⁻¹ := fun c => by
     congr 1; funext y; simp only [hA]; ring
-  have key := eq_of_analyticOnNhd_univ_of_eqOn (analyticOnNhd_regularizedGaussHGFun_c a b hxn)
+  have key := eq_of_analyticOnNhd_univ_of_eqOn
+      (analyticOnNhd_regularizedGaussHypergeometricFun_c a b hxn)
     (g := fun c => (1 / (2 * Real.pi * Gamma a * Gamma b)) *
       ∫ y : ℝ, A y * (Gamma (c + σ + I * y))⁻¹)
     (fun c _ => (hR.const_mul _).analyticAt c)

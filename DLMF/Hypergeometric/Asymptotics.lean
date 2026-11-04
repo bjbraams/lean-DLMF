@@ -52,7 +52,7 @@ noncomputable section
 namespace DLMF.Hypergeometric
 
 /-- `c^m k! ≤ m! (c)_k` for real `c ≥ 1` and `k ≥ m`. -/
-theorem pow_mul_factorial_le_poch {c : ℝ} (hc : 1 ≤ c) {m k : ℕ} (hk : m ≤ k) :
+theorem pow_mul_factorial_le_pochhammer {c : ℝ} (hc : 1 ≤ c) {m k : ℕ} (hk : m ≤ k) :
     c ^ m * k.factorial ≤ m.factorial * (ascPochhammer ℝ k).eval c := by
   induction k, hk using Nat.le_induction with
   | base =>
@@ -62,7 +62,7 @@ theorem pow_mul_factorial_le_poch {c : ℝ} (hc : 1 ≤ c) {m k : ℕ} (hk : m �
       | succ j ih =>
         rw [ascPochhammer_succ_eval, pow_succ]
         exact mul_le_mul ih (by linarith [(Nat.cast_nonneg j : (0 : ℝ) ≤ j)]) (by positivity)
-          (poch_eval_nonneg (by linarith) j)
+          (pochhammer_eval_nonneg (by linarith) j)
     have hf : (0 : ℝ) < m.factorial := by positivity
     nlinarith
   | succ k hk ih =>
@@ -73,41 +73,41 @@ theorem pow_mul_factorial_le_poch {c : ℝ} (hc : 1 ≤ c) {m k : ℕ} (hk : m �
           ring
       _ ≤ (m.factorial * (ascPochhammer ℝ k).eval c) * (c + k) :=
           mul_le_mul ih hk1 (by positivity) (by
-            have := poch_eval_nonneg (show (0 : ℝ) ≤ c by linarith) k
+            have := pochhammer_eval_nonneg (show (0 : ℝ) ≤ c by linarith) k
             positivity)
       _ = _ := by ring
 
 /-- Formula under the stated hypotheses: `Asymptotics.IsBigO atTop (fun c : ℝ => ₂F₁ a b (c : ℂ) z
-- ∑ k ∈ Finset.range m, gaussHGCoeff a b c k * z ^ k) (fun c : ℝ => (c : ℂ)⁻¹ ^ m)`. -/
+- ∑ k ∈ Finset.range m, gaussHypergeometricCoeff a b c k * z ^ k) (fun c : ℝ => (c : ℂ)⁻¹ ^ m)`. -/
 @[dlmf 15.12.E2]
 theorem large_denominator_expansion (a b : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (m : ℕ) :
     Asymptotics.IsBigO atTop
       (fun c : ℝ => ₂F₁ a b (c : ℂ) z -
-        ∑ k ∈ Finset.range m, gaussHGCoeff a b c k * z ^ k)
+        ∑ k ∈ Finset.range m, gaussHypergeometricCoeff a b c k * z ^ k)
       (fun c : ℝ => (c : ℂ)⁻¹ ^ m) := by
-  set g : ℕ → ℝ := fun k => ‖gaussHGCoeff (‖a‖ : ℂ) (‖b‖ : ℂ) 1 k * z ^ k‖ with hg
-  have hgs : Summable g := summable_norm_gaussHGCoeff_mul_pow _ _ _ hz
+  set g : ℕ → ℝ := fun k => ‖gaussHypergeometricCoeff (‖a‖ : ℂ) (‖b‖ : ℂ) 1 k * z ^ k‖ with hg
+  have hgs : Summable g := summable_norm_gaussHypergeometricCoeff_mul_pow _ _ _ hz
   refine Asymptotics.IsBigO.of_bound (m.factorial * ∑' k, g k) ?_
   filter_upwards [eventually_ge_atTop (1 : ℝ)] with c hc
   have hc0 : (0 : ℝ) < c := by linarith
-  set f : ℕ → ℂ := fun k => gaussHGCoeff a b c k * z ^ k with hf
-  have hfs : Summable f := (summable_norm_gaussHGCoeff_mul_pow a b c hz).of_norm
+  set f : ℕ → ℂ := fun k => gaussHypergeometricCoeff a b c k * z ^ k with hf
+  have hfs : Summable f := (summable_norm_gaussHypergeometricCoeff_mul_pow a b c hz).of_norm
   have hF : ₂F₁ a b (c : ℂ) z = ∑' k, f k := by
     rw [ordinaryHypergeometric_eq_tsum]
     simp only [smul_eq_mul, hf]
     congr 1
     funext n
-    simp [gaussHGCoeff, poch, div_eq_mul_inv, mul_assoc, mul_left_comm, mul_comm]
+    simp [gaussHypergeometricCoeff, pochhammer, div_eq_mul_inv, mul_assoc, mul_left_comm, mul_comm]
   rw [hF, ← hfs.sum_add_tsum_nat_add m, add_sub_cancel_left]
   -- termwise bound on the tail
   have hbd : ∀ k, ‖f (k + m)‖ ≤ m.factorial * (c ^ m)⁻¹ * g (k + m) := by
     intro k
-    have hpos := pow_mul_factorial_le_poch hc (Nat.le_add_left m k)
-    have hpc : ‖poch (c : ℂ) (k + m)‖ = (ascPochhammer ℝ (k + m)).eval c := by
-      rw [poch, ascPochhammer_eval_ofReal, Complex.norm_real, Real.norm_eq_abs,
-        abs_of_nonneg (poch_eval_nonneg hc0.le _)]
-    have h1 : ‖poch (1 : ℂ) (k + m)‖ = (k + m).factorial := by
-      rw [poch_nat_one, Complex.norm_natCast]
+    have hpos := pow_mul_factorial_le_pochhammer hc (Nat.le_add_left m k)
+    have hpc : ‖pochhammer (c : ℂ) (k + m)‖ = (ascPochhammer ℝ (k + m)).eval c := by
+      rw [pochhammer, ascPochhammer_eval_ofReal, Complex.norm_real, Real.norm_eq_abs,
+        abs_of_nonneg (pochhammer_eval_nonneg hc0.le _)]
+    have h1 : ‖pochhammer (1 : ℂ) (k + m)‖ = (k + m).factorial := by
+      rw [pochhammer_nat_one, Complex.norm_natCast]
     have ha := norm_ascPochhammer_eval_le (le_refl ‖a‖) (k + m)
     have hb := norm_ascPochhammer_eval_le (le_refl ‖b‖) (k + m)
     have hfac : (0 : ℝ) < (k + m).factorial := by positivity
@@ -117,15 +117,18 @@ theorem large_denominator_expansion (a b : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (m 
       by_contra hneg
       have := not_lt.mp hneg
       nlinarith
-    simp only [hf, hg, gaussHGCoeff, norm_mul, norm_div, norm_pow, Complex.norm_natCast, hpc, h1]
-    rw [show ‖poch a (k + m)‖ = ‖(ascPochhammer ℂ (k + m)).eval a‖ from rfl,
-      show ‖poch b (k + m)‖ = ‖(ascPochhammer ℂ (k + m)).eval b‖ from rfl]
+    simp only [hf, hg, gaussHypergeometricCoeff, norm_mul, norm_div, norm_pow,
+        Complex.norm_natCast, hpc, h1]
+    rw [show ‖pochhammer a (k + m)‖ = ‖(ascPochhammer ℂ (k + m)).eval a‖ from rfl,
+      show ‖pochhammer b (k + m)‖ = ‖(ascPochhammer ℂ (k + m)).eval b‖ from rfl]
     have hz0 : 0 ≤ ‖z‖ ^ (k + m) := by positivity
     have hcm : 0 < c ^ m := by positivity
     rw [div_mul_eq_mul_div, div_le_iff₀ (by positivity)]
     calc ‖(ascPochhammer ℂ (k + m)).eval a‖ * ‖(ascPochhammer ℂ (k + m)).eval b‖ * ‖z‖ ^ (k + m)
-        ≤ ‖poch (‖a‖ : ℂ) (k + m)‖ * ‖poch (‖b‖ : ℂ) (k + m)‖ * ‖z‖ ^ (k + m) := by gcongr
-      _ = m.factorial * (c ^ m)⁻¹ * (‖poch (‖a‖ : ℂ) (k + m)‖ * ‖poch (‖b‖ : ℂ) (k + m)‖ /
+        ≤ ‖pochhammer (‖a‖ : ℂ) (k + m)‖ * ‖pochhammer (‖b‖ : ℂ) (k + m)‖ *
+            ‖z‖ ^ (k + m) := by gcongr
+      _ = m.factorial * (c ^ m)⁻¹ *
+          (‖pochhammer (‖a‖ : ℂ) (k + m)‖ * ‖pochhammer (‖b‖ : ℂ) (k + m)‖ /
             ((k + m).factorial * (k + m).factorial) * ‖z‖ ^ (k + m)) *
             ((c ^ m * (k + m).factorial) / m.factorial * (k + m).factorial) := by
           field_simp
@@ -362,10 +365,11 @@ lemma LargeDenominator.div_mul_le {A A' P F M R : ℝ} (hA : 0 ≤ A) (hAA' : A 
 /-- The large-denominator expansion 15.12.2 along a shifted ray `c + λ`, `λ → +∞`, with complex
 `c`. -/
 theorem LargeDenominator.large_denominator_shift (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (m : ℕ) :
-    (fun l : ℝ => ₂F₁ a b (c + l) z - ∑ k ∈ Finset.range m, gaussHGCoeff a b (c + l) k * z ^ k)
+    (fun l : ℝ => ₂F₁ a b (c + l) z - ∑ k ∈ Finset.range m,
+        gaussHypergeometricCoeff a b (c + l) k * z ^ k)
       =O[atTop] fun l : ℝ => ((l : ℂ)⁻¹) ^ m := by
-  set g : ℕ → ℝ := fun k => ‖gaussHGCoeff (‖a‖ : ℂ) (‖b‖ : ℂ) 1 k * z ^ k‖ with hg
-  have hgs : Summable g := summable_norm_gaussHGCoeff_mul_pow _ _ _ hz
+  set g : ℕ → ℝ := fun k => ‖gaussHypergeometricCoeff (‖a‖ : ℂ) (‖b‖ : ℂ) 1 k * z ^ k‖ with hg
+  have hgs : Summable g := summable_norm_gaussHypergeometricCoeff_mul_pow _ _ _ hz
   refine Asymptotics.IsBigO.of_bound (m.factorial * 2 ^ m * ∑' k, g k) ?_
   filter_upwards [eventually_ge_atTop (2 + 2 * |c.re|)] with l hl
   have hca := neg_abs_le c.re
@@ -376,32 +380,34 @@ theorem LargeDenominator.large_denominator_shift (a b c : ℂ) {z : ℂ} (hz : �
   have hl0 : 0 < l := by linarith
   set C : ℂ := c + l with hC
   have hCre : C.re = ρ := by simp [hC, hρ]
-  set f : ℕ → ℂ := fun k => gaussHGCoeff a b C k * z ^ k with hf
-  have hfs : Summable f := (summable_norm_gaussHGCoeff_mul_pow a b C hz).of_norm
+  set f : ℕ → ℂ := fun k => gaussHypergeometricCoeff a b C k * z ^ k with hf
+  have hfs : Summable f := (summable_norm_gaussHypergeometricCoeff_mul_pow a b C hz).of_norm
   have hF : ₂F₁ a b C z = ∑' k, f k := by
     rw [ordinaryHypergeometric_eq_tsum]
     simp only [smul_eq_mul, hf]
     congr 1
     funext n
-    simp [gaussHGCoeff, poch, div_eq_mul_inv, mul_assoc, mul_left_comm, mul_comm]
+    simp [gaussHypergeometricCoeff, pochhammer, div_eq_mul_inv, mul_assoc, mul_left_comm, mul_comm]
   rw [hF, ← hfs.sum_add_tsum_nat_add m, add_sub_cancel_left]
   have hbd : ∀ k, ‖f (k + m)‖ ≤ m.factorial * (ρ ^ m)⁻¹ * g (k + m) := by
     intro k
-    have hpos := pow_mul_factorial_le_poch hρ1 (Nat.le_add_left m k)
-    have hpc := poch_eval_re_le_norm_poch (z := C) (by rw [hCre]; linarith) (k + m)
+    have hpos := pow_mul_factorial_le_pochhammer hρ1 (Nat.le_add_left m k)
+    have hpc := pochhammer_eval_re_le_norm_pochhammer (z := C) (by rw [hCre]; linarith) (k + m)
     rw [hCre] at hpc
     have ha := norm_ascPochhammer_eval_le (le_refl ‖a‖) (k + m)
     have hb := norm_ascPochhammer_eval_le (le_refl ‖b‖) (k + m)
     have hfac : (0 : ℝ) < (k + m).factorial := by positivity
     have hP : 0 < (ascPochhammer ℝ (k + m)).eval ρ := ascPochhammer_pos _ _ (by linarith)
-    have hPC : 0 < ‖poch C (k + m)‖ := hP.trans_le hpc
-    have e1 : ‖f (k + m)‖ = (‖poch a (k + m)‖ * ‖poch b (k + m)‖ * ‖z‖ ^ (k + m)) /
-        (‖poch C (k + m)‖ * (k + m).factorial) := by
-      simp only [hf, gaussHGCoeff, norm_mul, norm_div, norm_pow, Complex.norm_natCast]; ring
-    have e2 : g (k + m) = (‖poch (‖a‖ : ℂ) (k + m)‖ * ‖poch (‖b‖ : ℂ) (k + m)‖ * ‖z‖ ^ (k + m)) /
+    have hPC : 0 < ‖pochhammer C (k + m)‖ := hP.trans_le hpc
+    have e1 : ‖f (k + m)‖ = (‖pochhammer a (k + m)‖ * ‖pochhammer b (k + m)‖ * ‖z‖ ^ (k + m)) /
+        (‖pochhammer C (k + m)‖ * (k + m).factorial) := by
+      simp only [hf, gaussHypergeometricCoeff, norm_mul, norm_div, norm_pow,
+          Complex.norm_natCast]; ring
+    have e2 : g (k + m) =
+        (‖pochhammer (‖a‖ : ℂ) (k + m)‖ * ‖pochhammer (‖b‖ : ℂ) (k + m)‖ * ‖z‖ ^ (k + m)) /
         ((k + m).factorial * (k + m).factorial) := by
-      simp only [hg, gaussHGCoeff, norm_mul, norm_div, norm_pow, Complex.norm_natCast,
-        poch_nat_one]; ring
+      simp only [hg, gaussHypergeometricCoeff, norm_mul, norm_div, norm_pow, Complex.norm_natCast,
+        pochhammer_nat_one]; ring
     rw [e1, e2]
     refine LargeDenominator.div_mul_le (by positivity) ?_ hPC hfac (by positivity) ?_
     · gcongr
@@ -532,7 +538,7 @@ theorem LargeDenominator.integrableOn (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1)
 /-- Watson's lemma for the Laplace form of Euler's integral: 15.12.3 when `re b > 0`. -/
 theorem LargeDenominator.isBigO_base (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (hb : 0 < b.re) (m : ℕ) :
     (fun l : ℝ => Gamma (c - b + l) / Gamma (c + l) * (l : ℂ) ^ b * ₂F₁ a b (c + l) z -
-       ∑ k ∈ Finset.range m, poch b k * largeDenominatorCoeff a b c z k * ((l : ℂ)⁻¹) ^ k)
+       ∑ k ∈ Finset.range m, pochhammer b k * largeDenominatorCoeff a b c z k * ((l : ℂ)⁻¹) ^ k)
       =O[atTop] fun l => ((l : ℂ)⁻¹) ^ m := by
   set F : ℝ → ℂ := fun t => (t : ℂ) ^ (b - 1) * largeDenominatorGenerating a b c z t with hFdef
   have hF : ∀ N : ℕ, (fun t : ℝ => F t - ∑ k ∈ Finset.range N,
@@ -583,8 +589,8 @@ theorem LargeDenominator.isBigO_base (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) 
     congr 1
     · field_simp
     · refine Finset.sum_congr rfl fun s _ => ?_
-      have hp : Gamma ((s : ℂ) + b) = Gamma b * poch b s := by
-        have h1 := DLMF.Gamma.poch_mul_recip_Gamma_add_nat b s
+      have hp : Gamma ((s : ℂ) + b) = Gamma b * pochhammer b s := by
+        have h1 := DLMF.Gamma.pochhammer_mul_recip_Gamma_add_nat b s
         have h2 : Gamma (b + s) ≠ 0 := Gamma_ne_zero (not_neg_nat_of_re_pos (by simp; positivity))
         rw [add_comm]
         field_simp at h1
@@ -598,7 +604,7 @@ theorem LargeDenominator.isBigO_base (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) 
 /-- Coefficients of 15.12.2 (on the ray `c + λ`) re-expanded in powers of `1/λ` after
 multiplication by `λ^b Γ(c-b+λ)/Γ(c+λ)`. -/
 noncomputable def LargeDenominator.mixedCoeff (a b c z : ℂ) (N : ℕ) : ℂ :=
-  ∑ k ∈ Finset.range (N + 1), poch a k * poch b k * z ^ k / k ! *
+  ∑ k ∈ Finset.range (N + 1), pochhammer a k * pochhammer b k * z ^ k / k ! *
     DLMF.Gamma.stirlingRatioG (c - b) (c + k) (N - k)
 
 /-- 15.12.2 on the ray `c + λ` re-expanded, for all `b`. -/
@@ -612,7 +618,7 @@ theorem LargeDenominator.isBigO_mixed (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1)
     have h := LargeDenominator.ratio_shift b c (s := 0) (n := 0) le_rfl
     simpa using h
   have h2 := (hR.mul h1).congr_right fun l => one_mul _
-  have h3 : (fun l : ℝ => ∑ k ∈ Finset.range m, poch a k * poch b k * z ^ k / k ! *
+  have h3 : (fun l : ℝ => ∑ k ∈ Finset.range m, pochhammer a k * pochhammer b k * z ^ k / k ! *
       ((l : ℂ) ^ b * Gamma ((l : ℂ) + (c - b)) / Gamma ((l : ℂ) + (c + k)) -
         ∑ j ∈ Finset.range (m - k),
           DLMF.Gamma.stirlingRatioG (c - b) (c + k) j * ((l : ℂ)⁻¹) ^ (k + j)))
@@ -625,33 +631,34 @@ theorem LargeDenominator.isBigO_mixed (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1)
   have hcl : 0 < (c + l).re := by simp; linarith
   have hcl' : ∀ k : ℕ, c + l ≠ -k := not_neg_nat_of_re_pos hcl
   have hflip := Finset.sum_range_diag_flip m fun k j =>
-    poch a k * poch b k * z ^ k / k ! *
+    pochhammer a k * pochhammer b k * z ^ k / k ! *
       (DLMF.Gamma.stirlingRatioG (c - b) (c + k) j * ((l : ℂ)⁻¹) ^ (k + j))
   simp only [LargeDenominator.mixedCoeff, Finset.sum_mul]
   have hN : ∀ n ∈ Finset.range m, ∑ k ∈ Finset.range (n + 1),
-      poch a k * poch b k * z ^ k / k ! * DLMF.Gamma.stirlingRatioG (c - b) (c + k) (n - k) *
+      pochhammer a k * pochhammer b k * z ^ k / k ! *
+          DLMF.Gamma.stirlingRatioG (c - b) (c + k) (n - k) *
         ((l : ℂ)⁻¹) ^ n =
-      ∑ k ∈ Finset.range (n + 1), poch a k * poch b k * z ^ k / k ! *
+      ∑ k ∈ Finset.range (n + 1), pochhammer a k * pochhammer b k * z ^ k / k ! *
         (DLMF.Gamma.stirlingRatioG (c - b) (c + k) (n - k) * ((l : ℂ)⁻¹) ^ (k + (n - k))) := by
     intro n _
     refine Finset.sum_congr rfl fun k hk => ?_
     rw [Nat.add_sub_cancel' (Nat.lt_succ_iff.mp (Finset.mem_range.mp hk))]
     ring
   rw [Finset.sum_congr rfl hN, hflip]
-  have hS : ∀ k ∈ Finset.range m, gaussHGCoeff a b (c + l) k * z ^ k *
+  have hS : ∀ k ∈ Finset.range m, gaussHypergeometricCoeff a b (c + l) k * z ^ k *
       ((l : ℂ) ^ b * Gamma ((l : ℂ) + (c - b)) / Gamma ((l : ℂ) + (c + 0))) =
-      poch a k * poch b k * z ^ k / k ! *
+      pochhammer a k * pochhammer b k * z ^ k / k ! *
         ((l : ℂ) ^ b * Gamma ((l : ℂ) + (c - b)) / Gamma ((l : ℂ) + (c + k))) := by
     intro k _
-    have h := DLMF.Gamma.poch_mul_recip_Gamma_add_nat (c + l) k
-    have hp : poch (c + l) k ≠ 0 := poch_ne_zero_of_not_neg_nat hcl' k
+    have h := DLMF.Gamma.pochhammer_mul_recip_Gamma_add_nat (c + l) k
+    have hp : pochhammer (c + l) k ≠ 0 := pochhammer_ne_zero_of_not_neg_nat hcl' k
     have hGs : Gamma (c + l + k) ≠ 0 := Gamma_ne_zero (not_neg_nat_of_re_pos (by
       simp at hcl ⊢; positivity))
     have hG0 : Gamma (c + l) ≠ 0 := Gamma_ne_zero hcl'
     have hf : (k ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
     field_simp at h
     rw [show (l : ℂ) + (c + k) = c + l + k by ring, show (l : ℂ) + (c + 0) = c + l by ring,
-      ← h, gaussHGCoeff]
+      ← h, gaussHypergeometricCoeff]
     field_simp
   have hX : Gamma (c - b + l) / Gamma (c + l) * (l : ℂ) ^ b =
       (l : ℂ) ^ b * Gamma ((l : ℂ) + (c - b)) / Gamma ((l : ℂ) + (c + 0)) := by
@@ -665,12 +672,12 @@ theorem LargeDenominator.isBigO_mixed (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1)
 
 /-- For `re b > 0` the re-expanded coefficients of 15.12.2 are those of 15.12.3. -/
 theorem LargeDenominator.mixedCoeff_eq_of_re_pos (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (hb : 0 < b.re)
-    (N : ℕ) : LargeDenominator.mixedCoeff a b c z N = poch b N *
+    (N : ℕ) : LargeDenominator.mixedCoeff a b c z N = pochhammer b N *
         largeDenominatorCoeff a b c z N := by
   have h := HasAsymptoticExpansion.unique LargeDenominator.isAsymptoticScale
       LargeDenominator.frequently_ne
     (a := LargeDenominator.mixedCoeff a b c z)
-        (b := fun N => poch b N * largeDenominatorCoeff a b c z N)
+        (b := fun N => pochhammer b N * largeDenominatorCoeff a b c z N)
     (f := fun l : ℝ => Gamma (c - b + l) / Gamma (c + l) * (l : ℂ) ^ b * ₂F₁ a b (c + l) z)
     (fun n => (LargeDenominator.isBigO_mixed a b c hz n).congr_left fun l => by
       simp only [smul_eq_mul]; congr 1; exact Finset.sum_congr rfl fun _ _ => mul_comm _ _)
@@ -750,8 +757,8 @@ theorem LargeDenominator.differentiable_largeDenominatorCoeff (a c : ℂ) {z : �
 
 /-- The coefficient identity behind 15.12.3, for all `b`. -/
 theorem LargeDenominator.mixedCoeff_eq (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (N : ℕ) :
-    LargeDenominator.mixedCoeff a b c z N = poch b N * largeDenominatorCoeff a b c z N := by
-  set f : ℂ → ℂ := fun b => LargeDenominator.mixedCoeff a b c z N - poch b N *
+    LargeDenominator.mixedCoeff a b c z N = pochhammer b N * largeDenominatorCoeff a b c z N := by
+  set f : ℂ → ℂ := fun b => LargeDenominator.mixedCoeff a b c z N - pochhammer b N *
       largeDenominatorCoeff a b c z N
     with hfdef
   have hf : Differentiable ℂ f := (LargeDenominator.differentiable_mixedCoeff a c z N).sub
@@ -770,12 +777,12 @@ end ShiftExpansion
 
 /-- Formula under the stated hypotheses: `Asymptotics.IsBigO atTop (fun l : ℝ => Gamma (c - b + l)
 / Gamma (c + l) * (l : ℂ) ^ b * ₂F₁ a b (c + l) z - ∑ k ∈ Finset.range m,
-largeDenominatorCoeff a b c z k * poch b k / (l : ℂ) ^ k) (fun l : ℝ => (l : ℂ)⁻¹ ^ m)`. -/
+largeDenominatorCoeff a b c z k * pochhammer b k / (l : ℂ) ^ k) (fun l : ℝ => (l : ℂ)⁻¹ ^ m)`. -/
 @[dlmf 15.12.E3]
 theorem large_denominator_shift_expansion (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (m : ℕ) :
     Asymptotics.IsBigO atTop
       (fun l : ℝ => Gamma (c - b + l) / Gamma (c + l) * (l : ℂ) ^ b * ₂F₁ a b (c + l) z -
-        ∑ k ∈ Finset.range m, largeDenominatorCoeff a b c z k * poch b k / (l : ℂ) ^ k)
+        ∑ k ∈ Finset.range m, largeDenominatorCoeff a b c z k * pochhammer b k / (l : ℂ) ^ k)
       (fun l : ℝ => (l : ℂ)⁻¹ ^ m) := by
   have hK := LargeDenominator.isBigO_mixed a b c hz m
   simp only [LargeDenominator.mixedCoeff_eq a _ c hz] at hK

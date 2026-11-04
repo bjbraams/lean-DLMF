@@ -533,8 +533,12 @@ theorem laplace_remainder_isBigO (σ : ℝ) (G : ℂ → ℂ) :
 `P₂` the poles of `Γ(1 - z)H(z)` in `ℜβ₀ ≤ ℜz ≤ 1`, always including `z = 1` (the pole of
 `Γ(1 - z)`, whose residue `H(1)` the formula needs), `P` the poles of `Γ(1 - z)𝓜h(z)`
 (`𝓜h = 𝓜h₁ + H`) in `1 < ℜz < l` (`l ≥ 2` an integer, `0 < δ` small, no poles on
-`ℜz = l - δ`), decay of these products along vertical lines uniformly in strips, and
-integrability of `Γ(1 - z)𝓜h(z)` on the line `ℜz = l - δ` (which DLMF assumes implicitly),
+`ℜz = l - δ`), `Γ(1 - z)H(z)` analytic in `p ≤ ℜz ≤ l - δ` off these poles (so that `H` is the
+continuation of `𝓜h₂`; `𝓜h₁` is analytic for `ℜz > -c`), `Γ(1 - z)𝓜h(z)` analytic in
+`1 < ℜz ≤ l - δ` off `P` (so that `P` contains every pole there, including those of
+`Γ(1 - z)` at `2, …, l - 1`), decay of these products along
+vertical lines uniformly in strips, and integrability of `Γ(1 - z)𝓜h(z)` on the line
+`ℜz = l - δ` (which DLMF assumes implicitly),
 `𝓛h(ζ) = 𝓜h₁(1) + ∑_{P₂} Res[-ζ^{z-1}Γ(1 - z)H(z)] + ∑_{P} Res[-ζ^{z-1}Γ(1 - z)𝓜h(z)]
 + (2πi)⁻¹ ∫_{(l-δ)} ζ^{z-1}Γ(1 - z)𝓜h(z) dz` for `ζ > 0`. -/
 @[dlmf 2.5.E43]
@@ -545,9 +549,10 @@ theorem laplace_expansion_residues {h : ℝ → ℂ} {H : ℂ → ℂ} {c p : �
     (hH : ∀ z : ℂ, z.re ≤ p → H z = mellin (mellinTruncHigh h) z)
     (hP₂ : ∀ q ∈ P₂, p < q.re ∧ q.re ≤ 1) (h1P₂ : (1 : ℂ) ∈ P₂)
     (hP : ∀ q ∈ P, 1 < q.re ∧ q.re < l - δ)
-    (hHd : DifferentiableOn ℂ (fun z => Complex.Gamma (1 - z) *
-        (mellin (mellinTruncLow h) z + H z))
+    (hHd : DifferentiableOn ℂ (fun z => Complex.Gamma (1 - z) * H z)
       ({z : ℂ | p ≤ z.re ∧ z.re ≤ l - δ} \ ((P₂ : Set ℂ) ∪ P ∪ {1})))
+    (hPd : DifferentiableOn ℂ (fun z => Complex.Gamma (1 - z) *
+        (mellin (mellinTruncLow h) z + H z)) ({z : ℂ | 1 < z.re ∧ z.re ≤ l - δ} \ (P : Set ℂ)))
     (hdecay : Tendsto (fun y : ℝ => ⨆ σ : Icc p (l - δ), ‖Complex.Gamma (1 - (σ + y * I)) *
       (mellin (mellinTruncLow h) (σ + y * I) + H (σ + y * I))‖) (cocompact ℝ) (𝓝 0))
     (hl_int : VerticalIntegrable (fun z => Complex.Gamma (1 - z) *
@@ -726,7 +731,7 @@ from the Stieltjes form 6.2.2 of `E₁` (`DLMF.Confluent.expIntE1_stieltjes`). -
 @[dlmf 2.5.E45, dlmf 2.5.E49]
 theorem laplace_inv_one_add_eq {ζ : ℝ} (hζ : 0 < ζ) :
     laplaceTransform (fun t : ℝ => (((1 + t : ℝ)) : ℂ)⁻¹) ζ =
-      Complex.exp ζ * DLMF.Confluent.genExpIntE 1 ζ := by
+      Complex.exp ζ * DLMF.Confluent.expIntegralE 1 ζ := by
   have hS : (ζ : ℂ) ∈ slitPlane := ofReal_mem_slitPlane.2 hζ
   rw [DLMF.Confluent.expIntE1_stieltjes hS, ← mul_assoc, ← Complex.exp_add, add_neg_cancel,
     Complex.exp_zero, one_mul]
@@ -749,8 +754,8 @@ theorem laplace_inv_one_add_eq {ζ : ℝ} (hζ : 0 < ζ) :
 @[dlmf 2.5.E49]
 theorem laplace_inv_one_add_eq_complex {ζ : ℂ} (hζ : 0 < ζ.re) :
     laplaceTransform (fun t : ℝ => (((1 + t : ℝ)) : ℂ)⁻¹) ζ =
-      Complex.exp ζ * DLMF.Confluent.genExpIntE 1 ζ := by
-  rw [DLMF.Confluent.genExpIntE_stieltjes (by norm_num) hζ]
+      Complex.exp ζ * DLMF.Confluent.expIntegralE 1 ζ := by
+  rw [DLMF.Confluent.expIntegralE_stieltjes (by norm_num) hζ]
   simp only [sub_self, cpow_zero, Complex.Gamma_one, div_one, one_mul, laplaceTransform]
   rw [← mul_assoc, ← Complex.exp_add, add_neg_cancel, Complex.exp_zero, one_mul]
   refine setIntegral_congr_fun measurableSet_Ioi fun t _ => ?_

@@ -51,11 +51,11 @@ noncomputable section
 namespace DLMF.Confluent
 
 /-- Identity under the stated parameter and domain assumptions: `regularizedHGFun {a} {(-(n : ℂ))}
-z = poch a (n + 1) / (n + 1).factorial * z ^ (n + 1) * kummerM (a + n + 1) (n + 2) z`. -/
+z = pochhammer a (n + 1) / (n + 1).factorial * z ^ (n + 1) * kummerM (a + n + 1) (n + 2) z`. -/
 @[dlmf 13.2.E5]
 theorem regularizedHGFun_of_neg_nat (a : ℂ) (n : ℕ) (z : ℂ) :
     regularizedHGFun {a} {(-(n : ℂ))} z =
-      poch a (n + 1) / (n + 1).factorial * z ^ (n + 1) *
+      pochhammer a (n + 1) / (n + 1).factorial * z ^ (n + 1) *
         kummerM (a + n + 1) (n + 2) z := by
   rw [regularizedHGFun_eq_tsum]
   have hs : Summable fun k : ℕ => regularizedHGFunCoeff {a} {(-(n : ℂ))} k * z ^ k := by
@@ -99,13 +99,13 @@ theorem regularizedHGFun_of_neg_nat (a : ℂ) (n : ℕ) (z : ℂ) :
   have hΓ3 : Gamma (-(n : ℂ) + ((j + (n + 1) : ℕ) : ℂ)) = (j.factorial : ℂ) := by
     rw [show -(n : ℂ) + ((j + (n + 1) : ℕ) : ℂ) = (j : ℂ) + 1 by push_cast; ring]
     exact Complex.Gamma_nat_eq_factorial _
-  have hp : (ascPochhammer ℂ j).eval ((n : ℂ) + 2) ≠ 0 := poch_ne_zero_of_not_neg_nat hpole j
+  have hp : (ascPochhammer ℂ j).eval ((n : ℂ) + 2) ≠ 0 := pochhammer_ne_zero_of_not_neg_nat hpole j
   have hf1 : ((n + 1).factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
   have hf2 : (j.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
   have hf3 : ((n + 1 + j).factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
   rw [hΓ1, hΓ2] at hΓ
   rw [regularizedHGFunCoeff_singleton, hΓ3]
-  simp only [kummerMCoeff, poch]
+  simp only [kummerMCoeff, pochhammer]
   rw [add_comm j (n + 1), DLMF.Hypergeometric.ascPochhammer_eval_add a,
     show a + ((n + 1 : ℕ) : ℂ) = a + n + 1 by push_cast; ring, pow_add]
   field_simp
@@ -155,7 +155,7 @@ theorem kummerUConnection_eq_tricomiD {a c z : ℂ} (hc : c ∈ integerComplemen
 theorem tricomiD_intCast (a z : ℂ) (hz : z ≠ 0) (n : ℤ) : tricomiD a n z = 0 := by
   -- the regularized function at a nonpositive integer denominator
   have hneg : ∀ (x : ℂ) (k : ℕ), regularizedHGFun {x} {(-(k : ℂ))} z =
-      poch x (k + 1) * z ^ (k + 1) * regularizedHGFun {x + k + 1} {(k + 2 : ℂ)} z := by
+      pochhammer x (k + 1) * z ^ (k + 1) * regularizedHGFun {x + k + 1} {(k + 2 : ℂ)} z := by
     intro x k
     have hp : ∀ j : ℕ, ((k : ℂ) + 2) ≠ -(j : ℂ) := fun j h => by
       have := congrArg re h; simp at this
@@ -168,7 +168,7 @@ theorem tricomiD_intCast (a z : ℂ) (hz : z ≠ 0) (n : ℤ) : tricomiD a n z =
   rcases le_or_gt n 0 with hn | hn
   · obtain ⟨k, rfl⟩ : ∃ k : ℕ, n = -(k : ℤ) := ⟨n.natAbs, by omega⟩
     push_cast
-    rw [hneg, DLMF.Hypergeometric.recip_Gamma_eq_poch_mul k a, show 1 - -(k : ℂ) =
+    rw [hneg, DLMF.Hypergeometric.recip_Gamma_eq_pochhammer_mul k a, show 1 - -(k : ℂ) =
         ((k + 1 : ℕ) : ℂ) by push_cast; ring,
       cpow_natCast, show a - -(k : ℂ) + 1 = a + ((k + 1 : ℕ) : ℂ) by push_cast; ring,
       show 2 - -(k : ℂ) = (k + 2 : ℂ) by ring]
@@ -181,13 +181,14 @@ theorem tricomiD_intCast (a z : ℂ) (hz : z ≠ 0) (n : ℤ) : tricomiD a n z =
       push_cast
       rw [show (2 : ℂ) - ((k : ℂ) + 2) = -(k : ℂ) by ring, hneg,
         show a - ((k : ℂ) + 2) + 1 + k + 1 = a by ring,
-        DLMF.Hypergeometric.recip_Gamma_eq_poch_mul k (a - ((k : ℂ) + 2) + 1),
+        DLMF.Hypergeometric.recip_Gamma_eq_pochhammer_mul k (a - ((k : ℂ) + 2) + 1),
         show a - ((k : ℂ) + 2) + 1 + ((k + 1 : ℕ) : ℂ) = a by push_cast; ring]
       have hzk : z ^ (1 - ((k : ℂ) + 2)) * z ^ (k + 1) = 1 := by
         rw [show (1 : ℂ) - ((k : ℂ) + 2) = -((k + 1 : ℕ) : ℂ) by push_cast; ring, cpow_neg,
           cpow_natCast]
         exact inv_mul_cancel₀ (pow_ne_zero _ hz)
-      linear_combination (-(poch (a - (↑k + 2) + 1) (k + 1) * regularizedHGFun {a} {(k + 2 : ℂ)} z *
+      linear_combination (-(pochhammer (a - (↑k + 2) + 1) (k + 1) *
+          regularizedHGFun {a} {(k + 2 : ℂ)} z *
         (Gamma a)⁻¹)) * hzk
 
 /-- The numerator is entire in the second parameter, for `z ≠ 0`. -/
@@ -588,17 +589,18 @@ theorem kummerU_kummer_transform_all (a b : ℂ) {z : ℂ} (hz0 : z ≠ 0) :
 
 /-- The polynomial `(-1)^m ∑ C(m,s) (b+s)_{m-s} (-z)^s` equals `(-1)^m (b)_m M(-m,b,z)`. -/
 theorem neg_nat_sum_eq (m : ℕ) {b : ℂ} (hb : ∀ k : ℕ, b ≠ -(k : ℂ)) (z : ℂ) :
-    (-1 : ℂ) ^ m * ∑ s ∈ Finset.range (m + 1), (m.choose s : ℂ) * poch (b + s) (m - s) * (-z) ^ s =
-      (-1 : ℂ) ^ m * poch b m * kummerM (-(m : ℂ)) b z := by
+    (-1 : ℂ) ^ m * ∑ s ∈ Finset.range (m + 1), (m.choose s : ℂ) *
+        pochhammer (b + s) (m - s) * (-z) ^ s =
+      (-1 : ℂ) ^ m * pochhammer b m * kummerM (-(m : ℂ)) b z := by
   rw [kummerM_eq_sum_neg_nat, Finset.mul_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun s hs => ?_
   rw [Finset.mem_range] at hs
-  have hps : poch b s ≠ 0 := poch_ne_zero_of_not_neg_nat hb s
+  have hps : pochhammer b s ≠ 0 := pochhammer_ne_zero_of_not_neg_nat hb s
   have hf : (s.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr s.factorial_ne_zero
-  have e1 : poch b m = poch b s * poch (b + s) (m - s) := by
-    rw [← poch_add, Nat.add_sub_cancel' (by omega)]
-  have e2 : poch (-(m : ℂ)) s = (-1) ^ s * (m.choose s : ℂ) * s.factorial := by
-    rw [poch_neg_coe_nat, Nat.descFactorial_eq_factorial_mul_choose]; push_cast; ring
+  have e1 : pochhammer b m = pochhammer b s * pochhammer (b + s) (m - s) := by
+    rw [← pochhammer_add, Nat.add_sub_cancel' (by omega)]
+  have e2 : pochhammer (-(m : ℂ)) s = (-1) ^ s * (m.choose s : ℂ) * s.factorial := by
+    rw [pochhammer_neg_coe_nat, Nat.descFactorial_eq_factorial_mul_choose]; push_cast; ring
   rw [e1, e2, neg_pow]
   field_simp
   ring
@@ -607,7 +609,7 @@ theorem neg_nat_sum_eq (m : ℕ) {b : ℂ} (hb : ∀ k : ℕ, b ≠ -(k : ℂ)) 
 theorem kummerUConnection_neg_nat (m : ℕ) {c : ℂ} (hc : c ∈ integerComplement) (z : ℂ) :
     kummerUConnection (-(m : ℂ)) c z =
       (-1 : ℂ) ^ m * ∑ s ∈ Finset.range (m + 1), (m.choose s : ℂ) *
-          poch (c + s) (m - s) * (-z) ^ s := by
+          pochhammer (c + s) (m - s) * (-z) ^ s := by
   have hc0 := not_neg_nat_of_mem_integerComplement hc
   rw [neg_nat_sum_eq m hc0, kummerUConnection, Gamma_neg_nat_eq_zero, div_zero, zero_mul,
     zero_mul, add_zero]
@@ -616,7 +618,8 @@ theorem kummerUConnection_neg_nat (m : ℕ) {c : ℂ} (hc : c ∈ integerComplem
     exact hc ⟨1 + k - m, by push_cast; linear_combination hk⟩
   have hG := Gamma_add_nat_div_Gamma_eq (n := m) (1 - c - m) h1
   rw [show 1 - c - (m : ℂ) + m = 1 - c by ring] at hG
-  rw [show -(m : ℂ) - c + 1 = 1 - c - m by ring, ← DLMF.Hypergeometric.poch_reflect, poch, ← hG]
+  rw [show -(m : ℂ) - c + 1 = 1 - c - m by ring, ← DLMF.Hypergeometric.pochhammer_reflect,
+                                             pochhammer, ← hG]
 
 /-- DLMF 13.2.7 in polynomial form, valid for every second parameter `b`:
 `U(-m, b, z) = (-1)^m ∑_s C(m,s) (b+s)_{m-s} (-z)^s`. -/
@@ -624,9 +627,9 @@ theorem kummerUConnection_neg_nat (m : ℕ) {c : ℂ} (hc : c ∈ integerComplem
 theorem kummerU_neg_nat_sum (m : ℕ) (b z : ℂ) :
     kummerU (-(m : ℂ)) b z =
       (-1 : ℂ) ^ m * ∑ s ∈ Finset.range (m + 1),
-        (m.choose s : ℂ) * poch (b + s) (m - s) * (-z) ^ s := by
+        (m.choose s : ℂ) * pochhammer (b + s) (m - s) * (-z) ^ s := by
   set P : ℂ → ℂ := fun c => (-1 : ℂ) ^ m * ∑ s ∈ Finset.range (m + 1),
-    (m.choose s : ℂ) * poch (c + s) (m - s) * (-z) ^ s with hP
+    (m.choose s : ℂ) * pochhammer (c + s) (m - s) * (-z) ^ s with hP
   have hPc : Continuous P := by
     refine continuous_const.mul (continuous_finsetSum _ fun s _ => ?_)
     exact (continuous_const.mul
@@ -644,11 +647,11 @@ theorem kummerU_neg_nat_sum (m : ℕ) (b z : ℂ) :
     exact (kummerUConnection_neg_nat m hc z).symm
 
 /-- Identity under the stated parameter and domain assumptions: `kummerU (-(m : ℂ)) b z = (-1 : ℂ)
-^ m * poch b m * kummerM (-(m : ℂ)) b z`. -/
+^ m * pochhammer b m * kummerM (-(m : ℂ)) b z`. -/
 @[dlmf 13.2.E7]
 theorem kummerU_neg_nat (m : ℕ) (b z : ℂ) (hb : ∀ k : ℕ, b ≠ -k) :
     kummerU (-(m : ℂ)) b z =
-      (-1 : ℂ) ^ m * poch b m * kummerM (-(m : ℂ)) b z := by
+      (-1 : ℂ) ^ m * pochhammer b m * kummerM (-(m : ℂ)) b z := by
   rw [kummerU_neg_nat_sum, neg_nat_sum_eq m hb]
 
 /-- Kummer's transformation at `b = a + n + 1`. -/
@@ -662,19 +665,19 @@ lemma kummerU_shift_nat_aux (a : ℂ) (n : ℕ) {z : ℂ} (hz : z ∈ slitPlane)
 theorem kummerU_shift_nat (a : ℂ) (n : ℕ) {z : ℂ} (hz : z ∈ slitPlane)
     (ha : ∀ k : ℕ, 1 - a - n ≠ -k) :
     kummerU a (a + n + 1) z =
-      (-1 : ℂ) ^ n * poch (1 - a - n) n / z ^ (a + n) *
+      (-1 : ℂ) ^ n * pochhammer (1 - a - n) n / z ^ (a + n) *
         kummerM (-(n : ℂ)) (1 - a - n) z := by
   rw [kummerU_shift_nat_aux a n hz, kummerU_neg_nat n _ z ha,
     show -a - (n : ℂ) = -(a + n) by ring, cpow_neg]
   ring
 
 /-- Formula under the stated hypotheses: `kummerU a (a + n + 1) z = z ^ (-a) * ∑ s ∈ Finset.range
-(n + 1), (n.choose s : ℂ) * poch a s * z ^ (-(s : ℂ))`. -/
+(n + 1), (n.choose s : ℂ) * pochhammer a s * z ^ (-(s : ℂ))`. -/
 @[dlmf 13.2.E8]
 theorem kummerU_shift_nat_sum (a : ℂ) (n : ℕ) {z : ℂ} (hz : z ∈ slitPlane) :
     kummerU a (a + n + 1) z =
       z ^ (-a) * ∑ s ∈ Finset.range (n + 1),
-        (n.choose s : ℂ) * poch a s * z ^ (-(s : ℂ)) := by
+        (n.choose s : ℂ) * pochhammer a s * z ^ (-(s : ℂ)) := by
   have hz0 := slitPlane_ne_zero hz
   rw [kummerU_shift_nat_aux a n hz, kummerU_neg_nat_sum, Finset.mul_sum, Finset.mul_sum,
     Finset.mul_sum]
@@ -683,7 +686,7 @@ theorem kummerU_shift_nat_sum (a : ℂ) (n : ℕ) {z : ℂ} (hz : z ∈ slitPlan
   have hs' : s ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hs)
   rw [show n + 1 - 1 - s = n - s by omega, Nat.choose_symm hs', Nat.sub_sub_self hs',
     show (1 : ℂ) - a - n + ((n - s : ℕ) : ℂ) = 1 - a - ((s : ℕ) : ℂ) by
-      push_cast [Nat.cast_sub hs']; ring, DLMF.Hypergeometric.poch_reflect a s]
+      push_cast [Nat.cast_sub hs']; ring, DLMF.Hypergeometric.pochhammer_reflect a s]
   have e1 : z ^ (-a - n) = z ^ (-a) * (z ^ n)⁻¹ := by
     rw [sub_eq_add_neg, cpow_add _ _ hz0, cpow_neg z (n : ℂ), cpow_natCast]
   have e2 : z ^ (-(s : ℂ)) = (z ^ s)⁻¹ := by rw [cpow_neg, cpow_natCast]
@@ -695,7 +698,7 @@ theorem kummerU_shift_nat_sum (a : ℂ) (n : ℕ) {z : ℂ} (hz : z ∈ slitPlan
   have hzns : z ^ (n - s) ≠ 0 := pow_ne_zero _ hz0
   rw [e1, e2, e3, e4]
   field_simp
-  linear_combination (z ^ (-a) * (n.choose s : ℂ) * poch a s) * e5
+  linear_combination (z ^ (-a) * (n.choose s : ℂ) * pochhammer a s) * e5
 
 end DLMF.Confluent
 end

@@ -25,11 +25,11 @@ transforms of error functions of DLMF 7.14.1–7.14.3.
 
 * `FresnelMellinBarnes.mellin_auxFunction`: the Mellin transforms of the Fresnel auxiliary
   functions.
-* `fresnelAuxFComplex_mellinBarnes`, `fresnelAuxGComplex_mellinBarnes`: the Mellin–Barnes
-  integrals for `f(z)` and `g(z)` (DLMF 7.7.13, 7.7.14).
+* `fresnelAuxiliaryFComplex_mellinBarnes`, `fresnelAuxiliaryGComplex_mellinBarnes`: the
+  Mellin–Barnes integrals for `f(z)` and `g(z)` (DLMF 7.7.13, 7.7.14).
 * `laplace_exp_I_sq`: the Laplace transform of `exp(± i t²)`.
-* `fresnelAuxFComplex_laplace_square`, `fresnelAuxGComplex_laplace_square`: Laplace transforms of
-  `cos t²` and `sin t²` (DLMF 7.7.15, 7.7.16).
+* `fresnelAuxiliaryFComplex_laplace_square`, `fresnelAuxiliaryGComplex_laplace_square`: Laplace
+  transforms of `cos t²` and `sin t²` (DLMF 7.7.15, 7.7.16).
 * `erfc_fourier_halfLine`, `erf_laplace`, `erf_sqrt_laplace`: DLMF 7.14.1–7.14.3.
 -/
 
@@ -106,8 +106,8 @@ theorem FresnelMellinBarnes.integrableOn_rpow_div {q : ℝ} (h0 : -1 < q) (h1 : 
 
 /-- The Fresnel auxiliary functions `f` (`aux = false`) and `g` (`aux = true`). -/
 def FresnelMellinBarnes.auxFunction (aux : Bool) (z : ℂ) : ℂ := if aux then
-    fresnelAuxGComplex z else
-    fresnelAuxFComplex z
+    fresnelAuxiliaryGComplex z else
+    fresnelAuxiliaryFComplex z
 
 /-- The kernel of the double integral for the Mellin transform of the auxiliary functions. -/
 def FresnelMellinBarnes.kernel (k : ℕ) (w : ℂ) (p : ℝ × ℝ) : ℂ :=
@@ -381,8 +381,8 @@ theorem FresnelMellinBarnes.mellin_auxMellin (aux : Bool) {s : ℂ} (hs : 0 < s.
 lemma FresnelMellinBarnes.differentiable_auxFunction (aux : Bool) : Differentiable ℂ
     (FresnelMellinBarnes.auxFunction aux) := by
   unfold FresnelMellinBarnes.auxFunction; cases aux
-  · exact fresnelAuxFComplex_entire
-  · exact fresnelAuxGComplex_entire
+  · exact fresnelAuxiliaryFComplex_entire
+  · exact fresnelAuxiliaryGComplex_entire
 
 /-- The Mellin–Barnes integrand of DLMF 7.7.13–14. -/
 def FresnelMellinBarnes.integrand (b c : ℝ) (z : ℂ) (y : ℝ) : ℂ :=
@@ -671,14 +671,14 @@ end FresnelMellinBarnes
 
 /-- Identity under the stated parameter and domain assumptions: `HasIntegralWholeLine (fun y : ℝ
 => let s : ℂ := c+y*I; exp (-s*(2*log (π : ℂ)-log 16+4*log z))*Gamma s*Gamma (s+1/2)*Gamma
-(s+3/4)*Gamma (1/4-s)) (2*π*(2*π : ℂ)^(3/2 : ℂ)*fresnelAuxFComplex z)`. -/
+(s+3/4)*Gamma (1/4-s)) (2*π*(2*π : ℂ)^(3/2 : ℂ)*fresnelAuxiliaryFComplex z)`. -/
 @[dlmf 7.7.E13]
-theorem fresnelAuxFComplex_mellinBarnes {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/2) {c : ℝ}
+theorem fresnelAuxiliaryFComplex_mellinBarnes {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/2) {c : ℝ}
     (hc : 0 < c) (hc1 : c < 1/4) :
     HasIntegralWholeLine
         (fun y : ℝ => let s : ℂ := c+y*I;
         exp (-s*(2*log (π : ℂ)-log 16+4*log z))*Gamma s*Gamma (s+1/2)*Gamma (s+3/4)*Gamma (1/4-s))
-        (2*π*(2*π : ℂ)^(3/2 : ℂ)*fresnelAuxFComplex z) := by
+        (2*π*(2*π : ℂ)^(3/2 : ℂ)*fresnelAuxiliaryFComplex z) := by
   have hre : 0 < z.re := (abs_arg_lt_pi_div_two_iff.mp hz).resolve_right hz0
   have hv := FresnelMellinBarnes.mellinBarnes false hc (by norm_num; linarith) hre
   have e : (3 / 4 - ((if false = true then 1 else 0 : ℕ) : ℝ) / 2) = 3 / 4 := by norm_num
@@ -694,14 +694,14 @@ theorem fresnelAuxFComplex_mellinBarnes {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| 
 
 /-- Identity under the stated parameter and domain assumptions: `HasIntegralWholeLine (fun y : ℝ
 => let s : ℂ := c+y*I; exp (-s*(2*log (π : ℂ)-log 16+4*log z))*Gamma s*Gamma (s+1/2)*Gamma
-(s+1/4)*Gamma (3/4-s)) (2*π*(2*π : ℂ)^(3/2 : ℂ)*fresnelAuxGComplex z)`. -/
+(s+1/4)*Gamma (3/4-s)) (2*π*(2*π : ℂ)^(3/2 : ℂ)*fresnelAuxiliaryGComplex z)`. -/
 @[dlmf 7.7.E14]
-theorem fresnelAuxGComplex_mellinBarnes {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/2) {c : ℝ}
+theorem fresnelAuxiliaryGComplex_mellinBarnes {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/2) {c : ℝ}
     (hc : 0 < c) (hc1 : c < 3/4) :
     HasIntegralWholeLine
         (fun y : ℝ => let s : ℂ := c+y*I;
         exp (-s*(2*log (π : ℂ)-log 16+4*log z))*Gamma s*Gamma (s+1/2)*Gamma (s+1/4)*Gamma (3/4-s))
-        (2*π*(2*π : ℂ)^(3/2 : ℂ)*fresnelAuxGComplex z) := by
+        (2*π*(2*π : ℂ)^(3/2 : ℂ)*fresnelAuxiliaryGComplex z) := by
   have hre : 0 < z.re := (abs_arg_lt_pi_div_two_iff.mp hz).resolve_right hz0
   have hv := FresnelMellinBarnes.mellinBarnes true hc (by norm_num; linarith) hre
   have e : (3 / 4 - ((if true = true then 1 else 0 : ℕ) : ℝ) / 2) = 1 / 4 := by norm_num
@@ -784,8 +784,8 @@ theorem laplace_gaussian_boundary {a b0 : ℂ} (ha : 0 < a.re) (hb0re : b0.re = 
 `∫₀^∞ e^{-at} e^{iεt²} dt = √(π/2) (f(z) + iε g(z))` with `z = a/√(2π)`. -/
 theorem laplace_exp_I_sq {a : ℂ} (ha : 0 < a.re) {ε : ℝ} (hε : ε = 1 ∨ ε = -1) :
     (∫ t : ℝ in Ioi 0, exp (-a*t)*exp (ε*I*(t:ℂ)^2)) =
-      Real.sqrt (π/2)*(fresnelAuxFComplex (a/Real.sqrt (2*π)) +
-        ε*I*fresnelAuxGComplex (a/Real.sqrt (2*π))) := by
+      Real.sqrt (π/2)*(fresnelAuxiliaryFComplex (a/Real.sqrt (2*π)) +
+        ε*I*fresnelAuxiliaryGComplex (a/Real.sqrt (2*π))) := by
   have hneg : (-ε = 1 ∨ -ε = -1) := by rcases hε with rfl | rfl <;> norm_num
   have hF := FresnelAuxiliary.signed_erfc (a/Real.sqrt (2*π)) hneg
   have hζ : fresnelZetaComplex (-ε) (a/Real.sqrt (2*π)) =
@@ -839,8 +839,8 @@ theorem laplace_exp_I_sq {a : ℂ} (ha : 0 < a.re) {ε : ℝ} (hε : ε = 1 ∨ 
     rw [← hz, div_pow (a/2), cpow_half_sq hb0ne]
   rw [hpb, hz, hz2]
   set E := exp (ζ^2)*erfc ζ
-  set f := fresnelAuxFComplex (a/Real.sqrt (2*π))
-  set g := fresnelAuxGComplex (a/Real.sqrt (2*π))
+  set f := fresnelAuxiliaryFComplex (a/Real.sqrt (2*π))
+  set g := fresnelAuxiliaryGComplex (a/Real.sqrt (2*π))
   have hE : E = (1+σ)*(g-σ*f) := by
     linear_combination (-(1+σ))*hF + E/2*hσ2
   have hsq : (Real.sqrt (π/2):ℂ) = Real.sqrt π/Real.sqrt 2 := by
@@ -859,10 +859,10 @@ theorem integrableOn_exp_mul_exp_I_sq {a : ℂ} (ha : 0 < a.re) (ε : ℝ) :
   rw [h1]; simp
 
 /-- Identity under the stated parameter and domain assumptions: `(∫ t : ℝ in Ioi 0, exp (-a*t)*cos
-((t : ℂ)^2))=Real.sqrt (π/2)*fresnelAuxFComplex (a/Real.sqrt (2*π))`. -/
+((t : ℂ)^2))=Real.sqrt (π/2)*fresnelAuxiliaryFComplex (a/Real.sqrt (2*π))`. -/
 @[dlmf 7.7.E15]
-theorem fresnelAuxFComplex_laplace_square {a : ℂ} (ha : 0 < a.re) :
-    (∫ t : ℝ in Ioi 0, exp (-a*t)*cos ((t : ℂ)^2))=Real.sqrt (π/2)*fresnelAuxFComplex
+theorem fresnelAuxiliaryFComplex_laplace_square {a : ℂ} (ha : 0 < a.re) :
+    (∫ t : ℝ in Ioi 0, exp (-a*t)*cos ((t : ℂ)^2))=Real.sqrt (π/2)*fresnelAuxiliaryFComplex
         (a/Real.sqrt (2*π)) := by
   have h1 := laplace_exp_I_sq ha (Or.inl rfl)
   have h2 := laplace_exp_I_sq ha (Or.inr rfl)
@@ -874,10 +874,10 @@ theorem fresnelAuxFComplex_laplace_square {a : ℂ} (ha : 0 < a.re) :
   push_cast; ring
 
 /-- Identity under the stated parameter and domain assumptions: `(∫ t : ℝ in Ioi 0, exp (-a*t)*sin
-((t : ℂ)^2))=Real.sqrt (π/2)*fresnelAuxGComplex (a/Real.sqrt (2*π))`. -/
+((t : ℂ)^2))=Real.sqrt (π/2)*fresnelAuxiliaryGComplex (a/Real.sqrt (2*π))`. -/
 @[dlmf 7.7.E16]
-theorem fresnelAuxGComplex_laplace_square {a : ℂ} (ha : 0 < a.re) :
-    (∫ t : ℝ in Ioi 0, exp (-a*t)*sin ((t : ℂ)^2))=Real.sqrt (π/2)*fresnelAuxGComplex
+theorem fresnelAuxiliaryGComplex_laplace_square {a : ℂ} (ha : 0 < a.re) :
+    (∫ t : ℝ in Ioi 0, exp (-a*t)*sin ((t : ℂ)^2))=Real.sqrt (π/2)*fresnelAuxiliaryGComplex
         (a/Real.sqrt (2*π)) := by
   have h1 := laplace_exp_I_sq ha (Or.inl rfl)
   have h2 := laplace_exp_I_sq ha (Or.inr rfl)

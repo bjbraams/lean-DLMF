@@ -67,11 +67,13 @@ def genCosIntOnLog (a w : ℂ) : ℂ :=
 
 /-- Generalized upper sine integral, entire in a. -/
 def genSinIntTailOnLog (a w : ℂ) : ℂ :=
-  (exp (π*I*a/2)*upperIncGammaOnLog a (w-π*I/2)-exp (-π*I*a/2)*upperIncGammaOnLog a (w+π*I/2))/(2*I)
+  (exp (π*I*a/2)*upperIncompleteGammaOnLog a (w-π*I/2)-exp (-π*I*a/2)*upperIncompleteGammaOnLog a
+      (w+π*I/2))/(2*I)
 
 /-- Generalized upper cosine integral, entire in a. -/
 def genCosIntTailOnLog (a w : ℂ) : ℂ :=
-  (exp (π*I*a/2)*upperIncGammaOnLog a (w-π*I/2)+exp (-π*I*a/2)*upperIncGammaOnLog a (w+π*I/2))/2
+  (exp (π*I*a/2)*upperIncompleteGammaOnLog a (w-π*I/2)+exp
+      (-π*I*a/2)*upperIncompleteGammaOnLog a (w+π*I/2))/2
 
 /-- Principal branch for nonzero z by continued logarithmic coordinates. -/
 def genSinInt (a z : ℂ) : ℂ :=
@@ -90,10 +92,10 @@ def genCosIntTail (a z : ℂ) : ℂ :=
   genCosIntTailOnLog a (log z)
 
 /-- Identity under the stated parameter and domain assumptions: `genCosIntTailOnLog a
-w+ε*I*genSinIntTailOnLog a w=exp (ε*π*I*a/2)*upperIncGammaOnLog a (w-ε*π*I/2)`. -/
+w+ε*I*genSinIntTailOnLog a w=exp (ε*π*I*a/2)*upperIncompleteGammaOnLog a (w-ε*π*I/2)`. -/
 @[dlmf 8.21.E1]
 theorem genUpperTrig_gamma (a w : ℂ) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
-    genCosIntTailOnLog a w+ε*I*genSinIntTailOnLog a w=exp (ε*π*I*a/2)*upperIncGammaOnLog a
+    genCosIntTailOnLog a w+ε*I*genSinIntTailOnLog a w=exp (ε*π*I*a/2)*upperIncompleteGammaOnLog a
         (w-ε*π*I/2) := by
   rcases hε with rfl | rfl <;>
     simp only [genCosIntTailOnLog,genSinIntTailOnLog,Complex.ofReal_one,Complex.ofReal_neg,
@@ -104,8 +106,8 @@ theorem genUpperTrig_gamma (a w : ℂ) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
 genSinIntTailOnLog a w)`. -/
 theorem genSinIntTail_parameter_entire (w : ℂ) :
     Differentiable ℂ (fun a => genSinIntTailOnLog a w) := by
-  have h1 := upperIncGammaOnLog_parameter_entire (w-π*I/2)
-  have h2 := upperIncGammaOnLog_parameter_entire (w+π*I/2)
+  have h1 := upperIncompleteGammaOnLog_parameter_entire (w-π*I/2)
+  have h2 := upperIncompleteGammaOnLog_parameter_entire (w+π*I/2)
   exact (((by fun_prop : Differentiable ℂ fun a : ℂ => exp (π*I*a/2)).mul h1).sub
     ((by fun_prop : Differentiable ℂ fun a : ℂ => exp (-π*I*a/2)).mul h2)).div_const (2*I)
 
@@ -113,8 +115,8 @@ theorem genSinIntTail_parameter_entire (w : ℂ) :
 genCosIntTailOnLog a w)`. -/
 theorem genCosIntTail_parameter_entire (w : ℂ) :
     Differentiable ℂ (fun a => genCosIntTailOnLog a w) := by
-  have h1 := upperIncGammaOnLog_parameter_entire (w-π*I/2)
-  have h2 := upperIncGammaOnLog_parameter_entire (w+π*I/2)
+  have h1 := upperIncompleteGammaOnLog_parameter_entire (w-π*I/2)
+  have h2 := upperIncompleteGammaOnLog_parameter_entire (w+π*I/2)
   exact (((by fun_prop : Differentiable ℂ fun a : ℂ => exp (π*I*a/2)).mul h1).add
     ((by fun_prop : Differentiable ℂ fun a : ℂ => exp (-π*I*a/2)).mul h2)).div_const 2
 
@@ -332,9 +334,9 @@ theorem genCosInt_parameter_residue (n : ℕ) (w : ℂ) :
   simpa using h
 
 /-- `Γ(a, ε i (z+t)) → 0` along horizontal rays when `re a < 1`. -/
-theorem tendsto_upperIncGamma_mul_I_add_ofReal {a : ℂ} (ha : a.re < 1) (z : ℂ) {ε : ℝ}
+theorem tendsto_upperIncompleteGamma_mul_I_add_ofReal {a : ℂ} (ha : a.re < 1) (z : ℂ) {ε : ℝ}
     (hε : ε=1 ∨ ε = -1) :
-    Tendsto (fun t : ℝ => upperIncGamma a (ε*I*(z+t))) atTop (𝓝 0) := by
+    Tendsto (fun t : ℝ => upperIncompleteGamma a (ε*I*(z+t))) atTop (𝓝 0) := by
   have hβ : |-ε*(π/4)| < π/2 := by
     rcases hε with rfl | rfl <;> simp [abs_of_pos (by positivity : (0:ℝ) < π/4)] <;>
         linarith [Real.pi_pos]
@@ -344,7 +346,7 @@ theorem tendsto_upperIncGamma_mul_I_add_ofReal {a : ℂ} (ha : a.re < 1) (z : �
   have hU' := hU.norm.mul_const (Real.exp (ε*z.im))
   rw [norm_zero, zero_mul] at hU'
   refine squeeze_zero_norm' (Eventually.of_forall fun t => ?_) hU'
-  rw [upperIncGamma, norm_mul, Complex.norm_exp, Function.comp_apply, mul_comm]
+  rw [upperIncompleteGamma, norm_mul, Complex.norm_exp, Function.comp_apply, mul_comm]
   apply le_of_eq
   congr 2
   rcases hε with rfl | rfl <;> simp
@@ -365,10 +367,10 @@ theorem exp_add_pi_I_half (w : ℂ) : exp (w+π*I/2) = I*exp w := by
 theorem hasDerivAt_genTrigTailOnLog (a w : ℂ) :
     HasDerivAt (genSinIntTailOnLog a) (-exp (a*w)*sin (exp w)) w ∧
     HasDerivAt (genCosIntTailOnLog a) (-exp (a*w)*cos (exp w)) w := by
-  have h1 := ((hasDerivAt_upperIncGammaOnLog a (w-π*I/2)).comp w
+  have h1 := ((hasDerivAt_upperIncompleteGammaOnLog a (w-π*I/2)).comp w
       ((hasDerivAt_id w).sub_const _)).const_mul
     (exp (π*I*a/2))
-  have h2 := ((hasDerivAt_upperIncGammaOnLog a (w+π*I/2)).comp w
+  have h2 := ((hasDerivAt_upperIncompleteGammaOnLog a (w+π*I/2)).comp w
       ((hasDerivAt_id w).add_const _)).const_mul
     (exp (-π*I*a/2))
   have e1 : exp (π*I*a/2)*exp (a*(w-π*I/2)-exp (w-π*I/2)) = exp (a*w)*exp (I*exp w) := by
@@ -404,19 +406,21 @@ theorem hasDerivAt_genTrigTail (a : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     rw [Complex.exp_log hz0, ← hp]; ring
 
 /-- Away from the cut the generalized tails are combinations of principal upper Gamma values. -/
-theorem genTrigTail_eq_upperIncGamma (a : ℂ) {z : ℂ} (hz : 0 < z.re) :
-    genSinIntTail a z = (exp (π*I*a/2)*upperIncGamma a (-I*z)-exp (-π*I*a/2)*upperIncGamma
+theorem genTrigTail_eq_upperIncompleteGamma (a : ℂ) {z : ℂ} (hz : 0 < z.re) :
+    genSinIntTail a z = (exp (π*I*a/2)*upperIncompleteGamma a (-I*z)-exp
+        (-π*I*a/2)*upperIncompleteGamma
         a (I*z))/(2*I) ∧
-    genCosIntTail a z = (exp (π*I*a/2)*upperIncGamma a (-I*z)+exp (-π*I*a/2)*upperIncGamma
+    genCosIntTail a z = (exp (π*I*a/2)*upperIncompleteGamma a (-I*z)+exp
+        (-π*I*a/2)*upperIncompleteGamma
         a (I*z))/2 := by
   have hz0 : z ≠ 0 := by intro h; simp [h] at hz
   have ha := abs_lt.mp (Complex.abs_arg_lt_pi_div_two_iff.mpr (Or.inl hz))
-  have hm : upperIncGammaOnLog a (log z-π*I/2) = upperIncGamma a (-I*z) := by
-    rw [upperIncGammaOnLog_eq_upperIncGamma, exp_sub_pi_I_half, Complex.exp_log hz0]
+  have hm : upperIncompleteGammaOnLog a (log z-π*I/2) = upperIncompleteGamma a (-I*z) := by
+    rw [upperIncompleteGammaOnLog_eq_upperIncompleteGamma, exp_sub_pi_I_half, Complex.exp_log hz0]
     · simp [Complex.log_im]; linarith [Real.pi_pos]
     · simp [Complex.log_im]; linarith [Real.pi_pos]
-  have hp : upperIncGammaOnLog a (log z+π*I/2) = upperIncGamma a (I*z) := by
-    rw [upperIncGammaOnLog_eq_upperIncGamma, exp_add_pi_I_half, Complex.exp_log hz0]
+  have hp : upperIncompleteGammaOnLog a (log z+π*I/2) = upperIncompleteGamma a (I*z) := by
+    rw [upperIncompleteGammaOnLog_eq_upperIncompleteGamma, exp_add_pi_I_half, Complex.exp_log hz0]
     · simp [Complex.log_im]; linarith [Real.pi_pos]
     · simp [Complex.log_im]; linarith [Real.pi_pos]
   simp only [genSinIntTail, genCosIntTail, genSinIntTailOnLog, genCosIntTailOnLog, hm, hp]
@@ -426,9 +430,9 @@ theorem genTrigTail_eq_upperIncGamma (a : ℂ) {z : ℂ} (hz : 0 < z.re) :
 theorem tendsto_genTrigTail_add_ofReal {a : ℂ} (ha : a.re < 1) (z : ℂ) :
     Tendsto (fun t : ℝ => genSinIntTail a (z+t)) atTop (𝓝 0) ∧
     Tendsto (fun t : ℝ => genCosIntTail a (z+t)) atTop (𝓝 0) := by
-  have hm := (tendsto_upperIncGamma_mul_I_add_ofReal ha z (ε := -1) (Or.inr rfl)).const_mul
+  have hm := (tendsto_upperIncompleteGamma_mul_I_add_ofReal ha z (ε := -1) (Or.inr rfl)).const_mul
       (exp (π*I*a/2))
-  have hp := (tendsto_upperIncGamma_mul_I_add_ofReal ha z (ε := 1) (Or.inl rfl)).const_mul
+  have hp := (tendsto_upperIncompleteGamma_mul_I_add_ofReal ha z (ε := 1) (Or.inl rfl)).const_mul
       (exp (-π*I*a/2))
   rw [mul_zero] at hm hp
   constructor
@@ -436,19 +440,19 @@ theorem tendsto_genTrigTail_add_ofReal {a : ℂ} (ha : a.re < 1) (z : ℂ) :
     rw [sub_zero, zero_div] at h
     refine h.congr' ?_
     filter_upwards [eventually_re_add_ofReal_pos z] with t ht
-    rw [(genTrigTail_eq_upperIncGamma a ht).1]; push_cast; ring_nf
+    rw [(genTrigTail_eq_upperIncompleteGamma a ht).1]; push_cast; ring_nf
   · have h := (hm.add hp).div_const 2
     rw [add_zero, zero_div] at h
     refine h.congr' ?_
     filter_upwards [eventually_re_add_ofReal_pos z] with t ht
-    rw [(genTrigTail_eq_upperIncGamma a ht).2]; push_cast; ring_nf
+    rw [(genTrigTail_eq_upperIncompleteGamma a ht).2]; push_cast; ring_nf
 
 /-- `∫₀^R t^{a-1} e^{iεt} dt = (-iε)^{-a} (Γ(a) - Γ(a, -iεR))` for `R > 0`. -/
 theorem GeneralizedTrigIntegrals.integral_rpow_mul_exp_I {a : ℂ} (ha0 : 0 < a.re) {ε : ℝ}
     (hε : ε=1 ∨ ε = -1)
     {R : ℝ} (hR : 0 < R) :
     (∫ t in (0:ℝ)..R, (t : ℂ)^(a-1)*exp (ε*I*t)) =
-      (-(ε*I))^(-a) * (Gamma a - upperIncGamma a (-(ε*I)*R)) := by
+      (-(ε*I))^(-a) * (Gamma a - upperIncompleteGamma a (-(ε*I)*R)) := by
   have ha' : ∀ k : ℕ, a ≠ -k := fun k hk => by
     have := congrArg Complex.re hk
     simp at this
@@ -473,9 +477,9 @@ theorem GeneralizedTrigIntegrals.integral_rpow_mul_exp_I {a : ℂ} (ha0 : 0 < a.
     rw [ofReal_mul, mul_cpow_ofReal_nonneg hR.le hs.1]
     ring_nf
   rw [hsub, intervalIntegral.integral_congr hpt, intervalIntegral.integral_const_mul]
-  have hsc := scIncGamma_integral ha0 (-(ε*I)*R)
-  have hQ := normIncGammaQContinued_eq ha' hw0
-  rw [normIncGammaQContinued, normIncGammaPContinued, DLMF.Statistical.normIncGammaQ, hsc] at hQ
+  have hsc := tricomiIncompleteGamma_integral ha0 (-(ε*I)*R)
+  have hQ := regularizedIncompleteGammaQ_eq ha' hw0
+  rw [regularizedIncompleteGammaQ, regularizedGamma, hsc] at hQ
   have hpow : (-(ε*I)*(R:ℂ))^a = (-(ε*I))^a * (R:ℂ)^a := by
     rw [mul_comm, ofReal_mul_cpow_of_pos hR hc0, mul_comm]
   rw [hpow] at hQ
@@ -486,7 +490,7 @@ theorem GeneralizedTrigIntegrals.integral_rpow_mul_exp_I {a : ℂ} (ha0 : 0 < a.
     have : (-(ε*I) : ℂ)^a ≠ 0 := by rw [cpow_def_of_ne_zero hc0]; exact Complex.exp_ne_zero _
     rw [cpow_neg, inv_mul_cancel₀ this]
   set J := ∫ (x : ℝ) in (0:ℝ)..1, (x:ℂ) ^ (a - 1) * exp (-(-(ε * I) * R) * x)
-  have hU : upperIncGamma a (-(ε*I)*R) = Gamma a - (-(ε*I))^a * (R:ℂ)^a * J := by
+  have hU : upperIncompleteGamma a (-(ε*I)*R) = Gamma a - (-(ε*I))^a * (R:ℂ)^a * J := by
     rw [eq_div_iff hG0] at hQ
     have e : (1 - (-(ε*I))^a * (R:ℂ)^a * (1 / Gamma a * J)) * Gamma a =
         Gamma a - (-(ε*I))^a * (R:ℂ)^a * J := by field_simp
@@ -501,7 +505,7 @@ theorem gamma_rotated_oscillatory_integral {a : ℂ} (ha0 : 0 < a.re) (ha1 : a.r
     (hε : ε=1 ∨ ε = -1) :
     HasIntegralAtTop (fun t : ℝ => (t : ℂ)^(a-1)*exp (ε*I*t)) 0 (exp (ε*π*I*a/2)*Gamma a) := by
   have hε' : -ε = 1 ∨ -ε = -1 := by rcases hε with rfl | rfl <;> simp
-  have hT := tendsto_upperIncGamma_mul_I_add_ofReal ha1 0 hε'
+  have hT := tendsto_upperIncompleteGamma_mul_I_add_ofReal ha1 0 hε'
   have hc : (-(ε*I) : ℂ)^(-a) = exp (ε*π*I*a/2) := by
     have hc0 : (-(ε*I) : ℂ) ≠ 0 := by rcases hε with rfl | rfl <;> simp
     rw [cpow_def_of_ne_zero hc0]
@@ -592,12 +596,12 @@ theorem GeneralizedTrigIntegrals.genSin_add_tail {a : ℂ} (ha : ∀ n : ℕ, a 
     {z : ℂ} (hz : z ≠ 0) :
     genSinInt a z + genSinIntTail a z = Gamma a * sin (π*a/2) := by
   have hG := Gamma_ne_zero ha
-  have hs₁ := scIncGamma_hasSum_alternating ha (-I*z)
-  have hs₂ := scIncGamma_hasSum_alternating ha (I*z)
+  have hs₁ := tricomiIncompleteGamma_hasSum_alternating ha (-I*z)
+  have hs₂ := tricomiIncompleteGamma_hasSum_alternating ha (I*z)
   have hD := (hs₁.sub hs₂).mul_left (Gamma a/(2*I))
   have hodd : HasSum (fun m : ℕ => GeneralizedTrigIntegrals.trigTerm z 1 ∅ m a)
-      (Gamma a/(2*I)*(DLMF.Statistical.scIncGamma a (-I*z) -
-          DLMF.Statistical.scIncGamma a (I*z))) := by
+      (Gamma a/(2*I)*(DLMF.Statistical.tricomiIncompleteGamma a (-I*z) -
+          DLMF.Statistical.tricomiIncompleteGamma a (I*z))) := by
     have hinj : Function.Injective (fun m : ℕ => 2*m+1) := fun m n h => by simp at h; omega
     rw [← hinj.hasSum_iff] at hD
     · refine hD.congr_fun fun m => ?_
@@ -622,11 +626,11 @@ theorem GeneralizedTrigIntegrals.genSin_add_tail {a : ℂ} (ha : ∀ n : ℕ, a 
       rw [show (-(-I*z)) = I*z by ring, show (-(I*z)) = (-I)*z by ring, mul_pow, mul_pow, hI2, hnI2,
         sub_self, mul_zero]
   have hsi : genSinInt a z = exp (a*log z) *
-      (Gamma a/(2*I)*(DLMF.Statistical.scIncGamma a (-I*z) -
-      DLMF.Statistical.scIncGamma a (I*z))) := by
+      (Gamma a/(2*I)*(DLMF.Statistical.tricomiIncompleteGamma a (-I*z) -
+      DLMF.Statistical.tricomiIncompleteGamma a (I*z))) := by
     rw [genSinInt, GeneralizedTrigIntegrals.genSinIntOnLog_eq, Complex.exp_log hz, hodd.tsum_eq]
-  rw [hsi, genSinIntTail, genSinIntTailOnLog, upperIncGammaOnLog_eq_Gamma_sub ha,
-    upperIncGammaOnLog_eq_Gamma_sub ha, lowerIncGammaOnLog, lowerIncGammaOnLog,
+  rw [hsi, genSinIntTail, genSinIntTailOnLog, upperIncompleteGammaOnLog_eq_Gamma_sub ha,
+    upperIncompleteGammaOnLog_eq_Gamma_sub ha, lowerIncompleteGammaOnLog, lowerIncompleteGammaOnLog,
     GeneralizedTrigIntegrals.exp_log_sub_half_pi hz,
         GeneralizedTrigIntegrals.exp_log_add_half_pi hz,
     show a*(log z - π*I/2) = a*log z + (-π*I*a/2) by ring,
@@ -639,19 +643,20 @@ theorem GeneralizedTrigIntegrals.genSin_add_tail {a : ℂ} (ha : ∀ n : ℕ, a 
   set E' := exp (-π*I*a/2)
   set X := exp (a*log z)
   field_simp
-  linear_combination (-(X*DLMF.Statistical.scIncGamma a (-(I*z))) +
-      X*DLMF.Statistical.scIncGamma a (I*z))*hE + (E - E')*I_sq
+  linear_combination (-(X*DLMF.Statistical.tricomiIncompleteGamma a (-(I*z))) +
+      X*DLMF.Statistical.tricomiIncompleteGamma a (I*z))*hE + (E - E')*I_sq
 
 /-- `ci(a,z) + Ci(a,z) = Γ(a) cos(πa/2)` at regular parameters. -/
 theorem GeneralizedTrigIntegrals.genCos_add_tail {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n)
     {z : ℂ} (hz : z ≠ 0) :
     genCosInt a z + genCosIntTail a z = Gamma a * cos (π*a/2) := by
   have hG := Gamma_ne_zero ha
-  have hs₁ := scIncGamma_hasSum_alternating ha (-I*z)
-  have hs₂ := scIncGamma_hasSum_alternating ha (I*z)
+  have hs₁ := tricomiIncompleteGamma_hasSum_alternating ha (-I*z)
+  have hs₂ := tricomiIncompleteGamma_hasSum_alternating ha (I*z)
   have hD := (hs₁.add hs₂).mul_left (Gamma a/2)
   have heven : HasSum (fun m : ℕ => GeneralizedTrigIntegrals.trigTerm z 0 ∅ m a)
-      (Gamma a/2*(DLMF.Statistical.scIncGamma a (-I*z) + DLMF.Statistical.scIncGamma a (I*z))) := by
+      (Gamma a/2*(DLMF.Statistical.tricomiIncompleteGamma a (-I*z) +
+          DLMF.Statistical.tricomiIncompleteGamma a (I*z))) := by
     have hinj : Function.Injective (fun m : ℕ => 2*m) := fun m n h => by simp at h; omega
     rw [← hinj.hasSum_iff] at hD
     · refine hD.congr_fun fun m => ?_
@@ -676,10 +681,11 @@ theorem GeneralizedTrigIntegrals.genCos_add_tail {a : ℂ} (ha : ∀ n : ℕ, a 
       rw [show (-(-I*z)) = I*z by ring, show (-(I*z)) = (-I)*z by ring, mul_pow, mul_pow, hI2, hnI2]
       ring
   have hci : genCosInt a z = exp (a*log z) *
-      (Gamma a/2*(DLMF.Statistical.scIncGamma a (-I*z) + DLMF.Statistical.scIncGamma a (I*z))) := by
+      (Gamma a/2*(DLMF.Statistical.tricomiIncompleteGamma a (-I*z) +
+          DLMF.Statistical.tricomiIncompleteGamma a (I*z))) := by
     rw [genCosInt, GeneralizedTrigIntegrals.genCosIntOnLog_eq, Complex.exp_log hz, heven.tsum_eq]
-  rw [hci, genCosIntTail, genCosIntTailOnLog, upperIncGammaOnLog_eq_Gamma_sub ha,
-    upperIncGammaOnLog_eq_Gamma_sub ha, lowerIncGammaOnLog, lowerIncGammaOnLog,
+  rw [hci, genCosIntTail, genCosIntTailOnLog, upperIncompleteGammaOnLog_eq_Gamma_sub ha,
+    upperIncompleteGammaOnLog_eq_Gamma_sub ha, lowerIncompleteGammaOnLog, lowerIncompleteGammaOnLog,
     GeneralizedTrigIntegrals.exp_log_sub_half_pi hz,
         GeneralizedTrigIntegrals.exp_log_add_half_pi hz,
     show a*(log z - π*I/2) = a*log z + (-π*I*a/2) by ring,
@@ -692,15 +698,15 @@ theorem GeneralizedTrigIntegrals.genCos_add_tail {a : ℂ} (ha : ∀ n : ℕ, a 
   set E' := exp (-π*I*a/2)
   set X := exp (a*log z)
   field_simp
-  linear_combination (-(X*DLMF.Statistical.scIncGamma a (-(I*z))) -
-      X*DLMF.Statistical.scIncGamma a (I*z))*hE
+  linear_combination (-(X*DLMF.Statistical.tricomiIncompleteGamma a (-(I*z))) -
+      X*DLMF.Statistical.tricomiIncompleteGamma a (I*z))*hE
 
 /-- Continuity of the indicated function: `Continuous fun b => genSinIntTail b z`. -/
 theorem GeneralizedTrigIntegrals.genSinIntTail_continuous (z : ℂ) : Continuous fun b =>
     genSinIntTail b z := by
   unfold genSinIntTail genSinIntTailOnLog
-  have h1 := continuous_upperIncGammaOnLog_param (log z - π*I/2)
-  have h2 := continuous_upperIncGammaOnLog_param (log z + π*I/2)
+  have h1 := continuous_upperIncompleteGammaOnLog_param (log z - π*I/2)
+  have h2 := continuous_upperIncompleteGammaOnLog_param (log z + π*I/2)
   exact (((by fun_prop : Continuous fun b : ℂ => exp (π*I*b/2)).mul h1).sub
     ((by fun_prop : Continuous fun b : ℂ => exp (-π*I*b/2)).mul h2)).div_const _
 
@@ -708,8 +714,8 @@ theorem GeneralizedTrigIntegrals.genSinIntTail_continuous (z : ℂ) : Continuous
 theorem GeneralizedTrigIntegrals.genCosIntTail_continuous (z : ℂ) : Continuous fun b =>
     genCosIntTail b z := by
   unfold genCosIntTail genCosIntTailOnLog
-  have h1 := continuous_upperIncGammaOnLog_param (log z - π*I/2)
-  have h2 := continuous_upperIncGammaOnLog_param (log z + π*I/2)
+  have h1 := continuous_upperIncompleteGammaOnLog_param (log z - π*I/2)
+  have h2 := continuous_upperIncompleteGammaOnLog_param (log z + π*I/2)
   exact (((by fun_prop : Continuous fun b : ℂ => exp (π*I*b/2)).mul h1).add
     ((by fun_prop : Continuous fun b : ℂ => exp (-π*I*b/2)).mul h2)).div_const _
 
@@ -765,16 +771,17 @@ theorem genCosInt_value_at_infinity {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n : �
   rw [zero_add, genCosInt_complement ha (ofReal_ne_zero.mpr hx.ne')]
 
 /-- Ein at the negative rotated argument, by the parities of Cin and Si. -/
-theorem expIntEin_neg_mul_I_eq (z : ℂ) : expIntEin (-I*z)=cosIntCin z-I*sinInt z := by
-  have h := expIntEin_mul_I (-z)
-  rw [show I*(-z)=-I*z by ring, cosIntCin_even, sinInt_odd] at h
+theorem expIntegralEin_neg_mul_I_eq (z : ℂ) : expIntegralEin (-I*z)=cosIntegralCin
+    z-I*sinIntegral z := by
+  have h := expIntegralEin_mul_I (-z)
+  rw [show I*(-z)=-I*z by ring, cosIntegralCin_even, sinIntegral_odd] at h
   rw [h]; ring
 
-/-- Identity under the stated parameter and domain assumptions: `genSinIntTail 0 z = -sinIntTail z
-∧ genCosIntTail 0 z = -cosInt z`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`genSinIntTail 0 z = -sinIntegralTail z ∧ genCosIntTail 0 z = -cosIntegral z`. -/
 @[dlmf 8.21.E10]
 theorem genTrig_order_zero {z : ℂ} (hz : z ≠ 0) :
-    genSinIntTail 0 z = -sinIntTail z ∧ genCosIntTail 0 z = -cosInt z := by
+    genSinIntTail 0 z = -sinIntegralTail z ∧ genCosIntTail 0 z = -cosIntegral z := by
   have h1 : exp (log z-π*I/2)=-I*z := by
     rw [Complex.exp_sub, Complex.exp_log hz, show (π:ℂ)*I/2=(π/2:ℂ)*I by ring,
       Complex.exp_mul_I]
@@ -786,18 +793,19 @@ theorem genTrig_order_zero {z : ℂ} (hz : z ≠ 0) :
     simp [Complex.cos_pi_div_two, Complex.sin_pi_div_two]
     ring
   simp only [genSinIntTail, genCosIntTail, genSinIntTailOnLog, genCosIntTailOnLog, mul_zero,
-    zero_div, Complex.exp_zero, one_mul, upperIncGammaOnLog_zero, h1, h2, expIntEin_mul_I,
-    expIntEin_neg_mul_I_eq, sinIntTail, cosInt]
+    zero_div, Complex.exp_zero, one_mul, upperIncompleteGammaOnLog_zero, h1, h2,
+        expIntegralEin_mul_I,
+    expIntegralEin_neg_mul_I_eq, sinIntegralTail, cosIntegral]
   constructor
   · field_simp; ring_nf
   · ring
 
-/-- Identity under the stated parameter and domain assumptions: `genSinInt 0 z=sinInt z`. -/
+/-- Identity under the stated parameter and domain assumptions: `genSinInt 0 z=sinIntegral z`. -/
 @[dlmf 8.21.E11]
 theorem genSinInt_order_zero {z : ℂ} (hz : z ≠ 0) :
-    genSinInt 0 z=sinInt z := by
+    genSinInt 0 z=sinIntegral z := by
   simp only [genSinInt,genSinIntOnLog,zero_mul,Complex.exp_zero,one_mul,add_zero]
-  unfold sinInt
+  unfold sinIntegral
   apply tsum_congr
   intro k
   rw [show (2*k+1:ℂ)*log z=((2*k+1:ℕ):ℂ)*log z by push_cast; ring, Complex.exp_nat_mul,
@@ -843,10 +851,11 @@ theorem genSinIntOnLog_hasSum (a w : ℂ) :
     ring
 
 /-- Identity under the stated parameter and domain assumptions: `genCosIntOnLog a
-w+ε*I*genSinIntOnLog a w=exp (ε*π*I*a/2)*lowerIncGammaOnLog a (w-ε*π*I/2)`. -/
+w+ε*I*genSinIntOnLog a w=exp (ε*π*I*a/2)*lowerIncompleteGammaOnLog a (w-ε*π*I/2)`. -/
 @[dlmf 8.21.E2]
 theorem genLowerTrig_gamma {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (w : ℂ) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
-    genCosIntOnLog a w+ε*I*genSinIntOnLog a w=exp (ε*π*I*a/2)*lowerIncGammaOnLog a (w-ε*π*I/2) := by
+    genCosIntOnLog a w+ε*I*genSinIntOnLog a w=exp (ε*π*I*a/2)*lowerIncompleteGammaOnLog a
+        (w-ε*π*I/2) := by
   have ht : ((ε:ℂ)*I)^2= -1 := by
     rcases hε with rfl | rfl <;> norm_num [Complex.I_sq]
   have he : -exp (w-ε*π*I/2)=((ε:ℂ)*I)*exp w := by
@@ -872,16 +881,17 @@ theorem genLowerTrig_gamma {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (w : ℂ) {ε 
     rw [pow_succ,pow_mul,ht]
     push_cast
     ring
-  have hs := (scIncGamma_hasSum_alternating ha (exp (w-ε*π*I/2))).mul_left
+  have hs := (tricomiIncompleteGamma_hasSum_alternating ha (exp (w-ε*π*I/2))).mul_left
     (Gamma a*exp (a*w))
-  have hfull : HasSum f (Gamma a*exp (a*w)*DLMF.Statistical.scIncGamma a (exp (w-ε*π*I/2))) := by
+  have hfull : HasSum f
+      (Gamma a*exp (a*w)*DLMF.Statistical.tricomiIncompleteGamma a (exp (w-ε*π*I/2))) := by
     refine hs.congr_fun fun k=>?_
     dsimp [f]
     rw [he,mul_pow]
     field_simp [Gamma_ne_zero ha]
     simp only [mul_pow]
   have hsum := (hce.even_add_odd hso).unique hfull
-  rw [hsum,lowerIncGammaOnLog]
+  rw [hsum,lowerIncompleteGammaOnLog]
   have hp : exp (a*w)=exp (ε*π*I*a/2)*exp (a*(w-ε*π*I/2)) := by
     rw [←exp_add]
     congr 1

@@ -19,9 +19,9 @@ Fresnel integrals `C`, `S` and Dawson's integral `F` on the real line.
 
 ## Main results
 
-* `Real.fresnelCosInt_add_I_mul_fresnelSinInt`: `C(x) + i S(x) = (1+i)/2 · erf(√π (1-i) x / 2)`
+* `Real.fresnelC_add_I_mul_fresnelS`: `C(x) + i S(x) = (1+i)/2 · erf(√π (1-i) x / 2)`
   (DLMF 7.5.8).
-* `Real.tendsto_fresnelCosInt_atTop`, `Real.tendsto_fresnelSinInt_atTop`: `C(∞) = S(∞) = 1/2`
+* `Real.tendsto_fresnelC_atTop`, `Real.tendsto_fresnelS_atTop`: `C(∞) = S(∞) = 1/2`
   (DLMF 7.2.9), from the generalized Fresnel integrals of `DLMF.Gamma`.
 * `Real.dawsonF_eq_kummerM`: `F(x) = x M(1, 3/2, -x²)`.
 * `Real.hasAsymptoticExpansion_dawsonF`: `F(x) ~ ∑ (1/2)_k / (2 x^{2k+1})`, from the expansion of
@@ -42,7 +42,7 @@ noncomputable section
 namespace DLMF.Confluent
 
 /-- `C'(x) = cos(πx²/2)` for the Fresnel integral `C`. -/
-theorem Real.hasDerivAt_fresnelCosInt (x : ℝ) : HasDerivAt Real.fresnelCosInt
+theorem Real.hasDerivAt_fresnelC (x : ℝ) : HasDerivAt Real.fresnelC
     (Real.cos (π * x ^ 2 / 2)) x :=
   intervalIntegral.integral_hasDerivAt_right ((by fun_prop : Continuous fun t : ℝ =>
     Real.cos (π * t ^ 2 / 2)).intervalIntegrable _ _)
@@ -50,7 +50,7 @@ theorem Real.hasDerivAt_fresnelCosInt (x : ℝ) : HasDerivAt Real.fresnelCosInt
       ).stronglyMeasurableAtFilter _ _) (by fun_prop)
 
 /-- `S'(x) = sin(πx²/2)` for the Fresnel integral `S`. -/
-theorem Real.hasDerivAt_fresnelSinInt (x : ℝ) : HasDerivAt Real.fresnelSinInt
+theorem Real.hasDerivAt_fresnelS (x : ℝ) : HasDerivAt Real.fresnelS
     (Real.sin (π * x ^ 2 / 2)) x :=
   intervalIntegral.integral_hasDerivAt_right ((by fun_prop : Continuous fun t : ℝ =>
     Real.sin (π * t ^ 2 / 2)).intervalIntegrable _ _)
@@ -60,8 +60,8 @@ theorem Real.hasDerivAt_fresnelSinInt (x : ℝ) : HasDerivAt Real.fresnelSinInt
 /-- **Fresnel integrals through the error function** (DLMF 7.5.7, 7.5.8):
 `C(x) + i S(x) = (1+i)/2 · erf(√π (1-i) x / 2)`. -/
 @[dlmf 7.5.E8]
-theorem Real.fresnelCosInt_add_I_mul_fresnelSinInt (x : ℝ) :
-    (Real.fresnelCosInt x : ℂ) + I * Real.fresnelSinInt x =
+theorem Real.fresnelC_add_I_mul_fresnelS (x : ℝ) :
+    (Real.fresnelC x : ℂ) + I * Real.fresnelS x =
       (1 + I) / 2 * erf ((Real.sqrt π : ℂ) * (1 - I) / 2 * x) := by
   set c : ℂ := (Real.sqrt π : ℂ) * (1 - I) / 2 with hc
   have hπ : (Real.sqrt π : ℂ) ≠ 0 :=
@@ -88,7 +88,7 @@ theorem Real.fresnelCosInt_add_I_mul_fresnelSinInt (x : ℝ) :
   have hint := intervalIntegral.integral_eq_sub_of_hasDerivAt (fun t _ => hderiv t)
     ((by fun_prop : Continuous fun t : ℝ => exp (I * (π * t ^ 2 / 2))).intervalIntegrable 0 x)
   rw [Complex.ofReal_zero, mul_zero, erf_zero, mul_zero, sub_zero] at hint
-  rw [← hint, Real.fresnelCosInt, Real.fresnelSinInt, ← intervalIntegral.integral_ofReal,
+  rw [← hint, Real.fresnelC, Real.fresnelS, ← intervalIntegral.integral_ofReal,
     ← intervalIntegral.integral_ofReal, ← intervalIntegral.integral_const_mul,
     ← intervalIntegral.integral_add ((by fun_prop : Continuous fun t : ℝ =>
       ((Real.cos (π * t ^ 2 / 2) : ℝ) : ℂ)).intervalIntegrable 0 x)
@@ -113,13 +113,13 @@ theorem integral_comp_pi_mul_sq_div_two (g : ℝ → ℝ) (x : ℝ) :
 
 /-- `C(x) → 1/2` as `x → +∞` (DLMF 7.2.9). -/
 @[dlmf 7.2.E9]
-theorem Real.tendsto_fresnelCosInt_atTop : Tendsto Real.fresnelCosInt atTop (𝓝 (1 / 2)) := by
+theorem Real.tendsto_fresnelC_atTop : Tendsto Real.fresnelC atTop (𝓝 (1 / 2)) := by
   have hc : 0 < Real.sqrt (π / 2) := Real.sqrt_pos.mpr (by positivity)
   have h := ((DLMF.Gamma.Gamma_cos_pow 2 le_rfl).comp
     (tendsto_id.const_mul_atTop hc)).const_mul (Real.sqrt (π / 2))⁻¹
   convert h using 1
   · funext x
-    simp only [Function.comp_apply, id, Real.fresnelCosInt]
+    simp only [Function.comp_apply, id, Real.fresnelC]
     rw [integral_comp_pi_mul_sq_div_two Real.cos x]
   · rw [show (1 : ℝ) + 1 / (2 : ℕ) = 1 / 2 + 1 by norm_num, Real.Gamma_add_one (by norm_num),
       Real.Gamma_one_half_eq, show π / (2 * ((2 : ℕ) : ℝ)) = π / 4 by norm_num,
@@ -131,13 +131,13 @@ theorem Real.tendsto_fresnelCosInt_atTop : Tendsto Real.fresnelCosInt atTop (�
 
 /-- `S(x) → 1/2` as `x → +∞` (DLMF 7.2.9). -/
 @[dlmf 7.2.E9]
-theorem Real.tendsto_fresnelSinInt_atTop : Tendsto Real.fresnelSinInt atTop (𝓝 (1 / 2)) := by
+theorem Real.tendsto_fresnelS_atTop : Tendsto Real.fresnelS atTop (𝓝 (1 / 2)) := by
   have hc : 0 < Real.sqrt (π / 2) := Real.sqrt_pos.mpr (by positivity)
   have h := ((DLMF.Gamma.Gamma_sin_pow 2 le_rfl).comp
     (tendsto_id.const_mul_atTop hc)).const_mul (Real.sqrt (π / 2))⁻¹
   convert h using 1
   · funext x
-    simp only [Function.comp_apply, id, Real.fresnelSinInt]
+    simp only [Function.comp_apply, id, Real.fresnelS]
     rw [integral_comp_pi_mul_sq_div_two Real.sin x]
   · rw [show (1 : ℝ) + 1 / (2 : ℕ) = 1 / 2 + 1 by norm_num, Real.Gamma_add_one (by norm_num),
       Real.Gamma_one_half_eq, show π / (2 * ((2 : ℕ) : ℝ)) = π / 4 by norm_num,
@@ -189,7 +189,7 @@ theorem Real.dawsonF_eq_kummerM (x : ℝ) :
 `F(x) ~ ∑ (1/2)_k / (2 x^{2k+1})` as `x → +∞`. -/
 theorem Real.hasAsymptoticExpansion_dawsonF :
     HasAsymptoticExpansion atTop (fun (k : ℕ) (x : ℝ) => (x : ℂ) ^ (-1 - 2 * (k : ℂ)))
-      (fun k => poch (1 / 2) k / 2) (fun x : ℝ => (Real.dawsonF x : ℂ)) := by
+      (fun k => pochhammer (1 / 2) k / 2) (fun x : ℝ => (Real.dawsonF x : ℂ)) := by
   have hsq : Tendsto (fun x : ℝ => x ^ 2) atTop atTop := tendsto_pow_atTop two_ne_zero
   have hπ : (Real.sqrt π : ℂ) ≠ 0 :=
     Complex.ofReal_ne_zero.mpr (Real.sqrt_pos.mpr Real.pi_pos).ne'
@@ -218,7 +218,7 @@ theorem Real.hasAsymptoticExpansion_dawsonF :
   · funext k
     simp only [Pi.smul_apply, smul_eq_mul, kummerCoeff]
     rw [show (1 : ℂ) - 1 / 2 = 1 / 2 by norm_num, show (3 / 2 : ℂ) - 1 / 2 = 1 by norm_num,
-      poch_nat_one, Complex.Gamma_one_half_eq_sqrt, show (3 / 2 : ℂ) = 1 / 2 + 1 by norm_num,
+      pochhammer_nat_one, Complex.Gamma_one_half_eq_sqrt, show (3 / 2 : ℂ) = 1 / 2 + 1 by norm_num,
       Complex.Gamma_add_one _ (by norm_num), Complex.Gamma_one_half_eq_sqrt]
     have hf : (k.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr k.factorial_ne_zero
     field_simp

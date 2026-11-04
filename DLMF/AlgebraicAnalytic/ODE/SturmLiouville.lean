@@ -65,7 +65,7 @@ theorem liouville_normal_form {p q ρ T X u : ℝ → ℝ} {a b lam : ℝ}
     (hq : ContinuousOn q (Ioo a b)) (hpos : ∀ x ∈ Ioo a b, 0 < p x ∧ 0 < ρ x)
     (hT : ∀ x ∈ Ioo a b, HasDerivAt T (Real.sqrt (ρ x / p x)) x)
     (hX : ∀ t ∈ T '' Ioo a b, X t ∈ Ioo a b ∧ T (X t) = t)
-    (hu : IsSturmLiouvilleSolOn p q ρ lam u (Ioo a b)) :
+    (hu : IsSturmLiouvilleSolutionOn p q ρ lam u (Ioo a b)) :
     ∀ t ∈ T '' Ioo a b,
       let m : ℝ → ℝ := fun t => (p (X t) * ρ (X t)) ^ (1 / 4 : ℝ)
       let w : ℝ → ℝ := fun t => u (X t) * m t

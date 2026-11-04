@@ -25,19 +25,20 @@ Laguerre's differential inequality bound the values and zeros.
 
 * `jacobi_bound_at_one`, `jacobi_bound_at_neg_one`, `jacobi_bernstein_bound`,
   `jacobi_weighted_bound`: bounds for Jacobi polynomials (DLMF 18.14.1–18.14.3).
-* `ultrasphPoly_bound_at_one`, `ultrasphPoly_even_bound`, `ultrasphPoly_odd_bound`,
-  `ultrasphPoly_bernstein_bound`: bounds for Gegenbauer polynomials (DLMF 18.14.4–18.14.7).
-* `laguerrePolyL_bound`, `hermitePolyH_bound`: DLMF 18.14.8 and 18.14.9.
-* `jacobi_turan`, `laguerrePolyL_turan`, `laguerrePolyL_turan'`, `hermitePolyH_turan`: Turán's
-  inequalities (DLMF 18.14.11–18.14.13).
-* `jacobi_positive_weighted_sum`, `jacobi_positive_sum`, `laguerrePolyL_positive_weighted_sum`:
-  positive sums (DLMF 18.14.25–18.14.27).
+* `ultrasphericalPolynomial_bound_at_one`, `ultrasphericalPolynomial_even_bound`,
+  `ultrasphericalPolynomial_odd_bound`, `ultrasphericalPolynomial_bernstein_bound`: bounds for
+  Gegenbauer polynomials (DLMF 18.14.4–18.14.7).
+* `laguerrePolynomialL_bound`, `hermitePolynomialH_bound`: DLMF 18.14.8 and 18.14.9.
+* `jacobi_turan`, `laguerrePolynomialL_turan`, `laguerrePolynomialL_turan'`,
+  `hermitePolynomialH_turan`: Turán's inequalities (DLMF 18.14.11–18.14.13).
+* `jacobi_positive_weighted_sum`, `jacobi_positive_sum`,
+  `laguerrePolynomialL_positive_weighted_sum`: positive sums (DLMF 18.14.25–18.14.27).
 * `jacobi_darboux_asymptotic`: the large-`n` asymptotic form of Jacobi polynomials (DLMF §18.15).
-* `jacobi_zeros`, `laguerrePolyL_zeros`, `hermitePolyH_zeros`: the zeros are real, simple and in
-  the interval of orthogonality (DLMF §18.16).
+* `jacobi_zeros`, `laguerrePolynomialL_zeros`, `hermitePolynomialH_zeros`: the zeros are real,
+  simple and in the interval of orthogonality (DLMF §18.16).
 * `laguerre_inequality`: Laguerre's inequality for real polynomials with only real zeros.
-* `laguerrePolyL_zero_lower_bound`, `laguerrePolyL_zero_upper_bound`: bounds for the zeros of
-  Laguerre polynomials (DLMF 18.16.12–18.16.13).
+* `laguerrePolynomialL_zero_lower_bound`, `laguerrePolynomialL_zero_upper_bound`: bounds for the
+  zeros of Laguerre polynomials (DLMF 18.16.12–18.16.13).
 
 ## Implementation notes
 
@@ -66,7 +67,7 @@ theorem jacobiPolyPR_ode {α : ℝ} (hα : -1 < α) (β : ℝ) (n : ℕ) (x : �
       n * (n + α + β + 1) * (jacobiPolyPR α β n).eval x = 0 := by
   set p := jacobiPolyPR α β n
   set q := p.map (algebraMap ℝ ℂ)
-  have hfun : jacobiPolyP (α : ℂ) β n = fun z => q.eval z :=
+  have hfun : jacobiPolynomialP (α : ℂ) β n = fun z => q.eval z :=
     funext fun z => (eval_map_jacobiPolyPR hα β n z).symm
   have hd : deriv (fun z => q.eval z) = fun z => (derivative q).eval z :=
     funext fun z => Polynomial.deriv q
@@ -76,32 +77,32 @@ theorem jacobiPolyPR_ode {α : ℝ} (hα : -1 < α) (β : ℝ) (n : ℕ) (x : �
   exact_mod_cast h
 
 /-- Positivity and monotonicity of real Pochhammer symbols. -/
-theorem poch_ofReal_le {r s : ℝ} (hr : 0 < r) (hrs : r ≤ s) (n : ℕ) :
-    ∃ u v : ℝ, 0 < u ∧ u ≤ v ∧ poch (r : ℂ) n = u ∧ poch (s : ℂ) n = v := by
+theorem pochhammer_ofReal_le {r s : ℝ} (hr : 0 < r) (hrs : r ≤ s) (n : ℕ) :
+    ∃ u v : ℝ, 0 < u ∧ u ≤ v ∧ pochhammer (r : ℂ) n = u ∧ pochhammer (s : ℂ) n = v := by
   induction n with
-  | zero => exact ⟨1, 1, one_pos, le_rfl, by simp [poch_zero], by simp [poch_zero]⟩
+  | zero => exact ⟨1, 1, one_pos, le_rfl, by simp [pochhammer_zero], by simp [pochhammer_zero]⟩
   | succ k ih =>
     obtain ⟨u, v, hu, huv, h1, h2⟩ := ih
     refine ⟨u * (r + k), v * (s + k), by positivity, ?_, ?_, ?_⟩
     · exact mul_le_mul huv (by linarith) (by positivity) (by linarith)
-    · rw [poch_succ, h1]; push_cast; ring
-    · rw [poch_succ, h2]; push_cast; ring
+    · rw [pochhammer_succ, h1]; push_cast; ring
+    · rw [pochhammer_succ, h2]; push_cast; ring
 
-/-- Estimate under the stated parameter and domain assumptions: `‖jacobiPolyP α β n x‖ ≤ (poch (α
-+ 1) n).re / n.factorial`. -/
+/-- Estimate under the stated parameter and domain assumptions:
+`‖jacobiPolynomialP α β n x‖ ≤ (pochhammer (α + 1) n).re / n.factorial`. -/
 @[dlmf 18.14.E1]
 theorem jacobi_bound_at_one {α β x : ℝ} (hαβ : β ≤ α) (hβ : -1 < β) (hα : -1 / 2 ≤ α) (hx : |x| ≤ 1)
     (n : ℕ) :
-    ‖jacobiPolyP α β n x‖ ≤ (poch (α + 1) n).re / n.factorial := by
+    ‖jacobiPolynomialP α β n x‖ ≤ (pochhammer (α + 1) n).re / n.factorial := by
   have hα1 : -1 < α := by linarith
-  obtain ⟨u, v, hu, huv, h1, h2⟩ := poch_ofReal_le (r := β + 1) (s := α + 1) (by linarith)
+  obtain ⟨u, v, hu, huv, h1, h2⟩ := pochhammer_ofReal_le (r := β + 1) (s := α + 1) (by linarith)
     (by linarith) n
   have hpos : (0 : ℝ) < n.factorial := by exact_mod_cast n.factorial_pos
   set p := jacobiPolyPR α β n
-  have hnorm : ∀ t : ℝ, ‖jacobiPolyP α β n t‖ = |p.eval t| := fun t => by
+  have hnorm : ∀ t : ℝ, ‖jacobiPolynomialP α β n t‖ = |p.eval t| := fun t => by
     rw [← eval_jacobiPolyPR hα1, Complex.norm_real, Real.norm_eq_abs]
-  have hone : |p.eval 1| = (poch (α + 1) n).re / n.factorial := by
-    rw [← hnorm, show ((1 : ℝ) : ℂ) = 1 by simp, jacobiPolyP_one ]
+  have hone : |p.eval 1| = (pochhammer (α + 1) n).re / n.factorial := by
+    rw [← hnorm, show ((1 : ℝ) : ℂ) = 1 by simp, jacobiPolynomialP_one ]
     have : ((α : ℂ) + 1) = ((α + 1 : ℝ) : ℂ) := by push_cast; ring
     rw [this, h2, norm_div, Complex.norm_real, Complex.norm_natCast, Real.norm_of_nonneg
       (hu.le.trans huv)]
@@ -109,8 +110,8 @@ theorem jacobi_bound_at_one {α β x : ℝ} (hαβ : β ≤ α) (hβ : -1 < β) 
   have hneg : |p.eval (-1)| ≤ |p.eval 1| := by
     rw [← hnorm, ← hnorm, show ((-1 : ℝ) : ℂ) = -1 by simp,
       jacobi_reflection (by simpa using hα1) (by simpa using hβ),
-      show ((1 : ℝ) : ℂ) = 1 by simp, jacobiPolyP_one,
-      jacobiPolyP_one ]
+      show ((1 : ℝ) : ℂ) = 1 by simp, jacobiPolynomialP_one,
+      jacobiPolynomialP_one ]
     have e1 : ((β : ℂ) + 1) = ((β + 1 : ℝ) : ℂ) := by push_cast; ring
     have e2 : ((α : ℂ) + 1) = ((α + 1 : ℝ) : ℂ) := by push_cast; ring
     rw [e1, e2, h1, h2, norm_mul, norm_pow, norm_neg, norm_one, one_pow, one_mul, norm_div,
@@ -139,62 +140,65 @@ theorem jacobi_bound_at_one {α β x : ℝ} (hαβ : β ≤ α) (hβ : -1 < β) 
   · refine jacobi_ode_abs_le_right hlam (fun t ht => ?_) hy hy' hode x hxI
     nlinarith [ht.2]
 
-/-- Estimate under the stated parameter and domain assumptions: `‖jacobiPolyP α β n x‖ ≤ (poch (β
-+ 1) n).re / n.factorial`. -/
+/-- Estimate under the stated parameter and domain assumptions:
+`‖jacobiPolynomialP α β n x‖ ≤ (pochhammer (β + 1) n).re / n.factorial`. -/
 @[dlmf 18.14.E2]
 theorem jacobi_bound_at_neg_one {α β x : ℝ} (hαβ : α ≤ β) (hα : -1 < α) (hβ : -1 / 2 ≤ β)
     (hx : |x| ≤ 1) (n : ℕ) :
-    ‖jacobiPolyP α β n x‖ ≤ (poch (β + 1) n).re / n.factorial := by
+    ‖jacobiPolynomialP α β n x‖ ≤ (pochhammer (β + 1) n).re / n.factorial := by
   rw [show (x : ℂ) = -((-x : ℝ) : ℂ) by push_cast; ring,
     jacobi_reflection (by simpa using hα) (by simpa using hα.trans_le hαβ), norm_mul, norm_pow,
     norm_neg, norm_one, one_pow, one_mul]
   exact jacobi_bound_at_one hαβ hα hβ (by rwa [abs_neg]) n
 
 /-- Estimate under the stated parameter and domain assumptions: `((1 - x) / 2) ^ (α / 2 + 1 / 4) *
-((1 + x) / 2) ^ (β / 2 + 1 / 4) * ‖jacobiPolyP α β n x‖ ≤ Real.Gamma (max α β + n + 1) /
+((1 + x) / 2) ^ (β / 2 + 1 / 4) * ‖jacobiPolynomialP α β n x‖ ≤ Real.Gamma (max α β + n + 1) /
 (Real.sqrt Real.pi * n.factorial * (n + (α + β + 1) / 2) ^ (max α β + 1 / 2))`. -/
 @[dlmf 18.14.E3]
 theorem jacobi_bernstein_bound {α β x : ℝ} (hα : α ∈ Set.Icc (-1 / 2) (1 / 2))
     (hβ : β ∈ Set.Icc (-1 / 2) (1 / 2)) (hx : |x| ≤ 1) (n : ℕ) :
-    ((1 - x) / 2) ^ (α / 2 + 1 / 4) * ((1 + x) / 2) ^ (β / 2 + 1 / 4) * ‖jacobiPolyP α β n x‖ ≤
+    ((1 - x) / 2) ^ (α / 2 + 1 / 4) * ((1 + x) / 2) ^ (β / 2 + 1 / 4) *
+        ‖jacobiPolynomialP α β n x‖ ≤
       Real.Gamma (max α β + n + 1) / (Real.sqrt Real.pi * n.factorial *
         (n + (α + β + 1) / 2) ^ (max α β + 1 / 2)) := by
   sorry
 
 /-- Pochhammer symbols of a positive real are positive reals. -/
-theorem exists_poch_ofReal_eq {r : ℝ} (hr : 0 < r) (k : ℕ) :
-    ∃ s : ℝ, 0 < s ∧ poch (r : ℂ) k = s := by
+theorem exists_pochhammer_ofReal_eq {r : ℝ} (hr : 0 < r) (k : ℕ) :
+    ∃ s : ℝ, 0 < s ∧ pochhammer (r : ℂ) k = s := by
   induction k with
-  | zero => exact ⟨1, one_pos, by simp [poch_zero]⟩
+  | zero => exact ⟨1, one_pos, by simp [pochhammer_zero]⟩
   | succ k ih =>
     obtain ⟨s, hs, hk⟩ := ih
     refine ⟨s * (r + k), by positivity, ?_⟩
-    rw [poch_succ, hk]; push_cast; ring
+    rw [pochhammer_succ, hk]; push_cast; ring
 
-/-- Estimate under the stated parameter and domain assumptions: `‖ultrasphPoly lam n x‖ ≤ (poch (2
+/-- Estimate under the stated parameter and domain assumptions:
+`‖ultrasphericalPolynomial lam n x‖ ≤ (pochhammer (2
 * lam) n).re / n.factorial`. -/
 @[dlmf 18.14.E4]
-theorem ultrasphPoly_bound_at_one {lam x : ℝ} (hlam : 0 < lam) (hx : |x| ≤ 1) (n : ℕ) :
-    ‖ultrasphPoly lam n x‖ ≤ (poch (2 * lam) n).re / n.factorial := by
+theorem ultrasphericalPolynomial_bound_at_one {lam x : ℝ} (hlam : 0 < lam) (hx : |x| ≤ 1) (n : ℕ) :
+    ‖ultrasphericalPolynomial lam n x‖ ≤ (pochhammer (2 * lam) n).re / n.factorial := by
   have hl : -1 / 2 < (lam : ℂ).re := by simp; linarith
   set θ := Real.arccos x
   have hcx : (x : ℂ) = cos (θ : ℂ) := by
     rw [← Complex.ofReal_cos, Real.cos_arccos (abs_le.mp hx).1 (abs_le.mp hx).2]
   -- the coefficients of the trigonometric sum are positive reals
-  have hc : ∀ k ≤ n, ∃ c : ℝ, 0 < c ∧ poch (lam : ℂ) k * poch (lam : ℂ) (n - k) /
+  have hc : ∀ k ≤ n, ∃ c : ℝ, 0 < c ∧ pochhammer (lam : ℂ) k * pochhammer (lam : ℂ) (n - k) /
       ((k.factorial : ℂ) * (n - k).factorial) = c := by
     intro k _
-    obtain ⟨s, hs, h1⟩ := exists_poch_ofReal_eq hlam k
-    obtain ⟨t, ht, h2⟩ := exists_poch_ofReal_eq hlam (n - k)
+    obtain ⟨s, hs, h1⟩ := exists_pochhammer_ofReal_eq hlam k
+    obtain ⟨t, ht, h2⟩ := exists_pochhammer_ofReal_eq hlam (n - k)
     refine ⟨s * t / (k.factorial * (n - k).factorial), by positivity, ?_⟩
     rw [h1, h2]; push_cast; ring
   choose! c hcpos hceq using hc
-  have hone := ultrasphPoly_cos_sum hl n 0
+  have hone := ultrasphericalPolynomial_cos_sum hl n 0
   simp only [Complex.cos_zero, mul_zero] at hone
-  have hval : ultrasphPoly (lam : ℂ) n 1 = poch (2 * (lam : ℂ)) n / n.factorial := by
-    simp [ultrasphPoly]
-  rw [hcx, ultrasphPoly_cos_sum hl n θ]
-  calc ‖∑ k ∈ Finset.range (n + 1), poch (lam : ℂ) k * poch (lam : ℂ) (n - k) /
+  have hval : ultrasphericalPolynomial (lam : ℂ) n 1 = pochhammer (2 * (lam : ℂ)) n /
+      n.factorial := by
+    simp [ultrasphericalPolynomial]
+  rw [hcx, ultrasphericalPolynomial_cos_sum hl n θ]
+  calc ‖∑ k ∈ Finset.range (n + 1), pochhammer (lam : ℂ) k * pochhammer (lam : ℂ) (n - k) /
           ((k.factorial : ℂ) * (n - k).factorial) * cos (((n : ℂ) - 2 * k) * θ)‖
       ≤ ∑ k ∈ Finset.range (n + 1), c k := by
         refine (norm_sum_le _ _).trans (Finset.sum_le_sum fun k hk => ?_)
@@ -205,7 +209,7 @@ theorem ultrasphPoly_bound_at_one {lam x : ℝ} (hlam : 0 < lam) (hx : |x| ≤ 1
             ← Complex.ofReal_cos, Complex.norm_real, Real.norm_eq_abs]
           exact Real.abs_cos_le_one _
         nlinarith [hcpos k hkn]
-    _ = (poch (2 * (lam : ℂ)) n).re / n.factorial := by
+    _ = (pochhammer (2 * (lam : ℂ)) n).re / n.factorial := by
         have h := congrArg Complex.re (hone.symm.trans hval)
         rw [Finset.sum_congr rfl fun k hk => by
           rw [hceq k (Nat.lt_succ_iff.mp (Finset.mem_range.mp hk)), mul_one]] at h
@@ -216,16 +220,16 @@ theorem ultrasphPoly_bound_at_one {lam x : ℝ} (hlam : 0 < lam) (hx : |x| ≤ 1
 /-! ### Sonine–Pólya bounds for Gegenbauer polynomials with `-1/2 < λ < 0` -/
 
 /-- Gegenbauer polynomials with `-1/2 < λ` as a real multiple of a real Jacobi polynomial. -/
-theorem ultrasphPoly_eq_mul_jacobiPolyPR {lam : ℝ} (hlam : -1 / 2 < lam) (m : ℕ) :
-    ∃ c : ℂ, ∀ z : ℂ, ultrasphPoly lam m z =
+theorem ultrasphericalPolynomial_eq_mul_jacobiPolyPR {lam : ℝ} (hlam : -1 / 2 < lam) (m : ℕ) :
+    ∃ c : ℂ, ∀ z : ℂ, ultrasphericalPolynomial lam m z =
       c * (((jacobiPolyPR (lam - 1 / 2) (lam - 1 / 2) m).map (algebraMap ℝ ℂ)).eval z) := by
-  obtain ⟨u, -, hu, -, h1, -⟩ := poch_ofReal_le (r := lam + 1 / 2) (s := lam + 1 / 2)
+  obtain ⟨u, -, hu, -, h1, -⟩ := pochhammer_ofReal_le (r := lam + 1 / 2) (s := lam + 1 / 2)
     (by linarith) le_rfl m
-  have hp : poch ((lam : ℂ) + 1 / 2) m ≠ 0 := by
+  have hp : pochhammer ((lam : ℂ) + 1 / 2) m ≠ 0 := by
     have : ((lam : ℂ) + 1 / 2) = ((lam + 1 / 2 : ℝ) : ℂ) := by push_cast; ring
     rw [this, h1]; exact_mod_cast hu.ne'
-  refine ⟨poch (2 * (lam : ℂ)) m / poch ((lam : ℂ) + 1 / 2) m, fun z => ?_⟩
-  rw [ultrasphPoly_eq_jacobiPolyP m z hp, eval_map_jacobiPolyPR (by linarith)]
+  refine ⟨pochhammer (2 * (lam : ℂ)) m / pochhammer ((lam : ℂ) + 1 / 2) m, fun z => ?_⟩
+  rw [ultrasphericalPolynomial_eq_jacobiPolynomialP m z hp, eval_map_jacobiPolyPR (by linarith)]
   push_cast
   ring_nf
 
@@ -239,20 +243,23 @@ theorem derivative_eval_zero_of_even {p : ℝ[X]} (h : ∀ t, p.eval (-t) = p.ev
   have := h1.unique (p.hasDerivAt 0)
   linarith
 
-/-- Estimate under the stated parameter and domain assumptions: `‖ultrasphPoly lam (2 * n) x‖ ≤
-‖poch lam n / (n.factorial : ℂ)‖`. -/
+/-- Estimate under the stated parameter and domain assumptions:
+`‖ultrasphericalPolynomial lam (2 * n) x‖ ≤ ‖pochhammer lam n / (n.factorial : ℂ)‖`. -/
 @[dlmf 18.14.E5]
-theorem ultrasphPoly_even_bound {lam x : ℝ} (hlam : -1 / 2 < lam) (hlam0 : lam < 0) (hx : |x| ≤ 1)
+theorem ultrasphericalPolynomial_even_bound {lam x : ℝ} (hlam : -1 / 2 < lam)
+    (hlam0 : lam < 0) (hx : |x| ≤ 1)
     (n : ℕ) :
-    ‖ultrasphPoly lam (2 * n) x‖ ≤ ‖poch lam n / (n.factorial : ℂ)‖ := by
+    ‖ultrasphericalPolynomial lam (2 * n) x‖ ≤ ‖pochhammer lam n / (n.factorial : ℂ)‖ := by
   rcases Nat.eq_zero_or_pos n with rfl | hn
-  · simp [poch_zero]
+  · simp [pochhammer_zero]
   set a := lam - 1 / 2 with ha
   have ha1 : -1 < a := by linarith
-  obtain ⟨c, hc⟩ := ultrasphPoly_eq_mul_jacobiPolyPR hlam (2 * n)
+  obtain ⟨c, hc⟩ := ultrasphericalPolynomial_eq_mul_jacobiPolyPR hlam (2 * n)
   set p := jacobiPolyPR a a (2 * n)
-  have hz : ‖poch (lam : ℂ) n / (n.factorial : ℂ)‖ = ‖ultrasphPoly lam (2 * n) 0‖ := by
-    rw [ultrasphPoly_even_at_zero (by simpa using hlam), mul_div_assoc, norm_mul, norm_pow,
+  have hz : ‖pochhammer (lam : ℂ) n / (n.factorial : ℂ)‖ =
+      ‖ultrasphericalPolynomial lam (2 * n) 0‖ := by
+    rw [ultrasphericalPolynomial_even_at_zero (by simpa using hlam), mul_div_assoc,
+        norm_mul, norm_pow,
       norm_neg, norm_one, one_pow, one_mul]
   rw [hz, hc, hc, eval_map_ofReal, show (0 : ℂ) = ((0 : ℝ) : ℂ) by simp, eval_map_ofReal,
     norm_mul, norm_mul, Complex.norm_real, Complex.norm_real]
@@ -281,17 +288,18 @@ theorem ultrasphPoly_even_bound {lam x : ℝ} (hlam : -1 / 2 < lam) (hlam0 : lam
     linarith [key, h0]
   exact sq_le_sq.mp this
 
-/-- Estimate under the stated parameter and domain assumptions: `‖ultrasphPoly lam (2 * n + 1) x‖
-< -2 * (poch lam (n + 1)).re / (Real.sqrt ((2 * n + 1) * (2 * lam + 2 * n + 1)) *
-n.factorial)`. -/
+/-- Estimate under the stated parameter and domain assumptions:
+`‖ultrasphericalPolynomial lam (2 * n + 1) x‖ < -2 * (pochhammer lam (n + 1)).re / (Real.sqrt ((2 *
+n + 1) * (2 * lam + 2 * n + 1)) * n.factorial)`. -/
 @[dlmf 18.14.E6]
-theorem ultrasphPoly_odd_bound {lam x : ℝ} (hlam : -1 / 2 < lam) (hlam0 : lam < 0) (hx : |x| ≤ 1)
+theorem ultrasphericalPolynomial_odd_bound {lam x : ℝ} (hlam : -1 / 2 < lam)
+    (hlam0 : lam < 0) (hx : |x| ≤ 1)
     (n : ℕ) :
-    ‖ultrasphPoly lam (2 * n + 1) x‖ < -2 * (poch lam (n + 1)).re /
+    ‖ultrasphericalPolynomial lam (2 * n + 1) x‖ < -2 * (pochhammer lam (n + 1)).re /
       (Real.sqrt ((2 * n + 1) * (2 * lam + 2 * n + 1)) * n.factorial) := by
   set a := lam - 1 / 2 with ha
   have ha1 : -1 < a := by linarith
-  obtain ⟨c, hc⟩ := ultrasphPoly_eq_mul_jacobiPolyPR hlam (2 * n + 1)
+  obtain ⟨c, hc⟩ := ultrasphericalPolynomial_eq_mul_jacobiPolyPR hlam (2 * n + 1)
   set p := jacobiPolyPR a a (2 * n + 1)
   have hodd : ∀ t, p.eval (-t) = -p.eval t := fun t => by
     have h := jacobi_reflection (α := (a : ℂ)) (β := (a : ℂ)) (by simpa using ha1)
@@ -301,17 +309,18 @@ theorem ultrasphPoly_odd_bound {lam x : ℝ} (hlam : -1 / 2 < lam) (hlam0 : lam 
     exact_mod_cast (by linear_combination h : (((p.eval (-t)) : ℝ) : ℂ) = -((p.eval t : ℝ) : ℂ))
   have hp0 : p.eval 0 = 0 := by have := hodd 0; rw [neg_zero] at this; linarith
   -- the derivative at `0`
-  obtain ⟨u, -, hu, -, hu1, -⟩ := poch_ofReal_le (r := lam + 1) (s := lam + 1) (by linarith)
+  obtain ⟨u, -, hu, -, hu1, -⟩ := pochhammer_ofReal_le (r := lam + 1) (s := lam + 1) (by linarith)
     le_rfl n
   have hfac : (0 : ℝ) < n.factorial := by exact_mod_cast n.factorial_pos
   set q := p.map (algebraMap ℝ ℂ)
-  have hfun : ultrasphPoly (lam : ℂ) (2 * n + 1) = fun z => c * q.eval z := funext hc
-  have hder : deriv (ultrasphPoly (lam : ℂ) (2 * n + 1)) 0 =
+  have hfun : ultrasphericalPolynomial (lam : ℂ) (2 * n + 1) = fun z => c * q.eval z := funext hc
+  have hder : deriv (ultrasphericalPolynomial (lam : ℂ) (2 * n + 1)) 0 =
       c * (((derivative p).eval 0 : ℝ) : ℂ) := by
     rw [hfun, ((q.hasDerivAt 0).const_mul c).deriv, derivative_map,
       show (0 : ℂ) = ((0 : ℝ) : ℂ) by simp, eval_map_ofReal]
-  have hder' := ultrasphPoly_derivative (lam := (lam : ℂ)) (by simpa using hlam) (2 * n) 0
-  rw [ultrasphPoly_even_at_zero (by simp; linarith), hder] at hder'
+  have hder' := ultrasphericalPolynomial_derivative (lam := (lam : ℂ))
+      (by simpa using hlam) (2 * n) 0
+  rw [ultrasphericalPolynomial_even_at_zero (by simp; linarith), hder] at hder'
   have hlam1 : ((lam : ℂ) + 1) = ((lam + 1 : ℝ) : ℂ) := by push_cast; ring
   rw [hlam1, hu1] at hder'
   set D := (derivative p).eval 0
@@ -337,8 +346,8 @@ theorem ultrasphPoly_odd_bound {lam x : ℝ} (hlam : -1 / 2 < lam) (hlam0 : lam 
     have : 0 < 2 * (n : ℝ) + 1 + a + a + 1 := by linarith
     positivity
   have hLmeq : (2 * n + 1) * (2 * lam + 2 * n + 1) = Lm := by rw [hLm, ha]; push_cast; ring
-  have hpoch : (poch (lam : ℂ) (n + 1)).re = lam * u := by
-    rw [poch_succ_left, hlam1, hu1]; simp
+  have hpoch : (pochhammer (lam : ℂ) (n + 1)).re = lam * u := by
+    rw [pochhammer_succ_left, hlam1, hu1]; simp
   rw [hpoch, hLmeq]
   have hRHS : -2 * (lam * u) / (Real.sqrt Lm * n.factorial) = ‖c‖ * |D| / Real.sqrt Lm := by
     rw [hK]; field_simp
@@ -451,15 +460,16 @@ Proof: the Sonine-type function of `ClassicalInequalities.gegenbauer_sonine` bou
 `C_n^{(λ)}′(0)` are controlled by the sharp Gamma-ratio bounds `ClassicalInequalities.Gamma_even`,
 `ClassicalInequalities.Gamma_odd`. -/
 @[dlmf 18.14.E7]
-theorem ultrasphPoly_bernstein_bound {lam x : ℝ} (hlam : 0 < lam) (hlam1 : lam < 1) (hx : |x| ≤ 1)
+theorem ultrasphericalPolynomial_bernstein_bound {lam x : ℝ} (hlam : 0 < lam)
+    (hlam1 : lam < 1) (hx : |x| ≤ 1)
     (n : ℕ) :
-    (n + lam) ^ (1 - lam) * (1 - x ^ 2) ^ (lam / 2) * ‖ultrasphPoly lam n x‖ <
+    (n + lam) ^ (1 - lam) * (1 - x ^ 2) ^ (lam / 2) * ‖ultrasphericalPolynomial lam n x‖ <
       (2 : ℝ) ^ (1 - lam) / Real.Gamma lam := by
   have hlamh : -1 / 2 < lam := by linarith
   have hGl : 0 < Real.Gamma lam := Real.Gamma_pos_of_pos hlam
   have hR : 0 < (2 : ℝ) ^ (1 - lam) / Real.Gamma lam := by positivity
   set q := ultrasphPolyR lam n with hqdef
-  have hq (t : ℝ) : ultrasphPoly lam n t = ((q.eval t : ℝ) : ℂ) :=
+  have hq (t : ℝ) : ultrasphericalPolynomial lam n t = ((q.eval t : ℝ) : ℂ) :=
     (eval_ultrasphPolyR hlamh n t).symm
   rw [hq, Complex.norm_real, Real.norm_eq_abs]
   -- boundary points
@@ -504,7 +514,8 @@ theorem ultrasphPoly_bernstein_bound {lam x : ℝ} (hlam : 0 < lam) (hlam1 : lam
         _ < _ := key
     exact lt_of_pow_lt_pow_left₀ 2 hR.le this
   have hrefl (t : ℝ) : q.eval (-t) = (-1) ^ n * q.eval t := by
-    have h := ultrasphPoly_reflection (lam := (lam : ℂ)) (by simpa using hlamh) n (t : ℂ)
+    have h := ultrasphericalPolynomial_reflection (lam := (lam : ℂ))
+        (by simpa using hlamh) n (t : ℂ)
     rw [show -(t : ℂ) = ((-t : ℝ) : ℂ) by push_cast; ring, hq, hq] at h
     exact_mod_cast h
   have hasc (a : ℝ) (ha : 0 < a) (k : ℕ) :
@@ -521,8 +532,8 @@ theorem ultrasphPoly_bernstein_bound {lam x : ℝ} (hlam : 0 < lam) (hlam1 : lam
       rw [hrefl, pow_mul, neg_one_sq, one_pow, one_mul]
     have hd0 := derivative_eval_zero_of_even hev
     have hq0 : q.eval 0 = (-1) ^ m * ((ascPochhammer ℝ m).eval lam / m !) := by
-      have h := ultrasphPoly_even_at_zero (lam := (lam : ℂ)) (by simpa using hlamh) m
-      rw [show (0 : ℂ) = ((0 : ℝ) : ℂ) by simp, hq, poch_ofReal] at h
+      have h := ultrasphericalPolynomial_even_at_zero (lam := (lam : ℂ)) (by simpa using hlamh) m
+      rw [show (0 : ℂ) = ((0 : ℝ) : ℂ) by simp, hq, pochhammer_ofReal] at h
       apply Complex.ofReal_injective
       rw [h]; push_cast; ring
     have hS0 : S = ((ascPochhammer ℝ m).eval lam / m !) ^ 2 := by
@@ -546,15 +557,17 @@ theorem ultrasphPoly_bernstein_bound {lam x : ℝ} (hlam : 0 < lam) (hlam1 : lam
       rw [hrefl, pow_succ, pow_mul, neg_one_sq, one_pow, one_mul, neg_one_mul]
     have hq0 : q.eval 0 = 0 := by have := hodd 0; rw [neg_zero] at this; linarith
     -- the derivative at `0`
-    have hfun : ultrasphPoly (lam : ℂ) (2 * m + 1) = fun z => (q.map (algebraMap ℝ ℂ)).eval z :=
+    have hfun : ultrasphericalPolynomial (lam : ℂ) (2 * m + 1) = fun z =>
+        (q.map (algebraMap ℝ ℂ)).eval z :=
       funext fun z => (eval_map_ultrasphPolyR hlamh _ z).symm
-    have hder : deriv (ultrasphPoly (lam : ℂ) (2 * m + 1)) 0 =
+    have hder : deriv (ultrasphericalPolynomial (lam : ℂ) (2 * m + 1)) 0 =
         (((derivative q).eval 0 : ℝ) : ℂ) := by
       rw [hfun, ((q.map (algebraMap ℝ ℂ)).hasDerivAt 0).deriv, derivative_map,
         show (0 : ℂ) = ((0 : ℝ) : ℂ) by simp, eval_map_ofReal]
-    have hder' := ultrasphPoly_derivative (lam := (lam : ℂ)) (by simpa using hlamh) (2 * m) 0
-    rw [ultrasphPoly_even_at_zero (by simp; linarith), hder,
-      show (lam : ℂ) + 1 = ((lam + 1 : ℝ) : ℂ) by push_cast; ring, poch_ofReal] at hder'
+    have hder' := ultrasphericalPolynomial_derivative (lam := (lam : ℂ))
+        (by simpa using hlamh) (2 * m) 0
+    rw [ultrasphericalPolynomial_even_at_zero (by simp; linarith), hder,
+      show (lam : ℂ) + 1 = ((lam + 1 : ℝ) : ℂ) by push_cast; ring, pochhammer_ofReal] at hder'
     have hlam1' : (0 : ℝ) < lam + 1 := by linarith
     have hGl1 : Real.Gamma (lam + 1) = lam * Real.Gamma lam := Real.Gamma_add_one hlam.ne'
     set r := Real.Gamma (m + 1 + lam) / Real.Gamma (m + 1) with hr
@@ -579,8 +592,8 @@ theorem ultrasphPoly_bernstein_bound {lam x : ℝ} (hlam : 0 < lam) (hlam1 : lam
     exact bernstein_odd_bound hlam hlam1 m
 
 /-- The parameter-zero Laguerre estimate is the norm bound for a positive cosine transform. -/
-theorem laguerrePolyL_zero_parameter_bound (n : ℕ) {x : ℝ} (hx : 0 ≤ x) :
-    Real.exp (-x / 2) * ‖laguerrePolyL 0 n x‖ ≤ 1 := by
+theorem laguerrePolynomialL_zero_parameter_bound (n : ℕ) {x : ℝ} (hx : 0 ≤ x) :
+    Real.exp (-x / 2) * ‖laguerrePolynomialL 0 n x‖ ≤ 1 := by
   let y := Real.sqrt x
   let w : ℝ → ℝ := fun t => Real.exp (-(t ^ 2) / 2) * (aeval t (hermite n) : ℝ) ^ 2
   have hw : IntegrableOn w (Set.Ioi 0) := by
@@ -604,8 +617,8 @@ theorem laguerrePolyL_zero_parameter_bound (n : ℕ) {x : ℝ} (hx : 0 ≤ x) :
     simp only [w, ofReal_mul, ofReal_pow]
     ring
   have hT (v : ℝ) := hermite_product_cosine_transform 0 n v
-  have hL0 : laguerrePolyL 0 n 0 = 1 := by
-    rw [laguerrePolyL_at_zero]
+  have hL0 : laguerrePolynomialL 0 n 0 = 1 := by
+    rw [laguerrePolynomialL_at_zero]
     simp [Nat.factorial_ne_zero]
   have hzero := hT 0
   norm_num only [Nat.cast_zero, mul_zero, add_zero, zero_add, pow_zero, one_mul,
@@ -639,10 +652,10 @@ theorem laguerrePolyL_zero_parameter_bound (n : ℕ) {x : ℝ} (hx : 0 ≤ x) :
   nlinarith
 
 /-- Estimate under the stated parameter and domain assumptions: `Real.exp (-x / 2) *
-‖laguerrePolyL α n x‖ ≤ (poch (α + 1) n).re / n.factorial`. -/
+‖laguerrePolynomialL α n x‖ ≤ (pochhammer (α + 1) n).re / n.factorial`. -/
 @[dlmf 18.14.E8]
-theorem laguerrePolyL_bound {α x : ℝ} (hα : 0 ≤ α) (hx : 0 ≤ x) (n : ℕ) :
-    Real.exp (-x / 2) * ‖laguerrePolyL α n x‖ ≤ (poch (α + 1) n).re / n.factorial := by
+theorem laguerrePolynomialL_bound {α x : ℝ} (hα : 0 ≤ α) (hx : 0 ≤ x) (n : ℕ) :
+    Real.exp (-x / 2) * ‖laguerrePolynomialL α n x‖ ≤ (pochhammer (α + 1) n).re / n.factorial := by
   have hc : ∀ k : ℕ, (α : ℂ) + 1 ≠ -(k : ℂ) := by
     intro k hk
     have h := congrArg Complex.re hk
@@ -655,28 +668,28 @@ theorem laguerrePolyL_bound {α x : ℝ} (hα : 0 ≤ α) (hx : 0 ≤ x) (n : �
     linarith [Nat.cast_nonneg (α := ℝ) k]
   let c : ℕ → ℝ := fun k => (ascPochhammer ℝ (n - k)).eval α / (n - k).factorial
   have hc0 (k : ℕ) : 0 ≤ c k := div_nonneg (ascPochhammer_eval_nonneg hα _) (by positivity)
-  have hcoeff (k : ℕ) : poch (α : ℂ) (n - k) / ((n - k).factorial : ℂ) = (c k : ℂ) := by
-    rw [poch_ofReal]
+  have hcoeff (k : ℕ) : pochhammer (α : ℂ) (n - k) / ((n - k).factorial : ℂ) = (c k : ℂ) := by
+    rw [pochhammer_ofReal]
     simp only [c, ofReal_div, ofReal_natCast]
-  have hconn (t : ℂ) : laguerrePolyL α n t = ∑ k ∈ Finset.range (n + 1),
-      (c k : ℂ) * laguerrePolyL 0 k t := by
-    have hh := laguerrePolyL_connection 0 (α : ℂ) n t
+  have hconn (t : ℂ) : laguerrePolynomialL α n t = ∑ k ∈ Finset.range (n + 1),
+      (c k : ℂ) * laguerrePolynomialL 0 k t := by
+    have hh := laguerrePolynomialL_connection 0 (α : ℂ) n t
     rw [laguerreExtended_eq hc] at hh
     simpa only [sub_zero, hcoeff, laguerreExtended_eq hz] using hh
-  have hsum : ∑ k ∈ Finset.range (n + 1), c k = (poch (α + 1) n).re / n.factorial := by
-    have hL0 (k : ℕ) : laguerrePolyL 0 k 0 = 1 := by
-      rw [laguerrePolyL_at_zero]
+  have hsum : ∑ k ∈ Finset.range (n + 1), c k = (pochhammer (α + 1) n).re / n.factorial := by
+    have hL0 (k : ℕ) : laguerrePolynomialL 0 k 0 = 1 := by
+      rw [laguerrePolynomialL_at_zero]
       simp [Nat.factorial_ne_zero]
     have hh := congrArg Complex.re (hconn 0)
     simp only [hL0, mul_one, Complex.re_sum, ofReal_re] at hh
-    rw [laguerrePolyL_at_zero] at hh
+    rw [laguerrePolynomialL_at_zero] at hh
     simpa only [← ofReal_natCast, Complex.div_ofReal_re] using hh.symm
   rw [hconn]
   calc
-    _ ≤ Real.exp (-x / 2) * ∑ k ∈ Finset.range (n + 1), ‖(c k : ℂ) * laguerrePolyL 0 k x‖ :=
+    _ ≤ Real.exp (-x / 2) * ∑ k ∈ Finset.range (n + 1), ‖(c k : ℂ) * laguerrePolynomialL 0 k x‖ :=
       mul_le_mul_of_nonneg_left (norm_sum_le _ _) (Real.exp_pos _).le
     _ = ∑ k ∈ Finset.range (n + 1), c k *
-        (Real.exp (-x / 2) * ‖laguerrePolyL 0 k x‖) := by
+        (Real.exp (-x / 2) * ‖laguerrePolynomialL 0 k x‖) := by
       rw [Finset.mul_sum]
       apply Finset.sum_congr rfl
       intro k hk
@@ -685,39 +698,40 @@ theorem laguerrePolyL_bound {α x : ℝ} (hα : 0 ≤ α) (hx : 0 ≤ x) (n : �
     _ ≤ ∑ k ∈ Finset.range (n + 1), c k := by
       apply Finset.sum_le_sum
       intro k hk
-      exact mul_le_of_le_one_right (hc0 k) (laguerrePolyL_zero_parameter_bound k hx)
+      exact mul_le_of_le_one_right (hc0 k) (laguerrePolynomialL_zero_parameter_bound k hx)
     _ = _ := hsum
 
 /-- Estimate under the stated parameter and domain assumptions: `Real.exp (-(x ^ 2) / 2) * |aeval
-x (hermitePolyH n)| ≤ Real.sqrt (2 ^ n * n.factorial)`. -/
+x (hermitePolynomialH n)| ≤ Real.sqrt (2 ^ n * n.factorial)`. -/
 @[dlmf 18.14.E9]
-theorem hermitePolyH_bound (n : ℕ) (x : ℝ) :
-    Real.exp (-(x ^ 2) / 2) * |aeval x (hermitePolyH n)| ≤ Real.sqrt (2 ^ n * n.factorial) := by
+theorem hermitePolynomialH_bound (n : ℕ) (x : ℝ) :
+    Real.exp (-(x ^ 2) / 2) * |aeval x (hermitePolynomialH n)| ≤
+        Real.sqrt (2 ^ n * n.factorial) := by
   sorry
 
-/-- The stated relation follows from the given hypotheses: `(jacobiPolyP α β (n + 1) x /
-jacobiPolyP α β (n + 1) 1).re ^ 2 ≥ (jacobiPolyP α β n x / jacobiPolyP α β n 1).re *
-(jacobiPolyP α β (n + 2) x / jacobiPolyP α β (n + 2) 1).re`. -/
+/-- The stated relation follows from the given hypotheses: `(jacobiPolynomialP α β (n + 1) x /
+jacobiPolynomialP α β (n + 1) 1).re ^ 2 ≥ (jacobiPolynomialP α β n x / jacobiPolynomialP α β n 1).re
+* (jacobiPolynomialP α β (n + 2) x / jacobiPolynomialP α β (n + 2) 1).re`. -/
 @[dlmf 18.14.E11]
 theorem jacobi_turan {α β x : ℝ} (hα : -1 < α) (hαβ : α ≤ β) (hx : |x| ≤ 1) (n : ℕ) :
-    (jacobiPolyP α β (n + 1) x / jacobiPolyP α β (n + 1) 1).re ^ 2 ≥
-      (jacobiPolyP α β n x / jacobiPolyP α β n 1).re
-          * (jacobiPolyP α β (n + 2) x / jacobiPolyP α β (n + 2) 1).re := by
+    (jacobiPolynomialP α β (n + 1) x / jacobiPolynomialP α β (n + 1) 1).re ^ 2 ≥
+      (jacobiPolynomialP α β n x / jacobiPolynomialP α β n 1).re
+          * (jacobiPolynomialP α β (n + 2) x / jacobiPolynomialP α β (n + 2) 1).re := by
   sorry
 
 /-- Turán's inequality for Laguerre polynomials, via the identity
 `(n+2)Δₙ = (L_{n+1} - Lₙ)² + (n+α)Δ_{n-1}` for `Δₙ = L_{n+1}² - Lₙ L_{n+2}`.
 This is stronger than DLMF, which assumes `0 ≤ x`; the inequality holds for all real `x`. -/
 @[dlmf 18.14.E12]
-theorem laguerrePolyL_turan' {α x : ℝ} (hα : 0 ≤ α) (n : ℕ) :
-    (laguerrePolyL α (n + 1) x).re ^ 2 ≥ (laguerrePolyL α n x).re
-        * (laguerrePolyL α (n + 2) x).re := by
+theorem laguerrePolynomialL_turan' {α x : ℝ} (hα : 0 ≤ α) (n : ℕ) :
+    (laguerrePolynomialL α (n + 1) x).re ^ 2 ≥ (laguerrePolynomialL α n x).re
+        * (laguerrePolynomialL α (n + 2) x).re := by
   have hα' : -1 < ((α : ℂ)).re := by simp; linarith
   set L : ℕ → ℝ := fun k => (laguerrePolyLR α k).eval x with hL
-  have hreal (k : ℕ) : laguerrePolyL α k x = (L k : ℂ) := (eval_laguerrePolyLR α k x).symm
+  have hreal (k : ℕ) : laguerrePolynomialL α k x = (L k : ℂ) := (eval_laguerrePolyLR α k x).symm
   have hrec (k : ℕ) : ((k : ℝ) + 2) * L (k + 2) =
       (2 * k + α + 3 - x) * L (k + 1) - (k + α + 1) * L k := by
-    have h := laguerrePolyL_recurrence hα' k x
+    have h := laguerrePolynomialL_recurrence hα' k x
     rw [hreal, hreal, hreal] at h
     apply Complex.ofReal_injective
     push_cast
@@ -726,11 +740,11 @@ theorem laguerrePolyL_turan' {α x : ℝ} (hα : 0 ≤ α) (n : ℕ) :
     apply Complex.ofReal_injective; rw [← hreal]; simp
   have h1 : L 1 = α + 1 - x := by
     apply Complex.ofReal_injective; rw [← hreal]
-    unfold laguerrePolyL
+    unfold laguerrePolynomialL
     rw [DLMF.Confluent.kummerM_eq_sum_neg_nat]
     have : (α : ℂ) + 1 ≠ 0 := by
       intro h; have := congrArg Complex.re h; simp at this; linarith
-    simp [Finset.sum_range_succ, poch_one, poch_zero]
+    simp [Finset.sum_range_succ, pochhammer_one, pochhammer_zero]
     field_simp
     ring
   have hD (k : ℕ) : ((k : ℝ) + 3) * (L (k + 2) ^ 2 - L (k + 1) * L (k + 3)) =
@@ -761,24 +775,26 @@ theorem laguerrePolyL_turan' {α x : ℝ} (hα : 0 ≤ α) (n : ℕ) :
 
 /-- Turán's inequality for Laguerre polynomials, via the identity
 `(n+2)Δₙ = (L_{n+1} - Lₙ)² + (n+α)Δ_{n-1}` for `Δₙ = L_{n+1}² - Lₙ L_{n+2}`.
-This is the form with DLMF's hypothesis `0 ≤ x`; see `laguerrePolyL_turan'` for all real `x`. -/
+This is the form with DLMF's hypothesis `0 ≤ x`; see `laguerrePolynomialL_turan'` for all real `x`.
+-/
 @[dlmf 18.14.E12]
-theorem laguerrePolyL_turan {α x : ℝ} (hα : 0 ≤ α) (_hx : 0 ≤ x) (n : ℕ) :
-    (laguerrePolyL α (n + 1) x).re ^ 2 ≥ (laguerrePolyL α n x).re
-        * (laguerrePolyL α (n + 2) x).re :=
-  laguerrePolyL_turan' hα n
+theorem laguerrePolynomialL_turan {α x : ℝ} (hα : 0 ≤ α) (_hx : 0 ≤ x) (n : ℕ) :
+    (laguerrePolynomialL α (n + 1) x).re ^ 2 ≥ (laguerrePolynomialL α n x).re
+        * (laguerrePolynomialL α (n + 2) x).re :=
+  laguerrePolynomialL_turan' hα n
 
-/-- The stated relation follows from the given hypotheses: `(aeval x (hermitePolyH (n + 1)) : ℝ) ^
-2 ≥ aeval x (hermitePolyH n) * aeval x (hermitePolyH (n + 2))`. -/
+/-- The stated relation follows from the given hypotheses:
+`(aeval x (hermitePolynomialH (n + 1)) : ℝ) ^ 2 ≥ aeval x (hermitePolynomialH n) * aeval x
+(hermitePolynomialH (n + 2))`. -/
 @[dlmf 18.14.E13]
-theorem hermitePolyH_turan (n : ℕ) (x : ℝ) :
-    (aeval x (hermitePolyH (n + 1)) : ℝ) ^ 2 ≥ aeval x (hermitePolyH n)
-        * aeval x (hermitePolyH (n + 2)) := by
-  set H : ℕ → ℝ := fun k => (aeval x (hermitePolyH k) : ℝ) with hH
+theorem hermitePolynomialH_turan (n : ℕ) (x : ℝ) :
+    (aeval x (hermitePolynomialH (n + 1)) : ℝ) ^ 2 ≥ aeval x (hermitePolynomialH n)
+        * aeval x (hermitePolynomialH (n + 2)) := by
+  set H : ℕ → ℝ := fun k => (aeval x (hermitePolynomialH k) : ℝ) with hH
   have hrec : ∀ k : ℕ, H (k + 2) = 2 * x * H (k + 1) - 2 * (k + 1) * H k := by
     intro k
     simp only [hH]
-    rw [hermitePolyH_recurrence k]
+    rw [hermitePolynomialH_recurrence k]
     simp only [map_sub, map_mul, map_add, aeval_X, map_ofNat, map_natCast, map_one]
   have hD : ∀ n : ℕ, H (n + 1 + 1) ^ 2 - H (n + 1) * H (n + 1 + 2) =
       2 * (n + 1) * (H (n + 1) ^ 2 - H n * H (n + 2)) + 2 * H (n + 1) ^ 2 := by
@@ -793,7 +809,8 @@ theorem hermitePolyH_turan (n : ℕ) (x : ℝ) :
     intro n
     induction n with
     | zero =>
-      simp only [hH, Nat.zero_add, hermitePolyH_one, hermitePolyH_two, hermitePolyH_zero, map_sub,
+      simp only [hH, Nat.zero_add, hermitePolynomialH_one, hermitePolynomialH_two,
+          hermitePolynomialH_zero, map_sub,
         map_mul, map_pow, aeval_X, map_ofNat, map_one]
       nlinarith
     | succ n ih =>
@@ -807,76 +824,79 @@ theorem hermitePolyH_turan (n : ℕ) (x : ℝ) :
   linarith
 
 /-- Estimate under the stated parameter and domain assumptions: `0 ≤ (∑ m ∈ Finset.range (n + 1),
-poch (lam + 1) (n - m) / (n - m).factorial * (poch (lam + 1) m / m.factorial) * jacobiPolyP α
-β m x / jacobiPolyP β α m 1).re`. -/
+pochhammer (lam + 1) (n - m) / (n - m).factorial * (pochhammer (lam + 1) m / m.factorial) *
+jacobiPolynomialP α β m x / jacobiPolynomialP β α m 1).re`. -/
 @[dlmf 18.14.E25]
 theorem jacobi_positive_weighted_sum {α β lam x : ℝ} (hα : -1 < α) (hβ : -1 / 2 ≤ β)
     (hlam : 0 ≤ lam) (hαβ : lam ≤ α + β) (hx : -1 ≤ x) (n : ℕ) :
-    0 ≤ (∑ m ∈ Finset.range (n + 1), poch (lam + 1) (n - m) / (n - m).factorial *
-      (poch (lam + 1) m / m.factorial) * jacobiPolyP α β m x / jacobiPolyP β α m 1).re := by
+    0 ≤ (∑ m ∈ Finset.range (n + 1), pochhammer (lam + 1) (n - m) / (n - m).factorial *
+      (pochhammer (lam + 1) m / m.factorial) * jacobiPolynomialP α β m x /
+          jacobiPolynomialP β α m 1).re := by
   sorry
 
 /-- Estimate under the stated parameter and domain assumptions: `0 ≤ (∑ m ∈ Finset.range (n + 1),
-jacobiPolyP α β m x / jacobiPolyP β α m 1).re`. -/
+jacobiPolynomialP α β m x / jacobiPolynomialP β α m 1).re`. -/
 @[dlmf 18.14.E26]
 theorem jacobi_positive_sum {α β x : ℝ} (hα : -1 < α) (hβ : -1 < β)
     (hparams : (0 ≤ α + β ∧ -1 / 2 ≤ β) ∨ (-2 ≤ α + β ∧ 0 ≤ β)) (hx : -1 ≤ x) (n : ℕ) :
-    0 ≤ (∑ m ∈ Finset.range (n + 1), jacobiPolyP α β m x / jacobiPolyP β α m 1).re := by
+    0 ≤ (∑ m ∈ Finset.range (n + 1), jacobiPolynomialP α β m x / jacobiPolynomialP β α m 1).re := by
   sorry
 
 /-- Estimate under the stated parameter and domain assumptions: `0 ≤ (∑ m ∈ Finset.range (n + 1),
-poch (lam + 1) (n - m) / (n - m).factorial * (poch (lam + 1) m / m.factorial) * (-1 : ℂ) ^ m *
-laguerrePolyL β m x / laguerrePolyL β m 0).re`. -/
+pochhammer (lam + 1) (n - m) / (n - m).factorial * (pochhammer (lam + 1) m / m.factorial) * (-1 : ℂ)
+^ m * laguerrePolynomialL β m x / laguerrePolynomialL β m 0).re`. -/
 @[dlmf 18.14.E27]
-theorem laguerrePolyL_positive_weighted_sum {β lam x : ℝ} (hβ : -1 / 2 ≤ β) (hlam : -1 / 2 ≤ lam)
+theorem laguerrePolynomialL_positive_weighted_sum {β lam x : ℝ} (hβ : -1 / 2 ≤ β)
+    (hlam : -1 / 2 ≤ lam)
     (hx : 0 ≤ x) (n : ℕ) :
-    0 ≤ (∑ m ∈ Finset.range (n + 1), poch (lam + 1) (n - m) / (n - m).factorial *
-      (poch (lam + 1) m / m.factorial) * (-1 : ℂ) ^ m * laguerrePolyL β m x
-          / laguerrePolyL β m 0).re := by
+    0 ≤ (∑ m ∈ Finset.range (n + 1), pochhammer (lam + 1) (n - m) / (n - m).factorial *
+      (pochhammer (lam + 1) m / m.factorial) * (-1 : ℂ) ^ m * laguerrePolynomialL β m x
+          / laguerrePolynomialL β m 0).re := by
   sorry
 
 /-- Formula under the stated hypotheses: `∃ x : Fin n → ℝ, StrictMono x ∧ (∀ i, x i ∈ Set.Ioo (-1)
-1) ∧ ∀ z : ℂ, jacobiPolyP α β n z = 0 ↔ ∃ i, z = (x i : ℂ)`. -/
+1) ∧ ∀ z : ℂ, jacobiPolynomialP α β n z = 0 ↔ ∃ i, z = (x i : ℂ)`. -/
 @[dlmf 18.16.i]
 theorem jacobi_zeros {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
     ∃ x : Fin n → ℝ, StrictMono x ∧ (∀ i, x i ∈ Set.Ioo (-1) 1) ∧
-      ∀ z : ℂ, jacobiPolyP α β n z = 0 ↔ ∃ i, z = (x i : ℂ) :=
-  jacobiPolyP_zeros_Ioo hα hβ n
+      ∀ z : ℂ, jacobiPolynomialP α β n z = 0 ↔ ∃ i, z = (x i : ℂ) :=
+  jacobiPolynomialP_zeros_Ioo hα hβ n
 
 /-- Estimate under the stated parameter and domain assumptions: `∃ x : Fin n → ℝ, StrictMono x ∧
-(∀ i, 0 < x i) ∧ ∀ z : ℂ, laguerrePolyL α n z = 0 ↔ ∃ i, z = (x i : ℂ)`. -/
+(∀ i, 0 < x i) ∧ ∀ z : ℂ, laguerrePolynomialL α n z = 0 ↔ ∃ i, z = (x i : ℂ)`. -/
 @[dlmf 18.16.iv]
-theorem laguerrePolyL_zeros {α : ℝ} (hα : -1 < α) (n : ℕ) :
+theorem laguerrePolynomialL_zeros {α : ℝ} (hα : -1 < α) (n : ℕ) :
     ∃ x : Fin n → ℝ, StrictMono x ∧ (∀ i, 0 < x i) ∧
-      ∀ z : ℂ, laguerrePolyL α n z = 0 ↔ ∃ i, z = (x i : ℂ) :=
-  laguerrePolyL_zeros_pos hα n
+      ∀ z : ℂ, laguerrePolynomialL α n z = 0 ↔ ∃ i, z = (x i : ℂ) :=
+  laguerrePolynomialL_zeros_pos hα n
 
 /-- Estimate under the stated parameter and domain assumptions: `∃ x : Fin n → ℝ, StrictMono x ∧
-(∀ i, |x i| < Real.sqrt (2 * n + 1)) ∧ ∀ z : ℂ, (aeval z (hermitePolyH n) : ℂ) = 0 ↔ ∃ i, z =
+(∀ i, |x i| < Real.sqrt (2 * n + 1)) ∧ ∀ z : ℂ, (aeval z (hermitePolynomialH n) : ℂ) = 0 ↔ ∃ i, z =
 (x i : ℂ)`. -/
 @[dlmf 18.16.E16]
-theorem hermitePolyH_zeros (n : ℕ) :
+theorem hermitePolynomialH_zeros (n : ℕ) :
     ∃ x : Fin n → ℝ, StrictMono x ∧ (∀ i, |x i| < Real.sqrt (2 * n + 1)) ∧
-      ∀ z : ℂ, (aeval z (hermitePolyH n) : ℂ) = 0 ↔ ∃ i, z = (x i : ℂ) :=
-  hermitePolyH_zeros_bound n
+      ∀ z : ℂ, (aeval z (hermitePolynomialH n) : ℂ) = 0 ↔ ∃ i, z = (x i : ℂ) :=
+  hermitePolynomialH_zeros_bound n
 
 /-- The map `(fun n : ℕ => Real.sqrt n * (Real.sin (θ / 2)) ^ (α + 1 / 2) * (Real.cos (θ / 2)) ^
-(β + 1 / 2) * (jacobiPolyP α β n (Real.cos θ)).re - Real.cos ((n + (α + β + 1) / 2) * θ - (α +
+(β + 1 / 2) * (jacobiPolynomialP α β n (Real.cos θ)).re - Real.cos ((n + (α + β + 1) / 2) * θ - (α +
 1 / 2) * Real.pi / 2) / Real.sqrt Real.pi)` tends to `(𝓝 0)` along `atTop`. -/
 @[dlmf 18.15.E4_5]
 theorem jacobi_darboux_asymptotic {α β θ : ℝ} (hα : -1 < α) (hβ : -1 < β)
     (hθ : 0 < θ) (hθπ : θ < Real.pi) :
     Tendsto (fun n : ℕ => Real.sqrt n * (Real.sin (θ / 2)) ^ (α + 1 / 2) *
-      (Real.cos (θ / 2)) ^ (β + 1 / 2) * (jacobiPolyP α β n (Real.cos θ)).re -
+      (Real.cos (θ / 2)) ^ (β + 1 / 2) * (jacobiPolynomialP α β n (Real.cos θ)).re -
       Real.cos ((n + (α + β + 1) / 2) * θ - (α + 1 / 2) * Real.pi / 2) / Real.sqrt Real.pi) atTop
           (𝓝 0) := by
   sorry
 
 /-- Estimate under the stated parameter and domain assumptions: `((1 + x) / 2) ^ (β / 2) *
-‖jacobiPolyP α β n x‖ ≤ (poch (α + 1) n).re / n.factorial`. -/
+‖jacobiPolynomialP α β n x‖ ≤ (pochhammer (α + 1) n).re / n.factorial`. -/
 @[dlmf 18.14.E3_5]
 theorem jacobi_weighted_bound {α β x : ℝ} (hα : 0 ≤ α) (hβ : 0 ≤ β) (hx : |x| ≤ 1) (n : ℕ) :
-    ((1 + x) / 2) ^ (β / 2) * ‖jacobiPolyP α β n x‖ ≤ (poch (α + 1) n).re / n.factorial := by
+    ((1 + x) / 2) ^ (β / 2) * ‖jacobiPolynomialP α β n x‖ ≤ (pochhammer (α + 1) n).re /
+        n.factorial := by
   sorry
 
 /-! ### Laguerre's inequality and the Laguerre zero bounds -/
@@ -959,19 +979,19 @@ theorem laguerrePolyLR_ode {α : ℝ} (hα : -1 < α) (n : ℕ) (x : ℝ) :
       n * (laguerrePolyLR α n).eval x = 0 := by
   set p := laguerrePolyLR α n
   set q := p.map (algebraMap ℝ ℂ)
-  have hfun : laguerrePolyL (α : ℂ) n = fun z => q.eval z :=
+  have hfun : laguerrePolynomialL (α : ℂ) n = fun z => q.eval z :=
     funext fun z => (eval_map_laguerrePolyLR α n z).symm
   have hd : deriv (fun z => q.eval z) = fun z => (derivative q).eval z :=
     funext fun z => Polynomial.deriv q
-  have h := laguerrePolyL_differential_equation (α := (α : ℂ)) (by simpa using hα) n x
+  have h := laguerrePolynomialL_differential_equation (α := (α : ℂ)) (by simpa using hα) n x
   rw [hfun, hd, Polynomial.deriv] at h
   simp only [q, derivative_map, eval_map_ofReal] at h
   exact_mod_cast h
 
 /-- The quadratic inequality satisfied by every zero of `L_n^{(α)}`, from Laguerre's
 inequality applied to `L_n^{(α)}(t)/(t - x)` and the differential equation. -/
-theorem laguerrePolyL_zero_quadratic {α : ℝ} (hα : -1 < α) {n : ℕ} {x : ℝ}
-    (hx : laguerrePolyL α n x = 0) :
+theorem laguerrePolynomialL_zero_quadratic {α : ℝ} (hα : -1 < α) {n : ℕ} {x : ℝ}
+    (hx : laguerrePolynomialL α n x = 0) :
     4 * ((n : ℝ) - 1) * ((x - α - 2) * (x - α - 1) + (1 - n) * x) -
       3 * ((n : ℝ) - 2) * (x - α - 1) ^ 2 ≤ 0 := by
   set p := laguerrePolyLR α n with hp
@@ -1038,11 +1058,11 @@ theorem laguerrePolyL_zero_quadratic {α : ℝ} (hα : -1 < α) {n : ℕ} {x : �
   nlinarith [mul_pos hc hpos]
 
 /-- Both Laguerre zero bounds as a two-sided inequality. -/
-theorem laguerrePolyL_zero_bounds {α : ℝ} (hα : -1 < α) {n : ℕ} (hn : 0 < n) {x : ℝ}
-    (hx : laguerrePolyL α n x = 0) :
+theorem laguerrePolynomialL_zero_bounds {α : ℝ} (hα : -1 < α) {n : ℕ} (hn : 0 < n) {x : ℝ}
+    (hx : laguerrePolynomialL α n x = 0) :
     ((n : ℝ) - 1 - Real.sqrt (n ^ 2 + (n + 2) * (α + 1))) ^ 2 - 1 ≤ (n + 2) * x ∧
       (n + 2) * x ≤ ((n : ℝ) - 1 + Real.sqrt (n ^ 2 + (n + 2) * (α + 1))) ^ 2 - 1 := by
-  have hq := laguerrePolyL_zero_quadratic hα hx
+  have hq := laguerrePolynomialL_zero_quadratic hα hx
   set r := Real.sqrt (n ^ 2 + (n + 2) * (α + 1))
   have hr0 : 0 ≤ r := Real.sqrt_nonneg _
   have hα1 : (0 : ℝ) < α + 1 := by linarith
@@ -1064,18 +1084,18 @@ theorem laguerrePolyL_zero_bounds {α : ℝ} (hα : -1 < α) {n : ℕ} (hn : 0 <
 /-- Estimate under the stated parameter and domain assumptions: `((n : ℝ) - 1 - Real.sqrt (n ^ 2 +
 (n + 2) * (α + 1))) ^ 2 - 1 ≤ (n + 2) * x`. -/
 @[dlmf 18.16.E12]
-theorem laguerrePolyL_zero_lower_bound {α : ℝ} (hα : -1 < α) {n : ℕ} (hn : 0 < n) {x : ℝ}
-    (hx : laguerrePolyL α n x = 0) :
+theorem laguerrePolynomialL_zero_lower_bound {α : ℝ} (hα : -1 < α) {n : ℕ} (hn : 0 < n) {x : ℝ}
+    (hx : laguerrePolynomialL α n x = 0) :
     ((n : ℝ) - 1 - Real.sqrt (n ^ 2 + (n + 2) * (α + 1))) ^ 2 - 1 ≤ (n + 2) * x :=
-  (laguerrePolyL_zero_bounds hα hn hx).1
+  (laguerrePolynomialL_zero_bounds hα hn hx).1
 
 /-- The stated relation follows from the given hypotheses: `((n : ℝ) - 1 + Real.sqrt (n ^ 2 + (n +
 2) * (α + 1))) ^ 2 - 1 ≥ (n + 2) * x`. -/
 @[dlmf 18.16.E13]
-theorem laguerrePolyL_zero_upper_bound {α : ℝ} (hα : -1 < α) {n : ℕ} (hn : 0 < n) {x : ℝ}
-    (hx : laguerrePolyL α n x = 0) :
+theorem laguerrePolynomialL_zero_upper_bound {α : ℝ} (hα : -1 < α) {n : ℕ} (hn : 0 < n) {x : ℝ}
+    (hx : laguerrePolynomialL α n x = 0) :
     ((n : ℝ) - 1 + Real.sqrt (n ^ 2 + (n + 2) * (α + 1))) ^ 2 - 1 ≥ (n + 2) * x :=
-  (laguerrePolyL_zero_bounds hα hn hx).2
+  (laguerrePolynomialL_zero_bounds hα hn hx).2
 
 /-- Discriminant expressed through a complete root list. The identities below
 assume positive degree; this avoids conventions for the discriminant of a constant. -/

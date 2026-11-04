@@ -64,13 +64,13 @@ noncomputable section
 namespace DLMF.Zeta
 
 
-open DLMF.Hypergeometric (poch)
+open DLMF.Hypergeometric (pochhammer)
 
 /-- The Euler–Maclaurin sequence whose limit defines `hurwitzZetaComplex s z`. -/
 def hurwitzEMSeq (s z : ℂ) (N : ℕ) : ℂ :=
   (∑ n ∈ Finset.range N, (z + n) ^ (-s)) + (z + N) ^ (1 - s) / (s - 1) + (z + N) ^ (-s) / 2 +
     ∑ k ∈ Finset.range (⌈(1 - s.re) / 2⌉₊ + 1),
-      (bernoulli (2 * k + 2) : ℂ) / (2 * k + 2).factorial * poch s (2 * k + 1) *
+      (bernoulli (2 * k + 2) : ℂ) / (2 * k + 2).factorial * pochhammer s (2 * k + 1) *
         (z + N) ^ (-s - (2 * k + 1))
 
 /-- Identity under the stated parameter and domain assumptions: `hurwitzZetaComplex s z = limUnder
@@ -123,7 +123,7 @@ private lemma tendsto_hurwitzEMSeq_of_one_lt_re {s : ℂ} (hs : 1 < s.re) (a : �
   have h2 : Tendsto (fun N : ℕ => (a + N) ^ (-s) / 2) atTop (𝓝 0) := by
     simpa using (tendsto_add_natCast_cpow_of_re_neg a (w := -s) (by simp; linarith)).div_const 2
   have h3 : Tendsto (fun N : ℕ => ∑ k ∈ Finset.range (⌈(1 - s.re) / 2⌉₊ + 1),
-      (bernoulli (2 * k + 2) : ℂ) / (2 * k + 2).factorial * poch s (2 * k + 1) *
+      (bernoulli (2 * k + 2) : ℂ) / (2 * k + 2).factorial * pochhammer s (2 * k + 1) *
         (a + N) ^ (-s - (2 * k + 1))) atTop (𝓝 0) := by
     rw [show (0 : ℂ) = ∑ k ∈ Finset.range (⌈(1 - s.re) / 2⌉₊ + 1), 0 by simp]
     refine tendsto_finsetSum _ fun k _ => ?_
@@ -266,7 +266,7 @@ private lemma hasSum_eulerMaclaurinIncrement {M : ℕ} {s : ℂ} (hs : s ≠ 1) 
 /-- The Euler–Maclaurin increment at a real point as an integral against `B̃_{2M+1}`. -/
 private lemma eulerMaclaurinIncrement_eq_integral (M : ℕ) {s : ℂ} (hs : s ≠ 1) {a : ℝ} (ha : 0 < a)
     (k : ℕ) :
-    eulerMaclaurinIncrement M s ((a : ℂ) + k) = -(poch s (2 * M + 1) / (2 * M + 1 : ℕ)!) *
+    eulerMaclaurinIncrement M s ((a : ℂ) + k) = -(pochhammer s (2 * M + 1) / (2 * M + 1 : ℕ)!) *
       ∫ x in (k : ℝ)..(k + 1), ((periodicBernoulli (2 * M + 1) x : ℝ) : ℂ) /
         (((x + a : ℝ)) : ℂ) ^ (s + (2 * M + 1 : ℕ)) := by
   have hw : 0 < ((a : ℂ) + k).re := by simp; positivity
@@ -355,8 +355,8 @@ private lemma integrableOn_periodicBernoulli_div_add_cpow (p : ℕ) {w : ℂ} (h
       ((norm_nonneg _).trans (hB 0 ⟨le_rfl, zero_le_one⟩))
 
 /-- `C(s + n - 1, n) = (s)_n / n!`. -/
-private lemma ringChoose_add_sub_one_eq_poch_div_factorial (s : ℂ) (n : ℕ) :
-    Ring.choose (s + n - 1) n = poch s n / n ! := by
+private lemma ringChoose_add_sub_one_eq_pochhammer_div_factorial (s : ℂ) (n : ℕ) :
+    Ring.choose (s + n - 1) n = pochhammer s n / n ! := by
   have hf : (n ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
   rw [Ring.choose, show s + n - 1 - n + 1 = s by ring, eq_div_iff hf, mul_comm,
     ← nsmul_eq_mul, Ring.factorial_nsmul_multichoose_eq_ascPochhammer,
@@ -450,7 +450,7 @@ theorem hurwitzZetaComplex_eulerMaclaurin_one {s : ℂ} (hs : s ≠ 1) (hs0 : 0 
   have h2 := (hasSum_intervalIntegral_unit_Ioi hfr).mul_left (-s)
   have h3 := h1.sub h2
   set u : ℕ → ℂ := fun m => ((a : ℂ) + (N + m : ℕ)) ^ (-s)
-  have hterm : ∀ m : ℕ, -(poch s (2 * 0 + 1) / ((2 * 0 + 1 : ℕ)! : ℂ)) *
+  have hterm : ∀ m : ℕ, -(pochhammer s (2 * 0 + 1) / ((2 * 0 + 1 : ℕ)! : ℂ)) *
       (∫ x in ((N + m : ℕ) : ℝ)..((N + m : ℕ) + 1), ((periodicBernoulli (2 * 0 + 1) x : ℝ) : ℂ) /
         (((x + a : ℝ)) : ℂ) ^ (s + (2 * 0 + 1 : ℕ))) -
       -s * ∫ x in ((N + m : ℕ) : ℝ)..((N + m : ℕ) + 1),
@@ -484,7 +484,8 @@ theorem hurwitzZetaComplex_eulerMaclaurin_one {s : ℂ} (hs : s ≠ 1) (hs0 : 0 
       ring
     have hU := mul_integral_unit_one_div_add_cpow hsz ha k
     rw [hB]
-    simp only [poch, ascPochhammer_one, Polynomial.eval_X, mul_zero, zero_add, Nat.factorial_one,
+    simp only [pochhammer, ascPochhammer_one, Polynomial.eval_X, mul_zero, zero_add,
+        Nat.factorial_one,
       Nat.cast_one, div_one]
     simp only [u, k] at hU ⊢
     rw [show N + (m + 1) = N + m + 1 by ring]
@@ -532,7 +533,8 @@ private lemma eulerMaclaurinIncrement_zero_eq_integral_bernoulliFun {s w : ℂ} 
       have := (hasDerivAt_add_ofReal_cpow (c := 1 - s) (add_ofReal_mem_slitPlane hw hx.1)).div_const
         (1 - s)
       convert this using 1
-      simp only [cpowDerivFamily, pow_zero, DLMF.Hypergeometric.poch_zero, Nat.cast_zero, sub_zero,
+      simp only [cpowDerivFamily, pow_zero, DLMF.Hypergeometric.pochhammer_zero,
+          Nat.cast_zero, sub_zero,
         one_mul]
       field_simp
       ring_nf
@@ -569,7 +571,8 @@ private lemma eulerMaclaurinIncrement_zero_eq_integral_bernoulliFun {s w : ℂ} 
     rw [← intervalIntegral.integral_const_mul, ← intervalIntegral.integral_const_mul,
       ← intervalIntegral.integral_sub hB2 (hI2.const_mul _)]
     refine intervalIntegral.integral_congr fun t _ => ?_
-    simp only [cpowDerivFamily, DLMF.Hypergeometric.poch_succ, DLMF.Hypergeometric.poch_zero]
+    simp only [cpowDerivFamily, DLMF.Hypergeometric.pochhammer_succ,
+        DLMF.Hypergeometric.pochhammer_zero]
     push_cast
     ring_nf
   have hb1 : bernoulliFun 2 1 = bernoulli 2 := by
@@ -581,9 +584,9 @@ private lemma eulerMaclaurinIncrement_zero_eq_integral_bernoulliFun {s w : ℂ} 
     one_pow] at EM
   have h0 : cpowDerivFamily s w 0 1 = (w + 1) ^ (-s) := by
                                                           simp [cpowDerivFamily,
-                                                            DLMF.Hypergeometric.poch_zero]
+                                                            DLMF.Hypergeometric.pochhammer_zero]
   have h0' : cpowDerivFamily s w 0 0 = w ^ (-s) := by
-      simp [cpowDerivFamily, DLMF.Hypergeometric.poch_zero]
+      simp [cpowDerivFamily, DLMF.Hypergeometric.pochhammer_zero]
   rw [h0, h0'] at EM
   rw [hint2] at hsplit
   unfold eulerMaclaurinIncrement eulerMaclaurinTail
@@ -691,7 +694,7 @@ theorem hurwitzZetaComplex_eulerMaclaurin' {s : ℂ} (hs : s ≠ 1) {a : ℝ} (h
   have hint := integrableOn_periodicBernoulli_div_add_cpow (2 * n + 1)
     (w := s + (2 * n + 1 : ℕ)) (by push_cast; simp; linarith) ha.le (c := ((1 : ℕ) : ℝ)) (by simp)
   have h2 := (hasSum_intervalIntegral_unit_Ioi hint).mul_left
-    (-(poch s (2 * n + 1) / (2 * n + 1 : ℕ)!))
+    (-(pochhammer s (2 * n + 1) / (2 * n + 1 : ℕ)!))
   have heq := h1.unique h2
   rw [sub_eq_iff_eq_add] at heq
   rw [heq]
@@ -700,8 +703,8 @@ theorem hurwitzZetaComplex_eulerMaclaurin' {s : ℂ} (hs : s ≠ 1) {a : ℝ} (h
         ((periodicBernoulli (2 * n + 1) x : ℝ) : ℂ) / (((x + a : ℝ)) : ℂ) ^ (s + 2 * n + 1) := by
     rw [Nat.cast_one]
     congr 1; funext x; congr 2; push_cast; ring
-  have hc : Ring.choose (s + 2 * n) (2 * n + 1) = poch s (2 * n + 1) / (2 * n + 1 : ℕ)! := by
-    rw [← ringChoose_add_sub_one_eq_poch_div_factorial]; congr 1; push_cast; ring
+  have hc : Ring.choose (s + 2 * n) (2 * n + 1) = pochhammer s (2 * n + 1) / (2 * n + 1 : ℕ)! := by
+    rw [← ringChoose_add_sub_one_eq_pochhammer_div_factorial]; congr 1; push_cast; ring
   have h1a : (1 + (a : ℂ)) ≠ 0 := by
     intro h; have := congrArg Complex.re h; simp at this; linarith
   have hp : (1 + (a : ℂ)) ^ (1 - s) = (1 + a) * (1 + a) ^ (-s) := by
@@ -712,8 +715,9 @@ theorem hurwitzZetaComplex_eulerMaclaurin' {s : ℂ} (hs : s ≠ 1) {a : ℝ} (h
     rw [← Finset.Ico_add_one_right_eq_Icc, Finset.sum_Ico_eq_sum_range, add_tsub_cancel_right]
     refine Finset.sum_congr rfl fun k _ => ?_
     have hck : Ring.choose (s + 2 * ((1 + k : ℕ) : ℂ) - 2) (2 * (1 + k) - 1) =
-        poch s (2 * k + 1) / (2 * k + 1 : ℕ)! := by
-      rw [show 2 * (1 + k) - 1 = 2 * k + 1 by omega, ← ringChoose_add_sub_one_eq_poch_div_factorial]
+        pochhammer s (2 * k + 1) / (2 * k + 1 : ℕ)! := by
+      rw [show 2 * (1 + k) - 1 = 2 * k + 1 by omega,
+        ← ringChoose_add_sub_one_eq_pochhammer_div_factorial]
       congr 1; push_cast; ring
     rw [hck, eulerMaclaurinCoeff, show 2 * k + 2 = 2 * (1 + k) by ring]
     have hf : ((2 * (1 + k))! : ℂ) = (2 * (1 + k) : ℕ) * ((2 * k + 1 : ℕ)! : ℂ) := by
@@ -896,19 +900,19 @@ and a natural shift of the first parameter, on the right half-plane. -/
 theorem iteratedDeriv_hurwitzZetaComplex_param {s a : ℂ} (hs : s ≠ 1) (hs' : ∀ m : ℕ, s ≠ -m)
     (ha : 0 < a.re) (n : ℕ) :
     iteratedDeriv n (hurwitzZetaComplex s) a =
-      (-1) ^ n * poch s n * hurwitzZetaComplex (s + n) a := by
+      (-1) ^ n * pochhammer s n * hurwitzZetaComplex (s + n) a := by
   induction n generalizing a with
-  | zero => simp [DLMF.Hypergeometric.poch_zero]
+  | zero => simp [DLMF.Hypergeometric.pochhammer_zero]
   | succ n ih =>
     have heq : iteratedDeriv n (hurwitzZetaComplex s) =ᶠ[𝓝 a]
-        (fun w => (-1) ^ n * poch s n * hurwitzZetaComplex (s + n) w) := by
+        (fun w => (-1) ^ n * pochhammer s n * hurwitzZetaComplex (s + n) w) := by
       filter_upwards [isOpen_lt continuous_const continuous_re |>.mem_nhds ha] with w hw
       exact ih hw
     rw [iteratedDeriv_succ, heq.deriv_eq]
     have hs0 : s + n ≠ 0 := by intro he; apply hs' n; linear_combination he
     have hD := (hasDerivAt_hurwitzZetaComplex_param' hs0
-      (hurwitz_shift_ne_one hs hs' n) ha).const_mul ((-1) ^ n * poch s n)
-    rw [hD.deriv, DLMF.Hypergeometric.poch_succ, pow_succ]
+      (hurwitz_shift_ne_one hs hs' n) ha).const_mul ((-1) ^ n * pochhammer s n)
+    rw [hD.deriv, DLMF.Hypergeometric.pochhammer_succ, pow_succ]
     push_cast
     rw [show s + (n + 1) = s + n + 1 by ring]
     ring
@@ -918,11 +922,11 @@ theorem iteratedDeriv_hurwitzZetaComplex_param {s a : ℂ} (hs : s ≠ 1) (hs' :
 
 Corrected statement (2026-10-25): the hypothesis `hs' : ∀ m : ℕ, s ≠ -m` is added. At
 `s = 0, -1, -2, …` the term with `n + s = 1` is DLMF's limit of `(s)_n ζ(n+s)`, whereas Lean's
-`poch s n · ζ(1)` gives `0`; see `not_hasSum_hurwitzZetaComplex_taylor_zero`. -/
+`pochhammer s n · ζ(1)` gives `0`; see `not_hasSum_hurwitzZetaComplex_taylor_zero`. -/
 @[dlmf 25.11.E10]
 theorem hasSum_hurwitzZetaComplex_taylor {s a : ℂ} (hs : s ≠ 1) (hs' : ∀ m : ℕ, s ≠ -m)
     (ha : ‖a - 1‖ < 1) :
-    HasSum (fun n : ℕ => poch s n / n ! * riemannZeta (n + s) * (1 - a) ^ n)
+    HasSum (fun n : ℕ => pochhammer s n / n ! * riemannZeta (n + s) * (1 - a) ^ n)
       (hurwitzZetaComplex s a) := by
   have hpos : ∀ z ∈ Metric.ball (1 : ℂ) 1, 0 < z.re := by
     intro z hz

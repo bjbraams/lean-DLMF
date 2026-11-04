@@ -30,8 +30,8 @@ regular parameters on a straight vertical line `Re t = c`, adding the residues o
   crossed poles.
 * `CylinderBarnesContinuation.U_integral`: DLMF 12.5.8 for all regular parameters, in terms of
   `CylinderBarnesContinuation.integrand`.
-* `pcfU_barnes_continued`, `pcfV_barnes_continued`: DLMF 12.5.8–12.5.9 with crossed-residue
-  corrections.
+* `parabolicCylinderU_barnes_continued`, `parabolicCylinderV_barnes_continued`: DLMF 12.5.8–12.5.9
+  with crossed-residue corrections.
 
 ## Implementation notes
 
@@ -606,7 +606,7 @@ theorem CylinderBarnesContinuation.U_pos {a z : ℂ} (hz0 : z ≠ 0) (hz : |arg 
     {c : ℝ} (hc : 0 < c)
     (hav : ∀ n : ℕ, 2*c ≠ (1/2+1*a).re + n) (hA : 0 < (1/2+1*a).re) :
     (∫ y : ℝ, CylinderBarnesContinuation.integrand (1/2+1*a) z (c + y*I)) =
-      2*π*(Gamma (1/2+1*a)*(exp (z^2/4)*z^(a+1/2))*pcfU a z +
+      2*π*(Gamma (1/2+1*a)*(exp (z^2/4)*z^(a+1/2))*parabolicCylinderU a z +
         ∑ n ∈ Finset.range (CylinderBarnesContinuation.poleCount (1/2+1*a) c),
             CylinderBarnesContinuation.residue (1/2+1*a) z n) := by
   set A : ℂ := 1/2+1*a with hAdef
@@ -858,12 +858,12 @@ theorem CylinderBarnesContinuation.canonicalValue_differentiableAt {z : ℂ} (hz
 theorem CylinderBarnesContinuation.U_integral {a z : ℂ} (ha : ∀ n : ℕ, a ≠ -1/2 - n) (hz0 : z ≠ 0)
     (hz : |arg z| < 3*π/4) {c : ℝ} (hc : 0 < c) (hav : ∀ n : ℕ, 2*c ≠ (1/2+1*a).re + n) :
     (∫ y : ℝ, CylinderBarnesContinuation.integrand (1/2+1*a) z (c + y*I)) =
-      2*π*(Gamma (1/2+1*a)*(exp (z^2/4)*z^(a+1/2))*pcfU a z +
+      2*π*(Gamma (1/2+1*a)*(exp (z^2/4)*z^(a+1/2))*parabolicCylinderU a z +
         ∑ n ∈ Finset.range (CylinderBarnesContinuation.poleCount (1/2+1*a) c),
             CylinderBarnesContinuation.residue (1/2+1*a) z n) := by
   set D : Set ℂ := {a : ℂ | ∀ n : ℕ, a ≠ -1/2 - n}
   have hD : IsOpen D := Complex.BarnesResidue.isOpen_ne_sub_nat (-1/2)
-  set W : ℂ → ℂ := fun a => 2*π*(Gamma (1/2+1*a)*(exp (z^2/4)*z^(a+1/2))*pcfU a z)
+  set W : ℂ → ℂ := fun a => 2*π*(Gamma (1/2+1*a)*(exp (z^2/4)*z^(a+1/2))*parabolicCylinderU a z)
   have hGa : AnalyticOnNhd ℂ (CylinderBarnesContinuation.canonicalValue z) D :=
       DifferentiableOn.analyticOnNhd
     (fun a ha' => (CylinderBarnesContinuation.canonicalValue_differentiableAt hz0 hz
@@ -874,7 +874,7 @@ theorem CylinderBarnesContinuation.U_integral {a z : ℂ} (ha : ∀ n : ℕ, a �
     refine DifferentiableAt.differentiableWithinAt ?_
     exact (differentiableAt_const _).mul ((((differentiableAt_Gamma _ hG).comp a
       (by fun_prop)).mul ((differentiableAt_const _).mul (DifferentiableAt.const_cpow
-        (by fun_prop) (Or.inl hz0)))).mul (pcfU_entire_order z a))
+        (by fun_prop) (Or.inl hz0)))).mul (parabolicCylinderU_entire_order z a))
   have hpos : ∀ a : ℂ, 0 < (1/2+1*a).re → CylinderBarnesContinuation.canonicalValue z a = W a := by
     intro a hA
     have := CylinderBarnesContinuation.U_pos (a := a) hz0 hz
@@ -935,11 +935,11 @@ theorem CylinderBarnesContinuation.residue_true {a z : ℂ} (hz0 : z ≠ 0)
 /-- All regular parameters: crossed residues encode the deformed separating contour instead of
 strengthening the real-part hypothesis. -/
 @[dlmf 12.5.E8]
-theorem pcfU_barnes_continued {a z : ℂ} (ha : ∀ n : ℕ, 1*a ≠ -n-1/2) (hz0 : z ≠ 0)
+theorem parabolicCylinderU_barnes_continued {a z : ℂ} (ha : ∀ n : ℕ, 1*a ≠ -n-1/2) (hz0 : z ≠ 0)
     (hz : |arg z| < 3*π/4) {c : ℝ} (hc : 0 < c) (havoid : ∀ n : ℕ, 2*c ≠ 1/2+1*a.re+n) :
     HasIntegralWholeLine
         (fun y : ℝ => let t : ℂ := c+y*I; Gamma t*Gamma (1/2+1*a-2*t)*2^t*z^(2*t)*1)
-        (2*π*(Gamma (1/2+1*a)*(exp (z^2/4)*z^(a+1/2))*pcfU a z+pcfBarnesResidueSum
+        (2*π*(Gamma (1/2+1*a)*(exp (z^2/4)*z^(a+1/2))*parabolicCylinderU a z+pcfBarnesResidueSum
         false a z c)) := by
   have ha' : ∀ n : ℕ, a ≠ -1/2 - n := fun n h => ha n (by rw [h]; ring)
   have hav : ∀ n : ℕ, 2*c ≠ (1/2+1*a).re + n := fun n h => havoid n (by simp at h ⊢; linarith)
@@ -954,11 +954,11 @@ theorem pcfU_barnes_continued {a z : ℂ} (ha : ∀ n : ℕ, 1*a ≠ -n-1/2) (hz
 /-- All regular parameters: crossed residues encode the deformed separating contour instead of
 strengthening the real-part hypothesis. -/
 @[dlmf 12.5.E9]
-theorem pcfV_barnes_continued {a z : ℂ} (ha : ∀ n : ℕ, -1*a ≠ -n-1/2) (hz0 : z ≠ 0)
+theorem parabolicCylinderV_barnes_continued {a z : ℂ} (ha : ∀ n : ℕ, -1*a ≠ -n-1/2) (hz0 : z ≠ 0)
     (hz : |arg z| < π/4) {c : ℝ} (hc : 0 < c) (havoid : ∀ n : ℕ, 2*c ≠ 1/2+-1*a.re+n) :
     HasIntegralWholeLine
         (fun y : ℝ => let t : ℂ := c+y*I; Gamma t*Gamma (1/2+-1*a-2*t)*2^t*z^(2*t)*cos (π*t))
-        (2*π*(Gamma (1/2+-1*a)*((Real.sqrt (π/2):ℂ)*exp (-z^2/4)*z^(-a+1/2))*pcfV a
+        (2*π*(Gamma (1/2+-1*a)*((Real.sqrt (π/2):ℂ)*exp (-z^2/4)*z^(-a+1/2))*parabolicCylinderV a
         z+pcfBarnesResidueSum true a z c)) := by
   have ha' : ∀ n : ℕ, -a ≠ -1/2 - n := fun n h => ha n (by rw [neg_one_mul, h]; ring)
   have hav : ∀ n : ℕ, 2*c ≠ (1/2+1*(-a)).re + n := fun n h => havoid n (by simp at h ⊢; linarith)
@@ -989,7 +989,7 @@ theorem pcfV_barnes_continued {a z : ℂ} (ha : ∀ n : ℕ, -1*a ≠ -n-1/2) (h
   suffices hI : ∫ y : ℝ,
       (CylinderBarnesContinuation.integrand (1/2+1*(-a)) (I*z) (c + y*I) +
           CylinderBarnesContinuation.integrand (1/2+1*(-a)) (-I*z) (c + y*I))/2 =
-      2*π*(Gamma (1/2+-1*a)*((Real.sqrt (π/2):ℂ)*exp (-z^2/4)*z^(-a+1/2))*pcfV a
+      2*π*(Gamma (1/2+-1*a)*((Real.sqrt (π/2):ℂ)*exp (-z^2/4)*z^(-a+1/2))*parabolicCylinderV a
           z+pcfBarnesResidueSum true a z c) by
     rw [← hI]; exact CylinderIntegrals.hasIntegralWholeLine ((i1.add i2).div_const 2)
   rw [integral_div, integral_add i1 i2, CylinderBarnesContinuation.U_integral ha' hp0 hpa hc hav,
@@ -1002,11 +1002,12 @@ theorem pcfV_barnes_continued {a z : ℂ} (ha : ∀ n : ℕ, -1*a ≠ -n-1/2) (h
           pcfBarnesResidue true a z n := by
     rw [← Finset.sum_add_distrib, Finset.mul_sum]
     exact Finset.sum_congr rfl fun n _ => CylinderBarnesContinuation.residue_true hz0 hz2 n
-  have hM : Gamma (1/2+1*(-a))*(exp ((I*z)^2/4)*(I*z)^(-a+1/2))*pcfU (-a) (I*z) +
-      Gamma (1/2+1*(-a))*(exp ((-I*z)^2/4)*(-I*z)^(-a+1/2))*pcfU (-a) (-I*z) =
-      2*(Gamma (1/2+-1*a)*((Real.sqrt (π/2):ℂ)*exp (-z^2/4)*z^(-a+1/2))*pcfV a z) := by
-    have hV1 := pcfV_eq_mul_I a z
-    have hV2 := pcfV_eq_mul_neg_I a z
+  have hM : Gamma (1/2+1*(-a))*(exp ((I*z)^2/4)*(I*z)^(-a+1/2))*parabolicCylinderU (-a) (I*z) +
+      Gamma (1/2+1*(-a))*(exp ((-I*z)^2/4)*(-I*z)^(-a+1/2))*parabolicCylinderU (-a) (-I*z) =
+      2*(Gamma (1/2+-1*a)*((Real.sqrt (π/2):ℂ)*exp
+          (-z^2/4)*z^(-a+1/2))*parabolicCylinderV a z) := by
+    have hV1 := parabolicCylinderV_eq_mul_I a z
+    have hV2 := parabolicCylinderV_eq_mul_neg_I a z
     obtain ⟨f1, f2⟩ := CylinderIntegrals.I_mul_cpow hz0 hz2 (-a+1/2)
     rw [f1, f2, show (I*z)^2 = -z^2 by rw [mul_pow, I_sq]; ring,
       show (-I*z)^2 = -z^2 by rw [mul_pow, neg_sq, I_sq]; ring,
@@ -1016,13 +1017,15 @@ theorem pcfV_barnes_continued {a z : ℂ} (ha : ∀ n : ℕ, -1*a ≠ -n-1/2) (h
     have hq1 : exp (π/2*I*(-a+1/2)) = exp (-I*π*(a/2-1/4)) := by congr 1; ring
     have hq2 : exp (-(π/2)*I*(-a+1/2)) = exp (I*π*(a/2-1/4)) := by congr 1; ring
     rw [hq1, hq2]
-    have hsum : 2 * pcfV a z = (Real.sqrt (2/π):ℂ) * (exp (-I*π*(a/2-1/4)) * pcfU (-a) (I*z) +
-        exp (I*π*(a/2-1/4)) * pcfU (-a) (-I*z)) := by
+    have hsum : 2 * parabolicCylinderV a z = (Real.sqrt (2/π):ℂ) *
+        (exp (-I*π*(a/2-1/4)) * parabolicCylinderU (-a) (I*z) +
+        exp (I*π*(a/2-1/4)) * parabolicCylinderU (-a) (-I*z)) := by
       linear_combination hV1 + hV2
     linear_combination (-(Gamma (1/2+-1*a) * exp (-z^2/4) * z^(-a+1/2) *
         (Real.sqrt (π/2):ℂ))) * hsum -
-      (Gamma (1/2+-1*a) * exp (-z^2/4) * z^(-a+1/2) * (exp (-I*π*(a/2-1/4)) * pcfU (-a) (I*z) +
-        exp (I*π*(a/2-1/4)) * pcfU (-a) (-I*z))) * hs
+      (Gamma (1/2+-1*a) * exp (-z^2/4) * z^(-a+1/2) *
+          (exp (-I*π*(a/2-1/4)) * parabolicCylinderU (-a) (I*z) +
+        exp (I*π*(a/2-1/4)) * parabolicCylinderU (-a) (-I*z))) * hs
   linear_combination π * hM + π * hR
 
 end DLMF.Confluent

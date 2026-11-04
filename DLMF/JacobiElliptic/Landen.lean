@@ -44,7 +44,7 @@ namespace DLMF.JacobiElliptic
 
 /-- The descending Landen modulus `k₁ = (1 - k')/(1 + k')` (DLMF 22.7.1). -/
 @[dlmf 22.7.E1]
-def jacobiLandenDescModulus (k : ℂ) : ℂ := (1 - jacobiComodulusk k) / (1 + jacobiComodulusk k)
+def jacobiLandenDescModulus (k : ℂ) : ℂ := (1 - jacobiComodulus k) / (1 + jacobiComodulus k)
 
 /-- The ascending Landen modulus `k₂ = 2√k/(1 + k)` (DLMF 22.7.5, principal square root). -/
 @[dlmf 22.7.E5]
@@ -72,17 +72,17 @@ theorem jacobiLandenAscComodulus_sq {k : ℂ} (hk : 1 + k ≠ 0) :
 the denominators nonzero. -/
 @[dlmf 22.7.E2, dlmf 22.7.E3, dlmf 22.7.E4]
 theorem jacobi_landen_descending {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hn : JacobiRegulark .n z k)
-    (hn₁ : JacobiRegulark .n (z / (1 + jacobiLandenDescModulus k)) (jacobiLandenDescModulus k))
+    (hn : IsJacobiRegular .n z k)
+    (hn₁ : IsJacobiRegular .n (z / (1 + jacobiLandenDescModulus k)) (jacobiLandenDescModulus k))
     (h₁ : 1 + jacobiLandenDescModulus k *
-      jacobiSnk (z / (1 + jacobiLandenDescModulus k)) (jacobiLandenDescModulus k) ^ 2 ≠ 0)
+      jacobiSn (z / (1 + jacobiLandenDescModulus k)) (jacobiLandenDescModulus k) ^ 2 ≠ 0)
     (h₂ : 1 + jacobiLandenDescModulus k -
-      jacobiDnk (z / (1 + jacobiLandenDescModulus k)) (jacobiLandenDescModulus k) ^ 2 ≠ 0) :
+      jacobiDn (z / (1 + jacobiLandenDescModulus k)) (jacobiLandenDescModulus k) ^ 2 ≠ 0) :
     let k₁ := jacobiLandenDescModulus k
     let w := z / (1 + k₁)
-    jacobiSnk z k = (1 + k₁) * jacobiSnk w k₁ / (1 + k₁ * jacobiSnk w k₁ ^ 2) ∧
-      jacobiCnk z k = jacobiCnk w k₁ * jacobiDnk w k₁ / (1 + k₁ * jacobiSnk w k₁ ^ 2) ∧
-      jacobiDnk z k = (jacobiDnk w k₁ ^ 2 - (1 - k₁)) / (1 + k₁ - jacobiDnk w k₁ ^ 2) := by
+    jacobiSn z k = (1 + k₁) * jacobiSn w k₁ / (1 + k₁ * jacobiSn w k₁ ^ 2) ∧
+      jacobiCn z k = jacobiCn w k₁ * jacobiDn w k₁ / (1 + k₁ * jacobiSn w k₁ ^ 2) ∧
+      jacobiDn z k = (jacobiDn w k₁ ^ 2 - (1 - k₁)) / (1 + k₁ - jacobiDn w k₁ ^ 2) := by
   sorry
 
 /-- **Admitted.** DLMF 22.7.6–22.7.8 (ascending Landen transformation): with
@@ -93,15 +93,15 @@ theorem jacobi_landen_descending {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z :
 `dn(w, k₂) ≠ 0`. -/
 @[dlmf 22.7.E6, dlmf 22.7.E7, dlmf 22.7.E8]
 theorem jacobi_landen_ascending {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hn : JacobiRegulark .n z k)
-    (hn₂ : JacobiRegulark .n (z / (1 + jacobiLandenAscComodulus k)) (jacobiLandenAscModulus k))
-    (hd₂ : jacobiDnk (z / (1 + jacobiLandenAscComodulus k)) (jacobiLandenAscModulus k) ≠ 0) :
+    (hn : IsJacobiRegular .n z k)
+    (hn₂ : IsJacobiRegular .n (z / (1 + jacobiLandenAscComodulus k)) (jacobiLandenAscModulus k))
+    (hd₂ : jacobiDn (z / (1 + jacobiLandenAscComodulus k)) (jacobiLandenAscModulus k) ≠ 0) :
     let k₂ := jacobiLandenAscModulus k
     let k₂' := jacobiLandenAscComodulus k
     let w := z / (1 + k₂')
-    jacobiSnk z k = (1 + k₂') * jacobiSnk w k₂ * jacobiCnk w k₂ / jacobiDnk w k₂ ∧
-      jacobiCnk z k = (1 + k₂') * (jacobiDnk w k₂ ^ 2 - k₂') / (k₂ ^ 2 * jacobiDnk w k₂) ∧
-      jacobiDnk z k = (1 - k₂') * (jacobiDnk w k₂ ^ 2 + k₂') / (k₂ ^ 2 * jacobiDnk w k₂) := by
+    jacobiSn z k = (1 + k₂') * jacobiSn w k₂ * jacobiCn w k₂ / jacobiDn w k₂ ∧
+      jacobiCn z k = (1 + k₂') * (jacobiDn w k₂ ^ 2 - k₂') / (k₂ ^ 2 * jacobiDn w k₂) ∧
+      jacobiDn z k = (1 - k₂') * (jacobiDn w k₂ ^ 2 + k₂') / (k₂ ^ 2 * jacobiDn w k₂) := by
   sorry
 
 end DLMF.JacobiElliptic

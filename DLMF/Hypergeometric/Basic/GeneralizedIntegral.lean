@@ -31,8 +31,8 @@ namespace DLMF.Hypergeometric
 `(a₀)ₙ/Γ(b₀+n)`. -/
 theorem regularizedHGFunCoeff_cons (a₀ b₀ : ℂ) (a b : Multiset ℂ) (n : ℕ) :
     regularizedHGFunCoeff (a₀ ::ₘ a) (b₀ ::ₘ b) n =
-      poch a₀ n / Gamma (b₀ + n) * regularizedHGFunCoeff a b n := by
-  simp only [regularizedHGFunCoeff, Multiset.map_cons, Multiset.prod_cons, poch]
+      pochhammer a₀ n / Gamma (b₀ + n) * regularizedHGFunCoeff a b n := by
+  simp only [regularizedHGFunCoeff, Multiset.map_cons, Multiset.prod_cons, pochhammer]
   rw [div_mul_div_comm]
   ring_nf
 
@@ -110,8 +110,8 @@ theorem regularizedHGFun_cons_eq_integral {a₀ b₀ : ℂ} (ha : 0 < a₀.re) (
     have hB := Gamma_mul_Gamma_eq_betaIntegral hn hab
     rw [show a₀ + n + (b₀ - a₀) = b₀ + n by ring] at hB
     have hΓbn : Gamma (b₀ + n) ≠ 0 := Gamma_ne_zero_of_re_pos hbn
-    have hpoch : Gamma (a₀ + n) = poch a₀ n * Gamma a₀ := by
-      rw [poch, ← Complex.Gamma_add_nat_div_Gamma_eq a₀ (fun k hk => by
+    have hpoch : Gamma (a₀ + n) = pochhammer a₀ n * Gamma a₀ := by
+      rw [pochhammer, ← Complex.Gamma_add_nat_div_Gamma_eq a₀ (fun k hk => by
         have := congrArg re hk; simp at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)])]
       field_simp
     rw [hcongr, regularizedHGFunCoeff_cons,

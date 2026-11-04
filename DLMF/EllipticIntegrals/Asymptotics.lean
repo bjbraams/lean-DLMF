@@ -27,16 +27,16 @@ tends to `0` or `∞`.
 
 * `compEllIntLogCoeff_zero`, `compEllIntLogCoeff_succ`: `d(0) = 2 ln 2` and the recurrence
   for `d(m)` (DLMF 19.12.3).
-* `compEllIntKk_hasSum_log`, `compEllIntEk_hasSum_log`: the logarithmic expansions of `K(k)`
-  and `E(k)` in powers of `k'` (DLMF 19.12.1, 19.12.2).
-* `compEllIntPik_isBigO_log`, `compEllIntPik_isBigO_log_of_one_lt`: `Π(α², k)` as `k² → 1-`
-  for real `α² < 1` and `α² > 1` (DLMF 19.12.4, 19.12.5).
-* `symEllIntRC_isBigO_small`, `symEllIntRC_isBigO_large`: `R_C(x, y)` as `x/y → 0` and as
-  `y/x → 0` (DLMF 19.12.6, 19.12.7).
+* `completeEllipticK_hasSum_log`, `completeEllipticE_hasSum_log`: the logarithmic expansions of
+  `K(k)` and `E(k)` in powers of `k'` (DLMF 19.12.1, 19.12.2).
+* `completeEllipticPi_isBigO_log`, `completeEllipticPi_isBigO_log_of_one_lt`: `Π(α², k)` as
+  `k² → 1-` for real `α² < 1` and `α² > 1` (DLMF 19.12.4, 19.12.5).
+* `symmetricEllipticRC_isBigO_small`, `symmetricEllipticRC_isBigO_large`: `R_C(x, y)` as `x/y → 0`
+  and as `y/x → 0` (DLMF 19.12.6, 19.12.7).
 
 ## Implementation notes
 
-* In 19.12.1 and 19.12.2, `k' = (1 - k²)^{1/2}` is `jacobiComodulusk` (principal square root)
+* In 19.12.1 and 19.12.2, `k' = (1 - k²)^{1/2}` is `jacobiComodulus` (principal square root)
   and the logarithm is principal. Complex `k` are allowed, as in DLMF (`0 < |k'| < 1`); we add
   `1 - k² ∈ ℂ \ (-∞, 0]`, that is, `k` off DLMF's cuts `(-∞, -1] ∪ [1, ∞)` of `K` and `E`
   (§19.2(ii)), where DLMF does not define the integrals. For `E` the point `k' = 0` is allowed.
@@ -103,35 +103,36 @@ theorem compEllIntLogCoeff_succ (m : ℕ) :
 /-- DLMF 19.12.1: `K(k) = Σ_{m ≥ 0} ((½)_m)²/(m!)² k'^{2m} (ln(1/k') + d(m))`, for complex
 `k` with `0 < |k'| < 1`, `k' = (1 - k²)^{1/2}` principal, and `1 - k² ∉ (-∞, 0]`. -/
 @[dlmf 19.12.E1]
-theorem compEllIntKk_hasSum_log {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane)
-    (h1 : ‖jacobiComodulusk k‖ < 1) :
+theorem completeEllipticK_hasSum_log {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane)
+    (h1 : ‖jacobiComodulus k‖ < 1) :
     HasSum (fun m : ℕ => ((ascPochhammer ℂ m).eval (1 / 2 : ℂ)) ^ 2 / (m.factorial : ℂ) ^ 2 *
-        jacobiComodulusk k ^ (2 * m) *
-          (Complex.log (1 / jacobiComodulusk k) + compEllIntLogCoeff m))
-      (compEllIntKk k) := by
+        jacobiComodulus k ^ (2 * m) *
+          (Complex.log (1 / jacobiComodulus k) + compEllIntLogCoeff m))
+      (completeEllipticK k) := by
   sorry
 
 /-- DLMF 19.12.2:
 `E(k) = 1 + ½ Σ_{m ≥ 0} (½)_m (3/2)_m/((2)_m m!) k'^{2m+2} (ln(1/k') + d(m) - 1/((2m+1)(2m+2)))`,
 for complex `k` with `|k'| < 1`, `k' = (1 - k²)^{1/2}` principal, and `1 - k² ∉ (-∞, 0)`. -/
 @[dlmf 19.12.E2]
-theorem compEllIntEk_hasSum_log {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane ∨ k ^ 2 = 1)
-    (h1 : ‖jacobiComodulusk k‖ < 1) :
+theorem completeEllipticE_hasSum_log {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane ∨ k ^ 2 = 1)
+    (h1 : ‖jacobiComodulus k‖ < 1) :
     HasSum (fun m : ℕ => (1 / 2 : ℂ) * ((ascPochhammer ℂ m).eval (1 / 2 : ℂ) *
         (ascPochhammer ℂ m).eval (3 / 2 : ℂ) /
           ((ascPochhammer ℂ m).eval (2 : ℂ) * (m.factorial : ℂ)) *
-        jacobiComodulusk k ^ (2 * m + 2) *
-          (Complex.log (1 / jacobiComodulusk k) + compEllIntLogCoeff m -
+        jacobiComodulus k ^ (2 * m + 2) *
+          (Complex.log (1 / jacobiComodulus k) + compEllIntLogCoeff m -
             1 / ((2 * m + 1) * (2 * m + 2)))))
-      (compEllIntEk k - 1) := by
+      (completeEllipticE k - 1) := by
   sorry
 
 /-- DLMF 19.12.4: as `k² → 1-` (real `k → 1-`), for real `α² < 1`,
 `(1 - α²) Π(α², k) = (ln(4/k'))(1 + O(k'²)) - α² R_C(1, 1 - α²)`, stated as
 `(1 - α²) Π(α², k) + α² R_C(1, 1 - α²) - ln(4/k') = O(k'² ln(4/k'))`. -/
 @[dlmf 19.12.E4]
-theorem compEllIntPik_isBigO_log {α2 : ℝ} (hα : α2 < 1) :
-    (fun k : ℝ => (1 - α2) * compEllIntPik α2 k + α2 * symEllIntRC 1 ((1 - α2 : ℝ) : ℂ) -
+theorem completeEllipticPi_isBigO_log {α2 : ℝ} (hα : α2 < 1) :
+    (fun k : ℝ => (1 - α2) * completeEllipticPi α2 k + α2 *
+        symmetricEllipticRC 1 ((1 - α2 : ℝ) : ℂ) -
         (Real.log (4 / Real.sqrt (1 - k ^ 2)) : ℂ)) =O[𝓝[<] 1]
       fun k : ℝ => (1 - k ^ 2) * Real.log (4 / Real.sqrt (1 - k ^ 2)) := by
   sorry
@@ -140,12 +141,13 @@ theorem compEllIntPik_isBigO_log {α2 : ℝ} (hα : α2 < 1) :
 `Π`), `(1 - α²) Π(α², k) = (ln(4/k') - R_C(1, 1 - α⁻²))(1 + O(k'²))`, stated as
 `(1 - α²) Π(α², k) - (ln(4/k') - R_C(1, 1 - α⁻²)) = O(k'² (ln(4/k') - R_C(1, 1 - α⁻²)))`. -/
 @[dlmf 19.12.E5]
-theorem compEllIntPik_isBigO_log_of_one_lt {α2 : ℝ} (hα : 1 < α2) :
-    (fun k : ℝ => (1 - α2) * compEllIntPik α2 k -
+theorem completeEllipticPi_isBigO_log_of_one_lt {α2 : ℝ} (hα : 1 < α2) :
+    (fun k : ℝ => (1 - α2) * completeEllipticPi α2 k -
         ((Real.log (4 / Real.sqrt (1 - k ^ 2)) : ℂ) -
-          symEllIntRC 1 ((1 - α2⁻¹ : ℝ) : ℂ))) =O[𝓝[<] 1]
+          symmetricEllipticRC 1 ((1 - α2⁻¹ : ℝ) : ℂ))) =O[𝓝[<] 1]
       fun k : ℝ => ((1 - k ^ 2 : ℝ) : ℂ) *
-        ((Real.log (4 / Real.sqrt (1 - k ^ 2)) : ℂ) - symEllIntRC 1 ((1 - α2⁻¹ : ℝ) : ℂ)) := by
+        ((Real.log (4 / Real.sqrt (1 - k ^ 2)) : ℂ) -
+            symmetricEllipticRC 1 ((1 - α2⁻¹ : ℝ) : ℂ)) := by
   sorry
 
 /-- The filter of DLMF 19.12.6: `x ≥ 0`, `y > 0`, `x/y → 0`. -/
@@ -158,8 +160,8 @@ def largeRatioFilter : Filter (ℝ × ℝ) :=
 
 /-- `R_C(x, y) = y^{-1/2} arccos(√(x/y))/√(1 - x/y)` for `0 ≤ x < y` (Carlson's (6.9-15) and
 homogeneity; `x = 0` from 19.6.15). -/
-private lemma symEllIntRC_ofReal_eq_arccos {x y : ℝ} (hx : 0 ≤ x) (hxy : x < y) :
-    symEllIntRC (x : ℂ) (y : ℂ) =
+private lemma symmetricEllipticRC_ofReal_eq_arccos {x y : ℝ} (hx : 0 ≤ x) (hxy : x < y) :
+    symmetricEllipticRC (x : ℂ) (y : ℂ) =
       (((Real.sqrt y)⁻¹ * (Real.arccos (Real.sqrt (x / y)) / Real.sqrt (1 - x / y)) : ℝ) : ℂ) := by
   have hy : 0 < y := lt_of_le_of_lt hx hxy
   have hsy : 0 < Real.sqrt y := Real.sqrt_pos.mpr hy
@@ -169,13 +171,13 @@ private lemma symEllIntRC_ofReal_eq_arccos {x y : ℝ} (hx : 0 ≤ x) (hxy : x <
     have ht1 : x / y < 1 := (div_lt_one hy).mpr hxy
     have e1 : x = Real.sqrt y ^ 2 * (x / y) := by rw [hyy]; field_simp
     have e2 : y = Real.sqrt y ^ 2 * 1 := by rw [hyy, mul_one]
-    have h := symEllIntRC_sq_mul_eq_carlsonRC hsy ht0 one_pos
+    have h := symmetricEllipticRC_sq_mul_eq_carlsonRC hsy ht0 one_pos
     rw [← e1, ← e2] at h
     rw [h, show ((1 : ℝ) : ℂ) = ((1 : ℝ) : ℂ) from rfl, Carlson.TwoVariable.carlsonRC_of_lt ht0 ht1,
       div_one]
     push_cast
     ring
-  · have h := symEllIntRC_zero_ofReal_sq hsy
+  · have h := symmetricEllipticRC_zero_ofReal_sq hsy
     rw [hyy] at h
     rw [ofReal_zero, h, zero_div, Real.sqrt_zero, Real.arccos_zero, sub_zero, Real.sqrt_one,
       div_one]
@@ -233,8 +235,8 @@ private lemma abs_arccos_div_sqrt_sub_le {s : ℝ} (h0 : 0 ≤ s) (h1 : s ≤ 1 
 /-- DLMF 19.12.6: `R_C(x, y) = π/(2√y) - (√x/y)(1 + O(√(x/y)))` as `x/y → 0`, `x ≥ 0`,
 `y > 0`; stated as `R_C(x, y) - π/(2√y) + √x/y = O((√x/y) √(x/y))`. -/
 @[dlmf 19.12.E6]
-theorem symEllIntRC_isBigO_small :
-    (fun p : ℝ × ℝ => symEllIntRC (p.1 : ℂ) (p.2 : ℂ) -
+theorem symmetricEllipticRC_isBigO_small :
+    (fun p : ℝ × ℝ => symmetricEllipticRC (p.1 : ℂ) (p.2 : ℂ) -
         ((π / (2 * Real.sqrt p.2) - Real.sqrt p.1 / p.2 : ℝ) : ℂ)) =O[smallRatioFilter]
       fun p : ℝ × ℝ => Real.sqrt p.1 / p.2 * Real.sqrt (p.1 / p.2) := by
   have hev : ∀ᶠ p : ℝ × ℝ in smallRatioFilter,
@@ -259,7 +261,8 @@ theorem symEllIntRC_isBigO_small :
   have hs1 : s ≤ 1 / 2 := by nlinarith
   have hsx : Real.sqrt x / y = s / Real.sqrt y := by
     rw [hs, Real.sqrt_div' _ hy.le, div_div, ← Real.sqrt_mul hy.le, Real.sqrt_mul_self hy.le]
-  rw [symEllIntRC_ofReal_eq_arccos hx hxy, ← ofReal_sub, Complex.norm_real, Real.norm_eq_abs,
+  rw [symmetricEllipticRC_ofReal_eq_arccos hx hxy, ← ofReal_sub, Complex.norm_real,
+      Real.norm_eq_abs,
     Real.norm_eq_abs, hsx, ← hs]
   rw [show 1 - x / y = 1 - s ^ 2 by rw [hs2]]
   have he := abs_arccos_div_sqrt_sub_le hs0 hs1
@@ -356,8 +359,8 @@ private lemma abs_log_div_sqrt_sub_main_le {u : ℝ} (h0 : 0 < u) (h1 : u ≤ 1 
 `R_C(x, y) = (1/(2√x))((1 + y/(2x)) ln(4x/y) - y/(2x))(1 + O(y²/x²))` as `y/x → 0`, `x, y > 0`;
 stated as `R_C(x, y) - M = O(M y²/x²)` with `M` the main term. -/
 @[dlmf 19.12.E7]
-theorem symEllIntRC_isBigO_large :
-    (fun p : ℝ × ℝ => symEllIntRC (p.1 : ℂ) (p.2 : ℂ) -
+theorem symmetricEllipticRC_isBigO_large :
+    (fun p : ℝ × ℝ => symmetricEllipticRC (p.1 : ℂ) (p.2 : ℂ) -
         ((1 / (2 * Real.sqrt p.1) * ((1 + p.2 / (2 * p.1)) * Real.log (4 * p.1 / p.2) -
           p.2 / (2 * p.1)) : ℝ) : ℂ)) =O[largeRatioFilter]
       fun p : ℝ × ℝ => 1 / (2 * Real.sqrt p.1) * ((1 + p.2 / (2 * p.1)) *
@@ -385,7 +388,7 @@ theorem symEllIntRC_isBigO_large :
   have hxy : √(x - y) = √x * √(1 - u) := by
     rw [← Real.sqrt_mul hx.le]; congr 1; rw [hyu]; ring
   have hsy : √y = √x * √u := by rw [hyu, Real.sqrt_mul hx.le]
-  have hRC := (symEllIntRC_of_gt hy hyx).2
+  have hRC := (symmetricEllipticRC_of_gt hy hyx).2
   have hsplit : (√x + √(x - y)) / √y = (1 + √(1 - u)) / √u := by
     rw [hxy, hsy]; field_simp
   obtain ⟨hb, hM⟩ := abs_log_div_sqrt_sub_main_le hu0 ht.le

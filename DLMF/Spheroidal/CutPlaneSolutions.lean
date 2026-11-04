@@ -308,8 +308,8 @@ private lemma real_ode_of_isSpheroidalSolutionOn {lam γ2 μ : ℂ} {K : ℂ →
   ring
 
 /-- A real solution on `(-1, 1)`, cast to `ℂ`. -/
-private lemma real_ode_of_isSpheroidalSolutionReal {lam γ2 μ : ℝ} {f : ℝ → ℝ}
-    (hf : IsSpheroidalSolutionReal lam γ2 μ f) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
+private lemma Real.real_ode_of_isSpheroidalSolution {lam γ2 μ : ℝ} {f : ℝ → ℝ}
+    (hf : DLMF.Spheroidal.Real.IsSpheroidalSolution lam γ2 μ f) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
     HasDerivAt (fun t : ℝ => (f t : ℂ)) ((deriv f x : ℝ) : ℂ) x ∧
       HasDerivAt (fun t : ℝ => ((deriv f t : ℝ) : ℂ))
         (coeffP x • ((deriv f x : ℝ) : ℂ) + coeffQ lam γ2 μ x • (f x : ℂ)) x := by
@@ -355,7 +355,8 @@ for real solutions `f₁`, `f₂` of 30.2.1 on `(-1, 1)` and `c₁ c₂ : ℂ` t
 cut plane, vanishing off it, whose boundary values from the upper half plane are
 `c₁ f₁ + c₂ f₂`. -/
 theorem exists_isSpheroidalSolutionOn_cutPlane_boundary {lam γ2 μ : ℝ} {f₁ f₂ : ℝ → ℝ}
-    (hf₁ : IsSpheroidalSolutionReal lam γ2 μ f₁) (hf₂ : IsSpheroidalSolutionReal lam γ2 μ f₂)
+    (hf₁ : DLMF.Spheroidal.Real.IsSpheroidalSolution lam γ2 μ f₁)
+        (hf₂ : DLMF.Spheroidal.Real.IsSpheroidalSolution lam γ2 μ f₂)
     (c₁ c₂ : ℂ) :
     ∃ F, IsSpheroidalSolutionOn lam γ2 μ spheroidalCutPlane F ∧
       (∀ z, z ∉ spheroidalCutPlane → F z = 0) ∧
@@ -366,8 +367,8 @@ theorem exists_isSpheroidalSolutionOn_cutPlane_boundary {lam γ2 μ : ℝ} {f₁
   have hΦ : ∀ x ∈ Ioo (-1 : ℝ) 1, HasDerivAt Φ (Φ' x) x ∧
       HasDerivAt Φ' (coeffP x • Φ' x + coeffQ lam γ2 μ x • Φ x) x := by
     intro x hx
-    obtain ⟨a1, b1⟩ := real_ode_of_isSpheroidalSolutionReal hf₁ hx
-    obtain ⟨a2, b2⟩ := real_ode_of_isSpheroidalSolutionReal hf₂ hx
+    obtain ⟨a1, b1⟩ := DLMF.Spheroidal.Real.real_ode_of_isSpheroidalSolution hf₁ hx
+    obtain ⟨a2, b2⟩ := DLMF.Spheroidal.Real.real_ode_of_isSpheroidalSolution hf₂ hx
     refine ⟨(a1.const_mul c₁).add (a2.const_mul c₂), ?_⟩
     refine ((b1.const_mul c₁).add (b2.const_mul c₂)).congr_deriv ?_
     simp only [Φ, Φ', smul_eq_mul]
@@ -474,7 +475,8 @@ theorem isSpheroidalSolutionOn_wronskian_const {lam γ2 μ : ℂ} {U : Set ℂ} 
 `c₁ f₁ + c₂ f₂` from above, with its values and derivatives on `(-1, 1)`. -/
 private lemma exists_doubleCut_of_boundary {lam γ2 μ : ℝ} {F : ℂ → ℂ}
     (hF : IsSpheroidalSolutionOn lam γ2 μ spheroidalCutPlane F) {f₁ f₂ : ℝ → ℝ}
-    (hf₁ : IsSpheroidalSolutionReal lam γ2 μ f₁) (hf₂ : IsSpheroidalSolutionReal lam γ2 μ f₂)
+    (hf₁ : DLMF.Spheroidal.Real.IsSpheroidalSolution lam γ2 μ f₁)
+        (hf₂ : DLMF.Spheroidal.Real.IsSpheroidalSolution lam γ2 μ f₂)
     {c₁ c₂ : ℂ}
     (hb : ∀ x ∈ Ioo (-1 : ℝ) 1, Tendsto (fun ε : ℝ => F (x + ε * I)) (𝓝[>] 0)
       (𝓝 (c₁ * f₁ x + c₂ * f₂ x))) :
@@ -490,8 +492,8 @@ private lemma exists_doubleCut_of_boundary {lam γ2 μ : ℝ} {F : ℂ → ℂ}
     tendsto_nhds_unique (tendsto_of_eqOn_upper hK hKF hx) (hb x hx)
   refine ⟨K, hK, hKF, fun x hx => ⟨hval x hx, ?_⟩⟩
   have h1 := (real_ode_of_isSpheroidalSolutionOn hK hx).1
-  have h2 := ((real_ode_of_isSpheroidalSolutionReal hf₁ hx).1.const_mul c₁).add
-    ((real_ode_of_isSpheroidalSolutionReal hf₂ hx).1.const_mul c₂)
+  have h2 := ((DLMF.Spheroidal.Real.real_ode_of_isSpheroidalSolution hf₁ hx).1.const_mul c₁).add
+    ((DLMF.Spheroidal.Real.real_ode_of_isSpheroidalSolution hf₂ hx).1.const_mul c₂)
   refine h1.unique (h2.congr_of_eventuallyEq ?_)
   filter_upwards [Ioo_mem_nhds hx.1 hx.2] with t ht using hval t ht
 
@@ -502,8 +504,10 @@ and `-1 < x < 1`. -/
 theorem wronskian_cutPlane_of_boundary {lam γ2 μ : ℝ} {F G : ℂ → ℂ}
     (hF : IsSpheroidalSolutionOn lam γ2 μ spheroidalCutPlane F)
     (hG : IsSpheroidalSolutionOn lam γ2 μ spheroidalCutPlane G) {f₁ f₂ g₁ g₂ : ℝ → ℝ}
-    (hf₁ : IsSpheroidalSolutionReal lam γ2 μ f₁) (hf₂ : IsSpheroidalSolutionReal lam γ2 μ f₂)
-    (hg₁ : IsSpheroidalSolutionReal lam γ2 μ g₁) (hg₂ : IsSpheroidalSolutionReal lam γ2 μ g₂)
+    (hf₁ : DLMF.Spheroidal.Real.IsSpheroidalSolution lam γ2 μ f₁)
+        (hf₂ : DLMF.Spheroidal.Real.IsSpheroidalSolution lam γ2 μ f₂)
+    (hg₁ : DLMF.Spheroidal.Real.IsSpheroidalSolution lam γ2 μ g₁)
+        (hg₂ : DLMF.Spheroidal.Real.IsSpheroidalSolution lam γ2 μ g₂)
     {c₁ c₂ d₁ d₂ : ℂ}
     (hbF : ∀ x ∈ Ioo (-1 : ℝ) 1, Tendsto (fun ε : ℝ => F (x + ε * I)) (𝓝[>] 0)
       (𝓝 (c₁ * f₁ x + c₂ * f₂ x)))

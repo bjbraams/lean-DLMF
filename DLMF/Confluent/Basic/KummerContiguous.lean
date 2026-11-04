@@ -79,9 +79,9 @@ theorem kummerMCoeff_shift_a (a b : ℂ) (n : ℕ) :
   rw [mul_div_assoc', mul_div_assoc', mul_div_assoc', ← sub_div]
   congr 1
   cases n with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ m =>
-    rw [← poch_succ_left, poch_succ a (m + 1)]
+    rw [← pochhammer_succ_left, pochhammer_succ a (m + 1)]
     push_cast
     ring
 
@@ -91,14 +91,14 @@ theorem kummerMCoeff_shift_b_pred {a b : ℂ} (hb1 : ∀ k : ℕ, b - 1 ≠ -k) 
       (b - 1) * kummerMCoeff a (b - 1) n - (b - 1) * kummerMCoeff a b n := by
   have hb : ∀ k : ℕ, b ≠ -k := by simpa using not_neg_nat_add_nat hb1 1
   cases n with
-  | zero => simp [kummerMCoeff, poch_zero]
+  | zero => simp [kummerMCoeff, pochhammer_zero]
   | succ m =>
     have hb0 : b - 1 ≠ 0 := by simpa using hb1 0
     have hbm : b + m ≠ 0 := by simpa only [ne_eq, eq_neg_iff_add_eq_zero] using hb m
-    have hpb := poch_ne_zero_of_not_neg_nat hb m
+    have hpb := pochhammer_ne_zero_of_not_neg_nat hb m
     have hf : ((m + 1).factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
     simp only [kummerMCoeff]
-    rw [poch_succ_left (b - 1), sub_add_cancel, poch_succ b m]
+    rw [pochhammer_succ_left (b - 1), sub_add_cancel, pochhammer_succ b m]
     push_cast
     field_simp
     ring
@@ -110,13 +110,13 @@ theorem kummerMCoeff_shift_a_pred {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (n : 
       (b - a) * kummerMCoeff (a - 1) b n + (a - b) * kummerMCoeff a b n +
         (if n = 0 then 0 else kummerMCoeff a b (n - 1)) := by
   cases n with
-  | zero => simp [kummerMCoeff, poch_zero]
+  | zero => simp [kummerMCoeff, pochhammer_zero]
   | succ m =>
     have hbm : b + m ≠ 0 := by simpa only [ne_eq, eq_neg_iff_add_eq_zero] using hb m
-    have hpb := poch_ne_zero_of_not_neg_nat hb m
+    have hpb := pochhammer_ne_zero_of_not_neg_nat hb m
     have hf : (m.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
     simp only [kummerMCoeff, Nat.add_one_ne_zero, ↓reduceIte, Nat.add_sub_cancel]
-    rw [poch_succ_left (a - 1), sub_add_cancel, poch_succ a m, poch_succ b m,
+    rw [pochhammer_succ_left (a - 1), sub_add_cancel, pochhammer_succ a m, pochhammer_succ b m,
       Nat.factorial_succ]
     push_cast
     field_simp
@@ -129,13 +129,14 @@ theorem kummerMCoeff_shift_b_succ {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (n : 
       (a - b) * kummerMCoeff a (b + 1) n + b * kummerMCoeff a b n := by
   have hb0 : b ≠ 0 := by simpa using hb 0
   have hbn : b + n ≠ 0 := by simpa only [ne_eq, eq_neg_iff_add_eq_zero] using hb n
-  have hpb := poch_ne_zero_of_not_neg_nat hb n
+  have hpb := pochhammer_ne_zero_of_not_neg_nat hb n
   have hf : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
-  have hrel : b * poch (b + 1) n = poch b n * (b + n) := by rw [← poch_succ_left, poch_succ]
-  have hX : poch (b + 1) n = poch b n * (b + n) / b := by
+  have hrel : b * pochhammer (b + 1) n = pochhammer b n * (b + n) := by
+      rw [← pochhammer_succ_left, pochhammer_succ]
+  have hX : pochhammer (b + 1) n = pochhammer b n * (b + n) / b := by
     rw [eq_div_iff hb0]; linear_combination hrel
   simp only [kummerMCoeff]
-  rw [poch_succ a n, poch_succ b n, Nat.factorial_succ, hX]
+  rw [pochhammer_succ a n, pochhammer_succ b n, Nat.factorial_succ, hX]
   push_cast
   field_simp
   ring
@@ -145,17 +146,18 @@ theorem kummerMCoeff_contiguous_shift_a {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k)
     b * kummerMCoeff a b n - b * kummerMCoeff (a - 1) b n -
       (if n = 0 then 0 else kummerMCoeff a (b + 1) (n - 1)) = 0 := by
   cases n with
-  | zero => simp [kummerMCoeff, poch_zero]
+  | zero => simp [kummerMCoeff, pochhammer_zero]
   | succ m =>
     have hb0 : b ≠ 0 := by simpa using hb 0
     have hbm : b + m ≠ 0 := by simpa only [ne_eq, eq_neg_iff_add_eq_zero] using hb m
-    have hpb := poch_ne_zero_of_not_neg_nat hb m
+    have hpb := pochhammer_ne_zero_of_not_neg_nat hb m
     have hf : (m.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
-    have hrel : b * poch (b + 1) m = poch b m * (b + m) := by rw [← poch_succ_left, poch_succ]
-    have hX : poch (b + 1) m = poch b m * (b + m) / b := by
+    have hrel : b * pochhammer (b + 1) m = pochhammer b m * (b + m) := by
+        rw [← pochhammer_succ_left, pochhammer_succ]
+    have hX : pochhammer (b + 1) m = pochhammer b m * (b + m) / b := by
       rw [eq_div_iff hb0]; linear_combination hrel
     simp only [kummerMCoeff, Nat.add_one_ne_zero, ↓reduceIte, Nat.add_sub_cancel]
-    rw [poch_succ_left (a - 1), sub_add_cancel, poch_succ a m, poch_succ b m,
+    rw [pochhammer_succ_left (a - 1), sub_add_cancel, pochhammer_succ a m, pochhammer_succ b m,
       Nat.factorial_succ, hX]
     push_cast
     field_simp
@@ -169,28 +171,29 @@ theorem kummerMCoeff_ode_contiguous {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (n 
       (b + 1) * (if n = 0 then 0 else kummerMCoeff (a + 1) (b + 1) (n - 1)) -
       b * (b + 1) * kummerMCoeff a b n = 0 := by
   cases n with
-  | zero => simp [kummerMCoeff, poch_zero]; ring
+  | zero => simp [kummerMCoeff, pochhammer_zero]; ring
   | succ m =>
     have hb1 : ∀ k : ℕ, b + 1 ≠ -k := by simpa using not_neg_nat_add_nat hb 1
     have hb0 : b ≠ 0 := by simpa using hb 0
     have hb10 : b + 1 ≠ 0 := by simpa using hb1 0
     have hbm : b + 1 + m ≠ 0 := by simpa only [ne_eq, eq_neg_iff_add_eq_zero] using hb1 m
-    have hpb := poch_ne_zero_of_not_neg_nat hb1 m
+    have hpb := pochhammer_ne_zero_of_not_neg_nat hb1 m
     have hf : (m.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
-    have hrelA : (a + 1) * poch (a + 2) m = poch (a + 1) m * (a + 1 + m) := by
-      rw [show (a + 2 : ℂ) = a + 1 + 1 by ring, ← poch_succ_left, poch_succ]
-    have hrelB : (b + 1) * poch (b + 2) m = poch (b + 1) m * (b + 1 + m) := by
-      rw [show (b + 2 : ℂ) = b + 1 + 1 by ring, ← poch_succ_left, poch_succ]
-    have hX : poch (b + 2) m = poch (b + 1) m * (b + 1 + m) / (b + 1) := by
+    have hrelA : (a + 1) * pochhammer (a + 2) m = pochhammer (a + 1) m * (a + 1 + m) := by
+      rw [show (a + 2 : ℂ) = a + 1 + 1 by ring, ← pochhammer_succ_left, pochhammer_succ]
+    have hrelB : (b + 1) * pochhammer (b + 2) m = pochhammer (b + 1) m * (b + 1 + m) := by
+      rw [show (b + 2 : ℂ) = b + 1 + 1 by ring, ← pochhammer_succ_left, pochhammer_succ]
+    have hX : pochhammer (b + 2) m = pochhammer (b + 1) m * (b + 1 + m) / (b + 1) := by
       rw [eq_div_iff hb10]; linear_combination hrelB
     have hA : (a + 1) * kummerMCoeff (a + 2) (b + 2) m =
-        poch (a + 1) m * (a + 1 + m) / (poch (b + 2) m * m.factorial) := by
+        pochhammer (a + 1) m * (a + 1 + m) / (pochhammer (b + 2) m * m.factorial) := by
       simp only [kummerMCoeff]
       rw [mul_div_assoc', hrelA]
     simp only [Nat.add_one_ne_zero, ↓reduceIte, Nat.add_sub_cancel]
     rw [hA, hX]
     simp only [kummerMCoeff]
-    rw [poch_succ_left a, poch_succ (a + 1) m, poch_succ_left b, poch_succ (b + 1) m,
+    rw [pochhammer_succ_left a, pochhammer_succ (a + 1) m, pochhammer_succ_left b,
+        pochhammer_succ (b + 1) m,
       Nat.factorial_succ]
     push_cast
     field_simp
@@ -343,8 +346,8 @@ theorem deriv_kummerM {a b z : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (hb0 : b ≠ 0)
   have hcoeff (k : ℕ) : (k + 1 : ℂ) * kummerMCoeff a b (k + 1) =
       a / b * kummerMCoeff (a + 1) (b + 1) k := by
     have hk : (k + 1 : ℂ) ≠ 0 := by exact_mod_cast Nat.succ_ne_zero k
-    have hcp := poch_ne_zero_of_not_neg_nat hc1 k
-    simp only [kummerMCoeff, poch_succ_left, Nat.factorial_succ, Nat.cast_mul,
+    have hcp := pochhammer_ne_zero_of_not_neg_nat hc1 k
+    simp only [kummerMCoeff, pochhammer_succ_left, Nat.factorial_succ, Nat.cast_mul,
       Nat.cast_add, Nat.cast_one]
     field_simp
   have hd := (hasFPowerSeriesOnBall_kummerM (a := a) hb).deriv_ofScalars.hasSum_mul_pow
@@ -391,10 +394,10 @@ theorem hasDerivAt_kummerM_shift {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (z : �
   exact h.differentiableAt.hasDerivAt
 
 /-- Complex conjugation commutes with the Pochhammer symbol: `conj((a)_n) = (conj a)_n`. -/
-theorem conj_poch (a : ℂ) (n : ℕ) : conj (poch a n) = poch (conj a) n := by
+theorem conj_pochhammer (a : ℂ) (n : ℕ) : conj (pochhammer a n) = pochhammer (conj a) n := by
   induction n with
-  | zero => simp [poch_zero]
-  | succ n ih => rw [poch_succ, poch_succ, map_mul, ih, map_add, map_natCast]
+  | zero => simp [pochhammer_zero]
+  | succ n ih => rw [pochhammer_succ, pochhammer_succ, map_mul, ih, map_add, map_natCast]
 
 /-- Kummer's function commutes with complex conjugation. -/
 theorem conj_kummerM (a c z : ℂ) :
@@ -402,6 +405,6 @@ theorem conj_kummerM (a c z : ℂ) :
   rw [kummerM, kummerM, Complex.conj_tsum]
   congr 1
   funext n
-  simp [conj_poch, map_div₀, map_mul, map_pow]
+  simp [conj_pochhammer, map_div₀, map_mul, map_pow]
 
 end DLMF.Confluent

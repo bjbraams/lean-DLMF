@@ -47,13 +47,13 @@ def legendreBranchPower (μ z : ℂ) : ℂ :=
 hypergeometric function `𝐅`. -/
 @[dlmf 14.3.E6]
 def associatedP (ν μ z : ℂ) : ℂ :=
-  exp (μ/2*(log (z+1)-log (z-1)))*regularizedGaussHG (ν+1) (-ν) (1-μ) ((1-z)/2)
+  exp (μ/2*(log (z+1)-log (z-1)))*regularizedGaussHypergeometric (ν+1) (-ν) (1-μ) ((1-z)/2)
 
 /-- Olver Q is regularized before multiplying by Gamma, so exceptional parameters are retained. -/
 @[dlmf 14.3.E10]
 def olverQ (ν μ z : ℂ) : ℂ :=
   Real.sqrt π*legendreBranchPower μ z/(2^(ν+1)*z^(ν+μ+1))*
-    regularizedGaussHG ((ν+μ+2)/2) ((ν+μ+1)/2) (ν+3/2) (1/z^2)
+    regularizedGaussHypergeometric ((ν+μ+2)/2) ((ν+μ+1)/2) (ν+3/2) (1/z^2)
 
 /-- Classical associated Q, defined mathematically when degree plus order is not a negative
 integer. -/
@@ -71,14 +71,14 @@ def LegendreQRegular (ν μ : ℂ) : Prop :=
 @[dlmf 14.3.E13]
 def ferrersW1 (ν μ : ℂ) (x : ℝ) : ℂ :=
   2^μ*Gamma ((ν+μ+1)/2)/Gamma ((ν-μ+2)/2)*(1-x^2:ℂ)^(-μ/2)*
-    regularizedGaussHG (-(ν+μ)/2) ((ν-μ+1)/2) (1/2) (x^2)
+    regularizedGaussHypergeometric (-(ν+μ)/2) ((ν-μ+1)/2) (1/2) (x^2)
 
 /-- DLMF 14.3.14: the odd Ferrers auxiliary function `w₂(ν, μ, x) = 2^μ Γ((ν+μ+2)/2)/Γ((ν-μ+1)/2) x
 (1-x²)^{-μ/2} 𝐅((1-ν-μ)/2, (ν-μ+2)/2; 3/2; x²)`. -/
 @[dlmf 14.3.E14]
 def ferrersW2 (ν μ : ℂ) (x : ℝ) : ℂ :=
   2^μ*Gamma ((ν+μ+2)/2)/Gamma ((ν-μ+1)/2)*x*(1-x^2:ℂ)^(-μ/2)*
-    regularizedGaussHG ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2) (x^2)
+    regularizedGaussHypergeometric ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2) (x^2)
 
 /-- This representation supplies integer-order limiting values without division by sin of the
 order. -/

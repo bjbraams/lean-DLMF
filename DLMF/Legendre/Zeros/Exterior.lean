@@ -311,20 +311,22 @@ theorem ExteriorZeros.oneZero_iff {ν μ : ℝ} : AssociatedPOneZero ν μ ↔
 
 /-- For positive parameters the regularized Gauss series on `[0, 1)` is real, positive and
 increasing. -/
-theorem ExteriorZeros.regularizedGaussHG_pos_mono {a b c w w' : ℝ} (ha : 0 < a)
+theorem ExteriorZeros.regularizedGaussHypergeometric_pos_mono {a b c w w' : ℝ} (ha : 0 < a)
     (hb : 0 < b) (hc : 0 < c)
     (hw0 : 0 ≤ w) (hww : w ≤ w') (hw1 : w' < 1) :
-    0 < (regularizedGaussHG a b c w).re ∧ (regularizedGaussHG a b c w).im = 0 ∧
-      (regularizedGaussHG a b c w).re ≤ (regularizedGaussHG a b c w').re := by
+    0 < (regularizedGaussHypergeometric a b c w).re ∧
+        (regularizedGaussHypergeometric a b c w).im = 0 ∧
+      (regularizedGaussHypergeometric a b c w).re ≤
+          (regularizedGaussHypergeometric a b c w').re := by
   have hG : ∀ n : ℕ, 0 < Real.Gamma (c + n) := fun n => Real.Gamma_pos_of_pos (by positivity)
   let f : ℝ → ℕ → ℝ := fun w n => (ascPochhammer ℝ n).eval a *
     (ascPochhammer ℝ n).eval b * w ^ n / n.factorial * (Real.Gamma (c + n))⁻¹
   have hsum : ∀ w : ℝ, 0 ≤ w → w < 1 →
-      HasSum (fun n => (f w n : ℂ)) (regularizedGaussHG a b c w) := by
+      HasSum (fun n => (f w n : ℂ)) (regularizedGaussHypergeometric a b c w) := by
     intro w hw0 hw1
     have hw : ‖(w : ℂ)‖ < 1 := by rw [norm_real, Real.norm_eq_abs, abs_of_nonneg hw0]; exact hw1
-    rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hw]
-    refine (hasSum_regularizedGaussHGFun _ _ _ hw).congr_fun fun n => ?_
+    rw [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hw]
+    refine (hasSum_regularizedGaussHypergeometricFun _ _ _ hw).congr_fun fun n => ?_
     simp only [f]
     rw [ascPochhammer_eval_ofReal, ascPochhammer_eval_ofReal,
       show (c : ℂ) + n = ((c + n : ℝ) : ℂ) by push_cast; ring, Complex.Gamma_ofReal]
@@ -336,11 +338,11 @@ theorem ExteriorZeros.regularizedGaussHG_pos_mono {a b c w w' : ℝ} (ha : 0 < a
     simp only [f]; positivity
   have h1 := hsum w hw0 (hww.trans_lt hw1)
   have h2 := hsum w' (hw0.trans hww) hw1
-  have hr1 : HasSum (f w) (regularizedGaussHG a b c w).re := by
+  have hr1 : HasSum (f w) (regularizedGaussHypergeometric a b c w).re := by
     simpa using Complex.reCLM.hasSum h1
-  have hr2 : HasSum (f w') (regularizedGaussHG a b c w').re := by
+  have hr2 : HasSum (f w') (regularizedGaussHypergeometric a b c w').re := by
     simpa using Complex.reCLM.hasSum h2
-  have hi1 : HasSum (fun _ : ℕ => (0:ℝ)) (regularizedGaussHG a b c w).im := by
+  have hi1 : HasSum (fun _ : ℕ => (0:ℝ)) (regularizedGaussHypergeometric a b c w).im := by
     simpa using Complex.imCLM.hasSum h1
   refine ⟨?_, (hi1.unique hasSum_zero), hasSum_le (fun n => ?_) hr1 hr2⟩
   · have := le_hasSum hr1 0 fun j _ => hf0 w hw0 j
@@ -388,7 +390,8 @@ theorem ExteriorZeros.olverQ_pos_bound {ν : ℝ} (hν : -1/2 ≤ ν) (μ : ℝ)
   -- the real form
   set R : ℝ → ℝ := fun x => Real.sqrt π * Real.exp (m / 2 * (Real.log (x - 1) + Real.log (x + 1))) /
     ((2:ℝ) ^ (ν + 1) * x ^ (ν + m + 1)) with hR
-  have hrep : ∀ x : ℝ, 1 < x → olverQ ν m x = (R x : ℂ) * regularizedGaussHG a b c (1 / x ^ 2) := by
+  have hrep : ∀ x : ℝ, 1 < x → olverQ ν m x = (R x : ℂ) *
+      regularizedGaussHypergeometric a b c (1 / x ^ 2) := by
     intro x hx
     unfold olverQ legendreBranchPower
     have h1 : (x:ℂ) - 1 = ((x - 1 : ℝ) : ℂ) := by push_cast; ring
@@ -403,7 +406,7 @@ theorem ExteriorZeros.olverQ_pos_bound {ν : ℝ} (hν : -1/2 ≤ ν) (μ : ℝ)
     push_cast
     ring_nf
   have hdata : ∀ x : ℝ, 1 < x → 0 < R x ∧ (olverQ ν m x).re =
-      R x * (regularizedGaussHG a b c ((1 / x ^ 2 : ℝ) : ℂ)).re := by
+      R x * (regularizedGaussHypergeometric a b c ((1 / x ^ 2 : ℝ) : ℂ)).re := by
     intro x hx
     refine ⟨by
       simp only [hR]
@@ -419,19 +422,20 @@ theorem ExteriorZeros.olverQ_pos_bound {ν : ℝ} (hν : -1/2 ≤ ν) (μ : ℝ)
   · rw [hred x hx]
     obtain ⟨hR0, hre⟩ := hdata x hx
     rw [hre]
-    exact mul_pos hR0 (ExteriorZeros.regularizedGaussHG_pos_mono ha hb hc (hw x hx).1
+    exact mul_pos hR0 (ExteriorZeros.regularizedGaussHypergeometric_pos_mono ha hb hc (hw x hx).1
         le_rfl (hw x hx).2).1
-  · set S := (regularizedGaussHG a b c ((1 / 4 : ℝ) : ℂ)).re
+  · set S := (regularizedGaussHypergeometric a b c ((1 / 4 : ℝ) : ℂ)).re
     refine ⟨π * S ^ 2 + 1, by positivity, fun x hx => ?_⟩
     have hx1 : 1 < x := by linarith
     have hx0 : 0 < x := by linarith
     rw [hred x hx1]
     obtain ⟨hR0, hre⟩ := hdata x hx1
     rw [hre]
-    obtain ⟨hF0, -, hFle⟩ := ExteriorZeros.regularizedGaussHG_pos_mono ha hb hc (hw x hx1).1
+    obtain ⟨hF0, -, hFle⟩ :=
+        ExteriorZeros.regularizedGaussHypergeometric_pos_mono ha hb hc (hw x hx1).1
       (show 1 / x ^ 2 ≤ 1 / 4 by
         rw [div_le_div_iff₀ (by positivity) (by norm_num)]; nlinarith) (by norm_num)
-    set F := (regularizedGaussHG a b c ((1 / x ^ 2 : ℝ) : ℂ)).re
+    set F := (regularizedGaussHypergeometric a b c ((1 / x ^ 2 : ℝ) : ℂ)).re
     -- `(x²-1) R² ≤ π x`
     obtain ⟨t, ht⟩ : ∃ t, Real.log x = t := ⟨_, rfl⟩
     obtain ⟨L, hLd⟩ : ∃ L, Real.log (x - 1) + Real.log (x + 1) = L := ⟨_, rfl⟩
@@ -488,21 +492,21 @@ theorem ExteriorZeros.wronskian_re {F G : ℂ → ℂ} {x c : ℝ} (hx : 1 < x) 
 theorem ExteriorZeros.associatedP_near_one (ν : ℝ) {m : ℝ} (hm : 0 ≤ m) :
     ∃ s : ℝ, 1 < s ∧ ∃ K : ℝ, 0 < K ∧ ∀ x : ℝ, x ∈ Ioc 1 s → 0 < (associatedP ν (-m : ℝ) x).re ∧
       (x ^ 2 - 1) * (associatedP ν (-m : ℝ) x).re ^ 2 ≤ K * (x - 1) := by
-  set g : ℝ → ℂ := fun x => regularizedGaussHG ((ν:ℂ) + 1) (-(ν:ℂ)) (1 - ((-m:ℝ):ℂ))
+  set g : ℝ → ℂ := fun x => regularizedGaussHypergeometric ((ν:ℂ) + 1) (-(ν:ℂ)) (1 - ((-m:ℝ):ℂ))
     ((1 - (x:ℂ)) / 2) with hg
   have h0c : (0:ℂ) ∈ cutPlane := mem_cutPlane_of_norm_lt_one (by simp)
   have hcont : ContinuousAt g 1 := by
     have h1 : ContinuousAt (fun x : ℝ => (1 - (x:ℂ)) / 2) 1 := by fun_prop
     have h2 : ((1:ℂ) - ((1:ℝ):ℂ)) / 2 = 0 := by simp
-    have h3 := (analyticOnNhd_regularizedGaussHG ((ν:ℂ) + 1) (-(ν:ℂ)) (1 - ((-m:ℝ):ℂ)) 0
+    have h3 := (analyticOnNhd_regularizedGaussHypergeometric ((ν:ℂ) + 1) (-(ν:ℂ)) (1 - ((-m:ℝ):ℂ)) 0
       h0c).continuousAt
     exact h3.comp_of_eq h1 h2
   have hc : ∀ k : ℕ, (1:ℂ) - ((-m:ℝ):ℂ) ≠ -(k:ℂ) := fun k h => by
     have := congrArg re h; simp at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
   have hg1 : g 1 = ((Real.Gamma (1 + m))⁻¹ : ℝ) := by
     simp only [hg, ofReal_one, sub_self, zero_div]
-    rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ (by simp),
-      regularizedGaussHGFun_eq_div_Gamma hc, ordinaryHypergeometric_zero,
+    rw [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ (by simp),
+      regularizedGaussHypergeometricFun_eq_div_Gamma hc, ordinaryHypergeometric_zero,
       show (1:ℂ) - ((-m:ℝ):ℂ) = ((1 + m : ℝ) : ℂ) by push_cast; ring, Complex.Gamma_ofReal]
     push_cast; ring
   have hG := Real.Gamma_pos_of_pos (show 0 < 1 + m by linarith)

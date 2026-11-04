@@ -31,7 +31,7 @@ functions of DLMF 14.7.19.
 
 ## Main results
 
-* `GeneratingSeries.legendreP_nat_eq_legendrePolyP`: the terminating hypergeometric function
+* `GeneratingSeries.legendreP_nat_eq_legendrePolynomialP`: the terminating hypergeometric function
   `P_n(z)` equals the Legendre polynomial for every `z ∈ ℂ`, including the cut `(-∞,-1]` of the
   continuation.
 * `GeneratingSeries.generatingSeries_ode`, `GeneratingSeries.quadratic_generatingSeries_sq`:
@@ -61,7 +61,7 @@ namespace DLMF.Legendre
 
 /-- The Euler integral with `a = -m` is a polynomial function of `z` on all of `ℂ`. -/
 theorem GeneratingSeries.integral_poly (m : ℕ) {b c : ℂ} (hb : 0 < b.re) (hcb : 0 < (c-b).re) :
-    ∃ p : Polynomial ℂ, ∀ z, regularizedGaussHGIntegral (-(m:ℂ)) b c z = p.eval z := by
+    ∃ p : Polynomial ℂ, ∀ z, regularizedGaussHypergeometricIntegral (-(m:ℂ)) b c z = p.eval z := by
   set g : ℝ → ℂ := fun t => (t:ℂ)^(b-1) * (1-(t:ℂ))^(c-b-1) with hg
   have hgI : IntervalIntegrable g volume 0 1 := betaIntegral_convergent hb hcb
   set w : ℕ → ℂ := fun i => (Gamma b * Gamma (c-b))⁻¹ *
@@ -76,7 +76,7 @@ theorem GeneratingSeries.integral_poly (m : ℕ) {b c : ℂ} (hb : 0 < b.re) (hc
     rw [show (1:ℂ) - z*t = -(z*t) + 1 by ring, add_pow, Finset.mul_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [neg_pow, mul_pow, one_pow, mul_one]; ring
-  unfold regularizedGaussHGIntegral
+  unfold regularizedGaussHypergeometricIntegral
   simp_rw [hexp]
   rw [intervalIntegral.integral_finsetSum (fun i _ => by
     refine IntervalIntegrable.const_mul ?_ _
@@ -88,13 +88,14 @@ theorem GeneratingSeries.integral_poly (m : ℕ) {b c : ℂ} (hb : 0 < b.re) (hc
 
 /-- With `Re b ≥ 1`, the continuation recursion at `a = -m` is a polynomial function of `z`. -/
 lemma GeneratingSeries.recursion_poly (k : ℕ) : ∀ (m : ℕ) (b c : ℂ), shiftB b = 0 → shiftC b c ≤ k →
-    ∃ p : Polynomial ℂ, ∀ z, regularizedGaussHGByShifts k (-(m:ℂ)) b c z = p.eval z := by
+    ∃ p : Polynomial ℂ, ∀ z,
+        regularizedGaussHypergeometricByShifts k (-(m:ℂ)) b c z = p.eval z := by
   induction k with
   | zero =>
     intro m b c hB hC
     obtain ⟨h1, h2⟩ := euler_region_of_shift_eq_zero hB (Nat.le_zero.mp hC)
     obtain ⟨p, hp⟩ := GeneratingSeries.integral_poly m (b := b) (c := c) (by linarith) (by linarith)
-    exact ⟨p, fun z => by rw [regularizedGaussHGByShifts]; exact hp z⟩
+    exact ⟨p, fun z => by rw [regularizedGaussHypergeometricByShifts]; exact hp z⟩
   | succ k ih =>
     intro m b c hB hC
     by_cases hc : 0 < shiftC b c
@@ -102,11 +103,11 @@ lemma GeneratingSeries.recursion_poly (k : ℕ) : ∀ (m : ℕ) (b c : ℂ), shi
       obtain ⟨p1, hp1⟩ := ih m b (c+1) hB (by omega)
       rcases m with _ | m
       · refine ⟨Polynomial.C (c - 0) * p1, fun z => ?_⟩
-        rw [regularizedGaussHGByShifts_succ_of_pos_c hc, hp1]; simp
+        rw [regularizedGaussHypergeometricByShifts_succ_of_pos_c hc, hp1]; simp
       · obtain ⟨p2, hp2⟩ := ih m b (c+1) hB (by omega)
         refine ⟨Polynomial.C (c - -((m+1:ℕ):ℂ)) * p1 + Polynomial.C (-((m+1:ℕ):ℂ)) * p2,
           fun z => ?_⟩
-        rw [regularizedGaussHGByShifts_succ_of_pos_c hc, hp1,
+        rw [regularizedGaussHypergeometricByShifts_succ_of_pos_c hc, hp1,
           show -((m+1:ℕ):ℂ) + 1 = -(m:ℂ) by push_cast; ring, hp2]
         simp
     · have hb : ¬ 0 < shiftB b := by omega
@@ -114,7 +115,8 @@ lemma GeneratingSeries.recursion_poly (k : ℕ) : ∀ (m : ℕ) (b c : ℂ), shi
       obtain ⟨h1, h2⟩ := euler_region_of_shift_eq_zero hB hC0
       obtain ⟨p, hp⟩ := GeneratingSeries.integral_poly m (b := b) (c := c)
           (by linarith) (by linarith)
-      exact ⟨p, fun z => by rw [regularizedGaussHGByShifts_succ_of_zero hc hb]; exact hp z⟩
+      exact ⟨p, fun z => by
+          rw [regularizedGaussHypergeometricByShifts_succ_of_zero hc hb]; exact hp z⟩
 
 /-- `P_n` is a polynomial function on all of `ℂ`. -/
 theorem GeneratingSeries.legendreP_poly (n : ℕ) : ∃ q : Polynomial ℂ, ∀ z,
@@ -124,7 +126,7 @@ theorem GeneratingSeries.legendreP_poly (n : ℕ) : ∃ q : Polynomial ℂ, ∀ 
   obtain ⟨p, hp⟩ := GeneratingSeries.recursion_poly (shiftMeasure ((n:ℂ)+1) 1) n ((n:ℂ)+1) 1 hB
     (by unfold shiftMeasure; omega)
   refine ⟨p.comp (Polynomial.C (1/2) - Polynomial.C (1/2) * Polynomial.X), fun z => ?_⟩
-  rw [legendreP, regularizedGaussHG, hp]
+  rw [legendreP, regularizedGaussHypergeometric, hp]
   simp only [Polynomial.eval_comp, Polynomial.eval_sub, Polynomial.eval_C, Polynomial.eval_mul,
     Polynomial.eval_X]
   congr 1; ring
@@ -168,7 +170,7 @@ theorem GeneratingSeries.legendreP_zero (z : ℂ) : legendreP ((0:ℕ):ℂ) z = 
   obtain ⟨q, h⟩ := GeneratingSeries.legendreP_poly 0
   have key := GeneratingSeries.poly_ext (p := q) (q := 1) (fun w hw => by
     rw [← h, DLMF.Legendre.legendreP_nat 0 hw];
-        simp [DLMF.OrthogonalPolynomials.legendrePolyP_zero]) z
+        simp [DLMF.OrthogonalPolynomials.legendrePolynomialP_zero]) z
   rw [h, key]; simp
 
 /-- `P_1(z) = z` for every `z`. -/
@@ -176,21 +178,23 @@ theorem GeneratingSeries.legendreP_one_left (z : ℂ) : legendreP ((1:ℕ):ℂ) 
   obtain ⟨q, h⟩ := GeneratingSeries.legendreP_poly 1
   have key := GeneratingSeries.poly_ext (p := q) (q := Polynomial.X) (fun w hw => by
     rw [← h, DLMF.Legendre.legendreP_nat 1 hw];
-        simp [DLMF.OrthogonalPolynomials.legendrePolyP_one]) z
+        simp [DLMF.OrthogonalPolynomials.legendrePolynomialP_one]) z
   rw [h, key]; simp
 
 /-- `P_n(z)` equals the Legendre polynomial for every `z ∈ ℂ` (the hypergeometric
 representation terminates). -/
-theorem GeneratingSeries.legendreP_nat_eq_legendrePolyP (n : ℕ) (z : ℂ) :
-    legendreP n z = DLMF.OrthogonalPolynomials.legendrePolyP n z := by
+theorem GeneratingSeries.legendreP_nat_eq_legendrePolynomialP (n : ℕ) (z : ℂ) :
+    legendreP n z = DLMF.OrthogonalPolynomials.legendrePolynomialP n z := by
   induction n using Nat.strong_induction_on with
   | _ n ih =>
     match n, ih with
-    | 0, _ => rw [GeneratingSeries.legendreP_zero, DLMF.OrthogonalPolynomials.legendrePolyP_zero]
-    | 1, _ => rw [GeneratingSeries.legendreP_one_left, DLMF.OrthogonalPolynomials.legendrePolyP_one]
+    | 0, _ => rw [GeneratingSeries.legendreP_zero,
+                DLMF.OrthogonalPolynomials.legendrePolynomialP_zero]
+    | 1, _ => rw [GeneratingSeries.legendreP_one_left,
+                DLMF.OrthogonalPolynomials.legendrePolynomialP_one]
     | n+2, ih =>
       have e1 := GeneratingSeries.legendreP_nat_recurrence n z
-      have e2 := DLMF.OrthogonalPolynomials.legendrePolyP_recurrence n z
+      have e2 := DLMF.OrthogonalPolynomials.legendrePolynomialP_recurrence n z
       rw [ih n (by omega), ih (n+1) (by omega)] at e1
       have hn : (n:ℂ) + 2 ≠ 0 := by exact_mod_cast Nat.succ_ne_zero (n+1)
       exact mul_left_cancel₀ hn (e1.trans e2.symm)
@@ -427,7 +431,7 @@ theorem GeneratingSeries.product_eq (z : ℂ) (n : ℕ) :
 
 /-- The formal binomial series of `(1 - ζX)^{-1/2}`. -/
 noncomputable def GeneratingSeries.binomialSeries (ζ : ℂ) : ℂ⟦X⟧ :=
-  PowerSeries.mk fun j => poch (1/2) j * ζ^j / (j.factorial : ℂ)
+  PowerSeries.mk fun j => pochhammer (1/2) j * ζ^j / (j.factorial : ℂ)
 
 /-- The binomial series `B = GeneratingSeries.binomialSeries ζ` of `(1 - ζX)^{-1/2}` satisfies
 `(1 - ζX) B' = (ζ/2) B`. -/
@@ -438,10 +442,12 @@ theorem GeneratingSeries.binomialSeries_ode (ζ : ℂ) :
   rw [sub_mul, one_mul, map_sub, mul_assoc, PowerSeries.coeff_C_mul, PowerSeries.coeff_C_mul,
     PowerSeries.coeff_derivative]
   rcases n with _ | n
-  · simp [GeneratingSeries.binomialSeries, PowerSeries.coeff_mk, poch_succ, poch_zero]; ring
+  · simp [GeneratingSeries.binomialSeries, PowerSeries.coeff_mk, pochhammer_succ,
+        pochhammer_zero]; ring
   · rw [PowerSeries.coeff_succ_X_mul, PowerSeries.coeff_derivative]
     simp only [GeneratingSeries.binomialSeries, PowerSeries.coeff_mk]
-    rw [poch_succ (1/2) (n+1), poch_succ (1/2) n, Nat.factorial_succ (n+1), Nat.factorial_succ n]
+    rw [pochhammer_succ (1/2) (n+1), pochhammer_succ (1/2) n, Nat.factorial_succ (n+1),
+        Nat.factorial_succ n]
     have h1 : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
     have h2 : (n:ℂ) + 1 + 1 ≠ 0 := by
       have : ((n + 1 + 1 : ℕ) : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (by omega)
@@ -476,7 +482,7 @@ theorem GeneratingSeries.binomialSeries_sq (ζ : ℂ) : (1 - PowerSeries.C ζ * 
         ← PowerSeries.coeff_zero_eq_constantCoeff_apply,
       sub_mul, one_mul, map_sub, mul_assoc, PowerSeries.coeff_C_mul, PowerSeries.coeff_zero_X_mul,
       pow_two, PowerSeries.coeff_mul]
-    simp [GeneratingSeries.binomialSeries, poch_zero]
+    simp [GeneratingSeries.binomialSeries, pochhammer_zero]
 
 /-- Square roots of a power series with the same nonzero constant term coincide. -/
 theorem GeneratingSeries.sq_inj {A B : ℂ⟦X⟧} (h : A^2 = B^2)
@@ -513,23 +519,23 @@ theorem GeneratingSeries.binomialSeries_mul (z ζ₁ ζ₂ : ℂ) (hs : ζ₁ + 
   · rw [map_mul, ← PowerSeries.coeff_zero_eq_constantCoeff_apply,
       ← PowerSeries.coeff_zero_eq_constantCoeff_apply,
           ← PowerSeries.coeff_zero_eq_constantCoeff_apply]
-    simp [GeneratingSeries.binomialSeries, GeneratingSeries.generatingSeries, poch_zero,
+    simp [GeneratingSeries.binomialSeries, GeneratingSeries.generatingSeries, pochhammer_zero,
         GeneratingSeries.legendreSeq_zero]
   · rw [map_mul, ← PowerSeries.coeff_zero_eq_constantCoeff_apply,
       ← PowerSeries.coeff_zero_eq_constantCoeff_apply]
-    simp [GeneratingSeries.binomialSeries, poch_zero]
+    simp [GeneratingSeries.binomialSeries, pochhammer_zero]
 
 
 /-- `‖(1/2)_n‖ ≤ n!`. -/
-theorem GeneratingSeries.norm_poch_le (n : ℕ) : ‖poch (1/2:ℂ) n‖ ≤ n.factorial := by
+theorem GeneratingSeries.norm_pochhammer_le (n : ℕ) : ‖pochhammer (1/2:ℂ) n‖ ≤ n.factorial := by
   induction n with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ n ih =>
-    rw [poch_succ, norm_mul, Nat.factorial_succ, Nat.cast_mul]
+    rw [pochhammer_succ, norm_mul, Nat.factorial_succ, Nat.cast_mul]
     have h : ‖(1/2:ℂ) + n‖ ≤ n + 1 := by
       calc ‖(1/2:ℂ) + n‖ ≤ ‖(1/2:ℂ)‖ + ‖(n:ℂ)‖ := norm_add_le _ _
         _ ≤ n + 1 := by simp; linarith
-    calc ‖poch (1/2:ℂ) n‖ * ‖(1/2:ℂ) + n‖ ≤ n.factorial * (n + 1) :=
+    calc ‖pochhammer (1/2:ℂ) n‖ * ‖(1/2:ℂ) + n‖ ≤ n.factorial * (n + 1) :=
           mul_le_mul ih h (norm_nonneg _) (by positivity)
       _ = _ := by push_cast; ring
 
@@ -539,9 +545,9 @@ theorem GeneratingSeries.norm_coeff_binomialSeries_le (ζ h : ℂ) (j : ℕ) :
   simp only [GeneratingSeries.binomialSeries, PowerSeries.coeff_mk]
   have hf : (0:ℝ) < j.factorial := by exact_mod_cast j.factorial_pos
   rw [norm_mul, norm_div, norm_mul, norm_pow, norm_pow, Complex.norm_natCast, norm_mul, mul_pow]
-  calc ‖poch (1/2:ℂ) j‖ * ‖ζ‖^j / j.factorial * ‖h‖^j ≤ j.factorial * ‖ζ‖^j /
+  calc ‖pochhammer (1/2:ℂ) j‖ * ‖ζ‖^j / j.factorial * ‖h‖^j ≤ j.factorial * ‖ζ‖^j /
          j.factorial * ‖h‖^j := by
-        gcongr; exact GeneratingSeries.norm_poch_le j
+        gcongr; exact GeneratingSeries.norm_pochhammer_le j
     _ = ‖h‖^j * ‖ζ‖^j := by field_simp
 
 /-- For `‖hζ‖ < 1`, the binomial series `∑ b_j h^j` of `GeneratingSeries.binomialSeries ζ` converges

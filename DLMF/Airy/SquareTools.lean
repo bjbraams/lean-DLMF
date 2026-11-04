@@ -72,9 +72,9 @@ theorem zeta_ge {u : ℝ} (hu : 1 ≤ u) : 2 / 3 * u ≤ airyZeta u := by
   linarith
 
 /-- `0 < Ai(u) ≤ e^{-2u/3}` for `u ≥ 1`. -/
-theorem ai_le {u : ℝ} (hu : 1 ≤ u) : |airyAiReal u| ≤ Real.exp (-(2 / 3) * u) := by
+theorem ai_le {u : ℝ} (hu : 1 ≤ u) : |DLMF.Airy.Real.airyAi u| ≤ Real.exp (-(2 / 3) * u) := by
   have hu0 : 0 < u := by linarith
-  rw [abs_of_pos (airyAiReal_pos hu0.le)]
+  rw [abs_of_pos (DLMF.Airy.Real.airyAi_pos hu0.le)]
   refine (airyAi_bound hu0).trans ?_
   have hs : 1 ≤ Real.sqrt π := by
     rw [show (1 : ℝ) = Real.sqrt 1 by simp]
@@ -87,7 +87,7 @@ theorem ai_le {u : ℝ} (hu : 1 ≤ u) : |airyAiReal u| ≤ Real.exp (-(2 / 3) *
 
 /-- `|Ai'(u)| ≤ u e^{-2u/3}` for `u ≥ 1`. -/
 theorem aiDeriv_le {u : ℝ} (hu : 1 ≤ u) :
-    |airyAiDerivReal u| ≤ u * Real.exp (-(2 / 3) * u) := by
+    |DLMF.Airy.Real.airyAiDeriv u| ≤ u * Real.exp (-(2 / 3) * u) := by
   have hu0 : 0 < u := by linarith
   refine (airyAiDeriv_bound hu0).trans ?_
   have hz := IntegralRepresentation.two_thirds_le_airyZeta hu
@@ -137,38 +137,39 @@ theorem decay_of_le {h : ℝ → ℝ}
   ⟨144, fun u hu => (hb u hu).trans (by nlinarith [sq_mul_exp_le (u := u) (by linarith)])⟩
 
 /-- `Ai` restricted to the reals lies in the exponential decay class. -/
-theorem decay_ai : ExpDecay airyAiReal := by
+theorem decay_ai : ExpDecay DLMF.Airy.Real.airyAi := by
   refine decay_of_le fun u hu => (ai_le hu).trans ?_
   have := Real.exp_pos (-(2 / 3) * u)
   nlinarith [one_le_pow₀ (n := 2) hu]
 
 /-- `Ai'` restricted to the reals lies in the exponential decay class. -/
-theorem decay_aiDeriv : ExpDecay airyAiDerivReal := by
+theorem decay_aiDeriv : ExpDecay DLMF.Airy.Real.airyAiDeriv := by
   refine decay_of_le fun u hu => (aiDeriv_le hu).trans ?_
   have := Real.exp_pos (-(2 / 3) * u)
   have : u ≤ u ^ 2 := by nlinarith
   nlinarith
 
 /-- `u ↦ u Ai(u)` lies in the exponential decay class. -/
-theorem decay_mul_ai : ExpDecay fun u => u * airyAiReal u := by
+theorem decay_mul_ai : ExpDecay fun u => u * DLMF.Airy.Real.airyAi u := by
   refine decay_of_le fun u hu => ?_
   have h := ai_le hu
   have := Real.exp_pos (-(2 / 3) * u)
   rw [abs_mul, abs_of_pos (by linarith : 0 < u)]
   have : u ≤ u ^ 2 := by nlinarith
-  have h1 : u * |airyAiReal u| ≤ u * Real.exp (-(2 / 3) * u) :=
+  have h1 : u * |DLMF.Airy.Real.airyAi u| ≤ u * Real.exp (-(2 / 3) * u) :=
     mul_le_mul_of_nonneg_left h (by linarith)
   nlinarith
 
 /-- `u ↦ Ai(u) + u Ai'(u)` lies in the exponential decay class. -/
-theorem decay_ai_add : ExpDecay fun u => airyAiReal u + u * airyAiDerivReal u := by
+theorem decay_ai_add : ExpDecay fun u => DLMF.Airy.Real.airyAi u + u *
+    DLMF.Airy.Real.airyAiDeriv u := by
   refine decay_of_le fun u hu => ?_
   have h := ai_le hu
   have h' := aiDeriv_le hu
   have := Real.exp_pos (-(2 / 3) * u)
   refine (abs_add_le _ _).trans ?_
   rw [abs_mul, abs_of_pos (by linarith : 0 < u)]
-  have h1 : u * |airyAiDerivReal u| ≤ u * (u * Real.exp (-(2 / 3) * u)) :=
+  have h1 : u * |DLMF.Airy.Real.airyAiDeriv u| ≤ u * (u * Real.exp (-(2 / 3) * u)) :=
     mul_le_mul_of_nonneg_left h' (by linarith)
   have : 1 ≤ u ^ 2 := by nlinarith
   nlinarith
@@ -234,44 +235,46 @@ theorem scale_cube : scale ^ 3 = 4 := by
   rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]; norm_num
 
 /-- `F(x) = ∫₀^∞ Ai(c(x+t²)) dt`. -/
-def tailIntegral (x : ℝ) : ℝ := ∫ t in Ioi 0, airyAiReal (scale * (x + t ^ 2))
+def tailIntegral (x : ℝ) : ℝ := ∫ t in Ioi 0, DLMF.Airy.Real.airyAi (scale * (x + t ^ 2))
 /-- `∫₀^∞ Ai'(c(x+t²)) dt`. -/
-def tailIntegralDeriv (x : ℝ) : ℝ := ∫ t in Ioi 0, airyAiDerivReal (scale * (x + t ^ 2))
+def tailIntegralDeriv (x : ℝ) : ℝ := ∫ t in Ioi 0, DLMF.Airy.Real.airyAiDeriv (scale * (x + t ^ 2))
 /-- `∫₀^∞ u Ai(u) dt` with `u = c(x+t²)`. -/
-def tailIntegralMul (x : ℝ) : ℝ := ∫ t in Ioi 0, (fun u => u * airyAiReal u) (scale * (x + t ^ 2))
+def tailIntegralMul (x : ℝ) : ℝ := ∫ t in Ioi 0,
+    (fun u => u * DLMF.Airy.Real.airyAi u) (scale * (x + t ^ 2))
 /-- `∫₀^∞ (Ai(u) + u Ai'(u)) dt` with `u = c(x+t²)`. -/
 def tailIntegralMulDeriv (x : ℝ) : ℝ :=
-  ∫ t in Ioi 0, (fun u => airyAiReal u + u * airyAiDerivReal u) (scale * (x + t ^ 2))
+  ∫ t in Ioi 0, (fun u => DLMF.Airy.Real.airyAi u + u * DLMF.Airy.Real.airyAiDeriv u)
+      (scale * (x + t ^ 2))
 
 /-- `Ai` is continuous on the reals. -/
-theorem continuous_ai : Continuous airyAiReal :=
-  continuous_iff_continuousAt.mpr fun x => (hasDerivAt_airyAiReal x).continuousAt
+theorem continuous_ai : Continuous DLMF.Airy.Real.airyAi :=
+  continuous_iff_continuousAt.mpr fun x => (DLMF.Airy.Real.hasDerivAt_airyAi x).continuousAt
 /-- `Ai'` is continuous on the reals. -/
-theorem continuous_aiDeriv : Continuous airyAiDerivReal :=
-  continuous_iff_continuousAt.mpr fun x => (hasDerivAt_airyAiDerivReal x).continuousAt
+theorem continuous_aiDeriv : Continuous DLMF.Airy.Real.airyAiDeriv :=
+  continuous_iff_continuousAt.mpr fun x => (DLMF.Airy.Real.hasDerivAt_airyAiDeriv x).continuousAt
 
 /-- `F' = c F₁`, where `F(x) = ∫₀^∞ Ai(c(x+t²)) dt` and `F₁` is the same integral of `Ai'`. -/
 theorem hasDerivAt_tailIntegral (x : ℝ) : HasDerivAt tailIntegral (scale * tailIntegralDeriv x) x :=
   hasDerivAt_integral decay_ai continuous_ai decay_aiDeriv continuous_aiDeriv
-    hasDerivAt_airyAiReal scale_pos x
+    DLMF.Airy.Real.hasDerivAt_airyAi scale_pos x
 
 /-- `F₁' = c F₂`, where `F₂(x) = ∫₀^∞ u Ai(u) dt` with `u = c(x+t²)`. -/
 theorem hasDerivAt_tailIntegralDeriv (x : ℝ) : HasDerivAt tailIntegralDeriv
     (scale * tailIntegralMul x) x :=
   hasDerivAt_integral decay_aiDeriv continuous_aiDeriv decay_mul_ai
-    (by have := continuous_ai; fun_prop) hasDerivAt_airyAiDerivReal scale_pos x
+    (by have := continuous_ai; fun_prop) DLMF.Airy.Real.hasDerivAt_airyAiDeriv scale_pos x
 
 /-- `F₂' = c F₃`, where `F₃(x) = ∫₀^∞ (Ai(u) + u Ai'(u)) dt` with `u = c(x+t²)`. -/
 theorem hasDerivAt_tailIntegralMul (x : ℝ) : HasDerivAt tailIntegralMul
     (scale * tailIntegralMulDeriv x) x :=
   hasDerivAt_integral decay_mul_ai (by have := continuous_ai; fun_prop) decay_ai_add
     (by have := continuous_ai; have := continuous_aiDeriv; fun_prop)
-    (fun u => ((hasDerivAt_id u).mul (hasDerivAt_airyAiReal u)).congr_deriv (by simp))
+    (fun u => ((hasDerivAt_id u).mul (DLMF.Airy.Real.hasDerivAt_airyAi u)).congr_deriv (by simp))
     scale_pos x
 
 /-- Integrability of `t · 2ct Ai'(c(x+t²))` on `(0, ∞)`. -/
 theorem integrable_ibp (x : ℝ) : IntegrableOn (fun t : ℝ => t * (2 * scale * t *
-      airyAiDerivReal (scale * (x + t ^ 2)))) (Ioi 0) := by
+      DLMF.Airy.Real.airyAiDeriv (scale * (x + t ^ 2)))) (Ioi 0) := by
   have hc0 := scale_pos
   obtain ⟨K, hK0, hK⟩ := bound decay_aiDeriv continuous_aiDeriv hc0 x
   have hi := (integrableOn_rpow_mul_exp_neg_mul_sq (by positivity : 0 < scale / 2)
@@ -282,32 +285,35 @@ theorem integrable_ibp (x : ℝ) : IntegrableOn (fun t : ℝ => t * (2 * scale *
   rw [Real.norm_eq_abs]
   have := hK x le_rfl t
   rw [abs_mul, abs_mul, abs_mul, abs_mul, abs_of_pos ht, abs_of_pos hc0, abs_two]
-  have ht2 : t * (2 * scale * t * |airyAiDerivReal (scale * (x + t ^ 2))|) =
-    2 * scale * t ^ 2 * |airyAiDerivReal (scale * (x + t ^ 2))| := by ring
+  have ht2 : t * (2 * scale * t * |DLMF.Airy.Real.airyAiDeriv (scale * (x + t ^ 2))|) =
+    2 * scale * t ^ 2 * |DLMF.Airy.Real.airyAiDeriv (scale * (x + t ^ 2))| := by ring
   rw [ht2, show 2 * scale * K * (t ^ 2 * Real.exp (-(scale / 2) * t ^ 2)) =
     2 * scale * t ^ 2 * (K * Real.exp (-(scale / 2) * t ^ 2)) by ring]
   exact mul_le_mul_of_nonneg_left this (by positivity)
 
 /-- Integration by parts in `t`: `2c ∫₀^∞ t² Ai'(c(x+t²)) dt = -F(x)`. -/
 theorem ibp (x : ℝ) :
-    ∫ t in Ioi 0, t * (2 * scale * t * airyAiDerivReal (scale * (x + t ^ 2))) =
+    ∫ t in Ioi 0, t * (2 * scale * t * DLMF.Airy.Real.airyAiDeriv (scale * (x + t ^ 2))) =
       -tailIntegral x := by
   have hc0 := scale_pos
   obtain ⟨K, hK0, hK⟩ := bound decay_aiDeriv continuous_aiDeriv hc0 x
   obtain ⟨K', hK0', hK'⟩ := bound decay_ai continuous_ai hc0 x
-  have hv : ∀ t : ℝ, HasDerivAt (fun t : ℝ => airyAiReal (scale * (x + t ^ 2)))
-      (2 * scale * t * airyAiDerivReal (scale * (x + t ^ 2))) t := fun t => by
-    have := (hasDerivAt_airyAiReal (scale * (x + t ^ 2))).comp t
+  have hv : ∀ t : ℝ, HasDerivAt (fun t : ℝ => DLMF.Airy.Real.airyAi (scale * (x + t ^ 2)))
+      (2 * scale * t * DLMF.Airy.Real.airyAiDeriv (scale * (x + t ^ 2))) t := fun t => by
+    have := (DLMF.Airy.Real.hasDerivAt_airyAi (scale * (x + t ^ 2))).comp t
       (((hasDerivAt_pow 2 t).const_add x).const_mul scale)
     exact this.congr_deriv (by push_cast; ring)
   have h1 := integrable_ibp x
-  have h2 : IntegrableOn (fun t : ℝ => (1 : ℝ) * airyAiReal (scale * (x + t ^ 2))) (Ioi 0) := by
+  have h2 : IntegrableOn
+      (fun t : ℝ => (1 : ℝ) * DLMF.Airy.Real.airyAi (scale * (x + t ^ 2))) (Ioi 0) := by
     simpa using (integrable decay_ai continuous_ai hc0 x).integrableOn
-  have hz : Tendsto (fun t : ℝ => t * airyAiReal (scale * (x + t ^ 2))) (𝓝[>] 0) (𝓝 0) := by
-    have : Continuous fun t : ℝ => t * airyAiReal (scale * (x + t ^ 2)) := by
+  have hz : Tendsto (fun t : ℝ => t * DLMF.Airy.Real.airyAi (scale * (x + t ^ 2)))
+      (𝓝[>] 0) (𝓝 0) := by
+    have : Continuous fun t : ℝ => t * DLMF.Airy.Real.airyAi (scale * (x + t ^ 2)) := by
       have := continuous_ai; fun_prop
     simpa using (this.tendsto 0).mono_left nhdsWithin_le_nhds
-  have hinf : Tendsto (fun t : ℝ => t * airyAiReal (scale * (x + t ^ 2))) atTop (𝓝 0) := by
+  have hinf : Tendsto (fun t : ℝ => t * DLMF.Airy.Real.airyAi (scale * (x + t ^ 2)))
+      atTop (𝓝 0) := by
     have hl := (tendsto_rpow_mul_exp_neg_mul_atTop_nhds_zero 1 (scale / 2)
         (by positivity)).const_mul K'
     rw [mul_zero] at hl
@@ -319,7 +325,8 @@ theorem ibp (x : ℝ) :
       Real.exp_le_exp.mpr (by
         have : t ≤ t ^ 2 := by nlinarith
         nlinarith [mul_le_mul_of_nonneg_left this (by positivity : (0 : ℝ) ≤ scale / 2)])
-    calc t * |airyAiReal (scale * (x + t ^ 2))| ≤ t * (K' * Real.exp (-(scale / 2) * t)) :=
+    calc t * |DLMF.Airy.Real.airyAi (scale * (x + t ^ 2))| ≤ t *
+           (K' * Real.exp (-(scale / 2) * t)) :=
           mul_le_mul_of_nonneg_left (h3.trans (mul_le_mul_of_nonneg_left h4 hK0')) (by linarith)
       _ = _ := by ring
   have := integral_Ioi_mul_deriv_eq_deriv_mul (u := fun t : ℝ => t) (u' := fun _ => (1 : ℝ))
@@ -336,13 +343,14 @@ theorem hasDerivAt_F2' (x : ℝ) :
   refine h.congr_deriv ?_
   have e : tailIntegralMulDeriv x = tailIntegral x + scale * x * tailIntegralDeriv x +
       (1 / 2) * ∫ t in Ioi 0, t *
-          (2 * scale * t * airyAiDerivReal (scale * (x + t ^ 2))) := by
+          (2 * scale * t * DLMF.Airy.Real.airyAiDeriv (scale * (x + t ^ 2))) := by
     have i0 := integrable decay_ai continuous_ai hc0 x
     have i1 := ((integrable decay_aiDeriv continuous_aiDeriv hc0 x).integrableOn
       (s := Ioi 0)).const_mul (scale * x)
     have i2 := (integrable_ibp x).const_mul (1 / 2)
-    have i01 : IntegrableOn (fun t : ℝ => airyAiReal (scale * (x + t ^ 2)) +
-        scale * x * airyAiDerivReal (scale * (x + t ^ 2))) (Ioi 0) := i0.integrableOn.add i1
+    have i01 : IntegrableOn (fun t : ℝ => DLMF.Airy.Real.airyAi (scale * (x + t ^ 2)) +
+        scale * x * DLMF.Airy.Real.airyAiDeriv (scale * (x + t ^ 2))) (Ioi 0) :=
+            i0.integrableOn.add i1
     rw [tailIntegral, tailIntegralDeriv, ← integral_const_mul, ← integral_const_mul,
         ← integral_add i0.integrableOn i1,
       ← integral_add i01 i2, tailIntegralMulDeriv]
@@ -389,44 +397,54 @@ theorem isAiryProductSolution_tailIntegral :
 
 /-- Every solution of the product equation is a combination of `Ai², Ai Bi, Bi²`. -/
 theorem decomp {y y1 y2 : ℝ → ℝ} (hy : IsAiryProductSolution y y1 y2) :
-    ∃ a b d : ℝ, ∀ x, y x = a * airyAiReal x ^ 2 + b * (airyAiReal x * airyBiReal x) +
-      d * airyBiReal x ^ 2 := by
-  have hA := hasDerivAt_airyAiReal
-  have hA' := hasDerivAt_airyAiDerivReal
-  have hB := hasDerivAt_airyBiReal
-  have hB' := hasDerivAt_airyBiDerivReal
+    ∃ a b d : ℝ, ∀ x, y x = a * DLMF.Airy.Real.airyAi x ^ 2 + b *
+        (DLMF.Airy.Real.airyAi x * DLMF.Airy.Real.airyBi x) +
+      d * DLMF.Airy.Real.airyBi x ^ 2 := by
+  have hA := DLMF.Airy.Real.hasDerivAt_airyAi
+  have hA' := DLMF.Airy.Real.hasDerivAt_airyAiDeriv
+  have hB := DLMF.Airy.Real.hasDerivAt_airyBi
+  have hB' := DLMF.Airy.Real.hasDerivAt_airyBiDeriv
   have h1 := isAiryProductSolution_mul hA hA' hA hA'
   have h2 := isAiryProductSolution_mul hA hA' hB hB'
   have h3 := isAiryProductSolution_mul hB hB' hB hB'
-  have hW : ∀ x, wronskian3 (fun x => airyAiReal x * airyAiReal x)
-      (fun x => airyAiDerivReal x * airyAiReal x + airyAiReal x * airyAiDerivReal x)
-      (fun x => 2 * x * airyAiReal x * airyAiReal x + 2 * airyAiDerivReal x * airyAiDerivReal x)
-      (fun x => airyAiReal x * airyBiReal x)
-      (fun x => airyAiDerivReal x * airyBiReal x + airyAiReal x * airyBiDerivReal x)
-      (fun x => 2 * x * airyAiReal x * airyBiReal x + 2 * airyAiDerivReal x * airyBiDerivReal x)
-      (fun x => airyBiReal x * airyBiReal x)
-      (fun x => airyBiDerivReal x * airyBiReal x + airyBiReal x * airyBiDerivReal x)
-      (fun x => 2 * x * airyBiReal x * airyBiReal x + 2 * airyBiDerivReal x * airyBiDerivReal x) x =
+  have hW : ∀ x, wronskian3 (fun x => DLMF.Airy.Real.airyAi x * DLMF.Airy.Real.airyAi x)
+      (fun x => DLMF.Airy.Real.airyAiDeriv x * DLMF.Airy.Real.airyAi x + DLMF.Airy.Real.airyAi x *
+          DLMF.Airy.Real.airyAiDeriv x)
+      (fun x => 2 * x * DLMF.Airy.Real.airyAi x * DLMF.Airy.Real.airyAi x + 2 *
+          DLMF.Airy.Real.airyAiDeriv x * DLMF.Airy.Real.airyAiDeriv x)
+      (fun x => DLMF.Airy.Real.airyAi x * DLMF.Airy.Real.airyBi x)
+      (fun x => DLMF.Airy.Real.airyAiDeriv x * DLMF.Airy.Real.airyBi x + DLMF.Airy.Real.airyAi x *
+          DLMF.Airy.Real.airyBiDeriv x)
+      (fun x => 2 * x * DLMF.Airy.Real.airyAi x * DLMF.Airy.Real.airyBi x + 2 *
+          DLMF.Airy.Real.airyAiDeriv x * DLMF.Airy.Real.airyBiDeriv x)
+      (fun x => DLMF.Airy.Real.airyBi x * DLMF.Airy.Real.airyBi x)
+      (fun x => DLMF.Airy.Real.airyBiDeriv x * DLMF.Airy.Real.airyBi x + DLMF.Airy.Real.airyBi x *
+          DLMF.Airy.Real.airyBiDeriv x)
+      (fun x => 2 * x * DLMF.Airy.Real.airyBi x * DLMF.Airy.Real.airyBi x + 2 *
+          DLMF.Airy.Real.airyBiDeriv x * DLMF.Airy.Real.airyBiDeriv x) x =
       2 / π ^ 3 := fun x => by
     unfold wronskian3
     have w := wronskian_airyReal x
-    calc _ = 2 * (airyAiReal x * airyBiDerivReal x - airyAiDerivReal x *
-           airyBiReal x) ^ 3 := by ring
+    calc _ = 2 * (DLMF.Airy.Real.airyAi x * DLMF.Airy.Real.airyBiDeriv x -
+           DLMF.Airy.Real.airyAiDeriv x *
+           DLMF.Airy.Real.airyBi x) ^ 3 := by ring
       _ = _ := by rw [w]; ring
   have hπ : (2 / π ^ 3 : ℝ) ≠ 0 := by have := Real.pi_pos; positivity
   have key := decomp_gen hy h1 h2 h3 hW hπ
-  obtain ⟨a, b, d, hk⟩ : ∃ a b d : ℝ, ∀ x, y x = a * (airyAiReal x * airyAiReal x) +
-      b * (airyAiReal x * airyBiReal x) + d * (airyBiReal x * airyBiReal x) := ⟨_, _, _, key⟩
+  obtain ⟨a, b, d, hk⟩ : ∃ a b d : ℝ, ∀ x, y x = a *
+      (DLMF.Airy.Real.airyAi x * DLMF.Airy.Real.airyAi x) +
+      b * (DLMF.Airy.Real.airyAi x * DLMF.Airy.Real.airyBi x) + d *
+          (DLMF.Airy.Real.airyBi x * DLMF.Airy.Real.airyBi x) := ⟨_, _, _, key⟩
   exact ⟨a, b, d, fun x => (hk x).trans (by ring)⟩
 
 /-- The Mellin value `∫₀^∞ s^{-1/2} Ai(s) ds = √π / (3^{5/6} Γ(5/6))` (DLMF 9.10.17 at `α = 1/2`).
 -/
 theorem mellin_half :
-    ∫ s in Ioi 0, s ^ (-(1 / 2) : ℝ) * airyAiReal s =
+    ∫ s in Ioi 0, s ^ (-(1 / 2) : ℝ) * DLMF.Airy.Real.airyAi s =
       Real.sqrt π / ((3 : ℝ) ^ (5 / 6 : ℝ) * Real.Gamma (5 / 6)) := by
   have h := (airyAi_mellin (α := 1 / 2) (by norm_num)).2
   have e1 : ∀ t ∈ Ioi (0 : ℝ), (t : ℂ) ^ ((1 / 2 : ℂ) - 1) * airyAi t =
-      ((t ^ (-(1 / 2) : ℝ) * airyAiReal t : ℝ) : ℂ) := fun t ht => by
+      ((t ^ (-(1 / 2) : ℝ) * DLMF.Airy.Real.airyAi t : ℝ) : ℂ) := fun t ht => by
     rw [airyAi_ofReal_eq, ofReal_mul, ofReal_cpow (le_of_lt ht)]
     norm_num
   rw [setIntegral_congr_fun measurableSet_Ioi e1, integral_complex_ofReal] at h
@@ -445,13 +463,13 @@ theorem mellin_half :
 /-- `F(0) = ∫₀^∞ Ai(ct²) dt` through the substitutions `y = t²`, `s = cy`. -/
 theorem tailIntegral_zero_eq :
     tailIntegral 0 = scale ^ (-(1 / 2) : ℝ) / 2 * ∫ s in Ioi 0, s ^ (-(1 / 2) : ℝ) *
-        airyAiReal s := by
+        DLMF.Airy.Real.airyAi s := by
   have hc0 := scale_pos
   have h1 := integral_comp_rpow_Ioi_of_pos (g := fun y : ℝ => y ^ (-(1 / 2) : ℝ) / 2 *
-    airyAiReal (scale * y)) (p := 2) (by norm_num)
+    DLMF.Airy.Real.airyAi (scale * y)) (p := 2) (by norm_num)
   have e1 : ∀ t ∈ Ioi (0 : ℝ), (2 * t ^ ((2 : ℝ) - 1)) • ((fun y : ℝ => y ^ (-(1 / 2) : ℝ) / 2 *
-      airyAiReal (scale * y)) (t ^ (2 : ℝ))) =
-          airyAiReal (scale * (0 + t ^ 2)) := fun t ht => by
+      DLMF.Airy.Real.airyAi (scale * y)) (t ^ (2 : ℝ))) =
+          DLMF.Airy.Real.airyAi (scale * (0 + t ^ 2)) := fun t ht => by
     have ht' : 0 < t := ht
     simp only [smul_eq_mul, Real.rpow_two, zero_add]
     rw [← Real.rpow_natCast t 2, ← Real.rpow_mul ht'.le]
@@ -461,15 +479,16 @@ theorem tailIntegral_zero_eq :
   rw [setIntegral_congr_fun measurableSet_Ioi e1] at h1
   rw [tailIntegral, h1]
   have h2 := integral_comp_mul_left_Ioi (fun s : ℝ => (s / scale) ^ (-(1 / 2) : ℝ) / 2 *
-    airyAiReal s) 0 hc0
-  have e2 : ∀ y ∈ Ioi (0 : ℝ), (fun s : ℝ => (s / scale) ^ (-(1 / 2) : ℝ) / 2 * airyAiReal s)
-      (scale * y) = y ^ (-(1 / 2) : ℝ) / 2 * airyAiReal (scale * y) := fun y _ => by
+    DLMF.Airy.Real.airyAi s) 0 hc0
+  have e2 : ∀ y ∈ Ioi (0 : ℝ),
+      (fun s : ℝ => (s / scale) ^ (-(1 / 2) : ℝ) / 2 * DLMF.Airy.Real.airyAi s)
+      (scale * y) = y ^ (-(1 / 2) : ℝ) / 2 * DLMF.Airy.Real.airyAi (scale * y) := fun y _ => by
     simp only
     rw [mul_div_cancel_left₀ _ hc0.ne']
   rw [setIntegral_congr_fun measurableSet_Ioi e2, mul_zero] at h2
   rw [h2, smul_eq_mul]
-  have e3 : ∀ s ∈ Ioi (0 : ℝ), (s / scale) ^ (-(1 / 2) : ℝ) / 2 * airyAiReal s =
-      scale ^ (1 / 2 : ℝ) / 2 * (s ^ (-(1 / 2) : ℝ) * airyAiReal s) := fun s hs => by
+  have e3 : ∀ s ∈ Ioi (0 : ℝ), (s / scale) ^ (-(1 / 2) : ℝ) / 2 * DLMF.Airy.Real.airyAi s =
+      scale ^ (1 / 2 : ℝ) / 2 * (s ^ (-(1 / 2) : ℝ) * DLMF.Airy.Real.airyAi s) := fun s hs => by
     rw [Real.div_rpow (le_of_lt hs) hc0.le, Real.rpow_neg hc0.le]
     field_simp
   rw [setIntegral_congr_fun measurableSet_Ioi e3, integral_const_mul]
@@ -478,11 +497,11 @@ theorem tailIntegral_zero_eq :
   rw [← e4]; ring
 
 /-- The normalization `c F(0) = π Ai(0)²`. -/
-theorem tailIntegral_zero : scale * tailIntegral 0 = π * airyAiReal 0 ^ 2 := by
-  have hA : airyAiReal 0 = 1 / ((3 : ℝ) ^ (2 / 3 : ℝ) * Real.Gamma (2 / 3)) := by
+theorem tailIntegral_zero : scale * tailIntegral 0 = π * DLMF.Airy.Real.airyAi 0 ^ 2 := by
+  have hA : DLMF.Airy.Real.airyAi 0 = 1 / ((3 : ℝ) ^ (2 / 3 : ℝ) * Real.Gamma (2 / 3)) := by
     have h := airyAi_zero
     rw [Gamma_two_thirds_eq, ← ofReal_mul, ← ofReal_one, ← ofReal_div] at h
-    simp [airyAiReal, h]
+    simp [DLMF.Airy.Real.airyAi, h]
   rw [tailIntegral_zero_eq, mellin_half, hA]
   have hdup := Real.Gamma_mul_Gamma_add_half (1 / 3)
   have hrefl := ModulusPhase.gamma_third_reflection
@@ -538,19 +557,21 @@ theorem tendsto_tailIntegral : Tendsto (fun x => x ^ (1 / 2 : ℝ) * tailIntegra
 
 /-- `x^{1/2} Ai(x)² → 0` as `x → +∞`. -/
 theorem tendsto_ai_sq :
-    Tendsto (fun x => x ^ (1 / 2 : ℝ) * airyAiReal x ^ 2) atTop (𝓝 0) := by
+    Tendsto (fun x => x ^ (1 / 2 : ℝ) * DLMF.Airy.Real.airyAi x ^ 2) atTop (𝓝 0) := by
   have hl := tendsto_rpow_mul_exp_neg_mul_atTop_nhds_zero (1 / 2) (4 / 3) (by norm_num)
   refine squeeze_zero_norm' ?_ hl
   filter_upwards [eventually_ge_atTop 1] with x hx
   rw [Real.norm_eq_abs, abs_mul, abs_of_nonneg (by positivity), abs_pow]
   refine mul_le_mul_of_nonneg_left ?_ (by positivity)
   have h := ai_le hx
-  calc |airyAiReal x| ^ 2 ≤ Real.exp (-(2 / 3) * x) ^ 2 := pow_le_pow_left₀ (abs_nonneg _) h 2
+  calc |DLMF.Airy.Real.airyAi x| ^ 2 ≤ Real.exp (-(2 / 3) * x) ^ 2 :=
+         pow_le_pow_left₀ (abs_nonneg _) h 2
     _ = _ := by rw [← Real.exp_nat_mul]; ring_nf
 
 /-- `x^{1/2} Ai(x) Bi(x) → 1/(2π)` as `x → +∞`, from DLMF 9.7.5 and 9.7.7. -/
 theorem tendsto_ai_bi :
-    Tendsto (fun x => x ^ (1 / 2 : ℝ) * (airyAiReal x * airyBiReal x)) atTop (𝓝 (1 / (2 * π))) := by
+    Tendsto (fun x => x ^ (1 / 2 : ℝ) * (DLMF.Airy.Real.airyAi x * DLMF.Airy.Real.airyBi x)) atTop
+        (𝓝 (1 / (2 * π))) := by
   have hw := IsEquivalent.refl (u := fun x : ℝ => ((x ^ (1 / 2 : ℝ) : ℝ) : ℂ)) (l := atTop)
   have h := hw.mul (airyAi_isEquivalent.mul airyBi_isEquivalent)
   have hv : (fun x : ℝ => ((x ^ (1 / 2 : ℝ) : ℝ) : ℂ)) *
@@ -583,45 +604,48 @@ theorem tendsto_ai_bi :
   simp [airyAi_ofReal_eq, airyBi_ofReal_eq, ← ofReal_mul]
 
 /-- **Ai² as a Gaussian average of Ai**: `Ai(x)² = (c/π) ∫₀^∞ Ai(c(x+t²)) dt`, `c = 2^{2/3}`. -/
-theorem scale_mul_tailIntegral (x : ℝ) : scale * tailIntegral x = π * airyAiReal x ^ 2 := by
+theorem scale_mul_tailIntegral (x : ℝ) : scale * tailIntegral x = π *
+    DLMF.Airy.Real.airyAi x ^ 2 := by
   obtain ⟨a, b, d, hF⟩ := decomp isAiryProductSolution_tailIntegral
   have hq := tendsto_ai_bi
   have hr := tendsto_ai_sq
   have hf := tendsto_tailIntegral
   have hπ : (1 / (2 * π) : ℝ) ≠ 0 := by have := Real.pi_pos; positivity
   -- `A/B → 0` and `F/B² → 0`
-  have hAB : Tendsto (fun x => airyAiReal x / airyBiReal x) atTop (𝓝 0) := by
+  have hAB : Tendsto (fun x => DLMF.Airy.Real.airyAi x / DLMF.Airy.Real.airyBi x) atTop (𝓝 0) := by
     have := hr.div hq hπ
     rw [zero_div] at this
     refine this.congr' ?_
     filter_upwards [eventually_gt_atTop 0] with x hx
-    have h1 := (airyAiReal_pos hx.le).ne'
-    have h2 := (airyBiReal_pos hx.le).ne'
+    have h1 := (DLMF.Airy.Real.airyAi_pos hx.le).ne'
+    have h2 := (DLMF.Airy.Real.airyBi_pos hx.le).ne'
     have h3 : x ^ (1 / 2 : ℝ) ≠ 0 := by positivity
     simp only [Pi.div_apply]
     field_simp
-  have hFB : Tendsto (fun x => tailIntegral x / airyBiReal x ^ 2) atTop (𝓝 0) := by
+  have hFB : Tendsto (fun x => tailIntegral x / DLMF.Airy.Real.airyBi x ^ 2) atTop (𝓝 0) := by
     have := (hf.mul hr).div (hq.pow 2) (pow_ne_zero 2 hπ)
     rw [zero_mul, zero_div] at this
     refine this.congr' ?_
     filter_upwards [eventually_gt_atTop 0] with x hx
-    have h1 := (airyAiReal_pos hx.le).ne'
-    have h2 := (airyBiReal_pos hx.le).ne'
+    have h1 := (DLMF.Airy.Real.airyAi_pos hx.le).ne'
+    have h2 := (DLMF.Airy.Real.airyBi_pos hx.le).ne'
     have h3 : x ^ (1 / 2 : ℝ) ≠ 0 := by positivity
     simp only [Pi.div_apply]
     field_simp
   have hd : d = 0 := by
-    have h2 : Tendsto (fun x => a * (airyAiReal x / airyBiReal x) ^ 2 + b *
-        (airyAiReal x / airyBiReal x) + d) atTop (𝓝 d) := by
+    have h2 : Tendsto (fun x => a * (DLMF.Airy.Real.airyAi x / DLMF.Airy.Real.airyBi x) ^ 2 + b *
+        (DLMF.Airy.Real.airyAi x / DLMF.Airy.Real.airyBi x) + d) atTop (𝓝 d) := by
       simpa using ((hAB.pow 2).const_mul a).add (hAB.const_mul b) |>.add_const d
     refine tendsto_nhds_unique (h2.congr' ?_) hFB
     filter_upwards [eventually_gt_atTop 0] with x hx
-    have h2 := (airyBiReal_pos hx.le).ne'
+    have h2 := (DLMF.Airy.Real.airyBi_pos hx.le).ne'
     rw [hF x]; field_simp
   have hb : b = 0 := by
-    have h1 : Tendsto (fun x => a * (airyAiReal x / airyBiReal x) + b) atTop (𝓝 b) := by
+    have h1 : Tendsto (fun x => a * (DLMF.Airy.Real.airyAi x / DLMF.Airy.Real.airyBi x) + b)
+        atTop (𝓝 b) := by
       simpa using (hAB.const_mul a).add_const b
-    have h2 : Tendsto (fun x => tailIntegral x / (airyAiReal x * airyBiReal x)) atTop (𝓝 0) := by
+    have h2 : Tendsto (fun x => tailIntegral x /
+        (DLMF.Airy.Real.airyAi x * DLMF.Airy.Real.airyBi x)) atTop (𝓝 0) := by
       have := hf.div hq hπ
       rw [zero_div] at this
       refine this.congr' ?_
@@ -631,19 +655,19 @@ theorem scale_mul_tailIntegral (x : ℝ) : scale * tailIntegral x = π * airyAiR
       field_simp
     refine tendsto_nhds_unique (h1.congr' ?_) h2
     filter_upwards [eventually_gt_atTop 0] with x hx
-    have h1 := (airyAiReal_pos hx.le).ne'
-    have h2 := (airyBiReal_pos hx.le).ne'
+    have h1 := (DLMF.Airy.Real.airyAi_pos hx.le).ne'
+    have h2 := (DLMF.Airy.Real.airyBi_pos hx.le).ne'
     rw [hF x, hd]; field_simp; ring
   have h0 := tailIntegral_zero
   rw [hF 0, hb, hd] at h0
   rw [hF x, hb, hd]
-  have hA0 := (airyAiReal_pos (le_refl (0 : ℝ))).ne'
+  have hA0 := (DLMF.Airy.Real.airyAi_pos (le_refl (0 : ℝ))).ne'
   have ha : scale * a = π := by
-    have : (scale * a - π) * airyAiReal 0 ^ 2 = 0 := by linear_combination h0
+    have : (scale * a - π) * DLMF.Airy.Real.airyAi 0 ^ 2 = 0 := by linear_combination h0
     rcases mul_eq_zero.mp this with h | h
     · linarith
     · exact absurd (pow_eq_zero_iff two_ne_zero |>.mp h) hA0
-  linear_combination airyAiReal x ^ 2 * ha
+  linear_combination DLMF.Airy.Real.airyAi x ^ 2 * ha
 
 /-- **Ai² as a Gaussian average of Ai**, complex form:
 `Ai(x)² = (2^{2/3}/π) ∫₀^∞ Ai(2^{2/3}(x + t²)) dt` for real `x`, with the integral convergent. -/
@@ -652,7 +676,7 @@ theorem _root_.DLMF.Airy.airyAi_sq_eq_integral (x : ℝ) :
       airyAi x ^ 2 = (((2 : ℝ) ^ (2 / 3 : ℝ) / π : ℝ) : ℂ) *
         ∫ t in Ioi 0, airyAi (((2 : ℝ) ^ (2 / 3 : ℝ) * (x + t ^ 2) : ℝ)) := by
   have e : (fun t : ℝ => airyAi (((2 : ℝ) ^ (2 / 3 : ℝ) * (x + t ^ 2) : ℝ))) =
-      fun t : ℝ => ((airyAiReal (scale * (x + t ^ 2)) : ℝ) : ℂ) := by
+      fun t : ℝ => ((DLMF.Airy.Real.airyAi (scale * (x + t ^ 2)) : ℝ) : ℂ) := by
     funext t; rw [airyAi_ofReal_eq]; rfl
   rw [e, integral_complex_ofReal]
   refine ⟨(integrable decay_ai continuous_ai scale_pos x).integrableOn.ofReal, ?_⟩
@@ -666,11 +690,13 @@ theorem _root_.DLMF.Airy.airyAi_sq_eq_integral (x : ℝ) :
 
 /-- The substitution `s = t²`: `F(x) = ½ ∫₀^∞ s^{-1/2} Ai(c(x+s)) ds`. -/
 theorem tailIntegral_eq_half (x : ℝ) :
-    tailIntegral x = ∫ s in Ioi 0, s ^ (-(1 / 2) : ℝ) / 2 * airyAiReal (scale * (x + s)) := by
+    tailIntegral x = ∫ s in Ioi 0, s ^ (-(1 / 2) : ℝ) / 2 *
+        DLMF.Airy.Real.airyAi (scale * (x + s)) := by
   have h1 := integral_comp_rpow_Ioi_of_pos (g := fun s : ℝ => s ^ (-(1 / 2) : ℝ) / 2 *
-    airyAiReal (scale * (x + s))) (p := 2) (by norm_num)
+    DLMF.Airy.Real.airyAi (scale * (x + s))) (p := 2) (by norm_num)
   have e1 : ∀ t ∈ Ioi (0 : ℝ), (2 * t ^ ((2 : ℝ) - 1)) • ((fun s : ℝ => s ^ (-(1 / 2) : ℝ) / 2 *
-      airyAiReal (scale * (x + s))) (t ^ (2 : ℝ))) = airyAiReal (scale * (x + t ^ 2)) :=
+      DLMF.Airy.Real.airyAi (scale * (x + s))) (t ^ (2 : ℝ))) =
+          DLMF.Airy.Real.airyAi (scale * (x + t ^ 2)) :=
     fun t ht => by
     have ht' : 0 < t := ht
     simp only [smul_eq_mul, Real.rpow_two]
@@ -692,7 +718,7 @@ theorem integral_Ioi_eq_integral_indicator {E : Type*} [NormedAddCommGroup E] [N
   simp only [indicator, mem_Ioi, sub_pos]
 
 /-- `|Ai| ≤ K` on `[0, ∞)`. -/
-theorem ai_bounded : ∃ K, ∀ u, 0 ≤ u → |airyAiReal u| ≤ K := by
+theorem ai_bounded : ∃ K, ∀ u, 0 ≤ u → |DLMF.Airy.Real.airyAi u| ≤ K := by
   obtain ⟨K, hK0, hK⟩ := decay_ai.ext continuous_ai 0
   refine ⟨K, fun u hu => (hK u hu).trans ?_⟩
   exact mul_le_of_le_one_right hK0 (Real.exp_le_one_iff.mpr (by linarith))
@@ -713,12 +739,12 @@ theorem integrableOn_mellin {α : ℂ} (hα : 0 < α.re) :
 /-- The kernel of the double integral for the Mellin transform of `Ai²`. -/
 def mellinKernel (α : ℂ) (x v : ℝ) : ℂ :=
   if x < v then (x : ℂ) ^ (α - 1) * ((v : ℂ) - x) ^ ((1 / 2 : ℂ) - 1) *
-    ((airyAiReal (scale * v) : ℝ) : ℂ) else 0
+    ((DLMF.Airy.Real.airyAi (scale * v) : ℝ) : ℂ) else 0
 
 /-- The real kernel `s^{-1/2} Ai(c(x+s))` is integrable on `(0, ∞)`. -/
 theorem integrableOn_half (x : ℝ) :
     IntegrableOn (fun s : ℝ => s ^ (-(1 / 2) : ℝ) / 2 *
-        airyAiReal (scale * (x + s))) (Ioi 0) := by
+        DLMF.Airy.Real.airyAi (scale * (x + s))) (Ioi 0) := by
   rw [← integrableOn_Ioi_comp_rpow_iff _ (p := 2) (by norm_num)]
   refine (integrable decay_ai continuous_ai scale_pos x).integrableOn.congr_fun
     (fun t ht => ?_) measurableSet_Ioi
@@ -733,7 +759,8 @@ theorem integrableOn_half (x : ℝ) :
 theorem mellin_pt (α : ℂ) (x : ℝ) :
     (x : ℂ) ^ (α - 1) * airyAi x ^ 2 = ((scale / (2 * π) : ℝ) : ℂ) * ∫ v, mellinKernel α x v := by
   have e1 : (fun v => mellinKernel α x v) = fun v => (x : ℂ) ^ (α - 1) * (Ioi x).indicator
-      (fun v => ((((v - x) ^ (-(1 / 2) : ℝ) / 2 * airyAiReal (scale * (x + (v - x))) : ℝ) : ℂ))
+      (fun v => ((((v - x) ^ (-(1 / 2) : ℝ) / 2 *
+          DLMF.Airy.Real.airyAi (scale * (x + (v - x))) : ℝ) : ℂ))
         * 2) v := by
     funext v
     by_cases hv : x < v
@@ -745,19 +772,19 @@ theorem mellin_pt (α : ℂ) (x : ℝ) :
       rw [indicator_of_notMem (by simpa using hv), mul_zero]
   rw [e1, integral_const_mul]
   have e2 := integral_Ioi_eq_integral_indicator (fun s : ℝ => (((s ^ (-(1 / 2) : ℝ) / 2 *
-    airyAiReal (scale * (x + s))) : ℝ) : ℂ) * 2) x
+    DLMF.Airy.Real.airyAi (scale * (x + s))) : ℝ) : ℂ) * 2) x
   rw [← e2, integral_mul_const, integral_complex_ofReal, ← tailIntegral_eq_half,
     airyAi_ofReal_eq]
   have h := scale_mul_tailIntegral x
   have hπ := Real.pi_pos.ne'
-  rw [show (airyAiReal x : ℂ) ^ 2 = ((scale / π * tailIntegral x : ℝ) : ℂ) by
+  rw [show (DLMF.Airy.Real.airyAi x : ℂ) ^ 2 = ((scale / π * tailIntegral x : ℝ) : ℂ) by
     rw [← ofReal_pow]; congr 1; field_simp; linarith]
   push_cast
   field_simp
 
 /-- The real kernel `1_{v > x} (v-x)^{-1/2} Ai(cv)`. -/
 def realKernel (x v : ℝ) : ℝ :=
-  (Ioi x).indicator (fun v => (v - x) ^ (-(1 / 2) : ℝ) * airyAiReal (scale * v)) v
+  (Ioi x).indicator (fun v => (v - x) ^ (-(1 / 2) : ℝ) * DLMF.Airy.Real.airyAi (scale * v)) v
 
 /-- The kernel `Φ(α; x, v)` factors as `x^{α-1}` times the real kernel
 `1_{v > x}(v-x)^{-1/2} Ai(cv)`. -/
@@ -772,7 +799,7 @@ theorem mellinKernel_eq (α : ℂ) (x v : ℝ) :
 
 /-- The real kernel at `x` is the shift by `x` of `s ↦ 1_{s > 0} s^{-1/2} Ai(c(x+s))`. -/
 theorem realKernel_shift (x : ℝ) : (fun v => realKernel x v) = fun v =>
-    (Ioi 0).indicator (fun s => s ^ (-(1 / 2) : ℝ) / 2 * airyAiReal (scale * (x + s)) *
+    (Ioi 0).indicator (fun s => s ^ (-(1 / 2) : ℝ) / 2 * DLMF.Airy.Real.airyAi (scale * (x + s)) *
         2) (v - x) := by
   funext v
   by_cases hv : x < v
@@ -793,12 +820,13 @@ theorem realKernel_integrable (x : ℝ) : Integrable (fun v => realKernel x v) :
 /-- `∫ 1_{v > x}(v-x)^{-1/2} Ai(cv) dv = 2 F(x)`. -/
 theorem realKernel_integral (x : ℝ) : ∫ v, realKernel x v = 2 * tailIntegral x := by
   have e : (fun v => realKernel x v) = fun v => (Ioi x).indicator (fun v =>
-      (fun s => s ^ (-(1 / 2) : ℝ) / 2 * airyAiReal (scale * (x + s)) * 2) (v - x)) v := by
+      (fun s => s ^ (-(1 / 2) : ℝ) / 2 * DLMF.Airy.Real.airyAi (scale * (x + s)) * 2)
+          (v - x)) v := by
     funext v
     simp only [realKernel, add_sub_cancel]
     congr 1; funext v; ring
   rw [e, ← integral_Ioi_eq_integral_indicator
-      (fun s => s ^ (-(1 / 2) : ℝ) / 2 * airyAiReal (scale * (x + s)) * 2) x,
+      (fun s => s ^ (-(1 / 2) : ℝ) / 2 * DLMF.Airy.Real.airyAi (scale * (x + s)) * 2) x,
     integral_mul_const, tailIntegral_eq_half]
   ring
 
@@ -808,7 +836,7 @@ theorem realKernel_nonneg {x : ℝ} (hx : 0 ≤ x) (v : ℝ) : 0 ≤ realKernel 
   refine indicator_nonneg (fun v hv => ?_) v
   have hv' : x < v := hv
   exact mul_nonneg (Real.rpow_nonneg (by linarith) _)
-    (airyAiReal_pos (mul_nonneg scale_pos.le (by linarith))).le
+    (DLMF.Airy.Real.airyAi_pos (mul_nonneg scale_pos.le (by linarith))).le
 
 /-- The kernel `(x, v) ↦ Φ(α; x, v)` is measurable. -/
 theorem mellinKernel_measurable (α : ℂ) : Measurable fun p : ℝ × ℝ => mellinKernel α p.1 p.2 := by
@@ -845,13 +873,13 @@ theorem mellinKernel_integrable {α : ℂ} (hα : 0 < α.re) :
 /-- The inner `x`-integral is a Beta integral (DLMF 5.12.1). -/
 theorem integral_mellinKernel (α : ℂ) (v : ℝ) :
     ∫ x in Ioi 0, mellinKernel α x v = (Ioi 0).indicator (fun v : ℝ => betaIntegral α (1 / 2) *
-      ((v : ℂ) ^ (α + 1 / 2 - 1) * ((airyAiReal (scale * v) : ℝ) : ℂ))) v := by
+      ((v : ℂ) ^ (α + 1 / 2 - 1) * ((DLMF.Airy.Real.airyAi (scale * v) : ℝ) : ℂ))) v := by
   by_cases hv : 0 < v
   · rw [indicator_of_mem (mem_Ioi.mpr hv)]
     have e : ∀ x ∈ Ioi (0 : ℝ), mellinKernel α x v =
         (Iio v).indicator (fun x : ℝ => (x : ℂ) ^ (α - 1) *
         ((v : ℂ) - x) ^ ((1 / 2 : ℂ) - 1) *
-            ((airyAiReal (scale * v) : ℝ) : ℂ)) x := fun x _ => by
+            ((DLMF.Airy.Real.airyAi (scale * v) : ℝ) : ℂ)) x := fun x _ => by
       by_cases hxv : x < v
       · simp only [mellinKernel, hxv, ↓reduceIte, indicator_of_mem (mem_Iio.mpr hxv)]
       · simp only [mellinKernel, hxv, ↓reduceIte]
@@ -868,26 +896,28 @@ theorem integral_mellinKernel (α : ℂ) (v : ℝ) :
 /-- Fubini: `∫₀^∞ ∫ Φ(x,v) dv dx = B(α, 1/2) ∫₀^∞ v^{α-1/2} Ai(cv) dv`. -/
 theorem integral_integral_mellinKernel {α : ℂ} (hα : 0 < α.re) :
     ∫ x in Ioi 0, ∫ v, mellinKernel α x v = betaIntegral α (1 / 2) *
-      ∫ v : ℝ in Ioi 0, (v : ℂ) ^ (α + 1 / 2 - 1) * ((airyAiReal (scale * v) : ℝ) : ℂ) := by
+      ∫ v : ℝ in Ioi 0, (v : ℂ) ^ (α + 1 / 2 - 1) *
+          ((DLMF.Airy.Real.airyAi (scale * v) : ℝ) : ℂ) := by
   rw [integral_integral_swap (f := fun x v => mellinKernel α x v) (mellinKernel_integrable hα)]
   simp_rw [integral_mellinKernel]
   rw [integral_indicator measurableSet_Ioi, integral_const_mul]
 
 /-- The scaled Mellin transform `∫₀^∞ v^{w-1} Ai(cv) dv = c^{-w} M_Ai(w)` (DLMF 9.10.17). -/
 theorem scaled_mellin {w : ℂ} (hw : 0 < w.re) :
-    ∫ v : ℝ in Ioi 0, (v : ℂ) ^ (w - 1) * ((airyAiReal (scale * v) : ℝ) : ℂ) =
+    ∫ v : ℝ in Ioi 0, (v : ℂ) ^ (w - 1) * ((DLMF.Airy.Real.airyAi (scale * v) : ℝ) : ℂ) =
       exp (-(Real.log scale : ℂ) * w) *
         (Gamma w / ((3 : ℂ) ^ ((w + 2) / 3) * Gamma (w / 3 + 2 / 3))) := by
   have hc0 := scale_pos
   have h := integral_comp_mul_left_Ioi (fun s : ℝ => ((s / scale : ℝ) : ℂ) ^ (w - 1) *
-    ((airyAiReal s : ℝ) : ℂ)) 0 hc0
+    ((DLMF.Airy.Real.airyAi s : ℝ) : ℂ)) 0 hc0
   have e1 : ∀ v ∈ Ioi (0 : ℝ), (fun s : ℝ => ((s / scale : ℝ) : ℂ) ^ (w - 1) *
-      ((airyAiReal s : ℝ) : ℂ)) (scale * v) =
-      (v : ℂ) ^ (w - 1) * ((airyAiReal (scale * v) : ℝ) : ℂ) := fun v _ => by
+      ((DLMF.Airy.Real.airyAi s : ℝ) : ℂ)) (scale * v) =
+      (v : ℂ) ^ (w - 1) * ((DLMF.Airy.Real.airyAi (scale * v) : ℝ) : ℂ) := fun v _ => by
     simp only; rw [mul_div_cancel_left₀ _ hc0.ne']
   rw [setIntegral_congr_fun measurableSet_Ioi e1, mul_zero] at h
   rw [h]
-  have e2 : ∀ s ∈ Ioi (0 : ℝ), ((s / scale : ℝ) : ℂ) ^ (w - 1) * ((airyAiReal s : ℝ) : ℂ) =
+  have e2 : ∀ s ∈ Ioi (0 : ℝ), ((s / scale : ℝ) : ℂ) ^ (w - 1) *
+      ((DLMF.Airy.Real.airyAi s : ℝ) : ℂ) =
       exp (-(Real.log scale : ℂ) * (w - 1)) * ((s : ℂ) ^ (w - 1) * airyAi s) := fun s hs => by
     have hs' : (0 : ℝ) < s := hs
     rw [Complex.ofReal_cpow_eq_exp (div_pos hs' hc0), Complex.ofReal_cpow_eq_exp

@@ -7,6 +7,8 @@ module -- shake: keep-all
 
 public import DLMF.Lame.FourierSeries.CoefficientRecurrences
 public import DLMF.Lame.FourierSeries.EigenfunctionSeries
+public import DLMF.Lame.FourierSeries.ContinuedFractions
+public import DLMF.Lame.FourierSeries.CoefficientRatios
 
 /-!
 # Lamé functions: Fourier series (DLMF §29.6)
@@ -24,5 +26,7 @@ The coefficients are defined by the Fourier integrals `Real.lameCosCoeff` and
 expansions are theorems; the coefficient list is indexed from `0` (`A p = A_{2p}`, `A_{2p+1}`,
 `B_{2p+1}` or `B_{2p+2}`). The recurrences use `LameRecurrence` (`A0`, `C0` for `Ec^{2m}`;
 `A1`, `C1` for `Ec^{2m+1}`; `B1`, `D1` for `Es^{2m+1}`; `B2`, `D2` for `Es^{2m+2}`), with
-`H = 2a - ν(ν+1)k²` (29.6.2, 29.6.17, 29.6.32, 29.6.47).
+`H = 2a - ν(ν+1)k²` (29.6.2, 29.6.17, 29.6.32, 29.6.47). For non-integer `ν` the coefficients
+are the minimal solutions of these recurrences, which gives the continued-fraction equation
+29.3.10.
 -/

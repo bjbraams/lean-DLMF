@@ -29,7 +29,7 @@ the coefficient series sums to `(1 - u z)^{-a} (1 - z/u)^{-b}`.
 * `coeff_binomSeries`, `one_sub_X_mul_derivative_binomSeries`: coefficients and the
   differential equation `(1 - X) G' = λ G`.
 * `binomSeries_mul`: `G_λ G_μ = G_{λ+μ}` (Chu–Vandermonde).
-* `summable_norm_poch_div_factorial_mul_pow`: absolute convergence in the open unit disk.
+* `summable_norm_pochhammer_div_factorial_mul_pow`: absolute convergence in the open unit disk.
 * `binomProductSeries_ode`, `coeff_binomProductSeries_recurrence`: the differential equation
   of the product and the three-term recurrence of its coefficients.
 * `eq_coeff_binomProductSeries`, `coeff_binomProductSeries`: identification of the
@@ -49,12 +49,13 @@ namespace DLMF.OrthogonalPolynomials
 
 open PowerSeries in
 /-- The binomial series `(1 - X)^{-λ} = ∑ (λ)_n / n! Xⁿ` as a formal power series. -/
-def binomSeries (lam : ℂ) : PowerSeries ℂ := PowerSeries.mk fun n => poch lam n / (n.factorial : ℂ)
+def binomSeries (lam : ℂ) : PowerSeries ℂ := PowerSeries.mk fun n => pochhammer lam n /
+    (n.factorial : ℂ)
 
 open PowerSeries in
 /-- Coefficients of the binomial series. -/
 theorem coeff_binomSeries (lam : ℂ) (n : ℕ) :
-    coeff n (binomSeries lam) = poch lam n / (n.factorial : ℂ) := by
+    coeff n (binomSeries lam) = pochhammer lam n / (n.factorial : ℂ) := by
   simp [binomSeries]
 
 open PowerSeries in
@@ -65,9 +66,9 @@ theorem one_sub_X_mul_derivative_binomSeries (lam : ℂ) :
   rw [sub_mul, one_mul, map_sub, coeff_C_mul, coeff_derivative, coeff_binomSeries,
     coeff_binomSeries]
   rcases n with _ | n
-  · simp [poch_succ, poch_zero]
-  · rw [coeff_succ_X_mul, coeff_derivative, coeff_binomSeries, poch_succ lam (n + 1),
-      poch_succ lam n]
+  · simp [pochhammer_succ, pochhammer_zero]
+  · rw [coeff_succ_X_mul, coeff_derivative, coeff_binomSeries, pochhammer_succ lam (n + 1),
+      pochhammer_succ lam n]
     have h1 : ((n + 1 : ℕ) ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
     have h2 : ((n : ℕ) ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
     rw [Nat.factorial_succ (n + 1), Nat.factorial_succ n]
@@ -105,7 +106,7 @@ theorem binomSeries_mul (lam μ : ℂ) :
     binomSeries lam * binomSeries μ = binomSeries (lam + μ) := by
   ext n
   rw [coeff_mul, Finset.Nat.sum_antidiagonal_eq_sum_range_succ_mk, coeff_binomSeries,
-    ← poch_add_binomial_sum, Finset.sum_div]
+    ← pochhammer_add_binomial_sum, Finset.sum_div]
   refine Finset.sum_congr rfl fun k hk => ?_
   have hkn : k ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hk)
   simp only [coeff_binomSeries]
@@ -121,7 +122,7 @@ theorem one_sub_mul_rescale_binomSeries_one (a : ℂ) :
     (1 - C a * X) * rescale a (binomSeries 1) = 1 := by
   have hG : binomSeries 1 = mk fun _ => (1 : ℂ) := by
     ext n
-    rw [coeff_binomSeries, coeff_mk, poch_nat_one]
+    rw [coeff_binomSeries, coeff_mk, pochhammer_nat_one]
     exact div_self (Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero n))
   ext n
   rw [hG, rescale_mk, sub_mul, one_mul, map_sub, mul_assoc, coeff_C_mul]
@@ -132,11 +133,12 @@ theorem one_sub_mul_rescale_binomSeries_one (a : ℂ) :
     ring
 
 /-- `‖(λ)_j‖ ≤ (‖λ‖)_j`. -/
-theorem norm_poch_le_norm_poch_norm (lam : ℂ) (j : ℕ) : ‖poch lam j‖ ≤ ‖poch (‖lam‖ : ℂ) j‖ := by
+theorem norm_pochhammer_le_norm_pochhammer_norm (lam : ℂ) (j : ℕ) : ‖pochhammer lam j‖ ≤
+    ‖pochhammer (‖lam‖ : ℂ) j‖ := by
   induction j with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ j ih =>
-    rw [poch_succ, poch_succ, norm_mul, norm_mul]
+    rw [pochhammer_succ, pochhammer_succ, norm_mul, norm_mul]
     gcongr
     calc ‖lam + j‖ ≤ ‖lam‖ + j := by
           refine (norm_add_le _ _).trans ?_; simp
@@ -145,14 +147,14 @@ theorem norm_poch_le_norm_poch_norm (lam : ℂ) (j : ℕ) : ‖poch lam j‖ ≤
             Complex.norm_real, Real.norm_of_nonneg (by positivity)]
 
 /-- The binomial series converges absolutely in the open unit disk. -/
-theorem summable_norm_poch_div_factorial_mul_pow (lam : ℂ) {u : ℂ} (hu : ‖u‖ < 1) :
-    Summable fun j : ℕ => ‖poch lam j / (j.factorial : ℂ) * u ^ j‖ := by
+theorem summable_norm_pochhammer_div_factorial_mul_pow (lam : ℂ) {u : ℂ} (hu : ‖u‖ < 1) :
+    Summable fun j : ℕ => ‖pochhammer lam j / (j.factorial : ℂ) * u ^ j‖ := by
   have hr : ‖((‖u‖ : ℝ) : ℂ)‖ < 1 := by simpa using hu
-  have hs := (hasSum_poch_div_factorial (β := (‖lam‖ : ℂ)) hr).summable.norm
+  have hs := (hasSum_pochhammer_div_factorial (β := (‖lam‖ : ℂ)) hr).summable.norm
   refine hs.of_nonneg_of_le (fun _ => norm_nonneg _) fun j => ?_
   rw [norm_mul, norm_mul, norm_div, norm_div, norm_pow, norm_pow]
   gcongr
-  · exact norm_poch_le_norm_poch_norm lam j
+  · exact norm_pochhammer_le_norm_pochhammer_norm lam j
   · simp
 
 
@@ -204,14 +206,14 @@ theorem coeff_binomProductSeries_recurrence (a b : ℂ) {u : ℂ} (hu : u ≠ 0)
 open PowerSeries in
 /-- The constant coefficient of `G_a(uX) G_b(X/u)`. -/
 theorem coeff_zero_binomProductSeries (a b u : ℂ) : coeff 0 (binomProductSeries a b u) = 1 := by
-  simp [binomProductSeries, coeff_mul, coeff_rescale, coeff_binomSeries, poch_zero]
+  simp [binomProductSeries, coeff_mul, coeff_rescale, coeff_binomSeries, pochhammer_zero]
 
 open PowerSeries in
 /-- The linear coefficient of `G_a(uX) G_b(X/u)`. -/
 theorem coeff_one_binomProductSeries (a b u : ℂ) :
     coeff 1 (binomProductSeries a b u) = a * u + b * u⁻¹ := by
   simp [binomProductSeries, coeff_mul, coeff_rescale, coeff_binomSeries,
-    Finset.Nat.antidiagonal_succ, poch_succ, poch_zero]
+    Finset.Nat.antidiagonal_succ, pochhammer_succ, pochhammer_zero]
   ring
 
 open PowerSeries in
@@ -237,7 +239,7 @@ open PowerSeries in
 /-- Explicit coefficients of `G_a(uX) G_b(X/u)`. -/
 theorem coeff_binomProductSeries (a b u : ℂ) (n : ℕ) :
     coeff n (binomProductSeries a b u) = ∑ k ∈ Finset.range (n + 1),
-      poch a k * poch b (n - k) / ((k.factorial : ℂ) * (n - k).factorial) *
+      pochhammer a k * pochhammer b (n - k) / ((k.factorial : ℂ) * (n - k).factorial) *
         (u ^ k * u⁻¹ ^ (n - k)) := by
   rw [binomProductSeries, coeff_mul, Finset.Nat.sum_antidiagonal_eq_sum_range_succ_mk]
   refine Finset.sum_congr rfl fun k _ => ?_
@@ -250,14 +252,14 @@ theorem hasSum_coeff_binomProductSeries_mul_pow (a b : ℂ) {u z : ℂ} (h1 : �
     (h2 : ‖u⁻¹ * z‖ < 1) :
     HasSum (fun n : ℕ => coeff n (binomProductSeries a b u) * z ^ n)
       ((1 - u * z) ^ (-a) * (1 - u⁻¹ * z) ^ (-b)) := by
-  set f : ℕ → ℂ := fun j => poch a j / (j.factorial : ℂ) * (u * z) ^ j with hf
-  set g : ℕ → ℂ := fun j => poch b j / (j.factorial : ℂ) * (u⁻¹ * z) ^ j with hg
-  have hfs := summable_norm_poch_div_factorial_mul_pow a h1
-  have hgs := summable_norm_poch_div_factorial_mul_pow b h2
+  set f : ℕ → ℂ := fun j => pochhammer a j / (j.factorial : ℂ) * (u * z) ^ j with hf
+  set g : ℕ → ℂ := fun j => pochhammer b j / (j.factorial : ℂ) * (u⁻¹ * z) ^ j with hg
+  have hfs := summable_norm_pochhammer_div_factorial_mul_pow a h1
+  have hgs := summable_norm_pochhammer_div_factorial_mul_pow b h2
   have hprod := tsum_mul_tsum_eq_tsum_sum_antidiagonal_of_summable_norm hfs hgs
   have hsum := (summable_norm_sum_mul_antidiagonal_of_summable_norm hfs hgs).of_norm.hasSum
-  rw [← hprod, (hasSum_poch_div_factorial h1).tsum_eq,
-    (hasSum_poch_div_factorial h2).tsum_eq] at hsum
+  rw [← hprod, (hasSum_pochhammer_div_factorial h1).tsum_eq,
+    (hasSum_pochhammer_div_factorial h2).tsum_eq] at hsum
   have hcoeff : ∀ n : ℕ, coeff n (binomProductSeries a b u) * z ^ n =
       ∑ ij ∈ Finset.antidiagonal n, f ij.1 * g ij.2 := by
     intro n

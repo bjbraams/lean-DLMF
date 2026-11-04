@@ -27,7 +27,7 @@ integrals by scaling, replacing `e^{-x}` by `(1 - x/N)^N` (resp. `e^{-x²/2}` by
 
 * `dirichlet_simplex`, `dirichlet_simplex_full`: Dirichlet's integrals, DLMF 5.14.1–5.14.2.
 * `tendsto_integral_lagApprox`: convergence of the integrals of the Laguerre approximants.
-* `selberg_laguerrePolyL`: the Laguerre form of the Selberg integral, DLMF 5.14.5.
+* `selberg_laguerrePolynomialL`: the Laguerre form of the Selberg integral, DLMF 5.14.5.
 * `selberg_hermite`: the Hermite form (Mehta's integral), DLMF 5.14.6.
 
 ## References
@@ -579,7 +579,7 @@ theorem tendsto_lag_rhs {n m : ℕ} (hn : 0 < n) {a c : ℂ} :
 /-- Laguerre form of the Selberg integral, DLMF 5.14.5: the integral over `(0, ∞)ⁿ` of
 `t₁ ⋯ tₘ ∏ tᵢ^(a-1) e^(-tᵢ) |Δ(t)|^(2c)` is an explicit product of Gamma values. -/
 @[dlmf 5.14.E5]
-theorem selberg_laguerrePolyL {n m : ℕ} {a c : ℂ} (hm : m ≤ n)
+theorem selberg_laguerrePolynomialL {n m : ℕ} {a c : ℂ} (hm : m ≤ n)
     (ha : 0 < a.re) (hc : 0 < c.re) :
     ∫ t : Fin n → ℝ in Set.pi Set.univ fun _ => Set.Ioi (0 : ℝ),
         (∏ i : Fin m, (t (Fin.castLE hm i) : ℂ)) *
@@ -627,7 +627,7 @@ the value, with the duplication formula for the right-hand side. -/
 open Set Filter
 open scoped Topology
 
-/-! ### Affine change of variables on a cube -/
+/-! ### Affine change of variables on a unitCube -/
 
 /-- Affine change of variables from `[-s, s]ⁿ` to `[0, 1]ⁿ`. -/
 theorem integral_pi_Icc_affine {n : ℕ} (g : (Fin n → ℝ) → ℂ) {s : ℝ} (hs : 0 < s) :
@@ -732,7 +732,7 @@ theorem hermApprox_affine {n : ℕ} (c : ℂ) {N : ℕ} (hN : 0 < N) (t : Fin n 
 /-- Evaluation of the integral of the Hermite approximant over `[-√(2N), √(2N)]ⁿ` by Selberg's
 integral. -/
 theorem integral_hermApprox_eq {n : ℕ} {c : ℂ} {N : ℕ}
-    (hc : c ∈ DLMF.Selberg.cDomain n ((N : ℂ) + 1) ((N : ℂ) + 1)) (hN : 0 < N) :
+    (hc : c ∈ DLMF.Selberg.selbergConvergenceDomain n ((N : ℂ) + 1) ((N : ℂ) + 1)) (hN : 0 < N) :
     ∫ x in Set.pi Set.univ (fun _ => Icc (-√(2 * N)) √(2 * N)), hermApprox n c N x =
       ((2 * √(2 * N) : ℝ) : ℂ) ^ n * ((4 : ℂ) ^ (n * N) *
         ((2 * √(2 * N) : ℝ) : ℂ) ^ (((n * (n - 1) : ℕ) : ℂ) * c) *
@@ -744,7 +744,7 @@ theorem integral_hermApprox_eq {n : ℕ} {c : ℂ} {N : ℕ}
   simp_rw [hermApprox_affine c hN]
   rw [integral_const_mul]
   congr 1
-  exact DLMF.Selberg.selbergInt_eq hb hb hc
+  exact DLMF.Selberg.selbergIntegral_eq hb hb hc
 
 /-- The Hermite approximant is measurable. -/
 theorem measurable_hermApprox (n : ℕ) (c : ℂ) (N : ℕ) : Measurable (hermApprox n c N) := by
@@ -949,8 +949,9 @@ theorem one_add_mul_pos {n : ℕ} (hn : 0 < n) {σ : ℝ} (hσ : (-1 / n : ℝ) 
   · nlinarith
 
 /-- For `Re c > -1/n`, `c` lies in Selberg's parameter domain with `a = b = N + 1`. -/
-theorem mem_cDomain_herm {n : ℕ} (hn : 0 < n) {c : ℂ} (hc : (-1 / n : ℝ) < c.re) (N : ℕ) :
-    c ∈ DLMF.Selberg.cDomain n ((N : ℂ) + 1) ((N : ℂ) + 1) := by
+theorem mem_selbergConvergenceDomain_herm {n : ℕ} (hn : 0 < n) {c : ℂ}
+    (hc : (-1 / n : ℝ) < c.re) (N : ℕ) :
+    c ∈ DLMF.Selberg.selbergConvergenceDomain n ((N : ℂ) + 1) ((N : ℂ) + 1) := by
   have h1 := neg_one_lt_mul_of_div_lt hn hc
   have h2 := one_add_mul_pos hn hc (Nat.sub_le n 1)
   have hN : (0 : ℝ) ≤ N := Nat.cast_nonneg N
@@ -1075,7 +1076,7 @@ theorem integrable_hermBound {n : ℕ} (hn : 0 < n) {σ : ℝ} (hσ : (-1 / n : 
   have hσc : (-1 / n : ℝ) < (σ : ℂ).re := by simpa using hσ
   have hval := (tendsto_herm_rhs hn (σ : ℂ)).congr' (by
     filter_upwards [eventually_gt_atTop 0] with N hN
-    exact (integral_hermApprox_eq (mem_cDomain_herm hn hσc N) hN).symm)
+    exact (integral_hermApprox_eq (mem_selbergConvergenceDomain_herm hn hσc N) hN).symm)
   set L := ∏ j : Fin n, (((√(2 * π) : ℝ) : ℂ) *
       (Gamma (1 + (((j : ℕ) : ℂ) + 1) * σ) / Gamma (1 + σ))) with hL
   have hne : ∀ᶠ N in atTop, ∫ x in hermBox n N, hermApprox n σ N x ≠ 0 :=
@@ -1169,7 +1170,7 @@ theorem integral_hermIntegrand {n : ℕ} (hn : 0 < n) {c : ℂ} (hc : (-1 / n : 
         (Gamma (1 + (((j : ℕ) : ℂ) + 1) * c) / Gamma (1 + c))) := by
   have hrhs := (tendsto_herm_rhs hn c).congr' (by
     filter_upwards [eventually_gt_atTop 0] with N hN
-    exact (integral_hermApprox_eq (mem_cDomain_herm hn hc N) hN).symm)
+    exact (integral_hermApprox_eq (mem_selbergConvergenceDomain_herm hn hc N) hN).symm)
   exact tendsto_nhds_unique (tendsto_integral_hermApprox hn hc) hrhs
 
 /-- `(√(2π))ⁿ = (2π)^(n/2)`. -/

@@ -14,20 +14,21 @@ public import Mathlib.Data.Nat.Factorial.DoubleFactorial
 # Gaussian hypergeometric function of matrix argument (DLMF §35.7)
 
 Properties of the Gaussian hypergeometric function `₂F₁(a, b; c; T)` of a real symmetric
-matrix argument. The function `hyp2F1 a b c T` (DLMF 35.7.1), the Jacobi form
-`jacobiP γ δ ν T` (DLMF 35.7.2) and the operators `gaussPDEOperator` of DLMF 35.7.9 are defined
-in `DLMF.MatrixArgument.Basic`.
+matrix argument. The function `matrixHypergeometric2F1 a b c T` (DLMF 35.7.1), the Jacobi form
+`matrixJacobiP γ δ ν T` (DLMF 35.7.2) and the operators `gaussPDEOperator` of DLMF 35.7.9 are
+defined in `DLMF.MatrixArgument.Basic`.
 
 ## Main results
 
-* `hyp2F1_eq_tsum`: the zonal polynomial series for `₂F₁` (DLMF 35.7.1).
-* `hyp2F1_diagonal_two`: the case `m = 2` of DLMF 35.7.3.
-* `hasIntegralOn_hyp2F1`: the beta integral representation (DLMF 35.7.5).
-* `hyp2F1_euler`, `hyp2F1_pfaff`: the Euler and Pfaff transformations (DLMF 35.7.6).
-* `hyp2F1_one`: the Gauss formula for `₂F₁(a, b; c; I)` (DLMF 35.7.7).
-* `hyp2F1_reflection`: the reflection formula DLMF 35.7.8, corrected (see below).
-* `hyp2F1_gaussPDE`, `eq_hyp2F1_of_gaussPDE`: the system of partial differential equations
-  DLMF 35.7.9 and the uniqueness theorem of DLMF §35.7(iii).
+* `matrixHypergeometric2F1_eq_tsum`: the zonal polynomial series for `₂F₁` (DLMF 35.7.1).
+* `matrixHypergeometric2F1_diagonal_two`: the case `m = 2` of DLMF 35.7.3.
+* `hasIntegralOn_matrixHypergeometric2F1`: the beta integral representation (DLMF 35.7.5).
+* `matrixHypergeometric2F1_euler`, `matrixHypergeometric2F1_pfaff`: the Euler and Pfaff
+  transformations (DLMF 35.7.6).
+* `matrixHypergeometric2F1_one`: the Gauss formula for `₂F₁(a, b; c; I)` (DLMF 35.7.7).
+* `matrixHypergeometric2F1_reflection`: the reflection formula DLMF 35.7.8, corrected (see below).
+* `matrixHypergeometric2F1_gaussPDE`, `eq_matrixHypergeometric2F1_of_gaussPDE`: the system of
+  partial differential equations DLMF 35.7.9 and the uniqueness theorem of DLMF §35.7(iii).
 
 ## Implementation notes
 
@@ -56,11 +57,11 @@ namespace DLMF.MatrixArgument
 
 /-- DLMF 35.7.1: `₂F₁(a, b; c; T) = ∑_{k=0}^∞ (1/k!) ∑_{|κ|=k} [a]_κ [b]_κ / [c]_κ Z_κ(T)`. -/
 @[dlmf 35.7.E1]
-theorem hyp2F1_eq_tsum {m : ℕ} (a b c : ℂ) (T : Matrix (Fin m) (Fin m) ℝ) :
-    hyp2F1 a b c T = ∑' k : ℕ, (1 / (k ! : ℂ)) * ∑ κ ∈ partitions m k,
+theorem matrixHypergeometric2F1_eq_tsum {m : ℕ} (a b c : ℂ) (T : Matrix (Fin m) (Fin m) ℝ) :
+    matrixHypergeometric2F1 a b c T = ∑' k : ℕ, (1 / (k ! : ℂ)) * ∑ κ ∈ partitions m k,
       partitionalShiftedFactorial a κ * partitionalShiftedFactorial b κ /
         partitionalShiftedFactorial c κ * (zonalPolynomial κ T : ℂ) := by
-  simp [hyp2F1, hypergeometricPFQ, Fin.prod_univ_two]
+  simp [matrixHypergeometric2F1, matrixHypergeometricPFQ, Fin.prod_univ_two]
 
 /-- DLMF 35.7.3 (case `m = 2`):
 `₂F₁(a, b; c; diag(t₁, t₂)) = ∑_k (a)_k (c-a)_k (b)_k (c-b)_k / (k! (c)_{2k} (c - ½)_k)
@@ -68,9 +69,10 @@ theorem hyp2F1_eq_tsum {m : ℕ} (a b c : ℂ) (T : Matrix (Fin m) (Fin m) ℝ) 
 with the classical `₂F₁` (Mathlib's `ordinaryHypergeometric`), for `0 ≤ t₁, t₂ < 1` and
 `Γ₂(c) ≠ 0`. -/
 @[dlmf 35.7.E3]
-theorem hyp2F1_diagonal_two (a b c : ℂ) (hc : multivariateGamma 2 c ≠ 0) {t₁ t₂ : ℝ}
+theorem matrixHypergeometric2F1_diagonal_two (a b c : ℂ)
+    (hc : multivariateGamma 2 c ≠ 0) {t₁ t₂ : ℝ}
     (h₁ : 0 ≤ t₁) (h₁' : t₁ < 1) (h₂ : 0 ≤ t₂) (h₂' : t₂ < 1) :
-    hyp2F1 a b c (Matrix.diagonal ![t₁, t₂]) = ∑' k : ℕ,
+    matrixHypergeometric2F1 a b c (Matrix.diagonal ![t₁, t₂]) = ∑' k : ℕ,
       (ascPochhammer ℂ k).eval a * (ascPochhammer ℂ k).eval (c - a) *
         (ascPochhammer ℂ k).eval b * (ascPochhammer ℂ k).eval (c - b) /
         ((k ! : ℂ) * (ascPochhammer ℂ (2 * k)).eval c * (ascPochhammer ℂ k).eval (c - 1 / 2)) *
@@ -83,21 +85,23 @@ theorem hyp2F1_diagonal_two (a b c : ℂ) (hc : multivariateGamma 2 c ≠ 0) {t�
   |I - TX|^{-b} dX`, stated as: the integral converges and equals `B_m(a, c - a) ₂F₁(a, b; c; T)`.
 -/
 @[dlmf 35.7.E5]
-theorem hasIntegralOn_hyp2F1 {m : ℕ} {a c : ℂ} (b : ℂ) (ha : ((m : ℝ) - 1) / 2 < a.re)
+theorem hasIntegralOn_matrixHypergeometric2F1 {m : ℕ} {a c : ℂ} (b : ℂ)
+    (ha : ((m : ℝ) - 1) / 2 < a.re)
     (hca : ((m : ℝ) - 1) / 2 < (c - a).re) {T : Matrix (Fin m) (Fin m) ℝ} (hT : T.PosDef)
     (hT1 : (1 - T).PosDef) :
     HasIntegralOn (m := m) (matrixInterval 0 1)
       (fun X => ((X.det : ℂ) ^ (a - ((m : ℂ) + 1) / 2)) *
         (((1 - X).det : ℂ) ^ (c - a - ((m : ℂ) + 1) / 2)) * (((1 - T * X).det : ℂ) ^ (-b)))
-      (multivariateBeta m a (c - a) * hyp2F1 a b c T) := by
+      (multivariateBeta m a (c - a) * matrixHypergeometric2F1 a b c T) := by
   sorry
 
 /-- DLMF 35.7.6 (Euler transformation, first equality):
 `₂F₁(a, b; c; T) = |I - T|^{c-a-b} ₂F₁(c - a, c - b; c; T)` for `0 < T < I`, `Γ_m(c) ≠ 0`. -/
 @[dlmf 35.7.E6]
-theorem hyp2F1_euler {m : ℕ} (a b : ℂ) {c : ℂ} (hc : multivariateGamma m c ≠ 0)
+theorem matrixHypergeometric2F1_euler {m : ℕ} (a b : ℂ) {c : ℂ} (hc : multivariateGamma m c ≠ 0)
     {T : Matrix (Fin m) (Fin m) ℝ} (hT : T.PosDef) (hT1 : (1 - T).PosDef) :
-    hyp2F1 a b c T = (((1 - T).det : ℝ) : ℂ) ^ (c - a - b) * hyp2F1 (c - a) (c - b) c T := by
+    matrixHypergeometric2F1 a b c T = (((1 - T).det : ℝ) : ℂ) ^ (c - a - b) *
+        matrixHypergeometric2F1 (c - a) (c - b) c T := by
   sorry
 
 /-- DLMF 35.7.6 (Pfaff transformations, second and third equalities):
@@ -105,18 +109,20 @@ theorem hyp2F1_euler {m : ℕ} (a b : ℂ) {c : ℂ} (hc : multivariateGamma m c
   = |I - T|^{-b} ₂F₁(c - a, b; c; -T(I - T)⁻¹)`, stated for `0 < T < I/2`, where
 `‖T(I - T)⁻¹‖ < 1`, and `Γ_m(c) ≠ 0`. -/
 @[dlmf 35.7.E6]
-theorem hyp2F1_pfaff {m : ℕ} (a b : ℂ) {c : ℂ} (hc : multivariateGamma m c ≠ 0)
+theorem matrixHypergeometric2F1_pfaff {m : ℕ} (a b : ℂ) {c : ℂ} (hc : multivariateGamma m c ≠ 0)
     {T : Matrix (Fin m) (Fin m) ℝ} (hT : T.PosDef) (hT1 : (1 - (2 : ℝ) • T).PosDef) :
-    hyp2F1 a b c T = (((1 - T).det : ℝ) : ℂ) ^ (-a) * hyp2F1 a (c - b) c (-(T * (1 - T)⁻¹)) ∧
-      hyp2F1 a b c T = (((1 - T).det : ℝ) : ℂ) ^ (-b) * hyp2F1 (c - a) b c (-(T * (1 - T)⁻¹)) := by
+    matrixHypergeometric2F1 a b c T = (((1 - T).det : ℝ) : ℂ) ^ (-a) *
+        matrixHypergeometric2F1 a (c - b) c (-(T * (1 - T)⁻¹)) ∧
+      matrixHypergeometric2F1 a b c T = (((1 - T).det : ℝ) : ℂ) ^ (-b) *
+          matrixHypergeometric2F1 (c - a) b c (-(T * (1 - T)⁻¹)) := by
   sorry
 
 /-- DLMF 35.7.7 (Gauss formula): `₂F₁(a, b; c; I) = Γ_m(c) Γ_m(c - a - b) / (Γ_m(c - a) Γ_m(c - b))`
 for `ℜc, ℜ(c - a - b) > (m-1)/2`. -/
 @[dlmf 35.7.E7]
-theorem hyp2F1_one {m : ℕ} {a b c : ℂ} (hc : ((m : ℝ) - 1) / 2 < c.re)
+theorem matrixHypergeometric2F1_one {m : ℕ} {a b c : ℂ} (hc : ((m : ℝ) - 1) / 2 < c.re)
     (hcab : ((m : ℝ) - 1) / 2 < (c - a - b).re) :
-    hyp2F1 a b c (1 : Matrix (Fin m) (Fin m) ℝ) =
+    matrixHypergeometric2F1 a b c (1 : Matrix (Fin m) (Fin m) ℝ) =
       multivariateGamma m c * multivariateGamma m (c - a - b) /
         (multivariateGamma m (c - a) * multivariateGamma m (c - b)) := by
   sorry
@@ -127,13 +133,13 @@ regular (DLMF: `½(j+1) - c ∉ ℕ` and `c - a - b - ½(m-j) ∉ ℕ` for all `
 `₂F₁(a, b; c; T) = Γ_m(c) Γ_m(c - a - b) / (Γ_m(c - a) Γ_m(c - b))
   ₂F₁(a, b; a + b - c + (m+1)/2; I - T)`. -/
 @[dlmf 35.7.E8 "corrected: a must be a nonpositive integer (j = 1)"]
-theorem hyp2F1_reflection {m : ℕ} {a : ℂ} (b : ℂ) {c : ℂ} {n : ℕ} (ha : a = -n)
+theorem matrixHypergeometric2F1_reflection {m : ℕ} {a : ℂ} (b : ℂ) {c : ℂ} {n : ℕ} (ha : a = -n)
     (hc : multivariateGamma m c ≠ 0)
     (hc' : multivariateGamma m (a + b - c + ((m : ℂ) + 1) / 2) ≠ 0)
     {T : Matrix (Fin m) (Fin m) ℝ} (hT : T.PosDef) (hT1 : (1 - T).PosDef) :
-    hyp2F1 a b c T = multivariateGamma m c * multivariateGamma m (c - a - b) /
+    matrixHypergeometric2F1 a b c T = multivariateGamma m c * multivariateGamma m (c - a - b) /
         (multivariateGamma m (c - a) * multivariateGamma m (c - b)) *
-      hyp2F1 a b (a + b - c + ((m : ℂ) + 1) / 2) (1 - T) := by
+      matrixHypergeometric2F1 a b (a + b - c + ((m : ℂ) + 1) / 2) (1 - T) := by
   sorry
 
 /-- DLMF 35.7.9: the function `F(t) = ₂F₁(a, b; c; diag(t₁, …, t_m))` of the eigenvalues is
@@ -141,11 +147,13 @@ real-analytic on `|t_k| < 1` and satisfies each partial differential equation 35
 (`gaussPDEOperator a b c F j t = 0`) at every such `t` with pairwise distinct entries, when
 `Γ_m(c) ≠ 0`. -/
 @[dlmf 35.7.E9]
-theorem hyp2F1_gaussPDE {m : ℕ} (a b : ℂ) {c : ℂ} (hc : multivariateGamma m c ≠ 0) :
-    AnalyticOnNhd ℝ (fun t : Fin m → ℝ => hyp2F1 a b c (Matrix.diagonal t))
+theorem matrixHypergeometric2F1_gaussPDE {m : ℕ} (a b : ℂ) {c : ℂ}
+    (hc : multivariateGamma m c ≠ 0) :
+    AnalyticOnNhd ℝ (fun t : Fin m → ℝ => matrixHypergeometric2F1 a b c (Matrix.diagonal t))
         {t | ∀ k, |t k| < 1} ∧
       ∀ t : Fin m → ℝ, (∀ k, |t k| < 1) → Function.Injective t → ∀ j,
-        gaussPDEOperator a b c (fun t : Fin m → ℝ => hyp2F1 a b c (Matrix.diagonal t)) j t = 0 := by
+        gaussPDEOperator a b c
+            (fun t : Fin m → ℝ => matrixHypergeometric2F1 a b c (Matrix.diagonal t)) j t = 0 := by
   sorry
 
 /-- DLMF §35.7(iii) (uniqueness): a function `f` of the eigenvalues that is (a) symmetric,
@@ -153,13 +161,15 @@ theorem hyp2F1_gaussPDE {m : ℕ} (a b : ℂ) {c : ℂ} (hc : multivariateGamma 
 and solves each equation 35.7.9 at the points `0 < t_k < ε` with distinct entries, is
 `₂F₁(a, b; c; diag(t))` there. Regularity `Γ_m(c) ≠ 0` is made explicit. -/
 @[dlmf 35.7.iii]
-theorem eq_hyp2F1_of_gaussPDE {m : ℕ} (a b : ℂ) {c : ℂ} (hc : multivariateGamma m c ≠ 0)
+theorem eq_matrixHypergeometric2F1_of_gaussPDE {m : ℕ} (a b : ℂ) {c : ℂ}
+    (hc : multivariateGamma m c ≠ 0)
     (f : (Fin m → ℝ) → ℂ) (hsymm : ∀ (σ : Equiv.Perm (Fin m)) (t : Fin m → ℝ), f (t ∘ σ) = f t)
     {ε : ℝ} (hε : 0 < ε) (hε1 : ε ≤ 1) (hf : AnalyticOnNhd ℝ f {t | ∀ k, |t k| < ε})
     (h0 : f 0 = 1)
     (hpde : ∀ t : Fin m → ℝ, (∀ k, 0 < t k ∧ t k < ε) → Function.Injective t →
       ∀ j, gaussPDEOperator a b c f j t = 0) :
-    ∀ t : Fin m → ℝ, (∀ k, |t k| < ε) → f t = hyp2F1 a b c (Matrix.diagonal t) := by
+    ∀ t : Fin m → ℝ, (∀ k, |t k| < ε) → f t =
+        matrixHypergeometric2F1 a b c (Matrix.diagonal t) := by
   sorry
 
 end DLMF.MatrixArgument

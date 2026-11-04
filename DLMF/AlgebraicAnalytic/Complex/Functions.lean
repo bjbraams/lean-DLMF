@@ -77,7 +77,7 @@ The infinite products, partial fractions and generating functions of §1.10(ix)�
   `TauCeti.Contour.residue` (`residueAt_eq_residue`).
 * Products indexed by `n ≥ 1` in DLMF are indexed by `ℕ` here where the index is a dummy
   (Weierstrass products, Mittag-Leffler series); DLMF's convergence of infinite products is
-  `ProdConvergesDLMF`.
+  `InfiniteProductConverges`.
 * Logarithms and powers are principal (`Complex.log`, `cpow`).
 -/
 

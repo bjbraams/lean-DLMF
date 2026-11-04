@@ -48,7 +48,7 @@ open DLMF.Gamma
 
 /-- Coefficients of the analytic part of the integer-parameter logarithmic expansion. -/
 def tricomiLogSeriesCoeff (a : ℂ) (n k : ℕ) : ℂ :=
-  poch a k / k.factorial * (Gamma ((n : ℂ) + 1 + k))⁻¹ *
+  pochhammer a k / k.factorial * (Gamma ((n : ℂ) + 1 + k))⁻¹ *
     (digamma (a + k) - digamma (k + 1) - digamma ((n : ℂ) + 1 + k))
 
 /-- The analytic part that accompanies `log z` in the integer-parameter U expansion. -/
@@ -88,14 +88,14 @@ theorem tricomiLogSeries_zero (a : ℂ) (n : ℕ) :
       (digamma a - digamma 1 - digamma ((n : ℂ) + 1)) := by
   unfold tricomiLogSeries
   rw [tsum_eq_single 0]
-  · simp [tricomiLogSeriesCoeff, poch_zero]
+  · simp [tricomiLogSeriesCoeff, pochhammer_zero]
   · intro k hk
     simp [zero_pow hk]
 
 /-- Separation of the logarithm from the convergent integer-parameter series. -/
 theorem tricomi_log_series_split (a : ℂ) (n : ℕ) {z : ℂ} (hz : z ≠ 0)
     (ha : ∀ k : ℕ, a - n ≠ -(k : ℂ)) :
-    (∑' k : ℕ, (poch a k * z ^ k / k.factorial * (Gamma ((n : ℂ) + 1 + k))⁻¹) *
+    (∑' k : ℕ, (pochhammer a k * z ^ k / k.factorial * (Gamma ((n : ℂ) + 1 + k))⁻¹) *
       (log z + digamma (a + k) - digamma (k + 1) - digamma ((n : ℂ) + 1 + k))) =
       log z * regularizedHGFun {a} {(n : ℂ) + 1} z + tricomiLogSeries a n z := by
   have hM := (summable_regularizedConfluent_term a ((n : ℂ) + 1) z).mul_left (log z)
@@ -108,9 +108,9 @@ theorem tricomi_log_series_split (a : ℂ) (n : ℕ) {z : ℂ} (hz : z ≠ 0)
 /-- Coefficients of the analytic logarithmic part multiplied by `1/Γ(a-n)`, with
 `ψ(a+k)/Γ(a-n)` written as `-(a-n)_{n+k} (1/Γ)'(a+k)`; meaningful for all `a`. -/
 def tricomiLogSeriesRecipGammaCoeff (a : ℂ) (n k : ℕ) : ℂ :=
-  poch a k / k.factorial * (Gamma ((n : ℂ) + 1 + k))⁻¹ *
+  pochhammer a k / k.factorial * (Gamma ((n : ℂ) + 1 + k))⁻¹ *
     (-((Gamma (a - n))⁻¹ * (digamma (k + 1) + digamma ((n : ℂ) + 1 + k))) -
-      poch (a - n) (n + k) * recipGammaDeriv 1 (a + k))
+      pochhammer (a - n) (n + k) * recipGammaDeriv 1 (a + k))
 
 /-- The analytic part accompanying `log z` in the integer-parameter U expansion, multiplied by
 `1/Γ(a-n)`; it equals `tricomiLogSeries a n z / Γ(a-n)` when `a - n` is not a pole. -/
@@ -148,10 +148,10 @@ theorem analyticAt_tricomiLogSeriesRecipGamma (a : ℂ) (n : ℕ) :
 theorem tricomiLogSeriesRecipGamma_zero (a : ℂ) (n : ℕ) :
     tricomiLogSeriesRecipGamma a n 0 = (Gamma ((n : ℂ) + 1))⁻¹ *
       (-((Gamma (a - n))⁻¹ * (digamma 1 + digamma ((n : ℂ) + 1))) -
-        poch (a - n) n * recipGammaDeriv 1 a) := by
+        pochhammer (a - n) n * recipGammaDeriv 1 a) := by
   unfold tricomiLogSeriesRecipGamma
   rw [tsum_eq_single 0]
-  · simp [tricomiLogSeriesRecipGammaCoeff, poch_zero]
+  · simp [tricomiLogSeriesRecipGammaCoeff, pochhammer_zero]
   · intro k hk
     simp [zero_pow hk]
 
@@ -164,14 +164,14 @@ theorem tricomiLogSeriesRecipGamma_eq (a : ℂ) (n : ℕ) (z : ℂ)
   have h := recip_Gamma_mul_digamma_add_nat (x := a - n) (n + k) (not_neg_nat_add_nat ha (n + k))
   rw [show a - n + ((n + k : ℕ) : ℂ) = a + k by push_cast; ring] at h
   dsimp only [tricomiLogSeriesRecipGammaCoeff, tricomiLogSeriesCoeff]
-  linear_combination (-(poch a k / k.factorial * (Gamma ((n : ℂ) + 1 + k))⁻¹ * z ^ k)) * h
+  linear_combination (-(pochhammer a k / k.factorial * (Gamma ((n : ℂ) + 1 + k))⁻¹ * z ^ k)) * h
 
 /-- Separation of the logarithm from the convergent integer-parameter series, in the form with
 `(1/Γ)'`. Stronger than `tricomi_log_series_split`: valid for all `a`. -/
 theorem tricomi_log_series_split_recipGamma (a : ℂ) (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
-    (∑' k : ℕ, (poch a k * z ^ k / k.factorial * (Gamma ((n : ℂ) + 1 + k))⁻¹) *
+    (∑' k : ℕ, (pochhammer a k * z ^ k / k.factorial * (Gamma ((n : ℂ) + 1 + k))⁻¹) *
       ((Gamma (a - n))⁻¹ * (log z - digamma (k + 1) - digamma ((n : ℂ) + 1 + k)) -
-        poch (a - n) (n + k) * recipGammaDeriv 1 (a + k))) =
+        pochhammer (a - n) (n + k) * recipGammaDeriv 1 (a + k))) =
       (Gamma (a - n))⁻¹ * log z * regularizedHGFun {a} {(n : ℂ) + 1} z +
         tricomiLogSeriesRecipGamma a n z := by
   have hM := (summable_regularizedConfluent_term a ((n : ℂ) + 1) z).mul_left

@@ -17,11 +17,11 @@ addition theorems and the differential equations.
 
 ## Main results
 
-* `hasDerivAt_symEllIntR_update`: `∂ⱼ R_{-a}(𝐛; 𝐳) = -a wⱼ R_{-a-1}(𝐛 + 𝐞ⱼ; 𝐳)`,
+* `hasDerivAt_symmetricEllipticR_update`: `∂ⱼ R_{-a}(𝐛; 𝐳) = -a wⱼ R_{-a-1}(𝐛 + 𝐞ⱼ; 𝐳)`,
   `wⱼ = bⱼ/∑ bₖ` (DLMF 19.18.3, 19.18.4).
-* `hasDerivAt_symEllIntRF_right`: `∂R_F(x, y, z)/∂z = -(1/6) R_D(x, y, z)` (DLMF 19.18.1).
-* `symEllIntR_eventuallyEq_carlsonR`: near a slit-plane node, `symEllIntR a b` agrees with
-  `Carlson.carlsonR (-a) b`.
+* `hasDerivAt_symmetricEllipticRF_right`: `∂R_F(x, y, z)/∂z = -(1/6) R_D(x, y, z)` (DLMF 19.18.1).
+* `symmetricEllipticR_eventuallyEq_carlsonR`: near a slit-plane node, `symmetricEllipticR a b`
+  agrees with `Carlson.carlsonR (-a) b`.
 -/
 
 @[expose] public noncomputable section
@@ -33,27 +33,27 @@ namespace DLMF.EllipticIntegrals
 
 variable {ι : Type*} [Fintype ι]
 
-/-- Identity under the stated parameter and domain assumptions: `symEllIntR a b =ᶠ[𝓝 z]
+/-- Identity under the stated parameter and domain assumptions: `symmetricEllipticR a b =ᶠ[𝓝 z]
 Carlson.carlsonR (-a) b`. -/
-lemma symEllIntR_eventuallyEq_carlsonR (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
+lemma symmetricEllipticR_eventuallyEq_carlsonR (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
     (hz : z ∈ Carlson.carlsonRSlitDomain) :
-    symEllIntR a b =ᶠ[𝓝 z] Carlson.carlsonR (-a) b := by
+    symmetricEllipticR a b =ᶠ[𝓝 z] Carlson.carlsonR (-a) b := by
   filter_upwards [Carlson.isOpen_carlsonRSlitDomain.mem_nhds hz] with w hw
-  exact symEllIntR_of_mem _ _ hw
+  exact symmetricEllipticR_of_mem _ _ hw
 
 open scoped Classical in
-/-- At `(z j)`, the function `(fun w => symEllIntR a b (Function.update z j w))` has derivative
-`(Gamma (∑ i, b i) * (-a * b j * Carlson.regCarlsonR (-a - 1) (Dirichlet.addDirichletUnit b j)
-z))`. -/
-lemma hasDerivAt_symEllIntR_update_regCarlsonR (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
+/-- At `(z j)`, the function `(fun w => symmetricEllipticR a b (Function.update z j w))` has
+derivative `(Gamma (∑ i, b i) * (-a * b j * Carlson.regCarlsonR (-a - 1) (Dirichlet.addDirichletUnit
+b j) z))`. -/
+lemma hasDerivAt_symmetricEllipticR_update_regCarlsonR (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
     (hz : z ∈ Carlson.carlsonRSlitDomain) (j : ι) :
-    HasDerivAt (fun w => symEllIntR a b (Function.update z j w))
+    HasDerivAt (fun w => symmetricEllipticR a b (Function.update z j w))
       (Gamma (∑ i, b i) * (-a * b j *
         Carlson.regCarlsonR (-a - 1) (Dirichlet.addDirichletUnit b j) z)) (z j) := by
   have hc : Tendsto (Function.update z j) (𝓝 (z j)) (𝓝 z) := by
     have := ((continuous_const (y := z)).update j continuous_id).tendsto (z j)
     simpa using this
-  have hev := hc.eventually (symEllIntR_eventuallyEq_carlsonR a b hz)
+  have hev := hc.eventually (symmetricEllipticR_eventuallyEq_carlsonR a b hz)
   have h := (Carlson.hasDerivAt_regCarlsonR_update (-a) b hz j).const_mul (Gamma (∑ i, b i))
   exact h.congr_of_eventuallyEq hev
 
@@ -61,33 +61,35 @@ open scoped Classical in
 /-- DLMF 19.18.4: `∂ⱼ R_{-a}(𝐛; 𝐳) = -a wⱼ R_{-a-1}(𝐛 + 𝐞ⱼ; 𝐳)`, `wⱼ = bⱼ/∑ bₖ` (19.18.3),
 for slit-plane nodes and `∑ bₖ ≠ 0`. -/
 @[dlmf 19.18.E4, dlmf 19.18.E3]
-theorem hasDerivAt_symEllIntR_update (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
+theorem hasDerivAt_symmetricEllipticR_update (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
     (hz : z ∈ Carlson.carlsonRSlitDomain) (j : ι) (hb : ∑ i, b i ≠ 0) :
-    HasDerivAt (fun w => symEllIntR a b (Function.update z j w))
-      (-a * (b j / ∑ i, b i) * symEllIntR (a + 1) (Dirichlet.addDirichletUnit b j) z) (z j) := by
-  refine (hasDerivAt_symEllIntR_update_regCarlsonR a b hz j).congr_deriv ?_
-  rw [symEllIntR_of_mem _ _ hz]
+    HasDerivAt (fun w => symmetricEllipticR a b (Function.update z j w))
+      (-a * (b j / ∑ i, b i) *
+          symmetricEllipticR (a + 1) (Dirichlet.addDirichletUnit b j) z) (z j) := by
+  refine (hasDerivAt_symmetricEllipticR_update_regCarlsonR a b hz j).congr_deriv ?_
+  rw [symmetricEllipticR_of_mem _ _ hz]
   unfold Carlson.carlsonR
   rw [Dirichlet.sum_addDirichletUnit, Complex.Gamma_add_one _ hb, show -(a + 1) = -a - 1 by ring]
   field_simp
 
 /-- DLMF 19.18.1: `∂R_F(x, y, z)/∂z = -(1/6) R_D(x, y, z)` (slit-plane variables). -/
 @[dlmf 19.18.E1]
-theorem hasDerivAt_symEllIntRF_right {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane)
+theorem hasDerivAt_symmetricEllipticRF_right {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane)
     (hz : z ∈ slitPlane) :
-    HasDerivAt (fun w => symEllIntRF x y w) (-(1 / 6) * symEllIntRD x y z) z := by
-  have h := hasDerivAt_symEllIntR_update (1 / 2) (fun _ : Fin 3 => 1 / 2)
+    HasDerivAt (fun w => symmetricEllipticRF x y w) (-(1 / 6) * symmetricEllipticRD x y z) z := by
+  have h := hasDerivAt_symmetricEllipticR_update (1 / 2) (fun _ : Fin 3 => 1 / 2)
       (vec3_mem_carlsonRSlitDomain hx hy hz) 2
     (by simp)
   refine (h.congr_of_eventuallyEq ?_).congr_deriv ?_
   · filter_upwards [isOpen_slitPlane.mem_nhds hz] with w hw
-    rw [symEllIntRF_eq_symEllIntR hx hy hw]
+    rw [symmetricEllipticRF_eq_symmetricEllipticR hx hy hw]
     congr 1; funext i; fin_cases i <;> simp [Function.update]
   · have hb : Dirichlet.addDirichletUnit (fun _ : Fin 3 => (1 / 2 : ℂ)) 2 =
         ![1 / 2, 1 / 2, 3 / 2] := by
       unfold Dirichlet.addDirichletUnit
       funext i; fin_cases i <;> simp [Function.update]; norm_num
-    rw [hb, show (1 / 2 : ℂ) + 1 = 3 / 2 by norm_num, ← symEllIntRD_eq_symEllIntR hx hy hz]
+    rw [hb, show (1 / 2 : ℂ) + 1 = 3 / 2 by norm_num,
+                                              ← symmetricEllipticRD_eq_symmetricEllipticR hx hy hz]
     simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
     ring
 

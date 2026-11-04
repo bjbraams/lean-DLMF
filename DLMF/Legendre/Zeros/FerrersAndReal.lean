@@ -478,16 +478,16 @@ theorem FerrersZeros.nat_wronskian {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     div_self (Real.Gamma_pos_of_pos (by positivity)).ne']
 
 /-- On `(-1, 1)`, the real part `FerrersZeros.reFerrersP n 0 t` of `𝖯_n(t)` equals the Legendre
-polynomial `legendrePolyP n t`. -/
+polynomial `legendrePolynomialP n t`. -/
 theorem FerrersZeros.nat_reFerrersP_eq {t : ℝ} (ht : t ∈ Ioo (-1:ℝ) 1) :
-    (FerrersZeros.reFerrersP n 0 t : ℂ) = DLMF.OrthogonalPolynomials.legendrePolyP n t := by
+    (FerrersZeros.reFerrersP n 0 t : ℂ) = DLMF.OrthogonalPolynomials.legendrePolynomialP n t := by
   rw [← (FerrersZeros.P_data n 0 ht).2.1, ← ferrersP_nat_polynomial n ht]
   push_cast; rfl
 
 /-- On `(-1, 1)`, `|𝖯_n(t)| ≤ 1` for the Legendre polynomial `𝖯_n = FerrersZeros.reFerrersP n 0`. -/
 theorem FerrersZeros.nat_reFerrersP_abs_le {t : ℝ}
     (ht : t ∈ Ioo (-1:ℝ) 1) : |FerrersZeros.reFerrersP n 0 t| ≤ 1 := by
-  have h := DLMF.OrthogonalPolynomials.norm_legendrePolyP_le_one n
+  have h := DLMF.OrthogonalPolynomials.norm_legendrePolynomialP_le_one n
     (x := t) (abs_le.mpr ⟨ht.1.le, ht.2.le⟩)
   rwa [← FerrersZeros.nat_reFerrersP_eq n ht, norm_real, Real.norm_eq_abs] at h
 
@@ -562,7 +562,7 @@ end NatDegree
 /-- DLMF 14.16(ii): the n+1 zeros of Q_n. -/
 theorem ferrersQ_nat_zero_count (n : ℕ) :
     Set.Finite (ferrersZeroSet true n 0) ∧ (ferrersZeroSet true n 0).ncard=n+1 := by
-  obtain ⟨x, hxm, hxI, hxz⟩ := DLMF.OrthogonalPolynomials.legendrePolyP_zeros_Ioo n
+  obtain ⟨x, hxm, hxI, hxz⟩ := DLMF.OrthogonalPolynomials.legendrePolynomialP_zeros_Ioo n
   have hr := FerrersZeros.nat_regular n
   have hpz : ∀ t ∈ Ioo (-1:ℝ) 1, FerrersZeros.reFerrersP n 0 t = 0 ↔ ∃ i, t = x i := by
     intro t ht
@@ -908,14 +908,15 @@ theorem FerrersZeros.ne_zero_of_hasSum {f : ℕ → ℝ} {S : ℂ} (h : HasSum (
   linarith
 
 /-- The regularized Gauss series is positive for positive parameters on `(0, 1)`. -/
-theorem FerrersZeros.regularizedGaussHG_ne_zero {a b c w : ℝ} (ha : 0 < a) (hb : 0 < b) (hc : 0 < c)
-    (hw0 : 0 ≤ w) (hw1 : w < 1) : regularizedGaussHG a b c w ≠ 0 := by
+theorem FerrersZeros.regularizedGaussHypergeometric_ne_zero {a b c w : ℝ} (ha : 0 < a)
+    (hb : 0 < b) (hc : 0 < c)
+    (hw0 : 0 ≤ w) (hw1 : w < 1) : regularizedGaussHypergeometric a b c w ≠ 0 := by
   have hw : ‖(w : ℂ)‖ < 1 := by rw [norm_real, Real.norm_eq_abs, abs_of_nonneg hw0]; exact hw1
-  rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hw]
+  rw [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hw]
   have hG : ∀ n : ℕ, 0 < Real.Gamma (c + n) := fun n => Real.Gamma_pos_of_pos (by positivity)
   refine FerrersZeros.ne_zero_of_hasSum (f := fun n => (ascPochhammer ℝ n).eval a *
     (ascPochhammer ℝ n).eval b * w ^ n / n.factorial * (Real.Gamma (c + n))⁻¹)
-    ((hasSum_regularizedGaussHGFun _ _ _ hw).congr_fun fun n => ?_) (fun n => ?_) ?_
+    ((hasSum_regularizedGaussHypergeometricFun _ _ _ hw).congr_fun fun n => ?_) (fun n => ?_) ?_
   · rw [ascPochhammer_eval_ofReal, ascPochhammer_eval_ofReal,
       show (c : ℂ) + n = ((c + n : ℝ) : ℂ) by push_cast; ring, Complex.Gamma_ofReal]
     push_cast; ring
@@ -938,7 +939,8 @@ theorem FerrersZeros.olverQ_ne_zero_of_nonneg {ν μ : ℝ} (hν : -1 < ν) (hμ
   have h2 : (2 : ℂ) ^ ((ν : ℂ) + 1) ≠ 0 := cpow_ne_zero_iff.mpr (Or.inl two_ne_zero)
   have hxp : (x : ℂ) ^ ((ν : ℂ) + μ + 1) ≠ 0 := cpow_ne_zero_iff.mpr (Or.inl hx0)
   have hw : (1 : ℂ) / (x : ℂ) ^ 2 = ((1 / x ^ 2 : ℝ) : ℂ) := by push_cast; ring
-  have hF := FerrersZeros.regularizedGaussHG_ne_zero (a := (ν + μ + 2) / 2) (b := (ν + μ + 1) / 2)
+  have hF := FerrersZeros.regularizedGaussHypergeometric_ne_zero (a := (ν + μ + 2) / 2)
+      (b := (ν + μ + 1) / 2)
     (c := ν + 3 / 2) (w := 1 / x ^ 2) (by linarith) (by linarith) (by linarith) (by positivity)
     (by rw [div_lt_one (by positivity)]; nlinarith)
   push_cast at hF

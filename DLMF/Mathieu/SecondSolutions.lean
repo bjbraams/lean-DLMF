@@ -22,6 +22,8 @@ sign rule `C_n f_n → sin nz`, `S_n g_n → cos nz` as `q → 0`), together wit
 
 * `mathieu_ince`, `not_mathieuWI_mathieuWII_two_pi_periodic`: Ince's theorem on the absence of
   coexistence for `q ≠ 0` (DLMF §28.5(i)).
+* `mathieuWI_mathieuA_add_pi`, `mathieuWII_mathieuB_add_pi`: `w_I(z + π; a_n(q), q) =
+  (-1)ⁿ w_I(z; a_n(q), q)` and the analogue for `w_II` and `b_n(q)`.
 * `mathieuFe_eq`, `mathieuGe_eq`: `fe_n = C_n (z ce_n + f_n)` and `ge_n = S_n (z se_n + g_n)`
   (DLMF 28.5.1, 28.5.2).
 * `mathieuFeC_ne_zero`, `mathieuGeS_ne_zero`: `C_n(q) ≠ 0`, `S_n(q) ≠ 0` for real `q ≠ 0`.
@@ -408,7 +410,7 @@ private lemma mathieuWI_sub_linear_mul_mathieuWII_add_pi {a q ε : ℂ}
   linear_combination (-(deriv (mathieuWI a q) π * mathieuWII a q z * π)) * hW
 
 /-- `w_I(z + π; a_n(q), q) = (-1)ⁿ w_I(z; a_n(q), q)`. -/
-private lemma mathieuWI_mathieuA_add_pi (n : ℕ) (q : ℝ) (z : ℂ) :
+theorem mathieuWI_mathieuA_add_pi (n : ℕ) (q : ℝ) (z : ℂ) :
     mathieuWI (mathieuA n q) q (z + π) = (-1) ^ n * mathieuWI (mathieuA n q) q z := by
   rcases Nat.even_or_odd' n with ⟨k, rfl | rfl⟩
   · rw [mathieuWI_add_pi_of_deriv_half_pi_eq_zero
@@ -417,7 +419,7 @@ private lemma mathieuWI_mathieuA_add_pi (n : ℕ) (q : ℝ) (z : ℂ) :
     simp
 
 /-- `w_II(z + π; b_n(q), q) = (-1)ⁿ w_II(z; b_n(q), q)`, `n ≥ 1`. -/
-private lemma mathieuWII_mathieuB_add_pi {n : ℕ} (hn : n ≠ 0) (q : ℝ) (z : ℂ) :
+theorem mathieuWII_mathieuB_add_pi {n : ℕ} (hn : n ≠ 0) (q : ℝ) (z : ℂ) :
     mathieuWII (mathieuB n q) q (z + π) = (-1) ^ n * mathieuWII (mathieuB n q) q z := by
   rcases Nat.even_or_odd' n with ⟨k, rfl | rfl⟩
   · obtain ⟨j, rfl⟩ : ∃ j, k = j + 1 := ⟨k - 1, by omega⟩

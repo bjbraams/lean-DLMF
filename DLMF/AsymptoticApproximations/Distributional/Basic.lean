@@ -7,6 +7,7 @@ module
 
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Digamma
 public import Mathlib.RingTheory.Binomial
+public import DLMF.AlgebraicAnalytic.Transforms.Basic
 
 /-!
 # Distributional methods: definitions (DLMF §2.6)
@@ -15,7 +16,8 @@ Definitions for DLMF §2.6 (namespace `DLMF.AsymptoticApproximations`).
 
 ## Main definitions
 
-* `stieltjesTransform f z = ∫₀^∞ f(t)/(t+z) dt` (2.6.8) and its generalization
+* `stieltjesTransform_eq`: the Stieltjes transform `∫₀^∞ f(t)/(t+z) dt` (2.6.8) of
+  `AlgebraicAnalytic.stieltjesTransform`, and its generalization
   `generalizedStieltjesTransform ρ f z` (2.6.32).
 * `functionPairing f φ = ∫₀^∞ f φ` (2.6.11, 2.6.12).
 * `powPairing α s φ = (α)_s⁻¹ ∫₀^∞ t^{-α} φ^{(s)}(t) dt` (2.6.13), `0 < α < 1`.
@@ -52,12 +54,14 @@ open MeasureTheory Set Real
 
 namespace DLMF.AsymptoticApproximations
 
-/-- The **Stieltjes transform** `𝒮f(z) = ∫₀^∞ f(t)/(t+z) dt` (DLMF 2.6.8). For `f` locally
-integrable on `[0, ∞)` with `f(t) = O(t^{-α})`, `α > 0`, at infinity, the integral converges
-for `z ∉ (-∞, 0]`; outside its domain of convergence the value is Lean's totalized integral. -/
+/-- The **Stieltjes transform** in the form of DLMF 2.6.8, `𝒮f(z) = ∫₀^∞ f(t)/(t+z) dt`; the
+transform is `AlgebraicAnalytic.stieltjesTransform` (DLMF 1.14.47). For `f` locally integrable on
+`[0, ∞)` with `f(t) = O(t^{-α})`, `α > 0`, at infinity, the integral converges for
+`z ∉ (-∞, 0]`; outside its domain of convergence the value is Lean's totalized integral. -/
 @[dlmf 2.6.E8]
-def stieltjesTransform (f : ℝ → ℂ) (z : ℂ) : ℂ :=
-  ∫ t in Ioi (0 : ℝ), f t / ((t : ℂ) + z)
+theorem stieltjesTransform_eq (f : ℝ → ℂ) (z : ℂ) :
+    AlgebraicAnalytic.stieltjesTransform f z = ∫ t in Ioi (0 : ℝ), f t / ((t : ℂ) + z) := by
+  simp only [AlgebraicAnalytic.stieltjesTransform, add_comm z]
 
 /-- The **generalized Stieltjes transform** `∫₀^∞ f(t)/(t+z)^ρ dt`, `ρ > 0` (DLMF 2.6.32),
 with the principal branch of `(t+z)^ρ` (`z ∉ (-∞, 0]`). -/
@@ -189,7 +193,7 @@ def prodThreeSubOne (s : ℕ) : ℝ := ∏ k ∈ Icc 1 s, (3 * (k : ℝ) - 1)
 /-- The integral `S(x) = ∫₀^∞ (1+t)^{-1/3}/(x+t) dt` of DLMF 2.6.1, a Stieltjes transform. -/
 @[dlmf 2.6.E1]
 def stieltjesCubeRootExample (x : ℝ) : ℂ :=
-  stieltjesTransform (fun t => (((1 + t) ^ (-(1 / 3 : ℝ)) : ℝ) : ℂ)) x
+  AlgebraicAnalytic.stieltjesTransform (fun t => (((1 + t) ^ (-(1 / 3 : ℝ)) : ℝ) : ℂ)) x
 
 /-- The first sum of DLMF 2.6.6–2.6.7, `(2π/√3) ∑_{s<n} (-1)^s (-1/3 choose s) x^{-s-1/3}`. -/
 def stieltjesCubeRootNaiveSum (n : ℕ) (x : ℝ) : ℝ :=
@@ -230,7 +234,7 @@ section
 open Filter Finset
 
 /-- Smooth compactly supported test functions on `ℝ`. -/
-def IsCompactTest (u : ℝ → ℂ) : Prop := ContDiff ℝ ⊤ u ∧ HasCompactSupport u
+def IsCompactTest (u : ℝ → ℂ) : Prop := ContDiff ℝ (⊤ : ℕ∞) u ∧ HasCompactSupport u
 
 /-- The power kernel `t ↦ t^{μ-1}` (real power, cast to `ℂ`). -/
 def rpowKernel (μ : ℝ) (t : ℝ) : ℂ := ((t ^ (μ - 1) : ℝ) : ℂ)

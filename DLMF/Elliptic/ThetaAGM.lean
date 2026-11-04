@@ -28,7 +28,8 @@ and Jacobi's formula `K(m) = (π/2) θ₃(q)²` with complementary modulus `k' =
   `z = 0`).
 * `Real.jacobiThetaFourNullQ_pos`: `θ₄(q) > 0`.
 * `Real.agm_jacobiThetaThreeNullQ_sq_jacobiThetaFourNullQ_sq`: `M(θ₃(q)², θ₄(q)²) = 1`.
-* `Real.compEllIntKm_eq_jacobiThetaThreeNullQ`: Jacobi's formula `K = (π/2) θ₃²` (DLMF 20.9.2).
+* `Real.completeEllipticKOfParameter_eq_jacobiThetaThreeNullQ`: Jacobi's formula `K = (π/2) θ₃²`
+  (DLMF 20.9.2).
 * `jacobiThetaThreeTau_zero_I_mul`, `jacobiThetaFourTau_zero_I_mul`: on the imaginary axis
   `τ = it` the DLMF theta constants are the real series in the nome `q = e^{-πt}`.
 
@@ -351,8 +352,10 @@ complementary modulus `k' = θ₄(q)²/θ₃(q)²`, i.e. `m = 1 - θ₄⁴/θ₃
 theta doubling identities, which make `(θ₃(q^{2ⁿ})², θ₄(q^{2ⁿ})²)` an AGM sequence, with Gauss's
 theorem `K(m) = π/(2 M(1, √(1-m)))`. -/
 @[dlmf 20.9.E2]
-theorem Real.compEllIntKm_eq_jacobiThetaThreeNullQ {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) :
-    Real.compEllIntKm (1 - (Real.jacobiThetaFourNullQ q / Real.jacobiThetaThreeNullQ q) ^ 4) =
+theorem Real.completeEllipticKOfParameter_eq_jacobiThetaThreeNullQ {q : ℝ} (hq0 : 0 < q)
+    (hq1 : q < 1) :
+    Real.completeEllipticKOfParameter
+        (1 - (Real.jacobiThetaFourNullQ q / Real.jacobiThetaThreeNullQ q) ^ 4) =
       π / 2 * Real.jacobiThetaThreeNullQ q ^ 2 := by
   set a := Real.jacobiThetaThreeNullQ q
   set b := Real.jacobiThetaFourNullQ q
@@ -363,7 +366,7 @@ theorem Real.compEllIntKm_eq_jacobiThetaThreeNullQ {q : ℝ} (hq0 : 0 < q) (hq1 
   have hm : 1 - (b / a) ^ 4 < 1 := by
     have : 0 < (b / a) ^ 4 := by positivity
     linarith
-  rw [Real.compEllIntKm_eq_pi_div_agm hm]
+  rw [Real.completeEllipticKOfParameter_eq_pi_div_agm hm]
   have hsq : NNReal.sqrt (1 - (1 - (b / a) ^ 4)).toNNReal = kp.toNNReal := by
     apply NNReal.eq
     rw [Real.coe_sqrt, Real.coe_toNNReal _ (by positivity), Real.coe_toNNReal _ hkp0.le,

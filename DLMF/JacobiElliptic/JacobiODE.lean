@@ -28,8 +28,8 @@ are tools for identifying Jacobian elliptic functions with other expressions.
   are meromorphic, and the property is preserved by `f ↦ c f(w/a)`.
 * `eq_of_eventuallyEq_of_poleDichotomy`: two functions with the pole dichotomy that agree near
   `0` are equal (identity theorem for meromorphic functions on `ℂ`).
-* `poleDichotomy_jacobiPQk`: the Glaisher functions `pq(·, k)` have the pole dichotomy (from
-  `jacobiPQk_zeros_poles`).
+* `poleDichotomy_jacobiPQ`: the Glaisher functions `pq(·, k)` have the pole dichotomy (from
+  `jacobiPQ_zeros_poles`).
 -/
 
 @[expose] public section
@@ -240,36 +240,37 @@ theorem HasPoleDichotomy.comp {f : ℂ → ℂ} (hf : HasPoleDichotomy f) {a c :
     exact h.1
 
 /-- The Glaisher functions have the pole dichotomy. -/
-theorem poleDichotomy_jacobiPQk {k : ℂ} (hk : k ∈ jacobiModulusDomain) {p q : JacobiLetter}
+theorem poleDichotomy_jacobiPQ {k : ℂ} (hk : k ∈ jacobiModulusDomain) {p q : JacobiLetter}
     (hpq : p ≠ q) :
-    HasPoleDichotomy fun w => jacobiPQk p q w k := by
+    HasPoleDichotomy fun w => jacobiPQ p q w k := by
   intro z
-  have hτ := jacobiTauk_im_pos hk
-  have heq : (fun w => jacobiPQk p q w k) = fun w =>
-      jacobiLetterTheta p (jacobiZetak w k) (jacobiTauk k) /
-        jacobiLetterTheta q (jacobiZetak w k) (jacobiTauk k) := by
-    funext w; simp [jacobiPQk, jacobiGlaisher, hpq]
-  by_cases hq : jacobiLetterTheta q (jacobiZetak z k) (jacobiTauk k) = 0
+  have hτ := jacobiTau_im_pos hk
+  have heq : (fun w => jacobiPQ p q w k) = fun w =>
+      jacobiLetterTheta p (jacobiThetaArgument w k) (jacobiTau k) /
+        jacobiLetterTheta q (jacobiThetaArgument w k) (jacobiTau k) := by
+    funext w; simp [jacobiPQ, jacobiGlaisher, hpq]
+  by_cases hq : jacobiLetterTheta q (jacobiThetaArgument z k) (jacobiTau k) = 0
   · right
     have hmem : z ∈ jacobiCongruentk (jacobiLetterPointk q k) k := by
       rw [mem_jacobiCongruentk_iff_jacobiThetaOneTau_eq_zero hk]
       rw [jacobiLetterTheta_eq_amplitude_mul] at hq
       exact (mul_eq_zero.mp hq).resolve_left (jacobiLetterThetaAmplitude_ne_zero hτ _ _)
     refine ⟨?_, ?_⟩
-    · rw [((jacobiPQk_zeros_poles hk hpq z).2.1).mpr hmem]; decide
-    · show jacobiPQk p q z k = 0
-      rw [show jacobiPQk p q z k = _ from congrFun heq z, hq, div_zero]
+    · rw [((jacobiPQ_zeros_poles hk hpq z).2.1).mpr hmem]; decide
+    · show jacobiPQ p q z k = 0
+      rw [show jacobiPQ p q z k = _ from congrFun heq z, hq, div_zero]
   · left
     rw [heq]
-    exact ((differentiable_jacobiLetterTheta_comp_jacobiZetak hk p).analyticAt z).div
-      ((differentiable_jacobiLetterTheta_comp_jacobiZetak hk q).analyticAt z) hq
+    exact ((differentiable_jacobiLetterTheta_comp_jacobiThetaArgument hk p).analyticAt z).div
+      ((differentiable_jacobiLetterTheta_comp_jacobiThetaArgument hk q).analyticAt z) hq
 
 /-- Regularity near `0`, after the substitution `w ↦ w/a`. -/
 theorem eventually_jacobiLetterTheta_div_ne_zero {k : ℂ} (hk : k ∈ jacobiModulusDomain)
     {q : JacobiLetter} (hq : q ≠ .s)
-    (a : ℂ) : ∀ᶠ w in 𝓝 0, jacobiLetterTheta q (jacobiZetak (w / a) k) (jacobiTauk k) ≠ 0 := by
+    (a : ℂ) : ∀ᶠ w in 𝓝 0,
+        jacobiLetterTheta q (jacobiThetaArgument (w / a) k) (jacobiTau k) ≠ 0 := by
   have h := eventually_jacobiLetterTheta_ne_zero hk
-      (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk hq)
+      (jacobiLetterTheta_jacobiThetaArgument_zero_ne_zero hk hq)
   have ht : Tendsto (fun w : ℂ => w / a) (𝓝 0) (𝓝 0) := by
     have := ((continuous_id.div_const a).tendsto (0 : ℂ)); simpa using this
   exact ht.eventually h

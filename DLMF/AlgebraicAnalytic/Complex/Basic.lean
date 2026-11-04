@@ -28,7 +28,7 @@ Tau Ceti. Most notions of these sections are upstream: `Complex.re`, `Complex.im
   plane `OnePoint ℂ` (`∞ ± z = ∞`, `∞ · z = ∞` for `z ≠ 0`, `z/∞ = 0`, `z/0 = ∞` for `z ≠ 0`).
 * `AnalyticAtInfty f L`, `derivAtInfty f L` (§1.9(iv)): `f` is analytic at `∞` with value `L`
   there (`g(z) = f(1/z)`, `g(0) = L`, is analytic at `0`), and `f'(∞) = g'(0)`.
-* `mobius a b c d` and its extension `mobiusExt a b c d` to `OnePoint ℂ` (1.9.40–1.9.41).
+* `mobiusMap a b c d` and its extension `mobiusExt a b c d` to `OnePoint ℂ` (1.9.40–1.9.41).
 * `crossRatio` (1.9.45).
 * `recipCoeff`, `logCoeff`, `powCoeff ν` (1.9.55–1.9.62): the coefficients of `1/f`, `ln f`
   and `f^ν` for a power series `f`, by the recurrences 1.9.56, 1.9.59, 1.9.62.
@@ -37,7 +37,7 @@ Tau Ceti. Most notions of these sections are upstream: `Complex.re`, `Complex.im
   domains (via Tau Ceti's filled hull) and the positive (anticlockwise) sense.
 * `laurentCoeff` (1.10.7) and `residueAt` (§1.10(iii)): Laurent coefficients as circle integrals
   and the residue `a_{-1}` at an isolated singularity (also essential ones).
-* `ProdConvergesDLMF` (§1.10(ix)): DLMF's notion of convergence of `∏ (1 + a_n)` (partial
+* `InfiniteProductConverges` (§1.10(ix)): DLMF's notion of convergence of `∏ (1 + a_n)` (partial
   products from some index on converge to a nonzero limit).
 -/
 
@@ -98,7 +98,7 @@ def derivAtInfty (f : ℂ → ℂ) (L : ℂ) : ℂ :=
 /-- DLMF 1.9.40: the bilinear (Möbius) transformation `f(z) = (az + b)/(cz + d)` on `ℂ`
 (with `x/0 = 0` at `z = -d/c`; see `mobiusExt` for the extended plane). -/
 @[dlmf 1.9.E40]
-def mobius (a b c d : ℂ) (z : ℂ) : ℂ :=
+def mobiusMap (a b c d : ℂ) (z : ℂ) : ℂ :=
   (a * z + b) / (c * z + d)
 
 /-- DLMF 1.9.40–1.9.41: the bilinear transformation on the extended plane: `f(-d/c) = ∞`,
@@ -106,7 +106,7 @@ def mobius (a b c d : ℂ) (z : ℂ) : ℂ :=
 @[dlmf 1.9.E41]
 def mobiusExt (a b c d : ℂ) : OnePoint ℂ → OnePoint ℂ
   | ∞ => if c = 0 then ∞ else ((a / c : ℂ) : OnePoint ℂ)
-  | (z : ℂ) => if c * z + d = 0 then ∞ else ((mobius a b c d z : ℂ) : OnePoint ℂ)
+  | (z : ℂ) => if c * z + d = 0 then ∞ else ((mobiusMap a b c d z : ℂ) : OnePoint ℂ)
 
 /-- DLMF 1.9.45: the cross ratio `(z₁ - z₂)(z₃ - z₄) / ((z₁ - z₄)(z₃ - z₂))` of four complex
 numbers (the limiting forms with a point at `∞` are not defined here). -/
@@ -207,7 +207,7 @@ for some `k ≥ 1` the partial products `p_{k,m} = ∏_{n=k}^{m} (1 + a_n)` tend
 as `m → ∞` (finitely many zero factors are allowed). The value `a 0` is not used. This differs
 from Mathlib's `Multipliable`, which is unconditional and allows the limit `0`. -/
 @[dlmf 1.10.ix]
-def ProdConvergesDLMF (a : ℕ → ℂ) : Prop :=
+def InfiniteProductConverges (a : ℕ → ℂ) : Prop :=
   ∃ k ≥ 1, ∃ p : ℂ, p ≠ 0 ∧
     Tendsto (fun m : ℕ => ∏ n ∈ Finset.Icc k m, (1 + a n)) atTop (𝓝 p)
 

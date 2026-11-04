@@ -13,6 +13,7 @@ public import DLMF.Theta.Identities
 public import DLMF.Theta.Relations
 public import DLMF.Theta.Integrals
 public import DLMF.Theta.Generalizations
+public import DLMF.Theta.ImaginaryAxisMonotonicity
 public import DLMF.Theta.MathlibCoverage
 
 /-!

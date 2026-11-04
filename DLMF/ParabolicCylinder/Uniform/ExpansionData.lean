@@ -116,18 +116,19 @@ reciprocal-power expansions in the exterior region `t ≥ 1+δ`. -/
 theorem pcf_negative_parameter_uniform  :
     ∃ g : ℝ → ℂ, IsCylinderGNormalizer g ∧ ∀ δ : ℝ, 0 < δ →
         HasCylinderUniformExpansion
-        (fun μ t => pcfU (-μ^2/2) (μ*t*Real.sqrt 2)/(g μ*exp (-μ^2*pcfXi t)/(t^2-1:ℂ)^(1/4:ℂ)))
+        (fun μ t => parabolicCylinderU (-μ^2/2)
+            (μ*t*Real.sqrt 2)/(g μ*exp (-μ^2*pcfXi t)/(t^2-1:ℂ)^(1/4:ℂ)))
         (fun s t => pcfOlverA s t) (Ici (1+δ)) ∧
         HasCylinderUniformExpansion
-        (fun μ t => pcfUDeriv (-μ^2/2)
+        (fun μ t => parabolicCylinderUDeriv (-μ^2/2)
         (μ*t*Real.sqrt 2)/(-(μ:ℂ)/Real.sqrt 2*g μ*(t^2-1:ℂ)^(1/4:ℂ)*exp (-μ^2*pcfXi t)))
         (fun s t => pcfOlverB s t) (Ici (1+δ)) ∧
         HasCylinderUniformExpansion
-        (fun μ t => pcfV (-μ^2/2)
+        (fun μ t => parabolicCylinderV (-μ^2/2)
         (μ*t*Real.sqrt 2)/(2*g μ/Gamma (1/2+μ^2/2)*exp (μ^2*pcfXi t)/(t^2-1:ℂ)^(1/4:ℂ)))
         (fun s t => (-1)^s*pcfOlverA s t) (Ici (1+δ)) ∧
         HasCylinderUniformExpansion
-        (fun μ t => pcfVDeriv (-μ^2/2)
+        (fun μ t => parabolicCylinderVDeriv (-μ^2/2)
         (μ*t*Real.sqrt 2)/(Real.sqrt 2*μ*g μ/Gamma (1/2+μ^2/2)*(t^2-1:ℂ)^(1/4:ℂ)*exp (μ^2*pcfXi t)))
         (fun s t => (-1)^s*pcfOlverB s t) (Ici (1+δ)) := by
   sorry
@@ -147,18 +148,19 @@ their derivatives, uniformly on closed subintervals of `(-1,1)`. -/
 @[dlmf 12.10.E18, dlmf 12.10.E19, dlmf 12.10.E20, dlmf 12.10.E21]
 theorem pcf_oscillatory_parameter_uniform  :
     ∃ g : ℝ → ℂ, IsCylinderGNormalizer g ∧ ∀ δ : ℝ, 0 < δ → δ < 1 → ∀ N : ℕ,
-        (fun p : ℝ × ℝ => pcfU (-p.1^2/2) (p.1*p.2*Real.sqrt 2)/(2*g p.1/(1-p.2^2:ℂ)^(1/4:ℂ))-∑ s ∈
+        (fun p : ℝ × ℝ => parabolicCylinderU (-p.1^2/2)
+            (p.1*p.2*Real.sqrt 2)/(2*g p.1/(1-p.2^2:ℂ)^(1/4:ℂ))-∑ s ∈
         Finset.range N, Real.cos (pcfKappa p.1 p.2+s*π/2)*pcfOlverATilde s p.2/(p.1:ℂ)^(2*s))
         =O[pcfUniformFilter (Icc (-1+δ) (1-δ))] (fun p : ℝ × ℝ => (p.1:ℂ)^(-(2*N:ℤ))) ∧
-        (fun p : ℝ × ℝ => pcfUDeriv (-p.1^2/2)
+        (fun p : ℝ × ℝ => parabolicCylinderUDeriv (-p.1^2/2)
         (p.1*p.2*Real.sqrt 2)/(p.1*Real.sqrt 2*g p.1*(1-p.2^2:ℂ)^(1/4:ℂ))-∑ s ∈ Finset.range N,
         Real.sin (pcfKappa p.1 p.2+s*π/2)*pcfOlverBTilde s p.2/(p.1:ℂ)^(2*s))
         =O[pcfUniformFilter (Icc (-1+δ) (1-δ))] (fun p : ℝ × ℝ => (p.1:ℂ)^(-(2*N:ℤ))) ∧
-        (fun p : ℝ × ℝ => pcfV (-p.1^2/2)
+        (fun p : ℝ × ℝ => parabolicCylinderV (-p.1^2/2)
         (p.1*p.2*Real.sqrt 2)/(2*g p.1/(Gamma (1/2+p.1^2/2)*(1-p.2^2:ℂ)^(1/4:ℂ)))-∑ s ∈
         Finset.range N, Real.cos (pcfChi p.1 p.2+s*π/2)*pcfOlverATilde s p.2/(p.1:ℂ)^(2*s))
         =O[pcfUniformFilter (Icc (-1+δ) (1-δ))] (fun p : ℝ × ℝ => (p.1:ℂ)^(-(2*N:ℤ))) ∧
-        (fun p : ℝ × ℝ => pcfVDeriv (-p.1^2/2)
+        (fun p : ℝ × ℝ => parabolicCylinderVDeriv (-p.1^2/2)
         (p.1*p.2*Real.sqrt 2)/(p.1*Real.sqrt 2*g p.1*(1-p.2^2:ℂ)^(1/4:ℂ)/Gamma (1/2+p.1^2/2))-∑ s ∈
         Finset.range N, Real.sin (pcfChi p.1 p.2+s*π/2)*pcfOlverBTilde s p.2/(p.1:ℂ)^(2*s))
         =O[pcfUniformFilter (Icc (-1+δ) (1-δ))] (fun p : ℝ × ℝ => (p.1:ℂ)^(-(2*N:ℤ))) := by
@@ -273,7 +275,7 @@ theorem pcfTemmePoly_recurrence (s : ℕ) (τ : ℝ) :
   rw [hint, pcfTemmePoly]
   simp [q]
 
--- `pcfU_temme_uniform` (DLMF 12.10.31) is stated and proved in
+-- `parabolicCylinderU_temme_uniform` (DLMF 12.10.31) is stated and proved in
 -- `DLMF/ParabolicCylinder/UniformLG2.lean`.
 
 /-- The real Airy turning-point coordinate, positive for `t ≥ 1` and negative for `t < 1`, defined
@@ -731,7 +733,7 @@ theorem CylinderZetaTaylor.airyAverage_tendsto : Tendsto CylinderZetaTaylor.airy
   norm_num at this
   exact this
 
-/-- `((3/2)K)^{2/3} = 2^{1/3} R(u) + O(u⁵)`, via the cube relation. -/
+/-- `((3/2)K)^{2/3} = 2^{1/3} R(u) + O(u⁵)`, via the unitCube relation. -/
 theorem CylinderZetaTaylor.Z_expansion :
     (fun u => ((3/2) * CylinderZetaTaylor.airyAverage u)^(2/3:ℝ) - (2:ℝ)^(1/3:ℝ) *
         CylinderZetaTaylor.zetaRatioTaylor u) =O[𝓝 0]

@@ -43,20 +43,20 @@ namespace IncompleteGammaAsymptotics
 /-- The identity 8.11.14 with `S_n` unfolded. -/
 theorem exp_identity (n : ℕ) (x : ℝ) :
     exp (n*x : ℂ)=Elementary.expPartialSum n (n*x)+(n*x : ℂ)^n/n.factorial*
-      (lowerIncGamma (n+1) (n*x)/((n*x : ℂ)^n*exp (-n*x : ℂ))) := by
+      (lowerIncompleteGamma (n+1) (n*x)/((n*x : ℂ)^n*exp (-n*x : ℂ))) := by
   rw [show (-n*x : ℂ) = -(n*x : ℂ) by ring]
   set z : ℂ := (n*x : ℂ)
   have hf : (n.factorial : ℂ) ≠ 0 := by exact_mod_cast n.factorial_ne_zero
   by_cases hz : z = 0
-  · have h0 : lowerIncGamma (n+1) z = 0 := by
-      rw [lowerIncGamma_eq_regularized (natCast_add_one_ne_neg_nat n), hz,
+  · have h0 : lowerIncompleteGamma (n+1) z = 0 := by
+      rw [lowerIncompleteGamma_eq_regularized (natCast_add_one_ne_neg_nat n), hz,
         zero_cpow (by exact_mod_cast n.succ_ne_zero), mul_zero, zero_mul]
     rw [h0, zero_div, mul_zero, add_zero, hz, Complex.exp_zero, Elementary.expPartialSum,
       Finset.sum_eq_single 0]
     · simp
     · intro k _ hk; simp [hk]
     · simp
-  · rw [lowerIncGamma_nat_succ_expPartialSum n hz, Complex.exp_neg]
+  · rw [lowerIncompleteGamma_nat_succ_expPartialSum n hz, Complex.exp_neg]
     have he : exp z ≠ 0 := Complex.exp_ne_zero z
     have hzn : z^n ≠ 0 := pow_ne_zero _ hz
     field_simp
@@ -255,7 +255,7 @@ theorem ratio_eq (m : ℕ) (x : ℝ) :
       ((1 - ((m+1)*x)^(m+1)/((m+1).factorial) * ((m+1)*x*∫ s in (0:ℝ)..1, laplaceIntegrand m x s) /
         Real.exp ((m+1)*x) : ℝ) : ℂ) := by
   have hI := exp_identity (m+1) x
-  rw [lowerIncGamma_ratio_eq] at hI
+  rw [lowerIncompleteGamma_ratio_eq] at hI
   have he : exp (((m+1:ℕ):ℂ)*x) ≠ 0 := Complex.exp_ne_zero _
   rw [div_eq_iff he]
   push_cast at hI ⊢
@@ -421,7 +421,7 @@ theorem expPartialSum_poisson_limit {x : ℝ} (hx : 0 ≤ x) :
 /-- The exponential partial-sum remainder S_n. -/
 @[dlmf 8.11.E15]
 def expPartialSumRemainderS (n : ℕ) (x : ℝ) : ℂ :=
-  lowerIncGamma (n+1) (n*x)/((n*x : ℂ)^n*exp (-n*x : ℂ))
+  lowerIncompleteGamma (n+1) (n*x)/((n*x : ℂ)^n*exp (-n*x : ℂ))
 
 /-- Identity under the stated parameter and domain assumptions:
 `exp (n*x : ℂ)=Elementary.expPartialSum n (n*x)+(n*x : ℂ)^n/n.factorial*expPartialSumRemainderS n
@@ -440,7 +440,7 @@ theorem S_eq (m : ℕ) (x : ℝ) :
     expPartialSumRemainderS (m+1) x =
         (((m+1)*x * ∫ s in (0:ℝ)..1, laplaceIntegrand m x s : ℝ) : ℂ) := by
   unfold expPartialSumRemainderS
-  exact lowerIncGamma_ratio_eq m x
+  exact lowerIncompleteGamma_ratio_eq m x
 
 /-- The real coefficients `d_k(x) = (-1)^k x h_k(x)/(1-x)` of 8.11.18. -/
 noncomputable def remainderCoeff (k : ℕ) (x : ℝ) : ℝ := (-1)^k * (x * ibpRational k x/(1-x))

@@ -106,7 +106,7 @@ paragraph in §1.2(vi), §1.8(i), §1.15(i), §1.15(iv), and §1.17(iv).
 <!-- retained entry 8 -->
 - **Matrix exponential and exponential of the trace**, [1.2.76–77](https://dlmf.nist.gov/1.2.E76):
   Mathlib `NormedSpace.exp`, applied to matrices, and `Complex.exp A.trace`.
-  There is no separate local `etr` wrapper here.
+  There is no separate local `expTrace` wrapper here.
 
 ### §1.3 Determinants, Linear Operators, and Spectral Expansions
 
@@ -261,7 +261,7 @@ paragraph in §1.2(vi), §1.8(i), §1.15(i), §1.15(iv), and §1.17(iv).
   `DLMF.AlgebraicAnalytic.extAdd` ([source](DLMF/AlgebraicAnalytic/Complex/Basic.lean#L66)), `DLMF.AlgebraicAnalytic.extMul` ([source](DLMF/AlgebraicAnalytic/Complex/Basic.lean#L74)), `DLMF.AlgebraicAnalytic.extDiv` ([source](DLMF/AlgebraicAnalytic/Complex/Basic.lean#L82)), `DLMF.AlgebraicAnalytic.AnalyticAtInfty` ([source](DLMF/AlgebraicAnalytic/Complex/Basic.lean#L90)), `DLMF.AlgebraicAnalytic.derivAtInfty` ([source](DLMF/AlgebraicAnalytic/Complex/Basic.lean#L95)). The space is `OnePoint ℂ`. Inversion at zero is completed by a supplied value L before taking a derivative. The local extended arithmetic has artificial values for ∞·0 and 0/0, outside the DLMF rules.
 
 - **Conformal map, Möbius map and cross ratio**, [DLMF 1.9.Px22.p1](https://dlmf.nist.gov/1.9#Px22.p1):
-  `DLMF.AlgebraicAnalytic.mobius` ([source](DLMF/AlgebraicAnalytic/Complex/Basic.lean#L101)), `DLMF.AlgebraicAnalytic.mobiusExt` ([source](DLMF/AlgebraicAnalytic/Complex/Basic.lean#L107)), `DLMF.AlgebraicAnalytic.crossRatio` ([source](DLMF/AlgebraicAnalytic/Complex/Basic.lean#L114)). The extended Möbius map retains the pole and infinity values; the ordinary quotient is totalized at its pole. The local cross ratio takes four finite complex points only, so the limiting infinity cases remain expressions or a missing extension. Holomorphic maps with nonzero derivative are conformal, expressed through Mathlib `ConformalAt`.
+  `DLMF.AlgebraicAnalytic.mobiusMap` ([source](DLMF/AlgebraicAnalytic/Complex/Basic.lean#L101)), `DLMF.AlgebraicAnalytic.mobiusExt` ([source](DLMF/AlgebraicAnalytic/Complex/Basic.lean#L107)), `DLMF.AlgebraicAnalytic.crossRatio` ([source](DLMF/AlgebraicAnalytic/Complex/Basic.lean#L114)). The extended Möbius map retains the pole and infinity values; the ordinary quotient is totalized at its pole. The local cross ratio takes four finite complex points only, so the limiting infinity cases remain expressions or a missing extension. Holomorphic maps with nonzero derivative are conformal, expressed through Mathlib `ConformalAt`.
 
 - **Convergent/absolutely convergent series, pointwise and uniform convergence**, [DLMF 1.9.v](https://dlmf.nist.gov/1.9.v):
   Sequence convergence is `Filter.Tendsto`. A conditionally convergent ordered series uses limits of natural partial sums; Mathlib `Summable` is unconditional and over ℂ corresponds to absolute convergence. `TendstoUniformlyOn` and `TendstoLocallyUniformlyOn` distinguish uniform from compact-local convergence. Bilateral ordered convergence requires both half-series, rather than silently identifying it with unconditional summation.
@@ -302,7 +302,7 @@ paragraph in §1.2(vi), §1.8(i), §1.15(i), §1.15(iv), and §1.17(iv).
   F(z) is the parameter integral in 1.10.18. Uniform convergence on each compact subset is `TendstoLocallyUniformlyOn` for its truncations; the analyticity and differentiation identities are bridge theorems under the stated bounds. This section introduces no additional universal special-function object beyond the integral construction.
 
 - **DLMF convergence of infinite products and absolute/uniform product convergence**, [DLMF 1.10.ix](https://dlmf.nist.gov/1.10.ix):
-  `DLMF.AlgebraicAnalytic.ProdConvergesDLMF` ([source](DLMF/AlgebraicAnalytic/Complex/Basic.lean#L210)). It requires a nonzero limit for a tail and allows finitely many zero factors before the tail. Mathlib `Multipliable` is unconditional and permits a zero limit, so the notions are not identical. Uniform convergence refers to the partial-product functions.
+  `DLMF.AlgebraicAnalytic.InfiniteProductConverges` ([source](DLMF/AlgebraicAnalytic/Complex/Basic.lean#L210)). It requires a nonzero limit for a tail and allows finitely many zero factors before the tail. Mathlib `Multipliable` is unconditional and permits a zero limit, so the notions are not identical. Uniform convergence refers to the partial-product functions.
 
 - **Weierstrass canonical product and Mittag-Leffler partial-fraction sum**, [DLMF 1.10.E22](https://dlmf.nist.gov/1.10.E22):
   The displayed product P and sum f are exact mathematical constructions using `tprod`/`tsum` on their convergence domains. The local results use their explicit expressions rather than independent named functions. The exponential factors and subtraction terms are regularizations, not numerical approximations; omission changes convergence and the represented function.
@@ -319,16 +319,16 @@ paragraph in §1.2(vi), §1.8(i), §1.15(i), §1.15(iv), and §1.17(iv).
   Mathlib `Polynomial.Monic`, `Polynomial.roots`, `Polynomial.rootMultiplicity`, `Polynomial.reverse`, `Polynomial.discr` supply these objects. A reciprocal polynomial with a supplied degree may need explicit padding/reversal conventions if the constant term vanishes. Elementary symmetric root functions are finite products/sums, with Vieta’s formulas as bridges.
 
 - **Quadratic/cubic/quartic reduced coefficients, discriminants and radicals**, [DLMF 1.11.E11](https://dlmf.nist.gov/1.11.E11):
-  The p,q,r reductions of 1.11.12–17, Cardano quantities A,B and cube root ρ, and constrained square roots of 1.11.19–20 are explicit algebraic expressions. Mathlib `Cubic` and `Polynomial.discr` encode the polynomials/discriminants; no independently selected Cardano radical family is defined locally. The correlated square-root sign condition in the quartic formula must be retained.
+  The p,q,r reductions of 1.11.12–17, Cardano quantities A,B and unitCube root ρ, and constrained square roots of 1.11.19–20 are explicit algebraic expressions. Mathlib `Cubic` and `Polynomial.discr` encode the polynomials/discriminants; no independently selected Cardano radical family is defined locally. The correlated square-root sign condition in the quartic formula must be retained.
 
 - **DLMF quartic resolvent cubic**, [DLMF 1.11.E18](https://dlmf.nist.gov/1.11.E18):
-  `DLMF.AlgebraicAnalytic.dlmfResolventCubic` ([source](DLMF/AlgebraicAnalytic/Polynomials/Basic.lean#L59)). It is z³−2pz²+(p²−4r)z+q². TauCeti’s `resolventCubic` uses a different normalization, so it is a related object requiring a variable/coefficient conversion, not a direct alias.
+  `DLMF.AlgebraicAnalytic.eulerResolventCubic` ([source](DLMF/AlgebraicAnalytic/Polynomials/Basic.lean#L59)). It is z³−2pz²+(p²−4r)z+q². TauCeti’s `resolventCubic` uses a different normalization, so it is a related object requiring a variable/coefficient conversion, not a direct alias.
 
 - **Roots of unity and roots of a complex constant**, [DLMF 1.11.E21](https://dlmf.nist.gov/1.11.E21):
   Mathlib `rootsOfUnity`, `IsPrimitiveRoot`, and the polynomial root set encode the roots. The listed exponential/polar expressions enumerate them for positive n; the set of n roots is distinct from choosing a principal nth root. The quotient at n=0 is outside the intended formulas.
 
 - **Stable polynomial, Hurwitz matrix and Hurwitz determinants**, [DLMF 1.11.E24](https://dlmf.nist.gov/1.11.E24):
-  `DLMF.AlgebraicAnalytic.IsStablePolynomial` ([source](DLMF/AlgebraicAnalytic/Polynomials/Basic.lean#L66)), `DLMF.AlgebraicAnalytic.coeffInt` ([source](DLMF/AlgebraicAnalytic/Polynomials/Basic.lean#L71)), `DLMF.AlgebraicAnalytic.hurwitzMatrix` ([source](DLMF/AlgebraicAnalytic/Polynomials/Basic.lean#L78)), `DLMF.AlgebraicAnalytic.hurwitzDet` ([source](DLMF/AlgebraicAnalytic/Polynomials/Basic.lean#L84)). Coefficients outside the degree range are zero. The stability predicate tests the finite root multiset, so the zero polynomial is vacuously stable; the Hurwitz criterion requires a nonzero leading coefficient.
+  `DLMF.AlgebraicAnalytic.IsStablePolynomial` ([source](DLMF/AlgebraicAnalytic/Polynomials/Basic.lean#L66)), `DLMF.AlgebraicAnalytic.coeffOfInt` ([source](DLMF/AlgebraicAnalytic/Polynomials/Basic.lean#L71)), `DLMF.AlgebraicAnalytic.hurwitzMatrix` ([source](DLMF/AlgebraicAnalytic/Polynomials/Basic.lean#L78)), `DLMF.AlgebraicAnalytic.hurwitzDet` ([source](DLMF/AlgebraicAnalytic/Polynomials/Basic.lean#L84)). Coefficients outside the degree range are zero. The stability predicate tests the finite root multiset, so the zero polynomial is vacuously stable; the Hurwitz criterion requires a nonzero leading coefficient.
 
 ### §1.12 Continued Fractions
 
@@ -347,16 +347,16 @@ paragraph in §1.2(vi), §1.8(i), §1.15(i), §1.15(iv), and §1.17(iv).
 ### §1.13 Differential Equations
 
 - **Simply connected domain, second-order linear ODE, fundamental pair and Wronskians**, [DLMF 1.13.i](https://dlmf.nist.gov/1.13.i):
-  `DLMF.AlgebraicAnalytic.IsLinearODE2SolutionOn` ([source](DLMF/AlgebraicAnalytic/ODE/Basic.lean#L43)), `DLMF.AlgebraicAnalytic.IsFundamentalPair` ([source](DLMF/AlgebraicAnalytic/ODE/Basic.lean#L50)), `ODE.wronskian` ([source](DLMFMathlib/Analysis/ODE/Wronskian.lean#L24)), `DLMF.AlgebraicAnalytic.wronskianN` ([source](DLMF/AlgebraicAnalytic/ODE/Basic.lean#L57)). The solution predicate includes genuine derivatives. The source’s simply connected planar domain corresponds to the topological simply-connected condition under its open-domain assumptions. Fundamental solutions with prescribed initial data are existentially characterized, not globally selected by this definitions file.
+  `DLMF.AlgebraicAnalytic.IsLinearODE2SolutionOn` ([source](DLMF/AlgebraicAnalytic/ODE/Basic.lean#L43)), `DLMF.AlgebraicAnalytic.IsFundamentalPair` ([source](DLMF/AlgebraicAnalytic/ODE/Basic.lean#L77)), `ODE.wronskian` ([source](DLMFMathlib/Analysis/ODE/Wronskian.lean#L24)), `DLMF.AlgebraicAnalytic.wronskianN` ([source](DLMF/AlgebraicAnalytic/ODE/Basic.lean#L84)). The solution predicate includes genuine derivatives. The source’s simply connected planar domain corresponds to the topological simply-connected condition under its open-domain assumptions. Fundamental solutions with prescribed initial data are existentially characterized, not globally selected by this definitions file.
 
 - **Variation-of-parameters particular solution and transformed ODE coefficients**, [DLMF 1.13.E10](https://dlmf.nist.gov/1.13.E10):
   The particular solution in 1.13.10 is a combination of two primitives divided by their Wronskian. W,F,G in 1.13.12, H in 1.13.15, and η in 1.13.16 are explicit substitutions and coefficient expressions in the local transformation theorems; no additional universal coefficient functions are named. Choice of primitive and nonzero coordinate derivatives remain relevant.
 
 - **Liouville dependent-variable transform and Schwarzian derivative**, [DLMF 1.13.E18](https://dlmf.nist.gov/1.13.E18):
-  `DLMF.AlgebraicAnalytic.schwarzian` ([source](DLMF/AlgebraicAnalytic/ODE/Basic.lean#L63)). U=(ζ′)^(1/2)W is the local transformed function expression; the square-root branch and nonvanishing derivative matter. The Schwarzian is z‴/z′−(3/2)(z″/z′)², with totalized division outside its intended domain.
+  `DLMF.AlgebraicAnalytic.schwarzian` ([source](DLMF/AlgebraicAnalytic/ODE/Basic.lean#L90)). U=(ζ′)^(1/2)W is the local transformed function expression; the square-root branch and nonvanishing derivative matter. The Schwarzian is z‴/z′−(3/2)(z″/z′)², with totalized division outside its intended domain.
 
 - **Sturm–Liouville equation, unmixed/periodic boundary conditions and eigenvalue**, [DLMF 1.13.E26](https://dlmf.nist.gov/1.13.E26):
-  `DLMF.AlgebraicAnalytic.IsSturmLiouvilleSolOn` ([source](DLMF/AlgebraicAnalytic/ODE/Basic.lean#L69)), `DLMF.AlgebraicAnalytic.SLUnmixedBC` ([source](DLMF/AlgebraicAnalytic/ODE/Basic.lean#L77)), `DLMF.AlgebraicAnalytic.SLPeriodicBC` ([source](DLMF/AlgebraicAnalytic/ODE/Basic.lean#L82)), `DLMF.AlgebraicAnalytic.IsRegularSLEigenvalue` ([source](DLMF/AlgebraicAnalytic/ODE/Basic.lean#L90)), `DLMF.AlgebraicAnalytic.IsPeriodicSLEigenvalue` ([source](DLMF/AlgebraicAnalytic/ODE/Basic.lean#L98)). Eigenvalues require a nonzero solution satisfying the specified boundary conditions; p,ρ positivity and nondegenerate boundary coefficients are recorded in the predicates.
+  `DLMF.AlgebraicAnalytic.IsSturmLiouvilleSolutionOn` ([source](DLMF/AlgebraicAnalytic/ODE/Basic.lean#L96)), `DLMF.AlgebraicAnalytic.SLUnmixedBC` ([source](DLMF/AlgebraicAnalytic/ODE/Basic.lean#L104)), `DLMF.AlgebraicAnalytic.SLPeriodicBC` ([source](DLMF/AlgebraicAnalytic/ODE/Basic.lean#L109)), `DLMF.AlgebraicAnalytic.IsRegularSLEigenvalue` ([source](DLMF/AlgebraicAnalytic/ODE/Basic.lean#L117)), `DLMF.AlgebraicAnalytic.IsPeriodicSLEigenvalue` ([source](DLMF/AlgebraicAnalytic/ODE/Basic.lean#L125)). Eigenvalues require a nonzero solution satisfying the specified boundary conditions; p,ρ positivity and nondegenerate boundary coefficients are recorded in the predicates.
 
 - **Liouville normal coordinate, potential and eigenfunction nodes**, [DLMF 1.13.E29](https://dlmf.nist.gov/1.13.E29):
   The coordinate t is the positive-density integral, w=u(pρ)^(1/4), and q̂ is the transformed potential in 1.13.30–31. They are expressions in the Sturm–Liouville transformation statements; no globally selected inverse coordinate is fixed here. Nodes are interior zeros, counted in the relevant eigenfunction theorem rather than by a new universal node-list definition.
@@ -477,10 +477,10 @@ paragraph in §1.2(vi), §1.8(i), §1.15(i), §1.15(iv), and §1.17(iv).
   Mathlib `SchwartzMap` and `TemperedDistribution` represent the rapidly decaying smooth test functions and their continuous linear dual. Seminorm bounds control every polynomially weighted derivative; pointwise convergence of pairings is the weak distribution topology. The multivariable versions in §1.16(vi) use finite-dimensional real Euclidean spaces and multi-indices.
 
 - **DLMF Fourier transform on Schwartz space and tempered distributions**, [DLMF 1.16.E29](https://dlmf.nist.gov/1.16.E29):
-  `DLMF.AlgebraicAnalytic.dlmfFourierSchwartz` ([source](DLMF/AlgebraicAnalytic/Distributions/Basic.lean#L141)), `DLMF.AlgebraicAnalytic.dlmfFourierTempered` ([source](DLMF/AlgebraicAnalytic/Distributions/Basic.lean#L150)). The first is built from Mathlib’s inverse transform, scaling x by 1/(2π) and multiplying by (2π)^(−n/2); the second is its transpose. They are actual constructions with DLMF’s positive exponential sign, not aliases for Mathlib’s convention.
+  `DLMF.AlgebraicAnalytic.fourierTransformSchwartz` ([source](DLMF/AlgebraicAnalytic/Distributions/Basic.lean#L141)), `DLMF.AlgebraicAnalytic.fourierTransformTempered` ([source](DLMF/AlgebraicAnalytic/Distributions/Basic.lean#L150)). The first is built from Mathlib’s inverse transform, scaling x by 1/(2π) and multiplying by (2π)^(−n/2); the second is its transpose. They are actual constructions with DLMF’s positive exponential sign, not aliases for Mathlib’s convention.
 
 - **Polynomial multiplication and differential operators on test functions and distributions**, [DLMF 1.16.E30](https://dlmf.nist.gov/1.16.E30):
-  `DLMF.AlgebraicAnalytic.dlmfD` ([source](DLMF/AlgebraicAnalytic/Distributions/Basic.lean#L184)), `DLMF.AlgebraicAnalytic.polyOp` ([source](DLMF/AlgebraicAnalytic/Distributions/Basic.lean#L177)), `DLMF.AlgebraicAnalytic.polyEval` ([source](DLMF/AlgebraicAnalytic/Distributions/Basic.lean#L196)), `DLMF.AlgebraicAnalytic.polyMul` ([source](DLMF/AlgebraicAnalytic/Distributions/Basic.lean#L200)), `DLMF.AlgebraicAnalytic.polyDiffOp` ([source](DLMF/AlgebraicAnalytic/Distributions/Basic.lean#L191)), `DLMF.AlgebraicAnalytic.polyNeg` ([source](DLMF/AlgebraicAnalytic/Distributions/Basic.lean#L205)), `DLMF.AlgebraicAnalytic.temperedD` ([source](DLMF/AlgebraicAnalytic/Distributions/Basic.lean#L210)), `DLMF.AlgebraicAnalytic.temperedPolyDiffOp` ([source](DLMF/AlgebraicAnalytic/Distributions/Basic.lean#L216)), `DLMF.AlgebraicAnalytic.temperedPolyMul` ([source](DLMF/AlgebraicAnalytic/Distributions/Basic.lean#L222)). The coefficient polynomial is an `MvPolynomial`; Dⱼ=(1/i)∂ⱼ, and P₋ evaluates P at −x. Distribution derivatives act by the signed transpose, preserving the Fourier identities’ sign convention.
+  `DLMF.AlgebraicAnalytic.normalizedPartialDeriv` ([source](DLMF/AlgebraicAnalytic/Distributions/Basic.lean#L185)), `DLMF.AlgebraicAnalytic.polynomialOperator` ([source](DLMF/AlgebraicAnalytic/Distributions/Basic.lean#L177)), `DLMF.AlgebraicAnalytic.polyEval` ([source](DLMF/AlgebraicAnalytic/Distributions/Basic.lean#L198)), `DLMF.AlgebraicAnalytic.polyMul` ([source](DLMF/AlgebraicAnalytic/Distributions/Basic.lean#L202)), `DLMF.AlgebraicAnalytic.polynomialDifferentialOperator` ([source](DLMF/AlgebraicAnalytic/Distributions/Basic.lean#L192)), `DLMF.AlgebraicAnalytic.polyNeg` ([source](DLMF/AlgebraicAnalytic/Distributions/Basic.lean#L207)), `DLMF.AlgebraicAnalytic.temperedD` ([source](DLMF/AlgebraicAnalytic/Distributions/Basic.lean#L212)), `DLMF.AlgebraicAnalytic.temperedPolynomialDifferentialOperator` ([source](DLMF/AlgebraicAnalytic/Distributions/Basic.lean#L218)), `DLMF.AlgebraicAnalytic.temperedPolyMul` ([source](DLMF/AlgebraicAnalytic/Distributions/Basic.lean#L224)). The coefficient polynomial is an `MvPolynomial`; Dⱼ=(1/i)∂ⱼ, and P₋ evaluates P at −x. Distribution derivatives act by the signed transpose, preserving the Fourier identities’ sign convention.
 
 - **Sign and bounded-function tempered distributions**, [DLMF 1.16.E44](https://dlmf.nist.gov/1.16.E44):
   `DLMF.AlgebraicAnalytic.boundedTempered` ([source](DLMF/AlgebraicAnalytic/Distributions/Basic.lean#L156)), `DLMF.AlgebraicAnalytic.signTempered` ([source](DLMF/AlgebraicAnalytic/Distributions/Basic.lean#L161)). The general construction uses an essentially bounded function’s L∞ class and returns zero if that hypothesis fails. The sign function uses Mathlib `Real.sign`, whose value at zero is zero; the DLMF identity sign=2H−1 is stated away from zero.
@@ -488,10 +488,10 @@ paragraph in §1.2(vi), §1.8(i), §1.15(i), §1.15(iv), and §1.17(iv).
 ### §1.17 Integral and Series Representations of the Dirac Delta
 
 - **Delta sequence, Gaussian profile and test-function restriction**, [DLMF 1.17.E3](https://dlmf.nist.gov/1.17.E3):
-  `DLMF.AlgebraicAnalytic.IsDeltaSequence` ([source](DLMF/AlgebraicAnalytic/Distributions/Basic.lean#L235)), `DLMF.AlgebraicAnalytic.gaussianDeltaSeq` ([source](DLMF/AlgebraicAnalytic/Distributions/Basic.lean#L241)), `DLMF.AlgebraicAnalytic.normalizedGaussian` ([source](DLMF/AlgebraicAnalytic/Distributions/Basic.lean#L249)), `DLMF.AlgebraicAnalytic.IsTestFunctionOn` ([source](DLMF/AlgebraicAnalytic/Distributions/Basic.lean#L245)). The predicate is weak convergence against every smooth compactly supported test function and every translate; the Gaussian sequence has exact √(n/π) normalization. The Fourier/Bessel/Airy/Coulomb integral formulas are representation/completeness theorems for δ, not alternate ordinary delta functions.
+  `DLMF.AlgebraicAnalytic.IsDeltaSequence` ([source](DLMF/AlgebraicAnalytic/Distributions/Basic.lean#L237)), `DLMF.AlgebraicAnalytic.gaussianDeltaSeq` ([source](DLMF/AlgebraicAnalytic/Distributions/Basic.lean#L243)), `DLMF.AlgebraicAnalytic.normalizedGaussian` ([source](DLMF/AlgebraicAnalytic/Distributions/Basic.lean#L251)), `DLMF.AlgebraicAnalytic.IsTestFunctionOn` ([source](DLMF/AlgebraicAnalytic/Distributions/Basic.lean#L247)). The predicate is weak convergence against every smooth compactly supported test function and every translate; the Gaussian sequence has exact √(n/π) normalization. The Fourier/Bessel/Airy/Coulomb integral formulas are representation/completeness theorems for δ, not alternate ordinary delta functions.
 
 - **Periodic Dirichlet delta kernel**, [DLMF 1.17.E20](https://dlmf.nist.gov/1.17.E20):
-  `DLMF.AlgebraicAnalytic.dirichletKernel` ([source](DLMF/AlgebraicAnalytic/Distributions/Basic.lean#L253)). This is the finite exponential sum divided by 2π, including its true removable value at multiples of 2π; the quotient is a theorem away from those points. The formal infinite periodic delta series and the Legendre/Laguerre/Hermite/harmonic series are distributional representations, not convergent pointwise definitions of δ.
+  `DLMF.AlgebraicAnalytic.dirichletKernel` ([source](DLMF/AlgebraicAnalytic/Distributions/Basic.lean#L255)). This is the finite exponential sum divided by 2π, including its true removable value at multiples of 2π; the quotient is a theorem away from those points. The formal infinite periodic delta series and the Legendre/Laguerre/Hermite/harmonic series are distributional representations, not convergent pointwise definitions of δ.
 
 <!-- retained entry context1.17 -->
 [This heading](https://dlmf.nist.gov/1.17.iv) contains bibliographic guidance
@@ -510,31 +510,31 @@ it introduces no further mathematical definition. The delta distribution itself 
   Mathlib `ContinuousLinearMap` supplies bounded operators, and `LinearPMap` supplies partially defined linear operators and their domains. A bounded operator’s adjoint is `ContinuousLinearMap.adjoint`; densely defined adjoints use the partial-operator API. Unboundedness is failure of an operator-norm bound on the domain; equality of a differential expression with its formal adjoint does not identify their operator domains.
 
 - **Schrödinger differential expression and solution predicate**, [DLMF 1.18.E28](https://dlmf.nist.gov/1.18.E28):
-  `DLMF.AlgebraicAnalytic.schrodingerOp` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L57)), `DLMF.AlgebraicAnalytic.IsSchrodingerSolOn` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L165)). The expression −f″+qf on ordinary functions is distinct from a self-adjoint operator on L² with a specified domain and boundary conditions. The solution predicate includes actual differentiability.
+  `DLMF.AlgebraicAnalytic.schrodingerOperator` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L58)), `DLMF.AlgebraicAnalytic.IsSchrodingerSolutionOn` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L184)). The expression −f″+qf on ordinary functions is distinct from a self-adjoint operator on L² with a specified domain and boundary conditions. The solution predicate includes actual differentiability.
 
 - **Eigenfunction coefficient, unitary transform and spectral diagonalization**, [DLMF 1.18.E32](https://dlmf.nist.gov/1.18.E32):
-  `DLMF.AlgebraicAnalytic.eigenCoeff` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L219)), `DLMF.AlgebraicAnalytic.IsEigenfunctionTransform` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L233)), `DLMF.AlgebraicAnalytic.IsDiagonalizedBy` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L241)). The transform U is supplied as a unitary equivalence, not chosen from an admitted spectral existence statement. A spectral measure may combine continuous measure and atoms, retaining eigenvalue multiplicities via the required eigenfunction indexing. F(T) is then the conjugated multiplier, under its domain conditions.
+  `DLMF.AlgebraicAnalytic.eigenCoeff` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L238)), `DLMF.AlgebraicAnalytic.IsEigenfunctionTransform` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L252)), `DLMF.AlgebraicAnalytic.IsDiagonalizedBy` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L260)). The transform U is supplied as a unitary equivalence, not chosen from an admitted spectral existence statement. A spectral measure may combine continuous measure and atoms, retaining eigenvalue multiplicities via the required eigenfunction indexing. F(T) is then the conjugated multiplier, under its domain conditions.
 
 - **Normalized sine, cosine, exponential and Hermite eigenfunctions**, [DLMF 1.18.E36](https://dlmf.nist.gov/1.18.E36):
-  `DLMF.AlgebraicAnalytic.sinEigenfunction` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L76)), `DLMF.AlgebraicAnalytic.cosEigenfunction` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L81)), `DLMF.AlgebraicAnalytic.expEigenfunction` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L87)), `DLMF.AlgebraicAnalytic.hermiteFunction` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L94)). The cosine zero mode has a different normalization; signed exponential modes encode the multiplicity-two positive periodic eigenvalues. The Hermite construction converts Mathlib’s probabilists’ polynomial to the physicists’ convention and includes the Gaussian L² normalization.
+  `DLMF.AlgebraicAnalytic.sinEigenfunction` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L77)), `DLMF.AlgebraicAnalytic.cosEigenfunction` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L82)), `DLMF.AlgebraicAnalytic.expEigenfunction` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L88)), `TauCeti.hermiteFunction` (bridge `DLMF.AlgebraicAnalytic.ofReal_hermiteFunction`, [source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L96)). The cosine zero mode has a different normalization; signed exponential modes encode the multiplicity-two positive periodic eigenvalues. The Hermite construction converts Mathlib’s probabilists’ polynomial to the physicists’ convention and includes the Gaussian L² normalization.
 
 - **Hermite, Bessel and radial Schrödinger operators**, [DLMF 1.18.E41](https://dlmf.nist.gov/1.18.E41):
-  `DLMF.AlgebraicAnalytic.hermiteOp` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L62)), `DLMF.AlgebraicAnalytic.besselOp` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L66)), `DLMF.AlgebraicAnalytic.radialSchrodingerOp` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L71)). These are distinct differential expressions with their stated potentials and factors of 1/2. The Bessel and radial singular endpoints require domain/boundary data before they become self-adjoint L² operators.
+  `DLMF.AlgebraicAnalytic.hermiteOperator` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L63)), `DLMF.AlgebraicAnalytic.besselOperator` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L67)), `DLMF.AlgebraicAnalytic.radialSchrodingerOperator` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L72)). These are distinct differential expressions with their stated potentials and factors of 1/2. The Bessel and radial singular endpoints require domain/boundary data before they become self-adjoint L² operators.
 
 - **Spectral bands, mixed spectra, almost-Mathieu potential and resonances**, [DLMF 1.18.vii](https://dlmf.nist.gov/1.18.vii):
   Bands are intervals in the continuous spectrum; mixed spectra combine a point part and a continuous part with a spectral measure. The almost-Mathieu cosine potential and complex-dilation parameter in §1.18(viii) are displayed expressions, without selected local operator families. Resonance locations and widths are poles of continued resolvent matrix elements; no local global resonance/width selector is defined.
 
 - **Deficiency spaces and indices, limit-circle/limit-point endpoints**, [DLMF 1.18.ix](https://dlmf.nist.gov/1.18.ix):
-  `DLMF.AlgebraicAnalytic.deficiencySubspace` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L150)), `DLMF.AlgebraicAnalytic.deficiencyIndices` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L156)), `DLMF.AlgebraicAnalytic.l2SolutionSpace` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L193)), `DLMF.AlgebraicAnalytic.AllSolutionsL2Left` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L169)), `DLMF.AlgebraicAnalytic.AllSolutionsL2Right` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L174)), `DLMF.AlgebraicAnalytic.AllSolutionsL2Ici` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L178)), `DLMF.AlgebraicAnalytic.IsLimitCircleLeft` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L184)), `DLMF.AlgebraicAnalytic.IsLimitCircleRight` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L188)). The indices are cardinal dimensions at ±i. Limit-circle predicates require all solutions to be square integrable near the endpoint for every spectral parameter; the alternative limit-point case is expressed by negation under the Weyl hypotheses.
+  `DLMF.AlgebraicAnalytic.deficiencySubspace` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L169)), `DLMF.AlgebraicAnalytic.deficiencyIndices` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L175)), `DLMF.AlgebraicAnalytic.l2SolutionSpace` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L212)), `DLMF.AlgebraicAnalytic.AllSolutionsL2Left` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L188)), `DLMF.AlgebraicAnalytic.AllSolutionsL2Right` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L193)), `DLMF.AlgebraicAnalytic.AllSolutionsL2Ici` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L197)), `DLMF.AlgebraicAnalytic.IsLimitCircleLeft` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L203)), `DLMF.AlgebraicAnalytic.IsLimitCircleRight` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L207)). The indices are cardinal dimensions at ±i. Limit-circle predicates require all solutions to be square integrable near the endpoint for every spectral parameter; the alternative limit-point case is expressed by negation under the Weyl hypotheses.
 
 - **Symmetric, essentially self-adjoint and self-adjoint operators**, [DLMF 1.18.E68](https://dlmf.nist.gov/1.18.E68):
-  `DLMF.AlgebraicAnalytic.IsSymmetricOp` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L108)), `DLMF.AlgebraicAnalytic.IsEssentiallySelfAdjoint` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L113)). The partial-operator adjoint includes its domain. Essential self-adjointness is the equality of the closure/bidual with the adjoint, while self-adjointness requires the operator itself to equal its adjoint; formal symmetry of the differential expression is weaker.
+  `DLMF.AlgebraicAnalytic.IsSymmetricOperator` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L126)), `DLMF.AlgebraicAnalytic.IsEssentiallySelfAdjoint` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L131)). The partial-operator adjoint includes its domain. Essential self-adjointness is the equality of the closure/bidual with the adjoint, while self-adjointness requires the operator itself to equal its adjoint; formal symmetry of the differential expression is weaker.
 
 - **Resolvent set, spectrum, point/continuous/residual spectra**, [DLMF 1.18.Px13.p1](https://dlmf.nist.gov/1.18#Px13.p1):
-  `DLMF.AlgebraicAnalytic.shiftedOp` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L117)), `DLMF.AlgebraicAnalytic.opResolventSet` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L123)), `DLMF.AlgebraicAnalytic.opSpectrum` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L129)), `DLMF.AlgebraicAnalytic.opPointSpectrum` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L134)), `DLMF.AlgebraicAnalytic.opContinuousSpectrum` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L139)), `DLMF.AlgebraicAnalytic.opResidualSpectrum` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L145)). The definitions follow injectivity, density of range and a bounded-inverse inequality for z−T. They are actual sets for a supplied partial operator, not automatically a spectral theorem or a globally chosen inverse.
+  `DLMF.AlgebraicAnalytic.shiftedOperator` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L135)), `DLMF.AlgebraicAnalytic.operatorResolventSet` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L141)), `DLMF.AlgebraicAnalytic.operatorSpectrum` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L147)), `DLMF.AlgebraicAnalytic.operatorPointSpectrum` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L152)), `DLMF.AlgebraicAnalytic.operatorContinuousSpectrum` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L158)), `DLMF.AlgebraicAnalytic.operatorResidualSpectrum` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L164)). The definitions follow injectivity, density of range and a bounded-inverse inequality for z−T. They are actual sets for a supplied partial operator, not automatically a spectral theorem or a globally chosen inverse.
 
 - **Endpoint boundary value and maximal C² operator domain**, [DLMF 1.18.E71](https://dlmf.nist.gov/1.18.E71):
-  `DLMF.AlgebraicAnalytic.boundaryValueLeft` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L200)), `DLMF.AlgebraicAnalytic.schrodingerMaxDomainC2` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L207)), `DLMF.AlgebraicAnalytic.wronskianC` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L212)). The boundary value is a one-sided limit of αf+βf′. The maximal-domain object records only the C² portion with both f and its differential expression in L²; DLMF’s full distributional maximal domain is broader. A right endpoint analogue is expressed by its corresponding left-limit formula, without another named local boundary-value function.
+  `DLMF.AlgebraicAnalytic.boundaryValueLeft` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L219)), `DLMF.AlgebraicAnalytic.schrodingerMaxDomainC2` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L226)), `DLMF.AlgebraicAnalytic.wronskianC` ([source](DLMF/AlgebraicAnalytic/Spectral/Basic.lean#L231)). The boundary value is a one-sided limit of αf+βf′. The maximal-domain object records only the C² portion with both f and its differential expression in L²; DLMF’s full distributional maximal domain is broader. A right endpoint analogue is expressed by its corresponding left-limit formula, without another named local boundary-value function.
 
 ## Chapter 2 — Asymptotic approximations
 
@@ -614,27 +614,27 @@ five subsections.
   The integrals I(x)=∫e^{ixt}q(t)dt and ∫e^{−xt}q(t)dt are parameter-dependent instances of interval or half-line integrals. The derivative bounds σₙ in 2.3.3 are suprema in the hypotheses, without a separately named local sequence. The transform objects themselves are catalogued at §1.14.
 
 - **Variation integral**, [DLMF 2.3.E6](https://dlmf.nist.gov/2.3.E6):
-  `DLMF.AsymptoticApproximations.variationalOperator` ([source](DLMF/AsymptoticApproximations/Integrals/Basic.lean#L50)) is the oriented interval integral of ‖f′‖; on an increasing interval for a C¹ function it equals total variation. For a reversed interval its sign changes, so it is not the nonnegative variation measure without the appropriate orientation or absolute value.
+  `DLMF.AsymptoticApproximations.variationalOperator` ([source](DLMF/AsymptoticApproximations/Integrals/Basic.lean#L51)) is the oriented interval integral of ‖f′‖; on an increasing interval for a C¹ function it equals total variation. For a reversed interval its sign changes, so it is not the nonnegative variation measure without the appropriate orientation or absolute value.
 
 - **Fractional local expansions and Laplace coefficients**, [DLMF 2.3.E14](https://dlmf.nist.gov/2.3.E14):
-  Mathlib's `Ring.choose`, `DLMF.AsymptoticApproximations.binomSeriesCoeff` ([source](DLMF/AsymptoticApproximations/Integrals/Basic.lean#L57)), `DLMF.AsymptoticApproximations.laplaceCoeff` ([source](DLMF/AsymptoticApproximations/Integrals/Basic.lean#L67)) give the generalized binomial coefficient, the formal coefficient of (P/p₀)^β and the residue-defined bₛ of 2.3.16–18. The latter takes a chosen logarithm L₀ of p₀, preserving the branch required by the complex extension in §2.4. The phase p, amplitude q and their local coefficient sequences remain supplied data.
+  Mathlib's `Ring.choose`, `DLMF.AsymptoticApproximations.binomSeriesCoeff` ([source](DLMF/AsymptoticApproximations/Integrals/Basic.lean#L58)), `DLMF.AsymptoticApproximations.laplaceCoeff` ([source](DLMF/AsymptoticApproximations/Integrals/Basic.lean#L87)) give the generalized binomial coefficient, the formal coefficient of (P/p₀)^β and the residue-defined bₛ of 2.3.16–18. For rational ratios pⱼ/p₀ the coefficient is the value of the polynomial `DLMF.BernoulliEuler.binomialSeriesCoeff` ([source](DLMF/BernoulliEuler/Basic/HigherOrder.lean#L59)) (`binomSeriesCoeff_eq_eval_binomialSeriesCoeff`). The latter takes a chosen logarithm L₀ of p₀, preserving the branch required by the complex extension in §2.4. The phase p, amplitude q and their local coefficient sequences remain supplied data.
 
 - **Stationary points and stationary-phase coefficients**, [DLMF 2.3.E19](https://dlmf.nist.gov/2.3.E19):
-  A stationary point is a zero of the phase derivative. `DLMF.AsymptoticApproximations.stationaryPhaseP` ([source](DLMF/AsymptoticApproximations/Integrals/Basic.lean#L80)) recursively constructs Pₛ=((1/p′)d/dt)ˢ(q/p′) of 2.3.21. Its divisions are totalized; stationary points are excluded when applying the integration-by-parts formula.
+  A stationary point is a zero of the phase derivative. `DLMF.AsymptoticApproximations.stationaryPhaseP` ([source](DLMF/AsymptoticApproximations/Integrals/Basic.lean#L100)) recursively constructs Pₛ=((1/p′)d/dt)ˢ(q/p′) of 2.3.21. Its divisions are totalized; stationary points are excluded when applying the integration-by-parts formula.
 
 - **Coalescing stationary point and endpoint: Bleistein variables**, [DLMF 2.3.E24](https://dlmf.nist.gov/2.3.E24):
-  `DLMF.AsymptoticApproximations.bleisteinA` ([source](DLMF/AsymptoticApproximations/Integrals/Basic.lean#L89)), `DLMF.AsymptoticApproximations.bleisteinB` ([source](DLMF/AsymptoticApproximations/Integrals/Basic.lean#L94)), `DLMF.AsymptoticApproximations.bleisteinW` ([source](DLMF/AsymptoticApproximations/Integrals/Basic.lean#L101)), `DLMF.AsymptoticApproximations.bleisteinF` ([source](DLMF/AsymptoticApproximations/Integrals/Basic.lean#L107)) implement the quadratic normal form parameters a,b, transformed variable w and model integrals Fₛ. The local a has the sign of α, correcting the unsigned square-root shorthand in the printed 2.3.26 so that t=0 maps to w=0 for negative α as required by the prose. The transformed amplitude f(α,w) of 2.3.30 is supplied in the theorem rather than chosen by a global inverse map.
+  `DLMF.AsymptoticApproximations.bleisteinA` ([source](DLMF/AsymptoticApproximations/Integrals/Basic.lean#L109)), `DLMF.AsymptoticApproximations.bleisteinB` ([source](DLMF/AsymptoticApproximations/Integrals/Basic.lean#L114)), `DLMF.AsymptoticApproximations.bleisteinW` ([source](DLMF/AsymptoticApproximations/Integrals/Basic.lean#L121)), `DLMF.AsymptoticApproximations.bleisteinF` ([source](DLMF/AsymptoticApproximations/Integrals/Basic.lean#L127)) implement the quadratic normal form parameters a,b, transformed variable w and model integrals Fₛ. The local a has the sign of α, correcting the unsigned square-root shorthand in the printed 2.3.26 so that t=0 maps to w=0 for negative α as required by the prose. The transformed amplitude f(α,w) of 2.3.30 is supplied in the theorem rather than chosen by a global inverse map.
 
 ### §2.4 Contour Integrals
 
 - **Bromwich inversion and comparison transforms**, [DLMF 2.4.E2](https://dlmf.nist.gov/2.4.E2):
-  `DLMF.AsymptoticApproximations.bromwichPartial` ([source](DLMF/AsymptoticApproximations/Integrals/Basic.lean#L74)) is the truncated vertical-line integral (2πi)⁻¹∫e^{tz}Q(z)dz of 2.4.3. Q and the comparison pair F,f of 2.4.6 are supplied functions with Laplace-transform hypotheses; the finite integral is not itself a selected inverse transform on arbitrary data.
+  `DLMF.AsymptoticApproximations.bromwichPartialIntegral` ([source](DLMF/AsymptoticApproximations/Integrals/Basic.lean#L94)) is the truncated vertical-line integral (2πi)⁻¹∫e^{tz}Q(z)dz of 2.4.3. Q and the comparison pair F,f of 2.4.6 are supplied functions with Laplace-transform hypotheses; the finite integral is not itself a selected inverse transform on arbitrary data.
 
 - **Continuous powers along a path and polar asymptotic scale**, [DLMF 2.4.iii](https://dlmf.nist.gov/2.4.iii):
-  `DLMF.AsymptoticApproximations.pathPow` ([source](DLMF/AsymptoticApproximations/Integrals/Basic.lean#L112)), `DLMF.AsymptoticApproximations.polarScale` ([source](DLMF/AsymptoticApproximations/Integrals/Basic.lean#L117)) retain a continuous argument along the contour and the independent polar angle of z. They allow more than a principal argument interval and therefore are distinct from silently replacing each power by the principal complex power.
+  `DLMF.AsymptoticApproximations.pathPow` ([source](DLMF/AsymptoticApproximations/Integrals/Basic.lean#L132)), `DLMF.AsymptoticApproximations.polarScale` ([source](DLMF/AsymptoticApproximations/Integrals/Basic.lean#L137)) retain a continuous argument along the contour and the independent polar angle of z. They allow more than a principal argument interval and therefore are distinct from silently replacing each power by the principal complex power.
 
 - **Saddles and paths of steepest descent**, [DLMF 2.4.iv](https://dlmf.nist.gov/2.4.iv):
-  Saddles are zeros of p′ in the phase e^{−zp}; a steepest-descent contour has constant imaginary part of zp and increasing real part away from the relevant saddle. The local saddle coefficients are the existing logarithm-dependent `DLMF.AsymptoticApproximations.laplaceCoeff` ([source](DLMF/AsymptoticApproximations/Integrals/Basic.lean#L67)). There is no independently selected saddle or contour object for a general phase.
+  Saddles are zeros of p′ in the phase e^{−zp}; a steepest-descent contour has constant imaginary part of zp and increasing real part away from the relevant saddle. The local saddle coefficients are the existing logarithm-dependent `DLMF.AsymptoticApproximations.laplaceCoeff` ([source](DLMF/AsymptoticApproximations/Integrals/Basic.lean#L87)). There is no independently selected saddle or contour object for a general phase.
 
 - **Cubic normal form for two coalescing saddles**, [DLMF 2.4.E18](https://dlmf.nist.gov/2.4.E18):
   The Chester–Friedman–Ursell substitution p(α,t)=w³/3+a(α)w²+b(α)w+c(α), its two saddle images and transformed amplitude in 2.4.20 are specified by equations and hypotheses. No general canonical cubic coordinate map or a,b,c construction is selected locally. Airy/Scorer functions used after the further affine change are the Chapter 9 objects, with their existing normalizations.
@@ -645,39 +645,39 @@ five subsections.
 ### §2.5 Mellin Transform Methods
 
 - **Mellin convolution integral**, [DLMF 2.5.E3](https://dlmf.nist.gov/2.5.E3):
-  `DLMF.AsymptoticApproximations.mellinConvolutionIntegral` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L178)) implements I(x)=∫₀∞f(t)h(xt)dt, also used at 2.6.54. This is distinct in arguments and measure from the multiplicative Mellin convolution of 1.14.39; its Mellin factorization is a theorem, not a definition by continuation.
+  `DLMF.AsymptoticApproximations.mellinConvolutionIntegral` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L182)) implements I(x)=∫₀∞f(t)h(xt)dt, also used at 2.6.54. This is distinct in arguments and measure from the multiplicative Mellin convolution of 1.14.39; its Mellin factorization is a theorem, not a definition by continuation.
 
 - **Bessel-square example and Mellin residue coefficients**, [DLMF 2.5.E8](https://dlmf.nist.gov/2.5.E8):
   `DLMF.AsymptoticApproximations.besselSqMellinKernel` ([source](DLMF/AsymptoticApproximations/Mellin/Basic.lean#L50)), `DLMF.AsymptoticApproximations.besselSqMellinA` ([source](DLMF/AsymptoticApproximations/Mellin/Basic.lean#L56)), `DLMF.AsymptoticApproximations.besselSqMellinB` ([source](DLMF/AsymptoticApproximations/Mellin/Basic.lean#L66)) implement A(z), aₙ=A(n) and bₙ=−A′(n) in 2.5.10–13. The derivative definition continues the coefficient through reciprocal-Gamma zeros, where the displayed digamma product would be 0·∞. The example integral I(x), and cₛ,dₛ of 2.5.16, remain expressions in the corresponding statements; Jν is the existing Bessel construction.
 
 - **Low/high Mellin truncations and continued transforms**, [DLMF 2.5.E21](https://dlmf.nist.gov/2.5.E21):
-  `DLMF.AsymptoticApproximations.mellinTruncLow` ([source](DLMF/AsymptoticApproximations/Mellin/Basic.lean#L40)), `DLMF.AsymptoticApproximations.mellinTruncHigh` ([source](DLMF/AsymptoticApproximations/Mellin/Basic.lean#L45)) split f at t=1 (the low definition uses the indicator t≤1; only t>0 enters the Mellin integral). `DLMF.AsymptoticApproximations.IsMellinContinuationOn` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L172)), `DLMF.AsymptoticApproximations.IsMellinContinuation` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L222)) specify supplied holomorphic continuations on their indicated domains. They do not define a new transform by selecting arbitrary values outside a convergence strip. The four convolution pieces Iⱼₖ, their transforms Gⱼₖ and shifted-contour remainders Eⱼₖ in 2.5.30–36 remain finite expressions with the stated domains.
+  `DLMF.AsymptoticApproximations.mellinTruncLow` ([source](DLMF/AsymptoticApproximations/Mellin/Basic.lean#L40)), `DLMF.AsymptoticApproximations.mellinTruncHigh` ([source](DLMF/AsymptoticApproximations/Mellin/Basic.lean#L45)) split f at t=1 (the low definition uses the indicator t≤1; only t>0 enters the Mellin integral). `DLMF.AsymptoticApproximations.IsMellinContinuationOn` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L176)), `DLMF.AsymptoticApproximations.IsMellinContinuation` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L226)) specify supplied holomorphic continuations on their indicated domains. They do not define a new transform by selecting arbitrary values outside a convergence strip. The four convolution pieces Iⱼₖ, their transforms Gⱼₖ and shifted-contour remainders Eⱼₖ in 2.5.30–36 remain finite expressions with the stated domains.
 
 ### §2.6 Distributional Methods
 
-- **Stieltjes cube-root example and its missing expansion**, [DLMF 2.6.E1](https://dlmf.nist.gov/2.6.E1):
-  `DLMF.AsymptoticApproximations.stieltjesCubeRootExample` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L191)), `DLMF.AsymptoticApproximations.prodThreeSubOne` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L187)), `DLMF.AsymptoticApproximations.stieltjesCubeRootNaiveSum` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L195)), `DLMF.AsymptoticApproximations.stieltjesCubeRootMissingSum` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L199)) give the integral S(x), product 2·5···(3s−1) and the fractional-power and integer-power truncated sums of 2.6.6–7. The assigned Gamma-quotient value in 2.6.4 regularizes a divergent integral; it is not an equality with Lean’s totalized Bochner integral outside the ordinary convergence domain.
+- **Stieltjes unitCube-root example and its missing expansion**, [DLMF 2.6.E1](https://dlmf.nist.gov/2.6.E1):
+  `DLMF.AsymptoticApproximations.stieltjesCubeRootExample` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L195)), `DLMF.AsymptoticApproximations.prodThreeSubOne` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L191)), `DLMF.AsymptoticApproximations.stieltjesCubeRootNaiveSum` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L199)), `DLMF.AsymptoticApproximations.stieltjesCubeRootMissingSum` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L203)) give the integral S(x), product 2·5···(3s−1) and the fractional-power and integer-power truncated sums of 2.6.6–7. The assigned Gamma-quotient value in 2.6.4 regularizes a divergent integral; it is not an equality with Lean’s totalized Bochner integral outside the ordinary convergence domain.
 
 - **Stieltjes transform and its asymptotic data**, [DLMF 2.6.E8](https://dlmf.nist.gov/2.6.E8):
-  `DLMF.AsymptoticApproximations.stieltjesTransform` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L59)), `DLMF.AsymptoticApproximations.IsStieltjesExpansion` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L148)), `DLMF.AsymptoticApproximations.stieltjesRemainder` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L161)) implement the integral transform, the locally integrable asymptotic-data package with 0<α≤1, and fₙ after subtracting n terms. This transform is a separately defined instance of the same integral family already described at §1.14, not an alias to that chapter’s wrapper.
+  `DLMF.AlgebraicAnalytic.stieltjesTransform` ([source](DLMF/AlgebraicAnalytic/Transforms/Basic.lean#L116)), `DLMF.AsymptoticApproximations.IsStieltjesExpansion` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L152)), `DLMF.AsymptoticApproximations.stieltjesRemainder` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L165)) implement the integral transform, the locally integrable asymptotic-data package with 0<α≤1, and fₙ after subtracting n terms. The transform is the one of §1.14; its form 2.6.8 is the theorem `stieltjesTransform_eq`.
 
 - **Half-line distribution pairing formulas**, [DLMF 2.6.E11](https://dlmf.nist.gov/2.6.E11):
-  `DLMF.AsymptoticApproximations.functionPairing` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L71)), `DLMF.AsymptoticApproximations.powPairing` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L78)), `DLMF.AsymptoticApproximations.logPowPairing` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L85)), `DLMF.AsymptoticApproximations.tPowPairing` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L93)) give the integral values assigned to f, t^{−s−α}, t^{−s−1}, and general real powers. These are functions on test functions; their definitions do not assert continuity as Schwartz-space functionals. In particular they are distinct objects from the typed tempered distributions of §1.16, and their defining integrals need convergence hypotheses.
+  `DLMF.AsymptoticApproximations.functionPairing` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L75)), `DLMF.AsymptoticApproximations.powPairing` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L82)), `DLMF.AsymptoticApproximations.logPowPairing` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L89)), `DLMF.AsymptoticApproximations.tPowPairing` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L97)) give the integral values assigned to f, t^{−s−α}, t^{−s−1}, and general real powers. These are functions on test functions; their definitions do not assert continuity as Schwartz-space functionals. In particular they are distinct objects from the typed tempered distributions of §1.16, and their defining integrals need convergence hypotheses.
 
 - **Distributional remainder and Mellin moments**, [DLMF 2.6.E15](https://dlmf.nist.gov/2.6.E15):
-  `DLMF.AsymptoticApproximations.repeatedTailIntegral` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L107)), `DLMF.AsymptoticApproximations.remainderPairing` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L114)), `DLMF.AsymptoticApproximations.stieltjesDeltaCoeff` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L205)) implement fₙ,ₙ, the associated remainder pairing and cₛ from a supplied Mellin continuation M. Repeated-tail formulas are intended for n≥1; at n=0 the total definition is an integral, not f itself. The Stieltjes delta coefficients are intended at the indices used in 2.6.18.
+  `DLMF.AsymptoticApproximations.repeatedTailIntegral` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L111)), `DLMF.AsymptoticApproximations.remainderPairing` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L118)), `DLMF.AsymptoticApproximations.stieltjesDeltaCoeff` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L209)) implement fₙ,ₙ, the associated remainder pairing and cₛ from a supplied Mellin continuation M. Repeated-tail formulas are intended for n≥1; at n=0 the total definition is an integral, not f itself. The Stieltjes delta coefficients are intended at the indices used in 2.6.18.
 
 - **Delta-derivative pairing and logarithmic finite parts**, [DLMF 2.6.E19](https://dlmf.nist.gov/2.6.E19):
-  `DLMF.AsymptoticApproximations.diracDerivPairing` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L100)), `DLMF.AsymptoticApproximations.stieltjesLogDeltaCoeff` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L216)), `DLMF.AsymptoticApproximations.stieltjesLogCoeff` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L210)) implement (−1)ˢφ^{(s)}(0), the dₛ coefficients and the punctured-limit finite parts d̃ₛ in 2.6.21 and 2.6.29. The selected `limUnder` value needs an actual limit theorem before it characterizes analytic regularization.
+  `DLMF.AsymptoticApproximations.diracDerivPairing` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L104)), `DLMF.AsymptoticApproximations.stieltjesLogDeltaCoeff` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L220)), `DLMF.AsymptoticApproximations.stieltjesLogCoeff` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L214)) implement (−1)ˢφ^{(s)}(0), the dₛ coefficients and the punctured-limit finite parts d̃ₛ in 2.6.21 and 2.6.29. The selected `limUnder` value needs an actual limit theorem before it characterizes analytic regularization.
 
 - **Damped Stieltjes test functions and exact remainder**, [DLMF 2.6.E22](https://dlmf.nist.gov/2.6.E22):
-  `DLMF.AsymptoticApproximations.stieltjesTestFunction` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L120)), `DLMF.AsymptoticApproximations.stieltjesRemainderTerm` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L166)) give φε(t)=e^{−εt}/(t+z) and Rₙ(z) of 2.6.30. These φε are used only on the positive half-line and are not generally Schwartz functions on the whole real line.
+  `DLMF.AsymptoticApproximations.stieltjesTestFunction` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L124)), `DLMF.AsymptoticApproximations.stieltjesRemainderTerm` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L170)) give φε(t)=e^{−εt}/(t+z) and Rₙ(z) of 2.6.30. These φε are used only on the positive half-line and are not generally Schwartz functions on the whole real line.
 
 - **Generalized Stieltjes transform and fractional convolution**, [DLMF 2.6.E32](https://dlmf.nist.gov/2.6.E32):
-  `DLMF.AsymptoticApproximations.generalizedStieltjesTransform` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L65)), `DLMF.AsymptoticApproximations.riemannLiouvilleIntegral` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L126)), `DLMF.AsymptoticApproximations.halfLineConvolution` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L132)), `DLMF.AsymptoticApproximations.kPlusPairing` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L140)) give the principal-power transform of positive real order ρ, Riemann–Liouville integral of positive real order μ, convolution on [0,x], and pairings for Dⁿf in K⁺. The fractional integral is independent of the complex-order construction in §1.15. K⁺ is represented here by its pairings; no quotient algebra of distributions with its convolution product is constructed.
+  `DLMF.AsymptoticApproximations.generalizedStieltjesTransform` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L69)), `DLMF.AsymptoticApproximations.riemannLiouvilleIntegral` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L130)), `DLMF.AsymptoticApproximations.halfLineConvolution` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L136)), `DLMF.AsymptoticApproximations.kPlusPairing` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L144)) give the principal-power transform of positive real order ρ, Riemann–Liouville integral of positive real order μ, convolution on [0,x], and pairings for Dⁿf in K⁺. The fractional integral is independent of the complex-order construction in §1.15. K⁺ is represented here by its pairings; no quotient algebra of distributions with its convolution product is constructed.
 
 - **Fractional kernels and remainders**, [DLMF 2.6.E40](https://dlmf.nist.gov/2.6.E40):
-  `DLMF.AsymptoticApproximations.IsCompactTest` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L233)), `DLMF.AsymptoticApproximations.rpowKernel` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L236)), `DLMF.AsymptoticApproximations.logRpowKernel` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L239)), `DLMF.AsymptoticApproximations.repeatedRemainder` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L244)), `DLMF.AsymptoticApproximations.fractionalRemainder` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L250)), `DLMF.AsymptoticApproximations.rpowDivOneAddExample` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L255)) record smooth compact tests, power/logarithmic kernels, repeated integrals, the exact finite expression δₙ of 2.6.47 and the example t^{1−α}/(1+t). The kernels use real powers on t>0; their continuations as distributions require the pairing formulas and hypotheses, not the raw function values at t≤0.
+  `DLMF.AsymptoticApproximations.IsCompactTest` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L237)), `DLMF.AsymptoticApproximations.rpowKernel` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L240)), `DLMF.AsymptoticApproximations.logRpowKernel` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L243)), `DLMF.AsymptoticApproximations.repeatedRemainder` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L248)), `DLMF.AsymptoticApproximations.fractionalRemainder` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L254)), `DLMF.AsymptoticApproximations.rpowDivOneAddExample` ([source](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L259)) record smooth compact tests, power/logarithmic kernels, repeated integrals, the exact finite expression δₙ of 2.6.47 and the example t^{1−α}/(1+t). The kernels use real powers on t>0; their continuations as distributions require the pairing formulas and hypotheses, not the raw function values at t≤0.
 
 - **Mellin regularization and convolution remainders**, [DLMF 2.6.E59](https://dlmf.nist.gov/2.6.E59):
   The formal assignment ∫₀∞t^λdt=0 is part of Mellin regularization, not an ordinary convergent-integral identity. The hₓ and product remainder δₙ of 2.6.60–62 are explicit substitutions/integrals in the convolution statements, without separately selected transform objects.
@@ -685,22 +685,22 @@ five subsections.
 ### §2.7 Differential Equations
 
 - **Second-order equation and singularity classification**, [DLMF 2.7.E1](https://dlmf.nist.gov/2.7.E1):
-  `DLMF.AsymptoticApproximations.IsLinearODE2SolOn` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L57)), `DLMF.AsymptoticApproximations.IsLogPlaneSolOn` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L64)) encode the ordinary equation and its lift to z=e^ζ. The prose defines ordinary points by analytic coefficients, regular singular points by removable products (z−z₀)f and (z−z₀)²g, and irregular singular points otherwise. These classes are expressed through analytic hypotheses, rather than separately named local predicates; classification at infinity uses z↦1/z.
+  `DLMF.AlgebraicAnalytic.IsLinearODE2SolutionOn` ([source](DLMF/AlgebraicAnalytic/ODE/Basic.lean#L43)) with zero inhomogeneous term, `DLMF.AsymptoticApproximations.IsLogPlaneSolutionOn` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L72)) encode the ordinary equation (the predicate of §1.13, related to the Painlevé form by `isLinearODE2SolutionOn_iff_isODE2SolutionOn`) and its lift to z=e^ζ. The prose defines ordinary points by analytic coefficients, regular singular points by removable products (z−z₀)f and (z−z₀)²g, and irregular singular points otherwise. These classes are expressed through analytic hypotheses, rather than separately named local predicates; classification at infinity uses z↦1/z.
 
 - **Indicial equation and Frobenius coefficients**, [DLMF 2.7.E3](https://dlmf.nist.gov/2.7.E3):
-  `DLMF.AsymptoticApproximations.indicialPoly` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L70)), `DLMF.AsymptoticApproximations.frobeniusCoeff` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L77)) implement Q(α) and the normalized recurrence a₀=1. Divisions at resonant indices are totalized and are excluded by the nonresonance theorem hypotheses. The logarithmic resonant solution of 2.7.6 is a characterization of supplied solutions, not a second chosen Frobenius-series object.
+  `DLMF.AsymptoticApproximations.indicialPoly` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L78)), `DLMF.AsymptoticApproximations.frobeniusCoeff` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L85)) implement Q(α) and the normalized recurrence a₀=1. Divisions at resonant indices are totalized and are excluded by the nonresonance theorem hypotheses. The logarithmic resonant solution of 2.7.6 is a characterization of supplied solutions, not a second chosen Frobenius-series object.
 
 - **Rank of a meromorphic singularity**, [DLMF 2.7.ii](https://dlmf.nist.gov/2.7.ii):
-  `DLMF.AsymptoticApproximations.HasSingularityRank` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L87)) uses the least ℓ≥1 making the two products removable analytic germs, with rank ℓ−1. As written, this predicate can also hold with rank zero at an ordinary point; DLMF’s use of the word singularity additionally assumes the point is singular.
+  `DLMF.AsymptoticApproximations.HasSingularityRank` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L95)) uses the least ℓ≥1 making the two products removable analytic germs, with rank ℓ−1. As written, this predicate can also hold with rank zero at an ordinary point; DLMF’s use of the word singularity additionally assumes the point is singular.
 
 - **Rank-one characteristic data and formal coefficients**, [DLMF 2.7.E7](https://dlmf.nist.gov/2.7.E7):
-  `DLMF.AsymptoticApproximations.IsRankOneAtInfinity` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L235)), `DLMF.AsymptoticApproximations.rankOneExponent` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L96)), `DLMF.AsymptoticApproximations.rankOneCoeff` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L104)) encode convergent coefficient expansions at infinity, distinct characteristic roots, exponents μⱼ and normalized formal coefficients. `DLMF.AsymptoticApproximations.rankOneScale` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L230)), `DLMF.AsymptoticApproximations.logSectorFilter` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L225)), `DLMF.AsymptoticApproximations.logExterior` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L252)) retain the logarithmic plane needed for sectors wider than 2π. Stokes multipliers C₁,C₂ in 2.7.17 are connection constants supplied by existence statements, not independently chosen functions of f,g.
+  `DLMF.AsymptoticApproximations.IsRankOneAtInfinity` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L240)), `DLMF.AsymptoticApproximations.rankOneExponent` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L104)), `DLMF.AsymptoticApproximations.rankOneCoeff` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L112)) encode convergent coefficient expansions at infinity, distinct characteristic roots, exponents μⱼ and normalized formal coefficients. `DLMF.AsymptoticApproximations.rankOneScale` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L235)), `DLMF.AsymptoticApproximations.logSectorFilter` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L230)), `DLMF.AsymptoticApproximations.logExterior` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L257)) retain the logarithmic plane needed for sectors wider than 2π. Stokes multipliers C₁,C₂ in 2.7.17 are connection constants supplied by existence statements, not independently chosen functions of f,g.
 
 - **Fabry transformation**, [DLMF 2.7.E19](https://dlmf.nist.gov/2.7.E19):
   The exceptional repeated-characteristic-root substitution w=e^{−f₀z/2}W, t=z^{1/2} is expressed directly in the transformation statement; no canonical square-root covering map or selected transformed solution is defined locally.
 
 - **Liouville–Green equation, data and approximants**, [DLMF 2.7.E20](https://dlmf.nist.gov/2.7.E20):
-  `DLMF.AsymptoticApproximations.IsLiouvilleGreenSolutionOn` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L265)), `DLMF.AsymptoticApproximations.IsLiouvilleGreenData` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L270)), `DLMF.AsymptoticApproximations.lgApproximant` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L261)) specify real solution/data predicates and f^{−1/4}e^{±ξ}, with ξ′=√f. The error-control function F of 2.7.24 is an antiderivative determined up to a constant; its variation is a definite integral in the theorem, not a selected primitive.
+  `DLMF.AsymptoticApproximations.IsLiouvilleGreenSolutionOn` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L270)), `DLMF.AsymptoticApproximations.IsLiouvilleGreenData` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L275)), `DLMF.AsymptoticApproximations.liouvilleGreenApproximant` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L266)) specify real solution/data predicates and f^{−1/4}e^{±ξ}, with ξ′=√f. The error-control function F of 2.7.24 is an antiderivative determined up to a constant; its variation is a definite integral in the theorem, not a selected primitive.
 
 - **Recessive, dominant and numerically satisfactory solutions**, [DLMF 2.7.E30](https://dlmf.nist.gov/2.7.E30):
   A recessive/subdominant solution has ratio tending to zero relative to its dominant companion. In a singular neighborhood a numerically satisfactory pair contains a recessive member; on an oscillatory interval the pair has equal asymptotic amplitudes and phase difference π/2. No independent local general predicate selects such pairs; the definitions are descriptive, and decimal examples are excluded: numerical.
@@ -711,13 +711,13 @@ five subsections.
   Transition points are zeros or singularities of f in w″=(u²f+g)w; zeros are turning points. The Liouville change W=ż^{−1/2}w and ψ of 2.8.2–4, and cases ż²f=1,ξ,1/ξ, are expressed by the supplied change of variables and coefficient functions. There is no selected general transition coordinate or ψ construction.
 
 - **Uniform-expansion coefficient families**, [DLMF 2.8.E13](https://dlmf.nist.gov/2.8.E13):
-  Case I coefficients Aₛ are given by a derivative/indefinite-integral recurrence with arbitrary integration constants; no canonical A-family is chosen. `DLMF.AsymptoticApproximations.IsAiryCoeffs` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L295)), `DLMF.AsymptoticApproximations.IsBesselCoeffs` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L320)) are structures specifying the Airy and Bessel recurrences of 2.8.17–18 and 2.8.27–31, including derivative witnesses and the separate positive/negative ξ integrals; they are predicates on supplied coefficient families, not functions selecting those families.
+  Case I coefficients Aₛ are given by a derivative/indefinite-integral recurrence with arbitrary integration constants; no canonical A-family is chosen. `DLMF.AsymptoticApproximations.IsAiryCoeffs` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L300)), `DLMF.AsymptoticApproximations.IsBesselCoeffs` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L325)) are structures specifying the Airy and Bessel recurrences of 2.8.17–18 and 2.8.27–31, including derivative witnesses and the separate positive/negative ξ integrals; they are predicates on supplied coefficient families, not functions selecting those families.
 
 - **Airy envelope crossing point and envelopes**, [DLMF 2.8.E19](https://dlmf.nist.gov/2.8.E19):
-  `DLMF.AsymptoticApproximations.airyEnvCrit` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L119)), `DLMF.AsymptoticApproximations.envAi` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L125)), `DLMF.AsymptoticApproximations.envBi` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L133)) define the last nonpositive Ai=Bi crossing through a supremum and the piecewise envelopes. The exact crossing condition is mathematical; the printed decimal is excluded: numerical. A supremum definition alone needs its root/existence results before it gives the intended crossing.
+  `DLMF.AsymptoticApproximations.airyEnvCrit` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L127)), `DLMF.AsymptoticApproximations.envelopeAi` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L133)), `DLMF.AsymptoticApproximations.envelopeBi` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L141)) define the last nonpositive Ai=Bi crossing through a supremum and the piecewise envelopes. The exact crossing condition is mathematical; the printed decimal is excluded: numerical. A supremum definition alone needs its root/existence results before it gives the intended crossing.
 
 - **Bessel envelope crossing point and envelopes**, [DLMF 2.8.E32](https://dlmf.nist.gov/2.8.E32):
-  `DLMF.AsymptoticApproximations.besselEnvCrit` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L140)), `DLMF.AsymptoticApproximations.envJ` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L146)), `DLMF.AsymptoticApproximations.envY` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L153)) use an infimum of positive Jν+Yν zeros and the corresponding piecewise real envelopes. The Bessel values are extracted from the complex constructions; the intended nonnegative real order and positive argument are theorem hypotheses.
+  `DLMF.AsymptoticApproximations.besselEnvCrit` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L148)), `DLMF.AsymptoticApproximations.envelopeJ` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L154)), `DLMF.AsymptoticApproximations.envelopeY` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L161)) use an infimum of positive Jν+Yν zeros and the corresponding piecewise real envelopes. The Bessel values are extracted from the complex constructions; the intended nonnegative real order and positive argument are theorem hypotheses.
 
 - **Multiple, fractional and coalescing turning points**, [DLMF 2.8.v](https://dlmf.nist.gov/2.8.v):
   A multiple turning point has an integer multiplicity λ≥2; a fractional one has (z−z₀)^{−λ}f analytic with real λ>−2. The coalescing cases are distinguished by the types of zeros/poles and lead to Bessel, parabolic cylinder or Whittaker models. These general classifications have no additional local selection structures.
@@ -725,13 +725,13 @@ five subsections.
 ### §2.9 Difference Equations
 
 - **Second-order recurrence and its forward difference**, [DLMF 2.9.E1](https://dlmf.nist.gov/2.9.E1):
-  `DLMF.AsymptoticApproximations.IsRecurrenceSol` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L212)), `DLMF.AsymptoticApproximations.forwardDiff` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L197)) specify the three-term recurrence and Δw(n)=w(n+1)−w(n). The equivalent second-order difference equation is a theorem about this predicate.
+  `DLMF.AsymptoticApproximations.IsRecurrenceSolution` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L217)), with Mathlib's `fwdDiff 1` ([source](.lake/packages/mathlib/Mathlib/Algebra/Group/ForwardDiff.lean#L40)), specify the three-term recurrence and Δw(n)=w(n+1)−w(n). The equivalent second-order difference equation is a theorem about this predicate.
 
 - **Characteristic exponents and normalized recurrence coefficients**, [DLMF 2.9.E4](https://dlmf.nist.gov/2.9.E4):
-  `DLMF.AsymptoticApproximations.differenceExponent` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L162)), `DLMF.AsymptoticApproximations.differenceCoeff` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L171)), `DLMF.AsymptoticApproximations.IsDifferenceCoeffRel` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L190)), `DLMF.AsymptoticApproximations.invPowScale` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L200)), `DLMF.AsymptoticApproximations.geomCpowScale` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L204)) give αⱼ, the noncoincident-root recurrence, its implicit relation version and inverse-power scales. In the coincident-root case the division-based coefficient construction is not the intended definition; the relation predicate records the degenerate equations instead.
+  `DLMF.AsymptoticApproximations.differenceExponent` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L170)), `DLMF.AsymptoticApproximations.differenceCoeff` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L179)), `DLMF.AsymptoticApproximations.IsDifferenceCoeffRel` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L198)), `DLMF.AsymptoticApproximations.invPowScale` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L205)), `DLMF.AsymptoticApproximations.geomCpowScale` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L209)) give αⱼ, the noncoincident-root recurrence, its implicit relation version and inverse-power scales. In the coincident-root case the division-based coefficient construction is not the intended definition; the relation predicate records the degenerate equations instead.
 
 - **Repeated-root half-power scale and indicial equation**, [DLMF 2.9.E9](https://dlmf.nist.gov/2.9.E9):
-  `DLMF.AsymptoticApproximations.geomExpSqrtScale` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L207)) implements ρⁿe^{σκ√n}n^{α−s/2}. The κ,α of 2.9.10 and quadratic indicial roots of 2.9.11 remain supplied expressions/data; no chosen roots or full resonant coefficient family is defined. Recessive/dominant recurrence solutions use the ratio convention of §2.7.
+  `DLMF.AsymptoticApproximations.geomExpSqrtScale` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L212)) implements ρⁿe^{σκ√n}n^{α−s/2}. The κ,α of 2.9.10 and quadratic indicial roots of 2.9.11 remain supplied expressions/data; no chosen roots or full resonant coefficient family is defined. Recessive/dominant recurrence solutions use the ratio convention of §2.7.
 
 ### §2.10 Sums and Sequences
 
@@ -739,19 +739,19 @@ five subsections.
   The periodic Bernoulli function is the existing fractional-part polynomial construction catalogued at §24.2. Euler–Maclaurin and Abel–Plana here are summation identities, not additional function definitions.
 
 - **Logarithmic sum, remainder and Glaisher constant**, [DLMF 2.10.E3](https://dlmf.nist.gov/2.10.E3):
-  `DLMF.AsymptoticApproximations.jLogJSum` ([source](DLMF/AsymptoticApproximations/Sums/Basic.lean#L43)), `DLMF.AsymptoticApproximations.jLogJRemainder` ([source](DLMF/AsymptoticApproximations/Sums/Basic.lean#L49)), `DLMF.AsymptoticApproximations.sumMulLogTerm` ([source](DLMF/AsymptoticApproximations/Sums/Basic.lean#L121)) give S(n), its convergent tail remainder and expansion terms. The constant C=1/12−ζ′(−1), with e^C called Glaisher’s constant, is the Barnes-family constant recorded at §5.17; it is not newly selected from this asymptotic expansion.
+  `DLMF.AsymptoticApproximations.jLogJSum` ([source](DLMF/AsymptoticApproximations/Sums/Basic.lean#L45)), `DLMF.AsymptoticApproximations.jLogJRemainder` ([source](DLMF/AsymptoticApproximations/Sums/Basic.lean#L51)), `DLMF.AsymptoticApproximations.sumMulLogTerm` ([source](DLMF/AsymptoticApproximations/Sums/Basic.lean#L125)) give S(n), its convergent tail remainder and expansion terms. The constant C=1/12−ζ′(−1), with e^C called Glaisher’s constant, is the Barnes-family constant recorded at §5.17; it is not newly selected from this asymptotic expansion.
 
 - **Power-sum and harmonic expansion coefficients**, [DLMF 2.10.E7](https://dlmf.nist.gov/2.10.E7):
-  `DLMF.AsymptoticApproximations.powSumScale` ([source](DLMF/AsymptoticApproximations/Sums/Basic.lean#L125)), `DLMF.AsymptoticApproximations.powSumCoeff` ([source](DLMF/AsymptoticApproximations/Sums/Basic.lean#L128)), `DLMF.AsymptoticApproximations.invPowScaleReal` ([source](DLMF/AsymptoticApproximations/Sums/Basic.lean#L131)), `DLMF.AsymptoticApproximations.harmonicAsymptoticCoeff` ([source](DLMF/AsymptoticApproximations/Sums/Basic.lean#L134)) give the power scales and exact Bernoulli coefficient sequences. The finite sums use `Finset.sum`; the harmonic number itself is Mathlib’s construction catalogued in Chapter 26.
+  `DLMF.AsymptoticApproximations.powSumScale` ([source](DLMF/AsymptoticApproximations/Sums/Basic.lean#L129)), `DLMF.AsymptoticApproximations.powSumCoeff` ([source](DLMF/AsymptoticApproximations/Sums/Basic.lean#L132)), `DLMF.AsymptoticApproximations.Real.invPowScale` ([source](DLMF/AsymptoticApproximations/Sums/Basic.lean#L135)), `DLMF.AsymptoticApproximations.harmonicAsymptoticCoeff` ([source](DLMF/AsymptoticApproximations/Sums/Basic.lean#L138)) give the power scales and exact Bernoulli coefficient sequences. The finite sums use `Finset.sum`; the harmonic number itself is Mathlib’s construction catalogued in Chapter 26.
 
 - **Partial sums and oscillatory power sums**, [DLMF 2.10.E10](https://dlmf.nist.gov/2.10.E10):
-  `DLMF.AsymptoticApproximations.partialSumFrom` ([source](DLMF/AsymptoticApproximations/Sums/Basic.lean#L55)), `DLMF.AsymptoticApproximations.oscillatorySum` ([source](DLMF/AsymptoticApproximations/Sums/Basic.lean#L59)) implement Uⱼ=∑₁ʲuᵢ and S(α,β,n)=∑₁^{n−1}e^{ijβ}j^α, including their exact endpoint conventions.
+  `DLMF.AsymptoticApproximations.partialSumFrom` ([source](DLMF/AsymptoticApproximations/Sums/Basic.lean#L57)), `DLMF.AsymptoticApproximations.oscillatorySum` ([source](DLMF/AsymptoticApproximations/Sums/Basic.lean#L61)) implement Uⱼ=∑₁ʲuᵢ and S(α,β,n)=∑₁^{n−1}e^{ijβ}j^α, including their exact endpoint conventions.
 
 - **Entire ₀F₂ example and contour components**, [DLMF 2.10.E19](https://dlmf.nist.gov/2.10.E19):
-  `DLMF.AsymptoticApproximations.hypergeometric0F2OneOne` ([source](DLMF/AsymptoticApproximations/Sums/Basic.lean#L64)), `DLMF.AsymptoticApproximations.hypergeometric0F2OneOneIntegrand` ([source](DLMF/AsymptoticApproximations/Sums/Basic.lean#L144)), `DLMF.AsymptoticApproximations.contourIntegralC` ([source](DLMF/AsymptoticApproximations/Sums/Basic.lean#L79)), `DLMF.AsymptoticApproximations.contourIntegralC₁` ([source](DLMF/AsymptoticApproximations/Sums/Basic.lean#L86)), `DLMF.AsymptoticApproximations.contourIntegralC₂` ([source](DLMF/AsymptoticApproximations/Sums/Basic.lean#L93)), `DLMF.AsymptoticApproximations.arcPathIntegral` ([source](DLMF/AsymptoticApproximations/Sums/Basic.lean#L67)), `DLMF.AsymptoticApproximations.imagSegmentPathIntegral` ([source](DLMF/AsymptoticApproximations/Sums/Basic.lean#L72)) construct the entire factorial series, its Gamma-integrand and the oriented contour integrals. This is an independent native series representative of the hypergeometric family in Chapter 16; the contour representation is a bridge theorem with convergence hypotheses.
+  `DLMF.AsymptoticApproximations.hypergeometric0F2OneOne` ([source](DLMF/AsymptoticApproximations/Sums/Basic.lean#L66)), `DLMF.AsymptoticApproximations.hypergeometric0F2OneOneIntegrand` ([source](DLMF/AsymptoticApproximations/Sums/Basic.lean#L148)), `DLMF.AsymptoticApproximations.contourIntegralC` ([source](DLMF/AsymptoticApproximations/Sums/Basic.lean#L81)), `DLMF.AsymptoticApproximations.contourIntegralC₁` ([source](DLMF/AsymptoticApproximations/Sums/Basic.lean#L88)), `DLMF.AsymptoticApproximations.contourIntegralC₂` ([source](DLMF/AsymptoticApproximations/Sums/Basic.lean#L95)), `DLMF.AsymptoticApproximations.arcPathIntegral` ([source](DLMF/AsymptoticApproximations/Sums/Basic.lean#L69)), `DLMF.AsymptoticApproximations.imagSegmentPathIntegral` ([source](DLMF/AsymptoticApproximations/Sums/Basic.lean#L74)) construct the entire factorial series, its Gamma-integrand and the oriented contour integrals. This is an independent native series representative of the hypergeometric family in Chapter 16; the contour representation is a bridge theorem with convergence hypotheses.
 
 - **Laurent coefficient integral and Darboux comparison**, [DLMF 2.10.E26](https://dlmf.nist.gov/2.10.E26):
-  `DLMF.AsymptoticApproximations.laurentCoeff` ([source](DLMF/AsymptoticApproximations/Sums/Basic.lean#L100)), `DLMF.AsymptoticApproximations.legendreComparison` ([source](DLMF/AsymptoticApproximations/Sums/Basic.lean#L109)) construct an annulus-circle Laurent coefficient and the explicit two-branch Legendre comparison function of 2.10.34. The comparison uses factored principal powers to preserve the outward-ray cuts and their values at z=0; its real prefactor is used on 0<α<π. This should not be identified with raw principal powers of e^{±iα}−z on arbitrary α.
+  `DLMF.AlgebraicAnalytic.laurentCoeff` ([source](DLMF/AlgebraicAnalytic/Complex/Basic.lean#L191)) at centre 0, `DLMF.AsymptoticApproximations.legendreComparison` ([source](DLMF/AsymptoticApproximations/Sums/Basic.lean#L113)) construct an annulus-circle Laurent coefficient and the explicit two-branch Legendre comparison function of 2.10.34. The comparison uses factored principal powers to preserve the outward-ray cuts and their values at z=0; its real prefactor is used on 0<α<π. This should not be identified with raw principal powers of e^{±iα}−z on arbitrary α.
 
 ### §2.11 Remainder Terms; Stokes Phenomenon
 
@@ -866,7 +866,7 @@ introduces numerical methods under their own headings. Those methods were outsid
 ### §3.6 Linear Difference Equations
 
 - **Linear difference equations and minimal solutions**, [DLMF 3.6.E1](https://dlmf.nist.gov/3.6.E1):
-  The forward difference Δwₙ=wₙ₊₁−wₙ and its iterate express the homogeneous/inhomogeneous equation. The root-shifted homogeneous recurrence counterpart is `DLMF.AsymptoticApproximations.IsRecurrenceSol` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L212)), `DLMF.AsymptoticApproximations.forwardDiff` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L197)). A minimal/recessive/distinguished solution has ratio tending to zero against an independent dominant solution and is normalized only up to a constant.
+  The forward difference Δwₙ=wₙ₊₁−wₙ and its iterate express the homogeneous/inhomogeneous equation. The root-shifted homogeneous recurrence counterpart is `DLMF.AsymptoticApproximations.IsRecurrenceSolution` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L217)), with Mathlib's `fwdDiff 1`. A minimal/recessive/distinguished solution has ratio tending to zero against an independent dominant solution and is normalized only up to a constant.
 
 - **Miller and Olver sequences**, [DLMF 3.6.iii](https://dlmf.nist.gov/3.6.iii):
   Miller’s method starts a trial backward recurrence and applies a normalizing factor Λ determined by a value or linear sum. Olver’s pₙ,eₙ and finite-system wₙ⁽ᴺ⁾ are defined by 3.6.7–10 with the prescribed initial/boundary data and stopping test. No general local algorithm selects them; first- and higher-order equations in 3.6.17–18 are corresponding recurrence forms. Special-function examples use the existing Bessel and Weber functions.
@@ -902,7 +902,7 @@ introduces numerical methods under their own headings. Those methods were outsid
   A transformation preserves a sequence limit σ if its output has the same limit, and accelerates if (tₙ−σ)/(sₙ−σ)→0. These are expressible using `Filter.Tendsto` and asymptotic equivalence/little-o; no general sequence-transform structure is defined locally.
 
 - **Euler transformation and iterated forward differences**, [DLMF 3.9.E3](https://dlmf.nist.gov/3.9.E3):
-  Δᵏa₀ is the recursively iterated forward difference, also an alternating binomial sum; Euler’s transformed series weights it by (−1)ᵏ2^{−k−1}. `DLMF.AsymptoticApproximations.forwardDiff` ([source](DLMF/AsymptoticApproximations/ODE/Basic.lean#L197)) supplies one forward difference. Mathlib `fwdDiff` ([source](.lake/packages/mathlib/Mathlib/Algebra/Group/ForwardDiff.lean#L40)) defines the general increment operator; its iterates give Δᵏ. TauCeti `TauCeti.fwdDiffList` ([source](.lake/packages/TauCeti/TauCeti/Analysis/CompletelyMonotone/FiniteDifference/Basic.lean#L87)) also allows distinct increments. No separate general Euler series-transformation object was found.
+  Δᵏa₀ is the recursively iterated forward difference, also an alternating binomial sum; Euler’s transformed series weights it by (−1)ᵏ2^{−k−1}. Mathlib `fwdDiff` ([source](.lake/packages/mathlib/Mathlib/Algebra/Group/ForwardDiff.lean#L40)) defines the general increment operator; its iterates give Δᵏ. TauCeti `TauCeti.fwdDiffList` ([source](.lake/packages/TauCeti/TauCeti/Analysis/CompletelyMonotone/FiniteDifference/Basic.lean#L87)) also allows distinct increments. No separate general Euler series-transformation object was found.
 
 - **Aitken, Shanks and Wynn transformations**, [DLMF 3.9.E7](https://dlmf.nist.gov/3.9.E7):
   Aitken’s rational Δ² update, Hankel determinants Hₘ(uₙ), Shanks ratios and Wynn’s ε-table recurrence are the exact constructions of 3.9.7–11. No dedicated local general constructions were identified. Their denominator/nonvanishing conditions matter; an arbitrary totalized quotient is not a guarantee of limit preservation.
@@ -1004,11 +1004,11 @@ Traversal: all §§4.1–4.48 checked; matching headings are §4.2, §4.14,
 ### §4.9 Continued Fractions
 
 - **Exponential-polynomial continued-fraction auxiliary**, [DLMF 4.9.E5](https://dlmf.nist.gov/4.9.E5):
-  eₙ(z)=Σ_{k=0}ⁿzᵏ/k! is `DLMF.Elementary.expPartialSum` ([source](DLMF/Elementary/LogExpIntegrals.lean#L260)). A second actual exponential partial-sum construction appears in Chapter 8; the separate Chapter 8 construction is catalogued at its source position.
+  eₙ(z)=Σ_{k=0}ⁿzᵏ/k! is `DLMF.Elementary.expPartialSum` ([source](DLMF/Elementary/LogExpIntegrals.lean#L261)). A second actual exponential partial-sum construction appears in Chapter 8; the separate Chapter 8 construction is catalogued at its source position.
 
   [DLMF 4.9.E5](https://dlmf.nist.gov/4.9.E5):
   The exponential polynomial of degree n.
-  `DLMF.Elementary.expPartialSum` ([definition](DLMF/Elementary/LogExpIntegrals.lean#L260)).
+  `DLMF.Elementary.expPartialSum` ([definition](DLMF/Elementary/LogExpIntegrals.lean#L261)).
 
 ### §4.12 Generalized Logarithms and Exponentials
 
@@ -1213,7 +1213,7 @@ Traversal: all §§5.1–5.24 checked; the matching section is §5.2.
 - **Pochhammer symbol/rising factorial**, [5.2.4–5](https://dlmf.nist.gov/5.2.E4):
   Mathlib `ascPochhammer` evaluated at the base, from
   [Polynomial/Pochhammer](.lake/packages/mathlib/Mathlib/RingTheory/Polynomial/Pochhammer.lean);
-  `DLMF.Hypergeometric.poch`
+  `DLMF.Hypergeometric.pochhammer`
   is an abbreviation for this in [Hypergeometric/Basic](DLMF/Hypergeometric/Basic/Pochhammer.lean#L38).
   The gamma quotient is an identity away from poles, not its definition.
 
@@ -1341,19 +1341,19 @@ All local names below, including names beginning `Real.`, are under
 
 <!-- retained entry 43 -->
 - **Principal exponential integral E₁**, [6.2.1–2](https://dlmf.nist.gov/6.2.E1):
-  `genExpIntE 1 z` in [ExpIntegral](DLMF/Confluent/Basic/ExponentialIntegrals.lean#L26);
+  `expIntegralE 1 z` in [ExpIntegral](DLMF/Confluent/Basic/ExponentialIntegrals.lean#L26);
   `genExpIntEOnLog 1 w` retains arbitrary sheets. These are incomplete-gamma
   constructions; the horizontal-ray and half-line integrals are bridge theorems.
 
 <!-- retained entry 44 -->
 - **Entire complementary exponential integral Ein**, [6.2.3](https://dlmf.nist.gov/6.2.E3):
-  series `expIntEin` in [ExpIntegrals/Basic](DLMF/ExpIntegrals/Basic/Functions.lean#L26)
-  and independent real interval integral `Real.expIntEin` in
+  series `expIntegralEin` in [ExpIntegrals/Basic](DLMF/ExpIntegrals/Basic/Functions.lean#L26)
+  and independent real interval integral `Real.expIntegralEin` in
   [ExpIntegral](DLMF/Confluent/Basic/ExponentialIntegrals.lean#L31).
 
 <!-- retained entry 45 -->
 - **Real Ei and logarithmic integral li**, [6.2.5–8](https://dlmf.nist.gov/6.2.E5):
-  `Real.expIntEi` and `Real.logIntLi` in
+  `Real.expIntegralEi` and `Real.logIntegralLi` in
   [ExpIntegrals/Basic](DLMF/ExpIntegrals/Basic/Functions.lean#L61), using the continued
   series and `Ei(log x)`. The principal-value integrals are theorem characterizations,
   not separate functions. DLMF excludes `Ei(0)` and restricts this li definition
@@ -1361,32 +1361,32 @@ All local names below, including names beginning `Real.`, are under
 
 <!-- retained entry 46 -->
 - **Sine integral Si and shifted si**, [6.2.9–10](https://dlmf.nist.gov/6.2.E9):
-  complex series `sinInt` and shift `sinIntTail` in
+  complex series `sinIntegral` and shift `sinIntegralTail` in
   [ExpIntegrals/Basic](DLMF/ExpIntegrals/Basic/Functions.lean#L31);
-  independent real interval-integral `Real.sinInt` in
+  independent real interval-integral `Real.sinIntegral` in
   [ExpIntegral](DLMF/Confluent/Basic/ExponentialIntegrals.lean#L36).
 
 <!-- retained entry 47 -->
 - **Cosine integral Ci and entire Cin**, [6.2.11–13](https://dlmf.nist.gov/6.2.E11):
-  `cosIntCin`, `cosInt` in [ExpIntegrals/Basic](DLMF/ExpIntegrals/Basic/Functions.lean#L36),
-  and the real integral/logarithm constructions `Real.cosIntCin`, `Real.cosInt`
+  `cosIntegralCin`, `cosIntegral` in [ExpIntegrals/Basic](DLMF/ExpIntegrals/Basic/Functions.lean#L36),
+  and the real integral/logarithm constructions `Real.cosIntegralCin`, `Real.cosIntegral`
   in [ExpIntegral](DLMF/Confluent/Basic/ExponentialIntegrals.lean#L41).
   Complex Ci uses the principal logarithm; it does not encode both banks as a set.
 
 <!-- retained entry 48 -->
 - **Hyperbolic integrals Shi and Chi**, [6.2.15–16](https://dlmf.nist.gov/6.2.E15):
-  `sinhInt` and `coshInt` in [ExpIntegrals/Basic](DLMF/ExpIntegrals/Basic/Functions.lean#L51),
+  `sinhIntegral` and `coshIntegral` in [ExpIntegrals/Basic](DLMF/ExpIntegrals/Basic/Functions.lean#L51),
   respectively an entire series and a principal-logarithm-plus-series definition.
 
 <!-- retained entry 49 -->
 - **Auxiliary f and g**, [6.2.17–18](https://dlmf.nist.gov/6.2.E17):
-  `expIntAuxF` and `expIntAuxG` in
+  `sinIntegralAuxiliaryF` and `sinIntegralAuxiliaryG` in
   [ExpIntegrals/Basic](DLMF/ExpIntegrals/Basic/Functions.lean#L71).
 
 ### §6.4 Analytic Continuation
 
 - **Logarithmic-plane exponential integral and series coefficients**, [DLMF 6.4.E1](https://dlmf.nist.gov/6.4.E1):
-  `DLMF.Confluent.expIntE1OnLog` ([source](DLMF/ExpIntegrals/Continuation.lean#L46)) records E₁ with an explicit logarithmic argument, preserving monodromy. The reciprocal-factorial and spherical-Bessel coefficients of §6.10 are `DLMF.Confluent.expIntReciprocalFactorialCoeff`, `DLMF.Confluent.expIntSphericalCoeff` ([source](DLMF/ExpIntegrals/Expansions.lean#L634)). Their recurrence/initial conventions differ from arbitrary coefficients of an expansion with the same limiting order.
+  `DLMF.Confluent.expIntE1OnLog` ([source](DLMF/ExpIntegrals/Continuation.lean#L46)) records E₁ with an explicit logarithmic argument, preserving monodromy. The reciprocal-factorial and spherical-Bessel coefficients of §6.10 are `DLMF.Confluent.expIntReciprocalFactorialCoeff`, `DLMF.Confluent.expIntSphericalCoeff` ([source](DLMF/ExpIntegrals/Expansions.lean#L639)). Their recurrence/initial conventions differ from arbitrary coefficients of an expansion with the same limiting order.
 
   [DLMF 6.4.E1](https://dlmf.nist.gov/6.4.E1):
   E₁ on the logarithmic plane.
@@ -1396,20 +1396,20 @@ All local names below, including names beginning `Real.`, are under
 
 - **Reciprocal factorial coefficients, with the recurrence of DLMF 6.10.3**, [DLMF 6.10.E3](https://dlmf.nist.gov/6.10.E3):
   Reciprocal factorial coefficients, with the recurrence of DLMF 6.10.3.
-  `DLMF.Confluent.expIntReciprocalFactorialCoeff` ([definition](DLMF/ExpIntegrals/Expansions.lean#L96)).
+  `DLMF.Confluent.expIntReciprocalFactorialCoeff` ([definition](DLMF/ExpIntegrals/Expansions.lean#L97)).
 
 - **Spherical-Bessel expansion coefficients**, [DLMF 6.10.E7](https://dlmf.nist.gov/6.10.E7):
   Spherical-Bessel expansion coefficients.
-  `DLMF.Confluent.expIntSphericalCoeff` ([definition](DLMF/ExpIntegrals/Expansions.lean#L634)).
+  `DLMF.Confluent.expIntSphericalCoeff` ([definition](DLMF/ExpIntegrals/Expansions.lean#L639)).
 
 ### §6.12 Asymptotic Expansions
 
 - **Auxiliary remainders, ordered zeros and Acton integrals**, [DLMF 6.12.E5](https://dlmf.nist.gov/6.12.E5):
-  Rₙ^(f),Rₙ^(g) are the finite auxiliary-function remainders `DLMF.Confluent.expIntAsymptoticRemainder` ([source](DLMF/ExpIntegrals/Asymptotics.lean#L53)). The real Ei zero is `DLMF.Confluent.Real.expIntEiZero` ([source](DLMF/ExpIntegrals/ZerosIntegrals.lean#L57)); the Ci/si positive zeros in §6.13 are `DLMF.Confluent.Real.cosIntZero` and `DLMF.Confluent.Real.sinIntTailZero`. The ActonAₙ,Bₙ,Cₙ integrals introduced in §6.18.1 have actual `DLMF.Confluent.expIntActonA`, `DLMF.Confluent.expIntActonB`, `DLMF.Confluent.expIntActonC` definitions ([source](DLMF/ExpIntegrals/ZerosIntegrals.lean#L688)). Decimal zero approximations are excluded, while exact zero selection and asymptotics remain in scope.
+  Rₙ^(f),Rₙ^(g) are the finite auxiliary-function remainders `DLMF.Confluent.expIntAsymptoticRemainder` ([source](DLMF/ExpIntegrals/Asymptotics.lean#L55)). The real Ei zero is `DLMF.Confluent.Real.expIntEiZero` ([source](DLMF/ExpIntegrals/ZerosIntegrals.lean#L57)); the Ci/si positive zeros in §6.13 are `DLMF.Confluent.Real.cosIntZero` and `DLMF.Confluent.Real.sinIntTailZero`. The ActonAₙ,Bₙ,Cₙ integrals introduced in §6.18.1 have actual `DLMF.Confluent.expIntActonA`, `DLMF.Confluent.expIntActonB`, `DLMF.Confluent.expIntActonC` definitions ([source](DLMF/ExpIntegrals/ZerosIntegrals.lean#L688)). Decimal zero approximations are excluded, while exact zero selection and asymptotics remain in scope.
 
   [DLMF 6.12.E5](https://dlmf.nist.gov/6.12.E5):
   Finite auxiliary-function remainder.
-  `DLMF.Confluent.expIntAsymptoticRemainder` ([definition](DLMF/ExpIntegrals/Asymptotics.lean#L53)).
+  `DLMF.Confluent.expIntAsymptoticRemainder` ([definition](DLMF/ExpIntegrals/Asymptotics.lean#L55)).
 
 ### §6.13 Zeros
 
@@ -1426,15 +1426,15 @@ All local names below, including names beginning `Real.`, are under
 
 - **Acton auxiliary integrals A, B and C**, [DLMF 6.18.E1](https://dlmf.nist.gov/6.18.E1):
   Acton auxiliary integral.
-  `DLMF.Confluent.expIntActonA` ([definition](DLMF/ExpIntegrals/ZerosIntegrals.lean#L771)).
+  `DLMF.Confluent.expIntActonA` ([definition](DLMF/ExpIntegrals/ZerosIntegrals.lean#L784)).
 
   [DLMF 6.18.E1](https://dlmf.nist.gov/6.18.E1):
   Acton auxiliary integral.
-  `DLMF.Confluent.expIntActonB` ([definition](DLMF/ExpIntegrals/ZerosIntegrals.lean#L776)).
+  `DLMF.Confluent.expIntActonB` ([definition](DLMF/ExpIntegrals/ZerosIntegrals.lean#L789)).
 
   [DLMF 6.18.E1](https://dlmf.nist.gov/6.18.E1):
   Acton auxiliary integral.
-  `DLMF.Confluent.expIntActonC` ([definition](DLMF/ExpIntegrals/ZerosIntegrals.lean#L781)).
+  `DLMF.Confluent.expIntActonC` ([definition](DLMF/ExpIntegrals/ZerosIntegrals.lean#L794)).
 
 ## Chapter 7 — Error functions, Dawson's and Fresnel integrals
 
@@ -1480,29 +1480,29 @@ The local complex functions in this section are in namespace `DLMF.Confluent`.
 
 <!-- retained entry 53 -->
 - **Fresnel tail, C and S**, [7.2.6–8](https://dlmf.nist.gov/7.2.E6):
-  `fresnelTail`, `fresnelCosInt`, `fresnelSinInt` in
+  `fresnelTail`, `fresnelC`, `fresnelS` in
   [ErrorFunctions/Basic](DLMF/ErrorFunctions/Basic/Functions.lean#L35).
   C and S use the DLMF phase `πt²/2`; the tail is its entire continued
   expression `(1+i)/2 - C - iS`. The rescaled `fresnelC1`, `fresnelS1`,
   `fresnelC2`, `fresnelS2` in the same file are different argument normalizations.
 
 - **Independent real Fresnel integrals**, [DLMF 7.2.E7](https://dlmf.nist.gov/7.2.E7) and [7.2.E8](https://dlmf.nist.gov/7.2.E8):
-  `DLMF.Confluent.Real.fresnelCosInt` and `DLMF.Confluent.Real.fresnelSinInt` ([source](DLMF/Confluent/Basic/ErrorFunctions.lean#L62)) are real interval integrals of cos(πt²/2) and sin(πt²/2). These are independent integral definitions of the real restrictions, with the same DLMF phase, rather than wrappers evaluating the complex primitives.
+  `DLMF.Confluent.Real.fresnelC` and `DLMF.Confluent.Real.fresnelS` ([source](DLMF/Confluent/Basic/ErrorFunctions.lean#L62)) are real interval integrals of cos(πt²/2) and sin(πt²/2). These are independent integral definitions of the real restrictions, with the same DLMF phase, rather than wrappers evaluating the complex primitives.
 
 <!-- retained entry 54 -->
 - **Fresnel auxiliary f and g**, [7.2.10–11](https://dlmf.nist.gov/7.2.E10):
-  `fresnelAuxFComplex` and `fresnelAuxGComplex` in
+  `fresnelAuxiliaryFComplex` and `fresnelAuxiliaryGComplex` in
   [ErrorFunctions/Basic](DLMF/ErrorFunctions/Basic/Functions.lean#L50).
 
 - **Real Fresnel auxiliary function f**, [DLMF 7.2.E10](https://dlmf.nist.gov/7.2.E10):
   The auxiliary Fresnel function `f(x) = (1/2 - S(x)) cos(πx²/2) - (1/2 - C(x)) sin(πx²/2)`
   (DLMF 7.2.10).
-  `DLMF.Confluent.fresnelAuxF` ([definition](DLMF/Confluent/Basic/ErrorFunctions.lean#L71)).
+  `DLMF.Confluent.fresnelAuxiliaryF` ([definition](DLMF/Confluent/Basic/ErrorFunctions.lean#L71)).
 
 - **Real Fresnel auxiliary function g**, [DLMF 7.2.E11](https://dlmf.nist.gov/7.2.E11):
   The auxiliary Fresnel function `g(x) = (1/2 - C(x)) cos(πx²/2) + (1/2 - S(x)) sin(πx²/2)`
   (DLMF 7.2.11).
-  `DLMF.Confluent.fresnelAuxG` ([definition](DLMF/Confluent/Basic/ErrorFunctions.lean#L78)).
+  `DLMF.Confluent.fresnelAuxiliaryG` ([definition](DLMF/Confluent/Basic/ErrorFunctions.lean#L78)).
 
 <!-- retained entry 55 -->
 - **Goodwin–Staton integral**, [7.2.12](https://dlmf.nist.gov/7.2.E12):
@@ -1513,7 +1513,7 @@ The local complex functions in this section are in namespace `DLMF.Confluent`.
 
 - **Signed Fresnel-to-Gaussian change of variable**, [DLMF 7.5.E7](https://dlmf.nist.gov/7.5.E7):
   Signed Fresnel-to-Gaussian change of variable.
-  `DLMF.Confluent.fresnelZetaComplex` ([definition](DLMF/ErrorFunctions/Relations.lean#L249)).
+  `DLMF.Confluent.fresnelZetaComplex` ([definition](DLMF/ErrorFunctions/Relations.lean#L254)).
 
 ### §7.8 Inequalities
 
@@ -1567,15 +1567,15 @@ The local complex functions in this section are in namespace `DLMF.Confluent`.
   is selected by these real functions. The complementary wrapper is `DLMF.Confluent.Real.invErfc`.
 
 - **Inverse-error coefficients and transition variables**, [DLMF 7.17.ii](https://dlmf.nist.gov/7.17.ii):
-  In addition to the retained inverse functions, `DLMF.Confluent.invErfSeriesCoeff`, `DLMF.Confluent.invErfDerivativePoly`, `DLMF.Confluent.invErfTaylorCoeff` ([source](DLMF/ErrorFunctions/InverseGeneralized.lean#L285)) record recursive coefficients, derivative polynomials, and derivative-defined Taylor coefficients. The asymptoticu,v of 7.17.5–6 are `DLMF.Confluent.invErfcAsymptoticU`, `DLMF.Confluent.invErfcAsymptoticV`. Equality of recursive and analytic coefficients is a theorem, not an alias.
+  In addition to the retained inverse functions, `DLMF.Confluent.invErfSeriesCoeff`, `DLMF.Confluent.invErfDerivativePoly`, `DLMF.Confluent.invErfTaylorCoeff` ([source](DLMF/ErrorFunctions/InverseGeneralized.lean#L287)) record recursive coefficients, derivative polynomials, and derivative-defined Taylor coefficients. The asymptoticu,v of 7.17.5–6 are `DLMF.Confluent.invErfcAsymptoticU`, `DLMF.Confluent.invErfcAsymptoticV`. Equality of recursive and analytic coefficients is a theorem, not an alias.
 
   [DLMF 7.17.E5](https://dlmf.nist.gov/7.17.E5):
   Small-argument inverse-erfc variable u.
-  `DLMF.Confluent.invErfcAsymptoticU` ([definition](DLMF/ErrorFunctions/InverseGeneralized.lean#L595)).
+  `DLMF.Confluent.invErfcAsymptoticU` ([definition](DLMF/ErrorFunctions/InverseGeneralized.lean#L597)).
 
   [DLMF 7.17.E6](https://dlmf.nist.gov/7.17.E6):
   Small-argument inverse-erfc logarithmic variable v.
-  `DLMF.Confluent.invErfcAsymptoticV` ([definition](DLMF/ErrorFunctions/InverseGeneralized.lean#L600)).
+  `DLMF.Confluent.invErfcAsymptoticV` ([definition](DLMF/ErrorFunctions/InverseGeneralized.lean#L602)).
 
 ### §7.18 Repeated Integrals of the Complementary Error Function
 
@@ -1614,9 +1614,9 @@ once when discussing their mathematical content.
 
 <!-- retained entry 59 -->
 - **Lower incomplete gamma**, [8.2.1](https://dlmf.nist.gov/8.2.E1):
-  `DLMF.Confluent.lowerIncGamma` in
+  `DLMF.Confluent.lowerIncompleteGamma` in
   [Confluent/Basic](DLMF/Confluent/Basic/IncompleteGamma.lean#L22), using a Kummer series;
-  `lowerIncGammaOnLog` in [IncompleteGamma/Basic](DLMF/IncompleteGamma/Basic.lean#L31)
+  `lowerIncompleteGammaOnLog` in [IncompleteGamma/Basic](DLMF/IncompleteGamma/Basic.lean#L31)
   retains the logarithmic sheet. `TauCeti.lowerIncompleteGamma` in
   [TauCeti/IncompleteGamma](.lake/packages/TauCeti/TauCeti/Analysis/SpecialFunctions/IncompleteGamma.lean#L115)
   is an independent real integral for positive shape and nonnegative endpoint;
@@ -1626,65 +1626,63 @@ once when discussing their mathematical content.
 
 <!-- retained entry 60 -->
 - **Upper incomplete gamma**, [8.2.2](https://dlmf.nist.gov/8.2.E2):
-  `DLMF.Confluent.upperIncGamma` in
+  `DLMF.Confluent.upperIncompleteGamma` in
   [Confluent/Relations](DLMF/Confluent/Basic/IncompleteGamma.lean#L28), using Tricomi U;
-  `upperIncGammaOnLog` in [IncompleteGamma/Basic](DLMF/IncompleteGamma/Basic.lean#L27)
+  `upperIncompleteGammaOnLog` in [IncompleteGamma/Basic](DLMF/IncompleteGamma/Basic.lean#L27)
   continues on the logarithmic plane, also at integral parameters. Integral
   representations are bridge theorems, not additional functions.
 
 <!-- retained entry 61 -->
 - **Normalized P and Q**, [8.2.4](https://dlmf.nist.gov/8.2.E4):
-  quotient definitions `DLMF.Statistical.normIncGammaP`, `normIncGammaQ` in
-  [Statistical/IncompleteGamma](DLMF/Statistical/Basic/IncompleteGamma.lean#L27);
-  parameter-continuation definitions `DLMF.Confluent.normIncGammaPContinued`,
-  `normIncGammaQContinued`, `normIncGammaPOnLog`, `normIncGammaQOnLog` in
-  [IncompleteGamma/Basic](DLMF/IncompleteGamma/Basic.lean#L35).
-  The continued functions are materially different at nonpositive integral
-  parameters. `TauCeti.regularizedGamma` is the real integral quotient
-  representing P for positive real shape; `1 - regularizedGamma` represents Q
-  on that domain without another definition.
+  `DLMF.Confluent.regularizedGamma` (`P(a,z) = z^a γ*(a,z)`, continued in `a`),
+  `regularizedIncompleteGammaQ` (`1 - P`), `regularizedGammaOnLog`, `regularizedIncompleteGammaQOnLog`
+  in [IncompleteGamma/Basic](DLMF/IncompleteGamma/Basic.lean#L35).
+  Away from nonpositive integral `a` they are the quotients `γ(a,z)/Γ(a)` and `Γ(a,z)/Γ(a)`
+  (`regularizedGamma_eq`, `regularizedIncompleteGammaQ_eq'` in
+  [IncompleteGamma/Regularized](DLMF/IncompleteGamma/Regularized.lean)). For positive real
+  shape P restricts to `TauCeti.regularizedGamma` (`regularizedGamma_ofReal`).
 
 <!-- retained entry 62 -->
 - **Tricomi's entire γ-star**, [8.2.6–7](https://dlmf.nist.gov/8.2.E6):
-  `DLMF.Statistical.scIncGamma` in
+  `DLMF.Statistical.tricomiIncompleteGamma` in
   [Statistical/IncompleteGamma](DLMF/Statistical/Basic/IncompleteGamma.lean#L36),
   using the regularized confluent series rather than the singular quotient.
 
 ### §8.4 Special Values
 
 - **Exponential partial sums and incomplete-Gamma inequality auxiliaries**, [DLMF 8.4.E11](https://dlmf.nist.gov/8.4.E11):
-  eₙ(z) is `DLMF.Confluent.expPartialSum` ([source](DLMF/Elementary/LogExpIntegrals.lean#L260)), another actual construction alongside §4.9's polynomial. The bounds of §8.10 introduceϑ,c_a,d_a,α_a,β_a, represented by `DLMF.Confluent.Real.upperGammaTheta`, `DLMF.Confluent.Real.upperGammaCa`, `DLMF.Confluent.Real.upperGammaDa`, `DLMF.Confluent.Real.gammaPAlpha`, `DLMF.Confluent.Real.gammaPBeta` ([source](DLMF/IncompleteGamma/BoundsFractions.lean#L598)). The displayed rationalA₁,B₁,A₂,B₂ andI=∫₀ˣt^(a−1)eᵗdt are expressions in inequalities; they are not substitute definitions of incomplete Gamma. The local constants include their continuous a=1 values.
+  eₙ(z) is `DLMF.Confluent.expPartialSum` ([source](DLMF/Elementary/LogExpIntegrals.lean#L261)), another actual construction alongside §4.9's polynomial. The bounds of §8.10 introduceϑ,c_a,d_a,α_a,β_a, represented by `DLMF.Confluent.Real.upperGammaTheta`, `DLMF.Confluent.Real.upperGammaCa`, `DLMF.Confluent.Real.upperGammaDa`, `DLMF.Confluent.Real.gammaPAlpha`, `DLMF.Confluent.Real.gammaPBeta` ([source](DLMF/IncompleteGamma/BoundsFractions.lean#L606)). The displayed rationalA₁,B₁,A₂,B₂ andI=∫₀ˣt^(a−1)eᵗdt are expressions in inequalities; they are not substitute definitions of incomplete Gamma. The local constants include their continuous a=1 values.
 
   [DLMF 8.4.E11](https://dlmf.nist.gov/8.4.E11):
   The finite exponential sum e_n.
-  `DLMF.Confluent.expPartialSum` ([definition](DLMF/Elementary/LogExpIntegrals.lean#L260)).
+  `DLMF.Confluent.expPartialSum` ([definition](DLMF/Elementary/LogExpIntegrals.lean#L261)).
 
 ### §8.10 Inequalities
 
 - **First-order real incomplete-Gamma remainder ratio**, [DLMF 8.10.E3](https://dlmf.nist.gov/8.10.E3):
   The first-order real incomplete-Gamma remainder ratio.
-  `DLMF.Confluent.Real.upperGammaTheta` ([definition](DLMF/IncompleteGamma/BoundsFractions.lean#L140)).
+  `DLMF.Confluent.Real.upperGammaTheta` ([definition](DLMF/IncompleteGamma/BoundsFractions.lean#L141)).
 
 - **Incomplete-Gamma inequality constants cₐ and dₐ**, [DLMF 8.10.E9](https://dlmf.nist.gov/8.10.E9):
   Constant c_a.
-  `DLMF.Confluent.Real.upperGammaCa` ([definition](DLMF/IncompleteGamma/BoundsFractions.lean#L516)).
+  `DLMF.Confluent.Real.upperGammaCa` ([definition](DLMF/IncompleteGamma/BoundsFractions.lean#L522)).
 
   [DLMF 8.10.E9](https://dlmf.nist.gov/8.10.E9):
   Constant d_a.
-  `DLMF.Confluent.Real.upperGammaDa` ([definition](DLMF/IncompleteGamma/BoundsFractions.lean#L521)).
+  `DLMF.Confluent.Real.upperGammaDa` ([definition](DLMF/IncompleteGamma/BoundsFractions.lean#L527)).
 
 - **Lower and upper incomplete-Gamma bounding constants**, [DLMF 8.10.E12](https://dlmf.nist.gov/8.10.E12):
   Lower bounding constant α_a, with its continuous value at a=1.
-  `DLMF.Confluent.Real.gammaPAlpha` ([definition](DLMF/IncompleteGamma/BoundsFractions.lean#L593)).
+  `DLMF.Confluent.Real.gammaPAlpha` ([definition](DLMF/IncompleteGamma/BoundsFractions.lean#L601)).
 
   [DLMF 8.10.E12](https://dlmf.nist.gov/8.10.E12):
   Upper bounding constant β_a.
-  `DLMF.Confluent.Real.gammaPBeta` ([definition](DLMF/IncompleteGamma/BoundsFractions.lean#L598)).
+  `DLMF.Confluent.Real.gammaPBeta` ([definition](DLMF/IncompleteGamma/BoundsFractions.lean#L606)).
 
 ### §8.11 Asymptotic Approximations and Expansions
 
 - **Large-argument and exponential-partial-sum coefficients**, [DLMF 8.11.E1](https://dlmf.nist.gov/8.11.E1):
-  uₖ and Rₙ are `DLMF.Confluent.incGammaAsymptoticCoeff`, `DLMF.Confluent.incGammaAsymptoticRemainder`; bₖ(λ) is `DLMF.Confluent.incGammaLambdaPolynomial` ([source](DLMF/IncompleteGamma/Asymptotics/LargeArgument.lean#L425)). Sₙ(x) and dₖ(x) are `DLMF.Confluent.expPartialSumRemainderS`, `DLMF.Confluent.expPartialSumRemainderCoeff` ([source](DLMF/IncompleteGamma/Asymptotics/PartialSums.lean#L1203)). The remainders preserve logarithmic-plane arguments where needed. These exact coefficients and asymptotic families are mathematical definitions, rather than numerical approximants.
+  uₖ and Rₙ are `DLMF.Confluent.incGammaAsymptoticCoeff`, `DLMF.Confluent.incGammaAsymptoticRemainder`; bₖ(λ) is `DLMF.Confluent.incGammaLambdaPolynomial` ([source](DLMF/IncompleteGamma/Asymptotics/LargeArgument.lean#L431)). Sₙ(x) and dₖ(x) are `DLMF.Confluent.expPartialSumRemainderS`, `DLMF.Confluent.expPartialSumRemainderCoeff` ([source](DLMF/IncompleteGamma/Asymptotics/PartialSums.lean#L1203)). The remainders preserve logarithmic-plane arguments where needed. These exact coefficients and asymptotic families are mathematical definitions, rather than numerical approximants.
 
   [DLMF 8.11.E1](https://dlmf.nist.gov/8.11.E1):
   Falling-factorial incomplete-Gamma coefficients.
@@ -1696,7 +1694,7 @@ once when discussing their mathematical content.
 
   [DLMF 8.11.E9](https://dlmf.nist.gov/8.11.E9):
   Polynomials b_k(lam), defined by the differential recurrence 8.11.9.
-  `DLMF.Confluent.incGammaLambdaPolynomial` ([definition](DLMF/IncompleteGamma/Asymptotics/LargeArgument.lean#L425)).
+  `DLMF.Confluent.incGammaLambdaPolynomial` ([definition](DLMF/IncompleteGamma/Asymptotics/LargeArgument.lean#L431)).
 
   [DLMF 8.11.E15](https://dlmf.nist.gov/8.11.E15):
   The exponential partial-sum remainder S_n.
@@ -1709,46 +1707,46 @@ once when discussing their mathematical content.
 ### §8.12 Uniform Asymptotic Expansions for Large Parameter
 
 - **Uniform-Gamma transition variables and all-order coefficients**, [DLMF 8.12.E1](https://dlmf.nist.gov/8.12.E1):
-  λ=z/a,η²/2=λ−1−logλ with η~λ−1; `DLMF.Confluent.gammaUniformEtaOnLog` uses an explicit log coordinate and `DLMF.Confluent.gammaEtaFactor`. Both remainder functions `DLMF.Confluent.gammaUniformS` and `DLMF.Confluent.gammaUniformT` exist, together with `DLMF.Confluent.gammaUniformC`, inverse log map `DLMF.Confluent.gammaUniformInverseLog`, inverse-series `DLMF.Confluent.gammaUniformAlpha`, and Taylor coefficients `DLMF.Confluent.gammaUniformD` ([source](DLMF/IncompleteGamma/UniformAsymptotics.lean#L739)). `DLMF.Confluent.gammaUniformFilter` is the corresponding uniform-domain filter. Some analytic/removable-value specifications remain admitted; the existence of these definitions does not establish all their intended analytic properties.
+  λ=z/a,η²/2=λ−1−logλ with η~λ−1; `DLMF.Confluent.gammaUniformEtaOnLog` uses an explicit log coordinate and `DLMF.Confluent.gammaEtaFactor`. Both remainder functions `DLMF.Confluent.gammaUniformS` and `DLMF.Confluent.gammaUniformT` exist, together with `DLMF.Confluent.gammaUniformC`, inverse log map `DLMF.Confluent.gammaUniformInverseLog`, inverse-series `DLMF.Confluent.gammaUniformAlpha`, and Taylor coefficients `DLMF.Confluent.gammaUniformD` ([source](DLMF/IncompleteGamma/UniformAsymptotics.lean#L743)). `DLMF.Confluent.gammaUniformFilter` is the corresponding uniform-domain filter. Some analytic/removable-value specifications remain admitted; the existence of these definitions does not establish all their intended analytic properties.
 
   [DLMF 8.12.E1](https://dlmf.nist.gov/8.12.E1):
   η on the logarithmic λ-plane, normalized by η~log λ~λ-1 at λ=1.
-  `DLMF.Confluent.gammaUniformEtaOnLog` ([definition](DLMF/IncompleteGamma/UniformAsymptotics.lean#L90)).
+  `DLMF.Confluent.gammaUniformEtaOnLog` ([definition](DLMF/IncompleteGamma/UniformAsymptotics.lean#L91)).
 
   [DLMF 8.12.E4](https://dlmf.nist.gov/8.12.E4):
   The exact S remainder, with w the logarithm of λ.
-  `DLMF.Confluent.gammaUniformS` ([definition](DLMF/IncompleteGamma/UniformAsymptotics.lean#L352)).
+  `DLMF.Confluent.gammaUniformS` ([definition](DLMF/IncompleteGamma/UniformAsymptotics.lean#L353)).
 
   [DLMF 8.12.E9](https://dlmf.nist.gov/8.12.E9):
   Uniform coefficients, with removable singularities filled by limits at w=0.
-  `DLMF.Confluent.gammaUniformC` ([definition](DLMF/IncompleteGamma/UniformAsymptotics.lean#L491)).
+  `DLMF.Confluent.gammaUniformC` ([definition](DLMF/IncompleteGamma/UniformAsymptotics.lean#L495)).
 
 - **Paris transition coefficients and incomplete-Gamma inverse**, [DLMF 8.12.E18](https://dlmf.nist.gov/8.12.E18):
   χ=(z−a)/√z andd(χ) are represented by expressions and `DLMF.Confluent.gammaParisD`; both familiesAₖ,Bₖ have actual `DLMF.Confluent.gammaParisRawCoeff`, `DLMF.Confluent.gammaParisA`, `DLMF.Confluent.gammaParisB` constructions ([source](DLMF/IncompleteGamma/UniformAsymptotics.lean#L987)). They are extracted through asymptotic coefficients, with identifying statements still admitted. The inverse Q is `DLMF.Confluent.gammaQInverse`, valued in ℝ≥0∞ so that q=0 maps to ∞ andq=1 to 0; its interior is an existence-based selected solution, requiring its specification theorem.
 
   [DLMF 8.12.E19](https://dlmf.nist.gov/8.12.E19):
   The parabolic transition function d(χ).
-  `DLMF.Confluent.gammaParisD` ([definition](DLMF/IncompleteGamma/UniformAsymptotics.lean#L1075)).
+  `DLMF.Confluent.gammaParisD` ([definition](DLMF/IncompleteGamma/UniformAsymptotics.lean#L1081)).
 
   [DLMF 8.12.E21](https://dlmf.nist.gov/8.12.E21):
   The inverse Q, including x=∞ at q=0.
-  `DLMF.Confluent.gammaQInverse` ([definition](DLMF/IncompleteGamma/UniformAsymptotics.lean#L1119)).
+  `DLMF.Confluent.gammaQInverse` ([definition](DLMF/IncompleteGamma/UniformAsymptotics.lean#L1126)).
 
 ### §8.17 Incomplete Beta Functions
 
 <!-- retained entry 63 -->
 - **Incomplete beta Bₓ**, [8.17.1](https://dlmf.nist.gov/8.17.E1):
-  `DLMF.Statistical.Real.incBeta` in
+  `DLMF.Statistical.Real.incompleteBeta` in
   [Statistical/IncompleteBeta](DLMF/Statistical/IncompleteBeta.lean#L50)
   is an interval integral with real endpoint and complex parameters;
-  `DLMF.Statistical.incBeta` in
+  `DLMF.Statistical.incompleteBeta` in
   [IncompleteGamma/Beta](DLMF/IncompleteGamma/Beta.lean#L27) is a principal
   hypergeometric continuation, with a separate value at `z = 1`.
 
 <!-- retained entry 64 -->
 - **Normalized incomplete beta Iₓ**, [8.17.2](https://dlmf.nist.gov/8.17.E2):
-  `DLMF.Statistical.Real.normIncBetaI` is the integral quotient;
-  `DLMF.Statistical.normIncBetaI` is the continued regularized formula in
+  `DLMF.Statistical.Real.regularizedIncompleteBeta` is the integral quotient;
+  `DLMF.Statistical.regularizedIncompleteBeta` is the continued regularized formula in
   [IncompleteGamma/Beta](DLMF/IncompleteGamma/Beta.lean#L31), preserving
   a removable `a = 0` specialization. They should not be identified at
   exceptional parameters merely by totalized division.
@@ -1761,51 +1759,51 @@ once when discussing their mathematical content.
   [8.17.24](https://dlmf.nist.gov/8.17.E24) is a series identity for I, not a new definition.
 
 - **Incomplete-Beta recurrence and asymptotic parameters**, [DLMF 8.17.E11](https://dlmf.nist.gov/8.17.E11):
-  x′=1−x,c=a+b−1 and the continued-fractiondₖ are `DLMF.Statistical.incBetaComplement`, `DLMF.Statistical.incBetaContiguousParameter`, `DLMF.Statistical.incBetaFractionD` ([source](DLMF/IncompleteGamma/Beta.lean#L663)). The §8.18 constructions include `DLMF.Statistical.Real.betaXi`, `DLMF.Statistical.Real.betaGeneratingKernel`, `DLMF.Statistical.Real.betaGeneratingCoeff`, `DLMF.Statistical.betaAuxF`, `DLMF.Statistical.Real.betaCenter`, `DLMF.Statistical.Real.betaEta`, `DLMF.Statistical.Real.betaEtaInverse`, `DLMF.Statistical.betaSymmetricC`, `DLMF.Statistical.Real.betaZeta`, `DLMF.Statistical.Real.betaGeneralX`, `DLMF.Statistical.betaGeneralH`, and `DLMF.Statistical.Real.incBetaInverse` ([source](DLMF/IncompleteGamma/BetaAsymptotics.lean#L1065)). These give the endpoint variable, generating series, Fₖ sequence, signed transition variables and inverse maps, and both coefficient familiescₖ,hₖ. The branches at x=x₀ are filled by specified limiting conventions, not arbitrary principal square roots.
+  x′=1−x,c=a+b−1 and the continued-fractiondₖ are `DLMF.Statistical.incBetaComplement`, `DLMF.Statistical.incBetaContiguousParameter`, `DLMF.Statistical.incBetaFractionD` ([source](DLMF/IncompleteGamma/Beta.lean#L704)). The §8.18 constructions include `DLMF.Statistical.Real.betaXi`, `DLMF.Statistical.Real.betaGeneratingKernel`, `DLMF.Statistical.Real.betaGeneratingCoeff`, `DLMF.Statistical.betaAuxF`, `DLMF.Statistical.Real.betaCenter`, `DLMF.Statistical.Real.betaEta`, `DLMF.Statistical.Real.betaEtaInverse`, `DLMF.Statistical.betaSymmetricC`, `DLMF.Statistical.Real.betaZeta`, `DLMF.Statistical.Real.betaGeneralX`, `DLMF.Statistical.betaGeneralH`, and `DLMF.Statistical.Real.incBetaInverse` ([source](DLMF/IncompleteGamma/BetaAsymptotics.lean#L1074)). These give the endpoint variable, generating series, Fₖ sequence, signed transition variables and inverse maps, and both coefficient familiescₖ,hₖ. The branches at x=x₀ are filled by specified limiting conventions, not arbitrary principal square roots.
 
   [DLMF 8.17.E11](https://dlmf.nist.gov/8.17.E11):
   The complementary argument x prime.
-  `DLMF.Statistical.incBetaComplement` ([definition](DLMF/IncompleteGamma/Beta.lean#L254)).
+  `DLMF.Statistical.incBetaComplement` ([definition](DLMF/IncompleteGamma/Beta.lean#L262)).
 
   [DLMF 8.17.E11](https://dlmf.nist.gov/8.17.E11):
   The parameter c of the contiguous recurrences.
-  `DLMF.Statistical.incBetaContiguousParameter` ([definition](DLMF/IncompleteGamma/Beta.lean#L259)).
+  `DLMF.Statistical.incBetaContiguousParameter` ([definition](DLMF/IncompleteGamma/Beta.lean#L267)).
 
   [DLMF 8.17.E23](https://dlmf.nist.gov/8.17.E23):
   The Gauss continued-fraction numerators d_k.
-  `DLMF.Statistical.incBetaFractionD` ([definition](DLMF/IncompleteGamma/Beta.lean#L663)).
+  `DLMF.Statistical.incBetaFractionD` ([definition](DLMF/IncompleteGamma/Beta.lean#L704)).
 
 ### §8.18 Asymptotic Expansions of I x ⁡ ( a , b )
 
 - **Endpoint variable ξ**, [DLMF 8.18.E2](https://dlmf.nist.gov/8.18.E2):
   The endpoint variable ξ.
-  `DLMF.Statistical.Real.betaXi` ([definition](DLMF/IncompleteGamma/BetaAsymptotics.lean#L274)).
+  `DLMF.Statistical.Real.betaXi` ([definition](DLMF/IncompleteGamma/BetaAsymptotics.lean#L279)).
 
 - **Taylor coefficients d_k at ξ**, [DLMF 8.18.E6](https://dlmf.nist.gov/8.18.E6):
   Taylor coefficients d_k at ξ.
-  `DLMF.Statistical.Real.betaGeneratingCoeff` ([definition](DLMF/IncompleteGamma/BetaAsymptotics.lean#L283)).
+  `DLMF.Statistical.Real.betaGeneratingCoeff` ([definition](DLMF/IncompleteGamma/BetaAsymptotics.lean#L288)).
 
 - **Transition center x₀**, [DLMF 8.18.E8](https://dlmf.nist.gov/8.18.E8):
   The transition center x₀.
-  `DLMF.Statistical.Real.betaCenter` ([definition](DLMF/IncompleteGamma/BetaAsymptotics.lean#L620)).
+  `DLMF.Statistical.Real.betaCenter` ([definition](DLMF/IncompleteGamma/BetaAsymptotics.lean#L627)).
 
 - **Signed transition variable, continuous with η/(x-x₀)>0**, [DLMF 8.18.E10](https://dlmf.nist.gov/8.18.E10):
   The signed transition variable, continuous with η/(x-x₀)>0.
-  `DLMF.Statistical.Real.betaEta` ([definition](DLMF/IncompleteGamma/BetaAsymptotics.lean#L625)).
+  `DLMF.Statistical.Real.betaEta` ([definition](DLMF/IncompleteGamma/BetaAsymptotics.lean#L632)).
 
 - **General-case transition variable ζ with its required branch**, [DLMF 8.18.E15](https://dlmf.nist.gov/8.18.E15):
   The general-case transition variable ζ with its required branch.
-  `DLMF.Statistical.Real.betaZeta` ([definition](DLMF/IncompleteGamma/BetaAsymptotics.lean#L816)).
+  `DLMF.Statistical.Real.betaZeta` ([definition](DLMF/IncompleteGamma/BetaAsymptotics.lean#L824)).
 
 - **Inverse regularized incomplete beta on the real interval**, [DLMF 8.18.E18](https://dlmf.nist.gov/8.18.E18):
   Inverse of normalized incomplete Beta on [0,1].
-  `DLMF.Statistical.Real.incBetaInverse` ([definition](DLMF/IncompleteGamma/BetaAsymptotics.lean#L1065)).
+  `DLMF.Statistical.Real.incBetaInverse` ([definition](DLMF/IncompleteGamma/BetaAsymptotics.lean#L1074)).
 
 ### §8.19 Generalized Exponential Integral
 
 <!-- retained entry 66 -->
 - **Eₚ**, [8.19.1–4](https://dlmf.nist.gov/8.19.i):
-  `DLMF.Confluent.genExpIntE` in
+  `DLMF.Confluent.expIntegralE` in
   [ExpIntegral](DLMF/Confluent/Basic/ExponentialIntegrals.lean#L26),
   `genExpIntEOnLog` and `genExpIntEExtended` in
   [ExponentialIntegral](DLMF/IncompleteGamma/ExponentialIntegral.lean#L29).
@@ -1814,17 +1812,17 @@ once when discussing their mathematical content.
   representations, with no separately defined integral-based Eₚ object.
 
 - **Generalized exponential-integral order derivatives and large-order polynomials**, [DLMF 8.19.v](https://dlmf.nist.gov/8.19.v):
-  The higher-order generalized integrals are defined through repeated derivatives with respect top; these are order derivatives, distinct from derivatives with respect to the ordinary argument. L(p) in 8.19.27 is `DLMF.Confluent.genExpIntL` ([source](DLMF/IncompleteGamma/ExponentialIntegral.lean#L1194)); Aₖ(λ) in 8.20.4 is `DLMF.Confluent.expIntLargeOrderPolynomial` ([source](DLMF/IncompleteGamma/ExpIntegralAsymptotics.lean#L523)). The generalized trigonometric auxiliariesf,g in §8.21.18–19 are `DLMF.Confluent.genTrigAuxF`, `DLMF.Confluent.genTrigAuxG` ([source](DLMF/IncompleteGamma/SineCosine/SphericalSeries.lean#L466)).
+  The higher-order generalized integrals are defined through repeated derivatives with respect top; these are order derivatives, distinct from derivatives with respect to the ordinary argument. L(p) in 8.19.27 is `DLMF.Confluent.genExpIntL` ([source](DLMF/IncompleteGamma/ExponentialIntegral.lean#L1201)); Aₖ(λ) in 8.20.4 is `DLMF.Confluent.expIntLargeOrderPolynomial` ([source](DLMF/IncompleteGamma/ExpIntegralAsymptotics.lean#L531)). The generalized trigonometric auxiliariesf,g in §8.21.18–19 are `DLMF.Confluent.genTrigAuxF`, `DLMF.Confluent.genTrigAuxG` ([source](DLMF/IncompleteGamma/SineCosine/SphericalSeries.lean#L467)).
 
   [DLMF 8.19.E27](https://dlmf.nist.gov/8.19.E27):
   The auxiliary integral L(p) for positive p.
-  `DLMF.Confluent.genExpIntL` ([definition](DLMF/IncompleteGamma/ExponentialIntegral.lean#L1194)).
+  `DLMF.Confluent.genExpIntL` ([definition](DLMF/IncompleteGamma/ExponentialIntegral.lean#L1201)).
 
 ### §8.20 Asymptotic Expansions of E p ⁡ ( z )
 
 - **Large-order polynomials A_k(λ), including A₀=1**, [DLMF 8.20.E4](https://dlmf.nist.gov/8.20.E4):
   Large-order polynomials A_k(λ), including A₀=1.
-  `DLMF.Confluent.expIntLargeOrderPolynomial` ([definition](DLMF/IncompleteGamma/ExpIntegralAsymptotics.lean#L523)).
+  `DLMF.Confluent.expIntLargeOrderPolynomial` ([definition](DLMF/IncompleteGamma/ExpIntegralAsymptotics.lean#L531)).
 
 ### §8.21 Generalized Sine and Cosine Integrals
 
@@ -1844,11 +1842,11 @@ once when discussing their mathematical content.
 
 - **Generalized auxiliary f**, [DLMF 8.21.E18](https://dlmf.nist.gov/8.21.E18):
   Generalized auxiliary f.
-  `DLMF.Confluent.genTrigAuxF` ([definition](DLMF/IncompleteGamma/SineCosine/SphericalSeries.lean#L461)).
+  `DLMF.Confluent.genTrigAuxF` ([definition](DLMF/IncompleteGamma/SineCosine/SphericalSeries.lean#L462)).
 
 - **Generalized auxiliary g**, [DLMF 8.21.E19](https://dlmf.nist.gov/8.21.E19):
   Generalized auxiliary g.
-  `DLMF.Confluent.genTrigAuxG` ([definition](DLMF/IncompleteGamma/SineCosine/SphericalSeries.lean#L466)).
+  `DLMF.Confluent.genTrigAuxG` ([definition](DLMF/IncompleteGamma/SineCosine/SphericalSeries.lean#L467)).
 
 ### §8.22 Mathematical Applications
 
@@ -1868,12 +1866,12 @@ Fundamental definitions: [§9.2](https://dlmf.nist.gov/9.2)
 is titled “Differential Equation”, not “Definitions”. Its Ai, Bi and derivatives
 are `DLMF.Airy.airyAi`, `airyBi`, `airyAiDeriv`, `airyBiDeriv` in
 [Basic](DLMF/Airy/Basic.lean#L43), constructed from regularized ₀F₁;
-real restrictions `airyAiReal`, `airyBiReal`, `airyAiDerivReal`,
-`airyBiDerivReal` are in [Framework](DLMF/Airy/Framework.lean#L28).
+real restrictions `DLMF.Airy.Real.airyAi`, `DLMF.Airy.Real.airyBi`, `DLMF.Airy.Real.airyAiDeriv`,
+`DLMF.Airy.Real.airyBiDeriv` are in [Framework](DLMF/Airy/Framework.lean#L28).
 Integral formulas are bridge theorems, not alternative public Ai/Bi definitions.
 
 - **Airy equation, power-series building blocks and Riccati substitution**, [DLMF 9.2](https://dlmf.nist.gov/9.2):
-  `DLMF.Airy.IsAirySol` ([source](DLMF/Airy/Basic.lean#L78)) records the first-order pair forw″=zw. The actual entire building blocks `DLMF.Airy.airyF`, `DLMF.Airy.airyG`, `DLMF.Airy.airyFDeriv`, `DLMF.Airy.airyGDeriv` ([source](DLMF/Airy/Basic.lean#L46)) implement the series behind the Ai/Bi formulas; their defining series are described at §9.4, without a new Airy normalization. The Riccati solutionw′/w in 9.2.18 is a log-derivative expression. `DLMF.Airy.IsWellConditionedPairOn` ([source](DLMF/Airy/Framework.lean#L102)) packages the mathematical region condition for satisfactory pairs; it adds no numerical solver.
+  `DLMF.Airy.IsAirySolution` ([source](DLMF/Airy/Basic.lean#L78)) records the first-order pair forw″=zw. The actual entire building blocks `DLMF.Airy.airyF`, `DLMF.Airy.airyG`, `DLMF.Airy.airyFDeriv`, `DLMF.Airy.airyGDeriv` ([source](DLMF/Airy/Basic.lean#L46)) implement the series behind the Ai/Bi formulas; their defining series are described at §9.4, without a new Airy normalization. The Riccati solutionw′/w in 9.2.18 is a log-derivative expression. `DLMF.Airy.IsWellConditionedPairOn` ([source](DLMF/Airy/Framework.lean#L102)) packages the mathematical region condition for satisfactory pairs; it adds no numerical solver.
 
 ### §9.6 Relations to Other Functions
 
@@ -1927,7 +1925,7 @@ Integral formulas are bridge theorems, not alternative public Ai/Bi definitions.
 ### §9.12 Scorer Functions
 
 - **Scorer functions and inhomogeneous equation**, [DLMF 9.12](https://dlmf.nist.gov/9.12):
-  Hi is constructed by its entire series `DLMF.Airy.scorerHi`, Gi by `scorerGi=airyBi−scorerHi`; their derivative constructions, `DLMF.Airy.scorerHiCoeff`, `DLMF.Airy.scorerGiCoeff`, `DLMF.Airy.IsScorerSol`, and `DLMF.Airy.IsAiryInhomSol` also exist ([source](DLMF/Airy/Scorer/Representations.lean#L31)). Integral representations and independent series constructions are separate objects. The third-order Wronskian and `DLMF.Airy.IsWellConditionedTripleOn` package the stated satisfactory-triple properties.
+  Hi is constructed by its entire series `DLMF.Airy.scorerHi`, Gi by `scorerGi=airyBi−scorerHi`; their derivative constructions, `DLMF.Airy.scorerHiCoeff`, `DLMF.Airy.scorerGiCoeff`, `DLMF.Airy.IsScorerSolution`, and `DLMF.Airy.IsAiryInhomSol` also exist ([source](DLMF/Airy/Scorer/Representations.lean#L31)). Integral representations and independent series constructions are separate objects. The third-order Wronskian and `DLMF.Airy.IsWellConditionedTripleOn` package the stated satisfactory-triple properties.
 
   [DLMF 9.12.E17](https://dlmf.nist.gov/9.12.E17):
   The entire Scorer function Hi, specified by its Maclaurin series.
@@ -2032,7 +2030,7 @@ These logarithmic formulas must be used with their parameter hypotheses.
   ([source](DLMF/Mathieu/Modified/Basic/Functions.lean#L145)) retain the unwrapped argument
   in Jμ(h exp z), Yμ(h exp z) and J/Y/H¹/H². `mathieuCyl` in the same file
   and `DLMF.Spheroidal.spheroidalCylinder`
-  ([source](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L398)) select the four principal cylinder
+  ([source](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L399)) select the four principal cylinder
   functions. These selectors do not represent every constant linear combination
   denoted by DLMF's general Cν. Continued ze^(mπi) means a continued argument,
   not merely evaluation at an equal complex point on the principal sheet.
@@ -2092,7 +2090,7 @@ These logarithmic formulas must be used with their parameter hypotheses.
   [modified quotients 10.33.E1–2](https://dlmf.nist.gov/10.33.E1):
   the coefficients are the explicit ν,z-dependent expressions in these
   equations. No separately named Bessel-specific fraction object was found.
-  `DLMF.Core.cfContinuants`, `cfTail` and `HasContinuedFraction`
+  `DLMF.Core.continuedFractionContinuants`, `continuedFractionTail` and `HasContinuedFraction`
   ([source](DLMF/Core/Basic.lean#L206)) provide the generic finite
   continuants, their ratios, and convergence predicate. They preserve finite
   termination and avoid evaluating nested intermediate zero denominators.
@@ -2233,7 +2231,7 @@ These logarithmic formulas must be used with their parameter hypotheses.
   denominator c²+2c cos(νπ)t^(2ν)+t^(4ν), with c>0,0<ν<1.
   No named transform definitions were found in Mathlib, TauCeti or this project.
   `DLMF.AlgebraicAnalytic.tendsto_hankel_kernel`
-  ([source](DLMF/AlgebraicAnalytic/Spectral/Theory.lean#L889)) states the
+  ([source](DLMF/AlgebraicAnalytic/Spectral/Theory.lean#L870)) states the
   corresponding symmetric-kernel completeness limit, but it is a theorem
   statement, not a transform definition. Specialized exact Bessel-transform
   integrals also occur in
@@ -2256,7 +2254,7 @@ These logarithmic formulas must be used with their parameter hypotheses.
   the weighted integral on [0,1], normalized by Jν+1(jν,m)². No matching
   named local constructions were found. The existing
   `DLMF.Bessel.neumannCoeff`, `neumannLinCoeff`
-  ([source](DLMF/Bessel/NeumannSeries.lean#L1181)) extract coefficients of
+  ([source](DLMF/Bessel/NeumannSeries.lean#L1189)) extract coefficients of
   general locally constructed double series; they are not O_n or those
   contour/Fourier coefficient functionals. `powerNeumannCoeff`
   ([source](DLMF/Bessel/NeumannSeries.lean#L353)) does represent the separate
@@ -2628,55 +2626,55 @@ whose titles are “Differential Equations” and “The Function W(a,x)”.
 ### §12.2 Differential Equations
 
 - **Parabolic-cylinder equations, U,V,D and their independent series**, [DLMF 12.2](https://dlmf.nist.gov/12.2):
-  Chapter 12 places these fundamental definitions under equation/solution headings. `DLMF.Confluent.IsQuadraticCylinderSolution`, `DLMF.Confluent.IsOscillatoryCylinderSolution` ([source](DLMF/ParabolicCylinder/Basic/EquationAndPhaseData.lean#L50)) encode the quadratic-potential/oscillatory equations. The main U,V,D are `DLMF.Confluent.pcfU`, `DLMF.Confluent.pcfV`, `DLMF.Confluent.pcfD`, built from `DLMF.Confluent.pcfEven`, `DLMF.Confluent.pcfOdd` and their derivative formulas ([source](DLMF/ParabolicCylinder/Basic/Functions.lean#L25)); V's independent initial values/linear combination and `DLMF.Confluent.pcfVDeriv` are in [WronskiansAndConnections](DLMF/ParabolicCylinder/Basic/Functions.lean#L85). The Kummer representations and integral formulas are bridges for these constructions, with their branch restrictions.
+  Chapter 12 places these fundamental definitions under equation/solution headings. `DLMF.Confluent.IsQuadraticCylinderSolution`, `DLMF.Confluent.IsOscillatoryCylinderSolution` ([source](DLMF/ParabolicCylinder/Basic/EquationAndPhaseData.lean#L53)) encode the quadratic-potential/oscillatory equations. The main U,V,D are `DLMF.Confluent.parabolicCylinderU`, `DLMF.Confluent.parabolicCylinderV`, `DLMF.Confluent.parabolicCylinderD`, built from `DLMF.Confluent.parabolicCylinderEven`, `DLMF.Confluent.parabolicCylinderOdd` and their derivative formulas ([source](DLMF/ParabolicCylinder/Basic/Functions.lean#L25)); V's independent initial values/linear combination and `DLMF.Confluent.parabolicCylinderVDeriv` are in [WronskiansAndConnections](DLMF/ParabolicCylinder/Basic/Functions.lean#L85). The Kummer representations and integral formulas are bridges for these constructions, with their branch restrictions.
 
   [DLMF 12.2.E1](https://dlmf.nist.gov/12.2.E1):
   The scalar quadratic-potential equation `f″(z) + (az²+bz+c)f(z) = 0`, written using totalized
   iterated derivatives.
-  `DLMF.Confluent.IsQuadraticCylinderSolution` ([definition](DLMF/ParabolicCylinder/Basic/EquationAndPhaseData.lean#L44)).
+  `DLMF.Confluent.IsQuadraticCylinderSolution` ([definition](DLMF/ParabolicCylinder/Basic/EquationAndPhaseData.lean#L47)).
 
   [DLMF 12.2.E3](https://dlmf.nist.gov/12.2.E3):
   The oscillatory Weber equation `f″(z) + (z²/4-a)f(z) = 0`, written using totalized iterated
   derivatives.
-  `DLMF.Confluent.IsOscillatoryCylinderSolution` ([definition](DLMF/ParabolicCylinder/Basic/EquationAndPhaseData.lean#L50)).
+  `DLMF.Confluent.IsOscillatoryCylinderSolution` ([definition](DLMF/ParabolicCylinder/Basic/EquationAndPhaseData.lean#L53)).
 
 <!-- retained entry 90 -->
 - **U(a,z), Dν(z), and even/odd canonical solutions**, [12.2.2–5](https://dlmf.nist.gov/12.2.E2):
-  `DLMF.Confluent.pcfU`, `pcfD`, `pcfEven`, `pcfOdd`, and their separately
-  defined derivatives `pcfUDeriv`, `pcfEvenDeriv`, `pcfOddDeriv` in
+  `DLMF.Confluent.parabolicCylinderU`, `parabolicCylinderD`, `parabolicCylinderEven`, `parabolicCylinderOdd`, and their separately
+  defined derivatives `parabolicCylinderUDeriv`, `parabolicCylinderEvenDeriv`, `parabolicCylinderOddDeriv` in
   [EquationAndIntegrals](DLMF/ParabolicCylinder/Basic/Functions.lean#L25).
   The construction uses entire Kummer functions; integral representations
   are bridges on smaller parameter domains.
 
 <!-- retained entry 91 -->
 - **V(a,z)**, [§12.2(i), 12.2.8–9](https://dlmf.nist.gov/12.2.E8):
-  `DLMF.Confluent.pcfV`, `pcfVDeriv`, `pcfVZero`, `pcfVDerivZero` in
+  `DLMF.Confluent.parabolicCylinderV`, `parabolicCylinderVDeriv`, `parabolicCylinderVZero`, `parabolicCylinderVDerivZero` in
   [WronskiansAndConnections](DLMF/ParabolicCylinder/Basic/Functions.lean#L72).
 
 <!-- retained entry 92 -->
 - **U-bar and modulus/phase F, θ, G, ψ**, [12.2.21–23](https://dlmf.nist.gov/12.2.E21):
-  `DLMF.Confluent.pcfUBar`, `pcfUBarDeriv`, `pcfF`, `pcfTheta`,
-  `pcfG`, and `pcfPsi` in [Basic](DLMF/ParabolicCylinder/Basic/EquationAndPhaseData.lean#L35).
+  `DLMF.Confluent.parabolicCylinderUBar`, `parabolicCylinderUBarDeriv`, `parabolicCylinderF`, `parabolicCylinderTheta`,
+  `parabolicCylinderG`, and `parabolicCylinderPsi` in [Basic](DLMF/ParabolicCylinder/Basic/EquationAndPhaseData.lean#L35).
   U-bar means a gamma-scaled V, not complex conjugation; its parameter poles
   are excluded in mathematical uses.
 
 - **Barred cylinder solution and modulus/phase**, [DLMF 12.2.E21](https://dlmf.nist.gov/12.2.E21):
-  Ubar=Γ(1/2−a)V is `DLMF.Confluent.pcfUBar`, with `DLMF.Confluent.pcfUBarDeriv`; it is undefined mathematically at the excluded positive half-integera, not complex conjugation. F,θ,G,ψ are `DLMF.Confluent.pcfF`, `DLMF.Confluent.pcfTheta`, `DLMF.Confluent.pcfG`, `DLMF.Confluent.pcfPsi` ([source](DLMF/ParabolicCylinder/Basic/EquationAndPhaseData.lean#L80)). The local phases use principal-argument representatives; a continuous phase lift differs by 2π multiples and should not be silently claimed identical globally.
+  Ubar=Γ(1/2−a)V is `DLMF.Confluent.parabolicCylinderUBar`, with `DLMF.Confluent.parabolicCylinderUBarDeriv`; it is undefined mathematically at the excluded positive half-integera, not complex conjugation. F,θ,G,ψ are `DLMF.Confluent.parabolicCylinderF`, `DLMF.Confluent.parabolicCylinderTheta`, `DLMF.Confluent.parabolicCylinderG`, `DLMF.Confluent.parabolicCylinderPsi` ([source](DLMF/ParabolicCylinder/Basic/EquationAndPhaseData.lean#L83)). The local phases use principal-argument representatives; a continuous phase lift differs by 2π multiples and should not be silently claimed identical globally.
 
 ### §12.7 Relations to Other Functions
 
 - **Cylinder large-variable terms and repeated Gaussian tail**, [DLMF 12.7.E7](https://dlmf.nist.gov/12.7.E7):
-  The hhₙ tail, including its Gaussian index −1 convention, is `DLMF.Confluent.hhFunction` ([source](DLMF/ParabolicCylinder/Relations.lean#L124)), a distinct normalization from repeated erfc in §7.18. The large-variable series terms are `DLMF.Confluent.pcfUTerm`, `DLMF.Confluent.pcfVTerm`, with logarithmic-sector `DLMF.Confluent.pcfLogWedge` ([source](DLMF/ParabolicCylinder/SectorAsymptotics.lean#L629)); the comparable `DLMF.Confluent.CylinderSectorAsymptotics.uTerm`, `DLMF.Confluent.CylinderSectorAsymptotics.vTerm` implementations support the sector proofs. They are exact asymptotic terms, not convergent definitions of U,V everywhere.
+  The hhₙ tail, including its Gaussian index −1 convention, is `DLMF.Confluent.hhFunction` ([source](DLMF/ParabolicCylinder/Relations.lean#L127)), a distinct normalization from repeated erfc in §7.18. The large-variable series terms are `DLMF.Confluent.pcfUTerm`, `DLMF.Confluent.pcfVTerm`, with logarithmic-sector `DLMF.Confluent.pcfLogWedge` ([source](DLMF/ParabolicCylinder/SectorAsymptotics.lean#L633)); the comparable `DLMF.Confluent.CylinderSectorAsymptotics.uTerm`, `DLMF.Confluent.CylinderSectorAsymptotics.vTerm` implementations support the sector proofs. They are exact asymptotic terms, not convergent definitions of U,V everywhere.
 
   [DLMF 12.7.E7](https://dlmf.nist.gov/12.7.E7):
   The repeated Gaussian tail integral `∫₀∞ tⁿ/n! exp (-(z+t)²/2) dt`; the index `-1` denotes the
   Gaussian itself.
-  `DLMF.Confluent.hhFunction` ([definition](DLMF/ParabolicCylinder/Relations.lean#L124)).
+  `DLMF.Confluent.hhFunction` ([definition](DLMF/ParabolicCylinder/Relations.lean#L127)).
 
 ### §12.10 Uniform Asymptotic Expansions for Large Parameter
 
 - **Olver cylinder phases, polynomials and normalizers**, [DLMF 12.10.E7](https://dlmf.nist.gov/12.10.E7):
-  ξ,η,ξbar,h andΓ-coefficients are `DLMF.Confluent.pcfXi`, `DLMF.Confluent.pcfEta`, `DLMF.Confluent.pcfXiBar`, `DLMF.Confluent.pcfH`, `DLMF.Confluent.pcfGammaCoeff`. The recursively paired polynomialsuₛ,rₛ,vₛ are `DLMF.Confluent.pcfOlverPair`, `DLMF.Confluent.pcfOlverU`, `DLMF.Confluent.pcfOlverR`, `DLMF.Confluent.pcfOlverV` ([source](DLMF/ParabolicCylinder/Uniform/PhasesAndPolynomials.lean#L297)). Their exterior/interior/positive-parameter coefficient functions are `DLMF.Confluent.pcfOlverA`, `DLMF.Confluent.pcfOlverB`, `DLMF.Confluent.pcfOlverATilde`, `DLMF.Confluent.pcfOlverBTilde`, `DLMF.Confluent.pcfOlverUBar`, `DLMF.Confluent.pcfOlverVBar`, and oscillatory phases `DLMF.Confluent.pcfKappa`, `DLMF.Confluent.pcfChi` ([source](DLMF/ParabolicCylinder/Uniform/ExpansionData.lean#L142)). `DLMF.Confluent.IsCylinderGNormalizer`, `DLMF.Confluent.IsCylinderGBarNormalizer` specify normalizer functions appearing existentially in expansion theorems; they do not select a unique namedg. `DLMF.Confluent.pcfUniformFilter` and `DLMF.Confluent.HasCylinderUniformExpansion` specify actual uniformity.
+  ξ,η,ξbar,h andΓ-coefficients are `DLMF.Confluent.pcfXi`, `DLMF.Confluent.pcfEta`, `DLMF.Confluent.pcfXiBar`, `DLMF.Confluent.pcfH`, `DLMF.Confluent.pcfGammaCoeff`. The recursively paired polynomialsuₛ,rₛ,vₛ are `DLMF.Confluent.pcfOlverPair`, `DLMF.Confluent.pcfOlverU`, `DLMF.Confluent.pcfOlverR`, `DLMF.Confluent.pcfOlverV` ([source](DLMF/ParabolicCylinder/Uniform/PhasesAndPolynomials.lean#L297)). Their exterior/interior/positive-parameter coefficient functions are `DLMF.Confluent.pcfOlverA`, `DLMF.Confluent.pcfOlverB`, `DLMF.Confluent.pcfOlverATilde`, `DLMF.Confluent.pcfOlverBTilde`, `DLMF.Confluent.pcfOlverUBar`, `DLMF.Confluent.pcfOlverVBar`, and oscillatory phases `DLMF.Confluent.pcfKappa`, `DLMF.Confluent.pcfChi` ([source](DLMF/ParabolicCylinder/Uniform/ExpansionData.lean#L143)). `DLMF.Confluent.IsCylinderGNormalizer`, `DLMF.Confluent.IsCylinderGBarNormalizer` specify normalizer functions appearing existentially in expansion theorems; they do not select a unique namedg. `DLMF.Confluent.pcfUniformFilter` and `DLMF.Confluent.HasCylinderUniformExpansion` specify actual uniformity.
 
   [DLMF 12.10.E7](https://dlmf.nist.gov/12.10.E7):
   The exterior cylinder phase `(t√(t²-1) - log (t+√(t²-1)))/2` used in the exponential uniform
@@ -2715,11 +2713,11 @@ whose titles are “Differential Equations” and “The Function W(a,x)”.
 
   [DLMF 12.10.E22](https://dlmf.nist.gov/12.10.E22):
   The oscillatory cylinder phase `μ² η(t) - π/4`.
-  `DLMF.Confluent.pcfKappa` ([definition](DLMF/ParabolicCylinder/Uniform/ExpansionData.lean#L137)).
+  `DLMF.Confluent.pcfKappa` ([definition](DLMF/ParabolicCylinder/Uniform/ExpansionData.lean#L138)).
 
   [DLMF 12.10.E22](https://dlmf.nist.gov/12.10.E22):
   The companion oscillatory cylinder phase `μ² η(t) + π/4`.
-  `DLMF.Confluent.pcfChi` ([definition](DLMF/ParabolicCylinder/Uniform/ExpansionData.lean#L142)).
+  `DLMF.Confluent.pcfChi` ([definition](DLMF/ParabolicCylinder/Uniform/ExpansionData.lean#L143)).
 
   [DLMF 12.10.E23](https://dlmf.nist.gov/12.10.E23):
   The interior cylinder phase `(arccos t - t√(1-t²))/2` used in the oscillatory uniform
@@ -2746,7 +2744,7 @@ whose titles are “Differential Equations” and “The Function W(a,x)”.
   [DLMF 12.10.E28](https://dlmf.nist.gov/12.10.E28):
   The positive-parameter cylinder normalizer condition, with the alternating Gamma coefficient
   expansion of `g(μ) μ√2 H(μ)`.
-  `DLMF.Confluent.IsCylinderGBarNormalizer` ([definition](DLMF/ParabolicCylinder/Uniform/ExpansionData.lean#L170)).
+  `DLMF.Confluent.IsCylinderGBarNormalizer` ([definition](DLMF/ParabolicCylinder/Uniform/ExpansionData.lean#L172)).
 
   [DLMF 12.10.E30](https://dlmf.nist.gov/12.10.E30):
   The positive-parameter V coefficient obtained by substituting `-it` in the Olver polynomial
@@ -2754,104 +2752,104 @@ whose titles are “Differential Equations” and “The Function W(a,x)”.
   `DLMF.Confluent.pcfOlverVBar` ([definition](DLMF/ParabolicCylinder/Uniform/ExpansionData.lean#L93)).
 
 - **Temme and turning-point cylinder coefficients**, [DLMF 12.10.E32](https://dlmf.nist.gov/12.10.E32):
-  The exterior coordinateτ is `DLMF.Confluent.pcfTau`; the modified polynomial recurrence is `DLMF.Confluent.pcfTemmePoly` with `DLMF.Confluent.pcfPolyPrimitive`. The signed Airy coordinateζ, its inverse and amplitudeφ are `DLMF.Confluent.pcfZeta`, `DLMF.Confluent.pcfInverseZeta`, `DLMF.Confluent.pcfPhi`. The Airy coefficient familiesαₛ,βₛ,Aₛ,Bₛ,Cₛ,Dₛ,χ are `DLMF.Confluent.pcfAiryAlpha`, `DLMF.Confluent.pcfAiryBeta`, `DLMF.Confluent.pcfAiryA`, `DLMF.Confluent.pcfAiryB`, `DLMF.Confluent.pcfAiryC`, `DLMF.Confluent.pcfAiryD`, `DLMF.Confluent.pcfAiryChi` ([source](DLMF/ParabolicCylinder/Uniform/ExpansionData.lean#L994)). The removable t=1 branch and inverse coordinate are part of the intended definition. `DLMF.Confluent.HasCylinderAiryExpansion` records the expansion through turning-point zeros.
+  The exterior coordinateτ is `DLMF.Confluent.pcfTau`; the modified polynomial recurrence is `DLMF.Confluent.pcfTemmePoly` with `DLMF.Confluent.pcfPolyPrimitive`. The signed Airy coordinateζ, its inverse and amplitudeφ are `DLMF.Confluent.pcfZeta`, `DLMF.Confluent.pcfInverseZeta`, `DLMF.Confluent.pcfPhi`. The Airy coefficient familiesαₛ,βₛ,Aₛ,Bₛ,Cₛ,Dₛ,χ are `DLMF.Confluent.pcfAiryAlpha`, `DLMF.Confluent.pcfAiryBeta`, `DLMF.Confluent.pcfAiryA`, `DLMF.Confluent.pcfAiryB`, `DLMF.Confluent.pcfAiryC`, `DLMF.Confluent.pcfAiryD`, `DLMF.Confluent.pcfAiryChi` ([source](DLMF/ParabolicCylinder/Uniform/ExpansionData.lean#L996)). The removable t=1 branch and inverse coordinate are part of the intended definition. `DLMF.Confluent.HasCylinderAiryExpansion` records the expansion through turning-point zeros.
 
   [DLMF 12.10.E32](https://dlmf.nist.gov/12.10.E32):
   The auxiliary exterior coordinate `(t/√(t²-1)-1)/2` for the uniform cylinder coefficient
   recurrence.
-  `DLMF.Confluent.pcfTau` ([definition](DLMF/ParabolicCylinder/Uniform/ExpansionData.lean#L180)).
+  `DLMF.Confluent.pcfTau` ([definition](DLMF/ParabolicCylinder/Uniform/ExpansionData.lean#L182)).
 
   [DLMF 12.10.E39](https://dlmf.nist.gov/12.10.E39):
   The real Airy turning-point coordinate, positive for `t ≥ 1` and negative for `t < 1`, defined
   from the exterior and interior cylinder phases.
-  `DLMF.Confluent.pcfZeta` ([definition](DLMF/ParabolicCylinder/Uniform/ExpansionData.lean#L282)).
+  `DLMF.Confluent.pcfZeta` ([definition](DLMF/ParabolicCylinder/Uniform/ExpansionData.lean#L284)).
 
   [DLMF 12.10.E40](https://dlmf.nist.gov/12.10.E40):
   The fourth-root amplitude in the cylinder Airy expansion, with its removable value `2^(-1/6)`
   at the turning point.
-  `DLMF.Confluent.pcfPhi` ([definition](DLMF/ParabolicCylinder/Uniform/ExpansionData.lean#L585)).
+  `DLMF.Confluent.pcfPhi` ([definition](DLMF/ParabolicCylinder/Uniform/ExpansionData.lean#L587)).
 
   [DLMF 12.10.E42](https://dlmf.nist.gov/12.10.E42):
   Continuous coefficient at zero is supplied by a removable limit.
-  `DLMF.Confluent.pcfAiryA` ([definition](DLMF/ParabolicCylinder/Uniform/ExpansionData.lean#L920)).
+  `DLMF.Confluent.pcfAiryA` ([definition](DLMF/ParabolicCylinder/Uniform/ExpansionData.lean#L922)).
 
   [DLMF 12.10.E42](https://dlmf.nist.gov/12.10.E42):
   Continuous coefficient at zero is supplied by a removable limit.
-  `DLMF.Confluent.pcfAiryB` ([definition](DLMF/ParabolicCylinder/Uniform/ExpansionData.lean#L938)).
+  `DLMF.Confluent.pcfAiryB` ([definition](DLMF/ParabolicCylinder/Uniform/ExpansionData.lean#L940)).
 
   [DLMF 12.10.E43](https://dlmf.nist.gov/12.10.E43):
   The product-form Airy coefficient alpha used in the turning-point expansion of the cylinder
   functions.
-  `DLMF.Confluent.pcfAiryAlpha` ([definition](DLMF/ParabolicCylinder/Uniform/ExpansionData.lean#L910)).
+  `DLMF.Confluent.pcfAiryAlpha` ([definition](DLMF/ParabolicCylinder/Uniform/ExpansionData.lean#L912)).
 
   [DLMF 12.10.E43](https://dlmf.nist.gov/12.10.E43):
   The companion Airy coefficient beta, expressed as `-(6m+1)/(6m-1)` times alpha.
-  `DLMF.Confluent.pcfAiryBeta` ([definition](DLMF/ParabolicCylinder/Uniform/ExpansionData.lean#L915)).
+  `DLMF.Confluent.pcfAiryBeta` ([definition](DLMF/ParabolicCylinder/Uniform/ExpansionData.lean#L917)).
 
   [DLMF 12.10.E45](https://dlmf.nist.gov/12.10.E45):
   The logarithmic derivative of the cylinder Airy amplitude `pcfPhi` in the zeta coordinate.
-  `DLMF.Confluent.pcfAiryChi` ([definition](DLMF/ParabolicCylinder/Uniform/ExpansionData.lean#L994)).
+  `DLMF.Confluent.pcfAiryChi` ([definition](DLMF/ParabolicCylinder/Uniform/ExpansionData.lean#L996)).
 
   [DLMF 12.10.E46](https://dlmf.nist.gov/12.10.E46):
   Continuous coefficient at zero is supplied by a removable limit.
-  `DLMF.Confluent.pcfAiryC` ([definition](DLMF/ParabolicCylinder/Uniform/ExpansionData.lean#L957)).
+  `DLMF.Confluent.pcfAiryC` ([definition](DLMF/ParabolicCylinder/Uniform/ExpansionData.lean#L959)).
 
   [DLMF 12.10.E46](https://dlmf.nist.gov/12.10.E46):
   Continuous coefficient at zero is supplied by a removable limit.
-  `DLMF.Confluent.pcfAiryD` ([definition](DLMF/ParabolicCylinder/Uniform/ExpansionData.lean#L976)).
+  `DLMF.Confluent.pcfAiryD` ([definition](DLMF/ParabolicCylinder/Uniform/ExpansionData.lean#L978)).
 
 ### §12.11 Zeros
 
 - **Cylinder zero coordinates and corrections**, [DLMF 12.11.E2](https://dlmf.nist.gov/12.11.E2):
-  τₛ,λₛ are `DLMF.Confluent.pcfZeroTau`, `DLMF.Confluent.pcfZeroLambda` ([source](DLMF/ParabolicCylinder/AsymptoticsZeros.lean#L861)). Real zeros counted away from a turning point use `DLMF.Confluent.pcfDescendingZero`; the correction p₁ and exact first-zero coefficients are `DLMF.Confluent.pcfZeroP1`, `DLMF.Confluent.pcfFirstZeroCoeff` ([source](DLMF/ParabolicCylinder/TurningPoint.lean#L172)). The exact coefficients are used in place of treating rounded DLMF decimal displays as exact constants.
+  τₛ,λₛ are `DLMF.Confluent.pcfZeroTau`, `DLMF.Confluent.pcfZeroLambda` ([source](DLMF/ParabolicCylinder/AsymptoticsZeros.lean#L886)). Real zeros counted away from a turning point use `DLMF.Confluent.pcfDescendingZero`; the correction p₁ and exact first-zero coefficients are `DLMF.Confluent.pcfZeroP1`, `DLMF.Confluent.pcfFirstZeroCoeff` ([source](DLMF/ParabolicCylinder/TurningPoint.lean#L395)). The exact coefficients are used in place of treating rounded DLMF decimal displays as exact constants.
 
   [DLMF 12.11.E2](https://dlmf.nist.gov/12.11.E2):
   The leading complex phase coordinate for the `s`th large cylinder zero, including the
   logarithm of its Gamma connection coefficient.
-  `DLMF.Confluent.pcfZeroTau` ([definition](DLMF/ParabolicCylinder/AsymptoticsZeros.lean#L855)).
+  `DLMF.Confluent.pcfZeroTau` ([definition](DLMF/ParabolicCylinder/AsymptoticsZeros.lean#L880)).
 
   [DLMF 12.11.E3](https://dlmf.nist.gov/12.11.E3):
   The logarithmic correction `log (pcfZeroTau a s) - πi/2` in the expansion of the large
   cylinder zeros.
-  `DLMF.Confluent.pcfZeroLambda` ([definition](DLMF/ParabolicCylinder/AsymptoticsZeros.lean#L861)).
+  `DLMF.Confluent.pcfZeroLambda` ([definition](DLMF/ParabolicCylinder/AsymptoticsZeros.lean#L886)).
 
   [DLMF 12.11.E6](https://dlmf.nist.gov/12.11.E6):
   The first correction in the cylinder turning-point zero expansion, defined by its removable
   limit in the uniform zeta coordinate.
-  `DLMF.Confluent.pcfZeroP1` ([definition](DLMF/ParabolicCylinder/TurningPoint.lean#L136)).
+  `DLMF.Confluent.pcfZeroP1` ([definition](DLMF/ParabolicCylinder/TurningPoint.lean#L142)).
 
   [DLMF 12.11.E9](https://dlmf.nist.gov/12.11.E9):
   Exact coefficients, rather than rounded decimals treated as exact asymptotic constants.
-  `DLMF.Confluent.pcfFirstZeroCoeff` ([definition](DLMF/ParabolicCylinder/TurningPoint.lean#L172)).
+  `DLMF.Confluent.pcfFirstZeroCoeff` ([definition](DLMF/ParabolicCylinder/TurningPoint.lean#L395)).
 
 ### §12.14 The Function W ⁡ ( a , x )
 
 - **Oscillatory Weber W and its coefficient/phase systems**, [DLMF 12.14](https://dlmf.nist.gov/12.14):
-  The actual constructions include `DLMF.Confluent.pcfWZero`, `DLMF.Confluent.pcfWDerivZero`, `DLMF.Confluent.pcfWEven`, `DLMF.Confluent.pcfWOdd`, `DLMF.Confluent.pcfW`, `DLMF.Confluent.pcfWDeriv`, `DLMF.Confluent.pcfWK`, `DLMF.Confluent.pcfGammaPhase`, `DLMF.Confluent.pcfWRho` ([source](DLMF/ParabolicCylinder/Weber/Solutions.lean#L375)). The connection phase is a continuous Γ-phase normalized at 0, not an arbitrary principal argument. Power-series/asymptotic auxiliariesαₙ,βₙ,ω,S,s₁,s₂ and modulus/phase F,θ,G,ψ have actual `DLMF.Confluent.pcfWAlpha`, `DLMF.Confluent.pcfWBeta`, `DLMF.Confluent.pcfWOmega`, `DLMF.Confluent.pcfWS`, `DLMF.Confluent.pcfWCoeff`, `DLMF.Confluent.pcfWF`, `DLMF.Confluent.pcfWTheta`, `DLMF.Confluent.pcfWG`, `DLMF.Confluent.pcfWPsi` constructions ([source](DLMF/ParabolicCylinder/Weber/Representations.lean#L180)). Uniform phases σ,σbar andL are `DLMF.Confluent.pcfWSigma`, `DLMF.Confluent.pcfWSigmaBar`, `DLMF.Confluent.pcfWOlverL`, with `DLMF.Confluent.IsCylinderLNormalizer` ([source](DLMF/ParabolicCylinder/WeberUniform.lean#L79)). Bars on expansion data again denote transformed families, not conjugation.
+  The actual constructions include `DLMF.Confluent.pcfWZero`, `DLMF.Confluent.pcfWDerivZero`, `DLMF.Confluent.pcfWEven`, `DLMF.Confluent.pcfWOdd`, `DLMF.Confluent.pcfW`, `DLMF.Confluent.pcfWDeriv`, `DLMF.Confluent.pcfWK`, `DLMF.Confluent.pcfGammaPhase`, `DLMF.Confluent.pcfWRho` ([source](DLMF/ParabolicCylinder/Weber/Solutions.lean#L381)). The connection phase is a continuous Γ-phase normalized at 0, not an arbitrary principal argument. Power-series/asymptotic auxiliariesαₙ,βₙ,ω,S,s₁,s₂ and modulus/phase F,θ,G,ψ have actual `DLMF.Confluent.pcfWAlpha`, `DLMF.Confluent.pcfWBeta`, `DLMF.Confluent.pcfWOmega`, `DLMF.Confluent.pcfWS`, `DLMF.Confluent.pcfWCoeff`, `DLMF.Confluent.pcfWF`, `DLMF.Confluent.pcfWTheta`, `DLMF.Confluent.pcfWG`, `DLMF.Confluent.pcfWPsi` constructions ([source](DLMF/ParabolicCylinder/Weber/Representations.lean#L180)). Uniform phases σ,σbar andL are `DLMF.Confluent.pcfWSigma`, `DLMF.Confluent.pcfWSigmaBar`, `DLMF.Confluent.pcfWOlverL`, with `DLMF.Confluent.IsCylinderLNormalizer` ([source](DLMF/ParabolicCylinder/WeberUniform.lean#L79)). Bars on expansion data again denote transformed families, not conjugation.
 
   [DLMF 12.14.E5](https://dlmf.nist.gov/12.14.E5):
   The positive connection factor `√(1+exp(2πa)) - exp(πa)` for the real Weber function.
-  `DLMF.Confluent.pcfWK` ([definition](DLMF/ParabolicCylinder/Weber/Solutions.lean#L268)).
+  `DLMF.Confluent.pcfWK` ([definition](DLMF/ParabolicCylinder/Weber/Solutions.lean#L274)).
 
   [DLMF 12.14.E6](https://dlmf.nist.gov/12.14.E6):
   The Weber connection phase `π/8` plus half the chosen Gamma phase.
-  `DLMF.Confluent.pcfWRho` ([definition](DLMF/ParabolicCylinder/Weber/Solutions.lean#L375)).
+  `DLMF.Confluent.pcfWRho` ([definition](DLMF/ParabolicCylinder/Weber/Solutions.lean#L381)).
 
   [DLMF 12.14.E7](https://dlmf.nist.gov/12.14.E7):
   Continuous argument of Gamma along the vertical line, normalized to zero at a=0.
-  `DLMF.Confluent.pcfGammaPhase` ([definition](DLMF/ParabolicCylinder/Weber/Solutions.lean#L287)).
+  `DLMF.Confluent.pcfGammaPhase` ([definition](DLMF/ParabolicCylinder/Weber/Solutions.lean#L293)).
 
   [DLMF 12.14.E17](https://dlmf.nist.gov/12.14.E17):
   Combined exact amplitude s1+i s2, recovered from the two real W solutions.
-  `DLMF.Confluent.pcfWS` ([definition](DLMF/ParabolicCylinder/Weber/Representations.lean#L616)).
+  `DLMF.Confluent.pcfWS` ([definition](DLMF/ParabolicCylinder/Weber/Representations.lean#L627)).
 
   [DLMF 12.14.E19](https://dlmf.nist.gov/12.14.E19):
   The large-real-argument phase `x²/4 - a log x + π/4` plus half the Gamma phase.
-  `DLMF.Confluent.pcfWOmega` ([definition](DLMF/ParabolicCylinder/Weber/Representations.lean#L588)).
+  `DLMF.Confluent.pcfWOmega` ([definition](DLMF/ParabolicCylinder/Weber/Representations.lean#L599)).
 
   [DLMF 12.14.E22](https://dlmf.nist.gov/12.14.E22):
   The rising-factorial coefficient `(1/2+ia)_{2r}` in the large-argument Weber expansion.
-  `DLMF.Confluent.pcfWCoeff` ([definition](DLMF/ParabolicCylinder/Weber/Representations.lean#L666)).
+  `DLMF.Confluent.pcfWCoeff` ([definition](DLMF/ParabolicCylinder/Weber/Representations.lean#L677)).
 
   [DLMF 12.14.E27](https://dlmf.nist.gov/12.14.E27):
   The exterior uniform Weber phase `μ² ξ(t) + π/4`.
@@ -2873,21 +2871,21 @@ whose titles are “Differential Equations” and “The Function W(a,x)”.
 
   [DLMF 12.14.E37](https://dlmf.nist.gov/12.14.E37):
   The modulus of the normalized complex pair formed by `W(a,x)` and `W(a,-x)`.
-  `DLMF.Confluent.pcfWF` ([definition](DLMF/ParabolicCylinder/Weber/Representations.lean#L776)).
+  `DLMF.Confluent.pcfWF` ([definition](DLMF/ParabolicCylinder/Weber/Representations.lean#L787)).
 
   [DLMF 12.14.E37](https://dlmf.nist.gov/12.14.E37):
   The principal argument of the normalized complex Weber solution pair used to define its
   real-axis phase.
-  `DLMF.Confluent.pcfWTheta` ([definition](DLMF/ParabolicCylinder/Weber/Representations.lean#L782)).
+  `DLMF.Confluent.pcfWTheta` ([definition](DLMF/ParabolicCylinder/Weber/Representations.lean#L793)).
 
   [DLMF 12.14.E38](https://dlmf.nist.gov/12.14.E38):
   The modulus of the normalized pair of derivatives of `W(a,x)` and `W(a,-x)`.
-  `DLMF.Confluent.pcfWG` ([definition](DLMF/ParabolicCylinder/Weber/Representations.lean#L809)).
+  `DLMF.Confluent.pcfWG` ([definition](DLMF/ParabolicCylinder/Weber/Representations.lean#L820)).
 
   [DLMF 12.14.E38](https://dlmf.nist.gov/12.14.E38):
   The principal argument of the negated normalized derivative pair in the Weber modulus-phase
   representation.
-  `DLMF.Confluent.pcfWPsi` ([definition](DLMF/ParabolicCylinder/Weber/Representations.lean#L815)).
+  `DLMF.Confluent.pcfWPsi` ([definition](DLMF/ParabolicCylinder/Weber/Representations.lean#L826)).
 
 <!-- retained entry 93 -->
 - **W(a,x), initial values and canonical even/odd solutions**,
@@ -2902,12 +2900,12 @@ whose titles are “Differential Equations” and “The Function W(a,x)”.
 ### §12.15 Generalized Parabolic Cylinder Functions
 
 - **Generalized cylinder equation and parabolic coordinates**, [DLMF 12.15](https://dlmf.nist.gov/12.15):
-  `DLMF.Confluent.IsGeneralizedCylinderSolution` ([source](DLMF/ParabolicCylinder/Basic/EquationAndPhaseData.lean#L86)) records the parameter-dependent generalized equation; no distinguished normalized solution is chosen there. The parabolic-cylinder coordinate substitution in §12.17 and paraboloid-of-revolution coordinates are geometric formulas used to separate the Helmholtz equation. No dedicated local coordinate chart was found. Methods, software and numerical approximations of §§12.18–21 do not add acquired functions.
+  `DLMF.Confluent.IsGeneralizedCylinderSolution` ([source](DLMF/ParabolicCylinder/Basic/EquationAndPhaseData.lean#L89)) records the parameter-dependent generalized equation; no distinguished normalized solution is chosen there. The parabolic-cylinder coordinate substitution in §12.17 and paraboloid-of-revolution coordinates are geometric formulas used to separate the Helmholtz equation. No dedicated local coordinate chart was found. Methods, software and numerical approximations of §§12.18–21 do not add acquired functions.
 
   [DLMF 12.15.E1](https://dlmf.nist.gov/12.15.E1):
   The generalized cylinder equation with nonzero exponent parameter `lam`, evaluated at the
   specified argument.
-  `DLMF.Confluent.IsGeneralizedCylinderSolution` ([definition](DLMF/ParabolicCylinder/Basic/EquationAndPhaseData.lean#L86)).
+  `DLMF.Confluent.IsGeneralizedCylinderSolution` ([definition](DLMF/ParabolicCylinder/Basic/EquationAndPhaseData.lean#L89)).
 
 ## Chapter 13 — Confluent hypergeometric functions
 
@@ -2937,7 +2935,7 @@ Traversal: all §§13.1–13.32 checked; matching sections are §13.2 and §13.1
 ### §13.5 Continued Fractions
 
 - **Confluent continued fractions and large-parameter generating coefficients**, [DLMF 13.5](https://dlmf.nist.gov/13.5):
-  Besides the main Kummer functions and their regularized/logarithmic variants, there are `DLMF.Confluent.kummerMContFractCoeff`, `DLMF.Confluent.kummerUContFractCoeff`, `DLMF.Confluent.kummerMContinuedFraction`, `DLMF.Confluent.kummerUContinuedFraction` ([source](DLMF/Confluent/ContinuedFractions.lean#L99)). The qₛ(z,a) generating function of 13.8.3 is `DLMF.Confluent.largeBGenerating`, `DLMF.Confluent.largeBCoeff` ([source](DLMF/Confluent/Asymptotics/LargeArgument.lean#L1132)). For13.8.11–16 the pₖ,qₖ,cₖ coefficient recurrences and Cν(a,ζ)=cos(πa)Jν(ζ)+sin(πa)Yν(ζ) are formula-defined objects without named local coefficient wrappers; the Bessel combination is an expression in the existing Bessel functions. The signedλ→ζ transition in 13.8(ii) is the same mathematical inversion relation as §8.12 with its own parameter normalization.
+  Besides the main Kummer functions and their regularized/logarithmic variants, there are `DLMF.Confluent.kummerMContFractCoeff`, `DLMF.Confluent.kummerUContFractCoeff`, `DLMF.Confluent.kummerMContinuedFraction`, `DLMF.Confluent.kummerUContinuedFraction` ([source](DLMF/Confluent/ContinuedFractions.lean#L99)). The qₛ(z,a) generating function of 13.8.3 is `DLMF.Confluent.largeBGenerating`, `DLMF.Confluent.largeBCoeff` ([source](DLMF/Confluent/Asymptotics/LargeArgument.lean#L1136)). For13.8.11–16 the pₖ,qₖ,cₖ coefficient recurrences and Cν(a,ζ)=cos(πa)Jν(ζ)+sin(πa)Yν(ζ) are formula-defined objects without named local coefficient wrappers; the Bessel combination is an expression in the existing Bessel functions. The signedλ→ζ transition in 13.8(ii) is the same mathematical inversion relation as §8.12 with its own parameter normalization.
 
   [DLMF 13.5.E2](https://dlmf.nist.gov/13.5.E2):
   The continued fraction `1 + a₀z/(1 + a₁z/(1 + ⋯))` with the Kummer coefficients
@@ -2954,7 +2952,7 @@ Traversal: all §§13.1–13.32 checked; matching sections are §13.2 and §13.1
 - **Lower incomplete-Gamma integral for the Kummer reduction**, [DLMF 13.6.E5](https://dlmf.nist.gov/13.6.E5):
   Lower incomplete gamma via `₁F₁`, AAR §4.4:
   `γ(s,z) = z^s / s · M(s, s+1, -z)`.
-  `DLMF.Confluent.lowerIncGamma` ([definition](DLMF/Confluent/Basic/IncompleteGamma.lean#L32)).
+  `DLMF.Confluent.lowerIncompleteGamma` ([definition](DLMF/Confluent/Basic/IncompleteGamma.lean#L32)).
 
 - **Real error-function integral for the Kummer reduction**, [DLMF 13.6.E7](https://dlmf.nist.gov/13.6.E7):
   The error function, entire in `z`, through the confluent series of AAR §4.4:
@@ -2967,27 +2965,27 @@ Traversal: all §§13.1–13.32 checked; matching sections are §13.2 and §13.1
 - **Large-b generating function and coefficient sequence**, [DLMF 13.8.E3](https://dlmf.nist.gov/13.8.E3):
   Analytic normalization of the generating function in 13.8.3.
   The former product of singular powers assigned zero at the removable point.
-  `DLMF.Confluent.largeBGenerating` ([definition](DLMF/Confluent/Asymptotics/LargeArgument.lean#L1127)).
+  `DLMF.Confluent.largeBGenerating` ([definition](DLMF/Confluent/Asymptotics/LargeArgument.lean#L1131)).
 
   [DLMF 13.8.E3](https://dlmf.nist.gov/13.8.E3):
   The `s`-th Taylor coefficient at `0` of `largeBGenerating a z`.
-  `DLMF.Confluent.largeBCoeff` ([definition](DLMF/Confluent/Asymptotics/LargeArgument.lean#L1132)).
+  `DLMF.Confluent.largeBCoeff` ([definition](DLMF/Confluent/Asymptotics/LargeArgument.lean#L1136)).
 
 ### §13.9 Zeros
 
 - **Kummer zero sets and Bessel-series coefficients**, [DLMF 13.9](https://dlmf.nist.gov/13.9):
-  Positive real zero sets are `DLMF.Confluent.kummerMPosZeros`, `DLMF.Confluent.kummerUPosZeros` ([source](DLMF/Confluent/Zeros/RealZeros.lean#L61)); the sector set for U is `DLMF.Confluent.kummerUSectorZeros` ([source](DLMF/Confluent/Zeros/ComplexZeros.lean#L559)). DLMF's N,T,P zero counts are cardinalities of these sets or expressions in theorem statements, not independent chosen zeros when no enumeration is supplied. The coefficients Aₙ of 13.11.4 have the actual recurrence `DLMF.Confluent.besselExpansionCoeff` ([source](DLMF/Confluent/Series.lean#L323)). The parabolic zero-exclusion region in 13.9 is an explicit set predicate; its interpretation requires the stated real parameters.
+  Positive real zero sets are `DLMF.Confluent.kummerMPosZeros`, `DLMF.Confluent.kummerUPosZeros` ([source](DLMF/Confluent/Zeros/RealZeros.lean#L61)); the sector set for U is `DLMF.Confluent.kummerUSectorZeros` ([source](DLMF/Confluent/Zeros/ComplexZeros.lean#L559)). DLMF's N,T,P zero counts are cardinalities of these sets or expressions in theorem statements, not independent chosen zeros when no enumeration is supplied. The coefficients Aₙ of 13.11.4 have the actual recurrence `DLMF.Confluent.besselExpansionCoeff` ([source](DLMF/Confluent/Series.lean#L329)). The parabolic zero-exclusion region in 13.9 is an explicit set predicate; its interpretation requires the stated real parameters.
 
 ### §13.11 Series
 
 - **Kummer–Bessel expansion coefficients**, [DLMF 13.11.E4](https://dlmf.nist.gov/13.11.E4):
   Coefficients `A_s` in DLMF 13.11.3–13.11.4.
-  `DLMF.Confluent.besselExpansionCoeff` ([definition](DLMF/Confluent/Series.lean#L323)).
+  `DLMF.Confluent.besselExpansionCoeff` ([definition](DLMF/Confluent/Series.lean#L329)).
 
 ### §13.14 Definitions and Basic Properties
 
 - **Whittaker variants, continued fractions and Buchholz coefficients**, [DLMF 13.14](https://dlmf.nist.gov/13.14):
-  The actual `DLMF.Confluent.regularizedWhittakerM`, `DLMF.Confluent.whittakerMOnLog`, `DLMF.Confluent.whittakerWOnLog` ([source](DLMF/Confluent/Basic/Whittaker.lean#L85)) supplement the retained ordinary M,W. The regularized M continues across lower-parameter poles, while ordinary M/Gamma totalization need not do so. Whittaker continued fractions and their coefficients are `DLMF.Confluent.whittakerMContFractCoeff`, `DLMF.Confluent.whittakerWContFractCoeff`, `DLMF.Confluent.whittakerMContinuedFraction`, `DLMF.Confluent.whittakerWContinuedFraction` ([source](DLMF/Confluent/ContinuedFractions.lean#L924)). The polynomials pₛ^(μ)(z) of 13.24.3 are `DLMF.Confluent.whittakerBesselGenerating`, `DLMF.Confluent.whittakerBesselCoeff` ([source](DLMF/Confluent/Basic/Buchholz.lean#L48)), defined by analytic Taylor coefficients of a removable generating function; the Bessel representation theorem is separate. The parameter-dependent implicit coordinates and envelopes in §§13.20–21 are expressed by equations/existential variables; no general selected local coordinate construction was identified. The paraboloidal coordinates in §13.28 are descriptive application substitutions.
+  The actual `DLMF.Confluent.regularizedWhittakerM`, `DLMF.Confluent.whittakerMOnLog`, `DLMF.Confluent.whittakerWOnLog` ([source](DLMF/Confluent/Basic/Whittaker.lean#L85)) supplement the retained ordinary M,W. The regularized M continues across lower-parameter poles, while ordinary M/Gamma totalization need not do so. Whittaker continued fractions and their coefficients are `DLMF.Confluent.whittakerMContFractCoeff`, `DLMF.Confluent.whittakerWContFractCoeff`, `DLMF.Confluent.whittakerMContinuedFraction`, `DLMF.Confluent.whittakerWContinuedFraction` ([source](DLMF/Confluent/ContinuedFractions.lean#L925)). The polynomials pₛ^(μ)(z) of 13.24.3 are `DLMF.Confluent.whittakerBesselGenerating`, `DLMF.Confluent.whittakerBesselCoeff` ([source](DLMF/Confluent/Basic/Buchholz.lean#L48)), defined by analytic Taylor coefficients of a removable generating function; the Bessel representation theorem is separate. The parameter-dependent implicit coordinates and envelopes in §§13.20–21 are expressed by equations/existential variables; no general selected local coordinate construction was identified. The paraboloidal coordinates in §13.28 are descriptive application substitutions.
 
 <!-- retained entry 96 -->
 - **Whittaker M and W**, [13.14.2–3](https://dlmf.nist.gov/13.14.E2):
@@ -3008,12 +3006,12 @@ Traversal: all §§13.1–13.32 checked; matching sections are §13.2 and §13.1
 - **Whittaker-M continued fraction**, [DLMF 13.17.E2](https://dlmf.nist.gov/13.17.E2):
   The continued fraction with the Whittaker `M` coefficients `whittakerMContFractCoeff κ μ k`
   (DLMF 13.17.1).
-  `DLMF.Confluent.whittakerMContinuedFraction` ([definition](DLMF/Confluent/ContinuedFractions.lean#L908)).
+  `DLMF.Confluent.whittakerMContinuedFraction` ([definition](DLMF/Confluent/ContinuedFractions.lean#L909)).
 
 - **Whittaker-W continued fraction**, [DLMF 13.17.E4](https://dlmf.nist.gov/13.17.E4):
   The continued fraction with the Whittaker `W` coefficients `whittakerWContFractCoeff κ μ k`
   (DLMF 13.17.3).
-  `DLMF.Confluent.whittakerWContinuedFraction` ([definition](DLMF/Confluent/ContinuedFractions.lean#L924)).
+  `DLMF.Confluent.whittakerWContinuedFraction` ([definition](DLMF/Confluent/ContinuedFractions.lean#L925)).
 
 ### §13.24 Series
 
@@ -3052,7 +3050,7 @@ Traversal: all §§14.1–14.34 checked; matching headings are §14.3,
 
 <!-- retained entry 101 -->
 - **Olver's regularized hypergeometric F-bold**, [14.3.3](https://dlmf.nist.gov/14.3.E3):
-  `DLMF.Hypergeometric.regularizedGaussHG`, as detailed in Chapter 15.
+  `DLMF.Hypergeometric.regularizedGaussHypergeometric`, as detailed in Chapter 15.
 
 - **Classical Gauss function on its principal cut plane at regular c. This is a**, [DLMF 14.3.E3](https://dlmf.nist.gov/14.3.E3):
   Classical Gauss function on its principal cut plane at regular c. This is a
@@ -3076,7 +3074,7 @@ Traversal: all §§14.1–14.34 checked; matching headings are §14.3,
 ### §14.7 Integer Degree and Order
 
 - **Integer-degree Legendre auxiliary polynomials and integral variables**, [DLMF 14.7](https://dlmf.nist.gov/14.7):
-  Besides the retained P,Q,Ferrers/associated/Olver-normalized variants, the polynomial Wₙ occurring in the integer-degreeQ formula and the coefficientaₙ of degree differentiation in 14.11.3 are exact auxiliaries (the latter `DLMF.Legendre.legendreDegreeA` in [Hypergeometric](DLMF/Legendre/Hypergeometric.lean#L569)). The variable U of 14.12.10 is `DLMF.Legendre.legendreUCoordinate` ([source](DLMF/Legendre/IntegralRepresentations/Ferrers.lean#L441)). Continued-fraction numerators/denominators are `DLMF.Legendre.legendrePCFNum`, `DLMF.Legendre.legendrePCFDen`, `DLMF.Legendre.legendreQCFNum`, `DLMF.Legendre.legendreQCFDen` ([source](DLMF/Legendre/Series.lean#L828)). These ratios remain subject to their non-simultaneous-zero conditions.
+  Besides the retained P,Q,Ferrers/associated/Olver-normalized variants, the polynomial Wₙ occurring in the integer-degreeQ formula and the coefficientaₙ of degree differentiation in 14.11.3 are exact auxiliaries (the latter `DLMF.Legendre.legendreDegreeA` in [Hypergeometric](DLMF/Legendre/Hypergeometric.lean#L569)). The variable U of 14.12.10 is `DLMF.Legendre.legendreUCoordinate` ([source](DLMF/Legendre/IntegralRepresentations/Ferrers.lean#L446)). Continued-fraction numerators/denominators are `DLMF.Legendre.legendrePCFNum`, `DLMF.Legendre.legendrePCFDen`, `DLMF.Legendre.legendreQCFNum`, `DLMF.Legendre.legendreQCFDen` ([source](DLMF/Legendre/Series.lean#L835)). These ratios remain subject to their non-simultaneous-zero conditions.
 
 ### §14.11 Derivatives with Respect to Degree or Order
 
@@ -3084,36 +3082,36 @@ Traversal: all §§14.1–14.34 checked; matching headings are §14.3,
   DLMF 14.11.3: the function `𝖠^μ_ν(x) = sin(νπ) ((1+x)/(1-x))^{μ/2} Σ_{k≥0} ((1-x)/2)^k Γ(k-ν)
   Γ(k+ν+1)/(k! Γ(k-μ+1)) (ψ(k+ν+1) - ψ(k-ν))` (as a `tsum`) appearing in the degree derivatives
   14.11.1–2.
-  `DLMF.Legendre.legendreDegreeA` ([definition](DLMF/Legendre/Hypergeometric.lean#L885)).
+  `DLMF.Legendre.legendreDegreeA` ([definition](DLMF/Legendre/Hypergeometric.lean#L908)).
 
 ### §14.12 Integral Representations
 
 - **Legendre integral coordinate u**, [DLMF 14.12.E10](https://dlmf.nist.gov/14.12.E10):
   DLMF 14.12.10: the upper limit `u = ½ ln((x+1)/(x−1))` (for `x > 1`) used in 14.12.9 and in the
   uniform expansions of 14.15(ii).
-  `DLMF.Legendre.legendreUCoordinate` ([definition](DLMF/Legendre/IntegralRepresentations/Ferrers.lean#L441)).
+  `DLMF.Legendre.legendreUCoordinate` ([definition](DLMF/Legendre/IntegralRepresentations/Ferrers.lean#L446)).
 
 ### §14.14 Continued Fractions
 
 - **Continued-fraction numerator and denominator for Legendre P**, [DLMF 14.14.E2](https://dlmf.nist.gov/14.14.E2):
   DLMF 14.14.2: the partial numerators `(ν−μ−k+1)(ν+μ+k)(x²−1)/4` of the continued fraction
   14.14.1 for `P^μ_ν(x)`.
-  `DLMF.Legendre.legendrePCFNum` ([definition](DLMF/Legendre/Series.lean#L810)).
+  `DLMF.Legendre.legendrePCFNum` ([definition](DLMF/Legendre/Series.lean#L817)).
 
   [DLMF 14.14.E2](https://dlmf.nist.gov/14.14.E2):
   DLMF 14.14.2: the partial denominators `(μ+k) x` of the continued fraction 14.14.1 for
   `P^μ_ν(x)`.
-  `DLMF.Legendre.legendrePCFDen` ([definition](DLMF/Legendre/Series.lean#L816)).
+  `DLMF.Legendre.legendrePCFDen` ([definition](DLMF/Legendre/Series.lean#L823)).
 
 - **Continued-fraction numerator and denominator for Legendre Q**, [DLMF 14.14.E4](https://dlmf.nist.gov/14.14.E4):
   DLMF 14.14.4: the partial numerators of the continued fraction 14.14.3 for `Q^μ_ν(x)`: `1` at `k
   = 0` and `−(ν+μ+k)(ν−μ+k)` for `k ≥ 1`.
-  `DLMF.Legendre.legendreQCFNum` ([definition](DLMF/Legendre/Series.lean#L822)).
+  `DLMF.Legendre.legendreQCFNum` ([definition](DLMF/Legendre/Series.lean#L829)).
 
   [DLMF 14.14.E4](https://dlmf.nist.gov/14.14.E4):
   DLMF 14.14.4: the partial denominators `(2ν+2k+1) x` of the continued fraction 14.14.3 for
   `Q^μ_ν(x)`.
-  `DLMF.Legendre.legendreQCFDen` ([definition](DLMF/Legendre/Series.lean#L828)).
+  `DLMF.Legendre.legendreQCFDen` ([definition](DLMF/Legendre/Series.lean#L835)).
 
 ### §14.15 Uniform Asymptotic Approximations
 
@@ -3166,29 +3164,29 @@ Traversal: all §§14.1–14.34 checked; matching headings are §14.3,
   [DLMF 14.15.E23](https://dlmf.nist.gov/14.15.E23):
   DLMF 14.15.23: the crossing point `X_c`, the largest positive root of `U(−c, x) = Ū(−c, x)`,
   that separates the two branches of the parabolic-cylinder envelopes.
-  `DLMF.Legendre.cylinderEnvelopeCross` ([definition](DLMF/Legendre/UniformCoordinates/InverseCoordinates.lean#L238)).
+  `DLMF.Legendre.cylinderEnvelopeCross` ([definition](DLMF/Legendre/UniformCoordinates/InverseCoordinates.lean#L239)).
 
   [DLMF 14.15.E23](https://dlmf.nist.gov/14.15.E23):
   DLMF 14.15.23: the envelope functions `env U(−c, x)` (or `env Ū(−c, x)` when `barred`),
   equal to `(U(−c,x)² + Ū(−c,x)²)^{1/2}` for `x ≤ X_c` and to `√2 U(−c,x)` (resp. `√2 Ū(−c,x)`)
   for `x > X_c`.
-  `DLMF.Legendre.legendreCylinderEnvelope` ([definition](DLMF/Legendre/UniformCoordinates/InverseCoordinates.lean#L245)).
+  `DLMF.Legendre.legendreCylinderEnvelope` ([definition](DLMF/Legendre/UniformCoordinates/InverseCoordinates.lean#L246)).
 
   [DLMF 14.15.E26](https://dlmf.nist.gov/14.15.E26):
   DLMF 14.15.26: the turning-point parameter `a = ((ν+μ+1/2)|ν−μ+1/2|)^{1/2}/(ν+1/2)` of the
   parabolic-cylinder expansions 14.15.24–14.15.31.
-  `DLMF.Legendre.legendreCylinderA` ([definition](DLMF/Legendre/UniformCoordinates/InverseCoordinates.lean#L252)).
+  `DLMF.Legendre.legendreCylinderA` ([definition](DLMF/Legendre/UniformCoordinates/InverseCoordinates.lean#L255)).
 
   [DLMF 14.15.E26](https://dlmf.nist.gov/14.15.E26):
   DLMF 14.15.26: the parameter `α = (2|ν−μ+1/2|/(ν+1/2))^{1/2}` of the parabolic-cylinder
   expansions 14.15.24–14.15.31.
-  `DLMF.Legendre.legendreCylinderAlpha` ([definition](DLMF/Legendre/UniformCoordinates/InverseCoordinates.lean#L258)).
+  `DLMF.Legendre.legendreCylinderAlpha` ([definition](DLMF/Legendre/UniformCoordinates/InverseCoordinates.lean#L261)).
 
   [DLMF 14.15.E27](https://dlmf.nist.gov/14.15.E27):
   DLMF 14.15.27–14.15.29, 14.15.31: the relation between `x` and `ζ` defining the
   parabolic-cylinder variable, with branches for `a = 0` (`ζ² = −ln(1−x²)`, `xζ ≥ 0`), for `μ ≤ ν+1/2`
   with `x ≥ a` (14.15.27) or `|x| < a` (14.15.28), and for `μ > ν+1/2` (14.15.31).
-  `DLMF.Legendre.LegendreCylinderRelation` ([definition](DLMF/Legendre/UniformCoordinates/InverseCoordinates.lean#L265)).
+  `DLMF.Legendre.LegendreCylinderRelation` ([definition](DLMF/Legendre/UniformCoordinates/InverseCoordinates.lean#L268)).
 
 ### §14.16 Zeros
 
@@ -3212,7 +3210,7 @@ Traversal: all §§14.1–14.34 checked; matching headings are §14.3,
 ### §14.19 Toroidal (or Ring) Functions
 
 - **Toroidal coordinates and conical transformation data**, [DLMF 14.19.E1](https://dlmf.nist.gov/14.19.E1):
-  The toroidal chart is `DLMF.Legendre.toroidalCoordinates` ([source](DLMF/Legendre/Toroidal.lean#L53)); toroidal/ring functions are the indicated half-integer-degree Legendre solutions, with the existing normalizations rather than a new independent differential equation. The conical family also has `DLMF.Legendre.mehlerFockTransform`, `DLMF.Legendre.mehlerFockInverse` ([source](DLMF/Legendre/Conical.lean#L671)) and `DLMF.Legendre.conicalAlpha`, `DLMF.Legendre.conicalSigma`, `DLMF.Legendre.ConicalEtaRelation`, `DLMF.Legendre.conicalEta`, `DLMF.Legendre.conicalBeta`, `DLMF.Legendre.conicalRho` ([source](DLMF/Legendre/ConicalAsymptotics.lean#L423)). These are exact integral transforms and transition variables, with principal inverse-trigonometric branches.
+  The toroidal chart is `DLMF.Legendre.toroidalCoordinates` ([source](DLMF/Legendre/Toroidal.lean#L53)); toroidal/ring functions are the indicated half-integer-degree Legendre solutions, with the existing normalizations rather than a new independent differential equation. The conical family also has `DLMF.Legendre.mehlerFockTransform`, `DLMF.Legendre.mehlerFockInverse` ([source](DLMF/Legendre/Conical.lean#L672)) and `DLMF.Legendre.conicalAlpha`, `DLMF.Legendre.conicalSigma`, `DLMF.Legendre.ConicalEtaRelation`, `DLMF.Legendre.conicalEta`, `DLMF.Legendre.conicalBeta`, `DLMF.Legendre.conicalRho` ([source](DLMF/Legendre/ConicalAsymptotics.lean#L423)). These are exact integral transforms and transition variables, with principal inverse-trigonometric branches.
 
   [DLMF 14.19.E1](https://dlmf.nist.gov/14.19.E1):
   DLMF 14.19.1: the toroidal coordinates map `(η, θ, φ) ↦ (x, y, z) = (c sinh η cos φ, c sinh η
@@ -3232,12 +3230,12 @@ Traversal: all §§14.1–14.34 checked; matching headings are §14.3,
 - **Mehler–Fock integral transform**, [DLMF 14.20.E11](https://dlmf.nist.gov/14.20.E11):
   DLMF 14.20.11: the generalized Mehler–Fock transform `f(τ) = (τ/π) sinh(τπ) Γ(1/2-μ+iτ)
   Γ(1/2-μ-iτ) ∫₁^∞ P^μ_{-1/2+iτ}(x) g(x) dx`, taken as an improper integral at `+∞`.
-  `DLMF.Legendre.mehlerFockTransform` ([definition](DLMF/Legendre/Conical.lean#L664)).
+  `DLMF.Legendre.mehlerFockTransform` ([definition](DLMF/Legendre/Conical.lean#L665)).
 
 - **Inverse Mehler–Fock integral transform**, [DLMF 14.20.E12](https://dlmf.nist.gov/14.20.E12):
   DLMF 14.20.12: the inverse Mehler–Fock transform `g(x) = ∫₀^∞ P^μ_{-1/2+iτ}(x) f(τ) dτ`, taken
   as an improper integral at `+∞`.
-  `DLMF.Legendre.mehlerFockInverse` ([definition](DLMF/Legendre/Conical.lean#L671)).
+  `DLMF.Legendre.mehlerFockInverse` ([definition](DLMF/Legendre/Conical.lean#L672)).
 
 - **Conical transition parameter α**, [DLMF 14.20.E19](https://dlmf.nist.gov/14.20.E19):
   DLMF 14.20.19: the ratio `α = μ/τ` used in the uniform large-`τ` asymptotics of conical
@@ -3273,14 +3271,14 @@ Traversal: all §§14.1–14.34 checked; matching headings are §14.3,
 ### §14.24 Analytic Continuation
 
 - **Continued Legendre branches and generalized equation**, [DLMF 14.24](https://dlmf.nist.gov/14.24):
-  P(z,s),Q(z,s) and the subscript-s branches record the two specified circuit families around±1. `DLMF.Legendre.legendreTransport` ([source](DLMF/Legendre/Continuation/LogarithmicBranches.lean#L789)), `DLMF.Legendre.legendreEllipsePath` ([source](DLMF/Legendre/Continuation/LogarithmicBranches.lean#L932)), `DLMF.Legendre.legendreEllipseContinued` ([source](DLMF/Legendre/Continuation/LogarithmicBranches.lean#L937)), `DLMF.Legendre.legendreOneLoop` ([source](DLMF/Legendre/Continuation/Monodromy.lean#L490)), `DLMF.Legendre.legendreOneContinued` ([source](DLMF/Legendre/Continuation/Monodromy.lean#L497)) construct the path transport and circuit representatives; principal P,Q alone carry no circuit number. `DLMF.Legendre.IsGeneralizedLegendreSolution` ([source](DLMF/Legendre/Associated/BoundaryAndConnections.lean#L692)) records §14.29's generalized equation. Spheroidal surface harmonic names and normalized oblate variants in §14.30 are distinct from general homogeneous harmonic polynomials; the actual harmonic wrappers are listed at §14.30. The angular-momentum operators L²,L_z defined in §14.30(iv) are descriptive differential-operator formulas; no project-local physics-operator construction was found.
+  P(z,s),Q(z,s) and the subscript-s branches record the two specified circuit families around±1. `DLMF.Legendre.legendreTransport` ([source](DLMF/Legendre/Continuation/LogarithmicBranches.lean#L799)), `DLMF.Legendre.legendreEllipsePath` ([source](DLMF/Legendre/Continuation/LogarithmicBranches.lean#L943)), `DLMF.Legendre.legendreEllipseContinued` ([source](DLMF/Legendre/Continuation/LogarithmicBranches.lean#L948)), `DLMF.Legendre.legendreOneLoop` ([source](DLMF/Legendre/Continuation/Monodromy.lean#L490)), `DLMF.Legendre.legendreOneContinued` ([source](DLMF/Legendre/Continuation/Monodromy.lean#L497)) construct the path transport and circuit representatives; principal P,Q alone carry no circuit number. `DLMF.Legendre.IsGeneralizedLegendreSolution` ([source](DLMF/Legendre/Associated/BoundaryAndConnections.lean#L706)) records §14.29's generalized equation. Spheroidal surface harmonic names and normalized oblate variants in §14.30 are distinct from general homogeneous harmonic polynomials; the actual harmonic wrappers are listed at §14.30. The angular-momentum operators L²,L_z defined in §14.30(iv) are descriptive differential-operator formulas; no project-local physics-operator construction was found.
 
 ### §14.29 Generalizations
 
 - **Generalized Legendre equation predicate**, [DLMF 14.29.E1](https://dlmf.nist.gov/14.29.E1):
   DLMF 14.29.1: `f` satisfies the generalized Legendre equation at `z`, `(1-z²) f'' - 2z f' +
   (ν(ν+1) - μ₁²/(2(1-z)) - μ₂²/(2(1+z))) f = 0`.
-  `DLMF.Legendre.IsGeneralizedLegendreSolution` ([definition](DLMF/Legendre/Associated/BoundaryAndConnections.lean#L692)).
+  `DLMF.Legendre.IsGeneralizedLegendreSolution` ([definition](DLMF/Legendre/Associated/BoundaryAndConnections.lean#L706)).
 
 ### §14.30 Spherical and Spheroidal Harmonics
 
@@ -3319,15 +3317,15 @@ Traversal: all §§15.1–15.20 checked; the matching section is §15.2.
   `ordinaryHypergeometric` and `ordinaryHypergeometricSeries` in
   [OrdinaryHypergeometric](.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/OrdinaryHypergeometric.lean#L71)
   are the native series constructions. On the principal cut plane the ordinary
-  continued value is expressed locally as `Gamma c * regularizedGaussHG a b c z`;
+  continued value is expressed locally as `Gamma c * regularizedGaussHypergeometric a b c z`;
   The independent ordinary continued representative is `DLMF.Legendre.legendreGaussF` in [Hypergeometric](DLMF/Legendre/Hypergeometric.lean#L26), defined as Gamma(c) times the regularized continuation on its principal cut domain; regular lower parameters are required for that ordinary normalization.
 
 <!-- retained entry 107 -->
 - **Regularized F-bold**, [15.2.2](https://dlmf.nist.gov/15.2.E2): Mathlib
   `Complex.regularizedGaussHGFun` in
   [RegularizedHypergeometric](.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/RegularizedHypergeometric.lean#L360)
-  is the series; `DLMF.Hypergeometric.regularizedGaussHGIntegral` is Euler's
-  interval integral and `regularizedGaussHG` is its parameter-shift continuation
+  is the series; `DLMF.Hypergeometric.regularizedGaussHypergeometricIntegral` is Euler's
+  interval integral and `regularizedGaussHypergeometric` is its parameter-shift continuation
   in [ArgumentContinuation](DLMF/Hypergeometric/Basic/PrincipalBranch.lean#L118).
   The continued function has mathematical domain `ℂ \ [1,∞)`; the integral
   construction needs `Re b > 0`, `Re(c-b) > 0`. None of these objects alone
@@ -3336,7 +3334,7 @@ Traversal: all §§15.1–15.20 checked; the matching section is §15.2.
 <!-- retained entry 108 -->
 - **Terminating exceptional-parameter interpretation**,
   [15.2.4–6](https://dlmf.nist.gov/15.2.E4): terminating sums can be expressed
-  with `gaussHGCoeff` in [Basic](DLMF/Hypergeometric/Basic/GaussCoefficients.lean#L26).
+  with `gaussHypergeometricCoeff` in [Basic](DLMF/Hypergeometric/Basic/GaussCoefficients.lean#L26).
   There is no named two-variable limiting object distinguishing the two
   orders of parameter limits in 15.2.5 and 15.2.6; those interpretations must
   not be inferred from a totalized series or quotient.
@@ -3433,15 +3431,15 @@ Traversal: all §§15.1–15.20 checked; the matching section is §15.2.
 ### §15.12 Asymptotic Approximations
 
 - **Hypergeometric generating coefficients and zero count**, [DLMF 15.12.E4](https://dlmf.nist.gov/15.12.E4):
-  qₛ coefficients are `DLMF.Hypergeometric.largeDenominatorGenerating`, `DLMF.Hypergeometric.largeDenominatorCoeff`, with removable `DLMF.Hypergeometric.expSubOneDiv` ([source](DLMF/Hypergeometric/Asymptotics.lean#L152)). The pₛ,qₛ product coefficients of 15.16.2 and implicit asymptotic variables of 15.12 are additional formula-defined objects; no independently named local pₛ/qₛ or general coordinate construction was found. The N(a,b,c) of §15.13 denotes the number of zeros in the stated sector, with exceptional polynomial/undefined cases excluded; it is not an unconstrained integer parameter.
+  qₛ coefficients are `DLMF.Hypergeometric.largeDenominatorGenerating`, `DLMF.Hypergeometric.largeDenominatorCoeff`, with removable `DLMF.Hypergeometric.expSubOneDiv` ([source](DLMF/Hypergeometric/Asymptotics.lean#L155)). The pₛ,qₛ product coefficients of 15.16.2 and implicit asymptotic variables of 15.12 are additional formula-defined objects; no independently named local pₛ/qₛ or general coordinate construction was found. The N(a,b,c) of §15.13 denotes the number of zeros in the stated sector, with exceptional polynomial/undefined cases excluded; it is not an unconstrained integer parameter.
 
   [DLMF 15.12.E4](https://dlmf.nist.gov/15.12.E4):
   Generating function for the large-denominator coefficients.
-  `DLMF.Hypergeometric.largeDenominatorGenerating` ([definition](DLMF/Hypergeometric/Asymptotics.lean#L156)).
+  `DLMF.Hypergeometric.largeDenominatorGenerating` ([definition](DLMF/Hypergeometric/Asymptotics.lean#L159)).
 
   [DLMF 15.12.E4](https://dlmf.nist.gov/15.12.E4):
   Taylor coefficients of DLMF's generating function.
-  `DLMF.Hypergeometric.largeDenominatorCoeff` ([definition](DLMF/Hypergeometric/Asymptotics.lean#L161)).
+  `DLMF.Hypergeometric.largeDenominatorCoeff` ([definition](DLMF/Hypergeometric/Asymptotics.lean#L164)).
 
 ## Chapter 16 — Generalized hypergeometric functions and Meijer G
 
@@ -3453,27 +3451,27 @@ Traversal: all §§16.1–16.27 checked; matching headings are §16.2 and §16.1
 
 <!-- retained entry 109 -->
 - **Generalized ₚFq and its formal/terminating series**, [16.2.1](https://dlmf.nist.gov/16.2.E1):
-  `DLMF.Hypergeometric.genCoeff`, `genFormalSeries`, `genFiniteHG`, `genHG`
+  `DLMF.Hypergeometric.generalizedHypergeometricCoeff`, `generalizedHypergeometricSeries`, `generalizedHypergeometricTruncated`, `generalizedHypergeometric`
   in [GeneralizedHypergeometric/Basic](DLMF/GeneralizedHypergeometric/Basic/ParametersAndSeries.lean#L34).
-  `GenPrincipalContinuation` specifies the principal continuation for `p=q+1`;
-  `genHGLower` separately gives lower-bank values. For `p>q+1` nonterminating
+  `PrincipalContinuation` specifies the principal continuation for `p=q+1`;
+  `generalizedHypergeometricLower` separately gives lower-bank values. For `p>q+1` nonterminating
   series values are not a continuation: use the Barnes constructions
-  `GenHasBarnesValueLog`, `genBarnesHGLog` in the same file.
+  `HasBarnesValueLog`, `barnesHypergeometricLog` in the same file.
 
 <!-- retained entry 110 -->
 - **Excess γq**, [16.2.2](https://dlmf.nist.gov/16.2.E2):
-  `DLMF.Hypergeometric.genExcess` in
+  `DLMF.Hypergeometric.parameterExcess` in
   [Basic](DLMF/GeneralizedHypergeometric/Basic/ParametersAndSeries.lean#L60).
 
 - **Generalized hypergeometric excess and classifications**, [DLMF 16.2.E2](https://dlmf.nist.gov/16.2.E2):
-  The excessγ_q is `DLMF.Hypergeometric.genExcess`; regularized and ordinary/finite series are distinct constructions. Well-poised, very-well-poised andk-balanced classifications are `DLMF.Hypergeometric.GenWellPoised`, the corresponding half-parameter condition, and `DLMF.Hypergeometric.GenKBalanced` ([source](DLMF/GeneralizedHypergeometric/Basic/ParametersAndSeries.lean#L91)). Balanced/Saalschützian means1-balanced with termination as specified. The bilateral coefficient and series are `DLMF.Hypergeometric.genBilateralCoeff`, `DLMF.Hypergeometric.genBilateralHG` ([source](DLMF/GeneralizedHypergeometric/Basic/BilateralAndBarnes.lean#L47)); negative indices use the appropriate generalized factorial convention.
+  The excessγ_q is `DLMF.Hypergeometric.parameterExcess`; regularized and ordinary/finite series are distinct constructions. Well-poised, very-well-poised andk-balanced classifications are `DLMF.Hypergeometric.IsWellPoised`, the corresponding half-parameter condition, and `DLMF.Hypergeometric.IsKBalanced` ([source](DLMF/GeneralizedHypergeometric/Basic/ParametersAndSeries.lean#L95)). Balanced/Saalschützian means1-balanced with termination as specified. The bilateral coefficient and series are `DLMF.Hypergeometric.bilateralHypergeometricCoeff`, `DLMF.Hypergeometric.bilateralHypergeometric` ([source](DLMF/GeneralizedHypergeometric/Basic/BilateralAndBarnes.lean#L47)); negative indices use the appropriate generalized factorial convention.
 
 <!-- retained entry 111 -->
 - **Regularized generalized hypergeometric function**, [16.2.5](https://dlmf.nist.gov/16.2.E5):
   Mathlib `Complex.regularizedHGFunCoeff`, `regularizedHGFunSeries`,
   `regularizedHGFun` in
   [RegularizedHypergeometric](.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/RegularizedHypergeometric.lean#L67)
-  are native series objects. `DLMF.Hypergeometric.genRegularizedHG` in
+  are native series objects. `DLMF.Hypergeometric.regularizedGeneralizedHypergeometric` in
   [Basic](DLMF/GeneralizedHypergeometric/Basic/PrincipalContinuation.lean#L36) additionally chooses
   the specified principal continuation when `p=q+1`; existence obligations
   are separate. Multisets encode unordered upper and lower parameter lists.
@@ -3482,34 +3480,34 @@ Traversal: all §§16.1–16.27 checked; matching headings are §16.2 and §16.1
 
 - **Well-poised parameter vectors, in exactly the indexing order of 16.4.1**, [DLMF 16.4.E1](https://dlmf.nist.gov/16.4.E1):
   Well-poised parameter vectors, in exactly the indexing order of 16.4.1.
-  `DLMF.Hypergeometric.GenWellPoised` ([definition](DLMF/GeneralizedHypergeometric/Basic/ParametersAndSeries.lean#L82)).
+  `DLMF.Hypergeometric.IsWellPoised` ([definition](DLMF/GeneralizedHypergeometric/Basic/ParametersAndSeries.lean#L86)).
 
 - **K-balanced terminating unity series (16.4.2); balanced means k=1**, [DLMF 16.4.E2](https://dlmf.nist.gov/16.4.E2):
   A k-balanced terminating unity series (16.4.2); balanced means k=1.
-  `DLMF.Hypergeometric.GenKBalanced` ([definition](DLMF/GeneralizedHypergeometric/Basic/ParametersAndSeries.lean#L91)).
+  `DLMF.Hypergeometric.IsKBalanced` ([definition](DLMF/GeneralizedHypergeometric/Basic/ParametersAndSeries.lean#L95)).
 
 - **Thomae expression supplies parameter continuation beyond the original unit**, [DLMF 16.4.E11](https://dlmf.nist.gov/16.4.E11):
   The Thomae expression supplies parameter continuation beyond the original unit
   series region; at Gamma poles its totalized value is not an assigned finite limit.
-  `DLMF.Hypergeometric.gen3F2UnitThomae` ([definition](DLMF/GeneralizedHypergeometric/UnitArgument.lean#L1438)).
+  `DLMF.Hypergeometric.gen3F2UnitThomae` ([definition](DLMF/GeneralizedHypergeometric/UnitArgument.lean#L1106)).
 
 - **Formal bilateral hypergeometric coefficients and series**, [DLMF 16.4.E16](https://dlmf.nist.gov/16.4.E16):
   Formal bilateral hypergeometric coefficient, with no factorial factor (16.4.16).
-  `DLMF.Hypergeometric.genBilateralCoeff` ([definition](DLMF/GeneralizedHypergeometric/Basic/BilateralAndBarnes.lean#L41)).
+  `DLMF.Hypergeometric.bilateralHypergeometricCoeff` ([definition](DLMF/GeneralizedHypergeometric/Basic/BilateralAndBarnes.lean#L41)).
 
   [DLMF 16.4.E16](https://dlmf.nist.gov/16.4.E16):
   Totalized bilateral series. Outside an explicitly proved convergence regime this is
   only a formal-series interface, not an analytically continued function (16.4.16).
-  `DLMF.Hypergeometric.genBilateralHG` ([definition](DLMF/GeneralizedHypergeometric/Basic/BilateralAndBarnes.lean#L47)).
+  `DLMF.Hypergeometric.bilateralHypergeometric` ([definition](DLMF/GeneralizedHypergeometric/Basic/BilateralAndBarnes.lean#L47)).
 
 ### §16.8 Differential Equations
 
 - **Ordinary/regular singularities and generalized hypergeometric ODE**, [DLMF 16.8](https://dlmf.nist.gov/16.8):
-  The classification extends §2.7 to arbitrary order; the local predicates are `Complex.LinearODEOrdinaryAt`, `Complex.LinearODEAtMostRegularAt`, `Complex.LinearODERegularSingularAt`, `Complex.LinearODEIrregularAt` and their infinity counterparts ([source](DLMFMathlib/Analysis/ODE/Singularities.lean#L33)). The module path is `DLMFMathlib.Analysis.ODE.Singularities`; the declaration namespace is `Complex`. Eulerθ=zD is `DLMF.Hypergeometric.eulerTheta`, while the normalized differential form, coefficient polynomials and Frobenius solutions are `DLMF.Hypergeometric.genNormalizedODE`, `DLMF.Hypergeometric.genD`, `DLMF.Hypergeometric.genThetaA`, `DLMF.Hypergeometric.genThetaB`, `DLMF.Hypergeometric.genThetaDCoeff`, `DLMF.Hypergeometric.genODEAlpha`, `DLMF.Hypergeometric.genODEBeta`, `DLMF.Hypergeometric.genODEOrder`, `DLMF.Hypergeometric.genODECoeff`, `DLMF.Hypergeometric.GenODESolution`, `DLMF.Hypergeometric.GenFundamentalSystem`, `DLMF.Hypergeometric.genFrobeniusRoot`, `DLMF.Hypergeometric.genFrobeniusZero`, `DLMF.Hypergeometric.genHGNegativeLog`, `DLMF.Hypergeometric.genFrobeniusInfinityLog`, `DLMF.Hypergeometric.genInfinityConnectionCoeff`, `DLMF.Hypergeometric.genCenteredInfinityTerm` ([source](DLMF/GeneralizedHypergeometric/DifferentialEquations.lean#L151)). Ordinary powers and full logarithmic sheets remain separate.
+  The classification extends §2.7 to arbitrary order; the local predicates are `Complex.LinearODEOrdinaryAt`, `Complex.LinearODEAtMostRegularAt`, `Complex.LinearODERegularSingularAt`, `Complex.LinearODEIrregularAt` and their infinity counterparts ([source](DLMFMathlib/Analysis/ODE/Singularities.lean#L33)). The module path is `DLMFMathlib.Analysis.ODE.Singularities`; the declaration namespace is `Complex`. Eulerθ=zD is `DLMF.Hypergeometric.eulerTheta`, while the normalized differential form, coefficient polynomials and Frobenius solutions are `DLMF.Hypergeometric.genNormalizedODE`, `DLMF.Hypergeometric.genD`, `DLMF.Hypergeometric.genThetaA`, `DLMF.Hypergeometric.genThetaB`, `DLMF.Hypergeometric.genThetaDCoeff`, `DLMF.Hypergeometric.genODEAlpha`, `DLMF.Hypergeometric.genODEBeta`, `DLMF.Hypergeometric.genODEOrder`, `DLMF.Hypergeometric.genODECoeff`, `DLMF.Hypergeometric.GenODESolution`, `DLMF.Hypergeometric.GenFundamentalSystem`, `DLMF.Hypergeometric.genFrobeniusRoot`, `DLMF.Hypergeometric.genFrobeniusZero`, `DLMF.Hypergeometric.genHGNegativeLog`, `DLMF.Hypergeometric.genFrobeniusInfinityLog`, `DLMF.Hypergeometric.genInfinityConnectionCoeff`, `DLMF.Hypergeometric.genCenteredInfinityTerm` ([source](DLMF/GeneralizedHypergeometric/DifferentialEquations.lean#L154)). Ordinary powers and full logarithmic sheets remain separate.
 
   [DLMF 16.8.E1](https://dlmf.nist.gov/16.8.E1):
   Normalized scalar ODE value (16.8.1).
-  `DLMF.Hypergeometric.genNormalizedODE` ([definition](DLMF/GeneralizedHypergeometric/DifferentialEquations.lean#L60)).
+  `DLMF.Hypergeometric.genNormalizedODE` ([definition](DLMF/GeneralizedHypergeometric/DifferentialEquations.lean#L63)).
 
   [DLMF 16.8.E2](https://dlmf.nist.gov/16.8.E2):
   The Euler operator `θ f = z f'`.
@@ -3517,15 +3515,15 @@ Traversal: all §§16.1–16.27 checked; matching headings are §16.2 and §16.1
 
   [DLMF 16.8.E2](https://dlmf.nist.gov/16.8.E2):
   Differentiation operator; theta itself is the existing `eulerTheta` (16.8.2).
-  `DLMF.Hypergeometric.genD` ([definition](DLMF/GeneralizedHypergeometric/DifferentialEquations.lean#L65)).
+  `DLMF.Hypergeometric.genD` ([definition](DLMF/GeneralizedHypergeometric/DifferentialEquations.lean#L68)).
 
   [DLMF 16.8.E6](https://dlmf.nist.gov/16.8.E6):
   The nonresonant Frobenius solutions at zero (16.8.6).
-  `DLMF.Hypergeometric.genFrobeniusZero` ([definition](DLMF/GeneralizedHypergeometric/DifferentialEquations.lean#L114)).
+  `DLMF.Hypergeometric.genFrobeniusZero` ([definition](DLMF/GeneralizedHypergeometric/DifferentialEquations.lean#L117)).
 
   [DLMF 16.8.E7](https://dlmf.nist.gov/16.8.E7):
   The nonresonant infinity solutions with an explicit log(-z) sheet (16.8.7).
-  `DLMF.Hypergeometric.genFrobeniusInfinityLog` ([definition](DLMF/GeneralizedHypergeometric/DifferentialEquations.lean#L130)).
+  `DLMF.Hypergeometric.genFrobeniusInfinityLog` ([definition](DLMF/GeneralizedHypergeometric/DifferentialEquations.lean#L133)).
 
 ### §16.11 Asymptotic Expansions
 
@@ -3534,37 +3532,37 @@ Traversal: all §§16.1–16.27 checked; matching headings are §16.2 and §16.1
 
   [DLMF 16.11.E1](https://dlmf.nist.gov/16.11.E1):
   The kth formal exponential term E_(p,q) on the logarithm sheet w (16.11.1).
-  `DLMF.Hypergeometric.genETermLog` ([definition](DLMF/GeneralizedHypergeometric/Asymptotics.lean#L95)).
+  `DLMF.Hypergeometric.genETermLog` ([definition](DLMF/GeneralizedHypergeometric/Asymptotics.lean#L97)).
 
   [DLMF 16.11.E2](https://dlmf.nist.gov/16.11.E2):
   The formal algebraic simple-pole term H_(p,q) on logarithm sheet w (16.11.2).
-  `DLMF.Hypergeometric.genHTermLog` ([definition](DLMF/GeneralizedHypergeometric/Asymptotics.lean#L104)).
+  `DLMF.Hypergeometric.genHTermLog` ([definition](DLMF/GeneralizedHypergeometric/Asymptotics.lean#L106)).
 
   [DLMF 16.11.E3](https://dlmf.nist.gov/16.11.E3):
   The positive exponential index kappa, for p<q+1 (16.11.3).
-  `DLMF.Hypergeometric.genAsymptoticKappa` ([definition](DLMF/GeneralizedHypergeometric/Asymptotics.lean#L56)).
+  `DLMF.Hypergeometric.genAsymptoticKappa` ([definition](DLMF/GeneralizedHypergeometric/Asymptotics.lean#L58)).
 
   [DLMF 16.11.E3](https://dlmf.nist.gov/16.11.E3):
   The full complex exponent nu (16.11.3).
-  `DLMF.Hypergeometric.genAsymptoticNu` ([definition](DLMF/GeneralizedHypergeometric/Asymptotics.lean#L60)).
+  `DLMF.Hypergeometric.genAsymptoticNu` ([definition](DLMF/GeneralizedHypergeometric/Asymptotics.lean#L62)).
 
   [DLMF 16.11.E4](https://dlmf.nist.gov/16.11.E4):
   Raw c coefficients from the complete finite recurrence (16.11.4).
-  `DLMF.Hypergeometric.genAsymptoticCRaw` ([definition](DLMF/GeneralizedHypergeometric/Asymptotics.lean#L78)).
+  `DLMF.Hypergeometric.genAsymptoticCRaw` ([definition](DLMF/GeneralizedHypergeometric/Asymptotics.lean#L80)).
 
   [DLMF 16.11.E5](https://dlmf.nist.gov/16.11.E5):
   The raw e_(k,m) coefficient, where the augmented lower parameters are distinct.
-  `DLMF.Hypergeometric.genAsymptoticEkm` ([definition](DLMF/GeneralizedHypergeometric/Asymptotics.lean#L69)).
+  `DLMF.Hypergeometric.genAsymptoticEkm` ([definition](DLMF/GeneralizedHypergeometric/Asymptotics.lean#L71)).
 
 ### §16.13 Appell Functions
 
 <!-- retained entry extra111 -->
 **Appell F₁,F₂,F₃,F₄** definitions occur under
 [§16.13 “Appell Functions”, 16.13.1–4](https://dlmf.nist.gov/16.13):
-`DLMF.Hypergeometric.appF1`, `appF2`, `appF3` in
+`DLMF.Hypergeometric.appellF1`, `appellF2`, `appellF3` in
 [DefinitionsAndSeries](DLMF/GeneralizedHypergeometric/Appell/Basic/Series.lean#L77),
-and `appF4` in [AppellF4](DLMF/Hypergeometric/Basic/AppellF4.lean#L41).
-The four `appF1Euler`–`appF4Euler` definitions in
+and `appellF4` in [AppellF4](DLMF/Hypergeometric/Basic/AppellF4.lean#L41).
+The four `appellF1Euler`–`appellF4Euler` definitions in
 [EulerIntegrals](DLMF/GeneralizedHypergeometric/Appell/Basic/EulerBranches.lean#L53)
 are independent integral constructions; their domains differ from the double-series
 domains. `appF4InfinityExpression`, `appF4InfinityBranch` in
@@ -3573,19 +3571,19 @@ give a particular continued branch. `IsAppellContinuation`, `IsAppellBranchAt`
 specify general continuation data, rather than a globally single-valued Appell function.
 
 - **Appell series, Horn examples and independent Euler integrals**, [DLMF 16.13](https://dlmf.nist.gov/16.13):
-  F₁,F₂,F₃ have explicit coefficient and double-series constructions `DLMF.Hypergeometric.appF1Coeff`, `DLMF.Hypergeometric.appF2Coeff`, `DLMF.Hypergeometric.appF3Coeff`, `DLMF.Hypergeometric.appF1`, `DLMF.Hypergeometric.appF2`, `DLMF.Hypergeometric.appF3` ([source](DLMF/GeneralizedHypergeometric/Appell/Basic/Series.lean#L106)); F₄ is `DLMF.Hypergeometric.appF4` ([source](DLMF/Hypergeometric/Basic/AppellF4.lean#L51)). HornG₂,G₃ of 16.14.5–6 are `DLMF.Hypergeometric.hornG2`, `DLMF.Hypergeometric.hornG3` ([source](DLMF/GeneralizedHypergeometric/Appell/Basic/Series.lean#L117)), with the stated sufficient convergence regions. Independent `DLMF.Hypergeometric.appF1Euler`, `DLMF.Hypergeometric.appF2Euler`, `DLMF.Hypergeometric.appF3Euler`, `DLMF.Hypergeometric.appF4Euler` ([source](DLMF/GeneralizedHypergeometric/Appell/Basic/EulerBranches.lean#L81)) implement the integral formulas of §16.15; F₃ uses the triangleu,v≥0,u+v≤1, and F₄'s variables arex(1−y),y(1−x). Representation/continuation statements are separate from these actual integral constructions.
+  F₁,F₂,F₃ have explicit coefficient and double-series constructions `DLMF.Hypergeometric.appellF1Coeff`, `DLMF.Hypergeometric.appellF2Coeff`, `DLMF.Hypergeometric.appellF3Coeff`, `DLMF.Hypergeometric.appellF1`, `DLMF.Hypergeometric.appellF2`, `DLMF.Hypergeometric.appellF3` ([source](DLMF/GeneralizedHypergeometric/Appell/Basic/Series.lean#L106)); F₄ is `DLMF.Hypergeometric.appellF4` ([source](DLMF/Hypergeometric/Basic/AppellF4.lean#L52)). HornG₂,G₃ of 16.14.5–6 are `DLMF.Hypergeometric.hornG2`, `DLMF.Hypergeometric.hornG3` ([source](DLMF/GeneralizedHypergeometric/Appell/Basic/Series.lean#L117)), with the stated sufficient convergence regions. Independent `DLMF.Hypergeometric.appellF1Euler`, `DLMF.Hypergeometric.appellF2Euler`, `DLMF.Hypergeometric.appellF3Euler`, `DLMF.Hypergeometric.appellF4Euler` ([source](DLMF/GeneralizedHypergeometric/Appell/Basic/EulerBranches.lean#L82)) implement the integral formulas of §16.15; F₃ uses the triangleu,v≥0,u+v≤1, and F₄'s variables arex(1−y),y(1−x). Representation/continuation statements are separate from these actual integral constructions.
 
   [DLMF 16.13.E1](https://dlmf.nist.gov/16.13.E1):
   Appell F1 double-series coefficient.
-  `DLMF.Hypergeometric.appF1Coeff` ([definition](DLMF/GeneralizedHypergeometric/Appell/Basic/Series.lean#L78)).
+  `DLMF.Hypergeometric.appellF1Coeff` ([definition](DLMF/GeneralizedHypergeometric/Appell/Basic/Series.lean#L78)).
 
   [DLMF 16.13.E2](https://dlmf.nist.gov/16.13.E2):
   Appell F2 double-series coefficient.
-  `DLMF.Hypergeometric.appF2Coeff` ([definition](DLMF/GeneralizedHypergeometric/Appell/Basic/Series.lean#L83)).
+  `DLMF.Hypergeometric.appellF2Coeff` ([definition](DLMF/GeneralizedHypergeometric/Appell/Basic/Series.lean#L83)).
 
   [DLMF 16.13.E3](https://dlmf.nist.gov/16.13.E3):
   Appell F3 double-series coefficient.
-  `DLMF.Hypergeometric.appF3Coeff` ([definition](DLMF/GeneralizedHypergeometric/Appell/Basic/Series.lean#L88)).
+  `DLMF.Hypergeometric.appellF3Coeff` ([definition](DLMF/GeneralizedHypergeometric/Appell/Basic/Series.lean#L88)).
 
 ### §16.14 Partial Differential Equations
 
@@ -3601,11 +3599,11 @@ specify general continuation data, rather than a globally single-valued Appell f
 
 - **Euler square-integral branch of F2**, [DLMF 16.15.E2](https://dlmf.nist.gov/16.15.E2):
   The Euler square-integral branch of F2.
-  `DLMF.Hypergeometric.appF2Euler` ([definition](DLMF/GeneralizedHypergeometric/Appell/Basic/EulerBranches.lean#L69)).
+  `DLMF.Hypergeometric.appellF2Euler` ([definition](DLMF/GeneralizedHypergeometric/Appell/Basic/EulerBranches.lean#L70)).
 
 - **Euler simplex-integral branch of F3**, [DLMF 16.15.E3](https://dlmf.nist.gov/16.15.E3):
   The Euler simplex-integral branch of F3.
-  `DLMF.Hypergeometric.appF3Euler` ([definition](DLMF/GeneralizedHypergeometric/Appell/Basic/EulerBranches.lean#L75)).
+  `DLMF.Hypergeometric.appellF3Euler` ([definition](DLMF/GeneralizedHypergeometric/Appell/Basic/EulerBranches.lean#L76)).
 
 ### §16.17 Definition
 
@@ -3614,7 +3612,7 @@ specify general continuation data, rather than a globally single-valued Appell f
 
   [DLMF 16.17.E3](https://dlmf.nist.gov/16.17.E3):
   The source A_{p,q,k}^{m,n}, with indices starting at zero. It is used only for k<m≤q.
-  `DLMF.Hypergeometric.meijerResidueCoeff` ([definition](DLMF/GeneralizedHypergeometric/MeijerGRelations.lean#L78)).
+  `DLMF.Hypergeometric.meijerResidueCoeff` ([definition](DLMF/GeneralizedHypergeometric/MeijerGRelations.lean#L79)).
 
 <!-- retained entry 112 -->
 - **Meijer G, logarithmic branches, and the three admissible contour types**,
@@ -3632,11 +3630,11 @@ specify general continuation data, rather than a globally single-valued Appell f
 
 - **Meijer differential equation on the logarithmic plane; d/dw is z*d/dz**, [DLMF 16.21.E1](https://dlmf.nist.gov/16.21.E1):
   The Meijer differential equation on the logarithmic plane; d/dw is z*d/dz.
-  `DLMF.Hypergeometric.MeijerLogEquation` ([definition](DLMF/GeneralizedHypergeometric/MeijerGRelations.lean#L275)).
+  `DLMF.Hypergeometric.MeijerLogEquation` ([definition](DLMF/GeneralizedHypergeometric/MeijerGRelations.lean#L280)).
 
 - **Jth displayed G-solution, with the jth bottom parameter moved to the first position**, [DLMF 16.21.E2](https://dlmf.nist.gov/16.21.E2):
   The jth displayed G-solution, with the jth bottom parameter moved to the first position.
-  `DLMF.Hypergeometric.meijerFundamentalTerm` ([definition](DLMF/GeneralizedHypergeometric/MeijerGRelations.lean#L301)).
+  `DLMF.Hypergeometric.meijerFundamentalTerm` ([definition](DLMF/GeneralizedHypergeometric/MeijerGRelations.lean#L306)).
 
 ## Chapter 17 — q-hypergeometric and related functions
 
@@ -3794,9 +3792,9 @@ mathematical assumptions, not restrictions on the types of these total functions
 
 - **Finite/infinite q-Pochhammer and multi-parameter q-products**, [§18.1(i)](https://dlmf.nist.gov/18.1.i): these repeat the Chapter 17 objects `DLMF.QSeries.qPochhammer`, `qPochhammerInf` and the product-over-parameter-list conventions. Public list wrappers are `DLMF.QHypergeometric.qPochhammerList` and `qPochhammerListInf` in [Basic](DLMF/QHypergeometric/Basic/Series.lean#L24). The duplicated notation introduces no additional polynomial-specific q-product.
 
-- **Alternative zero-parameter Gegenbauer convention**, [18.1.1](https://dlmf.nist.gov/18.1.E1): C₀⁽⁰⁾=1 and Cₙ⁽⁰⁾=2Tₙ/n for n≥1. This is an alternative convention explicitly mentioned, but not used, by DLMF. It is expressible with Mathlib's Chebyshev T; it is **not** `ultrasphPoly 0 n`, whose raw hypergeometric prefactor vanishes for positive n. No separate wrapper implements the alternative convention.
+- **Alternative zero-parameter Gegenbauer convention**, [18.1.1](https://dlmf.nist.gov/18.1.E1): C₀⁽⁰⁾=1 and Cₙ⁽⁰⁾=2Tₙ/n for n≥1. This is an alternative convention explicitly mentioned, but not used, by DLMF. It is expressible with Mathlib's Chebyshev T; it is **not** `ultrasphericalPolynomial 0 n`, whose raw hypergeometric prefactor vanishes for positive n. No separate wrapper implements the alternative convention.
 
-- **Shifted Jacobi polynomials**, [18.1.2](https://dlmf.nist.gov/18.1.E2): Gₙ(p,q,x)=n! Pₙ⁽ᵖ⁻ᑫ,ᑫ⁻¹⁾(2x−1)/(n+p)ₙ. This is an unnamed rescaling of `jacobiPolyP` in its regular parameter range; a finite-coefficient realization is needed at exceptional parameters. DLMF explicitly does not develop this convention further.
+- **Shifted Jacobi polynomials**, [18.1.2](https://dlmf.nist.gov/18.1.E2): Gₙ(p,q,x)=n! Pₙ⁽ᵖ⁻ᑫ,ᑫ⁻¹⁾(2x−1)/(n+p)ₙ. This is an unnamed rescaling of `jacobiPolynomialP` in its regular parameter range; a finite-coefficient realization is needed at exceptional parameters. DLMF explicitly does not develop this convention further.
 
 - **Dilated Chebyshev polynomials**, [18.1.3](https://dlmf.nist.gov/18.1.E3): Cₙ(x)=2Tₙ(x/2) and Sₙ(x)=Uₙ(x/2), expressible using Mathlib's `Polynomial.Chebyshev.T` and `U`. These are not the Gegenbauer Cₙ; no dedicated local wrappers were found. DLMF explicitly does not develop these conventions further.
 
@@ -3842,7 +3840,7 @@ mathematical assumptions, not restrictions on the types of these total functions
 - **Discriminant expressed through a complete root list. The identities below**, [DLMF 18.2.E20](https://dlmf.nist.gov/18.2.E20):
   Discriminant expressed through a complete root list. The identities below
   assume positive degree; this avoids conventions for the discriminant of a constant.
-  `DLMF.OrthogonalPolynomials.rootDiscriminant` ([definition](DLMF/OrthogonalPolynomials/BoundsZeros/PointwiseAndZeroBounds.lean#L1083)).
+  `DLMF.OrthogonalPolynomials.rootDiscriminant` ([definition](DLMF/OrthogonalPolynomials/BoundsZeros/PointwiseAndZeroBounds.lean#L1103)).
 
 - **Quadratically transformed polynomial families and weights**, [18.2.22–23](https://dlmf.nist.gov/18.2.E22): rₙ(x²)=p₂ₙ(x), sₙ(x²)=p₂ₙ₊₁(x)/x and v(x²)=w(x), or their 2x²−1 variants. The corresponding weights are x⁻¹ᐟ²v(x), x¹ᐟ²v(x), or (1+x)⁻¹ᐟ²v(x), (1+x)¹ᐟ²v(x). No public constructors for these transformed families were found; individual classical instances are represented by the existing Jacobi/Laguerre polynomial functions. Defining s at x=0 requires polynomial extension, not totalized division by x.
 
@@ -3886,11 +3884,11 @@ mathematical assumptions, not restrictions on the types of these total functions
 
 ### §18.3 Definitions
 
-- **Pseudo-Jacobi/Routh–Romanovski polynomials and their weight**, [§18.3, Jacobi on other intervals](https://dlmf.nist.gov/18.3): Pₙ⁽⁻ᴺ⁻¹⁺ⁱν,⁻ᴺ⁻¹⁻ⁱν⁾(ix), with weight (1+x²)⁻ᴺ⁻¹exp(2ν arctan x), define a finite orthogonal system. There is no separate named wrapper. The finite complex-coefficient object `DLMF.OrthogonalPolynomials.JacobiDisc.jacPoly` in [JacobiDiscriminant](DLMF/OrthogonalPolynomials/JacobiDiscriminant.lean#L49) supplies the continued polynomial at all parameters; the raw `jacobiPolyP` formula cannot automatically be substituted at singular lower parameters. Real-parameter finite polynomials are `jacobiPolyPR`. This distinction also applies to the finite Jacobi systems on (1,∞).
+- **Pseudo-Jacobi/Routh–Romanovski polynomials and their weight**, [§18.3, Jacobi on other intervals](https://dlmf.nist.gov/18.3): Pₙ⁽⁻ᴺ⁻¹⁺ⁱν,⁻ᴺ⁻¹⁻ⁱν⁾(ix), with weight (1+x²)⁻ᴺ⁻¹exp(2ν arctan x), define a finite orthogonal system. There is no separate named wrapper. The finite complex-coefficient object `DLMF.OrthogonalPolynomials.JacobiDisc.jacPoly` in [JacobiDiscriminant](DLMF/OrthogonalPolynomials/JacobiDiscriminant.lean#L49) supplies the continued polynomial at all parameters; the raw `jacobiPolynomialP` formula cannot automatically be substituted at singular lower parameters. Real-parameter finite polynomials are `jacobiPolyPR`. This distinction also applies to the finite Jacobi systems on (1,∞).
 
 <!-- retained entry 121 -->
 - **Jacobi**, [Table 18.3.1](https://dlmf.nist.gov/18.3.T1):
-  `jacobiPolyP` in [Classical](DLMF/OrthogonalPolynomials/Basic/Definitions.lean#L43)
+  `jacobiPolynomialP` in [Classical](DLMF/OrthogonalPolynomials/Basic/Definitions.lean#L43)
   is the complex hypergeometric formula; `jacobiPolyPR`, `jacobiWeight`
   and `jacobiMeasure` in
   [ClassicalInstances](DLMF/OrthogonalPolynomials/ClassicalInstances.lean#L492)
@@ -3902,7 +3900,7 @@ mathematical assumptions, not restrictions on the types of these total functions
 
 <!-- retained entry 122 -->
 - **Ultraspherical/Gegenbauer**, [Table 18.3.1](https://dlmf.nist.gov/18.3.T1):
-  `ultrasphPoly` in [Classical](DLMF/OrthogonalPolynomials/Basic/Definitions.lean#L55)
+  `ultrasphericalPolynomial` in [Classical](DLMF/OrthogonalPolynomials/Basic/Definitions.lean#L55)
   and real polynomial `ultrasphPolyR` in
   [ClassicalInstances](DLMF/OrthogonalPolynomials/ClassicalInstances.lean#L864).
 
@@ -3921,17 +3919,17 @@ mathematical assumptions, not restrictions on the types of these total functions
 
 <!-- retained entry 125 -->
 - **Legendre and shifted Legendre**, [Table 18.3.1](https://dlmf.nist.gov/18.3.T1):
-  `legendrePolyP` in [Classical](DLMF/OrthogonalPolynomials/Basic/Definitions.lean#L51),
+  `legendrePolynomialP` in [Classical](DLMF/OrthogonalPolynomials/Basic/Definitions.lean#L51),
   the Jacobi specialization, and the corresponding real polynomial objects
   used in [Legendre](DLMF/OrthogonalPolynomials/Legendre.lean).
   Mathlib's `Polynomial.shiftedLegendre` in
   [ShiftedLegendre](.lake/packages/mathlib/Mathlib/RingTheory/Polynomial/ShiftedLegendre.lean)
   is an independent polynomial construction;
-  `aeval_shiftedLegendre_eq_legendrePolyP` is the normalization/argument bridge.
+  `aeval_shiftedLegendre_eq_legendrePolynomialP` is the normalization/argument bridge.
 
 <!-- retained entry 126 -->
 - **Laguerre**, [Table 18.3.1](https://dlmf.nist.gov/18.3.T1):
-  `laguerrePolyL` in [Classical](DLMF/OrthogonalPolynomials/Basic/Definitions.lean#L36),
+  `laguerrePolynomialL` in [Classical](DLMF/OrthogonalPolynomials/Basic/Definitions.lean#L36),
   continued finite-sum `laguerreExtended` in
   [Explicit](DLMF/OrthogonalPolynomials/Explicit.lean#L35),
   `laguerrePolyLR`, `laguerreWeight`, and `laguerreMeasure` in
@@ -3941,7 +3939,7 @@ mathematical assumptions, not restrictions on the types of these total functions
 
 <!-- retained entry 127 -->
 - **Hermite H and He**, [Table 18.3.1](https://dlmf.nist.gov/18.3.T1):
-  physicists' `hermitePolyH` in
+  physicists' `hermitePolynomialH` in
   [Classical](DLMF/OrthogonalPolynomials/Basic/Definitions.lean#L32) and real-coefficient
   alias `hermitePolyHR` in
   [AngularRepresentations](DLMF/OrthogonalPolynomials/Integrals/AngularRepresentations.lean#L56);
@@ -3968,7 +3966,7 @@ mathematical assumptions, not restrictions on the types of these total functions
 
 ### §18.14 Inequalities
 
-- **Endpoint-normalized Jacobi polynomials and ordered extrema**, [18.14.11](https://dlmf.nist.gov/18.14.E11), [18.14.14 and 18.14.21](https://dlmf.nist.gov/18.14.E14): Rₙ(x)=Pₙ⁽α,β⁾(x)/Pₙ⁽α,β⁾(1) is an unnamed rescaling of `jacobiPolyP`. The Jacobi and Laguerre extrema xₙ,ₘ are introduced by order in the prose/formulas, not by separate local extremum-enumeration functions. Generic derivative/zero/extremum predicates describe them; a sorted sequence would require additional choices and indexing conventions.
+- **Endpoint-normalized Jacobi polynomials and ordered extrema**, [18.14.11](https://dlmf.nist.gov/18.14.E11), [18.14.14 and 18.14.21](https://dlmf.nist.gov/18.14.E14): Rₙ(x)=Pₙ⁽α,β⁾(x)/Pₙ⁽α,β⁾(1) is an unnamed rescaling of `jacobiPolynomialP`. The Jacobi and Laguerre extrema xₙ,ₘ are introduced by order in the prose/formulas, not by separate local extremum-enumeration functions. Generic derivative/zero/extremum predicates describe them; a sorted sequence would require additional choices and indexing conventions.
 
 ### §18.15 Asymptotic Approximations
 
@@ -4105,7 +4103,7 @@ Differences
 
   [DLMF 18.28.E6_2](https://dlmf.nist.gov/18.28.E6_2):
   The coefficient in the Askey–Wilson q-difference operator.
-  `DLMF.OrthogonalPolynomials.askeyWilsonDifferenceCoefficient` ([definition](DLMF/OrthogonalPolynomials/QFamilies/ClassicalLimits.lean#L667)).
+  `DLMF.OrthogonalPolynomials.askeyWilsonDifferenceCoefficient` ([definition](DLMF/OrthogonalPolynomials/QFamilies/ClassicalLimits.lean#L676)).
 
 - **Al Salam Chihara**, [DLMF 18.28.E7](https://dlmf.nist.gov/18.28.E7):
   The Al-Salam–Chihara polynomials, the Askey–Wilson polynomials with `c = d = 0`
@@ -4137,7 +4135,7 @@ Differences
 
 - **Leading asymptotic coefficient; its argument is on the unit circle**, [DLMF 18.29.E2](https://dlmf.nist.gov/18.29.E2):
   Leading asymptotic coefficient; its argument is on the unit circle.
-  `DLMF.OrthogonalPolynomials.askeyWilsonAsymptoticCoefficient` ([definition](DLMF/OrthogonalPolynomials/QFamilies/ClassicalLimits.lean#L866)).
+  `DLMF.OrthogonalPolynomials.askeyWilsonAsymptoticCoefficient` ([definition](DLMF/OrthogonalPolynomials/QFamilies/ClassicalLimits.lean#L875)).
 
 ### §18.30 Associated OP’s
 
@@ -4195,22 +4193,22 @@ Differences
   [DLMF 18.33.E22](https://dlmf.nist.gov/18.33.E22):
   Reverse-conjugation at a specified degree; meaningful even if the constant
   coefficient vanishes.
-  `DLMF.OrthogonalPolynomials.reflectedPolynomial` ([definition](DLMF/OrthogonalPolynomials/UnitCircle.lean#L57)).
+  `DLMF.OrthogonalPolynomials.reflectedPolynomial` ([definition](DLMF/OrthogonalPolynomials/UnitCircle.lean#L58)).
 
 - **Trivial, Szegő–Askey, q-Askey and Rogers–Szegő cases and weights**, [18.33.12–16](https://dlmf.nist.gov/18.33.E12): the trivial polynomials are zⁿ with w=1; Szegő–Askey has weight (1−(z+z⁻¹)/2)^λ and its two Jacobi line weights; q-Askey has |(qz;q²)∞/(aqz;q²)∞|². These weights occur explicitly in `szegoAskey_orthogonal` and `szegoAskeyQ_orthogonal`, not in separate weight definitions. The Rogers–Szegő case is `szegoAskeyQ 0 q n z`; its argument includes the q⁻¹ scaling in DLMF's convention. The displayed finite-sum families are not unit-normalized φₙ without further scalar factors.
 
 - **Szego Askey**, [DLMF 18.33.E13](https://dlmf.nist.gov/18.33.E13):
   The Szegő–Askey polynomials `∑_k (λ+1)_k (λ)_{n-k} / (k! (n-k)!) zᵏ` (DLMF 18.33.13).
-  `DLMF.OrthogonalPolynomials.szegoAskey` ([definition](DLMF/OrthogonalPolynomials/UnitCircle.lean#L77)).
+  `DLMF.OrthogonalPolynomials.szegoAskey` ([definition](DLMF/OrthogonalPolynomials/SzegoAskeyOrthogonality.lean#L44)).
 
 - **Szego Askey Q**, [DLMF 18.33.E15](https://dlmf.nist.gov/18.33.E15):
   The `q`-analogue of the Szegő–Askey polynomials (DLMF 18.33.15).
-  `DLMF.OrthogonalPolynomials.szegoAskeyQ` ([definition](DLMF/OrthogonalPolynomials/UnitCircle.lean#L83)).
+  `DLMF.OrthogonalPolynomials.szegoAskeyQ` ([definition](DLMF/OrthogonalPolynomials/UnitCircle.lean#L78)).
 
 - **Verblunsky Coefficient**, [DLMF 18.33.E25](https://dlmf.nist.gov/18.33.E25):
   The Verblunsky coefficient `α_n = -conj(φ_{n+1}(0))` of a monic OPUC sequence
   (DLMF 18.33.25).
-  `DLMF.OrthogonalPolynomials.verblunskyCoefficient` ([definition](DLMF/OrthogonalPolynomials/UnitCircle.lean#L73)).
+  `DLMF.OrthogonalPolynomials.verblunskyCoefficient` ([definition](DLMF/OrthogonalPolynomials/UnitCircle.lean#L74)).
 
 - **The OPUC recurrence parameter ρₙ**, [18.33.26](https://dlmf.nist.gov/18.33.E26): ρₙ=√(1−|αₙ|²)=κₙ/κₙ₊₁, expressible as `Real.sqrt (1 - ‖verblunskyCoefficient p n‖^2)`. There is no separate public ρₙ definition; `unitCircle_norm_ratio` states the related squared-norm identity. The biorthogonal and rational families in §18.33(v) are literature pointers, without a formula or identified local family definition.
 
@@ -4230,7 +4228,7 @@ Differences
 
 - **Finite family related to the Morse differential equation**, [DLMF 18.34.E7_1](https://dlmf.nist.gov/18.34.E7_1):
   The finite family related to the Morse differential equation.
-  `DLMF.OrthogonalPolynomials.morsePolynomialFunction` ([definition](DLMF/OrthogonalPolynomials/Associated.lean#L1058)).
+  `DLMF.OrthogonalPolynomials.morsePolynomialFunction` ([definition](DLMF/OrthogonalPolynomials/Associated.lean#L1075)).
 
 ### §18.35 Pollaczek Polynomials
 
@@ -4252,7 +4250,7 @@ Differences
 
 - **Pollaczek Angular Weight**, [DLMF 18.35.E6](https://dlmf.nist.gov/18.35.E6):
   Angular density, including the Jacobian `sin θ` for `x = cos θ`.
-  `DLMF.OrthogonalPolynomials.pollaczekAngularWeight` ([definition](DLMF/OrthogonalPolynomials/Associated.lean#L1041)).
+  `DLMF.OrthogonalPolynomials.pollaczekAngularWeight` ([definition](DLMF/OrthogonalPolynomials/Associated.lean#L1058)).
 
 - **Pollaczek discrete mass points and weights; type-3 continuous weight**, [18.35.6_4](https://dlmf.nist.gov/18.35.E6_4), [18.35.6_6](https://dlmf.nist.gov/18.35.E6_6): D is the explicit sequence xₖ expressed using Δ=√((λ+k)²+b²−a²) and ρ=(Δ−b)/(λ+k−a); wₓₖ is its printed Gamma/power expression. The type-3 weight adds a hypergeometric denominator to the type-2 Gamma weight. No public definitions for these masses, auxiliaries or the type-3 weight were found. `pollaczekAngularWeight` represents only the continuous type-2 density **including** the sin θ Jacobian, so it is not directly the x-density w of 18.35.6 and does not package the supplemented discrete measure.
 
@@ -4295,7 +4293,7 @@ Differences
 
 ### §18.38 Mathematical Applications
 
-- **Toda/Hermite rational solution**, [18.38.1](https://dlmf.nist.gov/18.38.E1): Vₙ(x)=2n Hₙ₊₁(x)Hₙ₋₁(x)/Hₙ(x)² is an unnamed expression using `hermitePolyH`. No dedicated Vₙ wrapper was found. This is in an applications section; the formula is recorded for the definitions inventory without adding a new application theorem target.
+- **Toda/Hermite rational solution**, [18.38.1](https://dlmf.nist.gov/18.38.E1): Vₙ(x)=2n Hₙ₊₁(x)Hₙ₋₁(x)/Hₙ(x)² is an unnamed expression using `hermitePolynomialH`. No dedicated Vₙ wrapper was found. This is in an applications section; the formula is recorded for the definitions inventory without adding a new application theorem target.
 
 - **Symmetric Laurent polynomials, q-commutator, Askey–Wilson/Zhedanov algebra and Casimir operator**, [18.38.4–9 and prose](https://dlmf.nist.gov/18.38.E4): f(z)=c₀+Σcₖ(zᵏ+z⁻ᵏ); K₀ is the Askey–Wilson operator L, K₁ multiplies by z+z⁻¹, K₂=[K₀,K₁]q, with [X,Y]q=√q XY−q⁻¹ᐟ²YX. The constants B,C₀,C₁,D₀,D₁ are the displayed expressions in elementary symmetric polynomials e₁,…,e₄; Q is the displayed cubic/quadratic Casimir and Q₀ its scalar value. AW(3) is the abstract associative algebra with those generators/relations before specializing the constants. No dedicated Lean algebra/operator objects were found; generic Laurent polynomials, linear endomorphisms, elementary symmetric polynomials and algebra presentations provide ingredients. These mathematical definitions occur in application notes and are not new acquisition targets under project scope.
 
@@ -4303,7 +4301,7 @@ Differences
 
 ### §18.39 Applications in the Physical Sciences
 
-- **Schrödinger Hamiltonians, states and physical potentials**, [18.39.7–20](https://dlmf.nist.gov/18.39.E7): the section defines one-/three-dimensional Hamiltonians, stationary/time-dependent states, their expansion coefficients, harmonic and Morse potentials, and a rational SUSY potential. The harmonic eigenfunctions are normalized weighted/scaled `hermitePolyH` functions (the normalized unscaled mathematical family is also `TauCeti.hermiteFunction`); Morse states rescale `morsePolynomialFunction`; the rational example multiplies `exceptionalHermite` by the square root of its weight. No complete local physical-state/Hamiltonian interface was identified. These named mathematical expressions are recorded as **application notes excluded from new theorem acquisition**; the existing polynomial/weight definitions remain in scope.
+- **Schrödinger Hamiltonians, states and physical potentials**, [18.39.7–20](https://dlmf.nist.gov/18.39.E7): the section defines one-/three-dimensional Hamiltonians, stationary/time-dependent states, their expansion coefficients, harmonic and Morse potentials, and a rational SUSY potential. The harmonic eigenfunctions are normalized weighted/scaled `hermitePolynomialH` functions (the normalized unscaled mathematical family is also `TauCeti.hermiteFunction`); Morse states rescale `morsePolynomialFunction`; the rational example multiplies `exceptionalHermite` by the square root of its weight. No complete local physical-state/Hamiltonian interface was identified. These named mathematical expressions are recorded as **application notes excluded from new theorem acquisition**; the existing polynomial/weight definitions remain in scope.
 
 - **Radial/spherical-radial Coulomb functions and associated Coulomb–Laguerre polynomials**, [18.39.24–42](https://dlmf.nist.gov/18.39.E24): the radial Rₙ,ₗ and spherical-radial ψₙ,ₗ=rRₙ,ₗ use different measures r²dr and dr. The alternate Bohr index is n=p+l+1 and the radial coordinate is ρₙ=2Zr/n. The associated Coulomb–Laguerre polynomials are derivatives of p!Lₚ⁽⁰⁾, explicitly L-boldₚ₊ₘᵐ(ρ)=(−1)ᵐ(p+m)!Lₚ⁽ᵐ⁾(ρ), so they are rescalings of `laguerreExtended` in a regular regime, **not** `associatedLaguerre` from §18.30. No dedicated wrappers for these physical conventions were found. They occur in application notes excluded from new acquisition targets; Chapter 33 supplies related Coulomb functions separately.
 
@@ -4330,7 +4328,7 @@ Traversal: all §§19.1–19.39 checked; matching sections are §19.2 and §19.1
 ### §19.1 Special Notation
 
 - **Modulus, complementary modulus and parameter**, [DLMF 19.1](https://dlmf.nist.gov/19.1):
-  The parameter is m=k²; the complementary modulus satisfies k′²=1−k². The principal complex choice is `DLMF.JacobiElliptic.jacobiComodulusk` ([source](DLMF/JacobiElliptic/Basic/Definitions.lean#L146)). A consistent other square-root choice must be tracked separately. The complementary integrals in §19.2 have their own continuation conventions, as recorded at §19.2.
+  The parameter is m=k²; the complementary modulus satisfies k′²=1−k². The principal complex choice is `DLMF.JacobiElliptic.jacobiComodulus` ([source](DLMF/JacobiElliptic/Basic/Definitions.lean#L147)). A consistent other square-root choice must be tracked separately. The complementary integrals in §19.2 have their own continuation conventions, as recorded at §19.2.
 
 ### §19.2 Definitions
 
@@ -4341,36 +4339,36 @@ Traversal: all §§19.1–19.39 checked; matching sections are §19.2 and §19.1
 
 <!-- retained entry 139 -->
 - **Legendre incomplete F, E, D and Π**, [19.2.4–7](https://dlmf.nist.gov/19.2.E4):
-  `DLMF.EllipticIntegrals.incEllIntFk`, `incEllIntEk`, `incEllIntDk`,
-  `incEllIntPik` in [Legendre](DLMF/EllipticIntegrals/Basic/Legendre.lean#L185),
+  `DLMF.EllipticIntegrals.incompleteEllipticF`, `incompleteEllipticE`, `incompleteEllipticD`,
+  `incompleteEllipticPi` in [Legendre](DLMF/EllipticIntegrals/Basic/Legendre.lean#L185),
   complex segment integrals using principal square roots and a principal-value
   construction for interior Π poles. The Π argument is the characteristic
   `α²` itself, followed by modulus k. Independent real parameter-m integrals
-  are `DLMF.Elliptic.Real.incEllIntFm`, `incEllIntEm` in
-  [Jacobi](DLMF/Elliptic/Basic/Integrals.lean#L48), and `incEllIntPim` in
+  are `DLMF.Elliptic.Real.incompleteEllipticFOfParameter`, `incompleteEllipticEOfParameter` in
+  [Jacobi](DLMF/Elliptic/Basic/Integrals.lean#L48), and `incompleteEllipticPiOfParameter` in
   [ThirdKind](DLMF/Elliptic/Basic/Integrals.lean#L61), with `m=k²`.
   lean-codes also defines real modulus-k F, E, Π as
-  `Carlson.Real.incEllIntFk`, `incEllIntEk`, `incEllIntPik` in
+  `Carlson.Real.incEllIntFk`, `incompleteEllipticE`, `incompleteEllipticPi` in
   [Carlson/Elliptic/Standard](../lean-codes/Carlson/Elliptic/Standard.lean#L78).
   The ordinary real Π interval integrals do not implement principal values.
 
 <!-- retained entry 140 -->
 - **Complete K, E, D and Π**, [19.2.8](https://dlmf.nist.gov/19.2.E8):
-  `DLMF.EllipticIntegrals.compEllIntKk` in
+  `DLMF.EllipticIntegrals.completeEllipticK` in
   [Complete](DLMF/EllipticIntegrals/Basic/Complete.lean#L46) is a complex
-  t-integral; `DLMF.EllipticIntegrals.compEllIntEk`, `compEllIntDk`,
-  `compEllIntPik` in [Legendre](DLMF/EllipticIntegrals/Basic/Legendre.lean#L204)
+  t-integral; `DLMF.EllipticIntegrals.completeEllipticE`, `completeEllipticD`,
+  `completeEllipticPi` in [Legendre](DLMF/EllipticIntegrals/Basic/Legendre.lean#L204)
   specialize the amplitude to π/2. Real parameter-m K/E are
-  `DLMF.Elliptic.Real.compEllIntKm`, `compEllIntEm` in
+  `DLMF.Elliptic.Real.completeEllipticKOfParameter`, `completeEllipticEOfParameter` in
   [Complete](DLMF/Elliptic/Basic/Integrals.lean#L38), and real Π is
-  `DLMF.Elliptic.Real.compEllIntPim` in [ThirdKind](DLMF/Elliptic/Basic/Integrals.lean#L69).
+  `DLMF.Elliptic.Real.completeEllipticPiOfParameter` in [ThirdKind](DLMF/Elliptic/Basic/Integrals.lean#L69).
   lean-codes has independent real modulus-k `Carlson.Real.compEllIntKk`,
-  `compEllIntEk` in [Standard](../lean-codes/Carlson/Elliptic/Standard.lean#L93).
+  `completeEllipticE` in [Standard](../lean-codes/Carlson/Elliptic/Standard.lean#L93).
 
 <!-- retained entry 141 -->
 - **Complementary K-prime and E-prime**, [19.2.8_1–9](https://dlmf.nist.gov/19.2.E8_1):
-  `DLMF.EllipticIntegrals.compEllIntKpk` is the literal complementary-modulus
-  integral; `DLMF.EllipticIntegrals.cCompEllIntKk`, `cCompEllIntEk` in
+  `DLMF.EllipticIntegrals.completeEllipticKPrime` is the literal complementary-modulus
+  integral; `DLMF.EllipticIntegrals.complementaryEllipticK`, `complementaryEllipticE` in
   [Legendre](DLMF/EllipticIntegrals/Basic/Legendre.lean#L215) include the extra
   continuation terms on the left half-plane. These are materially different
   branch constructions, not interchangeable aliases for `K(sqrt(1-k²))`.
@@ -4384,7 +4382,7 @@ Traversal: all §§19.1–19.39 checked; matching sections are §19.2 and §19.1
 
 <!-- retained entry 143 -->
 - **Elementary degenerate RC**, [19.2.17](https://dlmf.nist.gov/19.2.E17):
-  `DLMF.EllipticIntegrals.symEllIntRC` in
+  `DLMF.EllipticIntegrals.symmetricEllipticRC` in
   [Symmetric](DLMF/EllipticIntegrals/Symmetric.lean#L73), with a Cauchy
   principal value for negative real y. `Carlson.TwoVariable.carlsonRC` in
   [QuadraticHybrid](../lean-codes/Carlson/TwoVariable/QuadraticHybrid.lean#L225)
@@ -4392,11 +4390,11 @@ Traversal: all §§19.1–19.39 checked; matching sections are §19.2 and §19.1
 
 ### §19.5 Maclaurin and Related Expansions
 
-- **Hypergeometric-series construction of complete elliptic K**, [DLMF 19.5.E1](https://dlmf.nist.gov/19.5.E1): The complete elliptic integral of the first kind as the hypergeometric series of AAR §3.2, in the modulus `k`: `K = (π/2) ₂F₁(1/2, 1/2; 1; k²)`, meaningful for `‖k‖ < 1`. The real integral form in the parameter `m = k²` is `DLMF.Elliptic.Real.compEllIntKm`.
+- **Hypergeometric-series construction of complete elliptic K**, [DLMF 19.5.E1](https://dlmf.nist.gov/19.5.E1): The complete elliptic integral of the first kind as the hypergeometric series of AAR §3.2, in the modulus `k`: `K = (π/2) ₂F₁(1/2, 1/2; 1; k²)`, meaningful for `‖k‖ < 1`. The real integral form in the parameter `m = k²` is `DLMF.Elliptic.Real.completeEllipticKOfParameter`.
   [`DLMF.Hypergeometric.compEllIntKkSeries`](DLMF/Hypergeometric/Identities/Whipple.lean#L386).
 
 - **Nome and small-modulus auxiliary parameters**, [DLMF 19.5.E5](https://dlmf.nist.gov/19.5.E5):
-  q=exp(−πK′/K) is `DLMF.JacobiElliptic.jacobiNomek` ([source](DLMF/JacobiElliptic/Basic/Definitions.lean#L154)); the τ-parametrized version uses exp(iπτ). The r=k²/16 and λ=(1−√k′)/(2(1+√k′)) of 19.5.6–7 are local expressions in the expansion statements, without separately named constructions. The complete hypergeometric-series representative is also `DLMF.Hypergeometric.compEllIntKkSeries` ([source](DLMF/Hypergeometric/Identities/Whipple.lean#L398)); convergence and its bridge to the integral require their stated domain.
+  q=exp(−πK′/K) is `DLMF.JacobiElliptic.jacobiNome` ([source](DLMF/JacobiElliptic/Basic/Definitions.lean#L155)); the τ-parametrized version uses exp(iπτ). The r=k²/16 and λ=(1−√k′)/(2(1+√k′)) of 19.5.6–7 are local expressions in the expansion statements, without separately named constructions. The complete hypergeometric-series representative is also `DLMF.Hypergeometric.compEllIntKkSeries` ([source](DLMF/Hypergeometric/Identities/Whipple.lean#L403)); convergence and its bridge to the integral require their stated domain.
 
 - **Descending Landen modulus sequence**, [DLMF 19.5.E11](https://dlmf.nist.gov/19.5.E11): The descending Landen sequence of moduli of DLMF 19.5.11: `k₀ = k`, `k_{m+1} = (1 - √(1 - k_m²))/(1 + √(1 - k_m²))` (principal square roots).
   [`DLMF.EllipticIntegrals.landenModulusSeq`](DLMF/EllipticIntegrals/Expansions.lean#L253).
@@ -4404,7 +4402,7 @@ Traversal: all §§19.1–19.39 checked; matching sections are §19.2 and §19.1
 ### §19.6 Special Cases
 
 - **The Legendre square-root factor Δ**, [DLMF 19.6.iv](https://dlmf.nist.gov/19.6.iv):
-  Δ(φ,k)=√(1−k²sin²φ) has several existing implementations: `DLMF.EllipticIntegrals.ellDelta` ([source](DLMF/EllipticIntegrals/SpecialCases.lean#L208)), `DLMF.EllipticIntegrals.ellDeltaComplex` ([source](DLMF/EllipticIntegrals/Derivatives.lean#L422)), and the real `DLMF.EllipticIntegrals.ellDeltaReal` ([source](DLMF/EllipticIntegrals/Addition.lean#L75)). The first takes a real angle and complex modulus, the second complex arguments, and the last real arguments. Principal complex and nonnegative real roots should not be silently identified outside their domains.
+  Δ(φ,k)=√(1−k²sin²φ) has several existing implementations: `DLMF.EllipticIntegrals.ellDelta` ([source](DLMF/EllipticIntegrals/SpecialCases.lean#L212)), `DLMF.EllipticIntegrals.ellDeltaComplex` ([source](DLMF/EllipticIntegrals/Derivatives.lean#L429)), and the real `DLMF.EllipticIntegrals.ellDeltaReal` ([source](DLMF/EllipticIntegrals/Addition.lean#L78)). The first takes a real angle and complex modulus, the second complex arguments, and the last real arguments. Principal complex and nonnegative real roots should not be silently identified outside their domains.
 
 ### §19.7 Connection Formulas
 
@@ -4414,7 +4412,7 @@ Traversal: all §§19.1–19.39 checked; matching sections are §19.2 and §19.1
 ### §19.8 Quadratic Transformations
 
 - **Arithmetic-geometric mean and its iterations**, [DLMF 19.8.i](https://dlmf.nist.gov/19.8.i):
-  Mathlib supplies `NNReal.agmSequences` and `NNReal.agm` ([source](.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/ArithmeticGeometricMean.lean#L56)); its sequence index and component ordering differ from the displayed a₀,g₀ convention. The direct DLMF sequences are `DLMF.EllipticIntegrals.agmSeqA`, `DLMF.EllipticIntegrals.agmSeqG`, `DLMF.EllipticIntegrals.agmSeqC` ([source](DLMF/EllipticIntegrals/Quadratic.lean#L85)), with cₙ=√(aₙ²−gₙ²). Other existing real iterations are `DLMF.EllipticIntegrals.agmA`, `DLMF.EllipticIntegrals.agmG` ([source](DLMF/EllipticIntegrals/SymmetricQuadratic.lean#L275)), and lean-codes' `Carlson.agmStep`, `Carlson.agmSeq`, `Carlson.agmX`, `Carlson.agmY` ([source](../lean-codes/Carlson/Elliptic/AGMSecondKind.lean#L45)). The independent integral construction `DLMF.Elliptic.agmIntegral` ([source](DLMF/Elliptic/AGM.lean#L143)) is linked to the mean by representation theorems; it is an integral, rather than another name for the limit.
+  Mathlib supplies `NNReal.agmSequences` and `NNReal.agm` ([source](.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/ArithmeticGeometricMean.lean#L56)); its sequence index and component ordering differ from the displayed a₀,g₀ convention. The direct DLMF sequences are `DLMF.EllipticIntegrals.agmSeqA`, `DLMF.EllipticIntegrals.agmSeqG`, `DLMF.EllipticIntegrals.agmSeqC` ([source](DLMF/EllipticIntegrals/Quadratic.lean#L86)), with cₙ=√(aₙ²−gₙ²). Other existing real iterations are `DLMF.EllipticIntegrals.agmA`, `DLMF.EllipticIntegrals.agmG` ([source](DLMF/EllipticIntegrals/SymmetricQuadratic.lean#L286)), and lean-codes' `Carlson.agmStep`, `Carlson.agmSeq`, `Carlson.agmX`, `Carlson.agmY` ([source](../lean-codes/Carlson/Elliptic/AGMSecondKind.lean#L45)). The independent integral construction `DLMF.Elliptic.agmIntegral` ([source](DLMF/Elliptic/AGM.lean#L145)) is linked to the mean by representation theorems; it is an integral, rather than another name for the limit.
 
   [DLMF 19.8.E1](https://dlmf.nist.gov/19.8.E1): DLMF's arithmetic means `aₙ` (19.8.1): `a₀`, `a_{n+1} = (aₙ + gₙ)/2`.
   [`DLMF.EllipticIntegrals.agmSeqA`](DLMF/EllipticIntegrals/Quadratic.lean#L42).
@@ -4434,7 +4432,7 @@ Traversal: all §§19.1–19.39 checked; matching sections are §19.2 and §19.1
 ### §19.9 Inequalities
 
 - **Ellipse perimeter and eccentricity parameter**, [DLMF 19.9.i](https://dlmf.nist.gov/19.9.i):
-  L(a,b) is `DLMF.EllipticIntegrals.ellipsePerimeter` ([source](DLMF/EllipticIntegrals/Inequalities.lean#L898)), defined by the arc-length integral. The λ=(a−b)/(a+b) of 19.9.10 and the auxiliary bounds L,U,σ of 19.9.18–22 are expressions in the inequalities, without additional named function definitions. The Ramanujan perimeter formula is an approximation expression, not an alternative exact definition of perimeter.
+  L(a,b) is `DLMF.EllipticIntegrals.ellipsePerimeter` ([source](DLMF/EllipticIntegrals/Inequalities.lean#L910)), defined by the arc-length integral. The λ=(a−b)/(a+b) of 19.9.10 and the auxiliary bounds L,U,σ of 19.9.18–22 are expressions in the inequalities, without additional named function definitions. The Ramanujan perimeter formula is an approximation expression, not an alternative exact definition of perimeter.
 
   [DLMF 19.9.i](https://dlmf.nist.gov/19.9.i): The perimeter `L(a, b)` of an ellipse with semiaxes `a, b` (DLMF §19.9(i)): the arc length `∫₀^{2π} √(a² sin²t + b² cos²t) dt` of `t ↦ (a cos t, b sin t)`.
   [`DLMF.EllipticIntegrals.ellipsePerimeter`](DLMF/EllipticIntegrals/Inequalities.lean#L192).
@@ -4442,7 +4440,7 @@ Traversal: all §§19.1–19.39 checked; matching sections are §19.2 and §19.1
 ### §19.11 Addition Theorems
 
 - **Addition-angle sine and cosine**, [DLMF 19.11.E4](https://dlmf.nist.gov/19.11.E4):
-  Besides Δ, the right sides specifying sin ψ and cos ψ are `DLMF.EllipticIntegrals.additionSin`, `DLMF.EllipticIntegrals.additionCos` ([source](DLMF/EllipticIntegrals/Addition.lean#L83)); their duplication specializations are `DLMF.EllipticIntegrals.duplicationSin`, `DLMF.EllipticIntegrals.duplicationCos` ([source](DLMF/EllipticIntegrals/Addition.lean#L676)). The selected angle and the γ,δ parameters remain quantified/local expressions; these sine/cosine functions alone do not choose a global inverse-sine branch.
+  Besides Δ, the right sides specifying sin ψ and cos ψ are `DLMF.EllipticIntegrals.additionSin`, `DLMF.EllipticIntegrals.additionCos` ([source](DLMF/EllipticIntegrals/Addition.lean#L86)); their duplication specializations are `DLMF.EllipticIntegrals.duplicationSin`, `DLMF.EllipticIntegrals.duplicationCos` ([source](DLMF/EllipticIntegrals/Addition.lean#L704)). The selected angle and the γ,δ parameters remain quantified/local expressions; these sine/cosine functions alone do not choose a global inverse-sine branch.
 
 ### §19.12 Asymptotic Approximations
 
@@ -4452,20 +4450,20 @@ Traversal: all §§19.1–19.39 checked; matching sections are §19.2 and §19.1
 ### §19.14 Reduction of General Elliptic Integrals
 
 - **Legendre reduction auxiliary U**, [DLMF 19.14.E6](https://dlmf.nist.gov/19.14.E6):
-  The explicit root expression is `DLMF.EllipticIntegrals.ei19b_redU`, with its admissibility package `DLMF.EllipticIntegrals.QuadraticProductReductionHyp` ([source](DLMF/EllipticIntegrals/Reduction.lean#L391)). The later `DLMF.EllipticIntegrals.quadraticPairU` of §19.29 gives another actual formulation of this biquadratic reduction parameter.
+  The explicit root expression is `DLMF.EllipticIntegrals.ei19b_redU`, with its admissibility package `DLMF.EllipticIntegrals.QuadraticProductReductionHyp` ([source](DLMF/EllipticIntegrals/Reduction.lean#L394)). The later `DLMF.EllipticIntegrals.quadraticPairU` of §19.29 gives another actual formulation of this biquadratic reduction parameter.
 
 ### §19.16 Definitions
 
 - **Admissible symmetric-integral arguments and cut-root convention**, [DLMF 19.16.i](https://dlmf.nist.gov/19.16.i): DLMF §19.16(i): an admissible argument of a symmetric integral, `x ∈ ℂ \ (-∞, 0]` or `x = 0` (that is, `x` is not a negative real number).
-  [`DLMF.EllipticIntegrals.SymEllIntArg`](DLMF/EllipticIntegrals/Basic/Symmetric.lean#L33).
+  [`DLMF.EllipticIntegrals.IsCarlsonArgument`](DLMF/EllipticIntegrals/Basic/Symmetric.lean#L33).
 
   [DLMF 19.16.i](https://dlmf.nist.gov/19.16.i): DLMF §19.16(i): the domain of `R_F(x, y, z)` and of the first three arguments of `R_J`: admissible arguments, at most one of them zero.
-  [`DLMF.EllipticIntegrals.SymEllIntRFDomain`](DLMF/EllipticIntegrals/Basic/Symmetric.lean#L38).
+  [`DLMF.EllipticIntegrals.CarlsonRFDomain`](DLMF/EllipticIntegrals/Basic/Symmetric.lean#L38).
 
 <!-- retained entry 144 -->
 - **RF, RJ, RG, RD and kernel s(t)**, [19.16.1–5](https://dlmf.nist.gov/19.16.E1):
-  `DLMF.EllipticIntegrals.symEllIntRF`, `symEllIntRJ`, `symEllIntRG`,
-  `symEllIntRD`, `symEllIntS` in
+  `DLMF.EllipticIntegrals.symmetricEllipticRF`, `symmetricEllipticRJ`, `symmetricEllipticRG`,
+  `symmetricEllipticRD`, `carlsonRootProduct` in
   [Symmetric](DLMF/EllipticIntegrals/Basic/Symmetric.lean#L57).
   These are normalized integrals; RD is an alias specialization of RJ.
   RJ has an explicit principal-value branch for negative real p. Independent
@@ -4481,9 +4479,9 @@ Traversal: all §§19.1–19.39 checked; matching sections are §19.2 and §19.1
 <!-- retained entry 146 -->
 - **Multivariate R-minus-a and conjugate parameter a-prime**,
   [19.16.8–10](https://dlmf.nist.gov/19.16.E8):
-  `DLMF.EllipticIntegrals.symEllIntR`, `symEllIntRConj` in
+  `DLMF.EllipticIntegrals.symmetricEllipticR`, `symmetricEllipticRConjugateExponent` in
   [Symmetric](DLMF/EllipticIntegrals/Symmetric.lean#L73).
-  `symEllIntR a` means Carlson's exponent `-a` and takes boundary limits
+  `symmetricEllipticR a` means Carlson's exponent `-a` and takes boundary limits
   when nodes leave the open product slit plane. lean-codes provides
   `Carlson.carlsonR`, `regCarlsonR` in
   [Explicit](../lean-codes/Carlson/R/Explicit.lean#L322), native simplex/Dirichlet
@@ -4499,15 +4497,15 @@ Traversal: all §§19.1–19.39 checked; matching sections are §19.2 and §19.1
   not additional local function definitions.
 
 - **Conjugate exponent and normalized weights**, [DLMF 19.16.E10](https://dlmf.nist.gov/19.16.E10):
-  a′=−a+Σbⱼ is `DLMF.EllipticIntegrals.symEllIntRConj` ([source](DLMF/EllipticIntegrals/Symmetric.lean#L158)). In §19.18.3, wⱼ=bⱼ/Σbᵢ and the coordinate vectors eⱼ are local expressions (`Pi.single` for a coordinate vector). Euler–Poisson–Darboux, wave and Laplace specializations in §19.18 are equations/theorem predicates on R and its substitutions, without independently selected solution functions.
+  a′=−a+Σbⱼ is `DLMF.EllipticIntegrals.symmetricEllipticRConjugateExponent` ([source](DLMF/EllipticIntegrals/Symmetric.lean#L162)). In §19.18.3, wⱼ=bⱼ/Σbᵢ and the coordinate vectors eⱼ are local expressions (`Pi.single` for a coordinate vector). Euler–Poisson–Darboux, wave and Laplace specializations in §19.18 are equations/theorem predicates on R and its substitutions, without independently selected solution functions.
 
 ### §19.19 Taylor and Related Series
 
 - **Homogeneous symmetric-integral hypergeometric polynomial T**, [DLMF 19.19.E1](https://dlmf.nist.gov/19.19.E1): DLMF 19.19.1: the homogeneous hypergeometric polynomial `T_N(𝐛, 𝐳) = ∑_{m₁+⋯+mₙ = N} ∏ⱼ (bⱼ)_{mⱼ} zⱼ^{mⱼ} / mⱼ!`.
-  [`DLMF.EllipticIntegrals.symEllIntT`](DLMF/EllipticIntegrals/SymmetricSeries.lean#L39).
+  [`DLMF.EllipticIntegrals.homogeneousHypergeometricPolynomial`](DLMF/EllipticIntegrals/SymmetricSeries.lean#L39).
 
 - **Elementary symmetric polynomials and centered variables**, [DLMF 19.19.E4](https://dlmf.nist.gov/19.19.E4):
-  Eₛ is `DLMF.EllipticIntegrals.symEllIntE` ([source](DLMF/EllipticIntegrals/SymmetricSeries.lean#L84)), the finite subset-product sum. It accompanies `DLMF.EllipticIntegrals.symEllIntT` (19.19.1). The mean A=(Σzⱼ)/n and centered Zⱼ=1−zⱼ/A of 19.19.6–7 are expressions in the series theorems, not separately named definitions.
+  Eₛ is `DLMF.EllipticIntegrals.elementarySymmetric` ([source](DLMF/EllipticIntegrals/SymmetricSeries.lean#L87)), the finite subset-product sum. It accompanies `DLMF.EllipticIntegrals.homogeneousHypergeometricPolynomial` (19.19.1). The mean A=(Σzⱼ)/n and centered Zⱼ=1−zⱼ/A of 19.19.6–7 are expressions in the series theorems, not separately named definitions.
 
 ### §19.20 Special Cases
 
@@ -4517,12 +4515,12 @@ Traversal: all §§19.1–19.39 checked; matching sections are §19.2 and §19.1
 ### §19.22 Quadratic Transformations
 
 - **Bartky/AGM third-kind and second-kind auxiliaries**, [DLMF 19.22.E5](https://dlmf.nist.gov/19.22.E5):
-  The transformed p± are `DLMF.EllipticIntegrals.symEllIntPm` ([source](DLMF/EllipticIntegrals/SymmetricQuadratic.lean#L178)). The real AGM arithmetic/geometric sequences are `DLMF.EllipticIntegrals.agmA`, `DLMF.EllipticIntegrals.agmG`; the Qₙ for R_D in 19.22.11 is `DLMF.EllipticIntegrals.agmQ` ([source](DLMF/EllipticIntegrals/SymmetricQuadratic.lean#L388)). For R_J, 19.22.13 uses the distinct `DLMF.EllipticIntegrals.agmP`, `DLMF.EllipticIntegrals.agmQJ` ([source](DLMF/EllipticIntegrals/SymmetricQuadratic.lean#L614)). They must not be confused with `DLMF.EllipticIntegrals.agmPiSeq` and `DLMF.EllipticIntegrals.agmPiEps` from §19.8.8. The v± and specializations z± in the transformations are expressions, with the displayed sign/positivity restrictions.
+  The transformed p± are `DLMF.EllipticIntegrals.quadraticTransformationP` ([source](DLMF/EllipticIntegrals/SymmetricQuadratic.lean#L184)). The real AGM arithmetic/geometric sequences are `DLMF.EllipticIntegrals.agmA`, `DLMF.EllipticIntegrals.agmG`; the Qₙ for R_D in 19.22.11 is `DLMF.EllipticIntegrals.agmQ` ([source](DLMF/EllipticIntegrals/SymmetricQuadratic.lean#L399)). For R_J, 19.22.13 uses the distinct `DLMF.EllipticIntegrals.agmP`, `DLMF.EllipticIntegrals.agmQJ` ([source](DLMF/EllipticIntegrals/SymmetricQuadratic.lean#L626)). They must not be confused with `DLMF.EllipticIntegrals.agmPiSeq` and `DLMF.EllipticIntegrals.agmPiEps` from §19.8.8. The v± and specializations z± in the transformations are expressions, with the displayed sign/positivity restrictions.
 
 ### §19.23 Integral Representations
 
 - **Sphere differential form and direction cosines**, [DLMF 19.23.E6](https://dlmf.nist.gov/19.23.E6):
-  The spherical integration form and its direction-cosine substitution are `DLMF.EllipticIntegrals.sphereQuadraticForm`, `DLMF.EllipticIntegrals.directionCosines` ([source](DLMF/EllipticIntegrals/SymmetricIntegrals.lean#L250)). The simplex and spherical integral formulas for R are representation theorems for the existing R-function, with their branch and measure hypotheses.
+  The spherical integration form and its direction-cosine substitution are `DLMF.EllipticIntegrals.sphereQuadraticForm`, `DLMF.EllipticIntegrals.directionCosines` ([source](DLMF/EllipticIntegrals/SymmetricIntegrals.lean#L554)). The simplex and spherical integral formulas for R are representation theorems for the existing R-function, with their branch and measure hypotheses.
 
 ### §19.25 Relations to Other Functions
 
@@ -4535,7 +4533,7 @@ Traversal: all §§19.1–19.39 checked; matching sections are §19.2 and §19.1
 ### §19.26 Addition Theorems
 
 - **Symmetric duplication parameter λ**, [DLMF 19.26.E19](https://dlmf.nist.gov/19.26.E19): DLMF 19.26.19: `λ = √x √y + √y √z + √z √x` (principal square roots).
-  [`DLMF.EllipticIntegrals.symEllIntDupLambda`](DLMF/EllipticIntegrals/SymmetricAddition.lean#L851).
+  [`DLMF.EllipticIntegrals.duplicationLambda`](DLMF/EllipticIntegrals/SymmetricAddition.lean#L851).
 
 ### §19.27 Asymptotic Approximations and Expansions
 
@@ -4560,7 +4558,7 @@ Traversal: all §§19.1–19.39 checked; matching sections are §19.2 and §19.1
 ### §19.29 Reduction of General Elliptic Integrals
 
 - **Reduction radicals, determinants, integrands and basic classes**, [DLMF 19.29](https://dlmf.nist.gov/19.29):
-  The individual construction entries below include `DLMF.EllipticIntegrals.SymmetricReduction.linearRoot`, `DLMF.EllipticIntegrals.SymmetricReduction.factorDet`, `DLMF.EllipticIntegrals.SymmetricReduction.quarticProduct`, `DLMF.EllipticIntegrals.SymmetricReduction.pairU`, its two infinite-endpoint variants, `DLMF.EllipticIntegrals.SymmetricReduction.pairUFiveSq`, `DLMF.EllipticIntegrals.SymmetricReduction.pairSFive`, `DLMF.EllipticIntegrals.SymmetricReduction.pairQFiveSq`, `DLMF.EllipticIntegrals.SymmetricReduction.reductionIntegral`, `DLMF.EllipticIntegrals.SymmetricReduction.unitVector`, `DLMF.EllipticIntegrals.SymmetricReduction.basicIndices`, `DLMF.EllipticIntegrals.SymmetricReduction.cubicProduct`, `DLMF.EllipticIntegrals.quadraticPairU`, `DLMF.EllipticIntegrals.SymmetricReduction.quadraticS`, `DLMF.EllipticIntegrals.SymmetricReduction.quadraticD`, `DLMF.EllipticIntegrals.SymmetricReduction.quadraticRF`, and `DLMF.EllipticIntegrals.SymmetricReduction.biquadraticU`. Their shared namespace is `DLMF.EllipticIntegrals` and [source](DLMF/EllipticIntegrals/SymmetricReduction.lean#L64). There is also `DLMF.EllipticIntegrals.SymmetricReduction.reductionIntegrand` ([source](DLMF/EllipticIntegrals/SymmetricReduction.lean#L594)) and domain/permutation predicates `DLMF.EllipticIntegrals.SymmetricReductionConditions`, `DLMF.EllipticIntegrals.IsReductionIndexPermutation` ([source](DLMF/EllipticIntegrals/SymmetricReduction.lean#L170)). Only the squares of U_{α5} and Q_{α5} are chosen locally; the DLMF signed roots are not independently supplied. The first-/second-/third-kind classification and the quadratic examples' ξ,η are prose/local formulas, rather than additional selected functions.
+  The individual construction entries below include `DLMF.EllipticIntegrals.SymmetricReduction.linearRoot`, `DLMF.EllipticIntegrals.SymmetricReduction.factorDet`, `DLMF.EllipticIntegrals.SymmetricReduction.quarticProduct`, `DLMF.EllipticIntegrals.SymmetricReduction.pairU`, its two infinite-endpoint variants, `DLMF.EllipticIntegrals.SymmetricReduction.pairUFiveSq`, `DLMF.EllipticIntegrals.SymmetricReduction.pairSFive`, `DLMF.EllipticIntegrals.SymmetricReduction.pairQFiveSq`, `DLMF.EllipticIntegrals.SymmetricReduction.reductionIntegral`, `DLMF.EllipticIntegrals.SymmetricReduction.unitVector`, `DLMF.EllipticIntegrals.SymmetricReduction.basicIndices`, `DLMF.EllipticIntegrals.SymmetricReduction.cubicProduct`, `DLMF.EllipticIntegrals.quadraticPairU`, `DLMF.EllipticIntegrals.SymmetricReduction.quadraticS`, `DLMF.EllipticIntegrals.SymmetricReduction.quadraticD`, `DLMF.EllipticIntegrals.SymmetricReduction.quadraticRF`, and `DLMF.EllipticIntegrals.SymmetricReduction.biquadraticU`. Their shared namespace is `DLMF.EllipticIntegrals` and [source](DLMF/EllipticIntegrals/SymmetricReduction.lean#L64). There is also `DLMF.EllipticIntegrals.SymmetricReduction.reductionIntegrand` ([source](DLMF/EllipticIntegrals/SymmetricReduction.lean#L595)) and domain/permutation predicates `DLMF.EllipticIntegrals.SymmetricReductionConditions`, `DLMF.EllipticIntegrals.IsReductionIndexPermutation` ([source](DLMF/EllipticIntegrals/SymmetricReduction.lean#L170)). Only the squares of U_{α5} and Q_{α5} are chosen locally; the DLMF signed roots are not independently supplied. The first-/second-/third-kind classification and the quadratic examples' ξ,η are prose/local formulas, rather than additional selected functions.
 
   [DLMF 19.29.E1](https://dlmf.nist.gov/19.29.E1): DLMF 19.29.1: `X_α = √(a_α + b_α x)` (and `Y_α = √(a_α + b_α y)` is `SymmetricReduction.linearRoot a b y α`), principal square root.
   [`DLMF.EllipticIntegrals.SymmetricReduction.linearRoot`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L66).
@@ -4619,7 +4617,7 @@ Traversal: all §§19.1–19.39 checked; matching sections are §19.2 and §19.1
 ### §19.30 Lengths of Plane Curves
 
 - **Plane curves and their arc lengths**, [DLMF 19.30](https://dlmf.nist.gov/19.30):
-  Ellipses, hyperbolas and Bernoulli's lemniscate are given by the explicit parametrizations of 19.30.1, .7, .10, with arc lengths s in .2, .8, .11. The full ellipse perimeter has both `DLMF.EllipticIntegrals.ellipsePerimeter` and the older `DLMF.Elliptic.ellipsePerimeter` ([source](DLMF/Elliptic/SpecialValues.lean#L197)); no separate local hyperbola or lemniscate arc-length construction was found. The scale parameters k,c,r,q and the amplitude in .12 are formula substitutions. Exact lemniscate perimeter expressions remain definitions/identities of interest; their decimal evaluations are excluded: numerical.
+  Ellipses, hyperbolas and Bernoulli's lemniscate are given by the explicit parametrizations of 19.30.1, .7, .10, with arc lengths s in .2, .8, .11. The full ellipse perimeter has both `DLMF.EllipticIntegrals.ellipsePerimeter` and the older `DLMF.Elliptic.ellipsePerimeter` ([source](DLMF/Elliptic/SpecialValues.lean#L206)); no separate local hyperbola or lemniscate arc-length construction was found. The scale parameters k,c,r,q and the amplitude in .12 are formula substitutions. Exact lemniscate perimeter expressions remain definitions/identities of interest; their decimal evaluations are excluded: numerical.
 
 ### §19.31 Probability Distributions
 
@@ -4722,7 +4720,7 @@ Traversal: all §§20.1–20.16 checked; the matching section is §20.2.
 ### §20.9 Relations to Other Functions
 
 - **Theta modulus and elliptic modular function**, [DLMF 20.9.E1](https://dlmf.nist.gov/20.9.E1):
-  k=θ₂²/θ₃² is both `DLMF.Theta.thetaModulusK` ([source](DLMF/Theta/Relations.lean#L74)) and `DLMF.JacobiElliptic.jacobiModulusTau` ([source](DLMF/JacobiElliptic/Basic/Definitions.lean#L128)); its square is the modular function `DLMF.Weierstrass.modularLambda`. The quarter-period constructions `DLMF.JacobiElliptic.compEllIntKTau`, `DLMF.JacobiElliptic.compEllIntKpTau` give the theta-side K,K′. Their equalities with integral constructions are bridge theorems, and the nome does not determine τ uniquely.
+  k=θ₂²/θ₃² is both `DLMF.Theta.thetaModulusK` ([source](DLMF/Theta/Relations.lean#L74)) and `DLMF.JacobiElliptic.jacobiModulusOfTau` ([source](DLMF/JacobiElliptic/Basic/Definitions.lean#L128)); its square is the modular function `DLMF.Weierstrass.modularLambda`. The quarter-period constructions `DLMF.JacobiElliptic.completeEllipticKOfTau`, `DLMF.JacobiElliptic.completeEllipticKPrimeOfTau` give the theta-side K,K′. Their equalities with integral constructions are bridge theorems, and the nome does not determine τ uniquely.
 
   [DLMF 20.9.E1](https://dlmf.nist.gov/20.9.E1): DLMF 20.9.1: the modulus `k = θ₂²(0|τ)/θ₃²(0|τ)`.
   [`DLMF.Theta.thetaModulusK`](DLMF/Theta/Relations.lean#L53).
@@ -4861,26 +4859,26 @@ Traversal: all §§22.1–22.22 checked; matching headings are §22.2,
 <!-- retained entry 153 -->
 - **Nome, modulus, complementary modulus, K and scaled argument ζ**,
   [22.2.1–3](https://dlmf.nist.gov/22.2.E1):
-  `DLMF.JacobiElliptic.jacobiNomek`, `jacobiTauk`, `jacobiComodulusk`,
-  `jacobiZetak`, and the τ-based
-  `jacobiModulusTau`, `jacobiComodulusTau`, `compEllIntKTau`,
-  `compEllIntKpTau`, `jacobiZetaTau` in
+  `DLMF.JacobiElliptic.jacobiNome`, `jacobiTau`, `jacobiComodulus`,
+  `jacobiThetaArgument`, and the τ-based
+  `jacobiModulusOfTau`, `jacobiComodulusOfTau`, `completeEllipticKOfTau`,
+  `completeEllipticKPrimeOfTau`, `jacobiThetaArgumentOfTau` in
   [Definitions](DLMF/JacobiElliptic/Basic/Definitions.lean#L120);
-  `DLMF.EllipticIntegrals.compEllIntKk`, `compEllIntKpk` in
+  `DLMF.EllipticIntegrals.completeEllipticK`, `completeEllipticKPrime` in
   [Complete](DLMF/EllipticIntegrals/Basic/Complete.lean#L46).
   Here “Zeta” denotes the scaled argument πz/(2K), not Jacobi's zeta function.
 
 <!-- retained entry 154 -->
 - **All twelve Jacobi functions and Glaisher quotients**,
   [22.2.4–12](https://dlmf.nist.gov/22.2.E4):
-  `DLMF.JacobiElliptic.jacobiGlaisher`, `jacobiPQTau`, `jacobiPQk`, with
+  `DLMF.JacobiElliptic.jacobiGlaisher`, `jacobiPQOfTau`, `jacobiPQ`, with
   `JacobiLetter`, in [Definitions](DLMF/JacobiElliptic/Basic/Definitions.lean#L84).
-  The explicit modulus-k wrappers are `jacobiSnk`, `jacobiCnk`, `jacobiDnk`,
-  `jacobiSdk`, `jacobiCdk`, `jacobiSck`, `jacobiNsk`, `jacobiNck`,
-  `jacobiNdk`, `jacobiDsk`, `jacobiDck`, `jacobiCsk`; each has a corresponding
-  τ wrapper `jacobiSnTau`, …, `jacobiCsTau` in the same file.
+  The explicit modulus-k wrappers are `jacobiSnk`, `jacobiCn`, `jacobiDn`,
+  `jacobiSd`, `jacobiCd`, `jacobiSc`, `jacobiNs`, `jacobiNc`,
+  `jacobiNd`, `jacobiDs`, `jacobiDc`, `jacobiCs`; each has a corresponding
+  τ wrapper `jacobiSnOfTau`, …, `jacobiCsOfTau` in the same file.
   Independent real inverse-integral constructions are
-  `DLMF.Elliptic.Real.jacobiSnm`, `jacobiCnm`, `jacobiDnm` in
+  `DLMF.Elliptic.Real.jacobiSnOfParameter`, `jacobiCnOfParameter`, `jacobiDnOfParameter` in
   [Jacobi](DLMF/Elliptic/Basic/Amplitude.lean#L145), with parameter `m=k²`.
   Their amplitude definition uses a fallback when `m ≥ 1`; it is not a
   general mathematical extension to that regime.
@@ -4888,7 +4886,7 @@ Traversal: all §§22.1–22.22 checked; matching headings are §22.2,
 ### §22.4 Periods, Poles, and Zeros
 
 - **Jacobian congruence classes and letter vertices**, [DLMF 22.4.i](https://dlmf.nist.gov/22.4.i):
-  The congruent set of a is {a+2mK+2niK′}. It is `DLMF.JacobiElliptic.jacobiCongruentk`; the vertices s=0,c=K,d=K+iK′,n=iK′ are `DLMF.JacobiElliptic.jacobiLetterPointk` ([source](DLMF/JacobiElliptic/PeriodsPolesZeros.lean#L778)). Copolar means having the same pole column and coperiodic the same period row in Tables22.4.1–2; no independent local predicates were found. The geometric lattice generated by K,iK′ differs from each function's actual period lattice.
+  The congruent set of a is {a+2mK+2niK′}. It is `DLMF.JacobiElliptic.jacobiCongruentk`; the vertices s=0,c=K,d=K+iK′,n=iK′ are `DLMF.JacobiElliptic.jacobiLetterPointk` ([source](DLMF/JacobiElliptic/PeriodsPolesZeros.lean#L789)). Copolar means having the same pole column and coperiodic the same period row in Tables22.4.1–2; no independent local predicates were found. The geometric lattice generated by K,iK′ differs from each function's actual period lattice.
 
 ### §22.7 Landen Transformations
 
@@ -4925,38 +4923,38 @@ Traversal: all §§22.1–22.22 checked; matching headings are §22.2,
 
 <!-- retained entry 155 -->
 - **Principal arcsn, arccn and arcdn**, [22.15.1–10](https://dlmf.nist.gov/22.15.E1):
-  `DLMF.Elliptic.Real.jacobiArcsnm` in
+  `DLMF.Elliptic.Real.jacobiArcsnOfParameter` in
   [SpecialValues](DLMF/Elliptic/SpecialValues.lean#L85),
-  `DLMF.JacobiElliptic.Real.jacobiArccnm`, `jacobiArcdnm` in
+  `DLMF.JacobiElliptic.Real.jacobiArccn`, `jacobiArcdn` in
   [Inverse](DLMF/JacobiElliptic/Inverse.lean#L42). They use parameter m,
   with the DLMF principal intervals and range conditions in theorems.
   The other nine inverse functions are independently defined there as
-  `jacobiArccdm`, `jacobiArcsdm`, `jacobiArcndm`, `jacobiArcdcm`,
-  `jacobiArcncm`, `jacobiArcscm`, `jacobiArcnsm`, `jacobiArcdsm`,
-  `jacobiArccsm`. General real solution sets are theorem characterizations;
+  `jacobiArccd`, `jacobiArcsd`, `jacobiArcnd`, `jacobiArcdc`,
+  `jacobiArcnc`, `jacobiArcsc`, `jacobiArcns`, `jacobiArcds`,
+  `jacobiArccs`. General real solution sets are theorem characterizations;
   no multivalued complex inverse object is defined.
 
 ### §22.16 Related Functions
 
 <!-- retained entry 156 -->
 - **Jacobi amplitude**, [22.16.1 and continuation prose](https://dlmf.nist.gov/22.16.E1):
-  `DLMF.Elliptic.Real.jacobiAmm` in
+  `DLMF.Elliptic.Real.jacobiAmOfParameter` in
   [Jacobi](DLMF/Elliptic/Basic/Amplitude.lean#L140), the inverse order isomorphism of F
   when `m<1`. This is the unwrapped real amplitude, not principal arcsine
   of sn on the whole real line.
 
 <!-- retained entry 157 -->
 - **Jacobi zeta Z**, [22.16.32](https://dlmf.nist.gov/22.16.E32):
-  `DLMF.JacobiElliptic.Real.jacobiZetaFunctionk`, using the independently
-  defined integral `Real.jacobiEpsilonk` in
+  `DLMF.JacobiElliptic.Real.jacobiZeta`, using the independently
+  defined integral `Real.jacobiEpsilon` in
   [Related](DLMF/JacobiElliptic/Related.lean#L284).
   Epsilon is the exact integral of dn² and supplies the referenced quantity
-  in the definition; it is distinct from the scaled argument called `jacobiZetak`.
+  in the definition; it is distinct from the scaled argument called `jacobiThetaArgument`.
 
 ### §22.17 Moduli Outside the Interval [0,1]
 
 - **Imaginary-modulus transformation**, [DLMF 22.17.E5](https://dlmf.nist.gov/22.17.E5):
-  k₁=k/√(1+k²) is `DLMF.JacobiElliptic.jacobiImagModulusk` ([source](DLMF/JacobiElliptic/OutsideModuli.lean#L138)); Lean selects the principal square root, whereas DLMF permits either consistent choice. Reciprocal and negative moduli are substitutions in the same functions, not new function families.
+  k₁=k/√(1+k²) is `DLMF.JacobiElliptic.jacobiImagModulusk` ([source](DLMF/JacobiElliptic/OutsideModuli.lean#L139)); Lean selects the principal square root, whereas DLMF permits either consistent choice. Reciprocal and negative moduli are substitutions in the same functions, not new function families.
 
   [DLMF 22.17.E5](https://dlmf.nist.gov/22.17.E5): The modulus `k₁ = k/√(1 + k²)` of DLMF 22.17.5 for complex `k` (principal square root; DLMF 22.17(i): either value of the square root can be chosen).
   [`DLMF.JacobiElliptic.jacobiImagModulusk`](DLMF/JacobiElliptic/OutsideModuli.lean#L116).
@@ -5030,7 +5028,7 @@ Traversal: all §§23.1–23.24 checked; matching sections are §23.2 and §23.1
 ### §23.5 Special Lattices
 
 - **Special lattice classes**, [DLMF 23.5](https://dlmf.nist.gov/23.5):
-  `DLMF.Weierstrass.HalfPeriods.IsRectangular`, `DLMF.Weierstrass.HalfPeriods.IsLemniscatic`, `DLMF.Weierstrass.HalfPeriods.IsRhombic`, `DLMF.Weierstrass.HalfPeriods.IsEquianharmonic` ([source](DLMF/Weierstrass/SpecialLattices.lean#L225)) express the four half-period geometries; `DLMF.Weierstrass.HalfPeriods.rectangular` and `DLMF.Weierstrass.HalfPeriods.rhombic` construct examples from positive real parameters. DLMF also names the pseudo-lemniscatic rhombic case2ω₃=(1+i)ω₁; no separate local predicate was found. Conjugation-invariant lattices are expressed directly as equality with the conjugate lattice, with real invariants as an equivalent property.
+  `DLMF.Weierstrass.HalfPeriods.IsRectangular`, `DLMF.Weierstrass.HalfPeriods.IsLemniscatic`, `DLMF.Weierstrass.HalfPeriods.IsRhombic`, `DLMF.Weierstrass.HalfPeriods.IsEquianharmonic` ([source](DLMF/Weierstrass/SpecialLattices.lean#L238)) express the four half-period geometries; `DLMF.Weierstrass.HalfPeriods.rectangular` and `DLMF.Weierstrass.HalfPeriods.rhombic` construct examples from positive real parameters. DLMF also names the pseudo-lemniscatic rhombic case2ω₃=(1+i)ω₁; no separate local predicate was found. Conjugation-invariant lattices are expressed directly as equality with the conjugate lattice, with real invariants as an equivalent property.
 
 ### §23.6 Relations to Other Functions
 
@@ -5075,7 +5073,7 @@ Traversal: all §§23.1–23.24 checked; matching sections are §23.2 and §23.1
 <!-- retained entry 162 -->
 - **Modular transformation, modular function, modular form and cusp form**,
   [23.15.3–5 and prose](https://dlmf.nist.gov/23.15.i):
-  `DLMF.Weierstrass.mobius`, `IsModularFunction`, `IsModularForm`,
+  `DLMF.Weierstrass.modularMobius`, `IsModularFunction`, `IsModularForm`,
   `IsCuspForm` in [ModularFunctions](DLMF/Weierstrass/ModularFunctions.lean#L69).
   They follow DLMF's multiplier and half-integer exponent convention with
   doubled integer weight `ℓ₂`; this is not simply an alias for Mathlib's
@@ -5096,13 +5094,13 @@ Traversal: all §§23.1–23.24 checked; matching sections are §23.2 and §23.1
   the derivative is `DLMF.Theta.jacobiThetaOneDerivNullTau`; Mathlib's
   `ModularForm.eta` construction in
   [DedekindEta](.lake/packages/mathlib/Mathlib/NumberTheory/ModularForms/DedekindEta.lean#L57)
-  is used directly. The local identities identify the correct cube-root
-  branch, rather than defining eta by a principal cube root without qualification.
+  is used directly. The local identities identify the correct unitCube-root
+  branch, rather than defining eta by a principal unitCube root without qualification.
 
 ### §23.18 Modular Transformations
 
 - **Eta multiplier and Dedekind sum**, [DLMF 23.18.E6](https://dlmf.nist.gov/23.18.E6):
-  ε(A) and s(d,c), c>0, are `DLMF.Weierstrass.etaMultiplier`, `DLMF.Weierstrass.dedekindSum` ([source](DLMF/Weierstrass/Basic/Modular.lean#L124)). The sum uses every r=1,…,c−1, not just residues coprime to c. The six anharmonic λ transforms of 23.18.1–2 also have existing exact helpers `DLMF.Weierstrass.anharmonicMap`, `DLMF.Weierstrass.anharmonicMapSL` ([source](DLMF/Weierstrass/ModularFunctions.lean#L782)); the arguments encode the matrix parity class.
+  ε(A) and s(d,c), c>0, are `DLMF.Weierstrass.etaMultiplier`, `DLMF.Weierstrass.dedekindSum` ([source](DLMF/Weierstrass/Basic/Modular.lean#L124)). The sum uses every r=1,…,c−1, not just residues coprime to c. The six anharmonic λ transforms of 23.18.1–2 also have existing exact helpers `DLMF.Weierstrass.anharmonicMap`, `DLMF.Weierstrass.anharmonicMapSL` ([source](DLMF/Weierstrass/ModularFunctions.lean#L552)); the arguments encode the matrix parity class.
 
   [DLMF 23.18.E6](https://dlmf.nist.gov/23.18.E6): The eta multiplier `ε(𝒜) = exp(πi((a + d)/(12c) + s(-d, c)))` (DLMF 23.18.6), `c > 0`.
   [`DLMF.Weierstrass.etaMultiplier`](DLMF/Weierstrass/ModularFunctions.lean#L758).
@@ -5366,7 +5364,7 @@ Traversal: all §§25.1–25.21 checked; matching headings are §25.2
 - **Riemann-zeta auxiliary function ω**, [DLMF 25.5.E14](https://dlmf.nist.gov/25.5.E14):
   DLMF 25.5.14: `ω(x) = ∑_{n≥1} e^{-n²πx}` (for `x > 0`; the `tsum` is `0` where the series
   diverges, i.e. for `x ≤ 0`).
-  `DLMF.Zeta.zetaOmega` ([definition](DLMF/Zeta/IntegralReps/PolygammaAndContours.lean#L48)).
+  `DLMF.Zeta.zetaOmega` ([definition](DLMF/Zeta/IntegralReps/PolygammaAndContours.lean#L53)).
 
 - **Keyhole-contour zeta integral**, [DLMF 25.5.iii](https://dlmf.nist.gov/25.5.iii):
   The keyhole loop integral `∫_{-∞}^{(0+)} z^a g(z) dz` around the negative real axis: from
@@ -5376,7 +5374,7 @@ Traversal: all §§25.1–25.21 checked; matching headings are §25.2
   `δ^a e^{iaθ}`, `-π < θ < π`, on the circle. Parametrized,
   `(e^{-iπa} - e^{iπa}) ∫_δ^∞ x^a g(-x) dx + ∫_{-π}^{π} δ^a e^{iaθ} g(δe^{iθ}) iδe^{iθ} dθ`
   (DLMF §25.5(iii), the contour of 25.5.20–25.5.21).
-  `DLMF.Zeta.keyholeLoopIntegral` ([definition](DLMF/Zeta/IntegralReps/PolygammaAndContours.lean#L604)).
+  `DLMF.Zeta.keyholeLoopIntegral` ([definition](DLMF/Zeta/IntegralReps/PolygammaAndContours.lean#L1006)).
 
 ### §25.9 Asymptotic Approximations
 
@@ -5496,7 +5494,7 @@ Traversal: all §§25.1–25.21 checked; matching headings are §25.2
 
 <!-- retained entry 175 -->
 - **Gauss sum G(χ)**, [25.15.6](https://dlmf.nist.gov/25.15.E6):
-  `DLMF.NumberTheory.gaussSumDLMF χ 1` in
+  `DLMF.NumberTheory.dirichletGaussSum χ 1` in
   [Characters](DLMF/NumberTheory/Characters.lean#L857), and Mathlib `gaussSum`
   in [GaussSum](.lake/packages/mathlib/Mathlib/NumberTheory/GaussSum.lean).
   The latter takes multiplicative and additive characters explicitly; the
@@ -5851,7 +5849,7 @@ Traversal: all §§27.1–27.22 checked; the matching heading is §27.2(i).
   Mathlib `ArithmeticFunction.sigma` in
   [ArithmeticFunction/Misc](.lake/packages/mathlib/Mathlib/NumberTheory/ArithmeticFunction/Misc.lean#L143)
   for natural exponents, and complex-exponent
-  `DLMF.NumberTheory.sigmaC`, with `powC`, in
+  `DLMF.NumberTheory.sigmaCpow`, with `cpowArithmeticFunction`, in
   [Functions](DLMF/NumberTheory/Functions.lean#L214).
 
 <!-- retained entry 203 -->
@@ -5871,14 +5869,14 @@ Traversal: all §§27.1–27.22 checked; the matching heading is §27.2(i).
 - **Multiplicative arithmetic-function predicate**, [DLMF 27.3.E1](https://dlmf.nist.gov/27.3.E1):
   DLMF 27.3.1: `f` is multiplicative on the positive integers if `f(1) = 1` and
   `f(mn) = f(m)f(n)` whenever `(m, n) = 1`.
-  `DLMF.NumberTheory.IsMultiplicativeFn` ([definition](DLMF/NumberTheory/Basic/Functions.lean#L348)).
+  `DLMF.NumberTheory.IsMultiplicativeFn` ([definition](DLMF/NumberTheory/Basic/Functions.lean#L355)).
 
 - **Arithmetic-function structures and multiplicativity**, [27.3.1 and 27.3.9](https://dlmf.nist.gov/27.3.E1): in addition to the local positive-domain predicates, Mathlib `ArithmeticFunction` and `ArithmeticFunction.IsMultiplicative` in [Defs](.lake/packages/mathlib/Mathlib/NumberTheory/ArithmeticFunction/Defs.lean#L423) package the zero-at0 convention and coprime multiplicativity. Complete multiplicativity can be represented by a multiplicative homomorphism on the relevant domain. These structured objects are distinct from unconstrained functions ℕ→ℂ; values at0 must be matched before adopting an upstream instance.
 
 - **Completely multiplicative arithmetic-function predicate**, [DLMF 27.3.E9](https://dlmf.nist.gov/27.3.E9):
   DLMF 27.3.9: `f` is completely multiplicative if `f(1) = 1` and `f(mn) = f(m)f(n)` for
   all `m, n = 1, 2, …`.
-  `DLMF.NumberTheory.IsCompletelyMultiplicativeFn` ([definition](DLMF/NumberTheory/Basic/Functions.lean#L365)).
+  `DLMF.NumberTheory.IsCompletelyMultiplicativeFn` ([definition](DLMF/NumberTheory/Basic/Functions.lean#L372)).
 
 ### §27.4 Euler Products and Dirichlet Series
 
@@ -5907,7 +5905,7 @@ Traversal: all §§27.1–27.22 checked; the matching heading is §27.2(i).
 - **Primitive Dirichlet-character predicate**, [DLMF 27.8](https://dlmf.nist.gov/27.8#p4):
   §27.8 after 27.8.6: DLMF's definition of a primitive character mod `k`: for every divisor
   `d < k` of `k` there is `a ≡ 1 (mod d)` with `(a, k) = 1` and `χ(a) ≠ 1`.
-  `DLMF.NumberTheory.IsPrimitiveDLMF` ([definition](DLMF/NumberTheory/Basic/Characters.lean#L86)).
+  `DLMF.NumberTheory.IsPrimitiveByDivisors` ([definition](DLMF/NumberTheory/Basic/Characters.lean#L86)).
 
 - **Inducing-modulus predicate for Dirichlet characters**, [DLMF 27.8.E7](https://dlmf.nist.gov/27.8.E7):
   DLMF 27.8.7: a divisor `d` of `k` is an induced modulus for `χ` if `χ(a) = 1` for all
@@ -5926,7 +5924,7 @@ Traversal: all §§27.1–27.22 checked; the matching heading is §27.2(i).
 
 - **Finite Fourier coefficients**, [DLMF 27.10.E3](https://dlmf.nist.gov/27.10.E3):
   DLMF 27.10.3: the finite Fourier coefficients `g(m) = k⁻¹ ∑_{n=1}^k f(n) e^{-2πimn/k}`.
-  `DLMF.NumberTheory.finiteFourierCoeff` ([definition](DLMF/NumberTheory/Characters.lean#L431)).
+  `DLMF.NumberTheory.finiteFourierCoeff` ([definition](DLMF/NumberTheory/Characters.lean#L432)).
 
 - **Ramanujan Sum**, [DLMF 27.10.E4](https://dlmf.nist.gov/27.10.E4):
   DLMF 27.10.4: Ramanujan's sum `c_k(n) = ∑_{m=1}^k χ₁(m) e^{2πimn/k}`, the sum over
@@ -5935,7 +5933,7 @@ Traversal: all §§27.1–27.22 checked; the matching heading is §27.2(i).
 
 - **Divisor Convolution Sum**, [DLMF 27.10.E6](https://dlmf.nist.gov/27.10.E6):
   DLMF 27.10.6: `s_k(n) = ∑_{d∣(n,k)} f(d) g(k/d)`.
-  `DLMF.NumberTheory.divisorConvolutionSum` ([definition](DLMF/NumberTheory/Characters.lean#L725)).
+  `DLMF.NumberTheory.divisorConvolutionSum` ([definition](DLMF/NumberTheory/Characters.lean#L726)).
 
 - **Fourier kernel and generalized Ramanujan coefficients**, [27.10.2–3 and 27.10.8](https://dlmf.nist.gov/27.10.E8): `DLMF.NumberTheory.expFrac` in [Characters](DLMF/NumberTheory/Characters.lean#L436) is exp(2πimn/k). The finite transform `finiteFourierCoeff` uses the negative exponential and the factor1/k. The aₖ(m) in the generalized divisor-convolution expansion is the displayed divisor sum Σd|(m,k)g(d)f(k/d)d/k; no separate public a-wrapper was found. `GaussSumSeparable` tests the exact normalization G(n,χ)=conj(χ(n))G(1,χ), not separability of a polynomial or field extension.
 
@@ -5945,7 +5943,7 @@ Traversal: all §§27.1–27.22 checked; the matching heading is §27.2(i).
 
 - **Gauss sum in the DLMF normalization**, [DLMF 27.10.E9](https://dlmf.nist.gov/27.10.E9):
   DLMF 27.10.9: the Gauss sum `G(n, χ) = ∑_{m=1}^k χ(m) e^{2πimn/k}`.
-  `DLMF.NumberTheory.gaussSumDLMF` ([definition](DLMF/NumberTheory/Basic/Characters.lean#L147)).
+  `DLMF.NumberTheory.dirichletGaussSum` ([definition](DLMF/NumberTheory/Basic/Characters.lean#L147)).
 
 ### §27.11 Asymptotic Formulas: Partial Sums
 
@@ -6015,11 +6013,11 @@ Traversal: all §§27.1–27.22 checked; the matching heading is §27.2(i).
   DLMF 27.14.10: `A_k(n) = ∑_{1≤h≤k, (h,k)=1} exp(πi s(h, k) - 2πi n h/k)`.
   `DLMF.NumberTheory.rademacherA` ([definition](DLMF/NumberTheory/Partitions.lean#L506)).
 
-- **Dedekind eta, multiplier and normalized discriminant**, [27.14.12–16](https://dlmf.nist.gov/27.14.E12): Mathlib `ModularForm.eta` in [DedekindEta](.lake/packages/mathlib/Mathlib/NumberTheory/ModularForms/DedekindEta.lean#L57) supplies η(τ) with Imτ>0; the project's eta notation refers to this function. The multiplier ε=exp(πi((a+d)/(12c)−s(d,c))) is explicit in the transformation formula, not a separately named wrapper. `discriminantDLMF` includes (2π)¹² times η²⁴, so it differs from the often normalized modular discriminant η²⁴. `ramanujanTau` is defined by a formal integer power-series product, separately from the analytic eta product; the generating-function bridge should not erase this normalization.
+- **Dedekind eta, multiplier and normalized discriminant**, [27.14.12–16](https://dlmf.nist.gov/27.14.E12): Mathlib `ModularForm.eta` in [DedekindEta](.lake/packages/mathlib/Mathlib/NumberTheory/ModularForms/DedekindEta.lean#L57) supplies η(τ) with Imτ>0; the project's eta notation refers to this function. The multiplier ε=exp(πi((a+d)/(12c)−s(d,c))) is explicit in the transformation formula, not a separately named wrapper. `modularDiscriminant` includes (2π)¹² times η²⁴, so it differs from the often normalized modular discriminant η²⁴. `ramanujanTau` is defined by a formal integer power-series product, separately from the analytic eta product; the generating-function bridge should not erase this normalization.
 
   [DLMF 27.14.E16](https://dlmf.nist.gov/27.14.E16):
   DLMF 27.14.16: the discriminant `Δ(τ) = (2π)¹² η(τ)²⁴`, `ℑτ > 0`.
-  `DLMF.NumberTheory.discriminantDLMF` ([definition](DLMF/NumberTheory/Basic/GeneratingFunctions.lean#L112)).
+  `DLMF.NumberTheory.modularDiscriminant` ([definition](DLMF/NumberTheory/Basic/GeneratingFunctions.lean#L112)).
 
   [DLMF 27.14.E18](https://dlmf.nist.gov/27.14.E18):
   DLMF 27.14.18: Ramanujan's `τ(n)`, the `n`th coefficient of `x ∏_{m≥1} (1 - xᵐ)²⁴`.
@@ -6121,9 +6119,9 @@ Names in this chapter are in `DLMF.Mathieu`.
 
 ### §28.6 Expansions for Small q
 
-- **Finite continued-fraction approximants**, [28.6.16–19](https://dlmf.nist.gov/28.6.E16) and [28.15.2](https://dlmf.nist.gov/28.15.E2): `DLMF.Mathieu.mathieuCFHead` and `DLMF.Mathieu.mathieuCFTail` in [ContFracDefs](DLMF/Mathieu/Basic/ContinuedFractions.lean#L30) encode the finite head and tail fractions used for integer characteristic values. `DLMF.Mathieu.mathieuContFrac` in [Noninteger/Defs](DLMF/Mathieu/Noninteger/Basic.lean#L196) encodes the finite truncation with denominators `a-(ν+2k)²`. These are finite totalized rational expressions; an infinite continued fraction is represented separately by a convergence statement about the truncations.
+- **Finite continued-fraction approximants**, [28.6.16–19](https://dlmf.nist.gov/28.6.E16) and [28.15.2](https://dlmf.nist.gov/28.15.E2): `DLMF.Mathieu.mathieuContinuedFractionHead` and `DLMF.Mathieu.mathieuContinuedFractionTail` in [ContFracDefs](DLMF/Mathieu/Basic/ContinuedFractions.lean#L30) encode the finite head and tail fractions used for integer characteristic values. `DLMF.Mathieu.mathieuContFrac` in [Noninteger/Defs](DLMF/Mathieu/Noninteger/Basic.lean#L196) encodes the finite truncation with denominators `a-(ν+2k)²`. These are finite totalized rational expressions; an infinite continued fraction is represented separately by a convergence statement about the truncations.
 
-- **Radii of convergence ρₙ⁽ʲ⁾ and the elliptic comparison constant**, [28.6.20](https://dlmf.nist.gov/28.6.E20): `ρₙ⁽ʲ⁾` are the radii for the indicated small-`q` characteristic-value series. The exact constant is `k k′ K(k)²`, where `0<k<1`, `2E(k)=K(k)` and `k′=√(1-k²)`. Existing objects are `DLMF.EllipticIntegrals.compEllIntEk` and `DLMF.EllipticIntegrals.compEllIntKk`; there is no separate public radius sequence or selected root `k`. The local theorem `DLMF.Mathieu.mathieu_radius_liminf` expresses the result through existence of analytic extensions to growing discs, rather than defining `ρₙ⁽ʲ⁾`. The decimal constant and Table 28.6.1 are excluded: numerical.
+- **Radii of convergence ρₙ⁽ʲ⁾ and the elliptic comparison constant**, [28.6.20](https://dlmf.nist.gov/28.6.E20): `ρₙ⁽ʲ⁾` are the radii for the indicated small-`q` characteristic-value series. The exact constant is `k k′ K(k)²`, where `0<k<1`, `2E(k)=K(k)` and `k′=√(1-k²)`. Existing objects are `DLMF.EllipticIntegrals.completeEllipticE` and `DLMF.EllipticIntegrals.completeEllipticK`; there is no separate public radius sequence or selected root `k`. The local theorem `DLMF.Mathieu.mathieu_radius_liminf` expresses the result through existence of analytic extensions to growing discs, rather than defining `ρₙ⁽ʲ⁾`. The decimal constant and Table 28.6.1 are excluded: numerical.
 
 ### §28.8 Asymptotic Expansions for Large q
 
@@ -6256,13 +6254,13 @@ Modified Bessel Functions
 
 ### §28.25 Asymptotic Expansions for Large ℜ ⁡ z
 
-- **Large-argument recurrence pair, prefactor and sector**, [28.25.1–5](https://dlmf.nist.gov/28.25.E1): in addition to `DLMF.Mathieu.modMathieuAsympD`, [Modified/Defs](DLMF/Mathieu/Modified/Basic/AsymptoticData.lean#L33) defines `DLMF.Mathieu.modMathieuAsympDPair` for adjacent recurrence coefficients, `DLMF.Mathieu.modMathieuAsympPrefactor` for the oscillatory exponential divided by the continued square root, and `DLMF.Mathieu.modMathieuAsympFilter` for `Re z→+∞` in the prescribed phase strip. The square root is continued as `(2πh)^(1/2) cosh(z/2)`; its branch is part of this realization.
+- **Large-argument recurrence pair, prefactor and sector**, [28.25.1–5](https://dlmf.nist.gov/28.25.E1): in addition to `DLMF.Mathieu.modMathieuAsymptoticD`, [Modified/Defs](DLMF/Mathieu/Modified/Basic/AsymptoticData.lean#L33) defines `DLMF.Mathieu.modMathieuAsymptoticDPair` for adjacent recurrence coefficients, `DLMF.Mathieu.modMathieuAsymptoticPrefactor` for the oscillatory exponential divided by the continued square root, and `DLMF.Mathieu.modMathieuAsymptoticFilter` for `Re z→+∞` in the prescribed phase strip. The square root is continued as `(2πh)^(1/2) cosh(z/2)`; its branch is part of this realization.
 
   [DLMF 28.25.E2](https://dlmf.nist.gov/28.25.E2):
   The coefficients `D^±_m` of DLMF 28.25.1, defined by 28.25.2 (`D_{-1} = 0`, `D_0 = 1`) and
   the recurrence 28.25.3; `σ = 1` gives `D^+_m` (for `M^{(3)}_ν`), `σ = -1` gives `D^-_m` (for
   `M^{(4)}_ν`); `a = λ_ν(h²)`.
-  `DLMF.Mathieu.modMathieuAsympD` ([definition](DLMF/Mathieu/Modified/Basic/AsymptoticData.lean#L53)).
+  `DLMF.Mathieu.modMathieuAsymptoticD` ([definition](DLMF/Mathieu/Modified/Basic/AsymptoticData.lean#L53)).
 
 ### §28.26 Asymptotic Approximations for Large q
 
@@ -6504,7 +6502,7 @@ Names below are in `DLMF.Lame`; the prefix `Real` is nested in that namespace.
   named Lean constructions of these alternative functions or conversion factors
   were found. They must be distinguished from the dn-weighted DLMF normalization
   in `DLMF.Lame.Real.IsNormalizedLameEigenfunction`
-  ([source](DLMF/Lame/Basic/SpectralData.lean#L100)).
+  ([source](DLMF/Lame/Basic/SpectralData.lean#L101)).
 
 ### §29.2 Differential Equations
 
@@ -6522,7 +6520,7 @@ Names below are in `DLMF.Lame`; the prefix `Real` is nested in that namespace.
 
 - **Algebraic, trigonometric and Weierstrass variables**, [DLMF 29.2.E3](https://dlmf.nist.gov/29.2.E3), [29.2.E5–12](https://dlmf.nist.gov/29.2.E5):
   ξ=sn²(z,k) is a composed expression; φ=π/2−am(z,k) is
-  `DLMF.Lame.Real.lamePhi` ([source](DLMF/Lame/Basic/Equations.lean#L131)).
+  `DLMF.Lame.Real.lamePhi` ([source](DLMF/Lame/Basic/Equations.lean#L132)).
   The real constants e₁>e₂>e₃ satisfy e₁+e₂+e₃=0 and
   (e₂−e₃)/(e₁−e₃)=k² and are not uniquely chosen by k.
   g=(e₁−e₃)h+ν(ν+1)e₃, η=(e₁−e₃)⁻¹ᐟ²(z−iK′),
@@ -6539,12 +6537,12 @@ Names below are in `DLMF.Lame`; the prefix `Real` is nested in that namespace.
   [DLMF 29.2.E4](https://dlmf.nist.gov/29.2.E4):
   The trigonometric form of Lamé's equation (DLMF 29.2.4) for real `φ`:
   `(1 - k² cos²φ) w'' + k² cos φ sin φ w' + (h - ν(ν+1) k² cos²φ) w = 0`.
-  `DLMF.Lame.Real.IsLameTrigSolution` ([definition](DLMF/Lame/Basic/Equations.lean#L118)).
+  `DLMF.Lame.Real.IsLameTrigSolution` ([definition](DLMF/Lame/Basic/Equations.lean#L119)).
 
   [DLMF 29.2.E5](https://dlmf.nist.gov/29.2.E5):
   The variable `φ = π/2 - am(x, k)` of DLMF 29.2.5 for real `x` (`am` is the real amplitude
-  `Real.jacobiAmm x (k²)` of §22.16(i)); then `cos φ = sn(x, k)` and `sin φ = cn(x, k)`.
-  `DLMF.Lame.Real.lamePhi` ([definition](DLMF/Lame/Basic/Equations.lean#L131)).
+  `Real.jacobiAmOfParameter x (k²)` of §22.16(i)); then `cos φ = sn(x, k)` and `sin φ = cn(x, k)`.
+  `DLMF.Lame.Real.lamePhi` ([definition](DLMF/Lame/Basic/Equations.lean#L132)).
 
   [DLMF 29.2.E9](https://dlmf.nist.gov/29.2.E9):
   The Weierstrass form of Lamé's equation (DLMF 29.2.9) in `η`:
@@ -6563,7 +6561,7 @@ Names below are in `DLMF.Lame`; the prefix `Real` is nested in that namespace.
 - **Four Lamé spectra aν²ᵐ, aν²ᵐ⁺¹, bν²ᵐ⁺¹, bν²ᵐ⁺²**,
   [§29.3(i) and Table 29.3.1](https://dlmf.nist.gov/29.3.i):
   `Real.lameSpectrum`, `Real.IsNthLameEigenvalue`, `Real.lameEigenvalue`,
-  `Real.lameAk`, `Real.lameBk`, with `Real.LameBoundary`,
+  `Real.lameA`, `Real.lameB`, with `Real.LameBoundary`,
   `Real.IsLameSolution`, `Real.IsLameEigenfunction`, in
   [Basic](DLMF/Lame/Basic/Equations.lean#L82). Boolean boundary types distinguish
   vanishing values and derivatives. Lean takes the modulus k, even where
@@ -6574,14 +6572,14 @@ Names below are in `DLMF.Lame`; the prefix `Real` is nested in that namespace.
 - **Four ordered spectra, endpoint conditions and normalized real functions**, [DLMF §29.3(i)](https://dlmf.nist.gov/29.3.i), [Table 29.3.2](https://dlmf.nist.gov/29.3.T2), [29.3.E18](https://dlmf.nist.gov/29.3.E18):
   `DLMF.Lame.Real.LameBoundary`, `DLMF.Lame.Real.IsLameEigenfunction`,
   `DLMF.Lame.Real.lameSpectrum`, `DLMF.Lame.Real.IsNthLameEigenvalue`,
-  `DLMF.Lame.Real.lameEigenvalue`, `DLMF.Lame.Real.lameAk` and
-  `DLMF.Lame.Real.lameBk` ([source](DLMF/Lame/Basic/SpectralData.lean#L93)) distinguish
+  `DLMF.Lame.Real.lameEigenvalue`, `DLMF.Lame.Real.lameA` and
+  `DLMF.Lame.Real.lameB` ([source](DLMF/Lame/Basic/SpectralData.lean#L94)) distinguish
   the four separated problems on [0,K]. In order a^(2m),a^(2m+1),b^(2m+1),b^(2m+2),
   the boundary types are Neumann–Neumann, Dirichlet–Neumann,
   Neumann–Dirichlet, Dirichlet–Dirichlet. The selected spectrum index is m;
   the displayed superscript counts zeros on [0,2K). The normalized functions
-  `DLMF.Lame.Real.lameEigenfunction`, `DLMF.Lame.Real.lameEck` and
-  `DLMF.Lame.Real.lameEsk` use ∫₀ᴷdn(x,k)w(x)²dx=π/4, Ec(K)>0 or Es′(K)<0.
+  `DLMF.Lame.Real.lameEigenfunction`, `DLMF.Lame.Real.lameEc` and
+  `DLMF.Lame.Real.lameEs` use ∫₀ᴷdn(x,k)w(x)²dx=π/4, Ec(K)>0 or Es′(K)<0.
   These are real-variable constructions, with zero fallbacks if their defining
   characterizations have no unique solution; complex-argument continuation is a
   separate gap.
@@ -6591,7 +6589,7 @@ Names below are in `DLMF.Lame`; the prefix `Real` is nested in that namespace.
   [29.3.9–17](https://dlmf.nist.gov/29.3.E9): the shifted eigenvalue H is
   the displayed arithmetic expression; the four recurrence families are
   encoded by `LameRecurrence`, `LameRecurrence.alpha`, `LameRecurrence.beta`,
-  `LameRecurrence.gamma`, `LameRecurrence.Satisfies`, `lameCFLeft`, `lameCFRight` in
+  `LameRecurrence.gamma`, `LameRecurrence.Satisfies`, `lameContinuedFractionLeft`, `lameContinuedFractionRight` in
   [Basic](DLMF/Lame/Basic/RecurrenceData.lean#L23). These are coefficient and recurrence
   objects, rather than independent definitions of Ec or Es.
 
@@ -6602,7 +6600,7 @@ Names below are in `DLMF.Lame`; the prefix `Real` is nested in that namespace.
   `DLMF.Lame.LameRecurrence.gamma` give α_p,β_p,γ_p, including their exceptional
   p=0 formulas ([source](DLMF/Lame/Basic/RecurrenceData.lean#L23)).
   `DLMF.Lame.LameRecurrence.Satisfies` encodes the coefficient recurrence.
-  `DLMF.Lame.lameCFLeft` and `DLMF.Lame.lameCFRight` are finite rational
+  `DLMF.Lame.lameContinuedFractionLeft` and `DLMF.Lame.lameContinuedFractionRight` are finite rational
   recursions, with the latter taking an explicit truncation depth
   ([source](DLMF/Lame/Basic/RecurrenceData.lean#L93)). Their totalized divisions do not make
   a denominator zero into a valid classical continued-fraction value; infinite
@@ -6612,7 +6610,7 @@ Names below are in `DLMF.Lame`; the prefix `Real` is nested in that namespace.
 - **Normalized Lamé functions Ecν, Esν**,
   [Table 29.3.2 and 29.3.18](https://dlmf.nist.gov/29.3.T2):
   `Real.IsNormalizedLameEigenfunction`, `Real.lameEigenfunction`,
-  `Real.lameEck`, `Real.lameEsk` in [Basic](DLMF/Lame/Basic/SpectralData.lean#L64).
+  `Real.lameEc`, `Real.lameEs` in [Basic](DLMF/Lame/Basic/SpectralData.lean#L64).
   These use the weighted dn integral and endpoint sign rules.
   `Real.lameEigenfunction_spec` proves existence and uniqueness on the same
   real parameter domain in [Eigenvalues](DLMF/Lame/Eigenvalues.lean#L158).
@@ -6631,7 +6629,7 @@ Names below are in `DLMF.Lame`; the prefix `Real` is nested in that namespace.
 
 - **Direct and dn-factored Fourier coefficient families**, [DLMF 29.6.E1](https://dlmf.nist.gov/29.6.E1), [29.6.E8](https://dlmf.nist.gov/29.6.E8), [29.6.E16](https://dlmf.nist.gov/29.6.E16), [29.6.E23](https://dlmf.nist.gov/29.6.E23), [29.6.E31](https://dlmf.nist.gov/29.6.E31), [29.6.E38](https://dlmf.nist.gov/29.6.E38), [29.6.E46](https://dlmf.nist.gov/29.6.E46), [29.6.E53](https://dlmf.nist.gov/29.6.E53):
   `DLMF.Lame.Real.lameCosCoeff` and `DLMF.Lame.Real.lameSinCoeff`
-  ([source](DLMF/Lame/Basic/RecurrenceData.lean#L137)) define the A/B families with a dn weight
+  ([source](DLMF/Lame/Basic/RecurrenceData.lean#L140)) define the A/B families with a dn weight
   and the C/D families with unit weight, all in φ=π/2−am(x,k). The latter are
   coefficients of w/dn, so w is reconstructed with an exterior dn factor.
   The even cosine constant is ½A₀ or ½C₀. Parity selects the even/odd frequency
@@ -6643,33 +6641,33 @@ Names below are in `DLMF.Lame`; the prefix `Real` is nested in that namespace.
   `DLMF.Lame.lameKappa` is κ=k√(ν(ν+1)), with p=2m+1 an expression.
   `DLMF.Lame.lameTau0`, `DLMF.Lame.lameTau1`, `DLMF.Lame.lameTau2`,
   `DLMF.Lame.lameTau3` and `DLMF.Lame.lameTau4`
-  ([source](DLMF/Lame/Basic/RecurrenceData.lean#L176)) are the five displayed exact coefficient
+  ([source](DLMF/Lame/Basic/RecurrenceData.lean#L180)) are the five displayed exact coefficient
   polynomials. They are distinct finite-index definitions; no named all-order
   τ_j sequence was found. Exact asymptotic coefficients remain in scope.
 
   [DLMF 29.7.E2](https://dlmf.nist.gov/29.7.E2):
   `κ = k(ν(ν+1))^{1/2}` (DLMF 29.7.2).
-  `DLMF.Lame.lameKappa` ([definition](DLMF/Lame/Basic/RecurrenceData.lean#L153)).
+  `DLMF.Lame.lameKappa` ([definition](DLMF/Lame/Basic/RecurrenceData.lean#L157)).
 
   [DLMF 29.7.E3](https://dlmf.nist.gov/29.7.E3):
   The coefficient `τ₀ = (1 + k²)(1 + p²)/2³` (DLMF 29.7.3).
-  `DLMF.Lame.lameTau0` ([definition](DLMF/Lame/Basic/RecurrenceData.lean#L157)).
+  `DLMF.Lame.lameTau0` ([definition](DLMF/Lame/Basic/RecurrenceData.lean#L161)).
 
   [DLMF 29.7.E4](https://dlmf.nist.gov/29.7.E4):
   The coefficient `τ₁ = p((1 + k²)²(p² + 3) - 4k²(p² + 5))/2⁶` (DLMF 29.7.4).
-  `DLMF.Lame.lameTau1` ([definition](DLMF/Lame/Basic/RecurrenceData.lean#L161)).
+  `DLMF.Lame.lameTau1` ([definition](DLMF/Lame/Basic/RecurrenceData.lean#L165)).
 
   [DLMF 29.7.E6](https://dlmf.nist.gov/29.7.E6):
   The coefficient `τ₂ = (1 + k²)(1 - k²)²(5p⁴ + 34p² + 9)/2¹⁰` (DLMF 29.7.6).
-  `DLMF.Lame.lameTau2` ([definition](DLMF/Lame/Basic/RecurrenceData.lean#L165)).
+  `DLMF.Lame.lameTau2` ([definition](DLMF/Lame/Basic/RecurrenceData.lean#L169)).
 
   [DLMF 29.7.E7](https://dlmf.nist.gov/29.7.E7):
   The coefficient `τ₃` of DLMF 29.7.7.
-  `DLMF.Lame.lameTau3` ([definition](DLMF/Lame/Basic/RecurrenceData.lean#L169)).
+  `DLMF.Lame.lameTau3` ([definition](DLMF/Lame/Basic/RecurrenceData.lean#L173)).
 
   [DLMF 29.7.E8](https://dlmf.nist.gov/29.7.E8):
   The coefficient `τ₄` of DLMF 29.7.8.
-  `DLMF.Lame.lameTau4` ([definition](DLMF/Lame/Basic/RecurrenceData.lean#L176)).
+  `DLMF.Lame.lameTau4` ([definition](DLMF/Lame/Basic/RecurrenceData.lean#L180)).
 
 ### §29.8 Integral Equations
 
@@ -6687,27 +6685,27 @@ Names below are in `DLMF.Lame`; the prefix `Real` is nested in that namespace.
 ### §29.9 Stability
 
 - **Stability of the differential equation**, [DLMF §29.9](https://dlmf.nist.gov/29.9):
-  `DLMF.Lame.Real.IsLameStable` ([source](DLMF/Lame/Basic/RecurrenceData.lean#L146)) means
+  `DLMF.Lame.Real.IsLameStable` ([source](DLMF/Lame/Basic/RecurrenceData.lean#L150)) means
   that every real solution is bounded on ℝ. Existence of one bounded periodic
   solution alone is insufficient for this definition.
 
   [DLMF 29.9](https://dlmf.nist.gov/29.9):
   Lamé's equation 29.2.1 with parameters `k, h, ν` is stable if all its real solutions are
   bounded on `ℝ` (DLMF §29.9).
-  `DLMF.Lame.Real.IsLameStable` ([definition](DLMF/Lame/Basic/RecurrenceData.lean#L146)).
+  `DLMF.Lame.Real.IsLameStable` ([definition](DLMF/Lame/Basic/RecurrenceData.lean#L150)).
 
 ### §29.10 Lamé Functions with Imaginary Periods
 
 - **Complementary-modulus transformation and imaginary-period functions**, [DLMF 29.10.E1–4](https://dlmf.nist.gov/29.10.E1):
   h′=ν(ν+1)−h and z′=i(z−K−iK′) are expressions in the change-of-equation
   theorem `DLMF.Lame.isLameSolutionOn_imaginary`
-  ([source](DLMF/Lame/DifferentialEquations.lean#L530)). DLMF's Ec/Es(z′,k′²)
+  ([source](DLMF/Lame/DifferentialEquations.lean#L544)). DLMF's Ec/Es(z′,k′²)
   require complex continuation of these functions. The current real-variable
   constructions give the restriction z=K+is, z′=K′−s; the corresponding
-  solution/period statements are `DLMF.Lame.Real.lameEck_imaginary_solution`,
-  `DLMF.Lame.Real.lameEsk_imaginary_solution` and
+  solution/period statements are `DLMF.Lame.Real.lameEc_imaginary_solution`,
+  `DLMF.Lame.Real.lameEs_imaginary_solution` and
   `DLMF.Lame.Real.lame_imaginary_periods`
-  ([source](DLMF/Lame/DifferentialEquations.lean#L688)). They do not construct
+  ([source](DLMF/Lame/DifferentialEquations.lean#L718)). They do not construct
   the full normalized complex Ec/Es family.
 
 ### §29.11 Lamé Wave Equation
@@ -6722,33 +6720,33 @@ Names below are in `DLMF.Lame`; the prefix `Real` is nested in that namespace.
 <!-- retained entry 224 -->
 - **Eight families of Lamé polynomials**,
   [29.12.1–8 and Table 29.12.1](https://dlmf.nist.gov/29.12.E1):
-  `LamePolyType`, `lamePolyEk`, and its wrappers `lameUEk`, `lameSEk`,
-  `lameCEk`, `lameDEk`, `lameSCEk`, `lameSDEk`, `lameCDEk`, `lameSCDEk`
+  `LamePolynomialType`, `lamePolynomialE`, and its wrappers `lameUE`, `lameSE`,
+  `lameCE`, `lameDE`, `lameSCE`, `lameSDE`, `lameCDE`, `lameSCDE`
   in [Polynomials/Defs](DLMF/Lame/Polynomials/Basic.lean#L53).
   These are finite Chebyshev expansions with sn/cn/dn prefactors, not
-  choices from the preceding eigenfunction family. `lamePolyH` and
-  `lamePolyCoeff` use the finite matrix `lameMatrix`, its sorted
+  choices from the preceding eigenfunction family. `lamePolynomialH` and
+  `lamePolynomialCoeff` use the finite matrix `lameMatrix`, its sorted
   characteristic-polynomial roots `lameMatrixEigenvalue`, and recurrence
-  eigenvectors `lameRecVec`; `LamePolyType.order`, `LamePolyType.signForm`,
-  `LamePolyType.normForm`, `LamePolyType.prefactor`, `LamePolyType.basis`
+  eigenvectors `lameRecurrenceVector`; `LamePolynomialType.order`, `LamePolynomialType.signForm`,
+  `LamePolynomialType.normForm`, `LamePolynomialType.prefactor`, `LamePolynomialType.basis`
   encode the order, sign, normalization and basis conventions.
 
 - **Eight polynomial types and correlated algebraic branches**, [DLMF Table 29.12.1](https://dlmf.nist.gov/29.12.T1), [29.12.E9–10](https://dlmf.nist.gov/29.12.E9):
-  `DLMF.Lame.LamePolyType` and `DLMF.Lame.LamePolyType.order` distinguish
+  `DLMF.Lame.LamePolynomialType` and `DLMF.Lame.LamePolynomialType.order` distinguish
   uE,sE,cE,dE,scE,sdE,cdE,scdE and their orders 2n,2n+1,2n+2,2n+3
   ([source](DLMF/Lame/Polynomials/Basic.lean#L53)). The functions are
   polynomials in sn,cn,dn and doubly periodic meromorphic functions of z.
   Their algebraic form ξ^ρ(ξ−1)^σ(ξ−k⁻²)^τP(ξ), ρ,σ,τ∈{0,½}, carries branches
   inherited from sn,cn,dn; arbitrary independent principal powers do not give
-  the same global function. `DLMF.Lame.lamePolyEk_algebraic_form`
-  ([source](DLMF/Lame/Polynomials/Series.lean#L657)) expresses the polynomial
+  the same global function. `DLMF.Lame.lamePolynomialE_algebraic_form`
+  ([source](DLMF/Lame/Polynomials/Series.lean#L671)) expresses the polynomial
   factor with these Jacobi prefactors. The polynomial and its ordered zero
   tuple are existential data, rather than a second chosen function or root list.
 
 <!-- retained entry 225 -->
 - **Algebraic polynomial form and ordered zeros ξ₁,…,ξₙ**,
   [29.12.9–10](https://dlmf.nist.gov/29.12.E9): the algebraic form is a
-  bridge theorem `lamePolyEk_algebraic_form` in
+  bridge theorem `lamePolynomialE_algebraic_form` in
   [Polynomials/Series](DLMF/Lame/Polynomials/Series.lean#L625), not a second
   selected Lamé polynomial. The zeros are quantified tuples in that theorem
   family, rather than a defined root-list object.
@@ -6756,15 +6754,15 @@ Names below are in `DLMF.Lame`; the prefix `Real` is nested in that namespace.
 <!-- retained entry 226 -->
 - **Zero-maximization function g and region R**,
   [29.12.11–12](https://dlmf.nist.gov/29.12.E11): explicit local expressions
-  in `lamePolyEk_zeros_maximize` in
+  in `lamePolynomialE_zeros_maximize` in
   [Polynomials/Series](DLMF/Lame/Polynomials/Series.lean#L643), with no
   separately named global definitions.
 
 - **Electrostatic zero density and ordered chamber**, [DLMF 29.12.E11–13](https://dlmf.nist.gov/29.12.E11):
   g(t)=∏ₚtₚ^(ρ+¼)|tₚ−1|^(σ+¼)(k⁻²−tₚ)^(τ+¼)∏_{q<r}(tᵣ−t_q), on
   R={0≤t₁≤⋯≤t_m≤1≤t_(m+1)≤⋯≤t_n≤k⁻²}. These are explicit local expressions
-  in `DLMF.Lame.lamePolyEk_zeros_maximize`
-  ([source](DLMF/Lame/Polynomials/Series.lean#L1112)), with no independent
+  in `DLMF.Lame.lamePolynomialE_zeros_maximize`
+  ([source](DLMF/Lame/Polynomials/Series.lean#L1126)), with no independent
   global definitions. The equilibrium equations characterize the zero tuple
   through reciprocal-distance sums; they introduce no additional function.
 
@@ -6781,50 +6779,50 @@ Names below are in `DLMF.Lame`; the prefix `Real` is nested in that namespace.
   [DLMF 29.14.E1](https://dlmf.nist.gov/29.14.E1):
   The product `E(s, k²) E(K + it, k²)` of a Lamé polynomial of type `t` at `s` and at
   `K + it` (DLMF 29.14.1, 29.14.4–29.14.10).
-  `DLMF.Lame.lameProduct` ([definition](DLMF/Lame/Polynomials/Basic.lean#L247)).
+  `DLMF.Lame.lameProduct` ([definition](DLMF/Lame/Polynomials/Basic.lean#L250)).
 
   [DLMF 29.14.E2](https://dlmf.nist.gov/29.14.E2):
   The inner product `⟨g, h⟩ = ∫₀^a ∫₀^b w(s, t) g(s, t) h(s, t) dt ds` of DLMF 29.14.2
   (`a = K`, `b = K'`) and 29.14.11 (`a = 4K`, `b = 2K'`); no complex conjugation, as in DLMF.
-  `DLMF.Lame.lameInner` ([definition](DLMF/Lame/Polynomials/Basic.lean#L240)).
+  `DLMF.Lame.lameInner` ([definition](DLMF/Lame/Polynomials/Basic.lean#L243)).
 
   [DLMF 29.14.E3](https://dlmf.nist.gov/29.14.E3):
   The weight `w(s, t) = sn²(K + it, k) - sn²(s, k)` of DLMF 29.14.3 (real `s, t`; it is real
   and nonnegative on `[0, K] × [0, K']`).
-  `DLMF.Lame.lameOrthWeight` ([definition](DLMF/Lame/Polynomials/Basic.lean#L234)).
+  `DLMF.Lame.lameOrthWeight` ([definition](DLMF/Lame/Polynomials/Basic.lean#L237)).
 
 ### §29.15 Fourier Series and Chebyshev Series
 
 - **Finite matrix, sorted eigenvalues and recurrence eigenvectors**, [DLMF 29.15.E2–4](https://dlmf.nist.gov/29.15.E2):
   `DLMF.Lame.lameMatrix` has β on its diagonal, α above and γ below;
   `DLMF.Lame.lameMatrixEigenvalue` sorts its real characteristic-polynomial
-  roots, and `DLMF.Lame.lameRecVecPair`, `DLMF.Lame.lameRecVec` generate the
+  roots, and `DLMF.Lame.lameRecurrenceVectorPair`, `DLMF.Lame.lameRecurrenceVector` generate the
   forward recurrence from v₋₁=0,v₀=1
   ([source](DLMF/Lame/Polynomials/Basic.lean#L127)).
-  `DLMF.Lame.LamePolyType.recurrence` selects the appropriate one of the eight
-  recurrence systems; `DLMF.Lame.lamePolyH` is its mth H value. The domain
+  `DLMF.Lame.LamePolynomialType.recurrence` selects the appropriate one of the eight
+  recurrence systems; `DLMF.Lame.lamePolynomialH` is its mth H value. The domain
   0<k<1, 0≤m≤n is needed for the intended real simple spectrum and for the
   nonzero recurrence denominators. Sorting roots with a zero fallback alone
   does not establish these spectral properties.
 
 - **Polynomial coefficient normalization and sign forms**, [DLMF 29.15.E5–6](https://dlmf.nist.gov/29.15.E5), [29.15.E10–41](https://dlmf.nist.gov/29.15.E10):
-  `DLMF.Lame.LamePolyType.normForm` and `DLMF.Lame.LamePolyType.signForm`
+  `DLMF.Lame.LamePolynomialType.normForm` and `DLMF.Lame.LamePolynomialType.signForm`
   ([source](DLMF/Lame/Polynomials/Basic.lean#L106)) are the eight quadratic
   normalization and linear sign forms. The conditions are normForm=1 and
   signForm>0. The dE,sdE,cdE,scdE quadratic forms contain the prescribed
   k-dependent neighboring-coefficient terms, rather than a universal Euclidean
-  norm. `DLMF.Lame.lamePolyCoeff` uses both forms to normalize the recurrence
+  norm. `DLMF.Lame.lamePolynomialCoeff` uses both forms to normalize the recurrence
   vector and sets coefficients beyond n to zero. The conversion
   h=(H_m+ν(ν+1)k²)/2 is a theorem expression.
 
 - **Independent finite Chebyshev construction of the eight functions**, [DLMF 29.15.E43–50](https://dlmf.nist.gov/29.15.E43):
-  `DLMF.Lame.LamePolyType.prefactor` and `DLMF.Lame.LamePolyType.basis` supply
+  `DLMF.Lame.LamePolynomialType.prefactor` and `DLMF.Lame.LamePolynomialType.basis` supply
   the cn/dn factors and even/odd Chebyshev T/U bases, including the half constant
-  term. `DLMF.Lame.lamePolyEk` is the resulting finite sum, with wrappers
-  `DLMF.Lame.lameUEk`, `DLMF.Lame.lameSEk`, `DLMF.Lame.lameCEk`,
-  `DLMF.Lame.lameDEk`, `DLMF.Lame.lameSCEk`, `DLMF.Lame.lameSDEk`,
-  `DLMF.Lame.lameCDEk`, `DLMF.Lame.lameSCDEk`
-  ([source](DLMF/Lame/Polynomials/Basic.lean#L227)). This construction accepts
+  term. `DLMF.Lame.lamePolynomialE` is the resulting finite sum, with wrappers
+  `DLMF.Lame.lameUE`, `DLMF.Lame.lameSE`, `DLMF.Lame.lameCE`,
+  `DLMF.Lame.lameDE`, `DLMF.Lame.lameSCE`, `DLMF.Lame.lameSDE`,
+  `DLMF.Lame.lameCDE`, `DLMF.Lame.lameSCDE`
+  ([source](DLMF/Lame/Polynomials/Basic.lean#L230)). This construction accepts
   complex z and is separate from the choice-defined real Ec/Es functions;
   identification on their common domain is a bridge theorem.
 
@@ -6832,7 +6830,7 @@ Names below are in `DLMF.Lame`; the prefix `Real` is nested in that namespace.
 
 - **Reduction-of-order second solution**, [DLMF 29.17.E1](https://dlmf.nist.gov/29.17.E1):
   F(z)=E(z)∫_(iK′)^zE(u)⁻²du is an explicit expression in
-  `DLMF.Lame.lamePolyEk_second_solution`
+  `DLMF.Lame.lamePolynomialE_second_solution`
   ([source](DLMF/Lame/OtherSolutions.lean#L48)), rather than a named function.
   Lean uses the straight segment from iK′ and assumes that its interior avoids
   zeros of E and other Jacobi poles. Different paths through singularities are
@@ -6898,7 +6896,7 @@ Traversal: all §§30.1–30.18 checked; matching headings are §§30.3(i),
 
 - **Equation, Liouville and scaled-variable forms**, [DLMF 30.2.E1–4](https://dlmf.nist.gov/30.2.E1):
   `DLMF.Spheroidal.IsSpheroidalSolutionOn` and
-  `DLMF.Spheroidal.IsSpheroidalSolutionReal` encode the complex equation and
+  `DLMF.Spheroidal.Real.IsSpheroidalSolution` encode the complex equation and
   its real interval form. `DLMF.Spheroidal.IsSpheroidalLiouvilleSolution` and
   `DLMF.Spheroidal.IsSpheroidalZetaSolution` encode the substitutions
   z=cos t, w=(1−z²)⁻¹ᐟ⁴g and ζ=γz
@@ -6917,7 +6915,7 @@ Traversal: all §§30.1–30.18 checked; matching headings are §§30.3(i),
   **The spheroidal differential equation on `(-1, 1)`** (DLMF 30.2.1 with `z = x` real and
   real parameters), for real-valued `f`: `f` is differentiable on `(-1, 1)` and `(1-x²) f'(x)` has
   derivative `-(λ + γ²(1-x²) - μ²/(1-x²)) f(x)` there.
-  `DLMF.Spheroidal.IsSpheroidalSolutionReal` ([definition](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L102)).
+  `DLMF.Spheroidal.Real.IsSpheroidalSolution` ([definition](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L102)).
 
   [DLMF 30.2.E2](https://dlmf.nist.gov/30.2.E2):
   **The Liouville normal form** (DLMF 30.2.2)
@@ -6949,69 +6947,69 @@ Traversal: all §§30.1–30.18 checked; matching headings are §§30.3(i),
   ([source](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L179)) select the entire g in
   w=(1−x²)^(m/2)g(x), and the eigenvalue with exactly n−m smaller spectral
   values. The two α,β,γ coefficient triples are
-  `DLMF.Spheroidal.spheroidalCFAlpha`, `DLMF.Spheroidal.spheroidalCFBeta`,
-  `DLMF.Spheroidal.spheroidalCFGamma`, and the three corresponding Alt
-  constructions `DLMF.Spheroidal.spheroidalCFAlphaAlt`,
-  `DLMF.Spheroidal.spheroidalCFBetaAlt`, `DLMF.Spheroidal.spheroidalCFGammaAlt`
+  `DLMF.Spheroidal.spheroidalPowerAlpha`, `DLMF.Spheroidal.spheroidalPowerBeta`,
+  `DLMF.Spheroidal.spheroidalPowerGamma`, and the three corresponding Alt
+  constructions `DLMF.Spheroidal.spheroidalLegendreAlpha`,
+  `DLMF.Spheroidal.spheroidalLegendreBeta`, `DLMF.Spheroidal.spheroidalLegendreGamma`
   ([source](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L258)). The fraction recursions advance
   by two, retaining the even/odd coefficient parity and β₀/β₁ terminal choice;
   the generic finite-tail expressions occur in theorem statements.
 
   [DLMF 30.3.E6](https://dlmf.nist.gov/30.3.E6):
   `α_k = -(k+1)(k+2)` (DLMF 30.3.6), the coefficients of the power-series recurrence 30.4.5.
-  `DLMF.Spheroidal.spheroidalCFAlpha` ([definition](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L234)).
+  `DLMF.Spheroidal.spheroidalPowerAlpha` ([definition](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L234)).
 
   [DLMF 30.3.E6](https://dlmf.nist.gov/30.3.E6):
   `β_k = (m+k)(m+k+1) - γ²` (DLMF 30.3.6).
-  `DLMF.Spheroidal.spheroidalCFBeta` ([definition](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L238)).
+  `DLMF.Spheroidal.spheroidalPowerBeta` ([definition](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L238)).
 
   [DLMF 30.3.E6](https://dlmf.nist.gov/30.3.E6):
   `γ_k = γ²` (DLMF 30.3.6).
-  `DLMF.Spheroidal.spheroidalCFGamma` ([definition](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L242)).
+  `DLMF.Spheroidal.spheroidalPowerGamma` ([definition](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L242)).
 
   [DLMF 30.3.E7](https://dlmf.nist.gov/30.3.E7):
   `α_k = γ² (k+2m+1)(k+2m+2)/((2k+2m+3)(2k+2m+5))` (DLMF 30.3.7).
-  `DLMF.Spheroidal.spheroidalCFAlphaAlt` ([definition](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L246)).
+  `DLMF.Spheroidal.spheroidalLegendreAlpha` ([definition](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L246)).
 
   [DLMF 30.3.E7](https://dlmf.nist.gov/30.3.E7):
   `β_k = (k+m)(k+m+1) - 2γ² ((k+m)(k+m+1) - 1 + m²)/((2k+2m-1)(2k+2m+3))` (DLMF 30.3.7).
-  `DLMF.Spheroidal.spheroidalCFBetaAlt` ([definition](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L252)).
+  `DLMF.Spheroidal.spheroidalLegendreBeta` ([definition](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L252)).
 
   [DLMF 30.3.E7](https://dlmf.nist.gov/30.3.E7):
   `γ_k = γ² (k-1)k/((2k+2m-3)(2k+2m-1))` (DLMF 30.3.7).
-  `DLMF.Spheroidal.spheroidalCFGammaAlt` ([definition](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L258)).
+  `DLMF.Spheroidal.spheroidalLegendreGamma` ([definition](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L258)).
 
 - **Taylor coefficients, convergence radius and eighth-order auxiliaries**, [DLMF 30.3.E8–12](https://dlmf.nist.gov/30.3.E8):
-  `DLMF.Spheroidal.spheroidalEll` is the kth Taylor coefficient at t=0 of
+  `DLMF.Spheroidal.spheroidalEigenvalueCoeff` is the kth Taylor coefficient at t=0 of
   t↦λ_n^m(t), corresponding to ℓ_(2k)γ^(2k)
   ([source](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L296)).
-  `DLMF.Spheroidal.spheroidalEllA`, `DLMF.Spheroidal.spheroidalEllB`,
-  `DLMF.Spheroidal.spheroidalEllC`, `DLMF.Spheroidal.spheroidalEllD` are the
+  `DLMF.Spheroidal.spheroidalEigenvalueAuxA`, `DLMF.Spheroidal.spheroidalEigenvalueAuxB`,
+  `DLMF.Spheroidal.spheroidalEigenvalueAuxC`, `DLMF.Spheroidal.spheroidalEigenvalueAuxD` are the
   exact rational auxiliaries in the ℓ₈ formula. The positive radius r_n^m is
-  existential in `DLMF.Spheroidal.hasSum_spheroidalEll`
-  ([source](DLMF/Spheroidal/Eigenvalues.lean#L175)), not a chosen maximal
+  existential in `DLMF.Spheroidal.hasSum_spheroidalEigenvalueCoeff`
+  ([source](DLMF/Spheroidal/Eigenvalues.lean#L176)), not a chosen maximal
   analytic convergence radius.
 
   [DLMF 30.3.E8](https://dlmf.nist.gov/30.3.E8):
   The coefficient `ℓ_{2k}` of `γ^{2k}` in the expansion 30.3.8 of `λ^m_n(γ²)`: the `k`-th
   Taylor coefficient at `0` of `γ² ↦ λ^m_n(γ²)`.
-  `DLMF.Spheroidal.spheroidalEll` ([definition](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L305)).
+  `DLMF.Spheroidal.spheroidalEigenvalueCoeff` ([definition](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L306)).
 
   [DLMF 30.3.E12](https://dlmf.nist.gov/30.3.E12):
   The auxiliary quantity `A` of DLMF 30.3.12 (entering `ℓ_8`, 30.3.11).
-  `DLMF.Spheroidal.spheroidalEllA` ([definition](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L310)).
+  `DLMF.Spheroidal.spheroidalEigenvalueAuxA` ([definition](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L311)).
 
   [DLMF 30.3.E12](https://dlmf.nist.gov/30.3.E12):
   The auxiliary quantity `B` of DLMF 30.3.12.
-  `DLMF.Spheroidal.spheroidalEllB` ([definition](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L320)).
+  `DLMF.Spheroidal.spheroidalEigenvalueAuxB` ([definition](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L321)).
 
   [DLMF 30.3.E12](https://dlmf.nist.gov/30.3.E12):
   The auxiliary quantity `C` of DLMF 30.3.12.
-  `DLMF.Spheroidal.spheroidalEllC` ([definition](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L332)).
+  `DLMF.Spheroidal.spheroidalEigenvalueAuxC` ([definition](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L333)).
 
   [DLMF 30.3.E12](https://dlmf.nist.gov/30.3.E12):
   The auxiliary quantity `D` of DLMF 30.3.12.
-  `DLMF.Spheroidal.spheroidalEllD` ([definition](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L342)).
+  `DLMF.Spheroidal.spheroidalEigenvalueAuxD` ([definition](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L343)).
 
 ### §30.4 Functions of the First Kind
 
@@ -7035,7 +7033,7 @@ Traversal: all §§30.1–30.18 checked; matching headings are §§30.3(i),
   or Ps′(0). The real angular wrapper is intended on [−1,1]. The g_k of its
   power expansion are Taylor-coefficient expressions of the chosen entire
   factor in `DLMF.Spheroidal.hasSum_spheroidalPs`
-  ([source](DLMF/Spheroidal/Angular.lean#L554)), without a second independent
+  ([source](DLMF/Spheroidal/Angular.lean#L558)), without a second independent
   coefficient family definition. `DLMF.Spheroidal.spheroidalExpansionCoeff`
   ([source](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L226)) is the normalized projection c_n
   of 30.4.8. The general expansion theorem is in L², with stronger pointwise
@@ -7098,8 +7096,8 @@ Traversal: all §§30.1–30.18 checked; matching headings are §§30.3(i),
   down to −N and zero values below −N; `DLMF.Spheroidal.spheroidalCoeffNeg`
   implements a_n,k^(−m) by factorial rescaling for k≥−R
   ([source](DLMF/Spheroidal/Basic/Ferrers.lean#L60)).
-  `DLMF.Spheroidal.spheroidalRecA`, `DLMF.Spheroidal.spheroidalRecB`,
-  `DLMF.Spheroidal.spheroidalRecC` and `DLMF.Spheroidal.spheroidalFwd`
+  `DLMF.Spheroidal.spheroidalRecurrenceA`, `DLMF.Spheroidal.spheroidalRecurrenceB`,
+  `DLMF.Spheroidal.spheroidalRecurrenceC` and `DLMF.Spheroidal.spheroidalFwd`
   ([source](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L285)) supply A_k,B_k,C_k and the forward
   sequence with f_(−N−1)=0,f_(−N)=1. If f_(−R)=0, DLMF leaves the extension
   below −R undefined and states that Qs does not exist. Lean's division by the
@@ -7107,16 +7105,16 @@ Traversal: all §§30.1–30.18 checked; matching headings are §§30.3(i),
 
   [DLMF 30.8.E3](https://dlmf.nist.gov/30.8.E3):
   `A_k = -γ² (n-m+2k-1)(n-m+2k)/((2n+4k-3)(2n+4k-1))` (DLMF 30.8.3), `k ∈ ℤ`.
-  `DLMF.Spheroidal.spheroidalRecA` ([definition](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L263)).
+  `DLMF.Spheroidal.spheroidalRecurrenceA` ([definition](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L263)).
 
   [DLMF 30.8.E3](https://dlmf.nist.gov/30.8.E3):
   `B_k = (n+2k)(n+2k+1) - 2γ² ((n+2k)(n+2k+1) - 1 + m²)/((2n+4k-1)(2n+4k+3))`
   (DLMF 30.8.3), `k ∈ ℤ`.
-  `DLMF.Spheroidal.spheroidalRecB` ([definition](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L270)).
+  `DLMF.Spheroidal.spheroidalRecurrenceB` ([definition](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L270)).
 
   [DLMF 30.8.E3](https://dlmf.nist.gov/30.8.E3):
   `C_k = -γ² (n+m+2k+1)(n+m+2k+2)/((2n+4k+3)(2n+4k+5))` (DLMF 30.8.3), `k ∈ ℤ`.
-  `DLMF.Spheroidal.spheroidalRecC` ([definition](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L277)).
+  `DLMF.Spheroidal.spheroidalRecurrenceC` ([definition](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L277)).
 
   [DLMF 30.8.ii](https://dlmf.nist.gov/30.8.ii):
   The forward solution of the recurrence 30.8.4 used in DLMF §30.8(ii): with
@@ -7130,7 +7128,7 @@ Traversal: all §§30.1–30.18 checked; matching headings are §§30.3(i),
   ([source](DLMF/Spheroidal/Basic/Ferrers.lean#L131)) specify the recessive a′
   coefficients for k≤−N−1 through the recurrence and matching equation.
   `DLMF.Spheroidal.spheroidalCPrime`
-  ([source](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L297)) is C′=γ²/(4m²−1) for n−m even,
+  ([source](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L298)) is C′=γ²/(4m²−1) for n−m even,
   and −γ²/((2m−1)(2m−3)) for n−m odd. The recessive-tail construction and
   existence statement are separate from the directly integrated main coefficients.
 
@@ -7148,7 +7146,7 @@ Traversal: all §§30.1–30.18 checked; matching headings are §§30.3(i),
   [DLMF 30.8.E11](https://dlmf.nist.gov/30.8.E11):
   The constant `C'` of DLMF 30.8.11: `γ²/(4m²-1)` for `n - m` even and
   `-γ²/((2m-1)(2m-3))` for `n - m` odd.
-  `DLMF.Spheroidal.spheroidalCPrime` ([definition](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L297)).
+  `DLMF.Spheroidal.spheroidalCPrime` ([definition](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L298)).
 
 ### §30.9 Asymptotic Approximations and Expansions
 
@@ -7157,7 +7155,7 @@ Traversal: all §§30.1–30.18 checked; matching headings are §§30.3(i),
   `DLMF.Spheroidal.spheroidalOblateQ` is n+1 when n−m is even and n otherwise.
   `DLMF.Spheroidal.spheroidalProlateBeta` and
   `DLMF.Spheroidal.spheroidalOblateC`
-  ([source](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L376)) contain exactly β₀,…,β₅ and
+  ([source](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L377)) contain exactly β₀,…,β₅ and
   c₀,…,c₅, respectively. Both return zero at larger indices; those zeros are
   not DLMF's further coefficients. The asymptotic theorems quantify an all-order
   sequence agreeing at these first six indices; no independent complete
@@ -7166,17 +7164,17 @@ Traversal: all §§30.1–30.18 checked; matching headings are §§30.3(i),
   [DLMF 30.9.E2](https://dlmf.nist.gov/30.9.E2):
   The coefficients `β_0, …, β_5` of the prolate expansion 30.9.1 (DLMF 30.9.2, 30.9.3), with
   `q = 2(n-m)+1`; `0` for `j ≥ 6` (not given by DLMF).
-  `DLMF.Spheroidal.spheroidalProlateBeta` ([definition](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L352)).
+  `DLMF.Spheroidal.spheroidalProlateBeta` ([definition](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L353)).
 
   [DLMF 30.9.ii](https://dlmf.nist.gov/30.9.ii):
   The parameter `q` of the oblate expansion 30.9.4: `n + 1` for `n - m` even, `n` for `n - m`
   odd.
-  `DLMF.Spheroidal.spheroidalOblateQ` ([definition](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L371)).
+  `DLMF.Spheroidal.spheroidalOblateQ` ([definition](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L372)).
 
   [DLMF 30.9.E5](https://dlmf.nist.gov/30.9.E5):
   The coefficients `c_0, …, c_5` of the oblate expansion 30.9.4 (DLMF 30.9.5, 30.9.6); `0` for
   `j ≥ 6` (not given by DLMF).
-  `DLMF.Spheroidal.spheroidalOblateC` ([definition](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L376)).
+  `DLMF.Spheroidal.spheroidalOblateC` ([definition](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L377)).
 
 ### §30.11 Radial Spheroidal Wave Functions
 
@@ -7316,8 +7314,8 @@ explicitly as complementary entries. Names below are in `DLMF.Heun`.
 
 <!-- retained entry 231 -->
 - **General Heun equation and normalized local solution Hℓ**,
-  [31.2.1 and 31.3.1](https://dlmf.nist.gov/31.2.E1): `heunEps`,
-  `heunCoeffP`, `heunCoeffR`, `IsHeunSolOn`, `heunODECoeff`,
+  [31.2.1 and 31.3.1](https://dlmf.nist.gov/31.2.E1): `heunEpsilon`,
+  `heunCoeffP`, `heunCoeffR`, `IsHeunSolutionOn`, `heunODECoeff`,
   `heunLocalCoeff`, `heunLocalRadius`, `heunLocal` in
   [Basic](DLMF/Heun/Basic.lean#L66). The last is the native power series
   around zero, with the coefficient of degree zero normalized to one.
@@ -7337,24 +7335,24 @@ explicitly as complementary entries. Names below are in `DLMF.Heun`.
 - **DLMF 31.2.3: the right-hand side coefficient of the normal form**, [DLMF 31.2.E3](https://dlmf.nist.gov/31.2.E3):
   DLMF 31.2.3: the right-hand side coefficient of the normal form
   `W'' = (A/z + B/(z-1) + C/(z-a) + D/z² + E/(z-1)² + F/(z-a)²) W`.
-  `DLMF.Heun.heunNormalCoeff` ([definition](DLMF/Heun/Basic.lean#L130)).
+  `DLMF.Heun.heunNormalCoeff` ([definition](DLMF/Heun/Basic.lean#L153)).
 
 - **Heun normal-form coefficients**, [DLMF 31.2.E4](https://dlmf.nist.gov/31.2.E4):
   DLMF 31.2.4: the coefficient `A` of the normal form (31.2.3).
-  `DLMF.Heun.heunNormalA` ([definition](DLMF/Heun/Basic.lean#L110)).
+  `DLMF.Heun.heunNormalA` ([definition](DLMF/Heun/Basic.lean#L133)).
 
   [DLMF 31.2.E4](https://dlmf.nist.gov/31.2.E4):
   DLMF 31.2.4: the coefficient `B` of the normal form (31.2.3).
-  `DLMF.Heun.heunNormalB` ([definition](DLMF/Heun/Basic.lean#L114)).
+  `DLMF.Heun.heunNormalB` ([definition](DLMF/Heun/Basic.lean#L137)).
 
   [DLMF 31.2.E4](https://dlmf.nist.gov/31.2.E4):
   DLMF 31.2.4: the coefficient `C` of the normal form (31.2.3).
-  `DLMF.Heun.heunNormalC` ([definition](DLMF/Heun/Basic.lean#L119)).
+  `DLMF.Heun.heunNormalC` ([definition](DLMF/Heun/Basic.lean#L142)).
 
   [DLMF 31.2.E4](https://dlmf.nist.gov/31.2.E4):
   DLMF 31.2.4: the coefficients `D, E, F` of the normal form, `D = ½γ(½γ - 1)` (with `γ`
   replaced by `δ`, `ε` for `E`, `F`).
-  `DLMF.Heun.heunNormalD` ([definition](DLMF/Heun/Basic.lean#L125)).
+  `DLMF.Heun.heunNormalD` ([definition](DLMF/Heun/Basic.lean#L148)).
 
 - **F-homotopic, homographic and composite automorphisms**, [DLMF 31.2.v](https://dlmf.nist.gov/31.2.v):
   The exponent-changing prefactors and fractional-linear variable changes define the 8×24=192 Heun automorphisms. The project states these transformations through equations and parameter substitutions; no separate generic automorphism-group or transformed-parameter structure is constructed.
@@ -7363,28 +7361,28 @@ explicitly as complementary entries. Names below are in `DLMF.Heun`.
 
 - **Heun recurrence coefficient polynomials**, [DLMF 31.3.E4](https://dlmf.nist.gov/31.3.E4):
   DLMF 31.3.4: `P_j = (j - 1 + α)(j - 1 + β)`.
-  `DLMF.Heun.heunRecP` ([definition](DLMF/Heun/Basic.lean#L139)).
+  `DLMF.Heun.heunRecurrenceP` ([definition](DLMF/Heun/Basic.lean#L162)).
 
   [DLMF 31.3.E4](https://dlmf.nist.gov/31.3.E4):
   DLMF 31.3.4: `Q_j = j((j - 1 + γ)(1 + a) + aδ + ε)`, with `ε = α + β + 1 - γ - δ`.
-  `DLMF.Heun.heunRecQ` ([definition](DLMF/Heun/Basic.lean#L143)).
+  `DLMF.Heun.heunRecurrenceQ` ([definition](DLMF/Heun/Basic.lean#L166)).
 
   [DLMF 31.3.E4](https://dlmf.nist.gov/31.3.E4):
   DLMF 31.3.4: `R_j = a(j + 1)(j + γ)`.
-  `DLMF.Heun.heunRecR` ([definition](DLMF/Heun/Basic.lean#L148)).
+  `DLMF.Heun.heunRecurrenceR` ([definition](DLMF/Heun/Basic.lean#L171)).
 
 - **Eight local Frobenius solutions and their equivalent expressions**, [DLMF 31.3.E5](https://dlmf.nist.gov/31.3.E5):
-  The second solution at zero and the six solutions at 1,a,∞ are products/compositions of the same `DLMF.Heun.heunLocal` ([source](DLMF/Heun/Basic.lean#L169)) with transformed parameters. They are bridge expressions, not independent native series objects. Integer-exponent resonances may require logarithmic solutions and are not supplied by an arbitrary division-based recurrence at its zero denominators.
+  The second solution at zero and the six solutions at 1,a,∞ are products/compositions of the same `DLMF.Heun.heunLocal` ([source](DLMF/Heun/Basic.lean#L192)) with transformed parameters. They are bridge expressions, not independent native series objects. Integer-exponent resonances may require logarithmic solutions and are not supplied by an arbitrary division-based recurrence at its zero denominators.
 
 ### §31.4 Solutions Analytic at Two Singularities: Heun Functions
 
 - **Two-singularity Heun families and accessory spectra**, [DLMF 31.4.E1](https://dlmf.nist.gov/31.4.E1):
-  `DLMF.Heun.IsHeunFunctionOn` ([source](DLMF/Heun/Basic.lean#L179)), `DLMF.Heun.IsHeunEigenvalue01` ([source](DLMF/Heun/Basic.lean#L187)), `DLMF.Heun.heunFunction01` ([source](DLMF/Heun/Basic.lean#L198)), `DLMF.Heun.heunCFTail` ([source](DLMF/Heun/Basic.lean#L206)) supplement the normalized local series with analytic-at-two-points data, the 0–1 eigenvalue predicate, a chosen disk continuation and finite fraction tails. No globally enumerated qₘ or canonical function for every pair involving ∞ is selected. The disk continuation’s characterization still uses the admission recorded in the retained entry.
+  `DLMF.Heun.IsHeunFunctionOn` ([source](DLMF/Heun/Basic.lean#L202)), `DLMF.Heun.IsHeunEigenvalue01` ([source](DLMF/Heun/Basic.lean#L210)), `DLMF.Heun.heunFunction01` ([source](DLMF/Heun/Basic.lean#L221)), `DLMF.Heun.heunContinuedFractionTail` ([source](DLMF/Heun/Basic.lean#L229)) supplement the normalized local series with analytic-at-two-points data, the 0–1 eigenvalue predicate, a chosen disk continuation and finite fraction tails. No globally enumerated qₘ or canonical function for every pair involving ∞ is selected. The disk continuation’s characterization still uses the admission recorded in the retained entry.
 
 - **Finite Heun continued-fraction convergents**, [DLMF 31.4.E2](https://dlmf.nist.gov/31.4.E2):
   DLMF 31.4.2: the `m`-th approximant of the continued fraction
   `aγP₁/(Q₁ + q - R₁P₂/(Q₂ + q - R₂P₃/(Q₃ + q - ⋯)))`.
-  `DLMF.Heun.heunCFApprox` ([definition](DLMF/Heun/Basic.lean#L214)).
+  `DLMF.Heun.heunContinuedFractionApprox` ([definition](DLMF/Heun/Basic.lean#L237)).
 
 ### §31.5 Solutions Analytic at Three Singularities: Heun Polynomials
 
@@ -7392,10 +7390,10 @@ explicitly as complementary entries. Names below are in `DLMF.Heun`.
   DLMF 31.5.1: the `(n+1) × (n+1)` tridiagonal matrix with first row `(0, aγ, 0, …)` and row
   `j ≥ 1` equal to `(…, P_j, -Q_j, R_j, …)` (columns `j - 1, j, j + 1`), for `α = -n`. Its
   eigenvalues are the `q_{n,m}`, `m = 0, …, n`.
-  `DLMF.Heun.heunPolyMatrix` ([definition](DLMF/Heun/Basic.lean#L221)).
+  `DLMF.Heun.heunPolyMatrix` ([definition](DLMF/Heun/Basic.lean#L245)).
 
 - **Heun polynomial parameter versus eigenvalue index**, [DLMF 31.5.E2](https://dlmf.nist.gov/31.5.E2):
-  The finite `DLMF.Heun.heunPoly` ([source](DLMF/Heun/Basic.lean#L233)) takes q directly, while `DLMF.Heun.heunPolyMatrix` ([source](DLMF/Heun/Basic.lean#L221)) gives the matrix whose eigenvalues are DLMF’s qₙ,ₘ. There is no separate definition choosing or ordering the complex accessory eigenvalues qₙ,ₘ; polynomial termination requires the corresponding spectral condition.
+  The finite `DLMF.Heun.heunPoly` ([source](DLMF/Heun/Basic.lean#L257)) takes q directly, while `DLMF.Heun.heunPolyMatrix` ([source](DLMF/Heun/Basic.lean#L245)) gives the matrix whose eigenvalues are DLMF’s qₙ,ₘ. There is no separate definition choosing or ordering the complex accessory eigenvalues qₙ,ₘ; polynomial termination requires the corresponding spectral condition.
 
 ### §31.6 Path-Multiplicative Solutions
 
@@ -7404,7 +7402,7 @@ explicitly as complementary entries. Names below are in `DLMF.Heun`.
   analytic continuation of the germ of `w` at `γ 0` along `γ` returns as `e^{2νπi} w`. DLMF takes
   for `γ` a simple closed contour encircling the two singularities `s₁, s₂ ∈ {0, 1, a}` once in the
   positive sense but not the third; that choice is left to the user of the predicate.
-  `DLMF.Heun.IsPathMultiplicative` ([definition](DLMF/Heun/Basic.lean#L338)).
+  `DLMF.Heun.IsPathMultiplicative` ([definition](DLMF/Heun/Basic.lean#L365)).
 
 ### §31.8 Solutions via Quadratures
 
@@ -7414,27 +7412,27 @@ explicitly as complementary entries. Names below are in `DLMF.Heun`.
 ### §31.9 Orthogonality
 
 - **Pochhammer contour, continued branch and normalization integral**, [DLMF 31.9.E2](https://dlmf.nist.gov/31.9.E2):
-  `DLMF.Heun.localBranchCpow` ([source](DLMF/Heun/Basic.lean#L309)), `DLMF.Heun.pochhammerLoop` ([source](DLMF/Heun/Basic.lean#L316)), `DLMF.Heun.continuedPathIntegral` ([source](DLMF/Heun/Basic.lean#L327)) construct a principal-initial local power germ, a four-circle representative of the double loop and its analytically continued integral. The integral falls back to zero if continuation does not exist; it is not obtained by evaluating principal powers independently around the loop. The Wronskian normalization θₘ in 31.9.3 is an expression in supplied solutions. The two-variable weight ρ(s,t) of 31.9.6 is a local expression, distinct from the one-variable weight used below.
+  `DLMF.Heun.localBranchCpow` ([source](DLMF/Heun/Basic.lean#L336)), `DLMF.Heun.pochhammerLoop` ([source](DLMF/Heun/Basic.lean#L343)), `DLMF.Heun.continuedPathIntegral` ([source](DLMF/Heun/Basic.lean#L354)) construct a principal-initial local power germ, a four-circle representative of the double loop and its analytically continued integral. The integral falls back to zero if continuation does not exist; it is not obtained by evaluating principal powers independently around the loop. The Wronskian normalization θₘ in 31.9.3 is an expression in supplied solutions. The two-variable weight ρ(s,t) of 31.9.6 is a local expression, distinct from the one-variable weight used below.
 
 ### §31.10 Integral Equations and Representations
 
 - **Heun bilinear weight**, [DLMF 31.10.E2](https://dlmf.nist.gov/31.10.E2):
   DLMF 31.10.2: the weight `ρ(t) = t^{γ-1}(t-1)^{δ-1}(t-a)^{ε-1}` with principal powers (any
   other branch is a constant multiple).
-  `DLMF.Heun.heunWeight` ([definition](DLMF/Heun/Basic.lean#L355)).
+  `DLMF.Heun.heunWeight` ([definition](DLMF/Heun/Basic.lean#L382)).
 
 - **DLMF 31.10.4: Heun's operator**, [DLMF 31.10.E4](https://dlmf.nist.gov/31.10.E4):
   DLMF 31.10.4: Heun's operator
   `𝒟_z = z(z-1)(z-a) d²/dz² + (γ(z-1)(z-a) + δz(z-a) + εz(z-1)) d/dz + αβz`. Heun's equation is
   `𝒟_z w = q w`.
-  `DLMF.Heun.heunOperator` ([definition](DLMF/Heun/Basic.lean#L348)).
+  `DLMF.Heun.heunOperator` ([definition](DLMF/Heun/Basic.lean#L375)).
 
 - **Heun bilinear concomitant coefficient**, [DLMF 31.10.E6](https://dlmf.nist.gov/31.10.E6):
   DLMF 31.10.6: `p(t) = t^γ (t-1)^δ (t-a)^ε = t(t-1)(t-a)ρ(t)`, principal powers.
-  `DLMF.Heun.heunConcomitantP` ([definition](DLMF/Heun/Basic.lean#L360)).
+  `DLMF.Heun.heunConcomitantP` ([definition](DLMF/Heun/Basic.lean#L387)).
 
 - **Heun integral kernels and separation coordinates**, [DLMF 31.10.E7](https://dlmf.nist.gov/31.10.E7):
-  The θ,φ coordinates of 31.10.7, product P-symbol kernel 31.10.9 and explicit hypergeometric kernels 31.10.10–11 are formula constructions in the integral-representation statements, not independently named general local functions. Integral-equation eigenvalues κₘ and normalization constants are supplied data. The existing `DLMF.Heun.heunOperator` ([source](DLMF/Heun/Basic.lean#L348)) is the differential operator entering their kernel PDE.
+  The θ,φ coordinates of 31.10.7, product P-symbol kernel 31.10.9 and explicit hypergeometric kernels 31.10.10–11 are formula constructions in the integral-representation statements, not independently named general local functions. Integral-equation eigenvalues κₘ and normalization constants are supplied data. The existing `DLMF.Heun.heunOperator` ([source](DLMF/Heun/Basic.lean#L375)) is the differential operator entering their kernel PDE.
 
 - **Double-integral weight, Cartesian/spherical kernels and separation constants**, [DLMF 31.10.E13](https://dlmf.nist.gov/31.10.E13):
   The two-variable ρ(s,t), u,v,w of 31.10.17, cylinder-product kernel 31.10.19, spherical variables and P-symbol kernel of 31.10.20–23 introduce additional explicit expressions. No local object selects these kernels or the quadratic-root parameters m,p,a,b,a′,b′. Their independent separation constants and root/branch choices are not fixed by the single principal-power `heunWeight`.
@@ -7445,56 +7443,56 @@ explicitly as complementary entries. Names below are in `DLMF.Heun`.
   DLMF 31.11.3_1 (added in DLMF 1.1.7): the Fuchs–Frobenius solution at `∞` of the P-symbol
   31.11.2, `P_j^5 = (λ)_j(1-γ+λ)_j/(1+λ-μ)_{2j} z^{-λ-j} ₂F₁(λ+j, 1-γ+λ+j; 1+λ-μ+2j; 1/z)`
   (principal power, `|z| > 1`).
-  `DLMF.Heun.heunHypP5` ([definition](DLMF/Heun/Basic.lean#L277)).
+  `DLMF.Heun.heunHypergeometricP5` ([definition](DLMF/Heun/Basic.lean#L303)).
 
 - **Heun hypergeometric recurrence coefficient P₆**, [DLMF 31.11.E3_2](https://dlmf.nist.gov/31.11.E3_2):
   DLMF 31.11.3_2 (added in DLMF 1.1.7): the other Fuchs–Frobenius solution at `∞`,
   `P_j^6 = (λ-μ)_{2j}/((1-μ)_j(γ-μ)_j) z^{-μ+j} ₂F₁(μ-j, 1-γ+μ-j; 1-λ+μ-2j; 1/z)`.
-  `DLMF.Heun.heunHypP6` ([definition](DLMF/Heun/Basic.lean#L285)).
+  `DLMF.Heun.heunHypergeometricP6` ([definition](DLMF/Heun/Basic.lean#L311)).
 
 - **Hypergeometric expansion coefficients and Type I/II choices**, [DLMF 31.11.E4](https://dlmf.nist.gov/31.11.E4):
-  `DLMF.Heun.heunHypCoeff` ([source](DLMF/Heun/Basic.lean#L266)), `DLMF.Heun.heunHypCFTail` ([source](DLMF/Heun/Basic.lean#L292)) give the normalized forward coefficient recurrence and finite continued-fraction tails. The Type I and four Type II λ,μ choices specialize these same objects; the convergence ellipse has foci 0,1 through a and is a domain condition, without a separately named local ellipse. The full expansion is a representation theorem, not an additional globally continued Heun definition.
+  `DLMF.Heun.heunHypergeometricCoeff` ([source](DLMF/Heun/Basic.lean#L290)), `DLMF.Heun.heunHypergeometricContinuedFractionTail` ([source](DLMF/Heun/Basic.lean#L318)) give the normalized forward coefficient recurrence and finite continued-fraction tails. The Type I and four Type II λ,μ choices specialize these same objects; the convergence ellipse has foci 0,1 through a and is a domain condition, without a separately named local ellipse. The full expansion is a representation theorem, not an additional globally continued Heun definition.
 
 - **DLMF 31.11.6 (as corrected in DLMF 1.1.7)**, [DLMF 31.11.E6](https://dlmf.nist.gov/31.11.E6):
   DLMF 31.11.6 (as corrected in DLMF 1.1.7):
   `K_j = (j+α-μ-1)(j+β-μ-1)(j+γ-μ-1)(j-μ)/((2j+λ-μ-1)(2j+λ-μ-2))`; `j` is complex so that
   `j = -1` is allowed.
-  `DLMF.Heun.heunHypK` ([definition](DLMF/Heun/Basic.lean#L242)).
+  `DLMF.Heun.heunHypergeometricK` ([definition](DLMF/Heun/Basic.lean#L266)).
 
 - **Heun hypergeometric-expansion scale L**, [DLMF 31.11.E7](https://dlmf.nist.gov/31.11.E7):
   DLMF 31.11.7: `L_j = a(λ+j)(μ-j) - q + (j+α-μ)(j+β-μ)(j+γ-μ)(j+λ)/((2j+λ-μ)(2j+λ-μ+1))
   + (j-α+λ)(j-β+λ)(j-γ+λ)(j-μ)/((2j+λ-μ)(2j+λ-μ-1))`.
-  `DLMF.Heun.heunHypL` ([definition](DLMF/Heun/Basic.lean#L249)).
+  `DLMF.Heun.heunHypergeometricL` ([definition](DLMF/Heun/Basic.lean#L273)).
 
 - **DLMF 31.11.8 (as corrected in DLMF 1.1.7)**, [DLMF 31.11.E8](https://dlmf.nist.gov/31.11.E8):
   DLMF 31.11.8 (as corrected in DLMF 1.1.7):
   `M_j = (j-α+λ+1)(j-β+λ+1)(j-γ+λ+1)(j+λ)/((2j+λ-μ+1)(2j+λ-μ+2))`.
-  `DLMF.Heun.heunHypM` ([definition](DLMF/Heun/Basic.lean#L259)).
+  `DLMF.Heun.heunHypergeometricM` ([definition](DLMF/Heun/Basic.lean#L283)).
 
 - **Heun hypergeometric continued-fraction convergents**, [DLMF 31.11.E13](https://dlmf.nist.gov/31.11.E13):
   DLMF 31.11.13: the `m`-th approximant of
   `L₀/M₀ - (K₁/M₁)/(L₁/M₁ - (K₂/M₂)/(L₂/M₂ - ⋯))`.
-  `DLMF.Heun.heunHypCFApprox` ([definition](DLMF/Heun/Basic.lean#L301)).
+  `DLMF.Heun.heunHypergeometricContinuedFractionApprox` ([definition](DLMF/Heun/Basic.lean#L327)).
 
 ### §31.12 Confluent Forms of Heun’s Equation
 
 <!-- retained entry 232 -->
 - **Confluent, doubly confluent, biconfluent and triconfluent equations**,
-  [31.12.1–4](https://dlmf.nist.gov/31.12.E1): `IsConfluentHeunSolOn`,
-  `IsDoublyConfluentHeunSolOn`, `IsBiconfluentHeunSolOn`,
-  `IsTriconfluentHeunSolOn` in [Basic](DLMF/Heun/Basic.lean#L347).
+  [31.12.1–4](https://dlmf.nist.gov/31.12.E1): `IsConfluentHeunSolutionOn`,
+  `IsDoublyConfluentHeunSolutionOn`, `IsBiconfluentHeunSolutionOn`,
+  `IsTriconfluentHeunSolutionOn` in [Basic](DLMF/Heun/Basic.lean#L347).
   These are solution predicates; no additional globally normalized
   confluent Heun function is selected there.
 
 - **Irregular-singularity rank for confluent equations**, [DLMF 31.12.E1](https://dlmf.nist.gov/31.12.E1):
-  `DLMF.Heun.HasIrregularRankAt` ([source](DLMF/Heun/Basic.lean#L401)), `DLMF.Heun.HasIrregularRankAtInfinity` ([source](DLMF/Heun/Basic.lean#L390)) encode finite/infinite irregular rank through coefficient growth after the reciprocal change of variable. They supplement the four confluent equation predicates, rather than choosing normalized confluent functions.
+  `DLMF.Heun.HasIrregularRankAt` ([source](DLMF/Heun/Basic.lean#L428)), `DLMF.Heun.HasIrregularRankAtInfinity` ([source](DLMF/Heun/Basic.lean#L417)) encode finite/infinite irregular rank through coefficient growth after the reciprocal change of variable. They supplement the four confluent equation predicates, rather than choosing normalized confluent functions.
 
 ### §31.14 General Fuchsian Equation
 
 <!-- retained entry 233 -->
 - **Fuchsian equation, exponents and normal form**,
   [31.14.1–5](https://dlmf.nist.gov/31.14.E1): `fuchsianCoeffP`,
-  `fuchsianCoeffR`, `IsFuchsianSolOn`, `fuchsianNormalQ`,
+  `fuchsianCoeffR`, `IsFuchsianSolutionOn`, `fuchsianNormalQ`,
   `fuchsianNormalGamma`, `fuchsianNormalCoeff` in
   [Basic](DLMF/Heun/Basic.lean#L393). The singular points and coefficients
   are finite indexed families; α and β are constrained roots of the
@@ -7524,27 +7522,27 @@ explicitly as complementary entries. Names below are in `DLMF.Heun`.
 - **Stieltjes electrostatic density**, [DLMF 31.15.E4](https://dlmf.nist.gov/31.15.E4):
   DLMF 31.15.4: `G(ζ_1, …, ζ_n) = ∏_k ∏_ℓ (ζ_k - a_ℓ)^{γ_ℓ/2} ∏_{j > k} (ζ_k - ζ_j)`, principal
   powers.
-  `DLMF.Heun.stieltjesG` ([definition](DLMF/Heun/Basic.lean#L463)).
+  `DLMF.Heun.stieltjesG` ([definition](DLMF/Heun/Basic.lean#L490)).
 
 - **Accessory charges and indexed root counts**, [DLMF 31.15.E7](https://dlmf.nist.gov/31.15.E7):
-  `DLMF.Heun.rootsIn` ([source](DLMF/Heun/Basic.lean#L467)), `DLMF.Heun.IsStieltjesOfIndex` ([source](DLMF/Heun/Basic.lean#L472)) count polynomial roots in the real gaps and specify the monic polynomial with prescribed gap counts. The accessory qⱼ are finite inverse-distance sums in the electrostatic equations; no separate local selected Van Vleck/accessory-vector function is supplied. The root count uses polynomial roots, not a choice of their enumeration.
+  `DLMF.Heun.rootsIn` ([source](DLMF/Heun/Basic.lean#L494)), `DLMF.Heun.IsStieltjesOfIndex` ([source](DLMF/Heun/Basic.lean#L499)) count polynomial roots in the real gaps and specify the monic polynomial with prescribed gap counts. The accessory qⱼ are finite inverse-distance sums in the electrostatic equations; no separate local selected Van Vleck/accessory-vector function is supplied. The root count uses polynomial roots, not a choice of their enumeration.
 
 - **Stieltjes polynomial product**, [DLMF 31.15.E8](https://dlmf.nist.gov/31.15.E8):
   DLMF 31.15.8: the product `S_𝐦(z_1) ⋯ S_𝐦(z_{N-1})`.
-  `DLMF.Heun.stieltjesProduct` ([definition](DLMF/Heun/Basic.lean#L498)).
+  `DLMF.Heun.stieltjesProduct` ([definition](DLMF/Heun/Basic.lean#L525)).
 
 - **Stieltjes ordered root chamber**, [DLMF 31.15.E10](https://dlmf.nist.gov/31.15.E10):
   DLMF 31.15.10: the box `Q = (a_1, a_2) × ⋯ × (a_{N-1}, a_N)` (here indexed from `0`).
-  `DLMF.Heun.stieltjesBox` ([definition](DLMF/Heun/Basic.lean#L486)).
+  `DLMF.Heun.stieltjesBox` ([definition](DLMF/Heun/Basic.lean#L513)).
 
 - **Stieltjes bilinear integral**, [DLMF 31.15.E11](https://dlmf.nist.gov/31.15.E11):
   DLMF 31.15.11: the inner product `(f, g)_ρ = ∫_Q f(z) conj(g(z)) ρ(z) dz`.
-  `DLMF.Heun.stieltjesInner` ([definition](DLMF/Heun/Basic.lean#L503)).
+  `DLMF.Heun.stieltjesInner` ([definition](DLMF/Heun/Basic.lean#L530)).
 
 - **DLMF 31.15.12: the weight**, [DLMF 31.15.E12](https://dlmf.nist.gov/31.15.E12):
   DLMF 31.15.12: the weight
   `ρ(z) = ∏_j ∏_k |z_j - a_k|^{γ_k - 1} · ∏_{j<k} (z_k - z_j)` on `Q`.
-  `DLMF.Heun.stieltjesWeight` ([definition](DLMF/Heun/Basic.lean#L492)).
+  `DLMF.Heun.stieltjesWeight` ([definition](DLMF/Heun/Basic.lean#L519)).
 
 ### §31.16 Mathematical Applications
 
@@ -7716,7 +7714,7 @@ Names below are in `DLMF.Painleve`.
 ### §32.10 Special Function Solutions
 
 - **Airy seed, derivative and iterated half-integer hierarchy**, [DLMF 32.10.E5](https://dlmf.nist.gov/32.10.E5):
-  `DLMF.Painleve.airySeed` ([source](DLMF/Painleve/Airy.lean#L61)), `DLMF.Painleve.airySeedDeriv` ([source](DLMF/Painleve/Airy.lean#L64)), `DLMF.Painleve.airyPII` ([source](DLMF/Painleve/Airy.lean#L85)), `DLMF.Painleve.airyPIIJet` ([source](DLMF/Painleve/Airy.lean#L121)), `DLMF.Painleve.airyPIIHierarchy` ([source](DLMF/Painleve/Airy.lean#L212)) give actual scaled Airy combinations and a rational Bäcklund hierarchy. They use a cube-root scale k³=−1/2 and the Beals–Wong convention c=−α; thus `airyPII` at c=1/2 is DLMF α=−1/2. These are explicit constructions rather than choices from admitted existence principles. `DLMF.Painleve.TauEquationsAt` ([source](DLMF/Painleve/Tau.lean#L38)), `DLMF.Painleve.tauQuotientDeriv` ([source](DLMF/Painleve/Tau.lean#L44)) are a separate bilinear quotient representation in that convention, not the Wronskian determinant `wronskianTau`.
+  `DLMF.Painleve.airySeed` ([source](DLMF/Painleve/Airy.lean#L61)), `DLMF.Painleve.airySeedDeriv` ([source](DLMF/Painleve/Airy.lean#L64)), `DLMF.Painleve.airyPII` ([source](DLMF/Painleve/Airy.lean#L85)), `DLMF.Painleve.airyPIIJet` ([source](DLMF/Painleve/Airy.lean#L121)), `DLMF.Painleve.airyPIIHierarchy` ([source](DLMF/Painleve/Airy.lean#L212)) give actual scaled Airy combinations and a rational Bäcklund hierarchy. They use a unitCube-root scale k³=−1/2 and the Beals–Wong convention c=−α; thus `airyPII` at c=1/2 is DLMF α=−1/2. These are explicit constructions rather than choices from admitted existence principles. `DLMF.Painleve.TauEquationsAt` ([source](DLMF/Painleve/Tau.lean#L38)), `DLMF.Painleve.tauQuotientDeriv` ([source](DLMF/Painleve/Tau.lean#L44)) are a separate bilinear quotient representation in that convention, not the Wronskian determinant `wronskianTau`.
 
   [DLMF 32.10.E9](https://dlmf.nist.gov/32.10.E9):
   DLMF 32.10.9: the `n × n` Wronskian `τ_n(z) = 𝒲{φ, φ', …, φ⁽ⁿ⁻¹⁾}(z)`, the determinant of
@@ -7873,7 +7871,7 @@ Names in this subsection are in `DLMF.Coulomb`.
 ### §33.6 Power-Series Expansions in ρ
 
 - **Shifted regular-series coefficient recurrence**, [DLMF 33.6.E3](https://dlmf.nist.gov/33.6.E3):
-  `DLMF.Coulomb.powerSeriesCoeffAux` ([source](DLMF/Coulomb/Basic/AuxiliaryData.lean#L76)) is the shifted recurrence underlying the indexed `powerSeriesCoeff`; coefficients below ℓ+1 are zero in the latter. The hypergeometric formula in 33.6.4 is a bridge, not a second native coefficient sequence. The logarithmic H± expansion is a representation of the Kummer-U construction, including exceptional-parameter limits.
+  `DLMF.Coulomb.powerSeriesCoeffTerm` ([source](DLMF/Coulomb/Basic/AuxiliaryData.lean#L76)) is the shifted recurrence underlying the indexed `powerSeriesCoeff`; coefficients below ℓ+1 are zero in the latter. The hypergeometric formula in 33.6.4 is a bridge, not a second native coefficient sequence. The logarithmic H± expansion is a representation of the Kummer-U construction, including exceptional-parameter limits.
 
   [DLMF 33.6.E3](https://dlmf.nist.gov/33.6.E3):
   The coefficient `A_k^ℓ(η)` of the power series `F_ℓ = C_ℓ ∑_{k ≥ ℓ+1} A_k^ℓ ρ^k`
@@ -7899,7 +7897,7 @@ Names in this subsection are in `DLMF.Coulomb`.
   `DLMF.Coulomb.besselSeriesCoeffA` ([definition](DLMF/Coulomb/Basic/AuxiliaryData.lean#L92)).
 
 - **Bessel-series coefficient indexing and λℓ**, [DLMF 33.9.E5](https://dlmf.nist.gov/33.9.E5):
-  The auxiliary `DLMF.Coulomb.besselSeriesCoeffBAux` ([source](DLMF/Coulomb/Basic/AuxiliaryData.lean#L102)) shifts the bₖ recurrence used by `besselSeriesCoeffB`; `besselSeriesCoeffA` uses the spherical-series initial data. The λℓ of 33.9.7 is specified asymptotically, not by a convergent sum, and no independently selected local λℓ function was found.
+  The auxiliary `DLMF.Coulomb.besselSeriesCoeffBTerm` ([source](DLMF/Coulomb/Basic/AuxiliaryData.lean#L102)) shifts the bₖ recurrence used by `besselSeriesCoeffB`; `besselSeriesCoeffA` uses the spherical-series initial data. The λℓ of 33.9.7 is specified asymptotically, not by a convergent sum, and no independently selected local λℓ function was found.
 
   [DLMF 33.9.E5](https://dlmf.nist.gov/33.9.E5):
   The coefficient `b_k` of DLMF 33.9.3–33.9.5 (`η ≠ 0`), extended by `0` for `k < 2ℓ`.
@@ -7968,7 +7966,7 @@ Names in this subsection are in `DLMF.Coulomb`.
 
 <!-- retained entry 243 -->
 - **Regular f(ε,ℓ;r)**, [33.14.4–5](https://dlmf.nist.gov/33.14.E4):
-  `coulombfKummer`, `coulombf` in
+  `coulombEnergyFKummer`, `coulombEnergyF` in
   [Energy/Defs](DLMF/Coulomb/Energy/Basic.lean#L70). For nonzero ε the
   definition takes the real part of the Kummer formula; ε=0 is filled by
   a regularized ₀F₁ expression. The Whittaker and Bessel forms are
@@ -7977,7 +7975,7 @@ Names in this subsection are in `DLMF.Coulomb`.
 <!-- retained entry 244 -->
 - **Irregular h and piecewise S(ε,r)**,
   [33.14.7–8](https://dlmf.nist.gov/33.14.E7): `coulombSFactor`,
-  `coulombhKappa`, `coulombhFormula`, `coulombh` in
+  `coulombEnergyHKappa`, `coulombEnergyHFormula`, `coulombEnergyH` in
   [Energy/Defs](DLMF/Coulomb/Energy/Basic.lean#L86).
   The first two formula objects expose the Whittaker/Kummer construction;
   the final real function fills ε=0 and Gamma-pole parameters by
@@ -7988,7 +7986,7 @@ Names in this subsection are in `DLMF.Coulomb`.
 <!-- retained entry 245 -->
 - **Energy-normalized s,c and factors A,B**,
   [33.14.9–12](https://dlmf.nist.gov/33.14.E9): `coulombAProd`,
-  `coulombBFactor`, `coulombs`, `coulombc` in
+  `coulombBFactor`, `coulombEnergyS`, `coulombEnergyC` in
   [Energy/Defs](DLMF/Coulomb/Energy/Basic.lean#L124).
   A is the finite product; its Gamma ratio is a theorem bridge. The
   functions s,c are complex and retain the principal powers when B<0,
@@ -8083,12 +8081,12 @@ Traversal: all §§34.1–34.15 checked; matching headings are §§34.2,
 ### §34.1 Special Notation
 
 - **Clebsch–Gordan phase convention**, [DLMF 34.1.E1](https://dlmf.nist.gov/34.1.E1):
-  `DLMF.WignerSymbols.clebschGordan` ([source](DLMF/WignerSymbols/Basic.lean#L150)) is the exact phase/√(2j₃+1)-scaled 3j coefficient. The order j₁,m₁,j₂,m₂,j₃,m₃ and the sign of the third projection inside 3j match the displayed convention; it is a separate normalization wrapper, not another independent Racah construction.
+  `DLMF.WignerSymbols.clebschGordan` ([source](DLMF/WignerSymbols/Basic.lean#L154)) is the exact phase/√(2j₃+1)-scaled 3j coefficient. The order j₁,m₁,j₂,m₂,j₃,m₃ and the sign of the third projection inside 3j match the displayed convention; it is a separate normalization wrapper, not another independent Racah construction.
 
   [DLMF 34.1.E1](https://dlmf.nist.gov/34.1.E1):
   DLMF 34.1.1: the Clebsch–Gordan coefficient
   `(j₁ m₁ j₂ m₂ | j₁ j₂ j₃ m₃) = (-1)^{j₁-j₂+m₃} (2j₃+1)^{1/2} (j₁ j₂ j₃; m₁ m₂ -m₃)`.
-  `DLMF.WignerSymbols.clebschGordan` ([definition](DLMF/WignerSymbols/Basic.lean#L150)).
+  `DLMF.WignerSymbols.clebschGordan` ([definition](DLMF/WignerSymbols/Basic.lean#L154)).
 
 ### §34.2 Definition: 3 ⁢ j Symbol
 
@@ -8102,12 +8100,12 @@ Traversal: all §§34.1–34.15 checked; matching headings are §§34.2,
   inequalities alone.
 
 - **Admissible finite projection and spin ranges**, [DLMF 34.2.E2](https://dlmf.nist.gov/34.2.E2):
-  `DLMF.WignerSymbols.IsNatQ` ([source](DLMF/WignerSymbols/Basic.lean#L75)), `DLMF.WignerSymbols.halfIntegersUpTo` ([source](DLMF/WignerSymbols/Basic.lean#L215)) supplement the projection/triad predicates and projection set. The internal rational factorial and sign functions use floors; their intended factorial/phase interpretation applies to integral admissible arguments, rather than defining Gamma factorials on arbitrary rationals.
+  `DLMF.WignerSymbols.IsNatQ` ([source](DLMF/WignerSymbols/Basic.lean#L75)), `DLMF.WignerSymbols.halfIntegersUpTo` ([source](DLMF/WignerSymbols/Basic.lean#L221)) supplement the projection/triad predicates and projection set. The internal rational factorial and sign functions use floors; their intended factorial/phase interpretation applies to integral admissible arguments, rather than defining Gamma factorials on arbitrary rationals.
 
 <!-- retained entry 249 -->
 - **Wigner 3j and triangle coefficient Δ**,
   [34.2.4–5](https://dlmf.nist.gov/34.2.E4): `wigner3j`, `triangleDelta`,
-  with `racahTerm3j`, `factQ`, `invFactQ`, `signPow`, in
+  with `racahTerm3j`, `ratFactorial`, `ratInvFactorial`, `signPow`, in
   [Basic](DLMF/WignerSymbols/Basic.lean#L114). This is the finite Racah
   sum; negative factorial arguments make reciprocal-factorial summands
   zero. Inadmissible projections are extended by zero. The ₃F₂ expression
@@ -8136,12 +8134,12 @@ Traversal: all §§34.1–34.15 checked; matching headings are §§34.2,
 ### §34.5 Basic Properties: 6 ⁢ j Symbol
 
 - **6j recurrence invariants and radical coefficient**, [DLMF 34.5.E12](https://dlmf.nist.gov/34.5.E12):
-  Jᵣ=jᵣ(jᵣ+1), Lᵣ=lᵣ(lᵣ+1) are local expressions, and `DLMF.WignerSymbols.sixJRecursionE` ([source](DLMF/WignerSymbols/Basic.lean#L186)) is the square root E(j) of 34.5.13. The nonnegative real-root convention is relevant on admissible spins; it is not an arbitrary signed continuation.
+  Jᵣ=jᵣ(jᵣ+1), Lᵣ=lᵣ(lᵣ+1) are local expressions, and `DLMF.WignerSymbols.sixJRecursionE` ([source](DLMF/WignerSymbols/Basic.lean#L192)) is the square root E(j) of 34.5.13. The nonnegative real-root convention is relevant on admissible spins; it is not an arbitrary signed continuation.
 
   [DLMF 34.5.E13](https://dlmf.nist.gov/34.5.E13):
   DLMF 34.5.13: the coefficient of the recursion relation 34.5.11,
   `E(j) = ((j² - (j₂-j₃)²)((j₂+j₃+1)² - j²)(j² - (l₂-l₃)²)((l₂+l₃+1)² - j²))^{1/2}`.
-  `DLMF.WignerSymbols.sixJRecursionE` ([definition](DLMF/WignerSymbols/Basic.lean#L186)).
+  `DLMF.WignerSymbols.sixJRecursionE` ([definition](DLMF/WignerSymbols/Basic.lean#L192)).
 
 ### §34.6 Definition: 9 ⁢ j Symbol
 
@@ -8155,14 +8153,14 @@ Traversal: all §§34.1–34.15 checked; matching headings are §§34.2,
 ### §34.7 Basic Properties: 9 ⁢ j Symbol
 
 - **9j total phase and symmetry group**, [DLMF 34.7.ii](https://dlmf.nist.gov/34.7.ii):
-  The total R is the sum of the nine arguments and determines the (−1)^R factor for odd row/column permutations. The 72 array operations are recorded as symmetry statements, not as a new symbol or separately constructed group action. The auxiliary six-argument factor `DLMF.WignerSymbols.symmetricRacahSum` ([source](DLMF/WignerSymbols/Basic.lean#L156)) is a local finite phase/weight expression used in symbol identities.
+  The total R is the sum of the nine arguments and determines the (−1)^R factor for odd row/column permutations. The 72 array operations are recorded as symmetry statements, not as a new symbol or separately constructed group action. The auxiliary six-argument factor `DLMF.WignerSymbols.symmetricRacahSum` ([source](DLMF/WignerSymbols/Basic.lean#L160)) is a local finite phase/weight expression used in symbol identities.
 
 ### §34.8 Approximations for Large Parameters
 
 - **Large-parameter angular-momentum angle**, [DLMF 34.8.E2](https://dlmf.nist.gov/34.8.E2):
   DLMF 34.8.2: the angle `θ ∈ [0, π]` of the approximation 34.8.1,
   `cos θ = (j₁(j₁+1) + j₂(j₂+1) - j₃(j₃+1)) / (2 √(j₁(j₁+1) j₂(j₂+1)))`.
-  `DLMF.WignerSymbols.largeParameterAngle` ([definition](DLMF/WignerSymbols/Basic.lean#L223)).
+  `DLMF.WignerSymbols.largeParameterAngle` ([definition](DLMF/WignerSymbols/Basic.lean#L229)).
 
 ### §34.10 Zeros
 
@@ -8180,7 +8178,7 @@ paragraph of §35.2 and §§35.3(i), 35.4(i), 35.5(i), 35.6(i), 35.7(i),
 The definitions use real symmetric matrices, the positive-definite cone,
 and Lebesgue measure on the independent upper-triangular entries. The
 supporting §35.1 notation has actual objects `SymMatrix`, `posDefCone`,
-`matrixInterval`, `etr`, `leadingMinor`, `matrixSpectralNorm`,
+`matrixInterval`, `expTrace`, `leadingMinor`, `matrixSpectralNorm`,
 `orthogonalHaar` in [Basic](DLMF/MatrixArgument/Basic.lean#L76).
 The measure is upstream `TauCeti.symmetricLebesgue`; its precise dependency
 and normalization are recorded in
@@ -8189,7 +8187,7 @@ and normalization are recorded in
 ### §35.1 Special Notation
 
 - **Symmetric-cone measure, order and integral predicate**, [DLMF 35.1](https://dlmf.nist.gov/35.1):
-  Matrix order X>T means X−T positive definite; dX is Lebesgue measure in independent upper-triangular coordinates. `DLMF.MatrixArgument.HasIntegralOn` ([source](DLMF/MatrixArgument/Basic.lean#L106)), `DLMF.MatrixArgument.complexSymmetricOfCoords` ([source](DLMF/MatrixArgument/Basic.lean#L126)) add an integrability-plus-value predicate and the complex symmetric coordinate map to the support objects retained above. The leading minor has value one at j=0 and a local fallback zero for j>m; the spectral norm acts on Euclidean space. DLMF assumes m>0, whereas the Lean definitions also accept m=0.
+  Matrix order X>T means X−T positive definite; dX is Lebesgue measure in independent upper-triangular coordinates. `DLMF.MatrixArgument.HasIntegralOn` ([source](DLMF/MatrixArgument/Basic.lean#L108)), `DLMF.MatrixArgument.complexSymmetricOfCoords` ([source](DLMF/MatrixArgument/Basic.lean#L128)) add an integrability-plus-value predicate and the complex symmetric coordinate map to the support objects retained above. The leading minor has value one at j=0 and a local fallback zero for j>m; the spectral norm acts on Euclidean space. DLMF assumes m>0, whereas the Lean definitions also accept m=0.
 
 - **Alternative matrix-function normalizations**, [DLMF 35.1](https://dlmf.nist.gov/35.1):
   Πₘ(a)=Γₘ(a+(m+1)/2), the normalized Bessel J=Aν/Aν(0), and determinant-scaled K/𝒦 notations in the closing prose are normalization dictionaries. No separate local wrappers are defined for these aliases; the determinant factors must be retained when comparing names across sources.
@@ -8265,7 +8263,7 @@ and normalization are recorded in
 
 <!-- retained entry 258 -->
 - **Matrix Bessel Aν and Bν**, [35.5.1–3](https://dlmf.nist.gov/35.5.E1):
-  `besselA`, `besselB` in [Basic](DLMF/MatrixArgument/Basic.lean#L257).
+  `matrixBesselA`, `besselB` in [Basic](DLMF/MatrixArgument/Basic.lean#L257).
   A uses its normalized zonal-polynomial series; B is a cone integral with
   the inverse-matrix exponential. The normalization at zero is the reciprocal
   multivariate Gamma expression, not a separately defined constant.
@@ -8276,31 +8274,31 @@ and normalization are recorded in
 
 <!-- retained entry 259 -->
 - **Matrix ₁F₁ and Ψ**, [35.6.1–2](https://dlmf.nist.gov/35.6.E1):
-  `hyp1F1`, `kummerPsi` in [Basic](DLMF/MatrixArgument/Basic.lean#L238).
-  The first wraps the partition series `hypergeometricPFQ`; Ψ is an
+  `matrixHypergeometric1F1`, `matrixKummerPsi` in [Basic](DLMF/MatrixArgument/Basic.lean#L238).
+  The first wraps the partition series `matrixHypergeometricPFQ`; Ψ is an
   independent cone-integral construction with Re a>(m−1)/2 and T positive
   definite. There is no separate global analytic continuation of that
   integral in this definition layer.
 
 <!-- retained entry 260 -->
 - **Matrix Laguerre form Lν⁽γ⁾**, [35.6.3](https://dlmf.nist.gov/35.6.E3):
-  `laguerreL` in [Basic](DLMF/MatrixArgument/Basic.lean#L288), the Gamma
+  `matrixLaguerreL` in [Basic](DLMF/MatrixArgument/Basic.lean#L288), the Gamma
   ratio times ₁F₁, with complex degree ν rather than just a polynomial index.
 
 ### §35.7 Gaussian Hypergeometric Function of Matrix Argument
 
 <!-- retained entry 261 -->
-- **Matrix ₂F₁**, [35.7.1](https://dlmf.nist.gov/35.7.E1): `hyp2F1` in
+- **Matrix ₂F₁**, [35.7.1](https://dlmf.nist.gov/35.7.E1): `matrixHypergeometric2F1` in
   [Basic](DLMF/MatrixArgument/Basic.lean#L244), a wrapper for the native
   partition series, interpreted on ‖T‖<1 and nonexceptional c.
 
 <!-- retained entry 262 -->
 - **Matrix Jacobi form Pν⁽γ,δ⁾**, [35.7.2](https://dlmf.nist.gov/35.7.E2):
-  `jacobiP` in [Basic](DLMF/MatrixArgument/Basic.lean#L296), the stated
+  `matrixJacobiP` in [Basic](DLMF/MatrixArgument/Basic.lean#L296), the stated
   Gamma-ratio/₂F₁ construction; DLMF requires 0<T<I and Re γ>−1.
 
 - **Eigenvalue-coordinate derivatives and hypergeometric PDE**, [DLMF 35.7.E9](https://dlmf.nist.gov/35.7.E9):
-  `DLMF.MatrixArgument.coordDeriv` ([source](DLMF/MatrixArgument/Basic.lean#L340)), `DLMF.MatrixArgument.gaussPDEOperator` ([source](DLMF/MatrixArgument/Basic.lean#L349)) construct coordinate derivatives and the differential operator minus abF. The raw operator is used at pairwise distinct eigenvalues; its totalized denominators do not describe a removable extension at coincident eigenvalues by themselves. Orthogonal invariance, analyticity near zero and value one normalize the characterized function; no independent PDE-selected ₂F₁ is defined.
+  `DLMF.MatrixArgument.coordDeriv` ([source](DLMF/MatrixArgument/Basic.lean#L345)), `DLMF.MatrixArgument.gaussPDEOperator` ([source](DLMF/MatrixArgument/Basic.lean#L354)) construct coordinate derivatives and the differential operator minus abF. The raw operator is used at pairwise distinct eigenvalues; its totalized denominators do not describe a removable extension at coincident eigenvalues by themselves. Orthogonal invariance, analyticity near zero and value one normalize the characterized function; no independent PDE-selected ₂F₁ is defined.
 
   [DLMF 35.7.E9](https://dlmf.nist.gov/35.7.E9):
   DLMF 35.7.9: the `j`th partial differential operator of the system for `₂F₁` of matrix
@@ -8308,16 +8306,16 @@ and normalization are recorded in
   `t_j(1-t_j) ∂²F/∂t_j² - ½ ∑_{k≠j} t_k(1-t_k)/(t_j-t_k) ∂F/∂t_k
     + (c - ½(m-1) - (a+b-½(m-3)) t_j + ½ ∑_{k≠j} t_j(1-t_j)/(t_j-t_k)) ∂F/∂t_j - abF`.
   It is used at points with pairwise distinct `t_k`, where no denominator vanishes.
-  `DLMF.MatrixArgument.gaussPDEOperator` ([definition](DLMF/MatrixArgument/Basic.lean#L349)).
+  `DLMF.MatrixArgument.gaussPDEOperator` ([definition](DLMF/MatrixArgument/Basic.lean#L354)).
 
 ### §35.8 Generalized Hypergeometric Functions of Matrix Argument
 
 <!-- retained entry 263 -->
 - **Generalized hypergeometric function of matrix argument**,
-  [35.8.1](https://dlmf.nist.gov/35.8.E1): `hypergeometricPFQ` in
+  [35.8.1](https://dlmf.nist.gov/35.8.E1): `matrixHypergeometricPFQ` in
   [Basic](DLMF/MatrixArgument/Basic.lean#L216), an infinite sum over weights
-  of finite sums over partitions. `hyp0F0`, `hyp1F0`, `hyp0F1`, `hyp1F1`,
-  `hyp2F1`, `hyp3F2` in the same file are parameter-list wrappers.
+  of finite sums over partitions. `matrixHypergeometric0F0`, `matrixHypergeometric1F0`, `matrixHypergeometric0F1`, `matrixHypergeometric1F1`,
+  `matrixHypergeometric2F1`, `matrixHypergeometric3F2` in the same file are parameter-list wrappers.
   Denominator partitional factorials must not vanish. The convergence
   distinctions p≤q, p=q+1 and p>q+1 are separate properties; a divergent
   totalized sum is not an analytic continuation.

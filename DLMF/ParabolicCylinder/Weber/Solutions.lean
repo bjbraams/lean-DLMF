@@ -62,13 +62,13 @@ def pcfWDerivZero (a : ℝ) : ℝ :=
 cylinder solution. -/
 @[dlmf 12.14.E15]
 def pcfWEven (a z : ℂ) : ℂ :=
-  pcfEven (-I*a) (exp (π*I/4)*z)
+  parabolicCylinderEven (-I*a) (exp (π*I/4)*z)
 
 /-- The odd entire solution of the oscillatory Weber equation, with the phase factor chosen to
 preserve its initial derivative. -/
 @[dlmf 12.14.E16]
 def pcfWOdd (a z : ℂ) : ℂ :=
-  exp (-π*I/4)*pcfOdd (-I*a) (exp (π*I/4)*z)
+  exp (-π*I/4)*parabolicCylinderOdd (-I*a) (exp (π*I/4)*z)
 
 /-- The real-normalized Weber function W, formed from its even and odd entire solutions with the
 prescribed initial values. -/
@@ -82,19 +82,19 @@ def pcfW (a : ℝ) (z : ℂ) : ℂ :=
 theorem pcfW_initial (a : ℝ) :
     pcfW a 0=pcfWZero a ∧ HasDerivAt (pcfW a) (pcfWDerivZero a) 0 := by
   constructor
-  · simp [pcfW, pcfWEven, pcfWOdd, pcfEven, pcfOdd]
+  · simp [pcfW, pcfWEven, pcfWOdd, parabolicCylinderEven, parabolicCylinderOdd]
   · have he : HasDerivAt (pcfWEven (a:ℂ)) 0 0 := by
-      have h := (hasDerivAt_pcfEven (-I*a) (exp (π*I/4)*0)).comp 0
+      have h := (hasDerivAt_parabolicCylinderEven (-I*a) (exp (π*I/4)*0)).comp 0
         ((hasDerivAt_id (0:ℂ)).const_mul (exp (π*I/4)))
       have h' : HasDerivAt (pcfWEven (a:ℂ)) _ 0 :=
         h.congr_of_eventuallyEq (Eventually.of_forall fun w => rfl)
-      simpa [pcfEvenDeriv] using h'
+      simpa [parabolicCylinderEvenDeriv] using h'
     have ho : HasDerivAt (pcfWOdd (a:ℂ)) 1 0 := by
-      have h := ((hasDerivAt_pcfOdd (-I*a) (exp (π*I/4)*0)).comp 0
+      have h := ((hasDerivAt_parabolicCylinderOdd (-I*a) (exp (π*I/4)*0)).comp 0
         ((hasDerivAt_id (0:ℂ)).const_mul (exp (π*I/4)))).const_mul (exp (-π*I/4))
       have h' : HasDerivAt (pcfWOdd (a:ℂ)) _ 0 :=
         h.congr_of_eventuallyEq (Eventually.of_forall fun w => rfl)
-      simpa [pcfOddDeriv, ← Complex.exp_add, neg_div] using h'
+      simpa [parabolicCylinderOddDeriv, ← Complex.exp_add, neg_div] using h'
     have h : HasDerivAt (pcfW a) _ 0 :=
       ((he.const_mul (pcfWZero a:ℂ)).add (ho.const_mul (pcfWDerivZero a:ℂ))).congr_of_eventuallyEq
         (Eventually.of_forall fun w => rfl)
@@ -119,9 +119,10 @@ theorem pcfWEven_kummer (a z : ℂ) :
     pcfWEven a z = exp (-I*z^2/4)*kummerM (1/4-I*a/2) (1/2) (I*z^2/2) ∧ pcfWEven a z =
         exp (I*z^2/4)*kummerM (1/4+I*a/2) (1/2) (-I*z^2/2) := by
   constructor
-  · rw [pcfWEven, pcfEven, mul_pow, exp_pi_I_quarter_sq, show -I*a/2 + 1/4 = 1/4-I*a/2 by ring,
+  · rw [pcfWEven, parabolicCylinderEven, mul_pow, exp_pi_I_quarter_sq, show -I*a/2 + 1/4 =
+        1/4-I*a/2 by ring,
       show -(I*z^2)/4 = -I*z^2/4 by ring]
-  · rw [pcfWEven, pcfEven_kummer_alternative, mul_pow, exp_pi_I_quarter_sq,
+  · rw [pcfWEven, parabolicCylinderEven_kummer_alternative, mul_pow, exp_pi_I_quarter_sq,
       show -(-I*a)/2 + 1/4 = 1/4+I*a/2 by ring, show -(I*z^2)/2 = -I*z^2/2 by ring]
 
 /-- Identity under the stated parameter and domain assumptions: `pcfWOdd a z = z*exp
@@ -133,20 +134,22 @@ theorem pcfWOdd_kummer (a z : ℂ) :
         z*exp (I*z^2/4)*kummerM (3/4+I*a/2) (3/2) (-I*z^2/2) := by
   have h1 := exp_neg_pi_I_quarter_mul
   constructor
-  · rw [pcfWOdd, pcfOdd, mul_pow, exp_pi_I_quarter_sq, show -I*a/2 + 3/4 = 3/4-I*a/2 by ring,
+  · rw [pcfWOdd, parabolicCylinderOdd, mul_pow, exp_pi_I_quarter_sq, show -I*a/2 + 3/4 =
+        3/4-I*a/2 by ring,
       show -(I*z^2)/4 = -I*z^2/4 by ring]
     linear_combination (z * exp (-I*z^2/4)*kummerM (3/4-I*a/2) (3/2) (I*z^2/2)) * h1
-  · rw [pcfWOdd, pcfOdd_kummer_alternative, mul_pow, exp_pi_I_quarter_sq,
+  · rw [pcfWOdd, parabolicCylinderOdd_kummer_alternative, mul_pow, exp_pi_I_quarter_sq,
       show -(-I*a)/2 + 3/4 = 3/4+I*a/2 by ring, show -(I*z^2)/2 = -I*z^2/2 by ring]
     linear_combination (z * exp (I*z^2/4)*kummerM (3/4+I*a/2) (3/2) (-I*z^2/2)) * h1
 
 /-- Derivative of `W(a,z)`. -/
 def pcfWDeriv (a : ℝ) (z : ℂ) : ℂ :=
-  pcfWZero a * (exp (π*I/4) * pcfEvenDeriv (-I*a) (exp (π*I/4)*z)) +
-    pcfWDerivZero a * pcfOddDeriv (-I*a) (exp (π*I/4)*z)
+  pcfWZero a * (exp (π*I/4) * parabolicCylinderEvenDeriv (-I*a) (exp (π*I/4)*z)) +
+    pcfWDerivZero a * parabolicCylinderOddDeriv (-I*a) (exp (π*I/4)*z)
 
 /-- A rotated solution of Weber's equation. -/
-theorem IsWeberSol.hasDerivAt_rot {b : ℂ} {f f' : ℂ → ℂ} (hf : IsWeberSol b f f') (c z : ℂ) :
+theorem IsWeberSolution.hasDerivAt_rot {b : ℂ} {f f' : ℂ → ℂ}
+    (hf : IsWeberSolution b f f') (c z : ℂ) :
     HasDerivAt (fun w => f (c*w)) (c * f' (c*z)) z ∧
       HasDerivAt (fun w => c * f' (c*w)) (c^2*((c*z)^2/4+b) * f (c*z)) z := by
   have hl : ∀ w : ℂ, HasDerivAt (fun w : ℂ => c*w) c w := fun w =>
@@ -157,8 +160,8 @@ theorem IsWeberSol.hasDerivAt_rot {b : ℂ} {f f' : ℂ → ℂ} (hf : IsWeberSo
 
 /-- `W` has derivative `pcfWDeriv`. -/
 theorem hasDerivAt_pcfW (a : ℝ) (z : ℂ) : HasDerivAt (pcfW a) (pcfWDeriv a z) z := by
-  have he := ((isWeberSol_pcfEven (-I*a)).hasDerivAt_rot (exp (π*I/4)) z).1
-  have ho := ((isWeberSol_pcfOdd (-I*a)).hasDerivAt_rot (exp (π*I/4)) z).1
+  have he := ((isWeberSolution_parabolicCylinderEven (-I*a)).hasDerivAt_rot (exp (π*I/4)) z).1
+  have ho := ((isWeberSolution_parabolicCylinderOdd (-I*a)).hasDerivAt_rot (exp (π*I/4)) z).1
   have h := (he.const_mul (pcfWZero a : ℂ)).add
       ((ho.const_mul (exp (-π*I/4))).const_mul (pcfWDerivZero a : ℂ))
   convert h using 1
@@ -168,18 +171,20 @@ theorem hasDerivAt_pcfW (a : ℝ) (z : ℂ) : HasDerivAt (pcfW a) (pcfWDeriv a z
 /-- Weber's oscillatory equation `W'' = (a - z²/4) W`. -/
 theorem hasDerivAt_pcfWDeriv (a : ℝ) (z : ℂ) :
     HasDerivAt (pcfWDeriv a) ((a - z^2/4) * pcfW a z) z := by
-  have he := ((isWeberSol_pcfEven (-I*a)).hasDerivAt_rot (exp (π*I/4)) z).2
-  have ho := ((isWeberSol_pcfOdd (-I*a)).hasDerivAt_rot (exp (π*I/4)) z).2
+  have he := ((isWeberSolution_parabolicCylinderEven (-I*a)).hasDerivAt_rot (exp (π*I/4)) z).2
+  have ho := ((isWeberSolution_parabolicCylinderOdd (-I*a)).hasDerivAt_rot (exp (π*I/4)) z).2
   have h := (he.const_mul (pcfWZero a : ℂ)).add
       ((ho.const_mul (exp (-π*I/4))).const_mul (pcfWDerivZero a : ℂ))
   have h1 := exp_neg_pi_I_quarter_mul
   have h2 := exp_pi_I_quarter_sq
   convert h using 1
   · funext w; simp only [Pi.add_apply, pcfWDeriv]
-    linear_combination (-(pcfWDerivZero a : ℂ) * pcfOddDeriv (-I*a) (exp (π*I/4)*w)) * h1
+    linear_combination (-(pcfWDerivZero a : ℂ) *
+        parabolicCylinderOddDeriv (-I*a) (exp (π*I/4)*w)) * h1
   · rw [pcfW, pcfWEven, pcfWOdd, mul_pow, h2]
-    linear_combination ((a:ℂ) - z^2/4) * ((pcfWZero a : ℂ) * pcfEven (-I*a) (exp (π*I/4)*z) +
-      (pcfWDerivZero a : ℂ) * (exp (-π*I/4) * pcfOdd (-I*a) (exp (π*I/4)*z))) * I_sq
+    linear_combination ((a:ℂ) - z^2/4) *
+        ((pcfWZero a : ℂ) * parabolicCylinderEven (-I*a) (exp (π*I/4)*z) +
+      (pcfWDerivZero a : ℂ) * (exp (-π*I/4) * parabolicCylinderOdd (-I*a) (exp (π*I/4)*z))) * I_sq
 
 /-- The derivative of `W`. -/
 theorem deriv_pcfW (a : ℝ) : deriv (pcfW a) = pcfWDeriv a :=
@@ -234,9 +239,10 @@ lemma pcfW_wronskian_aux (a : ℝ) (z : ℂ) :
       (by ring)
   have := is_const_of_deriv_eq_zero (fun w => (hd w).differentiableAt) (fun w => (hd w).deriv) z 0
   rw [this, neg_zero]
-  have h0 : pcfW a 0 = pcfWZero a := by simp [pcfW, pcfWEven, pcfWOdd, pcfEven, pcfOdd]
+  have h0 : pcfW a 0 = pcfWZero a := by
+      simp [pcfW, pcfWEven, pcfWOdd, parabolicCylinderEven, parabolicCylinderOdd]
   have h1 : pcfWDeriv a 0 = pcfWDerivZero a := by
-    simp [pcfWDeriv, pcfEvenDeriv_zero, pcfOddDeriv_zero]
+    simp [pcfWDeriv, parabolicCylinderEvenDeriv_zero, parabolicCylinderOddDeriv_zero]
   rw [h0, h1]; ring
 
 /-- `W(a,0) W'(a,0) = -1/2`. -/
@@ -411,7 +417,7 @@ lemma pcfW_aux_alg {e4 eφ s S g g1 g3 c3 W2 W' p : ℂ} {ng n3 : ℝ} (P : g = 
 /-- `V(a)² sin(π(1/4+ia/2)) (2 |Γ(1/2+ia)| |Γ(3/4+ia/2)|²) = e^{iπ/4} π √π` for
 `V(a) = e^{iρ} U(ia, 0)`, from the duplication and reflection formulas. -/
 lemma pcfW_aux_V_sq (a : ℝ) :
-    (exp (I*pcfWRho a) * pcfU (I*a) 0)^2 * sin (π*(1/4+I*a/2)) *
+    (exp (I*pcfWRho a) * parabolicCylinderU (I*a) 0)^2 * sin (π*(1/4+I*a/2)) *
       (2 * ‖Gamma (1/2+I*a)‖ * ‖Gamma (3/4+I*a/2)‖^2) = exp (π*I/4) * π * Real.sqrt π := by
   have hρ : exp (I*pcfWRho a)^2 = exp (π*I/4) * exp (I*pcfGammaPhase a) := by
     rw [← Complex.exp_nat_mul, ← Complex.exp_add, pcfWRho]; congr 1; push_cast; ring
@@ -437,7 +443,8 @@ lemma pcfW_aux_V_sq (a : ℝ) :
       ((map_ne_zero _).mpr (Complex.Gamma_ne_zero_of_re_pos (by norm_num))) Rf
   have hg3 : Gamma (3/4+I*a/2) ≠ 0 := Complex.Gamma_ne_zero_of_re_pos (by norm_num)
   have hW : (2:ℂ)^(I*a/2+1/4) ≠ 0 := by simp
-  rw [pcfU_zero, show I*(a:ℂ)/2+1/4 = I*a/2+1/4 by ring, show 3/4+I*(a:ℂ)/2 = 3/4+I*a/2 by ring,
+  rw [parabolicCylinderU_zero, show I*(a:ℂ)/2+1/4 = I*a/2+1/4 by ring, show 3/4+I*(a:ℂ)/2 =
+                                                                   3/4+I*a/2 by ring,
     mul_pow, div_pow, mul_pow, hρ, hw]
   exact pcfW_aux_alg P D Rf N3 h2 hS hg3 (by rw [← hw]; exact pow_ne_zero 2 hW)
       (by simp [Real.sqrt_ne_zero', Real.pi_pos]) (by simp)
@@ -458,7 +465,8 @@ lemma pcfW_aux_alg' {e4 eφ s cS g g1 g3 c1 W2 W' p : ℂ} {ng n1 : ℝ} (P : g 
 
 /-- The analogue of `pcfW_aux_V_sq` for `V'(a) = e^{iρ} e^{-iπ/4} U'(ia, 0)`. -/
 lemma pcfW_aux_V'_sq (a : ℝ) :
-    (exp (I*pcfWRho a) * (exp (-π*I/4) * pcfUDeriv (I*a) 0))^2 * conj (sin (π*(1/4+I*a/2))) *
+    (exp (I*pcfWRho a) * (exp (-π*I/4) * parabolicCylinderUDeriv (I*a) 0))^2 *
+        conj (sin (π*(1/4+I*a/2))) *
       (‖Gamma (1/2+I*a)‖ * ‖Gamma (1/4+I*a/2)‖^2) = -I * exp (π*I/4) * π * Real.sqrt π := by
   have hρ : exp (I*pcfWRho a)^2 = exp (π*I/4) * exp (I*pcfGammaPhase a) := by
     rw [← Complex.exp_nat_mul, ← Complex.exp_add, pcfWRho]; congr 1; push_cast; ring
@@ -491,7 +499,7 @@ lemma pcfW_aux_V'_sq (a : ℝ) :
       ((map_ne_zero _).mpr (Complex.Gamma_ne_zero_of_re_pos (by norm_num))) Rfc
   have hg1 : Gamma (1/4+I*a/2) ≠ 0 := Complex.Gamma_ne_zero_of_re_pos (by norm_num)
   have hW : (2:ℂ)^(I*a/2-1/4) ≠ 0 := by simp
-  rw [pcfUDeriv_zero, show I*(a:ℂ)/2-1/4 = I*a/2-1/4 by ring, show 1/4+I*(a:ℂ)/2 =
+  rw [parabolicCylinderUDeriv_zero, show I*(a:ℂ)/2-1/4 = I*a/2-1/4 by ring, show 1/4+I*(a:ℂ)/2 =
                                                           1/4+I*a/2 by ring,
     mul_pow, mul_pow, div_pow, neg_pow, mul_pow, hρ, hq, hw]
   have := pcfW_aux_alg' (e4 := exp (π*I/4)) P D Rfc N1 h2 hS hg1
@@ -501,7 +509,7 @@ lemma pcfW_aux_V'_sq (a : ℝ) :
 
 /-- `V(a)² = r (e^{πa/2} + i e^{-πa/2}) / 2` with `r > 0`, for `V(a) = e^{iρ} U(ia, 0)`. -/
 lemma pcfW_aux_V_sq_pos (a : ℝ) : ∃ r : ℝ, 0 < r ∧
-    (exp (I*pcfWRho a) * pcfU (I*a) 0)^2 =
+    (exp (I*pcfWRho a) * parabolicCylinderU (I*a) 0)^2 =
       r * (((Real.exp (π*a/2) : ℝ) + I * (Real.exp (-π*a/2) : ℝ)) / 2) := by
   have h := pcfW_aux_V_sq a
   have hT := pcfW_aux_T a
@@ -513,7 +521,7 @@ lemma pcfW_aux_V_sq_pos (a : ℝ) : ∃ r : ℝ, 0 < r ∧
   generalize sin (π*(1/4+I*a/2)) = S at h ⊢
   generalize ‖Gamma (1/2+I*a)‖ = ng at h hng ⊢
   generalize ‖Gamma (3/4+I*a/2)‖ = n3 at h hn3 ⊢
-  generalize exp (I*pcfWRho a) * pcfU (I*a) 0 = V at h ⊢
+  generalize exp (I*pcfWRho a) * parabolicCylinderU (I*a) 0 = V at h ⊢
   have hS : S ≠ 0 := by
     have hne : exp (π*I/4) * π * Real.sqrt π ≠ 0 := by
       simp [Real.pi_pos.ne', Real.sqrt_ne_zero', Real.pi_pos, Complex.exp_ne_zero]
@@ -538,7 +546,7 @@ theorem exp_neg_pi_I_quarter_eq : exp (-π*I/4) = -I * exp (π*I/4) := by
 /-- `V'(a)² = r (e^{πa/2} - i e^{-πa/2}) / 2` with `r > 0`, for
 `V'(a) = e^{iρ} e^{-iπ/4} U'(ia, 0)`. -/
 lemma pcfW_aux_V'_sq_pos (a : ℝ) : ∃ r : ℝ, 0 < r ∧
-    (exp (I*pcfWRho a) * (exp (-π*I/4) * pcfUDeriv (I*a) 0))^2 =
+    (exp (I*pcfWRho a) * (exp (-π*I/4) * parabolicCylinderUDeriv (I*a) 0))^2 =
       r * conj (((Real.exp (π*a/2) : ℝ) + I * (Real.exp (-π*a/2) : ℝ)) / 2) := by
   have h := pcfW_aux_V'_sq a
   have hT := pcfW_aux_T a
@@ -553,7 +561,7 @@ lemma pcfW_aux_V'_sq_pos (a : ℝ) : ∃ r : ℝ, 0 < r ∧
   generalize sin (π*(1/4+I*a/2)) = S at h ⊢
   generalize ‖Gamma (1/2+I*a)‖ = ng at h hng ⊢
   generalize ‖Gamma (1/4+I*a/2)‖ = n1 at h hn1 ⊢
-  generalize exp (I*pcfWRho a) * (exp (-π*I/4) * pcfUDeriv (I*a) 0) = V at h ⊢
+  generalize exp (I*pcfWRho a) * (exp (-π*I/4) * parabolicCylinderUDeriv (I*a) 0) = V at h ⊢
   have hS : S ≠ 0 := by
     have hne : -I * exp (π*I/4) * π * Real.sqrt π ≠ 0 := by
       simp [Real.pi_pos.ne', Real.sqrt_ne_zero', Real.pi_pos, Complex.exp_ne_zero]
@@ -595,36 +603,39 @@ theorem continuous_pcfGammaPhase : Continuous pcfGammaPhase :=
 
 /-- Signs of `V = e^{iρ} U(ia,0)` and `V' = e^{iρ} e^{-iπ/4} U'(ia,0)`. -/
 lemma pcfW_aux_signs (a : ℝ) :
-    (0 < (exp (I*pcfWRho a) * pcfU (I*a) 0).re ∧ 0 < (exp (I*pcfWRho a) * pcfU (I*a) 0).im) ∧
-    ((exp (I*pcfWRho a) * (exp (-π*I/4) * pcfUDeriv (I*a) 0)).re < 0 ∧
-      0 < (exp (I*pcfWRho a) * (exp (-π*I/4) * pcfUDeriv (I*a) 0)).im) := by
+    (0 < (exp (I*pcfWRho a) * parabolicCylinderU (I*a) 0).re ∧ 0 <
+        (exp (I*pcfWRho a) * parabolicCylinderU (I*a) 0).im) ∧
+    ((exp (I*pcfWRho a) * (exp (-π*I/4) * parabolicCylinderUDeriv (I*a) 0)).re < 0 ∧
+      0 < (exp (I*pcfWRho a) * (exp (-π*I/4) * parabolicCylinderUDeriv (I*a) 0)).im) := by
   have hρc : Continuous fun a : ℝ => exp (I*pcfWRho a) := by
     unfold pcfWRho; have := continuous_pcfGammaPhase; fun_prop
-  have hVc : Continuous fun a : ℝ => exp (I*pcfWRho a) * pcfU (I*a) 0 := by
+  have hVc : Continuous fun a : ℝ => exp (I*pcfWRho a) * parabolicCylinderU (I*a) 0 := by
     have hG := pcfW_aux_continuous_Gamma (s := 3/4) (by norm_num)
-    have : (fun a : ℝ => exp (I*pcfWRho a) * pcfU (I*a) 0) = fun a : ℝ =>
+    have : (fun a : ℝ => exp (I*pcfWRho a) * parabolicCylinderU (I*a) 0) = fun a : ℝ =>
         exp (I*pcfWRho a) * ((Real.sqrt π : ℂ) /
             ((2:ℂ)^(I*a/2+1/4) * Gamma ((3/4:ℝ) + I*a/2))) := by
-      funext a; rw [pcfU_zero]; push_cast; ring_nf
+      funext a; rw [parabolicCylinderU_zero]; push_cast; ring_nf
     rw [this]
     refine hρc.mul (continuous_const.div (Continuous.mul ?_ hG) fun a => mul_ne_zero (by simp)
       (Complex.Gamma_ne_zero_of_re_pos (by norm_num)))
     exact continuous_const.cpow (by fun_prop) (fun _ => Or.inl (by norm_num))
-  have hV'c : Continuous fun a : ℝ => exp (I*pcfWRho a) * (exp (-π*I/4) * pcfUDeriv (I*a) 0) := by
+  have hV'c : Continuous fun a : ℝ => exp (I*pcfWRho a) *
+      (exp (-π*I/4) * parabolicCylinderUDeriv (I*a) 0) := by
     have hG := pcfW_aux_continuous_Gamma (s := 1/4) (by norm_num)
-    have : (fun a : ℝ => exp (I*pcfWRho a) * (exp (-π*I/4) * pcfUDeriv (I*a) 0)) = fun a : ℝ =>
+    have : (fun a : ℝ => exp (I*pcfWRho a) *
+        (exp (-π*I/4) * parabolicCylinderUDeriv (I*a) 0)) = fun a : ℝ =>
         exp (I*pcfWRho a) * (exp (-π*I/4) *
           (-(Real.sqrt π : ℂ) / ((2:ℂ)^(I*a/2-1/4) * Gamma ((1/4:ℝ) + I*a/2)))) := by
-      funext a; rw [pcfUDeriv_zero]; push_cast; ring_nf
+      funext a; rw [parabolicCylinderUDeriv_zero]; push_cast; ring_nf
     rw [this]
     refine hρc.mul (continuous_const.mul (continuous_const.div (Continuous.mul ?_ hG) fun a =>
       mul_ne_zero (by simp) (Complex.Gamma_ne_zero_of_re_pos (by norm_num))))
     exact continuous_const.cpow (by fun_prop) (fun _ => Or.inl (by norm_num))
   -- products of real and imaginary parts
-  have hprod : ∀ a : ℝ, 0 < (exp (I*pcfWRho a) * pcfU (I*a) 0).re *
-      (exp (I*pcfWRho a) * pcfU (I*a) 0).im := fun a => by
+  have hprod : ∀ a : ℝ, 0 < (exp (I*pcfWRho a) * parabolicCylinderU (I*a) 0).re *
+      (exp (I*pcfWRho a) * parabolicCylinderU (I*a) 0).im := fun a => by
     obtain ⟨r, hr, h⟩ := pcfW_aux_V_sq_pos a
-    generalize exp (I*pcfWRho a) * pcfU (I*a) 0 = V at h ⊢
+    generalize exp (I*pcfWRho a) * parabolicCylinderU (I*a) 0 = V at h ⊢
     have hB := Real.exp_pos (-π*a/2)
     generalize Real.exp (π*a/2) = A at h
     generalize Real.exp (-π*a/2) = B at h hB
@@ -633,10 +644,10 @@ lemma pcfW_aux_signs (a : ℝ) :
     have hR : (↑r * ((↑A + I * ↑B) / 2 : ℂ)).im = r * B / 2 := by simp; ring
     rw [hR] at this
     nlinarith
-  have hprod' : ∀ a : ℝ, (exp (I*pcfWRho a) * (exp (-π*I/4) * pcfUDeriv (I*a) 0)).re *
-      (exp (I*pcfWRho a) * (exp (-π*I/4) * pcfUDeriv (I*a) 0)).im < 0 := fun a => by
+  have hprod' : ∀ a : ℝ, (exp (I*pcfWRho a) * (exp (-π*I/4) * parabolicCylinderUDeriv (I*a) 0)).re *
+      (exp (I*pcfWRho a) * (exp (-π*I/4) * parabolicCylinderUDeriv (I*a) 0)).im < 0 := fun a => by
     obtain ⟨r, hr, h⟩ := pcfW_aux_V'_sq_pos a
-    generalize exp (I*pcfWRho a) * (exp (-π*I/4) * pcfUDeriv (I*a) 0) = V at h ⊢
+    generalize exp (I*pcfWRho a) * (exp (-π*I/4) * parabolicCylinderUDeriv (I*a) 0) = V at h ⊢
     have hB := Real.exp_pos (-π*a/2)
     generalize Real.exp (π*a/2) = A at h
     generalize Real.exp (-π*a/2) = B at h hB
@@ -659,15 +670,16 @@ lemma pcfW_aux_signs (a : ℝ) :
     rw [Complex.ofReal_cpow (by norm_num)]; push_cast; rfl
   have g3p := Real.Gamma_pos_of_pos (show (0:ℝ) < 3/4 by norm_num)
   have g1p := Real.Gamma_pos_of_pos (show (0:ℝ) < 1/4 by norm_num)
-  have hV0 : 0 < (exp (I*pcfWRho 0) * pcfU (I*(0:ℝ)) 0).re := by
-    rw [hρ0, show I*((0:ℝ):ℂ) = 0 by simp, pcfU_zero,
+  have hV0 : 0 < (exp (I*pcfWRho 0) * parabolicCylinderU (I*(0:ℝ)) 0).re := by
+    rw [hρ0, show I*((0:ℝ):ℂ) = 0 by simp, parabolicCylinderU_zero,
       show (0:ℂ)/2+1/4 = 1/4 by ring, show (3/4:ℂ)+0/2 = 3/4 by ring, hG3, hp1,
       show (Real.sqrt π : ℂ) / ((((2:ℝ)^(1/4:ℝ) : ℝ) : ℂ) * (Real.Gamma (3/4) : ℂ)) =
         ((Real.sqrt π / ((2:ℝ)^(1/4:ℝ) * Real.Gamma (3/4)) : ℝ) : ℂ) by push_cast; ring,
       Complex.re_mul_ofReal, mul_comm I, Complex.exp_ofReal_mul_I_re]
     positivity
-  have hV'0 : (exp (I*pcfWRho 0) * (exp (-π*I/4) * pcfUDeriv (I*(0:ℝ)) 0)).re < 0 := by
-    rw [hρ0, show I*((0:ℝ):ℂ) = 0 by simp, pcfUDeriv_zero,
+  have hV'0 : (exp (I*pcfWRho 0) *
+      (exp (-π*I/4) * parabolicCylinderUDeriv (I*(0:ℝ)) 0)).re < 0 := by
+    rw [hρ0, show I*((0:ℝ):ℂ) = 0 by simp, parabolicCylinderUDeriv_zero,
       show (0:ℂ)/2-1/4 = -1/4 by ring, show (1/4:ℂ)+0/2 = 1/4 by ring, hG1, hp2,
       show -(Real.sqrt π : ℂ) / ((((2:ℝ)^(-1/4:ℝ) : ℝ) : ℂ) * (Real.Gamma (1/4) : ℂ)) =
         ((-(Real.sqrt π / ((2:ℝ)^(-1/4:ℝ) * Real.Gamma (1/4))) : ℝ) : ℂ) by push_cast; ring,
@@ -676,15 +688,17 @@ lemma pcfW_aux_signs (a : ℝ) :
       Complex.re_mul_ofReal, Complex.exp_ofReal_mul_I_re, Real.cos_neg]
     have : 0 < Real.sqrt π / ((2:ℝ)^(-1/4:ℝ) * Real.Gamma (1/4)) := by positivity
     nlinarith
-  have hre : ∀ a : ℝ, 0 < (exp (I*pcfWRho a) * pcfU (I*a) 0).re :=
-    pcfW_aux_pos_of_continuous (f := fun a : ℝ => (exp (I*pcfWRho a) * pcfU (I*a) 0).re)
+  have hre : ∀ a : ℝ, 0 < (exp (I*pcfWRho a) * parabolicCylinderU (I*a) 0).re :=
+    pcfW_aux_pos_of_continuous
+        (f := fun a : ℝ => (exp (I*pcfWRho a) * parabolicCylinderU (I*a) 0).re)
       (Complex.continuous_re.comp hVc) (fun a h => by
-        have := hprod a; rw [show (exp (I*pcfWRho a) * pcfU (I*a) 0).re = 0 from h,
+        have := hprod a; rw [show (exp (I*pcfWRho a) * parabolicCylinderU (I*a) 0).re = 0 from h,
             zero_mul] at this
         exact lt_irrefl _ this) hV0
-  have hre' : ∀ a : ℝ, 0 < -(exp (I*pcfWRho a) * (exp (-π*I/4) * pcfUDeriv (I*a) 0)).re :=
+  have hre' : ∀ a : ℝ, 0 <
+      -(exp (I*pcfWRho a) * (exp (-π*I/4) * parabolicCylinderUDeriv (I*a) 0)).re :=
     pcfW_aux_pos_of_continuous
-      (f := fun a : ℝ => -(exp (I*pcfWRho a) * (exp (-π*I/4) * pcfUDeriv (I*a) 0)).re)
+      (f := fun a : ℝ => -(exp (I*pcfWRho a) * (exp (-π*I/4) * parabolicCylinderUDeriv (I*a) 0)).re)
       (Complex.continuous_re.comp hV'c).neg (fun a h => by
         have := hprod' a; rw [neg_eq_zero.mp h, zero_mul] at this; exact lt_irrefl _ this)
       (neg_pos.mpr hV'0)
@@ -696,8 +710,9 @@ lemma pcfW_aux_signs (a : ℝ) :
 
 /-- Norm facts for the connection formula. -/
 lemma pcfW_aux_norms (a : ℝ) :
-    ‖exp (I*pcfWRho a) * pcfU (I*a) 0‖ = Real.sqrt π / ((2:ℝ)^(1/4:ℝ) * ‖Gamma (3/4+I*a/2)‖) ∧
-    ‖exp (I*pcfWRho a) * (exp (-π*I/4) * pcfUDeriv (I*a) 0)‖ =
+    ‖exp (I*pcfWRho a) * parabolicCylinderU (I*a) 0‖ = Real.sqrt π /
+        ((2:ℝ)^(1/4:ℝ) * ‖Gamma (3/4+I*a/2)‖) ∧
+    ‖exp (I*pcfWRho a) * (exp (-π*I/4) * parabolicCylinderUDeriv (I*a) 0)‖ =
       Real.sqrt π * (2:ℝ)^(1/4:ℝ) / ‖Gamma (1/4+I*a/2)‖ ∧
     ‖Gamma (1/4+I*a/2)‖ * ‖Gamma (3/4+I*a/2)‖ *
       ‖((Real.exp (π*a/2) : ℝ) + I * (Real.exp (-π*a/2) : ℝ)) / 2‖ = π := by
@@ -714,9 +729,10 @@ lemma pcfW_aux_norms (a : ℝ) :
   have hsq : ‖(Real.sqrt π : ℂ)‖ = Real.sqrt π := by
     rw [Complex.norm_real, Real.norm_of_nonneg (Real.sqrt_nonneg _)]
   refine ⟨?_, ?_, ?_⟩
-  · rw [norm_mul, he, one_mul, pcfU_zero, norm_div, norm_mul, h2, hsq]
+  · rw [norm_mul, he, one_mul, parabolicCylinderU_zero, norm_div, norm_mul, h2, hsq]
     congr 3; simp
-  · rw [norm_mul, he, one_mul, norm_mul, he4, one_mul, pcfUDeriv_zero, norm_div, norm_mul, h2,
+  · rw [norm_mul, he, one_mul, norm_mul, he4, one_mul, parabolicCylinderUDeriv_zero,
+        norm_div, norm_mul, h2,
       norm_neg, hsq]
     have : (I * (a:ℂ) / 2 - 1/4).re = -(1/4) := by simp
     rw [this, Real.rpow_neg (by norm_num), show I*(a:ℂ)/2 = I*a/2 by ring]
@@ -781,8 +797,8 @@ lemma pcfW_aux_sq_re_im {V T : ℂ} {r : ℝ} (hr : 0 ≤ r) (h : V^2 = r * T �
 
 /-- The four scalar identities behind the connection formulas of DLMF 12.14(iv). -/
 lemma pcfW_aux_scalar (a : ℝ) :
-    let V := exp (I*pcfWRho a) * pcfU (I*a) 0
-    let V' := exp (I*pcfWRho a) * (exp (-π*I/4) * pcfUDeriv (I*a) 0)
+    let V := exp (I*pcfWRho a) * parabolicCylinderU (I*a) 0
+    let V' := exp (I*pcfWRho a) * (exp (-π*I/4) * parabolicCylinderUDeriv (I*a) 0)
     pcfWZero a = Real.sqrt (pcfWK a/2) * Real.exp (π*a/4) * (2 * V.re) ∧
     -pcfWDerivZero a = Real.sqrt (pcfWK a/2) * Real.exp (π*a/4) * (2 * -V'.re) ∧
     pcfWZero a = 2 * V.im * Real.exp (π*a/4) / Real.sqrt (2*pcfWK a) ∧

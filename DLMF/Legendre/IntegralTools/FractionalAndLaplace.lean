@@ -142,18 +142,21 @@ theorem LaplaceIntegrals.analyticOnNhd_integral {F : ℂ → ℂ}
 `Γ(μ) 𝐅(a,b;1+μ;z) = ∫_0^1 (1-s)^{μ-1} 𝐅(a,b;1;zs) ds`. -/
 theorem LaplaceIntegrals.fractional_cutPlane (a b : ℂ) {μ : ℂ} (hμ : 0 < μ.re) {z : ℂ}
     (hz : z ∈ cutPlane) :
-    Gamma μ * regularizedGaussHG a b (1+μ) z =
-      ∫ s : ℝ in (0:ℝ)..1, (1-(s:ℂ))^(μ-1) * regularizedGaussHG a b 1 (z * s) := by
+    Gamma μ * regularizedGaussHypergeometric a b (1+μ) z =
+      ∫ s : ℝ in (0:ℝ)..1, (1-(s:ℂ))^(μ-1) * regularizedGaussHypergeometric a b 1 (z * s) := by
   have hw : IntervalIntegrable (fun s : ℝ => (1-(s:ℂ))^(μ-1)) volume 0 1 := by
     simpa using betaIntegral_convergent (u := 1) (by norm_num) hμ
-  refine eqOn_cutPlane_of_eqOn_disk (f := fun z => Gamma μ * regularizedGaussHG a b (1+μ) z)
-    (fun z hz => analyticAt_const.mul (analyticOnNhd_regularizedGaussHG a b _ z hz))
-    (LaplaceIntegrals.analyticOnNhd_integral (analyticOnNhd_regularizedGaussHG a b 1) hw)
+  refine eqOn_cutPlane_of_eqOn_disk
+      (f := fun z => Gamma μ * regularizedGaussHypergeometric a b (1+μ) z)
+    (fun z hz => analyticAt_const.mul (analyticOnNhd_regularizedGaussHypergeometric a b _ z hz))
+    (LaplaceIntegrals.analyticOnNhd_integral
+        (analyticOnNhd_regularizedGaussHypergeometric a b 1) hw)
         (fun z hz => ?_) hz
   have hfr := fractional_integral (a := a) (b := b) (c := 1+μ) (d := 1) (by norm_num)
     (by simpa using hμ) hz
   rw [show 1+μ-1 = μ by ring] at hfr
-  rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hz, hfr, ← mul_assoc,
+  rw [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hz,
+      hfr, ← mul_assoc,
     mul_one_div_cancel (Gamma_ne_zero_of_re_pos hμ), one_mul]
   refine intervalIntegral.integral_congr fun s hs => ?_
   rw [uIcc_of_le zero_le_one] at hs
@@ -161,7 +164,8 @@ theorem LaplaceIntegrals.fractional_cutPlane (a b : ℂ) {μ : ℂ} (hμ : 0 < �
     rw [norm_mul, norm_real, Real.norm_eq_abs, abs_of_nonneg hs.1]
     calc ‖z‖*s ≤ ‖z‖*1 := by gcongr; exact hs.2
       _ < 1 := by rw [mul_one]; exact hz
-  rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hzs, sub_self, cpow_zero, mul_one, mul_comm]
+  rw [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hzs, sub_self,
+      cpow_zero, mul_one, mul_comm]
 
 /-- Order-derivative relation `(1-z²) 𝑸' + μ z 𝑸^μ_ν = (ν+μ+1) (z²-1)^{1/2} 𝑸^{μ+1}_ν`. -/
 theorem LaplaceIntegrals.olverQ_order_deriv (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
@@ -236,7 +240,7 @@ theorem LaplaceIntegrals.tendsto_primitive (ν : ℂ) (k : ℕ) (hk : (k:ℝ) < 
   set A := (ν+-((k+1:ℕ):ℂ)+2)/2
   set B := (ν+-((k+1:ℕ):ℂ)+1)/2
   have e : ∀ R : ℝ, LaplaceIntegrals.primitive ν (k+1) R =
-      K * ((R:ℂ)^w)⁻¹ * regularizedGaussHG A B (ν+3/2) (1/(R:ℂ)^2) := by
+      K * ((R:ℂ)^w)⁻¹ * regularizedGaussHypergeometric A B (ν+3/2) (1/(R:ℂ)^2) := by
     intro R
     have hb : legendreBranchPower ((k+1:ℕ):ℂ) R * legendreBranchPower (-((k+1:ℕ):ℂ)) R = 1 := by
       rw [legendreBranchPower_mul, add_neg_cancel]; simp [legendreBranchPower]
@@ -244,7 +248,8 @@ theorem LaplaceIntegrals.tendsto_primitive (ν : ℂ) (k : ℕ) (hk : (k:ℝ) < 
     rw [div_eq_mul_inv (Real.sqrt π * legendreBranchPower _ _), mul_inv]
     linear_combination (exp (-((k+1:ℕ):ℂ)*π*I)*Gamma (ν+-((k+1:ℕ):ℂ)+1)*Real.sqrt π *
       (2^(ν+1))⁻¹ * ((R:ℂ)^(ν+-((k+1:ℕ):ℂ)+1))⁻¹ *
-      regularizedGaussHG ((ν+-((k+1:ℕ):ℂ)+2)/2) ((ν+-((k+1:ℕ):ℂ)+1)/2) (ν+3/2) (1/(R:ℂ)^2)) * hb
+      regularizedGaussHypergeometric ((ν+-((k+1:ℕ):ℂ)+2)/2) ((ν+-((k+1:ℕ):ℂ)+1)/2) (ν+3/2)
+          (1/(R:ℂ)^2)) * hb
   simp_rw [e]
   have h1 : Tendsto (fun R : ℝ => ((R:ℂ)^w)⁻¹) atTop (𝓝 0) := by
     rw [tendsto_zero_iff_norm_tendsto_zero]
@@ -252,9 +257,10 @@ theorem LaplaceIntegrals.tendsto_primitive (ν : ℂ) (k : ℕ) (hk : (k:ℝ) < 
     refine h.congr' ?_
     filter_upwards [eventually_gt_atTop 0] with R hR
     rw [norm_inv, norm_cpow_eq_rpow_re_of_pos hR]; rfl
-  have h2 : Tendsto (fun R : ℝ => regularizedGaussHG A B (ν+3/2) (1/(R:ℂ)^2)) atTop
-      (𝓝 (regularizedGaussHG A B (ν+3/2) 0)) := by
-    have hc := (analyticAt_regularizedGaussHG A B (ν+3/2) zero_mem_cutPlane).continuousAt
+  have h2 : Tendsto (fun R : ℝ => regularizedGaussHypergeometric A B (ν+3/2) (1/(R:ℂ)^2)) atTop
+      (𝓝 (regularizedGaussHypergeometric A B (ν+3/2) 0)) := by
+    have hc := (analyticAt_regularizedGaussHypergeometric A B (ν+3/2)
+        zero_mem_cutPlane).continuousAt
     have ht : Tendsto (fun R : ℝ => 1/(R:ℂ)^2) atTop (𝓝 0) := by
       have := ((continuous_ofReal.tendsto 0).comp
         (tendsto_inv_atTop_zero.comp (tendsto_pow_atTop (two_ne_zero (α := ℕ)))))
@@ -677,7 +683,7 @@ theorem LaplaceIntegrals.heine (x : ℝ) (hx : 1 < x) (n : ℕ) :
         have := legendreP_nat 1 (one_add_mem_slitPlane_of_sub_one hx1)
         simp only [Nat.cast_zero, zero_add, Nat.cast_one] at this ⊢
         rw [this]
-        simp [legendreQPoly, DLMF.OrthogonalPolynomials.legendrePolyP_one]
+        simp [legendreQPoly, DLMF.OrthogonalPolynomials.legendrePolynomialP_one]
       rw [hQ1]
       convert h using 2 with R
       simp only [Function.comp_apply]
@@ -958,7 +964,7 @@ theorem LaplaceIntegrals.legendreQ_finiteMoment {x : ℝ} (hx : 1 < x) (n : ℕ)
       have := legendreP_nat 1 (one_add_mem_slitPlane_of_sub_one hx1)
       simp only [Nat.cast_one] at this ⊢
       rw [this, hQ0]
-      simp [legendreQPoly, DLMF.OrthogonalPolynomials.legendrePolyP_one]
+      simp [legendreQPoly, DLMF.OrthogonalPolynomials.legendrePolynomialP_one]
     | succ k ih =>
       refine ⟨ih.2, ?_⟩
       have h := LaplaceIntegrals.legendreQ_nat_recurrence k hx1
@@ -1125,7 +1131,7 @@ theorem LaplaceIntegrals.legendreQ_intervalMoment {x : ℝ} (hx : 1 < x) (n : �
       have h3 : (x:ℂ)^2 - 1 ≠ 0 := by
         rw [show (x:ℂ)^2-1 = ((x^2-1:ℝ):ℂ) by push_cast; ring]
         exact ofReal_ne_zero.2 (by nlinarith)
-      simp [legendreQPoly, DLMF.OrthogonalPolynomials.legendrePolyP_one]
+      simp [legendreQPoly, DLMF.OrthogonalPolynomials.legendrePolynomialP_one]
       field_simp
     | succ k ih =>
       refine ⟨ih.2, ?_⟩

@@ -31,7 +31,7 @@ namespace DLMF.Confluent
 
 /-- Entire coefficient for the normalized finite Kummer–Bessel expansion. -/
 noncomputable def kummerBesselCoeff (ν : ℂ) (n k : ℕ) : ℂ :=
-  (-1) ^ k * (n.choose k : ℂ) * poch (2 * ν) k * (ν + k) *
+  (-1) ^ k * (n.choose k : ℂ) * pochhammer (2 * ν) k * (ν + k) *
     (1 / Gamma (2 * ν + 1 + n + k))
 /-- The ratio `b (k+1) = A k / A (k+1) = (k+1)(c+k)/(a+k)` of consecutive coefficients of
 Kummer's series. -/

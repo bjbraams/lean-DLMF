@@ -80,13 +80,13 @@ theorem legendreQ_zero {z : ℂ} (hz : z - 1 ∈ slitPlane) :
     have hw1 : w - 1 ≠ 0 := slitPlane_ne_zero hw'
     field_simp
   have hQ0 : legendreQ 0 w = (Real.sqrt π : ℂ) * 2⁻¹ *
-      (w⁻¹ * regularizedGaussHG (1 / 2) 1 (3 / 2) (w⁻¹ ^ 2)) := by
-    rw [legendreQ, regularizedGaussHG_symm _ _ _ (by
+      (w⁻¹ * regularizedGaussHypergeometric (1 / 2) 1 (3 / 2) (w⁻¹ ^ 2)) := by
+    rw [legendreQ, regularizedGaussHypergeometric_symm _ _ _ (by
       rw [show 1 / w ^ 2 = w⁻¹ ^ 2 by rw [inv_pow, one_div]]
       exact mem_cutPlane_of_norm_lt_one hu2)]
     norm_num [cpow_neg_one]
-  rw [hQ0, regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hu2,
-      regularizedGaussHGFun_eq_div_Gamma hc, hΓ,
+  rw [hQ0, regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hu2,
+      regularizedGaussHypergeometricFun_eq_div_Gamma hc, hΓ,
     ← hratio, ← hlog]
   field_simp
 

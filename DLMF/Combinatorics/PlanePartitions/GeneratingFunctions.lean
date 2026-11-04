@@ -109,7 +109,7 @@ private lemma truncMk_eulerOperator_prod {N : ℕ} {ι : Type*} (s : Finset ι) 
     simp only [map_mul, map_add]
     ring
 
-/-- A plane partition lies in the cube of side `|π|`. -/
+/-- A plane partition lies in the unitCube of side `|π|`. -/
 private lemma subset_planeBox_card_of_isPlanePartition {π : Finset (ℕ × ℕ × ℕ)}
     (hπ : IsPlanePartition π) :
     π ⊆ planeBox #π #π #π := by

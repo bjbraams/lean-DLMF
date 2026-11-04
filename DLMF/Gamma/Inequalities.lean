@@ -11,6 +11,7 @@ public import DLMF.Gamma.Products
 public import DLMF.Gamma.SpecialValues
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Series
 public import Mathlib.Analysis.Real.Pi.Bounds
+public import DLMFMathlib.Analysis.Asymptotics.WatsonRotated
 
 /-!
 # Inequalities for the Gamma function (DLMF §5.6)
@@ -37,6 +38,9 @@ function, from DLMF §5.6.
 
 The Gamma-ratio bound 5.6.8 is stated for real shifts `0 ≤ a` and `1 ≤ b - a` and holds on the
 open right half-plane; these restrictions are essential. The bound 5.6.9 assumes `0 ≤ z.re`.
+The bound 5.6.8 follows from the Laplace form
+`Γ(c) Γ(w)/Γ(w + c) = ∫₀^∞ e^{-ws} (1 - e^{-s})^{c-1} ds` of the Beta integral, rotating the
+ray of integration to `arg s = -arg z` and using `|1 - e^{-s}| ≤ |s|` on the right half-plane.
 -/
 
 @[expose] public section
@@ -766,13 +770,166 @@ theorem norm_Gamma_add_mul_I_ge {x y : ℝ} (hx : 1 / 2 ≤ x) :
   rw [div_mul_eq_mul_div, one_mul, div_le_iff₀ hc]
   linarith
 
+section RatioBound
+
+open MeasureTheory Set
+open scoped Interval
+
+/-- `|1 - e^{-t}| ≤ |t|` on the closed right half-plane. -/
+private theorem norm_one_sub_exp_neg_le (t : ℂ) (ht : 0 ≤ t.re) : ‖1 - cexp (-t)‖ ≤ ‖t‖ := by
+  have hconv : Convex ℝ {s : ℂ | 0 ≤ s.re} := convex_halfSpace_ge (f := re) (by
+    exact reLm.isLinear) 0
+  have h := hconv.norm_image_sub_le_of_norm_deriv_le (f := fun s => cexp (-s)) (C := 1)
+    (fun s _ => by fun_prop) (fun s hs => by
+      rw [deriv_cexp (by fun_prop), deriv_neg', norm_mul, norm_neg, norm_one, mul_one,
+        norm_exp, neg_re]
+      exact Real.exp_le_one_iff.mpr (by simpa using hs))
+    (show (0 : ℂ) ∈ {s : ℂ | 0 ≤ s.re} by simp) ht
+  simpa [norm_sub_rev] using h
+
+/-- The Beta integral after the substitution `x = e^{-s}`. -/
+private theorem betaIntegral_eq_integral_exp (w v : ℂ) :
+    betaIntegral w v = ∫ s in Ioi (0 : ℝ), cexp (-(w * s)) * (1 - cexp (-(s : ℂ))) ^ (v - 1) := by
+  have himg : (fun s : ℝ => Real.exp (-s)) '' Ioi 0 = Ioo 0 1 := by
+    ext y; constructor
+    · rintro ⟨s, hs, rfl⟩
+      exact ⟨Real.exp_pos _, Real.exp_lt_one_iff.mpr (by simpa using hs)⟩
+    · rintro ⟨h0, h1⟩
+      refine ⟨-Real.log y, ?_, by simp [Real.exp_log h0]⟩
+      simpa using Real.log_neg h0 h1
+  have hsub := integral_image_eq_integral_abs_deriv_smul (s := Ioi (0 : ℝ))
+    (f := fun s : ℝ => Real.exp (-s)) (f' := fun s => -Real.exp (-s)) measurableSet_Ioi
+    (fun s _ => by simpa using ((hasDerivAt_neg s).exp).hasDerivWithinAt)
+    (fun x _ y _ h => by simpa using h)
+    (fun x : ℝ => (x : ℂ) ^ (w - 1) * (1 - (x : ℂ)) ^ (v - 1))
+  rw [himg] at hsub
+  rw [betaIntegral, intervalIntegral.integral_of_le zero_le_one, integral_Ioc_eq_integral_Ioo, hsub]
+  refine setIntegral_congr_fun measurableSet_Ioi fun s _ => ?_
+  simp only [abs_neg, abs_of_pos (Real.exp_pos _), real_smul]
+  have hl : ((Real.exp (-s) : ℝ) : ℂ) ^ (w - 1) = cexp (-(s : ℂ) * (w - 1)) := by
+    rw [cpow_def_of_ne_zero (by exact_mod_cast (Real.exp_pos _).ne'), ← ofReal_log
+      (Real.exp_pos _).le, Real.log_exp]
+    push_cast; ring_nf
+  rw [hl, ofReal_exp]
+  push_cast
+  rw [← mul_assoc, ← Complex.exp_add]
+  congr 2
+  ring
+
+/-- Bounds for the kernel `e^{-at} (1 - e^{-t})^p` of the Laplace form of
+`Γ(z + a) / Γ(z + a + p + 1)` on the closed right half-plane. -/
+private theorem norm_ratioKernel_le {a p : ℝ} (ha : 0 ≤ a) (hp : 0 ≤ p) {t : ℂ} (ht : 0 ≤ t.re) :
+    ‖cexp (-(a * t)) * (1 - cexp (-t)) ^ (p : ℂ)‖ ≤ ‖t‖ ^ p ∧
+    ‖cexp (-(a * t)) * (1 - cexp (-t)) ^ (p : ℂ)‖ ≤ (2 : ℝ) ^ p := by
+  have he : ‖cexp (-(a * t))‖ ≤ 1 := by
+    rw [norm_exp, Real.exp_le_one_iff]
+    simp only [neg_re, re_ofReal_mul]
+    nlinarith
+  have h2 : ‖1 - cexp (-t)‖ ≤ 2 := by
+    refine (norm_sub_le _ _).trans ?_
+    rw [norm_one, norm_exp, neg_re]
+    linarith [Real.exp_le_one_iff.mpr (neg_nonpos.mpr ht)]
+  rw [norm_mul, norm_cpow_real]
+  constructor
+  · calc _ ≤ 1 * ‖t‖ ^ p := by gcongr; exact norm_one_sub_exp_neg_le t ht
+      _ = _ := one_mul _
+  · calc _ ≤ 1 * (2 : ℝ) ^ p := by gcongr
+      _ = _ := one_mul _
+
 /-- A Gamma-ratio bound on the right half-plane for nonnegative real shifts
 separated by at least one. These restrictions are essential in DLMF 5.6.8. -/
 @[dlmf 5.6.E8]
 theorem Gamma_ratio_norm_le {a b : ℝ} {z : ℂ} (hz : 0 < z.re)
     (ha : 0 ≤ a) (hba : 1 ≤ b - a) :
     ‖Complex.Gamma (z + a) / Complex.Gamma (z + b)‖ ≤ ‖z‖ ^ (-(b - a)) := by
-  sorry
+  set c := b - a with hc
+  have hc0 : 0 < c := by linarith
+  have hw : 0 < (z + a).re := by simp; linarith
+  have hcre : 0 < (c : ℂ).re := by simpa using hc0
+  have hzb : z + (b : ℂ) = (z + a) + c := by rw [hc]; push_cast; ring
+  have hB := Gamma_mul_Gamma_eq_betaIntegral hw hcre
+  have hGc : Complex.Gamma c = Real.Gamma c := by rw [Gamma_ofReal]
+  have hGcpos := Real.Gamma_pos_of_pos hc0
+  have hGwc : Complex.Gamma (z + a + c) ≠ 0 := Gamma_ne_zero_of_re_pos (by simp; linarith)
+  have hratio : Complex.Gamma (z + a) / Complex.Gamma (z + b) =
+      betaIntegral (z + a) c / (Real.Gamma c : ℂ) := by
+    rw [hzb, ← hGc, div_eq_div_iff hGwc (by rw [hGc]; exact_mod_cast hGcpos.ne'), hB]
+    ring
+  -- the Laplace form
+  set F : ℂ → ℂ := fun t => cexp (-(a * t)) * (1 - cexp (-t)) ^ (((c - 1 : ℝ)) : ℂ) with hF
+  have hlap : betaIntegral (z + a) c = ∫ s in Ioi (0 : ℝ), cexp (-(z * s)) * F s := by
+    rw [betaIntegral_eq_integral_exp]
+    refine setIntegral_congr_fun measurableSet_Ioi fun s _ => ?_
+    simp only [hF]
+    push_cast
+    rw [← mul_assoc, ← Complex.exp_add]
+    congr 2; ring
+  -- rotation
+  have hz0 : z ≠ 0 := fun h => by simp [h] at hz
+  have harg : |arg z| < π / 2 := abs_arg_lt_pi_div_two_iff.mpr (Or.inl hz)
+  set θ := -arg z with hθ
+  have hθ' := abs_lt.mp harg
+  have hy : ∀ y ∈ [[0, θ]], |y| < π / 2 ∧ |arg z + y| < π / 2 := fun y hy => by
+    rcases Set.mem_uIcc.mp hy with ⟨h1, h2⟩ | ⟨h1, h2⟩ <;>
+      exact ⟨abs_lt.mpr ⟨by linarith, by linarith⟩, abs_lt.mpr ⟨by linarith, by linarith⟩⟩
+  have hre : ∀ r : ℝ, 0 < r → ∀ y ∈ [[0, θ]], 0 < ((r : ℂ) * cexp (y * I)).re := by
+    intro r hr y hyθ
+    rw [re_ofReal_mul, exp_ofReal_mul_I_re]
+    exact mul_pos hr (Real.cos_pos_of_mem_Ioo (abs_lt.mp (hy y hyθ).1))
+  have hnorm : ∀ r : ℝ, 0 < r → ∀ y : ℝ, ‖(r : ℂ) * cexp (y * I)‖ = r := by
+    intro r hr y
+    rw [norm_mul, norm_exp_ofReal_mul_I, mul_one, norm_real, Real.norm_of_nonneg hr.le]
+  have hp : (0 : ℝ) ≤ c - 1 := by linarith
+  have hrot := integral_cexp_neg_mul_mul_eq_rotate (F := F) (θ := θ) (σ := c)
+    (C := (2 : ℝ) ^ (c - 1)) (k := 0) (z := z) hc0
+    (fun r hr y hyθ => by
+      have h := hre r hr y hyθ
+      have hs : (1 - cexp (-((r : ℂ) * cexp (y * I)))) ∈ slitPlane := by
+        refine mem_slitPlane_iff.mpr (Or.inl ?_)
+        have h1 := re_le_norm (cexp (-((r : ℂ) * cexp (y * I))))
+        rw [norm_exp, neg_re] at h1
+        rw [sub_re, one_re]
+        linarith [Real.exp_lt_one_iff.mpr (neg_lt_zero.mpr h)]
+      exact (by fun_prop : Differentiable ℂ fun t : ℂ => cexp (-(a * t))).differentiableAt.mul
+        ((by fun_prop : Differentiable ℂ fun t : ℂ => 1 - cexp (-t)).differentiableAt.cpow
+          (differentiableAt_const _) hs))
+    (fun r hr _ y hyθ => by
+      refine ((norm_ratioKernel_le ha hp (hre r hr y hyθ).le).1).trans ?_
+      rw [hnorm r hr]
+      exact le_mul_of_one_le_left (by positivity) (Real.one_le_rpow (by norm_num) hp))
+    (fun r hr y hyθ => by
+      refine ((norm_ratioKernel_le ha hp (hre r (by linarith) y hyθ).le).2).trans ?_
+      simp)
+    (fun y hyθ => by
+      rw [re_mul_exp_ofReal_mul_I]
+      exact mul_pos (norm_pos_iff.mpr hz0) (Real.cos_pos_of_mem_Ioo (abs_lt.mp (hy y hyθ).2)))
+  have hzθ : z * cexp (θ * I) = (‖z‖ : ℂ) := by
+    conv_lhs => rw [← norm_mul_exp_arg_mul_I z]
+    rw [hθ, mul_assoc, ← Complex.exp_add]
+    push_cast
+    rw [show (arg z : ℂ) * I + -(arg z : ℂ) * I = 0 by ring, Complex.exp_zero, mul_one]
+  have hzn : 0 < ‖z‖ := norm_pos_iff.mpr hz0
+  have hval := Real.integral_rpow_mul_exp_neg_mul_Ioi hc0 hzn
+  have hint : IntegrableOn (fun r : ℝ => r ^ (c - 1) * Real.exp (-(‖z‖ * r))) (Ioi 0) :=
+    .of_integral_ne_zero (by rw [hval]; positivity)
+  have hbound : ‖∫ r in Ioi (0 : ℝ), cexp (-(z * cexp (θ * I) * r)) * F (r * cexp (θ * I))‖ ≤
+      (1 / ‖z‖) ^ c * Real.Gamma c := by
+    rw [← hval]
+    refine norm_integral_le_of_norm_le hint ?_
+    refine (ae_restrict_iff' measurableSet_Ioi).mpr (Filter.Eventually.of_forall fun r hr => ?_)
+    have hr : (0 : ℝ) < r := hr
+    rw [norm_mul, mul_comm (r ^ (c - 1))]
+    gcongr
+    · rw [hzθ, norm_exp]
+      simp
+    · have h := (norm_ratioKernel_le ha hp (hre r hr θ right_mem_uIcc).le).1
+      rwa [hnorm r hr] at h
+  rw [hratio, hlap, hrot, norm_div, norm_mul, norm_exp_ofReal_mul_I, one_mul, norm_real,
+    Real.norm_of_nonneg hGcpos.le, div_le_iff₀ hGcpos]
+  refine hbound.trans_eq ?_
+  rw [one_div, Real.inv_rpow hzn.le, Real.rpow_neg hzn.le]
+
+end RatioBound
 
 /-- A complex Gamma bound in the closed right half-plane, away from zero. -/
 @[dlmf 5.6.E9]

@@ -18,14 +18,15 @@ parameter `m = k²`.
 
 ## Main results
 
-* `Real.incEllIntPim_char_zero`: `Π(φ, 0, m) = F(φ, m)`.
-* `Real.hasDerivAt_incEllIntPim`: `∂Π/∂φ = (1 - n sin²φ)⁻¹ (1 - m sin²φ)^{-1/2}`.
-* `Real.incEllIntPim_neg`, `Real.incEllIntPim_add_pi`: oddness and quasi-periodicity
-  `Π(φ + π, n, m) = Π(φ, n, m) + 2Π(n, m)` (DLMF §19.2(ii)).
-* `Real.incEllIntPim_param_zero`: the closed form at `m = 0`.
-* `Real.compEllIntPim_param_zero`: `Π(n, 0) = π/(2√(1-n))`.
-* `Real.compEllIntPim_param_zero_le`, `Real.compEllIntPim_ge_min_mul_compEllIntKm`: lower bounds
-  for the complete integral.
+* `Real.incompleteEllipticPiOfParameter_char_zero`: `Π(φ, 0, m) = F(φ, m)`.
+* `Real.hasDerivAt_incompleteEllipticPiOfParameter`: `∂Π/∂φ = (1 - n sin²φ)⁻¹ (1 - m sin²φ)^{-1/2}`.
+* `Real.incompleteEllipticPiOfParameter_neg`, `Real.incompleteEllipticPiOfParameter_add_pi`: oddness
+  and quasi-periodicity `Π(φ + π, n, m) = Π(φ, n, m) + 2Π(n, m)` (DLMF §19.2(ii)).
+* `Real.incompleteEllipticPiOfParameter_param_zero`: the closed form at `m = 0`.
+* `Real.completeEllipticPiOfParameter_param_zero`: `Π(n, 0) = π/(2√(1-n))`.
+* `Real.completeEllipticPiOfParameter_param_zero_le`,
+  `Real.completeEllipticPiOfParameter_ge_min_mul_completeEllipticKOfParameter`: lower bounds for the
+  complete integral.
 
 ## Implementation notes
 
@@ -62,29 +63,33 @@ theorem piIntegrand_neg (n m θ : ℝ) : piIntegrand n m (-θ) = piIntegrand n m
   simp [piIntegrand, sin_neg]
 
 /-- `Π(φ, 0, m) = F(φ, m)`. -/
-theorem Real.incEllIntPim_char_zero (φ m : ℝ) : Real.incEllIntPim φ 0 m = Real.incEllIntFm φ m := by
-  simp [Real.incEllIntPim, piIntegrand, Real.incEllIntFm]
+theorem Real.incompleteEllipticPiOfParameter_char_zero (φ m : ℝ) :
+    Real.incompleteEllipticPiOfParameter φ 0 m = Real.incompleteEllipticFOfParameter φ m := by
+  simp [Real.incompleteEllipticPiOfParameter, piIntegrand, Real.incompleteEllipticFOfParameter]
 
 /-- `∂Π/∂φ = (1 - n sin²φ)⁻¹ (1 - m sin²φ)^{-1/2}`. -/
-theorem Real.hasDerivAt_incEllIntPim {n m : ℝ} (hn : n < 1) (hm : m < 1) (φ : ℝ) :
-    HasDerivAt (fun φ => Real.incEllIntPim φ n m) (piIntegrand n m φ) φ :=
+theorem Real.hasDerivAt_incompleteEllipticPiOfParameter {n m : ℝ} (hn : n < 1)
+    (hm : m < 1) (φ : ℝ) :
+    HasDerivAt (fun φ => Real.incompleteEllipticPiOfParameter φ n m) (piIntegrand n m φ) φ :=
   intervalIntegral.integral_hasDerivAt_right
     ((continuous_piIntegrand hn hm).intervalIntegrable _ _)
     ((continuous_piIntegrand hn hm).stronglyMeasurableAtFilter _ _)
     (continuous_piIntegrand hn hm).continuousAt
 
 /-- `Π(-φ, n, m) = -Π(φ, n, m)`. -/
-theorem Real.incEllIntPim_neg (φ n m : ℝ) :
-    Real.incEllIntPim (-φ) n m = -Real.incEllIntPim φ n m := by
+theorem Real.incompleteEllipticPiOfParameter_neg (φ n m : ℝ) :
+    Real.incompleteEllipticPiOfParameter (-φ) n m =
+        -Real.incompleteEllipticPiOfParameter φ n m := by
   have h : ∫ θ in (0 : ℝ)..(-φ), piIntegrand n m θ =
       ∫ θ in (0 : ℝ)..(-φ), piIntegrand n m (-θ) := by simp only [piIntegrand_neg]
-  rw [Real.incEllIntPim, Real.incEllIntPim, h,
+  rw [Real.incompleteEllipticPiOfParameter, Real.incompleteEllipticPiOfParameter, h,
     intervalIntegral.integral_comp_neg (piIntegrand n m), neg_neg, neg_zero,
     intervalIntegral.integral_symm]
 
 /-- `Π(φ + π, n, m) = Π(φ, n, m) + 2Π(n, m)` (DLMF §19.2(ii)). -/
-theorem Real.incEllIntPim_add_pi {n m : ℝ} (hn : n < 1) (hm : m < 1) (φ : ℝ) :
-    Real.incEllIntPim (φ + π) n m = Real.incEllIntPim φ n m + 2 * Real.compEllIntPim n m := by
+theorem Real.incompleteEllipticPiOfParameter_add_pi {n m : ℝ} (hn : n < 1) (hm : m < 1) (φ : ℝ) :
+    Real.incompleteEllipticPiOfParameter (φ + π) n m = Real.incompleteEllipticPiOfParameter φ n m +
+        2 * Real.completeEllipticPiOfParameter n m := by
   have hc := continuous_piIntegrand hn hm
   have hper : ∫ θ in (0 : ℝ)..π, piIntegrand n m θ =
       2 * ∫ θ in (0 : ℝ)..(π / 2), piIntegrand n m θ := by
@@ -93,7 +98,8 @@ theorem Real.incEllIntPim_add_pi {n m : ℝ} (hn : n < 1) (hm : m < 1) (φ : ℝ
     have h := intervalIntegral.integral_comp_sub_left (piIntegrand n m) (a := 0) (b := π / 2) π
     simp only [piIntegrand_pi_sub, sub_zero, show π - π / 2 = π / 2 by ring] at h
     rw [← h]; ring
-  unfold Real.incEllIntPim Real.compEllIntPim Real.incEllIntPim
+  unfold Real.incompleteEllipticPiOfParameter Real.completeEllipticPiOfParameter
+      Real.incompleteEllipticPiOfParameter
   rw [← intervalIntegral.integral_add_adjacent_intervals (b := π)
     (hc.intervalIntegrable _ _) (hc.intervalIntegrable _ _), hper]
   have h := intervalIntegral.integral_comp_add_right (piIntegrand n m) (a := 0) (b := φ) π
@@ -128,8 +134,8 @@ theorem hasDerivAt_piZeroPrimitive {c : ℝ} (hc : 0 < c) (φ : ℝ) :
 
 /-- Closed form at `m = 0`: `Π(φ, n, 0) = (φ - arctan((1-c) sin φ cos φ/(cos²φ + c sin²φ)))/c`
 with `c = √(1-n)`; on `(-π/2, π/2)` this is `arctan(c tan φ)/c`. -/
-theorem Real.incEllIntPim_param_zero {n : ℝ} (hn : n < 1) (φ : ℝ) :
-    Real.incEllIntPim φ n 0 = piZeroPrimitive (√(1 - n)) φ := by
+theorem Real.incompleteEllipticPiOfParameter_param_zero {n : ℝ} (hn : n < 1) (φ : ℝ) :
+    Real.incompleteEllipticPiOfParameter φ n 0 = piZeroPrimitive (√(1 - n)) φ := by
   set c := √(1 - n) with hcdef
   have hc : 0 < c := sqrt_pos.mpr (by linarith)
   have hc2 : c ^ 2 = 1 - n := sq_sqrt (by linarith)
@@ -140,21 +146,23 @@ theorem Real.incEllIntPim_param_zero {n : ℝ} (hn : n < 1) (φ : ℝ) :
     simp only [piIntegrand, zero_mul, sub_zero, one_rpow, mul_one, hc2, one_div]
     congr 1
     linarith
-  rw [Real.incEllIntPim, intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv
+  rw [Real.incompleteEllipticPiOfParameter, intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv
     ((continuous_piIntegrand hn (by norm_num)).intervalIntegrable _ _)]
   simp [piZeroPrimitive]
 
 /-- `Π(n, 0) = π/(2√(1-n))` for `n < 1`. -/
-theorem Real.compEllIntPim_param_zero {n : ℝ} (hn : n < 1) :
-    Real.compEllIntPim n 0 = π / (2 * √(1 - n)) := by
-  rw [Real.compEllIntPim, Real.incEllIntPim_param_zero hn, piZeroPrimitive]
+theorem Real.completeEllipticPiOfParameter_param_zero {n : ℝ} (hn : n < 1) :
+    Real.completeEllipticPiOfParameter n 0 = π / (2 * √(1 - n)) := by
+  rw [Real.completeEllipticPiOfParameter, Real.incompleteEllipticPiOfParameter_param_zero hn,
+      piZeroPrimitive]
   simp
   ring
 
 /-- For a nonnegative parameter, the complete third-kind integral is at least its
 value at parameter zero; this follows by comparing the positive integrands. -/
-theorem Real.compEllIntPim_param_zero_le {n m : ℝ} (hn : n < 1) (hm0 : 0 ≤ m) (hm : m < 1) :
-    Real.compEllIntPim n 0 ≤ Real.compEllIntPim n m := by
+theorem Real.completeEllipticPiOfParameter_param_zero_le {n m : ℝ} (hn : n < 1)
+    (hm0 : 0 ≤ m) (hm : m < 1) :
+    Real.completeEllipticPiOfParameter n 0 ≤ Real.completeEllipticPiOfParameter n m := by
   apply intervalIntegral.integral_mono_on (show (0 : ℝ) ≤ π / 2 by positivity)
     ((continuous_piIntegrand hn (by norm_num : (0 : ℝ) < 1)).intervalIntegrable _ _)
     ((continuous_piIntegrand hn hm).intervalIntegrable _ _)
@@ -167,9 +175,12 @@ theorem Real.compEllIntPim_param_zero_le {n m : ℝ} (hn : n < 1) (hm0 : 0 ≤ m
 
 /-- The complete third-kind integral dominates a positive multiple of the first-kind
 integral: the reciprocal characteristic factor is at least `min 1 (1-n)⁻¹`. -/
-theorem Real.compEllIntPim_ge_min_mul_compEllIntKm {n m : ℝ} (hn : n < 1) (hm : m < 1) :
-    min 1 ((1 - n)⁻¹) * Real.compEllIntKm m ≤ Real.compEllIntPim n m := by
-  rw [Real.compEllIntKm, Real.compEllIntPim, Real.incEllIntPim,
+theorem Real.completeEllipticPiOfParameter_ge_min_mul_completeEllipticKOfParameter {n m : ℝ}
+    (hn : n < 1) (hm : m < 1) :
+    min 1 ((1 - n)⁻¹) * Real.completeEllipticKOfParameter m ≤
+        Real.completeEllipticPiOfParameter n m := by
+  rw [Real.completeEllipticKOfParameter, Real.completeEllipticPiOfParameter,
+      Real.incompleteEllipticPiOfParameter,
     ←intervalIntegral.integral_const_mul]
   apply intervalIntegral.integral_mono_on (show (0 : ℝ) ≤ π / 2 by positivity)
     (((continuous_one_sub_mul_sin_sq_rpow hm _).const_mul _).intervalIntegrable _ _)

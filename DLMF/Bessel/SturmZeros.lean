@@ -303,7 +303,7 @@ theorem besselI_sub_exp_isBigO {ν : ℂ} (hν : ∀ k : ℕ, 1 + 2 * ν ≠ -k)
   have hM := (isBigO_refl c atTop).mul hP
   refine (hM.congr' ?_ EventuallyEq.rfl).trans ?_
   · filter_upwards [eventually_gt_atTop 0] with x hx
-    simp only [Function.comp_apply, id, Finset.sum_range_one, DLMF.Hypergeometric.poch_zero,
+    simp only [Function.comp_apply, id, Finset.sum_range_one, DLMF.Hypergeometric.pochhammer_zero,
       Nat.factorial_zero, Nat.cast_one, div_one, CharP.cast_eq_zero, neg_zero, cpow_zero,
       mul_one, hc]
     rw [mul_sub, besselI_eq_mul_regularizedConfluent hν hx, ← besselI_main_term hν hx]

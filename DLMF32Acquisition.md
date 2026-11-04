@@ -63,7 +63,7 @@ declarations:
   `isPainleveIIOn_iff_isPIIOn : IsPainleveIIOn α w U ↔ IsPIIOn (-α) w U`. DLMF statements
   for `PII` are proved in the DLMF normalization; the integral equation 32.5 is stated with
   `IsPIIOn (0 : ℝ)` (real variable, `α = 0`).
-- **Branches.** Square and cube roots in DLMF formulas (`√2` in 32.2.11, `√(-2β)` in
+- **Branches.** Square and unitCube roots in DLMF formulas (`√2` in 32.2.11, `√(-2β)` in
   32.7.19–32.7.21, `2^{1/3}` in 32.7.3, `z^{1/4}`, `√w` in 32.7.49–32.7.50) are replaced by
   arbitrary roots (`r ^ 2 = 2`, `t ^ 3 = 2`, functions with `q ^ 4 = z`, `p ^ 2 = w` and the
   matching derivatives), so the statements are branch-free and cover every choice. The
@@ -381,7 +381,7 @@ declarations:
 - Real-variable results (§32.11) use `IsRealODE2SolutionOn` with `realPainleveIRhs`,
   `realPainleveIIRhs`, `modifiedPainleveIIRhs`, `realPainleveIIIRhs`, `realPainleveIVRhs`,
   `Asymptotics.IsEquivalent`, `IsLittleO`, `IsBigO`; `ph` is `Complex.arg`, `Ai` is
-  `airyAiReal`, `U` is `(pcfU a x).re`. The pairs `(d, θ₀)`, `(d, χ)` are fixed by `d > 0`
+  `DLMF.Airy.Real.airyAi`, `U` is `(parabolicCylinderU a x).re`. The pairs `(d, θ₀)`, `(d, χ)` are fixed by `d > 0`
   (needed for the connection formulas 32.11.9, 32.11.17, 32.11.21 to be well defined).
   32.11.6–9 and 32.11.10 are stated with the solution global on ℝ (stronger than DLMF).
   `painleveIII_connection` assumes `ν > -1/2`; the `PIV` statements assume `Γ(ν + 1) > 0`
@@ -485,69 +485,69 @@ declarations:
 - [32.10.E13](https://dlmf.nist.gov/32.10.E13): [`DLMF.Painleve.painleveIII_bessel_riccati`](DLMF/Painleve/SpecialSolutions.lean#L360) (proved)
 - [32.10.E14](https://dlmf.nist.gov/32.10.E14): [`DLMF.Painleve.painleveIII_bessel_riccati`](DLMF/Painleve/SpecialSolutions.lean#L360) (proved)
 - [32.10.E15](https://dlmf.nist.gov/32.10.E15): [`DLMF.Painleve.painleveIV_of_riccati`](DLMF/Painleve/SpecialSolutions.lean#L440) (proved)
-- [32.10.E16](https://dlmf.nist.gov/32.10.E16): [`DLMF.Painleve.painleveIV_erfc_plus`](DLMF/Painleve/SpecialSolutions.lean#L594) (proved)
+- [32.10.E16](https://dlmf.nist.gov/32.10.E16): [`DLMF.Painleve.painleveIV_erfc_plus`](DLMF/Painleve/SpecialSolutions.lean#L598) (proved)
 - [32.10.E17](https://dlmf.nist.gov/32.10.E17): [`DLMF.Painleve.painleveIV_of_riccati`](DLMF/Painleve/SpecialSolutions.lean#L440) (proved)
 - [32.10.E18](https://dlmf.nist.gov/32.10.E18): [`DLMF.Painleve.painleveIV_pcf_riccati`](DLMF/Painleve/SpecialSolutions.lean#L456) (proved)
 - [32.10.E19](https://dlmf.nist.gov/32.10.E19): [`DLMF.Painleve.painleveIV_pcf_riccati`](DLMF/Painleve/SpecialSolutions.lean#L456) (proved)
-- [32.10.E20](https://dlmf.nist.gov/32.10.E20): [`DLMF.Painleve.painleveIV_hermite`](DLMF/Painleve/SpecialSolutions.lean#L526) (proved) — `m ≥ 1`; `m = 1` gives `w ≡ 0` (excluded)
-- [32.10.E21](https://dlmf.nist.gov/32.10.E21): [`DLMF.Painleve.painleveIV_hermite'`](DLMF/Painleve/SpecialSolutions.lean#L561) (proved)
-- [32.10.E22](https://dlmf.nist.gov/32.10.E22): [`DLMF.Painleve.painleveIV_erfc_plus`](DLMF/Painleve/SpecialSolutions.lean#L594) (proved); [`DLMF.Painleve.painleveIV_erfc_minus`](DLMF/Painleve/SpecialSolutions.lean#L630) (proved)
-- [32.10.E23](https://dlmf.nist.gov/32.10.E23): [`DLMF.Painleve.painleveV_of_riccati`](DLMF/Painleve/SpecialSolutions.lean#L661) (proved)
+- [32.10.E20](https://dlmf.nist.gov/32.10.E20): [`DLMF.Painleve.painleveIV_hermite`](DLMF/Painleve/SpecialSolutions.lean#L530) (proved) — `m ≥ 1`; `m = 1` gives `w ≡ 0` (excluded)
+- [32.10.E21](https://dlmf.nist.gov/32.10.E21): [`DLMF.Painleve.painleveIV_hermite'`](DLMF/Painleve/SpecialSolutions.lean#L565) (proved)
+- [32.10.E22](https://dlmf.nist.gov/32.10.E22): [`DLMF.Painleve.painleveIV_erfc_plus`](DLMF/Painleve/SpecialSolutions.lean#L598) (proved); [`DLMF.Painleve.painleveIV_erfc_minus`](DLMF/Painleve/SpecialSolutions.lean#L634) (proved)
+- [32.10.E23](https://dlmf.nist.gov/32.10.E23): [`DLMF.Painleve.painleveV_of_riccati`](DLMF/Painleve/SpecialSolutions.lean#L665) (proved)
 - [32.10.E24](https://dlmf.nist.gov/32.10.E24): not formalized: alternative condition `(a - n)(b - n) = 0` of the informal "iff" classification of Whittaker-type solutions of `PV`; the case `n = 0` of 32.10.23 is `painleveV_of_riccati`
-- [32.10.E25](https://dlmf.nist.gov/32.10.E25): [`DLMF.Painleve.painleveV_of_riccati`](DLMF/Painleve/SpecialSolutions.lean#L661) (proved)
-- [32.10.E26](https://dlmf.nist.gov/32.10.E26): [`DLMF.Painleve.painleveV_whittaker_riccati`](DLMF/Painleve/SpecialSolutions.lean#L680) (proved)
-- [32.10.E27](https://dlmf.nist.gov/32.10.E27): [`DLMF.Painleve.painleveV_whittaker_riccati`](DLMF/Painleve/SpecialSolutions.lean#L680) (proved)
-- [32.10.E28](https://dlmf.nist.gov/32.10.E28): [`DLMF.Painleve.painleveVI_of_riccati`](DLMF/Painleve/SpecialSolutions.lean#L789) (proved)
-- [32.10.E29](https://dlmf.nist.gov/32.10.E29): [`DLMF.Painleve.painleveVI_of_riccati`](DLMF/Painleve/SpecialSolutions.lean#L789) (proved) — DLMF erratum: "if n = 1" should read "n = 0"
-- [32.10.E30](https://dlmf.nist.gov/32.10.E30): [`DLMF.Painleve.painleveVI_hypergeometric_riccati`](DLMF/Painleve/SpecialSolutions.lean#L821) (proved)
-- [32.10.E31](https://dlmf.nist.gov/32.10.E31): [`DLMF.Painleve.painleveVI_hypergeometric_riccati`](DLMF/Painleve/SpecialSolutions.lean#L821) (proved)
-- [32.10.E32](https://dlmf.nist.gov/32.10.E32): [`DLMF.Painleve.painleveVI_picard`](DLMF/Painleve/SpecialSolutions.lean#L1095) (admitted)
-- [32.10.E33](https://dlmf.nist.gov/32.10.E33): [`DLMF.Painleve.painleveVI_picard`](DLMF/Painleve/SpecialSolutions.lean#L1095) (admitted)
-- [32.10.E34](https://dlmf.nist.gov/32.10.E34): [`DLMF.Painleve.painleveVI_picard`](DLMF/Painleve/SpecialSolutions.lean#L1095) (admitted)
+- [32.10.E25](https://dlmf.nist.gov/32.10.E25): [`DLMF.Painleve.painleveV_of_riccati`](DLMF/Painleve/SpecialSolutions.lean#L665) (proved)
+- [32.10.E26](https://dlmf.nist.gov/32.10.E26): [`DLMF.Painleve.painleveV_whittaker_riccati`](DLMF/Painleve/SpecialSolutions.lean#L684) (proved)
+- [32.10.E27](https://dlmf.nist.gov/32.10.E27): [`DLMF.Painleve.painleveV_whittaker_riccati`](DLMF/Painleve/SpecialSolutions.lean#L684) (proved)
+- [32.10.E28](https://dlmf.nist.gov/32.10.E28): [`DLMF.Painleve.painleveVI_of_riccati`](DLMF/Painleve/SpecialSolutions.lean#L793) (proved)
+- [32.10.E29](https://dlmf.nist.gov/32.10.E29): [`DLMF.Painleve.painleveVI_of_riccati`](DLMF/Painleve/SpecialSolutions.lean#L793) (proved) — DLMF erratum: "if n = 1" should read "n = 0"
+- [32.10.E30](https://dlmf.nist.gov/32.10.E30): [`DLMF.Painleve.painleveVI_hypergeometric_riccati`](DLMF/Painleve/SpecialSolutions.lean#L825) (proved)
+- [32.10.E31](https://dlmf.nist.gov/32.10.E31): [`DLMF.Painleve.painleveVI_hypergeometric_riccati`](DLMF/Painleve/SpecialSolutions.lean#L825) (proved)
+- [32.10.E32](https://dlmf.nist.gov/32.10.E32): [`DLMF.Painleve.painleveVI_picard`](DLMF/Painleve/SpecialSolutions.lean#L1099) (admitted)
+- [32.10.E33](https://dlmf.nist.gov/32.10.E33): [`DLMF.Painleve.painleveVI_picard`](DLMF/Painleve/SpecialSolutions.lean#L1099) (admitted)
+- [32.10.E34](https://dlmf.nist.gov/32.10.E34): [`DLMF.Painleve.painleveVI_picard`](DLMF/Painleve/SpecialSolutions.lean#L1099) (admitted)
 
 ## [§32.11 Asymptotic Approximations for Real Variables](https://dlmf.nist.gov/32.11)
 
-- [32.11.i](https://dlmf.nist.gov/32.11.i): [`DLMF.Painleve.painleveI_not_global`](DLMF/Painleve/RealAsymptotics.lean#L81) (admitted); [`DLMF.Painleve.painleveI_trichotomy`](DLMF/Painleve/RealAsymptotics.lean#L88) (admitted) — numerical bounds on `k₁`, `k₂` excluded: numerical
-- [32.11.ii](https://dlmf.nist.gov/32.11.ii): [`DLMF.Painleve.painleveII_decaying_airy`](DLMF/Painleve/RealAsymptotics.lean#L116) (admitted); [`DLMF.Painleve.painleveII_existsUnique_airy`](DLMF/Painleve/RealAsymptotics.lean#L126) (admitted)
-- [32.11.v](https://dlmf.nist.gov/32.11.v): [`DLMF.Painleve.painleveIV_decaying_pcf`](DLMF/Painleve/RealAsymptotics.lean#L253) (admitted); [`DLMF.Painleve.painleveIV_existsUnique_pcf`](DLMF/Painleve/RealAsymptotics.lean#L264) (admitted); [`DLMF.Painleve.painleveIV_pole`](DLMF/Painleve/RealAsymptotics.lean#L337) (admitted)
+- [32.11.i](https://dlmf.nist.gov/32.11.i): [`DLMF.Painleve.painleveI_not_global`](DLMF/Painleve/RealAsymptotics.lean#L92) (proved); [`DLMF.Painleve.painleveI_trichotomy`](DLMF/Painleve/RealAsymptotics.lean#L182) (admitted) — numerical bounds on `k₁`, `k₂` excluded: numerical
+- [32.11.ii](https://dlmf.nist.gov/32.11.ii): [`DLMF.Painleve.painleveII_decaying_airy`](DLMF/Painleve/RealAsymptotics.lean#L210) (admitted); [`DLMF.Painleve.painleveII_existsUnique_airy`](DLMF/Painleve/RealAsymptotics.lean#L220) (admitted)
+- [32.11.v](https://dlmf.nist.gov/32.11.v): [`DLMF.Painleve.painleveIV_decaying_pcf`](DLMF/Painleve/RealAsymptotics.lean#L348) (admitted); [`DLMF.Painleve.painleveIV_existsUnique_pcf`](DLMF/Painleve/RealAsymptotics.lean#L359) (admitted); [`DLMF.Painleve.painleveIV_pole`](DLMF/Painleve/RealAsymptotics.lean#L437) (admitted)
 - [32.11.E1](https://dlmf.nist.gov/32.11.E1): [`DLMF.Painleve.painleveI_oscillating`](DLMF/Painleve/RealAsymptotics.lean#L63) (admitted)
 - [32.11.E2](https://dlmf.nist.gov/32.11.E2): [`DLMF.Painleve.painleveI_oscillating`](DLMF/Painleve/RealAsymptotics.lean#L63) (admitted)
 - [32.11.E3](https://dlmf.nist.gov/32.11.E3): [`DLMF.Painleve.painleveI_sqrt`](DLMF/Painleve/RealAsymptotics.lean#L74) (admitted)
-- [32.11.E4](https://dlmf.nist.gov/32.11.E4): [`DLMF.Painleve.painleveII_decaying_airy`](DLMF/Painleve/RealAsymptotics.lean#L116) (admitted)
-- [32.11.E5](https://dlmf.nist.gov/32.11.E5): [`DLMF.Painleve.painleveII_decaying_airy`](DLMF/Painleve/RealAsymptotics.lean#L116) (admitted)
-- [32.11.E6](https://dlmf.nist.gov/32.11.E6): [`DLMF.Painleve.painleveII_ablowitzSegur`](DLMF/Painleve/RealAsymptotics.lean#L139) (admitted) — stronger than DLMF (global on ℝ); `d > 0`
-- [32.11.E7](https://dlmf.nist.gov/32.11.E7): [`DLMF.Painleve.painleveII_ablowitzSegur`](DLMF/Painleve/RealAsymptotics.lean#L139) (admitted)
-- [32.11.E8](https://dlmf.nist.gov/32.11.E8): [`DLMF.Painleve.painleveII_ablowitzSegur`](DLMF/Painleve/RealAsymptotics.lean#L139) (admitted)
-- [32.11.E9](https://dlmf.nist.gov/32.11.E9): [`DLMF.Painleve.painleveII_ablowitzSegur`](DLMF/Painleve/RealAsymptotics.lean#L139) (admitted)
-- [32.11.E10](https://dlmf.nist.gov/32.11.E10): [`DLMF.Painleve.painleveII_hastingsMcLeod`](DLMF/Painleve/RealAsymptotics.lean#L157) (admitted) — stronger than DLMF (global on ℝ)
-- [32.11.E11](https://dlmf.nist.gov/32.11.E11): [`DLMF.Painleve.painleveII_pole`](DLMF/Painleve/RealAsymptotics.lean#L166) (admitted)
+- [32.11.E4](https://dlmf.nist.gov/32.11.E4): [`DLMF.Painleve.painleveII_decaying_airy`](DLMF/Painleve/RealAsymptotics.lean#L210) (admitted)
+- [32.11.E5](https://dlmf.nist.gov/32.11.E5): [`DLMF.Painleve.painleveII_decaying_airy`](DLMF/Painleve/RealAsymptotics.lean#L210) (admitted)
+- [32.11.E6](https://dlmf.nist.gov/32.11.E6): [`DLMF.Painleve.painleveII_ablowitzSegur`](DLMF/Painleve/RealAsymptotics.lean#L234) (admitted) — stronger than DLMF (global on ℝ); `d > 0`
+- [32.11.E7](https://dlmf.nist.gov/32.11.E7): [`DLMF.Painleve.painleveII_ablowitzSegur`](DLMF/Painleve/RealAsymptotics.lean#L234) (admitted)
+- [32.11.E8](https://dlmf.nist.gov/32.11.E8): [`DLMF.Painleve.painleveII_ablowitzSegur`](DLMF/Painleve/RealAsymptotics.lean#L234) (admitted)
+- [32.11.E9](https://dlmf.nist.gov/32.11.E9): [`DLMF.Painleve.painleveII_ablowitzSegur`](DLMF/Painleve/RealAsymptotics.lean#L234) (admitted)
+- [32.11.E10](https://dlmf.nist.gov/32.11.E10): [`DLMF.Painleve.painleveII_hastingsMcLeod`](DLMF/Painleve/RealAsymptotics.lean#L252) (admitted) — stronger than DLMF (global on ℝ)
+- [32.11.E11](https://dlmf.nist.gov/32.11.E11): [`DLMF.Painleve.painleveII_pole`](DLMF/Painleve/RealAsymptotics.lean#L261) (admitted)
 - [32.11.E12](https://dlmf.nist.gov/32.11.E12): [`DLMF.Painleve.modifiedPainleveIIRhs`](DLMF/Painleve/Basic/Solutions.lean#L142) (definition)
-- [32.11.E13](https://dlmf.nist.gov/32.11.E13): [`DLMF.Painleve.modifiedPainleveII_negInfty`](DLMF/Painleve/RealAsymptotics.lean#L177) (admitted)
-- [32.11.E14](https://dlmf.nist.gov/32.11.E14): [`DLMF.Painleve.modifiedPainleveII_negInfty`](DLMF/Painleve/RealAsymptotics.lean#L177) (admitted)
-- [32.11.E15](https://dlmf.nist.gov/32.11.E15): [`DLMF.Painleve.modifiedPainleveII_airy`](DLMF/Painleve/RealAsymptotics.lean#L189) (admitted)
-- [32.11.E16](https://dlmf.nist.gov/32.11.E16): [`DLMF.Painleve.modifiedPainleveII_airy`](DLMF/Painleve/RealAsymptotics.lean#L189) (admitted)
-- [32.11.E17](https://dlmf.nist.gov/32.11.E17): [`DLMF.Painleve.modifiedPainleveII_airy`](DLMF/Painleve/RealAsymptotics.lean#L189) (admitted) — requires `d > 0`
-- [32.11.E18](https://dlmf.nist.gov/32.11.E18): [`DLMF.Painleve.modifiedPainleveII_generic`](DLMF/Painleve/RealAsymptotics.lean#L204) (admitted)
-- [32.11.E19](https://dlmf.nist.gov/32.11.E19): [`DLMF.Painleve.modifiedPainleveII_generic`](DLMF/Painleve/RealAsymptotics.lean#L204) (admitted)
-- [32.11.E20](https://dlmf.nist.gov/32.11.E20): [`DLMF.Painleve.modifiedPainleveII_generic`](DLMF/Painleve/RealAsymptotics.lean#L204) (admitted)
-- [32.11.E21](https://dlmf.nist.gov/32.11.E21): [`DLMF.Painleve.modifiedPainleveII_generic`](DLMF/Painleve/RealAsymptotics.lean#L204) (admitted)
-- [32.11.E22](https://dlmf.nist.gov/32.11.E22): [`DLMF.Painleve.modifiedPainleveII_generic`](DLMF/Painleve/RealAsymptotics.lean#L204) (admitted)
-- [32.11.E23](https://dlmf.nist.gov/32.11.E23): [`DLMF.Painleve.modifiedPainleveII_generic`](DLMF/Painleve/RealAsymptotics.lean#L204) (admitted)
-- [32.11.E24](https://dlmf.nist.gov/32.11.E24): [`DLMF.Painleve.modifiedPainleveII_generic`](DLMF/Painleve/RealAsymptotics.lean#L204) (admitted)
-- [32.11.E25](https://dlmf.nist.gov/32.11.E25): [`DLMF.Painleve.painleveIII_connection`](DLMF/Painleve/RealAsymptotics.lean#L233) (admitted)
-- [32.11.E26](https://dlmf.nist.gov/32.11.E26): [`DLMF.Painleve.painleveIII_connection`](DLMF/Painleve/RealAsymptotics.lean#L233) (admitted)
-- [32.11.E27](https://dlmf.nist.gov/32.11.E27): [`DLMF.Painleve.painleveIII_connection`](DLMF/Painleve/RealAsymptotics.lean#L233) (admitted)
-- [32.11.E28](https://dlmf.nist.gov/32.11.E28): [`DLMF.Painleve.painleveIII_connection`](DLMF/Painleve/RealAsymptotics.lean#L233) (admitted)
-- [32.11.E29](https://dlmf.nist.gov/32.11.E29): [`DLMF.Painleve.painleveIV_decaying_pcf`](DLMF/Painleve/RealAsymptotics.lean#L253) (admitted)
-- [32.11.E30](https://dlmf.nist.gov/32.11.E30): [`DLMF.Painleve.painleveIV_decaying_pcf`](DLMF/Painleve/RealAsymptotics.lean#L253) (admitted)
-- [32.11.E31](https://dlmf.nist.gov/32.11.E31): [`DLMF.Painleve.painleveIV_noPoles`](DLMF/Painleve/RealAsymptotics.lean#L282) (admitted)
-- [32.11.E32](https://dlmf.nist.gov/32.11.E32): [`DLMF.Painleve.painleveIV_hermiteAsymptotics`](DLMF/Painleve/RealAsymptotics.lean#L293) (admitted)
-- [32.11.E33](https://dlmf.nist.gov/32.11.E33): [`DLMF.Painleve.painleveIV_oscillating`](DLMF/Painleve/RealAsymptotics.lean#L303) (admitted)
-- [32.11.E34](https://dlmf.nist.gov/32.11.E34): [`DLMF.Painleve.painleveIV_oscillating`](DLMF/Painleve/RealAsymptotics.lean#L303) (admitted)
-- [32.11.E35](https://dlmf.nist.gov/32.11.E35): [`DLMF.Painleve.painleveIV_oscillating`](DLMF/Painleve/RealAsymptotics.lean#L303) (admitted)
-- [32.11.E36](https://dlmf.nist.gov/32.11.E36): [`DLMF.Painleve.painleveIV_oscillating`](DLMF/Painleve/RealAsymptotics.lean#L303) (admitted)
-- [32.11.E37](https://dlmf.nist.gov/32.11.E37): [`DLMF.Painleve.painleveIV_oscillating`](DLMF/Painleve/RealAsymptotics.lean#L303) (admitted)
-- [32.11.E38](https://dlmf.nist.gov/32.11.E38): [`DLMF.Painleve.painleveIV_critical`](DLMF/Painleve/RealAsymptotics.lean#L326) (admitted)
+- [32.11.E13](https://dlmf.nist.gov/32.11.E13): [`DLMF.Painleve.modifiedPainleveII_negInfty`](DLMF/Painleve/RealAsymptotics.lean#L272) (admitted)
+- [32.11.E14](https://dlmf.nist.gov/32.11.E14): [`DLMF.Painleve.modifiedPainleveII_negInfty`](DLMF/Painleve/RealAsymptotics.lean#L272) (admitted)
+- [32.11.E15](https://dlmf.nist.gov/32.11.E15): [`DLMF.Painleve.modifiedPainleveII_airy`](DLMF/Painleve/RealAsymptotics.lean#L284) (admitted)
+- [32.11.E16](https://dlmf.nist.gov/32.11.E16): [`DLMF.Painleve.modifiedPainleveII_airy`](DLMF/Painleve/RealAsymptotics.lean#L284) (admitted)
+- [32.11.E17](https://dlmf.nist.gov/32.11.E17): [`DLMF.Painleve.modifiedPainleveII_airy`](DLMF/Painleve/RealAsymptotics.lean#L284) (admitted) — requires `d > 0`
+- [32.11.E18](https://dlmf.nist.gov/32.11.E18): [`DLMF.Painleve.modifiedPainleveII_generic`](DLMF/Painleve/RealAsymptotics.lean#L299) (admitted)
+- [32.11.E19](https://dlmf.nist.gov/32.11.E19): [`DLMF.Painleve.modifiedPainleveII_generic`](DLMF/Painleve/RealAsymptotics.lean#L299) (admitted)
+- [32.11.E20](https://dlmf.nist.gov/32.11.E20): [`DLMF.Painleve.modifiedPainleveII_generic`](DLMF/Painleve/RealAsymptotics.lean#L299) (admitted)
+- [32.11.E21](https://dlmf.nist.gov/32.11.E21): [`DLMF.Painleve.modifiedPainleveII_generic`](DLMF/Painleve/RealAsymptotics.lean#L299) (admitted)
+- [32.11.E22](https://dlmf.nist.gov/32.11.E22): [`DLMF.Painleve.modifiedPainleveII_generic`](DLMF/Painleve/RealAsymptotics.lean#L299) (admitted)
+- [32.11.E23](https://dlmf.nist.gov/32.11.E23): [`DLMF.Painleve.modifiedPainleveII_generic`](DLMF/Painleve/RealAsymptotics.lean#L299) (admitted)
+- [32.11.E24](https://dlmf.nist.gov/32.11.E24): [`DLMF.Painleve.modifiedPainleveII_generic`](DLMF/Painleve/RealAsymptotics.lean#L299) (admitted)
+- [32.11.E25](https://dlmf.nist.gov/32.11.E25): [`DLMF.Painleve.painleveIII_connection`](DLMF/Painleve/RealAsymptotics.lean#L328) (admitted)
+- [32.11.E26](https://dlmf.nist.gov/32.11.E26): [`DLMF.Painleve.painleveIII_connection`](DLMF/Painleve/RealAsymptotics.lean#L328) (admitted)
+- [32.11.E27](https://dlmf.nist.gov/32.11.E27): [`DLMF.Painleve.painleveIII_connection`](DLMF/Painleve/RealAsymptotics.lean#L328) (admitted)
+- [32.11.E28](https://dlmf.nist.gov/32.11.E28): [`DLMF.Painleve.painleveIII_connection`](DLMF/Painleve/RealAsymptotics.lean#L328) (admitted)
+- [32.11.E29](https://dlmf.nist.gov/32.11.E29): [`DLMF.Painleve.painleveIV_decaying_pcf`](DLMF/Painleve/RealAsymptotics.lean#L348) (admitted)
+- [32.11.E30](https://dlmf.nist.gov/32.11.E30): [`DLMF.Painleve.painleveIV_decaying_pcf`](DLMF/Painleve/RealAsymptotics.lean#L348) (admitted)
+- [32.11.E31](https://dlmf.nist.gov/32.11.E31): [`DLMF.Painleve.painleveIV_noPoles`](DLMF/Painleve/RealAsymptotics.lean#L379) (admitted)
+- [32.11.E32](https://dlmf.nist.gov/32.11.E32): [`DLMF.Painleve.painleveIV_hermiteAsymptotics`](DLMF/Painleve/RealAsymptotics.lean#L390) (admitted)
+- [32.11.E33](https://dlmf.nist.gov/32.11.E33): [`DLMF.Painleve.painleveIV_oscillating`](DLMF/Painleve/RealAsymptotics.lean#L401) (admitted)
+- [32.11.E34](https://dlmf.nist.gov/32.11.E34): [`DLMF.Painleve.painleveIV_oscillating`](DLMF/Painleve/RealAsymptotics.lean#L401) (admitted)
+- [32.11.E35](https://dlmf.nist.gov/32.11.E35): [`DLMF.Painleve.painleveIV_oscillating`](DLMF/Painleve/RealAsymptotics.lean#L401) (admitted)
+- [32.11.E36](https://dlmf.nist.gov/32.11.E36): [`DLMF.Painleve.painleveIV_oscillating`](DLMF/Painleve/RealAsymptotics.lean#L401) (admitted)
+- [32.11.E37](https://dlmf.nist.gov/32.11.E37): [`DLMF.Painleve.painleveIV_oscillating`](DLMF/Painleve/RealAsymptotics.lean#L401) (admitted)
+- [32.11.E38](https://dlmf.nist.gov/32.11.E38): [`DLMF.Painleve.painleveIV_critical`](DLMF/Painleve/RealAsymptotics.lean#L425) (admitted)
 
 ## [§32.12 Asymptotic Approximations for Complex Variables](https://dlmf.nist.gov/32.12)
 
@@ -572,17 +572,17 @@ declarations:
 ## [§32.14 Combinatorics](https://dlmf.nist.gov/32.14)
 
 - [32.14](https://dlmf.nist.gov/32.14): [`DLMF.Painleve.longestIncreasingLength`](DLMF/Painleve/Basic/Solutions.lean#L215) (definition)
-- [32.14.E1](https://dlmf.nist.gov/32.14.E1): [`DLMF.Painleve.longestIncreasing_tracyWidom`](DLMF/Painleve/Combinatorics.lean#L44) (admitted)
+- [32.14.E1](https://dlmf.nist.gov/32.14.E1): [`DLMF.Painleve.longestIncreasing_tracyWidom`](DLMF/Painleve/Combinatorics.lean#L45) (admitted)
 - [32.14.E2](https://dlmf.nist.gov/32.14.E2): [`DLMF.Painleve.tracyWidomF`](DLMF/Painleve/Basic/Solutions.lean#L224) (definition)
-- [32.14.E3](https://dlmf.nist.gov/32.14.E3): [`DLMF.Painleve.longestIncreasing_tracyWidom`](DLMF/Painleve/Combinatorics.lean#L44) (admitted)
-- [32.14.E4](https://dlmf.nist.gov/32.14.E4): [`DLMF.Painleve.longestIncreasing_tracyWidom`](DLMF/Painleve/Combinatorics.lean#L44) (admitted)
+- [32.14.E3](https://dlmf.nist.gov/32.14.E3): [`DLMF.Painleve.longestIncreasing_tracyWidom`](DLMF/Painleve/Combinatorics.lean#L45) (admitted)
+- [32.14.E4](https://dlmf.nist.gov/32.14.E4): [`DLMF.Painleve.longestIncreasing_tracyWidom`](DLMF/Painleve/Combinatorics.lean#L45) (admitted)
 
 ## [§32.15 Orthogonal Polynomials](https://dlmf.nist.gov/32.15)
 
-- [32.15](https://dlmf.nist.gov/32.15): [`DLMF.Painleve.freudRecurrenceSq_painleveIV`](DLMF/Painleve/Combinatorics.lean#L68) (admitted)
+- [32.15](https://dlmf.nist.gov/32.15): [`DLMF.Painleve.freudRecurrenceSq_painleveIV`](DLMF/Painleve/Combinatorics.lean#L69) (admitted)
 - [32.15.E1](https://dlmf.nist.gov/32.15.E1): [`DLMF.Painleve.freudMoment`](DLMF/Painleve/Basic/Solutions.lean#L233) (definition)
 - [32.15.E2](https://dlmf.nist.gov/32.15.E2): [`DLMF.Painleve.freudRecurrenceSq`](DLMF/Painleve/Basic/Solutions.lean#L243) (definition)
-- [32.15.E3](https://dlmf.nist.gov/32.15.E3): [`DLMF.Painleve.freudRecurrenceSq_discretePainleveI`](DLMF/Painleve/Combinatorics.lean#L59) (admitted)
+- [32.15.E3](https://dlmf.nist.gov/32.15.E3): [`DLMF.Painleve.freudRecurrenceSq_discretePainleveI`](DLMF/Painleve/Combinatorics.lean#L60) (proved)
 
 ## [§32.16 Physical Applications](https://dlmf.nist.gov/32.16)
 

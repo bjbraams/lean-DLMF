@@ -10,6 +10,7 @@ public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 public import Mathlib.Algebra.Polynomial.Derivative
 public import TauCeti.Analysis.Complex.Conformal.Continuation.Basic
 public import Mathlib.Tactic.Positivity.Finset
+public import DLMF.AlgebraicAnalytic.ODE.Basic
 
 /-!
 # Heun functions: definitions (DLMF Chapter 31)
@@ -20,30 +21,33 @@ This file holds the definitions of DLMF Chapter 31 (namespace `DLMF.Heun`).
 
 * `IsLinearODE2On p r w s`: `w'' + p w' + r w = 0` on `s`, with genuine differentiability, the
   shape of every second-order equation of the chapter.
-* `IsHeunSolOn a q α β γ δ ε w s`: Heun's equation, DLMF 31.2.1. The exponent parameter `ε` is
+* `IsHeunSolutionOn a q α β γ δ ε w s`: Heun's equation, DLMF 31.2.1. The exponent parameter `ε` is
   explicit and Fuchs's relation `α + β + 1 = γ + δ + ε` is a hypothesis wherever DLMF needs it.
   `heunODECoeff` is the same equation in the form of `Complex.linearODEValue`.
 * `heunNormalCoeff`: the normal form, DLMF 31.2.3–31.2.4.
-* `heunRecP`, `heunRecQ`, `heunRecR`, `heunLocalCoeff`: the coefficients of the three-term
-  recurrence (31.3.4) and the Maclaurin coefficients `c_j` of the local solution (31.3.2–31.3.3).
+* `heunRecurrenceP`, `heunRecurrenceQ`, `heunRecurrenceR`, `heunLocalCoeff`: the coefficients of the
+  three-term recurrence (31.3.4) and the Maclaurin coefficients `c_j` of the local solution
+  (31.3.2–31.3.3).
 * `heunLocal a q α β γ δ z = ∑ c_j z^j`: the local Heun function `Hl`, DLMF 31.3.1, with
-  `ε = α + β + 1 - γ - δ` (`heunEps`) and radius of convergence `min(1, |a|)` (`heunLocalRadius`).
-* `IsHeunFunctionOn`, `IsHeunEigenvalue01`, `heunFunction01`, `heunCFApprox`: Heun functions,
-  the eigenvalue predicate, the continued Heun function (by choice) and the continued fraction
-  31.4.2 (§31.4).
+  `ε = α + β + 1 - γ - δ` (`heunEpsilon`) and radius of convergence `min(1, |a|)`
+  (`heunLocalRadius`).
+* `IsHeunFunctionOn`, `IsHeunEigenvalue01`, `heunFunction01`, `heunContinuedFractionApprox`: Heun
+  functions, the eigenvalue predicate, the continued Heun function (by choice) and the continued
+  fraction 31.4.2 (§31.4).
 * `heunPolyMatrix`, `heunPoly`: the tridiagonal matrix 31.5.1 and Heun polynomials 31.5.2.
 * `IsPathMultiplicative`: path-multiplicative solutions, DLMF 31.6.1.
 * `localBranchCpow`, `pochhammerLoop`, `continuedPathIntegral`: continuously continued branches,
   the Pochhammer double loop, and integration along a path of the analytic continuation of a
   germ (via TauCeti's `IsAnalyticContinuationAlong`).
 * `heunOperator`, `heunWeight`, `heunConcomitantP`: Heun's operator and the data of §31.10.
-* `heunHypK`, `heunHypL`, `heunHypM`, `heunHypP5`, `heunHypP6`: the coefficients and
-  Fuchs–Frobenius solutions of the hypergeometric expansions of §31.11.
-* `IsConfluentHeunSolOn`, `IsDoublyConfluentHeunSolOn`, `IsBiconfluentHeunSolOn`,
-  `IsTriconfluentHeunSolOn`: the confluent forms 31.12.1–31.12.4; `HasIrregularRankAt` and
+* `heunHypergeometricK`, `heunHypergeometricL`, `heunHypergeometricM`, `heunHypergeometricP5`,
+  `heunHypergeometricP6`: the coefficients and Fuchs–Frobenius solutions of the hypergeometric
+  expansions of §31.11.
+* `IsConfluentHeunSolutionOn`, `IsDoublyConfluentHeunSolutionOn`, `IsBiconfluentHeunSolutionOn`,
+  `IsTriconfluentHeunSolutionOn`: the confluent forms 31.12.1–31.12.4; `HasIrregularRankAt` and
   `HasIrregularRankAtInfinity` give the rank of an irregular singularity.
-* `IsFuchsianSolOn`, `fuchsianNormalCoeff`: the general Fuchsian equation 31.14.1 and its normal
-  form.
+* `IsFuchsianSolutionOn`, `fuchsianNormalCoeff`: the general Fuchsian equation 31.14.1 and its
+  normal form.
 * `IsVanVleckStieltjes`, `stieltjesPoly`, `stieltjesG`, `stieltjesWeight`, `stieltjesInner`:
   Stieltjes and Van Vleck polynomials (§31.15).
 
@@ -51,8 +55,8 @@ This file holds the definitions of DLMF Chapter 31 (namespace `DLMF.Heun`).
 
 Outside the disk `|z| < min(1, |a|)`, and when `aγ = 0` or `γ ∈ {-1, -2, …}` (where a
 denominator `R_j` vanishes), the `tsum` and the totalized divisions in `heunLocal` are junk
-values. The biconfluent equation carries the sign as corrected in DLMF 1.0.7, and `heunHypK`,
-`heunHypM` follow the corrections of DLMF 1.1.7.
+values. The biconfluent equation carries the sign as corrected in DLMF 1.0.7, and
+`heunHypergeometricK`, `heunHypergeometricM` follow the corrections of DLMF 1.1.7.
 
 The basic properties of Heun's equation (singularities, exponents, normal and trigonometric
 forms and the automorphisms of §31.2) are in `DLMF.Heun.Basic.Equation`.
@@ -69,20 +73,39 @@ namespace DLMF.Heun
 
 /-! ### Second-order linear equations -/
 
-/-- `w'' + p w' + r w = 0` on `s`: `w` is differentiable at every point of `s` and its derivative
-has derivative `-(p w' + r w)` there. Genuine differentiability is required, so totalized
-derivatives cannot make a nonsolution satisfy the equation. -/
-structure IsLinearODE2On (p r : ℂ → ℂ) (w : ℂ → ℂ) (s : Set ℂ) : Prop where
-  /-- The solution is differentiable at every point of the domain. -/
-  differentiableAt : ∀ z ∈ s, DifferentiableAt ℂ w z
-  /-- The first derivative has the derivative prescribed by the differential equation. -/
-  hasDerivAt_deriv : ∀ z ∈ s, HasDerivAt (deriv w) (-(p z * deriv w z) - r z * w z) z
+/-- `w'' + p w' + r w = 0` on `s`: the homogeneous case of
+`AlgebraicAnalytic.IsLinearODE2SolutionOn` (DLMF 1.13.1). `w` is differentiable at every point of
+`s` and its derivative has derivative `-(p w' + r w)` there; genuine differentiability is
+required, so totalized derivatives cannot make a nonsolution satisfy the equation. -/
+abbrev IsLinearODE2On (p r : ℂ → ℂ) (w : ℂ → ℂ) (s : Set ℂ) : Prop :=
+  AlgebraicAnalytic.IsLinearODE2SolutionOn p r 0 w s
+
+namespace IsLinearODE2On
+
+variable {p r w : ℂ → ℂ} {s : Set ℂ}
+
+/-- The solution is differentiable at every point of the domain. -/
+theorem differentiableAt (h : IsLinearODE2On p r w s) : ∀ z ∈ s, DifferentiableAt ℂ w z :=
+  AlgebraicAnalytic.IsLinearODE2SolutionOn.differentiableAt h
+
+/-- The first derivative has the derivative prescribed by the differential equation. -/
+theorem hasDerivAt_deriv (h : IsLinearODE2On p r w s) :
+    ∀ z ∈ s, HasDerivAt (deriv w) (-(p z * deriv w z) - r z * w z) z :=
+  AlgebraicAnalytic.IsLinearODE2SolutionOn.hasDerivAt_deriv_of_homogeneous h
+
+/-- A solution from differentiability and the prescribed second derivative. -/
+theorem mk (hd : ∀ z ∈ s, DifferentiableAt ℂ w z)
+    (h2 : ∀ z ∈ s, HasDerivAt (deriv w) (-(p z * deriv w z) - r z * w z) z) :
+    IsLinearODE2On p r w s :=
+  AlgebraicAnalytic.IsLinearODE2SolutionOn.of_homogeneous hd h2
+
+end IsLinearODE2On
 
 /-! ### Heun's equation (§31.2) -/
 
 /-- The exponent parameter `ε` determined by Fuchs's relation `α + β + 1 = γ + δ + ε`
 (DLMF 31.2.1). -/
-def heunEps (α β γ δ : ℂ) : ℂ := α + β + 1 - γ - δ
+def heunEpsilon (α β γ δ : ℂ) : ℂ := α + β + 1 - γ - δ
 
 /-- The coefficient of `w'` in Heun's equation (DLMF 31.2.1):
 `γ/z + δ/(z-1) + ε/(z-a)`. Junk values (division by zero) at `z ∈ {0, 1, a}`. -/
@@ -97,7 +120,7 @@ def heunCoeffR (a q α β : ℂ) (z : ℂ) : ℂ := (α * β * z - q) / (z * (z 
 relation `α + β + 1 = γ + δ + ε` is not built in; theorems assume it where DLMF does. The set
 `s` should avoid the singular points `0, 1, a`. -/
 @[dlmf 31.2.E1]
-def IsHeunSolOn (a q α β γ δ ε : ℂ) (w : ℂ → ℂ) (s : Set ℂ) : Prop :=
+def IsHeunSolutionOn (a q α β γ δ ε : ℂ) (w : ℂ → ℂ) (s : Set ℂ) : Prop :=
   IsLinearODE2On (heunCoeffP a γ δ ε) (heunCoeffR a q α β) w s
 
 /-- Heun's equation (DLMF 31.2.1) as a normalized operator for `Complex.linearODEValue`:
@@ -136,16 +159,16 @@ def heunNormalCoeff (a q α β γ δ ε : ℂ) (z : ℂ) : ℂ :=
 
 /-- DLMF 31.3.4: `P_j = (j - 1 + α)(j - 1 + β)`. -/
 @[dlmf 31.3.E4]
-def heunRecP (α β : ℂ) (j : ℕ) : ℂ := ((j : ℂ) - 1 + α) * ((j : ℂ) - 1 + β)
+def heunRecurrenceP (α β : ℂ) (j : ℕ) : ℂ := ((j : ℂ) - 1 + α) * ((j : ℂ) - 1 + β)
 
 /-- DLMF 31.3.4: `Q_j = j((j - 1 + γ)(1 + a) + aδ + ε)`, with `ε = α + β + 1 - γ - δ`. -/
 @[dlmf 31.3.E4]
-def heunRecQ (a α β γ δ : ℂ) (j : ℕ) : ℂ :=
-  (j : ℂ) * (((j : ℂ) - 1 + γ) * (1 + a) + a * δ + heunEps α β γ δ)
+def heunRecurrenceQ (a α β γ δ : ℂ) (j : ℕ) : ℂ :=
+  (j : ℂ) * (((j : ℂ) - 1 + γ) * (1 + a) + a * δ + heunEpsilon α β γ δ)
 
 /-- DLMF 31.3.4: `R_j = a(j + 1)(j + γ)`. -/
 @[dlmf 31.3.E4]
-def heunRecR (a γ : ℂ) (j : ℕ) : ℂ := a * ((j : ℂ) + 1) * ((j : ℂ) + γ)
+def heunRecurrenceR (a γ : ℂ) (j : ℕ) : ℂ := a * ((j : ℂ) + 1) * ((j : ℂ) + γ)
 
 /-- The Maclaurin coefficients `c_j` of `Hl(a, q; α, β, γ, δ; z)` (DLMF 31.3.1–31.3.3):
 `c₀ = 1`, `c₁ = q/(aγ)` and `c_{j+1} = ((Q_j + q)c_j - P_j c_{j-1})/R_j` for `j ≥ 1`. When a
@@ -153,8 +176,8 @@ denominator vanishes the totalized division gives `0`. -/
 def heunLocalCoeff (a q α β γ δ : ℂ) : ℕ → ℂ
   | 0 => 1
   | 1 => q / (a * γ)
-  | (j + 2) => ((heunRecQ a α β γ δ (j + 1) + q) * heunLocalCoeff a q α β γ δ (j + 1) -
-      heunRecP α β (j + 1) * heunLocalCoeff a q α β γ δ j) / heunRecR a γ (j + 1)
+  | (j + 2) => ((heunRecurrenceQ a α β γ δ (j + 1) + q) * heunLocalCoeff a q α β γ δ (j + 1) -
+      heunRecurrenceP α β (j + 1) * heunLocalCoeff a q α β γ δ j) / heunRecurrenceR a γ (j + 1)
 
 /-- The radius `min(1, |a|)` of the disk on which the Maclaurin series of `Hl` converges
 (DLMF 31.3.1 with the singularities `1` and `a`; DLMF's standing assumption `|a| ≥ 1` makes it
@@ -178,14 +201,14 @@ singular points that is analytic on all of `U`, in particular at `s₁` and `s�
 @[dlmf 31.4.E3]
 def IsHeunFunctionOn (a q α β γ δ ε : ℂ) (s₁ s₂ : ℂ) (w : ℂ → ℂ) (U : Set ℂ) : Prop :=
   IsOpen U ∧ IsPreconnected U ∧ s₁ ∈ U ∧ s₂ ∈ U ∧ AnalyticOnNhd ℂ w U ∧
-    IsHeunSolOn a q α β γ δ ε w (U \ {0, 1, a}) ∧ ∃ z ∈ U, w z ≠ 0
+    IsHeunSolutionOn a q α β γ δ ε w (U \ {0, 1, a}) ∧ ∃ z ∈ U, w z ≠ 0
 
 /-- §31.4: `q` is an eigenvalue `q_m` of the accessory parameter for the pair `(0, 1)`: the local
 solution `Hl(a, q; α, β, γ, δ; ·)` continues analytically to a Heun function on a preconnected
 open set containing `0` and `1`. -/
 @[dlmf 31.4]
 def IsHeunEigenvalue01 (a q α β γ δ : ℂ) : Prop :=
-  ∃ (U : Set ℂ) (w : ℂ → ℂ), IsHeunFunctionOn a q α β γ δ (heunEps α β γ δ) 0 1 w U ∧
+  ∃ (U : Set ℂ) (w : ℂ → ℂ), IsHeunFunctionOn a q α β γ δ (heunEpsilon α β γ δ) 0 1 w U ∧
     w =ᶠ[𝓝 0] heunLocal a q α β γ δ
 
 open Classical in
@@ -201,18 +224,19 @@ def heunFunction01 (a q α β γ δ : ℂ) (z : ℂ) : ℂ :=
     if z ∈ Metric.ball (0 : ℂ) ‖a‖ then h.choose z else 0
   else 0
 
-/-- The tails of the continued fraction (31.4.2): `heunCFTail a q α β γ δ m k` is
+/-- The tails of the continued fraction (31.4.2): `heunContinuedFractionTail a q α β γ δ m k` is
 `R_k P_{k+1}/(Q_{k+1} + q - R_{k+1} P_{k+2}/(Q_{k+2} + q - ⋯))` truncated after `m` levels. -/
-def heunCFTail (a q α β γ δ : ℂ) : ℕ → ℕ → ℂ
+def heunContinuedFractionTail (a q α β γ δ : ℂ) : ℕ → ℕ → ℂ
   | 0, _ => 0
-  | (m + 1), k => heunRecR a γ k * heunRecP α β (k + 1) /
-      (heunRecQ a α β γ δ (k + 1) + q - heunCFTail a q α β γ δ m (k + 1))
+  | (m + 1), k => heunRecurrenceR a γ k * heunRecurrenceP α β (k + 1) /
+      (heunRecurrenceQ a α β γ δ (k + 1) + q - heunContinuedFractionTail a q α β γ δ m (k + 1))
 
 /-- DLMF 31.4.2: the `m`-th approximant of the continued fraction
 `aγP₁/(Q₁ + q - R₁P₂/(Q₂ + q - R₂P₃/(Q₃ + q - ⋯)))`. -/
 @[dlmf 31.4.E2]
-def heunCFApprox (a q α β γ δ : ℂ) (m : ℕ) : ℂ :=
-  a * γ * heunRecP α β 1 / (heunRecQ a α β γ δ 1 + q - heunCFTail a q α β γ δ m 1)
+def heunContinuedFractionApprox (a q α β γ δ : ℂ) (m : ℕ) : ℂ :=
+  a * γ * heunRecurrenceP α β 1 /
+      (heunRecurrenceQ a α β γ δ 1 + q - heunContinuedFractionTail a q α β γ δ m 1)
 
 /-- DLMF 31.5.1: the `(n+1) × (n+1)` tridiagonal matrix with first row `(0, aγ, 0, …)` and row
 `j ≥ 1` equal to `(…, P_j, -Q_j, R_j, …)` (columns `j - 1, j, j + 1`), for `α = -n`. Its
@@ -221,9 +245,9 @@ eigenvalues are the `q_{n,m}`, `m = 0, …, n`. -/
 def heunPolyMatrix (a β γ δ : ℂ) (n : ℕ) : Matrix (Fin (n + 1)) (Fin (n + 1)) ℂ :=
   fun i k =>
     if (i : ℕ) = 0 then (if (k : ℕ) = 1 then a * γ else 0)
-    else if (k : ℕ) + 1 = i then heunRecP (-(n : ℂ)) β i
-    else if (k : ℕ) = i then -heunRecQ a (-(n : ℂ)) β γ δ i
-    else if (k : ℕ) = i + 1 then heunRecR a γ i
+    else if (k : ℕ) + 1 = i then heunRecurrenceP (-(n : ℂ)) β i
+    else if (k : ℕ) = i then -heunRecurrenceQ a (-(n : ℂ)) β γ δ i
+    else if (k : ℕ) = i + 1 then heunRecurrenceR a γ i
     else 0
 
 /-- DLMF 31.5.2: the Heun polynomial `Hp_{n,m}(a, q; -n, β, γ, δ; z)` as the truncation of the
@@ -239,14 +263,14 @@ def heunPoly (a q β γ δ : ℂ) (n : ℕ) : ℂ[X] :=
 `K_j = (j+α-μ-1)(j+β-μ-1)(j+γ-μ-1)(j-μ)/((2j+λ-μ-1)(2j+λ-μ-2))`; `j` is complex so that
 `j = -1` is allowed. -/
 @[dlmf 31.11.E6]
-def heunHypK (α β γ lam μ : ℂ) (j : ℂ) : ℂ :=
+def heunHypergeometricK (α β γ lam μ : ℂ) (j : ℂ) : ℂ :=
   (j + α - μ - 1) * (j + β - μ - 1) * (j + γ - μ - 1) * (j - μ) /
     ((2 * j + lam - μ - 1) * (2 * j + lam - μ - 2))
 
 /-- DLMF 31.11.7: `L_j = a(λ+j)(μ-j) - q + (j+α-μ)(j+β-μ)(j+γ-μ)(j+λ)/((2j+λ-μ)(2j+λ-μ+1))
 + (j-α+λ)(j-β+λ)(j-γ+λ)(j-μ)/((2j+λ-μ)(2j+λ-μ-1))`. -/
 @[dlmf 31.11.E7]
-def heunHypL (a q α β γ lam μ : ℂ) (j : ℂ) : ℂ :=
+def heunHypergeometricL (a q α β γ lam μ : ℂ) (j : ℂ) : ℂ :=
   a * (lam + j) * (μ - j) - q +
     (j + α - μ) * (j + β - μ) * (j + γ - μ) * (j + lam) /
       ((2 * j + lam - μ) * (2 * j + lam - μ + 1)) +
@@ -256,25 +280,27 @@ def heunHypL (a q α β γ lam μ : ℂ) (j : ℂ) : ℂ :=
 /-- DLMF 31.11.8 (as corrected in DLMF 1.1.7):
 `M_j = (j-α+λ+1)(j-β+λ+1)(j-γ+λ+1)(j+λ)/((2j+λ-μ+1)(2j+λ-μ+2))`. -/
 @[dlmf 31.11.E8]
-def heunHypM (α β γ lam μ : ℂ) (j : ℂ) : ℂ :=
+def heunHypergeometricM (α β γ lam μ : ℂ) (j : ℂ) : ℂ :=
   (j - α + lam + 1) * (j - β + lam + 1) * (j - γ + lam + 1) * (j + lam) /
     ((2 * j + lam - μ + 1) * (2 * j + lam - μ + 2))
 
 /-- DLMF 31.11.4–31.11.5: the coefficients of the expansion 31.11.1, `c₀ = 1`,
 `L₀c₀ + M₀c₁ = 0` and `K_j c_{j-1} + L_j c_j + M_j c_{j+1} = 0` (`j ≥ 1`), solved forward
 (totalized division). -/
-def heunHypCoeff (a q α β γ lam μ : ℂ) : ℕ → ℂ
+def heunHypergeometricCoeff (a q α β γ lam μ : ℂ) : ℕ → ℂ
   | 0 => 1
-  | 1 => -(heunHypL a q α β γ lam μ 0 / heunHypM α β γ lam μ 0)
-  | (j + 2) => -((heunHypK α β γ lam μ ((j : ℂ) + 1) * heunHypCoeff a q α β γ lam μ j +
-      heunHypL a q α β γ lam μ ((j : ℂ) + 1) * heunHypCoeff a q α β γ lam μ (j + 1)) /
-      heunHypM α β γ lam μ ((j : ℂ) + 1))
+  | 1 => -(heunHypergeometricL a q α β γ lam μ 0 / heunHypergeometricM α β γ lam μ 0)
+  | (j + 2) => -((heunHypergeometricK α β γ lam μ ((j : ℂ) + 1) *
+                 heunHypergeometricCoeff a q α β γ lam μ j +
+      heunHypergeometricL a q α β γ lam μ ((j : ℂ) + 1) *
+          heunHypergeometricCoeff a q α β γ lam μ (j + 1)) /
+      heunHypergeometricM α β γ lam μ ((j : ℂ) + 1))
 
 /-- DLMF 31.11.3_1 (added in DLMF 1.1.7): the Fuchs–Frobenius solution at `∞` of the P-symbol
 31.11.2, `P_j^5 = (λ)_j(1-γ+λ)_j/(1+λ-μ)_{2j} z^{-λ-j} ₂F₁(λ+j, 1-γ+λ+j; 1+λ-μ+2j; 1/z)`
 (principal power, `|z| > 1`). -/
 @[dlmf 31.11.E3_1]
-def heunHypP5 (γ lam μ : ℂ) (j : ℕ) (z : ℂ) : ℂ :=
+def heunHypergeometricP5 (γ lam μ : ℂ) (j : ℕ) (z : ℂ) : ℂ :=
   (ascPochhammer ℂ j).eval lam * (ascPochhammer ℂ j).eval (1 - γ + lam) /
       (ascPochhammer ℂ (2 * j)).eval (1 + lam - μ) * z ^ (-lam - j) *
     ordinaryHypergeometric (lam + j) (1 - γ + lam + j) (1 + lam - μ + 2 * j) (1 / z)
@@ -282,24 +308,25 @@ def heunHypP5 (γ lam μ : ℂ) (j : ℕ) (z : ℂ) : ℂ :=
 /-- DLMF 31.11.3_2 (added in DLMF 1.1.7): the other Fuchs–Frobenius solution at `∞`,
 `P_j^6 = (λ-μ)_{2j}/((1-μ)_j(γ-μ)_j) z^{-μ+j} ₂F₁(μ-j, 1-γ+μ-j; 1-λ+μ-2j; 1/z)`. -/
 @[dlmf 31.11.E3_2]
-def heunHypP6 (γ lam μ : ℂ) (j : ℕ) (z : ℂ) : ℂ :=
+def heunHypergeometricP6 (γ lam μ : ℂ) (j : ℕ) (z : ℂ) : ℂ :=
   (ascPochhammer ℂ (2 * j)).eval (lam - μ) /
       ((ascPochhammer ℂ j).eval (1 - μ) * (ascPochhammer ℂ j).eval (γ - μ)) * z ^ (-μ + j) *
     ordinaryHypergeometric (μ - j) (1 - γ + μ - j) (1 - lam + μ - 2 * j) (1 / z)
 
 /-- The tails of the continued fraction 31.11.13:
 `(K_k/M_k)/(L_k/M_k - (K_{k+1}/M_{k+1})/(L_{k+1}/M_{k+1} - ⋯))`, `m` levels. -/
-def heunHypCFTail (a q α β γ lam μ : ℂ) : ℕ → ℕ → ℂ
+def heunHypergeometricContinuedFractionTail (a q α β γ lam μ : ℂ) : ℕ → ℕ → ℂ
   | 0, _ => 0
-  | (m + 1), k => heunHypK α β γ lam μ k / heunHypM α β γ lam μ k /
-      (heunHypL a q α β γ lam μ k / heunHypM α β γ lam μ k -
-        heunHypCFTail a q α β γ lam μ m (k + 1))
+  | (m + 1), k => heunHypergeometricK α β γ lam μ k / heunHypergeometricM α β γ lam μ k /
+      (heunHypergeometricL a q α β γ lam μ k / heunHypergeometricM α β γ lam μ k -
+        heunHypergeometricContinuedFractionTail a q α β γ lam μ m (k + 1))
 
 /-- DLMF 31.11.13: the `m`-th approximant of
 `L₀/M₀ - (K₁/M₁)/(L₁/M₁ - (K₂/M₂)/(L₂/M₂ - ⋯))`. -/
 @[dlmf 31.11.E13]
-def heunHypCFApprox (a q α β γ lam μ : ℂ) (m : ℕ) : ℂ :=
-  heunHypL a q α β γ lam μ 0 / heunHypM α β γ lam μ 0 - heunHypCFTail a q α β γ lam μ m 1
+def heunHypergeometricContinuedFractionApprox (a q α β γ lam μ : ℂ) (m : ℕ) : ℂ :=
+  heunHypergeometricL a q α β γ lam μ 0 / heunHypergeometricM α β γ lam μ 0 -
+      heunHypergeometricContinuedFractionTail a q α β γ lam μ m 1
 
 /-! ### Contour integrals with continued branches, path-multiplicative solutions -/
 
@@ -364,24 +391,24 @@ def heunConcomitantP (a γ δ ε : ℂ) (t : ℂ) : ℂ := t ^ γ * (t - 1) ^ δ
 /-- DLMF 31.12.1, the confluent Heun equation
 `w'' + (γ/z + δ/(z-1) + ε) w' + (αz - q)/(z(z-1)) w = 0`. -/
 @[dlmf 31.12.E1]
-def IsConfluentHeunSolOn (q α γ δ ε : ℂ) (w : ℂ → ℂ) (s : Set ℂ) : Prop :=
+def IsConfluentHeunSolutionOn (q α γ δ ε : ℂ) (w : ℂ → ℂ) (s : Set ℂ) : Prop :=
   IsLinearODE2On (fun z => γ / z + δ / (z - 1) + ε) (fun z => (α * z - q) / (z * (z - 1))) w s
 
 /-- DLMF 31.12.2, the doubly-confluent Heun equation
 `w'' + (δ/z² + γ/z + 1) w' + (αz - q)/z² w = 0`. -/
 @[dlmf 31.12.E2]
-def IsDoublyConfluentHeunSolOn (q α γ δ : ℂ) (w : ℂ → ℂ) (s : Set ℂ) : Prop :=
+def IsDoublyConfluentHeunSolutionOn (q α γ δ : ℂ) (w : ℂ → ℂ) (s : Set ℂ) : Prop :=
   IsLinearODE2On (fun z => δ / z ^ 2 + γ / z + 1) (fun z => (α * z - q) / z ^ 2) w s
 
 /-- DLMF 31.12.3, the biconfluent Heun equation (sign as corrected in DLMF 1.0.7)
 `w'' - (γ/z + δ + z) w' + (αz - q)/z w = 0`. -/
 @[dlmf 31.12.E3]
-def IsBiconfluentHeunSolOn (q α γ δ : ℂ) (w : ℂ → ℂ) (s : Set ℂ) : Prop :=
+def IsBiconfluentHeunSolutionOn (q α γ δ : ℂ) (w : ℂ → ℂ) (s : Set ℂ) : Prop :=
   IsLinearODE2On (fun z => -(γ / z + δ + z)) (fun z => (α * z - q) / z) w s
 
 /-- DLMF 31.12.4, the triconfluent Heun equation `w'' + (γ + z) z w' + (αz - q) w = 0`. -/
 @[dlmf 31.12.E4]
-def IsTriconfluentHeunSolOn (q α γ : ℂ) (w : ℂ → ℂ) (s : Set ℂ) : Prop :=
+def IsTriconfluentHeunSolutionOn (q α γ : ℂ) (w : ℂ → ℂ) (s : Set ℂ) : Prop :=
   IsLinearODE2On (fun z => (γ + z) * z) (fun z => α * z - q) w s
 
 /-- The equation `w'' + p w' + r w = 0` has an irregular singularity of rank `k ≥ 1` at infinity:
@@ -419,7 +446,7 @@ def fuchsianCoeffR {N : ℕ} (a q : Fin N → ℂ) (z : ℂ) : ℂ := ∑ j, q j
 `w'' + (∑_j γ_j/(z - a_j)) w' + (∑_j q_j/(z - a_j)) w = 0`, `∑_j q_j = 0` (the last condition is
 a hypothesis of the theorems, not part of the predicate). -/
 @[dlmf 31.14.E1]
-def IsFuchsianSolOn {N : ℕ} (a γ q : Fin N → ℂ) (w : ℂ → ℂ) (s : Set ℂ) : Prop :=
+def IsFuchsianSolutionOn {N : ℕ} (a γ q : Fin N → ℂ) (w : ℂ → ℂ) (s : Set ℂ) : Prop :=
   IsLinearODE2On (fuchsianCoeffP a γ) (fuchsianCoeffR a q) w s
 
 /-- DLMF 31.14.5: `q̃_j = ½ ∑_{k ≠ j} γ_j γ_k/(a_j - a_k) - q_j`. -/

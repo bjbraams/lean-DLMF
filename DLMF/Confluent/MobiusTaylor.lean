@@ -113,34 +113,34 @@ theorem mobius_taylor (F : ℕ → ℂ → ℂ) (C : ℕ → ℂ) (s x : ℂ)
 /-- First-parameter Kummer M expansion in the disk coordinate; no cut restriction on `x`. -/
 theorem kummerM_mobius_taylor {a b x v : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (hv : ‖v‖ < 1) :
     (1 - v) ^ (-a) * kummerM a b (x / (1 - v)) =
-      ∑' n : ℕ, poch a n * kummerM (a + n) b x / n.factorial * v ^ n := by
+      ∑' n : ℕ, pochhammer a n * kummerM (a + n) b x / n.factorial * v ^ n := by
   simpa only [Nat.cast_zero, add_zero] using
-    (mobius_taylor (fun n => kummerM (a + n) b) (poch a) a x (poch_zero a)
+    (mobius_taylor (fun n => kummerM (a + n) b) (pochhammer a) a x (pochhammer_zero a)
       (fun n w _ => ((analyticOnNhd_kummerM (a := a + n) hb) _
           (Set.mem_univ _)).differentiableAt) (by
         intro n w hw
-        rw [poch_succ]
+        rw [pochhammer_succ]
         have h := z_mul_deriv_kummerM_eq_shift_a (a := a + n) hb (x / (1 - w))
         rw [show a + ((n + 1 : ℕ) : ℂ) = a + n + 1 by push_cast; ring]
-        linear_combination (poch a n) * h) hv)
+        linear_combination (pochhammer a n) * h) hv)
 
 /-- First-parameter Tricomi U expansion in the disk coordinate. -/
 theorem kummerU_mobius_taylor (a b : ℂ) {x v : ℂ} (hx : 0 < x.re) (hv : ‖v‖ < 1) :
     (1 - v) ^ (-a) * kummerU a b (x / (1 - v)) =
-      ∑' n : ℕ, poch a n * poch (1 + a - b) n * kummerU (a + n) b x /
+      ∑' n : ℕ, pochhammer a n * pochhammer (1 + a - b) n * kummerU (a + n) b x /
         n.factorial * v ^ n := by
   simpa only [Nat.cast_zero, add_zero] using
     (mobius_taylor (fun n => kummerU (a + n) b)
-      (fun n => poch a n * poch (1 + a - b) n) a x (by simp [poch_zero])
+      (fun n => pochhammer a n * pochhammer (1 + a - b) n) a x (by simp [pochhammer_zero])
       (fun n w hw => (hasDerivAt_kummerU _ _
           (div_one_sub_mem_slitPlane hx hw)).differentiableAt) (by
         intro n w hw
         have hz := div_one_sub_mem_slitPlane hx hw
-        rw [deriv_kummerU _ _ hz, poch_succ, poch_succ]
+        rw [deriv_kummerU _ _ hz, pochhammer_succ, pochhammer_succ]
         have h1 := kummerU_contiguous_shift_a (a + n + 1) b _ (slitPlane_ne_zero hz)
         rw [add_sub_cancel_right] at h1
         rw [show a + ((n + 1 : ℕ) : ℂ) = a + n + 1 by push_cast; ring]
-        linear_combination (poch a n * poch (1 + a - b) n * (a + n)) * h1) hv)
+        linear_combination (pochhammer a n * pochhammer (1 + a - b) n * (a + n)) * h1) hv)
 
 /-- The addition hypotheses put `y/(x+y)` strictly inside the unit disk. -/
 theorem norm_div_add_lt_one {x y : ℂ} (hx : x ≠ 0) (hxy : x + y ≠ 0)
@@ -200,20 +200,20 @@ theorem kummerU_exp_mobius_taylor (a b : ℂ) {x v : ℂ} (hx : 0 < x.re) (hv : 
 /-- Exponentially weighted first-parameter Kummer M expansion in the disk coordinate. -/
 theorem kummerM_exp_mobius_taylor {a b x v : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (hv : ‖v‖ < 1) :
     (1 - v) ^ (-(b - a)) * (exp (-(x / (1 - v))) * kummerM a b (x / (1 - v))) =
-      ∑' n : ℕ, poch (b - a) n * (exp (-x) * kummerM (a - n) b x) / n.factorial * v ^ n := by
+      ∑' n : ℕ, pochhammer (b - a) n * (exp (-x) * kummerM (a - n) b x) / n.factorial * v ^ n := by
   simpa only [Nat.cast_zero, sub_zero] using
     (mobius_taylor (fun n z => exp (-z) * kummerM (a - n) b z)
-      (poch (b - a)) (b - a) x (poch_zero _)
+      (pochhammer (b - a)) (b - a) x (pochhammer_zero _)
       (fun n w hw => (by fun_prop : DifferentiableAt ℂ (fun z : ℂ => exp (-z)) _).mul
         (((analyticOnNhd_kummerM (a := a - n) hb) _ (Set.mem_univ _)).differentiableAt)) (by
         intro n w hw
         have hd := ((hasDerivAt_id (x / (1 - w))).neg.cexp).mul
           (((analyticOnNhd_kummerM (a := a - n) hb) _ (Set.mem_univ _)).differentiableAt.hasDerivAt)
         change HasDerivAt (fun z : ℂ => exp (-z) * kummerM (a - n) b z) _ _ at hd
-        rw [hd.deriv, poch_succ]
+        rw [hd.deriv, pochhammer_succ]
         dsimp only [Pi.neg_apply, id_eq]
         have h := z_mul_deriv_kummerM_eq_shift_a_pred (a := a - n) hb (x / (1 - w))
         rw [show a - ((n + 1 : ℕ) : ℂ) = a - n - 1 by push_cast; ring]
-        linear_combination (poch (b - a) n * exp (-(x / (1 - w)))) * h) hv)
+        linear_combination (pochhammer (b - a) n * exp (-(x / (1 - w)))) * h) hv)
 
 end DLMF.Confluent

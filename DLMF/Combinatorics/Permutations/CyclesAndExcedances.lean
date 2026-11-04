@@ -28,12 +28,12 @@ descent position, as DLMF counts positions from `1`). The statistics `numCycles`
 * `IsAdjacentSwap`: adjacent transpositions.
 * `insertMinEquiv`, `descentIndicator`, `majorIndexIncrement`: tools for the insertion
   bijections behind the Eulerian-number recurrences.
-* `dlmfExamplePerm`: the example permutation (26.13.2).
+* `examplePermutation`: the example permutation (26.13.2).
 
 ## Main results
 
-* `dlmfExamplePerm_eq_cycles`, `dlmfExamplePerm_eq_swaps`, `dlmfExamplePerm_stats`: the worked
-  example of DLMF 26.13.2 and §26.14(i).
+* `examplePermutation_eq_cycles`, `examplePermutation_eq_swaps`, `examplePermutation_stats`: the
+  worked example of DLMF 26.13.2 and §26.14(i).
 * `card_numCycles_eq_abs_signedStirlingFirst`: the Stirling cycle number `[n k]` is `|s(n, k)|`
   (DLMF 26.13.3).
 * `numDerangements_eq_factorial_mul_sum`, `numDerangements_eq_floor`: the derangement numbers
@@ -69,7 +69,7 @@ open Polynomial hiding bernoulli
 namespace DLMF.Combinatorics
 
 /-- The permutation (26.13.2), `1 2 3 4 5 6 7 8 ↦ 3 5 2 4 7 8 1 6`, in `0`-based form. -/
-def dlmfExamplePerm : Perm (Fin 8) where
+def examplePermutation : Perm (Fin 8) where
   toFun := ![2, 4, 1, 3, 6, 7, 0, 5]
   invFun := ![6, 2, 0, 3, 1, 7, 4, 5]
   left_inv := by decide
@@ -78,7 +78,7 @@ def dlmfExamplePerm : Perm (Fin 8) where
 /-- (26.13.2): the example permutation is `(1,3,2,5,7)(4)(6,8)` in cycle notation (`0`-based:
 `c[0, 2, 1, 4, 6] * c[5, 7]`, the fixed point dropped). -/
 @[dlmf 26.13.E2]
-theorem dlmfExamplePerm_eq_cycles : dlmfExamplePerm = c[0, 2, 1, 4, 6] * c[5, 7] := by
+theorem examplePermutation_eq_cycles : examplePermutation = c[0, 2, 1, 4, 6] * c[5, 7] := by
   decide
 
 /-- (26.13.3): the Stirling cycle number `[n k]`, the number of permutations of `{1, …, n}` with
@@ -202,8 +202,8 @@ theorem exists_swap_factorization_numCycles {n : ℕ} (σ : Perm (Fin n)) :
 
 /-- §26.13, the example: `(1,3,2,5,7)(6,8) = (1,3)(2,3)(2,5)(5,7)(6,8)` (`0`-based). -/
 @[dlmf 26.13]
-theorem dlmfExamplePerm_eq_swaps :
-    dlmfExamplePerm = swap 0 2 * swap 1 2 * swap 1 4 * swap 4 6 * swap 5 7 := by
+theorem examplePermutation_eq_swaps :
+    examplePermutation = swap 0 2 * swap 1 2 * swap 1 4 * swap 4 6 * swap 5 7 := by
   decide
 
 /-- (26.13.6): for `j < k`, `(j, k) = (k-1, k)(k-2, k-1)⋯(j+1, j+2)(j, j+1)(j+1, j+2)⋯(k-1, k)`,
@@ -242,9 +242,9 @@ def IsAdjacentSwap {n : ℕ} (τ : Perm (Fin n)) : Prop :=
 /-- §26.13 and §26.14(i), the example `35247816`: `inv = 11`, the descents are `52` and `81`,
 `maj = 2 + 6 = 8`. -/
 @[dlmf 26.14.i]
-theorem dlmfExamplePerm_stats :
-    inversionNumber dlmfExamplePerm = 11 ∧ descentNumber dlmfExamplePerm = 2 ∧
-      majorIndex dlmfExamplePerm = 8 := by
+theorem examplePermutation_stats :
+    inversionNumber examplePermutation = 11 ∧ descentNumber examplePermutation = 2 ∧
+      majorIndex examplePermutation = 8 := by
   decide
 
 /-! ### Insertion bijections (proof round 2) -/

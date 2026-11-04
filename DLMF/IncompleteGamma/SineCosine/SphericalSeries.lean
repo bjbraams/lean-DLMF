@@ -28,7 +28,7 @@ expansions (DLMF 8.21.16–8.21.27).
 * `genTrigAuxF_oscillatory_integral`, `genTrigAuxG_oscillatory_integral`: DLMF 8.21.22 and
   8.21.23.
 * `genTrigAuxF_laplace_integral`, `genTrigAuxG_laplace_integral`: DLMF 8.21.24 and 8.21.25.
-* `upperIncGammaOnLog_logSector_asymptotic`: the expansion of `e^{e^w} Γ(a, e^w)` on the
+* `upperIncompleteGammaOnLog_logSector_asymptotic`: the expansion of `e^{e^w} Γ(a, e^w)` on the
   logarithmic sector `|im w| ≤ 3π/2 - δ`.
 * `genTrigAuxF_sector_asymptotic`, `genTrigAuxG_sector_asymptotic`: the asymptotic expansions
   DLMF 8.21.26 and 8.21.27 on `|ph z| ≤ π - δ`.
@@ -150,28 +150,29 @@ theorem gsSph_cos_part {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n : ℂ)) :
     push_cast at hp ⊢
     linear_combination (2*((k:ℂ)+1)) * hp
 
-/-- The series with terms `(fun k : ℕ => z^a*(2*k+3/2 : ℂ)*poch (1-a/2) k/poch (1/2+a/2)
+/-- The series with terms `(fun k : ℕ => z^a*(2*k+3/2 : ℂ)*pochhammer (1-a/2) k/pochhammer (1/2+a/2)
 (k+1)*Bessel.sphericalJ (2*k+1) z)` converges to `(genSinInt a z)`. -/
 @[dlmf 8.21.E16]
 theorem genSinInt_spherical_series {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n+1)) {z : ℂ} (hz : z ≠ 0) :
     HasSum (fun k : ℕ =>
-        z^a*(2*k+3/2 : ℂ)*poch (1-a/2) k/poch (1/2+a/2) (k+1)*Bessel.sphericalJ (2*k+1) z)
+        z^a*(2*k+3/2 : ℂ)*pochhammer (1-a/2) k/pochhammer (1/2+a/2)
+            (k+1)*Bessel.sphericalJ (2*k+1) z)
         (genSinInt a z) := by
   obtain ⟨hHd, hHL⟩ := gsSph_sin_part ha
   set H : ℂ → ℂ := fun w => ∑' k : ℕ, (-1 : ℂ)^k*w^(2*k+1)/((2*k+a+1)*(2*k+1).factorial) with hH
   have hQ : ∀ k : ℕ, (1/2+a/2+k : ℂ) ≠ 0 := fun k e => ha k (by linear_combination 2*e)
-  have hQk : ∀ k : ℕ, poch (1/2+a/2) k ≠ 0 := by
+  have hQk : ∀ k : ℕ, pochhammer (1/2+a/2) k ≠ 0 := by
     intro k; induction k with
     | zero => simp
-    | succ k ih => rw [poch_succ]; exact mul_ne_zero ih (hQ k)
-  set c : ℕ → ℂ := fun k => (2*k+3/2 : ℂ)*poch (1-a/2) k/poch (1/2+a/2) (k+1) with hc
-  set e : ℕ → ℂ := fun k => poch (1-a/2) k/poch (1/2+a/2) k with he
+    | succ k ih => rw [pochhammer_succ]; exact mul_ne_zero ih (hQ k)
+  set c : ℕ → ℂ := fun k => (2*k+3/2 : ℂ)*pochhammer (1-a/2) k/pochhammer (1/2+a/2) (k+1) with hc
+  set e : ℕ → ℂ := fun k => pochhammer (1-a/2) k/pochhammer (1/2+a/2) k with he
   clear_value c e
   have hratio := Bessel.SphericalSeries.eventually_norm_add_le (1-a/2) (1/2+a/2)
   have hratio2 := Bessel.SphericalSeries.eventually_norm_add_le (1-a/2) (1/2+a/2+1)
   have he_r : ∀ᶠ k in atTop, ‖e (k+1)‖ ≤ 2 * ‖e k‖ := by
     filter_upwards [hratio] with k hk
-    simp only [he, poch_succ]
+    simp only [he, pochhammer_succ]
     rw [mul_div_mul_comm, norm_mul, norm_div]
     have hq := norm_pos_iff.mpr (hQ k)
     rw [mul_comm, show (1/2+a/2+k : ℂ) = 1/2+a/2+(k:ℂ) from rfl]
@@ -187,11 +188,11 @@ theorem genSinInt_spherical_series {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n+1)) 
         push_cast at h'; exact h'
       have hQ1 : (1/2+a/2+((k:ℂ)+1)) ≠ 0 := by have := hQ (k+1); push_cast at this; exact this
       have hQ0 := hQ k
-      simp only [hc, poch_succ]
+      simp only [hc, pochhammer_succ]
       push_cast
-      generalize poch (1-a/2) k = P
+      generalize pochhammer (1-a/2) k = P
       have hQk' := hQk k
-      generalize poch (1/2+a/2) k = Q at hQk' ⊢
+      generalize pochhammer (1/2+a/2) k = Q at hQk' ⊢
       generalize (1/2+a/2+(k:ℂ)) = u at hQ0 ⊢
       generalize (1/2+a/2+((k:ℂ)+1)) = v at hQ1 ⊢
       generalize (2*(k:ℂ)+3/2) = t at h32 ⊢
@@ -229,13 +230,13 @@ theorem genSinInt_spherical_series {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n+1)) 
     have hJ : Bessel.sphericalJ (2*k+1) w = w *
         (Bessel.sphericalJ (2*k) w + Bessel.sphericalJ (2*k+2) w) /
         (2*((2*k:ℕ):ℂ)+3) := by rw [eq_div_iff h3]; linear_combination -hr
-    simp only [hc, he, poch_succ]
+    simp only [hc, he, pochhammer_succ]
     rw [hJ, show 2*(k+1) = 2*k+2 by ring]
     have hQk' := hQk k
     have hQ' := hQ k
     push_cast at h3 ⊢
-    generalize poch (1-a/2) k = P
-    generalize poch (1/2+a/2) k = Q at hQk' ⊢
+    generalize pochhammer (1-a/2) k = P
+    generalize pochhammer (1/2+a/2) k = Q at hQk' ⊢
     generalize hu : (1/2+a/2+(k:ℂ)) = u at hQ' ⊢
     generalize ht : (2*(2*(k:ℂ))+3) = t at h3 ⊢
     field_simp
@@ -275,7 +276,7 @@ theorem genSinInt_spherical_series {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n+1)) 
                    (Bessel.SphericalSeries.tendsto_coeff_mul_sphericalJ e he_r 0 w).const_mul w)
     (Bessel.SphericalSeries.bound_coeff_mul_sphericalJ c hc_r 1)
     hHd (fun w => by
-      rw [hHL w]; simp [he, poch_zero, ← Bessel.SphericalSeries.mul_sphericalJ_zero])
+      rw [hHL w]; simp [he, pochhammer_zero, ← Bessel.SphericalSeries.mul_sphericalJ_zero])
     hpar z
   -- conclude
   have hG := genSinInt_hasSum (a := a) hz
@@ -287,28 +288,28 @@ theorem genSinInt_spherical_series {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n+1)) 
   convert key.mul_left (z^a) using 1
   funext k; simp only [hc]; ring
 
-/-- The series with terms `(fun k : ℕ => z^a*(2*k+1/2 : ℂ)*poch (1/2-a/2) k/poch (a/2)
+/-- The series with terms `(fun k : ℕ => z^a*(2*k+1/2 : ℂ)*pochhammer (1/2-a/2) k/pochhammer (a/2)
 (k+1)*Bessel.sphericalJ (2*k) z)` converges to `(genCosInt a z)`. -/
 @[dlmf 8.21.E17]
 theorem genCosInt_spherical_series {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n : ℂ)) {z : ℂ} (hz : z ≠ 0) :
     HasSum (fun k : ℕ =>
-        z^a*(2*k+1/2 : ℂ)*poch (1/2-a/2) k/poch (a/2) (k+1)*Bessel.sphericalJ (2*k) z)
+        z^a*(2*k+1/2 : ℂ)*pochhammer (1/2-a/2) k/pochhammer (a/2) (k+1)*Bessel.sphericalJ (2*k) z)
         (genCosInt a z) := by
   obtain ⟨hHd, hHL⟩ := gsSph_cos_part ha
   set H : ℂ → ℂ := fun w => ∑' k : ℕ, (-1 : ℂ)^k*w^(2*k)/((2*k+a)*(2*k).factorial) with hH
   have hQ : ∀ k : ℕ, (a/2+k : ℂ) ≠ 0 := fun k e => ha k (by linear_combination 2*e)
-  have hQk : ∀ k : ℕ, poch (a/2) k ≠ 0 := by
+  have hQk : ∀ k : ℕ, pochhammer (a/2) k ≠ 0 := by
     intro k; induction k with
     | zero => simp
-    | succ k ih => rw [poch_succ]; exact mul_ne_zero ih (hQ k)
-  set c : ℕ → ℂ := fun k => (2*k+1/2 : ℂ)*poch (1/2-a/2) k/poch (a/2) (k+1) with hc
-  set e : ℕ → ℂ := fun k => poch (1/2-a/2) k/poch (a/2) k with he
+    | succ k ih => rw [pochhammer_succ]; exact mul_ne_zero ih (hQ k)
+  set c : ℕ → ℂ := fun k => (2*k+1/2 : ℂ)*pochhammer (1/2-a/2) k/pochhammer (a/2) (k+1) with hc
+  set e : ℕ → ℂ := fun k => pochhammer (1/2-a/2) k/pochhammer (a/2) k with he
   clear_value c e
   have hratio := Bessel.SphericalSeries.eventually_norm_add_le (1/2-a/2) (a/2)
   have hratio2 := Bessel.SphericalSeries.eventually_norm_add_le (1/2-a/2) (a/2+1)
   have he_r : ∀ᶠ k in atTop, ‖e (k+1)‖ ≤ 2 * ‖e k‖ := by
     filter_upwards [hratio] with k hk
-    simp only [he, poch_succ]
+    simp only [he, pochhammer_succ]
     rw [mul_div_mul_comm, norm_mul, norm_div]
     have hq := norm_pos_iff.mpr (hQ k)
     rw [mul_comm]
@@ -324,11 +325,11 @@ theorem genCosInt_spherical_series {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n : �
         push_cast at h'; exact h'
       have hQ1 : (a/2+((k:ℂ)+1)) ≠ 0 := by have := hQ (k+1); push_cast at this; exact this
       have hQ0 := hQ k
-      simp only [hc, poch_succ]
+      simp only [hc, pochhammer_succ]
       push_cast
-      generalize poch (1/2-a/2) k = P
+      generalize pochhammer (1/2-a/2) k = P
       have hQk' := hQk k
-      generalize poch (a/2) k = Q at hQk' ⊢
+      generalize pochhammer (a/2) k = Q at hQk' ⊢
       generalize (a/2+(k:ℂ)) = u at hQ0 ⊢
       generalize (a/2+((k:ℂ)+1)) = v at hQ1 ⊢
       generalize (2*(k:ℂ)+1/2) = t at h32 ⊢
@@ -375,7 +376,7 @@ theorem genCosInt_spherical_series {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n : �
       rw [← Bessel.SphericalSeries.sphericalJ_zero_sub]
       have hQ0 := hQ 0
       have ha0 : a ≠ 0 := by have := ha 0; simpa using this
-      simp only [hc, he, poch_succ, poch_zero]
+      simp only [hc, he, pochhammer_succ, pochhammer_zero]
       push_cast
       field_simp
       have hinv := mul_inv_cancel₀ ha0
@@ -393,14 +394,14 @@ theorem genCosInt_spherical_series {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n : �
       have hJ : Bessel.sphericalJ (2*k+1+1) w = w *
           (Bessel.sphericalJ (2*k+1) w + Bessel.sphericalJ (2*k+1+2) w) /
           (2*((2*k+1:ℕ):ℂ)+3) := by rw [eq_div_iff h3]; linear_combination -hr
-      simp only [hc, he, poch_succ]
+      simp only [hc, he, pochhammer_succ]
       rw [hJ]
       have hQk' := hQk k
       have hQ' := hQ k
       have hQ'' : (a/2+((k:ℂ)+1)) ≠ 0 := by have := hQ (k+1); push_cast at this; exact this
       push_cast at h3 ⊢
-      generalize poch (1/2-a/2) k = P
-      generalize poch (a/2) k = Q at hQk' ⊢
+      generalize pochhammer (1/2-a/2) k = P
+      generalize pochhammer (a/2) k = Q at hQk' ⊢
       generalize hu : (a/2+(k:ℂ)) = u at hQ' ⊢
       generalize hv : (a/2+((k:ℂ)+1)) = v at hQ'' ⊢
       generalize ht : (2*(2*(k:ℂ)+1)+3) = t at h3 ⊢
@@ -691,9 +692,9 @@ theorem GeneralizedTrigSphericalSeries.ray_cpow {c : ℂ} (hc : c = I ∨ c = -I
   congr 1; ring
 
 /-- `Γ(a, z(t-c)) → 0` along the ray. -/
-theorem GeneralizedTrigSphericalSeries.tendsto_upperIncGamma_ray (c : ℂ) (a : ℂ) {z : ℂ}
+theorem GeneralizedTrigSphericalSeries.tendsto_upperIncompleteGamma_ray (c : ℂ) (a : ℂ) {z : ℂ}
     (hz : 0 < z.re) :
-    Tendsto (fun t : ℝ => upperIncGamma a (z*(t-c))) atTop (𝓝 0) := by
+    Tendsto (fun t : ℝ => upperIncompleteGamma a (z*(t-c))) atTop (𝓝 0) := by
   have hz0 : z ≠ 0 := by intro h; rw [h] at hz; simp at hz
   have hn : (0:ℝ) < ‖z‖ := norm_pos_iff.mpr hz0
   set u : ℂ := z/‖z‖
@@ -704,24 +705,24 @@ theorem GeneralizedTrigSphericalSeries.tendsto_upperIncGamma_ray (c : ℂ) (a : 
   have h := (tendsto_exp_neg_mul_kummerU_sectorAtTop (1-a) (1-a) (δ := u.re/2) (by positivity)).comp
     (hray.comp hs)
   refine h.congr fun t => ?_
-  simp only [Function.comp_apply, upperIncGamma]
+  simp only [Function.comp_apply, upperIncompleteGamma]
   have hn' : ((‖z‖:ℝ):ℂ) ≠ 0 := by exact_mod_cast hn.ne'
   congr 2 <;> · simp only [u]; push_cast; field_simp; ring
 
 /-- Rotating the upper Gamma integral onto the ray `z(t - c)`, `c = ±i`. -/
-theorem GeneralizedTrigSphericalSeries.upperIncGamma_rotate {c : ℂ} (hc : c = I ∨ c = -I)
+theorem GeneralizedTrigSphericalSeries.upperIncompleteGamma_rotate {c : ℂ} (hc : c = I ∨ c = -I)
     (a : ℂ) {z : ℂ}
     (hz : 0 < z.re) :
-    upperIncGamma a (-c*z) = z^a*(-c)^(a-1)*exp (c*z) *
+    upperIncompleteGamma a (-c*z) = z^a*(-c)^(a-1)*exp (c*z) *
       ∫ t : ℝ in Ioi 0, (1+c*t)^(a-1)*exp (-z*t) := by
   have hz0 : z ≠ 0 := by intro h; rw [h] at hz; simp at hz
-  set F : ℝ → ℂ := fun t => upperIncGamma a (z*(t-c))
+  set F : ℝ → ℂ := fun t => upperIncompleteGamma a (z*(t-c))
   set F' : ℝ → ℂ := fun t => -(z*(t-c))^(a-1)*exp (-(z*(t-c)))*z
   have hd : ∀ t : ℝ, 0 ≤ t → HasDerivAt F (F' t) t := by
     intro t ht
     have h1 : HasDerivAt (fun t : ℝ => z*((t:ℂ)-c)) z t := by
       simpa using ((hasDerivAt_id t).ofReal_comp.sub_const c).const_mul z
-    exact (hasDerivAt_upperIncGamma_complex a
+    exact (hasDerivAt_upperIncompleteGamma_complex a
         (GeneralizedTrigSphericalSeries.ray_mem_slitPlane hc hz ht)).comp t h1
   have hF' : ∀ t : ℝ, 0 ≤ t → F' t = -(z^a*(-c)^(a-1)*exp (c*z)) * ((1+c*t)^(a-1)*exp (-z*t)) := by
     intro t ht
@@ -736,7 +737,7 @@ theorem GeneralizedTrigSphericalSeries.upperIncGamma_rotate {c : ℂ} (hc : c = 
     exact h0.congr_fun (fun t ht => (hF' t (le_of_lt ht)).symm) measurableSet_Ioi
   have hcont : ContinuousWithinAt F (Ici 0) 0 := (hd 0 le_rfl).continuousAt.continuousWithinAt
   have h := integral_Ioi_of_hasDerivAt_of_tendsto hcont (fun t ht => hd t (le_of_lt ht)) hint
-    (GeneralizedTrigSphericalSeries.tendsto_upperIncGamma_ray c a hz)
+    (GeneralizedTrigSphericalSeries.tendsto_upperIncompleteGamma_ray c a hz)
   rw [setIntegral_congr_fun measurableSet_Ioi (fun t ht => hF' t (le_of_lt ht)),
     integral_const_mul] at h
   simp only [F, ofReal_zero, zero_sub] at h
@@ -745,23 +746,23 @@ theorem GeneralizedTrigSphericalSeries.upperIncGamma_rotate {c : ℂ} (hc : c = 
 
 /-- The two rotated upper Gamma values in the tails, as Laplace integrals. -/
 theorem GeneralizedTrigSphericalSeries.trigTail_rotate (a : ℂ) {z : ℂ} (hz : 0 < z.re) :
-    genSinIntTail a z = (exp (π*I*a/2)*upperIncGamma a (-I*z) -
-        exp (-π*I*a/2)*upperIncGamma a (I*z))/(2*I) ∧
-    genCosIntTail a z = (exp (π*I*a/2)*upperIncGamma a (-I*z) +
-        exp (-π*I*a/2)*upperIncGamma a (I*z))/2 := by
+    genSinIntTail a z = (exp (π*I*a/2)*upperIncompleteGamma a (-I*z) -
+        exp (-π*I*a/2)*upperIncompleteGamma a (I*z))/(2*I) ∧
+    genCosIntTail a z = (exp (π*I*a/2)*upperIncompleteGamma a (-I*z) +
+        exp (-π*I*a/2)*upperIncompleteGamma a (I*z))/2 := by
   have hz0 : z ≠ 0 := by intro h; rw [h] at hz; simp at hz
   have harg : |arg z| < π/2 := abs_arg_lt_pi_div_two_iff.mpr (Or.inl hz)
   rw [abs_lt] at harg
-  have h1 : upperIncGammaOnLog a (log z - π*I/2) = upperIncGamma a (-I*z) := by
-    rw [upperIncGammaOnLog_eq_upperIncGamma]
+  have h1 : upperIncompleteGammaOnLog a (log z - π*I/2) = upperIncompleteGamma a (-I*z) := by
+    rw [upperIncompleteGammaOnLog_eq_upperIncompleteGamma]
     · rw [sub_eq_add_neg, Complex.exp_add, Complex.exp_log hz0]
       congr 1
       rw [show -(↑π*I/2) = ((-(π/2):ℝ):ℂ)*I by push_cast; ring, Complex.exp_mul_I]
       simp; ring
     · simp [log_im]; linarith
     · simp [log_im]; linarith
-  have h2 : upperIncGammaOnLog a (log z + π*I/2) = upperIncGamma a (I*z) := by
-    rw [upperIncGammaOnLog_eq_upperIncGamma]
+  have h2 : upperIncompleteGammaOnLog a (log z + π*I/2) = upperIncompleteGamma a (I*z) := by
+    rw [upperIncompleteGammaOnLog_eq_upperIncompleteGamma]
     · rw [Complex.exp_add, Complex.exp_log hz0]
       congr 1
       rw [show (↑π*I/2) = (((π/2):ℝ):ℂ)*I by push_cast; ring, Complex.exp_mul_I]
@@ -795,8 +796,8 @@ lemma GeneralizedTrigSphericalSeries.genTrigAux_laplace (a : ℂ) {z : ℂ} (hz 
     genTrigAuxF a z=z^a/2*(∫ t : ℝ in Ioi 0, ((1+I*t)^(a-1)+(1-I*t)^(a-1))*exp (-z*t)) ∧
     genTrigAuxG a z=z^a/(2*I)*(∫ t : ℝ in Ioi 0, ((1-I*t)^(a-1)-(1+I*t)^(a-1))*exp (-z*t)) := by
   obtain ⟨hS, hC⟩ := GeneralizedTrigSphericalSeries.trigTail_rotate a hz
-  have K1 := GeneralizedTrigSphericalSeries.upperIncGamma_rotate (c := I) (Or.inl rfl) a hz
-  have K2 := GeneralizedTrigSphericalSeries.upperIncGamma_rotate (c := -I) (Or.inr rfl) a hz
+  have K1 := GeneralizedTrigSphericalSeries.upperIncompleteGamma_rotate (c := I) (Or.inl rfl) a hz
+  have K2 := GeneralizedTrigSphericalSeries.upperIncompleteGamma_rotate (c := -I) (Or.inr rfl) a hz
   rw [neg_neg] at K2
   have hJ2 : (∫ t : ℝ in Ioi 0, (1+(-I)*t)^(a-1)*exp (-z*t)) =
       ∫ t : ℝ in Ioi 0, (1-I*t)^(a-1)*exp (-z*t) := by
@@ -856,15 +857,17 @@ theorem genTrigAuxG_laplace_integral (a : ℂ) {z : ℂ} (hz : 0 < z.re) :
 
 /-- `e^{e^w} Γ(a, e^w) ~ ∑ (-1)^k (1-a)_k e^{(a-1-k) w}` on the logarithmic sector
 `|im w| ≤ 3π/2 - δ` (DLMF 8.11.2 continued to the logarithmic plane). -/
-theorem upperIncGammaOnLog_logSector_asymptotic (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < 3*π/2) :
+theorem upperIncompleteGammaOnLog_logSector_asymptotic (a : ℂ) {δ : ℝ} (hδ : 0 < δ)
+    (hδ1 : δ < 3*π/2) :
     HasAsymptoticExpansion (logSector (3*π/2-δ)) (fun (k : ℕ) w => exp ((a-1-k)*w))
-      (fun k => (-1 : ℂ)^k*poch (1-a) k) (fun w => exp (exp w) * upperIncGammaOnLog a w) := by
-  have h := (genExpIntE_log_sector_asymptotic (1-a) hδ hδ1).mul_left (fun w => exp (a*w + exp w))
+      (fun k => (-1 : ℂ)^k*pochhammer (1-a) k)
+          (fun w => exp (exp w) * upperIncompleteGammaOnLog a w) := by
+  have h := (expIntegralE_log_sector_asymptotic (1-a) hδ hδ1).mul_left (fun w => exp (a*w + exp w))
   have hφ : (fun (k : ℕ) (w : ℂ) => exp (a*w + exp w) * exp (-exp w-(k+1 : ℂ)*w)) =
       fun (k : ℕ) w => exp ((a-1-k)*w) := by
     funext k w; rw [← Complex.exp_add]; congr 1; ring
   have hf : (fun w => exp (a*w + exp w) • genExpIntEOnLog (1-a) w) =
-      fun w => exp (exp w) * upperIncGammaOnLog a w := by
+      fun w => exp (exp w) * upperIncompleteGammaOnLog a w := by
     funext w
     rw [smul_eq_mul, genExpIntEOnLog, show (1:ℂ) - (1 - a) = a by ring, ← mul_assoc,
       ← Complex.exp_add]
@@ -902,17 +905,17 @@ theorem exp_sign_mul_pi_div_two_mul_I {s : ℝ} (hs : s = 1 ∨ s = -1) :
 /-- One exponential piece of the generalized auxiliary functions:
 `e^{-sπia/2} e^{siz} Γ(a, z e^{sπi/2}) ~ ∑ e^{-s(k+1)πi/2} (-1)^k (1-a)_k z^{a-1-k}` (`s = ±1`)
 in the sector `|arg z| ≤ π - δ`. -/
-theorem upperIncGamma_rotated_piece_asymptotic (a : ℂ) {s : ℝ} (hs : s = 1 ∨ s = -1) {δ : ℝ}
+theorem upperIncompleteGamma_rotated_piece_asymptotic (a : ℂ) {s : ℝ} (hs : s = 1 ∨ s = -1) {δ : ℝ}
     (hδ : 0 < δ) (hδ1 : δ < π) :
     HasAsymptoticExpansion (sector (π-δ)) (fun (k : ℕ) z => z^(a-1-k))
-      (fun k => exp (-((s : ℂ)*(k+1)*π*I/2)) * ((-1 : ℂ)^k*poch (1-a) k))
+      (fun k => exp (-((s : ℂ)*(k+1)*π*I/2)) * ((-1 : ℂ)^k*pochhammer (1-a) k))
       (fun z => exp (-((s : ℂ)*π*I*a/2)) * (exp ((s : ℂ)*I*z) *
-        upperIncGammaOnLog a (log z + s*π*I/2))) := by
+        upperIncompleteGammaOnLog a (log z + s*π*I/2))) := by
   have hs1 : |s| ≤ 1 := by rcases hs with rfl | rfl <;> norm_num
   have hnz : ∀ᶠ z in sector (π-δ), z ≠ 0 := by
     filter_upwards [mem_inf_of_right (mem_principal_self _)] with z hz
     exact hz.1
-  have h1 := (upperIncGammaOnLog_logSector_asymptotic a hδ (by linarith)).comp_tendsto
+  have h1 := (upperIncompleteGammaOnLog_logSector_asymptotic a hδ (by linarith)).comp_tendsto
     (tendsto_log_add_sector hs1 (δ := δ))
   have h2 := h1.smul_scale (ψ := fun (k : ℕ) (z : ℂ) => z^(a-1-k))
     (κ := fun (k : ℕ) => exp ((a-1-k)*((s : ℂ)*π*I/2))) (fun k => by
@@ -940,13 +943,13 @@ theorem exp_neg_sign_mul_pi_div_two_mul_I_pow {s : ℝ} (hs : s = 1 ∨ s = -1) 
 /-- The auxiliary functions in terms of the two exponential pieces. -/
 lemma genTrigAux_eq_pieces (a z : ℂ) :
     genTrigAuxF a z = (exp (-(((-1:ℝ) : ℂ)*π*I*a/2)) * (exp (((-1:ℝ) : ℂ)*I*z) *
-        upperIncGammaOnLog a (log z + ((-1:ℝ) : ℂ)*π*I/2)) -
+        upperIncompleteGammaOnLog a (log z + ((-1:ℝ) : ℂ)*π*I/2)) -
       exp (-(((1:ℝ) : ℂ)*π*I*a/2)) * (exp (((1:ℝ) : ℂ)*I*z) *
-        upperIncGammaOnLog a (log z + ((1:ℝ) : ℂ)*π*I/2))) / (2*I) ∧
+        upperIncompleteGammaOnLog a (log z + ((1:ℝ) : ℂ)*π*I/2))) / (2*I) ∧
     genTrigAuxG a z = (exp (-(((-1:ℝ) : ℂ)*π*I*a/2)) * (exp (((-1:ℝ) : ℂ)*I*z) *
-        upperIncGammaOnLog a (log z + ((-1:ℝ) : ℂ)*π*I/2)) +
+        upperIncompleteGammaOnLog a (log z + ((-1:ℝ) : ℂ)*π*I/2)) +
       exp (-(((1:ℝ) : ℂ)*π*I*a/2)) * (exp (((1:ℝ) : ℂ)*I*z) *
-        upperIncGammaOnLog a (log z + ((1:ℝ) : ℂ)*π*I/2))) / 2 := by
+        upperIncompleteGammaOnLog a (log z + ((1:ℝ) : ℂ)*π*I/2))) / 2 := by
   have e1 : log z + ((-1:ℝ) : ℂ)*π*I/2 = log z - π*I/2 := by push_cast; ring
   have e2 : log z + ((1:ℝ) : ℂ)*π*I/2 = log z + π*I/2 := by push_cast; ring
   have e3 : exp (-(((-1:ℝ) : ℂ)*π*I*a/2)) = exp (π*I*a/2) := by congr 1; push_cast; ring
@@ -956,8 +959,8 @@ lemma genTrigAux_eq_pieces (a z : ℂ) :
   rw [e1, e2, e3, e4, e5, e6]
   simp only [genTrigAuxF, genTrigAuxG, genSinIntTail, genCosIntTail, genSinIntTailOnLog,
     genCosIntTailOnLog, Complex.cos, Complex.sin]
-  set X := upperIncGammaOnLog a (log z - π*I/2)
-  set Y := upperIncGammaOnLog a (log z + π*I/2)
+  set X := upperIncompleteGammaOnLog a (log z - π*I/2)
+  set Y := upperIncompleteGammaOnLog a (log z + π*I/2)
   set α := exp (π*I*a/2)
   set β := exp (-π*I*a/2)
   set u := exp (z*I)
@@ -971,18 +974,19 @@ lemma genTrigAux_eq_pieces (a z : ℂ) :
     ring_nf
 
 /-- Identity under the stated parameter and domain assumptions: `HasAsymptoticExpansion (sector
-(π-δ)) (fun k z => z^(a-1-2*k-0)) (fun k => (-1 : ℂ)^k*poch (1-a) (2*k+0)) (genTrigAuxF a)`. -/
+(π-δ)) (fun k z => z^(a-1-2*k-0)) (fun k => (-1 : ℂ)^k*pochhammer (1-a) (2*k+0)) (genTrigAuxF
+a)`. -/
 @[dlmf 8.21.E26]
 theorem genTrigAuxF_sector_asymptotic (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π) :
     HasAsymptoticExpansion (sector (π-δ)) (fun k z => z^(a-1-2*k-0))
-        (fun k => (-1 : ℂ)^k*poch (1-a) (2*k+0)) (genTrigAuxF a) := by
-  have hm := upperIncGamma_rotated_piece_asymptotic a (s := -1) (Or.inr rfl) hδ hδ1
-  have hp := upperIncGamma_rotated_piece_asymptotic a (s := 1) (Or.inl rfl) hδ hδ1
+        (fun k => (-1 : ℂ)^k*pochhammer (1-a) (2*k+0)) (genTrigAuxF a) := by
+  have hm := upperIncompleteGamma_rotated_piece_asymptotic a (s := -1) (Or.inr rfl) hδ hδ1
+  have hp := upperIncompleteGamma_rotated_piece_asymptotic a (s := 1) (Or.inl rfl) hδ hδ1
   have h := (hm.sub hp).const_smul (1 / (2 * I))
   have hf : ((1 / (2 * I)) • ((fun z => exp (-(((-1:ℝ) : ℂ)*π*I*a/2)) * (exp (((-1:ℝ) : ℂ)*I*z) *
-        upperIncGammaOnLog a (log z + ((-1:ℝ) : ℂ)*π*I/2))) -
+        upperIncompleteGammaOnLog a (log z + ((-1:ℝ) : ℂ)*π*I/2))) -
       (fun z => exp (-(((1:ℝ) : ℂ)*π*I*a/2)) * (exp (((1:ℝ) : ℂ)*I*z) *
-        upperIncGammaOnLog a (log z + ((1:ℝ) : ℂ)*π*I/2))))) = genTrigAuxF a := by
+        upperIncompleteGammaOnLog a (log z + ((1:ℝ) : ℂ)*π*I/2))))) = genTrigAuxF a := by
     funext z
     rw [(genTrigAux_eq_pieces a z).1]
     simp only [Pi.smul_apply, Pi.sub_apply, smul_eq_mul]
@@ -1010,18 +1014,19 @@ theorem genTrigAuxF_sector_asymptotic (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδ1 
     ring
 
 /-- Identity under the stated parameter and domain assumptions: `HasAsymptoticExpansion (sector
-(π-δ)) (fun k z => z^(a-1-2*k-1)) (fun k => (-1 : ℂ)^k*poch (1-a) (2*k+1)) (genTrigAuxG a)`. -/
+(π-δ)) (fun k z => z^(a-1-2*k-1)) (fun k => (-1 : ℂ)^k*pochhammer (1-a) (2*k+1)) (genTrigAuxG
+a)`. -/
 @[dlmf 8.21.E27]
 theorem genTrigAuxG_sector_asymptotic (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π) :
     HasAsymptoticExpansion (sector (π-δ)) (fun k z => z^(a-1-2*k-1))
-        (fun k => (-1 : ℂ)^k*poch (1-a) (2*k+1)) (genTrigAuxG a) := by
-  have hm := upperIncGamma_rotated_piece_asymptotic a (s := -1) (Or.inr rfl) hδ hδ1
-  have hp := upperIncGamma_rotated_piece_asymptotic a (s := 1) (Or.inl rfl) hδ hδ1
+        (fun k => (-1 : ℂ)^k*pochhammer (1-a) (2*k+1)) (genTrigAuxG a) := by
+  have hm := upperIncompleteGamma_rotated_piece_asymptotic a (s := -1) (Or.inr rfl) hδ hδ1
+  have hp := upperIncompleteGamma_rotated_piece_asymptotic a (s := 1) (Or.inl rfl) hδ hδ1
   have h := (hm.add hp).const_smul (1 / 2 : ℂ)
   have hf : ((1 / 2 : ℂ) • ((fun z => exp (-(((-1:ℝ) : ℂ)*π*I*a/2)) * (exp (((-1:ℝ) : ℂ)*I*z) *
-        upperIncGammaOnLog a (log z + ((-1:ℝ) : ℂ)*π*I/2))) +
+        upperIncompleteGammaOnLog a (log z + ((-1:ℝ) : ℂ)*π*I/2))) +
       (fun z => exp (-(((1:ℝ) : ℂ)*π*I*a/2)) * (exp (((1:ℝ) : ℂ)*I*z) *
-        upperIncGammaOnLog a (log z + ((1:ℝ) : ℂ)*π*I/2))))) = genTrigAuxG a := by
+        upperIncompleteGammaOnLog a (log z + ((1:ℝ) : ℂ)*π*I/2))))) = genTrigAuxG a := by
     funext z
     rw [(genTrigAux_eq_pieces a z).2]
     simp only [Pi.smul_apply, Pi.add_apply, smul_eq_mul]

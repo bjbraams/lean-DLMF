@@ -190,7 +190,8 @@ theorem struveCoeff_eq_regularized (ν : ℂ) (n : ℕ) :
     regularizedHGFunCoeff {1} {3/2,ν+3/2} n=struveCoeff ν n := by
   simp only [regularizedHGFunCoeff, Multiset.map_singleton, Multiset.prod_singleton,
     Multiset.insert_eq_cons, Multiset.map_cons, Multiset.prod_cons]
-  rw [show (ascPochhammer ℂ n).eval 1=(n.factorial:ℂ) by simpa [poch] using poch_nat_one n,
+  rw [show (ascPochhammer ℂ n).eval 1=(n.factorial:ℂ) by
+      simpa [pochhammer] using pochhammer_nat_one n,
     div_mul_eq_div_div, div_self (Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero n))]
   simp only [struveCoeff]
   rw [show (3/2:ℂ)+n=n+3/2 by ring, show ν+3/2+n=n+ν+3/2 by ring]

@@ -26,7 +26,7 @@ logarithmic derivative `θ₁'/θ₁`.
 Jacobian functions (§23.6(ii)): DLMF states 23.6.16–23.6.26 for any pair of generators
 with `K = K(k)` the complete elliptic integral of the modulus. The squared quantities in
 23.6.17 hold for every pair of generators only if `K` denotes the lattice quarter period
-`K = (π/2)θ₃²(0|τ)` (`DLMF.JacobiElliptic.compEllIntKTau`), not the principal integral of
+`K = (π/2)θ₃²(0|τ)` (`DLMF.JacobiElliptic.completeEllipticKOfTau`), not the principal integral of
 `k = θ₂²/θ₃²`: `k²` is invariant under `τ ↦ τ/(2τ + 1)` while `ω₁²(e₁ - e₃)` is not
 (numerical check: `ω₁ = 1.1 + 0.2i`, `ω₃ = 0.3 + 0.9i`, generators `(ω₁ + 2ω₃, ω₃)` give
 `K(k)² - ω₁²(e₁ - e₃) ≈ 11.0 - 13.7i`). The lattice forms are therefore stated for all

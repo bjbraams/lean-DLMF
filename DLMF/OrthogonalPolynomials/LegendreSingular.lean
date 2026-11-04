@@ -44,11 +44,11 @@ namespace DLMF.OrthogonalPolynomials.LegendreSingular
 def signKernel (x t : ℝ) : ℂ := (x-t : ℝ) / (|x-t| : ℝ)
 /-- The divided difference with its totalized diagonal value. -/
 def dq (n : ℕ) (x t : ℝ) : ℂ :=
-  (legendrePolyP n x-legendrePolyP n t) / (|x-t| : ℝ)
+  (legendrePolynomialP n x-legendrePolynomialP n t) / (|x-t| : ℝ)
 /-- The divided difference extends continuously on either side of the diagonal. -/
 theorem continuous_dslope (n : ℕ) (x : ℝ) :
-    Continuous (dslope (fun t : ℝ => legendrePolyP n t) x) := by
-  have hd (t : ℝ) : DifferentiableAt ℝ (fun t : ℝ => legendrePolyP n t) t :=
+    Continuous (dslope (fun t : ℝ => legendrePolynomialP n t) x) := by
+  have hd (t : ℝ) : DifferentiableAt ℝ (fun t : ℝ => legendrePolynomialP n t) t :=
     ((LegendreAddition.diff_jet n 0 t).hasDerivAt.comp_ofReal).differentiableAt
   apply continuous_iff_continuousAt.2
   intro t
@@ -57,14 +57,14 @@ theorem continuous_dslope (n : ℕ) (x : ℝ) :
   · exact (continuousAt_dslope_of_ne h).2 (hd t).continuousAt
 /-- The left-hand divided difference is the continuous divided slope. -/
 theorem dq_eq_dslope {x t : ℝ} (h : t < x) (n : ℕ) :
-    dq n x t = dslope (fun t : ℝ => legendrePolyP n t) x t := by
+    dq n x t = dslope (fun t : ℝ => legendrePolynomialP n t) x t := by
   rw [dq, dslope_of_ne _ h.ne, slope_def_module, real_smul, abs_of_pos (sub_pos.mpr h)]
   push_cast
   rw [show (t : ℂ)-x = -((x : ℂ)-t) by ring, inv_neg]
   ring
 /-- The right-hand divided difference has the opposite sign. -/
 theorem dq_eq_neg_dslope {x t : ℝ} (h : x < t) (n : ℕ) :
-    dq n x t = -dslope (fun t : ℝ => legendrePolyP n t) x t := by
+    dq n x t = -dslope (fun t : ℝ => legendrePolynomialP n t) x t := by
   rw [dq, dslope_of_ne _ h.ne', slope_def_module, real_smul, abs_of_neg (sub_neg.mpr h)]
   push_cast
   ring
@@ -129,23 +129,23 @@ theorem integral_signed {f : ℝ → ℂ} (hf : Continuous f) {x : ℝ} (hx : x 
 end DLMF.OrthogonalPolynomials.LegendreSingular
 namespace DLMF.OrthogonalPolynomials.LegendreSingular
 /-- Legendre endpoint values. -/
-theorem endpoints (n : ℕ) : legendrePolyP n 1 = 1 ∧ legendrePolyP n (-1) = (-1)^n := by
-  have h1 : legendrePolyP n 1 = 1 := by
-    rw [legendrePolyP, jacobiPolyP_one ]
+theorem endpoints (n : ℕ) : legendrePolynomialP n 1 = 1 ∧ legendrePolynomialP n (-1) = (-1)^n := by
+  have h1 : legendrePolynomialP n 1 = 1 := by
+    rw [legendrePolynomialP, jacobiPolynomialP_one ]
     simp [Nat.cast_ne_zero.mpr n.factorial_ne_zero]
   refine ⟨h1, ?_⟩
-  change jacobiPolyP 0 0 n (-1) = _
-  rw [jacobi_reflection (by norm_num) (by norm_num), ← legendrePolyP, h1, mul_one]
+  change jacobiPolynomialP 0 0 n (-1) = _
+  rw [jacobi_reflection (by norm_num) (by norm_num), ← legendrePolynomialP, h1, mul_one]
 
 /-- A primitive of a positive-degree Legendre polynomial. -/
 def primitive (n : ℕ) (t : ℝ) : ℂ :=
-  (legendrePolyP (n+2) t-legendrePolyP n t)/(2*n+3)
+  (legendrePolynomialP (n+2) t-legendrePolynomialP n t)/(2*n+3)
 /-- Its endpoint values vanish. -/
 theorem primitive_endpoints (n : ℕ) : primitive n (-1) = 0 ∧ primitive n 1 = 0 := by
   simp [primitive, (endpoints _).1, (endpoints _).2, pow_add]
 /-- The derivative of the primitive. -/
 theorem hasDerivAt_primitive (n : ℕ) (t : ℝ) :
-    HasDerivAt (primitive n) (legendrePolyP (n+1) t) t := by
+    HasDerivAt (primitive n) (legendrePolynomialP (n+1) t) t := by
   have h1 := (LegendreAddition.hderiv_jet (n+2) 0 t).comp_ofReal
   have h0 := (LegendreAddition.hderiv_jet n 0 t).comp_ofReal
   have hh := (h1.sub h0).div_const (2*n+3 : ℂ)
@@ -161,9 +161,9 @@ theorem hasDerivAt_primitive (n : ℕ) (t : ℝ) :
   linear_combination hr-hl
 /-- A signed Legendre integral, evaluated by its primitive. -/
 theorem integral_signed_legendre (n : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1) 1) :
-    (∫ t : ℝ in (-1)..1, signKernel x t*legendrePolyP (n+1) t) =
-      2*(legendrePolyP (n+2) x-legendrePolyP n x)/(2*n+3) := by
-  have hc : Continuous (fun t : ℝ => legendrePolyP (n+1) t) :=
+    (∫ t : ℝ in (-1)..1, signKernel x t*legendrePolynomialP (n+1) t) =
+      2*(legendrePolynomialP (n+2) x-legendrePolynomialP n x)/(2*n+3) := by
+  have hc : Continuous (fun t : ℝ => legendrePolynomialP (n+1) t) :=
     (LegendreAddition.diff_jet (n+1) 0).continuous.comp continuous_ofReal
   rw [integral_signed hc hx,
     intervalIntegral.integral_eq_sub_of_hasDerivAt (fun t _ => hasDerivAt_primitive n t)
@@ -176,9 +176,10 @@ theorem integral_signed_legendre (n : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1) 1) :
 /-- The recurrence for the divided differences. -/
 theorem dq_recurrence (n : ℕ) (x t : ℝ) :
     (n+2)*dq (n+2) x t =
-      (2*n+3)*((x : ℂ)*dq (n+1) x t + signKernel x t*legendrePolyP (n+1) t) - (n+1)*dq n x t := by
-  have hx := legendrePolyP_recurrence n (x : ℂ)
-  have ht := legendrePolyP_recurrence n (t : ℂ)
+      (2*n+3)*((x : ℂ)*dq (n+1) x t + signKernel x t*legendrePolynomialP (n+1) t) -
+          (n+1)*dq n x t := by
+  have hx := legendrePolynomialP_recurrence n (x : ℂ)
+  have ht := legendrePolynomialP_recurrence n (t : ℂ)
   dsimp only [dq, signKernel]
   push_cast
   linear_combination (((|x-t| : ℝ) : ℂ))⁻¹ * (hx-ht)
@@ -190,26 +191,26 @@ theorem harmonicSum_succ (n : ℕ) : harmonicSum (n+1) = harmonicSum n+(n+1 : �
   exact Finset.sum_range_succ _ _
 /-- The singular integral of a Legendre polynomial. -/
 theorem singular_integral (n : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1) 1) :
-    (∫ t : ℝ in (-1)..1, dq n x t) = 2*harmonicSum n*legendrePolyP n x := by
+    (∫ t : ℝ in (-1)..1, dq n x t) = 2*harmonicSum n*legendrePolynomialP n x := by
   have hI (k : ℕ) := (dq_integrable k hx).1.trans (dq_integrable k hx).2
-  have hC (k : ℕ) : Continuous (fun t : ℝ => legendrePolyP k t) :=
+  have hC (k : ℕ) : Continuous (fun t : ℝ => legendrePolynomialP k t) :=
     (LegendreAddition.diff_jet k 0).continuous.comp continuous_ofReal
   induction n using Nat.twoStepInduction with
-  | zero => simp [dq, legendrePolyP_zero, harmonicSum]
+  | zero => simp [dq, legendrePolynomialP_zero, harmonicSum]
   | one =>
     have he : dq 1 x = fun t => signKernel x t * (1 : ℂ) := by
       funext t
-      simp only [dq, legendrePolyP_one, signKernel, mul_one]
+      simp only [dq, legendrePolynomialP_one, signKernel, mul_one]
       push_cast
       rfl
     rw [he, integral_signed continuous_const hx]
-    norm_num [harmonicSum, legendrePolyP_one]
+    norm_num [harmonicSum, legendrePolynomialP_one]
     ring
   | more n ih0 ih1 =>
     have hS := (signed_integrable (hC (n+1)) hx).1.trans (signed_integrable (hC (n+1)) hx).2
     have hr : (n+2)*(∫ t : ℝ in (-1)..1, dq (n+2) x t) =
         (2*n+3)*((x : ℂ)*(∫ t : ℝ in (-1)..1, dq (n+1) x t) +
-          (∫ t : ℝ in (-1)..1, signKernel x t*legendrePolyP (n+1) t)) -
+          (∫ t : ℝ in (-1)..1, signKernel x t*legendrePolynomialP (n+1) t)) -
             (n+1)*(∫ t : ℝ in (-1)..1, dq n x t) := by
       rw [← intervalIntegral.integral_const_mul, ← intervalIntegral.integral_const_mul,
         ← intervalIntegral.integral_const_mul,
@@ -221,7 +222,7 @@ theorem singular_integral (n : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1) 1) :
       intro t _
       exact dq_recurrence n x t
     rw [ih0, ih1, integral_signed_legendre n hx] at hr
-    have hp := legendrePolyP_recurrence n (x : ℂ)
+    have hp := legendrePolynomialP_recurrence n (x : ℂ)
     have hn : (n+2 : ℂ) ≠ 0 := by exact_mod_cast (show n+2 ≠ 0 by omega)
     have hn1 : (n+1 : ℂ) ≠ 0 := by exact_mod_cast n.succ_ne_zero
     have hn3 : (2*n+3 : ℂ) ≠ 0 := by exact_mod_cast (show 2*n+3 ≠ 0 by omega)

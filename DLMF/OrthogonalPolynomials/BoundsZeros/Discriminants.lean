@@ -22,8 +22,8 @@ in terms of the root lists of the polynomials (`rootDiscriminant`, DLMF 18.2.20)
 ## Main results
 
 * `jacobi_discriminant`: the Jacobi discriminant (DLMF 18.16.19), from the AAR form.
-* `laguerrePolyL_discriminant`: the Laguerre discriminant (DLMF 18.16.20).
-* `hermitePolyH_discriminant`: the Hermite discriminant (DLMF 18.16.21).
+* `laguerrePolynomialL_discriminant`: the Laguerre discriminant (DLMF 18.16.20).
+* `hermitePolynomialH_discriminant`: the Hermite discriminant (DLMF 18.16.21).
 * `lagPoly_eq_nodal`, `hP_eq_nodal`: `L_n^{(α)}` and `H_n` as leading coefficient times the
   product over their real zeros.
 
@@ -51,9 +51,9 @@ namespace DLMF.OrthogonalPolynomials
 /-! ### Helpers for the discriminant formulas -/
 
 /-- For real `c`, the real part of `(c)_n` is `∏_{k<n} (c + k)`. -/
-theorem re_poch_ofReal (c : ℝ) (n : ℕ) :
-    (poch (c : ℂ) n).re = ∏ k ∈ Finset.range n, (c + k) := by
-  have h := poch_mul_pow (c : ℂ) 1 n
+theorem re_pochhammer_ofReal (c : ℝ) (n : ℕ) :
+    (pochhammer (c : ℂ) n).re = ∏ k ∈ Finset.range n, (c + k) := by
+  have h := pochhammer_mul_pow (c : ℂ) 1 n
   simp only [one_pow, mul_one] at h
   rw [h]
   have : (∏ k ∈ Finset.range n, ((c : ℂ) + k)) = ((∏ k ∈ Finset.range n, (c + k) : ℝ) : ℂ) := by
@@ -96,18 +96,19 @@ theorem jacobiDisc_factor {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) {m k : �
   push_cast
   field_simp
 
-/-- Formula under the stated hypotheses: `rootDiscriminant ((poch (n + α + β + 1) n).re / (2 ^ n *
-n.factorial)) x = (2 : ℝ)⁻¹ ^ (n * (n - 1)) * ∏ j ∈ Finset.Icc 1 n, (j : ℝ) ^ ((j : ℤ) - 2 * n
-+ 2) * (j + α) ^ (j - 1) * (j + β) ^ (j - 1) * (n + j + α + β) ^ (n - j)`. -/
+/-- Formula under the stated hypotheses:
+`rootDiscriminant ((pochhammer (n + α + β + 1) n).re / (2 ^ n * n.factorial)) x = (2 : ℝ)⁻¹ ^ (n *
+(n - 1)) * ∏ j ∈ Finset.Icc 1 n, (j : ℝ) ^ ((j : ℤ) - 2 * n + 2) * (j + α) ^ (j - 1) * (j + β) ^ (j
+- 1) * (n + j + α + β) ^ (n - j)`. -/
 @[dlmf 18.16.E19]
 theorem jacobi_discriminant {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) {n : ℕ} (hn : 0 < n)
-    (x : Fin n → ℝ) (hinj : Function.Injective x) (hroot : ∀ i, jacobiPolyP α β n (x i) = 0) :
-    rootDiscriminant ((poch (n + α + β + 1) n).re / (2 ^ n * n.factorial)) x =
+    (x : Fin n → ℝ) (hinj : Function.Injective x) (hroot : ∀ i, jacobiPolynomialP α β n (x i) = 0) :
+    rootDiscriminant ((pochhammer (n + α + β + 1) n).re / (2 ^ n * n.factorial)) x =
       (2 : ℝ)⁻¹ ^ (n * (n - 1)) * ∏ j ∈ Finset.Icc 1 n,
         (j : ℝ) ^ ((j : ℤ) - 2 * n + 2) * (j + α) ^ (j - 1) * (j + β) ^ (j - 1) *
           (n + j + α + β) ^ (n - j) := by
   obtain ⟨m, rfl⟩ := Nat.exists_eq_add_one_of_ne_zero hn.ne'
-  have hD := jacobiPolyP_prod_sq_sub (n := m + 1) (Nat.succ_ne_zero m) hα hβ x hroot hinj
+  have hD := jacobiPolynomialP_prod_sq_sub (n := m + 1) (Nat.succ_ne_zero m) hα hβ x hroot hinj
   have hL : (Finset.univ.prod fun i : Fin (m + 1) => Finset.univ.prod fun j : Fin (m + 1) =>
       if i.val < j.val then ((x i - x j : ℝ) : ℂ) ^ (2 : ℕ) else (1 : ℂ)) =
       ((∏ i : Fin (m + 1), ∏ j : Fin (m + 1),
@@ -129,7 +130,7 @@ theorem jacobi_discriminant {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) {n : �
     push_cast; ring
   unfold rootDiscriminant
   simp only [Fin.lt_def]
-  rw [hDR, hc, re_poch_ofReal, prod_Icc_one_eq_prod_range,
+  rw [hDR, hc, re_pochhammer_ofReal, prod_Icc_one_eq_prod_range,
     show (2 * ((m + 1 : ℕ) : ℤ) - 2) = ((2 * m : ℕ) : ℤ) by push_cast; ring, zpow_natCast,
     ← Finset.prod_range_add_one_eq_factorial]
   rw [Finset.prod_congr rfl fun k hk => jacobiDisc_factor hα hβ
@@ -157,7 +158,7 @@ namespace LagDisc
 open Polynomial Finset JacobiDisc DLMF.Confluent
 
 /-- Coefficient of `x^j` in `L_n^{(a)}`. -/
-def lcoef (a : ℂ) (n j : ℕ) : ℂ := poch (a + 1) n / n ! * kummerMCoeff (-(n : ℂ)) (a + 1) j
+def lcoef (a : ℂ) (n j : ℕ) : ℂ := pochhammer (a + 1) n / n ! * kummerMCoeff (-(n : ℂ)) (a + 1) j
 
 /-- The Laguerre polynomial as an element of `ℂ[X]`. -/
 def lagPoly (a : ℂ) (n : ℕ) : ℂ[X] := ∑ j ∈ range (n + 1), C (lcoef a n j) * X ^ j
@@ -166,8 +167,9 @@ def lagPoly (a : ℂ) (n : ℕ) : ℂ[X] := ∑ j ∈ range (n + 1), C (lcoef a 
 def laguerreLeadingCoeff (n : ℕ) : ℂ := (-1) ^ n / n !
 
 /-- `lagPoly a n` evaluates to `L_n^{(a)}`. -/
-theorem eval_lagPoly (a : ℂ) (n : ℕ) (x : ℂ) : (lagPoly a n).eval x = laguerrePolyL a n x := by
-  rw [laguerrePolyL_eq_sum_coeff]
+theorem eval_lagPoly (a : ℂ) (n : ℕ) (x : ℂ) : (lagPoly a n).eval x =
+    laguerrePolynomialL a n x := by
+  rw [laguerrePolynomialL_eq_sum_coeff]
   simp [lagPoly, eval_finsetSum, lcoef]
 
 /-- The coefficients of `lagPoly a n`. -/
@@ -180,14 +182,14 @@ theorem coeff_lagPoly (a : ℂ) (n k : ℕ) :
 variable {α : ℝ}
 
 /-- For `α > -1`, `(α+1)_n ≠ 0`. -/
-theorem poch_ne_zero' (hα : -1 < α) (n : ℕ) : poch ((α : ℂ) + 1) n ≠ 0 :=
-  poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith)) _
+theorem pochhammer_ne_zero' (hα : -1 < α) (n : ℕ) : pochhammer ((α : ℂ) + 1) n ≠ 0 :=
+  pochhammer_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith)) _
 
 /-- The leading coefficient of `L_n^{(α)}` is `(-1)ⁿ/n!`. -/
 theorem lcoef_self (hα : -1 < α) (n : ℕ) : lcoef α n n = laguerreLeadingCoeff n := by
-  have hp := poch_ne_zero' hα n
+  have hp := pochhammer_ne_zero' hα n
   have hf : (n ! : ℂ) ≠ 0 := by exact_mod_cast n.factorial_ne_zero
-  rw [lcoef, kummerMCoeff, poch_neg_coe_nat, Nat.descFactorial_self, laguerreLeadingCoeff]
+  rw [lcoef, kummerMCoeff, pochhammer_neg_coe_nat, Nat.descFactorial_self, laguerreLeadingCoeff]
   field_simp
 
 /-- `(-1)ⁿ/n! ≠ 0`. -/
@@ -226,7 +228,7 @@ theorem lagPoly_ne_zero (hα : -1 < α) (n : ℕ) : lagPoly α n ≠ 0 := by
 
 /-- If `x` lists `n` distinct real zeros of `L_n^{(α)}`, they are all its complex roots. -/
 theorem roots_lagPoly_eq (hα : -1 < α) {n : ℕ} (x : Fin n → ℝ)
-    (hroot : ∀ i, laguerrePolyL α n (x i) = 0) (hinj : Function.Injective x) :
+    (hroot : ∀ i, laguerrePolynomialL α n (x i) = 0) (hinj : Function.Injective x) :
     (lagPoly α n).roots = (univ.val.map fun i => (x i : ℂ)) := by
   have hne := lagPoly_ne_zero hα n
   have hnd : (univ.val.map fun i => (x i : ℂ)).Nodup :=
@@ -243,7 +245,7 @@ theorem roots_lagPoly_eq (hα : -1 < α) {n : ℕ} (x : Fin n → ℝ)
 
 /-- `L_n^{(α)} = (-1)ⁿ/n! ∏ (X - xᵢ)` over its `n` distinct real zeros. -/
 theorem lagPoly_eq_nodal (hα : -1 < α) {n : ℕ} (x : Fin n → ℝ)
-    (hroot : ∀ i, laguerrePolyL α n (x i) = 0) (hinj : Function.Injective x) :
+    (hroot : ∀ i, laguerrePolynomialL α n (x i) = 0) (hinj : Function.Injective x) :
     lagPoly α n = C (laguerreLeadingCoeff n) * Lagrange.nodal univ fun i => (x i : ℂ) := by
   conv_lhs => rw [← C_leadingCoeff_mul_prod_multiset_X_sub_C
     (IsAlgClosed.card_roots_eq_natDegree (k := ℂ) (p := lagPoly α n))]
@@ -255,7 +257,7 @@ def laguerreRootProd (a : ℂ) (m : ℕ) : ℂ :=
 
 /-- `laguerreRootProd a 0 = 1`. -/
 theorem laguerreRootProd_zero (a : ℂ) : laguerreRootProd a 0 = 1 := by
-  simp [laguerreRootProd, lagPoly, lcoef, poch_zero, kummerMCoeff]
+  simp [laguerreRootProd, lagPoly, lcoef, pochhammer_zero, kummerMCoeff]
 
 /-- At a zero of `L_{m+1}^{(α)}` the three-term recurrence gives
 `L_{m+2}^{(α)} = -(m+α+1)/(m+2) L_m^{(α)}`. -/
@@ -265,7 +267,7 @@ theorem eval_lagPoly_two_of_root (hα : -1 < α) (m : ℕ) {y : ℂ}
   have hα' : -1 < (α : ℂ).re := by simpa using hα
   rw [eval_lagPoly] at hy ⊢
   rw [eval_lagPoly]
-  have h := laguerrePolyL_recurrence hα' m y
+  have h := laguerrePolynomialL_recurrence hα' m y
   rw [hy] at h
   have h2 : (m + 2 : ℂ) ≠ 0 := by exact_mod_cast Nat.succ_ne_zero (m + 1)
   field_simp
@@ -319,45 +321,45 @@ theorem laguerreRootProd_eq (hα : -1 < α) (m : ℕ) :
 
 /-- The Laguerre discriminant expressed through `laguerreRootProd`. -/
 theorem disc_eq (hα : -1 < α) (m : ℕ) (x : Fin (m + 1) → ℝ)
-    (hroot : ∀ i, laguerrePolyL α (m + 1) (x i) = 0) (hinj : Function.Injective x) :
+    (hroot : ∀ i, laguerrePolynomialL α (m + 1) (x i) = 0) (hinj : Function.Injective x) :
     (∏ i : Fin (m + 1), ∏ j : Fin (m + 1),
       if i.val < j.val then ((x i - x j : ℝ) : ℂ) ^ 2 else 1) *
-        (laguerreLeadingCoeff (m + 1) ^ (m + 1) * poch ((α : ℂ) + 1) (m + 1)) =
+        (laguerreLeadingCoeff (m + 1) ^ (m + 1) * pochhammer ((α : ℂ) + 1) (m + 1)) =
       (-1) ^ (m + 1).choose 2 * (-((m : ℂ) + α + 1)) ^ (m + 1) * laguerreRootProd α m := by
   have hα' : -1 < (α : ℂ).re := by simpa using hα
   set xc : Fin (m + 1) → ℂ := fun i => (x i : ℂ) with hxc
   set K := laguerreLeadingCoeff (m + 1) with hK
   have hnodal := lagPoly_eq_nodal hα x hroot hinj
-  have hder : ∀ i, deriv (laguerrePolyL α (m + 1)) (xc i) =
+  have hder : ∀ i, deriv (laguerrePolynomialL α (m + 1)) (xc i) =
       K * ∏ j ∈ univ.erase i, (xc i - xc j) := by
     intro i
-    have hfun : laguerrePolyL α (m + 1) = fun z => (lagPoly α (m + 1)).eval z :=
+    have hfun : laguerrePolynomialL α (m + 1) = fun z => (lagPoly α (m + 1)).eval z :=
       funext fun z => (eval_lagPoly _ _ z).symm
     rw [hfun, Polynomial.deriv, hnodal, derivative_C_mul, eval_mul, eval_C,
       Lagrange.eval_nodal_derivative_eval_node_eq (mem_univ i), Lagrange.eval_nodal]
   have hrel : ∀ i, xc i * (K * ∏ j ∈ univ.erase i, (xc i - xc j)) =
-      -((m : ℂ) + α + 1) * laguerrePolyL α m (xc i) := by
+      -((m : ℂ) + α + 1) * laguerrePolynomialL α m (xc i) := by
     intro i
-    rw [← hder i, laguerrePolyL_derivative hα' m]
-    have h := laguerrePolyL_mul_argument hα' m (xc i)
+    rw [← hder i, laguerrePolynomialL_derivative hα' m]
+    have h := laguerrePolynomialL_mul_argument hα' m (xc i)
     rw [hroot i] at h
     linear_combination -h
   have hprod := congrArg (fun f : Fin (m + 1) → ℂ => ∏ i, f i) (funext hrel)
   simp only [prod_mul_distrib, prod_const, card_univ, Fintype.card_fin] at hprod
-  have hSS : ∏ i, laguerrePolyL α m (xc i) = laguerreRootProd α m := by
+  have hSS : ∏ i, laguerrePolynomialL α m (xc i) = laguerreRootProd α m := by
     unfold laguerreRootProd
     rw [roots_lagPoly_eq hα x hroot hinj, Multiset.map_map]
     simp only [Function.comp_def, eval_lagPoly]
     rfl
-  have h0 : K * ∏ i, (0 - xc i) = poch ((α : ℂ) + 1) (m + 1) / (m + 1)! := by
+  have h0 : K * ∏ i, (0 - xc i) = pochhammer ((α : ℂ) + 1) (m + 1) / (m + 1)! := by
     have := congrArg (fun p => p.eval 0) hnodal
     simp only [eval_mul, eval_C, Lagrange.eval_nodal, eval_lagPoly] at this
-    rw [← this, laguerrePolyL_at_zero]
+    rw [← this, laguerrePolynomialL_at_zero]
   have hneg : ∏ i, (0 - xc i) = (-1) ^ (m + 1) * ∏ i, xc i := by
     have hc : ∏ _i : Fin (m + 1), (-1 : ℂ) = (-1) ^ (m + 1) := by simp
     rw [← hc, ← prod_mul_distrib]
     exact prod_congr rfl fun i _ => by ring
-  have hx : ∏ i, xc i = poch ((α : ℂ) + 1) (m + 1) := by
+  have hx : ∏ i, xc i = pochhammer ((α : ℂ) + 1) (m + 1) := by
     rw [hneg, hK, laguerreLeadingCoeff] at h0
     have hf : ((m + 1)! : ℂ) ≠ 0 := by exact_mod_cast (m + 1).factorial_ne_zero
     have hs : ((-1 : ℂ) ^ (m + 1)) * (-1) ^ (m + 1) = 1 := by
@@ -375,7 +377,7 @@ theorem disc_eq (hα : -1 < α) (m : ℕ) (x : Fin (m + 1) → ℝ)
     rw [← pow_add, ← two_mul, pow_mul]; norm_num
   linear_combination ((-1 : ℂ) ^ (m + 1).choose 2) * hprod -
     ((∏ i, ∏ j, (if i.val < j.val then (xc i - xc j) ^ 2 else (1 : ℂ))) *
-      (K ^ (m + 1) * poch ((α : ℂ) + 1) (m + 1))) * hσ
+      (K ^ (m + 1) * pochhammer ((α : ℂ) + 1) (m + 1))) * hσ
 
 /-- Reindexing identity for the products `∏ (k+1+c)^{k+1}`. -/
 theorem prod_pow_succ_shift (c : ℂ) (m : ℕ) :
@@ -407,14 +409,14 @@ theorem prod_neg_one_pow_succ (m : ℕ) :
   simp
 
 /-- `(c)_n = ∏_{k<n} (c + k)`. -/
-theorem poch_eq_prod (c : ℂ) (n : ℕ) : poch c n = ∏ k ∈ range n, (c + k) := by
-  have h := poch_mul_pow c 1 n
+theorem pochhammer_eq_prod (c : ℂ) (n : ℕ) : pochhammer c n = ∏ k ∈ range n, (c + k) := by
+  have h := pochhammer_mul_pow c 1 n
   simp only [one_pow, mul_one] at h
   exact h
 
 /-- Closed form of the discriminant of the Laguerre polynomial `L_{m+1}^{(α)}` (Stieltjes). -/
 theorem disc_closed (hα : -1 < α) (m : ℕ) (x : Fin (m + 1) → ℝ)
-    (hroot : ∀ i, laguerrePolyL α (m + 1) (x i) = 0) (hinj : Function.Injective x) :
+    (hroot : ∀ i, laguerrePolynomialL α (m + 1) (x i) = 0) (hinj : Function.Injective x) :
     laguerreLeadingCoeff (m + 1) ^ (2 * m) * (∏ i : Fin (m + 1), ∏ j : Fin (m + 1),
       if i.val < j.val then ((x i - x j : ℝ) : ℂ) ^ 2 else 1) =
       ∏ k ∈ range (m + 1), ((k : ℂ) + 1) ^ (k + 1) / ((k : ℂ) + 1) ^ (2 * m) *
@@ -423,8 +425,8 @@ theorem disc_closed (hα : -1 < α) (m : ℕ) (x : Fin (m + 1) → ℝ)
   generalize (∏ i : Fin (m + 1), ∏ j : Fin (m + 1),
       if i.val < j.val then ((x i - x j : ℝ) : ℂ) ^ 2 else 1) = D at hD ⊢
   rw [laguerreRootProd_eq hα, prod_div_distrib, prod_mul_distrib, prod_neg_one_pow_succ] at hD
-  have hQ : poch ((α : ℂ) + 1) (m + 1) = ∏ k ∈ range (m + 1), ((k : ℂ) + 1 + α) := by
-    rw [poch_eq_prod]; exact prod_congr rfl fun k _ => by ring
+  have hQ : pochhammer ((α : ℂ) + 1) (m + 1) = ∏ k ∈ range (m + 1), ((k : ℂ) + 1 + α) := by
+    rw [pochhammer_eq_prod]; exact prod_congr rfl fun k _ => by ring
   rw [hQ] at hD
   rw [prod_mul_distrib, prod_div_distrib, prod_pow]
   have hfN : (∏ k ∈ range (m + 1), ((k : ℂ) + 1)) = (((m + 1)! : ℕ) : ℂ) := by
@@ -488,8 +490,8 @@ end LagDisc
 /-- Formula under the stated hypotheses: `rootDiscriminant ((-1 : ℝ) ^ n / n.factorial) x = ∏ j ∈
 Finset.Icc 1 n, (j : ℝ) ^ ((j : ℤ) - 2 * n + 2) * (j + α) ^ (j - 1)`. -/
 @[dlmf 18.16.E20]
-theorem laguerrePolyL_discriminant {α : ℝ} (hα : -1 < α) {n : ℕ} (hn : 0 < n)
-    (x : Fin n → ℝ) (hinj : Function.Injective x) (hroot : ∀ i, laguerrePolyL α n (x i) = 0) :
+theorem laguerrePolynomialL_discriminant {α : ℝ} (hα : -1 < α) {n : ℕ} (hn : 0 < n)
+    (x : Fin n → ℝ) (hinj : Function.Injective x) (hroot : ∀ i, laguerrePolynomialL α n (x i) = 0) :
     rootDiscriminant ((-1 : ℝ) ^ n / n.factorial) x =
       ∏ j ∈ Finset.Icc 1 n, (j : ℝ) ^ ((j : ℤ) - 2 * n + 2) * (j + α) ^ (j - 1) := by
   obtain ⟨m, rfl⟩ := Nat.exists_eq_add_one_of_ne_zero hn.ne'
@@ -539,13 +541,13 @@ namespace HerDisc
 open Polynomial Finset JacobiDisc
 
 /-- `H_n` has degree at most `n` and leading coefficient `2ⁿ`. -/
-theorem coeff_hermitePolyH_self (n : ℕ) :
-    (hermitePolyH n).natDegree ≤ n ∧ (hermitePolyH n).coeff n = 2 ^ n := by
+theorem coeff_hermitePolynomialH_self (n : ℕ) :
+    (hermitePolynomialH n).natDegree ≤ n ∧ (hermitePolynomialH n).coeff n = 2 ^ n := by
   induction n with
-  | zero => simp [hermitePolyH_zero]
+  | zero => simp [hermitePolynomialH_zero]
   | succ n ih =>
     obtain ⟨hd, hc⟩ := ih
-    rw [hermitePolyH_succ]
+    rw [hermitePolynomialH_succ]
     refine ⟨?_, ?_⟩
     · refine (natDegree_sub_le _ _).trans (max_le ?_ ?_)
       · refine (natDegree_mul_le).trans ?_
@@ -554,7 +556,7 @@ theorem coeff_hermitePolyH_self (n : ℕ) :
           simp
         omega
       · exact (natDegree_derivative_le _).trans (by omega)
-    · have h1 : (derivative (hermitePolyH n)).coeff (n + 1) = 0 := by
+    · have h1 : (derivative (hermitePolynomialH n)).coeff (n + 1) = 0 := by
         rw [coeff_derivative]
         rw [coeff_eq_zero_of_natDegree_lt (by omega), zero_mul]
       rw [coeff_sub, h1, sub_zero, mul_assoc, show (2 : ℤ[X]) = C 2 by rfl, coeff_C_mul,
@@ -562,18 +564,18 @@ theorem coeff_hermitePolyH_self (n : ℕ) :
       ring
 
 /-- The Hermite polynomial over `ℂ`. -/
-def hP (n : ℕ) : ℂ[X] := (hermitePolyH n).map (Int.castRingHom ℂ)
+def hP (n : ℕ) : ℂ[X] := (hermitePolynomialH n).map (Int.castRingHom ℂ)
 
 /-- The complex Hermite polynomial `H_n` has degree `n`. -/
 theorem natDegree_hP (n : ℕ) : (hP n).natDegree = n := by
-  obtain ⟨hd, hc⟩ := coeff_hermitePolyH_self n
-  have hne : (hermitePolyH n).natDegree = n :=
+  obtain ⟨hd, hc⟩ := coeff_hermitePolynomialH_self n
+  have hne : (hermitePolynomialH n).natDegree = n :=
     natDegree_eq_of_le_of_coeff_ne_zero hd (by rw [hc]; positivity)
   rw [hP, natDegree_map_eq_of_injective (RingHom.injective_int _), hne]
 
 /-- The leading coefficient of `H_n` is `2ⁿ`. -/
 theorem leadingCoeff_hP (n : ℕ) : (hP n).leadingCoeff = 2 ^ n := by
-  rw [leadingCoeff, natDegree_hP, hP, coeff_map, (coeff_hermitePolyH_self n).2]
+  rw [leadingCoeff, natDegree_hP, hP, coeff_map, (coeff_hermitePolynomialH_self n).2]
   simp
 
 /-- The complex Hermite polynomial is nonzero. -/
@@ -585,9 +587,9 @@ theorem hP_ne_zero (n : ℕ) : hP n ≠ 0 := by
 
 /-- At a real point the complex Hermite polynomial takes the real value of `H_n`. -/
 theorem eval_hP_ofReal (n : ℕ) (r : ℝ) :
-    (hP n).eval (r : ℂ) = ((aeval r (hermitePolyH n) : ℝ) : ℂ) := by
+    (hP n).eval (r : ℂ) = ((aeval r (hermitePolynomialH n) : ℝ) : ℂ) := by
   rw [hP, eval_map, aeval_def]
-  have h := Polynomial.hom_eval₂ (hermitePolyH n) (algebraMap ℤ ℝ) Complex.ofRealHom r
+  have h := Polynomial.hom_eval₂ (hermitePolynomialH n) (algebraMap ℤ ℝ) Complex.ofRealHom r
   rw [show Complex.ofRealHom.comp (algebraMap ℤ ℝ) = Int.castRingHom ℂ from
     RingHom.ext_int _ _] at h
   exact h.symm
@@ -595,18 +597,18 @@ theorem eval_hP_ofReal (n : ℕ) (r : ℝ) :
 /-- The Hermite recurrence `H_{n+2} = 2X H_{n+1} - 2(n+1) H_n`. -/
 theorem hP_recurrence (n : ℕ) :
     hP (n + 2) = 2 * X * hP (n + 1) - C (2 * (n + 1) : ℂ) * hP n := by
-  simp only [hP, hermitePolyH_recurrence, Polynomial.map_sub, Polynomial.map_mul,
+  simp only [hP, hermitePolynomialH_recurrence, Polynomial.map_sub, Polynomial.map_mul,
     Polynomial.map_ofNat, map_X, map_C]
   simp
 
 /-- `H_{n+1}' = 2(n+1) H_n`. -/
 theorem derivative_hP (n : ℕ) : derivative (hP (n + 1)) = C (2 * (n + 1) : ℂ) * hP n := by
-  simp only [hP, derivative_map, hermitePolyH_derivative, Polynomial.map_mul, map_C]
+  simp only [hP, derivative_map, hermitePolynomialH_derivative, Polynomial.map_mul, map_C]
   simp
 
 /-- If `x` lists `n` distinct real zeros of `H_n`, they are all its complex roots. -/
 theorem roots_hP_eq {n : ℕ} (x : Fin n → ℝ)
-    (hroot : ∀ i, (aeval (x i) (hermitePolyH n) : ℝ) = 0) (hinj : Function.Injective x) :
+    (hroot : ∀ i, (aeval (x i) (hermitePolynomialH n) : ℝ) = 0) (hinj : Function.Injective x) :
     (hP n).roots = (univ.val.map fun i => (x i : ℂ)) := by
   have hne := hP_ne_zero n
   have hnd : (univ.val.map fun i => (x i : ℂ)).Nodup :=
@@ -622,7 +624,7 @@ theorem roots_hP_eq {n : ℕ} (x : Fin n → ℝ)
 
 /-- `H_n = 2ⁿ ∏ (X - xᵢ)` over its `n` distinct real zeros. -/
 theorem hP_eq_nodal {n : ℕ} (x : Fin n → ℝ)
-    (hroot : ∀ i, (aeval (x i) (hermitePolyH n) : ℝ) = 0) (hinj : Function.Injective x) :
+    (hroot : ∀ i, (aeval (x i) (hermitePolynomialH n) : ℝ) = 0) (hinj : Function.Injective x) :
     hP n = C (2 ^ n) * Lagrange.nodal univ fun i => (x i : ℂ) := by
   conv_lhs => rw [← C_leadingCoeff_mul_prod_multiset_X_sub_C
     (IsAlgClosed.card_roots_eq_natDegree (k := ℂ) (p := hP n))]
@@ -634,7 +636,7 @@ def hermiteRootProd (m : ℕ) : ℂ := ((hP (m + 1)).roots.map fun y => (hP m).e
 
 /-- `hermiteRootProd 0 = 1`. -/
 theorem hermiteRootProd_zero : hermiteRootProd 0 = 1 := by
-  simp [hermiteRootProd, hP, hermitePolyH_zero]
+  simp [hermiteRootProd, hP, hermitePolynomialH_zero]
 
 /-- The recursion for the product of `H_m` over the zeros of `H_{m+1}`. -/
 theorem hermiteRootProd_succ (m : ℕ) : hermiteRootProd (m + 1) = (-(2 * ((m : ℂ) + 1))) ^ (m + 1) *
@@ -666,7 +668,8 @@ theorem hermiteRootProd_eq (m : ℕ) : hermiteRootProd m = ∏ k ∈ range m,
 
 /-- The Hermite discriminant expressed through `hermiteRootProd`. -/
 theorem disc_eq (m : ℕ) (x : Fin (m + 1) → ℝ)
-    (hroot : ∀ i, (aeval (x i) (hermitePolyH (m + 1)) : ℝ) = 0) (hinj : Function.Injective x) :
+    (hroot : ∀ i, (aeval (x i) (hermitePolynomialH (m + 1)) : ℝ) = 0)
+        (hinj : Function.Injective x) :
     (∏ i : Fin (m + 1), ∏ j : Fin (m + 1),
       if i.val < j.val then ((x i - x j : ℝ) : ℂ) ^ 2 else 1) * (2 ^ (m + 1)) ^ (m + 1) =
       (-1) ^ (m + 1).choose 2 * (2 * ((m : ℂ) + 1)) ^ (m + 1) * hermiteRootProd m := by
@@ -706,7 +709,8 @@ theorem sum_range_succ_eq_choose (m : ℕ) : ∑ k ∈ range m, (k + 1) = (m + 1
 
 /-- Closed form of the discriminant of the Hermite polynomial `H_{m+1}` (Stieltjes). -/
 theorem disc_closed (m : ℕ) (x : Fin (m + 1) → ℝ)
-    (hroot : ∀ i, (aeval (x i) (hermitePolyH (m + 1)) : ℝ) = 0) (hinj : Function.Injective x) :
+    (hroot : ∀ i, (aeval (x i) (hermitePolynomialH (m + 1)) : ℝ) = 0)
+        (hinj : Function.Injective x) :
     ((2 : ℂ) ^ (m + 1)) ^ (2 * m) * (∏ i : Fin (m + 1), ∏ j : Fin (m + 1),
       if i.val < j.val then ((x i - x j : ℝ) : ℂ) ^ 2 else 1) =
       (2 : ℂ) ^ (3 * (m + 1).choose 2) * ∏ k ∈ range (m + 1), ((k : ℂ) + 1) ^ (k + 1) := by
@@ -756,8 +760,9 @@ end HerDisc
 /-- Formula under the stated hypotheses: `rootDiscriminant (2 ^ n) x = (2 : ℝ) ^ (3 * n * (n - 1)
 / 2) * ∏ j ∈ Finset.Icc 1 n, (j : ℝ) ^ j`. -/
 @[dlmf 18.16.E21]
-theorem hermitePolyH_discriminant {n : ℕ} (hn : 0 < n) (x : Fin n → ℝ) (hinj : Function.Injective x)
-    (hroot : ∀ i, (aeval (x i) (hermitePolyH n) : ℝ) = 0) :
+theorem hermitePolynomialH_discriminant {n : ℕ} (hn : 0 < n) (x : Fin n → ℝ)
+    (hinj : Function.Injective x)
+    (hroot : ∀ i, (aeval (x i) (hermitePolynomialH n) : ℝ) = 0) :
     rootDiscriminant (2 ^ n) x = (2 : ℝ) ^ (3 * n * (n - 1) / 2) *
       ∏ j ∈ Finset.Icc 1 n, (j : ℝ) ^ j := by
   obtain ⟨m, rfl⟩ := Nat.exists_eq_add_one_of_ne_zero hn.ne'

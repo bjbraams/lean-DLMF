@@ -64,17 +64,17 @@ namespace DLMF.Confluent
 
 /-- The coefficient `(-1)^s (a)_s (a-b+1)_s / s!` of the Tricomi expansion. -/
 def tricomiCoeff (a b : ℂ) (s : ℕ) : ℂ :=
-  (-1) ^ s * poch a s * poch (a - b + 1) s / s.factorial
+  (-1) ^ s * pochhammer a s * pochhammer (a - b + 1) s / s.factorial
 
 /-- Binomial coefficients with negated upper index as Pochhammer symbols. -/
-theorem ring_choose_neg_eq_poch (r : ℂ) (n : ℕ) :
-    Ring.choose (-r) n = (-1) ^ n * poch r n / n.factorial := by
+theorem ring_choose_neg_eq_pochhammer (r : ℂ) (n : ℕ) :
+    Ring.choose (-r) n = (-1) ^ n * pochhammer r n / n.factorial := by
   rw [Ring.choose_neg', Int.negOnePow_def, zpow_natCast, Units.smul_def, Units.val_pow_eq_pow_val,
     Units.val_neg, Units.val_one, zsmul_eq_mul]
   have h := Ring.factorial_nsmul_multichoose_eq_ascPochhammer r n
   rw [Polynomial.ascPochhammer_smeval_eq_eval, nsmul_eq_mul] at h
   have hf : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
-  rw [eq_div_iff hf, poch, ← h]
+  rw [eq_div_iff hf, pochhammer, ← h]
   push_cast
   ring
 
@@ -143,10 +143,10 @@ theorem hasAsymptoticExpansion_kummerU_of_re_pos {a b : ℂ} (ha : 0 < a.re) :
     push_cast
     ring
   · funext n
-    have hG : Gamma (a + n) / Gamma a = poch a n := Gamma_add_nat_div_Gamma_eq (n := n) a ha'
+    have hG : Gamma (a + n) / Gamma a = pochhammer a n := Gamma_add_nat_div_Gamma_eq (n := n) a ha'
     have hG0 : Gamma a ≠ 0 := Complex.Gamma_ne_zero ha'
     simp only [Pi.smul_apply, smul_eq_mul, tricomiCoeff]
-    rw [show b - a - 1 = -(a - b + 1) by ring, ring_choose_neg_eq_poch,
+    rw [show b - a - 1 = -(a - b + 1) by ring, ring_choose_neg_eq_pochhammer,
       show (n : ℂ) + a = a + n by ring, ← hG]
     field_simp
 
@@ -155,13 +155,13 @@ theorem tricomiCoeff_sub_one_succ (a b : ℂ) (n : ℕ) :
     tricomiCoeff (a - 1) b (n + 1) =
       tricomiCoeff a (b + 1) (n + 1) - (b - a) * tricomiCoeff a b n := by
   simp only [tricomiCoeff]
-  have h1 : poch (a - 1) (n + 1) = (a - 1) * poch a n := by
-    rw [poch_succ_left, sub_add_cancel]
-  have h2 : poch (a - 1 - b + 1) (n + 1) = (a - b) * poch (a - b + 1) n := by
-    rw [poch_succ_left]; ring_nf
-  have h3 : poch (a - (b + 1) + 1) (n + 1) = (a - b) * poch (a - b + 1) n := by
-    rw [poch_succ_left]; ring_nf
-  rw [h1, h2, h3, poch_succ, Nat.factorial_succ]
+  have h1 : pochhammer (a - 1) (n + 1) = (a - 1) * pochhammer a n := by
+    rw [pochhammer_succ_left, sub_add_cancel]
+  have h2 : pochhammer (a - 1 - b + 1) (n + 1) = (a - b) * pochhammer (a - b + 1) n := by
+    rw [pochhammer_succ_left]; ring_nf
+  have h3 : pochhammer (a - (b + 1) + 1) (n + 1) = (a - b) * pochhammer (a - b + 1) n := by
+    rw [pochhammer_succ_left]; ring_nf
+  rw [h1, h2, h3, pochhammer_succ, Nat.factorial_succ]
   have hf : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
   have hn : (n : ℂ) + 1 ≠ 0 := by exact_mod_cast n.succ_ne_zero
   push_cast
@@ -170,7 +170,7 @@ theorem tricomiCoeff_sub_one_succ (a b : ℂ) (n : ℕ) :
 
 /-- The leading coefficient of the Tricomi expansion is `1`. -/
 theorem tricomiCoeff_zero (a b : ℂ) : tricomiCoeff a b 0 = 1 := by
-  simp [tricomiCoeff, poch_zero]
+  simp [tricomiCoeff, pochhammer_zero]
 
 /-- The norm of the Tricomi scale on the positive axis. -/
 theorem norm_ofReal_cpow_neg_add {x : ℝ} (hx : 0 < x) (n : ℕ) (a : ℂ) :
@@ -382,10 +382,10 @@ theorem hasAsymptoticExpansion_kummerU_sector_of_re_pos {a b : ℂ} (ha : 0 < a.
     simp only [hFdef, smul_eq_mul]
     ring_nf
   · funext n
-    have hG : Gamma (a + n) / Gamma a = poch a n := Gamma_add_nat_div_Gamma_eq (n := n) a ha'
+    have hG : Gamma (a + n) / Gamma a = pochhammer a n := Gamma_add_nat_div_Gamma_eq (n := n) a ha'
     have hG0 : Gamma a ≠ 0 := Complex.Gamma_ne_zero ha'
     simp only [Pi.smul_apply, smul_eq_mul, tricomiCoeff]
-    rw [show b - a - 1 = -(a - b + 1) by ring, ring_choose_neg_eq_poch,
+    rw [show b - a - 1 = -(a - b + 1) by ring, ring_choose_neg_eq_pochhammer,
       show (n : ℂ) + a = a + n by ring, ← hG]
     field_simp
 
@@ -415,7 +415,7 @@ theorem hasAsymptoticExpansion_kummerU_sector (a b : ℂ) {δ : ℝ} (hδ : 0 < 
 theorem kummerU_sum_eq {x : ℝ} (hx : 0 < x) (a b : ℂ) (n : ℕ) :
     ∑ s ∈ Finset.range n, (x : ℂ) ^ (-((s : ℂ) + a)) • tricomiCoeff a b s =
       (x : ℂ) ^ (-a) * ∑ s ∈ Finset.range n,
-        poch a s * poch (a - b + 1) s / s.factorial * (-(x : ℂ)) ^ (-(s : ℂ)) := by
+        pochhammer a s * pochhammer (a - b + 1) s / s.factorial * (-(x : ℂ)) ^ (-(s : ℂ)) := by
   have hx0 : (x : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hx.ne'
   rw [Finset.mul_sum]
   refine Finset.sum_congr rfl fun s _ => ?_
@@ -442,7 +442,7 @@ theorem one_sub_cpow_sub_sum_isBigO (β : ℂ) (N : ℕ) :
 
 /-- The coefficient `(1-a)_s (b-a)_s / (s! Γ(a))` of the Kummer expansion 13.7.1. -/
 def kummerCoeff (a b : ℂ) (s : ℕ) : ℂ :=
-  poch (1 - a) s * poch (b - a) s / s.factorial * (Gamma a)⁻¹
+  pochhammer (1 - a) s * pochhammer (b - a) s / s.factorial * (Gamma a)⁻¹
 
 /-- **The expansion of `𝐌(a,b,x)` for `re b > re a > 0`**, by Watson's lemma applied to the
 Euler integral 13.4.1 after the substitution `t ↦ 1 - t`. -/
@@ -532,12 +532,12 @@ theorem hasAsymptoticExpansion_regularizedConfluent_of_re_pos {a b : ℂ} (ha : 
     ring
   · ring_nf
   · funext n
-    have hG : Gamma (b - a + n) / Gamma (b - a) = poch (b - a) n :=
+    have hG : Gamma (b - a + n) / Gamma (b - a) = pochhammer (b - a) n :=
       Gamma_add_nat_div_Gamma_eq (n := n) (b - a) hba'
     have hG0 : Gamma (b - a) ≠ 0 := Complex.Gamma_ne_zero hba'
     have hGa : Gamma a ≠ 0 := Complex.Gamma_ne_zero ha'
     simp only [Pi.smul_apply, smul_eq_mul, kummerCoeff]
-    rw [show a - 1 = -(1 - a) by ring, ring_choose_neg_eq_poch,
+    rw [show a - 1 = -(1 - a) by ring, ring_choose_neg_eq_pochhammer,
       show (n : ℂ) + (b - a) = b - a + n by ring, ← hG]
     field_simp
     have h1 : ((-1 : ℂ) ^ n) ^ 2 = 1 := by rw [← pow_mul, mul_comm, pow_mul]; simp
@@ -545,7 +545,7 @@ theorem hasAsymptoticExpansion_regularizedConfluent_of_re_pos {a b : ℂ} (ha : 
 
 /-- The leading Kummer expansion coefficient is `1/Γ(a)`. -/
 theorem kummerCoeff_zero (a b : ℂ) : kummerCoeff a b 0 = (Gamma a)⁻¹ := by
-  simp [kummerCoeff, poch_zero]
+  simp [kummerCoeff, pochhammer_zero]
 
 /-- The coefficient recurrence behind the regularized 13.3.4. -/
 theorem kummerCoeff_sub_one (a b : ℂ) (m : ℕ) :
@@ -553,8 +553,8 @@ theorem kummerCoeff_sub_one (a b : ℂ) (m : ℕ) :
   simp only [kummerCoeff]
   rw [one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (a - 1), sub_add_cancel,
     show 1 - (a - 1) = 2 - a by ring, show b - (a - 1) = b - a + 1 by ring,
-    show b + 1 - a = b - a + 1 by ring, poch_succ_left (1 - a),
-    show 1 - a + 1 = 2 - a by ring, poch_succ_left (b - a), poch_succ (b - a + 1),
+    show b + 1 - a = b - a + 1 by ring, pochhammer_succ_left (1 - a),
+    show 1 - a + 1 = 2 - a by ring, pochhammer_succ_left (b - a), pochhammer_succ (b - a + 1),
     Nat.factorial_succ]
   have hf : (m.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr m.factorial_ne_zero
   have hn : (m : ℂ) + 1 ≠ 0 := by exact_mod_cast m.succ_ne_zero
@@ -569,15 +569,16 @@ theorem kummerCoeff_b_sub_one (a b : ℂ) (m : ℕ) :
         (b - a) * kummerCoeff a (b + 1) m := by
   simp only [kummerCoeff]
   rw [show b - 1 - a = b - a - 1 by ring, show b + 1 - a = b - a + 1 by ring,
-    poch_succ (1 - a), poch_succ_left (b - a - 1), sub_add_cancel, poch_succ (b - a),
+    pochhammer_succ (1 - a), pochhammer_succ_left (b - a - 1), sub_add_cancel,
+        pochhammer_succ (b - a),
     Nat.factorial_succ]
-  have key : (b - a) * poch (b - a + 1) m = poch (b - a) m * (b - a + m) := by
-    rw [← poch_succ_left, poch_succ]
+  have key : (b - a) * pochhammer (b - a + 1) m = pochhammer (b - a) m * (b - a + m) := by
+    rw [← pochhammer_succ_left, pochhammer_succ]
   have hf : (m.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr m.factorial_ne_zero
   have hn : (m : ℂ) + 1 ≠ 0 := by exact_mod_cast m.succ_ne_zero
   push_cast
   field_simp
-  linear_combination (poch (1 - a) m * (m + 1) / Gamma a) * key
+  linear_combination (pochhammer (1 - a) m * (m + 1) / Gamma a) * key
 
 /-- Comparison of the scales `eˣ x^c` at `+∞`. -/
 theorem isBigO_exp_mul_cpow {c d : ℂ} (h : c.re ≤ d.re) :
@@ -765,7 +766,7 @@ theorem hasAsymptoticExpansion_regularizedConfluent (a b : ℂ) :
 theorem regularizedConfluent_sum_eq {x : ℝ} (hx : 0 < x) (a b : ℂ) (n : ℕ) :
     ∑ s ∈ Finset.range n, (exp (x : ℂ) * (x : ℂ) ^ (a - b - s)) • kummerCoeff a b s =
       exp (x : ℂ) * (x : ℂ) ^ (a - b) / Gamma a * ∑ s ∈ Finset.range n,
-        poch (1 - a) s * poch (b - a) s / s.factorial * (x : ℂ) ^ (-(s : ℂ)) := by
+        pochhammer (1 - a) s * pochhammer (b - a) s / s.factorial * (x : ℂ) ^ (-(s : ℂ)) := by
   have hx0 : (x : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hx.ne'
   rw [Finset.mul_sum]
   refine Finset.sum_congr rfl fun s _ => ?_
@@ -851,14 +852,15 @@ theorem ofReal_ascPochhammer_eval (r : ℝ) (k : ℕ) :
   | succ k ih => rw [ascPochhammer_succ_eval, ascPochhammer_succ_eval]; push_cast; rw [ih]
 
 /-- Formula under the stated hypotheses: `Asymptotics.IsBigO atTop (fun x : ℝ => regularizedHGFun
-{a} {b} x - exp x * (x : ℂ) ^ (a - b) / Gamma a * ∑ s ∈ Finset.range n, poch (1 - a) s * poch
-(b - a) s / s.factorial * (x : ℂ) ^ (-(s : ℂ))) (fun x : ℝ => exp x * (x : ℂ) ^ (a - b - n))`. -/
+{a} {b} x - exp x * (x : ℂ) ^ (a - b) / Gamma a * ∑ s ∈ Finset.range n, pochhammer (1 - a) s *
+pochhammer (b - a) s / s.factorial * (x : ℂ) ^ (-(s : ℂ))) (fun x : ℝ => exp x * (x : ℂ) ^ (a - b -
+n))`. -/
 @[dlmf 13.7.E1]
 theorem regularizedHGFun_poincare_real (a b : ℂ) (n : ℕ) :
     Asymptotics.IsBigO atTop
       (fun x : ℝ => regularizedHGFun {a} {b} x -
         exp x * (x : ℂ) ^ (a - b) / Gamma a *
-          ∑ s ∈ Finset.range n, poch (1 - a) s * poch (b - a) s / s.factorial *
+          ∑ s ∈ Finset.range n, pochhammer (1 - a) s * pochhammer (b - a) s / s.factorial *
             (x : ℂ) ^ (-(s : ℂ)))
       (fun x : ℝ => exp x * (x : ℂ) ^ (a - b - n)) := by
   refine (hasAsymptoticExpansion_regularizedConfluent a b n).congr' ?_ EventuallyEq.rfl
@@ -866,14 +868,14 @@ theorem regularizedHGFun_poincare_real (a b : ℂ) (n : ℕ) :
   simp only [regularizedConfluent_sum_eq hx]
 
 /-- Formula under the stated hypotheses: `Asymptotics.IsBigO atTop (fun x : ℝ => kummerU a b x -
-(x : ℂ) ^ (-a) * ∑ s ∈ Finset.range n, poch a s * poch (a - b + 1) s / s.factorial * (-(x :
-ℂ)) ^ (-(s : ℂ))) (fun x : ℝ => (x : ℂ) ^ (-a - n))`. -/
+(x : ℂ) ^ (-a) * ∑ s ∈ Finset.range n, pochhammer a s * pochhammer (a - b + 1) s / s.factorial *
+(-(x : ℂ)) ^ (-(s : ℂ))) (fun x : ℝ => (x : ℂ) ^ (-a - n))`. -/
 @[dlmf 13.7.E3]
 theorem kummerU_poincare (a b : ℂ) (n : ℕ) :
     Asymptotics.IsBigO atTop
       (fun x : ℝ => kummerU a b x -
         (x : ℂ) ^ (-a) * ∑ s ∈ Finset.range n,
-          poch a s * poch (a - b + 1) s / s.factorial * (-(x : ℂ)) ^ (-(s : ℂ)))
+          pochhammer a s * pochhammer (a - b + 1) s / s.factorial * (-(x : ℂ)) ^ (-(s : ℂ)))
       (fun x : ℝ => (x : ℂ) ^ (-a - n)) := by
   refine (hasAsymptoticExpansion_kummerU a b n).congr' ?_ ?_
   · filter_upwards [eventually_gt_atTop 0] with x hx
@@ -887,10 +889,10 @@ theorem kummerU_poincare_finite {a b x : ℝ} (ha : 0 < a) (hb : b ≤ a + 1)
     (hx : 0 < x) (n : ℕ) :
     ‖kummerU a b x -
       (x : ℂ) ^ (-(a : ℂ)) * ∑ s ∈ Finset.range n,
-        poch (a : ℂ) s * poch ((a : ℂ) - b + 1) s / s.factorial *
+        pochhammer (a : ℂ) s * pochhammer ((a : ℂ) - b + 1) s / s.factorial *
           (-(x : ℂ)) ^ (-(s : ℂ))‖ ≤
       ‖(x : ℂ) ^ (-(a : ℂ) - n) *
-        poch (a : ℂ) n * poch ((a : ℂ) - b + 1) n / n.factorial‖ := by
+        pochhammer (a : ℂ) n * pochhammer ((a : ℂ) - b + 1) n / n.factorial‖ := by
   set r : ℝ := a - b + 1 with hr
   have hr0 : 0 ≤ r := by linarith
   have haC : 0 < (a : ℂ).re := by simpa using ha
@@ -899,12 +901,12 @@ theorem kummerU_poincare_finite {a b x : ℝ} (ha : 0 < a) (hb : b ≤ a + 1)
     simp at this
     linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
   have hGa : Gamma (a : ℂ) ≠ 0 := Complex.Gamma_ne_zero ha'
-  have hpr : ∀ k : ℕ, poch ((a : ℂ) - b + 1) k = (((ascPochhammer ℝ k).eval r : ℝ) : ℂ) := by
+  have hpr : ∀ k : ℕ, pochhammer ((a : ℂ) - b + 1) k = (((ascPochhammer ℝ k).eval r : ℝ) : ℂ) := by
     intro k
     rw [ofReal_ascPochhammer_eval, hr]
     push_cast
     rfl
-  have hpa : ∀ k : ℕ, poch (a : ℂ) k = Gamma ((k : ℂ) + a) / Gamma a := fun k => by
+  have hpa : ∀ k : ℕ, pochhammer (a : ℂ) k = Gamma ((k : ℂ) + a) / Gamma a := fun k => by
     rw [add_comm]; exact (Gamma_add_nat_div_Gamma_eq (n := k) (a : ℂ) ha').symm
   -- the coefficients of the binomial series of `(1+t)^{-r}`
   set c : ℕ → ℂ := fun k => (((-1) ^ k * (ascPochhammer ℝ k).eval r / k ! : ℝ) : ℂ) with hc
@@ -933,7 +935,8 @@ theorem kummerU_poincare_finite {a b x : ℝ} (ha : 0 < a) (hb : b ≤ a + 1)
     push_cast
     ring
   have hS : (x : ℂ) ^ (-(a : ℂ)) * ∑ s ∈ Finset.range n,
-      poch (a : ℂ) s * poch ((a : ℂ) - b + 1) s / s.factorial * (-(x : ℂ)) ^ (-(s : ℂ)) =
+      pochhammer (a : ℂ) s * pochhammer ((a : ℂ) - b + 1) s / s.factorial *
+          (-(x : ℂ)) ^ (-(s : ℂ)) =
       1 / Gamma a * ∫ t in Set.Ioi (0 : ℝ), Real.exp (-x * t) • P t := by
     rw [← kummerU_sum_eq hx]
     simp only [hP, Finset.smul_sum]
@@ -968,7 +971,7 @@ theorem kummerU_poincare_finite {a b x : ℝ} (ha : 0 < a) (hb : b ≤ a + 1)
   have hGpos : 0 < Real.Gamma a := Real.Gamma_pos_of_pos ha
   have hGa' : Gamma (a : ℂ) = (Real.Gamma a : ℂ) := Complex.Gamma_ofReal a
   set K : ℝ := (ascPochhammer ℝ n).eval r / n ! with hK
-  have hK0 : 0 ≤ K := div_nonneg (DLMF.Hypergeometric.poch_eval_nonneg hr0 n) (by positivity)
+  have hK0 : 0 ≤ K := div_nonneg (DLMF.Hypergeometric.pochhammer_eval_nonneg hr0 n) (by positivity)
   have hmaj : IntegrableOn (fun t : ℝ => K * (Real.exp (-x * t) * t ^ ((a + n) - 1)))
       (Set.Ioi 0) := (integrableOn_exp_neg_mul_mul_rpow_sub_one (by positivity) hx).const_mul K
   have hInt : ‖∫ t in Set.Ioi (0 : ℝ), Real.exp (-x * t) •
@@ -1004,7 +1007,7 @@ theorem kummerU_poincare_finite {a b x : ℝ} (ha : 0 < a) (hb : b ≤ a + 1)
           ((x ^ (-(a + n)) * (Real.Gamma (n + a) / Real.Gamma a) *
             (ascPochhammer ℝ n).eval r / n.factorial : ℝ) : ℂ) by push_cast; ring,
           Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg (by
-            have := DLMF.Hypergeometric.poch_eval_nonneg hr0 n
+            have := DLMF.Hypergeometric.pochhammer_eval_nonneg hr0 n
             have := Real.Gamma_pos_of_pos (show 0 < (n : ℝ) + a by positivity)
             positivity), hK, add_comm (n : ℝ) a]
         field_simp
@@ -1017,18 +1020,18 @@ theorem kummerU_poincare_remainder (a b : ℂ) (n : ℕ) :
     ∃ R : ℝ → ℂ,
       (∀ x : ℝ, 0 < x → kummerU a b x =
         (x : ℂ) ^ (-a) * ∑ s ∈ Finset.range n,
-          poch a s * poch (a - b + 1) s / s.factorial * (-(x : ℂ)) ^ (-(s : ℂ)) + R x) ∧
+          pochhammer a s * pochhammer (a - b + 1) s / s.factorial * (-(x : ℂ)) ^ (-(s : ℂ)) + R x) ∧
       Asymptotics.IsBigO atTop R (fun x : ℝ => (x : ℂ) ^ (-a - n)) :=
   ⟨_, fun _ _ => (add_sub_cancel _ _).symm, kummerU_poincare a b n⟩
 
 /-- Formula under the stated hypotheses: `Asymptotics.IsBigO atTop (fun b : ℝ => kummerM a b z - ∑
-s ∈ Finset.range n, poch a s / (poch (b : ℂ) s * s.factorial) * z ^ s) (fun b : ℝ => ((b :
-ℂ)⁻¹) ^ n)`. -/
+s ∈ Finset.range n, pochhammer a s / (pochhammer (b : ℂ) s * s.factorial) * z ^ s) (fun b : ℝ => ((b
+: ℂ)⁻¹) ^ n)`. -/
 @[dlmf 13.8.E1]
 theorem kummerM_large_b (a z : ℂ) (n : ℕ) :
     Asymptotics.IsBigO atTop
       (fun b : ℝ => kummerM a b z -
-        ∑ s ∈ Finset.range n, poch a s / (poch (b : ℂ) s * s.factorial) * z ^ s)
+        ∑ s ∈ Finset.range n, pochhammer a s / (pochhammer (b : ℂ) s * s.factorial) * z ^ s)
       (fun b : ℝ => ((b : ℂ)⁻¹) ^ n) := by
   set r := ‖z‖
   set α := ‖a‖
@@ -1047,7 +1050,7 @@ theorem kummerM_large_b (a z : ℂ) (n : ℕ) :
         ((r : ℝ) : ℂ) ^ s = (tt s : ℂ) := by
       intro s
       simp only [tt, Q, kummerMCoeff]
-      rw [poch_ofReal, poch_ofReal]
+      rw [pochhammer_ofReal, pochhammer_ofReal]
       push_cast
       ring
     simp only [ht] at hs
@@ -1077,13 +1080,13 @@ theorem kummerM_large_b (a z : ℂ) (n : ℕ) :
   have hbn : 0 < b ^ n := pow_pos hb0 n
   have hterm (s : ℕ) : ‖kummerMCoeff a b (s + n) * z ^ (s + n)‖ ≤
       (b ^ n)⁻¹ * (K0 * tt s) := by
-    have hnum : ‖poch a (s + n)‖ ≤
+    have hnum : ‖pochhammer a (s + n)‖ ≤
         (ascPochhammer ℝ n).eval α * (ascPochhammer ℝ s).eval A := by
-      rw [← hsplit]; exact norm_poch_le a (s + n)
-    have hden : b ^ n * Q s ≤ ‖poch ((b : ℝ) : ℂ) (s + n)‖ := by
-      rw [poch_ofReal, norm_real, hsplit,
-        Real.norm_of_nonneg (mul_nonneg (poch_eval_nonneg hb0.le n)
-          (poch_eval_nonneg (by positivity) s))]
+      rw [← hsplit]; exact norm_pochhammer_le a (s + n)
+    have hden : b ^ n * Q s ≤ ‖pochhammer ((b : ℝ) : ℂ) (s + n)‖ := by
+      rw [pochhammer_ofReal, norm_real, hsplit,
+        Real.norm_of_nonneg (mul_nonneg (pochhammer_eval_nonneg hb0.le n)
+          (pochhammer_eval_nonneg (by positivity) s))]
       have h1 : ∀ m : ℕ, b ^ m ≤ (ascPochhammer ℝ m).eval b := by
         intro m
         induction m with
@@ -1091,23 +1094,24 @@ theorem kummerM_large_b (a z : ℂ) (n : ℕ) :
         | succ m ih =>
           rw [pow_succ, ascPochhammer_succ_eval]
           exact mul_le_mul ih (by linarith [(Nat.cast_nonneg m : (0 : ℝ) ≤ m)])
-            hb0.le (poch_eval_nonneg hb0.le m)
+            hb0.le (pochhammer_eval_nonneg hb0.le m)
       have h2 : Q s ≤ (ascPochhammer ℝ s).eval (b + n) :=
-        poch_eval_mono (by positivity) (by linarith) s
-      exact mul_le_mul (h1 n) h2 (hQpos s).le (poch_eval_nonneg hb0.le n)
+        pochhammer_eval_mono (by positivity) (by linarith) s
+      exact mul_le_mul (h1 n) h2 (hQpos s).le (pochhammer_eval_nonneg hb0.le n)
     have hQF : (s.factorial : ℝ) ≤ Q s := by
       rw [← ascPochhammer_eval_one]
-      exact poch_eval_mono zero_le_one (by linarith [(Nat.cast_nonneg n : (0 : ℝ) ≤ n)]) s
+      exact pochhammer_eval_mono zero_le_one (by linarith [(Nat.cast_nonneg n : (0 : ℝ) ≤ n)]) s
     have hF : (0 : ℝ) < s.factorial := by positivity
     have hN : (0 : ℝ) < n.factorial := by positivity
-    have hP1 : 0 ≤ (ascPochhammer ℝ n).eval α := poch_eval_nonneg (norm_nonneg a) n
-    have hP2 : 0 ≤ (ascPochhammer ℝ s).eval A := poch_eval_nonneg (by positivity) s
+    have hP1 : 0 ≤ (ascPochhammer ℝ n).eval α := pochhammer_eval_nonneg (norm_nonneg a) n
+    have hP2 : 0 ≤ (ascPochhammer ℝ s).eval A := pochhammer_eval_nonneg (by positivity) s
     rw [kummerMCoeff, norm_mul, norm_div, norm_mul, norm_pow, Complex.norm_natCast, hfac]
-    calc ‖poch a (s + n)‖ / (‖poch ((b : ℝ) : ℂ) (s + n)‖ * (n.factorial * Q s)) * r ^ (s + n)
+    calc ‖pochhammer a (s + n)‖ /
+           (‖pochhammer ((b : ℝ) : ℂ) (s + n)‖ * (n.factorial * Q s)) * r ^ (s + n)
         ≤ (ascPochhammer ℝ n).eval α * (ascPochhammer ℝ s).eval A /
             (b ^ n * Q s * (n.factorial * s.factorial)) * r ^ (s + n) := by
           have hden' : b ^ n * Q s * (n.factorial * s.factorial) ≤
-              ‖poch ((b : ℝ) : ℂ) (s + n)‖ * (n.factorial * Q s) :=
+              ‖pochhammer ((b : ℝ) : ℂ) (s + n)‖ * (n.factorial * Q s) :=
             mul_le_mul hden (mul_le_mul_of_nonneg_left hQF hN.le) (by positivity)
               (norm_nonneg _)
           refine mul_le_mul_of_nonneg_right ?_ (by positivity)

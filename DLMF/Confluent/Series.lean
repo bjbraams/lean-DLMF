@@ -55,7 +55,7 @@ namespace DLMF.Confluent
 
 /-- Coefficients of the Bessel-function expansion DLMF 13.11.1. -/
 noncomputable def kummerBesselISeriesCoeff (a b : ℂ) (k : ℕ) : ℂ :=
-  poch (2 * a - 1) k * poch (2 * a - b) k / (poch b k * k !) * (a - 1 / 2 + k)
+  pochhammer (2 * a - 1) k * pochhammer (2 * a - b) k / (pochhammer b k * k !) * (a - 1 / 2 + k)
 
 /-- The coefficient identity behind DLMF 13.11.1: the Cauchy coefficients of the Bessel
 expansion reproduce `(a)_N 4^N / ((b)_N N!)`. -/
@@ -63,24 +63,24 @@ theorem kummerBesselISeriesCoeff_sum {a b : ℂ} (hν : ∀ j : ℕ, a - 1 / 2 +
     (hb : ∀ k : ℕ, b ≠ -k)
     (N : ℕ) :
     Gamma (a - 1 / 2) * ∑ k ∈ Finset.range (N + 1), (if k ≤ N then kummerBesselISeriesCoeff a b k *
-      (poch (2 * (a - 1 / 2 + k + 1) + ((N - k : ℕ) : ℂ) - 1) (N - k) /
+      (pochhammer (2 * (a - 1 / 2 + k + 1) + ((N - k : ℕ) : ℂ) - 1) (N - k) /
         ((N - k)! * Gamma (a - 1 / 2 + k + 1 + ((N - k : ℕ) : ℂ)))) else 0) =
       kummerMCoeff a b N * 4 ^ N := by
   set ν := a - 1 / 2 with hνdef
-  have hpb : ∀ n, poch b n ≠ 0 := poch_ne_zero_of_not_neg_nat hb
-  have hGN : ∀ n : ℕ, Gamma (ν + n + 1) = Gamma ν * poch ν (n + 1) := by
+  have hpb : ∀ n, pochhammer b n ≠ 0 := pochhammer_ne_zero_of_not_neg_nat hb
+  have hGN : ∀ n : ℕ, Gamma (ν + n + 1) = Gamma ν * pochhammer ν (n + 1) := by
     intro n
     rw [add_assoc, show ((n : ℂ) + 1) = ((n + 1 : ℕ) : ℂ) by push_cast; ring]
-    exact Gamma_add_nat_eq_mul_poch hν _
-  have hpν : ∀ n, poch ν n ≠ 0 := poch_ne_zero_of_not_neg_nat
+    exact Gamma_add_nat_eq_mul_pochhammer hν _
+  have hpν : ∀ n, pochhammer ν n ≠ 0 := pochhammer_ne_zero_of_not_neg_nat
     (fun k h => hν k (by rw [h]; ring))
   have hΓν : Gamma ν ≠ 0 := by
     have := Gamma_add_nat_ne_zero_of_ne (l := ν) (fun n h => hν n (by rw [h]; ring)) 0
     simpa using this
   have hterm : ∀ k ∈ Finset.range (N + 1), (if k ≤ N then kummerBesselISeriesCoeff a b k *
-      (poch (2 * (ν + k + 1) + ((N - k : ℕ) : ℂ) - 1) (N - k) /
+      (pochhammer (2 * (ν + k + 1) + ((N - k : ℕ) : ℂ) - 1) (N - k) /
         ((N - k)! * Gamma (ν + k + 1 + ((N - k : ℕ) : ℂ)))) else 0) =
-      vwpTerm (2 * ν) (2 * a - b) N k / (2 * N ! * poch b N * Gamma (ν + N + 1)) := by
+      vwpTerm (2 * ν) (2 * a - b) N k / (2 * N ! * pochhammer b N * Gamma (ν + N + 1)) := by
     intro k hk
     rw [Finset.mem_range] at hk
     simp only [show k ≤ N by omega, ↓reduceIte]
@@ -90,22 +90,22 @@ theorem kummerBesselISeriesCoeff_sum {a b : ℂ} (hν : ∀ j : ℕ, a - 1 / 2 +
         1 by push_cast; ring,
       show ν + k + 1 + (K : ℂ) = ν + ((k + K : ℕ) : ℂ) + 1 by push_cast; ring,
       show 2 * ν + 1 - (2 * a - b) + k = b + k by rw [hνdef]; ring,
-      show 2 * a - 1 = 2 * ν by rw [hνdef]; ring, poch_add b k K]
+      show 2 * a - 1 = 2 * ν by rw [hνdef]; ring, pochhammer_add b k K]
     have hfac := Nat.choose_mul_factorial_mul_factorial (show k ≤ k + K by omega)
     rw [Nat.add_sub_cancel_left] at hfac
     have hfac' : ((k + K).choose k : ℂ) * k ! * K ! = (k + K)! := by exact_mod_cast hfac
     have hk0 : (k ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
     have hK0 : (K ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
     have hpbk := hpb k
-    have hpbK : poch (b + k) K ≠ 0 := by
-      intro h; apply hpb (k + K); rw [poch_add, h, mul_zero]
+    have hpbK : pochhammer (b + k) K ≠ 0 := by
+      intro h; apply hpb (k + K); rw [pochhammer_add, h, mul_zero]
     have hG : Gamma (ν + ((k + K : ℕ) : ℂ) + 1) ≠ 0 := by
       rw [hGN]; exact mul_ne_zero hΓν (hpν _)
     have hch : ((k + K).choose k : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.choose_pos (by omega)).ne'
     rw [← hfac']
     field_simp
   rw [Finset.sum_congr rfl hterm, ← Finset.sum_div, sum_range_vwpTerm,
-      poch_two_mul_two_mul_add_one, hGN,
+      pochhammer_two_mul_two_mul_add_one, hGN,
     show ν + 1 / 2 = a by rw [hνdef]; ring]
   have hN0 : (N ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
   have := hpb N
@@ -124,13 +124,13 @@ theorem exists_norm_kummerBesselISeriesCoeff_le (a : ℂ) {b : ℂ} (hb : ∀ k 
   · have := Real.add_one_le_exp 1
     nlinarith [pow_le_pow_left₀ (by norm_num : (0 : ℝ) ≤ 2) (by linarith : (2 : ℝ) ≤ Real.exp 1) 3]
   have hk : (0 : ℝ) < k ! := by exact_mod_cast Nat.factorial_pos k
-  have h1 := norm_poch_le_factorial_mul_exp (2 * a - 1) k
-  have h2 := norm_poch_le_factorial_mul_exp (2 * a - b) k
-  have hG := Gamma_add_nat_eq_mul_poch hbi k
-  have hpb : poch b k ≠ 0 := poch_ne_zero_of_not_neg_nat hb k
-  have h3 : ‖(poch b k)⁻¹‖ ≤ ‖Gamma b‖ * (C * (2 ^ k / k !)) := by
+  have h1 := norm_pochhammer_le_factorial_mul_exp (2 * a - 1) k
+  have h2 := norm_pochhammer_le_factorial_mul_exp (2 * a - b) k
+  have hG := Gamma_add_nat_eq_mul_pochhammer hbi k
+  have hpb : pochhammer b k ≠ 0 := pochhammer_ne_zero_of_not_neg_nat hb k
+  have h3 : ‖(pochhammer b k)⁻¹‖ ≤ ‖Gamma b‖ * (C * (2 ^ k / k !)) := by
     have hΓb : Gamma b ≠ 0 := by simpa using Gamma_add_nat_ne_zero_of_ne (l := b) hb 0
-    rw [show (poch b k)⁻¹ = Gamma b * (Gamma (b + k))⁻¹ by rw [hG]; field_simp, norm_mul]
+    rw [show (pochhammer b k)⁻¹ = Gamma b * (Gamma (b + k))⁻¹ by rw [hG]; field_simp, norm_mul]
     exact mul_le_mul_of_nonneg_left (hC k) (norm_nonneg _)
   have h4 : ‖a - 1 / 2 + k‖ ≤ Real.exp (‖a - 1 / 2‖ + k) := by
     calc ‖a - 1 / 2 + k‖ ≤ ‖a - 1 / 2‖ + k := by
@@ -139,7 +139,8 @@ theorem exists_norm_kummerBesselISeriesCoeff_le (a : ℂ) {b : ℂ} (hb : ∀ k 
   simp only [kummerBesselISeriesCoeff]
   rw [div_eq_mul_inv, mul_inv, norm_mul, norm_mul, norm_mul, norm_mul, norm_inv (k ! : ℂ),
     Complex.norm_natCast]
-  calc ‖poch (2 * a - 1) k‖ * ‖poch (2 * a - b) k‖ * (‖(poch b k)⁻¹‖ * (k ! : ℝ)⁻¹) *
+  calc ‖pochhammer (2 * a - 1) k‖ * ‖pochhammer (2 * a - b) k‖ *
+         (‖(pochhammer b k)⁻¹‖ * (k ! : ℝ)⁻¹) *
         ‖a - 1 / 2 + k‖
       ≤ (k ! * Real.exp (‖2 * a - 1‖ + k)) * (k ! * Real.exp (‖2 * a - b‖ + k)) *
           ((‖Gamma b‖ * (C * (2 ^ k / k !))) * (k ! : ℝ)⁻¹) * Real.exp (‖a - 1 / 2‖ + k) := by
@@ -168,7 +169,7 @@ theorem kummerM_four_mul_eq_tsum {a b : ℂ} (hν : ∀ j : ℕ, a - 1 / 2 + j �
     push_cast at this
     rwa [show ν + k + 1 + j = ν + (k + 1 + j) by ring]
   set d : ℕ → ℕ → ℂ := fun k K =>
-    poch (2 * (ν + k + 1) + K - 1) K / (K ! * Gamma (ν + k + 1 + K)) with hd
+    pochhammer (2 * (ν + k + 1) + K - 1) K / (K ! * Gamma (ν + k + 1 + K)) with hd
   set f : ℕ × ℕ → ℂ := fun p => kummerBesselISeriesCoeff a b p.1 * w ^ p.1 * (d p.1 p.2 * w ^ p.2)
     with hf
   have hinner : ∀ k, HasSum (fun K => f (k, K)) (kummerBesselISeriesCoeff a b k * w ^ k *
@@ -257,14 +258,16 @@ theorem tsum_kummerBesselISeriesCoeff_besselI {a b z : ℂ} (hz : z ≠ 0) (σ :
   rw [inv_mul_cancel₀ (by rw [cpow_def_of_ne_zero hw]; exact exp_ne_zero _), one_mul]
 
 /-- Identity under the stated parameter and domain assumptions: `kummerM a b z = Gamma (a - 1 / 2)
-* exp (z / 2) * (z / 4) ^ (1 / 2 - a) * ∑' s : ℕ, poch (2 * a - 1) s * poch (2 * a - b) s /
-(poch b s * s.factorial) * (a - 1 / 2 + s) * besselI (a - 1 / 2 + s) (z / 2)`. -/
+* exp (z / 2) * (z / 4) ^ (1 / 2 - a) * ∑' s : ℕ, pochhammer (2 * a - 1) s * pochhammer (2 * a - b)
+  s /
+(pochhammer b s * s.factorial) * (a - 1 / 2 + s) * besselI (a - 1 / 2 + s) (z / 2)`. -/
 @[dlmf 13.11.E1]
 theorem kummerM_besselI_series {a b z : ℂ}
     (ha : ∀ k : ℕ, a + 1 / 2 ≠ -k) (ha0 : a ≠ 1 / 2) (hb : ∀ k : ℕ, b ≠ -k) (hz : z ∈ slitPlane) :
     kummerM a b z =
       Gamma (a - 1 / 2) * exp (z / 2) * (z / 4) ^ (1 / 2 - a) *
-        ∑' s : ℕ, poch (2 * a - 1) s * poch (2 * a - b) s / (poch b s * s.factorial) *
+        ∑' s : ℕ, pochhammer (2 * a - 1) s * pochhammer (2 * a - b) s /
+            (pochhammer b s * s.factorial) *
           (a - 1 / 2 + s) * besselI (a - 1 / 2 + s) (z / 2) := by
   have hν : ∀ j : ℕ, a - 1 / 2 + j ≠ 0 := by
     intro j
@@ -281,8 +284,9 @@ theorem kummerM_besselI_series {a b z : ℂ}
   ring
 
 /-- Identity under the stated parameter and domain assumptions: `kummerM a b z = Gamma (b - a - 1
-/ 2) * exp (z / 2) * (z / 4) ^ (a - b + 1 / 2) * ∑' s : ℕ, (-1 : ℂ) ^ s * poch (2 * b - 2 * a
-- 1) s * poch (b - 2 * a) s * (b - a - 1 / 2 + s) / (poch b s * s.factorial) * besselI (b - a
+/ 2) * exp (z / 2) * (z / 4) ^ (a - b + 1 / 2) * ∑' s : ℕ, (-1 : ℂ) ^ s * pochhammer (2 * b - 2 * a
+- 1) s * pochhammer (b - 2 * a) s * (b - a - 1 / 2 + s) / (pochhammer b s * s.factorial) * besselI
+  (b - a
 - 1 / 2 + s) (z / 2)`. -/
 @[dlmf 13.11.E2]
 theorem kummerM_besselI_series_complement {a b z : ℂ}
@@ -290,8 +294,8 @@ theorem kummerM_besselI_series_complement {a b z : ℂ}
     (hz : z ∈ slitPlane) :
     kummerM a b z =
       Gamma (b - a - 1 / 2) * exp (z / 2) * (z / 4) ^ (a - b + 1 / 2) *
-        ∑' s : ℕ, (-1 : ℂ) ^ s * poch (2 * b - 2 * a - 1) s * poch (b - 2 * a) s *
-          (b - a - 1 / 2 + s) / (poch b s * s.factorial) *
+        ∑' s : ℕ, (-1 : ℂ) ^ s * pochhammer (2 * b - 2 * a - 1) s * pochhammer (b - 2 * a) s *
+          (b - a - 1 / 2 + s) / (pochhammer b s * s.factorial) *
           besselI (b - a - 1 / 2 + s) (z / 2) := by
   have hν : ∀ j : ℕ, b - a - 1 / 2 + j ≠ 0 := by
     intro j
@@ -305,8 +309,9 @@ theorem kummerM_besselI_series_complement {a b z : ℂ}
   rw [kummerM_kummer_transform hb, core, hc, show a - b + 1 / 2 = -(b - a - 1 / 2) by ring]
   have hT : ∑' s : ℕ, (-1 : ℂ) ^ s * kummerBesselISeriesCoeff (b - a) b s *
       besselI (b - a - 1 / 2 + s) (z / 2) =
-      ∑' s : ℕ, (-1 : ℂ) ^ s * poch (2 * b - 2 * a - 1) s * poch (b - 2 * a) s *
-        (b - a - 1 / 2 + s) / (poch b s * s.factorial) * besselI (b - a - 1 / 2 + s) (z / 2) := by
+      ∑' s : ℕ, (-1 : ℂ) ^ s * pochhammer (2 * b - 2 * a - 1) s * pochhammer (b - 2 * a) s *
+        (b - a - 1 / 2 + s) / (pochhammer b s * s.factorial) *
+            besselI (b - a - 1 / 2 + s) (z / 2) := by
     refine tsum_congr fun s => ?_
     simp only [kummerBesselISeriesCoeff]
     rw [show 2 * (b - a) - 1 = 2 * b - 2 * a - 1 by ring, show 2 * (b - a) - b = b - 2 * a by ring]
@@ -315,8 +320,9 @@ theorem kummerM_besselI_series_complement {a b z : ℂ}
   have hexp : exp z * exp (-(z / 2)) = exp (z / 2) := by
     rw [← Complex.exp_add]; ring_nf
   linear_combination (Gamma (b - a - 1 / 2) * (z / 4) ^ (-(b - a - 1 / 2)) *
-    ∑' s : ℕ, (-1 : ℂ) ^ s * poch (2 * b - 2 * a - 1) s * poch (b - 2 * a) s *
-        (b - a - 1 / 2 + s) / (poch b s * s.factorial) * besselI (b - a - 1 / 2 + s) (z / 2)) * hexp
+    ∑' s : ℕ, (-1 : ℂ) ^ s * pochhammer (2 * b - 2 * a - 1) s * pochhammer (b - 2 * a) s *
+        (b - a - 1 / 2 + s) / (pochhammer b s * s.factorial) *
+            besselI (b - a - 1 / 2 + s) (z / 2)) * hexp
 
 /-- Coefficients `A_s` in DLMF 13.11.3–13.11.4. -/
 @[dlmf 13.11.E4]
@@ -334,7 +340,7 @@ open Finset
 
 /-- Terms of `[tᴺ] (1-t)^{-a} (1+t)^{a-b} = ∑_{m+r=N} (a)_m 2^m (-1)^r (b+m)_r / (m! r!)`. -/
 def besselExpansionTerm (a b : ℂ) (m r : ℕ) : ℂ :=
-  poch a m * 2 ^ m * (-1) ^ r * poch (b + m) r / (m ! * r !)
+  pochhammer a m * 2 ^ m * (-1) ^ r * pochhammer (b + m) r / (m ! * r !)
 
 /-- `[tᴺ] (1-t)^{-a} (1+t)^{a-b}`, the coefficients of `e^{-(b-2a)t} ∑ A_s t^s`. -/
 def besselExpansionB (a b : ℂ) (N : ℕ) : ℂ :=
@@ -342,12 +348,12 @@ def besselExpansionB (a b : ℂ) (N : ℕ) : ℂ :=
 
 /-- The zeroth coefficient of the Bessel-type expansion is `1`. -/
 theorem besselExpansionB_zero (a b : ℂ) : besselExpansionB a b 0 = 1 := by
-  simp [besselExpansionB, besselExpansionTerm, poch_zero]
+  simp [besselExpansionB, besselExpansionTerm, pochhammer_zero]
 
 /-- The first coefficient of the Bessel-type expansion is `(2a - b)` times the zeroth. -/
 theorem besselExpansionB_one (a b : ℂ) :
     besselExpansionB a b 1 = (2 * a - b) * besselExpansionB a b 0 := by
-  simp [besselExpansionB, besselExpansionTerm, sum_range_succ, poch_zero, poch_one]
+  simp [besselExpansionB, besselExpansionTerm, sum_range_succ, pochhammer_zero, pochhammer_one]
   ring
 
 /-- The recurrence `(N+2) B_{N+2} = (2a-b) B_{N+1} + (N+b) B_N` of the coefficients of
@@ -367,9 +373,9 @@ theorem besselExpansionB_rec (a b : ℂ) (N : ℕ) :
     simp only [hG, T, besselExpansionTerm, Nat.add_sub_cancel, show m + 1 ≠ 0 by omega,
       ite_false, show m + r + 2 - (m + 1) = r + 1 by omega]
     rcases m with _ | j
-    · simp only [ite_true, Nat.cast_zero, add_zero, poch_zero, pow_zero, Nat.factorial_zero,
+    · simp only [ite_true, Nat.cast_zero, add_zero, pochhammer_zero, pow_zero, Nat.factorial_zero,
         Nat.cast_one, one_mul, zero_add]
-      rw [show r + 2 = r + 1 + 1 from rfl, poch_succ b (r + 1), poch_succ b r]
+      rw [show r + 2 = r + 1 + 1 from rfl, pochhammer_succ b (r + 1), pochhammer_succ b r]
       simp only [Nat.factorial_succ, Nat.cast_mul, pow_succ]
       push_cast
       have h1 : (r : ℂ) + 1 ≠ 0 := by norm_cast
@@ -380,8 +386,8 @@ theorem besselExpansionB_rec (a b : ℂ) (N : ℕ) :
         show j + 1 + r + 2 - (j + 1) = r + 2 by omega]
       rw [show (b + ((j + 1 : ℕ) : ℂ)) = b + j + 1 by push_cast; ring,
         show r + 2 = r + 1 + 1 from rfl,
-        poch_succ a j, poch_succ (b + j + 1) (r + 1), poch_succ (b + j + 1) r,
-        poch_succ (b + j) (r + 1), poch_succ_left (b + j) r]
+        pochhammer_succ a j, pochhammer_succ (b + j + 1) (r + 1), pochhammer_succ (b + j + 1) r,
+        pochhammer_succ (b + j) (r + 1), pochhammer_succ_left (b + j) r]
       simp only [Nat.factorial_succ, Nat.cast_mul, pow_succ]
       push_cast
       have h1 : (r : ℂ) + 1 ≠ 0 := by norm_cast
@@ -402,8 +408,8 @@ theorem besselExpansionB_rec (a b : ℂ) (N : ℕ) :
     show N + 1 - (N + 1) = 0 by omega]
   have hb : (N + 2) * T (N + 2) 0 + (N + 2) * T (N + 1) 1 - (2 * a - b) * T (N + 1) 0 =
       2 * (a + N) * T N 1 := by
-    simp only [T, besselExpansionTerm, poch_zero, poch_one, pow_zero, pow_one,
-      Nat.factorial_zero, Nat.cast_one, mul_one, poch_succ a (N + 1), poch_succ a N]
+    simp only [T, besselExpansionTerm, pochhammer_zero, pochhammer_one, pow_zero, pow_one,
+      Nat.factorial_zero, Nat.cast_one, mul_one, pochhammer_succ a (N + 1), pochhammer_succ a N]
     simp only [Nat.factorial_succ, Nat.cast_mul, pow_succ]
     push_cast
     have h1 : (N : ℂ) + 1 ≠ 0 := by norm_cast
@@ -667,14 +673,14 @@ theorem regularizedHGFun_eq_besselExpansion (a b z : ℂ) :
   have hfs : Summable fun m => ‖f m‖ := by
     refine Summable.of_nonneg_of_le (fun _ => norm_nonneg _) (fun m => ?_)
       ((Real.summable_pow_div_factorial (2 * Real.exp 1 * ‖z‖)).mul_left (Cg * Real.exp ‖a‖))
-    have e : f m = poch a m * ((m ! : ℂ)⁻¹ * (Gamma (b + m))⁻¹) * z ^ m := by
+    have e : f m = pochhammer a m * ((m ! : ℂ)⁻¹ * (Gamma (b + m))⁻¹) * z ^ m := by
       show regularizedHGFunCoeff {a} {b} m * z ^ m = _
       rw [regularizedHGFunCoeff_singleton, div_eq_mul_inv, mul_inv]
     rw [e, norm_mul, norm_mul, norm_mul, norm_inv, norm_pow, Complex.norm_natCast]
     have hm : (0 : ℝ) < m ! := by exact_mod_cast Nat.factorial_pos m
-    have h1 := norm_poch_le_factorial_mul_exp a m
+    have h1 := norm_pochhammer_le_factorial_mul_exp a m
     have h2 := hCg m
-    calc ‖poch a m‖ * ((m ! : ℝ)⁻¹ * ‖(Gamma (b + m))⁻¹‖) * ‖z‖ ^ m
+    calc ‖pochhammer a m‖ * ((m ! : ℝ)⁻¹ * ‖(Gamma (b + m))⁻¹‖) * ‖z‖ ^ m
         ≤ (m ! * Real.exp (‖a‖ + m)) * ((m ! : ℝ)⁻¹ * (Cg * (2 ^ m / m !))) * ‖z‖ ^ m := by
           gcongr
       _ = Cg * Real.exp ‖a‖ * ((2 * Real.exp 1 * ‖z‖) ^ m / m !) := by
@@ -697,10 +703,11 @@ theorem regularizedHGFun_eq_besselExpansion (a b z : ℂ) :
         (Finset.Nat.sum_antidiagonal_eq_sum_range_succ _ N).symm, Finset.mul_sum]
     refine Finset.sum_congr rfl fun p hp => ?_
     rw [mem_antidiagonal] at hp
-    have hG := DLMF.Gamma.poch_mul_recip_Gamma_add_nat (b + p.1) p.2
+    have hG := DLMF.Gamma.pochhammer_mul_recip_Gamma_add_nat (b + p.1) p.2
     rw [add_assoc, ← Nat.cast_add, hp] at hG
     simp only [hf, hg, regularizedHGFunCoeff_singleton, besselExpansionTerm]
-    rw [div_eq_mul_inv (poch a p.1), mul_inv, ← hG, ← hp, pow_add, hw, neg_pow, div_pow, div_pow]
+    rw [div_eq_mul_inv (pochhammer a p.1), mul_inv, ← hG, ← hp, pow_add, hw, neg_pow,
+        div_pow, div_pow]
     have h1 : (p.1 ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
     have h2 : (p.2 ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
     have h3 : (2 : ℂ) ^ p.1 ≠ 0 := pow_ne_zero _ two_ne_zero
@@ -771,17 +778,17 @@ theorem regularizedHGFun_besselJ_series {a b z : ℂ} (hz : z ≠ 0) (hba0 : b -
 end BesselExpansion
 
 /-- Identity under the stated parameter and domain assumptions: `whittakerM κ μ z = Gamma (κ + μ)
-* (2 : ℂ) ^ (2 * κ + 2 * μ) * z ^ (1 / 2 - κ) * ∑' s : ℕ, (-1 : ℂ) ^ s * poch (2 * κ + 2 * μ)
-s * poch (2 * κ) s / (poch (1 + 2 * μ) s * s.factorial) * (κ + μ + s) * besselI (κ + μ + s) (z
-/ 2)`. -/
+* (2 : ℂ) ^ (2 * κ + 2 * μ) * z ^ (1 / 2 - κ) * ∑' s : ℕ, (-1 : ℂ) ^ s * pochhammer (2 * κ + 2 * μ)
+s * pochhammer (2 * κ) s / (pochhammer (1 + 2 * μ) s * s.factorial) * (κ + μ + s) * besselI (κ + μ +
+s) (z / 2)`. -/
 @[dlmf 13.24.E1]
 theorem whittakerM_besselI_series {κ μ z : ℂ}
     (hμ : ∀ k : ℕ, 2 * μ ≠ -k - 1) (hκ : ∀ k : ℕ, κ + μ ≠ -k - 1) (hκμ : κ + μ ≠ 0)
     (hz : z ∈ slitPlane) :
     whittakerM κ μ z =
       Gamma (κ + μ) * (2 : ℂ) ^ (2 * κ + 2 * μ) * z ^ (1 / 2 - κ) *
-        ∑' s : ℕ, (-1 : ℂ) ^ s * poch (2 * κ + 2 * μ) s * poch (2 * κ) s /
-          (poch (1 + 2 * μ) s * s.factorial) * (κ + μ + s) *
+        ∑' s : ℕ, (-1 : ℂ) ^ s * pochhammer (2 * κ + 2 * μ) s * pochhammer (2 * κ) s /
+          (pochhammer (1 + 2 * μ) s * s.factorial) * (κ + μ + s) *
           besselI (κ + μ + s) (z / 2) := by
   have hz0 := slitPlane_ne_zero hz
   have h := kummerM_besselI_series_complement (a := μ - κ + 1 / 2) (b := 1 + 2 * μ)
@@ -792,10 +799,10 @@ theorem whittakerM_besselI_series {κ μ z : ℂ}
     show 2 * (1 + 2 * μ) - 2 * (μ - κ + 1 / 2) - 1 = 2 * κ + 2 * μ by ring,
     show 1 + 2 * μ - 2 * (μ - κ + 1 / 2) = 2 * κ by ring] at h
   rw [whittakerM, h]
-  have hT : ∑' s : ℕ, (-1 : ℂ) ^ s * poch (2 * κ + 2 * μ) s * poch (2 * κ) s *
-      (κ + μ + s) / (poch (1 + 2 * μ) s * s.factorial) * besselI (κ + μ + s) (z / 2) =
-      ∑' s : ℕ, (-1 : ℂ) ^ s * poch (2 * κ + 2 * μ) s * poch (2 * κ) s /
-        (poch (1 + 2 * μ) s * s.factorial) * (κ + μ + s) * besselI (κ + μ + s) (z / 2) :=
+  have hT : ∑' s : ℕ, (-1 : ℂ) ^ s * pochhammer (2 * κ + 2 * μ) s * pochhammer (2 * κ) s *
+      (κ + μ + s) / (pochhammer (1 + 2 * μ) s * s.factorial) * besselI (κ + μ + s) (z / 2) =
+      ∑' s : ℕ, (-1 : ℂ) ^ s * pochhammer (2 * κ + 2 * μ) s * pochhammer (2 * κ) s /
+        (pochhammer (1 + 2 * μ) s * s.factorial) * (κ + μ + s) * besselI (κ + μ + s) (z / 2) :=
     tsum_congr fun s => by ring
   rw [hT]
   have e4 : (4 : ℂ) ^ (κ + μ) = (2 : ℂ) ^ (2 * κ + 2 * μ) := by
@@ -814,8 +821,8 @@ theorem whittakerM_besselI_series {κ μ z : ℂ}
     rw [← Complex.exp_add]; ring_nf; exact Complex.exp_zero
   rw [h4]
   linear_combination (Gamma (κ + μ) * (2 : ℂ) ^ (2 * κ + 2 * μ) *
-      (∑' s : ℕ, (-1 : ℂ) ^ s * poch (2 * κ + 2 * μ) s * poch (2 * κ) s /
-        (poch (1 + 2 * μ) s * s.factorial) * (κ + μ + s) * besselI (κ + μ + s) (z / 2))) *
+      (∑' s : ℕ, (-1 : ℂ) ^ s * pochhammer (2 * κ + 2 * μ) s * pochhammer (2 * κ) s /
+        (pochhammer (1 + 2 * μ) s * s.factorial) * (κ + μ + s) * besselI (κ + μ + s) (z / 2))) *
       (z ^ (μ + 1 / 2) * z ^ (-(κ + μ)) * hexp + hzz)
 
 

@@ -727,7 +727,7 @@ theorem reidAiryA_zero_parameter (z : ℂ) :
     reidAiryA 0 z 0 = airyAi z := by
   have hα : exp (3 * (((4 * π / 3 : ℝ) : ℂ) * I)) = 1 := exp_three_mul_of_eq 2 (by push_cast; ring)
   have hβ : exp (3 * (((2 * π / 3 : ℝ) : ℂ) * I)) = 1 := exp_three_mul_of_eq 1 (by push_cast; ring)
-  have hsol : IsAirySol (fun z => reidAiryA 0 z 0) (fun z => reidAiryA 0 z (-1)) := by
+  have hsol : IsAirySolution (fun z => reidAiryA 0 z 0) (fun z => reidAiryA 0 z (-1)) := by
     intro w
     have hd : ∀ p : ℂ, HasDerivAt (fun z => reidAiryA 0 z p) (reidAiryA 0 w (p - 1)) w :=
       fun p => (hasDerivAt_reidContour hα hβ p w).div_const _
@@ -741,7 +741,7 @@ theorem reidAiryA_zero_parameter (z : ℂ) :
     refine h2.congr_deriv ?_
     rw [sub_self, zero_mul, add_zero] at hdiff
     linear_combination hdiff
-  refine hsol.eq_of_initial isAirySol_airyAi ?_ ?_ z
+  refine hsol.eq_of_initial isAirySolution_airyAi ?_ ?_ z
   · exact reidAiryA_zero_initial.1
   · exact reidAiryA_zero_initial.2
 

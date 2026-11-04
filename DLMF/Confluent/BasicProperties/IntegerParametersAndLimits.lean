@@ -71,9 +71,9 @@ theorem kummerU_nat_eq_deriv (a : ℂ) (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
 /-- Reindexing the finite singular part in descending powers of the argument. -/
 theorem tricomi_finite_sum_eq (a : ℂ) (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
     (-1 : ℂ) ^ (n + 1) * z ^ (-(n : ℂ)) * ∑ j ∈ Finset.range n,
-      poch (a - n) j * z ^ j / j.factorial *
+      pochhammer (a - n) j * z ^ j / j.factorial *
         ((-1 : ℂ) ^ (n - 1 - j) * ((n - 1 - j).factorial : ℂ)) =
-    ∑ k ∈ Finset.Icc 1 n, ((k - 1).factorial : ℂ) * poch (1 - a + k) (n - k) /
+    ∑ k ∈ Finset.Icc 1 n, ((k - 1).factorial : ℂ) * pochhammer (1 - a + k) (n - k) /
       ((n - k).factorial : ℂ) * z ^ (-(k : ℂ)) := by
   rw [Finset.mul_sum]
   refine Finset.sum_bij (fun j _ => n - j) ?_ ?_ ?_ ?_
@@ -92,16 +92,16 @@ theorem tricomi_finite_sum_eq (a : ℂ) (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
       rw [← cpow_natCast z j, ← cpow_add _ _ hz]
       congr 1
       rw [Nat.cast_sub hjn]; ring
-    have hp : poch (a - n) j = (-1 : ℂ) ^ j * poch (1 - a + ((n - j : ℕ) : ℂ)) j := by
+    have hp : pochhammer (a - n) j = (-1 : ℂ) ^ j * pochhammer (1 - a + ((n - j : ℕ) : ℂ)) j := by
       rw [show a - (n : ℂ) = 1 - (1 - a + ((n - j : ℕ) : ℂ)) - j by
-        rw [Nat.cast_sub hjn]; ring, DLMF.Hypergeometric.poch_reflect]
+        rw [Nat.cast_sub hjn]; ring, DLMF.Hypergeometric.pochhammer_reflect]
     have hsign : (-1 : ℂ) ^ (n + 1) * (-1 : ℂ) ^ j * (-1 : ℂ) ^ (n - 1 - j) = 1 := by
       rw [← pow_add, ← pow_add, show n + 1 + j + (n - 1 - j) = 2 * n by
         have := Finset.mem_range.mp hj; omega, pow_mul]
       simp
     rw [show n - (n - j) = j by omega, show n - 1 - j = n - j - 1 by omega, hp]
     calc
-      _ = ((n - j - 1).factorial : ℂ) * poch (1 - a + ((n - j : ℕ) : ℂ)) j /
+      _ = ((n - j - 1).factorial : ℂ) * pochhammer (1 - a + ((n - j : ℕ) : ℂ)) j /
           (j.factorial : ℂ) * (z ^ (-(n : ℂ)) * z ^ j) *
             ((-1 : ℂ) ^ (n + 1) * (-1 : ℂ) ^ j * (-1 : ℂ) ^ (n - 1 - j)) := by
               rw [show n - 1 - j = n - j - 1 by omega]; ring
@@ -115,7 +115,7 @@ theorem kummerU_nat_log (a : ℂ) (n : ℕ) {z : ℂ} (hz : z ≠ 0)
       (-1 : ℂ) ^ (n + 1) * (Gamma (a - n))⁻¹ *
         (log z * regularizedHGFun {a} {(n : ℂ) + 1} z + tricomiLogSeries a n z) +
       (-1 : ℂ) ^ (n + 1) * z ^ (-(n : ℂ)) * (Gamma a)⁻¹ *
-        ∑ j ∈ Finset.range n, poch (a - n) j * z ^ j / j.factorial *
+        ∑ j ∈ Finset.range n, pochhammer (a - n) j * z ^ j / j.factorial *
           ((-1 : ℂ) ^ (n - 1 - j) * ((n - 1 - j).factorial : ℂ)) := by
   have h := kummerU_nat_eq_deriv a (n + 1) hz
   push_cast at h
@@ -135,7 +135,7 @@ theorem kummerU_nat_log_recipGamma (a : ℂ) (n : ℕ) {z : ℂ} (hz : z ≠ 0) 
         ((Gamma (a - n))⁻¹ * log z * regularizedHGFun {a} {(n : ℂ) + 1} z +
           tricomiLogSeriesRecipGamma a n z) +
       (-1 : ℂ) ^ (n + 1) * z ^ (-(n : ℂ)) * (Gamma a)⁻¹ *
-        ∑ j ∈ Finset.range n, poch (a - n) j * z ^ j / j.factorial *
+        ∑ j ∈ Finset.range n, pochhammer (a - n) j * z ^ j / j.factorial *
           ((-1 : ℂ) ^ (n - 1 - j) * ((n - 1 - j).factorial : ℂ)) := by
   have h := kummerU_nat_eq_deriv a (n + 1) hz
   push_cast at h
@@ -164,19 +164,19 @@ theorem isBigO_one_log_zero :
   linarith
 
 /-- Formula under the stated hypotheses: `kummerU a (n + 1) z = (-1 : ℂ) ^ (n + 1) / ((n.factorial
-: ℂ) * Gamma (a - n)) * ∑' k : ℕ, poch a k / (poch (n + 1 : ℂ) k * k.factorial) * z ^ k * (log
-z + digamma (a + k) - digamma (1 + k) - digamma (n + k + 1)) + 1 / Gamma a * ∑ k ∈ Finset.Icc
-1 n, ((k - 1).factorial : ℂ) * poch (1 - a + k) (n - k) / ((n - k).factorial : ℂ) * z ^ (-(k :
+: ℂ) * Gamma (a - n)) * ∑' k : ℕ, pochhammer a k / (pochhammer (n + 1 : ℂ) k * k.factorial) * z ^ k
+* (log z + digamma (a + k) - digamma (1 + k) - digamma (n + k + 1)) + 1 / Gamma a * ∑ k ∈ Finset.Icc
+1 n, ((k - 1).factorial : ℂ) * pochhammer (1 - a + k) (n - k) / ((n - k).factorial : ℂ) * z ^ (-(k :
 ℂ))`. -/
 @[dlmf 13.2.E9]
 theorem kummerU_nat_denom (a : ℂ) (n : ℕ) {z : ℂ} (hz : z ∈ slitPlane)
     (ha : ∀ k : ℕ, a - n ≠ -k) :
     kummerU a (n + 1) z =
       (-1 : ℂ) ^ (n + 1) / ((n.factorial : ℂ) * Gamma (a - n)) *
-        ∑' k : ℕ, poch a k / (poch (n + 1 : ℂ) k * k.factorial) * z ^ k *
+        ∑' k : ℕ, pochhammer a k / (pochhammer (n + 1 : ℂ) k * k.factorial) * z ^ k *
           (log z + digamma (a + k) - digamma (1 + k) - digamma (n + k + 1)) +
         1 / Gamma a * ∑ k ∈ Finset.Icc 1 n,
-          ((k - 1).factorial : ℂ) * poch (1 - a + k) (n - k) /
+          ((k - 1).factorial : ℂ) * pochhammer (1 - a + k) (n - k) /
             ((n - k).factorial : ℂ) * z ^ (-(k : ℂ)) := by
   have hz0 := slitPlane_ne_zero hz
   have h := deriv_tricomi_numerator_nat a n hz0 ha
@@ -185,7 +185,7 @@ theorem kummerU_nat_denom (a : ℂ) (n : ℕ) {z : ℂ} (hz : z ∈ slitPlane)
   push_cast at hU
   rw [h] at hU
   have hΓ : ∀ k : ℕ, Gamma ((n : ℂ) + 1 + k) =
-      (n.factorial : ℂ) * poch ((n : ℂ) + 1) k := by
+      (n.factorial : ℂ) * pochhammer ((n : ℂ) + 1) k := by
     intro k
     have hn : ∀ j : ℕ, (n : ℂ) + 1 ≠ -(j : ℂ) := by
       intro j hj
@@ -195,11 +195,11 @@ theorem kummerU_nat_denom (a : ℂ) (n : ℕ) {z : ℂ} (hz : z ∈ slitPlane)
     have hG := Gamma_add_nat_div_Gamma_eq (n := k) ((n : ℂ) + 1) hn
     rw [div_eq_iff (Gamma_ne_zero hn), Gamma_nat_eq_factorial] at hG
     rw [hG]; ring
-  have htail : (∑' k : ℕ, (poch a k * z ^ k / k.factorial *
+  have htail : (∑' k : ℕ, (pochhammer a k * z ^ k / k.factorial *
       (Gamma ((n : ℂ) + 1 + k))⁻¹) *
         (log z + digamma (a + k) - digamma (k + 1) - digamma ((n : ℂ) + 1 + k))) =
       (n.factorial : ℂ)⁻¹ * ∑' k : ℕ,
-        poch a k / (poch (n + 1 : ℂ) k * k.factorial) * z ^ k *
+        pochhammer a k / (pochhammer (n + 1 : ℂ) k * k.factorial) * z ^ k *
           (log z + digamma (a + k) - digamma (1 + k) - digamma (n + k + 1)) := by
     rw [← tsum_mul_left]
     refine tsum_congr fun k => ?_
@@ -220,11 +220,11 @@ because Mathlib's `ψ` is `0` at its poles). -/
 theorem kummerU_nat_denom_recipGamma (a : ℂ) (n : ℕ) {z : ℂ} (hz : z ∈ slitPlane) :
     kummerU a (n + 1) z =
       (-1 : ℂ) ^ (n + 1) / (n.factorial : ℂ) *
-        ∑' k : ℕ, poch a k / (poch (n + 1 : ℂ) k * k.factorial) * z ^ k *
+        ∑' k : ℕ, pochhammer a k / (pochhammer (n + 1 : ℂ) k * k.factorial) * z ^ k *
           ((Gamma (a - n))⁻¹ * (log z - digamma (1 + k) - digamma (n + k + 1)) -
-            poch (a - n) (n + k) * recipGammaDeriv 1 (a + k)) +
+            pochhammer (a - n) (n + k) * recipGammaDeriv 1 (a + k)) +
         1 / Gamma a * ∑ k ∈ Finset.Icc 1 n,
-          ((k - 1).factorial : ℂ) * poch (1 - a + k) (n - k) /
+          ((k - 1).factorial : ℂ) * pochhammer (1 - a + k) (n - k) /
             ((n - k).factorial : ℂ) * z ^ (-(k : ℂ)) := by
   have hz0 := slitPlane_ne_zero hz
   have h := deriv_tricomi_numerator_nat_recipGamma a n hz0
@@ -233,7 +233,7 @@ theorem kummerU_nat_denom_recipGamma (a : ℂ) (n : ℕ) {z : ℂ} (hz : z ∈ s
   push_cast at hU
   rw [h] at hU
   have hΓ : ∀ k : ℕ, Gamma ((n : ℂ) + 1 + k) =
-      (n.factorial : ℂ) * poch ((n : ℂ) + 1) k := by
+      (n.factorial : ℂ) * pochhammer ((n : ℂ) + 1) k := by
     intro k
     have hn : ∀ j : ℕ, (n : ℂ) + 1 ≠ -(j : ℂ) := by
       intro j hj
@@ -243,14 +243,14 @@ theorem kummerU_nat_denom_recipGamma (a : ℂ) (n : ℕ) {z : ℂ} (hz : z ∈ s
     have hG := Gamma_add_nat_div_Gamma_eq (n := k) ((n : ℂ) + 1) hn
     rw [div_eq_iff (Gamma_ne_zero hn), Gamma_nat_eq_factorial] at hG
     rw [hG]; ring
-  have htail : (∑' k : ℕ, (poch a k * z ^ k / k.factorial *
+  have htail : (∑' k : ℕ, (pochhammer a k * z ^ k / k.factorial *
       (Gamma ((n : ℂ) + 1 + k))⁻¹) *
         ((Gamma (a - n))⁻¹ * (log z - digamma (k + 1) - digamma ((n : ℂ) + 1 + k)) -
-          poch (a - n) (n + k) * recipGammaDeriv 1 (a + k))) =
+          pochhammer (a - n) (n + k) * recipGammaDeriv 1 (a + k))) =
       (n.factorial : ℂ)⁻¹ * ∑' k : ℕ,
-        poch a k / (poch (n + 1 : ℂ) k * k.factorial) * z ^ k *
+        pochhammer a k / (pochhammer (n + 1 : ℂ) k * k.factorial) * z ^ k *
           ((Gamma (a - n))⁻¹ * (log z - digamma (1 + k) - digamma (n + k + 1)) -
-            poch (a - n) (n + k) * recipGammaDeriv 1 (a + k)) := by
+            pochhammer (a - n) (n + k) * recipGammaDeriv 1 (a + k)) := by
     rw [← tsum_mul_left]
     refine tsum_congr fun k => ?_
     rw [hΓ, show (k : ℂ) + 1 = 1 + k by ring,
@@ -266,7 +266,7 @@ theorem kummerU_nat_denom_recipGamma (a : ℂ) (n : ℕ) {z : ℂ} (hz : z ∈ s
 @[dlmf 13.2.E10]
 theorem kummerU_neg_nat_nat_denom (m n : ℕ) (z : ℂ) :
     kummerU (-(m : ℂ)) (n + 1) z =
-      (-1 : ℂ) ^ m * poch (n + 1 : ℂ) m * kummerM (-(m : ℂ)) (n + 1) z := by
+      (-1 : ℂ) ^ m * pochhammer (n + 1 : ℂ) m * kummerM (-(m : ℂ)) (n + 1) z := by
   refine kummerU_neg_nat m _ z fun k hk => ?_
   have := congrArg re hk
   simp at this
@@ -334,13 +334,13 @@ theorem kummerU_analytic_continuation (a b z : ℂ) (m : ℤ) {w : ℂ}
 theorem kummerM_eq_sum_neg_nat_denom (n : ℕ) (a z : ℂ) :
     kummerM a (-(n : ℂ)) z =
       ∑ k ∈ Finset.range (n + 1),
-        poch a k / (poch (-(n : ℂ)) k * k.factorial) * z ^ k := by
+        pochhammer a k / (pochhammer (-(n : ℂ)) k * k.factorial) * z ^ k := by
   unfold kummerM
   refine tsum_eq_sum fun k hk => ?_
   have hkn : n < k := by
     rw [Finset.mem_range, not_lt] at hk
     exact Nat.lt_of_succ_le hk
-  rw [poch_neg_nat_eq_zero hkn, zero_mul, div_zero, zero_mul]
+  rw [pochhammer_neg_nat_eq_zero hkn, zero_mul, div_zero, zero_mul]
 
 /-- The totalized Kummer function `M(a,b,·)` is complex differentiable at `0`. -/
 theorem differentiableAt_kummerM (a b : ℂ) :
@@ -353,7 +353,7 @@ theorem differentiableAt_kummerM (a b : ℂ) :
       simpa using hb
     have hfun : kummerM a b =
         fun z => ∑ k ∈ Finset.range (n + 1),
-          poch a k / (poch (-(n : ℂ)) k * k.factorial) * z ^ k := by
+          pochhammer a k / (pochhammer (-(n : ℂ)) k * k.factorial) * z ^ k := by
       funext z
       rw [hn, kummerM_eq_sum_neg_nat_denom]
     rw [hfun]
@@ -372,15 +372,15 @@ theorem isBigO_kummerM_sub_one (a b : ℂ) :
     simp [id]
 
 /-- Identity under the stated parameter and domain assumptions: `Asymptotics.IsBigO (𝓝 (0 : ℂ))
-(fun z => kummerU (-(n : ℂ)) b z - (-1 : ℂ) ^ n * poch b n) id`. -/
+(fun z => kummerU (-(n : ℂ)) b z - (-1 : ℂ) ^ n * pochhammer b n) id`. -/
 @[dlmf 13.2.E14]
 theorem isBigO_kummerU_neg_nat (n : ℕ) (b : ℂ) :
     Asymptotics.IsBigO (𝓝 (0 : ℂ))
-      (fun z => kummerU (-(n : ℂ)) b z - (-1 : ℂ) ^ n * poch b n) id := by
+      (fun z => kummerU (-(n : ℂ)) b z - (-1 : ℂ) ^ n * pochhammer b n) id := by
   set P : ℂ → ℂ := fun z => (-1 : ℂ) ^ n * ∑ s ∈ Finset.range (n + 1),
-    (n.choose s : ℂ) * poch (b + s) (n - s) * (-z) ^ s with hP
+    (n.choose s : ℂ) * pochhammer (b + s) (n - s) * (-z) ^ s with hP
   have hU : ∀ z, kummerU (-(n : ℂ)) b z = P z := fun z => kummerU_neg_nat_sum n b z
-  have hP0 : P 0 = (-1 : ℂ) ^ n * poch b n := by
+  have hP0 : P 0 = (-1 : ℂ) ^ n * pochhammer b n := by
     simp only [hP, neg_zero]
     rw [Finset.sum_range_succ']
     simp
@@ -392,13 +392,13 @@ theorem isBigO_kummerU_neg_nat (n : ℕ) (b : ℂ) :
   · simp
 
 /-- Identity under the stated parameter and domain assumptions: `Asymptotics.IsBigO (𝓝[≠] (0 : ℂ))
-(fun z => kummerU (-(n : ℂ) + b - 1) b z - (-1 : ℂ) ^ n * poch (2 - b) n * z ^ (1 - b)) (fun z
+(fun z => kummerU (-(n : ℂ) + b - 1) b z - (-1 : ℂ) ^ n * pochhammer (2 - b) n * z ^ (1 - b)) (fun z
 => z ^ (2 - b))`. -/
 @[dlmf 13.2.E15]
 theorem isBigO_kummerU_neg_nat_shift (n : ℕ) (b : ℂ) :
     Asymptotics.IsBigO (𝓝[≠] (0 : ℂ))
       (fun z => kummerU (-(n : ℂ) + b - 1) b z -
-        (-1 : ℂ) ^ n * poch (2 - b) n * z ^ (1 - b))
+        (-1 : ℂ) ^ n * pochhammer (2 - b) n * z ^ (1 - b))
       (fun z => z ^ (2 - b)) := by
   have h := (isBigO_kummerU_neg_nat n (2 - b)).mono (nhdsWithin_le_nhds (s := {0}ᶜ))
   have hb : Asymptotics.IsBigO (𝓝[≠] (0 : ℂ)) (fun z : ℂ => z ^ (1 - b)) (fun z => z ^ (1 - b)) :=
@@ -508,10 +508,10 @@ private lemma isBigO_cpow_neg_nat_mul_sub (m : ℕ) {P : ℂ → ℂ}
   rw [he, one_mul]
 
 /-- `(-1)^k (1-m)_k = Γ(m)/Γ(m-k)`. -/
-private lemma neg_one_pow_mul_poch_one_sub_nat (m k : ℕ) (hm : 1 ≤ m) :
-    (-1 : ℂ) ^ k * poch (1 - m) k = Gamma m / Gamma ((m : ℂ) - k) := by
+private lemma neg_one_pow_mul_pochhammer_one_sub_nat (m k : ℕ) (hm : 1 ≤ m) :
+    (-1 : ℂ) ^ k * pochhammer (1 - m) k = Gamma m / Gamma ((m : ℂ) - k) := by
   obtain ⟨n, rfl⟩ : ∃ n, m = n + 1 := ⟨m - 1, by omega⟩
-  rw [show (1 : ℂ) - ((n + 1 : ℕ) : ℂ) = -(n : ℂ) by push_cast; ring, poch_neg_coe_nat,
+  rw [show (1 : ℂ) - ((n + 1 : ℕ) : ℂ) = -(n : ℂ) by push_cast; ring, pochhammer_neg_coe_nat,
     ← mul_assoc, ← pow_add, ← two_mul, pow_mul]
   simp only [neg_one_sq, one_pow, one_mul]
   rcases lt_or_ge n k with hk | hk
@@ -574,7 +574,7 @@ theorem isBigO_kummerU_at_zero_re_ge_two (a b : ℂ) (hb : 2 ≤ b.re) (hb2 : b 
     congr 1; ring
   simp only [hpow, show (m : ℂ) + 1 - 1 = m by ring]
   by_cases ha : ∀ k : ℕ, a - m ≠ -(k : ℂ)
-  · set P : ℂ → ℂ := fun z => ∑ j ∈ Finset.range m, poch (a - m) j * z ^ j / j.factorial *
+  · set P : ℂ → ℂ := fun z => ∑ j ∈ Finset.range m, pochhammer (a - m) j * z ^ j / j.factorial *
         ((-1 : ℂ) ^ (m - 1 - j) * ((m - 1 - j).factorial : ℂ)) with hPdef
     have hP : DifferentiableAt ℂ P 0 := by rw [hPdef]; fun_prop
     have hP0 : (-1 : ℂ) ^ (m + 1) * P 0 = Gamma m := by
@@ -582,7 +582,7 @@ theorem isBigO_kummerU_at_zero_re_ge_two (a b : ℂ) (hb : 2 ≤ b.re) (hb2 : b 
       rw [hPdef]
       simp only [Finset.sum_range_succ', ne_eq, Nat.add_one_ne_zero,
         not_false_eq_true, zero_pow, mul_zero, zero_div, zero_mul, Finset.sum_const_zero, zero_add,
-        poch_zero, pow_zero, Nat.factorial_zero, Nat.cast_one, div_one, one_mul]
+        pochhammer_zero, pow_zero, Nat.factorial_zero, Nat.cast_one, div_one, one_mul]
       rw [show ((p + 1 : ℕ) : ℂ) = (p : ℂ) + 1 by push_cast; ring, Gamma_nat_eq_factorial,
         show p + 1 - 1 - 0 = p by omega, ← mul_assoc, ← pow_add,
         show p + 1 + 1 + p = 2 * (p + 1) by ring, pow_mul]
@@ -610,11 +610,12 @@ theorem isBigO_kummerU_at_zero_re_ge_two (a b : ℂ) (hb : 2 ≤ b.re) (hb2 : b 
     have hak : a = (m : ℂ) - k := by linear_combination hk
     have hQ : Differentiable ℂ (kummerU (-(k : ℂ)) (1 - m)) := by
       rw [show kummerU (-(k : ℂ)) (1 - m) = fun z => (-1 : ℂ) ^ k *
-          ∑ j ∈ Finset.range (k + 1), (k.choose j : ℂ) * poch (1 - m + j) (k - j) * (-z) ^ j from
+          ∑ j ∈ Finset.range (k + 1), (k.choose j : ℂ) *
+              pochhammer (1 - m + j) (k - j) * (-z) ^ j from
         funext fun z => kummerU_neg_nat_sum k _ z]
       fun_prop
     have hQ0 : kummerU (-(k : ℂ)) (1 - m) 0 = Gamma m / Gamma a := by
-      rw [kummerU_neg_nat_sum, hak, ← neg_one_pow_mul_poch_one_sub_nat m k (by omega)]
+      rw [kummerU_neg_nat_sum, hak, ← neg_one_pow_mul_pochhammer_one_sub_nat m k (by omega)]
       simp [Finset.sum_range_succ']
     refine (isBigO_cpow_neg_nat_mul_sub m (hQ 0)).congr' ?_ (Filter.EventuallyEq.refl _ _)
     filter_upwards [self_mem_nhdsWithin] with z hz
@@ -643,7 +644,7 @@ theorem isBigO_kummerU_at_zero_b_two (a : ℂ) :
     · filter_upwards [self_mem_nhdsWithin] with z hz
       rw [show (2 : ℂ) = (1 : ℕ) + 1 by norm_num, kummerU_nat_log a 1 hz ha]
       simp only [Nat.cast_one, one_add_one_eq_two, pow_two,
-        Finset.sum_range_one, poch_zero, pow_zero, Nat.factorial_zero, Nat.sub_self,
+        Finset.sum_range_one, pochhammer_zero, pow_zero, Nat.factorial_zero, Nat.sub_self,
         Nat.cast_one, div_one, mul_one, cpow_neg_one]
       ring
     · filter_upwards with z
@@ -663,7 +664,7 @@ theorem isBigO_kummerU_at_zero_b_two (a : ℂ) :
       subst a
       have hc : Continuous (kummerU (-(k : ℂ)) 2) := by
         have heq : kummerU (-(k : ℂ)) 2 = fun z => (-1 : ℂ) ^ k *
-            ∑ j ∈ Finset.range (k + 1), (k.choose j : ℂ) * poch (2 + j) (k - j) * (-z) ^ j :=
+            ∑ j ∈ Finset.range (k + 1), (k.choose j : ℂ) * pochhammer (2 + j) (k - j) * (-z) ^ j :=
           funext fun z => kummerU_neg_nat_sum k 2 z
         rw [heq]
         fun_prop
@@ -718,7 +719,7 @@ theorem isBigO_kummerU_at_zero_b_one (a : ℂ) (ha : ∀ k : ℕ, a ≠ -k) :
       (fun z => z * log z) := by
   have ha0 : ∀ k : ℕ, a - (0 : ℕ) ≠ -(k : ℂ) := by simpa using ha
   have hM0 : regularizedHGFun {a} {(0 : ℂ) + 1} 0 = 1 := by
-    simp [regularizedHGFunCoeff_singleton, poch_zero]
+    simp [regularizedHGFunCoeff_singleton, pochhammer_zero]
   have hT0 : tricomiLogSeries a 0 0 = digamma a + 2 * (Real.eulerMascheroniConstant : ℂ) := by
     rw [tricomiLogSeries_zero]; simp [digamma_one]; ring
   have hM := ((differentiableAt_regularizedConfluent a ((0 : ℂ) + 1) 0).isBigO_sub).mono
@@ -754,10 +755,10 @@ theorem isBigO_kummerU_at_zero_b_one_recipGamma (a : ℂ) :
           recipGammaDeriv 1 a))
       (fun z => z * log z) := by
   have hM0 : regularizedHGFun {a} {(0 : ℂ) + 1} 0 = 1 := by
-    simp [regularizedHGFunCoeff_singleton, poch_zero]
+    simp [regularizedHGFunCoeff_singleton, pochhammer_zero]
   have hT0 : tricomiLogSeriesRecipGamma a 0 0 =
       2 * (Real.eulerMascheroniConstant : ℂ) * (Gamma a)⁻¹ - recipGammaDeriv 1 a := by
-    rw [tricomiLogSeriesRecipGamma_zero]; simp [digamma_one, poch_zero]; ring
+    rw [tricomiLogSeriesRecipGamma_zero]; simp [digamma_one, pochhammer_zero]; ring
   have hM := ((differentiableAt_regularizedConfluent a ((0 : ℂ) + 1) 0).isBigO_sub).mono
     (nhdsWithin_le_nhds (s := {0}ᶜ))
   have hT := ((analyticAt_tricomiLogSeriesRecipGamma a 0).differentiableAt.isBigO_sub).mono

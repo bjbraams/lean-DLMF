@@ -118,8 +118,8 @@ theorem ferrersP_w1_w2 {ν μ : ℂ} (h : LegendreQRegular ν μ) {x : ℝ} (hx 
     show (1-μ+(ν+1))/2=(ν-μ+2)/2 by ring,
     show (1-μ-(ν+1))/2=-(ν+μ)/2 by ring,
     show (1-μ+(ν+1)-1)/2=(ν-μ+1)/2 by ring] at hq
-  simp only [←regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hz,
-    ←regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hw] at hq
+  simp only [←regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hz,
+    ←regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hw] at hq
   have hGe : ∀ n : ℕ, (ν+μ+1)/2≠-n := by
     intro n he
     exact h (2*n) (by push_cast; linear_combination 2*he)
@@ -153,9 +153,9 @@ theorem ferrersP_w1_w2 {ν μ : ℂ} (h : LegendreQRegular ν μ) {x : ℝ} (hx 
   calc
     _ = ((((1+x)/(1-x):ℝ):ℂ)^(μ/2)*((1+(x:ℂ))/2)^(-μ))*
         ((π/Gamma ((1-ν-μ)/2))/Gamma ((ν-μ+2)/2)*
-          regularizedGaussHG (-(ν+μ)/2) ((ν-μ+1)/2) (1/2) (x^2)+
+          regularizedGaussHypergeometric (-(ν+μ)/2) ((ν-μ+1)/2) (1/2) (x^2)+
         x*(-(π/Gamma (-(ν+μ)/2)))/Gamma ((ν-μ+1)/2)*
-          regularizedGaussHG ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2) (x^2)) := by ring
+          regularizedGaussHypergeometric ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2) (x^2)) := by ring
     _ = _ := by rw [ferrers_quadratic_gauge μ hx,hre,hro]; ring
 
 /-! ### The even/odd quadratic basis of Ferrers solutions
@@ -166,11 +166,11 @@ regularity hypothesis is needed for `𝖯`. -/
 
 /-- The even quadratic Ferrers solution `(1-x²)^{-μ/2} 𝐅(-(ν+μ)/2, (ν-μ+1)/2; 1/2; x²)`. -/
 def ferrersEven (ν μ : ℂ) (x : ℝ) : ℂ :=
-  (1-(x:ℂ)^2)^(-μ/2)*regularizedGaussHG (-(ν+μ)/2) ((ν-μ+1)/2) (1/2) ((x:ℂ)^2)
+  (1-(x:ℂ)^2)^(-μ/2)*regularizedGaussHypergeometric (-(ν+μ)/2) ((ν-μ+1)/2) (1/2) ((x:ℂ)^2)
 
 /-- The odd quadratic Ferrers solution `x (1-x²)^{-μ/2} 𝐅((1-ν-μ)/2, (ν-μ+2)/2; 3/2; x²)`. -/
 def ferrersOdd (ν μ : ℂ) (x : ℝ) : ℂ :=
-  (x:ℂ)*((1-(x:ℂ)^2)^(-μ/2)*regularizedGaussHG ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2) ((x:ℂ)^2))
+  (x:ℂ)*((1-(x:ℂ)^2)^(-μ/2)*regularizedGaussHypergeometric ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2) ((x:ℂ)^2))
 
 /-- `1-x²` lies in the slit plane for `x ∈ (-1,1)`. -/
 theorem ferrers_one_sub_sq_mem_slitPlane {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) : 1-(x:ℂ)^2 ∈
@@ -193,7 +193,8 @@ theorem ferrersEven_neg_order (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1
   have hw := ferrers_sq_mem_cutPlane hx
   have hne := slitPlane_ne_zero (ferrers_one_sub_sq_mem_slitPlane hx)
   unfold ferrersEven
-  rw [regularizedGaussHG_euler _ _ _ hw, regularizedGaussHG_symm _ _ _ hw, ← mul_assoc,
+  rw [regularizedGaussHypergeometric_euler _ _ _ hw,
+      regularizedGaussHypergeometric_symm _ _ _ hw, ← mul_assoc,
     ← cpow_add _ _ hne]
   congr 2 <;> ring
 
@@ -203,7 +204,7 @@ theorem ferrersOdd_neg_order (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1)
   have hw := ferrers_sq_mem_cutPlane hx
   have hne := slitPlane_ne_zero (ferrers_one_sub_sq_mem_slitPlane hx)
   unfold ferrersOdd
-  rw [regularizedGaussHG_euler _ _ _ hw, regularizedGaussHG_symm _ _ _ hw]
+  rw [regularizedGaussHypergeometric_euler _ _ _ hw, regularizedGaussHypergeometric_symm _ _ _ hw]
   have e : -μ/2 = -(-μ)/2 + (3/2 - (1-ν-(-μ))/2 - (ν-(-μ)+2)/2) := by ring
   rw [e, cpow_add _ _ hne]
   ring_nf
@@ -212,14 +213,14 @@ theorem ferrersOdd_neg_order (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1)
 theorem ferrersEven_neg_degree (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersEven (-ν-1) μ x = ferrersEven ν μ x := by
   unfold ferrersEven
-  rw [regularizedGaussHG_symm _ _ _ (ferrers_sq_mem_cutPlane hx)]
+  rw [regularizedGaussHypergeometric_symm _ _ _ (ferrers_sq_mem_cutPlane hx)]
   congr 3 <;> ring
 
 /-- The odd solution is invariant under `ν ↦ -ν-1`. -/
 theorem ferrersOdd_neg_degree (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersOdd (-ν-1) μ x = ferrersOdd ν μ x := by
   unfold ferrersOdd
-  rw [regularizedGaussHG_symm _ _ _ (ferrers_sq_mem_cutPlane hx)]
+  rw [regularizedGaussHypergeometric_symm _ _ _ (ferrers_sq_mem_cutPlane hx)]
   congr 4 <;> ring
 
 /-- The even solution is even in `x`. -/
@@ -383,12 +384,12 @@ theorem half_cpow_neg (μ : ℂ) : (1/2:ℂ)^(-μ) = 2^μ := by
 
 /-- The even quadratic Gauss pullback `(1-w²)^(-μ/2) 𝐅(a,b;c;w²)` is stationary at `0`. -/
 theorem hasDerivAt_quadratic_even (a b c μ : ℂ) :
-    HasDerivAt (fun w : ℂ => (1-w^2)^(-μ/2) * regularizedGaussHG a b c (w^2)) 0 0 := by
+    HasDerivAt (fun w : ℂ => (1-w^2)^(-μ/2) * regularizedGaussHypergeometric a b c (w^2)) 0 0 := by
   have h1 : (1:ℂ)-0^2 ∈ slitPlane := by norm_num
   have hg := (hasStrictDerivAt_cpow_const (c := -μ/2) h1).hasDerivAt.comp (0:ℂ)
     ((hasDerivAt_pow 2 (0:ℂ)).const_sub 1)
   have h0 : (0:ℂ)^2 ∈ cutPlane := by rw [zero_pow two_ne_zero]; exact zero_mem_cutPlane
-  have hF := (differentiableAt_regularizedGaussHG a b c h0).hasDerivAt.comp (0:ℂ)
+  have hF := (differentiableAt_regularizedGaussHypergeometric a b c h0).hasDerivAt.comp (0:ℂ)
       (h := fun w : ℂ => w^2)
     (hasDerivAt_pow 2 (0:ℂ))
   refine (hg.mul hF).congr_deriv ?_
@@ -396,17 +397,17 @@ theorem hasDerivAt_quadratic_even (a b c μ : ℂ) :
 
 /-- The odd quadratic Gauss pullback `w (1-w²)^(-μ/2) 𝐅(a,b;c;w²)` has slope `𝐅(a,b;c;0)` at `0`. -/
 theorem hasDerivAt_quadratic_odd (a b c μ : ℂ) :
-    HasDerivAt (fun w : ℂ => w * ((1-w^2)^(-μ/2) * regularizedGaussHG a b c (w^2)))
-      (regularizedGaussHG a b c 0) 0 := by
+    HasDerivAt (fun w : ℂ => w * ((1-w^2)^(-μ/2) * regularizedGaussHypergeometric a b c (w^2)))
+      (regularizedGaussHypergeometric a b c 0) 0 := by
   refine ((hasDerivAt_id (0:ℂ)).mul (hasDerivAt_quadratic_even a b c μ)).congr_deriv ?_
   simp
 
 /-- The regularized quadratic form of `𝖯^μ_ν` on `(-1,1)`, valid for all parameters. -/
 theorem ferrersP_eq_quadratic (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersP ν μ x = 2^μ*(π/(Gamma ((1-ν-μ)/2)*Gamma ((ν-μ+2)/2))*
-        ((1-(x:ℂ)^2)^(-μ/2)*regularizedGaussHG (-(ν+μ)/2) ((ν-μ+1)/2) (1/2) ((x:ℂ)^2)) -
+        ((1-(x:ℂ)^2)^(-μ/2)*regularizedGaussHypergeometric (-(ν+μ)/2) ((ν-μ+1)/2) (1/2) ((x:ℂ)^2)) -
       π/(Gamma (-(ν+μ)/2)*Gamma ((ν-μ+1)/2))*
-        ((x:ℂ)*((1-(x:ℂ)^2)^(-μ/2)*regularizedGaussHG ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2)
+        ((x:ℂ)*((1-(x:ℂ)^2)^(-μ/2)*regularizedGaussHypergeometric ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2)
             ((x:ℂ)^2)))) := by
   have hz : ‖((1-(x:ℂ))/2)‖<1 := by
     rw [show (1-(x:ℂ))/2=(((1-x)/2:ℝ):ℂ) by push_cast; ring,
@@ -425,8 +426,8 @@ theorem ferrersP_eq_quadratic (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1
     show (1-μ+(ν+1))/2=(ν-μ+2)/2 by ring,
     show (1-μ-(ν+1))/2=-(ν+μ)/2 by ring,
     show (1-μ+(ν+1)-1)/2=(ν-μ+1)/2 by ring] at hq
-  simp only [←regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hz,
-    ←regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hw] at hq
+  simp only [←regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hz,
+    ←regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hw] at hq
   have hhalf : Gamma (1/2:ℂ)^2=(π:ℂ) := by
     rw [legendre_Gamma_one_half, ← ofReal_pow, Real.sq_sqrt Real.pi_pos.le]
   have hodd : Gamma (-1/2:ℂ)*Gamma (3/2:ℂ)= -(π:ℂ) := by
@@ -442,9 +443,9 @@ theorem ferrersP_eq_quadratic (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1
   calc
     _ = ((((1+x)/(1-x):ℝ):ℂ)^(μ/2)*((1+(x:ℂ))/2)^(-μ))*
         (π/(Gamma ((1-ν-μ)/2)*Gamma ((ν-μ+2)/2))*
-          regularizedGaussHG (-(ν+μ)/2) ((ν-μ+1)/2) (1/2) (x^2)-
+          regularizedGaussHypergeometric (-(ν+μ)/2) ((ν-μ+1)/2) (1/2) (x^2)-
         π/(Gamma (-(ν+μ)/2)*Gamma ((ν-μ+1)/2))*(x*
-          regularizedGaussHG ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2) (x^2))) := by ring
+          regularizedGaussHypergeometric ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2) (x^2))) := by ring
     _ = _ := by rw [ferrers_quadratic_gauge μ hx]; ring
 
 /-- `𝖯^μ_ν` in the even/odd basis, with reciprocal Gamma coefficients valid for all parameters. -/
@@ -557,10 +558,11 @@ theorem ferrersQ_hypergeometric {ν μ : ℂ} (h : LegendreQRegular ν μ) (hμ 
     - (g2*r1*T*O*P)*(P*B2*r2)*(g1*i1)*kT
 
 /-- Gauss values at `x²` depend continuously on affine parameters. -/
-theorem continuous_regularizedGaussHG_sq {A B C : ℂ → ℂ} (hA : Differentiable ℂ A)
+theorem continuous_regularizedGaussHypergeometric_sq {A B C : ℂ → ℂ} (hA : Differentiable ℂ A)
     (hB : Differentiable ℂ B) (hC : Differentiable ℂ C) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    Continuous fun ν => regularizedGaussHG (A ν) (B ν) (C ν) ((x:ℂ)^2) :=
-  (differentiable_regularizedGaussHG_comp hA hB hC (ferrers_sq_mem_cutPlane hx)).continuous
+    Continuous fun ν => regularizedGaussHypergeometric (A ν) (B ν) (C ν) ((x:ℂ)^2) :=
+  (differentiable_regularizedGaussHypergeometric_comp hA hB hC
+      (ferrers_sq_mem_cutPlane hx)).continuous
 
 /-- The reciprocal Gamma function is continuous. -/
 theorem continuous_recip_Gamma : Continuous fun s : ℂ => (Gamma s)⁻¹ := by
@@ -585,9 +587,11 @@ theorem continuousAt_ferrersQ_order {ν μ₀ : ℂ} (h : LegendreQRegular ν μ
   have p2 : Continuous fun μ : ℂ => (2:ℂ)^μ := continuous_const_cpow' (by norm_num)
   have pw : Continuous fun μ : ℂ => (1-(x:ℂ)^2)^(-μ/2) :=
     (continuous_const_cpow' hne).comp (by fun_prop)
-  have g1 := continuous_regularizedGaussHG_sq (A := fun μ => -(ν+μ)/2) (B := fun μ => (ν-μ+1)/2)
+  have g1 := continuous_regularizedGaussHypergeometric_sq (A := fun μ => -(ν+μ)/2)
+      (B := fun μ => (ν-μ+1)/2)
     (C := fun _ => 1/2) (by fun_prop) (by fun_prop) (by fun_prop) hx
-  have g2 := continuous_regularizedGaussHG_sq (A := fun μ => (1-ν-μ)/2) (B := fun μ => (ν-μ+2)/2)
+  have g2 := continuous_regularizedGaussHypergeometric_sq (A := fun μ => (1-ν-μ)/2)
+      (B := fun μ => (ν-μ+2)/2)
     (C := fun _ => 3/2) (by fun_prop) (by fun_prop) (by fun_prop) hx
   have hs : Continuous fun μ : ℂ => sin ((ν+μ)*π/2) := by fun_prop
   have hc : Continuous fun μ : ℂ => cos ((ν+μ)*π/2) := by fun_prop

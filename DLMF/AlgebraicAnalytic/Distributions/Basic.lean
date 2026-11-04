@@ -32,14 +32,14 @@ tempered distributions) and §1.17 (delta sequences). Mathlib already provides t
   `smoothMul` (1.16.6): multiplication by a smooth function.
 * `lineDistrib f`: the regular distribution of `f` on the line.
 * `xPlusDistrib α` (1.16.19, 1.16.21, 1.16.23): the distributions `x₊^α` for all real `α`.
-* `dlmfFourierSchwartz` (1.16.29): DLMF's Fourier transform
+* `fourierTransformSchwartz` (1.16.29): DLMF's Fourier transform
   `𝓕φ(x) = (2π)^{-n/2} ∫ φ(t) e^{i x·t} dt` on Schwartz space (DLMF convention 1.14.1, not
-  Mathlib's), and `dlmfFourierTempered` (1.16.35) its transpose on `𝓢'`.
+  Mathlib's), and `fourierTransformTempered` (1.16.35) its transpose on `𝓢'`.
 * `boundedTempered`, `signTempered`, `heavisideTempered`: tempered distributions of bounded
   functions.
-* `dlmfD j` (1.16.30), `polyOp` and `polyDiffOp P` (1.16.32), `polyEval`, `polyMul P` (1.16.31)
-  on Schwartz space, and their transposes `temperedD`, `temperedPolyDiffOp P`,
-  `temperedPolyMul P` on `𝓢'`.
+* `normalizedPartialDeriv j` (1.16.30), `polynomialOperator` and `polynomialDifferentialOperator P`
+  (1.16.32), `polyEval`, `polyMul P` (1.16.31) on Schwartz space, and their transposes `temperedD`,
+  `temperedPolynomialDifferentialOperator P`, `temperedPolyMul P` on `𝓢'`.
 * `IsDeltaSequence` (1.17.3–1.17.4), `gaussianDeltaSeq` (1.17.5), `dirichletKernel` (1.17.20).
 -/
 
@@ -136,19 +136,19 @@ def scaleEquiv (c : ℝ) (hc : c ≠ 0) : E ≃L[ℝ] E :=
 `𝓕φ(x) = (2π)^{-n/2} ∫_{ℝⁿ} φ(t) e^{i x·t} dt`, `n = dim E`, in the normalization of DLMF
 1.14.1 (kernel `e^{+ixt}`, symmetric factor). It is built from Mathlib's inverse transform
 `𝓕⁻φ(w) = ∫ e^{2πi⟪t, w⟫} φ(t) dt` as `(2π)^{-n/2} 𝓕⁻φ(x / 2π)`; the integral formula is
-`dlmfFourierSchwartz_apply`. That it maps `𝓢` to `𝓢` (DLMF's "`𝓕φ ∈ 𝓣ₙ`") is built in. -/
+`fourierTransformSchwartz_apply`. That it maps `𝓢` to `𝓢` (DLMF's "`𝓕φ ∈ 𝓣ₙ`") is built in. -/
 @[dlmf 1.16.E29, dlmf 1.16.vii]
-def dlmfFourierSchwartz : 𝓢(E, ℂ) →L[ℂ] 𝓢(E, ℂ) :=
+def fourierTransformSchwartz : 𝓢(E, ℂ) →L[ℂ] 𝓢(E, ℂ) :=
   (((2 * Real.pi) ^ (-(Module.finrank ℝ E : ℝ) / 2) : ℝ) : ℂ) •
     (SchwartzMap.compCLMOfContinuousLinearEquiv ℂ
         (scaleEquiv (2 * Real.pi)⁻¹ (by positivity)) ∘L
       FourierTransform.fourierInvCLM ℂ 𝓢(E, ℂ))
 
 /-- **DLMF's Fourier transform of a tempered distribution** (DLMF 1.16.35):
-`⟨𝓕(u), φ⟩ = ⟨u, 𝓕(φ)⟩` with DLMF's transform `dlmfFourierSchwartz` on test functions. -/
+`⟨𝓕(u), φ⟩ = ⟨u, 𝓕(φ)⟩` with DLMF's transform `fourierTransformSchwartz` on test functions. -/
 @[dlmf 1.16.E35]
-def dlmfFourierTempered : 𝓢'(E, ℂ) →L[ℂ] 𝓢'(E, ℂ) :=
-  PointwiseConvergenceCLM.precomp ℂ dlmfFourierSchwartz
+def fourierTransformTempered : 𝓢'(E, ℂ) →L[ℂ] 𝓢'(E, ℂ) :=
+  PointwiseConvergenceCLM.precomp ℂ fourierTransformSchwartz
 
 /-- The tempered distribution `φ ↦ ∫ φ(x) f(x) dx` of an essentially bounded function
 `f : ℝ → ℂ` (through Mathlib's `Lp.toTemperedDistribution` for `p = ∞`); zero if `f` is not
@@ -174,22 +174,24 @@ variable {n : ℕ}
 /-- The noncommutative evaluation of a multivariate polynomial `P = Σ_α c_α X^α` at a family
 `D` of elements of an algebra: `Σ_α c_α D₁^{α₁} ⋯ Dₙ^{αₙ}` (the factors in the order of the
 variables). For commuting `D_j` this is the usual evaluation. -/
-def polyOp {A : Type*} [Ring A] [Algebra ℂ A] (P : MvPolynomial (Fin n) ℂ) (D : Fin n → A) :
+def polynomialOperator {A : Type*} [Ring A] [Algebra ℂ A] (P : MvPolynomial (Fin n) ℂ)
+    (D : Fin n → A) :
     A :=
   ∑ α ∈ P.support, P.coeff α • (List.ofFn fun j => D j ^ α j).prod
 
 /-- DLMF 1.16.30: the operator `D_j = (1/i) ∂/∂x_j` on Schwartz space of
 `EuclideanSpace ℝ (Fin n)`, a linear endomorphism. -/
 @[dlmf 1.16.E30]
-def dlmfD (j : Fin n) : Module.End ℂ 𝓢(EuclideanSpace ℝ (Fin n), ℂ) :=
+def normalizedPartialDeriv (j : Fin n) : Module.End ℂ 𝓢(EuclideanSpace ℝ (Fin n), ℂ) :=
   (-I) • (LineDeriv.lineDerivOpCLM ℂ 𝓢(EuclideanSpace ℝ (Fin n), ℂ)
     (EuclideanSpace.single j (1 : ℝ))).toLinearMap
 
 /-- DLMF 1.16.32: the partial differential operator `P(𝐃) = Σ_α c_α 𝐃^α` on Schwartz space,
 for a polynomial `P(𝐱) = Σ_α c_α 𝐱^α` (1.16.31) given as an `MvPolynomial`. -/
 @[dlmf 1.16.E32]
-def polyDiffOp (P : MvPolynomial (Fin n) ℂ) : Module.End ℂ 𝓢(EuclideanSpace ℝ (Fin n), ℂ) :=
-  polyOp P dlmfD
+def polynomialDifferentialOperator (P : MvPolynomial (Fin n) ℂ) : Module.End ℂ
+    𝓢(EuclideanSpace ℝ (Fin n), ℂ) :=
+  polynomialOperator P normalizedPartialDeriv
 
 /-- DLMF 1.16.31: the polynomial function `P(𝐱) = Σ_α c_α x₁^{α₁} ⋯ xₙ^{αₙ}`. -/
 @[dlmf 1.16.E31]
@@ -213,9 +215,9 @@ def temperedD (j : Fin n) : Module.End ℂ 𝓢'(EuclideanSpace ℝ (Fin n), ℂ
 
 /-- The partial differential operator `P(𝐃)` on tempered distributions, the derivatives
 understood in the sense of distributions (DLMF, below 1.16.37). -/
-def temperedPolyDiffOp (P : MvPolynomial (Fin n) ℂ) :
+def temperedPolynomialDifferentialOperator (P : MvPolynomial (Fin n) ℂ) :
     Module.End ℂ 𝓢'(EuclideanSpace ℝ (Fin n), ℂ) :=
-  polyOp P temperedD
+  polynomialOperator P temperedD
 
 /-- Multiplication `u ↦ P u` of a tempered distribution by the polynomial `P(𝐱)` (convention
 1.16.6: `⟨P u, φ⟩ = ⟨u, P φ⟩`). -/
@@ -233,7 +235,7 @@ end PolyOps
 convergence against test functions). -/
 @[dlmf 1.17.E3, dlmf 1.17.E4]
 def IsDeltaSequence (δ : ℕ → ℝ → ℂ) : Prop :=
-  ∀ φ : ℝ → ℂ, ContDiff ℝ ⊤ φ → HasCompactSupport φ → ∀ a : ℝ,
+  ∀ φ : ℝ → ℂ, ContDiff ℝ (⊤ : ℕ∞) φ → HasCompactSupport φ → ∀ a : ℝ,
     Tendsto (fun n => ∫ x, δ n (x - a) * φ x) atTop (𝓝 (φ a))
 
 /-- DLMF 1.17.5: the Gaussian delta sequence `δₙ(x) = √(n/π) e^{-n x²}`. -/

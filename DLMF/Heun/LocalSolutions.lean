@@ -21,12 +21,12 @@ coefficients `c_j` of the three-term recurrence 31.3.2–31.3.4 (`heunLocalCoeff
 * `heunLocal_zero`: `Hl(0) = 1`.
 * `hasSum_heunLocal`, `hasFPowerSeriesOnBall_heunLocal`: convergence of the series in
   `|z| < min(1, |a|)`, DLMF 31.3.1.
-* `heunLocal_isHeunSolOn`, `eventuallyEq_heunLocal_of_analyticAt`: `Hl` solves Heun's equation
+* `heunLocal_isHeunSolutionOn`, `eventuallyEq_heunLocal_of_analyticAt`: `Hl` solves Heun's equation
   and is characterized as the solution with exponent `0` and value `1` at the origin (§31.3(i)).
-* `heunLocal_second_isHeunSolOn`: the second solution at `0`, DLMF 31.3.5.
-* `heunLocal_at_one_isHeunSolOn`, `heunLocal_second_at_one_isHeunSolOn`,
-  `heunLocal_at_a_isHeunSolOn`, `heunLocal_second_at_a_isHeunSolOn`,
-  `heunLocal_at_infinity_isHeunSolOn`, `heunLocal_second_at_infinity_isHeunSolOn`: the
+* `heunLocal_second_isHeunSolutionOn`: the second solution at `0`, DLMF 31.3.5.
+* `heunLocal_at_one_isHeunSolutionOn`, `heunLocal_second_at_one_isHeunSolutionOn`,
+  `heunLocal_at_a_isHeunSolutionOn`, `heunLocal_second_at_a_isHeunSolutionOn`,
+  `heunLocal_at_infinity_isHeunSolutionOn`, `heunLocal_second_at_infinity_isHeunSolutionOn`: the
   Fuchs–Frobenius solutions at `1`, `a`, `∞` (31.3.6–31.3.11), each on the disk of convergence
   of the `Hl` involved.
 * `heunLocal_eq_heunLocal_inv`, `heunLocal_eq_pfaff`: the equivalent expressions
@@ -76,10 +76,10 @@ theorem heunLocalCoeff_rec_zero (ha : a ≠ 0) (hγ : γ ≠ 0) :
 /-- DLMF 31.3.3: `R_j c_{j+1} - (Q_j + q) c_j + P_j c_{j-1} = 0` for `j ≥ 1` (for `R_j ≠ 0`, that
 is `a ≠ 0` and `γ ≠ -j`). -/
 @[dlmf 31.3.E3]
-theorem heunLocalCoeff_rec {j : ℕ} (hj : 1 ≤ j) (hR : heunRecR a γ j ≠ 0) :
-    heunRecR a γ j * heunLocalCoeff a q α β γ δ (j + 1) -
-      (heunRecQ a α β γ δ j + q) * heunLocalCoeff a q α β γ δ j +
-      heunRecP α β j * heunLocalCoeff a q α β γ δ (j - 1) = 0 := by
+theorem heunLocalCoeff_rec {j : ℕ} (hj : 1 ≤ j) (hR : heunRecurrenceR a γ j ≠ 0) :
+    heunRecurrenceR a γ j * heunLocalCoeff a q α β γ δ (j + 1) -
+      (heunRecurrenceQ a α β γ δ j + q) * heunLocalCoeff a q α β γ δ j +
+      heunRecurrenceP α β j * heunLocalCoeff a q α β γ δ (j - 1) = 0 := by
   obtain ⟨k, rfl⟩ : ∃ k, j = k + 1 := ⟨j - 1, by omega⟩
   simp only [Nat.add_sub_cancel]
   rw [show k + 1 + 1 = k + 2 from rfl, heunLocalCoeff, mul_div_cancel₀ _ hR]
@@ -153,50 +153,52 @@ private lemma majorant_step {a A B c₀ c c' : ℂ} {η δ r : ℝ} (hη : 0 < �
 /-- The recurrence of `heunLocalCoeff` in the form `c_{n+2} = A_n c_{n+1} + B_n c_n`. -/
 private lemma heunLocalCoeff_add_two (a q α β γ δ : ℂ) (n : ℕ) :
     heunLocalCoeff a q α β γ δ (n + 2) =
-      (heunRecQ a α β γ δ (n + 1) + q) / heunRecR a γ (n + 1) *
+      (heunRecurrenceQ a α β γ δ (n + 1) + q) / heunRecurrenceR a γ (n + 1) *
           heunLocalCoeff a q α β γ δ (n + 1) +
-        -heunRecP α β (n + 1) / heunRecR a γ (n + 1) * heunLocalCoeff a q α β γ δ n := by
+        -heunRecurrenceP α β (n + 1) / heunRecurrenceR a γ (n + 1) *
+            heunLocalCoeff a q α β γ δ n := by
   rw [heunLocalCoeff]; ring
 
-/-- Nonvanishing under the stated hypotheses: `∀ᶠ n : ℕ in atTop, heunRecR a γ (n + 1) ≠ 0`. -/
-private lemma eventually_heunRecR_ne_zero (a γ : ℂ) (ha : a ≠ 0) :
-    ∀ᶠ n : ℕ in atTop, heunRecR a γ (n + 1) ≠ 0 := by
+/-- Nonvanishing under the stated hypotheses: `∀ᶠ n : ℕ in atTop, heunRecurrenceR a γ (n + 1) ≠ 0`.
+-/
+private lemma eventually_heunRecurrenceR_ne_zero (a γ : ℂ) (ha : a ≠ 0) :
+    ∀ᶠ n : ℕ in atTop, heunRecurrenceR a γ (n + 1) ≠ 0 := by
   obtain ⟨N, hN⟩ := exists_nat_gt ‖γ‖
   filter_upwards [eventually_ge_atTop N] with n hn
-  unfold heunRecR
+  unfold heunRecurrenceR
   refine mul_ne_zero (mul_ne_zero ha (by norm_cast)) fun h => ?_
   have h' : γ = -(((n + 1 : ℕ) : ℂ)) := by linear_combination h
   have : ‖γ‖ = (n + 1 : ℝ) := by rw [h', norm_neg, Complex.norm_natCast]; push_cast; ring
   have : (N : ℝ) ≤ n := by exact_mod_cast hn
   linarith
 
-/-- The map `(fun n : ℕ => (heunRecQ a α β γ δ (n + 1) + q) / heunRecR a γ (n + 1) + -heunRecP α β
-(n + 1) / heunRecR a γ (n + 1) - 1)` tends to `(𝓝 0)` along `atTop`. -/
+/-- The map `(fun n : ℕ => (heunRecurrenceQ a α β γ δ (n + 1) + q) / heunRecurrenceR a γ (n + 1) +
+-heunRecurrenceP α β (n + 1) / heunRecurrenceR a γ (n + 1) - 1)` tends to `(𝓝 0)` along `atTop`. -/
 private lemma tendsto_heunRec_ratio_sum (a q α β γ δ : ℂ) (ha : a ≠ 0) :
-    Tendsto (fun n : ℕ => (heunRecQ a α β γ δ (n + 1) + q) / heunRecR a γ (n + 1) +
-      -heunRecP α β (n + 1) / heunRecR a γ (n + 1) - 1) atTop (𝓝 0) := by
+    Tendsto (fun n : ℕ => (heunRecurrenceQ a α β γ δ (n + 1) + q) / heunRecurrenceR a γ (n + 1) +
+      -heunRecurrenceP α β (n + 1) / heunRecurrenceR a γ (n + 1) - 1) atTop (𝓝 0) := by
   have h := (tendsto_linear_div_quadratic (a * δ - 2 * a - δ + 2)
     (-a * γ - α * β + α + β + q - 1) a γ ha).comp (tendsto_add_atTop_nat 1)
   refine h.congr' ?_
-  filter_upwards [eventually_heunRecR_ne_zero a γ ha] with n hn
+  filter_upwards [eventually_heunRecurrenceR_ne_zero a γ ha] with n hn
   simp only [Function.comp_apply]
   rw [eq_comm, ← add_div, div_sub_one hn]
-  unfold heunRecR heunRecQ heunRecP heunEps
+  unfold heunRecurrenceR heunRecurrenceQ heunRecurrenceP heunEpsilon
   push_cast
   ring_nf
 
-/-- The map `(fun n : ℕ => -heunRecP α β (n + 1) / heunRecR a γ (n + 1) + 1 / a)` tends to `(𝓝 0)`
-along `atTop`. -/
-private lemma tendsto_neg_heunRecP_div_heunRecR_add_inv (a α β γ : ℂ) (ha : a ≠ 0) :
-    Tendsto (fun n : ℕ => -heunRecP α β (n + 1) / heunRecR a γ (n + 1) + 1 / a) atTop
+/-- The map `(fun n : ℕ => -heunRecurrenceP α β (n + 1) / heunRecurrenceR a γ (n + 1) + 1 / a)`
+tends to `(𝓝 0)` along `atTop`. -/
+private lemma tendsto_neg_heunRecurrenceP_div_heunRecurrenceR_add_inv (a α β γ : ℂ) (ha : a ≠ 0) :
+    Tendsto (fun n : ℕ => -heunRecurrenceP α β (n + 1) / heunRecurrenceR a γ (n + 1) + 1 / a) atTop
       (𝓝 0) := by
   have h := (tendsto_linear_div_quadratic ((-a * α - a * β + a * γ + 3 * a) / a)
     ((-a * α * β + a * α + a * β + a * γ - a) / a) a γ ha).comp (tendsto_add_atTop_nat 1)
   refine h.congr' ?_
-  filter_upwards [eventually_heunRecR_ne_zero a γ ha] with n hn
+  filter_upwards [eventually_heunRecurrenceR_ne_zero a γ ha] with n hn
   simp only [Function.comp_apply]
   rw [eq_comm, div_add_div _ _ hn ha]
-  unfold heunRecR heunRecP at *
+  unfold heunRecurrenceR heunRecurrenceP at *
   field_simp
   push_cast
   ring
@@ -234,7 +236,8 @@ private lemma summable_norm_heunLocalCoeff_mul_pow {a q α β γ δ : ℂ} (ha :
     rw [hη, div_mul_cancel₀ _ hD.ne']; linarith
   have e1 := (Metric.tendsto_nhds.1 (tendsto_heunRec_ratio_sum a q α β γ δ ha)) (η * δ' / 2)
     (by positivity)
-  have e2 := (Metric.tendsto_nhds.1 (tendsto_neg_heunRecP_div_heunRecR_add_inv a α β γ ha)) (δ' / 2)
+  have e2 := (Metric.tendsto_nhds.1
+      (tendsto_neg_heunRecurrenceP_div_heunRecurrenceR_add_inv a α β γ ha)) (δ' / 2)
       (by positivity)
   set g : ℕ → ℝ := fun n => max (η * ‖c (n + 1)‖) ‖c (n + 1) - c n‖ * t ^ n with hg
   have hg0 : ∀ n, 0 ≤ g n := fun n =>
@@ -296,12 +299,13 @@ private lemma hasSum_coeffShift {u : ℕ → ℂ} {S z : ℂ} (h : HasSum (fun n
     HasSum (fun n => coeffShift u n * z ^ n) (z * S) :=
   HasSum.mul_pow_shift (c := coeffShift u) h rfl
 
-/-- The coefficient of `zⁿ` in `z (𝒟 f - q f)` for `f = ∑ bₙ zⁿ` (with `ε = heunEps α β γ δ`). -/
+/-- The coefficient of `zⁿ` in `z (𝒟 f - q f)` for `f = ∑ bₙ zⁿ` (with `ε = heunEpsilon α β γ δ`).
+-/
 def heunOperatorCoeff (a q α β γ δ : ℂ) (b : ℕ → ℂ) (n : ℕ) : ℂ :=
   coeffShift (coeffShift fun n => (n : ℂ) * (n - 1) * b n) n -
     (1 + a) * coeffShift (fun n => (n : ℂ) * (n - 1) * b n) n + a * ((n : ℂ) * (n - 1) * b n) +
-    (γ + δ + heunEps α β γ δ) * coeffShift (coeffShift fun n => (n : ℂ) * b n) n -
-    (γ * (1 + a) + δ * a + heunEps α β γ δ) * coeffShift (fun n => (n : ℂ) * b n) n +
+    (γ + δ + heunEpsilon α β γ δ) * coeffShift (coeffShift fun n => (n : ℂ) * b n) n -
+    (γ * (1 + a) + δ * a + heunEpsilon α β γ δ) * coeffShift (fun n => (n : ℂ) * b n) n +
     γ * a * ((n : ℂ) * b n) + α * β * coeffShift (coeffShift b) n - q * coeffShift b n
 
 /-- Identity under the stated parameter and domain assumptions:
@@ -319,12 +323,13 @@ theorem heunOperatorCoeff_one (a q α β γ δ : ℂ) (b : ℕ → ℂ) :
   ring
 
 /-- Identity under the stated parameter and domain assumptions:
-`heunOperatorCoeff a q α β γ δ b (k + 2) = heunRecR a γ (k + 1) * b (k + 2) - (heunRecQ a α β γ δ (k
-+ 1) + q) * b (k + 1) + heunRecP α β (k + 1) * b k`. -/
+`heunOperatorCoeff a q α β γ δ b (k + 2) = heunRecurrenceR a γ (k + 1) * b (k + 2) -
+(heunRecurrenceQ a α β γ δ (k + 1) + q) * b (k + 1) + heunRecurrenceP α β (k + 1) * b k`. -/
 theorem heunOperatorCoeff_add_two (a q α β γ δ : ℂ) (b : ℕ → ℂ) (k : ℕ) :
-    heunOperatorCoeff a q α β γ δ b (k + 2) = heunRecR a γ (k + 1) * b (k + 2) -
-      (heunRecQ a α β γ δ (k + 1) + q) * b (k + 1) + heunRecP α β (k + 1) * b k := by
-  simp only [heunOperatorCoeff, coeffShift, heunRecR, heunRecQ, heunRecP, heunEps]
+    heunOperatorCoeff a q α β γ δ b (k + 2) = heunRecurrenceR a γ (k + 1) * b (k + 2) -
+      (heunRecurrenceQ a α β γ δ (k + 1) + q) * b (k + 1) + heunRecurrenceP α β (k + 1) * b k := by
+  simp only [heunOperatorCoeff, coeffShift, heunRecurrenceR, heunRecurrenceQ,
+      heunRecurrenceP, heunEpsilon]
   push_cast
   ring
 
@@ -333,8 +338,8 @@ coefficients `heunOperatorCoeff … b`. -/
 theorem hasSum_heunOperator {a q α β γ δ : ℂ} {b : ℕ → ℂ} {f : ℂ → ℂ} {r : ENNReal}
     (h : HasFPowerSeriesOnBall f (ofScalars ℂ b) 0 r) {z : ℂ} (hz' : z ∈ Metric.eball 0 r) :
     HasSum (fun n => heunOperatorCoeff a q α β γ δ b n * z ^ n)
-      (z * (heunOperator a α β γ δ (heunEps α β γ δ) f z - q * f z)) := by
-  set ε := heunEps α β γ δ with hε
+      (z * (heunOperator a α β γ δ (heunEpsilon α β γ δ) f z - q * f z)) := by
+  set ε := heunEpsilon α β γ δ with hε
   have hF := h.hasSum_mul_pow hz'
   have hY := h.hasSum_z_mul_deriv hz'
   have hX : HasSum (fun n : ℕ => (n : ℂ) * (n - 1) * b n * z ^ n)
@@ -368,7 +373,7 @@ theorem hasSum_heunOperator {a q α β γ δ : ℂ} {b : ℕ → ℂ} {f : ℂ �
 /-- `z (𝒟 Hl - q Hl) = 0` on the disk of convergence. -/
 private lemma heunOperator_heunLocal {a q α β γ δ : ℂ} (ha : a ≠ 0) (hγ : ∀ n : ℕ, γ ≠ -(n : ℂ))
     {z : ℂ} (hz : ‖z‖ < heunLocalRadius a) :
-    z * (heunOperator a α β γ δ (heunEps α β γ δ) (heunLocal a q α β γ δ) z -
+    z * (heunOperator a α β γ δ (heunEpsilon α β γ δ) (heunLocal a q α β γ δ) z -
       q * heunLocal a q α β γ δ z) = 0 := by
   set c := heunLocalCoeff a q α β γ δ with hc
   have h := hasFPowerSeriesOnBall_heunLocal (q := q) (α := α) (β := β) (δ := δ) (γ := γ) ha
@@ -383,8 +388,8 @@ private lemma heunOperator_heunLocal {a q α β γ δ : ℂ} (ha : a ≠ 0) (hγ
     · rw [heunOperatorCoeff_one, hc, heunLocalCoeff, heunLocalCoeff]
       field_simp
       ring
-    · have hR : heunRecR a γ (k + 1) ≠ 0 := by
-        unfold heunRecR
+    · have hR : heunRecurrenceR a γ (k + 1) ≠ 0 := by
+        unfold heunRecurrenceR
         refine mul_ne_zero (mul_ne_zero ha (by norm_cast)) fun h0 => hγ (k + 1) ?_
         push_cast at h0 ⊢; linear_combination h0
       rw [heunOperatorCoeff_add_two, hc, heunLocalCoeff, mul_div_cancel₀ _ hR]
@@ -409,9 +414,9 @@ theorem hasSum_heunLocal (ha : a ≠ 0) {z : ℂ}
 /-- DLMF §31.3(i): `Hl` is analytic in the disk `|z| < min(1, |a|)` and solves Heun's equation
 (with `ε = α + β + 1 - γ - δ`) there, away from the regular singular point `z = 0`. -/
 @[dlmf 31.3.i, dlmf 31.3.E1]
-theorem heunLocal_isHeunSolOn (ha : a ≠ 0) (hγ : ∀ n : ℕ, γ ≠ -(n : ℂ)) :
+theorem heunLocal_isHeunSolutionOn (ha : a ≠ 0) (hγ : ∀ n : ℕ, γ ≠ -(n : ℂ)) :
     AnalyticOnNhd ℂ (heunLocal a q α β γ δ) (Metric.ball 0 (heunLocalRadius a)) ∧
-    IsHeunSolOn a q α β γ δ (heunEps α β γ δ) (heunLocal a q α β γ δ)
+    IsHeunSolutionOn a q α β γ δ (heunEpsilon α β γ δ) (heunLocal a q α β γ δ)
       (Metric.ball 0 (heunLocalRadius a) \ {0}) := by
   have h := hasFPowerSeriesOnBall_heunLocal (q := q) (α := α) (β := β) (γ := γ) (δ := δ) ha
   have hA : AnalyticOnNhd ℂ (heunLocal a q α β γ δ) (Metric.ball 0 (heunLocalRadius a)) :=
@@ -424,7 +429,7 @@ theorem heunLocal_isHeunSolOn (ha : a ≠ 0) (hγ : ∀ n : ℕ, γ ≠ -(n : �
     · subst h1; simp only [norm_one] at hz
       exact absurd (hz.trans_le (min_le_left _ _)) (lt_irrefl _)
     · subst h1; exact absurd (hz.trans_le (min_le_right _ _)) (lt_irrefl _)
-  rw [isHeunSolOn_iff_heunOperator hs]
+  rw [isHeunSolutionOn_iff_heunOperator hs]
   rintro z ⟨hz, hz0⟩
   have hzA := hA z hz
   refine ⟨hzA.differentiableAt, hzA.deriv.differentiableAt, ?_⟩
@@ -439,22 +444,24 @@ theorem heunLocal_isHeunSolOn (ha : a ≠ 0) (hγ : ∀ n : ℕ, γ ≠ -(n : �
 /-- Restriction of a solution to a subset. -/
 private lemma isLinearODE2On_mono {p r w : ℂ → ℂ} {s t : Set ℂ} (h : IsLinearODE2On p r w t)
     (hst : s ⊆ t) : IsLinearODE2On p r w s :=
-  ⟨fun z hz => h.1 z (hst hz), fun z hz => h.2 z (hst hz)⟩
+  IsLinearODE2On.mk (fun z hz => h.differentiableAt z (hst hz))
+      (fun z hz => h.hasDerivAt_deriv z (hst hz))
 
 /-- Heun's equation is symmetric in `α` and `β`. -/
-private lemma isHeunSolOn_swap {w : ℂ → ℂ} {s : Set ℂ} (h : IsHeunSolOn a q α β γ δ ε w s) :
-    IsHeunSolOn a q β α γ δ ε w s := by
+private lemma isHeunSolutionOn_swap {w : ℂ → ℂ} {s : Set ℂ}
+    (h : IsHeunSolutionOn a q α β γ δ ε w s) :
+    IsHeunSolutionOn a q β α γ δ ε w s := by
   have : heunCoeffR a q β α = heunCoeffR a q α β := by
     funext z; unfold heunCoeffR; ring
-  unfold IsHeunSolOn at *
+  unfold IsHeunSolutionOn at *
   rwa [this]
 
 /-- The homography `z ↦ 1 - z` (§31.2(v)): a solution of Heun's equation with parameters
 `(1 - a, αβ - q; α, β, δ, γ; ε)` composed with `1 - z` solves the original equation. -/
-private lemma isHeunSolOn_comp_one_sub {U V : Set ℂ} (hU : IsOpen U)
+private lemma isHeunSolutionOn_comp_one_sub {U V : Set ℂ} (hU : IsOpen U)
     (hUs : ∀ z ∈ U, z ≠ 0 ∧ z ≠ 1 ∧ z ≠ a ∧ 1 - z ∈ V) {w : ℂ → ℂ}
-    (hw : IsHeunSolOn (1 - a) (α * β - q) α β δ γ ε w V) :
-    IsHeunSolOn a q α β γ δ ε (fun z => w (1 - z)) U := by
+    (hw : IsHeunSolutionOn (1 - a) (α * β - q) α β δ γ ε w V) :
+    IsHeunSolutionOn a q α β γ δ ε (fun z => w (1 - z)) U := by
   refine isLinearODE2On_comp (φ₁ := fun _ => -1) (φ₂ := fun _ => 0) hU
     (fun z _ => by simpa using (hasDerivAt_id' z).const_sub (1 : ℂ))
     (fun z _ => hasDerivAt_const _ _) (fun z hz => (hUs z hz).2.2.2) (fun z hz => ?_)
@@ -481,10 +488,10 @@ private lemma isHeunSolOn_comp_one_sub {U V : Set ℂ} (hU : IsOpen U)
     ring
 
 /-- The homography `z ↦ (a - z)/(a - 1)` (§31.2(v)). -/
-private lemma isHeunSolOn_comp_sub_div (ha1 : a ≠ 1) {U V : Set ℂ} (hU : IsOpen U)
+private lemma isHeunSolutionOn_comp_sub_div (ha1 : a ≠ 1) {U V : Set ℂ} (hU : IsOpen U)
     (hUs : ∀ z ∈ U, z ≠ 0 ∧ z ≠ 1 ∧ z ≠ a ∧ (a - z) / (a - 1) ∈ V) {w : ℂ → ℂ}
-    (hw : IsHeunSolOn (a / (a - 1)) ((α * β * a - q) / (a - 1)) α β ε δ γ w V) :
-    IsHeunSolOn a q α β γ δ ε (fun z => w ((a - z) / (a - 1))) U := by
+    (hw : IsHeunSolutionOn (a / (a - 1)) ((α * β * a - q) / (a - 1)) α β ε δ γ w V) :
+    IsHeunSolutionOn a q α β γ δ ε (fun z => w ((a - z) / (a - 1))) U := by
   have ha1' : a - 1 ≠ 0 := sub_ne_zero.2 ha1
   refine isLinearODE2On_comp (φ₁ := fun _ => -1 / (a - 1)) (φ₂ := fun _ => 0) hU
     (fun z _ => ?_) (fun z _ => hasDerivAt_const _ _) (fun z hz => (hUs z hz).2.2.2)
@@ -514,13 +521,13 @@ private lemma isHeunSolOn_comp_sub_div (ha1 : a ≠ 1) {U V : Set ℂ} (hU : IsO
 /-- The map `w ↦ z^{-α} w(1/z)` (§31.2(v), §31.3(ii)): a solution of Heun's equation with
 parameters `(1/a, q/a - α(β - ε) - (α/a)(β - δ); α, α - γ + 1, α - β + 1, δ; ε)` gives a
 solution of the original equation. -/
-private lemma isHeunSolOn_comp_inv (ha0 : a ≠ 0) (hε : ε = heunEps α β γ δ) {U V : Set ℂ}
+private lemma isHeunSolutionOn_comp_inv (ha0 : a ≠ 0) (hε : ε = heunEpsilon α β γ δ) {U V : Set ℂ}
     (hU : IsOpen U) (hUs : ∀ z ∈ U, z ∈ slitPlane ∧ z ≠ 1 ∧ z ≠ a ∧ 1 / z ∈ V) {w : ℂ → ℂ}
-    (hw : IsHeunSolOn (1 / a) (q / a - α * (β - ε) - α / a * (β - δ)) α (α - γ + 1)
+    (hw : IsHeunSolutionOn (1 / a) (q / a - α * (β - ε) - α / a * (β - δ)) α (α - γ + 1)
       (α - β + 1) δ ε w V) :
-    IsHeunSolOn a q α β γ δ ε (fun z => z ^ (-α) * w (1 / z)) U := by
+    IsHeunSolutionOn a q α β γ δ ε (fun z => z ^ (-α) * w (1 / z)) U := by
   subst hε
-  unfold heunEps at *
+  unfold heunEpsilon at *
   set L : ℂ → ℂ := fun z => -α / z
   set L' : ℂ → ℂ := fun z => α / z ^ 2
   have hne : ∀ z ∈ U, z ≠ 0 ∧ z - 1 ≠ 0 ∧ z - a ≠ 0 := fun z hz =>
@@ -616,7 +623,7 @@ equation near `0` (punctured) that is analytic at `0` is `w(0) · Hl(z)` near `0
 @[dlmf 31.3.i]
 theorem eventuallyEq_heunLocal_of_analyticAt (ha : a ≠ 0) (hγ : ∀ n : ℕ, γ ≠ -(n : ℂ))
     {w : ℂ → ℂ} {U : Set ℂ} (hU : U ∈ 𝓝 (0 : ℂ)) (hw : AnalyticAt ℂ w 0)
-    (hsol : IsHeunSolOn a q α β γ δ (heunEps α β γ δ) w (U \ {0})) :
+    (hsol : IsHeunSolutionOn a q α β γ δ (heunEpsilon α β γ δ) w (U \ {0})) :
     w =ᶠ[𝓝 0] fun z => w 0 * heunLocal a q α β γ δ z := by
   obtain ⟨p, r, hp⟩ := hw
   set b : ℕ → ℂ := fun n => p.coeff n with hb
@@ -635,7 +642,7 @@ theorem eventuallyEq_heunLocal_of_analyticAt (ha : a ≠ 0) (hγ : ∀ n : ℕ, 
     ⟨hρU (Metric.ball_subset_ball hr'ρ hz.1), hz.2⟩
   have hs : ∀ z ∈ Metric.ball (0 : ℂ) r' \ {0}, z ≠ 0 ∧ z ≠ 1 ∧ z ≠ a := fun z hz =>
     ⟨hz.2, ne_one_and_ne_of_norm_lt_heunLocalRadius ((mem_ball_zero_iff.1 hz.1).trans_le hr'a)⟩
-  have hsol' := (isHeunSolOn_iff_heunOperator hs).1 (isLinearODE2On_mono hsol hsub)
+  have hsol' := (isHeunSolutionOn_iff_heunOperator hs).1 (isLinearODE2On_mono hsol hsub)
   have hzr : ∀ z : ℂ, ‖z‖ < r' → z ∈ Metric.eball (0 : ℂ) r := fun z hz => by
     refine Metric.eball_subset_eball hr'r ?_
     rw [Metric.eball_ofReal, mem_ball_zero_iff]; exact hz
@@ -661,8 +668,8 @@ theorem eventuallyEq_heunLocal_of_analyticAt (ha : a ≠ 0) (hγ : ∀ n : ℕ, 
         field_simp
         linear_combination h1
       | k + 2, ih =>
-        have hR : heunRecR a γ (k + 1) ≠ 0 := by
-          unfold heunRecR
+        have hR : heunRecurrenceR a γ (k + 1) ≠ 0 := by
+          unfold heunRecurrenceR
           refine mul_ne_zero (mul_ne_zero ha (by norm_cast)) fun h0 => hγ (k + 1) ?_
           push_cast at h0 ⊢; linear_combination h0
         have h2 := congrFun hE (k + 2)
@@ -690,18 +697,19 @@ theorem eventuallyEq_heunLocal_of_analyticAt (ha : a ≠ 0) (hγ : ∀ n : ℕ, 
 /-- DLMF 31.3.5: for `γ ∉ {1, 2, 3, …}` the solution with exponent `1 - γ` at `z = 0` is
 `z^{1-γ} Hl(a, (aδ + ε)(1 - γ) + q; α + 1 - γ, β + 1 - γ, 2 - γ, δ; z)`. -/
 @[dlmf 31.3.E5]
-theorem heunLocal_second_isHeunSolOn (ha : a ≠ 0) (hγ : ∀ n : ℕ, γ ≠ (n : ℂ) + 1)
-    (hε : ε = heunEps α β γ δ) :
-    IsHeunSolOn a q α β γ δ ε
+theorem heunLocal_second_isHeunSolutionOn (ha : a ≠ 0) (hγ : ∀ n : ℕ, γ ≠ (n : ℂ) + 1)
+    (hε : ε = heunEpsilon α β γ δ) :
+    IsHeunSolutionOn a q α β γ δ ε
       (fun z => z ^ (1 - γ) * heunLocal a ((a * δ + ε) * (1 - γ) + q) (α + 1 - γ) (β + 1 - γ)
         (2 - γ) δ z)
       {z | ‖z‖ < heunLocalRadius a ∧ z ∈ slitPlane} := by
-  have hF : α + β + 1 = γ + δ + ε := by rw [hε]; unfold heunEps; ring
+  have hF : α + β + 1 = γ + δ + ε := by rw [hε]; unfold heunEpsilon; ring
   have hγ' : ∀ n : ℕ, 2 - γ ≠ -(n : ℂ) := fun n h =>
     hγ (n + 1) (by push_cast; linear_combination -h)
-  have h := (heunLocal_isHeunSolOn (q := (a * δ + ε) * (1 - γ) + q) (α := α + 1 - γ)
+  have h := (heunLocal_isHeunSolutionOn (q := (a * δ + ε) * (1 - γ) + q) (α := α + 1 - γ)
     (β := β + 1 - γ) (δ := δ) ha hγ').2
-  have hε' : heunEps (α + 1 - γ) (β + 1 - γ) (2 - γ) δ = ε := by rw [hε]; unfold heunEps; ring
+  have hε' : heunEpsilon (α + 1 - γ) (β + 1 - γ) (2 - γ) δ = ε := by rw [hε];
+                                                                     unfold heunEpsilon; ring
   rw [hε'] at h
   refine heun_fHomotopic_zero hF (isOpen_ball_inter_slitPlane a) (fun z hz => ?_) ?_
   · exact ⟨hz.2, ne_one_and_ne_of_norm_lt_heunLocalRadius hz.1⟩
@@ -712,16 +720,16 @@ theorem heunLocal_second_isHeunSolOn (ha : a ≠ 0) (hγ : ∀ n : ℕ, γ ≠ (
 /-- DLMF 31.3.6: for `δ ∉ {0, -1, -2, …}` the solution with exponent `0` at `z = 1` is
 `Hl(1 - a, αβ - q; α, β, δ, γ; 1 - z)`. -/
 @[dlmf 31.3.E6]
-theorem heunLocal_at_one_isHeunSolOn (ha : a ≠ 1) (hδ : ∀ n : ℕ, δ ≠ -(n : ℂ))
-    (hε : ε = heunEps α β γ δ) :
-    IsHeunSolOn a q α β γ δ ε (fun z => heunLocal (1 - a) (α * β - q) α β δ γ (1 - z))
+theorem heunLocal_at_one_isHeunSolutionOn (ha : a ≠ 1) (hδ : ∀ n : ℕ, δ ≠ -(n : ℂ))
+    (hε : ε = heunEpsilon α β γ δ) :
+    IsHeunSolutionOn a q α β γ δ ε (fun z => heunLocal (1 - a) (α * β - q) α β δ γ (1 - z))
       ({z | ‖1 - z‖ < heunLocalRadius (1 - a)} \ {1}) := by
   have ha' : 1 - a ≠ 0 := sub_ne_zero.2 (Ne.symm ha)
-  have h := (heunLocal_isHeunSolOn (a := 1 - a) (q := α * β - q) (α := α) (β := β) (γ := δ)
+  have h := (heunLocal_isHeunSolutionOn (a := 1 - a) (q := α * β - q) (α := α) (β := β) (γ := δ)
     (δ := γ) ha' hδ).2
-  have hε' : heunEps α β δ γ = ε := by rw [hε]; unfold heunEps; ring
+  have hε' : heunEpsilon α β δ γ = ε := by rw [hε]; unfold heunEpsilon; ring
   rw [hε'] at h
-  refine isHeunSolOn_comp_one_sub (V := Metric.ball 0 (heunLocalRadius (1 - a)) \ {0})
+  refine isHeunSolutionOn_comp_one_sub (V := Metric.ball 0 (heunLocalRadius (1 - a)) \ {0})
     ((isOpen_lt (by fun_prop) continuous_const).sdiff isClosed_singleton) (fun z hz => ?_) h
   obtain ⟨hz, hz1⟩ := hz
   have hz1' : z ≠ 1 := hz1
@@ -733,19 +741,19 @@ theorem heunLocal_at_one_isHeunSolOn (ha : a ≠ 1) (hδ : ∀ n : ℕ, δ ≠ -
 /-- DLMF 31.3.7: for `δ ∉ {1, 2, 3, …}` the solution with exponent `1 - δ` at `z = 1` is
 `(1-z)^{1-δ} Hl(1 - a, ((1-a)γ + ε)(1 - δ) + αβ - q; α + 1 - δ, β + 1 - δ, 2 - δ, γ; 1 - z)`. -/
 @[dlmf 31.3.E7]
-theorem heunLocal_second_at_one_isHeunSolOn (ha : a ≠ 1) (hδ : ∀ n : ℕ, δ ≠ (n : ℂ) + 1)
-    (hε : ε = heunEps α β γ δ) :
-    IsHeunSolOn a q α β γ δ ε
+theorem heunLocal_second_at_one_isHeunSolutionOn (ha : a ≠ 1) (hδ : ∀ n : ℕ, δ ≠ (n : ℂ) + 1)
+    (hε : ε = heunEpsilon α β γ δ) :
+    IsHeunSolutionOn a q α β γ δ ε
       (fun z => (1 - z) ^ (1 - δ) * heunLocal (1 - a) (((1 - a) * γ + ε) * (1 - δ) + α * β - q)
         (α + 1 - δ) (β + 1 - δ) (2 - δ) γ (1 - z))
       {z | ‖1 - z‖ < heunLocalRadius (1 - a) ∧ 1 - z ∈ slitPlane} := by
   have ha' : 1 - a ≠ 0 := sub_ne_zero.2 (Ne.symm ha)
-  have hε' : ε = heunEps α β δ γ := by rw [hε]; unfold heunEps; ring
-  have h := heunLocal_second_isHeunSolOn (a := 1 - a) (q := α * β - q) (α := α) (β := β)
+  have hε' : ε = heunEpsilon α β δ γ := by rw [hε]; unfold heunEpsilon; ring
+  have h := heunLocal_second_isHeunSolutionOn (a := 1 - a) (q := α * β - q) (α := α) (β := β)
     (γ := δ) (δ := γ) ha' hδ hε'
   rw [show ((1 - a) * γ + ε) * (1 - δ) + α * β - q = ((1 - a) * γ + ε) * (1 - δ) + (α * β - q)
     by ring]
-  refine isHeunSolOn_comp_one_sub (V := {u | ‖u‖ < heunLocalRadius (1 - a) ∧ u ∈ slitPlane})
+  refine isHeunSolutionOn_comp_one_sub (V := {u | ‖u‖ < heunLocalRadius (1 - a) ∧ u ∈ slitPlane})
     ((isOpen_lt (by fun_prop : Continuous fun z : ℂ => ‖1 - z‖) continuous_const).inter
       (isOpen_slitPlane.preimage (by fun_prop : Continuous fun z : ℂ => 1 - z)))
     (fun z hz => ?_) h
@@ -758,18 +766,19 @@ theorem heunLocal_second_at_one_isHeunSolOn (ha : a ≠ 1) (hδ : ∀ n : ℕ, �
 /-- DLMF 31.3.8: for `ε ∉ {0, -1, -2, …}` the solution with exponent `0` at `z = a` is
 `Hl(a/(a-1), (αβa - q)/(a-1); α, β, ε, δ; (a-z)/(a-1))`. -/
 @[dlmf 31.3.E8]
-theorem heunLocal_at_a_isHeunSolOn (ha0 : a ≠ 0) (ha1 : a ≠ 1) (hε' : ∀ n : ℕ, ε ≠ -(n : ℂ))
-    (hε : ε = heunEps α β γ δ) :
-    IsHeunSolOn a q α β γ δ ε
+theorem heunLocal_at_a_isHeunSolutionOn (ha0 : a ≠ 0) (ha1 : a ≠ 1) (hε' : ∀ n : ℕ, ε ≠ -(n : ℂ))
+    (hε : ε = heunEpsilon α β γ δ) :
+    IsHeunSolutionOn a q α β γ δ ε
       (fun z => heunLocal (a / (a - 1)) ((α * β * a - q) / (a - 1)) α β ε δ ((a - z) / (a - 1)))
       ({z | ‖(a - z) / (a - 1)‖ < heunLocalRadius (a / (a - 1))} \ {a}) := by
   have ha1' : a - 1 ≠ 0 := sub_ne_zero.2 ha1
   have ha' : a / (a - 1) ≠ 0 := div_ne_zero ha0 ha1'
-  have h := (heunLocal_isHeunSolOn (a := a / (a - 1)) (q := (α * β * a - q) / (a - 1)) (α := α)
+  have h := (heunLocal_isHeunSolutionOn (a := a / (a - 1)) (q := (α * β * a - q) / (a - 1)) (α := α)
     (β := β) (γ := ε) (δ := δ) ha' hε').2
-  have hγ : heunEps α β ε δ = γ := by rw [hε]; unfold heunEps; ring
+  have hγ : heunEpsilon α β ε δ = γ := by rw [hε]; unfold heunEpsilon; ring
   rw [hγ] at h
-  refine isHeunSolOn_comp_sub_div ha1 (V := Metric.ball 0 (heunLocalRadius (a / (a - 1))) \ {0})
+  refine isHeunSolutionOn_comp_sub_div ha1
+      (V := Metric.ball 0 (heunLocalRadius (a / (a - 1))) \ {0})
     ((isOpen_lt (by fun_prop) continuous_const).sdiff isClosed_singleton) (fun z hz => ?_) h
   obtain ⟨hz, hza⟩ := hz
   have hza' : z ≠ a := hza
@@ -782,9 +791,9 @@ theorem heunLocal_at_a_isHeunSolOn (ha0 : a ≠ 0) (ha1 : a ≠ 1) (hε' : ∀ n
 `((a-z)/(a-1))^{1-ε} Hl(a/(a-1), (a(δ+γ) - γ)(1-ε)/(a-1) + (αβa - q)/(a-1);
 α + 1 - ε, β + 1 - ε, 2 - ε, δ; (a-z)/(a-1))`. -/
 @[dlmf 31.3.E9]
-theorem heunLocal_second_at_a_isHeunSolOn (ha0 : a ≠ 0) (ha1 : a ≠ 1)
-    (hε' : ∀ n : ℕ, ε ≠ (n : ℂ) + 1) (hε : ε = heunEps α β γ δ) :
-    IsHeunSolOn a q α β γ δ ε
+theorem heunLocal_second_at_a_isHeunSolutionOn (ha0 : a ≠ 0) (ha1 : a ≠ 1)
+    (hε' : ∀ n : ℕ, ε ≠ (n : ℂ) + 1) (hε : ε = heunEpsilon α β γ δ) :
+    IsHeunSolutionOn a q α β γ δ ε
       (fun z => ((a - z) / (a - 1)) ^ (1 - ε) *
         heunLocal (a / (a - 1)) ((a * (δ + γ) - γ) * (1 - ε) / (a - 1) + (α * β * a - q) / (a - 1))
           (α + 1 - ε) (β + 1 - ε) (2 - ε) δ ((a - z) / (a - 1)))
@@ -792,12 +801,12 @@ theorem heunLocal_second_at_a_isHeunSolOn (ha0 : a ≠ 0) (ha1 : a ≠ 1)
         (a - z) / (a - 1) ∈ slitPlane} := by
   have ha1' : a - 1 ≠ 0 := sub_ne_zero.2 ha1
   have ha' : a / (a - 1) ≠ 0 := div_ne_zero ha0 ha1'
-  have hγ : γ = heunEps α β ε δ := by rw [hε]; unfold heunEps; ring
-  have h := heunLocal_second_isHeunSolOn (a := a / (a - 1)) (q := (α * β * a - q) / (a - 1))
+  have hγ : γ = heunEpsilon α β ε δ := by rw [hε]; unfold heunEpsilon; ring
+  have h := heunLocal_second_isHeunSolutionOn (a := a / (a - 1)) (q := (α * β * a - q) / (a - 1))
     (α := α) (β := β) (γ := ε) (δ := δ) (ε := γ) ha' hε' hγ
   rw [show (a * (δ + γ) - γ) * (1 - ε) / (a - 1) + (α * β * a - q) / (a - 1) =
     (a / (a - 1) * δ + γ) * (1 - ε) + (α * β * a - q) / (a - 1) by field_simp; ring]
-  refine isHeunSolOn_comp_sub_div ha1
+  refine isHeunSolutionOn_comp_sub_div ha1
     (V := {u | ‖u‖ < heunLocalRadius (a / (a - 1)) ∧ u ∈ slitPlane})
     ((isOpen_lt (by fun_prop : Continuous fun z : ℂ => ‖(a - z) / (a - 1)‖)
       continuous_const).inter
@@ -814,18 +823,18 @@ exponent `α` at `∞` is
 `z^{-α} Hl(1/a, q/a - α(β - ε) - (α/a)(β - δ); α, α - γ + 1, α - β + 1, δ; 1/z)`,
 valid for `|z| > max(1, |a|)` off the branch cut of `z^{-α}`. -/
 @[dlmf 31.3.E10]
-theorem heunLocal_at_infinity_isHeunSolOn (ha0 : a ≠ 0)
-    (hαβ : ∀ n : ℕ, α - β + 1 ≠ -(n : ℂ)) (hε : ε = heunEps α β γ δ) :
-    IsHeunSolOn a q α β γ δ ε
+theorem heunLocal_at_infinity_isHeunSolutionOn (ha0 : a ≠ 0)
+    (hαβ : ∀ n : ℕ, α - β + 1 ≠ -(n : ℂ)) (hε : ε = heunEpsilon α β γ δ) :
+    IsHeunSolutionOn a q α β γ δ ε
       (fun z => z ^ (-α) * heunLocal (1 / a) (q / a - α * (β - ε) - α / a * (β - δ)) α
         (α - γ + 1) (α - β + 1) δ (1 / z))
       {z | ‖1 / z‖ < heunLocalRadius (1 / a) ∧ z ∈ slitPlane} := by
   have ha' : 1 / a ≠ 0 := one_div_ne_zero ha0
-  have h := (heunLocal_isHeunSolOn (a := 1 / a) (q := q / a - α * (β - ε) - α / a * (β - δ))
+  have h := (heunLocal_isHeunSolutionOn (a := 1 / a) (q := q / a - α * (β - ε) - α / a * (β - δ))
     (α := α) (β := α - γ + 1) (γ := α - β + 1) (δ := δ) ha' hαβ).2
-  have hε' : heunEps α (α - γ + 1) (α - β + 1) δ = ε := by rw [hε]; unfold heunEps; ring
+  have hε' : heunEpsilon α (α - γ + 1) (α - β + 1) δ = ε := by rw [hε]; unfold heunEpsilon; ring
   rw [hε'] at h
-  refine isHeunSolOn_comp_inv ha0 hε (V := Metric.ball 0 (heunLocalRadius (1 / a)) \ {0})
+  refine isHeunSolutionOn_comp_inv ha0 hε (V := Metric.ball 0 (heunLocalRadius (1 / a)) \ {0})
     (isOpen_inv_ball_inter_slitPlane a) (fun z hz => ?_) h
   obtain ⟨hz, hzs⟩ := hz
   obtain ⟨h1, h2⟩ := ne_one_and_ne_of_norm_lt_heunLocalRadius hz
@@ -836,19 +845,19 @@ theorem heunLocal_at_infinity_isHeunSolOn (ha0 : a ≠ 0)
 exponent `β` at `∞` is
 `z^{-β} Hl(1/a, q/a - β(α - ε) - (β/a)(α - δ); β, β - γ + 1, β - α + 1, δ; 1/z)`. -/
 @[dlmf 31.3.E11]
-theorem heunLocal_second_at_infinity_isHeunSolOn (ha0 : a ≠ 0)
-    (hαβ : ∀ n : ℕ, β - α + 1 ≠ -(n : ℂ)) (hε : ε = heunEps α β γ δ) :
-    IsHeunSolOn a q α β γ δ ε
+theorem heunLocal_second_at_infinity_isHeunSolutionOn (ha0 : a ≠ 0)
+    (hαβ : ∀ n : ℕ, β - α + 1 ≠ -(n : ℂ)) (hε : ε = heunEpsilon α β γ δ) :
+    IsHeunSolutionOn a q α β γ δ ε
       (fun z => z ^ (-β) * heunLocal (1 / a) (q / a - β * (α - ε) - β / a * (α - δ)) β
         (β - γ + 1) (β - α + 1) δ (1 / z))
       {z | ‖1 / z‖ < heunLocalRadius (1 / a) ∧ z ∈ slitPlane} := by
   have ha' : 1 / a ≠ 0 := one_div_ne_zero ha0
-  have h := (heunLocal_isHeunSolOn (a := 1 / a) (q := q / a - β * (α - ε) - β / a * (α - δ))
+  have h := (heunLocal_isHeunSolutionOn (a := 1 / a) (q := q / a - β * (α - ε) - β / a * (α - δ))
     (α := β) (β := β - γ + 1) (γ := β - α + 1) (δ := δ) ha' hαβ).2
-  have hε' : heunEps β (β - γ + 1) (β - α + 1) δ = ε := by rw [hε]; unfold heunEps; ring
+  have hε' : heunEpsilon β (β - γ + 1) (β - α + 1) δ = ε := by rw [hε]; unfold heunEpsilon; ring
   rw [hε'] at h
-  have hεs : ε = heunEps β α γ δ := by rw [hε]; unfold heunEps; ring
-  refine isHeunSolOn_swap (isHeunSolOn_comp_inv ha0 hεs
+  have hεs : ε = heunEpsilon β α γ δ := by rw [hε]; unfold heunEpsilon; ring
+  refine isHeunSolutionOn_swap (isHeunSolutionOn_comp_inv ha0 hεs
     (V := Metric.ball 0 (heunLocalRadius (1 / a)) \ {0}) (isOpen_inv_ball_inter_slitPlane a)
     (fun z hz => ?_) h)
   obtain ⟨hz, hzs⟩ := hz
@@ -861,7 +870,7 @@ theorem heunLocal_second_at_infinity_isHeunSolOn (ha0 : a ≠ 0)
 /-- The coefficients of `Hl(1/a, q/a; α, β, γ, ε; ·)` are `a^j` times those of
 `Hl(a, q; α, β, γ, δ; ·)`, where `ε = α + β + 1 - γ - δ`. -/
 private lemma heunLocalCoeff_inv (ha : a ≠ 0) (j : ℕ) :
-    heunLocalCoeff (1 / a) (q / a) α β γ (heunEps α β γ δ) j =
+    heunLocalCoeff (1 / a) (q / a) α β γ (heunEpsilon α β γ δ) j =
       a ^ j * heunLocalCoeff a q α β γ δ j := by
   induction j using Nat.strong_induction_on with
   | _ j ih =>
@@ -875,13 +884,13 @@ private lemma heunLocalCoeff_inv (ha : a ≠ 0) (j : ℕ) :
     | k + 2, ih =>
       have h1 := ih (k + 1) (by omega)
       have h0 := ih k (by omega)
-      have hQ : heunRecQ (1 / a) α β γ (heunEps α β γ δ) (k + 1) =
-          heunRecQ a α β γ δ (k + 1) / a := by
-        unfold heunRecQ heunEps
+      have hQ : heunRecurrenceQ (1 / a) α β γ (heunEpsilon α β γ δ) (k + 1) =
+          heunRecurrenceQ a α β γ δ (k + 1) / a := by
+        unfold heunRecurrenceQ heunEpsilon
         field_simp
         ring
-      have hR : heunRecR (1 / a) γ (k + 1) = heunRecR a γ (k + 1) / a ^ 2 := by
-        unfold heunRecR
+      have hR : heunRecurrenceR (1 / a) γ (k + 1) = heunRecurrenceR a γ (k + 1) / a ^ 2 := by
+        unfold heunRecurrenceR
         field_simp
       rw [heunLocalCoeff, heunLocalCoeff, h1, h0, hQ, hR, div_div_eq_mul_div, mul_div_assoc']
       congr 1
@@ -898,7 +907,7 @@ theorem heunLocal_eq_heunLocal_inv (ha : a ≠ 0) (z : ℂ) :
       heunLocal (1 / a) (q / a) α β γ (α + β + 1 - γ - δ) (z / a) := by
   rw [heunLocal, heunLocal]
   refine tsum_congr fun j => ?_
-  rw [show α + β + 1 - γ - δ = heunEps α β γ δ from rfl, heunLocalCoeff_inv ha, div_pow]
+  rw [show α + β + 1 - γ - δ = heunEpsilon α β γ δ from rfl, heunLocalCoeff_inv ha, div_pow]
   field_simp
 
 /-- The domain of 31.3.13 is star-shaped with respect to `0`. -/
@@ -992,9 +1001,9 @@ theorem heunLocal_eq_pfaff (ha0 : a ≠ 0) (ha1 : a ≠ 1) (hγ : ∀ n : ℕ, �
       exact pfaff_domain_mul_mem ht (by linarith) hy.1 hy.2
     exact (hstar.isPathConnected h0D).isConnected.isPreconnected
   have hHl : AnalyticOnNhd ℂ (heunLocal a q α β γ δ) D := fun u hu =>
-    (heunLocal_isHeunSolOn (q := q) (α := α) (β := β) (δ := δ) ha0 hγ).1 u
+    (heunLocal_isHeunSolutionOn (q := q) (α := α) (β := β) (δ := δ) ha0 hγ).1 u
       (mem_ball_zero_iff.2 hu.1)
-  have hHH := heunLocal_isHeunSolOn (q := -(q - a * α * γ) / (a - 1)) (α := α)
+  have hHH := heunLocal_isHeunSolutionOn (q := -(q - a * α * γ) / (a - 1)) (α := α)
     (β := α + 1 - δ) (δ := α + 1 - β) ha' hγ
   have hGa : AnalyticOnNhd ℂ G D := fun u hu => by
     have h1 : AnalyticAt ℂ (fun u : ℂ => (1 - u) ^ (-α)) u :=
@@ -1003,11 +1012,13 @@ theorem heunLocal_eq_pfaff (ha0 : a ≠ 0) (ha1 : a ≠ 1) (hγ : ∀ n : ℕ, �
       analyticAt_id.div (analyticAt_id.sub analyticAt_const) (hDne u hu)
     have h3 : AnalyticAt ℂ H (u / (u - 1)) := hHH.1 _ (mem_ball_zero_iff.2 hu.2)
     exact h1.mul (AnalyticAt.comp (g := H) (f := fun u : ℂ => u / (u - 1)) h3 h2)
-  have hε : heunEps α (α + 1 - δ) γ (α + 1 - β) = heunEps α β γ δ := by unfold heunEps; ring
+  have hε : heunEpsilon α (α + 1 - δ) γ (α + 1 - β) = heunEpsilon α β γ δ := by
+      unfold heunEpsilon; ring
   have hw := hHH.2
   rw [hε] at hw
-  have hsol : IsHeunSolOn a q α β γ δ (heunEps α β γ δ) G (D \ {0}) := by
-    refine heun_homography_mobius ha1 (by unfold heunEps; ring) (hDopen.sdiff isClosed_singleton)
+  have hsol : IsHeunSolutionOn a q α β γ δ (heunEpsilon α β γ δ) G (D \ {0}) := by
+    refine heun_homography_mobius ha1 (by unfold heunEpsilon; ring)
+        (hDopen.sdiff isClosed_singleton)
         (fun u hu => ?_) hw
     obtain ⟨hu, hu0⟩ := hu
     have hu0' : u ≠ 0 := hu0

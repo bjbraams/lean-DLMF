@@ -91,7 +91,8 @@ theorem integral_Ioi {a b c z : ℂ} (hb : 0 < b.re) (hcb : 0 < (c - b).re) (hz 
   have key := MeasureTheory.integral_image_eq_integral_abs_deriv_smul measurableSet_Ioi hderiv hinj
     (fun u : ℝ => (u : ℂ) ^ (b - 1) * (1 - (u : ℂ)) ^ (c - b - 1) * (1 - z * u) ^ (-a))
   rw [himage] at key
-  rw [regularizedGaussHGFun_eq_div_Gamma hcn, ordinaryHypergeometric_eq_integral hb hcb hz,
+  rw [regularizedGaussHypergeometricFun_eq_div_Gamma hcn,
+      ordinaryHypergeometric_eq_integral hb hcb hz,
     intervalIntegral.integral_of_le zero_le_one, MeasureTheory.integral_Ioc_eq_integral_Ioo, key]
   have hpt : ∫ t : ℝ in Set.Ioi 0, |f' t| • ((f t : ℂ) ^ (b - 1) * (1 - (f t : ℂ)) ^ (c - b - 1) *
       (1 - z * f t) ^ (-a)) = ∫ t : ℝ in Set.Ioi 0,
@@ -182,7 +183,7 @@ theorem barnes_integral_one_sub {a b c z : ℂ} {σ : ℝ} (hz : ‖z‖ < 1)
     intro y
     have hs : ∀ k : ℕ, -((σ : ℂ) + I * y) ≠ -(k : ℂ) := by
       apply not_neg_nat_of_re_pos; simp; linarith
-    have h := (hasSum_poch_div_factorial (β := -((σ : ℂ) + I * y)) hz).mul_left
+    have h := (hasSum_pochhammer_div_factorial (β := -((σ : ℂ) + I * y)) hz).mul_left
       (Gamma (a + σ + I * y) * Gamma (b + σ + I * y) * Gamma (c - a - b - σ - I * y) *
         Gamma (-((σ : ℂ) + I * y)))
     rw [neg_neg] at h
@@ -191,7 +192,7 @@ theorem barnes_integral_one_sub {a b c z : ℂ} {σ : ℝ} (hz : ‖z‖ < 1)
     rw [div_eq_iff (Gamma_ne_zero hs)] at hG
     simp only [hF, ha', hb', hc']
     rw [show ((n - σ : ℝ) : ℂ) - I * y = -((σ : ℂ) + I * y) + n by push_cast; ring, hG]
-    simp only [poch]
+    simp only [pochhammer]
     ring
   have hcont (w : ℂ) (hw : 0 < w.re) (e : ℂ) (he : e.re = 0) :
       Continuous fun y : ℝ => Gamma (w + e * y) := by
@@ -215,12 +216,12 @@ theorem barnes_integral_one_sub {a b c z : ℂ} {σ : ℝ} (hz : ‖z‖ < 1)
     fun_prop
   set e : ℕ → ℝ := fun n => Real.Gamma (n + τ) * (‖z‖ ^ n / n !) with he
   have he_s : Summable e := by
-    have h := (hasSum_poch_div_factorial (β := (τ : ℂ)) (z := (‖z‖ : ℂ))
+    have h := (hasSum_pochhammer_div_factorial (β := (τ : ℂ)) (z := (‖z‖ : ℂ))
       (by simpa using hz)).summable
     have h' : Summable fun n : ℕ => (ascPochhammer ℝ n).eval τ / n ! * ‖z‖ ^ n := by
       rw [← Complex.summable_ofReal]
       refine h.congr fun n => ?_
-      simp only [poch, ascPochhammer_eval_ofReal]
+      simp only [pochhammer, ascPochhammer_eval_ofReal]
       push_cast; ring
     refine (h'.mul_left (Real.Gamma τ)).congr fun n => ?_
     simp only [he]
@@ -262,7 +263,7 @@ theorem barnes_integral_one_sub {a b c z : ℂ} {σ : ℝ} (hz : ‖z‖ < 1)
   have hΓcb : Gamma (c - b) ≠ 0 := Gamma_ne_zero_of_re_pos (by
     simp [hc'] at hc'0; simp [ha'] at ha'0; simp; linarith)
   have hterm (n : ℕ) : 1 / (2 * Real.pi * Gamma a * Gamma b * Gamma (c - a) * Gamma (c - b)) *
-      ∫ y, F n y = poch a n * poch b n / (n ! * Gamma (c + n)) * z ^ n := by
+      ∫ y, F n y = pochhammer a n * pochhammer b n / (n ! * Gamma (c + n)) * z ^ n := by
     simp only [hF]
     rw [integral_mul_const]
     have hMB := DLMF.Gamma.mellin_barnes_four (a := a') (b := b') (c := c')
@@ -289,21 +290,21 @@ theorem barnes_integral_one_sub {a b c z : ℂ} {σ : ℝ} (hz : ‖z‖ < 1)
     rw [div_eq_iff hΓa] at hpa
     rw [div_eq_iff hΓb] at hpb
     rw [hpa, hpb]
-    simp only [poch]
+    simp only [pochhammer]
     have hn! : (n ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
     by_cases hΓc : Gamma (c + n) = 0
     · simp [hΓc]
     field_simp
   have hS' := hS.mul_left (1 / (2 * Real.pi * Gamma a * Gamma b * Gamma (c - a) * Gamma (c - b)))
   rw [funext hterm] at hS'
-  exact (hasSum_regularizedGaussHGFun_coeff a b c hz).unique hS'
+  exact (hasSum_regularizedGaussHypergeometricFun_coeff a b c hz).unique hS'
 
 /-- Absolute summability of the regularized series inside the unit disk. -/
-theorem summable_norm_regularizedGaussHGFun_term (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem summable_norm_regularizedGaussHypergeometricFun_term (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     Summable fun n : ℕ => ‖(ascPochhammer ℂ n).eval a * (ascPochhammer ℂ n).eval b * z ^ n /
       n.factorial * (Gamma (c + n))⁻¹‖ := by
   have h := (regularizedGaussHGFunSeries a b c).summable_norm_apply
-    (mem_eball_radius_regularizedGaussHGFunSeries a b c hz)
+    (mem_eball_radius_regularizedGaussHypergeometricFunSeries a b c hz)
   refine h.congr fun n => ?_
   rw [FormalMultilinearSeries.apply_eq_pow_smul_coeff, coeff_regularizedGaussHGFunSeries,
     smul_eq_mul]
@@ -323,7 +324,8 @@ theorem fractional_integral {a b c d z : ℂ} (hd : 0 < d.re) (hcd : 0 < (c - d)
     n.factorial * (Gamma (d + n))⁻¹
   let F : ℕ → ℝ → ℂ := fun n t => w t * (e n * (t : ℂ) ^ n)
   have hw : IntervalIntegrable w MeasureTheory.volume 0 1 := betaIntegral_convergent hd hcd
-  have he : Summable (fun n => ‖e n‖) := summable_norm_regularizedGaussHGFun_term a b d hz
+  have he : Summable (fun n => ‖e n‖) :=
+      summable_norm_regularizedGaussHypergeometricFun_term a b d hz
   have hFi (n : ℕ) : IntervalIntegrable (F n) MeasureTheory.volume 0 1 :=
     hw.mul_continuousOn (by fun_prop)
   have hs := intervalIntegral.hasSum_integral_of_dominated_convergence
@@ -372,7 +374,7 @@ theorem fractional_integral {a b c d z : ℂ} (hd : 0 < d.re) (hcd : 0 < (c - d)
       field_simp
     have hs' := hs.mul_left (1 / Gamma (c - d))
     simp_rw [hscaled] at hs'
-    rw [regularizedGaussHGFun_eq_tsum, ← hs'.tsum_eq]
+    rw [regularizedGaussHypergeometricFun_eq_tsum, ← hs'.tsum_eq]
   · rw [Set.uIoc_of_le (by norm_num : (0 : ℝ) ≤ 1)] at ht
     have ht1 : ‖(t : ℂ)‖ ≤ 1 := by
       simpa [Complex.norm_real, Real.norm_eq_abs, abs_of_pos ht.1] using ht.2
@@ -388,8 +390,8 @@ theorem fractional_integral {a b c d z : ℂ} (hd : 0 < d.re) (hcd : 0 < (c - d)
     have hzt : ‖z * t‖ < 1 := by
       rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos ht.1]
       nlinarith [norm_nonneg z, ht.2]
-    have h := (summable_regularizedGaussHGFun_term a b d hzt).hasSum
-    rw [← regularizedGaussHGFun_eq_tsum] at h
+    have h := (summable_regularizedGaussHypergeometricFun_term a b d hzt).hasSum
+    rw [← regularizedGaussHypergeometricFun_eq_tsum] at h
     have h' := h.mul_left (w t)
     simp only [F, e, w]
     convert h' using 1
@@ -428,12 +430,12 @@ theorem ProductIntegral.summable_of_antidiagonal {G : ℕ × ℕ → ℝ} (h0 : 
 theorem ProductIntegral.real_vandermonde (u v : ℝ) (N : ℕ) :
     ∑ p ∈ antidiagonal N, (ascPochhammer ℝ p.1).eval u / p.1 ! *
       ((ascPochhammer ℝ p.2).eval v / p.2 !) = (ascPochhammer ℝ N).eval (u + v) / N ! := by
-  have h := poch_add_eq_sum (u : ℂ) v N
+  have h := pochhammer_add_eq_sum (u : ℂ) v N
   rw [Finset.Nat.sum_antidiagonal_eq_sum_range_succ
     (fun i j => (ascPochhammer ℝ i).eval u / i ! * ((ascPochhammer ℝ j).eval v / j !))]
   apply Complex.ofReal_injective
   push_cast
-  simp only [poch, ← ofReal_add, ascPochhammer_eval_ofReal] at h
+  simp only [pochhammer, ← ofReal_add, ascPochhammer_eval_ofReal] at h
   rw [h, Finset.sum_div]
   refine Finset.sum_congr rfl fun m hm => ?_
   have hm' : m ≤ N := by simpa [Nat.lt_succ_iff] using hm
@@ -446,12 +448,12 @@ theorem ProductIntegral.real_vandermonde (u v : ℝ) (N : ℕ) :
   field_simp
 
 /-- `Re c` controls the Pochhammer symbol from below. -/
-theorem ProductIntegral.norm_poch_ge {c : ℂ} (hc : 0 < c.re) (n : ℕ) :
-    (ascPochhammer ℝ n).eval c.re ≤ ‖poch c n‖ := by
+theorem ProductIntegral.norm_pochhammer_ge {c : ℂ} (hc : 0 < c.re) (n : ℕ) :
+    (ascPochhammer ℝ n).eval c.re ≤ ‖pochhammer c n‖ := by
   induction n with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ n ih =>
-    rw [poch_succ, norm_mul, ascPochhammer_succ_eval]
+    rw [pochhammer_succ, norm_mul, ascPochhammer_succ_eval]
     have h1 : c.re + n ≤ ‖c + n‖ := by
       have := Complex.re_le_norm (c + n)
       simpa using this
@@ -473,7 +475,7 @@ theorem ProductIntegral.norm_inv_Gamma_le {c : ℂ} (hc : 0 < c.re) (N : ℕ) :
     have := ascPochhammer_pos N c.re hc
     exact this
   rw [abs_of_pos hP]
-  have hle := ProductIntegral.norm_poch_ge hc N
+  have hle := ProductIntegral.norm_pochhammer_ge hc N
   have hn1 : 0 < ‖Gamma c‖ := norm_pos_iff.mpr hg1
   have hn2 : 0 < ‖Gamma (c.re : ℂ)‖ := norm_pos_iff.mpr hg2
   have hpc : 0 < ‖(ascPochhammer ℂ N).eval c‖ := hP.trans_le hle
@@ -485,15 +487,17 @@ theorem ProductIntegral.norm_inv_Gamma_le {c : ℂ} (hc : 0 < c.re) (N : ℕ) :
 /-- Rearranging `∑ₘ (p)ₘ(q)ₘ/m! xᵐ 𝐅(s+m, r; c+m; x)` by total degree. -/
 theorem ProductIntegral.hasSum_shift_series (p q r s c A B : ℂ) (hc : 0 < c.re)
     {x : ℂ} (hx : ‖x‖ < 1)
-    (hK : ∀ N, ∑ m ∈ range (N + 1), poch p m * poch q m / m ! *
-      (poch (s + m) (N - m) * poch r (N - m) / (N - m)!) = poch A N * poch B N / N !) :
-    HasSum (fun m : ℕ => poch p m * poch q m / m ! * x ^ m *
+    (hK : ∀ N, ∑ m ∈ range (N + 1), pochhammer p m * pochhammer q m / m ! *
+      (pochhammer (s + m) (N - m) * pochhammer r (N - m) / (N - m)!) = pochhammer A N *
+          pochhammer B N / N !) :
+    HasSum (fun m : ℕ => pochhammer p m * pochhammer q m / m ! * x ^ m *
       regularizedGaussHGFun (s + m) r (c + m) x) (regularizedGaussHGFun A B c x) := by
-  set g : ℕ × ℕ → ℂ := fun mk => poch p mk.1 * poch q mk.1 / mk.1 ! * x ^ mk.1 *
-    (poch (s + mk.1) mk.2 * poch r mk.2 / (mk.2 ! * Gamma (c + mk.1 + mk.2)) * x ^ mk.2) with hg
-  have hrow (m : ℕ) : HasSum (fun k => g (m, k)) (poch p m * poch q m / m ! * x ^ m *
+  set g : ℕ × ℕ → ℂ := fun mk => pochhammer p mk.1 * pochhammer q mk.1 / mk.1 ! * x ^ mk.1 *
+    (pochhammer (s + mk.1) mk.2 * pochhammer r mk.2 / (mk.2 ! * Gamma (c + mk.1 + mk.2)) *
+        x ^ mk.2) with hg
+  have hrow (m : ℕ) : HasSum (fun k => g (m, k)) (pochhammer p m * pochhammer q m / m ! * x ^ m *
       regularizedGaussHGFun (s + m) r (c + m) x) :=
-    (hasSum_regularizedGaussHGFun_coeff (s + m) r (c + m) hx).mul_left _
+    (hasSum_regularizedGaussHypergeometricFun_coeff (s + m) r (c + m) hx).mul_left _
   set M : ℝ := ‖p‖ + ‖q‖ + ‖r‖ + ‖s‖ with hM
   have hM0 : 0 ≤ M := by positivity
   set C : ℝ := c.re with hC
@@ -502,17 +506,17 @@ theorem ProductIntegral.hasSum_shift_series (p q r s c A B : ℂ) (hc : 0 < c.re
   set H : ℕ × ℕ → ℝ := fun mk => K * (P M mk.1 / mk.1 ! * (P M mk.2 / mk.2 !)) *
     (P M (mk.1 + mk.2) * ‖x‖ ^ (mk.1 + mk.2) * ‖Gamma ((C : ℂ) + ((mk.1 + mk.2 : ℕ) : ℂ))‖⁻¹)
     with hH
-  have hPle {z : ℂ} (hz : ‖z‖ ≤ M) (n : ℕ) : ‖poch z n‖ ≤ P M n :=
-    (norm_poch_le z n).trans (poch_eval_mono (norm_nonneg z) hz n)
+  have hPle {z : ℂ} (hz : ‖z‖ ≤ M) (n : ℕ) : ‖pochhammer z n‖ ≤ P M n :=
+    (norm_pochhammer_le z n).trans (pochhammer_eval_mono (norm_nonneg z) hz n)
   have hPadd (m k : ℕ) : P M m * P (M + m) k = P M (m + k) := by
     apply Complex.ofReal_injective
     simp only [hP]
     push_cast
     rw [← ascPochhammer_eval_ofReal, ← ascPochhammer_eval_ofReal, ← ascPochhammer_eval_ofReal]
-    have := poch_add (M : ℂ) m k
-    simp only [poch] at this
+    have := pochhammer_add (M : ℂ) m k
+    simp only [pochhammer] at this
     rw [this]; push_cast; ring
-  have hP0 (y : ℝ) (hy : 0 ≤ y) (n : ℕ) : 0 ≤ P y n := poch_eval_nonneg hy n
+  have hP0 (y : ℝ) (hy : 0 ≤ y) (n : ℕ) : 0 ≤ P y n := pochhammer_eval_nonneg hy n
   have hH0 : ∀ mk, 0 ≤ H mk := fun mk => by
     simp only [hH]
     have a1 := hP0 M hM0 mk.1
@@ -531,8 +535,8 @@ theorem ProductIntegral.hasSum_shift_series (p q r s c A B : ℂ) (hc : 0 < c.re
     have e1 := hPle (z := p) (by rw [hM]; linarith [norm_nonneg q, norm_nonneg r, norm_nonneg s]) m
     have e2 := hPle (z := q) (by rw [hM]; linarith [norm_nonneg p, norm_nonneg r, norm_nonneg s]) m
     have e3 := hPle (z := r) (by rw [hM]; linarith [norm_nonneg p, norm_nonneg q, norm_nonneg s]) k
-    have e4 : ‖poch (s + m) k‖ ≤ P (M + m) k := by
-      refine (norm_poch_le _ k).trans (poch_eval_mono (norm_nonneg _) ?_ k)
+    have e4 : ‖pochhammer (s + m) k‖ ≤ P (M + m) k := by
+      refine (norm_pochhammer_le _ k).trans (pochhammer_eval_mono (norm_nonneg _) ?_ k)
       calc ‖s + m‖ ≤ ‖s‖ + ‖(m : ℂ)‖ := norm_add_le _ _
         _ ≤ M + m := by
           rw [Complex.norm_natCast, hM]; linarith [norm_nonneg p, norm_nonneg q, norm_nonneg r]
@@ -542,13 +546,13 @@ theorem ProductIntegral.hasSum_shift_series (p q r s c A B : ℂ) (hc : 0 < c.re
     have q0 := hP0 M hM0 m
     have q1 := hP0 M hM0 k
     have q2 := hP0 (M + m) (by positivity) k
-    have A1 : ‖poch p m‖ * ‖poch q m‖ * ‖poch (s + m) k‖ * ‖poch r k‖ ≤
+    have A1 : ‖pochhammer p m‖ * ‖pochhammer q m‖ * ‖pochhammer (s + m) k‖ * ‖pochhammer r k‖ ≤
         P M m * P M m * P (M + m) k * P M k :=
       mul_le_mul (mul_le_mul (mul_le_mul e1 e2 (norm_nonneg _) q0) e4 (norm_nonneg _)
         (mul_nonneg q0 q0)) e3 (norm_nonneg _) (mul_nonneg (mul_nonneg q0 q0) q2)
     have A2 := mul_le_mul A1 e5 (by positivity) (mul_nonneg (mul_nonneg (mul_nonneg q0 q0) q2) q1)
     have hX : 0 ≤ ‖x‖ ^ m * ‖x‖ ^ k / ((m ! : ℝ) * k !) := by positivity
-    calc _ = ‖poch p m‖ * ‖poch q m‖ * ‖poch (s + m) k‖ * ‖poch r k‖ *
+    calc _ = ‖pochhammer p m‖ * ‖pochhammer q m‖ * ‖pochhammer (s + m) k‖ * ‖pochhammer r k‖ *
             ‖Gamma (c + ((m + k : ℕ) : ℂ))‖⁻¹ * (‖x‖ ^ m * ‖x‖ ^ k / ((m ! : ℝ) * k !)) := by
           ring
       _ ≤ P M m * P M m * P (M + m) k * P M k * (‖Gamma (C : ℂ)‖ / ‖Gamma c‖ *
@@ -557,7 +561,8 @@ theorem ProductIntegral.hasSum_shift_series (p q r s c A B : ℂ) (hc : 0 < c.re
       _ = _ := by rw [← hPadd, pow_add]; ring
   have hHs : Summable H := by
     refine ProductIntegral.summable_of_antidiagonal hH0 ?_
-    have hT := summable_norm_regularizedGaussHGFun_term ((2 * M : ℝ) : ℂ) (M : ℂ) (C : ℂ)
+    have hT := summable_norm_regularizedGaussHypergeometricFun_term ((2 * M : ℝ) : ℂ)
+        (M : ℂ) (C : ℂ)
       (z := ((‖x‖ : ℝ) : ℂ)) (by simpa using hx)
     refine (hT.mul_left K).congr fun N => ?_
     have hfib : ∑ mk ∈ antidiagonal N, H mk = K * (∑ mk ∈ antidiagonal N,
@@ -577,11 +582,12 @@ theorem ProductIntegral.hasSum_shift_series (p q r s c A B : ℂ) (hc : 0 < c.re
   have h1 := hgs.hasSum.prod_fiberwise hrow
   have h2 := ProductIntegral.hasSum_antidiagonal hgs
   have h3 : (fun N => ∑ mk ∈ antidiagonal N, g mk) =
-      fun N => poch A N * poch B N / (N ! * Gamma (c + N)) * x ^ N := by
+      fun N => pochhammer A N * pochhammer B N / (N ! * Gamma (c + N)) * x ^ N := by
     funext N
     rw [Finset.Nat.sum_antidiagonal_eq_sum_range_succ (fun i j => g (i, j))]
-    have e : ∀ m ∈ range (N + 1), g (m, N - m) = poch p m * poch q m / m ! *
-        (poch (s + m) (N - m) * poch r (N - m) / (N - m)!) * ((Gamma (c + N))⁻¹ * x ^ N) := by
+    have e : ∀ m ∈ range (N + 1), g (m, N - m) = pochhammer p m * pochhammer q m / m ! *
+        (pochhammer (s + m) (N - m) * pochhammer r (N - m) / (N - m)!) *
+            ((Gamma (c + N))⁻¹ * x ^ N) := by
       intro m hm
       have hm' : m ≤ N := by simpa [Nat.lt_succ_iff] using hm
       simp only [hg]
@@ -591,18 +597,19 @@ theorem ProductIntegral.hasSum_shift_series (p q r s c A B : ℂ) (hc : 0 < c.re
     rw [Finset.sum_congr rfl e, ← Finset.sum_mul, hK]
     ring
   rw [h3] at h2
-  have h4 := hasSum_regularizedGaussHGFun_coeff A B c hx
+  have h4 := hasSum_regularizedGaussHypergeometricFun_coeff A B c hx
   rw [h2.unique h4] at h1
   exact h1
 
 /-- The Vandermonde coefficient identity behind the inner sum of 15.6.9. -/
 theorem ProductIntegral.coeff_inner (α u v : ℂ) (N : ℕ) :
-    ∑ n ∈ range (N + 1), poch α n * poch u n / n ! *
-      (poch (α + n) (N - n) * poch v (N - n) / (N - n)!) = poch α N * poch (u + v) N / N ! := by
-  rw [poch_add_eq_sum u v N, Finset.mul_sum, Finset.sum_div]
+    ∑ n ∈ range (N + 1), pochhammer α n * pochhammer u n / n ! *
+      (pochhammer (α + n) (N - n) * pochhammer v (N - n) / (N - n)!) = pochhammer α N *
+          pochhammer (u + v) N / N ! := by
+  rw [pochhammer_add_eq_sum u v N, Finset.mul_sum, Finset.sum_div]
   refine Finset.sum_congr rfl fun n hn => ?_
   have hn' : n ≤ N := by simpa [Nat.lt_succ_iff] using hn
-  have hp := poch_add α n (N - n)
+  have hp := pochhammer_add α n (N - n)
   rw [Nat.add_sub_cancel' hn'] at hp
   have hc := Nat.choose_mul_factorial_mul_factorial hn'
   have hc' : (N.choose n : ℂ) * n ! * (N - n)! = N ! := by exact_mod_cast hc
@@ -614,13 +621,13 @@ theorem ProductIntegral.coeff_inner (α u v : ℂ) (N : ℕ) :
 
 /-- The Pfaff–Saalschütz coefficient identity behind the outer sum of 15.6.9, for all `l`. -/
 theorem ProductIntegral.coeff_outer (a b l : ℂ) (N : ℕ) :
-    ∑ m ∈ range (N + 1), poch (l - a) m * poch (l - b) m / m ! *
-      (poch (l + m) (N - m) * poch (a + b - l) (N - m) / (N - m)!) =
-      poch a N * poch b N / N ! := by
+    ∑ m ∈ range (N + 1), pochhammer (l - a) m * pochhammer (l - b) m / m ! *
+      (pochhammer (l + m) (N - m) * pochhammer (a + b - l) (N - m) / (N - m)!) =
+      pochhammer a N * pochhammer b N / N ! := by
   have hgen : ∀ l : ℂ, l ∈ (Set.range fun k : ℕ => -(k : ℂ))ᶜ →
-      ∑ m ∈ range (N + 1), poch (l - a) m * poch (l - b) m / m ! *
-        (poch (l + m) (N - m) * poch (a + b - l) (N - m) / (N - m)!) =
-        poch a N * poch b N / N ! := by
+      ∑ m ∈ range (N + 1), pochhammer (l - a) m * pochhammer (l - b) m / m ! *
+        (pochhammer (l + m) (N - m) * pochhammer (a + b - l) (N - m) / (N - m)!) =
+        pochhammer a N * pochhammer b N / N ! := by
     intro l hl
     have hl' : ∀ k : ℕ, l ≠ -(k : ℂ) := fun k hk => hl ⟨k, hk.symm⟩
     have h := regularized_saalschutz_convolution (l - a) (l - b) l N
@@ -629,8 +636,8 @@ theorem ProductIntegral.coeff_outer (a b l : ℂ) (N : ℕ) :
     have hΓN : Gamma (l + N) ≠ 0 := Gamma_ne_zero (not_neg_nat_add_nat hl' N)
     have hN : (N ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr N.factorial_ne_zero
     have h' := congrArg (· * Gamma (l + N)) h
-    rw [show poch a N * poch b N / (N ! * Gamma (l + N)) * Gamma (l + N) =
-      poch a N * poch b N / (N ! : ℂ) by field_simp] at h'
+    rw [show pochhammer a N * pochhammer b N / (N ! * Gamma (l + N)) * Gamma (l + N) =
+      pochhammer a N * pochhammer b N / (N ! : ℂ) by field_simp] at h'
     rw [Finset.sum_mul] at h'
     rw [← h']
     refine Finset.sum_congr rfl fun m hm => ?_
@@ -641,14 +648,15 @@ theorem ProductIntegral.coeff_outer (a b l : ℂ) (N : ℕ) :
     have hΓm : Gamma (l + m) ≠ 0 := Gamma_ne_zero hlm
     have hm0 : (m ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr m.factorial_ne_zero
     rw [div_eq_iff hΓm] at hG
-    simp only [poch]
+    simp only [pochhammer]
     rw [hG]
     field_simp
   have hdense : Dense (Set.range fun k : ℕ => -(k : ℂ))ᶜ :=
     (Set.countable_range _).dense_compl ℝ
-  have hcont1 : Continuous fun l : ℂ => ∑ m ∈ range (N + 1), poch (l - a) m * poch (l - b) m /
-      m ! * (poch (l + m) (N - m) * poch (a + b - l) (N - m) / (N - m)!) := by
-    simp only [poch]
+  have hcont1 : Continuous fun l : ℂ => ∑ m ∈ range (N + 1), pochhammer (l - a) m *
+      pochhammer (l - b) m /
+      m ! * (pochhammer (l + m) (N - m) * pochhammer (a + b - l) (N - m) / (N - m)!) := by
+    simp only [pochhammer]
     have hp (n : ℕ) : Continuous fun z : ℂ => (ascPochhammer ℂ n).eval z :=
       (ascPochhammer ℂ n).continuous
     refine continuous_finsetSum _ fun m _ => ?_
@@ -724,7 +732,7 @@ theorem ProductIntegral.product_inner_term {α c d K : ℂ} {x : ℝ} (m n : ℕ
   have hg1 : Gamma (d + m) ≠ 0 := Gamma_ne_zero_of_re_pos hdm
   have hg2 : Gamma (c - d + n) ≠ 0 := Gamma_ne_zero_of_re_pos hcdn'
   have hg3 : Gamma (c + m + n) ≠ 0 := Gamma_ne_zero hcn
-  rw [regularizedGaussHGFun_eq_div_Gamma hcn, hE]
+  rw [regularizedGaussHypergeometricFun_eq_div_Gamma hcn, hE]
   have hI : ∫ t in (0 : ℝ)..1, (t : ℂ) ^ (d + m - 1) * (1 - (t : ℂ)) ^ (c - d - 1) *
         (((1 - (x : ℂ) * t) ^ α)⁻¹ * (K * ((1 - (t : ℂ)) * x / (1 - (x : ℂ) * t)) ^ n)) =
       K * (x : ℂ) ^ n * ∫ t in (0 : ℝ)..1, (t : ℂ) ^ (d + m - 1) * (1 - (t : ℂ)) ^ (c - d + n - 1) *
@@ -788,18 +796,21 @@ theorem product_integral {a b c d : ℂ} (l : ℂ) {x : ℝ}
     refine ContinuousOn.cpow (by fun_prop) continuousOn_const fun t ht => ?_
     rw [hcast]; exact ofReal_mem_slitPlane.2 (hpos t ht)
   have hF2c : ContinuousOn (fun t => F2 (W t)) (Set.Icc 0 1) := fun t ht =>
-    (differentiableAt_regularizedGaussHGFun _ _ _ (hWn t ht)).continuousAt.comp_continuousWithinAt
+    (differentiableAt_regularizedGaussHypergeometricFun _ _ _
+        (hWn t ht)).continuousAt.comp_continuousWithinAt
       (hWc t ht)
   have hsumm (p q r : ℂ) : Summable fun n : ℕ =>
-      ‖poch p n * poch q n / (n ! * Gamma (r + n))‖ * x ^ n := by
-    refine (summable_norm_regularizedGaussHGFun_term p q r hxn).congr fun n => ?_
+      ‖pochhammer p n * pochhammer q n / (n ! * Gamma (r + n))‖ * x ^ n := by
+    refine (summable_norm_regularizedGaussHypergeometricFun_term p q r hxn).congr fun n => ?_
     rw [show x ^ n = ‖(x : ℂ) ^ n‖ by
       rw [norm_pow, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hx0], ← norm_mul]
     congr 1
-    simp only [poch]
+    simp only [pochhammer]
     ring
-  set cA : ℕ → ℂ := fun m => poch (l - a) m * poch (l - b) m / (m ! * Gamma (d + m)) with hcA
-  set cB : ℕ → ℂ := fun n => poch α n * poch (l - d) n / (n ! * Gamma (c - d + n)) with hcB
+  set cA : ℕ → ℂ := fun m => pochhammer (l - a) m * pochhammer (l - b) m /
+      (m ! * Gamma (d + m)) with hcA
+  set cB : ℕ → ℂ := fun n => pochhammer α n * pochhammer (l - d) n /
+      (n ! * Gamma (c - d + n)) with hcB
   have hw0 := betaIntegral_convergent hd hcd
   -- Step 1: expand the first factor.
   have hS1 := ProductIntegral.hasSum_integral (u := fun t => h t * F2 (W t))
@@ -811,7 +822,7 @@ theorem product_integral {a b c d : ℂ} (l : ℂ) {x : ℝ}
         abs_of_nonneg hx0, abs_of_nonneg ht.1]
       nlinarith [ht.1, ht.2])
     (hsumm (l - a) (l - b) d)
-    (fun t ht => hasSum_regularizedGaussHGFun_coeff (l - a) (l - b) d (by
+    (fun t ht => hasSum_regularizedGaussHypergeometricFun_coeff (l - a) (l - b) d (by
       rw [norm_mul, Complex.norm_real, Complex.norm_real, Real.norm_eq_abs, Real.norm_eq_abs,
         abs_of_nonneg hx0, abs_of_nonneg ht.1]
       nlinarith [ht.1, ht.2]))
@@ -825,7 +836,7 @@ theorem product_integral {a b c d : ℂ} (l : ℂ) {x : ℝ}
   -- Step 2 and 3: each term.
   have hterm (m : ℕ) : (∫ t in (0 : ℝ)..1, (t : ℂ) ^ (d - 1) * (1 - (t : ℂ)) ^ (c - d - 1) *
       ((h t * F2 (W t)) * (cA m * ((x : ℂ) * t) ^ m))) =
-      poch (l - a) m * poch (l - b) m / m ! * (x : ℂ) ^ m *
+      pochhammer (l - a) m * pochhammer (l - b) m / m ! * (x : ℂ) ^ m *
         regularizedGaussHGFun (l + m) α (c + m) (x : ℂ) := by
     have hm0 : (0 : ℝ) ≤ m := Nat.cast_nonneg m
     have hdm : 0 < (d + m).re := by
@@ -847,14 +858,14 @@ theorem product_integral {a b c d : ℂ} (l : ℂ) {x : ℝ}
     have hwm := betaIntegral_convergent hdm hcd
     have hS2 := ProductIntegral.hasSum_integral (u := h) (v := W) (c := cB) (ρ := x)
       (S := fun t => F2 (W t)) hwm hhc hWc hWle (hsumm α (l - d) (c - d))
-      (fun t ht => hasSum_regularizedGaussHGFun_coeff α (l - d) (c - d) (hWn t ht))
+      (fun t ht => hasSum_regularizedGaussHypergeometricFun_coeff α (l - d) (c - d) (hWn t ht))
     have hcm : 0 < (c + m).re := by
       have : (c + m).re = c.re + m := by simp
       rw [this]; linarith
     have hGL := (ProductIntegral.hasSum_shift_series α (l - d) (d + m) α (c + m) α
         ((l - d) + (d + m))
       hcm hxn (ProductIntegral.coeff_inner α (l - d) (d + m))).mul_left (Gamma (d + m))
-    have hS2' : HasSum (fun n : ℕ => Gamma (d + m) * (poch α n * poch (l - d) n / n ! *
+    have hS2' : HasSum (fun n : ℕ => Gamma (d + m) * (pochhammer α n * pochhammer (l - d) n / n ! *
         (x : ℂ) ^ n * regularizedGaussHGFun (α + n) (d + m) (c + m + n) (x : ℂ)))
         (∫ t in (0 : ℝ)..1, (t : ℂ) ^ (d + m - 1) * (1 - (t : ℂ)) ^ (c - d - 1) *
           (h t * F2 (W t))) := by

@@ -180,26 +180,26 @@ recurrence 14.10.4 and evaluated at `-1` from the logarithmic behaviour of `𝖯
 (DLMF 15.8.10 at `m = 0`, `BoundaryAsymptotics.zeroBalanced_isBigO`). Helper names live in the
 namespace `FerrersGreen`. -/
 /-- `𝖯_α(x) = 𝐅(α+1,-α;1;(1-x)/2)`. -/
-theorem FerrersGreen.ferrersP_zero_eq_regularizedGaussHG (α : ℂ) (x : ℝ) :
-    ferrersP α 0 x = regularizedGaussHG (α+1) (-α) 1 ((1-(x:ℂ))/2) := by
+theorem FerrersGreen.ferrersP_zero_eq_regularizedGaussHypergeometric (α : ℂ) (x : ℝ) :
+    ferrersP α 0 x = regularizedGaussHypergeometric (α+1) (-α) 1 ((1-(x:ℂ))/2) := by
   simp [ferrersP]
 
 /-- `𝖯_α` is continuous on `(-1,∞)`. -/
 theorem FerrersGreen.continuousAt_ferrersP (α : ℂ) {x : ℝ} (hx : -1 < x) :
     ContinuousAt (ferrersP α 0) x := by
   have hw := OrthogonalityIntegrals.half_mem_cutPlane hx
-  have : ferrersP α 0 = fun y : ℝ => regularizedGaussHG (α+1) (-α) 1 ((1-(y:ℂ))/2) :=
-    funext (FerrersGreen.ferrersP_zero_eq_regularizedGaussHG α)
+  have : ferrersP α 0 = fun y : ℝ => regularizedGaussHypergeometric (α+1) (-α) 1 ((1-(y:ℂ))/2) :=
+    funext (FerrersGreen.ferrersP_zero_eq_regularizedGaussHypergeometric α)
   rw [this]
-  exact ContinuousAt.comp (g := regularizedGaussHG (α+1) (-α) 1)
-    (differentiableAt_regularizedGaussHG _ _ _ hw).continuousAt (by fun_prop)
+  exact ContinuousAt.comp (g := regularizedGaussHypergeometric (α+1) (-α) 1)
+    (differentiableAt_regularizedGaussHypergeometric _ _ _ hw).continuousAt (by fun_prop)
 
 /-- The Ferrers function satisfies `ferrersP α 0 1 = 1` for every complex degree `α`. -/
 theorem FerrersGreen.ferrersP_one (α : ℂ) : ferrersP α 0 1 = 1 := by
-  rw [FerrersGreen.ferrersP_zero_eq_regularizedGaussHG]
+  rw [FerrersGreen.ferrersP_zero_eq_regularizedGaussHypergeometric]
   have h1 : ∀ k : ℕ, (1:ℂ) ≠ -(k:ℂ) := fun k h => by
     have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg k : (0:ℝ) ≤ k)]
-  simpa using regularizedGaussHG_zero_of_regular (a := α+1) (b := -α) h1
+  simpa using regularizedGaussHypergeometric_zero_of_regular (a := α+1) (b := -α) h1
 
 /-- `ferrersP α 0 x → 1` as `x → 1⁻`. -/
 theorem FerrersGreen.tendsto_ferrersP_one (α : ℂ) :
@@ -230,7 +230,7 @@ theorem FerrersGreen.ferrersP_neg_one_isBigO (α : ℂ) :
       FerrersGreen.tendsto_half
   refine h.congr_left fun x => ?_
   simp only [Function.comp_apply]
-  rw [FerrersGreen.ferrersP_zero_eq_regularizedGaussHG, show α + 1 + -α = 1 by ring]
+  rw [FerrersGreen.ferrersP_zero_eq_regularizedGaussHypergeometric, show α + 1 + -α = 1 by ring]
   congr 3
   push_cast; ring
 
@@ -768,12 +768,13 @@ theorem FerrersGreen.tendsto_neg_left : Tendsto (fun x : ℝ => -x) (𝓝[>] (-1
 theorem FerrersGreen.ferrersP_pos_isBigO (α : ℂ) :
     (fun x : ℝ => ferrersP α 0 x + (0:ℂ) * Real.log ((1-x)/2) - 1) =O[𝓝[<] (1:ℝ)]
       (fun x => (1-x)/2 * Real.log ((1-x)/2)) := by
-  have hfun : ferrersP α 0 = fun y : ℝ => regularizedGaussHG (α+1) (-α) 1 ((1-(y:ℂ))/2) :=
-    funext (FerrersGreen.ferrersP_zero_eq_regularizedGaussHG α)
+  have hfun : ferrersP α 0 = fun y : ℝ =>
+      regularizedGaussHypergeometric (α+1) (-α) 1 ((1-(y:ℂ))/2) :=
+    funext (FerrersGreen.ferrersP_zero_eq_regularizedGaussHypergeometric α)
   have hw := OrthogonalityIntegrals.half_mem_cutPlane (show (-1:ℝ) < 1 by norm_num)
   have hd : DifferentiableAt ℝ (ferrersP α 0) 1 := by
     rw [hfun]
-    exact ((differentiableAt_regularizedGaussHG _ _ _ hw).restrictScalars ℝ).comp (1:ℝ)
+    exact ((differentiableAt_regularizedGaussHypergeometric _ _ _ hw).restrictScalars ℝ).comp (1:ℝ)
       (by fun_prop)
   have h1 := hd.isBigO_sub.mono (nhdsWithin_le_nhds (s := Iio (1:ℝ)))
   rw [FerrersGreen.ferrersP_one] at h1

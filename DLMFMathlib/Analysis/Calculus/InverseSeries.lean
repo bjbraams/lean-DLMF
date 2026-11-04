@@ -19,7 +19,7 @@ for a polynomial identity satisfied by `F`.
 ## Main results
 
 * `invSer_isBigO_sub_of_pow_sub`: if `A → a ≠ 0`, `B → a` and `A^n - B^n = O(φ)`, then
-  `A - B = O(φ)` (roots of algebraic relations, e.g. square and cube roots).
+  `A - B = O(φ)` (roots of algebraic relations, e.g. square and unitCube roots).
 * `invSer_isBigO_sub_of_leftInverse`: if `g` is a left inverse of `f` near `x₀` with a strict
   derivative at `f x₀`, then for any approximant `P → x₀` of `g ∘ h`,
   `P - g ∘ h = O(f ∘ P - h)`: a candidate expansion of an inverse function is verified by

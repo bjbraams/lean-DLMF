@@ -54,8 +54,8 @@ upstream items are recorded as `dlmf_upstream` pointers in
   `windingNumber_eq_zero_of_mem_contourExterior`: winding numbers (DLMF 1.9.32, §1.9(iii)).
 * `hasBasis_nhds_infty`, `extAdd_infty`, `extMul_infty`, `extDiv_infty`, `extDiv_zero`: the
   point at infinity (DLMF 1.9.35–1.9.39).
-* `mobiusExt_neg_div`, `hasDerivAt_mobius`, `derivAtInfty_mobius`, `mobius_mobius_inv`,
-  `mobiusExt_bijective`, `crossRatio_mobius`: bilinear transformations (DLMF 1.9.41–1.9.45).
+* `mobiusExt_neg_div`, `hasDerivAt_mobiusMap`, `derivAtInfty_mobiusMap`, `mobiusMap_mobiusMap_inv`,
+  `mobiusExt_bijective`, `crossRatio_mobiusMap`: bilinear transformations (DLMF 1.9.41–1.9.45).
 * `tendsto_cauchyProduct`: products of power series (DLMF 1.9.51–1.9.52, corrected).
 * `hasSum_recipCoeff`, `hasSum_logCoeff`, `hasSum_powCoeff` and the coefficient values
   `recipCoeff_zero_one_two`, `logCoeff_one_two_three`, `powCoeff_zero_one_two`:
@@ -486,8 +486,8 @@ theorem mobiusExt_neg_div (a b : ℂ) {c : ℂ} (d : ℂ) (hc : c ≠ 0) :
 
 /-- DLMF 1.9.42: `f'(z) = (ad - bc)/(cz + d)²` for `z ≠ -d/c`. -/
 @[dlmf 1.9.E42]
-theorem hasDerivAt_mobius (a b c d : ℂ) {z : ℂ} (hz : c * z + d ≠ 0) :
-    HasDerivAt (mobius a b c d) ((a * d - b * c) / (c * z + d) ^ 2) z := by
+theorem hasDerivAt_mobiusMap (a b c d : ℂ) {z : ℂ} (hz : c * z + d ≠ 0) :
+    HasDerivAt (mobiusMap a b c d) ((a * d - b * c) / (c * z + d) ^ 2) z := by
   have h1 : HasDerivAt (fun w => a * w + b) a z := by
     simpa using ((hasDerivAt_id z).const_mul a).add_const b
   have h2 : HasDerivAt (fun w => c * w + d) c z := by
@@ -497,15 +497,15 @@ theorem hasDerivAt_mobius (a b c d : ℂ) {z : ℂ} (hz : c * z + d ≠ 0) :
     (a * d - b * c) / (c * z + d) ^ 2 by ring] at h
   exact h
 
-/-- Identity under the stated parameter and domain assumptions: `Function.update (fun z => mobius
+/-- Identity under the stated parameter and domain assumptions: `Function.update (fun z => mobiusMap
 a b c d z⁻¹) 0 (a / c) = fun z => (a + b * z) / (c + d * z)`. -/
-private lemma update_mobius_inv_eq (a b c d : ℂ) :
-    Function.update (fun z => mobius a b c d z⁻¹) 0 (a / c) =
+private lemma update_mobiusMap_inv_eq (a b c d : ℂ) :
+    Function.update (fun z => mobiusMap a b c d z⁻¹) 0 (a / c) =
       fun z => (a + b * z) / (c + d * z) := by
   funext z
   by_cases hz : z = 0
   · subst hz; simp
-  · rw [Function.update_of_ne hz, mobius]
+  · rw [Function.update_of_ne hz, mobiusMap]
     by_cases h : c + d * z = 0
     · have h' : c * z⁻¹ + d = 0 := by
         rw [show c * z⁻¹ + d = (c + d * z) / z by field_simp, h, zero_div]
@@ -518,9 +518,9 @@ private lemma update_mobius_inv_eq (a b c d : ℂ) :
 `f'(∞) = g'(0)` for `g(z) = f(1/z)`, `g(0) = f(∞) = a/c`. The transformation is analytic at
 `∞`. -/
 @[dlmf 1.9.E43]
-theorem derivAtInfty_mobius (a b : ℂ) {c : ℂ} (d : ℂ) (hc : c ≠ 0) :
-    AnalyticAtInfty (mobius a b c d) (a / c) ∧
-      derivAtInfty (mobius a b c d) (a / c) = (b * c - a * d) / c ^ 2 := by
+theorem derivAtInfty_mobiusMap (a b : ℂ) {c : ℂ} (d : ℂ) (hc : c ≠ 0) :
+    AnalyticAtInfty (mobiusMap a b c d) (a / c) ∧
+      derivAtInfty (mobiusMap a b c d) (a / c) = (b * c - a * d) / c ^ 2 := by
   have hh : HasDerivAt (fun z : ℂ => (a + b * z) / (c + d * z)) ((b * c - a * d) / c ^ 2) 0 := by
     have h1 : HasDerivAt (fun w : ℂ => a + b * w) b 0 := by
       simpa using ((hasDerivAt_id (0 : ℂ)).const_mul b).const_add a
@@ -530,20 +530,20 @@ theorem derivAtInfty_mobius (a b : ℂ) {c : ℂ} (d : ℂ) (hc : c ≠ 0) :
     simp
   refine ⟨?_, ?_⟩
   · unfold AnalyticAtInfty
-    rw [update_mobius_inv_eq]
+    rw [update_mobiusMap_inv_eq]
     have : AnalyticAt ℂ (fun z : ℂ => a + b * z) 0 := by fun_prop
     have h2 : AnalyticAt ℂ (fun z : ℂ => c + d * z) 0 := by fun_prop
     exact this.div h2 (by simpa using hc)
   · unfold derivAtInfty
-    rw [update_mobius_inv_eq]
+    rw [update_mobiusMap_inv_eq]
     exact hh.deriv
 
 /-- DLMF 1.9.44: the inverse of the bilinear transformation 1.9.40 is `z = (dw - b)/(-cw + a)`:
 if `ad - bc ≠ 0` and `-cw + a ≠ 0`, then `f((dw - b)/(-cw + a)) = w`. -/
 @[dlmf 1.9.E44]
-theorem mobius_mobius_inv {a b c d : ℂ} (hdet : a * d - b * c ≠ 0) {w : ℂ}
-    (hw : -c * w + a ≠ 0) : mobius a b c d (mobius d (-b) (-c) a w) = w := by
-  unfold mobius
+theorem mobiusMap_mobiusMap_inv {a b c d : ℂ} (hdet : a * d - b * c ≠ 0) {w : ℂ}
+    (hw : -c * w + a ≠ 0) : mobiusMap a b c d (mobiusMap d (-b) (-c) a w) = w := by
+  unfold mobiusMap
   have e1 : a * ((d * w + -b) / (-c * w + a)) + b = (a * d - b * c) * w / (-c * w + a) := by
     rw [mul_div_assoc', div_add' _ _ _ hw]; congr 1; ring
   have e2 : c * ((d * w + -b) / (-c * w + a)) + d = (a * d - b * c) / (-c * w + a) := by
@@ -564,9 +564,9 @@ private lemma mobiusExt_leftInv {a b c d : ℂ} (hdet : a * d - b * c ≠ 0) (hc
         apply (div_eq_iff (neg_ne_zero.mpr hc)).2
         linear_combination hz
       simp [mobiusExt, hz, hc, hz']
-    · have hden : -c * mobius a b c d z + a ≠ 0 := by
-        have he : -c * mobius a b c d z + a = (a * d - b * c) / (c * z + d) := by
-          unfold mobius
+    · have hden : -c * mobiusMap a b c d z + a ≠ 0 := by
+        have he : -c * mobiusMap a b c d z + a = (a * d - b * c) / (c * z + d) := by
+          unfold mobiusMap
           field_simp
           ring
         rw [he]
@@ -575,7 +575,7 @@ private lemma mobiusExt_leftInv {a b c d : ℂ} (hdet : a * d - b * c ≠ 0) (hc
       have hd' : d * a - (-b) * (-c) ≠ 0 := by
         simpa only [neg_mul_neg, mul_comm] using hdet
       have hz' : -(-c) * z + d ≠ 0 := by simpa using hz
-      have he := mobius_mobius_inv (a := d) (b := -b) (c := -c) (d := a) (w := z) hd' hz'
+      have he := mobiusMap_mobiusMap_inv (a := d) (b := -b) (c := -c) (d := a) (w := z) hd' hz'
       simpa only [neg_neg] using congrArg (fun w : ℂ => (w : OnePoint ℂ)) he
 
 /-- DLMF §1.9(iv): the bilinear transformation 1.9.40 (`ad - bc ≠ 0`, `c ≠ 0`) is a one-to-one
@@ -596,15 +596,15 @@ theorem mobiusExt_bijective {a b c d : ℂ} (hdet : a * d - b * c ≠ 0) (hc : c
 /-- DLMF 1.9.45: the cross ratio is invariant under bilinear transformations (for four finite
 points with finite images, `ad - bc ≠ 0`). -/
 @[dlmf 1.9.E45]
-theorem crossRatio_mobius {a b c d : ℂ} (hdet : a * d - b * c ≠ 0) {z₁ z₂ z₃ z₄ : ℂ}
+theorem crossRatio_mobiusMap {a b c d : ℂ} (hdet : a * d - b * c ≠ 0) {z₁ z₂ z₃ z₄ : ℂ}
     (h₁ : c * z₁ + d ≠ 0) (h₂ : c * z₂ + d ≠ 0) (h₃ : c * z₃ + d ≠ 0) (h₄ : c * z₄ + d ≠ 0) :
-    crossRatio (mobius a b c d z₁) (mobius a b c d z₂) (mobius a b c d z₃)
-      (mobius a b c d z₄) = crossRatio z₁ z₂ z₃ z₄ := by
+    crossRatio (mobiusMap a b c d z₁) (mobiusMap a b c d z₂) (mobiusMap a b c d z₃)
+      (mobiusMap a b c d z₄) = crossRatio z₁ z₂ z₃ z₄ := by
   have key : ∀ {u v : ℂ}, c * u + d ≠ 0 → c * v + d ≠ 0 →
-      mobius a b c d u - mobius a b c d v = (a * d - b * c) * (u - v) /
+      mobiusMap a b c d u - mobiusMap a b c d v = (a * d - b * c) * (u - v) /
         ((c * u + d) * (c * v + d)) := by
     intro u v hu hv
-    unfold mobius
+    unfold mobiusMap
     rw [div_sub_div _ _ hu hv]
     congr 1
     ring

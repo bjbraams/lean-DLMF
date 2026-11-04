@@ -20,7 +20,7 @@ property of zonal kernels, the Funk–Hecke formula and the addition theorem.
 
 ## Main results
 
-* `zonal_harmonicOnNhd`: a polynomial annihilated by `laplacianMv` is harmonic in Mathlib's
+* `zonal_harmonicOnNhd`: a polynomial annihilated by `laplacianEuclidean` is harmonic in Mathlib's
   sense.
 * `zonal_kernel_hasSum`: `(1 - r²)/(1 - 2rt + r²)^{3/2} = ∑ (2j+1) P_j(t) r^j`.
 * `zonal_reproduce`: `(2j+1) ∫ P_j(ξ·y) S(y) dσ(y) = 4π δ_{jk} S(ξ)` for harmonic homogeneous
@@ -49,15 +49,17 @@ namespace DLMF.SphericalHarmonics
 
 /-- `(2n+1) P_n = C_n^{(3/2)} - C_{n-2}^{(3/2)}` (DLMF 18.9.7 at `λ = 1/2`). -/
 theorem zonal_two_mul_add_one (n : ℕ) (x : ℂ) :
-    (2 * n + 1 : ℂ) * legendrePolyP n x =
-      ultrasphPoly (3 / 2) n x - (if n < 2 then 0 else ultrasphPoly (3 / 2) (n - 2) x) := by
-  rw [legendre_eq_ultrasphPoly]
+    (2 * n + 1 : ℂ) * legendrePolynomialP n x =
+      ultrasphericalPolynomial (3 / 2) n x -
+          (if n < 2 then 0 else ultrasphericalPolynomial (3 / 2) (n - 2) x) := by
+  rw [legendre_eq_ultrasphericalPolynomial]
   rcases n with _ | _ | n
   · simp
   · simp only [show (1 : ℕ) < 2 by norm_num, ite_true, sub_zero]
-    rw [ultrasphPoly_one_eq (by norm_num), ultrasphPoly_one_eq (by norm_num)]
+    rw [ultrasphericalPolynomial_one_eq (by norm_num),
+        ultrasphericalPolynomial_one_eq (by norm_num)]
     ring
-  · have h := ultrasphPoly_raise_parameter (lam := 1 / 2) (by norm_num) n x
+  · have h := ultrasphericalPolynomial_raise_parameter (lam := 1 / 2) (by norm_num) n x
     rw [show (1 / 2 : ℂ) + 1 = 3 / 2 by norm_num] at h
     simp only [show ¬ (n + 2 < 2) by omega, ite_false, show n + 2 - 2 = n by omega]
     push_cast
@@ -65,10 +67,10 @@ theorem zonal_two_mul_add_one (n : ℕ) (x : ℂ) :
 
 /-- The Poisson-kernel expansion `(1 - r²)/(1 - 2rt + r²)^{3/2} = ∑ (2j+1) P_j(t) r^j`. -/
 theorem zonal_kernel_hasSum {t : ℝ} (ht : |t| ≤ 1) {r : ℝ} (hr : |r| < 1) :
-    HasSum (fun j : ℕ => (2 * j + 1 : ℂ) * legendrePolyP j t * (r : ℂ) ^ j)
+    HasSum (fun j : ℕ => (2 * j + 1 : ℂ) * legendrePolynomialP j t * (r : ℂ) ^ j)
       (((1 - r ^ 2) / (1 - 2 * r * t + r ^ 2) ^ (3 / 2 : ℝ) : ℝ) : ℂ) := by
   have hz : ‖(r : ℂ)‖ < 1 := by rwa [Complex.norm_real, Real.norm_eq_abs]
-  have hG := ultrasphPoly_generating_function (lam := 3 / 2) (by norm_num) ht hz
+  have hG := ultrasphericalPolynomial_generating_function (lam := 3 / 2) (by norm_num) ht hz
   have hpos : 0 < 1 - 2 * r * t + r ^ 2 := by
     have h1 : |r * t| < 1 := by
       rw [abs_mul]; nlinarith [abs_nonneg r, abs_nonneg t]
@@ -82,7 +84,8 @@ theorem zonal_kernel_hasSum {t : ℝ} (ht : |t| ≤ 1) {r : ℝ} (hr : |r| < 1) 
     rw [Complex.cpow_neg]
   rw [hval] at hG
   -- the shifted series
-  have hG2 : HasSum (fun n : ℕ => (if n < 2 then 0 else ultrasphPoly (3 / 2) (n - 2) (t : ℂ)) *
+  have hG2 : HasSum (fun n : ℕ =>
+      (if n < 2 then 0 else ultrasphericalPolynomial (3 / 2) (n - 2) (t : ℂ)) *
       (r : ℂ) ^ n) ((r : ℂ) ^ 2 * (((1 - 2 * r * t + r ^ 2) ^ (3 / 2 : ℝ))⁻¹ : ℝ)) := by
     rw [← hasSum_nat_add_iff' 2]
     simp only [show ∀ n : ℕ, ¬ (n + 2 < 2) from fun n => by omega, ite_false,
@@ -184,10 +187,10 @@ theorem zonal_fderiv_single (P : MvPolynomial (Fin n) ℝ) (y : EuclideanSpace �
   rw [(zonal_hasFDerivAt P y).fderiv]
   simp
 
-/-- The Laplacian of a polynomial function is the evaluation of `laplacianMv`. -/
+/-- The Laplacian of a polynomial function is the evaluation of `laplacianEuclidean`. -/
 theorem zonal_laplacian_eval (P : MvPolynomial (Fin n) ℝ) (x : EuclideanSpace ℝ (Fin n)) :
     Δ (fun z : EuclideanSpace ℝ (Fin n) => eval (fun i => z i) P) x =
-      eval (fun i => x i) (laplacianMv P) := by
+      eval (fun i => x i) (laplacianEuclidean P) := by
   have hd : DifferentiableAt ℝ
       (fderiv ℝ (fun z : EuclideanSpace ℝ (Fin n) => eval (fun i => z i) P)) x := by
     have : fderiv ℝ (fun z : EuclideanSpace ℝ (Fin n) => eval (fun i => z i) P) = fun y =>
@@ -202,10 +205,10 @@ theorem zonal_laplacian_eval (P : MvPolynomial (Fin n) ℝ) (x : EuclideanSpace 
   have : ∀ j, (fun y => fderiv ℝ (fun z : EuclideanSpace ℝ (Fin n) => eval (fun i => z i) P) y
       (EuclideanSpace.single j 1)) = fun z => eval (fun i => z i) (pderiv j P) :=
     fun j => funext fun y => zonal_fderiv_single P y j
-  simp only [zonal_fderiv_single, laplacianMv, map_sum]
+  simp only [zonal_fderiv_single, laplacianEuclidean, map_sum]
 
 /-- Harmonic polynomials give harmonic functions on Euclidean space. -/
-theorem zonal_harmonicOnNhd {P : MvPolynomial (Fin n) ℝ} (hP : laplacianMv P = 0)
+theorem zonal_harmonicOnNhd {P : MvPolynomial (Fin n) ℝ} (hP : laplacianEuclidean P = 0)
     (s : Set (EuclideanSpace ℝ (Fin n))) :
     HarmonicOnNhd (fun z : EuclideanSpace ℝ (Fin n) => eval (fun i => z i) P) s := by
   intro x _
@@ -361,7 +364,7 @@ expansion of the Poisson kernel in Legendre polynomials. -/
 theorem zonal_reproduce {k : ℕ} {S : MvPolynomial (Fin 3) ℝ} (hS : IsHarmonicHomogeneous k S)
     (ξ : sphere (0 : EuclideanSpace ℝ (Fin 3)) 1) (j : ℕ) :
     (2 * j + 1 : ℂ) * (∫ y : sphere (0 : EuclideanSpace ℝ (Fin 3)) 1,
-      legendrePolyP j (∑ i, ξ.val i * y.val i : ℝ) * (eval (fun i => y.val i) S : ℂ)
+      legendrePolynomialP j (∑ i, ξ.val i * y.val i : ℝ) * (eval (fun i => y.val i) S : ℂ)
         ∂(volume : Measure (EuclideanSpace ℝ (Fin 3))).toSphere) =
       if j = k then 4 * π * (eval (fun i => ξ.val i) S : ℂ) else 0 := by
   set σ := (volume : Measure (EuclideanSpace ℝ (Fin 3))).toSphere with hσ
@@ -370,12 +373,12 @@ theorem zonal_reproduce {k : ℕ} {S : MvPolynomial (Fin 3) ℝ} (hS : IsHarmoni
     with htdef
   have ht : ∀ y, |t y| ≤ 1 := fun y => zonal_abs_dot_le ξ y
   set G : ℕ → sphere (0 : EuclideanSpace ℝ (Fin 3)) 1 → ℂ :=
-    fun j y => legendrePolyP j (t y) * (ev y : ℂ) with hGdef
+    fun j y => legendrePolynomialP j (t y) * (ev y : ℂ) with hGdef
   have hev_cont : Continuous ev := (zonal_contDiff S).continuous
   have ht_cont : Continuous t := by
     simp only [htdef]; fun_prop
-  have hL (j : ℕ) : Continuous fun x : ℝ => legendrePolyP j x := by
-    simp_rw [DLMF.Legendre.legendrePolyP_eq_eval]
+  have hL (j : ℕ) : Continuous fun x : ℝ => legendrePolynomialP j x := by
+    simp_rw [DLMF.Legendre.legendrePolynomialP_eq_eval]
     exact (Polynomial.continuous _).comp continuous_ofReal
   have hG_cont : ∀ j, Continuous (G j) := fun j =>
     ((hL j).comp ht_cont).mul (continuous_ofReal.comp (hev_cont.comp continuous_subtype_val))
@@ -388,9 +391,9 @@ theorem zonal_reproduce {k : ℕ} {S : MvPolynomial (Fin 3) ℝ} (hS : IsHarmoni
   have hGb : ∀ j y, ‖G j y‖ ≤ M := by
     intro j y
     rw [norm_mul]
-    calc ‖legendrePolyP j (t y)‖ * ‖(ev y : ℂ)‖ ≤ 1 * M := by
+    calc ‖legendrePolynomialP j (t y)‖ * ‖(ev y : ℂ)‖ ≤ 1 * M := by
           gcongr
-          · exact norm_legendrePolyP_le_one j (ht y)
+          · exact norm_legendrePolynomialP_le_one j (ht y)
           · exact hM y (mem_univ _)
       _ = M := one_mul M
   have hM0 : 0 ≤ M := (norm_nonneg _).trans (hGb 0 ⟨EuclideanSpace.single 0 1, by simp⟩)
@@ -511,10 +514,11 @@ theorem zonal_legendre_induction (Φ : Polynomial ℂ → Prop)
     have hLd : L.natDegree = d := zonal_natDegree_legendre d
     have hL0 : L ≠ 0 := by
       intro h0
-      have hP := DLMF.Legendre.legendrePolyP_eq_eval d 1
+      have hP := DLMF.Legendre.legendrePolynomialP_eq_eval d 1
       rw [← hL, h0, Polynomial.eval_zero] at hP
-      have : DLMF.OrthogonalPolynomials.legendrePolyP d 1 = 1 := by
-        simp [DLMF.OrthogonalPolynomials.legendrePolyP, DLMF.OrthogonalPolynomials.jacobiPolyP,
+      have : DLMF.OrthogonalPolynomials.legendrePolynomialP d 1 = 1 := by
+        simp [DLMF.OrthogonalPolynomials.legendrePolynomialP,
+            DLMF.OrthogonalPolynomials.jacobiPolynomialP,
           Nat.factorial_ne_zero]
       rw [this] at hP; exact one_ne_zero hP
     set c := Q.leadingCoeff / L.leadingCoeff with hc
@@ -616,7 +620,7 @@ theorem zonal_funk_hecke {k : ℕ} {f : ℝ → ℂ}
     (∫ y : Metric.sphere (0 : EuclideanSpace ℝ (Fin 3)) 1,
       f (∑ i, x.val i * y.val i) * (MvPolynomial.eval (fun i => y.val i) S : ℂ)
         ∂(volume : Measure (EuclideanSpace ℝ (Fin 3))).toSphere) =
-      (2 * π : ℂ) * (∫ t : ℝ in (-1 : ℝ)..1, f t * legendrePolyP k t) *
+      (2 * π : ℂ) * (∫ t : ℝ in (-1 : ℝ)..1, f t * legendrePolynomialP k t) *
         (MvPolynomial.eval (fun i => x.val i) S : ℂ) := by
   set σ := (volume : Measure (EuclideanSpace ℝ (Fin 3))).toSphere with hσ
   set ev : EuclideanSpace ℝ (Fin 3) → ℝ := fun z => eval (fun i => z i) S with hev
@@ -627,14 +631,14 @@ theorem zonal_funk_hecke {k : ℕ} {f : ℝ → ℂ}
   have ht_cont : Continuous t := by simp only [htdef]; fun_prop
   have hevc : Continuous fun y : sphere (0 : EuclideanSpace ℝ (Fin 3)) 1 => (ev y : ℂ) :=
     continuous_ofReal.comp (hev_cont.comp continuous_subtype_val)
-  have hL (j : ℕ) : Continuous fun s : ℝ => legendrePolyP j s := by
-    simp_rw [DLMF.Legendre.legendrePolyP_eq_eval]
+  have hL (j : ℕ) : Continuous fun s : ℝ => legendrePolynomialP j s := by
+    simp_rw [DLMF.Legendre.legendrePolynomialP_eq_eval]
     exact (Polynomial.continuous _).comp continuous_ofReal
   obtain ⟨M, hM⟩ :=
     (isCompact_univ (X := sphere (0 : EuclideanSpace ℝ (Fin 3)) 1)).exists_bound_of_continuousOn
     (f := fun y => (ev y : ℂ)) hevc.continuousOn
   set D : (ℝ → ℂ) → ℂ := fun g => (∫ y, g (t y) * (ev y : ℂ) ∂σ) -
-    (2 * π : ℂ) * (∫ s : ℝ in (-1 : ℝ)..1, g s * legendrePolyP k s) * (ev x : ℂ) with hD
+    (2 * π : ℂ) * (∫ s : ℝ in (-1 : ℝ)..1, g s * legendrePolynomialP k s) * (ev x : ℂ) with hD
   have hint1 : ∀ g : ℝ → ℂ, ContinuousOn g (Icc (-1) 1) →
       Integrable (fun y => g (t y) * (ev y : ℂ)) σ := by
     intro g hg
@@ -642,7 +646,7 @@ theorem zonal_funk_hecke {k : ℕ} {f : ℝ → ℂ}
       (hg.comp_continuous ht_cont ht).mul hevc
     exact this.integrable_of_hasCompactSupport (.of_compactSpace _)
   have hint2 : ∀ g : ℝ → ℂ, ContinuousOn g (Icc (-1) 1) →
-      IntervalIntegrable (fun s => g s * legendrePolyP k s) volume (-1) 1 := by
+      IntervalIntegrable (fun s => g s * legendrePolynomialP k s) volume (-1) 1 := by
     intro g hg
     refine ContinuousOn.intervalIntegrable ?_
     rw [uIcc_of_le (by norm_num)]
@@ -677,16 +681,16 @@ theorem zonal_funk_hecke {k : ℕ} {f : ℝ → ℂ}
           Real.norm_eq_abs, abs_of_pos (by positivity)]
       rw [h2pi]
       gcongr
-      have hb : ∀ s ∈ Set.uIoc (-1 : ℝ) 1, ‖g s * legendrePolyP k s‖ ≤ ε := by
+      have hb : ∀ s ∈ Set.uIoc (-1 : ℝ) 1, ‖g s * legendrePolynomialP k s‖ ≤ ε := by
         intro s hs
         rw [uIoc_of_le (by norm_num)] at hs
         have hs' : s ∈ Icc (-1 : ℝ) 1 := ⟨hs.1.le, hs.2⟩
         rw [norm_mul]
-        calc ‖g s‖ * ‖legendrePolyP k s‖ ≤ ε * 1 := by
+        calc ‖g s‖ * ‖legendrePolynomialP k s‖ ≤ ε * 1 := by
               gcongr
               · exact (norm_nonneg _).trans (hg s hs')
               · exact hg s hs'
-              · exact norm_legendrePolyP_le_one k (abs_le.mpr hs')
+              · exact norm_legendrePolynomialP_le_one k (abs_le.mpr hs')
           _ = ε := mul_one ε
       have := intervalIntegral.norm_integral_le_of_norm_le_const hb
       rw [show |(1 : ℝ) - (-1)| = 2 by norm_num] at this
@@ -701,7 +705,8 @@ theorem zonal_funk_hecke {k : ℕ} {f : ℝ → ℂ}
         ((Polynomial.continuous p).comp continuous_ofReal).continuousOn
         ((Polynomial.continuous q).comp continuous_ofReal).continuousOn, hp, hq, add_zero]
     · intro a j
-      simp only [Polynomial.eval_mul, Polynomial.eval_C, ← DLMF.Legendre.legendrePolyP_eq_eval]
+      simp only [Polynomial.eval_mul, Polynomial.eval_C,
+          ← DLMF.Legendre.legendrePolynomialP_eq_eval]
       have hrep := zonal_reproduce hS x j
       have horth := legendre_orthogonality j k
       simp only [hD]
@@ -712,13 +717,13 @@ theorem zonal_funk_hecke {k : ℕ} {f : ℝ → ℂ}
         exact Nat.cast_ne_zero.mpr (by omega)
       split_ifs at hrep ⊢ with hjk
       · subst hjk
-        have hI : (∫ y, legendrePolyP j (t y) * (ev y : ℂ) ∂σ) =
+        have hI : (∫ y, legendrePolynomialP j (t y) * (ev y : ℂ) ∂σ) =
             4 * π * (ev x : ℂ) / (2 * j + 1) := by
           rw [eq_div_iff hj, mul_comm]; exact hrep
         rw [hI]
         field_simp
         ring
-      · have hI : (∫ y, legendrePolyP j (t y) * (ev y : ℂ) ∂σ) = 0 := by
+      · have hI : (∫ y, legendrePolynomialP j (t y) * (ev y : ℂ) ∂σ) = 0 := by
           rcases mul_eq_zero.mp hrep with h | h
           · exact absurd h hj
           · exact h
@@ -762,8 +767,8 @@ theorem zonal_eq_zero_of_integral {g : sphere (0 : EuclideanSpace ℝ (Fin 3)) 1
 
 /-- `P_k(t)` on the real line is the real polynomial `legendrePolyR k`. -/
 theorem zonal_legendre_real (k : ℕ) (t : ℝ) :
-    legendrePolyP k t = (((DLMF.Legendre.legendrePolyR k).eval t : ℝ) : ℂ) := by
-  rw [DLMF.Legendre.legendrePolyP_eq_eval, Polynomial.eval_map,
+    legendrePolynomialP k t = (((DLMF.Legendre.legendrePolyR k).eval t : ℝ) : ℂ) := by
+  rw [DLMF.Legendre.legendrePolynomialP_eq_eval, Polynomial.eval_map,
     show (t : ℂ) = Complex.ofRealHom t from rfl, Polynomial.eval₂_at_apply]
   rfl
 
@@ -797,7 +802,7 @@ theorem zonal_funk_hecke_real {k : ℕ} {g : ℝ → ℝ} (hg : Continuous g)
 /-- `P_0 = 1` as a real polynomial. -/
 theorem zonal_legendreR_zero (s : ℝ) : (DLMF.Legendre.legendrePolyR 0).eval s = 1 := by
   have h := zonal_legendre_real 0 s
-  rw [legendrePolyP_zero] at h
+  rw [legendrePolynomialP_zero] at h
   exact_mod_cast h.symm
 
 /-- **Addition theorem on the sphere** (AAR Theorem 9.6.3), for unit vectors. The proof shows
@@ -927,7 +932,7 @@ theorem zonal_spherical_addition {k : ℕ}
     (horth : ∀ i j, sphericalHarmonicInner (S i) (S j) = if i = j then 1 else 0)
     (x y : Fin 3 → ℝ)
     (hx : ∑ i, x i ^ 2 = 1) (hy : ∑ i, y i ^ 2 = 1) :
-    (2 * k + 1 : ℂ) / (4 * π) * legendrePolyP k (∑ i, x i * y i : ℝ) =
+    (2 * k + 1 : ℂ) / (4 * π) * legendrePolynomialP k (∑ i, x i * y i : ℝ) =
       ∑ m : Fin (2 * k + 1),
         (MvPolynomial.eval x (S m) : ℂ) * (MvPolynomial.eval y (S m) : ℂ) := by
   have h := zonal_addition_sphere S hS horth ⟨_, zonal_mem_sphere hx⟩ ⟨_, zonal_mem_sphere hy⟩

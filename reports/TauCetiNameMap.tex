@@ -1,0 +1,348 @@
+% TauCetiNameMap.tex -- proposed TauCeti names for the foundational layer of lean-DLMF.
+% Compile with LuaLaTeX: latexmk -lualatex TauCetiNameMap.tex
+\documentclass[11pt,a4paper]{article}
+\usepackage{leanreport}
+\hypersetup{pdftitle={lean-DLMF: TauCeti name map of the foundational layer}}
+
+\begin{document}
+
+\title{TauCeti Name Map\\of the Foundational Layer}
+\author{Bastiaan J. Braams}
+\date{2026-11-04}
+\maketitle
+\sloppy
+
+\begin{abstract}
+  The foundational (\texttt{Basic}) layer of \texttt{lean-DLMF} is to be offered to TauCeti
+  through roadmaps. In TauCeti, \texttt{lean-DLMF} declarations get the namespace
+  \lean{TauCeti}, and a later move to Mathlib drops that prefix. Every foundational name
+  therefore has to be a good Mathlib name once the \lean{DLMF.\textless Area\textgreater}
+  prefix is removed. This report applies a fixed mapping rule to all 3,660 public
+  foundational declarations, finds the clashes with Mathlib, TauCeti and lean-codes and the
+  clashes between areas, and proposes renames for the abbreviated names. The complete table
+  is \file{reports/TauCetiNameMap.tsv}. The report closes with the decisions needed before
+  the renaming round, as adopted.
+\end{abstract}
+
+\section{Mapping rule}
+
+The project keeps its area namespaces. A roadmap maps names as follows.
+\begin{itemize}
+  \item \lean{DLMF.\textless Area\textgreater.x} becomes \lean{TauCeti.x} (root placement) or
+    \lean{TauCeti.Complex.x} (complex placement). Root placement is the default. Complex
+    placement is used only where root placement would clash with an upstream name, which in
+    practice means that Mathlib or TauCeti has a real-valued function of that name at the root.
+  \item \lean{DLMF.\textless Area\textgreater.Real.x} becomes \lean{TauCeti.Real.x}.
+  \item A lemma in the namespace of a definition or structure keeps that namespace
+    (\lean{DLMF.Airy.IsAirySol.eq\_zero} becomes \lean{TauCeti.IsAirySolution.eq\_zero}).
+  \item A dot-notation lemma outside \lean{DLMF} keeps its name under \lean{TauCeti}.
+  \item The general areas (Chapter~1 \lean{AlgebraicAnalytic}, Chapter~2
+    \lean{AsymptoticApproximations} and \lean{DLMF.Core}) are not special functions. Their
+    roadmaps place declarations in the namespace of the Mathlib API they extend, which is
+    chosen per file. The table still gives the root form, marked \texttt{general}.
+\end{itemize}
+
+\section{The table}
+
+\file{reports/TauCetiNameMap.tsv} has one row per public declaration of a foundational
+module. Generated auxiliaries are excluded: recursors, \lean{match\_} and \lean{proof\_}
+terms, and \lean{eq\_1}. The columns are:
+\begin{enumerate}
+  \item kind: \texttt{def}, \texttt{type} or \texttt{thm};
+  \item the current name;
+  \item the module;
+  \item the proposed new \texttt{lean-DLMF} name, or \texttt{=} if unchanged;
+  \item the proposed TauCeti name;
+  \item the placement: \texttt{root}, \texttt{Complex}, \texttt{Real}, \texttt{dot API}
+    (namespace of a definition or structure), \texttt{sub-namespace} (helper namespace),
+    \texttt{general} or \texttt{dot};
+  \item flags: upstream clash, target clash, possible duplicate, remaining abbreviation.
+\end{enumerate}
+The table has 1,624 definitions, 53 types and 1,983 theorems. The placement counts are
+2,783 root, 361 general, 311 dot API, 151 Real, 28 sub-namespace, 16 Complex, 9 upstream
+(replaced by the upstream function or stated about it) and 1 dot. 732 names have a rename
+proposal, 370 of them definitions, types or namespaces of definitions.
+Theorem names follow the definitions they mention: \lean{pcfU\_neg} becomes
+\lean{parabolicCylinderU\_neg}.
+
+Renaming the foundational definitions also renames about 2,200 theorem-layer declarations
+whose names contain them, and changes about 10,000 identifier occurrences across the
+library. The renaming round covers both layers. Every rename is recorded in
+\file{reports/RenameMap20261101.tsv}.
+
+\section{Clashes}
+
+\subsection{Upstream clashes}
+
+Under root placement, eight foundational declarations clash with an upstream declaration.
+\begin{itemize}
+  \item \lean{Confluent.lowerIncGamma}, proposed \lean{lowerIncompleteGamma}: TauCeti has the
+    real \lean{TauCeti.lowerIncompleteGamma}. The same holds for
+    \lean{Statistical.normIncBetaI}, proposed \lean{regularizedIncompleteBeta}, against
+    TauCeti's real \lean{regularizedIncompleteBeta}, and for
+    \lean{MatrixArgument.multivariateGamma} with its lemma \lean{multivariateGamma\_one}. The
+    bridges already exist. Each whole family goes in \lean{Complex}, including the
+    \lean{OnLog} variants, \lean{upperIncompleteGamma}, the complex \lean{incompleteBeta} and
+    \lean{multivariateGammaVec}. The complex names mirror TauCeti's real ones, so that the
+    bridges read \lean{Complex.X\_ofReal}: in particular $P(a,z)$ becomes
+    \lean{Complex.regularizedGamma} after TauCeti's \lean{regularizedGamma}. The function
+    \lean{Statistical.Real.normIncBetaI} (now \lean{Real.regularizedIncompleteBeta}) has complex
+    parameters, a real argument and complex values; it agrees with TauCeti's real
+    \lean{regularizedIncompleteBeta} only for real positive parameters, so it gets a bridge
+    there and is not replaced. \lean{Statistical.normIncGammaP} and \lean{normIncGammaQ}
+    (quotient forms) agree with the \lean{Confluent} continuations except at the poles of
+    $\Gamma(a)$, where the quotients are totalized to~$0$; keeping one of them needs a proof
+    round, because every use must be checked at those points.
+  \item \lean{AlgebraicAnalytic.hermiteFunction} against TauCeti's real
+    \lean{hermiteFunction}. By 18.7.11 DLMF's
+    $(\sqrt\pi\,2^nn!)^{-1/2}e^{-x^2/2}H_n(x)$ equals TauCeti's
+    $\mathit{He}_n(\sqrt2x)e^{-x^2/2}/\sqrt{n!\sqrt\pi}$; the local definition differs only by
+    the cast to $\mathbb C$. It is replaced by the TauCeti function, and the tag 1.18.E42 moves
+    to a theorem about its cast.
+  \item \lean{AlgebraicAnalytic.dlmfResolventCubic}: TauCeti's \lean{resolventCubic} is the
+    Ferrari cubic $X^3-pX^2-4rX+(4pr-q^2)$, whereas DLMF~1.11.18 is
+    $X^3-2pX^2+(p^2-4r)X+q^2$, with roots $-(\alpha_1+\alpha_{j+1})^2$. The two are different
+    polynomials. The DLMF one becomes \lean{eulerResolventCubic}, after Euler's method.
+  \item \lean{OrthogonalPolynomials.poissonKernel} against Mathlib's \lean{poissonKernel}
+    (the disc Poisson kernel). The DLMF object is the kernel
+    $\sum p_n(x)p_n(y)z^n/h_n$ of 18.2.41. Proposal: \lean{orthogonalPoissonKernel}, at the
+    root.
+  \item \lean{Hypergeometric.ascPochhammer\_eval\_add} clashes with the lean-codes lemma of
+    the same name in the root namespace (module \module{Pochhammer}). If lean-codes is
+    offered upstream too, one of the two must go.
+\end{itemize}
+There are no clashes with Mathlib or TauCeti in the \lean{Real} namespace. The lean-codes
+module \module{ToMathlib.Analysis.SpecialFunctions.Bessel} defines \lean{Complex.besselI}
+and related lemmas; \lean{DLMF.Bessel.besselI} at the root does not clash with them, but a
+TauCeti submission of both would need one canonical modified Bessel function.
+
+\subsection{Clashes between areas}
+
+Two pairs of foundational definitions mapped to the same TauCeti name. Both were duplicates
+and are merged:
+\begin{itemize}
+  \item \lean{AlgebraicAnalytic.stieltjesTransform} (1.14.47) is the only definition of the
+    Stieltjes transform; DLMF 2.6.8 is the theorem
+    \lean{AsymptoticApproximations.stieltjesTransform\_eq}.
+  \item \lean{AlgebraicAnalytic.IsLinearODE2SolutionOn} (1.13.1) is the only second-order
+    linear ODE predicate. It allows an inhomogeneous term; DLMF 2.7.1 is the homogeneous case,
+    stated as \lean{AsymptoticApproximations.isLinearODE2SolutionOn\_iff\_isODE2SolutionOn},
+    and \lean{Heun.IsLinearODE2On} is an abbreviation of the homogeneous case with the API
+    \lean{differentiableAt}, \lean{hasDerivAt\_deriv} and \lean{mk}.
+\end{itemize}
+Three further pairs would clash under root placement:
+\begin{itemize}
+  \item \lean{AlgebraicAnalytic.mobius} (1.9.40, a function of four complex
+    coefficients) and \lean{Weierstrass.mobius} (23.15.3, an action of
+    $\mathrm{SL}(2,\mathbb Z)$): \lean{mobiusMap} and \lean{modularMobius}.
+  \item \lean{AlgebraicAnalytic.laplaceTransform} and \lean{MatrixArgument.laplaceTransform}:
+    the matrix one becomes \lean{matrixLaplaceTransform}.
+  \item \lean{AlgebraicAnalytic.laurentCoeff} ($a_n$ about $z_0$) is the only Laurent
+    coefficient; the Chapter~2 coefficient about $0$ is the theorem
+    \lean{AsymptoticApproximations.laurentCoeff\_zero\_eq} (2.10.26).
+\end{itemize}
+The segment integral over $[0,w]$ of Chapter~19 is \lean{Core.primitive}, with the unfolding
+lemma \lean{EllipticIntegrals.primitive\_eq\_integral}.
+
+\subsection{Further possible duplicates}
+
+\begin{itemize}
+  \item \lean{EllipticIntegrals.compEllIntKpk} and \lean{EllipticIntegrals.cCompEllIntKk} are
+    both $K'(k)$, continued from different domains ($k^2\notin(-\infty,0]$ and
+    $k\notin(-\infty,0]$).
+  \item The forward difference of Chapter~2 is Mathlib's \lean{fwdDiff 1}.
+  \item \lean{AlgebraicAnalytic.fourierTransform} uses DLMF's normalization
+    $(2\pi)^{-1/2}\int f(t)e^{ixt}\,dt$. Mathlib's \lean{Real.fourierIntegral} uses
+    $e^{-2\pi i xt}$, so the two are different functions; the bridge belongs in the
+    Chapter~1 roadmap.
+  \item \lean{BernoulliEuler.binomialSeriesCoeff} (a polynomial over $\mathbb Q$ in the
+    exponent) and \lean{AsymptoticApproximations.binomSeriesCoeff} (its value at a complex
+    exponent, for complex coefficients) are both kept; for rational coefficient ratios
+    \lean{AsymptoticApproximations.binomSeriesCoeff\_eq\_eval\_binomialSeriesCoeff} identifies
+    them.
+\end{itemize}
+
+\section{Rename proposals}
+
+The proposals spell out abbreviations, follow upstream precedent (TauCeti's
+\lean{lowerIncompleteGamma}, \lean{regularizedIncompleteBeta}, \lean{logIntegral}; Mathlib's
+\lean{fwdDiff}) and keep DLMF's own function letters (\lean{whittakerM}, \lean{ferrersP},
+\lean{mathieuCe}, \lean{spheroidalPs}). The families are:
+\begin{itemize}
+  \item Elliptic integrals, Chapter~19: \lean{compEllIntKk} $\to$ \lean{completeEllipticK},
+    likewise \lean{E}, \lean{Pi}, \lean{D}; \lean{compEllIntKpk} $\to$
+    \lean{completeEllipticKPrime}; \lean{cCompEllIntKk} $\to$ \lean{complementaryEllipticK};
+    \lean{incEllIntFk} $\to$ \lean{incompleteEllipticF}, likewise \lean{E}, \lean{Pi},
+    \lean{D}; \lean{symEllIntRF} $\to$ \lean{symmetricEllipticRF}, likewise \lean{RC},
+    \lean{RD}, \lean{RG}, \lean{RJ} and the general \lean{symEllIntR} $\to$
+    \lean{symmetricEllipticR}; \lean{symEllIntS} $\to$ \lean{carlsonRootProduct};
+    \lean{SymEllIntArg} $\to$ \lean{IsCarlsonArgument}; \lean{cauchyPVIoi} $\to$
+    \lean{principalValueIoi}.
+  \item Parameter forms of the older \lean{Elliptic} area (argument $m=k^2$):
+    \lean{compEllIntKm} $\to$ \lean{completeEllipticKOfParameter}, likewise for $E$, $\Pi$,
+    $F$, $\mathrm{am}$, $\mathrm{sn}$, $\mathrm{cn}$, $\mathrm{dn}$ and arcsn (decision~1).
+  \item Jacobi elliptic functions, Chapter~22: the suffix \lean{k} is dropped
+    (\lean{jacobiSnk} $\to$ \lean{jacobiSn}, for all twelve letter pairs, and
+    \lean{jacobiNomek}, \lean{jacobiComodulusk}, \lean{jacobiEpsilonk}, \lean{jacobiTauk},
+    \lean{jacobiPQk}). The $\tau$ forms become \lean{\ldots OfTau} (\lean{jacobiSnTau}
+    $\to$ \lean{jacobiSnOfTau}, \lean{compEllIntKTau} $\to$ \lean{completeEllipticKOfTau},
+    \lean{jacobiNevilleTau} $\to$ \lean{nevilleThetaOfTau}). The suffix \lean{m} of
+    \lean{JacobiElliptic.Real.jacobiArcndm} and its siblings is dropped, because they take
+    the modulus $k$. Two names say something else than they mean: \lean{jacobiZetak} is the
+    theta argument $\zeta=\pi z/(2K)$ of 22.2.3, proposed \lean{jacobiThetaArgument}, and
+    \lean{jacobiZetaFunctionk} is Jacobi's $\mathrm{Z}$ function, proposed \lean{jacobiZeta}.
+  \item Parabolic cylinder functions, Chapter~12: \lean{pcfX} $\to$
+    \lean{parabolicCylinderX} for all eighteen definitions (\lean{U}, \lean{V}, \lean{D},
+    \lean{UBar}, \lean{Even}, \lean{Odd}, the moduli \lean{F}, \lean{G}, the phases
+    \lean{Theta}, \lean{Psi}, \lean{Moment} and the derivatives and values at~$0$).
+  \item Chapters~6--8: \lean{sinInt} $\to$ \lean{sinIntegral}, likewise \lean{cosInt},
+    \lean{sinhInt}, \lean{coshInt}, \lean{cosIntCin}, \lean{sinIntTail}; \lean{expIntEin}
+    $\to$ \lean{expIntegralEin}; \lean{expIntEi} $\to$ \lean{expIntegralEi};
+    \lean{logIntLi} $\to$ \lean{logIntegralLi} (TauCeti's \lean{logIntegral} starts at~$2$);
+    \lean{genExpIntE} $\to$ \lean{expIntegralE}; \lean{fresnelCosInt} $\to$ \lean{fresnelC},
+    \lean{fresnelSinInt} $\to$ \lean{fresnelS}; \lean{expIntAuxF} $\to$
+    \lean{sinIntegralAuxiliaryF}, \lean{fresnelAuxF} $\to$ \lean{fresnelAuxiliaryF};
+    \lean{lowerIncGamma} $\to$ \lean{lowerIncompleteGamma}, \lean{upperIncGamma} $\to$
+    \lean{upperIncompleteGamma}, \lean{normIncGammaPContinued} $\to$
+    \lean{regularizedGamma}; \lean{incBeta} $\to$ \lean{incompleteBeta},
+    \lean{normIncBetaI} $\to$ \lean{regularizedIncompleteBeta}; \lean{scIncGamma} $\to$
+    \lean{tricomiIncompleteGamma}.
+  \item Generalized hypergeometric functions, Chapter~16: \lean{genHG} $\to$
+    \lean{generalizedHypergeometric}, \lean{genRegularizedHG} $\to$
+    \lean{regularizedGeneralizedHypergeometric}, \lean{genCoeff} $\to$
+    \lean{generalizedHypergeometricCoeff}, \lean{genPoch} $\to$ \lean{pochhammerProduct},
+    \lean{genGamma} $\to$ \lean{gammaProduct}, \lean{genIntPoch} $\to$
+    \lean{pochhammerOfInt}, \lean{genBilateralHG} $\to$ \lean{bilateralHypergeometric}; the
+    predicates \lean{GenWellPoised} $\to$ \lean{IsWellPoised}, \lean{GenVeryWellPoised},
+    \lean{GenKBalanced}, \lean{GenTerminates} $\to$ \lean{IsTerminating},
+    \lean{GenDenRegular} $\to$ \lean{LowerParametersRegular}; \lean{poch} $\to$
+    \lean{pochhammer}; \lean{regularizedGaussHG} $\to$ \lean{regularizedGaussHypergeometric},
+    \lean{gaussHGCoeff} $\to$ \lean{gaussHypergeometricCoeff}.
+  \item Appell functions: \lean{appF1} $\to$ \lean{appellF1}, and so on for all four
+    functions with their \lean{Coeff}, \lean{Euler} and \lean{EulerKernel} companions.
+  \item Matrix argument, Chapter~35: \lean{hyp0F1} $\to$ \lean{matrixHypergeometric0F1} and
+    the other five, \lean{hypergeometricPFQ} $\to$ \lean{matrixHypergeometricPFQ},
+    \lean{jacobiP} $\to$ \lean{matrixJacobiP}, \lean{laguerreL} $\to$ \lean{matrixLaguerreL},
+    \lean{besselA}, \lean{besselB}, \lean{kummerPsi}, \lean{laplaceTransform} likewise with the
+    prefix \lean{matrix}; \lean{etr} $\to$ \lean{expTrace}. Without the prefix these names
+    would be read as scalar functions at the TauCeti root.
+  \item Lamé, Chapter~29: the modulus suffix is dropped (\lean{lameEck} $\to$ \lean{lameEc},
+    \lean{lameAk} $\to$ \lean{lameA}, \lean{lameUEk} $\to$ \lean{lameUE}, and the other
+    polynomial forms); \lean{Poly}, \lean{Rec}, \lean{CF} are spelled out.
+  \item Heun, Chapter~31: \lean{heunHypK} $\to$ \lean{heunHypergeometricK} and the rest of
+    the 31.11 family; \lean{heunRecP} $\to$ \lean{heunRecurrenceP}; \lean{heunCFTail} $\to$
+    \lean{heunContinuedFractionTail}; \lean{heunEps} $\to$ \lean{heunEpsilon};
+    \lean{IsHeunSolOn} $\to$ \lean{IsHeunSolutionOn} and the confluent forms.
+  \item Spheroidal, Chapter~30: the continued-fraction coefficients of 30.3.6 and 30.3.7
+    become \lean{spheroidalPowerAlpha} and \lean{spheroidalLegendreAlpha} (and the
+    \lean{Beta}, \lean{Gamma} versions) in place of \lean{spheroidalCFAlpha} and
+    \lean{spheroidalCFAlphaAlt}; \lean{spheroidalEll} $\to$
+    \lean{spheroidalEigenvalueCoeff}; \lean{spheroidalRecA} $\to$
+    \lean{spheroidalRecurrenceA}.
+  \item Coulomb, Chapter~33: the functions $f,h,s,c$ of $\S$33.14 are \lean{coulombf},
+    \lean{coulombh}, \lean{coulombs}, \lean{coulombc}, which differ from \lean{coulombF} only
+    in case. They become \lean{coulombEnergyF}, \lean{coulombEnergyH},
+    \lean{coulombEnergyS}, \lean{coulombEnergyC} (decision~4).
+  \item Names that contain ``DLMF'': \lean{gaussSumDLMF} $\to$ \lean{dirichletGaussSum},
+    \lean{IsPrimitiveDLMF} $\to$ \lean{IsPrimitiveByDivisors} (with a bridge to Mathlib's
+    \lean{DirichletCharacter.IsPrimitive}), \lean{discriminantDLMF} $\to$
+    \lean{modularDiscriminant}, \lean{ProdConvergesDLMF} $\to$
+    \lean{InfiniteProductConverges}, \lean{dlmfD} $\to$ \lean{normalizedPartialDeriv},
+    \lean{dlmfFourierSchwartz} $\to$ \lean{fourierTransformSchwartz},
+    \lean{dlmfResolventCubic} $\to$ \lean{eulerResolventCubic}.
+  \item Other abbreviations: \lean{Sol} $\to$ \lean{Solution} (\lean{IsAirySol},
+    \lean{IsWeberSol}, \lean{IsSchrodingerSolOn}, \ldots); \lean{Op} $\to$ \lean{Operator}
+    (\lean{besselOp}, \lean{opSpectrum}, \ldots); \lean{Asymp} $\to$ \lean{Asymptotic};
+    \lean{cfTail} $\to$ \lean{continuedFractionTail}; \lean{powC} $\to$
+    \lean{cpowArithmeticFunction}, \lean{sigmaC} $\to$ \lean{sigmaCpow}; \lean{factQ} $\to$
+    \lean{ratFactorial}; \lean{laplacianMv} $\to$ \lean{laplacianEuclidean};
+    \lean{envAi} $\to$ \lean{envelopeAi}; \lean{lgApproximant} $\to$
+    \lean{liouvilleGreenApproximant}; \lean{legendrePolyP} $\to$ \lean{legendrePolynomialP}
+    and the other \lean{Poly} names; \lean{basicHG}, \lean{terminatingHG} $\to$
+    \lean{basicHypergeometric}, \lean{terminatingHypergeometric}.
+  \item Real forms with a \lean{Real} suffix: \lean{Airy.airyAiReal} and three siblings move
+    to \lean{DLMF.Airy.Real.airyAi}; likewise \lean{invPowScaleReal} and
+    \lean{IsSpheroidalSolutionReal}.
+  \item Selberg helpers (\lean{vdm}, \lean{iseg}, \lean{cube}, \lean{mono}, \lean{reflect},
+    \lean{succPre}, \lean{ibpF}, \ldots): spelled out (\lean{vandermondeAbsPow},
+    \lean{initialSegment}, \lean{unitCube}, \ldots); \lean{selbergInt} $\to$
+    \lean{selbergIntegral}, \lean{aomotoInt} $\to$ \lean{aomotoIntegral} (decision~5).
+\end{itemize}
+
+Names flagged by the scan and kept: DLMF letters (\lean{spheroidalPs}, \lean{spheroidalQs},
+\lean{discreteQHermiteI}), the suffix \lean{Int} where it means an integer index
+(\lean{mathieuMeInt}, \lean{qPochhammerInt}), \lean{ODE2}, \lean{besselWronskianSeries}
+and \lean{partitionCountDiff}. The suffix \lean{Big} is kept: it marks a DLMF capital letter,
+the $q$-exponentials $E_q$ (\lean{qExpBig}, \lean{qSinBig}, \lean{qCosBig}) and the
+alternative normalization $\Theta$ of \lean{riemannThetaBig}. \lean{Painleve.IsPIIOn}, the
+Beals--Wong normalization of $\mathrm{P_{II}}$, is a bridge to \lean{IsPainleveIIOn} and is not
+part of a roadmap.
+
+\section{Decisions for the renaming round}
+
+The following decisions were adopted on 2026-11-04.
+\begin{enumerate}
+  \item Parameter forms. The real functions of the parameter $m=k^2$ of the older
+    \lean{Elliptic} area get the suffix \lean{OfParameter}. Roadmaps contain only the forms in
+    the modulus~$k$ of Chapters~19 and~22.
+  \item Complex placement per family. The whole incomplete gamma and incomplete beta families
+    and \lean{multivariateGamma} go in \lean{Complex}, with names that mirror TauCeti's real
+    functions (\lean{Complex.regularizedGamma}). Every other function goes at the root. The
+    real-argument regularized incomplete beta function gets a bridge to TauCeti's on real
+    parameters. One of the two definitions of $P$ and of $Q$ is to be kept, after a proof
+    round.
+  \item General areas. Chapter~1, Chapter~2 and \lean{DLMF.Core} stay out of the renaming
+    round; their duplicates are merged and the names that contained ``DLMF'' are spelled
+    out. They get a separate Mathlib-overlap review before any roadmap.
+  \item Coulomb functions of \S33.14: \lean{coulombEnergyF}, \lean{coulombEnergyH},
+    \lean{coulombEnergyS}, \lean{coulombEnergyC}, after their variables $(\epsilon,r)$;
+    ``radial'' would not separate them from $F_\ell(\eta,\rho)$.
+  \item Helper definitions in the foundational layer. Most are used by other modules, so
+    making them private rarely works. Helpers that no foundational module needs move to the
+    theorem layer; the others are spelled out as proposed. \lean{selbergIntegral} and
+    \lean{aomotoIntegral} are DLMF objects (\S5.14), not helpers. The \lean{Elliptic}
+    helpers \lean{piIntegrand} and \lean{piZeroPrimitive} belong to this group.
+  \item Theta functions keep spelled-out numbers (\lean{jacobiThetaOneTau},
+    \ldots, \lean{jacobiThetaFourQ}). Numeral subscripts are not used: Mathlib's
+    \lean{jacobiTheta₂}~$z\,\tau=\sum_n e^{2\pi inz+\pi in^2\tau}$ is DLMF's
+    $\theta_3(\pi z|\tau)$, the subscript counting variables, so \lean{jacobiTheta₂} for DLMF's
+    $\theta_2$ would denote a different function. The bridge is recorded as a
+    \lean{dlmf\_upstream} pointer with relation ``different convention''. Whether \lean{Tau}
+    becomes \lean{OfTau}, as in Chapter~22, is settled with the Chapter~20 roadmap.
+\end{enumerate}
+\lean{hermiteFunction} is replaced by TauCeti's function: the tag 1.18.E42 is on the bridge
+\lean{ofReal\_hermiteFunction}, and the two theorems of 1.18.41--1.18.43 are stated for the
+cast of \lean{TauCeti.hermiteFunction}.
+
+\section{The renaming round}
+
+The renaming round of 2026-11-04 applied 3,221 renames: the definitions and theorems of the
+table and the theorem-layer names that contain them. The names that the round left unchanged are
+these.
+\begin{itemize}
+  \item Carlson's symmetric integrals \lean{symEllIntRF}, \lean{RC}, \lean{RD}, \lean{RG},
+    \lean{RJ} and the 319 names that contain them, at first. lean-codes declares
+    \lean{Carlson.carlsonRF}, \lean{Carlson.carlsonRG} and
+    \lean{Carlson.TwoVariable.carlsonRC} for the same functions, and the project has bridge
+    theorems between the two (\lean{symEllIntRC\_eq\_carlsonRC}). On 2026-11-04 the project
+    took names of its own in the style of \lean{completeEllipticK}: \lean{symmetricEllipticRF},
+    \lean{RC}, \lean{RD}, \lean{RG}, \lean{RJ} and \lean{symmetricEllipticR}, with the
+    helpers \lean{homogeneousHypergeometricPolynomial} ($T_N$, 19.19.1),
+    \lean{elementarySymmetric} ($E_s$, 19.19.4), \lean{quadraticTransformationP} ($p_\pm$,
+    19.22.5) and \lean{duplicationLambda} ($\lambda$, 19.26.19); 407 public and 53 private
+    names. Names with \lean{carlsonR} keep referring to the lean-codes functions.
+  \item The two definitions of $P$ and $Q$ and the real incomplete beta bridge (decision~2).
+  \item The merges of duplicates in the general areas (decision~3).
+\end{itemize}
+Three files that the longer names pushed past 1,500 lines were split along their DLMF
+subsections: \module{DLMF.Hypergeometric.QuadraticConnections} (\S15.8(iv)),
+\module{DLMF.GeneralizedHypergeometric.UnitArgumentDougall} (16.4.9--16.4.10) and
+\module{DLMF.EllipticIntegrals.IncompleteInequalities} (\S19.9(ii)); the Carlson names later
+split off \module{DLMF.EllipticIntegrals.SymmetricSpecialCasesRD} (\S19.20(iv)--(v)).
+
+After the renaming round, the scan is rerun and the table regenerated. The first roadmap
+is then written for a chapter whose foundational names come out of the round clean.
+Candidates are Chapter~12 (parabolic cylinder functions), Chapter~22 (Jacobi elliptic
+functions) and Chapter~19 (elliptic integrals).
+
+\end{document}

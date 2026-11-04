@@ -116,18 +116,19 @@ theorem ErrorFunctionIntegrals.integrableOn_rpow_div (k : ℕ) (hk : k ≤ 1) :
 /-- **DLMF 7.7.10–7.7.11 on the closed sector** `|arg z| ≤ π/4` (including `z = 0`): the open-sector
 Laplace forms `FresnelAuxiliary.laplace_open` extend by continuity along `z + ε`, `ε → 0⁺`. -/
 theorem ErrorFunctionIntegrals.fresnelAux_laplace (aux : Bool) {z : ℂ} (hz : |arg z| ≤ π/4) :
-    (if aux then fresnelAuxGComplex z else fresnelAuxFComplex z) = 1/(π*Real.sqrt 2) *
+    (if aux then fresnelAuxiliaryGComplex z else fresnelAuxiliaryFComplex z) = 1/(π*Real.sqrt 2) *
       ∫ t in Ioi (0:ℝ), exp (-π*z^2*t/2) * (t:ℂ)^(((if aux then 1 else 0 : ℕ) : ℂ) - 1/2) /
         ((t:ℂ)^2+1) := by
   set k : ℕ := if aux then 1 else 0 with hkdef
   have hk : k ≤ 1 := by simp only [k]; split_ifs <;> norm_num
   set F : ℂ → ℂ := fun w => ∫ t in Ioi (0:ℝ), exp (-π*w^2*t/2) * (t:ℂ)^((k : ℂ) - 1/2) /
     ((t:ℂ)^2+1) with hF
-  set Φ : ℂ → ℂ := fun w => if aux then fresnelAuxGComplex w else fresnelAuxFComplex w with hΦ
+  set Φ : ℂ → ℂ := fun w => if aux then fresnelAuxiliaryGComplex w else
+      fresnelAuxiliaryFComplex w with hΦ
   have hΦc : Continuous Φ := by
     simp only [Φ]; split_ifs
-    · exact fresnelAuxGComplex_entire.continuous
-    · exact fresnelAuxFComplex_entire.continuous
+    · exact fresnelAuxiliaryGComplex_entire.continuous
+    · exact fresnelAuxiliaryFComplex_entire.continuous
   have hL : Tendsto (fun ε : ℝ => Φ (z+ε)) (𝓝[>] 0) (𝓝 (Φ z)) := by
     have hc : Continuous fun ε : ℝ => Φ (z+ε) := hΦc.comp (by fun_prop)
     have h := hc.tendsto 0

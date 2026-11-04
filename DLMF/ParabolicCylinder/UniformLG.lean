@@ -620,11 +620,11 @@ theorem CylinderLiouvilleGreen.tendsto_sector {α : ℝ} (hα : 0 ≤ α) {μ : 
 /-- **The normalization of `U` at infinity** (from DLMF 12.9.1): for fixed `μ > 0`,
 `U(-μ²/2, μ t √2) / (A(t) e^{-μ² ξ(t)}) → h(μ)` as `t → ∞`. -/
 theorem CylinderLiouvilleGreen.tendsto_U_div {μ : ℝ} (hμ : 0 < μ) :
-    Tendsto (fun t : ℝ => pcfU (-μ^2/2) (μ*t*Real.sqrt 2) /
+    Tendsto (fun t : ℝ => parabolicCylinderU (-μ^2/2) (μ*t*Real.sqrt 2) /
       ((CylinderLiouvilleGreen.amplitude t * Real.exp (-(μ^2 * pcfXi t)) : ℝ) : ℂ)) atTop
           (𝓝 (pcfH μ)) := by
   set a : ℂ := -(μ:ℂ)^2/2
-  have hO := pcfU_sector_asymptotic a (δ := π/4) (by positivity) 1
+  have hO := parabolicCylinderU_sector_asymptotic a (δ := π/4) (by positivity) 1
   have hz2 : Tendsto (fun z : ℂ => z ^ (-(2*(1:ℕ):ℤ))) (sector (3*π/4-π/4)) (𝓝 0) := by
     have : Tendsto (fun z : ℂ => ‖z‖) (sector (3*π/4-π/4)) atTop :=
       tendsto_comap.mono_left inf_le_left
@@ -634,10 +634,11 @@ theorem CylinderLiouvilleGreen.tendsto_U_div {μ : ℝ} (hμ : 0 < μ) :
     simp
   have hE := (hO.trans_tendsto hz2).add_const 1
   simp only [zero_add, Finset.sum_range_one] at hE
-  have hE' : Tendsto (fun z : ℂ => cexp (z^2/4) * z^(a+1/2) * pcfU a z) (sector (3*π/4-π/4))
+  have hE' : Tendsto (fun z : ℂ => cexp (z^2/4) * z^(a+1/2) * parabolicCylinderU a z)
+      (sector (3*π/4-π/4))
       (𝓝 1) := by
     refine hE.congr fun z => ?_
-    simp [pcfUTerm, poch_zero]
+    simp [pcfUTerm, pochhammer_zero]
   have hT := hE'.comp (CylinderLiouvilleGreen.tendsto_sector (α := 3*π/4-π/4)
       (by linarith [Real.pi_pos]) hμ)
   have hR := (Complex.continuous_ofReal.tendsto _).comp
@@ -798,27 +799,29 @@ theorem CylinderLiouvilleGreen.xi_mono {x t : ℝ} (hx : 1 < x) (hxt : x ≤ t) 
 
 /-- `U(-μ²/2, μt√2)` as a function of `t`: first derivative. -/
 theorem CylinderLiouvilleGreen.hasDerivAt_U (μ t : ℝ) :
-    HasDerivAt (fun t : ℝ => pcfU (-μ^2/2) (μ*t*Real.sqrt 2))
-      ((μ:ℂ) * Real.sqrt 2 * pcfUDeriv (-μ^2/2) (μ*t*Real.sqrt 2)) t := by
+    HasDerivAt (fun t : ℝ => parabolicCylinderU (-μ^2/2) (μ*t*Real.sqrt 2))
+      ((μ:ℂ) * Real.sqrt 2 * parabolicCylinderUDeriv (-μ^2/2) (μ*t*Real.sqrt 2)) t := by
   have h1 : HasDerivAt (fun w : ℂ => (μ:ℂ) * w * Real.sqrt 2) ((μ:ℂ) * Real.sqrt 2) (t:ℂ) := by
     simpa using ((hasDerivAt_id (t:ℂ)).const_mul (μ:ℂ)).mul_const ((Real.sqrt 2 : ℝ) : ℂ)
-  have := ((hasDerivAt_pcfU (-(μ:ℂ)^2/2) ((μ:ℂ) * t * Real.sqrt 2)).comp (t:ℂ) h1).comp_ofReal
+  have := ((hasDerivAt_parabolicCylinderU (-(μ:ℂ)^2/2) ((μ:ℂ) * t * Real.sqrt 2)).comp (t:ℂ)
+      h1).comp_ofReal
   exact this.congr_deriv (by ring)
 
 /-- `U(-μ²/2, μt√2)` as a function of `t`: Weber's equation `w'' = μ⁴(t²-1) w`. -/
 theorem CylinderLiouvilleGreen.hasDerivAt_U' (μ t : ℝ) :
-    HasDerivAt (fun t : ℝ => (μ:ℂ) * Real.sqrt 2 * pcfUDeriv (-μ^2/2) (μ*t*Real.sqrt 2))
-      (((μ^4*(t^2-1) : ℝ) : ℂ) * pcfU (-μ^2/2) (μ*t*Real.sqrt 2)) t := by
+    HasDerivAt (fun t : ℝ => (μ:ℂ) * Real.sqrt 2 *
+        parabolicCylinderUDeriv (-μ^2/2) (μ*t*Real.sqrt 2))
+      (((μ^4*(t^2-1) : ℝ) : ℂ) * parabolicCylinderU (-μ^2/2) (μ*t*Real.sqrt 2)) t := by
   have h1 : HasDerivAt (fun w : ℂ => (μ:ℂ) * w * Real.sqrt 2) ((μ:ℂ) * Real.sqrt 2) (t:ℂ) := by
     simpa using ((hasDerivAt_id (t:ℂ)).const_mul (μ:ℂ)).mul_const ((Real.sqrt 2 : ℝ) : ℂ)
-  have := (((hasDerivAt_pcfUDeriv (-(μ:ℂ)^2/2) ((μ:ℂ) * t * Real.sqrt 2)).comp (t:ℂ)
+  have := (((hasDerivAt_parabolicCylinderUDeriv (-(μ:ℂ)^2/2) ((μ:ℂ) * t * Real.sqrt 2)).comp (t:ℂ)
     h1).comp_ofReal).const_mul ((μ:ℂ) * Real.sqrt 2)
   have hs2 : ((Real.sqrt 2 : ℝ) : ℂ)^2 = 2 := by
     exact_mod_cast Real.sq_sqrt (by norm_num : (0:ℝ) ≤ 2)
   refine this.congr_deriv ?_
   push_cast
   linear_combination (((μ:ℂ)^4*(t:ℂ)^2/4) * (((Real.sqrt 2 : ℝ) : ℂ)^2 + 2) - (μ:ℂ)^4/2) *
-    pcfU (-(μ:ℂ)^2/2) ((μ:ℂ) * t * Real.sqrt 2) * hs2
+    parabolicCylinderU (-(μ:ℂ)^2/2) ((μ:ℂ) * t * Real.sqrt 2) * hs2
 
 /-- The truncated Olver series `∑_{s<N} A_s(t)/u^s`. -/
 def CylinderLiouvilleGreen.coeffSum (N : ℕ) (u t : ℝ) : ℝ := ∑ s ∈ Finset.range N,
@@ -865,7 +868,8 @@ theorem CylinderLiouvilleGreen.abs_sum_sub_one_le {N : ℕ} (hN : 1 ≤ N) {f : 
 theorem CylinderLiouvilleGreen.core {δ : ℝ} (hδ : 0 < δ) {N : ℕ} (hN : 1 ≤ N) : ∃ C μ₀ : ℝ,
     1 ≤ μ₀ ∧ 0 ≤ C ∧
     ∀ μ, μ₀ ≤ μ → |CylinderLiouvilleGreen.limitCoeffSum N (μ^2) - 1| ≤ 1/2 ∧ ∀ t, 1 + δ ≤ t →
-      ‖pcfU (-μ^2/2) (μ*t*Real.sqrt 2) * (CylinderLiouvilleGreen.limitCoeffSum N (μ^2) : ℂ) /
+      ‖parabolicCylinderU (-μ^2/2) (μ*t*Real.sqrt 2) *
+          (CylinderLiouvilleGreen.limitCoeffSum N (μ^2) : ℂ) /
         (pcfH μ * ((CylinderLiouvilleGreen.amplitude t * Real.exp (-(μ^2 * pcfXi t)) : ℝ) : ℂ)) -
           (CylinderLiouvilleGreen.coeffSum N (μ^2) t : ℂ)‖ ≤ C /
               (μ^2)^N ∧ |CylinderLiouvilleGreen.coeffSum N (μ^2) t| ≤ 3/2 := by
@@ -1019,7 +1023,7 @@ theorem CylinderLiouvilleGreen.core {δ : ℝ} (hδ : 0 < δ) {N : ℕ} (hN : 1 
     exact (Complex.continuous_ofReal.tendsto _).comp this
   have hUl := CylinderLiouvilleGreen.tendsto_U_div hμ0
   have hS0' : (CylinderLiouvilleGreen.limitCoeffSum N u : ℂ) ≠ 0 := by exact_mod_cast hS0
-  have hl : Tendsto (fun t : ℝ => pcfU (-μ^2/2) (μ*t*Real.sqrt 2) / (W t : ℂ)) atTop
+  have hl : Tendsto (fun t : ℝ => parabolicCylinderU (-μ^2/2) (μ*t*Real.sqrt 2) / (W t : ℂ)) atTop
       (𝓝 (pcfH μ / CylinderLiouvilleGreen.limitCoeffSum N u)) := by
     refine (hUl.div hsl hS0').congr' ?_
     filter_upwards [eventually_gt_atTop 1] with t ht
@@ -1028,8 +1032,9 @@ theorem CylinderLiouvilleGreen.core {δ : ℝ} (hδ : 0 < δ) {N : ℕ} (hN : 1 
     rw [div_div]
   -- identification with `U`
   obtain ⟨κ, hκ⟩ := CylinderLiouvilleGreen.eq_mul_of_tendsto (b := c) (q := q)
-    (U := fun t => pcfU (-μ^2/2) (μ*t*Real.sqrt 2))
-    (U' := fun t => (μ:ℂ) * Real.sqrt 2 * pcfUDeriv (-μ^2/2) (μ*t*Real.sqrt 2)) (W := W) (W' := w')
+    (U := fun t => parabolicCylinderU (-μ^2/2) (μ*t*Real.sqrt 2))
+    (U' := fun t => (μ:ℂ) * Real.sqrt 2 * parabolicCylinderUDeriv (-μ^2/2) (μ*t*Real.sqrt 2))
+        (W := W) (W' := w')
     (fun t _ => CylinderLiouvilleGreen.hasDerivAt_U μ t)
     (fun t ht => by
       have h1 : 1 < t := lt_trans hc ht
@@ -1061,7 +1066,8 @@ theorem CylinderLiouvilleGreen.core {δ : ℝ} (hδ : 0 < δ) {N : ℕ} (hN : 1 
   have hne : ((CylinderLiouvilleGreen.amplitude t * Real.exp (-(u * pcfXi t)) : ℝ) : ℂ) ≠ 0 := by
     exact_mod_cast (hAe t ht1).ne'
   refine ⟨?_, ?_⟩
-  · have heq : pcfU (-μ^2/2) (μ*t*Real.sqrt 2) * (CylinderLiouvilleGreen.limitCoeffSum N u : ℂ) /
+  · have heq : parabolicCylinderU (-μ^2/2) (μ*t*Real.sqrt 2) *
+        (CylinderLiouvilleGreen.limitCoeffSum N u : ℂ) /
         (pcfH μ * ((CylinderLiouvilleGreen.amplitude t * Real.exp (-(u * pcfXi t)) : ℝ) : ℂ)) -
             (CylinderLiouvilleGreen.coeffSum N u t : ℂ) =
         (ε t : ℂ) := by
@@ -1169,7 +1175,8 @@ theorem pcf_negative_parameter_uniform_U :
             (μ:ℂ)^(2*s)) - 1) =O[atTop]
         (fun μ : ℝ => (μ:ℂ)^(-(2*N:ℤ)))) ∧
       ∀ δ : ℝ, 0 < δ → HasCylinderUniformExpansion
-        (fun μ t => pcfU (-μ^2/2) (μ*t*Real.sqrt 2)/(g μ*exp (-μ^2*pcfXi t)/(t^2-1:ℂ)^(1/4:ℂ)))
+        (fun μ t => parabolicCylinderU (-μ^2/2)
+            (μ*t*Real.sqrt 2)/(g μ*exp (-μ^2*pcfXi t)/(t^2-1:ℂ)^(1/4:ℂ)))
         (fun s t => pcfOlverA s t) (Ici (1+δ)) := by
   obtain ⟨Φ, hΦ⟩ := CylinderLiouvilleGreen.exists_asymptotic CylinderLiouvilleGreen.limitCoeff
   -- `Φ(μ²)` stays near `1`
@@ -1212,7 +1219,8 @@ theorem pcf_negative_parameter_uniform_U :
       _ = 2*B * ((μ^2)^N)⁻¹ * (1/2) := by ring
       _ ≤ 2*B * ((μ^2)^N)⁻¹ * Φ (μ^2) := by gcongr
   · -- the expansion
-    have key : ∀ N : ℕ, 1 ≤ N → (fun p : ℝ × ℝ => pcfU (-p.1^2/2) (p.1*p.2*Real.sqrt 2) /
+    have key : ∀ N : ℕ, 1 ≤ N →
+        (fun p : ℝ × ℝ => parabolicCylinderU (-p.1^2/2) (p.1*p.2*Real.sqrt 2) /
         (pcfH p.1 / (Φ (p.1^2) : ℂ) * exp (-p.1^2*pcfXi p.2) / (p.2^2-1:ℂ)^(1/4:ℂ)) -
         ∑ s ∈ Finset.range N, pcfOlverA s p.2 / (p.1:ℂ)^(2*s)) =O[pcfUniformFilter (Ici (1+δ))]
         (fun p : ℝ × ℝ => (p.1:ℂ)^(-(2*N:ℤ))) := by
@@ -1241,11 +1249,11 @@ theorem pcf_negative_parameter_uniform_U :
       simp only
       rw [CylinderLiouvilleGreen.denominator_eq ht1, CylinderLiouvilleGreen.sum_olverA_eq N μ ht1,
           CylinderLiouvilleGreen.norm_ofReal_zpow_neg_two_mul hμ0]
-      set X := pcfU (-μ^2/2) (μ*t*Real.sqrt 2) *
+      set X := parabolicCylinderU (-μ^2/2) (μ*t*Real.sqrt 2) *
           (CylinderLiouvilleGreen.limitCoeffSum N (μ^2) : ℂ) /
         (pcfH μ * ((CylinderLiouvilleGreen.amplitude t *
             Real.exp (-(μ^2 * pcfXi t)) : ℝ) : ℂ)) with hXdef
-      have hF : pcfU (-μ^2/2) (μ*t*Real.sqrt 2) / (pcfH μ / (Φ (μ^2) : ℂ) *
+      have hF : parabolicCylinderU (-μ^2/2) (μ*t*Real.sqrt 2) / (pcfH μ / (Φ (μ^2) : ℂ) *
           ((CylinderLiouvilleGreen.amplitude t * Real.exp (-(μ^2 * pcfXi t)) : ℝ) : ℂ)) -
               (CylinderLiouvilleGreen.coeffSum N (μ^2) t : ℂ) =
           (Φ (μ^2) / CylinderLiouvilleGreen.limitCoeffSum N (μ^2) : ℂ) *

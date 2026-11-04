@@ -778,16 +778,17 @@ def angerMu (lam : ℂ) : ℂ :=
 /-- Coefficients of the saddle expansion, with existence provided by the expansion theorem. -/
 def angerScaledB (lam : ℝ) (k : ℕ) : ℂ :=
   asymptoticCoeff (fun v : ℝ => ((π*v/2:ℂ)^(1/2:ℂ))*exp (v*angerMu lam)*angerA (-v) (lam*v))
-      k / poch (1/2) k
+      k / pochhammer (1/2) k
 
 /-- Asymptotic bound with the indicated comparison function: `(fun ν : ℂ => (π*ν/2)^(1/2:ℂ)*exp
-(ν*angerMu lam)*angerA (-ν) (lam*ν)-∑ k ∈ Finset.range N, poch (1/2) k*angerScaledB lam k/ν^k)
+(ν*angerMu lam)*angerA (-ν) (lam*ν)-∑ k ∈ Finset.range N, pochhammer (1/2) k*angerScaledB lam k/ν^k)
 =O[sector (π/2-δ)] (fun ν : ℂ => ν^(-(N:ℤ)))`. -/
 @[dlmf 11.11.E11]
 theorem angerA_scaled_saddle {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) {δ : ℝ} (hδ : 0 < δ)
     (hδπ : δ < π/2) (N : ℕ) :
     (fun ν : ℂ => (π*ν/2)^(1/2:ℂ)*exp (ν*angerMu lam)*angerA (-ν) (lam*ν)-∑ k ∈ Finset.range N,
-        poch (1/2) k*angerScaledB lam k/ν^k) =O[sector (π/2-δ)] (fun ν : ℂ => ν^(-(N:ℤ))) := by
+        pochhammer (1/2) k*angerScaledB lam k/ν^k) =O[sector (π/2-δ)]
+            (fun ν : ℂ => ν^(-(N:ℤ))) := by
   sorry
 
 /-- Identity under the stated parameter and domain assumptions: `angerScaledB lam 0 =

@@ -201,7 +201,7 @@ theorem exists_connection_one {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ))
 /-- Abel's theorem for `₂F₁` at `z = 1` when `Re(c-a-b) > 0`. -/
 theorem tendsto_ordinaryHypergeometric_left_one {a b c : ℂ} (h : 0 < (c - a - b).re) :
     Tendsto (fun x : ℝ => ₂F₁ a b c (x : ℂ)) (𝓝[<] 1) (𝓝 (₂F₁ a b c 1)) := by
-  have hs : Summable (gaussHGCoeff a b c) := by
+  have hs : Summable (gaussHypergeometricCoeff a b c) := by
     simpa using ordinaryHypergeometric_summable_of_mem_sphere (z := 1) (by simp) h
   have habel := Complex.tendsto_tsum_powerSeries_nhdsWithin_lt hs.hasSum.tendsto_sum_nat
   rw [tendsto_map'_iff, ← ordinaryHypergeometric_one_eq_tsum] at habel
@@ -211,7 +211,7 @@ theorem tendsto_ordinaryHypergeometric_left_one {a b c : ℂ} (h : 0 < (c - a - 
   simp only [smul_eq_mul]
   congr 1
   funext n
-  simp [gaussHGCoeff, poch, div_eq_mul_inv, mul_assoc, mul_left_comm, mul_comm]
+  simp [gaussHypergeometricCoeff, pochhammer, div_eq_mul_inv, mul_assoc, mul_left_comm, mul_comm]
 
 /-- `sin(πx) ≠ 0` when `x` is not an integer. -/
 theorem sin_pi_mul_ne_zero_of_not_int {x : ℂ} (hx : ∀ k : ℤ, x ≠ (k : ℂ)) :
@@ -429,7 +429,7 @@ theorem differentiable_connLhs_connRhs {A B C : ℂ → ℂ} (hA : Differentiabl
   have hR (A' B' C' : ℂ → ℂ) (hA' : Differentiable ℂ A') (hB' : Differentiable ℂ B')
       (hC' : Differentiable ℂ C') {x : ℂ} (hx : ‖x‖ < 1) :
       Differentiable ℂ (fun w => regularizedGaussHGFun (A' w) (B' w) (C' w) x) := fun w =>
-    (analyticOnNhd_regularizedGaussHGFun_comp hA' hB' hC' hx w trivial).differentiableAt
+    (analyticOnNhd_regularizedGaussHypergeometricFun_comp hA' hB' hC' hx w trivial).differentiableAt
   have hiG (U : ℂ → ℂ) (hU : Differentiable ℂ U) : Differentiable ℂ (fun w => (Gamma (U w))⁻¹) :=
     differentiable_one_div_Gamma.comp hU
   have hs : Differentiable ℂ (fun w => C w - A w - B w) := (hC.sub hA).sub hB
@@ -479,8 +479,9 @@ theorem connLhs_eq_connRhs_base {a b c : ℂ} (ha : ∀ k : ℤ, a ≠ (k : ℂ)
     rw [eq_div_iff hΓS, e2]
   rw [hG1, hG2] at h
   simp only [oneFirst, oneSecond] at h
-  simp only [connLhs, connRhs, regularizedGaussHGFun_eq_div_Gamma hc',
-    regularizedGaussHGFun_eq_div_Gamma hC, regularizedGaussHGFun_eq_div_Gamma hS]
+  simp only [connLhs, connRhs, regularizedGaussHypergeometricFun_eq_div_Gamma hc',
+    regularizedGaussHypergeometricFun_eq_div_Gamma hC,
+        regularizedGaussHypergeometricFun_eq_div_Gamma hS]
   rw [h]
   field_simp
   ring
@@ -567,8 +568,9 @@ theorem zero_first_connection_one_of_not_neg_nat {a b c z : ℂ} (hc : ∀ k : �
   have hG2 : Gamma (a + b - c) =
       -(π / Complex.sin (π * (c - a - b))) / Gamma (c - a - b + 1) := by
     rw [eq_div_iff hΓS, e2]
-  simp only [connLhs, connRhs, regularizedGaussHGFun_eq_div_Gamma hc',
-    regularizedGaussHGFun_eq_div_Gamma hC, regularizedGaussHGFun_eq_div_Gamma hS] at hP
+  simp only [connLhs, connRhs, regularizedGaussHypergeometricFun_eq_div_Gamma hc',
+    regularizedGaussHypergeometricFun_eq_div_Gamma hC,
+        regularizedGaussHypergeometricFun_eq_div_Gamma hS] at hP
   have hF : ₂F₁ a b c z = Gamma c * (π * (₂F₁ a b (a + b - c + 1) (1 - z) /
       Gamma (a + b - c + 1) * (Gamma (c - a))⁻¹ * (Gamma (c - b))⁻¹ -
       (1 - z) ^ (c - a - b) * (₂F₁ (c - a) (c - b) (c - a - b + 1) (1 - z) /

@@ -55,15 +55,15 @@ congruences, and Ramanujan's `τ` function (DLMF §27.14).
 (27.14.1) and `p_k(n)` is `Combinatorics.partitionCountAtMostParts k n`. Euler's reciprocal
 function `f(x) = ∏_{m≥1} (1 - xᵐ)` (27.14.2) is `eulerReciprocal x`; it equals `(x; x)_∞`
 (`DLMF.QSeries.qPochhammerInf x x`) for every `x` and Mathlib's `eulerFunction x` for `|x| < 1`.
-The definitions `eulerReciprocal`, `discriminantDLMF` and `ramanujanTau`, with the bridges
-`hasProd_eulerReciprocal`, `discriminantDLMF_eq` and the transformation law 27.14.17
-(`discriminantDLMF_transform`), are in the foundational module
+The definitions `eulerReciprocal`, `modularDiscriminant` and `ramanujanTau`, with the bridges
+`hasProd_eulerReciprocal`, `modularDiscriminant_eq` and the transformation law 27.14.17
+(`modularDiscriminant_transform`), are in the foundational module
 `DLMF.NumberTheory.Basic.GeneratingFunctions`.
 The pentagonal numbers `ω(±k) = (3k² ∓ k)/2` (27.14.5) are Mathlib's `pentagonal (±k)`.
 
 The Dedekind sum `s(h, k)` (27.14.11) is `DLMF.Weierstrass.dedekindSum h k` (DLMF 23.18.7, the
 same formula) and `η(τ)` (27.14.12) is Mathlib's `ModularForm.eta`. DLMF's discriminant
-`Δ(τ) = (2π)¹² η(τ)²⁴` (27.14.16) is `discriminantDLMF`; Mathlib's `ModularForm.discriminant`
+`Δ(τ) = (2π)¹² η(τ)²⁴` (27.14.16) is `modularDiscriminant`; Mathlib's `ModularForm.discriminant`
 is `η²⁴` without the factor `(2π)¹²`. Ramanujan's `τ(n)` (27.14.18) is `ramanujanTau n`, defined
 as the `n`th coefficient of the formal power series `X ∏_{m≥1} (1 - Xᵐ)²⁴ ∈ ℤ⟦X⟧`, so that it is
 integer valued by construction; the analytic generating function is `hasSum_ramanujanTau`.

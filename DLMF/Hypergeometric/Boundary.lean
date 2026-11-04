@@ -21,8 +21,8 @@ public import Mathlib.Data.Nat.Choose.Multinomial
 
 * `hasSum_regularizedGauss_one_of_nonpole`, `hasSum_regularizedGauss_one`: Gauss summation of
   the regularized coefficients for every denominator parameter, including Gamma poles.
-* `tendsto_regularizedGaussHG_left_one`: the left boundary limit at `z = 1` of the continued
-  regularized Gauss function.
+* `tendsto_regularizedGaussHypergeometric_left_one`: the left boundary limit at `z = 1` of the
+  continued regularized Gauss function.
 
 ## Implementation notes
 
@@ -40,9 +40,9 @@ namespace DLMF.Hypergeometric
 /-- Gauss summation of regularized coefficients at a regular denominator parameter. -/
 theorem hasSum_regularizedGauss_one_of_nonpole {a b c : ℂ}
     (hc : ∀ k : ℕ, c ≠ -k) (h : 0 < (c - a - b).re) :
-    HasSum (fun n : ℕ => poch a n * poch b n / (n.factorial * Gamma (c + n)))
+    HasSum (fun n : ℕ => pochhammer a n * pochhammer b n / (n.factorial * Gamma (c + n)))
       (Gamma (c - a - b) / (Gamma (c - a) * Gamma (c - b))) := by
-  have hs : Summable (gaussHGCoeff a b c) := by
+  have hs : Summable (gaussHypergeometricCoeff a b c) := by
     simpa using (ordinaryHypergeometric_summable_of_mem_sphere (a := a) (b := b)
       (c := c) (z := 1) (by simp) h)
   have hs' := hs.hasSum
@@ -50,13 +50,13 @@ theorem hasSum_regularizedGauss_one_of_nonpole {a b c : ℂ}
   convert hs'.div_const (Gamma c) using 1
   · funext n
     have hg := (div_eq_iff (Gamma_ne_zero hc)).mp (Gamma_add_nat_div_Gamma_eq (n := n) c hc)
-    rw [hg, gaussHGCoeff]
+    rw [hg, gaussHypergeometricCoeff]
     ring
   · field_simp [Gamma_ne_zero hc]
 
 /-- Regularized Gauss summation retains all denominator parameters, including Gamma poles. -/
 theorem hasSum_regularizedGauss_one {a b c : ℂ} (h : 0 < (c - a - b).re) :
-    HasSum (fun n : ℕ => poch a n * poch b n / (n.factorial * Gamma (c + n)))
+    HasSum (fun n : ℕ => pochhammer a n * pochhammer b n / (n.factorial * Gamma (c + n)))
       (Gamma (c - a - b) / (Gamma (c - a) * Gamma (c - b))) := by
   by_cases hc : ∀ k : ℕ, c ≠ -k
   · exact hasSum_regularizedGauss_one_of_nonpole hc h
@@ -67,13 +67,13 @@ theorem hasSum_regularizedGauss_one {a b c : ℂ} (h : 0 < (c - a - b).re) :
   have hcN : ∀ k : ℕ, (N : ℂ) + 1 ≠ -k := not_neg_nat_of_re_pos (by simp; positivity)
   have hgap : (N : ℂ) + 1 - (a + N) - (b + N) = -(m : ℂ) - a - b := by
     dsimp [N]; push_cast; ring
-  have hs : Summable (gaussHGCoeff (a + N) (b + N) (N + 1)) := by
+  have hs : Summable (gaussHypergeometricCoeff (a + N) (b + N) (N + 1)) := by
     simpa using (ordinaryHypergeometric_summable_of_mem_sphere
       (a := a + N) (b := b + N) (c := N + 1) (z := 1) (by simp) (by rwa [hgap]))
   have hs' := hs.hasSum
   rw [← ordinaryHypergeometric_one_eq_tsum, gauss_summation hcN (by rwa [hgap]), hgap] at hs'
   have hzero : ∑ k ∈ Finset.range N,
-      poch a k * poch b k / (k.factorial * Gamma (-(m : ℂ) + k)) = 0 := by
+      pochhammer a k * pochhammer b k / (k.factorial * Gamma (-(m : ℂ) + k)) = 0 := by
     apply Finset.sum_eq_zero
     intro k hk
     have hkm : k ≤ m := by have := Finset.mem_range.mp hk; dsimp [N] at this; omega
@@ -82,41 +82,42 @@ theorem hasSum_regularizedGauss_one {a b c : ℂ} (h : 0 < (c - a - b).re) :
     simp
   apply (hasSum_nat_add_iff' N).mp
   rw [hzero, sub_zero]
-  have hsum := hs'.mul_left (poch a N * poch b N / (N.factorial : ℂ))
+  have hsum := hs'.mul_left (pochhammer a N * pochhammer b N / (N.factorial : ℂ))
   convert hsum using 1
   · funext k
-    have hfac : ((k + N).factorial : ℂ) = (N.factorial : ℂ) * poch (N + 1 : ℂ) k := by
-      rw [← poch_nat_one, ← poch_nat_one, show (N : ℂ) + 1 = 1 + N by ring, ← poch_add]
+    have hfac : ((k + N).factorial : ℂ) = (N.factorial : ℂ) * pochhammer (N + 1 : ℂ) k := by
+      rw [← pochhammer_nat_one, ← pochhammer_nat_one, show (N : ℂ) + 1 = 1 + N by
+          ring, ← pochhammer_add]
       congr 1; omega
     rw [show -(m : ℂ) + ((k + N : ℕ) : ℂ) = (k : ℂ) + 1 by dsimp [N]; push_cast; ring,
-      Gamma_nat_eq_factorial, gaussHGCoeff, hfac,
-      show k + N = N + k by omega, poch_add a N k, poch_add b N k]
+      Gamma_nat_eq_factorial, gaussHypergeometricCoeff, hfac,
+      show k + N = N + k by omega, pochhammer_add a N k, pochhammer_add b N k]
     ring
   · symm
     rw [Gamma_nat_eq_factorial]
-    have href (u : ℂ) : poch u N / Gamma (1 - u) = (-1 : ℂ) ^ N / Gamma (-(m : ℂ) - u) := by
-      have hi := recip_Gamma_eq_poch_mul m (-(m : ℂ) - u)
+    have href (u : ℂ) : pochhammer u N / Gamma (1 - u) = (-1 : ℂ) ^ N / Gamma (-(m : ℂ) - u) := by
+      have hi := recip_Gamma_eq_pochhammer_mul m (-(m : ℂ) - u)
       rw [show -(m : ℂ) - u + ((m + 1 : ℕ) : ℂ) = 1 - u by push_cast; ring,
         show -(m : ℂ) - u = 1 - u - (N : ℂ) by dsimp [N]; push_cast; ring,
-        poch_reflect] at hi
+        pochhammer_reflect] at hi
       have hn : (-1 : ℂ) ^ N * (-1) ^ N = 1 := by rw [← mul_pow]; simp
       simp only [div_eq_mul_inv]
       rw [show -(m : ℂ) - u = 1 - u - (N : ℂ) by dsimp [N]; push_cast; ring, hi]
-      linear_combination -(poch u N * (Gamma (1 - u))⁻¹) * hn
+      linear_combination -(pochhammer u N * (Gamma (1 - u))⁻¹) * hn
     rw [show (N : ℂ) + 1 - (a + N) = 1 - a by ring,
       show (N : ℂ) + 1 - (b + N) = 1 - b by ring]
     have hnf : (N.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr N.factorial_ne_zero
     have hn : (-1 : ℂ) ^ N * (-1) ^ N = 1 := by rw [← mul_pow]; simp
     calc
       _ = Gamma (-(m : ℂ) - a - b) *
-          ((poch a N / Gamma (1 - a)) * (poch b N / Gamma (1 - b))) := by field_simp
+          ((pochhammer a N / Gamma (1 - a)) * (pochhammer b N / Gamma (1 - b))) := by field_simp
       _ = _ := by rw [href, href]; simp only [div_mul_div_comm, hn, one_div]; ring
 
 /-- The left boundary limit of the continued regularized Gauss function, for every denominator
 parameter. Mathlib's Abel limit theorem applies to `hasSum_regularizedGauss_one`, so exceptional
 parameters require no separate continuation argument. -/
-theorem tendsto_regularizedGaussHG_left_one {a b c : ℂ} (h : 0 < (c - a - b).re) :
-    Tendsto (fun x : ℝ => regularizedGaussHG a b c x) (𝓝[<] 1)
+theorem tendsto_regularizedGaussHypergeometric_left_one {a b c : ℂ} (h : 0 < (c - a - b).re) :
+    Tendsto (fun x : ℝ => regularizedGaussHypergeometric a b c x) (𝓝[<] 1)
       (𝓝 (Gamma (c - a - b) / (Gamma (c - a) * Gamma (c - b)))) := by
   have hA := Complex.tendsto_tsum_powerSeries_nhdsWithin_lt
     (hasSum_regularizedGauss_one h).tendsto_sum_nat
@@ -126,10 +127,11 @@ theorem tendsto_regularizedGaussHG_left_one {a b c : ℂ} (h : 0 < (c - a - b).r
   have hx' : ‖(x : ℂ)‖ < 1 := by
     rw [Complex.norm_real, Real.norm_eq_abs, abs_lt]
     exact hx
-  rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hx', regularizedGaussHGFun_eq_tsum]
+  rw [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hx',
+      regularizedGaussHypergeometricFun_eq_tsum]
   apply tsum_congr
   intro n
-  simp only [poch]
+  simp only [pochhammer]
   ring
 
 end DLMF.Hypergeometric

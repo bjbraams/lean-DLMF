@@ -586,19 +586,19 @@ theorem airyBiZero_phase {k : ℕ} (hk : 1 ≤ k) :
 theorem airyAiZero_value {k : ℕ} (hk : 1 ≤ k) :
     airyAiDeriv (airyAiZero k) = (-1 : ℂ) ^ (k - 1) / (π * airyModulus (airyAiZero k)) := by
   obtain ⟨-, h0, -, hθ⟩ := phaseZeroData_airyAi.spec hk
-  set x := airyRealZero airyAiReal k
+  set x := airyRealZero DLMF.Airy.Real.airyAi k
   change airyAiDeriv x = _
   obtain ⟨n, rfl⟩ : ∃ n, k = n + 1 := ⟨k - 1, by omega⟩
   have hW := wronskian_airyReal x
-  have hb := airyBiReal_eq_modulus_cos x
+  have hb := DLMF.Airy.Real.airyBi_eq_modulus_cos x
   rw [hθ, zero_add, Real.cos_nat_mul_pi] at hb
   rw [h0, hb] at hW
   have hM := (airyModulus_pos x).ne'
   have hπ := Real.pi_ne_zero
-  have hr : airyAiDerivReal x = (-1) ^ n / (π * airyModulus x) := by
+  have hr : DLMF.Airy.Real.airyAiDeriv x = (-1) ^ n / (π * airyModulus x) := by
     rw [eq_div_iff hπ] at hW
     rw [eq_div_iff (mul_ne_zero hπ hM)]
-    linear_combination (-1 : ℝ) ^ n * hW - (airyAiDerivReal x * airyModulus x * π) *
+    linear_combination (-1 : ℝ) ^ n * hW - (DLMF.Airy.Real.airyAiDeriv x * airyModulus x * π) *
       neg_one_pow_sq_real n
   rw [airyAiDeriv_ofReal_eq, hr, Nat.add_sub_cancel]
   push_cast; rfl
@@ -608,20 +608,20 @@ theorem airyAiZero_value {k : ℕ} (hk : 1 ≤ k) :
 theorem airyBiZero_value {k : ℕ} (hk : 1 ≤ k) :
     airyBiDeriv (airyBiZero k) = (-1 : ℂ) ^ (k - 1) / (π * airyModulus (airyBiZero k)) := by
   obtain ⟨-, h0, -, hθ⟩ := phaseZeroData_airyBi.spec hk
-  set x := airyRealZero airyBiReal k
+  set x := airyRealZero DLMF.Airy.Real.airyBi k
   change airyBiDeriv x = _
   obtain ⟨n, rfl⟩ : ∃ n, k = n + 1 := ⟨k - 1, by omega⟩
   have hW := wronskian_airyReal x
-  have ha := airyAiReal_eq_modulus_sin x
+  have ha := DLMF.Airy.Real.airyAi_eq_modulus_sin x
   rw [hθ, show -(π / 2) + ((n + 1 : ℕ) : ℝ) * π = n * π + π / 2 by push_cast; ring,
     Real.sin_add_pi_div_two, Real.cos_nat_mul_pi] at ha
   rw [h0, ha] at hW
   have hM := (airyModulus_pos x).ne'
   have hπ := Real.pi_ne_zero
-  have hr : airyBiDerivReal x = (-1) ^ n / (π * airyModulus x) := by
+  have hr : DLMF.Airy.Real.airyBiDeriv x = (-1) ^ n / (π * airyModulus x) := by
     rw [eq_div_iff hπ] at hW
     rw [eq_div_iff (mul_ne_zero hπ hM)]
-    linear_combination (-1 : ℝ) ^ n * hW - (airyBiDerivReal x * airyModulus x * π) *
+    linear_combination (-1 : ℝ) ^ n * hW - (DLMF.Airy.Real.airyBiDeriv x * airyModulus x * π) *
       neg_one_pow_sq_real n
   rw [airyBiDeriv_ofReal_eq, hr, Nat.add_sub_cancel]
   push_cast; rfl
@@ -632,19 +632,19 @@ theorem airyAiDerivZero_value {k : ℕ} (hk : 1 ≤ k) :
     airyAi (airyAiDerivZero k) = (-1 : ℂ) ^ (k - 1) /
         (π * airyDerivModulus (airyAiDerivZero k)) := by
   obtain ⟨-, h0, -, hθ⟩ := phaseZeroData_airyAiDeriv.spec hk
-  set x := airyRealZero airyAiDerivReal k
+  set x := airyRealZero DLMF.Airy.Real.airyAiDeriv k
   change airyAi x = _
   obtain ⟨n, rfl⟩ : ∃ n, k = n + 1 := ⟨k - 1, by omega⟩
   have hW := wronskian_airyReal x
-  have hb := airyBiDerivReal_eq_modulus_cos x
+  have hb := DLMF.Airy.Real.airyBiDeriv_eq_modulus_cos x
   rw [hθ, show -π + ((n + 1 : ℕ) : ℝ) * π = n * π by push_cast; ring, Real.cos_nat_mul_pi] at hb
   rw [h0, hb] at hW
   have hM := (airyDerivModulus_pos x).ne'
   have hπ := Real.pi_ne_zero
-  have hr : airyAiReal x = (-1) ^ n / (π * airyDerivModulus x) := by
+  have hr : DLMF.Airy.Real.airyAi x = (-1) ^ n / (π * airyDerivModulus x) := by
     rw [eq_div_iff hπ] at hW
     rw [eq_div_iff (mul_ne_zero hπ hM)]
-    linear_combination (-1 : ℝ) ^ n * hW - (airyAiReal x * airyDerivModulus x * π) *
+    linear_combination (-1 : ℝ) ^ n * hW - (DLMF.Airy.Real.airyAi x * airyDerivModulus x * π) *
       neg_one_pow_sq_real n
   rw [airyAi_ofReal_eq, hr, Nat.add_sub_cancel]
   push_cast; rfl
@@ -654,20 +654,20 @@ theorem airyAiDerivZero_value {k : ℕ} (hk : 1 ≤ k) :
 theorem airyBiDerivZero_value {k : ℕ} (hk : 1 ≤ k) :
     airyBi (airyBiDerivZero k) = (-1 : ℂ) ^ (k) / (π * airyDerivModulus (airyBiDerivZero k)) := by
   obtain ⟨-, h0, -, hθ⟩ := phaseZeroData_airyBiDeriv.spec hk
-  set x := airyRealZero airyBiDerivReal k
+  set x := airyRealZero DLMF.Airy.Real.airyBiDeriv k
   change airyBi x = _
   obtain ⟨n, rfl⟩ : ∃ n, k = n + 1 := ⟨k - 1, by omega⟩
   have hW := wronskian_airyReal x
-  have ha := airyAiDerivReal_eq_modulus_sin x
+  have ha := DLMF.Airy.Real.airyAiDeriv_eq_modulus_sin x
   rw [hθ, show -(π / 2) + ((n + 1 : ℕ) : ℝ) * π = n * π + π / 2 by push_cast; ring,
     Real.sin_add_pi_div_two, Real.cos_nat_mul_pi] at ha
   rw [h0, ha] at hW
   have hM := (airyDerivModulus_pos x).ne'
   have hπ := Real.pi_ne_zero
-  have hr : airyBiReal x = (-1) ^ (n + 1) / (π * airyDerivModulus x) := by
+  have hr : DLMF.Airy.Real.airyBi x = (-1) ^ (n + 1) / (π * airyDerivModulus x) := by
     rw [eq_div_iff hπ] at hW
     rw [eq_div_iff (mul_ne_zero hπ hM)]
-    linear_combination (-(-1 : ℝ) ^ n) * hW - (airyBiReal x * airyDerivModulus x * π) *
+    linear_combination (-(-1 : ℝ) ^ n) * hW - (DLMF.Airy.Real.airyBi x * airyDerivModulus x * π) *
       neg_one_pow_sq_real n
   rw [airyBi_ofReal_eq, hr]
   push_cast; rfl

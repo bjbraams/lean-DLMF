@@ -22,15 +22,15 @@ in `DLMF.Confluent.Basic.ErrorFunctions` and `DLMF.ErrorFunctions.Basic.Function
   (DLMF 7.2.1), on the real line and along the segment.
 * `erf_ofReal`, `erfc_ofReal`: on real arguments `erf` and `erfc` agree with TauCeti's
   `TauCeti.Real.erf` and `TauCeti.Real.erfc`.
-* `hasDerivAt_erf_complex`, `hasDerivAt_dawsonF_complex`, `hasDerivAt_fresnelCosInt_complex`,
-  `hasDerivAt_fresnelSinInt_complex`: the derivatives.
-* `differentiable_erf_complex`, `faddeevaW_entire`, `dawsonF_entire`, `fresnelCosInt_entire`,
-  `fresnelSinInt_entire`, `fresnelTail_entire`, `fresnelAuxFComplex_entire`,
-  `fresnelAuxGComplex_entire`: these functions are entire (DLMF §7.2).
-* `fresnelCosInt_hasSum`, `fresnelSinInt_hasSum`: the power series of `C(z)` and `S(z)`
+* `hasDerivAt_erf_complex`, `hasDerivAt_dawsonF_complex`, `hasDerivAt_fresnelC_complex`,
+  `hasDerivAt_fresnelS_complex`: the derivatives.
+* `differentiable_erf_complex`, `faddeevaW_entire`, `dawsonF_entire`, `fresnelC_entire`,
+  `fresnelS_entire`, `fresnelTail_entire`, `fresnelAuxiliaryFComplex_entire`,
+  `fresnelAuxiliaryGComplex_entire`: these functions are entire (DLMF §7.2).
+* `fresnelC_hasSum`, `fresnelS_hasSum`: the power series of `C(z)` and `S(z)`
   (DLMF 7.6.4, 7.6.6).
-* `dawsonF_ofReal`, `fresnelCosInt_ofReal`, `fresnelSinInt_ofReal`, `fresnelAuxFComplex_ofReal`,
-  `fresnelAuxGComplex_ofReal`: agreement with the real-variable definitions.
+* `dawsonF_ofReal`, `fresnelC_ofReal`, `fresnelS_ofReal`, `fresnelAuxiliaryFComplex_ofReal`,
+  `fresnelAuxiliaryGComplex_ofReal`: agreement with the real-variable definitions.
 * `iteratedErfc_neg_one`: the initial repeated integral `i⁻¹ erfc z = (2/√π) e^{-z²}`.
 * `Real.voigt_symmetry`: the parity of the Voigt functions in `x` (DLMF 7.19.6).
 
@@ -91,22 +91,22 @@ theorem hasDerivAt_erf_complex (z : ℂ) :
   fun z => (hasDerivAt_erf_complex z).differentiableAt
 
 /-- Fresnel primitives differentiate to their entire cosine integrand. -/
-theorem hasDerivAt_fresnelCosInt_complex (z : ℂ) :
-    HasDerivAt fresnelCosInt (cos (π*z^2/2)) z :=
+theorem hasDerivAt_fresnelC_complex (z : ℂ) :
+    HasDerivAt fresnelC (cos (π*z^2/2)) z :=
   hasDerivAt_primitive (by fun_prop) z
 
 /-- Fresnel primitives differentiate to their entire sine integrand. -/
-theorem hasDerivAt_fresnelSinInt_complex (z : ℂ) :
-    HasDerivAt fresnelSinInt (sin (π*z^2/2)) z :=
+theorem hasDerivAt_fresnelS_complex (z : ℂ) :
+    HasDerivAt fresnelS (sin (π*z^2/2)) z :=
   hasDerivAt_primitive (by fun_prop) z
 
 /-- The series with terms `(fun n : ℕ => (-1 :
-ℂ)^n*(π/2)^(2*n+0)*z^(4*n+1)/((2*n+0).factorial*(4*n+1 : ℂ)))` converges to `(fresnelCosInt
+ℂ)^n*(π/2)^(2*n+0)*z^(4*n+1)/((2*n+0).factorial*(4*n+1 : ℂ)))` converges to `(fresnelC
 z)`. -/
 @[dlmf 7.6.E4]
-theorem fresnelCosInt_hasSum (z : ℂ) :
+theorem fresnelC_hasSum (z : ℂ) :
     HasSum (fun n : ℕ => (-1 : ℂ)^n*(π/2)^(2*n+0)*z^(4*n+1)/((2*n+0).factorial*(4*n+1 : ℂ)))
-      (fresnelCosInt z) := by
+      (fresnelC z) := by
   have hs (w : ℂ) : HasSum (fun n : ℕ =>
       ((-1:ℂ)^n*(π/2:ℂ)^(2*n+0)/(2*n+0).factorial)*w^(2*(2*n+0)))
       (cos (π*w^2/2)) := by
@@ -117,7 +117,7 @@ theorem fresnelCosInt_hasSum (z : ℂ) :
   have h := hasSum_primitive_monomials
     (fun n : ℕ=>(-1:ℂ)^n*(π/2:ℂ)^(2*n+0)/(2*n+0).factorial)
     (fun n=>2*(2*n+0)) hs z
-  change HasSum _ (fresnelCosInt z) at h
+  change HasSum _ (fresnelC z) at h
   refine h.congr_fun fun n=>?_
   rw [show 2*(2*n+0)+1=4*n+1 by omega]
   push_cast
@@ -125,12 +125,12 @@ theorem fresnelCosInt_hasSum (z : ℂ) :
   ring
 
 /-- The series with terms `(fun n : ℕ => (-1 :
-ℂ)^n*(π/2)^(2*n+1)*z^(4*n+3)/((2*n+1).factorial*(4*n+3 : ℂ)))` converges to `(fresnelSinInt
+ℂ)^n*(π/2)^(2*n+1)*z^(4*n+3)/((2*n+1).factorial*(4*n+3 : ℂ)))` converges to `(fresnelS
 z)`. -/
 @[dlmf 7.6.E6]
-theorem fresnelSinInt_hasSum (z : ℂ) :
+theorem fresnelS_hasSum (z : ℂ) :
     HasSum (fun n : ℕ => (-1 : ℂ)^n*(π/2)^(2*n+1)*z^(4*n+3)/((2*n+1).factorial*(4*n+3 : ℂ)))
-      (fresnelSinInt z) := by
+      (fresnelS z) := by
   have hs (w : ℂ) : HasSum (fun n : ℕ =>
       ((-1:ℂ)^n*(π/2:ℂ)^(2*n+1)/(2*n+1).factorial)*w^(2*(2*n+1)))
       (sin (π*w^2/2)) := by
@@ -142,7 +142,7 @@ theorem fresnelSinInt_hasSum (z : ℂ) :
   have h := hasSum_primitive_monomials
     (fun n : ℕ=>(-1:ℂ)^n*(π/2:ℂ)^(2*n+1)/(2*n+1).factorial)
     (fun n=>2*(2*n+1)) hs z
-  change HasSum _ (fresnelSinInt z) at h
+  change HasSum _ (fresnelS z) at h
   refine h.congr_fun fun n=>?_
   rw [show 2*(2*n+1)+1=4*n+3 by omega]
   push_cast
@@ -171,34 +171,34 @@ theorem dawsonF_entire  :
   exact fun z => (hasDerivAt_dawsonF_complex z).differentiableAt
 
 /-- Entire differentiability asserted in DLMF §7.2. -/
-theorem fresnelCosInt_entire  :
-    Differentiable ℂ fresnelCosInt := by
+theorem fresnelC_entire  :
+    Differentiable ℂ fresnelC := by
   exact differentiable_primitive (by fun_prop)
 
 /-- Entire differentiability asserted in DLMF §7.2. -/
-theorem fresnelSinInt_entire  :
-    Differentiable ℂ fresnelSinInt := by
+theorem fresnelS_entire  :
+    Differentiable ℂ fresnelS := by
   exact differentiable_primitive (by fun_prop)
 
 /-- Entire differentiability asserted in DLMF §7.2. -/
 theorem fresnelTail_entire  :
     Differentiable ℂ fresnelTail := by
   unfold fresnelTail
-  exact ((differentiable_const _).sub fresnelCosInt_entire).sub (fresnelSinInt_entire.const_mul I)
+  exact ((differentiable_const _).sub fresnelC_entire).sub (fresnelS_entire.const_mul I)
 
 /-- Entire differentiability asserted in DLMF §7.2. -/
-theorem fresnelAuxFComplex_entire  :
-    Differentiable ℂ fresnelAuxFComplex := by
-  unfold fresnelAuxFComplex
-  exact (((differentiable_const (1/2:ℂ)).sub fresnelSinInt_entire).mul (by fun_prop)).sub
-    (((differentiable_const (1/2:ℂ)).sub fresnelCosInt_entire).mul (by fun_prop))
+theorem fresnelAuxiliaryFComplex_entire  :
+    Differentiable ℂ fresnelAuxiliaryFComplex := by
+  unfold fresnelAuxiliaryFComplex
+  exact (((differentiable_const (1/2:ℂ)).sub fresnelS_entire).mul (by fun_prop)).sub
+    (((differentiable_const (1/2:ℂ)).sub fresnelC_entire).mul (by fun_prop))
 
 /-- Entire differentiability asserted in DLMF §7.2. -/
-theorem fresnelAuxGComplex_entire  :
-    Differentiable ℂ fresnelAuxGComplex := by
-  unfold fresnelAuxGComplex
-  exact (((differentiable_const (1/2:ℂ)).sub fresnelCosInt_entire).mul (by fun_prop)).add
-    (((differentiable_const (1/2:ℂ)).sub fresnelSinInt_entire).mul (by fun_prop))
+theorem fresnelAuxiliaryGComplex_entire  :
+    Differentiable ℂ fresnelAuxiliaryGComplex := by
+  unfold fresnelAuxiliaryGComplex
+  exact (((differentiable_const (1/2:ℂ)).sub fresnelC_entire).mul (by fun_prop)).add
+    (((differentiable_const (1/2:ℂ)).sub fresnelS_entire).mul (by fun_prop))
 
 /-- Agreement with the existing real-variable definition. -/
 theorem dawsonF_ofReal (x : ℝ) :
@@ -208,34 +208,34 @@ theorem dawsonF_ofReal (x : ℝ) :
   simp only [Complex.ofReal_exp, Complex.ofReal_neg, Complex.ofReal_pow]
 
 /-- Agreement with the existing real-variable definition. -/
-theorem fresnelCosInt_ofReal (x : ℝ) :
-    fresnelCosInt x = (Real.fresnelCosInt x : ℂ) := by
-  rw [fresnelCosInt, primitive_ofReal, Real.fresnelCosInt, ← intervalIntegral.integral_ofReal]
+theorem fresnelC_ofReal (x : ℝ) :
+    fresnelC x = (Real.fresnelC x : ℂ) := by
+  rw [fresnelC, primitive_ofReal, Real.fresnelC, ← intervalIntegral.integral_ofReal]
   apply intervalIntegral.integral_congr
   intro t ht
   push_cast
   rfl
 
 /-- Agreement with the existing real-variable definition. -/
-theorem fresnelSinInt_ofReal (x : ℝ) :
-    fresnelSinInt x = (Real.fresnelSinInt x : ℂ) := by
-  rw [fresnelSinInt, primitive_ofReal, Real.fresnelSinInt, ← intervalIntegral.integral_ofReal]
+theorem fresnelS_ofReal (x : ℝ) :
+    fresnelS x = (Real.fresnelS x : ℂ) := by
+  rw [fresnelS, primitive_ofReal, Real.fresnelS, ← intervalIntegral.integral_ofReal]
   apply intervalIntegral.integral_congr
   intro t ht
   push_cast
   rfl
 
 /-- Agreement with the existing real-variable definition. -/
-theorem fresnelAuxFComplex_ofReal (x : ℝ) :
-    fresnelAuxFComplex x = (fresnelAuxF x : ℂ) := by
-  simp only [fresnelAuxFComplex, fresnelAuxF, fresnelCosInt_ofReal, fresnelSinInt_ofReal]
+theorem fresnelAuxiliaryFComplex_ofReal (x : ℝ) :
+    fresnelAuxiliaryFComplex x = (fresnelAuxiliaryF x : ℂ) := by
+  simp only [fresnelAuxiliaryFComplex, fresnelAuxiliaryF, fresnelC_ofReal, fresnelS_ofReal]
   push_cast
   rfl
 
 /-- Agreement with the existing real-variable definition. -/
-theorem fresnelAuxGComplex_ofReal (x : ℝ) :
-    fresnelAuxGComplex x = (fresnelAuxG x : ℂ) := by
-  simp only [fresnelAuxGComplex, fresnelAuxG, fresnelCosInt_ofReal, fresnelSinInt_ofReal]
+theorem fresnelAuxiliaryGComplex_ofReal (x : ℝ) :
+    fresnelAuxiliaryGComplex x = (fresnelAuxiliaryG x : ℂ) := by
+  simp only [fresnelAuxiliaryGComplex, fresnelAuxiliaryG, fresnelC_ofReal, fresnelS_ofReal]
   push_cast
   rfl
 

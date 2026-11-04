@@ -71,7 +71,7 @@ root of a quartic or cubic polynomial, written as a product of linear factors
   for a non-integrable integrand the Lean value is `0`, so integrability is either implied by
   the hypotheses or assumed explicitly. DLMF's condition that the segment with endpoints
   `a_α + b_α y`, `a_α + b_α x` lie in `ℂ \ (-∞, 0)` is
-  `∀ t ∈ [y, x], SymEllIntArg (a_α + b_α t)`.
+  `∀ t ∈ [y, x], IsCarlsonArgument (a_α + b_α t)`.
 
 ## References
 
@@ -164,7 +164,7 @@ def SymmetricReduction.pairQFiveSq (a b : Fin 5 → ℂ) (x y : ℝ) (α β γ �
 `ℂ \ (-∞, 0)`. -/
 def SymmetricReductionConditions (a b : Fin 5 → ℂ) (x y : ℝ) : Prop :=
   y < x ∧ (∀ α β : Fin 5, α ≠ β → α ≠ 4 → β ≠ 4 → factorDet a b α β ≠ 0) ∧
-    ∀ α : Fin 5, α ≠ 4 → ∀ t ∈ Icc y x, SymEllIntArg (a α + b α * t)
+    ∀ α : Fin 5, α ≠ 4 → ∀ t ∈ Icc y x, IsCarlsonArgument (a α + b α * t)
 
 /-- `α, β, γ, δ` is a permutation of DLMF's `1, 2, 3, 4` (Lean `0, 1, 2, 3`). -/
 def IsReductionIndexPermutation (α β γ δ : Fin 5) : Prop :=
@@ -425,7 +425,7 @@ of §19.29(i) (`SymmetricReductionConditions`): complex coefficients, `d_{αβ} 
 theorem SymmetricReduction.integral_inv_s {a b : Fin 5 → ℂ} {x y : ℝ}
     (h : SymmetricReductionConditions a b x y) :
     ∫ t in Ioo y x, (quarticProduct a b t)⁻¹ =
-      2 * symEllIntRF (pairU a b x y 0 1 2 3 ^ 2) (pairU a b x y 0 2 1 3 ^ 2)
+      2 * symmetricEllipticRF (pairU a b x y 0 1 2 3 ^ 2) (pairU a b x y 0 2 1 3 ^ 2)
         (pairU a b x y 1 2 0 3 ^ 2) := by
   sorry
 
@@ -436,9 +436,9 @@ theorem SymmetricReduction.integral_inv_s {a b : Fin 5 → ℂ} {x y : ℝ}
 @[dlmf 19.29.E6]
 theorem SymmetricReduction.integral_inv_s_Ioi {a b : Fin 5 → ℂ} {y : ℝ}
     (hd : ∀ α β : Fin 5, α ≠ β → α ≠ 4 → β ≠ 4 → factorDet a b α β ≠ 0)
-    (hseg : ∀ α : Fin 5, α ≠ 4 → ∀ t ∈ Ici y, SymEllIntArg (a α + b α * t)) :
+    (hseg : ∀ α : Fin 5, α ≠ 4 → ∀ t ∈ Ici y, IsCarlsonArgument (a α + b α * t)) :
     ∫ t in Ioi y, (quarticProduct a b t)⁻¹ =
-      2 * symEllIntRF (pairUAtTop a b y 0 1 2 3 ^ 2) (pairUAtTop a b y 0 2 1 3 ^ 2)
+      2 * symmetricEllipticRF (pairUAtTop a b y 0 1 2 3 ^ 2) (pairUAtTop a b y 0 2 1 3 ^ 2)
         (pairUAtTop a b y 1 2 0 3 ^ 2) := by
   sorry
 
@@ -449,9 +449,9 @@ theorem SymmetricReduction.integral_inv_s_Ioi {a b : Fin 5 → ℂ} {y : ℝ}
 @[dlmf 19.29.E6]
 theorem SymmetricReduction.integral_inv_s_Iio {a b : Fin 5 → ℂ} {x : ℝ}
     (hd : ∀ α β : Fin 5, α ≠ β → α ≠ 4 → β ≠ 4 → factorDet a b α β ≠ 0)
-    (hseg : ∀ α : Fin 5, α ≠ 4 → ∀ t ∈ Iic x, SymEllIntArg (a α + b α * t)) :
+    (hseg : ∀ α : Fin 5, α ≠ 4 → ∀ t ∈ Iic x, IsCarlsonArgument (a α + b α * t)) :
     ∫ t in Iio x, (quarticProduct a b t)⁻¹ =
-      2 * symEllIntRF (pairUAtBot a b x 0 1 2 3 ^ 2) (pairUAtBot a b x 0 2 1 3 ^ 2)
+      2 * symmetricEllipticRF (pairUAtBot a b x 0 1 2 3 ^ 2) (pairUAtBot a b x 0 2 1 3 ^ 2)
         (pairUAtBot a b x 1 2 0 3 ^ 2) := by
   sorry
 
@@ -465,7 +465,7 @@ theorem SymmetricReduction.integral_ratio_s {a b : Fin 5 → ℂ} {x y : ℝ}
         (hU : pairU a b x y α δ β γ ≠ 0) :
     ∫ t in Ioo y x, (a α + b α * t) / (a δ + b δ * t) * (quarticProduct a b t)⁻¹ =
       2 / 3 * factorDet a b α β * factorDet a b α γ *
-          symEllIntRD (pairU a b x y α β γ δ ^ 2) (pairU a b x y α γ β δ ^ 2)
+          symmetricEllipticRD (pairU a b x y α β γ δ ^ 2) (pairU a b x y α γ β δ ^ 2)
             (pairU a b x y α δ β γ ^ 2) +
         2 * linearRoot a b x α * linearRoot a b y α /
           (linearRoot a b x δ * linearRoot a b y δ * pairU a b x y α δ β γ) := by
@@ -487,12 +487,12 @@ theorem SymmetricReduction.integral_ratio5_s {a b : Fin 5 → ℂ} {x y : ℝ}
     (hd5 : ∀ ε : Fin 5, ε ≠ 4 → factorDet a b ε 4 ≠ 0)
     (h5 : ∀ t ∈ Icc y x, a 4 + b 4 * t ≠ 0)
     (hU5 : pairUFiveSq a b x y α β γ δ ≠ 0) (hQ5 : pairQFiveSq a b x y α β γ δ ≠ 0)
-    (hS5 : SymEllIntArg (pairSFive a b x y α β γ δ ^ 2)) :
+    (hS5 : IsCarlsonArgument (pairSFive a b x y α β γ δ ^ 2)) :
     ∫ t in Ioo y x, (a α + b α * t) / (a 4 + b 4 * t) * (quarticProduct a b t)⁻¹ =
       2 / 3 * (factorDet a b α β * factorDet a b α γ * factorDet a b α δ / factorDet a b α 4) *
-          symEllIntRJ (pairU a b x y 0 1 2 3 ^ 2) (pairU a b x y 0 2 1 3 ^ 2)
+          symmetricEllipticRJ (pairU a b x y 0 1 2 3 ^ 2) (pairU a b x y 0 2 1 3 ^ 2)
             (pairU a b x y 1 2 0 3 ^ 2) (pairUFiveSq a b x y α β γ δ) +
-        2 * symEllIntRC (pairSFive a b x y α β γ δ ^ 2) (pairQFiveSq a b x y α β γ δ) := by
+        2 * symmetricEllipticRC (pairSFive a b x y α β γ δ ^ 2) (pairQFiveSq a b x y α β γ δ) := by
   sorry
 
 /-- DLMF 19.29.10 (Gradshteyn–Ryzhik 3.142(2) as a cubic case of (19.29.7)): for real
@@ -504,7 +504,8 @@ theorem SymmetricReduction.gradshteynRyzhik_3_142 {a b u c : ℝ} (hab : b < a) 
     (huc : c < u) :
     ((∫ t in Ioo u b, √((a - t) / ((b - t) * (t - c) ^ 3)) : ℝ) : ℂ) =
       -(2 / 3) * (a - b) * ((b - u : ℝ) : ℂ) ^ (3 / 2 : ℂ) *
-          symEllIntRD ((a - b) * (u - c) : ℝ) ((b - c) * (a - u) : ℝ) ((a - b) * (b - c) : ℝ) +
+          symmetricEllipticRD ((a - b) * (u - c) : ℝ) ((b - c) * (a - u) : ℝ)
+              ((a - b) * (b - c) : ℝ) +
         ((2 / (b - c) * √((a - u) * (b - u) / (u - c)) : ℝ) : ℂ) := by
   sorry
 
@@ -517,7 +518,7 @@ theorem SymmetricReduction.gradshteynRyzhik_3_142 {a b u c : ℝ} (hab : b < a) 
 theorem SymmetricReduction.integral_inv_s_of_pos {a b : Fin 5 → ℝ} {x y : ℝ} (hxy : y < x)
     (hpos : ∀ α : Fin 5, α ≠ 4 → ∀ t ∈ Icc y x, 0 < a α + b α * t) :
     ∫ t in Ioo y x, (quarticProduct (fun i => (a i : ℂ)) (fun i => (b i : ℂ)) t)⁻¹ =
-      2 * symEllIntRF (pairU (fun i => (a i : ℂ)) (fun i => (b i : ℂ)) x y 0 1 2 3 ^ 2)
+      2 * symmetricEllipticRF (pairU (fun i => (a i : ℂ)) (fun i => (b i : ℂ)) x y 0 1 2 3 ^ 2)
         (pairU (fun i => (a i : ℂ)) (fun i => (b i : ℂ)) x y 0 2 1 3 ^ 2)
         (pairU (fun i => (a i : ℂ)) (fun i => (b i : ℂ)) x y 1 2 0 3 ^ 2) := by
   have hp : ∀ i : Fin 5, i ≠ 4 → ∀ t ∈ Icc y x, 0 < a i + b i * t := hpos
@@ -582,7 +583,7 @@ theorem SymmetricReduction.integral_inv_s_of_pos {a b : Fin 5 → ℝ} {x y : �
   have e2 := hpos' 0 2 1 3 (h0 x hx) (h2 x hx) (h1 y hy) (h3 y hy)
   have e3 := hpos' 1 2 0 3 (h1 x hx) (h2 x hx) (h0 y hy) (h3 y hy)
   rw [← ofReal_pow, ← ofReal_pow, ← ofReal_pow,
-    symEllIntRF_eq_carlsonRF (ofReal_mem_slitPlane.mpr (by positivity))
+    symmetricEllipticRF_eq_carlsonRF (ofReal_mem_slitPlane.mpr (by positivity))
       (ofReal_mem_slitPlane.mpr (by positivity)) (ofReal_mem_slitPlane.mpr (by positivity))]
   congr 3 <;> ring_nf
 
@@ -876,10 +877,10 @@ theorem SymmetricReduction.quadratic_first {a₁ b₁ a₂ b₂ x y : ℝ} (hy :
     (hQ : ∀ t ∈ Ioo y x, 0 < a₁ + b₁ * t ^ 2 ∧ 0 < a₂ + b₂ * t ^ 2)
     (hint : IntegrableOn (fun t => 1 / √((a₁ + b₁ * t ^ 2) * (a₂ + b₂ * t ^ 2))) (Ioo y x)) :
     ((∫ t in Ioo y x, 1 / √((a₁ + b₁ * t ^ 2) * (a₂ + b₂ * t ^ 2)) : ℝ) : ℂ) =
-      symEllIntRF (quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 + a₁ * b₂ : ℝ)
+      symmetricEllipticRF (quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 + a₁ * b₂ : ℝ)
         (quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 + a₂ * b₁ : ℝ)
             (quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 : ℝ) :=
-  integral_quadratic_product_eq_symEllIntRF hy hxy hQ
+  integral_quadratic_product_eq_symmetricEllipticRF hy hxy hQ
 
 /-- DLMF 19.29.19 for `0 < y` and both `Q_j` positive on `[y, x]` (proved): Carlson's
 Exercise 9.8-3, `Carlson.integral_quadratic_mul_quadratic` of `lean-codes`, in DLMF's notation;
@@ -888,10 +889,10 @@ the arguments of `R_F` are positive (`quadraticPairU_args_pos`). -/
 theorem SymmetricReduction.quadratic_first_of_pos {a₁ b₁ a₂ b₂ x y : ℝ} (hy : 0 < y) (hxy : y < x)
     (hQ : ∀ t ∈ Icc y x, 0 < a₁ + b₁ * t ^ 2 ∧ 0 < a₂ + b₂ * t ^ 2) :
     ((∫ t in Ioo y x, 1 / √((a₁ + b₁ * t ^ 2) * (a₂ + b₂ * t ^ 2)) : ℝ) : ℂ) =
-      symEllIntRF (quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 + a₁ * b₂ : ℝ)
+      symmetricEllipticRF (quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 + a₁ * b₂ : ℝ)
         (quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 + a₂ * b₁ : ℝ)
             (quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 : ℝ) :=
-  integral_quadratic_product_eq_symEllIntRF_of_pos hy hxy hQ
+  integral_quadratic_product_eq_symmetricEllipticRF_of_pos hy hxy hQ
 
 /-- DLMF 19.29.20: with the hypotheses of (19.29.19) and `U ≠ 0`,
 `∫_y^x t² dt / √(Q₁(t) Q₂(t)) = (1/3) a₁ a₂ R_D(U² + a₁b₂, U² + a₂b₁, U²) + xy/U`. -/
@@ -901,7 +902,7 @@ theorem SymmetricReduction.quadratic_second {a₁ b₁ a₂ b₂ x y : ℝ} (hy 
     (hint : IntegrableOn (fun t => t ^ 2 / √((a₁ + b₁ * t ^ 2) * (a₂ + b₂ * t ^ 2))) (Ioo y x))
     (hU : quadraticPairU a₁ b₁ a₂ b₂ x y ≠ 0) :
     ((∫ t in Ioo y x, t ^ 2 / √((a₁ + b₁ * t ^ 2) * (a₂ + b₂ * t ^ 2)) : ℝ) : ℂ) =
-      1 / 3 * a₁ * a₂ * symEllIntRD (quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 + a₁ * b₂ : ℝ)
+      1 / 3 * a₁ * a₂ * symmetricEllipticRD (quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 + a₁ * b₂ : ℝ)
           (quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 + a₂ * b₁ : ℝ)
               (quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 : ℝ) +
         ((x * y / quadraticPairU a₁ b₁ a₂ b₂ x y : ℝ) : ℂ) := by
@@ -917,7 +918,7 @@ theorem SymmetricReduction.quadratic_third {a₁ b₁ a₂ b₂ x y : ℝ} (hy :
       (Ioo y x))
     (hU : quadraticPairU a₁ b₁ a₂ b₂ x y ≠ 0) :
     ((∫ t in Ioo y x, 1 / (t ^ 2 * √((a₁ + b₁ * t ^ 2) * (a₂ + b₂ * t ^ 2))) : ℝ) : ℂ) =
-      1 / 3 * b₁ * b₂ * symEllIntRD (quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 + a₁ * b₂ : ℝ)
+      1 / 3 * b₁ * b₂ * symmetricEllipticRD (quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 + a₁ * b₂ : ℝ)
           (quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 + a₂ * b₁ : ℝ)
               (quadraticPairU a₁ b₁ a₂ b₂ x y ^ 2 : ℝ) +
         (((x * y * quadraticPairU a₁ b₁ a₂ b₂ x y)⁻¹ : ℝ) : ℂ) := by
@@ -935,9 +936,9 @@ theorem SymmetricReduction.quadratic_degenerate {a₁ b₁ a₂ b₂ x y : ℝ} 
     (hint₂ : IntegrableOn (fun t => 1 / (t ^ 2 * √((a₁ + b₁ * t ^ 2) * (a₂ + b₂ * t ^ 2))))
       (Ioo y x)) :
     ((∫ t in Ioo y x, t ^ 2 / √((a₁ + b₁ * t ^ 2) * (a₂ + b₂ * t ^ 2)) : ℝ) : ℂ) =
-        -2 / (b₁ * b₂) * symEllIntRG (a₁ * b₂ : ℝ) (a₂ * b₁ : ℝ) 0 ∧
+        -2 / (b₁ * b₂) * symmetricEllipticRG (a₁ * b₂ : ℝ) (a₂ * b₁ : ℝ) 0 ∧
       ((∫ t in Ioo y x, 1 / (t ^ 2 * √((a₁ + b₁ * t ^ 2) * (a₂ + b₂ * t ^ 2))) : ℝ) : ℂ) =
-        -2 / (a₁ * a₂) * symEllIntRG (a₁ * b₂ : ℝ) (a₂ * b₁ : ℝ) 0 := by
+        -2 / (a₁ * a₂) * symmetricEllipticRG (a₁ * b₂ : ℝ) (a₂ * b₁ : ℝ) 0 := by
   sorry
 
 /-- DLMF 19.29.23 (the case `x = ∞` of (19.29.19), `U` found by taking the limit): for
@@ -946,8 +947,8 @@ theorem SymmetricReduction.quadratic_degenerate {a₁ b₁ a₂ b₂ x y : ℝ} 
 @[dlmf 19.29.E23]
 theorem SymmetricReduction.quadratic_infinite {a b y : ℝ} (hb : 0 ≤ b) (hby : b ≤ y) (hy : 0 < y) :
     ((∫ t in Ioi y, 1 / √((t ^ 2 + a ^ 2) * (t ^ 2 - b ^ 2)) : ℝ) : ℂ) =
-      symEllIntRF (y ^ 2 + a ^ 2 : ℝ) (y ^ 2 - b ^ 2 : ℝ) (y ^ 2 : ℝ) := by
-  have h := integral_Ioi_quadratic_product_eq_symEllIntRF (a₁ := a ^ 2) (b₁ := 1)
+      symmetricEllipticRF (y ^ 2 + a ^ 2 : ℝ) (y ^ 2 - b ^ 2 : ℝ) (y ^ 2 : ℝ) := by
+  have h := integral_Ioi_quadratic_product_eq_symmetricEllipticRF (a₁ := a ^ 2) (b₁ := 1)
     (a₂ := -b ^ 2) (b₂ := 1) hy.le
     (fun t (ht : y < t) => ⟨by nlinarith [sq_nonneg a], by nlinarith⟩)
     (by norm_num)
@@ -973,7 +974,7 @@ variables of `R_F` are real and nonnegative unless both quadratics have real zer
 `Q₁` interlace those of `Q₂`, 19.29.iii.p2). -/
 @[dlmf 19.29.E24, dlmf 19.29.E25]
 def SymmetricReduction.quadraticRF (S₁ S₂ D₁₁ D₁₂ D₂₂ x y : ℝ) : ℂ :=
-  4 * symEllIntRF (S₁ * S₂ / (x - y) ^ 2 : ℝ)
+  4 * symmetricEllipticRF (S₁ * S₂ / (x - y) ^ 2 : ℝ)
     ((S₁ * S₂ / (x - y) ^ 2 + D₁₂ : ℝ) + ((D₁₂ ^ 2 - D₁₁ * D₂₂ : ℝ) : ℂ) ^ (1 / 2 : ℂ))
     ((S₁ * S₂ / (x - y) ^ 2 + D₁₂ : ℝ) - ((D₁₂ ^ 2 - D₁₁ * D₂₂ : ℝ) : ℂ) ^ (1 / 2 : ℂ))
 
@@ -1080,7 +1081,7 @@ assumed. -/
 theorem SymmetricReduction.cube_difference {a x y : ℝ} (ha : 0 ≤ a) (hay : a ≤ y) (hy : 0 < y)
     (hxy : y < x) :
     ((∫ t in Ioo y x, 1 / √(t ^ 3 - a ^ 3) : ℝ) : ℂ) =
-      4 * symEllIntRF ((√(x - a) + √(y - a)) ^ 2 *
+      4 * symmetricEllipticRF ((√(x - a) + √(y - a)) ^ 2 *
             ((√(x ^ 2 + a * x + a ^ 2) + √(y ^ 2 + a * y + a ^ 2)) ^ 2 - (x - y) ^ 2) /
               (x - y) ^ 2 : ℝ)
         ((√(x - a) + √(y - a)) ^ 2 *
@@ -1107,7 +1108,7 @@ theorem SymmetricReduction.biquadratic {f g h x y : ℝ} (hxy : y < x)
       AntitoneOn (fun t => f + g * t ^ 2 + h * t ^ 4) (Ioo y x))
     (hint : IntegrableOn (fun t => 1 / √(f + g * t ^ 2 + h * t ^ 4)) (Ioo y x)) :
     ((∫ t in Ioo y x, 1 / √(f + g * t ^ 2 + h * t ^ 4) : ℝ) : ℂ) =
-      2 * symEllIntRF (biquadraticU f g h x y : ℝ)
+      2 * symmetricEllipticRF (biquadraticU f g h x y : ℝ)
         ((biquadraticU f g h x y - g : ℝ) + 2 * ((f * h : ℝ) : ℂ) ^ (1 / 2 : ℂ))
         ((biquadraticU f g h x y - g : ℝ) - 2 * ((f * h : ℝ) : ℂ) ^ (1 / 2 : ℂ)) := by
   sorry
@@ -1120,7 +1121,7 @@ theorem SymmetricReduction.biquadratic {f g h x y : ℝ} (hxy : y < x)
 theorem SymmetricReduction.quartic_plus {a x y : ℝ} (hy : 0 ≤ y) (hxy : y < x)
     (ha : a ≠ 0 ∨ 0 < y) :
     ((∫ t in Ioo y x, 1 / √(t ^ 4 + a ^ 4) : ℝ) : ℂ) =
-      2 * symEllIntRF (((√(x ^ 4 + a ^ 4) + √(y ^ 4 + a ^ 4)) ^ 2 - (x ^ 2 - y ^ 2) ^ 2) /
+      2 * symmetricEllipticRF (((√(x ^ 4 + a ^ 4) + √(y ^ 4 + a ^ 4)) ^ 2 - (x ^ 2 - y ^ 2) ^ 2) /
             (x - y) ^ 2 : ℝ)
         (((√(x ^ 4 + a ^ 4) + √(y ^ 4 + a ^ 4)) ^ 2 - (x ^ 2 - y ^ 2) ^ 2) / (x - y) ^ 2 +
           2 * a ^ 2 : ℝ)

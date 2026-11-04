@@ -55,7 +55,7 @@ absent.
 | 5.2.E1 | Mathlib: `Gamma_eq_integral` |
 | 5.2.E2 | Mathlib: `Complex.digamma`; project: `Real.digamma` |
 | 5.2.E3 | Mathlib: `Real.eulerMascheroniConstant` |
-| 5.2.E4 | Existing: [`poch_zero`](../Hypergeometric/Basic.lean), [`poch_succ`](../Hypergeometric/Basic.lean) |
+| 5.2.E4 | Existing: [`pochhammer_zero`](../Hypergeometric/Basic.lean), [`pochhammer_succ`](../Hypergeometric/Basic.lean) |
 | 5.2.E5 | Mathlib: `Gamma_add_nat_div_Gamma_eq` |
 | 5.4.E1 | Mathlib: `Gamma_one`, `Gamma_nat_eq_factorial` |
 | 5.4.E6 | Mathlib: `Gamma_one_half_eq` |
@@ -100,7 +100,7 @@ absent.
 
 | Section | Tagged / numbered | Notes |
 | --- | ---: | --- |
-| [5.2](https://dlmf.nist.gov/5.2) | 7 / 7 | E4 split across `poch_zero`/`poch_succ`; E6–E7 new |
+| [5.2](https://dlmf.nist.gov/5.2) | 7 / 7 | E4 split across `pochhammer_zero`/`pochhammer_succ`; E6–E7 new |
 | [5.4](https://dlmf.nist.gov/5.4) | 15 / 20 | Decimals and extrema deferred |
 | [5.5](https://dlmf.nist.gov/5.5) | 9 / 9 | Mathlib or existing project |
 | [5.6](https://dlmf.nist.gov/5.6) | 9 / 9 | New inequalities |

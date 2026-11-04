@@ -45,7 +45,7 @@ DLMF 12.12.3.
 
 For `re a > -1/2`, Euler's integral `Γ(a+1/2) t^{-a-1/2} = ∫₀^∞ s^{a-1/2} e^{-ts} ds` (complex
 scale, `integral_cpow_mul_cexp_neg_mul_Ioi`), Fubini and the Gaussian reduce the vertical
-integral to DLMF 12.5.1 (`pcfU_eq_integral`); holomorphy in `a`
+integral to DLMF 12.5.1 (`parabolicCylinderU_eq_integral`); holomorphy in `a`
 (`CylinderContour.vertical_differentiable`) and the identity theorem give all `a`. The horizontal
 lines are the vertical lines rotated by `±π/2`.
 
@@ -196,7 +196,7 @@ theorem CylinderContour.vertical_integrable (z p : ℂ) {c : ℝ} (hc : 0 < c) :
 /-- DLMF 12.5.6 in integral form for `re a > -1/2` (Fubini against Euler's integral). -/
 theorem CylinderContour.vertical_of_re {a : ℂ} (ha : -1/2 < a.re) (z : ℂ) {c : ℝ} (hc : 0 < c) :
     ∫ y : ℝ, exp (-z*((c:ℂ)+y*I) + ((c:ℂ)+y*I)^2/2) * ((c:ℂ)+y*I)^(-a-1/2) =
-      (Real.sqrt (2*π) : ℂ) * exp (-z^2/4) * pcfU a z := by
+      (Real.sqrt (2*π) : ℂ) * exp (-z^2/4) * parabolicCylinderU a z := by
   set T : ℝ → ℂ := fun y => (c:ℂ)+y*I with hT
   set E : ℝ → ℂ := fun y => exp (-z*T y + (T y)^2/2) with hE
   have hs : 0 < (a+1/2).re := by simp; linarith
@@ -247,7 +247,7 @@ theorem CylinderContour.vertical_of_re {a : ℂ} (ha : -1/2 < a.re) (z : ℂ) {c
     rw [mul_left_comm, ← Complex.exp_add]; congr 2; ring
   rw [integral_integral_swap hprod] at hL
   simp_rw [hR] at hL
-  have hU := pcfU_eq_integral (show -1/2 < a.re from ha) z
+  have hU := parabolicCylinderU_eq_integral (show -1/2 < a.re from ha) z
   have hJ : ∫ s in Ioi (0:ℝ), (s:ℂ)^(a-1/2) * ((Real.sqrt (2*π) : ℂ) * exp (-(z+s)^2/2)) =
       (Real.sqrt (2*π) : ℂ) * exp (-z^2/2) *
         ∫ t in Ioi (0:ℝ), (t:ℂ)^(a-1/2) * exp (-(t:ℂ)^2/2 - z*t) := by
@@ -292,13 +292,14 @@ theorem CylinderContour.vertical_differentiable (z : ℂ) {c : ℝ} (hc : 0 < c)
 /-- DLMF 12.5.6 in integral form, all parameters. -/
 theorem CylinderContour.vertical (a z : ℂ) {c : ℝ} (hc : 0 < c) :
     ∫ y : ℝ, exp (-z*((c:ℂ)+y*I) + ((c:ℂ)+y*I)^2/2) * ((c:ℂ)+y*I)^(-a-1/2) =
-      (Real.sqrt (2*π) : ℂ) * exp (-z^2/4) * pcfU a z := by
+      (Real.sqrt (2*π) : ℂ) * exp (-z^2/4) * parabolicCylinderU a z := by
   have hf := CylinderContour.vertical_differentiable z hc
-  have hg : Differentiable ℂ (fun a : ℂ => (Real.sqrt (2*π) : ℂ) * exp (-z^2/4) * pcfU a z) :=
-    (pcfU_entire_order z).const_mul _
+  have hg : Differentiable ℂ
+      (fun a : ℂ => (Real.sqrt (2*π) : ℂ) * exp (-z^2/4) * parabolicCylinderU a z) :=
+    (parabolicCylinderU_entire_order z).const_mul _
   have heq : (fun a : ℂ =>
       ∫ y : ℝ, exp (-z*((c:ℂ)+y*I) + ((c:ℂ)+y*I)^2/2) * ((c:ℂ)+y*I)^(-a-1/2)) =ᶠ[𝓝 (1:ℂ)]
-      (fun a : ℂ => (Real.sqrt (2*π) : ℂ) * exp (-z^2/4) * pcfU a z) := by
+      (fun a : ℂ => (Real.sqrt (2*π) : ℂ) * exp (-z^2/4) * parabolicCylinderU a z) := by
     have hopen : IsOpen {b : ℂ | -1/2 < b.re} := isOpen_lt continuous_const continuous_re
     filter_upwards [hopen.mem_nhds (show -1/2 < (1:ℂ).re by norm_num)] with b hb
     exact CylinderContour.vertical_of_re hb z hc
@@ -337,7 +338,8 @@ theorem CylinderContour.I_mul_cpow {s : ℂ} (hs : 0 < s.re) (w : ℂ) :
 theorem CylinderContour.horizontal_upper (a z : ℂ) {c : ℝ} (hc : 0 < c) :
     Integrable (fun x : ℝ => exp (z*((x:ℂ)+c*I) - ((x:ℂ)+c*I)^2/2) * ((x:ℂ)+c*I)^(a-1/2)) ∧
     ∫ x : ℝ, exp (z*((x:ℂ)+c*I) - ((x:ℂ)+c*I)^2/2) * ((x:ℂ)+c*I)^(a-1/2) =
-      exp (I*π*(a/2-1/4)) * ((Real.sqrt (2*π) : ℂ) * exp (z^2/4) * pcfU (-a) (-I*z)) := by
+      exp (I*π*(a/2-1/4)) *
+          ((Real.sqrt (2*π) : ℂ) * exp (z^2/4) * parabolicCylinderU (-a) (-I*z)) := by
   set G : ℝ → ℂ := fun y => exp (-(-I*z)*((c:ℂ)+y*I) + ((c:ℂ)+y*I)^2/2) * ((c:ℂ)+y*I)^(a-1/2)
   have hfun : (fun x : ℝ => exp (z*((x:ℂ)+c*I) - ((x:ℂ)+c*I)^2/2) * ((x:ℂ)+c*I)^(a-1/2)) =
       fun x => exp (I*π*(a/2-1/4)) * G (-x) := by
@@ -364,7 +366,8 @@ theorem CylinderContour.horizontal_upper (a z : ℂ) {c : ℝ} (hc : 0 < c) :
 theorem CylinderContour.horizontal_lower (a z : ℂ) {c : ℝ} (hc : 0 < c) :
     Integrable (fun x : ℝ => exp (z*((x:ℂ)-c*I) - ((x:ℂ)-c*I)^2/2) * ((x:ℂ)-c*I)^(a-1/2)) ∧
     ∫ x : ℝ, exp (z*((x:ℂ)-c*I) - ((x:ℂ)-c*I)^2/2) * ((x:ℂ)-c*I)^(a-1/2) =
-      exp (-I*π*(a/2-1/4)) * ((Real.sqrt (2*π) : ℂ) * exp (z^2/4) * pcfU (-a) (I*z)) := by
+      exp (-I*π*(a/2-1/4)) *
+          ((Real.sqrt (2*π) : ℂ) * exp (z^2/4) * parabolicCylinderU (-a) (I*z)) := by
   set G : ℝ → ℂ := fun y => exp (-(I*z)*((c:ℂ)+y*I) + ((c:ℂ)+y*I)^2/2) * ((c:ℂ)+y*I)^(a-1/2)
   have hfun : (fun x : ℝ => exp (z*((x:ℂ)-c*I) - ((x:ℂ)-c*I)^2/2) * ((x:ℂ)-c*I)^(a-1/2)) =
       fun x => exp (-I*π*(a/2-1/4)) * G x := by
@@ -769,28 +772,30 @@ theorem CylinderContour.jump_Gamma {a : ℂ} (h1 : Gamma (1/2+a) ≠ 0) (h2 : Ga
 theorem CylinderContour.loop_value (a z : ℂ) {r : ℝ} (hr : 0 < r) :
     CylinderContour.jump a * (∫ t in Ioi r, CylinderContour.laplaceIntegrand a z t) +
         CylinderContour.circleIntegral a z r =
-      2*π*I * exp (z^2/4) * pcfU a z * (Gamma (1/2-a))⁻¹ := by
+      2*π*I * exp (z^2/4) * parabolicCylinderU a z * (Gamma (1/2-a))⁻¹ := by
   have hf : Differentiable ℂ
       (fun a => CylinderContour.jump a * (∫ t in Ioi r, CylinderContour.laplaceIntegrand a z t) +
       CylinderContour.circleIntegral a z r) :=
     ((by unfold CylinderContour.jump; fun_prop : Differentiable ℂ CylinderContour.jump).mul
       (CylinderContour.tail_differentiable z hr)).add
           (CylinderContour.circleIntegral_differentiable z hr)
-  have hg : Differentiable ℂ (fun a => 2*π*I * exp (z^2/4) * pcfU a z * (Gamma (1/2-a))⁻¹) :=
-    ((pcfU_entire_order z).const_mul _).mul (differentiable_one_div_Gamma.comp (by fun_prop))
+  have hg : Differentiable ℂ
+      (fun a => 2*π*I * exp (z^2/4) * parabolicCylinderU a z * (Gamma (1/2-a))⁻¹) :=
+    ((parabolicCylinderU_entire_order z).const_mul _).mul
+        (differentiable_one_div_Gamma.comp (by fun_prop))
   have hopen : IsOpen {b : ℂ | -1/2 < b.re ∧ b.re < 1/2} :=
     (isOpen_lt continuous_const continuous_re).inter (isOpen_lt continuous_re continuous_const)
   have heq : (fun a => CylinderContour.jump a *
       (∫ t in Ioi r, CylinderContour.laplaceIntegrand a z t) +
       CylinderContour.circleIntegral a z r) =ᶠ[𝓝 (0:ℂ)]
-      (fun a => 2*π*I * exp (z^2/4) * pcfU a z * (Gamma (1/2-a))⁻¹) := by
+      (fun a => 2*π*I * exp (z^2/4) * parabolicCylinderU a z * (Gamma (1/2-a))⁻¹) := by
     filter_upwards [hopen.mem_nhds (show (0:ℂ) ∈ {b : ℂ | -1/2 < b.re ∧ b.re < 1/2} by
       simp only [mem_ofPred_eq, zero_re]; norm_num)] with b hb
     obtain ⟨hb1, hb2⟩ := hb
     rw [CylinderContour.loop_limit_of_re hb1 z hr]
     have h1 : Gamma (1/2+b) ≠ 0 := Complex.Gamma_ne_zero_of_re_pos (by simp; linarith)
     have h2 : Gamma (1/2-b) ≠ 0 := Complex.Gamma_ne_zero_of_re_pos (by simp; linarith)
-    have hU := pcfU_eq_integral hb1 z
+    have hU := parabolicCylinderU_eq_integral hb1 z
     have hk := CylinderContour.jump_Gamma h1 h2
     have he : exp (z^2/4) * exp (-z^2/4) = 1 := by rw [← Complex.exp_add]; ring_nf; simp
     have hJ : ∫ t in Ioi (0:ℝ), CylinderContour.laplaceIntegrand b z t =
@@ -1155,11 +1160,11 @@ theorem CylinderContour.kernel {μ : ℂ} (hm0 : 0 < μ.re) (hm2 : μ.re < 2) {x
 /-- Exponential decay of `e^{-t²/4} U(a,t)` on the real line, uniform for `‖-a-1/2‖ ≤ P`
 (from the vertical-line representation 12.5.6 at `c = 1`). -/
 theorem CylinderContour.U_decay (P : ℝ) : ∃ M : ℝ, ∀ a : ℂ, ‖-a-1/2‖ ≤ P → ∀ t : ℝ,
-    ‖exp (-(t:ℂ)^2/4) * pcfU a t‖ ≤ M * Real.exp (-t) := by
+    ‖exp (-(t:ℂ)^2/4) * parabolicCylinderU a t‖ ≤ M * Real.exp (-t) := by
   have hs : (0:ℝ) < Real.sqrt (2*π) := Real.sqrt_pos.mpr (by positivity)
   refine ⟨(∫ y, CylinderContour.gaussMajorant 0 P 1 y) / Real.sqrt (2*π), fun a ha t => ?_⟩
   have hV := CylinderContour.vertical a t (c := 1) one_pos
-  have hval : exp (-(t:ℂ)^2/4) * pcfU a t =
+  have hval : exp (-(t:ℂ)^2/4) * parabolicCylinderU a t =
       (∫ y : ℝ, exp (-(t:ℂ)*(((1:ℝ):ℂ)+y*I) + (((1:ℝ):ℂ)+y*I)^2/2) * (((1:ℝ):ℂ)+y*I)^(-a-1/2)) /
         Real.sqrt (2*π) := by
     rw [hV]; field_simp

@@ -7,6 +7,7 @@ module -- shake: keep-all
 
 public import DLMF.Zeta.Hurwitz.SeriesAndContinuation
 public import DLMF.Zeta.Hurwitz.ValuesAndDerivatives
+public import DLMF.Zeta.Hurwitz.IteratedDerivatives
 
 /-!
 # The Hurwitz zeta function

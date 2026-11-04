@@ -28,14 +28,14 @@ enumerations there.
   §7.13(ii)).
 * `ZeroClassification.erf_ofReal_ne_zero`, `ZeroClassification.erf_I_mul_ofReal_ne_zero`: `erf` has
   no zero on the real or imaginary axis other than `0`.
-* `ZeroClassification.fresnelCosInt_neg`, `ZeroClassification.fresnelCosInt_conj`,
-  `ZeroClassification.fresnelCosInt_I_mul`, `ZeroClassification.fresnelSinInt_I_mul` and their
+* `ZeroClassification.fresnelC_neg`, `ZeroClassification.fresnelC_conj`,
+  `ZeroClassification.fresnelC_I_mul`, `ZeroClassification.fresnelS_I_mul` and their
   companions: the symmetries `C(-z) = -C(z)`, `C(z̄) = conj C(z)`, `C(iz) = i C(z)`,
   `S(iz) = -i S(z)`.
-* `ZeroClassification.fresnelCosInt_diag_ne_zero`, `ZeroClassification.fresnelSinInt_diag_ne_zero`:
+* `ZeroClassification.fresnelC_diag_ne_zero`, `ZeroClassification.fresnelS_diag_ne_zero`:
   no zeros on the diagonal `ℝ(1+i)` other than `0`, since `C((1+i)x) = (1+i)x ∫₀¹ cosh(πt²x²) dt`.
-* `ZeroClassification.fresnelCosInt_ofReal_ne_zero`,
-  `ZeroClassification.fresnelSinInt_ofReal_ne_zero`: no real zeros other than `0`: for `0 < x ≤ 1`
+* `ZeroClassification.fresnelC_ofReal_ne_zero`,
+  `ZeroClassification.fresnelS_ofReal_ne_zero`: no real zeros other than `0`: for `0 < x ≤ 1`
   the integrand is positive, and for `x ≥ 1` `C = 1/2 + f sin - g cos` with `‖f‖ + ‖g‖ < 1/2` from
   the Laplace integrals 7.7.10–7.7.11.
 * `ZeroClassification.octant_classification`: the eight-fold symmetry reduces a zero classification
@@ -314,84 +314,84 @@ theorem ZeroClassification.eq_of_hasDerivAt {f g f' : ℂ → ℂ} (hf : ∀ z, 
   exact sub_eq_zero.mp hc
 
 /-- `C` is odd. -/
-theorem ZeroClassification.fresnelCosInt_neg (z : ℂ) : fresnelCosInt (-z) = -fresnelCosInt z :=
+theorem ZeroClassification.fresnelC_neg (z : ℂ) : fresnelC (-z) = -fresnelC z :=
   ZeroClassification.eq_of_hasDerivAt (f' := fun z => -cos (π * z ^ 2 / 2))
     (fun z => by
-      have := (hasDerivAt_fresnelCosInt_complex (-z)).comp z (hasDerivAt_neg z)
+      have := (hasDerivAt_fresnelC_complex (-z)).comp z (hasDerivAt_neg z)
       simpa [neg_sq] using this)
-    (fun z => (hasDerivAt_fresnelCosInt_complex z).neg)
-    (by simp [fresnelCosInt, primitive_zero]) z
+    (fun z => (hasDerivAt_fresnelC_complex z).neg)
+    (by simp [fresnelC, primitive_zero]) z
 
 /-- `S` is odd. -/
-theorem ZeroClassification.fresnelSinInt_neg (z : ℂ) : fresnelSinInt (-z) = -fresnelSinInt z :=
+theorem ZeroClassification.fresnelS_neg (z : ℂ) : fresnelS (-z) = -fresnelS z :=
   ZeroClassification.eq_of_hasDerivAt (f' := fun z => -sin (π * z ^ 2 / 2))
     (fun z => by
-      have := (hasDerivAt_fresnelSinInt_complex (-z)).comp z (hasDerivAt_neg z)
+      have := (hasDerivAt_fresnelS_complex (-z)).comp z (hasDerivAt_neg z)
       simpa [neg_sq] using this)
-    (fun z => (hasDerivAt_fresnelSinInt_complex z).neg)
-    (by simp [fresnelSinInt, primitive_zero]) z
+    (fun z => (hasDerivAt_fresnelS_complex z).neg)
+    (by simp [fresnelS, primitive_zero]) z
 
 /-- `C` commutes with conjugation. -/
-theorem ZeroClassification.fresnelCosInt_conj (z : ℂ) : fresnelCosInt (conj z) =
-    conj (fresnelCosInt z) := by
+theorem ZeroClassification.fresnelC_conj (z : ℂ) : fresnelC (conj z) =
+    conj (fresnelC z) := by
   have h := ZeroClassification.eq_of_hasDerivAt (f' := fun z => cos (π * z ^ 2 / 2))
-    (f := fun z => conj (fresnelCosInt (conj z)))
+    (f := fun z => conj (fresnelC (conj z)))
     (fun z => by
-      have h1 := (hasDerivAt_fresnelCosInt_complex (conj z)).conj_conj
+      have h1 := (hasDerivAt_fresnelC_complex (conj z)).conj_conj
       rw [conj_conj] at h1
       convert h1 using 1
       · rfl
       rw [← Complex.cos_conj]
       simp only [map_div₀, map_mul, Complex.conj_ofReal, map_pow, conj_conj, map_ofNat])
-    hasDerivAt_fresnelCosInt_complex (by simp [fresnelCosInt, primitive_zero]) z
+    hasDerivAt_fresnelC_complex (by simp [fresnelC, primitive_zero]) z
   rw [← h, conj_conj]
 
 /-- `S` commutes with conjugation. -/
-theorem ZeroClassification.fresnelSinInt_conj (z : ℂ) : fresnelSinInt (conj z) =
-    conj (fresnelSinInt z) := by
+theorem ZeroClassification.fresnelS_conj (z : ℂ) : fresnelS (conj z) =
+    conj (fresnelS z) := by
   have h := ZeroClassification.eq_of_hasDerivAt (f' := fun z => sin (π * z ^ 2 / 2))
-    (f := fun z => conj (fresnelSinInt (conj z)))
+    (f := fun z => conj (fresnelS (conj z)))
     (fun z => by
-      have h1 := (hasDerivAt_fresnelSinInt_complex (conj z)).conj_conj
+      have h1 := (hasDerivAt_fresnelS_complex (conj z)).conj_conj
       rw [conj_conj] at h1
       convert h1 using 1
       · rfl
       rw [← Complex.sin_conj]
       simp only [map_div₀, map_mul, Complex.conj_ofReal, map_pow, conj_conj, map_ofNat])
-    hasDerivAt_fresnelSinInt_complex (by simp [fresnelSinInt, primitive_zero]) z
+    hasDerivAt_fresnelS_complex (by simp [fresnelS, primitive_zero]) z
   rw [← h, conj_conj]
 
 /-- `C(iz) = i C(z)`. -/
-theorem ZeroClassification.fresnelCosInt_I_mul (z : ℂ) : fresnelCosInt (I * z) = I *
-    fresnelCosInt z :=
+theorem ZeroClassification.fresnelC_I_mul (z : ℂ) : fresnelC (I * z) = I *
+    fresnelC z :=
   ZeroClassification.eq_of_hasDerivAt (f' := fun z => I * cos (π * z ^ 2 / 2))
     (fun z => by
-      have := (hasDerivAt_fresnelCosInt_complex (I * z)).comp z ((hasDerivAt_id z).const_mul I)
+      have := (hasDerivAt_fresnelC_complex (I * z)).comp z ((hasDerivAt_id z).const_mul I)
       convert this using 1
       simp only [mul_one, mul_pow, I_sq]
       rw [show π * (-1 * z ^ 2) / 2 = -(π * z ^ 2 / 2) by ring, Complex.cos_neg]
       ring)
-    (fun z => (hasDerivAt_fresnelCosInt_complex z).const_mul I)
-    (by simp [fresnelCosInt, primitive_zero]) z
+    (fun z => (hasDerivAt_fresnelC_complex z).const_mul I)
+    (by simp [fresnelC, primitive_zero]) z
 
 /-- `S(iz) = -i S(z)`. -/
-theorem ZeroClassification.fresnelSinInt_I_mul (z : ℂ) : fresnelSinInt (I * z) = -I *
-    fresnelSinInt z :=
+theorem ZeroClassification.fresnelS_I_mul (z : ℂ) : fresnelS (I * z) = -I *
+    fresnelS z :=
   ZeroClassification.eq_of_hasDerivAt (f' := fun z => -I * sin (π * z ^ 2 / 2))
     (fun z => by
-      have := (hasDerivAt_fresnelSinInt_complex (I * z)).comp z ((hasDerivAt_id z).const_mul I)
+      have := (hasDerivAt_fresnelS_complex (I * z)).comp z ((hasDerivAt_id z).const_mul I)
       convert this using 1
       simp only [mul_one, mul_pow, I_sq]
       rw [show π * (-1 * z ^ 2) / 2 = -(π * z ^ 2 / 2) by ring, Complex.sin_neg]
       ring)
-    (fun z => (hasDerivAt_fresnelSinInt_complex z).const_mul (-I))
-    (by simp [fresnelSinInt, primitive_zero]) z
+    (fun z => (hasDerivAt_fresnelS_complex z).const_mul (-I))
+    (by simp [fresnelS, primitive_zero]) z
 
 /-- On the diagonal, `C((1+i)x) = (1+i) x ∫₀¹ cosh(π t² x²) dt`. -/
-theorem ZeroClassification.fresnelCosInt_diag (x : ℝ) :
-    fresnelCosInt ((1 + I) * x) =
+theorem ZeroClassification.fresnelC_diag (x : ℝ) :
+    fresnelC ((1 + I) * x) =
       (1 + I) * x * ((∫ t in (0 : ℝ)..1, Real.cosh (π * t ^ 2 * x ^ 2) : ℝ) : ℂ) := by
-  rw [fresnelCosInt, primitive, segmentIntegral, sub_zero, ← intervalIntegral.integral_ofReal]
+  rw [fresnelC, primitive, segmentIntegral, sub_zero, ← intervalIntegral.integral_ofReal]
   congr 1
   refine intervalIntegral.integral_congr fun t _ => ?_
   simp only [zero_add]
@@ -405,10 +405,10 @@ theorem ZeroClassification.fresnelCosInt_diag (x : ℝ) :
   rfl
 
 /-- On the diagonal, `S((1+i)x) = (1+i) x i ∫₀¹ sinh(π t² x²) dt`. -/
-theorem ZeroClassification.fresnelSinInt_diag (x : ℝ) :
-    fresnelSinInt ((1 + I) * x) =
+theorem ZeroClassification.fresnelS_diag (x : ℝ) :
+    fresnelS ((1 + I) * x) =
       (1 + I) * x * (I * ((∫ t in (0 : ℝ)..1, Real.sinh (π * t ^ 2 * x ^ 2) : ℝ) : ℂ)) := by
-  rw [fresnelSinInt, primitive, segmentIntegral, sub_zero, ← intervalIntegral.integral_ofReal,
+  rw [fresnelS, primitive, segmentIntegral, sub_zero, ← intervalIntegral.integral_ofReal,
     ← intervalIntegral.integral_const_mul I]
   congr 1
   refine intervalIntegral.integral_congr fun t _ => ?_
@@ -423,9 +423,9 @@ theorem ZeroClassification.fresnelSinInt_diag (x : ℝ) :
   ring
 
 /-- `C` has no zero on the diagonal `ℝ(1+i)` other than `0`. -/
-theorem ZeroClassification.fresnelCosInt_diag_ne_zero {x : ℝ} (hx : x ≠ 0) :
-    fresnelCosInt ((1 + I) * x) ≠ 0 := by
-  rw [ZeroClassification.fresnelCosInt_diag]
+theorem ZeroClassification.fresnelC_diag_ne_zero {x : ℝ} (hx : x ≠ 0) :
+    fresnelC ((1 + I) * x) ≠ 0 := by
+  rw [ZeroClassification.fresnelC_diag]
   have hpos : 0 < ∫ t in (0 : ℝ)..1, Real.cosh (π * t ^ 2 * x ^ 2) :=
     intervalIntegral.intervalIntegral_pos_of_pos_on
         (Continuous.intervalIntegrable (by fun_prop) _ _)
@@ -434,9 +434,9 @@ theorem ZeroClassification.fresnelCosInt_diag_ne_zero {x : ℝ} (hx : x ≠ 0) :
   exact mul_ne_zero (mul_ne_zero h1 (by exact_mod_cast hx)) (by exact_mod_cast hpos.ne')
 
 /-- `S` has no zero on the diagonal `ℝ(1+i)` other than `0`. -/
-theorem ZeroClassification.fresnelSinInt_diag_ne_zero {x : ℝ} (hx : x ≠ 0) :
-    fresnelSinInt ((1 + I) * x) ≠ 0 := by
-  rw [ZeroClassification.fresnelSinInt_diag]
+theorem ZeroClassification.fresnelS_diag_ne_zero {x : ℝ} (hx : x ≠ 0) :
+    fresnelS ((1 + I) * x) ≠ 0 := by
+  rw [ZeroClassification.fresnelS_diag]
   have hpos : 0 < ∫ t in (0 : ℝ)..1, Real.sinh (π * t ^ 2 * x ^ 2) :=
     intervalIntegral.intervalIntegral_pos_of_pos_on
         (Continuous.intervalIntegrable (by fun_prop) _ _)
@@ -463,9 +463,9 @@ theorem ZeroClassification.norm_laplace_le {s a : ℝ} (hs : 0 < s) (ha : 0 < a)
 /-- The Fresnel auxiliary functions on the positive axis: `‖f(x)‖ ≤ 1/(πx)` and
 `‖g(x)‖ ≤ (π√2)⁻¹ (2/(πx²))^{3/2} Γ(3/2)`. -/
 lemma ZeroClassification.fresnelAux_norm_le {x : ℝ} (hx : 0 < x) :
-    ‖fresnelAuxFComplex x‖ ≤ 1 / (π * Real.sqrt 2) * ((1 / (π * x ^ 2 / 2)) ^ (1 / 2 : ℝ) *
+    ‖fresnelAuxiliaryFComplex x‖ ≤ 1 / (π * Real.sqrt 2) * ((1 / (π * x ^ 2 / 2)) ^ (1 / 2 : ℝ) *
         Real.Gamma (1 / 2)) ∧
-      ‖fresnelAuxGComplex x‖ ≤ 1 / (π * Real.sqrt 2) * ((1 / (π * x ^ 2 / 2)) ^ (3 / 2 : ℝ) *
+      ‖fresnelAuxiliaryGComplex x‖ ≤ 1 / (π * Real.sqrt 2) * ((1 / (π * x ^ 2 / 2)) ^ (3 / 2 : ℝ) *
         Real.Gamma (3 / 2)) := by
   have harg : |arg (x : ℂ)| ≤ π / 4 := by
     rw [arg_ofReal_of_nonneg hx.le, abs_zero]; positivity
@@ -490,14 +490,14 @@ lemma ZeroClassification.fresnelAux_norm_le {x : ℝ} (hx : 0 < x) :
           div_le_div_of_nonneg_left hnum one_pos hden
       _ = _ := div_one _
   constructor
-  · rw [fresnelAuxFComplex_laplace_integral harg, norm_mul]
+  · rw [fresnelAuxiliaryFComplex_laplace_integral harg, norm_mul]
     have h1 : ‖(1 : ℂ) / (π * Real.sqrt 2)‖ = 1 / (π * Real.sqrt 2) := by
       rw [show (1 : ℂ) / (π * Real.sqrt 2) = ((1 / (π * Real.sqrt 2) : ℝ) : ℂ) by push_cast; rfl,
         Complex.norm_real, Real.norm_eq_abs, abs_of_pos hc]
     rw [h1]
     gcongr
     exact ZeroClassification.norm_laplace_le (by norm_num) ha (hkey _ _ (by norm_num))
-  · rw [fresnelAuxGComplex_laplace_integral harg, norm_mul]
+  · rw [fresnelAuxiliaryGComplex_laplace_integral harg, norm_mul]
     have h1 : ‖(1 : ℂ) / (π * Real.sqrt 2)‖ = 1 / (π * Real.sqrt 2) := by
       rw [show (1 : ℂ) / (π * Real.sqrt 2) = ((1 / (π * Real.sqrt 2) : ℝ) : ℂ) by push_cast; rfl,
         Complex.norm_real, Real.norm_eq_abs, abs_of_pos hc]
@@ -507,7 +507,7 @@ lemma ZeroClassification.fresnelAux_norm_le {x : ℝ} (hx : 0 < x) :
 
 /-- For `x ≥ 1`, `‖f(x)‖ + ‖g(x)‖ < 1/2`. -/
 lemma ZeroClassification.fresnelAux_sum_lt {x : ℝ} (hx : 1 ≤ x) :
-    ‖fresnelAuxFComplex x‖ + ‖fresnelAuxGComplex x‖ < 1 / 2 := by
+    ‖fresnelAuxiliaryFComplex x‖ + ‖fresnelAuxiliaryGComplex x‖ < 1 / 2 := by
   obtain ⟨hF, hG⟩ := ZeroClassification.fresnelAux_norm_le (by linarith : (0 : ℝ) < x)
   have hpi := Real.pi_gt_d2
   have hs2 : (1.41 : ℝ) < Real.sqrt 2 := by
@@ -523,12 +523,13 @@ lemma ZeroClassification.fresnelAux_sum_lt {x : ℝ} (hx : 1 ≤ x) :
   have hG32 : Real.Gamma (3 / 2) = Real.sqrt π / 2 := by
     rw [show (3 / 2 : ℝ) = 1 / 2 + 1 by norm_num, Real.Gamma_add_one (by norm_num), hG12]; ring
   -- (1/r)^{1/2} = √(1/r)
-  have hF' : ‖fresnelAuxFComplex x‖ ≤ 1 / (π * Real.sqrt 2) *
+  have hF' : ‖fresnelAuxiliaryFComplex x‖ ≤ 1 / (π * Real.sqrt 2) *
       (Real.sqrt (2 / π) * Real.sqrt π) := by
     refine hF.trans ?_
     rw [hG12, ← Real.sqrt_eq_rpow]
     gcongr
-  have hG' : ‖fresnelAuxGComplex x‖ ≤ 1 / (π * Real.sqrt 2) * (2 / π * (Real.sqrt π / 2)) := by
+  have hG' : ‖fresnelAuxiliaryGComplex x‖ ≤ 1 / (π * Real.sqrt 2) *
+      (2 / π * (Real.sqrt π / 2)) := by
     refine hG.trans ?_
     rw [hG32]
     gcongr
@@ -553,14 +554,14 @@ lemma ZeroClassification.fresnelAux_sum_lt {x : ℝ} (hx : 1 ≤ x) :
   linarith
 
 /-- `C(x) ≠ 0` for real `x ≠ 0`. -/
-theorem ZeroClassification.fresnelCosInt_ofReal_ne_zero {x : ℝ} (hx : x ≠ 0) : fresnelCosInt
+theorem ZeroClassification.fresnelC_ofReal_ne_zero {x : ℝ} (hx : x ≠ 0) : fresnelC
     (x : ℂ) ≠ 0 := by
   wlog hpos : 0 < x generalizing x
   · have hneg : 0 < -x := neg_pos.mpr (lt_of_le_of_ne (not_lt.mp hpos) hx)
     have := this (neg_ne_zero.mpr hx) hneg
-    rwa [ofReal_neg, ZeroClassification.fresnelCosInt_neg, neg_ne_zero] at this
+    rwa [ofReal_neg, ZeroClassification.fresnelC_neg, neg_ne_zero] at this
   rcases le_or_gt x 1 with h1 | h1
-  · rw [fresnelCosInt_ofReal, Complex.ofReal_ne_zero]
+  · rw [fresnelC_ofReal, Complex.ofReal_ne_zero]
     refine (intervalIntegral.intervalIntegral_pos_of_pos_on
       (Continuous.intervalIntegrable (by fun_prop) _ _) (fun t ht => ?_) hpos).ne'
     apply Real.cos_pos_of_mem_Ioo
@@ -571,7 +572,7 @@ theorem ZeroClassification.fresnelCosInt_ofReal_ne_zero {x : ℝ} (hx : x ≠ 0)
       have : t ^ 2 < 1 := by nlinarith [ht.1]
       nlinarith [Real.pi_pos]
   · intro h0
-    have h := fresnelCosInt_aux (x : ℂ)
+    have h := fresnelC_aux (x : ℂ)
     rw [h0] at h
     have hsum := ZeroClassification.fresnelAux_sum_lt h1.le
     have hsin : ‖sin (π * (x : ℂ) ^ 2 / 2)‖ ≤ 1 := by
@@ -582,26 +583,26 @@ theorem ZeroClassification.fresnelCosInt_ofReal_ne_zero {x : ℝ} (hx : x ≠ 0)
       rw [show π * (x : ℂ) ^ 2 / 2 = ((π * x ^ 2 / 2 : ℝ) : ℂ) by push_cast; ring,
         ← ofReal_cos, Complex.norm_real, Real.norm_eq_abs]
       exact Real.abs_cos_le_one _
-    have : (1 / 2 : ℂ) = -(fresnelAuxFComplex x * sin (π * (x : ℂ) ^ 2 / 2)) +
-        fresnelAuxGComplex x * cos (π * (x : ℂ) ^ 2 / 2) := by linear_combination -h
+    have : (1 / 2 : ℂ) = -(fresnelAuxiliaryFComplex x * sin (π * (x : ℂ) ^ 2 / 2)) +
+        fresnelAuxiliaryGComplex x * cos (π * (x : ℂ) ^ 2 / 2) := by linear_combination -h
     have hn := congrArg norm this
     rw [show ‖(1 / 2 : ℂ)‖ = 1 / 2 by norm_num] at hn
-    have := norm_add_le (-(fresnelAuxFComplex x * sin (π * (x : ℂ) ^ 2 / 2)))
-      (fresnelAuxGComplex x * cos (π * (x : ℂ) ^ 2 / 2))
+    have := norm_add_le (-(fresnelAuxiliaryFComplex x * sin (π * (x : ℂ) ^ 2 / 2)))
+      (fresnelAuxiliaryGComplex x * cos (π * (x : ℂ) ^ 2 / 2))
     rw [norm_neg, norm_mul, norm_mul] at this
-    have := mul_le_of_le_one_right (norm_nonneg (fresnelAuxFComplex x)) hsin
-    have := mul_le_of_le_one_right (norm_nonneg (fresnelAuxGComplex x)) hcos
+    have := mul_le_of_le_one_right (norm_nonneg (fresnelAuxiliaryFComplex x)) hsin
+    have := mul_le_of_le_one_right (norm_nonneg (fresnelAuxiliaryGComplex x)) hcos
     linarith
 
 /-- `S(x) ≠ 0` for real `x ≠ 0`. -/
-theorem ZeroClassification.fresnelSinInt_ofReal_ne_zero {x : ℝ} (hx : x ≠ 0) : fresnelSinInt
+theorem ZeroClassification.fresnelS_ofReal_ne_zero {x : ℝ} (hx : x ≠ 0) : fresnelS
     (x : ℂ) ≠ 0 := by
   wlog hpos : 0 < x generalizing x
   · have hneg : 0 < -x := neg_pos.mpr (lt_of_le_of_ne (not_lt.mp hpos) hx)
     have := this (neg_ne_zero.mpr hx) hneg
-    rwa [ofReal_neg, ZeroClassification.fresnelSinInt_neg, neg_ne_zero] at this
+    rwa [ofReal_neg, ZeroClassification.fresnelS_neg, neg_ne_zero] at this
   rcases le_or_gt x 1 with h1 | h1
-  · rw [fresnelSinInt_ofReal, Complex.ofReal_ne_zero]
+  · rw [fresnelS_ofReal, Complex.ofReal_ne_zero]
     refine (intervalIntegral.intervalIntegral_pos_of_pos_on
       (Continuous.intervalIntegrable (by fun_prop) _ _) (fun t ht => ?_) hpos).ne'
     apply Real.sin_pos_of_pos_of_lt_pi
@@ -610,7 +611,7 @@ theorem ZeroClassification.fresnelSinInt_ofReal_ne_zero {x : ℝ} (hx : x ≠ 0)
       have : t ^ 2 < 1 := by nlinarith [ht.1]
       nlinarith [Real.pi_pos]
   · intro h0
-    have h := fresnelSinInt_aux (x : ℂ)
+    have h := fresnelS_aux (x : ℂ)
     rw [h0] at h
     have hsum := ZeroClassification.fresnelAux_sum_lt h1.le
     have hsin : ‖sin (π * (x : ℂ) ^ 2 / 2)‖ ≤ 1 := by
@@ -621,15 +622,15 @@ theorem ZeroClassification.fresnelSinInt_ofReal_ne_zero {x : ℝ} (hx : x ≠ 0)
       rw [show π * (x : ℂ) ^ 2 / 2 = ((π * x ^ 2 / 2 : ℝ) : ℂ) by push_cast; ring,
         ← ofReal_cos, Complex.norm_real, Real.norm_eq_abs]
       exact Real.abs_cos_le_one _
-    have : (1 / 2 : ℂ) = fresnelAuxFComplex x * cos (π * (x : ℂ) ^ 2 / 2) +
-        fresnelAuxGComplex x * sin (π * (x : ℂ) ^ 2 / 2) := by linear_combination -h
+    have : (1 / 2 : ℂ) = fresnelAuxiliaryFComplex x * cos (π * (x : ℂ) ^ 2 / 2) +
+        fresnelAuxiliaryGComplex x * sin (π * (x : ℂ) ^ 2 / 2) := by linear_combination -h
     have hn := congrArg norm this
     rw [show ‖(1 / 2 : ℂ)‖ = 1 / 2 by norm_num] at hn
-    have := norm_add_le (fresnelAuxFComplex x * cos (π * (x : ℂ) ^ 2 / 2))
-      (fresnelAuxGComplex x * sin (π * (x : ℂ) ^ 2 / 2))
+    have := norm_add_le (fresnelAuxiliaryFComplex x * cos (π * (x : ℂ) ^ 2 / 2))
+      (fresnelAuxiliaryGComplex x * sin (π * (x : ℂ) ^ 2 / 2))
     rw [norm_mul, norm_mul] at this
-    have := mul_le_of_le_one_right (norm_nonneg (fresnelAuxFComplex x)) hcos
-    have := mul_le_of_le_one_right (norm_nonneg (fresnelAuxGComplex x)) hsin
+    have := mul_le_of_le_one_right (norm_nonneg (fresnelAuxiliaryFComplex x)) hcos
+    have := mul_le_of_le_one_right (norm_nonneg (fresnelAuxiliaryGComplex x)) hsin
     linarith
 
 /-- `0 < Im w < Re w` places `w` in the open sector `0 < ph w < π/4`. -/

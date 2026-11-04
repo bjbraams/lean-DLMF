@@ -12,9 +12,9 @@ public import DLMF.AlgebraicAnalytic.Complex.Functions
 
 ## Main results
 
-* `prodConvergesDLMF_iff_log`, `prodConvergesDLMF_norm_iff`, `prod_mtest_log`, `prod_mtest`,
-  `differentiableOn_of_tendstoUniformlyOn_prod`, `tendsto_logDeriv_prod`: infinite products
-  (§1.10(ix), 1.10.20–1.10.24).
+* `infiniteProductConverges_iff_log`, `infiniteProductConverges_norm_iff`, `prod_mtest_log`,
+  `prod_mtest`, `differentiableOn_of_tendstoUniformlyOn_prod`, `tendsto_logDeriv_prod`: infinite
+  products (§1.10(ix), 1.10.20–1.10.24).
 * `weierstrass_product`, `mittag_leffler`: DLMF 1.10.22, 1.10.25.
 * `coeff_eq_circleIntegral`: DLMF 1.10.26–1.10.27.
 
@@ -22,7 +22,7 @@ public import DLMF.AlgebraicAnalytic.Complex.Functions
 
 * Products indexed by `n ≥ 1` in DLMF are indexed by `ℕ` here where the index is a dummy
   (Weierstrass products, Mittag-Leffler series); DLMF's convergence of infinite products is
-  `ProdConvergesDLMF` of `DLMF.AlgebraicAnalytic.Complex.Basic`.
+  `InfiniteProductConverges` of `DLMF.AlgebraicAnalytic.Complex.Basic`.
 -/
 
 @[expose] public noncomputable section
@@ -37,8 +37,8 @@ namespace DLMF.AlgebraicAnalytic
 /-- DLMF §1.10(ix): the product `∏_{n ≥ 1} (1 + aₙ)` with `aₙ ≠ -1` for all `n` converges iff
 `∑_{n ≥ 1} ln(1 + aₙ)` converges (principal logarithms, partial sums). -/
 @[dlmf 1.10.ix]
-theorem prodConvergesDLMF_iff_log {a : ℕ → ℂ} (ha : ∀ n ≥ 1, a n ≠ -1) :
-    ProdConvergesDLMF a ↔
+theorem infiniteProductConverges_iff_log {a : ℕ → ℂ} (ha : ∀ n ≥ 1, a n ≠ -1) :
+    InfiniteProductConverges a ↔
       ∃ s, Tendsto (fun N => ∑ n ∈ Finset.Icc 1 N, log (1 + a n)) atTop (𝓝 s) := by
   have hne : ∀ n ≥ 1, 1 + a n ≠ 0 := fun n hn h => ha n hn (by linear_combination h)
   set S : ℕ → ℂ := fun N => ∑ n ∈ Finset.Icc 1 N, log (1 + a n)
@@ -126,8 +126,8 @@ theorem prodConvergesDLMF_iff_log {a : ℕ → ℂ} (ha : ∀ n ≥ 1, a n ≠ -
 /-- DLMF §1.10(ix): the product `∏_{n ≥ 1} (1 + aₙ)` converges absolutely (that is,
 `∏ (1 + |aₙ|)` converges) iff `∑_{n ≥ 1} |aₙ|` converges. -/
 @[dlmf 1.10.ix]
-theorem prodConvergesDLMF_norm_iff {a : ℕ → ℂ} :
-    ProdConvergesDLMF (fun n => (‖a n‖ : ℂ)) ↔ Summable (fun n => ‖a (n + 1)‖) := by
+theorem infiniteProductConverges_norm_iff {a : ℕ → ℂ} :
+    InfiniteProductConverges (fun n => (‖a n‖ : ℂ)) ↔ Summable (fun n => ‖a (n + 1)‖) := by
   have hnorm (n : ℕ) : ‖1 + (‖a n‖ : ℂ)‖ = 1 + ‖a n‖ := by
     rw [← ofReal_one, ← ofReal_add, Complex.norm_real, Real.norm_eq_abs,
       abs_of_nonneg (by positivity)]

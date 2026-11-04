@@ -33,9 +33,9 @@ themselves, their defining formulas (§27.2) and DLMF's notions `IsMultiplicativ
   `∑_{d∣n} J_k(d) = n^k`.
 * `IsMultiplicativeFn.eq_prod_primeFactors`, `IsCompletelyMultiplicativeFn.eq_prod_primeFactors`:
   DLMF 27.3.2 and 27.3.10.
-* `jordanTotient_eq_mul_prod`, `sigma_zero_eq_prod`, `sigmaC_eq_prod`: the product formulas
+* `jordanTotient_eq_mul_prod`, `sigma_zero_eq_prod`, `sigmaCpow_eq_prod`: the product formulas
   DLMF 27.3.4–27.3.6.
-* `sigmaC_mul_sigmaC`, `totient_mul_totient`: DLMF 27.3.7 and 27.3.8.
+* `sigmaCpow_mul_sigmaCpow`, `totient_mul_totient`: DLMF 27.3.7 and 27.3.8.
 
 ## Implementation notes
 
@@ -80,12 +80,12 @@ corresponding facts for `⌊1/n⌋`, `d_k` and `J_k` are `isCompletelyMultiplica
 @[dlmf 27.3]
 theorem isMultiplicativeFn_basic (α : ℂ) :
     IsMultiplicativeFn (fun n ↦ n.totient) ∧ IsMultiplicativeFn (σ 0 : ℕ → ℕ) ∧
-      IsMultiplicativeFn (sigmaC α : ℕ → ℂ) ∧ IsMultiplicativeFn (μ : ℕ → ℤ) ∧
+      IsMultiplicativeFn (sigmaCpow α : ℕ → ℂ) ∧ IsMultiplicativeFn (μ : ℕ → ℤ) ∧
       IsMultiplicativeFn (liouville : ℕ → ℤ) := by
   refine ⟨⟨Nat.totient_one, fun m n _ _ h ↦ Nat.totient_mul h⟩,
     (isMultiplicative_iff_isMultiplicativeFn _).mp isMultiplicative_sigma,
     (isMultiplicative_iff_isMultiplicativeFn _).mp
-      (isMultiplicative_sigmaC α),
+      (isMultiplicative_sigmaCpow α),
     (isMultiplicative_iff_isMultiplicativeFn _).mp isMultiplicative_moebius,
     (isMultiplicative_iff_isMultiplicativeFn _).mp isMultiplicative_liouville⟩
 
@@ -358,18 +358,18 @@ theorem sigma_zero_eq_prod {n : ℕ} (hn : n ≠ 0) :
 every prime `p ∣ n`; DLMF's `α ≠ 0` suffices for real `α` but not for complex `α` (see the module
 docstring). -/
 @[dlmf 27.3.E6]
-theorem sigmaC_eq_prod {α : ℂ} {n : ℕ} (hn : n ≠ 0)
+theorem sigmaCpow_eq_prod {α : ℂ} {n : ℕ} (hn : n ≠ 0)
     (hα : ∀ p ∈ n.primeFactors, (p : ℂ) ^ α ≠ 1) :
-    sigmaC α n = ∏ p ∈ n.primeFactors,
+    sigmaCpow α n = ∏ p ∈ n.primeFactors,
       ((p : ℂ) ^ (α * (1 + n.factorization p)) - 1) / ((p : ℂ) ^ α - 1) := by
   rw [((isMultiplicative_iff_isMultiplicativeFn _).mp
-    (isMultiplicative_sigmaC α)).eq_prod_primeFactors hn]
+    (isMultiplicative_sigmaCpow α)).eq_prod_primeFactors hn]
   refine Finset.prod_congr rfl fun p hp ↦ ?_
   have hp' : p.Prime := Nat.prime_of_mem_primeFactors hp
   have hp0 : (p : ℂ) ≠ 0 := by exact_mod_cast hp'.ne_zero
   rw [eq_div_iff (sub_ne_zero.mpr (hα p hp))]
-  change sigmaC α (p ^ n.factorization p) * _ = _
-  rw [sigmaC_apply, Nat.divisors_prime_pow hp', Finset.sum_map]
+  change sigmaCpow α (p ^ n.factorization p) * _ = _
+  rw [sigmaCpow_apply, Nat.divisors_prime_pow hp', Finset.sum_map]
   simp only [Function.Embedding.coeFn_mk]
   have hpow : ∀ i : ℕ, (((p ^ i : ℕ) : ℂ)) ^ α = ((p : ℂ) ^ α) ^ i := by
     intro i
@@ -426,23 +426,23 @@ private lemma natCast_pow_cpow (p i : ℕ) (α : ℂ) : (((p ^ i : ℕ) : ℂ)) 
   | succ i ih => rw [pow_succ, Nat.cast_mul, Complex.natCast_mul_natCast_cpow, ih, pow_succ]
 
 /-- `σ_α(p^j) = ∑_{i ≤ j} (p^α)^i`. -/
-private lemma sigmaC_prime_pow (α : ℂ) {p : ℕ} (hp : p.Prime) (j : ℕ) :
-    sigmaC α (p ^ j) = ∑ i ∈ range (j + 1), ((p : ℂ) ^ α) ^ i := by
-  rw [sigmaC_apply, Nat.sum_divisors_prime_pow hp]
+private lemma sigmaCpow_prime_pow (α : ℂ) {p : ℕ} (hp : p.Prime) (j : ℕ) :
+    sigmaCpow α (p ^ j) = ∑ i ∈ range (j + 1), ((p : ℂ) ^ α) ^ i := by
+  rw [sigmaCpow_apply, Nat.sum_divisors_prime_pow hp]
   exact sum_congr rfl fun i _ ↦ natCast_pow_cpow p i α
 
 /-- 27.3.7 for prime powers. -/
-private lemma sum_divisors_cpow_mul_sigmaC_prime_pow (α : ℂ) {p : ℕ} (hp : p.Prime) (a b : ℕ) :
-    ∑ d ∈ (p ^ min a b).divisors, (d : ℂ) ^ α * sigmaC α (p ^ (a + b) / d ^ 2) =
-      sigmaC α (p ^ a) * sigmaC α (p ^ b) := by
+private lemma sum_divisors_cpow_mul_sigmaCpow_prime_pow (α : ℂ) {p : ℕ} (hp : p.Prime) (a b : ℕ) :
+    ∑ d ∈ (p ^ min a b).divisors, (d : ℂ) ^ α * sigmaCpow α (p ^ (a + b) / d ^ 2) =
+      sigmaCpow α (p ^ a) * sigmaCpow α (p ^ b) := by
   wlog hab : a ≤ b generalizing a b
   · rw [min_comm, add_comm, mul_comm]; exact this b a (by omega)
   obtain ⟨t, rfl⟩ : ∃ t, b = a + t := ⟨b - a, by omega⟩
-  rw [min_eq_left hab, Nat.sum_divisors_prime_pow hp, sigmaC_prime_pow α hp,
-    sigmaC_prime_pow α hp, ← sum_pow_mul_geom_sum_eq_mul_geom_sum]
+  rw [min_eq_left hab, Nat.sum_divisors_prime_pow hp, sigmaCpow_prime_pow α hp,
+    sigmaCpow_prime_pow α hp, ← sum_pow_mul_geom_sum_eq_mul_geom_sum]
   refine sum_congr rfl fun k hk ↦ ?_
   have hk' : k ≤ a := Nat.lt_succ_iff.mp (mem_range.mp hk)
-  rw [natCast_pow_cpow, ← pow_mul, Nat.pow_div (by omega) hp.pos, sigmaC_prime_pow α hp]
+  rw [natCast_pow_cpow, ← pow_mul, Nat.pow_div (by omega) hp.pos, sigmaCpow_prime_pow α hp]
   congr 3
   omega
 
@@ -460,12 +460,13 @@ theorem gcd_prime_pow_mul_prime_pow_mul {p a b m' n' : ℕ} (hm : p.Coprime m') 
   · rw [min_eq_right h]; exact Nat.gcd_eq_right (Nat.pow_dvd_pow p h)
 
 /-- Splitting off the `p`-part of the right side of 27.3.7. -/
-private lemma sum_divisors_gcd_cpow_mul_sigmaC_split (α : ℂ) {p a b m' n' : ℕ} (hm : p.Coprime m')
+private lemma sum_divisors_gcd_cpow_mul_sigmaCpow_split (α : ℂ) {p a b m' n' : ℕ}
+    (hm : p.Coprime m')
     (hn : p.Coprime n') :
     ∑ d ∈ ((p ^ a * m').gcd (p ^ b * n')).divisors,
-        (d : ℂ) ^ α * sigmaC α (p ^ a * m' * (p ^ b * n') / d ^ 2) =
-      (∑ i ∈ (p ^ min a b).divisors, (i : ℂ) ^ α * sigmaC α (p ^ (a + b) / i ^ 2)) *
-        ∑ j ∈ (m'.gcd n').divisors, (j : ℂ) ^ α * sigmaC α (m' * n' / j ^ 2) := by
+        (d : ℂ) ^ α * sigmaCpow α (p ^ a * m' * (p ^ b * n') / d ^ 2) =
+      (∑ i ∈ (p ^ min a b).divisors, (i : ℂ) ^ α * sigmaCpow α (p ^ (a + b) / i ^ 2)) *
+        ∑ j ∈ (m'.gcd n').divisors, (j : ℂ) ^ α * sigmaCpow α (m' * n' / j ^ 2) := by
   have hcop : (p ^ min a b).Coprime (m'.gcd n') :=
     Nat.Coprime.pow_left _ (Nat.Coprime.coprime_dvd_right (Nat.gcd_dvd_left m' n') hm)
   rw [gcd_prime_pow_mul_prime_pow_mul hm hn, Nat.divisors_mul, Finset.mul_def,
@@ -487,14 +488,14 @@ private lemma sum_divisors_gcd_cpow_mul_sigmaC_split (α : ℂ) {p a b m' n' : �
     have : (p ^ (a + b)).Coprime (m' * n') := Nat.Coprime.pow_left _ (Nat.Coprime.mul_right hm hn)
     exact (this.coprime_dvd_left (Nat.div_dvd_of_dvd hi2)).coprime_dvd_right
       (Nat.div_dvd_of_dvd hj2)
-  rw [hnum, (isMultiplicative_sigmaC α).map_mul_of_coprime hc, Nat.cast_mul,
+  rw [hnum, (isMultiplicative_sigmaCpow α).map_mul_of_coprime hc, Nat.cast_mul,
     Complex.natCast_mul_natCast_cpow]
   ring
 
 /-- DLMF 27.3.7 (proof). -/
-lemma sigmaC_mul_sigmaC_eq_sum_divisors_gcd (α : ℂ) {m n : ℕ} (hm : 0 < m) (hn : 0 < n) :
-    sigmaC α m * sigmaC α n =
-      ∑ d ∈ (m.gcd n).divisors, (d : ℂ) ^ α * sigmaC α (m * n / d ^ 2) := by
+lemma sigmaCpow_mul_sigmaCpow_eq_sum_divisors_gcd (α : ℂ) {m n : ℕ} (hm : 0 < m) (hn : 0 < n) :
+    sigmaCpow α m * sigmaCpow α n =
+      ∑ d ∈ (m.gcd n).divisors, (d : ℂ) ^ α * sigmaCpow α (m * n / d ^ 2) := by
   induction h : m * n using Nat.strong_induction_on generalizing m n with
   | _ N ih =>
   rw [← h]
@@ -502,7 +503,7 @@ lemma sigmaC_mul_sigmaC_eq_sum_divisors_gcd (α : ℂ) {m n : ℕ} (hm : 0 < m) 
   · have hm1 : m = 1 := by nlinarith
     have hn1 : n = 1 := by nlinarith
     subst hm1 hn1
-    simp [sigmaC_apply]
+    simp [sigmaCpow_apply]
   set p := (m * n).minFac
   have hp : p.Prime := Nat.minFac_prime (by omega)
   have hpmn : p ∣ m * n := Nat.minFac_dvd _
@@ -530,18 +531,18 @@ lemma sigmaC_mul_sigmaC_eq_sum_divisors_gcd (α : ℂ) {m n : ℕ} (hm : 0 < m) 
     have : 0 < m' * n' := Nat.mul_pos hm' hn'
     nlinarith
   have ih' := ih (m' * n') hlt hm' hn' rfl
-  rw [← hmm, ← hnn, sum_divisors_gcd_cpow_mul_sigmaC_split α hcm hcn, ← ih',
-    sum_divisors_cpow_mul_sigmaC_prime_pow α hp,
-    (isMultiplicative_sigmaC α).map_mul_of_coprime (Nat.Coprime.pow_left a hcm),
-    (isMultiplicative_sigmaC α).map_mul_of_coprime (Nat.Coprime.pow_left b hcn)]
+  rw [← hmm, ← hnn, sum_divisors_gcd_cpow_mul_sigmaCpow_split α hcm hcn, ← ih',
+    sum_divisors_cpow_mul_sigmaCpow_prime_pow α hp,
+    (isMultiplicative_sigmaCpow α).map_mul_of_coprime (Nat.Coprime.pow_left a hcm),
+    (isMultiplicative_sigmaCpow α).map_mul_of_coprime (Nat.Coprime.pow_left b hcn)]
   ring
 
 /-- DLMF 27.3.7: `σ_α(m) σ_α(n) = ∑_{d∣(m,n)} d^α σ_α(mn/d²)`. -/
 @[dlmf 27.3.E7]
-theorem sigmaC_mul_sigmaC (α : ℂ) {m n : ℕ} (hm : 0 < m) (hn : 0 < n) :
-    sigmaC α m * sigmaC α n =
-      ∑ d ∈ (m.gcd n).divisors, (d : ℂ) ^ α * sigmaC α (m * n / d ^ 2) :=
-  sigmaC_mul_sigmaC_eq_sum_divisors_gcd α hm hn
+theorem sigmaCpow_mul_sigmaCpow (α : ℂ) {m n : ℕ} (hm : 0 < m) (hn : 0 < n) :
+    sigmaCpow α m * sigmaCpow α n =
+      ∑ d ∈ (m.gcd n).divisors, (d : ℂ) ^ α * sigmaCpow α (m * n / d ^ 2) :=
+  sigmaCpow_mul_sigmaCpow_eq_sum_divisors_gcd α hm hn
 
 /-- DLMF 27.3.8: `φ(m) φ(n) = φ(mn) φ((m,n))/(m,n)`. -/
 @[dlmf 27.3.E8]

@@ -64,12 +64,13 @@ private lemma sin_sq_le_sin_sq_of_le {x y : ℝ} (hx : 0 ≤ x) (hxy : x ≤ y) 
   nlinarith
 
 /-- `Π` for real data with `α² sin²φ < 1` on `0 ≤ φ ≤ π/2` needs no principal value. -/
-private lemma incEllIntPik_ofReal_eq_integral_of_lt {φ α2 : ℝ} (hφ0 : 0 ≤ φ) (hφ1 : φ ≤ π / 2)
+private lemma incompleteEllipticPi_ofReal_eq_integral_of_lt {φ α2 : ℝ} (hφ0 : 0 ≤ φ)
+    (hφ1 : φ ≤ π / 2)
     (hα : α2 * Real.sin φ ^ 2 < 1) (k : ℂ) :
-    incEllIntPik φ α2 k = ∫ θ in (0 : ℝ)..φ, ((1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹ *
+    incompleteEllipticPi φ α2 k = ∫ θ in (0 : ℝ)..φ, ((1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹ *
       (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ))) := by
-  rw [incEllIntPik_eq_segmentIntegral (δ := min 1 (1 - α2 * Real.sin φ ^ 2))
-    (lt_min one_pos (by linarith)), segmentIntegral_ofReal]
+  rw [incompleteEllipticPi_eq_primitive (δ := min 1 (1 - α2 * Real.sin φ ^ 2))
+    (lt_min one_pos (by linarith)), primitive_ofReal]
   · simp only [← Complex.ofReal_sin]
   · intro t ht
     have hs := sin_sq_le_sin_sq_of_le (x := t * φ) (y := φ) (by nlinarith [ht.1])
@@ -113,15 +114,17 @@ private lemma integral_arcsin_mul_sin_subst {k β : ℝ} (hk0 : 0 < k) (hk1 : k 
   simp only [Real.sin_zero, mul_zero, Real.arcsin_zero, real_smul, Function.comp] at h
   exact h.symm
 
-/-- Identity under the stated parameter and domain assumptions: `incEllIntFk φ (1 / k : ℝ) = k *
-incEllIntFk β k ∧ incEllIntEk φ (1 / k : ℝ) = (incEllIntEk β k - (1 - k ^ 2 : ℝ) * incEllIntFk
-β k) / k ∧ incEllIntPik φ α2 (1 / k : ℝ) = k * incEllIntPik β (k ^ 2 * α2 : ℝ) k`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`incompleteEllipticF φ (1 / k : ℝ) = k * incompleteEllipticF β k ∧ incompleteEllipticE φ (1 / k : ℝ)
+= (incompleteEllipticE β k - (1 - k ^ 2 : ℝ) * incompleteEllipticF β k) / k ∧ incompleteEllipticPi φ
+α2 (1 / k : ℝ) = k * incompleteEllipticPi β (k ^ 2 * α2 : ℝ) k`. -/
 private lemma incEllInt_reciprocal_modulus_of_arcsin {k β φ α2 : ℝ} (hk0 : 0 < k)
     (hk1 : k < 1) (hβ0 : 0 ≤ β)
     (hβ1 : β ≤ π / 2) (hφ : Real.arcsin (k * Real.sin β) = φ) (hα : α2 * Real.sin φ ^ 2 < 1) :
-    incEllIntFk φ (1 / k : ℝ) = k * incEllIntFk β k ∧
-      incEllIntEk φ (1 / k : ℝ) = (incEllIntEk β k - (1 - k ^ 2 : ℝ) * incEllIntFk β k) / k ∧
-      incEllIntPik φ α2 (1 / k : ℝ) = k * incEllIntPik β (k ^ 2 * α2 : ℝ) k := by
+    incompleteEllipticF φ (1 / k : ℝ) = k * incompleteEllipticF β k ∧
+      incompleteEllipticE φ (1 / k : ℝ) =
+          (incompleteEllipticE β k - (1 - k ^ 2 : ℝ) * incompleteEllipticF β k) / k ∧
+      incompleteEllipticPi φ α2 (1 / k : ℝ) = k * incompleteEllipticPi β (k ^ 2 * α2 : ℝ) k := by
   subst hφ
   have hb : ∀ ψ : ℝ, k * Real.sin ψ ≤ 1 := fun ψ => by
     nlinarith [Real.sin_le_one ψ, Real.neg_one_le_sin ψ]
@@ -172,8 +175,8 @@ private lemma incEllInt_reciprocal_modulus_of_arcsin {k β φ α2 : ℝ} (hk0 : 
   have hsiint : IntervalIntegrable (fun ψ => (((s ψ)⁻¹ : ℝ) : ℂ)) volume 0 β :=
     (continuous_ofReal.comp (hsc.inv₀ fun ψ => (hs0 ψ).ne')).intervalIntegrable _ _
   refine ⟨?_, ?_, ?_⟩
-  · rw [incEllIntFk_ofReal_eq_integral, integral_arcsin_mul_sin_subst hk0 hk1 hβ0 hβ1,
-      incEllIntFk_ofReal_eq_integral, ← intervalIntegral.integral_const_mul]
+  · rw [incompleteEllipticF_ofReal_eq_integral, integral_arcsin_mul_sin_subst hk0 hk1 hβ0 hβ1,
+      incompleteEllipticF_ofReal_eq_integral, ← intervalIntegral.integral_const_mul]
     refine intervalIntegral.integral_congr_ae ?_
     filter_upwards [hae] with ψ hψ hmem
     have hc := hψ hmem
@@ -182,9 +185,9 @@ private lemma incEllInt_reciprocal_modulus_of_arcsin {k β φ α2 : ℝ} (hk0 : 
     have := (Real.sqrt_pos.2 (hspos ψ)).ne'
     simp only [hs]
     field_simp
-  · have hrhs : incEllIntEk β k - (1 - k ^ 2 : ℝ) * incEllIntFk β k =
+  · have hrhs : incompleteEllipticE β k - (1 - k ^ 2 : ℝ) * incompleteEllipticF β k =
         ∫ ψ in (0 : ℝ)..β, ((k ^ 2 * Real.cos ψ ^ 2 / s ψ : ℝ) : ℂ) := by
-      rw [incEllIntEk_ofReal_eq_integral, incEllIntFk_ofReal_eq_integral]
+      rw [incompleteEllipticE_ofReal_eq_integral, incompleteEllipticF_ofReal_eq_integral]
       simp only [fun ψ => (hΔ ψ).1, fun ψ => (hΔ ψ).2]
       rw [← intervalIntegral.integral_const_mul, ← intervalIntegral.integral_sub hsint
         (hsiint.const_mul _)]
@@ -197,7 +200,7 @@ private lemma incEllInt_reciprocal_modulus_of_arcsin {k β φ α2 : ℝ} (hk0 : 
       rw [Real.cos_sq']
       field_simp
       linear_combination h2
-    rw [hrhs, incEllIntEk_ofReal_eq_integral, integral_arcsin_mul_sin_subst hk0 hk1 hβ0 hβ1,
+    rw [hrhs, incompleteEllipticE_ofReal_eq_integral, integral_arcsin_mul_sin_subst hk0 hk1 hβ0 hβ1,
       ← intervalIntegral.integral_div]
     refine intervalIntegral.integral_congr_ae ?_
     filter_upwards [hae] with ψ hψ hmem
@@ -209,9 +212,10 @@ private lemma incEllInt_reciprocal_modulus_of_arcsin {k β φ α2 : ℝ} (hk0 : 
     field_simp
   · have hαβ : (k ^ 2 * α2) * Real.sin β ^ 2 < 1 := by
       have := hα; rw [hsin] at this; nlinarith
-    rw [incEllIntPik_ofReal_eq_integral_of_lt hφ0 hφ1 hα,
+    rw [incompleteEllipticPi_ofReal_eq_integral_of_lt hφ0 hφ1 hα,
         integral_arcsin_mul_sin_subst hk0 hk1 hβ0 hβ1,
-      incEllIntPik_ofReal_eq_integral_of_lt hβ0 hβ1 hαβ, ← intervalIntegral.integral_const_mul]
+      incompleteEllipticPi_ofReal_eq_integral_of_lt hβ0 hβ1 hαβ,
+          ← intervalIntegral.integral_const_mul]
     refine intervalIntegral.integral_congr_ae ?_
     filter_upwards [hae] with ψ hψ hmem
     have hc := hψ hmem
@@ -234,9 +238,10 @@ private lemma incEllInt_reciprocal_modulus_of_arcsin {k β φ α2 : ℝ} (hk0 : 
 theorem incEllInt_reciprocal_modulus {k φ α2 : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hφ0 : 0 ≤ φ)
     (hφ1 : φ ≤ π / 2) (hφk : Real.sin φ ≤ k) (hα : α2 * Real.sin φ ^ 2 < 1) :
     let β := Real.arcsin (Real.sin φ / k)
-    incEllIntFk φ (1 / k : ℝ) = k * incEllIntFk β k ∧
-      incEllIntEk φ (1 / k : ℝ) = (incEllIntEk β k - (1 - k ^ 2 : ℝ) * incEllIntFk β k) / k ∧
-      incEllIntPik φ α2 (1 / k : ℝ) = k * incEllIntPik β (k ^ 2 * α2 : ℝ) k := by
+    incompleteEllipticF φ (1 / k : ℝ) = k * incompleteEllipticF β k ∧
+      incompleteEllipticE φ (1 / k : ℝ) =
+          (incompleteEllipticE β k - (1 - k ^ 2 : ℝ) * incompleteEllipticF β k) / k ∧
+      incompleteEllipticPi φ α2 (1 / k : ℝ) = k * incompleteEllipticPi β (k ^ 2 * α2 : ℝ) k := by
   intro β
   have hs0 : 0 ≤ Real.sin φ := Real.sin_nonneg_of_nonneg_of_le_pi hφ0 (by linarith [Real.pi_pos])
   have hu0 : 0 ≤ Real.sin φ / k := div_nonneg hs0 hk0.le
@@ -469,11 +474,12 @@ theorem incEllInt_imaginary_modulus {k φ α2 : ℝ} (hφ0 : 0 ≤ φ) (hφ1 : �
     let θ := Real.arcsin (Real.sqrt (1 + k ^ 2) * Real.sin φ /
       Real.sqrt (1 + k ^ 2 * Real.sin φ ^ 2))
     let α12 := (α2 + k ^ 2) / (1 + k ^ 2)
-    incEllIntFk φ (I * k) = κ' * incEllIntFk θ κ ∧
-      incEllIntEk φ (I * k) = (1 / κ' : ℝ) * (incEllIntEk θ κ -
+    incompleteEllipticF φ (I * k) = κ' * incompleteEllipticF θ κ ∧
+      incompleteEllipticE φ (I * k) = (1 / κ' : ℝ) * (incompleteEllipticE θ κ -
         (κ ^ 2 * Real.sin θ * Real.cos θ / Real.sqrt (1 - κ ^ 2 * Real.sin θ ^ 2) : ℝ)) ∧
-      incEllIntPik φ α2 (I * k) = (κ' / α12 : ℝ) *
-        ((κ ^ 2 : ℝ) * incEllIntFk θ κ + (κ' ^ 2 * α2 : ℝ) * incEllIntPik θ α12 κ) := by
+      incompleteEllipticPi φ α2 (I * k) = (κ' / α12 : ℝ) *
+        ((κ ^ 2 : ℝ) * incompleteEllipticF θ κ + (κ' ^ 2 * α2 : ℝ) *
+            incompleteEllipticPi θ α12 κ) := by
   intro κ κ' θ α12
   set c := Real.sqrt (1 + k ^ 2) with hc
   set W : ℝ → ℝ := fun u => Real.sqrt (1 + k ^ 2 * Real.sin u ^ 2) with hW
@@ -501,11 +507,11 @@ theorem incEllInt_imaginary_modulus {k φ α2 : ℝ} (hφ0 : 0 ≤ φ) (hφ1 : �
       (Real.sin_nonneg_of_nonneg_of_le_pi hφ0 (by linarith [Real.pi_pos]))) (hW0 φ).le)
   have hθ1 : θ ≤ π / 2 := Real.arcsin_le_pi_div_two _
   -- the first kind
-  have hF1 : incEllIntFk φ (I * k) = ∫ u in (0 : ℝ)..φ, (((W u)⁻¹ : ℝ) : ℂ) := by
-    rw [incEllIntFk_ofReal_eq_integral]
+  have hF1 : incompleteEllipticF φ (I * k) = ∫ u in (0 : ℝ)..φ, (((W u)⁻¹ : ℝ) : ℂ) := by
+    rw [incompleteEllipticF_ofReal_eq_integral]
     exact intervalIntegral.integral_congr fun u _ => (hpt u).1
-  have hF2 : incEllIntFk θ κ = ∫ u in (0 : ℝ)..φ, ((c * (W u)⁻¹ : ℝ) : ℂ) := by
-    rw [incEllIntFk_ofReal_eq_integral, hsub]
+  have hF2 : incompleteEllipticF θ κ = ∫ u in (0 : ℝ)..φ, ((c * (W u)⁻¹ : ℝ) : ℂ) := by
+    rw [incompleteEllipticF_ofReal_eq_integral, hsub]
     refine intervalIntegral.integral_congr fun u _ => ?_
     rw [(hpt u).2.2.1, ← ofReal_mul]
     exact congrArg ofReal (div_mul_sqrt_eq_mul_inv (hW0 u) (hW2 u) c)
@@ -532,7 +538,7 @@ theorem incEllInt_imaginary_modulus {k φ α2 : ℝ} (hφ0 : 0 ≤ φ) (hφ1 : �
       have := (hW0 u).ne'
       field_simp
     have hΔφ : ellDelta (I * k) φ = (W φ : ℂ) := (hpt φ).2.1
-    have hEφ : incEllIntEk φ (I * k) =
+    have hEφ : incompleteEllipticE φ (I * k) =
         (((1 + k ^ 2) * J - k ^ 2 * (Real.sin φ * Real.cos φ) / W φ : ℝ) : ℂ) := by
       have h1k : (1 : ℂ) - (I * k) ^ 2 = ((1 + k ^ 2 : ℝ) : ℂ) := by
         rw [mul_pow, I_sq]; push_cast; ring
@@ -543,8 +549,8 @@ theorem incEllInt_imaginary_modulus {k φ α2 : ℝ} (hφ0 : 0 ≤ φ) (hφ1 : �
       rw [mul_pow, I_sq] at hcube
       push_cast at hcube ⊢
       linear_combination -hcube
-    have hEθ : incEllIntEk θ κ = ((c * J : ℝ) : ℂ) := by
-      rw [incEllIntEk_ofReal_eq_integral, hsub, hJ, ← intervalIntegral.integral_const_mul,
+    have hEθ : incompleteEllipticE θ κ = ((c * J : ℝ) : ℂ) := by
+      rw [incompleteEllipticE_ofReal_eq_integral, hsub, hJ, ← intervalIntegral.integral_const_mul,
         ← intervalIntegral.integral_ofReal]
       refine intervalIntegral.integral_congr fun u _ => ?_
       rw [(hpt u).2.2.2, ← ofReal_mul]
@@ -568,15 +574,15 @@ theorem incEllInt_imaginary_modulus {k φ α2 : ℝ} (hφ0 : 0 ≤ φ) (hφ1 : �
       rcases le_or_gt α12 0 with h | h
       · nlinarith [sq_nonneg (Real.sin θ)]
       · nlinarith [Real.sin_sq_le_one θ]
-    have hP1 : incEllIntPik φ α2 (I * k) =
+    have hP1 : incompleteEllipticPi φ α2 (I * k) =
         ∫ u in (0 : ℝ)..φ, (((1 - α2 * Real.sin u ^ 2)⁻¹ * (W u)⁻¹ : ℝ) : ℂ) := by
-      rw [incEllIntPik_ofReal_eq_integral_of_lt hφ0 hφ1 hα']
+      rw [incompleteEllipticPi_ofReal_eq_integral_of_lt hφ0 hφ1 hα']
       refine intervalIntegral.integral_congr fun u _ => ?_
       rw [(hpt u).1, show (1 - (α2 : ℂ) * (Real.sin u : ℂ) ^ 2)⁻¹ =
         (((1 - α2 * Real.sin u ^ 2)⁻¹ : ℝ) : ℂ) by push_cast; ring, ← ofReal_mul]
-    have hP2 : incEllIntPik θ α12 κ =
+    have hP2 : incompleteEllipticPi θ α12 κ =
         ∫ u in (0 : ℝ)..φ, ((c * W u / (1 - α2 * Real.sin u ^ 2) : ℝ) : ℂ) := by
-      rw [incEllIntPik_ofReal_eq_integral_of_lt hθ0 hθ1 hα12, hsub]
+      rw [incompleteEllipticPi_ofReal_eq_integral_of_lt hθ0 hθ1 hα12, hsub]
       refine intervalIntegral.integral_congr fun u _ => ?_
       have hs : Real.sin (imagModulusAmplitude k u) = c * Real.sin u / W u :=
           sin_imagModulusAmplitude k u

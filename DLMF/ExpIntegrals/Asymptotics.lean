@@ -25,16 +25,18 @@ by Watson's lemma.
 
 * `expIntE1_logSector_asymptotic`: the expansion of `E₁(z)` for `|ph z| ≤ 3π/2 - δ`
   (DLMF 6.12.1).
-* `expIntEi_asymptotic`: the expansion of `Ei(x)` as `x → ∞` (DLMF 6.12.2).
-* `expIntAuxF_sector_asymptotic`, `expIntAuxG_sector_asymptotic`: the expansions of `f` and `g`
-  (DLMF 6.12.3, 6.12.4).
-* `expIntAuxF_remainder_integral`, `expIntAuxG_remainder_integral`: the remainders as Laplace
-  integrals (DLMF 6.12.7, 6.12.8).
-* `expIntE1_remainder_bound`, `expIntE1_remainder_sign`, `expIntEi_remainder_bound`: remainder
+* `expIntegralEi_asymptotic`: the expansion of `Ei(x)` as `x → ∞` (DLMF 6.12.2).
+* `sinIntegralAuxiliaryF_sector_asymptotic`, `sinIntegralAuxiliaryG_sector_asymptotic`: the
+  expansions of `f` and `g` (DLMF 6.12.3, 6.12.4).
+* `sinIntegralAuxiliaryF_remainder_integral`, `sinIntegralAuxiliaryG_remainder_integral`: the
+  remainders as Laplace integrals (DLMF 6.12.7, 6.12.8).
+* `expIntE1_remainder_bound`, `expIntE1_remainder_sign`, `expIntegralEi_remainder_bound`: remainder
   bounds and signs for `E₁` and `Ei` (DLMF §6.12(i)).
 * `ExpIntegralAuxiliary.remainder_bound`, `ExpIntegralAuxiliary.remainder_sign`: remainder bounds
   and signs for `f` and `g` (DLMF §6.12(ii)).
-* `genExpIntE_one_eq_integral_rotate`: the rotated Laplace representation of `E₁`.
+* `expIntegralE_one_eq_integral_rotate`: the rotated Laplace representation of `E₁`.
+* `expIntegralE_one_eq_sum_add`: the expansion of `E₁` with the remainder `E_{M+1}`, which gives
+  the χ-bound for `Ei` from the vertical rotated Laplace integral on the cut.
 -/
 
 @[expose] public noncomputable section
@@ -51,7 +53,8 @@ def expIntAsymptoticTerm (aux : Bool) (n : ℕ) (z : ℂ) : ℂ :=
 /-- Finite auxiliary-function remainder. -/
 @[dlmf 6.12.E5, dlmf 6.12.E6]
 def expIntAsymptoticRemainder (aux : Bool) (N : ℕ) (z : ℂ) : ℂ :=
-  (if aux then expIntAuxG z else expIntAuxF z) - ∑ n ∈ Finset.range N, expIntAsymptoticTerm aux n z
+  (if aux then sinIntegralAuxiliaryG z else sinIntegralAuxiliaryF z) - ∑ n ∈ Finset.range N,
+      expIntAsymptoticTerm aux n z
 
 /-- A convergent improper integral of an integrable function is its Lebesgue integral. -/
 theorem _root_.DLMF.Core.HasIntegralAtTop.eq_integral_Ioi {f : ℝ → ℂ} {a : ℝ} {v : ℂ}
@@ -112,8 +115,8 @@ theorem laplace_rational_succ {z : ℂ} (hz : 0 < z.re) (m : ℕ) :
 
 /-- Real Laplace representations of `f` and `g` for `re z > 0`. -/
 theorem ExpIntegralAuxiliary.laplace_Ioi {z : ℂ} (hz : 0 < z.re) :
-    expIntAuxF z = ∫ t : ℝ in Ioi 0, exp (-z*t)*(t:ℂ)^0/((t:ℂ)^2+1) ∧
-    expIntAuxG z = ∫ t : ℝ in Ioi 0, exp (-z*t)*(t:ℂ)^1/((t:ℂ)^2+1) := by
+    sinIntegralAuxiliaryF z = ∫ t : ℝ in Ioi 0, exp (-z*t)*(t:ℂ)^0/((t:ℂ)^2+1) ∧
+    sinIntegralAuxiliaryG z = ∫ t : ℝ in Ioi 0, exp (-z*t)*(t:ℂ)^1/((t:ℂ)^2+1) := by
   have hz0 : z ≠ 0 := fun h => by simp [h] at hz
   obtain ⟨h1, h2⟩ := ExpIntegralAuxiliary.laplace_hasIntegralAtTop hz0 hz.le
   constructor
@@ -152,23 +155,25 @@ theorem exists_pos_le_norm_ofReal_mul_exp_sq_add_one {θ : ℝ} (hθ : |θ| < π
   exact hc _ (sq_nonneg r) _ (by rw [abs_mul, abs_two]; linarith)
 
 /-- `Ci` is differentiable on the slit plane. -/
-theorem differentiableAt_cosInt {z : ℂ} (hz : z ∈ slitPlane) : DifferentiableAt ℂ cosInt z := by
-  unfold cosInt
-  exact ((cosIntCin_entire z).neg.add (differentiableAt_log hz)).add_const _
+theorem differentiableAt_cosIntegral {z : ℂ} (hz : z ∈ slitPlane) : DifferentiableAt ℂ
+    cosIntegral z := by
+  unfold cosIntegral
+  exact ((cosIntegralCin_entire z).neg.add (differentiableAt_log hz)).add_const _
 
 /-- The auxiliary functions `f` and `g` of DLMF §6.2(ii) are differentiable on the slit plane. -/
 lemma differentiableOn_expIntAux (aux : Bool) :
-    DifferentiableOn ℂ (fun z => if aux then expIntAuxG z else expIntAuxF z) slitPlane := by
+    DifferentiableOn ℂ (fun z => if aux then sinIntegralAuxiliaryG z else sinIntegralAuxiliaryF z)
+        slitPlane := by
   intro z hz
-  have hc := differentiableAt_cosInt hz
-  have hs : DifferentiableAt ℂ sinIntTail z := by
-    unfold sinIntTail; exact (sinInt_entire z).sub_const _
+  have hc := differentiableAt_cosIntegral hz
+  have hs : DifferentiableAt ℂ sinIntegralTail z := by
+    unfold sinIntegralTail; exact (sinIntegral_entire z).sub_const _
   cases aux
   · simp only [Bool.false_eq_true, ite_false]
-    unfold expIntAuxF
+    unfold sinIntegralAuxiliaryF
     exact ((hc.mul (differentiableAt_sin)).sub (hs.mul differentiableAt_cos)).differentiableWithinAt
   · simp only [ite_true]
-    unfold expIntAuxG
+    unfold sinIntegralAuxiliaryG
     exact ((hc.neg.mul differentiableAt_cos).sub
         (hs.mul differentiableAt_sin)).differentiableWithinAt
 
@@ -283,7 +288,8 @@ theorem ofReal_mul_exp_sq_add_one_ne {θ c : ℝ} (hc0 : 0 < c)
 `f(z), g(z) = e^{iθ} ∫₀^∞ e^{-z e^{iθ} r} (r e^{iθ})ᵐ/((r e^{iθ})² + 1) dr`. -/
 lemma ExpIntegralAuxiliary.eq_integral_rotate (aux : Bool) {θ : ℝ} (hθ : |θ| < π / 2) {z : ℂ}
     (hz : 0 < (z * exp (θ * I)).re) :
-    (if aux then expIntAuxG z else expIntAuxF z) = exp (θ * I) * ∫ r in Ioi (0 : ℝ),
+    (if aux then sinIntegralAuxiliaryG z else sinIntegralAuxiliaryF z) = exp (θ * I) *
+        ∫ r in Ioi (0 : ℝ),
       cexp (-(z * exp (θ * I) * r)) * (((r : ℂ) * exp (θ * I)) ^ (if aux then 1 else 0) /
         (((r : ℂ) * exp (θ * I)) ^ 2 + 1)) := by
   set m : ℕ := if aux then 1 else 0 with hm
@@ -328,13 +334,15 @@ lemma ExpIntegralAuxiliary.eq_integral_rotate (aux : Bool) {θ : ℝ} (hθ : |θ
       cexp (-(z * exp (θ * I) * r)) * G r) U :=
     (differentiableOn_const _).mul (hLd.comp (differentiableOn_id.mul_const _)
       (fun z hz => hz))
-  have hL : DifferentiableOn ℂ (fun z => if aux then expIntAuxG z else expIntAuxF z) U :=
+  have hL : DifferentiableOn ℂ
+      (fun z => if aux then sinIntegralAuxiliaryG z else sinIntegralAuxiliaryF z) U :=
     (differentiableOn_expIntAux aux).mono hUs
   -- agreement on `U ∩ {re z > 0}`
-  have hagree : ∀ w : ℂ, 0 < w.re → w ∈ U → (if aux then expIntAuxG w else expIntAuxF w) =
+  have hagree : ∀ w : ℂ, 0 < w.re → w ∈ U →
+      (if aux then sinIntegralAuxiliaryG w else sinIntegralAuxiliaryF w) =
       exp (θ * I) * ∫ r in Ioi (0 : ℝ), cexp (-(w * exp (θ * I) * r)) * G r := by
     intro w hw hwU
-    have hlap : (if aux then expIntAuxG w else expIntAuxF w) =
+    have hlap : (if aux then sinIntegralAuxiliaryG w else sinIntegralAuxiliaryF w) =
         ∫ t : ℝ in Ioi 0, cexp (-(w * t)) * ((t : ℂ) ^ m / ((t : ℂ) ^ 2 + 1)) := by
       have h := ExpIntegralAuxiliary.laplace_Ioi hw
       rw [hm]
@@ -366,7 +374,7 @@ lemma ExpIntegralAuxiliary.eq_integral_rotate (aux : Bool) {θ : ℝ} (hθ : |θ
     rw [hz₀, ← Complex.exp_add, show ((-(θ / 2) : ℝ) : ℂ) * I + θ * I = ((θ / 2 : ℝ) : ℂ) * I by
       push_cast; ring, exp_ofReal_mul_I_re]
     exact hcos
-  have hev : (fun z => if aux then expIntAuxG z else expIntAuxF z) =ᶠ[𝓝 z₀]
+  have hev : (fun z => if aux then sinIntegralAuxiliaryG z else sinIntegralAuxiliaryF z) =ᶠ[𝓝 z₀]
       (fun z : ℂ => exp (θ * I) * ∫ r in Ioi (0 : ℝ), cexp (-(z * exp (θ * I) * r)) * G r) := by
     have hV : IsOpen {w : ℂ | 0 < w.re} := isOpen_lt continuous_const continuous_re
     filter_upwards [hV.mem_nhds hz₀re, hUo.mem_nhds hz₀U] with w hw hwU
@@ -380,7 +388,7 @@ lemma ExpIntegralAuxiliary.rotatedSector_asymptotic (aux : Bool) {θ δ : ℝ}
     HasAsymptoticExpansion (comap (fun z : ℂ => z * exp (θ * I)) (sectorAtTop δ))
       (fun (n : ℕ) (z : ℂ) => z ^ (-((n : ℂ) + 1)))
       (fun n => Gamma ((n : ℂ) + 1) • expIntAuxCoeff (if aux then 1 else 0) n)
-      (fun z => if aux then expIntAuxG z else expIntAuxF z) := by
+      (fun z => if aux then sinIntegralAuxiliaryG z else sinIntegralAuxiliaryF z) := by
   set m : ℕ := if aux then 1 else 0 with hm
   obtain ⟨c, hc0, hc⟩ := exists_pos_le_norm_ofReal_mul_exp_sq_add_one hθ
   have hGc : ContinuousOn (fun r : ℝ => ((r : ℂ) * exp (θ * I)) ^ m /
@@ -430,7 +438,7 @@ theorem sector_pi_sub_le_sup {δ : ℝ} (hδ : 0 < δ) :
 lemma expIntE1OnLog_eq_genExpIntEOnLog_one (w : ℂ) :
     expIntE1OnLog w = genExpIntEOnLog 1 w := by
   simp only [genExpIntEOnLog, sub_self, zero_mul, Complex.exp_zero, one_mul,
-    upperIncGammaOnLog_zero, expIntE1OnLog]
+    upperIncompleteGammaOnLog_zero, expIntE1OnLog]
 
 /-- Identity under the stated parameter and domain assumptions: `HasAsymptoticExpansion (logSector
 (3*π/2-δ)) (fun n w => exp (-exp w-(n+1 : ℂ)*w)) (fun n => (-1 : ℂ)^n*n.factorial)
@@ -439,10 +447,10 @@ expIntE1OnLog`. -/
 theorem expIntE1_logSector_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < 3*π/2) :
     HasAsymptoticExpansion (logSector (3*π/2-δ)) (fun n w => exp (-exp w-(n+1 : ℂ)*w))
         (fun n => (-1 : ℂ)^n*n.factorial) expIntE1OnLog := by
-  have h := genExpIntE_log_sector_asymptotic 1 hδ hδ1
+  have h := expIntegralE_log_sector_asymptotic 1 hδ hδ1
   have he : genExpIntEOnLog 1 = expIntE1OnLog := by
     funext w; exact (expIntE1OnLog_eq_genExpIntEOnLog_one w).symm
-  simp only [poch_nat_one, he] at h
+  simp only [pochhammer_nat_one, he] at h
   exact h
 
 /-- At `w = log x + π i`, the E₁ asymptotic scale is `e^x/(-x)^{n+1}`. -/
@@ -456,11 +464,11 @@ theorem exp_neg_exp_sub_mul_log_add_pi_I {x : ℝ} (hx : 0 < x) (n : ℕ) :
       push_cast; ring, Complex.exp_neg, Complex.exp_nat_mul, hw, div_eq_mul_inv]
 
 /-- Identity under the stated parameter and domain assumptions: `HasAsymptoticExpansion atTop (fun
-n (x : ℝ) => Real.exp x / x^(n+1)) (fun n => (n.factorial : ℝ)) Real.expIntEi`. -/
+n (x : ℝ) => Real.exp x / x^(n+1)) (fun n => (n.factorial : ℝ)) Real.expIntegralEi`. -/
 @[dlmf 6.12.E2]
-theorem expIntEi_asymptotic  :
+theorem expIntegralEi_asymptotic  :
     HasAsymptoticExpansion atTop (fun n (x : ℝ) => Real.exp x / x^(n+1))
-        (fun n => (n.factorial : ℝ)) Real.expIntEi := by
+        (fun n => (n.factorial : ℝ)) Real.expIntegralEi := by
   have hδ : (0:ℝ) < π/2 := by positivity
   have hδ1 : π/2 < 3*π/2 := by linarith [Real.pi_pos]
   set g : ℝ → ℂ := fun x => (Real.log x : ℂ) + π*I with hg
@@ -478,7 +486,7 @@ theorem expIntEi_asymptotic  :
   have h := (expIntE1_logSector_asymptotic hδ hδ1).comp_tendsto hgt
   intro N
   have hN := h N
-  have hL : (fun x : ℝ => Real.expIntEi x - ∑ n ∈ Finset.range N,
+  have hL : (fun x : ℝ => Real.expIntegralEi x - ∑ n ∈ Finset.range N,
       (Real.exp x / x^(n+1)) • (n.factorial : ℝ)) =O[atTop]
       (fun x => (expIntE1OnLog ∘ g) x - ∑ n ∈ Finset.range N,
         exp (-exp (g x)-(n+1 : ℂ)*(g x)) • ((-1 : ℂ)^n*n.factorial)) := by
@@ -494,11 +502,11 @@ theorem expIntEi_asymptotic  :
       simp only [Complex.ofReal_exp]
       have hx0 : (x:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hx.ne'
       field_simp
-    have hre : (expIntE1OnLog (g x)).re = -Real.expIntEi x := by
+    have hre : (expIntE1OnLog (g x)).re = -Real.expIntegralEi x := by
       have := expIntE1OnLog_halfTurn (Real.log x : ℂ) (ε := 1) (Or.inl rfl)
       simp only [Complex.ofReal_one, one_mul] at this
       rw [hg]; simp only
-      rw [this, ← Complex.ofReal_exp, Real.exp_log hx, Real.expIntEi, abs_of_pos hx]
+      rw [this, ← Complex.ofReal_exp, Real.exp_log hx, Real.expIntegralEi, abs_of_pos hx]
       simp; ring
     rw [Function.comp_apply, hsum, sub_neg_eq_add]
     refine le_trans ?_ (Complex.abs_re_le_norm _)
@@ -511,11 +519,11 @@ theorem expIntEi_asymptotic  :
 
 /-- Identity under the stated parameter and domain assumptions: `HasAsymptoticExpansion (sector
 (π-δ)) (fun n z => z^(-(2*(n : ℂ)+1))) (fun n => (-1 : ℂ)^n*((2*n+0).factorial : ℂ))
-expIntAuxF`. -/
+sinIntegralAuxiliaryF`. -/
 @[dlmf 6.12.E3]
-theorem expIntAuxF_sector_asymptotic {δ : ℝ} (hδ : 0 < δ) :
+theorem sinIntegralAuxiliaryF_sector_asymptotic {δ : ℝ} (hδ : 0 < δ) :
     HasAsymptoticExpansion (sector (π-δ)) (fun n z => z^(-(2*(n : ℂ)+1)))
-        (fun n => (-1 : ℂ)^n*((2*n+0).factorial : ℂ)) expIntAuxF := by
+        (fun n => (-1 : ℂ)^n*((2*n+0).factorial : ℂ)) sinIntegralAuxiliaryF := by
   obtain ⟨β, hβ, hcos, hcov⟩ := sector_pi_sub_le_sup hδ
   have hodd : ∀ n : ℕ, Gamma (((2 * n + 1 : ℕ) : ℂ) + 1) • expIntAuxCoeff 0 (2 * n + 1) = 0 := by
     intro n
@@ -535,18 +543,18 @@ theorem expIntAuxF_sector_asymptotic {δ : ℝ} (hδ : 0 < δ) :
 /-- Identity under the stated parameter and domain assumptions: `expIntAsymptoticRemainder false N
 z = (-1 : ℂ)^N * ∫ t : ℝ in Ioi 0, exp (-z*t)*(t : ℂ)^(2*N+0)/((t : ℂ)^2+1)`. -/
 @[dlmf 6.12.E7]
-theorem expIntAuxF_remainder_integral {z : ℂ} (hz : 0 < z.re) (N : ℕ) :
+theorem sinIntegralAuxiliaryF_remainder_integral {z : ℂ} (hz : 0 < z.re) (N : ℕ) :
     expIntAsymptoticRemainder false N z = (-1 : ℂ)^N * ∫ t : ℝ in Ioi 0,
         exp (-z*t)*(t : ℂ)^(2*N+0)/((t : ℂ)^2+1) := by
   simpa using ExpIntegralAuxiliary.remainder_integral_general false hz N
 
 /-- Identity under the stated parameter and domain assumptions: `HasAsymptoticExpansion (sector
 (π-δ)) (fun n z => z^(-(2*(n : ℂ)+2))) (fun n => (-1 : ℂ)^n*((2*n+1).factorial : ℂ))
-expIntAuxG`. -/
+sinIntegralAuxiliaryG`. -/
 @[dlmf 6.12.E4]
-theorem expIntAuxG_sector_asymptotic {δ : ℝ} (hδ : 0 < δ) :
+theorem sinIntegralAuxiliaryG_sector_asymptotic {δ : ℝ} (hδ : 0 < δ) :
     HasAsymptoticExpansion (sector (π-δ)) (fun n z => z^(-(2*(n : ℂ)+2)))
-        (fun n => (-1 : ℂ)^n*((2*n+1).factorial : ℂ)) expIntAuxG := by
+        (fun n => (-1 : ℂ)^n*((2*n+1).factorial : ℂ)) sinIntegralAuxiliaryG := by
   obtain ⟨β, hβ, hcos, hcov⟩ := sector_pi_sub_le_sup hδ
   have hev : ∀ n : ℕ, Gamma (((2 * n : ℕ) : ℂ) + 1) • expIntAuxCoeff 1 (2 * n) = 0 := by
     intro n
@@ -570,15 +578,15 @@ theorem expIntAuxG_sector_asymptotic {δ : ℝ} (hδ : 0 < δ) :
 /-- Identity under the stated parameter and domain assumptions: `expIntAsymptoticRemainder true N
 z = (-1 : ℂ)^N * ∫ t : ℝ in Ioi 0, exp (-z*t)*(t : ℂ)^(2*N+1)/((t : ℂ)^2+1)`. -/
 @[dlmf 6.12.E8]
-theorem expIntAuxG_remainder_integral {z : ℂ} (hz : 0 < z.re) (N : ℕ) :
+theorem sinIntegralAuxiliaryG_remainder_integral {z : ℂ} (hz : 0 < z.re) (N : ℕ) :
     expIntAsymptoticRemainder true N z = (-1 : ℂ)^N * ∫ t : ℝ in Ioi 0,
         exp (-z*t)*(t : ℂ)^(2*N+1)/((t : ℂ)^2+1) := by
   simpa using ExpIntegralAuxiliary.remainder_integral_general true hz N
 
 /-- Rotated Laplace representation of `E₁`: for `z ≠ 0` with `|arg z| < π`,
 `E₁(z) = e^{-z} e^{iθ} ∫₀^∞ e^{-|z| r}/(1 + r e^{iθ}) dr` with `θ = -arg z`. -/
-theorem genExpIntE_one_eq_integral_rotate {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π) :
-    genExpIntE 1 z = cexp (-z) * (exp (((-arg z : ℝ) : ℂ) * I) * ∫ r in Ioi (0 : ℝ),
+theorem expIntegralE_one_eq_integral_rotate {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π) :
+    expIntegralE 1 z = cexp (-z) * (exp (((-arg z : ℝ) : ℂ) * I) * ∫ r in Ioi (0 : ℝ),
       cexp (-((‖z‖ : ℂ) * r)) * (1 + (r : ℂ) * exp (((-arg z : ℝ) : ℂ) * I))⁻¹) := by
   have hθ : |-arg z| < π := by rwa [abs_neg]
   have hw : |(log z).im + -arg z| < π / 2 := by
@@ -590,7 +598,7 @@ theorem genExpIntE_one_eq_integral_rotate {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z
     rw [mul_assoc, ← Complex.exp_add]
     push_cast
     simp
-  have h2 := genExpIntEOnLog_eq_genExpIntE 1 (w := log z) (by rw [log_im]; exact neg_pi_lt_arg z)
+  have h2 := genExpIntEOnLog_eq_expIntegralE 1 (w := log z) (by rw [log_im]; exact neg_pi_lt_arg z)
     (by rw [log_im]; exact arg_le_pi z)
   rw [Complex.exp_log hz0] at h2
   rw [← h2, h, hze]
@@ -598,7 +606,7 @@ theorem genExpIntE_one_eq_integral_rotate {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z
 
 /-- First omitted term and csc multiplier from DLMF §6.12(i). -/
 lemma expIntE1_remainder_bound {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π) (N : ℕ) :
-    ‖genExpIntE 1 z - exp (-z)*∑ n ∈ Finset.range N, (-1 : ℂ)^n*(n.factorial : ℂ)/z^(n+1)‖ ≤
+    ‖expIntegralE 1 z - exp (-z)*∑ n ∈ Finset.range N, (-1 : ℂ)^n*(n.factorial : ℂ)/z^(n+1)‖ ≤
         (if |arg z| ≤ π/2 then 1 else 1/Real.sin |arg z|) *
         ‖exp (-z)*(N.factorial : ℂ)/z^(N+1)‖ := by
   set θ : ℝ := -arg z with hθ
@@ -719,9 +727,9 @@ lemma expIntE1_remainder_bound {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π) (N 
   have hzpow : ∀ n : ℕ, z^(n+1) = (a : ℂ)^(n+1) / e^(n+1) := by
     intro n
     rw [← hze, mul_pow]; field_simp
-  have hmain : genExpIntE 1 z - exp (-z)*∑ n ∈ Finset.range N,
+  have hmain : expIntegralE 1 z - exp (-z)*∑ n ∈ Finset.range N,
       (-1 : ℂ)^n*(n.factorial : ℂ)/z^(n+1) = cexp (-z) * (e * ∫ r in Ioi (0 : ℝ), R r) := by
-    rw [genExpIntE_one_eq_integral_rotate hz0 hz, ← hθ, ← he, ← ha, hint, mul_add,
+    rw [expIntegralE_one_eq_integral_rotate hz0 hz, ← hθ, ← he, ← ha, hint, mul_add,
       mul_add, Finset.mul_sum, Finset.mul_sum, Finset.mul_sum]
     have : ∀ n ∈ Finset.range N, cexp (-z) * (e * ((-e)^n * (n.factorial / (a : ℂ)^(n+1)))) =
         cexp (-z) * ((-1 : ℂ)^n*(n.factorial : ℂ)/z^(n+1)) := by
@@ -783,12 +791,12 @@ theorem integral_exp_neg_div_pow_succ {x : ℝ} (hx : 0 < x) (k : ℕ) :
 
 /-- Signed real remainder in DLMF §6.12(i). -/
 lemma expIntE1_remainder_sign {x : ℝ} (hx : 0 < x) (N : ℕ) :
-    0 ≤ (-1 : ℝ)^N * ((genExpIntE 1 x).re - Real.exp (-x)*∑ n ∈ Finset.range N,
+    0 ≤ (-1 : ℝ)^N * ((expIntegralE 1 x).re - Real.exp (-x)*∑ n ∈ Finset.range N,
         (-1 : ℝ)^n*(n.factorial : ℝ)/x^(n+1)) := by
-  have hE : (genExpIntE 1 x).re = ∫ t in Ioi x, Real.exp (-t)/t^(0+1) := by
-    rw [genExpIntE_one_eq_integral hx, Complex.ofReal_re]
+  have hE : (expIntegralE 1 x).re = ∫ t in Ioi x, Real.exp (-t)/t^(0+1) := by
+    rw [expIntegralE_one_eq_integral hx, Complex.ofReal_re]
     simp
-  have key : ∀ N : ℕ, (genExpIntE 1 x).re - Real.exp (-x)*∑ n ∈ Finset.range N,
+  have key : ∀ N : ℕ, (expIntegralE 1 x).re - Real.exp (-x)*∑ n ∈ Finset.range N,
       (-1 : ℝ)^n*(n.factorial : ℝ)/x^(n+1) =
       (-1:ℝ)^N*N.factorial*∫ t in Ioi x, Real.exp (-t)/t^(N+1) := by
     intro N
@@ -804,12 +812,251 @@ lemma expIntE1_remainder_sign {x : ℝ} (hx : 0 < x) (N : ℕ) :
   refine mul_nonneg (by positivity) (setIntegral_nonneg measurableSet_Ioi fun t ht => ?_)
   exact div_nonneg (Real.exp_pos _).le (pow_nonneg (lt_trans hx ht).le _)
 
+/-- Integrability of `(1 + r²)^(-a)` on `(0, ∞)` for `a ≥ 1`. -/
+private theorem integrableOn_one_add_sq_rpow_neg {a : ℝ} (ha : 1 ≤ a) :
+    IntegrableOn (fun r : ℝ => (1 + r^2) ^ (-a)) (Ioi 0) := by
+  refine (integrable_inv_one_add_sq.mono'
+    ((Continuous.rpow_const (by fun_prop) fun r => Or.inl (by positivity)).aestronglyMeasurable)
+    (Eventually.of_forall fun r => ?_)).integrableOn
+  have h1 : 1 ≤ 1 + r^2 := by nlinarith
+  rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+  calc (1 + r^2) ^ (-a) ≤ (1 + r^2) ^ (-1:ℝ) := Real.rpow_le_rpow_of_exponent_le h1 (by linarith)
+    _ = (1 + r^2)⁻¹ := Real.rpow_neg_one _
+
+/-- On the cut, `|E_{M+1}(-x)| ≤ e^x ∫₀^∞ (1+r²)^{-(M+1)/2} dr` for `M ≥ 1`. -/
+private theorem norm_expIntegralE_neg_le {M : ℕ} (hM : 1 ≤ M) {x : ℝ} (hx : 0 < x) :
+    ‖expIntegralE ((M:ℂ)+1) (-(x:ℂ))‖ ≤
+      Real.exp x * ∫ r in Ioi (0:ℝ), (1 + r^2) ^ (-(((M:ℝ)+1)/2)) := by
+  set a : ℝ := ((M:ℝ)+1)/2 with ha
+  have ha1 : 1 ≤ a := by
+    rw [ha]; have : (1:ℝ) ≤ M := by exact_mod_cast hM
+    linarith
+  set J := ∫ r in Ioi (0:ℝ), (1 + r^2) ^ (-a) with hJ
+  have hJi := integrableOn_one_add_sq_rpow_neg ha1
+  have hw : cexp ((Real.log x : ℂ) + π*I) = -(x:ℂ) := by
+    rw [Complex.exp_add, Complex.exp_pi_mul_I, ← Complex.ofReal_exp, Real.exp_log hx]; ring
+  have hE : expIntegralE ((M:ℂ)+1) (-(x:ℂ)) =
+      genExpIntEOnLog ((M:ℂ)+1) ((Real.log x : ℂ) + π*I) := by
+    rw [genExpIntEOnLog_eq_expIntegralE _ (by simp [Real.pi_pos]) (by simp), hw]
+  -- bound for each rotation angle
+  have key : ∀ s : ℝ, 0 < s → s < π/2 →
+      ‖expIntegralE ((M:ℂ)+1) (-(x:ℂ))‖ ≤ Real.exp x * ((1 - Real.sin s) ^ (-a) * J) := by
+    intro s hs0 hs1
+    set θ : ℝ := -(π/2) - s with hθ
+    have hθπ : |θ| < π := by
+      rw [abs_lt]; constructor <;> linarith [Real.pi_pos]
+    have hwθ : |((Real.log x : ℂ) + π*I).im + θ| < π/2 := by
+      simp only [add_im, ofReal_im, mul_im, ofReal_re, I_re, mul_zero, I_im, mul_one, zero_add]
+      rw [hθ, abs_lt]; constructor <;> linarith [Real.pi_pos]
+    have hsin : Real.sin s < 1 := by
+      rw [← Real.sin_pi_div_two]
+      exact Real.sin_lt_sin_of_lt_of_le_pi_div_two (by linarith) le_rfl hs1
+    have hsin0 : 0 < Real.sin s := Real.sin_pos_of_pos_of_lt_pi hs0 (by linarith)
+    have hcos : Real.cos θ = -Real.sin s := by
+      rw [hθ, show -(π/2) - s = -(π/2 + s) by ring, Real.cos_neg, Real.cos_add,
+        Real.cos_pi_div_two, Real.sin_pi_div_two]; ring
+    have hsinθ : Real.sin θ = -Real.cos s := by
+      rw [hθ, show -(π/2) - s = -(π/2 + s) by ring, Real.sin_neg, Real.sin_add,
+        Real.cos_pi_div_two, Real.sin_pi_div_two]; ring
+    rw [hE, genExpIntEOnLog_eq_integral_rotate _ hθπ hwθ, hw, neg_neg, norm_mul, norm_mul,
+      norm_exp_ofReal_mul_I, one_mul, ← Complex.ofReal_exp, Complex.norm_real,
+      Real.norm_eq_abs, abs_of_pos (Real.exp_pos x)]
+    refine mul_le_mul_of_nonneg_left ?_ (Real.exp_pos x).le
+    refine (norm_integral_le_integral_norm _).trans ?_
+    rw [hJ, ← integral_const_mul]
+    refine integral_mono_of_nonneg (Eventually.of_forall fun r => norm_nonneg _)
+      (hJi.const_mul _) ?_
+    refine (ae_restrict_mem measurableSet_Ioi).mono fun r hr => ?_
+    have hr : 0 < r := hr
+    simp only
+    rw [norm_mul]
+    have h1 : ‖cexp (-(-(x:ℂ) * cexp (θ * I) * r))‖ ≤ 1 := by
+      rw [Complex.norm_exp, Real.exp_le_one_iff]
+      rw [show -(-(x:ℂ) * cexp (θ * I) * r) = ((x * r : ℝ) : ℂ) * cexp (θ * I) by push_cast; ring,
+        re_ofReal_mul, exp_ofReal_mul_I_re, hcos]
+      nlinarith [mul_pos hx hr]
+    set q := ‖1 + (r:ℂ) * cexp (θ * I)‖ with hq
+    have hq2 : q^2 = 1 - 2*r*Real.sin s + r^2 := by
+      rw [hq, Complex.sq_norm, Complex.normSq_apply]
+      simp only [add_re, one_re, re_ofReal_mul, exp_ofReal_mul_I_re, add_im, one_im,
+        im_ofReal_mul, exp_ofReal_mul_I_im, hcos, hsinθ]
+      nlinarith [Real.sin_sq_add_cos_sq s]
+    set B := (1 - Real.sin s) * (1 + r^2) with hB
+    have hB0 : 0 < B := by rw [hB]; nlinarith
+    have hBq : B ≤ q^2 := by rw [hq2, hB]; nlinarith [sq_nonneg (1 - r)]
+    have hq0 : 0 < q := by
+      have : 0 < q^2 := lt_of_lt_of_le hB0 hBq
+      exact lt_of_le_of_ne (norm_nonneg _) (fun h => by rw [← h] at this; simp at this)
+    have h2 : ‖(1 + (r:ℂ) * cexp (θ * I)) ^ (-((M:ℂ)+1))‖ ≤ B ^ (-a) := by
+      rw [show ((M:ℂ)+1) = ((M+1 : ℕ) : ℂ) by push_cast; ring, cpow_neg, cpow_natCast,
+        norm_inv, norm_pow, ← hq]
+      have hsq : Real.sqrt B ≤ q := by
+        rw [Real.sqrt_le_left hq0.le]; exact hBq
+      have hBa : B ^ (-a) = ((Real.sqrt B) ^ (M+1))⁻¹ := by
+        rw [Real.sqrt_eq_rpow, ← Real.rpow_natCast, ← Real.rpow_mul hB0.le, ← Real.rpow_neg hB0.le,
+          ha]
+        push_cast; ring_nf
+      rw [hBa]
+      exact inv_anti₀ (pow_pos (Real.sqrt_pos.mpr hB0) _)
+        (pow_le_pow_left₀ (Real.sqrt_nonneg _) hsq _)
+    have h3 : B ^ (-a) = (1 - Real.sin s) ^ (-a) * (1 + r^2) ^ (-a) := by
+      rw [hB, Real.mul_rpow (by linarith) (by positivity)]
+    rw [← h3]
+    calc ‖cexp (-(-(x:ℂ) * cexp (θ * I) * r))‖ * ‖(1 + (r:ℂ) * cexp (θ * I)) ^ (-((M:ℂ)+1))‖
+        ≤ 1 * B ^ (-a) := mul_le_mul h1 h2 (norm_nonneg _) zero_le_one
+      _ = B ^ (-a) := one_mul _
+  -- let the rotation angle tend to the vertical
+  have hlim : Tendsto (fun s : ℝ => Real.exp x * ((1 - Real.sin s) ^ (-a) * J)) (𝓝[>] 0)
+      (𝓝 (Real.exp x * ((1 - Real.sin 0) ^ (-a) * J))) := by
+    refine (Tendsto.const_mul _ (Tendsto.mul_const _ (Tendsto.rpow_const ?_ (Or.inl ?_)))).mono_left
+      nhdsWithin_le_nhds
+    · exact ((continuous_const.sub Real.continuous_sin).tendsto 0)
+    · simp
+  rw [Real.sin_zero, sub_zero, Real.one_rpow, one_mul] at hlim
+  refine ge_of_tendsto hlim ?_
+  filter_upwards [Ioo_mem_nhdsGT (show (0:ℝ) < π/2 by positivity)] with s hs
+  exact key s hs.1 hs.2
+
+/-- The recurrence DLMF 8.19.12 iterated `M` times:
+`E₁(z) = e^{-z} ∑_{n<M} (-1)^n n!/z^{n+1} + (-1)^M M! z^{-M} E_{M+1}(z)`. -/
+theorem expIntegralE_one_eq_sum_add {z : ℂ} (hz : z ≠ 0) (M : ℕ) :
+    expIntegralE 1 z = exp (-z) * ∑ n ∈ Finset.range M, (-1 : ℂ)^n * (n.factorial : ℂ) / z^(n+1) +
+      (-1 : ℂ)^M * (M.factorial : ℂ) / z^M * expIntegralE (M+1) z := by
+  induction M with
+  | zero => simp
+  | succ M ih =>
+    have h := expIntegralE_add_one ((M:ℂ)+1) hz
+    rw [ih, Finset.sum_range_succ]
+    have e : ((M+1 : ℕ) : ℂ) + 1 = (M:ℂ) + 1 + 1 := by push_cast; ring
+    rw [e]
+    have hE : expIntegralE ((M:ℂ)+1) z =
+        (exp (-z) - ((M:ℂ)+1) * expIntegralE ((M:ℂ)+1+1) z) / z := by
+      field_simp; linear_combination h
+    rw [hE, Nat.factorial_succ]
+    push_cast
+    field_simp
+    ring
+
+/-- `Re E₁(-x) = -Ei(x)` on the principal branch. -/
+private theorem re_expIntegralE_one_neg {x : ℝ} (hx : 0 < x) :
+    (expIntegralE 1 (-(x:ℂ))).re = -Real.expIntegralEi x := by
+  have hw : cexp ((Real.log x : ℂ) + π*I) = -(x:ℂ) := by
+    rw [Complex.exp_add, Complex.exp_pi_mul_I, ← Complex.ofReal_exp, Real.exp_log hx]; ring
+  have h1 := genExpIntEOnLog_eq_expIntegralE 1 (w := (Real.log x : ℂ) + π*I)
+    (by simp [Real.pi_pos]) (by simp)
+  rw [hw, ← expIntE1OnLog_eq_genExpIntEOnLog_one] at h1
+  rw [← h1]
+  have := expIntE1OnLog_halfTurn (Real.log x : ℂ) (ε := 1) (Or.inl rfl)
+  simp only [Complex.ofReal_one, one_mul] at this
+  rw [this, ← Complex.ofReal_exp, Real.exp_log hx, Real.expIntegralEi, abs_of_pos hx]
+  simp; ring
+
+/-- `∫₀^∞ (1+r²)^{-a} dr = √π Γ(a-1/2)/(2Γ(a))` for `a > 1/2`. -/
+private theorem integral_one_add_sq_rpow_neg {a : ℝ} (ha : 1/2 < a) :
+    ∫ r in Ioi (0:ℝ), (1 + r^2) ^ (-a) =
+      Real.sqrt π * Real.Gamma (a - 1/2) / (2 * Real.Gamma a) := by
+  have hsub := integral_comp_rpow_Ioi_of_pos (g := fun y : ℝ => (1/2 : ℝ) * y ^ (-(1/2:ℝ)) *
+    (1 + y) ^ (-a)) (p := 2) two_pos
+  have hl : ∫ x in Ioi (0:ℝ), ((2:ℝ) * x ^ ((2:ℝ) - 1)) • ((1/2 : ℝ) * (x ^ (2:ℝ)) ^ (-(1/2:ℝ)) *
+      (1 + x ^ (2:ℝ)) ^ (-a)) = ∫ r in Ioi (0:ℝ), (1 + r^2) ^ (-a) := by
+    refine setIntegral_congr_fun measurableSet_Ioi fun x hx => ?_
+    have hx : 0 < x := hx
+    simp only [smul_eq_mul]
+    rw [show (2:ℝ) - 1 = 1 by norm_num, Real.rpow_one, ← Real.rpow_mul hx.le,
+      show (2:ℝ) * (-(1/2)) = -1 by norm_num, Real.rpow_neg_one, Real.rpow_two]
+    field_simp
+  rw [hl] at hsub
+  rw [hsub]
+  have hm := DLMF.Gamma.mellin_one_add_cpow_neg (a := (a:ℂ)) (s := (1/2:ℂ)) (by norm_num)
+    (by simp; linarith)
+  rw [mellin] at hm
+  have hc : (∫ t in Ioi (0:ℝ), (t:ℂ) ^ ((1/2:ℂ) - 1) • (((1 + t : ℝ) : ℂ) ^ (-(a:ℂ)))) =
+      ((∫ y in Ioi (0:ℝ), y ^ (-(1/2:ℝ)) * (1 + y) ^ (-a) : ℝ) : ℂ) := by
+    rw [← integral_complex_ofReal]
+    refine setIntegral_congr_fun measurableSet_Ioi fun t ht => ?_
+    have ht : 0 < t := ht
+    simp only [smul_eq_mul]
+    push_cast
+    rw [ofReal_cpow ht.le, ofReal_cpow (by positivity : (0:ℝ) ≤ 1 + t)]
+    push_cast
+    norm_num
+  rw [hc] at hm
+  have hG1 : Complex.Gamma (1/2) = (Real.sqrt π : ℂ) := by
+    rw [Complex.Gamma_one_half_eq, Real.sqrt_eq_rpow, ofReal_cpow Real.pi_pos.le]
+    push_cast; ring_nf
+  have hG2 : Complex.Gamma ((a:ℂ) - 1/2) = (Real.Gamma (a - 1/2) : ℂ) := by
+    rw [← Complex.Gamma_ofReal]; push_cast; ring_nf
+  have hG3 : Complex.Gamma (a:ℂ) = (Real.Gamma a : ℂ) := by rw [← Complex.Gamma_ofReal]
+  rw [hG1, hG2, hG3] at hm
+  have hm' : (∫ y in Ioi (0:ℝ), y ^ (-(1/2:ℝ)) * (1 + y) ^ (-a)) =
+      Real.sqrt π * Real.Gamma (a - 1/2) / Real.Gamma a := by
+    exact_mod_cast hm
+  have : (∫ y in Ioi (0:ℝ), (1/2 : ℝ) * y ^ (-(1/2:ℝ)) * (1 + y) ^ (-a)) =
+      (1/2) * ∫ y in Ioi (0:ℝ), y ^ (-(1/2:ℝ)) * (1 + y) ^ (-a) := by
+    rw [← integral_const_mul]; congr 1; funext y; ring
+  rw [this, hm']
+  ring
+
 /-- The χ-dependent Ei remainder estimate in DLMF §6.12(i). -/
-theorem expIntEi_remainder_bound {x : ℝ} (hx : 0 < x) (N : ℕ) :
-    |Real.expIntEi x - Real.exp x*∑ n ∈ Finset.range N, (n.factorial : ℝ)/x^(n+1)| ≤
+theorem expIntegralEi_remainder_bound {x : ℝ} (hx : 0 < x) (N : ℕ) :
+    |Real.expIntegralEi x - Real.exp x*∑ n ∈ Finset.range N, (n.factorial : ℝ)/x^(n+1)| ≤
         (1+Real.sqrt π*Real.Gamma (1+(N+1 : ℝ)/2)/Real.Gamma (1/2+(N+1 : ℝ)/2))*Real.exp
         x*(N.factorial : ℝ)/x^(N+1) := by
-  sorry
+  have hx0 : (x:ℂ) ≠ 0 := ofReal_ne_zero.mpr hx.ne'
+  have hA := expIntegralE_one_eq_sum_add (neg_ne_zero.mpr hx0) (N+1)
+  have hre := re_expIntegralE_one_neg hx
+  have hsum : exp (-(-(x:ℂ))) * ∑ n ∈ Finset.range (N+1), (-1 : ℂ)^n * (n.factorial : ℂ) /
+      (-(x:ℂ))^(n+1) =
+        -((Real.exp x * ∑ n ∈ Finset.range (N+1), (n.factorial : ℝ)/x^(n+1) : ℝ) : ℂ) := by
+    push_cast
+    rw [neg_neg, Finset.mul_sum, Finset.mul_sum, ← Finset.sum_neg_distrib]
+    refine Finset.sum_congr rfl fun n _ => ?_
+    rw [neg_pow (x:ℂ), pow_succ (-1 : ℂ), mul_assoc, mul_div_mul_left _ _
+      (pow_ne_zero _ (by norm_num))]
+    field_simp
+  have hfac : (-1 : ℂ)^(N+1) * ((N+1).factorial : ℂ) / (-(x:ℂ))^(N+1) =
+      (((N+1).factorial / x^(N+1) : ℝ) : ℂ) := by
+    push_cast
+    rw [neg_pow (x:ℂ), mul_div_mul_left _ _ (pow_ne_zero _ (by norm_num))]
+  rw [hsum, hfac] at hA
+  -- the remainder after `N+1` terms
+  set E := expIntegralE (((N+1 : ℕ) : ℂ)+1) (-(x:ℂ)) with hEdef
+  have hR : Real.expIntegralEi x - Real.exp x*∑ n ∈ Finset.range (N+1), (n.factorial : ℝ)/x^(n+1) =
+      -(((N+1).factorial / x^(N+1)) * E.re) := by
+    have := congrArg Complex.re hA
+    rw [hre] at this
+    simp only [add_re, neg_re, ofReal_re, re_ofReal_mul] at this
+    linarith
+  have hbound := norm_expIntegralE_neg_le (M := N+1) (by omega) hx
+  rw [← hEdef] at hbound
+  have hJ := integral_one_add_sq_rpow_neg (a := (((N+1:ℕ):ℝ)+1)/2)
+    (by push_cast; linarith [(N.cast_nonneg : (0:ℝ) ≤ N)])
+  rw [hJ] at hbound
+  have hsplit : Real.expIntegralEi x - Real.exp x*∑ n ∈ Finset.range N, (n.factorial : ℝ)/x^(n+1) =
+      Real.exp x * (N.factorial / x^(N+1)) + -(((N+1).factorial / x^(N+1)) * E.re) := by
+    rw [← hR, Finset.sum_range_succ]; ring
+  rw [hsplit]
+  refine (abs_add_le _ _).trans ?_
+  have hk : (0:ℝ) ≤ (N+1).factorial / x^(N+1) := by positivity
+  rw [abs_neg, abs_mul (((N+1).factorial : ℝ) / x^(N+1)), abs_of_nonneg hk,
+    abs_of_nonneg (by positivity : (0:ℝ) ≤ Real.exp x * (N.factorial / x^(N+1)))]
+  have hEre : |E.re| ≤ Real.exp x * (Real.sqrt π * Real.Gamma ((((N+1:ℕ):ℝ)+1)/2 - 1/2) /
+      (2 * Real.Gamma ((((N+1:ℕ):ℝ)+1)/2))) := (Complex.abs_re_le_norm E).trans hbound
+  have hG : Real.Gamma (1+(N+1 : ℝ)/2) = (N+1 : ℝ)/2 * Real.Gamma ((N+1:ℝ)/2) := by
+    rw [add_comm]; exact Real.Gamma_add_one (by positivity)
+  have e1 : (((N+1:ℕ):ℝ)+1)/2 - 1/2 = (N+1:ℝ)/2 := by push_cast; ring
+  have e2 : (((N+1:ℕ):ℝ)+1)/2 = 1/2+(N+1 : ℝ)/2 := by push_cast; ring
+  rw [e1, e2] at hEre
+  rw [hG]
+  have hpos : 0 < Real.Gamma (1/2+(N+1 : ℝ)/2) := Real.Gamma_pos_of_pos (by positivity)
+  calc Real.exp x * (N.factorial / x^(N+1)) + (N+1).factorial / x^(N+1) * |E.re|
+      ≤ Real.exp x * (N.factorial / x^(N+1)) + (N+1).factorial / x^(N+1) *
+        (Real.exp x * (Real.sqrt π * Real.Gamma ((N+1:ℝ)/2) /
+          (2 * Real.Gamma (1/2+(N+1 : ℝ)/2)))) := by gcongr
+    _ = _ := by
+      rw [Nat.factorial_succ]; push_cast
+      field_simp
+
 
 /-- First omitted term and csc multiplier in DLMF §6.12(ii). -/
 lemma ExpIntegralAuxiliary.remainder_bound (aux : Bool) {z : ℂ} (hz0 : z ≠ 0)

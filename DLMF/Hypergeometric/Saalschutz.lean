@@ -34,49 +34,50 @@ noncomputable section
 namespace DLMF.Hypergeometric
 
 /-- The coefficients of `𝐅(a,b;c;z)`: `(a)ₙ (b)ₙ / (n! Γ(c+n))`. -/
-theorem hasSum_regularizedGaussHGFun_coeff (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
-    HasSum (fun n : ℕ => poch a n * poch b n / (n ! * Gamma (c + n)) * z ^ n)
+theorem hasSum_regularizedGaussHypergeometricFun_coeff (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+    HasSum (fun n : ℕ => pochhammer a n * pochhammer b n / (n ! * Gamma (c + n)) * z ^ n)
       (regularizedGaussHGFun a b c z) := by
-  rw [regularizedGaussHGFun_eq_tsum]
-  refine ((summable_regularizedGaussHGFun_term a b c hz).hasSum).congr_fun fun n => ?_
-  simp only [poch]
+  rw [regularizedGaussHypergeometricFun_eq_tsum]
+  refine ((summable_regularizedGaussHypergeometricFun_term a b c hz).hasSum).congr_fun fun n => ?_
+  simp only [pochhammer]
   field_simp
 
 /-- The binomial series `(1-z)^{-d} = ∑ (d)ₘ zᵐ/m!` on the unit disk. -/
 theorem hasSum_one_sub_cpow_neg (d : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
-    HasSum (fun n : ℕ => poch d n / n ! * z ^ n) ((1 - z) ^ (-d)) :=
-  hasSum_poch_div_factorial hz
+    HasSum (fun n : ℕ => pochhammer d n / n ! * z ^ n) ((1 - z) ^ (-d)) :=
+  hasSum_pochhammer_div_factorial hz
 
 /-- **Regularized Pfaff–Saalschütz convolution**, valid for all parameters: comparing coefficients
 in Euler's transformation `𝐅(c-a,c-b;c;z) = (1-z)^{a+b-c} 𝐅(a,b;c;z)` gives
 `∑ₖ (a)ₖ(b)ₖ/(k! Γ(c+k)) · (c-a-b)ₙ₋ₖ/(n-k)! = (c-a)ₙ(c-b)ₙ/(n! Γ(c+n))`. -/
 theorem regularized_saalschutz_convolution (a b c : ℂ) (n : ℕ) :
-    ∑ k ∈ Finset.range (n + 1), poch a k * poch b k / (k ! * Gamma (c + k)) *
-        (poch (c - a - b) (n - k) / (n - k)!) =
-      poch (c - a) n * poch (c - b) n / (n ! * Gamma (c + n)) := by
+    ∑ k ∈ Finset.range (n + 1), pochhammer a k * pochhammer b k / (k ! * Gamma (c + k)) *
+        (pochhammer (c - a - b) (n - k) / (n - k)!) =
+      pochhammer (c - a) n * pochhammer (c - b) n / (n ! * Gamma (c + n)) := by
   have h := Complex.powerSeries_coefficients_unique (f := regularizedGaussHGFun (c - a) (c - b) c)
-    (c := fun n => ∑ k ∈ Finset.range (n + 1), poch a k * poch b k / (k ! * Gamma (c + k)) *
-        (poch (c - a - b) (n - k) / (n - k)!))
-    (d := fun n => poch (c - a) n * poch (c - b) n / (n ! * Gamma (c + n)))
+    (c := fun n => ∑ k ∈ Finset.range (n + 1), pochhammer a k * pochhammer b k /
+        (k ! * Gamma (c + k)) *
+        (pochhammer (c - a - b) (n - k) / (n - k)!))
+    (d := fun n => pochhammer (c - a) n * pochhammer (c - b) n / (n ! * Gamma (c + n)))
     (fun z hz => by
       have hconv := Complex.hasSum_powerSeries_convolution
-          (hasSum_regularizedGaussHGFun_coeff a b c hz)
-        (hasSum_poch_div_factorial (β := c - a - b) hz)
-      rw [regularizedGaussHGFun_euler (c - a) (c - b) c hz,
+          (hasSum_regularizedGaussHypergeometricFun_coeff a b c hz)
+        (hasSum_pochhammer_div_factorial (β := c - a - b) hz)
+      rw [regularizedGaussHypergeometricFun_euler (c - a) (c - b) c hz,
         show c - (c - a) - (c - b) = -(c - a - b) by ring,
         show c - (c - a) = a by ring, show c - (c - b) = b by ring, mul_comm]
       exact hconv)
-    (fun z hz => hasSum_regularizedGaussHGFun_coeff (c - a) (c - b) c hz)
+    (fun z hz => hasSum_regularizedGaussHypergeometricFun_coeff (c - a) (c - b) c hz)
   exact congrFun h n
 
 /-- `(d)ₙ = (d)ₙ₋ₖ (-1)ᵏ (1-d-n)ₖ` for `k ≤ n`. -/
-theorem poch_eq_poch_sub_mul (d : ℂ) {n k : ℕ} (hk : k ≤ n) :
-    poch d n = poch d (n - k) * ((-1) ^ k * poch (1 - d - n) k) := by
-  have h := poch_add d (n - k) k
+theorem pochhammer_eq_pochhammer_sub_mul (d : ℂ) {n k : ℕ} (hk : k ≤ n) :
+    pochhammer d n = pochhammer d (n - k) * ((-1) ^ k * pochhammer (1 - d - n) k) := by
+  have h := pochhammer_add d (n - k) k
   rw [Nat.sub_add_cancel hk] at h
   rw [h]
   congr 1
-  have := DLMF.Gamma.poch_neg_eq (-(d + ((n - k : ℕ) : ℂ))) k
+  have := DLMF.Gamma.pochhammer_neg_eq (-(d + ((n - k : ℕ) : ℂ))) k
   rw [neg_neg] at this
   rw [this]
   congr 2
@@ -87,24 +88,25 @@ theorem poch_eq_poch_sub_mul (d : ℂ) {n k : ℕ} (hk : k ≤ n) :
 `₃F₂(-n, a, b; c, 1+a+b-c-n; 1) = (c-a)ₙ (c-b)ₙ / ((c)ₙ (c-a-b)ₙ)`. -/
 @[dlmf 16.4.E3]
 theorem pfaff_saalschutz (n : ℕ) {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k)
-    (hd : poch (1 + a + b - c - n) n ≠ 0) :
-    ∑ k ∈ Finset.range (n + 1), poch (-(n : ℂ)) k * poch a k * poch b k /
-        (poch c k * poch (1 + a + b - c - n) k * k !) =
-      poch (c - a) n * poch (c - b) n / (poch c n * poch (c - a - b) n) := by
+    (hd : pochhammer (1 + a + b - c - n) n ≠ 0) :
+    ∑ k ∈ Finset.range (n + 1), pochhammer (-(n : ℂ)) k * pochhammer a k * pochhammer b k /
+        (pochhammer c k * pochhammer (1 + a + b - c - n) k * k !) =
+      pochhammer (c - a) n * pochhammer (c - b) n /
+          (pochhammer c n * pochhammer (c - a - b) n) := by
   set d := c - a - b with hddef
-  have hd' : poch (1 - d - n) n ≠ 0 := by
+  have hd' : pochhammer (1 - d - n) n ≠ 0 := by
     rw [show 1 - d - n = 1 + a + b - c - n by rw [hddef]; ring]; exact hd
-  have hdn : poch d n ≠ 0 := by
-    have := poch_eq_poch_sub_mul d (le_refl n)
-    rw [Nat.sub_self, poch_zero, one_mul] at this
+  have hdn : pochhammer d n ≠ 0 := by
+    have := pochhammer_eq_pochhammer_sub_mul d (le_refl n)
+    rw [Nat.sub_self, pochhammer_zero, one_mul] at this
     rw [this]; exact mul_ne_zero (pow_ne_zero _ (by norm_num)) hd'
   have hΓ : Gamma c ≠ 0 := Gamma_ne_zero hc
-  have hG (m : ℕ) : Gamma (c + m) = poch c m * Gamma c := by
-    rw [poch, ← Gamma_add_nat_div_Gamma_eq c hc]; field_simp
-  have hcm (m : ℕ) : poch c m ≠ 0 := poch_ne_zero_of_not_neg_nat hc m
-  have hpk (k : ℕ) (hk : k ≤ n) : poch (1 - d - n) k ≠ 0 := by
+  have hG (m : ℕ) : Gamma (c + m) = pochhammer c m * Gamma c := by
+    rw [pochhammer, ← Gamma_add_nat_div_Gamma_eq c hc]; field_simp
+  have hcm (m : ℕ) : pochhammer c m ≠ 0 := pochhammer_ne_zero_of_not_neg_nat hc m
+  have hpk (k : ℕ) (hk : k ≤ n) : pochhammer (1 - d - n) k ≠ 0 := by
     intro h0
-    have := poch_add (1 - d - n) k (n - k)
+    have := pochhammer_add (1 - d - n) k (n - k)
     rw [Nat.add_sub_cancel' hk, h0, zero_mul] at this
     exact hd' this
   have hconv := regularized_saalschutz_convolution a b c n
@@ -115,7 +117,8 @@ theorem pfaff_saalschutz (n : ℕ) {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k)
   rw [← hconv, Finset.sum_mul]
   refine Finset.sum_congr rfl fun k hk => ?_
   have hk' : k ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hk)
-  rw [hG k, poch_eq_poch_sub_mul d hk', poch_neg_coe_nat, Nat.descFactorial_eq_div hk']
+  rw [hG k, pochhammer_eq_pochhammer_sub_mul d hk', pochhammer_neg_coe_nat,
+      Nat.descFactorial_eq_div hk']
   have hkf : (k ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr k.factorial_ne_zero
   have hnkf : ((n - k)! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (n - k).factorial_ne_zero
   have hdiv : ((n ! / (n - k)! : ℕ) : ℂ) = n ! / (n - k)! := by

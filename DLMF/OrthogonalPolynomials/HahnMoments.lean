@@ -39,7 +39,7 @@ bounds for the Gamma function.
 open Complex MeasureTheory Filter
 open scoped Real Nat
 open DLMF.Hypergeometric
-open DLMF.Hypergeometric (Gamma_add_nat_eq_poch_mul_Gamma)
+open DLMF.Hypergeometric (Gamma_add_nat_eq_pochhammer_mul_Gamma)
 noncomputable section
 namespace DLMF.OrthogonalPolynomials.HahnMoments
 
@@ -91,27 +91,28 @@ def fourGammaMoment (a b c d : ℂ) (k j : ℕ) : ℂ :=
     Gamma (b + d + j) / Gamma (a + b + c + d + j + k))
 
 /-- Multiplying the weight by Pochhammer factors shifts its first and fourth Gamma parameters. -/
-theorem poch_mul_weight {a b c d : ℂ} (ha : 0 < a.re) (hd : 0 < d.re) (k j : ℕ) (x : ℝ) :
-    poch (a + I * x) k * poch (d - I * x) j * weight a b c d x =
+theorem pochhammer_mul_weight {a b c d : ℂ} (ha : 0 < a.re) (hd : 0 < d.re) (k j : ℕ) (x : ℝ) :
+    pochhammer (a + I * x) k * pochhammer (d - I * x) j * weight a b c d x =
       weight (a + k) b c (d + j) x := by
   dsimp only [weight]
   rw [show a + k + I * x = (a + I * x) + k by ring,
     show d + j - I * x = (d - I * x) + j by ring,
-    Gamma_add_nat_eq_poch_mul_Gamma (by simpa using ha),
-    Gamma_add_nat_eq_poch_mul_Gamma (by simpa using hd)]
+    Gamma_add_nat_eq_pochhammer_mul_Gamma (by simpa using ha),
+    Gamma_add_nat_eq_pochhammer_mul_Gamma (by simpa using hd)]
   ring
 
 /-- Absolute integrability and evaluation of every mixed Pochhammer moment. -/
 theorem mixed_moment {a b c d : ℂ}
     (ha : 0 < a.re) (hb : 0 < b.re) (hc : 0 < c.re) (hd : 0 < d.re) (k j : ℕ) :
-    Integrable (fun x : ℝ => poch (a + I * x) k * poch (d - I * x) j * weight a b c d x) ∧
-      (∫ x : ℝ, poch (a + I * x) k * poch (d - I * x) j * weight a b c d x) =
+    Integrable (fun x : ℝ => pochhammer (a + I * x) k * pochhammer (d - I * x) j *
+        weight a b c d x) ∧
+      (∫ x : ℝ, pochhammer (a + I * x) k * pochhammer (d - I * x) j * weight a b c d x) =
           fourGammaMoment a b c d k j := by
   have hak : 0 < (a + k).re := by simp; positivity
   have hdj : 0 < (d + j).re := by simp; positivity
   refine ⟨(integrable_weight hak hb hc hdj).congr
-    (Eventually.of_forall (fun x => (poch_mul_weight ha hd k j x).symm)), ?_⟩
-  simp_rw [poch_mul_weight ha hd]
+    (Eventually.of_forall (fun x => (pochhammer_mul_weight ha hd k j x).symm)), ?_⟩
+  simp_rw [pochhammer_mul_weight ha hd]
   rw [integral_weight hak hb hc hdj]
   unfold fourGammaMoment
   congr 1
@@ -124,54 +125,57 @@ theorem mixed_moment {a b c d : ℂ}
 theorem fourGammaMoment_factor {a b c d : ℂ}
     (ha : 0 < a.re) (hb : 0 < b.re) (hc : 0 < c.re) (hd : 0 < d.re) (k j : ℕ) :
     fourGammaMoment a b c d k j = fourGammaMoment a b c d 0 j *
-      (poch (a + c) k * poch (a + d + j) k / poch (a + b + c + d + j) k) := by
+      (pochhammer (a + c) k * pochhammer (a + d + j) k / pochhammer (a + b + c + d + j) k) := by
   unfold fourGammaMoment
   simp only [Nat.cast_zero, add_zero]
-  rw [Gamma_add_nat_eq_poch_mul_Gamma (by simp; linarith : 0 < (a + c).re),
-    Gamma_add_nat_eq_poch_mul_Gamma (by simp; positivity : 0 < (a + d + j).re),
-    Gamma_add_nat_eq_poch_mul_Gamma (by simp; positivity : 0 < (a + b + c + d + j).re)]
+  rw [Gamma_add_nat_eq_pochhammer_mul_Gamma (by simp; linarith : 0 < (a + c).re),
+    Gamma_add_nat_eq_pochhammer_mul_Gamma (by simp; positivity : 0 < (a + d + j).re),
+    Gamma_add_nat_eq_pochhammer_mul_Gamma (by simp; positivity : 0 < (a + b + c + d + j).re)]
   ring
 
 /-- The unnormalized terminating continuous Hahn sum. -/
 def hahnSum (a b c d : ℂ) (n : ℕ) (x : ℝ) : ℂ :=
   ∑ k ∈ Finset.range (n + 1),
-    (poch (-(n : ℂ)) k * poch (n + a + b + c + d - 1) k /
-      (poch (a + c) k * poch (a + d) k * k.factorial)) * poch (a + I * x) k
+    (pochhammer (-(n : ℂ)) k * pochhammer (n + a + b + c + d - 1) k /
+      (pochhammer (a + c) k * pochhammer (a + d) k * k.factorial)) * pochhammer (a + I * x) k
 
 /-- Every continuous Hahn sum times a reversed rising factorial has an absolutely integrable weight.
 -/
 theorem integrable_hahnSum_basis {a b c d : ℂ}
     (ha : 0 < a.re) (hb : 0 < b.re) (hc : 0 < c.re) (hd : 0 < d.re) (n j : ℕ) :
-    Integrable (fun x : ℝ => hahnSum a b c d n x * poch (d - I * x) j * weight a b c d x) := by
+    Integrable (fun x : ℝ => hahnSum a b c d n x * pochhammer (d - I * x) j *
+        weight a b c d x) := by
   simp only [hahnSum, Finset.sum_mul]
   apply integrable_finsetSum
   intro k hk
   simpa only [mul_assoc] using ((mixed_moment ha hb hc hd k j).1.const_mul
-    (poch (-(n : ℂ)) k * poch (n + a + b + c + d - 1) k /
-      (poch (a + c) k * poch (a + d) k * k.factorial)))
+    (pochhammer (-(n : ℂ)) k * pochhammer (n + a + b + c + d - 1) k /
+      (pochhammer (a + c) k * pochhammer (a + d) k * k.factorial)))
 
 /-- Pfaff–Saalschutz makes every lower-degree reversed Pochhammer moment vanish. -/
 theorem integral_hahnSum_basis_zero {a b c d : ℂ}
     (ha : 0 < a.re) (hb : 0 < b.re) (hc : 0 < c.re) (hd : 0 < d.re) {n j : ℕ} (hj : j < n) :
-    (∫ x : ℝ, hahnSum a b c d n x * poch (d - I * x) j * weight a b c d x) = 0 := by
-  have hA (k : ℕ) : poch (a + c) k ≠ 0 :=
-    poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith)) k
+    (∫ x : ℝ, hahnSum a b c d n x * pochhammer (d - I * x) j * weight a b c d x) = 0 := by
+  have hA (k : ℕ) : pochhammer (a + c) k ≠ 0 :=
+    pochhammer_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith)) k
   have hB : ∀ k : ℕ, a + d ≠ -k := not_neg_nat_of_re_pos (by simp; linarith)
-  have hS (k : ℕ) : poch (a + b + c + d + j) k ≠ 0 :=
-    poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; positivity)) k
+  have hS (k : ℕ) : pochhammer (a + b + c + d + j) k ≠ 0 :=
+    pochhammer_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; positivity)) k
   have hterm (k : ℕ) :
-      (∫ x : ℝ, (poch (-(n : ℂ)) k * poch (n + a + b + c + d - 1) k /
-        (poch (a + c) k * poch (a + d) k * k.factorial)) *
-          (poch (a + I * x) k * poch (d - I * x) j * weight a b c d x)) =
-        fourGammaMoment a b c d 0 j * (poch (-(n : ℂ)) k * poch (n + a + b + c + d - 1) k *
-          poch (a + d + j) k / (poch (a + d) k * poch (a + b + c + d + j) k * k.factorial)) := by
+      (∫ x : ℝ, (pochhammer (-(n : ℂ)) k * pochhammer (n + a + b + c + d - 1) k /
+        (pochhammer (a + c) k * pochhammer (a + d) k * k.factorial)) *
+          (pochhammer (a + I * x) k * pochhammer (d - I * x) j * weight a b c d x)) =
+        fourGammaMoment a b c d 0 j *
+            (pochhammer (-(n : ℂ)) k * pochhammer (n + a + b + c + d - 1) k *
+          pochhammer (a + d + j) k /
+              (pochhammer (a + d) k * pochhammer (a + b + c + d + j) k * k.factorial)) := by
     rw [integral_const_mul, (mixed_moment ha hb hc hd k j).2, fourGammaMoment_factor ha hb hc hd]
     field_simp [hA k]
-  have he : (fun x : ℝ => hahnSum a b c d n x * poch (d - I * x) j * weight a b c d x) =
+  have he : (fun x : ℝ => hahnSum a b c d n x * pochhammer (d - I * x) j * weight a b c d x) =
       fun x : ℝ => ∑ k ∈ Finset.range (n + 1),
-        (poch (-(n : ℂ)) k * poch (n + a + b + c + d - 1) k /
-          (poch (a + c) k * poch (a + d) k * k.factorial)) *
-          (poch (a + I * x) k * poch (d - I * x) j * weight a b c d x) := by
+        (pochhammer (-(n : ℂ)) k * pochhammer (n + a + b + c + d - 1) k /
+          (pochhammer (a + c) k * pochhammer (a + d) k * k.factorial)) *
+          (pochhammer (a + I * x) k * pochhammer (d - I * x) j * weight a b c d x) := by
     funext x
     simp only [hahnSum, Finset.sum_mul, mul_assoc]
   rw [he, integral_finsetSum _ (fun k hk => ((mixed_moment ha hb hc hd k j).1.const_mul _))]
@@ -182,15 +186,15 @@ theorem integral_hahnSum_basis_zero {a b c d : ℂ}
   have hs := pfaff_saalschutz n (a := n + a + b + c + d - 1) (b := a + d + j) hB
     (by rw [hbal]; exact hS n)
   rw [hbal, show a + d - (a + d + j) = -(j : ℂ) by ring,
-    poch_neg_nat_eq_zero hj, mul_zero, zero_div] at hs
+    pochhammer_neg_nat_eq_zero hj, mul_zero, zero_div] at hs
   rw [hs, mul_zero]
 
 /-- A rising factorial in the reversed variable is a finite combination of rising factorials. -/
-theorem poch_reverse_basis (A v : ℂ) (k : ℕ) :
-    poch (A - v) k = ∑ j ∈ Finset.range (k + 1),
-      ((-1 : ℂ) ^ k * k.choose j * poch (-A - k + 1) (k - j)) * poch v j := by
-  rw [show A - v = -(v - A) by ring, DLMF.Gamma.poch_neg_eq,
-    show v - A - k + 1 = v + (-A - k + 1) by ring, poch_add_eq_sum, Finset.mul_sum]
+theorem pochhammer_reverse_basis (A v : ℂ) (k : ℕ) :
+    pochhammer (A - v) k = ∑ j ∈ Finset.range (k + 1),
+      ((-1 : ℂ) ^ k * k.choose j * pochhammer (-A - k + 1) (k - j)) * pochhammer v j := by
+  rw [show A - v = -(v - A) by ring, DLMF.Gamma.pochhammer_neg_eq,
+    show v - A - k + 1 = v + (-A - k + 1) by ring, pochhammer_add_eq_sum, Finset.mul_sum]
   apply Finset.sum_congr rfl
   intro j hj
   ring
@@ -198,14 +202,14 @@ theorem poch_reverse_basis (A v : ℂ) (k : ℕ) :
 /-- A continuous Hahn sum annihilates the ordinary rising-factorial basis below its degree. -/
 theorem hahnSum_same_basis_zero {a b c d : ℂ}
     (ha : 0 < a.re) (hb : 0 < b.re) (hc : 0 < c.re) (hd : 0 < d.re) {n k : ℕ} (hk : k < n) :
-    Integrable (fun x : ℝ => hahnSum a b c d n x * poch (a + I * x) k * weight a b c d x) ∧
-      (∫ x : ℝ, hahnSum a b c d n x * poch (a + I * x) k * weight a b c d x) = 0 := by
-  let C (j : ℕ) : ℂ := (-1 : ℂ) ^ k * k.choose j * poch (-(a + d) - k + 1) (k - j)
-  have he : (fun x : ℝ => hahnSum a b c d n x * poch (a + I * x) k * weight a b c d x) =
+    Integrable (fun x : ℝ => hahnSum a b c d n x * pochhammer (a + I * x) k * weight a b c d x) ∧
+      (∫ x : ℝ, hahnSum a b c d n x * pochhammer (a + I * x) k * weight a b c d x) = 0 := by
+  let C (j : ℕ) : ℂ := (-1 : ℂ) ^ k * k.choose j * pochhammer (-(a + d) - k + 1) (k - j)
+  have he : (fun x : ℝ => hahnSum a b c d n x * pochhammer (a + I * x) k * weight a b c d x) =
       fun x : ℝ => ∑ j ∈ Finset.range (k + 1),
-        C j * (hahnSum a b c d n x * poch (d - I * x) j * weight a b c d x) := by
+        C j * (hahnSum a b c d n x * pochhammer (d - I * x) j * weight a b c d x) := by
     funext x
-    rw [show a + I * x = (a + d) - (d - I * x) by ring, poch_reverse_basis,
+    rw [show a + I * x = (a + d) - (d - I * x) by ring, pochhammer_reverse_basis,
       Finset.mul_sum, Finset.sum_mul]
     apply Finset.sum_congr rfl
     intro j hj
@@ -225,13 +229,13 @@ theorem hahnSum_orthogonal_lt {a b c d : ℂ}
     (ha : 0 < a.re) (hb : 0 < b.re) (hc : 0 < c.re) (hd : 0 < d.re) {m n : ℕ} (hmn : m < n) :
     Integrable (fun x : ℝ => hahnSum a b c d m x * hahnSum a b c d n x * weight a b c d x) ∧
       (∫ x : ℝ, hahnSum a b c d m x * hahnSum a b c d n x * weight a b c d x) = 0 := by
-  let C (k : ℕ) : ℂ := poch (-(m : ℂ)) k * poch (m + a + b + c + d - 1) k /
-    (poch (a + c) k * poch (a + d) k * k.factorial)
+  let C (k : ℕ) : ℂ := pochhammer (-(m : ℂ)) k * pochhammer (m + a + b + c + d - 1) k /
+    (pochhammer (a + c) k * pochhammer (a + d) k * k.factorial)
   have he : (fun x : ℝ => hahnSum a b c d m x * hahnSum a b c d n x * weight a b c d x) =
       fun x : ℝ => ∑ k ∈ Finset.range (m + 1),
-        C k * (hahnSum a b c d n x * poch (a + I * x) k * weight a b c d x) := by
+        C k * (hahnSum a b c d n x * pochhammer (a + I * x) k * weight a b c d x) := by
     funext x
-    change (∑ k ∈ Finset.range (m + 1), C k * poch (a + I * x) k) *
+    change (∑ k ∈ Finset.range (m + 1), C k * pochhammer (a + I * x) k) *
       hahnSum a b c d n x * weight a b c d x = _
     rw [Finset.sum_mul, Finset.sum_mul]
     apply Finset.sum_congr rfl

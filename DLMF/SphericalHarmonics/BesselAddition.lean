@@ -36,8 +36,8 @@ $$
 The proof is by power series and works directly at complex `ν`. Write `F_c = ₀F̃₁(;c;·)`, so
 that `J_ν(w)/w^ν = 2^{-ν} F_{ν+1}(x + y + z)` with `x = -r²/4`, `y = -ρ²/4`, `z = rρ cos φ / 2`.
 Taylor's theorem for the entire function `F_{ν+1}` gives the shift formula. Each `(2t)ᵏ` is
-expanded in Gegenbauer polynomials (`monomial_ultrasphPoly_expansion`, DLMF 18.18.17), and the
-absolutely convergent double series is regrouped by the Gegenbauer degree
+expanded in Gegenbauer polynomials (`monomial_ultrasphericalPolynomial_expansion`, DLMF 18.18.17),
+and the absolutely convergent double series is regrouped by the Gegenbauer degree
 (`GegenbauerAddition.reindexEquiv`, `GegenbauerAddition.norm_gegenbauer_le`,
 `GegenbauerAddition.norm_regularizedHGFun_le`). The inner sums are identified by the product
 formula, itself proved from the Taylor shift and a finite identity obtained from the contiguous
@@ -95,32 +95,32 @@ theorem GegenbauerAddition.hasSum_series (c w : ℂ) :
   ring
 
 /-- `N! ≤ ‖(c)_N‖` for `1 ≤ Re c`. -/
-theorem GegenbauerAddition.factorial_le_norm_poch {c : ℂ} (hc : 1 ≤ c.re) (N : ℕ) :
-    (N ! : ℝ) ≤ ‖poch c N‖ := by
+theorem GegenbauerAddition.factorial_le_norm_pochhammer {c : ℂ} (hc : 1 ≤ c.re) (N : ℕ) :
+    (N ! : ℝ) ≤ ‖pochhammer c N‖ := by
   induction N with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ N ih =>
     have hge : (N + 1 : ℝ) ≤ ‖c + N‖ := by
       have := Complex.re_le_norm (c + N)
       simp at this
       linarith
-    rw [poch_succ, norm_mul, Nat.factorial_succ, Nat.cast_mul, mul_comm]
+    rw [pochhammer_succ, norm_mul, Nat.factorial_succ, Nat.cast_mul, mul_comm]
     push_cast
     gcongr
 
 /-- `‖(ν)_k‖ ≤ k! (1 + ‖ν‖)^k`. -/
-theorem GegenbauerAddition.norm_poch_le (ν : ℂ) (k : ℕ) :
-    ‖poch ν k‖ ≤ k ! * (1 + ‖ν‖) ^ k := by
+theorem GegenbauerAddition.norm_pochhammer_le (ν : ℂ) (k : ℕ) :
+    ‖pochhammer ν k‖ ≤ k ! * (1 + ‖ν‖) ^ k := by
   induction k with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ k ih =>
-    rw [poch_succ, norm_mul, Nat.factorial_succ, Nat.cast_mul, pow_succ]
+    rw [pochhammer_succ, norm_mul, Nat.factorial_succ, Nat.cast_mul, pow_succ]
     have h1 : ‖ν + k‖ ≤ (k + 1) * (1 + ‖ν‖) := by
       calc ‖ν + k‖ ≤ ‖ν‖ + k := by
             refine (norm_add_le _ _).trans ?_
             simp
         _ ≤ _ := by nlinarith [norm_nonneg ν, (Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
-    calc ‖poch ν k‖ * ‖ν + k‖ ≤ (k ! * (1 + ‖ν‖) ^ k) * ((k + 1) * (1 + ‖ν‖)) := by
+    calc ‖pochhammer ν k‖ * ‖ν + k‖ ≤ (k ! * (1 + ‖ν‖) ^ k) * ((k + 1) * (1 + ‖ν‖)) := by
           gcongr
       _ = _ := by push_cast; ring
 
@@ -314,19 +314,19 @@ theorem GegenbauerAddition.hasSum_product {c : ℂ} (hc : 1 ≤ c.re) (x y : ℂ
 /-- A crude bound for Gegenbauer polynomials on `[-1, 1]` with complex parameter:
 `‖(ν + n) C_n^ν(cos φ)‖ ≤ (‖ν‖ + 1) (4 (1 + ‖ν‖))ⁿ`. -/
 theorem GegenbauerAddition.norm_gegenbauer_le {ν : ℂ} (hν : 0 < ν.re) (n : ℕ) (θ : ℝ) :
-    ‖(ν + n) * ultrasphPoly ν n (Real.cos θ)‖ ≤ (‖ν‖ + 1) * (4 * (1 + ‖ν‖)) ^ n := by
+    ‖(ν + n) * ultrasphericalPolynomial ν n (Real.cos θ)‖ ≤ (‖ν‖ + 1) * (4 * (1 + ‖ν‖)) ^ n := by
   set B : ℝ := 1 + ‖ν‖
   have hB : 0 ≤ B := by positivity
-  have hC : ‖ultrasphPoly ν n (Real.cos θ)‖ ≤ (n + 1) * B ^ n := by
-    rw [ofReal_cos, ultrasphPoly_cos_sum (by linarith)]
+  have hC : ‖ultrasphericalPolynomial ν n (Real.cos θ)‖ ≤ (n + 1) * B ^ n := by
+    rw [ofReal_cos, ultrasphericalPolynomial_cos_sum (by linarith)]
     refine (norm_sum_le _ _).trans ?_
     have hterm : ∀ k ∈ Finset.range (n + 1),
-        ‖poch ν k * poch ν (n - k) / ((k ! : ℂ) * (n - k) !) *
+        ‖pochhammer ν k * pochhammer ν (n - k) / ((k ! : ℂ) * (n - k) !) *
           cos (((n : ℂ) - 2 * k) * θ)‖ ≤ B ^ n := by
       intro k hk
       have hk' : k ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hk)
-      have h1 := GegenbauerAddition.norm_poch_le ν k
-      have h2 := GegenbauerAddition.norm_poch_le ν (n - k)
+      have h1 := GegenbauerAddition.norm_pochhammer_le ν k
+      have h2 := GegenbauerAddition.norm_pochhammer_le ν (n - k)
       have hcos : ‖cos (((n : ℂ) - 2 * k) * θ)‖ ≤ 1 := by
         rw [show ((n : ℂ) - 2 * k) * θ = (((n : ℝ) - 2 * k) * θ : ℝ) by push_cast; ring,
           ← ofReal_cos, Complex.norm_real, Real.norm_eq_abs]
@@ -334,7 +334,8 @@ theorem GegenbauerAddition.norm_gegenbauer_le {ν : ℂ} (hν : 0 < ν.re) (n : 
       have hkf : (0 : ℝ) < k ! := by exact_mod_cast Nat.factorial_pos k
       have hnkf : (0 : ℝ) < (n - k) ! := by exact_mod_cast Nat.factorial_pos (n - k)
       rw [norm_mul, norm_div, norm_mul, norm_mul, Complex.norm_natCast, Complex.norm_natCast]
-      calc ‖poch ν k‖ * ‖poch ν (n - k)‖ / (k ! * (n - k) !) * ‖cos (((n : ℂ) - 2 * k) * θ)‖
+      calc ‖pochhammer ν k‖ * ‖pochhammer ν (n - k)‖ / (k ! * (n - k) !) *
+             ‖cos (((n : ℂ) - 2 * k) * θ)‖
           ≤ (k ! * B ^ k) * ((n - k) ! * B ^ (n - k)) / (k ! * (n - k) !) * 1 := by
             gcongr
         _ = B ^ n := by
@@ -350,7 +351,8 @@ theorem GegenbauerAddition.norm_gegenbauer_le {ν : ℂ} (hν : 0 < ν.re) (n : 
     refine (norm_add_le _ _).trans ?_
     simp only [Complex.norm_natCast]
     nlinarith [norm_nonneg ν, (Nat.cast_nonneg n : (0 : ℝ) ≤ n)]
-  calc ‖ν + n‖ * ‖ultrasphPoly ν n (Real.cos θ)‖ ≤ ((‖ν‖ + 1) * (n + 1)) * ((n + 1) * B ^ n) := by
+  calc ‖ν + n‖ * ‖ultrasphericalPolynomial ν n (Real.cos θ)‖ ≤ ((‖ν‖ + 1) * (n + 1)) *
+         ((n + 1) * B ^ n) := by
         gcongr
     _ ≤ ((‖ν‖ + 1) * 2 ^ n) * (2 ^ n * B ^ n) := by gcongr
     _ = _ := by rw [mul_pow, show (4 : ℝ) = 2 * 2 by norm_num, mul_pow]; ring
@@ -370,14 +372,14 @@ def GegenbauerAddition.reindexEquiv : (Σ k : ℕ, Fin (k / 2 + 1)) ≃ ℕ × �
 /-- For `Re ν > 0`, the double family of the Bessel addition theorem,
 `(n, l) ↦ (ν+n) C^ν_n(cos φ) · aⁿ (a²)ˡ/l! · ν⁻¹/(ν+1)_{n+l} · F_{ν+1+n+2l}(s)`, is summable. -/
 private lemma GegenbauerAddition.summable_family {ν : ℂ} (hν : 0 < ν.re) (phi : ℝ) (a s : ℂ) :
-    Summable fun p : ℕ × ℕ => (ν + p.1) * ultrasphPoly ν p.1 (Real.cos phi) *
-      (a ^ p.1 * (a ^ 2) ^ p.2 / p.2 !) * (ν⁻¹ * (poch (ν + 1) (p.1 + p.2))⁻¹) *
+    Summable fun p : ℕ × ℕ => (ν + p.1) * ultrasphericalPolynomial ν p.1 (Real.cos phi) *
+      (a ^ p.1 * (a ^ 2) ^ p.2 / p.2 !) * (ν⁻¹ * (pochhammer (ν + 1) (p.1 + p.2))⁻¹) *
       regularizedHGFun (∅ : Multiset ℂ) {ν + 1 + ((p.1 + 2 * p.2 : ℕ) : ℂ)} s := by
   have hre1 : 1 ≤ (ν + 1).re := by simp; linarith
   set t : ℝ := Real.cos phi with ht
-  set Xf : ℕ → ℂ := fun n => (ν + n) * ultrasphPoly ν n t with hXf
+  set Xf : ℕ → ℂ := fun n => (ν + n) * ultrasphericalPolynomial ν n t with hXf
   set Yf : ℕ → ℕ → ℂ := fun n l => a ^ n * (a ^ 2) ^ l / l ! with hYf
-  set Zf : ℕ → ℕ → ℂ := fun n l => ν⁻¹ * (poch (ν + 1) (n + l))⁻¹ with hZf
+  set Zf : ℕ → ℕ → ℂ := fun n l => ν⁻¹ * (pochhammer (ν + 1) (n + l))⁻¹ with hZf
   set Vf : ℕ → ℕ → ℂ := fun n l =>
     regularizedHGFun (∅ : Multiset ℂ) {ν + 1 + ((n + 2 * l : ℕ) : ℂ)} s with hVf
   set G : ℕ × ℕ → ℂ := fun p => Xf p.1 * Yf p.1 p.2 * Zf p.1 p.2 * Vf p.1 p.2 with hG
@@ -397,10 +399,10 @@ private lemma GegenbauerAddition.summable_family {ν : ℂ} (hν : 0 < ν.re) (p
   have h3 : ‖Zf n l‖ ≤ ‖ν‖⁻¹ := by
     simp only [hZf]
     rw [norm_mul, norm_inv, norm_inv]
-    have hp := GegenbauerAddition.factorial_le_norm_poch hre1 (n + l)
+    have hp := GegenbauerAddition.factorial_le_norm_pochhammer hre1 (n + l)
     have hf : (1 : ℝ) ≤ (n + l) ! := by
       exact_mod_cast Nat.one_le_iff_ne_zero.mpr (Nat.factorial_ne_zero _)
-    calc ‖ν‖⁻¹ * ‖poch (ν + 1) (n + l)‖⁻¹ ≤ ‖ν‖⁻¹ * 1 := by
+    calc ‖ν‖⁻¹ * ‖pochhammer (ν + 1) (n + l)‖⁻¹ ≤ ‖ν‖⁻¹ * 1 := by
           gcongr
           exact inv_le_one_of_one_le₀ (hf.trans hp)
       _ = _ := mul_one _
@@ -426,7 +428,7 @@ theorem besselJ_addition {ν : ℂ} {r rho phi : ℝ} (hν : 0 < ν.re)
         (Real.sqrt (r ^ 2 + rho ^ 2 - 2 * r * rho * Real.cos phi) : ℂ) ^ ν =
       (2 ^ ν * Gamma ν / (r * rho : ℂ) ^ ν) *
         ∑' n : ℕ, (ν + n) * besselJ (ν + n) r * besselJ (ν + n) rho *
-          ultrasphPoly ν n (Real.cos phi) := by
+          ultrasphericalPolynomial ν n (Real.cos phi) := by
   set W := Real.sqrt (r ^ 2 + rho ^ 2 - 2 * r * rho * Real.cos phi) with hWdef
   have hW : 0 < W := Real.sqrt_pos.mpr hR
   have hW2 : W ^ 2 = r ^ 2 + rho ^ 2 - 2 * r * rho * Real.cos phi := Real.sq_sqrt hR.le
@@ -460,19 +462,19 @@ theorem besselJ_addition {ν : ℂ} {r rho phi : ℝ} (hν : 0 < ν.re)
     rw [harg]
     field_simp [hcpow_ne W hW]
   -- the double family
-  set Xf : ℕ → ℂ := fun n => (ν + n) * ultrasphPoly ν n t with hXf
+  set Xf : ℕ → ℂ := fun n => (ν + n) * ultrasphericalPolynomial ν n t with hXf
   set Yf : ℕ → ℕ → ℂ := fun n l => a ^ n * (a ^ 2) ^ l / l ! with hYf
-  set Zf : ℕ → ℕ → ℂ := fun n l => ν⁻¹ * (poch (ν + 1) (n + l))⁻¹ with hZf
+  set Zf : ℕ → ℕ → ℂ := fun n l => ν⁻¹ * (pochhammer (ν + 1) (n + l))⁻¹ with hZf
   set Vf : ℕ → ℕ → ℂ := fun n l =>
     regularizedHGFun (∅ : Multiset ℂ) {ν + 1 + ((n + 2 * l : ℕ) : ℂ)} s with hVf
   set G : ℕ × ℕ → ℂ := fun p => Xf p.1 * Yf p.1 p.2 * Zf p.1 p.2 * Vf p.1 p.2 with hG
   have hterm (k : ℕ) : z ^ k / k ! * regularizedHGFun (∅ : Multiset ℂ) {ν + 1 + k} s =
       ∑ l ∈ Finset.range (k / 2 + 1), G (k - 2 * l, l) := by
-    have hm := monomial_ultrasphPoly_expansion hν k (t : ℂ)
+    have hm := monomial_ultrasphericalPolynomial_expansion hν k (t : ℂ)
     have hk0 : (k ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero k)
     have h1 : z ^ k / k ! * regularizedHGFun (∅ : Multiset ℂ) {ν + 1 + k} s =
-        (∑ l ∈ Finset.range (k / 2 + 1), (ν + k - 2 * l) / ν / (poch (ν + 1) (k - l) * l !) *
-          ultrasphPoly ν (k - 2 * l) t) *
+        (∑ l ∈ Finset.range (k / 2 + 1), (ν + k - 2 * l) / ν / (pochhammer (ν + 1) (k - l) * l !) *
+          ultrasphericalPolynomial ν (k - 2 * l) t) *
           (a ^ k * regularizedHGFun (∅ : Multiset ℂ) {ν + 1 + k} s) := by
       rw [hz, mul_pow, hm]
       field_simp
@@ -507,14 +509,14 @@ theorem besselJ_addition {ν : ℂ} {r rho phi : ℝ} (hν : 0 < ν.re)
     convert h using 1
     funext l
     have hxy : x * y = a ^ 2 := by rw [hx, hy, ha]; ring
-    have hp : poch (ν + 1) (n + l) ≠ 0 := poch_ne_zero_of_re_pos (by simp; linarith) _
+    have hp : pochhammer (ν + 1) (n + l) ≠ 0 := pochhammer_ne_zero_of_re_pos (by simp; linarith) _
     have hg : Gamma ν ≠ 0 := Gamma_ne_zero_of_re_pos hν
-    have hpg : ν⁻¹ * (poch (ν + 1) (n + l))⁻¹ = Gamma ν * (Gamma (ν + 1 + n + l))⁻¹ := by
-      have h1 := DLMF.Gamma.poch_mul_recip_Gamma_add_nat (ν + 1) (n + l)
+    have hpg : ν⁻¹ * (pochhammer (ν + 1) (n + l))⁻¹ = Gamma ν * (Gamma (ν + 1 + n + l))⁻¹ := by
+      have h1 := DLMF.Gamma.pochhammer_mul_recip_Gamma_add_nat (ν + 1) (n + l)
       rw [Gamma_add_one ν hν0] at h1
       push_cast at h1
       rw [← add_assoc] at h1
-      rw [show (Gamma (ν + 1 + n + l))⁻¹ = (ν * Gamma ν)⁻¹ / poch (ν + 1) (n + l) by
+      rw [show (Gamma (ν + 1 + n + l))⁻¹ = (ν * Gamma ν)⁻¹ / pochhammer (ν + 1) (n + l) by
         rw [eq_div_iff hp, ← h1]; ring]
       field_simp
     simp only [hG, hXf, hYf, hZf, hVf]
@@ -541,7 +543,7 @@ theorem besselJ_addition {ν : ℂ} {r rho phi : ℝ} (hν : 0 < ν.re)
     rw [← mul_pow, ha]; ring
   rw [hapow, div_mul_eq_mul_div, eq_div_iff (mul_ne_zero hrp hrhop)]
   linear_combination (-1 : ℂ) * ((r : ℂ) ^ ν * (rho : ℂ) ^ ν * Gamma ν * (ν + n) *
-    ultrasphPoly ν n t *
+    ultrasphericalPolynomial ν n t *
     ((r : ℂ) / 2) ^ n * ((rho : ℂ) / 2) ^ n * regularizedHGFun (∅ : Multiset ℂ) {ν + 1 + n} x *
     regularizedHGFun (∅ : Multiset ℂ) {ν + 1 + n} y * (1 / 2 : ℂ) ^ ν) * h2pow
 

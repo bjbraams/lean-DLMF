@@ -375,7 +375,7 @@ absolute convergence.) -/
 @[dlmf 2.4.E2, dlmf 2.4.E3]
 theorem laplace_inversion {q : ℝ → ℂ} {c σ t : ℝ} (hq : DifferentiableOn ℝ q (Ioi 0))
     (hint : IntegrableOn (fun t => Real.exp (-c * t) • q t) (Ioi 0)) (hσ : c ≤ σ) (ht : 0 < t) :
-    Tendsto (bromwichPartial (DLMF.AlgebraicAnalytic.laplaceTransform q) σ t) atTop
+    Tendsto (bromwichPartialIntegral (DLMF.AlgebraicAnalytic.laplaceTransform q) σ t) atTop
       (𝓝 (q t)) := by
   set g : ℝ → ℂ := fun u => (Real.exp (-σ * u) : ℂ) * q u with hgdef
   have hgm : AEStronglyMeasurable g (volume.restrict (Set.Ioi 0)) :=
@@ -440,7 +440,7 @@ theorem laplace_inversion {q : ℝ → ℂ} {c σ t : ℝ} (hq : DifferentiableO
     · simp only [Function.uncurry, hF', norm_mul, one_mul]
       rw [show ((t - p.2 : ℝ) : ℂ) * I * p.1 = ((((t - p.2) * p.1 : ℝ)) : ℂ) * I by
         push_cast; ring, norm_exp_ofReal_mul_I, one_mul]
-  unfold bromwichPartial
+  unfold bromwichPartialIntegral
   refine Eq.symm ?_
   calc ((2 * Real.pi : ℝ) : ℂ)⁻¹ * ∫ τ in -η..η,
         cexp (t * (σ + τ * I)) * DLMF.AlgebraicAnalytic.laplaceTransform q (σ + τ * I)
@@ -482,7 +482,7 @@ expansion `Q(z) ∼ ∑ Γ((s+λ)/μ) aₛ z^{-(s+λ)/μ}` as `z → ∞` there 
 powers), the derivative having the termwise differentiated expansion. Then the inversion
 integral 2.4.5 converges at each limit, its value `q(t)` is independent of `σ ∈ [c, ∞)`, and
 `q(t) ∼ ∑ aₛ t^{(s+λ-μ)/μ}` as `t → 0⁺` (2.3.7). The improper integral is the limit of
-`bromwichPartial`. -/
+`bromwichPartialIntegral`. -/
 @[dlmf 2.4.E4, dlmf 2.4.E5]
 theorem inverseLaplace_of_hasAsymptoticExpansion {Q : ℂ → ℂ} {a : ℕ → ℂ} {lam mu c : ℝ}
     (hc : 0 < c) (hlam : 0 < lam) (hmu : 0 < mu)
@@ -494,7 +494,8 @@ theorem inverseLaplace_of_hasAsymptoticExpansion {Q : ℂ → ℂ} {a : ℕ → 
       (fun (s : ℕ) (z : ℂ) => z ^ (-(((s : ℂ) + lam) / mu) - 1))
       (fun s => -(((s : ℂ) + lam) / mu) * Complex.Gamma (((s : ℂ) + lam) / mu) * a s)
       (deriv Q)) :
-    ∃ q : ℝ → ℂ, (∀ σ, c ≤ σ → ∀ t, 0 < t → Tendsto (bromwichPartial Q σ t) atTop (𝓝 (q t))) ∧
+    ∃ q : ℝ → ℂ, (∀ σ, c ≤ σ → ∀ t, 0 < t →
+        Tendsto (bromwichPartialIntegral Q σ t) atTop (𝓝 (q t))) ∧
       HasAsymptoticExpansion (𝓝[>] 0)
         (fun (s : ℕ) (t : ℝ) => (t : ℂ) ^ ((((s : ℝ) + lam - mu) / mu : ℝ) : ℂ)) a q := by
   sorry
@@ -508,13 +509,13 @@ theorem haar_sub {Q F : ℂ → ℂ} {q f : ℝ → ℂ} {σ t : ℝ}
       (fun τ : ℝ => Complex.exp (t * (σ + τ * I)) * Q (σ + τ * I)) volume (-η) η)
     (hFi : ∀ η : ℝ, IntervalIntegrable
       (fun τ : ℝ => Complex.exp (t * (σ + τ * I)) * F (σ + τ * I)) volume (-η) η)
-    (hq : Tendsto (bromwichPartial Q σ t) atTop (𝓝 (q t)))
-    (hf : Tendsto (bromwichPartial F σ t) atTop (𝓝 (f t))) :
+    (hq : Tendsto (bromwichPartialIntegral Q σ t) atTop (𝓝 (q t)))
+    (hf : Tendsto (bromwichPartialIntegral F σ t) atTop (𝓝 (f t))) :
     Tendsto (fun η : ℝ => (Real.exp (σ * t) / (2 * π) : ℂ) *
         ∫ τ in -η..η, Complex.exp (I * t * τ) * (Q (σ + τ * I) - F (σ + τ * I)))
       atTop (𝓝 (q t - f t)) := by
   refine (hq.sub hf).congr fun η => ?_
-  unfold bromwichPartial
+  unfold bromwichPartialIntegral
   rw [← mul_sub, ← intervalIntegral.integral_sub (hQi η) (hFi η)]
   have h : ∀ τ : ℝ, Complex.exp (t * (σ + τ * I)) * Q (σ + τ * I) -
       Complex.exp (t * (σ + τ * I)) * F (σ + τ * I) =

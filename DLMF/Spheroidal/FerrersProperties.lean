@@ -23,8 +23,9 @@ of this file, which retain their original domains and coefficient conventions.
   coefficients `a'^m_{n,k}(γ²)` and their defining property (DLMF §30.8(ii)).
 * `exists_isSpheroidalQs_of_le`, `exists_isSpheroidalQs`, `spheroidalQs_spec`: existence of
   `𝖰s^m_n` and its defining property (DLMF 30.5.1).
-* `isSpheroidalSolutionReal_spheroidalPs`, `spheroidalPs_neg`, `spheroidalPs_zero_sign`,
-  `spheroidalPs_deriv_zero_sign`: the equation, parity 30.4.3 and sign conventions of `𝖯s`.
+* `DLMF.Spheroidal.Real.isSpheroidalSolution_spheroidalPs`, `spheroidalPs_neg`,
+  `spheroidalPs_zero_sign`, `spheroidalPs_deriv_zero_sign`: the equation, parity 30.4.3 and sign
+  conventions of `𝖯s`.
 * `existsUnique_isSpheroidalQsC`, `spheroidalQsC_spec`: existence and uniqueness of `𝑄s^m_n` and
   its defining property (DLMF 30.6.1), with the stronger primed forms without the hypothesis on
   the forward recursion.
@@ -129,11 +130,12 @@ theorem spheroidalPs_deriv_zero_sign {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) (h 
 /-- `𝖯s^m_n(x, γ²)` solves 30.2.1 on `(-1, 1)` with `μ = m`, `λ = λ^m_n(γ²)` (DLMF §30.4(i)).
 Proved from the admitted 30.3(i) equivalence and the existence theorem. -/
 @[dlmf 30.4.i]
-theorem isSpheroidalSolutionReal_spheroidalPs {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
-    IsSpheroidalSolutionReal (spheroidalEigenvalue n m γ2) γ2 m
+theorem Real.isSpheroidalSolution_spheroidalPs {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
+    DLMF.Spheroidal.Real.IsSpheroidalSolution (spheroidalEigenvalue n m γ2) γ2 m
       (fun x => spheroidalPs n m x γ2) := by
   have h := spheroidalPsFactor_spec hmn γ2
-  exact (isSpheroidalSolutionReal_iff_isSpheroidalFactor h.factor.differentiable h.real).mpr
+  exact (DLMF.Spheroidal.Real.isSpheroidalSolution_iff_isSpheroidalFactor
+      h.factor.differentiable h.real).mpr
     h.factor
 
 /-- **Parity** (DLMF 30.4.3): `𝖯s^m_n(-x, γ²) = (-1)^{n-m} 𝖯s^m_n(x, γ²)`. -/
@@ -179,8 +181,8 @@ private lemma inv_cosh_artanh_sq {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
 
 
 /-- Solutions of 30.2.1 on `(-1, 1)` with prescribed `w(0)`, `w'(0)`, through `x = tanh t`. -/
-private lemma exists_isSpheroidalSolutionReal_data (lam γ2 μ a b : ℝ) :
-    ∃ f : ℝ → ℝ, IsSpheroidalSolutionReal lam γ2 μ f ∧ f 0 = a ∧ deriv f 0 = b ∧
+private lemma Real.exists_isSpheroidalSolution_data (lam γ2 μ a b : ℝ) :
+    ∃ f : ℝ → ℝ, DLMF.Spheroidal.Real.IsSpheroidalSolution lam γ2 μ f ∧ f 0 = a ∧ deriv f 0 = b ∧
       (∀ x, x ∉ Ioo (-1 : ℝ) 1 → f x = 0) ∧
       (a = 0 → ∀ x ∈ Ioo (-1 : ℝ) 1, f (-x) = -f x) ∧
       (b = 0 → ∀ x ∈ Ioo (-1 : ℝ) 1, f (-x) = f x) := by
@@ -252,8 +254,9 @@ private lemma exists_isSpheroidalSolutionReal_data (lam γ2 μ a b : ℝ) :
 
 
 /-- Abel's identity for 30.2.1: `(1-x²)(f g' - f' g)` is constant on `(-1, 1)`. -/
-private lemma isSpheroidalSolutionReal_wronskian_const {lam γ2 μ : ℝ} {f g : ℝ → ℝ}
-    (hf : IsSpheroidalSolutionReal lam γ2 μ f) (hg : IsSpheroidalSolutionReal lam γ2 μ g)
+private lemma Real.isSpheroidalSolution_wronskian_const {lam γ2 μ : ℝ} {f g : ℝ → ℝ}
+    (hf : DLMF.Spheroidal.Real.IsSpheroidalSolution lam γ2 μ f)
+        (hg : DLMF.Spheroidal.Real.IsSpheroidalSolution lam γ2 μ g)
     {x y : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) (hy : y ∈ Ioo (-1 : ℝ) 1) :
     (1 - x ^ 2) * (f x * deriv g x - deriv f x * g x) =
       (1 - y ^ 2) * (f y * deriv g y - deriv f y * g y) := by
@@ -286,18 +289,20 @@ solution of 30.2.1 with data of the parity opposite to `𝖯s` at `0` is constru
 theorem exists_isSpheroidalQs_of_le {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
     ∃ f, IsSpheroidalQs n m γ2 f := by
   set P : ℝ → ℝ := fun t => spheroidalPs n m t γ2 with hP
-  have hPs : IsSpheroidalSolutionReal (spheroidalEigenvalue n m γ2) γ2 m P :=
-    isSpheroidalSolutionReal_spheroidalPs hmn γ2
+  have hPs : DLMF.Spheroidal.Real.IsSpheroidalSolution (spheroidalEigenvalue n m γ2) γ2 m P :=
+    DLMF.Spheroidal.Real.isSpheroidalSolution_spheroidalPs hmn γ2
   set C : ℝ := ((n + m).factorial : ℝ) / (n - m).factorial * spheroidalA n m γ2 *
     spheroidalANeg n m γ2 with hC
-  have key : ∀ f : ℝ → ℝ, IsSpheroidalSolutionReal (spheroidalEigenvalue n m γ2) γ2 m f →
+  have key : ∀ f : ℝ → ℝ,
+      DLMF.Spheroidal.Real.IsSpheroidalSolution (spheroidalEigenvalue n m γ2) γ2 m f →
       P 0 * deriv f 0 - deriv P 0 * f 0 = C →
       (∀ x, x ∉ Ioo (-1 : ℝ) 1 → f x = 0) →
       (∀ x ∈ Ioo (-1 : ℝ) 1, f (-x) = (-1) ^ (n - m + 1) * f x) →
       IsSpheroidalQs n m γ2 f := by
     intro f hfs h0 hout hpar
     refine ⟨hfs, hpar, fun x hx => ?_, hout⟩
-    have h := isSpheroidalSolutionReal_wronskian_const hPs hfs hx (y := 0) (by norm_num)
+    have h := DLMF.Spheroidal.Real.isSpheroidalSolution_wronskian_const hPs hfs hx
+        (y := 0) (by norm_num)
     have hx2 : 0 < 1 - x ^ 2 := by nlinarith [hx.1, hx.2]
     rw [h0] at h
     have : P x * deriv f x - deriv P x * f x = C / (1 - x ^ 2) := by
@@ -315,7 +320,8 @@ theorem exists_isSpheroidalQs_of_le {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
       rw [hPev, neg_zero] at this
       linarith
     obtain ⟨f, hfs, hf0, hfd, hout, hodd, -⟩ :=
-      exists_isSpheroidalSolutionReal_data (spheroidalEigenvalue n m γ2) γ2 m 0 (C / P 0)
+      DLMF.Spheroidal.Real.exists_isSpheroidalSolution_data (spheroidalEigenvalue n m γ2)
+          γ2 m 0 (C / P 0)
     refine ⟨f, key f hfs ?_ hout fun x hx => ?_⟩
     · rw [hfd, hdP, hf0]; field_simp; ring
     · rw [hodd rfl x hx, pow_succ, he.neg_one_pow]; ring
@@ -328,7 +334,8 @@ theorem exists_isSpheroidalQs_of_le {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
       rw [neg_zero, ho.neg_one_pow] at this
       linarith
     obtain ⟨f, hfs, hf0, hfd, hout, -, hev⟩ :=
-      exists_isSpheroidalSolutionReal_data (spheroidalEigenvalue n m γ2) γ2 m (-C / deriv P 0) 0
+      DLMF.Spheroidal.Real.exists_isSpheroidalSolution_data (spheroidalEigenvalue n m γ2) γ2 m
+          (-C / deriv P 0) 0
     refine ⟨f, key f hfs ?_ hout fun x hx => ?_⟩
     · rw [hf0, hP0]; field_simp; ring
     · rw [hev rfl x hx, pow_succ, ho.neg_one_pow]; ring
@@ -366,7 +373,7 @@ the boundary values 30.6.5 from above exists by
 @[dlmf 30.6.E1]
 theorem existsUnique_isSpheroidalQsC' {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
     ∃! F, IsSpheroidalQsC n m γ2 F := by
-  have hP := isSpheroidalSolutionReal_spheroidalPs hmn γ2
+  have hP := DLMF.Spheroidal.Real.isSpheroidalSolution_spheroidalPs hmn γ2
   have hQ := (spheroidalQs_spec' hmn γ2).ode
   obtain ⟨F, hFs, hFo, hFb⟩ := exists_isSpheroidalSolutionOn_cutPlane_boundary hQ hP
     ((-I) ^ m) (-((-I) ^ m * (I * π / 2)))

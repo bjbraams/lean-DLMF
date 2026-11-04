@@ -69,7 +69,7 @@ private lemma integral_exp_cpow_regularized0F1_complex_scaled {a c w b : ℂ}
   have hcoeff (n : ℕ) : Gamma (a.re : ℂ) * regularizedHGFunCoeff {(a.re : ℂ)} {c} n =
       Gamma ((a.re : ℂ) + n) * d n := by
     dsimp only [d]
-    have hp : poch (a.re : ℂ) n = Gamma ((a.re : ℂ) + n) / Gamma (a.re : ℂ) :=
+    have hp : pochhammer (a.re : ℂ) n = Gamma ((a.re : ℂ) + n) / Gamma (a.re : ℂ) :=
       (Gamma_add_nat_div_Gamma_eq (n := n) (a.re : ℂ)
         (not_neg_nat_of_re_pos (by simpa using ha))).symm
     rw [regularizedHGFunCoeff_singleton, DLMF.Bessel.regularizedHGFunCoeff_empty, hp]
@@ -96,7 +96,7 @@ private lemma integral_exp_cpow_regularized0F1_complex_scaled {a c w b : ℂ}
       (Gamma_add_nat_div_Gamma_eq (n := n) a (not_neg_nat_of_re_pos ha))
     rw [hGa, show -(a + (n : ℂ)) = -a + -(n : ℂ) by ring, cpow_add _ _ hb0]
     simp only [cpow_neg, cpow_natCast, d, regularizedHGFunCoeff_singleton,
-      DLMF.Bessel.regularizedHGFunCoeff_empty, div_pow, poch]
+      DLMF.Bessel.regularizedHGFunCoeff_empty, div_pow, pochhammer]
     ring
   have hpoint (t : ℝ) (ht : 0 < t) : (∑' n, F n t) =
       exp (-b * t) * (t : ℂ) ^ (a - 1) * regularizedHGFun ∅ {c} (w * t) := by
@@ -214,7 +214,7 @@ theorem besselJ_laplace_integral_kummer {μ ν s : ℂ} {w : ℝ}
     (∫ t : ℝ in Ioi 0, (t : ℂ) ^ (μ - 1) * exp (-s * t) * besselJ ν (w * t)) =
       ((w / 2 : ℂ) ^ ν * Gamma (2 * ν + 1) / Gamma (ν + 1)) *
         (Gamma (μ + ν) * (s + I * w) ^ (-(μ + ν)) *
-          regularizedGaussHG (ν + 1 / 2) (μ + ν) (2 * ν + 1)
+          regularizedGaussHypergeometric (ν + 1 / 2) (μ + ν) (2 * ν + 1)
             (2 * I * w / (s + I * w))) := by
   let C : ℂ := (w / 2 : ℂ) ^ ν * Gamma (2 * ν + 1) / Gamma (ν + 1)
   have hz : 0 < (s + I * w).re := by simpa using hs

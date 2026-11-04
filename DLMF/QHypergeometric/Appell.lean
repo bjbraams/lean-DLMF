@@ -187,7 +187,7 @@ theorem qAppell2_transformation (a b bp c cp q x y : ℂ)
     intro n
     have hH := heine_transformation (a := a*q^n) (b := b) (c := c) (z := x) hq hx hb hb0 hcr
       (fun k => by rw [show a*q^n*x*q^k = a*x*q^(n+k) by ring]; exact haxr _)
-    simp only [basicHG, List.map_cons, List.map_nil, List.prod_cons, List.prod_nil,
+    simp only [basicHypergeometric, List.map_cons, List.map_nil, List.prod_cons, List.prod_nil,
       mul_one] at hH
     have hsplit := qPochhammerInf_mul_qPochhammer (a := a*x) hq n
     have haxn : qPochhammer (a*x) q n ≠ 0 := qPochhammer_ne_zero_of_factors hq haxf n
@@ -259,7 +259,7 @@ theorem qAppell3_transformation (a ap b bp c q x y : ℂ)
     intro n
     have hH := heine_transformation (a := b) (b := a) (c := c*q^n) (z := x) hq hx ha ha0
       (fun k => by rw [mul_assoc, ← pow_add]; exact hcr _) hbxr
-    simp only [basicHG, List.map_cons, List.map_nil, List.prod_cons, List.prod_nil,
+    simp only [basicHypergeometric, List.map_cons, List.map_nil, List.prod_cons, List.prod_nil,
       mul_one] at hH
     have hsplit := qPochhammerInf_mul_qPochhammer (a := c) hq n
     have hcn : qPochhammer c q n ≠ 0 := qPochhammer_ne_zero_of_factors hq hcf n

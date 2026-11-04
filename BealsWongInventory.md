@@ -505,8 +505,8 @@ complex function theory and its connections.
 - **Partial — complex Jacobi functions**, §14.3, pp. 366–371. Missing are
   complex meromorphic sn/cn/dn, their imaginary periods, poles and
   residues, and imaginary/complementary-modulus transformations. The
-  project definitions are explicitly `Real.jacobiSnm`, `Real.jacobiCnm`,
-  and `Real.jacobiDnm`; real addition and periodicity are already covered.
+  project definitions are explicitly `Real.jacobiSnOfParameter`, `Real.jacobiCnOfParameter`,
+  and `Real.jacobiDnOfParameter`; real addition and periodicity are already covered.
 - **Partial — theta construction and representation of elliptic functions**,
   §§14.4–14.5, pp. 371–380. Theta series and some transformations are
   upstream, the local four-theta wrappers are present, and the Jacobi

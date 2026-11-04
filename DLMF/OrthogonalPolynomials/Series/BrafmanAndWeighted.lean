@@ -30,7 +30,7 @@ generating function DLMF 18.12.3, on the unit disc with principal branches.
 ## Implementation notes
 
 Brafman's formula follows from Bailey's product formula for Appell's `F₄`
-(`DLMF.Hypergeometric.appF4_bailey`): with `U = (1 - R - z)/2`, `V = (1 - R + z)/2` one has
+(`DLMF.Hypergeometric.appellF4_bailey`): with `U = (1 - R - z)/2`, `V = (1 - R + z)/2` one has
 `U(1 - V) = (x-1)z/2`, `V(1 - U) = (x+1)z/2`, and the antidiagonal sums of
 `F₄((x-1)z/2, (x+1)z/2)` are the Jacobi terms by DLMF 18.5.8. The bound `|U|², |V|² ≤ |z|`
 (from `Re(R conj(1 ∓ z)) > 0` by a connectedness argument) makes the right side holomorphic on
@@ -201,32 +201,36 @@ theorem JacobiBrafman.norm_sq_le' {x : ℝ} (hx : |x| ≤ 1) {z : ℂ} (hz : ‖
 /-- The antidiagonal sums of Appell's `F₄` at `((x-1)/2, (x+1)/2)` are Jacobi polynomials
 (by 18.5.8). -/
 theorem JacobiBrafman.coeff {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) (γ x : ℂ) (N : ℕ) :
-    ∑ p ∈ Finset.antidiagonal N, appF4Coeff γ (α + β + 1 - γ) (α + 1) (β + 1) p.1 p.2 *
+    ∑ p ∈ Finset.antidiagonal N, appellF4Coeff γ (α + β + 1 - γ) (α + 1) (β + 1) p.1 p.2 *
         ((x - 1) / 2) ^ p.1 * ((x + 1) / 2) ^ p.2 =
-      poch γ N * poch (α + β + 1 - γ) N / (poch (α + 1) N * poch (β + 1) N) *
-        jacobiPolyP α β N x := by
-  have hpa : ∀ j, poch (α + 1) j ≠ 0 := poch_ne_zero_of_not_neg_nat
+      pochhammer γ N * pochhammer (α + β + 1 - γ) N /
+          (pochhammer (α + 1) N * pochhammer (β + 1) N) *
+        jacobiPolynomialP α β N x := by
+  have hpa : ∀ j, pochhammer (α + 1) j ≠ 0 := pochhammer_ne_zero_of_not_neg_nat
     (not_neg_nat_of_re_pos (by simp only [add_re, one_re]; linarith))
-  have hpb : ∀ j, poch (β + 1) j ≠ 0 := poch_ne_zero_of_not_neg_nat
+  have hpb : ∀ j, pochhammer (β + 1) j ≠ 0 := pochhammer_ne_zero_of_not_neg_nat
     (not_neg_nat_of_re_pos (by simp only [add_re, one_re]; linarith))
   rw [jacobi_binomial_sum hα N x, ← mul_assoc, Finset.mul_sum,
     ← Finset.Nat.sum_antidiagonal_swap]
   simp only [Prod.fst_swap, Prod.snd_swap]
   rw [Finset.Nat.sum_antidiagonal_eq_sum_range_succ (fun n m =>
-      appF4Coeff γ (α + β + 1 - γ) (α + 1) (β + 1) m n * ((x - 1) / 2) ^ m * ((x + 1) / 2) ^ n)]
+      appellF4Coeff γ (α + β + 1 - γ) (α + 1) (β + 1) m n * ((x - 1) / 2) ^ m * ((x + 1) / 2) ^ n)]
   refine Finset.sum_congr rfl fun k hk => ?_
   obtain ⟨m, rfl⟩ := Nat.exists_eq_add_of_le (Nat.lt_succ_iff.mp (Finset.mem_range.mp hk))
   rw [Nat.add_sub_cancel_left]
   have e1 : α + ((k + m : ℕ) : ℂ) - k + 1 = α + 1 + m := by push_cast; ring
   rw [e1]
-  unfold appF4Coeff
-  rw [add_comm k m, poch_add (α + 1) m k,
-    show poch (β + 1) (m + k) = poch (β + 1) k * poch (β + 1 + k) m by rw [add_comm m k, poch_add],
+  unfold appellF4Coeff
+  rw [add_comm k m, pochhammer_add (α + 1) m k,
+    show pochhammer (β + 1) (m + k) = pochhammer (β + 1) k * pochhammer (β + 1 + k) m by
+        rw [add_comm m k, pochhammer_add],
     show β + (k : ℂ) + 1 = β + 1 + k by ring, pow_add, div_pow, div_pow]
   have := hpa m; have := hpb k
   have := hpa k; have := hpb m
-  have hpa' : poch (α + 1 + m) k ≠ 0 := fun h => hpa (m + k) (by rw [poch_add, h, mul_zero])
-  have hpb' : poch (β + 1 + k) m ≠ 0 := fun h => hpb (k + m) (by rw [poch_add, h, mul_zero])
+  have hpa' : pochhammer (α + 1 + m) k ≠ 0 := fun h =>
+      hpa (m + k) (by rw [pochhammer_add, h, mul_zero])
+  have hpb' : pochhammer (β + 1 + k) m ≠ 0 := fun h =>
+      hpb (k + m) (by rw [pochhammer_add, h, mul_zero])
   field_simp
 
 /-- Regrouping a summable double series along antidiagonals. -/
@@ -238,16 +242,16 @@ theorem JacobiBrafman.hasSum_antidiagonal {A : ℕ × ℕ → ℂ} {S : ℂ} (h 
   rwa [Finset.sum_coe_sort] at this
 
 /-- Brafman's generating function for small `|z|`, from Bailey's product formula
-`appF4_bailey`: with `U = (1 - R - z)/2`, `V = (1 - R + z)/2` one has `U(1 - V) = (x-1)z/2`
+`appellF4_bailey`: with `U = (1 - R - z)/2`, `V = (1 - R + z)/2` one has `U(1 - V) = (x-1)z/2`
 and `V(1 - U) = (x+1)z/2`. -/
 theorem JacobiBrafman.hasSum_small {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) (γ : ℂ) {x : ℝ}
     (hx : |x| ≤ 1) : ∃ ε > 0, ∀ z ∈ ball (0 : ℂ) ε,
-    HasSum (fun n : ℕ => poch γ n * poch (α + β + 1 - γ) n /
-      (poch (α + 1) n * poch (β + 1) n) * jacobiPolyP α β n x * z ^ n)
+    HasSum (fun n : ℕ => pochhammer γ n * pochhammer (α + β + 1 - γ) n /
+      (pochhammer (α + 1) n * pochhammer (β + 1) n) * jacobiPolynomialP α β n x * z ^ n)
       (₂F₁ γ (α + β + 1 - γ) (α + 1) ((1 - (1 - 2 * x * z + z ^ 2) ^ (1 / 2 : ℂ) - z) / 2) *
        ₂F₁ γ (α + β + 1 - γ) (β + 1) ((1 - (1 - 2 * x * z + z ^ 2) ^ (1 / 2 : ℂ) + z) / 2)) := by
   have hcc : (α + 1) + (β + 1) = γ + (α + β + 1 - γ) + 1 := by ring
-  obtain ⟨δ, hδ, hB⟩ := appF4_bailey hcc (by simp only [add_re, one_re]; linarith)
+  obtain ⟨δ, hδ, hB⟩ := appellF4_bailey hcc (by simp only [add_re, one_re]; linarith)
     (by simp only [add_re, one_re]; linarith)
   refine ⟨min (δ ^ 2) 1, lt_min (by positivity) one_pos, fun z hz => ?_⟩
   have hz' : ‖z‖ < min (δ ^ 2) 1 := by simpa using hz
@@ -304,25 +308,27 @@ theorem JacobiBrafman.differentiableOn (α β γ : ℂ) {x : ℝ} (hx : |x| ≤ 
 
 end JacobiBrafman
 
-/-- The series with terms `(fun n : ℕ => poch γ n * poch (α + β + 1 - γ) n / (poch (α + 1) n *
-poch (β + 1) n) * jacobiPolyP α β n x * z ^ n)` converges to `(₂F₁ γ (α + β + 1 - γ) (α + 1)
-((1 - (1 - 2 * x * z + z ^ 2) ^ (1 / 2 : ℂ) - z) / 2) * ₂F₁ γ (α + β + 1 - γ) (β + 1) ((1 - (1
+/-- The series with terms
+`(fun n : ℕ => pochhammer γ n * pochhammer (α + β + 1 - γ) n / (pochhammer (α + 1) n * pochhammer (β
++ 1) n) * jacobiPolynomialP α β n x * z ^ n)` converges to `(₂F₁ γ (α + β + 1 - γ) (α + 1) ((1 - (1
+- 2 * x * z + z ^ 2) ^ (1 / 2 : ℂ) - z) / 2) * ₂F₁ γ (α + β + 1 - γ) (β + 1) ((1 - (1
 - 2 * x * z + z ^ 2) ^ (1 / 2 : ℂ) + z) / 2))`. -/
 @[dlmf 18.12.E2_5]
 theorem jacobi_brafman_generating_function {α β : ℂ} (hα : -1 < α.re)
     (hβ : -1 < β.re) (γ : ℂ) {x : ℝ} (hx : |x| ≤ 1) {z : ℂ} (hz : ‖z‖ < 1)
     (hu : ‖(1 - (1 - 2 * x * z + z ^ 2) ^ (1 / 2 : ℂ) - z) / 2‖ < 1)
     (hv : ‖(1 - (1 - 2 * x * z + z ^ 2) ^ (1 / 2 : ℂ) + z) / 2‖ < 1) :
-    HasSum (fun n : ℕ => poch γ n * poch (α + β + 1 - γ) n /
-      (poch (α + 1) n * poch (β + 1) n) * jacobiPolyP α β n x * z ^ n)
+    HasSum (fun n : ℕ => pochhammer γ n * pochhammer (α + β + 1 - γ) n /
+      (pochhammer (α + 1) n * pochhammer (β + 1) n) * jacobiPolynomialP α β n x * z ^ n)
       (₂F₁ γ (α + β + 1 - γ) (α + 1) ((1 - (1 - 2 * x * z + z ^ 2) ^ (1 / 2 : ℂ) - z) / 2) *
        ₂F₁ γ (α + β + 1 - γ) (β + 1) ((1 - (1 - 2 * x * z + z ^ 2) ^ (1 / 2 : ℂ) + z) / 2)) := by
   -- `hu` and `hv` are redundant: they follow from `|z| < 1` (`JacobiBrafman.norm_sq_le`).
   have _hu := hu
   have _hv := hv
   obtain ⟨ε, hε, hsmall⟩ := JacobiBrafman.hasSum_small hα hβ γ hx
-  exact Complex.lagB_hasSum_of_differentiableOn (c := fun n => poch γ n *
-      poch (α + β + 1 - γ) n / (poch (α + 1) n * poch (β + 1) n) * jacobiPolyP α β n x)
+  exact Complex.lagB_hasSum_of_differentiableOn (c := fun n => pochhammer γ n *
+      pochhammer (α + β + 1 - γ) n / (pochhammer (α + 1) n * pochhammer (β + 1) n) *
+          jacobiPolynomialP α β n x)
     hε (JacobiBrafman.differentiableOn α β γ hx) hsmall (by simpa using hz)
 
 section JacobiWeighted
@@ -330,13 +336,13 @@ section JacobiWeighted
 open Metric Set
 
 /-- `k! ≤ (1 + 1/(Re β + 1))^k |(β+1)_k|` for `Re β > -1`. -/
-theorem JacobiWeightedGenerating.factorial_le_norm_poch {β : ℂ} (hβ : -1 < β.re) (k : ℕ) :
-    (k ! : ℝ) ≤ (1 + 1 / (β.re + 1)) ^ k * ‖poch (β + 1) k‖ := by
+theorem JacobiWeightedGenerating.factorial_le_norm_pochhammer {β : ℂ} (hβ : -1 < β.re) (k : ℕ) :
+    (k ! : ℝ) ≤ (1 + 1 / (β.re + 1)) ^ k * ‖pochhammer (β + 1) k‖ := by
   have hσ : 0 < β.re + 1 := by linarith
   induction k with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ k ih =>
-    rw [poch_succ, norm_mul, Nat.factorial_succ, pow_succ]
+    rw [pochhammer_succ, norm_mul, Nat.factorial_succ, pow_succ]
     have h1 : (β.re + 1 + k) ≤ ‖β + 1 + k‖ := by
       have := Complex.re_le_norm (β + 1 + k)
       simpa using this
@@ -348,7 +354,7 @@ theorem JacobiWeightedGenerating.factorial_le_norm_poch {β : ℂ} (hβ : -1 < �
       exact h3.trans (mul_le_mul_of_nonneg_left h1 (by positivity))
     push_cast
     calc ((k : ℝ) + 1) * k ! ≤ ((1 + 1 / (β.re + 1)) * ‖β + 1 + k‖) *
-          ((1 + 1 / (β.re + 1)) ^ k * ‖poch (β + 1) k‖) :=
+          ((1 + 1 / (β.re + 1)) ^ k * ‖pochhammer (β + 1) k‖) :=
           mul_le_mul h2 ih (by positivity) (by positivity)
       _ = _ := by ring
 
@@ -378,8 +384,8 @@ theorem JacobiWeightedGenerating.factorial_two_mul_add_le (k m : ℕ) :
 /-- The double-series term behind 18.12.3:
 `(λ)_{2k+m} (-1)^m y^k z^{k+m} / ((β+1)_k k! m!)`. -/
 noncomputable def jacWTerm (l β y z : ℂ) (p : ℕ × ℕ) : ℂ :=
-  poch l (2 * p.1 + p.2) * (-1) ^ p.2 * y ^ p.1 * z ^ (p.1 + p.2) /
-    (poch (β + 1) p.1 * p.1 ! * p.2 !)
+  pochhammer l (2 * p.1 + p.2) * (-1) ^ p.2 * y ^ p.1 * z ^ (p.1 + p.2) /
+    (pochhammer (β + 1) p.1 * p.1 ! * p.2 !)
 
 /-- A geometric bound for `jacWTerm`. -/
 theorem jacWTerm_norm_le (l : ℂ) {β : ℂ} (hβ : -1 < β.re) {y : ℂ} (hy : ‖y‖ ≤ 1) (z : ℂ)
@@ -388,14 +394,14 @@ theorem jacWTerm_norm_le (l : ℂ) {β : ℂ} (hβ : -1 < β.re) {y : ℂ} (hy :
   obtain ⟨k, m⟩ := p
   simp only
   have hσ : 0 < β.re + 1 := by linarith
-  have hP := JacobiWeightedGenerating.factorial_le_norm_poch hβ k
-  have hPpos : 0 < ‖poch (β + 1) k‖ := by
+  have hP := JacobiWeightedGenerating.factorial_le_norm_pochhammer hβ k
+  have hPpos : 0 < ‖pochhammer (β + 1) k‖ := by
     by_contra h
     push Not at h
-    have h0 : ‖poch (β + 1) k‖ = 0 := le_antisymm h (norm_nonneg _)
+    have h0 : ‖pochhammer (β + 1) k‖ = 0 := le_antisymm h (norm_nonneg _)
     rw [h0, mul_zero] at hP
     exact absurd hP (not_le.mpr (by exact_mod_cast k.factorial_pos))
-  have hL := appF4_norm_poch_le l (2 * k + m)
+  have hL := appellF4_norm_pochhammer_le l (2 * k + m)
   have hF := JacobiWeightedGenerating.factorial_two_mul_add_le k m
   have hk : (0 : ℝ) < k ! := by exact_mod_cast k.factorial_pos
   have hm : (0 : ℝ) < m ! := by exact_mod_cast m.factorial_pos
@@ -406,12 +412,12 @@ theorem jacWTerm_norm_le (l : ℂ) {β : ℂ} (hβ : -1 < β.re) {y : ℂ} (hy :
   have hyk : ‖y‖ ^ k ≤ 1 := pow_le_one₀ (norm_nonneg _) hy
   have hz := norm_nonneg z
   have hl := norm_nonneg l
-  calc ‖poch l (2 * k + m)‖ * ‖y‖ ^ k * ‖z‖ ^ (k + m)
+  calc ‖pochhammer l (2 * k + m)‖ * ‖y‖ ^ k * ‖z‖ ^ (k + m)
       ≤ ((1 + ‖l‖) ^ (2 * k + m) * (2 * k + m)!) * 1 * ‖z‖ ^ (k + m) := by gcongr
     _ ≤ ((1 + ‖l‖) ^ (2 * k + m) * (2 ^ (2 * k + m) * 4 ^ k * (k ! * k ! * m !))) * 1 *
           ‖z‖ ^ (k + m) := by gcongr
     _ ≤ ((1 + ‖l‖) ^ (2 * k + m) * (2 ^ (2 * k + m) * 4 ^ k *
-          (((1 + 1 / (β.re + 1)) ^ k * ‖poch (β + 1) k‖) * k ! * m !))) * 1 *
+          (((1 + 1 / (β.re + 1)) ^ k * ‖pochhammer (β + 1) k‖) * k ! * m !))) * 1 *
           ‖z‖ ^ (k + m) := by gcongr
     _ = _ := by
       simp only [mul_pow, ← pow_mul, pow_add]
@@ -419,25 +425,26 @@ theorem jacWTerm_norm_le (l : ℂ) {β : ℂ} (hβ : -1 < β.re) {y : ℂ} (hy :
       ring
 
 /-- Duplication for rising factorials: `(2a)_{2m} = 4^m (a)_m (a + 1/2)_m`. -/
-theorem JacobiWeightedGenerating.poch_two_mul (a : ℂ) (m : ℕ) :
-    poch (2 * a) (2 * m) = 4 ^ m * poch a m * poch (a + 1 / 2) m := by
-  exact poch_two_mul_two_mul a m
+theorem JacobiWeightedGenerating.pochhammer_two_mul (a : ℂ) (m : ℕ) :
+    pochhammer (2 * a) (2 * m) = 4 ^ m * pochhammer a m * pochhammer (a + 1 / 2) m := by
+  exact pochhammer_two_mul_two_mul a m
 
 /-- The `m`-sums of `jacWTerm` are binomial series. -/
 theorem jacWTerm_hasSum_fiber (l β y : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (k : ℕ) :
     HasSum (fun m => jacWTerm l β y z (k, m))
-      (poch l (2 * k) / (poch (β + 1) k * k !) * (y * z) ^ k * (1 + z) ^ (-(l + 2 * k))) := by
+      (pochhammer l (2 * k) / (pochhammer (β + 1) k * k !) * (y * z) ^ k *
+          (1 + z) ^ (-(l + 2 * k))) := by
   have hz' : ‖-z‖ < 1 := by rwa [norm_neg]
-  have h := (hasSum_poch_div_factorial (β := l + 2 * k) hz').mul_left
-    (poch l (2 * k) / (poch (β + 1) k * k !) * (y * z) ^ k)
+  have h := (hasSum_pochhammer_div_factorial (β := l + 2 * k) hz').mul_left
+    (pochhammer l (2 * k) / (pochhammer (β + 1) k * k !) * (y * z) ^ k)
   rw [sub_neg_eq_add] at h
   refine h.congr_fun fun m => ?_
   unfold jacWTerm
   simp only
-  rw [poch_add, show l + ((2 * k : ℕ) : ℂ) = l + 2 * k by push_cast; ring]
+  rw [pochhammer_add, show l + ((2 * k : ℕ) : ℂ) = l + 2 * k by push_cast; ring]
   have h1 : (m ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr m.factorial_ne_zero
   rw [neg_pow z, pow_add, mul_pow]
-  by_cases hp : poch (β + 1) k = 0
+  by_cases hp : pochhammer (β + 1) k = 0
   · simp [hp]
   have h2 : (k ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr k.factorial_ne_zero
   field_simp
@@ -445,7 +452,7 @@ theorem jacWTerm_hasSum_fiber (l β y : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (k : �
 /-- The `k`-sum of the fibre sums is `(1+z)^{-λ} ₂F₁(λ/2, λ/2 + 1/2; β+1; 4yz/(1+z)²)`. -/
 theorem jacWTerm_hasSum_outer (l β y : ℂ) {z : ℂ} (hz : ‖z‖ < 1)
     (hv : ‖4 * y * z / (1 + z) ^ 2‖ < 1) :
-    HasSum (fun k : ℕ => poch l (2 * k) / (poch (β + 1) k * k !) * (y * z) ^ k *
+    HasSum (fun k : ℕ => pochhammer l (2 * k) / (pochhammer (β + 1) k * k !) * (y * z) ^ k *
       (1 + z) ^ (-(l + 2 * k)))
       ((1 + z) ^ (-l) * ₂F₁ (l / 2) (l / 2 + 1 / 2) (β + 1) (4 * y * z / (1 + z) ^ 2)) := by
   have hz0 : 1 + z ≠ 0 := by
@@ -455,14 +462,15 @@ theorem jacWTerm_hasSum_outer (l β y : ℂ) {z : ℂ} (hz : ‖z‖ < 1)
   have h := ((hasFPowerSeriesOnBall_ordinaryHypergeometric (l / 2) (l / 2 + 1 / 2)
     (β + 1)).hasSum_mul_pow (mem_eball_one_of_norm_lt_one hv)).mul_left ((1 + z) ^ (-l))
   refine h.congr_fun fun k => ?_
-  have hpoch : poch l (2 * k) = 4 ^ k * poch (l / 2) k * poch (l / 2 + 1 / 2) k := by
-    have := JacobiWeightedGenerating.poch_two_mul (l / 2) k
+  have hpoch : pochhammer l (2 * k) = 4 ^ k * pochhammer (l / 2) k *
+      pochhammer (l / 2 + 1 / 2) k := by
+    have := JacobiWeightedGenerating.pochhammer_two_mul (l / 2) k
     rwa [show 2 * (l / 2) = l by ring] at this
   have hcp : (1 + z) ^ (-(l + 2 * k)) = (1 + z) ^ (-l) * (((1 + z) ^ 2) ^ k)⁻¹ := by
     rw [neg_add, cpow_add _ _ hz0, cpow_neg (1 + z) (2 * k),
       show (2 : ℂ) * k = ((2 * k : ℕ) : ℂ) by push_cast; ring, cpow_natCast, pow_mul]
-  rw [hcp, hpoch, gaussHGCoeff, div_pow, mul_pow, mul_pow, mul_pow]
-  by_cases hp : poch (β + 1) k = 0
+  rw [hcp, hpoch, gaussHypergeometricCoeff, div_pow, mul_pow, mul_pow, mul_pow]
+  by_cases hp : pochhammer (β + 1) k = 0
   · simp [hp]
   have h2 : (k ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr k.factorial_ne_zero
   have h3 : ((1 + z) ^ 2) ^ k ≠ 0 := pow_ne_zero _ (pow_ne_zero _ hz0)
@@ -472,7 +480,7 @@ theorem jacWTerm_hasSum_outer (l β y : ℂ) {z : ℂ} (hz : ‖z‖ < 1)
 theorem JacobiWeightedGenerating.coeff_eq_sum_antidiagonal {α β : ℂ} (hα : -1 < α.re)
     (hβ : -1 < β.re) (x z : ℂ)
     (n : ℕ) :
-    poch (α + β + 1) n / poch (β + 1) n * jacobiPolyP α β n x * z ^ n =
+    pochhammer (α + β + 1) n / pochhammer (β + 1) n * jacobiPolynomialP α β n x * z ^ n =
       ∑ p ∈ Finset.antidiagonal n, jacWTerm (α + β + 1) β ((x + 1) / 2) z p := by
   have hβ' : ∀ k : ℕ, β + 1 ≠ -(k : ℂ) := not_neg_nat_of_re_pos (by
     simp only [Complex.add_re, Complex.one_re]
@@ -488,22 +496,23 @@ theorem JacobiWeightedGenerating.coeff_eq_sum_antidiagonal {α β : ℂ} (hα : 
   rw [Nat.add_sub_cancel_left]
   unfold jacWTerm
   simp only
-  rw [show 2 * k + m = (k + m) + k by ring, poch_add (α + β + 1) (k + m) k,
-    poch_add (β + 1) k m]
-  have hpk := poch_ne_zero_of_not_neg_nat hβ' k
-  have hpm : poch (β + 1 + k) m ≠ 0 := by
+  rw [show 2 * k + m = (k + m) + k by ring, pochhammer_add (α + β + 1) (k + m) k,
+    pochhammer_add (β + 1) k m]
+  have hpk := pochhammer_ne_zero_of_not_neg_nat hβ' k
+  have hpm : pochhammer (β + 1 + k) m ≠ 0 := by
     have : ∀ j : ℕ, β + 1 + k ≠ -(j : ℂ) := not_neg_nat_of_re_pos (by
       simp only [Complex.add_re, Complex.one_re, Complex.natCast_re]
       linarith [(Nat.cast_nonneg (α := ℝ) k)])
-    exact poch_ne_zero_of_not_neg_nat this m
+    exact pochhammer_ne_zero_of_not_neg_nat this m
   have h1 : (k ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr k.factorial_ne_zero
   have h2 : (m ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr m.factorial_ne_zero
   rw [show ((k + m : ℕ) : ℂ) + β + α + 1 = α + β + 1 + ((k + m : ℕ) : ℂ) by ring,
     show β + k + 1 = β + 1 + k by ring, show (-x - 1) / 2 = -1 * ((x + 1) / 2) by ring,
     mul_pow]
   have hsq : (-1 : ℂ) ^ k * (-1) ^ k = 1 := by rw [← pow_add, ← two_mul, pow_mul]; simp
-  calc _ = poch (α + β + 1) (k + m) * poch (α + β + 1 + ↑(k + m)) k * ((-1) ^ k * (-1) ^ k) *
-        (-1) ^ m * ((x + 1) / 2) ^ k * z ^ (k + m) / (poch (β + 1) k * ↑k ! * ↑m !) := by
+  calc _ = pochhammer (α + β + 1) (k + m) * pochhammer (α + β + 1 + ↑(k + m)) k *
+         ((-1) ^ k * (-1) ^ k) *
+        (-1) ^ m * ((x + 1) / 2) ^ k * z ^ (k + m) / (pochhammer (β + 1) k * ↑k ! * ↑m !) := by
           field_simp
           rw [pow_add (-1 : ℂ) k m]
           ring
@@ -513,7 +522,8 @@ theorem JacobiWeightedGenerating.coeff_eq_sum_antidiagonal {α β : ℂ} (hα : 
 theorem JacobiWeightedGenerating.hasSum_small {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re)
     {x : ℝ} (hx : |x| ≤ 1)
     {z : ℂ} (hz : ‖z‖ < 1 / (32 * ((1 + ‖α + β + 1‖) ^ 2 * (1 + 1 / (β.re + 1))))) :
-    HasSum (fun n : ℕ => poch (α + β + 1) n / poch (β + 1) n * jacobiPolyP α β n x * z ^ n)
+    HasSum (fun n : ℕ => pochhammer (α + β + 1) n / pochhammer (β + 1) n *
+        jacobiPolynomialP α β n x * z ^ n)
       ((1 + z) ^ (-α - β - 1) * ₂F₁ ((α + β + 1) / 2) ((α + β + 2) / 2)
         (β + 1) (2 * (x + 1 : ℂ) * z / (1 + z) ^ 2)) := by
   set l := α + β + 1 with hl
@@ -585,7 +595,8 @@ theorem JacobiWeightedGenerating.hasSum_small {α β : ℂ} (hα : -1 < α.re) (
 theorem JacobiWeightedGenerating.tendsto_coeff {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re)
     {x : ℝ} (hx : |x| ≤ 1)
     {r : ℝ} (hr0 : 0 ≤ r) (hr : r < 1) :
-    Tendsto (fun n : ℕ => ‖poch (α + β + 1) n / poch (β + 1) n * jacobiPolyP α β n x‖ * r ^ n)
+    Tendsto (fun n : ℕ => ‖pochhammer (α + β + 1) n / pochhammer (β + 1) n *
+        jacobiPolynomialP α β n x‖ * r ^ n)
       atTop (𝓝 0) := by
   set s := Real.sqrt r with hs
   have hs0 : 0 ≤ s := Real.sqrt_nonneg r
@@ -597,14 +608,16 @@ theorem JacobiWeightedGenerating.tendsto_coeff {α β : ℂ} (hα : -1 < α.re) 
   -- the Pochhammer factor
   have hrad := (hasFPowerSeriesOnBall_ordinaryHypergeometric (α + β + 1) 1 (β + 1)).r_le
   have hsr : ((s.toNNReal : NNReal) : ENNReal) <
-      (FormalMultilinearSeries.ofScalars ℂ (gaussHGCoeff (α + β + 1) 1 (β + 1))).radius :=
+      (FormalMultilinearSeries.ofScalars ℂ
+          (gaussHypergeometricCoeff (α + β + 1) 1 (β + 1))).radius :=
     lt_of_lt_of_le (by rw [ENNReal.coe_lt_one_iff, Real.toNNReal_lt_one]; exact hs1) hrad
   have hG := ((FormalMultilinearSeries.ofScalars ℂ
-    (gaussHGCoeff (α + β + 1) 1 (β + 1))).summable_norm_mul_pow hsr).tendsto_atTop_zero
+    (gaussHypergeometricCoeff (α + β + 1) 1 (β + 1))).summable_norm_mul_pow hsr).tendsto_atTop_zero
   have := hG.mul hJ
   rw [zero_mul] at this
   refine this.congr fun n => ?_
-  rw [FormalMultilinearSeries.ofScalars_norm, gaussHGCoeff, poch_nat_one, norm_mul, norm_mul,
+  rw [FormalMultilinearSeries.ofScalars_norm, gaussHypergeometricCoeff, pochhammer_nat_one,
+      norm_mul, norm_mul,
     norm_pow, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hs0, Real.coe_toNNReal _ hs0,
     ← hss, mul_pow]
   have hf : (n ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
@@ -642,7 +655,8 @@ theorem JacobiWeightedGenerating.norm_div_sq_le {z : ℂ} (hz : ‖z‖ < 1) {b 
 theorem JacobiWeightedGenerating.one_le_radius {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) {x : ℝ}
     (hx : |x| ≤ 1) :
     1 ≤ (FormalMultilinearSeries.ofScalars ℂ
-      (fun n : ℕ => poch (α + β + 1) n / poch (β + 1) n * jacobiPolyP α β n x)).radius := by
+      (fun n : ℕ => pochhammer (α + β + 1) n / pochhammer (β + 1) n *
+          jacobiPolynomialP α β n x)).radius := by
   refine ENNReal.le_of_forall_nnreal_lt fun r hr => ?_
   have hr1 : (r : ℝ) < 1 := by exact_mod_cast hr
   refine FormalMultilinearSeries.le_radius_of_tendsto _ (l := 0) ?_
@@ -653,17 +667,20 @@ theorem JacobiWeightedGenerating.one_le_radius {α β : ℂ} (hα : -1 < α.re) 
 end JacobiWeighted
 
 open Metric Set in
-/-- The series with terms `(fun n : ℕ => poch (α + β + 1) n / poch (β + 1) n * jacobiPolyP α β n x
+/-- The series with terms
+`(fun n : ℕ => pochhammer (α + β + 1) n / pochhammer (β + 1) n * jacobiPolynomialP α β n x
 * z ^ n)` converges to `((1 + z) ^ (-α - β - 1) * ₂F₁ ((α + β + 1) / 2) ((α + β + 2) / 2) (β +
 1) (2 * (x + 1 : ℂ) * z / (1 + z) ^ 2))`. -/
 @[dlmf 18.12.E3]
 theorem jacobi_weighted_generating_function {α β : ℂ} (hα : -1 < α.re)
     (hβ : -1 < β.re) {x : ℝ} (hx : |x| ≤ 1) {z : ℂ} (hz : ‖z‖ < 1)
     (hu : ‖2 * (x + 1 : ℂ) * z / (1 + z) ^ 2‖ < 1) :
-    HasSum (fun n : ℕ => poch (α + β + 1) n / poch (β + 1) n * jacobiPolyP α β n x * z ^ n)
+    HasSum (fun n : ℕ => pochhammer (α + β + 1) n / pochhammer (β + 1) n *
+        jacobiPolynomialP α β n x * z ^ n)
       ((1 + z) ^ (-α - β - 1) * ₂F₁ ((α + β + 1) / 2) ((α + β + 2) / 2)
         (β + 1) (2 * (x + 1 : ℂ) * z / (1 + z) ^ 2)) := by
-  set c : ℕ → ℂ := fun n => poch (α + β + 1) n / poch (β + 1) n * jacobiPolyP α β n x with hc
+  set c : ℕ → ℂ := fun n => pochhammer (α + β + 1) n / pochhammer (β + 1) n *
+      jacobiPolynomialP α β n x with hc
   set p := FormalMultilinearSeries.ofScalars ℂ c with hp
   have hrad : 1 ≤ p.radius := JacobiWeightedGenerating.one_le_radius hα hβ hx
   have hF : HasFPowerSeriesOnBall p.sum p 0 1 :=

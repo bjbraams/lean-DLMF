@@ -24,8 +24,9 @@ The definitions and the real-axis calculus are in `DLMF.Airy.Basic.ModulusPhase`
 
 ## Main results
 
-* `airyAiReal_modulus_phase`, `airyBiReal_modulus_phase`, `airyAiDerivReal_modulus_phase`,
-  `airyBiDerivReal_modulus_phase`: DLMF 9.8.1, 9.8.2, 9.8.5, 9.8.6.
+* `DLMF.Airy.Real.airyAi_modulus_phase`, `DLMF.Airy.Real.airyBi_modulus_phase`,
+  `DLMF.Airy.Real.airyAiDeriv_modulus_phase`, `DLMF.Airy.Real.airyBiDeriv_modulus_phase`: DLMF
+  9.8.1, 9.8.2, 9.8.5, 9.8.6.
 * `airyPhase_atan_branch`, `airyDerivPhase_atan_branch`: DLMF 9.8.4, 9.8.8.
 * `airyModulus_bessel`, `airyDerivModulus_bessel`, `airyPhase_bessel_atan`,
   `airyDerivPhase_bessel_atan`: DLMF 9.8.9–9.8.12.
@@ -73,12 +74,13 @@ def airyPhaseSum (derivative : Bool) (N : ℕ) (x : ℝ) : ℝ :=
 /-! ### The complex form of the modulus–phase representation -/
 
 /-- `Bi(0) = √3 Ai(0)`. -/
-theorem airyBiReal_zero_eq : airyBiReal 0 = Real.sqrt 3 * airyAiReal 0 := by
+theorem Real.airyBi_zero_eq : DLMF.Airy.Real.airyBi 0 = Real.sqrt 3 * DLMF.Airy.Real.airyAi 0 := by
   have hA := airyAi_zero
   have hB := airyBi_zero
   rw [Gamma_two_thirds_eq] at hA hB
   simp only [← Complex.ofReal_mul, ← Complex.ofReal_one, ← Complex.ofReal_div] at hA hB
-  simp only [airyAiReal, airyBiReal, Complex.ofReal_zero, hA, hB, Complex.ofReal_re]
+  simp only [DLMF.Airy.Real.airyAi, DLMF.Airy.Real.airyBi, Complex.ofReal_zero, hA, hB,
+      Complex.ofReal_re]
   have h : (3 : ℝ) ^ (2 / 3 : ℝ) = Real.sqrt 3 * 3 ^ (1 / 6 : ℝ) := by
     rw [sqrt_three_eq_rpow, three_rpow_add]; norm_num
   rw [h]
@@ -88,21 +90,23 @@ theorem airyBiReal_zero_eq : airyBiReal 0 = Real.sqrt 3 * airyAiReal 0 := by
   field_simp
 
 /-- `Ai(0) > 0`. -/
-theorem airyAiReal_zero_pos : 0 < airyAiReal 0 := by
+theorem Real.airyAi_zero_pos : 0 < DLMF.Airy.Real.airyAi 0 := by
   obtain ⟨r, hr, he⟩ := airyAi_ofReal_pos (le_refl 0)
   rw [Complex.ofReal_zero] at he
-  simp [airyAiReal, he, hr]
+  simp [DLMF.Airy.Real.airyAi, he, hr]
 
 /-- The complex combination `Bi + i Ai` on the real axis. -/
 theorem hasDerivAt_airyBiAiComplex (t : ℝ) :
-    HasDerivAt (fun s : ℝ => (airyBiReal s : ℂ) + I * airyAiReal s)
-      ((airyBiDerivReal t : ℂ) + I * airyAiDerivReal t) t :=
-  (hasDerivAt_airyBiReal t).ofReal_comp.add ((hasDerivAt_airyAiReal t).ofReal_comp.const_mul I)
+    HasDerivAt (fun s : ℝ => (DLMF.Airy.Real.airyBi s : ℂ) + I * DLMF.Airy.Real.airyAi s)
+      ((DLMF.Airy.Real.airyBiDeriv t : ℂ) + I * DLMF.Airy.Real.airyAiDeriv t) t :=
+  (DLMF.Airy.Real.hasDerivAt_airyBi t).ofReal_comp.add
+      ((DLMF.Airy.Real.hasDerivAt_airyAi t).ofReal_comp.const_mul I)
 
 /-- `Bi + i Ai = M e^{iθ}` on the whole real axis (DLMF 9.8.1–9.8.2 in complex form). -/
 theorem airyBi_add_I_airyAi (x : ℝ) :
-    (airyBiReal x : ℂ) + I * airyAiReal x = airyModulus x * exp (I * airyPhase x) := by
-  set g : ℝ → ℂ := fun s => ((airyBiReal s : ℂ) + I * airyAiReal s) *
+    (DLMF.Airy.Real.airyBi x : ℂ) + I * DLMF.Airy.Real.airyAi x = airyModulus x *
+        exp (I * airyPhase x) := by
+  set g : ℝ → ℂ := fun s => ((DLMF.Airy.Real.airyBi s : ℂ) + I * DLMF.Airy.Real.airyAi s) *
     exp (-(I * airyPhase s)) / airyModulus s with hg
   have hd : ∀ t, HasDerivAt g 0 t := by
     intro t
@@ -121,10 +125,10 @@ theorem airyBi_add_I_airyAi (x : ℝ) :
     rw [div_eq_zero_iff]; left
     generalize exp (-(I * airyPhase t)) = e
     push_cast
-    generalize airyAiReal t = a at *
-    generalize airyBiReal t = b at *
-    generalize airyAiDerivReal t = a' at *
-    generalize airyBiDerivReal t = b' at *
+    generalize DLMF.Airy.Real.airyAi t = a at *
+    generalize DLMF.Airy.Real.airyBi t = b at *
+    generalize DLMF.Airy.Real.airyAiDeriv t = a' at *
+    generalize DLMF.Airy.Real.airyBiDeriv t = b' at *
     generalize airyModulus t = m at *
     have hW' : ((a : ℂ) * b' - a' * b) * π = 1 := by
       have : (a * b' - a' * b) * π = 1 := by rw [hW]; field_simp
@@ -138,14 +142,17 @@ theorem airyBi_add_I_airyAi (x : ℝ) :
   have hg0 : g 0 = 1 := by
     have hθ0 : airyPhase 0 = π / 6 := by simp [airyPhase]
     simp only [hg, hθ0]
-    rw [airyBiReal_zero_eq, show -(I * ((π / 6 : ℝ) : ℂ)) = -(π * I / 6) by push_cast; ring,
+    rw [DLMF.Airy.Real.airyBi_zero_eq, show -(I * ((π / 6 : ℝ) : ℂ)) = -(π * I / 6) by
+        push_cast; ring,
       exp_neg_pi_I_div_six]
-    have hM0 : airyModulus 0 = 2 * airyAiReal 0 := by
-      rw [airyModulus, airyBiReal_zero_eq, mul_pow, Real.sq_sqrt (by norm_num)]
-      rw [show airyAiReal 0 ^ 2 + 3 * airyAiReal 0 ^ 2 = (2 * airyAiReal 0) ^ 2 by ring]
-      exact Real.sqrt_sq (by linarith [airyAiReal_zero_pos])
+    have hM0 : airyModulus 0 = 2 * DLMF.Airy.Real.airyAi 0 := by
+      rw [airyModulus, DLMF.Airy.Real.airyBi_zero_eq, mul_pow, Real.sq_sqrt (by norm_num)]
+      rw [show DLMF.Airy.Real.airyAi 0 ^ 2 + 3 * DLMF.Airy.Real.airyAi 0 ^ 2 =
+          (2 * DLMF.Airy.Real.airyAi 0) ^ 2 by ring]
+      exact Real.sqrt_sq (by linarith [DLMF.Airy.Real.airyAi_zero_pos])
     rw [hM0]
-    have h0 : (airyAiReal 0 : ℂ) ≠ 0 := by exact_mod_cast airyAiReal_zero_pos.ne'
+    have h0 : (DLMF.Airy.Real.airyAi 0 : ℂ) ≠ 0 := by
+        exact_mod_cast DLMF.Airy.Real.airyAi_zero_pos.ne'
     have h3 : ((Real.sqrt 3 : ℝ) : ℂ) ^ 2 = 3 := sqrt_three_sq
     push_cast
     field_simp
@@ -162,13 +169,15 @@ theorem Gamma_one_third_eq : Complex.Gamma (1 / 3) = ((Real.Gamma (1 / 3) : ℝ)
   rw [show (1 / 3 : ℂ) = ((1 / 3 : ℝ) : ℂ) by push_cast; ring, Complex.Gamma_ofReal]
 
 /-- `Bi'(0) = -√3 Ai'(0)`. -/
-theorem airyBiDerivReal_zero_eq : airyBiDerivReal 0 = -(Real.sqrt 3 * airyAiDerivReal 0) := by
+theorem Real.airyBiDeriv_zero_eq : DLMF.Airy.Real.airyBiDeriv 0 =
+    -(Real.sqrt 3 * DLMF.Airy.Real.airyAiDeriv 0) := by
   have hA := airyAiDeriv_zero
   have hB := airyBiDeriv_zero
   rw [Gamma_one_third_eq] at hA hB
   simp only [← Complex.ofReal_mul, ← Complex.ofReal_one, ← Complex.ofReal_div,
     ← Complex.ofReal_neg] at hA hB
-  simp only [airyAiDerivReal, airyBiDerivReal, Complex.ofReal_zero, hA, hB, Complex.ofReal_re]
+  simp only [DLMF.Airy.Real.airyAiDeriv, DLMF.Airy.Real.airyBiDeriv, Complex.ofReal_zero, hA, hB,
+      Complex.ofReal_re]
   have h : (3 : ℝ) ^ (1 / 6 : ℝ) * 3 ^ (1 / 3 : ℝ) = Real.sqrt 3 := by
     rw [sqrt_three_eq_rpow, three_rpow_add]; norm_num
   rw [← h]
@@ -178,21 +187,22 @@ theorem airyBiDerivReal_zero_eq : airyBiDerivReal 0 = -(Real.sqrt 3 * airyAiDeri
   field_simp
 
 /-- `Ai'(0) < 0`. -/
-theorem airyAiDerivReal_zero_lt : airyAiDerivReal 0 < 0 := by
+theorem Real.airyAiDeriv_zero_lt : DLMF.Airy.Real.airyAiDeriv 0 < 0 := by
   have h := airyAiDeriv_zero
   rw [Gamma_one_third_eq] at h
   simp only [← Complex.ofReal_mul, ← Complex.ofReal_one, ← Complex.ofReal_div,
     ← Complex.ofReal_neg] at h
-  simp only [airyAiDerivReal, Complex.ofReal_zero, h, Complex.ofReal_re]
+  simp only [DLMF.Airy.Real.airyAiDeriv, Complex.ofReal_zero, h, Complex.ofReal_re]
   have := Real.Gamma_pos_of_pos (by norm_num : (0 : ℝ) < 1 / 3)
   have : 0 < (3 : ℝ) ^ (1 / 3 : ℝ) := by positivity
   exact div_neg_of_neg_of_pos (by norm_num) (by positivity)
 
 /-- `Bi' + i Ai' = N e^{iφ}` on the whole real axis (DLMF 9.8.5–9.8.6 in complex form). -/
 theorem airyBiDeriv_add_I_airyAiDeriv (x : ℝ) :
-    (airyBiDerivReal x : ℂ) + I * airyAiDerivReal x =
+    (DLMF.Airy.Real.airyBiDeriv x : ℂ) + I * DLMF.Airy.Real.airyAiDeriv x =
       airyDerivModulus x * exp (I * airyDerivPhase x) := by
-  set g : ℝ → ℂ := fun s => ((airyBiDerivReal s : ℂ) + I * airyAiDerivReal s) *
+  set g : ℝ → ℂ := fun s =>
+      ((DLMF.Airy.Real.airyBiDeriv s : ℂ) + I * DLMF.Airy.Real.airyAiDeriv s) *
     exp (-(I * airyDerivPhase s)) / airyDerivModulus s with hg
   have hd : ∀ t, HasDerivAt g 0 t := by
     intro t
@@ -201,10 +211,11 @@ theorem airyBiDeriv_add_I_airyAiDeriv (x : ℝ) :
       (((hasDerivAt_airyDerivPhase t).ofReal_comp.const_mul I).neg).cexp
     have hM := (hasDerivAt_airyDerivModulus t).ofReal_comp
     have hM0 : (airyDerivModulus t : ℂ) ≠ 0 := by exact_mod_cast (airyDerivModulus_pos t).ne'
-    have hF : HasDerivAt (fun s : ℝ => (airyBiDerivReal s : ℂ) + I * airyAiDerivReal s)
-        (((t * airyBiReal t : ℝ) : ℂ) + I * ((t * airyAiReal t : ℝ) : ℂ)) t :=
-      (hasDerivAt_airyBiDerivReal t).ofReal_comp.add
-        ((hasDerivAt_airyAiDerivReal t).ofReal_comp.const_mul I)
+    have hF : HasDerivAt
+        (fun s : ℝ => (DLMF.Airy.Real.airyBiDeriv s : ℂ) + I * DLMF.Airy.Real.airyAiDeriv s)
+        (((t * DLMF.Airy.Real.airyBi t : ℝ) : ℂ) + I * ((t * DLMF.Airy.Real.airyAi t : ℝ) : ℂ)) t :=
+      (DLMF.Airy.Real.hasDerivAt_airyBiDeriv t).ofReal_comp.add
+        ((DLMF.Airy.Real.hasDerivAt_airyAiDeriv t).ofReal_comp.const_mul I)
     have h := (hF.mul hE).div hM hM0
     refine h.congr_deriv ?_
     have hW := wronskian_airyReal t
@@ -215,10 +226,10 @@ theorem airyBiDeriv_add_I_airyAiDeriv (x : ℝ) :
     rw [div_eq_zero_iff]; left
     generalize exp (-(I * airyDerivPhase t)) = e
     push_cast
-    generalize airyAiReal t = a at *
-    generalize airyBiReal t = b at *
-    generalize airyAiDerivReal t = a' at *
-    generalize airyBiDerivReal t = b' at *
+    generalize DLMF.Airy.Real.airyAi t = a at *
+    generalize DLMF.Airy.Real.airyBi t = b at *
+    generalize DLMF.Airy.Real.airyAiDeriv t = a' at *
+    generalize DLMF.Airy.Real.airyBiDeriv t = b' at *
     generalize airyDerivModulus t = m at *
     have hW' : ((a : ℂ) * b' - a' * b) * π = 1 := by
       have : (a * b' - a' * b) * π = 1 := by rw [hW]; field_simp
@@ -238,15 +249,18 @@ theorem airyBiDeriv_add_I_airyAiDeriv (x : ℝ) :
   have hg0 : g 0 = 1 := by
     have hφ0 : airyDerivPhase 0 = -π / 6 := by simp [airyDerivPhase]
     simp only [hg, hφ0]
-    rw [airyBiDerivReal_zero_eq, show -(I * ((-π / 6 : ℝ) : ℂ)) = π * I / 6 by push_cast; ring,
+    rw [DLMF.Airy.Real.airyBiDeriv_zero_eq, show -(I * ((-π / 6 : ℝ) : ℂ)) = π * I / 6 by
+        push_cast; ring,
       exp_pi_I_div_six]
-    have hM0 : airyDerivModulus 0 = -(2 * airyAiDerivReal 0) := by
-      rw [airyDerivModulus, airyBiDerivReal_zero_eq, neg_sq, mul_pow, Real.sq_sqrt (by norm_num)]
-      rw [show airyAiDerivReal 0 ^ 2 + 3 * airyAiDerivReal 0 ^ 2 =
-        (-(2 * airyAiDerivReal 0)) ^ 2 by ring]
-      exact Real.sqrt_sq (by linarith [airyAiDerivReal_zero_lt])
+    have hM0 : airyDerivModulus 0 = -(2 * DLMF.Airy.Real.airyAiDeriv 0) := by
+      rw [airyDerivModulus, DLMF.Airy.Real.airyBiDeriv_zero_eq, neg_sq, mul_pow,
+          Real.sq_sqrt (by norm_num)]
+      rw [show DLMF.Airy.Real.airyAiDeriv 0 ^ 2 + 3 * DLMF.Airy.Real.airyAiDeriv 0 ^ 2 =
+        (-(2 * DLMF.Airy.Real.airyAiDeriv 0)) ^ 2 by ring]
+      exact Real.sqrt_sq (by linarith [DLMF.Airy.Real.airyAiDeriv_zero_lt])
     rw [hM0]
-    have h0 : (airyAiDerivReal 0 : ℂ) ≠ 0 := by exact_mod_cast airyAiDerivReal_zero_lt.ne
+    have h0 : (DLMF.Airy.Real.airyAiDeriv 0 : ℂ) ≠ 0 := by
+        exact_mod_cast DLMF.Airy.Real.airyAiDeriv_zero_lt.ne
     have h3 : ((Real.sqrt 3 : ℝ) : ℂ) ^ 2 = 3 := sqrt_three_sq
     push_cast
     field_simp
@@ -259,7 +273,7 @@ theorem airyBiDeriv_add_I_airyAiDeriv (x : ℝ) :
   simp
 
 /-- `Ai = M sin θ` on the whole real axis. -/
-theorem airyAiReal_eq_modulus_sin (x : ℝ) : airyAiReal x = airyModulus x *
+theorem Real.airyAi_eq_modulus_sin (x : ℝ) : DLMF.Airy.Real.airyAi x = airyModulus x *
     Real.sin (airyPhase x) := by
   have h := congrArg Complex.im (airyBi_add_I_airyAi x)
   rw [show I * (airyPhase x : ℂ) = (airyPhase x : ℂ) * I by ring, exp_mul_I,
@@ -267,7 +281,7 @@ theorem airyAiReal_eq_modulus_sin (x : ℝ) : airyAiReal x = airyModulus x *
   simpa [Complex.cos_ofReal_re, Complex.sin_ofReal_re] using h
 
 /-- `Bi = M cos θ` on the whole real axis. -/
-theorem airyBiReal_eq_modulus_cos (x : ℝ) : airyBiReal x = airyModulus x *
+theorem Real.airyBi_eq_modulus_cos (x : ℝ) : DLMF.Airy.Real.airyBi x = airyModulus x *
     Real.cos (airyPhase x) := by
   have h := congrArg Complex.re (airyBi_add_I_airyAi x)
   rw [show I * (airyPhase x : ℂ) = (airyPhase x : ℂ) * I by ring, exp_mul_I,
@@ -275,16 +289,16 @@ theorem airyBiReal_eq_modulus_cos (x : ℝ) : airyBiReal x = airyModulus x *
   simpa [Complex.cos_ofReal_re, Complex.sin_ofReal_re] using h
 
 /-- `Ai' = N sin φ` on the whole real axis. -/
-theorem airyAiDerivReal_eq_modulus_sin (x : ℝ) :
-    airyAiDerivReal x = airyDerivModulus x * Real.sin (airyDerivPhase x) := by
+theorem Real.airyAiDeriv_eq_modulus_sin (x : ℝ) :
+    DLMF.Airy.Real.airyAiDeriv x = airyDerivModulus x * Real.sin (airyDerivPhase x) := by
   have h := congrArg Complex.im (airyBiDeriv_add_I_airyAiDeriv x)
   rw [show I * (airyDerivPhase x : ℂ) = (airyDerivPhase x : ℂ) * I by ring, exp_mul_I,
 ] at h
   simpa [Complex.cos_ofReal_re, Complex.sin_ofReal_re] using h
 
 /-- `Bi' = N cos φ` on the whole real axis. -/
-theorem airyBiDerivReal_eq_modulus_cos (x : ℝ) :
-    airyBiDerivReal x = airyDerivModulus x * Real.cos (airyDerivPhase x) := by
+theorem Real.airyBiDeriv_eq_modulus_cos (x : ℝ) :
+    DLMF.Airy.Real.airyBiDeriv x = airyDerivModulus x * Real.cos (airyDerivPhase x) := by
   have h := congrArg Complex.re (airyBiDeriv_add_I_airyAiDeriv x)
   rw [show I * (airyDerivPhase x : ℂ) = (airyDerivPhase x : ℂ) * I by ring, exp_mul_I,
 ] at h
@@ -318,16 +332,18 @@ theorem exists_int_eq_arctan_tan {t : ℝ} (h : Real.cos t ≠ 0) :
 /-- `M N sin(θ - φ) = 1/π` on the whole real axis. -/
 theorem airy_modulus_phase_wronskian' (x : ℝ) :
     airyModulus x * airyDerivModulus x * Real.sin (airyPhase x - airyDerivPhase x) = 1 / π := by
-  rw [Real.sin_sub, ← wronskian_airyReal x, airyAiReal_eq_modulus_sin, airyBiReal_eq_modulus_cos,
-    airyAiDerivReal_eq_modulus_sin, airyBiDerivReal_eq_modulus_cos]
+  rw [Real.sin_sub, ← wronskian_airyReal x, DLMF.Airy.Real.airyAi_eq_modulus_sin,
+      DLMF.Airy.Real.airyBi_eq_modulus_cos,
+    DLMF.Airy.Real.airyAiDeriv_eq_modulus_sin, DLMF.Airy.Real.airyBiDeriv_eq_modulus_cos]
   ring
 
 /-- `M N cos(θ - φ) = Ai Ai' + Bi Bi'` on the whole real axis. -/
 theorem airy_modulus_phase_cos (x : ℝ) :
     airyModulus x * airyDerivModulus x * Real.cos (airyPhase x - airyDerivPhase x) =
-      airyAiReal x * airyAiDerivReal x + airyBiReal x * airyBiDerivReal x := by
-  rw [Real.cos_sub, airyAiReal_eq_modulus_sin, airyBiReal_eq_modulus_cos,
-    airyAiDerivReal_eq_modulus_sin, airyBiDerivReal_eq_modulus_cos]
+      DLMF.Airy.Real.airyAi x * DLMF.Airy.Real.airyAiDeriv x + DLMF.Airy.Real.airyBi x *
+          DLMF.Airy.Real.airyBiDeriv x := by
+  rw [Real.cos_sub, DLMF.Airy.Real.airyAi_eq_modulus_sin, DLMF.Airy.Real.airyBi_eq_modulus_cos,
+    DLMF.Airy.Real.airyAiDeriv_eq_modulus_sin, DLMF.Airy.Real.airyBiDeriv_eq_modulus_cos]
   ring
 
 /-- The energy `w'²/(-x) + w²` of a real solution of Airy's equation is monotone on `(-∞, 0)`. -/
@@ -354,15 +370,18 @@ theorem airy_energy_monotoneOn {f f' : ℝ → ℝ} (hf : ∀ t, HasDerivAt f (f
 /-- A uniform bound for `M²` on `(-∞, -1]`. -/
 theorem exists_airyModulus_sq_le :
     ∃ C > 0, ∀ x ≤ -1, airyModulus x ^ 2 ≤ C ∧ airyDerivModulus x ^ 2 ≤ -x * C := by
-  have hA := airy_energy_monotoneOn hasDerivAt_airyAiReal hasDerivAt_airyAiDerivReal
-  have hB := airy_energy_monotoneOn hasDerivAt_airyBiReal hasDerivAt_airyBiDerivReal
-  set C := (airyAiDerivReal (-1) ^ 2 * (-(-1 : ℝ))⁻¹ + airyAiReal (-1) ^ 2) +
-    (airyBiDerivReal (-1) ^ 2 * (-(-1 : ℝ))⁻¹ + airyBiReal (-1) ^ 2) with hC
+  have hA := airy_energy_monotoneOn DLMF.Airy.Real.hasDerivAt_airyAi
+      DLMF.Airy.Real.hasDerivAt_airyAiDeriv
+  have hB := airy_energy_monotoneOn DLMF.Airy.Real.hasDerivAt_airyBi
+      DLMF.Airy.Real.hasDerivAt_airyBiDeriv
+  set C := (DLMF.Airy.Real.airyAiDeriv (-1) ^ 2 * (-(-1 : ℝ))⁻¹ + DLMF.Airy.Real.airyAi (-1) ^ 2) +
+    (DLMF.Airy.Real.airyBiDeriv (-1) ^ 2 * (-(-1 : ℝ))⁻¹ + DLMF.Airy.Real.airyBi (-1) ^ 2) with hC
   have hC0 : 0 < C := by
     have := airyModulusSq_pos (-1)
     have e : (-(-1 : ℝ))⁻¹ = 1 := by norm_num
     rw [hC, e]
-    nlinarith [sq_nonneg (airyAiDerivReal (-1)), sq_nonneg (airyBiDerivReal (-1))]
+    nlinarith [sq_nonneg (DLMF.Airy.Real.airyAiDeriv (-1)),
+        sq_nonneg (DLMF.Airy.Real.airyBiDeriv (-1))]
   refine ⟨C, hC0, fun x hx => ?_⟩
   have hx0 : x ∈ Iio (0 : ℝ) := by rw [mem_Iio]; linarith
   have h1 : (-1 : ℝ) ∈ Iio (0 : ℝ) := by norm_num
@@ -371,17 +390,18 @@ theorem exists_airyModulus_sq_le :
   simp only at ha hb
   have hpos : 0 < -x := by linarith
   have hi : 0 ≤ (-x)⁻¹ := by positivity
-  have e1 : 0 ≤ airyAiDerivReal x ^ 2 * (-x)⁻¹ := by positivity
-  have e2 : 0 ≤ airyBiDerivReal x ^ 2 * (-x)⁻¹ := by positivity
+  have e1 : 0 ≤ DLMF.Airy.Real.airyAiDeriv x ^ 2 * (-x)⁻¹ := by positivity
+  have e2 : 0 ≤ DLMF.Airy.Real.airyBiDeriv x ^ 2 * (-x)⁻¹ := by positivity
   constructor
   · rw [airyModulus_sq]; linarith
   · rw [airyDerivModulus_sq]
-    have : airyAiDerivReal x ^ 2 + airyBiDerivReal x ^ 2 =
-        -x * (airyAiDerivReal x ^ 2 * (-x)⁻¹ + airyBiDerivReal x ^ 2 * (-x)⁻¹) := by
+    have : DLMF.Airy.Real.airyAiDeriv x ^ 2 + DLMF.Airy.Real.airyBiDeriv x ^ 2 =
+        -x * (DLMF.Airy.Real.airyAiDeriv x ^ 2 * (-x)⁻¹ +
+            DLMF.Airy.Real.airyBiDeriv x ^ 2 * (-x)⁻¹) := by
       rw [← add_mul, mul_comm, mul_assoc, inv_mul_cancel₀ hpos.ne', mul_one]
     rw [this]
     apply mul_le_mul_of_nonneg_left _ hpos.le
-    nlinarith [sq_nonneg (airyAiReal x), sq_nonneg (airyBiReal x)]
+    nlinarith [sq_nonneg (DLMF.Airy.Real.airyAi x), sq_nonneg (DLMF.Airy.Real.airyBi x)]
 
 /-- The phase `θ` tends to `+∞` at `-∞`. -/
 theorem tendsto_airyPhase_atBot : Tendsto airyPhase atBot atTop := by
@@ -447,36 +467,38 @@ theorem tendsto_airyDerivPhase_atBot : Tendsto airyDerivPhase atBot atTop := by
 
 /-- For `x ≤ 0`, `Ai(x) = M(x) sin θ(x)` (DLMF 9.8.1). -/
 @[dlmf 9.8.E1]
-theorem airyAiReal_modulus_phase {x : ℝ} :
-    airyAiReal x = airyModulus x * Real.sin (airyPhase x) :=
-  airyAiReal_eq_modulus_sin x
+theorem Real.airyAi_modulus_phase {x : ℝ} :
+    DLMF.Airy.Real.airyAi x = airyModulus x * Real.sin (airyPhase x) :=
+  DLMF.Airy.Real.airyAi_eq_modulus_sin x
 
 /-- For `x ≤ 0`, `Bi(x) = M(x) cos θ(x)` (DLMF 9.8.2). -/
 @[dlmf 9.8.E2]
-theorem airyBiReal_modulus_phase {x : ℝ} :
-    airyBiReal x = airyModulus x * Real.cos (airyPhase x) :=
-  airyBiReal_eq_modulus_cos x
+theorem Real.airyBi_modulus_phase {x : ℝ} :
+    DLMF.Airy.Real.airyBi x = airyModulus x * Real.cos (airyPhase x) :=
+  DLMF.Airy.Real.airyBi_eq_modulus_cos x
 
 /-- For `x ≤ 0`, `Ai'(x) = N(x) sin φ(x)` (DLMF 9.8.5). -/
 @[dlmf 9.8.E5]
-theorem airyAiDerivReal_modulus_phase {x : ℝ} :
-    airyAiDerivReal x = airyDerivModulus x * Real.sin (airyDerivPhase x) :=
-  airyAiDerivReal_eq_modulus_sin x
+theorem Real.airyAiDeriv_modulus_phase {x : ℝ} :
+    DLMF.Airy.Real.airyAiDeriv x = airyDerivModulus x * Real.sin (airyDerivPhase x) :=
+  DLMF.Airy.Real.airyAiDeriv_eq_modulus_sin x
 
 /-- For `x ≤ 0`, `Bi'(x) = N(x) cos φ(x)` (DLMF 9.8.6). -/
 @[dlmf 9.8.E6]
-theorem airyBiDerivReal_modulus_phase {x : ℝ} :
-    airyBiDerivReal x = airyDerivModulus x * Real.cos (airyDerivPhase x) :=
-  airyBiDerivReal_eq_modulus_cos x
+theorem Real.airyBiDeriv_modulus_phase {x : ℝ} :
+    DLMF.Airy.Real.airyBiDeriv x = airyDerivModulus x * Real.cos (airyDerivPhase x) :=
+  DLMF.Airy.Real.airyBiDeriv_eq_modulus_cos x
 
 /-- The arctangent formula with its continuous branch retained (DLMF 9.8.4). -/
 @[dlmf 9.8.E4]
-theorem airyPhase_atan_branch {x : ℝ} (hb : airyBiReal x ≠ 0) :
-    ∃ k : ℤ, airyPhase x = Real.arctan (airyAiReal x / airyBiReal x) + k * π := by
+theorem airyPhase_atan_branch {x : ℝ} (hb : DLMF.Airy.Real.airyBi x ≠ 0) :
+    ∃ k : ℤ, airyPhase x =
+        Real.arctan (DLMF.Airy.Real.airyAi x / DLMF.Airy.Real.airyBi x) + k * π := by
   have hc : Real.cos (airyPhase x) ≠ 0 := fun h =>
-      hb (by rw [airyBiReal_eq_modulus_cos, h, mul_zero])
+      hb (by rw [DLMF.Airy.Real.airyBi_eq_modulus_cos, h, mul_zero])
   have hM := (airyModulus_pos x).ne'
-  rw [airyAiReal_eq_modulus_sin, airyBiReal_eq_modulus_cos, mul_div_mul_left _ _ hM,
+  rw [DLMF.Airy.Real.airyAi_eq_modulus_sin, DLMF.Airy.Real.airyBi_eq_modulus_cos,
+      mul_div_mul_left _ _ hM,
     ← Real.tan_eq_sin_div_cos]
   exact exists_int_eq_arctan_tan hc
 
@@ -492,12 +514,14 @@ theorem airyPhase_zero :
 
 /-- The arctangent formula with its continuous branch retained (DLMF 9.8.8). -/
 @[dlmf 9.8.E8]
-theorem airyDerivPhase_atan_branch {x : ℝ} (hb : airyBiDerivReal x ≠ 0) :
-    ∃ k : ℤ, airyDerivPhase x = Real.arctan (airyAiDerivReal x / airyBiDerivReal x) + k * π := by
+theorem airyDerivPhase_atan_branch {x : ℝ} (hb : DLMF.Airy.Real.airyBiDeriv x ≠ 0) :
+    ∃ k : ℤ, airyDerivPhase x =
+        Real.arctan (DLMF.Airy.Real.airyAiDeriv x / DLMF.Airy.Real.airyBiDeriv x) + k * π := by
   have hc : Real.cos (airyDerivPhase x) ≠ 0 := fun h =>
-    hb (by rw [airyBiDerivReal_eq_modulus_cos, h, mul_zero])
+    hb (by rw [DLMF.Airy.Real.airyBiDeriv_eq_modulus_cos, h, mul_zero])
   have hM := (airyDerivModulus_pos x).ne'
-  rw [airyAiDerivReal_eq_modulus_sin, airyBiDerivReal_eq_modulus_cos, mul_div_mul_left _ _ hM,
+  rw [DLMF.Airy.Real.airyAiDeriv_eq_modulus_sin, DLMF.Airy.Real.airyBiDeriv_eq_modulus_cos,
+      mul_div_mul_left _ _ hM,
     ← Real.tan_eq_sin_div_cos]
   exact exists_int_eq_arctan_tan hc
 
@@ -624,14 +648,16 @@ theorem airyPhase_bessel_atan {x : ℝ} (hx : x < 0)
   have h33 := sqrt_three_mul_self
   have hM := airyModulus_pos x
   have hc : airyModulus x * Real.cos (airyPhase x - 2 * π / 3) = Real.sqrt y * J / Real.sqrt 3 := by
-    rw [Real.cos_sub, c23, s23, mul_add, ← mul_assoc, ← mul_assoc, ← airyBiReal_eq_modulus_cos,
-      ← airyAiReal_eq_modulus_sin, hAr, hBr, h3]
+    rw [Real.cos_sub, c23, s23, mul_add, ← mul_assoc, ← mul_assoc,
+        ← DLMF.Airy.Real.airyBi_eq_modulus_cos,
+      ← DLMF.Airy.Real.airyAi_eq_modulus_sin, hAr, hBr, h3]
     field_simp
     linear_combination (2 * J) * h33
   have hs : airyModulus x * Real.sin (airyPhase x - 2 * π / 3) =
       Real.sqrt y * ((J - 2 * K) / Real.sqrt 3) / Real.sqrt 3 := by
-    rw [Real.sin_sub, c23, s23, mul_sub, ← mul_assoc, ← mul_assoc, ← airyBiReal_eq_modulus_cos,
-      ← airyAiReal_eq_modulus_sin, hAr, hBr, h3]
+    rw [Real.sin_sub, c23, s23, mul_sub, ← mul_assoc, ← mul_assoc,
+        ← DLMF.Airy.Real.airyBi_eq_modulus_cos,
+      ← DLMF.Airy.Real.airyAi_eq_modulus_sin, hAr, hBr, h3]
     field_simp
     linear_combination ((J - K) * (Real.sqrt 3 ^ 2 + 3) - (J + K)) * h33
   have hsy : 0 < Real.sqrt y := Real.sqrt_pos.mpr hy0
@@ -769,13 +795,15 @@ theorem airyDerivPhase_bessel_atan {x : ℝ} (hx : x < 0)
   have h33 := sqrt_three_mul_self
   have hc : airyDerivModulus x * Real.cos (airyDerivPhase x - 1 * π / 3) = y * J / Real.sqrt 3 := by
     rw [one_mul, Real.cos_sub, Real.cos_pi_div_three, Real.sin_pi_div_three, mul_add, ← mul_assoc,
-      ← mul_assoc, ← airyBiDerivReal_eq_modulus_cos, ← airyAiDerivReal_eq_modulus_sin, hAr, hBr]
+      ← mul_assoc, ← DLMF.Airy.Real.airyBiDeriv_eq_modulus_cos,
+          ← DLMF.Airy.Real.airyAiDeriv_eq_modulus_sin, hAr, hBr]
     field_simp
     linear_combination (J - K) * h33
   have hs : airyDerivModulus x * Real.sin (airyDerivPhase x - 1 * π / 3) =
       y * (-(J + 2 * K) / Real.sqrt 3) / Real.sqrt 3 := by
     rw [one_mul, Real.sin_sub, Real.cos_pi_div_three, Real.sin_pi_div_three, mul_sub, ← mul_assoc,
-      ← mul_assoc, ← airyBiDerivReal_eq_modulus_cos, ← airyAiDerivReal_eq_modulus_sin, hAr, hBr]
+      ← mul_assoc, ← DLMF.Airy.Real.airyBiDeriv_eq_modulus_cos,
+          ← DLMF.Airy.Real.airyAiDeriv_eq_modulus_sin, hAr, hBr]
     field_simp
     linear_combination (-2 * J - 4 * K) * h33
   exact ModulusPhase.eq_add_arctan (c := y / Real.sqrt 3) hM (div_ne_zero hy0.ne' hs3) hJ
@@ -848,7 +876,8 @@ theorem airy_phase_difference_tan {x : ℝ} :
   have hc := airy_modulus_phase_cos x
   rw [deriv_airyPhase, deriv_airyModulus, Real.tan_eq_sin_div_cos]
   simp only
-  set S := airyAiReal x * airyAiDerivReal x + airyBiReal x * airyBiDerivReal x
+  set S := DLMF.Airy.Real.airyAi x * DLMF.Airy.Real.airyAiDeriv x + DLMF.Airy.Real.airyBi x *
+      DLMF.Airy.Real.airyBiDeriv x
   have hsin : Real.sin (airyPhase x - airyDerivPhase x) =
       1 / (π * (airyModulus x * airyDerivModulus x)) := by
     rw [eq_div_iff (mul_ne_zero hπ (mul_ne_zero hM hN)),
@@ -874,35 +903,44 @@ theorem airy_modulus_ode {x : ℝ} :
   constructor
   · rw [deriv_airyModulus]
     have hM := (airyModulus_pos x).ne'
-    have h : HasDerivAt (fun t => (airyAiReal t * airyAiDerivReal t +
-        airyBiReal t * airyBiDerivReal t) / airyModulus t) _ x :=
+    have h : HasDerivAt (fun t => (DLMF.Airy.Real.airyAi t * DLMF.Airy.Real.airyAiDeriv t +
+        DLMF.Airy.Real.airyBi t * DLMF.Airy.Real.airyBiDeriv t) / airyModulus t) _ x :=
       (hasDerivAt_airyCross x).div (hasDerivAt_airyModulus x) hM
     rw [h.deriv]
     have hπ := Real.pi_ne_zero
     have hL := airy_lagrange x
     have hM2 := airyModulus_sq x
     field_simp
-    linear_combination hL + ((airyAiDerivReal x ^ 2 + airyBiDerivReal x ^ 2) * π ^ 2 -
+    linear_combination hL +
+        ((DLMF.Airy.Real.airyAiDeriv x ^ 2 + DLMF.Airy.Real.airyBiDeriv x ^ 2) * π ^ 2 -
       x * airyModulus x ^ 2 * π ^ 2) * hM2
   · have d1 : deriv (fun t => airyModulus t ^ 2) = fun t =>
-        2 * (airyAiReal t * airyAiDerivReal t + airyBiReal t * airyBiDerivReal t) := by
+        2 * (DLMF.Airy.Real.airyAi t * DLMF.Airy.Real.airyAiDeriv t + DLMF.Airy.Real.airyBi t *
+            DLMF.Airy.Real.airyBiDeriv t) := by
       rw [airyModulus_sq_fun]
       funext t
-      exact (((hasDerivAt_airyAiReal t).pow 2).add ((hasDerivAt_airyBiReal t).pow 2)).deriv.trans
+      exact (((DLMF.Airy.Real.hasDerivAt_airyAi t).pow 2).add
+          ((DLMF.Airy.Real.hasDerivAt_airyBi t).pow 2)).deriv.trans
         (by simp; ring)
-    have d2 : deriv (fun t => 2 * (airyAiReal t * airyAiDerivReal t +
-        airyBiReal t * airyBiDerivReal t)) = fun t => 2 * (airyAiDerivReal t ^ 2 +
-          airyBiDerivReal t ^ 2 + t * (airyAiReal t ^ 2 + airyBiReal t ^ 2)) :=
+    have d2 : deriv (fun t => 2 * (DLMF.Airy.Real.airyAi t * DLMF.Airy.Real.airyAiDeriv t +
+        DLMF.Airy.Real.airyBi t * DLMF.Airy.Real.airyBiDeriv t)) = fun t => 2 *
+            (DLMF.Airy.Real.airyAiDeriv t ^ 2 +
+          DLMF.Airy.Real.airyBiDeriv t ^ 2 + t *
+              (DLMF.Airy.Real.airyAi t ^ 2 + DLMF.Airy.Real.airyBi t ^ 2)) :=
       funext fun t => ((hasDerivAt_airyCross t).const_mul 2).deriv
-    have d3 : HasDerivAt (fun t => 2 * (airyAiDerivReal t ^ 2 + airyBiDerivReal t ^ 2 +
-          t * (airyAiReal t ^ 2 + airyBiReal t ^ 2)))
-        (2 * (2 * airyAiDerivReal x * (x * airyAiReal x) + 2 * airyBiDerivReal x *
-            (x * airyBiReal x) +
-          ((airyAiReal x ^ 2 + airyBiReal x ^ 2) + x * (2 * (airyAiReal x * airyAiDerivReal x +
-            airyBiReal x * airyBiDerivReal x))))) x := by
-      have h := (((((hasDerivAt_airyAiDerivReal x).pow 2).add
-        ((hasDerivAt_airyBiDerivReal x).pow 2)).add ((hasDerivAt_id x).mul
-          (((hasDerivAt_airyAiReal x).pow 2).add ((hasDerivAt_airyBiReal x).pow 2)))).const_mul 2)
+    have d3 : HasDerivAt
+        (fun t => 2 * (DLMF.Airy.Real.airyAiDeriv t ^ 2 + DLMF.Airy.Real.airyBiDeriv t ^ 2 +
+          t * (DLMF.Airy.Real.airyAi t ^ 2 + DLMF.Airy.Real.airyBi t ^ 2)))
+        (2 * (2 * DLMF.Airy.Real.airyAiDeriv x * (x * DLMF.Airy.Real.airyAi x) + 2 *
+            DLMF.Airy.Real.airyBiDeriv x *
+            (x * DLMF.Airy.Real.airyBi x) +
+          ((DLMF.Airy.Real.airyAi x ^ 2 + DLMF.Airy.Real.airyBi x ^ 2) + x *
+              (2 * (DLMF.Airy.Real.airyAi x * DLMF.Airy.Real.airyAiDeriv x +
+            DLMF.Airy.Real.airyBi x * DLMF.Airy.Real.airyBiDeriv x))))) x := by
+      have h := (((((DLMF.Airy.Real.hasDerivAt_airyAiDeriv x).pow 2).add
+        ((DLMF.Airy.Real.hasDerivAt_airyBiDeriv x).pow 2)).add ((hasDerivAt_id x).mul
+          (((DLMF.Airy.Real.hasDerivAt_airyAi x).pow 2).add
+              ((DLMF.Airy.Real.hasDerivAt_airyBi x).pow 2)))).const_mul 2)
       exact h.congr_deriv (by simp only [Pi.add_apply, Pi.pow_apply, id]; push_cast; ring)
     simp only [iteratedDeriv_succ, iteratedDeriv_zero]
     rw [d1, d2, d3.deriv, airyModulus_sq]
@@ -913,13 +951,16 @@ theorem airy_modulus_ode {x : ℝ} :
 theorem airy_phase_ode {x : ℝ} :
     deriv airyPhase x ^ 2 + iteratedDeriv 3 airyPhase x / (2 * deriv airyPhase x) -
       3 / 4 * (iteratedDeriv 2 airyPhase x / deriv airyPhase x) ^ 2 = -x := by
-  set p : ℝ → ℝ := fun t => airyAiReal t ^ 2 + airyBiReal t ^ 2 with hp
-  set S : ℝ → ℝ := fun t => airyAiReal t * airyAiDerivReal t + airyBiReal t * airyBiDerivReal t
+  set p : ℝ → ℝ := fun t => DLMF.Airy.Real.airyAi t ^ 2 + DLMF.Airy.Real.airyBi t ^ 2 with hp
+  set S : ℝ → ℝ := fun t => DLMF.Airy.Real.airyAi t * DLMF.Airy.Real.airyAiDeriv t +
+      DLMF.Airy.Real.airyBi t * DLMF.Airy.Real.airyBiDeriv t
     with hS
   have hp' : ∀ t, HasDerivAt p (2 * S t) t := fun t =>
-    (((hasDerivAt_airyAiReal t).pow 2).add ((hasDerivAt_airyBiReal t).pow 2)).congr_deriv
+    (((DLMF.Airy.Real.hasDerivAt_airyAi t).pow 2).add
+        ((DLMF.Airy.Real.hasDerivAt_airyBi t).pow 2)).congr_deriv
       (by simp only [hS]; push_cast; ring)
-  have hS' : ∀ t, HasDerivAt S (airyAiDerivReal t ^ 2 + airyBiDerivReal t ^ 2 + t * p t) t :=
+  have hS' : ∀ t, HasDerivAt S
+      (DLMF.Airy.Real.airyAiDeriv t ^ 2 + DLMF.Airy.Real.airyBiDeriv t ^ 2 + t * p t) t :=
     hasDerivAt_airyCross
   have hpos : ∀ t, π * p t ≠ 0 := fun t => by
     have := airyModulusSq_pos t; have := Real.pi_pos; simp only [hp]; positivity
@@ -938,10 +979,10 @@ theorem airy_phase_ode {x : ℝ} :
   have hπ := Real.pi_ne_zero
   have hp0 := airyModulusSq_pos x
   simp only [hp, hS, Pi.pow_apply] at hL ⊢
-  generalize airyAiReal x = a at *
-  generalize airyBiReal x = b at *
-  generalize airyAiDerivReal x = a' at *
-  generalize airyBiDerivReal x = b' at *
+  generalize DLMF.Airy.Real.airyAi x = a at *
+  generalize DLMF.Airy.Real.airyBi x = b at *
+  generalize DLMF.Airy.Real.airyAiDeriv x = a' at *
+  generalize DLMF.Airy.Real.airyBiDeriv x = b' at *
   push_cast
   field_simp
   linear_combination (-4 : ℝ) * hL

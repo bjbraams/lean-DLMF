@@ -14,7 +14,7 @@ public import Mathlib.Analysis.SpecialFunctions.Exp
 # Remainder terms; Stokes phenomenon
 
 This file covers DLMF §2.11: the example `I(m) = ∫_0^π cos(mt)/(t²+1) dt`, the generalized
-exponential integral `E_p(z)` (`DLMF.Confluent.genExpIntE`, on the logarithmic plane
+exponential integral `E_p(z)` (`DLMF.Confluent.expIntegralE`, on the logarithmic plane
 `genExpIntEOnLog`), exponentially improved expansions with the terminant
 `F_{n+p}(z) = Γ(n+p)/(2π) E_{n+p}(z)/z^{n+p-1}`, and re-expansion in terminants.
 
@@ -22,10 +22,10 @@ exponential integral `E_p(z)` (`DLMF.Confluent.genExpIntE`, on the logarithmic p
 
 * `cosRationalIntegral_asymptotic`, `cosRationalCoeff_explicit`: the asymptotic expansion of
   `I(m)` and its first coefficients (DLMF 2.11.1–2.11.3).
-* `genExpIntE_eq_integral`, `genExpIntE_asymptotic`, `genExpIntE_compound_asymptotic`: the
+* `expIntegralE_eq_integral`, `expIntegralE_asymptotic`, `expIntegralE_compound_asymptotic`: the
   Stieltjes representation, Poincaré expansion and compound expansion of `E_p(z)`
   (DLMF 2.11.5–2.11.7; corollaries of DLMF 8.19.4, 8.20.2 and 8.20.3).
-* `genExpIntE_eq_sum_add_terminant`, `terminant_eq_integral`, `terminant_eq_saddle_integral`:
+* `expIntegralE_eq_sum_add_terminant`, `terminant_eq_integral`, `terminant_eq_saddle_integral`:
   the expansion with terminant remainder and the integral forms of the terminant
   (DLMF 2.11.8–2.11.12).
 * `terminant_reexpansions`: re-expansion of the terminant (DLMF 2.11.13–2.11.15, 2.11.17).
@@ -278,10 +278,10 @@ theorem cosRationalCoeff_explicit (t : ℝ) :
 `E_p(z) = e^{-z} z^{p-1}/Γ(p) ∫_0^∞ e^{-zt} t^{p-1}/(1+t) dt`. Corollary of the project's
 8.19.4. -/
 @[dlmf 2.11.E5]
-theorem genExpIntE_eq_integral {p z : ℂ} (hp : 0 < p.re) (hz : 0 < z.re) :
-    genExpIntE p z = exp (-z) * z ^ (p - 1) / Gamma p *
+theorem expIntegralE_eq_integral {p z : ℂ} (hp : 0 < p.re) (hz : 0 < z.re) :
+    expIntegralE p z = exp (-z) * z ^ (p - 1) / Gamma p *
       ∫ t : ℝ in Ioi 0, exp (-z * t) * (t : ℂ) ^ (p - 1) / (1 + t) := by
-  rw [genExpIntE_stieltjes hp hz]
+  rw [expIntegralE_stieltjes hp hz]
   have : (∫ t : ℝ in Ioi 0, (t : ℂ) ^ (p - 1) * exp (-z * t) / (1 + t)) =
       ∫ t : ℝ in Ioi 0, exp (-z * t) * (t : ℂ) ^ (p - 1) / (1 + t) := by
     congr 1; funext t; ring
@@ -291,24 +291,24 @@ theorem genExpIntE_eq_integral {p z : ℂ} (hp : 0 < p.re) (hz : 0 < z.re) :
 /-- DLMF 2.11.6: for fixed `p`, `E_p(z) ∼ e^{-z}/z ∑ (-1)^s (p)_s/z^s` as `z → ∞` in
 `|ph z| ≤ 3π/2 - δ`, on the logarithmic plane (`z = e^w`). The project's 8.20.2. -/
 @[dlmf 2.11.E6]
-theorem genExpIntE_asymptotic (p : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < 3 * π / 2) :
+theorem expIntegralE_asymptotic (p : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < 3 * π / 2) :
     HasAsymptoticExpansion (logSector (3 * π / 2 - δ))
-      (fun k w => exp (-exp w - (k + 1 : ℂ) * w)) (fun k => (-1 : ℂ) ^ k * poch p k)
+      (fun k w => exp (-exp w - (k + 1 : ℂ) * w)) (fun k => (-1 : ℂ) ^ k * pochhammer p k)
       (genExpIntEOnLog p) :=
-  genExpIntE_log_sector_asymptotic p hδ hδ1
+  expIntegralE_log_sector_asymptotic p hδ hδ1
 
 /-- DLMF 2.11.7: `E_p(z) ∼ 2πi e^{-pπi}/Γ(p) z^{p-1} + e^{-z}/z ∑ (-1)^s (p)_s/z^s` as
 `z → ∞` in `π/2 + δ ≤ ph z ≤ 7π/2 - δ`, on the logarithmic plane. The project's 8.20.3
 (`ε = 1`). -/
 @[dlmf 2.11.E7]
-theorem genExpIntE_compound_asymptotic (p : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < 3 * π / 2) :
+theorem expIntegralE_compound_asymptotic (p : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < 3 * π / 2) :
     HasAsymptoticExpansion
       (comap (fun w : ℂ => Real.exp w.re) atTop ⊓
         𝓟 {w : ℂ | π / 2 + δ ≤ (1 : ℝ) * w.im ∧ (1 : ℝ) * w.im ≤ 7 * π / 2 - δ})
-      (fun k w => exp (-exp w - (k + 1 : ℂ) * w)) (fun k => (-1 : ℂ) ^ k * poch p k)
+      (fun k w => exp (-exp w - (k + 1 : ℂ) * w)) (fun k => (-1 : ℂ) ^ k * pochhammer p k)
       (fun w => genExpIntEOnLog p w -
         ((1 : ℝ) : ℂ) * 2 * π * I / Gamma p * exp (-((1 : ℝ) : ℂ) * p * π * I + (p - 1) * w)) :=
-  genExpIntE_extended_sector_asymptotic p (Or.inl rfl) hδ hδ1
+  expIntegralE_extended_sector_asymptotic p (Or.inl rfl) hδ hδ1
 
 /-! ### §2.11(iii) Exponentially improved expansions -/
 
@@ -327,29 +327,30 @@ theorem inv_one_add_eq_sum {t : ℂ} (ht : 1 + t ≠ 0) (n : ℕ) :
 `E_p(z) = e^{-z}/z ∑_{s<n} (-1)^s (p)_s/z^s + (-1)ⁿ 2π/Γ(p) z^{p-1} F_{n+p}(z)` with the
 terminant `F_{n+p}(z) = Γ(n+p)/(2π) E_{n+p}(z)/z^{n+p-1}` (2.11.11). -/
 @[dlmf 2.11.E10]
-theorem genExpIntE_eq_sum_add_terminant {p z : ℂ} (hp : 0 < p.re) (hz : z ∈ slitPlane)
+theorem expIntegralE_eq_sum_add_terminant {p z : ℂ} (hp : 0 < p.re) (hz : z ∈ slitPlane)
     (n : ℕ) :
-    genExpIntE p z = exp (-z) / z * ∑ s ∈ Finset.range n, (-1) ^ s * poch p s / z ^ s +
+    expIntegralE p z = exp (-z) / z * ∑ s ∈ Finset.range n, (-1) ^ s * pochhammer p s / z ^ s +
       (-1) ^ n * (2 * π) / Gamma p * z ^ (p - 1) *
-        (Gamma (n + p) / (2 * π) * genExpIntE (n + p) z / z ^ (n + p - 1)) := by
+        (Gamma (n + p) / (2 * π) * expIntegralE (n + p) z / z ^ (n + p - 1)) := by
   have hz0 : z ≠ 0 := slitPlane_ne_zero hz
-  have key : ∀ m : ℕ, genExpIntE p z = exp (-z) / z * ∑ s ∈ Finset.range m,
-      (-1) ^ s * poch p s / z ^ s + (-1) ^ m * poch p m / z ^ m * genExpIntE (m + p) z := by
+  have key : ∀ m : ℕ, expIntegralE p z = exp (-z) / z * ∑ s ∈ Finset.range m,
+      (-1) ^ s * pochhammer p s / z ^ s + (-1) ^ m * pochhammer p m / z ^ m *
+          expIntegralE (m + p) z := by
     intro m
     induction m with
-    | zero => simp [poch_zero]
+    | zero => simp [pochhammer_zero]
     | succ m ih =>
-      have hr := genExpIntE_add_one ((m : ℂ) + p) hz0
-      rw [ih, Finset.sum_range_succ, poch_succ]
+      have hr := expIntegralE_add_one ((m : ℂ) + p) hz0
+      rw [ih, Finset.sum_range_succ, pochhammer_succ]
       push_cast
       rw [show (m : ℂ) + 1 + p = (m : ℂ) + p + 1 by ring]
       field_simp
-      linear_combination (-1) ^ m * poch p m * z * z ^ m * hr
+      linear_combination (-1) ^ m * pochhammer p m * z * z ^ m * hr
   rw [key n]
   congr 1
   have hΓ : Gamma p ≠ 0 := Complex.Gamma_ne_zero_of_re_pos hp
-  have hG : Gamma ((n : ℂ) + p) = poch p n * Gamma p := by
-    rw [add_comm]; exact Gamma_add_nat_eq_poch_mul_Gamma hp n
+  have hG : Gamma ((n : ℂ) + p) = pochhammer p n * Gamma p := by
+    rw [add_comm]; exact Gamma_add_nat_eq_pochhammer_mul_Gamma hp n
   have hzp : z ^ ((n : ℂ) + p - 1) = z ^ n * z ^ (p - 1) := by
     rw [show (n : ℂ) + p - 1 = (n : ℂ) + (p - 1) by ring, Complex.cpow_add _ _ hz0,
       Complex.cpow_natCast]
@@ -363,14 +364,14 @@ theorem genExpIntE_eq_sum_add_terminant {p z : ℂ} (hp : 0 < p.re) (hz : z ∈ 
 Proved from the project's 8.19.4. -/
 @[dlmf 2.11.E11]
 theorem terminant_eq_integral {ν z : ℂ} (hν : 0 < ν.re) (hz : 0 < z.re) :
-    Gamma ν / (2 * π) * genExpIntE ν z / z ^ (ν - 1) =
+    Gamma ν / (2 * π) * expIntegralE ν z / z ^ (ν - 1) =
       exp (-z) / (2 * π) * ∫ t : ℝ in Ioi 0, exp (-z * t) * (t : ℂ) ^ (ν - 1) / (1 + t) := by
   have hz0 : z ≠ 0 := fun h => by simp [h] at hz
   have hzp : z ^ (ν - 1) ≠ 0 := by
     rw [Ne, Complex.cpow_eq_zero_iff]; exact fun h => hz0 h.1
   have hΓ : Gamma ν ≠ 0 := Complex.Gamma_ne_zero_of_re_pos hν
   have hπ : (2 * π : ℂ) ≠ 0 := by simp [Real.pi_ne_zero]
-  rw [genExpIntE_eq_integral hν hz]
+  rw [expIntegralE_eq_integral hν hz]
   field_simp
 
 /-- DLMF 2.11.12 (with 2.11.8): with `z = ρe^{iθ}` (`ρ`, `θ` real) and `n = ρ - p + α`,
@@ -379,7 +380,7 @@ theorem terminant_eq_integral {ν z : ℂ} (hν : 0 < ν.re) (hz : 0 < z.re) :
 @[dlmf 2.11.E12, dlmf 2.11.E8]
 theorem terminant_eq_saddle_integral {p : ℂ} {n : ℕ} {ρ θ : ℝ}
     (hν : 0 < ((n : ℂ) + p).re) (hz : 0 < ((ρ : ℂ) * exp (I * θ)).re) :
-    Gamma (n + p) / (2 * π) * genExpIntE (n + p) (ρ * exp (I * θ)) /
+    Gamma (n + p) / (2 * π) * expIntegralE (n + p) (ρ * exp (I * θ)) /
         (ρ * exp (I * θ)) ^ ((n : ℂ) + p - 1) =
       exp (-(ρ * exp (I * θ))) / (2 * π) * ∫ t : ℝ in Ioi 0,
         exp (-(ρ * (t * exp (I * θ) - Real.log t))) * (t : ℂ) ^ ((n - ρ + p : ℂ) - 1) /
@@ -596,8 +597,8 @@ singularity at infinity with `λ₂ - λ₁ = 1`, solutions `w₁, w₂` with th
 @[dlmf 2.11.E19, dlmf 2.11.E20, dlmf 2.11.E21, dlmf 2.11.E22, dlmf 2.11.E23, dlmf 2.11.v]
 theorem rankOne_terminant_reexpansion {f g : ℂ → ℂ} {fs gs : ℕ → ℂ} {a : ℝ} {l₁ l₂ : ℂ}
     (h : IsRankOneAtInfinity f g fs gs a l₁ l₂) (h12 : l₂ - l₁ = 1) {W₁ W₂ : ℂ → ℂ}
-    (hW₁ : IsLogPlaneSolOn f g W₁ (logExterior a))
-    (hW₂ : IsLogPlaneSolOn f g W₂ (logExterior a))
+    (hW₁ : IsLogPlaneSolutionOn f g W₁ (logExterior a))
+    (hW₂ : IsLogPlaneSolutionOn f g W₂ (logExterior a))
     (hE₁ : HasAsymptoticExpansion (logSectorFilter (-π) π 0)
       (rankOneScale l₁ (rankOneExponent fs gs l₁) 0) (rankOneCoeff fs gs l₁) W₁)
     (hE₂ : HasAsymptoticExpansion (logSectorFilter 0 (2 * π) 0)
@@ -644,16 +645,16 @@ theorem expIntE1_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < 3 * π / 2) :
   expIntE1_logSector_asymptotic hδ hδ1
 
 /-- The Pochhammer product `(½+μ-κ)_s (½-μ-κ)_s = (-1)^s ∏_{k=1}^{s} (μ² - (κ-k+½)²)`. -/
-private lemma poch_mul_poch_eq_prod_sq_sub (κ μ : ℂ) (s : ℕ) :
-    poch (1 / 2 + μ - κ) s * poch (1 / 2 - μ - κ) s =
+private lemma pochhammer_mul_pochhammer_eq_prod_sq_sub (κ μ : ℂ) (s : ℕ) :
+    pochhammer (1 / 2 + μ - κ) s * pochhammer (1 / 2 - μ - κ) s =
       (-1) ^ s * ∏ k ∈ Finset.Icc 1 s, (μ ^ 2 - (κ - k + 1 / 2) ^ 2) := by
   induction s with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ s ih =>
-    rw [poch_succ, poch_succ, Finset.prod_Icc_succ_top (by omega), pow_succ]
-    have : poch (1 / 2 + μ - κ) s * (1 / 2 + μ - κ + s) *
-        (poch (1 / 2 - μ - κ) s * (1 / 2 - μ - κ + s)) =
-        (poch (1 / 2 + μ - κ) s * poch (1 / 2 - μ - κ) s) *
+    rw [pochhammer_succ, pochhammer_succ, Finset.prod_Icc_succ_top (by omega), pow_succ]
+    have : pochhammer (1 / 2 + μ - κ) s * (1 / 2 + μ - κ + s) *
+        (pochhammer (1 / 2 - μ - κ) s * (1 / 2 - μ - κ + s)) =
+        (pochhammer (1 / 2 + μ - κ) s * pochhammer (1 / 2 - μ - κ) s) *
           ((1 / 2 + μ - κ + s) * (1 / 2 - μ - κ + s)) := by ring
     rw [this, ih]
     push_cast
@@ -680,7 +681,7 @@ theorem whittakerW_asymptotic (κ μ : ℂ) (N : ℕ) :
     rw [Complex.cpow_neg, Complex.cpow_natCast, neg_pow]
   have hsub : (x : ℂ) ^ ((s : ℂ) - κ) = (x : ℂ) ^ s / (x : ℂ) ^ κ := by
     rw [Complex.cpow_sub _ _ hx0, Complex.cpow_natCast]
-  rw [whittakerTerm, hsub, hneg, poch_mul_poch_eq_prod_sq_sub]
+  rw [whittakerTerm, hsub, hneg, pochhammer_mul_pochhammer_eq_prod_sq_sub]
   have hf : (s.factorial : ℂ) ≠ 0 := by exact_mod_cast s.factorial_ne_zero
   have h1 : ((-1 : ℂ) ^ s) ≠ 0 := pow_ne_zero _ (by norm_num)
   field_simp

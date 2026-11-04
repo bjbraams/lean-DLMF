@@ -36,7 +36,7 @@ def angerDebyePoly : ℕ → Polynomial ℂ
 /-- Unnumbered general coefficient formula in DLMF 11.11(iii), with the Debye normalization from
 10.41(ii). -/
 theorem angerScaledB_debye {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) (k : ℕ) :
-    poch (1/2) k*angerScaledB lam k=(-1)^k/(1-lam^2:ℂ)^(1/4:ℂ)*(angerDebyePoly k).eval
+    pochhammer (1/2) k*angerScaledB lam k=(-1)^k/(1-lam^2:ℂ)^(1/4:ℂ)*(angerDebyePoly k).eval
         (1/(1-lam^2:ℂ)^(1/2:ℂ)) := by
   sorry
 

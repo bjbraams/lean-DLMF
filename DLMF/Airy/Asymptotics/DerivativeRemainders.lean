@@ -133,8 +133,8 @@ theorem DerivativeRemainders.constant_moment :
   have h := laplace_kummerU (a := (-(1/6):ℂ)) (b := 5/6) (c := 2/3) (z := 1)
     (by norm_num) (by norm_num) (by norm_num)
   norm_num at h
-  rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ (by norm_num),
-    regularizedGaussHGFun_eq_div_Gamma (fun k => by
+  rw [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ (by norm_num),
+    regularizedGaussHypergeometricFun_eq_div_Gamma (fun k => by
       have hk : (0:ℝ) ≤ k := Nat.cast_nonneg k
       intro he
       have := congrArg Complex.re he
@@ -305,10 +305,10 @@ theorem DerivativeRemainders.density_nonneg {t : ℝ} (ht : 0 < t) : 0 ≤
   mul_nonneg (Real.exp_pos _).le (DerivativeRemainders.normalizedU_nonneg ht).1
 
 /-- The regularized Gauss function at zero, on its positive parameter half-plane. -/
-theorem DerivativeRemainders.regularizedGaussHG_zero (a b c : ℂ) (hc : 0 < c.re) :
-    regularizedGaussHG a b c 0 = 1/Gamma c := by
-  rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ (by norm_num),
-    regularizedGaussHGFun_eq_div_Gamma (fun k => by
+theorem DerivativeRemainders.regularizedGaussHypergeometric_zero (a b c : ℂ) (hc : 0 < c.re) :
+    regularizedGaussHypergeometric a b c 0 = 1/Gamma c := by
+  rw [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ (by norm_num),
+    regularizedGaussHypergeometricFun_eq_div_Gamma (fun k => by
       intro he
       have := congrArg Complex.re he
       simp only [neg_re, natCast_re] at this
@@ -335,7 +335,7 @@ theorem DerivativeRemainders.density_moment_complex (k : ℕ) :
     norm_num
     rw [show (k:ℂ)+5/6+1/3+1=(k:ℂ)+13/6 by ring,
       show -(1/6:ℂ)+((k:ℂ)+5/6)+1/3+1=(k:ℂ)+2 by ring,
-      DerivativeRemainders.regularizedGaussHG_zero _ _ _ (by simp; positivity)]
+      DerivativeRemainders.regularizedGaussHypergeometric_zero _ _ _ (by simp; positivity)]
     ring
 
 /-- The real moments of the positive derivative Stieltjes density. -/

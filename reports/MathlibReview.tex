@@ -147,9 +147,9 @@ The ten clear duplicate pairs listed on 2026-11-01 were consolidated into one ca
 each, and \lean{cbinom} was replaced by Mathlib's \lean{Ring.choose}. The cleanup then resolved
 the overlaps found in the foundational layer: one Klein invariant
 (\lean{ModularForm.kleinJ}), one polylogarithm (\lean{DLMF.Zeta.polylog} with
-\lean{polylogSeries}), the complete integrals \lean{compEllIntKk}/\lean{compEllIntKpk} in
+\lean{polylogSeries}), the complete integrals \lean{compEllIntKk}/\lean{completeEllipticKPrime} in
 \lean{DLMF.EllipticIntegrals}, and \lean{arcsinhDomain_eq_arctanCutPlane} as an
-\lean{rfl} theorem. Of the judgment-call pairs, \lean{DLMF.Selberg.vdmSq} and
+\lean{rfl} theorem. Of the judgment-call pairs, \lean{DLMF.Selberg.vandermondeSq} and
 \lean{siegelDiscriminant} still have identical bodies; the second could be defined as the
 first.
 
@@ -173,7 +173,7 @@ is not yet available from foundational imports).
 5{,}223 declarations named after development rounds were renamed in Mathlib style, and 3{,}486
 of them were made \texttt{private}; 53 files were renamed. The map is in
 \dlmf{reports/RenameMap20261101.tsv}. The round-prefix heuristic now matches 21 public
-names, all of them mathematical (\lean{hyp2F1_euler}, \lean{reg0F1_zero},
+names, all of them mathematical (\lean{matrixHypergeometric2F1_euler}, \lean{reg0F1_zero},
 \lean{vec3_mem_carlsonRSlitDomain}). The last file name with a round identifier,
 \file{P1a2EntirePeriodic.lean}, and the real Frobenius solutions \lean{p3lyR}, \lean{p3lyR'}
 of the Spheroidal area were renamed later on 2026-11-02 (\file{EntirePeriodic.lean},
@@ -187,7 +187,7 @@ accordingly. A source scan that tracks \texttt{namespace} blocks finds:
 \begin{itemize}
   \item Of 21{,}338 public declarations under \file{DLMF/}, only three are outside
     \lean{DLMF}. They are dot-notation lemmas, which the policy allows: the lemmas
-    \lean{DifferentiableOn.regularizedGaussHG} and
+    \lean{DifferentiableOn.regularizedGaussHypergeometric} and
     \lean{HasFPowerSeriesOnBall.hasSum_gaussOperator} in the Hypergeometric area, and
     \lean{DirichletCharacter.isDirichletCharacterFn} in NumberTheory.
   \item 67 public declarations outside \file{DLMF/Core} sat directly in \lean{DLMF}: the
@@ -249,7 +249,7 @@ on 2026-11-01) instead of the \lean{airyAi}/\lean{airyBi} vocabulary. \emph{Reso
 2026-11-02:} they are \lean{airyAi_…}, \lean{airyAiDeriv_…}, \lean{airyBi_…},
 \lean{airyBiDeriv_…}, \lean{airyHyperR_…} and \lean{airyHyperS_…}; the \lean{airySq_*} helpers are
 in \lean{DLMF.Airy.AiSquare}, and \lean{regularizedGaussHGAux} is
-\lean{regularizedGaussHGByShifts}.
+\lean{regularizedGaussHypergeometricByShifts}.
 
 \section{Documentation}
 
@@ -293,7 +293,7 @@ now:
   \lean{logarithmic_connection_one_sub_recip_recipGamma} & 266 & 266 \\
   \lean{IsPainleveVIOn.quartic_root} & 260 & 260 \\
   \lean{pcf_positive_parameter_uniform} & --- & 254 \\
-  \lean{pcfU_chebyshev_infinite} & --- & 248 \\
+  \lean{parabolicCylinderU_chebyshev_infinite} & --- & 248 \\
   \bottomrule
 \end{tabular}
 \end{center}
@@ -391,7 +391,7 @@ lexicographic order; this count was measured afresh and is not directly comparab
   \item \textbf{Fix the small interface defects:} the closed hypothesis of
     \lean{integral_quadratic_mul_cot_pi}, the slit-plane hypotheses of the Kummer addition
     theorems, the \lean{0 ≤ N} binders, the two weaker \lean{cpow_half_sq} copies,
-    \lean{vdmSq}/\lean{siegelDiscriminant}, and a bridge from \lean{periodicBernoulli} to
+    \lean{vandermondeSq}/\lean{siegelDiscriminant}, and a bridge from \lean{periodicBernoulli} to
     \lean{periodizedBernoulli}. Search for further postfix-\lean{⁻¹} parsing errors of the
     \lean{xPlusDistrib} kind.
   \item \textbf{Complete the namespace policy:} done later on 2026-11-02 except for the new

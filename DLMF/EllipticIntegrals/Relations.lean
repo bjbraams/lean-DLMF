@@ -20,12 +20,12 @@ chapters concerned.
 
 ## Main results
 
-* `log_div_eq_mul_symEllIntRC`, `arctan_div_eq_mul_symEllIntRC`,
-  `artanh_div_eq_mul_symEllIntRC`, `arcsin_div_eq_mul_symEllIntRC`,
-  `arsinh_div_eq_mul_symEllIntRC`, `arccos_div_eq_mul_symEllIntRC`,
-  `arcosh_div_eq_mul_symEllIntRC`: the seven lines of DLMF 19.10.1.
-* `sinh_mul_symEllIntRC_eq_gudermannian`: `(sinh φ) R_C(1, cosh² φ) = gd φ` (DLMF 19.10.2).
-* `symEllIntRC_zero_ofReal_sq`: `R_C(0, y²) = π/(2y)` for `y > 0`.
+* `log_div_eq_mul_symmetricEllipticRC`, `arctan_div_eq_mul_symmetricEllipticRC`,
+  `artanh_div_eq_mul_symmetricEllipticRC`, `arcsin_div_eq_mul_symmetricEllipticRC`,
+  `arsinh_div_eq_mul_symmetricEllipticRC`, `arccos_div_eq_mul_symmetricEllipticRC`,
+  `arcosh_div_eq_mul_symmetricEllipticRC`: the seven lines of DLMF 19.10.1.
+* `sinh_mul_symmetricEllipticRC_eq_gudermannian`: `(sinh φ) R_C(1, cosh² φ) = gd φ` (DLMF 19.10.2).
+* `symmetricEllipticRC_zero_ofReal_sq`: `R_C(0, y²) = π/(2y)` for `y > 0`.
 
 ## Implementation notes
 
@@ -37,7 +37,7 @@ real `x` for `arctan` and `arcsinh`, `|x| < y` for `arctanh`, `|x| ≤ y` for `a
 its right side is even in `x`; for example `arccos (-1/2) = 2π/3` while the right side is
 `π/3`.)
 
-`R_C` is DLMF's `DLMF.EllipticIntegrals.symEllIntRC` (19.2.17). On positive arguments it is
+`R_C` is DLMF's `DLMF.EllipticIntegrals.symmetricEllipticRC` (19.2.17). On positive arguments it is
 `Carlson.TwoVariable.carlsonRC` of the companion library `lean-codes`, whose elementary values
 (Carlson 1977, Exercise 6.9-16, formulas (6.9-15), (6.9-16)) are reused through homogeneity.
 
@@ -73,9 +73,10 @@ private lemma ofReal_sq_cpow_neg_half {y : ℝ} (hy : 0 < y) :
 
 /-- Homogeneity of DLMF's `R_C` for positive real arguments, in the form used below:
 `R_C(y² a, y² b) = y⁻¹ R_C(a, b)` (Carlson's `R_C`), `y, a, b > 0`. -/
-theorem symEllIntRC_sq_mul_eq_carlsonRC {y a b : ℝ} (hy : 0 < y) (ha : 0 < a) (hb : 0 < b) :
-    symEllIntRC ((y ^ 2 * a : ℝ) : ℂ) ((y ^ 2 * b : ℝ) : ℂ) = (y : ℂ)⁻¹ * carlsonRC a b := by
-  rw [symEllIntRC_eq_carlsonRC (ofReal_mem_slitPlane_of_pos (by positivity))
+theorem symmetricEllipticRC_sq_mul_eq_carlsonRC {y a b : ℝ} (hy : 0 < y) (ha : 0 < a) (hb : 0 < b) :
+    symmetricEllipticRC ((y ^ 2 * a : ℝ) : ℂ) ((y ^ 2 * b : ℝ) : ℂ) = (y : ℂ)⁻¹ *
+        carlsonRC a b := by
+  rw [symmetricEllipticRC_eq_carlsonRC (ofReal_mem_slitPlane_of_pos (by positivity))
     (ofReal_mem_slitPlane_of_pos (by positivity))]
   have h := Carlson.TwoVariable.carlsonRC_mul_of_pos (l := y ^ 2) (by positivity)
     (ofReal_mem_slitPlane_of_pos ha) (ofReal_mem_slitPlane_of_pos hb)
@@ -85,16 +86,16 @@ theorem symEllIntRC_sq_mul_eq_carlsonRC {y a b : ℝ} (hy : 0 < y) (ha : 0 < a) 
   rfl
 
 /-- `R_C(y², y² b) = y⁻¹ R_C(1, b)`, `y, b > 0`. -/
-private lemma symEllIntRC_sq_eq_carlsonRC_one_left {y b : ℝ} (hy : 0 < y) (hb : 0 < b) :
-    symEllIntRC ((y ^ 2 : ℝ) : ℂ) ((y ^ 2 * b : ℝ) : ℂ) = (y : ℂ)⁻¹ * carlsonRC 1 b := by
-  have h := symEllIntRC_sq_mul_eq_carlsonRC hy one_pos hb
+private lemma symmetricEllipticRC_sq_eq_carlsonRC_one_left {y b : ℝ} (hy : 0 < y) (hb : 0 < b) :
+    symmetricEllipticRC ((y ^ 2 : ℝ) : ℂ) ((y ^ 2 * b : ℝ) : ℂ) = (y : ℂ)⁻¹ * carlsonRC 1 b := by
+  have h := symmetricEllipticRC_sq_mul_eq_carlsonRC hy one_pos hb
   rw [mul_one] at h
   rw [h, ofReal_one]
 
 /-- `R_C(y² a, y²) = y⁻¹ R_C(a, 1)`, `y, a > 0`. -/
-private lemma symEllIntRC_sq_eq_carlsonRC_one_right {y a : ℝ} (hy : 0 < y) (ha : 0 < a) :
-    symEllIntRC ((y ^ 2 * a : ℝ) : ℂ) ((y ^ 2 : ℝ) : ℂ) = (y : ℂ)⁻¹ * carlsonRC a 1 := by
-  have h := symEllIntRC_sq_mul_eq_carlsonRC hy ha one_pos
+private lemma symmetricEllipticRC_sq_eq_carlsonRC_one_right {y a : ℝ} (hy : 0 < y) (ha : 0 < a) :
+    symmetricEllipticRC ((y ^ 2 * a : ℝ) : ℂ) ((y ^ 2 : ℝ) : ℂ) = (y : ℂ)⁻¹ * carlsonRC a 1 := by
+  have h := symmetricEllipticRC_sq_mul_eq_carlsonRC hy ha one_pos
   rw [mul_one] at h
   rw [h, ofReal_one]
 
@@ -134,15 +135,15 @@ private lemma log_eq_sub_one_mul_carlsonRC {u : ℝ} (hu : 0 < u) :
 
 /-- DLMF 19.10.1 (first line): `ln(x/y) = (x - y) R_C(¼(x + y)², xy)` for `x, y > 0`. -/
 @[dlmf 19.10.E1]
-theorem log_div_eq_mul_symEllIntRC {x y : ℝ} (hx : 0 < x) (hy : 0 < y) :
+theorem log_div_eq_mul_symmetricEllipticRC {x y : ℝ} (hx : 0 < x) (hy : 0 < y) :
     (Real.log (x / y) : ℂ) =
-      (x - y) * symEllIntRC (((x + y) ^ 2 / 4 : ℝ) : ℂ) ((x * y : ℝ) : ℂ) := by
+      (x - y) * symmetricEllipticRC (((x + y) ^ 2 / 4 : ℝ) : ℂ) ((x * y : ℝ) : ℂ) := by
   set u := x / y with hu
   have hu0 : 0 < u := div_pos hx hy
   have hxu : x = y * u := by rw [hu]; field_simp
   have e1 : (x + y) ^ 2 / 4 = y ^ 2 * (((u + 1) / 2) ^ 2) := by rw [hxu]; ring
   have e2 : x * y = y ^ 2 * u := by rw [hxu]; ring
-  rw [e1, e2, symEllIntRC_sq_mul_eq_carlsonRC hy (by positivity) hu0,
+  rw [e1, e2, symmetricEllipticRC_sq_mul_eq_carlsonRC hy (by positivity) hu0,
       log_eq_sub_one_mul_carlsonRC hu0, hxu]
   have : (y : ℂ) ≠ 0 := by exact_mod_cast hy.ne'
   push_cast
@@ -150,12 +151,13 @@ theorem log_div_eq_mul_symEllIntRC {x y : ℝ} (hx : 0 < x) (hy : 0 < y) :
 
 /-- DLMF 19.10.1 (second line): `arctan(x/y) = x R_C(y², y² + x²)` for real `x` and `y > 0`. -/
 @[dlmf 19.10.E1]
-theorem arctan_div_eq_mul_symEllIntRC (x : ℝ) {y : ℝ} (hy : 0 < y) :
-    (Real.arctan (x / y) : ℂ) = x * symEllIntRC ((y ^ 2 : ℝ) : ℂ) ((y ^ 2 + x ^ 2 : ℝ) : ℂ) := by
+theorem arctan_div_eq_mul_symmetricEllipticRC (x : ℝ) {y : ℝ} (hy : 0 < y) :
+    (Real.arctan (x / y) : ℂ) = x *
+        symmetricEllipticRC ((y ^ 2 : ℝ) : ℂ) ((y ^ 2 + x ^ 2 : ℝ) : ℂ) := by
   set u := x / y with hu
   have hxu : x = y * u := by rw [hu]; field_simp
   have e2 : y ^ 2 + x ^ 2 = y ^ 2 * (1 + u ^ 2) := by rw [hxu]; ring
-  rw [e2, symEllIntRC_sq_eq_carlsonRC_one_left hy (by positivity),
+  rw [e2, symmetricEllipticRC_sq_eq_carlsonRC_one_left hy (by positivity),
     Carlson.TwoVariable.arctan_eq_mul_carlsonRC u, hxu]
   have : (y : ℂ) ≠ 0 := by exact_mod_cast hy.ne'
   push_cast
@@ -176,8 +178,9 @@ private lemma artanh_eq_mul_carlsonRC_one {u : ℝ} (hu : |u| < 1) :
 
 /-- DLMF 19.10.1 (third line): `arctanh(x/y) = x R_C(y², y² - x²)` for `|x| < y`. -/
 @[dlmf 19.10.E1]
-theorem artanh_div_eq_mul_symEllIntRC {x y : ℝ} (hxy : |x| < y) :
-    (Real.artanh (x / y) : ℂ) = x * symEllIntRC ((y ^ 2 : ℝ) : ℂ) ((y ^ 2 - x ^ 2 : ℝ) : ℂ) := by
+theorem artanh_div_eq_mul_symmetricEllipticRC {x y : ℝ} (hxy : |x| < y) :
+    (Real.artanh (x / y) : ℂ) = x *
+        symmetricEllipticRC ((y ^ 2 : ℝ) : ℂ) ((y ^ 2 - x ^ 2 : ℝ) : ℂ) := by
   have hy : 0 < y := lt_of_le_of_lt (abs_nonneg x) hxy
   set u := x / y with hu
   have hxu : x = y * u := by rw [hu]; field_simp
@@ -186,21 +189,21 @@ theorem artanh_div_eq_mul_symEllIntRC {x y : ℝ} (hxy : |x| < y) :
   have hu2 : 0 < 1 - u ^ 2 := by
     have := sq_lt_one_iff_abs_lt_one u |>.mpr hu1; linarith
   have e2 : y ^ 2 - x ^ 2 = y ^ 2 * (1 - u ^ 2) := by rw [hxu]; ring
-  rw [e2, symEllIntRC_sq_eq_carlsonRC_one_left hy hu2, artanh_eq_mul_carlsonRC_one hu1, hxu]
+  rw [e2, symmetricEllipticRC_sq_eq_carlsonRC_one_left hy hu2, artanh_eq_mul_carlsonRC_one hu1, hxu]
   have : (y : ℂ) ≠ 0 := by exact_mod_cast hy.ne'
   push_cast
   field_simp
 
 /-- `R_C(0, y²) = π/(2y)` for `y > 0` (a case of DLMF 19.6.15), from `R_C(0, y²) = R_F(0, y², y²)`
 (19.16.6), (19.16.20) and `R_{-1/2}(½, ½; y², y²) = (y²)^{-1/2}` (19.16.11). -/
-theorem symEllIntRC_zero_ofReal_sq {y : ℝ} (hy : 0 < y) :
-    symEllIntRC 0 ((y ^ 2 : ℝ) : ℂ) = ((π / (2 * y) : ℝ) : ℂ) := by
+theorem symmetricEllipticRC_zero_ofReal_sq {y : ℝ} (hy : 0 < y) :
+    symmetricEllipticRC 0 ((y ^ 2 : ℝ) : ℂ) = ((π / (2 * y) : ℝ) : ℂ) := by
   have hs : ((y ^ 2 : ℝ) : ℂ) ∈ slitPlane := ofReal_mem_slitPlane_of_pos (by positivity)
-  rw [symEllIntRC_eq_symEllIntRF 0 (not_isNegReal_of_mem_slitPlane hs),
-    symEllIntRF_zero_left hs hs]
+  rw [symmetricEllipticRC_eq_symmetricEllipticRF 0 (not_isNegReal_of_mem_slitPlane hs),
+    symmetricEllipticRF_zero_left hs hs]
   have hv : (![((y ^ 2 : ℝ) : ℂ), ((y ^ 2 : ℝ) : ℂ)] : Fin 2 → ℂ) = fun _ => ((y ^ 2 : ℝ) : ℂ) := by
     funext i; fin_cases i <;> rfl
-  rw [hv, symEllIntR_const _ _ hs (by simp [Fin.sum_univ_two]; norm_num),
+  rw [hv, symmetricEllipticR_const _ _ hs (by simp [Fin.sum_univ_two]; norm_num),
     show (-(1 / 2 : ℂ)) = (-1 / 2 : ℂ) by ring, ofReal_sq_cpow_neg_half hy]
   have : (y : ℂ) ≠ 0 := by exact_mod_cast hy.ne'
   push_cast
@@ -208,8 +211,9 @@ theorem symEllIntRC_zero_ofReal_sq {y : ℝ} (hy : 0 < y) :
 
 /-- DLMF 19.10.1 (fourth line): `arcsin(x/y) = x R_C(y² - x², y²)` for `|x| ≤ y`. -/
 @[dlmf 19.10.E1]
-theorem arcsin_div_eq_mul_symEllIntRC {x y : ℝ} (hxy : |x| ≤ y) (hy : 0 < y) :
-    (Real.arcsin (x / y) : ℂ) = x * symEllIntRC ((y ^ 2 - x ^ 2 : ℝ) : ℂ) ((y ^ 2 : ℝ) : ℂ) := by
+theorem arcsin_div_eq_mul_symmetricEllipticRC {x y : ℝ} (hxy : |x| ≤ y) (hy : 0 < y) :
+    (Real.arcsin (x / y) : ℂ) = x *
+        symmetricEllipticRC ((y ^ 2 - x ^ 2 : ℝ) : ℂ) ((y ^ 2 : ℝ) : ℂ) := by
   have hyc : (y : ℂ) ≠ 0 := by exact_mod_cast hy.ne'
   rcases hxy.lt_or_eq with h | h
   · set u := x / y with hu
@@ -228,11 +232,11 @@ theorem arcsin_div_eq_mul_symEllIntRC {x y : ℝ} (hxy : |x| ≤ y) (hy : 0 < y)
         linear_combination -this
       · simp [h']
       · exact Carlson.TwoVariable.arcsin_eq_mul_carlsonRC h' hu1.2
-    rw [e2, symEllIntRC_sq_eq_carlsonRC_one_right hy hu2, hodd, hxu]
+    rw [e2, symmetricEllipticRC_sq_eq_carlsonRC_one_right hy hu2, hodd, hxu]
     push_cast
     field_simp
   · have hx2 : x ^ 2 = y ^ 2 := by rw [← sq_abs, h]
-    rw [hx2, sub_self, ofReal_zero, symEllIntRC_zero_ofReal_sq hy]
+    rw [hx2, sub_self, ofReal_zero, symmetricEllipticRC_zero_ofReal_sq hy]
     rcases abs_eq hy.le |>.mp h with h' | h'
     · rw [h', div_self hy.ne', Real.arcsin_one]
       push_cast; field_simp
@@ -242,9 +246,10 @@ theorem arcsin_div_eq_mul_symEllIntRC {x y : ℝ} (hxy : |x| ≤ y) (hy : 0 < y)
 /-- DLMF 19.10.1 (sixth line): `arccos(x/y) = (y² - x²)^{1/2} R_C(x², y²)` for `0 ≤ x ≤ y`
 (the formula is false for `x < 0`, where its right side is even in `x`). -/
 @[dlmf 19.10.E1]
-theorem arccos_div_eq_mul_symEllIntRC {x y : ℝ} (hx : 0 ≤ x) (hxy : x ≤ y) (hy : 0 < y) :
+theorem arccos_div_eq_mul_symmetricEllipticRC {x y : ℝ} (hx : 0 ≤ x) (hxy : x ≤ y) (hy : 0 < y) :
     (Real.arccos (x / y) : ℂ) =
-      (Real.sqrt (y ^ 2 - x ^ 2) : ℂ) * symEllIntRC ((x ^ 2 : ℝ) : ℂ) ((y ^ 2 : ℝ) : ℂ) := by
+      (Real.sqrt (y ^ 2 - x ^ 2) : ℂ) *
+          symmetricEllipticRC ((x ^ 2 : ℝ) : ℂ) ((y ^ 2 : ℝ) : ℂ) := by
   have hyc : (y : ℂ) ≠ 0 := by exact_mod_cast hy.ne'
   rcases hx.lt_or_eq with hx0 | rfl
   · rcases hxy.lt_or_eq with h | rfl
@@ -256,25 +261,26 @@ theorem arccos_div_eq_mul_symEllIntRC {x y : ℝ} (hx : 0 ≤ x) (hxy : x ≤ y)
       have e3 : Real.sqrt (y ^ 2 - x ^ 2) = y * Real.sqrt (1 - u ^ 2) := by
         rw [hxu, show y ^ 2 - (y * u) ^ 2 = y ^ 2 * (1 - u ^ 2) by ring,
           Real.sqrt_mul (by positivity), Real.sqrt_sq hy.le]
-      rw [e3, e2, symEllIntRC_sq_eq_carlsonRC_one_right hy (by positivity),
+      rw [e3, e2, symmetricEllipticRC_sq_eq_carlsonRC_one_right hy (by positivity),
         Carlson.TwoVariable.arccos_eq_mul_carlsonRC hu0 hu1]
       push_cast
       field_simp
     · rw [div_self hy.ne', Real.arccos_one, sub_self, Real.sqrt_zero]
       simp
   · rw [zero_div, Real.arccos_zero, show ((0 : ℝ) ^ 2 : ℝ) = 0 by norm_num, ofReal_zero,
-      symEllIntRC_zero_ofReal_sq hy, sub_zero, Real.sqrt_sq hy.le]
+      symmetricEllipticRC_zero_ofReal_sq hy, sub_zero, Real.sqrt_sq hy.le]
     push_cast
     field_simp
 
 /-- DLMF 19.10.1 (fifth line): `arcsinh(x/y) = x R_C(y² + x², y²)` for real `x` and `y > 0`. -/
 @[dlmf 19.10.E1]
-theorem arsinh_div_eq_mul_symEllIntRC (x : ℝ) {y : ℝ} (hy : 0 < y) :
-    (Real.arsinh (x / y) : ℂ) = x * symEllIntRC ((y ^ 2 + x ^ 2 : ℝ) : ℂ) ((y ^ 2 : ℝ) : ℂ) := by
+theorem arsinh_div_eq_mul_symmetricEllipticRC (x : ℝ) {y : ℝ} (hy : 0 < y) :
+    (Real.arsinh (x / y) : ℂ) = x *
+        symmetricEllipticRC ((y ^ 2 + x ^ 2 : ℝ) : ℂ) ((y ^ 2 : ℝ) : ℂ) := by
   set u := x / y with hu
   have hxu : x = y * u := by rw [hu]; field_simp
   have e2 : y ^ 2 + x ^ 2 = y ^ 2 * (1 + u ^ 2) := by rw [hxu]; ring
-  rw [e2, symEllIntRC_sq_eq_carlsonRC_one_right hy (by positivity),
+  rw [e2, symmetricEllipticRC_sq_eq_carlsonRC_one_right hy (by positivity),
     Carlson.TwoVariable.arsinh_eq_mul_carlsonRC u, hxu]
   have : (y : ℂ) ≠ 0 := by exact_mod_cast hy.ne'
   push_cast
@@ -283,9 +289,10 @@ theorem arsinh_div_eq_mul_symEllIntRC (x : ℝ) {y : ℝ} (hy : 0 < y) :
 /-- DLMF 19.10.1 (seventh line): `arccosh(x/y) = (x² - y²)^{1/2} R_C(x², y²)` for
 `x ≥ y > 0`. -/
 @[dlmf 19.10.E1]
-theorem arcosh_div_eq_mul_symEllIntRC {x y : ℝ} (hy : 0 < y) (hxy : y ≤ x) :
+theorem arcosh_div_eq_mul_symmetricEllipticRC {x y : ℝ} (hy : 0 < y) (hxy : y ≤ x) :
     (Real.arcosh (x / y) : ℂ) =
-      (Real.sqrt (x ^ 2 - y ^ 2) : ℂ) * symEllIntRC ((x ^ 2 : ℝ) : ℂ) ((y ^ 2 : ℝ) : ℂ) := by
+      (Real.sqrt (x ^ 2 - y ^ 2) : ℂ) *
+          symmetricEllipticRC ((x ^ 2 : ℝ) : ℂ) ((y ^ 2 : ℝ) : ℂ) := by
   rcases hxy.lt_or_eq with h | rfl
   · set u := x / y with hu
     have hxu : x = y * u := by rw [hu]; field_simp
@@ -294,7 +301,7 @@ theorem arcosh_div_eq_mul_symEllIntRC {x y : ℝ} (hy : 0 < y) (hxy : y ≤ x) :
     have e3 : Real.sqrt (x ^ 2 - y ^ 2) = y * Real.sqrt (u ^ 2 - 1) := by
       rw [hxu, show (y * u) ^ 2 - y ^ 2 = y ^ 2 * (u ^ 2 - 1) by ring,
         Real.sqrt_mul (by positivity), Real.sqrt_sq hy.le]
-    rw [e3, e2, symEllIntRC_sq_eq_carlsonRC_one_right hy (by positivity),
+    rw [e3, e2, symmetricEllipticRC_sq_eq_carlsonRC_one_right hy (by positivity),
       Carlson.TwoVariable.arcosh_eq_mul_carlsonRC hu1]
     have : (y : ℂ) ≠ 0 := by exact_mod_cast hy.ne'
     push_cast
@@ -305,12 +312,12 @@ theorem arcosh_div_eq_mul_symEllIntRC {x y : ℝ} (hy : 0 < y) (hxy : y ≤ x) :
 /-- DLMF 19.10.2: `(sinh φ) R_C(1, cosh² φ) = gd φ` for real `φ`, with the Gudermannian
 `gd` of DLMF 4.23.39 (`DLMF.Elementary.gudermannian`). -/
 @[dlmf 19.10.E2]
-theorem sinh_mul_symEllIntRC_eq_gudermannian (φ : ℝ) :
-    (Real.sinh φ : ℂ) * symEllIntRC 1 ((Real.cosh φ ^ 2 : ℝ) : ℂ) =
+theorem sinh_mul_symmetricEllipticRC_eq_gudermannian (φ : ℝ) :
+    (Real.sinh φ : ℂ) * symmetricEllipticRC 1 ((Real.cosh φ ^ 2 : ℝ) : ℂ) =
       (DLMF.Elementary.gudermannian φ : ℂ) := by
   rw [(DLMF.Elementary.gudermannian_elementary φ).2.2,
     Carlson.TwoVariable.arctan_eq_mul_carlsonRC, ← Real.cosh_sq', ← ofReal_one,
-    symEllIntRC_eq_carlsonRC (ofReal_mem_slitPlane_of_pos one_pos)
+    symmetricEllipticRC_eq_carlsonRC (ofReal_mem_slitPlane_of_pos one_pos)
       (ofReal_mem_slitPlane_of_pos (by positivity))]
 
 end DLMF.EllipticIntegrals

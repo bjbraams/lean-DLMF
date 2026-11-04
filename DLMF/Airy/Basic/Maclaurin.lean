@@ -38,54 +38,54 @@ theorem Gamma_five_thirds : Gamma (5 / 3) = 2 / 3 * Gamma (2 / 3) := by
 
 /-- Triplication: `(3k)! = 27^k k! (1/3)_k (2/3)_k`. -/
 theorem factorial_three_mul (k : ℕ) :
-    (((3 * k) ! : ℕ) : ℂ) = 27 ^ k * k ! * poch (1 / 3) k * poch (2 / 3) k := by
+    (((3 * k) ! : ℕ) : ℂ) = 27 ^ k * k ! * pochhammer (1 / 3) k * pochhammer (2 / 3) k := by
   induction k with
-  | zero => simp [poch]
+  | zero => simp [pochhammer]
   | succ k ih =>
     rw [show 3 * (k + 1) = 3 * k + 2 + 1 by ring, Nat.factorial_succ, Nat.factorial_succ,
       Nat.factorial_succ]
     push_cast
     rw [ih]
-    simp only [poch, ascPochhammer_succ_eval, Nat.factorial_succ]
+    simp only [pochhammer, ascPochhammer_succ_eval, Nat.factorial_succ]
     push_cast
     ring
 
 /-- `(3k+1)! = 27^k k! (2/3)_k (4/3)_k`. -/
 theorem factorial_three_mul_add_one (k : ℕ) :
-    (((3 * k + 1) ! : ℕ) : ℂ) = 27 ^ k * k ! * poch (2 / 3) k * poch (4 / 3) k := by
+    (((3 * k + 1) ! : ℕ) : ℂ) = 27 ^ k * k ! * pochhammer (2 / 3) k * pochhammer (4 / 3) k := by
   induction k with
-  | zero => simp [poch]
+  | zero => simp [pochhammer]
   | succ k ih =>
     rw [show 3 * (k + 1) + 1 = 3 * k + 1 + 2 + 1 by ring, Nat.factorial_succ, Nat.factorial_succ,
       Nat.factorial_succ]
     push_cast
     rw [ih]
-    simp only [poch, ascPochhammer_succ_eval, Nat.factorial_succ]
+    simp only [pochhammer, ascPochhammer_succ_eval, Nat.factorial_succ]
     push_cast
     ring
 
 /-- `(3k+2)! = 2 · 27^k k! (4/3)_k (5/3)_k`. -/
 theorem factorial_three_mul_add_two (k : ℕ) :
-    (((3 * k + 2) ! : ℕ) : ℂ) = 2 * 27 ^ k * k ! * poch (4 / 3) k * poch (5 / 3) k := by
+    (((3 * k + 2) ! : ℕ) : ℂ) = 2 * 27 ^ k * k ! * pochhammer (4 / 3) k * pochhammer (5 / 3) k := by
   induction k with
-  | zero => simp [poch]
+  | zero => simp [pochhammer]
   | succ k ih =>
     rw [show 3 * (k + 1) + 2 = 3 * k + 2 + 2 + 1 by ring, Nat.factorial_succ, Nat.factorial_succ,
       Nat.factorial_succ]
     push_cast
     rw [ih]
-    simp only [poch, ascPochhammer_succ_eval, Nat.factorial_succ]
+    simp only [pochhammer, ascPochhammer_succ_eval, Nat.factorial_succ]
     push_cast
     ring
 
 /-- Maclaurin series of `airyF`. -/
 theorem hasSum_airyF_maclaurin (z : ℂ) :
-    HasSum (fun k : ℕ => (Gamma (2 / 3))⁻¹ * (3 : ℂ) ^ k * poch (1 / 3) k / (3 * k)! *
+    HasSum (fun k : ℕ => (Gamma (2 / 3))⁻¹ * (3 : ℂ) ^ k * pochhammer (1 / 3) k / (3 * k)! *
       z ^ (3 * k)) (airyF z) := by
   refine (Complex.hasSum_regularizedHGFun_empty_singleton (2 / 3) (z ^ 3 / 9)).congr_fun fun k => ?_
-  rw [factorial_three_mul, Gamma_add_nat_eq_poch_mul_Gamma (by norm_num)]
-  have h1 := poch_ne_zero_of_re_pos (z := 1 / 3) (by norm_num) k
-  have h2 := poch_ne_zero_of_re_pos (z := 2 / 3) (by norm_num) k
+  rw [factorial_three_mul, Gamma_add_nat_eq_pochhammer_mul_Gamma (by norm_num)]
+  have h1 := pochhammer_ne_zero_of_re_pos (z := 1 / 3) (by norm_num) k
+  have h2 := pochhammer_ne_zero_of_re_pos (z := 2 / 3) (by norm_num) k
   have h3 : Gamma (2 / 3) ≠ 0 := Gamma_ne_zero_of_re_pos (by norm_num)
   have hk : (k ! : ℂ) ≠ 0 := by exact_mod_cast k.factorial_ne_zero
   rw [pow_mul, show (27 : ℂ) = 3 * 9 by norm_num, mul_pow, div_pow]
@@ -93,13 +93,13 @@ theorem hasSum_airyF_maclaurin (z : ℂ) :
 
 /-- Maclaurin series of `airyG`. -/
 theorem hasSum_airyG_maclaurin (z : ℂ) :
-    HasSum (fun k : ℕ => (Gamma (4 / 3))⁻¹ * (3 : ℂ) ^ k * poch (2 / 3) k / (3 * k + 1)! *
+    HasSum (fun k : ℕ => (Gamma (4 / 3))⁻¹ * (3 : ℂ) ^ k * pochhammer (2 / 3) k / (3 * k + 1)! *
       z ^ (3 * k + 1)) (airyG z) := by
   refine ((Complex.hasSum_regularizedHGFun_empty_singleton (4 / 3) (z ^ 3 / 9)).mul_left
       z).congr_fun fun k => ?_
-  rw [factorial_three_mul_add_one, Gamma_add_nat_eq_poch_mul_Gamma (by norm_num)]
-  have h1 := poch_ne_zero_of_re_pos (z := 4 / 3) (by norm_num) k
-  have h2 := poch_ne_zero_of_re_pos (z := 2 / 3) (by norm_num) k
+  rw [factorial_three_mul_add_one, Gamma_add_nat_eq_pochhammer_mul_Gamma (by norm_num)]
+  have h1 := pochhammer_ne_zero_of_re_pos (z := 4 / 3) (by norm_num) k
+  have h2 := pochhammer_ne_zero_of_re_pos (z := 2 / 3) (by norm_num) k
   have h3 : Gamma (4 / 3) ≠ 0 := Gamma_ne_zero_of_re_pos (by norm_num)
   have hk : (k ! : ℂ) ≠ 0 := by exact_mod_cast k.factorial_ne_zero
   rw [pow_succ, pow_mul, show (27 : ℂ) = 3 * 9 by norm_num, mul_pow, div_pow]
@@ -107,14 +107,14 @@ theorem hasSum_airyG_maclaurin (z : ℂ) :
 
 /-- Maclaurin series of `airyFDeriv`. -/
 theorem hasSum_airyFDeriv_maclaurin (z : ℂ) :
-    HasSum (fun k : ℕ => (Gamma (2 / 3))⁻¹ * (3 : ℂ) ^ k * poch (4 / 3) k / (3 * k + 2)! *
+    HasSum (fun k : ℕ => (Gamma (2 / 3))⁻¹ * (3 : ℂ) ^ k * pochhammer (4 / 3) k / (3 * k + 2)! *
       z ^ (3 * k + 2)) (airyFDeriv z) := by
   refine ((Complex.hasSum_regularizedHGFun_empty_singleton (5 / 3) (z ^ 3 / 9)).mul_left (z ^ 2 /
       3)).congr_fun fun k => ?_
-  rw [factorial_three_mul_add_two, Gamma_add_nat_eq_poch_mul_Gamma (by norm_num),
+  rw [factorial_three_mul_add_two, Gamma_add_nat_eq_pochhammer_mul_Gamma (by norm_num),
     Gamma_five_thirds]
-  have h1 := poch_ne_zero_of_re_pos (z := 4 / 3) (by norm_num) k
-  have h2 := poch_ne_zero_of_re_pos (z := 5 / 3) (by norm_num) k
+  have h1 := pochhammer_ne_zero_of_re_pos (z := 4 / 3) (by norm_num) k
+  have h2 := pochhammer_ne_zero_of_re_pos (z := 5 / 3) (by norm_num) k
   have h3 : Gamma (2 / 3) ≠ 0 := Gamma_ne_zero_of_re_pos (by norm_num)
   have hk : (k ! : ℂ) ≠ 0 := by exact_mod_cast k.factorial_ne_zero
   rw [pow_add, pow_mul, show (27 : ℂ) = 3 * 9 by norm_num, mul_pow, div_pow]
@@ -129,15 +129,15 @@ theorem airyGDeriv_eq (z : ℂ) :
 
 /-- Maclaurin series of `airyGDeriv`. -/
 theorem hasSum_airyGDeriv_maclaurin (z : ℂ) :
-    HasSum (fun k : ℕ => (Gamma (4 / 3))⁻¹ * (3 : ℂ) ^ k * poch (2 / 3) k / (3 * k)! *
+    HasSum (fun k : ℕ => (Gamma (4 / 3))⁻¹ * (3 : ℂ) ^ k * pochhammer (2 / 3) k / (3 * k)! *
       z ^ (3 * k)) (airyGDeriv z) := by
   rw [airyGDeriv_eq]
   refine ((Complex.hasSum_regularizedHGFun_empty_singleton (1 / 3) (z ^ 3 / 9)).mul_left
       3).congr_fun fun k => ?_
-  rw [factorial_three_mul, Gamma_add_nat_eq_poch_mul_Gamma (by norm_num),
+  rw [factorial_three_mul, Gamma_add_nat_eq_pochhammer_mul_Gamma (by norm_num),
     Gamma_four_thirds]
-  have h1 := poch_ne_zero_of_re_pos (z := 1 / 3) (by norm_num) k
-  have h2 := poch_ne_zero_of_re_pos (z := 2 / 3) (by norm_num) k
+  have h1 := pochhammer_ne_zero_of_re_pos (z := 1 / 3) (by norm_num) k
+  have h2 := pochhammer_ne_zero_of_re_pos (z := 2 / 3) (by norm_num) k
   have h3 : Gamma (1 / 3) ≠ 0 := Gamma_ne_zero_of_re_pos (by norm_num)
   have hk : (k ! : ℂ) ≠ 0 := by exact_mod_cast k.factorial_ne_zero
   rw [pow_mul, show (27 : ℂ) = 3 * 9 by norm_num, mul_pow, div_pow]
@@ -153,8 +153,9 @@ theorem airyGDeriv_zero' : airyGDeriv 0 = (Gamma (4 / 3))⁻¹ := by
 z^{3k+1}/(3k+1)!` (DLMF 9.4.1). -/
 @[dlmf 9.4.E1]
 theorem hasSum_airyAi_maclaurin (z : ℂ) :
-    HasSum (fun k : ℕ => airyAi 0 * (3 : ℂ) ^ k * poch (1 / 3) k / (3 * k).factorial * z ^ (3 * k) +
-      airyAiDeriv 0 * (3 : ℂ) ^ k * poch (2 / 3) k / (3 * k + 1).factorial * z ^ (3 * k + 1))
+    HasSum (fun k : ℕ => airyAi 0 * (3 : ℂ) ^ k * pochhammer (1 / 3) k /
+        (3 * k).factorial * z ^ (3 * k) +
+      airyAiDeriv 0 * (3 : ℂ) ^ k * pochhammer (2 / 3) k / (3 * k + 1).factorial * z ^ (3 * k + 1))
       (airyAi z) := by
   convert ((hasSum_airyF_maclaurin z).mul_left (((3 : ℝ) ^ (-(2 / 3 : ℝ)) : ℝ) : ℂ)).add
     ((hasSum_airyG_maclaurin z).mul_left (-(((3 : ℝ) ^ (-(4 / 3 : ℝ)) : ℝ) : ℂ))) using 1
@@ -167,9 +168,9 @@ theorem hasSum_airyAi_maclaurin (z : ℂ) :
 z^{3k+2}/(3k+2)!` (DLMF 9.4.2). -/
 @[dlmf 9.4.E2]
 theorem hasSum_airyAiDeriv_maclaurin (z : ℂ) :
-    HasSum (fun k : ℕ => airyAiDeriv 0 * (3 : ℂ) ^ k * poch (2 / 3) k / (3 * k).factorial *
+    HasSum (fun k : ℕ => airyAiDeriv 0 * (3 : ℂ) ^ k * pochhammer (2 / 3) k / (3 * k).factorial *
         z ^ (3 * k) +
-      airyAi 0 * (3 : ℂ) ^ k * poch (4 / 3) k / (3 * k + 2).factorial * z ^ (3 * k + 2))
+      airyAi 0 * (3 : ℂ) ^ k * pochhammer (4 / 3) k / (3 * k + 2).factorial * z ^ (3 * k + 2))
       (airyAiDeriv z) := by
   convert ((hasSum_airyGDeriv_maclaurin z).mul_left (-(((3 : ℝ) ^ (-(4 / 3 : ℝ)) : ℝ) : ℂ))).add
     ((hasSum_airyFDeriv_maclaurin z).mul_left (((3 : ℝ) ^ (-(2 / 3 : ℝ)) : ℝ) : ℂ)) using 1
@@ -182,8 +183,9 @@ theorem hasSum_airyAiDeriv_maclaurin (z : ℂ) :
 `Ai(0)`, `Ai'(0)` (DLMF 9.4.3). -/
 @[dlmf 9.4.E3]
 theorem hasSum_airyBi_maclaurin (z : ℂ) :
-    HasSum (fun k : ℕ => airyBi 0 * (3 : ℂ) ^ k * poch (1 / 3) k / (3 * k).factorial * z ^ (3 * k) +
-      airyBiDeriv 0 * (3 : ℂ) ^ k * poch (2 / 3) k / (3 * k + 1).factorial * z ^ (3 * k + 1))
+    HasSum (fun k : ℕ => airyBi 0 * (3 : ℂ) ^ k * pochhammer (1 / 3) k /
+        (3 * k).factorial * z ^ (3 * k) +
+      airyBiDeriv 0 * (3 : ℂ) ^ k * pochhammer (2 / 3) k / (3 * k + 1).factorial * z ^ (3 * k + 1))
       (airyBi z) := by
   convert ((hasSum_airyF_maclaurin z).mul_left
       ((Real.sqrt 3 : ℂ) * (((3 : ℝ) ^ (-(2 / 3 : ℝ)) : ℝ) : ℂ))).add
@@ -198,9 +200,9 @@ theorem hasSum_airyBi_maclaurin (z : ℂ) :
 `Ai(0)`, `Ai'(0)` (DLMF 9.4.4). -/
 @[dlmf 9.4.E4]
 theorem hasSum_airyBiDeriv_maclaurin (z : ℂ) :
-    HasSum (fun k : ℕ => airyBiDeriv 0 * (3 : ℂ) ^ k * poch (2 / 3) k / (3 * k).factorial *
+    HasSum (fun k : ℕ => airyBiDeriv 0 * (3 : ℂ) ^ k * pochhammer (2 / 3) k / (3 * k).factorial *
         z ^ (3 * k) +
-      airyBi 0 * (3 : ℂ) ^ k * poch (4 / 3) k / (3 * k + 2).factorial * z ^ (3 * k + 2))
+      airyBi 0 * (3 : ℂ) ^ k * pochhammer (4 / 3) k / (3 * k + 2).factorial * z ^ (3 * k + 2))
       (airyBiDeriv z) := by
   convert ((hasSum_airyGDeriv_maclaurin z).mul_left
       ((Real.sqrt 3 : ℂ) * (((3 : ℝ) ^ (-(4 / 3 : ℝ)) : ℝ) : ℂ))).add

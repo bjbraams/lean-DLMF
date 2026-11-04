@@ -17,11 +17,12 @@ Power series, derivatives, parity and the limit at infinity of the real-variable
 
 ## Main results
 
-* `Real.hasSum_expIntEin`, `Real.hasSum_sinInt`, `Real.hasSum_cosIntCin`, `Real.cosInt_eq_tsum`:
-  the power series (DLMF 6.6.4–6.6.6).
-* `Real.hasDerivAt_sinInt`, `Real.hasDerivAt_cosInt`: `Si' = sinc` and `Ci'(x) = cos x / x`.
-* `Real.sinInt_neg`: `Si` is odd.
-* `Real.tendsto_sinInt_atTop`: `Si(x) → π/2` as `x → ∞` (DLMF 6.2.14), from TauCeti's
+* `Real.hasSum_expIntegralEin`, `Real.hasSum_sinIntegral`, `Real.hasSum_cosIntegralCin`,
+  `Real.cosIntegral_eq_tsum`: the power series (DLMF 6.6.4–6.6.6).
+* `Real.hasDerivAt_sinIntegral`, `Real.hasDerivAt_cosIntegral`: `Si' = sinc` and
+  `Ci'(x) = cos x / x`.
+* `Real.sinIntegral_neg`: `Si` is odd.
+* `Real.tendsto_sinIntegral_atTop`: `Si(x) → π/2` as `x → ∞` (DLMF 6.2.14), from TauCeti's
   Dirichlet integral.
 * `hasSum_intervalIntegral_of_dominated`: termwise integration of a dominated series.
 
@@ -75,8 +76,9 @@ theorem hasSum_intervalIntegral_of_dominated {F : ℕ → ℝ → ℝ} {f : ℝ 
 /-- **The power series of `Ein`** (DLMF 6.6.4):
 `Ein(x) = ∑_{k≥0} (-1)^k x^{k+1} / ((k+1) (k+1)!)`. -/
 @[dlmf 6.6.E4]
-theorem Real.hasSum_expIntEin (x : ℝ) :
-    HasSum (fun k : ℕ => (-1) ^ k * x ^ (k + 1) / ((k + 1) * (k + 1)!)) (Real.expIntEin x) := by
+theorem Real.hasSum_expIntegralEin (x : ℝ) :
+    HasSum (fun k : ℕ => (-1) ^ k * x ^ (k + 1) / ((k + 1) * (k + 1)!))
+        (Real.expIntegralEin x) := by
   have h := hasSum_intervalIntegral_of_dominated (F := fun k t =>
     (-1) ^ k * t ^ k / (k + 1)!) x (fun k => by fun_prop) (fun k t ht => ?_)
     (Real.summable_pow_div_factorial |x|) (fun t ht => hasSum_einIntegrand ht)
@@ -92,27 +94,27 @@ theorem Real.hasSum_expIntEin (x : ℝ) :
       _ ≤ |x| ^ k / k ! := by gcongr
 
 /-- `Si'(x) = sinc x`. -/
-theorem Real.hasDerivAt_sinInt (x : ℝ) : HasDerivAt Real.sinInt (Real.sinc x) x :=
+theorem Real.hasDerivAt_sinIntegral (x : ℝ) : HasDerivAt Real.sinIntegral (Real.sinc x) x :=
   intervalIntegral.integral_hasDerivAt_right (Real.continuous_sinc.intervalIntegrable _ _)
     (Real.continuous_sinc.stronglyMeasurableAtFilter _ _) Real.continuous_sinc.continuousAt
 
 /-- `Si` is odd. -/
-theorem Real.sinInt_neg (x : ℝ) : Real.sinInt (-x) = -Real.sinInt x := by
+theorem Real.sinIntegral_neg (x : ℝ) : Real.sinIntegral (-x) = -Real.sinIntegral x := by
   have h := intervalIntegral.integral_comp_neg (a := 0) (b := x) Real.sinc
   simp only [Real.sinc_neg, neg_zero] at h
-  rw [Real.sinInt, Real.sinInt, h, intervalIntegral.integral_symm]
+  rw [Real.sinIntegral, Real.sinIntegral, h, intervalIntegral.integral_symm]
 
 /-- `Si(x) → π/2` as `x → +∞` (DLMF 6.2.14), from TauCeti's Dirichlet integral. -/
 @[dlmf 6.2.E14]
-theorem Real.tendsto_sinInt_atTop : Tendsto Real.sinInt atTop (𝓝 (π / 2)) :=
+theorem Real.tendsto_sinIntegral_atTop : Tendsto Real.sinIntegral atTop (𝓝 (π / 2)) :=
   TauCeti.Contour.tendsto_integral_sinc_atTop
 
 /-- **The power series of `Si`** (DLMF 6.6.5):
 `Si(x) = ∑_{k≥0} (-1)^k x^{2k+1} / ((2k+1) (2k+1)!)`. -/
 @[dlmf 6.6.E5]
-theorem Real.hasSum_sinInt (x : ℝ) :
+theorem Real.hasSum_sinIntegral (x : ℝ) :
     HasSum (fun k : ℕ => (-1) ^ k * x ^ (2 * k + 1) / ((2 * k + 1) * (2 * k + 1)!))
-      (Real.sinInt x) := by
+      (Real.sinIntegral x) := by
   have h := hasSum_intervalIntegral_of_dominated (F := fun k t =>
     (-1) ^ k * t ^ (2 * k) / (2 * k + 1)!) (f := Real.sinc) (b := fun k => (x ^ 2) ^ k / k !) x
     (fun k => by fun_prop) (fun k t ht => ?_) (Real.summable_pow_div_factorial _)
@@ -135,9 +137,9 @@ theorem Real.hasSum_sinInt (x : ℝ) :
     field_simp
 
 /-- **The power series of `Cin`**: `Cin(x) = ∑_{k≥0} (-1)^k x^{2k+2} / ((2k+2) (2k+2)!)`. -/
-theorem Real.hasSum_cosIntCin (x : ℝ) :
+theorem Real.hasSum_cosIntegralCin (x : ℝ) :
     HasSum (fun k : ℕ => (-1) ^ k * x ^ (2 * k + 2) / ((2 * k + 2) * (2 * k + 2)!))
-      (Real.cosIntCin x) := by
+      (Real.cosIntegralCin x) := by
   have h := hasSum_intervalIntegral_of_dominated (F := fun k t =>
     (-1) ^ k * t ^ (2 * k + 1) / (2 * k + 2)!) (f := fun t => (1 - Real.cos t) / t)
     (b := fun k => |x| * (x ^ 2) ^ k / k !) x
@@ -171,10 +173,10 @@ theorem Real.hasSum_cosIntCin (x : ℝ) :
 /-- **The power series of `Ci`** (DLMF 6.6.6): for `x > 0`,
 `Ci(x) = γ + log x + ∑_{k≥0} (-1)^{k+1} x^{2k+2} / ((2k+2) (2k+2)!)`. -/
 @[dlmf 6.6.E6]
-theorem Real.cosInt_eq_tsum (x : ℝ) :
-    Real.cosInt x = Real.eulerMascheroniConstant + Real.log x +
+theorem Real.cosIntegral_eq_tsum (x : ℝ) :
+    Real.cosIntegral x = Real.eulerMascheroniConstant + Real.log x +
       ∑' k : ℕ, (-1) ^ (k + 1) * x ^ (2 * k + 2) / ((2 * k + 2) * (2 * k + 2)!) := by
-  rw [Real.cosInt, (Real.hasSum_cosIntCin x).tsum_eq.symm, ← tsum_neg]
+  rw [Real.cosIntegral, (Real.hasSum_cosIntegralCin x).tsum_eq.symm, ← tsum_neg]
   · have : (fun k : ℕ => (-1 : ℝ) ^ (k + 1) * x ^ (2 * k + 2) / ((2 * k + 2) * (2 * k + 2)!)) =
         fun k => -((-1) ^ k * x ^ (2 * k + 2) / ((2 * k + 2) * (2 * k + 2)!)) := by
       funext k; ring
@@ -182,12 +184,12 @@ theorem Real.cosInt_eq_tsum (x : ℝ) :
     ring
 
 /-- `Ci'(x) = cos x / x` for `x > 0`. -/
-theorem Real.hasDerivAt_cosInt {x : ℝ} (hx : 0 < x) :
-    HasDerivAt Real.cosInt (Real.cos x / x) x := by
+theorem Real.hasDerivAt_cosIntegral {x : ℝ} (hx : 0 < x) :
+    HasDerivAt Real.cosIntegral (Real.cos x / x) x := by
   have hcont : ContinuousOn (fun t : ℝ => (1 - Real.cos t) / t) (Set.Ioi 0) :=
     fun t ht => (by fun_prop (disch := exact (ne_of_gt ht)) :
       ContinuousAt (fun t : ℝ => (1 - Real.cos t) / t) t).continuousWithinAt
-  have hCin : HasDerivAt Real.cosIntCin ((1 - Real.cos x) / x) x := by
+  have hCin : HasDerivAt Real.cosIntegralCin ((1 - Real.cos x) / x) x := by
     refine intervalIntegral.integral_hasDerivAt_right ?_ ?_
       (hcont.continuousAt (Ioi_mem_nhds hx))
     · refine (intervalIntegrable_const (c := |x|)).mono_fun'

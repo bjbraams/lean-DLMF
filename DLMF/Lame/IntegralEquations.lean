@@ -17,10 +17,10 @@ The integral equation DLMF 29.8.2 for a solution `w` of Lamé's equation 29.2.1 
 ## Main results
 
 * `Real.lame_integral_equation`: DLMF 29.8.1–29.8.4.
-* `Real.lameEck_even_integral_equation`: DLMF 29.8.5–29.8.6 for `Ec^{2m}_ν`.
-* `Real.lameEck_odd_integral_equation`: DLMF 29.8.7 for `Ec^{2m+1}_ν`.
-* `Real.lameEsk_odd_integral_equation`: DLMF 29.8.8 for `Es^{2m+1}_ν`.
-* `Real.lameEsk_even_integral_equation`: DLMF 29.8.9 for `Es^{2m+2}_ν`.
+* `Real.lameEc_even_integral_equation`: DLMF 29.8.5–29.8.6 for `Ec^{2m}_ν`.
+* `Real.lameEc_odd_integral_equation`: DLMF 29.8.7 for `Ec^{2m+1}_ν`.
+* `Real.lameEs_odd_integral_equation`: DLMF 29.8.8 for `Es^{2m+1}_ν`.
+* `Real.lameEs_even_integral_equation`: DLMF 29.8.9 for `Es^{2m+2}_ν`.
 
 ## Implementation notes
 
@@ -56,18 +56,22 @@ Wronskian `W = w w₂' - w' w₂`. Then with `μ = 2στ/W` and (29.8.1)
 theorem Real.lame_integral_equation (hk0 : 0 < k) (hk1 : k < 1) {w w₂ : ℝ → ℝ}
     (hw : Real.IsLameSolution h ν k w) (hw₂ : Real.IsLameSolution h ν k w₂) {σ τ : ℝ}
     (hσ : σ = 1 ∨ σ = -1)
-    (hwσ : ∀ z, w (z + 2 * Real.compEllIntKm (k ^ 2)) = σ * w z)
-    (hw₂τ : ∀ z, w₂ (z + 2 * Real.compEllIntKm (k ^ 2)) = τ * w z + σ * w₂ z)
+    (hwσ : ∀ z, w (z + 2 * Real.completeEllipticKOfParameter (k ^ 2)) = σ * w z)
+    (hw₂τ : ∀ z, w₂ (z + 2 * Real.completeEllipticKOfParameter (k ^ 2)) = τ * w z + σ * w₂ z)
     (hW : w 0 * deriv w₂ 0 - deriv w 0 * w₂ 0 ≠ 0) (z₁ z₂ z₃ : ℝ) :
     ((2 * σ * τ / (w 0 * deriv w₂ 0 - deriv w 0 * w₂ 0) * w z₁ * w z₂ * w z₃ : ℝ) : ℂ) =
-      ∫ z in (-(2 * Real.compEllIntKm (k ^ 2)))..(2 * Real.compEllIntKm (k ^ 2)),
+      ∫ z in (-(2 * Real.completeEllipticKOfParameter (k ^ 2)))..(2 *
+          Real.completeEllipticKOfParameter (k ^ 2)),
         DLMF.Legendre.legendreP ν
-            ((k ^ 2 * Real.jacobiSnm z (k ^ 2) * Real.jacobiSnm z₁ (k ^ 2) *
-                Real.jacobiSnm z₂ (k ^ 2) * Real.jacobiSnm z₃ (k ^ 2) -
-              k ^ 2 / (1 - k ^ 2) * Real.jacobiCnm z (k ^ 2) * Real.jacobiCnm z₁ (k ^ 2) *
-                Real.jacobiCnm z₂ (k ^ 2) * Real.jacobiCnm z₃ (k ^ 2) +
-              1 / (1 - k ^ 2) * Real.jacobiDnm z (k ^ 2) * Real.jacobiDnm z₁ (k ^ 2) *
-                Real.jacobiDnm z₂ (k ^ 2) * Real.jacobiDnm z₃ (k ^ 2) : ℝ) : ℂ) *
+            ((k ^ 2 * Real.jacobiSnOfParameter z (k ^ 2) * Real.jacobiSnOfParameter z₁ (k ^ 2) *
+                Real.jacobiSnOfParameter z₂ (k ^ 2) * Real.jacobiSnOfParameter z₃ (k ^ 2) -
+              k ^ 2 / (1 - k ^ 2) * Real.jacobiCnOfParameter z (k ^ 2) *
+                  Real.jacobiCnOfParameter z₁ (k ^ 2) *
+                Real.jacobiCnOfParameter z₂ (k ^ 2) * Real.jacobiCnOfParameter z₃ (k ^ 2) +
+              1 / (1 - k ^ 2) * Real.jacobiDnOfParameter z (k ^ 2) *
+                  Real.jacobiDnOfParameter z₁ (k ^ 2) *
+                Real.jacobiDnOfParameter z₂ (k ^ 2) *
+                    Real.jacobiDnOfParameter z₃ (k ^ 2) : ℝ) : ℂ) *
           (w z : ℂ) := by
   sorry
 
@@ -75,78 +79,90 @@ theorem Real.lame_integral_equation (hk0 : 0 < k) (hk1 : k < 1) {w w₂ : ℝ �
 `Ec^{2m}_ν`, `Ec^{2m}_ν(z₁, k²) (w₂(K) - w₂(-K))/w₂'(0) = ∫_{-K}^K P_ν(y) Ec^{2m}_ν(z, k²) dz`
 with `y = dn(z, k) dn(z₁, k)/k'`. Admitted. -/
 @[dlmf 29.8.E5, dlmf 29.8.E6]
-theorem Real.lameEck_even_integral_equation (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) {w₂ : ℝ → ℝ}
-    (hw₂ : Real.IsLameSolution (Real.lameAk ν (2 * m) k) ν k w₂)
-    (hind : Real.lameEck ν (2 * m) 0 k * deriv w₂ 0 -
-      deriv (fun z => Real.lameEck ν (2 * m) z k) 0 * w₂ 0 ≠ 0) (z₁ : ℝ) :
-    ((Real.lameEck ν (2 * m) z₁ k *
-        ((w₂ (Real.compEllIntKm (k ^ 2)) - w₂ (-Real.compEllIntKm (k ^ 2))) / deriv w₂ 0) :
+theorem Real.lameEc_even_integral_equation (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) {w₂ : ℝ → ℝ}
+    (hw₂ : Real.IsLameSolution (Real.lameA ν (2 * m) k) ν k w₂)
+    (hind : Real.lameEc ν (2 * m) 0 k * deriv w₂ 0 -
+      deriv (fun z => Real.lameEc ν (2 * m) z k) 0 * w₂ 0 ≠ 0) (z₁ : ℝ) :
+    ((Real.lameEc ν (2 * m) z₁ k *
+        ((w₂ (Real.completeEllipticKOfParameter (k ^ 2)) -
+            w₂ (-Real.completeEllipticKOfParameter (k ^ 2))) / deriv w₂ 0) :
         ℝ) : ℂ) =
-      ∫ z in (-Real.compEllIntKm (k ^ 2))..Real.compEllIntKm (k ^ 2),
+      ∫ z in (-Real.completeEllipticKOfParameter
+          (k ^ 2))..Real.completeEllipticKOfParameter (k ^ 2),
         DLMF.Legendre.legendreP ν
-            ((Real.jacobiDnm z (k ^ 2) * Real.jacobiDnm z₁ (k ^ 2) / Real.sqrt (1 - k ^ 2) :
+            ((Real.jacobiDnOfParameter z (k ^ 2) * Real.jacobiDnOfParameter z₁ (k ^ 2) /
+                Real.sqrt (1 - k ^ 2) :
               ℝ) : ℂ) *
-          (Real.lameEck ν (2 * m) z k : ℂ) := by
+          (Real.lameEc ν (2 * m) z k : ℂ) := by
   sorry
 
 /-- 29.8.7: `Ec^{2m+1}_ν(z₁, k²) (w₂(K) + w₂(-K))/w₂(0) =
 -k² sn(z₁, k) ∫_{-K}^K sn(z, k) P_ν'(y) Ec^{2m+1}_ν(z, k²) dz` (`h = a^{2m+1}_ν(k²)`, `w₂`
 independent of `Ec^{2m+1}_ν`, `y` as in 29.8.6). Admitted. -/
 @[dlmf 29.8.E7]
-theorem Real.lameEck_odd_integral_equation (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) {w₂ : ℝ → ℝ}
-    (hw₂ : Real.IsLameSolution (Real.lameAk ν (2 * m + 1) k) ν k w₂)
-    (hind : Real.lameEck ν (2 * m + 1) 0 k * deriv w₂ 0 -
-      deriv (fun z => Real.lameEck ν (2 * m + 1) z k) 0 * w₂ 0 ≠ 0) (z₁ : ℝ) :
-    ((Real.lameEck ν (2 * m + 1) z₁ k *
-        ((w₂ (Real.compEllIntKm (k ^ 2)) + w₂ (-Real.compEllIntKm (k ^ 2))) / w₂ 0) : ℝ) : ℂ) =
-      ((-(k ^ 2 * Real.jacobiSnm z₁ (k ^ 2)) : ℝ) : ℂ) *
-        ∫ z in (-Real.compEllIntKm (k ^ 2))..Real.compEllIntKm (k ^ 2),
-          (Real.jacobiSnm z (k ^ 2) : ℂ) *
+theorem Real.lameEc_odd_integral_equation (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) {w₂ : ℝ → ℝ}
+    (hw₂ : Real.IsLameSolution (Real.lameA ν (2 * m + 1) k) ν k w₂)
+    (hind : Real.lameEc ν (2 * m + 1) 0 k * deriv w₂ 0 -
+      deriv (fun z => Real.lameEc ν (2 * m + 1) z k) 0 * w₂ 0 ≠ 0) (z₁ : ℝ) :
+    ((Real.lameEc ν (2 * m + 1) z₁ k *
+        ((w₂ (Real.completeEllipticKOfParameter (k ^ 2)) +
+            w₂ (-Real.completeEllipticKOfParameter (k ^ 2))) / w₂ 0) : ℝ) : ℂ) =
+      ((-(k ^ 2 * Real.jacobiSnOfParameter z₁ (k ^ 2)) : ℝ) : ℂ) *
+        ∫ z in (-Real.completeEllipticKOfParameter
+            (k ^ 2))..Real.completeEllipticKOfParameter (k ^ 2),
+          (Real.jacobiSnOfParameter z (k ^ 2) : ℂ) *
             deriv (DLMF.Legendre.legendreP ν)
-              ((Real.jacobiDnm z (k ^ 2) * Real.jacobiDnm z₁ (k ^ 2) / Real.sqrt (1 - k ^ 2) :
+              ((Real.jacobiDnOfParameter z (k ^ 2) * Real.jacobiDnOfParameter z₁ (k ^ 2) /
+                  Real.sqrt (1 - k ^ 2) :
                 ℝ) : ℂ) *
-            (Real.lameEck ν (2 * m + 1) z k : ℂ) := by
+            (Real.lameEc ν (2 * m + 1) z k : ℂ) := by
   sorry
 
 /-- 29.8.8: `Es^{2m+1}_ν(z₁, k²) (w₂'(K) + w₂'(-K))/w₂'(0) =
 (k²/k') cn(z₁, k) ∫_{-K}^K cn(z, k) P_ν'(y) Es^{2m+1}_ν(z, k²) dz` (`h = b^{2m+1}_ν(k²)`, `w₂`
 independent of `Es^{2m+1}_ν`). Admitted. -/
 @[dlmf 29.8.E8]
-theorem Real.lameEsk_odd_integral_equation (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) {w₂ : ℝ → ℝ}
-    (hw₂ : Real.IsLameSolution (Real.lameBk ν (2 * m + 1) k) ν k w₂)
-    (hind : Real.lameEsk ν (2 * m + 1) 0 k * deriv w₂ 0 -
-      deriv (fun z => Real.lameEsk ν (2 * m + 1) z k) 0 * w₂ 0 ≠ 0) (z₁ : ℝ) :
-    ((Real.lameEsk ν (2 * m + 1) z₁ k *
-        ((deriv w₂ (Real.compEllIntKm (k ^ 2)) + deriv w₂ (-Real.compEllIntKm (k ^ 2))) /
+theorem Real.lameEs_odd_integral_equation (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) {w₂ : ℝ → ℝ}
+    (hw₂ : Real.IsLameSolution (Real.lameB ν (2 * m + 1) k) ν k w₂)
+    (hind : Real.lameEs ν (2 * m + 1) 0 k * deriv w₂ 0 -
+      deriv (fun z => Real.lameEs ν (2 * m + 1) z k) 0 * w₂ 0 ≠ 0) (z₁ : ℝ) :
+    ((Real.lameEs ν (2 * m + 1) z₁ k *
+        ((deriv w₂ (Real.completeEllipticKOfParameter (k ^ 2)) +
+            deriv w₂ (-Real.completeEllipticKOfParameter (k ^ 2))) /
           deriv w₂ 0) : ℝ) : ℂ) =
-      ((k ^ 2 / Real.sqrt (1 - k ^ 2) * Real.jacobiCnm z₁ (k ^ 2) : ℝ) : ℂ) *
-        ∫ z in (-Real.compEllIntKm (k ^ 2))..Real.compEllIntKm (k ^ 2),
-          (Real.jacobiCnm z (k ^ 2) : ℂ) *
+      ((k ^ 2 / Real.sqrt (1 - k ^ 2) * Real.jacobiCnOfParameter z₁ (k ^ 2) : ℝ) : ℂ) *
+        ∫ z in (-Real.completeEllipticKOfParameter
+            (k ^ 2))..Real.completeEllipticKOfParameter (k ^ 2),
+          (Real.jacobiCnOfParameter z (k ^ 2) : ℂ) *
             deriv (DLMF.Legendre.legendreP ν)
-              ((Real.jacobiDnm z (k ^ 2) * Real.jacobiDnm z₁ (k ^ 2) / Real.sqrt (1 - k ^ 2) :
+              ((Real.jacobiDnOfParameter z (k ^ 2) * Real.jacobiDnOfParameter z₁ (k ^ 2) /
+                  Real.sqrt (1 - k ^ 2) :
                 ℝ) : ℂ) *
-            (Real.lameEsk ν (2 * m + 1) z k : ℂ) := by
+            (Real.lameEs ν (2 * m + 1) z k : ℂ) := by
   sorry
 
 /-- 29.8.9: `Es^{2m+2}_ν(z₁, k²) (w₂'(K) - w₂'(-K))/w₂(0) =
 -(k⁴/k') sn(z₁, k) cn(z₁, k) ∫_{-K}^K sn(z, k) cn(z, k) P_ν''(y) Es^{2m+2}_ν(z, k²) dz`
 (`h = b^{2m+2}_ν(k²)`, `w₂` independent of `Es^{2m+2}_ν`). Admitted. -/
 @[dlmf 29.8.E9]
-theorem Real.lameEsk_even_integral_equation (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) {w₂ : ℝ → ℝ}
-    (hw₂ : Real.IsLameSolution (Real.lameBk ν (2 * m + 2) k) ν k w₂)
-    (hind : Real.lameEsk ν (2 * m + 2) 0 k * deriv w₂ 0 -
-      deriv (fun z => Real.lameEsk ν (2 * m + 2) z k) 0 * w₂ 0 ≠ 0) (z₁ : ℝ) :
-    ((Real.lameEsk ν (2 * m + 2) z₁ k *
-        ((deriv w₂ (Real.compEllIntKm (k ^ 2)) - deriv w₂ (-Real.compEllIntKm (k ^ 2))) /
+theorem Real.lameEs_even_integral_equation (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) {w₂ : ℝ → ℝ}
+    (hw₂ : Real.IsLameSolution (Real.lameB ν (2 * m + 2) k) ν k w₂)
+    (hind : Real.lameEs ν (2 * m + 2) 0 k * deriv w₂ 0 -
+      deriv (fun z => Real.lameEs ν (2 * m + 2) z k) 0 * w₂ 0 ≠ 0) (z₁ : ℝ) :
+    ((Real.lameEs ν (2 * m + 2) z₁ k *
+        ((deriv w₂ (Real.completeEllipticKOfParameter (k ^ 2)) -
+            deriv w₂ (-Real.completeEllipticKOfParameter (k ^ 2))) /
           w₂ 0) : ℝ) : ℂ) =
-      ((-(k ^ 4 / Real.sqrt (1 - k ^ 2) * Real.jacobiSnm z₁ (k ^ 2) *
-          Real.jacobiCnm z₁ (k ^ 2)) : ℝ) : ℂ) *
-        ∫ z in (-Real.compEllIntKm (k ^ 2))..Real.compEllIntKm (k ^ 2),
-          (Real.jacobiSnm z (k ^ 2) * Real.jacobiCnm z (k ^ 2) : ℂ) *
+      ((-(k ^ 4 / Real.sqrt (1 - k ^ 2) * Real.jacobiSnOfParameter z₁ (k ^ 2) *
+          Real.jacobiCnOfParameter z₁ (k ^ 2)) : ℝ) : ℂ) *
+        ∫ z in (-Real.completeEllipticKOfParameter
+            (k ^ 2))..Real.completeEllipticKOfParameter (k ^ 2),
+          (Real.jacobiSnOfParameter z (k ^ 2) * Real.jacobiCnOfParameter z (k ^ 2) : ℂ) *
             deriv (deriv (DLMF.Legendre.legendreP ν))
-              ((Real.jacobiDnm z (k ^ 2) * Real.jacobiDnm z₁ (k ^ 2) / Real.sqrt (1 - k ^ 2) :
+              ((Real.jacobiDnOfParameter z (k ^ 2) * Real.jacobiDnOfParameter z₁ (k ^ 2) /
+                  Real.sqrt (1 - k ^ 2) :
                 ℝ) : ℂ) *
-            (Real.lameEsk ν (2 * m + 2) z k : ℂ) := by
+            (Real.lameEs ν (2 * m + 2) z k : ℂ) := by
   sorry
 
 end DLMF.Lame

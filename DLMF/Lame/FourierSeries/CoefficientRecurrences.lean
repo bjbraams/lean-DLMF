@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Lame.FourierExistence
+public import DLMF.Lame.FourierSeries.CoefficientRatios
 
 /-!
 # Fourier coefficient recurrences of Lamé functions
@@ -23,12 +24,12 @@ of all four Lamé functions in DLMF §29.6.
   for the cosine and sine kernels.
 * `lame_normalization_seq_identity`: the sequence identity behind the normalizations 29.6.12,
   29.6.27, 29.6.42 and 29.6.57.
-* `Real.lameEck_even_hasSum_fourierA`, `Real.lameEck_even_fourierA_rec_zero`,
-  `Real.lameEck_even_fourierA_rec`, `Real.lameEck_even_fourierA_normalization`,
-  `Real.lameEck_even_fourierA_pos`, `Real.lameEck_even_fourierA_ratio`: DLMF 29.6.1–29.6.7.
-* `Real.lameEck_even_hasSum_fourierC`, `Real.lameEck_even_fourierC_rec_zero`,
-  `Real.lameEck_even_fourierC_rec`, `Real.lameEck_even_fourierC_normalization`,
-  `Real.lameEck_even_fourierC_pos`, `Real.lameEck_even_fourierC_ratio`: DLMF 29.6.8–29.6.14.
+* `Real.lameEc_even_hasSum_fourierA`, `Real.lameEc_even_fourierA_rec_zero`,
+  `Real.lameEc_even_fourierA_rec`, `Real.lameEc_even_fourierA_normalization`,
+  `Real.lameEc_even_fourierA_pos`, `Real.lameEc_even_fourierA_ratio`: DLMF 29.6.1–29.6.7.
+* `Real.lameEc_even_hasSum_fourierC`, `Real.lameEc_even_fourierC_rec_zero`,
+  `Real.lameEc_even_fourierC_rec`, `Real.lameEc_even_fourierC_normalization`,
+  `Real.lameEc_even_fourierC_pos`, `Real.lameEc_even_fourierC_ratio`: DLMF 29.6.8–29.6.14.
 
 ## Implementation notes
 
@@ -53,8 +54,9 @@ variable {ν k : ℝ}
 
 /-- `φ(K) = π/2 - am(K, k) = 0`. -/
 theorem lamePhi_K (hk0 : 0 < k) (hk1 : k < 1) :
-    Real.lamePhi (Real.compEllIntKm (k ^ 2)) k = 0 := by
-  rw [Real.lamePhi, Real.jacobiAmm_compEllIntKm (modulus_sq_lt_one hk0 hk1), sub_self]
+    Real.lamePhi (Real.completeEllipticKOfParameter (k ^ 2)) k = 0 := by
+  rw [Real.lamePhi, Real.jacobiAmOfParameter_completeEllipticKOfParameter
+      (modulus_sq_lt_one hk0 hk1), sub_self]
 
 /-! ### Fourier series from the `C²` theory (helpers) -/
 
@@ -73,33 +75,33 @@ lemma neg_one_pow_eq_iff_mod_two (j : ℕ) : ((-1 : ℝ) ^ j = 1 ↔ j % 2 = 0) 
   · rw [h.neg_one_pow, Nat.odd_iff.1 h]; norm_num
 
 /-- The cosine series of `Ec^m_ν / ρ` in `φ` (all indices, with the parity factor). -/
-lemma hasSum_lameEck_cos (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) (weighted : Bool)
+lemma hasSum_lameEc_cos (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) (weighted : Bool)
     (x : ℝ) :
     HasSum (fun j : ℕ => (if j = 0 then 1 / 2 else 1) *
       ((1 + (-1) ^ m * (-1) ^ j) / 2 *
-        Real.lameCosCoeff (fun x => Real.lameEck ν m x k) k weighted j) *
+        Real.lameCosCoeff (fun x => Real.lameEc ν m x k) k weighted j) *
         Real.cos (j * Real.lamePhi x k))
-      (Real.lameEck ν m x k / (if weighted then 1 else Real.jacobiDnm x (k ^ 2))) :=
+      (Real.lameEc ν m x k / (if weighted then 1 else Real.jacobiDnOfParameter x (k ^ 2))) :=
   hasSum_lameCosCoeff hk0 hk1
     (contDiff_two_of_isLameSolution (modulus_sq_lt_one hk0 hk1)
-        (Real.lameEck_isLameEigenfunction (ν := ν) hk0 hk1 m).1)
-    (fun x => (Real.lameEck_parity hk0 hk1 m x).2.2.2.2)
-    (fun x => (Real.lameEck_parity hk0 hk1 m x).2.1)
-    (fun x => (Real.lameEck_parity hk0 hk1 m x).1) weighted x
+        (Real.lameEc_isLameEigenfunction (ν := ν) hk0 hk1 m).1)
+    (fun x => (Real.lameEc_parity hk0 hk1 m x).2.2.2.2)
+    (fun x => (Real.lameEc_parity hk0 hk1 m x).2.1)
+    (fun x => (Real.lameEc_parity hk0 hk1 m x).1) weighted x
 
 /-- The sine series of `Es^m_ν / ρ` in `φ` (all indices, with the parity factor). -/
-lemma hasSum_lameEsk_sin (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) (weighted : Bool)
+lemma hasSum_lameEs_sin (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) (weighted : Bool)
     (x : ℝ) :
     HasSum (fun j : ℕ => ((1 - (-1) ^ (m + 1) * (-1) ^ j) / 2 *
-        Real.lameSinCoeff (fun x => Real.lameEsk ν m x k) k weighted j) *
+        Real.lameSinCoeff (fun x => Real.lameEs ν m x k) k weighted j) *
         Real.sin (j * Real.lamePhi x k))
-      (Real.lameEsk ν m x k / (if weighted then 1 else Real.jacobiDnm x (k ^ 2))) :=
+      (Real.lameEs ν m x k / (if weighted then 1 else Real.jacobiDnOfParameter x (k ^ 2))) :=
   hasSum_lameSinCoeff hk0 hk1
     (contDiff_two_of_isLameSolution (modulus_sq_lt_one hk0 hk1)
-        (Real.lameEsk_isLameEigenfunction (ν := ν) hk0 hk1 m).1)
-    (fun x => (Real.lameEsk_parity hk0 hk1 m x).2.2.2.2)
-    (fun x => (Real.lameEsk_parity hk0 hk1 m x).2.1)
-    (fun x => (Real.lameEsk_parity hk0 hk1 m x).1) weighted x
+        (Real.lameEs_isLameEigenfunction (ν := ν) hk0 hk1 m).1)
+    (fun x => (Real.lameEs_parity hk0 hk1 m x).2.2.2.2)
+    (fun x => (Real.lameEs_parity hk0 hk1 m x).2.1)
+    (fun x => (Real.lameEs_parity hk0 hk1 m x).1) weighted x
 
 /-- For `k² < 1`, `x ↦ cos(j φ(x))` is continuous, `φ = π/2 - am(x, k)`. -/
 private lemma continuous_cos_mul_lamePhi (hk : k ^ 2 < 1) (j : ℕ) :
@@ -114,75 +116,81 @@ private lemma continuous_sin_mul_lamePhi (hk : k ^ 2 < 1) (j : ℕ) :
     (continuous_iff_continuousAt.2 fun t => (hasDerivAt_lamePhi hk t).continuousAt))
 
 /-- Termwise integration of the cosine series of `Ec^m_ν / ρ` against a continuous `g`. -/
-lemma hasSum_lameEck_cos_integral (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ)
+lemma hasSum_lameEc_cos_integral (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ)
     (weighted : Bool) {g : ℝ → ℝ} (hg : Continuous g) :
     HasSum (fun j : ℕ => (if j = 0 then 1 / 2 else 1) *
       ((1 + (-1) ^ m * (-1) ^ j) / 2 *
-        Real.lameCosCoeff (fun x => Real.lameEck ν m x k) k weighted j) *
-        ∫ t in (0 : ℝ)..Real.compEllIntKm (k ^ 2), Real.cos (j * Real.lamePhi t k) * g t)
-      (∫ t in (0 : ℝ)..Real.compEllIntKm (k ^ 2),
-        Real.lameEck ν m t k / (if weighted then 1 else Real.jacobiDnm t (k ^ 2)) * g t) := by
+        Real.lameCosCoeff (fun x => Real.lameEc ν m x k) k weighted j) *
+        ∫ t in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2),
+            Real.cos (j * Real.lamePhi t k) * g t)
+      (∫ t in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2),
+        Real.lameEc ν m t k /
+            (if weighted then 1 else Real.jacobiDnOfParameter t (k ^ 2)) * g t) := by
   have hk := modulus_sq_lt_one hk0 hk1
-  have hpar := Real.lameEck_parity (ν := ν) hk0 hk1 m
+  have hpar := Real.lameEc_parity (ν := ν) hk0 hk1 m
   exact hasSum_integral_mul_of_summable_abs (summable_abs_lameCosCoeff hk0 hk1
-    (contDiff_two_of_isLameSolution hk (Real.lameEck_isLameEigenfunction (ν := ν) hk0 hk1 m).1)
+    (contDiff_two_of_isLameSolution hk (Real.lameEc_isLameEigenfunction (ν := ν) hk0 hk1 m).1)
     (fun x => (hpar x).2.2.2.2) (fun x => (hpar x).2.1) (fun x => (hpar x).1) weighted)
     (continuous_cos_mul_lamePhi hk) (fun _ _ => Real.abs_cos_le_one _) hg
-    (fun t => hasSum_lameEck_cos hk0 hk1 m weighted t) _ _
+    (fun t => hasSum_lameEc_cos hk0 hk1 m weighted t) _ _
 
 /-- Termwise integration of the sine series of `Es^m_ν / ρ` against a continuous `g`. -/
-lemma hasSum_lameEsk_sin_integral (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ)
+lemma hasSum_lameEs_sin_integral (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ)
     (weighted : Bool) {g : ℝ → ℝ} (hg : Continuous g) :
     HasSum (fun j : ℕ => ((1 - (-1) ^ (m + 1) * (-1) ^ j) / 2 *
-        Real.lameSinCoeff (fun x => Real.lameEsk ν m x k) k weighted j) *
-        ∫ t in (0 : ℝ)..Real.compEllIntKm (k ^ 2), Real.sin (j * Real.lamePhi t k) * g t)
-      (∫ t in (0 : ℝ)..Real.compEllIntKm (k ^ 2),
-        Real.lameEsk ν m t k / (if weighted then 1 else Real.jacobiDnm t (k ^ 2)) * g t) := by
+        Real.lameSinCoeff (fun x => Real.lameEs ν m x k) k weighted j) *
+        ∫ t in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2),
+            Real.sin (j * Real.lamePhi t k) * g t)
+      (∫ t in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2),
+        Real.lameEs ν m t k /
+            (if weighted then 1 else Real.jacobiDnOfParameter t (k ^ 2)) * g t) := by
   have hk := modulus_sq_lt_one hk0 hk1
-  have hpar := Real.lameEsk_parity (ν := ν) hk0 hk1 m
+  have hpar := Real.lameEs_parity (ν := ν) hk0 hk1 m
   exact hasSum_integral_mul_of_summable_abs (summable_abs_lameSinCoeff hk0 hk1
-    (contDiff_two_of_isLameSolution hk (Real.lameEsk_isLameEigenfunction (ν := ν) hk0 hk1 m).1)
+    (contDiff_two_of_isLameSolution hk (Real.lameEs_isLameEigenfunction (ν := ν) hk0 hk1 m).1)
     (fun x => (hpar x).2.2.2.2) (fun x => (hpar x).2.1) (fun x => (hpar x).1) weighted)
     (continuous_sin_mul_lamePhi hk) (fun _ _ => Real.abs_sin_le_one _) hg
-    (fun t => hasSum_lameEsk_sin hk0 hk1 m weighted t) _ _
+    (fun t => hasSum_lameEs_sin hk0 hk1 m weighted t) _ _
 
 /-- `∫₀^K cos(jφ) w dn = (π/4) A_j`. -/
 lemma integral_cos_lamePhi_mul_dn (w : ℝ → ℝ) (j : ℕ) :
-    ∫ t in (0 : ℝ)..Real.compEllIntKm (k ^ 2), Real.cos (j * Real.lamePhi t k) *
-      (w t * Real.jacobiDnm t (k ^ 2)) = π / 4 * Real.lameCosCoeff w k true j := by
+    ∫ t in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2), Real.cos (j * Real.lamePhi t k) *
+      (w t * Real.jacobiDnOfParameter t (k ^ 2)) = π / 4 * Real.lameCosCoeff w k true j := by
   rw [Real.lameCosCoeff, ← mul_assoc, show π / 4 * (4 / π) = 1 by field_simp, one_mul]
   congr 1; funext t; simp only [↓reduceIte]; ring
 
 /-- `∫₀^K cos(jφ) w = (π/4) C_j`. -/
 lemma integral_cos_lamePhi_mul (w : ℝ → ℝ) (j : ℕ) :
-    ∫ t in (0 : ℝ)..Real.compEllIntKm (k ^ 2), Real.cos (j * Real.lamePhi t k) * w t =
+    ∫ t in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2),
+        Real.cos (j * Real.lamePhi t k) * w t =
       π / 4 * Real.lameCosCoeff w k false j := by
   rw [Real.lameCosCoeff, ← mul_assoc, show π / 4 * (4 / π) = 1 by field_simp, one_mul]
   congr 1; funext t; simp only [Bool.false_eq_true, ↓reduceIte]; ring
 
 /-- `∫₀^K sin(jφ) w dn = (π/4) B_j`. -/
 lemma integral_sin_lamePhi_mul_dn (w : ℝ → ℝ) (j : ℕ) :
-    ∫ t in (0 : ℝ)..Real.compEllIntKm (k ^ 2), Real.sin (j * Real.lamePhi t k) *
-      (w t * Real.jacobiDnm t (k ^ 2)) = π / 4 * Real.lameSinCoeff w k true j := by
+    ∫ t in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2), Real.sin (j * Real.lamePhi t k) *
+      (w t * Real.jacobiDnOfParameter t (k ^ 2)) = π / 4 * Real.lameSinCoeff w k true j := by
   rw [Real.lameSinCoeff, ← mul_assoc, show π / 4 * (4 / π) = 1 by field_simp, one_mul]
   congr 1; funext t; simp only [↓reduceIte]; ring
 
 /-- `∫₀^K sin(jφ) w = (π/4) D_j`. -/
 lemma integral_sin_lamePhi_mul (w : ℝ → ℝ) (j : ℕ) :
-    ∫ t in (0 : ℝ)..Real.compEllIntKm (k ^ 2), Real.sin (j * Real.lamePhi t k) * w t =
+    ∫ t in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2),
+        Real.sin (j * Real.lamePhi t k) * w t =
       π / 4 * Real.lameSinCoeff w k false j := by
   rw [Real.lameSinCoeff, ← mul_assoc, show π / 4 * (4 / π) = 1 by field_simp, one_mul]
   congr 1; funext t; simp only [Bool.false_eq_true, ↓reduceIte]; ring
 
 /-- For `0 < k < 1`, the Lamé function `x ↦ Ec^m_ν(x, k²)` is continuous. -/
-lemma continuous_lameEck (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
-    Continuous fun x => Real.lameEck ν m x k :=
-  (Real.lameEck_isLameEigenfunction (ν := ν) hk0 hk1 m).1.differentiable.continuous
+lemma continuous_lameEc (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
+    Continuous fun x => Real.lameEc ν m x k :=
+  (Real.lameEc_isLameEigenfunction (ν := ν) hk0 hk1 m).1.differentiable.continuous
 
 /-- For `ν ≥ -1/2`, `0 < k < 1`, the Lamé function `x ↦ Es^m_ν(x, k²)` is continuous. -/
-lemma continuous_lameEsk (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
-    Continuous fun x => Real.lameEsk ν m x k :=
-  (Real.lameEsk_isLameEigenfunction (ν := ν) hk0 hk1 m).1.differentiable.continuous
+lemma continuous_lameEs (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
+    Continuous fun x => Real.lameEs ν m x k :=
+  (Real.lameEs_isLameEigenfunction (ν := ν) hk0 hk1 m).1.differentiable.continuous
 
 /-- The sequence identity behind the normalizations 29.6.12, 29.6.27, 29.6.42, 29.6.57. -/
 lemma lame_normalization_seq_identity {C : ℕ → ℝ} (hC : Summable fun p => |C p|) (k e a : ℝ)
@@ -237,13 +245,13 @@ private lemma sin_natAbs_sub_two_mul (j : ℕ) (φ : ℝ) :
 
 /-- `∫₀^K cos(jφ) w dn² = (π/4)((1 - k²/2) C_j - (k²/4)(C_{j+2} + C_{|j-2|}))`. -/
 lemma integral_cos_lamePhi_mul_dn_sq (hk : k ^ 2 < 1) {w : ℝ → ℝ} (hw : Continuous w) (j : ℕ) :
-    ∫ t in (0 : ℝ)..Real.compEllIntKm (k ^ 2), Real.cos (j * Real.lamePhi t k) *
-      (w t * Real.jacobiDnm t (k ^ 2) ^ 2) =
+    ∫ t in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2), Real.cos (j * Real.lamePhi t k) *
+      (w t * Real.jacobiDnOfParameter t (k ^ 2) ^ 2) =
       π / 4 * ((1 - k ^ 2 / 2) * Real.lameCosCoeff w k false j - k ^ 2 / 4 *
         (Real.lameCosCoeff w k false (j + 2) +
           Real.lameCosCoeff w k false (Int.natAbs ((j : ℤ) - 2)))) := by
   have hi : ∀ i : ℕ, IntervalIntegrable (fun t => Real.cos (i * Real.lamePhi t k) * w t)
-      MeasureTheory.volume 0 (Real.compEllIntKm (k ^ 2)) := fun i =>
+      MeasureTheory.volume 0 (Real.completeEllipticKOfParameter (k ^ 2)) := fun i =>
     ((continuous_cos_mul_lamePhi hk i).mul hw).intervalIntegrable _ _
   rw [intervalIntegral.integral_congr (g := fun t => (1 - k ^ 2 / 2) *
       (Real.cos (j * Real.lamePhi t k) * w t) - k ^ 2 / 4 *
@@ -256,7 +264,7 @@ lemma integral_cos_lamePhi_mul_dn_sq (hk : k ^ 2 < 1) {w : ℝ → ℝ} (hw : Co
       integral_cos_lamePhi_mul, integral_cos_lamePhi_mul, integral_cos_lamePhi_mul]
     ring
   simp only
-  have hd := Real.mul_jacobiSnm_sq_add_jacobiDnm_sq hk t
+  have hd := Real.mul_jacobiSnOfParameter_sq_add_jacobiDnOfParameter_sq hk t
   rw [cos_natAbs_sub_two_mul, ← cos_lamePhi] at *
   have e1 : Real.cos (((j + 2 : ℕ) : ℝ) * Real.lamePhi t k) = Real.cos (j * Real.lamePhi t k) *
       Real.cos (2 * Real.lamePhi t k) - Real.sin (j * Real.lamePhi t k) *
@@ -269,13 +277,13 @@ lemma integral_cos_lamePhi_mul_dn_sq (hk : k ^ 2 < 1) {w : ℝ → ℝ} (hw : Co
 
 /-- `∫₀^K sin(jφ) w dn² = (π/4)((1 - k²/2) D_j - (k²/4)(D_{j+2} ± D_{|j-2|}))`. -/
 lemma integral_sin_lamePhi_mul_dn_sq (hk : k ^ 2 < 1) {w : ℝ → ℝ} (hw : Continuous w) (j : ℕ) :
-    ∫ t in (0 : ℝ)..Real.compEllIntKm (k ^ 2), Real.sin (j * Real.lamePhi t k) *
-      (w t * Real.jacobiDnm t (k ^ 2) ^ 2) =
+    ∫ t in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2), Real.sin (j * Real.lamePhi t k) *
+      (w t * Real.jacobiDnOfParameter t (k ^ 2) ^ 2) =
       π / 4 * ((1 - k ^ 2 / 2) * Real.lameSinCoeff w k false j - k ^ 2 / 4 *
         (Real.lameSinCoeff w k false (j + 2) + (if j < 2 then -1 else 1) *
           Real.lameSinCoeff w k false (Int.natAbs ((j : ℤ) - 2)))) := by
   have hi : ∀ i : ℕ, IntervalIntegrable (fun t => Real.sin (i * Real.lamePhi t k) * w t)
-      MeasureTheory.volume 0 (Real.compEllIntKm (k ^ 2)) := fun i =>
+      MeasureTheory.volume 0 (Real.completeEllipticKOfParameter (k ^ 2)) := fun i =>
     ((continuous_sin_mul_lamePhi hk i).mul hw).intervalIntegrable _ _
   rw [intervalIntegral.integral_congr (g := fun t => (1 - k ^ 2 / 2) *
       (Real.sin (j * Real.lamePhi t k) * w t) - k ^ 2 / 4 *
@@ -289,7 +297,7 @@ lemma integral_sin_lamePhi_mul_dn_sq (hk : k ^ 2 < 1) {w : ℝ → ℝ} (hw : Co
       integral_sin_lamePhi_mul]
     ring
   simp only
-  have hd := Real.mul_jacobiSnm_sq_add_jacobiDnm_sq hk t
+  have hd := Real.mul_jacobiSnOfParameter_sq_add_jacobiDnOfParameter_sq hk t
   have hs := sin_natAbs_sub_two_mul j (Real.lamePhi t k)
   rw [← cos_lamePhi] at hd
   have e1 : Real.sin (((j + 2 : ℕ) : ℝ) * Real.lamePhi t k) = Real.sin (j * Real.lamePhi t k) *
@@ -305,17 +313,18 @@ lemma integral_sin_lamePhi_mul_dn_sq (hk : k ^ 2 < 1) {w : ℝ → ℝ} (hw : Co
 private lemma contDiff_three_of_isLameSolution {h : ℝ} {w : ℝ → ℝ} (hk : k ^ 2 < 1)
     (hw : Real.IsLameSolution h ν k w) : ContDiff ℝ 3 w := by
   have hdd : deriv (deriv w) =
-      fun x => -(h - ν * (ν + 1) * k ^ 2 * Real.jacobiSnm x (k ^ 2) ^ 2) * w x :=
+      fun x => -(h - ν * (ν + 1) * k ^ 2 * Real.jacobiSnOfParameter x (k ^ 2) ^ 2) * w x :=
     funext fun x => (hw.hasDerivAt_deriv x).deriv
-  have hsn : ContDiff ℝ 1 fun x => Real.jacobiSnm x (k ^ 2) := by
+  have hsn : ContDiff ℝ 1 fun x => Real.jacobiSnOfParameter x (k ^ 2) := by
     rw [contDiff_one_iff_deriv]
-    refine ⟨fun x => (Real.hasDerivAt_jacobiSnm hk x).differentiableAt, ?_⟩
-    rw [show deriv (fun x => Real.jacobiSnm x (k ^ 2)) =
-      fun x => Real.jacobiCnm x (k ^ 2) * Real.jacobiDnm x (k ^ 2) from
-      funext fun x => (Real.hasDerivAt_jacobiSnm hk x).deriv]
+    refine ⟨fun x => (Real.hasDerivAt_jacobiSnOfParameter hk x).differentiableAt, ?_⟩
+    rw [show deriv (fun x => Real.jacobiSnOfParameter x (k ^ 2)) =
+      fun x => Real.jacobiCnOfParameter x (k ^ 2) * Real.jacobiDnOfParameter x (k ^ 2) from
+      funext fun x => (Real.hasDerivAt_jacobiSnOfParameter hk x).deriv]
     exact (continuous_iff_continuousAt.2 fun x =>
-      (Real.hasDerivAt_jacobiCnm hk x).continuousAt).mul
-      (continuous_iff_continuousAt.2 fun x => (Real.hasDerivAt_jacobiDnm hk x).continuousAt)
+      (Real.hasDerivAt_jacobiCnOfParameter hk x).continuousAt).mul
+      (continuous_iff_continuousAt.2 fun x =>
+          (Real.hasDerivAt_jacobiDnOfParameter hk x).continuousAt)
   have hw1 : ContDiff ℝ 1 w := (contDiff_two_of_isLameSolution hk hw).of_le (by norm_num)
   rw [show (3 : WithTop ℕ∞) = 2 + 1 from rfl, contDiff_succ_iff_deriv]
   refine ⟨hw.differentiable, by simp, ?_⟩
@@ -325,16 +334,17 @@ private lemma contDiff_three_of_isLameSolution {h : ℝ} {w : ℝ → ℝ} (hk :
   exact ((contDiff_const.sub (contDiff_const.mul (hsn.pow 2))).neg).mul hw1
 
 /-- For `k² < 1`, the incomplete elliptic integral `ψ ↦ F(ψ, k)` is `C³`. -/
-private lemma contDiff_three_incEllIntFm (hk : k ^ 2 < 1) :
-    ContDiff ℝ 3 (fun ψ => Real.incEllIntFm ψ (k ^ 2)) := by
-  have hd : deriv (fun ψ => Real.incEllIntFm ψ (k ^ 2)) =
+private lemma contDiff_three_incompleteEllipticFOfParameter (hk : k ^ 2 < 1) :
+    ContDiff ℝ 3 (fun ψ => Real.incompleteEllipticFOfParameter ψ (k ^ 2)) := by
+  have hd : deriv (fun ψ => Real.incompleteEllipticFOfParameter ψ (k ^ 2)) =
       fun ψ => (1 - k ^ 2 * Real.sin ψ ^ 2) ^ (-(1 / 2) : ℝ) :=
-    funext fun ψ => (Real.hasDerivAt_incEllIntFm hk ψ).deriv
+    funext fun ψ => (Real.hasDerivAt_incompleteEllipticFOfParameter hk ψ).deriv
   have hpos : ∀ ψ, 0 < 1 - k ^ 2 * Real.sin ψ ^ 2 := fun ψ => by
     have := Real.sin_sq_le_one ψ
     nlinarith [sq_nonneg k, sq_nonneg (Real.sin ψ)]
   rw [show (3 : WithTop ℕ∞) = 2 + 1 from rfl, contDiff_succ_iff_deriv]
-  refine ⟨fun ψ => (Real.hasDerivAt_incEllIntFm hk ψ).differentiableAt, by simp, ?_⟩
+  refine ⟨fun ψ => (Real.hasDerivAt_incompleteEllipticFOfParameter hk
+      ψ).differentiableAt, by simp, ?_⟩
   rw [hd]
   exact (contDiff_const.sub (contDiff_const.mul (Real.contDiff_sin.pow 2))).rpow_const_of_ne
     fun ψ => (hpos ψ).ne'
@@ -351,15 +361,16 @@ private lemma contDiff_three_fourierWeight (hk : k ^ 2 < 1) (weighted : Bool) :
 /-- If `w` is `C³` then so is `φ ↦ w(F(π/2 - φ, k))/ρ(φ)`, for `k² < 1`. -/
 private lemma contDiff_three_phiTransform (hk : k ^ 2 < 1) {w : ℝ → ℝ} (hw : ContDiff ℝ 3 w)
     (weighted : Bool) : ContDiff ℝ 3 (phiTransform w k weighted) :=
-  (hw.comp ((contDiff_three_incEllIntFm hk).comp (contDiff_const.sub contDiff_id))).div
+  (hw.comp ((contDiff_three_incompleteEllipticFOfParameter hk).comp
+      (contDiff_const.sub contDiff_id))).div
     (contDiff_three_fourierWeight hk weighted) fun φ => (fourierWeight_pos hk weighted φ).ne'
 
 /-- Termwise differentiation at `φ = 0` of the sine series of a Lamé solution with
 `w(2K - x) = -w(x)`: `∑ j b_j = F'(0)`. -/
 lemma hasSum_mul_lameSinCoeff (hk0 : 0 < k) (hk1 : k < 1) {h : ℝ} {w : ℝ → ℝ}
     (hw : Real.IsLameSolution h ν k w)
-    (h4 : ∀ x, w (x + 4 * Real.compEllIntKm (k ^ 2)) = w x)
-    (hσ : ∀ x, w (2 * Real.compEllIntKm (k ^ 2) - x) = -w x) {δ : ℝ}
+    (h4 : ∀ x, w (x + 4 * Real.completeEllipticKOfParameter (k ^ 2)) = w x)
+    (hσ : ∀ x, w (2 * Real.completeEllipticKOfParameter (k ^ 2) - x) = -w x) {δ : ℝ}
     (hδ : ∀ x, w (-x) = δ * w x) (weighted : Bool) :
     HasSum (fun j : ℕ => (j : ℝ) * ((1 - δ * (-1) ^ j) / 2 * Real.lameSinCoeff w k weighted j))
       (deriv (phiTransform w k weighted) 0) := by
@@ -370,7 +381,7 @@ lemma hasSum_mul_lameSinCoeff (hk0 : 0 < k) (hk1 : k < 1) {h : ℝ} {w : ℝ →
   have hG : ContDiff ℝ 2 (deriv F) := by
     rw [show (3 : WithTop ℕ∞) = 2 + 1 from rfl, contDiff_succ_iff_deriv] at hF3
     exact hF3.2.2
-  have hσ' : ∀ x, w (2 * Real.compEllIntKm (k ^ 2) - x) = -1 * w x := fun x => by
+  have hσ' : ∀ x, w (2 * Real.completeEllipticKOfParameter (k ^ 2) - x) = -1 * w x := fun x => by
     rw [hσ, neg_one_mul]
   have hodd : ∀ t, F (-t) = -F t := fun t => by
     rw [hFdef, phiTransform_neg hk hσ', neg_one_mul]
@@ -416,18 +427,22 @@ lemma hasSum_mul_lameSinCoeff (hk0 : 0 < k) (hk1 : k < 1) {h : ℝ} {w : ℝ →
 
 /-- `F'(0) > 0` for `F = w(x(φ))/ρ(φ)` when `w(K) = 0` and `w'(K) < 0`. -/
 lemma deriv_phiTransform_pos (hk : k ^ 2 < 1) {w : ℝ → ℝ} (hw : Differentiable ℝ w)
-    (hK : w (Real.compEllIntKm (k ^ 2)) = 0) (hd : deriv w (Real.compEllIntKm (k ^ 2)) < 0)
+    (hK : w (Real.completeEllipticKOfParameter (k ^ 2)) = 0)
+        (hd : deriv w (Real.completeEllipticKOfParameter (k ^ 2)) < 0)
     (weighted : Bool) : 0 < deriv (phiTransform w k weighted) 0 := by
   set c := (1 - k ^ 2 * Real.sin (π / 2 - 0) ^ 2) ^ (-(1 / 2) : ℝ) with hc
   have hc0 : 0 < c := Real.rpow_pos_of_pos (by
     have := Real.sin_sq_le_one (π / 2 - 0)
     nlinarith [sq_nonneg k, sq_nonneg (Real.sin (π / 2 - 0))]) _
-  have hg : HasDerivAt (fun φ => Real.incEllIntFm (π / 2 - φ) (k ^ 2)) (c * -1) 0 :=
-    (Real.hasDerivAt_incEllIntFm hk (π / 2 - 0)).comp (0 : ℝ)
+  have hg : HasDerivAt
+      (fun φ => Real.incompleteEllipticFOfParameter (π / 2 - φ) (k ^ 2)) (c * -1) 0 :=
+    (Real.hasDerivAt_incompleteEllipticFOfParameter hk (π / 2 - 0)).comp (0 : ℝ)
       ((hasDerivAt_id (0 : ℝ)).const_sub (π / 2))
-  have hg0 : Real.incEllIntFm (π / 2 - 0) (k ^ 2) = Real.compEllIntKm (k ^ 2) := by
-    rw [sub_zero, Real.incEllIntFm_pi_div_two]
-  have hwg := (hw (Real.incEllIntFm (π / 2 - 0) (k ^ 2))).hasDerivAt.comp (0 : ℝ) hg
+  have hg0 : Real.incompleteEllipticFOfParameter (π / 2 - 0) (k ^ 2) =
+      Real.completeEllipticKOfParameter (k ^ 2) := by
+    rw [sub_zero, Real.incompleteEllipticFOfParameter_pi_div_two]
+  have hwg := (hw (Real.incompleteEllipticFOfParameter (π / 2 - 0)
+      (k ^ 2))).hasDerivAt.comp (0 : ℝ) hg
   have hρ := ((contDiff_three_fourierWeight hk weighted).differentiable (by norm_num) 0).hasDerivAt
   have hρ0 := fourierWeight_pos hk weighted 0
   have hdiv := hwg.div hρ hρ0.ne'
@@ -445,25 +460,28 @@ private lemma integral_lame_green_test {h : ℝ} {w F F1 F2 : ℝ → ℝ} (hk :
     (hw : Real.IsLameSolution h ν k w)
     (hF : ∀ x, HasDerivAt F (F1 x) x) (hF1 : ∀ x, HasDerivAt F1 (F2 x) x)
     (hF2 : Continuous F2) (a b : ℝ) :
-    ∫ x in a..b, w x * (F2 x + (h - ν * (ν + 1) * k ^ 2 * Real.jacobiSnm x (k ^ 2) ^ 2) * F x) =
+    ∫ x in a..b, w x * (F2 x +
+        (h - ν * (ν + 1) * k ^ 2 * Real.jacobiSnOfParameter x (k ^ 2) ^ 2) * F x) =
       (w b * F1 b - deriv w b * F b) - (w a * F1 a - deriv w a * F a) := by
   have hd : ∀ x, HasDerivAt (fun y => w y * F1 y - deriv w y * F y)
-      (w x * (F2 x + (h - ν * (ν + 1) * k ^ 2 * Real.jacobiSnm x (k ^ 2) ^ 2) * F x)) x := by
+      (w x * (F2 x + (h - ν * (ν + 1) * k ^ 2 * Real.jacobiSnOfParameter x (k ^ 2) ^ 2)
+          * F x)) x := by
     intro x
     have := (((hw.differentiable x).hasDerivAt).mul (hF1 x)).sub
       ((hw.hasDerivAt_deriv x).mul (hF x))
     convert this using 1; ring
   have hFc : Continuous F := continuous_iff_continuousAt.2 fun x => (hF x).continuousAt
   have hcont : Continuous fun x =>
-      w x * (F2 x + (h - ν * (ν + 1) * k ^ 2 * Real.jacobiSnm x (k ^ 2) ^ 2) * F x) :=
+      w x * (F2 x + (h - ν * (ν + 1) * k ^ 2 * Real.jacobiSnOfParameter x (k ^ 2) ^ 2) * F x) :=
     hw.differentiable.continuous.mul (hF2.add ((continuous_const.sub
-      (continuous_const.mul ((Real.continuous_jacobiSnm hk).pow 2))).mul hFc))
+      (continuous_const.mul ((Real.continuous_jacobiSnOfParameter hk).pow 2))).mul hFc))
   exact intervalIntegral.integral_eq_sub_of_hasDerivAt (fun x _ => hd x)
     (hcont.intervalIntegrable a b)
 
 /-- `sin φ(x) = cn(x, k)` for `φ(x) = π/2 - am(x, k)`. -/
-private lemma sin_lamePhi (x : ℝ) : Real.sin (Real.lamePhi x k) = Real.jacobiCnm x (k ^ 2) := by
-  simp [Real.lamePhi, Real.sin_pi_div_two_sub, Real.jacobiCnm]
+private lemma sin_lamePhi (x : ℝ) : Real.sin (Real.lamePhi x k) =
+    Real.jacobiCnOfParameter x (k ^ 2) := by
+  simp [Real.lamePhi, Real.sin_pi_div_two_sub, Real.jacobiCnOfParameter]
 
 /-- For `k² < 1`, `x ↦ φ(x) = π/2 - am(x, k)` is continuous. -/
 private lemma continuous_lamePhi (hk : k ^ 2 < 1) : Continuous fun x => Real.lamePhi x k :=
@@ -471,17 +489,18 @@ private lemma continuous_lamePhi (hk : k ^ 2 < 1) : Continuous fun x => Real.lam
 
 /-- `φ(0) = π/2`, since `am(0, k) = 0`. -/
 private lemma lamePhi_zero (hk : k ^ 2 < 1) : Real.lamePhi 0 k = π / 2 := by
-  simp [Real.lamePhi, Real.jacobiAmm_zero hk]
+  simp [Real.lamePhi, Real.jacobiAmOfParameter_zero hk]
 
 /-- `φ(K) = 0`, since `am(K, k) = π/2`. -/
 private lemma lamePhi_K_of_sq_lt_one (hk : k ^ 2 < 1) : Real.lamePhi
-    (Real.compEllIntKm (k ^ 2)) k = 0 := by
-  rw [Real.lamePhi, Real.jacobiAmm_compEllIntKm hk, sub_self]
+    (Real.completeEllipticKOfParameter (k ^ 2)) k = 0 := by
+  rw [Real.lamePhi, Real.jacobiAmOfParameter_completeEllipticKOfParameter hk, sub_self]
 
 /-- `cn(K, k) = 0` for `k² < 1`. -/
-private lemma jacobiCnm_K (hk : k ^ 2 < 1) : Real.jacobiCnm (Real.compEllIntKm (k ^ 2))
+private lemma jacobiCnOfParameter_K (hk : k ^ 2 < 1) : Real.jacobiCnOfParameter
+    (Real.completeEllipticKOfParameter (k ^ 2))
     (k ^ 2) = 0 := by
-  simp [Real.jacobiCnm, Real.jacobiAmm_compEllIntKm hk]
+  simp [Real.jacobiCnOfParameter, Real.jacobiAmOfParameter_completeEllipticKOfParameter hk]
 
 /-- The integral identity behind the Fourier recurrences of §29.6, for a real index `j` and a
 trigonometric kernel `g` (`cos` or `sin`, with `g' = g₁`, `g₁' = -g`); unweighted case. -/
@@ -490,19 +509,22 @@ lemma integral_lame_kernel {h j : ℝ} {w g g1 : ℝ → ℝ} (hk : k ^ 2 < 1)
     (hg : ∀ t, HasDerivAt g (g1 t) t) (hg1 : ∀ t, HasDerivAt g1 (-g t) t)
     (hadd : ∀ a b, g (a + b) = g a * Real.cos b + g1 a * Real.sin b)
     (h0 : w 0 * g1 (j * (π / 2)) = 0) (h0' : deriv w 0 * g (j * (π / 2)) = 0)
-    (hK : w (Real.compEllIntKm (k ^ 2)) * g1 0 = 0)
-    (hK' : deriv w (Real.compEllIntKm (k ^ 2)) * g 0 = 0) :
+    (hK : w (Real.completeEllipticKOfParameter (k ^ 2)) * g1 0 = 0)
+    (hK' : deriv w (Real.completeEllipticKOfParameter (k ^ 2)) * g 0 = 0) :
     (j ^ 2 * (2 - k ^ 2) - (2 * h - ν * (ν + 1) * k ^ 2)) *
-        (∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2), w x * g (j * Real.lamePhi x k)) +
+        (∫ x in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2), w x *
+            g (j * Real.lamePhi x k)) +
       k ^ 2 / 2 * (ν - j) * (ν + j + 1) *
-        (∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2), w x * g ((j + 2) * Real.lamePhi x k)) +
+        (∫ x in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2), w x *
+            g ((j + 2) * Real.lamePhi x k)) +
       k ^ 2 / 2 * (ν - j + 1) * (ν + j) *
-        (∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2), w x * g ((j - 2) * Real.lamePhi x k)) =
+        (∫ x in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2), w x *
+            g ((j - 2) * Real.lamePhi x k)) =
       0 := by
-  set K := Real.compEllIntKm (k ^ 2)
-  set S := fun x => Real.jacobiSnm x (k ^ 2)
-  set Cn := fun x => Real.jacobiCnm x (k ^ 2)
-  set D := fun x => Real.jacobiDnm x (k ^ 2)
+  set K := Real.completeEllipticKOfParameter (k ^ 2)
+  set S := fun x => Real.jacobiSnOfParameter x (k ^ 2)
+  set Cn := fun x => Real.jacobiCnOfParameter x (k ^ 2)
+  set D := fun x => Real.jacobiDnOfParameter x (k ^ 2)
   set φ := fun x => Real.lamePhi x k
   have hgc : Continuous g := continuous_iff_continuousAt.2 fun t => (hg t).continuousAt
   have hg1c : Continuous g1 := continuous_iff_continuousAt.2 fun t => (hg1 t).continuousAt
@@ -512,14 +534,14 @@ lemma integral_lame_kernel {h j : ℝ} {w g g1 : ℝ → ℝ} (hk : k ^ 2 < 1)
   have hF1 : ∀ x, HasDerivAt (fun x => -(j * D x * g1 (j * φ x)))
       (j * k ^ 2 * S x * Cn x * g1 (j * φ x) - j ^ 2 * D x ^ 2 * g (j * φ x)) x := by
     intro x
-    have h1 := (((Real.hasDerivAt_jacobiDnm hk x).mul
+    have h1 := (((Real.hasDerivAt_jacobiDnOfParameter hk x).mul
       ((hg1 _).comp x ((hφ x).const_mul j))).const_mul j).neg
     convert h1 using 1
     · funext y; simp only [Pi.neg_apply, Pi.mul_apply, Function.comp_apply, D, φ]; ring
     · simp only [D, S, Cn, φ, Function.comp_apply]; ring
-  have hS : Continuous S := Real.continuous_jacobiSnm hk
-  have hC : Continuous Cn := Real.continuous_jacobiCnm hk
-  have hD : Continuous D := Real.continuous_jacobiDnm hk
+  have hS : Continuous S := Real.continuous_jacobiSnOfParameter hk
+  have hC : Continuous Cn := Real.continuous_jacobiCnOfParameter hk
+  have hD : Continuous D := Real.continuous_jacobiDnOfParameter hk
   have hP : Continuous φ := continuous_lamePhi hk
   have hF2 : Continuous fun x =>
       j * k ^ 2 * S x * Cn x * g1 (j * φ x) - j ^ 2 * D x ^ 2 * g (j * φ x) := by
@@ -529,12 +551,12 @@ lemma integral_lame_kernel {h j : ℝ} {w g g1 : ℝ → ℝ} (hk : k ^ 2 < 1)
   have hφK : φ K = 0 := lamePhi_K_of_sq_lt_one hk
   simp only [hφ0, hφK, mul_zero] at hG
   have hpt : ∀ x, w x * ((j * k ^ 2 * S x * Cn x * g1 (j * φ x) - j ^ 2 * D x ^ 2 * g (j * φ x)) +
-      (h - ν * (ν + 1) * k ^ 2 * Real.jacobiSnm x (k ^ 2) ^ 2) * g (j * φ x)) =
+      (h - ν * (ν + 1) * k ^ 2 * Real.jacobiSnOfParameter x (k ^ 2) ^ 2) * g (j * φ x)) =
       -(1 / 2) * ((j ^ 2 * (2 - k ^ 2) - (2 * h - ν * (ν + 1) * k ^ 2)) * (w x * g (j * φ x)) +
         k ^ 2 / 2 * (ν - j) * (ν + j + 1) * (w x * g ((j + 2) * φ x)) +
         k ^ 2 / 2 * (ν - j + 1) * (ν + j) * (w x * g ((j - 2) * φ x))) := by
     intro x
-    have hD2 := Real.mul_jacobiSnm_sq_add_jacobiDnm_sq hk x
+    have hD2 := Real.mul_jacobiSnOfParameter_sq_add_jacobiDnOfParameter_sq hk x
     have hc := cos_lamePhi (k := k) x
     have hs := sin_lamePhi (k := k) x
     rw [show (j + 2) * φ x = j * φ x + 2 * φ x by ring,
@@ -560,22 +582,22 @@ lemma integral_lame_weighted_kernel {h j : ℝ} {w g g1 : ℝ → ℝ} (hk : k ^
     (hg : ∀ t, HasDerivAt g (g1 t) t) (hg1 : ∀ t, HasDerivAt g1 (-g t) t)
     (hadd : ∀ a b, g (a + b) = g a * Real.cos b + g1 a * Real.sin b)
     (h0 : w 0 * g1 (j * (π / 2)) = 0) (h0' : deriv w 0 * g (j * (π / 2)) = 0)
-    (hK : w (Real.compEllIntKm (k ^ 2)) * g1 0 = 0)
-    (hK' : deriv w (Real.compEllIntKm (k ^ 2)) * g 0 = 0) :
+    (hK : w (Real.completeEllipticKOfParameter (k ^ 2)) * g1 0 = 0)
+    (hK' : deriv w (Real.completeEllipticKOfParameter (k ^ 2)) * g 0 = 0) :
     (j ^ 2 * (2 - k ^ 2) - (2 * h - ν * (ν + 1) * k ^ 2)) *
-        (∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2),
-          w x * g (j * Real.lamePhi x k) * Real.jacobiDnm x (k ^ 2)) +
+        (∫ x in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2),
+          w x * g (j * Real.lamePhi x k) * Real.jacobiDnOfParameter x (k ^ 2)) +
       k ^ 2 / 2 * (ν - j - 1) * (ν + j + 2) *
-        (∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2),
-          w x * g ((j + 2) * Real.lamePhi x k) * Real.jacobiDnm x (k ^ 2)) +
+        (∫ x in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2),
+          w x * g ((j + 2) * Real.lamePhi x k) * Real.jacobiDnOfParameter x (k ^ 2)) +
       k ^ 2 / 2 * (ν - j + 2) * (ν + j - 1) *
-        (∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2),
-          w x * g ((j - 2) * Real.lamePhi x k) * Real.jacobiDnm x (k ^ 2)) =
+        (∫ x in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2),
+          w x * g ((j - 2) * Real.lamePhi x k) * Real.jacobiDnOfParameter x (k ^ 2)) =
       0 := by
-  set K := Real.compEllIntKm (k ^ 2)
-  set S := fun x => Real.jacobiSnm x (k ^ 2)
-  set Cn := fun x => Real.jacobiCnm x (k ^ 2)
-  set D := fun x => Real.jacobiDnm x (k ^ 2)
+  set K := Real.completeEllipticKOfParameter (k ^ 2)
+  set S := fun x => Real.jacobiSnOfParameter x (k ^ 2)
+  set Cn := fun x => Real.jacobiCnOfParameter x (k ^ 2)
+  set D := fun x => Real.jacobiDnOfParameter x (k ^ 2)
   set φ := fun x => Real.lamePhi x k
   have hgc : Continuous g := continuous_iff_continuousAt.2 fun t => (hg t).continuousAt
   have hg1c : Continuous g1 := continuous_iff_continuousAt.2 fun t => (hg1 t).continuousAt
@@ -587,7 +609,7 @@ lemma integral_lame_weighted_kernel {h j : ℝ} {w g g1 : ℝ → ℝ} (hk : k ^
   have hF : ∀ x, HasDerivAt (fun x => D x * g (j * φ x))
       (-(k ^ 2 * S x * Cn x) * g (j * φ x) - j * D x ^ 2 * g1 (j * φ x)) x := by
     intro x
-    have h1 := (Real.hasDerivAt_jacobiDnm hk x).mul (hG0 x)
+    have h1 := (Real.hasDerivAt_jacobiDnOfParameter hk x).mul (hG0 x)
     convert h1 using 1
     simp only [D, S, Cn]; ring
   have hF1 : ∀ x, HasDerivAt
@@ -595,14 +617,14 @@ lemma integral_lame_weighted_kernel {h j : ℝ} {w g g1 : ℝ → ℝ} (hk : k ^
       (-(k ^ 2) * D x * (Cn x ^ 2 - S x ^ 2) * g (j * φ x) +
         3 * j * k ^ 2 * D x * S x * Cn x * g1 (j * φ x) - j ^ 2 * D x ^ 3 * g (j * φ x)) x := by
     intro x
-    have h1 := (((((Real.hasDerivAt_jacobiSnm hk x).const_mul (k ^ 2)).mul
-      (Real.hasDerivAt_jacobiCnm hk x)).neg).mul (hG0 x)).sub
-      ((((Real.hasDerivAt_jacobiDnm hk x).pow 2).const_mul j).mul (hG1 x))
+    have h1 := (((((Real.hasDerivAt_jacobiSnOfParameter hk x).const_mul (k ^ 2)).mul
+      (Real.hasDerivAt_jacobiCnOfParameter hk x)).neg).mul (hG0 x)).sub
+      ((((Real.hasDerivAt_jacobiDnOfParameter hk x).pow 2).const_mul j).mul (hG1 x))
     convert h1 using 1
     simp only [D, S, Cn, Pi.mul_apply, Pi.neg_apply, Pi.pow_apply]; ring
-  have hS : Continuous S := Real.continuous_jacobiSnm hk
-  have hC : Continuous Cn := Real.continuous_jacobiCnm hk
-  have hD : Continuous D := Real.continuous_jacobiDnm hk
+  have hS : Continuous S := Real.continuous_jacobiSnOfParameter hk
+  have hC : Continuous Cn := Real.continuous_jacobiCnOfParameter hk
+  have hD : Continuous D := Real.continuous_jacobiDnOfParameter hk
   have hP : Continuous φ := continuous_lamePhi hk
   have hF2 : Continuous fun x => -(k ^ 2) * D x * (Cn x ^ 2 - S x ^ 2) * g (j * φ x) +
         3 * j * k ^ 2 * D x * S x * Cn x * g1 (j * φ x) - j ^ 2 * D x ^ 3 * g (j * φ x) := by
@@ -610,19 +632,19 @@ lemma integral_lame_weighted_kernel {h j : ℝ} {w g g1 : ℝ → ℝ} (hk : k ^
   have hG := integral_lame_green_test hk hw hF hF1 hF2 0 K
   have hφ0 : φ 0 = π / 2 := lamePhi_zero hk
   have hφK : φ K = 0 := lamePhi_K_of_sq_lt_one hk
-  have hS0 : S 0 = 0 := Real.jacobiSnm_zero hk
-  have hCK : Cn K = 0 := jacobiCnm_K hk
+  have hS0 : S 0 = 0 := Real.jacobiSnOfParameter_zero hk
+  have hCK : Cn K = 0 := jacobiCnOfParameter_K hk
   simp only [hφ0, hφK, mul_zero, hS0, hCK, zero_mul, mul_zero, neg_zero, zero_sub] at hG
   have hpt : ∀ x, w x * ((-(k ^ 2) * D x * (Cn x ^ 2 - S x ^ 2) * g (j * φ x) +
         3 * j * k ^ 2 * D x * S x * Cn x * g1 (j * φ x) - j ^ 2 * D x ^ 3 * g (j * φ x)) +
-      (h - ν * (ν + 1) * k ^ 2 * Real.jacobiSnm x (k ^ 2) ^ 2) * (D x * g (j * φ x))) =
+      (h - ν * (ν + 1) * k ^ 2 * Real.jacobiSnOfParameter x (k ^ 2) ^ 2) * (D x * g (j * φ x))) =
       -(1 / 2) * ((j ^ 2 * (2 - k ^ 2) - (2 * h - ν * (ν + 1) * k ^ 2)) *
           (w x * g (j * φ x) * D x) +
         k ^ 2 / 2 * (ν - j - 1) * (ν + j + 2) * (w x * g ((j + 2) * φ x) * D x) +
         k ^ 2 / 2 * (ν - j + 2) * (ν + j - 1) * (w x * g ((j - 2) * φ x) * D x)) := by
     intro x
-    have hD2 := Real.mul_jacobiSnm_sq_add_jacobiDnm_sq hk x
-    have hSC := Real.jacobiSnm_sq_add_jacobiCnm_sq x (k ^ 2)
+    have hD2 := Real.mul_jacobiSnOfParameter_sq_add_jacobiDnOfParameter_sq hk x
+    have hSC := Real.jacobiSnOfParameter_sq_add_jacobiCnOfParameter_sq x (k ^ 2)
     have hc := cos_lamePhi (k := k) x
     have hs := sin_lamePhi (k := k) x
     rw [show (j + 2) * φ x = j * φ x + 2 * φ x by ring,
@@ -630,8 +652,9 @@ lemma integral_lame_weighted_kernel {h j : ℝ} {w g g1 : ℝ → ℝ} (hk : k ^
       Real.cos_two_mul, Real.sin_two_mul]
     simp only [S, Cn, D, φ] at *
     rw [hc, hs]
-    linear_combination (-j ^ 2 * Real.jacobiDnm x (k ^ 2) * w x * g (j * Real.lamePhi x k)) * hD2 +
-      (-k ^ 2 * Real.jacobiDnm x (k ^ 2) * w x * g (j * Real.lamePhi x k)) * hSC
+    linear_combination (-j ^ 2 * Real.jacobiDnOfParameter x (k ^ 2) * w x *
+        g (j * Real.lamePhi x k)) * hD2 +
+      (-k ^ 2 * Real.jacobiDnOfParameter x (k ^ 2) * w x * g (j * Real.lamePhi x k)) * hSC
   have hwc : Continuous w := hw.differentiable.continuous
   rw [intervalIntegral.integral_congr (fun x _ => hpt x), intervalIntegral.integral_const_mul,
     intervalIntegral.integral_add (Continuous.intervalIntegrable (by fun_prop) _ _)
@@ -641,9 +664,10 @@ lemma integral_lame_weighted_kernel {h j : ℝ} {w g g1 : ℝ → ℝ} (hk : k ^
     intervalIntegral.integral_const_mul, intervalIntegral.integral_const_mul,
     intervalIntegral.integral_const_mul] at hG
   simp only [φ, D] at hG
-  linear_combination (-2) * hG + 2 * j * Real.jacobiDnm K (k ^ 2) ^ 2 * hK -
-    2 * j * Real.jacobiDnm 0 (k ^ 2) ^ 2 * h0 + 2 * Real.jacobiDnm K (k ^ 2) * hK' -
-    2 * Real.jacobiDnm 0 (k ^ 2) * h0'
+  linear_combination (-2) * hG + 2 * j * Real.jacobiDnOfParameter K (k ^ 2) ^ 2 * hK -
+    2 * j * Real.jacobiDnOfParameter 0 (k ^ 2) ^ 2 * h0 + 2 *
+        Real.jacobiDnOfParameter K (k ^ 2) * hK' -
+    2 * Real.jacobiDnOfParameter 0 (k ^ 2) * h0'
 
 /-- The integral identity of `integral_lame_kernel`/`integral_lame_weighted_kernel` for the cosine
 kernel, as an identity between the (real-index) Fourier coefficients `(4/π)∫₀^K w cos(jφ) ρ dx`. -/
@@ -651,26 +675,27 @@ lemma integral_cos_lamePhi_recurrence {h j : ℝ} {w : ℝ → ℝ} (hk : k ^ 2 
     (hw : Real.IsLameSolution h ν k w)
     (b : Bool) (h0 : w 0 * Real.sin (j * (π / 2)) = 0)
     (h0' : deriv w 0 * Real.cos (j * (π / 2)) = 0)
-    (hK' : deriv w (Real.compEllIntKm (k ^ 2)) = 0) :
+    (hK' : deriv w (Real.completeEllipticKOfParameter (k ^ 2)) = 0) :
     (j ^ 2 * (2 - k ^ 2) - (2 * h - ν * (ν + 1) * k ^ 2)) *
-        (4 / π * ∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2), w x * Real.cos (j * Real.lamePhi x k) *
-          (if b then Real.jacobiDnm x (k ^ 2) else 1)) +
+        (4 / π * ∫ x in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2), w x *
+            Real.cos (j * Real.lamePhi x k) *
+          (if b then Real.jacobiDnOfParameter x (k ^ 2) else 1)) +
       (if b then k ^ 2 / 2 * (ν - j - 1) * (ν + j + 2) else k ^ 2 / 2 * (ν - j) * (ν + j + 1)) *
-        (4 / π * ∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2),
+        (4 / π * ∫ x in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2),
           w x * Real.cos ((j + 2) * Real.lamePhi x k) *
-            (if b then Real.jacobiDnm x (k ^ 2) else 1)) +
+            (if b then Real.jacobiDnOfParameter x (k ^ 2) else 1)) +
       (if b then k ^ 2 / 2 * (ν - j + 2) * (ν + j - 1) else k ^ 2 / 2 * (ν - j + 1) * (ν + j)) *
-        (4 / π * ∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2),
+        (4 / π * ∫ x in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2),
           w x * Real.cos ((j - 2) * Real.lamePhi x k) *
-            (if b then Real.jacobiDnm x (k ^ 2) else 1)) = 0 := by
+            (if b then Real.jacobiDnOfParameter x (k ^ 2) else 1)) = 0 := by
   have hg : ∀ t, HasDerivAt Real.cos (-Real.sin t) t := Real.hasDerivAt_cos
   have hg1 : ∀ t, HasDerivAt (fun t => -Real.sin t) (-Real.cos t) t :=
     fun t => (Real.hasDerivAt_sin t).neg
   have hadd : ∀ a b, Real.cos (a + b) = Real.cos a * Real.cos b + -Real.sin a * Real.sin b :=
     fun a b => by rw [Real.cos_add]; ring
   have h0n : w 0 * -Real.sin (j * (π / 2)) = 0 := by rw [mul_neg, h0, neg_zero]
-  have hKn : w (Real.compEllIntKm (k ^ 2)) * -Real.sin 0 = 0 := by simp
-  have hK'' : deriv w (Real.compEllIntKm (k ^ 2)) * Real.cos 0 = 0 := by simp [hK']
+  have hKn : w (Real.completeEllipticKOfParameter (k ^ 2)) * -Real.sin 0 = 0 := by simp
+  have hK'' : deriv w (Real.completeEllipticKOfParameter (k ^ 2)) * Real.cos 0 = 0 := by simp [hK']
   cases b
   · have := integral_lame_kernel hk hw hg hg1 hadd h0n h0' hKn hK''
     simp only [Bool.false_eq_true, ite_false, mul_one]
@@ -684,24 +709,25 @@ lemma integral_sin_lamePhi_recurrence {h j : ℝ} {w : ℝ → ℝ} (hk : k ^ 2 
     (hw : Real.IsLameSolution h ν k w)
     (b : Bool) (h0 : w 0 * Real.cos (j * (π / 2)) = 0)
     (h0' : deriv w 0 * Real.sin (j * (π / 2)) = 0)
-    (hK : w (Real.compEllIntKm (k ^ 2)) = 0) :
+    (hK : w (Real.completeEllipticKOfParameter (k ^ 2)) = 0) :
     (j ^ 2 * (2 - k ^ 2) - (2 * h - ν * (ν + 1) * k ^ 2)) *
-        (4 / π * ∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2), w x * Real.sin (j * Real.lamePhi x k) *
-          (if b then Real.jacobiDnm x (k ^ 2) else 1)) +
+        (4 / π * ∫ x in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2), w x *
+            Real.sin (j * Real.lamePhi x k) *
+          (if b then Real.jacobiDnOfParameter x (k ^ 2) else 1)) +
       (if b then k ^ 2 / 2 * (ν - j - 1) * (ν + j + 2) else k ^ 2 / 2 * (ν - j) * (ν + j + 1)) *
-        (4 / π * ∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2),
+        (4 / π * ∫ x in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2),
           w x * Real.sin ((j + 2) * Real.lamePhi x k) *
-            (if b then Real.jacobiDnm x (k ^ 2) else 1)) +
+            (if b then Real.jacobiDnOfParameter x (k ^ 2) else 1)) +
       (if b then k ^ 2 / 2 * (ν - j + 2) * (ν + j - 1) else k ^ 2 / 2 * (ν - j + 1) * (ν + j)) *
-        (4 / π * ∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2),
+        (4 / π * ∫ x in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2),
           w x * Real.sin ((j - 2) * Real.lamePhi x k) *
-            (if b then Real.jacobiDnm x (k ^ 2) else 1)) = 0 := by
+            (if b then Real.jacobiDnOfParameter x (k ^ 2) else 1)) = 0 := by
   have hg : ∀ t, HasDerivAt Real.sin (Real.cos t) t := Real.hasDerivAt_sin
   have hg1 : ∀ t, HasDerivAt Real.cos (-Real.sin t) t := Real.hasDerivAt_cos
   have hadd : ∀ a b, Real.sin (a + b) = Real.sin a * Real.cos b + Real.cos a * Real.sin b :=
     fun a b => Real.sin_add a b
-  have hKn : w (Real.compEllIntKm (k ^ 2)) * Real.cos 0 = 0 := by simp [hK]
-  have hK'' : deriv w (Real.compEllIntKm (k ^ 2)) * Real.sin 0 = 0 := by simp
+  have hKn : w (Real.completeEllipticKOfParameter (k ^ 2)) * Real.cos 0 = 0 := by simp [hK]
+  have hK'' : deriv w (Real.completeEllipticKOfParameter (k ^ 2)) * Real.sin 0 = 0 := by simp
   cases b
   · have := integral_lame_kernel hk hw hg hg1 hadd h0 h0' hKn hK''
     simp only [Bool.false_eq_true, ite_false, mul_one]
@@ -713,13 +739,13 @@ lemma integral_sin_lamePhi_recurrence {h j : ℝ} {w : ℝ → ℝ} (hk : k ^ 2 
 /-- DLMF 29.6.1: `Ec^{2m}_ν(x, k²) = ½A₀ + ∑_{p≥1} A_{2p} cos(2pφ)` for real `x`, with `φ = π/2 -
 am(x, k)` and the Fourier coefficients `A_{2p}` of `Real.lameCosCoeff` (weighted by `dn`). -/
 @[dlmf 29.6.E1]
-theorem Real.lameEck_even_hasSum_fourierA
+theorem Real.lameEc_even_hasSum_fourierA
     (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
     ∀ x : ℝ, HasSum (fun p : ℕ => (if p = 0 then 1 / 2 else 1) *
-      Real.lameCosCoeff (fun x => Real.lameEck ν (2 * m) x k) k true (2 * p) *
-      Real.cos (((2 * p : ℕ) : ℝ) * Real.lamePhi x k)) (Real.lameEck ν (2 * m) x k) := by
+      Real.lameCosCoeff (fun x => Real.lameEc ν (2 * m) x k) k true (2 * p) *
+      Real.cos (((2 * p : ℕ) : ℝ) * Real.lamePhi x k)) (Real.lameEc ν (2 * m) x k) := by
   intro x
-  have hs := hasSum_lameEck_cos (ν := ν) hk0 hk1 (2 * m) true x
+  have hs := hasSum_lameEc_cos (ν := ν) hk0 hk1 (2 * m) true x
   simp only [↓reduceIte, div_one] at hs
   convert hasSum_two_mul_add_of_mod_two 0 (fun j hj => ?_) hs using 1
   · funext p
@@ -731,16 +757,16 @@ theorem Real.lameEck_even_hasSum_fourierA
 recurrence `A0` (index `p` of the coefficient list). Proved from Lamé's equation
 by Green's identity (`integral_cos_lamePhi_recurrence`, `integral_sin_lamePhi_recurrence`). -/
 @[dlmf 29.6.E2, dlmf 29.6.E3]
-theorem Real.lameEck_even_fourierA_rec_zero
+theorem Real.lameEc_even_fourierA_rec_zero
     (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
     let A : ℕ → ℝ := fun p =>
-      Real.lameCosCoeff (fun x => Real.lameEck ν (2 * m) x k) k true (2 * p)
-    let H : ℝ := 2 * Real.lameAk ν (2 * m) k - ν * (ν + 1) * k ^ 2
+      Real.lameCosCoeff (fun x => Real.lameEc ν (2 * m) x k) k true (2 * p)
+    let H : ℝ := 2 * Real.lameA ν (2 * m) k - ν * (ν + 1) * k ^ 2
     (LameRecurrence.A0.beta ν k 0 - H) * A 0 +
       LameRecurrence.A0.alpha ν k 0 * A 1 = 0 := by
   intro X H
   have hk := modulus_sq_lt_one hk0 hk1
-  obtain ⟨hw, hb, -⟩ := Real.lameEck_isLameEigenfunction (ν := ν) hk0 hk1 (2 * m)
+  obtain ⟨hw, hb, -⟩ := Real.lameEc_isLameEigenfunction (ν := ν) hk0 hk1 (2 * m)
   simp [Real.LameBoundary] at hb
   have key := integral_cos_lamePhi_recurrence hk hw true (j := 0) (by simp)
     (by simp [hb.1]) hb.2
@@ -752,18 +778,18 @@ theorem Real.lameEck_even_fourierA_rec_zero
 list), for the recurrence `A0`. Proved from Lamé's equation
 by Green's identity (`integral_cos_lamePhi_recurrence`, `integral_sin_lamePhi_recurrence`). -/
 @[dlmf 29.6.E4]
-theorem Real.lameEck_even_fourierA_rec
+theorem Real.lameEc_even_fourierA_rec
     (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
     let A : ℕ → ℝ := fun p =>
-      Real.lameCosCoeff (fun x => Real.lameEck ν (2 * m) x k) k true (2 * p)
-    let H : ℝ := 2 * Real.lameAk ν (2 * m) k - ν * (ν + 1) * k ^ 2
+      Real.lameCosCoeff (fun x => Real.lameEc ν (2 * m) x k) k true (2 * p)
+    let H : ℝ := 2 * Real.lameA ν (2 * m) k - ν * (ν + 1) * k ^ 2
     ∀ p : ℕ, 1 ≤ p → LameRecurrence.A0.gamma ν k p * A (p - 1) +
       (LameRecurrence.A0.beta ν k p - H) * A p +
       LameRecurrence.A0.alpha ν k p * A (p + 1) = 0 := by
   intro X H p hp
   obtain ⟨q, rfl⟩ : ∃ q, p = q + 1 := ⟨p - 1, by omega⟩
   have hk := modulus_sq_lt_one hk0 hk1
-  obtain ⟨hw, hb, -⟩ := Real.lameEck_isLameEigenfunction (ν := ν) hk0 hk1 (2 * m)
+  obtain ⟨hw, hb, -⟩ := Real.lameEc_isLameEigenfunction (ν := ν) hk0 hk1 (2 * m)
   simp [Real.LameBoundary] at hb
   have key := integral_cos_lamePhi_recurrence hk hw true (j := ((2 * (q + 1) : ℕ) : ℝ))
     (by rw [show ((2 * (q + 1) : ℕ) : ℝ) * (π / 2) = ((q + 1 : ℕ) : ℝ) * π by push_cast; ring,
@@ -779,22 +805,23 @@ theorem Real.lameEck_even_fourierA_rec
 
 /-- DLMF 29.6.5: the normalization of the coefficients `A_{2p}`. -/
 @[dlmf 29.6.E5]
-theorem Real.lameEck_even_fourierA_normalization
+theorem Real.lameEc_even_fourierA_normalization
     (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
     let A : ℕ → ℝ := fun p =>
-      Real.lameCosCoeff (fun x => Real.lameEck ν (2 * m) x k) k true (2 * p)
+      Real.lameCosCoeff (fun x => Real.lameEc ν (2 * m) x k) k true (2 * p)
     HasSum (fun p => (if p = 0 then 1 / 2 else 1) * A p ^ 2) 1 := by
   intro A
   have hk := modulus_sq_lt_one hk0 hk1
-  have h := hasSum_lameEck_cos_integral (ν := ν) hk0 hk1 (2 * m) true
-    (g := fun x => Real.lameEck ν (2 * m) x k * Real.jacobiDnm x (k ^ 2))
-    ((continuous_lameEck hk0 hk1 _).mul (Real.continuous_jacobiDnm hk))
+  have h := hasSum_lameEc_cos_integral (ν := ν) hk0 hk1 (2 * m) true
+    (g := fun x => Real.lameEc ν (2 * m) x k * Real.jacobiDnOfParameter x (k ^ 2))
+    ((continuous_lameEc hk0 hk1 _).mul (Real.continuous_jacobiDnOfParameter hk))
   simp only [↓reduceIte, div_one, integral_cos_lamePhi_mul_dn] at h
-  rw [show (∫ t in (0 : ℝ)..Real.compEllIntKm (k ^ 2), Real.lameEck ν (2 * m) t k *
-      (Real.lameEck ν (2 * m) t k * Real.jacobiDnm t (k ^ 2))) =
-      ∫ t in (0 : ℝ)..Real.compEllIntKm (k ^ 2), Real.jacobiDnm t (k ^ 2) *
-        Real.lameEck ν (2 * m) t k ^ 2 by congr 1; funext t; ring,
-    Real.lameEck_normalization (ν := ν) hk0 hk1] at h
+  rw [show (∫ t in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2), Real.lameEc ν (2 * m) t k *
+      (Real.lameEc ν (2 * m) t k * Real.jacobiDnOfParameter t (k ^ 2))) =
+      ∫ t in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2),
+          Real.jacobiDnOfParameter t (k ^ 2) *
+        Real.lameEc ν (2 * m) t k ^ 2 by congr 1; funext t; ring,
+    Real.lameEc_normalization (ν := ν) hk0 hk1] at h
   have h2 := h.mul_left (4 / π)
   rw [show 4 / π * (π / 4) = 1 by field_simp] at h2
   convert hasSum_two_mul_add_of_mod_two 0 (fun j hj => ?_) h2 using 1
@@ -807,39 +834,58 @@ theorem Real.lameEck_even_fourierA_normalization
 /-- DLMF 29.6.6: positivity (the value at `x = K`, where `φ = 0`; proved from the Fourier series and
 `Ec(K) > 0`). -/
 @[dlmf 29.6.E6]
-theorem Real.lameEck_even_fourierA_pos
+theorem Real.lameEc_even_fourierA_pos
     (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
     let A : ℕ → ℝ := fun p =>
-      Real.lameCosCoeff (fun x => Real.lameEck ν (2 * m) x k) k true (2 * p)
+      Real.lameCosCoeff (fun x => Real.lameEc ν (2 * m) x k) k true (2 * p)
     ∃ S, HasSum (fun p => (if p = 0 then 1 / 2 else 1) * A p) S ∧ 0 < S := by
   intro A
-  have hs := Real.lameEck_even_hasSum_fourierA (ν := ν) hk0 hk1 m (Real.compEllIntKm (k ^ 2))
+  have hs := Real.lameEc_even_hasSum_fourierA (ν := ν) hk0 hk1 m
+      (Real.completeEllipticKOfParameter (k ^ 2))
   simp only [lamePhi_K hk0 hk1, mul_zero, Real.cos_zero, mul_one] at hs
-  exact ⟨_, hs, Real.lameEck_K_pos (ν := ν) hk0 hk1 _⟩
+  exact ⟨_, hs, Real.lameEc_K_pos (ν := ν) hk0 hk1 _⟩
 
-/-- DLMF 29.6.7: `A_{p+1}/A_p → k²/(1 + k')²` unless `ν = 2 * n` with `m ≤ n`. Admitted. -/
+/-- DLMF 29.6.7: `A_{p+1}/A_p → k²/(1 + k')²` unless `ν = 2 * n` with `m ≤ n`. -/
 @[dlmf 29.6.E7]
-theorem Real.lameEck_even_fourierA_ratio
+theorem Real.lameEc_even_fourierA_ratio
     (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
     let A : ℕ → ℝ := fun p =>
-      Real.lameCosCoeff (fun x => Real.lameEck ν (2 * m) x k) k true (2 * p)
+      Real.lameCosCoeff (fun x => Real.lameEc ν (2 * m) x k) k true (2 * p)
     (∀ n : ℕ, ν = ((2 * n : ℕ) : ℝ) → n < m) →
       Tendsto (fun p => A (p + 1) / A p) atTop
         (𝓝 (k ^ 2 / (1 + Real.sqrt (1 - k ^ 2)) ^ 2)) := by
-  sorry
+  intro c hexc
+  have hk := modulus_sq_lt_one hk0 hk1
+  have h0 := Real.lameEc_even_fourierA_rec_zero (ν := ν) hk0 hk1 m
+  have h1 := Real.lameEc_even_fourierA_rec (ν := ν) hk0 hk1 m
+  obtain ⟨C, hC⟩ := abs_lameCosCoeff_le hk (continuous_lameEc (ν := ν) hk0 hk1 (2 * m)) true
+  have hnz : ∃ p, c p ≠ 0 := by
+    by_contra h
+    push Not at h
+    obtain ⟨S, hS, hSpos⟩ := Real.lameEc_even_fourierA_pos (ν := ν) hk0 hk1 m
+    simp only [c] at h
+    exact hSpos.ne' (hS.unique (by simp [h]))
+  have hE : Real.lameA ν (2 * m) k = Real.lameEigenvalue ν k (lamePolyOddZero .uE)
+      (lamePolyOddK .uE) m := by
+    simp only [Real.lameA, lamePolyOddZero, lamePolyOddK]
+    rw [show (2 * m).bodd = false by simp [Nat.bodd_mul],
+      show 2 * m / 2 = m by omega]
+  rw [hE] at h0 h1
+  exact LamePolynomialType.tendsto_coeff_ratio .uE hν hk0 hk1 h0 h1 (fun p => hC _) hnz hexc
 
 /-- DLMF 29.6.8: `Ec^{2m}_ν(x, k²) = dn(x, k) ∑_p C_{2p} (trig)` for real `x`, with the unweighted
 Fourier coefficients `C_{2p}`. -/
 @[dlmf 29.6.E8]
-theorem Real.lameEck_even_hasSum_fourierC
+theorem Real.lameEc_even_hasSum_fourierC
     (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
-    ∀ x : ℝ, HasSum (fun p : ℕ => Real.jacobiDnm x (k ^ 2) * ((if p = 0 then 1 / 2 else 1) *
-      Real.lameCosCoeff (fun x => Real.lameEck ν (2 * m) x k) k false (2 * p) *
-      Real.cos (((2 * p : ℕ) : ℝ) * Real.lamePhi x k))) (Real.lameEck ν (2 * m) x k) := by
+    ∀ x : ℝ, HasSum (fun p : ℕ => Real.jacobiDnOfParameter x (k ^ 2) *
+        ((if p = 0 then 1 / 2 else 1) *
+      Real.lameCosCoeff (fun x => Real.lameEc ν (2 * m) x k) k false (2 * p) *
+      Real.cos (((2 * p : ℕ) : ℝ) * Real.lamePhi x k))) (Real.lameEc ν (2 * m) x k) := by
   intro x
-  have hd := (Real.jacobiDnm_pos (modulus_sq_lt_one hk0 hk1) x).ne'
-  have hs := (hasSum_lameEck_cos (ν := ν) hk0 hk1 (2 * m) false x).mul_left
-      (Real.jacobiDnm x (k ^ 2))
+  have hd := (Real.jacobiDnOfParameter_pos (modulus_sq_lt_one hk0 hk1) x).ne'
+  have hs := (hasSum_lameEc_cos (ν := ν) hk0 hk1 (2 * m) false x).mul_left
+      (Real.jacobiDnOfParameter x (k ^ 2))
   simp only [Bool.false_eq_true, ↓reduceIte, mul_div_cancel₀ _ hd] at hs
   convert hasSum_two_mul_add_of_mod_two 0 (fun j hj => ?_) hs using 1
   · funext p
@@ -851,16 +897,16 @@ theorem Real.lameEck_even_hasSum_fourierC
 Proved from Lamé's equation by Green's identity (`integral_cos_lamePhi_recurrence`,
 `integral_sin_lamePhi_recurrence`). -/
 @[dlmf 29.6.E9]
-theorem Real.lameEck_even_fourierC_rec_zero
+theorem Real.lameEc_even_fourierC_rec_zero
     (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
     let C : ℕ → ℝ := fun p =>
-      Real.lameCosCoeff (fun x => Real.lameEck ν (2 * m) x k) k false (2 * p)
-    let H : ℝ := 2 * Real.lameAk ν (2 * m) k - ν * (ν + 1) * k ^ 2
+      Real.lameCosCoeff (fun x => Real.lameEc ν (2 * m) x k) k false (2 * p)
+    let H : ℝ := 2 * Real.lameA ν (2 * m) k - ν * (ν + 1) * k ^ 2
     (LameRecurrence.C0.beta ν k 0 - H) * C 0 +
       LameRecurrence.C0.alpha ν k 0 * C 1 = 0 := by
   intro X H
   have hk := modulus_sq_lt_one hk0 hk1
-  obtain ⟨hw, hb, -⟩ := Real.lameEck_isLameEigenfunction (ν := ν) hk0 hk1 (2 * m)
+  obtain ⟨hw, hb, -⟩ := Real.lameEc_isLameEigenfunction (ν := ν) hk0 hk1 (2 * m)
   simp [Real.LameBoundary] at hb
   have key := integral_cos_lamePhi_recurrence hk hw false (j := 0) (by simp)
     (by simp [hb.1]) hb.2
@@ -872,18 +918,18 @@ theorem Real.lameEck_even_fourierC_rec_zero
 Proved from Lamé's equation by Green's identity (`integral_cos_lamePhi_recurrence`,
 `integral_sin_lamePhi_recurrence`). -/
 @[dlmf 29.6.E10]
-theorem Real.lameEck_even_fourierC_rec
+theorem Real.lameEc_even_fourierC_rec
     (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
     let C : ℕ → ℝ := fun p =>
-      Real.lameCosCoeff (fun x => Real.lameEck ν (2 * m) x k) k false (2 * p)
-    let H : ℝ := 2 * Real.lameAk ν (2 * m) k - ν * (ν + 1) * k ^ 2
+      Real.lameCosCoeff (fun x => Real.lameEc ν (2 * m) x k) k false (2 * p)
+    let H : ℝ := 2 * Real.lameA ν (2 * m) k - ν * (ν + 1) * k ^ 2
     ∀ p : ℕ, 1 ≤ p → LameRecurrence.C0.gamma ν k p * C (p - 1) +
       (LameRecurrence.C0.beta ν k p - H) * C p +
       LameRecurrence.C0.alpha ν k p * C (p + 1) = 0 := by
   intro X H p hp
   obtain ⟨q, rfl⟩ : ∃ q, p = q + 1 := ⟨p - 1, by omega⟩
   have hk := modulus_sq_lt_one hk0 hk1
-  obtain ⟨hw, hb, -⟩ := Real.lameEck_isLameEigenfunction (ν := ν) hk0 hk1 (2 * m)
+  obtain ⟨hw, hb, -⟩ := Real.lameEc_isLameEigenfunction (ν := ν) hk0 hk1 (2 * m)
   simp [Real.LameBoundary] at hb
   have key := integral_cos_lamePhi_recurrence hk hw false (j := ((2 * (q + 1) : ℕ) : ℝ))
     (by rw [show ((2 * (q + 1) : ℕ) : ℝ) * (π / 2) = ((q + 1 : ℕ) : ℝ) * π by push_cast; ring,
@@ -899,42 +945,44 @@ theorem Real.lameEck_even_fourierC_rec
 
 /-- DLMF 29.6.12: the normalization of the coefficients `C_{2p}` (both series converge). -/
 @[dlmf 29.6.E12]
-theorem Real.lameEck_even_fourierC_normalization
+theorem Real.lameEc_even_fourierC_normalization
     (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
     let C : ℕ → ℝ := fun p =>
-      Real.lameCosCoeff (fun x => Real.lameEck ν (2 * m) x k) k false (2 * p)
+      Real.lameCosCoeff (fun x => Real.lameEc ν (2 * m) x k) k false (2 * p)
     ∃ S T : ℝ, HasSum (fun p => (if p = 0 then 1 / 2 else 1) * C p ^ 2) S ∧
       HasSum (fun p => C p * C (p + 1)) T ∧
       (1 - k ^ 2 / 2) * S - k ^ 2 / 2 * T = 1 := by
   intro C
   have hk := modulus_sq_lt_one hk0 hk1
-  have hE := continuous_lameEck (ν := ν) hk0 hk1 (2 * m)
-  have h := hasSum_lameEck_cos_integral (ν := ν) hk0 hk1 (2 * m) false
-    (g := fun x => Real.lameEck ν (2 * m) x k * Real.jacobiDnm x (k ^ 2) ^ 2)
-    (hE.mul ((Real.continuous_jacobiDnm hk).pow 2))
+  have hE := continuous_lameEc (ν := ν) hk0 hk1 (2 * m)
+  have h := hasSum_lameEc_cos_integral (ν := ν) hk0 hk1 (2 * m) false
+    (g := fun x => Real.lameEc ν (2 * m) x k * Real.jacobiDnOfParameter x (k ^ 2) ^ 2)
+    (hE.mul ((Real.continuous_jacobiDnOfParameter hk).pow 2))
   simp only [Bool.false_eq_true, ↓reduceIte, integral_cos_lamePhi_mul_dn_sq hk hE] at h
-  rw [show (∫ t in (0 : ℝ)..Real.compEllIntKm (k ^ 2), Real.lameEck ν (2 * m) t k /
-      Real.jacobiDnm t (k ^ 2) * (Real.lameEck ν (2 * m) t k * Real.jacobiDnm t (k ^ 2) ^ 2)) =
-      ∫ t in (0 : ℝ)..Real.compEllIntKm (k ^ 2), Real.jacobiDnm t (k ^ 2) *
-        Real.lameEck ν (2 * m) t k ^ 2 by
-      congr 1; funext t; field_simp [(Real.jacobiDnm_pos hk t).ne'],
-    Real.lameEck_normalization (ν := ν) hk0 hk1] at h
+  rw [show (∫ t in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2), Real.lameEc ν (2 * m) t k /
+      Real.jacobiDnOfParameter t (k ^ 2) *
+          (Real.lameEc ν (2 * m) t k * Real.jacobiDnOfParameter t (k ^ 2) ^ 2)) =
+      ∫ t in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2),
+          Real.jacobiDnOfParameter t (k ^ 2) *
+        Real.lameEc ν (2 * m) t k ^ 2 by
+      congr 1; funext t; field_simp [(Real.jacobiDnOfParameter_pos hk t).ne'],
+    Real.lameEc_normalization (ν := ν) hk0 hk1] at h
   have h2 := h.mul_left (4 / π)
   rw [show 4 / π * (π / 4) = 1 by field_simp] at h2
   have hCs : Summable fun p => |C p| := by
     have hs := summable_abs_lameCosCoeff hk0 hk1
       (contDiff_two_of_isLameSolution hk
-          (Real.lameEck_isLameEigenfunction (ν := ν) hk0 hk1 (2 * m)).1)
-      (fun x => (Real.lameEck_parity hk0 hk1 _ x).2.2.2.2)
-      (fun x => (Real.lameEck_parity hk0 hk1 _ x).2.1)
-      (fun x => (Real.lameEck_parity hk0 hk1 _ x).1) false
+          (Real.lameEc_isLameEigenfunction (ν := ν) hk0 hk1 (2 * m)).1)
+      (fun x => (Real.lameEc_parity hk0 hk1 _ x).2.2.2.2)
+      (fun x => (Real.lameEc_parity hk0 hk1 _ x).2.1)
+      (fun x => (Real.lameEc_parity hk0 hk1 _ x).1) false
     refine ((hs.comp_injective (fun a b hab => by simpa using hab :
       Function.Injective fun p : ℕ => 2 * p)).mul_left 2).of_nonneg_of_le
       (fun _ => abs_nonneg _) fun p => ?_
     simp only [Function.comp, C, pow_mul]; norm_num
     split_ifs <;> (try simp only [abs_mul]) <;> norm_num <;>
       linarith [abs_nonneg
-        (Real.lameCosCoeff (fun x => Real.lameEck ν (2 * m) x k) k false (2 * p))]
+        (Real.lameCosCoeff (fun x => Real.lameEc ν (2 * m) x k) k false (2 * p))]
   have h3 := hasSum_two_mul_add_of_mod_two 0 (fun j hj => ?_) h2
   · obtain ⟨S, T, hS, hT, hST⟩ := lame_normalization_seq_identity hCs k (1 / 2) (C 1) (by
       convert h3 using 1
@@ -952,32 +1000,52 @@ theorem Real.lameEck_even_fourierC_normalization
 /-- DLMF 29.6.13: positivity (the value of `Ec/dn` at `x = K`; proved from the series and `Ec(K) >
 0`). -/
 @[dlmf 29.6.E13]
-theorem Real.lameEck_even_fourierC_pos
+theorem Real.lameEc_even_fourierC_pos
     (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
     let C : ℕ → ℝ := fun p =>
-      Real.lameCosCoeff (fun x => Real.lameEck ν (2 * m) x k) k false (2 * p)
+      Real.lameCosCoeff (fun x => Real.lameEc ν (2 * m) x k) k false (2 * p)
     ∃ S, HasSum (fun p => (if p = 0 then 1 / 2 else 1) * C p) S ∧ 0 < S := by
   intro C
-  have hs := Real.lameEck_even_hasSum_fourierC (ν := ν) hk0 hk1 m (Real.compEllIntKm (k ^ 2))
+  have hs := Real.lameEc_even_hasSum_fourierC (ν := ν) hk0 hk1 m
+      (Real.completeEllipticKOfParameter (k ^ 2))
   simp only [lamePhi_K hk0 hk1, mul_zero, Real.cos_zero, mul_one] at hs
-  have hd := Real.jacobiDnm_pos (modulus_sq_lt_one hk0 hk1) (Real.compEllIntKm (k ^ 2))
-  rw [show Real.lameEck ν (2 * m) (Real.compEllIntKm (k ^ 2)) k =
-      Real.jacobiDnm (Real.compEllIntKm (k ^ 2)) (k ^ 2) *
-        (Real.lameEck ν (2 * m) (Real.compEllIntKm (k ^ 2)) k /
-          Real.jacobiDnm (Real.compEllIntKm (k ^ 2)) (k ^ 2)) by field_simp,
+  have hd := Real.jacobiDnOfParameter_pos (modulus_sq_lt_one hk0 hk1)
+      (Real.completeEllipticKOfParameter (k ^ 2))
+  rw [show Real.lameEc ν (2 * m) (Real.completeEllipticKOfParameter (k ^ 2)) k =
+      Real.jacobiDnOfParameter (Real.completeEllipticKOfParameter (k ^ 2)) (k ^ 2) *
+        (Real.lameEc ν (2 * m) (Real.completeEllipticKOfParameter (k ^ 2)) k /
+          Real.jacobiDnOfParameter (Real.completeEllipticKOfParameter (k ^ 2))
+              (k ^ 2)) by field_simp,
     hasSum_mul_left_iff hd.ne'] at hs
-  exact ⟨_, hs, div_pos (Real.lameEck_K_pos (ν := ν) hk0 hk1 _) hd⟩
+  exact ⟨_, hs, div_pos (Real.lameEc_K_pos (ν := ν) hk0 hk1 _) hd⟩
 
-/-- DLMF 29.6.14: `C_{p+1}/C_p → k²/(1 + k')²` unless `ν = 2 * n + 1` with `m ≤ n`. Admitted. -/
+/-- DLMF 29.6.14: `C_{p+1}/C_p → k²/(1 + k')²` unless `ν = 2 * n + 1` with `m ≤ n`. -/
 @[dlmf 29.6.E14]
-theorem Real.lameEck_even_fourierC_ratio
+theorem Real.lameEc_even_fourierC_ratio
     (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
     let C : ℕ → ℝ := fun p =>
-      Real.lameCosCoeff (fun x => Real.lameEck ν (2 * m) x k) k false (2 * p)
+      Real.lameCosCoeff (fun x => Real.lameEc ν (2 * m) x k) k false (2 * p)
     (∀ n : ℕ, ν = ((2 * n + 1 : ℕ) : ℝ) → n < m) →
       Tendsto (fun p => C (p + 1) / C p) atTop
         (𝓝 (k ^ 2 / (1 + Real.sqrt (1 - k ^ 2)) ^ 2)) := by
-  sorry
+  intro c hexc
+  have hk := modulus_sq_lt_one hk0 hk1
+  have h0 := Real.lameEc_even_fourierC_rec_zero (ν := ν) hk0 hk1 m
+  have h1 := Real.lameEc_even_fourierC_rec (ν := ν) hk0 hk1 m
+  obtain ⟨C, hC⟩ := abs_lameCosCoeff_le hk (continuous_lameEc (ν := ν) hk0 hk1 (2 * m)) false
+  have hnz : ∃ p, c p ≠ 0 := by
+    by_contra h
+    push Not at h
+    obtain ⟨S, hS, hSpos⟩ := Real.lameEc_even_fourierC_pos (ν := ν) hk0 hk1 m
+    simp only [c] at h
+    exact hSpos.ne' (hS.unique (by simp [h]))
+  have hE : Real.lameA ν (2 * m) k = Real.lameEigenvalue ν k (lamePolyOddZero .dE)
+      (lamePolyOddK .dE) m := by
+    simp only [Real.lameA, lamePolyOddZero, lamePolyOddK]
+    rw [show (2 * m).bodd = false by simp [Nat.bodd_mul],
+      show 2 * m / 2 = m by omega]
+  rw [hE] at h0 h1
+  exact LamePolynomialType.tendsto_coeff_ratio .dE hν hk0 hk1 h0 h1 (fun p => hC _) hnz hexc
 
 end DLMF.Lame
 end

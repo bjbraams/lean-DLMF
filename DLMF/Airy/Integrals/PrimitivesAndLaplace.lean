@@ -360,13 +360,13 @@ theorem airyBi_negative_integral_asymptotic :
 
 /-- For an Airy solution `w`, an antiderivative of `z w(z)` is `w'(z)` (DLMF 9.10.8). -/
 @[dlmf 9.10.E8]
-theorem airy_linear_antiderivative {w w' : ℂ → ℂ} (hw : IsAirySol w w') (z : ℂ) :
+theorem airy_linear_antiderivative {w w' : ℂ → ℂ} (hw : IsAirySolution w w') (z : ℂ) :
     HasDerivAt w' (z * w z) z := by
   exact (hw z).2
 
 /-- For an Airy solution `w`, an antiderivative of `z² w(z)` is `z w'(z) - w(z)` (DLMF 9.10.9). -/
 @[dlmf 9.10.E9]
-theorem airy_quadratic_antiderivative {w w' : ℂ → ℂ} (hw : IsAirySol w w') (z : ℂ) :
+theorem airy_quadratic_antiderivative {w w' : ℂ → ℂ} (hw : IsAirySolution w w') (z : ℂ) :
     HasDerivAt (fun t => t * w' t - w t) (z ^ 2 * w z) z := by
   have h := ((hasDerivAt_id z).mul (hw z).2).sub (hw z).1
   exact h.congr_deriv (by simp only [id]; ring)
@@ -374,7 +374,8 @@ theorem airy_quadratic_antiderivative {w w' : ℂ → ℂ} (hw : IsAirySol w w')
 /-- For an Airy solution `w`, `z^{n+2} w' - (n+2) z^{n+1} w` is an antiderivative of
 `z^{n+3} w - (n+1)(n+2) z^n w`, the recurrence for the moments `∫ z^n w` (DLMF 9.10.10). -/
 @[dlmf 9.10.E10]
-theorem airy_moment_antiderivative_recurrence {w w' : ℂ → ℂ} (hw : IsAirySol w w') (n : ℕ) (z : ℂ) :
+theorem airy_moment_antiderivative_recurrence {w w' : ℂ → ℂ} (hw : IsAirySolution w w')
+    (n : ℕ) (z : ℂ) :
     HasDerivAt (fun t => t ^ (n + 2) * w' t - (n + 2 : ℂ) * t ^ (n + 1) * w t)
       (z ^ (n + 3) * w z - (n + 1 : ℂ) * (n + 2 : ℂ) * z ^ n * w z) z := by
   have h := ((hasDerivAt_pow (n + 2) z).mul (hw z).2).sub

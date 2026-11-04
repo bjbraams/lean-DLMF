@@ -11,6 +11,7 @@ public import Carlson.Elliptic.LegendreStandard
 public import Carlson.Mean.Capacity
 public import Carlson.Mean.StrictOrder
 public import DLMF.EllipticIntegrals.Inequalities
+public import DLMF.EllipticIntegrals.IncompleteInequalities
 public import DLMF.EllipticIntegrals.Symmetric
 public import DLMF.EllipticIntegrals.SymmetricQuadratic
 
@@ -20,23 +21,24 @@ public import DLMF.EllipticIntegrals.SymmetricQuadratic
 Inequalities for the complete integrals (§19.24(i)) and the incomplete integrals (§19.24(ii)).
 All variables are real and positive (or nonnegative where DLMF says so); on such arguments the
 symmetric integrals of `DLMF.EllipticIntegrals` are real, and the inequalities are stated for
-their real parts (`symEllIntRF_ofReal_im` etc. record that the imaginary parts vanish).
+their real parts (`symmetricEllipticRF_ofReal_im` etc. record that the imaginary parts vanish).
 
 ## Main results
 
-* `symEllIntRF_zero_log_bounds`, `symEllIntRG_zero_bounds`, `symEllIntRG_zero_sq_bounds`,
-  `symEllIntRJ_zero_bounds`: bounds for `R_F(0, y, z)`, `R_G(0, y, z)`, `R_G(0, y², z²)` and
-  `R_J(0, y, z, p)` (DLMF 19.24.1–19.24.4).
-* `symEllIntRF_zero_agm_bounds`: the AGM bounds `1/aₙ ≤ (2/π) R_F(0, a₀², g₀²) ≤ 1/gₙ`
+* `symmetricEllipticRF_zero_log_bounds`, `symmetricEllipticRG_zero_bounds`,
+  `symmetricEllipticRG_zero_sq_bounds`, `symmetricEllipticRJ_zero_bounds`: bounds for
+  `R_F(0, y, z)`, `R_G(0, y, z)`, `R_G(0, y², z²)` and `R_J(0, y, z, p)` (DLMF 19.24.1–19.24.4).
+* `symmetricEllipticRF_zero_agm_bounds`: the AGM bounds `1/aₙ ≤ (2/π) R_F(0, a₀², g₀²) ≤ 1/gₙ`
   (DLMF 19.24.5, 19.24.6).
-* `ellipsePerimeter_eq_symEllIntRG`: `L(a, b) = 8 R_G(0, a², b²)` (DLMF 19.24.7).
-* `symEllIntRF_symEllIntRG_complete_bounds`, `symEllIntRG_div_symEllIntRF_agm_bounds`:
-  DLMF 19.24.8 and Neuman's bounds 19.24.9.
-* `symEllIntRF_ge`, `symEllIntRF_le`, `symEllIntRJ_bounds`, `symEllIntRG_bounds`: bounds by
-  elementary means (DLMF 19.24.10–19.24.12).
-* `symEllIntR_mul_neg_gt`, `symEllIntRF_symEllIntRG_gt`: Neuman's bounds (DLMF 19.24.13,
-  19.24.14).
-* `symEllIntRF_symEllIntRC_bounds`: `R_C(x, (y+z)/2) ≤ R_F(x, y, z) ≤ R_C(x, √(yz))`
+* `ellipsePerimeter_eq_symmetricEllipticRG`: `L(a, b) = 8 R_G(0, a², b²)` (DLMF 19.24.7).
+* `symmetricEllipticRF_symmetricEllipticRG_complete_bounds`,
+  `symmetricEllipticRG_div_symmetricEllipticRF_agm_bounds`: DLMF 19.24.8 and Neuman's bounds
+  19.24.9.
+* `symmetricEllipticRF_ge`, `symmetricEllipticRF_le`, `symmetricEllipticRJ_bounds`,
+  `symmetricEllipticRG_bounds`: bounds by elementary means (DLMF 19.24.10–19.24.12).
+* `symmetricEllipticR_mul_neg_gt`, `symmetricEllipticRF_symmetricEllipticRG_gt`: Neuman's bounds
+  (DLMF 19.24.13, 19.24.14).
+* `symmetricEllipticRF_symmetricEllipticRC_bounds`: `R_C(x, (y+z)/2) ≤ R_F(x, y, z) ≤ R_C(x, √(yz))`
   (DLMF 19.24.15).
 
 ## Implementation notes
@@ -88,45 +90,45 @@ private lemma ofReal_add_ofReal_cpow_half {t r : ℝ} (h : 0 ≤ t + r) :
   rw [← ofReal_add, show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring,
     ← ofReal_cpow h, Real.sqrt_eq_rpow]
 
-/-- Identity under the stated parameter and domain assumptions: `symEllIntS (x : ℂ) (y : ℂ) (z :
-ℂ) t = ((√(t + x) * √(t + y) * √(t + z) : ℝ) : ℂ)`. -/
-private lemma symEllIntS_ofReal {x y z t : ℝ} (hx : 0 ≤ t + x) (hy : 0 ≤ t + y)
+/-- Identity under the stated parameter and domain assumptions:
+`carlsonRootProduct (x : ℂ) (y : ℂ) (z : ℂ) t = ((√(t + x) * √(t + y) * √(t + z) : ℝ) : ℂ)`. -/
+private lemma carlsonRootProduct_ofReal {x y z t : ℝ} (hx : 0 ≤ t + x) (hy : 0 ≤ t + y)
     (hz : 0 ≤ t + z) :
-    symEllIntS (x : ℂ) (y : ℂ) (z : ℂ) t = ((√(t + x) * √(t + y) * √(t + z) : ℝ) : ℂ) := by
-  rw [symEllIntS, ofReal_add_ofReal_cpow_half hx, ofReal_add_ofReal_cpow_half hy,
+    carlsonRootProduct (x : ℂ) (y : ℂ) (z : ℂ) t = ((√(t + x) * √(t + y) * √(t + z) : ℝ) : ℂ) := by
+  rw [carlsonRootProduct, ofReal_add_ofReal_cpow_half hx, ofReal_add_ofReal_cpow_half hy,
     ofReal_add_ofReal_cpow_half hz]
   push_cast; ring
 
 /-- `R_F(x, y, z)` is real for nonnegative real `x, y, z`. -/
-theorem symEllIntRF_ofReal_im {x y z : ℝ} (hx : 0 ≤ x) (hy : 0 ≤ y) (hz : 0 ≤ z) :
-    (symEllIntRF x y z).im = 0 := by
-  have h : (∫ t in Ioi (0 : ℝ), (symEllIntS (x : ℂ) (y : ℂ) (z : ℂ) t)⁻¹) =
+theorem symmetricEllipticRF_ofReal_im {x y z : ℝ} (hx : 0 ≤ x) (hy : 0 ≤ y) (hz : 0 ≤ z) :
+    (symmetricEllipticRF x y z).im = 0 := by
+  have h : (∫ t in Ioi (0 : ℝ), (carlsonRootProduct (x : ℂ) (y : ℂ) (z : ℂ) t)⁻¹) =
       ∫ t in Ioi (0 : ℝ), (((√(t + x) * √(t + y) * √(t + z))⁻¹ : ℝ) : ℂ) := by
     refine setIntegral_congr_fun measurableSet_Ioi fun t (ht : 0 < t) => ?_
-    rw [symEllIntS_ofReal (by linarith) (by linarith) (by linarith), ofReal_inv]
-  rw [symEllIntRF, h, integral_complex_ofReal]
+    rw [carlsonRootProduct_ofReal (by linarith) (by linarith) (by linarith), ofReal_inv]
+  rw [symmetricEllipticRF, h, integral_complex_ofReal]
   simp
 
 /-! ### Strict comparisons for the R-function -/
 
 /-- DLMF 19.24.13 (Neuman): if `a ≠ 0` is real, all components of `𝐛` and `𝐳` are positive and
 the components of `𝐳` are not all equal, then `R_a(𝐛; 𝐳) R_{-a}(𝐛; 𝐳) > 1` and
-`R_a(𝐛; 𝐳) + R_{-a}(𝐛; 𝐳) > 2`. In `symEllIntR a 𝐛 𝐳 = R_{-a}(𝐛; 𝐳)` notation,
-`R_a(𝐛; 𝐳) = symEllIntR (-a) 𝐛 𝐳`. -/
+`R_a(𝐛; 𝐳) + R_{-a}(𝐛; 𝐳) > 2`. In `symmetricEllipticR a 𝐛 𝐳 = R_{-a}(𝐛; 𝐳)` notation,
+`R_a(𝐛; 𝐳) = symmetricEllipticR (-a) 𝐛 𝐳`. -/
 @[dlmf 19.24.E13]
-theorem symEllIntR_mul_neg_gt {ι : Type*} [Fintype ι] {a : ℝ} (ha : a ≠ 0) {b z : ι → ℝ}
+theorem symmetricEllipticR_mul_neg_gt {ι : Type*} [Fintype ι] {a : ℝ} (ha : a ≠ 0) {b z : ι → ℝ}
     (hb : ∀ i, 0 < b i) (hz : ∀ i, 0 < z i) (hne : ∃ i j, z i ≠ z j) :
-    1 < (symEllIntR (-a : ℂ) (fun i => (b i : ℂ)) (fun i => (z i : ℂ))).re *
-        (symEllIntR (a : ℂ) (fun i => (b i : ℂ)) (fun i => (z i : ℂ))).re ∧
-      2 < (symEllIntR (-a : ℂ) (fun i => (b i : ℂ)) (fun i => (z i : ℂ))).re +
-        (symEllIntR (a : ℂ) (fun i => (b i : ℂ)) (fun i => (z i : ℂ))).re := by
+    1 < (symmetricEllipticR (-a : ℂ) (fun i => (b i : ℂ)) (fun i => (z i : ℂ))).re *
+        (symmetricEllipticR (a : ℂ) (fun i => (b i : ℂ)) (fun i => (z i : ℂ))).re ∧
+      2 < (symmetricEllipticR (-a : ℂ) (fun i => (b i : ℂ)) (fun i => (z i : ℂ))).re +
+        (symmetricEllipticR (a : ℂ) (fun i => (b i : ℂ)) (fun i => (z i : ℂ))).re := by
   have : Nonempty ι := ⟨hne.choose⟩
   have hdom : (fun i => (z i : ℂ)) ∈ Carlson.carlsonRSlitDomain :=
     fun i => ofReal_mem_slitPlane.mpr (hz i)
   have he (t : ℝ) :
-      (symEllIntR (t : ℂ) (fun i => (b i : ℂ)) (fun i => (z i : ℂ))).re =
+      (symmetricEllipticR (t : ℂ) (fun i => (b i : ℂ)) (fun i => (z i : ℂ))).re =
         Carlson.carlsonRReal (-t) b z := by
-    rw [symEllIntR_of_mem _ _ hdom, ← ofReal_neg,
+    rw [symmetricEllipticR_of_mem _ _ hdom, ← ofReal_neg,
       ← Carlson.ofReal_carlsonRReal (-t) hb hz, ofReal_re]
   rw [show (-a : ℂ) = ((-a : ℝ) : ℂ) by simp, he, he, neg_neg]
   have hp := Carlson.carlsonRReal_pos a hb hz
@@ -145,9 +147,9 @@ theorem symEllIntR_mul_neg_gt {ι : Type*} [Fintype ι] {a : ℝ} (ha : a ≠ 0)
 /-- DLMF 19.24.1: `ln 4 ≤ √z R_F(0, y, z) + ln √(y/z) ≤ π/2` for `0 < y ≤ z` (the condition
 `y ≤ z` only identifies the smaller variable, 19.24.i.p1). -/
 @[dlmf 19.24.E1]
-theorem symEllIntRF_zero_log_bounds {y z : ℝ} (hy : 0 < y) (hyz : y ≤ z) :
-    Real.log 4 ≤ √z * (symEllIntRF 0 y z).re + Real.log √(y / z) ∧
-      √z * (symEllIntRF 0 y z).re + Real.log √(y / z) ≤ π / 2 := by
+theorem symmetricEllipticRF_zero_log_bounds {y z : ℝ} (hy : 0 < y) (hyz : y ≤ z) :
+    Real.log 4 ≤ √z * (symmetricEllipticRF 0 y z).re + Real.log √(y / z) ∧
+      √z * (symmetricEllipticRF 0 y z).re + Real.log √(y / z) ≤ π / 2 := by
   have hz : 0 < z := hy.trans_le hyz
   have hsz : 0 < √z := Real.sqrt_pos.mpr hz
   rcases hyz.lt_or_eq with hyz' | rfl
@@ -157,20 +159,20 @@ theorem symEllIntRF_zero_log_bounds {y z : ℝ} (hy : 0 < y) (hyz : y ≤ z) :
     have hk2' : k ^ 2 = 1 - y / z := Real.sq_sqrt hb.le
     have hk1 : k < 1 := by
       rw [hk, Real.sqrt_lt' zero_lt_one]; linarith [div_pos hy hz]
-    have hRF : symEllIntRF 0 y z = ((√z)⁻¹ : ℝ) * compEllIntKk k := by
-      rw [symEllIntRF_zero_eq_carlsonRK (ofReal_mem_slitPlane.mpr hy)
+    have hRF : symmetricEllipticRF 0 y z = ((√z)⁻¹ : ℝ) * completeEllipticK k := by
+      rw [symmetricEllipticRF_zero_eq_carlsonRK (ofReal_mem_slitPlane.mpr hy)
         (ofReal_mem_slitPlane.mpr hz), Carlson.carlsonRK_eq_compEllIntKk hy hyz, ← hk,
-        compEllIntKk_ofReal_carlson (by nlinarith)]
+        completeEllipticK_ofReal_carlson (by nlinarith)]
       have := Real.pi_pos
       push_cast
       field_simp
-    have he : √z * (symEllIntRF 0 y z).re = (compEllIntKk k).re := by
+    have he : √z * (symmetricEllipticRF 0 y z).re = (completeEllipticK k).re := by
       rw [hRF, re_ofReal_mul]; field_simp
     have hyz2 : y / z = 1 - k ^ 2 := by rw [hk2']; ring
     rw [he, hyz2]
-    exact log_four_le_compEllIntKk_add_log hk0 hk1
+    exact log_four_le_completeEllipticK_add_log hk0 hk1
   · have hys : (y : ℂ) ∈ slitPlane := ofReal_mem_slitPlane.mpr hy
-    rw [symEllIntRF_zero_self hys, div_self hy.ne', Real.sqrt_one, Real.log_one, add_zero,
+    rw [symmetricEllipticRF_zero_self hys, div_self hy.ne', Real.sqrt_one, Real.log_one, add_zero,
       show (-1 / 2 : ℂ) = ((-(1 / 2) : ℝ) : ℂ) by push_cast; ring, ← ofReal_cpow hy.le,
       Real.rpow_neg hy.le, ← Real.sqrt_eq_rpow]
     have he : √y * (((π / 2 : ℂ) * (((√y)⁻¹ : ℝ) : ℂ))).re = π / 2 := by
@@ -185,8 +187,9 @@ theorem symEllIntRF_zero_log_bounds {y z : ℝ} (hy : 0 < y) (hyz : y ≤ z) :
 
 /-- DLMF 19.24.2: `1/2 ≤ z^{-1/2} R_G(0, y, z) ≤ π/4` for `0 ≤ y ≤ z`, `z > 0`. -/
 @[dlmf 19.24.E2]
-theorem symEllIntRG_zero_bounds {y z : ℝ} (hy : 0 ≤ y) (hyz : y ≤ z) (hz : 0 < z) :
-    1 / 2 ≤ (√z)⁻¹ * (symEllIntRG 0 y z).re ∧ (√z)⁻¹ * (symEllIntRG 0 y z).re ≤ π / 4 := by
+theorem symmetricEllipticRG_zero_bounds {y z : ℝ} (hy : 0 ≤ y) (hyz : y ≤ z) (hz : 0 < z) :
+    1 / 2 ≤ (√z)⁻¹ * (symmetricEllipticRG 0 y z).re ∧ (√z)⁻¹ *
+        (symmetricEllipticRG 0 y z).re ≤ π / 4 := by
   have hsz : 0 < √z := Real.sqrt_pos.mpr hz
   have hpower : (z : ℂ) ^ (1 / 2 : ℂ) = (√z : ℂ) := by
     rw [show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring,
@@ -194,7 +197,7 @@ theorem symEllIntRG_zero_bounds {y z : ℝ} (hy : 0 ≤ y) (hyz : y ≤ z) (hz :
   by_cases hy0 : y = 0
   · subst y
     simp only [ofReal_zero]
-    rw [(symEllIntRG_zero_self (y := (1 : ℂ)) one_mem_slitPlane
+    rw [(symmetricEllipticRG_zero_self (y := (1 : ℂ)) one_mem_slitPlane
       (ofReal_mem_slitPlane.mpr hz)).2, hpower]
     simp only [mul_re, div_ofNat_re, one_re, ofReal_re, ofReal_im, mul_zero, sub_zero]
     have he : (√z)⁻¹ * ((1 / 2) * √z) = 1 / 2 := by field_simp
@@ -203,7 +206,7 @@ theorem symEllIntRG_zero_bounds {y z : ℝ} (hy : 0 ≤ y) (hyz : y ≤ z) (hz :
   have hy' : 0 < y := lt_of_le_of_ne hy (Ne.symm hy0)
   by_cases heq : y = z
   · subst z
-    rw [(symEllIntRG_zero_self (ofReal_mem_slitPlane.mpr hy')
+    rw [(symmetricEllipticRG_zero_self (ofReal_mem_slitPlane.mpr hy')
       (z := (1 : ℂ)) one_mem_slitPlane).1, hpower]
     simp only [mul_re, div_ofNat_re, ofReal_re, ofReal_im, mul_zero, sub_zero]
     have he : (√y)⁻¹ * (π / 4 * √y) = π / 4 := by field_simp
@@ -216,45 +219,47 @@ theorem symEllIntRG_zero_bounds {y z : ℝ} (hy : 0 ≤ y) (hyz : y ≤ z) (hz :
   have hk1 : √(1 - y / z) < 1 := (Real.sqrt_lt' zero_lt_one).mpr (by simpa using hb1)
   have hk2 : √(1 - y / z) ^ 2 < 1 := by nlinarith
   have hRE := Carlson.carlsonRE_eq_compEllIntEk hy' hyz
-  rw [← compEllIntEk_ofReal hk2.le] at hRE
-  have hRG : symEllIntRG 0 y z = ((√z / 2 : ℝ) : ℂ) * compEllIntEk (√(1 - y / z)) := by
-    rw [symEllIntRG_zero_eq_carlsonRE (ofReal_mem_slitPlane.mpr hy')
+  rw [← completeEllipticE_ofReal hk2.le] at hRE
+  have hRG : symmetricEllipticRG 0 y z = ((√z / 2 : ℝ) : ℂ) * completeEllipticE (√(1 - y / z)) := by
+    rw [symmetricEllipticRG_zero_eq_carlsonRE (ofReal_mem_slitPlane.mpr hy')
       (ofReal_mem_slitPlane.mpr hz), hRE]
     push_cast
     field_simp
     ring
-  have he : (√z)⁻¹ * (symEllIntRG 0 y z).re = (compEllIntEk (√(1 - y / z))).re / 2 := by
+  have he : (√z)⁻¹ * (symmetricEllipticRG 0 y z).re =
+      (completeEllipticE (√(1 - y / z))).re / 2 := by
     rw [hRG]
     simp only [mul_re, ofReal_re, ofReal_im, zero_mul, sub_zero]
     field_simp
   rw [he]
-  obtain ⟨hL, hU⟩ := one_le_compEllIntEk_le hk0 hk1
+  obtain ⟨hL, hU⟩ := one_le_completeEllipticE_le hk0 hk1
   constructor <;> linarith
 
 /-- DLMF 19.24.3: `((y^{3/2} + z^{3/2})/2)^{2/3} ≤ (4/π) R_G(0, y², z²) ≤ ((y² + z²)/2)^{1/2}`
 for `y, z > 0`. -/
 @[dlmf 19.24.E3]
-theorem symEllIntRG_zero_sq_bounds {y z : ℝ} (hy : 0 < y) (hz : 0 < z) :
+theorem symmetricEllipticRG_zero_sq_bounds {y z : ℝ} (hy : 0 < y) (hz : 0 < z) :
     ((y ^ (3 / 2 : ℝ) + z ^ (3 / 2 : ℝ)) / 2) ^ (2 / 3 : ℝ) ≤
-        4 / π * (symEllIntRG 0 ((y ^ 2 : ℝ) : ℂ) ((z ^ 2 : ℝ) : ℂ)).re ∧
-      4 / π * (symEllIntRG 0 ((y ^ 2 : ℝ) : ℂ) ((z ^ 2 : ℝ) : ℂ)).re ≤ √((y ^ 2 + z ^ 2) / 2) := by
+        4 / π * (symmetricEllipticRG 0 ((y ^ 2 : ℝ) : ℂ) ((z ^ 2 : ℝ) : ℂ)).re ∧
+      4 / π * (symmetricEllipticRG 0 ((y ^ 2 : ℝ) : ℂ) ((z ^ 2 : ℝ) : ℂ)).re ≤
+          √((y ^ 2 + z ^ 2) / 2) := by
   sorry
 
 /-- DLMF 19.24.4: `(2/√p) (2yz + yp + zp)^{-1/2} ≤ (4/(3π)) R_J(0, y, z, p) ≤ (y z p²)^{-3/8}`
 for `y, z, p > 0`; the case `p = z` gives bounds for `R_D(0, y, z)` (19.24.i.p2). -/
 @[dlmf 19.24.E4]
-theorem symEllIntRJ_zero_bounds {y z p : ℝ} (hy : 0 < y) (hz : 0 < z) (hp : 0 < p) :
+theorem symmetricEllipticRJ_zero_bounds {y z p : ℝ} (hy : 0 < y) (hz : 0 < z) (hp : 0 < p) :
     2 / √p * (2 * y * z + y * p + z * p) ^ (-1 / 2 : ℝ) ≤
-        4 / (3 * π) * (symEllIntRJ 0 y z p).re ∧
-      4 / (3 * π) * (symEllIntRJ 0 y z p).re ≤ (y * z * p ^ 2) ^ (-3 / 8 : ℝ) := by
+        4 / (3 * π) * (symmetricEllipticRJ 0 y z p).re ∧
+      4 / (3 * π) * (symmetricEllipticRJ 0 y z p).re ≤ (y * z * p ^ 2) ^ (-3 / 8 : ℝ) := by
   let b : Fin 3 → ℝ := ![1 / 2, 1 / 2, 1]
   let v : Fin 3 → ℝ := ![y, z, p]
   have hb : b ∈ ProbabilityTheory.mvRealBetaDomain := by
     intro i; fin_cases i <;> norm_num [b]
   have hv : ∀ i, 0 < v i := by intro i; fin_cases i <;> assumption
-  have he : 4 / (3 * π) * (symEllIntRJ 0 y z p).re = Carlson.carlsonRReal (-3 / 2) b v := by
-    rw [symEllIntRJ_zero_left (ofReal_mem_slitPlane.mpr hy) (ofReal_mem_slitPlane.mpr hz)
-      (ofReal_mem_slitPlane.mpr hp), symEllIntR_of_mem _ _
+  have he : 4 / (3 * π) * (symmetricEllipticRJ 0 y z p).re = Carlson.carlsonRReal (-3 / 2) b v := by
+    rw [symmetricEllipticRJ_zero_left (ofReal_mem_slitPlane.mpr hy) (ofReal_mem_slitPlane.mpr hz)
+      (ofReal_mem_slitPlane.mpr hp), symmetricEllipticR_of_mem _ _
       (vec3_mem_carlsonRSlitDomain (ofReal_mem_slitPlane.mpr hy) (ofReal_mem_slitPlane.mpr hz)
           (ofReal_mem_slitPlane.mpr hp))]
     have H := Carlson.ofReal_carlsonRReal (-3 / 2) hb hv
@@ -322,10 +327,10 @@ theorem symEllIntRJ_zero_bounds {y z p : ℝ} (hy : 0 < y) (hz : 0 < z) (hp : 0 
 `a_{n+1} = (aₙ + gₙ)/2`, `g_{n+1} = √(aₙ gₙ)` (19.24.6, §19.8(i)),
 `1/aₙ ≤ (2/π) R_F(0, a₀², g₀²) ≤ 1/gₙ` for every `n`. -/
 @[dlmf 19.24.E5, dlmf 19.24.E6]
-theorem symEllIntRF_zero_agm_bounds {a g : ℕ → ℝ} (hg0 : 0 < g 0) (hag : g 0 ≤ a 0)
+theorem symmetricEllipticRF_zero_agm_bounds {a g : ℕ → ℝ} (hg0 : 0 < g 0) (hag : g 0 ≤ a 0)
     (ha : ∀ n, a (n + 1) = (a n + g n) / 2) (hg : ∀ n, g (n + 1) = √(a n * g n)) (n : ℕ) :
-    1 / a n ≤ 2 / π * (symEllIntRF 0 ((a 0 ^ 2 : ℝ) : ℂ) ((g 0 ^ 2 : ℝ) : ℂ)).re ∧
-      2 / π * (symEllIntRF 0 ((a 0 ^ 2 : ℝ) : ℂ) ((g 0 ^ 2 : ℝ) : ℂ)).re ≤ 1 / g n := by
+    1 / a n ≤ 2 / π * (symmetricEllipticRF 0 ((a 0 ^ 2 : ℝ) : ℂ) ((g 0 ^ 2 : ℝ) : ℂ)).re ∧
+      2 / π * (symmetricEllipticRF 0 ((a 0 ^ 2 : ℝ) : ℂ) ((g 0 ^ 2 : ℝ) : ℂ)).re ≤ 1 / g n := by
   let a₀ : ℝ≥0 := ⟨a 0, (hg0.trans_le hag).le⟩
   let g₀ : ℝ≥0 := ⟨g 0, hg0.le⟩
   have ha₀ : 0 < a₀ := hg0.trans_le hag
@@ -357,12 +362,13 @@ theorem symEllIntRF_zero_agm_bounds {a g : ℕ → ℝ} (hg0 : 0 < g 0) (hag : g
     | succ n =>
       exact ⟨by exact_mod_cast (NNReal.agmSequences_fst_le_agm (x := a₀) (y := g₀) n),
         by exact_mod_cast (NNReal.agm_le_agmSequences_snd (x := a₀) (y := g₀) n)⟩
-  have hRF := congrArg Complex.re (symEllIntRF_zero_eq_inv_agm ha₀ hg₀)
-  have hRF' : 2 / π * (symEllIntRF 0 ((a 0 ^ 2 : ℝ) : ℂ) ((g 0 ^ 2 : ℝ) : ℂ)).re =
+  have hRF := congrArg Complex.re (symmetricEllipticRF_zero_eq_inv_agm ha₀ hg₀)
+  have hRF' : 2 / π * (symmetricEllipticRF 0 ((a 0 ^ 2 : ℝ) : ℂ) ((g 0 ^ 2 : ℝ) : ℂ)).re =
       (NNReal.agm a₀ g₀ : ℝ)⁻¹ := by
     have hcoef : (2 / (π : ℂ)) = ((2 / π : ℝ) : ℂ) := by push_cast; rfl
     rw [hcoef, ← Complex.ofReal_inv] at hRF
-    change ((((2 / π : ℝ) : ℂ) * symEllIntRF 0 ((a 0 : ℂ) ^ 2) ((g 0 : ℂ) ^ 2)).re) = _ at hRF
+    change ((((2 / π : ℝ) : ℂ) *
+        symmetricEllipticRF 0 ((a 0 : ℂ) ^ 2) ((g 0 : ℂ) ^ 2)).re) = _ at hRF
     simpa only [← Complex.ofReal_pow, Complex.mul_re, Complex.ofReal_re,
       Complex.ofReal_im, zero_mul, sub_zero] using hRF
   rw [hRF', one_div, one_div]
@@ -391,8 +397,8 @@ lemma ellipsePerimeter_eq_four_mul_quarter (a b : ℝ) :
 (`DLMF.EllipticIntegrals.ellipsePerimeter`). Valid for all real `a, b` (both sides depend on
 `a², b²` only). -/
 @[dlmf 19.24.E7]
-theorem ellipsePerimeter_eq_symEllIntRG (a b : ℝ) :
-    (ellipsePerimeter a b : ℂ) = 8 * symEllIntRG 0 ((a ^ 2 : ℝ) : ℂ) ((b ^ 2 : ℝ) : ℂ) := by
+theorem ellipsePerimeter_eq_symmetricEllipticRG (a b : ℝ) :
+    (ellipsePerimeter a b : ℂ) = 8 * symmetricEllipticRG 0 ((a ^ 2 : ℝ) : ℂ) ((b ^ 2 : ℝ) : ℂ) := by
   rw [ellipsePerimeter_eq_four_mul_quarter]
   have hcos (b : ℝ) : (∫ t in (0 : ℝ)..(π / 2),
       Real.sqrt (b ^ 2 * Real.cos t ^ 2)) = |b| := by
@@ -422,22 +428,22 @@ theorem ellipsePerimeter_eq_symEllIntRG (a b : ℝ) :
     rw [hcos]
     by_cases hb : b = 0
     · subst b
-      simp [symEllIntRG]
-    · rw [(symEllIntRG_zero_self (y := (1 : ℂ)) one_mem_slitPlane
+      simp [symmetricEllipticRG]
+    · rw [(symmetricEllipticRG_zero_self (y := (1 : ℂ)) one_mem_slitPlane
         (ofReal_mem_slitPlane.mpr (sq_pos_of_ne_zero hb))).2,
         Carlson.ofReal_cpow_half (sq_nonneg b), Real.sqrt_sq_eq_abs]
       push_cast; ring
   by_cases hb : b = 0
   · subst b
     simp only [zero_pow two_ne_zero, zero_mul, add_zero, ofReal_zero]
-    rw [hsin, symEllIntRG_comm_right,
-      (symEllIntRG_zero_self (y := (1 : ℂ)) one_mem_slitPlane
+    rw [hsin, symmetricEllipticRG_comm_right,
+      (symmetricEllipticRG_zero_self (y := (1 : ℂ)) one_mem_slitPlane
         (ofReal_mem_slitPlane.mpr (sq_pos_of_ne_zero ha))).2,
       Carlson.ofReal_cpow_half (sq_nonneg a), Real.sqrt_sq_eq_abs]
     push_cast; ring
   have H := Carlson.ellipse_perimeter (abs_pos.mpr ha) (abs_pos.mpr hb)
   simp only [sq_abs, ← Real.sqrt_eq_rpow] at H
-  rw [symEllIntRG_zero_eq_carlsonRE (ofReal_mem_slitPlane.mpr (sq_pos_of_ne_zero ha))
+  rw [symmetricEllipticRG_zero_eq_carlsonRE (ofReal_mem_slitPlane.mpr (sq_pos_of_ne_zero ha))
     (ofReal_mem_slitPlane.mpr (sq_pos_of_ne_zero hb))]
   rw [H]
   ring
@@ -446,11 +452,11 @@ theorem ellipsePerimeter_eq_symEllIntRG (a b : ℝ) :
 /-- DLMF 19.24.8: for `x, y > 0`, `x ≠ y`,
 `R_F(x, y, 0) R_G(x, y, 0) > π²/8` and `R_F(x, y, 0) + 2 R_G(x, y, 0) > π`. -/
 @[dlmf 19.24.E8]
-theorem symEllIntRF_symEllIntRG_complete_bounds {x y : ℝ} (hx : 0 < x) (hy : 0 < y)
+theorem symmetricEllipticRF_symmetricEllipticRG_complete_bounds {x y : ℝ} (hx : 0 < x) (hy : 0 < y)
     (hxy : x ≠ y) :
-    π ^ 2 / 8 < (symEllIntRF x y 0).re * (symEllIntRG x y 0).re ∧
-      π < (symEllIntRF x y 0).re + 2 * (symEllIntRG x y 0).re := by
-  have h := symEllIntR_mul_neg_gt (a := -1/2) (by norm_num)
+    π ^ 2 / 8 < (symmetricEllipticRF x y 0).re * (symmetricEllipticRG x y 0).re ∧
+      π < (symmetricEllipticRF x y 0).re + 2 * (symmetricEllipticRG x y 0).re := by
+  have h := symmetricEllipticR_mul_neg_gt (a := -1/2) (by norm_num)
     (b := fun _ : Fin 2 => 1/2) (z := ![x,y]) (by intro i; norm_num)
     (by intro i; fin_cases i <;> assumption) ⟨0,1,hxy⟩
   have he : (fun i => ((![x,y] : Fin 2 → ℝ) i : ℂ)) = ![(x:ℂ),y] := by
@@ -458,14 +464,17 @@ theorem symEllIntRF_symEllIntRG_complete_bounds {x y : ℝ} (hx : 0 < x) (hy : 0
   simp only [ofReal_neg, ofReal_div, ofReal_one, ofReal_ofNat, neg_div, neg_neg, he] at h
   have hb : (![1/2,1/2] : Fin 2 → ℂ) = (fun _ => 1/2) := by
     ext i; fin_cases i <;> rfl
-  have hF : symEllIntRF x y 0 = (π/2) * symEllIntR (1/2) (fun _ : Fin 2 => 1/2) ![x,y] := by
-    rw [← symEllIntRF_comm_right, ← symEllIntRF_comm_left]
-    simpa only [hb] using symEllIntRF_zero_left (ofReal_mem_slitPlane.mpr hx)
+  have hF : symmetricEllipticRF x y 0 = (π/2) *
+      symmetricEllipticR (1/2) (fun _ : Fin 2 => 1/2) ![x, y] := by
+    rw [← symmetricEllipticRF_comm_right, ← symmetricEllipticRF_comm_left]
+    simpa only [hb] using symmetricEllipticRF_zero_left (ofReal_mem_slitPlane.mpr hx)
         (ofReal_mem_slitPlane.mpr hy)
-  have hG : symEllIntRG x y 0 = (π/4) * symEllIntR (-1/2) (fun _ : Fin 2 => 1/2) ![x,y] := by
-    rw [← symEllIntRG_comm_right, ← symEllIntRG_comm_left]
+  have hG : symmetricEllipticRG x y 0 = (π/4) *
+      symmetricEllipticR (-1/2) (fun _ : Fin 2 => 1/2) ![x, y] := by
+    rw [← symmetricEllipticRG_comm_right, ← symmetricEllipticRG_comm_left]
     simpa only [hb] using
-        (symEllIntRG_zero_left (ofReal_mem_slitPlane.mpr hx) (ofReal_mem_slitPlane.mpr hy)).1
+        (symmetricEllipticRG_zero_left (ofReal_mem_slitPlane.mpr hx)
+            (ofReal_mem_slitPlane.mpr hy)).1
   rw [hF, hG]
   simp only [mul_re, div_ofNat_re, ofReal_re, ofReal_im, div_ofNat_im, zero_div,
     zero_mul, sub_zero]
@@ -475,9 +484,10 @@ theorem symEllIntRF_symEllIntRG_complete_bounds {x y : ℝ} (hx : 0 < x) (hy : 0
   · nlinarith [mul_lt_mul_of_pos_left h.2 Real.pi_pos]
 
 /-- `R_G(0, y, z)/R_F(0, y, z) = (z/2) E(k)/K(k)` with `k = √(1 - y/z)`, for `0 < y < z`. -/
-private lemma symEllIntRG_div_symEllIntRF_zero {y z : ℝ} (hy : 0 < y) (hyz : y < z) :
-    (symEllIntRG 0 y z).re / (symEllIntRF 0 y z).re =
-      z / 2 * ((compEllIntEk (√(1 - y / z))).re / (compEllIntKk (√(1 - y / z))).re) := by
+private lemma symmetricEllipticRG_div_symmetricEllipticRF_zero {y z : ℝ} (hy : 0 < y)
+    (hyz : y < z) :
+    (symmetricEllipticRG 0 y z).re / (symmetricEllipticRF 0 y z).re =
+      z / 2 * ((completeEllipticE (√(1 - y / z))).re / (completeEllipticK (√(1 - y / z))).re) := by
   have hz : 0 < z := hy.trans hyz
   have hsz : 0 < √z := Real.sqrt_pos.mpr hz
   set k := √(1 - y / z) with hk
@@ -485,27 +495,27 @@ private lemma symEllIntRG_div_symEllIntRF_zero {y z : ℝ} (hy : 0 < y) (hyz : y
   have hk0 : 0 < k := Real.sqrt_pos.mpr hb
   have hk2' : k ^ 2 = 1 - y / z := Real.sq_sqrt hb.le
   have hk2 : k ^ 2 < 1 := by rw [hk2']; linarith [div_pos hy hz]
-  have hRF : symEllIntRF 0 y z = ((√z)⁻¹ : ℝ) * compEllIntKk k := by
-    rw [symEllIntRF_zero_eq_carlsonRK (ofReal_mem_slitPlane.mpr hy)
+  have hRF : symmetricEllipticRF 0 y z = ((√z)⁻¹ : ℝ) * completeEllipticK k := by
+    rw [symmetricEllipticRF_zero_eq_carlsonRK (ofReal_mem_slitPlane.mpr hy)
       (ofReal_mem_slitPlane.mpr hz), Carlson.carlsonRK_eq_compEllIntKk hy hyz.le, ← hk,
-      compEllIntKk_ofReal_carlson hk2.le]
+      completeEllipticK_ofReal_carlson hk2.le]
     have := Real.pi_pos
     push_cast
     field_simp
   have hRE := Carlson.carlsonRE_eq_compEllIntEk hy hyz.le
-  rw [← hk, ← compEllIntEk_ofReal hk2.le] at hRE
-  have hRG : symEllIntRG 0 y z = ((√z / 2 : ℝ) : ℂ) * compEllIntEk k := by
-    rw [symEllIntRG_zero_eq_carlsonRE (ofReal_mem_slitPlane.mpr hy)
+  rw [← hk, ← completeEllipticE_ofReal hk2.le] at hRE
+  have hRG : symmetricEllipticRG 0 y z = ((√z / 2 : ℝ) : ℂ) * completeEllipticE k := by
+    rw [symmetricEllipticRG_zero_eq_carlsonRE (ofReal_mem_slitPlane.mpr hy)
       (ofReal_mem_slitPlane.mpr hz), hRE]
     push_cast
     field_simp
     ring
-  have hK : 0 < (compEllIntKk k).re := by
+  have hK : 0 < (completeEllipticK k).re := by
     have hM : (0 : ℝ) < NNReal.agm 1 (NNReal.sqrt (1 - k ^ 2).toNNReal) :=
       NNReal.agm_pos one_pos (NNReal.sqrt_pos.mpr (Real.toNNReal_pos.mpr (by linarith)))
-    have e : compEllIntKk k =
+    have e : completeEllipticK k =
         ((π / (2 * (NNReal.agm 1 (NNReal.sqrt (1 - k ^ 2).toNNReal) : ℝ)) : ℝ) : ℂ) := by
-      rw [compEllIntKk_eq_pi_div_agm (m := k ^ 2) (by push_cast; ring) hk2]; push_cast; rfl
+      rw [completeEllipticK_eq_pi_div_agm (m := k ^ 2) (by push_cast; ring) hk2]; push_cast; rfl
     rw [e, ofReal_re]
     positivity
   rw [hRF, hRG, re_ofReal_mul, re_ofReal_mul]
@@ -517,28 +527,31 @@ private lemma symEllIntRG_div_symEllIntRF_zero {y z : ℝ} (hy : 0 < y) (hyz : y
 `g₁²/2 ≤ R_G(a₀², g₀², 0)/R_F(a₀², g₀², 0) ≤ a₁²/2`, with equality (in either inequality) iff
 `a₀ = g₀`. -/
 @[dlmf 19.24.E9]
-theorem symEllIntRG_div_symEllIntRF_agm_bounds {a₀ g₀ : ℝ} (hg : 0 < g₀) (hag : g₀ ≤ a₀) :
+theorem symmetricEllipticRG_div_symmetricEllipticRF_agm_bounds {a₀ g₀ : ℝ} (hg : 0 < g₀)
+    (hag : g₀ ≤ a₀) :
     let a₁ := (a₀ + g₀) / 2
     let g₁ := √(a₀ * g₀)
-    let r := (symEllIntRG ((a₀ ^ 2 : ℝ) : ℂ) ((g₀ ^ 2 : ℝ) : ℂ) 0).re /
-      (symEllIntRF ((a₀ ^ 2 : ℝ) : ℂ) ((g₀ ^ 2 : ℝ) : ℂ) 0).re
+    let r := (symmetricEllipticRG ((a₀ ^ 2 : ℝ) : ℂ) ((g₀ ^ 2 : ℝ) : ℂ) 0).re /
+      (symmetricEllipticRF ((a₀ ^ 2 : ℝ) : ℂ) ((g₀ ^ 2 : ℝ) : ℂ) 0).re
     g₁ ^ 2 / 2 ≤ r ∧ r ≤ a₁ ^ 2 / 2 ∧ (g₁ ^ 2 / 2 = r ↔ a₀ = g₀) ∧ (r = a₁ ^ 2 / 2 ↔ a₀ = g₀) := by
   intro a₁ g₁ r
   have ha : 0 < a₀ := hg.trans_le hag
   have hg1 : g₁ ^ 2 = a₀ * g₀ := Real.sq_sqrt (by positivity)
-  have hr : r = (symEllIntRG 0 ((g₀ ^ 2 : ℝ) : ℂ) ((a₀ ^ 2 : ℝ) : ℂ)).re /
-      (symEllIntRF 0 ((g₀ ^ 2 : ℝ) : ℂ) ((a₀ ^ 2 : ℝ) : ℂ)).re := by
+  have hr : r = (symmetricEllipticRG 0 ((g₀ ^ 2 : ℝ) : ℂ) ((a₀ ^ 2 : ℝ) : ℂ)).re /
+      (symmetricEllipticRF 0 ((g₀ ^ 2 : ℝ) : ℂ) ((a₀ ^ 2 : ℝ) : ℂ)).re := by
     simp only [r]
-    rw [← symEllIntRG_comm_right, ← symEllIntRG_comm_left, ← symEllIntRG_comm_right,
-      ← symEllIntRF_comm_right, ← symEllIntRF_comm_left, ← symEllIntRF_comm_right]
+    rw [← symmetricEllipticRG_comm_right, ← symmetricEllipticRG_comm_left,
+        ← symmetricEllipticRG_comm_right,
+      ← symmetricEllipticRF_comm_right, ← symmetricEllipticRF_comm_left,
+          ← symmetricEllipticRF_comm_right]
   rcases hag.lt_or_eq with hlt | heq
   · have hsq : g₀ ^ 2 < a₀ ^ 2 := by nlinarith
-    rw [symEllIntRG_div_symEllIntRF_zero (by positivity) hsq] at hr
+    rw [symmetricEllipticRG_div_symmetricEllipticRF_zero (by positivity) hsq] at hr
     have hk0 : 0 < √(1 - g₀ ^ 2 / a₀ ^ 2) :=
       Real.sqrt_pos.mpr (sub_pos.mpr ((div_lt_one (by positivity)).mpr hsq))
     have hk1 : √(1 - g₀ ^ 2 / a₀ ^ 2) < 1 := by
       rw [Real.sqrt_lt' one_pos]; have := div_pos (pow_pos hg 2) (pow_pos ha 2); linarith
-    obtain ⟨h1, h2⟩ := compEllIntEk_div_compEllIntKk_bounds hk0 hk1
+    obtain ⟨h1, h2⟩ := completeEllipticE_div_completeEllipticK_bounds hk0 hk1
     have hkp : √(1 - √(1 - g₀ ^ 2 / a₀ ^ 2) ^ 2) = g₀ / a₀ := by
       have : g₀ ^ 2 / a₀ ^ 2 < 1 := (div_lt_one (by positivity)).mpr hsq
       rw [Real.sq_sqrt (by linarith), sub_sub_cancel, Real.sqrt_div (sq_nonneg _),
@@ -560,7 +573,7 @@ theorem symEllIntRG_div_symEllIntRF_agm_bounds {a₀ g₀ : ℝ} (hg : 0 < g₀)
   · subst heq
     have hys : ((g₀ ^ 2 : ℝ) : ℂ) ∈ slitPlane := ofReal_mem_slitPlane.mpr (by positivity)
     have hval : r = g₀ ^ 2 / 2 := by
-      rw [hr, (symEllIntRG_zero_self hys hys).1, symEllIntRF_zero_self hys]
+      rw [hr, (symmetricEllipticRG_zero_self hys hys).1, symmetricEllipticRF_zero_self hys]
       rw [show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring,
         show (-1 / 2 : ℂ) = ((-(1 / 2) : ℝ) : ℂ) by push_cast; ring,
         ← ofReal_cpow (by positivity), ← ofReal_cpow (by positivity),
@@ -589,20 +602,20 @@ bounds are Jensen bounds before and after Euler transformation. The `R_F`–`R_C
 inequalities and `lean-codes`' `integral_lt_integral_of_ae_lt`. The complete `R_G` bounds
 in (19.24.2) use `Carlson.carlsonRE_eq_compEllIntEk` and the bounds for `E(k)` from §19.9. -/
 @[dlmf 19.24.E10]
-theorem symEllIntRF_ge {x y z : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z) :
-    3 / (√x + √y + √z) ≤ (symEllIntRF x y z).re := by
+theorem symmetricEllipticRF_ge {x y z : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z) :
+    3 / (√x + √y + √z) ≤ (symmetricEllipticRF x y z).re := by
   have h := Carlson.inv_dupMean_le_carlsonRF_sq (Real.sqrt_pos.mpr hx) (Real.sqrt_pos.mpr hy)
     (Real.sqrt_pos.mpr hz)
   simp only [Real.sq_sqrt hx.le, Real.sq_sqrt hy.le, Real.sq_sqrt hz.le, Carlson.dupMean,
     inv_div] at h
-  rw [symEllIntRF_eq_carlsonRF (ofReal_mem_slitPlane.mpr hx) (ofReal_mem_slitPlane.mpr hy)
+  rw [symmetricEllipticRF_eq_carlsonRF (ofReal_mem_slitPlane.mpr hx) (ofReal_mem_slitPlane.mpr hy)
     (ofReal_mem_slitPlane.mpr hz)]
   exact h
 
 /-- DLMF 19.24.10 (upper bound): `R_F(x, y, z) ≤ (xyz)^{-1/6}` for positive `x, y, z`. -/
 @[dlmf 19.24.E10]
-theorem symEllIntRF_le {x y z : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z) :
-    (symEllIntRF x y z).re ≤ (x * y * z) ^ (-1 / 6 : ℝ) := by
+theorem symmetricEllipticRF_le {x y z : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z) :
+    (symmetricEllipticRF x y z).re ≤ (x * y * z) ^ (-1 / 6 : ℝ) := by
   let b : Fin 3 → ℝ := fun _ => 1 / 2
   let v : Fin 3 → ℝ := ![x, y, z]
   have hb : b ∈ ProbabilityTheory.mvRealBetaDomain := by intro i; norm_num [b]
@@ -613,7 +626,7 @@ theorem symEllIntRF_le {x y z : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z) :
   rw [Carlson.carlsonMeanReal_neg_sum hb hv] at hm
   have hbound := Real.rpow_le_rpow_of_nonpos (Real.exp_pos _) hm (by norm_num : (-1 / 2 : ℝ) ≤ 0)
   rw [Carlson.carlsonMeanReal_rpow (by norm_num : (-1 / 2 : ℝ) ≠ 0) hb hv] at hbound
-  rw [symEllIntRF_eq_carlsonRF (ofReal_mem_slitPlane.mpr hx)
+  rw [symmetricEllipticRF_eq_carlsonRF (ofReal_mem_slitPlane.mpr hx)
     (ofReal_mem_slitPlane.mpr hy) (ofReal_mem_slitPlane.mpr hz), Carlson.carlsonRF]
   have he := Carlson.ofReal_carlsonRReal (-1 / 2) hb hv
   norm_num only [b, v, ofReal_neg, ofReal_div, ofReal_one, ofReal_ofNat] at he
@@ -632,9 +645,9 @@ theorem symEllIntRF_le {x y z : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z) :
 /-- On positive real nodes, the real part of `R_J(x, y, z, p)` is the real Carlson
 R-average with five half-parameters and repeated last node `p`. This makes the general
 capacity bound applicable without a separate equal-node aggregation argument. -/
-private lemma re_symEllIntRJ_eq_carlsonRReal {x y z p : ℝ} (hx : 0 < x) (hy : 0 < y)
+private lemma re_symmetricEllipticRJ_eq_carlsonRReal {x y z p : ℝ} (hx : 0 < x) (hy : 0 < y)
     (hz : 0 < z) (hp : 0 < p) :
-    (symEllIntRJ x y z p).re = Carlson.carlsonRReal (-3/2)
+    (symmetricEllipticRJ x y z p).re = Carlson.carlsonRReal (-3/2)
       (fun _ : Fin 5 => 1/2) ![x,y,z,p,p] := by
   have hv : ∀ i, 0 < (![x,y,z,p,p] : Fin 5 → ℝ) i := by
     intro i; fin_cases i <;> assumption
@@ -643,13 +656,13 @@ private lemma re_symEllIntRJ_eq_carlsonRReal {x y z p : ℝ} (hx : 0 < x) (hy : 
   rw [neg_div, ← hc]
   have hnp : ¬ IsNegReal (p:ℂ) := not_isNegReal_of_mem_slitPlane
     (ofReal_mem_slitPlane.mpr hp)
-  rw [symEllIntRJ, ite_eq_right hnp]
-  have he : (∫ t in Ioi (0:ℝ), (symEllIntS x y z t * ((t:ℂ)+p))⁻¹) =
+  rw [symmetricEllipticRJ, ite_eq_right hnp]
+  have he : (∫ t in Ioi (0:ℝ), (carlsonRootProduct x y z t * ((t:ℂ)+p))⁻¹) =
       ((∫ t in Ioi (0:ℝ), Carlson.capacityKernel (![x,y,z,p,p] : Fin 5 → ℝ) t : ℝ):ℂ) := by
     rw [← integral_complex_ofReal]
     refine setIntegral_congr_fun measurableSet_Ioi fun t ht => ?_
     change 0 < t at ht
-    rw [symEllIntS_ofReal (by linarith) (by linarith) (by linarith)]
+    rw [carlsonRootProduct_ofReal (by linarith) (by linarith) (by linarith)]
     simp only [Carlson.capacityKernel, Fin.prod_univ_succ, Matrix.cons_val_zero,
       Matrix.cons_val_succ, Matrix.cons_val_fin_one]
     simp only [Fin.prod_univ_zero, mul_one]
@@ -664,14 +677,15 @@ private lemma re_symEllIntRJ_eq_carlsonRReal {x y z p : ℝ} (hx : 0 < x) (hy : 
 /-- DLMF 19.24.11: `(5/(√x + √y + √z + 2√p))³ ≤ R_J(x, y, z, p) ≤ (x y z p²)^{-3/10}` for
 positive `x, y, z, p`. -/
 @[dlmf 19.24.E11]
-theorem symEllIntRJ_bounds {x y z p : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z) (hp : 0 < p) :
-    (5 / (√x + √y + √z + 2 * √p)) ^ 3 ≤ (symEllIntRJ x y z p).re ∧
-      (symEllIntRJ x y z p).re ≤ (x * y * z * p ^ 2) ^ (-3 / 10 : ℝ) := by
+theorem symmetricEllipticRJ_bounds {x y z p : ℝ} (hx : 0 < x) (hy : 0 < y)
+    (hz : 0 < z) (hp : 0 < p) :
+    (5 / (√x + √y + √z + 2 * √p)) ^ 3 ≤ (symmetricEllipticRJ x y z p).re ∧
+      (symmetricEllipticRJ x y z p).re ≤ (x * y * z * p ^ 2) ^ (-3 / 10 : ℝ) := by
   let b : Fin 5 → ℝ := fun _ => 1 / 2
   let v : Fin 5 → ℝ := ![x,y,z,p,p]
   have hb : b ∈ ProbabilityTheory.mvRealBetaDomain := by intro i; norm_num [b]
   have hv : ∀ i, 0 < v i := by intro i; fin_cases i <;> assumption
-  rw [re_symEllIntRJ_eq_carlsonRReal hx hy hz hp]
+  rw [re_symmetricEllipticRJ_eq_carlsonRReal hx hy hz hp]
   constructor
   · by_cases hn : ∃ i j, v i ≠ v j
     · have h := (Carlson.carlsonRReal_capacity_lower_bound hv (by norm_num) hn).le
@@ -707,18 +721,19 @@ theorem symEllIntRJ_bounds {x y z p : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z
 /-- DLMF 19.24.12: `(√x + √y + √z)/3 ≤ R_G(x, y, z) ≤
 min(√((x + y + z)/3), (x² + y² + z²)/(3√(xyz)))` for positive `x, y, z`. -/
 @[dlmf 19.24.E12]
-theorem symEllIntRG_bounds {x y z : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z) :
-    (√x + √y + √z) / 3 ≤ (symEllIntRG x y z).re ∧
-      (symEllIntRG x y z).re ≤ min (√((x + y + z) / 3)) ((x ^ 2 + y ^ 2 + z ^ 2) / (3 * √(x * y *
+theorem symmetricEllipticRG_bounds {x y z : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z) :
+    (√x + √y + √z) / 3 ≤ (symmetricEllipticRG x y z).re ∧
+      (symmetricEllipticRG x y z).re ≤
+          min (√((x + y + z) / 3)) ((x ^ 2 + y ^ 2 + z ^ 2) / (3 * √(x * y *
         z))) := by
   let b : Fin 3 → ℝ := fun _ => 1 / 2
   let v : Fin 3 → ℝ := ![x,y,z]
   have hb : b ∈ ProbabilityTheory.mvRealBetaDomain := by intro i; norm_num [b]
   have hv : ∀ i, 0 < v i := by intro i; fin_cases i <;> assumption
-  have he : (symEllIntRG x y z).re = Carlson.carlsonRReal (1 / 2) b v := by
-    rw [symEllIntRG_eq_symEllIntR (ofReal_mem_slitPlane.mpr hx)
+  have he : (symmetricEllipticRG x y z).re = Carlson.carlsonRReal (1 / 2) b v := by
+    rw [symmetricEllipticRG_eq_symmetricEllipticR (ofReal_mem_slitPlane.mpr hx)
       (ofReal_mem_slitPlane.mpr hy) (ofReal_mem_slitPlane.mpr hz),
-      symEllIntR_of_mem _ _ (vec3_mem_carlsonRSlitDomain (ofReal_mem_slitPlane.mpr hx)
+      symmetricEllipticR_of_mem _ _ (vec3_mem_carlsonRSlitDomain (ofReal_mem_slitPlane.mpr hx)
         (ofReal_mem_slitPlane.mpr hy) (ofReal_mem_slitPlane.mpr hz)), neg_div, neg_neg]
     have hc := Carlson.ofReal_carlsonRReal (1 / 2) hb hv
     norm_num only [b, v, ofReal_div, ofReal_one, ofReal_ofNat] at hc
@@ -756,43 +771,44 @@ theorem symEllIntRG_bounds {x y z : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z) 
 /-- DLMF 19.24.14: for positive `x, y, z`, not all equal, `R_F(x, y, z) R_G(x, y, z) > 1` and
 `R_F(x, y, z) + R_G(x, y, z) > 2` (the case `a = 1/2` of (19.24.13)). -/
 @[dlmf 19.24.E14]
-theorem symEllIntRF_symEllIntRG_gt {x y z : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z)
+theorem symmetricEllipticRF_symmetricEllipticRG_gt {x y z : ℝ} (hx : 0 < x)
+    (hy : 0 < y) (hz : 0 < z)
     (hne : ¬ (x = y ∧ y = z)) :
-    1 < (symEllIntRF x y z).re * (symEllIntRG x y z).re ∧
-      2 < (symEllIntRF x y z).re + (symEllIntRG x y z).re := by
+    1 < (symmetricEllipticRF x y z).re * (symmetricEllipticRG x y z).re ∧
+      2 < (symmetricEllipticRF x y z).re + (symmetricEllipticRG x y z).re := by
   have hn : ∃ i j, (![x, y, z] : Fin 3 → ℝ) i ≠ ![x, y, z] j := by
     by_contra! hn
     exact hne ⟨hn 0 1, hn 1 2⟩
   have hp : ∀ i, 0 < (![x, y, z] : Fin 3 → ℝ) i := by
     intro i; fin_cases i <;> assumption
-  have h := symEllIntR_mul_neg_gt (a := -1 / 2) (by norm_num) (b := fun _ : Fin 3 => 1 / 2)
+  have h := symmetricEllipticR_mul_neg_gt (a := -1 / 2) (by norm_num) (b := fun _ : Fin 3 => 1 / 2)
     (by intro i; norm_num) hp hn
-  rw [symEllIntRF_eq_symEllIntR (ofReal_mem_slitPlane.mpr hx)
+  rw [symmetricEllipticRF_eq_symmetricEllipticR (ofReal_mem_slitPlane.mpr hx)
     (ofReal_mem_slitPlane.mpr hy) (ofReal_mem_slitPlane.mpr hz),
-    symEllIntRG_eq_symEllIntR (ofReal_mem_slitPlane.mpr hx)
+    symmetricEllipticRG_eq_symmetricEllipticR (ofReal_mem_slitPlane.mpr hx)
       (ofReal_mem_slitPlane.mpr hy) (ofReal_mem_slitPlane.mpr hz)]
   have he : (fun i => ((![x, y, z] : Fin 3 → ℝ) i : ℂ)) = ![(x : ℂ), y, z] := by
     ext i; fin_cases i <;> rfl
   simpa only [ofReal_neg, ofReal_div, ofReal_one, ofReal_ofNat, neg_div, neg_neg, he] using h
 
 /-- On nonnegative real arguments, `R_F` is its convergent real square-root integral. -/
-private lemma symEllIntRF_re_integral_and_integrable {x y z : ℝ}
+private lemma symmetricEllipticRF_re_integral_and_integrable {x y z : ℝ}
     (hx : 0 ≤ x) (hy : 0 < y) (hz : 0 < z) :
-    (symEllIntRF x y z).re =
+    (symmetricEllipticRF x y z).re =
         (1 / 2) * ∫ t in Ioi (0 : ℝ), (√(t + x) * √(t + y) * √(t + z))⁻¹ ∧
       IntegrableOn (fun t => (√(t + x) * √(t + y) * √(t + z))⁻¹) (Ioi (0 : ℝ)) := by
-  have he : (fun t : ℝ => (symEllIntS x y z t)⁻¹) =ᵐ[volume.restrict (Ioi (0 : ℝ))]
+  have he : (fun t : ℝ => (carlsonRootProduct x y z t)⁻¹) =ᵐ[volume.restrict (Ioi (0 : ℝ))]
       (fun t => (((√(t + x) * √(t + y) * √(t + z))⁻¹ : ℝ) : ℂ)) := by
     filter_upwards [ae_restrict_mem measurableSet_Ioi] with t (ht : 0 < t)
-    rw [symEllIntS_ofReal (by linarith) (by linarith) (by linarith), ofReal_inv]
-  have hxc : SymEllIntArg (x : ℂ) := by
+    rw [carlsonRootProduct_ofReal (by linarith) (by linarith) (by linarith), ofReal_inv]
+  have hxc : IsCarlsonArgument (x : ℂ) := by
     rcases hx.eq_or_lt with hh | hh
     · exact Or.inr (by exact_mod_cast hh.symm)
     · exact Or.inl (ofReal_mem_slitPlane.mpr hh)
-  have hi := (integrableOn_symEllIntRF_integrand hxc (ofReal_mem_slitPlane.mpr hy)
+  have hi := (integrableOn_symmetricEllipticRF_integrand hxc (ofReal_mem_slitPlane.mpr hy)
     (ofReal_mem_slitPlane.mpr hz)).congr he
   constructor
-  · rw [symEllIntRF, integral_congr_ae he, integral_complex_ofReal]
+  · rw [symmetricEllipticRF, integral_congr_ae he, integral_complex_ofReal]
     simp
   · change Integrable (fun t : ℝ => (√(t + x) * √(t + y) * √(t + z))⁻¹)
       (volume.restrict (Ioi (0 : ℝ)))
@@ -801,7 +817,7 @@ private lemma symEllIntRF_re_integral_and_integrable {x y z : ℝ}
 
 /-- Replacing two distinct positive arguments by their arithmetic or geometric mean
 strictly brackets the real `R_F` kernel. -/
-private lemma symEllIntRF_RC_kernel_bounds {x y z t : ℝ}
+private lemma symmetricEllipticRF_RC_kernel_bounds {x y z t : ℝ}
     (hx : 0 ≤ x) (hy : 0 < y) (hz : 0 < z) (ht : 0 < t) (hyz : y ≠ z) :
     (√(t + x) * (t + (y + z) / 2))⁻¹ < (√(t + x) * √(t + y) * √(t + z))⁻¹ ∧
       (√(t + x) * √(t + y) * √(t + z))⁻¹ < (√(t + x) * (t + √(y * z)))⁻¹ := by
@@ -830,15 +846,18 @@ private lemma symEllIntRF_RC_kernel_bounds {x y z t : ℝ}
 /-- DLMF 19.24.15: `R_C(x, (y + z)/2) ≤ R_F(x, y, z) ≤ R_C(x, √(yz))` for `x ≥ 0` and `y, z > 0`,
 with equality (in either inequality) iff `y = z`. -/
 @[dlmf 19.24.E15]
-theorem symEllIntRF_symEllIntRC_bounds {x y z : ℝ} (hx : 0 ≤ x) (hy : 0 < y) (hz : 0 < z) :
-    (symEllIntRC x (((y + z) / 2 : ℝ) : ℂ)).re ≤ (symEllIntRF x y z).re ∧
-      (symEllIntRF x y z).re ≤ (symEllIntRC x ((√(y * z) : ℝ) : ℂ)).re ∧
-      ((symEllIntRC x (((y + z) / 2 : ℝ) : ℂ)).re = (symEllIntRF x y z).re ↔ y = z) ∧
-      ((symEllIntRF x y z).re = (symEllIntRC x ((√(y * z) : ℝ) : ℂ)).re ↔ y = z) := by
+theorem symmetricEllipticRF_symmetricEllipticRC_bounds {x y z : ℝ} (hx : 0 ≤ x)
+    (hy : 0 < y) (hz : 0 < z) :
+    (symmetricEllipticRC x (((y + z) / 2 : ℝ) : ℂ)).re ≤ (symmetricEllipticRF x y z).re ∧
+      (symmetricEllipticRF x y z).re ≤ (symmetricEllipticRC x ((√(y * z) : ℝ) : ℂ)).re ∧
+      ((symmetricEllipticRC x (((y + z) / 2 : ℝ) : ℂ)).re =
+          (symmetricEllipticRF x y z).re ↔ y = z) ∧
+      ((symmetricEllipticRF x y z).re =
+          (symmetricEllipticRC x ((√(y * z) : ℝ) : ℂ)).re ↔ y = z) := by
   have hA : 0 < (y + z) / 2 := by positivity
   have hG : 0 < √(y * z) := Real.sqrt_pos.mpr (mul_pos hy hz)
-  have hrc (q : ℝ) (hq : 0 < q) : symEllIntRC x q = symEllIntRF x q q :=
-    symEllIntRC_eq_symEllIntRF _
+  have hrc (q : ℝ) (hq : 0 < q) : symmetricEllipticRC x q = symmetricEllipticRF x q q :=
+    symmetricEllipticRC_eq_symmetricEllipticRF _
       (not_isNegReal_of_mem_slitPlane (ofReal_mem_slitPlane.mpr hq))
   rw [hrc _ hA, hrc _ hG]
   by_cases hyz : y = z
@@ -846,9 +865,9 @@ theorem symEllIntRF_symEllIntRC_bounds {x y z : ℝ} (hx : 0 ≤ x) (hy : 0 < y)
     rw [show (y + y) / 2 = y by ring,
       show √(y * y) = y by rw [← sq, Real.sqrt_sq hy.le]]
     simp
-  · have hi := symEllIntRF_re_integral_and_integrable hx hy hz
-    have hia := symEllIntRF_re_integral_and_integrable hx hA hA
-    have hig := symEllIntRF_re_integral_and_integrable hx hG hG
+  · have hi := symmetricEllipticRF_re_integral_and_integrable hx hy hz
+    have hia := symmetricEllipticRF_re_integral_and_integrable hx hA hA
+    have hig := symmetricEllipticRF_re_integral_and_integrable hx hG hG
     have : NeZero (volume.restrict (Ioi (0 : ℝ))) := ⟨by
       intro hzero
       have h := Measure.restrict_eq_zero.mp hzero
@@ -862,19 +881,19 @@ theorem symEllIntRF_symEllIntRC_bounds {x y z : ℝ} (hx : 0 ≤ x) (hy : 0 < y)
       apply integral_lt_integral_of_ae_lt hia.2 hi.2
       filter_upwards [ae_restrict_mem measurableSet_Ioi] with t (ht : 0 < t)
       rw [hprod _ _ hA ht]
-      exact (symEllIntRF_RC_kernel_bounds hx hy hz ht hyz).1
+      exact (symmetricEllipticRF_RC_kernel_bounds hx hy hz ht hyz).1
     have hU : (∫ t in Ioi (0 : ℝ), (√(t + x) * √(t + y) * √(t + z))⁻¹) <
         ∫ t in Ioi (0 : ℝ), (√(t + x) * √(t + √(y * z)) * √(t + √(y * z)))⁻¹ := by
       apply integral_lt_integral_of_ae_lt hi.2 hig.2
       filter_upwards [ae_restrict_mem measurableSet_Ioi] with t (ht : 0 < t)
       rw [hprod _ _ hG ht]
-      exact (symEllIntRF_RC_kernel_bounds hx hy hz ht hyz).2
-    have hL' : (symEllIntRF x (((y + z) / 2 : ℝ) : ℂ) (((y + z) / 2 : ℝ) : ℂ)).re <
-        (symEllIntRF x y z).re := by
+      exact (symmetricEllipticRF_RC_kernel_bounds hx hy hz ht hyz).2
+    have hL' : (symmetricEllipticRF x (((y + z) / 2 : ℝ) : ℂ) (((y + z) / 2 : ℝ) : ℂ)).re <
+        (symmetricEllipticRF x y z).re := by
       rw [hia.1, hi.1]
       linarith
-    have hU' : (symEllIntRF x y z).re <
-        (symEllIntRF x ((√(y * z) : ℝ) : ℂ) ((√(y * z) : ℝ) : ℂ)).re := by
+    have hU' : (symmetricEllipticRF x y z).re <
+        (symmetricEllipticRF x ((√(y * z) : ℝ) : ℂ) ((√(y * z) : ℝ) : ℂ)).re := by
       rw [hi.1, hig.1]
       linarith
     exact ⟨hL'.le, hU'.le, iff_of_false (ne_of_lt hL') hyz,

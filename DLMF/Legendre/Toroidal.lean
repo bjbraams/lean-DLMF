@@ -87,7 +87,7 @@ theorem ToroidalWhipple.P_neg_degree (ν μ : ℂ) {y : ℝ} (hy : 1 < y) :
     associatedP (-ν-1) μ y = associatedP ν μ y := by
   have hz : 1 + (y:ℂ) ∈ slitPlane := Or.inl (by simp; linarith)
   unfold associatedP
-  rw [regularizedGaussHG_symm _ _ _ (mem_cutPlane_of_one_add hz)]
+  rw [regularizedGaussHypergeometric_symm _ _ _ (mem_cutPlane_of_one_add hz)]
   congr 2 <;> ring
 
 /-- `(c/(s))^{1/2}` for positive reals as an exponential of logarithms. -/
@@ -165,7 +165,7 @@ theorem ToroidalWhipple.Q_hypergeometric_generic (ν μ : ℂ) (hc : ∀ k : ℕ
     (ht : ∀ k : ℕ, 2*ν + 1 ≠ -(k:ℂ))
     {ξ : ℝ} (hξ : 0 < ξ) :
     olverQ (ν-1/2) μ (Real.cosh ξ)=Real.sqrt π*(1-Real.exp (-2*ξ):ℂ)^μ/exp
-        ((ν+1/2)*ξ)*regularizedGaussHG (μ+1/2) (ν+μ+1/2) (ν+1) (Real.exp (-2*ξ)) := by
+        ((ν+1/2)*ξ)*regularizedGaussHypergeometric (μ+1/2) (ν+μ+1/2) (ν+1) (Real.exp (-2*ξ)) := by
   set q := Real.exp (-ξ) with hqdef
   have hq0 : 0 < q := Real.exp_pos _
   have hq1 : q < 1 := by rw [hqdef]; exact Real.exp_lt_one_iff.mpr (by linarith)
@@ -192,9 +192,10 @@ theorem ToroidalWhipple.Q_hypergeometric_generic (ν μ : ℂ) (hc : ∀ k : ℕ
     intro k; rw [show ν-1/2+3/2 = ν+1 by ring]; exact hc k
   unfold olverQ
   rw [hq2, harg, show ((q^2:ℝ):ℂ) = ((q^2:ℝ):ℂ) from rfl,
-    regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hn1,
-    regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hn2,
-    regularizedGaussHGFun_eq_div_Gamma hc, regularizedGaussHGFun_eq_div_Gamma hc',
+    regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hn1,
+    regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hn2,
+    regularizedGaussHypergeometricFun_eq_div_Gamma hc,
+        regularizedGaussHypergeometricFun_eq_div_Gamma hc',
     ToroidalWhipple.quadraticTransformation ν μ hc ht hq0 hq1, ordinaryHypergeometric_symm,
     show (ν-1/2+μ+2)/2 = (ν+μ+1/2+1)/2 by ring, show (ν-1/2+μ+1)/2 = (ν+μ+1/2)/2 by ring,
     show ν-1/2+3/2 = ν+1 by ring]
@@ -239,7 +240,8 @@ theorem ToroidalWhipple.P_hypergeometric_generic (ν μ : ℂ) (hc1 : ∀ k : �
     (hc2 : ∀ k : ℕ, 1 - μ ≠ -(k:ℂ))
     {ξ : ℝ} (hξ : 0 < ξ) :
     associatedP (ν-1/2) μ (Real.cosh ξ)=Gamma
-        (1/2-μ)/(Real.sqrt π*(1-Real.exp (-2*ξ):ℂ)^μ*exp ((ν+1/2)*ξ))*regularizedGaussHG (1/2-μ)
+        (1/2-μ)/(Real.sqrt π*(1-Real.exp (-2*ξ):ℂ)^μ*exp
+            ((ν+1/2)*ξ))*regularizedGaussHypergeometric (1/2-μ)
         (1/2+ν-μ) (1-2*μ) (1-Real.exp (-2*ξ)) := by
   set q := Real.exp (-ξ) with hqdef
   have hq0 : 0 < q := Real.exp_pos _
@@ -277,9 +279,10 @@ theorem ToroidalWhipple.P_hypergeometric_generic (ν μ : ℂ) (hc1 : ∀ k : �
     rw [norm_real, Real.norm_eq_abs, abs_of_pos (by linarith)]; nlinarith
   have hc2' : ∀ k : ℕ, -μ + 1 ≠ -(k:ℂ) := fun k => by rw [show -μ+1 = 1-μ by ring]; exact hc2 k
   rw [hq2, show (1:ℂ) - ((q^2:ℝ):ℂ) = ((1-q^2:ℝ):ℂ) by push_cast; ring,
-    regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hw1,
-    regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hw2,
-    regularizedGaussHGFun_eq_div_Gamma hc2', regularizedGaussHGFun_eq_div_Gamma hc1,
+    regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hw1,
+    regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hw2,
+    regularizedGaussHypergeometricFun_eq_div_Gamma hc2',
+        regularizedGaussHypergeometricFun_eq_div_Gamma hc1,
     ordinaryHypergeometric_symm (1/2-μ), show 1-2*μ = 2*(1/2-μ) by ring,
     quadratic_double_denominator (by intro k; rw [show 2*(1/2-μ) = 1-2*μ by ring]; exact hc1 k)
       (by intro k; rw [show 1/2-μ+1/2 = 1-μ by ring]; exact hc2 k) hw2,
@@ -345,7 +348,8 @@ theorem ToroidalWhipple.P_hypergeometric_generic (ν μ : ℂ) (hc1 : ∀ k : �
 @[dlmf 14.19.E2]
 theorem toroidalP_hypergeometric (ν μ : ℂ) (hμ : ∀ n : ℕ, μ ≠ n+1/2) {ξ : ℝ} (hξ : 0 < ξ) :
     associatedP (ν-1/2) μ (Real.cosh ξ)=Gamma
-        (1/2-μ)/(Real.sqrt π*(1-Real.exp (-2*ξ):ℂ)^μ*exp ((ν+1/2)*ξ))*regularizedGaussHG (1/2-μ)
+        (1/2-μ)/(Real.sqrt π*(1-Real.exp (-2*ξ):ℂ)^μ*exp
+            ((ν+1/2)*ξ))*regularizedGaussHypergeometric (1/2-μ)
         (1/2+ν-μ) (1-2*μ) (1-Real.exp (-2*ξ)) := by
   have ht1 : 1 < Real.cosh ξ := Real.one_lt_cosh.mpr hξ.ne'
   have hz : ((Real.cosh ξ:ℝ):ℂ) - 1 ∈ slitPlane :=
@@ -366,12 +370,12 @@ theorem toroidalP_hypergeometric (ν μ : ℂ) (hμ : ∀ n : ℕ, μ ≠ n+1/2)
   have key := legendre_eq_of_continuous_off_countable
     (f := fun μ : ℂ => (Gamma (1/2-μ))⁻¹ * associatedP (ν-1/2) μ (Real.cosh ξ))
     (g := fun μ : ℂ => ((Real.sqrt π:ℂ)*(1-Real.exp (-2*ξ):ℂ)^μ*exp ((ν+1/2)*ξ))⁻¹ *
-      regularizedGaussHG (1/2-μ) (1/2+ν-μ) (1-2*μ) (1-Real.exp (-2*ξ)))
+      regularizedGaussHypergeometric (1/2-μ) (1/2+ν-μ) (1-2*μ) (1-Real.exp (-2*ξ)))
     ((differentiable_one_div_Gamma.continuous.comp (continuous_const.sub continuous_id)).mul
       (associatedP_entire_order (ν-1/2) _ hz).continuous)
     (((continuous_const.mul (continuous_const_cpow' hb)).mul
         (Continuous.cexp (by fun_prop))).inv₀ hD
-      |>.mul (differentiable_regularizedGaussHG_comp (A := fun μ : ℂ => 1/2-μ)
+      |>.mul (differentiable_regularizedGaussHypergeometric_comp (A := fun μ : ℂ => 1/2-μ)
       (B := fun μ : ℂ => 1/2+ν-μ) (C := fun μ : ℂ => 1-2*μ) (by fun_prop)
           (by fun_prop) (by fun_prop)
       hcut).continuous)
@@ -379,7 +383,7 @@ theorem toroidalP_hypergeometric (ν μ : ℂ) (hμ : ∀ n : ℕ, μ ≠ n+1/2)
   · have hG : Gamma (1/2-μ) ≠ 0 := Gamma_ne_zero fun m hm => hμ m (by linear_combination -hm)
     have key' : (Gamma (1/2-μ))⁻¹ * associatedP (ν-1/2) μ (Real.cosh ξ) =
         ((Real.sqrt π:ℂ)*(1-Real.exp (-2*ξ):ℂ)^μ*exp ((ν+1/2)*ξ))⁻¹ *
-          regularizedGaussHG (1/2-μ) (1/2+ν-μ) (1-2*μ) (1-Real.exp (-2*ξ)) := key
+          regularizedGaussHypergeometric (1/2-μ) (1/2+ν-μ) (1-2*μ) (1-Real.exp (-2*ξ)) := key
     calc associatedP (ν-1/2) μ (Real.cosh ξ)
         = Gamma (1/2-μ) * ((Gamma (1/2-μ))⁻¹ * associatedP (ν-1/2) μ (Real.cosh ξ)) := by
           rw [← mul_assoc, mul_inv_cancel₀ hG, one_mul]
@@ -397,7 +401,7 @@ theorem toroidalP_hypergeometric (ν μ : ℂ) (hμ : ∀ n : ℕ, μ ≠ n+1/2)
 @[dlmf 14.19.E3]
 theorem toroidalQ_hypergeometric (ν μ : ℂ) {ξ : ℝ} (hξ : 0 < ξ) :
     olverQ (ν-1/2) μ (Real.cosh ξ)=Real.sqrt π*(1-Real.exp (-2*ξ):ℂ)^μ/exp
-        ((ν+1/2)*ξ)*regularizedGaussHG (μ+1/2) (ν+μ+1/2) (ν+1) (Real.exp (-2*ξ)) := by
+        ((ν+1/2)*ξ)*regularizedGaussHypergeometric (μ+1/2) (ν+μ+1/2) (ν+1) (Real.exp (-2*ξ)) := by
   have ht1 : 1 < Real.cosh ξ := Real.one_lt_cosh.mpr hξ.ne'
   have hz : ((Real.cosh ξ:ℝ):ℂ) - 1 ∈ slitPlane :=
       Or.inl (by simp only [sub_re, ofReal_re, one_re]; linarith)
@@ -407,12 +411,12 @@ theorem toroidalQ_hypergeometric (ν μ : ℂ) {ξ : ℝ} (hξ : 0 < ξ) :
     exact Real.exp_lt_one_iff.mpr (by linarith)
   refine legendre_eq_of_continuous_off_countable (f := fun ν : ℂ => olverQ (ν-1/2) μ (Real.cosh ξ))
     (g := fun ν : ℂ => Real.sqrt π*(1-Real.exp (-2*ξ):ℂ)^μ/exp
-        ((ν+1/2)*ξ)*regularizedGaussHG (μ+1/2)
+        ((ν+1/2)*ξ)*regularizedGaussHypergeometric (μ+1/2)
       (ν+μ+1/2) (ν+1) (Real.exp (-2*ξ)))
     ((olverQ_entire_degree μ _ hz).continuous.comp (continuous_id.sub continuous_const)) ?_
     (countable_range (fun n : ℤ => (n:ℂ)/2)) (fun ν hν => ?_) ν
   · refine (continuous_const.div (Continuous.cexp (by fun_prop)) (fun _ => exp_ne_zero _)).mul ?_
-    exact (differentiable_regularizedGaussHG_comp (A := fun _ : ℂ => μ+1/2)
+    exact (differentiable_regularizedGaussHypergeometric_comp (A := fun _ : ℂ => μ+1/2)
       (B := fun ν : ℂ => ν+μ+1/2) (C := fun ν : ℂ => ν+1) (by fun_prop) (by fun_prop) (by fun_prop)
       hcut).continuous
   · refine ToroidalWhipple.Q_hypergeometric_generic ν μ (fun k hk => hν ⟨-2*(k:ℤ)-2, ?_⟩)
@@ -614,12 +618,12 @@ theorem toroidalP_integral (n m : ℕ) {ξ : ℝ} (hξ : 0 < ξ) :
   obtain ⟨hI, hE⟩ := ToroidalIntegral.halfAngle_changeOfVariables hKI
   have hw : 1 - (((q^2)⁻¹:ℝ):ℂ) ∈ cutPlane := by
     rw [mem_cutPlane, sub_sub_cancel]; exact Or.inl (by simp only [ofReal_re]; positivity)
-  have hF : regularizedGaussHG a ((m:ℂ)+1/2) (2*(m:ℂ)+1) (1 - (((q^2)⁻¹:ℝ):ℂ)) =
+  have hF : regularizedGaussHypergeometric a ((m:ℂ)+1/2) (2*(m:ℂ)+1) (1 - (((q^2)⁻¹:ℝ):ℂ)) =
       exp (Real.log q * (2*((m:ℂ)-(-n-1/2)))) * exp ((Real.log q + Real.log c) * ((-n-1/2:ℂ)-m)) *
         (Gamma ((m:ℂ)+1) / Gamma (2*(m:ℂ)+1)) *
-        regularizedGaussHG (((m:ℂ)-(-n-1/2))/2) (((m:ℂ)-(-n-1/2)+1)/2) ((m:ℂ)+1)
+        regularizedGaussHypergeometric (((m:ℂ)-(-n-1/2))/2) (((m:ℂ)-(-n-1/2)+1)/2) ((m:ℂ)+1)
             (1 - 1/(c:ℂ)^2) := by
-    rw [regularizedGaussHG_symm _ _ _ hw, show a = (m:ℂ) - (-n-1/2) by rw [hadef]; ring,
+    rw [regularizedGaussHypergeometric_symm _ _ _ hw, show a = (m:ℂ) - (-n-1/2) by rw [hadef]; ring,
       ExteriorIntegral.cosh_hypergeometric (-n-1/2) m
           (by simp only [natCast_re]; linarith [(m.cast_nonneg : (0:ℝ) ≤ m)])
         hq0 hq1 hqx]
@@ -646,7 +650,7 @@ theorem toroidalP_integral (n m : ℕ) {ξ : ℝ} (hξ : 0 < ξ) :
         (exp (Real.log q * (2*((m:ℂ)-(-n-1/2)))) *
             exp ((Real.log q + Real.log c) * ((-n-1/2:ℂ)-m)) *
           (Gamma ((m:ℂ)+1) / Gamma (2*(m:ℂ)+1)) *
-          regularizedGaussHG (((m:ℂ)-(-n-1/2))/2) (((m:ℂ)-(-n-1/2)+1)/2) ((m:ℂ)+1)
+          regularizedGaussHypergeometric (((m:ℂ)-(-n-1/2))/2) (((m:ℂ)-(-n-1/2)+1)/2) ((m:ℂ)+1)
               (1 - 1/(c:ℂ)^2))) := by
     rw [intervalIntegral.integral_of_le Real.pi_pos.le, integral_Ioc_eq_integral_Ioo,
       ← setIntegral_congr_fun measurableSet_Ioo hf, integral_const_mul, hE, hKv]
@@ -785,7 +789,7 @@ theorem ToroidalFourier.diag_split {F : ℕ × ℕ → ℂ} {P : ℂ} {gp gm : �
 
 /-- Absolute convergence of the binomial series `∑ (α)_j z^j/j!` for `|z| < 1`. -/
 theorem ToroidalFourier.binomial_norm_summable (α : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
-    Summable (fun j : ℕ => ‖poch α j / (j ! : ℂ) * z^j‖) := by
+    Summable (fun j : ℕ => ‖pochhammer α j / (j ! : ℂ) * z^j‖) := by
   set t := ‖z‖
   set r := (1 + t)/2
   have hr : r < 1 := by simp only [r]; linarith
@@ -793,11 +797,11 @@ theorem ToroidalFourier.binomial_norm_summable (α : ℂ) {z : ℂ} (hz : ‖z�
   refine summable_of_ratio_norm_eventually_le hr ?_
   filter_upwards [eventually_ge_atTop ⌈‖α‖/(r - t)⌉₊] with j hj
   have hj' : ‖α‖/(r - t) ≤ j := Nat.ceil_le.mp hj
-  rw [norm_norm, norm_norm, poch_succ, Nat.factorial_succ, pow_succ]
+  rw [norm_norm, norm_norm, pochhammer_succ, Nat.factorial_succ, pow_succ]
   push_cast
   have hj1 : (0:ℝ) < (j:ℝ) + 1 := by positivity
-  have e : poch α j * (α + j) / (((j:ℂ)+1) * (j ! : ℂ)) * (z^j * z) =
-      (poch α j / (j ! : ℂ) * z^j) * ((α + j) * z / ((j:ℂ)+1)) := by
+  have e : pochhammer α j * (α + j) / (((j:ℂ)+1) * (j ! : ℂ)) * (z^j * z) =
+      (pochhammer α j / (j ! : ℂ) * z^j) * ((α + j) * z / ((j:ℂ)+1)) := by
     have : ((j:ℂ)+1) ≠ 0 := by exact_mod_cast (Nat.succ_ne_zero j)
     have : (j ! : ℂ) ≠ 0 := by exact_mod_cast (Nat.factorial_pos j).ne'
     field_simp
@@ -819,20 +823,20 @@ theorem ToroidalFourier.binomial_norm_summable (α : ℂ) {z : ℂ} (hz : ‖z�
 `∑_k (α)_{k+m}(α)_k t^{2k+m} E^m/((k+m)! k!) = E^m t^m (α)_m 𝐅(α, α+m; m+1; t²)`. -/
 theorem ToroidalFourier.fiber (α : ℂ) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t < 1) {E : ℂ}
     (hE : E ≠ 0) (m : ℕ) :
-    HasSum (fun k : ℕ => (poch α (k+m) / ((k+m) ! : ℂ) * ((t:ℂ)*E)^(k+m)) *
-        (poch α k / (k ! : ℂ) * ((t:ℂ)*E⁻¹)^k))
-      (E^m * (t:ℂ)^m * poch α m * regularizedGaussHGFun α (α+m) (m+1) ((t:ℂ)^2)) := by
+    HasSum (fun k : ℕ => (pochhammer α (k+m) / ((k+m) ! : ℂ) * ((t:ℂ)*E)^(k+m)) *
+        (pochhammer α k / (k ! : ℂ) * ((t:ℂ)*E⁻¹)^k))
+      (E^m * (t:ℂ)^m * pochhammer α m * regularizedGaussHGFun α (α+m) (m+1) ((t:ℂ)^2)) := by
   have hz : ‖((t:ℂ)^2)‖ < 1 := by
     rw [norm_pow, norm_real, Real.norm_eq_abs, abs_of_nonneg ht0]; nlinarith
-  have hs := (summable_regularizedGaussHGFun_term α (α+m) (m+1) hz).hasSum.mul_left
-    (E^m * (t:ℂ)^m * poch α m)
-  rw [regularizedGaussHGFun_eq_tsum]
+  have hs := (summable_regularizedGaussHypergeometricFun_term α (α+m) (m+1) hz).hasSum.mul_left
+    (E^m * (t:ℂ)^m * pochhammer α m)
+  rw [regularizedGaussHypergeometricFun_eq_tsum]
   convert hs using 1
   funext k
   have hG : Gamma ((m:ℂ)+1+k) = ((m+k) ! : ℂ) := by
     rw [show (m:ℂ)+1+k = ((m+k:ℕ):ℂ)+1 by push_cast; ring, Gamma_nat_eq_factorial]
-  rw [hG, show k + m = m + k by ring, poch_add]
-  simp only [poch]
+  rw [hG, show k + m = m + k by ring, pochhammer_add]
+  simp only [pochhammer]
   have h1 : ((m+k) ! : ℂ) ≠ 0 := by exact_mod_cast (Nat.factorial_pos _).ne'
   have h2 : (k ! : ℂ) ≠ 0 := by exact_mod_cast (Nat.factorial_pos _).ne'
   have h3 : E^k * E⁻¹^k = 1 := by rw [← mul_pow, mul_inv_cancel₀ hE, one_pow]
@@ -845,7 +849,7 @@ theorem ToroidalFourier.fiber (α : ℂ) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t < 1)
 `c_n = t^n (α)_n 𝐅(α, α+n; n+1; t²)`, `∑_{n ≥ 1} (Eⁿ + E⁻ⁿ) c_n = (1-tE)^{-α}(1-t/E)^{-α} - c_0`. -/
 theorem ToroidalFourier.binomial_product (α : ℂ) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t < 1) {E : ℂ}
     (hE : ‖E‖ = 1) :
-    HasSum (fun j : ℕ => (E^(j+1) + E⁻¹^(j+1)) * ((t:ℂ)^(j+1) * poch α (j+1) *
+    HasSum (fun j : ℕ => (E^(j+1) + E⁻¹^(j+1)) * ((t:ℂ)^(j+1) * pochhammer α (j+1) *
         regularizedGaussHGFun α (α+(j+1:ℕ)) ((j+1:ℕ)+1) ((t:ℂ)^2)))
       ((1 - (t:ℂ)*E)^(-α) * (1 - (t:ℂ)*E⁻¹)^(-α) -
         regularizedGaussHGFun α α 1 ((t:ℂ)^2)) := by
@@ -857,15 +861,15 @@ theorem ToroidalFourier.binomial_product (α : ℂ) {t : ℝ} (ht0 : 0 ≤ t) (h
     exact ht1
   have hs1 := hasSum_one_sub_cpow_neg α hn1
   have hs2 := hasSum_one_sub_cpow_neg α hn2
-  have hsm : Summable (fun x : ℕ × ℕ => (poch α x.1 / (x.1 ! : ℂ) * ((t:ℂ)*E)^x.1) *
-      (poch α x.2 / (x.2 ! : ℂ) * ((t:ℂ)*E⁻¹)^x.2)) :=
-    summable_mul_of_summable_norm (f := fun j : ℕ => poch α j / (j ! : ℂ) * ((t:ℂ)*E)^j)
-      (g := fun j : ℕ => poch α j / (j ! : ℂ) * ((t:ℂ)*E⁻¹)^j)
+  have hsm : Summable (fun x : ℕ × ℕ => (pochhammer α x.1 / (x.1 ! : ℂ) * ((t:ℂ)*E)^x.1) *
+      (pochhammer α x.2 / (x.2 ! : ℂ) * ((t:ℂ)*E⁻¹)^x.2)) :=
+    summable_mul_of_summable_norm (f := fun j : ℕ => pochhammer α j / (j ! : ℂ) * ((t:ℂ)*E)^j)
+      (g := fun j : ℕ => pochhammer α j / (j ! : ℂ) * ((t:ℂ)*E⁻¹)^j)
       (ToroidalFourier.binomial_norm_summable α hn1) (ToroidalFourier.binomial_norm_summable α hn2)
   have hF := HasSum.mul hs1 hs2 hsm
   obtain ⟨a, b, ha, hb, hab⟩ := ToroidalFourier.diag_split hF
-    (gp := fun n => E^n * (t:ℂ)^n * poch α n * regularizedGaussHGFun α (α+n) (n+1) ((t:ℂ)^2))
-    (gm := fun n => E⁻¹^(n+1) * (t:ℂ)^(n+1) * poch α (n+1) *
+    (gp := fun n => E^n * (t:ℂ)^n * pochhammer α n * regularizedGaussHGFun α (α+n) (n+1) ((t:ℂ)^2))
+    (gm := fun n => E⁻¹^(n+1) * (t:ℂ)^(n+1) * pochhammer α (n+1) *
       regularizedGaussHGFun α (α+(n+1:ℕ)) ((n+1:ℕ)+1) ((t:ℂ)^2))
     (fun n => by
       have h := ToroidalFourier.fiber α ht0 ht1 hE0 n
@@ -879,9 +883,9 @@ theorem ToroidalFourier.binomial_product (α : ℂ) {t : ℝ} (ht0 : 0 ≤ t) (h
   have ha' := (hasSum_nat_add_iff' 1).mpr ha
   simp only [Finset.range_one, Finset.sum_singleton] at ha'
   have hsum := ha'.add hb
-  rw [show a - (E^0 * (t:ℂ)^0 * poch α 0 *
+  rw [show a - (E^0 * (t:ℂ)^0 * pochhammer α 0 *
       regularizedGaussHGFun α (α+(0:ℕ)) ((0:ℕ)+1) ((t:ℂ)^2)) + b
-    = a + b - regularizedGaussHGFun α α 1 ((t:ℂ)^2) by simp [poch]; ring, hab] at hsum
+    = a + b - regularizedGaussHGFun α α 1 ((t:ℂ)^2) by simp [pochhammer]; ring, hab] at hsum
   convert hsum using 1
   funext j
   ring
@@ -972,7 +976,7 @@ theorem ToroidalFourier.coeff (μ : ℂ) {ξ : ℝ} (hξ : 0 < ξ) (n : ℕ) :
   have h2 : ((Real.exp (-ξ):ℂ))^2 = (Real.exp (-2*ξ):ℂ) := by
     rw [← ofReal_pow, ← Real.exp_nat_mul]; push_cast; ring_nf
   rw [toroidalQ_hypergeometric (n:ℂ) μ hξ,
-      ← regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ ht, h2,
+      ← regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ ht, h2,
     show (n:ℂ)+μ+1/2 = μ+1/2+n by ring]
   have he : exp (((n:ℂ)+1/2)*ξ) = exp (ξ/2) * (((Real.exp (-ξ):ℂ))^n)⁻¹ := by
     rw [← ofReal_pow, ← Real.exp_nat_mul, ofReal_exp, ← exp_neg, ← exp_add]; congr 1;
@@ -1013,7 +1017,7 @@ theorem toroidalQ_fourier {μ : ℂ} (hμ : -1/2 < μ.re) {ξ : ℝ} (hξ : 0 < 
     rw [ofReal_cos, Complex.cos, ← exp_nat_mul, inv_pow, ← exp_nat_mul, ← exp_neg]
     congr 2 <;> push_cast <;> ring_nf
   rw [hc]
-  simp only [poch]
+  simp only [pochhammer]
   ring
 
 /-- DLMF 14.19.7 (Whipple): for natural `n, m` and `ξ > 0`, `P^m_{n-1/2}(cosh ξ) =

@@ -105,7 +105,7 @@ theorem laplace_kummerU_gauss_of_re_pos {a b c z : ℂ}
     IntegrableOn (tricomiLaplaceKernel a b c z) (Ioi 0) ∧
       (∫ t : ℝ in Ioi 0, tricomiLaplaceKernel a b c z t) =
         Gamma b * Gamma (b - c + 1) *
-          regularizedGaussHG b (b - c + 1) (a + b - c + 1) (1 - z) := by
+          regularizedGaussHypergeometric b (b - c + 1) (a + b - c + 1) (1 - z) := by
   let F (t u : ℝ) : ℂ := exp (-(z + u) * t) * (t : ℂ) ^ (b - 1) *
     (u : ℂ) ^ (a - 1) * (1 + (u : ℂ)) ^ (c - a - 1)
   have hi : Integrable (Function.uncurry F)
@@ -145,13 +145,13 @@ theorem laplace_kummerU_gauss {a b c z : ℂ}
     IntegrableOn (tricomiLaplaceKernel a b c z) (Ioi 0) ∧
       (∫ t : ℝ in Ioi 0, tricomiLaplaceKernel a b c z t) =
         Gamma b * Gamma (b - c + 1) *
-          regularizedGaussHG b (b - c + 1) (a + b - c + 1) (1 - z) := by
+          regularizedGaussHypergeometric b (b - c + 1) (a + b - c + 1) (1 - z) := by
   have hshift : ∀ N : ℕ, ∀ a b c z : ℂ,
       0 < a.re + N → 0 < b.re → (c - 1).re < b.re → 0 < z.re →
       IntegrableOn (tricomiLaplaceKernel a b c z) (Ioi 0) ∧
         (∫ t : ℝ in Ioi 0, tricomiLaplaceKernel a b c z t) =
           Gamma b * Gamma (b - c + 1) *
-            regularizedGaussHG b (b - c + 1) (a + b - c + 1) (1 - z) := by
+            regularizedGaussHypergeometric b (b - c + 1) (a + b - c + 1) (1 - z) := by
     intro N
     induction N with
     | zero => intro a b c z ha hb hbc hz;
@@ -180,7 +180,8 @@ theorem laplace_kummerU_gauss {a b c z : ℂ}
         Gamma_add_one _ (ne_zero_of_re_pos hb)]
       have hw : 1 - z ∈ cutPlane := by
         change 1 - (1 - z) ∈ slitPlane; rw [sub_sub_cancel]; exact Or.inl hz
-      have hg := regularizedGaussHG_contiguous_a_succ_c_pred b (b - c + 1) ((a + b - c + 1) + 1) hw
+      have hg := regularizedGaussHypergeometric_contiguous_a_succ_c_pred b (b - c + 1)
+          ((a + b - c + 1) + 1) hw
       rw [add_sub_cancel_right] at hg
       linear_combination (Gamma b * Gamma (b - c + 1)) * hg
   obtain ⟨N, hN⟩ := exists_nat_gt (-a.re)

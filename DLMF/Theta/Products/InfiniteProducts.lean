@@ -94,8 +94,9 @@ private lemma differentiable_qPochhammerInf {q : ℂ} (hq : ‖q‖ < 1) :
   have := (hd a₀ hmem).differentiableAt (hU.mem_nhds hmem)
   simpa only [qPochhammerInf, sub_eq_add_neg] using this
 
-/-- `θ₁(z|τ) = 2 q^{1/4} sin z (Q;Q)_∞ (Q e^{2iz};Q)_∞ (Q e^{-2iz};Q)_∞`, `Q = q²` (helper). -/
-private lemma jacobiThetaOneTau_eq_qPochhammerInf (z : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
+/-- DLMF 20.5.1 in `q`-Pochhammer form:
+`θ₁(z|τ) = 2 q^{1/4} sin z (Q;Q)_∞ (Q e^{2iz};Q)_∞ (Q e^{-2iz};Q)_∞`, `Q = q²`. -/
+theorem jacobiThetaOneTau_eq_qPochhammerInf (z : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
     jacobiThetaOneTau z τ = 2 * cexp (π * I * τ / 4) * sin z *
       (qPochhammerInf (cexp (π * I * τ) ^ 2) (cexp (π * I * τ) ^ 2) *
         qPochhammerInf (cexp (π * I * τ) ^ 2 * cexp (2 * I * z)) (cexp (π * I * τ) ^ 2) *

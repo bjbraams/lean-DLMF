@@ -19,7 +19,7 @@ Both solve the inhomogeneous Airy equation `w'' = z w ± 1/π`.
 * `scorerHi`, `scorerHiCoeff`: `Hi` and its Maclaurin coefficients (DLMF 9.12.17).
 * `scorerGi`: the complementary function, with `Gi + Hi = Bi`.
 * `scorerHiDeriv`, `scorerGiDeriv`: the derivatives.
-* `IsScorerSol`: solutions of `w'' = z w + 1/π` on all of `ℂ`.
+* `IsScorerSolution`: solutions of `w'' = z w + 1/π` on all of `ℂ`.
 
 ## Main results
 
@@ -60,7 +60,7 @@ def scorerHiDeriv : ℂ → ℂ := deriv scorerHi
 def scorerGiDeriv : ℂ → ℂ := deriv scorerGi
 
 /-- The inhomogeneous Airy equation with forcing 1/π. -/
-def IsScorerSol (w w' : ℂ → ℂ) : Prop :=
+def IsScorerSolution (w w' : ℂ → ℂ) : Prop :=
   ∀ z, HasDerivAt w (w' z) z ∧ HasDerivAt w' (z * w z + 1 / π) z
 
 /-- The three-step recurrence `c_{k+3}(k+3)(k+2) = c_k` of the Hi coefficients. -/
@@ -183,7 +183,7 @@ theorem hasDerivAt_scorerHi (z : ℂ) : HasDerivAt scorerHi (scorerHiDeriv z) z 
 theorem scorerGiDeriv_eq (z : ℂ) : scorerGiDeriv z = airyBiDeriv z - scorerHiDeriv z :=
   ((hasDerivAt_airyBi z).sub (hasDerivAt_scorerHi z)).deriv
 
-/-- `exp(-ε·2πi/3)` is a cube root of unity for `ε = ±1`. -/
+/-- `exp(-ε·2πi/3)` is a unitCube root of unity for `ε = ±1`. -/
 theorem exp_neg_eps_cube {ε : ℝ} (hε : ε = 1 ∨ ε = -1) : exp (-ε * (2 * π * I / 3)) ^ 3 = 1 := by
   rcases hε with rfl | rfl
   · simpa using omega_recip_cube
@@ -197,14 +197,14 @@ theorem scorerGi_entire  :
 /-- `Hi` solves the inhomogeneous Airy equation `w'' = z w + 1/π` (DLMF 9.12.1). -/
 @[dlmf 9.12.E1]
 theorem scorerHi_ode  :
-    IsScorerSol scorerHi scorerHiDeriv := by
+    IsScorerSolution scorerHi scorerHiDeriv := by
   exact fun z =>
     ⟨hasDerivAt_scorerHi z, hasDerivAt_scorerHiDeriv z⟩
 
 /-- `-Gi` solves `w'' = z w + 1/π`, that is, `Gi'' = z Gi - 1/π` (DLMF 9.12.3). -/
 @[dlmf 9.12.E3]
 theorem scorerGi_ode  :
-    IsScorerSol (fun z => -scorerGi z) (fun z => -scorerGiDeriv z) := by
+    IsScorerSolution (fun z => -scorerGi z) (fun z => -scorerGiDeriv z) := by
   intro z
   have hG : scorerGiDeriv = fun z => airyBiDeriv z - scorerHiDeriv z := funext scorerGiDeriv_eq
   refine ⟨((hasDerivAt_airyBi z).sub (hasDerivAt_scorerHi z)).neg.congr_deriv
@@ -216,7 +216,8 @@ theorem scorerGi_ode  :
 /-- For `ε = ±1`, `e^{-2πiε/3} Hi(z e^{-2πiε/3})` solves `w'' = z w + 1/π` (DLMF 9.12.3). -/
 @[dlmf 9.12.E3]
 theorem scorerHi_rotated_ode {ε : ℝ} (hε : ε = 1 ∨ ε = -1) :
-    IsScorerSol (fun z => exp (-ε * (2 * π * I / 3)) * scorerHi (z * exp (-ε * (2 * π * I / 3))))
+    IsScorerSolution (fun z => exp (-ε * (2 * π * I / 3)) *
+        scorerHi (z * exp (-ε * (2 * π * I / 3))))
       (fun z => exp (-ε * (4 * π * I / 3)) * scorerHiDeriv (z * exp (-ε * (2 * π * I / 3)))) := by
   set ω := exp (-ε * (2 * π * I / 3)) with hω
   have h3 : ω ^ 3 = 1 := exp_neg_eps_cube hε
@@ -236,17 +237,18 @@ theorem scorerHi_rotated_ode {ε : ℝ} (hε : ε = 1 ∨ ε = -1) :
 /-- Every solution of `w'' = z w + 1/π` is a particular solution plus a combination of two
 independent Airy solutions (DLMF 9.12.2). -/
 @[dlmf 9.12.E2]
-theorem scorer_general_solution {w w' p p' f f' g g' : ℂ → ℂ} (hw : IsScorerSol w w')
-    (hp : IsScorerSol p p')
-    (hf : IsAirySol f f') (hg : IsAirySol g g') (hind : f 0 * g' 0 - f' 0 * g 0 ≠ 0) :
+theorem scorer_general_solution {w w' p p' f f' g g' : ℂ → ℂ} (hw : IsScorerSolution w w')
+    (hp : IsScorerSolution p p')
+    (hf : IsAirySolution f f') (hg : IsAirySolution g g') (hind : f 0 * g' 0 - f' 0 * g 0 ≠ 0) :
     ∃ a b : ℂ, ∀ z, w z = a * f z + b * g z + p z := by
   set D := f 0 * g' 0 - f' 0 * g 0
   set u0 := w 0 - p 0
   set u1 := w' 0 - p' 0
   refine ⟨(u0 * g' 0 - u1 * g 0) / D, (f 0 * u1 - f' 0 * u0) / D, fun z => ?_⟩
-  have hu : IsAirySol (fun z => w z - p z) (fun z => w' z - p' z) := fun z =>
+  have hu : IsAirySolution (fun z => w z - p z) (fun z => w' z - p' z) := fun z =>
     ⟨(hw z).1.sub (hp z).1, ((hw z).2.sub (hp z).2).congr_deriv (by ring)⟩
-  have hs : IsAirySol (fun z => (u0 * g' 0 - u1 * g 0) / D * f z + (f 0 * u1 - f' 0 * u0) / D * g z)
+  have hs : IsAirySolution
+      (fun z => (u0 * g' 0 - u1 * g 0) / D * f z + (f 0 * u1 - f' 0 * u0) / D * g z)
       (fun z => (u0 * g' 0 - u1 * g 0) / D * f' z + (f 0 * u1 - f' 0 * u0) / D * g' z) :=
     fun z => ⟨((hf z).1.const_mul _).add ((hg z).1.const_mul _),
       (((hf z).2.const_mul _).add ((hg z).2.const_mul _)).congr_deriv (by ring)⟩

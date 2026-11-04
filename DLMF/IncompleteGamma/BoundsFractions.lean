@@ -25,19 +25,20 @@ inequalities for the incomplete Gamma functions in DLMF §8.10.
 
 ## Main results
 
-* `scIncGamma_continuedFraction`, `upperIncGamma_continuedFraction_complex`: the continued
-  fractions DLMF 8.9.1 and 8.9.2.
-* `upperIncGamma_bound_le_one`, `upperIncGamma_bound_ge_one`, `lowerIncGamma_bound_ge`,
-  `lowerIncGamma_bound_le`: the elementary bounds DLMF 8.10.1 and 8.10.2.
+* `tricomiIncompleteGamma_continuedFraction`, `upperIncompleteGamma_continuedFraction_complex`: the
+  continued fractions DLMF 8.9.1 and 8.9.2.
+* `upperIncompleteGamma_bound_le_one`, `upperIncompleteGamma_bound_ge_one`,
+  `lowerIncompleteGamma_bound_ge`, `lowerIncompleteGamma_bound_le`: the elementary bounds DLMF
+  8.10.1 and 8.10.2.
 * `Real.upperGammaTheta_identity`, `Real.upperGammaTheta_bounds`: DLMF 8.10.3 and 8.10.4.
 * `Real.upperGammaPade_bounds`, `Real.upperGammaPade_first`: DLMF 8.10.5 and 8.10.6.
 * `incompleteGamma_positive_exponential_integral`: DLMF 8.10.7.
 * `incompleteGamma_positive_exponential_bounds`, `incompleteGamma_positive_exponential_limit`:
   DLMF 8.10.8 for `a > 0` and its limit at `a = 0`.
-* `upperIncGamma_power_bounds`, `upperIncGamma_power_bounds_zero_limit`: DLMF 8.10.10.
-* `normIncGammaP_exponential_bounds`, `normIncGammaP_exponential_bounds_strict`: Alzer's
-  bounds DLMF 8.10.11.
-* `normIncGammaQ_diagonal_bounds`: DLMF 8.10.13.
+* `upperIncompleteGamma_power_bounds`, `upperIncompleteGamma_power_bounds_zero_limit`: DLMF 8.10.10.
+* `regularizedGamma_exponential_bounds`,
+  `regularizedGamma_exponential_bounds_strict`: Alzer's bounds DLMF 8.10.11.
+* `regularizedIncompleteGammaQ_diagonal_bounds`: DLMF 8.10.13.
 
 ## Implementation notes
 
@@ -57,16 +58,16 @@ open DLMF.Statistical
 
 /-- Continued-fraction representation: `HasContinuedFraction (fun k => if k=0 then 1 else if Odd k
 then -(if k=1 then 1 else ((k-1 : ℕ)/2 : ℂ)+a)*z else ((k : ℕ)/2 : ℂ)*z) (fun k => if k=0 then
-1 else a+k) (Gamma (a+1)*exp z*scIncGamma a z)`. -/
+1 else a+k) (Gamma (a+1)*exp z*tricomiIncompleteGamma a z)`. -/
 @[dlmf 8.9.E1]
-theorem scIncGamma_continuedFraction {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(n+1)) (z : ℂ) :
+theorem tricomiIncompleteGamma_continuedFraction {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(n+1)) (z : ℂ) :
     HasContinuedFraction
         (fun k => if k=0 then 1 else if Odd k then -(if k=1 then 1 else ((k-1 : ℕ)/2 : ℂ)+a)*z else
         ((k : ℕ)/2 : ℂ)*z) (fun k => if k=0 then 1 else a+k)
-        (Gamma (a+1)*exp z*scIncGamma a z) := by
+        (Gamma (a+1)*exp z*tricomiIncompleteGamma a z) := by
   have hc : ∀ k : ℕ, a + 1 ≠ -k := fun k h => ha k (by linear_combination h)
-  have hval : Gamma (a + 1) * exp z * scIncGamma a z = kummerM 1 (a + 1) z := by
-    rw [scIncGamma, kummerM_eq_mul_regularizedHGFun hc,
+  have hval : Gamma (a + 1) * exp z * tricomiIncompleteGamma a z = kummerM 1 (a + 1) z := by
+    rw [tricomiIncompleteGamma, kummerM_eq_mul_regularizedHGFun hc,
       show Gamma (a + 1) * exp z * (exp (-z) * regularizedHGFun {1} {a + 1} z) =
         Gamma (a + 1) * regularizedHGFun {1} {a + 1} z * (exp z * exp (-z)) by ring,
       ← Complex.exp_add, add_neg_cancel, Complex.exp_zero, mul_one]
@@ -91,7 +92,7 @@ theorem scIncGamma_continuedFraction {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(n+1)) 
     rw [kummerM_zero]
     refine tendsto_const_nhds.congr' ?_
     filter_upwards [eventually_ge_atTop 1] with n hn
-    rw [IncompleteGammaFractions.cfTail_freeze (by simp [A]) hn, hA0]
+    rw [IncompleteGammaFractions.continuedFractionTail_freeze (by simp [A]) hn, hA0]
     simp
   · refine (IncompleteGammaFractions.hasContinuedFraction_iff ?_ _).mpr ?_
     · intro k _
@@ -100,21 +101,21 @@ theorem scIncGamma_continuedFraction {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(n+1)) 
       (fun k hk => by simp [show k ≠ 0 by omega])
 
 /-- Continued-fraction representation: `HasContinuedFraction (fun k => if k=0 then z⁻¹ else (if
-Odd k then ((k+1)/2 : ℕ)-a else ((k/2 : ℕ) : ℂ))/z) (fun _ => 1) (z^(-a)*exp z*upperIncGamma a
-z)`. -/
+Odd k then ((k+1)/2 : ℕ)-a else ((k/2 : ℕ) : ℂ))/z) (fun _ => 1) (z^(-a)*exp z*upperIncompleteGamma
+a z)`. -/
 @[dlmf 8.9.E2]
-theorem upperIncGamma_continuedFraction_complex (a : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
+theorem upperIncompleteGamma_continuedFraction_complex (a : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     HasContinuedFraction
         (fun k => if k=0 then z⁻¹ else (if Odd k then ((k+1)/2 : ℕ)-a else ((k/2 : ℕ) : ℂ))/z)
-        (fun _ => 1) (z^(-a)*exp z*upperIncGamma a z) := by
+        (fun _ => 1) (z^(-a)*exp z*upperIncompleteGamma a z) := by
   sorry
 
-/-- Estimate under the stated parameter and domain assumptions: `x^(1-a)*Real.exp x*(upperIncGamma
-a x).re ≤ 1`. -/
+/-- Estimate under the stated parameter and domain assumptions:
+`x^(1-a)*Real.exp x*(upperIncompleteGamma a x).re ≤ 1`. -/
 @[dlmf 8.10.E1]
-theorem upperIncGamma_bound_le_one {a x : ℝ} (ha1 : a ≤ 1) (hx : 0 < x) :
-    x^(1-a)*Real.exp x*(upperIncGamma a x).re ≤ 1 := by
-  have h := IncompleteGammaRealIntegrals.upperIncGamma_re_le ha1 hx
+theorem upperIncompleteGamma_bound_le_one {a x : ℝ} (ha1 : a ≤ 1) (hx : 0 < x) :
+    x^(1-a)*Real.exp x*(upperIncompleteGamma a x).re ≤ 1 := by
+  have h := IncompleteGammaRealIntegrals.upperIncompleteGamma_re_le ha1 hx
   have e : x^(1-a)*Real.exp x*(x^(a-1)*Real.exp (-x)) = 1 := by
     rw [show x^(1-a)*Real.exp x*(x^(a-1)*Real.exp (-x)) =
         (x^(1-a)*x^(a-1))*(Real.exp x*Real.exp (-x)) by ring,
@@ -123,11 +124,11 @@ theorem upperIncGamma_bound_le_one {a x : ℝ} (ha1 : a ≤ 1) (hx : 0 < x) :
     _ = 1 := e
 
 /-- Estimate under the stated parameter and domain assumptions: `1 ≤ x^(1-a)*Real.exp
-x*(upperIncGamma a x).re`. -/
+x*(upperIncompleteGamma a x).re`. -/
 @[dlmf 8.10.E1]
-theorem upperIncGamma_bound_ge_one {a x : ℝ} (ha : 1 ≤ a) (hx : 0 < x) :
-    1 ≤ x^(1-a)*Real.exp x*(upperIncGamma a x).re := by
-  have h := IncompleteGammaRealIntegrals.upperIncGamma_re_ge ha hx
+theorem upperIncompleteGamma_bound_ge_one {a x : ℝ} (ha : 1 ≤ a) (hx : 0 < x) :
+    1 ≤ x^(1-a)*Real.exp x*(upperIncompleteGamma a x).re := by
+  have h := IncompleteGammaRealIntegrals.upperIncompleteGamma_re_ge ha hx
   have e : x^(1-a)*Real.exp x*(x^(a-1)*Real.exp (-x)) = 1 := by
     rw [show x^(1-a)*Real.exp x*(x^(a-1)*Real.exp (-x)) =
         (x^(1-a)*x^(a-1))*(Real.exp x*Real.exp (-x)) by ring,
@@ -138,17 +139,17 @@ theorem upperIncGamma_bound_ge_one {a x : ℝ} (ha : 1 ≤ a) (hx : 0 < x) :
 /-- The first-order real incomplete-Gamma remainder ratio. -/
 @[dlmf 8.10.E3]
 def Real.upperGammaTheta (a x : ℝ) : ℝ :=
-  if a=1 then 1 else (x^(1-a)*Real.exp x*(upperIncGamma a x).re-1)*x/(a-1)
+  if a=1 then 1 else (x^(1-a)*Real.exp x*(upperIncompleteGamma a x).re-1)*x/(a-1)
 
-/-- Identity under the stated parameter and domain assumptions: `x^(1-a)*Real.exp x*(upperIncGamma
-a x).re=1+(a-1)/x*Real.upperGammaTheta a x`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`x^(1-a)*Real.exp x*(upperIncompleteGamma a x).re=1+(a-1)/x*Real.upperGammaTheta a x`. -/
 @[dlmf 8.10.E3]
 theorem Real.upperGammaTheta_identity {a x : ℝ} (hx : 0 < x) :
-    x^(1-a)*Real.exp x*(upperIncGamma a x).re=1+(a-1)/x*Real.upperGammaTheta a x := by
+    x^(1-a)*Real.exp x*(upperIncompleteGamma a x).re=1+(a-1)/x*Real.upperGammaTheta a x := by
   rw [Real.upperGammaTheta]
   split_ifs with h
   · subst h
-    rw [ofReal_one, upperIncGamma_one, ← ofReal_neg, ← ofReal_exp, ofReal_re, sub_self,
+    rw [ofReal_one, upperIncompleteGamma_one, ← ofReal_neg, ← ofReal_exp, ofReal_re, sub_self,
       Real.rpow_zero, one_mul, ← Real.exp_add, add_neg_cancel, Real.exp_zero]
     ring
   · have h1 : a - 1 ≠ 0 := sub_ne_zero.mpr h
@@ -162,11 +163,11 @@ theorem Real.upperGammaTheta_limit (a : ℝ) :
   · subst ha
     exact tendsto_const_nhds.congr fun x => by simp [Real.upperGammaTheta]
   have ha1 : (a:ℝ) - 1 ≠ 0 := sub_ne_zero.mpr ha
-  have h := hasAsymptoticExpansion_upperIncGamma (a:ℂ) 2
+  have h := hasAsymptoticExpansion_upperIncompleteGamma (a:ℂ) 2
   simp only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add, pow_zero, one_mul,
     smul_eq_mul] at h
-  set D : ℝ → ℂ := fun x => upperIncGamma a x - (exp (-(x:ℂ)) * (x:ℂ)^((a:ℂ)-1-((0:ℕ):ℂ)) *
-    poch (1-a) 0 + exp (-(x:ℂ)) * (x:ℂ)^((a:ℂ)-1-((1:ℕ):ℂ)) * ((-1)^1*poch (1-a) 1))
+  set D : ℝ → ℂ := fun x => upperIncompleteGamma a x - (exp (-(x:ℂ)) * (x:ℂ)^((a:ℂ)-1-((0:ℕ):ℂ)) *
+    pochhammer (1-a) 0 + exp (-(x:ℂ)) * (x:ℂ)^((a:ℂ)-1-((1:ℕ):ℂ)) * ((-1)^1*pochhammer (1-a) 1))
   have hf := (isBigO_refl (fun x : ℝ => (x:ℂ)^(2-(a:ℂ))*exp (x:ℂ)) atTop).mul h
   -- the comparison function tends to zero
   have hg : Tendsto (fun x : ℝ =>
@@ -192,12 +193,12 @@ theorem Real.upperGammaTheta_limit (a : ℝ) :
     simp only [Function.comp_apply, D]
     have hc : (x:ℂ)^(2-(a:ℂ))*cexp x = ((x^(2-a)*Real.exp x : ℝ):ℂ) := by
       rw [ofReal_mul, ofReal_cpow hx.le, ofReal_exp]; push_cast; ring
-    have hsum : exp (-(x:ℂ)) * (x:ℂ)^((a:ℂ)-1-((0:ℕ):ℂ)) * poch (1-a) 0 +
-        exp (-(x:ℂ)) * (x:ℂ)^((a:ℂ)-1-((1:ℕ):ℂ)) * ((-1)^1*poch (1-a) 1) =
+    have hsum : exp (-(x:ℂ)) * (x:ℂ)^((a:ℂ)-1-((0:ℕ):ℂ)) * pochhammer (1-a) 0 +
+        exp (-(x:ℂ)) * (x:ℂ)^((a:ℂ)-1-((1:ℕ):ℂ)) * ((-1)^1*pochhammer (1-a) 1) =
         ((Real.exp (-x) * x^(a-1) - Real.exp (-x) * x^(a-2) * (1-a) : ℝ) : ℂ) := by
       push_cast
       rw [ofReal_cpow hx.le, ofReal_cpow hx.le]
-      simp [poch]
+      simp [pochhammer]
       ring_nf
     rw [hc, hsum, re_ofReal_mul, sub_re, ofReal_re, Real.upperGammaTheta]
     simp only [ha, ↓reduceIte]
@@ -223,16 +224,17 @@ theorem Real.upperGammaTheta_bounds {a x : ℝ} (ha : a ≤ 2) (hx : 0 < x) :
   by_cases h1 : a = 1
   · simp [Real.upperGammaTheta, h1]
   have hx0 : (x:ℂ) ≠ 0 := ofReal_ne_zero.mpr hx.ne'
-  have hrec := upperIncGamma_add_one ((a:ℂ)-1) hx0
+  have hrec := upperIncompleteGamma_add_one ((a:ℂ)-1) hx0
   rw [sub_add_cancel] at hrec
   have e : ((x:ℂ)^((a:ℂ)-1)*exp (-(x:ℂ))).re = x^(a-1)*Real.exp (-x) := by
     rw [show (a:ℂ)-1 = ((a-1:ℝ):ℂ) by push_cast; ring, ← ofReal_cpow hx.le, ← ofReal_neg,
       ← ofReal_exp, ← ofReal_mul, ofReal_re]
-  have hre : (upperIncGamma a x).re = (a-1)*(upperIncGamma ((a-1:ℝ):ℂ) x).re +
+  have hre : (upperIncompleteGamma a x).re = (a-1)*(upperIncompleteGamma ((a-1:ℝ):ℂ) x).re +
       x^(a-1)*Real.exp (-x) := by
     rw [hrec, add_re, e]; push_cast
     simp [Complex.mul_re]
-  have hθ : Real.upperGammaTheta a x = x^(2-a)*Real.exp x*(upperIncGamma ((a-1:ℝ):ℂ) x).re := by
+  have hθ : Real.upperGammaTheta a x =
+      x^(2-a)*Real.exp x*(upperIncompleteGamma ((a-1:ℝ):ℂ) x).re := by
     have ha1 : a - 1 ≠ 0 := sub_ne_zero.mpr h1
     simp only [Real.upperGammaTheta, h1, ↓reduceIte]
     rw [hre]
@@ -242,12 +244,12 @@ theorem Real.upperGammaTheta_bounds {a x : ℝ} (ha : a ≤ 2) (hx : 0 < x) :
     rw [hv]
     field_simp
     linear_combination Real.exp x*Real.exp (-x)*hu + hee
-  have hle := IncompleteGammaRealIntegrals.upperIncGamma_re_le (a := a-1) (by linarith) hx
-  have hpos := IncompleteGammaRealIntegrals.upperIncGamma_re_pos (a := a-1) hx
+  have hle := IncompleteGammaRealIntegrals.upperIncompleteGamma_re_le (a := a-1) (by linarith) hx
+  have hpos := IncompleteGammaRealIntegrals.upperIncompleteGamma_re_pos (a := a-1) hx
       (IncompleteGammaRealIntegrals.integrableOn_rpow_exp_of_le_one (by linarith) hx)
   rw [hθ]
   refine ⟨by positivity, ?_⟩
-  calc x^(2-a)*Real.exp x*(upperIncGamma ((a-1:ℝ):ℂ) x).re ≤
+  calc x^(2-a)*Real.exp x*(upperIncompleteGamma ((a-1:ℝ):ℂ) x).re ≤
          x^(2-a)*Real.exp x*(x^(a-1-1)*Real.exp (-x)) := by
         gcongr
     _ = 1 := by
@@ -257,23 +259,25 @@ theorem Real.upperGammaTheta_bounds {a x : ℝ} (ha : a ≤ 2) (hx : 0 < x) :
 
 /-- Finite Legendre convergents giving A_n and B_n. -/
 def Real.upperGammaPade (upper : Bool) (n : ℕ) (a x : ℝ) : ℝ :=
-  (cfTail (fun k => if k=0 then x else if Odd k then ((k+1)/2 : ℕ)-a else ((k/2 : ℕ) : ℝ))
+  (continuedFractionTail
+      (fun k => if k=0 then x else if Odd k then ((k+1)/2 : ℕ)-a else ((k/2 : ℕ) : ℝ))
       (fun k => if Even k then (x : ℂ) else 1) 0 (2*n+if upper then 1 else 0)).re
 
 /-- Estimate under the stated parameter and domain assumptions: `Real.upperGammaPade false n a x <
-x^(1-a)*Real.exp x*(upperIncGamma a x).re ∧ x^(1-a)*Real.exp x*(upperIncGamma a x).re <
-Real.upperGammaPade true n a x`. -/
+x^(1-a)*Real.exp x*(upperIncompleteGamma a x).re ∧ x^(1-a)*Real.exp x*(upperIncompleteGamma a x).re
+< Real.upperGammaPade true n a x`. -/
 @[dlmf 8.10.E5]
 theorem Real.upperGammaPade_bounds {a x : ℝ} (ha : a < 1) (hx : 0 < x) {n : ℕ} (hn : 1 ≤ n) :
-    Real.upperGammaPade false n a x < x^(1-a)*Real.exp x*(upperIncGamma a x).re ∧
-        x^(1-a)*Real.exp x*(upperIncGamma a x).re < Real.upperGammaPade true n a x := by
+    Real.upperGammaPade false n a x < x^(1-a)*Real.exp x*(upperIncompleteGamma a x).re ∧
+        x^(1-a)*Real.exp x*(upperIncompleteGamma a x).re < Real.upperGammaPade true n a x := by
   have key : ∀ (u : Bool), Real.upperGammaPade u n a x =
       (GenContFract.ofFun 0 (IncompleteGammaFractions.padeNumerator a x)
           (DLMF.Statistical.gammaIncCFDen x)).convs
         (2*n+if u then 1 else 0) := by
     intro u
     rw [Real.upperGammaPade,
-        IncompleteGammaFractions.cfTail_ofReal (a := IncompleteGammaFractions.padeNumerator a x)
+        IncompleteGammaFractions.continuedFractionTail_ofReal
+            (a := IncompleteGammaFractions.padeNumerator a x)
       (b := DLMF.Statistical.gammaIncCFDen x) (fun k => ?_) (fun k => ?_)
       (fun k _ => (IncompleteGammaFractions.padeNumerator_pos ha hx k).ne'), ofReal_re]
     · simp only [IncompleteGammaFractions.padeNumerator, DLMF.Statistical.gammaIncCFNum]
@@ -316,8 +320,8 @@ theorem Real.upperGammaPade_first {a x : ℝ} (ha : a < 1) (hx : 0 < x) :
   have d4 := hc (x^2+2*(3-a)*x+(2-a)*(3-a)) (by nlinarith)
   have hx0 := hc x hx
   push_cast at d1 d2 d3 d4
-  simp only [Real.upperGammaPade, cfTail]
-  simp [cfContinuants.eq_def, GenContFract.nextConts, GenContFract.nextNum,
+  simp only [Real.upperGammaPade, continuedFractionTail]
+  simp [continuedFractionContinuants.eq_def, GenContFract.nextConts, GenContFract.nextNum,
       GenContFract.nextDen, h1, h2,
     show ¬ Odd 2 by decide, show Odd 3 by decide, show ¬ Odd 4 by decide, show Odd 1 by decide,
     show Even 2 by decide, show ¬ Even 3 by decide, show Even 4 by decide, show ¬ Even 1 by decide]
@@ -339,12 +343,13 @@ theorem Real.upperGammaPade_first {a x : ℝ} (ha : a < 1) (hx : 0 < x) :
     ring
 
 /-- Identity under the stated parameter and domain assumptions: `(∫ t in (0 : ℝ)..x, (t :
-ℂ)^(a-1)*exp t)=Gamma a*(x : ℂ)^a*scIncGamma a (-x)`. -/
+ℂ)^(a-1)*exp t)=Gamma a*(x : ℂ)^a*tricomiIncompleteGamma a (-x)`. -/
 @[dlmf 8.10.E7]
 theorem incompleteGamma_positive_exponential_integral {a : ℂ} (ha : 0 < a.re) {x : ℝ} (hx : 0 < x) :
-    (∫ t in (0 : ℝ)..x, (t : ℂ)^(a-1)*exp t)=Gamma a*(x : ℂ)^a*scIncGamma a (-x) := by
+    (∫ t in (0 : ℝ)..x, (t : ℂ)^(a-1)*exp t)=Gamma a*(x : ℂ)^a*tricomiIncompleteGamma a (-x) := by
   have hG : Gamma a ≠ 0 := Complex.Gamma_ne_zero_of_re_pos ha
-  rw [scIncGamma_integral ha, ← mul_assoc, mul_assoc (Gamma a), mul_comm ((x:ℂ)^a), ← mul_assoc,
+  rw [tricomiIncompleteGamma_integral ha, ← mul_assoc, mul_assoc (Gamma a),
+      mul_comm ((x:ℂ)^a), ← mul_assoc,
     mul_one_div_cancel hG, one_mul]
   have hsub := intervalIntegral.integral_comp_mul_left (a := 0) (b := 1)
     (fun t : ℝ => (t : ℂ)^(a-1)*exp t) hx.ne'
@@ -486,14 +491,14 @@ theorem incompleteGamma_positive_exponential_bounds {a x : ℝ} (ha : 0 < a) (hx
         ∧ a*x^(-a)*Real.exp (-x)*(∫ t in (0 : ℝ)..x, t^(a-1)*Real.exp t) < (a+1)/(a+1+x) :=
   IncompleteGammaBounds.positive_exponential_bounds ha hx
 
-/-- The map `(fun a : ℝ => (exp (-x : ℂ)*Gamma (a+1)*scIncGamma a (-x)).re)` tends to `(𝓝
-(Real.exp (-x)))` along `(𝓝[>] 0)`. -/
+/-- The map `(fun a : ℝ => (exp (-x : ℂ)*Gamma (a+1)*tricomiIncompleteGamma a (-x)).re)` tends to
+`(𝓝 (Real.exp (-x)))` along `(𝓝[>] 0)`. -/
 @[dlmf 8.10.E8]
 theorem incompleteGamma_positive_exponential_limit {x : ℝ} :
-    Tendsto (fun a : ℝ => (exp (-x : ℂ)*Gamma (a+1)*scIncGamma a (-x)).re) (𝓝[>] 0)
+    Tendsto (fun a : ℝ => (exp (-x : ℂ)*Gamma (a+1)*tricomiIncompleteGamma a (-x)).re) (𝓝[>] 0)
         (𝓝 (Real.exp (-x))) := by
-  have h0 : scIncGamma 0 (-x) = 1 := by
-    have := scIncGamma_neg_nat 0 (-(x:ℂ)); simpa using this
+  have h0 : tricomiIncompleteGamma 0 (-x) = 1 := by
+    have := tricomiIncompleteGamma_neg_nat 0 (-(x:ℂ)); simpa using this
   have hG : ContinuousAt (fun a : ℝ => Gamma (a+1)) 0 := by
     have hd : DifferentiableAt ℂ Gamma ((0:ℝ)+1) := by
       refine Complex.differentiableAt_Gamma _ fun m => ?_
@@ -502,10 +507,11 @@ theorem incompleteGamma_positive_exponential_limit {x : ℝ} :
       simp at this
       linarith [(Nat.cast_nonneg m : (0:ℝ) ≤ m)]
     exact hd.continuousAt.comp (f := fun a : ℝ => (a:ℂ)+1) (by fun_prop)
-  have hc : ContinuousAt (fun a : ℝ => (exp (-x : ℂ)*Gamma (a+1)*scIncGamma a (-x)).re) 0 := by
+  have hc : ContinuousAt
+      (fun a : ℝ => (exp (-x : ℂ)*Gamma (a+1)*tricomiIncompleteGamma a (-x)).re) 0 := by
     refine Complex.continuous_re.continuousAt.comp ?_
     exact (continuousAt_const.mul hG).mul
-      ((continuous_scIncGamma_param _).comp continuous_ofReal).continuousAt
+      ((continuous_tricomiIncompleteGamma_param _).comp continuous_ofReal).continuousAt
   have := hc.tendsto.mono_left (nhdsWithin_le_nhds (s := Set.Ioi 0))
   convert this using 2
   simp only [ofReal_zero, zero_add, Complex.Gamma_one, h0, mul_one]
@@ -523,9 +529,9 @@ def Real.upperGammaDa (a : ℝ) : ℝ :=
 
 /-- At x=0 the displayed scaled formula uses its zero limit. -/
 @[dlmf 8.10.E10]
-theorem upperIncGamma_power_bounds {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx : 0 < x) :
-    x/(2*a)*((1+2/x)^a-1) < x^(1-a)*Real.exp x*(upperIncGamma a x).re ∧
-        x^(1-a)*Real.exp x*(upperIncGamma a x).re ≤
+theorem upperIncompleteGamma_power_bounds {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx : 0 < x) :
+    x/(2*a)*((1+2/x)^a-1) < x^(1-a)*Real.exp x*(upperIncompleteGamma a x).re ∧
+        x^(1-a)*Real.exp x*(upperIncompleteGamma a x).re ≤
         x/(a*Real.upperGammaCa a)*((1+Real.upperGammaCa a/x)^a-1) := by
   have hnp : ∀ k : ℕ, (a:ℂ) ≠ -k := by
     intro k h
@@ -533,10 +539,11 @@ theorem upperIncGamma_power_bounds {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx : 
     simp at this
     linarith [(Nat.cast_nonneg k : (0:ℝ) ≤ k)]
   have hx' : (x:ℂ) ≠ 0 := ofReal_ne_zero.mpr (ne_of_gt hx)
-  have h := lowerIncGamma_add_upperIncGamma hnp hx'
-  rw [lowerIncGamma_ofReal ha hx] at h
-  have hu : (upperIncGamma a x).re = Real.Gamma a - TauCeti.lowerIncompleteGamma a x := by
-    have : upperIncGamma a x = ((Real.Gamma a - TauCeti.lowerIncompleteGamma a x : ℝ) : ℂ) := by
+  have h := lowerIncompleteGamma_add_upperIncompleteGamma hnp hx'
+  rw [lowerIncompleteGamma_ofReal ha hx] at h
+  have hu : (upperIncompleteGamma a x).re = Real.Gamma a - TauCeti.lowerIncompleteGamma a x := by
+    have : upperIncompleteGamma a x =
+        ((Real.Gamma a - TauCeti.lowerIncompleteGamma a x : ℝ) : ℂ) := by
       rw [ofReal_sub, ← Complex.Gamma_ofReal]; linear_combination h
     rw [this, ofReal_re]
   have key : ∀ l : ℝ, 0 < l → x/(a*l)*((1+l/x)^a-1) =
@@ -561,11 +568,11 @@ theorem upperIncGamma_power_bounds {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx : 
     rw [key _ hc]
     exact (mul_lt_mul_of_pos_left (IncompleteGammaBounds.upper_lt ha ha1 hx) hP).le
 
-/-- The map `(fun x : ℝ => x^(1-a)*Real.exp x*(upperIncGamma a x).re)` tends to `(𝓝 0)` along
+/-- The map `(fun x : ℝ => x^(1-a)*Real.exp x*(upperIncompleteGamma a x).re)` tends to `(𝓝 0)` along
 `(𝓝[>] 0)`. -/
 @[dlmf 8.10.E10]
-theorem upperIncGamma_power_bounds_zero_limit {a : ℝ} (ha : 0 < a) (ha1 : a < 1) :
-    Tendsto (fun x : ℝ => x^(1-a)*Real.exp x*(upperIncGamma a x).re) (𝓝[>] 0) (𝓝 0) := by
+theorem upperIncompleteGamma_power_bounds_zero_limit {a : ℝ} (ha : 0 < a) (ha1 : a < 1) :
+    Tendsto (fun x : ℝ => x^(1-a)*Real.exp x*(upperIncompleteGamma a x).re) (𝓝[>] 0) (𝓝 0) := by
   have hnp : ∀ k : ℕ, (a:ℂ) ≠ -k := by
     intro k h
     have := congrArg Complex.re h
@@ -582,9 +589,10 @@ theorem upperIncGamma_power_bounds_zero_limit {a : ℝ} (ha : 0 < a) (ha1 : a < 
   refine this.congr' ?_
   filter_upwards [self_mem_nhdsWithin] with x hx
   have hx' : (x:ℂ) ≠ 0 := ofReal_ne_zero.mpr (ne_of_gt hx)
-  have h := lowerIncGamma_add_upperIncGamma hnp hx'
-  rw [lowerIncGamma_ofReal ha hx] at h
-  have hu : upperIncGamma a x = ((Real.Gamma a - TauCeti.lowerIncompleteGamma a x : ℝ) : ℂ) := by
+  have h := lowerIncompleteGamma_add_upperIncompleteGamma hnp hx'
+  rw [lowerIncompleteGamma_ofReal ha hx] at h
+  have hu : upperIncompleteGamma a x =
+      ((Real.Gamma a - TauCeti.lowerIncompleteGamma a x : ℝ) : ℂ) := by
     rw [ofReal_sub, ← Complex.Gamma_ofReal]; linear_combination h
   rw [hu, ofReal_re]
 
@@ -601,9 +609,9 @@ def Real.gammaPBeta (a : ℝ) : ℝ :=
 /-- Alzer's strict bounds behind DLMF 8.10.11 (helper for the two tagged statements). -/
 theorem IncompleteGammaBounds.exponential_bounds_strict {a x : ℝ} (ha : 0 < a)
     (ha1 : a ≠ 1) (hx : 0 < x) :
-    (1-Real.exp (-Real.gammaPAlpha a*x))^a < (normIncGammaPContinued a x).re ∧
-        (normIncGammaPContinued a x).re < (1-Real.exp (-Real.gammaPBeta a*x))^a := by
-  rw [IncompleteGammaBounds.normIncGammaP_re ha hx.le]
+    (1-Real.exp (-Real.gammaPAlpha a*x))^a < (regularizedGamma a x).re ∧
+        (regularizedGamma a x).re < (1-Real.exp (-Real.gammaPBeta a*x))^a := by
+  rw [IncompleteGammaBounds.re_regularizedGamma_ofReal ha hx.le]
   have hγ : 0 < Real.Gamma (1+a)^(-1/a) :=
     Real.rpow_pos_of_pos (Real.Gamma_pos_of_pos (by linarith)) _
   rcases lt_or_gt_of_ne ha1 with h | h
@@ -620,41 +628,45 @@ theorem IncompleteGammaBounds.exponential_bounds_strict {a x : ℝ} (ha : 0 < a)
         (IncompleteGammaBounds.leftPropagation_one_gt_one h) hx
 
 /-- Estimate under the stated parameter and domain assumptions: `(1-Real.exp (-Real.gammaPAlpha
-a*x))^a ≤ (normIncGammaPContinued a x).re ∧ (normIncGammaPContinued a x).re ≤ (1-Real.exp
+a*x))^a ≤ (regularizedGamma a x).re ∧ (regularizedGamma a x).re ≤ (1-Real.exp
 (-Real.gammaPBeta a*x))^a`. -/
 @[dlmf 8.10.E11]
-theorem normIncGammaP_exponential_bounds {a x : ℝ} (ha : 0 < a) (hx : 0 ≤ x) :
-    (1-Real.exp (-Real.gammaPAlpha a*x))^a ≤ (normIncGammaPContinued a x).re ∧
-        (normIncGammaPContinued a x).re ≤ (1-Real.exp (-Real.gammaPBeta a*x))^a := by
+theorem regularizedGamma_exponential_bounds {a x : ℝ} (ha : 0 < a) (hx : 0 ≤ x) :
+    (1-Real.exp (-Real.gammaPAlpha a*x))^a ≤ (regularizedGamma a x).re ∧
+        (regularizedGamma a x).re ≤ (1-Real.exp (-Real.gammaPBeta a*x))^a := by
   rcases hx.eq_or_lt with h0 | h0
   · subst h0
-    rw [IncompleteGammaBounds.normIncGammaP_re ha le_rfl]
+    rw [IncompleteGammaBounds.re_regularizedGamma_ofReal ha le_rfl]
     simp [Real.zero_rpow ha.ne']
   by_cases ha1 : a = 1
   · subst ha1
-    rw [IncompleteGammaBounds.normIncGammaP_re ha hx, TauCeti.regularizedGamma_one hx]
+    rw [IncompleteGammaBounds.re_regularizedGamma_ofReal ha hx,
+        TauCeti.regularizedGamma_one hx]
     simp [Real.gammaPAlpha, Real.gammaPBeta, Real.upperGammaDa, one_add_one_eq_two]
   · have := IncompleteGammaBounds.exponential_bounds_strict ha ha1 h0
     exact ⟨this.1.le, this.2.le⟩
 
 /-- The source equality condition excludes the automatic equality at x=0. -/
 @[dlmf 8.10.E11]
-theorem normIncGammaP_exponential_bounds_strict {a x : ℝ} (ha : 0 < a) (ha1 : a ≠ 1) (hx : 0 < x) :
-    (1-Real.exp (-Real.gammaPAlpha a*x))^a < (normIncGammaPContinued a x).re ∧
-        (normIncGammaPContinued a x).re < (1-Real.exp (-Real.gammaPBeta a*x))^a :=
+theorem regularizedGamma_exponential_bounds_strict {a x : ℝ} (ha : 0 < a)
+    (ha1 : a ≠ 1) (hx : 0 < x) :
+    (1-Real.exp (-Real.gammaPAlpha a*x))^a < (regularizedGamma a x).re ∧
+        (regularizedGamma a x).re < (1-Real.exp (-Real.gammaPBeta a*x))^a :=
   IncompleteGammaBounds.exponential_bounds_strict ha ha1 hx
 
-/-- Estimate under the stated parameter and domain assumptions: `(normIncGammaQContinued n n).re <
-1/2 ∧ 1/2 < (normIncGammaQContinued n (n-1 : ℕ)).re`. -/
+/-- Estimate under the stated parameter and domain assumptions:
+`(regularizedIncompleteGammaQ n n).re < 1/2 ∧ 1/2 < (regularizedIncompleteGammaQ n (n-1 : ℕ)).re`.
+-/
 @[dlmf 8.10.E13]
-theorem normIncGammaQ_diagonal_bounds {n : ℕ} (hn : 1 ≤ n) :
-    (normIncGammaQContinued n n).re < 1/2 ∧ 1/2 < (normIncGammaQContinued n (n-1 : ℕ)).re := by
+theorem regularizedIncompleteGammaQ_diagonal_bounds {n : ℕ} (hn : 1 ≤ n) :
+    (regularizedIncompleteGammaQ n n).re < 1/2 ∧ 1/2 <
+        (regularizedIncompleteGammaQ n (n-1 : ℕ)).re := by
   have hn0 : (0:ℝ) < n := by exact_mod_cast hn
   have hG := Real.Gamma_pos_of_pos hn0
   have e1 : (n:ℂ) = ((n:ℝ):ℂ) := (ofReal_natCast n).symm
   have e2 : ((n-1:ℕ):ℂ) = (((n-1:ℕ):ℝ):ℂ) := (ofReal_natCast _).symm
-  rw [e1, e2, IncompleteGammaBounds.normIncGammaQ_re hn0 hn0.le,
-      IncompleteGammaBounds.normIncGammaQ_re hn0 (Nat.cast_nonneg _)]
+  rw [e1, e2, IncompleteGammaBounds.re_regularizedIncompleteGammaQ_ofReal hn0 hn0.le,
+      IncompleteGammaBounds.re_regularizedIncompleteGammaQ_ofReal hn0 (Nat.cast_nonneg _)]
   constructor
   · have := IncompleteGammaBounds.Gamma_lt_two_lower_self hn0
     rw [sub_lt_iff_lt_add, ← sub_lt_iff_lt_add', lt_div_iff₀ hG]; linarith

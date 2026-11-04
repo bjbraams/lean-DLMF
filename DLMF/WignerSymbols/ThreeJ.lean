@@ -15,26 +15,27 @@ public import DLMF.Hypergeometric.ArgumentContinuation
 public import DLMF.Hypergeometric.Solutions
 public import Mathlib.Algebra.Order.Ring.Star
 public import DLMF.GeneralizedHypergeometric.UnitArgument
+public import DLMF.GeneralizedHypergeometric.ClearedTerminating
+public import DLMF.WignerSymbols.RacahPochhammer
 
 /-!
 # The `3j` symbol
 
 Statements of DLMF §34.2 (the `₃F₂` form 34.2.6) and §34.3
-(special cases, symmetry, recursion relations and orthogonality) for `wigner3j`, and the
-zeros of §34.10. The relations to Legendre polynomials and spherical harmonics
-(§34.3(vii)) are in `DLMF.WignerSymbols.ThreeJLegendre`.
+(special cases, symmetry and orthogonality) for `wigner3j`, and the zeros of §34.10. The
+recursion relations (§34.3(iii)) are in `DLMF.WignerSymbols.ThreeJRecursion`, the relations to
+Legendre polynomials and spherical harmonics (§34.3(vii)) in
+`DLMF.WignerSymbols.ThreeJLegendre`.
 
 ## Main results
 
-* `wigner3j_eq_hyp3F2`: DLMF 34.2.6.
+* `wigner3j_eq_matrixHypergeometric3F2`: DLMF 34.2.6.
 * `wigner3j_j_j_zero`, `wigner3j_j_j_one_zero`, `wigner3j_j_j_one_one`: DLMF 34.3.1–34.3.3.
 * `wigner3j_zero_zero_zero_of_even`, `wigner3j_zero_zero_zero_of_odd`: DLMF 34.3.4–34.3.5.
 * `wigner3j_stretched`, `wigner3j_top`: DLMF 34.3.6–34.3.7.
 * `wigner3j_cycle`, `wigner3j_cycle₂`, `wigner3j_swap`, `wigner3j_neg`: the symmetries DLMF
   34.3.8–34.3.10.
 * `wigner3j_regge₁`, `wigner3j_regge₂`: the Regge symmetries DLMF 34.3.11–34.3.12.
-* `wigner3j_recursion_half`, `wigner3j_recursion_m`, `wigner3j_recursion_j`: DLMF
-  34.3.13–34.3.15 for all arguments (stronger than DLMF).
 * `wigner3j_orthogonality_m`, `wigner3j_orthogonality_j`, `wigner3j_sum_sq`: DLMF
   34.3.16–34.3.18.
 * `wigner3j_one_one_one_zero`: a nontrivial zero (DLMF §34.10).
@@ -43,14 +44,17 @@ zeros of §34.10. The relations to Legendre polynomials and spherical harmonics
 
 The triangle conditions of §34.2 are in `DLMF.WignerSymbols.Basic.TriangleConditions`. Since
 `wigner3j` is `0` outside the admissible range (34.2.1–34.2.3), the symmetry relations
-34.3.8–34.3.12 and the recursion relations 34.3.13–34.3.15 are stated for all rational arguments;
-for the recursions this is stronger than DLMF, which assumes the triangle conditions for every
-symbol. Square roots are `Real.sqrt`, which is `0` at negative arguments; the coefficients of the
-recursions vanish exactly where a symbol leaves the admissible range.
+34.3.8–34.3.12 are stated for all rational arguments.
+
+The `₃F₂` form 34.2.6 follows from Racah's sum, reflected about `s = j₁ - m₁` and written as a
+terminating `₃F₂(1)` with cleared denominators (`DLMF.Hypergeometric.genClearedFiniteHG`, which
+keeps the vanishing terms of negative factorial arguments), by two steps of Sheppard's
+transformation (`DLMF.Hypergeometric.genClearedFiniteHG_sheppard`).
 
 The even case 34.3.4 of `wigner3j_zero_zero_zero_of_even` reduces the symmetric Racah sum
-with zero magnetic numbers to Dixon's terminating sum 16.4.5 (`genHG_dixon_terminating_even`
-in `DLMF.GeneralizedHypergeometric.UnitArgument`).
+with zero magnetic numbers to Dixon's terminating sum 16.4.5
+(`generalizedHypergeometric_dixon_terminating_even` in
+`DLMF.GeneralizedHypergeometric.UnitArgument`).
 -/
 
 @[expose] public noncomputable section
@@ -83,19 +87,19 @@ private lemma symmetricRacahSum_neg (x₁ x₂ x₃ y₁ y₂ y₃ : ℚ) :
   ring_nf
 
 /-- `symmetricRacahSum` is symmetric in the `x` and in the `y` arguments. -/
-private lemma symmetricRacahSum_swap_x12 (x₁ x₂ x₃ y₁ y₂ y₃ : ℚ) :
+theorem symmetricRacahSum_swap_x12 (x₁ x₂ x₃ y₁ y₂ y₃ : ℚ) :
     symmetricRacahSum x₁ x₂ x₃ y₁ y₂ y₃ = symmetricRacahSum x₂ x₁ x₃ y₁ y₂ y₃ :=
   finsum_congr fun _ => by ring
 /-- Symmetry of the symmetric Racah sum in `x₂ ↔ x₃`. -/
-private lemma symmetricRacahSum_swap_x23 (x₁ x₂ x₃ y₁ y₂ y₃ : ℚ) :
+theorem symmetricRacahSum_swap_x23 (x₁ x₂ x₃ y₁ y₂ y₃ : ℚ) :
     symmetricRacahSum x₁ x₂ x₃ y₁ y₂ y₃ = symmetricRacahSum x₁ x₃ x₂ y₁ y₂ y₃ :=
   finsum_congr fun _ => by ring
 /-- Symmetry of the symmetric Racah sum in `y₁ ↔ y₂`. -/
-private lemma symmetricRacahSum_swap_y12 (x₁ x₂ x₃ y₁ y₂ y₃ : ℚ) :
+theorem symmetricRacahSum_swap_y12 (x₁ x₂ x₃ y₁ y₂ y₃ : ℚ) :
     symmetricRacahSum x₁ x₂ x₃ y₁ y₂ y₃ = symmetricRacahSum x₁ x₂ x₃ y₂ y₁ y₃ :=
   finsum_congr fun _ => by ring
 /-- Symmetry of the symmetric Racah sum in `y₂ ↔ y₃`. -/
-private lemma symmetricRacahSum_swap_y23 (x₁ x₂ x₃ y₁ y₂ y₃ : ℚ) :
+theorem symmetricRacahSum_swap_y23 (x₁ x₂ x₃ y₁ y₂ y₃ : ℚ) :
     symmetricRacahSum x₁ x₂ x₃ y₁ y₂ y₃ = symmetricRacahSum x₁ x₂ x₃ y₁ y₃ y₂ :=
   finsum_congr fun _ => by ring
 
@@ -113,9 +117,9 @@ private lemma sum_racahTerm3j_eq_symmetricRacahSum {j₁ j₂ j₃ m₁ m₂ : �
     ring_nf
   · intro s hs
     simp only [Function.mem_support] at hs
-    have h1 : invFactQ ((s : ℚ) - 0) ≠ 0 := fun h0 => hs (by rw [h0]; ring)
-    have h2 : invFactQ (j₁ + j₂ - j₃ - s) ≠ 0 := fun h0 => hs (by rw [h0]; ring)
-    rw [Ne, invFactQ_eq_zero_iff_neg, not_lt] at h1 h2
+    have h1 : ratInvFactorial ((s : ℚ) - 0) ≠ 0 := fun h0 => hs (by rw [h0]; ring)
+    have h2 : ratInvFactorial (j₁ + j₂ - j₃ - s) ≠ 0 := fun h0 => hs (by rw [h0]; ring)
+    rw [Ne, ratInvFactorial_eq_zero_iff_neg, not_lt] at h1 h2
     simp only [coe_map, Nat.castEmbedding_apply, coe_range, Set.mem_image, Set.mem_Iio]
     refine ⟨s.toNat, ?_, Int.toNat_of_nonneg (by exact_mod_cast (by linarith : (0 : ℚ) ≤ s))⟩
     have : (s : ℚ) ≤ ((⌊j₁ + j₂ - j₃⌋.toNat : ℕ) : ℚ) := by rw [hA.floor_toNat]; linarith
@@ -147,46 +151,252 @@ macro "wigner_pick9" : tactic => `(tactic| first
   | (apply IsNatQ.of_eq h9; ring1))
 
 /-- Racah's formula with the prefactor as one square root and the sum in symmetric form. -/
-private lemma wigner3j_eq_sqrt_mul_symmetricRacahSum {j₁ j₂ j₃ m₁ m₂ m₃ : ℚ}
+theorem wigner3j_eq_sqrt_mul_symmetricRacahSum {j₁ j₂ j₃ m₁ m₂ m₃ : ℚ}
     (h : IsAdmissible3j j₁ j₂ j₃ m₁ m₂ m₃) :
     wigner3j j₁ j₂ j₃ m₁ m₂ m₃ =
       signPow (j₁ - j₂ - m₃) *
-        Real.sqrt (factQ (j₁ + j₂ - j₃) * factQ (j₁ - j₂ + j₃) * factQ (-j₁ + j₂ + j₃) /
-          factQ (j₁ + j₂ + j₃ + 1) * (factQ (j₁ + m₁) * factQ (j₁ - m₁) * factQ (j₂ + m₂) *
-          factQ (j₂ - m₂) * factQ (j₃ + m₃) * factQ (j₃ - m₃))) *
+        Real.sqrt (ratFactorial (j₁ + j₂ - j₃) * ratFactorial (j₁ - j₂ + j₃) *
+            ratFactorial (-j₁ + j₂ + j₃) /
+          ratFactorial (j₁ + j₂ + j₃ + 1) *
+              (ratFactorial (j₁ + m₁) * ratFactorial (j₁ - m₁) * ratFactorial (j₂ + m₂) *
+          ratFactorial (j₂ - m₂) * ratFactorial (j₃ + m₃) * ratFactorial (j₃ - m₃))) *
         symmetricRacahSum (j₁ + j₂ - j₃) (j₁ - m₁) (j₂ + m₂) 0 (j₂ - j₃ - m₁) (j₁ - j₃ + m₂) := by
   unfold wigner3j
   simp only [h, ↓reduceIte]
   rw [sum_racahTerm3j_eq_symmetricRacahSum h.1.1, triangleDelta,
-      Real.sqrt_mul (x := factQ (j₁ + j₂ - j₃) *
-    factQ (j₁ - j₂ + j₃) * factQ (-j₁ + j₂ + j₃) / factQ (j₁ + j₂ + j₃ + 1))
-    (by unfold factQ; positivity)]
+      Real.sqrt_mul (x := ratFactorial (j₁ + j₂ - j₃) *
+    ratFactorial (j₁ - j₂ + j₃) * ratFactorial (-j₁ + j₂ + j₃) / ratFactorial (j₁ + j₂ + j₃ + 1))
+    (by unfold ratFactorial; positivity)]
   ring
 
 /-- The `3j` symbol vanishes unless `m₁ + m₂ + m₃ = 0`. -/
 private lemma wigner3j_eq_zero_of_add_add_ne_zero {j₁ j₂ j₃ m₁ m₂ m₃ : ℚ} (h : m₁ + m₂ + m₃ ≠ 0) :
     wigner3j j₁ j₂ j₃ m₁ m₂ m₃ = 0 := wigner3j_of_not fun h' => h h'.2.2.2.2
 
+open DLMF.Hypergeometric in
+/-- Racah's sum 34.2.4 reflected (`s = α - k`, `α = j₁ - m₁`) is a terminating `₃F₂(1)` with
+cleared denominators, `(-1)^α / (α! A₂! γ! A₁! β!) ×`
+`∑ₖ (-α)ₖ(-γ)ₖ(-A₂)ₖ/k! (β-α+1+k)_{α-k}(A₁-α+1+k)_{α-k}`. -/
+private lemma sum_reflected_racahTerm3j_eq_cleared (A1 A2 α β γ : ℕ) :
+    ∑ k ∈ range (α + 1), ((-1 : ℂ) ^ (α - k) * (ratInvFactorial ((α : ℚ) - k) : ℂ) *
+      (ratInvFactorial ((((A1 : ℤ) - α : ℤ) : ℚ) + k) : ℂ) * (ratInvFactorial (k : ℚ) : ℂ) *
+      (ratInvFactorial ((((β : ℤ) - α : ℤ) : ℚ) + k) : ℂ) * (ratInvFactorial ((A2 : ℚ) - k) : ℂ) *
+      (ratInvFactorial ((γ : ℚ) - k) : ℂ)) =
+    (-1) ^ α / (α.factorial * A2.factorial * γ.factorial * A1.factorial * β.factorial) *
+      genClearedFiniteHG α {-(α : ℂ), -(γ : ℂ), -(A2 : ℂ)}
+        {(β : ℂ) - α + 1, (A1 : ℂ) - α + 1} := by
+  rw [genClearedFiniteHG, mul_sum]
+  refine sum_congr rfl fun k hk => ?_
+  have hk' : k ≤ α := Nat.lt_succ_iff.mp (mem_range.mp hk)
+  rw [ratInvFactorial_natCast_sub_natCast, ratInvFactorial_natCast_sub_natCast,
+    ratInvFactorial_natCast_sub_natCast, ratInvFactorial_of_eq (x := (k : ℚ)) rfl,
+    ratInvFactorial_intCast_add_natCast _ hk' (by omega),
+        ratInvFactorial_intCast_add_natCast _ hk' (by omega),
+    show ((A1 : ℤ) - α + α).toNat = A1 by omega, show ((β : ℤ) - α + α).toNat = β by omega]
+  have hsg : (-1 : ℂ) ^ α = (-1) ^ (α - k) * (-1) ^ k := by
+    rw [← pow_add, Nat.sub_add_cancel hk']
+  simp only [pochhammerProduct, Multiset.insert_eq_cons, Multiset.map_cons, Multiset.map_singleton,
+    Multiset.prod_cons, Multiset.prod_singleton, hsg]
+  push_cast
+  have h1 : (α.factorial : ℂ) ≠ 0 := by exact_mod_cast α.factorial_ne_zero
+  have h2 : (A2.factorial : ℂ) ≠ 0 := by exact_mod_cast A2.factorial_ne_zero
+  have h3 : (γ.factorial : ℂ) ≠ 0 := by exact_mod_cast γ.factorial_ne_zero
+  have h4 : (A1.factorial : ℂ) ≠ 0 := by exact_mod_cast A1.factorial_ne_zero
+  have h5 : (β.factorial : ℂ) ≠ 0 := by exact_mod_cast β.factorial_ne_zero
+  have h6 : (k.factorial : ℂ) ≠ 0 := by exact_mod_cast k.factorial_ne_zero
+  field_simp
+  have e : ((-1 : ℂ) ^ k) ^ 2 = 1 := by rw [← pow_mul, pow_mul']; norm_num
+  linear_combination (norm := ring_nf) (pochhammer (-(α : ℂ)) k * pochhammer (-(A2 : ℂ)) k *
+    pochhammer (-(γ : ℂ)) k * pochhammer ((A1 : ℂ) - α + 1 + k) (α - k) *
+    pochhammer ((β : ℂ) - α + 1 + k) (α - k)) * e
+
 /-! ## §34.2 The triangle conditions -/
 
+open DLMF.Hypergeometric in
 /-- DLMF 34.2.6: the `3j` symbol as a terminating `₃F₂` of unit argument,
 `(-1)^{j₂-m₁+m₃} (j₁+j₂+m₃)! (j₂+j₃-m₁)! / (Δ(j₁j₂j₃) (j₁+j₂+j₃+1)!)`
 `× ((j₁+m₁)!(j₃-m₃)! / ((j₁-m₁)!(j₂+m₂)!(j₂-m₂)!(j₃+m₃)!))^{1/2}`
 `× ₃F₂(-j₁-j₂-j₃-1, -j₁+m₁, -j₃-m₃; -j₁-j₂-m₃, -j₂-j₃+m₁; 1)`.
 The series terminates after `n = min(j₁-m₁, j₃+m₃)` terms; the lower parameters are
 nonpositive integers `≤ -n`, so every retained Pochhammer denominator is nonzero
-(`genFiniteHG`, the convention of §16.2). Assumes 34.2.1–34.2.3. -/
+(`generalizedHypergeometricTruncated`, the convention of §16.2). Assumes 34.2.1–34.2.3. -/
 @[dlmf 34.2.E6]
-theorem wigner3j_eq_hyp3F2 {j₁ j₂ j₃ m₁ m₂ m₃ : ℚ} (h : IsAdmissible3j j₁ j₂ j₃ m₁ m₂ m₃) :
+theorem wigner3j_eq_matrixHypergeometric3F2 {j₁ j₂ j₃ m₁ m₂ m₃ : ℚ}
+    (h : IsAdmissible3j j₁ j₂ j₃ m₁ m₂ m₃) :
     (wigner3j j₁ j₂ j₃ m₁ m₂ m₃ : ℂ) =
-      ((signPow (j₂ - m₁ + m₃) * factQ (j₁ + j₂ + m₃) * factQ (j₂ + j₃ - m₁) /
-          (triangleDelta j₁ j₂ j₃ * factQ (j₁ + j₂ + j₃ + 1)) *
-          Real.sqrt (factQ (j₁ + m₁) * factQ (j₃ - m₃) /
-            (factQ (j₁ - m₁) * factQ (j₂ + m₂) * factQ (j₂ - m₂) * factQ (j₃ + m₃))) : ℝ) : ℂ) *
-        DLMF.Hypergeometric.genFiniteHG (min ⌊j₁ - m₁⌋.toNat ⌊j₃ + m₃⌋.toNat)
+      ((signPow (j₂ - m₁ + m₃) * ratFactorial (j₁ + j₂ + m₃) * ratFactorial (j₂ + j₃ - m₁) /
+          (triangleDelta j₁ j₂ j₃ * ratFactorial (j₁ + j₂ + j₃ + 1)) *
+          Real.sqrt (ratFactorial (j₁ + m₁) * ratFactorial (j₃ - m₃) /
+            (ratFactorial (j₁ - m₁) * ratFactorial (j₂ + m₂) * ratFactorial (j₂ - m₂) *
+                ratFactorial (j₃ + m₃))) : ℝ) : ℂ) *
+        DLMF.Hypergeometric.generalizedHypergeometricTruncated (min ⌊j₁ - m₁⌋.toNat ⌊j₃ + m₃⌋.toNat)
           {((-j₁ - j₂ - j₃ - 1 : ℚ) : ℂ), ((-j₁ + m₁ : ℚ) : ℂ), ((-j₃ - m₃ : ℚ) : ℂ)}
           {((-j₁ - j₂ - m₃ : ℚ) : ℂ), ((-j₂ - j₃ + m₁ : ℚ) : ℂ)} 1 := by
-  sorry
+  have h' := h
+  obtain ⟨⟨⟨A1, hA1⟩, ⟨A2, hA2⟩, ⟨A3, hA3⟩⟩, ⟨⟨α, hα⟩, ⟨α', hα'⟩⟩, ⟨⟨β', hβ'⟩, ⟨β, hβ⟩⟩,
+    ⟨⟨γ', hγ'⟩, ⟨γ, hγ⟩⟩, hm⟩ := h'
+  have r1 : A1 + γ = α + β' := by
+    have : ((A1 + γ : ℕ) : ℚ) = ((α + β' : ℕ) : ℚ) := by push_cast; linarith
+    exact_mod_cast this
+  have r2 : A3 + α = β + γ := by
+    have : ((A3 + α : ℕ) : ℚ) = ((β + γ : ℕ) : ℚ) := by push_cast; linarith
+    exact_mod_cast this
+  -- Racah's sum, reflected
+  have hz1 : ∀ s : ℕ, A1 < s → racahTerm3j j₁ j₂ j₃ m₁ m₂ s = 0 := by
+    intro s hs
+    have : (A1 : ℚ) < s := by exact_mod_cast hs
+    unfold racahTerm3j
+    rw [ratInvFactorial_of_neg (x := j₁ + j₂ - j₃ - s) (by linarith)]
+    ring
+  have hz2 : ∀ s : ℕ, α < s → racahTerm3j j₁ j₂ j₃ m₁ m₂ s = 0 := by
+    intro s hs
+    have : (α : ℚ) < s := by exact_mod_cast hs
+    unfold racahTerm3j
+    rw [ratInvFactorial_of_neg (x := j₁ - m₁ - s) (by linarith)]
+    ring
+  have hsum : ∑ s ∈ range (A1 + 1), racahTerm3j j₁ j₂ j₃ m₁ m₂ s =
+      ∑ s ∈ range (α + 1), racahTerm3j j₁ j₂ j₃ m₁ m₂ s := by
+    rw [Finset.sum_subset (s₂ := range (A1 + α + 1)) (range_subset_range.2 (by omega))
+        (fun s _ hs => hz1 s (by simp only [mem_range, not_lt] at hs; omega)),
+      Finset.sum_subset (s₁ := range (α + 1)) (s₂ := range (A1 + α + 1))
+        (range_subset_range.2 (by omega))
+        (fun s _ hs => hz2 s (by simp only [mem_range, not_lt] at hs; omega))]
+  have hS : ((∑ s ∈ range (α + 1), racahTerm3j j₁ j₂ j₃ m₁ m₂ s : ℝ) : ℂ) =
+      (-1) ^ α / (α.factorial * A2.factorial * γ.factorial * A1.factorial * β.factorial) *
+        genClearedFiniteHG α {-(α : ℂ), -(γ : ℂ), -(A2 : ℂ)}
+          {(β : ℂ) - α + 1, (A1 : ℂ) - α + 1} := by
+    rw [← sum_reflected_racahTerm3j_eq_cleared, ← Finset.sum_range_reflect, Complex.ofReal_sum]
+    refine sum_congr rfl fun k hk => ?_
+    have hk' : k ≤ α := Nat.lt_succ_iff.mp (mem_range.mp hk)
+    rw [show α + 1 - 1 - k = α - k by omega]
+    unfold racahTerm3j
+    have hs : ((α - k : ℕ) : ℚ) = α - k := by rw [Nat.cast_sub hk']
+    rw [hs, show j₁ + j₂ - j₃ - ((α : ℚ) - k) = (((A1 : ℤ) - α : ℤ) : ℚ) + k by
+        push_cast; linarith,
+      show j₁ - m₁ - ((α : ℚ) - k) = (k : ℚ) by linarith,
+      show j₂ + m₂ - ((α : ℚ) - k) = (((β : ℤ) - α : ℤ) : ℚ) + k by push_cast; linarith,
+      show j₃ - j₂ + m₁ + ((α : ℚ) - k) = (A2 : ℚ) - k by linarith,
+      show j₃ - j₁ - m₂ + ((α : ℚ) - k) = (γ : ℚ) - k by linarith]
+    push_cast
+    ring
+  -- two Sheppard steps
+  have hB : genClearedFiniteHG α {-(α : ℂ), -(γ : ℂ), -(A2 : ℂ)}
+      {(β : ℂ) - α + 1, (A1 : ℂ) - α + 1} =
+      genClearedFiniteHG α {-(α : ℂ), -((A1 : ℂ) + A2 + A3 + 1), -(γ : ℂ)}
+        {-((A1 : ℂ) + γ), -((A3 : ℂ) + α)} := by
+    rw [genClearedFiniteHG_sheppard α (-(γ : ℂ)) _ (-((A1 : ℂ) + γ)) (-((A3 : ℂ) + α))]
+    conv_rhs => rw [Multiset.pair_comm (-(γ : ℂ)), Multiset.pair_comm (-((A1 : ℂ) + γ)),
+      genClearedFiniteHG_sheppard α (-(γ : ℂ)) (-((A1 : ℂ) + γ) - -((A1 : ℂ) + A2 + A3 + 1))
+        (1 + -(γ : ℂ) - -((A3 : ℂ) + α) - α) (-((A1 : ℂ) + γ))]
+    rw [← mul_assoc, ← pow_add, ← two_mul, pow_mul, neg_one_sq, one_pow, one_mul]
+    have r2' : (A3 : ℂ) + α = β + γ := by exact_mod_cast r2
+    rw [show (1 + -(γ : ℂ) - -((A3 : ℂ) + α) - α) - (-((A1 : ℂ) + γ) -
+        -((A1 : ℂ) + A2 + A3 + 1)) = -(A2 : ℂ) by ring,
+      show 1 + -(γ : ℂ) - -((A1 : ℂ) + γ) - α = (A1 : ℂ) - α + 1 by ring,
+      show 1 + -(γ : ℂ) - -((A3 : ℂ) + α) - α = (β : ℂ) - α + 1 by linear_combination r2']
+  -- the Wigner series
+  have hW : genClearedFiniteHG α {-(α : ℂ), -((A1 : ℂ) + A2 + A3 + 1), -(γ : ℂ)}
+        {-((A1 : ℂ) + γ), -((A3 : ℂ) + α)} =
+      pochhammer (-((A1 + γ : ℕ) : ℂ)) α * pochhammer (-((A3 + α : ℕ) : ℂ)) α *
+        generalizedHypergeometricTruncated α {-(α : ℂ), -((A1 : ℂ) + A2 + A3 + 1), -(γ : ℂ)}
+          {-((A1 : ℂ) + γ), -((A3 : ℂ) + α)} 1 := by
+    have n1 := pochhammer_neg_natCast_ne_zero (N := A1 + γ) (k := α) (by omega)
+    have n2 := pochhammer_neg_natCast_ne_zero (N := A3 + α) (k := α) (by omega)
+    push_cast at n1 n2 ⊢
+    rw [genClearedFiniteHG_eq_mul]
+    · simp only [pochhammerProduct, Multiset.insert_eq_cons, Multiset.map_cons,
+          Multiset.map_singleton,
+        Multiset.prod_cons, Multiset.prod_singleton]
+    · simp only [Multiset.insert_eq_cons, Multiset.mem_cons, Multiset.mem_singleton]
+      rintro y (rfl | rfl)
+      exacts [n1, n2]
+  have hfloorA : ⌊j₁ + j₂ - j₃⌋.toNat = A1 := by rw [hA1, Int.floor_natCast, Int.toNat_natCast]
+  have hfloor1 : ⌊j₁ - m₁⌋.toNat = α := by rw [hα, Int.floor_natCast, Int.toNat_natCast]
+  have hfloor3 : ⌊j₃ + m₃⌋.toNat = γ := by rw [hγ, Int.floor_natCast, Int.toNat_natCast]
+  have c1 : ((-j₁ - j₂ - j₃ - 1 : ℚ) : ℂ) = -((A1 : ℂ) + A2 + A3 + 1) := by
+    rw [show (-j₁ - j₂ - j₃ - 1 : ℚ) = -((A1 : ℚ) + A2 + A3 + 1) by linarith]; push_cast; ring
+  have c2 : ((-j₁ + m₁ : ℚ) : ℂ) = -(α : ℂ) := by
+    rw [show (-j₁ + m₁ : ℚ) = -(α : ℚ) by linarith]; push_cast; ring
+  have c3 : ((-j₃ - m₃ : ℚ) : ℂ) = -(γ : ℂ) := by
+    rw [show (-j₃ - m₃ : ℚ) = -(γ : ℚ) by linarith]; push_cast; ring
+  have c4 : ((-j₁ - j₂ - m₃ : ℚ) : ℂ) = -((A1 : ℂ) + γ) := by
+    rw [show (-j₁ - j₂ - m₃ : ℚ) = -((A1 : ℚ) + γ) by linarith]; push_cast; ring
+  have c5 : ((-j₂ - j₃ + m₁ : ℚ) : ℂ) = -((A3 : ℂ) + α) := by
+    rw [show (-j₂ - j₃ + m₁ : ℚ) = -((A3 : ℚ) + α) by linarith]; push_cast; ring
+  have hD : generalizedHypergeometricTruncated (min α γ)
+      {-((A1 : ℂ) + A2 + A3 + 1), -(α : ℂ), -(γ : ℂ)}
+      {-((A1 : ℂ) + γ), -((A3 : ℂ) + α)} 1 =
+      generalizedHypergeometricTruncated α {-(α : ℂ), -((A1 : ℂ) + A2 + A3 + 1), -(γ : ℂ)}
+        {-((A1 : ℂ) + γ), -((A3 : ℂ) + α)} 1 := by
+    rw [show ({-((A1 : ℂ) + A2 + A3 + 1), -(α : ℂ), -(γ : ℂ)} : Multiset ℂ) =
+      {-(α : ℂ), -((A1 : ℂ) + A2 + A3 + 1), -(γ : ℂ)} by
+        simp only [Multiset.insert_eq_cons]; exact Multiset.cons_swap _ _ _]
+    rcases le_total α γ with hle | hle
+    · rw [min_eq_left hle]
+    · rw [min_eq_right hle,
+          generalizedHypergeometricTruncated_eq_of_neg_natCast_mem _ _ (N := γ) (by simp) hle]
+  rw [hfloor1, hfloor3, c1, c2, c3, c4, c5, hD]
+  unfold wigner3j
+  simp only [h, ↓reduceIte]
+  rw [hfloorA, hsum, Complex.ofReal_mul, hS, hB, hW, pochhammer_neg_coe_nat, pochhammer_neg_coe_nat]
+  -- the real prefactors
+  have hsign : signPow (j₁ - j₂ - m₃) = signPow (j₂ - m₁ + m₃) * (-1) ^ α := by
+    rw [signPow_of_eq (n := (α' : ℤ) - β') (by push_cast; linarith),
+      signPow_of_eq (n := (β' : ℤ) - α' + α) (by push_cast; linarith),
+      show (α' : ℤ) - β' = ((β' : ℤ) - α' + α) + α + 2 * ((α' : ℤ) - β' - α) by ring,
+      zpow_add₀ (by norm_num), zpow_add₀ (by norm_num), zpow_mul]
+    norm_num
+  have d1 : ((A1 + γ).descFactorial α : ℝ) * β'.factorial = (A1 + γ).factorial := by
+    have := Nat.factorial_mul_descFactorial (n := A1 + γ) (k := α) (by omega)
+    rw [show A1 + γ - α = β' by omega] at this
+    exact_mod_cast (by linarith : (A1 + γ).descFactorial α * β'.factorial = (A1 + γ).factorial)
+  have d2 : ((A3 + α).descFactorial α : ℝ) * A3.factorial = (A3 + α).factorial := by
+    have := Nat.factorial_mul_descFactorial (n := A3 + α) (k := α) (by omega)
+    rw [show A3 + α - α = A3 by omega] at this
+    exact_mod_cast (by linarith : (A3 + α).descFactorial α * A3.factorial = (A3 + α).factorial)
+  have hT : 0 ≤ (A1.factorial : ℝ) * A2.factorial * A3.factorial / (A1 + A2 + A3 + 1).factorial :=
+    by positivity
+  have hQ : 0 ≤ (α'.factorial : ℝ) * γ'.factorial / (α.factorial * β.factorial * β'.factorial *
+      γ.factorial) := by positivity
+  have hP6 : Real.sqrt (α'.factorial * α.factorial * β.factorial * β'.factorial * γ.factorial *
+      γ'.factorial) = α.factorial * β.factorial * β'.factorial * γ.factorial *
+        Real.sqrt ((α'.factorial : ℝ) * γ'.factorial / (α.factorial * β.factorial *
+          β'.factorial * γ.factorial)) := by
+    rw [show (α'.factorial : ℝ) * α.factorial * β.factorial * β'.factorial * γ.factorial *
+      γ'.factorial = ((α.factorial : ℝ) * β.factorial * β'.factorial * γ.factorial) ^ 2 *
+        ((α'.factorial : ℝ) * γ'.factorial / (α.factorial * β.factorial * β'.factorial *
+          γ.factorial)) by field_simp,
+      Real.sqrt_mul (by positivity), Real.sqrt_sq (by positivity)]
+  have key : signPow (j₁ - j₂ - m₃) * triangleDelta j₁ j₂ j₃ *
+      Real.sqrt (ratFactorial (j₁ + m₁) * ratFactorial (j₁ - m₁) * ratFactorial (j₂ + m₂) *
+          ratFactorial (j₂ - m₂) *
+        ratFactorial (j₃ + m₃) * ratFactorial (j₃ - m₃)) *
+      ((-1) ^ α / (α.factorial * A2.factorial * γ.factorial * A1.factorial * β.factorial) *
+        ((-1) ^ α * (A1 + γ).descFactorial α * ((-1) ^ α * (A3 + α).descFactorial α))) =
+      signPow (j₂ - m₁ + m₃) * ratFactorial (j₁ + j₂ + m₃) * ratFactorial (j₂ + j₃ - m₁) /
+          (triangleDelta j₁ j₂ j₃ * ratFactorial (j₁ + j₂ + j₃ + 1)) *
+          Real.sqrt (ratFactorial (j₁ + m₁) * ratFactorial (j₃ - m₃) /
+            (ratFactorial (j₁ - m₁) * ratFactorial (j₂ + m₂) * ratFactorial (j₂ - m₂) *
+                ratFactorial (j₃ + m₃))) := by
+    unfold triangleDelta
+    rw [ratFactorial_of_eq hα', ratFactorial_of_eq hα, ratFactorial_of_eq hβ,
+        ratFactorial_of_eq hβ', ratFactorial_of_eq hγ,
+      ratFactorial_of_eq hγ', ratFactorial_of_eq hA1, ratFactorial_of_eq hA2,
+          ratFactorial_of_eq hA3,
+      ratFactorial_of_eq (x := j₁ + j₂ + j₃ + 1) (n := A1 + A2 + A3 + 1) (by push_cast; linarith),
+      ratFactorial_of_eq (x := j₁ + j₂ + m₃) (n := A1 + γ) (by push_cast; linarith),
+      ratFactorial_of_eq (x := j₂ + j₃ - m₁) (n := A3 + α) (by push_cast; linarith), hP6, hsign,
+      ← d1, ← d2]
+    have hΔ := Real.sq_sqrt hT
+    have hΔ0 : Real.sqrt ((A1.factorial : ℝ) * A2.factorial * A3.factorial /
+        (A1 + A2 + A3 + 1).factorial) ≠ 0 := by positivity
+    have hs : ((-1 : ℝ) ^ α) ^ 2 = 1 := by rw [← pow_mul, pow_mul']; norm_num
+    field_simp
+    rw [hΔ, show ((-1 : ℝ) ^ α) ^ 4 = 1 by rw [← pow_mul, pow_mul']; norm_num]
+    field_simp
+  rw [← key]
+  push_cast
+  ring
 
 /-! ## §34.3(i) Special cases -/
 
@@ -216,7 +426,7 @@ theorem wigner3j_j_j_zero {j m : ℚ} (h : IsProjection j m) :
     ring_nf
     rw [show (1 : ℚ) + a + b = ((a + b + 1 : ℕ) : ℚ) by push_cast; ring,
       show (0 : ℚ) = ((0 : ℕ) : ℚ) by simp]
-    simp only [← Nat.cast_add, factQ_natCast, invFactQ_natCast, signPow_natCast]
+    simp only [← Nat.cast_add, ratFactorial_natCast, ratInvFactorial_natCast, signPow_natCast]
     have hf : ((a + b + 1).factorial : ℝ) = ((a : ℝ) + b + 1) * (a + b).factorial := by
       push_cast [Nat.factorial_succ]; ring
     have hpos : (0 : ℝ) < (a : ℝ) + b + 1 := by positivity
@@ -236,11 +446,11 @@ theorem wigner3j_j_j_zero {j m : ℚ} (h : IsProjection j m) :
   · intro s _ hs
     unfold racahTerm3j
     rcases lt_or_gt_of_ne hs with hlt | hgt
-    · rw [invFactQ_of_neg (x := 0 - ((a + b : ℚ)) / 2 + ((b : ℚ) - a) / 2 + s)]
+    · rw [ratInvFactorial_of_neg (x := 0 - ((a + b : ℚ)) / 2 + ((b : ℚ) - a) / 2 + s)]
       · ring
       · have : (s : ℚ) < a := by exact_mod_cast hlt
         linarith
-    · rw [invFactQ_of_neg (x := ((a + b : ℚ)) / 2 + -(((b : ℚ) - a) / 2) - s)]
+    · rw [ratInvFactorial_of_neg (x := ((a + b : ℚ)) / 2 + -(((b : ℚ) - a) / 2) - s)]
       · ring
       · have : (a : ℚ) < s := by exact_mod_cast hgt
         linarith
@@ -254,20 +464,21 @@ macro "wigner_ring_cast" : tactic => `(tactic| first | ring1 | (push_cast; ring1
 /-- The symmetric Racah sum with `x₁ = y₁ = n` reduces to its single term `s = n`. -/
 private lemma symmetricRacahSum_intCast_intCast (n : ℤ) (x₂ x₃ y₂ y₃ : ℚ) :
     symmetricRacahSum n x₂ x₃ n y₂ y₃ =
-      (-1 : ℝ) ^ n * (invFactQ (x₂ - n) * invFactQ (x₃ - n) * (invFactQ (n - y₂) *
-        invFactQ (n - y₃))) := by
+      (-1 : ℝ) ^ n * (ratInvFactorial (x₂ - n) * ratInvFactorial (x₃ - n) *
+          (ratInvFactorial (n - y₂) *
+        ratInvFactorial (n - y₃))) := by
   unfold symmetricRacahSum
   rw [finsum_eq_single _ n]
   · simp only [sub_self]
-    rw [show (0 : ℚ) = ((0 : ℕ) : ℚ) by simp, invFactQ_natCast]
+    rw [show (0 : ℚ) = ((0 : ℕ) : ℚ) by simp, ratInvFactorial_natCast]
     simp
   · intro s hs
     rcases lt_or_gt_of_ne hs with h | h
-    · rw [invFactQ_of_neg (x := (s : ℚ) - n) (by
+    · rw [ratInvFactorial_of_neg (x := (s : ℚ) - n) (by
         have : (s : ℚ) < n := by exact_mod_cast h
         linarith)]
       ring
-    · rw [invFactQ_of_neg (x := (n : ℚ) - s) (by
+    · rw [ratInvFactorial_of_neg (x := (n : ℚ) - s) (by
         have : (n : ℚ) < s := by exact_mod_cast h
         linarith)]
       ring
@@ -276,25 +487,27 @@ private lemma symmetricRacahSum_intCast_intCast (n : ℤ) (x₂ x₃ y₂ y₃ :
 private lemma symmetricRacahSum_of_eq_intCast {x₁ x₂ x₃ y₁ y₂ y₃ : ℚ} (n : ℤ) (hx : x₁ = n)
     (hy : y₁ = n) :
     symmetricRacahSum x₁ x₂ x₃ y₁ y₂ y₃ =
-      (-1 : ℝ) ^ n * (invFactQ (x₂ - n) * invFactQ (x₃ - n) * (invFactQ (n - y₂) *
-        invFactQ (n - y₃))) := by
+      (-1 : ℝ) ^ n * (ratInvFactorial (x₂ - n) * ratInvFactorial (x₃ - n) *
+          (ratInvFactorial (n - y₂) *
+        ratInvFactorial (n - y₃))) := by
   subst hx hy; exact symmetricRacahSum_intCast_intCast n x₂ x₃ y₂ y₃
 
 /-- The symmetric Racah sum with `x₁ = n + 1`, `y₁ = n` has the two terms `s = n, n + 1`. -/
 private lemma symmetricRacahSum_of_eq_add_one {x₁ x₂ x₃ y₁ y₂ y₃ : ℚ} (n : ℤ) (hx : x₁ = n + 1)
     (hy : y₁ = n) :
     symmetricRacahSum x₁ x₂ x₃ y₁ y₂ y₃ =
-      (-1 : ℝ) ^ n * (invFactQ (x₂ - n) * invFactQ (x₃ - n) * (invFactQ (n - y₂) *
-        invFactQ (n - y₃)) - invFactQ (x₂ - n - 1) * invFactQ (x₃ - n - 1) *
-        (invFactQ (n + 1 - y₂) * invFactQ (n + 1 - y₃))) := by
+      (-1 : ℝ) ^ n * (ratInvFactorial (x₂ - n) * ratInvFactorial (x₃ - n) *
+          (ratInvFactorial (n - y₂) *
+        ratInvFactorial (n - y₃)) - ratInvFactorial (x₂ - n - 1) * ratInvFactorial (x₃ - n - 1) *
+        (ratInvFactorial (n + 1 - y₂) * ratInvFactorial (n + 1 - y₃))) := by
   subst hx hy
   unfold symmetricRacahSum
   rw [finsum_eq_sum_of_support_subset _ (s := {n, n + 1}) ?_,
     Finset.sum_pair (by omega)]
   · rw [zpow_add₀ (by norm_num)]
     push_cast
-    simp only [sub_self, show ((n : ℚ) + 1 - n) = 1 by ring, invFactQ_zero,
-      invFactQ_one]
+    simp only [sub_self, show ((n : ℚ) + 1 - n) = 1 by ring, ratInvFactorial_zero,
+      ratInvFactorial_one]
     ring_nf
   · intro s hs
     simp only [Function.mem_support] at hs
@@ -303,13 +516,13 @@ private lemma symmetricRacahSum_of_eq_add_one {x₁ x₂ x₃ y₁ y₂ y₃ : �
     simp only [not_or] at hne
     rcases lt_or_gt_of_ne hne.1 with h | h
     · apply hs
-      rw [invFactQ_of_neg (x := (s : ℚ) - n) (by
+      rw [ratInvFactorial_of_neg (x := (s : ℚ) - n) (by
         have : (s : ℚ) < n := by exact_mod_cast h
         linarith)]
       ring
     · have h' : n + 1 < s := by omega
       apply hs
-      rw [invFactQ_of_neg (x := (n : ℚ) + 1 - s) (by
+      rw [ratInvFactorial_of_neg (x := (n : ℚ) + 1 - s) (by
         have : (n : ℚ) + 1 < s := by exact_mod_cast h'
         linarith)]
       ring
@@ -429,20 +642,20 @@ section Dixon
 open DLMF.Hypergeometric
 
 /-- `(m+1)_t = (m+t)!/m!`. -/
-private lemma poch_natCast_add_one (m t : ℕ) :
-    poch ((m : ℂ) + 1) t = ((m + t).factorial : ℂ) / m.factorial := by
+private lemma pochhammer_natCast_add_one (m t : ℕ) :
+    pochhammer ((m : ℂ) + 1) t = ((m + t).factorial : ℂ) / m.factorial := by
   have h := Nat.factorial_mul_ascFactorial m t
   have hm : (m.factorial : ℂ) ≠ 0 := by exact_mod_cast m.factorial_ne_zero
-  rw [eq_div_iff hm, poch, show (m : ℂ) + 1 = ((m + 1 : ℕ) : ℂ) by push_cast; ring,
+  rw [eq_div_iff hm, pochhammer, show (m : ℂ) + 1 = ((m + 1 : ℕ) : ℂ) by push_cast; ring,
     ← ascPochhammer_eval_cast, ascPochhammer_nat_eq_ascFactorial, ← h]
   push_cast; ring
 
 /-- `(-M)_t = (-1)^t M!/(M-t)!` for `t ≤ M`. -/
-private lemma poch_neg_natCast (M t : ℕ) (ht : t ≤ M) :
-    poch (-(M : ℂ)) t = (-1) ^ t * ((M.factorial : ℂ) / (M - t).factorial) := by
-  have h := poch_reflect (((M - t : ℕ) : ℂ) + 1) t
+private lemma pochhammer_neg_natCast (M t : ℕ) (ht : t ≤ M) :
+    pochhammer (-(M : ℂ)) t = (-1) ^ t * ((M.factorial : ℂ) / (M - t).factorial) := by
+  have h := pochhammer_reflect (((M - t : ℕ) : ℂ) + 1) t
   rw [show (1 : ℂ) - (((M - t : ℕ) : ℂ) + 1) - t = -(M : ℂ) by push_cast [ht]; ring,
-    poch_natCast_add_one, Nat.sub_add_cancel ht] at h
+    pochhammer_natCast_add_one, Nat.sub_add_cancel ht] at h
   exact h
 
 /-- Dixon's identity in factorial form, from the even terminating Dixon sum. -/
@@ -451,7 +664,8 @@ private lemma dixon_factorial_sum (A B C : ℕ) (hB : A ≤ B) (hC : A ≤ C) :
       (A + C - t).factorial * t.factorial * (B - A + t).factorial * (C - A + t).factorial) =
       (-1) ^ A * ((A + B + C).factorial / (A.factorial * B.factorial * C.factorial *
         (A + B).factorial * (B + C).factorial * (A + C).factorial)) := by
-  have hb : GenDenRegular {1 - (-((A : ℂ) + B)) - 2 * A, 1 - (-((A : ℂ) + C)) - 2 * A} := by
+  have hb : LowerParametersRegular
+      {1 - (-((A : ℂ) + B)) - 2 * A, 1 - (-((A : ℂ) + C)) - 2 * A} := by
     intro x hx n hn
     simp only [Multiset.insert_eq_cons, Multiset.mem_cons, Multiset.mem_singleton] at hx
     rcases hx with rfl | rfl
@@ -459,9 +673,10 @@ private lemma dixon_factorial_sum (A B C : ℕ) (hB : A ≤ B) (hC : A ≤ C) :
       exact absurd (by exact_mod_cast this : B - A + 1 + n = 0) (by omega)
     · have : ((C - A + 1 + n : ℕ) : ℂ) = 0 := by push_cast [hC]; linear_combination hn
       exact absurd (by exact_mod_cast this : C - A + 1 + n = 0) (by omega)
-  have hD := genHG_dixon_terminating_even A (-((A : ℂ) + B)) (-((A : ℂ) + C)) hb
+  have hD := generalizedHypergeometric_dixon_terminating_even A (-((A : ℂ) + B)) (-((A : ℂ) + C)) hb
   have hf : ∀ m : ℕ, (m.factorial : ℂ) ≠ 0 := fun m => by exact_mod_cast m.factorial_ne_zero
-  have hterm : ∀ t ∈ range (2 * A + 1), genCoeff {(-(2 * A) : ℂ), -((A : ℂ) + B),
+  have hterm : ∀ t ∈ range (2 * A + 1),
+      generalizedHypergeometricCoeff {(-(2 * A) : ℂ), -((A : ℂ) + B),
       -((A : ℂ) + C)} {1 - (-((A : ℂ) + B)) - 2 * A, 1 - (-((A : ℂ) + C)) - 2 * A} t * 1 ^ t =
       ((2 * A).factorial * (A + B).factorial * (A + C).factorial * (B - A).factorial *
         (C - A).factorial : ℂ) * ((-1 : ℂ) ^ t / ((2 * A - t).factorial *
@@ -469,15 +684,16 @@ private lemma dixon_factorial_sum (A B C : ℕ) (hB : A ≤ B) (hC : A ≤ C) :
             (B - A + t).factorial * (C - A + t).factorial)) := by
     intro t ht
     have ht' : t ≤ 2 * A := Nat.lt_succ_iff.mp (mem_range.mp ht)
-    have h1 := poch_neg_natCast (2 * A) t ht'
-    have h2 := poch_neg_natCast (A + B) t (by omega)
-    have h3 := poch_neg_natCast (A + C) t (by omega)
-    have h4 := poch_natCast_add_one (B - A) t
-    have h5 := poch_natCast_add_one (C - A) t
+    have h1 := pochhammer_neg_natCast (2 * A) t ht'
+    have h2 := pochhammer_neg_natCast (A + B) t (by omega)
+    have h3 := pochhammer_neg_natCast (A + C) t (by omega)
+    have h4 := pochhammer_natCast_add_one (B - A) t
+    have h5 := pochhammer_natCast_add_one (C - A) t
     push_cast at h1 h2 h3
     rw [show ((B - A : ℕ) : ℂ) + 1 = 1 - (-((A : ℂ) + B)) - 2 * A by push_cast [hB]; ring] at h4
     rw [show ((C - A : ℕ) : ℂ) + 1 = 1 - (-((A : ℂ) + C)) - 2 * A by push_cast [hC]; ring] at h5
-    simp only [genCoeff, genPoch, Multiset.insert_eq_cons, Multiset.map_cons,
+    simp only [generalizedHypergeometricCoeff, pochhammerProduct, Multiset.insert_eq_cons,
+        Multiset.map_cons,
       Multiset.map_singleton, Multiset.prod_cons, Multiset.prod_singleton, one_pow, mul_one]
     rw [h1, h2, h3, h4, h5]
     have := hf (2 * A - t); have := hf (A + B - t); have := hf (A + C - t); have := hf t
@@ -485,11 +701,11 @@ private lemma dixon_factorial_sum (A B C : ℕ) (hB : A ≤ B) (hC : A ≤ C) :
     have hs2 : (-1 : ℂ) ^ (t * 2) = 1 := by rw [mul_comm, pow_mul]; simp
     field_simp
     linear_combination ((2 * A).factorial * (A + B).factorial * (A + C).factorial : ℂ) * hs2
-  unfold genFiniteHG at hD
+  unfold generalizedHypergeometricTruncated at hD
   rw [sum_congr rfl hterm, ← mul_sum] at hD
-  have hP1 := poch_neg_natCast (A + B + C) A (by omega)
-  have hP2 := poch_neg_natCast B A hB
-  have hP3 := poch_neg_natCast C A hC
+  have hP1 := pochhammer_neg_natCast (A + B + C) A (by omega)
+  have hP2 := pochhammer_neg_natCast B A hB
+  have hP3 := pochhammer_neg_natCast C A hC
   rw [show -((A + B + C : ℕ) : ℂ) = -((A : ℂ) + B) + -((A : ℂ) + C) + A by push_cast; ring,
     show A + B + C - A = B + C by omega] at hP1
   rw [show -(B : ℂ) = -((A : ℂ) + B) + A by ring] at hP2
@@ -525,19 +741,19 @@ private lemma symmetricRacahSum_dixon_of_le (A B C : ℕ) (hB : A ≤ B) (hC : A
     refine sum_congr rfl fun t ht => ?_
     have ht' : t ≤ 2 * A := Nat.lt_succ_iff.mp (mem_range.mp ht)
     simp only [Nat.castEmbedding_apply, Int.cast_natCast, zpow_natCast]
-    rw [invFactQ_of_eq (n := 2 * A - t) (by push_cast [ht']; ring),
-      invFactQ_of_eq (n := A + B - t) (by push_cast [show t ≤ A + B by omega]; ring),
-      invFactQ_of_eq (n := A + C - t) (by push_cast [show t ≤ A + C by omega]; ring),
-      invFactQ_of_eq (n := t) (by ring),
-      invFactQ_of_eq (n := B - A + t) (by push_cast [hB]; ring),
-      invFactQ_of_eq (n := C - A + t) (by push_cast [hC]; ring)]
+    rw [ratInvFactorial_of_eq (n := 2 * A - t) (by push_cast [ht']; ring),
+      ratInvFactorial_of_eq (n := A + B - t) (by push_cast [show t ≤ A + B by omega]; ring),
+      ratInvFactorial_of_eq (n := A + C - t) (by push_cast [show t ≤ A + C by omega]; ring),
+      ratInvFactorial_of_eq (n := t) (by ring),
+      ratInvFactorial_of_eq (n := B - A + t) (by push_cast [hB]; ring),
+      ratInvFactorial_of_eq (n := C - A + t) (by push_cast [hC]; ring)]
     push_cast
     field_simp
   · intro s hs
     simp only [Function.mem_support] at hs
-    have h1 : invFactQ (((2 * A : ℕ) : ℚ) - s) ≠ 0 := fun h0 => hs (by rw [h0]; ring)
-    have h2 : invFactQ ((s : ℚ) - 0) ≠ 0 := fun h0 => hs (by rw [h0]; ring)
-    rw [Ne, invFactQ_eq_zero_iff_neg, not_lt] at h1 h2
+    have h1 : ratInvFactorial (((2 * A : ℕ) : ℚ) - s) ≠ 0 := fun h0 => hs (by rw [h0]; ring)
+    have h2 : ratInvFactorial ((s : ℚ) - 0) ≠ 0 := fun h0 => hs (by rw [h0]; ring)
+    rw [Ne, ratInvFactorial_eq_zero_iff_neg, not_lt] at h1 h2
     simp only [coe_map, Nat.castEmbedding_apply, coe_range, Set.mem_image, Set.mem_Iio]
     refine ⟨s.toNat, ?_, Int.toNat_of_nonneg (by exact_mod_cast (by linarith : (0 : ℚ) ≤ s))⟩
     have : (s : ℚ) ≤ ((2 * A : ℕ) : ℚ) := by linarith
@@ -598,9 +814,10 @@ conditions. -/
 theorem wigner3j_zero_zero_zero_of_even {j₁ j₂ j₃ : ℚ} (h : IsTriad j₁ j₂ j₃)
     (h₁ : IsNatQ j₁) (h₂ : IsNatQ j₂) (h₃ : IsNatQ j₃) (n : ℕ) (hJ : j₁ + j₂ + j₃ = 2 * n) :
     wigner3j j₁ j₂ j₃ 0 0 0 =
-      (-1 : ℝ) ^ n * Real.sqrt (factQ (2 * n - 2 * j₁) * factQ (2 * n - 2 * j₂) *
-        factQ (2 * n - 2 * j₃) / factQ (2 * n + 1)) *
-        (n.factorial / (factQ (n - j₁) * factQ (n - j₂) * factQ (n - j₃))) := by
+      (-1 : ℝ) ^ n * Real.sqrt (ratFactorial (2 * n - 2 * j₁) * ratFactorial (2 * n - 2 * j₂) *
+        ratFactorial (2 * n - 2 * j₃) / ratFactorial (2 * n + 1)) *
+        (n.factorial / (ratFactorial (n - j₁) * ratFactorial (n - j₂) *
+            ratFactorial (n - j₃))) := by
   obtain ⟨p₁, rfl⟩ := h₁
   obtain ⟨p₂, rfl⟩ := h₂
   obtain ⟨p₃, rfl⟩ := h₃
@@ -628,24 +845,24 @@ theorem wigner3j_zero_zero_zero_of_even {j₁ j₂ j₃ : ℚ} (h : IsTriad j₁
   set Q : ℕ := a + c with hQ
   set R : ℕ := b + c with hR
   set N : ℕ := a + b + c with hN
-  rw [factQ_of_eq (x := (P : ℚ) + Q - R) (n := 2 * a) (by push_cast [hP, hQ, hR]; ring),
-    factQ_of_eq (x := (P : ℚ) - Q + R) (n := 2 * b) (by push_cast [hP, hQ, hR]; ring),
-    factQ_of_eq (x := -(P : ℚ) + Q + R) (n := 2 * c) (by push_cast [hP, hQ, hR]; ring),
-    factQ_of_eq (x := (P : ℚ) + Q + R + 1) (n := 2 * N + 1)
+  rw [ratFactorial_of_eq (x := (P : ℚ) + Q - R) (n := 2 * a) (by push_cast [hP, hQ, hR]; ring),
+    ratFactorial_of_eq (x := (P : ℚ) - Q + R) (n := 2 * b) (by push_cast [hP, hQ, hR]; ring),
+    ratFactorial_of_eq (x := -(P : ℚ) + Q + R) (n := 2 * c) (by push_cast [hP, hQ, hR]; ring),
+    ratFactorial_of_eq (x := (P : ℚ) + Q + R + 1) (n := 2 * N + 1)
       (by push_cast [hP, hQ, hR, hN]; ring),
-    factQ_of_eq (x := (P : ℚ) + 0) (n := P) (by ring),
-    factQ_of_eq (x := (P : ℚ) - 0) (n := P) (by ring),
-    factQ_of_eq (x := (Q : ℚ) + 0) (n := Q) (by ring),
-    factQ_of_eq (x := (Q : ℚ) - 0) (n := Q) (by ring),
-    factQ_of_eq (x := (R : ℚ) + 0) (n := R) (by ring),
-    factQ_of_eq (x := (R : ℚ) - 0) (n := R) (by ring),
-    factQ_of_eq (x := 2 * (N : ℚ) - 2 * P) (n := 2 * c) (by push_cast [hP, hN]; ring),
-    factQ_of_eq (x := 2 * (N : ℚ) - 2 * Q) (n := 2 * b) (by push_cast [hQ, hN]; ring),
-    factQ_of_eq (x := 2 * (N : ℚ) - 2 * R) (n := 2 * a) (by push_cast [hR, hN]; ring),
-    factQ_of_eq (x := 2 * (N : ℚ) + 1) (n := 2 * N + 1) (by push_cast; ring),
-    factQ_of_eq (x := (N : ℚ) - P) (n := c) (by push_cast [hP, hN]; ring),
-    factQ_of_eq (x := (N : ℚ) - Q) (n := b) (by push_cast [hQ, hN]; ring),
-    factQ_of_eq (x := (N : ℚ) - R) (n := a) (by push_cast [hR, hN]; ring)]
+    ratFactorial_of_eq (x := (P : ℚ) + 0) (n := P) (by ring),
+    ratFactorial_of_eq (x := (P : ℚ) - 0) (n := P) (by ring),
+    ratFactorial_of_eq (x := (Q : ℚ) + 0) (n := Q) (by ring),
+    ratFactorial_of_eq (x := (Q : ℚ) - 0) (n := Q) (by ring),
+    ratFactorial_of_eq (x := (R : ℚ) + 0) (n := R) (by ring),
+    ratFactorial_of_eq (x := (R : ℚ) - 0) (n := R) (by ring),
+    ratFactorial_of_eq (x := 2 * (N : ℚ) - 2 * P) (n := 2 * c) (by push_cast [hP, hN]; ring),
+    ratFactorial_of_eq (x := 2 * (N : ℚ) - 2 * Q) (n := 2 * b) (by push_cast [hQ, hN]; ring),
+    ratFactorial_of_eq (x := 2 * (N : ℚ) - 2 * R) (n := 2 * a) (by push_cast [hR, hN]; ring),
+    ratFactorial_of_eq (x := 2 * (N : ℚ) + 1) (n := 2 * N + 1) (by push_cast; ring),
+    ratFactorial_of_eq (x := (N : ℚ) - P) (n := c) (by push_cast [hP, hN]; ring),
+    ratFactorial_of_eq (x := (N : ℚ) - Q) (n := b) (by push_cast [hQ, hN]; ring),
+    ratFactorial_of_eq (x := (N : ℚ) - R) (n := a) (by push_cast [hR, hN]; ring)]
   have hX : (0 : ℝ) ≤ ((2 * a).factorial : ℝ) * (2 * b).factorial * (2 * c).factorial /
       (2 * N + 1).factorial := by positivity
   rw [show ((P.factorial : ℝ) * P.factorial * Q.factorial * Q.factorial * R.factorial *
@@ -671,22 +888,22 @@ macro "wigner_finish" : tactic => `(tactic|
 
 /-- The symmetric Racah sum with `x₁ = y₁ = 0`. -/
 private lemma symmetricRacahSum_x₁_y₁_zero (x₂ x₃ y₂ y₃ : ℚ) :
-    symmetricRacahSum 0 x₂ x₃ 0 y₂ y₃ = invFactQ x₂ * invFactQ x₃ *
-        (invFactQ (-y₂) * invFactQ (-y₃)) := by
+    symmetricRacahSum 0 x₂ x₃ 0 y₂ y₃ = ratInvFactorial x₂ * ratInvFactorial x₃ *
+        (ratInvFactorial (-y₂) * ratInvFactorial (-y₃)) := by
   have := symmetricRacahSum_intCast_intCast 0 x₂ x₃ y₂ y₃
   simp only [Int.cast_zero, sub_zero, zero_sub, zpow_zero, one_mul] at this
   exact this
 
 /-- The symmetric Racah sum with `x₂ = y₁ = 0`. -/
 private lemma symmetricRacahSum_x₂_y₁_zero (x₁ x₃ y₂ y₃ : ℚ) :
-    symmetricRacahSum x₁ 0 x₃ 0 y₂ y₃ = invFactQ x₁ * invFactQ x₃ *
-        (invFactQ (-y₂) * invFactQ (-y₃)) := by
+    symmetricRacahSum x₁ 0 x₃ 0 y₂ y₃ = ratInvFactorial x₁ * ratInvFactorial x₃ *
+        (ratInvFactorial (-y₂) * ratInvFactorial (-y₃)) := by
   rw [symmetricRacahSum_swap_x12, symmetricRacahSum_x₁_y₁_zero]
 
 /-- The symmetric Racah sum with `x₃ = y₁ = 0`. -/
 private lemma symmetricRacahSum_x₃_y₁_zero (x₁ x₂ y₂ y₃ : ℚ) :
-    symmetricRacahSum x₁ x₂ 0 0 y₂ y₃ = invFactQ x₁ * invFactQ x₂ *
-        (invFactQ (-y₂) * invFactQ (-y₃)) := by
+    symmetricRacahSum x₁ x₂ 0 0 y₂ y₃ = ratInvFactorial x₁ * ratInvFactorial x₂ *
+        (ratInvFactorial (-y₂) * ratInvFactorial (-y₃)) := by
   rw [← symmetricRacahSum_cycle_x, symmetricRacahSum_x₁_y₁_zero]
 
 /-- DLMF 34.3.6: the stretched case `j₃ = j₁ + j₂`,
@@ -698,10 +915,11 @@ private lemma symmetricRacahSum_x₃_y₁_zero (x₁ x₂ y₂ y₃ : ℚ) :
 theorem wigner3j_stretched {j₁ j₂ m₁ m₂ : ℚ} (h₁ : IsProjection j₁ m₁)
     (h₂ : IsProjection j₂ m₂) :
     wigner3j j₁ j₂ (j₁ + j₂) m₁ m₂ (-m₁ - m₂) =
-      signPow (j₁ - j₂ + m₁ + m₂) * Real.sqrt (factQ (2 * j₁) * factQ (2 * j₂) *
-        factQ (j₁ + j₂ + m₁ + m₂) * factQ (j₁ + j₂ - m₁ - m₂) /
-        (factQ (2 * j₁ + 2 * j₂ + 1) * factQ (j₁ + m₁) * factQ (j₁ - m₁) * factQ (j₂ + m₂) *
-          factQ (j₂ - m₂))) := by
+      signPow (j₁ - j₂ + m₁ + m₂) * Real.sqrt (ratFactorial (2 * j₁) * ratFactorial (2 * j₂) *
+        ratFactorial (j₁ + j₂ + m₁ + m₂) * ratFactorial (j₁ + j₂ - m₁ - m₂) /
+        (ratFactorial (2 * j₁ + 2 * j₂ + 1) * ratFactorial (j₁ + m₁) * ratFactorial (j₁ - m₁) *
+            ratFactorial (j₂ + m₂) *
+          ratFactorial (j₂ - m₂))) := by
   obtain ⟨⟨p₁, hp₁⟩, ⟨q₁, hq₁⟩⟩ := h₁
   obtain ⟨⟨p₂, hp₂⟩, ⟨q₂, hq₂⟩⟩ := h₂
   obtain rfl : j₁ = ((p₁ : ℚ) + q₁) / 2 := by linarith
@@ -717,8 +935,8 @@ theorem wigner3j_stretched {j₁ j₂ m₁ m₂ : ℚ} (h₁ : IsProjection j₁
       ⟨⟨q₁ + q₂, by wigner_ring_cast⟩, ⟨p₁ + p₂, by wigner_ring_cast⟩⟩, by ring⟩
   rw [wigner3j_eq_sqrt_mul_symmetricRacahSum hadm, sub_self, symmetricRacahSum_x₁_y₁_zero]
   ring_nf
-  simp only [one_add_natCast_eq, ← Nat.cast_add, factQ_natCast, invFactQ_natCast,
-    factQ_zero, one_mul]
+  simp only [one_add_natCast_eq, ← Nat.cast_add, ratFactorial_natCast, ratInvFactorial_natCast,
+    ratFactorial_zero, one_mul]
   wigner_finish
 
 /-- DLMF 34.3.7: `(j₁ j₂ j₃; j₁ -j₁-m₃ m₃) = (-1)^{j₁-j₂-m₃}`
@@ -730,10 +948,11 @@ assuming the triangle conditions and that `m₃` and `-j₁-m₃` are projection
 theorem wigner3j_top {j₁ j₂ j₃ m₃ : ℚ} (h : IsTriad j₁ j₂ j₃) (h₂ : IsProjection j₂ (-j₁ - m₃))
     (h₃ : IsProjection j₃ m₃) :
     wigner3j j₁ j₂ j₃ j₁ (-j₁ - m₃) m₃ =
-      signPow (j₁ - j₂ - m₃) * Real.sqrt (factQ (2 * j₁) * factQ (-j₁ + j₂ + j₃) *
-        factQ (j₁ + j₂ + m₃) * factQ (j₃ - m₃) /
-        (factQ (j₁ + j₂ + j₃ + 1) * factQ (j₁ - j₂ + j₃) * factQ (j₁ + j₂ - j₃) *
-          factQ (-j₁ + j₂ - m₃) * factQ (j₃ + m₃))) := by
+      signPow (j₁ - j₂ - m₃) * Real.sqrt (ratFactorial (2 * j₁) * ratFactorial (-j₁ + j₂ + j₃) *
+        ratFactorial (j₁ + j₂ + m₃) * ratFactorial (j₃ - m₃) /
+        (ratFactorial (j₁ + j₂ + j₃ + 1) * ratFactorial (j₁ - j₂ + j₃) *
+            ratFactorial (j₁ + j₂ - j₃) *
+          ratFactorial (-j₁ + j₂ - m₃) * ratFactorial (j₃ + m₃))) := by
   obtain ⟨⟨a₁, ha₁⟩, ⟨a₂, ha₂⟩, ⟨a₃, ha₃⟩⟩ := h
   obtain ⟨⟨b, hb⟩, ⟨c, hc⟩⟩ := h₂
   obtain ⟨⟨d, hd⟩, ⟨e, he⟩⟩ := h₃
@@ -751,8 +970,8 @@ theorem wigner3j_top {j₁ j₂ j₃ m₃ : ℚ} (h : IsTriad j₁ j₂ j₃) (h
   rw [wigner3j_eq_sqrt_mul_symmetricRacahSum hadm]
   ring_nf
   simp only [symmetricRacahSum_x₂_y₁_zero, neg_neg, one_add_natCast_eq,
-      ← Nat.cast_add, factQ_natCast,
-    invFactQ_natCast, factQ_zero, mul_one]
+      ← Nat.cast_add, ratFactorial_natCast,
+    ratInvFactorial_natCast, ratFactorial_zero, mul_one]
   wigner_finish
 
 /-! ## §34.3(ii) Symmetry -/
@@ -968,264 +1187,6 @@ theorem wigner3j_regge₂ (j₁ j₂ j₃ m₁ m₂ m₃ : ℚ) :
         symmetricRacahSum_cycle_x, symmetricRacahSum_cycle_x]
     ring_nf
   · rw [wigner3j_of_not h, wigner3j_of_not (mt hiff.mpr h)]
-
-/-! ## §34.3(iii) Recursion relations -/
-
-/-- `1/(t-1)! = t/t!` for an integer `t` (both sides vanish for `t ≤ 0`). -/
-private lemma invFactQ_sub_one_of_eq_intCast {t : ℚ} {n : ℤ} (h : t = n) :
-    invFactQ (t - 1) = (t : ℝ) * invFactQ t := by
-  subst h
-  rcases lt_or_ge n 1 with hn | hn
-  · have hn1 : (n : ℚ) < 1 := by exact_mod_cast hn
-    rw [invFactQ_of_neg (by linarith)]
-    rcases lt_or_ge n 0 with hn' | hn'
-    · rw [invFactQ_of_neg (by exact_mod_cast hn'), mul_zero]
-    · have : n = 0 := by omega
-      subst this; simp
-  · obtain ⟨k, rfl⟩ : ∃ k : ℕ, n = k + 1 := ⟨(n - 1).toNat, by omega⟩
-    rw [invFactQ_of_eq (n := k) (by push_cast; ring),
-      invFactQ_of_eq (n := k + 1) (by push_cast; ring), Nat.factorial_succ]
-    push_cast
-    field_simp
-
-/-- The summand of `symmetricRacahSum` has finite support. -/
-private lemma finite_support_symmetricRacahSum_summand (x₁ x₂ x₃ y₁ y₂ y₃ : ℚ) :
-    (Function.support fun s : ℤ => (-1 : ℝ) ^ s * (invFactQ (x₁ - s) * invFactQ (x₂ - s) *
-      invFactQ (x₃ - s) * (invFactQ (s - y₁) * invFactQ (s - y₂) * invFactQ (s - y₃)))).Finite := by
-  apply (Set.finite_Icc (⌈y₁⌉) (⌊x₁⌋)).subset
-  intro s hs
-  simp only [Function.mem_support] at hs
-  simp only [Set.mem_Icc]
-  constructor
-  · by_contra h
-    apply hs
-    rw [invFactQ_of_neg (x := (s : ℚ) - y₁) (by
-      have : (s : ℚ) < y₁ := by
-        rw [not_le, Int.lt_ceil] at h; exact h
-      linarith)]
-    ring
-  · by_contra h
-    apply hs
-    rw [invFactQ_of_neg (x := x₁ - s) (by
-      have : x₁ < (s : ℚ) := by
-        rw [not_le, Int.floor_lt] at h; exact h
-      linarith)]
-    ring
-
-/-- Contiguity of the symmetric Racah sum: lowering `x₃` and raising `y₃` by one. -/
-private lemma symmetricRacahSum_contiguous (x₁ x₂ y₁ y₂ : ℚ) {x₃ y₃ : ℚ} {n k : ℤ} (hx : x₃ = n)
-    (hy : y₃ = k) :
-    symmetricRacahSum x₁ x₂ (x₃ - 1) y₁ y₂ y₃ + symmetricRacahSum x₁ x₂ x₃ y₁ y₂ (y₃ + 1) =
-      ((x₃ - y₃ : ℚ) : ℝ) * symmetricRacahSum x₁ x₂ x₃ y₁ y₂ y₃ := by
-  unfold symmetricRacahSum
-  rw [← finsum_add_distrib (finite_support_symmetricRacahSum_summand _ _ _ _ _ _)
-      (finite_support_symmetricRacahSum_summand _ _ _ _ _ _),
-    mul_finsum]
-  refine finsum_congr fun s => ?_
-  rw [show x₃ - 1 - s = (x₃ - s) - 1 by ring, show (s : ℚ) - (y₃ + 1) = (s - y₃) - 1 by ring,
-    invFactQ_sub_one_of_eq_intCast (n := n - s) (by rw [hx]; push_cast; ring),
-    invFactQ_sub_one_of_eq_intCast (n := s - k) (by rw [hy]; push_cast; ring)]
-  push_cast
-  ring
-
-/-- The symmetric Racah sum vanishes when `x₃ < y₂`. -/
-private lemma symmetricRacahSum_eq_zero_of_lt (x₁ x₂ y₁ y₃ : ℚ) {x₃ y₂ : ℚ} (h : x₃ < y₂) :
-    symmetricRacahSum x₁ x₂ x₃ y₁ y₂ y₃ = 0 := by
-  unfold symmetricRacahSum
-  convert finsum_zero with s
-  rcases lt_or_ge (x₃ - s) 0 with h' | h'
-  · rw [invFactQ_of_neg h']; ring
-  · rw [invFactQ_of_neg (x := (s : ℚ) - y₂) (by linarith)]; ring
-
-
-/-- DLMF 34.3.13. Stated for all arguments (stronger than DLMF, which assumes the triangle
-conditions for each symbol). -/
-@[dlmf 34.3.E13]
-theorem wigner3j_recursion_half (j₁ j₂ j₃ m₁ m₂ m₃ : ℚ) :
-    Real.sqrt ((j₁ + j₂ + j₃ + 1) * (-j₁ + j₂ + j₃)) * wigner3j j₁ j₂ j₃ m₁ m₂ m₃ =
-      Real.sqrt ((j₂ + m₂) * (j₃ - m₃)) *
-          wigner3j j₁ (j₂ - 1 / 2) (j₃ - 1 / 2) m₁ (m₂ - 1 / 2) (m₃ + 1 / 2) -
-        Real.sqrt ((j₂ - m₂) * (j₃ + m₃)) *
-          wigner3j j₁ (j₂ - 1 / 2) (j₃ - 1 / 2) m₁ (m₂ + 1 / 2) (m₃ - 1 / 2) := by
-  have one : IsNatQ 1 := ⟨1, by simp⟩
-  by_cases hL : IsAdmissible3j j₁ j₂ j₃ m₁ m₂ m₃
-  swap
-  · have h1 : ¬ IsAdmissible3j j₁ (j₂ - 1 / 2) (j₃ - 1 / 2) m₁ (m₂ - 1 / 2) (m₃ + 1 / 2) := by
-      rintro ⟨⟨t1, t2, t3⟩, p1, ⟨p2a, p2b⟩, ⟨p3a, p3b⟩, hs⟩
-      exact hL ⟨⟨t1.of_eq (by ring), t2.of_eq (by ring), (t3.add one).of_eq (by ring)⟩, p1,
-        ⟨p2a.of_eq (by ring), (p2b.add one).of_eq (by ring)⟩,
-        ⟨(p3a.add one).of_eq (by ring), p3b.of_eq (by ring)⟩, by linarith⟩
-    have h2 : ¬ IsAdmissible3j j₁ (j₂ - 1 / 2) (j₃ - 1 / 2) m₁ (m₂ + 1 / 2) (m₃ - 1 / 2) := by
-      rintro ⟨⟨t1, t2, t3⟩, p1, ⟨p2a, p2b⟩, ⟨p3a, p3b⟩, hs⟩
-      exact hL ⟨⟨t1.of_eq (by ring), t2.of_eq (by ring), (t3.add one).of_eq (by ring)⟩, p1,
-        ⟨(p2a.add one).of_eq (by ring), p2b.of_eq (by ring)⟩,
-        ⟨p3a.of_eq (by ring), (p3b.add one).of_eq (by ring)⟩, by linarith⟩
-    rw [wigner3j_of_not hL, wigner3j_of_not h1, wigner3j_of_not h2]; ring
-  have hL' := hL
-  obtain ⟨⟨⟨a, ha⟩, ⟨b, hb⟩, ⟨c, hc⟩⟩, ⟨⟨p₁, hp₁⟩, ⟨q₁, hq₁⟩⟩, ⟨⟨p₂, hp₂⟩, ⟨q₂, hq₂⟩⟩,
-    ⟨⟨p₃, hp₃⟩, ⟨q₃, hq₃⟩⟩, hm⟩ := hL'
-  rcases c with _ | w
-  · have h1 : ¬ IsAdmissible3j j₁ (j₂ - 1 / 2) (j₃ - 1 / 2) m₁ (m₂ - 1 / 2) (m₃ + 1 / 2) := by
-      rintro ⟨⟨-, -, t3⟩, -⟩
-      have := t3.nonneg; push_cast at hc; linarith
-    have h2 : ¬ IsAdmissible3j j₁ (j₂ - 1 / 2) (j₃ - 1 / 2) m₁ (m₂ + 1 / 2) (m₃ - 1 / 2) := by
-      rintro ⟨⟨-, -, t3⟩, -⟩
-      have := t3.nonneg; push_cast at hc; linarith
-    rw [wigner3j_of_not h1, wigner3j_of_not h2,
-      show (-(j₁ : ℝ) + j₂ + j₃) = 0 by
-        have := congrArg (Rat.cast : ℚ → ℝ) hc; push_cast at this; linarith]
-    simp
-  have hR : ∀ {x : ℚ} {n : ℕ}, x = n → (x : ℝ) = n := fun h => by rw [h]; simp
-  have hJ : j₁ + j₂ + j₃ + 1 = ((a + b + w + 2 : ℕ) : ℚ) := by push_cast at hc ⊢; linarith
-  set PL : ℝ := factQ (j₁ + j₂ - j₃) * factQ (j₁ - j₂ + j₃) * factQ (-j₁ + j₂ + j₃) /
-          factQ (j₁ + j₂ + j₃ + 1) * (factQ (j₁ + m₁) * factQ (j₁ - m₁) * factQ (j₂ + m₂) *
-          factQ (j₂ - m₂) * factQ (j₃ + m₃) * factQ (j₃ - m₃)) with hPL
-  set K : ℝ := signPow (j₁ - j₂ - m₃) * Real.sqrt PL *
-    Real.sqrt (((a + b + w + 2 : ℕ) : ℝ) / ((w + 1 : ℕ) : ℝ)) with hK
-  have e1 : Real.sqrt ((j₂ + m₂) * (j₃ - m₃)) *
-      wigner3j j₁ (j₂ - 1 / 2) (j₃ - 1 / 2) m₁ (m₂ - 1 / 2) (m₃ + 1 / 2) =
-      K * symmetricRacahSum (j₁ + j₂ - j₃) (j₁ - m₁) ((j₂ + m₂) - 1) 0 (j₂ - j₃ - m₁)
-          (j₁ - j₃ + m₂) := by
-    rcases q₂ with _ | u
-    · rw [symmetricRacahSum_swap_y12,
-          symmetricRacahSum_eq_zero_of_lt _ _ _ _ (by push_cast at hq₂; linarith),
-        show ((j₂ : ℝ) + m₂) = 0 by have := hR hq₂; push_cast at this; linarith]
-      simp
-    rcases p₃ with _ | v
-    · rw [symmetricRacahSum_eq_zero_of_lt _ _ _ _ (by push_cast at hq₂ hp₃; linarith),
-        show ((j₃ : ℝ) - m₃) = 0 by have := hR hp₃; push_cast at this; linarith]
-      simp
-    have hR1 : IsAdmissible3j j₁ (j₂ - 1 / 2) (j₃ - 1 / 2) m₁ (m₂ - 1 / 2) (m₃ + 1 / 2) :=
-      ⟨⟨⟨a, by linarith⟩, ⟨b, by linarith⟩, ⟨w, by push_cast at hc ⊢; linarith⟩⟩,
-        ⟨⟨p₁, hp₁⟩, ⟨q₁, hq₁⟩⟩, ⟨⟨p₂, by linarith⟩, ⟨u, by push_cast at hq₂ ⊢; linarith⟩⟩,
-        ⟨⟨v, by push_cast at hp₃ ⊢; linarith⟩, ⟨q₃, by linarith⟩⟩, by linarith⟩
-    rw [wigner3j_eq_sqrt_mul_symmetricRacahSum hR1, show j₁ - (j₂ - 1 / 2) - (m₃ + 1 / 2) = j₁ -
-        j₂ - m₃ by ring,
-      show symmetricRacahSum (j₁ + (j₂ - 1 / 2) - (j₃ - 1 / 2)) (j₁ - m₁)
-          (j₂ - 1 / 2 + (m₂ - 1 / 2)) 0
-        (j₂ - 1 / 2 - (j₃ - 1 / 2) - m₁) (j₁ - (j₃ - 1 / 2) + (m₂ - 1 / 2)) =
-        symmetricRacahSum (j₁ + j₂ - j₃) (j₁ - m₁) ((j₂ + m₂) - 1) 0 (j₂ - j₃ - m₁)
-            (j₁ - j₃ + m₂) by
-          congr 1 <;> ring, hK,
-      show ∀ c s Q S : ℝ, c * (s * Q * S) = s * (c * Q) * S from fun _ _ _ _ => by ring]
-    congr 1
-    rw [mul_assoc (signPow (j₁ - j₂ - m₃))]
-    congr 1
-    have hu : (j₂ : ℝ) + m₂ = (u : ℝ) + 1 := by have := hR hq₂; push_cast at this; linarith
-    have hv : (j₃ : ℝ) - m₃ = (v : ℝ) + 1 := by have := hR hp₃; push_cast at this; linarith
-    have hPL0 : 0 ≤ PL := by rw [hPL]; wigner_cast_nonneg
-    rw [hu, hv, ← Real.sqrt_mul (by positivity), ← Real.sqrt_mul hPL0, hPL]
-    congr 1
-    rw [factQ_of_eq (n := a) (show j₁ + (j₂ - 1 / 2) - (j₃ - 1 / 2) = (a : ℚ) by linarith),
-      factQ_of_eq (n := b) (show j₁ - (j₂ - 1 / 2) + (j₃ - 1 / 2) = (b : ℚ) by linarith),
-      factQ_of_eq (n := w) (show -j₁ + (j₂ - 1 / 2) + (j₃ - 1 / 2) = (w : ℚ) by
-        push_cast at hc; linarith),
-      factQ_of_eq (n := a + b + w + 1) (show j₁ + (j₂ - 1 / 2) + (j₃ - 1 / 2) + 1 =
-        ((a + b + w + 1 : ℕ) : ℚ) by push_cast at hJ ⊢; linarith),
-      factQ_of_eq (n := u) (show j₂ - 1 / 2 + (m₂ - 1 / 2) = (u : ℚ) by
-        push_cast at hq₂; linarith),
-      factQ_of_eq (n := p₂) (show j₂ - 1 / 2 - (m₂ - 1 / 2) = (p₂ : ℚ) by linarith),
-      factQ_of_eq (n := q₃) (show j₃ - 1 / 2 + (m₃ + 1 / 2) = (q₃ : ℚ) by linarith),
-      factQ_of_eq (n := v) (show j₃ - 1 / 2 - (m₃ + 1 / 2) = (v : ℚ) by
-        push_cast at hp₃; linarith),
-      ha, hb, hc, hJ, hq₁, hp₁, hq₂, hp₂, hq₃, hp₃]
-    simp only [factQ_natCast, Nat.factorial_succ, show a + b + w + 2 = (a + b + w + 1) + 1 from rfl]
-    push_cast
-    field_simp
-  have e2 : Real.sqrt ((j₂ - m₂) * (j₃ + m₃)) *
-      wigner3j j₁ (j₂ - 1 / 2) (j₃ - 1 / 2) m₁ (m₂ + 1 / 2) (m₃ - 1 / 2) =
-      -K * symmetricRacahSum (j₁ + j₂ - j₃) (j₁ - m₁) (j₂ + m₂) 0 (j₂ - j₃ - m₁)
-          ((j₁ - j₃ + m₂) + 1) := by
-    rcases p₂ with _ | u
-    · rw [symmetricRacahSum_swap_x12, symmetricRacahSum_swap_x23, symmetricRacahSum_swap_y23,
-        symmetricRacahSum_eq_zero_of_lt _ _ _ _ (by push_cast at hp₂; linarith),
-        show ((j₂ : ℝ) - m₂) = 0 by have := hR hp₂; push_cast at this; linarith]
-      simp
-    rcases q₃ with _ | v
-    · rw [symmetricRacahSum_swap_x23, symmetricRacahSum_swap_y23,
-        symmetricRacahSum_eq_zero_of_lt _ _ _ _ (by push_cast at hq₃; linarith),
-        show ((j₃ : ℝ) + m₃) = 0 by have := hR hq₃; push_cast at this; linarith]
-      simp
-    have hR2 : IsAdmissible3j j₁ (j₂ - 1 / 2) (j₃ - 1 / 2) m₁ (m₂ + 1 / 2) (m₃ - 1 / 2) :=
-      ⟨⟨⟨a, by linarith⟩, ⟨b, by linarith⟩, ⟨w, by push_cast at hc ⊢; linarith⟩⟩,
-        ⟨⟨p₁, hp₁⟩, ⟨q₁, hq₁⟩⟩, ⟨⟨u, by push_cast at hp₂ ⊢; linarith⟩, ⟨q₂, by linarith⟩⟩,
-        ⟨⟨p₃, by linarith⟩, ⟨v, by push_cast at hq₃ ⊢; linarith⟩⟩, by linarith⟩
-    rw [wigner3j_eq_sqrt_mul_symmetricRacahSum hR2,
-      show j₁ - (j₂ - 1 / 2) - (m₃ - 1 / 2) = j₁ - j₂ - m₃ + ((1 : ℤ) : ℚ) by push_cast; ring,
-      signPow_add_intCast, zpow_one,
-      show symmetricRacahSum (j₁ + (j₂ - 1 / 2) - (j₃ - 1 / 2)) (j₁ - m₁)
-          (j₂ - 1 / 2 + (m₂ + 1 / 2)) 0
-        (j₂ - 1 / 2 - (j₃ - 1 / 2) - m₁) (j₁ - (j₃ - 1 / 2) + (m₂ + 1 / 2)) =
-        symmetricRacahSum (j₁ + j₂ - j₃) (j₁ - m₁) (j₂ + m₂) 0 (j₂ - j₃ - m₁)
-            ((j₁ - j₃ + m₂) + 1) by
-          congr 1 <;> ring, hK, neg_mul,
-      show ∀ c s Q S : ℝ, c * (s * (-1) * Q * S) = -(s * (c * Q) * S) from
-        fun _ _ _ _ => by ring]
-    congr 2
-    rw [mul_assoc (signPow (j₁ - j₂ - m₃))]
-    congr 1
-    have hu : (j₂ : ℝ) - m₂ = (u : ℝ) + 1 := by have := hR hp₂; push_cast at this; linarith
-    have hv : (j₃ : ℝ) + m₃ = (v : ℝ) + 1 := by have := hR hq₃; push_cast at this; linarith
-    have hPL0 : 0 ≤ PL := by rw [hPL]; wigner_cast_nonneg
-    rw [hu, hv, ← Real.sqrt_mul (by positivity), ← Real.sqrt_mul hPL0, hPL]
-    congr 1
-    rw [factQ_of_eq (n := a) (show j₁ + (j₂ - 1 / 2) - (j₃ - 1 / 2) = (a : ℚ) by linarith),
-      factQ_of_eq (n := b) (show j₁ - (j₂ - 1 / 2) + (j₃ - 1 / 2) = (b : ℚ) by linarith),
-      factQ_of_eq (n := w) (show -j₁ + (j₂ - 1 / 2) + (j₃ - 1 / 2) = (w : ℚ) by
-        push_cast at hc; linarith),
-      factQ_of_eq (n := a + b + w + 1) (show j₁ + (j₂ - 1 / 2) + (j₃ - 1 / 2) + 1 =
-        ((a + b + w + 1 : ℕ) : ℚ) by push_cast at hJ ⊢; linarith),
-      factQ_of_eq (n := q₂) (show j₂ - 1 / 2 + (m₂ + 1 / 2) = (q₂ : ℚ) by linarith),
-      factQ_of_eq (n := u) (show j₂ - 1 / 2 - (m₂ + 1 / 2) = (u : ℚ) by
-        push_cast at hp₂; linarith),
-      factQ_of_eq (n := v) (show j₃ - 1 / 2 + (m₃ - 1 / 2) = (v : ℚ) by
-        push_cast at hq₃; linarith),
-      factQ_of_eq (n := p₃) (show j₃ - 1 / 2 - (m₃ - 1 / 2) = (p₃ : ℚ) by linarith),
-      ha, hb, hc, hJ, hq₁, hp₁, hq₂, hp₂, hq₃, hp₃]
-    simp only [factQ_natCast, Nat.factorial_succ, show a + b + w + 2 = (a + b + w + 1) + 1 from rfl]
-    push_cast
-    field_simp
-  rw [e1, e2, wigner3j_eq_sqrt_mul_symmetricRacahSum hL, ← hPL, show ∀ x y : ℝ, K * x - -K * y =
-      K * (x + y) from
-    fun x y => by ring, symmetricRacahSum_contiguous _ _ _ _ hq₂ (n := q₂) (k := (a : ℤ) - p₂) (by
-      push_cast; linarith), hK]
-  have hcR : (-(j₁ : ℝ) + j₂ + j₃) = ((w + 1 : ℕ) : ℝ) := by
-    have := hR hc; push_cast at this ⊢; linarith
-  have hJR : ((j₁ : ℝ) + j₂ + j₃ + 1) = ((a + b + w + 2 : ℕ) : ℝ) := by
-    have := hR hJ; push_cast at this ⊢; linarith
-  rw [hcR, hJR, show (((j₂ + m₂) - (j₁ - j₃ + m₂) : ℚ) : ℝ) = ((w + 1 : ℕ) : ℝ) by
-    rw [show (j₂ + m₂) - (j₁ - j₃ + m₂) = -j₁ + j₂ + j₃ by ring, hR hc]]
-  have hw : (0 : ℝ) < ((w + 1 : ℕ) : ℝ) := by positivity
-  rw [Real.sqrt_mul (by positivity), Real.sqrt_div (by positivity)]
-  have hs : Real.sqrt ((w + 1 : ℕ) : ℝ) ^ 2 = ((w + 1 : ℕ) : ℝ) := Real.sq_sqrt hw.le
-  have hs0 : Real.sqrt ((w + 1 : ℕ) : ℝ) ≠ 0 := by positivity
-  field_simp
-  rw [hs]
-  ring
-
-/-- DLMF 34.3.14. Stated for all arguments (stronger than DLMF). -/
-@[dlmf 34.3.E14]
-theorem wigner3j_recursion_m (j₁ j₂ j₃ m₁ m₂ m₃ : ℚ) :
-    ((j₁ * (j₁ + 1) - j₂ * (j₂ + 1) - j₃ * (j₃ + 1) - 2 * m₂ * m₃ : ℚ) : ℝ) *
-        wigner3j j₁ j₂ j₃ m₁ m₂ m₃ =
-      Real.sqrt ((j₂ - m₂) * (j₂ + m₂ + 1) * (j₃ - m₃ + 1) * (j₃ + m₃)) *
-          wigner3j j₁ j₂ j₃ m₁ (m₂ + 1) (m₃ - 1) +
-        Real.sqrt ((j₂ - m₂ + 1) * (j₂ + m₂) * (j₃ - m₃) * (j₃ + m₃ + 1)) *
-          wigner3j j₁ j₂ j₃ m₁ (m₂ - 1) (m₃ + 1) := by
-  sorry
-
-/-- DLMF 34.3.15. Stated for all arguments (stronger than DLMF). -/
-@[dlmf 34.3.E15]
-theorem wigner3j_recursion_j (j₁ j₂ j₃ m₁ m₂ m₃ : ℚ) :
-    ((2 * j₁ + 1) * ((j₂ * (j₂ + 1) - j₃ * (j₃ + 1)) * m₁ - j₁ * (j₁ + 1) * (m₃ - m₂)) : ℚ) *
-        wigner3j j₁ j₂ j₃ m₁ m₂ m₃ =
-      ((j₁ + 1 : ℚ) : ℝ) * Real.sqrt (j₁ ^ 2 - (j₂ - j₃) ^ 2) *
-          Real.sqrt ((j₂ + j₃ + 1) ^ 2 - j₁ ^ 2) * Real.sqrt (j₁ ^ 2 - m₁ ^ 2) *
-          wigner3j (j₁ - 1) j₂ j₃ m₁ m₂ m₃ +
-        (j₁ : ℝ) * Real.sqrt ((j₁ + 1) ^ 2 - (j₂ - j₃) ^ 2) *
-          Real.sqrt ((j₂ + j₃ + 1) ^ 2 - (j₁ + 1) ^ 2) * Real.sqrt ((j₁ + 1) ^ 2 - m₁ ^ 2) *
-          wigner3j (j₁ + 1) j₂ j₃ m₁ m₂ m₃ := by
-  sorry
 
 /-! ## §34.3(iv) Orthogonality
 

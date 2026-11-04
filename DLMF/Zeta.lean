@@ -26,6 +26,8 @@ public import DLMF.Zeta.Lerch
 public import DLMF.Zeta.DirichletL
 public import DLMF.Zeta.MathlibCoverageB
 public import DLMF.Zeta.CotangentMoments
+public import DLMF.Zeta.HurwitzAsymptotics
+public import DLMF.Zeta.HurwitzLoopIntegral
 
 /-!
 # Zeta and related functions

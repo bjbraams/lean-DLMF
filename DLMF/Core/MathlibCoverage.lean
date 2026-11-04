@@ -26,8 +26,8 @@ TauCeti's source; the namespace alone does not identify ownership.
 ## Implementation notes
 
 The alternative notations of §8.1 are aliases for existing functions: Prym's `P_z(a)`, `Q_z(a)`
-mean `DLMF.Confluent.lowerIncGamma a z` and `upperIncGamma a z`; `(a,z)!` and `[a,z]!` shift
-that parameter to `a+1`. `B(a,b,x)` and `I(a,b,x)` name the incomplete Beta functions, and
+mean `DLMF.Confluent.lowerIncompleteGamma a z` and `upperIncompleteGamma a z`; `(a,z)!` and `[a,z]!`
+shift that parameter to `a+1`. `B(a,b,x)` and `I(a,b,x)` name the incomplete Beta functions, and
 Luke's generalized trigonometric parameter is `1-a`. These aliases do not introduce new
 mathematical functions.
 

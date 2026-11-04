@@ -11,12 +11,13 @@ public import DLMF.QHypergeometric.Basic.Series
 # Basic properties of the general basic hypergeometric series
 
 This file proves the value at the origin of the general unilateral series `rφs` and its
-agreement with the phase-free series `DLMF.QSeries.basicHG` when `r = s + 1`.
+agreement with the phase-free series `DLMF.QSeries.basicHypergeometric` when `r = s + 1`.
 
 ## Main results
 
 * `qPhi_zero`: `rφs(a; b; q, 0) = 1`.
-* `qPhi_eq_basicHG`: `qPhi` agrees with `DLMF.QSeries.basicHG` when `r = s + 1`.
+* `qPhi_eq_basicHypergeometric`: `qPhi` agrees with `DLMF.QSeries.basicHypergeometric` when
+  `r = s + 1`.
 
 ## Implementation notes
 
@@ -35,11 +36,11 @@ namespace DLMF.QHypergeometric
   · intro n hn
     simp [qPhiTerm, zero_pow hn]
 
-/-- The general definition agrees with the existing phase-free basicHG when r=s+1. -/
-theorem qPhi_eq_basicHG {a b : List ℂ} (h : a.length=b.length+1) (q z : ℂ) :
-    qPhi a b q z=DLMF.QSeries.basicHG a b q z := by
+/-- The general definition agrees with the existing phase-free basicHypergeometric when r=s+1. -/
+theorem qPhi_eq_basicHypergeometric {a b : List ℂ} (h : a.length=b.length+1) (q z : ℂ) :
+    qPhi a b q z=DLMF.QSeries.basicHypergeometric a b q z := by
   have he : qPhiExponent a b=0 := by simp only [qPhiExponent]; omega
-  unfold qPhi DLMF.QSeries.basicHG
+  unfold qPhi DLMF.QSeries.basicHypergeometric
   apply tsum_congr
   intro n
   simp [qPhiTerm, qPochhammerList, he]

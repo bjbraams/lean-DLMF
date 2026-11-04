@@ -55,7 +55,7 @@ noncomputable section
 
 namespace DLMF.Zeta
 
-open DLMF.Hypergeometric (poch poch_succ poch_zero)
+open DLMF.Hypergeometric (pochhammer pochhammer_succ pochhammer_zero)
 
 /-- One step of integration by parts against Bernoulli polynomials on `[0,1]`. -/
 private lemma integral_mul_bernoulliFun_eq_parts_step {u u' : ℝ → ℂ} (p : ℕ)
@@ -124,22 +124,22 @@ theorem add_ofReal_mem_slitPlane {w : ℂ} (hw : 0 < w.re) {t : ℝ} (ht : 0 ≤
   Complex.mem_slitPlane_iff.mpr (Or.inl (by simp; linarith))
 
 /-- The derivative family of `t ↦ (w+t)^{-s}`. -/
-def cpowDerivFamily (s w : ℂ) (j : ℕ) (t : ℝ) : ℂ := (-1) ^ j * poch s j * (w + t) ^ (-s - j)
+def cpowDerivFamily (s w : ℂ) (j : ℕ) (t : ℝ) : ℂ := (-1) ^ j * pochhammer s j * (w + t) ^ (-s - j)
 
 /-- At `t`, the function `(cpowDerivFamily s w j)` has derivative `(cpowDerivFamily s w (j + 1)
 t)`. -/
 theorem hasDerivAt_cpowDerivFamily {s w : ℂ} (hw : 0 < w.re) (j : ℕ) {t : ℝ} (ht : 0 ≤ t) :
     HasDerivAt (cpowDerivFamily s w j) (cpowDerivFamily s w (j + 1) t) t := by
   have h := (hasDerivAt_add_ofReal_cpow (c := -s - j) (add_ofReal_mem_slitPlane hw ht)).const_mul
-    ((-1) ^ j * poch s j)
+    ((-1) ^ j * pochhammer s j)
   unfold cpowDerivFamily
   convert h using 1
-  rw [show -s - ((j + 1 : ℕ) : ℂ) = -s - j - 1 by push_cast; ring, poch_succ, pow_succ]
+  rw [show -s - ((j + 1 : ℕ) : ℂ) = -s - j - 1 by push_cast; ring, pochhammer_succ, pow_succ]
   ring
 
 /-- The coefficient `B_{2k+2}/(2k+2)! · (s)_{2k+1}` of the Euler–Maclaurin correction terms. -/
 def eulerMaclaurinCoeff (s : ℂ) (k : ℕ) : ℂ :=
-  (bernoulli (2 * k + 2) : ℂ) / (2 * k + 2).factorial * poch s (2 * k + 1)
+  (bernoulli (2 * k + 2) : ℂ) / (2 * k + 2).factorial * pochhammer s (2 * k + 1)
 
 /-- The Euler–Maclaurin tail `w^{1-s}/(s-1) + w^{-s}/2 + ∑_{k<M} c_k w^{-s-2k-1}`. -/
 def eulerMaclaurinTail (M : ℕ) (s w : ℂ) : ℂ :=
@@ -161,7 +161,7 @@ private lemma sum_range_two_mul_eq_sum_pairs_complex (T : ℕ → ℂ) (M : ℕ)
 `w^{-s} + F(w+1) - F(w) = -((s)_{2M+1}/(2M+1)!) ∫_0^1 (w+t)^{-s-2M-1} B_{2M+1}(t) dt`. -/
 theorem cpow_add_eulerMaclaurinTail_sub_eq_integral {s w : ℂ} (hs : s ≠ 1) (hw : 0 < w.re) (M : ℕ) :
     w ^ (-s) + eulerMaclaurinTail M s (w + 1) - eulerMaclaurinTail M s w =
-      -(poch s (2 * M + 1) / (2 * M + 1 : ℕ)!) *
+      -(pochhammer s (2 * M + 1) / (2 * M + 1 : ℕ)!) *
         ∫ t in (0 : ℝ)..1, (w + t) ^ (-s - (2 * M + 1 : ℕ)) * (bernoulliFun (2 * M + 1) t : ℂ) := by
   have EM := integral_eq_sum_bernoulliFun_add_integral (cpowDerivFamily s w)
     (fun j x hx => hasDerivAt_cpowDerivFamily hw j hx.1) (2 * M + 1)
@@ -176,7 +176,7 @@ theorem cpow_add_eulerMaclaurinTail_sub_eq_integral {s w : ℂ} (hs : s ≠ 1) (
       have := (hasDerivAt_add_ofReal_cpow (c := 1 - s) (add_ofReal_mem_slitPlane hw hx.1)).div_const
         (1 - s)
       convert this using 1
-      simp only [cpowDerivFamily, pow_zero, poch_zero, Nat.cast_zero, sub_zero, one_mul]
+      simp only [cpowDerivFamily, pow_zero, pochhammer_zero, Nat.cast_zero, sub_zero, one_mul]
       field_simp
       ring_nf
     rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hF]
@@ -198,7 +198,8 @@ theorem cpow_add_eulerMaclaurinTail_sub_eq_integral {s w : ℂ} (hs : s ≠ 1) (
     simp only [cpowDerivFamily, hb, hb0, eulerMaclaurinCoeff, ofReal_one, ofReal_zero, add_zero]
     rw [show 2 * k + 1 + 1 = 2 * k + 2 from rfl]
     push_cast
-    linear_combination ((bernoulli (2 * k + 2) : ℂ) / ((2 * k + 2)! : ℕ) * poch s (2 * k + 1) *
+    linear_combination ((bernoulli (2 * k + 2) : ℂ) / ((2 * k + 2)! : ℕ) *
+        pochhammer s (2 * k + 1) *
       ((w + 1) ^ (-s - (2 * k + 1)) - w ^ (-s - (2 * k + 1)))) * hm
   have heven : ∀ k : ℕ, (-1 : ℂ) ^ (2 * k + 1 + 1) / (((2 * k + 1 + 1 + 1)! : ℕ) : ℂ) *
       (cpowDerivFamily s w (2 * k + 1 + 1) 1 * (bernoulliFun (2 * k + 1 + 1 + 1) 1 : ℂ) -
@@ -212,12 +213,12 @@ theorem cpow_add_eulerMaclaurinTail_sub_eq_integral {s w : ℂ} (hs : s ≠ 1) (
   simp only [hodd, heven, add_zero] at EM
   have hR : ∫ x in (0 : ℝ)..1, cpowDerivFamily s w (2 * M + 1) x *
       (bernoulliFun (2 * M + 1) x : ℂ) =
-      (-1) ^ (2 * M + 1) * poch s (2 * M + 1) * ∫ t in (0 : ℝ)..1,
+      (-1) ^ (2 * M + 1) * pochhammer s (2 * M + 1) * ∫ t in (0 : ℝ)..1,
         (w + t) ^ (-s - (2 * M + 1 : ℕ)) * (bernoulliFun (2 * M + 1) t : ℂ) := by
     rw [← intervalIntegral.integral_const_mul]
     congr 1; ext t; simp only [cpowDerivFamily]; ring
-  have h0 : cpowDerivFamily s w 0 1 = (w + 1) ^ (-s) := by simp [cpowDerivFamily, poch_zero]
-  have h0' : cpowDerivFamily s w 0 0 = w ^ (-s) := by simp [cpowDerivFamily, poch_zero]
+  have h0 : cpowDerivFamily s w 0 1 = (w + 1) ^ (-s) := by simp [cpowDerivFamily, pochhammer_zero]
+  have h0' : cpowDerivFamily s w 0 0 = w ^ (-s) := by simp [cpowDerivFamily, pochhammer_zero]
   have hm : ((-1 : ℂ)) ^ (2 * M + 1) * (-1) ^ (2 * M + 1) = 1 := by rw [← mul_pow]; simp
   rw [hR, h0, h0'] at EM
   simp only [mul_sub, Finset.sum_sub_distrib, bernoulliFun_one, zero_add, pow_zero,
@@ -227,7 +228,7 @@ theorem cpow_add_eulerMaclaurinTail_sub_eq_integral {s w : ℂ} (hs : s ≠ 1) (
   unfold eulerMaclaurinTail
   set I := ∫ t in (0 : ℝ)..1, (w + t) ^ (-s - (2 * M + 1 : ℕ)) * (bernoulliFun (2 * M + 1) t : ℂ)
   push_cast at EM
-  linear_combination (-1 : ℂ) * EM - (poch s (2 * M + 1) / ((2 * M + 1)! : ℕ) * I) * hm
+  linear_combination (-1 : ℂ) * EM - (pochhammer s (2 * M + 1) / ((2 * M + 1)! : ℕ) * I) * hm
 
 /-- Bound for a principal power on a right half-plane with nonpositive real exponent. -/
 private lemma norm_cpow_le_of_re_nonpos {x u : ℂ} {c : ℝ} (hc : 0 < c) (hx : c ≤ x.re)
@@ -250,7 +251,7 @@ private lemma exists_norm_cpow_add_eulerMaclaurinTail_sub_le
     (M : ℕ) : ∃ C : ℝ, 0 ≤ C ∧ ∀ s w : ℂ, s ≠ 1 → 0 < w.re →
     0 ≤ s.re + (2 * M + 1) →
     ‖w ^ (-s) + eulerMaclaurinTail M s (w + 1) - eulerMaclaurinTail M s w‖ ≤
-      C * ‖poch s (2 * M + 1)‖ * w.re ^ (-(s.re + (2 * M + 1))) * Real.exp (π * |s.im|) := by
+      C * ‖pochhammer s (2 * M + 1)‖ * w.re ^ (-(s.re + (2 * M + 1))) * Real.exp (π * |s.im|) := by
   obtain ⟨B, hB⟩ : ∃ B, ∀ y ∈ Icc (0 : ℝ) 1, ‖bernoulliFun (2 * M + 1) y‖ ≤ B :=
     IsCompact.exists_bound_of_continuousOn isCompact_Icc
       (continuous_bernoulliFun (2 * M + 1)).continuousOn
@@ -274,9 +275,9 @@ private lemma exists_norm_cpow_add_eulerMaclaurinTail_sub_le
           convert h using 3 <;> simp; ring
         · exact hB t ⟨ht.1.le, ht.2⟩)
     simpa using this
-  calc ‖poch s (2 * M + 1)‖ / ((2 * M + 1 : ℕ)! : ℝ) * ‖∫ t in (0 : ℝ)..1,
+  calc ‖pochhammer s (2 * M + 1)‖ / ((2 * M + 1 : ℕ)! : ℝ) * ‖∫ t in (0 : ℝ)..1,
         (w + t) ^ (-s - (2 * M + 1 : ℕ)) * (bernoulliFun (2 * M + 1) t : ℂ)‖
-      ≤ ‖poch s (2 * M + 1)‖ / ((2 * M + 1 : ℕ)! : ℝ) *
+      ≤ ‖pochhammer s (2 * M + 1)‖ / ((2 * M + 1 : ℕ)! : ℝ) *
         ((w.re ^ (-(s.re + (2 * M + 1))) * Real.exp (π * |s.im|)) * B) := by gcongr
     _ = _ := by ring
 
@@ -304,13 +305,13 @@ theorem eulerMaclaurinSeq_add (M : ℕ) (s z : ℂ) (N₀ N : ℕ) :
     push_cast
     ring_nf
 
-/-- Estimate under the stated parameter and domain assumptions: `‖poch s n‖ ≤ (R + n) ^ n`. -/
-private lemma norm_poch_le_add_pow {s : ℂ} {R : ℝ} (hR : 0 ≤ R) (hs : ‖s‖ ≤ R) (n : ℕ) :
-    ‖poch s n‖ ≤ (R + n) ^ n := by
+/-- Estimate under the stated parameter and domain assumptions: `‖pochhammer s n‖ ≤ (R + n) ^ n`. -/
+private lemma norm_pochhammer_le_add_pow {s : ℂ} {R : ℝ} (hR : 0 ≤ R) (hs : ‖s‖ ≤ R) (n : ℕ) :
+    ‖pochhammer s n‖ ≤ (R + n) ^ n := by
   induction n with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ n ih =>
-    rw [poch_succ, norm_mul, pow_succ]
+    rw [pochhammer_succ, norm_mul, pow_succ]
     have h1 : ‖s + n‖ ≤ R + n := (norm_add_le _ _).trans (by simp [hs])
     have h2 : (R + n) ^ n ≤ (R + (n + 1 : ℕ)) ^ n := by gcongr; linarith
     have h3 : R + n ≤ R + (n + 1 : ℕ) := by push_cast; linarith
@@ -355,7 +356,7 @@ theorem exists_summable_bound_eulerMaclaurinIncrement {M : ℕ} {K : Set (ℂ ×
     have h2 : Real.exp (π * |q.1.im|) ≤ Real.exp (π * R) := by
       rw [Real.exp_le_exp]
       exact mul_le_mul_of_nonneg_left ((abs_im_le_norm _).trans hs) Real.pi_pos.le
-    have h3 := norm_poch_le_add_pow hR hs (2 * M + 1)
+    have h3 := norm_pochhammer_le_add_pow hR hs (2 * M + 1)
     simp only [u]
     have := mul_le_mul (mul_le_mul (mul_le_mul_of_nonneg_left h3 hC0) h1 (by positivity)
       (by positivity)) h2 (by positivity) (by positivity)
@@ -464,7 +465,7 @@ For `0 < z ≤ 1` it agrees with Mathlib's `hurwitzZeta` (`hurwitzZetaComplex_eq
 def hurwitzZetaComplex (s z : ℂ) : ℂ :=
   let M := ⌈(1-s.re)/2⌉₊+1; limUnder atTop (fun N : ℕ => (∑ n ∈ Finset.range N, (z+n)^(-s)) +
     (z+N)^(1-s)/(s-1)+(z+N)^(-s)/2+∑ k ∈ Finset.range M,
-      (bernoulli (2*k+2) : ℂ)/(2*k+2).factorial*poch s (2*k+1)*(z+N)^(-s-(2*k+1)))
+      (bernoulli (2*k+2) : ℂ)/(2*k+2).factorial*pochhammer s (2*k+1)*(z+N)^(-s-(2*k+1)))
 
 /-- The project's `hurwitzZetaComplex` is the Euler–Maclaurin limit for any admissible `M`. -/
 theorem hurwitzZetaComplex_eq_limUnder_eulerMaclaurinSeq {M : ℕ} {s z : ℂ} (hs : s ≠ 1)
@@ -505,9 +506,10 @@ theorem tendstoUniformlyOn_eulerMaclaurinSeq_hurwitzZetaComplex {M : ℕ} {K : S
   have h2 := (tendsto_eulerMaclaurinSeq_hurwitzZetaComplex (z := q.2) hq1 hM).comp hT
   exact tendsto_nhds_unique h1 h2
 
-/-- Differentiability at the specified argument: `DifferentiableAt ℂ (fun t => poch t k) s`. -/
-theorem differentiableAt_poch (k : ℕ) (s : ℂ) :
-    DifferentiableAt ℂ (fun t => poch t k) s :=
+/-- Differentiability at the specified argument: `DifferentiableAt ℂ (fun t => pochhammer t k) s`.
+-/
+theorem differentiableAt_pochhammer (k : ℕ) (s : ℂ) :
+    DifferentiableAt ℂ (fun t => pochhammer t k) s :=
   (ascPochhammer ℂ k).differentiableAt
 
 /-- Each term of the Euler–Maclaurin sequence is holomorphic in `s ≠ 1` when `z + n ≠ 0`. -/
@@ -522,7 +524,7 @@ private lemma differentiableAt_eulerMaclaurinSeq_exponent (M : ℕ) {s z : ℂ} 
   · exact ((differentiableAt_const _).sub differentiableAt_id).const_cpow (Or.inl (hz N)) |>.div
       (differentiableAt_id.sub (differentiableAt_const _)) hs1
   · exact (differentiableAt_id.neg.const_cpow (Or.inl (hz N))).div_const _
-  · exact ((differentiableAt_poch _ s).const_mul _).mul
+  · exact ((differentiableAt_pochhammer _ s).const_mul _).mul
       ((differentiableAt_id.neg.sub (differentiableAt_const _)).const_cpow (Or.inl (hz N)))
 
 /-- **Holomorphy of `ζ(s, z)` in `s ≠ 1`** for `z ≠ 0, -1, -2, …`. -/

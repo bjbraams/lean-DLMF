@@ -12,23 +12,24 @@ public import DLMF.MatrixArgument.MatrixIntegrals
 # Confluent hypergeometric functions of matrix argument (DLMF §35.6)
 
 Properties of the confluent hypergeometric functions `₁F₁(a; b; T)` and `Ψ(a; b; T)` of a real
-symmetric matrix argument. The functions `hyp1F1 a b T` (DLMF 35.6.1), `kummerPsi a b T`
-(DLMF 35.6.2) and the Laguerre form `laguerreL γ ν T` (DLMF 35.6.3) are defined in
-`DLMF.MatrixArgument.Basic`.
+symmetric matrix argument. The functions `matrixHypergeometric1F1 a b T` (DLMF 35.6.1),
+`matrixKummerPsi a b T` (DLMF 35.6.2) and the Laguerre form `matrixLaguerreL γ ν T` (DLMF 35.6.3)
+are defined in `DLMF.MatrixArgument.Basic`.
 
 ## Main results
 
-* `hyp1F1_eq_tsum`: the zonal polynomial series for `₁F₁` (DLMF 35.6.1).
-* `integrableOn_kummerPsi`: absolute convergence of the integral defining `Ψ` (DLMF 35.6.2).
-* `hasIntegralOn_hyp1F1`: the beta integral representation of `₁F₁` (DLMF 35.6.4).
-* `hasIntegralOn_hyp1F1_laplace`, `hasIntegralOn_hyp1F1_convolution`: the Laplace transform
-  and convolution formulas DLMF 35.6.5 and 35.6.6.
-* `hyp1F1_kummer`: Kummer's transformation `₁F₁(a; b; T) = etr(T) ₁F₁(b - a; b; -T)`
-  (DLMF 35.6.7).
-* `hasIntegralOn_kummerPsi_mellin`: the Mellin transform of `Ψ` (DLMF 35.6.8), by Fubini from
+* `matrixHypergeometric1F1_eq_tsum`: the zonal polynomial series for `₁F₁` (DLMF 35.6.1).
+* `integrableOn_matrixKummerPsi`: absolute convergence of the integral defining `Ψ` (DLMF 35.6.2).
+* `hasIntegralOn_matrixHypergeometric1F1`: the beta integral representation of `₁F₁` (DLMF 35.6.4).
+* `hasIntegralOn_matrixHypergeometric1F1_laplace`,
+  `hasIntegralOn_matrixHypergeometric1F1_convolution`: the Laplace transform and convolution
+  formulas DLMF 35.6.5 and 35.6.6.
+* `matrixHypergeometric1F1_kummer`: Kummer's transformation
+  `₁F₁(a; b; T) = expTrace(T) ₁F₁(b - a; b; -T)` (DLMF 35.6.7).
+* `hasIntegralOn_matrixKummerPsi_mellin`: the Mellin transform of `Ψ` (DLMF 35.6.8), by Fubini from
   DLMF 35.3.8.
-* `tendsto_hyp1F1_besselA`, `tendsto_kummerPsi_besselB`: the confluence limits to the Bessel
-  functions `A_ν` and `B_ν` (DLMF 35.6.9 and 35.6.10).
+* `tendsto_matrixHypergeometric1F1_matrixBesselA`, `tendsto_matrixKummerPsi_matrixBesselB`: the
+  confluence limits to the Bessel functions `A_ν` and `B_ν` (DLMF 35.6.9 and 35.6.10).
 
 ## Implementation notes
 
@@ -45,34 +46,34 @@ namespace DLMF.MatrixArgument
 
 /-- DLMF 35.6.1: `₁F₁(a; b; T) = ∑_{k=0}^∞ (1/k!) ∑_{|κ|=k} [a]_κ / [b]_κ Z_κ(T)`. -/
 @[dlmf 35.6.E1]
-theorem hyp1F1_eq_tsum {m : ℕ} (a b : ℂ) (T : Matrix (Fin m) (Fin m) ℝ) :
-    hyp1F1 a b T = ∑' k : ℕ, (1 / (k ! : ℂ)) * ∑ κ ∈ partitions m k,
+theorem matrixHypergeometric1F1_eq_tsum {m : ℕ} (a b : ℂ) (T : Matrix (Fin m) (Fin m) ℝ) :
+    matrixHypergeometric1F1 a b T = ∑' k : ℕ, (1 / (k ! : ℂ)) * ∑ κ ∈ partitions m k,
       partitionalShiftedFactorial a κ / partitionalShiftedFactorial b κ *
         (zonalPolynomial κ T : ℂ) := by
-  simp [hyp1F1, hypergeometricPFQ]
+  simp [matrixHypergeometric1F1, matrixHypergeometricPFQ]
 
 /-- For `m = 1`, `₁F₁(a; b; t) = ∑_k (a)_k / (b)_k t^k / k!`, Kummer's series (DLMF 13.2.2). -/
-private lemma hyp1F1_fin_one (a b : ℂ) (T : Matrix (Fin 1) (Fin 1) ℝ) :
-    hyp1F1 a b T = ∑' k : ℕ, (1 / (k ! : ℂ)) *
+private lemma matrixHypergeometric1F1_fin_one (a b : ℂ) (T : Matrix (Fin 1) (Fin 1) ℝ) :
+    matrixHypergeometric1F1 a b T = ∑' k : ℕ, (1 / (k ! : ℂ)) *
       ((ascPochhammer ℂ k).eval a / (ascPochhammer ℂ k).eval b * ((T 0 0 : ℂ) ^ k)) := by
-  rw [hyp1F1, hypergeometricPFQ_fin_one]
+  rw [matrixHypergeometric1F1, matrixHypergeometricPFQ_fin_one]
   simp
 
 /-- DLMF 35.6.2: the integral defining `Ψ(a; b; T)` converges absolutely for `ℜa > (m-1)/2`
 and `T ∈ Ω`. -/
 @[dlmf 35.6.E2]
-theorem integrableOn_kummerPsi {m : ℕ} {a : ℂ} (b : ℂ) (ha : ((m : ℝ) - 1) / 2 < a.re)
+theorem integrableOn_matrixKummerPsi {m : ℕ} {a : ℂ} (b : ℂ) (ha : ((m : ℝ) - 1) / 2 < a.re)
     {T : Matrix (Fin m) (Fin m) ℝ} (hT : T.PosDef) :
     IntegrableOn (fun X : SymMatrix m =>
-        (etr (-(T * (X : Matrix (Fin m) (Fin m) ℝ))) : ℂ) *
+        (expTrace (-(T * (X : Matrix (Fin m) (Fin m) ℝ))) : ℂ) *
           (((X : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ (a - ((m : ℂ) + 1) / 2)) *
           (((1 + (X : Matrix (Fin m) (Fin m) ℝ)).det : ℂ) ^ (b - a - ((m : ℂ) + 1) / 2)))
       (posDefCone m) (TauCeti.symmetricLebesgue m) := by
   have hmeas : Measurable (fun X : SymMatrix m =>
-        (etr (-(T * (X : Matrix (Fin m) (Fin m) ℝ))) : ℂ) *
+        (expTrace (-(T * (X : Matrix (Fin m) (Fin m) ℝ))) : ℂ) *
           (((X : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ (a - ((m : ℂ) + 1) / 2)) *
           (((1 + (X : Matrix (Fin m) (Fin m) ℝ)).det : ℂ) ^ (b - a - ((m : ℂ) + 1) / 2))) := by
-    unfold etr
+    unfold expTrace
     refine ((Complex.measurable_ofReal.comp ?_).mul
       ((Complex.measurable_ofReal.comp continuous_subtype_val.matrix_det.measurable).pow_const
         _)).mul ((Complex.measurable_ofReal.comp
@@ -84,7 +85,7 @@ theorem integrableOn_kummerPsi {m : ℕ} {a : ℂ} (b : ℂ) (ha : ((m : ℝ) - 
   have hre : (a - ((m : ℂ) + 1) / 2).re = a.re - ((m : ℝ) + 1) / 2 := by simp
   -- pointwise facts on the cone
   have hfacts : ∀ X : SymMatrix m, (X : Matrix (Fin m) (Fin m) ℝ).PosDef →
-      ‖(etr (-(T * (X : Matrix (Fin m) (Fin m) ℝ))) : ℂ) *
+      ‖(expTrace (-(T * (X : Matrix (Fin m) (Fin m) ℝ))) : ℂ) *
           (((X : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ (a - ((m : ℂ) + 1) / 2)) *
           (((1 + (X : Matrix (Fin m) (Fin m) ℝ)).det : ℂ) ^ (b - a - ((m : ℂ) + 1) / 2))‖ =
         (X : Matrix (Fin m) (Fin m) ℝ).det ^ (a.re - ((m : ℝ) + 1) / 2) *
@@ -94,7 +95,7 @@ theorem integrableOn_kummerPsi {m : ℕ} {a : ℂ} (b : ℂ) (ha : ((m : ℝ) - 
     have hX1 : (1 + (X : Matrix (Fin m) (Fin m) ℝ)).PosDef := Matrix.PosDef.one.add hX
     rw [norm_mul, norm_mul, Complex.norm_real, Complex.norm_cpow_eq_rpow_re_of_pos hX.det_pos,
       Complex.norm_cpow_eq_rpow_re_of_pos hX1.det_pos, hre, ← hc]
-    unfold etr
+    unfold expTrace
     rw [Real.norm_of_nonneg (Real.exp_pos _).le, Matrix.trace_neg]
     ring
   have hone : ∀ X : SymMatrix m, (X : Matrix (Fin m) (Fin m) ℝ).PosDef →
@@ -169,27 +170,28 @@ theorem integrableOn_kummerPsi {m : ℕ} {a : ℂ} (b : ℂ) (ha : ((m : ℝ) - 
       _ = _ := by ring
 
 /-- DLMF 35.6.4: for `ℜa, ℜ(b - a) > (m-1)/2` and `T ∈ 𝓢`,
-`₁F₁(a; b; T) = B_m(a, b - a)⁻¹ ∫_{0<X<I} etr(TX) |X|^{a-(m+1)/2} |I - X|^{b-a-(m+1)/2} dX`,
+`₁F₁(a; b; T) = B_m(a, b - a)⁻¹ ∫_{0<X<I} expTrace(TX) |X|^{a-(m+1)/2} |I - X|^{b-a-(m+1)/2} dX`,
 stated as: the integral converges and equals `B_m(a, b - a) ₁F₁(a; b; T)`. -/
 @[dlmf 35.6.E4]
-theorem hasIntegralOn_hyp1F1 {m : ℕ} {a b : ℂ} (ha : ((m : ℝ) - 1) / 2 < a.re)
+theorem hasIntegralOn_matrixHypergeometric1F1 {m : ℕ} {a b : ℂ} (ha : ((m : ℝ) - 1) / 2 < a.re)
     (hba : ((m : ℝ) - 1) / 2 < (b - a).re) {T : Matrix (Fin m) (Fin m) ℝ}
     (hT : T.IsHermitian) :
     HasIntegralOn (m := m) (matrixInterval 0 1)
-      (fun X => (etr (T * X) : ℂ) * ((X.det : ℂ) ^ (a - ((m : ℂ) + 1) / 2)) *
+      (fun X => (expTrace (T * X) : ℂ) * ((X.det : ℂ) ^ (a - ((m : ℂ) + 1) / 2)) *
         (((1 - X).det : ℂ) ^ (b - a - ((m : ℂ) + 1) / 2)))
-      (multivariateBeta m a (b - a) * hyp1F1 a b T) := by
+      (multivariateBeta m a (b - a) * matrixHypergeometric1F1 a b T) := by
   sorry
 
 /-- DLMF 35.6.5: for `T > S`, `ℜb > (m-1)/2`,
-`∫_Ω etr(-TX) |X|^{b-(m+1)/2} ₁F₁(a; b; SX) dX = Γ_m(b) |I - ST⁻¹|^{-a} |T|^{-b}`.
+`∫_Ω expTrace(-TX) |X|^{b-(m+1)/2} ₁F₁(a; b; SX) dX = Γ_m(b) |I - ST⁻¹|^{-a} |T|^{-b}`.
 `S ∈ 𝓢` and `T ∈ Ω` (needed for `|T|^{-b}`) are made explicit. -/
 @[dlmf 35.6.E5]
-theorem hasIntegralOn_hyp1F1_laplace {m : ℕ} (a : ℂ) {b : ℂ} (hb : ((m : ℝ) - 1) / 2 < b.re)
+theorem hasIntegralOn_matrixHypergeometric1F1_laplace {m : ℕ} (a : ℂ) {b : ℂ}
+    (hb : ((m : ℝ) - 1) / 2 < b.re)
     {S T : Matrix (Fin m) (Fin m) ℝ} (hS : S.IsHermitian) (hT : T.PosDef) (hTS : (T - S).PosDef) :
     HasIntegralOn (posDefCone m)
-      (fun X => (etr (-(T * X)) : ℂ) * ((X.det : ℂ) ^ (b - ((m : ℂ) + 1) / 2)) *
-        hyp1F1 a b (CFC.sqrt X * S * CFC.sqrt X))
+      (fun X => (expTrace (-(T * X)) : ℂ) * ((X.det : ℂ) ^ (b - ((m : ℂ) + 1) / 2)) *
+        matrixHypergeometric1F1 a b (CFC.sqrt X * S * CFC.sqrt X))
       (multivariateGamma m b * ((1 - S * T⁻¹).det : ℂ) ^ (-a) * (T.det : ℂ) ^ (-b)) := by
   sorry
 
@@ -197,22 +199,22 @@ theorem hasIntegralOn_hyp1F1_laplace {m : ℕ} (a : ℂ) {b : ℂ} (hb : ((m : �
 `B_m(b₁, b₂) |T|^{b₁+b₂-(m+1)/2} ₁F₁(a₁ + a₂; b₁ + b₂; T) = ∫_{0<X<T} |X|^{b₁-(m+1)/2}
   ₁F₁(a₁; b₁; X) |T - X|^{b₂-(m+1)/2} ₁F₁(a₂; b₂; T - X) dX`. -/
 @[dlmf 35.6.E6]
-theorem hasIntegralOn_hyp1F1_convolution {m : ℕ} (a₁ a₂ : ℂ) {b₁ b₂ : ℂ}
+theorem hasIntegralOn_matrixHypergeometric1F1_convolution {m : ℕ} (a₁ a₂ : ℂ) {b₁ b₂ : ℂ}
     (hb₁ : ((m : ℝ) - 1) / 2 < b₁.re) (hb₂ : ((m : ℝ) - 1) / 2 < b₂.re)
     {T : Matrix (Fin m) (Fin m) ℝ} (hT : T.PosDef) :
     HasIntegralOn (matrixInterval 0 T)
-      (fun X => ((X.det : ℂ) ^ (b₁ - ((m : ℂ) + 1) / 2)) * hyp1F1 a₁ b₁ X *
-        (((T - X).det : ℂ) ^ (b₂ - ((m : ℂ) + 1) / 2)) * hyp1F1 a₂ b₂ (T - X))
+      (fun X => ((X.det : ℂ) ^ (b₁ - ((m : ℂ) + 1) / 2)) * matrixHypergeometric1F1 a₁ b₁ X *
+        (((T - X).det : ℂ) ^ (b₂ - ((m : ℂ) + 1) / 2)) * matrixHypergeometric1F1 a₂ b₂ (T - X))
       (multivariateBeta m b₁ b₂ * (T.det : ℂ) ^ (b₁ + b₂ - ((m : ℂ) + 1) / 2) *
-        hyp1F1 (a₁ + a₂) (b₁ + b₂) T) := by
+        matrixHypergeometric1F1 (a₁ + a₂) (b₁ + b₂) T) := by
   sorry
 
-/-- DLMF 35.6.7 (Kummer transformation): `₁F₁(a; b; T) = etr(T) ₁F₁(b - a; b; -T)` for
+/-- DLMF 35.6.7 (Kummer transformation): `₁F₁(a; b; T) = expTrace(T) ₁F₁(b - a; b; -T)` for
 `T ∈ 𝓢`, when `Γ_m(b) ≠ 0`. -/
 @[dlmf 35.6.E7]
-theorem hyp1F1_kummer {m : ℕ} (a : ℂ) {b : ℂ} (hb : multivariateGamma m b ≠ 0)
+theorem matrixHypergeometric1F1_kummer {m : ℕ} (a : ℂ) {b : ℂ} (hb : multivariateGamma m b ≠ 0)
     {T : Matrix (Fin m) (Fin m) ℝ} (hT : T.IsHermitian) :
-    hyp1F1 a b T = (etr T : ℂ) * hyp1F1 (b - a) b (-T) := by
+    matrixHypergeometric1F1 a b T = (expTrace T : ℂ) * matrixHypergeometric1F1 (b - a) b (-T) := by
   sorry
 
 /-- Identity under the stated parameter and domain assumptions: `(((‖(x : ℂ) ^ q‖ : ℝ)) : ℂ) = (x
@@ -225,11 +227,11 @@ private lemma ofReal_norm_cpow_eq_cpow_re {x : ℝ} (hx : 0 < x) (q : ℂ) :
 `∫_Ω |T|^{c-(m+1)/2} Ψ(a; b; T) dT
   = Γ_m(c) Γ_m(a - c) Γ_m(c - b + (m+1)/2) / (Γ_m(a) Γ_m(a - b + (m+1)/2))`. -/
 @[dlmf 35.6.E8]
-theorem hasIntegralOn_kummerPsi_mellin {m : ℕ} {a b c : ℂ}
+theorem hasIntegralOn_matrixKummerPsi_mellin {m : ℕ} {a b c : ℂ}
     (hac : c.re + ((m : ℝ) - 1) / 2 < a.re) (hc : (m : ℝ) - 1 < c.re + ((m : ℝ) - 1) / 2)
     (hcb : -1 < (c - b).re) :
     HasIntegralOn (posDefCone m)
-      (fun T => ((T.det : ℂ) ^ (c - ((m : ℂ) + 1) / 2)) * kummerPsi a b T)
+      (fun T => ((T.det : ℂ) ^ (c - ((m : ℂ) + 1) / 2)) * matrixKummerPsi a b T)
       (multivariateGamma m c * multivariateGamma m (a - c) *
           multivariateGamma m (c - b + ((m : ℂ) + 1) / 2) /
         (multivariateGamma m a * multivariateGamma m (a - b + ((m : ℂ) + 1) / 2))) := by
@@ -248,28 +250,29 @@ theorem hasIntegralOn_kummerPsi_mellin {m : ℕ} {a b c : ℂ}
   set w : SymMatrix m → ℂ := fun X => (((X : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ (a - p)) *
     (((1 + (X : Matrix (Fin m) (Fin m) ℝ)).det : ℂ) ^ (b - a - p)) with hw
   set f : SymMatrix m → SymMatrix m → ℂ := fun X T => w X *
-    ((etr (-((X : Matrix (Fin m) (Fin m) ℝ) * (T : Matrix (Fin m) (Fin m) ℝ))) : ℂ) *
+    ((expTrace (-((X : Matrix (Fin m) (Fin m) ℝ) * (T : Matrix (Fin m) (Fin m) ℝ))) : ℂ) *
       (((T : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ (c - p))) with hfdef
   have hfm : Measurable (Function.uncurry f) := by
     have hwm : Measurable w :=
       (measurable_det_cpow _).mul ((Complex.measurable_ofReal.comp
         (continuous_const.add continuous_subtype_val).matrix_det.measurable).pow_const _)
     have hXT : Measurable fun q : SymMatrix m × SymMatrix m =>
-        (etr (-((q.1 : Matrix (Fin m) (Fin m) ℝ) * (q.2 : Matrix (Fin m) (Fin m) ℝ))) : ℂ) := by
-      unfold etr
+        (expTrace (-((q.1 : Matrix (Fin m) (Fin m) ℝ) *
+            (q.2 : Matrix (Fin m) (Fin m) ℝ))) : ℂ) := by
+      unfold expTrace
       exact Complex.measurable_ofReal.comp (Real.measurable_exp.comp
         ((continuous_subtype_val.comp continuous_fst).matrix_mul
           (continuous_subtype_val.comp continuous_snd)).neg.matrix_trace.measurable)
     exact (hwm.comp measurable_fst).mul (hXT.mul ((measurable_det_cpow _).comp measurable_snd))
   have hinT : ∀ X ∈ posDefCone m, HasIntegralOn (posDefCone m)
-      (fun T => (etr (-((X : Matrix (Fin m) (Fin m) ℝ) * T)) : ℂ) * ((T.det : ℂ) ^ (c - p)))
+      (fun T => (expTrace (-((X : Matrix (Fin m) (Fin m) ℝ) * T)) : ℂ) * ((T.det : ℂ) ^ (c - p)))
       (multivariateGamma m c * ((X : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ (-c)) :=
     fun X hX => hasIntegralOn_laplace_det_cpow hX hc'
   set c' : ℂ := (c.re : ℂ)
   have hc'' : ((m : ℝ) - 1) / 2 < c'.re := by simpa [c'] using hc'
   have hnormT : ∀ X T : SymMatrix m, T ∈ posDefCone m →
       ((‖f X T‖ : ℝ) : ℂ) = ((‖w X‖ : ℝ) : ℂ) *
-        ((etr (-((X : Matrix (Fin m) (Fin m) ℝ) * (T : Matrix (Fin m) (Fin m) ℝ))) : ℂ) *
+        ((expTrace (-((X : Matrix (Fin m) (Fin m) ℝ) * (T : Matrix (Fin m) (Fin m) ℝ))) : ℂ) *
           (((T : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ (c' - p))) := by
     intro X T hT
     have hT : (T : Matrix (Fin m) (Fin m) ℝ).PosDef := hT
@@ -277,7 +280,7 @@ theorem hasIntegralOn_kummerPsi_mellin {m : ℕ} {a b c : ℂ}
       apply Complex.ext <;> simp [c', p]
     rw [hre]
     simp only [hfdef, norm_mul, Complex.norm_real, Real.norm_eq_abs,
-      abs_of_nonneg (Real.exp_pos _).le, etr, Complex.ofReal_mul]
+      abs_of_nonneg (Real.exp_pos _).le, expTrace, Complex.ofReal_mul]
     rw [ofReal_norm_cpow_eq_cpow_re hT.det_pos]
   have hnormInt : ∀ X, X ∈ posDefCone m → ∫ T, ‖f X T‖ ∂ν =
       (((‖w X‖ : ℝ) : ℂ) *
@@ -333,13 +336,13 @@ theorem hasIntegralOn_kummerPsi_mellin {m : ℕ} {a b c : ℂ}
       ring
   -- the `T`-integrals and the `X`-integrand
   have hinX : ∀ T : SymMatrix m, ((((T : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ (c - p)) *
-      kummerPsi a b (T : Matrix (Fin m) (Fin m) ℝ)) =
+      matrixKummerPsi a b (T : Matrix (Fin m) (Fin m) ℝ)) =
       (multivariateGamma m a)⁻¹ * ∫ X, f X T ∂ν := by
     intro T
-    unfold kummerPsi
+    unfold matrixKummerPsi
     rw [← integral_const_mul, ← integral_const_mul, one_div, ← integral_const_mul]
     refine integral_congr_ae (Filter.Eventually.of_forall fun X => ?_)
-    simp only [hfdef, hw, etr]
+    simp only [hfdef, hw, expTrace]
     rw [Matrix.trace_neg, Matrix.trace_neg, Matrix.trace_mul_comm]
     ring
   refine ⟨?_, ?_⟩
@@ -347,7 +350,7 @@ theorem hasIntegralOn_kummerPsi_mellin {m : ℕ} {a b c : ℂ}
     refine Integrable.congr this (Filter.Eventually.of_forall fun T => ?_)
     exact (hinX T).symm
   · rw [show (∫ T in posDefCone m, (((T : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ (c - p)) *
-        kummerPsi a b (T : Matrix (Fin m) (Fin m) ℝ) ∂TauCeti.symmetricLebesgue m) =
+        matrixKummerPsi a b (T : Matrix (Fin m) (Fin m) ℝ) ∂TauCeti.symmetricLebesgue m) =
         ∫ T, (multivariateGamma m a)⁻¹ * ∫ X, f X T ∂ν ∂ν from
           integral_congr_ae (Filter.Eventually.of_forall hinX)]
     rw [integral_const_mul, (integral_integral_swap hfi).symm]
@@ -374,20 +377,21 @@ theorem hasIntegralOn_kummerPsi_mellin {m : ℕ} {a b c : ℂ}
 /-- DLMF 35.6.9: `lim_{a→∞} ₁F₁(a; ν + (m+1)/2; -a⁻¹T) = A_ν(T) / A_ν(0)` (real `a → +∞`),
 for `T ∈ 𝓢` and `Γ_m(ν + (m+1)/2) ≠ 0`. -/
 @[dlmf 35.6.E9]
-theorem tendsto_hyp1F1_besselA {m : ℕ} {ν : ℂ}
+theorem tendsto_matrixHypergeometric1F1_matrixBesselA {m : ℕ} {ν : ℂ}
     (hν : multivariateGamma m (ν + ((m : ℂ) + 1) / 2) ≠ 0)
     {T : Matrix (Fin m) (Fin m) ℝ} (hT : T.IsHermitian) :
-    Tendsto (fun a : ℝ => hyp1F1 a (ν + ((m : ℂ) + 1) / 2) (-(a⁻¹ • T))) atTop
-      (𝓝 (besselA ν T / besselA ν (0 : Matrix (Fin m) (Fin m) ℝ))) := by
+    Tendsto (fun a : ℝ => matrixHypergeometric1F1 a (ν + ((m : ℂ) + 1) / 2) (-(a⁻¹ • T))) atTop
+      (𝓝 (matrixBesselA ν T / matrixBesselA ν (0 : Matrix (Fin m) (Fin m) ℝ))) := by
   sorry
 
 /-- DLMF 35.6.10: `lim_{a→∞} Γ_m(a) Ψ(a + ν; ν + (m+1)/2; a⁻¹T) = B_ν(T)` (real `a → +∞`),
 for `T ∈ Ω`. -/
 @[dlmf 35.6.E10]
-theorem tendsto_kummerPsi_besselB {m : ℕ} (ν : ℂ) {T : Matrix (Fin m) (Fin m) ℝ}
+theorem tendsto_matrixKummerPsi_matrixBesselB {m : ℕ} (ν : ℂ) {T : Matrix (Fin m) (Fin m) ℝ}
     (hT : T.PosDef) :
     Tendsto (fun a : ℝ => multivariateGamma m a *
-        kummerPsi (a + ν) (ν + ((m : ℂ) + 1) / 2) (a⁻¹ • T)) atTop (𝓝 (besselB ν T)) := by
+        matrixKummerPsi (a + ν) (ν + ((m : ℂ) + 1) / 2) (a⁻¹ • T)) atTop
+            (𝓝 (matrixBesselB ν T)) := by
   sorry
 
 end DLMF.MatrixArgument

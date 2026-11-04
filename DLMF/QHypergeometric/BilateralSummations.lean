@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.QHypergeometric.Convergence
+public import DLMF.QHypergeometric.QuintupleProduct
 public import DLMF.QHypergeometric.VeryWellPoisedSums
 
 /-!
@@ -100,7 +101,12 @@ theorem ramanujan_one_psi_one {a b q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (ha
 theorem quintuple_product {q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz : z≠0) :
     HasSum (fun n : ℤ => (-1:ℂ)^n*q^qQuintupleExponent n*z^(3*n)*(1+z*q^n))
       (qPochhammerListInf [q,-z,-q/z] q*qPochhammerListInf [q*z^2,q/z^2] (q^2)) := by
-  sorry
+  have h := QuintupleProduct.hasSum_quintuple hq0 hq hz
+  convert h using 1
+  · rfl
+  · simp only [QuintupleProduct.productSide, qPochhammerListInf, List.map_cons, List.map_nil,
+      List.prod_cons, List.prod_nil, mul_one]
+    ring
 
 /-- The well-poised `2ψ2` summation (DLMF 17.8.E4). -/
 @[dlmf 17.8.E4]

@@ -42,8 +42,8 @@ integrals of DLMF §14.17 and the iterated integrals of DLMF §14.6(ii):
 * `OrthogonalityIntegrals.ferrersP_nat_nat`, `OrthogonalityIntegrals.ferrersP_mul`: Ferrers
   functions of integer degree and order via derivatives of the Legendre polynomial.
 * `OrthogonalityIntegrals.contiguous`,
-  `OrthogonalityIntegrals.hasDerivAt_pow_mul_regularizedGaussHG`: the contiguous relation and the
-  primitive.
+  `OrthogonalityIntegrals.hasDerivAt_pow_mul_regularizedGaussHypergeometric`: the contiguous
+  relation and the primitive.
 * `OrthogonalityIntegrals.iterate_ferrers`, `OrthogonalityIntegrals.iterate_associated`,
   `OrthogonalityIntegrals.iterate_segment`: iterated integrals of `𝖯_ν` and `P_ν` from the endpoint
   `1`.
@@ -70,7 +70,7 @@ open DLMF.OrthogonalPolynomials
 theorem OrthogonalityIntegrals.analytic_jet (n m : ℕ) : AnalyticOnNhd ℂ
     (LegendreAddition.jet n m) univ := by
   rw [LegendreAddition.jet, iteratedDeriv_eq_iterate]
-  exact (show AnalyticOnNhd ℂ (legendrePolyP n) univ from analyticOnNhd_jacobiPolyP 0 0
+  exact (show AnalyticOnNhd ℂ (legendrePolynomialP n) univ from analyticOnNhd_jacobiPolynomialP 0 0
       n).iterated_deriv m
 
 /-- Complex derivative of `P_n^{(m)}`. -/
@@ -194,7 +194,7 @@ theorem OrthogonalityIntegrals.prod_factorial {m n : ℕ} (h : m ≤ n) :
 theorem OrthogonalityIntegrals.ferrersP_nat_nat (n m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersP n m x = (-1)^m * (((1-x^2)^((m:ℝ)/2) : ℝ) : ℂ) * LegendreAddition.jet n m x := by
   have hs : 1+(x:ℂ) ∈ slitPlane := Or.inl (by simp; linarith [hx.1])
-  have hev : legendreP (n:ℂ) =ᶠ[𝓝 (x:ℂ)] legendrePolyP n := by
+  have hev : legendreP (n:ℂ) =ᶠ[𝓝 (x:ℂ)] legendrePolynomialP n := by
     filter_upwards [isOpen_one_add_mem_slitPlane.mem_nhds hs] with w hw
     rw [legendreP_nat n hw]
   rw [ferrersP_nat n m hx, hev.iteratedDeriv_eq]; rfl
@@ -218,21 +218,23 @@ theorem OrthogonalityIntegrals.ferrersP_mul (l n m : ℕ) {x : ℝ} (hx : x ∈ 
 
 /-- `𝐅(a,b;c;z) = c 𝐅(a,b;c+1;z) + a b z 𝐅(a+1,b+1;c+2;z)` on the cut plane. -/
 theorem OrthogonalityIntegrals.contiguous (a b c : ℂ) {z : ℂ} (hz : z ∈ cutPlane) :
-    regularizedGaussHG a b c z = c * regularizedGaussHG a b (c+1) z +
-      a * b * z * regularizedGaussHG (a+1) (b+1) (c+2) z := by
-  have h1 := regularizedGaussHG_contiguous_c a b c hz
-  have h2 := regularizedGaussHG_contiguous_shift_b b a (c+1) hz
-  rw [regularizedGaussHG_symm b a _ hz, regularizedGaussHG_symm b (a+1) _ hz,
-    regularizedGaussHG_symm (b+1) (a+1) _ hz, show c+1+1 = c+2 by ring] at h2
+    regularizedGaussHypergeometric a b c z = c * regularizedGaussHypergeometric a b (c+1) z +
+      a * b * z * regularizedGaussHypergeometric (a+1) (b+1) (c+2) z := by
+  have h1 := regularizedGaussHypergeometric_contiguous_c a b c hz
+  have h2 := regularizedGaussHypergeometric_contiguous_shift_b b a (c+1) hz
+  rw [regularizedGaussHypergeometric_symm b a _ hz,
+      regularizedGaussHypergeometric_symm b (a+1) _ hz,
+    regularizedGaussHypergeometric_symm (b+1) (a+1) _ hz, show c+1+1 = c+2 by ring] at h2
   linear_combination h1 - a * h2
 
 /-- `d/dw [w^{k+1} 𝐅(a,b;k+2;w)] = w^k 𝐅(a,b;k+1;w)` on the cut plane. -/
-theorem OrthogonalityIntegrals.hasDerivAt_pow_mul_regularizedGaussHG (a b : ℂ) (k : ℕ) {w : ℂ}
+theorem OrthogonalityIntegrals.hasDerivAt_pow_mul_regularizedGaussHypergeometric (a b : ℂ)
+    (k : ℕ) {w : ℂ}
     (hw : w ∈ cutPlane) :
-    HasDerivAt (fun w => w^(k+1) * regularizedGaussHG a b ((k:ℂ)+2) w)
-      (w^k * regularizedGaussHG a b ((k:ℂ)+1) w) w := by
-  have hF := (differentiableAt_regularizedGaussHG a b ((k:ℂ)+2) hw).hasDerivAt
-  rw [deriv_regularizedGaussHG _ _ _ hw] at hF
+    HasDerivAt (fun w => w^(k+1) * regularizedGaussHypergeometric a b ((k:ℂ)+2) w)
+      (w^k * regularizedGaussHypergeometric a b ((k:ℂ)+1) w) w := by
+  have hF := (differentiableAt_regularizedGaussHypergeometric a b ((k:ℂ)+2) hw).hasDerivAt
+  rw [deriv_regularizedGaussHypergeometric _ _ _ hw] at hF
   have hc := OrthogonalityIntegrals.contiguous a b ((k:ℂ)+1) hw
   rw [show (k:ℂ)+1+1 = k+2 by ring, show (k:ℂ)+1+2 = k+2+1 by ring] at hc
   refine ((hasDerivAt_pow (k+1) w).mul hF).congr_deriv ?_
@@ -240,7 +242,7 @@ theorem OrthogonalityIntegrals.hasDerivAt_pow_mul_regularizedGaussHG (a b : ℂ)
 
 /-- `H_k(x) = (1-x)^k 𝐅(a,b;k+1;(1-x)/2)`. -/
 def OrthogonalityIntegrals.ferrersPrimitive (a b : ℂ) (k : ℕ) (x : ℝ) : ℂ :=
-  (1-(x:ℂ))^k * regularizedGaussHG a b ((k:ℂ)+1) ((1-x)/2)
+  (1-(x:ℂ))^k * regularizedGaussHypergeometric a b ((k:ℂ)+1) ((1-x)/2)
 
 /-- `(1-x)/2` lies in the cut plane for `x > -1`. -/
 theorem OrthogonalityIntegrals.half_mem_cutPlane {x : ℝ} (hx : -1 < x) : (1-(x:ℂ))/2
@@ -254,10 +256,12 @@ theorem OrthogonalityIntegrals.hasDerivAt_ferrersPrimitive (a b : ℂ) (k : ℕ)
   have hw := OrthogonalityIntegrals.half_mem_cutPlane hx
   have hψ : HasDerivAt (fun z : ℂ => (1-z)/2) (-1/2) (x:ℂ) := by
     simpa using ((hasDerivAt_id' (x:ℂ)).const_sub 1).div_const 2
-  have h := (((OrthogonalityIntegrals.hasDerivAt_pow_mul_regularizedGaussHG a b k hw).comp (x:ℂ)
+  have h := (((OrthogonalityIntegrals.hasDerivAt_pow_mul_regularizedGaussHypergeometric a b
+      k hw).comp (x:ℂ)
       hψ).comp_ofReal).const_mul (2^(k+1):ℂ)
   have e : OrthogonalityIntegrals.ferrersPrimitive a b (k+1) = fun x : ℝ => (2^(k+1):ℂ) *
-      ((fun w => w^(k+1) * regularizedGaussHG a b ((k:ℂ)+2) w) ∘ fun z : ℂ => (1-z)/2) x := by
+      ((fun w => w^(k+1) * regularizedGaussHypergeometric a b ((k:ℂ)+2) w) ∘ fun z : ℂ =>
+          (1-z)/2) x := by
     funext y
     simp only [OrthogonalityIntegrals.ferrersPrimitive, Function.comp, div_pow]
     push_cast
@@ -275,8 +279,8 @@ theorem OrthogonalityIntegrals.continuousAt_ferrersPrimitive (a b : ℂ) (k : �
   have hw := OrthogonalityIntegrals.half_mem_cutPlane hx
   unfold OrthogonalityIntegrals.ferrersPrimitive
   refine ContinuousAt.mul (by fun_prop) ?_
-  exact ContinuousAt.comp (g := regularizedGaussHG a b ((k:ℂ)+1))
-    (differentiableAt_regularizedGaussHG a b _ hw).continuousAt (by fun_prop)
+  exact ContinuousAt.comp (g := regularizedGaussHypergeometric a b ((k:ℂ)+1))
+    (differentiableAt_regularizedGaussHypergeometric a b _ hw).continuousAt (by fun_prop)
 
 /-- `H_{k+1}(1) = 0`. -/
 theorem OrthogonalityIntegrals.ferrersPrimitive_one (a b : ℂ) (k : ℕ) :
@@ -316,7 +320,7 @@ theorem OrthogonalityIntegrals.iterate_ferrers (ν : ℂ) (k : ℕ) {x : ℝ} (h
 
 /-- `K_k(w) = (w-1)^k 𝐅(a,b;k+1;(1-w)/2)`. -/
 def OrthogonalityIntegrals.associatedPrimitive (a b : ℂ) (k : ℕ) (w : ℂ) : ℂ :=
-  (w-1)^k * regularizedGaussHG a b ((k:ℂ)+1) ((1-w)/2)
+  (w-1)^k * regularizedGaussHypergeometric a b ((k:ℂ)+1) ((1-w)/2)
 
 /-- `K_{k+1}' = K_k` where `1+w` lies in the slit plane. -/
 theorem OrthogonalityIntegrals.hasDerivAt_associatedPrimitive (a b : ℂ) (k : ℕ) {w : ℂ}
@@ -326,10 +330,12 @@ theorem OrthogonalityIntegrals.hasDerivAt_associatedPrimitive (a b : ℂ) (k : �
   have hc := mem_cutPlane_of_one_add hw
   have hψ : HasDerivAt (fun z : ℂ => (1-z)/2) (-1/2) w := by
     simpa using ((hasDerivAt_id' w).const_sub 1).div_const 2
-  have h := ((OrthogonalityIntegrals.hasDerivAt_pow_mul_regularizedGaussHG a b k hc).comp w
+  have h := ((OrthogonalityIntegrals.hasDerivAt_pow_mul_regularizedGaussHypergeometric
+      a b k hc).comp w
       hψ).const_mul ((-2)^(k+1):ℂ)
   have e : OrthogonalityIntegrals.associatedPrimitive a b (k+1) = fun w : ℂ => ((-2)^(k+1):ℂ) *
-      ((fun w => w^(k+1) * regularizedGaussHG a b ((k:ℂ)+2) w) ∘ fun z : ℂ => (1-z)/2) w := by
+      ((fun w => w^(k+1) * regularizedGaussHypergeometric a b ((k:ℂ)+2) w) ∘ fun z : ℂ =>
+          (1-z)/2) w := by
     funext y
     simp only [OrthogonalityIntegrals.associatedPrimitive, Function.comp]
     push_cast
@@ -348,8 +354,8 @@ theorem OrthogonalityIntegrals.continuousAt_associatedPrimitive (a b : ℂ) (k :
   have hc := mem_cutPlane_of_one_add hw
   unfold OrthogonalityIntegrals.associatedPrimitive
   refine ContinuousAt.mul (by fun_prop) ?_
-  exact ContinuousAt.comp (g := regularizedGaussHG a b ((k:ℂ)+1))
-    (differentiableAt_regularizedGaussHG a b _ hc).continuousAt (by fun_prop)
+  exact ContinuousAt.comp (g := regularizedGaussHypergeometric a b ((k:ℂ)+1))
+    (differentiableAt_regularizedGaussHypergeometric a b _ hc).continuousAt (by fun_prop)
 
 /-- `1+t` lies in the slit plane for real `t ≥ 1`. -/
 theorem OrthogonalityIntegrals.one_add_ofReal_mem {t : ℝ} (ht : 1 ≤ t) : 1 + (t:ℂ) ∈ slitPlane :=

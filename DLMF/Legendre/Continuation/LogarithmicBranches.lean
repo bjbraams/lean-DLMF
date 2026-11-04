@@ -112,12 +112,13 @@ lemma associatedP_boundary_aux (ν μ : ℂ) (s : ℝ) (hs : s = 1 ∨ s = -1) {
     have := ((continuousAt_clog hsl).tendsto).comp (hz.add_const 1)
     rw [show (x:ℂ) + 1 = ((1 + x : ℝ) : ℂ) by push_cast; ring, ← ofReal_log h1.le] at this
     exact this
-  have hF : Tendsto (fun ε : ℝ => regularizedGaussHG (ν+1) (-ν) (1-μ) ((1-((x:ℂ)+(s:ℂ)*I*ε))/2))
-      (𝓝[>] (0:ℝ)) (𝓝 (regularizedGaussHG (ν+1) (-ν) (1-μ) ((1-(x:ℂ))/2))) := by
+  have hF : Tendsto (fun ε : ℝ =>
+      regularizedGaussHypergeometric (ν+1) (-ν) (1-μ) ((1-((x:ℂ)+(s:ℂ)*I*ε))/2))
+      (𝓝[>] (0:ℝ)) (𝓝 (regularizedGaussHypergeometric (ν+1) (-ν) (1-μ) ((1-(x:ℂ))/2))) := by
     have hcut : (1-(x:ℂ))/2 ∈ cutPlane := by
       rw [mem_cutPlane, show (1:ℂ) - (1-(x:ℂ))/2 = (((1+x)/2 : ℝ) : ℂ) by push_cast; ring]
       exact Or.inl (by simp only [ofReal_re]; linarith)
-    have hc := ((analyticOnNhd_regularizedGaussHG (ν+1) (-ν) (1-μ)) _ hcut).continuousAt
+    have hc := ((analyticOnNhd_regularizedGaussHypergeometric (ν+1) (-ν) (1-μ)) _ hcut).continuousAt
     exact hc.tendsto.comp ((hz.const_sub 1).div_const 2)
   have hE := ((continuous_exp.tendsto _).comp ((hlogp.sub hlogm).const_mul (μ/2)))
   have := hE.mul hF
@@ -150,14 +151,14 @@ theorem legendre_eq_of_continuousAt_off_countable {f g : ℂ → ℂ} {μ₀ : �
 
 /-- `𝖯^μ_ν` continued analytically off `(-1,1)` into the unit disk. -/
 noncomputable def ferrersPCont (ν μ z : ℂ) : ℂ :=
-  exp (μ/2*(log (1+z)-log (1-z)))*regularizedGaussHG (ν+1) (-ν) (1-μ) ((1-z)/2)
+  exp (μ/2*(log (1+z)-log (1-z)))*regularizedGaussHypergeometric (ν+1) (-ν) (1-μ) ((1-z)/2)
 
 /-- `𝖰^μ_ν` continued analytically off `(-1,1)` into the unit disk. -/
 noncomputable def ferrersQCont (ν μ z : ℂ) : ℂ :=
   -π/2*sin ((ν+μ)*π/2)*(2^μ*Gamma ((ν+μ+1)/2)/Gamma ((ν-μ+2)/2)*(1-z^2)^(-μ/2)*
-    regularizedGaussHG (-(ν+μ)/2) ((ν-μ+1)/2) (1/2) (z^2))+
+    regularizedGaussHypergeometric (-(ν+μ)/2) ((ν-μ+1)/2) (1/2) (z^2))+
   π/2*cos ((ν+μ)*π/2)*(2^μ*Gamma ((ν+μ+2)/2)/Gamma ((ν-μ+1)/2)*z*(1-z^2)^(-μ/2)*
-    regularizedGaussHG ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2) (z^2))
+    regularizedGaussHypergeometric ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2) (z^2))
 
 /-- On real arguments, the disk continuation `ferrersQCont ν μ` agrees with the Ferrers function
 `𝖰^μ_ν = ferrersQ ν μ` (by definition). -/
@@ -198,8 +199,9 @@ theorem ferrersPCont_analytic (ν μ : ℂ) : AnalyticOnNhd ℂ (ferrersPCont ν
     (Metric.ball (0:ℂ) 1) := by
   intro z hz
   obtain ⟨hp, hm, hc, -, -⟩ := legendre_disk_facts hz
-  have hG : AnalyticAt ℂ (fun w : ℂ => regularizedGaussHG (ν+1) (-ν) (1-μ) ((1-w)/2)) z :=
-    (analyticAt_regularizedGaussHG _ _ _ hc).comp_of_eq (by fun_prop) rfl
+  have hG : AnalyticAt ℂ
+      (fun w : ℂ => regularizedGaussHypergeometric (ν+1) (-ν) (1-μ) ((1-w)/2)) z :=
+    (analyticAt_regularizedGaussHypergeometric _ _ _ hc).comp_of_eq (by fun_prop) rfl
   have hE : AnalyticAt ℂ (fun w : ℂ => exp (μ/2*(log (1+w)-log (1-w)))) z := by
     fun_prop (disch := assumption)
   exact hE.mul hG
@@ -211,10 +213,12 @@ theorem ferrersQCont_analytic (ν μ : ℂ) : AnalyticOnNhd ℂ (ferrersQCont ν
   obtain ⟨-, -, -, hs, hc⟩ := legendre_disk_facts hz
   have hW : AnalyticAt ℂ (fun w : ℂ => (1-w^2)^(-μ/2)) z :=
     (by fun_prop : AnalyticAt ℂ (fun w : ℂ => 1-w^2) z).cpow analyticAt_const hs
-  have hG1 : AnalyticAt ℂ (fun w : ℂ => regularizedGaussHG (-(ν+μ)/2) ((ν-μ+1)/2) (1/2) (w^2)) z :=
-    (analyticAt_regularizedGaussHG _ _ _ hc).comp_of_eq (by fun_prop) rfl
-  have hG2 : AnalyticAt ℂ (fun w : ℂ => regularizedGaussHG ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2) (w^2)) z :=
-    (analyticAt_regularizedGaussHG _ _ _ hc).comp_of_eq (by fun_prop) rfl
+  have hG1 : AnalyticAt ℂ
+      (fun w : ℂ => regularizedGaussHypergeometric (-(ν+μ)/2) ((ν-μ+1)/2) (1/2) (w^2)) z :=
+    (analyticAt_regularizedGaussHypergeometric _ _ _ hc).comp_of_eq (by fun_prop) rfl
+  have hG2 : AnalyticAt ℂ
+      (fun w : ℂ => regularizedGaussHypergeometric ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2) (w^2)) z :=
+    (analyticAt_regularizedGaussHypergeometric _ _ _ hc).comp_of_eq (by fun_prop) rfl
   unfold ferrersQCont
   exact (analyticAt_const.mul (analyticAt_const.mul hW |>.mul hG1)).add
     (analyticAt_const.mul (((analyticAt_const.mul analyticAt_id).mul hW).mul hG2))
@@ -239,10 +243,10 @@ theorem continuousAt_ferrersQCont_order {ν μ₀ : ℂ} (h : LegendreQRegular �
   have p2 : Continuous fun μ : ℂ => (2:ℂ)^μ := continuous_const_cpow' (by norm_num)
   have pw : Continuous fun μ : ℂ => (1-z^2)^(-μ/2) :=
       (continuous_const_cpow' hne).comp (by fun_prop)
-  have g1 := (differentiable_regularizedGaussHG_comp (A := fun μ : ℂ => -(ν+μ)/2)
+  have g1 := (differentiable_regularizedGaussHypergeometric_comp (A := fun μ : ℂ => -(ν+μ)/2)
       (B := fun μ : ℂ => (ν-μ+1)/2)
     (C := fun _ : ℂ => 1/2) (by fun_prop) (by fun_prop) (by fun_prop) hc).continuous
-  have g2 := (differentiable_regularizedGaussHG_comp (A := fun μ : ℂ => (1-ν-μ)/2)
+  have g2 := (differentiable_regularizedGaussHypergeometric_comp (A := fun μ : ℂ => (1-ν-μ)/2)
       (B := fun μ : ℂ => (ν-μ+2)/2)
     (C := fun _ : ℂ => 3/2) (by fun_prop) (by fun_prop) (by fun_prop) hc).continuous
   have hs : Continuous fun μ : ℂ => sin ((ν+μ)*π/2) := by fun_prop
@@ -259,7 +263,8 @@ theorem continuous_ferrersPCont_order (ν : ℂ) {z : ℂ} (hz : z ∈ Metric.ba
   obtain ⟨-, -, hc, -, -⟩ := legendre_disk_facts hz
   unfold ferrersPCont
   exact (by fun_prop : Continuous fun μ : ℂ => exp (μ/2*(log (1+z)-log (1-z)))).mul
-    (differentiable_regularizedGaussHG_comp (A := fun _ : ℂ => ν+1) (B := fun _ : ℂ => -ν)
+    (differentiable_regularizedGaussHypergeometric_comp (A := fun _ : ℂ => ν+1)
+        (B := fun _ : ℂ => -ν)
       (C := fun μ : ℂ => 1-μ) (by fun_prop) (by fun_prop) (by fun_prop) hc).continuous
 
 /-- On the side `s Im z > 0`, `log (z-1) = log (1-z) + sπi`. -/
@@ -409,9 +414,9 @@ theorem legendre_cos_sub_sin_exp {s : ℝ} (hs : s = 1 ∨ s = -1) (θ : ℂ) :
 /-- The right side of DLMF 14.23.3, continued into the unit disk. -/
 noncomputable def olverQSideHyp (s : ℝ) (ν μ z : ℂ) : ℂ :=
   exp (-(s:ℂ)*ν*π*I/2)*(π:ℂ)^(3/2:ℂ)*(1-z^2)^(μ/2)*((2:ℂ)^(ν+1))⁻¹*
-    (z*regularizedGaussHG ((μ-ν+1)/2) ((ν+μ+2)/2) (3/2)
+    (z*regularizedGaussHypergeometric ((μ-ν+1)/2) ((ν+μ+2)/2) (3/2)
         (z^2)*((Gamma ((ν-μ+1)/2))⁻¹*(Gamma ((ν+μ+1)/2))⁻¹)-
-      (s:ℂ)*I*regularizedGaussHG ((μ-ν)/2) ((ν+μ+1)/2) (1/2)
+      (s:ℂ)*I*regularizedGaussHypergeometric ((μ-ν)/2) ((ν+μ+1)/2) (1/2)
           (z^2)*((Gamma ((ν-μ+2)/2))⁻¹*(Gamma ((ν+μ+2)/2))⁻¹))
 
 /-- `olverQSideHyp s ν μ` is analytic on the open unit disk. -/
@@ -421,10 +426,12 @@ theorem olverQSideHyp_analytic (s : ℝ) (ν μ : ℂ) :
   obtain ⟨-, -, -, hsl, hc⟩ := legendre_disk_facts hz
   have hW : AnalyticAt ℂ (fun w : ℂ => (1-w^2)^(μ/2)) z :=
     (by fun_prop : AnalyticAt ℂ (fun w : ℂ => 1-w^2) z).cpow analyticAt_const hsl
-  have hG1 : AnalyticAt ℂ (fun w : ℂ => regularizedGaussHG ((μ-ν+1)/2) ((ν+μ+2)/2) (3/2) (w^2)) z :=
-    (analyticAt_regularizedGaussHG _ _ _ hc).comp_of_eq (by fun_prop) rfl
-  have hG2 : AnalyticAt ℂ (fun w : ℂ => regularizedGaussHG ((μ-ν)/2) ((ν+μ+1)/2) (1/2) (w^2)) z :=
-    (analyticAt_regularizedGaussHG _ _ _ hc).comp_of_eq (by fun_prop) rfl
+  have hG1 : AnalyticAt ℂ
+      (fun w : ℂ => regularizedGaussHypergeometric ((μ-ν+1)/2) ((ν+μ+2)/2) (3/2) (w^2)) z :=
+    (analyticAt_regularizedGaussHypergeometric _ _ _ hc).comp_of_eq (by fun_prop) rfl
+  have hG2 : AnalyticAt ℂ
+      (fun w : ℂ => regularizedGaussHypergeometric ((μ-ν)/2) ((ν+μ+1)/2) (1/2) (w^2)) z :=
+    (analyticAt_regularizedGaussHypergeometric _ _ _ hc).comp_of_eq (by fun_prop) rfl
   unfold olverQSideHyp
   exact ((analyticAt_const.mul hW).mul analyticAt_const).mul
     (((analyticAt_id.mul hG1).mul analyticAt_const).sub
@@ -436,10 +443,10 @@ theorem continuous_olverQSideHyp_order (s : ℝ) (ν : ℂ) {z : ℂ} (hz : z �
   obtain ⟨-, -, -, hsl, hc⟩ := legendre_disk_facts hz
   have hne := slitPlane_ne_zero hsl
   have pw : Continuous fun μ : ℂ => (1-z^2)^(μ/2) := (continuous_const_cpow' hne).comp (by fun_prop)
-  have g1 := (differentiable_regularizedGaussHG_comp (A := fun μ : ℂ => (μ-ν+1)/2)
+  have g1 := (differentiable_regularizedGaussHypergeometric_comp (A := fun μ : ℂ => (μ-ν+1)/2)
       (B := fun μ : ℂ => (ν+μ+2)/2)
     (C := fun _ : ℂ => 3/2) (by fun_prop) (by fun_prop) (by fun_prop) hc).continuous
-  have g2 := (differentiable_regularizedGaussHG_comp (A := fun μ : ℂ => (μ-ν)/2)
+  have g2 := (differentiable_regularizedGaussHypergeometric_comp (A := fun μ : ℂ => (μ-ν)/2)
       (B := fun μ : ℂ => (ν+μ+1)/2)
     (C := fun _ : ℂ => 1/2) (by fun_prop) (by fun_prop) (by fun_prop) hc).continuous
   have i1 := continuous_recip_Gamma.comp (by fun_prop : Continuous fun μ : ℂ => (ν-μ+1)/2)
@@ -464,16 +471,17 @@ theorem olverQSide_eq_hyp_real {s : ℝ} (hs : s = 1 ∨ s = -1) {ν μ : ℂ} (
   have hc := ferrers_sq_mem_cutPlane hy
   have hne := slitPlane_ne_zero (ferrers_one_sub_sq_mem_slitPlane hy)
   have hE : ferrersEven ν μ y =
-      (1-(y:ℂ)^2)^(μ/2)*regularizedGaussHG ((μ-ν)/2) ((ν+μ+1)/2) (1/2) ((y:ℂ)^2) := by
+      (1-(y:ℂ)^2)^(μ/2)*regularizedGaussHypergeometric ((μ-ν)/2) ((ν+μ+1)/2) (1/2) ((y:ℂ)^2) := by
     unfold ferrersEven
-    rw [regularizedGaussHG_euler _ _ _ hc, regularizedGaussHG_symm _ _ _ hc,
+    rw [regularizedGaussHypergeometric_euler _ _ _ hc, regularizedGaussHypergeometric_symm _ _ _ hc,
       show (1/2:ℂ) - -(ν+μ)/2 - (ν-μ+1)/2 = μ by ring, show (1/2:ℂ) - (ν-μ+1)/2 = (μ-ν)/2 by ring,
       show (1/2:ℂ) - -(ν+μ)/2 = (ν+μ+1)/2 by ring, ← mul_assoc, ← cpow_add _ _ hne]
     ring_nf
   have hO : ferrersOdd ν μ y =
-      y*((1-(y:ℂ)^2)^(μ/2)*regularizedGaussHG ((μ-ν+1)/2) ((ν+μ+2)/2) (3/2) ((y:ℂ)^2)) := by
+      y*((1-(y:ℂ)^2)^(μ/2)*regularizedGaussHypergeometric ((μ-ν+1)/2) ((ν+μ+2)/2) (3/2)
+          ((y:ℂ)^2)) := by
     unfold ferrersOdd
-    rw [regularizedGaussHG_euler _ _ _ hc, regularizedGaussHG_symm _ _ _ hc,
+    rw [regularizedGaussHypergeometric_euler _ _ _ hc, regularizedGaussHypergeometric_symm _ _ _ hc,
       show (3/2:ℂ) - (1-ν-μ)/2 - (ν-μ+2)/2 = μ by ring, show (3/2:ℂ) - (ν-μ+2)/2 =
                                                     (μ-ν+1)/2 by ring,
       show (3/2:ℂ) - (1-ν-μ)/2 = (ν+μ+2)/2 by ring, ← mul_assoc ((1-(y:ℂ)^2)^(-μ/2)),
@@ -497,8 +505,8 @@ theorem olverQSide_eq_hyp_real {s : ℝ} (hs : s = 1 ∨ s = -1) {ν μ : ℂ} (
       ferrersP_even_odd ν μ hy, r1, r2,
     hE, hO, legendre_Gamma_plus, hX, legendre_pi_three_halves, cpow_add _ _ two_ne_zero, cpow_one]
   generalize (1-(y:ℂ)^2)^(μ/2) = U
-  generalize regularizedGaussHG ((μ-ν)/2) ((ν+μ+1)/2) (1/2) ((y:ℂ)^2) = F1
-  generalize regularizedGaussHG ((μ-ν+1)/2) ((ν+μ+2)/2) (3/2) ((y:ℂ)^2) = F3
+  generalize regularizedGaussHypergeometric ((μ-ν)/2) ((ν+μ+1)/2) (1/2) ((y:ℂ)^2) = F1
+  generalize regularizedGaussHypergeometric ((μ-ν+1)/2) ((ν+μ+2)/2) (3/2) ((y:ℂ)^2) = F3
   generalize (Gamma ((ν-μ+2)/2))⁻¹ = gc
   generalize (Gamma ((ν-μ+1)/2))⁻¹ = gd
   generalize Gamma ((ν+μ+1)/2) = ga at ha
@@ -617,9 +625,10 @@ theorem ferrersQ_boundary_inverse_upper {ν μ : ℂ} (hr : LegendreQRegular ν 
 @[dlmf 14.23.E3]
 theorem olverQ_boundary_hypergeometric_upper (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     Tendsto (fun ε : ℝ => olverQ ν μ (x+(1:ℂ)*I*ε)) (𝓝[>] (0:ℝ))
-        (𝓝 (exp (-(1:ℂ)*ν*π*I/2)*(π:ℂ)^(3/2:ℂ)*(1-x^2:ℂ)^(μ/2)/2^(ν+1)*(x*regularizedGaussHG
-        ((μ-ν+1)/2) ((ν+μ+2)/2) (3/2)
-        (x^2)/(Gamma ((ν-μ+1)/2)*Gamma ((ν+μ+1)/2))-(1:ℂ)*I*regularizedGaussHG ((μ-ν)/2) ((ν+μ+1)/2)
+        (𝓝 (exp (-(1:ℂ)*ν*π*I/2)*(π:ℂ)^(3/2:ℂ)*(1-x^2:ℂ)^(μ/2)/2^(ν+1)*
+          (x*regularizedGaussHypergeometric ((μ-ν+1)/2) ((ν+μ+2)/2) (3/2)
+        (x^2)/(Gamma ((ν-μ+1)/2)*Gamma ((ν+μ+1)/2))-(1:ℂ)*I*regularizedGaussHypergeometric
+            ((μ-ν)/2) ((ν+μ+1)/2)
         (1/2) (x^2)/(Gamma ((ν-μ+2)/2)*Gamma ((ν+μ+2)/2))))) := by
   have h := olverQ_boundary_hyp_aux ν μ 1 (Or.inl rfl) hx
   simp only [olverQSideHyp, ofReal_one] at h
@@ -678,9 +687,10 @@ theorem ferrersQ_boundary_inverse_lower {ν μ : ℂ} (hr : LegendreQRegular ν 
 @[dlmf 14.23.E3]
 theorem olverQ_boundary_hypergeometric_lower (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     Tendsto (fun ε : ℝ => olverQ ν μ (x+(-1:ℂ)*I*ε)) (𝓝[>] (0:ℝ))
-        (𝓝 (exp (-(-1:ℂ)*ν*π*I/2)*(π:ℂ)^(3/2:ℂ)*(1-x^2:ℂ)^(μ/2)/2^(ν+1)*(x*regularizedGaussHG
-        ((μ-ν+1)/2) ((ν+μ+2)/2) (3/2)
-        (x^2)/(Gamma ((ν-μ+1)/2)*Gamma ((ν+μ+1)/2))-(-1:ℂ)*I*regularizedGaussHG ((μ-ν)/2)
+        (𝓝 (exp (-(-1:ℂ)*ν*π*I/2)*(π:ℂ)^(3/2:ℂ)*(1-x^2:ℂ)^(μ/2)/2^(ν+1)*
+          (x*regularizedGaussHypergeometric ((μ-ν+1)/2) ((ν+μ+2)/2) (3/2)
+        (x^2)/(Gamma ((ν-μ+1)/2)*Gamma
+            ((ν+μ+1)/2))-(-1:ℂ)*I*regularizedGaussHypergeometric ((μ-ν)/2)
         ((ν+μ+1)/2) (1/2) (x^2)/(Gamma ((ν-μ+2)/2)*Gamma ((ν+μ+2)/2))))) := by
   have h := olverQ_boundary_hyp_aux ν μ (-1) (Or.inr rfl) hx
   simp only [olverQSideHyp, ofReal_neg, ofReal_one] at h
@@ -714,7 +724,7 @@ theorem ferrersP_conical_neg_tau (τ μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ
     rw [show (1-(x:ℂ))/2=(((1-x)/2:ℝ):ℂ) by push_cast; ring, norm_real, Real.norm_eq_abs, abs_lt]
     constructor <;> linarith [hx.1,hx.2]
   unfold ferrersP
-  rw [regularizedGaussHG_symm _ _ _ (mem_cutPlane_of_norm_lt_one hz)]
+  rw [regularizedGaussHypergeometric_symm _ _ _ (mem_cutPlane_of_norm_lt_one hz)]
   ring_nf
 
 /-- conicalQHat boundary.
@@ -865,14 +875,15 @@ theorem legendreTransport_unique (ν μ a b : ℂ) (γ : ℝ → ℂ) (hγ : Con
 /-- The right side of the `ζ`-form of `𝑸^μ_ν`:
 `√π (1-w²)^μ w^{ν+1} 𝐅(μ+1/2, ν+μ+1; ν+3/2; w²)`. -/
 def OlverQZetaForm.rhs (ν μ w : ℂ) : ℂ :=
-  Real.sqrt π * (1 - w^2)^μ * w^(ν+1) * regularizedGaussHG (μ+1/2) (ν+μ+1) (ν+3/2) (w^2)
+  Real.sqrt π * (1 - w^2)^μ * w^(ν+1) * regularizedGaussHypergeometric (μ+1/2) (ν+μ+1) (ν+3/2) (w^2)
 
 /-- `OlverQZetaForm.rhs ν μ` is analytic at `w` when `w ∉ (-∞, 0]` and `1 - w² ∉ (-∞, 0]`. -/
 theorem OlverQZetaForm.rhs_analyticAt (ν μ : ℂ) {w : ℂ} (hw : w ∈ slitPlane)
     (hw2 : 1 - w^2 ∈ slitPlane) :
     AnalyticAt ℂ (OlverQZetaForm.rhs ν μ) w := by
-  have hF : AnalyticAt ℂ (fun w : ℂ => regularizedGaussHG (μ+1/2) (ν+μ+1) (ν+3/2) (w^2)) w :=
-    (analyticAt_regularizedGaussHG _ _ _ (show w^2 ∈ cutPlane from hw2)).comp_of_eq
+  have hF : AnalyticAt ℂ
+      (fun w : ℂ => regularizedGaussHypergeometric (μ+1/2) (ν+μ+1) (ν+3/2) (w^2)) w :=
+    (analyticAt_regularizedGaussHypergeometric _ _ _ (show w^2 ∈ cutPlane from hw2)).comp_of_eq
       (f := fun w : ℂ => w^2) (by fun_prop) rfl
   have h1 : AnalyticAt ℂ (fun w : ℂ => (1 - w^2)^μ) w :=
     (analyticAt_const.sub (analyticAt_id.pow 2)).cpow analyticAt_const hw2

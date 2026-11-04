@@ -365,20 +365,20 @@ theorem erf_sector_limit {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π/4) :
 theorem fresnelTail_horizontal_integral (z : ℂ) :
     Tendsto (fun R : ℝ => segmentIntegral (fun t => exp (π*I*t^2/2)) z R) atTop
         (𝓝 (fresnelTail z)) := by
-  have hd (w : ℂ) : HasDerivAt (fun w => fresnelCosInt w + I*fresnelSinInt w)
+  have hd (w : ℂ) : HasDerivAt (fun w => fresnelC w + I*fresnelS w)
       (exp (π*I*w^2/2)) w := by
-    convert (hasDerivAt_fresnelCosInt_complex w).add
-      ((hasDerivAt_fresnelSinInt_complex w).const_mul I) using 1
+    convert (hasDerivAt_fresnelC_complex w).add
+      ((hasDerivAt_fresnelS_complex w).const_mul I) using 1
     rw [show π*I*w^2/2 = (π*w^2/2)*I by ring, ← Complex.cos_add_sin_I]
     ring
   have hs (R : ℝ) : segmentIntegral (fun t => exp (π*I*t^2/2)) z R =
-      ((Real.fresnelCosInt R : ℂ) + I*Real.fresnelSinInt R) -
-        (fresnelCosInt z + I*fresnelSinInt z) := by
-    rw [segmentIntegral_eq_sub hd, fresnelCosInt_ofReal, fresnelSinInt_ofReal]
+      ((Real.fresnelC R : ℂ) + I*Real.fresnelS R) -
+        (fresnelC z + I*fresnelS z) := by
+    rw [segmentIntegral_eq_sub hd, fresnelC_ofReal, fresnelS_ofReal]
   simp_rw [hs]
-  have hC := (Complex.continuous_ofReal.tendsto _).comp Real.tendsto_fresnelCosInt_atTop
-  have hS := (Complex.continuous_ofReal.tendsto _).comp Real.tendsto_fresnelSinInt_atTop
-  have h := (hC.add (hS.const_mul I)).sub_const (fresnelCosInt z + I*fresnelSinInt z)
+  have hC := (Complex.continuous_ofReal.tendsto _).comp Real.tendsto_fresnelC_atTop
+  have hS := (Complex.continuous_ofReal.tendsto _).comp Real.tendsto_fresnelS_atTop
+  have h := (hC.add (hS.const_mul I)).sub_const (fresnelC z + I*fresnelS z)
   convert h using 2
   · simp
   · simp only [fresnelTail]; push_cast; ring

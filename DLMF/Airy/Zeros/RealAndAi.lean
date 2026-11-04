@@ -47,13 +47,13 @@ def airyRealZero (f : ℝ → ℝ) (k : ℕ) : ℝ :=
   Classical.epsilon (fun x : ℝ => x < 0 ∧ f x = 0 ∧
     ({y : ℝ | x < y ∧ y < 0 ∧ f y = 0} : Set ℝ).ncard = k - 1)
 /-- Negative zeros of Ai. -/
-def airyAiZero : ℕ → ℝ := airyRealZero airyAiReal
+def airyAiZero : ℕ → ℝ := airyRealZero DLMF.Airy.Real.airyAi
 /-- Negative zeros of Ai'. -/
-def airyAiDerivZero : ℕ → ℝ := airyRealZero airyAiDerivReal
+def airyAiDerivZero : ℕ → ℝ := airyRealZero DLMF.Airy.Real.airyAiDeriv
 /-- Negative zeros of Bi. -/
-def airyBiZero : ℕ → ℝ := airyRealZero airyBiReal
+def airyBiZero : ℕ → ℝ := airyRealZero DLMF.Airy.Real.airyBi
 /-- Negative zeros of Bi'. -/
-def airyBiDerivZero : ℕ → ℝ := airyRealZero airyBiDerivReal
+def airyBiDerivZero : ℕ → ℝ := airyRealZero DLMF.Airy.Real.airyBiDeriv
 /-- Zeros in the upper complex-zero sector of Bi or Bi'. -/
 def airyUpperZeroSet (f : ℂ → ℂ) : Set ℂ := {z | π / 3 < arg z ∧ arg z < π / 2 ∧ f z = 0}
 /-- Complex zeros ordered by increasing modulus; the specification theorem establishes existence. -/
@@ -81,7 +81,7 @@ def airyComplexZeroArgument (offset : ℝ) (k : ℕ) : ℂ := airyZeroArgument o
     I * Real.log 2 / 4
 
 /-- `Ai(x) → 0` as `x → +∞` on the real axis. -/
-theorem tendsto_airyAiReal_atTop : Tendsto airyAiReal atTop (𝓝 0) := by
+theorem Real.tendsto_airyAi_atTop : Tendsto DLMF.Airy.Real.airyAi atTop (𝓝 0) := by
   have hv : Tendsto (fun x : ℝ => Real.exp (-airyZeta x) / (2 * Real.sqrt π * x ^ (1 / 4 : ℝ)))
       atTop (𝓝 0) :=
     (Real.tendsto_exp_neg_atTop_nhds_zero.comp tendsto_airyZeta).div_atTop
@@ -95,21 +95,21 @@ theorem tendsto_airyAiReal_atTop : Tendsto airyAiReal atTop (𝓝 0) := by
   exact h'
 
 /-- `Bi(x) > 0` for `x ≥ 0`. -/
-theorem airyBiReal_pos {x : ℝ} (hx : 0 ≤ x) : 0 < airyBiReal x := by
+theorem Real.airyBi_pos {x : ℝ} (hx : 0 ≤ x) : 0 < DLMF.Airy.Real.airyBi x := by
   obtain ⟨r, hr, he⟩ := airyBi_ofReal_pos hx
-  simp [airyBiReal, he, hr]
+  simp [DLMF.Airy.Real.airyBi, he, hr]
 
 /-- `Ai(x) > 0` for `x ≥ 0`. -/
-theorem airyAiReal_pos {x : ℝ} (hx : 0 ≤ x) : 0 < airyAiReal x := by
+theorem Real.airyAi_pos {x : ℝ} (hx : 0 ≤ x) : 0 < DLMF.Airy.Real.airyAi x := by
   obtain ⟨r, hr, he⟩ := airyAi_ofReal_pos hx
-  simp [airyAiReal, he, hr]
+  simp [DLMF.Airy.Real.airyAi, he, hr]
 
 /-- `Bi'(0) > 0`. -/
-theorem airyBiDerivReal_zero_pos : 0 < airyBiDerivReal 0 := by
+theorem Real.airyBiDeriv_zero_pos : 0 < DLMF.Airy.Real.airyBiDeriv 0 := by
   have h := airyBiDeriv_zero
   rw [show (1 / 3 : ℂ) = ((1 / 3 : ℝ) : ℂ) by push_cast; ring, Complex.Gamma_ofReal,
     ← Complex.ofReal_div] at h
-  simp only [airyBiDerivReal, ofReal_zero, h, ofReal_re]
+  simp only [DLMF.Airy.Real.airyBiDeriv, ofReal_zero, h, ofReal_re]
   have := Real.Gamma_pos_of_pos (by norm_num : (0 : ℝ) < 1 / 3)
   positivity
 
@@ -289,7 +289,7 @@ end PhaseZeroData
 end PhaseZeros
 
 /-- All real zeros are negative, DLMF §9.9(i). -/
-theorem airyAi_real_zeros_negative {x : ℝ} (hx : airyAiReal x = 0) :
+theorem airyAi_real_zeros_negative {x : ℝ} (hx : DLMF.Airy.Real.airyAi x = 0) :
     x < 0 := by
   by_contra hn
   obtain ⟨r, hr, he⟩ := airyAi_ofReal_pos (not_lt.mp hn)
@@ -299,7 +299,7 @@ theorem airyAi_real_zeros_negative {x : ℝ} (hx : airyAiReal x = 0) :
   linarith
 
 /-- The zeros of `Ai` are the crossings `θ = jπ`. -/
-theorem phaseZeroData_airyAi : PhaseZeroData airyAiReal airyPhase 0 := by
+theorem phaseZeroData_airyAi : PhaseZeroData DLMF.Airy.Real.airyAi airyPhase 0 := by
   have hπ := Real.pi_pos
   have h0 : airyPhase 0 = π / 6 := by simp [airyPhase]
   refine ⟨airyPhase_continuous, airy_phase_monotone, tendsto_airyPhase_atBot, ?_, ?_, ?_,
@@ -307,60 +307,61 @@ theorem phaseZeroData_airyAi : PhaseZeroData airyAiReal airyPhase 0 := by
   · rw [h0]; positivity
   · rw [h0]; linarith
   · intro x _
-    rw [airyAiReal_eq_modulus_sin, mul_eq_zero, or_iff_right (airyModulus_pos x).ne',
+    rw [DLMF.Airy.Real.airyAi_eq_modulus_sin, mul_eq_zero, or_iff_right (airyModulus_pos x).ne',
       Real.sin_eq_zero_iff]
     exact ⟨fun ⟨n, hn⟩ => ⟨n, by rw [← hn]; ring⟩, fun ⟨n, hn⟩ => ⟨n, by rw [hn]; ring⟩⟩
 
 /-- Infinitely many real zeros, DLMF §9.9(i). -/
 theorem airyAi_infinite_real_zeros :
-    Set.Infinite {x : ℝ | airyAiReal x = 0} := by
+    Set.Infinite {x : ℝ | DLMF.Airy.Real.airyAi x = 0} := by
   exact phaseZeroData_airyAi.infinite
 
 /-- The ordered real-zero specification in DLMF §9.9(i). -/
 theorem airyAiZero_spec {k : ℕ} (hk : 1 ≤ k) :
-    airyAiZero k < 0 ∧ airyAiReal (airyAiZero k) = 0 ∧
-      ({y : ℝ | airyAiZero k < y ∧ y < 0 ∧ airyAiReal y = 0} : Set ℝ).ncard = k - 1 := by
+    airyAiZero k < 0 ∧ DLMF.Airy.Real.airyAi (airyAiZero k) = 0 ∧
+      ({y : ℝ | airyAiZero k < y ∧ y < 0 ∧ DLMF.Airy.Real.airyAi y = 0} : Set ℝ).ncard = k - 1 := by
   obtain ⟨h1, h2, h3, -⟩ := phaseZeroData_airyAi.spec hk
   exact ⟨h1, h2, h3⟩
 
 /-- The real zeros are exhausted in their stated order, DLMF §9.9(i). -/
 theorem airyAiZero_enumeration :
-    StrictAntiOn airyAiZero (Ici 1) ∧ ∀ x : ℝ, airyAiReal x = 0 ↔ ∃ k : ℕ, 1 ≤ k ∧
+    StrictAntiOn airyAiZero (Ici 1) ∧ ∀ x : ℝ, DLMF.Airy.Real.airyAi x = 0 ↔ ∃ k : ℕ, 1 ≤ k ∧
         airyAiZero k = x := by
   exact phaseZeroData_airyAi.enumeration
 
 /-- All real zeros are negative, DLMF §9.9(i). -/
-theorem airyAiDeriv_real_zeros_negative {x : ℝ} (hx : airyAiDerivReal x = 0) :
+theorem airyAiDeriv_real_zeros_negative {x : ℝ} (hx : DLMF.Airy.Real.airyAiDeriv x = 0) :
     x < 0 := by
   by_contra hn
   replace hn := not_lt.mp hn
-  have hcont : Continuous airyAiDerivReal := continuous_iff_continuousAt.mpr fun t =>
-    (hasDerivAt_airyAiDerivReal t).continuousAt
-  have hmono : StrictMonoOn airyAiDerivReal (Ici 0) := by
+  have hcont : Continuous DLMF.Airy.Real.airyAiDeriv := continuous_iff_continuousAt.mpr fun t =>
+    (DLMF.Airy.Real.hasDerivAt_airyAiDeriv t).continuousAt
+  have hmono : StrictMonoOn DLMF.Airy.Real.airyAiDeriv (Ici 0) := by
     refine strictMonoOn_of_deriv_pos (convex_Ici 0) hcont.continuousOn fun t ht => ?_
     rw [interior_Ici, mem_Ioi] at ht
-    rw [(hasDerivAt_airyAiDerivReal t).deriv]
-    exact mul_pos ht (airyAiReal_pos ht.le)
-  have hpos : ∀ t, x < t → 0 < airyAiDerivReal t := fun t ht => by
+    rw [(DLMF.Airy.Real.hasDerivAt_airyAiDeriv t).deriv]
+    exact mul_pos ht (DLMF.Airy.Real.airyAi_pos ht.le)
+  have hpos : ∀ t, x < t → 0 < DLMF.Airy.Real.airyAiDeriv t := fun t ht => by
     have := hmono (mem_Ici.mpr hn) (mem_Ici.mpr (hn.trans ht.le)) ht
     linarith
-  have hAi : MonotoneOn airyAiReal (Ici x) := by
+  have hAi : MonotoneOn DLMF.Airy.Real.airyAi (Ici x) := by
     refine monotoneOn_of_deriv_nonneg (convex_Ici x)
       (continuous_iff_continuousAt.mpr fun t =>
-        (hasDerivAt_airyAiReal t).continuousAt).continuousOn
-      (fun t _ => (hasDerivAt_airyAiReal t).differentiableAt.differentiableWithinAt)
+        (DLMF.Airy.Real.hasDerivAt_airyAi t).continuousAt).continuousOn
+      (fun t _ => (DLMF.Airy.Real.hasDerivAt_airyAi t).differentiableAt.differentiableWithinAt)
       fun t ht => ?_
     rw [interior_Ici, mem_Ioi] at ht
-    rw [(hasDerivAt_airyAiReal t).deriv]
+    rw [(DLMF.Airy.Real.hasDerivAt_airyAi t).deriv]
     exact (hpos t ht).le
-  have h0 := airyAiReal_pos hn
-  obtain ⟨t, ht1, ht2⟩ := ((tendsto_order.1 tendsto_airyAiReal_atTop).2 _ h0).and
+  have h0 := DLMF.Airy.Real.airyAi_pos hn
+  obtain ⟨t, ht1, ht2⟩ := ((tendsto_order.1 DLMF.Airy.Real.tendsto_airyAi_atTop).2 _ h0).and
     (eventually_ge_atTop x) |>.exists
   have := hAi (mem_Ici.mpr le_rfl) (mem_Ici.mpr ht2) ht2
   linarith
 
 /-- The zeros of `Ai'` are the crossings `φ = (j - 1)π`. -/
-theorem phaseZeroData_airyAiDeriv : PhaseZeroData airyAiDerivReal airyDerivPhase (-π) := by
+theorem phaseZeroData_airyAiDeriv : PhaseZeroData DLMF.Airy.Real.airyAiDeriv
+    airyDerivPhase (-π) := by
   have hπ := Real.pi_pos
   have h0 : airyDerivPhase 0 = -π / 6 := by simp [airyDerivPhase]
   refine ⟨airyDerivPhase_continuous, airy_derivPhase_monotone, tendsto_airyDerivPhase_atBot,
@@ -368,31 +369,34 @@ theorem phaseZeroData_airyAiDeriv : PhaseZeroData airyAiDerivReal airyDerivPhase
   · rw [h0]; linarith
   · rw [h0]; linarith
   · intro x _
-    rw [airyAiDerivReal_eq_modulus_sin, mul_eq_zero, or_iff_right (airyDerivModulus_pos x).ne',
+    rw [DLMF.Airy.Real.airyAiDeriv_eq_modulus_sin, mul_eq_zero,
+        or_iff_right (airyDerivModulus_pos x).ne',
       Real.sin_eq_zero_iff]
     exact ⟨fun ⟨n, hn⟩ => ⟨n + 1, by rw [← hn]; push_cast; ring⟩,
       fun ⟨n, hn⟩ => ⟨n - 1, by rw [hn]; push_cast; ring⟩⟩
 
 /-- Infinitely many real zeros, DLMF §9.9(i). -/
 theorem airyAiDeriv_infinite_real_zeros :
-    Set.Infinite {x : ℝ | airyAiDerivReal x = 0} := by
+    Set.Infinite {x : ℝ | DLMF.Airy.Real.airyAiDeriv x = 0} := by
   exact phaseZeroData_airyAiDeriv.infinite
 
 /-- The ordered real-zero specification in DLMF §9.9(i). -/
 theorem airyAiDerivZero_spec {k : ℕ} (hk : 1 ≤ k) :
-    airyAiDerivZero k < 0 ∧ airyAiDerivReal (airyAiDerivZero k) = 0 ∧
-      ({y : ℝ | airyAiDerivZero k < y ∧ y < 0 ∧ airyAiDerivReal y = 0} : Set ℝ).ncard = k - 1 := by
+    airyAiDerivZero k < 0 ∧ DLMF.Airy.Real.airyAiDeriv (airyAiDerivZero k) = 0 ∧
+      ({y : ℝ | airyAiDerivZero k < y ∧ y < 0 ∧ DLMF.Airy.Real.airyAiDeriv y = 0} : Set
+          ℝ).ncard = k - 1 := by
   obtain ⟨h1, h2, h3, -⟩ := phaseZeroData_airyAiDeriv.spec hk
   exact ⟨h1, h2, h3⟩
 
 /-- The real zeros are exhausted in their stated order, DLMF §9.9(i). -/
 theorem airyAiDerivZero_enumeration :
-    StrictAntiOn airyAiDerivZero (Ici 1) ∧ ∀ x : ℝ, airyAiDerivReal x = 0 ↔ ∃ k : ℕ, 1 ≤ k ∧
+    StrictAntiOn airyAiDerivZero (Ici 1) ∧ ∀ x : ℝ, DLMF.Airy.Real.airyAiDeriv x = 0 ↔
+        ∃ k : ℕ, 1 ≤ k ∧
         airyAiDerivZero k = x := by
   exact phaseZeroData_airyAiDeriv.enumeration
 
 /-- All real zeros are negative, DLMF §9.9(i). -/
-theorem airyBi_real_zeros_negative {x : ℝ} (hx : airyBiReal x = 0) :
+theorem airyBi_real_zeros_negative {x : ℝ} (hx : DLMF.Airy.Real.airyBi x = 0) :
     x < 0 := by
   by_contra hn
   obtain ⟨r, hr, he⟩ := airyBi_ofReal_pos (not_lt.mp hn)
@@ -402,7 +406,7 @@ theorem airyBi_real_zeros_negative {x : ℝ} (hx : airyBiReal x = 0) :
   linarith
 
 /-- The zeros of `Bi` are the crossings `θ = (j - 1/2)π`. -/
-theorem phaseZeroData_airyBi : PhaseZeroData airyBiReal airyPhase (-(π / 2)) := by
+theorem phaseZeroData_airyBi : PhaseZeroData DLMF.Airy.Real.airyBi airyPhase (-(π / 2)) := by
   have hπ := Real.pi_pos
   have h0 : airyPhase 0 = π / 6 := by simp [airyPhase]
   refine ⟨airyPhase_continuous, airy_phase_monotone, tendsto_airyPhase_atBot, ?_, ?_, ?_,
@@ -410,48 +414,49 @@ theorem phaseZeroData_airyBi : PhaseZeroData airyBiReal airyPhase (-(π / 2)) :=
   · rw [h0]; linarith
   · rw [h0]; linarith
   · intro x _
-    rw [airyBiReal_eq_modulus_cos, mul_eq_zero, or_iff_right (airyModulus_pos x).ne',
+    rw [DLMF.Airy.Real.airyBi_eq_modulus_cos, mul_eq_zero, or_iff_right (airyModulus_pos x).ne',
       Real.cos_eq_zero_iff]
     exact ⟨fun ⟨n, hn⟩ => ⟨n + 1, by rw [hn]; push_cast; ring⟩,
       fun ⟨n, hn⟩ => ⟨n - 1, by rw [hn]; push_cast; ring⟩⟩
 
 /-- Infinitely many real zeros, DLMF §9.9(i). -/
 theorem airyBi_infinite_real_zeros :
-    Set.Infinite {x : ℝ | airyBiReal x = 0} := by
+    Set.Infinite {x : ℝ | DLMF.Airy.Real.airyBi x = 0} := by
   exact phaseZeroData_airyBi.infinite
 
 /-- The ordered real-zero specification in DLMF §9.9(i). -/
 theorem airyBiZero_spec {k : ℕ} (hk : 1 ≤ k) :
-    airyBiZero k < 0 ∧ airyBiReal (airyBiZero k) = 0 ∧
-      ({y : ℝ | airyBiZero k < y ∧ y < 0 ∧ airyBiReal y = 0} : Set ℝ).ncard = k - 1 := by
+    airyBiZero k < 0 ∧ DLMF.Airy.Real.airyBi (airyBiZero k) = 0 ∧
+      ({y : ℝ | airyBiZero k < y ∧ y < 0 ∧ DLMF.Airy.Real.airyBi y = 0} : Set ℝ).ncard = k - 1 := by
   obtain ⟨h1, h2, h3, -⟩ := phaseZeroData_airyBi.spec hk
   exact ⟨h1, h2, h3⟩
 
 /-- The real zeros are exhausted in their stated order, DLMF §9.9(i). -/
 theorem airyBiZero_enumeration :
-    StrictAntiOn airyBiZero (Ici 1) ∧ ∀ x : ℝ, airyBiReal x = 0 ↔ ∃ k : ℕ, 1 ≤ k ∧
+    StrictAntiOn airyBiZero (Ici 1) ∧ ∀ x : ℝ, DLMF.Airy.Real.airyBi x = 0 ↔ ∃ k : ℕ, 1 ≤ k ∧
         airyBiZero k = x := by
   exact phaseZeroData_airyBi.enumeration
 
 /-- All real zeros are negative, DLMF §9.9(i). -/
-theorem airyBiDeriv_real_zeros_negative {x : ℝ} (hx : airyBiDerivReal x = 0) :
+theorem airyBiDeriv_real_zeros_negative {x : ℝ} (hx : DLMF.Airy.Real.airyBiDeriv x = 0) :
     x < 0 := by
   by_contra hn
   replace hn := not_lt.mp hn
-  have hmono : MonotoneOn airyBiDerivReal (Ici 0) := by
+  have hmono : MonotoneOn DLMF.Airy.Real.airyBiDeriv (Ici 0) := by
     refine monotoneOn_of_deriv_nonneg (convex_Ici 0)
       (continuous_iff_continuousAt.mpr fun t =>
-        (hasDerivAt_airyBiDerivReal t).continuousAt).continuousOn
-      (fun t _ => (hasDerivAt_airyBiDerivReal t).differentiableAt.differentiableWithinAt)
+        (DLMF.Airy.Real.hasDerivAt_airyBiDeriv t).continuousAt).continuousOn
+      (fun t _ => (DLMF.Airy.Real.hasDerivAt_airyBiDeriv t).differentiableAt.differentiableWithinAt)
       fun t ht => ?_
     rw [interior_Ici, mem_Ioi] at ht
-    rw [(hasDerivAt_airyBiDerivReal t).deriv]
-    exact mul_nonneg ht.le (airyBiReal_pos ht.le).le
+    rw [(DLMF.Airy.Real.hasDerivAt_airyBiDeriv t).deriv]
+    exact mul_nonneg ht.le (DLMF.Airy.Real.airyBi_pos ht.le).le
   have := hmono ((mem_Ici.mpr le_rfl)) hn hn
-  linarith [airyBiDerivReal_zero_pos]
+  linarith [DLMF.Airy.Real.airyBiDeriv_zero_pos]
 
 /-- The zeros of `Bi'` are the crossings `φ = (j - 1/2)π`. -/
-theorem phaseZeroData_airyBiDeriv : PhaseZeroData airyBiDerivReal airyDerivPhase (-(π / 2)) := by
+theorem phaseZeroData_airyBiDeriv : PhaseZeroData DLMF.Airy.Real.airyBiDeriv airyDerivPhase
+    (-(π / 2)) := by
   have hπ := Real.pi_pos
   have h0 : airyDerivPhase 0 = -π / 6 := by simp [airyDerivPhase]
   refine ⟨airyDerivPhase_continuous, airy_derivPhase_monotone, tendsto_airyDerivPhase_atBot,
@@ -459,26 +464,29 @@ theorem phaseZeroData_airyBiDeriv : PhaseZeroData airyBiDerivReal airyDerivPhase
   · rw [h0]; linarith
   · rw [h0]; linarith
   · intro x _
-    rw [airyBiDerivReal_eq_modulus_cos, mul_eq_zero, or_iff_right (airyDerivModulus_pos x).ne',
+    rw [DLMF.Airy.Real.airyBiDeriv_eq_modulus_cos, mul_eq_zero,
+        or_iff_right (airyDerivModulus_pos x).ne',
       Real.cos_eq_zero_iff]
     exact ⟨fun ⟨n, hn⟩ => ⟨n + 1, by rw [hn]; push_cast; ring⟩,
       fun ⟨n, hn⟩ => ⟨n - 1, by rw [hn]; push_cast; ring⟩⟩
 
 /-- Infinitely many real zeros, DLMF §9.9(i). -/
 theorem airyBiDeriv_infinite_real_zeros :
-    Set.Infinite {x : ℝ | airyBiDerivReal x = 0} := by
+    Set.Infinite {x : ℝ | DLMF.Airy.Real.airyBiDeriv x = 0} := by
   exact phaseZeroData_airyBiDeriv.infinite
 
 /-- The ordered real-zero specification in DLMF §9.9(i). -/
 theorem airyBiDerivZero_spec {k : ℕ} (hk : 1 ≤ k) :
-    airyBiDerivZero k < 0 ∧ airyBiDerivReal (airyBiDerivZero k) = 0 ∧
-      ({y : ℝ | airyBiDerivZero k < y ∧ y < 0 ∧ airyBiDerivReal y = 0} : Set ℝ).ncard = k - 1 := by
+    airyBiDerivZero k < 0 ∧ DLMF.Airy.Real.airyBiDeriv (airyBiDerivZero k) = 0 ∧
+      ({y : ℝ | airyBiDerivZero k < y ∧ y < 0 ∧ DLMF.Airy.Real.airyBiDeriv y = 0} : Set
+          ℝ).ncard = k - 1 := by
   obtain ⟨h1, h2, h3, -⟩ := phaseZeroData_airyBiDeriv.spec hk
   exact ⟨h1, h2, h3⟩
 
 /-- The real zeros are exhausted in their stated order, DLMF §9.9(i). -/
 theorem airyBiDerivZero_enumeration :
-    StrictAntiOn airyBiDerivZero (Ici 1) ∧ ∀ x : ℝ, airyBiDerivReal x = 0 ↔ ∃ k : ℕ, 1 ≤ k ∧
+    StrictAntiOn airyBiDerivZero (Ici 1) ∧ ∀ x : ℝ, DLMF.Airy.Real.airyBiDeriv x = 0 ↔
+        ∃ k : ℕ, 1 ≤ k ∧
         airyBiDerivZero k = x := by
   exact phaseZeroData_airyBiDeriv.enumeration
 
@@ -658,8 +666,8 @@ theorem NonrealZeros.not_forall (z0 : ℂ) : ¬ ∀ t : ℝ, 0 < t → airyAi (z
     exact h t (lt_trans one_pos ht)
   have h0 := hf.eqOn_zero_of_preconnected_of_frequently_eq_zero isPreconnected_univ
     (mem_univ _) hfreq (mem_univ 0)
-  have hp := airyAiReal_zero_pos
-  simp only [airyAiReal, ofReal_zero, h0, Pi.zero_apply, zero_re] at hp
+  have hp := DLMF.Airy.Real.airyAi_zero_pos
+  simp only [DLMF.Airy.Real.airyAi, ofReal_zero, h0, Pi.zero_apply, zero_re] at hp
   exact lt_irrefl _ hp
 
 /-- **Energy identity argument.** If `conj(Ai(z₀)) Ai'(z₀) = 0`, then `z₀` is real and negative. -/

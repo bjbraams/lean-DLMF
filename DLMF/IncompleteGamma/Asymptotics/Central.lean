@@ -15,8 +15,9 @@ Stirling's formula with Binet's remainder, the saddle substitution and Gaussian 
 
 ## Main results
 
-* `normIncGammaP_central_expansion`: the central expansion of `P(a+1, x)`, DLMF 8.11.10.
-* `scIncGamma_central_expansion`: DLMF 8.11.11.
+* `regularizedGamma_central_expansion`: the central expansion of `P(a+1, x)`,
+  DLMF 8.11.10.
+* `tricomiIncompleteGamma_central_expansion`: DLMF 8.11.11.
 * `IncompleteGammaCentral.stirling`: `a^{a+1} e^{-a}/Γ(a+1) = √a/√(2π) e^{-Φ(a)}`.
 
 See `DLMF.IncompleteGamma.Asymptotics` for the overview.
@@ -393,8 +394,9 @@ theorem IncompleteGammaCentral.stirling {a : ℝ} (ha : 0 < a) :
 
 /-- For real `a, x > 0`, the continued `P(a+1, x)` is the real integral
 `(1/Γ(a+1)) ∫₀ˣ t^a e^{-t} dt`. -/
-theorem IncompleteGammaCentral.normIncGammaP_eq {a x : ℝ} (ha : 0 < a) (hx : 0 < x) :
-    normIncGammaPContinued ((a:ℂ)+1) (x:ℂ) =
+theorem IncompleteGammaCentral.regularizedGamma_add_one_eq_integral {a x : ℝ}
+    (ha : 0 < a) (hx : 0 < x) :
+    regularizedGamma ((a:ℂ)+1) (x:ℂ) =
       (((∫ t in (0:ℝ)..x, t^a * Real.exp (-t)) / Real.Gamma (a+1) : ℝ) : ℂ) := by
   have hre : 0 < ((a:ℂ)+1).re := by simp; linarith
   have hnp : ∀ n : ℕ, (a:ℂ)+1 ≠ -n := by
@@ -403,8 +405,8 @@ theorem IncompleteGammaCentral.normIncGammaP_eq {a x : ℝ} (ha : 0 < a) (hx : 0
     simp at this
     have : (0:ℝ) ≤ n := Nat.cast_nonneg n
     linarith
-  rw [normIncGammaPContinued_eq hnp, DLMF.Statistical.normIncGammaP,
-    lowerIncGamma_eq_integral hre hx, show (a:ℂ)+1 = ((a+1:ℝ):ℂ) by push_cast; ring,
+  rw [regularizedGamma_eq hnp,
+    lowerIncompleteGamma_eq_integral hre hx, show (a:ℂ)+1 = ((a+1:ℝ):ℂ) by push_cast; ring,
     Complex.Gamma_ofReal, show ((a+1:ℝ):ℂ) - 1 = (a:ℂ) by push_cast; ring]
   push_cast
   congr 1
@@ -843,13 +845,13 @@ theorem IncompleteGammaCentral.central_estimate {B : ℝ} (hB : 0 < B) : ∃ C s
 def gammaCentralFilter (B : ℝ) : Filter (ℝ × ℝ) :=
   comap Prod.fst atTop ⊓ 𝓟 {p : ℝ × ℝ | 0 < p.1 ∧ |p.2| ≤ B}
 
-/-- normIncGammaP central expansion. Proof: Stirling with Binet's remainder, the saddle substitution
-`φ(U(v)) = v²/2` with `U'(v) = 1 + 2v/3 + O(v²)`, and the Gaussian integral through `erf`
-(`IncompleteGammaCentral.central_estimate`). -/
+/-- The central expansion of `P(a+1, x)`. Proof: Stirling with Binet's remainder,
+the saddle substitution `φ(U(v)) = v²/2` with `U'(v) = 1 + 2v/3 + O(v²)`, and the Gaussian integral
+through `erf` (`IncompleteGammaCentral.central_estimate`). -/
 @[dlmf 8.11.E10]
-theorem normIncGammaP_central_expansion {B : ℝ} (hB : 0 < B) :
+theorem regularizedGamma_central_expansion {B : ℝ} (hB : 0 < B) :
     IsBigO (gammaCentralFilter B)
-        (fun p : ℝ × ℝ => normIncGammaPContinued (p.1+1) (p.1+Real.sqrt (2*p.1)*p.2)-erfc
+        (fun p : ℝ × ℝ => regularizedGamma (p.1+1) (p.1+Real.sqrt (2*p.1)*p.2)-erfc
         (-p.2)/2+((Real.sqrt (2/(π*p.1))/3*(1+p.2^2)*Real.exp (-p.2^2) : ℝ) : ℂ))
         (fun p => p.1⁻¹) := by
   obtain ⟨C, s₀, hs₀, -, hcore⟩ := IncompleteGammaCentral.central_estimate hB
@@ -889,7 +891,8 @@ theorem normIncGammaP_central_expansion {B : ℝ} (hB : 0 < B) :
                                 exact mul_le_mul_of_nonneg_left (neg_abs_le y) hs0.le
     have : 0 < 1 + s*y := by linarith
     positivity
-  rw [hx, IncompleteGammaCentral.normIncGammaP_eq ha hxpos, show -(y:ℂ) = ((-y:ℝ):ℂ) by
+  rw [hx, IncompleteGammaCentral.regularizedGamma_add_one_eq_integral ha hxpos,
+      show -(y:ℂ) = ((-y:ℝ):ℂ) by
       push_cast; ring,
     erfc_ofReal]
   have hsq : Real.sqrt (2/(π*a)) = s/Real.sqrt π := by
@@ -906,14 +909,14 @@ theorem normIncGammaP_central_expansion {B : ℝ} (hB : 0 < B) :
     _ = 2*C*a⁻¹ := by rw [hss]; ring
 
 /-- Identity under the stated parameter and domain assumptions: `IsBigO (gammaCentralFilter B)
-(fun p : ℝ × ℝ => let x := p.1+Real.sqrt (2*p.1)*p.2; (x : ℂ)^(1-(p.1 : ℂ))*scIncGamma (1-p.1)
-(-x)+Real.cos (π*p.1)-Real.sin (π*p.1)/π*(2*Real.sqrt π*dawsonF p.2+(2/3*Real.sqrt
+(fun p : ℝ × ℝ => let x := p.1+Real.sqrt (2*p.1)*p.2; (x : ℂ)^(1-(p.1 : ℂ))*tricomiIncompleteGamma
+(1-p.1) (-x)+Real.cos (π*p.1)-Real.sin (π*p.1)/π*(2*Real.sqrt π*dawsonF p.2+(2/3*Real.sqrt
 (2*π/p.1)*(1-p.2^2) : ℝ))*Real.exp (p.2^2)) (fun p => p.1⁻¹)`. -/
 @[dlmf 8.11.E11]
-theorem scIncGamma_central_expansion {B : ℝ} (hB : 0 < B) :
+theorem tricomiIncompleteGamma_central_expansion {B : ℝ} (hB : 0 < B) :
     IsBigO (gammaCentralFilter B)
         (fun p : ℝ × ℝ => let x := p.1+Real.sqrt (2*p.1)*p.2;
-        (x : ℂ)^(1-(p.1 : ℂ))*scIncGamma (1-p.1) (-x)+Real.cos (π*p.1)-Real.sin
+        (x : ℂ)^(1-(p.1 : ℂ))*tricomiIncompleteGamma (1-p.1) (-x)+Real.cos (π*p.1)-Real.sin
         (π*p.1)/π*(2*Real.sqrt π*dawsonF p.2+(2/3*Real.sqrt (2*π/p.1)*(1-p.2^2) : ℝ))*Real.exp
         (p.2^2)) (fun p => p.1⁻¹) := by
   sorry

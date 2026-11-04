@@ -44,18 +44,18 @@ theorem Gamma_ratio_norm_le_nat {a : ℝ} {z : ℂ} (hz : 0 < z.re) (ha : 0 ≤ 
     have he := congrArg re hk
     simp only [add_re, ofReal_re, neg_re, natCast_re] at he
     linarith [Nat.cast_nonneg (α := ℝ) k]
-  have hP : ‖z‖ ^ n ≤ ‖poch (z + a) n‖ := by
+  have hP : ‖z‖ ^ n ≤ ‖pochhammer (z + a) n‖ := by
     induction n with
-    | zero => simp [poch_zero]
+    | zero => simp [pochhammer_zero]
     | succ n ih =>
-      rw [pow_succ, DLMF.Hypergeometric.poch_succ, norm_mul]
+      rw [pow_succ, DLMF.Hypergeometric.pochhammer_succ, norm_mul]
       have hn : ‖z‖ ≤ ‖z + a + n‖ := by
         have h := norm_le_norm_add_ofReal hz.le (add_nonneg ha (Nat.cast_nonneg n))
         simpa only [ofReal_add, ofReal_natCast, add_assoc] using h
       exact mul_le_mul ih hn (norm_nonneg _) (norm_nonneg _)
   have hg := (div_eq_iff (Gamma_ne_zero hp)).mp (Gamma_add_nat_div_Gamma_eq (n := n) (z + a) hp)
   have hratio : ‖Complex.Gamma (z + a) / Complex.Gamma (z + a + n)‖ =
-      ‖poch (z + a) n‖⁻¹ := by
+      ‖pochhammer (z + a) n‖⁻¹ := by
     rw [hg, norm_div, norm_mul]
     field_simp [norm_ne_zero_iff.mpr (Gamma_ne_zero hp)]
   rw [hratio, Real.rpow_neg (norm_nonneg z), Real.rpow_natCast]

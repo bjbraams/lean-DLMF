@@ -26,6 +26,8 @@ consecutive squares (from their explicit values at `q = 0`), this identifies the
   `solvesRecurrence_mathieuFourierB_odd`, `solvesRecurrence_mathieuFourierB_even`: the
   recurrences 28.4.5–28.4.8 in `SolvesRecurrence` form.
 * `tendsto_mathieuFourierA_even` and its companions: the Fourier coefficients tend to `0`.
+* `mathieuA_lt_mathieuA_succ`, `mathieuB_lt_mathieuB_succ`: `a_m(q) < a_{m+1}(q)` and
+  `b_m(q) < b_{m+1}(q)` for all real `q` (Sturm interlacing).
 * `eventually_abs_mathieuA_sub_sq_le`, `eventually_abs_mathieuB_sub_sq_le`: `|a_m(q) - m²|` and
   `|b_m(q) - m²|` are at most `4|q|` for small real `q`.
 * `mathieuA_even_sub_isBigO_of_trial`, `mathieuA_odd_sub_isBigO_of_trial`,
@@ -344,7 +346,7 @@ private lemma mathieuB_mem_sturmSpectrum {m : ℕ} (hm : m ≠ 0) (q : ℝ) :
   exact ⟨h.1, ncard_eq_of_encard_eq_natCast h.2⟩
 
 /-- `a_m(q) < a_{m+1}(q)` for real `q` (interlacing of the two spectra with `w'(0) = 0`). -/
-private lemma mathieuA_lt_mathieuA_succ (m : ℕ) (q : ℝ) : mathieuA m q < mathieuA (m + 1) q := by
+theorem mathieuA_lt_mathieuA_succ (m : ℕ) (q : ℝ) : mathieuA m q < mathieuA (m + 1) q := by
   obtain ⟨j, rfl | rfl⟩ := Nat.even_or_odd' m
   · have h1 := mathieuA_mem_sturmSpectrum (2 * j) q
     have h2 := mathieuA_mem_sturmSpectrum (2 * j + 1) q
@@ -361,7 +363,7 @@ private lemma mathieuA_lt_mathieuA_succ (m : ℕ) (q : ℝ) : mathieuA m q < mat
       (by rw [h1.2, h2.2]; omega)
 
 /-- `b_m(q) < b_{m+1}(q)` for real `q`, `m ≥ 1`. -/
-private lemma mathieuB_lt_mathieuB_succ {m : ℕ} (hm : m ≠ 0) (q : ℝ) : mathieuB m q <
+theorem mathieuB_lt_mathieuB_succ {m : ℕ} (hm : m ≠ 0) (q : ℝ) : mathieuB m q <
     mathieuB (m + 1) q := by
   obtain ⟨j, rfl | rfl⟩ := Nat.even_or_odd' m
   · obtain ⟨j, rfl⟩ : ∃ i, j = i + 1 := ⟨j - 1, by omega⟩

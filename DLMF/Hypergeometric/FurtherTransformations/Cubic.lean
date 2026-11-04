@@ -687,7 +687,8 @@ theorem cubic_transformation
     · simp [hP, hφdef, hH, ordinaryHypergeometric_zero]
   -- extension to `‖w‖ < 1, Re w < 8/9` through the cut-plane continuation
   set c₂ := 2 * a + 5 / 6 with hc₂
-  set R : ℂ → ℂ := fun w => P w * (Gamma c₂ * regularizedGaussHG a (a + 1 / 2) c₂ (φ w)) with hR
+  set R : ℂ → ℂ := fun w => P w *
+      (Gamma c₂ * regularizedGaussHypergeometric a (a + 1 / 2) c₂ (φ w)) with hR
   set A : Set ℂ := {w | ‖w‖ < 1 ∧ w.re < 8 / 9} with hA
   have hAc : IsPreconnected A := by
     have : A = Metric.ball (0 : ℂ) 1 ∩ {w | w.re < 8 / 9} := by
@@ -697,12 +698,13 @@ theorem cubic_transformation
   have hRe : ∀ w : ℂ, ‖φ w‖ < 1 → R w = P w * H (φ w) := by
     intro w hw
     simp only [hR, hH]
-    rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hw, regularizedGaussHGFun_eq_div_Gamma ht,
+    rw [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hw,
+        regularizedGaussHypergeometricFun_eq_div_Gamma ht,
       mul_div_cancel₀ _ (Gamma_ne_zero ht)]
   have hLan : AnalyticOnNhd ℂ (₂F₁ (3 * a) (3 * a + 1 / 2) (4 * a + 2 / 3) : ℂ → ℂ) A :=
     fun w hw => analyticAt_ordinaryHypergeometric hw.1
   have hRan : AnalyticOnNhd ℂ R A := fun w hw =>
-    (hPa w hw.2).mul (analyticAt_const.mul ((analyticAt_regularizedGaussHG _ _ _
+    (hPa w hw.2).mul (analyticAt_const.mul ((analyticAt_regularizedGaussHypergeometric _ _ _
       (cubic_map_mem_cutPlane hw.2)).comp (f := φ) (hφa w hw.2)))
   have h0A : (0 : ℂ) ∈ A := by simp [hA]
   have hev : (₂F₁ (3 * a) (3 * a + 1 / 2) (4 * a + 2 / 3) : ℂ → ℂ) =ᶠ[𝓝 0] R := by
@@ -731,7 +733,7 @@ theorem deriv_deriv_comp {φ F : ℂ → ℂ} {z : ℂ} (hφ : AnalyticAt ℂ φ
   simp only [iteratedDeriv_succ, iteratedDeriv_zero, Function.comp_apply]
   ring
 
-/-- The principal cube root has positive real part. -/
+/-- The principal unitCube root has positive real part. -/
 theorem re_cpow_third_pos {x : ℂ} (hx : x ≠ 0) : 0 < (x ^ (1 / 3 : ℂ)).re := by
   rw [cpow_def_of_ne_zero hx, exp_re]
   refine mul_pos (Real.exp_pos _) (Real.cos_pos_of_mem_Ioo ⟨?_, ?_⟩)

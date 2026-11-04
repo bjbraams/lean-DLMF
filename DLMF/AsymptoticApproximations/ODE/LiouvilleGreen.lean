@@ -52,14 +52,14 @@ theorem liouvilleGreen_interval {a₁ a₂ : ℝ} (ha : a₁ < a₂) {f f' f'' g
     (hd : IsLiouvilleGreenData f f' f'' g ξ (Ioo a₁ a₂)) :
     ((∀ x ∈ Ioo a₁ a₂, IntegrableOn (fun t => |errorDensity f f' f'' g t|) (Ioc a₁ x)) →
       ∃ ε ε' : ℝ → ℝ, IsLiouvilleGreenSolutionOn f g
-          (fun x => lgApproximant f ξ 1 x * (1 + ε x)) (Ioo a₁ a₂) ∧
+          (fun x => liouvilleGreenApproximant f ξ 1 x * (1 + ε x)) (Ioo a₁ a₂) ∧
         ∀ x ∈ Ioo a₁ a₂, HasDerivAt ε (ε' x) x ∧
           |ε x| ≤ Real.exp ((∫ t in Ioc a₁ x, |errorDensity f f' f'' g t|) / 2) - 1 ∧
           (√(f x))⁻¹ * |ε' x| / 2 ≤
             Real.exp ((∫ t in Ioc a₁ x, |errorDensity f f' f'' g t|) / 2) - 1) ∧
     ((∀ x ∈ Ioo a₁ a₂, IntegrableOn (fun t => |errorDensity f f' f'' g t|) (Ico x a₂)) →
       ∃ ε ε' : ℝ → ℝ, IsLiouvilleGreenSolutionOn f g
-          (fun x => lgApproximant f ξ (-1) x * (1 + ε x)) (Ioo a₁ a₂) ∧
+          (fun x => liouvilleGreenApproximant f ξ (-1) x * (1 + ε x)) (Ioo a₁ a₂) ∧
         ∀ x ∈ Ioo a₁ a₂, HasDerivAt ε (ε' x) x ∧
           |ε x| ≤ Real.exp ((∫ t in Ico x a₂, |errorDensity f f' f'' g t|) / 2) - 1 ∧
           (√(f x))⁻¹ * |ε' x| / 2 ≤
@@ -74,7 +74,7 @@ theorem liouvilleGreen_recessive_atTop {a : ℝ} {f f' f'' g ξ : ℝ → ℝ}
     (hd : IsLiouvilleGreenData f f' f'' g ξ (Ioi a))
     (hV : ∀ c, a < c → IntegrableOn (fun t => |errorDensity f f' f'' g t|) (Ioi c)) :
     ∃ ε ε' : ℝ → ℝ, IsLiouvilleGreenSolutionOn f g
-        (fun x => lgApproximant f ξ (-1) x * (1 + ε x)) (Ioi a) ∧
+        (fun x => liouvilleGreenApproximant f ξ (-1) x * (1 + ε x)) (Ioi a) ∧
       ∀ x ∈ Ioi a, HasDerivAt ε (ε' x) x ∧
         |ε x| ≤ Real.exp ((∫ t in Ioi x, |errorDensity f f' f'' g t|) / 2) - 1 ∧
         (√(f x))⁻¹ * |ε' x| / 2 ≤
@@ -87,9 +87,9 @@ theorem liouvilleGreen_recessive_atTop {a : ℝ} {f f' f'' g ξ : ℝ → ℝ}
   · obtain ⟨-, h2, h3, -, -⟩ := H x hx
     refine ⟨?_, ?_⟩
     · convert h2 using 2 with y
-      simp [lgApproximant]
+      simp [liouvilleGreenApproximant]
     · convert h3 using 1
-      simp [lgApproximant]
+      simp [liouvilleGreenApproximant]
   · obtain ⟨h1, -, -, h4, h5⟩ := H x hx
     refine ⟨h1, by simpa using h4, ?_⟩
     have hs : 0 < √(f x) := Real.sqrt_pos.2 (hd.pos x hx)
@@ -106,8 +106,9 @@ theorem liouvilleGreen_recessive_isEquivalent {a : ℝ} {f f' f'' g ξ : ℝ →
     (hd : IsLiouvilleGreenData f f' f'' g ξ (Ioi a))
     (hV : ∀ c, a < c → IntegrableOn (fun t => |errorDensity f f' f'' g t|) (Ioi c)) :
     ∃ ε : ℝ → ℝ, IsLiouvilleGreenSolutionOn f g
-        (fun x => lgApproximant f ξ (-1) x * (1 + ε x)) (Ioi a) ∧
-      (fun x => lgApproximant f ξ (-1) x * (1 + ε x)) ~[atTop] lgApproximant f ξ (-1) := by
+        (fun x => liouvilleGreenApproximant f ξ (-1) x * (1 + ε x)) (Ioi a) ∧
+      (fun x => liouvilleGreenApproximant f ξ (-1) x * (1 + ε x)) ~[atTop]
+          liouvilleGreenApproximant f ξ (-1) := by
   obtain ⟨ε, ε', hsol, H⟩ := liouvilleGreen_recessive_atTop hd hV
   refine ⟨ε, hsol, ?_⟩
   have hε : Tendsto ε atTop (𝓝 0) := by
@@ -121,8 +122,8 @@ theorem liouvilleGreen_recessive_isEquivalent {a : ℝ} {f f' f'' g ξ : ℝ →
   have h1 : Tendsto (fun x => 1 + ε x) atTop (𝓝 1) := by simpa using hε.const_add 1
   refine h1.congr' ?_
   filter_upwards [eventually_gt_atTop a] with x hx
-  have hne : lgApproximant f ξ (-1) x ≠ 0 := by
-    unfold lgApproximant
+  have hne : liouvilleGreenApproximant f ξ (-1) x ≠ 0 := by
+    unfold liouvilleGreenApproximant
     exact mul_ne_zero (Real.rpow_pos_of_pos (hd.pos x hx) _).ne' (Real.exp_pos _).ne'
   simp only [Pi.div_apply]
   field_simp
@@ -139,12 +140,14 @@ theorem liouvilleGreen_interval_isEquivalent {a₁ a₂ : ℝ} (ha : a₁ < a₂
     (hξ₁ : ¬ IsBoundedUnder (· ≤ ·) (𝓝[>] a₁) (fun x => |ξ x|))
     (hξ₂ : ¬ IsBoundedUnder (· ≤ ·) (𝓝[<] a₂) (fun x => |ξ x|)) :
     (∃ w₁ : ℝ → ℝ, IsLiouvilleGreenSolutionOn f g w₁ (Ioo a₁ a₂) ∧
-        w₁ ~[𝓝[>] a₁] lgApproximant f ξ 1 ∧
-      ∀ v, IsLiouvilleGreenSolutionOn f g v (Ioo a₁ a₂) → v ~[𝓝[>] a₁] lgApproximant f ξ 1 →
+        w₁ ~[𝓝[>] a₁] liouvilleGreenApproximant f ξ 1 ∧
+      ∀ v, IsLiouvilleGreenSolutionOn f g v (Ioo a₁ a₂) →
+          v ~[𝓝[>] a₁] liouvilleGreenApproximant f ξ 1 →
         EqOn v w₁ (Ioo a₁ a₂)) ∧
     (∃ w₂ : ℝ → ℝ, IsLiouvilleGreenSolutionOn f g w₂ (Ioo a₁ a₂) ∧
-        w₂ ~[𝓝[<] a₂] lgApproximant f ξ (-1) ∧
-      ∀ v, IsLiouvilleGreenSolutionOn f g v (Ioo a₁ a₂) → v ~[𝓝[<] a₂] lgApproximant f ξ (-1) →
+        w₂ ~[𝓝[<] a₂] liouvilleGreenApproximant f ξ (-1) ∧
+      ∀ v, IsLiouvilleGreenSolutionOn f g v (Ioo a₁ a₂) →
+          v ~[𝓝[<] a₂] liouvilleGreenApproximant f ξ (-1) →
         EqOn v w₂ (Ioo a₁ a₂)) := by
   sorry
 
@@ -159,10 +162,12 @@ theorem liouvilleGreen_dominant {a₁ a₂ : ℝ} (ha : a₁ < a₂) {f f' f'' g
     (hξ₂ : ¬ IsBoundedUnder (· ≤ ·) (𝓝[<] a₂) (fun x => |ξ x|))
     {w₁ w₂ : ℝ → ℝ} (hw₁ : IsLiouvilleGreenSolutionOn f g w₁ (Ioo a₁ a₂))
         (hw₂ : IsLiouvilleGreenSolutionOn f g w₂ (Ioo a₁ a₂))
-    (hw₁e : w₁ ~[𝓝[>] a₁] lgApproximant f ξ 1) (hw₂e : w₂ ~[𝓝[<] a₂] lgApproximant f ξ (-1)) :
+    (hw₁e : w₁ ~[𝓝[>] a₁] liouvilleGreenApproximant f ξ 1)
+        (hw₂e : w₂ ~[𝓝[<] a₂] liouvilleGreenApproximant f ξ (-1)) :
     ∃ w₃ w₄ : ℝ → ℝ, IsLiouvilleGreenSolutionOn f g w₃ (Ioo a₁ a₂) ∧
         IsLiouvilleGreenSolutionOn f g w₄ (Ioo a₁ a₂) ∧
-      w₃ ~[𝓝[<] a₂] lgApproximant f ξ 1 ∧ w₄ ~[𝓝[>] a₁] lgApproximant f ξ (-1) ∧
+      w₃ ~[𝓝[<] a₂] liouvilleGreenApproximant f ξ 1 ∧
+          w₄ ~[𝓝[>] a₁] liouvilleGreenApproximant f ξ (-1) ∧
       Tendsto (fun x => w₁ x / w₄ x) (𝓝[>] a₁) (𝓝 0) ∧
       Tendsto (fun x => w₂ x / w₃ x) (𝓝[<] a₂) (𝓝 0) := by
   sorry

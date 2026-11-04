@@ -9,6 +9,8 @@ public import DLMF.Bailey
 public import DLMF.QHypergeometric.Convergence
 public import DLMF.QHypergeometric.BasicSummations
 public import DLMF.QHypergeometric.TwoPhiTwoSums
+public import DLMF.QHypergeometric.BibasicBilateral
+public import Mathlib.LinearAlgebra.Lagrange
 
 /-!
 # Higher basic summations (DLMF §17.7)
@@ -1169,6 +1171,34 @@ theorem bibasic_gasper {a b c p q : ℂ} (ha : a≠1) (hb : b≠1) (hbc : b*c≠
     field_simp
     ring
 
+/-- Telescoping over an integer interval. -/
+private lemma sum_Icc_sub_telescope (T : ℤ → ℂ) {a b : ℤ} (h : a ≤ b + 1) :
+    ∑ k ∈ Finset.Icc a b, (T k - T (k-1)) = T b - T (a-1) := by
+  obtain ⟨t, rfl⟩ : ∃ t : ℕ, b = a - 1 + t := ⟨(b - (a-1)).toNat, by omega⟩
+  clear h
+  induction t with
+  | zero => simp
+  | succ t ih =>
+    rw [show a - 1 + ((t+1 : ℕ) : ℤ) = a - 1 + t + 1 by push_cast; ring,
+      ← insert_Icc_right_eq_Icc_add_one (by omega), sum_insert (by simp), ih]
+    simp only [add_sub_cancel_right]
+    ring
+
+/-- A defined integer-index shifted factorial at a negative index is nonzero. -/
+private lemma qPochhammerListInt_negSucc_ne_zero {l : List ℂ} {r : ℂ} {j : ℕ}
+    (h : QIntPochhammerListDefined l r (Int.negSucc j)) :
+    qPochhammerListInt l r (Int.negSucc j) ≠ 0 := by
+  rcases h with h | h
+  · exact absurd h (by omega)
+  · unfold qPochhammerListInt
+    refine List.prod_ne_zero fun hmem => ?_
+    obtain ⟨x, hx, hx0⟩ := List.mem_map.1 hmem
+    rw [qPochhammerInt_negSucc, inv_eq_zero] at hx0
+    apply h x hx
+    rw [show (-Int.negSucc j).toNat = j+1 by omega, show Int.negSucc j = -(j+1 : ℤ) by omega]
+    exact hx0
+
+open BibasicBilateral in
 /-- A bilateral finite bibasic summation over the indices `-m ≤ k ≤ n` (DLMF 17.7.E22). -/
 @[dlmf 17.7.E22]
 theorem bibasic_bilateral_finite {a b c d p q : ℂ} (hbc : b*c≠0) (hp : p≠0) (hq : q≠0) (m n : ℕ)
@@ -1187,8 +1217,102 @@ theorem bibasic_bilateral_finite {a b c d p q : ℂ} (hbc : b*c≠0) (hp : p≠0
         (qPochhammerList [d*q,a*d*q/b] q n*qPochhammerList [a*d*p/c,b*c*p/d] p n)-
        qPochhammerList [c/(a*d),d/(b*c)] p (m+1)*qPochhammerList [1/d,b/(a*d)] q (m+1)/
         (qPochhammerList [1/c,b*c/(a*d^2)] q (m+1)*qPochhammerList [1/a,1/b] p (m+1))) := by
-  sorry
+  have hb : b ≠ 0 := left_ne_zero_of_mul hbc
+  have hc : c ≠ 0 := right_ne_zero_of_mul hbc
+  have hd : d ≠ 0 := fun h => hP (by simp [h])
+  have hP' : (1-a*d)*(1-b/d)*(1-c/d)*(1-a*d/(b*c)) ≠ 0 := fun h => hP (by
+    linear_combination d*h)
+  have hR1 := qPochhammerList_ne_zero_of_le (show 0+1 ≤ m+1 by omega) _ (left_ne_zero_of_mul hR)
+  have hR2 := qPochhammerList_ne_zero_of_le (show 0+1 ≤ m+1 by omega) _ (right_ne_zero_of_mul hR)
+  show ∑ k ∈ Finset.Icc (-(m:ℤ)) n, summand a b c d p q k =
+    scale a b c d * (upperValue a b c d p q n - lowerValue a b c d p q m)
+  set T : ℤ → ℂ := fun k => if 0 ≤ k then scale a b c d * upperValue a b c d p q k.toNat
+    else scale a b c d * lowerValue a b c d p q (-k-1).toNat with hT
+  have hpt : ∀ k ∈ Finset.Icc (-(m:ℤ)) n, summand a b c d p q k = T k - T (k-1) := by
+    intro k hk
+    have hk' := Finset.mem_Icc.1 hk
+    rcases k with k | j
+    · rcases k with _ | k
+      · show summand a b c d p q 0 = T 0 - T (0-1)
+        rw [summand_zero hb hc hd hP' (mul_ne_zero hR1 hR2)]
+        simp [hT]
+        ring
+      · have h5 := (hF _ hk).2.2.2.2
+        simp only [qPochhammerListInt, Int.ofNat_eq_natCast,
+          qPochhammerInt_natCast] at h5
+        rw [Int.ofNat_eq_natCast, summand_natCast_succ hb hc hd hq k hP' (by
+          simpa only [qPochhammerList] using h5)]
+        simp only [hT]
+        split_ifs with h1 h2 h2
+        · rw [show ((((k+1 : ℕ) : ℤ)).toNat) = k+1 by omega,
+            show ((((k+1 : ℕ) : ℤ) - 1).toNat) = k by omega]
+          ring
+        all_goals omega
+    · have hj : j + 2 ≤ m + 1 := by
+        have := hk'.1; simp [Int.negSucc_eq] at this; omega
+      have hR1' := qPochhammerList_ne_zero_of_le hj _ (left_ne_zero_of_mul hR)
+      have hR2' := qPochhammerList_ne_zero_of_le hj _ (right_ne_zero_of_mul hR)
+      obtain ⟨d1, d2, d3, d4, -⟩ := hF _ hk
+      have hFj := mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (qPochhammerListInt_negSucc_ne_zero d1) (qPochhammerListInt_negSucc_ne_zero d2))
+        (qPochhammerListInt_negSucc_ne_zero d3)) (qPochhammerListInt_negSucc_ne_zero d4)
+      have hT1 : T (Int.negSucc j) = scale a b c d * lowerValue a b c d p q j := by
+        simp only [hT]; split_ifs with h
+        · omega
+        · congr 2; omega
+      have hT2 : T (Int.negSucc j - 1) = scale a b c d * lowerValue a b c d p q (j+1) := by
+        simp only [hT]; split_ifs with h
+        · omega
+        · congr 2; omega
+      rw [hT1, hT2, ← mul_sub]
+      rcases eq_or_ne a 0 with rfl | ha
+      · exact summand_negSucc_of_eq_zero hb hc hd hp hq j hP' hFj (mul_ne_zero hR1' hR2')
+      · exact summand_negSucc ha hb hc hd hp hq j hP' hFj (mul_ne_zero hR1' hR2')
+  rw [sum_congr rfl hpt, sum_Icc_sub_telescope T (by omega)]
+  simp only [hT]
+  split_ifs with h1 h2 h2
+  · omega
+  · rw [show ((n:ℤ)).toNat = n by omega, show (-(-(m:ℤ) - 1) - 1).toNat = m by omega]
+    ring
+  all_goals omega
 
+/-- `2 C(k,2) + k = k²`. -/
+private lemma choose_two_mul_two_add (k : ℕ) : k.choose 2 * 2 + k = k * k := by
+  induction k with
+  | zero => simp
+  | succ k ih => rw [Nat.choose_succ_succ, Nat.choose_one_right]; nlinarith
+
+/-- Splitting a product over `range m` with one index `k` removed. -/
+private lemma prod_erase_range_eq (f : ℕ → ℂ) {k m : ℕ} (hk : k < m) :
+    ∏ j ∈ (range m).erase k, f j = (∏ j ∈ range k, f j) * ∏ i ∈ range (m-1-k), f (k+1+i) := by
+  obtain ⟨r, rfl⟩ : ∃ r, m = k + 1 + r := ⟨m - 1 - k, by omega⟩
+  have h1 : (range (k+1+r)).erase k = range k ∪ (Finset.Ico (k+1) (k+1+r)) := by
+    ext j; simp only [Finset.mem_erase, Finset.mem_range, Finset.mem_union, Finset.mem_Ico]; omega
+  rw [h1, prod_union (by
+    rw [Finset.disjoint_left]; intro j h1 h2
+    simp only [Finset.mem_range, Finset.mem_Ico] at h1 h2; omega),
+    prod_Ico_eq_prod_range, show k + 1 + r - (k + 1) = k + 1 + r - 1 - k by omega]
+
+/-- A factor of a nonzero finite shifted factorial is nonzero. -/
+private lemma one_sub_mul_pow_ne_zero {x r : ℂ} {n i : ℕ} (h : qPochhammer x r n ≠ 0)
+    (hi : i < n) : 1 - x * r^i ≠ 0 := by
+  rw [qPochhammer_eq_prod, prod_ne_zero_iff] at h
+  exact h i (Finset.mem_range.2 hi)
+
+/-- `∏_{j<k} (p^k - p^j) = (-1)^k p^{C(k,2)} (p;p)_k`. -/
+private lemma prod_range_pow_sub_pow {p : ℂ} (k : ℕ) :
+    ∏ j ∈ range k, (p^k - p^j) = (-1)^k * p^(k.choose 2) * qPochhammer p p k := by
+  induction k with
+  | zero => simp
+  | succ k ih =>
+    rw [prod_range_succ', pow_zero]
+    have h1 : ∀ j ∈ range k, p^(k+1) - p^(j+1) = p * (p^k - p^j) := fun j _ => by ring
+    rw [prod_congr rfl h1, prod_mul_distrib, prod_const, card_range, ih, qPochhammer_succ,
+      Nat.choose_succ_succ, Nat.choose_one_right]
+    ring
+
+
+open Polynomial in
 /-- Gasper1995(4.1.23), with p and q swapped, gives both corrected denominator entries. -/
 @[dlmf 17.7.E23]
 theorem bibasic_difference_corrected {a b p q : ℂ} (hb : b≠0) (hp : p≠0) (hq : q≠0) (n : ℕ)
@@ -1198,7 +1322,140 @@ theorem bibasic_difference_corrected {a b p q : ℂ} (hb : b≠0) (hp : p≠0) (
     (1-a/q)*(1-b/q)*(∑ k∈range (n+1), qPochhammerListInt [a*p^k,b*p^(-(k:ℤ))] q ((n:ℤ)-1)*
       (1-a*p^(2*k)/b)/(qPochhammer p p k*qPochhammer p p (n-k)*qPochhammer (a*p^k/b) p (n+1))*
       (-1:ℂ)^k*p^(k.choose 2))=(if n=0 then 1 else 0) := by
-  sorry
+  rcases Nat.eq_zero_or_pos n with rfl | hn
+  · obtain ⟨haq, hbq⟩ := h0 rfl
+    have hab := hD 0 le_rfl
+    simp only [zero_add, qPochhammer_one, pow_zero, mul_one] at hab
+    have e1 : 1 - a/q ≠ 0 := fun h => haq (by field_simp at h; linear_combination -h)
+    have e2 : 1 - b/q ≠ 0 := fun h => hbq (by field_simp at h; linear_combination -h)
+    have hm : ∀ x, qPochhammerInt x q (-1) = (1 - x/q)⁻¹ := fun x => by
+      rw [show (-1:ℤ) = Int.negSucc 0 from rfl, qPochhammerInt_negSucc]
+      simp [qPochhammer_one, div_eq_mul_inv]
+    have e3 : b - a ≠ 0 := fun h => hab (by
+      rw [show a = b by linear_combination -h, div_self hb, sub_self])
+    simp [qPochhammerListInt, zpow_neg, hm, qPochhammer_one]
+    field_simp
+  · obtain ⟨N, rfl⟩ : ∃ N, n = N+1 := ⟨n-1, by omega⟩
+    simp only [Nat.add_one_ne_zero, ↓reduceIte]
+    refine mul_eq_zero_of_right _ ?_
+    set y : ℕ → ℂ := fun k => a*p^k + b*(p^k)⁻¹ with hy
+    set P : ℂ[X] := ∏ j ∈ range N, (C (1 + a*b*q^(2*j)) - C (q^j) * X) with hPdef
+    have hdeg : P.natDegree ≤ N := by
+      refine (natDegree_prod_le _ _).trans ?_
+      refine (sum_le_card_nsmul _ _ 1 fun j _ => ?_).trans (by simp)
+      refine (natDegree_sub_le _ _).trans (max_le (by rw [natDegree_C]; exact zero_le_one) ?_)
+      exact (natDegree_C_mul_le _ _).trans (by simp)
+    have hpj : ∀ j, j ≤ N+1 → 0 < j → p^j ≠ 1 := by
+      intro j hj hj0 h
+      apply hP
+      rw [qPochhammer_eq_prod]
+      exact prod_eq_zero (i := j-1) (by simp; omega) (by
+        rw [← pow_succ', Nat.sub_add_cancel hj0, h, sub_self])
+    have hinj : Set.InjOn y ↑(Finset.range (N+2)) := by
+      intro k hk j hj hkj
+      simp only [Finset.coe_range, Set.mem_Iio] at hk hj
+      by_contra hne
+      have h1 : p^k - p^j ≠ 0 := by
+        rcases lt_or_gt_of_ne hne with h | h
+        · obtain ⟨t, rfl⟩ : ∃ t, j = k + t := ⟨j - k, by omega⟩
+          rw [pow_add, show p^k - p^k*p^t = p^k*(1-p^t) by ring]
+          exact mul_ne_zero (pow_ne_zero _ hp) (sub_ne_zero.2 (hpj t (by omega) (by omega)).symm)
+        · obtain ⟨t, rfl⟩ : ∃ t, k = j + t := ⟨k - j, by omega⟩
+          rw [pow_add, show p^j*p^t - p^j = p^j*(p^t-1) by ring]
+          exact mul_ne_zero (pow_ne_zero _ hp) (sub_ne_zero.2 (hpj t (by omega) (by omega)))
+      have h2 : a*p^k*p^j - b ≠ 0 := by
+        have := one_sub_mul_pow_ne_zero (hD k (by omega)) (show j < N+1+1 by omega)
+        intro h; apply this; field_simp; linear_combination -h
+      have h3 : (y k - y j) * (p^k*p^j) = (p^k - p^j) * (a*p^k*p^j - b) := by
+        simp only [hy]; field_simp; ring
+      rw [hkj, sub_self, zero_mul] at h3
+      exact mul_ne_zero h1 h2 h3.symm
+    have hL := Lagrange.coeff_eq_sum hinj (P := P) (by
+      rw [card_range]
+      exact (degree_le_natDegree).trans_lt (by exact_mod_cast (by omega : P.natDegree < N+2)))
+    rw [card_range, show N+2-1 = N+1 by omega,
+      coeff_eq_zero_of_natDegree_lt (by omega)] at hL
+    set S : ℂ := ∏ j ∈ range (N+2), p^j with hS
+    have hS0 : S ≠ 0 := prod_ne_zero_iff.2 fun j _ => pow_ne_zero _ hp
+    have hterm : ∀ k ∈ range (N+1+1),
+        qPochhammerListInt [a*p^k,b*p^(-(k:ℤ))] q (((N+1:ℕ):ℤ)-1)*(1-a*p^(2*k)/b)/
+          (qPochhammer p p k*qPochhammer p p (N+1-k)*qPochhammer (a*p^k/b) p (N+1+1))*
+          (-1:ℂ)^k*p^(k.choose 2) =
+        (-b)^(N+1)/S * (P.eval (y k) / ∏ j ∈ (range (N+2)).erase k, (y k - y j)) := by
+      intro k hk
+      have hk' : k < N+2 := Finset.mem_range.1 hk
+      obtain ⟨r, hr⟩ : ∃ r, N+1 = k + r := ⟨N+1-k, by omega⟩
+      have hpk : p^k ≠ 0 := pow_ne_zero _ hp
+      -- the polynomial value
+      have hE : P.eval (y k) = qPochhammer (a*p^k) q N * qPochhammer (b*(p^k)⁻¹) q N := by
+        simp only [hPdef, eval_prod, eval_sub, eval_C, eval_mul, eval_X, qPochhammer_eq_prod,
+          ← prod_mul_distrib, hy]
+        refine prod_congr rfl fun j _ => ?_
+        field_simp
+        ring
+      have hlhs : qPochhammerListInt [a*p^k,b*p^(-(k:ℤ))] q (((N+1:ℕ):ℤ)-1) =
+          qPochhammer (a*p^k) q N * qPochhammer (b*(p^k)⁻¹) q N := by
+        rw [show (((N+1:ℕ):ℤ)-1) = ((N:ℕ):ℤ) by push_cast; ring]
+        simp [qPochhammerListInt, zpow_neg]
+      -- the nodal product
+      set Pi := ∏ j ∈ (range (N+2)).erase k, (y k - y j) with hPi
+      set Cp := ∏ j ∈ (range (N+2)).erase k, (p^k*p^j) with hCp
+      set B := ∏ j ∈ (range (N+2)).erase k, (a*p^k*p^j - b) with hB
+      have hPiC : Pi * Cp = (∏ j ∈ (range (N+2)).erase k, (p^k - p^j)) * B := by
+        rw [hPi, hCp, hB, ← prod_mul_distrib, ← prod_mul_distrib]
+        refine prod_congr rfl fun j _ => ?_
+        simp only [hy]; field_simp; ring
+      have hA : ∏ j ∈ (range (N+2)).erase k, (p^k - p^j) =
+          (-1)^k * p^(k.choose 2) * qPochhammer p p k * ((p^k)^r * qPochhammer p p r) := by
+        rw [prod_erase_range_eq _ hk', prod_range_pow_sub_pow, show N+2-1-k = r by omega,
+          qPochhammer_eq_prod p p r, show (p^k)^r = ∏ _i ∈ range r, p^k by simp,
+          ← prod_mul_distrib]
+        congr 1
+        refine prod_congr rfl fun i _ => ?_
+        ring
+      have hBe : B * (a*p^k*p^k - b) = (-b)^(N+2) * qPochhammer (a*p^k/b) p (N+1+1) := by
+        rw [hB, mul_comm, mul_prod_erase _ (fun j => a*p^k*p^j - b) hk, qPochhammer_eq_prod,
+          show (-b)^(N+2) = ∏ _i ∈ range (N+1+1), (-b) by simp, ← prod_mul_distrib]
+        refine prod_congr rfl fun j _ => ?_
+        field_simp
+        ring
+      have hCe : Cp * (p^k*p^k) = (p^k)^(N+2) * S := by
+        rw [hCp, mul_comm, mul_prod_erase _ (fun j => p^k*p^j) hk, prod_mul_distrib, prod_const,
+          card_range]
+      have hlast : a*p^k*p^k - b ≠ 0 := by
+        have := one_sub_mul_pow_ne_zero (hD k (by omega)) (show k < N+1+1 by omega)
+        intro h; apply this; field_simp; linear_combination -h
+      have hpk1 : qPochhammer p p k ≠ 0 := qPochhammer_ne_zero_of_le hP (by omega)
+      have hpr : qPochhammer p p r ≠ 0 := qPochhammer_ne_zero_of_le hP (by omega)
+      have hDk := hD k (by omega)
+      have hCp0 : Cp ≠ 0 := prod_ne_zero_iff.2 fun j _ => mul_ne_zero hpk (pow_ne_zero _ hp)
+      have hCpv := eq_div_of_mul_eq (mul_ne_zero hpk hpk) hCe
+      have hBv := eq_div_of_mul_eq hlast hBe
+      have hPiv := eq_div_of_mul_eq hCp0 hPiC
+      rw [hA, hBv, hCpv] at hPiv
+      rw [hlhs, ← hE, show N+1-k = r by omega, hPiv]
+      have hexp : (p^k)^(N+2) = p^(k.choose 2)*p^(k.choose 2)*p^k*(p^k)^r*p^k := by
+        have hkk : k*k = k.choose 2 * 2 + k := (choose_two_mul_two_add k).symm
+        rw [show N+2 = k+r+1 by omega, pow_add, pow_add, ← pow_mul, hkk, pow_add, pow_mul]
+        ring
+      rw [hexp, show p^(2*k) = p^k*p^k by ring]
+      generalize eval (y k) P = E at *
+      generalize qPochhammer (a*p^k/b) p (N+1+1) = D at *
+      generalize qPochhammer p p k = Q1 at *
+      generalize qPochhammer p p r = Q2 at *
+      have hC0 : p^(k.choose 2) ≠ 0 := pow_ne_zero _ hp
+      generalize p^(k.choose 2) = Ck at *
+      generalize p^k = X at *
+      have hb2 : a*X*X - b ≠ 0 := hlast
+      have hσ : ((-1:ℂ)^k)*(-1)^k = 1 := by rw [← mul_pow]; simp
+      generalize (-1:ℂ)^k = σ at *
+      rw [show (-b)^(N+2) = (-b)^(N+1)*(-b) from pow_succ _ _]
+      have hBn : (-b)^(N+1) ≠ 0 := pow_ne_zero _ (neg_ne_zero.2 hb)
+      generalize (-b)^(N+1) = Bn at *
+      have hσ0 : σ ≠ 0 := left_ne_zero_of_mul_eq_one hσ
+      field_simp
+      linear_combination E*(b - a*X^2)*hσ
+    rw [sum_congr rfl hterm, ← mul_sum, show N+1+1 = N+2 from rfl, ← hL, mul_zero]
 
 /-- The printed argument in 17.7.19 gives a nonzero terminating series. -/
 @[dlmf 17.7.E19]
@@ -1208,8 +1465,8 @@ theorem karlsson_printed_counter : qPhi [2] [] (1/2) (1/4)=(1/2:ℂ) := by
         (k := k) (by omega)
     norm_num at h
     exact h
-  rw [qPhi_eq_basicHG (by simp)]
-  unfold basicHG
+  rw [qPhi_eq_basicHypergeometric (by simp)]
+  unfold basicHypergeometric
   rw [tsum_eq_sum (s := range 2) (fun k hk => by
     have h := hzero k (by simp only [Finset.mem_range, not_lt] at hk; exact hk)
     simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, h,

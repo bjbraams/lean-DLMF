@@ -20,8 +20,10 @@ induction on `k` along the recurrence gives the leading term of `A^0_{2s}/A^0_0`
 ## Main results
 
 * `mathieuFourierA_zero_small_q`: DLMF 28.4.21.
-* `mathieuFourierA_up_small_q`, `mathieuFourierB_up_small_q`: DLMF 28.4.22.
-* `mathieuFourierA_down_small_q`, `mathieuFourierB_down_small_q`: DLMF 28.4.23.
+* `mathieuFourierA_up_small_q`, `mathieuFourierB_up_small_q`: DLMF 28.4.22 (with stronger
+  primed forms for `s ≥ 0`).
+* `mathieuFourierA_down_small_q`, `mathieuFourierB_down_small_q`: DLMF 28.4.23 (with stronger
+  primed forms for `s ≥ 0`).
 -/
 
 @[expose] public noncomputable section
@@ -281,6 +283,364 @@ private lemma eventually_norm_sub_le : ∀ᶠ q : ℝ in 𝓝 0, ∀ k : ℕ,
     rw [← coeff_succ] at this
     simpa [errConst, add_assoc] using this
 
+/-! ### General `m`: induction along the recurrence from the index of the eigenvalue -/
+
+/-- One step of the induction along a three-term row. -/
+private lemma step_bound {q : ℝ} {D E X Y L An c : ℂ} {C : ℝ} {k : ℕ}
+    (hrow : D * X = q * (L + Y)) (hD : 1 ≤ ‖D‖) (hq1 : |q| ≤ 1)
+    (hY : ‖Y - c * (q : ℂ) ^ k * An‖ ≤ C * (|q| ^ (k + 1) * ‖An‖))
+    (hL : ‖L‖ ≤ 2 * ((3 * |q|) ^ (k + 2) * ‖An‖)) (hED : ‖E - D‖ ≤ 5 * |q|) (hE : E ≠ 0) :
+    ‖X - c / E * (q : ℂ) ^ (k + 1) * An‖ ≤
+      (C + 2 * 3 ^ (k + 2) + 5 * ‖c‖ / ‖E‖) * (|q| ^ (k + 2) * ‖An‖) := by
+  have hD0 : D ≠ 0 := by rintro rfl; simp at hD; linarith
+  have key : X - c / E * (q : ℂ) ^ (k + 1) * An =
+      ((q : ℂ) * (Y - c * (q : ℂ) ^ k * An) + q * L +
+        c * (q : ℂ) ^ (k + 1) * An * ((E - D) / E)) / D := by
+    rw [eq_div_iff hD0]
+    have hc : c * E * E⁻¹ = c := by field_simp
+    linear_combination hrow - ((q : ℂ) * (q : ℂ) ^ k * An) * hc
+  have hqn : ‖(q : ℂ)‖ = |q| := by rw [Complex.norm_real, Real.norm_eq_abs]
+  have hA := norm_nonneg An
+  have hq0 := abs_nonneg q
+  have t1 : ‖(q : ℂ) * (Y - c * (q : ℂ) ^ k * An)‖ ≤ C * (|q| ^ (k + 2) * ‖An‖) := by
+    rw [norm_mul, hqn]
+    calc |q| * ‖Y - c * (q : ℂ) ^ k * An‖ ≤ |q| * (C * (|q| ^ (k + 1) * ‖An‖)) := by gcongr
+      _ = _ := by ring
+  have t2 : ‖(q : ℂ) * L‖ ≤ 2 * 3 ^ (k + 2) * (|q| ^ (k + 2) * ‖An‖) := by
+    rw [norm_mul, hqn]
+    calc |q| * ‖L‖ ≤ 1 * (2 * ((3 * |q|) ^ (k + 2) * ‖An‖)) := by gcongr
+      _ = _ := by rw [mul_pow]; ring
+  have t3 : ‖c * (q : ℂ) ^ (k + 1) * An * ((E - D) / E)‖ ≤
+      5 * ‖c‖ / ‖E‖ * (|q| ^ (k + 2) * ‖An‖) := by
+    rw [norm_mul, norm_mul, norm_mul, norm_pow, hqn, norm_div]
+    rcases eq_or_ne ‖E‖ 0 with hE | hE
+    · simp [hE]
+    have hE' : 0 < ‖E‖ := lt_of_le_of_ne (norm_nonneg _) (Ne.symm hE)
+    calc ‖c‖ * |q| ^ (k + 1) * ‖An‖ * (‖E - D‖ / ‖E‖)
+        ≤ ‖c‖ * |q| ^ (k + 1) * ‖An‖ * (5 * |q| / ‖E‖) := by gcongr
+      _ = _ := by field_simp; ring
+  rw [key, norm_div]
+  calc _ ≤ ‖(q : ℂ) * (Y - c * (q : ℂ) ^ k * An) + q * L +
+        c * (q : ℂ) ^ (k + 1) * An * ((E - D) / E)‖ :=
+        div_le_self (norm_nonneg _) hD
+    _ ≤ _ := norm_add₃_le.trans (by linarith)
+
+/-- From an estimate `F - K q^s G = O(q^{s+1} ‖G‖)` to the form `F = (K q^s + ε) G`. -/
+private lemma exists_eps_of_isBigO {F G : ℝ → ℂ} {K : ℂ} {s : ℕ}
+    (h : (fun q : ℝ => F q - K * (q : ℂ) ^ s * G q) =O[𝓝 0]
+      (fun q : ℝ => q ^ (s + 1) * ‖G q‖)) :
+    ∃ ε : ℝ → ℂ, ε =O[𝓝 0] (fun q : ℝ => q ^ (s + 1)) ∧
+      ∀ᶠ q in 𝓝 0, F q = (K * (q : ℂ) ^ s + ε q) * G q := by
+  obtain ⟨C, hC, hCw⟩ := h.exists_pos
+  have hb := hCw.bound
+  refine ⟨fun q => if G q = 0 then 0 else (F q - K * (q : ℂ) ^ s * G q) / G q, ?_, ?_⟩
+  · refine IsBigO.of_bound C ?_
+    filter_upwards [hb] with q hq
+    split_ifs with hG
+    · simp only [norm_zero]; positivity
+    · rw [norm_mul, norm_norm] at hq
+      rw [norm_div, div_le_iff₀ (norm_pos_iff.2 hG)]
+      linarith
+  · filter_upwards [hb] with q hq
+    split_ifs with hG
+    · simp only [hG, norm_zero, mul_zero, sub_zero] at hq
+      rw [hG, mul_zero]
+      exact norm_le_zero_iff.mp hq
+    · field_simp; ring
+
+/-- **Gap condition**: if `a(q)` is within `4|q|` of `m² = (2n+δ)²` and each diagonal entry
+`d_i(q)` within `|q|` of `(2i+δ)²`, then for small `q`, `‖a(q) - d_i(q)‖ ≥ 1` for `i ≠ n`. -/
+theorem eventually_one_le_norm_sub_diagonal {δ n m : ℕ} {d : ℝ → ℕ → ℂ} {a : ℝ → ℂ}
+    (hm : m = 2 * n + δ)
+    (hd : ∀ q i, ‖d q i - (((2 * i + δ : ℕ) : ℂ)) ^ 2‖ ≤ |q|)
+    (ha : ∀ᶠ q in 𝓝 0, ‖a q - (m : ℂ) ^ 2‖ ≤ 4 * |q|) :
+    ∀ᶠ q : ℝ in 𝓝 0, |q| < 1 / 8 ∧ ‖a q - (m : ℂ) ^ 2‖ ≤ 4 * |q| ∧
+      ∀ i ≠ n, 1 ≤ ‖a q - d q i‖ := by
+  filter_upwards [ha, eventually_abs_lt_one_div_eight] with q hq h8
+  refine ⟨h8, hq, fun i hi => ?_⟩
+  have h4 := four_le_abs_sq_sub_sq hi δ
+  have e : ‖(((2 * i + δ : ℕ) : ℂ)) ^ 2 - (m : ℂ) ^ 2‖ =
+      |(((2 * i + δ : ℕ) : ℝ)) ^ 2 - (((2 * n + δ : ℕ) : ℝ)) ^ 2| := by
+    rw [show (((2 * i + δ : ℕ) : ℂ)) ^ 2 - (m : ℂ) ^ 2 =
+      (((((2 * i + δ : ℕ) : ℝ)) ^ 2 - (((2 * n + δ : ℕ) : ℝ)) ^ 2 : ℝ) : ℂ) by
+        subst hm; push_cast; ring, Complex.norm_real, Real.norm_eq_abs]
+  have tri : ‖(((2 * i + δ : ℕ) : ℂ)) ^ 2 - (m : ℂ) ^ 2‖ ≤
+      ‖a q - d q i‖ + ‖a q - (m : ℂ) ^ 2‖ + ‖d q i - (((2 * i + δ : ℕ) : ℂ)) ^ 2‖ := by
+    have := norm_add₃_le (a := -(a q - d q i)) (b := a q - (m : ℂ) ^ 2)
+      (c := -(d q i - (((2 * i + δ : ℕ) : ℂ)) ^ 2))
+    rw [norm_neg, norm_neg] at this
+    convert this using 2; ring
+  have := hd q i
+  linarith
+
+
+/-- The coefficient `(m-k-1)!/(k!(m-1)! 4^k)` of 28.4.23. -/
+def descendingCoefficient (m k : ℕ) : ℂ :=
+  ((m - k - 1).factorial : ℂ) / ((k.factorial : ℂ) * ((m - 1).factorial : ℂ)) / 4 ^ k
+
+/-- The coefficient `(-1)^k m!/(k!(m+k)! 4^k)` of 28.4.22. -/
+private def ascendingCoefficient (m k : ℕ) : ℂ :=
+  (-1) ^ k * (m.factorial : ℂ) / ((k.factorial : ℂ) * ((m + k).factorial : ℂ)) / 4 ^ k
+
+/-- `descendingCoefficient m 0 = 1`. -/
+theorem descendingCoefficient_zero (m : ℕ) : descendingCoefficient m 0 = 1 := by
+  simp only [descendingCoefficient, Nat.sub_zero, Nat.factorial_zero, Nat.cast_one, one_mul,
+    pow_zero, div_one]
+  exact div_self (by exact_mod_cast (Nat.factorial_pos _).ne')
+
+/-- `ascendingCoefficient m 0 = 1`. -/
+private lemma ascendingCoefficient_zero (m : ℕ) : ascendingCoefficient m 0 = 1 := by
+  simp only [ascendingCoefficient, add_zero, Nat.factorial_zero, Nat.cast_one, one_mul,
+    pow_zero, div_one]
+  exact div_self (by exact_mod_cast (Nat.factorial_pos _).ne')
+
+/-- `m² - (m - 2(k+1))² = 4(k+1)(m-k-1) ≠ 0` for `m = 2n+δ`, `k < n`. -/
+theorem sq_sub_sq_descending {δ n m k : ℕ} (hm : m = 2 * n + δ) (hk : k + 1 ≤ n) :
+    (m : ℂ) ^ 2 - (((2 * (n - (k + 1)) + δ : ℕ) : ℂ)) ^ 2 =
+      4 * ((k : ℂ) + 1) * (((m - k - 2 : ℕ) : ℂ) + 1) ∧
+    (m : ℂ) ^ 2 - (((2 * (n - (k + 1)) + δ : ℕ) : ℂ)) ^ 2 ≠ 0 := by
+  obtain ⟨r, hr⟩ : ∃ r, m = k + 2 + r := ⟨m - k - 2, by omega⟩
+  have h1 : ((2 * (n - (k + 1)) + δ : ℕ) : ℂ) = (m : ℂ) - 2 * ((k : ℂ) + 1) := by
+    have : 2 * (n - (k + 1)) + δ + 2 * (k + 1) = m := by omega
+    rw [eq_sub_iff_add_eq]; exact_mod_cast this
+  have h2 : m - k - 2 = r := by omega
+  rw [h1, h2, hr]; push_cast
+  refine ⟨by ring, ?_⟩
+  rw [show ((k : ℂ) + 2 + r) ^ 2 - ((k : ℂ) + 2 + r - 2 * ((k : ℂ) + 1)) ^ 2 =
+    4 * ((k : ℂ) + 1) * ((r : ℂ) + 1) by ring]
+  exact mul_ne_zero (mul_ne_zero (by norm_num : (4 : ℂ) ≠ 0) (by exact_mod_cast k.succ_ne_zero))
+    (by exact_mod_cast r.succ_ne_zero)
+
+/-- Recurrence of the coefficients of 28.4.23 along the rows below `m`. -/
+theorem descendingCoefficient_succ {δ n m k : ℕ} (hm : m = 2 * n + δ) (hk : k + 1 ≤ n) :
+    descendingCoefficient m k / ((m : ℂ) ^ 2 - (((2 * (n - (k + 1)) + δ : ℕ) : ℂ)) ^ 2) =
+      descendingCoefficient m (k + 1) := by
+  rw [(sq_sub_sq_descending hm hk).1]
+  obtain ⟨r, hr⟩ : ∃ r, m = k + 2 + r := ⟨m - k - 2, by omega⟩
+  rw [show m - k - 2 = r by omega]
+  simp only [descendingCoefficient]
+  rw [show m - k - 1 = r + 1 by omega, show m - (k + 1) - 1 = r by omega,
+    Nat.factorial_succ r, Nat.factorial_succ k]
+  have := (Nat.factorial_pos r).ne'
+  have := (Nat.factorial_pos k).ne'
+  have := (Nat.factorial_pos (m - 1)).ne'
+  push_cast
+  field_simp
+  ring
+
+/-- `m² - (m + 2(k+1))² = -4(k+1)(m+k+1) ≠ 0`. -/
+private lemma sq_sub_sq_ascending {δ n m k : ℕ} (hm : m = 2 * n + δ) :
+    (m : ℂ) ^ 2 - (((2 * (n + (k + 1)) + δ : ℕ) : ℂ)) ^ 2 =
+      -(4 * ((k : ℂ) + 1) * ((m : ℂ) + k + 1)) ∧
+    (m : ℂ) ^ 2 - (((2 * (n + (k + 1)) + δ : ℕ) : ℂ)) ^ 2 ≠ 0 := by
+  have h1 : ((2 * (n + (k + 1)) + δ : ℕ) : ℂ) = (m : ℂ) + 2 * ((k : ℂ) + 1) := by
+    rw [hm]; push_cast; ring
+  rw [h1]
+  refine ⟨by ring, ?_⟩
+  rw [show (m : ℂ) ^ 2 - ((m : ℂ) + 2 * ((k : ℂ) + 1)) ^ 2 =
+    -(4 * ((k : ℂ) + 1) * (((m + k : ℕ) : ℂ) + 1)) by push_cast; ring]
+  exact neg_ne_zero.2 (mul_ne_zero (mul_ne_zero (by norm_num : (4 : ℂ) ≠ 0)
+    (by exact_mod_cast k.succ_ne_zero))
+    (by exact_mod_cast (m + k).succ_ne_zero))
+
+/-- Recurrence of the coefficients of 28.4.22 along the rows above `m`. -/
+private lemma ascendingCoefficient_succ {δ n m k : ℕ} (hm : m = 2 * n + δ) :
+    ascendingCoefficient m k / ((m : ℂ) ^ 2 - (((2 * (n + (k + 1)) + δ : ℕ) : ℂ)) ^ 2) =
+      ascendingCoefficient m (k + 1) := by
+  rw [(sq_sub_sq_ascending hm).1]
+  simp only [ascendingCoefficient]
+  rw [show m + (k + 1) = (m + k) + 1 by ring, Nat.factorial_succ (m + k), Nat.factorial_succ k]
+  have := (Nat.factorial_pos m).ne'
+  have := (Nat.factorial_pos k).ne'
+  have := (Nat.factorial_pos (m + k)).ne'
+  have h4 : ((m : ℂ) + k + 1) ≠ 0 := by exact_mod_cast (m + k).succ_ne_zero
+  push_cast
+  field_simp
+  ring
+
+/-- The norm of `q^j ‖x‖` as a real function. -/
+private lemma norm_pow_mul_norm (q : ℝ) (j : ℕ) (x : ℂ) : ‖q ^ j * ‖x‖‖ = |q| ^ j * ‖x‖ := by
+  rw [norm_mul, norm_pow, Real.norm_eq_abs, norm_norm]
+
+/-- **Downward estimate**: for a decaying solution of a Mathieu-type recurrence with eigenvalue
+near `m² = (2n+δ)²`, `A_{n-k} = (m-k-1)!/(k!(m-1)!) (q/4)^k A_n + O(q^{k+1} A_n)`. -/
+private lemma down_isBigO {δ n m : ℕ} {β : ℂ} {d : ℝ → ℕ → ℂ} {a : ℝ → ℂ} {A : ℝ → ℕ → ℂ}
+    (hm : m = 2 * n + δ) (hβ : ‖β‖ ≤ 2)
+    (hrec : ∀ q : ℝ, SolvesRecurrence (d q) β q (a q) (A q))
+    (hlim : ∀ q, Tendsto (A q) atTop (𝓝 0))
+    (hd : ∀ q i, ‖d q i - (((2 * i + δ : ℕ) : ℂ)) ^ 2‖ ≤ |q|)
+    (ha : ∀ᶠ q in 𝓝 0, ‖a q - (m : ℂ) ^ 2‖ ≤ 4 * |q|) :
+    ∀ k ≤ n, (fun q : ℝ => A q (n - k) - descendingCoefficient m k * (q : ℂ) ^ k * A q n) =O[𝓝 0]
+      (fun q : ℝ => q ^ (k + 1) * ‖A q n‖) := by
+  intro k
+  induction k with
+  | zero =>
+    intro _
+    simp only [Nat.sub_zero, descendingCoefficient_zero, pow_zero, one_mul, mul_one, sub_self]
+    exact isBigO_zero _ _
+  | succ k ih =>
+    intro hk
+    obtain ⟨C, hC⟩ := (ih (by omega)).bound
+    set i := n - (k + 1) with hi
+    set E : ℂ := (m : ℂ) ^ 2 - (((2 * i + δ : ℕ) : ℂ)) ^ 2 with hEdef
+    have hE : E ≠ 0 := (sq_sub_sq_descending hm hk).2
+    refine IsBigO.of_bound (C + 2 * 3 ^ (k + 2) + 5 * ‖descendingCoefficient m k‖ / ‖E‖) ?_
+    filter_upwards [hC, eventually_one_le_norm_sub_diagonal hm hd ha] with q hq ⟨h8, ham, hgap⟩
+    rw [norm_pow_mul_norm] at hq ⊢
+    have hq4 : ‖(q : ℂ)‖ ≤ 1 / 4 := by
+      rw [Complex.norm_real, Real.norm_eq_abs]; linarith
+    have hqn : ‖(q : ℂ)‖ = |q| := by rw [Complex.norm_real, Real.norm_eq_abs]
+    have hdec := norm_le_pow_dist_mul_of_solvesRecurrence hβ (hrec q) (hlim q) hq4 hgap
+    rw [hqn] at hdec
+    have hrow : (a q - d q i) * A q i = q * (recurrenceLower β (A q) i + A q (n - k)) := by
+      have := hrec q i
+      simp only [recurrenceOperator] at this
+      rw [show i + 1 = n - k by omega] at this
+      linear_combination -this
+    have hL : ‖recurrenceLower β (A q) i‖ ≤ 2 * ((3 * |q|) ^ (k + 2) * ‖A q n‖) :=
+      norm_recurrenceLower_le hβ (A q) (by positivity) fun j hj => by
+        have := hdec j
+        rwa [show Nat.dist j n = k + 2 by simp [Nat.dist]; omega] at this
+    have hED : ‖E - (a q - d q i)‖ ≤ 5 * |q| := by
+      have := norm_sub_le (d q i - (((2 * i + δ : ℕ) : ℂ)) ^ 2) (a q - (m : ℂ) ^ 2)
+      rw [show d q i - (((2 * i + δ : ℕ) : ℂ)) ^ 2 - (a q - (m : ℂ) ^ 2) = E - (a q - d q i) by
+        simp only [hEdef]; ring] at this
+      linarith [hd q i]
+    have hD : 1 ≤ ‖a q - d q i‖ := hgap i (by omega)
+    have := step_bound (k := k) hrow hD (by linarith) hq hL hED hE
+    rwa [show descendingCoefficient m k / E = descendingCoefficient m (k + 1) from
+      descendingCoefficient_succ hm hk] at this
+
+/-- The lower neighbour of the row `n + k + 1` is `A_{n+k}`. -/
+private lemma recurrenceLower_add_one {β : ℂ} {n k : ℕ} (hβ : n ≠ 0 ∨ β = 1) (A : ℕ → ℂ) :
+    recurrenceLower β A (n + (k + 1)) = A (n + k) := by
+  rcases Nat.eq_zero_or_pos (n + k) with h | h
+  · obtain ⟨rfl, rfl⟩ : n = 0 ∧ k = 0 := by omega
+    rcases hβ with h | rfl
+    · exact absurd rfl h
+    · simp [recurrenceLower]
+  · obtain ⟨j, hj⟩ : ∃ j, n + k = j + 1 := ⟨n + k - 1, by omega⟩
+    rw [show n + (k + 1) = j + 2 by omega, hj]
+    rfl
+
+/-- **Upward estimate**: `A_{n+k} = (-1)^k m!/(k!(m+k)!) (q/4)^k A_n + O(q^{k+1} A_n)`. -/
+private lemma up_isBigO {δ n m : ℕ} {β : ℂ} {d : ℝ → ℕ → ℂ} {a : ℝ → ℂ} {A : ℝ → ℕ → ℂ}
+    (hm : m = 2 * n + δ) (hβ : ‖β‖ ≤ 2) (hβ1 : n ≠ 0 ∨ β = 1)
+    (hrec : ∀ q : ℝ, SolvesRecurrence (d q) β q (a q) (A q))
+    (hlim : ∀ q, Tendsto (A q) atTop (𝓝 0))
+    (hd : ∀ q i, ‖d q i - (((2 * i + δ : ℕ) : ℂ)) ^ 2‖ ≤ |q|)
+    (ha : ∀ᶠ q in 𝓝 0, ‖a q - (m : ℂ) ^ 2‖ ≤ 4 * |q|) (k : ℕ) :
+    (fun q : ℝ => A q (n + k) - ascendingCoefficient m k * (q : ℂ) ^ k * A q n) =O[𝓝 0]
+      (fun q : ℝ => q ^ (k + 1) * ‖A q n‖) := by
+  induction k with
+  | zero =>
+    simp only [add_zero, ascendingCoefficient_zero, pow_zero, one_mul, mul_one, sub_self]
+    exact isBigO_zero _ _
+  | succ k ih =>
+    obtain ⟨C, hC⟩ := ih.bound
+    set i := n + (k + 1) with hi
+    set E : ℂ := (m : ℂ) ^ 2 - (((2 * i + δ : ℕ) : ℂ)) ^ 2 with hEdef
+    have hE : E ≠ 0 := (sq_sub_sq_ascending hm).2
+    refine IsBigO.of_bound (C + 2 * 3 ^ (k + 2) + 5 * ‖ascendingCoefficient m k‖ / ‖E‖) ?_
+    filter_upwards [hC, eventually_one_le_norm_sub_diagonal hm hd ha] with q hq ⟨h8, ham, hgap⟩
+    rw [norm_pow_mul_norm] at hq ⊢
+    have hq4 : ‖(q : ℂ)‖ ≤ 1 / 4 := by
+      rw [Complex.norm_real, Real.norm_eq_abs]; linarith
+    have hqn : ‖(q : ℂ)‖ = |q| := by rw [Complex.norm_real, Real.norm_eq_abs]
+    have hdec := norm_le_pow_dist_mul_of_solvesRecurrence hβ (hrec q) (hlim q) hq4 hgap
+    rw [hqn] at hdec
+    have hrow : (a q - d q i) * A q i = q * (A q (i + 1) + A q (n + k)) := by
+      have := hrec q i
+      simp only [recurrenceOperator] at this
+      rw [hi, recurrenceLower_add_one hβ1] at this
+      linear_combination -this
+    have hL : ‖A q (i + 1)‖ ≤ 2 * ((3 * |q|) ^ (k + 2) * ‖A q n‖) := by
+      have := hdec (i + 1)
+      rw [show Nat.dist (i + 1) n = k + 2 by simp [Nat.dist]; omega] at this
+      have h0 : 0 ≤ (3 * |q|) ^ (k + 2) * ‖A q n‖ := by positivity
+      linarith
+    have hED : ‖E - (a q - d q i)‖ ≤ 5 * |q| := by
+      have := norm_sub_le (d q i - (((2 * i + δ : ℕ) : ℂ)) ^ 2) (a q - (m : ℂ) ^ 2)
+      rw [show d q i - (((2 * i + δ : ℕ) : ℂ)) ^ 2 - (a q - (m : ℂ) ^ 2) = E - (a q - d q i) by
+        simp only [hEdef]; ring] at this
+      linarith [hd q i]
+    have hD : 1 ≤ ‖a q - d q i‖ := hgap i (by omega)
+    have := step_bound (k := k) hrow hD (by linarith) hq hL hED hE
+    rwa [show ascendingCoefficient m k / E = ascendingCoefficient m (k + 1) from
+      ascendingCoefficient_succ hm] at this
+
+/-- 28.4.23 for a decaying solution of a Mathieu-type recurrence. -/
+private lemma down_final {δ n m s : ℕ} {β : ℂ} {d : ℝ → ℕ → ℂ} {a : ℝ → ℂ} {A : ℝ → ℕ → ℂ}
+    (hm : m = 2 * n + δ) (hβ : ‖β‖ ≤ 2)
+    (hrec : ∀ q : ℝ, SolvesRecurrence (d q) β q (a q) (A q))
+    (hlim : ∀ q, Tendsto (A q) atTop (𝓝 0))
+    (hd : ∀ q i, ‖d q i - (((2 * i + δ : ℕ) : ℂ)) ^ 2‖ ≤ |q|)
+    (ha : ∀ᶠ q in 𝓝 0, ‖a q - (m : ℂ) ^ 2‖ ≤ 4 * |q|) (hs : s ≤ n) :
+    ∃ ε : ℝ → ℂ, ε =O[𝓝 0] (fun q : ℝ => q ^ (s + 1)) ∧ ∀ᶠ q in 𝓝 0,
+      A q (n - s) = (((m - s - 1).factorial : ℂ) /
+        ((s.factorial : ℂ) * ((m - 1).factorial : ℂ)) * ((q : ℂ) / 4) ^ s + ε q) * A q n := by
+  obtain ⟨ε, h1, h2⟩ := exists_eps_of_isBigO (down_isBigO hm hβ hrec hlim hd ha s hs)
+  refine ⟨ε, h1, ?_⟩
+  filter_upwards [h2] with q hq
+  rw [hq, div_pow]; simp only [descendingCoefficient]; ring
+
+/-- 28.4.22 for a decaying solution of a Mathieu-type recurrence. -/
+private lemma up_final {δ n m s : ℕ} {β : ℂ} {d : ℝ → ℕ → ℂ} {a : ℝ → ℂ} {A : ℝ → ℕ → ℂ}
+    (hm : m = 2 * n + δ) (hβ : ‖β‖ ≤ 2) (hβ1 : n ≠ 0 ∨ β = 1)
+    (hrec : ∀ q : ℝ, SolvesRecurrence (d q) β q (a q) (A q))
+    (hlim : ∀ q, Tendsto (A q) atTop (𝓝 0))
+    (hd : ∀ q i, ‖d q i - (((2 * i + δ : ℕ) : ℂ)) ^ 2‖ ≤ |q|)
+    (ha : ∀ᶠ q in 𝓝 0, ‖a q - (m : ℂ) ^ 2‖ ≤ 4 * |q|) :
+    ∃ ε : ℝ → ℂ, ε =O[𝓝 0] (fun q : ℝ => q ^ (s + 1)) ∧ ∀ᶠ q in 𝓝 0,
+      A q (n + s) = ((-1) ^ s * (m.factorial : ℂ) /
+        ((s.factorial : ℂ) * ((m + s).factorial : ℂ)) * ((q : ℂ) / 4) ^ s + ε q) * A q n := by
+  obtain ⟨ε, h1, h2⟩ := exists_eps_of_isBigO (up_isBigO hm hβ hβ1 hrec hlim hd ha s)
+  refine ⟨ε, h1, ?_⟩
+  filter_upwards [h2] with q hq
+  rw [hq, div_pow]; simp only [ascendingCoefficient]; ring
+
+/-- `‖a_m(q) - m²‖ ≤ 4|q|` for small `q`, in complex form. -/
+theorem eventually_norm_mathieuA_sub_sq_le (m : ℕ) :
+    ∀ᶠ q : ℝ in 𝓝 0, ‖(mathieuA m q : ℂ) - (m : ℂ) ^ 2‖ ≤ 4 * |q| := by
+  filter_upwards [eventually_abs_mathieuA_sub_sq_le m] with q hq
+  rwa [show (mathieuA m q : ℂ) - (m : ℂ) ^ 2 = ((mathieuA m q - (m : ℝ) ^ 2 : ℝ) : ℂ) by
+    push_cast; ring, Complex.norm_real, Real.norm_eq_abs]
+
+/-- `‖b_m(q) - m²‖ ≤ 4|q|` for small `q`, in complex form. -/
+theorem eventually_norm_mathieuB_sub_sq_le {m : ℕ} (hm : m ≠ 0) :
+    ∀ᶠ q : ℝ in 𝓝 0, ‖(mathieuB m q : ℂ) - (m : ℂ) ^ 2‖ ≤ 4 * |q| := by
+  filter_upwards [eventually_abs_mathieuB_sub_sq_le hm] with q hq
+  rwa [show (mathieuB m q : ℂ) - (m : ℂ) ^ 2 = ((mathieuB m q - (m : ℝ) ^ 2 : ℝ) : ℂ) by
+    push_cast; ring, Complex.norm_real, Real.norm_eq_abs]
+
+/-- The diagonal of 28.4.5 is `(2i)²`. -/
+theorem norm_four_mul_sq_sub_sq_le (q : ℝ) (i : ℕ) :
+    ‖4 * (i : ℂ) ^ 2 - (((2 * i + 0 : ℕ) : ℂ)) ^ 2‖ ≤ |q| := by
+  rw [show 4 * (i : ℂ) ^ 2 - (((2 * i + 0 : ℕ) : ℂ)) ^ 2 = 0 by push_cast; ring, norm_zero]
+  exact abs_nonneg q
+
+/-- The diagonal of 28.4.8 is `(2i+2)²`. -/
+theorem norm_two_mul_add_two_sq_sub_sq_le (q : ℝ) (i : ℕ) :
+    ‖(2 * (i : ℂ) + 2) ^ 2 - (((2 * i + 2 : ℕ) : ℂ)) ^ 2‖ ≤ |q| := by
+  rw [show (2 * (i : ℂ) + 2) ^ 2 - (((2 * i + 2 : ℕ) : ℂ)) ^ 2 = 0 by push_cast; ring, norm_zero]
+  exact abs_nonneg q
+
+/-- The diagonal of 28.4.6 is within `|q|` of `(2i+1)²`. -/
+theorem norm_odd_sq_add_ite_sub_sq_le (q : ℝ) (i : ℕ) :
+    ‖((2 * (i : ℂ) + 1) ^ 2 + if i = 0 then (q : ℂ) else 0) - (((2 * i + 1 : ℕ) : ℂ)) ^ 2‖ ≤
+      |q| := by
+  rw [show ((2 * (i : ℂ) + 1) ^ 2 + if i = 0 then (q : ℂ) else 0) - (((2 * i + 1 : ℕ) : ℂ)) ^ 2 =
+    if i = 0 then (q : ℂ) else 0 by push_cast; ring]
+  split_ifs <;> simp
+
+/-- The diagonal of 28.4.7 is within `|q|` of `(2i+1)²`. -/
+theorem norm_odd_sq_sub_ite_sub_sq_le (q : ℝ) (i : ℕ) :
+    ‖((2 * (i : ℂ) + 1) ^ 2 - if i = 0 then (q : ℂ) else 0) - (((2 * i + 1 : ℕ) : ℂ)) ^ 2‖ ≤
+      |q| := by
+  rw [show ((2 * (i : ℂ) + 1) ^ 2 - if i = 0 then (q : ℂ) else 0) - (((2 * i + 1 : ℕ) : ℂ)) ^ 2 =
+    -(if i = 0 then (q : ℂ) else 0) by push_cast; ring]
+  split_ifs <;> simp
+
 end SmallQFourier
 
 /-! ### Behavior for small `q` (§28.4(vi)) -/
@@ -324,44 +684,164 @@ theorem mathieuFourierA_zero_small_q {s : ℕ} (hs : 1 ≤ s) :
       · exact absurd h0 (by simpa using mathieuFourierA_even_zero_ne_zero 0 hq)
     · field_simp; ring
 
-/-- **DLMF 28.4.22** (`A`): for fixed `s, m ≥ 1`,
-`A^m_{m+2s}(q) = ((-1)^s m!/(s!(m+s)!) (q/4)^s + O(q^{s+1})) A^m_m(q)` as `q → 0`. -/
-@[dlmf 28.4.E22]
-theorem mathieuFourierA_up_small_q {m s : ℕ} (hm : 1 ≤ m) (hs : 1 ≤ s) :
-    ∃ ε : ℝ → ℂ, ε =O[𝓝 0] (fun q : ℝ => q ^ (s + 1)) ∧ ∀ q : ℝ,
+open SmallQFourier in
+/-- **DLMF 28.4.22** (`A`): for fixed `m ≥ 1` and `s`,
+`A^m_{m+2s}(q) = ((-1)^s m!/(s!(m+s)!) (q/4)^s + O(q^{s+1})) A^m_m(q)` as `q → 0`.
+Stronger than DLMF, which assumes `s ≥ 1`. -/
+@[dlmf 28.4.E22 "stronger than DLMF: s = 0 allowed"]
+theorem mathieuFourierA_up_small_q' {m s : ℕ} (hm : 1 ≤ m) :
+    ∃ ε : ℝ → ℂ, ε =O[𝓝 0] (fun q : ℝ => q ^ (s + 1)) ∧ ∀ᶠ q in 𝓝 0,
       mathieuFourierA m (m + 2 * s) q = ((-1) ^ s * (m.factorial : ℂ) /
         ((s.factorial : ℂ) * ((m + s).factorial : ℂ)) * ((q : ℂ) / 4) ^ s + ε q) *
         mathieuFourierA m m q := by
-  sorry
+  rcases Nat.even_or_odd' m with ⟨n, rfl | rfl⟩
+  · obtain ⟨ε, h1, h2⟩ := up_final (s := s) (n := n) (m := 2 * n) (δ := 0) (β := 2)
+      (A := fun q i => mathieuFourierA (2 * n) (2 * i) q) rfl (by norm_num) (.inl (by omega))
+      (solvesRecurrence_mathieuFourierA_even n) (tendsto_mathieuFourierA_even n)
+      norm_four_mul_sq_sub_sq_le
+      (eventually_norm_mathieuA_sub_sq_le _)
+    refine ⟨ε, h1, ?_⟩
+    filter_upwards [h2] with q hq
+    rw [show 2 * n + 2 * s = 2 * (n + s) by ring]
+    exact hq
+  · obtain ⟨ε, h1, h2⟩ := up_final (s := s) (n := n) (δ := 1) (β := 1)
+      (A := fun q i => mathieuFourierA (2 * n + 1) (2 * i + 1) q) rfl (by norm_num) (.inr rfl)
+      (solvesRecurrence_mathieuFourierA_odd n) (tendsto_mathieuFourierA_odd n)
+      norm_odd_sq_add_ite_sub_sq_le
+      (eventually_norm_mathieuA_sub_sq_le _)
+    refine ⟨ε, h1, ?_⟩
+    filter_upwards [h2] with q hq
+    rw [show 2 * n + 1 + 2 * s = 2 * (n + s) + 1 by ring]
+    exact hq
+
+/-- **DLMF 28.4.22** (`A`): for fixed `s, m ≥ 1`,
+`A^m_{m+2s}(q) = ((-1)^s m!/(s!(m+s)!) (q/4)^s + O(q^{s+1})) A^m_m(q)` as `q → 0`. -/
+@[dlmf 28.4.E22]
+theorem mathieuFourierA_up_small_q {m s : ℕ} (hm : 1 ≤ m) (_hs : 1 ≤ s) :
+    ∃ ε : ℝ → ℂ, ε =O[𝓝 0] (fun q : ℝ => q ^ (s + 1)) ∧ ∀ᶠ q in 𝓝 0,
+      mathieuFourierA m (m + 2 * s) q = ((-1) ^ s * (m.factorial : ℂ) /
+        ((s.factorial : ℂ) * ((m + s).factorial : ℂ)) * ((q : ℂ) / 4) ^ s + ε q) *
+        mathieuFourierA m m q :=
+  mathieuFourierA_up_small_q' hm
+
+open SmallQFourier in
+/-- **DLMF 28.4.22** (`B`):
+`B^m_{m+2s}(q) = ((-1)^s m!/(s!(m+s)!) (q/4)^s + O(q^{s+1})) B^m_m(q)`.
+Stronger than DLMF, which assumes `s ≥ 1`. -/
+@[dlmf 28.4.E22 "stronger than DLMF: s = 0 allowed"]
+theorem mathieuFourierB_up_small_q' {m s : ℕ} (hm : 1 ≤ m) :
+    ∃ ε : ℝ → ℂ, ε =O[𝓝 0] (fun q : ℝ => q ^ (s + 1)) ∧ ∀ᶠ q in 𝓝 0,
+      mathieuFourierB m (m + 2 * s) q = ((-1) ^ s * (m.factorial : ℂ) /
+        ((s.factorial : ℂ) * ((m + s).factorial : ℂ)) * ((q : ℂ) / 4) ^ s + ε q) *
+        mathieuFourierB m m q := by
+  rcases Nat.even_or_odd' m with ⟨n, rfl | rfl⟩
+  · obtain ⟨n, rfl⟩ : ∃ j, n = j + 1 := ⟨n - 1, by omega⟩
+    obtain ⟨ε, h1, h2⟩ := up_final (s := s) (n := n) (δ := 2) (β := 1)
+      (A := fun q i => mathieuFourierB (2 * n + 2) (2 * i + 2) q) (by ring) (by norm_num)
+      (.inr rfl) (solvesRecurrence_mathieuFourierB_even n) (tendsto_mathieuFourierB_even n)
+      norm_two_mul_add_two_sq_sub_sq_le (eventually_norm_mathieuB_sub_sq_le (by omega))
+    refine ⟨ε, h1, ?_⟩
+    filter_upwards [h2] with q hq
+    rw [show 2 * (n + 1) + 2 * s = 2 * (n + s) + 2 by ring, show 2 * (n + 1) = 2 * n + 2 by ring]
+    exact hq
+  · obtain ⟨ε, h1, h2⟩ := up_final (s := s) (n := n) (δ := 1) (β := 1)
+      (A := fun q i => mathieuFourierB (2 * n + 1) (2 * i + 1) q) rfl (by norm_num) (.inr rfl)
+      (solvesRecurrence_mathieuFourierB_odd n) (tendsto_mathieuFourierB_odd n)
+      norm_odd_sq_sub_ite_sub_sq_le
+      (eventually_norm_mathieuB_sub_sq_le (by omega))
+    refine ⟨ε, h1, ?_⟩
+    filter_upwards [h2] with q hq
+    rw [show 2 * n + 1 + 2 * s = 2 * (n + s) + 1 by ring]
+    exact hq
 
 /-- **DLMF 28.4.22** (`B`):
 `B^m_{m+2s}(q) = ((-1)^s m!/(s!(m+s)!) (q/4)^s + O(q^{s+1})) B^m_m(q)`. -/
 @[dlmf 28.4.E22]
-theorem mathieuFourierB_up_small_q {m s : ℕ} (hm : 1 ≤ m) (hs : 1 ≤ s) :
-    ∃ ε : ℝ → ℂ, ε =O[𝓝 0] (fun q : ℝ => q ^ (s + 1)) ∧ ∀ q : ℝ,
+theorem mathieuFourierB_up_small_q {m s : ℕ} (hm : 1 ≤ m) (_hs : 1 ≤ s) :
+    ∃ ε : ℝ → ℂ, ε =O[𝓝 0] (fun q : ℝ => q ^ (s + 1)) ∧ ∀ᶠ q in 𝓝 0,
       mathieuFourierB m (m + 2 * s) q = ((-1) ^ s * (m.factorial : ℂ) /
         ((s.factorial : ℂ) * ((m + s).factorial : ℂ)) * ((q : ℂ) / 4) ^ s + ε q) *
-        mathieuFourierB m m q := by
-  sorry
+        mathieuFourierB m m q :=
+  mathieuFourierB_up_small_q' hm
+
+open SmallQFourier in
+/-- **DLMF 28.4.23** (`A`): for `2s ≤ m`,
+`A^m_{m-2s}(q) = ((m-s-1)!/(s!(m-1)!) (q/4)^s + O(q^{s+1})) A^m_m(q)` as `q → 0`.
+Stronger than DLMF, which assumes `s ≥ 1`. -/
+@[dlmf 28.4.E23 "stronger than DLMF: s = 0 allowed"]
+theorem mathieuFourierA_down_small_q' {m s : ℕ} (hsm : 2 * s ≤ m) :
+    ∃ ε : ℝ → ℂ, ε =O[𝓝 0] (fun q : ℝ => q ^ (s + 1)) ∧ ∀ᶠ q in 𝓝 0,
+      mathieuFourierA m (m - 2 * s) q = (((m - s - 1).factorial : ℂ) /
+        ((s.factorial : ℂ) * ((m - 1).factorial : ℂ)) * ((q : ℂ) / 4) ^ s + ε q) *
+        mathieuFourierA m m q := by
+  rcases Nat.even_or_odd' m with ⟨n, rfl | rfl⟩
+  · obtain ⟨ε, h1, h2⟩ := down_final (s := s) (n := n) (m := 2 * n) (δ := 0) (β := 2)
+      (A := fun q i => mathieuFourierA (2 * n) (2 * i) q) rfl (by norm_num)
+      (solvesRecurrence_mathieuFourierA_even n) (tendsto_mathieuFourierA_even n)
+      norm_four_mul_sq_sub_sq_le
+      (eventually_norm_mathieuA_sub_sq_le _) (by omega)
+    refine ⟨ε, h1, ?_⟩
+    filter_upwards [h2] with q hq
+    rw [show 2 * n - 2 * s = 2 * (n - s) by omega]
+    exact hq
+  · obtain ⟨ε, h1, h2⟩ := down_final (s := s) (n := n) (δ := 1) (β := 1)
+      (A := fun q i => mathieuFourierA (2 * n + 1) (2 * i + 1) q) rfl (by norm_num)
+      (solvesRecurrence_mathieuFourierA_odd n) (tendsto_mathieuFourierA_odd n)
+      norm_odd_sq_add_ite_sub_sq_le
+      (eventually_norm_mathieuA_sub_sq_le _) (by omega)
+    refine ⟨ε, h1, ?_⟩
+    filter_upwards [h2] with q hq
+    rw [show 2 * n + 1 - 2 * s = 2 * (n - s) + 1 by omega]
+    exact hq
 
 /-- **DLMF 28.4.23** (`A`): for `1 ≤ s` and `2s ≤ m`,
 `A^m_{m-2s}(q) = ((m-s-1)!/(s!(m-1)!) (q/4)^s + O(q^{s+1})) A^m_m(q)` as `q → 0`. -/
 @[dlmf 28.4.E23]
-theorem mathieuFourierA_down_small_q {m s : ℕ} (hs : 1 ≤ s) (hsm : 2 * s ≤ m) :
-    ∃ ε : ℝ → ℂ, ε =O[𝓝 0] (fun q : ℝ => q ^ (s + 1)) ∧ ∀ q : ℝ,
+theorem mathieuFourierA_down_small_q {m s : ℕ} (_hs : 1 ≤ s) (hsm : 2 * s ≤ m) :
+    ∃ ε : ℝ → ℂ, ε =O[𝓝 0] (fun q : ℝ => q ^ (s + 1)) ∧ ∀ᶠ q in 𝓝 0,
       mathieuFourierA m (m - 2 * s) q = (((m - s - 1).factorial : ℂ) /
         ((s.factorial : ℂ) * ((m - 1).factorial : ℂ)) * ((q : ℂ) / 4) ^ s + ε q) *
-        mathieuFourierA m m q := by
-  sorry
+        mathieuFourierA m m q :=
+  mathieuFourierA_down_small_q' hsm
+
+open SmallQFourier in
+/-- **DLMF 28.4.23** (`B`): for `2s < m`,
+`B^m_{m-2s}(q) = ((m-s-1)!/(s!(m-1)!) (q/4)^s + O(q^{s+1})) B^m_m(q)` as `q → 0`.
+Stronger than DLMF, which assumes `s ≥ 1`. -/
+@[dlmf 28.4.E23 "stronger than DLMF: s = 0 allowed"]
+theorem mathieuFourierB_down_small_q' {m s : ℕ} (hsm : 2 * s < m) :
+    ∃ ε : ℝ → ℂ, ε =O[𝓝 0] (fun q : ℝ => q ^ (s + 1)) ∧ ∀ᶠ q in 𝓝 0,
+      mathieuFourierB m (m - 2 * s) q = (((m - s - 1).factorial : ℂ) /
+        ((s.factorial : ℂ) * ((m - 1).factorial : ℂ)) * ((q : ℂ) / 4) ^ s + ε q) *
+        mathieuFourierB m m q := by
+  rcases Nat.even_or_odd' m with ⟨n, rfl | rfl⟩
+  · obtain ⟨n, rfl⟩ : ∃ j, n = j + 1 := ⟨n - 1, by omega⟩
+    obtain ⟨ε, h1, h2⟩ := down_final (s := s) (n := n) (δ := 2) (β := 1)
+      (A := fun q i => mathieuFourierB (2 * n + 2) (2 * i + 2) q) (by ring) (by norm_num)
+      (solvesRecurrence_mathieuFourierB_even n) (tendsto_mathieuFourierB_even n)
+      norm_two_mul_add_two_sq_sub_sq_le (eventually_norm_mathieuB_sub_sq_le (by omega)) (by omega)
+    refine ⟨ε, h1, ?_⟩
+    filter_upwards [h2] with q hq
+    rw [show 2 * (n + 1) - 2 * s = 2 * (n - s) + 2 by omega, show 2 * (n + 1) = 2 * n + 2 by ring]
+    exact hq
+  · obtain ⟨ε, h1, h2⟩ := down_final (s := s) (n := n) (δ := 1) (β := 1)
+      (A := fun q i => mathieuFourierB (2 * n + 1) (2 * i + 1) q) rfl (by norm_num)
+      (solvesRecurrence_mathieuFourierB_odd n) (tendsto_mathieuFourierB_odd n)
+      norm_odd_sq_sub_ite_sub_sq_le
+      (eventually_norm_mathieuB_sub_sq_le (by omega)) (by omega)
+    refine ⟨ε, h1, ?_⟩
+    filter_upwards [h2] with q hq
+    rw [show 2 * n + 1 - 2 * s = 2 * (n - s) + 1 by omega]
+    exact hq
 
 /-- **DLMF 28.4.23** (`B`): for `1 ≤ s` and `2s < m`,
 `B^m_{m-2s}(q) = ((m-s-1)!/(s!(m-1)!) (q/4)^s + O(q^{s+1})) B^m_m(q)` as `q → 0`. -/
 @[dlmf 28.4.E23]
-theorem mathieuFourierB_down_small_q {m s : ℕ} (hs : 1 ≤ s) (hsm : 2 * s < m) :
-    ∃ ε : ℝ → ℂ, ε =O[𝓝 0] (fun q : ℝ => q ^ (s + 1)) ∧ ∀ q : ℝ,
+theorem mathieuFourierB_down_small_q {m s : ℕ} (_hs : 1 ≤ s) (hsm : 2 * s < m) :
+    ∃ ε : ℝ → ℂ, ε =O[𝓝 0] (fun q : ℝ => q ^ (s + 1)) ∧ ∀ᶠ q in 𝓝 0,
       mathieuFourierB m (m - 2 * s) q = (((m - s - 1).factorial : ℂ) /
         ((s.factorial : ℂ) * ((m - 1).factorial : ℂ)) * ((q : ℂ) / 4) ^ s + ε q) *
-        mathieuFourierB m m q := by
-  sorry
+        mathieuFourierB m m q :=
+  mathieuFourierB_down_small_q' hsm
 
 end DLMF.Mathieu

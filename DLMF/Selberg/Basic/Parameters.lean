@@ -14,7 +14,7 @@ public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
 ## Main definitions
 
 * `selbergRHS`: the right-hand side of Selberg's formula.
-* `cDomain`: the domain of convergence in `c` for fixed `a`, `b`.
+* `selbergConvergenceDomain`: the domain of convergence in `c` for fixed `a`, `b`.
 -/
 
 @[expose] public noncomputable section
@@ -31,7 +31,7 @@ def selbergRHS (n : ℕ) (a b c : ℂ) : ℂ :=
       (Gamma (a + b + (n + j - 1 : ℕ) * c) * Gamma (1 + c))
 
 /-- The domain of convergence in `c` for fixed `a`, `b`. -/
-def cDomain (N : ℕ) (a b : ℂ) : Set ℂ :=
+def selbergConvergenceDomain (N : ℕ) (a b : ℂ) : Set ℂ :=
   {c | 0 < 1 + N * c.re ∧ 0 < a.re + ((N - 1 : ℕ) : ℝ) * c.re ∧
     0 < b.re + ((N - 1 : ℕ) : ℝ) * c.re}
 

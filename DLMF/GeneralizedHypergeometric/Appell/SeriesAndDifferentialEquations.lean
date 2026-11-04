@@ -47,11 +47,11 @@ partial differential equations of the Appell functions. The definitions are in
 
 ## Main results
 
-* `hasSum_appF1`, `analytic_appF1`, `appF1_zero`: convergence, analyticity and value at the
+* `hasSum_appellF1`, `analytic_appellF1`, `appellF1_zero`: convergence, analyticity and value at the
   origin of `F₁`, DLMF 16.13.1; likewise for `F₂`, `F₃`, `F₄` (16.13.2–16.13.4).
 * `appell_generic_nonseparable`: generic Appell functions are not products of one-variable
   functions (DLMF §16.13).
-* `appF1_pde`, `appF2_pde`, `appF3_pde`, `appF4_pde`: the systems DLMF 16.14.1–16.14.4.
+* `appellF1_pde`, `appellF2_pde`, `appellF3_pde`, `appellF4_pde`: the systems DLMF 16.14.1–16.14.4.
 * `hornG2_summable`, `hornG3_summable`, `hornG3_nonmaximal_region`: Horn's `G₂`, `G₃`,
   DLMF 16.14.5–16.14.6 and §16.14(ii).
 * `appell_continuation_unique`: uniqueness of continued Appell branches (DLMF §16.16).
@@ -86,40 +86,41 @@ theorem appell_tsum_zero (c : ℕ × ℕ→ℂ) :
     · simp [hm]
 
 /-- Subexponential bound for the F1 coefficients. -/
-private lemma exists_norm_appF1Coeff_le (a b b' c : ℂ) (hc : AppellRegular c) {σ : ℝ} (hσ : 1 < σ) :
-    ∃ C : ℝ, ∀ q : ℕ × ℕ, ‖appF1Coeff a b b' c q.1 q.2‖ ≤ C * σ ^ (q.1 + q.2) := by
+private lemma exists_norm_appellF1Coeff_le (a b b' c : ℂ) (hc : AppellRegular c)
+    {σ : ℝ} (hσ : 1 < σ) :
+    ∃ C : ℝ, ∀ q : ℕ × ℕ, ‖appellF1Coeff a b b' c q.1 q.2‖ ≤ C * σ ^ (q.1 + q.2) := by
   obtain ⟨τ, hτ, hτσ⟩ := exists_one_lt_pow_le hσ 2
-  obtain ⟨C1, hC1, h1⟩ := norm_poch_le_mul_norm_poch a c hc hτ
-  obtain ⟨C2, hC2, h2⟩ := norm_poch_le_mul_factorial b hτ
-  obtain ⟨C3, hC3, h3⟩ := norm_poch_le_mul_factorial b' hτ
+  obtain ⟨C1, hC1, h1⟩ := norm_pochhammer_le_mul_norm_pochhammer a c hc hτ
+  obtain ⟨C2, hC2, h2⟩ := norm_pochhammer_le_mul_factorial b hτ
+  obtain ⟨C3, hC3, h3⟩ := norm_pochhammer_le_mul_factorial b' hτ
   refine ⟨C1 * C2 * C3, fun ⟨m, n⟩ => ?_⟩
-  have hcN : 0 < ‖poch c (m + n)‖ := norm_pos_iff.mpr (poch_ne_zero_of_not_neg_nat hc _)
+  have hcN : 0 < ‖pochhammer c (m + n)‖ := norm_pos_iff.mpr (pochhammer_ne_zero_of_not_neg_nat hc _)
   have hm : (0 : ℝ) < m ! := by exact_mod_cast m.factorial_pos
   have hn : (0 : ℝ) < n ! := by exact_mod_cast n.factorial_pos
   have hτ0 : 0 ≤ τ := by linarith
-  simp only [appF1Coeff, norm_div, norm_mul, Complex.norm_natCast]
+  simp only [appellF1Coeff, norm_div, norm_mul, Complex.norm_natCast]
   rw [div_le_iff₀ (by positivity)]
-  calc ‖poch a (m + n)‖ * ‖poch b m‖ * ‖poch b' n‖
-      ≤ (C1 * τ ^ (m + n) * ‖poch c (m + n)‖) * (C2 * τ ^ m * m !) * (C3 * τ ^ n * n !) := by
+  calc ‖pochhammer a (m + n)‖ * ‖pochhammer b m‖ * ‖pochhammer b' n‖
+      ≤ (C1 * τ ^ (m + n) * ‖pochhammer c (m + n)‖) * (C2 * τ ^ m * m !) * (C3 * τ ^ n * n !) := by
         gcongr
         exacts [h1 _, h2 _, h3 _]
-    _ = C1 * C2 * C3 * (τ ^ 2) ^ (m + n) * (‖poch c (m + n)‖ * (m ! * n !)) := by ring
-    _ ≤ C1 * C2 * C3 * σ ^ (m + n) * (‖poch c (m + n)‖ * (m ! * n !)) := by
+    _ = C1 * C2 * C3 * (τ ^ 2) ^ (m + n) * (‖pochhammer c (m + n)‖ * (m ! * n !)) := by ring
+    _ ≤ C1 * C2 * C3 * σ ^ (m + n) * (‖pochhammer c (m + n)‖ * (m ! * n !)) := by
         gcongr
 
 /-- Binomially weighted subexponential bound for the F2 coefficients. -/
-private lemma exists_norm_appF2Coeff_le (a b b' c c' : ℂ) (hc : AppellRegular c)
+private lemma exists_norm_appellF2Coeff_le (a b b' c c' : ℂ) (hc : AppellRegular c)
     (hc' : AppellRegular c')
     {σ : ℝ} (hσ : 1 < σ) :
-    ∃ C : ℝ, ∀ q : ℕ × ℕ, ‖appF2Coeff a b b' c c' q.1 q.2‖ ≤
+    ∃ C : ℝ, ∀ q : ℕ × ℕ, ‖appellF2Coeff a b b' c c' q.1 q.2‖ ≤
       C * σ ^ (q.1 + q.2) * ((q.1 + q.2).choose q.1 : ℝ) := by
   obtain ⟨τ, hτ, hτσ⟩ := exists_one_lt_pow_le hσ 2
-  obtain ⟨C1, hC1, h1⟩ := norm_poch_le_mul_factorial a hτ
-  obtain ⟨C2, hC2, h2⟩ := norm_poch_le_mul_norm_poch b c hc hτ
-  obtain ⟨C3, hC3, h3⟩ := norm_poch_le_mul_norm_poch b' c' hc' hτ
+  obtain ⟨C1, hC1, h1⟩ := norm_pochhammer_le_mul_factorial a hτ
+  obtain ⟨C2, hC2, h2⟩ := norm_pochhammer_le_mul_norm_pochhammer b c hc hτ
+  obtain ⟨C3, hC3, h3⟩ := norm_pochhammer_le_mul_norm_pochhammer b' c' hc' hτ
   refine ⟨C1 * C2 * C3, fun ⟨m, n⟩ => ?_⟩
-  have hcm : 0 < ‖poch c m‖ := norm_pos_iff.mpr (poch_ne_zero_of_not_neg_nat hc _)
-  have hcn : 0 < ‖poch c' n‖ := norm_pos_iff.mpr (poch_ne_zero_of_not_neg_nat hc' _)
+  have hcm : 0 < ‖pochhammer c m‖ := norm_pos_iff.mpr (pochhammer_ne_zero_of_not_neg_nat hc _)
+  have hcn : 0 < ‖pochhammer c' n‖ := norm_pos_iff.mpr (pochhammer_ne_zero_of_not_neg_nat hc' _)
   have hm : (0 : ℝ) < m ! := by exact_mod_cast m.factorial_pos
   have hn : (0 : ℝ) < n ! := by exact_mod_cast n.factorial_pos
   have hτ0 : 0 ≤ τ := by linarith
@@ -127,64 +128,65 @@ private lemma exists_norm_appF2Coeff_le (a b b' c c' : ℂ) (hc : AppellRegular 
     have := Nat.add_choose_mul_factorial_mul_factorial m n
     rw [← Nat.choose_symm_add] at this
     exact_mod_cast this.symm
-  simp only [appF2Coeff, norm_div, norm_mul, Complex.norm_natCast]
+  simp only [appellF2Coeff, norm_div, norm_mul, Complex.norm_natCast]
   rw [div_le_iff₀ (by positivity)]
-  calc ‖poch a (m + n)‖ * ‖poch b m‖ * ‖poch b' n‖
-      ≤ (C1 * τ ^ (m + n) * (m + n) !) * (C2 * τ ^ m * ‖poch c m‖) *
-          (C3 * τ ^ n * ‖poch c' n‖) := by
+  calc ‖pochhammer a (m + n)‖ * ‖pochhammer b m‖ * ‖pochhammer b' n‖
+      ≤ (C1 * τ ^ (m + n) * (m + n) !) * (C2 * τ ^ m * ‖pochhammer c m‖) *
+          (C3 * τ ^ n * ‖pochhammer c' n‖) := by
         gcongr
         exacts [h1 _, h2 _, h3 _]
     _ = C1 * C2 * C3 * (τ ^ 2) ^ (m + n) * ((m + n).choose m : ℝ) *
-          (‖poch c m‖ * ‖poch c' n‖ * (m ! * n !)) := by rw [hfac]; ring
+          (‖pochhammer c m‖ * ‖pochhammer c' n‖ * (m ! * n !)) := by rw [hfac]; ring
     _ ≤ C1 * C2 * C3 * σ ^ (m + n) * ((m + n).choose m : ℝ) *
-          (‖poch c m‖ * ‖poch c' n‖ * (m ! * n !)) := by
+          (‖pochhammer c m‖ * ‖pochhammer c' n‖ * (m ! * n !)) := by
         gcongr
 
 /-- Subexponential bound for the F3 coefficients. -/
-private lemma exists_norm_appF3Coeff_le (a a' b b' c : ℂ) (hc : AppellRegular c)
+private lemma exists_norm_appellF3Coeff_le (a a' b b' c : ℂ) (hc : AppellRegular c)
     {σ : ℝ} (hσ : 1 < σ) :
-    ∃ C : ℝ, ∀ q : ℕ × ℕ, ‖appF3Coeff a a' b b' c q.1 q.2‖ ≤ C * σ ^ (q.1 + q.2) := by
+    ∃ C : ℝ, ∀ q : ℕ × ℕ, ‖appellF3Coeff a a' b b' c q.1 q.2‖ ≤ C * σ ^ (q.1 + q.2) := by
   obtain ⟨τ, hτ, hτσ⟩ := exists_one_lt_pow_le hσ 3
-  obtain ⟨C1, hC1, h1⟩ := norm_poch_le_mul_factorial a hτ
-  obtain ⟨C2, hC2, h2⟩ := norm_poch_le_mul_factorial a' hτ
-  obtain ⟨C3, hC3, h3⟩ := norm_poch_le_mul_factorial b hτ
-  obtain ⟨C4, hC4, h4⟩ := norm_poch_le_mul_factorial b' hτ
-  obtain ⟨C5, hC5, h5⟩ := factorial_le_mul_norm_poch c hc hτ
+  obtain ⟨C1, hC1, h1⟩ := norm_pochhammer_le_mul_factorial a hτ
+  obtain ⟨C2, hC2, h2⟩ := norm_pochhammer_le_mul_factorial a' hτ
+  obtain ⟨C3, hC3, h3⟩ := norm_pochhammer_le_mul_factorial b hτ
+  obtain ⟨C4, hC4, h4⟩ := norm_pochhammer_le_mul_factorial b' hτ
+  obtain ⟨C5, hC5, h5⟩ := factorial_le_mul_norm_pochhammer c hc hτ
   refine ⟨C1 * C2 * C3 * C4 * C5, fun ⟨m, n⟩ => ?_⟩
-  have hcN : 0 < ‖poch c (m + n)‖ := norm_pos_iff.mpr (poch_ne_zero_of_not_neg_nat hc _)
+  have hcN : 0 < ‖pochhammer c (m + n)‖ := norm_pos_iff.mpr (pochhammer_ne_zero_of_not_neg_nat hc _)
   have hm : (0 : ℝ) < m ! := by exact_mod_cast m.factorial_pos
   have hn : (0 : ℝ) < n ! := by exact_mod_cast n.factorial_pos
   have hτ0 : 0 ≤ τ := by linarith
   have hfac : (m ! : ℝ) * n ! ≤ (m + n) ! := by
     exact_mod_cast Nat.le_of_dvd (Nat.factorial_pos _)
         (Nat.factorial_mul_factorial_dvd_factorial_add m n)
-  have h6 : (m ! : ℝ) * n ! ≤ C5 * τ ^ (m + n) * ‖poch c (m + n)‖ := hfac.trans (h5 _)
-  simp only [appF3Coeff, norm_div, norm_mul, Complex.norm_natCast]
+  have h6 : (m ! : ℝ) * n ! ≤ C5 * τ ^ (m + n) * ‖pochhammer c (m + n)‖ := hfac.trans (h5 _)
+  simp only [appellF3Coeff, norm_div, norm_mul, Complex.norm_natCast]
   rw [div_le_iff₀ (by positivity)]
-  calc ‖poch a m‖ * ‖poch a' n‖ * ‖poch b m‖ * ‖poch b' n‖
+  calc ‖pochhammer a m‖ * ‖pochhammer a' n‖ * ‖pochhammer b m‖ * ‖pochhammer b' n‖
       ≤ (C1 * τ ^ m * m !) * (C2 * τ ^ n * n !) * (C3 * τ ^ m * m !) * (C4 * τ ^ n * n !) := by
         gcongr
         exacts [h1 _, h2 _, h3 _, h4 _]
     _ = C1 * C2 * C3 * C4 * (τ ^ 2) ^ (m + n) * (m ! * n !) * (m ! * n !) := by ring
-    _ ≤ C1 * C2 * C3 * C4 * (τ ^ 2) ^ (m + n) * (C5 * τ ^ (m + n) * ‖poch c (m + n)‖) *
+    _ ≤ C1 * C2 * C3 * C4 * (τ ^ 2) ^ (m + n) * (C5 * τ ^ (m + n) * ‖pochhammer c (m + n)‖) *
           (m ! * n !) := by gcongr
-    _ = C1 * C2 * C3 * C4 * C5 * (τ ^ 3) ^ (m + n) * (‖poch c (m + n)‖ * (m ! * n !)) := by ring
-    _ ≤ C1 * C2 * C3 * C4 * C5 * σ ^ (m + n) * (‖poch c (m + n)‖ * (m ! * n !)) := by
+    _ = C1 * C2 * C3 * C4 * C5 * (τ ^ 3) ^ (m + n) *
+        (‖pochhammer c (m + n)‖ * (m ! * n !)) := by ring
+    _ ≤ C1 * C2 * C3 * C4 * C5 * σ ^ (m + n) * (‖pochhammer c (m + n)‖ * (m ! * n !)) := by
         gcongr
 
 /-- Squared-binomial subexponential bound for the F4 coefficients. -/
-lemma exists_norm_appF4Coeff_le (a b c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegular c')
+lemma exists_norm_appellF4Coeff_le (a b c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegular c')
     {σ : ℝ} (hσ : 1 < σ) :
-    ∃ C : ℝ, ∀ q : ℕ × ℕ, ‖appF4Coeff a b c c' q.1 q.2‖ ≤
+    ∃ C : ℝ, ∀ q : ℕ × ℕ, ‖appellF4Coeff a b c c' q.1 q.2‖ ≤
       C * σ ^ (q.1 + q.2) * ((q.1 + q.2).choose q.1 : ℝ) ^ 2 := by
   obtain ⟨τ, hτ, hτσ⟩ := exists_one_lt_pow_le hσ 3
-  obtain ⟨C1, hC1, h1⟩ := norm_poch_le_mul_factorial a hτ
-  obtain ⟨C2, hC2, h2⟩ := norm_poch_le_mul_factorial b hτ
-  obtain ⟨C3, hC3, h3⟩ := factorial_le_mul_norm_poch c hc hτ
-  obtain ⟨C4, hC4, h4⟩ := factorial_le_mul_norm_poch c' hc' hτ
+  obtain ⟨C1, hC1, h1⟩ := norm_pochhammer_le_mul_factorial a hτ
+  obtain ⟨C2, hC2, h2⟩ := norm_pochhammer_le_mul_factorial b hτ
+  obtain ⟨C3, hC3, h3⟩ := factorial_le_mul_norm_pochhammer c hc hτ
+  obtain ⟨C4, hC4, h4⟩ := factorial_le_mul_norm_pochhammer c' hc' hτ
   refine ⟨C1 * C2 * C3 * C4, fun ⟨m, n⟩ => ?_⟩
-  have hcm : 0 < ‖poch c m‖ := norm_pos_iff.mpr (poch_ne_zero_of_not_neg_nat hc _)
-  have hcn : 0 < ‖poch c' n‖ := norm_pos_iff.mpr (poch_ne_zero_of_not_neg_nat hc' _)
+  have hcm : 0 < ‖pochhammer c m‖ := norm_pos_iff.mpr (pochhammer_ne_zero_of_not_neg_nat hc _)
+  have hcn : 0 < ‖pochhammer c' n‖ := norm_pos_iff.mpr (pochhammer_ne_zero_of_not_neg_nat hc' _)
   have hm : (0 : ℝ) < m ! := by exact_mod_cast m.factorial_pos
   have hn : (0 : ℝ) < n ! := by exact_mod_cast n.factorial_pos
   have hτ0 : 0 ≤ τ := by linarith
@@ -192,108 +194,113 @@ lemma exists_norm_appF4Coeff_le (a b c c' : ℂ) (hc : AppellRegular c) (hc' : A
     have := Nat.add_choose_mul_factorial_mul_factorial m n
     rw [← Nat.choose_symm_add] at this
     exact_mod_cast this.symm
-  simp only [appF4Coeff, norm_div, norm_mul, Complex.norm_natCast]
+  simp only [appellF4Coeff, norm_div, norm_mul, Complex.norm_natCast]
   rw [div_le_iff₀ (by positivity)]
-  calc ‖poch a (m + n)‖ * ‖poch b (m + n)‖
+  calc ‖pochhammer a (m + n)‖ * ‖pochhammer b (m + n)‖
       ≤ (C1 * τ ^ (m + n) * (m + n) !) * (C2 * τ ^ (m + n) * (m + n) !) := by
         gcongr
         exacts [h1 _, h2 _]
     _ = C1 * C2 * (τ ^ 2) ^ (m + n) * ((m + n).choose m : ℝ) ^ 2 * (m ! * n !) *
           (m ! * n !) := by rw [hfac]; ring
     _ ≤ C1 * C2 * (τ ^ 2) ^ (m + n) * ((m + n).choose m : ℝ) ^ 2 * (m ! * n !) *
-          ((C3 * τ ^ m * ‖poch c m‖) * (C4 * τ ^ n * ‖poch c' n‖)) := by
+          ((C3 * τ ^ m * ‖pochhammer c m‖) * (C4 * τ ^ n * ‖pochhammer c' n‖)) := by
         gcongr
         exacts [h3 _, h4 _]
     _ = C1 * C2 * C3 * C4 * (τ ^ 3) ^ (m + n) * ((m + n).choose m : ℝ) ^ 2 *
-          (‖poch c m‖ * ‖poch c' n‖ * (m ! * n !)) := by ring
+          (‖pochhammer c m‖ * ‖pochhammer c' n‖ * (m ! * n !)) := by ring
     _ ≤ C1 * C2 * C3 * C4 * σ ^ (m + n) * ((m + n).choose m : ℝ) ^ 2 *
-          (‖poch c m‖ * ‖poch c' n‖ * (m ! * n !)) := by
+          (‖pochhammer c m‖ * ‖pochhammer c' n‖ * (m ! * n !)) := by
         gcongr
 
-/-- 16.13.E1: hasSum appF1. -/
+/-- 16.13.E1: hasSum appellF1. -/
 @[dlmf 16.13.E1]
-theorem hasSum_appF1 (a b b' c : ℂ) (hc : AppellRegular c) {x y : ℂ} (hxy : (x,y)∈appellBidisc) :
-    HasSum (fun p : ℕ × ℕ => appF1Coeff a b b' c p.1 p.2*x^p.1*y^p.2) (appF1 a b b' c x y) := by
-  exact (hasSum_and_analyticOnNhd_doubleSeries (fun q => appF1Coeff a b b' c q.1 q.2) appellBidisc
+theorem hasSum_appellF1 (a b b' c : ℂ) (hc : AppellRegular c) {x y : ℂ} (hxy : (x,y)∈appellBidisc) :
+    HasSum (fun p : ℕ × ℕ => appellF1Coeff a b b' c p.1 p.2*x^p.1*y^p.2)
+        (appellF1 a b b' c x y) := by
+  exact (hasSum_and_analyticOnNhd_doubleSeries
+      (fun q => appellF1Coeff a b b' c q.1 q.2) appellBidisc
     (fun _ hp => exists_summable_doubleSeries_of_bidisc _
-        (fun _ hσ => exists_norm_appF1Coeff_le a b b' c hc hσ)
+        (fun _ hσ => exists_norm_appellF1Coeff_le a b b' c hc hσ)
       hp.1 hp.2)).1 (x, y) hxy
 
-/-- 16.13: analytic appF1. -/
+/-- 16.13: analytic appellF1. -/
 @[dlmf 16.13]
-theorem analytic_appF1 (a b b' c : ℂ) (hc : AppellRegular c) :
-    AnalyticOnNhd ℂ (fun p : ℂ × ℂ => appF1 a b b' c p.1 p.2) appellBidisc := by
-  exact (hasSum_and_analyticOnNhd_doubleSeries (fun q => appF1Coeff a b b' c q.1 q.2) appellBidisc
+theorem analytic_appellF1 (a b b' c : ℂ) (hc : AppellRegular c) :
+    AnalyticOnNhd ℂ (fun p : ℂ × ℂ => appellF1 a b b' c p.1 p.2) appellBidisc := by
+  exact (hasSum_and_analyticOnNhd_doubleSeries
+      (fun q => appellF1Coeff a b b' c q.1 q.2) appellBidisc
     (fun _ hp => exists_summable_doubleSeries_of_bidisc _
-        (fun _ hσ => exists_norm_appF1Coeff_le a b b' c hc hσ)
+        (fun _ hσ => exists_norm_appellF1Coeff_le a b b' c hc hσ)
       hp.1 hp.2)).2
 
-/-- 16.13.E2: hasSum appF2. -/
+/-- 16.13.E2: hasSum appellF2. -/
 @[dlmf 16.13.E2]
-theorem hasSum_appF2 (a b b' c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegular c') {x y : ℂ}
+theorem hasSum_appellF2 (a b b' c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegular c') {x y : ℂ}
     (hxy : (x, y)∈appellDiamond) :
-    HasSum (fun p : ℕ × ℕ => appF2Coeff a b b' c c' p.1 p.2*x^p.1*y^p.2)
-        (appF2 a b b' c c' x y) := by
-  exact (hasSum_and_analyticOnNhd_doubleSeries (fun q => appF2Coeff a b b' c c' q.1 q.2)
+    HasSum (fun p : ℕ × ℕ => appellF2Coeff a b b' c c' p.1 p.2*x^p.1*y^p.2)
+        (appellF2 a b b' c c' x y) := by
+  exact (hasSum_and_analyticOnNhd_doubleSeries (fun q => appellF2Coeff a b b' c c' q.1 q.2)
     appellDiamond (fun _ hp => exists_summable_doubleSeries_of_diamond _
-      (fun _ hσ => exists_norm_appF2Coeff_le a b b' c c' hc hc' hσ) hp)).1 (x, y) hxy
+      (fun _ hσ => exists_norm_appellF2Coeff_le a b b' c c' hc hc' hσ) hp)).1 (x, y) hxy
 
-/-- 16.13: analytic appF2. -/
+/-- 16.13: analytic appellF2. -/
 @[dlmf 16.13]
-theorem analytic_appF2 (a b b' c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegular c') :
-    AnalyticOnNhd ℂ (fun p : ℂ × ℂ => appF2 a b b' c c' p.1 p.2) appellDiamond := by
-  exact (hasSum_and_analyticOnNhd_doubleSeries (fun q => appF2Coeff a b b' c c' q.1 q.2)
+theorem analytic_appellF2 (a b b' c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegular c') :
+    AnalyticOnNhd ℂ (fun p : ℂ × ℂ => appellF2 a b b' c c' p.1 p.2) appellDiamond := by
+  exact (hasSum_and_analyticOnNhd_doubleSeries (fun q => appellF2Coeff a b b' c c' q.1 q.2)
     appellDiamond (fun _ hp => exists_summable_doubleSeries_of_diamond _
-      (fun _ hσ => exists_norm_appF2Coeff_le a b b' c c' hc hc' hσ) hp)).2
+      (fun _ hσ => exists_norm_appellF2Coeff_le a b b' c c' hc hc' hσ) hp)).2
 
-/-- 16.13.E3: hasSum appF3. -/
+/-- 16.13.E3: hasSum appellF3. -/
 @[dlmf 16.13.E3]
-theorem hasSum_appF3 (a a' b b' c : ℂ) (hc : AppellRegular c) {x y : ℂ} (hxy : (x,y)∈appellBidisc) :
-    HasSum (fun p : ℕ × ℕ => appF3Coeff a a' b b' c p.1 p.2*x^p.1*y^p.2)
-        (appF3 a a' b b' c x y) := by
-  exact (hasSum_and_analyticOnNhd_doubleSeries (fun q => appF3Coeff a a' b b' c q.1 q.2)
+theorem hasSum_appellF3 (a a' b b' c : ℂ) (hc : AppellRegular c) {x y : ℂ}
+    (hxy : (x, y)∈appellBidisc) :
+    HasSum (fun p : ℕ × ℕ => appellF3Coeff a a' b b' c p.1 p.2*x^p.1*y^p.2)
+        (appellF3 a a' b b' c x y) := by
+  exact (hasSum_and_analyticOnNhd_doubleSeries (fun q => appellF3Coeff a a' b b' c q.1 q.2)
     appellBidisc (fun _ hp => exists_summable_doubleSeries_of_bidisc _
-      (fun _ hσ => exists_norm_appF3Coeff_le a a' b b' c hc hσ) hp.1 hp.2)).1 (x, y) hxy
+      (fun _ hσ => exists_norm_appellF3Coeff_le a a' b b' c hc hσ) hp.1 hp.2)).1 (x, y) hxy
 
-/-- 16.13: analytic appF3. -/
+/-- 16.13: analytic appellF3. -/
 @[dlmf 16.13]
-theorem analytic_appF3 (a a' b b' c : ℂ) (hc : AppellRegular c) :
-    AnalyticOnNhd ℂ (fun p : ℂ × ℂ => appF3 a a' b b' c p.1 p.2) appellBidisc := by
-  exact (hasSum_and_analyticOnNhd_doubleSeries (fun q => appF3Coeff a a' b b' c q.1 q.2)
+theorem analytic_appellF3 (a a' b b' c : ℂ) (hc : AppellRegular c) :
+    AnalyticOnNhd ℂ (fun p : ℂ × ℂ => appellF3 a a' b b' c p.1 p.2) appellBidisc := by
+  exact (hasSum_and_analyticOnNhd_doubleSeries (fun q => appellF3Coeff a a' b b' c q.1 q.2)
     appellBidisc (fun _ hp => exists_summable_doubleSeries_of_bidisc _
-      (fun _ hσ => exists_norm_appF3Coeff_le a a' b b' c hc hσ) hp.1 hp.2)).2
+      (fun _ hσ => exists_norm_appellF3Coeff_le a a' b b' c hc hσ) hp.1 hp.2)).2
 
-/-- 16.13.E4: hasSum appF4. -/
+/-- 16.13.E4: hasSum appellF4. -/
 @[dlmf 16.13.E4]
-theorem hasSum_appF4 (a b c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegular c') {x y : ℂ}
+theorem hasSum_appellF4 (a b c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegular c') {x y : ℂ}
     (hxy : (x, y)∈appellF4Domain) :
-    HasSum (fun p : ℕ × ℕ => appF4Coeff a b c c' p.1 p.2*x^p.1*y^p.2) (appF4 a b c c' x y) := by
-  exact (hasSum_and_analyticOnNhd_doubleSeries (fun q => appF4Coeff a b c c' q.1 q.2)
+    HasSum (fun p : ℕ × ℕ => appellF4Coeff a b c c' p.1 p.2*x^p.1*y^p.2)
+        (appellF4 a b c c' x y) := by
+  exact (hasSum_and_analyticOnNhd_doubleSeries (fun q => appellF4Coeff a b c c' q.1 q.2)
     appellF4Domain (fun _ hp => exists_summable_doubleSeries_of_sqrt_add_sqrt _
-      (fun _ hσ => exists_norm_appF4Coeff_le a b c c' hc hc' hσ) hp)).1 (x, y) hxy
+      (fun _ hσ => exists_norm_appellF4Coeff_le a b c c' hc hc' hσ) hp)).1 (x, y) hxy
 
-/-- 16.13: analytic appF4. -/
+/-- 16.13: analytic appellF4. -/
 @[dlmf 16.13]
-theorem analytic_appF4 (a b c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegular c') :
-    AnalyticOnNhd ℂ (fun p : ℂ × ℂ => appF4 a b c c' p.1 p.2) appellF4Domain := by
-  exact (hasSum_and_analyticOnNhd_doubleSeries (fun q => appF4Coeff a b c c' q.1 q.2)
+theorem analytic_appellF4 (a b c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegular c') :
+    AnalyticOnNhd ℂ (fun p : ℂ × ℂ => appellF4 a b c c' p.1 p.2) appellF4Domain := by
+  exact (hasSum_and_analyticOnNhd_doubleSeries (fun q => appellF4Coeff a b c c' q.1 q.2)
     appellF4Domain (fun _ hp => exists_summable_doubleSeries_of_sqrt_add_sqrt _
-      (fun _ hσ => exists_norm_appF4Coeff_le a b c c' hc hc' hσ) hp)).2
+      (fun _ hσ => exists_norm_appellF4Coeff_le a b c c' hc hc' hσ) hp)).2
 
-/-- 16.13.E1: appF1 zero. -/
+/-- 16.13.E1: appellF1 zero. -/
 @[dlmf 16.13.E1]
-theorem appF1_zero (a b b' c : ℂ) : appF1 a b b' c 0 0=1 := by
-  rw [appF1,appell_tsum_zero]; simp [appF1Coeff,poch_zero]
+theorem appellF1_zero (a b b' c : ℂ) : appellF1 a b b' c 0 0=1 := by
+  rw [appellF1,appell_tsum_zero]; simp [appellF1Coeff,pochhammer_zero]
 
-/-- 16.13.E2: appF2 zero. -/
+/-- 16.13.E2: appellF2 zero. -/
 @[dlmf 16.13.E2]
-theorem appF2_zero (a b b' c c' : ℂ) : appF2 a b b' c c' 0 0=1 := by
-  rw [appF2,appell_tsum_zero]; simp [appF2Coeff,poch_zero]
+theorem appellF2_zero (a b b' c c' : ℂ) : appellF2 a b b' c c' 0 0=1 := by
+  rw [appellF2,appell_tsum_zero]; simp [appellF2Coeff,pochhammer_zero]
 
-/-- 16.13.E3: appF3 zero. -/
+/-- 16.13.E3: appellF3 zero. -/
 @[dlmf 16.13.E3]
-theorem appF3_zero (a a' b b' c : ℂ) : appF3 a a' b b' c 0 0=1 := by
-  rw [appF3,appell_tsum_zero]; simp [appF3Coeff,poch_zero]
+theorem appellF3_zero (a a' b b' c : ℂ) : appellF3 a a' b b' c 0 0=1 := by
+  rw [appellF3,appell_tsum_zero]; simp [appellF3Coeff,pochhammer_zero]
 
 /-- Positive natural denominator parameters avoid every nonpositive integer. -/
 private lemma appellRegular_natCast {n : ℕ} (hn : 0 < n) : AppellRegular (n : ℂ) := by
@@ -307,44 +314,44 @@ private lemma appellRegular_natCast {n : ℕ} (hn : 0 < n) : AppellRegular (n : 
 @[dlmf 16.13]
 theorem appell_generic_nonseparable :
     (¬∃ f g : ℂ→ℂ,AnalyticAt ℂ f 0 ∧ AnalyticAt ℂ g 0 ∧
-      (fun p : ℂ × ℂ => appF1 1 1 1 2 p.1 p.2)=ᶠ[𝓝 (0,0)] (fun p => f p.1*g p.2)) ∧
+      (fun p : ℂ × ℂ => appellF1 1 1 1 2 p.1 p.2)=ᶠ[𝓝 (0,0)] (fun p => f p.1*g p.2)) ∧
     (¬∃ f g : ℂ→ℂ,AnalyticAt ℂ f 0 ∧ AnalyticAt ℂ g 0 ∧
-      (fun p : ℂ × ℂ => appF2 1 1 1 1 1 p.1 p.2)=ᶠ[𝓝 (0,0)] (fun p => f p.1*g p.2)) ∧
+      (fun p : ℂ × ℂ => appellF2 1 1 1 1 1 p.1 p.2)=ᶠ[𝓝 (0,0)] (fun p => f p.1*g p.2)) ∧
     (¬∃ f g : ℂ→ℂ,AnalyticAt ℂ f 0 ∧ AnalyticAt ℂ g 0 ∧
-      (fun p : ℂ × ℂ => appF3 1 1 1 1 2 p.1 p.2)=ᶠ[𝓝 (0,0)] (fun p => f p.1*g p.2)) ∧
+      (fun p : ℂ × ℂ => appellF3 1 1 1 1 2 p.1 p.2)=ᶠ[𝓝 (0,0)] (fun p => f p.1*g p.2)) ∧
     (¬∃ f g : ℂ→ℂ,AnalyticAt ℂ f 0 ∧ AnalyticAt ℂ g 0 ∧
-      (fun p : ℂ × ℂ => appF4 1 1 1 1 p.1 p.2)=ᶠ[𝓝 (0,0)] (fun p => f p.1*g p.2)) := by
+      (fun p : ℂ × ℂ => appellF4 1 1 1 1 p.1 p.2)=ᶠ[𝓝 (0,0)] (fun p => f p.1*g p.2)) := by
   have h1 : AppellRegular 1 := by
     simpa using appellRegular_natCast (n := 1) (by norm_num)
   have h2 : AppellRegular 2 := by
     simpa using appellRegular_natCast (n := 2) (by norm_num)
-  unfold appF1 appF2 appF3 appF4
+  unfold appellF1 appellF2 appellF3 appellF4
   refine ⟨Complex.not_exists_mul_analyticAt_of_coeff_ne ?_ ?_,
     Complex.not_exists_mul_analyticAt_of_coeff_ne ?_ ?_,
     Complex.not_exists_mul_analyticAt_of_coeff_ne ?_ ?_,
     Complex.not_exists_mul_analyticAt_of_coeff_ne ?_ ?_⟩
   · simpa only [norm_zero] using exists_summable_doubleSeries_of_bidisc _
-      (fun _ hσ => exists_norm_appF1Coeff_le 1 1 1 2 h2 hσ)
+      (fun _ hσ => exists_norm_appellF1Coeff_le 1 1 1 2 h2 hσ)
       (x := 0) (y := 0) (by norm_num) (by norm_num)
-  · norm_num [appF1Coeff, poch_succ, poch_zero, Nat.factorial]
+  · norm_num [appellF1Coeff, pochhammer_succ, pochhammer_zero, Nat.factorial]
   · simpa only [norm_zero] using exists_summable_doubleSeries_of_diamond _
-      (fun _ hσ => exists_norm_appF2Coeff_le 1 1 1 1 1 h1
+      (fun _ hσ => exists_norm_appellF2Coeff_le 1 1 1 1 1 h1
         h1 hσ) (x := 0) (y := 0) (by norm_num)
-  · norm_num [appF2Coeff, poch_succ, poch_zero, Nat.factorial]
+  · norm_num [appellF2Coeff, pochhammer_succ, pochhammer_zero, Nat.factorial]
   · simpa only [norm_zero] using exists_summable_doubleSeries_of_bidisc _
-      (fun _ hσ => exists_norm_appF3Coeff_le 1 1 1 1 2 h2 hσ)
+      (fun _ hσ => exists_norm_appellF3Coeff_le 1 1 1 1 2 h2 hσ)
       (x := 0) (y := 0) (by norm_num) (by norm_num)
-  · norm_num [appF3Coeff, poch_succ, poch_zero, Nat.factorial]
+  · norm_num [appellF3Coeff, pochhammer_succ, pochhammer_zero, Nat.factorial]
   · simpa only [norm_zero] using exists_summable_doubleSeries_of_sqrt_add_sqrt _
-      (fun _ hσ => exists_norm_appF4Coeff_le 1 1 1 1 h1
+      (fun _ hσ => exists_norm_appellF4Coeff_le 1 1 1 1 h1
         h1 hσ) (x := 0) (y := 0) (by norm_num)
-  · norm_num [appF4Coeff, poch_succ, poch_zero, Nat.factorial]
+  · norm_num [appellF4Coeff, pochhammer_succ, pochhammer_zero, Nat.factorial]
 
 /-- The first-index Appell F1 coefficient recurrence, with its denominator cleared. -/
-lemma appF1Coeff_recurrence_left (a b b' c : ℂ) (hc : AppellRegular c) (m n : ℕ) :
-    (m + 1 : ℂ) * (m + n + c) * appF1Coeff a b b' c (m + 1) n =
-      (m + n + a) * (m + b) * appF1Coeff a b b' c m n := by
-  have hp := poch_ne_zero_of_not_neg_nat hc (m + n)
+lemma appellF1Coeff_recurrence_left (a b b' c : ℂ) (hc : AppellRegular c) (m n : ℕ) :
+    (m + 1 : ℂ) * (m + n + c) * appellF1Coeff a b b' c (m + 1) n =
+      (m + n + a) * (m + b) * appellF1Coeff a b b' c m n := by
+  have hp := pochhammer_ne_zero_of_not_neg_nat hc (m + n)
   have hc0 : c + ((m + n:ℕ):ℂ) ≠ 0 := by
     intro he
     exact hc (m + n) (by linear_combination he)
@@ -352,59 +359,59 @@ lemma appF1Coeff_recurrence_left (a b b' c : ℂ) (hc : AppellRegular c) (m n : 
   have hn : (n ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
   have hm1 : (m : ℂ) + 1 ≠ 0 := by exact_mod_cast (Nat.succ_ne_zero m)
   simp only [Nat.cast_add] at hc0
-  unfold appF1Coeff
+  unfold appellF1Coeff
   rw [show m + 1 + n=m + n + 1 by omega]
-  simp only [poch_succ, Nat.factorial_succ, Nat.cast_mul, Nat.cast_add, Nat.cast_one]
+  simp only [pochhammer_succ, Nat.factorial_succ, Nat.cast_mul, Nat.cast_add, Nat.cast_one]
   field_simp
   ring
 
 /-- Exchanging the separate upper parameters exchanges the F1 coefficient indices. -/
-lemma appF1Coeff_swap (a b b' c : ℂ) (m n : ℕ) :
-    appF1Coeff a b b' c m n = appF1Coeff a b' b c n m := by
-  simp only [appF1Coeff, Nat.add_comm m n, div_eq_mul_inv, mul_inv_rev]
+lemma appellF1Coeff_swap (a b b' c : ℂ) (m n : ℕ) :
+    appellF1Coeff a b b' c m n = appellF1Coeff a b' b c n m := by
+  simp only [appellF1Coeff, Nat.add_comm m n, div_eq_mul_inv, mul_inv_rev]
   ring
 
 /-- The second-index Appell F1 coefficient recurrence follows by exchanging the two variables. -/
-lemma appF1Coeff_recurrence_right (a b b' c : ℂ) (hc : AppellRegular c) (m n : ℕ) :
-    (n + 1 : ℂ) * (n + m + c) * appF1Coeff a b b' c m (n + 1) =
-      (n + m + a) * (n + b') * appF1Coeff a b b' c m n := by
-  have h := appF1Coeff_recurrence_left a b' b c hc n m
-  rw [appF1Coeff_swap a b' b c (n + 1) m, appF1Coeff_swap a b' b c n m] at h
+lemma appellF1Coeff_recurrence_right (a b b' c : ℂ) (hc : AppellRegular c) (m n : ℕ) :
+    (n + 1 : ℂ) * (n + m + c) * appellF1Coeff a b b' c m (n + 1) =
+      (n + m + a) * (n + b') * appellF1Coeff a b b' c m n := by
+  have h := appellF1Coeff_recurrence_left a b' b c hc n m
+  rw [appellF1Coeff_swap a b' b c (n + 1) m, appellF1Coeff_swap a b' b c n m] at h
   exact h
 
 /-- The first-index Appell F2 coefficient recurrence, with its denominator cleared. -/
-lemma appF2Coeff_recurrence_left (a b b' c c' : ℂ) (hc : AppellRegular c) (m n : ℕ) :
-    (m + 1 : ℂ) * (m + c) * appF2Coeff a b b' c c' (m + 1) n =
-      (m + n + a) * (m + b) * appF2Coeff a b b' c c' m n := by
-  have hp := poch_ne_zero_of_not_neg_nat hc m
+lemma appellF2Coeff_recurrence_left (a b b' c c' : ℂ) (hc : AppellRegular c) (m n : ℕ) :
+    (m + 1 : ℂ) * (m + c) * appellF2Coeff a b b' c c' (m + 1) n =
+      (m + n + a) * (m + b) * appellF2Coeff a b b' c c' m n := by
+  have hp := pochhammer_ne_zero_of_not_neg_nat hc m
   have hc0 : c + (m : ℂ) ≠ 0 := by intro he; exact hc m (by linear_combination he)
   have hm : (m ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr m.factorial_ne_zero
   have hm1 : (m : ℂ) + 1 ≠ 0 := by exact_mod_cast (Nat.succ_ne_zero m)
-  unfold appF2Coeff
+  unfold appellF2Coeff
   rw [show m + 1 + n=m + n + 1 by omega]
-  simp only [poch_succ, Nat.factorial_succ, Nat.cast_mul, Nat.cast_add, Nat.cast_one]
+  simp only [pochhammer_succ, Nat.factorial_succ, Nat.cast_mul, Nat.cast_add, Nat.cast_one]
   field_simp
   ring
 
 /-- Exchanging the separate upper and lower parameter pairs exchanges the F2 indices. -/
-lemma appF2Coeff_swap (a b b' c c' : ℂ) (m n : ℕ) :
-    appF2Coeff a b b' c c' m n = appF2Coeff a b' b c' c n m := by
-  simp only [appF2Coeff, Nat.add_comm m n, div_eq_mul_inv, mul_inv_rev]
+lemma appellF2Coeff_swap (a b b' c c' : ℂ) (m n : ℕ) :
+    appellF2Coeff a b b' c c' m n = appellF2Coeff a b' b c' c n m := by
+  simp only [appellF2Coeff, Nat.add_comm m n, div_eq_mul_inv, mul_inv_rev]
   ring
 
 /-- The second-index Appell F2 coefficient recurrence follows by exchanging the two variables. -/
-lemma appF2Coeff_recurrence_right (a b b' c c' : ℂ) (hc' : AppellRegular c') (m n : ℕ) :
-    (n + 1 : ℂ) * (n + c') * appF2Coeff a b b' c c' m (n + 1) =
-      (n + m + a) * (n + b') * appF2Coeff a b b' c c' m n := by
-  have h := appF2Coeff_recurrence_left a b' b c' c hc' n m
-  rw [appF2Coeff_swap a b' b c' c (n + 1) m, appF2Coeff_swap a b' b c' c n m] at h
+lemma appellF2Coeff_recurrence_right (a b b' c c' : ℂ) (hc' : AppellRegular c') (m n : ℕ) :
+    (n + 1 : ℂ) * (n + c') * appellF2Coeff a b b' c c' m (n + 1) =
+      (n + m + a) * (n + b') * appellF2Coeff a b b' c c' m n := by
+  have h := appellF2Coeff_recurrence_left a b' b c' c hc' n m
+  rw [appellF2Coeff_swap a b' b c' c (n + 1) m, appellF2Coeff_swap a b' b c' c n m] at h
   exact h
 
 /-- The first-index Appell F3 coefficient recurrence, with its denominator cleared. -/
-lemma appF3Coeff_recurrence_left (a a' b b' c : ℂ) (hc : AppellRegular c) (m n : ℕ) :
-    (m + 1 : ℂ) * (m + n + c) * appF3Coeff a a' b b' c (m + 1) n =
-      (m + a) * (m + b) * appF3Coeff a a' b b' c m n := by
-  have hp := poch_ne_zero_of_not_neg_nat hc (m + n)
+lemma appellF3Coeff_recurrence_left (a a' b b' c : ℂ) (hc : AppellRegular c) (m n : ℕ) :
+    (m + 1 : ℂ) * (m + n + c) * appellF3Coeff a a' b b' c (m + 1) n =
+      (m + a) * (m + b) * appellF3Coeff a a' b b' c m n := by
+  have hp := pochhammer_ne_zero_of_not_neg_nat hc (m + n)
   have hc0 : c + ((m + n:ℕ):ℂ) ≠ 0 := by
     intro he
     exact hc (m + n) (by linear_combination he)
@@ -412,141 +419,141 @@ lemma appF3Coeff_recurrence_left (a a' b b' c : ℂ) (hc : AppellRegular c) (m n
   have hn : (n ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
   have hm1 : (m : ℂ) + 1 ≠ 0 := by exact_mod_cast (Nat.succ_ne_zero m)
   simp only [Nat.cast_add] at hc0
-  unfold appF3Coeff
+  unfold appellF3Coeff
   rw [show m + 1 + n=m + n + 1 by omega]
-  simp only [poch_succ, Nat.factorial_succ, Nat.cast_mul, Nat.cast_add, Nat.cast_one]
+  simp only [pochhammer_succ, Nat.factorial_succ, Nat.cast_mul, Nat.cast_add, Nat.cast_one]
   field_simp
   ring
 
 /-- The two pairs of F3 upper parameters follow their corresponding coefficient indices. -/
-lemma appF3Coeff_swap (a a' b b' c : ℂ) (m n : ℕ) :
-    appF3Coeff a a' b b' c m n = appF3Coeff a' a b' b c n m := by
-  simp only [appF3Coeff, Nat.add_comm m n, div_eq_mul_inv, mul_inv_rev]
+lemma appellF3Coeff_swap (a a' b b' c : ℂ) (m n : ℕ) :
+    appellF3Coeff a a' b b' c m n = appellF3Coeff a' a b' b c n m := by
+  simp only [appellF3Coeff, Nat.add_comm m n, div_eq_mul_inv, mul_inv_rev]
   ring
 
 /-- The second-index Appell F3 coefficient recurrence follows by exchanging the two variables. -/
-lemma appF3Coeff_recurrence_right (a a' b b' c : ℂ) (hc : AppellRegular c) (m n : ℕ) :
-    (n + 1 : ℂ) * (n + m + c) * appF3Coeff a a' b b' c m (n + 1) =
-      (n + a') * (n + b') * appF3Coeff a a' b b' c m n := by
-  have h := appF3Coeff_recurrence_left a' a b' b c hc n m
-  rw [appF3Coeff_swap a' a b' b c (n + 1) m, appF3Coeff_swap a' a b' b c n m] at h
+lemma appellF3Coeff_recurrence_right (a a' b b' c : ℂ) (hc : AppellRegular c) (m n : ℕ) :
+    (n + 1 : ℂ) * (n + m + c) * appellF3Coeff a a' b b' c m (n + 1) =
+      (n + a') * (n + b') * appellF3Coeff a a' b b' c m n := by
+  have h := appellF3Coeff_recurrence_left a' a b' b c hc n m
+  rw [appellF3Coeff_swap a' a b' b c (n + 1) m, appellF3Coeff_swap a' a b' b c n m] at h
   exact h
 
 /-- The first-index Appell F4 coefficient recurrence, with its denominator cleared. -/
-lemma appF4Coeff_recurrence_left (a b c c' : ℂ) (hc : AppellRegular c) (m n : ℕ) :
-    (m + 1 : ℂ) * (m + c) * appF4Coeff a b c c' (m + 1) n =
-      (m + n + a) * (m + n + b) * appF4Coeff a b c c' m n := by
-  have hp := poch_ne_zero_of_not_neg_nat hc m
+lemma appellF4Coeff_recurrence_left (a b c c' : ℂ) (hc : AppellRegular c) (m n : ℕ) :
+    (m + 1 : ℂ) * (m + c) * appellF4Coeff a b c c' (m + 1) n =
+      (m + n + a) * (m + n + b) * appellF4Coeff a b c c' m n := by
+  have hp := pochhammer_ne_zero_of_not_neg_nat hc m
   have hc0 : c + (m : ℂ) ≠ 0 := by intro he; exact hc m (by linear_combination he)
   have hm : (m ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr m.factorial_ne_zero
   have hm1 : (m : ℂ) + 1 ≠ 0 := by exact_mod_cast (Nat.succ_ne_zero m)
-  unfold appF4Coeff
+  unfold appellF4Coeff
   rw [show m + 1 + n=m + n + 1 by omega]
-  simp only [poch_succ, Nat.factorial_succ, Nat.cast_mul, Nat.cast_add, Nat.cast_one]
+  simp only [pochhammer_succ, Nat.factorial_succ, Nat.cast_mul, Nat.cast_add, Nat.cast_one]
   field_simp
   ring
 
 /-- Exchanging the F4 lower parameters exchanges its two coefficient indices. -/
-lemma appF4Coeff_swap (a b c c' : ℂ) (m n : ℕ) :
-    appF4Coeff a b c c' m n = appF4Coeff a b c' c n m := by
-  simp only [appF4Coeff, Nat.add_comm m n, div_eq_mul_inv, mul_inv_rev]
+lemma appellF4Coeff_swap (a b c c' : ℂ) (m n : ℕ) :
+    appellF4Coeff a b c c' m n = appellF4Coeff a b c' c n m := by
+  simp only [appellF4Coeff, Nat.add_comm m n, div_eq_mul_inv, mul_inv_rev]
   ring
 
 /-- The second-index Appell F4 coefficient recurrence follows by exchanging the two variables. -/
-lemma appF4Coeff_recurrence_right (a b c c' : ℂ) (hc' : AppellRegular c') (m n : ℕ) :
-    (n + 1 : ℂ) * (n + c') * appF4Coeff a b c c' m (n + 1) =
-      (n + m + a) * (n + m + b) * appF4Coeff a b c c' m n := by
-  have h := appF4Coeff_recurrence_left a b c' c hc' n m
-  rw [appF4Coeff_swap a b c' c (n + 1) m, appF4Coeff_swap a b c' c n m] at h
+lemma appellF4Coeff_recurrence_right (a b c c' : ℂ) (hc' : AppellRegular c') (m n : ℕ) :
+    (n + 1 : ℂ) * (n + c') * appellF4Coeff a b c c' m (n + 1) =
+      (n + m + a) * (n + m + b) * appellF4Coeff a b c c' m n := by
+  have h := appellF4Coeff_recurrence_left a b c' c hc' n m
+  rw [appellF4Coeff_swap a b c' c (n + 1) m, appellF4Coeff_swap a b c' c n m] at h
   exact h
 /-- With a regular lower parameter, Appell F1 satisfies its paired second order PDEs
 on the open unit bidisc (DLMF 16.14.1). -/
 @[dlmf 16.14.E1]
-theorem appF1_pde (a b b' c : ℂ) (hc : AppellRegular c) {x y : ℂ} (hxy : (x,y)∈appellBidisc) :
-    let f := appF1 a b b' c
+theorem appellF1_pde (a b b' c : ℂ) (hc : AppellRegular c) {x y : ℂ} (hxy : (x,y)∈appellBidisc) :
+    let f := appellF1 a b b' c
     x*(1-x)*appellDx (appellDx f) x y+y*(1-x)*appellDx (appellDy f) x y+(c-(a+b+1)*x)*appellDx f x
         y-b*y*appellDy f x y-a*b*f x y=0 ∧
     y*(1-y)*appellDy (appellDy f) x y+x*(1-y)*appellDx (appellDy f) x y+(c-(a+b'+1)*y)*appellDy f x
         y-b'*x*appellDx f x y-a*b'*f x y=0 := by
   obtain ⟨A, B, hA, hB, hS⟩ := exists_summable_doubleSeries_of_bidisc _
-    (fun _ hσ => exists_norm_appF1Coeff_le a b b' c hc hσ) hxy.1 hxy.2
+    (fun _ hσ => exists_norm_appellF1Coeff_le a b b' c hc hσ) hxy.1 hxy.2
   have hP := Complex.bivariateSeries_pde_x_of_coeff_recurrence hS hA hB 1 1 0 1 a b c
-    (fun m n => by simpa using appF1Coeff_recurrence_left a b b' c hc m n)
+    (fun m n => by simpa using appellF1Coeff_recurrence_left a b b' c hc m n)
   have hQ := Complex.bivariateSeries_pde_y_of_coeff_recurrence hS hA hB 1 1 0 1 a b' c
-    (fun m n => by simpa using appF1Coeff_recurrence_right a b b' c hc m n)
+    (fun m n => by simpa using appellF1Coeff_recurrence_right a b b' c hc m n)
   dsimp only at hP hQ
   constructor
-  · unfold appellDx appellDy appF1
+  · unfold appellDx appellDy appellF1
     linear_combination hP
-  · unfold appellDx appellDy appF1
+  · unfold appellDx appellDy appellF1
     linear_combination hQ
 
 /-- With both lower parameters regular, Appell F2 satisfies its paired second order PDEs
 on the convergence diamond `‖x‖ + ‖y‖ < 1` (DLMF 16.14.2). -/
 @[dlmf 16.14.E2]
-theorem appF2_pde (a b b' c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegular c') {x y : ℂ}
+theorem appellF2_pde (a b b' c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegular c') {x y : ℂ}
     (hxy : (x, y)∈appellDiamond) :
-    let f := appF2 a b b' c c'
+    let f := appellF2 a b b' c c'
     x*(1-x)*appellDx (appellDx f) x y-x*y*appellDx (appellDy f) x y+(c-(a+b+1)*x)*appellDx f x
         y-b*y*appellDy f x y-a*b*f x y=0 ∧
     y*(1-y)*appellDy (appellDy f) x y-x*y*appellDx (appellDy f) x y+(c'-(a+b'+1)*y)*appellDy f x
         y-b'*x*appellDx f x y-a*b'*f x y=0 := by
   obtain ⟨A, B, hA, hB, hS⟩ := exists_summable_doubleSeries_of_diamond _
-    (fun _ hσ => exists_norm_appF2Coeff_le a b b' c c' hc hc' hσ) hxy
+    (fun _ hσ => exists_norm_appellF2Coeff_le a b b' c c' hc hc' hσ) hxy
   have hP := Complex.bivariateSeries_pde_x_of_coeff_recurrence hS hA hB 0 1 0 1 a b c
-    (fun m n => by simpa using appF2Coeff_recurrence_left a b b' c c' hc m n)
+    (fun m n => by simpa using appellF2Coeff_recurrence_left a b b' c c' hc m n)
   have hQ := Complex.bivariateSeries_pde_y_of_coeff_recurrence hS hA hB 0 1 0 1 a b' c'
-    (fun m n => by simpa using appF2Coeff_recurrence_right a b b' c c' hc' m n)
+    (fun m n => by simpa using appellF2Coeff_recurrence_right a b b' c c' hc' m n)
   dsimp only at hP hQ
   constructor
-  · unfold appellDx appellDy appF2
+  · unfold appellDx appellDy appellF2
     linear_combination hP
-  · unfold appellDx appellDy appF2
+  · unfold appellDx appellDy appellF2
     linear_combination hQ
 
 /-- With a regular lower parameter, Appell F3 satisfies its paired second order PDEs
 on the open unit bidisc (DLMF 16.14.3). -/
 @[dlmf 16.14.E3]
-theorem appF3_pde (a a' b b' c : ℂ) (hc : AppellRegular c) {x y : ℂ} (hxy : (x,y)∈appellBidisc) :
-    let f := appF3 a a' b b' c
+theorem appellF3_pde (a a' b b' c : ℂ) (hc : AppellRegular c) {x y : ℂ} (hxy : (x,y)∈appellBidisc) :
+    let f := appellF3 a a' b b' c
     x*(1-x)*appellDx (appellDx f) x y+y*appellDx (appellDy f) x y+(c-(a+b+1)*x)*appellDx f x
         y-a*b*f x y=0 ∧
     y*(1-y)*appellDy (appellDy f) x y+x*appellDx (appellDy f) x y+(c-(a'+b'+1)*y)*appellDy f x
         y-a'*b'*f x y=0 := by
   obtain ⟨A, B, hA, hB, hS⟩ := exists_summable_doubleSeries_of_bidisc _
-    (fun _ hσ => exists_norm_appF3Coeff_le a a' b b' c hc hσ) hxy.1 hxy.2
+    (fun _ hσ => exists_norm_appellF3Coeff_le a a' b b' c hc hσ) hxy.1 hxy.2
   have hP := Complex.bivariateSeries_pde_x_of_coeff_recurrence hS hA hB 1 0 0 1 a b c
-    (fun m n => by simpa using appF3Coeff_recurrence_left a a' b b' c hc m n)
+    (fun m n => by simpa using appellF3Coeff_recurrence_left a a' b b' c hc m n)
   have hQ := Complex.bivariateSeries_pde_y_of_coeff_recurrence hS hA hB 1 0 0 1 a' b' c
-    (fun m n => by simpa using appF3Coeff_recurrence_right a a' b b' c hc m n)
+    (fun m n => by simpa using appellF3Coeff_recurrence_right a a' b b' c hc m n)
   dsimp only at hP hQ
   constructor
-  · unfold appellDx appellDy appF3
+  · unfold appellDx appellDy appellF3
     linear_combination hP
-  · unfold appellDx appellDy appF3
+  · unfold appellDx appellDy appellF3
     linear_combination hQ
 
 /-- With both lower parameters regular, Appell F4 satisfies its paired second order PDEs
 on the domain `√‖x‖ + √‖y‖ < 1` of absolute convergence (DLMF 16.14.4). -/
 @[dlmf 16.14.E4]
-theorem appF4_pde (a b c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegular c') {x y : ℂ}
+theorem appellF4_pde (a b c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegular c') {x y : ℂ}
     (hxy : (x, y)∈appellF4Domain) :
-    let f := appF4 a b c c'
+    let f := appellF4 a b c c'
     x*(1-x)*appellDx (appellDx f) x y-2*x*y*appellDx (appellDy f) x y-y^2*appellDy (appellDy f) x
         y+(c-(a+b+1)*x)*appellDx f x y-(a+b+1)*y*appellDy f x y-a*b*f x y=0 ∧
     y*(1-y)*appellDy (appellDy f) x y-2*x*y*appellDx (appellDy f) x y-x^2*appellDx (appellDx f) x
         y+(c'-(a+b+1)*y)*appellDy f x y-(a+b+1)*x*appellDx f x y-a*b*f x y=0 := by
   obtain ⟨A, B, hA, hB, hS⟩ := exists_summable_doubleSeries_of_sqrt_add_sqrt _
-    (fun _ hσ => exists_norm_appF4Coeff_le a b c c' hc hc' hσ) hxy
+    (fun _ hσ => exists_norm_appellF4Coeff_le a b c c' hc hc' hσ) hxy
   have hP := Complex.bivariateSeries_pde_x_of_coeff_recurrence hS hA hB 0 1 1 1 a b c
-    (fun m n => by simpa using appF4Coeff_recurrence_left a b c c' hc m n)
+    (fun m n => by simpa using appellF4Coeff_recurrence_left a b c c' hc m n)
   have hQ := Complex.bivariateSeries_pde_y_of_coeff_recurrence hS hA hB 0 1 1 1 a b c'
-    (fun m n => by simpa using appF4Coeff_recurrence_right a b c c' hc' m n)
+    (fun m n => by simpa using appellF4Coeff_recurrence_right a b c c' hc' m n)
   dsimp only at hP hQ
   constructor
-  · unfold appellDx appellDy appF4
+  · unfold appellDx appellDy appellF4
     linear_combination hP
-  · unfold appellDx appellDy appF4
+  · unfold appellDx appellDy appellF4
     linear_combination hQ
 
 /-- A non-integral parameter is regular. -/
@@ -554,8 +561,9 @@ lemma ne_neg_nat_of_ne_int {b : ℂ} (hb : ∀ k : ℤ, b ≠ k) : ∀ k : ℕ, 
   fun k h => hb (-(k : ℤ)) (by rw [h]; push_cast; ring)
 
 /-- `Γ(b+j) = (b)ⱼ Γ(b)` at regular `b`. -/
-private lemma Gamma_add_nat_eq_poch_mul_Gamma_of_ne_neg_nat {b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (j : ℕ) :
-    Gamma (b + j) = poch b j * Gamma b := by
+private lemma Gamma_add_nat_eq_pochhammer_mul_Gamma_of_ne_neg_nat {b : ℂ}
+    (hb : ∀ k : ℕ, b ≠ -k) (j : ℕ) :
+    Gamma (b + j) = pochhammer b j * Gamma b := by
   have h := Complex.Gamma_add_nat_div_Gamma_eq (n := j) b hb
   rw [div_eq_iff (Complex.Gamma_ne_zero hb)] at h
   exact h
@@ -564,24 +572,25 @@ private lemma Gamma_add_nat_eq_poch_mul_Gamma_of_ne_neg_nat {b : ℂ} (hb : ∀ 
 private lemma Gamma_add_nat_mul_Gamma_sub_nat {b b' : ℂ} (hb : ∀ k : ℤ, b ≠ k)
     (hb' : ∀ k : ℤ, b' ≠ k) (j : ℕ) :
     Gamma (b + j) * Gamma (b' - j) =
-      (-1) ^ j * poch b j / poch (1 - b') j * (Gamma b * Gamma b') := by
+      (-1) ^ j * pochhammer b j / pochhammer (1 - b') j * (Gamma b * Gamma b') := by
   have hbr := ne_neg_nat_of_ne_int hb
   have hb'r : ∀ k : ℕ, b' - j ≠ -k := fun k h => hb' (j - k) (by
     push_cast; linear_combination h)
-  have h1 := Gamma_add_nat_eq_poch_mul_Gamma_of_ne_neg_nat hb'r j
+  have h1 := Gamma_add_nat_eq_pochhammer_mul_Gamma_of_ne_neg_nat hb'r j
   rw [sub_add_cancel] at h1
-  have hr := poch_reflect (1 - b') j
+  have hr := pochhammer_reflect (1 - b') j
   rw [show 1 - (1 - b') - (j : ℂ) = b' - j by ring] at hr
   have h1b' : ∀ k : ℕ, 1 - b' ≠ -k := fun k h => hb' (k + 1) (by push_cast; linear_combination -h)
-  have hp := poch_ne_zero_of_not_neg_nat h1b' j
-  have hpj : poch (b' - j) j ≠ 0 := by rw [hr]; exact mul_ne_zero (pow_ne_zero _ (by norm_num)) hp
-  rw [Gamma_add_nat_eq_poch_mul_Gamma_of_ne_neg_nat hbr j]
-  have hG : Gamma (b' - j) = Gamma b' / poch (b' - j) j := by
+  have hp := pochhammer_ne_zero_of_not_neg_nat h1b' j
+  have hpj : pochhammer (b' - j) j ≠ 0 := by rw [hr];
+                                             exact mul_ne_zero (pow_ne_zero _ (by norm_num)) hp
+  rw [Gamma_add_nat_eq_pochhammer_mul_Gamma_of_ne_neg_nat hbr j]
+  have hG : Gamma (b' - j) = Gamma b' / pochhammer (b' - j) j := by
     rw [h1]; field_simp
   rw [hG, hr]
   have hs : (-1 : ℂ) ^ (j * 2) = 1 := by rw [pow_mul']; norm_num
   field_simp
-  linear_combination (-(poch b j * Gamma b * Gamma b')) * hs
+  linear_combination (-(pochhammer b j * Gamma b * Gamma b')) * hs
 
 /-- Subexponential bound for the Horn G2 Gamma pair `Γ(b+n-m)Γ(b'+m-n)`. -/
 private lemma exists_norm_Gamma_add_sub_mul_Gamma_le {b b' : ℂ} (hb : ∀ k : ℤ, b ≠ k)
@@ -590,8 +599,8 @@ private lemma exists_norm_Gamma_add_sub_mul_Gamma_le {b b' : ℂ} (hb : ∀ k : 
       ‖Gamma (b + n - m) * Gamma (b' + m - n)‖ ≤ C * σ ^ (m + n) * ‖Gamma b * Gamma b'‖ := by
   have h1b' : ∀ k : ℕ, 1 - b' ≠ -k := fun k h => hb' (k + 1) (by push_cast; linear_combination -h)
   have h1b : ∀ k : ℕ, 1 - b ≠ -k := fun k h => hb (k + 1) (by push_cast; linear_combination -h)
-  obtain ⟨C1, hC1, h1⟩ := norm_poch_le_mul_norm_poch b (1 - b') h1b' hσ
-  obtain ⟨C2, hC2, h2⟩ := norm_poch_le_mul_norm_poch b' (1 - b) h1b hσ
+  obtain ⟨C1, hC1, h1⟩ := norm_pochhammer_le_mul_norm_pochhammer b (1 - b') h1b' hσ
+  obtain ⟨C2, hC2, h2⟩ := norm_pochhammer_le_mul_norm_pochhammer b' (1 - b) h1b hσ
   refine ⟨C1 + C2, by positivity, fun m n => ?_⟩
   have hσ0 : 0 ≤ σ := by linarith
   have hG0 := norm_nonneg (Gamma b * Gamma b')
@@ -600,12 +609,12 @@ private lemma exists_norm_Gamma_add_sub_mul_Gamma_le {b b' : ℂ} (hb : ∀ k : 
     have e1 : b + ((m + j : ℕ) : ℂ) - m = b + j := by push_cast; ring
     have e2 : b' + (m : ℂ) - ((m + j : ℕ) : ℂ) = b' - j := by push_cast; ring
     rw [e1, e2, Gamma_add_nat_mul_Gamma_sub_nat hb hb' j]
-    have hp := norm_pos_iff.mpr (poch_ne_zero_of_not_neg_nat h1b' j)
+    have hp := norm_pos_iff.mpr (pochhammer_ne_zero_of_not_neg_nat h1b' j)
     rw [norm_mul, norm_div, norm_mul, norm_pow, norm_neg, norm_one, one_pow, one_mul]
-    have hj : ‖poch b j‖ / ‖poch (1 - b') j‖ ≤ C1 * σ ^ j := by
+    have hj : ‖pochhammer b j‖ / ‖pochhammer (1 - b') j‖ ≤ C1 * σ ^ j := by
       rw [div_le_iff₀ hp]; exact h1 j
     have hσj : σ ^ j ≤ σ ^ (m + (m + j)) := pow_le_pow_right₀ hσ.le (by omega)
-    calc ‖poch b j‖ / ‖poch (1 - b') j‖ * ‖Gamma b * Gamma b'‖
+    calc ‖pochhammer b j‖ / ‖pochhammer (1 - b') j‖ * ‖Gamma b * Gamma b'‖
         ≤ C1 * σ ^ j * ‖Gamma b * Gamma b'‖ := by gcongr
       _ ≤ (C1 + C2) * σ ^ (m + (m + j)) * ‖Gamma b * Gamma b'‖ := by
         gcongr
@@ -614,12 +623,12 @@ private lemma exists_norm_Gamma_add_sub_mul_Gamma_le {b b' : ℂ} (hb : ∀ k : 
     have e1 : b + (n : ℂ) - ((n + j : ℕ) : ℂ) = b - j := by push_cast; ring
     have e2 : b' + ((n + j : ℕ) : ℂ) - n = b' + j := by push_cast; ring
     rw [e1, e2, mul_comm, Gamma_add_nat_mul_Gamma_sub_nat hb' hb j, mul_comm (Gamma b') (Gamma b)]
-    have hp := norm_pos_iff.mpr (poch_ne_zero_of_not_neg_nat h1b j)
+    have hp := norm_pos_iff.mpr (pochhammer_ne_zero_of_not_neg_nat h1b j)
     rw [norm_mul, norm_div, norm_mul, norm_pow, norm_neg, norm_one, one_pow, one_mul]
-    have hj : ‖poch b' j‖ / ‖poch (1 - b) j‖ ≤ C2 * σ ^ j := by
+    have hj : ‖pochhammer b' j‖ / ‖pochhammer (1 - b) j‖ ≤ C2 * σ ^ j := by
       rw [div_le_iff₀ hp]; exact h2 j
     have hσj : σ ^ j ≤ σ ^ (n + j + n) := pow_le_pow_right₀ hσ.le (by omega)
-    calc ‖poch b' j‖ / ‖poch (1 - b) j‖ * ‖Gamma b * Gamma b'‖
+    calc ‖pochhammer b' j‖ / ‖pochhammer (1 - b) j‖ * ‖Gamma b * Gamma b'‖
         ≤ C2 * σ ^ j * ‖Gamma b * Gamma b'‖ := by gcongr
       _ ≤ (C1 + C2) * σ ^ (n + j + n) * ‖Gamma b * Gamma b'‖ := by
         gcongr
@@ -640,19 +649,20 @@ theorem hornG2_summable (a a' b b' : ℂ) (ha : AppellRegular a) (ha' : AppellRe
         (Gamma a*Gamma a'*Gamma b*Gamma b'*(q.1 !*q.2 !))‖ ≤ C * σ ^ (q.1 + q.2) := by
     intro σ hσ
     obtain ⟨τ, hτ, hτσ⟩ := exists_one_lt_pow_le hσ 2
-    obtain ⟨C1, hC1, h1⟩ := norm_poch_le_mul_factorial a hτ
-    obtain ⟨C2, hC2, h2⟩ := norm_poch_le_mul_factorial a' hτ
+    obtain ⟨C1, hC1, h1⟩ := norm_pochhammer_le_mul_factorial a hτ
+    obtain ⟨C2, hC2, h2⟩ := norm_pochhammer_le_mul_factorial a' hτ
     obtain ⟨C3, hC3, h3⟩ := exists_norm_Gamma_add_sub_mul_Gamma_le hb hb' hτ
     refine ⟨C1 * C2 * C3, fun ⟨m, n⟩ => ?_⟩
     simp only
     have hm : (0 : ℝ) < m ! := by exact_mod_cast m.factorial_pos
     have hn : (0 : ℝ) < n ! := by exact_mod_cast n.factorial_pos
     have hτ0 : 0 ≤ τ := by linarith
-    rw [Gamma_add_nat_eq_poch_mul_Gamma_of_ne_neg_nat ha m,
-        Gamma_add_nat_eq_poch_mul_Gamma_of_ne_neg_nat ha' n]
-    have e : poch a m * Gamma a * (poch a' n * Gamma a') * Gamma (b + n - m) * Gamma (b' + m - n) /
+    rw [Gamma_add_nat_eq_pochhammer_mul_Gamma_of_ne_neg_nat ha m,
+        Gamma_add_nat_eq_pochhammer_mul_Gamma_of_ne_neg_nat ha' n]
+    have e : pochhammer a m * Gamma a * (pochhammer a' n * Gamma a') * Gamma (b + n - m) *
+        Gamma (b' + m - n) /
         (Gamma a * Gamma a' * Gamma b * Gamma b' * (m ! * n !)) =
-        poch a m * poch a' n * (Gamma (b + n - m) * Gamma (b' + m - n)) /
+        pochhammer a m * pochhammer a' n * (Gamma (b + n - m) * Gamma (b' + m - n)) /
           ((Gamma b * Gamma b') * (m ! * n !)) := by
       field_simp
     have hm0 : (m ! : ℂ) ≠ 0 := by exact_mod_cast m.factorial_ne_zero
@@ -660,8 +670,8 @@ theorem hornG2_summable (a a' b b' : ℂ) (ha : AppellRegular a) (ha' : AppellRe
     have hden : 0 < ‖Gamma b * Gamma b' * ((m ! : ℂ) * n !)‖ :=
       norm_pos_iff.mpr (mul_ne_zero (mul_ne_zero hGb hGb') (mul_ne_zero hm0 hn0))
     rw [e, norm_div, div_le_iff₀ hden]
-    calc ‖poch a m * poch a' n * (Gamma (b + n - m) * Gamma (b' + m - n))‖
-        = ‖poch a m‖ * ‖poch a' n‖ * ‖Gamma (b + n - m) * Gamma (b' + m - n)‖ := by
+    calc ‖pochhammer a m * pochhammer a' n * (Gamma (b + n - m) * Gamma (b' + m - n))‖
+        = ‖pochhammer a m‖ * ‖pochhammer a' n‖ * ‖Gamma (b + n - m) * Gamma (b' + m - n)‖ := by
           rw [norm_mul, norm_mul]
       _ ≤ (C1 * τ ^ m * m !) * (C2 * τ ^ n * n !) *
             (C3 * τ ^ (m + n) * ‖Gamma b * Gamma b'‖) := by
@@ -686,29 +696,29 @@ private lemma exists_norm_Gamma_add_nat_le_and_sub_nat_le {a : ℂ} (ha : ∀ k 
       ‖Gamma (a - j)‖ * j ! ≤ C * σ ^ j := by
   have har := ne_neg_nat_of_ne_int ha
   have h1a : ∀ k : ℕ, 1 - a ≠ -k := fun k h => ha (k + 1) (by push_cast; linear_combination -h)
-  obtain ⟨C1, hC1, h1⟩ := norm_poch_le_mul_factorial a hσ
-  obtain ⟨C2, hC2, h2⟩ := factorial_le_mul_norm_poch (1 - a) h1a hσ
+  obtain ⟨C1, hC1, h1⟩ := norm_pochhammer_le_mul_factorial a hσ
+  obtain ⟨C2, hC2, h2⟩ := factorial_le_mul_norm_pochhammer (1 - a) h1a hσ
   refine ⟨(C1 + C2) * ‖Gamma a‖, by positivity, fun j => ⟨?_, ?_⟩⟩
-  · rw [Gamma_add_nat_eq_poch_mul_Gamma_of_ne_neg_nat har j, norm_mul]
-    calc ‖poch a j‖ * ‖Gamma a‖ ≤ (C1 * σ ^ j * j !) * ‖Gamma a‖ := by gcongr; exact h1 j
+  · rw [Gamma_add_nat_eq_pochhammer_mul_Gamma_of_ne_neg_nat har j, norm_mul]
+    calc ‖pochhammer a j‖ * ‖Gamma a‖ ≤ (C1 * σ ^ j * j !) * ‖Gamma a‖ := by gcongr; exact h1 j
       _ ≤ (C1 + C2) * ‖Gamma a‖ * σ ^ j * j ! := by
         have : 0 ≤ C2 * ‖Gamma a‖ * σ ^ j * j ! := by positivity
         nlinarith
   · -- Γ(a) = (a-j)ⱼ Γ(a-j) with (a-j)ⱼ = (-1)^j (1-a)ⱼ
     have hb'r : ∀ k : ℕ, a - j ≠ -k := fun k h => ha (j - k) (by push_cast; linear_combination h)
-    have hG := Gamma_add_nat_eq_poch_mul_Gamma_of_ne_neg_nat hb'r j
+    have hG := Gamma_add_nat_eq_pochhammer_mul_Gamma_of_ne_neg_nat hb'r j
     rw [sub_add_cancel] at hG
-    have hr := poch_reflect (1 - a) j
+    have hr := pochhammer_reflect (1 - a) j
     rw [show 1 - (1 - a) - (j : ℂ) = a - j by ring] at hr
     rw [hr] at hG
-    have hn : ‖Gamma a‖ = ‖poch (1 - a) j‖ * ‖Gamma (a - j)‖ := by
+    have hn : ‖Gamma a‖ = ‖pochhammer (1 - a) j‖ * ‖Gamma (a - j)‖ := by
       rw [hG, norm_mul, norm_mul, norm_pow, norm_neg, norm_one, one_pow, one_mul]
     rw [hn]
     have hG0 := norm_nonneg (Gamma (a - j))
-    calc ‖Gamma (a - j)‖ * j ! ≤ ‖Gamma (a - j)‖ * (C2 * σ ^ j * ‖poch (1 - a) j‖) := by
+    calc ‖Gamma (a - j)‖ * j ! ≤ ‖Gamma (a - j)‖ * (C2 * σ ^ j * ‖pochhammer (1 - a) j‖) := by
           gcongr; exact h2 j
-      _ ≤ (C1 + C2) * (‖poch (1 - a) j‖ * ‖Gamma (a - j)‖) * σ ^ j := by
-        have : 0 ≤ C1 * (‖poch (1 - a) j‖ * ‖Gamma (a - j)‖) * σ ^ j := by positivity
+      _ ≤ (C1 + C2) * (‖pochhammer (1 - a) j‖ * ‖Gamma (a - j)‖) * σ ^ j := by
+        have : 0 ≤ C1 * (‖pochhammer (1 - a) j‖ * ‖Gamma (a - j)‖) * σ ^ j := by positivity
         nlinarith
 
 /-- `(A+B)! ≤ 2^(A+B) A! B!`. -/

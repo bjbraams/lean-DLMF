@@ -22,8 +22,8 @@ public import DLMFMathlib.Analysis.Calculus.DifferentialOperators
   `contiguous_a_pred_c_succ`, `contiguous_a_pred_c_pred`, `contiguous_c_three`,
   `contiguous_diagonal`: Gauss's contiguous relations DLMF 15.5.12–15.5.19.
 * `deriv_contiguous_c_succ`: DLMF 15.5.21.
-* `contiguous_ultrasphPoly_raise`, `contiguous_jacobi_lowering`, `contiguous_jacobi_raising`:
-  hypergeometric forms of 18.9.7, 18.9.17 and 18.9.18.
+* `contiguous_ultrasphericalPolynomial_raise`, `contiguous_jacobi_lowering`,
+  `contiguous_jacobi_raising`: hypergeometric forms of 18.9.7, 18.9.17 and 18.9.18.
 
 ## Implementation notes
 
@@ -45,7 +45,7 @@ noncomputable section
 namespace DLMF.Hypergeometric
 
 /-- Identity under the stated parameter and domain assumptions: `iteratedDeriv n (₂F₁ a b c) z =
-poch a n * poch b n / poch c n * ₂F₁ (a + n) (b + n) (c + n) z`. -/
+pochhammer a n * pochhammer b n / pochhammer c n * ₂F₁ (a + n) (b + n) (c + n) z`. -/
 @[dlmf 15.5.E2]
 theorem iteratedDeriv_hypergeometric
     {a b c z : ℂ}
@@ -53,17 +53,18 @@ theorem iteratedDeriv_hypergeometric
     (hc : ∀ k : ℕ, c ≠ -(k : ℂ))
     (hz : ‖z‖ < 1)  :
     iteratedDeriv n (₂F₁ a b c) z =
-      poch a n * poch b n / poch c n * ₂F₁ (a + n) (b + n) (c + n) z := by
+      pochhammer a n * pochhammer b n / pochhammer c n * ₂F₁ (a + n) (b + n) (c + n) z := by
   induction n generalizing z with
-  | zero => simp [iteratedDeriv_zero, poch_zero]
+  | zero => simp [iteratedDeriv_zero, pochhammer_zero]
   | succ n ih =>
     have heq : iteratedDeriv n (₂F₁ a b c) =ᶠ[𝓝 z]
-        (fun w => poch a n * poch b n / poch c n * ₂F₁ (a + n) (b + n) (c + n) w) := by
+        (fun w => pochhammer a n * pochhammer b n / pochhammer c n *
+            ₂F₁ (a + n) (b + n) (c + n) w) := by
       filter_upwards [isOpen_lt continuous_norm continuous_const |>.mem_nhds hz] with w hw
       exact ih hw
     rw [iteratedDeriv_succ, heq.deriv_eq, deriv_const_mul_field,
       deriv_ordinaryHypergeometric (not_neg_nat_add_nat hc n) hz]
-    simp only [poch_succ, Nat.cast_add, Nat.cast_one, div_eq_mul_inv, mul_inv_rev]
+    simp only [pochhammer_succ, Nat.cast_add, Nat.cast_one, div_eq_mul_inv, mul_inv_rev]
     ring
 
 /-- For `z ≠ 0`, `z * z ^ (a - 1) = z ^ a`. -/
@@ -112,7 +113,7 @@ private lemma deriv_cpow_mul_hg_lower {a b c z : ℂ}
   linear_combination z ^ (c - 1 - 1) * ha - z ^ (c - 1 - 1) * hd
 
 /-- Identity under the stated parameter and domain assumptions: `(mulDerivMul^[n]) (fun w => w ^
-(a - 1) * ₂F₁ a b c w) z = poch a n * z ^ (a + n - 1) * ₂F₁ (a + n) b c z`. -/
+(a - 1) * ₂F₁ a b c w) z = pochhammer a n * z ^ (a + n - 1) * ₂F₁ (a + n) b c z`. -/
 @[dlmf 15.5.E3]
 theorem iterate_mulDerivMul
     {a b c z : ℂ}
@@ -121,28 +122,28 @@ theorem iterate_mulDerivMul
     (hz : ‖z‖ < 1)
     (hzs : z ∈ slitPlane) :
     (mulDerivMul^[n]) (fun w => w ^ (a - 1) * ₂F₁ a b c w) z =
-      poch a n * z ^ (a + n - 1) * ₂F₁ (a + n) b c z := by
+      pochhammer a n * z ^ (a + n - 1) * ₂F₁ (a + n) b c z := by
   induction n generalizing z with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ n ih =>
     have heq : (fun w => w * (mulDerivMul^[n]) (fun t => t ^ (a - 1) * ₂F₁ a b c t) w)
-        =ᶠ[𝓝 z] (fun w => poch a n * (w * (w ^ (a + n - 1) * ₂F₁ (a + n) b c w))) := by
+        =ᶠ[𝓝 z] (fun w => pochhammer a n * (w * (w ^ (a + n - 1) * ₂F₁ (a + n) b c w))) := by
       filter_upwards [isOpen_lt continuous_norm continuous_const |>.mem_nhds hz,
         isOpen_slitPlane.mem_nhds hzs] with w hw hs
       rw [ih hw hs]
       ring
     rw [Function.iterate_succ_apply', mulDerivMul_eq_mul, heq.deriv_eq, deriv_const_mul_field]
-    change z * (poch a n * deriv (fun w => w * (w ^ (a + n - 1) * ₂F₁ (a + n) b c w)) z) = _
+    change z * (pochhammer a n * deriv (fun w => w * (w ^ (a + n - 1) * ₂F₁ (a + n) b c w)) z) = _
     calc
-      _ = poch a n * mulDerivMul (fun w => w ^ (a + n - 1) * ₂F₁ (a + n) b c w) z := by
+      _ = pochhammer a n * mulDerivMul (fun w => w ^ (a + n - 1) * ₂F₁ (a + n) b c w) z := by
         rw [mulDerivMul_eq_mul]; ring
       _ = _ := by
         rw [mulDerivMul_hg hc hz hzs]
-        simp only [poch_succ, Nat.cast_add, Nat.cast_one]
+        simp only [pochhammer_succ, Nat.cast_add, Nat.cast_one]
         ring
 
 /-- Identity under the stated parameter and domain assumptions: `iteratedDeriv n (fun w => w ^ (c
-- 1) * ₂F₁ a b c w) z = poch (c - n) n * z ^ (c - n - 1) * ₂F₁ a b (c - n) z`. -/
+- 1) * ₂F₁ a b c w) z = pochhammer (c - n) n * z ^ (c - n - 1) * ₂F₁ a b (c - n) z`. -/
 @[dlmf 15.5.E4]
 theorem iteratedDeriv_mul_cpow
     {a b c z : ℂ}
@@ -152,9 +153,9 @@ theorem iteratedDeriv_mul_cpow
     (hzs : z ∈ slitPlane)
     (hcn : ∀ k : ℕ, c - n ≠ -(k : ℂ)) :
     iteratedDeriv n (fun w => w ^ (c - 1) * ₂F₁ a b c w) z =
-      poch (c - n) n * z ^ (c - n - 1) * ₂F₁ a b (c - n) z := by
+      pochhammer (c - n) n * z ^ (c - n - 1) * ₂F₁ a b (c - n) z := by
   induction n generalizing c with
-  | zero => simp [iteratedDeriv_zero, poch_zero]
+  | zero => simp [iteratedDeriv_zero, pochhammer_zero]
   | succ n ih =>
     have hcm : ∀ k : ℕ, c - 1 ≠ -(k : ℂ) := by
       intro k hk
@@ -174,7 +175,7 @@ theorem iteratedDeriv_mul_cpow
       ring
     rw [iteratedDeriv_succ', heq.iteratedDeriv_eq n, iteratedDeriv_const_mul_field,
       ih hcm hcn']
-    simp only [poch_succ, Nat.cast_add, Nat.cast_one]
+    simp only [pochhammer_succ, Nat.cast_add, Nat.cast_one]
     ring
 
 /-- Leibniz rule for `w ↦ w h(w)`: `(w h)^{(m+1)} = z h^{(m+1)} + (m + 1) h^{(m)}`. -/
@@ -310,21 +311,23 @@ theorem deriv_contiguous_c_succ {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : �
     c * (1 - z) * deriv (₂F₁ a b c) z =
       (c - a) * (c - b) * ₂F₁ a b (c + 1) z + c * (a + b - c) * ₂F₁ a b c z := by
   have hcoeff (n : ℕ) :
-      c * ((n + 1) * gaussHGCoeff a b c (n + 1) - n * gaussHGCoeff a b c n) =
-        (c - a) * (c - b) * gaussHGCoeff a b (c + 1) n +
-          c * (a + b - c) * gaussHGCoeff a b c n := by
-    have hcp := poch_ne_zero_of_not_neg_nat hc n
+      c * ((n + 1) * gaussHypergeometricCoeff a b c (n + 1) - n *
+          gaussHypergeometricCoeff a b c n) =
+        (c - a) * (c - b) * gaussHypergeometricCoeff a b (c + 1) n +
+          c * (a + b - c) * gaussHypergeometricCoeff a b c n := by
+    have hcp := pochhammer_ne_zero_of_not_neg_nat hc n
     have hc1 : ∀ k : ℕ, c + 1 ≠ -(k : ℂ) := by simpa using not_neg_nat_add_nat hc 1
-    have hcp1 := poch_ne_zero_of_not_neg_nat hc1 n
+    have hcp1 := pochhammer_ne_zero_of_not_neg_nat hc1 n
     have hf : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
-    have hshift : (c + n) * gaussHGCoeff a b (c + 1) n = c * gaussHGCoeff a b c n := by
-      have hpoch := poch_succ_left_mul c n
-      simp only [gaussHGCoeff]
+    have hshift : (c + n) * gaussHypergeometricCoeff a b (c + 1) n = c *
+        gaussHypergeometricCoeff a b c n := by
+      have hpoch := pochhammer_succ_left_mul c n
+      simp only [gaussHypergeometricCoeff]
       field_simp [hcp, hcp1, hf]
-      linear_combination -(poch a n * poch b n) * hpoch
+      linear_combination -(pochhammer a n * pochhammer b n) * hpoch
     have hn : c + (n : ℂ) ≠ 0 := by simpa [eq_neg_iff_add_eq_zero] using hc n
     apply mul_left_cancel₀ hn
-    have hrec := gaussHGCoeff_recurrence (a := a) (b := b) hc n
+    have hrec := gaussHypergeometricCoeff_recurrence (a := a) (b := b) hc n
     linear_combination c * hrec - (c - a) * (c - b) * hshift
   have hz' := mem_eball_one_of_norm_lt_one hz
   have hs := hasFPowerSeriesOnBall_ordinaryHypergeometric a b c
@@ -334,10 +337,10 @@ theorem deriv_contiguous_c_succ {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : �
   have h₃ := (hasFPowerSeriesOnBall_ordinaryHypergeometric a b (c + 1)).hasSum_mul_pow hz'
   have hleft := (h₁.sub h₂).mul_left c
   have hright := (h₃.mul_left ((c - a) * (c - b))).add (h₀.mul_left (c * (a + b - c)))
-  have heq : (fun n : ℕ => c * (((n + 1) * gaussHGCoeff a b c (n + 1) * z ^ n) -
-        n * gaussHGCoeff a b c n * z ^ n)) =
-      (fun n : ℕ => (c - a) * (c - b) * (gaussHGCoeff a b (c + 1) n * z ^ n) +
-        c * (a + b - c) * (gaussHGCoeff a b c n * z ^ n)) := by
+  have heq : (fun n : ℕ => c * (((n + 1) * gaussHypergeometricCoeff a b c (n + 1) * z ^ n) -
+        n * gaussHypergeometricCoeff a b c n * z ^ n)) =
+      (fun n : ℕ => (c - a) * (c - b) * (gaussHypergeometricCoeff a b (c + 1) n * z ^ n) +
+        c * (a + b - c) * (gaussHypergeometricCoeff a b c n * z ^ n)) := by
     funext n
     linear_combination hcoeff n * z ^ n
   rw [heq] at hleft
@@ -485,7 +488,7 @@ private lemma deriv_cpow_mul_one_sub_cpow_mul_hg {a b c z : ℂ} (s t : ℂ)
   ring
 
 /-- Identity under the stated parameter and domain assumptions: `(mulDerivMul^[n]) (fun w => w ^
-(c - a - 1) * (1 - w) ^ (a + b - c) * ₂F₁ a b c w) z = poch (c - a) n * z ^ (c - a + n - 1) *
+(c - a - 1) * (1 - w) ^ (a + b - c) * ₂F₁ a b c w) z = pochhammer (c - a) n * z ^ (c - a + n - 1) *
 (1 - z) ^ (a - n + b - c) * ₂F₁ (a - n) b c z`. -/
 @[dlmf 15.5.E5]
 theorem iterate_mulDerivMul_euler
@@ -495,13 +498,14 @@ theorem iterate_mulDerivMul_euler
     (hz : ‖z‖ < 1)
     (hzs : z ∈ slitPlane) :
     (mulDerivMul^[n]) (fun w => w ^ (c - a - 1) * (1 - w) ^ (a + b - c) * ₂F₁ a b c w) z =
-      poch (c - a) n * z ^ (c - a + n - 1) * (1 - z) ^ (a - n + b - c) * ₂F₁ (a - n) b c z := by
+      pochhammer (c - a) n * z ^ (c - a + n - 1) * (1 - z) ^ (a - n + b - c) *
+          ₂F₁ (a - n) b c z := by
   induction n generalizing z with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ n ih =>
     have heq : (fun w => w * (mulDerivMul^[n])
           (fun t => t ^ (c - a - 1) * (1 - t) ^ (a + b - c) * ₂F₁ a b c t) w) =ᶠ[𝓝 z]
-        (fun w => poch (c - a) n *
+        (fun w => pochhammer (c - a) n *
           (w ^ (c - a + n) * (1 - w) ^ (a - n + b - c) * ₂F₁ (a - n) b c w)) := by
       filter_upwards [isOpen_lt continuous_norm continuous_const |>.mem_nhds hz,
         isOpen_slitPlane.mem_nhds hzs] with w hw hs
@@ -520,20 +524,21 @@ theorem iterate_mulDerivMul_euler
     have e4 : z ^ (c - a + n) = z * z ^ (c - a + n - 1) := (mul_cpow_pred hz0 _).symm
     have e5 : (1 - z) ^ (a - n + b - c) = (1 - z) * (1 - z) ^ (a - n + b - c - 1) :=
       (mul_cpow_pred h1z _).symm
-    rw [e1, e2, e3, poch_succ, e4, e5]
+    rw [e1, e2, e3, pochhammer_succ, e4, e5]
     linear_combination
-      (poch (c - a) n * z * z ^ (c - a + n - 1) * (1 - z) ^ (a - n + b - c - 1)) * hd
+      (pochhammer (c - a) n * z * z ^ (c - a + n - 1) * (1 - z) ^ (a - n + b - c - 1)) * hd
 
 /-- Identity under the stated parameter and domain assumptions: `iteratedDeriv n (fun w => (1 - w)
-^ (a + b - c) * ₂F₁ a b c w) z = poch (c - a) n * poch (c - b) n / poch c n * (1 - z) ^ (a + b
+^ (a + b - c) * ₂F₁ a b c w) z = pochhammer (c - a) n * pochhammer (c - b) n / pochhammer c n * (1 -
+z) ^ (a + b
 - c - n) * ₂F₁ a b (c + n) z`. -/
 @[dlmf 15.5.E6]
 theorem iteratedDeriv_euler {a b c z : ℂ} (n : ℕ) (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (hz : ‖z‖ < 1)  :
     iteratedDeriv n (fun w => (1 - w) ^ (a + b - c) * ₂F₁ a b c w) z =
-      poch (c - a) n * poch (c - b) n / poch c n * (1 - z) ^ (a + b - c - n) *
+      pochhammer (c - a) n * pochhammer (c - b) n / pochhammer c n * (1 - z) ^ (a + b - c - n) *
           ₂F₁ a b (c + n) z := by
   induction n generalizing c with
-  | zero => simp [iteratedDeriv_zero, poch_zero]
+  | zero => simp [iteratedDeriv_zero, pochhammer_zero]
   | succ n ih =>
     have hc1 : ∀ k : ℕ, c + 1 ≠ -(k : ℂ) := by simpa using not_neg_nat_add_nat hc 1
     have hc0 : c ≠ 0 := by simpa using hc 0
@@ -551,16 +556,16 @@ theorem iteratedDeriv_euler {a b c z : ℂ} (n : ℕ) (hc : ∀ k : ℕ, c ≠ -
       field_simp
       linear_combination ((1 - w) ^ (a + b - c - 1)) * hd
     rw [iteratedDeriv_succ', heq.iteratedDeriv_eq n, iteratedDeriv_const_mul_field, ih hc1]
-    have h1 : poch (c - a) (n + 1) = (c - a) * poch (c + 1 - a) n := by
-      rw [poch_succ_left]; congr 2; ring
-    have h2 : poch (c - b) (n + 1) = (c - b) * poch (c + 1 - b) n := by
-      rw [poch_succ_left]; congr 2; ring
-    have h3 : poch c (n + 1) = c * poch (c + 1) n := poch_succ_left c n
+    have h1 : pochhammer (c - a) (n + 1) = (c - a) * pochhammer (c + 1 - a) n := by
+      rw [pochhammer_succ_left]; congr 2; ring
+    have h2 : pochhammer (c - b) (n + 1) = (c - b) * pochhammer (c + 1 - b) n := by
+      rw [pochhammer_succ_left]; congr 2; ring
+    have h3 : pochhammer c (n + 1) = c * pochhammer (c + 1) n := pochhammer_succ_left c n
     have hexp2 : (1 - z) ^ (a + b - (c + 1) - n) = (1 - z) ^ (a + b - c - ((n + 1 : ℕ) : ℂ)) := by
       congr 1; push_cast; ring
     have harg : c + 1 + (n : ℂ) = c + ((n + 1 : ℕ) : ℂ) := by push_cast; ring
     rw [h1, h2, h3, hexp2, harg]
-    have hp : poch (c + 1) n ≠ 0 := poch_ne_zero_of_not_neg_nat hc1 n
+    have hp : pochhammer (c + 1) n ≠ 0 := pochhammer_ne_zero_of_not_neg_nat hc1 n
     field_simp
 
 /-- `c (1-z) F' = a c F - a (c-b) F(a+1,b;c+1)`. -/
@@ -604,7 +609,8 @@ private lemma mul_one_sub_deriv_eq_shift_down_two {a b c z : ℂ}
   linear_combination c * h1 - c * h2 - (c - a) * h3 - (a - 1) * h4 - (a - 1) * z * h5
 
 /-- Identity under the stated parameter and domain assumptions: `(oneSubMulDerivMul^[n]) (fun w =>
-(1 - w) ^ (a - 1) * ₂F₁ a b c w) z = (-1 : ℂ) ^ n * poch a n * poch (c - b) n / poch c n * (1
+(1 - w) ^ (a - 1) * ₂F₁ a b c w) z = (-1 : ℂ) ^ n * pochhammer a n * pochhammer (c - b) n /
+pochhammer c n * (1
 - z) ^ (a + n - 1) * ₂F₁ (a + n) b (c + n) z`. -/
 @[dlmf 15.5.E7]
 theorem iterate_oneSubMulDerivMul
@@ -613,17 +619,18 @@ theorem iterate_oneSubMulDerivMul
     (hc : ∀ k : ℕ, c ≠ -(k : ℂ))
     (hz : ‖z‖ < 1)  :
     (oneSubMulDerivMul^[n]) (fun w => (1 - w) ^ (a - 1) * ₂F₁ a b c w) z =
-      (-1 : ℂ) ^ n * poch a n * poch (c - b) n / poch c n * (1 - z) ^ (a + n - 1) *
+      (-1 : ℂ) ^ n * pochhammer a n * pochhammer (c - b) n / pochhammer c n *
+          (1 - z) ^ (a + n - 1) *
           ₂F₁ (a + n) b (c + n) z
         := by
   induction n generalizing z with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ n ih =>
     have hcn : ∀ k : ℕ, c + n ≠ -(k : ℂ) := not_neg_nat_add_nat hc n
     have hcn0 : c + (n : ℂ) ≠ 0 := by simpa using hcn 0
     have heq : (fun w => (1 - w) * (oneSubMulDerivMul^[n])
           (fun t => (1 - t) ^ (a - 1) * ₂F₁ a b c t) w) =ᶠ[𝓝 z]
-        (fun w => (-1 : ℂ) ^ n * poch a n * poch (c - b) n / poch c n *
+        (fun w => (-1 : ℂ) ^ n * pochhammer a n * pochhammer (c - b) n / pochhammer c n *
           ((1 - w) ^ (a + n) * ₂F₁ (a + n) b (c + n) w)) := by
       filter_upwards [isOpen_lt continuous_norm continuous_const |>.mem_nhds hz] with w hw
       rw [ih hw, ← mul_cpow_pred (slitPlane_ne_zero (one_sub_mem_slitPlane_of_norm_lt_one hw))
@@ -638,13 +645,13 @@ theorem iterate_oneSubMulDerivMul
     have e2 : a + ((n + 1 : ℕ) : ℂ) = a + n + 1 := by push_cast; ring
     have e3 : c + ((n + 1 : ℕ) : ℂ) = c + n + 1 := by push_cast; ring
     have e4 : (1 - z) ^ (a + n) = (1 - z) * (1 - z) ^ (a + n - 1) := (mul_cpow_pred h1z _).symm
-    rw [e1, e2, e3, poch_succ, poch_succ, poch_succ, pow_succ, e4]
-    have hp : poch c n ≠ 0 := poch_ne_zero_of_not_neg_nat hc n
+    rw [e1, e2, e3, pochhammer_succ, pochhammer_succ, pochhammer_succ, pow_succ, e4]
+    have hp : pochhammer c n ≠ 0 := pochhammer_ne_zero_of_not_neg_nat hc n
     field_simp
-    linear_combination (poch a n * poch (c - b) n * (1 - z) ^ (a + n - 1)) * hd
+    linear_combination (pochhammer a n * pochhammer (c - b) n * (1 - z) ^ (a + n - 1)) * hd
 
 /-- Identity under the stated parameter and domain assumptions: `(oneSubMulDerivMul^[n]) (fun w =>
-w ^ (c - 1) * (1 - w) ^ (b - c) * ₂F₁ a b c w) z = poch (c - n) n * z ^ (c - n - 1) * (1 - z)
+w ^ (c - 1) * (1 - w) ^ (b - c) * ₂F₁ a b c w) z = pochhammer (c - n) n * z ^ (c - n - 1) * (1 - z)
 ^ (b - c + n) * ₂F₁ (a - n) b (c - n) z`. -/
 @[dlmf 15.5.E8]
 theorem iterate_oneSubMulDerivMul_cpow
@@ -655,9 +662,9 @@ theorem iterate_oneSubMulDerivMul_cpow
     (hzs : z ∈ slitPlane)
     (hcn : ∀ k : ℕ, c - n ≠ -(k : ℂ)) :
     (oneSubMulDerivMul^[n]) (fun w => w ^ (c - 1) * (1 - w) ^ (b - c) * ₂F₁ a b c w) z =
-      poch (c - n) n * z ^ (c - n - 1) * (1 - z) ^ (b - c + n) * ₂F₁ (a - n) b (c - n) z := by
+      pochhammer (c - n) n * z ^ (c - n - 1) * (1 - z) ^ (b - c + n) * ₂F₁ (a - n) b (c - n) z := by
   induction n generalizing z with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ n ih =>
     have hcn' : ∀ k : ℕ, c - n ≠ -(k : ℂ) := by
       intro k hk
@@ -671,7 +678,7 @@ theorem iterate_oneSubMulDerivMul_cpow
       linear_combination hk
     have heq : (fun w => (1 - w) * (oneSubMulDerivMul^[n])
           (fun t => t ^ (c - 1) * (1 - t) ^ (b - c) * ₂F₁ a b c t) w) =ᶠ[𝓝 z]
-        (fun w => poch (c - n) n *
+        (fun w => pochhammer (c - n) n *
           (w ^ (c - n - 1) * (1 - w) ^ (b - c + n + 1) * ₂F₁ (a - n) b (c - n) w)) := by
       filter_upwards [isOpen_lt continuous_norm continuous_const |>.mem_nhds hz,
         isOpen_slitPlane.mem_nhds hzs] with w hw hs
@@ -687,8 +694,8 @@ theorem iterate_oneSubMulDerivMul_cpow
     have hd := mul_one_sub_deriv_eq_shift_down (a := a - n) (b := b) hcn' hcn1 hz
     have hz0 : z ≠ 0 := slitPlane_ne_zero hzs
     have h1z : (1 : ℂ) - z ≠ 0 := slitPlane_ne_zero (one_sub_mem_slitPlane_of_norm_lt_one hz)
-    have e1 : poch (c - ((n + 1 : ℕ) : ℂ)) (n + 1) = (c - n - 1) * poch (c - n) n := by
-      rw [poch_succ_left, show c - ((n + 1 : ℕ) : ℂ) + 1 = c - n by push_cast; ring,
+    have e1 : pochhammer (c - ((n + 1 : ℕ) : ℂ)) (n + 1) = (c - n - 1) * pochhammer (c - n) n := by
+      rw [pochhammer_succ_left, show c - ((n + 1 : ℕ) : ℂ) + 1 = c - n by push_cast; ring,
         show c - ((n + 1 : ℕ) : ℂ) = c - n - 1 by push_cast; ring]
     have e2 : z ^ (c - ((n + 1 : ℕ) : ℂ) - 1) = z ^ (c - n - 1 - 1) := by
       congr 1; push_cast; ring
@@ -700,11 +707,11 @@ theorem iterate_oneSubMulDerivMul_cpow
     have e7 : (1 - z) ^ (b - c + n + 1) = (1 - z) * (1 - z) ^ (b - c + n + 1 - 1) :=
       (mul_cpow_pred h1z _).symm
     rw [e1, e2, e3, e4, e5, e6, e7]
-    linear_combination (poch (c - n) n * z ^ (c - n - 1 - 1) *
+    linear_combination (pochhammer (c - n) n * z ^ (c - n - 1 - 1) *
       (1 - z) ^ (b - c + n + 1 - 1) * (1 - z)) * hd
 
 /-- Identity under the stated parameter and domain assumptions: `iteratedDeriv n (fun w => w ^ (c
-- 1) * (1 - w) ^ (a + b - c) * ₂F₁ a b c w) z = poch (c - n) n * z ^ (c - n - 1) * (1 - z) ^
+- 1) * (1 - w) ^ (a + b - c) * ₂F₁ a b c w) z = pochhammer (c - n) n * z ^ (c - n - 1) * (1 - z) ^
 (a + b - c - n) * ₂F₁ (a - n) (b - n) (c - n) z`. -/
 @[dlmf 15.5.E9]
 theorem iteratedDeriv_two_cpow
@@ -715,10 +722,10 @@ theorem iteratedDeriv_two_cpow
     (hzs : z ∈ slitPlane)
     (hcn : ∀ k : ℕ, c - n ≠ -(k : ℂ)) :
     iteratedDeriv n (fun w => w ^ (c - 1) * (1 - w) ^ (a + b - c) * ₂F₁ a b c w) z =
-      poch (c - n) n * z ^ (c - n - 1) * (1 - z) ^ (a + b - c - n) *
+      pochhammer (c - n) n * z ^ (c - n - 1) * (1 - z) ^ (a + b - c - n) *
           ₂F₁ (a - n) (b - n) (c - n) z := by
   induction n generalizing a b c with
-  | zero => simp [iteratedDeriv_zero, poch_zero]
+  | zero => simp [iteratedDeriv_zero, pochhammer_zero]
   | succ n ih =>
     have hcm : ∀ k : ℕ, c - 1 ≠ -(k : ℂ) := by
       intro k hk
@@ -753,13 +760,14 @@ theorem iteratedDeriv_two_cpow
       show b - 1 - (n : ℂ) = b - ((n + 1 : ℕ) : ℂ) by push_cast; ring,
       show (1 - z) ^ (a - 1 + (b - 1) - (c - 1) - (n : ℂ)) =
         (1 - z) ^ (a + b - c - ((n + 1 : ℕ) : ℂ)) by congr 1; push_cast; ring,
-      poch_succ, show c - ((n + 1 : ℕ) : ℂ) + (n : ℂ) = c - 1 by push_cast; ring]
+      pochhammer_succ, show c - ((n + 1 : ℕ) : ℂ) + (n : ℂ) = c - 1 by push_cast; ring]
     ring
 
 /-! ### Relations found by computer algebra for the orthogonal-polynomial identities -/
 
 /-- Hypergeometric form of 18.9.7 (`b = 2c - 1 - a`). -/
-theorem contiguous_ultrasphPoly_raise {a c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (hz : ‖z‖ < 1) :
+theorem contiguous_ultrasphericalPolynomial_raise {a c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ))
+    (hz : ‖z‖ < 1) :
     (2*z*(a - 2*c + 2)) *
         ((-c*(2*c - 1)*(2*a - 2*c + 1)) * ₂F₁ a (-a + 2*c - 1) c z +
         (-(a - 2*c)*(2*c - 1)*(a - 2*c + 1)/2) * ₂F₁ a ((-a + 2*c - 1) + 2) (c + 1) z +
@@ -791,7 +799,8 @@ theorem contiguous_ultrasphPoly_raise {a c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k
       (a*(2*c - 1)*(a - 2*c + 2)) * h8
 
 /-- Hypergeometric form of 18.9.8 (`b = 2c - 1 - a`). -/
-theorem contiguous_ultrasphPoly_raise_sq {a c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (hz : ‖z‖ < 1) :
+theorem contiguous_ultrasphericalPolynomial_raise_sq {a c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ))
+    (hz : ‖z‖ < 1) :
     (a*(a + 1)) * ((2*c) * ₂F₁ a (-a + 2*c - 1) c z + (4*z*(z - 1)*(2*a - 2*c + 3)) *
         ₂F₁ (a + 2) (-a + 2*c - 1) (c + 1) z + (-2*c) *
         ₂F₁ (a + 2) ((-a + 2*c - 1) - 2) c z) = 0 := by

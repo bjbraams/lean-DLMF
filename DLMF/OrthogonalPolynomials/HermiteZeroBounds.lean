@@ -45,12 +45,12 @@ namespace HermiteZeroBounds
 
 /-- The real polynomial evaluation agrees with the existing complex Hermite evaluation. -/
 theorem ofReal_eval (n : ℕ) (t : ℝ) :
-    (((hermitePolyHR n).eval t : ℝ) : ℂ) = (aeval (t : ℂ) (hermitePolyH n) : ℂ) := by
-  rw [aeval_hermitePolyH_complex, eval_map_ofReal]
+    (((hermitePolyHR n).eval t : ℝ) : ℂ) = (aeval (t : ℂ) (hermitePolynomialH n) : ℂ) := by
+  rw [aeval_hermitePolynomialH_complex, eval_map_ofReal]
 
 /-- The Gaussian factor introduces no additional zeros. -/
 theorem zero_iff (n : ℕ) (t : ℝ) :
-    HermiteFixedX.u n t = 0 ↔ (aeval (t : ℂ) (hermitePolyH n) : ℂ) = 0 := by
+    HermiteFixedX.u n t = 0 ↔ (aeval (t : ℂ) (hermitePolynomialH n) : ℂ) = 0 := by
   rw [HermiteFixedX.u, mul_eq_zero, or_iff_right (exp_ne_zero _), ← ofReal_eval,
     Complex.ofReal_eq_zero]
 
@@ -59,7 +59,8 @@ theorem u_even (m : ℕ) (t : ℝ) : HermiteFixedX.u (2 * m) (-t) = HermiteFixed
   have hp : (hermitePolyHR (2 * m)).eval (-t) = (hermitePolyHR (2 * m)).eval t := by
     apply Complex.ofReal_injective
     rw [ofReal_eval, ofReal_eval, Complex.ofReal_neg,
-      hermitePolyH_even_eq_laguerrePolyL, hermitePolyH_even_eq_laguerrePolyL, neg_sq]
+      hermitePolynomialH_even_eq_laguerrePolynomialL,
+          hermitePolynomialH_even_eq_laguerrePolynomialL, neg_sq]
   simp only [HermiteFixedX.u, neg_sq, hp]
 
 /-- Even Hermite functions do not vanish at zero. -/
@@ -72,10 +73,10 @@ theorem u_even_zero_ne (m : ℕ) : HermiteFixedX.u (2 * m) 0 ≠ 0 := by
 /-- Positive Hermite zeros are square roots of the corresponding Laguerre zeros. -/
 private lemma positive_roots_of_laguerre {n m : ℕ} {α : ℝ} (hα : -1 < α)
     (hrel : ∀ t : ℝ, 0 < t → (HermiteFixedX.u n t = 0 ↔
-      laguerrePolyL α m ((t : ℂ) ^ 2) = 0)) :
+      laguerrePolynomialL α m ((t : ℂ) ^ 2) = 0)) :
     ∃ x : Fin m → ℝ, StrictMono x ∧ (∀ i, 0 < x i) ∧
       ∀ t : ℝ, 0 < t → (HermiteFixedX.u n t = 0 ↔ ∃ i, t = x i) := by
-  obtain ⟨r, hr, hrpos, hroots⟩ := laguerrePolyL_zeros_pos hα m
+  obtain ⟨r, hr, hrpos, hroots⟩ := laguerrePolynomialL_zeros_pos hα m
   let x : Fin m → ℝ := fun i => sqrt (r i)
   have hxpos (i : Fin m) : 0 < x i := sqrt_pos.mpr (hrpos i)
   refine ⟨x, fun i j hij => sqrt_lt_sqrt (hrpos i).le (hr hij), hxpos, ?_⟩
@@ -95,7 +96,7 @@ theorem positive_roots_even (m : ℕ) :
       ∀ t : ℝ, 0 < t → (HermiteFixedX.u (2 * m) t = 0 ↔ ∃ i, t = x i) := by
   apply positive_roots_of_laguerre (α := -(1 / 2)) (by norm_num)
   intro t _
-  rw [zero_iff, hermitePolyH_even_eq_laguerrePolyL]
+  rw [zero_iff, hermitePolynomialH_even_eq_laguerrePolynomialL]
   have hc : (-1 : ℂ) ^ m * 2 ^ (2 * m) * m.factorial ≠ 0 :=
     mul_ne_zero (mul_ne_zero (pow_ne_zero _ (by norm_num)) (pow_ne_zero _ (by norm_num)))
       (Nat.cast_ne_zero.mpr m.factorial_ne_zero)
@@ -108,7 +109,7 @@ theorem positive_roots_odd (m : ℕ) :
       ∀ t : ℝ, 0 < t → (HermiteFixedX.u (2 * m + 1) t = 0 ↔ ∃ i, t = x i) := by
   apply positive_roots_of_laguerre (α := 1 / 2) (by norm_num)
   intro t ht
-  rw [zero_iff, hermitePolyH_odd_eq_laguerrePolyL]
+  rw [zero_iff, hermitePolynomialH_odd_eq_laguerrePolynomialL]
   have hc : (-1 : ℂ) ^ m * 2 ^ (2 * m + 1) * m.factorial * t ≠ 0 := by
     exact mul_ne_zero (mul_ne_zero (mul_ne_zero (pow_ne_zero _ (by norm_num))
       (pow_ne_zero _ (by norm_num))) (Nat.cast_ne_zero.mpr m.factorial_ne_zero))
@@ -352,7 +353,7 @@ end HermiteZeroBounds
 Here `freq (2m) = √(4m+1)`. Both inequalities are strict. -/
 theorem hermite_even_positive_zero_bounds (m : ℕ) :
     ∃ x : Fin m → ℝ, StrictMono x ∧ (∀ i, 0 < x i) ∧
-      (∀ t : ℝ, 0 < t → ((aeval (t : ℂ) (hermitePolyH (2 * m)) : ℂ) = 0 ↔ ∃ i, t = x i)) ∧
+      (∀ t : ℝ, 0 < t → ((aeval (t : ℂ) (hermitePolynomialH (2 * m)) : ℂ) = 0 ↔ ∃ i, t = x i)) ∧
       ∀ i : Fin m, (2 * (i : ℝ) + 1) * π / (2 * freq (2 * m)) < x i ∧
         x i < (4 * ((i : ℝ) + 1) + 1) / freq (2 * m) := by
   obtain ⟨x, hx, hxpos, hcomplete⟩ := HermiteZeroBounds.positive_roots_even m
@@ -387,7 +388,7 @@ theorem hermite_even_positive_zero_bounds (m : ℕ) :
 Here `freq (2m+1) = √(4m+3)`. Both inequalities are strict. -/
 theorem hermite_odd_positive_zero_bounds (m : ℕ) :
     ∃ x : Fin m → ℝ, StrictMono x ∧ (∀ i, 0 < x i) ∧
-      (∀ t : ℝ, 0 < t → ((aeval (t : ℂ) (hermitePolyH (2 * m + 1)) : ℂ) = 0 ↔ ∃ i, t = x i)) ∧
+      (∀ t : ℝ, 0 < t → ((aeval (t : ℂ) (hermitePolynomialH (2 * m + 1)) : ℂ) = 0 ↔ ∃ i, t = x i)) ∧
       ∀ i : Fin m, ((i : ℝ) + 1) * π / freq (2 * m + 1) < x i ∧
         x i < (4 * ((i : ℝ) + 1) + 3) / freq (2 * m + 1) := by
   obtain ⟨x, hx, hxpos, hcomplete⟩ := HermiteZeroBounds.positive_roots_odd m
@@ -395,7 +396,7 @@ theorem hermite_odd_positive_zero_bounds (m : ℕ) :
   have hfirst (i : Fin m) (hi : i.val = 0) : π / freq (2 * m + 1) < x i := by
     have hz : HermiteFixedX.u (2 * m + 1) 0 = 0 := by
       rw [HermiteFixedX.u_zero, HermiteFixedX.hermitePolyHR_eval_zero,
-        HermiteFixedX.hermitePolyH_odd_at_zero]
+        HermiteFixedX.hermitePolynomialH_odd_at_zero]
       norm_num
     have hno : ∀ t ∈ Ioo 0 (x i), HermiteFixedX.u (2 * m + 1) t ≠ 0 := by
       intro t ht hz

@@ -11,7 +11,7 @@ public import DLMF.Lame.FourierSeries
 /-!
 # Lamé polynomials as normalized Lamé functions (helpers for DLMF 29.12.1–29.12.8)
 
-The identification of the Lamé polynomial `lamePolyEk t n m`, on the real line, with the
+The identification of the Lamé polynomial `lamePolynomialE t n m`, on the real line, with the
 normalized Lamé function of §29.3 is reduced to two facts about its coefficients: the
 normalization integral 29.3.18 equals `π/4` times the quadratic form `t.normForm` of the
 coefficients, and the value (or minus the derivative) at `K` is a positive multiple of the
@@ -19,7 +19,7 @@ linear form `t.signForm`.
 
 ## Main results
 
-* `lamePolyEk_re_eq_lameEigenfunction`: the identification with the normalized Lamé function,
+* `lamePolynomialE_re_eq_lameEigenfunction`: the identification with the normalized Lamé function,
   given the normalization and sign conditions.
 * `integral_cos_series_lamePhi_sq`, `integral_sin_series_lamePhi_sq`,
   `integral_dn_cos_series_lamePhi_sq`, `integral_dn_sin_series_lamePhi_sq`: the normalization
@@ -45,7 +45,8 @@ noncomputable section
 namespace DLMF.Lame
 
 /-- `normForm` depends only on the coefficients `c₀, …, cₙ`. -/
-private lemma lamePolyType_normForm_congr (t : LamePolyType) (k : ℝ) (n : ℕ) {c c' : ℕ → ℝ}
+private lemma lamePolynomialType_normForm_congr (t : LamePolynomialType) (k : ℝ)
+    (n : ℕ) {c c' : ℕ → ℝ}
     (h : ∀ p ≤ n, c p = c' p) : t.normForm k n c = t.normForm k n c' := by
   have h1 : ∑ p ∈ Finset.range (n + 1), c p ^ 2 = ∑ p ∈ Finset.range (n + 1), c' p ^ 2 :=
     Finset.sum_congr rfl fun p hp => by rw [h p (by simp at hp; omega)]
@@ -53,10 +54,11 @@ private lemma lamePolyType_normForm_congr (t : LamePolyType) (k : ℝ) (n : ℕ)
     Finset.sum_congr rfl fun p hp => by
       rw [h p (by simp at hp; omega), h (p + 1) (by simp at hp; omega)]
   have h0 := h 0 (Nat.zero_le _)
-  cases t <;> simp only [LamePolyType.normForm, h1, h2, h0]
+  cases t <;> simp only [LamePolynomialType.normForm, h1, h2, h0]
 
 /-- `normForm` is a quadratic form. -/
-private lemma lamePolyType_normForm_smul (t : LamePolyType) (k : ℝ) (n : ℕ) (a : ℝ) (c : ℕ → ℝ) :
+private lemma lamePolynomialType_normForm_smul (t : LamePolynomialType) (k : ℝ) (n : ℕ)
+    (a : ℝ) (c : ℕ → ℝ) :
     t.normForm k n (fun p => a * c p) = a ^ 2 * t.normForm k n c := by
   have h1 : ∑ p ∈ Finset.range (n + 1), (a * c p) ^ 2 =
       a ^ 2 * ∑ p ∈ Finset.range (n + 1), c p ^ 2 := by
@@ -64,10 +66,10 @@ private lemma lamePolyType_normForm_smul (t : LamePolyType) (k : ℝ) (n : ℕ) 
   have h2 : ∑ p ∈ Finset.range n, a * c p * (a * c (p + 1)) =
       a ^ 2 * ∑ p ∈ Finset.range n, c p * c (p + 1) := by
     rw [Finset.mul_sum]; exact Finset.sum_congr rfl fun p _ => by ring
-  cases t <;> simp only [LamePolyType.normForm, h1, h2] <;> ring
+  cases t <;> simp only [LamePolynomialType.normForm, h1, h2] <;> ring
 
 /-- `signForm` depends only on the coefficients `c₀, …, cₙ`. -/
-private lemma lamePolyType_signForm_congr (t : LamePolyType) (n : ℕ) {c c' : ℕ → ℝ}
+private lemma lamePolynomialType_signForm_congr (t : LamePolynomialType) (n : ℕ) {c c' : ℕ → ℝ}
     (h : ∀ p ≤ n, c p = c' p) : t.signForm n c = t.signForm n c' := by
   have h1 : ∀ f : ℕ → ℝ, ∑ p ∈ Finset.range (n + 1), f p * c p =
       ∑ p ∈ Finset.range (n + 1), f p * c' p := fun f =>
@@ -77,44 +79,46 @@ private lemma lamePolyType_signForm_congr (t : LamePolyType) (n : ℕ) {c c' : �
   have h2 : ∑ p ∈ Finset.Ioc 0 n, c p = ∑ p ∈ Finset.Ioc 0 n, c' p :=
     Finset.sum_congr rfl fun p hp => by rw [h p (by simp at hp; omega)]
   have h0 := h 0 (Nat.zero_le _)
-  cases t <;> simp only [LamePolyType.signForm, h1, h1', h2, h0]
+  cases t <;> simp only [LamePolynomialType.signForm, h1, h1', h2, h0]
 
 /-- `signForm` is linear. -/
-private lemma lamePolyType_signForm_smul (t : LamePolyType) (n : ℕ) (a : ℝ) (c : ℕ → ℝ) :
+private lemma lamePolynomialType_signForm_smul (t : LamePolynomialType) (n : ℕ)
+    (a : ℝ) (c : ℕ → ℝ) :
     t.signForm n (fun p => a * c p) = a * t.signForm n c := by
-  cases t <;> simp only [LamePolyType.signForm] <;>
+  cases t <;> simp only [LamePolynomialType.signForm] <;>
     first
     | (rw [mul_add, Finset.mul_sum (Finset.Ioc 0 n)]; try ring)
     | (simp only [Finset.mul_sum]; try exact Finset.sum_congr rfl fun p _ => by ring)
 
 /-- The normalized coefficients: `t.normForm = 1`, `t.signForm ≥ 0`, provided the Lamé
 polynomial does not vanish identically. -/
-private lemma lamePolyCoeff_normForm_signForm {k : ℝ} (t : LamePolyType) {n m : ℕ}
-    (hne : (fun x : ℝ => (lamePolyEk t n m x k).re) ≠ 0) :
-    t.normForm k n (lamePolyCoeff t n m k) = 1 ∧ 0 ≤ t.signForm n (lamePolyCoeff t n m k) := by
-  set v := lameRecVec t.recurrence (t.order n) k (lamePolyH t n m k)
+private lemma lamePolynomialCoeff_normForm_signForm {k : ℝ} (t : LamePolynomialType) {n m : ℕ}
+    (hne : (fun x : ℝ => (lamePolynomialE t n m x k).re) ≠ 0) :
+    t.normForm k n (lamePolynomialCoeff t n m k) = 1 ∧ 0 ≤
+        t.signForm n (lamePolynomialCoeff t n m k) := by
+  set v := lameRecurrenceVector t.recurrence (t.order n) k (lamePolynomialH t n m k)
   set s : ℝ := if t.signForm n v < 0 then -1 else 1
   set r := Real.sqrt (t.normForm k n v)
-  have hc : ∀ p ≤ n, lamePolyCoeff t n m k p = (s / r) * v p := fun p hp => by
-    simp only [lamePolyCoeff, hp, ↓reduceIte, s, r, v]; ring
+  have hc : ∀ p ≤ n, lamePolynomialCoeff t n m k p = (s / r) * v p := fun p hp => by
+    simp only [lamePolynomialCoeff, hp, ↓reduceIte, s, r, v]; ring
   have hpos : 0 < t.normForm k n v := by
     by_contra hle
     have hr : r = 0 := Real.sqrt_eq_zero'.2 (not_lt.1 hle)
     apply hne
     funext x
-    have : ∀ p ∈ Finset.range (n + 1), lamePolyCoeff t n m k p = 0 := fun p hp => by
+    have : ∀ p ∈ Finset.range (n + 1), lamePolynomialCoeff t n m k p = 0 := fun p hp => by
       rw [hc p (by simp at hp; omega), hr, div_zero, zero_mul]
-    have h0 : ∑ p ∈ Finset.range (n + 1), (lamePolyCoeff t n m k p : ℂ) *
-        t.basis p (jacobiSnk (x : ℂ) k) = 0 :=
+    have h0 : ∑ p ∈ Finset.range (n + 1), (lamePolynomialCoeff t n m k p : ℂ) *
+        t.basis p (jacobiSn (x : ℂ) k) = 0 :=
       Finset.sum_eq_zero fun p hp => by rw [this p hp]; simp
-    simp [lamePolyEk, h0]
+    simp [lamePolynomialE, h0]
   have hr2 : r ^ 2 = t.normForm k n v := Real.sq_sqrt hpos.le
   have hr0 : 0 < r := Real.sqrt_pos.2 hpos
   refine ⟨?_, ?_⟩
-  · rw [lamePolyType_normForm_congr t k n hc, lamePolyType_normForm_smul, div_pow, hr2]
+  · rw [lamePolynomialType_normForm_congr t k n hc, lamePolynomialType_normForm_smul, div_pow, hr2]
     have : s ^ 2 = 1 := by simp only [s]; split_ifs <;> norm_num
     rw [this]; field_simp
-  · rw [lamePolyType_signForm_congr t n hc, lamePolyType_signForm_smul]
+  · rw [lamePolynomialType_signForm_congr t n hc, lamePolynomialType_signForm_smul]
     simp only [s]
     split_ifs with h
     · have : 0 ≤ -1 / r * t.signForm n v := by
@@ -127,30 +131,32 @@ private lemma lamePolyCoeff_normForm_signForm {k : ℝ} (t : LamePolyType) {n m 
 the Lamé polynomial is `π/4` times `t.normForm` of its coefficients and its value at `K`
 (`Ec` types) or minus its derivative there (`Es` types) is a positive multiple of
 `t.signForm`, then it is the normalized `m`th eigenfunction of §29.3. -/
-theorem lamePolyEk_re_eq_lameEigenfunction {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType)
+theorem lamePolynomialE_re_eq_lameEigenfunction {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1)
+    (t : LamePolynomialType)
     {n m : ℕ} (hm : m ≤ n)
-    (hN : ∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2),
-        Real.jacobiDnm x (k ^ 2) * (lamePolyEk t n m x k).re ^ 2 =
-      π / 4 * t.normForm k n (lamePolyCoeff t n m k))
+    (hN : ∫ x in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2),
+        Real.jacobiDnOfParameter x (k ^ 2) * (lamePolynomialE t n m x k).re ^ 2 =
+      π / 4 * t.normForm k n (lamePolynomialCoeff t n m k))
     {σ : ℝ} (hσ : 0 < σ)
-    (hS : (if lamePolyOddK t then -deriv (fun x : ℝ => (lamePolyEk t n m x k).re)
-        (Real.compEllIntKm (k ^ 2)) else (lamePolyEk t n m (Real.compEllIntKm (k ^ 2)) k).re) =
-      σ * t.signForm n (lamePolyCoeff t n m k)) :
-    (fun x : ℝ => (lamePolyEk t n m x k).re) =
+    (hS : (if lamePolyOddK t then -deriv (fun x : ℝ => (lamePolynomialE t n m x k).re)
+        (Real.completeEllipticKOfParameter (k ^ 2)) else
+            (lamePolynomialE t n m (Real.completeEllipticKOfParameter (k ^ 2)) k).re) =
+      σ * t.signForm n (lamePolynomialCoeff t n m k)) :
+    (fun x : ℝ => (lamePolynomialE t n m x k).re) =
       Real.lameEigenfunction (t.order n : ℝ) k (lamePolyOddZero t) (lamePolyOddK t) m := by
   have hk : k ^ 2 < 1 := by nlinarith
-  set w := fun x : ℝ => (lamePolyEk t n m x k).re with hw
-  set K := Real.compEllIntKm (k ^ 2)
-  have hE := isLameEigenfunction_lamePolyEk_re hk0 hk1 t hm
-  rw [← lameEigenvalue_lamePolyType_eq hk0 hk1 t hm] at hE
+  set w := fun x : ℝ => (lamePolynomialE t n m x k).re with hw
+  set K := Real.completeEllipticKOfParameter (k ^ 2)
+  have hE := isLameEigenfunction_lamePolynomialE_re hk0 hk1 t hm
+  rw [← lameEigenvalue_lamePolynomialType_eq hk0 hk1 t hm] at hE
   obtain ⟨hre, hbc, hne⟩ := hE
-  obtain ⟨hn1, hs0⟩ := lamePolyCoeff_normForm_signForm t hne
+  obtain ⟨hn1, hs0⟩ := lamePolynomialCoeff_normForm_signForm t hne
   have hν : -1 / 2 ≤ (t.order n : ℝ) := by
     have := Nat.cast_nonneg (α := ℝ) (t.order n); linarith
   have hsol := (isLameSolution_iff_isSturmLiouvilleSolution).mp hre
   -- the sign condition
   have hsign : if lamePolyOddK t then deriv w K < 0 else 0 < w K := by
-    have hge : 0 ≤ σ * t.signForm n (lamePolyCoeff t n m k) := mul_nonneg hσ.le hs0
+    have hge : 0 ≤ σ * t.signForm n (lamePolynomialCoeff t n m k) := mul_nonneg hσ.le hs0
     rw [← hS] at hge
     have hne0 : (if lamePolyOddK t then -deriv w K else w K) ≠ 0 := by
       intro h0
@@ -178,24 +184,27 @@ theorem lamePolyEk_re_eq_lameEigenfunction {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1)
 /-! ### The substitution `φ = π/2 - am(x, k)` and trigonometric orthogonality -/
 
 /-- `∫₀^K dn(x) g(φ(x)) dx = ∫₀^{π/2} g(φ) dφ` for `φ = π/2 - am(x, k)`. -/
-theorem integral_jacobiDnm_mul_comp_lamePhi {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) {g : ℝ → ℝ}
+theorem integral_jacobiDnOfParameter_mul_comp_lamePhi {k : ℝ} (hk0 : 0 < k)
+    (hk1 : k < 1) {g : ℝ → ℝ}
     (hg : Continuous g) :
-    ∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2), Real.jacobiDnm x (k ^ 2) * g (Real.lamePhi x k) =
+    ∫ x in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2), Real.jacobiDnOfParameter x (k ^ 2) *
+        g (Real.lamePhi x k) =
       ∫ t in (0 : ℝ)..π / 2, g t := by
   have hk : k ^ 2 < 1 := by nlinarith
-  have hdn : Continuous fun x => Real.jacobiDnm x (k ^ 2) :=
-    continuous_iff_continuousAt.2 fun x => (Real.hasDerivAt_jacobiDnm hk x).continuousAt
-  have hsub := intervalIntegral.integral_comp_mul_deriv (a := 0) (b := Real.compEllIntKm (k ^ 2))
-    (f := fun x => Real.lamePhi x k) (f' := fun x => -Real.jacobiDnm x (k ^ 2))
+  have hdn : Continuous fun x => Real.jacobiDnOfParameter x (k ^ 2) :=
+    continuous_iff_continuousAt.2 fun x => (Real.hasDerivAt_jacobiDnOfParameter hk x).continuousAt
+  have hsub := intervalIntegral.integral_comp_mul_deriv (a := 0)
+      (b := Real.completeEllipticKOfParameter (k ^ 2))
+    (f := fun x => Real.lamePhi x k) (f' := fun x => -Real.jacobiDnOfParameter x (k ^ 2))
     (g := g) (fun x _ => hasDerivAt_lamePhi hk x) hdn.neg.continuousOn hg
-  have h0 : Real.lamePhi 0 k = π / 2 := by simp [Real.lamePhi, Real.jacobiAmm_zero hk]
-  have hK : Real.lamePhi (Real.compEllIntKm (k ^ 2)) k = 0 := by
-    rw [Real.lamePhi, Real.jacobiAmm_compEllIntKm hk, sub_self]
+  have h0 : Real.lamePhi 0 k = π / 2 := by simp [Real.lamePhi, Real.jacobiAmOfParameter_zero hk]
+  have hK : Real.lamePhi (Real.completeEllipticKOfParameter (k ^ 2)) k = 0 := by
+    rw [Real.lamePhi, Real.jacobiAmOfParameter_completeEllipticKOfParameter hk, sub_self]
   rw [h0, hK] at hsub
-  have e : ∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2),
-      Real.jacobiDnm x (k ^ 2) * g (Real.lamePhi x k) =
-      -∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2),
-        (g ∘ fun x => Real.lamePhi x k) x * -Real.jacobiDnm x (k ^ 2) := by
+  have e : ∫ x in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2),
+      Real.jacobiDnOfParameter x (k ^ 2) * g (Real.lamePhi x k) =
+      -∫ x in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2),
+        (g ∘ fun x => Real.lamePhi x k) x * -Real.jacobiDnOfParameter x (k ^ 2) := by
     rw [← intervalIntegral.integral_neg]
     refine intervalIntegral.integral_congr fun x _ => ?_
     simp only [Function.comp_apply]; ring
@@ -308,10 +317,11 @@ theorem integral_cos_series_lamePhi_sq {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N 
     (b : ℕ → ℝ) {e : ℕ → ℕ}
     (he : Function.Injective e) (hpar : ∀ p q, Even (e p + e q)) {w : ℝ → ℝ}
     (hw : ∀ y, w y = ∑ p ∈ Finset.range N, b p * Real.cos (e p * Real.lamePhi y k)) :
-    ∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2), Real.jacobiDnm x (k ^ 2) * w x ^ 2 =
+    ∫ x in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2),
+        Real.jacobiDnOfParameter x (k ^ 2) * w x ^ 2 =
       ∑ p ∈ Finset.range N, b p ^ 2 * (if e p = 0 then π / 2 else π / 4) := by
   simp_rw [hw]
-  rw [integral_jacobiDnm_mul_comp_lamePhi hk0 hk1
+  rw [integral_jacobiDnOfParameter_mul_comp_lamePhi hk0 hk1
     (g := fun φ => (∑ p ∈ Finset.range N, b p * Real.cos (e p * φ)) ^ 2) (by fun_prop)]
   refine integral_sum_sq_of_orthogonal N b (fun p t => Real.cos (e p * t)) (fun p => by fun_prop) _
     fun p q => ?_
@@ -325,10 +335,11 @@ theorem integral_sin_series_lamePhi_sq {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N 
     (b : ℕ → ℝ) {e : ℕ → ℕ}
     (he : Function.Injective e) (hpar : ∀ p q, Even (e p + e q)) {w : ℝ → ℝ}
     (hw : ∀ y, w y = ∑ p ∈ Finset.range N, b p * Real.sin (e p * Real.lamePhi y k)) :
-    ∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2), Real.jacobiDnm x (k ^ 2) * w x ^ 2 =
+    ∫ x in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2),
+        Real.jacobiDnOfParameter x (k ^ 2) * w x ^ 2 =
       ∑ p ∈ Finset.range N, b p ^ 2 * (if e p = 0 then 0 else π / 4) := by
   simp_rw [hw]
-  rw [integral_jacobiDnm_mul_comp_lamePhi hk0 hk1
+  rw [integral_jacobiDnOfParameter_mul_comp_lamePhi hk0 hk1
     (g := fun φ => (∑ p ∈ Finset.range N, b p * Real.sin (e p * φ)) ^ 2) (by fun_prop)]
   refine integral_sum_sq_of_orthogonal N b (fun p t => Real.sin (e p * t)) (fun p => by fun_prop) _
     fun p q => ?_
@@ -342,7 +353,7 @@ theorem cos_series_lamePhi_eval_K {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ
     (b : ℕ → ℝ) (e : ℕ → ℝ)
     {w : ℝ → ℝ}
     (hw : ∀ y, w y = ∑ p ∈ Finset.range N, b p * Real.cos (e p * Real.lamePhi y k)) :
-    w (Real.compEllIntKm (k ^ 2)) = ∑ p ∈ Finset.range N, b p := by
+    w (Real.completeEllipticKOfParameter (k ^ 2)) = ∑ p ∈ Finset.range N, b p := by
   rw [hw, lamePhi_K hk0 hk1]; simp
 
 /-- Minus the derivative at `K` of a finite sine series in `φ`: `dn(K) ∑ eₚ bₚ`. -/
@@ -350,14 +361,15 @@ theorem deriv_sin_series_lamePhi_K {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : �
     (b : ℕ → ℝ) (e : ℕ → ℝ)
     {w : ℝ → ℝ}
     (hw : ∀ y, w y = ∑ p ∈ Finset.range N, b p * Real.sin (e p * Real.lamePhi y k)) :
-    -deriv w (Real.compEllIntKm (k ^ 2)) =
-      Real.jacobiDnm (Real.compEllIntKm (k ^ 2)) (k ^ 2) * ∑ p ∈ Finset.range N, e p * b p := by
+    -deriv w (Real.completeEllipticKOfParameter (k ^ 2)) =
+      Real.jacobiDnOfParameter (Real.completeEllipticKOfParameter (k ^ 2)) (k ^ 2) * ∑ p ∈
+          Finset.range N, e p * b p := by
   have hk : k ^ 2 < 1 := by nlinarith
   have hw' : w = fun y => ∑ p ∈ Finset.range N, b p * Real.sin (e p * Real.lamePhi y k) :=
     funext hw
-  set K := Real.compEllIntKm (k ^ 2)
+  set K := Real.completeEllipticKOfParameter (k ^ 2)
   have hd : HasDerivAt w (∑ p ∈ Finset.range N, b p * (Real.cos (e p * Real.lamePhi K k) *
-      (e p * -Real.jacobiDnm K (k ^ 2)))) K := by
+      (e p * -Real.jacobiDnOfParameter K (k ^ 2)))) K := by
     rw [hw']
     exact HasDerivAt.fun_sum fun p _ =>
       (((hasDerivAt_lamePhi hk K).const_mul (e p)).sin).const_mul (b p)
@@ -458,9 +470,10 @@ private lemma integral_cos_two_mul_sin_mul_sin (a b : ℕ) (hab : Even (a + b)) 
 private lemma integral_dn_series_lamePhi_sq {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ) (b : ℕ → ℝ)
     (f : ℕ → ℝ → ℝ)
     (hf : ∀ p, Continuous (f p)) {w : ℝ → ℝ}
-    (hw : ∀ y, w y = Real.jacobiDnm y (k ^ 2) *
+    (hw : ∀ y, w y = Real.jacobiDnOfParameter y (k ^ 2) *
       ∑ p ∈ Finset.range N, b p * f p (Real.lamePhi y k)) :
-    ∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2), Real.jacobiDnm x (k ^ 2) * w x ^ 2 =
+    ∫ x in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2),
+        Real.jacobiDnOfParameter x (k ^ 2) * w x ^ 2 =
       ∑ p ∈ Finset.range N, ∑ q ∈ Finset.range N, b p * b q *
         ((1 - k ^ 2 / 2) * ∫ t in (0 : ℝ)..π / 2, f p t * f q t) -
       k ^ 2 / 2 * ∑ p ∈ Finset.range N, ∑ q ∈ Finset.range N, b p * b q *
@@ -468,16 +481,17 @@ private lemma integral_dn_series_lamePhi_sq {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1
   have hk : k ^ 2 < 1 := by nlinarith
   have hF : Continuous fun t => ∑ p ∈ Finset.range N, b p * f p t :=
     continuous_finsetSum _ fun p _ => continuous_const.mul (hf p)
-  have e : ∀ x, Real.jacobiDnm x (k ^ 2) * w x ^ 2 = Real.jacobiDnm x (k ^ 2) *
+  have e : ∀ x, Real.jacobiDnOfParameter x (k ^ 2) * w x ^ 2 = Real.jacobiDnOfParameter x (k ^ 2) *
       (fun t => (1 - k ^ 2 * Real.cos t ^ 2) * (∑ p ∈ Finset.range N, b p * f p t) ^ 2)
         (Real.lamePhi x k) := fun x => by
-    have h1 := Real.mul_jacobiSnm_sq_add_jacobiDnm_sq hk x
+    have h1 := Real.mul_jacobiSnOfParameter_sq_add_jacobiDnOfParameter_sq hk x
     rw [hw]
     beta_reduce
     rw [cos_lamePhi, mul_pow,
-      show Real.jacobiDnm x (k ^ 2) ^ 2 = 1 - k ^ 2 * Real.jacobiSnm x (k ^ 2) ^ 2 by linarith]
+      show Real.jacobiDnOfParameter x (k ^ 2) ^ 2 = 1 - k ^ 2 *
+          Real.jacobiSnOfParameter x (k ^ 2) ^ 2 by linarith]
   simp_rw [e]
-  rw [integral_jacobiDnm_mul_comp_lamePhi hk0 hk1
+  rw [integral_jacobiDnOfParameter_mul_comp_lamePhi hk0 hk1
     (g := fun t => (1 - k ^ 2 * Real.cos t ^ 2) * (∑ p ∈ Finset.range N, b p * f p t) ^ 2)
     (by fun_prop)]
   rw [integral_weight_mul_sum_sq N b f hf (ρ := fun t => 1 - k ^ 2 * Real.cos t ^ 2) (by fun_prop)]
@@ -544,9 +558,10 @@ private lemma dnNorm_double_sum_eq (k : ℝ) (N : ℕ) (b : ℕ → ℝ) (α : �
 theorem integral_dn_cos_series_lamePhi_sq {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ)
     (b : ℕ → ℝ) (δ : ℕ)
     (hb : b N = 0) {w : ℝ → ℝ}
-    (hw : ∀ y, w y = Real.jacobiDnm y (k ^ 2) *
+    (hw : ∀ y, w y = Real.jacobiDnOfParameter y (k ^ 2) *
       ∑ p ∈ Finset.range N, b p * Real.cos (((2 * p + δ : ℕ) : ℝ) * Real.lamePhi y k)) :
-    ∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2), Real.jacobiDnm x (k ^ 2) * w x ^ 2 =
+    ∫ x in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2),
+        Real.jacobiDnOfParameter x (k ^ 2) * w x ^ 2 =
       (1 - k ^ 2 / 2) * ∑ p ∈ Finset.range N, b p ^ 2 * (if 2 * p + δ = 0 then π / 2 else π / 4)
       - k ^ 2 / 2 * (π / 8) * (2 * ∑ p ∈ Finset.range N, b p * b (p + 1) +
         ∑ p ∈ Finset.range N, ∑ q ∈ Finset.range N, b p * b q *
@@ -577,9 +592,10 @@ theorem integral_dn_cos_series_lamePhi_sq {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) 
 theorem integral_dn_sin_series_lamePhi_sq {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ)
     (b : ℕ → ℝ) (δ : ℕ)
     (hb : b N = 0) {w : ℝ → ℝ}
-    (hw : ∀ y, w y = Real.jacobiDnm y (k ^ 2) *
+    (hw : ∀ y, w y = Real.jacobiDnOfParameter y (k ^ 2) *
       ∑ p ∈ Finset.range N, b p * Real.sin (((2 * p + δ : ℕ) : ℝ) * Real.lamePhi y k)) :
-    ∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2), Real.jacobiDnm x (k ^ 2) * w x ^ 2 =
+    ∫ x in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2),
+        Real.jacobiDnOfParameter x (k ^ 2) * w x ^ 2 =
       (1 - k ^ 2 / 2) * ∑ p ∈ Finset.range N, b p ^ 2 * (if 2 * p + δ = 0 then 0 else π / 4)
       - k ^ 2 / 2 * (π / 8) * (2 * ∑ p ∈ Finset.range N, b p * b (p + 1) +
         ∑ p ∈ Finset.range N, ∑ q ∈ Finset.range N, b p * b q *
@@ -641,31 +657,32 @@ theorem dnNorm_extraTerm_two (b : ℕ → ℝ) (N : ℕ) :
 theorem dn_cos_series_lamePhi_eval_K {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ)
     (b : ℕ → ℝ) (e : ℕ → ℝ)
     {w : ℝ → ℝ}
-    (hw : ∀ y, w y = Real.jacobiDnm y (k ^ 2) *
+    (hw : ∀ y, w y = Real.jacobiDnOfParameter y (k ^ 2) *
       ∑ p ∈ Finset.range N, b p * Real.cos (e p * Real.lamePhi y k)) :
-    w (Real.compEllIntKm (k ^ 2)) =
-      Real.jacobiDnm (Real.compEllIntKm (k ^ 2)) (k ^ 2) * ∑ p ∈ Finset.range N, b p := by
+    w (Real.completeEllipticKOfParameter (k ^ 2)) =
+      Real.jacobiDnOfParameter (Real.completeEllipticKOfParameter (k ^ 2)) (k ^ 2) * ∑ p ∈
+          Finset.range N, b p := by
   rw [hw, lamePhi_K hk0 hk1]; simp
 
 /-- Minus the derivative at `K` of `dn` times a finite sine series in `φ`. -/
 theorem deriv_dn_sin_series_lamePhi_K {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ)
     (b : ℕ → ℝ) (e : ℕ → ℝ)
     {w : ℝ → ℝ}
-    (hw : ∀ y, w y = Real.jacobiDnm y (k ^ 2) *
+    (hw : ∀ y, w y = Real.jacobiDnOfParameter y (k ^ 2) *
       ∑ p ∈ Finset.range N, b p * Real.sin (e p * Real.lamePhi y k)) :
-    -deriv w (Real.compEllIntKm (k ^ 2)) =
-      Real.jacobiDnm (Real.compEllIntKm (k ^ 2)) (k ^ 2) ^ 2 *
+    -deriv w (Real.completeEllipticKOfParameter (k ^ 2)) =
+      Real.jacobiDnOfParameter (Real.completeEllipticKOfParameter (k ^ 2)) (k ^ 2) ^ 2 *
         ∑ p ∈ Finset.range N, e p * b p := by
   have hk : k ^ 2 < 1 := by nlinarith
-  set K := Real.compEllIntKm (k ^ 2)
+  set K := Real.completeEllipticKOfParameter (k ^ 2)
   set v := fun y => ∑ p ∈ Finset.range N, b p * Real.sin (e p * Real.lamePhi y k) with hv
   have hdv := deriv_sin_series_lamePhi_K hk0 hk1 N b e (w := v) fun y => rfl
   have hvd : DifferentiableAt ℝ v K := by
     simp only [hv]
     exact DifferentiableAt.fun_sum fun p _ =>
       (((hasDerivAt_lamePhi hk K).differentiableAt.const_mul (e p)).sin).const_mul (b p)
-  have hw' : w = fun y => Real.jacobiDnm y (k ^ 2) * v y := funext hw
-  have hd := ((Real.hasDerivAt_jacobiDnm hk K).fun_mul hvd.hasDerivAt)
+  have hw' : w = fun y => Real.jacobiDnOfParameter y (k ^ 2) * v y := funext hw
+  have hd := ((Real.hasDerivAt_jacobiDnOfParameter hk K).fun_mul hvd.hasDerivAt)
   rw [hw', hd.deriv]
   have hv0 : v K = 0 := by simp [hv, K, lamePhi_K hk0 hk1]
   rw [hv0, mul_zero, zero_add, neg_mul_eq_mul_neg, hdv]

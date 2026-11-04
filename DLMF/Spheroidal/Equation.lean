@@ -17,8 +17,8 @@ The irregular singularity of the spheroidal equation 30.2.1 at infinity, its spe
 ## Main results
 
 * `spheroidal_irregular_infinity`: the irregular singularity of rank 1 at `∞` (§30.2(i)).
-* `isSpheroidalSolutionReal_ferrersP`, `isSpheroidalZetaSolution_sphericalJ`: the case `γ = 0`
-  (the associated Legendre equation 14.2.2 and the spherical Bessel equation 10.47.1).
+* `DLMF.Spheroidal.Real.isSpheroidalSolution_ferrersP`, `isSpheroidalZetaSolution_sphericalJ`: the
+  case `γ = 0` (the associated Legendre equation 14.2.2 and the spherical Bessel equation 10.47.1).
 * `exists_bounded_iff_mem_spheroidalSpectrum`: bounded solutions exist exactly on the spectrum
   (§30.3(i)).
 
@@ -73,8 +73,8 @@ theorem spheroidal_irregular_infinity (lam μ γ : ℂ) (hγ : γ ≠ 0) :
 /-- **`γ = 0`: the associated Legendre equation** (DLMF §30.2(iii), 14.2.2): the Ferrers function
 `𝖯^m_n(x)` solves 30.2.1 on `(-1, 1)` with `γ = 0`, `λ = n(n+1)`, `μ = m`. -/
 @[dlmf 30.2.iii]
-theorem isSpheroidalSolutionReal_ferrersP (n m : ℕ) :
-    IsSpheroidalSolutionReal ((n : ℝ) * (n + 1)) 0 m
+theorem Real.isSpheroidalSolution_ferrersP (n m : ℕ) :
+    DLMF.Spheroidal.Real.IsSpheroidalSolution ((n : ℝ) * (n + 1)) 0 m
       (fun x => (DLMF.Legendre.ferrersP n m x).re) := by
   have key : ∀ x ∈ Ioo (-1 : ℝ) 1, _ := fun x hx =>
     DLMF.Legendre.LegendreSturm.ferrersP_solution (n : ℝ) (m : ℝ) hx
@@ -154,7 +154,8 @@ solution bounded on `(-1, 1)` iff `λ` lies in the spectrum, i.e. iff it has a n
 of the form `(1-x²)^{m/2} g(x)` with `g` entire. -/
 @[dlmf 30.3.i]
 theorem exists_bounded_iff_mem_spheroidalSpectrum (m : ℕ) (γ2 lam : ℝ) :
-    (∃ f : ℝ → ℝ, IsSpheroidalSolutionReal lam γ2 m f ∧ (∃ x ∈ Ioo (-1 : ℝ) 1, f x ≠ 0) ∧
+    (∃ f : ℝ → ℝ, DLMF.Spheroidal.Real.IsSpheroidalSolution lam γ2 m f ∧
+        (∃ x ∈ Ioo (-1 : ℝ) 1, f x ≠ 0) ∧
       ∃ C, ∀ x ∈ Ioo (-1 : ℝ) 1, |f x| ≤ C) ↔ lam ∈ spheroidalSpectrum m γ2 := by
   sorry
 

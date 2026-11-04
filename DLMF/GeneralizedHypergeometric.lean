@@ -24,6 +24,9 @@ public import DLMF.GeneralizedHypergeometric.MeijerG
 public import DLMF.GeneralizedHypergeometric.MeijerGRelations
 public import DLMF.GeneralizedHypergeometric.Transformations
 public import DLMF.GeneralizedHypergeometric.UnitArgument
+public import DLMF.GeneralizedHypergeometric.UnitArgumentDougall
+public import DLMF.GeneralizedHypergeometric.ClearedTerminating
+public import DLMF.GeneralizedHypergeometric.WhippleTerminating
 
 /-!
 # Generalized hypergeometric, Appell and Meijer G functions (DLMF Chapter 16)

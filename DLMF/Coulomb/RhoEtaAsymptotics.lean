@@ -111,9 +111,10 @@ theorem coulombH_eq_largeRho (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
 /-- The terms `f_k + i g_k` are the terms of the expansion 33.11.1 of `e^{-iθ_ℓ} H^+_ℓ`. -/
 private lemma largeRhoTerm_fst_add_I_mul_eq (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : ρ ≠ 0) (k : ℕ) :
     ((largeRhoTerm ℓ η ρ k).1 : ℂ) + I * (largeRhoTerm ℓ η ρ k).2.1 =
-      ((ρ : ℂ) ^ k)⁻¹ * (poch (I * η - ℓ) k * poch (I * η + ℓ + 1) k / (k ! * (2 * I) ^ k)) := by
+      ((ρ : ℂ) ^ k)⁻¹ * (pochhammer (I * η - ℓ) k * pochhammer (I * η + ℓ + 1) k /
+          (k ! * (2 * I) ^ k)) := by
   induction k with
-  | zero => simp [largeRhoTerm, poch]
+  | zero => simp [largeRhoTerm, pochhammer]
   | succ k ih =>
     have hs : ((largeRhoTerm ℓ η ρ (k + 1)).1 : ℂ) + I * (largeRhoTerm ℓ η ρ (k + 1)).2.1 =
         (((2 * k + 1) * η / ((2 * k + 2) * ρ) : ℝ) +
@@ -124,7 +125,7 @@ private lemma largeRhoTerm_fst_add_I_mul_eq (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (h
       ring_nf
       rw [I_sq]
       ring
-    rw [hs, ih, poch_succ, poch_succ, Nat.factorial_succ]
+    rw [hs, ih, pochhammer_succ, pochhammer_succ, Nat.factorial_succ]
     have hρ' : (ρ : ℂ) ≠ 0 := by exact_mod_cast hρ
     have hk : ((k : ℂ) + 1) ≠ 0 := by exact_mod_cast Nat.succ_ne_zero k
     have hk2 : (2 * (k : ℂ) + 2) ≠ 0 := by
@@ -146,7 +147,7 @@ theorem largeRhoFG_isBigO (ℓ : ℕ) (η : ℝ) (K : ℕ) :
         =O[atTop] (fun ρ : ℝ => (ρ ^ (K + 1))⁻¹) := by
   set D : ℝ → ℂ := fun ρ => exp (-I * coulombTheta ℓ η ρ) * coulombHPlus ℓ η ρ -
     ∑ k ∈ Finset.range (K + 1), ((ρ : ℂ) ^ k)⁻¹ •
-      (poch (I * η - ℓ) k * poch (I * η + ℓ + 1) k / (k ! * (2 * I) ^ k)) with hD
+      (pochhammer (I * η - ℓ) k * pochhammer (I * η + ℓ + 1) k / (k ! * (2 * I) ^ k)) with hD
   have h : D =O[atTop] (fun ρ : ℝ => (ρ ^ (K + 1))⁻¹) := by
     rw [← isBigO_norm_right]
     refine ((hasAsymptoticExpansion_coulombHPlus ℓ η (K + 1)).norm_right).congr_right ?_
@@ -181,7 +182,7 @@ theorem largeRhoFG_isBigO (ℓ : ℕ) (η : ℝ) (K : ℕ) :
 /-- The ray expansion of `z^a U(a,b,z)` along `z = -2iρ`. -/
 private lemma hasAsymptoticExpansion_cpow_mul_kummerU_neg_two_I (a b : ℂ) :
     HasAsymptoticExpansion atTop (fun (k : ℕ) (ρ : ℝ) => ((ρ : ℂ) ^ k)⁻¹)
-      (fun k => poch a k * poch (a - b + 1) k / (k ! * (2 * I) ^ k))
+      (fun k => pochhammer a k * pochhammer (a - b + 1) k / (k ! * (2 * I) ^ k))
       (fun ρ : ℝ => ((ρ : ℂ) * (-2 * I)) ^ a * kummerU a b ((ρ : ℂ) * (-2 * I))) := by
   have h := hasAsymptoticExpansion_ray_cpow_mul_kummerU a b
     (c := -2 * I) (by simp [I_ne_zero]) (δ := 1 / 2) (α := π / 4) (by norm_num)
@@ -316,8 +317,8 @@ theorem largeRhoFGHat_isBigO (ℓ : ℕ) (η : ℝ) (K : ℕ) :
         =O[atTop] (fun ρ : ℝ => (ρ ^ (K + 1))⁻¹) := by
   set A : ℂ := (ℓ : ℂ) + 1 + I * η with hA
   set B : ℂ := 2 * ℓ + 2 with hB
-  set c : ℕ → ℂ := fun k => poch A k * poch (A - B + 1) k / (k ! * (2 * I) ^ k) with hc
-  set c' : ℕ → ℂ := fun k => poch (A + 1) k * poch (A + 1 - (B + 1) + 1) k /
+  set c : ℕ → ℂ := fun k => pochhammer A k * pochhammer (A - B + 1) k / (k ! * (2 * I) ^ k) with hc
+  set c' : ℕ → ℂ := fun k => pochhammer (A + 1) k * pochhammer (A + 1 - (B + 1) + 1) k /
     (k ! * (2 * I) ^ k) with hc'
   set E1 : ℝ → ℂ := fun ρ => ((ρ : ℂ) * (-2 * I)) ^ A * kummerU A B ((ρ : ℂ) * (-2 * I))
   set E2 : ℝ → ℂ := fun ρ => ((ρ : ℂ) * (-2 * I)) ^ (A + 1) *
@@ -330,8 +331,8 @@ theorem largeRhoFGHat_isBigO (ℓ : ℕ) (η : ℝ) (K : ℕ) :
     hasAsymptoticExpansion_cpow_mul_kummerU_neg_two_I (A + 1) (B + 1) (K + 1)
   have hcc : ∀ k, A * c' k = (A + k) * c k := by
     intro k
-    have h1 := poch_succ A k
-    have h2 := poch_succ_left A k
+    have h1 := pochhammer_succ A k
+    have h2 := pochhammer_succ_left A k
     simp only [hc, hc', show A + 1 - (B + 1) + 1 = A - B + 1 by ring]
     rw [mul_div_assoc', ← mul_assoc, ← h2, h1]
     ring

@@ -38,19 +38,22 @@ open DLMF.Core
 namespace DLMF.Airy
 
 /-- The derivative of a product of Airy solutions. -/
-theorem airy_product_deriv {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f') (hg : IsAirySol g g') :
+theorem airy_product_deriv {f f' g g' : ℂ → ℂ} (hf : IsAirySolution f f')
+    (hg : IsAirySolution g g') :
     deriv (fun z => f z * g z) = fun z => f' z * g z + f z * g' z :=
   ODE.product_deriv (fun z => (hf z).1) (fun z => (hg z).1)
 
 /-- The second derivative of a product of Airy solutions. -/
-theorem airy_product_second_deriv {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f') (hg : IsAirySol g g') :
+theorem airy_product_second_deriv {f f' g g' : ℂ → ℂ} (hf : IsAirySolution f f')
+    (hg : IsAirySolution g g') :
     deriv (deriv (fun z => f z * g z)) = fun z => 2 * z * f z * g z + 2 * f' z * g' z :=
   ODE.product_second_deriv hf hg
 
 /-- A product `w = f g` of two Airy solutions satisfies the third-order equation
 `w''' - 4 z w' - 2 w = 0` (DLMF 9.11.1). -/
 @[dlmf 9.11.E1]
-theorem airy_product_ode {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f') (hg : IsAirySol g g') (z : ℂ) :
+theorem airy_product_ode {f f' g g' : ℂ → ℂ} (hf : IsAirySolution f f')
+    (hg : IsAirySolution g g') (z : ℂ) :
     iteratedDeriv 3 (fun t => f t * g t) z - 4 * z * deriv (fun t => f t * g t) z - 2 *
         f z * g z = 0 := by
   have h := ODE.product_third_deriv hf hg (fun z => hasDerivAt_id z) z
@@ -65,12 +68,12 @@ theorem airy_product_wronskian (z : ℂ) :
   have hB : (fun t => airyBi t ^ 2) = fun t => airyBi t * airyBi t := by funext t; ring
   unfold airyWronskian3
   rw [hA, hB]
-  rw [airy_product_second_deriv isAirySol_airyAi isAirySol_airyAi,
-    airy_product_second_deriv isAirySol_airyAi isAirySol_airyBi,
-    airy_product_second_deriv isAirySol_airyBi isAirySol_airyBi]
-  simp only [airy_product_deriv isAirySol_airyAi isAirySol_airyAi,
-    airy_product_deriv isAirySol_airyAi isAirySol_airyBi,
-    airy_product_deriv isAirySol_airyBi isAirySol_airyBi]
+  rw [airy_product_second_deriv isAirySolution_airyAi isAirySolution_airyAi,
+    airy_product_second_deriv isAirySolution_airyAi isAirySolution_airyBi,
+    airy_product_second_deriv isAirySolution_airyBi isAirySolution_airyBi]
+  simp only [airy_product_deriv isAirySolution_airyAi isAirySolution_airyAi,
+    airy_product_deriv isAirySolution_airyAi isAirySolution_airyBi,
+    airy_product_deriv isAirySolution_airyBi isAirySolution_airyBi]
   calc
     _ = 2 * (airyAi z * airyBiDeriv z - airyAiDeriv z * airyBi z) ^ 3 := by ring
     _ = 2 / π ^ 3 := by rw [wronskian_airyAi_airyBi]; ring
@@ -94,8 +97,8 @@ theorem airy_modulus_sq_exp_integral (z : ℂ) :
 
 /-- For Airy solutions `f, g`, an antiderivative of `f g` is `-f' g' + z f g` (DLMF 9.11.5). -/
 @[dlmf 9.11.E5]
-theorem airy_product_antiderivative_5 {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f')
-    (hg : IsAirySol g g') (z : ℂ) :
+theorem airy_product_antiderivative_5 {f f' g g' : ℂ → ℂ} (hf : IsAirySolution f f')
+    (hg : IsAirySolution g g') (z : ℂ) :
     HasDerivAt (fun t => -f' t * g' t + t * f t * g t) (f z * g z) z := by
   have h := ((hf z).2.neg.mul (hg z).2).add
     (((hasDerivAt_id z).mul (hf z).1).mul (hg z).1)
@@ -104,8 +107,8 @@ theorem airy_product_antiderivative_5 {f f' g g' : ℂ → ℂ} (hf : IsAirySol 
 /-- For Airy solutions `f, g` with Wronskian `𝒲 = f g' - f' g`, an antiderivative of `f g'` is
 `(f g + 𝒲 z)/2` (DLMF 9.11.6). -/
 @[dlmf 9.11.E6]
-theorem airy_product_antiderivative_6 {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f')
-    (hg : IsAirySol g g') (z : ℂ) :
+theorem airy_product_antiderivative_6 {f f' g g' : ℂ → ℂ} (hf : IsAirySolution f f')
+    (hg : IsAirySolution g g') (z : ℂ) :
     HasDerivAt (fun t => (f t * g t + t * (f 0 * g' 0 - f' 0 * g 0)) / 2) (f z * g' z) z := by
   have h := (((hf z).1.mul (hg z).1).add
     ((hasDerivAt_id z).mul_const (f 0 * g' 0 - f' 0 * g 0))).div_const 2
@@ -115,8 +118,8 @@ theorem airy_product_antiderivative_6 {f f' g g' : ℂ → ℂ} (hf : IsAirySol 
 /-- For Airy solutions `f, g`, an antiderivative of `f' g'` is `(f g' + f' g + z f' g' - z² f g)/3`
 (DLMF 9.11.7). -/
 @[dlmf 9.11.E7]
-theorem airy_product_antiderivative_7 {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f')
-    (hg : IsAirySol g g') (z : ℂ) :
+theorem airy_product_antiderivative_7 {f f' g g' : ℂ → ℂ} (hf : IsAirySolution f f')
+    (hg : IsAirySolution g g') (z : ℂ) :
     HasDerivAt (fun t => (f t * g' t + f' t * g t + t * f' t * g' t - t ^ 2 * f t * g t) / 3)
         (f' z * g' z) z := by
   have h := (((((hf z).1.mul (hg z).2).add ((hf z).2.mul (hg z).1)).add
@@ -127,8 +130,8 @@ theorem airy_product_antiderivative_7 {f f' g g' : ℂ → ℂ} (hf : IsAirySol 
 /-- For Airy solutions `f, g`, an antiderivative of `z f g` is
 `(f g' + f' g)/6 - (z f' g' - z² f g)/3` (DLMF 9.11.8). -/
 @[dlmf 9.11.E8]
-theorem airy_product_antiderivative_8 {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f')
-    (hg : IsAirySol g g') (z : ℂ) :
+theorem airy_product_antiderivative_8 {f f' g g' : ℂ → ℂ} (hf : IsAirySolution f f')
+    (hg : IsAirySolution g g') (z : ℂ) :
     HasDerivAt (fun t => (f t * g' t + f' t * g t) / 6 - (t * f' t * g' t - t ^ 2 * f t * g t) / 3)
         (z * f z * g z) z := by
   have h := ((((hf z).1.mul (hg z).2).add ((hf z).2.mul (hg z).1)).div_const 6).sub
@@ -139,8 +142,8 @@ theorem airy_product_antiderivative_8 {f f' g g' : ℂ → ℂ} (hf : IsAirySol 
 /-- For Airy solutions `f, g` with Wronskian `𝒲`, an antiderivative of `z f g'` is
 `f' g'/2 + 𝒲 z²/4` (DLMF 9.11.9). -/
 @[dlmf 9.11.E9]
-theorem airy_product_antiderivative_9 {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f')
-    (hg : IsAirySol g g') (z : ℂ) :
+theorem airy_product_antiderivative_9 {f f' g g' : ℂ → ℂ} (hf : IsAirySolution f f')
+    (hg : IsAirySolution g g') (z : ℂ) :
     HasDerivAt (fun t => f' t * g' t / 2 + t ^ 2 * (f 0 * g' 0 - f' 0 * g 0) / 4)
         (z * f z * g' z) z := by
   have h := (((hf z).2.mul (hg z).2).div_const 2).add
@@ -151,8 +154,8 @@ theorem airy_product_antiderivative_9 {f f' g g' : ℂ → ℂ} (hf : IsAirySol 
 /-- For Airy solutions `f, g`, an antiderivative of `z f' g'` is
 `(3/10)(-f g + z f g' + z f' g) + (z² f' g' - z³ f g)/5` (DLMF 9.11.10). -/
 @[dlmf 9.11.E10]
-theorem airy_product_antiderivative_10 {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f')
-    (hg : IsAirySol g g') (z : ℂ) :
+theorem airy_product_antiderivative_10 {f f' g g' : ℂ → ℂ} (hf : IsAirySolution f f')
+    (hg : IsAirySolution g g') (z : ℂ) :
     HasDerivAt (fun t => 3 / 10 * (-f t * g t + t * f t * g' t + t * f' t * g t) +
         (t ^ 2 * f' t * g' t - t ^ 3 * f t * g t) / 5) (z * f' z * g' z) z := by
   have h := (((((hf z).1.mul (hg z).1).neg.add
@@ -170,7 +173,8 @@ theorem airy_product_antiderivative_10 {f f' g g' : ℂ → ℂ} (hf : IsAirySol
 /-- For Airy solutions `f, g` with nonzero Wronskian `𝒲`, if `F` has derivative `F'` at `g(z)/f(z)`
 and `f(z) ≠ 0`, then `F(g/f)/𝒲` has derivative `F'/f(z)²` at `z` (DLMF 9.11.11). -/
 @[dlmf 9.11.E11]
-theorem airy_quotient_antiderivative {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f') (hg : IsAirySol g g')
+theorem airy_quotient_antiderivative {f f' g g' : ℂ → ℂ} (hf : IsAirySolution f f')
+    (hg : IsAirySolution g g')
     {F : ℂ → ℂ} {F' z : ℂ}
     (hF : HasDerivAt F F' (g z / f z)) (hfz : f z ≠ 0)
     (hW : f 0 * g' 0 - f' 0 * g 0 ≠ 0) :
@@ -321,57 +325,64 @@ theorem airyAi_fourth_integral  :
   sorry
 
 /-- `Bi'(x) ≥ Bi'(0)` for `x ≥ 0`, since `Bi'' = x Bi ≥ 0` there. -/
-theorem airyBiDerivReal_ge {x : ℝ} (hx : 0 ≤ x) : airyBiDerivReal 0 ≤ airyBiDerivReal x := by
-  have hmono : MonotoneOn airyBiDerivReal (Ici 0) := by
+theorem Real.airyBiDeriv_ge {x : ℝ} (hx : 0 ≤ x) : DLMF.Airy.Real.airyBiDeriv 0 ≤
+    DLMF.Airy.Real.airyBiDeriv x := by
+  have hmono : MonotoneOn DLMF.Airy.Real.airyBiDeriv (Ici 0) := by
     refine monotoneOn_of_deriv_nonneg (convex_Ici 0)
       (continuous_iff_continuousAt.mpr fun t =>
-        (hasDerivAt_airyBiDerivReal t).continuousAt).continuousOn
-      (fun t _ => (hasDerivAt_airyBiDerivReal t).differentiableAt.differentiableWithinAt)
+        (DLMF.Airy.Real.hasDerivAt_airyBiDeriv t).continuousAt).continuousOn
+      (fun t _ => (DLMF.Airy.Real.hasDerivAt_airyBiDeriv t).differentiableAt.differentiableWithinAt)
       fun t ht => ?_
     rw [interior_Ici, mem_Ioi] at ht
-    rw [(hasDerivAt_airyBiDerivReal t).deriv]
-    exact mul_nonneg ht.le (airyBiReal_pos ht.le).le
+    rw [(DLMF.Airy.Real.hasDerivAt_airyBiDeriv t).deriv]
+    exact mul_nonneg ht.le (DLMF.Airy.Real.airyBi_pos ht.le).le
   exact hmono (mem_Ici.mpr le_rfl) (mem_Ici.mpr hx) hx
 
 /-- `Bi(x) ≥ Bi(0) + Bi'(0) x` for `x ≥ 0`. -/
-theorem airyBiReal_ge {x : ℝ} (hx : 0 ≤ x) :
-    airyBiReal 0 + airyBiDerivReal 0 * x ≤ airyBiReal x := by
-  have hmono : MonotoneOn (fun t => airyBiReal t - airyBiDerivReal 0 * t) (Ici 0) := by
-    have hd : ∀ t, HasDerivAt (fun t => airyBiReal t - airyBiDerivReal 0 * t)
-        (airyBiDerivReal t - airyBiDerivReal 0) t := fun t =>
-      ((hasDerivAt_airyBiReal t).sub ((hasDerivAt_id t).const_mul _)).congr_deriv (by simp)
+theorem Real.airyBi_ge {x : ℝ} (hx : 0 ≤ x) :
+    DLMF.Airy.Real.airyBi 0 + DLMF.Airy.Real.airyBiDeriv 0 * x ≤ DLMF.Airy.Real.airyBi x := by
+  have hmono : MonotoneOn
+      (fun t => DLMF.Airy.Real.airyBi t - DLMF.Airy.Real.airyBiDeriv 0 * t) (Ici 0) := by
+    have hd : ∀ t, HasDerivAt (fun t => DLMF.Airy.Real.airyBi t - DLMF.Airy.Real.airyBiDeriv 0 * t)
+        (DLMF.Airy.Real.airyBiDeriv t - DLMF.Airy.Real.airyBiDeriv 0) t := fun t =>
+      ((DLMF.Airy.Real.hasDerivAt_airyBi t).sub
+          ((hasDerivAt_id t).const_mul _)).congr_deriv (by simp)
     refine monotoneOn_of_deriv_nonneg (convex_Ici 0)
       (continuous_iff_continuousAt.mpr fun t => (hd t).continuousAt).continuousOn
       (fun t _ => (hd t).differentiableAt.differentiableWithinAt) fun t ht => ?_
     rw [interior_Ici, mem_Ioi] at ht
     rw [(hd t).deriv]
-    linarith [airyBiDerivReal_ge ht.le]
+    linarith [DLMF.Airy.Real.airyBiDeriv_ge ht.le]
   have := hmono (mem_Ici.mpr le_rfl) (mem_Ici.mpr hx) hx
   simp only [mul_zero, sub_zero] at this
   linarith
 
 /-- `Bi(x) → ∞` as `x → +∞`. -/
-theorem tendsto_airyBiReal_atTop : Tendsto airyBiReal atTop atTop := by
-  refine tendsto_atTop_mono' _ (eventually_ge_atTop 0 |>.mono fun x hx => airyBiReal_ge hx) ?_
-  exact tendsto_atTop_add_const_left _ _ (tendsto_id.const_mul_atTop airyBiDerivReal_zero_pos)
+theorem Real.tendsto_airyBi_atTop : Tendsto DLMF.Airy.Real.airyBi atTop atTop := by
+  refine tendsto_atTop_mono' _
+      (eventually_ge_atTop 0 |>.mono fun x hx => DLMF.Airy.Real.airyBi_ge hx) ?_
+  exact tendsto_atTop_add_const_left _ _
+      (tendsto_id.const_mul_atTop DLMF.Airy.Real.airyBiDeriv_zero_pos)
 
 /-- `Ai(x)/Bi(x) → 0` as `x → +∞`. -/
-theorem tendsto_airyAi_div_airyBi : Tendsto (fun x => airyAiReal x / airyBiReal x) atTop (𝓝 0) :=
-  tendsto_airyAiReal_atTop.div_atTop tendsto_airyBiReal_atTop
+theorem tendsto_airyAi_div_airyBi : Tendsto
+    (fun x => DLMF.Airy.Real.airyAi x / DLMF.Airy.Real.airyBi x) atTop (𝓝 0) :=
+  DLMF.Airy.Real.tendsto_airyAi_atTop.div_atTop DLMF.Airy.Real.tendsto_airyBi_atTop
 
 /-- `Ai'(x)/Bi'(x) → 0` as `x → +∞`, via the Wronskian. -/
 theorem tendsto_airyAiDeriv_div_airyBiDeriv :
-    Tendsto (fun x => airyAiDerivReal x / airyBiDerivReal x) atTop (𝓝 0) := by
-  have h1 : Tendsto (fun x => airyBiReal x * airyBiDerivReal x) atTop atTop :=
+    Tendsto (fun x => DLMF.Airy.Real.airyAiDeriv x / DLMF.Airy.Real.airyBiDeriv x) atTop (𝓝 0) := by
+  have h1 : Tendsto (fun x => DLMF.Airy.Real.airyBi x * DLMF.Airy.Real.airyBiDeriv x) atTop atTop :=
     tendsto_atTop_mono' _ (eventually_ge_atTop 0 |>.mono fun x hx =>
-      mul_le_mul_of_nonneg_left (airyBiDerivReal_ge hx) (airyBiReal_pos hx).le)
-      (tendsto_airyBiReal_atTop.atTop_mul_const airyBiDerivReal_zero_pos)
+      mul_le_mul_of_nonneg_left (DLMF.Airy.Real.airyBiDeriv_ge hx)
+          (DLMF.Airy.Real.airyBi_pos hx).le)
+      (DLMF.Airy.Real.tendsto_airyBi_atTop.atTop_mul_const DLMF.Airy.Real.airyBiDeriv_zero_pos)
   have h2 := (h1.const_mul_atTop Real.pi_pos).inv_tendsto_atTop
   have h3 := tendsto_airyAi_div_airyBi.sub h2
   rw [sub_zero] at h3
   refine h3.congr' (eventually_ge_atTop 0 |>.mono fun x hx => ?_)
-  have hb := (airyBiReal_pos hx).ne'
-  have hb' := (airyBiDerivReal_zero_pos.trans_le (airyBiDerivReal_ge hx)).ne'
+  have hb := (DLMF.Airy.Real.airyBi_pos hx).ne'
+  have hb' := (DLMF.Airy.Real.airyBiDeriv_zero_pos.trans_le (DLMF.Airy.Real.airyBiDeriv_ge hx)).ne'
   have hW := wronskian_airyReal x
   have hπ := Real.pi_ne_zero
   simp only [Pi.inv_apply]
@@ -385,15 +396,16 @@ theorem arctan_recip_sqrt_three : Real.arctan (1 / Real.sqrt 3) = π / 6 := by
       Real.arctan_tan (by linarith [Real.pi_pos]) (by linarith [Real.pi_pos])]
 
 /-- `Ai(0)/Bi(0) = 1/√3`. -/
-theorem RealRemainders.zero_ratio : airyAiReal 0 / airyBiReal 0 = 1 / Real.sqrt 3 := by
-  have hA : airyAiReal 0 = 1 / ((3 : ℝ) ^ (2 / 3 : ℝ) * Real.Gamma (2 / 3)) := by
+theorem RealRemainders.zero_ratio : DLMF.Airy.Real.airyAi 0 / DLMF.Airy.Real.airyBi 0 = 1 /
+    Real.sqrt 3 := by
+  have hA : DLMF.Airy.Real.airyAi 0 = 1 / ((3 : ℝ) ^ (2 / 3 : ℝ) * Real.Gamma (2 / 3)) := by
     have h := airyAi_zero
     rw [Gamma_two_thirds_eq, ← ofReal_mul, ← ofReal_one, ← ofReal_div] at h
-    simp [airyAiReal, h]
-  have hB : airyBiReal 0 = 1 / ((3 : ℝ) ^ (1 / 6 : ℝ) * Real.Gamma (2 / 3)) := by
+    simp [DLMF.Airy.Real.airyAi, h]
+  have hB : DLMF.Airy.Real.airyBi 0 = 1 / ((3 : ℝ) ^ (1 / 6 : ℝ) * Real.Gamma (2 / 3)) := by
     have h := airyBi_zero
     rw [Gamma_two_thirds_eq, ← ofReal_mul, ← ofReal_one, ← ofReal_div] at h
-    simp [airyBiReal, h]
+    simp [DLMF.Airy.Real.airyBi, h]
   have hG := (Real.Gamma_pos_of_pos (by norm_num : (0 : ℝ) < 2 / 3)).ne'
   have h1 : (3 : ℝ) ^ (1 / 6 : ℝ) = (3 : ℝ) ^ (2 / 3 : ℝ) * (Real.sqrt 3)⁻¹ := by
     rw [Real.sqrt_eq_rpow, ← Real.rpow_neg (by norm_num), ← Real.rpow_add (by norm_num)]
@@ -404,17 +416,18 @@ theorem RealRemainders.zero_ratio : airyAiReal 0 / airyBiReal 0 = 1 / Real.sqrt 
   field_simp
 
 /-- `Ai'(0)/Bi'(0) = -1/√3`. -/
-theorem airyDerivReal_zero_ratio : airyAiDerivReal 0 / airyBiDerivReal 0 = -(1 / Real.sqrt 3) := by
+theorem airyDerivReal_zero_ratio : DLMF.Airy.Real.airyAiDeriv 0 / DLMF.Airy.Real.airyBiDeriv 0 =
+    -(1 / Real.sqrt 3) := by
   have hG' : Complex.Gamma (1 / 3) = ((Real.Gamma (1 / 3) : ℝ) : ℂ) := by
     rw [← Complex.Gamma_ofReal]; push_cast; ring_nf
-  have hA : airyAiDerivReal 0 = -1 / ((3 : ℝ) ^ (1 / 3 : ℝ) * Real.Gamma (1 / 3)) := by
+  have hA : DLMF.Airy.Real.airyAiDeriv 0 = -1 / ((3 : ℝ) ^ (1 / 3 : ℝ) * Real.Gamma (1 / 3)) := by
     have h := airyAiDeriv_zero
     rw [hG', ← ofReal_mul, show (-1 : ℂ) = ((-1 : ℝ) : ℂ) by simp, ← ofReal_div] at h
-    rw [airyAiDerivReal, ofReal_zero, h, ofReal_re]
-  have hB : airyBiDerivReal 0 = (3 : ℝ) ^ (1 / 6 : ℝ) / Real.Gamma (1 / 3) := by
+    rw [DLMF.Airy.Real.airyAiDeriv, ofReal_zero, h, ofReal_re]
+  have hB : DLMF.Airy.Real.airyBiDeriv 0 = (3 : ℝ) ^ (1 / 6 : ℝ) / Real.Gamma (1 / 3) := by
     have h := airyBiDeriv_zero
     rw [hG', ← ofReal_div] at h
-    simp [airyBiDerivReal, h]
+    simp [DLMF.Airy.Real.airyBiDeriv, h]
   have hG := (Real.Gamma_pos_of_pos (by norm_num : (0 : ℝ) < 1 / 3)).ne'
   have h1 : (3 : ℝ) ^ (1 / 3 : ℝ) * (3 : ℝ) ^ (1 / 6 : ℝ) = Real.sqrt 3 := by
     rw [Real.sqrt_eq_rpow, ← Real.rpow_add (by norm_num)]; norm_num
@@ -425,10 +438,11 @@ theorem airyDerivReal_zero_ratio : airyAiDerivReal 0 / airyBiDerivReal 0 = -(1 /
 
 /-- A primitive of `1/(Ai² + Bi²)` on `[0, ∞)`. -/
 theorem hasDerivAt_arctan_airy_ratio {x : ℝ} (hx : 0 ≤ x) :
-    HasDerivAt (fun t => -π * Real.arctan (airyAiReal t / airyBiReal t))
-      (1 / (airyAiReal x ^ 2 + airyBiReal x ^ 2)) x := by
-  have hb := (airyBiReal_pos hx).ne'
-  have h := (((hasDerivAt_airyAiReal x).div (hasDerivAt_airyBiReal x) hb).arctan).const_mul (-π)
+    HasDerivAt (fun t => -π * Real.arctan (DLMF.Airy.Real.airyAi t / DLMF.Airy.Real.airyBi t))
+      (1 / (DLMF.Airy.Real.airyAi x ^ 2 + DLMF.Airy.Real.airyBi x ^ 2)) x := by
+  have hb := (DLMF.Airy.Real.airyBi_pos hx).ne'
+  have h := (((DLMF.Airy.Real.hasDerivAt_airyAi x).div (DLMF.Airy.Real.hasDerivAt_airyBi x)
+      hb).arctan).const_mul (-π)
   refine h.congr_deriv ?_
   have hW := wronskian_airyReal x
   have hπ := Real.pi_ne_zero
@@ -436,14 +450,16 @@ theorem hasDerivAt_arctan_airy_ratio {x : ℝ} (hx : 0 ≤ x) :
   simp only [Pi.div_apply]
   field_simp
   field_simp at hW
-  linear_combination (airyAiReal x ^ 2 + airyBiReal x ^ 2) * hW
+  linear_combination (DLMF.Airy.Real.airyAi x ^ 2 + DLMF.Airy.Real.airyBi x ^ 2) * hW
 
 /-- A primitive of `x/(Ai'² + Bi'²)` on `[0, ∞)`. -/
 theorem hasDerivAt_arctan_airyDeriv_ratio {x : ℝ} (hx : 0 ≤ x) :
-    HasDerivAt (fun t => π * Real.arctan (airyAiDerivReal t / airyBiDerivReal t))
-      (x / (airyAiDerivReal x ^ 2 + airyBiDerivReal x ^ 2)) x := by
-  have hb := (airyBiDerivReal_zero_pos.trans_le (airyBiDerivReal_ge hx)).ne'
-  have h := (((hasDerivAt_airyAiDerivReal x).div (hasDerivAt_airyBiDerivReal x)
+    HasDerivAt (fun t => π *
+        Real.arctan (DLMF.Airy.Real.airyAiDeriv t / DLMF.Airy.Real.airyBiDeriv t))
+      (x / (DLMF.Airy.Real.airyAiDeriv x ^ 2 + DLMF.Airy.Real.airyBiDeriv x ^ 2)) x := by
+  have hb := (DLMF.Airy.Real.airyBiDeriv_zero_pos.trans_le (DLMF.Airy.Real.airyBiDeriv_ge hx)).ne'
+  have h := (((DLMF.Airy.Real.hasDerivAt_airyAiDeriv x).div
+      (DLMF.Airy.Real.hasDerivAt_airyBiDeriv x)
       hb).arctan).const_mul π
   refine h.congr_deriv ?_
   have hW := wronskian_airyReal x
@@ -452,7 +468,8 @@ theorem hasDerivAt_arctan_airyDeriv_ratio {x : ℝ} (hx : 0 ≤ x) :
   simp only [Pi.div_apply]
   field_simp
   field_simp at hW
-  linear_combination (x * (airyAiDerivReal x ^ 2 + airyBiDerivReal x ^ 2)) * hW
+  linear_combination (x *
+      (DLMF.Airy.Real.airyAiDeriv x ^ 2 + DLMF.Airy.Real.airyBiDeriv x ^ 2)) * hW
 
 /-- `∫₀^∞ dt/(Ai(t)² + Bi(t)²) = ∫₀^∞ t dt/(Ai'(t)² + Bi'(t)²) = π²/6` (DLMF 9.11.19). -/
 @[dlmf 9.11.E19]
@@ -460,10 +477,11 @@ theorem airy_modulus_reciprocal_integrals  :
     (∫ t : ℝ in Ioi 0, 1 / (airyAi t ^ 2 + airyBi t ^ 2)) = (π : ℂ) ^ 2 / 6 ∧
       (∫ t : ℝ in Ioi 0, (t : ℂ) / (airyAiDeriv t ^ 2 + airyBiDeriv t ^ 2)) = (π : ℂ) ^ 2 / 6 := by
   have e1 : (fun t : ℝ => 1 / (airyAi t ^ 2 + airyBi t ^ 2)) =
-      fun t : ℝ => ((1 / (airyAiReal t ^ 2 + airyBiReal t ^ 2) : ℝ) : ℂ) := by
+      fun t : ℝ => ((1 / (DLMF.Airy.Real.airyAi t ^ 2 + DLMF.Airy.Real.airyBi t ^ 2) : ℝ) : ℂ) := by
     funext t; rw [airyAi_ofReal_eq, airyBi_ofReal_eq]; push_cast; ring
   have e2 : (fun t : ℝ => (t : ℂ) / (airyAiDeriv t ^ 2 + airyBiDeriv t ^ 2)) =
-      fun t : ℝ => ((t / (airyAiDerivReal t ^ 2 + airyBiDerivReal t ^ 2) : ℝ) : ℂ) := by
+      fun t : ℝ => ((t / (DLMF.Airy.Real.airyAiDeriv t ^ 2 +
+          DLMF.Airy.Real.airyBiDeriv t ^ 2) : ℝ) : ℂ) := by
     funext t; rw [airyAiDeriv_ofReal_eq, airyBiDeriv_ofReal_eq]; push_cast; ring
   rw [e1, e2, _root_.integral_complex_ofReal, _root_.integral_complex_ofReal]
   have i1 := integral_Ioi_of_hasDerivAt_of_nonneg' (a := 0)

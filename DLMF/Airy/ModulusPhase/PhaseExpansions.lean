@@ -168,7 +168,7 @@ theorem ModulusPhase.tendsto_rpow_mul {f : ℝ → ℝ} {a b : ℝ} (c : ℝ) (h
 
 /-- `Ai(-s) = π^{-1/2} s^{-1/4} cos(ζ - π/4) + O(s^{-7/4})`, real form. -/
 theorem ModulusPhase.aiReal_neg_sub :
-    (fun s : ℝ => airyAiReal (-s) - s ^ (-(1 / 4) : ℝ) / Real.sqrt π *
+    (fun s : ℝ => DLMF.Airy.Real.airyAi (-s) - s ^ (-(1 / 4) : ℝ) / Real.sqrt π *
         Real.cos (airyZeta s - π / 4))
       =O[atTop] (fun s : ℝ => s ^ (-(7 / 4) : ℝ)) := by
   refine (ModulusPhase.ai_neg_sub.norm_left.congr_left fun s => ?_).of_norm_left
@@ -177,7 +177,7 @@ theorem ModulusPhase.aiReal_neg_sub :
 
 /-- `Bi(-s) = -π^{-1/2} s^{-1/4} sin(ζ - π/4) + O(s^{-7/4})`, real form. -/
 theorem ModulusPhase.biReal_neg_sub :
-    (fun s : ℝ => airyBiReal (-s) + s ^ (-(1 / 4) : ℝ) / Real.sqrt π *
+    (fun s : ℝ => DLMF.Airy.Real.airyBi (-s) + s ^ (-(1 / 4) : ℝ) / Real.sqrt π *
         Real.sin (airyZeta s - π / 4))
       =O[atTop] (fun s : ℝ => s ^ (-(7 / 4) : ℝ)) := by
   refine (ModulusPhase.bi_neg_sub.norm_left.congr_left fun s => ?_).of_norm_left
@@ -301,7 +301,7 @@ private lemma ModulusPhase.phase_limit_cos {L : ℝ}
     filter_upwards [eventually_gt_atTop 0] with s hs
     simp only [y]
     rw [ModulusPhase.sqrt_eq hs (airyModulus_pos _).le, Real.sin_add_pi_div_two,
-      airyAiReal_eq_modulus_sin (-s)]
+      DLMF.Airy.Real.airyAi_eq_modulus_sin (-s)]
     have hsp : 0 < Real.sqrt π := Real.sqrt_pos.mpr hπ
     have h4 : s ^ (1 / 4 : ℝ) * s ^ (-(1 / 4) : ℝ) = 1 := by
       rw [← Real.rpow_add hs]; norm_num
@@ -313,7 +313,7 @@ private lemma ModulusPhase.phase_limit_cos {L : ℝ}
     filter_upwards [eventually_gt_atTop 0] with s hs
     simp only [y]
     rw [ModulusPhase.sqrt_eq hs (airyModulus_pos _).le, Real.cos_add_pi_div_two,
-      airyBiReal_eq_modulus_cos (-s)]
+      DLMF.Airy.Real.airyBi_eq_modulus_cos (-s)]
     have hsp : 0 < Real.sqrt π := Real.sqrt_pos.mpr hπ
     have h4 : s ^ (1 / 4 : ℝ) * s ^ (-(1 / 4) : ℝ) = 1 := by
       rw [← Real.rpow_add hs]; norm_num
@@ -390,7 +390,7 @@ theorem ModulusPhase.derivModulus_bounds {s : ℝ} (hs : 0 < s) :
 
 /-- `Ai'(-s) = π^{-1/2} s^{1/4} sin(ζ - π/4) + O(s^{-5/4})`, real form. -/
 theorem ModulusPhase.aiDerivReal_neg_sub :
-    (fun s : ℝ => airyAiDerivReal (-s) - s ^ (1 / 4 : ℝ) / Real.sqrt π *
+    (fun s : ℝ => DLMF.Airy.Real.airyAiDeriv (-s) - s ^ (1 / 4 : ℝ) / Real.sqrt π *
         Real.sin (airyZeta s - π / 4))
       =O[atTop] (fun s : ℝ => s ^ (-(5 / 4) : ℝ)) := by
   refine (IntegralRepresentation.aiDeriv_neg_sub.norm_left.congr_left fun s => ?_).of_norm_left
@@ -399,7 +399,7 @@ theorem ModulusPhase.aiDerivReal_neg_sub :
 
 /-- `Bi'(-s) = π^{-1/2} s^{1/4} cos(ζ - π/4) + O(s^{-5/4})`, real form. -/
 theorem ModulusPhase.biDerivReal_neg_sub :
-    (fun s : ℝ => airyBiDerivReal (-s) - s ^ (1 / 4 : ℝ) / Real.sqrt π *
+    (fun s : ℝ => DLMF.Airy.Real.airyBiDeriv (-s) - s ^ (1 / 4 : ℝ) / Real.sqrt π *
         Real.cos (airyZeta s - π / 4))
       =O[atTop] (fun s : ℝ => s ^ (-(5 / 4) : ℝ)) := by
   refine (IntegralRepresentation.biDeriv_neg_sub.norm_left.congr_left fun s => ?_).of_norm_left
@@ -528,7 +528,8 @@ private lemma ModulusPhase.derivPhase_limit_cos {L : ℝ}
       ModulusPhase.aiDerivReal_neg_sub).congr' ?_
     filter_upwards [eventually_gt_atTop 0] with s hs
     simp only [y]
-    rw [ModulusPhase.sqrt_eq hs (airyDerivModulus_pos _).le, airyAiDerivReal_eq_modulus_sin (-s)]
+    rw [ModulusPhase.sqrt_eq hs (airyDerivModulus_pos _).le,
+        DLMF.Airy.Real.airyAiDeriv_eq_modulus_sin (-s)]
     have hsp : 0 < Real.sqrt π := Real.sqrt_pos.mpr hπ
     have h4 : s ^ (-(1 / 4) : ℝ) * s ^ (1 / 4 : ℝ) = 1 := by
       rw [← Real.rpow_add hs]; norm_num
@@ -540,7 +541,8 @@ private lemma ModulusPhase.derivPhase_limit_cos {L : ℝ}
       ModulusPhase.biDerivReal_neg_sub).congr' ?_
     filter_upwards [eventually_gt_atTop 0] with s hs
     simp only [y]
-    rw [ModulusPhase.sqrt_eq hs (airyDerivModulus_pos _).le, airyBiDerivReal_eq_modulus_cos (-s)]
+    rw [ModulusPhase.sqrt_eq hs (airyDerivModulus_pos _).le,
+        DLMF.Airy.Real.airyBiDeriv_eq_modulus_cos (-s)]
     have hsp : 0 < Real.sqrt π := Real.sqrt_pos.mpr hπ
     have h4 : s ^ (-(1 / 4) : ℝ) * s ^ (1 / 4 : ℝ) = 1 := by
       rw [← Real.rpow_add hs]; norm_num

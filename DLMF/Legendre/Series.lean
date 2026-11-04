@@ -62,17 +62,17 @@ namespace DLMF.Legendre
 
 /-- The Fourier coefficient `Γ(ν+μ+k+1)/Γ(ν+k+3/2) · (μ+1/2)_k/k!` of DLMF 14.13.1–14.13.2. -/
 noncomputable def FerrersFourier.coeff (ν μ : ℂ) (k : ℕ) : ℂ :=
-  Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*poch (μ+1/2) k/(k.factorial:ℂ)
+  Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*pochhammer (μ+1/2) k/(k.factorial:ℂ)
 
 /-- `‖FerrersFourier.coeff ν μ k‖ ≤ C k^{2 Re μ - 1}` eventually. -/
 theorem FerrersFourier.coeff_bound (ν μ : ℂ) : ∃ C : ℝ, 0 ≤ C ∧
     ∀ᶠ k : ℕ in atTop, ‖FerrersFourier.coeff ν μ k‖ ≤ C * (k:ℝ)^(2*μ.re-1) := by
-  obtain ⟨C, hC, hP⟩ := FerrersFourier.poch_div_factorial_le (μ+1/2)
+  obtain ⟨C, hC, hP⟩ := FerrersFourier.pochhammer_div_factorial_le (μ+1/2)
   refine ⟨2*C, by positivity, ?_⟩
   filter_upwards [FerrersFourier.gamma_ratio_le (ν+μ+1) (ν+3/2), hP, eventually_gt_atTop 0]
     with k hA hk hk0
   have e : FerrersFourier.coeff ν μ k =
-      Gamma (k+(ν+μ+1))/Gamma (k+(ν+3/2)) * (poch (μ+1/2) k/(k.factorial:ℂ)) := by
+      Gamma (k+(ν+μ+1))/Gamma (k+(ν+3/2)) * (pochhammer (μ+1/2) k/(k.factorial:ℂ)) := by
     rw [FerrersFourier.coeff, show ν+μ+k+1 = k+(ν+μ+1) by ring, show ν+k+3/2 =
                                                             k+(ν+3/2) by ring]; ring
   have hre : (ν+μ+1-(ν+3/2)).re = μ.re - 1/2 := by simp; ring
@@ -83,7 +83,7 @@ theorem FerrersFourier.coeff_bound (ν μ : ℂ) : ∃ C : ℝ, 0 ≤ C ∧
   have hpow : (k:ℝ)^(2*μ.re-1) = (k:ℝ)^(μ.re-1/2) * (k:ℝ)^(μ.re-1/2) := by
     rw [← Real.rpow_add hkp]; ring_nf
   rw [e, norm_mul, hpow]
-  calc ‖Gamma (k+(ν+μ+1))/Gamma (k+(ν+3/2))‖ * ‖poch (μ+1/2) k/(k.factorial:ℂ)‖
+  calc ‖Gamma (k+(ν+μ+1))/Gamma (k+(ν+3/2))‖ * ‖pochhammer (μ+1/2) k/(k.factorial:ℂ)‖
       ≤ (2 * (k:ℝ)^(μ.re-1/2)) * (C * (k:ℝ)^(μ.re-1/2)) := by gcongr
     _ = _ := by ring
 
@@ -125,7 +125,7 @@ theorem FerrersFourier.coeff_succ (ν μ : ℂ) : ∀ᶠ k : ℕ in atTop,
   rw [FerrersFourier.coeff, FerrersFourier.coeff]
   push_cast
   rw [show ν+μ+(k+1)+1 = (ν+μ+k+1)+1 by ring, show ν+(k+1)+3/2 = (ν+k+3/2)+1 by ring,
-    Complex.Gamma_add_one _ h1, Complex.Gamma_add_one _ h2, poch_succ, Nat.factorial_succ]
+    Complex.Gamma_add_one _ h1, Complex.Gamma_add_one _ h2, pochhammer_succ, Nat.factorial_succ]
   push_cast
   simp only [div_eq_mul_inv, mul_inv]
   ring
@@ -187,7 +187,7 @@ theorem FerrersFourier.series_tendsto {ν μ : ℂ} (hr : LegendreQRegular ν μ
     (hμ : μ.re < 1/2) {w : ℂ}
     (hw : ‖w‖ = 1) (hw1 : w ≠ 1) (hcut : w ∈ cutPlane) :
     Tendsto (fun N => ∑ k ∈ Finset.range N, FerrersFourier.coeff ν μ k * w^k) atTop
-      (𝓝 (Gamma (ν+μ+1) * regularizedGaussHG (ν+μ+1) (μ+1/2) (ν+3/2) w)) := by
+      (𝓝 (Gamma (ν+μ+1) * regularizedGaussHypergeometric (ν+μ+1) (μ+1/2) (ν+3/2) w)) := by
   have hw1' : w - 1 ≠ 0 := sub_ne_zero.mpr hw1
   have hB : ∀ n, ‖∑ i ∈ Finset.range n, w^i‖ ≤ 2/‖w-1‖ := by
     intro n
@@ -205,11 +205,12 @@ theorem FerrersFourier.series_tendsto {ν μ : ℂ} (hr : LegendreQRegular ν μ
   -- the Abel means are the hypergeometric function inside the disk
   have hmean : ∀ x : ℝ, 0 ≤ x → x < 1 →
       ((fun z : ℂ => ∑' n, FerrersFourier.coeff ν μ n * w^n * z^n) ∘ ofReal) x =
-        Gamma (ν+μ+1) * regularizedGaussHG (ν+μ+1) (μ+1/2) (ν+3/2) (w*x) := by
+        Gamma (ν+μ+1) * regularizedGaussHypergeometric (ν+μ+1) (μ+1/2) (ν+3/2) (w*x) := by
     intro x hx0 hx1
     have hn : ‖w*x‖ < 1 := by
       rw [norm_mul, hw, one_mul, norm_real, Real.norm_eq_abs, abs_of_nonneg hx0]; exact hx1
-    rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hn, regularizedGaussHGFun_eq_tsum,
+    rw [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hn,
+        regularizedGaussHypergeometricFun_eq_tsum,
       ← tsum_mul_left]
     simp only [Function.comp_apply]
     congr 1; funext n
@@ -218,18 +219,20 @@ theorem FerrersFourier.series_tendsto {ν μ : ℂ} (hr : LegendreQRegular ν μ
     have hG' : Gamma (ν+μ+n+1) = Gamma (ν+μ+1) * (ascPochhammer ℂ n).eval (ν+μ+1) := by
       rw [← hG, show ν+μ+n+1 = ν+μ+1+n by ring]; field_simp
     rw [FerrersFourier.coeff, hG', show ν+n+3/2 = ν+3/2+n by ring, mul_pow]
-    simp only [poch, div_eq_mul_inv]
+    simp only [pochhammer, div_eq_mul_inv]
     ring
   have hlim2 : Tendsto
-      (fun x : ℝ => Gamma (ν+μ+1) * regularizedGaussHG (ν+μ+1) (μ+1/2) (ν+3/2) (w*x))
-      (𝓝[<] (1:ℝ)) (𝓝 (Gamma (ν+μ+1) * regularizedGaussHG (ν+μ+1) (μ+1/2) (ν+3/2) w)) := by
+      (fun x : ℝ => Gamma (ν+μ+1) * regularizedGaussHypergeometric (ν+μ+1) (μ+1/2) (ν+3/2) (w*x))
+      (𝓝[<] (1:ℝ)) (𝓝 (Gamma (ν+μ+1) *
+          regularizedGaussHypergeometric (ν+μ+1) (μ+1/2) (ν+3/2) w)) := by
     have hc : Tendsto (fun x : ℝ => w*(x:ℂ)) (𝓝[<] (1:ℝ)) (𝓝 w) := by
       have : Continuous (fun x : ℝ => w*(x:ℂ)) := by fun_prop
       simpa using (this.tendsto 1).mono_left nhdsWithin_le_nhds
-    exact ((analyticAt_regularizedGaussHG _ _ _ hcut).continuousAt.tendsto.comp hc).const_mul _
+    exact ((analyticAt_regularizedGaussHypergeometric _ _ _ hcut).continuousAt.tendsto.comp
+        hc).const_mul _
   have hev : ∀ᶠ x : ℝ in 𝓝[<] (1:ℝ),
       ((fun z : ℂ => ∑' n, FerrersFourier.coeff ν μ n * w^n * z^n) ∘ ofReal) x =
-        Gamma (ν+μ+1) * regularizedGaussHG (ν+μ+1) (μ+1/2) (ν+3/2) (w*x) := by
+        Gamma (ν+μ+1) * regularizedGaussHypergeometric (ν+μ+1) (μ+1/2) (ν+3/2) (w*x) := by
     filter_upwards [self_mem_nhdsWithin,
         nhdsWithin_le_nhds (Ioi_mem_nhds (show (0:ℝ) < 1 by norm_num))]
       with x hx1 hx0
@@ -268,7 +271,7 @@ theorem FerrersFourier.tendsto_pair {ν μ : ℂ} (hr : LegendreQRegular ν μ) 
     Tendsto (fun N => ∑ k ∈ Finset.range N, FerrersFourier.coeff ν μ k *
         exp ((s:ℂ)*((ν+μ+2*k+1)*θ)*I))
       atTop (𝓝 (exp ((s:ℂ)*(ν+μ+1)*I*θ) * (Gamma (ν+μ+1) *
-        regularizedGaussHG (ν+μ+1) (μ+1/2) (ν+3/2) (exp ((s:ℂ)*2*I*θ))))) := by
+        regularizedGaussHypergeometric (ν+μ+1) (μ+1/2) (ν+3/2) (exp ((s:ℂ)*2*I*θ))))) := by
   have hcut := FerrersFourier.exp_mem_cutPlane hs h0 hπ
   have h := (FerrersFourier.series_tendsto hr hμ (FerrersFourier.norm_exp θ)
     (fun h1 => slitPlane_ne_zero hcut (by rw [h1, sub_self])) hcut).const_mul
@@ -281,7 +284,8 @@ theorem FerrersFourier.tendsto_pair {ν μ : ℂ} (hr : LegendreQRegular ν μ) 
 /-- `2/√π · Γ(n+k+1)/Γ(n+k+3/2) = 2^{2n+2}(n!)²/(π(2n+1)!) · (n+1)_k/(n+3/2)_k`. -/
 theorem FerrersFourier.nat_coeff (n k : ℕ) :
     (2:ℂ)/Real.sqrt π * (Gamma ((n:ℂ)+k+1)/Gamma ((n:ℂ)+k+3/2)) =
-      2^(2*n+2)*(n.factorial:ℂ)^2/(π*((2*n+1).factorial:ℂ))*(poch (n+1) k/poch (n+3/2) k) := by
+      2^(2*n+2)*(n.factorial:ℂ)^2/(π*((2*n+1).factorial:ℂ))*(pochhammer (n+1) k/pochhammer
+          (n+3/2) k) := by
   have ha : ∀ m : ℕ, ((n:ℂ)+1) ≠ -(m:ℂ) := fun m h => by
     have := congrArg re h; simp at this; linarith [(m.cast_nonneg : (0:ℝ) ≤ m)]
   have hb : ∀ m : ℕ, ((n:ℂ)+3/2) ≠ -(m:ℂ) := fun m h => by
@@ -294,17 +298,17 @@ theorem FerrersFourier.nat_coeff (n k : ℕ) :
   rw [show (1/2:ℂ) + ((n+1:ℕ):ℂ) = (n:ℂ)+3/2 by push_cast; ring, legendre_Gamma_one_half] at hG2
   have hb0 : Gamma ((n:ℂ)+3/2) ≠ 0 := Gamma_ne_zero hb
   have hn0 : (n.factorial : ℂ) ≠ 0 := by exact_mod_cast (Nat.factorial_pos _).ne'
-  have hp0 : poch ((n:ℂ)+3/2) k ≠ 0 := by
+  have hp0 : pochhammer ((n:ℂ)+3/2) k ≠ 0 := by
     show (ascPochhammer ℂ k).eval _ ≠ 0
     rw [← h2]; exact div_ne_zero
         (Gamma_ne_zero (fun m h => hb (m+k) (by push_cast; linear_combination h))) hb0
   have hr : (Real.sqrt π:ℂ) ≠ 0 := ofReal_ne_zero.mpr (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hpi : (π:ℂ) = (Real.sqrt π:ℂ)^2 := by
     rw [← ofReal_pow, Real.sq_sqrt Real.pi_pos.le]
-  have hA : Gamma ((n:ℂ)+k+1) = n.factorial * poch ((n:ℂ)+1) k := by
-    rw [poch, ← h1, hG1, show (n:ℂ)+1+k = (n:ℂ)+k+1 by ring, mul_div_cancel₀ _ hn0]
-  have hB : Gamma ((n:ℂ)+k+3/2) = Gamma ((n:ℂ)+3/2) * poch ((n:ℂ)+3/2) k := by
-    rw [poch, ← h2, show (n:ℂ)+3/2+k = (n:ℂ)+k+3/2 by ring, mul_div_cancel₀ _ hb0]
+  have hA : Gamma ((n:ℂ)+k+1) = n.factorial * pochhammer ((n:ℂ)+1) k := by
+    rw [pochhammer, ← h1, hG1, show (n:ℂ)+1+k = (n:ℂ)+k+1 by ring, mul_div_cancel₀ _ hn0]
+  have hB : Gamma ((n:ℂ)+k+3/2) = Gamma ((n:ℂ)+3/2) * pochhammer ((n:ℂ)+3/2) k := by
+    rw [pochhammer, ← h2, show (n:ℂ)+3/2+k = (n:ℂ)+k+3/2 by ring, mul_div_cancel₀ _ hb0]
   rw [hA, hB, hG2, hpi]
   have f1 : ((2*(n+1)).factorial : ℂ) = (2*n+2) * ((2*n+1).factorial : ℂ) := by
     rw [show 2*(n+1) = (2*n+1)+1 by ring, Nat.factorial_succ]; push_cast; ring
@@ -330,7 +334,7 @@ series converging as the limit of its partial sums. -/
 theorem ferrersP_fourier_series {ν μ : ℂ} (hν : LegendreQRegular ν μ) (hμ : μ.re < 1/2) {θ : ℝ}
     (h0 : 0 < θ) (hπ : θ < π) :
     Tendsto (fun N : ℕ => ∑ k ∈ Finset.range N,
-        2^(μ+1)/Real.sqrt π*(Real.sin θ:ℂ)^μ*Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*poch (μ+1/2)
+        2^(μ+1)/Real.sqrt π*(Real.sin θ:ℂ)^μ*Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*pochhammer (μ+1/2)
         k/(k.factorial:ℂ)*sin ((ν+μ+2*k+1)*θ)) atTop (𝓝 (ferrersP ν μ (Real.cos θ))) := by
   have hsin : 0 < Real.sin θ := Real.sin_pos_of_pos_of_lt_pi h0 hπ
   have Ep := FourierHypergeometric.PQ_hypergeometric ν μ hν h0 hπ (s := 1) (Or.inl rfl)
@@ -347,9 +351,9 @@ theorem ferrersP_fourier_series {ν μ : ℂ} (hν : LegendreQRegular ν μ) (h�
   have h2 : (2:ℂ)^(μ+1) = 2^μ*2 := by rw [cpow_add _ _ two_ne_zero, cpow_one]
   have e : ferrersP ν μ (Real.cos θ) = 2^(μ+1)/Real.sqrt π*(Real.sin θ:ℂ)^μ*I/2 *
       (exp (((-1:ℝ):ℂ)*(ν+μ+1)*I*θ) * (Gamma (ν+μ+1) *
-        regularizedGaussHG (ν+μ+1) (μ+1/2) (ν+3/2) (exp (((-1:ℝ):ℂ)*2*I*θ))) -
+        regularizedGaussHypergeometric (ν+μ+1) (μ+1/2) (ν+3/2) (exp (((-1:ℝ):ℂ)*2*I*θ))) -
       exp (((1:ℝ):ℂ)*(ν+μ+1)*I*θ) * (Gamma (ν+μ+1) *
-        regularizedGaussHG (ν+μ+1) (μ+1/2) (ν+3/2) (exp (((1:ℝ):ℂ)*2*I*θ)))) := by
+        regularizedGaussHypergeometric (ν+μ+1) (μ+1/2) (ν+3/2) (exp (((1:ℝ):ℂ)*2*I*θ)))) := by
     have h1 : ((-1:ℝ):ℂ) = -1 := by push_cast; ring
     have h1' : ((1:ℝ):ℂ) = 1 := ofReal_one
     rw [hpi] at Ep Em
@@ -361,8 +365,9 @@ theorem ferrersP_fourier_series {ν μ : ℂ} (hν : LegendreQRegular ν μ) (h�
     set P := ferrersP ν μ (Real.cos θ)
     set T := (2:ℂ)^μ * (Real.sin θ:ℂ)^μ
     set G := Gamma (ν+μ+1)
-    set D := exp (1*(ν+μ+1)*I*θ) * regularizedGaussHG (ν+μ+1) (μ+1/2) (ν+3/2) (exp (1*2*I*θ)) -
-      exp (-1*(ν+μ+1)*I*θ) * regularizedGaussHG (ν+μ+1) (μ+1/2) (ν+3/2) (exp (-1*2*I*θ))
+    set D := exp (1*(ν+μ+1)*I*θ) *
+        regularizedGaussHypergeometric (ν+μ+1) (μ+1/2) (ν+3/2) (exp (1*2*I*θ)) -
+      exp (-1*(ν+μ+1)*I*θ) * regularizedGaussHypergeometric (ν+μ+1) (μ+1/2) (ν+3/2) (exp (-1*2*I*θ))
     linear_combination (-I*a^2)*(Ep - Em) + (-(P*(a*r+1) + a*T*I*G*D))*hrinv + (P*a^2*r^2)*I_sq
   rw [e]
   refine h.congr fun N => ?_
@@ -375,7 +380,8 @@ theorem ferrersP_fourier_series {ν μ : ℂ} (hν : LegendreQRegular ν μ) (h�
 /-- Absolute convergence in DLMF 14.13. -/
 theorem ferrersP_fourier_absolute {ν μ : ℂ} (hμ : μ.re < 0) {θ : ℝ} :
     Summable (fun k : ℕ =>
-        ‖Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*poch (μ+1/2) k/(k.factorial:ℂ)*sin ((ν+μ+2*k+1)*θ)‖) := by
+        ‖Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*pochhammer (μ+1/2) k/(k.factorial:ℂ)*sin
+            ((ν+μ+2*k+1)*θ)‖) := by
   refine FerrersFourier.summable hμ _ (B := Real.exp |((ν+μ)*θ).im|) fun k => ?_
   have him : ((ν+μ+2*(k:ℂ)+1)*(θ:ℂ)).im = ((ν+μ)*θ).im := by simp [mul_im]
   exact (FerrersFourier.norm_sin_le _).trans_eq (by rw [him])
@@ -386,17 +392,17 @@ sums. -/
 @[dlmf 14.13.E3]
 theorem ferrersP_nat_fourier (n : ℕ) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
     Tendsto (fun N : ℕ => ∑ k ∈ Finset.range N,
-        2^(2*n+2)*(n.factorial:ℂ)^2/(π*((2*n+1).factorial:ℂ))*poch (1/2) k*poch (n+1)
-        k/((k.factorial:ℂ)*poch (n+3/2) k)*sin ((n+2*k+1:ℂ)*θ)) atTop
+        2^(2*n+2)*(n.factorial:ℂ)^2/(π*((2*n+1).factorial:ℂ))*pochhammer (1/2) k*pochhammer (n+1)
+        k/((k.factorial:ℂ)*pochhammer (n+3/2) k)*sin ((n+2*k+1:ℂ)*θ)) atTop
         (𝓝 (ferrersP n 0 (Real.cos θ))) := by
   have h := ferrersP_fourier_series (FerrersFourier.nat_regular n) (by simp) h0 hπ
   refine h.congr fun N => Finset.sum_congr rfl fun k _ => ?_
   have e := FerrersFourier.nat_coeff n k
   simp only [zero_add, add_zero, cpow_one, cpow_zero, mul_one]
-  calc (2:ℂ)/Real.sqrt π*Gamma ((n:ℂ)+k+1)/Gamma ((n:ℂ)+k+3/2)*poch (1/2) k/(k.factorial:ℂ)*
+  calc (2:ℂ)/Real.sqrt π*Gamma ((n:ℂ)+k+1)/Gamma ((n:ℂ)+k+3/2)*pochhammer (1/2) k/(k.factorial:ℂ)*
         sin (((n:ℂ)+2*k+1)*θ)
       = (2/Real.sqrt π*(Gamma ((n:ℂ)+k+1)/Gamma ((n:ℂ)+k+3/2))) *
-          (poch (1/2) k/(k.factorial:ℂ)*sin (((n:ℂ)+2*k+1)*θ)) := by ring
+          (pochhammer (1/2) k/(k.factorial:ℂ)*sin (((n:ℂ)+2*k+1)*θ)) := by ring
     _ = _ := by rw [e]; ring
 
 /-- DLMF 14.13.2: for `0 < θ < π`, `Re μ < 1/2` and `ν + μ ∉ {−1, −2, …}`, `𝖰^μ_ν(cos θ) = π^{1/2}
@@ -406,7 +412,7 @@ as the limit of its partial sums. -/
 theorem ferrersQ_fourier_series {ν μ : ℂ} (hν : LegendreQRegular ν μ) (hμ : μ.re < 1/2) {θ : ℝ}
     (h0 : 0 < θ) (hπ : θ < π) :
     Tendsto (fun N : ℕ => ∑ k ∈ Finset.range N,
-        Real.sqrt π*2^μ*(Real.sin θ:ℂ)^μ*Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*poch (μ+1/2)
+        Real.sqrt π*2^μ*(Real.sin θ:ℂ)^μ*Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*pochhammer (μ+1/2)
         k/(k.factorial:ℂ)*cos ((ν+μ+2*k+1)*θ)) atTop (𝓝 (ferrersQ ν μ (Real.cos θ))) := by
   have hsin : 0 < Real.sin θ := Real.sin_pos_of_pos_of_lt_pi h0 hπ
   have Ep := FourierHypergeometric.PQ_hypergeometric ν μ hν h0 hπ (s := 1) (Or.inl rfl)
@@ -419,9 +425,9 @@ theorem ferrersQ_fourier_series {ν μ : ℂ} (hν : LegendreQRegular ν μ) (h�
   have h := ((hp.add hm).const_mul (Real.sqrt π*2^μ*(Real.sin θ:ℂ)^μ/2))
   have e : ferrersQ ν μ (Real.cos θ) = Real.sqrt π*2^μ*(Real.sin θ:ℂ)^μ/2 *
       (exp (((1:ℝ):ℂ)*(ν+μ+1)*I*θ) * (Gamma (ν+μ+1) *
-        regularizedGaussHG (ν+μ+1) (μ+1/2) (ν+3/2) (exp (((1:ℝ):ℂ)*2*I*θ))) +
+        regularizedGaussHypergeometric (ν+μ+1) (μ+1/2) (ν+3/2) (exp (((1:ℝ):ℂ)*2*I*θ))) +
       exp (((-1:ℝ):ℂ)*(ν+μ+1)*I*θ) * (Gamma (ν+μ+1) *
-        regularizedGaussHG (ν+μ+1) (μ+1/2) (ν+3/2) (exp (((-1:ℝ):ℂ)*2*I*θ)))) := by
+        regularizedGaussHypergeometric (ν+μ+1) (μ+1/2) (ν+3/2) (exp (((-1:ℝ):ℂ)*2*I*θ)))) := by
     have h1 : ((-1:ℝ):ℂ) = -1 := by push_cast; ring
     have h2 : ((1:ℝ):ℂ) = 1 := ofReal_one
     linear_combination (1/2:ℂ)*Ep + (1/2:ℂ)*Em - (π*I*ferrersP ν μ (Real.cos θ)/4)*h1 -
@@ -437,7 +443,8 @@ theorem ferrersQ_fourier_series {ν μ : ℂ} (hν : LegendreQRegular ν μ) (h�
 /-- Absolute convergence in DLMF 14.13. -/
 theorem ferrersQ_fourier_absolute {ν μ : ℂ} (hμ : μ.re < 0) {θ : ℝ} :
     Summable (fun k : ℕ =>
-        ‖Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*poch (μ+1/2) k/(k.factorial:ℂ)*cos ((ν+μ+2*k+1)*θ)‖) := by
+        ‖Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*pochhammer (μ+1/2) k/(k.factorial:ℂ)*cos
+            ((ν+μ+2*k+1)*θ)‖) := by
   refine FerrersFourier.summable hμ _ (B := Real.exp |((ν+μ)*θ).im|) fun k => ?_
   have him : ((ν+μ+2*(k:ℂ)+1)*(θ:ℂ)).im = ((ν+μ)*θ).im := by simp [mul_im]
   exact (FerrersFourier.norm_cos_le _).trans_eq (by rw [him])
@@ -492,8 +499,8 @@ theorem FerrersFourier.cos_pair {θ : ℝ} (x : ℝ) :
 @[dlmf 14.13.E4]
 theorem ferrersQ_nat_fourier (n : ℕ) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
     Tendsto (fun N : ℕ => ∑ k ∈ Finset.range N,
-        2^(2*n+1)*(n.factorial:ℂ)^2/((2*n+1).factorial:ℂ)*poch (1/2) k*poch (n+1)
-        k/((k.factorial:ℂ)*poch (n+3/2) k)*cos ((n+2*k+1:ℂ)*θ)) atTop
+        2^(2*n+1)*(n.factorial:ℂ)^2/((2*n+1).factorial:ℂ)*pochhammer (1/2) k*pochhammer (n+1)
+        k/((k.factorial:ℂ)*pochhammer (n+3/2) k)*cos ((n+2*k+1:ℂ)*θ)) atTop
         (𝓝 (ferrersQ n 0 (Real.cos θ))) := by
   have h := ferrersQ_fourier_series (FerrersFourier.nat_regular n) (by simp) h0 hπ
   refine h.congr fun N => Finset.sum_congr rfl fun k _ => ?_
@@ -503,12 +510,12 @@ theorem ferrersQ_nat_fourier (n : ℕ) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) 
     rw [← ofReal_pow, Real.sq_sqrt Real.pi_pos.le]
   have hs : (π:ℂ)/2 * (2/Real.sqrt π) = Real.sqrt π := by rw [hpi]; field_simp
   simp only [zero_add, add_zero, cpow_zero, mul_one]
-  calc (Real.sqrt π:ℂ)*Gamma ((n:ℂ)+k+1)/Gamma ((n:ℂ)+k+3/2)*poch (1/2) k/(k.factorial:ℂ)*
+  calc (Real.sqrt π:ℂ)*Gamma ((n:ℂ)+k+1)/Gamma ((n:ℂ)+k+3/2)*pochhammer (1/2) k/(k.factorial:ℂ)*
         cos (((n:ℂ)+2*k+1)*θ)
       = (π/2*(2/Real.sqrt π))*(Gamma ((n:ℂ)+k+1)/Gamma ((n:ℂ)+k+3/2)) *
-          (poch (1/2) k/(k.factorial:ℂ)*cos (((n:ℂ)+2*k+1)*θ)) := by rw [hs]; ring
+          (pochhammer (1/2) k/(k.factorial:ℂ)*cos (((n:ℂ)+2*k+1)*θ)) := by rw [hs]; ring
     _ = π/2*(2/Real.sqrt π*(Gamma ((n:ℂ)+k+1)/Gamma ((n:ℂ)+k+3/2))) *
-          (poch (1/2) k/(k.factorial:ℂ)*cos (((n:ℂ)+2*k+1)*θ)) := by ring
+          (pochhammer (1/2) k/(k.factorial:ℂ)*cos (((n:ℂ)+2*k+1)*θ)) := by ring
     _ = _ := by
       rw [e]
       have : (π:ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_pos.ne'
@@ -862,7 +869,7 @@ theorem ContinuedFraction.backwardQ_eq (ν μ : ℂ) {x : ℝ} (hx : 1 < x) (k :
     rw [norm_pow]; have := FourierHypergeometric.norm_invJoukowski_lt_one hz
     nlinarith [norm_nonneg (FourierHypergeometric.invJoukowski x)]
   rw [ContinuedFraction.backwardQ, OlverQZetaForm.olverQ_eq_rhs _ _ hz, OlverQZetaForm.rhs,
-      regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ h2]
+      regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ h2]
   congr 2 <;> ring_nf
 
 /-- Eventually `0 < Re (c + k)`. -/
@@ -1054,9 +1061,10 @@ theorem ContinuedFraction.backwardP_eq (ν μ : ℂ) {x : ℝ} (hx : 1 < x) (k :
     rw [Complex.norm_real, Real.norm_of_nonneg h0.le]; exact h1
   have e9 := associated_hypergeometric_9 ν (μ+k-1) (z := (x:ℂ))
   rw [show -(μ+(k:ℂ)-1) = 1-μ-k by ring, show μ+(k:ℂ)-1+1 = μ+k by ring] at e9
-  rw [ContinuedFraction.backwardP, e9, regularizedGaussHG_symm _ _ _ hcut,
-      regularizedGaussHG_pfaff _ _ _ hcut,
-    ContinuedFraction.pfaff_arg hx, regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ ht]
+  rw [ContinuedFraction.backwardP, e9, regularizedGaussHypergeometric_symm _ _ _ hcut,
+      regularizedGaussHypergeometric_pfaff _ _ _ hcut,
+    ContinuedFraction.pfaff_arg hx,
+        regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ ht]
   rw [show μ+(k:ℂ)-(ν+1) = (μ-ν-1)+k by ring]
   ring
 
@@ -1270,7 +1278,7 @@ theorem associatedQ_continued_fraction {ν μ : ℂ} (hne : ν ≠ μ) {x : ℝ}
 theorem ferrersP_fourier_not_absolute {ν μ : ℂ}
     (hμ0 : 0 ≤ μ.re) {θ : ℝ}
     (h0 : 0 < θ) (hπ : θ < π) (hmid : θ ≠ π/2) :
-    ¬Summable (fun k : ℕ => ‖Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*poch (μ+1/2) k/
+    ¬Summable (fun k : ℕ => ‖Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*pochhammer (μ+1/2) k/
       (k.factorial:ℂ)*sin ((ν+μ+2*k+1)*θ)‖) := by
   refine FerrersFourier.not_summable hμ0 _
       (half_pos (FerrersFourier.sin_two_mul_ne h0 hπ hmid)) fun k => ?_
@@ -1288,7 +1296,7 @@ theorem ferrersP_fourier_not_absolute {ν μ : ℂ}
 theorem ferrersQ_fourier_not_absolute {ν μ : ℂ}
     (hμ0 : 0 ≤ μ.re) {θ : ℝ}
     (h0 : 0 < θ) (hπ : θ < π) (hmid : θ ≠ π/2) :
-    ¬Summable (fun k : ℕ => ‖Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*poch (μ+1/2) k/
+    ¬Summable (fun k : ℕ => ‖Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*pochhammer (μ+1/2) k/
       (k.factorial:ℂ)*cos ((ν+μ+2*k+1)*θ)‖) := by
   refine FerrersFourier.not_summable hμ0 _
       (half_pos (FerrersFourier.sin_two_mul_ne h0 hπ hmid)) fun k => ?_
@@ -1307,7 +1315,7 @@ theorem ferrersPQ_fourier_hypergeometric (ν μ : ℂ) (hr : LegendreQRegular ν
     {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) (s : ℂ) (hs : s=1 ∨ s=-1) :
     s*π*I/2*ferrersP ν μ (Real.cos θ)+ferrersQ ν μ (Real.cos θ)=
       Real.sqrt π*Gamma (ν+μ+1)*(2*Real.sin θ:ℂ)^μ*exp (s*(ν+μ+1)*I*θ)*
-        regularizedGaussHG (ν+μ+1) (μ+1/2) (ν+3/2) (exp (s*2*I*θ)) := by
+        regularizedGaussHypergeometric (ν+μ+1) (μ+1/2) (ν+3/2) (exp (s*2*I*θ)) := by
   rcases hs with rfl | rfl
   · have h := FourierHypergeometric.PQ_hypergeometric ν μ hr h0 hπ (s := 1) (Or.inl rfl);
         simp only [ofReal_one] at h; exact h

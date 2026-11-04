@@ -22,8 +22,8 @@ which turn terminating summation identities into nonterminating ones.
 * `CarlsonTheorem.eq_zero_of_periodic_of_bound`: Carlson's theorem for periodic functions.
 * `CarlsonTheorem.exists_norm_Gamma_le_strip`, `CarlsonTheorem.exists_norm_recip_Gamma_le_strip`:
   uniform vertical bounds for `Γ` and `1/Γ` on strips.
-* `CarlsonTheorem.summable_norm_Gamma_ratio`, `CarlsonTheorem.isBigO_gaussHGCoeff`: growth of Gamma
-  ratios and of the Gauss coefficients.
+* `CarlsonTheorem.summable_norm_Gamma_ratio`, `CarlsonTheorem.isBigO_gaussHypergeometricCoeff`:
+  growth of Gamma ratios and of the Gauss coefficients.
 * `kummer_theorem`: Kummer's theorem `₂F₁(a,b;1+a-b;-1)`, DLMF 15.4.26.
 
 See `DLMF.Hypergeometric.Identities` for the overview.
@@ -56,17 +56,17 @@ theorem kummer_theorem {a b : ℂ}
   have hre' : 0 < (C - a / 2 - (a / 2 - b + 1 / 2)).re := by
     rw [show C - a / 2 - (a / 2 - b + 1 / 2) = 1 / 2 by rw [hCdef]; ring]; norm_num
   -- The series as a power series with coefficients multiplied by `(-1)^n`.
-  have htsum : ∀ x : ℂ, ₂F₁ a b C x = ∑' n, gaussHGCoeff a b C n * x ^ n := by
+  have htsum : ∀ x : ℂ, ₂F₁ a b C x = ∑' n, gaussHypergeometricCoeff a b C n * x ^ n := by
     intro x
     rw [ordinaryHypergeometric_eq_tsum]
     simp only [smul_eq_mul]
     congr 1
     funext n
-    simp [gaussHGCoeff, poch, div_eq_mul_inv, mul_assoc, mul_left_comm, mul_comm]
-  have hsum : Summable fun n => gaussHGCoeff a b C n * (-1 : ℂ) ^ n :=
+    simp [gaussHypergeometricCoeff, pochhammer, div_eq_mul_inv, mul_assoc, mul_left_comm, mul_comm]
+  have hsum : Summable fun n => gaussHypergeometricCoeff a b C n * (-1 : ℂ) ^ n :=
     ordinaryHypergeometric_summable_of_mem_sphere (z := -1) (by simp) hre
   have habel := Complex.tendsto_tsum_powerSeries_nhdsWithin_lt
-    (f := fun n => gaussHGCoeff a b C n * (-1 : ℂ) ^ n) hsum.hasSum.tendsto_sum_nat
+    (f := fun n => gaussHypergeometricCoeff a b C n * (-1 : ℂ) ^ n) hsum.hasSum.tendsto_sum_nat
   rw [Filter.tendsto_map'_iff] at habel
   have hneg : Filter.Tendsto (fun x : ℝ => -x) (nhdsWithin (-1) (Set.Ioi (-1)))
       (nhdsWithin 1 (Set.Iio 1)) := by
@@ -472,15 +472,16 @@ theorem summable_norm_Gamma_ratio (p q r s : ℂ) (h : (p + q - r - s).re < -1) 
   summable_of_isBigO_nat (Real.summable_nat_rpow.mpr h) (isBigO_Gamma_ratio p q r s).norm_left
 
 /-- Growth of the Gauss coefficients: `(a)_n (b)_n / ((c)_n n!) = O(n^{a+b-c-1})`. -/
-theorem isBigO_gaussHGCoeff (a b c : ℂ) (hc : ∀ k : ℕ, c ≠ -k) :
-    (gaussHGCoeff a b c) =O[atTop] fun n : ℕ => (n : ℝ) ^ (a + b - c - 1).re := by
+theorem isBigO_gaussHypergeometricCoeff (a b c : ℂ) (hc : ∀ k : ℕ, c ≠ -k) :
+    (gaussHypergeometricCoeff a b c) =O[atTop] fun n : ℕ => (n : ℝ) ^ (a + b - c - 1).re := by
   by_cases hpole : ∃ k : ℕ, a = -k ∨ b = -k
   · obtain ⟨k, hk⟩ := hpole
     refine Asymptotics.IsBigO.of_bound 0 ?_
     filter_upwards [eventually_gt_atTop k] with n hn
-    rcases hk with rfl | rfl <;> simp [gaussHGCoeff, poch_neg_nat_eq_zero hn]
+    rcases hk with rfl | rfl <;> simp [gaussHypergeometricCoeff, pochhammer_neg_nat_eq_zero hn]
   push Not at hpole
-  have ht := tendsto_gaussHGCoeff_div_cpow (fun k => (hpole k).1) (fun k => (hpole k).2) hc
+  have ht := tendsto_gaussHypergeometricCoeff_div_cpow (fun k => (hpole k).1)
+      (fun k => (hpole k).2) hc
   have hb := ht.norm.isBoundedUnder_le
   obtain ⟨C, hC⟩ := hb
   refine Asymptotics.IsBigO.of_bound C ?_

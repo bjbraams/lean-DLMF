@@ -27,7 +27,7 @@ fraction `Γ(a,x) = x^a e^{-x}/(x + (1-a)/(1 + 1/(x + (2-a)/(1 + 2/(x + ⋯)))))
 
 ## Main results
 
-* `upperIncGamma_eq_gammaTail`: `Γ(a,x) = x^a e^{-x} J₀(a-1)`.
+* `upperIncompleteGamma_eq_gammaTail`: `Γ(a,x) = x^a e^{-x} J₀(a-1)`.
 * `gammaTail_ibp`, `gammaTail_split`: `x J_m(σ) = 0^m + m J_{m-1}(σ) + σ J_m(σ-1)` and
   `J_n(σ) = J_n(σ-1) + J_{n+1}(σ-1)`.
 * `posContFract_det`, `posContFract_error`: the determinant formula and the error bound.
@@ -201,10 +201,11 @@ theorem integral_Ioi_one_eq_shift {E : Type*} [NormedAddCommGroup E] [NormedSpac
   exact (integral_add_left_eq_self (fun u => (Ioi (1 : ℝ)).indicator g u) 1).symm
 
 /-- `Γ(a,x) = x^a e^{-x} ∫₀^∞ (1+t)^{a-1} e^{-xt} dt` for real `a` and `x > 0`. -/
-theorem upperIncGamma_eq_gammaTail (a : ℝ) {x : ℝ} (hx : 0 < x) :
-    DLMF.Confluent.upperIncGamma (a : ℂ) (x : ℂ) =
+theorem upperIncompleteGamma_eq_gammaTail (a : ℝ) {x : ℝ} (hx : 0 < x) :
+    DLMF.Confluent.upperIncompleteGamma (a : ℂ) (x : ℂ) =
       ((x ^ a * Real.exp (-x) * gammaTail x (a - 1) 0 : ℝ) : ℂ) := by
-  rw [DLMF.Confluent.upperIncGamma_eq_cpow_mul_integral_Ioi_one _ hx, integral_Ioi_one_eq_shift,
+  rw [DLMF.Confluent.upperIncompleteGamma_eq_cpow_mul_integral_Ioi_one _ hx,
+      integral_Ioi_one_eq_shift,
     gammaTail, ← ofReal_cpow hx.le]
   push_cast
   rw [← integral_complex_ofReal, ← integral_const_mul, ← integral_const_mul]
@@ -680,12 +681,13 @@ theorem gammaInc_seidelStern_div {α x : ℝ} (hα : α < 1) (hx : 0 < x) :
 `x^a e^{-x}/(x + (1-a)/(1 + 1/(x + (2-a)/(1 + 2/(x + ⋯)))))` converge to `Γ(a,x)`. -/
 @[dlmf 8.9.E2]
 theorem tendsto_gammaIncContFract {α x : ℝ} (hα : α < 1) (hx : 0 < x) :
-    Tendsto (gammaIncContFract α x).convs atTop (𝓝 (DLMF.Confluent.upperIncGamma α x).re) := by
+    Tendsto (gammaIncContFract α x).convs atTop
+        (𝓝 (DLMF.Confluent.upperIncompleteGamma α x).re) := by
   have h := posContFract_tendsto (gammaIncCFNum_pos hα hx) (gammaIncCFDen_pos hx)
     (gammaIncCFTail_pos (α := α) hx) (gammaIncCFTail_rec hx) (gammaInc_seidelStern_div hα hx)
   have hval : gammaIncCFNum α x 0 * gammaIncCFTail α x 1 / gammaIncCFTail α x 0 =
-      (DLMF.Confluent.upperIncGamma α x).re := by
-    rw [upperIncGamma_eq_gammaTail α hx, ofReal_re]
+      (DLMF.Confluent.upperIncompleteGamma α x).re := by
+    rw [upperIncompleteGamma_eq_gammaTail α hx, ofReal_re]
     have h1 := gammaIncCFTail_even α x 0
     simp only [mul_zero, zero_add] at h1
     rw [h1]

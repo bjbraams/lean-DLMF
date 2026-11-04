@@ -67,17 +67,20 @@ section GaussStieltjes
 open Set
 
 /-- `𝐅(a,c;c;w) = (1-w)^{-a}/Γ(c)` on the cut plane. -/
-theorem regularizedGaussHG_self_right (a c : ℂ) {w : ℂ} (hw : w ∈ cutPlane) :
-    regularizedGaussHG a c c w = (1 - w) ^ (-a) * (Gamma c)⁻¹ := by
-  have h0 : regularizedGaussHG 0 (c - a) c w = (Gamma c)⁻¹ :=
-    eqOn_cutPlane_of_eqOn_disk (f := regularizedGaussHG 0 (c - a) c) (g := fun _ => (Gamma c)⁻¹)
-      (analyticOnNhd_regularizedGaussHG _ _ _) analyticOnNhd_const (fun u hu => by
-        rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hu, regularizedGaussHGFun_eq_tsum,
+theorem regularizedGaussHypergeometric_self_right (a c : ℂ) {w : ℂ} (hw : w ∈ cutPlane) :
+    regularizedGaussHypergeometric a c c w = (1 - w) ^ (-a) * (Gamma c)⁻¹ := by
+  have h0 : regularizedGaussHypergeometric 0 (c - a) c w = (Gamma c)⁻¹ :=
+    eqOn_cutPlane_of_eqOn_disk (f := regularizedGaussHypergeometric 0 (c - a) c)
+        (g := fun _ => (Gamma c)⁻¹)
+      (analyticOnNhd_regularizedGaussHypergeometric _ _ _) analyticOnNhd_const (fun u hu => by
+        rw [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hu,
+            regularizedGaussHypergeometricFun_eq_tsum,
           tsum_eq_single 0 (fun n hn => by
             obtain ⟨m, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hn
             simp [ascPochhammer_succ_left])]
         simp) hw
-  rw [regularizedGaussHG_euler, show c - c = (0 : ℂ) by ring, regularizedGaussHG_symm _ _ _ hw, h0,
+  rw [regularizedGaussHypergeometric_euler, show c - c = (0 : ℂ) by
+      ring, regularizedGaussHypergeometric_symm _ _ _ hw, h0,
     show c - a - c = -a by ring]
   exact hw
 
@@ -89,7 +92,7 @@ theorem neg_ofReal_mem_cutPlane {t : ℝ} (ht : 0 ≤ t) : (-(t : ℂ)) ∈ cutP
 
 /-- The kernel of the Gauss–Laplace representation 13.4.8. -/
 def kummerUGaussKernel (a b c z : ℂ) (t : ℝ) : ℂ :=
-  exp (-z * t) * (t : ℂ) ^ (c - 1) * regularizedGaussHG a (a - b + 1) c (-(t : ℂ))
+  exp (-z * t) * (t : ℂ) ^ (c - 1) * regularizedGaussHypergeometric a (a - b + 1) c (-(t : ℂ))
 
 /-- For `Re a, Re c, Re z > 0`, `U(a,b,z) = z^{c-a} ∫₀^∞ e^{-zt} t^{c-1} ₂F̃₁(a, a-b+1; c; -t) dt`,
 with the integrand integrable (DLMF 13.4.8 for `Re a > 0`). -/
@@ -152,7 +155,7 @@ theorem kummerU_gauss_of_re_pos {a b c z : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) 
             regularizedHGFun {β} {c} ((-z * t) * s) := by
       simp only [hF]; rw [integral_const_mul]
     rw [hF', hL, kummerUGaussKernel, ← hβ,
-      regularizedGaussHG_symm _ _ _ (neg_ofReal_mem_cutPlane ht0.le)]
+      regularizedGaussHypergeometric_symm _ _ _ (neg_ofReal_mem_cutPlane ht0.le)]
     have hGa : Gamma a ≠ 0 := Gamma_ne_zero_of_re_pos ha
     have hza : z ^ a * z ^ (-a) = 1 := by rw [← cpow_add _ _ hz0]; simp
     have e : ∀ X Y : ℂ, (Gamma a)⁻¹ * z ^ a * (X * (Gamma a * z ^ (-a) * Y)) =
@@ -165,7 +168,7 @@ theorem kummerU_gauss_of_re_pos {a b c z : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) 
     have hL := laplace_regularizedHGFun (a := β) (b := c) (c := c) (k := -z * s) (z := z) hc
       (by simp; nlinarith) hz
     have harg : (-z * s) / z = -(s : ℂ) := by field_simp
-    rw [harg, regularizedGaussHG_self_right _ _ (neg_ofReal_mem_cutPlane hs0.le)] at hL
+    rw [harg, regularizedGaussHypergeometric_self_right _ _ (neg_ofReal_mem_cutPlane hs0.le)] at hL
     have hF' : ∫ t : ℝ in Ioi 0, F t s = (exp (-z * s) * (s : ℂ) ^ (a - 1)) *
         ∫ t : ℝ in Ioi 0, exp (-z * t) * (t : ℂ) ^ (c - 1) *
             regularizedHGFun {β} {c} ((-z * s) * t) := by
@@ -209,9 +212,10 @@ lemma kummerU_gauss_aux {a b c z : ℂ} (hc : 0 < c.re) (hz : 0 < z.re) :
         intro t ht
         have ht0 : (t : ℂ) ≠ 0 := ofReal_ne_zero.mpr (ne_of_gt ht)
         have hw := neg_ofReal_mem_cutPlane (le_of_lt (mem_Ioi.mp ht))
-        have hg := regularizedGaussHG_contiguous_shift_b (a - b + 1) a c hw
-        rw [regularizedGaussHG_symm _ _ _ hw, regularizedGaussHG_symm (a - b + 1) (a + 1) c hw,
-          regularizedGaussHG_symm (a - b + 1 + 1) (a + 1) (c + 1) hw] at hg
+        have hg := regularizedGaussHypergeometric_contiguous_shift_b (a - b + 1) a c hw
+        rw [regularizedGaussHypergeometric_symm _ _ _ hw,
+            regularizedGaussHypergeometric_symm (a - b + 1) (a + 1) c hw,
+          regularizedGaussHypergeometric_symm (a - b + 1 + 1) (a + 1) (c + 1) hw] at hg
         simp only [kummerUGaussKernel]
         rw [show a + 1 - (b + 1) + 1 = a - b + 1 by ring, show a + 1 - b + 1 = a -
                                                       b + 1 + 1 by ring,
@@ -235,27 +239,27 @@ lemma kummerU_gauss_aux {a b c z : ℂ} (hc : 0 < c.re) (hz : 0 < z.re) :
   exact hshift N a b c (by linarith) hc
 
 /-- Identity under the stated parameter and domain assumptions: `kummerU a b z = z ^ (c - a) * ∫ t
-: ℝ in Set.Ioi 0, exp (-z * t) * (t : ℂ) ^ (c - 1) * DLMF.Hypergeometric.regularizedGaussHG a
-(a - b + 1) c (-(t : ℂ))`. -/
+: ℝ in Set.Ioi 0, exp (-z * t) * (t : ℂ) ^ (c - 1) *
+DLMF.Hypergeometric.regularizedGaussHypergeometric a (a - b + 1) c (-(t : ℂ))`. -/
 @[dlmf 13.4.E8]
 theorem kummerU_gauss {a b c z : ℂ} (ha : 0 < c.re) (hz : 0 < z.re) :
     kummerU a b z =
       z ^ (c - a) *
         ∫ t : ℝ in Set.Ioi 0,
           exp (-z * t) * (t : ℂ) ^ (c - 1) *
-            DLMF.Hypergeometric.regularizedGaussHG a (a - b + 1) c (-(t : ℂ)) :=
+            DLMF.Hypergeometric.regularizedGaussHypergeometric a (a - b + 1) c (-(t : ℂ)) :=
   (kummerU_gauss_aux ha hz).2
 
 /-- Identity under the stated parameter and domain assumptions: `whittakerW κ μ z = exp (-z / 2) *
 z ^ (κ + c) * ∫ t : ℝ in Set.Ioi 0, exp (-z * t) * (t : ℂ) ^ (c - 1) *
-DLMF.Hypergeometric.regularizedGaussHG (1 / 2 + μ - κ) (1 / 2 - μ - κ) c (-(t : ℂ))`. -/
+DLMF.Hypergeometric.regularizedGaussHypergeometric (1 / 2 + μ - κ) (1 / 2 - μ - κ) c (-(t : ℂ))`. -/
 @[dlmf 13.16.E9]
 theorem whittakerW_gauss {κ μ c z : ℂ} (hc : 0 < c.re) (hz : 0 < z.re) :
     whittakerW κ μ z =
       exp (-z / 2) * z ^ (κ + c) *
         ∫ t : ℝ in Set.Ioi 0,
           exp (-z * t) * (t : ℂ) ^ (c - 1) *
-            DLMF.Hypergeometric.regularizedGaussHG (1 / 2 + μ - κ) (1 / 2 - μ - κ) c
+            DLMF.Hypergeometric.regularizedGaussHypergeometric (1 / 2 + μ - κ) (1 / 2 - μ - κ) c
                 (-(t : ℂ)) := by
   have hz0 : z ≠ 0 := by intro h; simp [h] at hz
   rw [whittakerW, kummerU_gauss (b := 1 + 2 * μ) hc hz,
@@ -385,8 +389,8 @@ theorem kummerU_stieltjes_of_re_pos {a b z : ℂ} (hz : 0 < z.re)
       change 1 - (1 - (1 + (s : ℂ))⁻¹) ∈ slitPlane
       rw [sub_sub_cancel, h1s, ← ofReal_inv]
       exact ofReal_mem_slitPlane.mpr (by positivity)
-    have hp := regularizedGaussHG_pfaff a (b - a) 1 hw
-    rw [regularizedGaussHG_symm _ _ _ hw] at hL
+    have hp := regularizedGaussHypergeometric_pfaff a (b - a) 1 hw
+    rw [regularizedGaussHypergeometric_symm _ _ _ hw] at hL
     have hq : (1 - (1 + (s : ℂ))⁻¹) / (1 - (1 + (s : ℂ))⁻¹ - 1) = -(s : ℂ) := by
       have : (1 + (s : ℂ)) ≠ 0 := by rw [h1s]; exact ofReal_ne_zero.mpr (by positivity)
       field_simp; ring
@@ -409,7 +413,7 @@ theorem kummerU_stieltjes_of_re_pos {a b z : ℂ} (hz : 0 < z.re)
     rw [hL, kummerUGaussKernel, sub_self, cpow_zero,
       show a - b + 1 = 1 + a - b by ring]
     linear_combination (Gamma a * Gamma (1 + a - b) * exp (-z * s) *
-      regularizedGaussHG a (1 + a - b) 1 (-(s : ℂ))) * hpow
+      regularizedGaussHypergeometric a (1 + a - b) 1 (-(s : ℂ))) * hpow
   have hrw : ∀ t ∈ Ioi (0 : ℝ), kummerU (b - a) b t * exp (-(t : ℂ)) * (t : ℂ) ^ (a - 1) /
       ((t : ℂ) + z) = ∫ s : ℝ in Ioi 0, G t s := by
     intro t ht
@@ -573,7 +577,7 @@ theorem KummerIntegrals.stieltjes_zero_of_re_pos {a b z : ℂ} (hz : 0 < z.re) (
       change 1 - (-1 : ℂ) / s ∈ slitPlane
       rw [show (1 : ℂ) - (-1) / s = ((1 + s⁻¹ : ℝ) : ℂ) by push_cast; ring]
       exact ofReal_mem_slitPlane.mpr (by positivity)
-    rw [regularizedGaussHG_self_right a b hw] at hL
+    rw [regularizedGaussHypergeometric_self_right a b hw] at hL
     have hpow : (s : ℂ) ^ (-b) * (1 - (-1 : ℂ) / s) ^ (-a) =
         (s : ℂ) ^ (a - b) * (1 + (s : ℂ)) ^ (-a) := by
       have hs' : (s : ℂ) ≠ 0 := ofReal_ne_zero.mpr hs0.ne'

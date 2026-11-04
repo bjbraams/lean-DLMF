@@ -397,7 +397,8 @@ theorem airy_modulus_product_monotone :
     ModulusPhase.integral_pos (ModulusPhase.integrableOn_exp_pow x 1) fun t ht => by
       unfold ModulusPhase.kernel1; positivity
   have hc : ∀ z, (airyModulus z * airyDerivModulus z) ^ 2 =
-      (airyAiReal z * airyAiDerivReal z + airyBiReal z * airyBiDerivReal z) ^ 2 + (π ^ 2)⁻¹ := by
+      (DLMF.Airy.Real.airyAi z * DLMF.Airy.Real.airyAiDeriv z + DLMF.Airy.Real.airyBi z *
+          DLMF.Airy.Real.airyBiDeriv z) ^ 2 + (π ^ 2)⁻¹ := by
     intro z
     have hL := airy_lagrange z
     rw [mul_pow, airyModulus_sq, airyDerivModulus_sq]

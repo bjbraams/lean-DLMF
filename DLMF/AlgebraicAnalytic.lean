@@ -58,6 +58,8 @@ public import DLMF.AlgebraicAnalytic.Transforms.Laplace
 public import DLMF.AlgebraicAnalytic.Transforms.MathlibCoverage
 public import DLMF.AlgebraicAnalytic.Transforms.MellinHilbertStieltjes
 public import DLMF.AlgebraicAnalytic.Transforms.Tables
+public import DLMF.AlgebraicAnalytic.Transforms.MellinTable
+public import DLMF.AlgebraicAnalytic.Transforms.StieltjesPower
 
 /-!
 # Algebraic and analytic methods (DLMF Chapter 1)

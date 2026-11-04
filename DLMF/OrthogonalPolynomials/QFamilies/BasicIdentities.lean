@@ -22,7 +22,8 @@ the Askey–Wilson polynomials and q-Racah duality.
 
 ## Main definitions
 
-* `terminatingBasicHG`: a terminating basic hypergeometric sum with exponent `1 + s - r`.
+* `terminatingBasicHypergeometric`: a terminating basic hypergeometric sum with exponent
+  `1 + s - r`.
 * `qHahn`, `bigQJacobi`, `littleQJacobi`: DLMF 18.27.3, 18.27.5 and 18.27.13.
 * `littleQLaguerre`, `qLaguerre`, `stieltjesWigert`: DLMF 18.27.14_5, 18.27.15 and 18.27.18.
 * `discreteQHermiteI`, `discreteQHermiteII`: DLMF 18.27.21 and 18.27.23.
@@ -163,7 +164,7 @@ private lemma qHahn_difference_equation_aux {a b q : ℂ} (hq : q ≠ 0) (hqn : 
     ring
   have hpoly (z : ℂ) : qHahn a b q N n z =
       ∑ k ∈ Finset.range (n + 1), c k * qPochhammer z q k := by
-    unfold qHahn terminatingBasicHG
+    unfold qHahn terminatingBasicHypergeometric
     simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, List.length_cons,
       List.length_nil, mul_one]
     norm_num only [Nat.cast_add, Nat.cast_one, Nat.cast_zero,
@@ -325,7 +326,7 @@ theorem littleQJacobi_eq_sum (a b q x : ℂ) (n : ℕ) :
     littleQJacobi a b q n x = ∑ j ∈ Finset.range (n + 1),
       (qPochhammer (q⁻¹ ^ n) q j * qPochhammer (a * b * q ^ (n + 1)) q j /
         (qPochhammer (a * q) q j * qPochhammer q q j) * q ^ j) * x ^ j := by
-  unfold littleQJacobi terminatingBasicHG
+  unfold littleQJacobi terminatingBasicHypergeometric
   simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, List.length_cons,
     List.length_nil, mul_one]
   norm_num only [Nat.cast_add, Nat.cast_one, Nat.cast_zero,
@@ -426,7 +427,7 @@ theorem littleQJacobi_orthogonal {a b q : ℝ} (hq : 0 < q) (hq1 : q < 1)
     ring
 
 /-- Every factor in a finite shifted factorial with negative real parameter is at least one. -/
-private lemma qLaguerre_norm_poch_ge_one {q x : ℝ} (hq : 0 < q) (hx : 0 ≤ x) (n : ℕ) :
+private lemma qLaguerre_norm_pochhammer_ge_one {q x : ℝ} (hq : 0 < q) (hx : 0 ≤ x) (n : ℕ) :
     1 ≤ ‖qPochhammer (-(x : ℂ)) q n‖ := by
   rw [qPochhammer_eq_prod, norm_prod]
   apply Finset.one_le_prod₀
@@ -442,7 +443,7 @@ private lemma qLaguerre_norm_inf_ge_pow {q x : ℝ} (hq : 0 < q) (hq1 : q < 1)
   have hqc : ‖(q : ℂ)‖ < 1 := by simpa [Complex.norm_real, abs_of_pos hq]
   have hbase (y : ℝ) (hy : 0 ≤ y) : 1 ≤ ‖qPochhammerInf (-(y : ℂ)) q‖ :=
     ge_of_tendsto (tendsto_qPochhammer (w := -(y : ℂ)) hqc).norm
-      (Filter.Eventually.of_forall fun n => qLaguerre_norm_poch_ge_one hq hy n)
+      (Filter.Eventually.of_forall fun n => qLaguerre_norm_pochhammer_ge_one hq hy n)
   have hfinite (n : ℕ) : x ^ n * q ^ n.choose 2 ≤ ‖qPochhammer (-(x : ℂ)) q n‖ := by
     induction n with
     | zero => simp
@@ -578,7 +579,7 @@ private lemma qLaguerre_finite_monomial_expansion (α q : ℂ) (n : ℕ) :
     (qPochhammer (q⁻¹ ^ n) q k / (qPochhammer (q ^ (α + 1)) q k * qPochhammer q q k)) *
       ((-1 : ℂ) ^ k * q ^ (k * (k - 1) / 2)) * (-q ^ (n + α + 1)) ^ k, ?_⟩
   intro x
-  unfold qLaguerre terminatingBasicHG
+  unfold qLaguerre terminatingBasicHypergeometric
   rw [Finset.mul_sum]
   refine Finset.sum_congr rfl fun k _ => ?_
   simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil,
@@ -623,7 +624,7 @@ private lemma qLaguerre_monomial_orthogonality {α q : ℝ} (hα : -1 < α)
     have he : (q : ℂ) ^ ((d : ℂ) + (α : ℂ) + 1) = v * (q : ℂ) ^ d := by
       rw [show (d : ℂ) + (α : ℂ) + 1 = ((α + 1 : ℝ) : ℂ) + (d : ℂ) by push_cast; ring,
         Complex.cpow_add _ _ hq0, Complex.cpow_natCast, ← Complex.ofReal_cpow hq.le]
-    unfold qLaguerre terminatingBasicHG
+    unfold qLaguerre terminatingBasicHypergeometric
     rw [Finset.mul_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil,
@@ -964,7 +965,7 @@ theorem askeyWilson_laurent_representation {a b c d q : ℂ}
   have hsplit {w : ℂ} (hw : ‖w‖ < 1) {k : ℕ} (hk : k ≤ n) :
       qPochhammer (w * q ^ k) q (n - k) = qPochhammer w q n / qPochhammer w q k := by
     rw [qPochhammer_split w q hk, mul_div_cancel_left₀ _ (hne hw k)]
-  unfold askeyWilson askeyWilsonLaurent terminatingBasicHG
+  unfold askeyWilson askeyWilsonLaurent terminatingBasicHypergeometric
   simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, List.length_cons,
     List.length_nil, mul_one]
   norm_num only [Nat.cast_add, Nat.cast_one, Nat.cast_zero, show (1 + (3 : ℤ) - 4) = 0 by norm_num,

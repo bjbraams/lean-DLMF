@@ -9,15 +9,16 @@ public import DLMF.Airy.Basic
 public import DLMF.Bessel.Basic
 public import DLMF.Painleve.Basic
 public import Mathlib.RingTheory.Binomial
+public import DLMF.AlgebraicAnalytic.ODE.Basic
 
 /-!
 # Differential and difference equations: definitions (DLMF §§2.7–2.9)
 
 ## Main definitions
 
-* `IsLinearODE2SolOn f g w U`: `w'' + f w' + g w = 0` on `U ⊆ ℂ` (DLMF 2.7.1), via
-  `DLMF.Painleve.IsODE2SolutionOn`.
-* `IsLogPlaneSolOn f g W U`: the same equation on the logarithmic plane, `W(ζ) = w(e^ζ)`, used
+* `isLinearODE2SolutionOn_iff_isODE2SolutionOn`: `w'' + f w' + g w = 0` on `U ⊆ ℂ` (DLMF 2.7.1)
+  is `AlgebraicAnalytic.IsLinearODE2SolutionOn f g 0 w U`, or `DLMF.Painleve.IsODE2SolutionOn`.
+* `IsLogPlaneSolutionOn f g W U`: the same equation on the logarithmic plane, `W(ζ) = w(e^ζ)`, used
   for solutions continued over sectors of opening larger than `2π` (2.7.14–2.7.17).
 * `indicialPoly`, `frobeniusCoeff`: the indicial equation 2.7.3 and the Frobenius recursion
   2.7.5 at a regular singularity.
@@ -25,13 +26,13 @@ public import Mathlib.RingTheory.Binomial
 * `rankOneExponent`, `rankOneCoeff`, `IsRankOneAtInfinity`, `rankOneScale`, `logSectorFilter`:
   the exponent 2.7.10 and the recursion 2.7.11 of the formal solutions 2.7.8 at an irregular
   singularity of rank 1 at infinity, with the data, scale and sector filter of 2.7.14–2.7.16.
-* `lgApproximant`, `IsLiouvilleGreenSolutionOn`, `IsLiouvilleGreenData`: the Liouville–Green setting
-  of 2.7.20.
-* `airyEnvCrit`, `envAi`, `envBi` (2.8.19–2.8.21) and `besselEnvCrit`, `envJ`, `envY`
-  (2.8.32–2.8.34): the envelope functions of §2.8.
+* `liouvilleGreenApproximant`, `IsLiouvilleGreenSolutionOn`, `IsLiouvilleGreenData`: the
+  Liouville–Green setting of 2.7.20.
+* `airyEnvCrit`, `envelopeAi`, `envelopeBi` (2.8.19–2.8.21) and `besselEnvCrit`, `envelopeJ`,
+  `envelopeY` (2.8.32–2.8.34): the envelope functions of §2.8.
 * `IsAiryCoeffs`, `IsBesselCoeffs`: the coefficient relations 2.8.17–2.8.18 and 2.8.27–2.8.28,
   2.8.31.
-* `differenceExponent`, `differenceCoeff`, `IsDifferenceCoeffRel`, `IsRecurrenceSol`: the
+* `differenceExponent`, `differenceCoeff`, `IsDifferenceCoeffRel`, `IsRecurrenceSolution`: the
   three-term recurrence 2.9.1 and the exponent 2.9.6 and recursion 2.9.7 of its formal solutions
   2.9.4.
 
@@ -51,17 +52,24 @@ namespace DLMF.AsymptoticApproximations
 
 /-! ### §2.7 -/
 
-/-- DLMF 2.7.1: `w'' + f(z) w' + g(z) w = 0` on `U ⊆ ℂ`, with `w` and `w'` complex
-differentiable at every point of `U`. -/
+/-- DLMF 2.7.1: `w'' + f(z) w' + g(z) w = 0` on `U ⊆ ℂ` is the homogeneous case of
+`AlgebraicAnalytic.IsLinearODE2SolutionOn` (DLMF 1.13.1), with `w` and `w'` complex differentiable
+at every point of `U`; equivalently `w'' = F(z, w, w')` in the sense of
+`Painleve.IsODE2SolutionOn`. -/
 @[dlmf 2.7.E1]
-def IsLinearODE2SolOn (f g : ℂ → ℂ) (w : ℂ → ℂ) (U : Set ℂ) : Prop :=
-  DLMF.Painleve.IsODE2SolutionOn (fun z w w' => -(f z * w' + g z * w)) w U
+theorem isLinearODE2SolutionOn_iff_isODE2SolutionOn {f g w : ℂ → ℂ} {U : Set ℂ} :
+    AlgebraicAnalytic.IsLinearODE2SolutionOn f g 0 w U ↔
+      DLMF.Painleve.IsODE2SolutionOn (fun z w w' => -(f z * w' + g z * w)) w U := by
+  refine ⟨fun h => ⟨h.differentiableAt, fun z hz => ?_⟩, fun h =>
+    AlgebraicAnalytic.IsLinearODE2SolutionOn.of_homogeneous h.differentiableAt fun z hz => ?_⟩
+  · exact (h.hasDerivAt_deriv_of_homogeneous z hz).congr_deriv (by ring)
+  · exact (h.hasDerivAt_deriv z hz).congr_deriv (by ring)
 
 /-- The equation 2.7.1 on the logarithmic plane: `W(ζ) = w(e^ζ)` satisfies
 `W'' - W' + e^ζ f(e^ζ) W' + e^{2ζ} g(e^ζ) W = 0` (since `z d/dz = d/dζ`). Solutions of 2.7.1
 continued along arcs around the origin are functions of `ζ`, and `ph z = ℑζ`. -/
 @[dlmf 2.7.E1]
-def IsLogPlaneSolOn (f g : ℂ → ℂ) (W : ℂ → ℂ) (U : Set ℂ) : Prop :=
+def IsLogPlaneSolutionOn (f g : ℂ → ℂ) (W : ℂ → ℂ) (U : Set ℂ) : Prop :=
   DLMF.Painleve.IsODE2SolutionOn
     (fun ζ W W' => W' - exp ζ * f (exp ζ) * W' - exp (2 * ζ) * g (exp ζ) * W) W U
 
@@ -119,18 +127,18 @@ absolute value. All real roots are negative, so `c` is the largest root. -/
 def airyEnvCrit : ℝ :=
   sSup {x : ℝ | x ≤ 0 ∧ DLMF.Airy.airyAi x = DLMF.Airy.airyBi x}
 
-/-- The envelope `envAi` of `Ai` (DLMF 2.8.20–2.8.21): `(Ai² + Bi²)^{1/2}` for `x ≤ c` and
+/-- The envelope `envelopeAi` of `Ai` (DLMF 2.8.20–2.8.21): `(Ai² + Bi²)^{1/2}` for `x ≤ c` and
 `√2 Ai(x)` for `x ≥ c`. -/
 @[dlmf 2.8.E20, dlmf 2.8.E21]
-def envAi (x : ℝ) : ℝ :=
+def envelopeAi (x : ℝ) : ℝ :=
   if x ≤ airyEnvCrit then
     Real.sqrt ((DLMF.Airy.airyAi x).re ^ 2 + (DLMF.Airy.airyBi x).re ^ 2)
   else Real.sqrt 2 * (DLMF.Airy.airyAi x).re
 
-/-- The envelope `envBi` of `Bi` (DLMF 2.8.20–2.8.21): `(Ai² + Bi²)^{1/2}` for `x ≤ c` and
+/-- The envelope `envelopeBi` of `Bi` (DLMF 2.8.20–2.8.21): `(Ai² + Bi²)^{1/2}` for `x ≤ c` and
 `√2 Bi(x)` for `x ≥ c`. -/
 @[dlmf 2.8.E20, dlmf 2.8.E21]
-def envBi (x : ℝ) : ℝ :=
+def envelopeBi (x : ℝ) : ℝ :=
   if x ≤ airyEnvCrit then
     Real.sqrt ((DLMF.Airy.airyAi x).re ^ 2 + (DLMF.Airy.airyBi x).re ^ 2)
   else Real.sqrt 2 * (DLMF.Airy.airyBi x).re
@@ -143,14 +151,14 @@ def besselEnvCrit (ν : ℝ) : ℝ :=
 /-- The envelope `env J_ν` (DLMF 2.8.33–2.8.34): `√2 J_ν(x)` for `0 < x ≤ X_ν` and
 `(J_ν² + Y_ν²)^{1/2}` for `x ≥ X_ν`. -/
 @[dlmf 2.8.E33, dlmf 2.8.E34]
-def envJ (ν x : ℝ) : ℝ :=
+def envelopeJ (ν x : ℝ) : ℝ :=
   if x ≤ besselEnvCrit ν then Real.sqrt 2 * (Complex.besselJ ν x).re
   else Real.sqrt ((Complex.besselJ ν x).re ^ 2 + (DLMF.Bessel.besselY ν x).re ^ 2)
 
 /-- The envelope `env Y_ν` (DLMF 2.8.33–2.8.34): `√2 |Y_ν(x)|` for `0 < x ≤ X_ν` and
 `(J_ν² + Y_ν²)^{1/2}` for `x ≥ X_ν`. -/
 @[dlmf 2.8.E33, dlmf 2.8.E34]
-def envY (ν x : ℝ) : ℝ :=
+def envelopeY (ν x : ℝ) : ℝ :=
   if x ≤ besselEnvCrit ν then Real.sqrt 2 * |(DLMF.Bessel.besselY ν x).re|
   else Real.sqrt ((Complex.besselJ ν x).re ^ 2 + (DLMF.Bessel.besselY ν x).re ^ 2)
 
@@ -193,9 +201,6 @@ def IsDifferenceCoeffRel (fs gs : ℕ → ℂ) (ρ α : ℂ) (a : ℕ → ℂ) :
       ρ * ∑ q ∈ Finset.range (r + 2), Ring.choose (α + r - s) (r + 1 - q) * fs q +
       gs (r + 1)) * a (s - r)
 
-/-- The forward difference `Δw(n) = w(n+1) - w(n)` (DLMF §3.6(i)), used in 2.9.2. -/
-def forwardDiff (w : ℕ → ℂ) (n : ℕ) : ℂ := w (n + 1) - w n
-
 /-- The scale `n ↦ n^{-s}` of the coefficient expansions 2.9.3. -/
 def invPowScale (s n : ℕ) : ℂ := ((n : ℂ) ^ s)⁻¹
 
@@ -209,7 +214,7 @@ def geomExpSqrtScale (ρ κ α : ℂ) (σ : ℂ) (s n : ℕ) : ℂ :=
 
 /-- `w` solves the three-term recurrence `w(n+2) + f(n) w(n+1) + g(n) w(n) = 0` (DLMF 2.9.1)
 for all `n = 0, 1, 2, …`. -/
-def IsRecurrenceSol (f g w : ℕ → ℂ) : Prop := ∀ n, w (n + 2) + f n * w (n + 1) + g n * w n = 0
+def IsRecurrenceSolution (f g w : ℕ → ℂ) : Prop := ∀ n, w (n + 2) + f n * w (n + 1) + g n * w n = 0
 
 section
 
@@ -258,7 +263,7 @@ section
 open MeasureTheory
 
 /-- The Liouville–Green approximant `f^{-1/4}(x) exp(σ ξ(x))`, `σ = ±1`. -/
-def lgApproximant (f ξ : ℝ → ℝ) (σ : ℝ) (x : ℝ) : ℝ :=
+def liouvilleGreenApproximant (f ξ : ℝ → ℝ) (σ : ℝ) (x : ℝ) : ℝ :=
   f x ^ (-(1 / 4) : ℝ) * Real.exp (σ * ξ x)
 
 /-- `w` is a twice-differentiable solution of `w'' = (f + g) w` (DLMF 2.7.20) on `S`. -/

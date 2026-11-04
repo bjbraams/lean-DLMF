@@ -57,9 +57,9 @@ namespace DLMF.Confluent
 theorem kummerM_self {a z : ℂ} (ha : ∀ k : ℕ, a ≠ -k) :
     kummerM a a z = exp z := by
   unfold kummerM
-  have hcoeff : ∀ n : ℕ, poch a n / (poch a n * n !) * z ^ n = z ^ n / n ! := by
+  have hcoeff : ∀ n : ℕ, pochhammer a n / (pochhammer a n * n !) * z ^ n = z ^ n / n ! := by
     intro n
-    have hne := poch_ne_zero_of_not_neg_nat ha n
+    have hne := pochhammer_ne_zero_of_not_neg_nat ha n
     field [hne]
   simp_rw [hcoeff]
   simpa [exp_eq_exp_ℂ] using (congrFun (NormedSpace.exp_eq_tsum_div (𝔸 := ℂ)) z).symm
@@ -67,18 +67,19 @@ theorem kummerM_self {a z : ℂ} (ha : ∀ k : ℕ, a ≠ -k) :
 /-- A terminating `₁F₁(-n;c;z)` is a polynomial of degree at most `n`. -/
 theorem kummerM_eq_sum_neg_nat (n : ℕ) (c z : ℂ) :
     kummerM (-(n : ℂ)) c z =
-      ∑ k ∈ Finset.range (n + 1), poch (-(n : ℂ)) k / (poch c k * k.factorial) * z ^ k := by
+      ∑ k ∈ Finset.range (n + 1), pochhammer (-(n : ℂ)) k /
+          (pochhammer c k * k.factorial) * z ^ k := by
   unfold kummerM
   refine tsum_eq_sum fun k hk => ?_
   have hkn : n < k := by
     rw [Finset.mem_range] at hk
     omega
-  simp [poch_neg_nat_eq_zero hkn]
+  simp [pochhammer_neg_nat_eq_zero hkn]
 
 /-- The coefficients of the regularized `₁F₁` are `(a)_n / (n! Γ(c+n))`. -/
 theorem regularizedHGFunCoeff_singleton (a c : ℂ) (n : ℕ) :
-    regularizedHGFunCoeff {a} {c} n = poch a n / (n ! * Gamma (c + n)) := by
-  simp [regularizedHGFunCoeff, poch]
+    regularizedHGFunCoeff {a} {c} n = pochhammer a n / (n ! * Gamma (c + n)) := by
+  simp [regularizedHGFunCoeff, pochhammer]
 
 /-- The regularized generalized hypergeometric function is the sum of its coefficient series. -/
 theorem regularizedHGFun_eq_tsum (a b : Multiset ℂ) (z : ℂ) :
@@ -91,7 +92,7 @@ theorem regularizedHGFun_eq_tsum (a b : Multiset ℂ) (z : ℂ) :
 theorem kummerMCoeff_eq_mul_regularizedHGFunCoeff {a c : ℂ}
     (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
     kummerMCoeff a c n = Gamma c * regularizedHGFunCoeff {a} {c} n := by
-  have hp : poch c n = Gamma (c + n) / Gamma c :=
+  have hp : pochhammer c n = Gamma (c + n) / Gamma c :=
     (Gamma_add_nat_div_Gamma_eq (n := n) c hc).symm
   have hc0 : Gamma c ≠ 0 := Gamma_ne_zero hc
   have hcn : Gamma (c + n) ≠ 0 := Gamma_ne_zero (not_neg_nat_add_nat hc n)
@@ -103,7 +104,7 @@ theorem kummerMCoeff_eq_mul_regularizedHGFunCoeff {a c : ℂ}
 theorem kummerM_eq_mul_regularizedHGFun {a c z : ℂ} (hc : ∀ k : ℕ, c ≠ -k) :
     kummerM a c z = Gamma c * regularizedHGFun {a} {c} z := by
   unfold kummerM
-  simp_rw [show ∀ n : ℕ, poch a n / (poch c n * n !) =
+  simp_rw [show ∀ n : ℕ, pochhammer a n / (pochhammer c n * n !) =
     Gamma c * regularizedHGFunCoeff {a} {c} n from
       kummerMCoeff_eq_mul_regularizedHGFunCoeff hc]
   rw [regularizedHGFun_eq_tsum, ← tsum_mul_left]
@@ -145,11 +146,11 @@ theorem analyticOnNhd_kummerM {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) :
 theorem kummerMCoeff_recurrence {a c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
     (n + 1 : ℂ) * (c + n) * kummerMCoeff a c (n + 1) =
       (a + n) * kummerMCoeff a c n := by
-  have hcp := poch_ne_zero_of_not_neg_nat hc n
+  have hcp := pochhammer_ne_zero_of_not_neg_nat hc n
   have hcn : c + (n : ℂ) ≠ 0 := by
     simpa only [ne_eq, eq_neg_iff_add_eq_zero] using hc n
   have hn : (n + 1 : ℂ) ≠ 0 := by exact_mod_cast Nat.succ_ne_zero n
-  simp only [kummerMCoeff, poch_succ, Nat.factorial_succ,
+  simp only [kummerMCoeff, pochhammer_succ, Nat.factorial_succ,
     Nat.cast_mul, Nat.cast_add, Nat.cast_one]
   field [hcp, hcn, hn, Nat.cast_ne_zero.mpr n.factorial_ne_zero]
 
@@ -301,8 +302,8 @@ theorem kummerU_zero (b z : ℂ) : kummerU 0 b z = 1 := by
 /-- The coefficient identity for the Gaussian antiderivative. -/
 theorem kummerMCoeff_half (n : ℕ) :
     (2 * n + 1 : ℂ) * kummerMCoeff (1 / 2) (3 / 2) n = 1 / n.factorial := by
-  have hp : poch (1 / 2 : ℂ) n ≠ 0 :=
-    poch_ne_zero_of_not_neg_nat (fun k hk => by
+  have hp : pochhammer (1 / 2 : ℂ) n ≠ 0 :=
+    pochhammer_ne_zero_of_not_neg_nat (fun k hk => by
       have he := congrArg Complex.re hk
       simp at he
       have := Nat.cast_nonneg (α := ℝ) k
@@ -313,7 +314,7 @@ theorem kummerMCoeff_half (n : ℕ) :
     have := congrArg Complex.re he
     simp at this
     linarith
-  rw [kummerMCoeff, poch_three_halves_eq]
+  rw [kummerMCoeff, pochhammer_three_halves_eq]
   field [hp, hn, Nat.cast_ne_zero.mpr n.factorial_ne_zero]
 
 /-- A first-order relation between the confluent series and the exponential. -/

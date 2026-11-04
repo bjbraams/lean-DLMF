@@ -262,7 +262,7 @@ private lemma qGauss_nonzero {a b c q : ℂ} (hq0 : q ≠ 0) (hq : ‖q‖ < 1)
     show c / a * b⁻¹ = c / (a * b) by ring] using h
 
 /-- At base zero, a nonempty finite shifted factorial retains only its first factor. -/
-private lemma qGauss_poch_zero_base (a : ℂ) (n : ℕ) : qPochhammer a 0 (n + 1) = 1 - a := by
+private lemma qGauss_pochhammer_zero_base (a : ℂ) (n : ℕ) : qPochhammer a 0 (n + 1) = 1 - a := by
   rw [qPochhammer_eq_prod, prod_range_succ']
   simp
 
@@ -286,7 +286,7 @@ private lemma qGauss_zero_base {a b c : ℂ} (ha : a ≠ 0) (hb : b ≠ 0)
     convert (hasSum_geometric_of_norm_lt_one hz').mul_left (A * z) using 1
     ext n
     rw [qPhiTerm_two_one]
-    simp only [qGauss_poch_zero_base, sub_zero, mul_one, pow_succ]
+    simp only [qGauss_pochhammer_zero_base, sub_zero, mul_one, pow_succ]
     dsimp [A]
     ring
   have hsum := htail.zero_add

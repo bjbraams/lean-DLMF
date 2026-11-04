@@ -23,6 +23,6 @@ domains. Euler integrals provide analytic branches beyond the series domains. Tr
 formulas are identities of germs at the origin, transported along compatible analytic
 continuations; no divergent totalized series is identified with a continued function. The
 connection formula at infinity specifies its continuation explicitly. Two-variable continuation
-extends the TauCeti one-variable continuation API. `appF4` and Bailey's product formula come
+extends the TauCeti one-variable continuation API. `appellF4` and Bailey's product formula come
 from `DLMF.Hypergeometric.AppellF4`.
 -/

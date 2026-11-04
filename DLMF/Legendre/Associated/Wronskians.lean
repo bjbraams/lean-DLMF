@@ -121,21 +121,23 @@ theorem IsFerrersSolution.comp_neg {ν μ : ℂ} {f : ℝ → ℂ} (hf : IsFerre
     linear_combination ef
 
 /-- The Gauss equation for `𝐅(α,β;γ;·)` at `x²`, `x ∈ (-1,1)`. -/
-theorem regularizedGaussHG_ode_sq (α β γ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    (x:ℂ)^2*(1-(x:ℂ)^2)*deriv (deriv (regularizedGaussHG α β γ)) ((x:ℂ)^2)+
-      (γ-(α+β+1)*(x:ℂ)^2)*deriv (regularizedGaussHG α β γ) ((x:ℂ)^2)-
-      α*β*regularizedGaussHG α β γ ((x:ℂ)^2)=0 := by
+theorem regularizedGaussHypergeometric_ode_sq (α β γ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+    (x:ℂ)^2*(1-(x:ℂ)^2)*deriv (deriv (regularizedGaussHypergeometric α β γ)) ((x:ℂ)^2)+
+      (γ-(α+β+1)*(x:ℂ)^2)*deriv (regularizedGaussHypergeometric α β γ) ((x:ℂ)^2)-
+      α*β*regularizedGaussHypergeometric α β γ ((x:ℂ)^2)=0 := by
   have hs := ferrers_one_sub_sq_mem_slitPlane hx
-  rw [←show iteratedDeriv 2 (regularizedGaussHG α β γ)=deriv (deriv (regularizedGaussHG α β γ)) by
-    rw [iteratedDeriv_succ,iteratedDeriv_one],iteratedDeriv_regularizedGaussHG α β γ 2 hs,
-    deriv_regularizedGaussHG α β γ hs]
-  exact regularizedGaussHG_ode α β γ hs
+  rw [←show iteratedDeriv 2 (regularizedGaussHypergeometric α β γ)=deriv
+      (deriv (regularizedGaussHypergeometric α β γ)) by
+    rw [iteratedDeriv_succ, iteratedDeriv_one],
+        iteratedDeriv_regularizedGaussHypergeometric α β γ 2 hs,
+    deriv_regularizedGaussHypergeometric α β γ hs]
+  exact regularizedGaussHypergeometric_ode α β γ hs
 
 /-- The even quadratic solution solves the associated Legendre equation. -/
 theorem ferrersEven_isFerrersSolution (ν μ : ℂ) : IsFerrersSolution ν μ (ferrersEven ν μ) := by
   let a : ℂ := -(ν+μ)/2
   let b : ℂ := (ν-μ+1)/2
-  let F := regularizedGaussHG a b (1/2)
+  let F := regularizedGaussHypergeometric a b (1/2)
   let g : ℂ→ℂ := fun z=>(1-z^2)^(-μ/2)
   let q : ℂ→ℂ := fun z=>μ*z/(1-z^2)
   let E1 : ℝ→ℂ := fun y=>g y*(q y*F ((y:ℂ)^2)+2*y*deriv F ((y:ℂ)^2))
@@ -148,7 +150,7 @@ theorem ferrersEven_isFerrersSolution (ν μ : ℂ) : IsFerrersSolution ν μ (f
   have hE2 := (quadratic_gauss_gauge_jets a b (1/2) μ
       (ferrers_one_sub_sq_mem_slitPlane hx)).2.comp_ofReal
   refine ⟨(hE x hx).differentiableAt, _, hE2.congr_of_eventuallyEq heq, ?_⟩
-  have he := regularizedGaussHG_ode_sq a b (1/2) hx
+  have he := regularizedGaussHypergeometric_ode_sq a b (1/2) hx
   rw [(hE x hx).deriv]
   simp only [ferrersEven]
   dsimp only [E1,g,q,F,a,b] at he ⊢
@@ -159,7 +161,7 @@ theorem ferrersEven_isFerrersSolution (ν μ : ℂ) : IsFerrersSolution ν μ (f
 theorem ferrersOdd_isFerrersSolution (ν μ : ℂ) : IsFerrersSolution ν μ (ferrersOdd ν μ) := by
   let A : ℂ := (1-ν-μ)/2
   let B : ℂ := (ν-μ+2)/2
-  let G := regularizedGaussHG A B (3/2)
+  let G := regularizedGaussHypergeometric A B (3/2)
   let g : ℂ→ℂ := fun z=>(1-z^2)^(-μ/2)
   let q : ℂ→ℂ := fun z=>μ*z/(1-z^2)
   let O : ℝ→ℂ := fun y=>g y*G ((y:ℂ)^2)
@@ -178,7 +180,7 @@ theorem ferrersOdd_isFerrersSolution (ν μ : ℂ) : IsFerrersSolution ν μ (fe
       (ferrers_one_sub_sq_mem_slitPlane hx)).2.comp_ofReal
   have hsecond := (hO x hx).add ((hasDerivAt_id x).ofReal_comp.mul hO2)
   refine ⟨(hd x hx).differentiableAt, _, hsecond.congr_of_eventuallyEq heq, ?_⟩
-  have ho := regularizedGaussHG_ode_sq A B (3/2) hx
+  have ho := regularizedGaussHypergeometric_ode_sq A B (3/2) hx
   rw [(hd x hx).deriv]
   simp only [ferrersOdd, id_eq, ofReal_one]
   dsimp only [O1,O,g,q,G,A,B] at ho ⊢
@@ -194,7 +196,7 @@ theorem ferrers_even_odd_wronskian (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:�
   have hE0 : ferrersEven ν μ 0 = 1/(Real.sqrt π:ℂ) := by
     unfold ferrersEven
     rw [ofReal_zero, show (0:ℂ)^2 = 0 by norm_num,
-                                           regularizedGaussHG_zero_of_regular
+                                           regularizedGaussHypergeometric_zero_of_regular
                                            Complex.one_div_two_ne_neg_natCast,
       legendre_Gamma_one_half]
     simp
@@ -202,8 +204,8 @@ theorem ferrers_even_odd_wronskian (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:�
   have hO1 : deriv (ferrersOdd ν μ) 0 = 2/(Real.sqrt π:ℂ) := by
     have h := (hasDerivAt_quadratic_odd ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2) μ).comp_ofReal (z := 0)
     rw [show ferrersOdd ν μ = fun y:ℝ => (y:ℂ)*((1-(y:ℂ)^2)^(-μ/2)*
-      regularizedGaussHG ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2) ((y:ℂ)^2)) from rfl, h.deriv,
-      regularizedGaussHG_zero_of_regular Complex.three_div_two_ne_neg_natCast,
+      regularizedGaussHypergeometric ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2) ((y:ℂ)^2)) from rfl, h.deriv,
+      regularizedGaussHypergeometric_zero_of_regular Complex.three_div_two_ne_neg_natCast,
           legendre_Gamma_three_halves]
     field_simp
   rw [hE0, hO0, hO1] at hw
@@ -237,7 +239,7 @@ theorem ferrersP_conical_real (τ μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1
   unfold ferrersP
   rw [show -(-(-1/2+I*(τ:ℂ))-1) = (-1/2+I*τ)+1 by ring, show -(-1/2+I*(τ:ℂ))-1+1 =
                                                     -(-1/2+I*τ) by ring,
-    regularizedGaussHG_symm _ _ _ (mem_cutPlane_of_one_add hp)]
+    regularizedGaussHypergeometric_symm _ _ _ (mem_cutPlane_of_one_add hp)]
 
 /-- The Wronskian of two combinations of the even and odd solutions. -/
 theorem ferrersWronskian_of_even_odd {ν μ a b c d : ℂ} {f g : ℝ → ℂ}

@@ -26,9 +26,9 @@ negative real axis, and the relations of `Ei` to `E₁`, `Shi` and `Chi`.
   branch and the continuation formulas of `E₁` (DLMF 6.4.1–6.4.3).
 * `cosIntOnLog_halfTurn`, `coshIntOnLog_halfTurn`, `expIntAuxFOnLog_halfTurn`,
   `expIntAuxGOnLog_halfTurn`: DLMF 6.4.4–6.4.7.
-* `expIntE1_negative_boundary`, `expIntEi_boundary_average`: the boundary values of `E₁` on the
+* `expIntE1_negative_boundary`, `expIntegralEi_boundary_average`: the boundary values of `E₁` on the
   negative real axis and `Ei` as their average (DLMF 6.5.1, 6.5.2).
-* `sinhInt_eq_Ei`, `coshInt_eq_Ei`: `Shi` and `Chi` in terms of `Ei` and `E₁` (DLMF 6.5.3,
+* `sinhIntegral_eq_Ei`, `coshIntegral_eq_Ei`: `Shi` and `Chi` in terms of `Ei` and `E₁` (DLMF 6.5.3,
   6.5.4).
 * `ExpIntegralAuxiliary.laplace_hasIntegralAtTop`: Laplace representations of `f` and `g` on the
   closed right half-plane minus the origin.
@@ -44,29 +44,29 @@ namespace DLMF.Confluent
 /-- E₁ on the logarithmic plane. -/
 @[dlmf 6.4.E1]
 def expIntE1OnLog (w : ℂ) : ℂ :=
-  expIntEin (exp w) - w - Real.eulerMascheroniConstant
+  expIntegralEin (exp w) - w - Real.eulerMascheroniConstant
 
 /-- Cosine integral on the logarithmic plane. -/
 def cosIntOnLog (w : ℂ) : ℂ :=
-  -cosIntCin (exp w) + w + Real.eulerMascheroniConstant
+  -cosIntegralCin (exp w) + w + Real.eulerMascheroniConstant
 
 /-- Hyperbolic cosine integral on the logarithmic plane. -/
 def coshIntOnLog (w : ℂ) : ℂ :=
-  coshInt (exp w) - log (exp w) + w
+  coshIntegral (exp w) - log (exp w) + w
 
 /-- Continued auxiliary f. -/
 def expIntAuxFOnLog (w : ℂ) : ℂ :=
-  cosIntOnLog w * sin (exp w) - sinIntTail (exp w) * cos (exp w)
+  cosIntOnLog w * sin (exp w) - sinIntegralTail (exp w) * cos (exp w)
 
 /-- Continued auxiliary g. -/
 def expIntAuxGOnLog (w : ℂ) : ℂ :=
-  -cosIntOnLog w * cos (exp w) - sinIntTail (exp w) * sin (exp w)
+  -cosIntOnLog w * cos (exp w) - sinIntegralTail (exp w) * sin (exp w)
 
 /-- Identity under the stated parameter and domain assumptions: `expIntE1OnLog (log z) =
-genExpIntE 1 z`. -/
+expIntegralE 1 z`. -/
 @[dlmf 6.4.E1]
 theorem expIntE1OnLog_principal {z : ℂ} (hz : z ≠ 0) :
-    expIntE1OnLog (log z) = genExpIntE 1 z := by
+    expIntE1OnLog (log z) = expIntegralE 1 z := by
   rw [expIntE1OnLog, Complex.exp_log hz, expIntE1_eq_Ein_complex hz]
 
 /-- Identity under the stated parameter and domain assumptions: `expIntE1OnLog (w+2*m*π*I) =
@@ -81,10 +81,10 @@ theorem expIntE1OnLog_monodromy (w : ℂ) (m : ℤ) :
   ring
 
 /-- Identity under the stated parameter and domain assumptions: `expIntE1OnLog (w+ε*π*I) =
-expIntEin (-exp w)-w-Real.eulerMascheroniConstant-ε*π*I`. -/
+expIntegralEin (-exp w)-w-Real.eulerMascheroniConstant-ε*π*I`. -/
 @[dlmf 6.4.E3]
 theorem expIntE1OnLog_halfTurn (w : ℂ) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
-    expIntE1OnLog (w+ε*π*I) = expIntEin (-exp w)-w-Real.eulerMascheroniConstant-ε*π*I := by
+    expIntE1OnLog (w+ε*π*I) = expIntegralEin (-exp w)-w-Real.eulerMascheroniConstant-ε*π*I := by
   have he : exp (w+ε*π*I) = -exp w := by
     rcases hε with rfl | rfl <;> simp [Complex.exp_add, Complex.exp_pi_mul_I,
       show (-1:ℂ)*π*I=-(π*I) by ring, Complex.exp_neg]
@@ -99,7 +99,7 @@ theorem cosIntOnLog_halfTurn (w : ℂ) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
   have he : exp (w+ε*π*I) = -exp w := by
     rcases hε with rfl | rfl <;> simp [Complex.exp_add, Complex.exp_pi_mul_I,
       show (-1:ℂ)*π*I=-(π*I) by ring, Complex.exp_neg]
-  simp only [cosIntOnLog, he, cosIntCin_even]
+  simp only [cosIntOnLog, he, cosIntegralCin_even]
   ring
 
 /-- Identity under the stated parameter and domain assumptions: `coshIntOnLog (w+ε*π*I) =
@@ -116,7 +116,7 @@ theorem coshIntOnLog_halfTurn (w : ℂ) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
     apply tsum_congr
     intro k
     rw [neg_pow z, show (-1:ℂ)^(2*k+2)=1 by simp [pow_add, pow_mul], one_mul]
-  simp only [coshIntOnLog, coshInt, he, hpar]
+  simp only [coshIntOnLog, coshIntegral, he, hpar]
   ring
 
 /-- Identity under the stated parameter and domain assumptions: `expIntAuxFOnLog (w+ε*π*I) = π*exp
@@ -131,8 +131,8 @@ theorem expIntAuxFOnLog_halfTurn (w : ℂ) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
   have hexp : exp (-ε*I*exp w)=cos (exp w)-ε*I*sin (exp w) := by
     rw [show -(ε:ℂ)*I*exp w=(-ε*exp w)*I by ring, Complex.exp_mul_I]
     rcases hε with rfl | rfl <;> simp [mul_comm, sub_eq_add_neg]
-  simp only [expIntAuxFOnLog, expIntAuxGOnLog, he, hc, sinInt_odd,
-    Complex.sin_neg, Complex.cos_neg, sinIntTail, sinInt_odd]
+  simp only [expIntAuxFOnLog, expIntAuxGOnLog, he, hc, sinIntegral_odd,
+    Complex.sin_neg, Complex.cos_neg, sinIntegralTail, sinIntegral_odd]
   rw [hexp]
   rcases hε with rfl | rfl <;> norm_num <;> ring_nf <;> simp [I_sq] <;> ring
 
@@ -148,19 +148,20 @@ theorem expIntAuxGOnLog_halfTurn (w : ℂ) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
   have hexp : exp (-ε*I*exp w)=cos (exp w)-ε*I*sin (exp w) := by
     rw [show -(ε:ℂ)*I*exp w=(-ε*exp w)*I by ring, Complex.exp_mul_I]
     rcases hε with rfl | rfl <;> simp [mul_comm, sub_eq_add_neg]
-  simp only [expIntAuxFOnLog, expIntAuxGOnLog, he, hc, sinInt_odd,
-    Complex.sin_neg, Complex.cos_neg, sinIntTail, sinInt_odd]
+  simp only [expIntAuxFOnLog, expIntAuxGOnLog, he, hc, sinIntegral_odd,
+    Complex.sin_neg, Complex.cos_neg, sinIntegralTail, sinIntegral_odd]
   rw [hexp]
   rcases hε with rfl | rfl <;> norm_num <;> ring_nf <;> simp [I_sq] <;> ring
 
-/-- The map `(fun y : ℝ => genExpIntE 1 (-x+ε*y*I))` tends to `(𝓝 (-(Real.expIntEi x : ℂ)-ε*π*I))`
-along `(𝓝[>] 0)`. -/
+/-- The map `(fun y : ℝ => expIntegralE 1 (-x+ε*y*I))` tends to
+`(𝓝 (-(Real.expIntegralEi x : ℂ)-ε*π*I))` along `(𝓝[>] 0)`. -/
 @[dlmf 6.5.E1]
 theorem expIntE1_negative_boundary {x : ℝ} (hx : 0 < x) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
-    Tendsto (fun y : ℝ => genExpIntE 1 (-x+ε*y*I)) (𝓝[>] 0) (𝓝 (-(Real.expIntEi x : ℂ)-ε*π*I)) := by
-  have hEin : expIntEin (-(x:ℂ))-(Real.log x:ℂ)-(Real.eulerMascheroniConstant:ℂ)=
-      -(Real.expIntEi x:ℂ) := by
-    rw [Real.expIntEi,show -(x:ℂ)=(-x:ℝ) by simp,expIntEin_ofReal]
+    Tendsto (fun y : ℝ => expIntegralE 1 (-x+ε*y*I)) (𝓝[>] 0)
+        (𝓝 (-(Real.expIntegralEi x : ℂ)-ε*π*I)) := by
+  have hEin : expIntegralEin (-(x:ℂ))-(Real.log x:ℂ)-(Real.eulerMascheroniConstant:ℂ)=
+      -(Real.expIntegralEi x:ℂ) := by
+    rw [Real.expIntegralEi,show -(x:ℂ)=(-x:ℝ) by simp,expIntegralEin_ofReal]
     simp only [abs_of_pos hx,Complex.ofReal_re,Complex.ofReal_neg]
     push_cast
     ring
@@ -190,10 +191,10 @@ theorem expIntE1_negative_boundary {x : ℝ} (hx : 0 < x) {ε : ℝ} (hε : ε=1
       have hh := (tendsto_log_nhdsWithin_im_neg_of_re_neg_of_im_zero
         (by simpa using (neg_neg_of_pos hx)) (by simp) (z:= -(x:ℂ))).comp ht
       simpa [Function.comp_def,Complex.norm_real,Real.norm_of_nonneg hx.le,sub_eq_add_neg] using hh
-  have hlim := ((expIntEin_entire.continuous.tendsto (-(x:ℂ))).comp hf).sub hlog
+  have hlim := ((expIntegralEin_entire.continuous.tendsto (-(x:ℂ))).comp hf).sub hlog
     |>.sub_const (Real.eulerMascheroniConstant:ℂ)
-  have hvalue : expIntEin (-(x:ℂ))-((Real.log x:ℂ)+ε*π*I)-Real.eulerMascheroniConstant=
-      -(Real.expIntEi x:ℂ)-ε*π*I := by linear_combination hEin
+  have hvalue : expIntegralEin (-(x:ℂ))-((Real.log x:ℂ)+ε*π*I)-Real.eulerMascheroniConstant=
+      -(Real.expIntegralEi x:ℂ)-ε*π*I := by linear_combination hEin
   rw [hvalue] at hlim
   apply hlim.congr'
   filter_upwards [self_mem_nhdsWithin] with y hy
@@ -205,21 +206,22 @@ theorem expIntE1_negative_boundary {x : ℝ} (hx : 0 < x) {ε : ℝ} (hε : ε=1
   simp [Complex.mul_re,Complex.mul_im] at hr
   linarith
 
-/-- Identity under the stated parameter and domain assumptions: `(Real.expIntEi x : ℂ) =
+/-- Identity under the stated parameter and domain assumptions: `(Real.expIntegralEi x : ℂ) =
 -(expIntE1OnLog (Real.log x+π*I)+expIntE1OnLog (Real.log x-π*I))/2`. -/
 @[dlmf 6.5.E2]
-theorem expIntEi_boundary_average {x : ℝ} (hx : 0 < x) :
-    (Real.expIntEi x : ℂ) = -(expIntE1OnLog (Real.log x+π*I)+expIntE1OnLog (Real.log x-π*I))/2 := by
+theorem expIntegralEi_boundary_average {x : ℝ} (hx : 0 < x) :
+    (Real.expIntegralEi x : ℂ) =
+        -(expIntE1OnLog (Real.log x+π*I)+expIntE1OnLog (Real.log x-π*I))/2 := by
   have h1 := expIntE1OnLog_halfTurn (Real.log x:ℂ) (ε:=1) (Or.inl rfl)
   have h2 := expIntE1OnLog_halfTurn (Real.log x:ℂ) (ε:=-1) (Or.inr rfl)
   have hxexp : exp (Real.log x:ℂ)=(x:ℂ) := by rw [← Complex.ofReal_exp, Real.exp_log hx]
   simp only [Complex.ofReal_one, Complex.ofReal_neg, one_mul, neg_one_mul] at h1 h2
   rw [hxexp] at h1 h2
   rw [show (Real.log x:ℂ)+(-π*I)=(Real.log x:ℂ)-π*I by ring] at h2
-  have hr : (Real.expIntEi x:ℂ)=(Real.eulerMascheroniConstant:ℂ)+Real.log x-
-      DLMF.Confluent.expIntEin (-x) := by
-    rw [Real.expIntEi]
-    have hEin := expIntEin_ofReal (-x)
+  have hr : (Real.expIntegralEi x:ℂ)=(Real.eulerMascheroniConstant:ℂ)+Real.log x-
+      DLMF.Confluent.expIntegralEin (-x) := by
+    rw [Real.expIntegralEi]
+    have hEin := expIntegralEin_ofReal (-x)
     simp only [Complex.ofReal_neg] at hEin
     rw [hEin]
     simp only [Complex.ofReal_re, abs_of_pos hx]
@@ -229,61 +231,68 @@ theorem expIntEi_boundary_average {x : ℝ} (hx : 0 < x) :
   linear_combination (h1+h2)/2
 
 /-- Even and odd parts of Ein give the hyperbolic integrals. -/
-theorem expIntEin_hyperbolic (z : ℂ) :
-    expIntEin z=sinhInt z+cosIntCin (I*z) ∧
-    expIntEin (-z)= -sinhInt z+cosIntCin (I*z) := by
-  have hm := expIntEin_mul_I (I*z)
-  rw [show I*(I*z)= -z by simp only [←mul_assoc,Complex.I_mul_I,neg_one_mul],sinInt_mul_I] at hm
-  have hp := expIntEin_mul_I (-(I*z))
-  rw [show I*(-(I*z))=z by ring_nf; simp,cosIntCin_even,sinInt_odd,sinInt_mul_I] at hp
+theorem expIntegralEin_hyperbolic (z : ℂ) :
+    expIntegralEin z=sinhIntegral z+cosIntegralCin (I*z) ∧
+    expIntegralEin (-z)= -sinhIntegral z+cosIntegralCin (I*z) := by
+  have hm := expIntegralEin_mul_I (I*z)
+  rw [show I*(I*z)= -z by simp only [←mul_assoc, Complex.I_mul_I, neg_one_mul],
+                            sinIntegral_mul_I] at hm
+  have hp := expIntegralEin_mul_I (-(I*z))
+  rw [show I*(-(I*z))=z by ring_nf; simp, cosIntegralCin_even, sinIntegral_odd,
+                             sinIntegral_mul_I] at hp
   constructor
   · linear_combination (norm := ring_nf) hp <;> simp [I_sq] <;> ring
   · linear_combination (norm := ring_nf) hm <;> simp [I_sq] <;> ring
 
 /-- Real Ei in terms of the entire Ein normalization. -/
-theorem expIntEi_eq_Ein {x : ℝ} (hx : 0<x) :
-    (Real.expIntEi x:ℂ)=(Real.eulerMascheroniConstant:ℂ)+Real.log x-expIntEin (-(x:ℂ)) := by
-  rw [Real.expIntEi,show -(x:ℂ)=(-x:ℝ) by simp,expIntEin_ofReal]
+theorem expIntegralEi_eq_Ein {x : ℝ} (hx : 0<x) :
+    (Real.expIntegralEi x:ℂ)=(Real.eulerMascheroniConstant:ℂ)+Real.log
+        x-expIntegralEin (-(x:ℂ)) := by
+  rw [Real.expIntegralEi,show -(x:ℂ)=(-x:ℝ) by simp,expIntegralEin_ofReal]
   simp only [abs_of_pos hx,Complex.ofReal_re]
   push_cast
   ring
 
-/-- Identity under the stated parameter and domain assumptions: `((Real.expIntEi x : ℂ)+genExpIntE
-1 x)/2 = sinhInt x ∧ sinhInt x = -I*sinInt (I*x)`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`((Real.expIntegralEi x : ℂ)+expIntegralE 1 x)/2 = sinhIntegral x ∧ sinhIntegral x = -I*sinIntegral
+(I*x)`. -/
 @[dlmf 6.5.E3]
-theorem sinhInt_eq_Ei {x : ℝ} (hx : 0 < x) :
-    ((Real.expIntEi x : ℂ)+genExpIntE 1 x)/2 = sinhInt x ∧ sinhInt x = -I*sinInt (I*x) := by
-  have hp := expIntEin_hyperbolic (x:ℂ)
+theorem sinhIntegral_eq_Ei {x : ℝ} (hx : 0 < x) :
+    ((Real.expIntegralEi x : ℂ)+expIntegralE 1 x)/2 = sinhIntegral x ∧ sinhIntegral x =
+        -I*sinIntegral (I*x) := by
+  have hp := expIntegralEin_hyperbolic (x:ℂ)
   have he := expIntE1_eq_Ein_complex (Complex.ofReal_ne_zero.mpr hx.ne')
-  rw [expIntEi_eq_Ein hx,Complex.ofReal_log hx.le]
+  rw [expIntegralEi_eq_Ein hx,Complex.ofReal_log hx.le]
   refine ⟨?_,?_⟩
   · rw [he,hp.1,hp.2]
     ring
-  · rw [sinInt_mul_I]
+  · rw [sinIntegral_mul_I]
     ring_nf
     simp [I_sq]
 
-/-- Identity under the stated parameter and domain assumptions: `((Real.expIntEi x : ℂ)-genExpIntE
-1 x)/2 = coshInt x ∧ coshInt x = cosInt (I*x)-π*I/2`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`((Real.expIntegralEi x : ℂ)-expIntegralE 1 x)/2 = coshIntegral x ∧ coshIntegral x = cosIntegral
+(I*x)-π*I/2`. -/
 @[dlmf 6.5.E4]
-theorem coshInt_eq_Ei {x : ℝ} (hx : 0 < x) :
-    ((Real.expIntEi x : ℂ)-genExpIntE 1 x)/2 = coshInt x ∧ coshInt x = cosInt (I*x)-π*I/2 := by
-  have hp := expIntEin_hyperbolic (x:ℂ)
+theorem coshIntegral_eq_Ei {x : ℝ} (hx : 0 < x) :
+    ((Real.expIntegralEi x : ℂ)-expIntegralE 1 x)/2 = coshIntegral x ∧ coshIntegral x =
+        cosIntegral (I*x)-π*I/2 := by
+  have hp := expIntegralEin_hyperbolic (x:ℂ)
   have he := expIntE1_eq_Ein_complex (Complex.ofReal_ne_zero.mpr hx.ne')
-  have hc := cosIntCin_mul_I (x:ℂ)
-  rw [expIntEi_eq_Ein hx,Complex.ofReal_log hx.le]
+  have hc := cosIntegralCin_mul_I (x:ℂ)
+  rw [expIntegralEi_eq_Ein hx,Complex.ofReal_log hx.le]
   constructor
   · rw [he,hp.1,hp.2,hc]
-    unfold coshInt
+    unfold coshIntegral
     ring
-  · rw [cosInt, (log_quarter_turn hx).1]
+  · rw [cosIntegral, (log_quarter_turn hx).1]
     rw [hc]
-    unfold coshInt
+    unfold coshIntegral
     ring
 
 /-- `E₁(z(t-c)) → 0` as `t → ∞`, for `z ≠ 0` in the closed right half-plane. -/
 theorem tendsto_expIntE1_mul_sub {z : ℂ} (hz0 : z ≠ 0) (hz : 0 ≤ z.re) (c : ℂ) :
-    Tendsto (fun t : ℝ => genExpIntE 1 (z*(t-c))) atTop (𝓝 0) := by
+    Tendsto (fun t : ℝ => expIntegralE 1 (z*(t-c))) atTop (𝓝 0) := by
   have harg : |arg z| ≤ π/2 := Complex.abs_arg_le_pi_div_two_iff.mpr hz
   set β : ℝ := -(arg z/2)
   have hβ : |β| < π/2 := by
@@ -324,7 +333,7 @@ theorem tendsto_expIntE1_mul_sub {z : ℂ} (hz0 : z ≠ 0) (hz : 0 ≤ z.re) (c 
     filter_upwards [this.eventually_gt_atTop 0] with t ht h0
     simp [h0] at ht
   filter_upwards [hn, eventually_ge_atTop 0] with t ht ht0
-  rw [genExpIntE_eq_exp_mul_kummerU 1 ht, show (2:ℂ)-1=1 by norm_num, norm_mul, Complex.norm_exp,
+  rw [expIntegralE_eq_exp_mul_kummerU 1 ht, show (2:ℂ)-1=1 by norm_num, norm_mul, Complex.norm_exp,
     Function.comp_apply, mul_comm]
   refine mul_le_mul_of_nonneg_left (Real.exp_le_exp.mpr ?_) (norm_nonneg _)
   have : (-(z*((t:ℂ)-c))).re = -(z.re*t) + (z*c).re := by simp [mul_sub]; ring
@@ -332,7 +341,7 @@ theorem tendsto_expIntE1_mul_sub {z : ℂ} (hz0 : z ≠ 0) (hz : 0 ≤ z.re) (c 
 
 /-- `(E₁ on the log plane)' = -exp(-e^w)`. -/
 theorem hasDerivAt_expIntE1OnLog (w : ℂ) : HasDerivAt expIntE1OnLog (-exp (-exp w)) w := by
-  have h := (((hasDerivAt_expIntEin_complex (Complex.exp_ne_zero w)).comp w
+  have h := (((hasDerivAt_expIntegralEin_complex (Complex.exp_ne_zero w)).comp w
     (Complex.hasDerivAt_exp w)).sub (hasDerivAt_id w)).sub_const (Real.eulerMascheroniConstant:ℂ)
   refine h.congr_deriv ?_
   have he : exp w ≠ 0 := Complex.exp_ne_zero w
@@ -380,8 +389,8 @@ theorem hasIntegralAtTop_exp_neg_mul_div_sub {z : ℂ} (hz0 : z ≠ 0) (hz : 0 �
 /-- Laplace representations of the auxiliary functions `f` and `g` on the closed right
 half-plane minus the origin, as improper integrals. -/
 theorem ExpIntegralAuxiliary.laplace_hasIntegralAtTop {z : ℂ} (hz0 : z ≠ 0) (hz : 0 ≤ z.re) :
-    HasIntegralAtTop (fun t : ℝ => exp (-z*t)/((t:ℂ)^2+1)) 0 (expIntAuxF z) ∧
-    HasIntegralAtTop (fun t : ℝ => (t:ℂ)*exp (-z*t)/((t:ℂ)^2+1)) 0 (expIntAuxG z) := by
+    HasIntegralAtTop (fun t : ℝ => exp (-z*t)/((t:ℂ)^2+1)) 0 (sinIntegralAuxiliaryF z) ∧
+    HasIntegralAtTop (fun t : ℝ => (t:ℂ)*exp (-z*t)/((t:ℂ)^2+1)) 0 (sinIntegralAuxiliaryG z) := by
   have hs1 : ∀ t : ℝ, 0 ≤ t → (t:ℂ)-I ∈ slitPlane := fun t _ => by right; simp
   have hs2 : ∀ t : ℝ, 0 ≤ t → (t:ℂ)-(-I) ∈ slitPlane := fun t _ => by right; simp
   have hn1 (t : ℝ) : (t:ℂ)-I ≠ 0 := fun h => by have := congrArg Complex.im h; simp at this
@@ -403,16 +412,16 @@ theorem ExpIntegralAuxiliary.laplace_hasIntegralAtTop {z : ℂ} (hz0 : z ≠ 0) 
     · field_simp; ring
   -- the common value
   have hEm : expIntE1OnLog (log z+log (((0:ℝ):ℂ)-I)) =
-      cosIntCin z-I*sinInt z-log z+π*I/2-Real.eulerMascheroniConstant := by
-    have he := expIntEin_mul_I (-z)
-    rw [cosIntCin_even, sinInt_odd] at he
+      cosIntegralCin z-I*sinIntegral z-log z+π*I/2-Real.eulerMascheroniConstant := by
+    have he := expIntegralEin_mul_I (-z)
+    rw [cosIntegralCin_even, sinIntegral_odd] at he
     rw [expIntE1OnLog, Complex.exp_add, Complex.exp_log hz0, show ((0:ℝ):ℂ)-I = -I by simp,
       Complex.exp_log (neg_ne_zero.mpr I_ne_zero), log_neg_I, show z*(-I) = I*(-z) by ring, he]
     ring
   have hEp : expIntE1OnLog (log z+log (((0:ℝ):ℂ)-(-I))) =
-      cosIntCin z+I*sinInt z-log z-π*I/2-Real.eulerMascheroniConstant := by
+      cosIntegralCin z+I*sinIntegral z-log z-π*I/2-Real.eulerMascheroniConstant := by
     rw [expIntE1OnLog, Complex.exp_add, Complex.exp_log hz0, show ((0:ℝ):ℂ)-(-I) = I by simp,
-      Complex.exp_log I_ne_zero, log_I, mul_comm z I, expIntEin_mul_I]
+      Complex.exp_log I_ne_zero, log_I, mul_comm z I, expIntegralEin_mul_I]
     ring
   have hsin : sin z = (exp (-z*I)-exp (z*I))*I/2 := by rw [Complex.sin]
   have hcos : cos z = (exp (z*I)+exp (-z*I))/2 := by rw [Complex.cos]
@@ -421,13 +430,15 @@ theorem ExpIntegralAuxiliary.laplace_hasIntegralAtTop {z : ℂ} (hz0 : z ≠ 0) 
         (1/(2*I))).congr
       fun t _ => ((hf t _).1).symm
     convert h using 1
-    rw [hEm, hEp, expIntAuxF, cosInt, sinIntTail, hsin, hcos, show -z*I = -(z*I) by ring,
+    rw [hEm, hEp, sinIntegralAuxiliaryF, cosIntegral, sinIntegralTail, hsin, hcos, show -z*I =
+        -(z*I) by ring,
       show -z*(-I) = z*I by ring]
     field_simp
     ring_nf; rw [I_sq]; ring
   · have h := ((h1.add h2 hi1 hi2).const_mul (1/2)).congr fun t _ => ((hf t _).2).symm
     convert h using 1
-    rw [hEm, hEp, expIntAuxG, cosInt, sinIntTail, hsin, hcos, show -z*I = -(z*I) by ring,
+    rw [hEm, hEp, sinIntegralAuxiliaryG, cosIntegral, sinIntegralTail, hsin, hcos, show -z*I =
+        -(z*I) by ring,
       show -z*(-I) = z*I by ring]
     field_simp
     ring_nf

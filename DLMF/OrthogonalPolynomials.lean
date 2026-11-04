@@ -46,6 +46,7 @@ public import DLMF.OrthogonalPolynomials.QFamilies.ContinuousQHermite
 public import DLMF.OrthogonalPolynomials.UnitCircle
 public import DLMF.OrthogonalPolynomials.Multivariate
 public import DLMF.OrthogonalPolynomials.InequalityTools
+public import DLMF.OrthogonalPolynomials.SzegoAskeyOrthogonality
 
 /-!
 # Orthogonal polynomials (DLMF Chapter 18, AAR Chapters 5–7)

@@ -504,12 +504,190 @@ theorem hasSum_riemannZeta_two_central_binom :
     ring
   · simp only [ofRealCLM_apply]; push_cast; ring
 
+/-- The weight `m!² (n-m)!/(n+m)! = 1/(C(n,m) C(n+m,m))` of van der Poorten's proof of 25.6.9. -/
+private def centralWeight (n m : ℕ) : ℝ := (m ! : ℝ) ^ 2 * (n - m)! / (n + m)!
+
+/-- The row identity `1/(p+1)³ + ∑_{m<k} (-1)^m/(2(m+1)³) (w(p+1,m+1) - w(p,m+1)) =
+(-1)^k k!² (p-k)!/((p+1)² (p+1+k)!)` for `k ≤ p`. -/
+private lemma centralWeight_row (p : ℕ) : ∀ k, k ≤ p →
+    1 / ((p : ℝ) + 1) ^ 3 + ∑ m ∈ range k, (-1 : ℝ) ^ m / (2 * ((m : ℝ) + 1) ^ 3) *
+      (centralWeight (p + 1) (m + 1) - centralWeight p (m + 1)) =
+      (-1 : ℝ) ^ k * (k ! : ℝ) ^ 2 * (p - k)! / (((p : ℝ) + 1) ^ 2 * (p + 1 + k)!) := by
+  intro k
+  induction k with
+  | zero =>
+    intro _
+    simp only [range_zero, sum_empty, add_zero, pow_zero, Nat.factorial_zero, Nat.cast_one,
+      one_pow, mul_one, Nat.sub_zero, one_mul]
+    rw [Nat.factorial_succ]
+    push_cast
+    have : (p ! : ℝ) ≠ 0 := by positivity
+    field_simp
+  | succ k ih =>
+    intro hk
+    rw [sum_range_succ, ← add_assoc, ih (by omega)]
+    obtain ⟨q, rfl⟩ : ∃ q, p = k + 1 + q := ⟨p - (k + 1), by omega⟩
+    simp only [centralWeight]
+    rw [show k + 1 + q - k = q + 1 by omega, show k + 1 + q + 1 - (k + 1) = q + 1 by omega,
+      show k + 1 + q - (k + 1) = q by omega, show k + 1 + q + 1 + (k + 1) = (2 * k + q + 2) + 1 by
+        omega, show k + 1 + q + (k + 1) = 2 * k + q + 2 by omega,
+      show k + 1 + q + 1 + k = 2 * k + q + 2 by omega]
+    rw [Nat.factorial_succ (2 * k + q + 2), Nat.factorial_succ q, Nat.factorial_succ k]
+    push_cast
+    have h1 : (q ! : ℝ) ≠ 0 := by positivity
+    have h2 : ((2 * k + q + 2)! : ℝ) ≠ 0 := by positivity
+    have h3 : (k ! : ℝ) ≠ 0 := by positivity
+    field_simp
+    ring
+
+/-- The diagonal identity `∑_{n<N} 1/(n+1)³ + ∑_{m<N} (-1)^m w(N,m+1)/(2(m+1)³) =
+(5/2) ∑_{n<N} (-1)^n/((n+1)³ C(2n+2,n+1))`. -/
+private lemma centralWeight_diagonal (N : ℕ) :
+    ∑ n ∈ range N, 1 / ((n : ℝ) + 1) ^ 3 + ∑ m ∈ range N, (-1 : ℝ) ^ m /
+      (2 * ((m : ℝ) + 1) ^ 3) * centralWeight N (m + 1) =
+      ∑ n ∈ range N, (5 / 2 : ℝ) * (-1) ^ n /
+        (((n : ℝ) + 1) ^ 3 * ((2 * n + 2).choose (n + 1) : ℝ)) := by
+  induction N with
+  | zero => simp
+  | succ N ih =>
+    have hsplit : ∑ m ∈ range N, (-1 : ℝ) ^ m / (2 * ((m : ℝ) + 1) ^ 3) *
+        centralWeight (N + 1) (m + 1) =
+        ∑ m ∈ range N, (-1 : ℝ) ^ m / (2 * ((m : ℝ) + 1) ^ 3) *
+          (centralWeight (N + 1) (m + 1) - centralWeight N (m + 1)) +
+        ∑ m ∈ range N, (-1 : ℝ) ^ m / (2 * ((m : ℝ) + 1) ^ 3) * centralWeight N (m + 1) := by
+      rw [← sum_add_distrib]
+      exact sum_congr rfl fun m _ => by ring
+    have hrow := centralWeight_row N N le_rfl
+    rw [sum_range_succ, sum_range_succ (fun m => (-1 : ℝ) ^ m / (2 * ((m : ℝ) + 1) ^ 3) *
+      centralWeight (N + 1) (m + 1)), hsplit, sum_range_succ, ← ih]
+    have hC : ((2 * N + 2).choose (N + 1) : ℝ) * (N + 1)! * (N + 1)! = (2 * N + 2)! := by
+      have := Nat.choose_mul_factorial_mul_factorial (show N + 1 ≤ 2 * N + 2 by omega)
+      rw [show 2 * N + 2 - (N + 1) = N + 1 by omega] at this
+      exact_mod_cast this
+    have hw : centralWeight (N + 1) (N + 1) = ((N + 1)! : ℝ) ^ 2 / (2 * N + 2)! := by
+      simp only [centralWeight, Nat.sub_self, Nat.factorial_zero, Nat.cast_one, mul_one]
+      rw [show N + 1 + (N + 1) = 2 * N + 2 by omega]
+    rw [hw]
+    have hrow' : 1 / ((N : ℝ) + 1) ^ 3 + ∑ m ∈ range N, (-1 : ℝ) ^ m /
+        (2 * ((m : ℝ) + 1) ^ 3) * (centralWeight (N + 1) (m + 1) - centralWeight N (m + 1)) =
+        (-1 : ℝ) ^ N * (N ! : ℝ) ^ 2 / (((N : ℝ) + 1) ^ 2 * (2 * N + 1)!) := by
+      rw [hrow, Nat.sub_self, Nat.factorial_zero, Nat.cast_one, mul_one,
+        show N + 1 + N = 2 * N + 1 by omega]
+    have hfac1 : ((N + 1)! : ℝ) = (N + 1) * N ! := by push_cast [Nat.factorial_succ]; ring
+    have hfac2 : ((2 * N + 2)! : ℝ) = (2 * N + 2) * (2 * N + 1)! := by
+      rw [show 2 * N + 2 = (2 * N + 1) + 1 by omega, Nat.factorial_succ]; push_cast; ring
+    have hpos : (0 : ℝ) < ((2 * N + 2).choose (N + 1) : ℝ) := by
+      exact_mod_cast Nat.choose_pos (by omega)
+    have h3 : ((2 * N + 1)! : ℝ) ≠ 0 := by positivity
+    have h4 : (N ! : ℝ) ≠ 0 := by positivity
+    have hcho : ((2 * N + 2).choose (N + 1) : ℝ) =
+        (2 * N + 2) * (2 * N + 1)! / ((N + 1) * N !) ^ 2 := by
+      rw [← hfac1, ← hfac2, ← hC]; field_simp
+    linear_combination (norm := skip) hrow'
+    rw [hcho, hfac1, hfac2]
+    field_simp
+    ring
+
+/-- `0 ≤ w(N, j) ≤ 1/(N+1)` for `1 ≤ j ≤ N`. -/
+private lemma centralWeight_le {N j : ℕ} (hj : 1 ≤ j) (hjN : j ≤ N) :
+    0 ≤ centralWeight N j ∧ centralWeight N j ≤ 1 / ((N : ℝ) + 1) := by
+  have h1 := Nat.choose_mul_factorial_mul_factorial hjN
+  have h2 := Nat.choose_mul_factorial_mul_factorial (show j ≤ N + j by omega)
+  rw [Nat.add_sub_cancel] at h2
+  have hc1 : 1 ≤ N.choose j := Nat.choose_pos hjN
+  have hc2 : N + 1 ≤ (N + j).choose j := by
+    rw [← Nat.choose_symm_add]
+    calc N + 1 = (N + 1).choose N := by rw [Nat.choose_succ_self_right]
+      _ ≤ (N + j).choose N := Nat.choose_le_choose N (by omega)
+  have hle : j ! ^ 2 * (N - j)! * (N + 1) ≤ (N + j)! := by
+    rw [← h2, ← h1]
+    have := Nat.mul_le_mul hc1 hc2
+    calc j ! ^ 2 * (N - j)! * (N + 1) = 1 * (N + 1) * (j ! * (N - j)! * j !) := by ring
+      _ ≤ N.choose j * (N + j).choose j * (j ! * (N - j)! * j !) :=
+          Nat.mul_le_mul_right _ this
+      _ = (N + j).choose j * j ! * (N.choose j * j ! * (N - j)!) := by ring
+  have hle' : ((j ! : ℝ) ^ 2 * (N - j)!) * ((N : ℝ) + 1) ≤ (N + j)! := by exact_mod_cast hle
+  have hpos : (0 : ℝ) < (N + j)! := by positivity
+  refine ⟨by unfold centralWeight; positivity, ?_⟩
+  unfold centralWeight
+  rw [div_le_div_iff₀ hpos (by positivity)]
+  linarith
+
 /-- DLMF 25.6.9: `ζ(3) = (5/2) ∑_{k≥1} (-1)^{k-1}/(k³ binom(2k, k))`. -/
 @[dlmf 25.6.E9]
 theorem hasSum_riemannZeta_three_central_binom :
     HasSum (fun k : ℕ => (5 / 2 : ℂ) * (-1) ^ k /
         (((k : ℂ) + 1) ^ 3 * ((2 * k + 2).choose (k + 1) : ℂ))) (riemannZeta 3) := by
-  sorry
+  set g : ℕ → ℝ := fun n => (5 / 2 : ℝ) * (-1) ^ n /
+    (((n : ℝ) + 1) ^ 3 * ((2 * n + 2).choose (n + 1) : ℝ))
+  set a : ℕ → ℝ := fun n => 1 / ((n : ℝ) + 1) ^ 3
+  have ha : Summable a := by
+    have := (Real.summable_one_div_nat_pow (p := 3)).mpr (by norm_num)
+    exact (summable_nat_add_iff 1).mpr this |>.congr fun n => by simp [a]
+  have hg : Summable g := by
+    refine Summable.of_norm_bounded (g := fun n => (5 / 2 : ℝ) * a n) (ha.mul_left _) ?_
+    intro n
+    have hc : (1 : ℝ) ≤ ((2 * n + 2).choose (n + 1) : ℝ) := by
+      exact_mod_cast Nat.choose_pos (by omega)
+    have : (0 : ℝ) < ((n : ℝ) + 1) ^ 3 := by positivity
+    have hn : ‖g n‖ = (5 / 2 : ℝ) / (((n : ℝ) + 1) ^ 3 * ((2 * n + 2).choose (n + 1) : ℝ)) := by
+      simp only [g, norm_div, norm_mul, norm_pow, norm_neg, norm_one, one_pow, mul_one,
+        Real.norm_eq_abs]
+      rw [abs_of_pos (by positivity : (0 : ℝ) < ((2 * n + 2).choose (n + 1) : ℝ)),
+        abs_of_pos (by positivity : (0 : ℝ) < (n : ℝ) + 1)]
+      norm_num
+    rw [hn, div_le_iff₀ (by positivity)]
+    simp only [a]
+    field_simp
+    nlinarith
+  -- the remainder tends to zero
+  set K : ℝ := ∑' m, a m
+  have hR : Tendsto (fun N : ℕ => ∑ m ∈ range N, (-1 : ℝ) ^ m / (2 * ((m : ℝ) + 1) ^ 3) *
+      centralWeight N (m + 1)) atTop (𝓝 0) := by
+    refine squeeze_zero_norm (a := fun N : ℕ => K / ((N : ℝ) + 1)) (fun N => ?_) ?_
+    · refine (norm_sum_le _ _).trans ?_
+      calc ∑ m ∈ range N, ‖(-1 : ℝ) ^ m / (2 * ((m : ℝ) + 1) ^ 3) * centralWeight N (m + 1)‖
+          ≤ ∑ m ∈ range N, a m * (1 / ((N : ℝ) + 1)) := by
+            refine sum_le_sum fun m hm => ?_
+            have hm : m + 1 ≤ N := Finset.mem_range.mp hm
+            obtain ⟨h0, h1⟩ := centralWeight_le (N := N) (j := m + 1) (by omega) hm
+            rw [norm_mul, Real.norm_eq_abs, Real.norm_eq_abs, abs_of_nonneg h0, abs_div,
+              abs_pow, abs_neg, abs_one, one_pow, abs_of_pos (by positivity)]
+            have hpos : (0 : ℝ) < ((m : ℝ) + 1) ^ 3 := by positivity
+            calc 1 / (2 * ((m : ℝ) + 1) ^ 3) * centralWeight N (m + 1)
+                ≤ a m * centralWeight N (m + 1) := by
+                  refine mul_le_mul_of_nonneg_right ?_ h0
+                  simp only [a]
+                  rw [div_le_div_iff₀ (by positivity) hpos]; linarith
+              _ ≤ a m * (1 / ((N : ℝ) + 1)) :=
+                  mul_le_mul_of_nonneg_left h1 (by simp only [a]; positivity)
+        _ = (∑ m ∈ range N, a m) * (1 / ((N : ℝ) + 1)) := by rw [sum_mul]
+        _ ≤ K * (1 / ((N : ℝ) + 1)) := by
+            refine mul_le_mul_of_nonneg_right ?_ (by positivity)
+            exact ha.sum_le_tsum _ (fun m _ => by simp only [a]; positivity)
+        _ = K / ((N : ℝ) + 1) := by ring
+    · have := (tendsto_one_div_add_atTop_nhds_zero_nat).const_mul K
+      rw [mul_zero] at this
+      refine this.congr fun N => ?_
+      ring
+  have hlim : Tendsto (fun N => ∑ n ∈ range N, g n) atTop (𝓝 K) := by
+    have := ha.hasSum.tendsto_sum_nat.add hR
+    rw [add_zero] at this
+    exact this.congr fun N => centralWeight_diagonal N
+  have hgK : HasSum g K := (hg.hasSum_iff_tendsto_nat).mpr hlim
+  have hz : riemannZeta 3 = ((K : ℝ) : ℂ) := by
+    rw [zeta_eq_tsum_one_div_nat_add_one_cpow (by norm_num), Complex.ofReal_tsum]
+    refine tsum_congr fun n => ?_
+    simp only [a]
+    push_cast
+    rw [show (3 : ℂ) = ((3 : ℕ) : ℂ) by norm_num, cpow_natCast]
+  rw [hz]
+  convert (Complex.ofRealCLM.hasSum hgK) using 1
+  · funext k
+    simp only [g, ofRealCLM_apply]
+    push_cast
+    ring
+  · simp
 
 /-- DLMF 25.6.10: `ζ(4) = (36/17) ∑_{k≥1} 1/(k⁴ binom(2k, k))`. -/
 @[dlmf 25.6.E10]

@@ -221,8 +221,8 @@ private lemma jet_three_term_recurrence (m ν : ℕ) (hν : m ≤ ν) {x : ℝ} 
 private lemma exists_jet_self_eq_const (m : ℕ) : ∃ c : ℝ, c ≠ 0 ∧ ∀ x : ℝ,
     (OrthogonalPolynomials.LegendreAddition.jet m m x).re = c := by
   set q := legendrePolyR m with hq
-  have hf : OrthogonalPolynomials.legendrePolyP m =
-      fun z => ((legendrePolyR m).map ofRealHom).eval z := funext (legendrePolyP_eq_eval m)
+  have hf : OrthogonalPolynomials.legendrePolynomialP m =
+      fun z => ((legendrePolyR m).map ofRealHom).eval z := funext (legendrePolynomialP_eq_eval m)
   have hD : ∀ x : ℝ, (OrthogonalPolynomials.LegendreAddition.jet m m x).re =
       (Polynomial.derivative^[m] q).eval x := by
     intro x
@@ -331,8 +331,8 @@ private lemma weighted_moments_eq_zero_of_jet_moments {H : ℝ → ℝ}
 theorem jet_ofReal_eq_re (N m : ℕ) (x : ℝ) :
     (OrthogonalPolynomials.LegendreAddition.jet N m x) =
         ((OrthogonalPolynomials.LegendreAddition.jet N m x).re : ℂ) := by
-  have hf : OrthogonalPolynomials.legendrePolyP N =
-      fun z => ((legendrePolyR N).map ofRealHom).eval z := funext (legendrePolyP_eq_eval N)
+  have hf : OrthogonalPolynomials.legendrePolynomialP N =
+      fun z => ((legendrePolyR N).map ofRealHom).eval z := funext (legendrePolynomialP_eq_eval N)
   rw [OrthogonalPolynomials.LegendreAddition.jet, hf, iteratedDeriv_eval_polynomial,
       Polynomial.iterate_derivative_map]
   dsimp only
@@ -343,17 +343,18 @@ theorem jet_ofReal_eq_re (N m : ℕ) (x : ℝ) :
 theorem re_jet_neg (ν m : ℕ) (x : ℝ) :
     (OrthogonalPolynomials.LegendreAddition.jet ν m ((-x : ℝ) : ℂ)).re = (-1) ^ (ν + m) *
         (OrthogonalPolynomials.LegendreAddition.jet ν m x).re := by
-  have hP : OrthogonalPolynomials.legendrePolyP ν =
-      fun z => (-1 : ℂ) ^ ν * OrthogonalPolynomials.legendrePolyP ν (-z) := by
+  have hP : OrthogonalPolynomials.legendrePolynomialP ν =
+      fun z => (-1 : ℂ) ^ ν * OrthogonalPolynomials.legendrePolynomialP ν (-z) := by
     funext z
     have h := OrthogonalPolynomials.jacobi_reflection (α := 0) (β := 0) (by norm_num)
       (by norm_num) ν (-z)
     rw [neg_neg] at h
-    change OrthogonalPolynomials.jacobiPolyP 0 0 ν z =
-      (-1) ^ ν * OrthogonalPolynomials.jacobiPolyP 0 0 ν (-z)
+    change OrthogonalPolynomials.jacobiPolynomialP 0 0 ν z =
+      (-1) ^ ν * OrthogonalPolynomials.jacobiPolynomialP 0 0 ν (-z)
     rw [h]
-  have hD : iteratedDeriv m (OrthogonalPolynomials.legendrePolyP ν) (-(x : ℂ)) =
-      (-1 : ℂ) ^ (ν + m) * iteratedDeriv m (OrthogonalPolynomials.legendrePolyP ν) (x : ℂ) := by
+  have hD : iteratedDeriv m (OrthogonalPolynomials.legendrePolynomialP ν) (-(x : ℂ)) =
+      (-1 : ℂ) ^ (ν + m) *
+          iteratedDeriv m (OrthogonalPolynomials.legendrePolynomialP ν) (x : ℂ) := by
     conv_lhs => rw [hP]
     rw [iteratedDeriv_const_mul_field, iteratedDeriv_comp_neg, neg_neg, smul_eq_mul]
     ring

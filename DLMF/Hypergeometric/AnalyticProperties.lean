@@ -53,7 +53,7 @@ namespace DLMF.Hypergeometric
 theorem entire_regularized_parameters {z : ℂ} (hz : ‖z‖ < 1) :
     Differentiable ℂ (fun p : ℂ × ℂ × ℂ =>
       regularizedGaussHGFun p.1 p.2.1 p.2.2 z) :=
-  differentiable_regularizedGaussHGFun_of_differentiable differentiable_fst
+  differentiable_regularizedGaussHypergeometricFun_of_differentiable differentiable_fst
     (differentiable_fst.comp differentiable_snd) (differentiable_snd.comp differentiable_snd) hz
 
 /-- Dirichlet's test with a sequence of bounded variation tending to zero. -/
@@ -86,8 +86,8 @@ theorem exists_tendsto_sum_mul_of_bdd_variation {f g : ℕ → ℂ} {B : ℝ}
   · exact hhs.hasSum.tendsto_sum_nat.comp (tendsto_sub_atTop_nat 1)
 
 /-- Formula under the stated hypotheses: `(∃ s : ℂ, Tendsto (fun n : ℕ => ∑ k ∈ Finset.range n,
-gaussHGCoeff a b c k * z ^ k) atTop (𝓝 s)) ∧ ¬ Summable (fun k : ℕ => ‖gaussHGCoeff a b c k *
-z ^ k‖)`. -/
+gaussHypergeometricCoeff a b c k * z ^ k) atTop (𝓝 s)) ∧ ¬ Summable (fun k : ℕ =>
+‖gaussHypergeometricCoeff a b c k * z ^ k‖)`. -/
 @[dlmf 15.2.i]
 theorem conditional_convergence_on_circle
     {a b c z : ℂ}
@@ -98,8 +98,8 @@ theorem conditional_convergence_on_circle
     (hz1 : z ≠ 1)
     (hlo : -1 < (c - a - b).re) (hhi : (c - a - b).re ≤ 0) :
     (∃ s : ℂ, Tendsto (fun n : ℕ => ∑ k ∈ Finset.range n,
-      gaussHGCoeff a b c k * z ^ k) atTop (𝓝 s)) ∧
-      ¬ Summable (fun k : ℕ => ‖gaussHGCoeff a b c k * z ^ k‖) := by
+      gaussHypergeometricCoeff a b c k * z ^ k) atTop (𝓝 s)) ∧
+      ¬ Summable (fun k : ℕ => ‖gaussHypergeometricCoeff a b c k * z ^ k‖) := by
   set α := a + b - c - 1 with hα
   set σ := α.re with hσ
   have hσ0 : σ < 0 := by simp only [hσ, hα, sub_re, add_re, one_re] at hlo ⊢; simp at hlo; linarith
@@ -108,10 +108,10 @@ theorem conditional_convergence_on_circle
   have hL0 : L ≠ 0 :=
     div_ne_zero (Gamma_ne_zero hc) (mul_ne_zero (Gamma_ne_zero ha) (Gamma_ne_zero hb))
   have hLpos : 0 < ‖L‖ := norm_pos_iff.mpr hL0
-  have hlim := tendsto_gaussHGCoeff_div_cpow ha hb hc
+  have hlim := tendsto_gaussHypergeometricCoeff_div_cpow ha hb hc
   -- two-sided bounds on the coefficients
-  have hev : ∀ᶠ k : ℕ in atTop, ‖L‖ / 2 * (k : ℝ) ^ σ ≤ ‖gaussHGCoeff a b c k‖ ∧
-      ‖gaussHGCoeff a b c k‖ ≤ 3 * ‖L‖ / 2 * (k : ℝ) ^ σ := by
+  have hev : ∀ᶠ k : ℕ in atTop, ‖L‖ / 2 * (k : ℝ) ^ σ ≤ ‖gaussHypergeometricCoeff a b c k‖ ∧
+      ‖gaussHypergeometricCoeff a b c k‖ ≤ 3 * ‖L‖ / 2 * (k : ℝ) ^ σ := by
     have h1 := (hlim.sub_const L).norm.eventually (gt_mem_nhds (show ‖L - L‖ < ‖L‖ / 2 by
       rw [sub_self, norm_zero]; linarith))
     filter_upwards [h1, eventually_ge_atTop 1] with k hk hk1
@@ -120,12 +120,14 @@ theorem conditional_convergence_on_circle
     have hkσ : 0 < (k : ℝ) ^ σ := Real.rpow_pos_of_pos hkpos σ
     have hk0 : (k : ℂ) ^ α ≠ 0 := by
       intro h; rw [h, norm_zero] at hnk; linarith
-    have heq : gaussHGCoeff a b c k = (gaussHGCoeff a b c k / (k : ℂ) ^ α) * (k : ℂ) ^ α := by
+    have heq : gaussHypergeometricCoeff a b c k = (gaussHypergeometricCoeff a b c k / (k : ℂ) ^ α) *
+        (k : ℂ) ^ α := by
       rw [div_mul_cancel₀ _ hk0]
-    have hn : ‖gaussHGCoeff a b c k‖ = ‖gaussHGCoeff a b c k / (k : ℂ) ^ α‖ * (k : ℝ) ^ σ := by
+    have hn : ‖gaussHypergeometricCoeff a b c k‖ = ‖gaussHypergeometricCoeff a b c k /
+        (k : ℂ) ^ α‖ * (k : ℝ) ^ σ := by
       rw [heq, norm_mul, hnk, mul_div_cancel_right₀ _ hk0]
-    have hq := norm_sub_norm_le (gaussHGCoeff a b c k / (k : ℂ) ^ α) L
-    have hq' := norm_sub_norm_le L (gaussHGCoeff a b c k / (k : ℂ) ^ α)
+    have hq := norm_sub_norm_le (gaussHypergeometricCoeff a b c k / (k : ℂ) ^ α) L
+    have hq' := norm_sub_norm_le L (gaussHypergeometricCoeff a b c k / (k : ℂ) ^ α)
     rw [norm_sub_rev] at hq'
     constructor
     · rw [hn]; nlinarith
@@ -133,7 +135,7 @@ theorem conditional_convergence_on_circle
   have hzk : ∀ k : ℕ, ‖z ^ k‖ = 1 := fun k => by rw [norm_pow, hz, one_pow]
   refine ⟨?_, ?_⟩
   · -- Dirichlet's test
-    have hf0 : Tendsto (gaussHGCoeff a b c) atTop (𝓝 0) := by
+    have hf0 : Tendsto (gaussHypergeometricCoeff a b c) atTop (𝓝 0) := by
       rw [tendsto_zero_iff_norm_tendsto_zero]
       have hr : Tendsto (fun k : ℕ => 3 * ‖L‖ / 2 * (k : ℝ) ^ σ) atTop (𝓝 0) := by
         have := (tendsto_rpow_neg_atTop (y := -σ) (by linarith)).comp tendsto_natCast_atTop_atTop
@@ -141,7 +143,8 @@ theorem conditional_convergence_on_circle
       exact squeeze_zero' (Eventually.of_forall fun k => norm_nonneg _)
         (hev.mono fun k hk => hk.2) hr
     set M := ‖α‖ + ‖a * b - c‖ with hM
-    have hvar : Summable fun k => ‖gaussHGCoeff a b c (k + 1) - gaussHGCoeff a b c k‖ := by
+    have hvar : Summable fun k => ‖gaussHypergeometricCoeff a b c (k + 1) -
+        gaussHypergeometricCoeff a b c k‖ := by
       refine Summable.of_norm_bounded_eventually_nat
           (g := fun k : ℕ => 3 * M * ‖L‖ * (k : ℝ) ^ (σ - 1))
         ((Real.summable_nat_rpow.mpr (by linarith)).mul_left _) ?_
@@ -149,7 +152,7 @@ theorem conditional_convergence_on_circle
       filter_upwards [hev, eventually_ge_atTop (K + 1)] with k hk hkK
       have hk1 : (1 : ℝ) ≤ k := by exact_mod_cast (show 1 ≤ k by omega)
       have hkK' : (K : ℝ) + 1 ≤ k := by exact_mod_cast hkK
-      have hrec := gaussHGCoeff_recurrence (a := a) (b := b) hc k
+      have hrec := gaussHypergeometricCoeff_recurrence (a := a) (b := b) hc k
       have hck : (k + 1 : ℝ) / 2 ≤ ‖c + k‖ := by
         have := norm_sub_norm_le ((k : ℂ)) (-c)
         rw [Complex.norm_natCast, norm_neg, sub_neg_eq_add, add_comm] at this
@@ -158,8 +161,8 @@ theorem conditional_convergence_on_circle
       have hk10 : (k : ℂ) + 1 ≠ 0 := by
         have : ((k + 1 : ℕ) : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (by omega)
         simpa using this
-      have hdiff : gaussHGCoeff a b c (k + 1) - gaussHGCoeff a b c k =
-          (α * k + (a * b - c)) * gaussHGCoeff a b c k / ((k + 1) * (c + k)) := by
+      have hdiff : gaussHypergeometricCoeff a b c (k + 1) - gaussHypergeometricCoeff a b c k =
+          (α * k + (a * b - c)) * gaussHypergeometricCoeff a b c k / ((k + 1) * (c + k)) := by
         rw [eq_div_iff (mul_ne_zero hk10 hck0)]
         simp only [hα]
         linear_combination hrec
@@ -180,7 +183,7 @@ theorem conditional_convergence_on_circle
       rw [hkσ, div_le_iff₀ (by positivity)]
       have hcpos : 0 < ‖c + k‖ := by linarith
       have hM0 : 0 ≤ M := by positivity
-      calc ‖α * k + (a * b - c)‖ * ‖gaussHGCoeff a b c k‖
+      calc ‖α * k + (a * b - c)‖ * ‖gaussHypergeometricCoeff a b c k‖
           ≤ M * (k + 1) * (3 * ‖L‖ / 2 * (k : ℝ) ^ σ) :=
             mul_le_mul hnum hk.2 (norm_nonneg _) (by positivity)
         _ ≤ 3 * M * ‖L‖ * ((k : ℝ) ^ σ / k) * ((k + 1) * ‖c + k‖) := by
@@ -205,7 +208,7 @@ theorem conditional_convergence_on_circle
   · -- the series is not absolutely convergent
     intro hsum
     apply Real.not_summable_natCast_inv
-    have hs : Summable fun k : ℕ => ‖gaussHGCoeff a b c k‖ := by
+    have hs : Summable fun k : ℕ => ‖gaussHypergeometricCoeff a b c k‖ := by
       simpa [norm_mul, hzk] using hsum
     have hs' := hs.mul_left (2 / ‖L‖)
     refine Summable.of_norm_bounded_eventually_nat hs' ?_
@@ -217,10 +220,10 @@ theorem conditional_convergence_on_circle
     rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
     calc (k : ℝ)⁻¹ ≤ (k : ℝ) ^ σ := hpow
       _ = 2 / ‖L‖ * (‖L‖ / 2 * (k : ℝ) ^ σ) := by field_simp
-      _ ≤ 2 / ‖L‖ * ‖gaussHGCoeff a b c k‖ := by gcongr; exact hk.1
+      _ ≤ 2 / ‖L‖ * ‖gaussHypergeometricCoeff a b c k‖ := by gcongr; exact hk.1
 
 /-- Formula under the stated hypotheses: `¬ ∃ s : ℂ, Tendsto (fun n : ℕ => ∑ k ∈ Finset.range n,
-gaussHGCoeff a b c k * z ^ k) atTop (𝓝 s)`. -/
+gaussHypergeometricCoeff a b c k * z ^ k) atTop (𝓝 s)`. -/
 @[dlmf 15.2.i]
 theorem divergence_on_circle
     {a b c z : ℂ}
@@ -231,33 +234,34 @@ theorem divergence_on_circle
     (h :
     (c - a - b).re ≤ -1) :
     ¬ ∃ s : ℂ, Tendsto (fun n : ℕ => ∑ k ∈ Finset.range n,
-      gaussHGCoeff a b c k * z ^ k) atTop (𝓝 s) := by
+      gaussHypergeometricCoeff a b c k * z ^ k) atTop (𝓝 s) := by
   rintro ⟨S, hS⟩
   -- The terms of a convergent series tend to zero.
-  have hterm : Tendsto (fun n : ℕ => gaussHGCoeff a b c n * z ^ n) atTop (𝓝 0) := by
+  have hterm : Tendsto (fun n : ℕ => gaussHypergeometricCoeff a b c n * z ^ n) atTop (𝓝 0) := by
     have h1 := hS.comp (tendsto_add_atTop_nat 1)
     have h2 := h1.sub hS
     rw [sub_self] at h2
     refine h2.congr fun n => ?_
     simp [Finset.sum_range_succ]
   -- But the normalized coefficients tend to a nonzero limit.
-  have hlim := tendsto_gaussHGCoeff_div_cpow ha hb hc
+  have hlim := tendsto_gaussHypergeometricCoeff_div_cpow ha hb hc
   have hL : Gamma c / (Gamma a * Gamma b) ≠ 0 :=
     div_ne_zero (Gamma_ne_zero hc) (mul_ne_zero (Gamma_ne_zero ha) (Gamma_ne_zero hb))
   have hre : 0 ≤ (a + b - c - 1).re := by
     simp only [sub_re, add_re, one_re] at h ⊢; linarith
   have hbound : ∀ᶠ n : ℕ in atTop, ‖Gamma c / (Gamma a * Gamma b)‖ / 2 ≤
-      ‖gaussHGCoeff a b c n * z ^ n‖ := by
+      ‖gaussHypergeometricCoeff a b c n * z ^ n‖ := by
     have hev := hlim.norm.eventually (lt_mem_nhds (show ‖Gamma c / (Gamma a * Gamma b)‖ / 2 <
       ‖Gamma c / (Gamma a * Gamma b)‖ by have := norm_pos_iff.mpr hL; linarith))
     filter_upwards [hev, eventually_ge_atTop 1] with n hn hn1
     have hnpos : (0 : ℝ) < n := by exact_mod_cast hn1
-    rw [norm_div (gaussHGCoeff a b c n), norm_natCast_cpow_of_pos (by exact_mod_cast hn1)] at hn
+    rw [norm_div (gaussHypergeometricCoeff a b c n),
+        norm_natCast_cpow_of_pos (by exact_mod_cast hn1)] at hn
     have hpow : 1 ≤ (n : ℝ) ^ (a + b - c - 1).re := Real.one_le_rpow (by exact_mod_cast hn1) hre
     have hp0 : 0 < (n : ℝ) ^ (a + b - c - 1).re := by positivity
     rw [norm_mul, norm_pow, hz, one_pow, mul_one]
     rw [lt_div_iff₀ hp0] at hn
-    nlinarith [norm_nonneg (gaussHGCoeff a b c n)]
+    nlinarith [norm_nonneg (gaussHypergeometricCoeff a b c n)]
   have hpos : 0 < ‖Gamma c / (Gamma a * Gamma b)‖ / 2 := by
     have := norm_pos_iff.mpr hL; linarith
   have := (hterm.norm.eventually (gt_mem_nhds (show ‖(0 : ℂ)‖ <
@@ -309,13 +313,14 @@ theorem zero_balanced_limit {a b : ℂ} (hc : ∀ k : ℕ, a + b ≠ -(k : ℂ))
   · obtain ⟨ha, hb⟩ := hab
     set δ : ℕ → ℂ := fun k => -digamma (k + 1) - digamma (k + 1) + digamma (a + k) + digamma (b + k)
       with hδ
-    set h : ℕ → ℂ := fun k => gaussHGCoeff a b 1 k * δ k with hh
+    set h : ℕ → ℂ := fun k => gaussHypergeometricCoeff a b 1 k * δ k with hh
     obtain ⟨Ca, hCa⟩ := exists_norm_digamma_add_nat_le ha
     obtain ⟨Cb, hCb⟩ := exists_norm_digamma_add_nat_le hb
     obtain ⟨C1, hC1⟩ := exists_norm_digamma_add_nat_le (x := 1) (fun m hm => by
       have := congrArg re hm; simp at this; linarith [(Nat.cast_nonneg m : (0 : ℝ) ≤ m)])
     have hr : 1 ≤ (ofScalars ℂ h).radius := by
-      refine one_le_radius_of_le_gaussHGCoeff a b 1 (C := Ca + Cb + C1 + C1) 0 fun k _ => ?_
+      refine one_le_radius_of_le_gaussHypergeometricCoeff a b 1 (C := Ca + Cb + C1 + C1)
+          0 fun k _ => ?_
       simp only [hh, hδ, norm_mul]
       have h1 : digamma ((k : ℂ) + 1) = digamma (1 + k) := by rw [add_comm]
       rw [h1]
@@ -336,8 +341,10 @@ theorem zero_balanced_limit {a b : ℂ} (hc : ∀ k : ℕ, a + b ≠ -(k : ℂ))
               · exact hCa k
               · exact hCb k
           _ = _ := by ring
-      calc ‖gaussHGCoeff a b 1 k‖ * ‖-digamma (1 + k) - digamma (1 + k) + digamma (a + k) +
-            digamma (b + k)‖ ≤ ‖gaussHGCoeff a b 1 k‖ * ((Ca + Cb + C1 + C1) * (k + 1)) := by gcongr
+      calc ‖gaussHypergeometricCoeff a b 1 k‖ * ‖-digamma (1 + k) - digamma (1 + k) +
+             digamma (a + k) +
+            digamma (b + k)‖ ≤ ‖gaussHypergeometricCoeff a b 1 k‖ *
+                ((Ca + Cb + C1 + C1) * (k + 1)) := by gcongr
         _ = _ := by ring
     have hH := hasFPowerSeriesOnBall_ofScalars_sum hr
     set H := (ofScalars ℂ h).sum with hHdef
@@ -363,18 +370,19 @@ theorem zero_balanced_limit {a b : ℂ} (hc : ∀ k : ℕ, a + b ≠ -(k : ℂ))
       have hwb : 1 - (x : ℂ) ∈ Metric.eball (0 : ℂ) 1 := mem_eball_one_of_norm_lt_one hwn
       have hF1 := (hasFPowerSeriesOnBall_ordinaryHypergeometric a b 1).hasSum_mul_pow hwb
       have hHs := hH.hasSum_mul_pow hwb
-      have hsum : HasSum (fun k : ℕ => poch a k * poch b k /
+      have hsum : HasSum (fun k : ℕ => pochhammer a k * pochhammer b k /
           ((k.factorial : ℂ) * (k.factorial : ℂ)) *
           (1 - (x : ℂ)) ^ k * (log (1 - (x : ℂ)) - digamma (k + 1) - digamma (k + 1) +
             digamma (a + k) + digamma (b + k)))
           (log (1 - (x : ℂ)) * ₂F₁ a b 1 (1 - (x : ℂ)) + H (1 - (x : ℂ))) := by
         convert (hF1.mul_left (log (1 - (x : ℂ)))).add hHs using 1
         funext k
-        simp only [hh, hδ, gaussHGCoeff, poch_nat_one]
+        simp only [hh, hδ, gaussHypergeometricCoeff, pochhammer_nat_one]
         ring
       rw [hsum.tsum_eq] at hE
       have hFR : ₂F₁ a b (a + b) (x : ℂ) = Gamma (a + b) * regularizedGaussHGFun a b (a + b) x := by
-        rw [regularizedGaussHGFun_eq_div_Gamma hcab, mul_div_cancel₀ _ (Gamma_ne_zero hcab)]
+        rw [regularizedGaussHypergeometricFun_eq_div_Gamma hcab,
+            mul_div_cancel₀ _ (Gamma_ne_zero hcab)]
       rw [hFR, hE, ← hlog]
       have hL0' : log (1 - (x : ℂ)) ≠ 0 := by rw [hlog]; exact hL0
       push_cast
@@ -406,13 +414,14 @@ theorem zero_balanced_limit {a b : ℂ} (hc : ∀ k : ℕ, a + b ≠ -(k : ℂ))
     obtain ⟨n, b', hF, hG⟩ := hpoly
     rw [hG, div_zero]
     have hcont : Tendsto (fun x : ℝ => ₂F₁ a b (a + b) (x : ℂ)) (𝓝[<] 1)
-        (𝓝 (∑ k ∈ Finset.range (n + 1), gaussHGCoeff (-(n : ℂ)) b' (a + b) k *
+        (𝓝 (∑ k ∈ Finset.range (n + 1), gaussHypergeometricCoeff (-(n : ℂ)) b' (a + b) k *
             ((1 : ℝ) : ℂ) ^ k)) := by
       rw [hF]
       simp_rw [ordinaryHypergeometric_eq_sum_neg_nat]
       refine Tendsto.mono_left ?_ nhdsWithin_le_nhds
       exact (by fun_prop : Continuous fun x : ℝ =>
-        ∑ k ∈ Finset.range (n + 1), gaussHGCoeff (-(n : ℂ)) b' (a + b) k * (x : ℂ) ^ k).tendsto 1
+        ∑ k ∈ Finset.range (n + 1), gaussHypergeometricCoeff (-(n : ℂ)) b' (a + b) k *
+            (x : ℂ) ^ k).tendsto 1
     have := hcont.mul hL
     rw [mul_zero] at this
     exact this.congr fun x => by rw [div_eq_mul_inv, ofReal_neg]
@@ -469,9 +478,11 @@ theorem imaginary_excess_limit
       rw [show 1 - (x : ℂ) = ((1 - x : ℝ) : ℂ) by push_cast; ring, norm_real, Real.norm_eq_abs,
         abs_of_pos (by linarith)]; linarith
     have hcon := regularized_connection_one_sub a b c hxn h1xn
-    rw [regularizedGaussHGFun_eq_div_Gamma hc,
-      show a + b - c + 1 = 1 - s by rw [hs]; ring, regularizedGaussHGFun_eq_div_Gamma h1s,
-      show c - a - b + 1 = s + 1 by rw [hs], regularizedGaussHGFun_eq_div_Gamma h1s'] at hcon
+    rw [regularizedGaussHypergeometricFun_eq_div_Gamma hc,
+      show a + b - c + 1 = 1 - s by rw [hs]; ring,
+                                      regularizedGaussHypergeometricFun_eq_div_Gamma h1s,
+      show c - a - b + 1 = s + 1 by rw [hs],
+                                      regularizedGaussHypergeometricFun_eq_div_Gamma h1s'] at hcon
     have hpos : (0 : ℝ) < 1 - x := by linarith
     have hq : (1 - (x : ℂ)) ^ (-s) * (1 - (x : ℂ)) ^ s = 1 := by
       have hne0 : (1 - (x : ℂ)) ≠ 0 := by
@@ -531,11 +542,11 @@ theorem terminating_iterated_parameter_limit (b : ℂ) (m l : ℕ) {z : ℂ} (hz
     apply Filter.Tendsto.limUnder_eq
     have hfun : (fun a => ₂F₁ a b c z) = fun a => Gamma c * regularizedGaussHGFun a b c z := by
       funext a
-      rw [regularizedGaussHGFun_eq_div_Gamma hc, mul_div_cancel₀ _ (Gamma_ne_zero hc)]
+      rw [regularizedGaussHypergeometricFun_eq_div_Gamma hc, mul_div_cancel₀ _ (Gamma_ne_zero hc)]
     have hcont : ContinuousAt (fun a => ₂F₁ a b c z) (-(m : ℂ)) := by
       rw [hfun]
       exact continuousAt_const.mul
-        ((analyticOnNhd_regularizedGaussHGFun_a b c hz) _ (Set.mem_univ _)).continuousAt
+        ((analyticOnNhd_regularizedGaussHypergeometricFun_a b c hz) _ (Set.mem_univ _)).continuousAt
     exact hcont.tendsto.mono_left nhdsWithin_le_nhds
   -- the outer limit, by continuity of the terminating series in `c` at `c = -m-l`
   have hmem : (-(m : ℂ) - l) ∈ {c : ℂ | ∀ j : ℕ, j < m → c ≠ -(j : ℂ)} := fun j hj h => by
@@ -554,20 +565,20 @@ theorem terminating_iterated_parameter_limit (b : ℂ) (m l : ℕ) {z : ℂ} (hz
 @[dlmf 15.2.E6]
 theorem diagonal_parameter_limit (b : ℂ) (m l : ℕ) {z : ℂ} (hz : ‖z‖ < 1) :
     Tendsto (fun a : ℂ => ₂F₁ a b (a - l) z) (𝓝[≠] (-(m : ℂ)))
-      (𝓝 (∑' k : ℕ, poch (-(m : ℂ) - l + k) l * poch b k /
-        (poch (-(m : ℂ) - l) l * (k.factorial : ℂ)) * z ^ k)) := by
-  set T : ℂ → ℕ → ℂ := fun a k => poch (a - l + k) l * poch b k /
-    (poch (a - l) l * (k.factorial : ℂ)) * z ^ k with hT
-  have hP0 : poch (-(m : ℂ) - l) l ≠ 0 := by
-    apply poch_ne_zero_of_lt
+      (𝓝 (∑' k : ℕ, pochhammer (-(m : ℂ) - l + k) l * pochhammer b k /
+        (pochhammer (-(m : ℂ) - l) l * (k.factorial : ℂ)) * z ^ k)) := by
+  set T : ℂ → ℕ → ℂ := fun a k => pochhammer (a - l + k) l * pochhammer b k /
+    (pochhammer (a - l) l * (k.factorial : ℂ)) * z ^ k with hT
+  have hP0 : pochhammer (-(m : ℂ) - l) l ≠ 0 := by
+    apply pochhammer_ne_zero_of_lt
     intro j hj h
     have : ((m + l : ℕ) : ℂ) = j := by push_cast; linear_combination -h
     have : m + l = j := by exact_mod_cast this
     omega
-  have hPc : Continuous fun a : ℂ => poch (a - l) l :=
+  have hPc : Continuous fun a : ℂ => pochhammer (a - l) l :=
     ((Polynomial.differentiable (ascPochhammer ℂ l)).comp
         (differentiable_id.sub_const _)).continuous
-  set δ := ‖poch (-(m : ℂ) - l) l‖ / 2 with hδ
+  set δ := ‖pochhammer (-(m : ℂ) - l) l‖ / 2 with hδ
   have hδ0 : 0 < δ := by have := norm_pos_iff.mpr hP0; positivity
   -- eventual properties near `-m`
   have hev1 : ∀ᶠ a in 𝓝[≠] (-(m : ℂ)), ∀ j : ℕ, a - l ≠ -(j : ℂ) := by
@@ -596,7 +607,7 @@ theorem diagonal_parameter_limit (b : ℂ) (m l : ℕ) {z : ℂ} (hz : ‖z‖ <
       _ ≤ ‖a - -(m : ℂ)‖ + ‖-(m : ℂ)‖ := norm_add_le _ _
       _ ≤ 1 + m := by rw [norm_neg, Complex.norm_natCast]; linarith
       _ = m + 1 := by ring
-  have hev3 : ∀ᶠ a in 𝓝[≠] (-(m : ℂ)), δ < ‖poch (a - l) l‖ :=
+  have hev3 : ∀ᶠ a in 𝓝[≠] (-(m : ℂ)), δ < ‖pochhammer (a - l) l‖ :=
     nhdsWithin_le_nhds (hPc.norm.continuousAt.eventually
       (lt_mem_nhds (half_lt_self (norm_pos_iff.mpr hP0))))
   -- the series for `a` near `-m`
@@ -606,18 +617,18 @@ theorem diagonal_parameter_limit (b : ℂ) (m l : ℕ) {z : ℂ} (hz : ‖z‖ <
     simp only [smul_eq_mul]
     congr 1
     funext k
-    have hk : poch (a - l) k ≠ 0 := poch_ne_zero_of_not_neg_nat ha k
-    have hl : poch (a - l) l ≠ 0 := poch_ne_zero_of_not_neg_nat ha l
+    have hk : pochhammer (a - l) k ≠ 0 := pochhammer_ne_zero_of_not_neg_nat ha k
+    have hl : pochhammer (a - l) l ≠ 0 := pochhammer_ne_zero_of_not_neg_nat ha l
     have hf : (k.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr k.factorial_ne_zero
-    have e1 := poch_add (a - l) l k
-    have e2 := poch_add (a - l) k l
+    have e1 := pochhammer_add (a - l) l k
+    have e2 := pochhammer_add (a - l) k l
     rw [show a - l + l = a by ring, add_comm l k] at e1
     simp only [hT]
-    rw [show (ascPochhammer ℂ k).eval a = poch a k from rfl,
-      show (ascPochhammer ℂ k).eval b = poch b k from rfl,
-      show (ascPochhammer ℂ k).eval (a - l) = poch (a - l) k from rfl]
+    rw [show (ascPochhammer ℂ k).eval a = pochhammer a k from rfl,
+      show (ascPochhammer ℂ k).eval b = pochhammer b k from rfl,
+      show (ascPochhammer ℂ k).eval (a - l) = pochhammer (a - l) k from rfl]
     field_simp
-    linear_combination (-(poch b k * z ^ k)) * (e2.symm.trans e1)
+    linear_combination (-(pochhammer b k * z ^ k)) * (e2.symm.trans e1)
   set R : ℝ := m + 1 + l with hR
   have hR0 : 0 < R := by positivity
   have hRne : ∀ j : ℕ, (R : ℂ) ≠ -(j : ℂ) := by
@@ -625,25 +636,25 @@ theorem diagonal_parameter_limit (b : ℂ) (m l : ℕ) {z : ℂ} (hz : ‖z‖ <
     have := congrArg re h
     simp at this
     linarith [(Nat.cast_nonneg j : (0 : ℝ) ≤ j)]
-  have hshift : ∀ k : ℕ, ‖poch ((R + k : ℝ) : ℂ) l‖ =
-      ‖poch (R : ℂ) l‖ * ‖poch ((R + l : ℝ) : ℂ) k‖ / ‖poch (R : ℂ) k‖ := by
+  have hshift : ∀ k : ℕ, ‖pochhammer ((R + k : ℝ) : ℂ) l‖ =
+      ‖pochhammer (R : ℂ) l‖ * ‖pochhammer ((R + l : ℝ) : ℂ) k‖ / ‖pochhammer (R : ℂ) k‖ := by
     intro k
-    have hk := norm_pos_iff.mpr (poch_ne_zero_of_not_neg_nat hRne k)
-    have e1 := poch_add (R : ℂ) k l
-    have e2 := poch_add (R : ℂ) l k
+    have hk := norm_pos_iff.mpr (pochhammer_ne_zero_of_not_neg_nat hRne k)
+    have e1 := pochhammer_add (R : ℂ) k l
+    have e2 := pochhammer_add (R : ℂ) l k
     rw [add_comm l k, e1] at e2
     rw [eq_div_iff hk.ne', ← norm_mul, ← norm_mul,
       show ((R + k : ℝ) : ℂ) = (R : ℂ) + k by push_cast; ring,
       show ((R + l : ℝ) : ℂ) = (R : ℂ) + l by push_cast; ring, mul_comm, ← e2]
-  set bound : ℕ → ℝ := fun k => δ⁻¹ * (‖poch (R : ℂ) l‖ *
-    ‖gaussHGCoeff ((R + l : ℝ) : ℂ) (‖b‖ : ℂ) (R : ℂ) k * z ^ k‖) with hbound
+  set bound : ℕ → ℝ := fun k => δ⁻¹ * (‖pochhammer (R : ℂ) l‖ *
+    ‖gaussHypergeometricCoeff ((R + l : ℝ) : ℂ) (‖b‖ : ℂ) (R : ℂ) k * z ^ k‖) with hbound
   have hsum : Summable bound :=
-    ((summable_norm_gaussHGCoeff_mul_pow _ _ _ hz).mul_left _).mul_left _
+    ((summable_norm_gaussHypergeometricCoeff_mul_pow _ _ _ hz).mul_left _).mul_left _
   have hdom : ∀ᶠ a in 𝓝[≠] (-(m : ℂ)), ∀ k, ‖T a k‖ ≤ bound k := by
     filter_upwards [hev2, hev3] with a ha2 ha3 k
-    have hk := norm_pos_iff.mpr (poch_ne_zero_of_not_neg_nat hRne k)
+    have hk := norm_pos_iff.mpr (pochhammer_ne_zero_of_not_neg_nat hRne k)
     have hf : (0 : ℝ) < k.factorial := by positivity
-    have h1 : ‖poch (a - l + k) l‖ ≤ ‖poch ((R + k : ℝ) : ℂ) l‖ := by
+    have h1 : ‖pochhammer (a - l + k) l‖ ≤ ‖pochhammer ((R + k : ℝ) : ℂ) l‖ := by
       apply norm_ascPochhammer_eval_le
       calc ‖a - l + k‖ ≤ ‖a‖ + l + k := by
             refine (norm_add_le _ _).trans ?_
@@ -652,25 +663,29 @@ theorem diagonal_parameter_limit (b : ℂ) (m l : ℕ) {z : ℂ} (hz : ‖z‖ <
             refine (norm_sub_le _ _).trans ?_
             rw [Complex.norm_natCast]
         _ ≤ R + k := by rw [hR]; linarith
-    have h2 : ‖poch b k‖ ≤ ‖poch (‖b‖ : ℂ) k‖ := norm_ascPochhammer_eval_le le_rfl k
-    simp only [hT, hbound, gaussHGCoeff]
+    have h2 : ‖pochhammer b k‖ ≤ ‖pochhammer (‖b‖ : ℂ) k‖ := norm_ascPochhammer_eval_le le_rfl k
+    simp only [hT, hbound, gaussHypergeometricCoeff]
     simp only [norm_mul, norm_div, Complex.norm_natCast]
-    have h3 : ‖poch (a - l + k) l‖ * ‖poch b k‖ / (‖poch (a - l) l‖ * k.factorial) ≤
-        δ⁻¹ * (‖poch ((R + k : ℝ) : ℂ) l‖ * ‖poch (‖b‖ : ℂ) k‖ / k.factorial) := by
+    have h3 : ‖pochhammer (a - l + k) l‖ * ‖pochhammer b k‖ /
+        (‖pochhammer (a - l) l‖ * k.factorial) ≤
+        δ⁻¹ * (‖pochhammer ((R + k : ℝ) : ℂ) l‖ * ‖pochhammer (‖b‖ : ℂ) k‖ / k.factorial) := by
       rw [div_le_iff₀ (mul_pos (hδ0.trans ha3) hf)]
-      calc ‖poch (a - l + k) l‖ * ‖poch b k‖ ≤ ‖poch ((R + k : ℝ) : ℂ) l‖ * ‖poch (‖b‖ : ℂ) k‖ :=
+      calc ‖pochhammer (a - l + k) l‖ * ‖pochhammer b k‖ ≤ ‖pochhammer ((R + k : ℝ) : ℂ) l‖ *
+             ‖pochhammer (‖b‖ : ℂ) k‖ :=
             mul_le_mul h1 h2 (norm_nonneg _) (norm_nonneg _)
-        _ = δ⁻¹ * (‖poch ((R + k : ℝ) : ℂ) l‖ * ‖poch (‖b‖ : ℂ) k‖ / k.factorial) *
+        _ = δ⁻¹ * (‖pochhammer ((R + k : ℝ) : ℂ) l‖ * ‖pochhammer (‖b‖ : ℂ) k‖ / k.factorial) *
               (δ * k.factorial) := by field_simp
         _ ≤ _ := by gcongr
     rw [hshift k] at h3
-    calc ‖poch (a - l + k) l‖ * ‖poch b k‖ / (‖poch (a - l) l‖ * k.factorial) * ‖z ^ k‖
-        ≤ δ⁻¹ * (‖poch (R : ℂ) l‖ * ‖poch ((R + l : ℝ) : ℂ) k‖ / ‖poch (R : ℂ) k‖ *
-            ‖poch (‖b‖ : ℂ) k‖ / k.factorial) * ‖z ^ k‖ := by gcongr
+    calc ‖pochhammer (a - l + k) l‖ * ‖pochhammer b k‖ /
+           (‖pochhammer (a - l) l‖ * k.factorial) * ‖z ^ k‖
+        ≤ δ⁻¹ * (‖pochhammer (R : ℂ) l‖ * ‖pochhammer ((R + l : ℝ) : ℂ) k‖ /
+            ‖pochhammer (R : ℂ) k‖ *
+            ‖pochhammer (‖b‖ : ℂ) k‖ / k.factorial) * ‖z ^ k‖ := by gcongr
       _ = _ := by push_cast; field_simp
   have hpt : ∀ k, Tendsto (fun a => T a k) (𝓝[≠] (-(m : ℂ))) (𝓝 (T (-(m : ℂ)) k)) := by
     intro k
-    have hc1 : Continuous fun a : ℂ => poch (a - l + k) l :=
+    have hc1 : Continuous fun a : ℂ => pochhammer (a - l + k) l :=
       ((Polynomial.differentiable (ascPochhammer ℂ l)).comp
         ((differentiable_id.sub_const _).add_const _)).continuous
     have hca : ContinuousAt (fun a => T a k) (-(m : ℂ)) := by

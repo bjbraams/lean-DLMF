@@ -23,12 +23,12 @@ public import DLMF.IncompleteGamma.UniformAsymptotics
 
 ## Main results
 
-* `incBeta_large_a_fixed_x`, `incBeta_large_a_integer_b_exact`: the fixed-argument expansion,
-  DLMF 8.18.1.
+* `incompleteBeta_large_a_fixed_x`, `incompleteBeta_large_a_integer_b_exact`: the fixed-argument
+  expansion, DLMF 8.18.1.
 * `betaAuxF_recurrence`, `betaAuxF_initial`, `Real.betaGenerating_hasSum`: DLMF 8.18.4–8.18.6.
-* `incBeta_large_a_uniform`: the uniform endpoint expansion, DLMF 8.18.3.
-* `incBeta_symmetric_uniform_expansion`: the symmetric uniform expansion, DLMF 8.18.9.
-* `incBeta_general_uniform_expansion`: the general uniform expansion, DLMF 8.18.14.
+* `incompleteBeta_large_a_uniform`: the uniform endpoint expansion, DLMF 8.18.3.
+* `incompleteBeta_symmetric_uniform_expansion`: the symmetric uniform expansion, DLMF 8.18.9.
+* `incompleteBeta_general_uniform_expansion`: the general uniform expansion, DLMF 8.18.14.
 * `Real.incBetaInverse_spec`: DLMF 8.18.18.
 
 ## Implementation notes
@@ -48,9 +48,9 @@ namespace DLMF.Statistical
 open DLMF.Confluent
 
 /-- Finite diagonal shifts of the incomplete Beta function. -/
-theorem normIncBetaI_diagonal_remainder {a b z : ℂ} (ha : ∀ k : ℕ, a+1 ≠ -k)
+theorem regularizedIncompleteBeta_diagonal_remainder {a b z : ℂ} (ha : ∀ k : ℕ, a+1 ≠ -k)
     (hz : ‖z‖ < 1) (hz0 : z ≠ 0) (N : ℕ) :
-    normIncBetaI a b z = normIncBetaI (a+N) (b-N) z +
+    regularizedIncompleteBeta a b z = regularizedIncompleteBeta (a+N) (b-N) z +
       Gamma (a+b)*z^a*(1-z)^(b-1) *
         ∑ k ∈ Finset.range N, (z/(1-z))^k/(Gamma (a+k+1)*Gamma (b-k)) := by
   have hz1 : z ≠ 1 := by intro h; simp [h] at hz
@@ -61,7 +61,7 @@ theorem normIncBetaI_diagonal_remainder {a b z : ℂ} (ha : ∀ k : ℕ, a+1 ≠
     have haN : ∀ k : ℕ, (a+N)+1 ≠ -k := by
       intro k h
       exact ha (N+k) (by push_cast; linear_combination h)
-    have hs := normIncBetaI_shift_diagonal (a+N) (b-N) haN hz hz0
+    have hs := regularizedIncompleteBeta_shift_diagonal (a+N) (b-N) haN hz hz0
     have hp : z^(a+N)*(1-z)^(b-N-1) = z^a*(1-z)^(b-1)*(z/(1-z))^N := by
       rw [cpow_add _ _ hz0, cpow_natCast,
         show b-(N:ℂ)-1=(b-1)-(N:ℂ) by ring, cpow_sub _ _ hy, cpow_natCast, div_pow]
@@ -73,44 +73,45 @@ theorem normIncBetaI_diagonal_remainder {a b z : ℂ} (ha : ∀ k : ℕ, a+1 ≠
     linear_combination (Gamma (a+b) / Gamma (b-N) / Gamma (a+N+1)) * hp
 
 /-- A beta-type Gauss function has a majorant independent of its positive real parameter. -/
-theorem incBeta_gauss_uniform_bound (b : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem incompleteBeta_gauss_uniform_bound (b : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ a : ℝ, 0 < a →
-      ‖regularizedGaussHG a b (a+1) z‖ ≤ C * ‖1 / Gamma ((a:ℂ)+1)‖ := by
-  let g : ℕ → ℝ := fun k => ‖gaussHGCoeff 1 b 1 k * z^k‖
-  have hg : Summable g := summable_norm_gaussHGCoeff_mul_pow 1 b 1 hz
+      ‖regularizedGaussHypergeometric a b (a+1) z‖ ≤ C * ‖1 / Gamma ((a:ℂ)+1)‖ := by
+  let g : ℕ → ℝ := fun k => ‖gaussHypergeometricCoeff 1 b 1 k * z^k‖
+  have hg : Summable g := summable_norm_gaussHypergeometricCoeff_mul_pow 1 b 1 hz
   refine ⟨∑' k, g k, tsum_nonneg (fun k => norm_nonneg _), ?_⟩
   intro a ha
   have hden : ∀ k : ℕ, (a:ℂ)+1 ≠ -k := by
     intro k h; have h' := congrArg Complex.re h; simp at h';
         linarith [(Nat.cast_nonneg k : (0:ℝ) ≤ k)]
-  rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hz,
-    regularizedGaussHGFun_eq_div_Gamma hden]
-  have hF : ₂F₁ (a:ℂ) b ((a:ℂ)+1) z = ∑' k, gaussHGCoeff a b (a+1) k*z^k := by
+  rw [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hz,
+    regularizedGaussHypergeometricFun_eq_div_Gamma hden]
+  have hF : ₂F₁ (a:ℂ) b ((a:ℂ)+1) z = ∑' k, gaussHypergeometricCoeff a b (a+1) k*z^k := by
     rw [ordinaryHypergeometric_eq_tsum]
     simp only [smul_eq_mul]
     apply tsum_congr; intro k
-    simp [gaussHGCoeff, poch, div_eq_mul_inv, mul_comm, mul_left_comm, mul_assoc]
-  have hbd : ∀ k : ℕ, ‖gaussHGCoeff a b (a+1) k*z^k‖ ≤ g k := by
+    simp [gaussHypergeometricCoeff, pochhammer, div_eq_mul_inv, mul_comm, mul_left_comm, mul_assoc]
+  have hbd : ∀ k : ℕ, ‖gaussHypergeometricCoeff a b (a+1) k*z^k‖ ≤ g k := by
     intro k
-    have hpa : ‖poch (a:ℂ) k‖ ≤ ‖poch ((a:ℂ)+1) k‖ := by
+    have hpa : ‖pochhammer (a:ℂ) k‖ ≤ ‖pochhammer ((a:ℂ)+1) k‖ := by
       rw [show ((a:ℂ)+1) = ((a+1:ℝ):ℂ) by push_cast; rfl,
-        poch, poch, ascPochhammer_eval_ofReal, ascPochhammer_eval_ofReal,
+        pochhammer, pochhammer, ascPochhammer_eval_ofReal, ascPochhammer_eval_ofReal,
         Complex.norm_real, Complex.norm_real, Real.norm_eq_abs, Real.norm_eq_abs,
         abs_of_nonneg (DLMF.Hypergeometric.ascPochhammer_eval_nonneg ha.le k),
         abs_of_nonneg (DLMF.Hypergeometric.ascPochhammer_eval_nonneg (by linarith) k)]
       exact DLMF.Hypergeometric.ascPochhammer_eval_mono ha.le (by linarith) k
-    have hpk : 0 < ‖poch ((a:ℂ)+1) k‖ := norm_pos_iff.mpr (poch_ne_zero_of_not_neg_nat hden k)
+    have hpk : 0 < ‖pochhammer ((a:ℂ)+1) k‖ :=
+        norm_pos_iff.mpr (pochhammer_ne_zero_of_not_neg_nat hden k)
     have hfac : (0:ℝ) < k.factorial := by positivity
-    have hgk : g k = ‖poch b k‖ * ‖z‖^k / k.factorial := by
-      dsimp only [g, gaussHGCoeff]
-      rw [poch_nat_one]
+    have hgk : g k = ‖pochhammer b k‖ * ‖z‖^k / k.factorial := by
+      dsimp only [g, gaussHypergeometricCoeff]
+      rw [pochhammer_nat_one]
       simp only [norm_mul, norm_div, norm_pow, Complex.norm_natCast]
       field_simp
     rw [hgk]
-    simp only [gaussHGCoeff, norm_mul, norm_div, norm_pow, Complex.norm_natCast]
+    simp only [gaussHypergeometricCoeff, norm_mul, norm_div, norm_pow, Complex.norm_natCast]
     rw [div_mul_eq_mul_div, div_le_div_iff₀ (mul_pos hpk hfac) hfac]
     nlinarith [mul_le_mul_of_nonneg_right hpa
-        (mul_nonneg (norm_nonneg (poch b k)) (pow_nonneg (norm_nonneg z) k))]
+        (mul_nonneg (norm_nonneg (pochhammer b k)) (pow_nonneg (norm_nonneg z) k))]
   have hbnd : ‖₂F₁ (a:ℂ) b ((a:ℂ)+1) z‖ ≤ ∑' k, g k := by
     rw [hF]
     exact tsum_of_norm_bounded hg.hasSum hbd
@@ -120,15 +121,16 @@ theorem incBeta_gauss_uniform_bound (b : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
 
 /-- Fixed-argument incomplete-Beta expansion, with a finite shifted remainder. -/
 @[dlmf 8.18.E1]
-theorem incBeta_large_a_fixed_x {b x : ℝ} (hb : 0 < b) (hx : 0 < x) (hx1 : x < 1) (N : ℕ) :
+theorem incompleteBeta_large_a_fixed_x {b x : ℝ} (hb : 0 < b) (hx : 0 < x) (hx1 : x < 1) (N : ℕ) :
     IsBigO atTop (fun a : ℝ =>
-        normIncBetaI a b x/(Gamma (a+b)*(x : ℂ)^(a : ℂ)*(1-x : ℂ)^((b : ℂ)-1))-∑ k ∈ Finset.range N,
+        regularizedIncompleteBeta a b x/(Gamma (a+b)*(x : ℂ)^(a : ℂ)*(1-x : ℂ)^((b : ℂ)-1))-∑ k ∈
+            Finset.range N,
         ((x : ℂ)/(1-x))^k/(Gamma (a+k+1)*Gamma ((b : ℂ)-k))) (fun a : ℝ => 1/Gamma (a+N+1)) := by
   have hxn : ‖(x:ℂ)‖ < 1 := by rw [Complex.norm_real, Real.norm_of_nonneg hx.le]; exact hx1
   have hx0 : (x:ℂ) ≠ 0 := ofReal_ne_zero.mpr hx.ne'
   have hxne : (x:ℂ) ≠ 1 := by exact_mod_cast hx1.ne
   have hy0 : (1:ℂ)-x ≠ 0 := sub_ne_zero.mpr (Ne.symm hxne)
-  obtain ⟨C, hC, hbound⟩ := incBeta_gauss_uniform_bound (1-((b:ℂ)-N)) hxn
+  obtain ⟨C, hC, hbound⟩ := incompleteBeta_gauss_uniform_bound (1-((b:ℂ)-N)) hxn
   set K : ℂ := (x:ℂ)^N/(Gamma ((b:ℂ)-N)*((1:ℂ)-x)^((b:ℂ)-1))
   refine IsBigO.of_bound (‖K‖*C) ?_
   filter_upwards [eventually_gt_atTop (0:ℝ)] with a ha
@@ -141,18 +143,18 @@ theorem incBeta_large_a_fixed_x {b x : ℝ} (hb : 0 < b) (hx : 0 < x) (hx1 : x <
   have hY : ((1:ℂ)-x)^((b:ℂ)-1) ≠ 0 := cpow_ne_zero_iff.mpr (Or.inl hy0)
   have hP : Gamma ((a:ℂ)+b)*(x:ℂ)^(a:ℂ)*((1:ℂ)-x)^((b:ℂ)-1) ≠ 0 :=
     mul_ne_zero (mul_ne_zero hG hX) hY
-  have hd := normIncBetaI_diagonal_remainder (a := (a:ℂ)) (b := (b:ℂ)) ha1 hxn hx0 N
-  have he : normIncBetaI (a:ℂ) b x/(Gamma (a+b)*(x:ℂ)^(a:ℂ)*((1:ℂ)-x)^((b:ℂ)-1)) -
+  have hd := regularizedIncompleteBeta_diagonal_remainder (a := (a:ℂ)) (b := (b:ℂ)) ha1 hxn hx0 N
+  have he : regularizedIncompleteBeta (a:ℂ) b x/(Gamma (a+b)*(x:ℂ)^(a:ℂ)*((1:ℂ)-x)^((b:ℂ)-1)) -
       ∑ k ∈ Finset.range N, ((x:ℂ)/(1-x))^k/(Gamma (a+k+1)*Gamma ((b:ℂ)-k)) =
-      normIncBetaI ((a:ℂ)+N) ((b:ℂ)-N) x /
+      regularizedIncompleteBeta ((a:ℂ)+N) ((b:ℂ)-N) x /
         (Gamma ((a:ℂ)+b)*(x:ℂ)^(a:ℂ)*((1:ℂ)-x)^((b:ℂ)-1)) := by
     rw [hd, add_div, mul_div_cancel_left₀ _ hP]
     ring
   rw [he]
-  have hr : normIncBetaI ((a:ℂ)+N) ((b:ℂ)-N) x /
+  have hr : regularizedIncompleteBeta ((a:ℂ)+N) ((b:ℂ)-N) x /
       (Gamma ((a:ℂ)+b)*(x:ℂ)^(a:ℂ)*((1:ℂ)-x)^((b:ℂ)-1)) =
-      K*regularizedGaussHG ((a:ℂ)+N) (1-((b:ℂ)-N)) ((a:ℂ)+N+1) x := by
-    rw [normIncBetaI, if_neg hxne,
+      K*regularizedGaussHypergeometric ((a:ℂ)+N) (1-((b:ℂ)-N)) ((a:ℂ)+N+1) x := by
+    rw [regularizedIncompleteBeta, if_neg hxne,
       show ((a:ℂ)+N)+((b:ℂ)-N) = (a:ℂ)+b by ring,
       cpow_add _ _ hx0, cpow_natCast]
     dsimp only [K]
@@ -162,16 +164,18 @@ theorem incBeta_large_a_fixed_x {b x : ℝ} (hb : 0 < b) (hx : 0 < x) (hx1 : x <
   rw [hr, norm_mul]
   have hB := hbound (a+N) haN
   simp only [Complex.ofReal_add, Complex.ofReal_natCast] at hB
-  calc ‖K‖*‖regularizedGaussHG ((a:ℂ)+N) (1-((b:ℂ)-N)) ((a:ℂ)+N+1) x‖ ≤
+  calc ‖K‖*‖regularizedGaussHypergeometric ((a:ℂ)+N) (1-((b:ℂ)-N)) ((a:ℂ)+N+1) x‖ ≤
       ‖K‖*(C*‖1/Gamma ((a:ℂ)+N+1)‖) := mul_le_mul_of_nonneg_left hB (norm_nonneg _)
     _ = _ := by ring
 
-/-- Formula under the stated hypotheses: `normIncBetaI a b x=Gamma (a+b)*(x : ℂ)^(a : ℂ)*(1-x :
-ℂ)^((b : ℂ)-1)*(∑ k ∈ Finset.range N, ((x : ℂ)/(1-x))^k/(Gamma (a+k+1)*Gamma ((b : ℂ)-k)))`. -/
+/-- Formula under the stated hypotheses:
+`regularizedIncompleteBeta a b x=Gamma (a+b)*(x : ℂ)^(a : ℂ)*(1-x : ℂ)^((b : ℂ)-1)*(∑ k ∈
+Finset.range N, ((x : ℂ)/(1-x))^k/(Gamma (a+k+1)*Gamma ((b : ℂ)-k)))`. -/
 @[dlmf 8.18.E1]
-theorem incBeta_large_a_integer_b_exact {a : ℝ} (ha : 0 < a) {b N : ℕ} (hb : 1 ≤ b) (hN : b ≤ N)
+theorem incompleteBeta_large_a_integer_b_exact {a : ℝ} (ha : 0 < a) {b N : ℕ}
+    (hb : 1 ≤ b) (hN : b ≤ N)
     {x : ℝ} (hx : 0 < x) (hx1 : x < 1) :
-    normIncBetaI a b x=Gamma
+    regularizedIncompleteBeta a b x=Gamma
         (a+b)*(x : ℂ)^(a : ℂ)*(1-x : ℂ)^((b : ℂ)-1)*(∑ k ∈ Finset.range N,
         ((x : ℂ)/(1-x))^k/(Gamma (a+k+1)*Gamma ((b : ℂ)-k))) := by
   set X : ℂ := (x:ℂ)
@@ -197,9 +201,10 @@ theorem incBeta_large_a_integer_b_exact {a : ℝ} (ha : 0 < a) {b N : ℕ} (hb :
     have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg k : (0:ℝ) ≤ k)]
   induction b, hb using Nat.le_induction with
   | base =>
-    have h1 := normIncBetaI_ofReal (a := (a:ℂ)) (b := 1) (by simpa using ha) (by norm_num)
+    have h1 := regularizedIncompleteBeta_ofReal (a := (a:ℂ)) (b := 1)
+        (by simpa using ha) (by norm_num)
       (x := x) ⟨hx.le, hx1.le⟩
-    rw [Nat.cast_one, h1, Real.normIncBetaI_one_right (by simpa using ha)]
+    rw [Nat.cast_one, h1, Real.regularizedIncompleteBeta_one_right (by simpa using ha)]
     have hS1 : S 1 = G (a+1) := by
       simp only [S]
       obtain ⟨M, rfl⟩ : ∃ M, N = M + 1 := ⟨N-1, by omega⟩
@@ -220,7 +225,7 @@ theorem incBeta_large_a_integer_b_exact {a : ℝ} (ha : 0 < a) {b N : ℕ} (hb :
     have hab : (a:ℂ)+b ≠ 0 := by
       intro h; have := congrArg Complex.re h; simp at this;
           linarith [(Nat.cast_nonneg b : (0:ℝ) ≤ b)]
-    have hsh := normIncBetaI_shift_right (a:ℂ) b ha1 hab hxn
+    have hsh := regularizedIncompleteBeta_shift_right (a:ℂ) b ha1 hab hxn
     obtain ⟨M, rfl⟩ : ∃ M, N = M + 1 := ⟨N-1, by omega⟩
     have hbM : b ≤ M := by omega
     have hA : (∑ k ∈ Finset.range (M+1), R^k*(G (a+k)*G (((b+1:ℕ):ℂ)-k))) =
@@ -257,7 +262,7 @@ theorem incBeta_large_a_integer_b_exact {a : ℝ} (ha : 0 < a) {b N : ℕ} (hb :
       ring_nf
     have hGab : Gamma ((a:ℂ)+((b+1:ℕ):ℂ)) = ((a:ℂ)+b) * Gamma (a+b) := by
       rw [show (a:ℂ)+((b+1:ℕ):ℂ) = (a+b)+1 by push_cast; ring, Gamma_add_one _ hab]
-    have hsh' : normIncBetaI (a:ℂ) ((b+1:ℕ):ℂ) X = normIncBetaI a b X +
+    have hsh' : regularizedIncompleteBeta (a:ℂ) ((b+1:ℕ):ℂ) X = regularizedIncompleteBeta a b X +
         Gamma (a+b)/Gamma (b+1)*X^(a:ℂ)*Y^(b:ℂ)/Gamma a := by
       rw [Nat.cast_succ]; exact hsh
     rw [hsh', ih, hGab, hYb, hYb']
@@ -387,7 +392,7 @@ theorem betaAuxF_recurrence {a b ξ : ℝ} (ha : 0 < a) (hb : 0 < b) (hξ : 0 �
 /-- The `F₀` integral as an upper incomplete Gamma value, including the endpoint `ξ = 0`. -/
 lemma betaAux_integral_zero {a b ξ : ℝ} (ha : 0 < a) (hb : 0 < b) (hξ : 0 ≤ ξ) :
     ((∫ t in Ioi ξ, t^(b-1)*Real.exp (-a*t) : ℝ) : ℂ) =
-      (a : ℂ)^(-(b : ℂ))*(Gamma b*normIncGammaQContinued b (a*ξ)) := by
+      (a : ℂ)^(-(b : ℂ))*(Gamma b*regularizedIncompleteGammaQ b (a*ξ)) := by
   have hb0 : (b:ℂ) ≠ 0 := ofReal_ne_zero.mpr hb.ne'
   have hnp : ∀ n : ℕ, (b:ℂ) ≠ -n := by
     intro n h
@@ -395,15 +400,16 @@ lemma betaAux_integral_zero {a b ξ : ℝ} (ha : 0 < a) (hb : 0 < b) (hξ : 0 �
     simp at this
     linarith [(Nat.cast_nonneg n : (0:ℝ) ≤ n)]
   -- the Gamma-type integral over `Ioi (a ξ)`
-  have hQ : Gamma b*normIncGammaQContinued b (a*ξ) =
+  have hQ : Gamma b*regularizedIncompleteGammaQ b (a*ξ) =
       ∫ t in Ioi (a*ξ), (t : ℂ)^((b:ℂ)-1)*Real.exp (-t) := by
     rcases hξ.lt_or_eq with hξ | hξ
     · have hx : 0 < a*ξ := mul_pos ha hξ
       have hz : ((a*ξ : ℝ) : ℂ) ≠ 0 := ofReal_ne_zero.mpr hx.ne'
-      rw [show (a:ℂ)*ξ = ((a*ξ : ℝ) : ℂ) by push_cast; ring, normIncGammaQContinued_eq hnp hz,
-        normIncGammaQ, mul_div_cancel₀ _ (Gamma_ne_zero hnp), upperIncGamma_eq_integral _ hx]
+      rw [show (a:ℂ)*ξ = ((a*ξ : ℝ) : ℂ) by push_cast; ring, regularizedIncompleteGammaQ_eq hnp hz,
+        mul_div_cancel₀ _ (Gamma_ne_zero hnp),
+            upperIncompleteGamma_eq_integral _ hx]
     · subst hξ
-      rw [mul_zero, ofReal_zero, mul_zero, normIncGammaQContinued, normIncGammaPContinued,
+      rw [mul_zero, ofReal_zero, mul_zero, regularizedIncompleteGammaQ, regularizedGamma,
         zero_cpow hb0, zero_mul, sub_zero, mul_one,
         Complex.Gamma_eq_integral (by simpa using hb), Complex.GammaIntegral]
       refine setIntegral_congr_fun measurableSet_Ioi fun t _ => ?_
@@ -427,11 +433,11 @@ lemma betaAux_integral_zero {a b ξ : ℝ} (ha : 0 < a) (hb : 0 < b) (hξ : 0 �
   linear_combination (-((t:ℂ)^((b:ℂ)-1) * cexp (-(a:ℂ)*t))) * hab
 
 /-- Identity under the stated parameter and domain assumptions: `betaAuxF 0 a b ξ=(a : ℂ)^(-(b :
-ℂ))*normIncGammaQContinued b (a*ξ) ∧ betaAuxF 1 a b ξ=(b-a*ξ)/a*betaAuxF 0 a b
+ℂ))*regularizedIncompleteGammaQ b (a*ξ) ∧ betaAuxF 1 a b ξ=(b-a*ξ)/a*betaAuxF 0 a b
 ξ+((ξ^b*Real.exp (-a*ξ) : ℝ) : ℂ)/(a*Gamma b)`. -/
 @[dlmf 8.18.E5]
 theorem betaAuxF_initial {a b ξ : ℝ} (ha : 0 < a) (hb : 0 < b) (hξ : 0 ≤ ξ) :
-    betaAuxF 0 a b ξ=(a : ℂ)^(-(b : ℂ))*normIncGammaQContinued b (a*ξ) ∧
+    betaAuxF 0 a b ξ=(a : ℂ)^(-(b : ℂ))*regularizedIncompleteGammaQ b (a*ξ) ∧
         betaAuxF 1 a b ξ=(b-a*ξ)/a*betaAuxF 0 a b
         ξ+((ξ^b*Real.exp (-a*ξ) : ℝ) : ℂ)/(a*Gamma b) := by
   have hG : Gamma (b:ℂ) ≠ 0 := Complex.Gamma_ne_zero_of_re_pos (by simpa using hb)
@@ -604,13 +610,14 @@ theorem Real.betaGeneratingCoeff_at_endpoint {b : ℝ} :
   ring
 
 /-- Estimate under the stated parameter and domain assumptions: `IsBigO (comap Prod.fst atTop ⊓ 𝓟
-{p : ℝ × ℝ | 0 < p.1 ∧ 0 < p.2 ∧ p.2 ≤ 1}) (fun p => Gamma p.1/Gamma (p.1+b)*normIncBetaI p.1
-b p.2-∑ k ∈ Finset.range N, Real.betaGeneratingCoeff b (Real.betaXi p.2) k*betaAuxF k p.1 b
-(Real.betaXi p.2)) (fun p => (p.1 : ℂ)^(-(N : ℤ))*betaAuxF 0 p.1 b (Real.betaXi p.2))`. -/
+{p : ℝ × ℝ | 0 < p.1 ∧ 0 < p.2 ∧ p.2 ≤ 1}) (fun p => Gamma p.1/Gamma
+(p.1+b)*regularizedIncompleteBeta p.1 b p.2-∑ k ∈ Finset.range N, Real.betaGeneratingCoeff b
+(Real.betaXi p.2) k*betaAuxF k p.1 b (Real.betaXi p.2)) (fun p => (p.1 : ℂ)^(-(N : ℤ))*betaAuxF 0
+p.1 b (Real.betaXi p.2))`. -/
 @[dlmf 8.18.E3]
-theorem incBeta_large_a_uniform {b : ℝ} (hb : 0 < b) (N : ℕ) :
+theorem incompleteBeta_large_a_uniform {b : ℝ} (hb : 0 < b) (N : ℕ) :
     IsBigO (comap Prod.fst atTop ⊓ 𝓟 {p : ℝ × ℝ | 0 < p.1 ∧ 0 < p.2 ∧ p.2 ≤ 1})
-        (fun p => Gamma p.1/Gamma (p.1+b)*normIncBetaI p.1 b p.2-∑ k ∈ Finset.range N,
+        (fun p => Gamma p.1/Gamma (p.1+b)*regularizedIncompleteBeta p.1 b p.2-∑ k ∈ Finset.range N,
         Real.betaGeneratingCoeff b (Real.betaXi p.2) k*betaAuxF k p.1 b (Real.betaXi p.2))
         (fun p => (p.1 : ℂ)^(-(N : ℤ))*betaAuxF 0 p.1 b (Real.betaXi p.2)) := by
   sorry
@@ -777,7 +784,8 @@ def betaSymmetricC (k : ℕ) (x₀ η : ℝ) : ℂ :=
   (-1 : ℂ)^k*asymptoticCoeff
       (fun t : ℝ => let x := Real.betaEtaInverse x₀ η;
       Real.sqrt (2*π*t)*Real.exp
-      (t*η^2/2)*(normIncBetaI (t*x₀) (t*(1-x₀)) x-DLMF.Confluent.erfc (-η*Real.sqrt (t/2))/2)) k
+      (t*η^2/2)*(regularizedIncompleteBeta (t*x₀) (t*(1-x₀)) x-DLMF.Confluent.erfc
+          (-η*Real.sqrt (t/2))/2)) k
 
 /-- Identity under the stated parameter and domain assumptions: `betaSymmetricC 0 x₀
 η=(1/η-Real.sqrt (x₀*(1-x₀))/(Real.betaEtaInverse x₀ η-x₀) : ℝ)`. -/
@@ -801,12 +809,12 @@ theorem betaSymmetricC_analytic (k : ℕ) {x₀ : ℝ} (hx₀ : 0 < x₀) (hx₀
 /-- Uniform Gaussian expansion of the symmetric incomplete Beta function as the shape parameter
 grows, away from both endpoint parameters. -/
 @[dlmf 8.18.E9]
-theorem incBeta_symmetric_uniform_expansion {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < 1/2) (N : ℕ) :
+theorem incompleteBeta_symmetric_uniform_expansion {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < 1/2) (N : ℕ) :
     IsBigO (comap (fun p : ℝ × ℝ × ℝ => p.1) atTop ⊓ 𝓟
         {p : ℝ × ℝ × ℝ | 0 < p.1 ∧ δ ≤ p.2.1 ∧ p.2.1 ≤ 1-δ ∧ 0 < p.2.2 ∧ p.2.2 < 1})
         (fun p => let η := Real.betaEta p.2.1 p.2.2;
         Real.sqrt (2*π*p.1)*Real.exp
-        (p.1*η^2/2)*(normIncBetaI (p.1*p.2.1) (p.1*(1-p.2.1)) p.2.2-DLMF.Confluent.erfc
+        (p.1*η^2/2)*(regularizedIncompleteBeta (p.1*p.2.1) (p.1*(1-p.2.1)) p.2.2-DLMF.Confluent.erfc
         (-η*Real.sqrt (p.1/2))/2)-∑ k ∈ Finset.range N,
         (-1 : ℂ)^k*betaSymmetricC k p.2.1 η/(p.1 : ℂ)^k) (fun p => p.1^(-(N : ℤ))) := by
   sorry
@@ -1026,8 +1034,8 @@ theorem Real.betaZeta_spec {μ x : ℝ} (hμ : 0 < μ) (hx : 0 < x) (hx1 : x < 1
 def betaGeneralH (k : ℕ) (ζ μ : ℝ) : ℂ :=
   asymptoticCoeff (fun a : ℝ => let x := Real.betaGeneralX μ ζ; let x₀ := 1/(1+μ);
       -gammaScaled (a*μ)*Real.sqrt (2*π*a*μ)*Real.exp
-      (-a*Real.log (x/x₀)-a*μ*Real.log ((1-x)/(1-x₀)))*(normIncBetaI a (a*μ)
-      x-normIncGammaQContinued (a*μ) (a*ζ))) k
+      (-a*Real.log (x/x₀)-a*μ*Real.log ((1-x)/(1-x₀)))*(regularizedIncompleteBeta a (a*μ)
+      x-regularizedIncompleteGammaQ (a*μ) (a*ζ))) k
 
 /-- Identity under the stated parameter and domain assumptions: `betaGeneralH 0 ζ
 μ=(μ*(1/(ζ-μ)-(1+μ)^(-3/2 : ℝ)/(1/(1+μ)-Real.betaGeneralX μ ζ)) : ℝ)`. -/
@@ -1050,13 +1058,14 @@ theorem betaGeneralH_analytic (k : ℕ) {μ : ℝ} (hμ : 0 < μ) :
 
 /-- Uniform normalized remainder with the natural sqrt(1+b/a) coefficient-growth envelope. -/
 @[dlmf 8.18.E14]
-theorem incBeta_general_uniform_expansion (N : ℕ) :
+theorem incompleteBeta_general_uniform_expansion (N : ℕ) :
     IsBigO (comap (fun p : ℝ × ℝ × ℝ => p.1) atTop ⊓ 𝓟
         {p : ℝ × ℝ × ℝ | 0 < p.1 ∧ 0 < p.2.1 ∧ 0 < p.2.2 ∧ p.2.2 < 1})
         (fun p => let μ := p.2.1/p.1; let x₀ := 1/(1+μ); let ζ := Real.betaZeta μ p.2.2;
         -gammaScaled p.2.1*Real.sqrt (2*π*p.2.1)*Real.exp
-        (-p.1*Real.log (p.2.2/x₀)-p.2.1*Real.log ((1-p.2.2)/(1-x₀)))*(normIncBetaI p.1 p.2.1
-        p.2.2-normIncGammaQContinued p.2.1 (p.1*ζ))-∑ k ∈ Finset.range N,
+        (-p.1*Real.log (p.2.2/x₀)-p.2.1*Real.log
+            ((1-p.2.2)/(1-x₀)))*(regularizedIncompleteBeta p.1 p.2.1
+        p.2.2-regularizedIncompleteGammaQ p.2.1 (p.1*ζ))-∑ k ∈ Finset.range N,
         betaGeneralH k ζ μ/(p.1 : ℂ)^k) (fun p => p.1^(-(N : ℤ))*Real.sqrt (1+p.2.1/p.1)) := by
   sorry
 
@@ -1064,16 +1073,16 @@ theorem incBeta_general_uniform_expansion (N : ℕ) :
 @[dlmf 8.18.E18]
 def Real.incBetaInverse (a b p : ℝ) : ℝ :=
   if p=0 then 0 else if p=1 then 1 else
-      Classical.epsilon (fun x : ℝ => x ∈ Icc (0 : ℝ) 1 ∧ (normIncBetaI a b x).re=p)
+      Classical.epsilon (fun x : ℝ => x ∈ Icc (0 : ℝ) 1 ∧ (regularizedIncompleteBeta a b x).re=p)
 
 /-- For real positive parameters, `x ↦ Re I_x(a,b)` takes every value of `[0,1]` on `[0,1]`. -/
-theorem IncompleteBetaUniform.exists_normIncBetaI_eq {a b p : ℝ} (ha : 0 < a)
+theorem IncompleteBetaUniform.exists_regularizedIncompleteBeta_eq {a b p : ℝ} (ha : 0 < a)
     (hb : 0 < b) (hp : 0 ≤ p)
     (hp1 : p ≤ 1) :
-    ∃ x ∈ Icc (0:ℝ) 1, (Real.normIncBetaI a b x).re = p := by
+    ∃ x ∈ Icc (0:ℝ) 1, (Real.regularizedIncompleteBeta a b x).re = p := by
   have ha' : 0 < (a:ℂ).re := by simpa using ha
   have hb' : 0 < (b:ℂ).re := by simpa using hb
-  set f : ℝ → ℝ := fun x => (Real.normIncBetaI a b x).re
+  set f : ℝ → ℝ := fun x => (Real.regularizedIncompleteBeta a b x).re
   have hc : ContinuousOn f (Icc 0 1) := by
     have hi : IntegrableOn (fun t : ℝ => (t : ℂ) ^ ((a:ℂ) - 1) * (1 - (t : ℂ)) ^ ((b:ℂ) - 1))
         (uIcc 0 1) := by
@@ -1083,26 +1092,28 @@ theorem IncompleteBetaUniform.exists_normIncBetaI_eq {a b p : ℝ} (ha : 0 < a)
     have := intervalIntegral.continuousOn_primitive_interval hi
     rw [uIcc_of_le zero_le_one] at this
     exact Complex.continuous_re.comp_continuousOn (this.div_const _)
-  have h0 : f 0 = 0 := by simp [f, Real.normIncBetaI, Real.incBeta_zero]
-  have h1 : f 1 = 1 := by simp [f, Real.normIncBetaI_one ha' hb']
+  have h0 : f 0 = 0 := by simp [f, Real.regularizedIncompleteBeta, Real.incompleteBeta_zero]
+  have h1 : f 1 = 1 := by simp [f, Real.regularizedIncompleteBeta_one ha' hb']
   obtain ⟨x, hx, hfx⟩ := intermediate_value_Icc zero_le_one hc
     (show p ∈ Icc (f 0) (f 1) by rw [h0, h1]; exact ⟨hp, hp1⟩)
   exact ⟨x, hx, hfx⟩
 
 /-- Formula under the stated hypotheses: `Real.incBetaInverse a b p ∈ Icc (0 : ℝ) 1 ∧
-(normIncBetaI a b (Real.incBetaInverse a b p)).re=p`. -/
+(regularizedIncompleteBeta a b (Real.incBetaInverse a b p)).re=p`. -/
 @[dlmf 8.18.E18]
 theorem Real.incBetaInverse_spec {a b p : ℝ} (ha : 0 < a) (hb : 0 < b) (hp : 0 ≤ p) (hp1 : p ≤ 1) :
     Real.incBetaInverse a b p ∈ Icc (0 : ℝ) 1 ∧
-        (normIncBetaI a b (Real.incBetaInverse a b p)).re=p := by
+        (regularizedIncompleteBeta a b (Real.incBetaInverse a b p)).re=p := by
   rcases hp.eq_or_lt with h0 | h0
   · subst h0
-    simp [Real.incBetaInverse, Real.normIncBetaI, Real.incBeta_zero]
+    simp [Real.incBetaInverse, Real.regularizedIncompleteBeta, Real.incompleteBeta_zero]
   rcases hp1.eq_or_lt with h1 | h1
   · subst h1
-    simp [Real.incBetaInverse, Real.normIncBetaI_one (a := (a:ℂ)) (b := (b:ℂ)) (by simpa using ha)
+    simp [Real.incBetaInverse,
+        Real.regularizedIncompleteBeta_one (a := (a:ℂ)) (b := (b:ℂ)) (by simpa using ha)
       (by simpa using hb)]
-  have hs := Classical.epsilon_spec (IncompleteBetaUniform.exists_normIncBetaI_eq ha hb hp hp1)
+  have hs := Classical.epsilon_spec
+      (IncompleteBetaUniform.exists_regularizedIncompleteBeta_eq ha hb hp hp1)
   simp only [Real.incBetaInverse, h0.ne', h1.ne, ite_false]
   exact hs
 

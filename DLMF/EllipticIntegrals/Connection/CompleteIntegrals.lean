@@ -11,7 +11,7 @@ public import DLMF.EllipticIntegrals.Derivatives
 # Connections among complete elliptic integrals (DLMF §19.7(i)–(ii))
 
 Legendre's relation and the complementary-, imaginary- and reciprocal-modulus connections
-among the complete elliptic integrals `K`, `E`, with `k' = jacobiComodulusk k` (principal).
+among the complete elliptic integrals `K`, `E`, with `k' = jacobiComodulus k` (principal).
 
 ## Main definitions
 
@@ -61,12 +61,14 @@ open DLMF.JacobiElliptic
 `E(k)K'(k) + E'(k)K(k) - K(k)K'(k) = π/2`. -/
 @[dlmf 19.7.E1]
 theorem legendre_relation_ofReal {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) :
-    compEllIntEk k * cCompEllIntKk k + cCompEllIntEk k * compEllIntKk k -
-      compEllIntKk k * cCompEllIntKk k = π / 2 := by
+    completeEllipticE k * complementaryEllipticK k + complementaryEllipticE k *
+        completeEllipticK k -
+      completeEllipticK k * complementaryEllipticK k = π / 2 := by
   have hk2 : k ^ 2 < 1 := by nlinarith
-  rw [compEllIntEk_eq_ofReal (m := k ^ 2) (by push_cast; ring) hk2.le,
-    compEllIntKk_eq_ofReal (m := k ^ 2) (by push_cast; ring) hk2.le, cCompEllIntKk_ofReal hk0,
-    cCompEllIntEk_ofReal hk0]
+  rw [completeEllipticE_eq_ofReal (m := k ^ 2) (by push_cast; ring) hk2.le,
+    completeEllipticK_eq_ofReal (m := k ^ 2) (by push_cast; ring) hk2.le,
+        complementaryEllipticK_ofReal hk0,
+    complementaryEllipticE_ofReal hk0]
   have h := DLMF.Elliptic.legendre_relation (m := k ^ 2) (by positivity) hk2
   exact_mod_cast h
 
@@ -134,34 +136,34 @@ private lemma isPreconnected_setOf_one_sub_sq_mem_slitPlane : IsPreconnected
   have := one_sub_mul_ofReal_mem_slitPlane hy (sq_nonneg b) (by nlinarith)
   convert this using 2; push_cast; ring
 
-/-- Differentiability at the specified argument: `DifferentiableAt ℂ jacobiComodulusk k`. -/
-theorem differentiableAt_jacobiComodulusk {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) :
-    DifferentiableAt ℂ jacobiComodulusk k := by
-  unfold jacobiComodulusk
+/-- Differentiability at the specified argument: `DifferentiableAt ℂ jacobiComodulus k`. -/
+theorem differentiableAt_jacobiComodulus {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) :
+    DifferentiableAt ℂ jacobiComodulus k := by
+  unfold jacobiComodulus
   exact (by fun_prop : DifferentiableAt ℂ (fun k : ℂ => 1 - k ^ 2) k).cpow_const hk
 
-/-- Nonvanishing under the stated hypotheses: `jacobiComodulusk k ≠ 0`. -/
-private lemma jacobiComodulusk_ne_zero_of_mem_slitPlane {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) :
-    jacobiComodulusk k ≠ 0 := by
+/-- Nonvanishing under the stated hypotheses: `jacobiComodulus k ≠ 0`. -/
+private lemma jacobiComodulus_ne_zero_of_mem_slitPlane {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) :
+    jacobiComodulus k ≠ 0 := by
   intro h
-  have := jacobiComodulusk_sq_eq_one_sub_sq k
+  have := jacobiComodulus_sq_eq_one_sub_sq k
   rw [h] at this
   exact slitPlane_ne_zero hk (by rw [← this]; ring)
 
-/-- Identity under the stated parameter and domain assumptions: `jacobiComodulusk x = (Real.sqrt
+/-- Identity under the stated parameter and domain assumptions: `jacobiComodulus x = (Real.sqrt
 (1 - x ^ 2) : ℂ)`. -/
-private lemma jacobiComodulusk_ofReal_eq_sqrt {x : ℝ} (hx : x ^ 2 ≤ 1) :
-    jacobiComodulusk x = (Real.sqrt (1 - x ^ 2) : ℂ) := by
-  rw [jacobiComodulusk, Real.sqrt_eq_rpow, ofReal_cpow (by linarith)]
+private lemma jacobiComodulus_ofReal_eq_sqrt {x : ℝ} (hx : x ^ 2 ≤ 1) :
+    jacobiComodulus x = (Real.sqrt (1 - x ^ 2) : ℂ) := by
+  rw [jacobiComodulus, Real.sqrt_eq_rpow, ofReal_cpow (by linarith)]
   push_cast; rfl
 
-/-- Formula under the stated hypotheses: `1 - (I * k / jacobiComodulusk k) ^ 2 ∈ slitPlane`. -/
+/-- Formula under the stated hypotheses: `1 - (I * k / jacobiComodulus k) ^ 2 ∈ slitPlane`. -/
 private lemma one_sub_sq_imag_modulus_mem_slitPlane {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) :
-    1 - (I * k / jacobiComodulusk k) ^ 2 ∈ slitPlane := by
-  have hne := jacobiComodulusk_ne_zero_of_mem_slitPlane hk
+    1 - (I * k / jacobiComodulus k) ^ 2 ∈ slitPlane := by
+  have hne := jacobiComodulus_ne_zero_of_mem_slitPlane hk
   have hne' : 1 - k ^ 2 ≠ 0 := slitPlane_ne_zero hk
-  have : 1 - (I * k / jacobiComodulusk k) ^ 2 = (1 - k ^ 2)⁻¹ := by
-    rw [div_pow, jacobiComodulusk_sq_eq_one_sub_sq, mul_pow, I_sq]
+  have : 1 - (I * k / jacobiComodulus k) ^ 2 = (1 - k ^ 2)⁻¹ := by
+    rw [div_pow, jacobiComodulus_sq_eq_one_sub_sq, mul_pow, I_sq]
     field_simp; ring
   rw [this]; exact inv_mem_slitPlane_of_mem hk
 
@@ -180,83 +182,86 @@ theorem eq_of_differentiableOn_of_eq_on_Ioo {f g : ℂ → ℂ}
     (fun x h1 h2 => h x h1 (by linarith))
   simpa using this
 
-/-- Identity under the stated parameter and domain assumptions: `compEllIntKk (I * k /
-jacobiComodulusk k) = jacobiComodulusk k * compEllIntKk k ∧ compEllIntEk (I * k /
-jacobiComodulusk k) = compEllIntEk k / jacobiComodulusk k`. -/
-private lemma compEllIntKk_compEllIntEk_imag_modulus {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) :
-    compEllIntKk (I * k / jacobiComodulusk k) = jacobiComodulusk k * compEllIntKk k ∧
-      compEllIntEk (I * k / jacobiComodulusk k) = compEllIntEk k / jacobiComodulusk k := by
-  have hD := differentiableOn_compEllIntKk_compEllIntEk
-  have hcomp : DifferentiableOn ℂ (fun k : ℂ => I * k / jacobiComodulusk k)
+/-- Identity under the stated parameter and domain assumptions: `completeEllipticK (I * k /
+jacobiComodulus k) = jacobiComodulus k * completeEllipticK k ∧ completeEllipticE (I * k /
+jacobiComodulus k) = completeEllipticE k / jacobiComodulus k`. -/
+private lemma completeEllipticK_completeEllipticE_imag_modulus {k : ℂ}
+    (hk : 1 - k ^ 2 ∈ slitPlane) :
+    completeEllipticK (I * k / jacobiComodulus k) = jacobiComodulus k * completeEllipticK k ∧
+      completeEllipticE (I * k / jacobiComodulus k) = completeEllipticE k / jacobiComodulus k := by
+  have hD := differentiableOn_completeEllipticK_completeEllipticE
+  have hcomp : DifferentiableOn ℂ (fun k : ℂ => I * k / jacobiComodulus k)
       {k : ℂ | 1 - k ^ 2 ∈ slitPlane} := fun k hk =>
     ((differentiableAt_const _).mul differentiableAt_id |>.div
-        (differentiableAt_jacobiComodulusk hk)
-      (jacobiComodulusk_ne_zero_of_mem_slitPlane hk)).differentiableWithinAt
-  have hmaps : MapsTo (fun k : ℂ => I * k / jacobiComodulusk k) {k : ℂ | 1 - k ^ 2 ∈ slitPlane}
+        (differentiableAt_jacobiComodulus hk)
+      (jacobiComodulus_ne_zero_of_mem_slitPlane hk)).differentiableWithinAt
+  have hmaps : MapsTo (fun k : ℂ => I * k / jacobiComodulus k) {k : ℂ | 1 - k ^ 2 ∈ slitPlane}
       {k : ℂ | 1 - k ^ 2 ∈ slitPlane} := fun k hk => one_sub_sq_imag_modulus_mem_slitPlane hk
-  have hc : DifferentiableOn ℂ jacobiComodulusk {k : ℂ | 1 - k ^ 2 ∈ slitPlane} := fun k hk =>
-    (differentiableAt_jacobiComodulusk hk).differentiableWithinAt
+  have hc : DifferentiableOn ℂ jacobiComodulus {k : ℂ | 1 - k ^ 2 ∈ slitPlane} := fun k hk =>
+    (differentiableAt_jacobiComodulus hk).differentiableWithinAt
   have hreal : ∀ x : ℝ, 0 < x → x < 1 → 0 < Real.sqrt (1 - x ^ 2) ∧
-      Real.sqrt (1 - x ^ 2) ^ 2 = 1 - x ^ 2 ∧ jacobiComodulusk x = (Real.sqrt (1 - x ^ 2) : ℂ) :=
+      Real.sqrt (1 - x ^ 2) ^ 2 = 1 - x ^ 2 ∧ jacobiComodulus x = (Real.sqrt (1 - x ^ 2) : ℂ) :=
     fun x h0 h1 => ⟨Real.sqrt_pos.2 (by nlinarith), Real.sq_sqrt (by nlinarith),
-      jacobiComodulusk_ofReal_eq_sqrt (by nlinarith)⟩
+      jacobiComodulus_ofReal_eq_sqrt (by nlinarith)⟩
   constructor
   · refine eq_of_differentiableOn_of_eq_on_Ioo (hD.1.comp hcomp hmaps)
-        (g := fun k => jacobiComodulusk k * compEllIntKk k) (hc.mul hD.1) (fun x h0 h1 => ?_) hk
+        (g := fun k => jacobiComodulus k * completeEllipticK k) (hc.mul hD.1) (fun x h0 h1 => ?_) hk
     obtain ⟨hc0, hc2, hcx⟩ := hreal x h0 h1
     simp only [Function.comp, hcx]
-    unfold compEllIntKk
+    unfold completeEllipticK
     rw [integral_cpow_imag_modulus hc0 hc2, (ofReal_inv_sq_cpow_half hc0).1]
   · refine eq_of_differentiableOn_of_eq_on_Ioo (hD.2.comp hcomp hmaps)
-        (g := fun k => compEllIntEk k / jacobiComodulusk k)
-        (hD.2.div hc fun k hk => jacobiComodulusk_ne_zero_of_mem_slitPlane hk)
+        (g := fun k => completeEllipticE k / jacobiComodulus k)
+        (hD.2.div hc fun k hk => jacobiComodulus_ne_zero_of_mem_slitPlane hk)
       (fun x h0 h1 => ?_) hk
     obtain ⟨hc0, hc2, hcx⟩ := hreal x h0 h1
     simp only [Function.comp_def, hcx]
-    rw [compEllIntEk_eq_integral, compEllIntEk_eq_integral, integral_cpow_imag_modulus hc0 hc2,
+    rw [completeEllipticE_eq_integral, completeEllipticE_eq_integral,
+        integral_cpow_imag_modulus hc0 hc2,
       (ofReal_inv_sq_cpow_half hc0).2]
     ring
 
-/-- Identity under the stated parameter and domain assumptions: `jacobiComodulusk
-(jacobiComodulusk k) = k`. -/
-private lemma jacobiComodulusk_jacobiComodulusk {k : ℂ} (hk : 0 < k.re) :
-    jacobiComodulusk (jacobiComodulusk k) = k := by
-  rw [jacobiComodulusk, jacobiComodulusk_sq_eq_one_sub_sq, sub_sub_cancel, one_div]
+/-- Identity under the stated parameter and domain assumptions: `jacobiComodulus
+(jacobiComodulus k) = k`. -/
+private lemma jacobiComodulus_jacobiComodulus {k : ℂ} (hk : 0 < k.re) :
+    jacobiComodulus (jacobiComodulus k) = k := by
+  rw [jacobiComodulus, jacobiComodulus_sq_eq_one_sub_sq, sub_sub_cancel, one_div]
   have h := abs_arg_lt_pi_div_two_iff.2 (Or.inl hk)
   rw [abs_lt] at h
   exact Complex.pow_cpow_nat_inv (by norm_num) (by push_cast; linarith) (by push_cast; linarith)
 
-/-- Identity under the stated parameter and domain assumptions: `compEllIntKk (-I *
-jacobiComodulusk k / k) = k * compEllIntKk (jacobiComodulusk k) ∧ compEllIntEk (-I *
-jacobiComodulusk k / k) = compEllIntEk (jacobiComodulusk k) / k`. -/
-private lemma compEllIntKk_compEllIntEk_imag_comodulus {k : ℂ} (hk : 0 < k.re)
+/-- Identity under the stated parameter and domain assumptions: `completeEllipticK (-I *
+jacobiComodulus k / k) = k * completeEllipticK (jacobiComodulus k) ∧ completeEllipticE (-I *
+jacobiComodulus k / k) = completeEllipticE (jacobiComodulus k) / k`. -/
+private lemma completeEllipticK_completeEllipticE_imag_comodulus {k : ℂ} (hk : 0 < k.re)
     (hk2 : k ^ 2 ∈ slitPlane) :
-    compEllIntKk (-I * jacobiComodulusk k / k) = k * compEllIntKk (jacobiComodulusk k) ∧
-      compEllIntEk (-I * jacobiComodulusk k / k) = compEllIntEk (jacobiComodulusk k) / k := by
-  have h1 : 1 - jacobiComodulusk k ^ 2 ∈ slitPlane := by
-    rw [jacobiComodulusk_sq_eq_one_sub_sq, sub_sub_cancel]; exact hk2
-  have h := compEllIntKk_compEllIntEk_imag_modulus h1
-  rw [jacobiComodulusk_jacobiComodulusk hk] at h
-  rw [show -I * jacobiComodulusk k / k = -(I * jacobiComodulusk k / k) by ring,
-    compEllIntKk_neg, compEllIntEk_neg]
+    completeEllipticK (-I * jacobiComodulus k / k) = k * completeEllipticK (jacobiComodulus k) ∧
+      completeEllipticE (-I * jacobiComodulus k / k) =
+          completeEllipticE (jacobiComodulus k) / k := by
+  have h1 : 1 - jacobiComodulus k ^ 2 ∈ slitPlane := by
+    rw [jacobiComodulus_sq_eq_one_sub_sq, sub_sub_cancel]; exact hk2
+  have h := completeEllipticK_completeEllipticE_imag_modulus h1
+  rw [jacobiComodulus_jacobiComodulus hk] at h
+  rw [show -I * jacobiComodulus k / k = -(I * jacobiComodulus k / k) by ring,
+    completeEllipticK_neg, completeEllipticE_neg]
   exact h
 
 /-- The Legendre combination with the literal complementary integrals `K(k')`, `E(k')`. -/
 noncomputable def legendreCombination (k : ℂ) : ℂ :=
-  compEllIntEk k * compEllIntKk (jacobiComodulusk k) +
-    compEllIntEk (jacobiComodulusk k) * compEllIntKk k -
-      compEllIntKk k * compEllIntKk (jacobiComodulusk k)
+  completeEllipticE k * completeEllipticK (jacobiComodulus k) +
+    completeEllipticE (jacobiComodulus k) * completeEllipticK k -
+      completeEllipticK k * completeEllipticK (jacobiComodulus k)
 
-/-- Identity under the stated parameter and domain assumptions: `jacobiComodulusk (-k) =
-jacobiComodulusk k`. -/
-private lemma jacobiComodulusk_neg (k : ℂ) : jacobiComodulusk (-k) = jacobiComodulusk k := by
-  simp [jacobiComodulusk]
+/-- Identity under the stated parameter and domain assumptions: `jacobiComodulus (-k) =
+jacobiComodulus k`. -/
+private lemma jacobiComodulus_neg (k : ℂ) : jacobiComodulus (-k) = jacobiComodulus k := by
+  simp [jacobiComodulus]
 
 /-- Identity under the stated parameter and domain assumptions:
 `legendreCombination (-k) = legendreCombination k`. -/
 private lemma legendreCombination_neg (k : ℂ) : legendreCombination (-k) =
     legendreCombination k := by
-  simp only [legendreCombination, jacobiComodulusk_neg, compEllIntKk_neg, compEllIntEk_neg]
+  simp only [legendreCombination, jacobiComodulus_neg, completeEllipticK_neg, completeEllipticE_neg]
 
 /-- Formula under the stated hypotheses: `k ^ 2 ∈ slitPlane`. -/
 private lemma pow_two_mem_slitPlane_of_re_pos {k : ℂ} (hk : 0 < k.re) : k ^ 2 ∈ slitPlane := by
@@ -324,15 +329,15 @@ private lemma isPreconnected_setOf_re_pos_one_sub_sq_mem_slitPlane : IsPreconnec
 /-- Identity under the stated parameter and domain assumptions: `legendreCombination k = π / 2`. -/
 private lemma legendreCombination_of_re_pos {k : ℂ} (hk : 0 < k.re) (hk1 : 1 - k ^ 2 ∈ slitPlane) :
     legendreCombination k = π / 2 := by
-  have hD := differentiableOn_compEllIntKk_compEllIntEk
+  have hD := differentiableOn_completeEllipticK_completeEllipticE
   have hV : {k : ℂ | 0 < k.re ∧ 1 - k ^ 2 ∈ slitPlane} ⊆ {k : ℂ | 1 - k ^ 2 ∈ slitPlane} :=
     fun k hk => hk.2
-  have hc : DifferentiableOn ℂ jacobiComodulusk {k : ℂ | 0 < k.re ∧ 1 - k ^ 2 ∈ slitPlane} :=
-    fun k hk => (differentiableAt_jacobiComodulusk hk.2).differentiableWithinAt
-  have hmaps : MapsTo jacobiComodulusk {k : ℂ | 0 < k.re ∧ 1 - k ^ 2 ∈ slitPlane}
+  have hc : DifferentiableOn ℂ jacobiComodulus {k : ℂ | 0 < k.re ∧ 1 - k ^ 2 ∈ slitPlane} :=
+    fun k hk => (differentiableAt_jacobiComodulus hk.2).differentiableWithinAt
+  have hmaps : MapsTo jacobiComodulus {k : ℂ | 0 < k.re ∧ 1 - k ^ 2 ∈ slitPlane}
       {k : ℂ | 1 - k ^ 2 ∈ slitPlane} := fun k hk => by
-    show 1 - jacobiComodulusk k ^ 2 ∈ slitPlane
-    rw [jacobiComodulusk_sq_eq_one_sub_sq, sub_sub_cancel];
+    show 1 - jacobiComodulus k ^ 2 ∈ slitPlane
+    rw [jacobiComodulus_sq_eq_one_sub_sq, sub_sub_cancel];
         exact pow_two_mem_slitPlane_of_re_pos hk.1
   have hW : DifferentiableOn ℂ legendreCombination {k : ℂ | 0 < k.re ∧ 1 - k ^ 2 ∈ slitPlane} := by
     have h1 := hD.1.mono hV
@@ -352,16 +357,17 @@ private lemma legendreCombination_of_re_pos {k : ℂ} (hk : 0 < k.re) (hk1 : 1 -
   have hx1 : x < 1 := by linarith
   have h := legendre_relation_ofReal hx0 hx1
   have hre : 0 < (x : ℂ).re ∨ ((x : ℂ).re = 0 ∧ 0 ≤ (x : ℂ).im) := Or.inl (by simpa using hx0)
-  rw [(cCompEllIntKk_of_re_pos hre).1, (cCompEllIntKk_of_re_pos hre).2] at h
+  rw [(complementaryEllipticK_of_re_pos hre).1, (complementaryEllipticK_of_re_pos hre).2] at h
   rw [legendreCombination]; exact h
 
 /-- The Legendre combination with DLMF's continued `K'`, `E'` equals `legendreCombination`
 everywhere. -/
 private lemma compEllInt_legendre_sum_eq_legendreCombination (k : ℂ) :
-    compEllIntEk k * cCompEllIntKk k + cCompEllIntEk k * compEllIntKk k -
-      compEllIntKk k * cCompEllIntKk k = legendreCombination k := by
-  unfold cCompEllIntKk cCompEllIntEk legendreCombination
-  rw [compEllIntKk_jacobiComodulusk, compEllIntKk_neg, compEllIntEk_neg]
+    completeEllipticE k * complementaryEllipticK k + complementaryEllipticE k *
+        completeEllipticK k -
+      completeEllipticK k * complementaryEllipticK k = legendreCombination k := by
+  unfold complementaryEllipticK complementaryEllipticE legendreCombination
+  rw [completeEllipticK_jacobiComodulusk, completeEllipticK_neg, completeEllipticE_neg]
   split_ifs <;> ring
 
 /-- Continuity within the specified domain: `ContinuousWithinAt (fun z : ℂ => z ^ r) {z : ℂ | 0 ≤
@@ -558,23 +564,24 @@ private lemma tendsto_integral_cpow_cut {a : ℝ} (ha : 1 < a) {ρ : ℝ}
       exact mul_nonneg (le_of_lt hη) (sq_nonneg _)
 
 /-- Identity under the stated parameter and domain assumptions:
-`legendreCombination k = compEllIntEk k * (∫ θ in (0 : ℝ)..(π / 2), (1 - (1 - k ^ 2) * (Real.sin θ :
-ℂ) ^ 2) ^ ((-(1 / 2) : ℝ) : ℂ)) + (∫ θ in (0 : ℝ)..(π / 2), (1 - (1 - k ^ 2) * (Real.sin θ : ℂ) ^ 2)
-^ ((1 / 2 : ℝ) : ℂ)) * compEllIntKk k - compEllIntKk k * (∫ θ in (0 : ℝ)..(π / 2), (1 - (1 - k ^ 2)
+`legendreCombination k = completeEllipticE k * (∫ θ in (0 : ℝ)..(π / 2), (1 - (1 - k ^ 2) *
+(Real.sin θ : ℂ) ^ 2) ^ ((-(1 / 2) : ℝ) : ℂ)) + (∫ θ in (0 : ℝ)..(π / 2), (1 - (1 - k ^ 2) *
+(Real.sin θ : ℂ) ^ 2) ^ ((1 / 2 : ℝ) : ℂ)) * completeEllipticK k - completeEllipticK k * (∫ θ in (0
+: ℝ)..(π / 2), (1 - (1 - k ^ 2)
 * (Real.sin θ : ℂ) ^ 2) ^ ((-(1 / 2) : ℝ) : ℂ))`. -/
 private lemma legendreCombination_eq_integral (k : ℂ) : legendreCombination k =
-    compEllIntEk k * (∫ θ in (0 : ℝ)..(π / 2),
+    completeEllipticE k * (∫ θ in (0 : ℝ)..(π / 2),
       (1 - (1 - k ^ 2) * (Real.sin θ : ℂ) ^ 2) ^ ((-(1 / 2) : ℝ) : ℂ)) +
     (∫ θ in (0 : ℝ)..(π / 2), (1 - (1 - k ^ 2) * (Real.sin θ : ℂ) ^ 2) ^ ((1 / 2 : ℝ) : ℂ)) *
-      compEllIntKk k -
-    compEllIntKk k * (∫ θ in (0 : ℝ)..(π / 2),
+      completeEllipticK k -
+    completeEllipticK k * (∫ θ in (0 : ℝ)..(π / 2),
       (1 - (1 - k ^ 2) * (Real.sin θ : ℂ) ^ 2) ^ ((-(1 / 2) : ℝ) : ℂ)) := by
-  have hK : compEllIntKk (jacobiComodulusk k) = ∫ θ in (0 : ℝ)..(π / 2),
+  have hK : completeEllipticK (jacobiComodulus k) = ∫ θ in (0 : ℝ)..(π / 2),
       (1 - (1 - k ^ 2) * (Real.sin θ : ℂ) ^ 2) ^ ((-(1 / 2) : ℝ) : ℂ) := by
-    unfold compEllIntKk; rw [jacobiComodulusk_sq_eq_one_sub_sq]; push_cast; rfl
-  have hE : compEllIntEk (jacobiComodulusk k) = ∫ θ in (0 : ℝ)..(π / 2),
+    unfold completeEllipticK; rw [jacobiComodulus_sq_eq_one_sub_sq]; push_cast; rfl
+  have hE : completeEllipticE (jacobiComodulus k) = ∫ θ in (0 : ℝ)..(π / 2),
       (1 - (1 - k ^ 2) * (Real.sin θ : ℂ) ^ 2) ^ ((1 / 2 : ℝ) : ℂ) := by
-    rw [compEllIntEk_eq_integral, jacobiComodulusk_sq_eq_one_sub_sq]; push_cast; rfl
+    rw [completeEllipticE_eq_integral, jacobiComodulus_sq_eq_one_sub_sq]; push_cast; rfl
   rw [legendreCombination, hK, hE]
 
 /-- Identity under the stated parameter and domain assumptions:
@@ -617,7 +624,7 @@ private lemma legendreCombination_I_mul {y : ℝ} (hy : 0 < y) : legendreCombina
       simpa [hη] using this
     · filter_upwards [self_mem_nhdsWithin] with ε hε
       exact mul_pos (mul_pos two_pos hε) (hspos ε)
-  have hD := differentiableOn_compEllIntKk_compEllIntEk
+  have hD := differentiableOn_completeEllipticK_completeEllipticE
   have hKc := (tendsto_integral_cpow_cut ha1 (ρ := -(1 / 2)) (Or.inl rfl)).comp hηt
   have hEc := (tendsto_integral_cpow_cut ha1 (ρ := 1 / 2) (Or.inr rfl)).comp hηt
   have hT : Tendsto (fun ε => legendreCombination (kε ε)) (𝓝[>] 0)
@@ -635,8 +642,9 @@ private lemma legendreCombination_I_mul {y : ℝ} (hy : 0 < y) : legendreCombina
 `k² ∉ [1, ∞)`: `E(k)K'(k) + E'(k)K(k) - K(k)K'(k) = π/2` (with DLMF's continued `K'`, `E'`). -/
 @[dlmf 19.7.E1]
 theorem legendre_relation_complex {k : ℂ} (hk : k ∈ slitPlane) (hk1 : 1 - k ^ 2 ∈ slitPlane) :
-    compEllIntEk k * cCompEllIntKk k + cCompEllIntEk k * compEllIntKk k -
-      compEllIntKk k * cCompEllIntKk k = π / 2 := by
+    completeEllipticE k * complementaryEllipticK k + complementaryEllipticE k *
+        completeEllipticK k -
+      completeEllipticK k * complementaryEllipticK k = π / 2 := by
   rw [compEllInt_legendre_sum_eq_legendreCombination]
   rcases lt_trichotomy k.re 0 with h | h | h
   · rw [← legendreCombination_neg]
@@ -657,18 +665,18 @@ theorem legendre_relation_complex {k : ℂ} (hk : k ∈ slitPlane) (hk1 : 1 - k 
 `E(ik/k') = (1/k')E(k)` in the principal domain `1 - k² ∈ ℂ \ (-∞, 0]`. -/
 @[dlmf 19.7.E2]
 theorem compEllInt_imaginary_modulus {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) :
-    compEllIntKk (I * k / jacobiComodulusk k) = jacobiComodulusk k * compEllIntKk k ∧
-      compEllIntEk (I * k / jacobiComodulusk k) = compEllIntEk k / jacobiComodulusk k :=
-  compEllIntKk_compEllIntEk_imag_modulus hk
+    completeEllipticK (I * k / jacobiComodulus k) = jacobiComodulus k * completeEllipticK k ∧
+      completeEllipticE (I * k / jacobiComodulus k) = completeEllipticE k / jacobiComodulus k :=
+  completeEllipticK_completeEllipticE_imag_modulus hk
 
 /-- DLMF 19.7.2 (second and fourth formulas), with the implicit condition `Re k > 0`
 (see the module docstring): `K(-ik'/k) = kK(k')` and `E(-ik'/k) = (1/k)E(k')`, for
 `k² ∉ (-∞, 0]`. -/
 @[dlmf 19.7.E2]
 theorem compEllInt_imaginary_comodulus {k : ℂ} (hk : 0 < k.re) (hk2 : k ^ 2 ∈ slitPlane) :
-    compEllIntKk (-I * jacobiComodulusk k / k) = k * compEllIntKk (jacobiComodulusk k) ∧
-      compEllIntEk (-I * jacobiComodulusk k / k) = compEllIntEk (jacobiComodulusk k) / k :=
-  compEllIntKk_compEllIntEk_imag_comodulus hk hk2
+    completeEllipticK (-I * jacobiComodulus k / k) = k * completeEllipticK (jacobiComodulus k) ∧
+      completeEllipticE (-I * jacobiComodulus k / k) = completeEllipticE (jacobiComodulus k) / k :=
+  completeEllipticK_completeEllipticE_imag_comodulus hk hk2
 
 /-- **Admitted.** DLMF 19.7.3 (Fettis): for `Re k > 0` and `Im k² ≠ 0`, with `s = 1` if
 `Im k² > 0` and `s = -1` if `Im k² < 0` (DLMF's upper/lower signs),
@@ -678,14 +686,17 @@ theorem compEllInt_imaginary_comodulus {k : ℂ} (hk : 0 < k.re) (hk2 : k ^ 2 �
 @[dlmf 19.7.E3]
 theorem compEllInt_reciprocal_modulus {k : ℂ} (hk : 0 < k.re) {s : ℂ}
     (hs : (0 < (k ^ 2).im ∧ s = 1) ∨ ((k ^ 2).im < 0 ∧ s = -1)) :
-    compEllIntKk (1 / k) = k * (compEllIntKk k - s * I * compEllIntKk (jacobiComodulusk k)) ∧
-      compEllIntKk (1 / jacobiComodulusk k) = jacobiComodulusk k *
-        (compEllIntKk (jacobiComodulusk k) + s * I * compEllIntKk k) ∧
-      compEllIntEk (1 / k) = (1 / k) * (compEllIntEk k + s * I * compEllIntEk (jacobiComodulusk k) -
-        (1 - k ^ 2) * compEllIntKk k - s * I * k ^ 2 * compEllIntKk (jacobiComodulusk k)) ∧
-      compEllIntEk (1 / jacobiComodulusk k) = (1 / jacobiComodulusk k) *
-        (compEllIntEk (jacobiComodulusk k) - s * I * compEllIntEk k -
-          k ^ 2 * compEllIntKk (jacobiComodulusk k) + s * I * (1 - k ^ 2) * compEllIntKk k) := by
+    completeEllipticK (1 / k) = k *
+        (completeEllipticK k - s * I * completeEllipticK (jacobiComodulus k)) ∧
+      completeEllipticK (1 / jacobiComodulus k) = jacobiComodulus k *
+        (completeEllipticK (jacobiComodulus k) + s * I * completeEllipticK k) ∧
+      completeEllipticE (1 / k) = (1 / k) *
+          (completeEllipticE k + s * I * completeEllipticE (jacobiComodulus k) -
+        (1 - k ^ 2) * completeEllipticK k - s * I * k ^ 2 * completeEllipticK (jacobiComodulus k)) ∧
+      completeEllipticE (1 / jacobiComodulus k) = (1 / jacobiComodulus k) *
+        (completeEllipticE (jacobiComodulus k) - s * I * completeEllipticE k -
+          k ^ 2 * completeEllipticK (jacobiComodulus k) + s * I * (1 - k ^ 2) *
+              completeEllipticK k) := by
   sorry
 
 end DLMF.EllipticIntegrals

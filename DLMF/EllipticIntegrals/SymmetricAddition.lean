@@ -26,27 +26,31 @@ The addition theorems for `R_F`, `R_D`, `R_G`, `R_J` and `R_C` (§19.26(i)), the
 ## Main definitions
 
 * `CarlsonNonnegDomain`: the standing assumption of §19.26.
-* `symEllIntDupLambda`: `λ = √x√y + √y√z + √z√x` (DLMF 19.26.19).
+* `duplicationLambda`: `λ = √x√y + √y√z + √z√x` (DLMF 19.26.19).
 
 ## Main results
 
-* `symEllIntRF_add_symEllIntRF`, `symEllIntRD_add_symEllIntRD`, `symEllIntRG_add_symEllIntRG`,
-  `symEllIntRJ_add_symEllIntRJ`: the addition theorems (DLMF 19.26.1, 19.26.7–19.26.10).
-* `symEllInt_addition_mu_perm`, `symEllInt_addition_sqrt_z`, `symEllInt_addition_note`,
-  `symEllInt_addition_mu_iff`, `symEllInt_addition_quadratic`: Euler's algebraic relation
-  between `λ` and `μ` (DLMF 19.26.2–19.26.6).
-* `symEllIntRC_add_symEllIntRC`, `symEllIntRC_addition_mu`, `symEllIntRC_addition_theta`,
-  `symEllIntRC_addition_pq`, `symEllIntRC_addition_eta_sub_xi`: the addition theorem of `R_C`
-  and its equivalent forms (DLMF 19.26.11–19.26.15).
-* `symEllIntRF_addition_zero`, `symEllIntRC_addition_zero`: the case `x = 0`
+* `symmetricEllipticRF_add_symmetricEllipticRF`, `symmetricEllipticRD_add_symmetricEllipticRD`,
+  `symmetricEllipticRG_add_symmetricEllipticRG`, `symmetricEllipticRJ_add_symmetricEllipticRJ`: the
+  addition theorems (DLMF 19.26.1, 19.26.7–19.26.10).
+* `symmetricElliptic_addition_mu_perm`, `symmetricElliptic_addition_sqrt_z`,
+  `symmetricElliptic_addition_note`, `symmetricElliptic_addition_mu_iff`,
+  `symmetricElliptic_addition_quadratic`: Euler's algebraic relation between `λ` and `μ` (DLMF
+  19.26.2–19.26.6).
+* `symmetricEllipticRC_add_symmetricEllipticRC`, `symmetricEllipticRC_addition_mu`,
+  `symmetricEllipticRC_addition_theta`, `symmetricEllipticRC_addition_pq`,
+  `symmetricEllipticRC_addition_eta_sub_xi`: the addition theorem of `R_C` and its equivalent forms
+  (DLMF 19.26.11–19.26.15).
+* `symmetricEllipticRF_addition_zero`, `symmetricEllipticRC_addition_zero`: the case `x = 0`
   (DLMF 19.26.16, 19.26.17).
-* `symEllIntRF_duplication`, `symEllIntRF_duplication_zero`, `symEllIntRF_duplication_quarter`:
-  duplication of `R_F` (DLMF 19.26.18).
-* `symEllIntRD_duplication`, `symEllIntRG_duplication`, `symEllIntRJ_duplication`,
-  `symEllIntRC_duplication`: duplication of `R_D`, `R_G`, `R_J`, `R_C`
-  (DLMF 19.26.20–19.26.23, 19.26.25).
-* `symEllIntRJ_duplication_alpha_beta`, `symEllInt_duplication_inverse`: DLMF 19.26.23, 19.26.24.
-* `symEllIntRC_sq_eq`, `symEllIntRC_duplication_theta`: DLMF 19.26.26, 19.26.27.
+* `symmetricEllipticRF_duplication`, `symmetricEllipticRF_duplication_zero`,
+  `symmetricEllipticRF_duplication_quarter`: duplication of `R_F` (DLMF 19.26.18).
+* `symmetricEllipticRD_duplication`, `symmetricEllipticRG_duplication`,
+  `symmetricEllipticRJ_duplication`, `symmetricEllipticRC_duplication`: duplication of `R_D`, `R_G`,
+  `R_J`, `R_C` (DLMF 19.26.20–19.26.23, 19.26.25).
+* `symmetricEllipticRJ_duplication_alpha_beta`, `symmetricElliptic_duplication_inverse`: DLMF
+  19.26.23, 19.26.24.
+* `symmetricEllipticRC_sq_eq`, `symmetricEllipticRC_duplication_theta`: DLMF 19.26.26, 19.26.27.
 
 ## Implementation notes
 
@@ -116,7 +120,8 @@ private lemma addition_algebra_perm {a b c A B C l m : ℝ} (hA : A ^ 2 = a ^ 2 
 `x, y, z`"): under the standing assumptions, the `x`-form of (19.26.2) implies the `y`- and
 `z`-forms. -/
 @[dlmf 19.26.E2]
-theorem symEllInt_addition_mu_perm {x y z l m : ℝ} (h : CarlsonNonnegDomain x y z) (hl : 0 < l)
+theorem symmetricElliptic_addition_mu_perm {x y z l m : ℝ}
+    (h : CarlsonNonnegDomain x y z) (hl : 0 < l)
     (hμ : x + m = (√((x + l) * y * z) + √(x * (y + l) * (z + l))) ^ 2 / l ^ 2) :
     y + m = (√((y + l) * x * z) + √(y * (x + l) * (z + l))) ^ 2 / l ^ 2 ∧
       z + m = (√((z + l) * x * y) + √(z * (x + l) * (y + l))) ^ 2 / l ^ 2 := by
@@ -171,7 +176,8 @@ private lemma sqrt_add_mul_eq_of_shifted_sq {q r s l m : ℝ} (hq : 0 ≤ q) (hr
 `(ξ', η', ζ') = (x + μ, y + μ, z + μ)`, `√z = (ξζ' + η'ζ - ξη')/(√(ξηζ') + √(ξ'η'ζ))` (and the
 permuted formulas for `√x`, `√y`). -/
 @[dlmf 19.26.E3, dlmf 19.26.E4]
-theorem symEllInt_addition_sqrt_z {x y z l m : ℝ} (h : CarlsonNonnegDomain x y z) (hl : 0 < l)
+theorem symmetricElliptic_addition_sqrt_z {x y z l m : ℝ}
+    (h : CarlsonNonnegDomain x y z) (hl : 0 < l)
     (hm : 0 < m)
     (hμ : x + m = (√((x + l) * y * z) + √(x * (y + l) * (z + l))) ^ 2 / l ^ 2) :
     let ξ := x + l; let η := y + l; let ζ := z + l
@@ -187,7 +193,7 @@ theorem symEllInt_addition_sqrt_z {x y z l m : ℝ} (h : CarlsonNonnegDomain x y
   have hyM : 0 < y + m := by linarith
   have hzM : 0 < z + m := by linarith
   have hl0 : l ≠ 0 := ne_of_gt hl
-  have hp := symEllInt_addition_mu_perm h hl hμ
+  have hp := symmetricElliptic_addition_mu_perm h hl hμ
   have hU := sqrt_add_mul_eq_of_shifted_sq hx hy hz hl hm hμ
   have hV := sqrt_add_mul_eq_of_shifted_sq hy hx hz hl hm hp.1
   have hW := sqrt_add_mul_eq_of_shifted_sq hz hx hy hl hm hp.2
@@ -213,16 +219,17 @@ theorem symEllInt_addition_sqrt_z {x y z l m : ℝ} (h : CarlsonNonnegDomain x y
 /-- DLMF 19.26.4 (the note): `ξζ' + η'ζ - ξη' = ξ'ζ + ηζ' - ξ'η`, an identity for all
 `x, y, z, λ, μ`. -/
 @[dlmf 19.26.E4]
-theorem symEllInt_addition_note (x y z l m : ℝ) :
+theorem symmetricElliptic_addition_note (x y z l m : ℝ) :
     (x + l) * (z + m) + (y + m) * (z + l) - (x + l) * (y + m) =
       (x + m) * (z + l) + (y + l) * (z + m) - (x + m) * (y + l) := by
   ring
 
 /-- `R_F(0, y, z) = (π/2) R_K(y, z)` with `lean-codes`' `Carlson.TwoVariable.carlsonRK`. -/
-theorem symEllIntRF_zero_eq_pi_div_two_mul_carlsonRK {y z : ℂ} (hy : y ∈ slitPlane)
+theorem symmetricEllipticRF_zero_eq_pi_div_two_mul_carlsonRK {y z : ℂ} (hy : y ∈ slitPlane)
     (hz : z ∈ slitPlane) :
-    symEllIntRF 0 y z = (π / 2 : ℂ) * Carlson.TwoVariable.carlsonRK y z := by
-  rw [symEllIntRF_zero_left hy hz, symEllIntR_of_mem _ _ (vec2_mem_carlsonRSlitDomain hy hz)]
+    symmetricEllipticRF 0 y z = (π / 2 : ℂ) * Carlson.TwoVariable.carlsonRK y z := by
+  rw [symmetricEllipticRF_zero_left hy hz,
+      symmetricEllipticR_of_mem _ _ (vec2_mem_carlsonRSlitDomain hy hz)]
   unfold Carlson.TwoVariable.carlsonRK Carlson.TwoVariable.pair
   congr 2; ring
 
@@ -230,17 +237,19 @@ theorem symEllIntRF_zero_eq_pi_div_two_mul_carlsonRK {y z : ℂ} (hy : y ∈ sli
 `R_F(λ, y + λ, z + λ) = R_F(0, y, z) - R_F(μ, y + μ, z + μ)`, `λ, μ, y, z > 0`. From
 `lean-codes`' `Carlson.carlsonRF_add_carlsonRF_zero` (Carlson (9.7-17)). -/
 @[dlmf 19.26.E16]
-theorem symEllIntRF_addition_zero {y z l m : ℝ} (hy : 0 < y) (hz : 0 < z) (hl : 0 < l)
+theorem symmetricEllipticRF_addition_zero {y z l m : ℝ} (hy : 0 < y) (hz : 0 < z) (hl : 0 < l)
     (hm : 0 < m) (hlm : l * m = y * z) :
-    symEllIntRF (l : ℂ) ((y + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) =
-      symEllIntRF 0 y z - symEllIntRF (m : ℂ) ((y + m : ℝ) : ℂ) ((z + m : ℝ) : ℂ) := by
+    symmetricEllipticRF (l : ℂ) ((y + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) =
+      symmetricEllipticRF 0 y z -
+          symmetricEllipticRF (m : ℂ) ((y + m : ℝ) : ℂ) ((z + m : ℝ) : ℂ) := by
   have hs : ∀ r : ℝ, 0 < r → (r : ℂ) ∈ slitPlane := fun r hr => ofReal_mem_slitPlane.mpr hr
   have H := Carlson.carlsonRF_add_carlsonRF_zero hy hz hl hm hlm
-  have hrot : ∀ a b c : ℂ, symEllIntRF a b c = symEllIntRF b c a := fun a b c => by
-    rw [symEllIntRF_comm_left, symEllIntRF_comm_right]
-  rw [hrot (l : ℂ), hrot (m : ℂ), symEllIntRF_zero_eq_pi_div_two_mul_carlsonRK (hs y hy) (hs z hz),
-    symEllIntRF_eq_carlsonRF (hs _ (by linarith)) (hs _ (by linarith)) (hs l hl),
-    symEllIntRF_eq_carlsonRF (hs _ (by linarith)) (hs _ (by linarith)) (hs m hm), ← H]
+  have hrot : ∀ a b c : ℂ, symmetricEllipticRF a b c = symmetricEllipticRF b c a := fun a b c => by
+    rw [symmetricEllipticRF_comm_left, symmetricEllipticRF_comm_right]
+  rw [hrot (l : ℂ), hrot (m : ℂ),
+      symmetricEllipticRF_zero_eq_pi_div_two_mul_carlsonRK (hs y hy) (hs z hz),
+    symmetricEllipticRF_eq_carlsonRF (hs _ (by linarith)) (hs _ (by linarith)) (hs l hl),
+    symmetricEllipticRF_eq_carlsonRF (hs _ (by linarith)) (hs _ (by linarith)) (hs m hm), ← H]
   ring
 
 /-- Identity under the stated parameter and domain assumptions: `l * (l * m - (x * y + x * z + y *
@@ -267,7 +276,8 @@ private lemma addition_parameter_identities {x y z l m : ℝ} (hx : 0 ≤ x) (hy
 /-- DLMF 19.26.5: (19.26.2) is equivalent to
 `μ = λ^{-2} (√(xyz) + √((x + λ)(y + λ)(z + λ)))² - λ - x - y - z`. -/
 @[dlmf 19.26.E5]
-theorem symEllInt_addition_mu_iff {x y z l m : ℝ} (h : CarlsonNonnegDomain x y z) (hl : 0 < l) :
+theorem symmetricElliptic_addition_mu_iff {x y z l m : ℝ}
+    (h : CarlsonNonnegDomain x y z) (hl : 0 < l) :
     x + m = (√((x + l) * y * z) + √(x * (y + l) * (z + l))) ^ 2 / l ^ 2 ↔
       m = (√(x * y * z) + √((x + l) * (y + l) * (z + l))) ^ 2 / l ^ 2 - l - x - y - z := by
   obtain ⟨hx, hy, hz, -, -⟩ := h
@@ -301,10 +311,11 @@ theorem symEllInt_addition_mu_iff {x y z l m : ℝ} (h : CarlsonNonnegDomain x y
 
 /-- DLMF 19.26.6: (19.26.2) implies `(λμ - xy - xz - yz)² = 4xyz(λ + μ + x + y + z)`. -/
 @[dlmf 19.26.E6]
-theorem symEllInt_addition_quadratic {x y z l m : ℝ} (h : CarlsonNonnegDomain x y z) (hl : 0 < l)
+theorem symmetricElliptic_addition_quadratic {x y z l m : ℝ}
+    (h : CarlsonNonnegDomain x y z) (hl : 0 < l)
     (hμ : x + m = (√((x + l) * y * z) + √(x * (y + l) * (z + l))) ^ 2 / l ^ 2) :
     (l * m - x * y - x * z - y * z) ^ 2 = 4 * x * y * z * (l + m + x + y + z) := by
-  have h5 := (symEllInt_addition_mu_iff h hl).mp hμ
+  have h5 := (symmetricElliptic_addition_mu_iff h hl).mp hμ
   obtain ⟨hx, hy, hz, -, -⟩ := h
   obtain ⟨h1, h2⟩ := addition_parameter_identities hx hy hz hl h5
   have hP := Real.sq_sqrt (show 0 ≤ x * y * z by positivity)
@@ -314,16 +325,16 @@ theorem symEllInt_addition_quadratic {x y z l m : ℝ} (h : CarlsonNonnegDomain 
       (√(x * y * z) + √((x + l) * (y + l) * (z + l)))) * h1 +
     4 * (√(x * y * z) + √((x + l) * (y + l) * (z + l))) ^ 2 * hP - 4 * (x * y * z) * h2
 
-/-- Identity under the stated parameter and domain assumptions: `symEllIntRF ((x + l : ℝ) : ℂ) ((y
-+ l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) + symEllIntRF ((x + m : ℝ) : ℂ) ((y + m : ℝ) : ℂ) ((z + m : ℝ)
-: ℂ) = symEllIntRF x y z`. -/
-private lemma symEllIntRF_addition_of_pos {x y z l m : ℝ} (hx : 0 < x) (hy : 0 < y)
+/-- Identity under the stated parameter and domain assumptions:
+`symmetricEllipticRF ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) + symmetricEllipticRF ((x
++ m : ℝ) : ℂ) ((y + m : ℝ) : ℂ) ((z + m : ℝ) : ℂ) = symmetricEllipticRF x y z`. -/
+private lemma symmetricEllipticRF_addition_of_pos {x y z l m : ℝ} (hx : 0 < x) (hy : 0 < y)
     (hz : 0 < z) (hl : 0 < l)
     (hm : 0 < m)
     (h5 : m = (√(x * y * z) + √((x + l) * (y + l) * (z + l))) ^ 2 / l ^ 2 - l - x - y - z) :
-    symEllIntRF ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) +
-        symEllIntRF ((x + m : ℝ) : ℂ) ((y + m : ℝ) : ℂ) ((z + m : ℝ) : ℂ) =
-      symEllIntRF x y z := by
+    symmetricEllipticRF ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) +
+        symmetricEllipticRF ((x + m : ℝ) : ℂ) ((y + m : ℝ) : ℂ) ((z + m : ℝ) : ℂ) =
+      symmetricEllipticRF x y z := by
   have hs : ∀ r : ℝ, 0 < r → (r : ℂ) ∈ slitPlane := fun r hr => ofReal_mem_slitPlane.mpr hr
   obtain ⟨h1, h2⟩ := addition_parameter_identities hx.le hy.le hz.le hl h5
   set P := √(x * y * z)
@@ -335,21 +346,22 @@ private lemma symEllIntRF_addition_of_pos {x y z l m : ℝ} (hx : 0 < x) (hy : 0
       Real.sqrt_sq (by positivity)]
   have h13 : l * m - x * y - x * z - y * z = 2 * P * √(l + m + x + y + z) := by
     rw [hsq]; field_simp; linear_combination h1
-  rw [symEllIntRF_eq_carlsonRF (hs _ (by linarith)) (hs _ (by linarith)) (hs _ (by linarith)),
-    symEllIntRF_eq_carlsonRF (hs _ (by linarith)) (hs _ (by linarith)) (hs _ (by linarith)),
-    symEllIntRF_eq_carlsonRF (hs x hx) (hs y hy) (hs z hz)]
+  rw [symmetricEllipticRF_eq_carlsonRF (hs _ (by linarith)) (hs _ (by linarith))
+      (hs _ (by linarith)),
+    symmetricEllipticRF_eq_carlsonRF (hs _ (by linarith)) (hs _ (by linarith)) (hs _ (by linarith)),
+    symmetricEllipticRF_eq_carlsonRF (hs x hx) (hs y hy) (hs z hz)]
   exact Carlson.carlsonRF_add_carlsonRF hx hy hz hl hm h13
 
-/-- Identity under the stated parameter and domain assumptions: `symEllIntRF ((x + l : ℝ) : ℂ) ((y
-+ l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) + symEllIntRF ((x + m : ℝ) : ℂ) ((y + m : ℝ) : ℂ) ((z + m : ℝ)
-: ℂ) = symEllIntRF x y z`. -/
-private lemma symEllIntRF_addition_of_nonneg_left {x y z l m : ℝ} (hx : 0 ≤ x)
+/-- Identity under the stated parameter and domain assumptions:
+`symmetricEllipticRF ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) + symmetricEllipticRF ((x
++ m : ℝ) : ℂ) ((y + m : ℝ) : ℂ) ((z + m : ℝ) : ℂ) = symmetricEllipticRF x y z`. -/
+private lemma symmetricEllipticRF_addition_of_nonneg_left {x y z l m : ℝ} (hx : 0 ≤ x)
     (hy : 0 < y) (hz : 0 < z)
     (hl : 0 < l) (hm : 0 < m)
     (h5 : m = (√(x * y * z) + √((x + l) * (y + l) * (z + l))) ^ 2 / l ^ 2 - l - x - y - z) :
-    symEllIntRF ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) +
-        symEllIntRF ((x + m : ℝ) : ℂ) ((y + m : ℝ) : ℂ) ((z + m : ℝ) : ℂ) =
-      symEllIntRF x y z := by
+    symmetricEllipticRF ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) +
+        symmetricEllipticRF ((x + m : ℝ) : ℂ) ((y + m : ℝ) : ℂ) ((z + m : ℝ) : ℂ) =
+      symmetricEllipticRF x y z := by
   rcases hx.eq_or_lt with h0 | hx'
   · subst h0
     obtain ⟨h1, -⟩ := addition_parameter_identities le_rfl hy.le hz.le hl h5
@@ -358,58 +370,61 @@ private lemma symEllIntRF_addition_of_nonneg_left {x y z l m : ℝ} (hx : 0 ≤ 
       rcases mul_eq_zero.mp this with h | h
       · exact absurd h hl.ne'
       · linarith
-    have H := symEllIntRF_addition_zero hy hz hl hm hlm
+    have H := symmetricEllipticRF_addition_zero hy hz hl hm hlm
     simp only [zero_add, ofReal_zero]
     rw [H]; ring
-  · exact symEllIntRF_addition_of_pos hx' hy hz hl hm h5
+  · exact symmetricEllipticRF_addition_of_pos hx' hy hz hl hm h5
 
 /-- DLMF 19.26.1 with 19.26.2: the addition theorem
 `R_F(x + λ, y + λ, z + λ) + R_F(x + μ, y + μ, z + μ) = R_F(x, y, z)`, where `λ, μ > 0` and
 `x + μ = λ^{-2} (√((x + λ) y z) + √(x (y + λ)(z + λ)))²` (19.26.2; the permuted equations for
-`y + μ`, `z + μ` follow, `symEllInt_addition_mu_perm`). -/
+`y + μ`, `z + μ` follow, `symmetricElliptic_addition_mu_perm`). -/
 @[dlmf 19.26.E1, dlmf 19.26.E2]
-theorem symEllIntRF_add_symEllIntRF {x y z l m : ℝ} (h : CarlsonNonnegDomain x y z) (hl : 0 < l)
+theorem symmetricEllipticRF_add_symmetricEllipticRF {x y z l m : ℝ}
+    (h : CarlsonNonnegDomain x y z) (hl : 0 < l)
     (hm : 0 < m)
     (hμ : x + m = (√((x + l) * y * z) + √(x * (y + l) * (z + l))) ^ 2 / l ^ 2) :
-    symEllIntRF ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) +
-        symEllIntRF ((x + m : ℝ) : ℂ) ((y + m : ℝ) : ℂ) ((z + m : ℝ) : ℂ) =
-      symEllIntRF x y z := by
-  have h5 := (symEllInt_addition_mu_iff h hl).mp hμ
+    symmetricEllipticRF ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) +
+        symmetricEllipticRF ((x + m : ℝ) : ℂ) ((y + m : ℝ) : ℂ) ((z + m : ℝ) : ℂ) =
+      symmetricEllipticRF x y z := by
+  have h5 := (symmetricElliptic_addition_mu_iff h hl).mp hμ
   obtain ⟨hx, hy, hz, h0x, h0y⟩ := h
-  have hrot : ∀ a b c : ℂ, symEllIntRF a b c = symEllIntRF b c a := fun a b c => by
-    rw [symEllIntRF_comm_left, symEllIntRF_comm_right]
+  have hrot : ∀ a b c : ℂ, symmetricEllipticRF a b c = symmetricEllipticRF b c a := fun a b c => by
+    rw [symmetricEllipticRF_comm_left, symmetricEllipticRF_comm_right]
   rcases hy.eq_or_lt with hy0 | hy'
   · -- `y = 0`: then `x, z > 0`
     have hx' : 0 < x := hx.lt_of_ne (fun hx0 => (h0x hx0.symm).1.ne' hy0.symm)
     have hz' : 0 < z := (h0y hy0.symm)
-    have H := symEllIntRF_addition_of_nonneg_left hy hx' hz' hl hm (by
+    have H := symmetricEllipticRF_addition_of_nonneg_left hy hx' hz' hl hm (by
       rw [h5, show y * x * z = x * y * z by ring,
         show (y + l) * (x + l) * (z + l) = (x + l) * (y + l) * (z + l) by ring]; ring)
-    rw [symEllIntRF_comm_left ((x + l : ℝ) : ℂ), symEllIntRF_comm_left ((x + m : ℝ) : ℂ),
-      symEllIntRF_comm_left (x : ℂ)] at H
+    rw [symmetricEllipticRF_comm_left ((x + l : ℝ) : ℂ),
+        symmetricEllipticRF_comm_left ((x + m : ℝ) : ℂ),
+      symmetricEllipticRF_comm_left (x : ℂ)] at H
     exact H
   rcases hz.eq_or_lt with hz0 | hz'
   · -- `z = 0`: then `x, y > 0`
     have hx' : 0 < x := hx.lt_of_ne (fun hx0 => (h0x hx0.symm).2.ne' hz0.symm)
-    have H := symEllIntRF_addition_of_nonneg_left hz hx' hy' hl hm (by
+    have H := symmetricEllipticRF_addition_of_nonneg_left hz hx' hy' hl hm (by
       rw [h5, show z * x * y = x * y * z by ring,
         show (z + l) * (x + l) * (y + l) = (x + l) * (y + l) * (z + l) by ring]; ring)
     rw [hrot ((z + l : ℝ) : ℂ), hrot ((z + m : ℝ) : ℂ), hrot (z : ℂ)] at H
     exact H
-  · exact symEllIntRF_addition_of_nonneg_left hx hy' hz' hl hm h5
+  · exact symmetricEllipticRF_addition_of_nonneg_left hx hy' hz' hl hm h5
 
 /-- The canonical node derivative expressed using the continued Carlson `R_F`. -/
 lemma hasDerivAt_carlsonRF_right {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane)
     (hz : z ∈ slitPlane) :
-    HasDerivAt (fun w => Carlson.carlsonRF x y w) (-(1 / 6) * symEllIntRD x y z) z := by
-  apply (hasDerivAt_symEllIntRF_right hx hy hz).congr_of_eventuallyEq
+    HasDerivAt (fun w => Carlson.carlsonRF x y w) (-(1 / 6) * symmetricEllipticRD x y z) z := by
+  apply (hasDerivAt_symmetricEllipticRF_right hx hy hz).congr_of_eventuallyEq
   filter_upwards [isOpen_slitPlane.mem_nhds hz] with w hw
-  exact (symEllIntRF_eq_carlsonRF hx hy hw).symm
+  exact (symmetricEllipticRF_eq_carlsonRF hx hy hw).symm
 
 open scoped Classical in
 /-- The real final-variable derivative of `R_F` also holds when its first variable is zero. -/
-lemma hasDerivAt_symEllIntRF_right_real {x y z : ℝ} (hx : 0 ≤ x) (hy : 0 < y) (hz : 0 < z) :
-    HasDerivAt (fun w : ℝ => symEllIntRF x y w) (-(1 / 6) * symEllIntRD x y z) z := by
+lemma hasDerivAt_symmetricEllipticRF_right_real {x y z : ℝ} (hx : 0 ≤ x) (hy : 0 < y) (hz : 0 < z) :
+    HasDerivAt (fun w : ℝ => symmetricEllipticRF x y w)
+        (-(1 / 6) * symmetricEllipticRD x y z) z := by
   classical
   have hyc := ofReal_mem_slitPlane.mpr hy
   have hzc := ofReal_mem_slitPlane.mpr hz
@@ -419,12 +434,13 @@ lemma hasDerivAt_symEllIntRF_right_real {x y z : ℝ} (hx : 0 ≤ x) (hy : 0 < y
       (![1 / 2, 1 / 2] : Fin 2 → ℂ) (vec2_mem_carlsonRSlitDomain hyc hzc) 1).const_mul (π / 2 : ℂ)
     have he : Dirichlet.addDirichletUnit (![1 / 2, 1 / 2] : Fin 2 → ℂ) 1 = ![1 / 2, 3 / 2] := by
       funext i; fin_cases i <;> norm_num [Dirichlet.addDirichletUnit]
-    have H' : HasDerivAt (fun w : ℂ => symEllIntRF 0 y w)
+    have H' : HasDerivAt (fun w : ℂ => symmetricEllipticRF 0 y w)
         ((π / 2 : ℂ) * (-(1 / 2) * (1 / 2) * Carlson.regCarlsonR (-(1 / 2) - 1)
           (Dirichlet.addDirichletUnit (![1 / 2, 1 / 2] : Fin 2 → ℂ) 1) ![(y : ℂ), z])) (z : ℂ) := by
       apply H.congr_of_eventuallyEq
       filter_upwards [isOpen_slitPlane.mem_nhds hzc] with w hw
-      rw [symEllIntRF_zero_left hyc hw, symEllIntR_of_mem _ _ (vec2_mem_carlsonRSlitDomain hyc hw),
+      rw [symmetricEllipticRF_zero_left hyc hw,
+          symmetricEllipticR_of_mem _ _ (vec2_mem_carlsonRSlitDomain hyc hw),
           Carlson.carlsonR]
       simp only [Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one]
       norm_num
@@ -432,13 +448,13 @@ lemma hasDerivAt_symEllIntRF_right_real {x y z : ℝ} (hx : 0 ≤ x) (hy : 0 < y
       funext i; fin_cases i <;> simp [Function.update]
     refine H'.comp_ofReal.congr_deriv ?_
     simp only [ofReal_zero]
-    rw [he, symEllIntRD_zero_left hyc hzc,
-        symEllIntR_of_mem _ _ (vec2_mem_carlsonRSlitDomain hyc hzc), Carlson.carlsonR]
+    rw [he, symmetricEllipticRD_zero_left hyc hzc,
+        symmetricEllipticR_of_mem _ _ (vec2_mem_carlsonRSlitDomain hyc hzc), Carlson.carlsonR]
     simp only [Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one]
     norm_num [Carlson.Gamma_two']
     ring
   · have hxc := ofReal_mem_slitPlane.mpr (lt_of_le_of_ne hx (Ne.symm hx0))
-    exact (hasDerivAt_symEllIntRF_right hxc hyc hzc).comp_ofReal
+    exact (hasDerivAt_symmetricEllipticRF_right hxc hyc hzc).comp_ofReal
 
 /-- A variable common translation and a variable final coordinate separate in the derivative
 of `R_F`. The two contributions are the diagonal derivative and `-R_D/6`. -/
@@ -447,7 +463,7 @@ lemma hasDerivAt_carlsonRF_translate_right {x y z l' : ℝ} {l : ℝ → ℝ}
     HasDerivAt (fun w : ℝ => Carlson.carlsonRF (x + l w : ℝ) (y + l w : ℝ) (w + l w : ℝ))
       (-(1 / 2) * (l' : ℂ) * ((x + l z : ℝ) : ℂ) ^ (-1 / 2 : ℂ) *
         ((y + l z : ℝ) : ℂ) ^ (-1 / 2 : ℂ) * ((z + l z : ℝ) : ℂ) ^ (-1 / 2 : ℂ) -
-        (1 / 6) * symEllIntRD (x + l z : ℝ) (y + l z : ℝ) (z + l z : ℝ)) z := by
+        (1 / 6) * symmetricEllipticRD (x + l z : ℝ) (y + l z : ℝ) (z + l z : ℝ)) z := by
   let p : Fin 3 → ℂ := ![((x + l z : ℝ) : ℂ), ((y + l z : ℝ) : ℂ), ((z + l z : ℝ) : ℂ)]
   let F : (Fin 3 → ℂ) → ℂ := Carlson.carlsonR (-1 / 2) (fun _ => 1 / 2)
   let v : Fin 3 → ℂ := fun _ => 1
@@ -492,7 +508,7 @@ lemma hasDerivAt_carlsonRF_translate_right {x y z l' : ℝ} {l : ℝ → ℝ}
   have HE := hF.hasFDerivAt.comp_hasDerivAt_of_eq (p 2) he (by funext i; fin_cases i <;> rfl)
   have hfe : (F ∘ fun w : ℂ => ![p 0, p 1, w]) = fun w => Carlson.carlsonRF (p 0) (p 1) w := rfl
   rw [hfe] at HE
-  have hLE : L e = -(1 / 6) * symEllIntRD (p 0) (p 1) (p 2) :=
+  have hLE : L e = -(1 / 6) * symmetricEllipticRD (p 0) (p 1) (p 2) :=
     HE.unique (hasDerivAt_carlsonRF_right (hp 0) (hp 1) (hp 2))
   have hN : HasDerivAt (fun w : ℝ =>
       ![((x + l w : ℝ) : ℂ), ((y + l w : ℝ) : ℂ), ((w + l w : ℝ) : ℂ)])
@@ -513,12 +529,12 @@ lemma hasDerivAt_carlsonRF_translate_right {x y z l' : ℝ} {l : ℝ → ℝ}
 
 /-- Differentiation of the first-kind addition theorem gives the third-kind addition
 formula, including a possible zero first argument. -/
-lemma symEllIntRD_add_of_nonneg {x y z l m : ℝ} (hx : 0 ≤ x) (hy : 0 < y) (hz : 0 < z)
+lemma symmetricEllipticRD_add_of_nonneg {x y z l m : ℝ} (hx : 0 ≤ x) (hy : 0 < y) (hz : 0 < z)
     (hl : 0 < l) (hm : 0 < m)
     (hmu : x + m = (√((x + l) * y * z) + √(x * (y + l) * (z + l))) ^ 2 / l ^ 2) :
-    symEllIntRD (x + l : ℝ) (y + l : ℝ) (z + l : ℝ) +
-        symEllIntRD (x + m : ℝ) (y + m : ℝ) (z + m : ℝ) =
-      symEllIntRD x y z - ((3 / √(z * (z + l) * (z + m)) : ℝ) : ℂ) := by
+    symmetricEllipticRD (x + l : ℝ) (y + l : ℝ) (z + l : ℝ) +
+        symmetricEllipticRD (x + m : ℝ) (y + m : ℝ) (z + m : ℝ) =
+      symmetricEllipticRD x y z - ((3 / √(z * (z + l) * (z + m)) : ℝ) : ℂ) := by
   let u := √(x + l) * √y
   let v := √x * √(y + l)
   let M : ℝ → ℝ := fun w => (u * √w + v * √(w + l)) ^ 2 / l ^ 2 - x
@@ -544,26 +560,28 @@ lemma symEllIntRD_add_of_nonneg {x y z l m : ℝ} (hx : 0 ≤ x) (hy : 0 < y) (h
     ring
   have hdom (w : ℝ) (hw : 0 < w) : CarlsonNonnegDomain x y w :=
     ⟨hx, hy.le, hw.le, fun _ => ⟨hy, hw⟩, fun hh => False.elim (hy.ne' hh)⟩
-  have hev : (fun w : ℝ => symEllIntRF x y w) =ᶠ[𝓝 z] fun w : ℝ =>
+  have hev : (fun w : ℝ => symmetricEllipticRF x y w) =ᶠ[𝓝 z] fun w : ℝ =>
       Carlson.carlsonRF (x + l : ℝ) (y + l : ℝ) (w + l : ℝ) +
       Carlson.carlsonRF (x + M w : ℝ) (y + M w : ℝ) (w + M w : ℝ) := by
     have hMpos : ∀ᶠ w in 𝓝 z, 0 < M w := hM.continuousAt.eventually
       (eventually_gt_nhds (show 0 < M z by rw [heq]; exact hm))
     filter_upwards [eventually_gt_nhds hz, hMpos] with w hw hMw
-    have H := symEllIntRF_add_symEllIntRF (hdom w hw) hl hMw (m := M w) (by
+    have H := symmetricEllipticRF_add_symmetricEllipticRF (hdom w hw) hl hMw (m := M w) (by
       rw [sqrt_mul_mul_of_nonneg hxL.le hy.le,
         sqrt_mul_mul_of_nonneg hx hyL.le]
       dsimp only [M, u, v]; ring)
-    rw [symEllIntRF_eq_carlsonRF (ofReal_mem_slitPlane.mpr hxL) (ofReal_mem_slitPlane.mpr hyL)
+    rw [symmetricEllipticRF_eq_carlsonRF (ofReal_mem_slitPlane.mpr hxL)
+        (ofReal_mem_slitPlane.mpr hyL)
       (ofReal_mem_slitPlane.mpr (by linarith)),
-      symEllIntRF_eq_carlsonRF (ofReal_mem_slitPlane.mpr (by linarith))
+      symmetricEllipticRF_eq_carlsonRF (ofReal_mem_slitPlane.mpr (by linarith))
         (ofReal_mem_slitPlane.mpr (by linarith)) (ofReal_mem_slitPlane.mpr (by linarith))] at H
     exact H.symm
   have HL := hasDerivAt_carlsonRF_translate_right (x := x) (y := y) (z := z)
     (hasDerivAt_const z l) hxL hyL hzL
   have HM := hasDerivAt_carlsonRF_translate_right hM
     (by rw [heq]; exact hxM) (by rw [heq]; exact hyM) (by rw [heq]; exact hzM)
-  have HE := ((hasDerivAt_symEllIntRF_right_real hx hy hz).congr_of_eventuallyEq hev.symm).unique
+  have HE := ((hasDerivAt_symmetricEllipticRF_right_real hx hy hz).congr_of_eventuallyEq
+      hev.symm).unique
     (HL.add HM)
   simp only [ofReal_zero, mul_zero, zero_mul, zero_sub, heq] at HE
   rw [← inv_cpow_half_eq_cpow_neg_half, ← inv_cpow_half_eq_cpow_neg_half,
@@ -572,7 +590,7 @@ lemma symEllIntRD_add_of_nonneg {x y z l m : ℝ} (hx : 0 ≤ x) (hy : 0 < y) (h
     Carlson.ofReal_cpow_half hzM.le] at HE
   have hU := sqrt_add_mul_eq_of_shifted_sq hx hy.le hz.le hl hm hmu
   have hV := sqrt_add_mul_eq_of_shifted_sq hy.le hx hz.le hl hm
-    ((symEllInt_addition_mu_perm (hdom z hz) hl hmu).1)
+    ((symmetricElliptic_addition_mu_perm (hdom z hz) hl hmu).1)
   have hd : d * (√z * √(z + l)) = √(x + m) * √(y + m) := by
     dsimp only [d, u, v]
     apply mul_right_cancel₀ (pow_ne_zero 2 hl.ne')
@@ -593,12 +611,13 @@ lemma symEllIntRD_add_of_nonneg {x y z l m : ℝ} (hx : 0 ≤ x) (hy : 0 < y) (h
 = R_D(x, y, z) - 3/√(z (z + λ)(z + μ))`, with `λ, μ` as in (19.26.1)–(19.26.2) and `z > 0`
 (`R_D`'s third argument is nonzero). -/
 @[dlmf 19.26.E7]
-theorem symEllIntRD_add_symEllIntRD {x y z l m : ℝ} (h : CarlsonNonnegDomain x y z) (hz : 0 < z)
+theorem symmetricEllipticRD_add_symmetricEllipticRD {x y z l m : ℝ}
+    (h : CarlsonNonnegDomain x y z) (hz : 0 < z)
     (hl : 0 < l) (hm : 0 < m)
     (hμ : x + m = (√((x + l) * y * z) + √(x * (y + l) * (z + l))) ^ 2 / l ^ 2) :
-    symEllIntRD ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) +
-        symEllIntRD ((x + m : ℝ) : ℂ) ((y + m : ℝ) : ℂ) ((z + m : ℝ) : ℂ) =
-      symEllIntRD x y z - ((3 / √(z * (z + l) * (z + m)) : ℝ) : ℂ) := by
+    symmetricEllipticRD ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) +
+        symmetricEllipticRD ((x + m : ℝ) : ℂ) ((y + m : ℝ) : ℂ) ((z + m : ℝ) : ℂ) =
+      symmetricEllipticRD x y z - ((3 / √(z * (z + l) * (z + m)) : ℝ) : ℂ) := by
   rcases h with ⟨hx, hy, _, hx0, hy0⟩
   by_cases hyz : y = 0
   · subst y
@@ -607,10 +626,10 @@ theorem symEllIntRD_add_symEllIntRD {x y z l m : ℝ} (h : CarlsonNonnegDomain x
       have hxx : x = 0 := by linarith
       exact (hx0 hxx).1.ne' rfl
     have hdom : CarlsonNonnegDomain x 0 z := ⟨hx, le_rfl, hz.le, hx0, hy0⟩
-    have hp := (symEllInt_addition_mu_perm hdom hl hμ).1
-    have H := symEllIntRD_add_of_nonneg (x := 0) (by norm_num) hx' hz hl hm hp
-    simpa only [ofReal_zero, symEllIntRD_comm] using H
-  · exact symEllIntRD_add_of_nonneg hx (lt_of_le_of_ne hy (Ne.symm hyz)) hz hl hm hμ
+    have hp := (symmetricElliptic_addition_mu_perm hdom hl hμ).1
+    have H := symmetricEllipticRD_add_of_nonneg (x := 0) (by norm_num) hx' hz hl hm hp
+    simpa only [ofReal_zero, symmetricEllipticRD_comm] using H
+  · exact symmetricEllipticRD_add_of_nonneg hx (lt_of_le_of_ne hy (Ne.symm hyz)) hz hl hm hμ
 
 /-- Polynomial identity behind the square-root correction in second-kind addition. -/
 private lemma rg_addition_root_algebra {a b c A B C l : ℝ}
@@ -624,13 +643,14 @@ private lemma rg_addition_root_algebra {a b c A B C l : ℝ}
       a ^ 2 * c ^ 2 * l + b ^ 2 * c ^ 2 * l) * hC
 
 /-- The second-kind addition theorem when its final two arguments are positive. -/
-lemma symEllIntRG_add_of_nonneg {x y z l m : ℝ} (hx : 0 ≤ x) (hy : 0 < y) (hz : 0 < z)
+lemma symmetricEllipticRG_add_of_nonneg {x y z l m : ℝ} (hx : 0 ≤ x) (hy : 0 < y) (hz : 0 < z)
     (hl : 0 < l) (hm : 0 < m)
     (hmu : x + m = (√((x + l) * y * z) + √(x * (y + l) * (z + l))) ^ 2 / l ^ 2) :
-    2 * symEllIntRG (x + l : ℝ) (y + l : ℝ) (z + l : ℝ) +
-        2 * symEllIntRG (x + m : ℝ) (y + m : ℝ) (z + m : ℝ) =
-      2 * symEllIntRG x y z + l * symEllIntRF (x + l : ℝ) (y + l : ℝ) (z + l : ℝ) +
-        m * symEllIntRF (x + m : ℝ) (y + m : ℝ) (z + m : ℝ) + (√(l + m + x + y + z) : ℂ) := by
+    2 * symmetricEllipticRG (x + l : ℝ) (y + l : ℝ) (z + l : ℝ) +
+        2 * symmetricEllipticRG (x + m : ℝ) (y + m : ℝ) (z + m : ℝ) =
+      2 * symmetricEllipticRG x y z + l * symmetricEllipticRF (x + l : ℝ) (y + l : ℝ) (z + l : ℝ) +
+        m * symmetricEllipticRF (x + m : ℝ) (y + m : ℝ) (z + m : ℝ) +
+            (√(l + m + x + y + z) : ℂ) := by
   have hdom : CarlsonNonnegDomain x y z := ⟨hx, hy.le, hz.le, fun _ => ⟨hy, hz⟩,
     fun hh => False.elim (hy.ne' hh)⟩
   have hxL : 0 < x + l := by linarith
@@ -641,11 +661,11 @@ lemma symEllIntRG_add_of_nonneg {x y z l m : ℝ} (hx : 0 ≤ x) (hy : 0 < y) (h
   have hzM : 0 < z + m := by linarith
   have hs : 0 < l + m + x + y + z := by linarith
   have hU := sqrt_add_mul_eq_of_shifted_sq hx hy.le hz.le hl hm hmu
-  have hp := symEllInt_addition_mu_perm hdom hl hmu
+  have hp := symmetricElliptic_addition_mu_perm hdom hl hmu
   have hV := sqrt_add_mul_eq_of_shifted_sq hy.le hx hz.le hl hm hp.1
   have hW := sqrt_add_mul_eq_of_shifted_sq hz.le hx hy.le hl hm hp.2
   have hsum := (addition_parameter_identities hx hy.le hz.le hl
-      ((symEllInt_addition_mu_iff hdom hl).mp hmu)).2
+      ((symmetricElliptic_addition_mu_iff hdom hl).mp hmu)).2
   rw [sqrt_mul_mul_of_nonneg hx hy.le, sqrt_mul_mul_of_nonneg hxL.le hyL.le] at hsum
   have hS : √(l + m + x + y + z) * l = √x * √y * √z + √(x + l) * √(y + l) * √(z + l) := by
     apply (sq_eq_sq₀ (by positivity) (by positivity)).mp
@@ -670,14 +690,15 @@ lemma symEllIntRG_add_of_nonneg {x y z l m : ℝ} (hx : 0 ≤ x) (hy : 0 < y) (h
     have H := rg_addition_root_algebra hA hB hC
     linear_combination H +
         (√(z + l) ^ 2 * √x ^ 2 * √y ^ 2 - √z ^ 2 * √(x + l) ^ 2 * √(y + l) ^ 2) * hC
-  have hxC : SymEllIntArg (x : ℂ) := by
+  have hxC : IsCarlsonArgument (x : ℂ) := by
     by_cases hh : x = 0
     · exact Or.inr (by simp [hh])
     · exact Or.inl (ofReal_mem_slitPlane.mpr (lt_of_le_of_ne hx (Ne.symm hh)))
-  have hG := two_mul_symEllIntRG hxC (ofReal_mem_slitPlane.mpr hy) (ofReal_mem_slitPlane.mpr hz)
-  have hGL := two_mul_symEllIntRG (Or.inl (ofReal_mem_slitPlane.mpr hxL))
+  have hG := two_mul_symmetricEllipticRG hxC (ofReal_mem_slitPlane.mpr hy)
+      (ofReal_mem_slitPlane.mpr hz)
+  have hGL := two_mul_symmetricEllipticRG (Or.inl (ofReal_mem_slitPlane.mpr hxL))
     (ofReal_mem_slitPlane.mpr hyL) (ofReal_mem_slitPlane.mpr hzL)
-  have hGM := two_mul_symEllIntRG (Or.inl (ofReal_mem_slitPlane.mpr hxM))
+  have hGM := two_mul_symmetricEllipticRG (Or.inl (ofReal_mem_slitPlane.mpr hxM))
     (ofReal_mem_slitPlane.mpr hyM) (ofReal_mem_slitPlane.mpr hzM)
   rw [← inv_cpow_half_eq_cpow_neg_half, Carlson.ofReal_cpow_half hx,
     Carlson.ofReal_cpow_half hy.le, Carlson.ofReal_cpow_half hz.le] at hG
@@ -685,8 +706,8 @@ lemma symEllIntRG_add_of_nonneg {x y z l m : ℝ} (hx : 0 ≤ x) (hy : 0 < y) (h
     Carlson.ofReal_cpow_half hyL.le, Carlson.ofReal_cpow_half hzL.le] at hGL
   rw [← inv_cpow_half_eq_cpow_neg_half, Carlson.ofReal_cpow_half hxM.le,
     Carlson.ofReal_cpow_half hyM.le, Carlson.ofReal_cpow_half hzM.le] at hGM
-  have hRF := symEllIntRF_add_symEllIntRF hdom hl hm hmu
-  have hRD := symEllIntRD_add_of_nonneg hx hy hz hl hm hmu
+  have hRF := symmetricEllipticRF_add_symmetricEllipticRF hdom hl hm hmu
+  have hRD := symmetricEllipticRD_add_of_nonneg hx hy hz hl hm hmu
   have hSC := congrArg (fun r : ℝ => (r : ℂ)) hscalar
   push_cast at hG hGL hGM hRF hRD hSC ⊢
   simp only [div_eq_mul_inv] at hSC hRD
@@ -696,14 +717,15 @@ lemma symEllIntRG_add_of_nonneg {x y z l m : ℝ} (hx : 0 ≤ x) (hy : 0 < y) (h
 /-- DLMF 19.26.8: `2R_G(x + λ, …) + 2R_G(x + μ, …) = 2R_G(x, y, z) + λ R_F(x + λ, …)
 + μ R_F(x + μ, …) + √(λ + μ + x + y + z)`, with `λ, μ` as in (19.26.1)–(19.26.2). -/
 @[dlmf 19.26.E8]
-theorem symEllIntRG_add_symEllIntRG {x y z l m : ℝ} (h : CarlsonNonnegDomain x y z) (hl : 0 < l)
+theorem symmetricEllipticRG_add_symmetricEllipticRG {x y z l m : ℝ}
+    (h : CarlsonNonnegDomain x y z) (hl : 0 < l)
     (hm : 0 < m)
     (hμ : x + m = (√((x + l) * y * z) + √(x * (y + l) * (z + l))) ^ 2 / l ^ 2) :
-    2 * symEllIntRG ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) +
-        2 * symEllIntRG ((x + m : ℝ) : ℂ) ((y + m : ℝ) : ℂ) ((z + m : ℝ) : ℂ) =
-      2 * symEllIntRG x y z +
-        l * symEllIntRF ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) +
-        m * symEllIntRF ((x + m : ℝ) : ℂ) ((y + m : ℝ) : ℂ) ((z + m : ℝ) : ℂ) +
+    2 * symmetricEllipticRG ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) +
+        2 * symmetricEllipticRG ((x + m : ℝ) : ℂ) ((y + m : ℝ) : ℂ) ((z + m : ℝ) : ℂ) =
+      2 * symmetricEllipticRG x y z +
+        l * symmetricEllipticRF ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) +
+        m * symmetricEllipticRF ((x + m : ℝ) : ℂ) ((y + m : ℝ) : ℂ) ((z + m : ℝ) : ℂ) +
         ((√(l + m + x + y + z) : ℝ) : ℂ) := by
   by_cases hz0 : z = 0
   · rcases h with ⟨hx, hy, hz, hx0, hy0⟩
@@ -717,10 +739,12 @@ theorem symEllIntRG_add_symEllIntRG {x y z l m : ℝ} (h : CarlsonNonnegDomain x
       have hyy : y = 0 := by linarith
       exact (hy0 hyy).ne' rfl
     have hdom : CarlsonNonnegDomain x y 0 := ⟨hx, hy, le_rfl, hx0, hy0⟩
-    have hp := (symEllInt_addition_mu_perm hdom hl hμ).2
-    have H := symEllIntRG_add_of_nonneg (x := 0) (by norm_num) hx' hy' hl hm hp
-    simpa only [ofReal_zero, zero_add, add_zero, symEllIntRG_comm_left, symEllIntRG_comm_right,
-      symEllIntRF_comm_left, symEllIntRF_comm_right, add_comm, add_left_comm, add_assoc] using H
+    have hp := (symmetricElliptic_addition_mu_perm hdom hl hμ).2
+    have H := symmetricEllipticRG_add_of_nonneg (x := 0) (by norm_num) hx' hy' hl hm hp
+    simpa only [ofReal_zero, zero_add, add_zero, symmetricEllipticRG_comm_left,
+        symmetricEllipticRG_comm_right,
+      symmetricEllipticRF_comm_left, symmetricEllipticRF_comm_right, add_comm, add_left_comm,
+          add_assoc] using H
   · rcases h with ⟨hx, hy, hz, hx0, hy0⟩
     have hz' : 0 < z := lt_of_le_of_ne hz (Ne.symm hz0)
     by_cases hyz : y = 0
@@ -730,35 +754,38 @@ theorem symEllIntRG_add_symEllIntRG {x y z l m : ℝ} (h : CarlsonNonnegDomain x
         have hxx : x = 0 := by linarith
         exact (hx0 hxx).1.ne' rfl
       have hdom : CarlsonNonnegDomain x 0 z := ⟨hx, le_rfl, hz, hx0, hy0⟩
-      have hp := (symEllInt_addition_mu_perm hdom hl hμ).1
-      have H := symEllIntRG_add_of_nonneg (x := 0) (by norm_num) hx' hz' hl hm hp
-      simpa only [ofReal_zero, zero_add, add_zero, symEllIntRG_comm_left,
-        symEllIntRF_comm_left, add_comm, add_left_comm, add_assoc] using H
-    · exact symEllIntRG_add_of_nonneg hx (lt_of_le_of_ne hy (Ne.symm hyz)) hz' hl hm hμ
+      have hp := (symmetricElliptic_addition_mu_perm hdom hl hμ).1
+      have H := symmetricEllipticRG_add_of_nonneg (x := 0) (by norm_num) hx' hz' hl hm hp
+      simpa only [ofReal_zero, zero_add, add_zero, symmetricEllipticRG_comm_left,
+        symmetricEllipticRF_comm_left, add_comm, add_left_comm, add_assoc] using H
+    · exact symmetricEllipticRG_add_of_nonneg hx (lt_of_le_of_ne hy (Ne.symm hyz)) hz' hl hm hμ
 
 
 /-- DLMF 19.26.9 with 19.26.10: `R_J(x + λ, y + λ, z + λ, p + λ) + R_J(x + μ, y + μ, z + μ, p + μ)
 = R_J(x, y, z, p) - 3 R_C(γ - δ, γ)`, `γ = p(p + λ)(p + μ)`, `δ = (p - x)(p - y)(p - z)`, with
 `λ, μ` as in (19.26.1)–(19.26.2) and `p > 0` (the identity fails for `p < 0`). -/
 @[dlmf 19.26.E9, dlmf 19.26.E10]
-theorem symEllIntRJ_add_symEllIntRJ {x y z p l m : ℝ} (h : CarlsonNonnegDomain x y z) (hp : 0 < p)
+theorem symmetricEllipticRJ_add_symmetricEllipticRJ {x y z p l m : ℝ}
+    (h : CarlsonNonnegDomain x y z) (hp : 0 < p)
     (hl : 0 < l) (hm : 0 < m)
     (hμ : x + m = (√((x + l) * y * z) + √(x * (y + l) * (z + l))) ^ 2 / l ^ 2) :
     let γ := p * (p + l) * (p + m)
     let δ := (p - x) * (p - y) * (p - z)
-    symEllIntRJ ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) ((p + l : ℝ) : ℂ) +
-        symEllIntRJ ((x + m : ℝ) : ℂ) ((y + m : ℝ) : ℂ) ((z + m : ℝ) : ℂ) ((p + m : ℝ) : ℂ) =
-      symEllIntRJ x y z p - 3 * symEllIntRC ((γ - δ : ℝ) : ℂ) (γ : ℂ) := by
+    symmetricEllipticRJ ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) ((p + l : ℝ) : ℂ) +
+        symmetricEllipticRJ ((x + m : ℝ) : ℂ) ((y + m : ℝ) : ℂ) ((z + m : ℝ) : ℂ)
+            ((p + m : ℝ) : ℂ) =
+      symmetricEllipticRJ x y z p - 3 * symmetricEllipticRC ((γ - δ : ℝ) : ℂ) (γ : ℂ) := by
   sorry
 
 /-- DLMF 19.26.11 with 19.26.12: `R_C(x + λ, y + λ) + R_C(x + μ, y + μ) = R_C(x, y)` for
 `λ > 0`, `y > 0`, `x ≥ 0`, where `x + μ = λ^{-2} (√(x + λ) y + √x (y + λ))²`. -/
 @[dlmf 19.26.E11, dlmf 19.26.E12]
-theorem symEllIntRC_add_symEllIntRC {x y l m : ℝ} (hx : 0 ≤ x) (hy : 0 < y) (hl : 0 < l)
+theorem symmetricEllipticRC_add_symmetricEllipticRC {x y l m : ℝ} (hx : 0 ≤ x)
+    (hy : 0 < y) (hl : 0 < l)
     (hμ : x + m = (√(x + l) * y + √x * (y + l)) ^ 2 / l ^ 2) :
-    symEllIntRC ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) + symEllIntRC ((x + m : ℝ) : ℂ)
+    symmetricEllipticRC ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) + symmetricEllipticRC ((x + m : ℝ) : ℂ)
         ((y + m : ℝ) : ℂ) =
-      symEllIntRC x y := by
+      symmetricEllipticRC x y := by
   have hnn : ∀ r : ℝ, 0 ≤ r → ¬ IsNegReal (r : ℂ) := fun r hr ⟨_, h⟩ => by
     simp at h; linarith
   have hsx := Real.sq_sqrt hx
@@ -781,17 +808,17 @@ theorem symEllIntRC_add_symEllIntRC {x y l m : ℝ} (hx : 0 ≤ x) (hy : 0 < y) 
     rw [hμ, show (x + l) * y * y = (x + l) * (y * y) by ring, Real.sqrt_mul (by linarith),
       Real.sqrt_mul_self hy.le, show x * (y + l) * (y + l) = x * ((y + l) * (y + l)) by ring,
       Real.sqrt_mul hx, Real.sqrt_mul_self (by linarith)]
-  have h := symEllIntRF_add_symEllIntRF (x := x) (y := y) (z := y)
+  have h := symmetricEllipticRF_add_symmetricEllipticRF (x := x) (y := y) (z := y)
     ⟨hx, hy.le, hy.le, fun _ => ⟨hy, hy⟩, fun h0 => absurd h0 hy.ne'⟩ hl hm hμ'
-  rw [symEllIntRC_eq_symEllIntRF _ (hnn _ (by linarith)),
-      symEllIntRC_eq_symEllIntRF _ (hnn _ (by linarith)),
-    symEllIntRC_eq_symEllIntRF _ (hnn _ hy.le)]
+  rw [symmetricEllipticRC_eq_symmetricEllipticRF _ (hnn _ (by linarith)),
+      symmetricEllipticRC_eq_symmetricEllipticRF _ (hnn _ (by linarith)),
+    symmetricEllipticRC_eq_symmetricEllipticRF _ (hnn _ hy.le)]
   exact h
 
 /-- DLMF 19.26.12 (second equation): `x + μ = λ^{-2} (√(x + λ) y + √x (y + λ))²` implies
 `y + μ = (y (y + λ)/λ²) (√x + √(x + λ))²`. -/
 @[dlmf 19.26.E12]
-theorem symEllIntRC_addition_mu {x y l m : ℝ} (hx : 0 ≤ x) (hl : 0 < l)
+theorem symmetricEllipticRC_addition_mu {x y l m : ℝ} (hx : 0 ≤ x) (hl : 0 < l)
     (hμ : x + m = (√(x + l) * y + √x * (y + l)) ^ 2 / l ^ 2) :
     y + m = y * (y + l) / l ^ 2 * (√x + √(x + l)) ^ 2 := by
   have hl2 : l ^ 2 ≠ 0 := by positivity
@@ -808,12 +835,13 @@ theorem symEllIntRC_addition_mu {x y l m : ℝ} (hx : 0 ≤ x) (hl : 0 < l)
 `0`. **Corrected**: we also assume `α, β > 0` (DLMF's conditions do not fix the signs of `α, β`;
 the identity fails for `α = -2, β = 3, θ = 3/2`). -/
 @[dlmf 19.26.E13]
-theorem symEllIntRC_addition_theta {α β θ : ℝ} (hα : 0 < α) (hβ : 0 < β)
+theorem symmetricEllipticRC_addition_theta {α β θ : ℝ} (hα : 0 < α) (hβ : 0 < β)
     (hα₁ : 0 < α ^ 2 - θ) (hα₂ : α ^ 2 - θ < α ^ 2) (hβ₁ : 0 < β ^ 2 - θ) :
     let σ := (α * β + θ) / (α + β)
-    symEllIntRC ((α ^ 2 : ℝ) : ℂ) ((α ^ 2 - θ : ℝ) : ℂ) + symEllIntRC ((β ^ 2 : ℝ) : ℂ)
+    symmetricEllipticRC ((α ^ 2 : ℝ) : ℂ) ((α ^ 2 - θ : ℝ) : ℂ) +
+        symmetricEllipticRC ((β ^ 2 : ℝ) : ℂ)
         ((β ^ 2 - θ : ℝ) : ℂ) =
-      symEllIntRC ((σ ^ 2 : ℝ) : ℂ) ((σ ^ 2 - θ : ℝ) : ℂ) := by
+      symmetricEllipticRC ((σ ^ 2 : ℝ) : ℂ) ((σ ^ 2 - θ : ℝ) : ℂ) := by
   let σ := (α * β + θ) / (α + β)
   have hd : 0 < α + β := by linarith
   have hθ : 0 < θ := by linarith
@@ -844,7 +872,7 @@ theorem symEllIntRC_addition_theta {α β θ : ℝ} (hα : 0 < α) (hβ : 0 < β
       √(σ ^ 2) * (σ ^ 2 - θ + l)) ^ 2 / l ^ 2 := by
     rw [h1, h2, h3, Real.sqrt_sq hα.le, Real.sqrt_sq hs.le, hnum]
     field_simp
-  have H := symEllIntRC_add_symEllIntRC (sq_nonneg σ) hy hl hμ
+  have H := symmetricEllipticRC_add_symmetricEllipticRC (sq_nonneg σ) hy hl hμ
   rw [h1, h2, h3, h4] at H
   exact H
 
@@ -853,18 +881,18 @@ theorem symEllIntRC_addition_theta {α β θ : ℝ} (hα : 0 < α) (hβ : 0 < β
 `x ≥ 0` but divides by `x`; we assume `x > 0`. (`R_C` with a negative second argument is the
 Cauchy principal value.) -/
 @[dlmf 19.26.E14, dlmf 19.26.E15]
-theorem symEllIntRC_addition_pq {x y p q : ℝ} (hx : 0 < x) (hy : 0 ≤ y) (hp : p ≠ 0)
+theorem symmetricEllipticRC_addition_pq {x y p q : ℝ} (hx : 0 < x) (hy : 0 ≤ y) (hp : p ≠ 0)
     (hq : q ≠ 0) (hpq : (p - x) * (q - x) = (y - x) ^ 2) :
     let ξ := y ^ 2 / x
     let η := p * q / x
-    ((p - y : ℝ) : ℂ) * symEllIntRC x p + ((q - y : ℝ) : ℂ) * symEllIntRC x q =
-      ((η - ξ : ℝ) : ℂ) * symEllIntRC ξ η := by
+    ((p - y : ℝ) : ℂ) * symmetricEllipticRC x p + ((q - y : ℝ) : ℂ) * symmetricEllipticRC x q =
+      ((η - ξ : ℝ) : ℂ) * symmetricEllipticRC ξ η := by
   sorry
 
 /-- DLMF 19.26.15 (last equation): `η - ξ = p + q - 2y` under `(p - x)(q - x) = (y - x)²`,
 `ξ = y²/x`, `η = pq/x`, `x ≠ 0`. -/
 @[dlmf 19.26.E15]
-theorem symEllIntRC_addition_eta_sub_xi {x y p q : ℝ} (hx : x ≠ 0)
+theorem symmetricEllipticRC_addition_eta_sub_xi {x y p q : ℝ} (hx : x ≠ 0)
     (hpq : (p - x) * (q - x) = (y - x) ^ 2) :
     p * q / x - y ^ 2 / x = p + q - 2 * y := by
   field_simp
@@ -875,34 +903,36 @@ theorem symEllIntRC_addition_eta_sub_xi {x y p q : ℝ} (hx : x ≠ 0)
 /-- DLMF 19.26.17: `√α R_C(β, α + β) + √β R_C(α, α + β) = π/2`, for
 `α, β ∈ ℂ \ (-∞, 0)` with `α + β > 0`. -/
 @[dlmf 19.26.E17]
-theorem symEllIntRC_addition_zero {α β : ℂ} (hα : SymEllIntArg α) (hβ : SymEllIntArg β)
+theorem symmetricEllipticRC_addition_zero {α β : ℂ} (hα : IsCarlsonArgument α)
+    (hβ : IsCarlsonArgument β)
     (hαβ : 0 < (α + β).re) (hαβ' : (α + β).im = 0) :
-    α ^ (1 / 2 : ℂ) * symEllIntRC β (α + β) + β ^ (1 / 2 : ℂ) * symEllIntRC α (α + β) = π / 2 := by
+    α ^ (1 / 2 : ℂ) * symmetricEllipticRC β (α + β) + β ^ (1 / 2 : ℂ) *
+        symmetricEllipticRC α (α + β) = π / 2 := by
   sorry
 
 /-! ### §19.26(iii) Duplication formulas -/
 
 /-- DLMF 19.26.19: `λ = √x √y + √y √z + √z √x` (principal square roots). -/
 @[dlmf 19.26.E19]
-def symEllIntDupLambda (x y z : ℂ) : ℂ :=
+def duplicationLambda (x y z : ℂ) : ℂ :=
   x ^ (1 / 2 : ℂ) * y ^ (1 / 2 : ℂ) + y ^ (1 / 2 : ℂ) * z ^ (1 / 2 : ℂ) +
     z ^ (1 / 2 : ℂ) * x ^ (1 / 2 : ℂ)
 
 /-- DLMF's `λ` is `lean-codes`' `Carlson.dupLambda`. -/
-theorem symEllIntDupLambda_eq_dupLambda (x y z : ℂ) :
-    symEllIntDupLambda x y z = Carlson.dupLambda x y z := by
-  unfold symEllIntDupLambda Carlson.dupLambda; ring
+theorem duplicationLambda_eq_dupLambda (x y z : ℂ) :
+    duplicationLambda x y z = Carlson.dupLambda x y z := by
+  unfold duplicationLambda Carlson.dupLambda; ring
 
 /-- DLMF 19.26.18 (first equality), **stronger than DLMF**:
 `R_F(x, y, z) = 2 R_F(x + λ, y + λ, z + λ)` for all `x, y, z ∈ ℂ \ (-∞, 0]`
 (DLMF: positive `x, y, z`). From `lean-codes`' `Carlson.carlsonRF_duplication`. -/
 @[dlmf 19.26.E18]
-theorem symEllIntRF_duplication {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane)
+theorem symmetricEllipticRF_duplication {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane)
     (hz : z ∈ slitPlane) :
-    symEllIntRF x y z = 2 * symEllIntRF (x + symEllIntDupLambda x y z)
-      (y + symEllIntDupLambda x y z) (z + symEllIntDupLambda x y z) := by
-  rw [symEllIntDupLambda_eq_dupLambda, symEllIntRF_eq_carlsonRF hx hy hz,
-    symEllIntRF_eq_carlsonRF (Carlson.add_dupLambda_mem hx hy hz)
+    symmetricEllipticRF x y z = 2 * symmetricEllipticRF (x + duplicationLambda x y z)
+      (y + duplicationLambda x y z) (z + duplicationLambda x y z) := by
+  rw [duplicationLambda_eq_dupLambda, symmetricEllipticRF_eq_carlsonRF hx hy hz,
+    symmetricEllipticRF_eq_carlsonRF (Carlson.add_dupLambda_mem hx hy hz)
       (by rw [← Carlson.dupLambda_comm_left]; exact Carlson.add_dupLambda_mem hy hx hz)
       (by rw [← Carlson.dupLambda_comm_right, ← Carlson.dupLambda_comm_left]
           exact Carlson.add_dupLambda_mem hz hx hy)]
@@ -910,14 +940,14 @@ theorem symEllIntRF_duplication {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y ∈
 
 /-- DLMF 19.26.18 (first equality) at one vanishing variable:
 `R_F(0, y, z) = 2 R_F(λ, y + λ, z + λ)` with `λ = √y √z`, for `y, z ∈ ℂ \ (-∞, 0]`. From
-`lean-codes`' `Carlson.carlsonRK_duplication`. Together with `symEllIntRF_duplication` and the
-symmetry of `R_F` this covers DLMF's domain (positive variables, at most one zero). -/
+`lean-codes`' `Carlson.carlsonRK_duplication`. Together with `symmetricEllipticRF_duplication` and
+the symmetry of `R_F` this covers DLMF's domain (positive variables, at most one zero). -/
 @[dlmf 19.26.E18]
-theorem symEllIntRF_duplication_zero {y z : ℂ} (hy : y ∈ slitPlane) (hz : z ∈ slitPlane) :
-    symEllIntRF 0 y z = 2 * symEllIntRF (0 + symEllIntDupLambda 0 y z)
-      (y + symEllIntDupLambda 0 y z) (z + symEllIntDupLambda 0 y z) := by
-  have hL : symEllIntDupLambda 0 y z = y ^ (1 / 2 : ℂ) * z ^ (1 / 2 : ℂ) := by
-    simp [symEllIntDupLambda]
+theorem symmetricEllipticRF_duplication_zero {y z : ℂ} (hy : y ∈ slitPlane) (hz : z ∈ slitPlane) :
+    symmetricEllipticRF 0 y z = 2 * symmetricEllipticRF (0 + duplicationLambda 0 y z)
+      (y + duplicationLambda 0 y z) (z + duplicationLambda 0 y z) := by
+  have hL : duplicationLambda 0 y z = y ^ (1 / 2 : ℂ) * z ^ (1 / 2 : ℂ) := by
+    simp [duplicationLambda]
   have hm : y ^ (1 / 2 : ℂ) * z ^ (1 / 2 : ℂ) ∈ slitPlane :=
     Carlson.mul_mem_slitPlane_of_re_pos (Carlson.re_cpow_half_pos hy) (Carlson.re_cpow_half_pos hz)
   have hadd : ∀ a b : ℂ, a ∈ slitPlane → b ∈ slitPlane →
@@ -931,11 +961,11 @@ theorem symEllIntRF_duplication_zero {y z : ℂ} (hy : y ∈ slitPlane) (hz : z 
     rw [add_re]; linarith [Carlson.re_cpow_half_pos ha, Carlson.re_cpow_half_pos hb]
   have hz' : z + y ^ (1 / 2 : ℂ) * z ^ (1 / 2 : ℂ) ∈ slitPlane := by
     rw [mul_comm]; exact hadd z y hz hy
-  have hrot : ∀ a b c : ℂ, symEllIntRF a b c = symEllIntRF b c a := fun a b c => by
-    rw [symEllIntRF_comm_left, symEllIntRF_comm_right]
+  have hrot : ∀ a b c : ℂ, symmetricEllipticRF a b c = symmetricEllipticRF b c a := fun a b c => by
+    rw [symmetricEllipticRF_comm_left, symmetricEllipticRF_comm_right]
   rw [hL, zero_add, hrot (y ^ (1 / 2 : ℂ) * z ^ (1 / 2 : ℂ)),
-    symEllIntRF_zero_eq_pi_div_two_mul_carlsonRK hy hz,
-    symEllIntRF_eq_carlsonRF (hadd y z hy hz) hz' hm, Carlson.carlsonRK_duplication hy hz]
+    symmetricEllipticRF_zero_eq_pi_div_two_mul_carlsonRK hy hz,
+    symmetricEllipticRF_eq_carlsonRF (hadd y z hy hz) hz' hm, Carlson.carlsonRK_duplication hy hz]
 
 /-- Formula under the stated hypotheses: `a / 4 ∈ slitPlane`. -/
 private lemma div_four_mem_slitPlane {a : ℂ} (ha : a ∈ slitPlane) : a / 4 ∈ slitPlane := by
@@ -959,13 +989,14 @@ private lemma one_quarter_cpow_neg_half : ((1 / 4 : ℝ) : ℂ) ^ (-1 / 2 : ℂ)
 `2 R_F(x + λ, y + λ, z + λ) = R_F((x + λ)/4, (y + λ)/4, (z + λ)/4)` for all
 `x, y, z ∈ ℂ \ (-∞, 0]`, by homogeneity (`Carlson.carlsonRF_mul_of_pos`). -/
 @[dlmf 19.26.E18]
-theorem symEllIntRF_duplication_quarter {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane)
+theorem symmetricEllipticRF_duplication_quarter {x y z : ℂ} (hx : x ∈ slitPlane)
+    (hy : y ∈ slitPlane)
     (hz : z ∈ slitPlane) :
-    2 * symEllIntRF (x + symEllIntDupLambda x y z) (y + symEllIntDupLambda x y z)
-        (z + symEllIntDupLambda x y z) =
-      symEllIntRF ((x + symEllIntDupLambda x y z) / 4) ((y + symEllIntDupLambda x y z) / 4)
-        ((z + symEllIntDupLambda x y z) / 4) := by
-  rw [symEllIntDupLambda_eq_dupLambda]
+    2 * symmetricEllipticRF (x + duplicationLambda x y z) (y + duplicationLambda x y z)
+        (z + duplicationLambda x y z) =
+      symmetricEllipticRF ((x + duplicationLambda x y z) / 4) ((y + duplicationLambda x y z) / 4)
+        ((z + duplicationLambda x y z) / 4) := by
+  rw [duplicationLambda_eq_dupLambda]
   have h1 := Carlson.add_dupLambda_mem hx hy hz
   have h2 : y + Carlson.dupLambda x y z ∈ slitPlane := by
     rw [← Carlson.dupLambda_comm_left]; exact Carlson.add_dupLambda_mem hy hx hz
@@ -973,16 +1004,17 @@ theorem symEllIntRF_duplication_quarter {x y z : ℂ} (hx : x ∈ slitPlane) (hy
     rw [← Carlson.dupLambda_comm_right, ← Carlson.dupLambda_comm_left]
     exact Carlson.add_dupLambda_mem hz hx hy
   have hq : ∀ w : ℂ, w / 4 = ((1 / 4 : ℝ) : ℂ) * w := fun w => by push_cast; ring
-  rw [symEllIntRF_eq_carlsonRF h1 h2 h3,
-    symEllIntRF_eq_carlsonRF (div_four_mem_slitPlane h1) (div_four_mem_slitPlane h2)
+  rw [symmetricEllipticRF_eq_carlsonRF h1 h2 h3,
+    symmetricEllipticRF_eq_carlsonRF (div_four_mem_slitPlane h1) (div_four_mem_slitPlane h2)
       (div_four_mem_slitPlane h3), hq, hq, hq,
     Carlson.carlsonRF_mul_of_pos (by norm_num) h1 h2 h3, one_quarter_cpow_neg_half]
 
 /-- Differentiating duplication of `R_F` gives duplication of `R_D`, including a zero first
 argument. The other two arguments are positive. -/
-lemma symEllIntRD_duplication_of_nonneg {x y z : ℝ} (hx : 0 ≤ x) (hy : 0 < y) (hz : 0 < z) :
+lemma symmetricEllipticRD_duplication_of_nonneg {x y z : ℝ} (hx : 0 ≤ x) (hy : 0 < y) (hz : 0 < z) :
     let l := √x * √y + √y * √z + √z * √x
-    symEllIntRD x y z = 2 * symEllIntRD ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) +
+    symmetricEllipticRD x y z = 2 *
+        symmetricEllipticRD ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) +
       ((3 / (√z * (z + l)) : ℝ) : ℂ) := by
   let l : ℝ → ℝ := fun w => √x * √y + √y * √w + √w * √x
   let d := (√x + √y) / (2 * √z)
@@ -1000,36 +1032,39 @@ lemma symEllIntRD_duplication_of_nonneg {x y z : ℝ} (hx : 0 ≤ x) (hy : 0 < y
     dsimp only [d]
     ring
   have HC := (hasDerivAt_carlsonRF_translate_right hD hX hY hZ).const_mul (2 : ℂ)
-  have hev : (fun w : ℝ => symEllIntRF x y w) =ᶠ[𝓝 z] fun w : ℝ =>
+  have hev : (fun w : ℝ => symmetricEllipticRF x y w) =ᶠ[𝓝 z] fun w : ℝ =>
       2 * Carlson.carlsonRF (x + l w : ℝ) (y + l w : ℝ) (w + l w : ℝ) := by
     filter_upwards [eventually_gt_nhds hz] with w hw
     have hwc := ofReal_mem_slitPlane.mpr hw
     have hyc := ofReal_mem_slitPlane.mpr hy
-    have hscale : symEllIntDupLambda x y w = ((l w : ℝ) : ℂ) := by
-      unfold symEllIntDupLambda
+    have hscale : duplicationLambda x y w = ((l w : ℝ) : ℂ) := by
+      unfold duplicationLambda
       rw [Carlson.ofReal_cpow_half hx, Carlson.ofReal_cpow_half hy.le,
           Carlson.ofReal_cpow_half hw.le]
       dsimp only [l]; push_cast; ring
-    have H : symEllIntRF x y w = 2 * symEllIntRF (x + l w : ℝ) (y + l w : ℝ) (w + l w : ℝ) := by
+    have H : symmetricEllipticRF x y w = 2 *
+        symmetricEllipticRF (x + l w : ℝ) (y + l w : ℝ) (w + l w : ℝ) := by
       by_cases hx0 : x = 0
       · subst x
-        have H := symEllIntRF_duplication_zero hyc hwc
+        have H := symmetricEllipticRF_duplication_zero hyc hwc
         simp only [ofReal_zero] at hscale
         rw [hscale] at H
         simpa only [ofReal_zero, zero_add, ← ofReal_add] using H
-      · have H := symEllIntRF_duplication
+      · have H := symmetricEllipticRF_duplication
           (ofReal_mem_slitPlane.mpr (lt_of_le_of_ne hx (Ne.symm hx0))) hyc hwc
         rw [hscale] at H
         simpa only [← ofReal_add] using H
-    rw [H, symEllIntRF_eq_carlsonRF (ofReal_mem_slitPlane.mpr (by linarith [hl w hw]))
+    rw [H, symmetricEllipticRF_eq_carlsonRF (ofReal_mem_slitPlane.mpr (by linarith [hl w hw]))
       (ofReal_mem_slitPlane.mpr (by linarith [hl w hw]))
           (ofReal_mem_slitPlane.mpr (by linarith [hl w hw]))]
-  have HE := ((hasDerivAt_symEllIntRF_right_real hx hy hz).congr_of_eventuallyEq hev.symm).unique HC
+  have HE := ((hasDerivAt_symmetricEllipticRF_right_real hx hy hz).congr_of_eventuallyEq
+      hev.symm).unique HC
   rw [← inv_cpow_half_eq_cpow_neg_half, ← inv_cpow_half_eq_cpow_neg_half,
       ← inv_cpow_half_eq_cpow_neg_half,
     Carlson.ofReal_cpow_half hX.le, Carlson.ofReal_cpow_half hY.le,
         Carlson.ofReal_cpow_half hZ.le] at HE
-  have HR : symEllIntRD x y z = 2 * symEllIntRD (x + l z : ℝ) (y + l z : ℝ) (z + l z : ℝ) +
+  have HR : symmetricEllipticRD x y z = 2 *
+      symmetricEllipticRD (x + l z : ℝ) (y + l z : ℝ) (z + l z : ℝ) +
       ((6 * d * (√(x + l z) * √(y + l z) * √(z + l z))⁻¹ : ℝ) : ℂ) := by
     push_cast at HE ⊢
     simp only [mul_inv_rev]
@@ -1052,15 +1087,17 @@ lemma symEllIntRD_duplication_of_nonneg {x y z : ℝ} (hx : 0 ≤ x) (hy : 0 < y
     dsimp only [d]
     field_simp
     ring
-  change symEllIntRD x y z = 2 * symEllIntRD (x + l z : ℝ) (y + l z : ℝ) (z + l z : ℝ) + _
+  change symmetricEllipticRD x y z = 2 *
+      symmetricEllipticRD (x + l z : ℝ) (y + l z : ℝ) (z + l z : ℝ) + _
   rw [HR, hcorr]
 
 /-- DLMF 19.26.20: `R_D(x, y, z) = 2 R_D(x + λ, y + λ, z + λ) + 3/(√z (z + λ))`, `λ` as in
 (19.26.19), under the standing assumptions with `z > 0`. -/
 @[dlmf 19.26.E20]
-theorem symEllIntRD_duplication {x y z : ℝ} (h : CarlsonNonnegDomain x y z) (hz : 0 < z) :
+theorem symmetricEllipticRD_duplication {x y z : ℝ} (h : CarlsonNonnegDomain x y z) (hz : 0 < z) :
     let l := √x * √y + √y * √z + √z * √x
-    symEllIntRD x y z = 2 * symEllIntRD ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) +
+    symmetricEllipticRD x y z = 2 *
+        symmetricEllipticRD ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) +
       ((3 / (√z * (z + l)) : ℝ) : ℂ) := by
   rcases h with ⟨hx, hy, _, hx0, hy0⟩
   by_cases hyz : y = 0
@@ -1069,19 +1106,20 @@ theorem symEllIntRD_duplication {x y z : ℝ} (h : CarlsonNonnegDomain x y z) (h
       by_contra hh
       have hxx : x = 0 := by linarith
       exact (hx0 hxx).1.ne' rfl
-    have H := symEllIntRD_duplication_of_nonneg (x := (0 : ℝ)) (by norm_num) hx' hz
+    have H := symmetricEllipticRD_duplication_of_nonneg (x := (0 : ℝ)) (by norm_num) hx' hz
     simp only [Real.sqrt_zero, zero_mul, mul_zero, zero_add, add_zero] at H
-    simpa only [ofReal_zero, symEllIntRD_comm, Real.sqrt_zero, zero_mul, mul_zero,
+    simpa only [ofReal_zero, symmetricEllipticRD_comm, Real.sqrt_zero, zero_mul, mul_zero,
       zero_add, add_zero, mul_comm] using H
   · have hy' : 0 < y := lt_of_le_of_ne hy (Ne.symm hyz)
-    exact symEllIntRD_duplication_of_nonneg hx hy' hz
+    exact symmetricEllipticRD_duplication_of_nonneg hx hy' hz
 
 
 /-- The real duplication formula for `R_G` with the last two arguments positive. -/
-lemma symEllIntRG_duplication_of_nonneg {x y z : ℝ} (hx : 0 ≤ x) (hy : 0 < y) (hz : 0 < z) :
+lemma symmetricEllipticRG_duplication_of_nonneg {x y z : ℝ} (hx : 0 ≤ x) (hy : 0 < y) (hz : 0 < z) :
     let l := √x * √y + √y * √z + √z * √x
-    2 * symEllIntRG x y z = 4 * symEllIntRG ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) -
-      l * symEllIntRF x y z - √x - √y - √z := by
+    2 * symmetricEllipticRG x y z = 4 *
+        symmetricEllipticRG ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) -
+      l * symmetricEllipticRF x y z - √x - √y - √z := by
   let l := √x * √y + √y * √z + √z * √x
   have hl : 0 < l := by dsimp only [l]; positivity
   have hX : 0 < x + l := by linarith
@@ -1113,41 +1151,44 @@ lemma symEllIntRG_duplication_of_nonneg {x y z : ℝ} (hx : 0 ≤ x) (hy : 0 < y
     rw [hratio, hdif]
     field_simp
     nlinarith [Real.sq_sqrt hz.le]
-  have hxC : SymEllIntArg (x : ℂ) := by
+  have hxC : IsCarlsonArgument (x : ℂ) := by
     by_cases h : x = 0
     · exact Or.inr (by simp [h])
     · exact Or.inl (ofReal_mem_slitPlane.mpr (lt_of_le_of_ne hx (Ne.symm h)))
-  have hG := two_mul_symEllIntRG hxC (ofReal_mem_slitPlane.mpr hy) (ofReal_mem_slitPlane.mpr hz)
-  have hGs := two_mul_symEllIntRG (Or.inl (ofReal_mem_slitPlane.mpr hX))
+  have hG := two_mul_symmetricEllipticRG hxC (ofReal_mem_slitPlane.mpr hy)
+      (ofReal_mem_slitPlane.mpr hz)
+  have hGs := two_mul_symmetricEllipticRG (Or.inl (ofReal_mem_slitPlane.mpr hX))
     (ofReal_mem_slitPlane.mpr hY) (ofReal_mem_slitPlane.mpr hZ)
   rw [← inv_cpow_half_eq_cpow_neg_half, Carlson.ofReal_cpow_half hx, Carlson.ofReal_cpow_half hy.le,
     Carlson.ofReal_cpow_half hz.le] at hG
   rw [← inv_cpow_half_eq_cpow_neg_half, Carlson.ofReal_cpow_half hX.le,
       Carlson.ofReal_cpow_half hY.le,
     Carlson.ofReal_cpow_half hZ.le] at hGs
-  have hscale : symEllIntDupLambda x y z = (l : ℂ) := by
-    unfold symEllIntDupLambda
+  have hscale : duplicationLambda x y z = (l : ℂ) := by
+    unfold duplicationLambda
     rw [Carlson.ofReal_cpow_half hx, Carlson.ofReal_cpow_half hy.le, Carlson.ofReal_cpow_half hz.le]
     dsimp only [l]; push_cast; ring
-  have hRF : symEllIntRF x y z = 2 * symEllIntRF (x + l : ℝ) (y + l : ℝ) (z + l : ℝ) := by
+  have hRF : symmetricEllipticRF x y z = 2 *
+      symmetricEllipticRF (x + l : ℝ) (y + l : ℝ) (z + l : ℝ) := by
     by_cases hx0 : x = 0
     · subst x
-      have H := symEllIntRF_duplication_zero (ofReal_mem_slitPlane.mpr hy)
+      have H := symmetricEllipticRF_duplication_zero (ofReal_mem_slitPlane.mpr hy)
           (ofReal_mem_slitPlane.mpr hz)
       simp only [ofReal_zero] at hscale
       rw [hscale] at H
       simpa only [ofReal_zero, zero_add, ← ofReal_add] using H
-    · have H := symEllIntRF_duplication
+    · have H := symmetricEllipticRF_duplication
         (ofReal_mem_slitPlane.mpr (lt_of_le_of_ne hx (Ne.symm hx0)))
         (ofReal_mem_slitPlane.mpr hy) (ofReal_mem_slitPlane.mpr hz)
       rw [hscale] at H
       simpa only [← ofReal_add] using H
-  have hRD := symEllIntRD_duplication_of_nonneg hx hy hz
-  change symEllIntRD x y z = 2 * symEllIntRD (x + l : ℝ) (y + l : ℝ) (z + l : ℝ) +
+  have hRD := symmetricEllipticRD_duplication_of_nonneg hx hy hz
+  change symmetricEllipticRD x y z = 2 * symmetricEllipticRD (x + l : ℝ) (y + l : ℝ) (z + l : ℝ) +
     ((3 / (√z * (z + l)) : ℝ) : ℂ) at hRD
   have hSC := congrArg (fun r : ℝ => (r : ℂ)) hscalar
-  change 2 * symEllIntRG x y z = 4 * symEllIntRG (x + l : ℝ) (y + l : ℝ) (z + l : ℝ) -
-    l * symEllIntRF x y z - √x - √y - √z
+  change 2 * symmetricEllipticRG x y z = 4 *
+      symmetricEllipticRG (x + l : ℝ) (y + l : ℝ) (z + l : ℝ) -
+    l * symmetricEllipticRF x y z - √x - √y - √z
   push_cast at hG hGs hRF hRD hSC ⊢
   simp only [div_eq_mul_inv, mul_inv_rev] at hSC hRD
   linear_combination hG - 2 * hGs + ((z : ℂ) + l) * hRF -
@@ -1156,10 +1197,11 @@ lemma symEllIntRG_duplication_of_nonneg {x y z : ℝ} (hx : 0 ≤ x) (hy : 0 < y
 /-- DLMF 19.26.21: `2 R_G(x, y, z) = 4 R_G(x + λ, y + λ, z + λ) - λ R_F(x, y, z) - √x - √y - √z`,
 `λ` as in (19.26.19), under the standing assumptions. -/
 @[dlmf 19.26.E21]
-theorem symEllIntRG_duplication {x y z : ℝ} (h : CarlsonNonnegDomain x y z) :
+theorem symmetricEllipticRG_duplication {x y z : ℝ} (h : CarlsonNonnegDomain x y z) :
     let l := √x * √y + √y * √z + √z * √x
-    2 * symEllIntRG x y z = 4 * symEllIntRG ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) -
-      l * symEllIntRF x y z - √x - √y - √z := by
+    2 * symmetricEllipticRG x y z = 4 *
+        symmetricEllipticRG ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) -
+      l * symmetricEllipticRF x y z - √x - √y - √z := by
   rcases h with ⟨hx, hy, hz, hx0, hy0⟩
   by_cases hz0 : z = 0
   · subst z
@@ -1171,10 +1213,12 @@ theorem symEllIntRG_duplication {x y z : ℝ} (h : CarlsonNonnegDomain x y z) :
       by_contra hh
       have hyy : y = 0 := by linarith
       exact (hy0 hyy).ne' rfl
-    have H := symEllIntRG_duplication_of_nonneg (x := (0 : ℝ)) (by norm_num) hx' hy'
+    have H := symmetricEllipticRG_duplication_of_nonneg (x := (0 : ℝ)) (by norm_num) hx' hy'
     simp only [Real.sqrt_zero, zero_mul, mul_zero, zero_add, add_zero] at H ⊢
-    simpa only [ofReal_zero, sub_zero, symEllIntRG_comm_left, symEllIntRG_comm_right,
-      symEllIntRF_comm_left, symEllIntRF_comm_right, add_comm, add_left_comm, add_assoc,
+    simpa only [ofReal_zero, sub_zero, symmetricEllipticRG_comm_left,
+        symmetricEllipticRG_comm_right,
+      symmetricEllipticRF_comm_left, symmetricEllipticRF_comm_right, add_comm,
+          add_left_comm, add_assoc,
           mul_comm] using H
   · have hz' : 0 < z := lt_of_le_of_ne hz (Ne.symm hz0)
     by_cases hyz : y = 0
@@ -1183,29 +1227,32 @@ theorem symEllIntRG_duplication {x y z : ℝ} (h : CarlsonNonnegDomain x y z) :
         by_contra hh
         have hxx : x = 0 := by linarith
         exact (hx0 hxx).1.ne' rfl
-      have H := symEllIntRG_duplication_of_nonneg (x := (0 : ℝ)) (by norm_num) hx' hz'
+      have H := symmetricEllipticRG_duplication_of_nonneg (x := (0 : ℝ)) (by norm_num) hx' hz'
       simp only [Real.sqrt_zero, zero_mul, mul_zero, zero_add, add_zero] at H ⊢
-      simpa only [ofReal_zero, sub_zero, symEllIntRG_comm_left, symEllIntRF_comm_left,
+      simpa only [ofReal_zero, sub_zero, symmetricEllipticRG_comm_left,
+          symmetricEllipticRF_comm_left,
         add_comm, add_left_comm, add_assoc, mul_comm] using H
-    · exact symEllIntRG_duplication_of_nonneg hx (lt_of_le_of_ne hy (Ne.symm hyz)) hz'
+    · exact symmetricEllipticRG_duplication_of_nonneg hx (lt_of_le_of_ne hy (Ne.symm hyz)) hz'
 
 /-- DLMF 19.26.22 with 19.26.23: `R_J(x, y, z, p) = 2 R_J(x + λ, y + λ, z + λ, p + λ)
 + 3 R_C(α², β²)`, `α = p(√x + √y + √z) + √x√y√z`, `β = √p (p + λ)`, `λ` as in (19.26.19),
 under the standing assumptions and `p > 0`. -/
 @[dlmf 19.26.E22, dlmf 19.26.E23]
-theorem symEllIntRJ_duplication {x y z p : ℝ} (h : CarlsonNonnegDomain x y z) (hp : 0 < p) :
+theorem symmetricEllipticRJ_duplication {x y z p : ℝ} (h : CarlsonNonnegDomain x y z) (hp : 0 < p) :
     let l := √x * √y + √y * √z + √z * √x
     let α := p * (√x + √y + √z) + √x * √y * √z
     let β := √p * (p + l)
-    symEllIntRJ x y z p = 2 * symEllIntRJ ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ)
-      ((p + l : ℝ) : ℂ) + 3 * symEllIntRC ((α ^ 2 : ℝ) : ℂ) ((β ^ 2 : ℝ) : ℂ) := by
+    symmetricEllipticRJ x y z p = 2 *
+        symmetricEllipticRJ ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ)
+      ((p + l : ℝ) : ℂ) + 3 * symmetricEllipticRC ((α ^ 2 : ℝ) : ℂ) ((β ^ 2 : ℝ) : ℂ) := by
   sorry
 
 /-- DLMF 19.26.23 (identities): with `α, β` as in (19.26.23),
 `β ± α = (√p ± √x)(√p ± √y)(√p ± √z)` (either sign throughout) and
 `β² - α² = (p - x)(p - y)(p - z)`, for `x, y, z, p ≥ 0`. -/
 @[dlmf 19.26.E23]
-theorem symEllIntRJ_duplication_alpha_beta {x y z p : ℝ} (hx : 0 ≤ x) (hy : 0 ≤ y) (hz : 0 ≤ z)
+theorem symmetricEllipticRJ_duplication_alpha_beta {x y z p : ℝ} (hx : 0 ≤ x)
+    (hy : 0 ≤ y) (hz : 0 ≤ z)
     (hp : 0 ≤ p) :
     let l := √x * √y + √y * √z + √z * √x
     let α := p * (√x + √y + √z) + √x * √y * √z
@@ -1231,7 +1278,7 @@ theorem symEllIntRJ_duplication_alpha_beta {x y z p : ℝ} (hx : 0 ≤ x) (hy : 
 `z = (ξζ + ηζ - ξη)²/(4ξηζ)`, `(ξ, η, ζ) = (x + λ, y + λ, z + λ)`, `λ` as in (19.26.19), for
 `x, y, z ≥ 0` at most one of them `0`; the formulas for `x`, `y` follow by permutation. -/
 @[dlmf 19.26.E24]
-theorem symEllInt_duplication_inverse {x y z : ℝ} (h : CarlsonNonnegDomain x y z) :
+theorem symmetricElliptic_duplication_inverse {x y z : ℝ} (h : CarlsonNonnegDomain x y z) :
     let l := √x * √y + √y * √z + √z * √x
     let ξ := x + l; let η := y + l; let ζ := z + l
     z = (ξ * ζ + η * ζ - ξ * η) ^ 2 / (4 * ξ * η * ζ) := by
@@ -1265,9 +1312,9 @@ theorem symEllInt_duplication_inverse {x y z : ℝ} (h : CarlsonNonnegDomain x y
 
 /-- DLMF 19.26.25: `R_C(x, y) = 2 R_C(x + λ, y + λ)`, `λ = y + 2√x√y`, for `x ≥ 0`, `y > 0`. -/
 @[dlmf 19.26.E25]
-theorem symEllIntRC_duplication {x y : ℝ} (hx : 0 ≤ x) (hy : 0 < y) :
+theorem symmetricEllipticRC_duplication {x y : ℝ} (hx : 0 ≤ x) (hy : 0 < y) :
     let l := y + 2 * √x * √y
-    symEllIntRC x y = 2 * symEllIntRC ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) := by
+    symmetricEllipticRC x y = 2 * symmetricEllipticRC ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) := by
   let l := y + 2 * √x * √y
   have hl : 0 < l := by dsimp [l]; positivity
   have hnn (r : ℝ) (hr : 0 < r) : ¬ IsNegReal (r : ℂ) :=
@@ -1275,8 +1322,8 @@ theorem symEllIntRC_duplication {x y : ℝ} (hx : 0 ≤ x) (hy : 0 < y) :
   have hroot (r : ℝ) (hr : 0 ≤ r) : (r : ℂ) ^ (1 / 2 : ℂ) = (√r : ℂ) := by
     rw [show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by norm_num,
       ← Complex.ofReal_cpow hr, ← Real.sqrt_eq_rpow]
-  have hdup : symEllIntDupLambda (x : ℂ) y y = (l : ℂ) := by
-    unfold symEllIntDupLambda
+  have hdup : duplicationLambda (x : ℂ) y y = (l : ℂ) := by
+    unfold duplicationLambda
     rw [hroot x hx, hroot y hy.le]
     dsimp [l]
     have hy2 : (√y : ℂ) * √y = (y : ℂ) := by
@@ -1284,17 +1331,18 @@ theorem symEllIntRC_duplication {x y : ℝ} (hx : 0 ≤ x) (hy : 0 < y) :
     rw [hy2]
     push_cast
     ring
-  change symEllIntRC x y = 2 * symEllIntRC ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ)
-  rw [symEllIntRC_eq_symEllIntRF _ (hnn y hy),
-    symEllIntRC_eq_symEllIntRF _ (hnn (y + l) (by linarith))]
+  change symmetricEllipticRC x y = 2 * symmetricEllipticRC ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ)
+  rw [symmetricEllipticRC_eq_symmetricEllipticRF _ (hnn y hy),
+    symmetricEllipticRC_eq_symmetricEllipticRF _ (hnn (y + l) (by linarith))]
   by_cases hx0 : x = 0
   · subst x
-    have h := symEllIntRF_duplication_zero (ofReal_mem_slitPlane.mpr hy)
+    have h := symmetricEllipticRF_duplication_zero (ofReal_mem_slitPlane.mpr hy)
       (ofReal_mem_slitPlane.mpr hy)
-    change symEllIntDupLambda 0 (y : ℂ) y = (l : ℂ) at hdup
+    change duplicationLambda 0 (y : ℂ) y = (l : ℂ) at hdup
     rw [hdup] at h
     simpa only [zero_add, Complex.ofReal_add, ofReal_zero] using h
-  · have h := symEllIntRF_duplication (ofReal_mem_slitPlane.mpr (lt_of_le_of_ne hx (Ne.symm hx0)))
+  · have h := symmetricEllipticRF_duplication
+        (ofReal_mem_slitPlane.mpr (lt_of_le_of_ne hx (Ne.symm hx0)))
       (ofReal_mem_slitPlane.mpr hy) (ofReal_mem_slitPlane.mpr hy)
     simpa only [hdup, ← Complex.ofReal_add] using h
 
@@ -1302,8 +1350,9 @@ theorem symEllIntRC_duplication {x y : ℝ} (hx : 0 ≤ x) (hy : 0 < y) :
 `x = 0` or `ℜ x > 0`, and `ℜ y > 0`. The first squared argument must avoid the negative
 real cut; a nonzero purely imaginary `x` is outside this domain. -/
 @[dlmf 19.26.E26]
-theorem symEllIntRC_sq_eq {x y : ℂ} (hx : x = 0 ∨ 0 < x.re) (hy : 0 < y.re) :
-    symEllIntRC (x ^ 2) (y ^ 2) = symEllIntRC (((x + y) / 2) ^ 2) ((x + y) / 2 * y) := by
+theorem symmetricEllipticRC_sq_eq {x y : ℂ} (hx : x = 0 ∨ 0 < x.re) (hy : 0 < y.re) :
+    symmetricEllipticRC (x ^ 2) (y ^ 2) =
+        symmetricEllipticRC (((x + y) / 2) ^ 2) ((x + y) / 2 * y) := by
   have hy2 : y ^ 2 ∈ slitPlane := by
     simpa only [pow_two] using Carlson.mul_mem_slitPlane_of_re_pos hy hy
   have hy0 : y ≠ 0 := slitPlane_ne_zero (Or.inl hy)
@@ -1314,12 +1363,12 @@ theorem symEllIntRC_sq_eq {x y : ℂ} (hx : x = 0 ∨ 0 < x.re) (hy : 0 < y.re) 
   have hay : (x + y) / 2 * y ∈ slitPlane := Carlson.mul_mem_slitPlane_of_re_pos ha hy
   rcases hx with rfl | hx
   · simp only [zero_pow two_ne_zero, zero_add] at *
-    have hleft : symEllIntRC 0 (y ^ 2) = (π / 2) * y⁻¹ := by
-      rw [symEllIntRC_eq_symEllIntRF _ (not_isNegReal_of_mem_slitPlane hy2),
-        symEllIntRF_zero_left hy2 hy2]
+    have hleft : symmetricEllipticRC 0 (y ^ 2) = (π / 2) * y⁻¹ := by
+      rw [symmetricEllipticRC_eq_symmetricEllipticRF _ (not_isNegReal_of_mem_slitPlane hy2),
+        symmetricEllipticRF_zero_left hy2 hy2]
       have hv : (![y ^ 2, y ^ 2] : Fin 2 → ℂ) = fun _ => y ^ 2 := by
         funext i; fin_cases i <;> rfl
-      rw [hv, symEllIntR_const _ _ hy2 (Gamma_ne_zero_of_re_pos (by norm_num))]
+      rw [hv, symmetricEllipticR_const _ _ hy2 (Gamma_ne_zero_of_re_pos (by norm_num))]
       rw [show -(1 / 2 : ℂ) = -(2⁻¹) by norm_num, cpow_neg, sq_cpow_two_inv hy]
     have hμarg : ∀ i : Fin 2, arg ((y / 2) ^ 2) + arg ((![1, 2] : Fin 2 → ℂ) i) ∈ Ioo (-π) π := by
       intro i
@@ -1332,13 +1381,13 @@ theorem symEllIntRC_sq_eq {x y : ℂ} (hx : x = 0 ∨ 0 < x.re) (hy : 0 < y.re) 
         rw [harg2, add_zero]
         exact ⟨neg_pi_lt_arg _, lt_of_le_of_ne (arg_le_pi _) (mem_slitPlane_iff_arg.mp ha2).1⟩
     have htwo : (2 : ℂ) ∈ slitPlane := Or.inl (by norm_num)
-    have H := symEllIntR_mul (1 / 2) ![1 / 2, 1]
+    have H := symmetricEllipticR_mul (1 / 2) ![1 / 2, 1]
       (vec2_mem_carlsonRSlitDomain one_mem_slitPlane htwo) ha2 hμarg
     have hv : (fun i => (y / 2) ^ 2 * (![1, 2] : Fin 2 → ℂ) i) = ![(y / 2) ^ 2, y / 2 * y] := by
       funext i; fin_cases i <;> simp; ring
-    rw [hv, ← symEllIntRC_eq_symEllIntR ha2 hay,
-      ← symEllIntRC_eq_symEllIntR one_mem_slitPlane htwo,
-      symEllIntRC_eq_carlsonRC one_mem_slitPlane htwo] at H
+    rw [hv, ← symmetricEllipticRC_eq_symmetricEllipticR ha2 hay,
+      ← symmetricEllipticRC_eq_symmetricEllipticR one_mem_slitPlane htwo,
+      symmetricEllipticRC_eq_carlsonRC one_mem_slitPlane htwo] at H
     have hconst := Carlson.TwoVariable.pi_eq_four_mul_carlsonRC.1
     have hhalf : ((y / 2) ^ 2) ^ (-(1 / 2) : ℂ) = (y / 2)⁻¹ := by
       rw [show -(1 / 2 : ℂ) = -(2⁻¹) by norm_num, cpow_neg,
@@ -1348,9 +1397,9 @@ theorem symEllIntRC_sq_eq {x y : ℂ} (hx : x = 0 ∨ 0 < x.re) (hy : 0 < y.re) 
     rw [hleft, H]
     field_simp
     linear_combination hconst
-  · rw [symEllIntRC_eq_carlsonRC
+  · rw [symmetricEllipticRC_eq_carlsonRC
       (by simpa only [pow_two] using Carlson.mul_mem_slitPlane_of_re_pos hx hx) hy2,
-      symEllIntRC_eq_carlsonRC ha2 hay]
+      symmetricEllipticRC_eq_carlsonRC ha2 hay]
     exact Carlson.TwoVariable.carlsonRC_sq_eq x y hx hy
 
 /-- DLMF 19.26.27: `R_C(x², x² - θ) = 2 R_C(s², s² - θ)`, `s = x + √(x² - θ)`, `θ ≠ x², s²`.
@@ -1362,10 +1411,10 @@ The proof reuses lean-codes' `Carlson.TwoVariable.carlsonRC_sq_eq` and
 `Carlson.TwoVariable.carlsonRC_mul_of_pos`.
 Checked numerically at 3000 random complex points under the stated hypotheses. -/
 @[dlmf 19.26.E27]
-theorem symEllIntRC_duplication_theta {x θ : ℂ} (hx : 0 < x.re)
+theorem symmetricEllipticRC_duplication_theta {x θ : ℂ} (hx : 0 < x.re)
     (hθx : x ^ 2 - θ ∈ slitPlane) :
     let s := x + (x ^ 2 - θ) ^ (1 / 2 : ℂ)
-    symEllIntRC (x ^ 2) (x ^ 2 - θ) = 2 * symEllIntRC (s ^ 2) (s ^ 2 - θ) := by
+    symmetricEllipticRC (x ^ 2) (x ^ 2 - θ) = 2 * symmetricEllipticRC (s ^ 2) (s ^ 2 - θ) := by
   let y := (x ^ 2 - θ) ^ (1 / 2 : ℂ)
   have hy : 0 < y.re := Carlson.re_cpow_half_pos hθx
   have hy2 : y ^ 2 = x ^ 2 - θ := by
@@ -1384,12 +1433,12 @@ theorem symEllIntRC_duplication_theta {x θ : ℂ} (hx : 0 < x.re)
   have hsarg2 : ((1 / 4 : ℝ) : ℂ) * ((x + y) ^ 2 - θ) = (x + y) / 2 * y := by
     rw [he]; push_cast; ring
   rw [hsarg, hsarg2, one_quarter_cpow_neg_half] at hscale
-  change symEllIntRC (x ^ 2) (x ^ 2 - θ) =
-    2 * symEllIntRC ((x + y) ^ 2) ((x + y) ^ 2 - θ)
+  change symmetricEllipticRC (x ^ 2) (x ^ 2 - θ) =
+    2 * symmetricEllipticRC ((x + y) ^ 2) ((x + y) ^ 2 - θ)
   have hright := he ▸ Carlson.mul_mem_slitPlane_of_re_pos hs (by simp [hy])
-  rw [symEllIntRC_eq_carlsonRC
+  rw [symmetricEllipticRC_eq_carlsonRC
       (by simpa only [pow_two] using Carlson.mul_mem_slitPlane_of_re_pos hx hx) hθx,
-    symEllIntRC_eq_carlsonRC
+    symmetricEllipticRC_eq_carlsonRC
       (by simpa only [pow_two] using Carlson.mul_mem_slitPlane_of_re_pos hs hs) hright]
   exact h1.trans hscale
 

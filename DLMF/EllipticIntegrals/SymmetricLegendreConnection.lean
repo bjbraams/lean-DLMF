@@ -23,16 +23,17 @@ possible one variable may be `0` (DLMF's boundary case), which gives the complet
 
 ## Main results
 
-* `symEllIntRD_two_term_relation`, `symEllIntRD_cyclic_sum'`,
-  `symEllIntRD_cyclic_mul_sum_of_symEllIntArg`: DLMF 19.21.7–19.21.9, the last allowing `x = 0`
-  (stronger than DLMF).
-* `six_mul_symEllIntRG`: DLMF 19.21.11 (first form).
-* `symEllIntRJ_self_right_eq_sub_symEllIntRC`: DLMF 19.20.8 (third formula), allowing `x = 0`
-  (stronger than DLMF).
-* `symEllIntRD_self_right_of_mem_slitPlane`, `symEllIntRD_self_left_eq_sub_symEllIntRC`:
-  DLMF 19.20.20 and 19.20.21 on the slit plane.
-* `not_integrableOn_symEllIntRF_integrand_zero_zero`,
-  `not_integrableOn_symEllIntRJ_integrand_zero_zero`: with two zero variables the integrands
+* `symmetricEllipticRD_two_term_relation`, `symmetricEllipticRD_cyclic_sum'`,
+  `symmetricEllipticRD_cyclic_mul_sum_of_isCarlsonArgument`: DLMF 19.21.7–19.21.9, the last allowing
+  `x = 0` (stronger than DLMF).
+* `six_mul_symmetricEllipticRG`: DLMF 19.21.11 (first form).
+* `symmetricEllipticRJ_self_right_eq_sub_symmetricEllipticRC`: DLMF 19.20.8 (third formula),
+  allowing `x = 0` (stronger than DLMF).
+* `symmetricEllipticRD_self_right_of_mem_slitPlane`,
+  `symmetricEllipticRD_self_left_eq_sub_symmetricEllipticRC`: DLMF 19.20.20 and 19.20.21 on the slit
+  plane.
+* `not_integrableOn_symmetricEllipticRF_integrand_zero_zero`,
+  `not_integrableOn_symmetricEllipticRJ_integrand_zero_zero`: with two zero variables the integrands
   of `R_F` and `R_J` are not integrable at `0`.
 -/
 
@@ -201,45 +202,47 @@ private lemma linearDivSqrtProductDeriv_three_three_mul (t u v w x y z : ℂ) (h
   ring
 
 /-- An admissible argument is not a negative real. -/
-private lemma not_isNegReal_of_symEllIntArg {x : ℂ} (hx : SymEllIntArg x) : ¬ IsNegReal x := by
+private lemma not_isNegReal_of_isCarlsonArgument {x : ℂ} (hx : IsCarlsonArgument x) :
+    ¬ IsNegReal x := by
   rcases hx with hx | rfl
   · exact not_isNegReal_of_mem_slitPlane hx
   · simp [IsNegReal]
 
 /-- `R_D(y, z, x)` as `(3/2) ∫ (s(t) (t + x))⁻¹` with `s` written in the order `x, y, z`. -/
-private lemma symEllIntRD_rotate_eq_integral (x y z : ℂ) (hx : SymEllIntArg x) :
-    symEllIntRD y z x = (3 / 2) * ∫ t in Ioi (0 : ℝ), (((t : ℂ) + x) ^ (1 / 2 : ℂ) *
+private lemma symmetricEllipticRD_rotate_eq_integral (x y z : ℂ) (hx : IsCarlsonArgument x) :
+    symmetricEllipticRD y z x = (3 / 2) * ∫ t in Ioi (0 : ℝ), (((t : ℂ) + x) ^ (1 / 2 : ℂ) *
       ((t : ℂ) + y) ^ (1 / 2 : ℂ) * ((t : ℂ) + z) ^ (1 / 2 : ℂ) * ((t : ℂ) + x))⁻¹ := by
-  rw [symEllIntRD_eq_integral (not_isNegReal_of_symEllIntArg hx)]
-  congr 2; funext t; simp only [symEllIntS]; ring_nf
+  rw [symmetricEllipticRD_eq_integral (not_isNegReal_of_isCarlsonArgument hx)]
+  congr 2; funext t; simp only [carlsonRootProduct]; ring_nf
 
 /-- `R_D(z, x, y)` as `(3/2) ∫ (s(t) (t + y))⁻¹` with `s` written in the order `x, y, z`. -/
-private lemma symEllIntRD_rotate_two_eq_integral (x y z : ℂ) (hy : SymEllIntArg y) :
-    symEllIntRD z x y = (3 / 2) * ∫ t in Ioi (0 : ℝ), (((t : ℂ) + x) ^ (1 / 2 : ℂ) *
+private lemma symmetricEllipticRD_rotate_two_eq_integral (x y z : ℂ) (hy : IsCarlsonArgument y) :
+    symmetricEllipticRD z x y = (3 / 2) * ∫ t in Ioi (0 : ℝ), (((t : ℂ) + x) ^ (1 / 2 : ℂ) *
       ((t : ℂ) + y) ^ (1 / 2 : ℂ) * ((t : ℂ) + z) ^ (1 / 2 : ℂ) * ((t : ℂ) + y))⁻¹ := by
-  rw [symEllIntRD_eq_integral (not_isNegReal_of_symEllIntArg hy)]
-  congr 2; funext t; simp only [symEllIntS]; ring_nf
+  rw [symmetricEllipticRD_eq_integral (not_isNegReal_of_isCarlsonArgument hy)]
+  congr 2; funext t; simp only [carlsonRootProduct]; ring_nf
 
 /-- DLMF 19.21.9, **stronger than DLMF** in allowing `x = 0`:
 `x R_D(y, z, x) + y R_D(z, x, y) + z R_D(x, y, z) = 3 R_F(x, y, z)` for admissible `x` and
 `y, z ∈ ℂ \ (-∞, 0]` (at `x = 0` the first term is `0`). -/
 @[dlmf 19.21.E9]
-theorem symEllIntRD_cyclic_mul_sum_of_symEllIntArg {x y z : ℂ} (hx : SymEllIntArg x)
+theorem symmetricEllipticRD_cyclic_mul_sum_of_isCarlsonArgument {x y z : ℂ}
+    (hx : IsCarlsonArgument x)
     (hy : y ∈ slitPlane)
     (hz : z ∈ slitPlane) :
-    x * symEllIntRD y z x + y * symEllIntRD z x y + z * symEllIntRD x y z =
-      3 * symEllIntRF x y z := by
+    x * symmetricEllipticRD y z x + y * symmetricEllipticRD z x y + z * symmetricEllipticRD x y z =
+      3 * symmetricEllipticRF x y z := by
   set S : ℝ → ℂ := fun t => ((t : ℂ) + x) ^ (1 / 2 : ℂ) * ((t : ℂ) + y) ^ (1 / 2 : ℂ) *
     ((t : ℂ) + z) ^ (1 / 2 : ℂ) with hS
   have iF : IntegrableOn (fun t : ℝ => (S t)⁻¹) (Ioi 0) :=
-      integrableOn_symEllIntRF_integrand hx hy hz
+      integrableOn_symmetricEllipticRF_integrand hx hy hz
   have iDy : IntegrableOn (fun t : ℝ => (S t * ((t : ℂ) + y))⁻¹) (Ioi 0) :=
-    integrableOn_symEllIntRJ_integrand hx hy hz hy
+    integrableOn_symmetricEllipticRJ_integrand hx hy hz hy
   have iDz : IntegrableOn (fun t : ℝ => (S t * ((t : ℂ) + z))⁻¹) (Ioi 0) :=
-    integrableOn_symEllIntRJ_integrand hx hy hz hz
+    integrableOn_symmetricEllipticRJ_integrand hx hy hz hz
   have iDx : IntegrableOn (fun t : ℝ => x * (S t * ((t : ℂ) + x))⁻¹) (Ioi 0) := by
     rcases hx with hx' | rfl
-    · exact (integrableOn_symEllIntRJ_integrand (Or.inl hx') hy hz hx').const_mul x
+    · exact (integrableOn_symmetricEllipticRJ_integrand (Or.inl hx') hy hz hx').const_mul x
     · simp
   have i1 : IntegrableOn (fun t : ℝ => x * (S t * ((t : ℂ) + x))⁻¹ +
       y * (S t * ((t : ℂ) + y))⁻¹) (Ioi 0) := iDx.add (iDy.const_mul y)
@@ -262,24 +265,25 @@ theorem symEllIntRD_cyclic_mul_sum_of_symEllIntArg {x y z : ℂ} (hx : SymEllInt
   rw [zero_mul, neg_zero, integral_const_mul, integral_sub i2 iF,
     integral_add i1 (iDz.const_mul z), integral_add iDx (iDy.const_mul y),
     integral_const_mul, integral_const_mul, integral_const_mul] at key
-  rw [symEllIntRD_rotate_eq_integral x y z hx, symEllIntRD_rotate_two_eq_integral x y z (Or.inl hy),
-    symEllIntRD_eq_integral (not_isNegReal_of_mem_slitPlane hz), symEllIntRF]
-  simp only [symEllIntS]
+  rw [symmetricEllipticRD_rotate_eq_integral x y z hx,
+      symmetricEllipticRD_rotate_two_eq_integral x y z (Or.inl hy),
+    symmetricEllipticRD_eq_integral (not_isNegReal_of_mem_slitPlane hz), symmetricEllipticRF]
+  simp only [carlsonRootProduct]
   linear_combination key
 
 /-- DLMF 19.21.8: `R_D(y, z, x) + R_D(z, x, y) + R_D(x, y, z) = 3 x^{-1/2} y^{-1/2} z^{-1/2}`. -/
-theorem symEllIntRD_cyclic_sum' {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane)
+theorem symmetricEllipticRD_cyclic_sum' {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane)
     (hz : z ∈ slitPlane) :
-    symEllIntRD y z x + symEllIntRD z x y + symEllIntRD x y z =
+    symmetricEllipticRD y z x + symmetricEllipticRD z x y + symmetricEllipticRD x y z =
       3 * x ^ (-1 / 2 : ℂ) * y ^ (-1 / 2 : ℂ) * z ^ (-1 / 2 : ℂ) := by
   set S : ℝ → ℂ := fun t => ((t : ℂ) + x) ^ (1 / 2 : ℂ) * ((t : ℂ) + y) ^ (1 / 2 : ℂ) *
     ((t : ℂ) + z) ^ (1 / 2 : ℂ) with hS
   have iDx : IntegrableOn (fun t : ℝ => (S t * ((t : ℂ) + x))⁻¹) (Ioi 0) :=
-    integrableOn_symEllIntRJ_integrand (Or.inl hx) hy hz hx
+    integrableOn_symmetricEllipticRJ_integrand (Or.inl hx) hy hz hx
   have iDy : IntegrableOn (fun t : ℝ => (S t * ((t : ℂ) + y))⁻¹) (Ioi 0) :=
-    integrableOn_symEllIntRJ_integrand (Or.inl hx) hy hz hy
+    integrableOn_symmetricEllipticRJ_integrand (Or.inl hx) hy hz hy
   have iDz : IntegrableOn (fun t : ℝ => (S t * ((t : ℂ) + z))⁻¹) (Ioi 0) :=
-    integrableOn_symEllIntRJ_integrand (Or.inl hx) hy hz hz
+    integrableOn_symmetricEllipticRJ_integrand (Or.inl hx) hy hz hz
   have i1 : IntegrableOn (fun t : ℝ => (S t * ((t : ℂ) + x))⁻¹ +
       (S t * ((t : ℂ) + y))⁻¹) (Ioi 0) := iDx.add iDy
   have i2 : IntegrableOn (fun t : ℝ => (S t * ((t : ℂ) + x))⁻¹ +
@@ -296,10 +300,10 @@ theorem symEllIntRD_cyclic_sum' {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y ∈
       simp only [hS]
       rw [← this]
   rw [integral_const_mul, integral_add i1 iDz, integral_add iDx iDy] at key
-  rw [symEllIntRD_rotate_eq_integral x y z (Or.inl hx),
-      symEllIntRD_rotate_two_eq_integral x y z (Or.inl hy),
-    symEllIntRD_eq_integral (not_isNegReal_of_mem_slitPlane hz)]
-  simp only [symEllIntS]
+  rw [symmetricEllipticRD_rotate_eq_integral x y z (Or.inl hx),
+      symmetricEllipticRD_rotate_two_eq_integral x y z (Or.inl hy),
+    symmetricEllipticRD_eq_integral (not_isNegReal_of_mem_slitPlane hz)]
+  simp only [carlsonRootProduct]
   have e : ∀ w : ℂ, w ^ (-1 / 2 : ℂ) = (w ^ (1 / 2 : ℂ))⁻¹ := fun w => by
     rw [show (-1 / 2 : ℂ) = -(1 / 2) by ring, cpow_neg]
   rw [e x, e y, e z]
@@ -308,18 +312,19 @@ theorem symEllIntRD_cyclic_sum' {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y ∈
 
 /-- DLMF 19.21.7: `(x - y) R_D(y, z, x) + (z - y) R_D(x, y, z) = 3R_F(x, y, z)
 - 3 y^{1/2} x^{-1/2} z^{-1/2}`, slit-plane variables. -/
-theorem symEllIntRD_two_term_relation {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane)
+theorem symmetricEllipticRD_two_term_relation {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane)
     (hz : z ∈ slitPlane) :
-    (x - y) * symEllIntRD y z x + (z - y) * symEllIntRD x y z =
-      3 * symEllIntRF x y z - 3 * y ^ (1 / 2 : ℂ) * x ^ (-1 / 2 : ℂ) * z ^ (-1 / 2 : ℂ) := by
+    (x - y) * symmetricEllipticRD y z x + (z - y) * symmetricEllipticRD x y z =
+      3 * symmetricEllipticRF x y z - 3 * y ^ (1 / 2 : ℂ) * x ^ (-1 / 2 : ℂ) *
+          z ^ (-1 / 2 : ℂ) := by
   set S : ℝ → ℂ := fun t => ((t : ℂ) + x) ^ (1 / 2 : ℂ) * ((t : ℂ) + y) ^ (1 / 2 : ℂ) *
     ((t : ℂ) + z) ^ (1 / 2 : ℂ) with hS
   have iF : IntegrableOn (fun t : ℝ => (S t)⁻¹) (Ioi 0) :=
-    integrableOn_symEllIntRF_integrand (Or.inl hx) hy hz
+    integrableOn_symmetricEllipticRF_integrand (Or.inl hx) hy hz
   have iDx : IntegrableOn (fun t : ℝ => (S t * ((t : ℂ) + x))⁻¹) (Ioi 0) :=
-    integrableOn_symEllIntRJ_integrand (Or.inl hx) hy hz hx
+    integrableOn_symmetricEllipticRJ_integrand (Or.inl hx) hy hz hx
   have iDz : IntegrableOn (fun t : ℝ => (S t * ((t : ℂ) + z))⁻¹) (Ioi 0) :=
-    integrableOn_symEllIntRJ_integrand (Or.inl hx) hy hz hz
+    integrableOn_symmetricEllipticRJ_integrand (Or.inl hx) hy hz hz
   have i1 : IntegrableOn (fun t : ℝ => (x - y) * (S t * ((t : ℂ) + x))⁻¹ +
       (z - y) * (S t * ((t : ℂ) + z))⁻¹) (Ioi 0) :=
     (iDx.const_mul (x - y)).add (iDz.const_mul (z - y))
@@ -338,9 +343,9 @@ theorem symEllIntRD_two_term_relation {x y z : ℂ} (hx : x ∈ slitPlane) (hy :
       rw [← this]
   rw [integral_const_mul, integral_sub i1 iF, integral_add (iDx.const_mul (x - y))
     (iDz.const_mul (z - y)), integral_const_mul, integral_const_mul] at key
-  rw [symEllIntRD_rotate_eq_integral x y z (Or.inl hx),
-    symEllIntRD_eq_integral (not_isNegReal_of_mem_slitPlane hz), symEllIntRF]
-  simp only [symEllIntS]
+  rw [symmetricEllipticRD_rotate_eq_integral x y z (Or.inl hx),
+    symmetricEllipticRD_eq_integral (not_isNegReal_of_mem_slitPlane hz), symmetricEllipticRF]
+  simp only [carlsonRootProduct]
   have e : ∀ w : ℂ, w ^ (-1 / 2 : ℂ) = (w ^ (1 / 2 : ℂ))⁻¹ := fun w => by
     rw [show (-1 / 2 : ℂ) = -(1 / 2) by ring, cpow_neg]
   have hy2 : y ^ (1 / 2 : ℂ) * y ^ (1 / 2 : ℂ) = y := cpow_half_mul_cpow_half y
@@ -354,26 +359,27 @@ theorem symEllIntRD_two_term_relation {x y z : ℂ} (hx : x ∈ slitPlane) (hy :
 /-- DLMF 19.21.11 (first form): `6R_G(x, y, z) = 3(x + y + z) R_F(x, y, z) - ∑ x² R_D(y, z, x)`
 (cyclic sum), slit-plane variables. The integrands agree pointwise
 (`t x/(t + x) = x - x²/(t + x)`). -/
-theorem six_mul_symEllIntRG {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane)
+theorem six_mul_symmetricEllipticRG {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane)
     (hz : z ∈ slitPlane) :
-    6 * symEllIntRG x y z = 3 * (x + y + z) * symEllIntRF x y z -
-      (x ^ 2 * symEllIntRD y z x + y ^ 2 * symEllIntRD z x y + z ^ 2 * symEllIntRD x y z) := by
+    6 * symmetricEllipticRG x y z = 3 * (x + y + z) * symmetricEllipticRF x y z -
+      (x ^ 2 * symmetricEllipticRD y z x + y ^ 2 * symmetricEllipticRD z x y + z ^ 2 *
+          symmetricEllipticRD x y z) := by
   set S : ℝ → ℂ := fun t => ((t : ℂ) + x) ^ (1 / 2 : ℂ) * ((t : ℂ) + y) ^ (1 / 2 : ℂ) *
     ((t : ℂ) + z) ^ (1 / 2 : ℂ) with hS
   have iF : IntegrableOn (fun t : ℝ => (S t)⁻¹) (Ioi 0) :=
-    integrableOn_symEllIntRF_integrand (Or.inl hx) hy hz
+    integrableOn_symmetricEllipticRF_integrand (Or.inl hx) hy hz
   have iDx : IntegrableOn (fun t : ℝ => (S t * ((t : ℂ) + x))⁻¹) (Ioi 0) :=
-    integrableOn_symEllIntRJ_integrand (Or.inl hx) hy hz hx
+    integrableOn_symmetricEllipticRJ_integrand (Or.inl hx) hy hz hx
   have iDy : IntegrableOn (fun t : ℝ => (S t * ((t : ℂ) + y))⁻¹) (Ioi 0) :=
-    integrableOn_symEllIntRJ_integrand (Or.inl hx) hy hz hy
+    integrableOn_symmetricEllipticRJ_integrand (Or.inl hx) hy hz hy
   have iDz : IntegrableOn (fun t : ℝ => (S t * ((t : ℂ) + z))⁻¹) (Ioi 0) :=
-    integrableOn_symEllIntRJ_integrand (Or.inl hx) hy hz hz
+    integrableOn_symmetricEllipticRJ_integrand (Or.inl hx) hy hz hz
   have i1 : IntegrableOn (fun t : ℝ => x ^ 2 * (S t * ((t : ℂ) + x))⁻¹ +
       y ^ 2 * (S t * ((t : ℂ) + y))⁻¹) (Ioi 0) := (iDx.const_mul _).add (iDy.const_mul _)
   have i2 : IntegrableOn (fun t : ℝ => x ^ 2 * (S t * ((t : ℂ) + x))⁻¹ +
       y ^ 2 * (S t * ((t : ℂ) + y))⁻¹ + z ^ 2 * (S t * ((t : ℂ) + z))⁻¹) (Ioi 0) :=
     i1.add (iDz.const_mul _)
-  have hpt : ∀ t ∈ Ioi (0 : ℝ), (symEllIntS x y z t)⁻¹ *
+  have hpt : ∀ t ∈ Ioi (0 : ℝ), (carlsonRootProduct x y z t)⁻¹ *
       (x / ((t : ℂ) + x) + y / ((t : ℂ) + y) + z / ((t : ℂ) + z)) * t =
       (x + y + z) * (S t)⁻¹ - (x ^ 2 * (S t * ((t : ℂ) + x))⁻¹ +
         y ^ 2 * (S t * ((t : ℂ) + y))⁻¹ + z ^ 2 * (S t * ((t : ℂ) + z))⁻¹) := by
@@ -381,26 +387,26 @@ theorem six_mul_symEllIntRG {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ sli
     have h1 := slitPlane_ne_zero (ofReal_pos_add_mem_slitPlane ht (Or.inl hx))
     have h2 := slitPlane_ne_zero (ofReal_pos_add_mem_slitPlane ht (Or.inl hy))
     have h3 := slitPlane_ne_zero (ofReal_pos_add_mem_slitPlane ht (Or.inl hz))
-    simp only [symEllIntS, hS]
+    simp only [carlsonRootProduct, hS]
     field_simp
     ring
-  have hG : symEllIntRG x y z = (1 / 4) * ((x + y + z) * (∫ t in Ioi (0 : ℝ), (S t)⁻¹) -
+  have hG : symmetricEllipticRG x y z = (1 / 4) * ((x + y + z) * (∫ t in Ioi (0 : ℝ), (S t)⁻¹) -
       (x ^ 2 * (∫ t in Ioi (0 : ℝ), (S t * ((t : ℂ) + x))⁻¹) +
         y ^ 2 * (∫ t in Ioi (0 : ℝ), (S t * ((t : ℂ) + y))⁻¹) +
         z ^ 2 * (∫ t in Ioi (0 : ℝ), (S t * ((t : ℂ) + z))⁻¹))) := by
-    rw [symEllIntRG, setIntegral_congr_fun measurableSet_Ioi hpt,
+    rw [symmetricEllipticRG, setIntegral_congr_fun measurableSet_Ioi hpt,
       integral_sub (iF.const_mul _) i2, integral_add i1 (iDz.const_mul _),
       integral_add (iDx.const_mul _) (iDy.const_mul _), integral_const_mul, integral_const_mul,
       integral_const_mul, integral_const_mul]
-  rw [hG, symEllIntRD_rotate_eq_integral x y z (Or.inl hx),
-      symEllIntRD_rotate_two_eq_integral x y z (Or.inl hy),
-    symEllIntRD_eq_integral (not_isNegReal_of_mem_slitPlane hz), symEllIntRF]
-  simp only [symEllIntS, hS]
+  rw [hG, symmetricEllipticRD_rotate_eq_integral x y z (Or.inl hx),
+      symmetricEllipticRD_rotate_two_eq_integral x y z (Or.inl hy),
+    symmetricEllipticRD_eq_integral (not_isNegReal_of_mem_slitPlane hz), symmetricEllipticRF]
+  simp only [carlsonRootProduct, hS]
   ring
 
 /-- Integrability of `R_C`'s integrand `((t + x)^{1/2} (t + y))⁻¹`: `x` admissible, `y` in the
 slit plane. -/
-private lemma integrableOn_symEllIntRC_integrand {x y : ℂ} (hx : SymEllIntArg x)
+private lemma integrableOn_symmetricEllipticRC_integrand {x y : ℂ} (hx : IsCarlsonArgument x)
     (hy : y ∈ slitPlane) :
     IntegrableOn (fun t : ℝ => (((t : ℂ) + x) ^ (1 / 2 : ℂ) * ((t : ℂ) + y))⁻¹) (Ioi 0) := by
   obtain ⟨c1, hc1, h1⟩ := exists_mul_sqrt_le_norm_cpow_half hx
@@ -422,36 +428,40 @@ private lemma integrableOn_symEllIntRC_integrand {x y : ℂ} (hx : SymEllIntArg 
 /-- DLMF 19.20.8 (third), **stronger than DLMF** in allowing `x = 0`:
 `R_J(x, y, y, p) = 3/(p - y) (R_C(x, y) - R_C(x, p))`, `p ≠ y`, `x` admissible,
 `y, p ∈ ℂ \ (-∞, 0]`. Partial fractions in the integrand. -/
-theorem symEllIntRJ_self_right_eq_sub_symEllIntRC {x y p : ℂ} (hx : SymEllIntArg x)
+theorem symmetricEllipticRJ_self_right_eq_sub_symmetricEllipticRC {x y p : ℂ}
+    (hx : IsCarlsonArgument x)
     (hy : y ∈ slitPlane)
     (hp : p ∈ slitPlane) (hpy : p ≠ y) :
-    symEllIntRJ x y y p = 3 / (p - y) * (symEllIntRC x y - symEllIntRC x p) := by
-  have iy := integrableOn_symEllIntRC_integrand hx hy
-  have ip := integrableOn_symEllIntRC_integrand hx hp
+    symmetricEllipticRJ x y y p = 3 / (p - y) *
+        (symmetricEllipticRC x y - symmetricEllipticRC x p) := by
+  have iy := integrableOn_symmetricEllipticRC_integrand hx hy
+  have ip := integrableOn_symmetricEllipticRC_integrand hx hp
   have hpy' : p - y ≠ 0 := sub_ne_zero.mpr hpy
-  have hpt : ∀ t ∈ Ioi (0 : ℝ), (symEllIntS x y y t * ((t : ℂ) + p))⁻¹ =
+  have hpt : ∀ t ∈ Ioi (0 : ℝ), (carlsonRootProduct x y y t * ((t : ℂ) + p))⁻¹ =
       (p - y)⁻¹ * ((((t : ℂ) + x) ^ (1 / 2 : ℂ) * ((t : ℂ) + y))⁻¹ -
         (((t : ℂ) + x) ^ (1 / 2 : ℂ) * ((t : ℂ) + p))⁻¹) := by
     intro t ht
     have h1 := ofReal_pos_add_cpow_half_ne_zero ht hx
     have h2 := slitPlane_ne_zero (ofReal_pos_add_mem_slitPlane ht (Or.inl hy))
     have h3 := slitPlane_ne_zero (ofReal_pos_add_mem_slitPlane ht (Or.inl hp))
-    simp only [symEllIntS, mul_assoc, cpow_half_mul_cpow_half]
+    simp only [carlsonRootProduct, mul_assoc, cpow_half_mul_cpow_half]
     field_simp
     ring
-  simp only [symEllIntRJ, symEllIntRC, not_isNegReal_of_mem_slitPlane hp,
+  simp only [symmetricEllipticRJ, symmetricEllipticRC, not_isNegReal_of_mem_slitPlane hp,
     not_isNegReal_of_mem_slitPlane hy, ↓reduceIte]
   rw [setIntegral_congr_fun measurableSet_Ioi hpt, integral_const_mul, integral_sub iy ip]
   field_simp
 
 /-- DLMF 19.20.20 on the slit plane: `R_D(x, y, y) = 3/(2(y - x)) (R_C(x, y) - √x/y)`, `x ≠ y`.
 From (19.21.7) with `(x, y, z) ↦ (y, x, y)`. -/
-theorem symEllIntRD_self_right_of_mem_slitPlane {x y : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane)
+theorem symmetricEllipticRD_self_right_of_mem_slitPlane {x y : ℂ} (hx : x ∈ slitPlane)
+    (hy : y ∈ slitPlane)
     (hxy : x ≠ y) :
-    symEllIntRD x y y = 3 / (2 * (y - x)) * (symEllIntRC x y - x ^ (1 / 2 : ℂ) / y) := by
-  have h := symEllIntRD_two_term_relation hy hx hy
-  rw [symEllIntRD_comm x y y, symEllIntRF_comm_left,
-    ← symEllIntRC_eq_symEllIntRF x (not_isNegReal_of_mem_slitPlane hy)] at h
+    symmetricEllipticRD x y y = 3 / (2 * (y - x)) *
+        (symmetricEllipticRC x y - x ^ (1 / 2 : ℂ) / y) := by
+  have h := symmetricEllipticRD_two_term_relation hy hx hy
+  rw [symmetricEllipticRD_comm x y y, symmetricEllipticRF_comm_left,
+    ← symmetricEllipticRC_eq_symmetricEllipticRF x (not_isNegReal_of_mem_slitPlane hy)] at h
   have hyx : y - x ≠ 0 := sub_ne_zero.mpr (Ne.symm hxy)
   have hy0 := cpow_half_ne_zero_of_mem_slitPlane hy
   have hy2 := cpow_half_mul_cpow_half y
@@ -459,20 +469,23 @@ theorem symEllIntRD_self_right_of_mem_slitPlane {x y : ℂ} (hx : x ∈ slitPlan
     rw [show (-1 / 2 : ℂ) = -(1 / 2) by ring, cpow_neg]
   have hinv : (y ^ (1 / 2 : ℂ))⁻¹ * (y ^ (1 / 2 : ℂ))⁻¹ = y⁻¹ := by rw [← mul_inv, hy2]
   have hyne := slitPlane_ne_zero hy
-  have h' : 2 * (y - x) * symEllIntRD x y y = 3 * symEllIntRC x y - 3 * x ^ (1 / 2 : ℂ) * y⁻¹ := by
+  have h' : 2 * (y - x) * symmetricEllipticRD x y y = 3 * symmetricEllipticRC x y - 3 *
+      x ^ (1 / 2 : ℂ) * y⁻¹ := by
     rw [← hinv, ← e]; linear_combination h
-  calc symEllIntRD x y y = (2 * (y - x) * symEllIntRD x y y) / (2 * (y - x)) := by field_simp
-    _ = (3 * symEllIntRC x y - 3 * x ^ (1 / 2 : ℂ) * y⁻¹) / (2 * (y - x)) := by rw [h']
+  calc symmetricEllipticRD x y y = (2 * (y - x) * symmetricEllipticRD x y y) /
+         (2 * (y - x)) := by field_simp
+    _ = (3 * symmetricEllipticRC x y - 3 * x ^ (1 / 2 : ℂ) * y⁻¹) / (2 * (y - x)) := by rw [h']
     _ = _ := by ring
 
 /-- DLMF 19.20.21: `R_D(x, x, z) = 3/(z - x) (R_C(z, x) - 1/√z)`, `x ≠ z`, slit plane. From
 (19.21.8) and (19.20.20). -/
-theorem symEllIntRD_self_left_eq_sub_symEllIntRC {x z : ℂ} (hx : x ∈ slitPlane) (hz : z ∈ slitPlane)
+theorem symmetricEllipticRD_self_left_eq_sub_symmetricEllipticRC {x z : ℂ} (hx : x ∈ slitPlane)
+    (hz : z ∈ slitPlane)
     (hxz : x ≠ z) :
-    symEllIntRD x x z = 3 / (z - x) * (symEllIntRC z x - 1 / z ^ (1 / 2 : ℂ)) := by
-  have h8 := symEllIntRD_cyclic_sum' hx hx hz
-  have h20 := symEllIntRD_self_right_of_mem_slitPlane hz hx (Ne.symm hxz)
-  rw [← symEllIntRD_comm x z x] at h8
+    symmetricEllipticRD x x z = 3 / (z - x) * (symmetricEllipticRC z x - 1 / z ^ (1 / 2 : ℂ)) := by
+  have h8 := symmetricEllipticRD_cyclic_sum' hx hx hz
+  have h20 := symmetricEllipticRD_self_right_of_mem_slitPlane hz hx (Ne.symm hxz)
+  rw [← symmetricEllipticRD_comm x z x] at h8
   have hxz' : x - z ≠ 0 := sub_ne_zero.mpr hxz
   have hzx' : z - x ≠ 0 := sub_ne_zero.mpr (Ne.symm hxz)
   have hx0 := cpow_half_ne_zero_of_mem_slitPlane hx
@@ -485,14 +498,14 @@ theorem symEllIntRD_self_left_eq_sub_symEllIntRC {x z : ℂ} (hx : x ∈ slitPla
   have hxne := slitPlane_ne_zero hx
   have hzne := slitPlane_ne_zero hz
   have hinv : (x ^ (1 / 2 : ℂ))⁻¹ * (x ^ (1 / 2 : ℂ))⁻¹ = x⁻¹ := by rw [← mul_inv, hx2]
-  have h8' : 2 * (3 / (2 * (x - z)) * (symEllIntRC z x - z ^ (1 / 2 : ℂ) / x)) +
-      symEllIntRD x x z = 3 * x⁻¹ * (z ^ (1 / 2 : ℂ))⁻¹ := by
+  have h8' : 2 * (3 / (2 * (x - z)) * (symmetricEllipticRC z x - z ^ (1 / 2 : ℂ) / x)) +
+      symmetricEllipticRD x x z = 3 * x⁻¹ * (z ^ (1 / 2 : ℂ))⁻¹ := by
     rw [← hinv]; linear_combination h8
   have hzz : z ^ (1 / 2 : ℂ) / x = z / (x * z ^ (1 / 2 : ℂ)) := by
     rw [div_eq_div_iff hxne (mul_ne_zero hxne hz0)]; linear_combination x * hz2
   rw [hzz] at h8'
-  calc symEllIntRD x x z = 3 * x⁻¹ * (z ^ (1 / 2 : ℂ))⁻¹ -
-      2 * (3 / (2 * (x - z)) * (symEllIntRC z x - z / (x * z ^ (1 / 2 : ℂ)))) := by
+  calc symmetricEllipticRD x x z = 3 * x⁻¹ * (z ^ (1 / 2 : ℂ))⁻¹ -
+      2 * (3 / (2 * (x - z)) * (symmetricEllipticRC z x - z / (x * z ^ (1 / 2 : ℂ)))) := by
         linear_combination h8'
     _ = _ := by field_simp; ring
 
@@ -532,9 +545,9 @@ private lemma norm_ofReal_add_le_one_add_norm {w : ℂ} {t : ℝ} (ht : 0 ≤ t)
     _ ≤ 1 + ‖w‖ := by rw [Complex.norm_real, Real.norm_of_nonneg ht]; linarith
 
 /-- The integrand `(s(t) (t + p))⁻¹` with two zero variables is not integrable at `0`. -/
-theorem not_integrableOn_symEllIntRJ_integrand_zero_zero {z p : ℂ} (hz : z ∈ slitPlane)
+theorem not_integrableOn_symmetricEllipticRJ_integrand_zero_zero {z p : ℂ} (hz : z ∈ slitPlane)
     (hp : p ∈ slitPlane) :
-    ¬ IntegrableOn (fun t => (symEllIntS 0 0 z t * ((t : ℂ) + p))⁻¹) (Ioi 0) := by
+    ¬ IntegrableOn (fun t => (carlsonRootProduct 0 0 z t * ((t : ℂ) + p))⁻¹) (Ioi 0) := by
   have hA : 0 < Real.sqrt (1 + ‖z‖) := Real.sqrt_pos.mpr (by positivity)
   refine not_integrableOn_Ioi_of_inv_le_norm (M := (Real.sqrt (1 + ‖z‖) * (1 + ‖p‖))⁻¹)
     (by positivity) fun t ht => ?_
@@ -545,7 +558,7 @@ theorem not_integrableOn_symEllIntRJ_integrand_zero_zero {z p : ℂ} (hz : z ∈
     norm_pos_iff.mpr (ofReal_pos_add_cpow_half_ne_zero ht0 (Or.inl hz))
   have q2 : 0 < ‖(t : ℂ) + p‖ :=
     norm_pos_iff.mpr (slitPlane_ne_zero (ofReal_pos_add_mem_slitPlane ht0 (Or.inl hp)))
-  simp only [symEllIntS, add_zero]
+  simp only [carlsonRootProduct, add_zero]
   rw [cpow_half_mul_cpow_half, norm_inv, norm_mul, norm_mul, Complex.norm_real,
     Real.norm_of_nonneg ht0.le, ← mul_inv, inv_le_inv₀ (by positivity) (by positivity)]
   calc t * ‖((t : ℂ) + z) ^ (1 / 2 : ℂ)‖ * ‖(t : ℂ) + p‖
@@ -553,8 +566,8 @@ theorem not_integrableOn_symEllIntRJ_integrand_zero_zero {z p : ℂ} (hz : z ∈
     _ = _ := by ring
 
 /-- The integrand `s(t)⁻¹` with two zero variables is not integrable at `0`. -/
-theorem not_integrableOn_symEllIntRF_integrand_zero_zero {z : ℂ} (hz : z ∈ slitPlane) :
-    ¬ IntegrableOn (fun t => (symEllIntS 0 0 z t)⁻¹) (Ioi 0) := by
+theorem not_integrableOn_symmetricEllipticRF_integrand_zero_zero {z : ℂ} (hz : z ∈ slitPlane) :
+    ¬ IntegrableOn (fun t => (carlsonRootProduct 0 0 z t)⁻¹) (Ioi 0) := by
   have hA : 0 < Real.sqrt (1 + ‖z‖) := Real.sqrt_pos.mpr (by positivity)
   refine not_integrableOn_Ioi_of_inv_le_norm (M := (Real.sqrt (1 + ‖z‖))⁻¹)
     (by positivity) fun t ht => ?_
@@ -562,7 +575,7 @@ theorem not_integrableOn_symEllIntRF_integrand_zero_zero {z : ℂ} (hz : z ∈ s
   have h1 := norm_ofReal_add_cpow_half_le (w := z) ht0.le ht.2.le
   have q1 : 0 < ‖((t : ℂ) + z) ^ (1 / 2 : ℂ)‖ :=
     norm_pos_iff.mpr (ofReal_pos_add_cpow_half_ne_zero ht0 (Or.inl hz))
-  simp only [symEllIntS, add_zero]
+  simp only [carlsonRootProduct, add_zero]
   rw [cpow_half_mul_cpow_half, norm_inv, norm_mul, Complex.norm_real,
     Real.norm_of_nonneg ht0.le, ← mul_inv, inv_le_inv₀ (by positivity) (by positivity)]
   calc t * ‖((t : ℂ) + z) ^ (1 / 2 : ℂ)‖ ≤ t * Real.sqrt (1 + ‖z‖) := by gcongr

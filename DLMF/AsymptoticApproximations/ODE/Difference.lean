@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.AsymptoticApproximations.ODE.Basic
+public import Mathlib.Algebra.Group.ForwardDiff
 
 public import DLMFMathlib.Analysis.Asymptotics.AsymptoticExpansion
 
@@ -47,17 +48,17 @@ equivalent to the second-order difference equation
 `Δ²w(n) + (2 + f(n)) Δw(n) + (1 + f(n) + g(n)) w(n) = 0`; the two left sides are equal. -/
 @[dlmf 2.9.E1, dlmf 2.9.E2]
 theorem recurrence_eq_difference (f g w : ℕ → ℂ) (n : ℕ) :
-    forwardDiff (forwardDiff w) n + (2 + f n) * forwardDiff w n + (1 + f n + g n) * w n =
+    fwdDiff 1 (fwdDiff 1 w) n + (2 + f n) * fwdDiff 1 w n + (1 + f n + g n) * w n =
       w (n + 2) + f n * w (n + 1) + g n * w n := by
-  unfold forwardDiff; ring
+  simp only [fwdDiff]; ring
 
 /-- DLMF 2.9.1 ⇔ 2.9.2 for all `n = 0, 1, 2, …`. -/
 @[dlmf 2.9.E1, dlmf 2.9.E2]
 theorem recurrence_iff_difference (f g w : ℕ → ℂ) :
-    IsRecurrenceSol f g w ↔
-      ∀ n, forwardDiff (forwardDiff w) n + (2 + f n) * forwardDiff w n +
+    IsRecurrenceSolution f g w ↔
+      ∀ n, fwdDiff 1 (fwdDiff 1 w) n + (2 + f n) * fwdDiff 1 w n +
         (1 + f n + g n) * w n = 0 := by
-  simp only [IsRecurrenceSol, recurrence_eq_difference]
+  simp only [IsRecurrenceSolution, recurrence_eq_difference]
 
 /-- DLMF 2.9.4–2.9.8 (distinct characteristic values): let `f(n) ~ ∑ f_s n^{-s}` and
 `g(n) ~ ∑ g_s n^{-s}` as `n → ∞` (2.9.3) with `g₀ ≠ 0` and `f₀² ≠ 4g₀`, and let `ρ` be a root
@@ -69,7 +70,7 @@ theorem difference_distinct_roots_solution {f g : ℕ → ℂ} {fs gs : ℕ → 
     (hf : HasAsymptoticExpansion atTop invPowScale fs f)
     (hg : HasAsymptoticExpansion atTop invPowScale gs g) (hg0 : gs 0 ≠ 0)
     (hdisc : fs 0 ^ 2 ≠ 4 * gs 0) {ρ : ℂ} (hρ : ρ ^ 2 + fs 0 * ρ + gs 0 = 0) :
-    ∃ w : ℕ → ℂ, IsRecurrenceSol f g w ∧
+    ∃ w : ℕ → ℂ, IsRecurrenceSolution f g w ∧
       HasAsymptoticExpansion atTop (geomCpowScale ρ (differenceExponent fs gs ρ))
         (differenceCoeff fs gs ρ) w := by
   sorry
@@ -207,13 +208,13 @@ theorem difference_recessive {f g : ℕ → ℂ} {fs gs : ℕ → ℂ}
     (hρ₂ : ρ₂ ^ 2 + fs 0 * ρ₂ + gs 0 = 0)
     (hdom : ‖ρ₁‖ < ‖ρ₂‖ ∨ (‖ρ₁‖ = ‖ρ₂‖ ∧
       (differenceExponent fs gs ρ₁).re < (differenceExponent fs gs ρ₂).re))
-    {w₁ w₂ : ℕ → ℂ} (hs₁ : IsRecurrenceSol f g w₁) (hs₂ : IsRecurrenceSol f g w₂)
+    {w₁ w₂ : ℕ → ℂ} (hs₁ : IsRecurrenceSolution f g w₁) (hs₂ : IsRecurrenceSolution f g w₂)
     (hw₁ : HasAsymptoticExpansion atTop (geomCpowScale ρ₁ (differenceExponent fs gs ρ₁))
       (differenceCoeff fs gs ρ₁) w₁)
     (hw₂ : HasAsymptoticExpansion atTop (geomCpowScale ρ₂ (differenceExponent fs gs ρ₂))
       (differenceCoeff fs gs ρ₂) w₂) :
     Tendsto (fun n => w₁ n / w₂ n) atTop (𝓝 0) ∧
-      ∀ v : ℕ → ℂ, IsRecurrenceSol f g v → Tendsto (fun n => v n / w₂ n) atTop (𝓝 0) →
+      ∀ v : ℕ → ℂ, IsRecurrenceSolution f g v → Tendsto (fun n => v n / w₂ n) atTop (𝓝 0) →
         ∃ c : ℂ, v = c • w₁ := by
   sorry
 
@@ -229,7 +230,7 @@ theorem difference_coincident_sqrt {f g : ℕ → ℂ} {fs gs : ℕ → ℂ}
     (hdisc : fs 0 ^ 2 = 4 * gs 0) (h1 : 2 * gs 1 ≠ fs 0 * fs 1) {κ α : ℂ}
     (hκ : κ ^ 2 * gs 0 = 2 * fs 0 * fs 1 - 4 * gs 1) (hα : 4 * gs 0 * α = gs 0 + 2 * gs 1) :
     ∃ c : ℕ → ℂ, c 0 = 1 ∧ ∃ w₁ w₂ : ℕ → ℂ,
-      IsRecurrenceSol f g w₁ ∧ IsRecurrenceSol f g w₂ ∧
+      IsRecurrenceSolution f g w₁ ∧ IsRecurrenceSolution f g w₂ ∧
       HasAsymptoticExpansion atTop (geomExpSqrtScale (-fs 0 / 2) κ α (-1)) c w₁ ∧
       HasAsymptoticExpansion atTop (geomExpSqrtScale (-fs 0 / 2) κ α 1)
         (fun s => (-1) ^ s * c s) w₂ ∧
@@ -250,7 +251,8 @@ theorem difference_coincident_power {f g : ℕ → ℂ} {fs gs : ℕ → ℂ}
       fs 0 * fs 2 = 2 * gs 0 * (x - α) * (x - α'))
     (hint : ∀ m : ℤ, α' - α ≠ m) :
     ∃ a : ℕ → ℂ, IsDifferenceCoeffRel fs gs (-fs 0 / 2) α a ∧ ∃ w : ℕ → ℂ,
-      IsRecurrenceSol f g w ∧ HasAsymptoticExpansion atTop (geomCpowScale (-fs 0 / 2) α) a w := by
+      IsRecurrenceSolution f g w ∧
+          HasAsymptoticExpansion atTop (geomCpowScale (-fs 0 / 2) α) a w := by
   sorry
 
 /-- DLMF 2.9.12 for `j = 1` when `α₂ - α₁ ∈ {0, 1, 2, …}` (§2.9(ii)): with the hypotheses of
@@ -265,7 +267,8 @@ theorem difference_coincident_power_int {f g : ℕ → ℂ} {fs gs : ℕ → ℂ
       fs 0 * fs 2 = 2 * gs 0 * (x - α₁) * (x - α₂))
     {d : ℕ} (hd : α₂ - α₁ = d) :
     ∃ a : ℕ → ℂ, IsDifferenceCoeffRel fs gs (-fs 0 / 2) α₁ a ∧ ∃ w : ℕ → ℂ,
-      IsRecurrenceSol f g w ∧ HasAsymptoticExpansion atTop (geomCpowScale (-fs 0 / 2) α₁) a w := by
+      IsRecurrenceSolution f g w ∧
+          HasAsymptoticExpansion atTop (geomCpowScale (-fs 0 / 2) α₁) a w := by
   sorry
 
 /-- DLMF 2.9.13 (coincident characteristic values, `2g₁ = f₀f₁`, `α₂ - α₁ = d ∈ ℕ`): given the
@@ -280,10 +283,10 @@ theorem difference_coincident_log {f g : ℕ → ℂ} {fs gs : ℕ → ℂ}
     (hdisc : fs 0 ^ 2 = 4 * gs 0) (h1 : 2 * gs 1 = fs 0 * fs 1) {α₁ α₂ : ℂ}
     (hroots : ∀ x : ℂ, 2 * gs 0 * x ^ 2 - (fs 0 * fs 1 + 2 * gs 0) * x + 2 * gs 2 -
       fs 0 * fs 2 = 2 * gs 0 * (x - α₁) * (x - α₂))
-    {d : ℕ} (hd : α₂ - α₁ = d) {a : ℕ → ℂ} {w₁ : ℕ → ℂ} (hs₁ : IsRecurrenceSol f g w₁)
+    {d : ℕ} (hd : α₂ - α₁ = d) {a : ℕ → ℂ} {w₁ : ℕ → ℂ} (hs₁ : IsRecurrenceSolution f g w₁)
     (hw₁ : HasAsymptoticExpansion atTop (geomCpowScale (-fs 0 / 2) α₁) a w₁) :
     ∃ (b : ℕ → ℂ) (c : ℂ) (w₂ : ℕ → ℂ), b d = 0 ∧ (d = 0 → c = 1) ∧ (1 ≤ d → b 0 = 1) ∧
-      IsRecurrenceSol f g w₂ ∧
+      IsRecurrenceSolution f g w₂ ∧
       HasAsymptoticExpansion atTop (geomCpowScale (-fs 0 / 2) α₂) b
         (fun n => w₂ n - c * w₁ n * Real.log n) ∧
       ∀ᶠ n in atTop, w₁ n * w₂ (n + 1) - w₁ (n + 1) * w₂ n ≠ 0 := by

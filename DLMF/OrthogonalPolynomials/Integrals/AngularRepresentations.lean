@@ -28,13 +28,14 @@ Dirichlet–Mehler integrals (DLMF 18.10.1–18.10.2).
 ## Main results
 
 * `jacobi_norm`, `jacobi_norm_all`: Jacobi squared norms, DLMF Table 18.3.1.
-* `laguerrePolyL_norm`, `hermitePolyH_orthogonality`, `hermite_orthogonality`: Laguerre norms
-  and Hermite orthogonality in both normalizations, DLMF Table 18.3.1.
-* `legendre_orthogonality`, `ultrasphPoly_orthogonality`, `ultrasphPoly_norm`: Legendre and
-  Gegenbauer orthogonality, DLMF Table 18.3.1.
-* `jacobi_rodrigues`, `laguerrePolyL_rodrigues`, `ultrasphPoly_rodrigues`,
+* `laguerrePolynomialL_norm`, `hermitePolynomialH_orthogonality`, `hermite_orthogonality`: Laguerre
+  norms and Hermite orthogonality in both normalizations, DLMF Table 18.3.1.
+* `legendre_orthogonality`, `ultrasphericalPolynomial_orthogonality`,
+  `ultrasphericalPolynomial_norm`: Legendre and Gegenbauer orthogonality, DLMF Table 18.3.1.
+* `jacobi_rodrigues`, `laguerrePolynomialL_rodrigues`, `ultrasphericalPolynomial_rodrigues`,
   `legendre_rodrigues`: Rodrigues formulas, DLMF 18.5.5.
-* `ultrasphPoly_dirichlet_integral`, `legendre_dirichlet_mehler`: DLMF 18.10.1 and 18.10.2.
+* `ultrasphericalPolynomial_dirichlet_integral`, `legendre_dirichlet_mehler`: DLMF 18.10.1 and
+  18.10.2.
 
 ## Implementation notes
 
@@ -63,7 +64,7 @@ open DLMF.Confluent
 
 open DLMF.Bessel
 
-open DLMF.Hypergeometric (Gamma_add_nat_eq_poch_mul_Gamma)
+open DLMF.Hypergeometric (Gamma_add_nat_eq_pochhammer_mul_Gamma)
 
 noncomputable section
 
@@ -80,11 +81,11 @@ theorem integrable_pow_mul_exp_neg_sq (k : ℕ) :
   simp [Real.rpow_natCast]
 
 /-- Physicists' Hermite polynomials as real polynomials. -/
-abbrev hermitePolyHR (n : ℕ) : ℝ[X] := (hermitePolyH n).map (Int.castRingHom ℝ)
+abbrev hermitePolyHR (n : ℕ) : ℝ[X] := (hermitePolynomialH n).map (Int.castRingHom ℝ)
 
 /-- Evaluating the integer Hermite polynomial at a real point agrees with its real form. -/
-theorem aeval_hermitePolyH_eq_eval (n : ℕ) (x : ℝ) :
-    (aeval x (hermitePolyH n) : ℝ) = (hermitePolyHR n).eval x := by
+theorem aeval_hermitePolynomialH_eq_eval (n : ℕ) (x : ℝ) :
+    (aeval x (hermitePolynomialH n) : ℝ) = (hermitePolyHR n).eval x := by
   rw [aeval_def, hermitePolyHR, eval_map]
   congr 1
 
@@ -236,10 +237,11 @@ theorem intervalIntegrable_jacobi_weight {α β : ℝ} (hα : -1 < α) (hβ : -1
 
 /-- Integrability of Jacobi polynomial products against their weight. -/
 theorem intervalIntegrable_jacobi_product {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (m n : ℕ) :
-    IntervalIntegrable (fun t : ℝ => jacobiPolyP α β m t * jacobiPolyP α β n t *
+    IntervalIntegrable (fun t : ℝ => jacobiPolynomialP α β m t * jacobiPolynomialP α β n t *
       (1 - (t : ℂ)) ^ (α : ℂ) * (1 + (t : ℂ)) ^ (β : ℂ)) volume (-1) 1 := by
-  have hP (k : ℕ) : Continuous (fun t : ℝ => jacobiPolyP α β k t) :=
-    (continuous_iff_continuousAt.mpr fun z => (analyticAt_jacobiPolyP α β k z).continuousAt).comp
+  have hP (k : ℕ) : Continuous (fun t : ℝ => jacobiPolynomialP α β k t) :=
+    (continuous_iff_continuousAt.mpr fun z =>
+        (analyticAt_jacobiPolynomialP α β k z).continuousAt).comp
       continuous_ofReal
   convert (intervalIntegrable_jacobi_weight hα hβ).continuousOn_mul
     ((hP m).mul (hP n)).continuousOn using 1
@@ -249,16 +251,17 @@ theorem intervalIntegrable_jacobi_product {α β : ℝ} (hα : -1 < α) (hβ : -
 
 /-- Integration by parts reduces a Jacobi squared norm to a shifted norm. -/
 theorem jacobi_norm_shift {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
-    4 * (n + 1 : ℂ) * (∫ t : ℝ in (-1 : ℝ)..1, jacobiPolyP α β (n + 1) t ^ 2 *
+    4 * (n + 1 : ℂ) * (∫ t : ℝ in (-1 : ℝ)..1, jacobiPolynomialP α β (n + 1) t ^ 2 *
       (1 - (t : ℂ)) ^ (α : ℂ) * (1 + (t : ℂ)) ^ (β : ℂ)) =
-    (n + α + β + 2 : ℂ) * (∫ t : ℝ in (-1 : ℝ)..1, jacobiPolyP (α + 1) (β + 1) n t ^ 2 *
+    (n + α + β + 2 : ℂ) * (∫ t : ℝ in (-1 : ℝ)..1, jacobiPolynomialP (α + 1) (β + 1) n t ^ 2 *
       (1 - (t : ℂ)) ^ (α + 1 : ℂ) * (1 + (t : ℂ)) ^ (β + 1 : ℂ)) := by
   let w (a b : ℝ) (t : ℝ) : ℂ := (1 - (t : ℂ)) ^ (a : ℂ) * (1 + (t : ℂ)) ^ (b : ℂ)
-  let g (t : ℝ) : ℂ := w (α + 1) (β + 1) t * jacobiPolyP (α + 1) (β + 1) n t
-  let H (t : ℝ) : ℂ := g t * jacobiPolyP α β (n + 1) t
-  let f (a b : ℝ) (k : ℕ) (t : ℝ) : ℂ := jacobiPolyP a b k t ^ 2 * w a b t
-  have hP (a b : ℝ) (k : ℕ) : Continuous (fun t : ℝ => jacobiPolyP a b k t) :=
-    (continuous_iff_continuousAt.mpr fun z => (analyticAt_jacobiPolyP a b k z).continuousAt).comp
+  let g (t : ℝ) : ℂ := w (α + 1) (β + 1) t * jacobiPolynomialP (α + 1) (β + 1) n t
+  let H (t : ℝ) : ℂ := g t * jacobiPolynomialP α β (n + 1) t
+  let f (a b : ℝ) (k : ℕ) (t : ℝ) : ℂ := jacobiPolynomialP a b k t ^ 2 * w a b t
+  have hP (a b : ℝ) (k : ℕ) : Continuous (fun t : ℝ => jacobiPolynomialP a b k t) :=
+    (continuous_iff_continuousAt.mpr fun z =>
+        (analyticAt_jacobiPolynomialP a b k z).continuousAt).comp
       continuous_ofReal
   have hw : ContinuousOn (w (α + 1) (β + 1)) (Set.Icc (-1) 1) := by
     intro t ht
@@ -284,7 +287,7 @@ theorem jacobi_norm_shift {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n : ℕ
       (c := ((α + 1 : ℝ) : ℂ)) h1).comp_ofReal)
     have hB := ((((hasDerivAt_id' (t : ℂ)).const_add 1).cpow_const
       (c := ((β + 1 : ℝ) : ℂ)) h2).comp_ofReal)
-    have hJ := (analyticAt_jacobiPolyP ((α + 1 : ℝ) : ℂ) ((β + 1 : ℝ) : ℂ) n
+    have hJ := (analyticAt_jacobiPolynomialP ((α + 1 : ℝ) : ℂ) ((β + 1 : ℝ) : ℂ) n
         (t : ℂ)).differentiableAt.hasDerivAt.comp_ofReal
     have hg : DifferentiableAt ℝ g t := by
       simpa only [g, w, ofReal_add, ofReal_one, Function.comp_apply, Pi.mul_def] using
@@ -292,10 +295,11 @@ theorem jacobi_norm_shift {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n : ℕ
     have he := jacobi_weighted_derivative (α := α + 1) (β := β + 1)
       (by linarith) n ht
     simp only [ofReal_add, ofReal_one, add_sub_cancel_right, add_sub_cancel_right] at he
-    have he' : deriv g t = -2 * (n + 1 : ℂ) * w α β t * jacobiPolyP α β (n + 1) t := by
+    have he' : deriv g t = -2 * (n + 1 : ℂ) * w α β t * jacobiPolynomialP α β (n + 1) t := by
       simpa only [g, w, ofReal_add, ofReal_one, mul_assoc] using he
     have hJ' :=
-        (analyticAt_jacobiPolyP (α : ℂ) β (n + 1) (t : ℂ)).differentiableAt.hasDerivAt.comp_ofReal
+        (analyticAt_jacobiPolynomialP (α : ℂ) β (n + 1)
+            (t : ℂ)).differentiableAt.hasDerivAt.comp_ofReal
     rw [jacobi_derivative hα] at hJ'
     have h := hg.hasDerivAt.mul hJ'
     rw [he'] at h
@@ -350,14 +354,14 @@ theorem integral_jacobi_weight {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) :
 
 /-- Jacobi squared norms at all degrees, with a denominator regular at degree zero. -/
 theorem jacobi_norm_all {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
-    (∫ t : ℝ in (-1 : ℝ)..1, jacobiPolyP α β n t ^ 2 *
+    (∫ t : ℝ in (-1 : ℝ)..1, jacobiPolynomialP α β n t ^ 2 *
       (1 - (t : ℂ)) ^ (α : ℂ) * (1 + (t : ℂ)) ^ (β : ℂ)) =
       (2 : ℂ) ^ ((α : ℂ) + β + 1) * Gamma ((α : ℂ) + n + 1) * Gamma ((β : ℂ) + n + 1) *
-        poch ((α : ℂ) + β + n + 1) n /
+        pochhammer ((α : ℂ) + β + n + 1) n /
           (n.factorial * Gamma ((α : ℂ) + β + 2 * n + 2)) := by
   induction n generalizing α β with
-  | zero => simpa only [jacobiPolyP_zero, one_pow, one_mul, Nat.cast_zero, add_zero, mul_zero,
-      poch_zero, mul_one, Nat.factorial_zero, Nat.cast_one, mul_div_assoc,
+  | zero => simpa only [jacobiPolynomialP_zero, one_pow, one_mul, Nat.cast_zero, add_zero, mul_zero,
+      pochhammer_zero, mul_one, Nat.factorial_zero, Nat.cast_one, mul_div_assoc,
           mul_assoc] using integral_jacobi_weight hα hβ
   | succ n ih =>
     have h := jacobi_norm_shift hα hβ n
@@ -369,7 +373,7 @@ theorem jacobi_norm_all {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n : ℕ) 
     apply mul_left_cancel₀ hn
     rw [h]
     push_cast
-    rw [poch_succ_left, Nat.factorial_succ]
+    rw [pochhammer_succ_left, Nat.factorial_succ]
     push_cast
     have hp : (2 : ℂ) ^ (((α : ℂ) + 1) + ((β : ℂ) + 1) + 1) =
         4 * (2 : ℂ) ^ ((α : ℂ) + β + 1) := by
@@ -390,12 +394,12 @@ theorem jacobi_norm_all {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n : ℕ) 
     ring
 
 /-- Identity under the stated parameter and domain assumptions: `∫ x : ℝ in (-1 : ℝ)..1,
-jacobiPolyP α β (n + 1) x ^ 2 * (1 - (x : ℂ)) ^ (α : ℂ) * (1 + (x : ℂ)) ^ (β : ℂ) = (2 : ℂ) ^
+jacobiPolynomialP α β (n + 1) x ^ 2 * (1 - (x : ℂ)) ^ (α : ℂ) * (1 + (x : ℂ)) ^ (β : ℂ) = (2 : ℂ) ^
 ((α : ℂ) + β + 1) * Gamma (n + (α : ℂ) + 2) * Gamma (n + (β : ℂ) + 2) / ((2 * n + α + β + 3) *
 (n + 1).factorial * Gamma (n + (α : ℂ) + β + 2))`. -/
 @[dlmf 18.3.T1]
 theorem jacobi_norm {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
-    ∫ x : ℝ in (-1 : ℝ)..1, jacobiPolyP α β (n + 1) x ^ 2 *
+    ∫ x : ℝ in (-1 : ℝ)..1, jacobiPolynomialP α β (n + 1) x ^ 2 *
       (1 - (x : ℂ)) ^ (α : ℂ) * (1 + (x : ℂ)) ^ (β : ℂ) =
       (2 : ℂ) ^ ((α : ℂ) + β + 1) * Gamma (n + (α : ℂ) + 2) * Gamma (n + (β : ℂ) + 2) /
       ((2 * n + α + β + 3) * (n + 1).factorial * Gamma (n + (α : ℂ) + β + 2)) := by
@@ -404,7 +408,7 @@ theorem jacobi_norm {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
     simp; have := (Nat.cast_nonneg n : (0 : ℝ) ≤ n); linarith
   have hg := Gamma_add_nat_div_Gamma_eq (n := n + 1) ((α : ℂ) + β + n + 2)
     (not_neg_nat_of_re_pos hz)
-  change _ = poch ((α : ℂ) + β + n + 2) (n + 1) at hg
+  change _ = pochhammer ((α : ℂ) + β + n + 2) (n + 1) at hg
   push_cast at hg ⊢
   rw [show (α : ℂ) + β + (n + 1) + 1 = (α : ℂ) + β + n + 2 by ring, ← hg,
     show (α : ℂ) + β + n + 2 + (n + 1) = (α : ℂ) + β + 2 * n + 3 by ring,
@@ -427,57 +431,59 @@ theorem jacobi_norm {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
 
 /-- The squared Laguerre norm for the weight `x^α exp (-x)` on the positive ray. -/
 @[dlmf 18.3.T1]
-theorem laguerrePolyL_norm {α : ℝ} (hα : -1 < α) (n : ℕ) :
-    ∫ x : ℝ in Set.Ioi 0, laguerrePolyL α n x ^ 2 * exp (-x) * (x : ℂ) ^ (α : ℂ) =
+theorem laguerrePolynomialL_norm {α : ℝ} (hα : -1 < α) (n : ℕ) :
+    ∫ x : ℝ in Set.Ioi 0, laguerrePolynomialL α n x ^ 2 * exp (-x) * (x : ℂ) ^ (α : ℂ) =
       Gamma (n + (α : ℂ) + 1) / n.factorial := by
-  have heq : (fun x : ℝ => laguerrePolyL α n x ^ 2 * exp (-x) * (x : ℂ) ^ (α : ℂ)) =
+  have heq : (fun x : ℝ => laguerrePolynomialL α n x ^ 2 * exp (-x) * (x : ℂ) ^ (α : ℂ)) =
       fun x : ℝ => ∑ k ∈ Finset.range (n + 1),
-        (poch ((α : ℂ) + 1) n / n.factorial * kummerMCoeff (-(n : ℂ)) (α + 1) k) *
-          (laguerrePolyL α n x * (x : ℂ) ^ k * (x : ℂ) ^ (α : ℂ) * exp (-(x : ℂ))) := by
+        (pochhammer ((α : ℂ) + 1) n / n.factorial * kummerMCoeff (-(n : ℂ)) (α + 1) k) *
+          (laguerrePolynomialL α n x * (x : ℂ) ^ k * (x : ℂ) ^ (α : ℂ) * exp (-(x : ℂ))) := by
     funext x
     rw [pow_two]
-    conv_lhs => arg 1; arg 1; arg 1; rw [laguerrePolyL_eq_sum_coeff (α : ℂ) n]
+    conv_lhs => arg 1; arg 1; arg 1; rw [laguerrePolynomialL_eq_sum_coeff (α : ℂ) n]
     simp only [Finset.sum_mul]
     apply Finset.sum_congr rfl
     intro k _
     ring
   rw [heq, integral_finsetSum _ (fun k _ =>
-    (integrable_laguerrePolyL_mul_monomial hα n k).const_mul _)]
-  simp_rw [MeasureTheory.integral_const_mul, integral_laguerrePolyL_mul_monomial hα]
+    (integrable_laguerrePolynomialL_mul_monomial hα n k).const_mul _)]
+  simp_rw [MeasureTheory.integral_const_mul, integral_laguerrePolynomialL_mul_monomial hα]
   rw [Finset.sum_eq_single n]
   · have hc : ∀ j : ℕ, (α : ℂ) + 1 ≠ -j := not_neg_nat_of_re_pos (by
       simp only [add_re, ofReal_re, one_re]; linarith)
     have hn : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
-    have hp := poch_ne_zero_of_not_neg_nat hc n
-    change (poch ((α : ℂ) + 1) n / n.factorial *
-      (poch (-(n : ℂ)) n / (poch ((α : ℂ) + 1) n * n.factorial))) *
-      (Gamma ((α : ℂ) + n + 1) * poch (-(n : ℂ)) n / n.factorial) = _
-    rw [poch_neg_coe_nat, Nat.descFactorial_self]
+    have hp := pochhammer_ne_zero_of_not_neg_nat hc n
+    change (pochhammer ((α : ℂ) + 1) n / n.factorial *
+      (pochhammer (-(n : ℂ)) n / (pochhammer ((α : ℂ) + 1) n * n.factorial))) *
+      (Gamma ((α : ℂ) + n + 1) * pochhammer (-(n : ℂ)) n / n.factorial) = _
+    rw [pochhammer_neg_coe_nat, Nat.descFactorial_self]
     have hs : (-1 : ℂ) ^ n * (-1) ^ n = 1 := by rw [← mul_pow]; simp
     rw [show (α : ℂ) + n + 1 = n + (α : ℂ) + 1 by ring]
     field_simp [hn, hp]
     linear_combination (Gamma (n + (α : ℂ) + 1)) * hs
   · intro k hk hkn
     have hlt : k < n := by have := Finset.mem_range.mp hk; omega
-    rw [poch_neg_nat_eq_zero hlt]
+    rw [pochhammer_neg_nat_eq_zero hlt]
     simp
   · simp
 
-/-- Identity under the stated parameter and domain assumptions: `∫ x : ℝ, (aeval x (hermitePolyH
-m) : ℝ) * aeval x (hermitePolyH n) * Real.exp (-(x ^ 2)) = if m = n then Real.sqrt Real.pi * 2
-^ n * n.factorial else 0`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`∫ x : ℝ, (aeval x (hermitePolynomialH m) : ℝ) * aeval x (hermitePolynomialH n) * Real.exp (-(x ^
+2)) = if m = n then Real.sqrt Real.pi * 2 ^ n * n.factorial else 0`. -/
 @[dlmf 18.3.T1]
-theorem hermitePolyH_orthogonality (m n : ℕ) :
-    ∫ x : ℝ, (aeval x (hermitePolyH m) : ℝ) * aeval x (hermitePolyH n) * Real.exp (-(x ^ 2)) =
+theorem hermitePolynomialH_orthogonality (m n : ℕ) :
+    ∫ x : ℝ, (aeval x (hermitePolynomialH m) : ℝ) * aeval x (hermitePolynomialH n) *
+        Real.exp (-(x ^ 2)) =
       if m = n then Real.sqrt Real.pi * 2 ^ n * n.factorial else 0 := by
-  have key : ∀ a b : ℕ, ∫ x : ℝ, (aeval x (hermitePolyH a) : ℝ) * aeval x (hermitePolyH b) *
+  have key : ∀ a b : ℕ, ∫ x : ℝ, (aeval x (hermitePolynomialH a) : ℝ) *
+      aeval x (hermitePolynomialH b) *
       Real.exp (-(x ^ 2)) = ∫ x : ℝ, (derivative^[b] (hermitePolyHR a)).eval x *
         Real.exp (-(x ^ 2)) := fun a b => by
     rw [← integral_eval_mul_hermite_gauss b]
     congr 1; funext x
-    rw [aeval_hermitePolyH_eq_eval, aeval_hermitePolyH_eq_eval]; ring
+    rw [aeval_hermitePolynomialH_eq_eval, aeval_hermitePolynomialH_eq_eval]; ring
   have hzero : ∀ a b : ℕ, a < b → ∫ x : ℝ,
-      (aeval x (hermitePolyH a) : ℝ) * aeval x (hermitePolyH b) *
+      (aeval x (hermitePolynomialH a) : ℝ) * aeval x (hermitePolynomialH b) *
       Real.exp (-(x ^ 2)) = 0 := fun a b hab => by
     rw [key, iterate_derivative_eq_zero ((hermitePolyHR_natDegree_coeff a).1.trans_lt hab)]
     simp
@@ -508,26 +514,28 @@ theorem hermite_orthogonality (m n : ℕ) :
     TauCeti.integral_hermite_mul_hermite_mul_gaussian m n
 
 /-- Identity under the stated parameter and domain assumptions: `∫ x : ℝ in (-1 : ℝ)..1,
-legendrePolyP m x * legendrePolyP n x = if m = n then 2 / (2 * (n : ℂ) + 1) else 0`. -/
+legendrePolynomialP m x * legendrePolynomialP n x = if m = n then 2 / (2 * (n : ℂ) + 1) else 0`. -/
 @[dlmf 18.3.T1]
 theorem legendre_orthogonality (m n : ℕ) :
-    ∫ x : ℝ in (-1 : ℝ)..1, legendrePolyP m x * legendrePolyP n x =
+    ∫ x : ℝ in (-1 : ℝ)..1, legendrePolynomialP m x * legendrePolynomialP n x =
       if m = n then 2 / (2 * (n : ℂ) + 1) else 0 := by
-  let K : ℕ → ℕ → ℂ := fun i j => ∫ x : ℝ in (-1 : ℝ)..1, legendrePolyP i x * legendrePolyP j x
+  let K : ℕ → ℕ → ℂ := fun i j => ∫ x : ℝ in (-1 : ℝ)..1, legendrePolynomialP i x *
+      legendrePolynomialP j x
   let J : ℕ → ℕ → ℂ := fun i j => ∫ x : ℝ in (-1 : ℝ)..1,
-    (x : ℂ) * legendrePolyP i x * legendrePolyP j x
-  have hL (i : ℕ) : Continuous (fun x : ℝ => legendrePolyP i x) :=
+    (x : ℂ) * legendrePolynomialP i x * legendrePolynomialP j x
+  have hL (i : ℕ) : Continuous (fun x : ℝ => legendrePolynomialP i x) :=
     (continuous_iff_continuousAt.mpr fun z =>
-      ((analyticOnNhd_jacobiPolyP 0 0 i) z (Set.mem_univ z)).continuousAt).comp continuous_ofReal
+      ((analyticOnNhd_jacobiPolynomialP 0 0 i) z (Set.mem_univ z)).continuousAt).comp
+          continuous_ofReal
   have hK (i j : ℕ) : IntervalIntegrable
-      (fun x : ℝ => legendrePolyP i x * legendrePolyP j x) volume (-1) 1 :=
+      (fun x : ℝ => legendrePolynomialP i x * legendrePolynomialP j x) volume (-1) 1 :=
     ((hL i).mul (hL j)).intervalIntegrable _ _
   have hJ (i j : ℕ) : IntervalIntegrable
-      (fun x : ℝ => (x : ℂ) * legendrePolyP i x * legendrePolyP j x) volume (-1) 1 :=
+      (fun x : ℝ => (x : ℂ) * legendrePolynomialP i x * legendrePolynomialP j x) volume (-1) 1 :=
     ((continuous_ofReal.mul (hL i)).mul (hL j)).intervalIntegrable _ _
   have hzero (i j : ℕ) (hij : i ≠ j) : K i j = 0 := by
-    simpa only [K, legendrePolyP, ofReal_zero, cpow_zero, mul_one] using
-      jacobiPolyP_orthogonal (α := 0) (β := 0) (by norm_num) (by norm_num) hij
+    simpa only [K, legendrePolynomialP, ofReal_zero, cpow_zero, mul_one] using
+      jacobiPolynomialP_orthogonal (α := 0) (β := 0) (by norm_num) (by norm_num) hij
   have hR (i j : ℕ) : (i + 2 : ℂ) * K (i + 2) j =
       (2 * i + 3 : ℂ) * J (i + 1) j - (i + 1 : ℂ) * K i j := by
     dsimp [K, J]
@@ -536,18 +544,18 @@ theorem legendre_orthogonality (m n : ℕ) :
       ← intervalIntegral.integral_sub ((hJ (i + 1) j).const_mul _) ((hK i j).const_mul _)]
     apply intervalIntegral.integral_congr
     intro x _
-    linear_combination legendrePolyP j x * legendrePolyP_recurrence i x
+    linear_combination legendrePolynomialP j x * legendrePolynomialP_recurrence i x
   have hJsym (i j : ℕ) : J i j = J j i :=
     intervalIntegral.integral_congr fun x _ => by ring
   have hnorm : ∀ i : ℕ, K i i = 2 / (2 * (i : ℂ) + 1) := by
     intro i
     induction i using Nat.twoStepInduction with
-    | zero => norm_num [K, legendrePolyP_zero]
+    | zero => norm_num [K, legendrePolynomialP_zero]
     | one =>
       have h := hR 0 0
       rw [hzero 2 0 (by omega)] at h
-      have h00 : K 0 0 = 2 := by norm_num [K, legendrePolyP_zero]
-      have h10 : J 1 0 = K 1 1 := by simp [J, K, legendrePolyP_zero]
+      have h00 : K 0 0 = 2 := by norm_num [K, legendrePolynomialP_zero]
+      have h10 : J 1 0 = K 1 1 := by simp [J, K, legendrePolynomialP_zero]
       rw [h00, h10] at h
       norm_num at h ⊢
       linear_combination -h / 3
@@ -584,7 +592,7 @@ theorem legendre_orthogonality (m n : ℕ) :
   · exact hzero m n hmn
 
 /-- Duplication converts the symmetric Jacobi normalization to the Gegenbauer one. -/
-private lemma ultrasphPoly_norm_constant {lam : ℝ} (hlam : 0 < lam) :
+private lemma ultrasphericalPolynomial_norm_constant {lam : ℝ} (hlam : 0 < lam) :
     (2 : ℂ) ^ (2 * (lam : ℂ)) * Gamma ((lam : ℂ) + 1 / 2) ^ 2 / Gamma (2 * (lam : ℂ)) ^ 2 =
       2 * (2 : ℂ) ^ (1 - 2 * (lam : ℂ)) * Real.pi / Gamma (lam : ℂ) ^ 2 := by
   have hG : Gamma (lam : ℂ) ≠ 0 := Gamma_ne_zero_of_re_pos hlam
@@ -605,25 +613,25 @@ private lemma ultrasphPoly_norm_constant {lam : ℝ} (hlam : 0 < lam) :
   exact hp'
 
 /-- Gegenbauer squared norms, including degree zero. -/
-theorem ultrasphPoly_norm {lam : ℝ} (hlam : 0 < lam) (n : ℕ) :
-    (∫ t : ℝ in (-1 : ℝ)..1, ultrasphPoly lam n t ^ 2 *
+theorem ultrasphericalPolynomial_norm {lam : ℝ} (hlam : 0 < lam) (n : ℕ) :
+    (∫ t : ℝ in (-1 : ℝ)..1, ultrasphericalPolynomial lam n t ^ 2 *
       (1 - (t : ℂ) ^ 2) ^ ((lam : ℂ) - 1 / 2)) =
       (2 : ℂ) ^ (1 - 2 * (lam : ℂ)) * Real.pi * Gamma (n + 2 * (lam : ℂ)) /
         ((n + lam) * Gamma (lam : ℂ) ^ 2 * n.factorial) := by
   have ha : -1 < lam - 1 / 2 := by linarith
-  have hpoch (k : ℕ) : poch ((lam : ℂ) + 1 / 2) k ≠ 0 :=
-    poch_ne_zero_of_re_pos (by simp; linarith) k
-  have he : (∫ t : ℝ in (-1 : ℝ)..1, ultrasphPoly lam n t ^ 2 *
+  have hpoch (k : ℕ) : pochhammer ((lam : ℂ) + 1 / 2) k ≠ 0 :=
+    pochhammer_ne_zero_of_re_pos (by simp; linarith) k
+  have he : (∫ t : ℝ in (-1 : ℝ)..1, ultrasphericalPolynomial lam n t ^ 2 *
       (1 - (t : ℂ) ^ 2) ^ ((lam : ℂ) - 1 / 2)) =
-      (poch (2 * (lam : ℂ)) n / poch ((lam : ℂ) + 1 / 2) n) ^ 2 *
+      (pochhammer (2 * (lam : ℂ)) n / pochhammer ((lam : ℂ) + 1 / 2) n) ^ 2 *
         (∫ t : ℝ in (-1 : ℝ)..1,
-            jacobiPolyP ((lam - 1 / 2 : ℝ) : ℂ) ((lam - 1 / 2 : ℝ) : ℂ) n t ^ 2 *
+            jacobiPolynomialP ((lam - 1 / 2 : ℝ) : ℂ) ((lam - 1 / 2 : ℝ) : ℂ) n t ^ 2 *
           (1 - (t : ℂ)) ^ ((lam - 1 / 2 : ℝ) : ℂ) * (1 + (t : ℂ)) ^ ((lam - 1 / 2 : ℝ) : ℂ)) := by
     rw [← intervalIntegral.integral_const_mul]
     apply intervalIntegral.integral_congr_Ioo_of_le (by norm_num)
     intro t ht
     dsimp only
-    rw [ultrasphPoly_eq_jacobiPolyP n _ (hpoch n), mul_pow]
+    rw [ultrasphericalPolynomial_eq_jacobiPolynomialP n _ (hpoch n), mul_pow]
     have hp := mul_cpow_ofReal_nonneg (show 0 ≤ 1 - t by linarith [ht.2])
       (show 0 ≤ 1 + t by linarith [ht.1]) ((lam : ℂ) - 1 / 2)
     push_cast at hp ⊢
@@ -634,13 +642,13 @@ theorem ultrasphPoly_norm {lam : ℝ} (hlam : 0 < lam) (n : ℕ) :
   push_cast
   have h1 := Gamma_add_nat_div_Gamma_eq (n := n) ((lam : ℂ) + 1 / 2)
     (not_neg_nat_of_re_pos (by simp; linarith))
-  change _ = poch ((lam : ℂ) + 1 / 2) n at h1
+  change _ = pochhammer ((lam : ℂ) + 1 / 2) n at h1
   have h2 := Gamma_add_nat_div_Gamma_eq (n := n) (2 * (lam : ℂ))
     (not_neg_nat_of_re_pos (by simp; linarith))
-  change _ = poch (2 * (lam : ℂ)) n at h2
+  change _ = pochhammer (2 * (lam : ℂ)) n at h2
   have h3 := Gamma_add_nat_div_Gamma_eq (n := n) (2 * (lam : ℂ) + n)
     (not_neg_nat_of_re_pos (by simp; have := (Nat.cast_nonneg n : (0 : ℝ) ≤ n); linarith))
-  change _ = poch (2 * (lam : ℂ) + n) n at h3
+  change _ = pochhammer (2 * (lam : ℂ) + n) n at h3
   have hG (k : ℕ) : Gamma (2 * (lam : ℂ) + k) ≠ 0 := Gamma_ne_zero_of_re_pos (by
     simp; have := (Nat.cast_nonneg k : (0 : ℝ) ≤ k); linarith)
   have hGh : Gamma ((lam : ℂ) + 1 / 2 + n) ≠ 0 := Gamma_ne_zero_of_re_pos (by
@@ -658,7 +666,7 @@ theorem ultrasphPoly_norm {lam : ℝ} (hlam : 0 < lam) (n : ℕ) :
       have hp : 0 < (2 * (lam : ℂ) + (2 * n : ℕ)).re := by
         simp; have := (Nat.cast_nonneg n : (0 : ℝ) ≤ n); linarith
       intro h; rw [h] at hp; simp at hp)]
-  have hconst := ultrasphPoly_norm_constant hlam
+  have hconst := ultrasphericalPolynomial_norm_constant hlam
   have halgebra : (Gamma (2 * (lam : ℂ) + n) / Gamma (2 * (lam : ℂ)) /
       (Gamma ((lam : ℂ) + 1 / 2 + n) / Gamma ((lam : ℂ) + 1 / 2))) ^ 2 *
         ((2 : ℂ) ^ (2 * (lam : ℂ)) * Gamma ((lam : ℂ) + 1 / 2 + n) *
@@ -679,40 +687,44 @@ theorem ultrasphPoly_norm {lam : ℝ} (hlam : 0 < lam) (n : ℕ) :
   field_simp
 
 /-- Identity under the stated parameter and domain assumptions: `∫ x : ℝ in (-1 : ℝ)..1,
-ultrasphPoly lam m x * ultrasphPoly lam n x * (1 - (x : ℂ) ^ 2) ^ ((lam : ℂ) - 1 / 2) = if m =
-n then (2 : ℂ) ^ (1 - 2 * (lam : ℂ)) * Real.pi * Gamma (n + 2 * (lam : ℂ)) / ((n + lam) *
+ultrasphericalPolynomial lam m x * ultrasphericalPolynomial lam n x * (1 - (x : ℂ) ^ 2) ^ ((lam : ℂ)
+- 1 / 2) = if m = n then (2 : ℂ) ^ (1 - 2 * (lam : ℂ)) * Real.pi * Gamma (n + 2 * (lam : ℂ)) / ((n +
+  lam) *
 Gamma (lam : ℂ) ^ 2 * n.factorial) else 0`. -/
 @[dlmf 18.3.T1]
-theorem ultrasphPoly_orthogonality {lam : ℝ} (hlam : 0 < lam) (m n : ℕ) :
-    ∫ x : ℝ in (-1 : ℝ)..1, ultrasphPoly lam m x * ultrasphPoly lam n x *
+theorem ultrasphericalPolynomial_orthogonality {lam : ℝ} (hlam : 0 < lam) (m n : ℕ) :
+    ∫ x : ℝ in (-1 : ℝ)..1, ultrasphericalPolynomial lam m x * ultrasphericalPolynomial lam n x *
       (1 - (x : ℂ) ^ 2) ^ ((lam : ℂ) - 1 / 2) =
       if m = n then (2 : ℂ) ^ (1 - 2 * (lam : ℂ)) * Real.pi * Gamma (n + 2 * (lam : ℂ)) /
         ((n + lam) * Gamma (lam : ℂ) ^ 2 * n.factorial) else 0 := by
   split_ifs with hmn
   · subst m
-    simpa only [pow_two] using ultrasphPoly_norm hlam n
+    simpa only [pow_two] using ultrasphericalPolynomial_norm hlam n
   · have ha : -1 < lam - 1 / 2 := by linarith
-    have hpoch (k : ℕ) : poch ((lam : ℂ) + 1 / 2) k ≠ 0 :=
-      poch_ne_zero_of_re_pos (by simp; linarith) k
-    have he : (∫ x : ℝ in (-1 : ℝ)..1, ultrasphPoly lam m x * ultrasphPoly lam n x *
+    have hpoch (k : ℕ) : pochhammer ((lam : ℂ) + 1 / 2) k ≠ 0 :=
+      pochhammer_ne_zero_of_re_pos (by simp; linarith) k
+    have he : (∫ x : ℝ in (-1 : ℝ)..1, ultrasphericalPolynomial lam m x *
+        ultrasphericalPolynomial lam n x *
         (1 - (x : ℂ) ^ 2) ^ ((lam : ℂ) - 1 / 2)) =
-        (poch (2 * (lam : ℂ)) m / poch ((lam : ℂ) + 1 / 2) m *
-          (poch (2 * (lam : ℂ)) n / poch ((lam : ℂ) + 1 / 2) n)) *
-          (∫ t : ℝ in (-1 : ℝ)..1, jacobiPolyP ((lam - 1 / 2 : ℝ) : ℂ) ((lam - 1 / 2 : ℝ) : ℂ) m t *
-            jacobiPolyP ((lam - 1 / 2 : ℝ) : ℂ) ((lam - 1 / 2 : ℝ) : ℂ) n t *
+        (pochhammer (2 * (lam : ℂ)) m / pochhammer ((lam : ℂ) + 1 / 2) m *
+          (pochhammer (2 * (lam : ℂ)) n / pochhammer ((lam : ℂ) + 1 / 2) n)) *
+          (∫ t : ℝ in (-1 : ℝ)..1,
+              jacobiPolynomialP ((lam - 1 / 2 : ℝ) : ℂ) ((lam - 1 / 2 : ℝ) : ℂ) m t *
+            jacobiPolynomialP ((lam - 1 / 2 : ℝ) : ℂ) ((lam - 1 / 2 : ℝ) : ℂ) n t *
             (1 - (t : ℂ)) ^ ((lam - 1 / 2 : ℝ) : ℂ) * (1 + (t : ℂ)) ^ ((lam - 1 / 2 : ℝ) : ℂ)) := by
       rw [← intervalIntegral.integral_const_mul]
       apply intervalIntegral.integral_congr_Ioo_of_le (by norm_num)
       intro t ht
       dsimp only
-      rw [ultrasphPoly_eq_jacobiPolyP m _ (hpoch m), ultrasphPoly_eq_jacobiPolyP n _ (hpoch n)]
+      rw [ultrasphericalPolynomial_eq_jacobiPolynomialP m _ (hpoch m),
+          ultrasphericalPolynomial_eq_jacobiPolynomialP n _ (hpoch n)]
       have hp := mul_cpow_ofReal_nonneg (show 0 ≤ 1 - t by linarith [ht.2])
         (show 0 ≤ 1 + t by linarith [ht.1]) ((lam : ℂ) - 1 / 2)
       push_cast at hp ⊢
       rw [show (1 - (t : ℂ)) * (1 + t) = 1 - (t : ℂ) ^ 2 by ring] at hp
       rw [hp]
       ring
-    rw [he, jacobiPolyP_orthogonal ha ha hmn, mul_zero]
+    rw [he, jacobiPolynomialP_orthogonal ha ha hmn, mul_zero]
 
 /-- Repeated differentiation of the Jacobi weight, using the proved weighted
 derivative identity on the open interval. -/
@@ -721,7 +733,7 @@ theorem iteratedDeriv_jacobi_weight {α β : ℝ} (hα : -1 < α) (hβ : -1 < β
     iteratedDeriv n (fun t : ℝ => (1 - (t : ℂ)) ^ (α + n : ℂ) *
       (1 + (t : ℂ)) ^ (β + n : ℂ)) x =
         (-2 : ℂ) ^ n * n.factorial * (1 - (x : ℂ)) ^ (α : ℂ) *
-          (1 + (x : ℂ)) ^ (β : ℂ) * jacobiPolyP α β n x := by
+          (1 + (x : ℂ)) ^ (β : ℂ) * jacobiPolynomialP α β n x := by
   induction n generalizing α β x with
   | zero => simp
   | succ n ih =>
@@ -729,7 +741,7 @@ theorem iteratedDeriv_jacobi_weight {α β : ℝ} (hα : -1 < α) (hβ : -1 < β
         (1 + (t : ℂ)) ^ ((β : ℂ) + ((n + 1 : ℕ) : ℂ))) =ᶠ[𝓝 x]
         (fun t : ℝ => ((-2 : ℂ) ^ n * n.factorial) *
           ((1 - (t : ℂ)) ^ (α + 1 : ℂ) * (1 + (t : ℂ)) ^ (β + 1 : ℂ) *
-            jacobiPolyP (α + 1) (β + 1) n t)) := by
+            jacobiPolynomialP (α + 1) (β + 1) n t)) := by
       filter_upwards [isOpen_Ioo.mem_nhds hx] with t ht
       have h := ih (α := α + 1) (β := β + 1) (by linarith) (by linarith) ht
       push_cast at h
@@ -746,16 +758,17 @@ theorem iteratedDeriv_jacobi_weight {α β : ℝ} (hα : -1 < α) (hβ : -1 < β
     ring
 
 /-- Repeated differentiation of the Laguerre weight on the positive half-line. -/
-theorem iteratedDeriv_laguerrePolyL_weight {α : ℝ} (hα : -1 < α) (n : ℕ) {x : ℝ} (hx : 0 < x) :
+theorem iteratedDeriv_laguerrePolynomialL_weight {α : ℝ} (hα : -1 < α) (n : ℕ)
+    {x : ℝ} (hx : 0 < x) :
     iteratedDeriv n (fun t : ℝ => exp (-(t : ℂ)) * (t : ℂ) ^ (α + n : ℂ)) x =
-      (n.factorial : ℂ) * exp (-(x : ℂ)) * (x : ℂ) ^ (α : ℂ) * laguerrePolyL α n x := by
+      (n.factorial : ℂ) * exp (-(x : ℂ)) * (x : ℂ) ^ (α : ℂ) * laguerrePolynomialL α n x := by
   induction n generalizing α x with
   | zero => simp
   | succ n ih =>
     have heq : iteratedDeriv n
         (fun t : ℝ => exp (-(t : ℂ)) * (t : ℂ) ^ ((α : ℂ) + ((n + 1 : ℕ) : ℂ)))
         =ᶠ[𝓝 x] (fun t : ℝ => (n.factorial : ℂ) *
-          (exp (-(t : ℂ)) * (t : ℂ) ^ (α + 1 : ℂ) * laguerrePolyL (α + 1) n t)) := by
+          (exp (-(t : ℂ)) * (t : ℂ) ^ (α + 1 : ℂ) * laguerrePolynomialL (α + 1) n t)) := by
       filter_upwards [Ioi_mem_nhds hx] with t ht
       have h := ih (α := α + 1) (by linarith) ht
       push_cast at h
@@ -763,20 +776,22 @@ theorem iteratedDeriv_laguerrePolyL_weight {α : ℝ} (hα : -1 < α) (n : ℕ) 
       rw [show (α : ℂ) + ((n : ℂ) + 1) = (α : ℂ) + 1 + n by ring]
       simpa only [mul_assoc] using h
     rw [iteratedDeriv_succ, heq.deriv_eq, deriv_const_mul_field]
-    have hD := laguerrePolyL_weighted_derivative (by linarith : 0 < α + 1) n hx
+    have hD := laguerrePolynomialL_weighted_derivative (by linarith : 0 < α + 1) n hx
     push_cast at hD
     rw [hD]
     simp only [Nat.factorial_succ, Nat.cast_add, Nat.cast_one, Nat.cast_mul,
       add_sub_cancel_right]
     ring
 
-/-- Identity under the stated parameter and domain assumptions: `jacobiPolyP α β n x = (deriv^[n]
-(fun t : ℝ => (1 - t) ^ (α + n) * (1 + t) ^ (β + n)) x : ℝ) / ((-2 : ℂ) ^ n * n.factorial * (1
+/-- Identity under the stated parameter and domain assumptions:
+`jacobiPolynomialP α β n x = (deriv^[n] (fun t : ℝ => (1 - t) ^ (α + n) * (1 + t) ^ (β + n)) x : ℝ)
+/ ((-2 : ℂ) ^ n * n.factorial * (1
 - x : ℂ) ^ (α : ℂ) * (1 + x : ℂ) ^ (β : ℂ))`. -/
 @[dlmf 18.5.E5]
 theorem jacobi_rodrigues {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n : ℕ)
     {x : ℝ} (hx : x ∈ Set.Ioo (-1) 1) :
-    jacobiPolyP α β n x = (deriv^[n] (fun t : ℝ => (1 - t) ^ (α + n) * (1 + t) ^ (β + n)) x : ℝ) /
+    jacobiPolynomialP α β n x =
+        (deriv^[n] (fun t : ℝ => (1 - t) ^ (α + n) * (1 + t) ^ (β + n)) x : ℝ) /
       ((-2 : ℂ) ^ n * n.factorial * (1 - x : ℂ) ^ (α : ℂ) * (1 + x : ℂ) ^ (β : ℂ)) := by
   let f : ℝ → ℝ := fun t => (1 - t) ^ (α + n) * (1 + t) ^ (β + n)
   have hf : ContDiffAt ℝ n f x := by
@@ -798,11 +813,12 @@ theorem jacobi_rodrigues {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n : ℕ)
   field_simp [cpow_ne_zero_iff.mpr (Or.inl h1), cpow_ne_zero_iff.mpr (Or.inl h2),
     Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero n)]
 
-/-- Identity under the stated parameter and domain assumptions: `laguerrePolyL α n x = (Real.exp x
+/-- Identity under the stated parameter and domain assumptions:
+`laguerrePolynomialL α n x = (Real.exp x
 * x ^ (-α) * deriv^[n] (fun t : ℝ => Real.exp (-t) * t ^ (n + α)) x / n.factorial : ℝ)`. -/
 @[dlmf 18.5.E5]
-theorem laguerrePolyL_rodrigues {α : ℝ} (hα : -1 < α) (n : ℕ) {x : ℝ} (hx : 0 < x) :
-    laguerrePolyL α n x = (Real.exp x * x ^ (-α) *
+theorem laguerrePolynomialL_rodrigues {α : ℝ} (hα : -1 < α) (n : ℕ) {x : ℝ} (hx : 0 < x) :
+    laguerrePolynomialL α n x = (Real.exp x * x ^ (-α) *
       deriv^[n] (fun t : ℝ => Real.exp (-t) * t ^ (n + α)) x / n.factorial : ℝ) := by
   let f : ℝ → ℝ := fun t => Real.exp (-t) * t ^ (n + α)
   have hf : ContDiffAt ℝ n f x :=
@@ -817,7 +833,7 @@ theorem laguerrePolyL_rodrigues {α : ℝ} (hα : -1 < α) (n : ℕ) {x : ℝ} (
     congr 2
     ring
   have hd := heq.iteratedDeriv_eq n
-  rw [iteratedDeriv_smul_const hf, iteratedDeriv_laguerrePolyL_weight hα n hx,
+  rw [iteratedDeriv_smul_const hf, iteratedDeriv_laguerrePolynomialL_weight hα n hx,
     Complex.real_smul, mul_one, iteratedDeriv_eq_iterate] at hd
   push_cast
   rw [hd, ofReal_cpow hx.le, ofReal_neg, exp_neg, cpow_neg]
@@ -827,16 +843,17 @@ theorem laguerrePolyL_rodrigues {α : ℝ} (hα : -1 < α) (n : ℕ) {x : ℝ} (
 /-- **Rodrigues' formula for Gegenbauer polynomials** (DLMF 18.5.5, Temme §6.3): for `λ > -1/2`
 and `-1 < x < 1`,
 `C_n^λ(x) = (2λ)_n / ((-2)ⁿ n! (λ+1/2)_n) · (1-x²)^{1/2-λ} dⁿ/dxⁿ (1-x²)^{n+λ-1/2}`. -/
-theorem ultrasphPoly_rodrigues {lam : ℝ} (hlam : -1 / 2 < lam) (n : ℕ) {x : ℝ}
+theorem ultrasphericalPolynomial_rodrigues {lam : ℝ} (hlam : -1 / 2 < lam) (n : ℕ) {x : ℝ}
     (hx : x ∈ Set.Ioo (-1) 1) :
-    ultrasphPoly lam n x = poch (2 * lam) n / ((-2 : ℂ) ^ n * n.factorial * poch (lam + 1 / 2) n) *
+    ultrasphericalPolynomial lam n x = pochhammer (2 * lam) n /
+        ((-2 : ℂ) ^ n * n.factorial * pochhammer (lam + 1 / 2) n) *
       ((1 - x ^ 2) ^ (1 / 2 - lam) *
         deriv^[n] (fun t : ℝ => (1 - t ^ 2) ^ (n + lam - 1 / 2)) x : ℝ) := by
   have hα : -1 < lam - 1 / 2 := by linarith
-  have hp : poch ((lam : ℂ) + 1 / 2) n ≠ 0 := poch_ne_zero_of_not_neg_nat
+  have hp : pochhammer ((lam : ℂ) + 1 / 2) n ≠ 0 := pochhammer_ne_zero_of_not_neg_nat
     (not_neg_nat_of_re_pos (by simp; linarith)) n
   have hJ := jacobi_rodrigues hα hα n hx
-  rw [ultrasphPoly_eq_jacobiPolyP n x hp]
+  rw [ultrasphericalPolynomial_eq_jacobiPolynomialP n x hp]
   push_cast at hJ ⊢
   rw [hJ]
   -- the two weights agree near `x`
@@ -869,10 +886,10 @@ theorem ultrasphPoly_rodrigues {lam : ℝ} (hlam : -1 / 2 < lam) (n : ℕ) {x : 
 /-- **Rodrigues' formula for Legendre polynomials** (DLMF 18.5.5, Temme (6.20)):
 `P_n(x) = (2ⁿ n!)⁻¹ dⁿ/dxⁿ (x² - 1)ⁿ` for `-1 < x < 1`. -/
 theorem legendre_rodrigues (n : ℕ) {x : ℝ} (hx : x ∈ Set.Ioo (-1) 1) :
-    legendrePolyP n x = ((2 ^ n * n.factorial : ℝ)⁻¹ *
+    legendrePolynomialP n x = ((2 ^ n * n.factorial : ℝ)⁻¹ *
       deriv^[n] (fun t : ℝ => (t ^ 2 - 1) ^ n) x : ℝ) := by
-  have h := ultrasphPoly_rodrigues (lam := 1 / 2) (by norm_num) n hx
-  rw [show ((1 / 2 : ℝ) : ℂ) = 1 / 2 by norm_num, ← legendre_eq_ultrasphPoly] at h
+  have h := ultrasphericalPolynomial_rodrigues (lam := 1 / 2) (by norm_num) n hx
+  rw [show ((1 / 2 : ℝ) : ℂ) = 1 / 2 by norm_num, ← legendre_eq_ultrasphericalPolynomial] at h
   rw [h]
   have hfun : (fun t : ℝ => (1 - t ^ 2) ^ ((n : ℝ) + 1 / 2 - 1 / 2)) =
       fun t : ℝ => (-1) ^ n * (t ^ 2 - 1) ^ n := by
@@ -882,10 +899,10 @@ theorem legendre_rodrigues (n : ℕ) {x : ℝ} (hx : x ∈ Set.Ioo (-1) 1) :
   rw [hfun, ← iteratedDeriv_eq_iterate, ← iteratedDeriv_eq_iterate,
     iteratedDeriv_const_mul_field]
   simp only [show (1 / 2 : ℝ) - 1 / 2 = 0 by norm_num, Real.rpow_zero, one_mul]
-  have hp1 : poch (2 * (1 / 2 : ℂ)) n = n.factorial := by
-    rw [show (2 : ℂ) * (1 / 2) = 1 by norm_num, poch_nat_one]
-  have hp2 : poch ((1 / 2 : ℂ) + 1 / 2) n = n.factorial := by
-    rw [show (1 / 2 : ℂ) + 1 / 2 = 1 by norm_num, poch_nat_one]
+  have hp1 : pochhammer (2 * (1 / 2 : ℂ)) n = n.factorial := by
+    rw [show (2 : ℂ) * (1 / 2) = 1 by norm_num, pochhammer_nat_one]
+  have hp2 : pochhammer ((1 / 2 : ℂ) + 1 / 2) n = n.factorial := by
+    rw [show (1 / 2 : ℂ) + 1 / 2 = 1 by norm_num, pochhammer_nat_one]
   rw [hp1, hp2]
   have hf : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
   push_cast
@@ -1002,7 +1019,7 @@ private lemma dirM_pointwise {θ lam : ℝ} (hθ : 0 < θ) (hθπ : θ < Real.pi
   have hF := sin_sq_cos_quotient ((n : ℂ) + lam + 1 / 2) hxlt
   have hc : ∀ j : ℕ, (1 / 2 : ℂ) ≠ -(j : ℂ) := fun j h => by
     have := congrArg Complex.re h; simp at this; linarith [(j.cast_nonneg : (0:ℝ) ≤ j)]
-  have hR := regularizedGaussHGFun_eq_div_Gamma hc (a := (n : ℂ) + lam + 1 / 2)
+  have hR := regularizedGaussHypergeometricFun_eq_div_Gamma hc (a := (n : ℂ) + lam + 1 / 2)
     (b := 1 - ((n : ℂ) + lam + 1 / 2)) (((k ^ 2 : ℝ) : ℂ) * t)
   have hz : ((Real.sin x : ℂ)) ^ 2 = ((k ^ 2 : ℝ) : ℂ) * t := by
     rw [hsinx, ← ofReal_pow, mul_pow, hst]; push_cast; ring
@@ -1057,9 +1074,9 @@ private lemma dirM_const_real {θ lam : ℝ} (hθ : 0 < θ) (hθπ : θ < Real.p
 `ψ = 2 arcsin(sin(θ/2) √t)`, the quotient formula 15.4.14, the fractional integral 15.6.8 and
 Euler's transformation 15.8.1. -/
 @[dlmf 18.10.E1]
-theorem ultrasphPoly_dirichlet_integral {lam : ℝ} (hlam : 0 < lam) (n : ℕ)
+theorem ultrasphericalPolynomial_dirichlet_integral {lam : ℝ} (hlam : 0 < lam) (n : ℕ)
     {θ : ℝ} (hθ : 0 < θ) (hθπ : θ < Real.pi) :
-    ultrasphPoly lam n (Real.cos θ) / ultrasphPoly lam n 1 =
+    ultrasphericalPolynomial lam n (Real.cos θ) / ultrasphericalPolynomial lam n 1 =
       (2 : ℂ) ^ (lam : ℂ) * Gamma (lam + 1 / 2 : ℂ) /
         (Real.sqrt Real.pi * Gamma (lam : ℂ)) * (Real.sin θ : ℂ) ^ (1 - 2 * lam : ℂ) *
       ∫ phi : ℝ in (0 : ℝ)..θ, (Real.cos ((n + lam) * phi) : ℂ) *
@@ -1090,7 +1107,7 @@ theorem ultrasphPoly_dirichlet_integral {lam : ℝ} (hlam : 0 < lam) (n : ℕ)
       rw [hc, show (lam : ℂ) + 1 / 2 - 1 / 2 = lam by ring]
       exact Complex.Gamma_ne_zero_of_re_pos (by simpa using hlam)
     rw [hfr, ← mul_assoc, mul_one_div_cancel hG, one_mul]
-  rw [hI, regularizedGaussHGFun_euler a (1 - a) c hz1,
+  rw [hI, regularizedGaussHypergeometricFun_euler a (1 - a) c hz1,
     show c - a - (1 - a) = (lam : ℂ) - 1 / 2 by rw [hc]; ring,
     show c - a = -(n : ℂ) by rw [hc, ha]; ring,
     show c - (1 - a) = (n : ℂ) + 2 * lam by rw [hc, ha]; ring,
@@ -1098,14 +1115,14 @@ theorem ultrasphPoly_dirichlet_integral {lam : ℝ} (hlam : 0 < lam) (n : ℕ)
   have hcc : ∀ j : ℕ, c ≠ -(j : ℂ) := fun j h => by
     have := congrArg Complex.re h; rw [hc] at this; simp at this
     linarith [(j.cast_nonneg : (0:ℝ) ≤ j)]
-  rw [regularizedGaussHGFun_eq_div_Gamma hcc]
+  rw [regularizedGaussHypergeometricFun_eq_div_Gamma hcc]
   have hcosθ : Real.cos θ = 1 - 2 * k ^ 2 := by
     rw [show θ = 2 * (θ / 2) by ring, Real.cos_two_mul', ← hk]
     nlinarith [Real.sin_sq_add_cos_sq (θ / 2)]
   have hlre : -1 / 2 < (lam : ℂ).re := by simp; linarith
-  have hP : poch (2 * (lam : ℂ)) n ≠ 0 := poch_ne_zero_of_re_pos (by simp; linarith) n
+  have hP : pochhammer (2 * (lam : ℂ)) n ≠ 0 := pochhammer_ne_zero_of_re_pos (by simp; linarith) n
   have hf : (n ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
-  rw [ultrasphPoly_at_one, ultrasphPoly,
+  rw [ultrasphericalPolynomial_at_one, ultrasphericalPolynomial,
     show (1 - ((Real.cos θ : ℝ) : ℂ)) / 2 = z by rw [hz, hcosθ]; push_cast; ring, ← hc]
   -- the constant
   have hR := dirM_const_real (lam := lam) hθ hθπ
@@ -1134,21 +1151,21 @@ theorem ultrasphPoly_dirichlet_integral {lam : ℝ} (hlam : 0 < lam) (n : ℕ)
   rw [show ((2 * (lam : ℂ) - 1) / 2) = (lam : ℂ) - 1 / 2 by ring]
   linear_combination (-(₂F₁ (-(n : ℂ)) (n + 2 * lam) c z)) * hC
 
-/-- Identity under the stated parameter and domain assumptions: `legendrePolyP n (Real.cos θ) =
-(Real.sqrt 2 / Real.pi * ∫ phi : ℝ in (0 : ℝ)..θ, Real.cos ((n + 1 / 2) * phi) / Real.sqrt
-(Real.cos phi - Real.cos θ) : ℝ)`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`legendrePolynomialP n (Real.cos θ) = (Real.sqrt 2 / Real.pi * ∫ phi : ℝ in (0 : ℝ)..θ, Real.cos ((n
++ 1 / 2) * phi) / Real.sqrt (Real.cos phi - Real.cos θ) : ℝ)`. -/
 @[dlmf 18.10.E2]
 theorem legendre_dirichlet_mehler (n : ℕ) {θ : ℝ} (hθ : 0 < θ) (hθπ : θ < Real.pi) :
-    legendrePolyP n (Real.cos θ) = (Real.sqrt 2 / Real.pi *
+    legendrePolynomialP n (Real.cos θ) = (Real.sqrt 2 / Real.pi *
       ∫ phi : ℝ in (0 : ℝ)..θ, Real.cos ((n + 1 / 2) * phi) /
           Real.sqrt (Real.cos phi - Real.cos θ) : ℝ) := by
-  have h := ultrasphPoly_dirichlet_integral (lam := 1 / 2) (by norm_num) n hθ hθπ
-  have h1 : ultrasphPoly ((1 / 2 : ℝ) : ℂ) n 1 = 1 := by
-    rw [ultrasphPoly_at_one]
-    rw [show 2 * ((1 / 2 : ℝ) : ℂ) = 1 by push_cast; ring, poch_nat_one]
+  have h := ultrasphericalPolynomial_dirichlet_integral (lam := 1 / 2) (by norm_num) n hθ hθπ
+  have h1 : ultrasphericalPolynomial ((1 / 2 : ℝ) : ℂ) n 1 = 1 := by
+    rw [ultrasphericalPolynomial_at_one]
+    rw [show 2 * ((1 / 2 : ℝ) : ℂ) = 1 by push_cast; ring, pochhammer_nat_one]
     exact div_self (Nat.cast_ne_zero.mpr n.factorial_ne_zero)
   rw [h1, div_one, show ((1 / 2 : ℝ) : ℂ) = 1 / 2 by push_cast; ring,
-    ← legendre_eq_ultrasphPoly] at h
+    ← legendre_eq_ultrasphericalPolynomial] at h
   rw [h]
   have hint : (∫ phi : ℝ in (0 : ℝ)..θ, (Real.cos ((n + 1 / 2) * phi) : ℂ) *
       (Real.cos phi - Real.cos θ : ℂ) ^ ((1 / 2 : ℂ) - 1)) =

@@ -16,7 +16,7 @@ If Lamé's equation 29.2.1 has a Lamé polynomial solution `E` (eigenvalue
 
 ## Main results
 
-* `lamePolyEk_second_solution`: DLMF 29.17.1, with Wronskian `E F' - E' F = 1`, so that `F` is
+* `lamePolynomialE_second_solution`: DLMF 29.17.1, with Wronskian `E F' - E' F = 1`, so that `F` is
   independent of `E`.
 
 ## Implementation notes
@@ -42,29 +42,33 @@ namespace DLMF.Lame
 variable {k : ℝ}
 
 /-- 29.17.1: `F(z) = E(z) ∫_{iK'}^z du/E(u)²` is a second solution of Lamé's equation with
-`E F' - E' F = 1`, `E = lamePolyEk t n m · k`, `ν = t.order n`, `h = ½(H_m + ν(ν+1)k²)`.
+`E F' - E' F = 1`, `E = lamePolynomialE t n m · k`, `ν = t.order n`, `h = ½(H_m + ν(ν+1)k²)`.
 Admitted. -/
 @[dlmf 29.17.E1]
-theorem lamePolyEk_second_solution (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType)
+theorem lamePolynomialE_second_solution (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolynomialType)
     {n m : ℕ} (hm : m ≤ n) {U : Set ℂ} (hU : IsOpen U)
     (hseg : ∀ z ∈ U, ∀ s ∈ Ioc (0 : ℝ) 1,
-      let u := I * Real.compEllIntKm (1 - k ^ 2) + s * (z - I * Real.compEllIntKm (1 - k ^ 2))
-      lamePolyEk t n m u k ≠ 0 ∧ ∀ p q : ℤ,
-        u ≠ 2 * p * Real.compEllIntKm (k ^ 2) + (2 * q + 1) * I * Real.compEllIntKm (1 - k ^ 2)) :
-    IsLameSolutionOn ((lamePolyH t n m k + t.order n * (t.order n + 1) * k ^ 2) / 2)
+      let u := I * Real.completeEllipticKOfParameter (1 - k ^ 2) + s *
+          (z - I * Real.completeEllipticKOfParameter (1 - k ^ 2))
+      lamePolynomialE t n m u k ≠ 0 ∧ ∀ p q : ℤ,
+        u ≠ 2 * p * Real.completeEllipticKOfParameter (k ^ 2) + (2 * q + 1) * I *
+            Real.completeEllipticKOfParameter (1 - k ^ 2)) :
+    IsLameSolutionOn ((lamePolynomialH t n m k + t.order n * (t.order n + 1) * k ^ 2) / 2)
         (t.order n) k
-        (fun z => lamePolyEk t n m z k * ∫ s in (0 : ℝ)..1,
-          (z - I * Real.compEllIntKm (1 - k ^ 2)) /
-            lamePolyEk t n m (I * Real.compEllIntKm (1 - k ^ 2) +
-              s * (z - I * Real.compEllIntKm (1 - k ^ 2))) k ^ 2) U ∧
-      ∀ z ∈ U, lamePolyEk t n m z k * deriv (fun z => lamePolyEk t n m z k * ∫ s in (0 : ℝ)..1,
-          (z - I * Real.compEllIntKm (1 - k ^ 2)) /
-            lamePolyEk t n m (I * Real.compEllIntKm (1 - k ^ 2) +
-              s * (z - I * Real.compEllIntKm (1 - k ^ 2))) k ^ 2) z -
-        deriv (fun z => lamePolyEk t n m z k) z * (lamePolyEk t n m z k * ∫ s in (0 : ℝ)..1,
-          (z - I * Real.compEllIntKm (1 - k ^ 2)) /
-            lamePolyEk t n m (I * Real.compEllIntKm (1 - k ^ 2) +
-              s * (z - I * Real.compEllIntKm (1 - k ^ 2))) k ^ 2) = 1 := by
+        (fun z => lamePolynomialE t n m z k * ∫ s in (0 : ℝ)..1,
+          (z - I * Real.completeEllipticKOfParameter (1 - k ^ 2)) /
+            lamePolynomialE t n m (I * Real.completeEllipticKOfParameter (1 - k ^ 2) +
+              s * (z - I * Real.completeEllipticKOfParameter (1 - k ^ 2))) k ^ 2) U ∧
+      ∀ z ∈ U, lamePolynomialE t n m z k *
+          deriv (fun z => lamePolynomialE t n m z k * ∫ s in (0 : ℝ)..1,
+          (z - I * Real.completeEllipticKOfParameter (1 - k ^ 2)) /
+            lamePolynomialE t n m (I * Real.completeEllipticKOfParameter (1 - k ^ 2) +
+              s * (z - I * Real.completeEllipticKOfParameter (1 - k ^ 2))) k ^ 2) z -
+        deriv (fun z => lamePolynomialE t n m z k) z *
+            (lamePolynomialE t n m z k * ∫ s in (0 : ℝ)..1,
+          (z - I * Real.completeEllipticKOfParameter (1 - k ^ 2)) /
+            lamePolynomialE t n m (I * Real.completeEllipticKOfParameter (1 - k ^ 2) +
+              s * (z - I * Real.completeEllipticKOfParameter (1 - k ^ 2))) k ^ 2) = 1 := by
   sorry
 
 end DLMF.Lame

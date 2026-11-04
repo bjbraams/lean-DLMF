@@ -24,7 +24,7 @@ recurrence 33.19.2, which gives the power series 33.19.1.
 
 ## Main results
 
-* `coulombf_eq_re_coulombfComplex`: `f(ε,ℓ;r) = Re coulombfComplex ε ℓ r`.
+* `coulombEnergyF_eq_re_coulombfComplex`: `f(ε,ℓ;r) = Re coulombfComplex ε ℓ r`.
 * `hasDerivAt_deriv_coulombfComplex`: the equation 33.14.1 for `coulombfComplex ε ℓ` at `z ≠ 0`.
 * `hasSum_coulombAlpha_of_ode`: an entire solution `z^{ℓ+1} ψ(z)` of 33.14.1 with `ψ(0) = α₀` has
   the power series `∑ α_k z^{k+ℓ+1}`.
@@ -92,9 +92,9 @@ theorem coulombKappa_eq_or_eq_neg (ε r : ℝ) :
 /-- **The sign of `κ` is immaterial** in 33.14.5 (DLMF §33.14(ii)), by Kummer's transformation
 `M(a,b,z) = e^z M(b-a,b,-z)`. -/
 @[dlmf 33.14.ii]
-theorem coulombfKummer_neg (κ : ℂ) (ℓ : ℕ) (r : ℝ) :
-    coulombfKummer (-κ) ℓ r = coulombfKummer κ ℓ r := by
-  unfold coulombfKummer
+theorem coulombEnergyFKummer_neg (κ : ℂ) (ℓ : ℕ) (r : ℝ) :
+    coulombEnergyFKummer (-κ) ℓ r = coulombEnergyFKummer κ ℓ r := by
+  unfold coulombEnergyFKummer
   rw [kummerM_kummer_transform (two_mul_nat_add_two_ne_neg_nat ℓ) (a := (ℓ : ℂ) + 1 - κ),
     show 2 * (ℓ : ℂ) + 2 - (ℓ + 1 - κ) = ℓ + 1 - -κ by ring,
     show -(2 * (r : ℂ) / κ) = 2 * r / -κ by ring]
@@ -109,7 +109,8 @@ def coulombfKummerComplex (κ : ℂ) (ℓ : ℕ) (z : ℂ) : ℂ :=
 
 /-- The Kummer form of `f(ε,ℓ;r)` is the restriction of its complex extension
 `coulombfKummerComplex`. -/
-private lemma coulombfKummer_eq_coulombfKummerComplex (κ : ℂ) (ℓ : ℕ) (r : ℝ) : coulombfKummer κ ℓ r
+private lemma coulombEnergyFKummer_eq_coulombfKummerComplex (κ : ℂ) (ℓ : ℕ) (r : ℝ) :
+    coulombEnergyFKummer κ ℓ r
     = coulombfKummerComplex κ ℓ r :=
   rfl
 
@@ -447,22 +448,22 @@ theorem differentiable_coulombfComplex (ε : ℝ) (ℓ : ℕ) : Differentiable �
       exact (differentiable_id.pow _).mul (differentiable_coulombfReducedComplex ε ℓ)
 
 /-- `f(ε,ℓ;r) = Re coulombfComplex ε ℓ r`. -/
-theorem coulombf_eq_re_coulombfComplex (ε : ℝ) (ℓ : ℕ) (r : ℝ) :
-    coulombf ε ℓ r = (coulombfComplex ε ℓ r).re := by
-  unfold coulombf coulombfComplex
+theorem coulombEnergyF_eq_re_coulombfComplex (ε : ℝ) (ℓ : ℕ) (r : ℝ) :
+    coulombEnergyF ε ℓ r = (coulombfComplex ε ℓ r).re := by
+  unfold coulombEnergyF coulombfComplex
   split_ifs with hε
   · rfl
-  · rw [coulombfKummer_eq_coulombfKummerComplex]
+  · rw [coulombEnergyFKummer_eq_coulombfKummerComplex]
     rcases coulombKappa_eq_or_eq_neg ε r with h | h
     · rw [h]
-    · rw [h, ← coulombfKummer_eq_coulombfKummerComplex, coulombfKummer_neg,
-          coulombfKummer_eq_coulombfKummerComplex]
+    · rw [h, ← coulombEnergyFKummer_eq_coulombfKummerComplex, coulombEnergyFKummer_neg,
+          coulombEnergyFKummer_eq_coulombfKummerComplex]
 
 /-- The derivative of `f(ε,ℓ;·)` is the real part of the derivative of `coulombfComplex ε ℓ`. -/
-theorem hasDerivAt_coulombf (ε : ℝ) (ℓ : ℕ) (x : ℝ) :
-    HasDerivAt (coulombf ε ℓ) (deriv (coulombfComplex ε ℓ) x).re x := by
-  rw [show coulombf ε ℓ = fun x : ℝ =>
-      (coulombfComplex ε ℓ x).re from funext (coulombf_eq_re_coulombfComplex ε ℓ)]
+theorem hasDerivAt_coulombEnergyF (ε : ℝ) (ℓ : ℕ) (x : ℝ) :
+    HasDerivAt (coulombEnergyF ε ℓ) (deriv (coulombfComplex ε ℓ) x).re x := by
+  rw [show coulombEnergyF ε ℓ = fun x : ℝ =>
+      (coulombfComplex ε ℓ x).re from funext (coulombEnergyF_eq_re_coulombfComplex ε ℓ)]
   exact ((differentiable_coulombfComplex ε ℓ x).hasDerivAt).real_of_complex
 
 /-! ### Taylor coefficients, ladder relations -/

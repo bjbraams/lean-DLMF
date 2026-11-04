@@ -21,15 +21,15 @@ and the constant three-point and four-point expressions (DLMF 22.8.24–22.8.27)
 
 ## Main results
 
-* `jacobiSnk_add_alt`, `jacobiSnk_add_alt₂`, `jacobiCnk_add_alt`, `jacobiCnk_add_alt₂`,
-  `jacobiDnk_add_alt`, `jacobiDnk_add_alt₂`: the addition theorems DLMF 22.8.13–22.8.18, at
+* `jacobiSn_add_alt`, `jacobiSn_add_alt₂`, `jacobiCn_add_alt`, `jacobiCn_add_alt₂`,
+  `jacobiDn_add_alt`, `jacobiDn_add_alt₂`: the addition theorems DLMF 22.8.13–22.8.18, at
   points where the functions involved are finite.
 * `jacobiSnCnDnk_add_sub`: the addition formulas at `u + v` and `u - v` with the common
   denominator.
 * `jacobi_det_sum_zero`, `jacobi_prod_sum_zero`: the four-point identities DLMF 22.8.19–22.8.21
   for `z₁ + z₂ + z₃ + z₄ = 0`.
 * `jacobi_det_sum_two_K`, `jacobi_det_sum_two_K'`: corrected forms of DLMF 22.8.22–22.8.23.
-* `jacobiSnCnDnk_two_mul_compEllIntKk_div_three`: the values at `2K/3` and `4K/3`.
+* `jacobiSnCnDnk_two_mul_completeEllipticK_div_three`: the values at `2K/3` and `4K/3`.
 * `jacobiDnThreePointExpr_const`: DLMF 22.8.24–22.8.25, proved from the values at `2K/3` and
   the addition theorem.
 * `jacobiDn_four_point`: DLMF 22.8.26–22.8.27, from Table 22.4.3.
@@ -52,7 +52,7 @@ noncomputable section
 
 namespace DLMF.JacobiElliptic
 
-open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
+open DLMF.EllipticIntegrals (completeEllipticK completeEllipticKPrime)
 
 local notation "θ₁" => jacobiThetaOneTau
 
@@ -63,29 +63,29 @@ local notation "θ₃" => jacobiThetaThreeTau
 local notation "θ₄" => jacobiThetaFourTau
 
 /-- DLMF 22.8.13: an addition theorem for `sn`, at points `u`, `v` where the functions
-`·n` are finite (`JacobiRegulark .n`) and the printed denominator is nonzero. -/
+`·n` are finite (`IsJacobiRegular .n`) and the printed denominator is nonzero. -/
 @[dlmf 22.8.E13]
-theorem jacobiSnk_add_alt {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
-    (hu : JacobiRegulark .n u k) (hv : JacobiRegulark .n v k)
-    (hden : jacobiSnk u k * jacobiCnk v k * jacobiDnk v k -
-      jacobiSnk v k * jacobiCnk u k * jacobiDnk u k ≠ 0) :
-    jacobiSnk (u + v) k =
-      (jacobiSnk u k ^ 2 - jacobiSnk v k ^ 2) / (jacobiSnk u k * jacobiCnk v k * jacobiDnk v k -
-        jacobiSnk v k * jacobiCnk u k * jacobiDnk u k) := by
-  have hτ := jacobiTauk_im_pos hk
+theorem jacobiSn_add_alt {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
+    (hu : IsJacobiRegular .n u k) (hv : IsJacobiRegular .n v k)
+    (hden : jacobiSn u k * jacobiCn v k * jacobiDn v k -
+      jacobiSn v k * jacobiCn u k * jacobiDn u k ≠ 0) :
+    jacobiSn (u + v) k =
+      (jacobiSn u k ^ 2 - jacobiSn v k ^ 2) / (jacobiSn u k * jacobiCn v k * jacobiDn v k -
+        jacobiSn v k * jacobiCn u k * jacobiDn u k) := by
+  have hτ := jacobiTau_im_pos hk
   have hmod := (jacobi_inversion_k hk).1
-  have hu' : θ₄ (jacobiZetak u k) (jacobiTauk k) ≠ 0 := by
+  have hu' : θ₄ (jacobiThetaArgument u k) (jacobiTau k) ≠ 0 := by
     intro h'; apply hu; simp [jacobiLetterTheta, h']
-  have hv' : θ₄ (jacobiZetak v k) (jacobiTauk k) ≠ 0 := by
+  have hv' : θ₄ (jacobiThetaArgument v k) (jacobiTau k) ≠ 0 := by
     intro h'; apply hv; simp [jacobiLetterTheta, h']
   rw [eq_div_iff hden]
-  simp only [jacobiSnk, jacobiCnk, jacobiDnk, jacobiPQk, jacobiGlaisher, jacobiLetterTheta,
+  simp only [jacobiSn, jacobiCn, jacobiDn, jacobiPQ, jacobiGlaisher, jacobiLetterTheta,
     reduceCtorEq, ↓reduceIte] at hden ⊢
-  rw [jacobiZetak_add]
-  rw [jacobiModulusTau] at hmod
-  generalize jacobiZetak u k = x at hu' hden ⊢
-  generalize jacobiZetak v k = y at hv' hden ⊢
-  generalize jacobiTauk k = τ at hτ hu' hv' hden hmod ⊢
+  rw [jacobiThetaArgument_add]
+  rw [jacobiModulusOfTau] at hmod
+  generalize jacobiThetaArgument u k = x at hu' hden ⊢
+  generalize jacobiThetaArgument v k = y at hv' hden ⊢
+  generalize jacobiTau k = τ at hτ hu' hv' hden hmod ⊢
   subst hmod
   obtain ⟨h2, h3, h4, -⟩ := jacobiThetaTau_zero_ne_zero_and_pow_four τ hτ
   have hD : (θ₄ (x + y) τ * θ₁ (x - y) τ) ≠ 0 := by
@@ -100,30 +100,30 @@ theorem jacobiSnk_add_alt {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
     (θ₃ 0 τ * θ₂ 0 τ * θ₄ (x + y) τ) * jacobiThetaOneTau_add_mul_jacobiThetaOneTau_sub_four x y τ hτ
 
 /-- DLMF 22.8.14: an addition theorem for `sn`, at points `u`, `v` where the functions
-`·n` are finite (`JacobiRegulark .n`) and the printed denominator is nonzero. -/
+`·n` are finite (`IsJacobiRegular .n`) and the printed denominator is nonzero. -/
 @[dlmf 22.8.E14]
-theorem jacobiSnk_add_alt₂ {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
-    (hu : JacobiRegulark .n u k) (hv : JacobiRegulark .n v k)
-    (hden : jacobiCnk u k * jacobiCnk v k +
-      jacobiSnk u k * jacobiDnk u k * jacobiSnk v k * jacobiDnk v k ≠ 0) :
-    jacobiSnk (u + v) k =
-      (jacobiSnk u k * jacobiCnk u k * jacobiDnk v k + jacobiSnk v k * jacobiCnk v k *
-        jacobiDnk u k) / (jacobiCnk u k * jacobiCnk v k + jacobiSnk u k * jacobiDnk u k *
-          jacobiSnk v k * jacobiDnk v k) := by
-  have hτ := jacobiTauk_im_pos hk
+theorem jacobiSn_add_alt₂ {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
+    (hu : IsJacobiRegular .n u k) (hv : IsJacobiRegular .n v k)
+    (hden : jacobiCn u k * jacobiCn v k +
+      jacobiSn u k * jacobiDn u k * jacobiSn v k * jacobiDn v k ≠ 0) :
+    jacobiSn (u + v) k =
+      (jacobiSn u k * jacobiCn u k * jacobiDn v k + jacobiSn v k * jacobiCn v k *
+        jacobiDn u k) / (jacobiCn u k * jacobiCn v k + jacobiSn u k * jacobiDn u k *
+          jacobiSn v k * jacobiDn v k) := by
+  have hτ := jacobiTau_im_pos hk
   have hmod := (jacobi_inversion_k hk).1
-  have hu' : θ₄ (jacobiZetak u k) (jacobiTauk k) ≠ 0 := by
+  have hu' : θ₄ (jacobiThetaArgument u k) (jacobiTau k) ≠ 0 := by
     intro h'; apply hu; simp [jacobiLetterTheta, h']
-  have hv' : θ₄ (jacobiZetak v k) (jacobiTauk k) ≠ 0 := by
+  have hv' : θ₄ (jacobiThetaArgument v k) (jacobiTau k) ≠ 0 := by
     intro h'; apply hv; simp [jacobiLetterTheta, h']
   rw [eq_div_iff hden]
-  simp only [jacobiSnk, jacobiCnk, jacobiDnk, jacobiPQk, jacobiGlaisher, jacobiLetterTheta,
+  simp only [jacobiSn, jacobiCn, jacobiDn, jacobiPQ, jacobiGlaisher, jacobiLetterTheta,
     reduceCtorEq, ↓reduceIte] at hden ⊢
-  rw [jacobiZetak_add]
-  rw [jacobiModulusTau] at hmod
-  generalize jacobiZetak u k = x at hu' hden ⊢
-  generalize jacobiZetak v k = y at hv' hden ⊢
-  generalize jacobiTauk k = τ at hτ hu' hv' hden hmod ⊢
+  rw [jacobiThetaArgument_add]
+  rw [jacobiModulusOfTau] at hmod
+  generalize jacobiThetaArgument u k = x at hu' hden ⊢
+  generalize jacobiThetaArgument v k = y at hv' hden ⊢
+  generalize jacobiTau k = τ at hτ hu' hv' hden hmod ⊢
   subst hmod
   obtain ⟨h2, h3, h4, -⟩ := jacobiThetaTau_zero_ne_zero_and_pow_four τ hτ
   have hD : (θ₄ (x + y) τ * θ₂ (x - y) τ) ≠ 0 := by
@@ -138,30 +138,30 @@ theorem jacobiSnk_add_alt₂ {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : �
     (θ₂ 0 τ * θ₄ (x + y) τ) * jacobiThetaOneTau_add_mul_jacobiThetaTwoTau_sub x y τ hτ
 
 /-- DLMF 22.8.15: an addition theorem for `cn`, at points `u`, `v` where the functions
-`·n` are finite (`JacobiRegulark .n`) and the printed denominator is nonzero. -/
+`·n` are finite (`IsJacobiRegular .n`) and the printed denominator is nonzero. -/
 @[dlmf 22.8.E15]
-theorem jacobiCnk_add_alt {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
-    (hu : JacobiRegulark .n u k) (hv : JacobiRegulark .n v k)
-    (hden : jacobiSnk u k * jacobiCnk v k * jacobiDnk v k -
-      jacobiSnk v k * jacobiCnk u k * jacobiDnk u k ≠ 0) :
-    jacobiCnk (u + v) k =
-      (jacobiSnk u k * jacobiCnk u k * jacobiDnk v k - jacobiSnk v k * jacobiCnk v k *
-        jacobiDnk u k) / (jacobiSnk u k * jacobiCnk v k * jacobiDnk v k - jacobiSnk v k *
-          jacobiCnk u k * jacobiDnk u k) := by
-  have hτ := jacobiTauk_im_pos hk
+theorem jacobiCn_add_alt {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
+    (hu : IsJacobiRegular .n u k) (hv : IsJacobiRegular .n v k)
+    (hden : jacobiSn u k * jacobiCn v k * jacobiDn v k -
+      jacobiSn v k * jacobiCn u k * jacobiDn u k ≠ 0) :
+    jacobiCn (u + v) k =
+      (jacobiSn u k * jacobiCn u k * jacobiDn v k - jacobiSn v k * jacobiCn v k *
+        jacobiDn u k) / (jacobiSn u k * jacobiCn v k * jacobiDn v k - jacobiSn v k *
+          jacobiCn u k * jacobiDn u k) := by
+  have hτ := jacobiTau_im_pos hk
   have hmod := (jacobi_inversion_k hk).1
-  have hu' : θ₄ (jacobiZetak u k) (jacobiTauk k) ≠ 0 := by
+  have hu' : θ₄ (jacobiThetaArgument u k) (jacobiTau k) ≠ 0 := by
     intro h'; apply hu; simp [jacobiLetterTheta, h']
-  have hv' : θ₄ (jacobiZetak v k) (jacobiTauk k) ≠ 0 := by
+  have hv' : θ₄ (jacobiThetaArgument v k) (jacobiTau k) ≠ 0 := by
     intro h'; apply hv; simp [jacobiLetterTheta, h']
   rw [eq_div_iff hden]
-  simp only [jacobiSnk, jacobiCnk, jacobiDnk, jacobiPQk, jacobiGlaisher, jacobiLetterTheta,
+  simp only [jacobiSn, jacobiCn, jacobiDn, jacobiPQ, jacobiGlaisher, jacobiLetterTheta,
     reduceCtorEq, ↓reduceIte] at hden ⊢
-  rw [jacobiZetak_add]
-  rw [jacobiModulusTau] at hmod
-  generalize jacobiZetak u k = x at hu' hden ⊢
-  generalize jacobiZetak v k = y at hv' hden ⊢
-  generalize jacobiTauk k = τ at hτ hu' hv' hden hmod ⊢
+  rw [jacobiThetaArgument_add]
+  rw [jacobiModulusOfTau] at hmod
+  generalize jacobiThetaArgument u k = x at hu' hden ⊢
+  generalize jacobiThetaArgument v k = y at hv' hden ⊢
+  generalize jacobiTau k = τ at hτ hu' hv' hden hmod ⊢
   subst hmod
   obtain ⟨h2, h3, h4, -⟩ := jacobiThetaTau_zero_ne_zero_and_pow_four τ hτ
   have hD : (θ₄ (x + y) τ * θ₁ (x - y) τ) ≠ 0 := by
@@ -176,30 +176,30 @@ theorem jacobiCnk_add_alt {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
     (θ₂ 0 τ * θ₄ (x + y) τ) * jacobiThetaTwoTau_add_mul_jacobiThetaOneTau_sub x y τ hτ
 
 /-- DLMF 22.8.16: an addition theorem for `cn`, at points `u`, `v` where the functions
-`·n` are finite (`JacobiRegulark .n`) and the printed denominator is nonzero. -/
+`·n` are finite (`IsJacobiRegular .n`) and the printed denominator is nonzero. -/
 @[dlmf 22.8.E16]
-theorem jacobiCnk_add_alt₂ {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
-    (hu : JacobiRegulark .n u k) (hv : JacobiRegulark .n v k)
-    (hden : jacobiCnk u k * jacobiCnk v k +
-      jacobiSnk u k * jacobiDnk u k * jacobiSnk v k * jacobiDnk v k ≠ 0) :
-    jacobiCnk (u + v) k =
-      (1 - jacobiSnk u k ^ 2 - jacobiSnk v k ^ 2 + k ^ 2 * jacobiSnk u k ^ 2 * jacobiSnk v k ^ 2) /
-        (jacobiCnk u k * jacobiCnk v k + jacobiSnk u k * jacobiDnk u k * jacobiSnk v k *
-          jacobiDnk v k) := by
-  have hτ := jacobiTauk_im_pos hk
+theorem jacobiCn_add_alt₂ {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
+    (hu : IsJacobiRegular .n u k) (hv : IsJacobiRegular .n v k)
+    (hden : jacobiCn u k * jacobiCn v k +
+      jacobiSn u k * jacobiDn u k * jacobiSn v k * jacobiDn v k ≠ 0) :
+    jacobiCn (u + v) k =
+      (1 - jacobiSn u k ^ 2 - jacobiSn v k ^ 2 + k ^ 2 * jacobiSn u k ^ 2 * jacobiSn v k ^ 2) /
+        (jacobiCn u k * jacobiCn v k + jacobiSn u k * jacobiDn u k * jacobiSn v k *
+          jacobiDn v k) := by
+  have hτ := jacobiTau_im_pos hk
   have hmod := (jacobi_inversion_k hk).1
-  have hu' : θ₄ (jacobiZetak u k) (jacobiTauk k) ≠ 0 := by
+  have hu' : θ₄ (jacobiThetaArgument u k) (jacobiTau k) ≠ 0 := by
     intro h'; apply hu; simp [jacobiLetterTheta, h']
-  have hv' : θ₄ (jacobiZetak v k) (jacobiTauk k) ≠ 0 := by
+  have hv' : θ₄ (jacobiThetaArgument v k) (jacobiTau k) ≠ 0 := by
     intro h'; apply hv; simp [jacobiLetterTheta, h']
   rw [eq_div_iff hden]
-  simp only [jacobiSnk, jacobiCnk, jacobiDnk, jacobiPQk, jacobiGlaisher, jacobiLetterTheta,
+  simp only [jacobiSn, jacobiCn, jacobiDn, jacobiPQ, jacobiGlaisher, jacobiLetterTheta,
     reduceCtorEq, ↓reduceIte] at hden ⊢
-  rw [jacobiZetak_add]
-  rw [jacobiModulusTau] at hmod
-  generalize jacobiZetak u k = x at hu' hden ⊢
-  generalize jacobiZetak v k = y at hv' hden ⊢
-  generalize jacobiTauk k = τ at hτ hu' hv' hden hmod ⊢
+  rw [jacobiThetaArgument_add]
+  rw [jacobiModulusOfTau] at hmod
+  generalize jacobiThetaArgument u k = x at hu' hden ⊢
+  generalize jacobiThetaArgument v k = y at hv' hden ⊢
+  generalize jacobiTau k = τ at hτ hu' hv' hden hmod ⊢
   subst hmod
   obtain ⟨h2, h3, h4, -⟩ := jacobiThetaTau_zero_ne_zero_and_pow_four τ hτ
   have hD : (θ₄ (x + y) τ * θ₂ (x - y) τ) ≠ 0 := by
@@ -214,30 +214,30 @@ theorem jacobiCnk_add_alt₂ {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : �
     (θ₂ 0 τ * θ₄ (x + y) τ) * jacobiThetaTwoTau_add_mul_jacobiThetaTwoTau_sub_four x y τ hτ
 
 /-- DLMF 22.8.17: an addition theorem for `dn`, at points `u`, `v` where the functions
-`·n` are finite (`JacobiRegulark .n`) and the printed denominator is nonzero. -/
+`·n` are finite (`IsJacobiRegular .n`) and the printed denominator is nonzero. -/
 @[dlmf 22.8.E17]
-theorem jacobiDnk_add_alt {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
-    (hu : JacobiRegulark .n u k) (hv : JacobiRegulark .n v k)
-    (hden : jacobiSnk u k * jacobiCnk v k * jacobiDnk v k -
-      jacobiSnk v k * jacobiCnk u k * jacobiDnk u k ≠ 0) :
-    jacobiDnk (u + v) k =
-      (jacobiSnk u k * jacobiCnk v k * jacobiDnk u k - jacobiSnk v k * jacobiCnk u k *
-        jacobiDnk v k) / (jacobiSnk u k * jacobiCnk v k * jacobiDnk v k - jacobiSnk v k *
-          jacobiCnk u k * jacobiDnk u k) := by
-  have hτ := jacobiTauk_im_pos hk
+theorem jacobiDn_add_alt {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
+    (hu : IsJacobiRegular .n u k) (hv : IsJacobiRegular .n v k)
+    (hden : jacobiSn u k * jacobiCn v k * jacobiDn v k -
+      jacobiSn v k * jacobiCn u k * jacobiDn u k ≠ 0) :
+    jacobiDn (u + v) k =
+      (jacobiSn u k * jacobiCn v k * jacobiDn u k - jacobiSn v k * jacobiCn u k *
+        jacobiDn v k) / (jacobiSn u k * jacobiCn v k * jacobiDn v k - jacobiSn v k *
+          jacobiCn u k * jacobiDn u k) := by
+  have hτ := jacobiTau_im_pos hk
   have hmod := (jacobi_inversion_k hk).1
-  have hu' : θ₄ (jacobiZetak u k) (jacobiTauk k) ≠ 0 := by
+  have hu' : θ₄ (jacobiThetaArgument u k) (jacobiTau k) ≠ 0 := by
     intro h'; apply hu; simp [jacobiLetterTheta, h']
-  have hv' : θ₄ (jacobiZetak v k) (jacobiTauk k) ≠ 0 := by
+  have hv' : θ₄ (jacobiThetaArgument v k) (jacobiTau k) ≠ 0 := by
     intro h'; apply hv; simp [jacobiLetterTheta, h']
   rw [eq_div_iff hden]
-  simp only [jacobiSnk, jacobiCnk, jacobiDnk, jacobiPQk, jacobiGlaisher, jacobiLetterTheta,
+  simp only [jacobiSn, jacobiCn, jacobiDn, jacobiPQ, jacobiGlaisher, jacobiLetterTheta,
     reduceCtorEq, ↓reduceIte] at hden ⊢
-  rw [jacobiZetak_add]
-  rw [jacobiModulusTau] at hmod
-  generalize jacobiZetak u k = x at hu' hden ⊢
-  generalize jacobiZetak v k = y at hv' hden ⊢
-  generalize jacobiTauk k = τ at hτ hu' hv' hden hmod ⊢
+  rw [jacobiThetaArgument_add]
+  rw [jacobiModulusOfTau] at hmod
+  generalize jacobiThetaArgument u k = x at hu' hden ⊢
+  generalize jacobiThetaArgument v k = y at hv' hden ⊢
+  generalize jacobiTau k = τ at hτ hu' hv' hden hmod ⊢
   subst hmod
   obtain ⟨h2, h3, h4, -⟩ := jacobiThetaTau_zero_ne_zero_and_pow_four τ hτ
   have hD : (θ₄ (x + y) τ * θ₁ (x - y) τ) ≠ 0 := by
@@ -252,31 +252,31 @@ theorem jacobiDnk_add_alt {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
     (θ₃ 0 τ * θ₄ (x + y) τ) * jacobiThetaThreeTau_add_mul_jacobiThetaOneTau_sub x y τ hτ
 
 /-- DLMF 22.8.18: an addition theorem for `dn`, at points `u`, `v` where the functions
-`·n` are finite (`JacobiRegulark .n`) and the printed denominator is nonzero. -/
+`·n` are finite (`IsJacobiRegular .n`) and the printed denominator is nonzero. -/
 @[dlmf 22.8.E18]
-theorem jacobiDnk_add_alt₂ {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
-    (hu : JacobiRegulark .n u k) (hv : JacobiRegulark .n v k)
-    (hden : jacobiCnk u k * jacobiCnk v k +
-      jacobiSnk u k * jacobiDnk u k * jacobiSnk v k * jacobiDnk v k ≠ 0) :
-    jacobiDnk (u + v) k =
-      (jacobiCnk u k * jacobiDnk u k * jacobiCnk v k * jacobiDnk v k + jacobiComodulusk k ^ 2 *
-        jacobiSnk u k * jacobiSnk v k) / (jacobiCnk u k * jacobiCnk v k + jacobiSnk u k *
-          jacobiDnk u k * jacobiSnk v k * jacobiDnk v k) := by
-  have hτ := jacobiTauk_im_pos hk
+theorem jacobiDn_add_alt₂ {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
+    (hu : IsJacobiRegular .n u k) (hv : IsJacobiRegular .n v k)
+    (hden : jacobiCn u k * jacobiCn v k +
+      jacobiSn u k * jacobiDn u k * jacobiSn v k * jacobiDn v k ≠ 0) :
+    jacobiDn (u + v) k =
+      (jacobiCn u k * jacobiDn u k * jacobiCn v k * jacobiDn v k + jacobiComodulus k ^ 2 *
+        jacobiSn u k * jacobiSn v k) / (jacobiCn u k * jacobiCn v k + jacobiSn u k *
+          jacobiDn u k * jacobiSn v k * jacobiDn v k) := by
+  have hτ := jacobiTau_im_pos hk
   have hmod := (jacobi_inversion_k hk).1
-  have hu' : θ₄ (jacobiZetak u k) (jacobiTauk k) ≠ 0 := by
+  have hu' : θ₄ (jacobiThetaArgument u k) (jacobiTau k) ≠ 0 := by
     intro h'; apply hu; simp [jacobiLetterTheta, h']
-  have hv' : θ₄ (jacobiZetak v k) (jacobiTauk k) ≠ 0 := by
+  have hv' : θ₄ (jacobiThetaArgument v k) (jacobiTau k) ≠ 0 := by
     intro h'; apply hv; simp [jacobiLetterTheta, h']
   rw [eq_div_iff hden]
   rw [← (jacobi_inversion_k hk).2.1] at ⊢
-  simp only [jacobiSnk, jacobiCnk, jacobiDnk, jacobiPQk, jacobiGlaisher, jacobiLetterTheta,
-    jacobiComodulusTau, reduceCtorEq, ↓reduceIte] at hden ⊢
-  rw [jacobiZetak_add]
-  rw [jacobiModulusTau] at hmod
-  generalize jacobiZetak u k = x at hu' hden ⊢
-  generalize jacobiZetak v k = y at hv' hden ⊢
-  generalize jacobiTauk k = τ at hτ hu' hv' hden hmod ⊢
+  simp only [jacobiSn, jacobiCn, jacobiDn, jacobiPQ, jacobiGlaisher, jacobiLetterTheta,
+    jacobiComodulusOfTau, reduceCtorEq, ↓reduceIte] at hden ⊢
+  rw [jacobiThetaArgument_add]
+  rw [jacobiModulusOfTau] at hmod
+  generalize jacobiThetaArgument u k = x at hu' hden ⊢
+  generalize jacobiThetaArgument v k = y at hv' hden ⊢
+  generalize jacobiTau k = τ at hτ hu' hv' hden hmod ⊢
   subst hmod
   obtain ⟨h2, h3, h4, -⟩ := jacobiThetaTau_zero_ne_zero_and_pow_four τ hτ
   have hD : (θ₄ (x + y) τ * θ₂ (x - y) τ) ≠ 0 := by
@@ -291,24 +291,24 @@ theorem jacobiDnk_add_alt₂ {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : �
     (θ₄ (x + y) τ * θ₄ 0 τ) * jacobiThetaThreeTau_add_mul_jacobiThetaTwoTau_sub x y τ hτ
 
 /-- `1 - k² sn²u sn²v ≠ 0` where `sn` is finite at `u`, `v`, `u + v`, `u - v`. -/
-private lemma one_sub_sq_mul_jacobiSnk_sq_mul_jacobiSnk_sq_ne_zero {k : ℂ}
+private lemma one_sub_sq_mul_jacobiSn_sq_mul_jacobiSn_sq_ne_zero {k : ℂ}
     (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
-    (hu : JacobiRegulark .n u k) (hv : JacobiRegulark .n v k)
-    (hp : JacobiRegulark .n (u + v) k) (hm : JacobiRegulark .n (u - v) k) :
-    1 - k ^ 2 * jacobiSnk u k ^ 2 * jacobiSnk v k ^ 2 ≠ 0 := by
-  have hτ := jacobiTauk_im_pos hk
+    (hu : IsJacobiRegular .n u k) (hv : IsJacobiRegular .n v k)
+    (hp : IsJacobiRegular .n (u + v) k) (hm : IsJacobiRegular .n (u - v) k) :
+    1 - k ^ 2 * jacobiSn u k ^ 2 * jacobiSn v k ^ 2 ≠ 0 := by
+  have hτ := jacobiTau_im_pos hk
   have hmod := (jacobi_inversion_k hk).1
-  have hu' := jacobiThetaFourTau_jacobiZetak_ne_zero hu
-  have hv' := jacobiThetaFourTau_jacobiZetak_ne_zero hv
-  have hp' := jacobiThetaFourTau_jacobiZetak_ne_zero hp
-  have hm' := jacobiThetaFourTau_jacobiZetak_ne_zero hm
-  rw [jacobiZetak_add] at hp'
-  rw [sub_eq_add_neg, jacobiZetak_add, jacobiZetak_neg, ← sub_eq_add_neg] at hm'
-  simp only [jacobiSnk, jacobiPQk, jacobiGlaisher, jacobiLetterTheta, reduceCtorEq, ↓reduceIte]
-  rw [jacobiModulusTau] at hmod
-  generalize jacobiZetak u k = x at hu' hp' hm' ⊢
-  generalize jacobiZetak v k = y at hv' hp' hm' ⊢
-  generalize jacobiTauk k = τ at hτ hu' hv' hp' hm' hmod ⊢
+  have hu' := jacobiThetaFourTau_jacobiThetaArgument_ne_zero hu
+  have hv' := jacobiThetaFourTau_jacobiThetaArgument_ne_zero hv
+  have hp' := jacobiThetaFourTau_jacobiThetaArgument_ne_zero hp
+  have hm' := jacobiThetaFourTau_jacobiThetaArgument_ne_zero hm
+  rw [jacobiThetaArgument_add] at hp'
+  rw [sub_eq_add_neg, jacobiThetaArgument_add, jacobiThetaArgument_neg, ← sub_eq_add_neg] at hm'
+  simp only [jacobiSn, jacobiPQ, jacobiGlaisher, jacobiLetterTheta, reduceCtorEq, ↓reduceIte]
+  rw [jacobiModulusOfTau] at hmod
+  generalize jacobiThetaArgument u k = x at hu' hp' hm' ⊢
+  generalize jacobiThetaArgument v k = y at hv' hp' hm' ⊢
+  generalize jacobiTau k = τ at hτ hu' hv' hp' hm' hmod ⊢
   subst hmod
   obtain ⟨h2, h3, h4, -⟩ := jacobiThetaTau_zero_ne_zero_and_pow_four τ hτ
   have N4 := jacobiThetaFourTau_add_mul_jacobiThetaFourTau_sub x y τ hτ
@@ -323,73 +323,73 @@ private lemma one_sub_sq_mul_jacobiSnk_sq_mul_jacobiSnk_sq_ne_zero {k : ℂ}
     · exact hp' h
     · exact hm' h
 
-/-- The stated relation follows from the given hypotheses: `JacobiRegulark .n (-v) k`. -/
-private lemma jacobiRegulark_n_neg {k : ℂ} {v : ℂ} (hv : JacobiRegulark .n v k) : JacobiRegulark
+/-- The stated relation follows from the given hypotheses: `IsJacobiRegular .n (-v) k`. -/
+private lemma isJacobiRegular_n_neg {k : ℂ} {v : ℂ} (hv : IsJacobiRegular .n v k) : IsJacobiRegular
     .n (-v) k := by
-  unfold JacobiRegulark at *
-  rw [jacobiZetak_neg, jacobiLetterTheta_neg]; simpa using hv
+  unfold IsJacobiRegular at *
+  rw [jacobiThetaArgument_neg, jacobiLetterTheta_neg]; simpa using hv
 
 /-- Addition formulas at `u + v` and `u - v` with the common denominator. -/
 theorem jacobiSnCnDnk_add_sub {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
-    (hu : JacobiRegulark .n u k) (hv : JacobiRegulark .n v k)
-    (hp : JacobiRegulark .n (u + v) k) (hm : JacobiRegulark .n (u - v) k) :
-    let su := jacobiSnk u k; let cu := jacobiCnk u k; let du := jacobiDnk u k
-    let sv := jacobiSnk v k; let cv := jacobiCnk v k; let dv := jacobiDnk v k
+    (hu : IsJacobiRegular .n u k) (hv : IsJacobiRegular .n v k)
+    (hp : IsJacobiRegular .n (u + v) k) (hm : IsJacobiRegular .n (u - v) k) :
+    let su := jacobiSn u k; let cu := jacobiCn u k; let du := jacobiDn u k
+    let sv := jacobiSn v k; let cv := jacobiCn v k; let dv := jacobiDn v k
     let D := 1 - k ^ 2 * su ^ 2 * sv ^ 2
     D ≠ 0 ∧
-    jacobiSnk (u + v) k = (su * cv * dv + sv * cu * du) / D ∧
-    jacobiCnk (u + v) k = (cu * cv - su * du * sv * dv) / D ∧
-    jacobiDnk (u + v) k = (du * dv - k ^ 2 * su * cu * sv * cv) / D ∧
-    jacobiSnk (u - v) k = (su * cv * dv - sv * cu * du) / D ∧
-    jacobiCnk (u - v) k = (cu * cv + su * du * sv * dv) / D ∧
-    jacobiDnk (u - v) k = (du * dv + k ^ 2 * su * cu * sv * cv) / D := by
+    jacobiSn (u + v) k = (su * cv * dv + sv * cu * du) / D ∧
+    jacobiCn (u + v) k = (cu * cv - su * du * sv * dv) / D ∧
+    jacobiDn (u + v) k = (du * dv - k ^ 2 * su * cu * sv * cv) / D ∧
+    jacobiSn (u - v) k = (su * cv * dv - sv * cu * du) / D ∧
+    jacobiCn (u - v) k = (cu * cv + su * du * sv * dv) / D ∧
+    jacobiDn (u - v) k = (du * dv + k ^ 2 * su * cu * sv * cv) / D := by
   intro su cu du sv cv dv D
-  have hD : D ≠ 0 := one_sub_sq_mul_jacobiSnk_sq_mul_jacobiSnk_sq_ne_zero hk hu hv hp hm
-  have hD' : 1 - k ^ 2 * jacobiSnk u k ^ 2 * jacobiSnk (-v) k ^ 2 ≠ 0 := by
-    have : jacobiSnk (-v) k = -jacobiSnk v k := by simp [jacobiSnk, jacobiPQk_neg]
+  have hD : D ≠ 0 := one_sub_sq_mul_jacobiSn_sq_mul_jacobiSn_sq_ne_zero hk hu hv hp hm
+  have hD' : 1 - k ^ 2 * jacobiSn u k ^ 2 * jacobiSn (-v) k ^ 2 ≠ 0 := by
+    have : jacobiSn (-v) k = -jacobiSn v k := by simp [jacobiSn, jacobiPQ_neg]
     rw [this, neg_sq]; exact hD
-  have ns : jacobiSnk (-v) k = -sv := by simp [sv, jacobiSnk, jacobiPQk_neg]
-  have nc : jacobiCnk (-v) k = cv := by simp [cv, jacobiCnk, jacobiPQk_neg]
-  have nd : jacobiDnk (-v) k = dv := by simp [dv, jacobiDnk, jacobiPQk_neg]
-  have hv' := jacobiRegulark_n_neg hv
-  have a1 := jacobiSnk_add hk hu hv' hD'
-  have a2 := jacobiCnk_add hk hu hv' hD'
-  have a3 := jacobiDnk_add hk hu hv' hD'
+  have ns : jacobiSn (-v) k = -sv := by simp [sv, jacobiSn, jacobiPQ_neg]
+  have nc : jacobiCn (-v) k = cv := by simp [cv, jacobiCn, jacobiPQ_neg]
+  have nd : jacobiDn (-v) k = dv := by simp [dv, jacobiDn, jacobiPQ_neg]
+  have hv' := isJacobiRegular_n_neg hv
+  have a1 := jacobiSn_add hk hu hv' hD'
+  have a2 := jacobiCn_add hk hu hv' hD'
+  have a3 := jacobiDn_add hk hu hv' hD'
   rw [← sub_eq_add_neg, ns, nc, nd, neg_sq] at a1 a2 a3
-  refine ⟨hD, jacobiSnk_add hk hu hv hD, jacobiCnk_add hk hu hv hD, jacobiDnk_add hk hu hv hD,
+  refine ⟨hD, jacobiSn_add hk hu hv hD, jacobiCn_add hk hu hv hD, jacobiDn_add hk hu hv hD,
     ?_, ?_, ?_⟩
   · rw [a1]; ring
   · rw [a2]; ring
   · rw [a3]; ring
 
-/-- Nonvanishing under the stated hypotheses: `jacobiPQk p q z k ≠ 0`. -/
-private lemma jacobiPQk_ne_zero_of_regular {p q : JacobiLetter} (hpq : p ≠ q) {z k : ℂ}
-    (hp : JacobiRegulark p z k) (hq : JacobiRegulark q z k) : jacobiPQk p q z k ≠ 0 := by
-  unfold jacobiPQk jacobiGlaisher
+/-- Nonvanishing under the stated hypotheses: `jacobiPQ p q z k ≠ 0`. -/
+private lemma jacobiPQ_ne_zero_of_regular {p q : JacobiLetter} (hpq : p ≠ q) {z k : ℂ}
+    (hp : IsJacobiRegular p z k) (hq : IsJacobiRegular q z k) : jacobiPQ p q z k ≠ 0 := by
+  unfold jacobiPQ jacobiGlaisher
   simp only [hpq, ↓reduceIte]
   exact div_ne_zero hp hq
 
-/-- The stated relation follows from the given hypotheses: `JacobiRegulark r (z + compEllIntKk k)
-k ↔ JacobiRegulark r.swapK z k`. -/
-theorem jacobiRegulark_add_compEllIntKk_iff {k : ℂ} (hk : k ∈ jacobiModulusDomain)
+/-- The stated relation follows from the given hypotheses:
+`IsJacobiRegular r (z + completeEllipticK k) k ↔ IsJacobiRegular r.swapK z k`. -/
+theorem isJacobiRegular_add_completeEllipticK_iff {k : ℂ} (hk : k ∈ jacobiModulusDomain)
     (r : JacobiLetter) (z : ℂ) :
-    JacobiRegulark r (z + compEllIntKk k) k ↔ JacobiRegulark r.swapK z k := by
-  have hK := compEllIntKk_ne_zero hk
-  have hτ := jacobiTauk_im_pos hk
-  have hz : jacobiZetak (z + compEllIntKk k) k = jacobiZetak z k + π / 2 := by
-    rw [jacobiZetak, jacobiZetak]; field_simp
-  unfold JacobiRegulark
+    IsJacobiRegular r (z + completeEllipticK k) k ↔ IsJacobiRegular r.swapK z k := by
+  have hK := completeEllipticK_ne_zero hk
+  have hτ := jacobiTau_im_pos hk
+  have hz : jacobiThetaArgument (z + completeEllipticK k) k = jacobiThetaArgument z k + π / 2 := by
+    rw [jacobiThetaArgument, jacobiThetaArgument]; field_simp
+  unfold IsJacobiRegular
   rw [hz, jacobiLetterTheta_add_pi_div_two hτ]
   exact ⟨fun h => right_ne_zero_of_mul h,
     fun h => mul_ne_zero (jacobiLetterMultiplierK_ne_zero hτ r) h⟩
 
-/-- The stated relation follows from the given hypotheses: `JacobiRegulark .n (z + 2 *
-compEllIntKk k) k ↔ JacobiRegulark .n z k`. -/
-theorem jacobiRegulark_n_add_two_mul_compEllIntKk_iff {k : ℂ}
+/-- The stated relation follows from the given hypotheses: `IsJacobiRegular .n (z + 2 *
+completeEllipticK k) k ↔ IsJacobiRegular .n z k`. -/
+theorem isJacobiRegular_n_add_two_mul_completeEllipticK_iff {k : ℂ}
     (hk : k ∈ jacobiModulusDomain) (z : ℂ) :
-    JacobiRegulark .n (z + 2 * compEllIntKk k) k ↔ JacobiRegulark .n z k := by
-  rw [show z + 2 * compEllIntKk k = z + compEllIntKk k + compEllIntKk k by ring,
-    jacobiRegulark_add_compEllIntKk_iff hk, jacobiRegulark_add_compEllIntKk_iff hk]
+    IsJacobiRegular .n (z + 2 * completeEllipticK k) k ↔ IsJacobiRegular .n z k := by
+  rw [show z + 2 * completeEllipticK k = z + completeEllipticK k + completeEllipticK k by ring,
+    isJacobiRegular_add_completeEllipticK_iff hk, isJacobiRegular_add_completeEllipticK_iff hk]
   rfl
 
 /-- Theta functions at real multiples of `π`. -/
@@ -419,99 +419,104 @@ theorem jacobiThetaTau_real_mul_pi_ne_zero {τ : ℂ} (hτ : 0 < τ.im) (r : ℝ
   · intro hr; rw [Ne, h1]; rintro ⟨m, n, h⟩
     exact hr m (key m n (by rw [h]; push_cast; ring)).2
 
-/-- Identity under the stated parameter and domain assumptions: `jacobiZetak (c * compEllIntKk k)
-k = ((c / 2 : ℝ) : ℂ) * π`. -/
-private lemma jacobiZetak_real_mul_compEllIntKk {k : ℂ} (hk : k ∈ jacobiModulusDomain) (c : ℝ) :
-    jacobiZetak (c * compEllIntKk k) k = ((c / 2 : ℝ) : ℂ) * π := by
-  have hK := compEllIntKk_ne_zero hk
-  rw [jacobiZetak]; push_cast; field_simp
+/-- Identity under the stated parameter and domain assumptions:
+`jacobiThetaArgument (c * completeEllipticK k) k = ((c / 2 : ℝ) : ℂ) * π`. -/
+private lemma jacobiThetaArgument_real_mul_completeEllipticK {k : ℂ}
+    (hk : k ∈ jacobiModulusDomain) (c : ℝ) :
+    jacobiThetaArgument (c * completeEllipticK k) k = ((c / 2 : ℝ) : ℂ) * π := by
+  have hK := completeEllipticK_ne_zero hk
+  rw [jacobiThetaArgument]; push_cast; field_simp
 
-/-- Nonvanishing under the stated hypotheses: `JacobiRegulark .n (c * compEllIntKk k) k ∧
-JacobiRegulark .d (c * compEllIntKk k) k ∧ ((∀ m : ℤ, c / 2 ≠ m) → JacobiRegulark .s (c *
-compEllIntKk k) k)`. -/
-private lemma jacobiRegulark_real_mul_compEllIntKk {k : ℂ} (hk : k ∈ jacobiModulusDomain) (c : ℝ) :
-    JacobiRegulark .n (c * compEllIntKk k) k ∧ JacobiRegulark .d (c * compEllIntKk k) k ∧
-      ((∀ m : ℤ, c / 2 ≠ m) → JacobiRegulark .s (c * compEllIntKk k) k) := by
-  have hτ := jacobiTauk_im_pos hk
+/-- Nonvanishing under the stated hypotheses: `IsJacobiRegular .n (c * completeEllipticK k) k ∧
+IsJacobiRegular .d (c * completeEllipticK k) k ∧ ((∀ m : ℤ, c / 2 ≠ m) → IsJacobiRegular .s (c *
+completeEllipticK k) k)`. -/
+private lemma isJacobiRegular_real_mul_completeEllipticK {k : ℂ}
+    (hk : k ∈ jacobiModulusDomain) (c : ℝ) :
+    IsJacobiRegular .n (c * completeEllipticK k) k ∧
+        IsJacobiRegular .d (c * completeEllipticK k) k ∧
+      ((∀ m : ℤ, c / 2 ≠ m) → IsJacobiRegular .s (c * completeEllipticK k) k) := by
+  have hτ := jacobiTau_im_pos hk
   obtain ⟨h4, h3, h1⟩ := jacobiThetaTau_real_mul_pi_ne_zero hτ (c / 2)
   obtain ⟨n2, n3, n4, -⟩ := jacobiThetaTau_zero_ne_zero_and_pow_four _ hτ
-  simp only [JacobiRegulark, jacobiLetterTheta, jacobiZetak_real_mul_compEllIntKk hk]
+  simp only [IsJacobiRegular, jacobiLetterTheta, jacobiThetaArgument_real_mul_completeEllipticK hk]
   exact ⟨div_ne_zero h4 n4, div_ne_zero h3 n3,
     fun h => mul_ne_zero (div_ne_zero n3 (mul_ne_zero n2 n4)) (h1 h)⟩
 
 /-- Values at `2K/3` and `4K/3`. -/
-theorem jacobiSnCnDnk_two_mul_compEllIntKk_div_three {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
-    let a := 2 * compEllIntKk k / 3
-    let b := 4 * compEllIntKk k / 3
-    JacobiRegulark .n a k ∧ JacobiRegulark .n b k ∧ jacobiSnk a k ≠ 0 ∧
-      jacobiSnk b k = jacobiSnk a k ∧ jacobiCnk b k = -jacobiCnk a k ∧
-      jacobiDnk b k = jacobiDnk a k ∧ 1 - k ^ 2 * jacobiSnk a k ^ 4 ≠ 0 ∧
-      1 - k ^ 2 * jacobiSnk a k ^ 4 = 2 * jacobiCnk a k * jacobiDnk a k ∧
-      jacobiCnk a k ^ 2 - jacobiSnk a k ^ 2 * jacobiDnk a k ^ 2 =
-        -2 * jacobiCnk a k ^ 2 * jacobiDnk a k := by
+theorem jacobiSnCnDnk_two_mul_completeEllipticK_div_three {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
+    let a := 2 * completeEllipticK k / 3
+    let b := 4 * completeEllipticK k / 3
+    IsJacobiRegular .n a k ∧ IsJacobiRegular .n b k ∧ jacobiSn a k ≠ 0 ∧
+      jacobiSn b k = jacobiSn a k ∧ jacobiCn b k = -jacobiCn a k ∧
+      jacobiDn b k = jacobiDn a k ∧ 1 - k ^ 2 * jacobiSn a k ^ 4 ≠ 0 ∧
+      1 - k ^ 2 * jacobiSn a k ^ 4 = 2 * jacobiCn a k * jacobiDn a k ∧
+      jacobiCn a k ^ 2 - jacobiSn a k ^ 2 * jacobiDn a k ^ 2 =
+        -2 * jacobiCn a k ^ 2 * jacobiDn a k := by
   intro a b
-  have ea : a = ((2 / 3 : ℝ) : ℂ) * compEllIntKk k := by simp only [a]; push_cast; ring
-  have eb : b = ((4 / 3 : ℝ) : ℂ) * compEllIntKk k := by simp only [b]; push_cast; ring
-  obtain ⟨hna, -, hsa⟩ := jacobiRegulark_real_mul_compEllIntKk hk (2 / 3)
-  obtain ⟨hnb, -, -⟩ := jacobiRegulark_real_mul_compEllIntKk hk (4 / 3)
+  have ea : a = ((2 / 3 : ℝ) : ℂ) * completeEllipticK k := by simp only [a]; push_cast; ring
+  have eb : b = ((4 / 3 : ℝ) : ℂ) * completeEllipticK k := by simp only [b]; push_cast; ring
+  obtain ⟨hna, -, hsa⟩ := isJacobiRegular_real_mul_completeEllipticK hk (2 / 3)
+  obtain ⟨hnb, -, -⟩ := isJacobiRegular_real_mul_completeEllipticK hk (4 / 3)
   rw [← ea] at hna hsa; rw [← eb] at hnb
-  have hsa' : jacobiSnk a k ≠ 0 := by
-    refine jacobiPQk_ne_zero_of_regular (by decide) (hsa ?_) hna
+  have hsa' : jacobiSn a k ≠ 0 := by
+    refine jacobiPQ_ne_zero_of_regular (by decide) (hsa ?_) hna
     intro m hm
     have h3 : (3 * m : ℝ) = 1 := by linarith
     have h3' : (3 * m : ℤ) = 1 := by exact_mod_cast h3
     omega
-  have e2 : b = -a + 2 * compEllIntKk k := by simp only [a, b]; ring
-  have vs : jacobiSnk b k = jacobiSnk a k := by
-    rw [e2, (jacobiSnk_shift hk _).2.2.2.1]
-    simp [jacobiSnk, jacobiPQk_neg]
-  have vc : jacobiCnk b k = -jacobiCnk a k := by
-    rw [e2, (jacobiCnk_shift hk _).2.2.2.1]
-    simp [jacobiCnk, jacobiPQk_neg]
-  have vd : jacobiDnk b k = jacobiDnk a k := by
-    rw [e2, (jacobiDnk_shift hk _).2.2.2.1]
-    simp [jacobiDnk, jacobiPQk_neg]
+  have e2 : b = -a + 2 * completeEllipticK k := by simp only [a, b]; ring
+  have vs : jacobiSn b k = jacobiSn a k := by
+    rw [e2, (jacobiSn_shift hk _).2.2.2.1]
+    simp [jacobiSn, jacobiPQ_neg]
+  have vc : jacobiCn b k = -jacobiCn a k := by
+    rw [e2, (jacobiCn_shift hk _).2.2.2.1]
+    simp [jacobiCn, jacobiPQ_neg]
+  have vd : jacobiDn b k = jacobiDn a k := by
+    rw [e2, (jacobiDn_shift hk _).2.2.2.1]
+    simp [jacobiDn, jacobiPQ_neg]
   have e2a : 2 * a = b := by simp only [a, b]; ring
-  have hn0 : JacobiRegulark .n (a - a) k := by
-    rw [sub_self]; simpa using (jacobiRegulark_real_mul_compEllIntKk hk 0).1
-  have hnaa : JacobiRegulark .n (a + a) k := by rw [← two_mul, e2a]; exact hnb
-  have hD4 := one_sub_sq_mul_jacobiSnk_sq_mul_jacobiSnk_sq_ne_zero hk hna hna hnaa hn0
-  have hD : 1 - k ^ 2 * jacobiSnk a k ^ 4 ≠ 0 := by convert hD4 using 2; ring
-  have d1 := jacobiSnk_add hk hna hna hD4
-  have d2 := jacobiCnk_add hk hna hna hD4
+  have hn0 : IsJacobiRegular .n (a - a) k := by
+    rw [sub_self]; simpa using (isJacobiRegular_real_mul_completeEllipticK hk 0).1
+  have hnaa : IsJacobiRegular .n (a + a) k := by rw [← two_mul, e2a]; exact hnb
+  have hD4 := one_sub_sq_mul_jacobiSn_sq_mul_jacobiSn_sq_ne_zero hk hna hna hnaa hn0
+  have hD : 1 - k ^ 2 * jacobiSn a k ^ 4 ≠ 0 := by convert hD4 using 2; ring
+  have d1 := jacobiSn_add hk hna hna hD4
+  have d2 := jacobiCn_add hk hna hna hD4
   rw [← two_mul, e2a, vs] at d1; rw [← two_mul, e2a, vc] at d2
   rw [eq_div_iff hD4] at d1 d2
-  have E1 : 1 - k ^ 2 * jacobiSnk a k ^ 4 = 2 * jacobiCnk a k * jacobiDnk a k := by
+  have E1 : 1 - k ^ 2 * jacobiSn a k ^ 4 = 2 * jacobiCn a k * jacobiDn a k := by
     apply mul_left_cancel₀ hsa'; linear_combination d1
   refine ⟨hna, hnb, hsa', vs, vc, vd, hD, E1, ?_⟩
-  linear_combination -d2 - jacobiCnk a k * E1
+  linear_combination -d2 - jacobiCn a k * E1
 
 /-- Nonvanishing under the stated hypotheses: `k ≠ 0`. -/
 theorem ne_zero_of_mem_jacobiModulusDomain {k : ℂ} (hk : k ∈ jacobiModulusDomain) : k ≠ 0 := by
   rintro rfl; simp [jacobiModulusDomain] at hk
 
-/-- Nonvanishing under the stated hypotheses: `jacobiDnk (2 * compEllIntKk k / 3) k ≠ 0`. -/
-theorem jacobiDnk_two_mul_compEllIntKk_div_three_ne_zero {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
-    jacobiDnk (2 * compEllIntKk k / 3) k ≠ 0 := by
-  obtain ⟨hn, hd, -⟩ := jacobiRegulark_real_mul_compEllIntKk hk (2 / 3)
-  have ea : 2 * compEllIntKk k / 3 = ((2 / 3 : ℝ) : ℂ) * compEllIntKk k := by push_cast; ring
-  rw [ea]; exact jacobiPQk_ne_zero_of_regular (by decide) hd hn
+/-- Nonvanishing under the stated hypotheses: `jacobiDn (2 * completeEllipticK k / 3) k ≠ 0`. -/
+theorem jacobiDn_two_mul_completeEllipticK_div_three_ne_zero {k : ℂ}
+    (hk : k ∈ jacobiModulusDomain) :
+    jacobiDn (2 * completeEllipticK k / 3) k ≠ 0 := by
+  obtain ⟨hn, hd, -⟩ := isJacobiRegular_real_mul_completeEllipticK hk (2 / 3)
+  have ea : 2 * completeEllipticK k / 3 = ((2 / 3 : ℝ) : ℂ) * completeEllipticK k := by
+      push_cast; ring
+  rw [ea]; exact jacobiPQ_ne_zero_of_regular (by decide) hd hn
 
 /-- `sn² + cn² = 1`, `k² sn² + dn² = 1` (copy of 22.6.1 for use in this file). -/
-private lemma jacobiSnk_sq_add_jacobiCnk_sq_and_of_regular {k : ℂ}
+private lemma jacobiSn_sq_add_jacobiCn_sq_and_of_regular {k : ℂ}
     (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hn : JacobiRegulark .n z k) :
-    jacobiSnk z k ^ 2 + jacobiCnk z k ^ 2 = 1 ∧ k ^ 2 * jacobiSnk z k ^ 2 + jacobiDnk z k ^ 2 = 1 :=
+    (hn : IsJacobiRegular .n z k) :
+    jacobiSn z k ^ 2 + jacobiCn z k ^ 2 = 1 ∧ k ^ 2 * jacobiSn z k ^ 2 + jacobiDn z k ^ 2 = 1 :=
         by
-  have hτ := jacobiTauk_im_pos hk
+  have hτ := jacobiTau_im_pos hk
   have hmod := (jacobi_inversion_k hk).1
-  have hn' : jacobiThetaFourTau (jacobiZetak z k) (jacobiTauk k) ≠ 0 := by
+  have hn' : jacobiThetaFourTau (jacobiThetaArgument z k) (jacobiTau k) ≠ 0 := by
     intro h; apply hn; simp [jacobiLetterTheta, h]
-  simp only [jacobiSnk, jacobiCnk, jacobiDnk, jacobiPQk, jacobiGlaisher, jacobiLetterTheta,
+  simp only [jacobiSn, jacobiCn, jacobiDn, jacobiPQ, jacobiGlaisher, jacobiLetterTheta,
     reduceCtorEq, ↓reduceIte]
-  rw [jacobiModulusTau] at hmod
-  generalize jacobiZetak z k = ζ at hn' ⊢
-  generalize jacobiTauk k = τ at hτ hn' hmod ⊢
+  rw [jacobiModulusOfTau] at hmod
+  generalize jacobiThetaArgument z k = ζ at hn' ⊢
+  generalize jacobiTau k = τ at hτ hn' hmod ⊢
   subst hmod
   have h2 := jacobiThetaTwoTau_zero_ne_zero hτ
   have h3 := jacobiThetaThreeTau_zero_ne_zero hτ
@@ -530,18 +535,18 @@ private lemma jacobiSnk_sq_add_jacobiCnk_sq_and_of_regular {k : ℂ}
 `det [sn zⱼ, cn zⱼ, dn zⱼ, 1] = 0` (at points where `sn, cn, dn` are finite). -/
 @[dlmf 22.8.E19, dlmf 22.8.E20]
 theorem jacobi_det_sum_zero {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : Fin 4 → ℂ)
-    (hz : z 0 + z 1 + z 2 + z 3 = 0) (hreg : ∀ j, JacobiRegulark .n (z j) k) :
+    (hz : z 0 + z 1 + z 2 + z 3 = 0) (hreg : ∀ j, IsJacobiRegular .n (z j) k) :
     Matrix.det (Matrix.of fun i : Fin 4 =>
-      ![jacobiSnk (z i) k, jacobiCnk (z i) k, jacobiDnk (z i) k, 1]) = 0 := by
+      ![jacobiSn (z i) k, jacobiCn (z i) k, jacobiDn (z i) k, 1]) = 0 := by
   sorry
 
 /-- **Admitted.** DLMF 22.8.21: if `z₁ + z₂ + z₃ + z₄ = 0` then
 `k'² - k'²k² ∏ sn zⱼ + k² ∏ cn zⱼ - ∏ dn zⱼ = 0`. -/
 @[dlmf 22.8.E19, dlmf 22.8.E21]
 theorem jacobi_prod_sum_zero {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : Fin 4 → ℂ)
-    (hz : z 0 + z 1 + z 2 + z 3 = 0) (hreg : ∀ j, JacobiRegulark .n (z j) k) :
-    jacobiComodulusk k ^ 2 - jacobiComodulusk k ^ 2 * k ^ 2 * ∏ j, jacobiSnk (z j) k +
-      k ^ 2 * ∏ j, jacobiCnk (z j) k - ∏ j, jacobiDnk (z j) k = 0 := by
+    (hz : z 0 + z 1 + z 2 + z 3 = 0) (hreg : ∀ j, IsJacobiRegular .n (z j) k) :
+    jacobiComodulus k ^ 2 - jacobiComodulus k ^ 2 * k ^ 2 * ∏ j, jacobiSn (z j) k +
+      k ^ 2 * ∏ j, jacobiCn (z j) k - ∏ j, jacobiDn (z j) k = 0 := by
   sorry
 
 /-- **Admitted, corrected.** DLMF 22.8.22–22.8.23 with the third column corrected to `sn`: if
@@ -551,10 +556,11 @@ is nonzero (≈ -0.107 + 0.033i at `k = 0.6`); with `sn zⱼ` it vanishes. -/
 @[dlmf 22.8.E22,
   dlmf 22.8.E23 "corrected: printed third column cn z_j replaced by sn z_j"]
 theorem jacobi_det_sum_two_K {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : Fin 4 → ℂ)
-    (hz : z 0 + z 1 + z 2 + z 3 = 2 * compEllIntKk k) (hreg : ∀ j, JacobiRegulark .n (z j) k) :
+    (hz : z 0 + z 1 + z 2 + z 3 = 2 * completeEllipticK k)
+        (hreg : ∀ j, IsJacobiRegular .n (z j) k) :
     Matrix.det (Matrix.of fun i : Fin 4 =>
-      ![jacobiSnk (z i) k * jacobiCnk (z i) k, jacobiCnk (z i) k * jacobiDnk (z i) k,
-        jacobiSnk (z i) k, jacobiDnk (z i) k]) = 0 := by
+      ![jacobiSn (z i) k * jacobiCn (z i) k, jacobiCn (z i) k * jacobiDn (z i) k,
+        jacobiSn (z i) k, jacobiDn (z i) k]) = 0 := by
   sorry
 
 /-- **Admitted, corrected.** DLMF 22.8.22–22.8.23 with the second column corrected to
@@ -566,17 +572,18 @@ is nonzero numerically; with second column `sn zⱼ dn zⱼ` it vanishes (an alt
 @[dlmf 22.8.E22,
   dlmf 22.8.E23 "corrected: printed second column cn z_j dn z_j replaced by sn z_j dn z_j"]
 theorem jacobi_det_sum_two_K' {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : Fin 4 → ℂ)
-    (hz : z 0 + z 1 + z 2 + z 3 = 2 * compEllIntKk k) (hreg : ∀ j, JacobiRegulark .n (z j) k) :
+    (hz : z 0 + z 1 + z 2 + z 3 = 2 * completeEllipticK k)
+        (hreg : ∀ j, IsJacobiRegular .n (z j) k) :
     Matrix.det (Matrix.of fun i : Fin 4 =>
-      ![jacobiSnk (z i) k * jacobiCnk (z i) k, jacobiSnk (z i) k * jacobiDnk (z i) k,
-        jacobiCnk (z i) k, jacobiDnk (z i) k]) = 0 := by
+      ![jacobiSn (z i) k * jacobiCn (z i) k, jacobiSn (z i) k * jacobiDn (z i) k,
+        jacobiCn (z i) k, jacobiDn (z i) k]) = 0 := by
   sorry
 
 /-- The expression of DLMF 22.8.25 at `z₁`, with `z₂ = z₁ - 2K/3`, `z₃ = z₂ - 2K/3`. -/
 def jacobiDnThreePointExpr (z k : ℂ) : ℂ :=
-  let d₁ := jacobiDnk z k
-  let d₂ := jacobiDnk (z - 2 * compEllIntKk k / 3) k
-  let d₃ := jacobiDnk (z - 4 * compEllIntKk k / 3) k
+  let d₁ := jacobiDn z k
+  let d₂ := jacobiDn (z - 2 * completeEllipticK k / 3) k
+  let d₃ := jacobiDn (z - 4 * completeEllipticK k / 3) k
   (d₂ + d₃) * (d₃ + d₁) * (d₁ + d₂) / (d₁ + d₂ + d₃)
 
 /-- DLMF 22.8.24–22.8.25: if `z₁ - z₂ = z₂ - z₃ = 2K/3` then
@@ -584,55 +591,56 @@ def jacobiDnThreePointExpr (z k : ℂ) : ℂ :=
 `zⱼ` (at points where the `dn zⱼ` are finite and the denominator is nonzero). -/
 @[dlmf 22.8.E24, dlmf 22.8.E25]
 theorem jacobiDnThreePointExpr_const {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
-    ∃ c : ℂ, ∀ z : ℂ, (∀ j : ℕ, JacobiRegulark .n (z - 2 * j * compEllIntKk k / 3) k) →
-      jacobiDnk z k + jacobiDnk (z - 2 * compEllIntKk k / 3) k +
-        jacobiDnk (z - 4 * compEllIntKk k / 3) k ≠ 0 →
+    ∃ c : ℂ, ∀ z : ℂ, (∀ j : ℕ, IsJacobiRegular .n (z - 2 * j * completeEllipticK k / 3) k) →
+      jacobiDn z k + jacobiDn (z - 2 * completeEllipticK k / 3) k +
+        jacobiDn (z - 4 * completeEllipticK k / 3) k ≠ 0 →
       jacobiDnThreePointExpr z k = c := by
-  have W := jacobiSnCnDnk_two_mul_compEllIntKk_div_three hk
+  have W := jacobiSnCnDnk_two_mul_completeEllipticK_div_three hk
   simp only at W
   obtain ⟨hna, -, hsa, -, -, -, -, E1, E2⟩ := W
-  obtain ⟨ha1, ha2⟩ := jacobiSnk_sq_add_jacobiCnk_sq_and_of_regular hk hna
-  have hκ := jacobiDnk_two_mul_compEllIntKk_div_three_ne_zero hk
+  obtain ⟨ha1, ha2⟩ := jacobiSn_sq_add_jacobiCn_sq_and_of_regular hk hna
+  have hκ := jacobiDn_two_mul_completeEllipticK_div_three_ne_zero hk
   have hk0 : k ≠ 0 := ne_zero_of_mem_jacobiModulusDomain hk
-  have hF2 : 1 + 2 * jacobiDnk (2 * compEllIntKk k / 3) k ≠ 0 := by
+  have hF2 : 1 + 2 * jacobiDn (2 * completeEllipticK k / 3) k ≠ 0 := by
     intro h
     have hY := mul_inv_cancel₀ hsa
-    generalize (jacobiSnk (2 * compEllIntKk k / 3) k)⁻¹ = Y at hY
+    generalize (jacobiSn (2 * completeEllipticK k / 3) k)⁻¹ = Y at hY
     have : (1 : ℂ) = 0 := by
-      linear_combination (-4 * Y ^ 2) * E2 + (-jacobiSnk (2 * compEllIntKk k / 3) k * Y - 1) * hY +
-        (-2 * jacobiSnk (2 * compEllIntKk k / 3) k ^ 2 *
-            jacobiDnk (2 * compEllIntKk k / 3) k * Y ^ 2 +
-          jacobiSnk (2 * compEllIntKk k / 3) k ^ 2 * Y ^ 2 +
-          4 * jacobiCnk (2 * compEllIntKk k / 3) k ^ 2 * Y ^ 2) * h
+      linear_combination (-4 * Y ^ 2) * E2 +
+          (-jacobiSn (2 * completeEllipticK k / 3) k * Y - 1) * hY +
+        (-2 * jacobiSn (2 * completeEllipticK k / 3) k ^ 2 *
+            jacobiDn (2 * completeEllipticK k / 3) k * Y ^ 2 +
+          jacobiSn (2 * completeEllipticK k / 3) k ^ 2 * Y ^ 2 +
+          4 * jacobiCn (2 * completeEllipticK k / 3) k ^ 2 * Y ^ 2) * h
     exact one_ne_zero this
-  refine ⟨2 * jacobiDnk (2 * compEllIntKk k / 3) k *
-      (1 + jacobiDnk (2 * compEllIntKk k / 3) k) ^ 2 /
-    (1 + 2 * jacobiDnk (2 * compEllIntKk k / 3) k), fun z hreg hden => ?_⟩
+  refine ⟨2 * jacobiDn (2 * completeEllipticK k / 3) k *
+      (1 + jacobiDn (2 * completeEllipticK k / 3) k) ^ 2 /
+    (1 + 2 * jacobiDn (2 * completeEllipticK k / 3) k), fun z hreg hden => ?_⟩
   have hn := hreg 0
   have hm := hreg 1
   have hb := hreg 2
-  rw [show z - 2 * ((0 : ℕ) : ℂ) * compEllIntKk k / 3 = z by push_cast; ring] at hn
-  rw [show z - 2 * ((1 : ℕ) : ℂ) * compEllIntKk k / 3 = z - 2 * compEllIntKk k / 3 by
+  rw [show z - 2 * ((0 : ℕ) : ℂ) * completeEllipticK k / 3 = z by push_cast; ring] at hn
+  rw [show z - 2 * ((1 : ℕ) : ℂ) * completeEllipticK k / 3 = z - 2 * completeEllipticK k / 3 by
     push_cast; ring] at hm
-  have eb : z - 2 * ((2 : ℕ) : ℂ) * compEllIntKk k / 3 + 2 * compEllIntKk k =
-      z + 2 * compEllIntKk k / 3 := by push_cast; ring
-  have hp : JacobiRegulark .n (z + 2 * compEllIntKk k / 3) k := by
-    rw [← eb, jacobiRegulark_n_add_two_mul_compEllIntKk_iff hk]; exact hb
-  have d3 : jacobiDnk (z - 4 * compEllIntKk k / 3) k =
-      jacobiDnk (z + 2 * compEllIntKk k / 3) k := by
-    rw [← (jacobiDnk_shift hk _).2.2.2.1]; congr 1; ring
+  have eb : z - 2 * ((2 : ℕ) : ℂ) * completeEllipticK k / 3 + 2 * completeEllipticK k =
+      z + 2 * completeEllipticK k / 3 := by push_cast; ring
+  have hp : IsJacobiRegular .n (z + 2 * completeEllipticK k / 3) k := by
+    rw [← eb, isJacobiRegular_n_add_two_mul_completeEllipticK_iff hk]; exact hb
+  have d3 : jacobiDn (z - 4 * completeEllipticK k / 3) k =
+      jacobiDn (z + 2 * completeEllipticK k / 3) k := by
+    rw [← (jacobiDn_shift hk _).2.2.2.1]; congr 1; ring
   obtain ⟨hD, -, -, e3, -, -, e6⟩ := jacobiSnCnDnk_add_sub hk hn hna hp hm
-  obtain ⟨h1, h2⟩ := jacobiSnk_sq_add_jacobiCnk_sq_and_of_regular hk hn
+  obtain ⟨h1, h2⟩ := jacobiSn_sq_add_jacobiCn_sq_and_of_regular hk hn
   unfold jacobiDnThreePointExpr
   simp only
   rw [d3] at hden ⊢
   rw [e3, e6] at hden ⊢
-  generalize jacobiSnk z k = s at *
-  generalize jacobiCnk z k = c at *
-  generalize jacobiDnk z k = d at *
-  generalize jacobiSnk (2 * compEllIntKk k / 3) k = sa at *
-  generalize jacobiCnk (2 * compEllIntKk k / 3) k = ca at *
-  generalize jacobiDnk (2 * compEllIntKk k / 3) k = κ at *
+  generalize jacobiSn z k = s at *
+  generalize jacobiCn z k = c at *
+  generalize jacobiDn z k = d at *
+  generalize jacobiSn (2 * completeEllipticK k / 3) k = sa at *
+  generalize jacobiCn (2 * completeEllipticK k / 3) k = ca at *
+  generalize jacobiDn (2 * completeEllipticK k / 3) k = κ at *
   generalize hDdef : 1 - k ^ 2 * s ^ 2 * sa ^ 2 = D at hD hden ⊢
   have hden' : d * D + (d * κ + k ^ 2 * s * c * sa * ca) +
       (d * κ - k ^ 2 * s * c * sa * ca) ≠ 0 := by
@@ -873,29 +881,29 @@ theorem jacobiDnThreePointExpr_const {k : ℂ} (hk : k ∈ jacobiModulusDomain) 
         +24*d*ca-10*d*κ+18*d*D+8*d) * hX
 
 /-- `dn(z + K) dn z = k'` where both are finite and `dn z ≠ 0` (from Table 22.4.3). -/
-theorem jacobiDnk_add_K_mul {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hn : JacobiRegulark .n z k) (hd : JacobiRegulark .d z k) :
-    jacobiDnk (z + compEllIntKk k) k * jacobiDnk z k = jacobiComodulusk k := by
-  rw [(jacobiDnk_shift hk z).1, mul_assoc]
-  have hdn : jacobiDnk z k ≠ 0 := by
-    unfold jacobiDnk jacobiPQk jacobiGlaisher
+theorem jacobiDn_add_K_mul {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
+    (hn : IsJacobiRegular .n z k) (hd : IsJacobiRegular .d z k) :
+    jacobiDn (z + completeEllipticK k) k * jacobiDn z k = jacobiComodulus k := by
+  rw [(jacobiDn_shift hk z).1, mul_assoc]
+  have hdn : jacobiDn z k ≠ 0 := by
+    unfold jacobiDn jacobiPQ jacobiGlaisher
     simp only [reduceCtorEq, ↓reduceIte]
     exact div_ne_zero hd hn
-  rw [jacobiNdk, jacobiPQk_eq_one_div, ← jacobiDnk, one_div_mul_cancel hdn, mul_one]
+  rw [jacobiNd, jacobiPQ_eq_one_div, ← jacobiDn, one_div_mul_cancel hdn, mul_one]
 
 /-- DLMF 22.8.26–22.8.27: if `z₁ - z₂ = z₂ - z₃ = z₃ - z₄ = K/2` then
 `dn z₁ dn z₃ = dn z₂ dn z₄ = k'` (at points `z₃`, `z₄` where `dn` is finite and nonzero). -/
 @[dlmf 22.8.E26, dlmf 22.8.E27]
 theorem jacobiDn_four_point {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z₁ z₂ z₃ z₄ : ℂ}
-    (h₁ : z₁ - z₂ = compEllIntKk k / 2) (h₂ : z₂ - z₃ = compEllIntKk k / 2)
-    (h₃ : z₃ - z₄ = compEllIntKk k / 2)
-    (hn₃ : JacobiRegulark .n z₃ k) (hd₃ : JacobiRegulark .d z₃ k)
-    (hn₄ : JacobiRegulark .n z₄ k) (hd₄ : JacobiRegulark .d z₄ k) :
-    jacobiDnk z₁ k * jacobiDnk z₃ k = jacobiComodulusk k ∧
-      jacobiDnk z₂ k * jacobiDnk z₄ k = jacobiComodulusk k := by
-  have e₁ : z₁ = z₃ + compEllIntKk k := by linear_combination h₁ + h₂
-  have e₂ : z₂ = z₄ + compEllIntKk k := by linear_combination h₂ + h₃
-  exact ⟨e₁ ▸ jacobiDnk_add_K_mul hk hn₃ hd₃, e₂ ▸ jacobiDnk_add_K_mul hk hn₄ hd₄⟩
+    (h₁ : z₁ - z₂ = completeEllipticK k / 2) (h₂ : z₂ - z₃ = completeEllipticK k / 2)
+    (h₃ : z₃ - z₄ = completeEllipticK k / 2)
+    (hn₃ : IsJacobiRegular .n z₃ k) (hd₃ : IsJacobiRegular .d z₃ k)
+    (hn₄ : IsJacobiRegular .n z₄ k) (hd₄ : IsJacobiRegular .d z₄ k) :
+    jacobiDn z₁ k * jacobiDn z₃ k = jacobiComodulus k ∧
+      jacobiDn z₂ k * jacobiDn z₄ k = jacobiComodulus k := by
+  have e₁ : z₁ = z₃ + completeEllipticK k := by linear_combination h₁ + h₂
+  have e₂ : z₂ = z₄ + completeEllipticK k := by linear_combination h₂ + h₃
+  exact ⟨e₁ ▸ jacobiDn_add_K_mul hk hn₃ hd₃, e₂ ▸ jacobiDn_add_K_mul hk hn₄ hd₄⟩
 
 end DLMF.JacobiElliptic
 

@@ -9,6 +9,7 @@ public import DLMF.AlgebraicAnalytic.Summability.Basic
 public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 public import DLMFMathlib.Analysis.SpecialFunctions.Trigonometric.OneSubCosIntegral
 public import TauCeti.Analysis.Fourier.ExpNegAbs
+public import DLMFMathlib.MeasureTheory.Integral.ApproximateIdentity
 
 /-!
 # Summability of integrals and of Fourier integrals (DLMF §1.15(iv)–(v))
@@ -554,11 +555,59 @@ theorem fourierAbelMean_eq_poisson {f : ℝ → ℂ} (hf : Integrable f) (x : �
         ring
 
 
+/-- Rescaling a convolution integral: `∫ f(t) K(x - t) dt = ∫ (εK(εu)) f(x - εu) du`. -/
+private lemma integral_mul_kernel_eq_scaled {f : ℝ → ℂ} (K : ℝ → ℝ) (x : ℝ) {ε : ℝ}
+    (hε : 0 < ε) :
+    ∫ t, f t * (K (x - t) : ℂ) = ∫ u, (ε * K (ε * u)) • f (x - ε * u) := by
+  have h1 : ∫ t, f t * (K (x - t) : ℂ) = ∫ s, f (x - s) * (K s : ℂ) := by
+    rw [← integral_sub_left_eq_self (fun t => f t * (K (x - t) : ℂ)) volume x]
+    simp
+  have h2 := Measure.integral_comp_mul_left (fun s => f (x - s) * (K s : ℂ)) ε
+  rw [abs_inv, abs_of_pos hε] at h2
+  have h3 : ∫ u, (ε * K (ε * u)) • f (x - ε * u) =
+      ε • ∫ u, f (x - ε * u) * (K (ε * u) : ℂ) := by
+    rw [← integral_smul]
+    congr 1; funext u
+    rw [Complex.real_smul, Complex.real_smul]
+    push_cast
+    ring
+  rw [h1, h3, h2, smul_smul, mul_inv_cancel₀ hε.ne', one_smul]
+
+/-- The Cauchy density `1/(π(1 + u²))`. -/
+private lemma halfPlanePoissonKernel_scaled {y : ℝ} (hy : 0 < y) (u : ℝ) :
+    y * ((2 * Real.pi)⁻¹ * halfPlanePoissonKernel (y * u) y) = (Real.pi * (1 + u ^ 2))⁻¹ := by
+  unfold halfPlanePoissonKernel
+  have := Real.pi_pos
+  field_simp
+  ring
+
 /-- DLMF 1.15.38: for `f` absolutely integrable, `∫ |h(x, y) - f(x)| dx → 0` as `y → 0+`. -/
 @[dlmf 1.15.E38]
 theorem tendsto_integral_norm_fourierAbelMean_sub {f : ℝ → ℂ} (hf : Integrable f) :
     Tendsto (fun y => ∫ x, ‖fourierAbelMean f x y - f x‖) (𝓝[>] 0) (𝓝 0) := by
-  sorry
+  have hk : Integrable fun u : ℝ => (Real.pi * (1 + u ^ 2))⁻¹ := by
+    refine (integrable_inv_one_add_sq.const_mul Real.pi⁻¹).congr
+      (Eventually.of_forall fun u => ?_)
+    simp only [mul_inv]
+  have hk1 : ∫ u : ℝ, (Real.pi * (1 + u ^ 2))⁻¹ = 1 := by
+    simp_rw [mul_inv]
+    rw [integral_const_mul, integral_univ_inv_one_add_sq]
+    exact inv_mul_cancel₀ Real.pi_ne_zero
+  have h := (hf.tendsto_integral_norm_integral_smul_comp_sub_mul_sub hk
+    (fun u => by positivity) hk1).mono_left (nhdsWithin_le_nhds (s := Ioi 0))
+  refine h.congr' ?_
+  filter_upwards [self_mem_nhdsWithin] with y hy
+  refine integral_congr_ae (Eventually.of_forall fun x => ?_)
+  simp only
+  rw [fourierAbelMean_eq_poisson hf x hy, ← integral_const_mul]
+  have := integral_mul_kernel_eq_scaled (f := f)
+    (fun s => (2 * Real.pi)⁻¹ * halfPlanePoissonKernel s y) x hy
+  simp_rw [halfPlanePoissonKernel_scaled hy] at this
+  rw [← this]
+  congr 2
+  refine integral_congr_ae (Eventually.of_forall fun t => ?_)
+  push_cast
+  ring
 
 /-- The integrand of 1.15.39 is integrable for integrable `f` and `y > 0`. -/
 private lemma integrable_poissonCauchy_integrand {f : ℝ → ℝ} (hf : Integrable f)
@@ -790,18 +839,140 @@ theorem tendsto_integral_fejerKernelLine_tail {δ : ℝ} (hδ : 0 < δ) :
       · filter_upwards [eventually_gt_atTop 0] with R hR using fejerKernelLine_le hR hs0
     · simp only [indicator_of_notMem hs]; exact tendsto_const_nhds
 
+/-- The real antiderivative used for the Fejér integral. -/
+private lemma integral_triangle_cos {R u : ℝ} (hR : 0 < R) (hu : u ≠ 0) :
+    ∫ t in (0 : ℝ)..R, 2 * (1 - t / R) * Real.cos (u * t) =
+      2 * (1 - Real.cos (R * u)) / (R * u ^ 2) := by
+  have hd : ∀ t ∈ uIcc (0 : ℝ) R, HasDerivAt
+      (fun t => 2 * (1 - t / R) * Real.sin (u * t) / u - 2 * Real.cos (u * t) / (R * u ^ 2))
+      (2 * (1 - t / R) * Real.cos (u * t)) t := by
+    intro t _
+    have h1 := ((((hasDerivAt_id' t).div_const R).const_sub 1).const_mul 2).mul
+      (((hasDerivAt_id' t).const_mul u).sin) |>.div_const u
+    have h2 := ((((hasDerivAt_id' t).const_mul u).cos).const_mul 2).div_const (R * u ^ 2)
+    refine (h1.sub h2).congr_deriv ?_
+    field_simp
+    ring
+  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hd (by
+    apply Continuous.intervalIntegrable; fun_prop)]
+  simp only [div_self hR.ne', sub_self, mul_zero, zero_mul, zero_div, Real.cos_zero,
+    sub_zero, mul_one, Real.sin_zero]
+  rw [mul_comm u R]
+  field_simp
+  ring
+
+/-- `∫_{-R}^{R} (1 - |t|/R) e^{itu} dt = 2(1 - cos Ru)/(Ru²)` for `u ≠ 0`. -/
+private lemma integral_triangle_cexp {R u : ℝ} (hR : 0 < R) (hu : u ≠ 0) :
+    ∫ t in -R..R, ((1 - |t| / R : ℝ) : ℂ) * cexp (I * t * u) =
+      ((2 * (1 - Real.cos (R * u)) / (R * u ^ 2) : ℝ) : ℂ) := by
+  have hc : Continuous fun t : ℝ => ((1 - |t| / R : ℝ) : ℂ) * cexp (I * t * u) := by fun_prop
+  rw [← intervalIntegral.integral_add_adjacent_intervals (b := 0)
+    (hc.intervalIntegrable _ _) (hc.intervalIntegrable _ _)]
+  have h := intervalIntegral.integral_comp_neg (a := (0 : ℝ)) (b := R)
+    (fun t : ℝ => ((1 - |t| / R : ℝ) : ℂ) * cexp (I * t * u))
+  simp only [neg_zero, abs_neg, ofReal_neg, mul_neg, neg_mul] at h
+  rw [← h, ← intervalIntegral.integral_add (by apply Continuous.intervalIntegrable; fun_prop)
+    (hc.intervalIntegrable _ _), ← integral_triangle_cos hR hu, ← intervalIntegral.integral_ofReal]
+  refine intervalIntegral.integral_congr fun t ht => ?_
+  rw [uIcc_of_le hR.le] at ht
+  simp only [abs_of_nonneg ht.1]
+  rw [← mul_add, show I * t * u = (u * t : ℝ) * I by push_cast; ring,
+    show -((u * t : ℝ) * I) = -(u * t : ℝ) * I by ring, add_comm, ← Complex.two_cos]
+  push_cast
+  ring
+
 /-- DLMF 1.15.45: for `f` absolutely integrable and `R > 0`, the Cesàro mean 1.15.44 of the
 Fourier integral is `σ_R(θ) = ∫ f(t) K_R(θ - t) dt`. -/
 @[dlmf 1.15.E45]
 theorem fourierCesaroMeanIntegral_eq {f : ℝ → ℂ} (hf : Integrable f) {R : ℝ} (hR : 0 < R)
     (θ : ℝ) :
     fourierCesaroMeanIntegral f R θ = ∫ t, f t * (fejerKernelLine R (θ - t) : ℂ) := by
-  sorry
+  set μ : Measure ℝ := volume.restrict (Ioc (-R) R) with hμ
+  have he : Integrable (fun t : ℝ => ((1 - |t| / R : ℝ) : ℂ)) μ :=
+    ((by fun_prop : Continuous fun t : ℝ => ((1 - |t| / R : ℝ) : ℂ)).integrableOn_Icc
+      (a := -R) (b := R)).mono_set Ioc_subset_Icc_self
+  set F : ℝ → ℝ → ℂ := fun t s =>
+    cexp (-(I * θ * t)) * cexp (I * t * s) * (((1 - |t| / R : ℝ) : ℂ) * f s) with hF
+  have hFi : Integrable (Function.uncurry F) (μ.prod volume) := by
+    have hp := he.mul_prod hf
+    refine (hp.bdd_mul (c := 1) (f := fun p : ℝ × ℝ =>
+        cexp (-(I * θ * p.1)) * cexp (I * p.1 * p.2)) ?_ ?_).congr
+        (Eventually.of_forall fun p => ?_)
+    · exact (by fun_prop : Continuous fun p : ℝ × ℝ =>
+        cexp (-(I * θ * p.1)) * cexp (I * p.1 * p.2)).aestronglyMeasurable
+    · refine Eventually.of_forall fun p => ?_
+      rw [norm_mul, Complex.norm_exp, Complex.norm_exp]
+      simp
+    · simp [hF, Function.uncurry]
+  have hsq : ((Real.sqrt (2 * Real.pi))⁻¹ : ℂ) * ((Real.sqrt (2 * Real.pi))⁻¹ : ℂ) =
+      ((2 * Real.pi : ℝ)⁻¹ : ℂ) := by
+    rw [← mul_inv, ← ofReal_mul, Real.mul_self_sqrt (by positivity)]
+  unfold fourierCesaroMeanIntegral fourierTransform
+  rw [intervalIntegral.integral_of_le (by linarith)]
+  have hin : ∀ t : ℝ, ((1 - |t| / R : ℝ) : ℂ) * cexp (-(I * θ * t)) *
+      (((Real.sqrt (2 * Real.pi))⁻¹ : ℂ) * ∫ s : ℝ, f s * cexp (I * t * s)) =
+      ((Real.sqrt (2 * Real.pi))⁻¹ : ℂ) * ∫ s, F t s := by
+    intro t
+    conv_lhs => rw [← integral_const_mul, ← integral_const_mul]
+    conv_rhs => rw [← integral_const_mul]
+    congr 1; funext s
+    simp only [hF]
+    ring
+  simp_rw [hin]
+  rw [integral_const_mul, ← mul_assoc, hsq, integral_integral_swap hFi, ← integral_const_mul]
+  refine integral_congr_ae ?_
+  have hθ : ∀ᵐ s : ℝ, s ∉ ({θ} : Set ℝ) :=
+    measure_eq_zero_iff_ae_notMem.1 (measure_singleton θ)
+  filter_upwards [hθ] with s hs
+  simp only [hF]
+  have hu : s - θ ≠ 0 := sub_ne_zero.mpr fun h => hs (mem_singleton_iff.mpr h)
+  have h := integral_triangle_cexp hR hu
+  rw [intervalIntegral.integral_of_le (by linarith)] at h
+  calc ((2 * Real.pi : ℝ)⁻¹ : ℂ) * ∫ t in Ioc (-R) R,
+        cexp (-(I * θ * t)) * cexp (I * t * s) * (((1 - |t| / R : ℝ) : ℂ) * f s)
+      = ((2 * Real.pi : ℝ)⁻¹ : ℂ) * ((∫ t in Ioc (-R) R,
+          ((1 - |t| / R : ℝ) : ℂ) * cexp (I * t * (s - θ : ℝ))) * f s) := by
+        rw [← integral_mul_const]
+        congr 2; funext t
+        rw [show I * t * (s - θ : ℝ) = -(I * θ * t) + I * t * s by push_cast; ring,
+          Complex.exp_add]
+        ring
+    _ = f s * (fejerKernelLine R (θ - s) : ℂ) := by
+        rw [h, fejerKernelLine]
+        have hu2 : (θ - s) ^ 2 = (s - θ) ^ 2 := by ring
+        have hcos : Real.cos (R * (θ - s)) = Real.cos (R * (s - θ)) := by
+          rw [← Real.cos_neg]; ring_nf
+        rw [hu2, hcos]
+        have hpi := Real.pi_pos
+        push_cast
+        field_simp
+
+/-- The Fejér density `(1 - cos u)/(πu²)`. -/
+private lemma fejerKernelLine_scaled {R : ℝ} (hR : 0 < R) (u : ℝ) :
+    R⁻¹ * fejerKernelLine R (R⁻¹ * u) = Real.pi⁻¹ * ((1 - Real.cos u) / u ^ 2) := by
+  unfold fejerKernelLine
+  have := Real.pi_pos
+  rw [mul_inv_cancel_left₀ hR.ne']
+  field_simp
 
 /-- DLMF 1.15.46: for `f` absolutely integrable, `∫ |σ_R(θ) - f(θ)| dθ → 0` as `R → ∞`. -/
 @[dlmf 1.15.E46]
 theorem tendsto_integral_norm_fourierCesaroMeanIntegral_sub {f : ℝ → ℂ} (hf : Integrable f) :
     Tendsto (fun R => ∫ θ, ‖fourierCesaroMeanIntegral f R θ - f θ‖) atTop (𝓝 0) := by
-  sorry
+  have hk : Integrable fun u : ℝ => Real.pi⁻¹ * ((1 - Real.cos u) / u ^ 2) :=
+    Real.integrable_one_sub_cos_div_sq.const_mul _
+  have hk1 : ∫ u : ℝ, Real.pi⁻¹ * ((1 - Real.cos u) / u ^ 2) = 1 := by
+    rw [integral_const_mul, Real.integral_one_sub_cos_div_sq]
+    exact inv_mul_cancel₀ Real.pi_ne_zero
+  have h := (hf.tendsto_integral_norm_integral_smul_comp_sub_mul_sub hk
+    (fun u => mul_nonneg (inv_nonneg.mpr Real.pi_pos.le) (Real.one_sub_cos_div_sq_nonneg u))
+    hk1).comp tendsto_inv_atTop_zero
+  refine h.congr' ?_
+  filter_upwards [eventually_gt_atTop 0] with R hR
+  refine integral_congr_ae (Eventually.of_forall fun θ => ?_)
+  dsimp only
+  rw [fourierCesaroMeanIntegral_eq hf hR,
+    integral_mul_kernel_eq_scaled (fejerKernelLine R) θ (inv_pos.mpr hR)]
+  simp_rw [fejerKernelLine_scaled hR]
 
 end DLMF.AlgebraicAnalytic

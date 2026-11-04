@@ -29,11 +29,11 @@ wave equation (DLMF 29.11.1).
 
 ## Implementation notes
 
-`IsLameSolutionOn h ν k w U` uses the project's complex `sn(z, k) = jacobiSnk z k` (modulus
+`IsLameSolutionOn h ν k w U` uses the project's complex `sn(z, k) = jacobiSn z k` (modulus
 `k`); like `DLMF.Painleve.IsPIIOn` it records genuine differentiability of `w` and `w'`, so
 totalized derivatives cannot make a nonsolution satisfy the equation. `Real.IsLameSolution`
-uses the real-variable `sn = DLMF.Elliptic.Real.jacobiSnm x (k²)` (parameter `m = k²`), which
-agrees with the complex `sn` for `0 < k < 1` (`jacobiSnk_ofReal`).
+uses the real-variable `sn = DLMF.Elliptic.Real.jacobiSnOfParameter x (k²)` (parameter `m = k²`),
+which agrees with the complex `sn` for `0 < k < 1` (`jacobiSn_ofReal`).
 -/
 
 @[expose] public noncomputable section
@@ -55,7 +55,7 @@ structure IsLameSolutionOn (h ν k : ℂ) (w : ℂ → ℂ) (U : Set ℂ) : Prop
   differentiableAt : ∀ z ∈ U, DifferentiableAt ℂ w z
   /-- `w'` has the derivative prescribed by the differential equation at every point. -/
   hasDerivAt_deriv : ∀ z ∈ U,
-    HasDerivAt (deriv w) (-(h - ν * (ν + 1) * k ^ 2 * jacobiSnk z k ^ 2) * w z) z
+    HasDerivAt (deriv w) (-(h - ν * (ν + 1) * k ^ 2 * jacobiSn z k ^ 2) * w z) z
 
 /-- The algebraic form of Lamé's equation (DLMF 29.2.2) in `ξ = sn²(z, k)` (29.2.3):
 `w'' + ½(1/ξ + 1/(ξ-1) + 1/(ξ-k⁻²)) w' + (h k⁻² - ν(ν+1)ξ)/(4ξ(ξ-1)(ξ-k⁻²)) w = 0` on `U`. -/
@@ -99,10 +99,10 @@ structure IsLameWaveSolutionOn (h ν k ω : ℂ) (w : ℂ → ℂ) (U : Set ℂ)
   differentiableAt : ∀ z ∈ U, DifferentiableAt ℂ w z
   /-- `w'` has the derivative prescribed by the differential equation at every point. -/
   hasDerivAt_deriv : ∀ z ∈ U, HasDerivAt (deriv w)
-    (-(h - ν * (ν + 1) * k ^ 2 * jacobiSnk z k ^ 2 + k ^ 2 * ω ^ 2 * jacobiSnk z k ^ 4) * w z) z
+    (-(h - ν * (ν + 1) * k ^ 2 * jacobiSn z k ^ 2 + k ^ 2 * ω ^ 2 * jacobiSn z k ^ 4) * w z) z
 
 /-- Lamé's equation (DLMF 29.2.1) for real `x ∈ ℝ` and real parameters, with the real
-`sn(x, k) = Real.jacobiSnm x (k²)`: `w` is differentiable on `ℝ` and
+`sn(x, k) = Real.jacobiSnOfParameter x (k²)`: `w` is differentiable on `ℝ` and
 `w'' = -(h - ν(ν+1) k² sn²(x, k)) w` everywhere. -/
 @[dlmf 29.2.E1 "real form: real x, real h, ν, k"]
 structure Real.IsLameSolution (h ν k : ℝ) (w : ℝ → ℝ) : Prop where
@@ -110,7 +110,8 @@ structure Real.IsLameSolution (h ν k : ℝ) (w : ℝ → ℝ) : Prop where
   differentiable : Differentiable ℝ w
   /-- `w'` has the derivative prescribed by the differential equation at every point. -/
   hasDerivAt_deriv : ∀ x : ℝ,
-    HasDerivAt (deriv w) (-(h - ν * (ν + 1) * k ^ 2 * Real.jacobiSnm x (k ^ 2) ^ 2) * w x) x
+    HasDerivAt (deriv w)
+        (-(h - ν * (ν + 1) * k ^ 2 * Real.jacobiSnOfParameter x (k ^ 2) ^ 2) * w x) x
 
 /-- The trigonometric form of Lamé's equation (DLMF 29.2.4) for real `φ`:
 `(1 - k² cos²φ) w'' + k² cos φ sin φ w' + (h - ν(ν+1) k² cos²φ) w = 0`. -/
@@ -126,8 +127,8 @@ structure Real.IsLameTrigSolution (h ν k : ℝ) (w : ℝ → ℝ) : Prop where
       (h - ν * (ν + 1) * k ^ 2 * Real.cos φ ^ 2) * w φ = 0
 
 /-- The variable `φ = π/2 - am(x, k)` of DLMF 29.2.5 for real `x` (`am` is the real amplitude
-`Real.jacobiAmm x (k²)` of §22.16(i)); then `cos φ = sn(x, k)` and `sin φ = cn(x, k)`. -/
+`Real.jacobiAmOfParameter x (k²)` of §22.16(i)); then `cos φ = sn(x, k)` and `sin φ = cn(x, k)`. -/
 @[dlmf 29.2.E5]
-def Real.lamePhi (x k : ℝ) : ℝ := π / 2 - Real.jacobiAmm x (k ^ 2)
+def Real.lamePhi (x k : ℝ) : ℝ := π / 2 - Real.jacobiAmOfParameter x (k ^ 2)
 
 end DLMF.Lame

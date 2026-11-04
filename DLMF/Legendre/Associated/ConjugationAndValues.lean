@@ -47,21 +47,22 @@ theorem ascPochhammer_eval_conj (n : ℕ) (a : ℂ) :
   | succ n ih => simp [ascPochhammer_succ_eval, ih]
 
 /-- Conjugation symmetry of the regularized Gauss function on the unit disk. -/
-theorem regularizedGaussHG_conj {a b c z : ℂ} (hz : ‖z‖ < 1) :
-    conj (regularizedGaussHG a b c z) =
-      regularizedGaussHG (conj a) (conj b) (conj c) (conj z) := by
+theorem regularizedGaussHypergeometric_conj {a b c z : ℂ} (hz : ‖z‖ < 1) :
+    conj (regularizedGaussHypergeometric a b c z) =
+      regularizedGaussHypergeometric (conj a) (conj b) (conj c) (conj z) := by
   have hz' : ‖conj z‖ < 1 := by rwa [RCLike.norm_conj]
-  rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hz,
-    regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hz', regularizedGaussHGFun_eq_tsum,
-    regularizedGaussHGFun_eq_tsum, Complex.conj_tsum]
+  rw [regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hz,
+    regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ hz',
+        regularizedGaussHypergeometricFun_eq_tsum,
+    regularizedGaussHypergeometricFun_eq_tsum, Complex.conj_tsum]
   congr 1
   funext n
   simp [ascPochhammer_eval_conj, ← Gamma_conj, map_div₀]
 
 /-- Real parameters and a real argument in the unit disk give a real Gauss value. -/
-theorem regularizedGaussHG_real_im {a b c z : ℝ} (hz : |z| < 1) :
-    (regularizedGaussHG a b c z).im = 0 := by
-  rw [← conj_eq_iff_im, regularizedGaussHG_conj (by simpa using hz)]
+theorem regularizedGaussHypergeometric_real_im {a b c z : ℝ} (hz : |z| < 1) :
+    (regularizedGaussHypergeometric a b c z).im = 0 := by
+  rw [← conj_eq_iff_im, regularizedGaussHypergeometric_conj (by simpa using hz)]
   simp
 
 /-- `conj (r^w) = r^(conj w)` for positive real `r`. -/
@@ -77,7 +78,7 @@ theorem ferrersP_conj (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     rw [show (1-(x:ℂ))/2=(((1-x)/2:ℝ):ℂ) by push_cast; ring, norm_real, Real.norm_eq_abs, abs_lt]
     constructor <;> linarith [hx.1,hx.2]
   unfold ferrersP
-  rw [map_mul, conj_ofReal_cpow (div_pos h1 h2), regularizedGaussHG_conj hz]
+  rw [map_mul, conj_ofReal_cpow (div_pos h1 h2), regularizedGaussHypergeometric_conj hz]
   simp [map_div₀, map_ofNat]
 
 /-- `conj (2^w) = 2^(conj w)`. -/
@@ -99,7 +100,8 @@ theorem conj_one_sub_sq_cpow {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) (w : ℂ) :
 theorem ferrersEven_conj (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     conj (ferrersEven ν μ x) = ferrersEven (conj ν) (conj μ) x := by
   unfold ferrersEven
-  rw [map_mul, conj_one_sub_sq_cpow hx, regularizedGaussHG_conj (ferrers_norm_sq_lt_one hx)]
+  rw [map_mul, conj_one_sub_sq_cpow hx,
+      regularizedGaussHypergeometric_conj (ferrers_norm_sq_lt_one hx)]
   simp [map_div₀, map_ofNat]
 
 /-- Conjugation symmetry of the odd quadratic solution. -/
@@ -107,7 +109,7 @@ theorem ferrersOdd_conj (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     conj (ferrersOdd ν μ x) = ferrersOdd (conj ν) (conj μ) x := by
   unfold ferrersOdd
   rw [map_mul, map_mul, conj_one_sub_sq_cpow hx,
-      regularizedGaussHG_conj (ferrers_norm_sq_lt_one hx)]
+      regularizedGaussHypergeometric_conj (ferrers_norm_sq_lt_one hx)]
   simp [map_div₀, map_ofNat]
 
 /-- Conjugation symmetry of the Ferrers function of the second kind. -/
@@ -135,7 +137,7 @@ theorem associatedP_zero_order (ν : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     · left; simp at h ⊢; linarith
     · right; simpa using h
   simpa [associatedP,legendreP] using
-    regularizedGaussHG_symm (ν+1) (-ν) 1 (mem_cutPlane_of_one_add hz')
+    regularizedGaussHypergeometric_symm (ν+1) (-ν) 1 (mem_cutPlane_of_one_add hz')
 
 /-- Compatibility of the totalized degree-only APIs; classical Q additionally requires regular
 degree. -/
@@ -160,8 +162,8 @@ theorem associatedP_analytic (ν μ : ℂ) :
   intro z hz
   have hp : z+1 ∈ slitPlane := by simpa [add_comm] using one_add_mem_slitPlane_of_sub_one hz
   have hG : AnalyticAt ℂ (fun w : ℂ =>
-      regularizedGaussHG (ν+1) (-ν) (1-μ) ((1-w)/2)) z :=
-    (analyticAt_regularizedGaussHG _ _ _
+      regularizedGaussHypergeometric (ν+1) (-ν) (1-μ) ((1-w)/2)) z :=
+    (analyticAt_regularizedGaussHypergeometric _ _ _
         (mem_cutPlane_of_one_add (by simpa [add_comm] using hp))).comp_of_eq
       (by fun_prop) rfl
   unfold associatedP
@@ -176,7 +178,8 @@ theorem associatedP_entire_degree (μ : ℂ) :
   have hw := mem_cutPlane_of_one_add (one_add_mem_slitPlane_of_sub_one hz)
   unfold associatedP
   exact (differentiable_const _).mul
-    (differentiable_regularizedGaussHG_comp (by fun_prop) (by fun_prop) (by fun_prop) hw)
+    (differentiable_regularizedGaussHypergeometric_comp (by fun_prop) (by fun_prop)
+        (by fun_prop) hw)
 
 /-- Entire parameter dependence on the principal sheet. -/
 theorem associatedP_entire_order (ν : ℂ) :
@@ -185,13 +188,15 @@ theorem associatedP_entire_order (ν : ℂ) :
   have hw := mem_cutPlane_of_one_add (one_add_mem_slitPlane_of_sub_one hz)
   unfold associatedP
   exact (by fun_prop : Differentiable ℂ fun μ : ℂ => exp (μ/2*(log (z+1)-log (z-1)))).mul
-    (differentiable_regularizedGaussHG_comp (by fun_prop) (by fun_prop) (by fun_prop) hw)
+    (differentiable_regularizedGaussHypergeometric_comp (by fun_prop) (by fun_prop)
+        (by fun_prop) hw)
 
 /-- The logarithmic gauge derivative for associated P, before imposing its degree parameters. -/
 theorem hasDerivAt_associatedP_aux (a b c μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    HasDerivAt (fun w : ℂ => exp (μ/2*(log (w+1)-log (w-1)))*regularizedGaussHG a b c ((1-w)/2))
-      (μ/(1-z^2)*(exp (μ/2*(log (z+1)-log (z-1)))*regularizedGaussHG a b c ((1-z)/2))-
-        a*b/2*(exp (μ/2*(log (z+1)-log (z-1)))*regularizedGaussHG (a+1) (b+1) (c+1)
+    HasDerivAt (fun w : ℂ =>
+        exp (μ/2*(log (w+1)-log (w-1)))*regularizedGaussHypergeometric a b c ((1-w)/2))
+      (μ/(1-z^2)*(exp (μ/2*(log (z+1)-log (z-1)))*regularizedGaussHypergeometric a b c ((1-z)/2))-
+        a*b/2*(exp (μ/2*(log (z+1)-log (z-1)))*regularizedGaussHypergeometric (a+1) (b+1) (c+1)
             ((1-z)/2))) z := by
   have hp : z+1 ∈ slitPlane := by simpa [add_comm] using one_add_mem_slitPlane_of_sub_one hz
   have hm0 := slitPlane_ne_zero hz
@@ -199,7 +204,8 @@ theorem hasDerivAt_associatedP_aux (a b c μ : ℂ) {z : ℂ} (hz : z-1 ∈ slit
   have he := (((hasDerivAt_id z).add_const 1).clog hp).sub
     (((hasDerivAt_id z).sub_const 1).clog hz)
   have hE := (he.const_mul (μ/2)).cexp
-  have hG := hasDerivAt_regularizedGaussHG_half a b c (one_add_mem_slitPlane_of_sub_one hz)
+  have hG := hasDerivAt_regularizedGaussHypergeometric_half a b c
+      (one_add_mem_slitPlane_of_sub_one hz)
   refine (hE.mul hG).congr_deriv ?_
   simp only [id_eq, Pi.sub_apply]
   have hne : 1-z^2 ≠ 0 := by
@@ -217,8 +223,10 @@ theorem associatedP_ode (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
         z+(ν*(ν+1)-μ^2/(1-z^2))*associatedP ν μ z=0 := by
   have hd (w : ℂ) (hw : w-1 ∈ slitPlane) := hasDerivAt_associatedP_aux (ν+1) (-ν) (1-μ) μ hw
   have hev : deriv (associatedP ν μ) =ᶠ[𝓝 z] fun w =>
-      μ/(1-w^2)*(exp (μ/2*(log (w+1)-log (w-1)))*regularizedGaussHG (ν+1) (-ν) (1-μ) ((1-w)/2))-
-        (ν+1)*(-ν)/2*(exp (μ/2*(log (w+1)-log (w-1)))*regularizedGaussHG (ν+1+1) (-ν+1) (1-μ+1)
+      μ/(1-w^2)*(exp (μ/2*(log (w+1)-log (w-1)))*regularizedGaussHypergeometric (ν+1) (-ν)
+          (1-μ) ((1-w)/2))-
+        (ν+1)*(-ν)/2*(exp (μ/2*(log (w+1)-log (w-1)))*regularizedGaussHypergeometric
+            (ν+1+1) (-ν+1) (1-μ+1)
             ((1-w)/2)) := by
     filter_upwards [isOpen_sub_one_mem_slitPlane.mem_nhds hz] with w hw
     exact (hd w hw).deriv
@@ -237,15 +245,17 @@ theorem associatedP_ode (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
   have h2 := (hq.mul (hd z hz)).sub
     ((hasDerivAt_associatedP_aux (ν+1+1) (-ν+1) (1-μ+1) μ hz).const_mul ((ν+1)*(-ν)/2))
   have h2' : HasDerivAt (fun w : ℂ =>
-      μ/(1-w^2)*(exp (μ/2*(log (w+1)-log (w-1)))*regularizedGaussHG (ν+1) (-ν) (1-μ) ((1-w)/2))-
-        (ν+1)*(-ν)/2*(exp (μ/2*(log (w+1)-log (w-1)))*regularizedGaussHG (ν+1+1) (-ν+1) (1-μ+1)
+      μ/(1-w^2)*(exp (μ/2*(log (w+1)-log (w-1)))*regularizedGaussHypergeometric (ν+1) (-ν)
+          (1-μ) ((1-w)/2))-
+        (ν+1)*(-ν)/2*(exp (μ/2*(log (w+1)-log (w-1)))*regularizedGaussHypergeometric
+            (ν+1+1) (-ν+1) (1-μ+1)
             ((1-w)/2))) _ z :=
     h2.congr_of_eventuallyEq (Eventually.of_forall fun w => rfl)
   have hd0 : HasDerivAt (associatedP ν μ) _ z := hd z hz
   rw [iteratedDeriv_succ, iteratedDeriv_one, hev.deriv_eq, h2'.deriv, hd0.deriv]
-  have hode := regularizedGaussHG_ode (ν+1) (-ν) (1-μ)
+  have hode := regularizedGaussHypergeometric_ode (ν+1) (-ν) (1-μ)
     (mem_cutPlane_of_one_add (one_add_mem_slitPlane_of_sub_one hz))
-  simp only [poch, ascPochhammer_succ_eval, ascPochhammer_zero, Polynomial.eval_one] at hode
+  simp only [pochhammer, ascPochhammer_succ_eval, ascPochhammer_zero, Polynomial.eval_one] at hode
   simp only [associatedP]
   rw [show ν+1+1=ν+2 by ring, show -ν+1+1=-ν+2 by ring,
     show 1-μ+1+1=1-μ+2 by ring]
@@ -278,7 +288,8 @@ theorem associatedP_real (ν μ : ℝ) {x : ℝ} (hx : 1 < x) :
     rw [show (x:ℂ)+1 = ((x+1:ℝ):ℂ) by push_cast; ring, ofReal_log (by linarith)]
   rw [← conj_eq_iff_im]
   unfold associatedP
-  rw [regularizedGaussHG_pfaff _ _ _ hw, hb, hl1, hl2, map_mul, map_mul, regularizedGaussHG_conj hz,
+  rw [regularizedGaussHypergeometric_pfaff _ _ _ hw, hb, hl1, hl2, map_mul, map_mul,
+      regularizedGaussHypergeometric_conj hz,
     ← exp_conj, conj_ofReal_cpow (by linarith)]
   simp [map_div₀, map_ofNat]
 
@@ -290,9 +301,9 @@ theorem olverQ_analytic (ν μ : ℂ) :
   have hs := mem_slitPlane_of_sub_one hz
   have hz0 := slitPlane_ne_zero hs
   have hp : z+1 ∈ slitPlane := by simpa [add_comm] using one_add_mem_slitPlane_of_sub_one hz
-  have hG : AnalyticAt ℂ (fun w : ℂ => regularizedGaussHG ((ν+μ+2)/2)
+  have hG : AnalyticAt ℂ (fun w : ℂ => regularizedGaussHypergeometric ((ν+μ+2)/2)
       ((ν+μ+1)/2) (ν+3/2) (1/w^2)) z :=
-    (analyticAt_regularizedGaussHG _ _ _ (recip_sq_mem_cutPlane hz)).comp_of_eq
+    (analyticAt_regularizedGaussHypergeometric _ _ _ (recip_sq_mem_cutPlane hz)).comp_of_eq
       (by fun_prop (disch := exact pow_ne_zero 2 hz0)) rfl
   have hB : AnalyticAt ℂ (legendreBranchPower μ) z := by
     unfold legendreBranchPower
@@ -313,7 +324,7 @@ theorem olverQ_entire_degree (μ : ℂ) :
   unfold olverQ
   refine (((differentiable_const _).div ((differentiable_const_cpow_of_neZero (2:ℂ) |>.comp
     (by fun_prop : Differentiable ℂ fun ν : ℂ => ν+1)).mul ?_) ?_)).mul
-    (differentiable_regularizedGaussHG_comp (by fun_prop) (by fun_prop) (by fun_prop)
+    (differentiable_regularizedGaussHypergeometric_comp (by fun_prop) (by fun_prop) (by fun_prop)
         (recip_sq_mem_cutPlane hz))
   · exact (differentiable_const_cpow_of_neZero z |>.comp
                                                     (by fun_prop : Differentiable ℂ
@@ -330,7 +341,7 @@ theorem olverQ_entire_order (ν : ℂ) :
   have : NeZero z := ⟨hz0⟩
   unfold olverQ legendreBranchPower
   refine (((differentiable_const _).mul (by fun_prop)).div ((differentiable_const _).mul ?_) ?_).mul
-    (differentiable_regularizedGaussHG_comp (by fun_prop) (by fun_prop) (by fun_prop)
+    (differentiable_regularizedGaussHypergeometric_comp (by fun_prop) (by fun_prop) (by fun_prop)
         (recip_sq_mem_cutPlane hz))
   · exact (differentiable_const_cpow_of_neZero z |>.comp
                                                     (by fun_prop : Differentiable ℂ
@@ -349,7 +360,7 @@ theorem olverQ_ode (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
   let b : ℂ := (ν+μ+1)/2
   let c : ℂ := ν+3/2
   let r : ℂ := ν+μ+1
-  let F := regularizedGaussHG a b c
+  let F := regularizedGaussHypergeometric a b c
   let u : ℂ → ℂ := fun w => 1/w^2
   let v : ℂ → ℂ := fun w => -2/w^3
   let g : ℂ → ℂ := fun w => (Real.sqrt π:ℂ)/2^(ν+1)*
@@ -383,7 +394,7 @@ theorem olverQ_ode (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
       field_simp [(hne w hw).1]
       ring
   have hF (w : ℂ) (hw : w-1∈slitPlane) : AnalyticAt ℂ F (u w) :=
-    analyticAt_regularizedGaussHG a b c (recip_sq_mem_cutPlane hw)
+    analyticAt_regularizedGaussHypergeometric a b c (recip_sq_mem_cutPlane hw)
   have hf : olverQ ν μ=fun w => g w*F (u w) := by
     funext w
     simp only [olverQ,g,F,u,a,b,c,r,legendreBranchPower,cpow_neg]
@@ -422,12 +433,12 @@ theorem olverQ_ode (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
   have hode : u z*(1-u z)*deriv (deriv F) (u z)+
       (c-(a+b+1)*u z)*deriv F (u z)-a*b*F (u z)=0 := by
     dsimp only [F]
-    rw [← show iteratedDeriv 2 (regularizedGaussHG a b c)=deriv
-        (deriv (regularizedGaussHG a b c)) by
+    rw [← show iteratedDeriv 2 (regularizedGaussHypergeometric a b c)=deriv
+        (deriv (regularizedGaussHypergeometric a b c)) by
       rw [iteratedDeriv_succ, iteratedDeriv_one],
-          iteratedDeriv_regularizedGaussHG a b c 2 (recip_sq_mem_cutPlane hz),
-      deriv_regularizedGaussHG a b c (recip_sq_mem_cutPlane hz)]
-    exact regularizedGaussHG_ode a b c (recip_sq_mem_cutPlane hz)
+          iteratedDeriv_regularizedGaussHypergeometric a b c 2 (recip_sq_mem_cutPlane hz),
+      deriv_regularizedGaussHypergeometric a b c (recip_sq_mem_cutPlane hz)]
+    exact regularizedGaussHypergeometric_ode a b c (recip_sq_mem_cutPlane hz)
   simp only [Function.comp_apply,Pi.mul_apply,Pi.add_apply]
   generalize g z=G at *
   generalize F (u z)=F0 at *
@@ -454,7 +465,8 @@ theorem olverQ_real (ν μ : ℝ) {x : ℝ} (hx : 1 < x) :
     rw [show (x:ℂ)+1 = ((x+1:ℝ):ℂ) by push_cast; ring, ofReal_log (by linarith)]
   rw [← conj_eq_iff_im]
   unfold olverQ legendreBranchPower
-  rw [hl1, hl2, map_mul, map_div₀, map_mul, map_mul, regularizedGaussHG_conj hz, ← exp_conj,
+  rw [hl1, hl2, map_mul, map_div₀, map_mul, map_mul,
+      regularizedGaussHypergeometric_conj hz, ← exp_conj,
     conj_two_cpow, conj_ofReal_cpow hx0]
   simp [map_div₀, map_ofNat]
 
@@ -462,7 +474,7 @@ theorem olverQ_real (ν μ : ℝ) {x : ℝ} (hx : 1 < x) :
 The complex jets also give real derivatives on the Ferrers interval. -/
 theorem quadratic_gauss_gauge_jets (a b c μ : ℂ) {z : ℂ}
     (hz : 1-z^2∈slitPlane) :
-    let F := regularizedGaussHG a b c
+    let F := regularizedGaussHypergeometric a b c
     let g : ℂ→ℂ := fun w=>(1-w^2)^(-μ/2)
     let q : ℂ→ℂ := fun w=>μ*w/(1-w^2)
     let d : ℂ→ℂ := fun w=>g w*(q w*F (w^2)+2*w*deriv F (w^2))
@@ -470,7 +482,7 @@ theorem quadratic_gauss_gauge_jets (a b c μ : ℂ) {z : ℂ}
     HasDerivAt d (g z*((q z^2+μ*(1+z^2)/(1-z^2)^2)*F (z^2)+
       (4*z*q z+2)*deriv F (z^2)+4*z^2*deriv (deriv F) (z^2))) z := by
   dsimp only
-  let F := regularizedGaussHG a b c
+  let F := regularizedGaussHypergeometric a b c
   let g : ℂ→ℂ := fun w=>(1-w^2)^(-μ/2)
   let q : ℂ→ℂ := fun w=>μ*w/(1-w^2)
   have hne : 1-z^2≠0 := slitPlane_ne_zero hz
@@ -488,7 +500,7 @@ theorem quadratic_gauss_gauge_jets (a b c μ : ℂ) {z : ℂ}
     simp only [id_eq]
     field_simp
     ring
-  have hF : AnalyticAt ℂ F (z^2) := analyticAt_regularizedGaussHG a b c hz
+  have hF : AnalyticAt ℂ F (z^2) := analyticAt_regularizedGaussHypergeometric a b c hz
   have hC := hF.differentiableAt.hasDerivAt.comp z (h:=fun w : ℂ=>w^2) (hasDerivAt_pow 2 z)
   have hC' := hF.deriv.differentiableAt.hasDerivAt.comp z (h:=fun w : ℂ=>w^2) (hasDerivAt_pow 2 z)
   constructor
@@ -512,8 +524,8 @@ theorem ferrersQ_ode {ν μ : ℂ} {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
   let b : ℂ := (ν-μ+1)/2
   let A : ℂ := (1-ν-μ)/2
   let B : ℂ := (ν-μ+2)/2
-  let F := regularizedGaussHG a b (1/2)
-  let G := regularizedGaussHG A B (3/2)
+  let F := regularizedGaussHypergeometric a b (1/2)
+  let G := regularizedGaussHypergeometric A B (3/2)
   let g : ℂ→ℂ := fun z=>(1-z^2)^(-μ/2)
   let q : ℂ→ℂ := fun z=>μ*z/(1-z^2)
   let E : ℝ→ℂ := fun y=>g y*F ((y:ℂ)^2)
@@ -557,13 +569,15 @@ theorem ferrersQ_ode {ν μ : ℂ} {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     hsecond.congr_of_eventuallyEq (Eventually.of_forall fun y=>by
       simp only [E1,O1,F,G,g,q,Pi.add_apply,Pi.mul_apply,id_eq])
   have hode (α β γ : ℂ) :
-      (x:ℂ)^2*(1-(x:ℂ)^2)*deriv (deriv (regularizedGaussHG α β γ)) ((x:ℂ)^2)+
-      (γ-(α+β+1)*(x:ℂ)^2)*deriv (regularizedGaussHG α β γ) ((x:ℂ)^2)-
-      α*β*regularizedGaussHG α β γ ((x:ℂ)^2)=0 := by
-    rw [←show iteratedDeriv 2 (regularizedGaussHG α β γ)=deriv (deriv (regularizedGaussHG α β γ)) by
-      rw [iteratedDeriv_succ,iteratedDeriv_one],iteratedDeriv_regularizedGaussHG α β γ 2 (hs x hx),
-      deriv_regularizedGaussHG α β γ (hs x hx)]
-    exact regularizedGaussHG_ode α β γ (hs x hx)
+      (x:ℂ)^2*(1-(x:ℂ)^2)*deriv (deriv (regularizedGaussHypergeometric α β γ)) ((x:ℂ)^2)+
+      (γ-(α+β+1)*(x:ℂ)^2)*deriv (regularizedGaussHypergeometric α β γ) ((x:ℂ)^2)-
+      α*β*regularizedGaussHypergeometric α β γ ((x:ℂ)^2)=0 := by
+    rw [←show iteratedDeriv 2 (regularizedGaussHypergeometric α β γ)=deriv
+        (deriv (regularizedGaussHypergeometric α β γ)) by
+      rw [iteratedDeriv_succ, iteratedDeriv_one],
+          iteratedDeriv_regularizedGaussHypergeometric α β γ 2 (hs x hx),
+      deriv_regularizedGaussHypergeometric α β γ (hs x hx)]
+    exact regularizedGaussHypergeometric_ode α β γ (hs x hx)
   have he := hode a b (1/2)
   have ho := hode A B (3/2)
   rw [iteratedDeriv_succ,iteratedDeriv_one,heq.deriv_eq,hsecond'.deriv,(hd x hx).deriv,hf]

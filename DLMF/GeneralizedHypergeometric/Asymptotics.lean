@@ -30,10 +30,12 @@ public import Mathlib.Topology.Algebra.Monoid
 * `genH_simple_residue`, `genH_resonant_log_polynomial`: algebraic terms as Barnes residues.
 * `genH_balanced_converges`: convergence of the algebraic series for `p = q + 1`, `|z| > 1`,
   DLMF 16.11.6.
-* `genHG_equal_order_asymptotic`, `genHG_one_lower_asymptotic`,
-  `genHG_fewer_upper_asymptotic`: large-`z` expansions, DLMF 16.11.7–16.11.9.
-* `genHG_partial_large_parameter_asymptotic`, `genHG_all_large_parameter_asymptotic`:
-  large-parameter expansions, DLMF 16.11.10–16.11.11.
+* `generalizedHypergeometric_equal_order_asymptotic`,
+  `generalizedHypergeometric_one_lower_asymptotic`,
+  `generalizedHypergeometric_fewer_upper_asymptotic`: large-`z` expansions, DLMF 16.11.7–16.11.9.
+* `generalizedHypergeometric_partial_large_parameter_asymptotic`,
+  `generalizedHypergeometric_all_large_parameter_asymptotic`: large-parameter expansions, DLMF
+  16.11.10–16.11.11.
 
 ## Implementation notes
 
@@ -68,7 +70,7 @@ def genAsymptoticAugment {q : ℕ} (b : Fin q → ℂ) (j : Fin (q + 1)) : ℂ :
 @[dlmf 16.11.E5]
 def genAsymptoticEkm {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ) (k m : ℕ) : ℂ :=
   ∑ j : Fin (q + 1),
-    poch (1 - genAsymptoticNu a b - genAsymptoticKappa p q * genAsymptoticAugment b j + m)
+    pochhammer (1 - genAsymptoticNu a b - genAsymptoticKappa p q * genAsymptoticAugment b j + m)
       (genAsymptoticKappa p q + k - m) *
     (∏ i, (a i - genAsymptoticAugment b j)) /
       (∏ i ∈ univ.erase j, (genAsymptoticAugment b i - genAsymptoticAugment b j))
@@ -105,7 +107,7 @@ def genHTermLog {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
     (w : ℂ) (jk : Fin p × ℕ) : ℂ :=
   (-1 : ℂ) ^ jk.2 / jk.2.factorial * Gamma (a jk.1 + jk.2) *
     (∏ i ∈ univ.erase jk.1, Gamma (a i - a jk.1 - jk.2)) /
-    genGamma (genShift (genParams b) (-a jk.1 - jk.2)) *
+    gammaProduct (shiftParameters (parametersOfFin b) (-a jk.1 - jk.2)) *
     Complex.exp ((-a jk.1 - jk.2) * w)
 
 /-- The distinct upper-pole set, which does not count resonant coincidences twice. -/
@@ -114,7 +116,7 @@ def genHPoleSet {p : ℕ} (a : Fin p → ℂ) : Set ℂ :=
 
 /-- The algebraic formal term at any pole, including logarithmic multiple-pole terms. -/
 def genHResidueLog {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ) (w s : ℂ) : ℂ :=
-  TauCeti.Contour.residue (genBarnesKernelLog (genParams a) (genParams b) w) s
+  TauCeti.Contour.residue (barnesKernelLog (parametersOfFin a) (parametersOfFin b) w) s
 
 /-- A finite set of distinct algebraic poles through order N. -/
 def genHPoleTrunc {p : ℕ} (a : Fin p → ℂ) (N : ℕ) : Finset ℂ := by
@@ -431,9 +433,9 @@ private lemma exists_continuous_ekm {p q : ℕ} (a : Fin p → ℂ) (b : Fin q �
               fun i _ => h2 i
         _ = p := by simp
   have heval : ∀ ε t, (P ε).eval t =
-      (-1 : ℂ) ^ q * poch (1 - ν ε - κ * t + m) M * ∏ i, (a i - t) := by
+      (-1 : ℂ) ^ q * pochhammer (1 - ν ε - κ * t + m) M * ∏ i, (a i - t) := by
     intro ε t
-    simp only [P, eval_mul, eval_C, eval_comp, eval_sub, eval_X, eval_prod, poch]
+    simp only [P, eval_mul, eval_C, eval_comp, eval_sub, eval_X, eval_prod, pochhammer]
     congr 3
     ring
   have hc : ∀ t, Continuous fun ε => (P ε).eval t := by
@@ -685,14 +687,15 @@ private lemma prod_Gamma_mul_pow_eq_prod_poleRemovedGamma {p : ℕ} (a : Fin p �
   exact prod_congr rfl fun i _ => hs i
 
 /-- A shifted parameter Gamma product as a finite product. -/
-private lemma genGamma_genShift_genParams {p : ℕ} (a : Fin p → ℂ) (s : ℂ) :
-    genGamma (genShift (genParams a) s) = ∏ i, Gamma (a i + s) := by
-  simp [genGamma, genShift, genParams, List.map_ofFn, List.prod_ofFn, Function.comp_def]
+private lemma gammaProduct_shiftParameters_parametersOfFin {p : ℕ} (a : Fin p → ℂ) (s : ℂ) :
+    gammaProduct (shiftParameters (parametersOfFin a) s) = ∏ i, Gamma (a i + s) := by
+  simp [gammaProduct, shiftParameters, parametersOfFin, List.map_ofFn, List.prod_ofFn,
+      Function.comp_def]
 
 /-- The reciprocal lower Gamma block of the Barnes kernel is entire. -/
-private lemma analyticAt_inv_genGamma_genShift {q : ℕ} (b : Fin q → ℂ) (s₀ : ℂ) :
-    AnalyticAt ℂ (fun s => (genGamma (genShift (genParams b) s))⁻¹) s₀ := by
-  simp only [genGamma_genShift_genParams, ← prod_inv_distrib]
+private lemma analyticAt_inv_gammaProduct_shiftParameters {q : ℕ} (b : Fin q → ℂ) (s₀ : ℂ) :
+    AnalyticAt ℂ (fun s => (gammaProduct (shiftParameters (parametersOfFin b) s))⁻¹) s₀ := by
+  simp only [gammaProduct_shiftParameters_parametersOfFin, ← prod_inv_distrib]
   apply Finset.analyticAt_fun_prod
   intro i _
   have h : Differentiable ℂ (fun s : ℂ => (Gamma s)⁻¹) := by
@@ -700,44 +703,48 @@ private lemma analyticAt_inv_genGamma_genShift {q : ℕ} (b : Fin q → ℂ) (s�
   exact (h.analyticAt (b i + s₀)).comp_of_eq (f := fun s => b i + s) (by fun_prop) rfl
 
 /-- The Barnes kernel near a point, after removing all Gamma poles from the upper block. -/
-private lemma genBarnesKernelLog_eq_zpow_smul_poleRemoved {p q : ℕ} (a : Fin p → ℂ)
+private lemma barnesKernelLog_eq_zpow_smul_poleRemoved {p q : ℕ} (a : Fin p → ℂ)
     (b : Fin q → ℂ) (w s₀ : ℂ) :
-    ∀ᶠ s in 𝓝[≠] s₀, genBarnesKernelLog (genParams a) (genParams b) w s =
+    ∀ᶠ s in 𝓝[≠] s₀, barnesKernelLog (parametersOfFin a) (parametersOfFin b) w s =
       (s - s₀) ^ (-((∑ i, gammaPoleOrder (a i + s₀) : ℕ) : ℤ)) •
         ((∏ i, poleRemovedGamma (a i + s₀) (a i + s)) *
-          (genGamma (genShift (genParams b) s))⁻¹ * Gamma (-s) * Complex.exp (s * w)) := by
+          (gammaProduct (shiftParameters (parametersOfFin b) s))⁻¹ * Gamma (-s) *
+              Complex.exp (s * w)) := by
   filter_upwards [prod_Gamma_mul_pow_eq_prod_poleRemovedGamma a s₀,
       self_mem_nhdsWithin] with s hs hne
   have hne : s - s₀ ≠ 0 := sub_ne_zero.mpr hne
-  rw [← hs, genBarnesKernelLog, genGamma_genShift_genParams, zpow_neg, zpow_natCast, smul_eq_mul]
+  rw [← hs, barnesKernelLog, gammaProduct_shiftParameters_parametersOfFin, zpow_neg,
+      zpow_natCast, smul_eq_mul]
   field_simp
 
 /-- Each vector parameter belongs to its multiset. -/
-private lemma mem_genParams {p : ℕ} (a : Fin p → ℂ) (i : Fin p) : a i ∈ genParams a := by
-  simp [genParams]
+private lemma mem_parametersOfFin {p : ℕ} (a : Fin p → ℂ) (i : Fin p) : a i ∈
+    parametersOfFin a := by
+  simp [parametersOfFin]
 
 /-- The reflected Gamma factor is regular at every upper pole. -/
 private lemma analyticAt_Gamma_neg_of_upper_pole {p : ℕ} (a : Fin p → ℂ)
-    (ha : GenDenRegular (genParams a))
+    (ha : LowerParametersRegular (parametersOfFin a))
     (j : Fin p) (k : ℕ) : AnalyticAt ℂ (fun s => Gamma (-s)) (-a j - k) := by
   have hnp : ∀ m : ℕ, -(-a j - k) ≠ -m := by
     intro m h
-    apply ha (a j) (mem_genParams a j) (m + k)
+    apply ha (a j) (mem_parametersOfFin a j) (m + k)
     push_cast; linear_combination h
   exact (analyticAt_Gamma_of_ne_neg_nat hnp).comp_of_eq (f := fun s => -s) (by fun_prop) rfl
 
 /-- The pole-removed Barnes kernel is analytic at an upper pole. -/
 private lemma analyticAt_poleRemoved_barnesKernel {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
-    (ha : GenDenRegular (genParams a))
+    (ha : LowerParametersRegular (parametersOfFin a))
     (j : Fin p) (k : ℕ) (w : ℂ) :
     AnalyticAt ℂ (fun s => (∏ i, poleRemovedGamma (a i + (-a j - k)) (a i + s)) *
-      (genGamma (genShift (genParams b) s))⁻¹ * Gamma (-s) * Complex.exp (s * w)) (-a j - k) := by
+      (gammaProduct (shiftParameters (parametersOfFin b) s))⁻¹ * Gamma (-s) *
+          Complex.exp (s * w)) (-a j - k) := by
   have h1 : AnalyticAt ℂ (fun s => ∏ i, poleRemovedGamma (a i + (-a j - k)) (a i + s))
       (-a j - k) := by
     apply Finset.analyticAt_fun_prod
     intro i _
     exact (analyticAt_poleRemovedGamma _).comp_of_eq (f := fun s => a i + s) (by fun_prop) rfl
-  exact ((h1.mul (analyticAt_inv_genGamma_genShift b _)).mul
+  exact ((h1.mul (analyticAt_inv_gammaProduct_shiftParameters b _)).mul
     (analyticAt_Gamma_neg_of_upper_pole a ha j k)).mul (by fun_prop)
 
 /-- Gamma poles are simple. -/
@@ -748,7 +755,7 @@ private lemma gammaPoleOrder_le_one (c : ℂ) : gammaPoleOrder c ≤ 1 := by
 /-- The algebraic coefficients equal the corresponding simple Barnes residues. -/
 @[dlmf 16.11.E2]
 theorem genH_simple_residue {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
-    (ha : GenDenRegular (genParams a))
+    (ha : LowerParametersRegular (parametersOfFin a))
     (hdiff : ∀ i j, i ≠ j → ∀ n : ℤ, a i - a j ≠ n)
     (w : ℂ) (j : Fin p) (k : ℕ) :
     genHResidueLog a b w (-a j - k) = genHTermLog a b w (j, k) := by
@@ -764,7 +771,7 @@ theorem genH_simple_residue {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
       Finset.sum_eq_zero (fun i hi =>
           gammaPoleOrder_of_ne_neg_nat (hnp i (Finset.ne_of_mem_erase hi)))]
     rfl
-  have hloc := genBarnesKernelLog_eq_zpow_smul_poleRemoved a b w s₀
+  have hloc := barnesKernelLog_eq_zpow_smul_poleRemoved a b w s₀
   rw [hN] at hloc
   unfold genHResidueLog
   rw [TauCeti.Contour.residue_eq_of_eventuallyEq_zpow_smul (by norm_num)
@@ -782,7 +789,7 @@ theorem genH_simple_residue {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
 
 /-- A repeated pole contributes an exponential times a polynomial in the logarithm. -/
 theorem genH_resonant_log_polynomial {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
-    (ha : GenDenRegular (genParams a)) {s : ℂ} (hs : s ∈ genHPoleSet a) :
+    (ha : LowerParametersRegular (parametersOfFin a)) {s : ℂ} (hs : s ∈ genHPoleSet a) :
     ∃ P : Polynomial ℂ, P.natDegree ≤ p - 1 ∧
       ∀ w : ℂ, genHResidueLog a b w s = Complex.exp (s * w) * P.eval w := by
   classical
@@ -799,13 +806,13 @@ theorem genH_resonant_log_polynomial {p q : ℕ} (a : Fin p → ℂ) (b : Fin q 
     calc N ≤ ∑ _i : Fin p, 1 := Finset.sum_le_sum fun i _ => gammaPoleOrder_le_one _
       _ = p := by simp
   set G0 : ℂ → ℂ := fun s => (∏ i, poleRemovedGamma (a i + s₀) (a i + s)) *
-      (genGamma (genShift (genParams b) s))⁻¹ * Gamma (-s) with hG0
+      (gammaProduct (shiftParameters (parametersOfFin b) s))⁻¹ * Gamma (-s) with hG0
   have hG0a : AnalyticAt ℂ G0 s₀ := by
     have h1 : AnalyticAt ℂ (fun s => ∏ i, poleRemovedGamma (a i + s₀) (a i + s)) s₀ := by
       apply Finset.analyticAt_fun_prod
       intro i _
       exact (analyticAt_poleRemovedGamma _).comp_of_eq (f := fun s => a i + s) (by fun_prop) rfl
-    exact (h1.mul (analyticAt_inv_genGamma_genShift b _)).mul
+    exact (h1.mul (analyticAt_inv_gammaProduct_shiftParameters b _)).mul
         (analyticAt_Gamma_neg_of_upper_pole a ha j k)
   set n := N - 1 with hn
   refine ⟨∑ i ∈ range (n + 1), Polynomial.C ((n.choose i : ℂ) * iteratedDeriv i G0 s₀ /
@@ -815,7 +822,7 @@ theorem genH_resonant_log_polynomial {p q : ℕ} (a : Fin p → ℂ) (b : Fin q 
     refine (Polynomial.natDegree_C_mul_X_pow_le _ _).trans ?_
     omega
   · intro w
-    have hloc := genBarnesKernelLog_eq_zpow_smul_poleRemoved a b w s₀
+    have hloc := barnesKernelLog_eq_zpow_smul_poleRemoved a b w s₀
     unfold genHResidueLog
     have hE : AnalyticAt ℂ (fun s : ℂ => Complex.exp (s * w)) s₀ := by fun_prop
     rw [TauCeti.Contour.residue_eq_of_eventuallyEq_zpow_smul (by omega) (hG0a.mul hE) hloc]
@@ -839,33 +846,37 @@ theorem genH_resonant_log_polynomial {p q : ℕ} (a : Fin p → ℂ) (b : Fin q 
 both closed cut sides. -/
 @[dlmf 16.11.E6]
 theorem genH_balanced_converges {q : ℕ} (a : Fin (q + 1) → ℂ) (b : Fin q → ℂ)
-    (ha : GenDenRegular (genParams a)) (hb : GenDenRegular (genParams b))
+    (ha : LowerParametersRegular (parametersOfFin a))
+        (hb : LowerParametersRegular (parametersOfFin b))
     {w : ℂ} (hr : 0 < w.re) (hi : |w.im| ≤ Real.pi) :
     HasSum (fun s : genHPoleSet a => genHResidueLog a b w s)
-      (genGamma (genParams a) / genGamma (genParams b) *
-        genHGNegativeLog (genParams a) (genParams b) w) := by
+      (gammaProduct (parametersOfFin a) / gammaProduct (parametersOfFin b) *
+        genHGNegativeLog (parametersOfFin a) (parametersOfFin b) w) := by
   sorry
 
 /-- All orders of the equal-order expansion, with the full phase convention and resonant residues.
 -/
 @[dlmf 16.11.E7]
-theorem genHG_equal_order_asymptotic {q : ℕ} (a b : Fin q → ℂ)
-    (ha : GenDenRegular (genParams a)) (hb : GenDenRegular (genParams b))
+theorem generalizedHypergeometric_equal_order_asymptotic {q : ℕ} (a b : Fin q → ℂ)
+    (ha : LowerParametersRegular (parametersOfFin a))
+        (hb : LowerParametersRegular (parametersOfFin b))
     (N : ℕ) (ε : ℝ) (hε : ε = 1 ∨ ε = -1) :
     Asymptotics.IsBigO (genInfinityLogHalf ε)
-      (fun w => genGamma (genParams a) / genGamma (genParams b) *
-        genHG (genParams a) (genParams b) (Complex.exp w) -
+      (fun w => gammaProduct (parametersOfFin a) / gammaProduct (parametersOfFin b) *
+        generalizedHypergeometric (parametersOfFin a) (parametersOfFin b) (Complex.exp w) -
         genHTruncLog a b (w - ε * Real.pi * I) N - ∑ k ∈ range N, genETermLog a b w k)
       (fun w => genHScaleLog a (w - ε * Real.pi * I) N + ‖genEScaleLog a b w N‖) := by
   sorry
 
 /-- All orders with p=q−1, both shifted E branches, and the full algebraic residue series. -/
 @[dlmf 16.11.E8]
-theorem genHG_one_lower_asymptotic {p : ℕ} (a : Fin p → ℂ) (b : Fin (p + 1) → ℂ)
-    (ha : GenDenRegular (genParams a)) (hb : GenDenRegular (genParams b)) (N : ℕ) :
+theorem generalizedHypergeometric_one_lower_asymptotic {p : ℕ} (a : Fin p → ℂ) (b : Fin (p + 1) → ℂ)
+    (ha : LowerParametersRegular (parametersOfFin a))
+        (hb : LowerParametersRegular (parametersOfFin b)) (N : ℕ) :
     Asymptotics.IsBigO (DLMF.Core.logSector Real.pi)
-      (fun w => genGamma (genParams a) / genGamma (genParams b) *
-        genHG (genParams a) (genParams b) (-Complex.exp w) - genHTruncLog a b w N -
+      (fun w => gammaProduct (parametersOfFin a) / gammaProduct (parametersOfFin b) *
+        generalizedHypergeometric (parametersOfFin a) (parametersOfFin b) (-Complex.exp w) -
+            genHTruncLog a b w N -
         ∑ k ∈ range N, (genETermLog a b (w - Real.pi * I) k + genETermLog a b (w + Real.pi * I) k))
       (fun w => genHScaleLog a w N + ‖genEScaleLog a b (w - Real.pi * I) N‖ +
         ‖genEScaleLog a b (w + Real.pi * I) N‖) := by
@@ -873,11 +884,13 @@ theorem genHG_one_lower_asymptotic {p : ℕ} (a : Fin p → ℂ) (b : Fin (p + 1
 
 /-- All orders with p≤q−2 on the full principal sector, with both E branch contributions. -/
 @[dlmf 16.11.E9]
-theorem genHG_fewer_upper_asymptotic {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ) (hpq : p + 2 ≤ q)
-    (ha : GenDenRegular (genParams a)) (hb : GenDenRegular (genParams b)) (N : ℕ) :
+theorem generalizedHypergeometric_fewer_upper_asymptotic {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
+    (hpq : p + 2 ≤ q)
+    (ha : LowerParametersRegular (parametersOfFin a))
+        (hb : LowerParametersRegular (parametersOfFin b)) (N : ℕ) :
     Asymptotics.IsBigO (DLMF.Core.logSector Real.pi)
-      (fun w => genGamma (genParams a) / genGamma (genParams b) *
-        genHG (genParams a) (genParams b) (-Complex.exp w) -
+      (fun w => gammaProduct (parametersOfFin a) / gammaProduct (parametersOfFin b) *
+        generalizedHypergeometric (parametersOfFin a) (parametersOfFin b) (-Complex.exp w) -
         ∑ k ∈ range N, (genETermLog a b (w - Real.pi * I) k + genETermLog a b (w + Real.pi * I) k))
       (fun w => ‖genEScaleLog a b (w - Real.pi * I) N‖ +
         ‖genEScaleLog a b (w + Real.pi * I) N‖) := by
@@ -886,15 +899,17 @@ theorem genHG_fewer_upper_asymptotic {p q : ℕ} (a : Fin p → ℂ) (b : Fin q 
 /-- Every printed partial large-parameter shift, with unrestricted shifted bottoms and the full
 principal z domain. -/
 @[dlmf 16.11.E10]
-theorem genHG_partial_large_parameter_asymptotic {p : ℕ} (a : Fin (p + 1) → ℂ) (b : Fin p → ℂ)
+theorem generalizedHypergeometric_partial_large_parameter_asymptotic {p : ℕ} (a : Fin (p + 1) → ℂ)
+    (b : Fin p → ℂ)
     {k : ℕ} (hk : 1 ≤ k) (hkp : k ≤ p)
     (hb : ∀ j : Fin p, k ≤ j.val → ∀ n : ℕ, b j ≠ -n)
     {z : ℂ} (hz : z ∈ cutPlane) (m : ℕ) :
     Asymptotics.IsBigO atTop
-      (fun r : ℝ => genHG (genParams (genPartialShift a (k - 1) r))
-        (genParams (genPartialShift b k r)) z -
-        ∑ n ∈ range m, genCoeff (genParams (genPartialShift a (k - 1) r))
-          (genParams (genPartialShift b k r)) n * z ^ n)
+      (fun r : ℝ => generalizedHypergeometric (parametersOfFin (genPartialShift a (k - 1) r))
+        (parametersOfFin (genPartialShift b k r)) z -
+        ∑ n ∈ range m, generalizedHypergeometricCoeff
+            (parametersOfFin (genPartialShift a (k - 1) r))
+          (parametersOfFin (genPartialShift b k r)) n * z ^ n)
       (fun r : ℝ => 1 / r ^ m) := by
   sorry
 
@@ -907,28 +922,28 @@ private lemma pow_le_prod_half_add {r : ℝ} (hr : 0 < r) (n : ℕ) :
       linarith [(Nat.cast_nonneg k : (0:ℝ) ≤ k)]
 
 /-- Upper bound for a rising factorial at a large real shift. -/
-private lemma norm_poch_add_le {x : ℂ} {r : ℝ} (hr : 0 < r) (hx : ‖x‖ ≤ r) (n : ℕ) :
-    ‖poch (x + r) n‖ ≤ 4 ^ n * ∏ k ∈ range n, (r / 2 + k) := by
+private lemma norm_pochhammer_add_le {x : ℂ} {r : ℝ} (hr : 0 < r) (hx : ‖x‖ ≤ r) (n : ℕ) :
+    ‖pochhammer (x + r) n‖ ≤ 4 ^ n * ∏ k ∈ range n, (r / 2 + k) := by
   induction n with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ n ih =>
-    rw [poch_succ, norm_mul, prod_range_succ, pow_succ]
+    rw [pochhammer_succ, norm_mul, prod_range_succ, pow_succ]
     have h1 : ‖x + r + n‖ ≤ 4 * (r / 2 + n) := by
       refine (norm_add₃_le).trans ?_
       rw [Complex.norm_real, Complex.norm_natCast, Real.norm_of_nonneg hr.le]
       linarith [(Nat.cast_nonneg n : (0:ℝ) ≤ n)]
-    calc ‖poch (x + r) n‖ * ‖x + r + n‖ ≤ (4 ^ n * ∏ k ∈ range n, (r / 2 + k)) *
+    calc ‖pochhammer (x + r) n‖ * ‖x + r + n‖ ≤ (4 ^ n * ∏ k ∈ range n, (r / 2 + k)) *
            (4 * (r / 2 + n)) :=
           mul_le_mul ih h1 (norm_nonneg _) (by positivity)
       _ = _ := by ring
 
 /-- Lower bound for a rising factorial at a large real shift. -/
-private lemma prod_le_norm_poch_add {y : ℂ} {r : ℝ} (hr : 0 < r) (hy : ‖y‖ ≤ r / 2) (n : ℕ) :
-    ∏ k ∈ range n, (r / 2 + k) ≤ ‖poch (y + r) n‖ := by
+private lemma prod_le_norm_pochhammer_add {y : ℂ} {r : ℝ} (hr : 0 < r) (hy : ‖y‖ ≤ r / 2) (n : ℕ) :
+    ∏ k ∈ range n, (r / 2 + k) ≤ ‖pochhammer (y + r) n‖ := by
   induction n with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ n ih =>
-    rw [poch_succ, norm_mul, prod_range_succ]
+    rw [pochhammer_succ, norm_mul, prod_range_succ]
     have h1 : r / 2 + n ≤ ‖y + r + n‖ := by
       have : ‖((r : ℂ) + n)‖ = r + n := by
         rw [show ((r : ℂ) + n) = ((r + n : ℝ) : ℂ) by push_cast; ring, Complex.norm_real,
@@ -940,45 +955,51 @@ private lemma prod_le_norm_poch_add {y : ℂ} {r : ℝ} (hr : 0 < r) (hy : ‖y�
     exact mul_le_mul ih h1 (by positivity) (norm_nonneg _)
 
 /-- Upper bound for a shifted multiset rising-factorial product. -/
-private lemma norm_genPoch_genShift_le {r : ℝ} (hr : 0 < r) (c : Multiset ℂ) (hc : ∀ x ∈ c, ‖x‖ ≤ r)
-    (n : ℕ) : ‖genPoch (genShift c r) n‖ ≤ (4 ^ n * ∏ k ∈ range n, (r / 2 + k)) ^ c.card := by
+private lemma norm_pochhammerProduct_shiftParameters_le {r : ℝ} (hr : 0 < r) (c : Multiset ℂ)
+    (hc : ∀ x ∈ c, ‖x‖ ≤ r)
+    (n : ℕ) : ‖pochhammerProduct (shiftParameters c r) n‖ ≤
+        (4 ^ n * ∏ k ∈ range n, (r / 2 + k)) ^ c.card := by
   induction c using Multiset.induction_on with
-  | empty => simp [genPoch, genShift]
+  | empty => simp [pochhammerProduct, shiftParameters]
   | @cons x c ih =>
-    simp only [genPoch, genShift, Multiset.map_cons, Multiset.prod_cons, Multiset.card_cons,
+    simp only [pochhammerProduct, shiftParameters, Multiset.map_cons, Multiset.prod_cons,
+        Multiset.card_cons,
       pow_succ] at ih ⊢
     rw [norm_mul, mul_comm _ (4 ^ n * _)]
-    exact mul_le_mul (norm_poch_add_le hr (hc x (Multiset.mem_cons_self x c)) n)
+    exact mul_le_mul (norm_pochhammer_add_le hr (hc x (Multiset.mem_cons_self x c)) n)
       (ih fun y hy => hc y (Multiset.mem_cons_of_mem hy)) (norm_nonneg _) (by positivity)
 
 /-- Lower bound for a shifted multiset rising-factorial product. -/
-private lemma le_norm_genPoch_genShift {r : ℝ} (hr : 0 < r) (c : Multiset ℂ)
+private lemma le_norm_pochhammerProduct_shiftParameters {r : ℝ} (hr : 0 < r) (c : Multiset ℂ)
     (hc : ∀ x ∈ c, ‖x‖ ≤ r / 2)
-    (n : ℕ) : (∏ k ∈ range n, (r / 2 + k)) ^ c.card ≤ ‖genPoch (genShift c r) n‖ := by
+    (n : ℕ) : (∏ k ∈ range n, (r / 2 + k)) ^ c.card ≤
+        ‖pochhammerProduct (shiftParameters c r) n‖ := by
   induction c using Multiset.induction_on with
-  | empty => simp [genPoch, genShift]
+  | empty => simp [pochhammerProduct, shiftParameters]
   | @cons x c ih =>
-    simp only [genPoch, genShift, Multiset.map_cons, Multiset.prod_cons, Multiset.card_cons,
+    simp only [pochhammerProduct, shiftParameters, Multiset.map_cons, Multiset.prod_cons,
+        Multiset.card_cons,
       pow_succ] at ih ⊢
     rw [norm_mul, mul_comm _ (∏ k ∈ range n, (r / 2 + k))]
-    exact mul_le_mul (prod_le_norm_poch_add hr (hc x (Multiset.mem_cons_self x c)) n)
+    exact mul_le_mul (prod_le_norm_pochhammer_add hr (hc x (Multiset.mem_cons_self x c)) n)
       (ih fun y hy => hc y (Multiset.mem_cons_of_mem hy)) (by positivity) (norm_nonneg _)
 
 /-- Uniform coefficient bound for large common real shifts, p≤q. -/
-private lemma norm_genCoeff_genShift_le {r : ℝ} (hr : 0 < r) (a b : Multiset ℂ)
+private lemma norm_generalizedHypergeometricCoeff_shiftParameters_le {r : ℝ} (hr : 0 < r)
+    (a b : Multiset ℂ)
     (hab : a.card ≤ b.card)
     (ha : ∀ x ∈ a, ‖x‖ ≤ r) (hb : ∀ x ∈ b, ‖x‖ ≤ r / 2) (n : ℕ) :
-    ‖genCoeff (genShift a r) (genShift b r) n‖ ≤
+    ‖generalizedHypergeometricCoeff (shiftParameters a r) (shiftParameters b r) n‖ ≤
       (4 ^ a.card * (2 / r) ^ (b.card - a.card)) ^ n / n.factorial := by
   set P := ∏ k ∈ range n, (r / 2 + k) with hP
   have hP0 : 0 < P := prod_pos fun k _ => by positivity
   have hPge := pow_le_prod_half_add hr n
-  have h1 := norm_genPoch_genShift_le hr a ha n
-  have h2 := le_norm_genPoch_genShift hr b hb n
+  have h1 := norm_pochhammerProduct_shiftParameters_le hr a ha n
+  have h2 := le_norm_pochhammerProduct_shiftParameters hr b hb n
   have hf : (0 : ℝ) < n.factorial := by exact_mod_cast n.factorial_pos
-  unfold genCoeff
+  unfold generalizedHypergeometricCoeff
   rw [norm_div, norm_mul, Complex.norm_natCast]
-  have hB : 0 < ‖genPoch (genShift b r) n‖ := lt_of_lt_of_le (by positivity) h2
+  have hB : 0 < ‖pochhammerProduct (shiftParameters b r) n‖ := lt_of_lt_of_le (by positivity) h2
   rw [div_le_div_iff₀ (by positivity) hf]
   rw [← mul_assoc]
   refine mul_le_mul_of_nonneg_right ?_ hf.le
@@ -987,7 +1008,7 @@ private lemma norm_genCoeff_genShift_le {r : ℝ} (hr : 0 < r) (a b : Multiset �
   have e : ((2 / r) ^ (b.card - a.card)) ^ n * ((r / 2) ^ n) ^ (b.card - a.card) = 1 := by
     rw [← pow_mul, ← pow_mul, mul_comm (b.card - a.card) n, ← mul_pow, div_mul_div_comm,
       mul_comm 2 r, div_self (by positivity), one_pow]
-  calc ‖genPoch (genShift a r) n‖ ≤ (4 ^ n * P) ^ a.card := h1
+  calc ‖pochhammerProduct (shiftParameters a r) n‖ ≤ (4 ^ n * P) ^ a.card := h1
     _ = (4 ^ a.card) ^ n * P ^ a.card := by rw [mul_pow, ← pow_mul, ← pow_mul, mul_comm a.card n]
     _ = (4 ^ a.card) ^ n * ((2 / r) ^ (b.card - a.card)) ^ n *
           (((r / 2) ^ n) ^ (b.card - a.card) * P ^ a.card) := by
@@ -997,20 +1018,24 @@ private lemma norm_genCoeff_genShift_le {r : ℝ} (hr : 0 < r) (a b : Multiset �
           by ring, e, mul_one]
     _ ≤ (4 ^ a.card) ^ n * ((2 / r) ^ (b.card - a.card)) ^ n *
           (P ^ (b.card - a.card) * P ^ a.card) := by gcongr
-    _ ≤ (4 ^ a.card * (2 / r) ^ (b.card - a.card)) ^ n * ‖genPoch (genShift b r) n‖ := by
+    _ ≤ (4 ^ a.card * (2 / r) ^ (b.card - a.card)) ^ n *
+        ‖pochhammerProduct (shiftParameters b r) n‖ := by
         rw [← hsplit, mul_pow]; gcongr
 
 /-- Every full large-parameter shift for p<q, without unnecessary exclusions on the unshifted
 constants. -/
 @[dlmf 16.11.E11]
-theorem genHG_all_large_parameter_asymptotic {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ) (hpq : p < q)
+theorem generalizedHypergeometric_all_large_parameter_asymptotic {p q : ℕ} (a : Fin p → ℂ)
+    (b : Fin q → ℂ) (hpq : p < q)
     (z : ℂ) (m : ℕ) :
     Asymptotics.IsBigO atTop
-      (fun r : ℝ => genHG (genShift (genParams a) r) (genShift (genParams b) r) z -
-        ∑ n ∈ range m, genCoeff (genShift (genParams a) r) (genShift (genParams b) r) n * z ^ n)
+      (fun r : ℝ => generalizedHypergeometric (shiftParameters (parametersOfFin a) r)
+          (shiftParameters (parametersOfFin b) r) z -
+        ∑ n ∈ range m, generalizedHypergeometricCoeff (shiftParameters (parametersOfFin a) r)
+            (shiftParameters (parametersOfFin b) r) n * z ^ n)
       (fun r : ℝ => 1 / r ^ ((q - p) * m)) := by
-  have hca : (genParams a).card = p := by simp [genParams]
-  have hcb : (genParams b).card = q := by simp [genParams]
+  have hca : (parametersOfFin a).card = p := by simp [parametersOfFin]
+  have hcb : (parametersOfFin b).card = q := by simp [parametersOfFin]
   set R0 : ℝ := 2 * (∑ i, ‖a i‖ + ∑ j, ‖b j‖) + 1 with hR0
   set K : ℝ := 4 ^ p * 2 ^ (q - p) * ‖z‖ with hK
   set S : ℝ := ∑' n : ℕ, K ^ n / n.factorial with hS
@@ -1021,17 +1046,17 @@ theorem genHG_all_large_parameter_asymptotic {p q : ℕ} (a : Fin p → ℂ) (b 
   have hsb : 0 ≤ ∑ j, ‖b j‖ := sum_nonneg fun _ _ => norm_nonneg _
   have hr1 : 1 ≤ r := by linarith
   have hr0 : 0 < r := by linarith
-  have ha : ∀ x ∈ genParams a, ‖x‖ ≤ r := by
+  have ha : ∀ x ∈ parametersOfFin a, ‖x‖ ≤ r := by
     intro x hx
-    obtain ⟨i, rfl⟩ := List.mem_ofFn.mp (by simpa [genParams] using hx)
+    obtain ⟨i, rfl⟩ := List.mem_ofFn.mp (by simpa [parametersOfFin] using hx)
     have := single_le_sum (f := fun i => ‖a i‖) (fun _ _ => norm_nonneg _) (mem_univ i)
     linarith
-  have hb : ∀ x ∈ genParams b, ‖x‖ ≤ r / 2 := by
+  have hb : ∀ x ∈ parametersOfFin b, ‖x‖ ≤ r / 2 := by
     intro x hx
-    obtain ⟨i, rfl⟩ := List.mem_ofFn.mp (by simpa [genParams] using hx)
+    obtain ⟨i, rfl⟩ := List.mem_ofFn.mp (by simpa [parametersOfFin] using hx)
     have := single_le_sum (f := fun i => ‖b i‖) (fun _ _ => norm_nonneg _) (mem_univ i)
     linarith
-  have hreg : GenDenRegular (genShift (genParams b) r) := by
+  have hreg : LowerParametersRegular (shiftParameters (parametersOfFin b) r) := by
     intro x hx n hxn
     obtain ⟨y, hy, rfl⟩ := Multiset.mem_map.mp hx
     have h1 := congrArg Complex.re hxn
@@ -1040,11 +1065,14 @@ theorem genHG_all_large_parameter_asymptotic {p q : ℕ} (a : Fin p → ℂ) (b 
     have h3 := neg_abs_le y.re
     have : (0 : ℝ) ≤ n := Nat.cast_nonneg n
     linarith
-  have hsum := genHG_hasSum_entire (a := genShift (genParams a) r) (b := genShift (genParams b) r)
-    (by simp [genShift, hca, hcb]; omega) hreg z
-  set c := fun n => genCoeff (genShift (genParams a) r) (genShift (genParams b) r) n * z ^ n
+  have hsum := generalizedHypergeometric_hasSum_entire (a := shiftParameters (parametersOfFin a) r)
+      (b := shiftParameters (parametersOfFin b) r)
+    (by simp [shiftParameters, hca, hcb]; omega) hreg z
+  set c := fun n => generalizedHypergeometricCoeff (shiftParameters (parametersOfFin a) r)
+      (shiftParameters (parametersOfFin b) r) n * z ^ n
     with hc
-  have hrem : genHG (genShift (genParams a) r) (genShift (genParams b) r) z -
+  have hrem : generalizedHypergeometric (shiftParameters (parametersOfFin a) r)
+      (shiftParameters (parametersOfFin b) r) z -
       ∑ n ∈ range m, c n = ∑' n, c (n + m) := by
     rw [← hsum.tsum_eq, ← hsum.summable.sum_add_tsum_nat_add m]; ring
   rw [hrem]
@@ -1053,12 +1081,14 @@ theorem genHG_all_large_parameter_asymptotic {p q : ℕ} (a : Fin p → ℂ) (b 
   have ht1 : t ≤ 1 := pow_le_one₀ (by positivity) (by rw [div_le_one hr0]; exact hr1)
   have hbound : ∀ n, ‖c (n + m)‖ ≤ (K * t) ^ m * (K ^ n / n.factorial) := by
     intro n
-    have hco := norm_genCoeff_genShift_le hr0 (genParams a) (genParams b) (by omega) ha hb (n + m)
+    have hco := norm_generalizedHypergeometricCoeff_shiftParameters_le hr0 (parametersOfFin a)
+        (parametersOfFin b) (by omega) ha hb (n + m)
     rw [hca, hcb] at hco
     simp only [hc, norm_mul, norm_pow]
     have hKt : 4 ^ p * (2 / r) ^ (q - p) * ‖z‖ = K * t := by
       rw [hK, ht, div_eq_mul_one_div 2 r, mul_pow]; ring
-    calc ‖genCoeff (genShift (genParams a) r) (genShift (genParams b) r) (n + m)‖ * ‖z‖ ^ (n + m)
+    calc ‖generalizedHypergeometricCoeff (shiftParameters (parametersOfFin a) r)
+           (shiftParameters (parametersOfFin b) r) (n + m)‖ * ‖z‖ ^ (n + m)
         ≤ (4 ^ p * (2 / r) ^ (q - p)) ^ (n + m) / (n + m).factorial * ‖z‖ ^ (n + m) := by gcongr
       _ = (K * t) ^ (n + m) / (n + m).factorial := by rw [← hKt, mul_pow _ ‖z‖]; ring
       _ ≤ (K * t) ^ (n + m) / n.factorial := by

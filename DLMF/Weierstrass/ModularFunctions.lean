@@ -27,8 +27,8 @@ in `DLMF.Weierstrass.Basic.Modular`; `J` is `ModularForm.kleinJ = E₄³/(E₄³
 * `eta_hasProd`, `eta_pow_three_eq_theta`, `eta_hasSum`: DLMF 23.17.8, 23.15.9, 23.17.6.
 * `modularLambda_special`, `kleinJ_special`, `eta_special`: values at `i` and `e^{πi/3}`
   (DLMF 23.17.1–23.17.3).
-* `modularLambda_isBigO`, `kleinJ_isBigO`, `modularLambda_hasProd`: DLMF 23.17.4, 23.17.5,
-  23.17.7.
+* `modularLambda_hasProd`: DLMF 23.17.7; the `q`-expansions 23.17.4–23.17.5 are in
+  `DLMF.Weierstrass.ModularExpansions`.
 * `modularLambda_smul`, `modularLambda_smul_of_even`, `isCuspForm_modularLambda`: DLMF
   23.18.1–23.18.3.
 * `isModularFunction_kleinJ`: DLMF 23.18.4 (the invariance itself is
@@ -47,7 +47,7 @@ carries a branch of `q^{1/4}` which only changes them by a fourth root of unity,
 (fourth powers) and `J` (eighth powers) are unaffected by it.
 
 The transformation 23.15.3 is the Möbius action of `SL(2, ℤ)` on the upper half-plane
-(`A • τ` for `A : SL(2, ℤ)`, `τ : ℍ`); `mobius_coe` is the bridge to the explicit formula.
+(`A • τ` for `A : SL(2, ℤ)`, `τ : ℍ`); `modularMobius_coe` is the bridge to the explicit formula.
 
 The general notions of §23.15(i) are formalized literally: the level `ℓ` is an integer or half
 an odd integer, which we encode by the integer `ℓ₂ = 2ℓ`, with `(cτ + d)^ℓ` the principal
@@ -69,7 +69,7 @@ noncomputable section
 
 namespace DLMF.Weierstrass
 
-open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
+open DLMF.EllipticIntegrals (completeEllipticK completeEllipticKPrime)
 
 open DLMF.Elliptic DLMF.Theta DLMF.JacobiElliptic
 open ModularForm (kleinJ)
@@ -80,17 +80,17 @@ open ModularForm (kleinJ)
 `τ = iK'(k)/K(k)` (stated for every complex `k`, with the project's principal `K`, `K'`). -/
 @[dlmf 23.15.E1]
 theorem nome_eq_modulus (k : ℂ) :
-    jacobiNomek k = cexp (-(π * compEllIntKpk k / compEllIntKk k)) ∧
-      jacobiNomek k = cexp (π * I * jacobiTauk k) :=
-  ⟨rfl, jacobiNomek_eq_exp_tau k⟩
+    jacobiNome k = cexp (-(π * completeEllipticKPrime k / completeEllipticK k)) ∧
+      jacobiNome k = cexp (π * I * jacobiTau k) :=
+  ⟨rfl, jacobiNome_eq_exp_tau k⟩
 
 /-- DLMF 23.15.2: for `k` in the modulus domain of DLMF 22.2 (`ℜk > 0`, and `k < 1` if `k` is
 real) and `τ = iK'(k)/K(k)`, `k = θ₂²(0|τ)/θ₃²(0|τ)` and `k' = θ₄²(0|τ)/θ₃²(0|τ)`. -/
 @[dlmf 23.15.E2]
 theorem modulus_eq_theta {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
-    k = jacobiThetaTwoTau 0 (jacobiTauk k) ^ 2 / jacobiThetaThreeTau 0 (jacobiTauk k) ^ 2 ∧
-      jacobiComodulusk k =
-        jacobiThetaFourTau 0 (jacobiTauk k) ^ 2 / jacobiThetaThreeTau 0 (jacobiTauk k) ^ 2 := by
+    k = jacobiThetaTwoTau 0 (jacobiTau k) ^ 2 / jacobiThetaThreeTau 0 (jacobiTau k) ^ 2 ∧
+      jacobiComodulus k =
+        jacobiThetaFourTau 0 (jacobiTau k) ^ 2 / jacobiThetaThreeTau 0 (jacobiTau k) ^ 2 := by
   obtain ⟨h1, h2, -⟩ := jacobi_inversion_k hk
   exact ⟨h1.symm, h2.symm⟩
 
@@ -322,7 +322,7 @@ def upperHalfPlaneI : ℍ := ⟨I, by simp⟩
 noncomputable def upperHalfPlaneRho : ℍ := ⟨cexp (π * I / 3), by
   rw [HalfPeriods.exp_pi_I_div_three_eq]; simp⟩
 
-/-- DLMF 23.15.9: for `ℑτ > 0`, `η(τ)³ = θ₁'(0|τ)/2` (the cube root of DLMF being the branch
+/-- DLMF 23.15.9: for `ℑτ > 0`, `η(τ)³ = θ₁'(0|τ)/2` (the unitCube root of DLMF being the branch
 fixed by the second equality) and `η(τ) = e^{iπτ/12} θ₃(π(1 + τ)/2 | 3τ)`; `η` is Mathlib's
 Dedekind eta function `ModularForm.eta`. -/
 @[dlmf 23.15.E9]
@@ -462,236 +462,6 @@ theorem kleinJ_special : kleinJ upperHalfPlaneI = 1 ∧ kleinJ upperHalfPlaneRho
       this, l2, show 1 - cexp (π * I / 3) + cexp (π * I / 3) ^ 2 = 0 by
       linear_combination hρ2]
     simp
-
-/-- Tail bound for a lacunary `q`-series `∑ₙ q^{e(n)}`: dropping the finitely many terms with
-`e(n) < N` leaves `O(‖q‖^N)` for `‖q‖ ≤ 1/2`. -/
-private lemma norm_tsum_pow_sub_sum_le {e : ℤ → ℕ} {N : ℕ} (F : Finset ℤ)
-    (hF : ∀ n ∉ F, N ≤ e n) (hs : Summable fun n => (1 / 2 : ℝ) ^ e n) {q : ℂ}
-    (hq : ‖q‖ ≤ 1 / 2) :
-    ‖∑' n, q ^ e n - ∑ n ∈ F, q ^ e n‖ ≤ 2 ^ N * (∑' n, (1 / 2 : ℝ) ^ e n) * ‖q‖ ^ N := by
-  have hle : ∀ n, ‖q ^ e n‖ ≤ (1 / 2 : ℝ) ^ e n := fun n => by
-    rw [norm_pow]; exact pow_le_pow_left₀ (norm_nonneg _) hq _
-  have hsum : Summable fun n => q ^ e n := Summable.of_norm_bounded hs hle
-  have hpt : ∀ n ∉ F, ‖q ^ e n‖ ≤ ‖q‖ ^ N * (2 ^ N * (1 / 2 : ℝ) ^ e n) := by
-    intro n hn
-    have h1 := hF n hn
-    rw [norm_pow, ← Nat.add_sub_cancel' h1, pow_add, pow_add]
-    have h2 : ‖q‖ ^ (e n - N) ≤ (1 / 2 : ℝ) ^ (e n - N) :=
-      pow_le_pow_left₀ (norm_nonneg _) hq _
-    have h3 : (2 : ℝ) ^ N * ((1 / 2 : ℝ) ^ N * (1 / 2 : ℝ) ^ (e n - N)) =
-        (1 / 2 : ℝ) ^ (e n - N) := by
-      rw [← mul_assoc, ← mul_pow]; norm_num
-    rw [h3]
-    exact mul_le_mul_of_nonneg_left h2 (pow_nonneg (norm_nonneg _) _)
-  rw [← hsum.sum_add_tsum_compl (s := F), add_sub_cancel_left]
-  have hsc : Summable fun n : ((F : Set ℤ)ᶜ : Set ℤ) => (1 / 2 : ℝ) ^ e n :=
-    hs.subtype _
-  have hb : Summable fun n : ((F : Set ℤ)ᶜ : Set ℤ) =>
-      ‖q‖ ^ N * (2 ^ N * (1 / 2 : ℝ) ^ e n) := (hsc.mul_left _).mul_left _
-  calc ‖∑' n : ((F : Set ℤ)ᶜ : Set ℤ), q ^ e n‖
-      ≤ ∑' n : ((F : Set ℤ)ᶜ : Set ℤ), ‖q‖ ^ N * (2 ^ N * (1 / 2 : ℝ) ^ e n) :=
-        tsum_of_norm_bounded hb.hasSum fun n => hpt n n.2
-    _ = ‖q‖ ^ N * (2 ^ N * ∑' n : ((F : Set ℤ)ᶜ : Set ℤ), (1 / 2 : ℝ) ^ e n) := by
-        rw [tsum_mul_left, tsum_mul_left]
-    _ ≤ ‖q‖ ^ N * (2 ^ N * ∑' n, (1 / 2 : ℝ) ^ e n) := by
-        gcongr
-        exact hs.tsum_subtype_le _ _ (fun n => by positivity)
-    _ = _ := by ring
-
-open Filter Topology in
-/-- The nome `q = e^{iπτ}` tends to `0` at `i∞`. -/
-private lemma tendsto_nome_atImInfty :
-    Tendsto (fun τ : ℍ => cexp (π * I * τ)) atImInfty (𝓝 0) := by
-  refine (qParam_tendsto_atImInfty (h := 2) (by norm_num)).congr fun τ => ?_
-  simp only [Function.Periodic.qParam]
-  congr 1; push_cast; ring
-
-/-- `θ₃(0|τ) = ∑ₙ q^{n²}`. -/
-private lemma jacobiTheta₂_zero_eq_tsum (τ : ℂ) :
-    jacobiTheta₂ 0 τ = ∑' n : ℤ, cexp (π * I * τ) ^ (n.natAbs ^ 2) := by
-  simp only [jacobiTheta₂, jacobiTheta₂_term]
-  congr 1; funext n
-  rw [← Complex.exp_nat_mul]
-  congr 1
-  have : ((n.natAbs ^ 2 : ℕ) : ℂ) = (n : ℂ) ^ 2 := by
-    have h : ((n.natAbs : ℤ) : ℂ) ^ 2 = (n : ℂ) ^ 2 := by exact_mod_cast Int.natAbs_sq n
-    rw [Nat.cast_pow, ← h, Int.cast_natCast]
-  rw [this]; ring
-
-private lemma int_mul_add_nonneg (n : ℤ) : 0 ≤ n * n + n := by
-  rcases le_or_gt 0 n with h | h <;> nlinarith
-
-/-- `e^{-iπτ/4}θ₂(0|τ) = ∑ₙ q^{n(n+1)}`. -/
-private lemma jacobiTheta₂_half_eq_tsum (τ : ℂ) :
-    jacobiTheta₂ (τ / 2) τ = ∑' n : ℤ, cexp (π * I * τ) ^ (n * n + n).toNat := by
-  simp only [jacobiTheta₂, jacobiTheta₂_term]
-  congr 1; funext n
-  rw [← Complex.exp_nat_mul]
-  congr 1
-  have : (((n * n + n).toNat : ℕ) : ℂ) = (n : ℂ) ^ 2 + n := by
-    have h := Int.toNat_of_nonneg (int_mul_add_nonneg n)
-    have h' : (((n * n + n).toNat : ℤ) : ℂ) = ((n * n + n : ℤ) : ℂ) := by rw [h]
-    push_cast at h'; rw [h']; ring
-  rw [this]; ring
-
-private lemma summable_half_pow_natAbs :
-    Summable fun n : ℤ => (1 / 2 : ℝ) ^ n.natAbs := by
-  have hg : Summable fun n : ℕ => (1 / 2 : ℝ) ^ n :=
-    summable_geometric_of_lt_one (by norm_num) (by norm_num)
-  exact Summable.of_nat_of_neg (by simpa using hg) (by simpa using hg)
-
-private lemma summable_half_pow_natAbs_sq :
-    Summable fun n : ℤ => (1 / 2 : ℝ) ^ (n.natAbs ^ 2) :=
-  Summable.of_nonneg_of_le (fun n => by positivity)
-    (fun n => pow_le_pow_of_le_one (by norm_num) (by norm_num) (Nat.le_self_pow two_ne_zero _))
-    summable_half_pow_natAbs
-
-private lemma summable_half_pow_toNat :
-    Summable fun n : ℤ => (1 / 2 : ℝ) ^ (n * n + n).toNat := by
-  refine Summable.of_nonneg_of_le (fun n => by positivity) (fun n => ?_)
-    (summable_half_pow_natAbs.mul_left 2)
-  have h : n.natAbs ≤ (n * n + n).toNat + 1 := by
-    rcases le_or_gt 0 n with h | h
-    · have : n ≤ n * n + n := by nlinarith
-      omega
-    · have : -n - 1 ≤ n * n + n := by nlinarith
-      omega
-  have := pow_le_pow_of_le_one (by norm_num : (0 : ℝ) ≤ 1 / 2) (by norm_num) h
-  rw [pow_succ] at this
-  linarith
-
-open Filter in
-private lemma eventually_norm_exp_pi_I_mul_le :
-    ∀ᶠ τ : ℍ in atImInfty, ‖cexp (π * I * τ)‖ ≤ 1 / 2 := by
-  have := tendsto_nome_atImInfty.norm
-  rw [norm_zero] at this
-  exact this.eventually (ge_mem_nhds (by norm_num))
-
-/-- `θ₃(0|τ) = 1 + 2q + O(q⁴)`. -/
-private lemma jacobiTheta₂_zero_isBigO :
-    (fun τ : ℍ => jacobiTheta₂ 0 τ - (1 + 2 * cexp (π * I * τ))) =O[atImInfty]
-      fun τ => cexp (π * I * τ) ^ 4 := by
-  refine IsBigO.of_bound (2 ^ 4 * ∑' n : ℤ, (1 / 2 : ℝ) ^ (n.natAbs ^ 2)) ?_
-  filter_upwards [eventually_norm_exp_pi_I_mul_le] with τ hτ
-  have h := norm_tsum_pow_sub_sum_le (e := fun n : ℤ => n.natAbs ^ 2) (N := 4) {-1, 0, 1}
-    (fun n hn => by
-      simp only [Finset.mem_insert, Finset.mem_singleton, not_or] at hn
-      have : 2 ≤ n.natAbs := by omega
-      exact (Nat.pow_le_pow_left this 2).trans' (by norm_num))
-    summable_half_pow_natAbs_sq hτ
-  have hF : ∑ n ∈ ({-1, 0, 1} : Finset ℤ), cexp (π * I * τ) ^ (n.natAbs ^ 2) =
-      1 + 2 * cexp (π * I * τ) := by
-    simp; ring
-  rw [jacobiTheta₂_zero_eq_tsum, ← hF, norm_pow]
-  exact h
-
-/-- `e^{-iπτ/4}θ₂(0|τ) = 2 + 2q² + O(q⁶)`. -/
-private lemma jacobiTheta₂_half_isBigO :
-    (fun τ : ℍ => jacobiTheta₂ ((τ : ℂ) / 2) τ - (2 + 2 * cexp (π * I * τ) ^ 2)) =O[atImInfty]
-      fun τ => cexp (π * I * τ) ^ 6 := by
-  refine IsBigO.of_bound (2 ^ 6 * ∑' n : ℤ, (1 / 2 : ℝ) ^ (n * n + n).toNat) ?_
-  filter_upwards [eventually_norm_exp_pi_I_mul_le] with τ hτ
-  have h := norm_tsum_pow_sub_sum_le (e := fun n : ℤ => (n * n + n).toNat) (N := 6)
-    {-2, -1, 0, 1}
-    (fun n hn => by
-      simp only [Finset.mem_insert, Finset.mem_singleton, not_or] at hn
-      have : 6 ≤ n * n + n := by
-        rcases le_or_gt 2 n with h | h
-        · nlinarith
-        · have : n ≤ -3 := by omega
-          nlinarith
-      omega)
-    summable_half_pow_toNat hτ
-  have hF : ∑ n ∈ ({-2, -1, 0, 1} : Finset ℤ), cexp (π * I * τ) ^ (n * n + n).toNat =
-      2 + 2 * cexp (π * I * τ) ^ 2 := by
-    simp; ring
-  rw [jacobiTheta₂_half_eq_tsum, ← hF, norm_pow]
-  exact h
-
-/-- `λ(τ) = q B⁴/T⁴` with `B = e^{-iπτ/4}θ₂(0|τ)` and `T = θ₃(0|τ)`. -/
-private lemma modularLambda_eq_nome_mul (τ : ℂ) :
-    modularLambda τ = cexp (π * I * τ) * jacobiTheta₂ (τ / 2) τ ^ 4 / jacobiTheta₂ 0 τ ^ 4 := by
-  simp only [modularLambda, jacobiThetaTwoNullTau, jacobiThetaThreeNullTau, jacobiThetaTwoTau,
-    jacobiThetaThreeTau, mul_zero, add_zero, zero_div, zero_add]
-  have h1 : cexp (π * I * τ / 4) ^ 4 = cexp (π * I * τ) := by
-    rw [← Complex.exp_nat_mul]; congr 1; push_cast; ring
-  have h2 : (π : ℂ) * τ / 2 / π = τ / 2 := by
-    have : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
-    field_simp
-  rw [mul_pow, h1, h2]
-
-/-- DLMF 23.17.4: `λ(τ) = 16q(1 - 8q + 44q² + O(q³))` as `q = e^{iπτ} → 0`. -/
-@[dlmf 23.17.E4]
-theorem modularLambda_isBigO :
-    (fun τ : ℍ ↦ modularLambda τ - 16 * cexp (π * I * τ) *
-        (1 - 8 * cexp (π * I * τ) + 44 * cexp (π * I * τ) ^ 2)) =O[atImInfty]
-      fun τ ↦ cexp (π * I * τ) ^ 4 := by
-  open Filter Topology in
-  set q : ℍ → ℂ := fun τ => cexp (π * I * τ) with hq
-  set B : ℍ → ℂ := fun τ => jacobiTheta₂ ((τ : ℂ) / 2) τ
-  set T : ℍ → ℂ := fun τ => jacobiTheta₂ 0 τ
-  set a : ℍ → ℂ := fun τ => B τ - (2 + 2 * q τ ^ 2)
-  set b : ℍ → ℂ := fun τ => T τ - (1 + 2 * q τ)
-  have hq0 : Tendsto q atImInfty (𝓝 0) := tendsto_nome_atImInfty
-  have ha : a =O[atImInfty] fun τ => q τ ^ 6 := jacobiTheta₂_half_isBigO
-  have hb : b =O[atImInfty] fun τ => q τ ^ 4 := jacobiTheta₂_zero_isBigO
-  have hq6 : (fun τ => q τ ^ 6) =O[atImInfty] fun τ => q τ ^ 4 := by
-    have : (fun τ => q τ ^ 6) = fun τ => q τ ^ 4 * q τ ^ 2 := funext fun τ => by ring
-    rw [this]
-    simpa using (isBigO_refl (fun τ => q τ ^ 4) atImInfty).mul
-      ((hq0.pow 2).isBigO_one ℂ)
-  have ha0 : Tendsto a atImInfty (𝓝 0) :=
-    ha.trans_tendsto (by simpa using hq0.pow 6)
-  have hb0 : Tendsto b atImInfty (𝓝 0) :=
-    hb.trans_tendsto (by simpa using hq0.pow 4)
-  have hB : Tendsto B atImInfty (𝓝 2) := by
-    have : B = fun τ => a τ + (2 + 2 * q τ ^ 2) := funext fun τ => by simp [a]
-    rw [this]; simpa using ha0.add ((hq0.pow 2).const_mul 2 |>.const_add 2)
-  have hT : Tendsto T atImInfty (𝓝 1) := by
-    have : T = fun τ => b τ + (1 + 2 * q τ) := funext fun τ => by simp [b]
-    rw [this]; simpa using hb0.add ((hq0.const_mul 2).const_add 1)
-  have hT4 : Tendsto (fun τ => T τ ^ 4) atImInfty (𝓝 1) := by simpa using hT.pow 4
-  have hTne : ∀ᶠ τ in atImInfty, T τ ≠ 0 :=
-    hT.eventually (isOpen_ne.mem_nhds one_ne_zero)
-  set r : ℂ → ℂ := fun x => 16 * (-192 - 810 * x - 1280 * x ^ 2 - 700 * x ^ 3 + x ^ 5)
-  set c : ℍ → ℂ := fun τ => 2 + 2 * q τ ^ 2
-  set d : ℍ → ℂ := fun τ => 1 + 2 * q τ
-  set P : ℍ → ℂ := fun τ => 1 - 8 * q τ + 44 * q τ ^ 2
-  have key : ∀ᶠ τ : ℍ in atImInfty, modularLambda (τ : ℂ) - 16 * q τ * P τ =
-      q τ ^ 4 * (r (q τ) / T τ ^ 4) +
-      a τ * (q τ * (B τ ^ 3 + B τ ^ 2 * c τ + B τ * c τ ^ 2 + c τ ^ 3) / T τ ^ 4) +
-      b τ * (q τ * (-16 * P τ * (T τ ^ 3 + T τ ^ 2 * d τ + T τ * d τ ^ 2 + d τ ^ 3)) /
-        T τ ^ 4) := by
-    filter_upwards [hTne] with τ hτ
-    rw [modularLambda_eq_nome_mul]
-    simp only [a, b, c, d, P, r, B, T, q] at hτ ⊢
-    field_simp
-    ring
-  have hV : Tendsto (fun τ => (q τ, B τ, T τ)) atImInfty (𝓝 ((0 : ℂ), (2 : ℂ), (1 : ℂ))) :=
-    hq0.prodMk_nhds (hB.prodMk_nhds hT)
-  have bdd : ∀ Φ : ℂ × ℂ × ℂ → ℂ, ContinuousAt Φ ((0 : ℂ), (2 : ℂ), (1 : ℂ)) →
-      (fun τ => Φ (q τ, B τ, T τ)) =O[atImInfty] (fun _ => (1 : ℂ)) :=
-    fun Φ hΦ => (hΦ.tendsto.comp hV).isBigO_one ℂ
-  have h1 := (isBigO_refl (fun τ => q τ ^ 4) atImInfty).mul
-    (bdd (fun p => r p.1 / p.2.2 ^ 4) (by fun_prop (disch := norm_num)))
-  have h2 := (ha.trans hq6).mul (bdd (fun p => p.1 * (p.2.1 ^ 3 + p.2.1 ^ 2 * (2 + 2 * p.1 ^ 2) +
-      p.2.1 * (2 + 2 * p.1 ^ 2) ^ 2 + (2 + 2 * p.1 ^ 2) ^ 3) / p.2.2 ^ 4)
-    (by fun_prop (disch := norm_num)))
-  have h3 := hb.mul (bdd (fun p => p.1 * (-16 * (1 - 8 * p.1 + 44 * p.1 ^ 2) *
-      (p.2.2 ^ 3 + p.2.2 ^ 2 * (1 + 2 * p.1) + p.2.2 * (1 + 2 * p.1) ^ 2 + (1 + 2 * p.1) ^ 3)) /
-      p.2.2 ^ 4) (by fun_prop (disch := norm_num)))
-  simp only [mul_one] at h1 h2 h3
-  exact ((h1.add h2).add h3).congr' (key.mono fun τ h => h.symm) EventuallyEq.rfl
-
-
-/-- DLMF 23.17.5: `1728J(τ) = q⁻² + 744 + 196884q² + 21493760q⁴ + O(q⁶)` as
-`q = e^{iπτ} → 0`. -/
-@[dlmf 23.17.E5]
-theorem kleinJ_isBigO :
-    (fun τ : ℍ ↦ 1728 * kleinJ τ - (cexp (π * I * τ) ^ (-2 : ℤ) + 744 +
-        196884 * cexp (π * I * τ) ^ 2 + 21493760 * cexp (π * I * τ) ^ 4)) =O[atImInfty]
-      fun τ ↦ cexp (π * I * τ) ^ 6 := by
-  sorry
 
 /-- DLMF 23.17.6: `η(τ) = ∑_{n∈ℤ} (-1)ⁿ q^{(6n+1)²/12}` with `q^{(6n+1)²/12} = e^{iπτ(6n+1)²/12}`,
 for `ℑτ > 0` (Euler's pentagonal number theorem). -/
@@ -1063,14 +833,14 @@ theorem isModularFunction_eta : IsModularFunction ⊤ 1 ModularForm.eta := by
   have hgcont : Continuous g := by
     refine Continuous.div ?_ (hscont.mul continuous_eta_upperHalfPlane) fun τ =>
         mul_ne_zero (hs0 τ) (hη0 τ)
-    have he : (fun τ : ℍ => η ((A • τ : ℍ) : ℂ)) = fun τ : ℍ => η (mobius A τ) :=
-      funext fun τ => by rw [mobius_coe]
+    have he : (fun τ : ℍ => η ((A • τ : ℍ) : ℂ)) = fun τ : ℍ => η (modularMobius A τ) :=
+      funext fun τ => by rw [modularMobius_coe]
     rw [he]
     refine continuous_iff_continuousAt.mpr fun τ => ?_
-    have hpos : 0 < (mobius A τ).im := by rw [← mobius_coe]; exact (A • τ).im_pos
+    have hpos : 0 < (modularMobius A τ).im := by rw [← modularMobius_coe]; exact (A • τ).im_pos
     refine (ModularForm.differentiableAt_eta_of_mem_upperHalfPlaneSet hpos).continuousAt.comp
-      (f := fun τ : ℍ => mobius A τ) ?_
-    simp only [mobius]
+      (f := fun τ : ℍ => modularMobius A τ) ?_
+    simp only [modularMobius]
     exact (((continuous_const.mul UpperHalfPlane.continuous_coe).add continuous_const).div
       ((continuous_const.mul UpperHalfPlane.continuous_coe).add continuous_const) hden).continuousAt
   have hT : IsDiscrete {w : ℂ | w ^ 24 = 1} := by

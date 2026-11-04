@@ -16,8 +16,8 @@ public import Mathlib.Algebra.Polynomial.FieldDivision
 
 * `fuchsian_exponents_finite`, `fuchsian_exponents_infinity`, `fuchsian_indicial_infinity`:
   the exponents `{0, 1-γ_j}` at `a_j` and `{α, β}` at `∞` of the general Fuchsian equation
-  31.14.1 (`IsFuchsianSolOn`), with 31.14.2.
-* `isHeunSolOn_iff_isFuchsianSolOn`: Heun's equation is the case `N = 3`.
+  31.14.1 (`IsFuchsianSolutionOn`), with 31.14.2.
+* `isHeunSolutionOn_iff_isFuchsianSolutionOn`: Heun's equation is the case `N = 3`.
 * `fuchsian_normalForm`, `fuchsianNormalQ_sum`, `fuchsianNormalQ_sum_eq_zero`: the normal form
   31.14.3–31.14.5 and `∑ q̃_j = 0`.
 * `vanVleck_card_le`: the bound on the number of Van Vleck polynomials (§31.15(i)).
@@ -167,11 +167,11 @@ theorem fuchsian_indicial_infinity {N : ℕ} (a γ q : Fin N → ℂ) {α β : �
 `q_1 = -q/a`, `q_2 = (αβ - q)/(1 - a)`, `q_3 = (αβa - q)/(a(a - 1))`; these satisfy
 `∑ q_j = 0` and `∑ a_j q_j = αβ` (31.14.2). Off the singular points the two equations coincide. -/
 @[dlmf 31.14.E1, dlmf 31.14.E2]
-theorem isHeunSolOn_iff_isFuchsianSolOn {a q α β γ δ ε : ℂ} (ha0 : a ≠ 0) (ha1 : a ≠ 1)
+theorem isHeunSolutionOn_iff_isFuchsianSolutionOn {a q α β γ δ ε : ℂ} (ha0 : a ≠ 0) (ha1 : a ≠ 1)
     {w : ℂ → ℂ} {s : Set ℂ} (hs : ∀ z ∈ s, z ≠ 0 ∧ z ≠ 1 ∧ z ≠ a) :
     let qs : Fin 3 → ℂ := ![-q / a, (α * β - q) / (1 - a), (α * β * a - q) / (a * (a - 1))]
     (∑ j, qs j = 0 ∧ ∑ j, (![0, 1, a] : Fin 3 → ℂ) j * qs j = α * β) ∧
-    (IsHeunSolOn a q α β γ δ ε w s ↔ IsFuchsianSolOn ![0, 1, a] ![γ, δ, ε] qs w s) := by
+    (IsHeunSolutionOn a q α β γ δ ε w s ↔ IsFuchsianSolutionOn ![0, 1, a] ![γ, δ, ε] qs w s) := by
   intro qs
   have ha1' : (1 : ℂ) - a ≠ 0 := sub_ne_zero.mpr (Ne.symm ha1)
   have ha1'' : a - 1 ≠ 0 := sub_ne_zero.mpr ha1
@@ -188,7 +188,8 @@ theorem isHeunSolOn_iff_isFuchsianSolOn {a q α β γ δ ε : ℂ} (ha0 : a ≠ 
       Matrix.head_cons, Matrix.tail_cons, sub_zero]
     field_simp
     ring
-  refine ⟨⟨?_, ?_⟩, ⟨fun h => ⟨h.1, fun z hz => ?_⟩, fun h => ⟨h.1, fun z hz => ?_⟩⟩⟩
+  refine ⟨⟨?_, ?_⟩, ⟨fun h => IsLinearODE2On.mk (h.differentiableAt) (fun z hz => ?_), fun h =>
+      IsLinearODE2On.mk (h.differentiableAt) (fun z hz => ?_)⟩⟩
   · simp only [Fin.sum_univ_three, qs, Matrix.cons_val_zero, Matrix.cons_val_one,
       Matrix.cons_val_two, Matrix.head_cons, Matrix.tail_cons]
     field_simp
@@ -197,8 +198,8 @@ theorem isHeunSolOn_iff_isFuchsianSolOn {a q α β γ δ ε : ℂ} (ha0 : a ≠ 
       Matrix.cons_val_two, Matrix.head_cons, Matrix.tail_cons]
     field_simp
     ring
-  · rw [hP, hR z hz]; exact h.2 z hz
-  · rw [← hP, ← hR z hz]; exact h.2 z hz
+  · rw [hP, hR z hz]; exact h.hasDerivAt_deriv z hz
+  · rw [← hP, ← hR z hz]; exact h.hasDerivAt_deriv z hz
 
 /-- DLMF 31.14.4–31.14.5: `∑_j q̃_j = -∑_j q_j`; in particular `∑_j q̃_j = 0` when
 `∑_j q_j = 0` (31.14.4). No distinctness of the `a_j` is needed. -/
@@ -306,7 +307,7 @@ distinct (`Function.Injective a`, implicit in DLMF; added 2026-10-26 after the c
 theorem fuchsian_normalForm {N : ℕ} {a γ q : Fin N → ℂ} {w : ℂ → ℂ} {U : Set ℂ}
     (ha : Function.Injective a)
     (hU : IsOpen U) (hUa : ∀ z ∈ U, ∀ j, z - a j ∈ slitPlane)
-    (hw : IsFuchsianSolOn a γ q w U) :
+    (hw : IsFuchsianSolutionOn a γ q w U) :
     IsLinearODE2On 0 (fun z => -fuchsianNormalCoeff a γ q z)
       (fun z => (∏ j, (z - a j) ^ (γ j / 2)) * w z) U := by
   classical
@@ -338,13 +339,13 @@ for `a = (0, 0)`, `γ = (2, 2)`, `q = 0`, `w = 1` on `slitPlane`, `W = z²` but 
 `1/(a_j - a_k) = 0` makes the right-hand side `0`. -/
 private lemma not_fuchsian_normalForm_of_not_injective :
     ¬ ∀ (N : ℕ) (a γ q : Fin N → ℂ) (w : ℂ → ℂ) (U : Set ℂ), IsOpen U →
-      (∀ z ∈ U, ∀ j, z - a j ∈ slitPlane) → IsFuchsianSolOn a γ q w U →
+      (∀ z ∈ U, ∀ j, z - a j ∈ slitPlane) → IsFuchsianSolutionOn a γ q w U →
       IsLinearODE2On 0 (fun z => -fuchsianNormalCoeff a γ q z)
         (fun z => (∏ j, (z - a j) ^ (γ j / 2)) * w z) U := by
   intro h
-  have hw : IsFuchsianSolOn (0 : Fin 2 → ℂ) (fun _ => 2) 0 (fun _ => 1) slitPlane :=
-    ⟨fun z _ => differentiableAt_const _, fun z _ => by
-      simpa [fuchsianCoeffR] using hasDerivAt_const z (0 : ℂ)⟩
+  have hw : IsFuchsianSolutionOn (0 : Fin 2 → ℂ) (fun _ => 2) 0 (fun _ => 1) slitPlane :=
+    IsLinearODE2On.mk (fun z _ => differentiableAt_const _) (fun z _ => by
+      simpa [fuchsianCoeffR] using hasDerivAt_const z (0 : ℂ))
   have := (h 2 0 (fun _ => 2) 0 (fun _ => 1) slitPlane isOpen_slitPlane
     (fun z hz _ => by simpa using hz) hw).hasDerivAt_deriv 1 one_mem_slitPlane
   have hW : (fun z : ℂ => (∏ j : Fin 2, (z - (0 : Fin 2 → ℂ) j) ^ ((2 : ℂ) / 2)) * 1) =

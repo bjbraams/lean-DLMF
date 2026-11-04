@@ -204,9 +204,9 @@ variable {k : ℝ}
 
 /-- `dφ/dx = -dn(x, k)` (moved here from `DLMF.Lame.FourierSeries`). -/
 theorem hasDerivAt_lamePhi (hk : k ^ 2 < 1) (x : ℝ) :
-    HasDerivAt (fun x => Real.lamePhi x k) (-Real.jacobiDnm x (k ^ 2)) x := by
-  have := (Real.hasDerivAt_jacobiAmm hk x).const_sub (π / 2)
-  simpa [Real.lamePhi, Real.jacobiDnm, Real.jacobiSnm] using this
+    HasDerivAt (fun x => Real.lamePhi x k) (-Real.jacobiDnOfParameter x (k ^ 2)) x := by
+  have := (Real.hasDerivAt_jacobiAmOfParameter hk x).const_sub (π / 2)
+  simpa [Real.lamePhi, Real.jacobiDnOfParameter, Real.jacobiSnOfParameter] using this
 
 /-- The weight `ρ(φ) = 1` (`weighted`) or `dn = (1 - k² cos²φ)^{1/2}` in the variable `φ`. -/
 def fourierWeight (k : ℝ) (weighted : Bool) (φ : ℝ) : ℝ :=
@@ -215,7 +215,7 @@ def fourierWeight (k : ℝ) (weighted : Bool) (φ : ℝ) : ℝ :=
 /-- A real function `w(x)` divided by the weight, as a function of `φ`:
 `F(φ) = w(F(π/2 - φ | k²)) / ρ(φ)`, so that `F(φ(x)) = w(x)/ρ`. -/
 def phiTransform (w : ℝ → ℝ) (k : ℝ) (weighted : Bool) (φ : ℝ) : ℝ :=
-  w (Real.incEllIntFm (π / 2 - φ) (k ^ 2)) / fourierWeight k weighted φ
+  w (Real.incompleteEllipticFOfParameter (π / 2 - φ) (k ^ 2)) / fourierWeight k weighted φ
 
 /-- For `k² < 1`, `1 - k² cos²φ > 0`. -/
 theorem one_sub_sq_mul_cos_sq_pos (hk : k ^ 2 < 1) (φ : ℝ) : 0 < 1 - k ^ 2 * Real.cos φ ^ 2 := by
@@ -239,16 +239,17 @@ private lemma contDiff_two_fourierWeight (hk : k ^ 2 < 1) (weighted : Bool) : Co
   · simpa using contDiff_const
 
 /-- For `k² < 1`, the incomplete elliptic integral `ψ ↦ F(ψ, k)` is `C²`. -/
-private lemma contDiff_two_incEllIntFm (hk : k ^ 2 < 1) :
-    ContDiff ℝ 2 (fun ψ => Real.incEllIntFm ψ (k ^ 2)) := by
-  have hd : deriv (fun ψ => Real.incEllIntFm ψ (k ^ 2)) =
+private lemma contDiff_two_incompleteEllipticFOfParameter (hk : k ^ 2 < 1) :
+    ContDiff ℝ 2 (fun ψ => Real.incompleteEllipticFOfParameter ψ (k ^ 2)) := by
+  have hd : deriv (fun ψ => Real.incompleteEllipticFOfParameter ψ (k ^ 2)) =
       fun ψ => (1 - k ^ 2 * Real.sin ψ ^ 2) ^ (-(1 / 2) : ℝ) :=
-    funext fun ψ => (Real.hasDerivAt_incEllIntFm hk ψ).deriv
+    funext fun ψ => (Real.hasDerivAt_incompleteEllipticFOfParameter hk ψ).deriv
   have hpos : ∀ ψ, 0 < 1 - k ^ 2 * Real.sin ψ ^ 2 := fun ψ => by
     have := Real.sin_sq_le_one ψ
     nlinarith [sq_nonneg k, sq_nonneg (Real.sin ψ)]
   rw [show (2 : WithTop ℕ∞) = 1 + 1 from rfl, contDiff_succ_iff_deriv]
-  refine ⟨fun ψ => (Real.hasDerivAt_incEllIntFm hk ψ).differentiableAt, by simp, ?_⟩
+  refine ⟨fun ψ => (Real.hasDerivAt_incompleteEllipticFOfParameter hk
+      ψ).differentiableAt, by simp, ?_⟩
   rw [hd]
   exact (contDiff_const.sub (contDiff_const.mul (Real.contDiff_sin.pow 2))).rpow_const_of_ne
     fun ψ => (hpos ψ).ne'
@@ -258,7 +259,7 @@ theorem contDiff_two_of_isLameSolution {h ν : ℝ} {w : ℝ → ℝ} (hk : k ^ 
     (hw : Real.IsLameSolution h ν k w) :
     ContDiff ℝ 2 w := by
   have hdd : deriv (deriv w) =
-      fun x => -(h - ν * (ν + 1) * k ^ 2 * Real.jacobiSnm x (k ^ 2) ^ 2) * w x :=
+      fun x => -(h - ν * (ν + 1) * k ^ 2 * Real.jacobiSnOfParameter x (k ^ 2) ^ 2) * w x :=
     funext fun x => (hw.hasDerivAt_deriv x).deriv
   rw [show (2 : WithTop ℕ∞) = 1 + 1 from rfl, contDiff_succ_iff_deriv]
   refine ⟨hw.differentiable, by simp, ?_⟩
@@ -266,7 +267,7 @@ theorem contDiff_two_of_isLameSolution {h ν : ℝ} {w : ℝ → ℝ} (hk : k ^ 
   refine ⟨fun x => (hw.hasDerivAt_deriv x).differentiableAt, ?_⟩
   rw [hdd]
   exact ((continuous_const.sub
-    (continuous_const.mul ((Real.continuous_jacobiSnm hk).pow 2))).neg).mul
+    (continuous_const.mul ((Real.continuous_jacobiSnOfParameter hk).pow 2))).neg).mul
     hw.differentiable.continuous
 
 variable {w : ℝ → ℝ} {weighted : Bool}
@@ -274,15 +275,17 @@ variable {w : ℝ → ℝ} {weighted : Bool}
 /-- If `w` is `C²` then so is `φ ↦ w(F(π/2 - φ, k))/ρ(φ)`, for `k² < 1`. -/
 private lemma contDiff_two_phiTransform (hk : k ^ 2 < 1) (hw : ContDiff ℝ 2 w) :
     ContDiff ℝ 2 (phiTransform w k weighted) :=
-  (hw.comp ((contDiff_two_incEllIntFm hk).comp (contDiff_const.sub contDiff_id))).div
+  (hw.comp ((contDiff_two_incompleteEllipticFOfParameter hk).comp
+      (contDiff_const.sub contDiff_id))).div
     (contDiff_two_fourierWeight hk weighted) fun φ => (fourierWeight_pos hk weighted φ).ne'
 
 /-- `F(ψ - 2π, k) = F(ψ, k) - 4K(k)` for `k² < 1`. -/
-private lemma incEllIntFm_sub_two_pi (hk : k ^ 2 < 1) (ψ : ℝ) :
-    Real.incEllIntFm (ψ - 2 * π) (k ^ 2) =
-      Real.incEllIntFm ψ (k ^ 2) - 4 * Real.compEllIntKm (k ^ 2) := by
-  have h1 := Real.incEllIntFm_add_pi hk (ψ - 2 * π)
-  have h2 := Real.incEllIntFm_add_pi hk (ψ - 2 * π + π)
+private lemma incompleteEllipticFOfParameter_sub_two_pi (hk : k ^ 2 < 1) (ψ : ℝ) :
+    Real.incompleteEllipticFOfParameter (ψ - 2 * π) (k ^ 2) =
+      Real.incompleteEllipticFOfParameter ψ (k ^ 2) - 4 *
+          Real.completeEllipticKOfParameter (k ^ 2) := by
+  have h1 := Real.incompleteEllipticFOfParameter_add_pi hk (ψ - 2 * π)
+  have h2 := Real.incompleteEllipticFOfParameter_add_pi hk (ψ - 2 * π + π)
   rw [show ψ - 2 * π + π + π = ψ by ring] at h2
   linarith
 
@@ -303,24 +306,28 @@ private lemma fourierWeight_add_two_pi (φ : ℝ) : fourierWeight k weighted (φ
 
 /-- If `w` has period `4K`, then `φ ↦ w(F(π/2 - φ, k))/ρ(φ)` has period `2π`. -/
 theorem phiTransform_periodic (hk : k ^ 2 < 1)
-    (h4 : ∀ x, w (x + 4 * Real.compEllIntKm (k ^ 2)) = w x) :
+    (h4 : ∀ x, w (x + 4 * Real.completeEllipticKOfParameter (k ^ 2)) = w x) :
     Function.Periodic (phiTransform w k weighted) (2 * π) := fun φ => by
   simp only [phiTransform, fourierWeight_add_two_pi]
-  rw [show π / 2 - (φ + 2 * π) = (π / 2 - φ) - 2 * π by ring, incEllIntFm_sub_two_pi hk]
+  rw [show π / 2 - (φ + 2 * π) = (π / 2 - φ) - 2 * π by ring,
+                                                          incompleteEllipticFOfParameter_sub_two_pi
+                                                          hk]
   congr 1
-  have := h4 (Real.incEllIntFm (π / 2 - φ) (k ^ 2) - 4 * Real.compEllIntKm (k ^ 2))
+  have := h4 (Real.incompleteEllipticFOfParameter (π / 2 - φ) (k ^ 2) - 4 *
+      Real.completeEllipticKOfParameter (k ^ 2))
   rw [sub_add_cancel] at this
   exact this.symm
 
 /-- If `w(2K - x) = σ w(x)`, then `F(-φ) = σ F(φ)` for `F(φ) = w(F(π/2 - φ, k))/ρ(φ)`. -/
 theorem phiTransform_neg (hk : k ^ 2 < 1) {σ : ℝ}
-    (hσ : ∀ x, w (2 * Real.compEllIntKm (k ^ 2) - x) = σ * w x) (φ : ℝ) :
+    (hσ : ∀ x, w (2 * Real.completeEllipticKOfParameter (k ^ 2) - x) = σ * w x) (φ : ℝ) :
     phiTransform w k weighted (-φ) = σ * phiTransform w k weighted φ := by
   simp only [phiTransform, fourierWeight_neg]
-  have : Real.incEllIntFm (π / 2 - -φ) (k ^ 2) =
-      2 * Real.compEllIntKm (k ^ 2) - Real.incEllIntFm (π / 2 - φ) (k ^ 2) := by
-    rw [show π / 2 - -φ = -(π / 2 - φ) + π by ring, Real.incEllIntFm_add_pi hk,
-      Real.incEllIntFm_neg]
+  have : Real.incompleteEllipticFOfParameter (π / 2 - -φ) (k ^ 2) =
+      2 * Real.completeEllipticKOfParameter (k ^ 2) -
+          Real.incompleteEllipticFOfParameter (π / 2 - φ) (k ^ 2) := by
+    rw [show π / 2 - -φ = -(π / 2 - φ) + π by ring, Real.incompleteEllipticFOfParameter_add_pi hk,
+      Real.incompleteEllipticFOfParameter_neg]
     ring
   rw [this, hσ, mul_div_assoc]
 
@@ -328,57 +335,59 @@ theorem phiTransform_neg (hk : k ^ 2 < 1) {σ : ℝ}
 private lemma phiTransform_pi_sub {δ : ℝ} (hδ : ∀ x, w (-x) = δ * w x) (φ : ℝ) :
     phiTransform w k weighted (π - φ) = δ * phiTransform w k weighted φ := by
   simp only [phiTransform, fourierWeight_pi_sub]
-  rw [show π / 2 - (π - φ) = -(π / 2 - φ) by ring, Real.incEllIntFm_neg, hδ, mul_div_assoc]
+  rw [show π / 2 - (π - φ) = -(π / 2 - φ) by ring, Real.incompleteEllipticFOfParameter_neg,
+                                               hδ, mul_div_assoc]
 
 /-- `cos φ(x) = sn(x, k)` for `φ(x) = π/2 - am(x, k)`. -/
-theorem cos_lamePhi (x : ℝ) : Real.cos (Real.lamePhi x k) = Real.jacobiSnm x (k ^ 2) := by
-  simp [Real.lamePhi, Real.cos_pi_div_two_sub, Real.jacobiSnm]
+theorem cos_lamePhi (x : ℝ) : Real.cos (Real.lamePhi x k) = Real.jacobiSnOfParameter x (k ^ 2) := by
+  simp [Real.lamePhi, Real.cos_pi_div_two_sub, Real.jacobiSnOfParameter]
 
 /-- At `φ = φ(x)` the weight is `ρ(φ(x)) = 1` (weighted) or `dn(x, k)`. -/
 private lemma fourierWeight_lamePhi (x : ℝ) :
     fourierWeight k weighted (Real.lamePhi x k) =
-      if weighted then 1 else Real.jacobiDnm x (k ^ 2) := by
-  simp [fourierWeight, cos_lamePhi, Real.jacobiDnm]
+      if weighted then 1 else Real.jacobiDnOfParameter x (k ^ 2) := by
+  simp [fourierWeight, cos_lamePhi, Real.jacobiDnOfParameter]
 
 /-- At `φ = φ(x)`, `w(F(π/2 - φ, k))/ρ(φ) = w(x)/ρ(φ(x))`, i.e. `w(x)` or `w(x)/dn(x, k)`. -/
 private lemma phiTransform_lamePhi (hk : k ^ 2 < 1) (x : ℝ) :
     phiTransform w k weighted (Real.lamePhi x k) =
-      w x / (if weighted then 1 else Real.jacobiDnm x (k ^ 2)) := by
+      w x / (if weighted then 1 else Real.jacobiDnOfParameter x (k ^ 2)) := by
   rw [phiTransform, fourierWeight_lamePhi]
   congr 2
-  rw [Real.lamePhi, sub_sub_cancel, Real.incEllIntFm_jacobiAmm hk]
+  rw [Real.lamePhi, sub_sub_cancel, Real.incompleteEllipticFOfParameter_jacobiAmOfParameter hk]
 
 /-- The Fourier integrals of `DLMF.Lame.Basic` in the variable `φ`:
 `∫₀^K w(x) τ(φ(x)) ρ(x) dx = ∫₀^{π/2} F(t) τ(t) dt`. -/
 private lemma integral_comp_lamePhi (hk0 : 0 < k) (hk1 : k < 1) (hw : Continuous w) {τ : ℝ → ℝ}
     (hτ : Continuous τ) :
-    ∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2),
-      w x * τ (Real.lamePhi x k) * (if weighted then Real.jacobiDnm x (k ^ 2) else 1) =
+    ∫ x in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2),
+      w x * τ (Real.lamePhi x k) * (if weighted then Real.jacobiDnOfParameter x (k ^ 2) else 1) =
       ∫ t in (0 : ℝ)..π / 2, phiTransform w k weighted t * τ t := by
   have hk := modulus_sq_lt_one hk0 hk1
   have hF : Continuous (phiTransform w k weighted) :=
-    (hw.comp (((contDiff_two_incEllIntFm hk).continuous).comp
+    (hw.comp (((contDiff_two_incompleteEllipticFOfParameter hk).continuous).comp
       (continuous_const.sub continuous_id))).div (contDiff_two_fourierWeight hk weighted).continuous
       fun φ => (fourierWeight_pos hk weighted φ).ne'
-  have hdn : Continuous fun x => Real.jacobiDnm x (k ^ 2) :=
-    continuous_iff_continuousAt.2 fun x => (Real.hasDerivAt_jacobiDnm hk x).continuousAt
-  have hsub := intervalIntegral.integral_comp_mul_deriv (a := 0) (b := Real.compEllIntKm (k ^ 2))
-    (f := fun x => Real.lamePhi x k) (f' := fun x => -Real.jacobiDnm x (k ^ 2))
+  have hdn : Continuous fun x => Real.jacobiDnOfParameter x (k ^ 2) :=
+    continuous_iff_continuousAt.2 fun x => (Real.hasDerivAt_jacobiDnOfParameter hk x).continuousAt
+  have hsub := intervalIntegral.integral_comp_mul_deriv (a := 0)
+      (b := Real.completeEllipticKOfParameter (k ^ 2))
+    (f := fun x => Real.lamePhi x k) (f' := fun x => -Real.jacobiDnOfParameter x (k ^ 2))
     (g := fun t => phiTransform w k weighted t * τ t) (fun x _ => hasDerivAt_lamePhi hk x)
     hdn.neg.continuousOn (hF.mul hτ)
-  have h0 : Real.lamePhi 0 k = π / 2 := by simp [Real.lamePhi, Real.jacobiAmm_zero hk]
-  have hK : Real.lamePhi (Real.compEllIntKm (k ^ 2)) k = 0 := by
-    rw [Real.lamePhi, Real.jacobiAmm_compEllIntKm hk, sub_self]
+  have h0 : Real.lamePhi 0 k = π / 2 := by simp [Real.lamePhi, Real.jacobiAmOfParameter_zero hk]
+  have hK : Real.lamePhi (Real.completeEllipticKOfParameter (k ^ 2)) k = 0 := by
+    rw [Real.lamePhi, Real.jacobiAmOfParameter_completeEllipticKOfParameter hk, sub_self]
   rw [h0, hK] at hsub
   have hsub' : ∫ t in (0 : ℝ)..π / 2, phiTransform w k weighted t * τ t =
-      -∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2),
+      -∫ x in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2),
         ((fun t => phiTransform w k weighted t * τ t) ∘ fun x => Real.lamePhi x k) x *
-          -Real.jacobiDnm x (k ^ 2) := by
+          -Real.jacobiDnOfParameter x (k ^ 2) := by
     rw [hsub, intervalIntegral.integral_symm]
   rw [hsub', ← intervalIntegral.integral_neg]
   refine intervalIntegral.integral_congr fun x _ => ?_
   simp only [Function.comp_apply, phiTransform_lamePhi hk]
-  have := Real.jacobiDnm_pos hk x
+  have := Real.jacobiDnOfParameter_pos hk x
   cases weighted
   · simp only [Bool.false_eq_true, ↓reduceIte]; field_simp
   · simp only [↓reduceIte, div_one]; ring
@@ -401,16 +410,16 @@ period `4K`, `w(2K - x) = w(x)` and `w(-x) = δ w(x)`, then
 `w(x)/ρ(x) = ∑ⱼ c_j ((1 + δ(-1)^j)/2) C_j cos(jφ)` with `c₀ = 1/2`, `cⱼ = 1` otherwise, the
 coefficients `C_j = Real.lameCosCoeff w k weighted j` and `ρ = 1` (`weighted`) or `dn`. -/
 theorem hasSum_lameCosCoeff (hk0 : 0 < k) (hk1 : k < 1) (hw : ContDiff ℝ 2 w)
-    (h4 : ∀ x, w (x + 4 * Real.compEllIntKm (k ^ 2)) = w x)
-    (hσ : ∀ x, w (2 * Real.compEllIntKm (k ^ 2) - x) = w x) {δ : ℝ}
+    (h4 : ∀ x, w (x + 4 * Real.completeEllipticKOfParameter (k ^ 2)) = w x)
+    (hσ : ∀ x, w (2 * Real.completeEllipticKOfParameter (k ^ 2) - x) = w x) {δ : ℝ}
     (hδ : ∀ x, w (-x) = δ * w x) (weighted : Bool) (x : ℝ) :
     HasSum (fun j : ℕ => (if j = 0 then 1 / 2 else 1) *
       ((1 + δ * (-1) ^ j) / 2 * Real.lameCosCoeff w k weighted j) *
         Real.cos (j * Real.lamePhi x k))
-      (w x / (if weighted then 1 else Real.jacobiDnm x (k ^ 2))) := by
+      (w x / (if weighted then 1 else Real.jacobiDnOfParameter x (k ^ 2))) := by
   have hk := modulus_sq_lt_one hk0 hk1
   have hF := contDiff_two_phiTransform (weighted := weighted) hk hw
-  have hσ' : ∀ x, w (2 * Real.compEllIntKm (k ^ 2) - x) = 1 * w x := fun x => by
+  have hσ' : ∀ x, w (2 * Real.completeEllipticKOfParameter (k ^ 2) - x) = 1 * w x := fun x => by
     rw [one_mul]; exact hσ x
   have hev : ∀ t, phiTransform w k weighted (-t) = phiTransform w k weighted t := fun t => by
     have := phiTransform_neg (weighted := weighted) hk hσ' t
@@ -429,15 +438,15 @@ theorem hasSum_lameCosCoeff (hk0 : 0 < k) (hk1 : k < 1) (hw : ContDiff ℝ 2 w)
 `w(2K - x) = -w(x)` and `w(-x) = δ w(x)`, then
 `w(x)/ρ(x) = ∑ⱼ ((1 - δ(-1)^j)/2) S_j sin(jφ)` with `S_j = Real.lameSinCoeff w k weighted j`. -/
 theorem hasSum_lameSinCoeff (hk0 : 0 < k) (hk1 : k < 1) (hw : ContDiff ℝ 2 w)
-    (h4 : ∀ x, w (x + 4 * Real.compEllIntKm (k ^ 2)) = w x)
-    (hσ : ∀ x, w (2 * Real.compEllIntKm (k ^ 2) - x) = -w x) {δ : ℝ}
+    (h4 : ∀ x, w (x + 4 * Real.completeEllipticKOfParameter (k ^ 2)) = w x)
+    (hσ : ∀ x, w (2 * Real.completeEllipticKOfParameter (k ^ 2) - x) = -w x) {δ : ℝ}
     (hδ : ∀ x, w (-x) = δ * w x) (weighted : Bool) (x : ℝ) :
     HasSum (fun j : ℕ => ((1 - δ * (-1) ^ j) / 2 * Real.lameSinCoeff w k weighted j) *
         Real.sin (j * Real.lamePhi x k))
-      (w x / (if weighted then 1 else Real.jacobiDnm x (k ^ 2))) := by
+      (w x / (if weighted then 1 else Real.jacobiDnOfParameter x (k ^ 2))) := by
   have hk := modulus_sq_lt_one hk0 hk1
   have hF := contDiff_two_phiTransform (weighted := weighted) hk hw
-  have hσ' : ∀ x, w (2 * Real.compEllIntKm (k ^ 2) - x) = -1 * w x := fun x => by
+  have hσ' : ∀ x, w (2 * Real.completeEllipticKOfParameter (k ^ 2) - x) = -1 * w x := fun x => by
     rw [neg_one_mul]; exact hσ x
   have hodd : ∀ t, phiTransform w k weighted (-t) = -phiTransform w k weighted t := fun t => by
     have := phiTransform_neg (weighted := weighted) hk hσ' t
@@ -545,13 +554,13 @@ theorem lameSinCoeff_eq_integral (hk0 : 0 < k) (hk1 : k < 1) (hw : ContDiff ℝ 
 
 /-- Absolute summability of the Lamé cosine coefficients. -/
 theorem summable_abs_lameCosCoeff (hk0 : 0 < k) (hk1 : k < 1) (hw : ContDiff ℝ 2 w)
-    (h4 : ∀ x, w (x + 4 * Real.compEllIntKm (k ^ 2)) = w x)
-    (hσ : ∀ x, w (2 * Real.compEllIntKm (k ^ 2) - x) = w x) {δ : ℝ}
+    (h4 : ∀ x, w (x + 4 * Real.completeEllipticKOfParameter (k ^ 2)) = w x)
+    (hσ : ∀ x, w (2 * Real.completeEllipticKOfParameter (k ^ 2) - x) = w x) {δ : ℝ}
     (hδ : ∀ x, w (-x) = δ * w x) (weighted : Bool) :
     Summable fun j : ℕ => |(if j = 0 then 1 / 2 else 1) *
       ((1 + δ * (-1) ^ j) / 2 * Real.lameCosCoeff w k weighted j)| := by
   have hk := modulus_sq_lt_one hk0 hk1
-  have hσ' : ∀ x, w (2 * Real.compEllIntKm (k ^ 2) - x) = 1 * w x := fun x => by
+  have hσ' : ∀ x, w (2 * Real.completeEllipticKOfParameter (k ^ 2) - x) = 1 * w x := fun x => by
     rw [one_mul]; exact hσ x
   have hev : ∀ t, phiTransform w k weighted (-t) = phiTransform w k weighted t := fun t => by
     have := phiTransform_neg (weighted := weighted) hk hσ' t
@@ -565,12 +574,12 @@ theorem summable_abs_lameCosCoeff (hk0 : 0 < k) (hk1 : k < 1) (hw : ContDiff ℝ
 
 /-- Absolute summability of the Lamé sine coefficients. -/
 theorem summable_abs_lameSinCoeff (hk0 : 0 < k) (hk1 : k < 1) (hw : ContDiff ℝ 2 w)
-    (h4 : ∀ x, w (x + 4 * Real.compEllIntKm (k ^ 2)) = w x)
-    (hσ : ∀ x, w (2 * Real.compEllIntKm (k ^ 2) - x) = -w x) {δ : ℝ}
+    (h4 : ∀ x, w (x + 4 * Real.completeEllipticKOfParameter (k ^ 2)) = w x)
+    (hσ : ∀ x, w (2 * Real.completeEllipticKOfParameter (k ^ 2) - x) = -w x) {δ : ℝ}
     (hδ : ∀ x, w (-x) = δ * w x) (weighted : Bool) :
     Summable fun j : ℕ => |(1 - δ * (-1) ^ j) / 2 * Real.lameSinCoeff w k weighted j| := by
   have hk := modulus_sq_lt_one hk0 hk1
-  have hσ' : ∀ x, w (2 * Real.compEllIntKm (k ^ 2) - x) = -1 * w x := fun x => by
+  have hσ' : ∀ x, w (2 * Real.completeEllipticKOfParameter (k ^ 2) - x) = -1 * w x := fun x => by
     rw [neg_one_mul]; exact hσ x
   have hodd : ∀ t, phiTransform w k weighted (-t) = -phiTransform w k weighted t := fun t => by
     have := phiTransform_neg (weighted := weighted) hk hσ' t

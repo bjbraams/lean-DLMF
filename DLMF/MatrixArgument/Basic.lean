@@ -26,8 +26,8 @@ hypergeometric functions of matrix argument (§§35.5–35.8).
 
 * `SymMatrix`, `posDefCone`, `matrixInterval`: the space `𝓢` of real symmetric matrices, the
   cone `Ω` and the matrix interval `S < X < T` (DLMF §35.1).
-* `etr`, `leadingMinor`, `matrixSpectralNorm`: `etr X = exp(tr X)`, the leading principal minors
-  `|(X)_j|` and the spectral norm `‖T‖`.
+* `expTrace`, `leadingMinor`, `matrixSpectralNorm`: `expTrace X = exp(tr X)`, the leading principal
+  minors `|(X)_j|` and the spectral norm `‖T‖`.
 * `orthogonalHaar`: the normalized Haar measure `dH` on `O(m)`.
 * `HasIntegralOn`: integrability on a set of symmetric matrices together with the value of the
   integral.
@@ -35,11 +35,13 @@ hypergeometric functions of matrix argument (§§35.5–35.8).
   `ℓ(κ)` and `[a]_κ` (DLMF §35.4(i), 35.4.1).
 * `zonalPolynomialAtOne`, `zonalPolynomial`: `Z_κ(I)` and `Z_κ(T)` (DLMF 35.4.2, 35.4.3).
 * `multivariateGamma`, `multivariateGammaVec`, `multivariateBeta`: DLMF 35.3.4, 35.3.5, 35.3.7.
-* `laplaceTransform`, `matrixConvolution`: DLMF 35.2.1, 35.2.3.
-* `besselA`, `besselB`: the Bessel functions of matrix argument (DLMF 35.5.1–35.5.3).
-* `hypergeometricPFQ`: `pFq(a; b; T)` (DLMF 35.8.1), with the special cases `hyp0F0`, `hyp1F0`,
-  `hyp0F1`, `hyp1F1` (35.6.1), `hyp2F1` (35.7.1) and `hyp3F2`.
-* `kummerPsi`, `laguerreL`, `jacobiP`: DLMF 35.6.2, 35.6.3, 35.7.2.
+* `matrixLaplaceTransform`, `matrixConvolution`: DLMF 35.2.1, 35.2.3.
+* `matrixBesselA`, `matrixBesselB`: the Bessel functions of matrix argument (DLMF 35.5.1–35.5.3).
+* `matrixHypergeometricPFQ`: `pFq(a; b; T)` (DLMF 35.8.1), with the special cases
+  `matrixHypergeometric0F0`, `matrixHypergeometric1F0`, `matrixHypergeometric0F1`,
+  `matrixHypergeometric1F1` (35.6.1), `matrixHypergeometric2F1` (35.7.1) and
+  `matrixHypergeometric3F2`.
+* `matrixKummerPsi`, `matrixLaguerreL`, `matrixJacobiP`: DLMF 35.6.2, 35.6.3, 35.7.2.
 * `gaussPDEOperator`: the system of partial differential equations 35.7.9 for `₂F₁`.
 
 ## Main results
@@ -53,7 +55,7 @@ hypergeometric functions of matrix argument (§§35.5–35.8).
   Ceti's `selfAdjoint.submodule ℝ (Matrix (Fin m) (Fin m) ℝ)` (abbreviation `SymMatrix m`), and
   DLMF's `dX = ∏_{j ≤ k} dx_{j,k}` is Tau Ceti's `TauCeti.symmetricLebesgue m`, the push-forward
   of Lebesgue measure on the `m(m+1)/2` upper-triangular coordinates. With this normalization
-  Tau Ceti proves `∫_Ω etr(-X) |X|^{a-(m+1)/2} dX = Γ_m(a)` (DLMF 35.3.1, real `a`).
+  Tau Ceti proves `∫_Ω expTrace(-X) |X|^{a-(m+1)/2} dX = Γ_m(a)` (DLMF 35.3.1, real `a`).
 * The orthogonal group `O(m)` is Mathlib's `Matrix.orthogonalGroup (Fin m) ℝ`. It is compact
   (`instCompactSpaceOrthogonalGroup`), and `orthogonalHaar m` is the Haar measure giving the
   whole group mass `1`.
@@ -74,7 +76,7 @@ hypergeometric functions of matrix argument (§§35.5–35.8).
   which has the same eigenvalues.
 * `multivariateGamma m a` is the product formula 35.3.4, the meromorphic continuation of the
   integral 35.3.1; Tau Ceti's real `TauCeti.multivariateGamma` agrees on real arguments.
-* `hypergeometricPFQ a b T` is the series over partitions with the Lean `tsum` totalization in
+* `matrixHypergeometricPFQ a b T` is the series over partitions with the Lean `tsum` totalization in
   the weight `k`.
 -/
 
@@ -108,8 +110,8 @@ def HasIntegralOn {m : ℕ} (s : Set (SymMatrix m)) (f : Matrix (Fin m) (Fin m) 
   IntegrableOn (fun X : SymMatrix m => f X) s (TauCeti.symmetricLebesgue m) ∧
     ∫ X in s, f X ∂TauCeti.symmetricLebesgue m = I
 
-/-- DLMF §35.1: `etr(X) = exp(tr X)`. -/
-def etr {m : ℕ} (X : Matrix (Fin m) (Fin m) ℝ) : ℝ := Real.exp X.trace
+/-- DLMF §35.1: `expTrace(X) = exp(tr X)`. -/
+def expTrace {m : ℕ} (X : Matrix (Fin m) (Fin m) ℝ) : ℝ := Real.exp X.trace
 
 /-- DLMF §35.1: the `j`th (leading) principal minor `|(X)_j|`, the determinant of the upper-left
 `j × j` block of `X`; it is `1` for `j = 0` and (by convention here) `0` for `j > m`. -/
@@ -215,9 +217,9 @@ def zonalPolynomialAtOne {m : ℕ} (κ : Fin m → ℕ) : ℝ :=
 /-- DLMF 35.4.3: the zonal polynomial
 `Z_κ(T) = Z_κ(I) |T|^{k_m} ∫_{O(m)} ∏_{j=1}^{m-1} |(HTH⁻¹)_j|^{k_j - k_{j+1}} dH`, written as
 `Z_κ(I) ∫_{O(m)} ∏_{j=1}^{m} |(HTHᵀ)_j|^{k_j - k_{j+1}} dH` with `k_{m+1} = 0` (the factor
-`j = m` is `|HTHᵀ|^{k_m} = |T|^{k_m}`; see `zonalPolynomial_eq_dlmf`). DLMF defines `Z_κ` on
-`𝓢` and for partitions `κ`; the formula is evaluated here for every real matrix `T` and every
-`κ`, and is meaningful for symmetric `T` and nonincreasing `κ`. -/
+`j = m` is `|HTHᵀ|^{k_m} = |T|^{k_m}`; see `zonalPolynomial_eq_integral_leadingMinor`). DLMF defines
+`Z_κ` on `𝓢` and for partitions `κ`; the formula is evaluated here for every real matrix `T` and
+every `κ`, and is meaningful for symmetric `T` and nonincreasing `κ`. -/
 @[dlmf 35.4.E3]
 def zonalPolynomial {m : ℕ} (κ : Fin m → ℕ) (T : Matrix (Fin m) (Fin m) ℝ) : ℝ :=
   zonalPolynomialAtOne κ *
@@ -234,37 +236,40 @@ the series in `k` diverges; convergence is §35.8(i)). DLMF requires
 `-b_j + (k+1)/2 ∉ ℕ` (`1 ≤ k ≤ m`), which is where no `[b_j]_κ` vanishes; otherwise the Lean
 quotient `x / 0 = 0` applies. Meaningful for symmetric `T`. -/
 @[dlmf 35.8.E1]
-def hypergeometricPFQ {m p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
+def matrixHypergeometricPFQ {m p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
     (T : Matrix (Fin m) (Fin m) ℝ) : ℂ :=
   ∑' k : ℕ, (1 / (k ! : ℂ)) * ∑ κ ∈ partitions m k,
     (∏ i, partitionalShiftedFactorial (a i) κ) / (∏ j, partitionalShiftedFactorial (b j) κ) *
       (zonalPolynomial κ T : ℂ)
 
 /-- DLMF 35.8.2: `₀F₀(−; −; T)` of matrix argument. -/
-def hyp0F0 {m : ℕ} (T : Matrix (Fin m) (Fin m) ℝ) : ℂ := hypergeometricPFQ ![] ![] T
+def matrixHypergeometric0F0 {m : ℕ} (T : Matrix (Fin m) (Fin m) ℝ) : ℂ :=
+    matrixHypergeometricPFQ ![] ![] T
 
 /-- DLMF 35.8.3: `₁F₀(a; −; T)` of matrix argument. -/
-def hyp1F0 {m : ℕ} (a : ℂ) (T : Matrix (Fin m) (Fin m) ℝ) : ℂ := hypergeometricPFQ ![a] ![] T
+def matrixHypergeometric1F0 {m : ℕ} (a : ℂ) (T : Matrix (Fin m) (Fin m) ℝ) : ℂ :=
+    matrixHypergeometricPFQ ![a] ![] T
 
 /-- DLMF 35.8.4: `₀F₁(−; b; T)` of matrix argument. -/
-def hyp0F1 {m : ℕ} (b : ℂ) (T : Matrix (Fin m) (Fin m) ℝ) : ℂ := hypergeometricPFQ ![] ![b] T
+def matrixHypergeometric0F1 {m : ℕ} (b : ℂ) (T : Matrix (Fin m) (Fin m) ℝ) : ℂ :=
+    matrixHypergeometricPFQ ![] ![b] T
 
 /-- DLMF 35.6.1: the confluent hypergeometric function of matrix argument
 `₁F₁(a; b; T) = ∑_k (1/k!) ∑_{|κ|=k} [a]_κ / [b]_κ Z_κ(T)`. -/
 @[dlmf 35.6.E1]
-def hyp1F1 {m : ℕ} (a b : ℂ) (T : Matrix (Fin m) (Fin m) ℝ) : ℂ :=
-  hypergeometricPFQ ![a] ![b] T
+def matrixHypergeometric1F1 {m : ℕ} (a b : ℂ) (T : Matrix (Fin m) (Fin m) ℝ) : ℂ :=
+  matrixHypergeometricPFQ ![a] ![b] T
 
 /-- DLMF 35.7.1: the Gaussian hypergeometric function of matrix argument
 `₂F₁(a, b; c; T) = ∑_k (1/k!) ∑_{|κ|=k} [a]_κ [b]_κ / [c]_κ Z_κ(T)`; DLMF requires
 `-c + (j+1)/2 ∉ ℕ` (`1 ≤ j ≤ m`) and `‖T‖ < 1`. -/
 @[dlmf 35.7.E1]
-def hyp2F1 {m : ℕ} (a b c : ℂ) (T : Matrix (Fin m) (Fin m) ℝ) : ℂ :=
-  hypergeometricPFQ ![a, b] ![c] T
+def matrixHypergeometric2F1 {m : ℕ} (a b c : ℂ) (T : Matrix (Fin m) (Fin m) ℝ) : ℂ :=
+  matrixHypergeometricPFQ ![a, b] ![c] T
 
 /-- DLMF §35.8(iii): `₃F₂(a₁, a₂, a₃; b₁, b₂; T)` of matrix argument. -/
-def hyp3F2 {m : ℕ} (a₁ a₂ a₃ b₁ b₂ : ℂ) (T : Matrix (Fin m) (Fin m) ℝ) : ℂ :=
-  hypergeometricPFQ ![a₁, a₂, a₃] ![b₁, b₂] T
+def matrixHypergeometric3F2 {m : ℕ} (a₁ a₂ a₃ b₁ b₂ : ℂ) (T : Matrix (Fin m) (Fin m) ℝ) : ℂ :=
+  matrixHypergeometricPFQ ![a₁, a₂, a₃] ![b₁, b₂] T
 
 /-! ## Bessel functions and the confluent function `Ψ` -/
 
@@ -272,29 +277,29 @@ def hyp3F2 {m : ℕ} (a₁ a₂ a₃ b₁ b₂ : ℂ) (T : Matrix (Fin m) (Fin m
 `A_ν(T) = A_ν(0) ∑_k ((-1)^k / k!) ∑_{|κ|=k} Z_κ(T) / [ν + (m+1)/2]_κ` with
 `A_ν(0) = 1 / Γ_m(ν + (m+1)/2)` (`ν ∈ ℂ`, `T ∈ 𝓢`). -/
 @[dlmf 35.5.E2]
-def besselA {m : ℕ} (ν : ℂ) (T : Matrix (Fin m) (Fin m) ℝ) : ℂ :=
+def matrixBesselA {m : ℕ} (ν : ℂ) (T : Matrix (Fin m) (Fin m) ℝ) : ℂ :=
   1 / multivariateGamma m (ν + ((m : ℂ) + 1) / 2) *
     ∑' k : ℕ, ((-1) ^ k / (k ! : ℂ)) * ∑ κ ∈ partitions m k,
       1 / partitionalShiftedFactorial (ν + ((m : ℂ) + 1) / 2) κ * (zonalPolynomial κ T : ℂ)
 
 /-- DLMF 35.5.3: the Bessel function of the second kind of matrix argument
-`B_ν(T) = ∫_Ω etr(-(TX + X⁻¹)) |X|^{ν-(m+1)/2} dX` (`ν ∈ ℂ`, `T ∈ Ω`; principal power of the
+`B_ν(T) = ∫_Ω expTrace(-(TX + X⁻¹)) |X|^{ν-(m+1)/2} dX` (`ν ∈ ℂ`, `T ∈ Ω`; principal power of the
 positive determinant). -/
 @[dlmf 35.5.E3]
-def besselB {m : ℕ} (ν : ℂ) (T : Matrix (Fin m) (Fin m) ℝ) : ℂ :=
+def matrixBesselB {m : ℕ} (ν : ℂ) (T : Matrix (Fin m) (Fin m) ℝ) : ℂ :=
   ∫ X in posDefCone m,
-    (etr (-(T * (X : Matrix (Fin m) (Fin m) ℝ) + (X : Matrix (Fin m) (Fin m) ℝ)⁻¹)) : ℂ) *
+    (expTrace (-(T * (X : Matrix (Fin m) (Fin m) ℝ) + (X : Matrix (Fin m) (Fin m) ℝ)⁻¹)) : ℂ) *
       (((X : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ (ν - ((m : ℂ) + 1) / 2))
     ∂TauCeti.symmetricLebesgue m
 
 /-- DLMF 35.6.2: the confluent hypergeometric function of the second kind of matrix argument
-`Ψ(a; b; T) = Γ_m(a)⁻¹ ∫_Ω etr(-TX) |X|^{a-(m+1)/2} |I + X|^{b-a-(m+1)/2} dX`
+`Ψ(a; b; T) = Γ_m(a)⁻¹ ∫_Ω expTrace(-TX) |X|^{a-(m+1)/2} |I + X|^{b-a-(m+1)/2} dX`
 (`ℜa > (m-1)/2`, `T ∈ Ω`). -/
 @[dlmf 35.6.E2]
-def kummerPsi {m : ℕ} (a b : ℂ) (T : Matrix (Fin m) (Fin m) ℝ) : ℂ :=
+def matrixKummerPsi {m : ℕ} (a b : ℂ) (T : Matrix (Fin m) (Fin m) ℝ) : ℂ :=
   1 / multivariateGamma m a *
     ∫ X in posDefCone m,
-      (etr (-(T * (X : Matrix (Fin m) (Fin m) ℝ))) : ℂ) *
+      (expTrace (-(T * (X : Matrix (Fin m) (Fin m) ℝ))) : ℂ) *
         (((X : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ (a - ((m : ℂ) + 1) / 2)) *
         (((1 + (X : Matrix (Fin m) (Fin m) ℝ)).det : ℂ) ^ (b - a - ((m : ℂ) + 1) / 2))
       ∂TauCeti.symmetricLebesgue m
@@ -303,25 +308,25 @@ def kummerPsi {m : ℕ} (a b : ℂ) (T : Matrix (Fin m) (Fin m) ℝ) : ℂ :=
 `L_ν^{(γ)}(T) = Γ_m(γ + ν + (m+1)/2) / Γ_m(γ + (m+1)/2) ₁F₁(-ν; γ + (m+1)/2; T)`
 (DLMF: `ℜγ, ℜ(γ + ν) > -1`). -/
 @[dlmf 35.6.E3]
-def laguerreL {m : ℕ} (γ ν : ℂ) (T : Matrix (Fin m) (Fin m) ℝ) : ℂ :=
+def matrixLaguerreL {m : ℕ} (γ ν : ℂ) (T : Matrix (Fin m) (Fin m) ℝ) : ℂ :=
   multivariateGamma m (γ + ν + ((m : ℂ) + 1) / 2) / multivariateGamma m (γ + ((m : ℂ) + 1) / 2) *
-    hyp1F1 (-ν) (γ + ((m : ℂ) + 1) / 2) T
+    matrixHypergeometric1F1 (-ν) (γ + ((m : ℂ) + 1) / 2) T
 
 /-- DLMF 35.7.2: the Jacobi form
 `P_ν^{(γ,δ)}(T) = Γ_m(γ + ν + (m+1)/2) / Γ_m(γ + (m+1)/2)
   ₂F₁(-ν, γ + δ + ν + (m+1)/2; γ + (m+1)/2; T)` (DLMF: `0 < T < I`, `ℜγ > -1`). The classical
-Jacobi polynomial is `DLMF.OrthogonalPolynomials.jacobiPolyP`. -/
+Jacobi polynomial is `DLMF.OrthogonalPolynomials.jacobiPolynomialP`. -/
 @[dlmf 35.7.E2]
-def jacobiP {m : ℕ} (γ δ ν : ℂ) (T : Matrix (Fin m) (Fin m) ℝ) : ℂ :=
+def matrixJacobiP {m : ℕ} (γ δ ν : ℂ) (T : Matrix (Fin m) (Fin m) ℝ) : ℂ :=
   multivariateGamma m (γ + ν + ((m : ℂ) + 1) / 2) / multivariateGamma m (γ + ((m : ℂ) + 1) / 2) *
-    hyp2F1 (-ν) (γ + δ + ν + ((m : ℂ) + 1) / 2) (γ + ((m : ℂ) + 1) / 2) T
+    matrixHypergeometric2F1 (-ν) (γ + δ + ν + ((m : ℂ) + 1) / 2) (γ + ((m : ℂ) + 1) / 2) T
 
 /-! ## Laplace transform and convolution -/
 
-/-- DLMF 35.2.1: the Laplace transform `g(𝐙) = ∫_Ω etr(-𝐙X) f(X) dX` of a complex function `f`
+/-- DLMF 35.2.1: the Laplace transform `g(𝐙) = ∫_Ω expTrace(-𝐙X) f(X) dX` of a complex function `f`
 on `Ω`, at a complex (symmetric) matrix `𝐙`. -/
 @[dlmf 35.2.E1]
-def laplaceTransform {m : ℕ} (f : Matrix (Fin m) (Fin m) ℝ → ℂ)
+def matrixLaplaceTransform {m : ℕ} (f : Matrix (Fin m) (Fin m) ℝ → ℂ)
     (Z : Matrix (Fin m) (Fin m) ℂ) : ℂ :=
   ∫ X in posDefCone m,
     Complex.exp (-(Z * (X : Matrix (Fin m) (Fin m) ℝ).map (fun x : ℝ => (x : ℂ))).trace) * f X

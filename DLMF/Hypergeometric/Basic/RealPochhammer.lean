@@ -13,12 +13,12 @@ public import DLMF.Hypergeometric.Basic.SpecialValues
 # Pochhammer symbols of real arguments
 
 The scalar power-series calculus, the representation of `₂F₁` by its series on the unit disk
-and the binomial series `hasSum_poch_div_factorial` are in
+and the binomial series `hasSum_pochhammer_div_factorial` are in
 `DLMF.Hypergeometric.Basic.GaussSeries`.
 
 ## Main results
 
-* `poch_ofReal`: Pochhammer symbols of real arguments are real.
+* `pochhammer_ofReal`: Pochhammer symbols of real arguments are real.
 -/
 
 @[expose] public section
@@ -31,12 +31,12 @@ noncomputable section
 namespace DLMF.Hypergeometric
 
 /-- Helper lemma for generating-function estimates. -/
-theorem poch_ofReal (x : ℝ) (n : ℕ) :
-    poch (x : ℂ) n = ↑((ascPochhammer ℝ n).eval x) := by
+theorem pochhammer_ofReal (x : ℝ) (n : ℕ) :
+    pochhammer (x : ℂ) n = ↑((ascPochhammer ℝ n).eval x) := by
   induction n with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ n ih =>
-    rw [poch_succ, ascPochhammer_succ_eval, ih]
+    rw [pochhammer_succ, ascPochhammer_succ_eval, ih]
     push_cast
     ring
 

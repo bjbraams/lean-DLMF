@@ -25,16 +25,17 @@ vertical-contour estimates, and the Mellin–Barnes representations DLMF 8.6.10 
 
 ## Main results
 
-* `lowerIncGamma_trigonometric_integral`, `lowerIncGamma_besselJ_integral`,
-  `lowerIncGamma_logarithmic_integral`: DLMF 8.6.1–8.6.3.
-* `upperIncGamma_stieltjes_integral`, `upperIncGamma_laplace_integral_complex`,
-  `upperIncGamma_besselK_integral`, `upperIncGamma_logarithmic_integral`: DLMF 8.6.4–8.6.7.
-* `lowerIncGamma_circle_integral`: the loop integral DLMF 8.6.8.
-* `upperGammaIndentPV_converges`, `upperIncGamma_indented_integral`: the indented-contour
+* `lowerIncompleteGamma_trigonometric_integral`, `lowerIncompleteGamma_besselJ_integral`,
+  `lowerIncompleteGamma_logarithmic_integral`: DLMF 8.6.1–8.6.3.
+* `upperIncompleteGamma_stieltjes_integral`, `upperIncompleteGamma_laplace_integral_complex`,
+  `upperIncompleteGamma_besselK_integral`, `upperIncompleteGamma_logarithmic_integral`: DLMF
+  8.6.4–8.6.7.
+* `lowerIncompleteGamma_circle_integral`: the loop integral DLMF 8.6.8.
+* `upperGammaIndentPV_converges`, `upperIncompleteGamma_indented_integral`: the indented-contour
   representation DLMF 8.6.9.
-* `lowerIncGamma_mellinBarnes`: DLMF 8.6.10, with the separating contour expressed by a
+* `lowerIncompleteGamma_mellinBarnes`: DLMF 8.6.10, with the separating contour expressed by a
   vertical line and the crossed-pole residue.
-* `upperIncGamma_mellinBarnes`: DLMF 8.6.11, from the Barnes integral for `U` (DLMF 13.4.18).
+* `upperIncompleteGamma_mellinBarnes`: DLMF 8.6.11, from the Barnes integral for `U` (DLMF 13.4.18).
 -/
 
 @[expose] public noncomputable section
@@ -99,11 +100,11 @@ theorem hasSum_integral_exp_circle {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (z : �
   rw [hsin, hs, neg_pow]
   field_simp
 
-/-- Identity under the stated parameter and domain assumptions: `lowerIncGamma a z=z^a/sin
+/-- Identity under the stated parameter and domain assumptions: `lowerIncompleteGamma a z=z^a/sin
 (π*a)*(∫ t : ℝ in 0..π, exp (z*Real.cos t)*cos (a*t+z*Real.sin t))`. -/
 @[dlmf 8.6.E1]
-theorem lowerIncGamma_trigonometric_integral {a : ℂ} (ha : ∀ n : ℤ, a ≠ n) (z : ℂ) :
-    lowerIncGamma a z=z^a/sin
+theorem lowerIncompleteGamma_trigonometric_integral {a : ℂ} (ha : ∀ n : ℤ, a ≠ n) (z : ℂ) :
+    lowerIncompleteGamma a z=z^a/sin
         (π*a)*(∫ t : ℝ in 0..π, exp (z*Real.cos t)*cos (a*t+z*Real.sin t)) := by
   have ha' : ∀ n : ℕ, a ≠ -n := fun n h => ha (-n) (by push_cast; exact h)
   have hsin : sin (π*a) ≠ 0 := by
@@ -139,8 +140,8 @@ theorem lowerIncGamma_trigonometric_integral {a : ℂ} (ha : ∀ n : ℤ, a ≠ 
       intervalIntegral.integral_comp_neg,
       neg_zero, add_comm, intervalIntegral.integral_add_adjacent_intervals (hGi _ _) (hGi _ _)]
   rw [heq, ← (hasSum_integral_exp_circle ha' z).tsum_eq, tsum_mul_left,
-    lowerIncGamma_eq_regularized ha', regularizedConfluent_self_succ_neg,
-    ← (scIncGamma_hasSum_alternating ha' z).tsum_eq]
+    lowerIncompleteGamma_eq_regularized ha', regularizedConfluent_self_succ_neg,
+    ← (tricomiIncompleteGamma_hasSum_alternating ha' z).tsum_eq]
   have hG := Gamma_ne_zero ha'
   have hT : (∑' k : ℕ, (-z)^k/(Gamma a*(k.factorial : ℂ)*(a+k))) =
       (∑' k : ℕ, (-z)^k/((k.factorial : ℂ)*(a+k)))/Gamma a := by
@@ -181,11 +182,12 @@ theorem lgJ_norm_Gamma_ge {a : ℂ} (ha : 0 < a.re) (k : ℕ) :
           mul_le_mul_of_nonneg_right hre (by positivity)
       _ = _ := by ring
 
-/-- Identity under the stated parameter and domain assumptions: `lowerIncGamma a z=z^(a/2)*(∫ t :
-ℝ in Ioi 0, exp (-t : ℂ)*(t : ℂ)^(a/2-1)*besselJ a (2*(z*t)^(1/2 : ℂ)))`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`lowerIncompleteGamma a z=z^(a/2)*(∫ t : ℝ in Ioi 0, exp (-t : ℂ)*(t : ℂ)^(a/2-1)*besselJ a
+(2*(z*t)^(1/2 : ℂ)))`. -/
 @[dlmf 8.6.E2]
-theorem lowerIncGamma_besselJ_integral {a : ℂ} (ha : 0 < a.re) {z : ℂ} (hz : z ∈ slitPlane) :
-    lowerIncGamma a z=z^(a/2)*(∫ t : ℝ in Ioi 0,
+theorem lowerIncompleteGamma_besselJ_integral {a : ℂ} (ha : 0 < a.re) {z : ℂ} (hz : z ∈ slitPlane) :
+    lowerIncompleteGamma a z=z^(a/2)*(∫ t : ℝ in Ioi 0,
         exp (-t : ℂ)*(t : ℂ)^(a/2-1)*besselJ a (2*(z*t)^(1/2 : ℂ))) := by
   have hz0 : z ≠ 0 := slitPlane_ne_zero hz
   have ha' : ∀ n : ℕ, a ≠ -n := fun n h => by
@@ -291,8 +293,8 @@ theorem lowerIncGamma_besselJ_integral {a : ℂ} (ha : 0 < a.re) {z : ℂ} (hz :
       ∫ t : ℝ in Ioi 0, ∑' k : ℕ, F k t :=
     setIntegral_congr_fun measurableSet_Ioi fun t ht => hpt t ht
   rw [hI, ← key, tsum_congr hFk, tsum_mul_left, ← mul_assoc, ← cpow_add _ _ hz0, add_halves,
-    lowerIncGamma_eq_regularized ha', regularizedConfluent_self_succ_neg,
-    ← (scIncGamma_hasSum_alternating ha' z).tsum_eq]
+    lowerIncompleteGamma_eq_regularized ha', regularizedConfluent_self_succ_neg,
+    ← (tricomiIncompleteGamma_hasSum_alternating ha' z).tsum_eq]
   have hG := Gamma_ne_zero ha'
   have hT : (∑' k : ℕ, (-z)^k/(Gamma a*(k ! : ℂ)*(a+k))) =
       (∑' k : ℕ, (-z)^k/((k ! : ℂ)*(a+k)))/Gamma a := by
@@ -301,20 +303,20 @@ theorem lowerIncGamma_besselJ_integral {a : ℂ} (ha : 0 < a.re) {z : ℂ} (hz :
   rw [hT]
   field_simp
 
-/-- Identity under the stated parameter and domain assumptions: `lowerIncGamma a z=z^a*(∫ t : ℝ in
-Ioi 0, exp (-a*t-z*Real.exp (-t)))`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`lowerIncompleteGamma a z=z^a*(∫ t : ℝ in Ioi 0, exp (-a*t-z*Real.exp (-t)))`. -/
 @[dlmf 8.6.E3]
-theorem lowerIncGamma_logarithmic_integral {a : ℂ} (ha : 0 < a.re) {z : ℂ} :
-    lowerIncGamma a z=z^a*(∫ t : ℝ in Ioi 0, exp (-a*t-z*Real.exp (-t))) := by
+theorem lowerIncompleteGamma_logarithmic_integral {a : ℂ} (ha : 0 < a.re) {z : ℂ} :
+    lowerIncompleteGamma a z=z^a*(∫ t : ℝ in Ioi 0, exp (-a*t-z*Real.exp (-t))) := by
   have ha' : ∀ k : ℕ, a ≠ -k := fun k hk => by
     have := congrArg Complex.re hk
     simp at this
     linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
   have hk := regularizedConfluent_kummer_transform a (a+1) (-z)
   rw [show a+1-a=1 by ring, neg_neg] at hk
-  have hsc : regularizedHGFun {a} {a+1} (-z) = scIncGamma a z := by
-    rw [hk, scIncGamma]
-  rw [lowerIncGamma_eq_regularized ha', hsc, scIncGamma_integral ha]
+  have hsc : regularizedHGFun {a} {a+1} (-z) = tricomiIncompleteGamma a z := by
+    rw [hk, tricomiIncompleteGamma]
+  rw [lowerIncompleteGamma_eq_regularized ha', hsc, tricomiIncompleteGamma_integral ha]
   have hG := Gamma_ne_zero ha'
   rw [show Gamma a * z^a * (1/Gamma a * ∫ t : ℝ in 0..1, (t : ℂ)^(a-1)*exp (-z*t)) =
     z^a * ∫ t : ℝ in 0..1, (t : ℂ)^(a-1)*exp (-z*t) by field_simp]
@@ -338,15 +340,17 @@ theorem lowerIncGamma_logarithmic_integral {a : ℂ} (ha : 0 < a.re) {z : ℂ} :
   congr 1
   ring
 
-/-- Identity under the stated parameter and domain assumptions: `upperIncGamma a z=z^a*exp
+/-- Identity under the stated parameter and domain assumptions: `upperIncompleteGamma a z=z^a*exp
 (-z)/Gamma (1-a)*(∫ t : ℝ in Ioi 0, (t : ℂ)^(-a)*exp (-t : ℂ)/(z+t))`. -/
 @[dlmf 8.6.E4]
-theorem upperIncGamma_stieltjes_integral {a : ℂ} (ha : a.re < 1) {z : ℂ} (hz : z ∈ slitPlane) :
-    upperIncGamma a z=z^a*exp (-z)/Gamma
+theorem upperIncompleteGamma_stieltjes_integral {a : ℂ} (ha : a.re < 1) {z : ℂ}
+    (hz : z ∈ slitPlane) :
+    upperIncompleteGamma a z=z^a*exp (-z)/Gamma
         (1-a)*(∫ t : ℝ in Ioi 0, (t : ℂ)^(-a)*exp (-t : ℂ)/(z+t)) := by
   -- Tricomi's Stieltjes representation 13.4.5 at `a = b = 1 - a`, where `U(0,b,t) = 1`.
   have h := kummerU_stieltjes (a := 1 - a) (b := 1 - a) hz (by simp) (by simp; linarith)
-  rw [upperIncGamma, h, show 1 - (1 - a) = a by ring, show (1 : ℂ) + (1 - a) - (1 - a) = 1 by ring,
+  rw [upperIncompleteGamma, h, show 1 - (1 - a) = a by ring, show (1 : ℂ) + (1 - a) -
+                                                         (1 - a) = 1 by ring,
     show (1 - a) - (1 - a) = (0 : ℂ) by ring, show (1 - a) - 1 = -a by ring, Gamma_one, mul_one]
   have hi : (∫ t : ℝ in Ioi 0, kummerU 0 (1 - a) t * exp (-(t : ℂ)) * (t : ℂ) ^ (-a) /
       ((t : ℂ) + z)) = ∫ t : ℝ in Ioi 0, (t : ℂ)^(-a)*exp (-t : ℂ)/(z+t) := by
@@ -354,24 +358,24 @@ theorem upperIncGamma_stieltjes_integral {a : ℂ} (ha : a.re < 1) {z : ℂ} (hz
     rw [kummerU_zero, add_comm (t : ℂ) z]; ring
   rw [hi]; ring
 
-/-- Identity under the stated parameter and domain assumptions: `upperIncGamma a z=z^a*exp (-z)*(∫
-t : ℝ in Ioi 0, exp (-z*t)*(1+(t : ℂ))^(a-1))`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`upperIncompleteGamma a z=z^a*exp (-z)*(∫ t : ℝ in Ioi 0, exp (-z*t)*(1+(t : ℂ))^(a-1))`. -/
 @[dlmf 8.6.E5]
-theorem upperIncGamma_laplace_integral_complex (a : ℂ) {z : ℂ} (hz : 0 < z.re) :
-    upperIncGamma a z=z^a*exp (-z)*(∫ t : ℝ in Ioi 0, exp (-z*t)*(1+(t : ℂ))^(a-1)) := by
+theorem upperIncompleteGamma_laplace_integral_complex (a : ℂ) {z : ℂ} (hz : 0 < z.re) :
+    upperIncompleteGamma a z=z^a*exp (-z)*(∫ t : ℝ in Ioi 0, exp (-z*t)*(1+(t : ℂ))^(a-1)) := by
   have hz0 : z ≠ 0 := slitPlane_ne_zero (Or.inl hz)
-  rw [upperIncGamma_eq_cpow_mul_kummerU a hz0, kummerU_laplace (by norm_num) hz, Gamma_one,
+  rw [upperIncompleteGamma_eq_cpow_mul_kummerU a hz0, kummerU_laplace (by norm_num) hz, Gamma_one,
     div_one, one_mul]
   congr 1
   refine setIntegral_congr_fun measurableSet_Ioi fun t _ => ?_
   rw [sub_self, cpow_zero, mul_one, show a+1-1-1 = a-1 by ring]
 
-/-- Identity under the stated parameter and domain assumptions: `upperIncGamma a z=2*z^(a/2)*exp
-(-z)/Gamma (1-a)*(∫ t : ℝ in Ioi 0, exp (-t : ℂ)*(t : ℂ)^(-a/2)*DLMF.Bessel.besselK a
-(2*(z*t)^(1/2 : ℂ)))`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`upperIncompleteGamma a z=2*z^(a/2)*exp (-z)/Gamma (1-a)*(∫ t : ℝ in Ioi 0, exp (-t : ℂ)*(t :
+ℂ)^(-a/2)*DLMF.Bessel.besselK a (2*(z*t)^(1/2 : ℂ)))`. -/
 @[dlmf 8.6.E6]
-theorem upperIncGamma_besselK_integral {a : ℂ} (ha : a.re < 1) {z : ℂ} (hz : z ∈ slitPlane) :
-    upperIncGamma a z=2*z^(a/2)*exp (-z)/Gamma
+theorem upperIncompleteGamma_besselK_integral {a : ℂ} (ha : a.re < 1) {z : ℂ} (hz : z ∈ slitPlane) :
+    upperIncompleteGamma a z=2*z^(a/2)*exp (-z)/Gamma
         (1-a)*(∫ t : ℝ in Ioi 0,
         exp (-t : ℂ)*(t : ℂ)^(-a/2)*DLMF.Bessel.besselK a (2*(z*t)^(1/2 : ℂ))) := by
   -- DLMF 13.4.7 at `a = b = 1 - a`, with `K_{-a} = K_a`.
@@ -384,15 +388,15 @@ theorem upperIncGamma_besselK_integral {a : ℂ} (ha : a.re < 1) {z : ℂ} (hz :
       ∫ t : ℝ in Ioi 0, exp (-t : ℂ)*(t : ℂ)^(-a/2)*DLMF.Bessel.besselK a (2*(z*t)^(1/2 : ℂ)) := by
     refine setIntegral_congr_fun measurableSet_Ioi fun t ht => ?_
     rw [DLMF.Bessel.besselK_neg a (two_mul_cpow_half_mem_slitPlane hz ht)]
-  rw [upperIncGamma, h, hi]
+  rw [upperIncompleteGamma, h, hi]
   ring
 
-/-- Identity under the stated parameter and domain assumptions: `upperIncGamma a z=z^a*(∫ t : ℝ in
-Ioi 0, exp (a*t-z*Real.exp t))`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`upperIncompleteGamma a z=z^a*(∫ t : ℝ in Ioi 0, exp (a*t-z*Real.exp t))`. -/
 @[dlmf 8.6.E7]
-theorem upperIncGamma_logarithmic_integral (a : ℂ) {z : ℂ} (hz : 0 < z.re) :
-    upperIncGamma a z=z^a*(∫ t : ℝ in Ioi 0, exp (a*t-z*Real.exp t)) := by
-  rw [upperIncGamma_laplace_integral_complex a hz, mul_assoc]
+theorem upperIncompleteGamma_logarithmic_integral (a : ℂ) {z : ℂ} (hz : 0 < z.re) :
+    upperIncompleteGamma a z=z^a*(∫ t : ℝ in Ioi 0, exp (a*t-z*Real.exp t)) := by
+  rw [upperIncompleteGamma_laplace_integral_complex a hz, mul_assoc]
   congr 1
   have hshift := setIntegral_Ioi_comp_add_right
     (fun s : ℝ => exp (-z*(s-1))*(s:ℂ)^(a-1)) 0 1
@@ -411,11 +415,13 @@ theorem upperIncGamma_logarithmic_integral (a : ℂ) {z : ℂ} (hz : 0 < z.re) :
   congr 1
   ring
 
-/-- Identity under the stated parameter and domain assumptions: `lowerIncGamma a z = -I*z^a/(2*sin
-(π*a))*(∫ θ : ℝ in (-π)..π, I*exp (a*I*θ+z*exp (I*θ)))`. -/
+/-- Identity under the stated parameter and domain assumptions:
+`lowerIncompleteGamma a z = -I*z^a/(2*sin (π*a))*(∫ θ : ℝ in (-π)..π, I*exp (a*I*θ+z*exp (I*θ)))`.
+-/
 @[dlmf 8.6.E8]
-theorem lowerIncGamma_circle_integral {a : ℂ} (ha : ∀ n : ℤ, a ≠ n) {z : ℂ} :
-    lowerIncGamma a z = -I*z^a/(2*sin (π*a))*(∫ θ : ℝ in (-π)..π, I*exp (a*I*θ+z*exp (I*θ))) := by
+theorem lowerIncompleteGamma_circle_integral {a : ℂ} (ha : ∀ n : ℤ, a ≠ n) {z : ℂ} :
+    lowerIncompleteGamma a z =
+        -I*z^a/(2*sin (π*a))*(∫ θ : ℝ in (-π)..π, I*exp (a*I*θ+z*exp (I*θ))) := by
   have ha' : ∀ n : ℕ, a ≠ -n := fun n h => ha (-n) (by push_cast; exact h)
   have hsin : sin (π*a) ≠ 0 := by
     rw [Complex.sin_ne_zero_iff]
@@ -425,8 +431,8 @@ theorem lowerIncGamma_circle_integral {a : ℂ} (ha : ∀ n : ℤ, a ≠ n) {z :
       field_simp at hk
       linear_combination hk)
   rw [intervalIntegral.integral_const_mul, ← (hasSum_integral_exp_circle ha' z).tsum_eq,
-    tsum_mul_left, lowerIncGamma_eq_regularized ha', regularizedConfluent_self_succ_neg,
-    ← (scIncGamma_hasSum_alternating ha' z).tsum_eq]
+    tsum_mul_left, lowerIncompleteGamma_eq_regularized ha', regularizedConfluent_self_succ_neg,
+    ← (tricomiIncompleteGamma_hasSum_alternating ha' z).tsum_eq]
   have hG := Gamma_ne_zero ha'
   have hT : (∑' k : ℕ, (-z)^k/(Gamma a*(k.factorial : ℂ)*(a+k))) =
       (∑' k : ℕ, (-z)^k/((k.factorial : ℂ)*(a+k)))/Gamma a := by
@@ -528,12 +534,12 @@ theorem upperGammaIndentPV_converges {a z : ℂ} (ha : -1 < a.re) (hz : 0 < z.re
   rw [hv, hl.limUnder_eq]
   exact hl
 
-/-- Identity under the stated parameter and domain assumptions: `upperIncGammaOnLog (-a) (log
+/-- Identity under the stated parameter and domain assumptions: `upperIncompleteGammaOnLog (-a) (log
 z+ε*π*I)=exp z*exp (-ε*π*I*a)/Gamma (1+a)*(upperGammaIndentPV a z-ε*π*I*exp (-z))`. -/
 @[dlmf 8.6.E9]
-theorem upperIncGamma_indented_integral {a z : ℂ} (ha : -1 < a.re) (hz : 0 < z.re) {ε : ℝ}
+theorem upperIncompleteGamma_indented_integral {a z : ℂ} (ha : -1 < a.re) (hz : 0 < z.re) {ε : ℝ}
     (hε : ε=1 ∨ ε = -1) :
-    upperIncGammaOnLog (-a) (log z+ε*π*I)=exp z*exp (-ε*π*I*a)/Gamma
+    upperIncompleteGammaOnLog (-a) (log z+ε*π*I)=exp z*exp (-ε*π*I*a)/Gamma
         (1+a)*(upperGammaIndentPV a z-ε*π*I*exp (-z)) := by
   sorry
 
@@ -634,7 +640,7 @@ theorem differentiableOn_integral_upperIncGammaMBIntegrand (a : ℂ) {c : ℝ} (
 /-- DLMF 8.6.11 for real `x > 0`, from the Barnes integral for `U` (DLMF 13.4.18). -/
 theorem integral_upperIncGammaMBIntegrand_ofReal (a : ℂ) {x : ℝ} (hx : 0 < x) {c : ℝ} (hc : 0 < c)
     (hca : 0 < c+a.re) :
-    ∫ y, upperIncGammaMBIntegrand a x c y = 2*π*upperIncGamma a x := by
+    ∫ y, upperIncGammaMBIntegrand a x c y = 2*π*upperIncompleteGamma a x := by
   have hx0 : (x : ℂ) ≠ 0 := ofReal_ne_zero.mpr hx.ne'
   have hB := kummerU_barnes_exp (a := 1-a) (b := 1-a) (σ := c+a.re) hx
     (by simp; linarith) hca
@@ -661,7 +667,8 @@ theorem integral_upperIncGammaMBIntegrand_ofReal (a : ℂ) {x : ℝ} (hx : 0 < x
       cpow_add _ _ hx0, cpow_neg (x:ℂ) a]
     have hxa : (x:ℂ)^a ≠ 0 := cpow_ne_zero_iff.mpr (Or.inl hx0)
     field_simp
-  rw [hshift, integral_const_mul, integral_add_right_eq_self (fun t => H t) a.im, upperIncGamma, hB]
+  rw [hshift, integral_const_mul, integral_add_right_eq_self (fun t => H t) a.im,
+      upperIncompleteGamma, hB]
   have hpi : (π:ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
   have he : exp (-(x:ℂ)) * exp x = 1 := by rw [← exp_add]; simp
   rw [show (1:ℂ) - (1 - a) = a by ring]
@@ -669,29 +676,29 @@ theorem integral_upperIncGammaMBIntegrand_ofReal (a : ℂ) {x : ℝ} (hx : 0 < x
   linear_combination -((x:ℂ)^a * (∫ t, H t)) * he
 
 /-- Identity under the stated parameter and domain assumptions: `HasIntegralWholeLine (fun y : ℝ
-=> let s : ℂ := c+y*I; Gamma (s+a)*z^(-s)/s) (2*π*upperIncGamma a z)`. -/
+=> let s : ℂ := c+y*I; Gamma (s+a)*z^(-s)/s) (2*π*upperIncompleteGamma a z)`. -/
 @[dlmf 8.6.E11]
-theorem upperIncGamma_mellinBarnes (a : ℂ) {z : ℂ} (hz : 0 < z.re) {c : ℝ} (hc : 0 < c)
+theorem upperIncompleteGamma_mellinBarnes (a : ℂ) {z : ℂ} (hz : 0 < z.re) {c : ℝ} (hc : 0 < c)
     (hca : 0 < c+a.re) :
     HasIntegralWholeLine (fun y : ℝ => let s : ℂ := c+y*I; Gamma (s+a)*z^(-s)/s)
-        (2*π*upperIncGamma a z) := by
+        (2*π*upperIncompleteGamma a z) := by
   set U : Set ℂ := {z : ℂ | 0 < z.re}
   have hUo : IsOpen U := isOpen_lt continuous_const continuous_re
   have hF := (differentiableOn_integral_upperIncGammaMBIntegrand a hc hca).analyticOnNhd hUo
-  have hG : AnalyticOnNhd ℂ (fun z => 2*π*upperIncGamma a z) U := by
+  have hG : AnalyticOnNhd ℂ (fun z => 2*π*upperIncompleteGamma a z) U := by
     refine DifferentiableOn.analyticOnNhd (fun z hz => ?_) hUo
-    unfold upperIncGamma
+    unfold upperIncompleteGamma
     exact ((differentiableAt_neg_iff.mpr differentiableAt_id |>.cexp).mul
       (differentiableAt_kummerU _ _ (Or.inl hz))).const_mul _ |>.differentiableWithinAt
   have h1 : (1:ℂ) ∈ U := by simp [U]
   have hfreq : ∃ᶠ w in 𝓝[≠] (1:ℂ), (∫ y, upperIncGammaMBIntegrand a w c y) =
-      2*π*upperIncGamma a w := by
+      2*π*upperIncompleteGamma a w := by
     have hmap : Tendsto (fun x : ℝ => (x:ℂ)) (𝓝[≠] (1:ℝ)) (𝓝[≠] (1:ℂ)) := by
       have := continuous_ofReal.continuousWithinAt.tendsto_nhdsWithin (s := {(1:ℝ)}ᶜ)
         (t := {(1:ℂ)}ᶜ) (x := 1) (fun x hx h => hx (by simp at h ⊢; exact_mod_cast h))
       simpa using this
     have hev : ∀ᶠ x : ℝ in 𝓝[≠] (1:ℝ), (∫ y, upperIncGammaMBIntegrand a (x:ℂ) c y) =
-        2*π*upperIncGamma a x := by
+        2*π*upperIncompleteGamma a x := by
       filter_upwards [nhdsWithin_le_nhds (lt_mem_nhds (show (0:ℝ) < 1 by norm_num))] with x hx
       exact integral_upperIncGammaMBIntegrand_ofReal a hx hc hca
     exact hmap.frequently hev.frequently
@@ -743,15 +750,15 @@ theorem IncompleteGammaBarnes.lowerIntegrand_eq_upper (a z : ℂ) (c y : ℝ) :
 theorem IncompleteGammaBarnes.integral_right {a z : ℂ} (hz : 0 < z.re) {c : ℝ} (hc : 0 < c)
     (hca : a.re < c) :
     Integrable (IncompleteGammaBarnes.lowerIntegrand a z c) ∧ ∫ y,
-        IncompleteGammaBarnes.lowerIntegrand a z c y = -(2*π*upperIncGamma a z) := by
+        IncompleteGammaBarnes.lowerIntegrand a z c y = -(2*π*upperIncompleteGamma a z) := by
   have hc0 : 0 < c - a.re := by linarith
   have hca' : 0 < (c - a.re) + a.re := by linarith
   have hint := integrable_upperIncGammaMBIntegrand a hz hc0 hca'
   have hfun : IncompleteGammaBarnes.lowerIntegrand a z c = fun y =>
       -upperIncGammaMBIntegrand a z (c - a.re) (y - a.im) :=
     funext fun y => IncompleteGammaBarnes.lowerIntegrand_eq_upper a z c y
-  have hv := upperIncGamma_mellinBarnes a hz hc0 hca'
-  have hv' : ∫ y, upperIncGammaMBIntegrand a z (c - a.re) y = 2*π*upperIncGamma a z :=
+  have hv := upperIncompleteGamma_mellinBarnes a hz hc0 hca'
+  have hv' : ∫ y, upperIncGammaMBIntegrand a z (c - a.re) y = 2*π*upperIncompleteGamma a z :=
     IncompleteGammaBarnes.integral_eq hint hv
   refine ⟨hfun ▸ (hint.comp_sub_right a.im).neg, ?_⟩
   rw [hfun, integral_neg,
@@ -935,9 +942,9 @@ theorem IncompleteGammaBarnes.integral_value {a z : ℂ} (ha : ∀ n : ℕ, a �
     {c : ℝ} (hc : 0 < c)
     (hca : c ≠ a.re) :
     ∫ y, IncompleteGammaBarnes.lowerIntegrand a z c y =
-        2*π*(lowerIncGamma a z-(if a.re < c then Gamma a else 0)) := by
+        2*π*(lowerIncompleteGamma a z-(if a.re < c then Gamma a else 0)) := by
   have hz0 : z ≠ 0 := fun h => by rw [h] at hz; simp at hz
-  have hsum := lowerIncGamma_add_upperIncGamma ha hz0
+  have hsum := lowerIncompleteGamma_add_upperIncompleteGamma ha hz0
   by_cases h : a.re < c
   · simp only [h, ↓reduceIte]
     have hR := (IncompleteGammaBarnes.integral_right hz hc h).2
@@ -975,10 +982,10 @@ theorem IncompleteGammaBarnes.integral_value {a z : ℂ} (ha : ∀ n : ℕ, a �
 
 /-- The separating contour expressed by a vertical line and its crossed-pole residue. -/
 @[dlmf 8.6.E10]
-theorem lowerIncGamma_mellinBarnes {a z : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (hz : 0 < z.re) {c : ℝ}
+theorem lowerIncompleteGamma_mellinBarnes {a z : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (hz : 0 < z.re) {c : ℝ}
     (hc : 0 < c) (hca : c ≠ a.re) :
     HasIntegralWholeLine (fun y : ℝ => let s : ℂ := c+y*I; Gamma s/(a-s)*z^(a-s))
-        (2*π*(lowerIncGamma a z-(if a.re < c then Gamma a else 0))) := by
+        (2*π*(lowerIncompleteGamma a z-(if a.re < c then Gamma a else 0))) := by
   have hfun : (fun y : ℝ => let s : ℂ := c+y*I; Gamma s/(a-s)*z^(a-s)) =
       IncompleteGammaBarnes.lowerIntegrand a z c := rfl
   rw [hfun, ← IncompleteGammaBarnes.integral_value ha hz hc hca]

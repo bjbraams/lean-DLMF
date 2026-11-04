@@ -27,7 +27,7 @@ duplicated. Links and proof statuses below come from the compiled DLMF tag dump 
 `#print axioms` audit; a declaration whose proof uses an admitted lemma is marked
 "proved modulo".
 
-All 107 in-scope numbered IDs are covered by 124 tagged declarations (16 definitions, 42 proved, 1 proved modulo admitted lemmas, 65 admitted); 48 IDs carry no admission, two are partly proved (20.7.E11, 20.9.E2) and 57 are admitted. With the prose-tagged declarations the area has 143 tagged local declarations: 16 definitions, 51 proved, 2 proved modulo admitted lemmas and 74 direct admissions (two added 2026-10-25 as full-domain corrected forms of 20.7.E34 and 20.9.E2, and two for 20.9.E3 in terms of the complex R_F, `carlsonRF_jacobiTheta_rect` and `carlsonRF_jacobiTheta_eventually`, added by the Chapter 19 acquisition). Proved results include the Fourier series, lattice quasi-periodicity and half-period shifts (§20.2), the zeros (§20.2(iv)), the product forms 20.4.3–20.4.5 and 20.5.1–20.5.4 from the Jacobi triple product, the τ + 1 and −1/τ transformations 20.7.26–20.7.33, and the elliptic-modular properties of k².
+All 107 in-scope numbered IDs are covered by 124 tagged declarations (16 definitions, 42 proved, 1 proved modulo admitted lemmas, 65 admitted); 48 IDs carry no admission, two are partly proved (20.7.E11, 20.9.E2) and 57 are admitted. With the prose-tagged declarations the area has 143 tagged local declarations: 16 definitions, 51 proved, 2 proved modulo admitted lemmas and 74 direct admissions (two added 2026-10-25 as full-domain corrected forms of 20.7.E34 and 20.9.E2, and two for 20.9.E3 in terms of the complex R_F, `symmetricEllipticRF_jacobiTheta_rect` and `symmetricEllipticRF_jacobiTheta_eventually`, added by the Chapter 19 acquisition). Proved results include the Fourier series, lattice quasi-periodicity and half-period shifts (§20.2), the zeros (§20.2(iv)), the product forms 20.4.3–20.4.5 and 20.5.1–20.5.4 from the Jacobi triple product, the τ + 1 and −1/τ transformations 20.7.26–20.7.33, and the elliptic-modular properties of k².
 
 ## Domains, conventions and source corrections
 
@@ -56,7 +56,7 @@ All 107 in-scope numbered IDs are covered by 124 tagged declarations (16 definit
   An independent check (2026-10-25) shows the identity also holds for complex z near the real
   segment (e.g. z = 1.4+0.5i, and τ = 0.3+0.6i); the true condition is a branch condition
   (continuation of R_F from z = 0, where all three arguments are 1). Revisited 2026-10-25 with
-  the complex Chapter 19 `R_F` (`DLMF.EllipticIntegrals.symEllIntRF`): two corrected complex
+  the complex Chapter 19 `R_F` (`DLMF.EllipticIntegrals.symmetricEllipticRF`): two corrected complex
   forms are acquired, for τ = it with z in the open period rectangle |Re z| < π/2,
   |Im z| < πt/2 (mpmath: no failure at 3500 points, including points near the edges; fails at
   373 of 500 points with πt/2 < |Im z| < 0.9πt), and for general τ with z in a punctured
@@ -65,16 +65,16 @@ All 107 in-scope numbered IDs are covered by 124 tagged declarations (16 definit
   with τ in the Γ(2) fundamental region).
 - **Domain restriction (20.9.2).** For complex τ the identity `K(k) = (π/2)θ₃²(0|τ)` with the
   principal branch of `K` holds only on part of the upper half-plane; with the project's real
-  `Real.compEllIntKm` it is acquired in the rectangular case `τ = it`. With the principal complex
-  `K` of Chapter 22 (`EllipticIntegrals.compEllIntKk`) the exact region of validity is the union of
+  `Real.completeEllipticKOfParameter` it is acquired in the rectangular case `τ = it`. With the principal complex
+  `K` of Chapter 22 (`EllipticIntegrals.completeEllipticK`) the exact region of validity is the union of
   the translates `F + 2n` of the Γ(2) fundamental region
   `F = {|Re τ| < 1, |τ − 1/2| > 1/2, |τ + 1/2| > 1/2}` (K′ = −iτK holds on F itself); this
-  full-domain form is `compEllIntKk_eq_jacobiThetaThreeNullTau_fundamental`.
+  full-domain form is `completeEllipticK_eq_jacobiThetaThreeNullTau_fundamental`.
 - **Exceptional point (20.10.3).** The right side has a removable singularity at `s = 1`,
   where Mathlib's totalized `riemannZeta 1` would give 0. The identity is stated for `s ≠ 1`
   and the value `ln 2` at `s = 1` separately; both were checked numerically.
 - Carlson's `R_F` in 20.9.3–20.9.5 is the complex Chapter 19 integral
-  `DLMF.EllipticIntegrals.symEllIntRF` (DLMF 19.16.1); in the rectangular forms its arguments are
+  `DLMF.EllipticIntegrals.symmetricEllipticRF` (DLMF 19.16.1); in the rectangular forms its arguments are
   nonnegative reals (cast to ℂ). It replaced the local real placeholder `th20_carlsonRF` on
   2026-10-25.
 
@@ -114,15 +114,15 @@ All 107 in-scope numbered IDs are covered by 124 tagged declarations (16 definit
 
 ## [§20.5 Infinite Products and Related Results](https://dlmf.nist.gov/20.5)
 
-- [20.5.E1](https://dlmf.nist.gov/20.5.E1): [`DLMF.Theta.jacobiThetaOneTau_hasProd`](DLMF/Theta/Products/InfiniteProducts.lean#L285) (proved). Proved from the triple product (17.8.E1) via 20.5.E2; `Multipliable ∧ θ = 2q^{1/4} sin z ∏′` (valid also at sin z = 0).
-- [20.5.E2](https://dlmf.nist.gov/20.5.E2): [`DLMF.Theta.jacobiThetaTwoTau_hasProd`](DLMF/Theta/Products/InfiniteProducts.lean#L240) (proved). Proved from the triple product and `qPochhammerInf_shift`.
-- [20.5.E3](https://dlmf.nist.gov/20.5.E3): [`DLMF.Theta.jacobiThetaThreeTau_hasProd`](DLMF/Theta/Products/InfiniteProducts.lean#L308) (proved). Proved from the triple product.
-- [20.5.E4](https://dlmf.nist.gov/20.5.E4): [`DLMF.Theta.jacobiThetaFourTau_hasProd`](DLMF/Theta/Products/InfiniteProducts.lean#L332) (proved). Proved from 20.5.E3 at z + π/2.
-- [20.5.E5](https://dlmf.nist.gov/20.5.E5): [`DLMF.Theta.jacobiThetaOneTau_hasProd_sin`](DLMF/Theta/Products/InfiniteProducts.lean#L353) (proved). Im τ > 0; factors sin(nπτ) ≠ 0.
-- [20.5.E6](https://dlmf.nist.gov/20.5.E6): [`DLMF.Theta.jacobiThetaTwoTau_hasProd_cos`](DLMF/Theta/Products/InfiniteProducts.lean#L385) (proved). Im τ > 0.
-- [20.5.E7](https://dlmf.nist.gov/20.5.E7): [`DLMF.Theta.jacobiThetaThreeTau_hasProd_cos`](DLMF/Theta/Products/InfiniteProducts.lean#L426) (proved). Im τ > 0.
-- [20.5.E8](https://dlmf.nist.gov/20.5.E8): [`DLMF.Theta.jacobiThetaFourTau_hasProd_sin`](DLMF/Theta/Products/InfiniteProducts.lean#L465) (proved). Im τ > 0.
-- [20.5.E9](https://dlmf.nist.gov/20.5.E9): [`DLMF.Theta.jacobiThetaThreeTau_triple_product`](DLMF/Theta/Products/InfiniteProducts.lean#L502) (proved). Both the bilateral series (`HasSum` over ℤ) and the product; p = e^{iπz}.
+- [20.5.E1](https://dlmf.nist.gov/20.5.E1): [`DLMF.Theta.jacobiThetaOneTau_hasProd`](DLMF/Theta/Products/InfiniteProducts.lean#L286) (proved). Proved from the triple product (17.8.E1) via 20.5.E2; `Multipliable ∧ θ = 2q^{1/4} sin z ∏′` (valid also at sin z = 0).
+- [20.5.E2](https://dlmf.nist.gov/20.5.E2): [`DLMF.Theta.jacobiThetaTwoTau_hasProd`](DLMF/Theta/Products/InfiniteProducts.lean#L241) (proved). Proved from the triple product and `qPochhammerInf_shift`.
+- [20.5.E3](https://dlmf.nist.gov/20.5.E3): [`DLMF.Theta.jacobiThetaThreeTau_hasProd`](DLMF/Theta/Products/InfiniteProducts.lean#L309) (proved). Proved from the triple product.
+- [20.5.E4](https://dlmf.nist.gov/20.5.E4): [`DLMF.Theta.jacobiThetaFourTau_hasProd`](DLMF/Theta/Products/InfiniteProducts.lean#L333) (proved). Proved from 20.5.E3 at z + π/2.
+- [20.5.E5](https://dlmf.nist.gov/20.5.E5): [`DLMF.Theta.jacobiThetaOneTau_hasProd_sin`](DLMF/Theta/Products/InfiniteProducts.lean#L354) (proved). Im τ > 0; factors sin(nπτ) ≠ 0.
+- [20.5.E6](https://dlmf.nist.gov/20.5.E6): [`DLMF.Theta.jacobiThetaTwoTau_hasProd_cos`](DLMF/Theta/Products/InfiniteProducts.lean#L386) (proved). Im τ > 0.
+- [20.5.E7](https://dlmf.nist.gov/20.5.E7): [`DLMF.Theta.jacobiThetaThreeTau_hasProd_cos`](DLMF/Theta/Products/InfiniteProducts.lean#L427) (proved). Im τ > 0.
+- [20.5.E8](https://dlmf.nist.gov/20.5.E8): [`DLMF.Theta.jacobiThetaFourTau_hasProd_sin`](DLMF/Theta/Products/InfiniteProducts.lean#L466) (proved). Im τ > 0.
+- [20.5.E9](https://dlmf.nist.gov/20.5.E9): [`DLMF.Theta.jacobiThetaThreeTau_triple_product`](DLMF/Theta/Products/InfiniteProducts.lean#L503) (proved). Both the bilateral series (`HasSum` over ℤ) and the product; p = e^{iπz}.
 - [20.5.E10](https://dlmf.nist.gov/20.5.E10): [`DLMF.Theta.jacobiThetaOneTau_logDeriv`](DLMF/Theta/Products/LogDerivativesAndDoubleProducts.lean#L54) (proved). Strip |Im z| < π Im τ; both series; at the real zeros of θ₁ both sides are 0 in Lean (removable singularity, see module docstring).
 - [20.5.E11](https://dlmf.nist.gov/20.5.E11): [`DLMF.Theta.jacobiThetaTwoTau_logDeriv`](DLMF/Theta/Products/LogDerivativesAndDoubleProducts.lean#L112) (proved). Strip |Im z| < π Im τ; both series.
 - [20.5.E12](https://dlmf.nist.gov/20.5.E12): [`DLMF.Theta.jacobiThetaThreeTau_logDeriv`](DLMF/Theta/Products/LogDerivativesAndDoubleProducts.lean#L168) (proved). Strip |Im z| < π Im τ/2; both series.
@@ -157,7 +157,7 @@ All 107 in-scope numbered IDs are covered by 124 tagged declarations (16 definit
 - [20.7.E8](https://dlmf.nist.gov/20.7.E8): [`DLMF.Theta.jacobiThetaThreeTau_add_mul_sub`](DLMF/Theta/Identities.lean#L535) (proved).
 - [20.7.E9](https://dlmf.nist.gov/20.7.E9): [`DLMF.Theta.jacobiThetaFourTau_add_mul_sub`](DLMF/Theta/Identities.lean#L552) (proved).
 - [20.7.E10](https://dlmf.nist.gov/20.7.E10): [`DLMF.Theta.jacobiThetaOneTau_two_mul`](DLMF/Theta/Identities.lean#L571) (proved).
-- [20.7.E11](https://dlmf.nist.gov/20.7.E11): [`DLMF.Theta.jacobiTheta_reduction_two_mul`](DLMF/Theta/Identities.lean#L591) (proved); [`DLMF.Elliptic.Real.jacobiThetaThreeNullQ_mul_jacobiThetaFourNullQ`](DLMF/Elliptic/ThetaAGM.lean#L151) (proved). q² ↔ 2τ. **Corrected** (formalization): nonvanishing hypotheses on the denominators θ₁(2z|2τ), θ₄(2z|2τ), since the printed quotient is false at their zeros under x/0 = 0. The z = 0 real-nome case is the existing `Real.jacobiThetaThreeNullQ_mul_jacobiThetaFourNullQ`.
+- [20.7.E11](https://dlmf.nist.gov/20.7.E11): [`DLMF.Theta.jacobiTheta_reduction_two_mul`](DLMF/Theta/Identities.lean#L591) (proved); [`DLMF.Elliptic.Real.jacobiThetaThreeNullQ_mul_jacobiThetaFourNullQ`](DLMF/Elliptic/ThetaAGM.lean#L152) (proved). q² ↔ 2τ. **Corrected** (formalization): nonvanishing hypotheses on the denominators θ₁(2z|2τ), θ₄(2z|2τ), since the printed quotient is false at their zeros under x/0 = 0. The z = 0 real-nome case is the existing `Real.jacobiThetaThreeNullQ_mul_jacobiThetaFourNullQ`.
 - [20.7.E12](https://dlmf.nist.gov/20.7.E12): [`DLMF.Theta.jacobiTheta_reduction_two_tau`](DLMF/Theta/Identities.lean#L607) (proved). q² ↔ 2τ. **Corrected** (formalization): nonvanishing hypotheses on θ₁(z|τ), θ₂(z|τ), since the quotients are false at their zeros under x/0 = 0.
 - [20.7.E13](https://dlmf.nist.gov/20.7.E13): [`DLMF.Theta.jacobiThetaOneTau_mul_watson`](DLMF/Theta/Identities.lean#L626) (proved). q² ↔ 2τ.
 - [20.7.E14](https://dlmf.nist.gov/20.7.E14): [`DLMF.Theta.jacobiThetaThreeTau_mul_watson`](DLMF/Theta/Identities.lean#L634) (proved). q² ↔ 2τ.
@@ -189,10 +189,10 @@ All 107 in-scope numbered IDs are covered by 124 tagged declarations (16 definit
 ## [§20.9 Relations to Other Functions](https://dlmf.nist.gov/20.9)
 
 - [20.9.E1](https://dlmf.nist.gov/20.9.E1): [`DLMF.Theta.thetaModulusK`](DLMF/Theta/Relations.lean#L72) (definition). Definition k(τ); k′ = θ₄²/θ₃² as a companion definition.
-- [20.9.E2](https://dlmf.nist.gov/20.9.E2): [`DLMF.Theta.compEllIntK_eq_jacobiThetaThreeNullTau`](DLMF/Theta/Relations.lean#L105) (proved); [`DLMF.Theta.compEllIntKk_eq_jacobiThetaThreeNullTau_fundamental`](DLMF/Theta/Relations.lean#L126) (admitted); [`DLMF.Elliptic.Real.compEllIntKm_eq_jacobiThetaThreeNullQ`](DLMF/Elliptic/ThetaAGM.lean#L349) (proved). **Corrected**: with the principal complex K the printed identity holds only for τ in the translates F + 2n of the Γ(2) fundamental region F = {|Re τ| < 1, |τ ∓ 1/2| > 1/2} (fails at 58 of 308 random τ). Rectangular case τ = it (real `Real.compEllIntKm`), also K′ = −iτK; full-domain form with the principal `EllipticIntegrals.compEllIntKk`: K = (π/2)θ₃² and K′ = −iτK on F, K = (π/2)θ₃² on every F + 2n (mpmath: no failure at 676 points of F; region agrees exactly with the validity set at 500 random τ). The existing real-nome theorem `Real.compEllIntKm_eq_jacobiThetaThreeNullQ` is the first equation with m = 1 − θ₄⁴/θ₃⁴.
-- [20.9.E3](https://dlmf.nist.gov/20.9.E3): [`DLMF.Theta.carlsonRF_jacobiTheta`](DLMF/Theta/Relations.lean#L146) (admitted); [`DLMF.Theta.carlsonRF_jacobiTheta_rect`](DLMF/Theta/Relations.lean#L162) (admitted); [`DLMF.Theta.carlsonRF_jacobiTheta_eventually`](DLMF/Theta/Relations.lean#L180) (admitted). **Corrected** (domain): the printed identity needs a branch condition (continuation of R_F from z = 0). The left side is π-periodic and even, the right side is not; numerically the printed identity fails at z = 1.6, 2, 2.5 (τ = 0.8i). Acquired for τ = it and real 0 < |z| ≤ π/2; for τ = it and complex z ≠ 0 in the open period rectangle |Re z| < π/2, |Im z| < πt/2 (mpmath: no failure at 3500 points); and for general τ and z in a punctured neighbourhood of 0. R_F is the complex Chapter 19 `symEllIntRF`.
-- [20.9.E4](https://dlmf.nist.gov/20.9.E4): [`DLMF.Theta.carlsonRF_zero_jacobiThetaNull`](DLMF/Theta/Relations.lean#L198) (proved). τ = it.
-- [20.9.E5](https://dlmf.nist.gov/20.9.E5): [`DLMF.Theta.exp_carlsonRF_ratio_eq_nome`](DLMF/Theta/Relations.lean#L243) (proved). τ = it, q = e^{−πt}.
+- [20.9.E2](https://dlmf.nist.gov/20.9.E2): [`DLMF.Theta.compEllIntK_eq_jacobiThetaThreeNullTau`](DLMF/Theta/Relations.lean#L105) (proved); [`DLMF.Theta.completeEllipticK_eq_jacobiThetaThreeNullTau_fundamental`](DLMF/Theta/Relations.lean#L126) (admitted); [`DLMF.Elliptic.Real.completeEllipticKOfParameter_eq_jacobiThetaThreeNullQ`](DLMF/Elliptic/ThetaAGM.lean#L350) (proved). **Corrected**: with the principal complex K the printed identity holds only for τ in the translates F + 2n of the Γ(2) fundamental region F = {|Re τ| < 1, |τ ∓ 1/2| > 1/2} (fails at 58 of 308 random τ). Rectangular case τ = it (real `Real.completeEllipticKOfParameter`), also K′ = −iτK; full-domain form with the principal `EllipticIntegrals.completeEllipticK`: K = (π/2)θ₃² and K′ = −iτK on F, K = (π/2)θ₃² on every F + 2n (mpmath: no failure at 676 points of F; region agrees exactly with the validity set at 500 random τ). The existing real-nome theorem `Real.completeEllipticKOfParameter_eq_jacobiThetaThreeNullQ` is the first equation with m = 1 − θ₄⁴/θ₃⁴.
+- [20.9.E3](https://dlmf.nist.gov/20.9.E3): [`DLMF.Theta.symmetricEllipticRF_jacobiTheta`](DLMF/Theta/Relations.lean#L309) (proved); [`DLMF.Theta.symmetricEllipticRF_jacobiTheta_rect`](DLMF/Theta/Relations.lean#L335) (admitted); [`DLMF.Theta.symmetricEllipticRF_jacobiTheta_eventually`](DLMF/Theta/Relations.lean#L353) (admitted). **Corrected** (domain): the printed identity needs a branch condition (continuation of R_F from z = 0). The left side is π-periodic and even, the right side is not; numerically the printed identity fails at z = 1.6, 2, 2.5 (τ = 0.8i). Acquired for τ = it and real 0 < |z| ≤ π/2; for τ = it and complex z ≠ 0 in the open period rectangle |Re z| < π/2, |Im z| < πt/2 (mpmath: no failure at 3500 points); and for general τ and z in a punctured neighbourhood of 0. R_F is the complex Chapter 19 `symmetricEllipticRF`.
+- [20.9.E4](https://dlmf.nist.gov/20.9.E4): [`DLMF.Theta.symmetricEllipticRF_zero_jacobiThetaNull`](DLMF/Theta/Relations.lean#L371) (proved). τ = it.
+- [20.9.E5](https://dlmf.nist.gov/20.9.E5): [`DLMF.Theta.exp_symmetricEllipticRF_ratio_eq_nome`](DLMF/Theta/Relations.lean#L418) (proved). τ = it, q = e^{−πt}.
 
 ## [§20.10 Integrals](https://dlmf.nist.gov/20.10)
 
@@ -261,10 +261,10 @@ A bibliographic pointer with no stated formula is not converted into an opaque a
 - [20.8.p1](https://dlmf.nist.gov/20.8#p1): Introduces 20.8.1; further expansions are only cited.
 - [20.9.i.p1](https://dlmf.nist.gov/20.9#i.p1), [20.9.i.p2](https://dlmf.nist.gov/20.9#i.p2): Introduce 20.9.1–20.9.5; the reference to 22.2.1 (`k` via theta constants) belongs to the Chapter 22 acquisition.
 - [20.9.ii.p1](https://dlmf.nist.gov/20.9#ii.p1): Cross-reference to §§22.2 and 23.6(i) (theta quotients for Jacobian and Weierstrass functions); acquired in the Chapter 22 and 23 modules, which import `DLMF.Theta.Basic`.
-- [20.9.ii.p2](https://dlmf.nist.gov/20.9#ii.p2): Acquired: [`DLMF.Theta.thetaModulusK_inversion`](DLMF/Theta/Relations.lean#L258) (proved); [`DLMF.Theta.thetaModulusK_sq_modular`](DLMF/Theta/Relations.lean#L256) (proved modulo admitted lemmas). Jacobi's inversion problem: existence and uniqueness of `t > 0` with `k(it) = k` for `0 < k < 1` (admitted).
+- [20.9.ii.p2](https://dlmf.nist.gov/20.9#ii.p2): Acquired: [`DLMF.Theta.thetaModulusK_inversion`](DLMF/Theta/Relations.lean#L433) (proved); [`DLMF.Theta.thetaModulusK_sq_modular`](DLMF/Theta/Relations.lean#L256) (proved modulo admitted lemmas). Jacobi's inversion problem: existence and uniqueness of `t > 0` with `k(it) = k` for `0 < k < 1` (admitted).
 - [20.9.ii.p3](https://dlmf.nist.gov/20.9#ii.p3): `k²` as the elliptic modular function: invariance under `τ ↦ τ + 2` and `λ(−1/τ) = 1 − λ(τ)` (proved from 20.7.E26–E33, modulo the admitted 20.7.E1 through 20.7.E5).
 - [20.9.iii.p1](https://dlmf.nist.gov/20.9#iii.p1): Cross-references to the zeta function; the Mellin transforms 20.10.E1–E3 carry the content.
-- [20.9.ii](https://dlmf.nist.gov/20.9.ii): [`DLMF.Theta.thetaModulusK_inversion`](DLMF/Theta/Relations.lean#L258) (proved); [`DLMF.Theta.thetaModulusK_sq_modular`](DLMF/Theta/Relations.lean#L284) (proved).
+- [20.9.ii](https://dlmf.nist.gov/20.9.ii): [`DLMF.Theta.thetaModulusK_inversion`](DLMF/Theta/Relations.lean#L433) (proved); [`DLMF.Theta.thetaModulusK_sq_modular`](DLMF/Theta/Relations.lean#L459) (proved).
 - [20.10.i.p1](https://dlmf.nist.gov/20.10#i.p1), [20.10.ii.p1](https://dlmf.nist.gov/20.10#ii.p1): Hypotheses `Re s > 1`, `Re s > 0`, `ℓ > 0`, `|Re β| + |Im β| ≤ ℓ` are built into 20.10.E1–E5.
 - [20.10.i.p2](https://dlmf.nist.gov/20.10#i.p2), [20.10.ii.p2](https://dlmf.nist.gov/20.10#ii.p2), [20.10.iii.p1](https://dlmf.nist.gov/20.10#iii.p1): Bibliographic pointers; no assertion.
 - [20.11.i.p1](https://dlmf.nist.gov/20.11#i.p1): Gauss sum definition and reciprocity: 20.11.E1–E2; "discrete analog of theta/Poisson" is a remark.

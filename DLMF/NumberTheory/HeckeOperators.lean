@@ -24,7 +24,7 @@ reduces to prime powers, and at a prime power it follows from the two-term recur
 
 ## Implementation notes
 
-The reduction follows `sigmaC_mul_sigmaC_eq_sum_divisors_gcd` (`DLMF.NumberTheory.Functions`),
+The reduction follows `sigmaCpow_mul_sigmaCpow_eq_sum_divisors_gcd` (`DLMF.NumberTheory.Functions`),
 here stated for general `f` and `w`.
 -/
 

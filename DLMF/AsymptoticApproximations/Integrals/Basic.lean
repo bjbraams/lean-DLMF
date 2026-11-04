@@ -9,6 +9,7 @@ public import Mathlib.Analysis.Calculus.Deriv.Basic
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 public import Mathlib.RingTheory.PowerSeries.Basic
 public import Mathlib.RingTheory.Binomial
+public import DLMF.BernoulliEuler.Basic.HigherOrder
 
 /-!
 # Asymptotics of integrals: definitions (DLMF §§2.3–2.4)
@@ -22,7 +23,7 @@ public import Mathlib.RingTheory.Binomial
   method, defined by the residue formula 2.3.18 in its formal form
   `bₛ = μ⁻¹ [τˢ] Q(τ) P(τ)^{-(λ+s)/μ}`, where `p(t) - p(a) = (t-a)^μ P(t-a)` and
   `q(t) = (t-a)^{λ-1} Q(t-a)`.
-* `bromwichPartial Q σ t η` (2.4.3, 2.4.6): the truncated inversion integral
+* `bromwichPartialIntegral Q σ t η` (2.4.3, 2.4.6): the truncated inversion integral
   `(2πi)⁻¹ ∫_{σ-iη}^{σ+iη} e^{tz} Q(z) dz`.
 * `stationaryPhaseP p q s` (2.3.21): `Pₛ = ((1/p') d/dt)ˢ (q/p')`.
 * `bleisteinA`, `bleisteinB`, `bleisteinW`, `bleisteinF` (2.3.26, 2.3.27, 2.3.33): the
@@ -58,6 +59,25 @@ def binomSeriesCoeff (p : ℕ → ℂ) (β : ℂ) (n : ℕ) : ℂ :=
   ∑ k ∈ range (n + 1), Ring.choose β k *
     PowerSeries.coeff n ((PowerSeries.mk fun j => if j = 0 then 0 else p j / p 0) ^ k)
 
+/-- For rational ratios `pⱼ/p₀ = qⱼ`, the binomial-series coefficient is the evaluation at `β`
+of the polynomial `BernoulliEuler.binomialSeriesCoeff g n` with `g = ∑_{j ≥ 1} qⱼ τʲ`. -/
+theorem binomSeriesCoeff_eq_eval_binomialSeriesCoeff (p : ℕ → ℂ) (q : ℕ → ℚ)
+    (hpq : ∀ j, j ≠ 0 → p j / p 0 = q j) (β : ℂ) (n : ℕ) :
+    binomSeriesCoeff p β n = ((BernoulliEuler.binomialSeriesCoeff
+      (PowerSeries.mk fun j => if j = 0 then 0 else q j) n).map (algebraMap ℚ ℂ)).eval β := by
+  have hG : (PowerSeries.mk fun j => if j = 0 then 0 else p j / p 0) =
+      PowerSeries.map (algebraMap ℚ ℂ) (PowerSeries.mk fun j => if j = 0 then 0 else q j) := by
+    ext j
+    by_cases hj : j = 0 <;> simp [hj, hpq]
+  rw [binomSeriesCoeff, BernoulliEuler.binomialSeriesCoeff, Polynomial.map_sum,
+    Polynomial.eval_finsetSum, hG]
+  refine sum_congr rfl fun k _ => ?_
+  rw [← map_pow, PowerSeries.coeff_map, Polynomial.map_mul, Polynomial.map_C, descPochhammer_map,
+    Polynomial.eval_mul, Polynomial.eval_C, Ring.choose_eq_smul, ← Polynomial.aeval_eq_smeval,
+    ← descPochhammer_map (algebraMap ℤ ℂ), Polynomial.eval_map_algebraMap, smul_eq_mul, map_div₀,
+    map_natCast]
+  ring
+
 /-- DLMF 2.3.18 (formal residue form, defining the `bₛ` of 2.3.15–2.3.16):
 `bₛ = μ⁻¹ Res_{t=a}[q(t)/(p(t) - p(a))^{(λ+s)/μ}]
 = μ⁻¹ p₀^{-(λ+s)/μ} [τˢ] Q(τ)(P(τ)/p₀)^{-(λ+s)/μ}`,
@@ -71,7 +91,7 @@ def laplaceCoeff (L₀ : ℂ) (p q : ℕ → ℂ) (lam mu : ℂ) (s : ℕ) : ℂ
 /-- DLMF 2.4.3, 2.4.6: the truncated inversion integral
 `(2πi)⁻¹ ∫_{σ-iη}^{σ+iη} e^{tz} Q(z) dz = (2π)⁻¹ ∫_{-η}^{η} e^{t(σ+iτ)} Q(σ+iτ) dτ`
 (path `z = σ + iτ`, `dz = i dτ`). -/
-def bromwichPartial (Q : ℂ → ℂ) (σ t η : ℝ) : ℂ :=
+def bromwichPartialIntegral (Q : ℂ → ℂ) (σ t η : ℝ) : ℂ :=
   ((2 * Real.pi : ℝ) : ℂ)⁻¹ *
     ∫ τ in -η..η, Complex.exp (t * (σ + τ * Complex.I)) * Q (σ + τ * Complex.I)
 

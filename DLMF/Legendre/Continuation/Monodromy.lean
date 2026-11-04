@@ -139,7 +139,7 @@ theorem EllipseTransport.hasDerivAt_movingPoint (ζ : ℂ) (s : ℤ) (t : ℝ) :
 noncomputable def EllipseTransport.transport (ν μ ζ : ℂ) (s : ℤ) (t : ℝ) : ℂ :=
   Real.sqrt π * (1 - EllipseTransport.movingPoint ζ s t ^ 2)^μ *
       (ζ^(ν+1) * exp (-(ν+1)*((s:ℂ)*π*I*t))) *
-    regularizedGaussHG (μ+1/2) (ν+μ+1) (ν+3/2) (EllipseTransport.movingPoint ζ s t ^ 2)
+    regularizedGaussHypergeometric (μ+1/2) (ν+μ+1) (ν+3/2) (EllipseTransport.movingPoint ζ s t ^ 2)
 
 /-- Locally along the path, the transport is a constant multiple of `𝑸^μ_ν(σ z)`, `σ = ±1`. -/
 theorem EllipseTransport.transport_local (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) {σ : ℂ}
@@ -550,7 +550,7 @@ theorem Transport.eventually_eq_of_exp {d : ℝ → ℂ} {s : Set ℝ} {t₀ : �
 
 /-- The regular factor `(w+1)^{-μ/2} 𝐅(ν+1, -ν; 1+μ; (1-w)/2)` of `P^{-μ}_ν`. -/
 noncomputable def Transport.regularFactor (ν μ w : ℂ) : ℂ :=
-  exp (-μ/2*log (w+1)) * regularizedGaussHG (ν+1) (-ν) (1+μ) ((1-w)/2)
+  exp (-μ/2*log (w+1)) * regularizedGaussHypergeometric (ν+1) (-ν) (1+μ) ((1-w)/2)
 
 /-- `P^{-μ}_ν(w) = e^{μ log(w-1)/2} K(w)`. -/
 theorem Transport.associatedP_eq (ν μ w : ℂ) :
@@ -569,8 +569,9 @@ theorem Transport.ferrersPCont_eq (ν μ w : ℂ) :
 theorem Transport.regularFactor_analyticAt (ν μ : ℂ) {w : ℂ} (hp : w+1 ∈ slitPlane)
     (hc : (1-w)/2 ∈ cutPlane) :
     AnalyticAt ℂ (Transport.regularFactor ν μ) w := by
-  have hG : AnalyticAt ℂ (fun w : ℂ => regularizedGaussHG (ν+1) (-ν) (1+μ) ((1-w)/2)) w :=
-    (analyticAt_regularizedGaussHG _ _ _ hc).comp_of_eq (by fun_prop) rfl
+  have hG : AnalyticAt ℂ
+      (fun w : ℂ => regularizedGaussHypergeometric (ν+1) (-ν) (1+μ) ((1-w)/2)) w :=
+    (analyticAt_regularizedGaussHypergeometric _ _ _ hc).comp_of_eq (by fun_prop) rfl
   have hE : AnalyticAt ℂ (fun w : ℂ => exp (-μ/2*log (w+1))) w := by
     fun_prop (disch := assumption)
   exact hE.mul hG

@@ -174,7 +174,7 @@ def multivariateGammaVecExponent {m : ℕ} (s : Fin m → ℂ) (j : Fin m) : ℂ
 
 /-- The integrand of 35.3.2. -/
 def multivariateGammaVecIntegrand {m : ℕ} (s : Fin m → ℂ) (X : Matrix (Fin m) (Fin m) ℝ) : ℂ :=
-  (etr (-X) : ℂ) * ∏ j : Fin m,
+  (expTrace (-X) : ℂ) * ∏ j : Fin m,
       ((leadingMinor X (j.1 + 1) : ℝ) : ℂ) ^ (multivariateGammaVecExponent s j)
 
 /-- The one-dimensional factors of 35.3.2 in Cholesky coordinates. -/
@@ -256,7 +256,7 @@ private lemma indicator_choleskyJacobian_mul_integrand_eq_prod {m : ℕ} (s : Fi
       rw [TauCeti.trace_lowerTriangleMatrix_mul_transpose, ← Finset.sum_neg_distrib,
         Real.exp_sum]
       push_cast; rfl
-    unfold multivariateGammaVecIntegrand etr
+    unfold multivariateGammaVecIntegrand expTrace
     rw [Matrix.trace_neg, hexp]
     simp_rw [hminor]
     rw [← Complex.exp_sum, hsum, choleskyJacobian]
@@ -329,7 +329,7 @@ lemma hasIntegralOn_multivariateGammaVecIntegrand {m : ℕ} {s : Fin m → ℂ}
     · exact (integrable_and_integral_choleskyDiagFactor (hc _)).1
     · exact integrable_and_integral_exp_neg_sq.1
   refine hasIntegralOn_of_cholesky ?_ ?_ ?_
-  · unfold multivariateGammaVecIntegrand etr leadingMinor
+  · unfold multivariateGammaVecIntegrand expTrace leadingMinor
     fun_prop
   · rw [← integrable_indicator_iff (TauCeti.measurableSet_posDiagLowerRegion m), hind]
     exact Integrable.fintype_prod hfacint

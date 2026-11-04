@@ -12,7 +12,7 @@ public import DLMF.Airy.Basic.Properties
 
 ## Main results
 
-* `isAirySol_rotated`: `z ↦ Ai(ωz)` solves Airy's equation for a cube root of unity `ω`
+* `isAirySolution_rotated`: `z ↦ Ai(ωz)` solves Airy's equation for a unitCube root of unity `ω`
   (DLMF 9.2.2).
 * `airy_general_solution`: every entire solution of Airy's equation is a combination of `Ai`
   and `Bi`.
@@ -34,11 +34,11 @@ open scoped Real
 
 namespace DLMF.Airy
 
-/-- For a cube root of unity `ω`, `z ↦ Ai(ωz)` solves Airy's equation, with derivative
+/-- For a unitCube root of unity `ω`, `z ↦ Ai(ωz)` solves Airy's equation, with derivative
 `ω Ai'(ωz)` (DLMF 9.2.2). -/
 @[dlmf 9.2.E2]
-theorem isAirySol_rotated {ω : ℂ} (hω : ω ^ 3 = 1) :
-    IsAirySol (fun z => airyAi (ω * z)) (fun z => ω * airyAiDeriv (ω * z)) := by
+theorem isAirySolution_rotated {ω : ℂ} (hω : ω ^ 3 = 1) :
+    IsAirySolution (fun z => airyAi (ω * z)) (fun z => ω * airyAiDeriv (ω * z)) := by
   intro z
   have h1 := (hasDerivAt_airyAi (ω * z)).comp z ((hasDerivAt_id z).const_mul ω)
   have h2 := ((hasDerivAt_airyAiDeriv (ω * z)).comp z ((hasDerivAt_id z).const_mul ω)).const_mul ω
@@ -49,12 +49,12 @@ theorem isAirySol_rotated {ω : ℂ} (hω : ω ^ 3 = 1) :
   · exact h2.congr_deriv (by linear_combination z * airyAi (ω * z) * hω)
 
 /-- Every entire Airy solution is a linear combination of Ai and Bi. -/
-theorem airy_general_solution {w w' : ℂ → ℂ} (hw : IsAirySol w w') :
+theorem airy_general_solution {w w' : ℂ → ℂ} (hw : IsAirySolution w w') :
     ∃ a b : ℂ, ∀ z, w z = a * airyAi z + b * airyBi z := by
   let a : ℂ := π * (w 0 * airyBiDeriv 0 - w' 0 * airyBi 0)
   let b : ℂ := π * (airyAi 0 * w' 0 - airyAiDeriv 0 * w 0)
   refine ⟨a, b, ?_⟩
-  have hs : IsAirySol (fun z => a * airyAi z + b * airyBi z)
+  have hs : IsAirySolution (fun z => a * airyAi z + b * airyBi z)
       (fun z => a * airyAiDeriv z + b * airyBiDeriv z) := fun z => ⟨
     ((hasDerivAt_airyAi z).const_mul a).add ((hasDerivAt_airyBi z).const_mul b),
     (((hasDerivAt_airyAiDeriv z).const_mul a).add
@@ -98,7 +98,7 @@ theorem wronskian_airyAi_rotated (z : ℂ) {ε : ℝ} (hε : ε = 1 ∨ ε = -1)
     rcases hε with rfl | rfl
     · simpa [ω] using omega_recip_cube
     · simpa [ω] using omega_cube
-  have hr := isAirySol_airyAi.wronskian_eq (isAirySol_rotated hω) z
+  have hr := isAirySolution_airyAi.wronskian_eq (isAirySolution_rotated hω) z
   simp only [mul_zero] at hr
   have he : ω - 1 = -(Real.sqrt 3 : ℂ) * exp (ε * (π * I / 6)) := by
     rcases hε with rfl | rfl
@@ -128,7 +128,8 @@ theorem wronskian_airyAi_rotations (z : ℂ) :
         airyAiDeriv (z * exp (2 * π * I / 3)) -
       exp (-2 * π * I / 3) * airyAiDeriv (z * exp (-2 * π * I / 3)) *
         airyAi (z * exp (2 * π * I / 3)) = 1 / (2 * π * I) := by
-  have hr := (isAirySol_rotated omega_recip_cube).wronskian_eq (isAirySol_rotated omega_cube) z
+  have hr := (isAirySolution_rotated omega_recip_cube).wronskian_eq
+      (isAirySolution_rotated omega_cube) z
   simp only [mul_zero] at hr
   have he : exp (2 * π * I / 3) - exp (-(2 * π * I / 3)) = (Real.sqrt 3 : ℂ) * I := by
     rw [exp_two_pi_I_div_three, exp_neg_two_pi_I_div_three]
@@ -183,7 +184,8 @@ theorem airyBi_neg_connection (z : ℂ) :
 /-- If `w` solves Airy's equation and `w(z) ≠ 0`, the logarithmic derivative `W = w'/w`
 satisfies the Riccati equation `W' = z - W²` at `z` (DLMF 9.2.16). -/
 @[dlmf 9.2.E16]
-theorem airy_log_derivative_riccati {w w' : ℂ → ℂ} (hw : IsAirySol w w') {z : ℂ} (hz : w z ≠ 0) :
+theorem airy_log_derivative_riccati {w w' : ℂ → ℂ} (hw : IsAirySolution w w') {z : ℂ}
+    (hz : w z ≠ 0) :
     HasDerivAt (fun t => w' t / w t) (z - (w' z / w z) ^ 2) z := by
   have h := (hw z).2.div (hw z).1 hz
   exact h.congr_deriv (by field_simp)

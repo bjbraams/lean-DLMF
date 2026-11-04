@@ -34,7 +34,7 @@ carrying the integer case (the polynomial addition theorem) to all degrees. The 
 * `AdditionTheorem.hyperbolic_coeff_eq`, `associatedP_addition`: the Fourier
   coefficients of `φ ↦ P_ν(cosh ξ₁ cosh ξ₂ - sinh ξ₁ sinh ξ₂ cos φ)` for all complex `ν`, and DLMF
   14.18.4.
-* `AdditionTheorem.regularizedGaussHG_one_eq_integral`: the representation
+* `AdditionTheorem.regularizedGaussHypergeometric_one_eq_integral`: the representation
   `𝖯_ν(cos θ) = π^{-1/2} ∫₀^π 𝐅(ν+1, -ν; 1/2; sin²(θ/2) sin² t) dt` (termwise, with Wallis'
   integral `AdditionTheorem.integral_sin_pow_even`), which with 15.4.14 is the Mehler–Dirichlet
   integral in disguise.
@@ -90,7 +90,7 @@ theorem AdditionTheorem.associatedP_zero {ν : ℂ} {x : ℝ} (hx : 1 ≤ x) :
   · subst h
     rw [ofReal_one, legendreP_one]
     simp only [associatedP, zero_div, zero_mul, exp_zero, one_mul, sub_zero, sub_self]
-    rw [regularizedGaussHG_zero_of_regular]
+    rw [regularizedGaussHypergeometric_zero_of_regular]
     · simp
     · intro k hk
       have := congrArg Complex.re hk; simp at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
@@ -116,7 +116,7 @@ theorem AdditionTheorem.norm_legendreP_le (ν : ℂ) {x : ℝ} (hx : 1 ≤ x) :
 
 /-- Bound for nonnegative integer order on `(1, ∞)` from 14.12.7. -/
 theorem AdditionTheorem.norm_associatedP_nat_le (ν : ℂ) (m : ℕ) {x : ℝ} (hx : 1 < x) :
-    ‖associatedP ν m x‖ ≤ ‖poch (ν + 1) m‖ * (2 * x) ^ |ν.re| := by
+    ‖associatedP ν m x‖ ≤ ‖pochhammer (ν + 1) m‖ * (2 * x) ^ |ν.re| := by
   rw [associatedP_fourier_integral ν m hx, norm_mul, norm_div]
   have hI : ‖∫ θ : ℝ in (0:ℝ)..π, (x + Real.sqrt (x ^ 2 - 1) * Real.cos θ : ℂ) ^ ν *
       Real.cos (m * θ)‖ ≤ (2 * x) ^ |ν.re| * |π - 0| := by
@@ -134,9 +134,9 @@ theorem AdditionTheorem.norm_associatedP_nat_le (ν : ℂ) (m : ℕ) {x : ℝ} (
   have hπ := Real.pi_pos
   rw [sub_zero, abs_of_pos hπ] at hI
   rw [Complex.norm_real, Real.norm_eq_abs, abs_of_pos hπ]
-  calc ‖poch (ν + 1) m‖ / π * ‖∫ θ : ℝ in (0:ℝ)..π,
+  calc ‖pochhammer (ν + 1) m‖ / π * ‖∫ θ : ℝ in (0:ℝ)..π,
         (x + Real.sqrt (x ^ 2 - 1) * Real.cos θ : ℂ) ^ ν * Real.cos (m * θ)‖
-      ≤ ‖poch (ν + 1) m‖ / π * ((2 * x) ^ |ν.re| * π) := by gcongr
+      ≤ ‖pochhammer (ν + 1) m‖ / π * ((2 * x) ^ |ν.re| * π) := by gcongr
     _ = _ := by field_simp
 
 /-- Bound for negative integer order on `(1, ∞)` from the fractional integral 14.12.5. -/
@@ -161,16 +161,16 @@ theorem AdditionTheorem.norm_associatedP_neg_le (ν : ℂ) {m : ℕ} (hm : 1 ≤
   rwa [abs_of_pos (by linarith : (0:ℝ) < x - 1)] at hI
 
 /-- `|(ν+1)_m| ≤ m! e^m e^{|ν|}`. -/
-theorem AdditionTheorem.norm_poch_le (ν : ℂ) (m : ℕ) :
-    ‖poch (ν + 1) m‖ ≤ m ! * Real.exp m * Real.exp ‖ν‖ := by
-  have h1 : ‖poch (ν + 1) m‖ ≤ (‖ν‖ + m) ^ m := by
-    have key : ∀ k : ℕ, k ≤ m → ‖poch (ν + 1) k‖ ≤ (‖ν‖ + m) ^ k := by
+theorem AdditionTheorem.norm_pochhammer_le (ν : ℂ) (m : ℕ) :
+    ‖pochhammer (ν + 1) m‖ ≤ m ! * Real.exp m * Real.exp ‖ν‖ := by
+  have h1 : ‖pochhammer (ν + 1) m‖ ≤ (‖ν‖ + m) ^ m := by
+    have key : ∀ k : ℕ, k ≤ m → ‖pochhammer (ν + 1) k‖ ≤ (‖ν‖ + m) ^ k := by
       intro k
       induction k with
-      | zero => intro _; simp [poch_zero]
+      | zero => intro _; simp [pochhammer_zero]
       | succ k ih =>
         intro hk
-        rw [poch_succ, norm_mul, pow_succ]
+        rw [pochhammer_succ, norm_mul, pow_succ]
         gcongr
         · exact ih (by omega)
         · calc ‖ν + 1 + k‖ ≤ ‖ν‖ + ‖(1:ℂ) + k‖ := by
@@ -183,7 +183,7 @@ theorem AdditionTheorem.norm_poch_le (ν : ℂ) (m : ℕ) :
   have h2 := Real.pow_div_factorial_le_exp (x := ‖ν‖ + m) (by positivity) m
   have hf : (0:ℝ) < m ! := by exact_mod_cast Nat.factorial_pos m
   rw [div_le_iff₀ hf, Real.exp_add] at h2
-  calc ‖poch (ν + 1) m‖ ≤ (‖ν‖ + m) ^ m := h1
+  calc ‖pochhammer (ν + 1) m‖ ≤ (‖ν‖ + m) ^ m := h1
     _ ≤ Real.exp ‖ν‖ * Real.exp m * m ! := h2
     _ = _ := by ring
 
@@ -212,10 +212,12 @@ theorem AdditionTheorem.hyperbolicArg_mem {ξ₁ ξ₂ : ℝ} (h1 : 0 ≤ ξ₁)
 /-- The order-zero Legendre function along `AdditionTheorem.hyperbolicArg` is `C²` in the angle. -/
 theorem AdditionTheorem.hyperbolicArg_contDiff (ν : ℂ) {ξ₁ ξ₂ : ℝ} (h1 : 0 ≤ ξ₁) (h2 : 0 ≤ ξ₂) :
     ContDiff ℝ 2 (fun t : ℝ => associatedP ν 0 (AdditionTheorem.hyperbolicArg ξ₁ ξ₂ t)) := by
-  have hG : DifferentiableOn ℂ (fun z => regularizedGaussHG (ν + 1) (-ν) 1 z) cutPlane :=
-    DifferentiableOn.regularizedGaussHG (differentiableOn_const _) (differentiableOn_const _)
+  have hG : DifferentiableOn ℂ
+      (fun z => regularizedGaussHypergeometric (ν + 1) (-ν) 1 z) cutPlane :=
+    DifferentiableOn.regularizedGaussHypergeometric (differentiableOn_const _)
+        (differentiableOn_const _)
       (differentiableOn_const _) differentiableOn_id fun w hw => hw
-  have hG2 : ContDiffOn ℝ 2 (fun z => regularizedGaussHG (ν + 1) (-ν) 1 z) cutPlane :=
+  have hG2 : ContDiffOn ℝ 2 (fun z => regularizedGaussHypergeometric (ν + 1) (-ν) 1 z) cutPlane :=
     (hG.contDiffOn isOpen_cutPlane).restrict_scalars ℝ
   have hh : ContDiff ℝ 2
       (fun t : ℝ => (((1 - AdditionTheorem.hyperbolicArg ξ₁ ξ₂ t) / 2 : ℝ) : ℂ)) := by
@@ -270,7 +272,8 @@ theorem AdditionTheorem.hyperbolic_coeff_bound (ν : ℂ) {ξ₁ ξ₂ : ℝ} (h
 theorem AdditionTheorem.differentiable_associatedP_zero {z : ℂ} (hz : (1 - z) / 2 ∈ cutPlane) :
     Differentiable ℂ (fun ν : ℂ => associatedP ν 0 z) := by
   simp only [ExteriorGreen.associatedP_eq]
-  exact differentiable_regularizedGaussHG_comp (A := fun ν : ℂ => ν + 1) (B := fun ν : ℂ => -ν)
+  exact differentiable_regularizedGaussHypergeometric_comp (A := fun ν : ℂ => ν + 1)
+      (B := fun ν : ℂ => -ν)
     (C := fun _ => 1) (by fun_prop) (by fun_prop) (by fun_prop) hz
 
 /-- The Fourier coefficients in the hyperbolic case are entire in the degree. -/
@@ -317,7 +320,7 @@ theorem AdditionTheorem.hyperbolic_coeff_differentiable {ξ₁ ξ₂ : ℝ} (h1 
 theorem AdditionTheorem.differentiable_associatedP (μ : ℂ) {z : ℂ} (hz : (1 - z) / 2 ∈ cutPlane) :
     Differentiable ℂ (fun ν : ℂ => associatedP ν μ z) := by
   unfold associatedP
-  exact (differentiable_const _).mul (differentiable_regularizedGaussHG_comp
+  exact (differentiable_const _).mul (differentiable_regularizedGaussHypergeometric_comp
     (A := fun ν : ℂ => ν + 1) (B := fun ν : ℂ => -ν) (C := fun _ => 1 - μ)
     (by fun_prop) (by fun_prop) (by fun_prop) hz)
 
@@ -336,9 +339,9 @@ theorem AdditionTheorem.hyperbolic_rhs_bound {x₁ x₂ : ℝ} (hx₁ : 1 < x₁
   · refine ⟨1, fun ν => ?_⟩
     rw [pow_zero, one_mul, Nat.cast_zero, neg_zero, norm_mul]
     have e1 := (AdditionTheorem.norm_associatedP_nat_le ν 0 hx₁).trans_eq (by
-      rw [poch_zero, norm_one, one_mul, AdditionTheorem.rpow_eq_exp (by linarith)])
+      rw [pochhammer_zero, norm_one, one_mul, AdditionTheorem.rpow_eq_exp (by linarith)])
     have e2 := (AdditionTheorem.norm_associatedP_nat_le ν 0 hx₂).trans_eq (by
-      rw [poch_zero, norm_one, one_mul, AdditionTheorem.rpow_eq_exp (by linarith)])
+      rw [pochhammer_zero, norm_one, one_mul, AdditionTheorem.rpow_eq_exp (by linarith)])
     simp only [Nat.cast_zero] at e1 e2
     calc ‖associatedP ν 0 x₁‖ * ‖associatedP ν 0 x₂‖
         ≤ Real.exp (Real.log (2 * x₁) * |ν.re|) * Real.exp (Real.log (2 * x₂) * |ν.re|) :=
@@ -360,7 +363,7 @@ theorem AdditionTheorem.hyperbolic_rhs_bound {x₁ x₂ : ℝ} (hx₁ : 1 < x₁
       refine (AdditionTheorem.norm_associatedP_nat_le ν m hx₂).trans ?_
       rw [AdditionTheorem.rpow_eq_exp (by linarith)]
       gcongr
-      exact AdditionTheorem.norm_poch_le ν m
+      exact AdditionTheorem.norm_pochhammer_le ν m
     have hn : ‖ν‖ ≤ |ν.re| + |ν.im| := norm_le_abs_re_add_abs_im ν
     rw [norm_mul, norm_mul, norm_pow, norm_neg, norm_one, one_pow, one_mul]
     calc ‖associatedP ν (-(m:ℂ)) x₁‖ * ‖associatedP ν m x₂‖
@@ -515,7 +518,7 @@ open DLMF.OrthogonalPolynomials.LegendreAddition in
 theorem AdditionTheorem.associatedP_nat_nat (n m : ℕ) {x : ℝ} (hx : 1 < x) :
     associatedP n m x = (Real.sqrt (x ^ 2 - 1) : ℂ) ^ m * jet n m x := by
   have hz := LaplaceIntegrals.one_lt_mem hx
-  have hev : associatedP (n:ℂ) 0 =ᶠ[𝓝 (x:ℂ)] DLMF.OrthogonalPolynomials.legendrePolyP n := by
+  have hev : associatedP (n:ℂ) 0 =ᶠ[𝓝 (x:ℂ)] DLMF.OrthogonalPolynomials.legendrePolynomialP n := by
     filter_upwards [(isOpen_slitPlane.preimage (by fun_prop : Continuous fun w : ℂ => w-1)).mem_nhds
       hz] with w hw
     rw [associatedP_zero_order _ hw, legendreP_nat n (one_add_mem_slitPlane_of_sub_one hw)]
@@ -697,7 +700,7 @@ theorem AdditionTheorem.integral_sin_pow_even (n : ℕ) :
 
 /-- `𝐅(ν+1, -ν; 1; s) = π^{-1/2} ∫₀^π 𝐅(ν+1, -ν; 1/2; s sin² t) dt` for `0 ≤ s < 1`
 (the Mehler–Dirichlet integral in disguise). -/
-theorem AdditionTheorem.regularizedGaussHG_one_eq_integral (ν : ℂ) {s : ℝ} (hs0 : 0 ≤ s)
+theorem AdditionTheorem.regularizedGaussHypergeometric_one_eq_integral (ν : ℂ) {s : ℝ} (hs0 : 0 ≤ s)
     (hs1 : s < 1) :
     regularizedGaussHGFun (ν + 1) (-ν) 1 s = 1 / (Real.sqrt π : ℂ) *
       ∫ t : ℝ in (0:ℝ)..π,
@@ -705,7 +708,8 @@ theorem AdditionTheorem.regularizedGaussHG_one_eq_integral (ν : ℂ) {s : ℝ} 
   have hsn : ‖(s:ℂ)‖ < 1 := by rw [norm_real, Real.norm_eq_abs, abs_of_nonneg hs0]; exact hs1
   set e : ℕ → ℂ := fun n => (ascPochhammer ℂ n).eval (ν + 1) * (ascPochhammer ℂ n).eval (-ν) *
     (s:ℂ) ^ n / n.factorial * (Gamma (1 / 2 + n))⁻¹ with he_def
-  have he : Summable (fun n => ‖e n‖) := summable_norm_regularizedGaussHGFun_term _ _ _ hsn
+  have he : Summable (fun n => ‖e n‖) :=
+      summable_norm_regularizedGaussHypergeometricFun_term _ _ _ hsn
   set F : ℕ → ℝ → ℂ := fun n t => e n * (((Real.sin t) ^ 2 : ℝ) : ℂ) ^ n with hF_def
   have hFc : ∀ n, Continuous (F n) := fun n => by simp only [hF_def]; fun_prop
   have hs := intervalIntegral.hasSum_integral_of_dominated_convergence
@@ -728,7 +732,8 @@ theorem AdditionTheorem.regularizedGaussHG_one_eq_integral (ν : ℂ) {s : ℝ} 
                                           nlinarith [Real.sin_sq_add_cos_sq t,
                                             sq_nonneg (Real.cos t)]
         nlinarith
-      refine (hasSum_regularizedGaussHGFun (ν + 1) (-ν) (1 / 2) hz).congr_fun fun n => ?_
+      refine (hasSum_regularizedGaussHypergeometricFun (ν + 1) (-ν) (1 / 2)
+          hz).congr_fun fun n => ?_
       simp only [hF_def, he_def]
       push_cast
       ring)
@@ -746,7 +751,8 @@ theorem AdditionTheorem.regularizedGaussHG_one_eq_integral (ν : ℂ) {s : ℝ} 
     generalize Gamma (1 / 2 + n) = G at hG ⊢
     field_simp
   simp only [hint] at hs
-  have h1 := (hasSum_regularizedGaussHGFun (ν + 1) (-ν) 1 hsn).mul_left (Real.sqrt π : ℂ)
+  have h1 := (hasSum_regularizedGaussHypergeometricFun (ν + 1) (-ν) 1 hsn).mul_left
+      (Real.sqrt π : ℂ)
   have hπ : (Real.sqrt π : ℂ) ≠ 0 := ofReal_ne_zero.2 (Real.sqrt_pos.2 Real.pi_pos).ne'
   rw [hs.unique h1]
   field_simp
@@ -773,9 +779,9 @@ theorem AdditionTheorem.norm_ferrersP_zero_le (ν : ℂ) {θ : ℝ} (h0 : 0 ≤ 
     simp only [ferrersP, zero_div, cpow_zero, one_mul, sub_zero]
     rw [show (1 - ((Real.cos θ : ℝ) : ℂ)) / 2 = ((c ^ 2 : ℝ) : ℂ) by
       rw [hc, ← AdditionTheorem.one_sub_cos_half]; push_cast; ring]
-    exact regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ (by
+    exact regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun _ _ _ (by
       rw [norm_real, Real.norm_eq_abs, abs_of_nonneg (sq_nonneg _)]; exact hs1)
-  rw [hF, AdditionTheorem.regularizedGaussHG_one_eq_integral ν (sq_nonneg c) hs1]
+  rw [hF, AdditionTheorem.regularizedGaussHypergeometric_one_eq_integral ν (sq_nonneg c) hs1]
   have hsq : (Real.sqrt π : ℝ) ^ 2 = π := Real.sq_sqrt Real.pi_pos.le
   have hsqp : 0 < Real.sqrt π := Real.sqrt_pos.2 Real.pi_pos
   set B := Real.exp (θ * |ν.im|) / Real.cos (θ / 2) with hB
@@ -807,7 +813,7 @@ theorem AdditionTheorem.norm_ferrersP_zero_le (ν : ℂ) {θ : ℝ} (h0 : 0 ≤ 
       have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
     rw [show ((c ^ 2 * Real.sin t ^ 2 : ℝ) : ℂ) = (Real.sin w : ℂ) ^ 2 by
         rw [hsw]; simp only [y]; push_cast; ring,
-      regularizedGaussHGFun_eq_div_Gamma hc12, legendre_Gamma_one_half,
+      regularizedGaussHypergeometricFun_eq_div_Gamma hc12, legendre_Gamma_one_half,
       show -ν = 1 - (ν + 1) by ring, sin_sq_cos_quotient (ν + 1) hwπ, norm_div, norm_div,
       Complex.norm_real, Complex.norm_real, Real.norm_eq_abs, Real.norm_eq_abs,
       abs_of_pos hcw0, abs_of_pos hsqp]
@@ -873,10 +879,12 @@ theorem AdditionTheorem.ferrersArg_mem {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h
 theorem AdditionTheorem.ferrersArg_contDiff (ν : ℂ) {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h2 : 0 ≤ θ₂)
     (hs : θ₁ + θ₂ < π) :
     ContDiff ℝ 2 (fun t : ℝ => ferrersP ν 0 (AdditionTheorem.ferrersArg θ₁ θ₂ t)) := by
-  have hG : DifferentiableOn ℂ (fun z => regularizedGaussHG (ν + 1) (-ν) 1 z) cutPlane :=
-    DifferentiableOn.regularizedGaussHG (differentiableOn_const _) (differentiableOn_const _)
+  have hG : DifferentiableOn ℂ
+      (fun z => regularizedGaussHypergeometric (ν + 1) (-ν) 1 z) cutPlane :=
+    DifferentiableOn.regularizedGaussHypergeometric (differentiableOn_const _)
+        (differentiableOn_const _)
       (differentiableOn_const _) differentiableOn_id fun w hw => hw
-  have hG2 : ContDiffOn ℝ 2 (fun z => regularizedGaussHG (ν + 1) (-ν) 1 z) cutPlane :=
+  have hG2 : ContDiffOn ℝ 2 (fun z => regularizedGaussHypergeometric (ν + 1) (-ν) 1 z) cutPlane :=
     (hG.contDiffOn isOpen_cutPlane).restrict_scalars ℝ
   have hh : ContDiff ℝ 2
       (fun t : ℝ => (((1 - AdditionTheorem.ferrersArg θ₁ θ₂ t) / 2 : ℝ) : ℂ)) := by
@@ -891,7 +899,7 @@ theorem AdditionTheorem.ferrersArg_contDiff (ν : ℂ) {θ₁ θ₂ : ℝ} (h1 :
         (by linarith [(AdditionTheorem.ferrersArg_mem h1 h2 hs t).1])
   convert this using 1
   funext t
-  simp only [Function.comp, FerrersGreen.ferrersP_zero_eq_regularizedGaussHG]
+  simp only [Function.comp, FerrersGreen.ferrersP_zero_eq_regularizedGaussHypergeometric]
   congr 1; push_cast; ring
 
 /-- `-1 < cos (θ₁ + θ₂)`. -/
@@ -937,7 +945,7 @@ theorem AdditionTheorem.ferrers_coeff_bound (ν : ℂ) {θ₁ θ₂ : ℝ} (h1 :
 theorem AdditionTheorem.differentiable_ferrersP (μ : ℂ) {x : ℝ} (hx : -1 < x) :
     Differentiable ℂ (fun ν : ℂ => ferrersP ν μ x) := by
   unfold ferrersP
-  refine (differentiable_const _).mul (differentiable_regularizedGaussHG_comp
+  refine (differentiable_const _).mul (differentiable_regularizedGaussHypergeometric_comp
     (A := fun ν : ℂ => ν + 1) (B := fun ν : ℂ => -ν) (C := fun _ => 1 - μ)
     (by fun_prop) (by fun_prop) (by fun_prop) ?_)
   rw [show (1 - (x:ℂ)) / 2 = (((1 - x) / 2 : ℝ) : ℂ) by push_cast; ring]
@@ -1021,16 +1029,16 @@ theorem AdditionTheorem.norm_ferrersP_neg_le {m : ℕ} (hm : 1 ≤ m) {θ : ℝ}
     _ = _ := by field_simp
 
 /-- `|(a)_k| ≤ k! ε^{-k} e^{ε (|a| + k)}`. -/
-theorem AdditionTheorem.norm_poch_le_exp (a : ℂ) (k : ℕ) {ε : ℝ} (hε : 0 < ε) :
-    ‖poch a k‖ ≤ k ! / ε ^ k * Real.exp (ε * (‖a‖ + k)) := by
-  have h1 : ‖poch a k‖ ≤ (‖a‖ + k) ^ k := by
-    have key : ∀ j : ℕ, j ≤ k → ‖poch a j‖ ≤ (‖a‖ + k) ^ j := by
+theorem AdditionTheorem.norm_pochhammer_le_exp (a : ℂ) (k : ℕ) {ε : ℝ} (hε : 0 < ε) :
+    ‖pochhammer a k‖ ≤ k ! / ε ^ k * Real.exp (ε * (‖a‖ + k)) := by
+  have h1 : ‖pochhammer a k‖ ≤ (‖a‖ + k) ^ k := by
+    have key : ∀ j : ℕ, j ≤ k → ‖pochhammer a j‖ ≤ (‖a‖ + k) ^ j := by
       intro j
       induction j with
-      | zero => intro _; simp [poch_zero]
+      | zero => intro _; simp [pochhammer_zero]
       | succ j ih =>
         intro hj
-        rw [poch_succ, norm_mul, pow_succ]
+        rw [pochhammer_succ, norm_mul, pow_succ]
         gcongr
         · exact ih (by omega)
         · calc ‖a + j‖ ≤ ‖a‖ + ‖(j:ℂ)‖ := norm_add_le _ _
@@ -1041,7 +1049,7 @@ theorem AdditionTheorem.norm_poch_le_exp (a : ℂ) (k : ℕ) {ε : ℝ} (hε : 0
   have h2 := Real.pow_div_factorial_le_exp (x := ε * (‖a‖ + k)) (by positivity) k
   have hf : (0:ℝ) < k ! := by exact_mod_cast Nat.factorial_pos k
   rw [div_le_iff₀ hf, mul_pow] at h2
-  calc ‖poch a k‖ ≤ (‖a‖ + k) ^ k := h1
+  calc ‖pochhammer a k‖ ≤ (‖a‖ + k) ^ k := h1
     _ = (ε ^ k * (‖a‖ + k) ^ k) / ε ^ k := by field_simp
     _ ≤ (Real.exp (ε * (‖a‖ + k)) * k !) / ε ^ k := by gcongr
     _ = _ := by ring
@@ -1049,8 +1057,8 @@ theorem AdditionTheorem.norm_poch_le_exp (a : ℂ) (k : ℕ) {ε : ℝ} (hε : 0
 /-- `𝖯^m_ν(x) = (-1)^m (ν-m+1)_{2m} 𝖯^{-m}_ν(x)` for every complex `ν` (14.9.3 without the
 exceptional degrees, by continuation in `ν`). -/
 theorem AdditionTheorem.ferrersP_nat_eq (ν : ℂ) (m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    ferrersP ν m x = (-1) ^ m * poch (ν - m + 1) (2 * m) * ferrersP ν (-(m:ℂ)) x := by
-  set D : ℂ → ℂ := fun ν => ferrersP ν m x - (-1) ^ m * poch (ν - m + 1) (2 * m) *
+    ferrersP ν m x = (-1) ^ m * pochhammer (ν - m + 1) (2 * m) * ferrersP ν (-(m:ℂ)) x := by
+  set D : ℂ → ℂ := fun ν => ferrersP ν m x - (-1) ^ m * pochhammer (ν - m + 1) (2 * m) *
     ferrersP ν (-(m:ℂ)) x
   have hD : Differentiable ℂ D := by
     refine (AdditionTheorem.differentiable_ferrersP _ hx.1).sub
@@ -1064,17 +1072,17 @@ theorem AdditionTheorem.ferrersP_nat_eq (ν : ℂ) (m : ℕ) {x : ℝ} (hx : x �
     have hh : ∀ n : ℕ, ν - m + 1 ≠ -n := fun n h => by
       have := congrArg Complex.re h; simp at this; linarith [(n.cast_nonneg : (0:ℝ) ≤ n)]
     have hGa : Gamma (ν - m + 1) ≠ 0 := Gamma_ne_zero_of_re_pos (by linarith)
-    have hP := DLMF.Gamma.poch_mul_recip_Gamma_add_nat (ν - m + 1) (2 * m)
+    have hP := DLMF.Gamma.pochhammer_mul_recip_Gamma_add_nat (ν - m + 1) (2 * m)
     rw [show ν - m + 1 + ((2 * m : ℕ) : ℂ) = ν + m + 1 by push_cast; ring] at hP
     have hGb : Gamma (ν + m + 1) ≠ 0 := Gamma_ne_zero_of_re_pos (by simp; linarith)
     simp only [D]
     rw [ferrersP_negative_integer_order ν m hh hx]
     have hs : ((-1:ℂ)) ^ m * (-1) ^ m = 1 := by rw [← mul_pow]; norm_num
-    have : poch (ν - m + 1) (2 * m) * Gamma (ν - m + 1) / Gamma (ν + m + 1) = 1 := by
+    have : pochhammer (ν - m + 1) (2 * m) * Gamma (ν - m + 1) / Gamma (ν + m + 1) = 1 := by
       rw [mul_div_assoc, div_eq_mul_inv, mul_comm (Gamma _), ← mul_assoc, hP, inv_mul_cancel₀ hGa]
-    rw [show (-1:ℂ) ^ m * poch (ν - m + 1) (2 * m) * ((-1) ^ m * Gamma (ν - m + 1) /
+    rw [show (-1:ℂ) ^ m * pochhammer (ν - m + 1) (2 * m) * ((-1) ^ m * Gamma (ν - m + 1) /
         Gamma (ν + m + 1) * ferrersP ν m x) = ((-1:ℂ) ^ m * (-1) ^ m) *
-        (poch (ν - m + 1) (2 * m) * Gamma (ν - m + 1) / Gamma (ν + m + 1)) * ferrersP ν m x by
+        (pochhammer (ν - m + 1) (2 * m) * Gamma (ν - m + 1) / Gamma (ν + m + 1)) * ferrersP ν m x by
       ring, hs, this]
     ring
   have han : AnalyticOnNhd ℂ D univ := hD.differentiableOn.analyticOnNhd isOpen_univ
@@ -1123,8 +1131,8 @@ theorem AdditionTheorem.ferrers_rhs_bound {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁)
     set P : ℝ := (2 * m) ! / ε ^ (2 * m) * Real.exp (ε * (m + 1 + (2 * m : ℕ)))
     refine ⟨K₁ * K₂ * P, fun ν => ?_⟩
     rw [AdditionTheorem.ferrersP_nat_eq ν m hx2]
-    have hp : ‖poch (ν - m + 1) (2 * m)‖ ≤ P * Real.exp (ε * ‖ν‖) := by
-      refine (AdditionTheorem.norm_poch_le_exp _ _ hε).trans ?_
+    have hp : ‖pochhammer (ν - m + 1) (2 * m)‖ ≤ P * Real.exp (ε * ‖ν‖) := by
+      refine (AdditionTheorem.norm_pochhammer_le_exp _ _ hε).trans ?_
       have : ‖ν - m + 1‖ ≤ ‖ν‖ + (m + 1) := by
         calc ‖ν - m + 1‖ ≤ ‖ν‖ + ‖(m:ℂ)‖ + ‖(1:ℂ)‖ := by
               refine (norm_add_le _ _).trans ?_
@@ -1135,7 +1143,7 @@ theorem AdditionTheorem.ferrers_rhs_bound {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁)
       gcongr
       nlinarith
     simp only [norm_mul, norm_pow, norm_neg, norm_one, one_pow, one_mul]
-    calc ‖ferrersP ν (-(m:ℂ)) (Real.cos θ₁)‖ * (‖poch (ν - m + 1) (2 * m)‖ *
+    calc ‖ferrersP ν (-(m:ℂ)) (Real.cos θ₁)‖ * (‖pochhammer (ν - m + 1) (2 * m)‖ *
           ‖ferrersP ν (-(m:ℂ)) (Real.cos θ₂)‖)
         ≤ (K₁ * Real.exp (θ₁ * |ν.im|)) * ((P * Real.exp (ε * ‖ν‖)) *
           (K₂ * Real.exp (θ₂ * |ν.im|))) := by
@@ -1233,7 +1241,7 @@ theorem AdditionTheorem.ferrersP_nat_eq_ferrersPNat (n k : ℕ) {x : ℝ} (hx : 
       have hc : ∀ j : ℕ, (1:ℂ) ≠ -(j:ℂ) := by
         intro j h; have := congrArg Complex.re h; simp at this;
             linarith [(j.cast_nonneg : (0:ℝ) ≤ j)]
-      rw [show ((1:ℂ) - ((1:ℝ):ℂ))/2 = 0 by simp, regularizedGaussHG_zero_of_regular hc]
+      rw [show ((1:ℂ) - ((1:ℝ):ℂ))/2 = 0 by simp, regularizedGaussHypergeometric_zero_of_regular hc]
       simp
     · simp [ferrersP]
       left; exact_mod_cast Nat.succ_ne_zero k

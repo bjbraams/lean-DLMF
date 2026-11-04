@@ -23,10 +23,11 @@ restrictive parameter hypotheses to all parameters.
 
 ## Main results
 
-* `regularizedGaussHGFun_contiguous_a` and the other `regularizedGaussHGFun_contiguous_*`
-  lemmas: contiguous relations for all parameters (the generators `contiguous_c` and
-  `contiguous_shift_b` are in `DLMF.Hypergeometric.Basic.ParameterAnalyticity`).
-* `regularizedGaussHGFun_euler`, `regularizedGaussHGFun_pfaff`,
+* `regularizedGaussHypergeometricFun_contiguous_a` and the other
+  `regularizedGaussHGFun_contiguous_*` lemmas: contiguous relations for all parameters (the
+  generators `contiguous_c` and `contiguous_shift_b` are in
+  `DLMF.Hypergeometric.Basic.ParameterAnalyticity`).
+* `regularizedGaussHypergeometricFun_euler`, `regularizedGaussHypergeometricFun_pfaff`,
   `euler_transformation_of_ne_neg_nat`, `pfaff_transformation_of_ne_neg_nat`: Euler's and
   Pfaff's transformations.
 * `tendsto_ordinaryHypergeometric_nhdsWithin_one`: Gauss's asymptotic as `x → 1⁻`, DLMF 15.4.23
@@ -57,7 +58,7 @@ neighbours are linear combinations of those regularized identities, matching
 -/
 
 /-- 15.5.11 (`contiguous_a`) for the regularized function, valid for all parameters. -/
-theorem regularizedGaussHGFun_contiguous_a (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem regularizedGaussHypergeometricFun_contiguous_a (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     (c - a) * regularizedGaussHGFun (a - 1) b c z +
         (2 * a - c + (b - a) * z) * regularizedGaussHGFun a b c z +
         a * (z - 1) * regularizedGaussHGFun (a + 1) b c z = 0 :=
@@ -71,34 +72,35 @@ theorem regularizedGaussHGFun_contiguous_a (a b c : ℂ) {z : ℂ} (hz : ‖z‖
     (fun c hc => by
       have hΓ0 : Gamma c ≠ 0 := Gamma_ne_zero hc
       have h := contiguous_a (a := a) (b := b) hc hz
-      simp only [regularizedGaussHGFun_eq_div_Gamma hc]
+      simp only [regularizedGaussHypergeometricFun_eq_div_Gamma hc]
       field_simp
       linear_combination h) c
 
 /-- 15.5.12 (`contiguous_ab`): `contiguous_shift_b` minus its `a ↔ b` swap. -/
-theorem regularizedGaussHGFun_contiguous_ab (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem regularizedGaussHypergeometricFun_contiguous_ab (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     (b - a) * regularizedGaussHGFun a b c z + a * regularizedGaussHGFun (a + 1) b c z -
       b * regularizedGaussHGFun a (b + 1) c z = 0 := by
-  have ha := regularizedGaussHGFun_contiguous_shift_b a b c hz
-  have hb := regularizedGaussHGFun_contiguous_shift_b b a c hz
+  have ha := regularizedGaussHypergeometricFun_contiguous_shift_b a b c hz
+  have hb := regularizedGaussHypergeometricFun_contiguous_shift_b b a c hz
   simp only [regularizedGaussHGFun_symm b a c, regularizedGaussHGFun_symm b (a + 1) c,
     regularizedGaussHGFun_symm (b + 1) (a + 1) (c + 1)] at hb
   linear_combination b * ha - a * hb
 
 /-- 15.5.13 (`contiguous_a_b_pred`): swapped `contiguous_a` plus `(z-1)` times
 `contiguous_ab`. -/
-theorem regularizedGaussHGFun_contiguous_a_b_pred (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem regularizedGaussHypergeometricFun_contiguous_a_b_pred (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     (c - a - b) * regularizedGaussHGFun a b c z +
         a * (1 - z) * regularizedGaussHGFun (a + 1) b c z -
         (c - b) * regularizedGaussHGFun a (b - 1) c z = 0 := by
-  have hab := regularizedGaussHGFun_contiguous_ab a b c hz
-  have ha := regularizedGaussHGFun_contiguous_a b a c hz
+  have hab := regularizedGaussHypergeometricFun_contiguous_ab a b c hz
+  have ha := regularizedGaussHypergeometricFun_contiguous_a b a c hz
   simp only [regularizedGaussHGFun_symm b a c, regularizedGaussHGFun_symm (b - 1) a c,
     regularizedGaussHGFun_symm (b + 1) a c] at ha
   linear_combination -(ha + (z - 1) * hab)
 
 /-- 15.5.21 (`deriv_contiguous_c_succ`) for the regularized function, valid for all parameters. -/
-theorem regularizedGaussHGFun_contiguous_c_succ_deriv (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem regularizedGaussHypergeometricFun_contiguous_c_succ_deriv (a b c : ℂ) {z : ℂ}
+    (hz : ‖z‖ < 1) :
     (1 - z) * (a * b) * regularizedGaussHGFun (a + 1) (b + 1) (c + 1) z =
       (c - a) * (c - b) * regularizedGaussHGFun a b (c + 1) z +
         (a + b - c) * regularizedGaussHGFun a b c z :=
@@ -117,29 +119,30 @@ theorem regularizedGaussHGFun_contiguous_c_succ_deriv (a b c : ℂ) {z : ℂ} (h
         rw [deriv_ordinaryHypergeometric hc hz]
         field_simp
       have h := deriv_contiguous_c_succ (a := a) (b := b) hc hz
-      simp only [regularizedGaussHGFun_eq_div_Gamma hc,
-        regularizedGaussHGFun_eq_div_Gamma hc1, hΓ1]
+      simp only [regularizedGaussHypergeometricFun_eq_div_Gamma hc,
+        regularizedGaussHypergeometricFun_eq_div_Gamma hc1, hΓ1]
       field_simp [hΓ0, ne_zero_of_not_neg_nat hc]
       linear_combination h - (1 - z) * hd) c
 
 /-- 15.5.14 (`contiguous_a_c_succ`): `-z` times `contiguous_c_succ_deriv` plus
 `a(1-z)` times swapped `contiguous_shift_b`. -/
-theorem regularizedGaussHGFun_contiguous_a_c_succ (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem regularizedGaussHypergeometricFun_contiguous_a_c_succ (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     (a + (b - c) * z) * regularizedGaussHGFun a b c z -
         a * (1 - z) * regularizedGaussHGFun (a + 1) b c z +
         (c - a) * (c - b) * z * regularizedGaussHGFun a b (c + 1) z = 0 := by
-  have hd := regularizedGaussHGFun_contiguous_c_succ_deriv a b c hz
-  have hs := regularizedGaussHGFun_contiguous_shift_b b a c hz
+  have hd := regularizedGaussHypergeometricFun_contiguous_c_succ_deriv a b c hz
+  have hs := regularizedGaussHypergeometricFun_contiguous_shift_b b a c hz
   simp only [regularizedGaussHGFun_symm b a c, regularizedGaussHGFun_symm b (a + 1) c,
     regularizedGaussHGFun_symm (b + 1) (a + 1) (c + 1)] at hs
   linear_combination -z * hd + a * (1 - z) * hs
 
 /-- 15.5.15 (`contiguous_a_succ_c_pred`): `contiguous_c` at `c-1`. -/
-theorem regularizedGaussHGFun_contiguous_a_succ_c_pred (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem regularizedGaussHypergeometricFun_contiguous_a_succ_c_pred (a b c : ℂ) {z : ℂ}
+    (hz : ‖z‖ < 1) :
     (c - a - 1) * regularizedGaussHGFun a b c z +
         a * regularizedGaussHGFun (a + 1) b c z -
         regularizedGaussHGFun a b (c - 1) z = 0 := by
-  have h := regularizedGaussHGFun_contiguous_c a b (c - 1) hz
+  have h := regularizedGaussHypergeometricFun_contiguous_c a b (c - 1) hz
   simp only [sub_add_cancel] at h
   have h' :
       regularizedGaussHGFun a b (c - 1) z =
@@ -151,11 +154,12 @@ theorem regularizedGaussHGFun_contiguous_a_succ_c_pred (a b c : ℂ) {z : ℂ} (
 
 /-- 15.5.16 (`contiguous_a_pred_c_succ`): swapped `contiguous_shift_b` and
 `contiguous_c`. -/
-theorem regularizedGaussHGFun_contiguous_a_pred_c_succ (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem regularizedGaussHypergeometricFun_contiguous_a_pred_c_succ (a b c : ℂ) {z : ℂ}
+    (hz : ‖z‖ < 1) :
     (1 - z) * regularizedGaussHGFun a b c z - regularizedGaussHGFun (a - 1) b c z +
       (c - b) * z * regularizedGaussHGFun a b (c + 1) z = 0 := by
-  have hs := regularizedGaussHGFun_contiguous_shift_b b (a - 1) c hz
-  have hc' := regularizedGaussHGFun_contiguous_c b a c hz
+  have hs := regularizedGaussHypergeometricFun_contiguous_shift_b b (a - 1) c hz
+  have hc' := regularizedGaussHypergeometricFun_contiguous_c b a c hz
   simp only [sub_add_cancel, regularizedGaussHGFun_symm b (a - 1) c,
     regularizedGaussHGFun_symm b a c, regularizedGaussHGFun_symm (b + 1) a (c + 1)] at hs
   simp only [regularizedGaussHGFun_symm b a c, regularizedGaussHGFun_symm b a (c + 1),
@@ -164,27 +168,28 @@ theorem regularizedGaussHGFun_contiguous_a_pred_c_succ (a b c : ℂ) {z : ℂ} (
 
 /-- 15.5.17 (`contiguous_a_pred_c_pred`): `contiguous_a` plus `(1-z)` times
 `contiguous_a_succ_c_pred`. -/
-theorem regularizedGaussHGFun_contiguous_a_pred_c_pred (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem regularizedGaussHypergeometricFun_contiguous_a_pred_c_pred (a b c : ℂ) {z : ℂ}
+    (hz : ‖z‖ < 1) :
     (a - 1 + (b + 1 - c) * z) * regularizedGaussHGFun a b c z +
         (c - a) * regularizedGaussHGFun (a - 1) b c z -
         (1 - z) * regularizedGaussHGFun a b (c - 1) z = 0 := by
-  have h₁ := regularizedGaussHGFun_contiguous_a a b c hz
-  have h₂ := regularizedGaussHGFun_contiguous_a_succ_c_pred a b c hz
+  have h₁ := regularizedGaussHypergeometricFun_contiguous_a a b c hz
+  have h₂ := regularizedGaussHypergeometricFun_contiguous_a_succ_c_pred a b c hz
   linear_combination h₁ + (1 - z) * h₂
 
 /-- 15.5.18 (`contiguous_c_three`): `contiguous_a_c_succ - contiguous_a + contiguous_a_pred_c_pred`.
 -/
-theorem regularizedGaussHGFun_contiguous_c_three (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem regularizedGaussHypergeometricFun_contiguous_c_three (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     (z - 1) * regularizedGaussHGFun a b (c - 1) z +
         (c - 1 - (2 * c - a - b - 1) * z) * regularizedGaussHGFun a b c z +
         (c - a) * (c - b) * z * regularizedGaussHGFun a b (c + 1) z = 0 := by
-  have h₁ := regularizedGaussHGFun_contiguous_a_c_succ a b c hz
-  have h₂ := regularizedGaussHGFun_contiguous_a a b c hz
-  have h₃ := regularizedGaussHGFun_contiguous_a_pred_c_pred a b c hz
+  have h₁ := regularizedGaussHypergeometricFun_contiguous_a_c_succ a b c hz
+  have h₂ := regularizedGaussHypergeometricFun_contiguous_a a b c hz
+  have h₃ := regularizedGaussHypergeometricFun_contiguous_a_pred_c_pred a b c hz
   linear_combination h₁ - h₂ + h₃
 
 /-- 15.5.19 (`contiguous_diagonal`) for the regularized function, valid for all parameters. -/
-theorem regularizedGaussHGFun_contiguous_diagonal (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem regularizedGaussHypergeometricFun_contiguous_diagonal (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     z * (1 - z) * (a + 1) * (b + 1) * regularizedGaussHGFun (a + 2) (b + 2) (c + 2) z +
         (c - (a + b + 1) * z) * regularizedGaussHGFun (a + 1) (b + 1) (c + 1) z -
         regularizedGaussHGFun a b c z = 0 :=
@@ -204,8 +209,9 @@ theorem regularizedGaussHGFun_contiguous_diagonal (a b c : ℂ) {z : ℂ} (hz : 
       have hΓ2 : Gamma (c + 2) = (c + 1) * Gamma (c + 1) := by
         simpa [show c + 1 + 1 = c + 2 by ring] using Gamma_succ_of_not_neg_nat hc1
       have h := contiguous_diagonal (a := a) (b := b) hc hz
-      simp only [regularizedGaussHGFun_eq_div_Gamma hc,
-        regularizedGaussHGFun_eq_div_Gamma hc1, regularizedGaussHGFun_eq_div_Gamma hc2,
+      simp only [regularizedGaussHypergeometricFun_eq_div_Gamma hc,
+        regularizedGaussHypergeometricFun_eq_div_Gamma hc1,
+            regularizedGaussHypergeometricFun_eq_div_Gamma hc2,
         hΓ2, hΓ1]
       field_simp [hΓ0, ne_zero_of_not_neg_nat hc, ne_zero_of_not_neg_nat hc1]
       linear_combination h) c
@@ -214,7 +220,7 @@ theorem regularizedGaussHGFun_contiguous_diagonal (a b c : ℂ) {z : ℂ} (hz : 
 
 /-- Euler's transformation 15.8.1 for the regularized function, valid for all parameters:
 `𝐅(a,b;c;z) = (1-z)^(c-a-b) 𝐅(c-a,c-b;c;z)`. -/
-theorem regularizedGaussHGFun_euler (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem regularizedGaussHypergeometricFun_euler (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     regularizedGaussHGFun a b c z =
       (1 - z) ^ (c - a - b) * regularizedGaussHGFun (c - a) (c - b) c z := by
   have h1z : (1 : ℂ) - z ≠ 0 := by
@@ -228,14 +234,14 @@ theorem regularizedGaussHGFun_euler (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     intro c hc b
     have hcpole : ∀ k : ℕ, c ≠ -(k : ℂ) := not_neg_nat_of_re_pos hc
     have hf : AnalyticOnNhd ℂ (fun b => regularizedGaussHGFun a b c z) univ :=
-      analyticOnNhd_regularizedGaussHGFun_b a c hz
+      analyticOnNhd_regularizedGaussHypergeometricFun_b a c hz
     have hg : AnalyticOnNhd ℂ (fun b => (1 - z) ^ (c - a - b) *
         regularizedGaussHGFun (c - a) (c - b) c z) univ := by
       intro b _
       have hd : Differentiable ℂ (fun b => (1 - z) ^ (c - a - b) *
           regularizedGaussHGFun (c - a) (c - b) c z) :=
         ((differentiable_const _).sub differentiable_id |>.const_cpow (Or.inl h1z)).mul
-          (differentiable_regularizedGaussHGFun_comp (differentiable_const _)
+          (differentiable_regularizedGaussHypergeometricFun_comp (differentiable_const _)
             ((differentiable_const _).sub differentiable_id) (differentiable_const _) hz)
       exact hd.analyticAt b
     have hopen : IsOpen {b : ℂ | 0 < b.re ∧ b.re < c.re} :=
@@ -247,13 +253,14 @@ theorem regularizedGaussHGFun_euler (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     have key := eq_of_analyticOnNhd_univ_of_eqOn hf hg hopen hne fun b hb => by
       obtain ⟨hb0, hbc⟩ := hb
       have hcb : 0 < (c - b).re := by simp only [Complex.sub_re]; linarith
-      rw [regularizedGaussHGFun_eq_div_Gamma hcpole, regularizedGaussHGFun_eq_div_Gamma hcpole,
+      rw [regularizedGaussHypergeometricFun_eq_div_Gamma hcpole,
+          regularizedGaussHypergeometricFun_eq_div_Gamma hcpole,
         euler_transformation hb0 hcb hz]
       ring
     exact congrFun key b
   -- step 2: continuation in `c`
   have hf : AnalyticOnNhd ℂ (fun c => regularizedGaussHGFun a b c z) univ :=
-    analyticOnNhd_regularizedGaussHGFun_c a b hz
+    analyticOnNhd_regularizedGaussHypergeometricFun_c a b hz
   have hg : AnalyticOnNhd ℂ (fun c => (1 - z) ^ (c - a - b) *
       regularizedGaussHGFun (c - a) (c - b) c z) univ := by
     intro c _
@@ -261,14 +268,15 @@ theorem regularizedGaussHGFun_euler (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
         regularizedGaussHGFun (c - a) (c - b) c z) :=
       ((differentiable_id.sub (differentiable_const _)).sub (differentiable_const _)
         |>.const_cpow (Or.inl h1z)).mul
-        (differentiable_regularizedGaussHGFun_comp (differentiable_id.sub (differentiable_const _))
+        (differentiable_regularizedGaussHypergeometricFun_comp
+            (differentiable_id.sub (differentiable_const _))
           (differentiable_id.sub (differentiable_const _)) differentiable_id hz)
     exact hd.analyticAt c
   exact congrFun (eq_of_eqOn_re_pos hf hg fun c hc => step1 c hc b) c
 
 /-- Pfaff's transformation 15.8.1 for the regularized function, valid for all parameters:
 `𝐅(a,b;c;z) = (1-z)^(-a) 𝐅(a,c-b;c;z/(z-1))`. -/
-theorem regularizedGaussHGFun_pfaff (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1)
+theorem regularizedGaussHypergeometricFun_pfaff (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1)
     (hzt : ‖z / (z - 1)‖ < 1) :
     regularizedGaussHGFun a b c z =
       (1 - z) ^ (-a) * regularizedGaussHGFun a (c - b) c (z / (z - 1)) := by
@@ -277,14 +285,14 @@ theorem regularizedGaussHGFun_pfaff (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1)
     intro c hc b
     have hcpole : ∀ k : ℕ, c ≠ -(k : ℂ) := not_neg_nat_of_re_pos hc
     have hf : AnalyticOnNhd ℂ (fun b => regularizedGaussHGFun a b c z) univ :=
-      analyticOnNhd_regularizedGaussHGFun_b a c hz
+      analyticOnNhd_regularizedGaussHypergeometricFun_b a c hz
     have hg : AnalyticOnNhd ℂ (fun b => (1 - z) ^ (-a) *
         regularizedGaussHGFun a (c - b) c (z / (z - 1))) univ := by
       intro b _
       have hd : Differentiable ℂ (fun b => (1 - z) ^ (-a) *
           regularizedGaussHGFun a (c - b) c (z / (z - 1))) :=
         (differentiable_const _).mul
-          (differentiable_regularizedGaussHGFun_comp (differentiable_const _)
+          (differentiable_regularizedGaussHypergeometricFun_comp (differentiable_const _)
             ((differentiable_const _).sub differentiable_id) (differentiable_const _) hzt)
       exact hd.analyticAt b
     have hopen : IsOpen {b : ℂ | 0 < b.re ∧ b.re < c.re} :=
@@ -296,19 +304,20 @@ theorem regularizedGaussHGFun_pfaff (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1)
     have key := eq_of_analyticOnNhd_univ_of_eqOn hf hg hopen hne fun b hb => by
       obtain ⟨hb0, hbc⟩ := hb
       have hcb : 0 < (c - b).re := by simp only [Complex.sub_re]; linarith
-      rw [regularizedGaussHGFun_eq_div_Gamma hcpole, regularizedGaussHGFun_eq_div_Gamma hcpole,
+      rw [regularizedGaussHypergeometricFun_eq_div_Gamma hcpole,
+          regularizedGaussHypergeometricFun_eq_div_Gamma hcpole,
         pfaff_transformation hb0 hcb hz hzt]
       ring
     exact congrFun key b
   have hf : AnalyticOnNhd ℂ (fun c => regularizedGaussHGFun a b c z) univ :=
-    analyticOnNhd_regularizedGaussHGFun_c a b hz
+    analyticOnNhd_regularizedGaussHypergeometricFun_c a b hz
   have hg : AnalyticOnNhd ℂ (fun c => (1 - z) ^ (-a) *
       regularizedGaussHGFun a (c - b) c (z / (z - 1))) univ := by
     intro c _
     have hd : Differentiable ℂ (fun c => (1 - z) ^ (-a) *
         regularizedGaussHGFun a (c - b) c (z / (z - 1))) :=
       (differentiable_const _).mul
-        (differentiable_regularizedGaussHGFun_comp (differentiable_const _)
+        (differentiable_regularizedGaussHypergeometricFun_comp (differentiable_const _)
           (differentiable_id.sub (differentiable_const _)) differentiable_id hzt)
     exact hd.analyticAt c
   exact congrFun (eq_of_eqOn_re_pos hf hg fun c hc => step1 c hc b) c
@@ -317,8 +326,8 @@ theorem regularizedGaussHGFun_pfaff (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1)
 theorem euler_transformation_of_ne_neg_nat {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) {z : ℂ}
     (hz : ‖z‖ < 1) : ₂F₁ a b c z = (1 - z) ^ (c - a - b) * ₂F₁ (c - a) (c - b) c z := by
   have hΓ : Gamma c ≠ 0 := Gamma_ne_zero hc
-  have h := regularizedGaussHGFun_euler a b c hz
-  simp only [regularizedGaussHGFun_eq_div_Gamma hc] at h
+  have h := regularizedGaussHypergeometricFun_euler a b c hz
+  simp only [regularizedGaussHypergeometricFun_eq_div_Gamma hc] at h
   rw [div_eq_iff hΓ] at h
   rw [h]
   field_simp
@@ -337,7 +346,7 @@ theorem tendsto_ordinaryHypergeometric_nhdsWithin_one {a b c : ℂ}
   have hG := gauss_summation (a := c - a) (b := c - b) hc h'
   rw [show c - (c - a) - (c - b) = a + b - c by ring, sub_sub_cancel, sub_sub_cancel,
     ordinaryHypergeometric_one_eq_tsum] at hG
-  have hs : Summable (gaussHGCoeff (c - a) (c - b) c) := by
+  have hs : Summable (gaussHypergeometricCoeff (c - a) (c - b) c) := by
     simpa using ordinaryHypergeometric_summable_of_mem_sphere (z := 1) (by simp) h'
   have habel := Complex.tendsto_tsum_powerSeries_nhdsWithin_lt hs.hasSum.tendsto_sum_nat
   rw [tendsto_map'_iff, hG] at habel
@@ -355,15 +364,15 @@ theorem tendsto_ordinaryHypergeometric_nhdsWithin_one {a b c : ℂ}
   simp only [Function.comp_apply, smul_eq_mul]
   congr 1
   funext n
-  simp [gaussHGCoeff, poch, div_eq_mul_inv, mul_assoc, mul_left_comm, mul_comm]
+  simp [gaussHypergeometricCoeff, pochhammer, div_eq_mul_inv, mul_assoc, mul_left_comm, mul_comm]
 
 /-- Pfaff's transformation 15.8.1 for `₂F₁`, with no hypothesis on `a`, `b`. -/
 theorem pfaff_transformation_of_ne_neg_nat {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) {z : ℂ}
     (hz : ‖z‖ < 1) (hzt : ‖z / (z - 1)‖ < 1) :
     ₂F₁ a b c z = (1 - z) ^ (-a) * ₂F₁ a (c - b) c (z / (z - 1)) := by
   have hΓ : Gamma c ≠ 0 := Gamma_ne_zero hc
-  have h := regularizedGaussHGFun_pfaff a b c hz hzt
-  simp only [regularizedGaussHGFun_eq_div_Gamma hc] at h
+  have h := regularizedGaussHypergeometricFun_pfaff a b c hz hzt
+  simp only [regularizedGaussHypergeometricFun_eq_div_Gamma hc] at h
   rw [div_eq_iff hΓ] at h
   rw [h]
   field_simp
@@ -371,11 +380,12 @@ theorem pfaff_transformation_of_ne_neg_nat {a b c : ℂ} (hc : ∀ k : ℕ, c �
 /-! ### Terminating series as functions of the denominator parameter -/
 
 /-- `(c)_k ≠ 0` when `c` avoids `0, -1, …, -(k-1)`. -/
-theorem poch_ne_zero_of_lt (c : ℂ) (k : ℕ) (hc : ∀ j : ℕ, j < k → c ≠ -(j : ℂ)) : poch c k ≠ 0 := by
+theorem pochhammer_ne_zero_of_lt (c : ℂ) (k : ℕ) (hc : ∀ j : ℕ, j < k → c ≠ -(j : ℂ)) :
+    pochhammer c k ≠ 0 := by
   induction k with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ k ih =>
-    rw [poch_succ]
+    rw [pochhammer_succ]
     refine mul_ne_zero (ih fun j hj => hc j (by omega)) fun h => ?_
     exact hc k (by omega) (by linear_combination h)
 
@@ -385,20 +395,20 @@ theorem analyticOnNhd_gauss_neg_nat_param (n : ℕ) (b z : ℂ) :
         {c : ℂ | ∀ j : ℕ, j < n → c ≠ -(j : ℂ)} := by
   intro c hc
   have heq : (fun c : ℂ => ₂F₁ (-(n : ℂ)) b c z) = fun c => ∑ k ∈ Finset.range (n + 1),
-      poch (-(n : ℂ)) k * poch b k / (poch c k * k.factorial) * z ^ k := by
+      pochhammer (-(n : ℂ)) k * pochhammer b k / (pochhammer c k * k.factorial) * z ^ k := by
     funext c
     rw [ordinaryHypergeometric_eq_sum_neg_nat]
     rfl
   rw [heq]
   refine Finset.analyticAt_fun_sum (Finset.range (n + 1)) fun k hk => ?_
   have hk' : k ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hk)
-  have hden : poch c k * k.factorial ≠ 0 := mul_ne_zero
-    (poch_ne_zero_of_lt c k fun j hj => hc j (lt_of_lt_of_le hj hk'))
+  have hden : pochhammer c k * k.factorial ≠ 0 := mul_ne_zero
+    (pochhammer_ne_zero_of_lt c k fun j hj => hc j (lt_of_lt_of_le hj hk'))
     (Nat.cast_ne_zero.mpr k.factorial_ne_zero)
-  have hpoch : AnalyticAt ℂ (fun c : ℂ => poch c k * k.factorial) c :=
+  have hpoch : AnalyticAt ℂ (fun c : ℂ => pochhammer c k * k.factorial) c :=
     ((Polynomial.differentiable (ascPochhammer ℂ k)).analyticAt c).mul analyticAt_const
-  exact (AnalyticAt.fun_div (f := fun _ : ℂ => poch (-(n : ℂ)) k * poch b k)
-    (g := fun c : ℂ => poch c k * k.factorial) (x := c) analyticAt_const hpoch hden).mul
+  exact (AnalyticAt.fun_div (f := fun _ : ℂ => pochhammer (-(n : ℂ)) k * pochhammer b k)
+    (g := fun c : ℂ => pochhammer c k * k.factorial) (x := c) analyticAt_const hpoch hden).mul
     analyticAt_const
 
 /-- Gauss's contiguous relation in `a` for a terminating series, valid for every argument. -/
@@ -412,7 +422,8 @@ theorem contiguous_a_neg_nat {b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) 
   have hpoly : ∀ m : ℕ, Differentiable ℂ (fun z : ℂ => ₂F₁ (-(m : ℂ)) b c z) := by
     intro m
     have : (fun z : ℂ => ₂F₁ (-(m : ℂ)) b c z) =
-        fun z : ℂ => ∑ k ∈ Finset.range (m + 1), gaussHGCoeff (-(m : ℂ)) b c k * z ^ k := by
+        fun z : ℂ => ∑ k ∈ Finset.range (m + 1),
+            gaussHypergeometricCoeff (-(m : ℂ)) b c k * z ^ k := by
       funext z; exact ordinaryHypergeometric_eq_sum_neg_nat m b c z
     rw [this]
     fun_prop

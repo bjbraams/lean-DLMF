@@ -16,12 +16,12 @@ public import Mathlib.Analysis.Complex.Order
 ## Main definitions
 
 * `cutPlane`: the cut plane `ℂ ∖ [1, ∞)`, the natural domain of `₂F₁` in its argument.
-* `eulerKernel`, `regularizedGaussHGIntegral`: Euler's integral 15.6.1 in the regularized
-  normalization.
-* `shiftB`, `shiftC`, `shiftMeasure`, `regularizedGaussHGByShifts`: the contiguous shifts into the
-  Euler region and the recursion.
-* `regularizedGaussHG`: the continuation of the regularized function `𝐅(a,b;c;z)` to the cut
-  plane, for all parameters.
+* `eulerKernel`, `regularizedGaussHypergeometricIntegral`: Euler's integral 15.6.1 in the
+  regularized normalization.
+* `shiftB`, `shiftC`, `shiftMeasure`, `regularizedGaussHypergeometricByShifts`: the contiguous
+  shifts into the Euler region and the recursion.
+* `regularizedGaussHypergeometric`: the continuation of the regularized function `𝐅(a,b;c;z)` to the
+  cut plane, for all parameters.
 
 ## Main results
 
@@ -134,7 +134,7 @@ def eulerKernelDeriv (a b c z : ℂ) (t : ℝ) : ℂ :=
 
 /-- Euler's integral in the regularized normalization:
 `𝐅(a,b;c;z) = (Γ(b) Γ(c-b))⁻¹ ∫₀¹ t^(b-1) (1-t)^(c-b-1) (1 - z t)^(-a) dt`. -/
-def regularizedGaussHGIntegral (a b c z : ℂ) : ℂ :=
+def regularizedGaussHypergeometricIntegral (a b c z : ℂ) : ℂ :=
   (Gamma b * Gamma (c - b))⁻¹ * ∫ t : ℝ in (0 : ℝ)..1, eulerKernel a b c z t
 
 /-- Number of `b`-shifts needed to reach `Re b ≥ 1`. -/
@@ -148,20 +148,22 @@ def shiftMeasure (b c : ℂ) : ℕ := shiftB b + shiftC b c
 
 /-- The recursion with fuel: shift `c` while `shiftC > 0`, then shift `b` while `shiftB > 0`,
 then use Euler's integral. -/
-def regularizedGaussHGByShifts : ℕ → ℂ → ℂ → ℂ → ℂ → ℂ
-  | 0, a, b, c, z => regularizedGaussHGIntegral a b c z
+def regularizedGaussHypergeometricByShifts : ℕ → ℂ → ℂ → ℂ → ℂ → ℂ
+  | 0, a, b, c, z => regularizedGaussHypergeometricIntegral a b c z
   | n + 1, a, b, c, z =>
     if 0 < shiftC b c then
-      (c - a) * regularizedGaussHGByShifts n a b (c + 1) z + a
-          * regularizedGaussHGByShifts n (a + 1) b (c + 1) z
+      (c - a) * regularizedGaussHypergeometricByShifts n a b (c + 1) z + a
+          * regularizedGaussHypergeometricByShifts n (a + 1) b (c + 1) z
     else if 0 < shiftB b then
-      regularizedGaussHGByShifts n a (b + 1) c z - a * z
-          * regularizedGaussHGByShifts n (a + 1) (b + 1) (c + 1) z
-    else regularizedGaussHGIntegral a b c z
+      regularizedGaussHypergeometricByShifts n a (b + 1) c z - a * z
+          * regularizedGaussHypergeometricByShifts n (a + 1) (b + 1) (c + 1) z
+    else regularizedGaussHypergeometricIntegral a b c z
 
 /-- The regularized Gauss function `𝐅(a,b;c;z) = ₂F₁(a,b;c;z)/Γ(c)` continued to the cut
 plane `ℂ ∖ [1, ∞)`, for all parameters (DLMF §15.2(i)). Its domain is `cutPlane`; the series is
-Mathlib's `regularizedGaussHGFun` and the Euler integral is `regularizedGaussHGIntegral`. -/
-def regularizedGaussHG (a b c z : ℂ) : ℂ := regularizedGaussHGByShifts (shiftMeasure b c) a b c z
+Mathlib's `regularizedGaussHGFun` and the Euler integral is
+`regularizedGaussHypergeometricIntegral`. -/
+def regularizedGaussHypergeometric (a b c z : ℂ) : ℂ :=
+    regularizedGaussHypergeometricByShifts (shiftMeasure b c) a b c z
 
 end DLMF.Hypergeometric

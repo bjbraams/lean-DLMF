@@ -25,21 +25,21 @@ continued fractions, orthogonality, and the stability criterion of DLMF §29.9.
 
 * `Real.lameEigenvalue_spec`: existence and ordering of the four spectra of Table 29.3.2.
 * `Real.lameEigenfunction_spec`: existence and uniqueness of the normalized eigenfunctions.
-* `Real.lameEck_isLameEigenfunction`, `Real.lameEsk_isLameEigenfunction`,
-  `Real.lameEck_normalization`, `Real.lameEsk_normalization`, `Real.lameEck_K_pos`,
-  `Real.lameEsk_deriv_K_neg`: the eigenfunction property, the normalization 29.3.18 and the
+* `Real.lameEc_isLameEigenfunction`, `Real.lameEs_isLameEigenfunction`,
+  `Real.lameEc_normalization`, `Real.lameEs_normalization`, `Real.lameEc_K_pos`,
+  `Real.lameEs_deriv_K_neg`: the eigenfunction property, the normalization 29.3.18 and the
   sign rule of §29.3(v).
-* `Real.lameEck_parity`, `Real.lameEsk_parity`: the parities and periods of Tables 29.3.1–29.3.2.
-* `Real.lameEck_zeros_Ioo`, `Real.lameEsk_zeros_Ioo`, `Real.lameEck_zeros_Ico`,
-  `Real.lameEsk_zeros_Ico`: the zero counts of Table 29.3.2 and §29.3(iv).
-* `Real.lameAk_lt_lameAk_succ`, `Real.lameAk_lt_lameBk_succ`, `Real.lameBk_lt_lameBk_succ`,
-  `Real.lameBk_lt_lameAk_succ`: the interlacing 29.3.1–29.3.4.
-* `Real.lameAk_eq_lameBk`, `Real.lameAk_sub_lameBk_mul_pos`: coalescence and sign,
+* `Real.lameEc_parity`, `Real.lameEs_parity`: the parities and periods of Tables 29.3.1–29.3.2.
+* `Real.lameEc_zeros_Ioo`, `Real.lameEs_zeros_Ioo`, `Real.lameEc_zeros_Ico`,
+  `Real.lameEs_zeros_Ico`: the zero counts of Table 29.3.2 and §29.3(iv).
+* `Real.lameA_lt_lameA_succ`, `Real.lameA_lt_lameB_succ`, `Real.lameB_lt_lameB_succ`,
+  `Real.lameB_lt_lameA_succ`: the interlacing 29.3.1–29.3.4.
+* `Real.lameA_eq_lameB`, `Real.lameA_sub_lameB_mul_pos`: coalescence and sign,
   29.3.5–29.3.6.
-* `Real.lameCF_A0`, `Real.lameCF_A1`, `Real.lameCF_B1`, `Real.lameCF_B2`,
-  `Real.lameCF_A0_terminating`: the continued-fraction equation 29.3.10.
-* `Real.lameEck_even_orthogonal`, `Real.lameEck_odd_orthogonal`, `Real.lameEsk_odd_orthogonal`,
-  `Real.lameEsk_even_orthogonal`: the orthogonality relations 29.3.19.
+* `Real.lameCF_A0_terminating`: the continued-fraction equation 29.3.10 for integer `ν`; the
+  non-integer case is in `DLMF.Lame.FourierSeries.ContinuedFractions`.
+* `Real.lameEc_even_orthogonal`, `Real.lameEc_odd_orthogonal`, `Real.lameEs_odd_orthogonal`,
+  `Real.lameEs_even_orthogonal`: the orthogonality relations 29.3.19.
 * `Real.not_isLameStable_iff`, `Real.not_isLameStable_iff_nat`: the stability criterion of
   DLMF §29.9.
 
@@ -72,23 +72,27 @@ variable {h ν k : ℝ} {w : ℝ → ℝ}
 /-! ### Existence theorems -/
 
 /-- The Lamé potential `ν(ν+1) k² sn²(x, k)`. -/
-def lamePotential (ν k : ℝ) (x : ℝ) : ℝ := ν * (ν + 1) * k ^ 2 * Real.jacobiSnm x (k ^ 2) ^ 2
+def lamePotential (ν k : ℝ) (x : ℝ) : ℝ := ν * (ν + 1) * k ^ 2 *
+    Real.jacobiSnOfParameter x (k ^ 2) ^ 2
 
 /-- For `k² < 1` the Lamé potential `ν(ν+1) k² sn²(x, k)` is continuous in `x`. -/
 theorem continuous_lamePotential (hk : k ^ 2 < 1) : Continuous (lamePotential ν k) :=
   continuous_const.mul
-    ((continuous_iff_continuousAt.2 fun x => (Real.hasDerivAt_jacobiSnm hk x).continuousAt).pow 2)
+    ((continuous_iff_continuousAt.2 fun x =>
+        (Real.hasDerivAt_jacobiSnOfParameter hk x).continuousAt).pow 2)
 
 /-- The Lamé potential is bounded: `|ν(ν+1) k² sn²(x, k)| ≤ |ν(ν+1)| k²`. -/
 theorem abs_lamePotential_le (x : ℝ) : |lamePotential ν k x| ≤ |ν * (ν + 1)| * k ^ 2 := by
-  have h1 : Real.jacobiSnm x (k ^ 2) ^ 2 ≤ 1 := by
-    have := Real.jacobiSnm_sq_add_jacobiCnm_sq x (k ^ 2)
-    nlinarith [sq_nonneg (Real.jacobiCnm x (k ^ 2))]
-  rw [lamePotential, abs_mul, abs_mul, abs_of_nonneg (sq_nonneg (Real.jacobiSnm x (k ^ 2))),
+  have h1 : Real.jacobiSnOfParameter x (k ^ 2) ^ 2 ≤ 1 := by
+    have := Real.jacobiSnOfParameter_sq_add_jacobiCnOfParameter_sq x (k ^ 2)
+    nlinarith [sq_nonneg (Real.jacobiCnOfParameter x (k ^ 2))]
+  rw [lamePotential, abs_mul, abs_mul,
+      abs_of_nonneg (sq_nonneg (Real.jacobiSnOfParameter x (k ^ 2))),
     abs_of_nonneg (sq_nonneg k)]
   have := abs_nonneg (ν * (ν + 1))
   have := sq_nonneg k
-  calc |ν * (ν + 1)| * k ^ 2 * Real.jacobiSnm x (k ^ 2) ^ 2 ≤ |ν * (ν + 1)| * k ^ 2 * 1 := by
+  calc |ν * (ν + 1)| * k ^ 2 * Real.jacobiSnOfParameter x (k ^ 2) ^ 2 ≤ |ν * (ν + 1)| *
+         k ^ 2 * 1 := by
         gcongr
     _ = _ := mul_one _
 
@@ -112,7 +116,8 @@ theorem isLameSolution_iff_isSturmLiouvilleSolution {h : ℝ} {w : ℝ → ℝ} 
 `[0, K]` of the Lamé potential with the same boundary conditions. -/
 theorem lameSpectrum_eq_separatedSpectrum (odd0 oddK : Bool) :
     Real.lameSpectrum ν k odd0 oddK =
-      ODE.separatedSpectrum (lamePotential ν k) (Real.compEllIntKm (k ^ 2)) odd0 oddK := by
+      ODE.separatedSpectrum (lamePotential ν k) (Real.completeEllipticKOfParameter (k ^ 2))
+          odd0 oddK := by
   ext h
   simp only [Real.lameSpectrum, Real.IsLameEigenfunction, ODE.separatedSpectrum, mem_ofPred_eq,
     isLameSolution_iff_isSturmLiouvilleSolution]
@@ -132,7 +137,7 @@ theorem Real.lameEigenvalue_spec (hk0 : 0 < k) (hk1 : k < 1)
       Real.lameSpectrum ν k odd0 oddK = Set.range (Real.lameEigenvalue ν k odd0 oddK) ∧
       Tendsto (Real.lameEigenvalue ν k odd0 oddK) atTop atTop := by
   have hk : k ^ 2 < 1 := by nlinarith
-  have hK := Real.compEllIntKm_pos hk
+  have hK := Real.completeEllipticKOfParameter_pos hk
   have hS := lameSpectrum_eq_separatedSpectrum (ν := ν) (k := k) odd0 oddK
   have hinf : ¬BddAbove (Real.lameSpectrum ν k odd0 oddK) := hS ▸
     ODE.not_bddAbove_separatedSpectrum (continuous_lamePotential hk) abs_lamePotential_le
@@ -157,16 +162,18 @@ theorem Real.isNthLameEigenvalue_lameEigenvalue (hk0 : 0 < k) (hk1 : k < 1)
   exact hs.exists.choose_spec
 
 /-- Positivity of `∫₀^K dn · w²` for a nonzero solution `w`. -/
-private lemma integral_jacobiDnm_mul_sq_pos (hk : k ^ 2 < 1) {h : ℝ} {w : ℝ → ℝ}
+private lemma integral_jacobiDnOfParameter_mul_sq_pos (hk : k ^ 2 < 1) {h : ℝ} {w : ℝ → ℝ}
     (hw : ODE.IsSturmLiouvilleSolution (lamePotential ν k) h w) (hne : w ≠ 0) :
-    0 < ∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2), Real.jacobiDnm x (k ^ 2) * w x ^ 2 := by
-  have hK := Real.compEllIntKm_pos hk
-  set K := Real.compEllIntKm (k ^ 2)
-  set f : ℝ → ℝ := fun x => Real.jacobiDnm x (k ^ 2) * w x ^ 2
-  have hdn : Continuous fun x => Real.jacobiDnm x (k ^ 2) :=
-    continuous_iff_continuousAt.2 fun x => (Real.hasDerivAt_jacobiDnm hk x).continuousAt
+    0 < ∫ x in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2),
+        Real.jacobiDnOfParameter x (k ^ 2) * w x ^ 2 := by
+  have hK := Real.completeEllipticKOfParameter_pos hk
+  set K := Real.completeEllipticKOfParameter (k ^ 2)
+  set f : ℝ → ℝ := fun x => Real.jacobiDnOfParameter x (k ^ 2) * w x ^ 2
+  have hdn : Continuous fun x => Real.jacobiDnOfParameter x (k ^ 2) :=
+    continuous_iff_continuousAt.2 fun x => (Real.hasDerivAt_jacobiDnOfParameter hk x).continuousAt
   have hf : Continuous f := hdn.mul (hw.continuous.pow 2)
-  have hf0 : ∀ x, 0 ≤ f x := fun x => mul_nonneg (Real.jacobiDnm_pos hk x).le (sq_nonneg _)
+  have hf0 : ∀ x, 0 ≤ f x := fun x =>
+      mul_nonneg (Real.jacobiDnOfParameter_pos hk x).le (sq_nonneg _)
   obtain ⟨x₀, hx₀, hwx₀⟩ : ∃ x ∈ Ioo 0 K, w x ≠ 0 := by
     by_contra hno
     push Not at hno
@@ -182,7 +189,7 @@ private lemma integral_jacobiDnm_mul_sq_pos (hk : k ^ 2 < 1) {h : ℝ} {w : ℝ 
   refine ⟨hK, ?_⟩
   have hU : IsOpen ({x | f x ≠ 0} ∩ Ioo 0 K) := (isOpen_ne_fun hf continuous_const).inter isOpen_Ioo
   have hpos := hU.measure_pos MeasureTheory.volume
-    ⟨x₀, mul_ne_zero (Real.jacobiDnm_pos hk x₀).ne' (pow_ne_zero 2 hwx₀), hx₀⟩
+    ⟨x₀, mul_ne_zero (Real.jacobiDnOfParameter_pos hk x₀).ne' (pow_ne_zero 2 hwx₀), hx₀⟩
   exact hpos.trans_le (MeasureTheory.measure_mono fun x hx => ⟨hx.1, Ioo_subset_Ioc_self hx.2⟩)
 
 /-- **Existence and uniqueness of the normalized Lamé eigenfunctions** (DLMF §§29.3(iv)–(v)):
@@ -196,7 +203,7 @@ theorem Real.lameEigenfunction_spec (hk0 : 0 < k) (hk1 : k < 1)
     ∃! w, Real.IsNormalizedLameEigenfunction ν k odd0 oddK j w := by
   have hk : k ^ 2 < 1 := by nlinarith
   have hV := continuous_lamePotential (ν := ν) hk
-  set K := Real.compEllIntKm (k ^ 2)
+  set K := Real.completeEllipticKOfParameter (k ^ 2)
   set h := Real.lameEigenvalue ν k odd0 oddK j
   have hmem : h ∈ ODE.separatedSpectrum (lamePotential ν k) K odd0 oddK :=
     lameSpectrum_eq_separatedSpectrum (ν := ν) (k := k) odd0 oddK ▸
@@ -205,8 +212,8 @@ theorem Real.lameEigenfunction_spec (hk0 : 0 < k) (hk1 : k < 1)
   set Y := ODE.basicSolution (lamePotential ν k) odd0 h
   have hYne := ODE.basicSolution_ne_zero hV odd0 h
   have hG := (ODE.mem_separatedSpectrum_iff hV odd0 oddK).1 hmem
-  set I := ∫ x in (0 : ℝ)..K, Real.jacobiDnm x (k ^ 2) * Y x ^ 2
-  have hI : 0 < I := integral_jacobiDnm_mul_sq_pos hk hy hYne
+  set I := ∫ x in (0 : ℝ)..K, Real.jacobiDnOfParameter x (k ^ 2) * Y x ^ 2
+  have hI : 0 < I := integral_jacobiDnOfParameter_mul_sq_pos hk hy hYne
   -- the sign datum `a`: the normalized eigenfunction `c Y` satisfies the sign rule iff `0 < c a`
   set a := if oddK then -deriv Y K else Y K
   have ha : a ≠ 0 := by
@@ -219,7 +226,8 @@ theorem Real.lameEigenfunction_spec (hk0 : 0 < k) (hk1 : k < 1)
       exact hYne (ODE.isSturmLiouvilleSolution_eq_zero_of_eq_zero_of_deriv_eq_zero hV hy hG ha0)
   have hderiv : ∀ c : ℝ, deriv (fun x => c * Y x) = fun x => c * deriv Y x := fun c =>
     funext fun x => ((hy.hasDerivAt x).const_mul c).deriv
-  have hint : ∀ c : ℝ, ∫ x in (0 : ℝ)..K, Real.jacobiDnm x (k ^ 2) * (c * Y x) ^ 2 = c ^ 2 * I :=
+  have hint : ∀ c : ℝ, ∫ x in (0 : ℝ)..K, Real.jacobiDnOfParameter x (k ^ 2) *
+      (c * Y x) ^ 2 = c ^ 2 * I :=
     fun c => by
       rw [← intervalIntegral.integral_const_mul]
       congr 1; funext x; ring
@@ -300,25 +308,29 @@ theorem comodulus_mem_Ioo (hk0 : 0 < k) (hk1 : k < 1) :
   rw [Real.sqrt_lt' one_pos]; nlinarith
 
 /-- `sn²` is even. -/
-private lemma jacobiSnm_neg_sq (hk : k ^ 2 < 1) (x : ℝ) :
-    Real.jacobiSnm (2 * 0 - x) (k ^ 2) ^ 2 = Real.jacobiSnm x (k ^ 2) ^ 2 := by
+private lemma jacobiSnOfParameter_neg_sq (hk : k ^ 2 < 1) (x : ℝ) :
+    Real.jacobiSnOfParameter (2 * 0 - x) (k ^ 2) ^ 2 = Real.jacobiSnOfParameter x (k ^ 2) ^ 2 := by
   rw [show 2 * (0 : ℝ) - x = -x by ring, (jacobi_neg hk x).1, neg_sq]
 
 /-- `sn²(2K - x) = sn²(x)`. -/
-private lemma jacobiSnm_two_K_sub_sq (hk : k ^ 2 < 1) (x : ℝ) :
-    Real.jacobiSnm (2 * Real.compEllIntKm (k ^ 2) - x) (k ^ 2) ^ 2 =
-      Real.jacobiSnm x (k ^ 2) ^ 2 := by
-  rw [show 2 * Real.compEllIntKm (k ^ 2) - x = -x + 2 * Real.compEllIntKm (k ^ 2) by ring,
-    (Real.jacobi_add_two_compEllIntKm hk (-x)).1, (jacobi_neg hk x).1, neg_neg]
+private lemma jacobiSnOfParameter_two_K_sub_sq (hk : k ^ 2 < 1) (x : ℝ) :
+    Real.jacobiSnOfParameter (2 * Real.completeEllipticKOfParameter (k ^ 2) - x) (k ^ 2) ^ 2 =
+      Real.jacobiSnOfParameter x (k ^ 2) ^ 2 := by
+  rw [show 2 * Real.completeEllipticKOfParameter (k ^ 2) - x = -x + 2 *
+      Real.completeEllipticKOfParameter (k ^ 2) by ring,
+    (Real.jacobi_add_two_completeEllipticKOfParameter hk (-x)).1, (jacobi_neg hk x).1, neg_neg]
 
 /-- **Reflection principle** for Lamé's equation: if `sn²` is symmetric about `c`, a solution
 with `w'(c) = 0` is even about `c` and one with `w(c) = 0` is odd about `c`. -/
 private lemma isLameSolution_reflect {c : ℝ} (hk : k ^ 2 < 1) (hw : Real.IsLameSolution h ν k w)
-    (hsym : ∀ x, Real.jacobiSnm (2 * c - x) (k ^ 2) ^ 2 = Real.jacobiSnm x (k ^ 2) ^ 2) :
+    (hsym : ∀ x, Real.jacobiSnOfParameter (2 * c - x) (k ^ 2) ^ 2 =
+        Real.jacobiSnOfParameter x (k ^ 2) ^ 2) :
     (deriv w c = 0 → ∀ x, w (2 * c - x) = w x) ∧ (w c = 0 → ∀ x, w (2 * c - x) = -w x) := by
-  set q : ℝ → ℝ := fun x => -(h - ν * (ν + 1) * k ^ 2 * Real.jacobiSnm x (k ^ 2) ^ 2) with hq_def
+  set q : ℝ → ℝ := fun x =>
+      -(h - ν * (ν + 1) * k ^ 2 * Real.jacobiSnOfParameter x (k ^ 2) ^ 2) with hq_def
   have hq : Continuous q :=
-    (continuous_const.sub (continuous_const.mul ((Real.continuous_jacobiSnm hk).pow 2))).neg
+    (continuous_const.sub
+        (continuous_const.mul ((Real.continuous_jacobiSnOfParameter hk).pow 2))).neg
   have hw' : ∀ x, HasDerivAt w (deriv w x) x ∧
       HasDerivAt (deriv w) ((0 : ℝ) • deriv w x + q x • w x) x := fun x =>
     ⟨(hw.differentiable x).hasDerivAt, by simpa [q, smul_eq_mul] using hw.hasDerivAt_deriv x⟩
@@ -372,8 +384,10 @@ private lemma integral_mul_eq_zero_of_isLameSolution {h₁ h₂ : ℝ} {w₁ w�
 private lemma wronskian_eq_zero_of_lameBoundary {odd0 oddK : Bool} {w₁ w₂ : ℝ → ℝ}
     (h₁ : Real.LameBoundary k odd0 oddK w₁) (h₂ : Real.LameBoundary k odd0 oddK w₂) :
     deriv w₁ 0 * w₂ 0 - w₁ 0 * deriv w₂ 0 = 0 ∧
-      deriv w₁ (Real.compEllIntKm (k ^ 2)) * w₂ (Real.compEllIntKm (k ^ 2)) -
-        w₁ (Real.compEllIntKm (k ^ 2)) * deriv w₂ (Real.compEllIntKm (k ^ 2)) = 0 := by
+      deriv w₁ (Real.completeEllipticKOfParameter (k ^ 2)) *
+          w₂ (Real.completeEllipticKOfParameter (k ^ 2)) -
+        w₁ (Real.completeEllipticKOfParameter (k ^ 2)) *
+            deriv w₂ (Real.completeEllipticKOfParameter (k ^ 2)) = 0 := by
   obtain ⟨a₁, b₁⟩ := h₁
   obtain ⟨a₂, b₂⟩ := h₂
   constructor
@@ -385,51 +399,53 @@ private lemma wronskian_eq_zero_of_lameBoundary {odd0 oddK : Bool} {w₁ w₂ : 
 /-- `Ec^m_ν(x, k²)` is an eigenfunction for `a^m_ν(k²)` (Table 29.3.2): it solves 29.2.1 with
 `h = a^m_ν(k²)`, satisfies the boundary conditions of its type and is not identically zero. -/
 @[dlmf 29.3.iv]
-theorem Real.lameEck_isLameEigenfunction (hk0 : 0 < k) (hk1 : k < 1)
+theorem Real.lameEc_isLameEigenfunction (hk0 : 0 < k) (hk1 : k < 1)
     (m : ℕ) :
-    Real.IsLameEigenfunction (Real.lameAk ν m k) ν k m.bodd false
-      (fun x => Real.lameEck ν m x k) :=
+    Real.IsLameEigenfunction (Real.lameA ν m k) ν k m.bodd false
+      (fun x => Real.lameEc ν m x k) :=
   (Real.isNormalizedLameEigenfunction_lameEigenfunction hk0 hk1 _ _ _).1
 
 /-- `Es^m_ν(x, k²)` is an eigenfunction for `b^m_ν(k²)` (Table 29.3.2). -/
 @[dlmf 29.3.iv]
-theorem Real.lameEsk_isLameEigenfunction (hk0 : 0 < k) (hk1 : k < 1)
+theorem Real.lameEs_isLameEigenfunction (hk0 : 0 < k) (hk1 : k < 1)
     (m : ℕ) :
-    Real.IsLameEigenfunction (Real.lameBk ν m k) ν k (!m.bodd) true
-      (fun x => Real.lameEsk ν m x k) :=
+    Real.IsLameEigenfunction (Real.lameB ν m k) ν k (!m.bodd) true
+      (fun x => Real.lameEs ν m x k) :=
   (Real.isNormalizedLameEigenfunction_lameEigenfunction hk0 hk1 _ _ _).1
 
 /-- Normalization 29.3.18 for `Ec^{2m}_ν` and `Ec^{2m+1}_ν`:
 `∫₀^K dn(x, k) (Ec^m_ν(x, k²))² dx = π/4`. -/
 @[dlmf 29.3.E18]
-theorem Real.lameEck_normalization (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
-    ∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2), Real.jacobiDnm x (k ^ 2) * Real.lameEck ν m x k ^ 2
+theorem Real.lameEc_normalization (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
+    ∫ x in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2), Real.jacobiDnOfParameter x (k ^ 2) *
+        Real.lameEc ν m x k ^ 2
       = π / 4 :=
   (Real.isNormalizedLameEigenfunction_lameEigenfunction hk0 hk1 _ _ _).2.1
 
 /-- Normalization 29.3.18 for `Es^{2m+1}_ν` and `Es^{2m+2}_ν`:
 `∫₀^K dn(x, k) (Es^m_ν(x, k²))² dx = π/4` (`m ≥ 1`). -/
 @[dlmf 29.3.E18]
-theorem Real.lameEsk_normalization (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
-    ∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2), Real.jacobiDnm x (k ^ 2) * Real.lameEsk ν m x k ^ 2
+theorem Real.lameEs_normalization (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
+    ∫ x in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2), Real.jacobiDnOfParameter x (k ^ 2) *
+        Real.lameEs ν m x k ^ 2
       = π / 4 :=
   (Real.isNormalizedLameEigenfunction_lameEigenfunction hk0 hk1 _ _ _).2.1
 
 /-- The sign rule of §29.3(v): `Ec^m_ν(K, k²) > 0`. -/
 @[dlmf 29.3.v]
-theorem Real.lameEck_K_pos (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
-    0 < Real.lameEck ν m (Real.compEllIntKm (k ^ 2)) k := by
+theorem Real.lameEc_K_pos (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
+    0 < Real.lameEc ν m (Real.completeEllipticKOfParameter (k ^ 2)) k := by
   have := (Real.isNormalizedLameEigenfunction_lameEigenfunction (ν := ν) hk0 hk1 m.bodd false
     (m / 2)).2.2
-  simpa [Real.lameEck] using this
+  simpa [Real.lameEc] using this
 
 /-- The sign rule of §29.3(v): `dEs^m_ν(z, k²)/dz < 0` at `z = K`. -/
 @[dlmf 29.3.v]
-theorem Real.lameEsk_deriv_K_neg (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
-    deriv (fun x => Real.lameEsk ν m x k) (Real.compEllIntKm (k ^ 2)) < 0 := by
+theorem Real.lameEs_deriv_K_neg (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
+    deriv (fun x => Real.lameEs ν m x k) (Real.completeEllipticKOfParameter (k ^ 2)) < 0 := by
   have := (Real.isNormalizedLameEigenfunction_lameEigenfunction (ν := ν) hk0 hk1 (!m.bodd) true
     ((m - 1) / 2)).2.2
-  simpa [Real.lameEsk] using this
+  simpa [Real.lameEs] using this
 
 /-! ### Parity and periodicity (Tables 29.3.1, 29.3.2) -/
 
@@ -439,16 +455,16 @@ and `ε = ±1` according to `w(K) = 0` or `w'(K) = 0`, `w(-x) = δ w(x)`,
 theorem Real.IsLameEigenfunction.parity {odd0 oddK : Bool} (hk0 : 0 < k) (hk1 : k < 1)
     (hw : Real.IsLameEigenfunction h ν k odd0 oddK w) (x : ℝ) :
     w (-x) = (if odd0 then -1 else 1) * w x ∧
-      w (2 * Real.compEllIntKm (k ^ 2) - x) = (if oddK then -1 else 1) * w x ∧
-      w (-x - Real.compEllIntKm (k ^ 2)) =
-        (if oddK then -1 else 1) * w (x - Real.compEllIntKm (k ^ 2)) ∧
-      w (x + 2 * Real.compEllIntKm (k ^ 2)) =
+      w (2 * Real.completeEllipticKOfParameter (k ^ 2) - x) = (if oddK then -1 else 1) * w x ∧
+      w (-x - Real.completeEllipticKOfParameter (k ^ 2)) =
+        (if oddK then -1 else 1) * w (x - Real.completeEllipticKOfParameter (k ^ 2)) ∧
+      w (x + 2 * Real.completeEllipticKOfParameter (k ^ 2)) =
         (if odd0 then -1 else 1) * (if oddK then -1 else 1) * w x := by
   have hk := modulus_sq_lt_one hk0 hk1
   obtain ⟨hsol, ⟨h0, hK⟩, -⟩ := hw
-  set K := Real.compEllIntKm (k ^ 2)
-  have r0 := isLameSolution_reflect (c := 0) hk hsol (jacobiSnm_neg_sq hk)
-  have rK := isLameSolution_reflect (c := K) hk hsol (jacobiSnm_two_K_sub_sq hk)
+  set K := Real.completeEllipticKOfParameter (k ^ 2)
+  have r0 := isLameSolution_reflect (c := 0) hk hsol (jacobiSnOfParameter_neg_sq hk)
+  have rK := isLameSolution_reflect (c := K) hk hsol (jacobiSnOfParameter_two_K_sub_sq hk)
   have P0 : ∀ y, w (-y) = (if odd0 then -1 else 1) * w y := by
     intro y
     cases odd0
@@ -486,22 +502,25 @@ private lemma ite_not_bodd_eq_neg_one_pow (m : ℕ) : (if (!m.bodd) then (-1 : �
 `z ↦ Ec^m_ν(z - K)` is even, and `Ec^m_ν(x + 2K) = (-1)^m Ec^m_ν(x)`, so that `Ec^{2m}_ν` has
 period `2K` and `Ec^{2m+1}_ν` period `4K`. -/
 @[dlmf 29.3.T1, dlmf 29.3.T2]
-theorem Real.lameEck_parity (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) (x : ℝ) :
-    Real.lameEck ν m (-x) k = (-1) ^ m * Real.lameEck ν m x k ∧
-      Real.lameEck ν m (2 * Real.compEllIntKm (k ^ 2) - x) k = Real.lameEck ν m x k ∧
-      Real.lameEck ν m (-x - Real.compEllIntKm (k ^ 2)) k =
-        Real.lameEck ν m (x - Real.compEllIntKm (k ^ 2)) k ∧
-      Real.lameEck ν m (x + 2 * Real.compEllIntKm (k ^ 2)) k = (-1) ^ m * Real.lameEck ν m x k ∧
-      Real.lameEck ν m (x + 4 * Real.compEllIntKm (k ^ 2)) k = Real.lameEck ν m x k := by
-  have hw := Real.lameEck_isLameEigenfunction (ν := ν) hk0 hk1 m
+theorem Real.lameEc_parity (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) (x : ℝ) :
+    Real.lameEc ν m (-x) k = (-1) ^ m * Real.lameEc ν m x k ∧
+      Real.lameEc ν m (2 * Real.completeEllipticKOfParameter (k ^ 2) - x) k = Real.lameEc ν m x k ∧
+      Real.lameEc ν m (-x - Real.completeEllipticKOfParameter (k ^ 2)) k =
+        Real.lameEc ν m (x - Real.completeEllipticKOfParameter (k ^ 2)) k ∧
+      Real.lameEc ν m (x + 2 * Real.completeEllipticKOfParameter (k ^ 2)) k = (-1) ^ m *
+          Real.lameEc ν m x k ∧
+      Real.lameEc ν m (x + 4 * Real.completeEllipticKOfParameter (k ^ 2)) k =
+          Real.lameEc ν m x k := by
+  have hw := Real.lameEc_isLameEigenfunction (ν := ν) hk0 hk1 m
   have P := fun y => Real.IsLameEigenfunction.parity hk0 hk1 hw y
   obtain ⟨p1, p2, p3, p4⟩ := P x
-  have p5 := (P (x + 2 * Real.compEllIntKm (k ^ 2))).2.2.2
+  have p5 := (P (x + 2 * Real.completeEllipticKOfParameter (k ^ 2))).2.2.2
   simp only [ite_bodd_eq_neg_one_pow, Bool.false_eq_true, ↓reduceIte, mul_one, one_mul]
       at p1 p2 p3 p4 p5
   refine ⟨p1, p2, p3, p4, ?_⟩
-  rw [show x + 4 * Real.compEllIntKm (k ^ 2) =
-    x + 2 * Real.compEllIntKm (k ^ 2) + 2 * Real.compEllIntKm (k ^ 2) by ring, p5, p4,
+  rw [show x + 4 * Real.completeEllipticKOfParameter (k ^ 2) =
+    x + 2 * Real.completeEllipticKOfParameter (k ^ 2) + 2 *
+        Real.completeEllipticKOfParameter (k ^ 2) by ring, p5, p4,
     ← mul_assoc, ← pow_add, ← two_mul, pow_mul]
   simp
 
@@ -510,22 +529,25 @@ theorem Real.lameEck_parity (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) (x : ℝ) :
 `Es^m_ν(x + 2K) = (-1)^m Es^m_ν(x)`, so that `Es^{2m+2}_ν` has period `2K` and `Es^{2m+1}_ν`
 period `4K`. -/
 @[dlmf 29.3.T1, dlmf 29.3.T2]
-theorem Real.lameEsk_parity (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) (x : ℝ) :
-    Real.lameEsk ν m (-x) k = (-1) ^ (m + 1) * Real.lameEsk ν m x k ∧
-      Real.lameEsk ν m (2 * Real.compEllIntKm (k ^ 2) - x) k = -Real.lameEsk ν m x k ∧
-      Real.lameEsk ν m (-x - Real.compEllIntKm (k ^ 2)) k =
-        -Real.lameEsk ν m (x - Real.compEllIntKm (k ^ 2)) k ∧
-      Real.lameEsk ν m (x + 2 * Real.compEllIntKm (k ^ 2)) k = (-1) ^ m * Real.lameEsk ν m x k ∧
-      Real.lameEsk ν m (x + 4 * Real.compEllIntKm (k ^ 2)) k = Real.lameEsk ν m x k := by
-  have hw := Real.lameEsk_isLameEigenfunction (ν := ν) hk0 hk1 m
+theorem Real.lameEs_parity (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) (x : ℝ) :
+    Real.lameEs ν m (-x) k = (-1) ^ (m + 1) * Real.lameEs ν m x k ∧
+      Real.lameEs ν m (2 * Real.completeEllipticKOfParameter (k ^ 2) - x) k = -Real.lameEs ν m x k ∧
+      Real.lameEs ν m (-x - Real.completeEllipticKOfParameter (k ^ 2)) k =
+        -Real.lameEs ν m (x - Real.completeEllipticKOfParameter (k ^ 2)) k ∧
+      Real.lameEs ν m (x + 2 * Real.completeEllipticKOfParameter (k ^ 2)) k = (-1) ^ m *
+          Real.lameEs ν m x k ∧
+      Real.lameEs ν m (x + 4 * Real.completeEllipticKOfParameter (k ^ 2)) k =
+          Real.lameEs ν m x k := by
+  have hw := Real.lameEs_isLameEigenfunction (ν := ν) hk0 hk1 m
   have P := fun y => Real.IsLameEigenfunction.parity hk0 hk1 hw y
   obtain ⟨p1, p2, p3, p4⟩ := P x
-  have p5 := (P (x + 2 * Real.compEllIntKm (k ^ 2))).2.2.2
+  have p5 := (P (x + 2 * Real.completeEllipticKOfParameter (k ^ 2))).2.2.2
   have hs : (-1 : ℝ) ^ (m + 1) * -1 = (-1) ^ m := by rw [pow_succ]; ring
   simp only [ite_not_bodd_eq_neg_one_pow, ↓reduceIte, neg_one_mul, hs] at p1 p2 p3 p4 p5
   refine ⟨p1, p2, p3, p4, ?_⟩
-  rw [show x + 4 * Real.compEllIntKm (k ^ 2) =
-    x + 2 * Real.compEllIntKm (k ^ 2) + 2 * Real.compEllIntKm (k ^ 2) by ring, p5, p4,
+  rw [show x + 4 * Real.completeEllipticKOfParameter (k ^ 2) =
+    x + 2 * Real.completeEllipticKOfParameter (k ^ 2) + 2 *
+        Real.completeEllipticKOfParameter (k ^ 2) by ring, p5, p4,
     ← mul_assoc, ← pow_add, ← two_mul, pow_mul]
   simp
 
@@ -535,10 +557,10 @@ theorem Real.lameEsk_parity (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) (x : ℝ) :
 type has exactly `j` zeros in `(0, K)`. -/
 private lemma encard_zeros_lameEigenfunction (hk0 : 0 < k) (hk1 : k < 1)
     (odd0 oddK : Bool) (j : ℕ) :
-    {x | x ∈ Ioo 0 (Real.compEllIntKm (k ^ 2)) ∧
+    {x | x ∈ Ioo 0 (Real.completeEllipticKOfParameter (k ^ 2)) ∧
       Real.lameEigenfunction ν k odd0 oddK j x = 0}.encard = j := by
   have hk := modulus_sq_lt_one hk0 hk1
-  have hK := Real.compEllIntKm_pos hk
+  have hK := Real.completeEllipticKOfParameter_pos hk
   obtain ⟨⟨hw, hbc, hne⟩, -, -⟩ :=
     Real.isNormalizedLameEigenfunction_lameEigenfunction hk0 hk1 odd0 oddK j
   have hN := Real.isNthLameEigenvalue_lameEigenvalue (ν := ν) hk0 hk1 odd0 oddK j
@@ -611,8 +633,8 @@ private lemma lameEigenvalue_interlace (hk0 : 0 < k) (hk1 : k < 1) (odd0 : Bool)
     Real.lameEigenvalue ν k odd0 false j < Real.lameEigenvalue ν k odd0 true j ∧
       Real.lameEigenvalue ν k odd0 true j < Real.lameEigenvalue ν k odd0 false (j + 1) := by
   have hk := modulus_sq_lt_one hk0 hk1
-  have hK := Real.compEllIntKm_pos hk
-  set K := Real.compEllIntKm (k ^ 2)
+  have hK := Real.completeEllipticKOfParameter_pos hk
+  set K := Real.completeEllipticKOfParameter (k ^ 2)
   set V := lamePotential ν k
   have hV : Continuous V := continuous_lamePotential hk
   have hB : ∀ x, |V x| ≤ |ν * (ν + 1)| * k ^ 2 := abs_lamePotential_le
@@ -755,19 +777,21 @@ private lemma deriv_neg_eq_zero_of_parity {w : ℝ → ℝ} {K s : ℝ} (hw : Di
 
 /-- In the problem on `[0, 2K]` with potential `V(x - K)` and Neumann conditions at both ends,
 `a^m_ν` is an eigenvalue with exactly `m` smaller eigenvalues. -/
-private lemma lameAk_mem_separatedSpectrum_shift (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
-    Real.lameAk ν m k ∈ ODE.separatedSpectrum
-        (fun x => lamePotential ν k (x - Real.compEllIntKm (k ^ 2)))
-      (2 * Real.compEllIntKm (k ^ 2)) false false ∧
-    (ODE.separatedSpectrum (fun x => lamePotential ν k (x - Real.compEllIntKm (k ^ 2)))
-      (2 * Real.compEllIntKm (k ^ 2)) false false ∩ Iio (Real.lameAk ν m k)).encard = m := by
+private lemma lameA_mem_separatedSpectrum_shift (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
+    Real.lameA ν m k ∈ ODE.separatedSpectrum
+        (fun x => lamePotential ν k (x - Real.completeEllipticKOfParameter (k ^ 2)))
+      (2 * Real.completeEllipticKOfParameter (k ^ 2)) false false ∧
+    (ODE.separatedSpectrum
+        (fun x => lamePotential ν k (x - Real.completeEllipticKOfParameter (k ^ 2)))
+      (2 * Real.completeEllipticKOfParameter (k ^ 2)) false false ∩ Iio
+          (Real.lameA ν m k)).encard = m := by
   have hk := modulus_sq_lt_one hk0 hk1
-  have hK := Real.compEllIntKm_pos hk
-  set K := Real.compEllIntKm (k ^ 2)
-  set E := fun x => Real.lameEck ν m x k with hE
-  obtain ⟨hw, hb, hne⟩ := Real.lameEck_isLameEigenfunction hk0 hk1 m
+  have hK := Real.completeEllipticKOfParameter_pos hk
+  set K := Real.completeEllipticKOfParameter (k ^ 2)
+  set E := fun x => Real.lameEc ν m x k with hE
+  obtain ⟨hw, hb, hne⟩ := Real.lameEc_isLameEigenfunction hk0 hk1 m
   rw [isLameSolution_iff_isSturmLiouvilleSolution] at hw
-  have hpar := Real.lameEck_parity (ν := ν) hk0 hk1 m
+  have hpar := Real.lameEc_parity (ν := ν) hk0 hk1 m
   set u := fun x => E (x - K) with hu
   have hus := isSturmLiouvilleSolution_comp_sub (K := K) hw
   have hdu : ∀ x, deriv u x = deriv E (x - K) := fun x => deriv_comp_sub_const E K x
@@ -778,7 +802,7 @@ private lemma lameAk_mem_separatedSpectrum_shift (hk0 : 0 < k) (hk1 : k < 1) (m 
     exact ⟨deriv_neg_eq_zero_of_parity hw.1 (fun x => (hpar x).1) hb.2, hb.2⟩
   have hune : u ≠ 0 := fun h0 => hne (funext fun y => by
     have := congrFun h0 (y + K); simpa [u] using this)
-  have hmem : Real.lameAk ν m k ∈
+  have hmem : Real.lameA ν m k ∈
       ODE.separatedSpectrum (fun x => lamePotential ν k (x - K)) (2 * K) false false :=
     ⟨u, hus, hbc, hune⟩
   refine ⟨hmem, ?_⟩
@@ -809,20 +833,21 @@ private lemma lameAk_mem_separatedSpectrum_shift (hk0 : 0 < k) (hk1 : k < 1) (m 
 
 /-- In the problem on `[0, 2K]` with potential `V(x - K)` and Dirichlet conditions at both ends,
 `b^m_ν` (`m ≥ 1`) is an eigenvalue with exactly `m - 1` smaller eigenvalues. -/
-private lemma lameBk_mem_separatedSpectrum_shift (hk0 : 0 < k) (hk1 : k < 1) {m : ℕ} (hm : 1 ≤ m) :
-    Real.lameBk ν m k ∈ ODE.separatedSpectrum
-        (fun x => lamePotential ν k (x - Real.compEllIntKm (k ^ 2)))
-      (2 * Real.compEllIntKm (k ^ 2)) true true ∧
-    (ODE.separatedSpectrum (fun x => lamePotential ν k (x - Real.compEllIntKm (k ^ 2)))
-      (2 * Real.compEllIntKm (k ^ 2)) true true ∩ Iio (Real.lameBk ν m k)).encard =
+private lemma lameB_mem_separatedSpectrum_shift (hk0 : 0 < k) (hk1 : k < 1) {m : ℕ} (hm : 1 ≤ m) :
+    Real.lameB ν m k ∈ ODE.separatedSpectrum
+        (fun x => lamePotential ν k (x - Real.completeEllipticKOfParameter (k ^ 2)))
+      (2 * Real.completeEllipticKOfParameter (k ^ 2)) true true ∧
+    (ODE.separatedSpectrum
+        (fun x => lamePotential ν k (x - Real.completeEllipticKOfParameter (k ^ 2)))
+      (2 * Real.completeEllipticKOfParameter (k ^ 2)) true true ∩ Iio (Real.lameB ν m k)).encard =
         (m - 1 : ℕ) := by
   have hk := modulus_sq_lt_one hk0 hk1
-  have hK := Real.compEllIntKm_pos hk
-  set K := Real.compEllIntKm (k ^ 2)
-  set E := fun x => Real.lameEsk ν m x k with hE
-  obtain ⟨hw, hb, hne⟩ := Real.lameEsk_isLameEigenfunction hk0 hk1 m
+  have hK := Real.completeEllipticKOfParameter_pos hk
+  set K := Real.completeEllipticKOfParameter (k ^ 2)
+  set E := fun x => Real.lameEs ν m x k with hE
+  obtain ⟨hw, hb, hne⟩ := Real.lameEs_isLameEigenfunction hk0 hk1 m
   rw [isLameSolution_iff_isSturmLiouvilleSolution] at hw
-  have hpar := Real.lameEsk_parity (ν := ν) hk0 hk1 m
+  have hpar := Real.lameEs_parity (ν := ν) hk0 hk1 m
   set u := fun x => E (x - K) with hu
   have hus := isSturmLiouvilleSolution_comp_sub (K := K) hw
   simp only [Real.LameBoundary, ↓reduceIte] at hb
@@ -830,11 +855,11 @@ private lemma lameBk_mem_separatedSpectrum_shift (hk0 : 0 < k) (hk1 : k < 1) {m 
     simp only [ODE.SatisfiesSeparatedBC, ↓reduceIte, u]
     rw [zero_sub, show 2 * K - K = K by ring]
     refine ⟨?_, hb.2⟩
-    show Real.lameEsk ν m (-K) k = 0
-    rw [(hpar K).1, show Real.lameEsk ν m K k = 0 from hb.2, mul_zero]
+    show Real.lameEs ν m (-K) k = 0
+    rw [(hpar K).1, show Real.lameEs ν m K k = 0 from hb.2, mul_zero]
   have hune : u ≠ 0 := fun h0 => hne (funext fun y => by
     have := congrFun h0 (y + K); simpa [u] using this)
-  have hmem : Real.lameBk ν m k ∈
+  have hmem : Real.lameB ν m k ∈
       ODE.separatedSpectrum (fun x => lamePotential ν k (x - K)) (2 * K) true true :=
     ⟨u, hus, hbc, hune⟩
   refine ⟨hmem, ?_⟩
@@ -867,34 +892,37 @@ private lemma lameBk_mem_separatedSpectrum_shift (hk0 : 0 < k) (hk1 : k < 1) {m 
 /-- Table 29.3.2: `Ec^m_ν(x, k²)` has exactly `⌊m/2⌋` zeros in `(0, K)` (the "nonnegative
 integer `m`" of the table for `Ec^{2m}`, `Ec^{2m+1}`). -/
 @[dlmf 29.3.iv]
-theorem Real.lameEck_zeros_Ioo (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
-    {x ∈ Set.Ioo 0 (Real.compEllIntKm (k ^ 2)) | Real.lameEck ν m x k = 0}.Finite ∧
-      {x ∈ Set.Ioo 0 (Real.compEllIntKm (k ^ 2)) | Real.lameEck ν m x k = 0}.ncard = m / 2 :=
+theorem Real.lameEc_zeros_Ioo (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
+    {x ∈ Set.Ioo 0 (Real.completeEllipticKOfParameter (k ^ 2)) | Real.lameEc ν m x k = 0}.Finite ∧
+      {x ∈ Set.Ioo 0 (Real.completeEllipticKOfParameter (k ^ 2)) | Real.lameEc ν m x k =
+          0}.ncard = m / 2 :=
   finite_and_ncard_of_encard_eq (encard_zeros_lameEigenfunction hk0 hk1 _ _ _)
 
 /-- Table 29.3.2: `Es^m_ν(x, k²)` (`m ≥ 1`) has exactly `⌊(m - 1)/2⌋` zeros in `(0, K)`. -/
 @[dlmf 29.3.iv]
-theorem Real.lameEsk_zeros_Ioo (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
-    {x ∈ Set.Ioo 0 (Real.compEllIntKm (k ^ 2)) | Real.lameEsk ν m x k = 0}.Finite ∧
-      {x ∈ Set.Ioo 0 (Real.compEllIntKm (k ^ 2)) | Real.lameEsk ν m x k = 0}.ncard =
+theorem Real.lameEs_zeros_Ioo (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
+    {x ∈ Set.Ioo 0 (Real.completeEllipticKOfParameter (k ^ 2)) | Real.lameEs ν m x k = 0}.Finite ∧
+      {x ∈ Set.Ioo 0 (Real.completeEllipticKOfParameter (k ^ 2)) | Real.lameEs ν m x k = 0}.ncard =
         (m - 1) / 2 :=
   finite_and_ncard_of_encard_eq (encard_zeros_lameEigenfunction hk0 hk1 _ _ _)
 
 /-- §29.3(iv): the superscript `m` of `Ec^m_ν` is the number of zeros in `[0, 2K)`. -/
 @[dlmf 29.3.iv]
-theorem Real.lameEck_zeros_Ico (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
-    {x ∈ Set.Ico 0 (2 * Real.compEllIntKm (k ^ 2)) | Real.lameEck ν m x k = 0}.Finite ∧
-      {x ∈ Set.Ico 0 (2 * Real.compEllIntKm (k ^ 2)) | Real.lameEck ν m x k = 0}.ncard = m := by
+theorem Real.lameEc_zeros_Ico (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
+    {x ∈ Set.Ico 0 (2 * Real.completeEllipticKOfParameter (k ^ 2)) | Real.lameEc ν m x
+        k = 0}.Finite ∧
+      {x ∈ Set.Ico 0 (2 * Real.completeEllipticKOfParameter (k ^ 2)) | Real.lameEc ν m x k =
+          0}.ncard = m := by
   have hk := modulus_sq_lt_one hk0 hk1
-  have hK := Real.compEllIntKm_pos hk
-  obtain ⟨hw, hb, hne⟩ := Real.lameEck_isLameEigenfunction hk0 hk1 m
+  have hK := Real.completeEllipticKOfParameter_pos hk
+  obtain ⟨hw, hb, hne⟩ := Real.lameEc_isLameEigenfunction hk0 hk1 m
   rw [isLameSolution_iff_isSturmLiouvilleSolution] at hw
-  have hnz : ∀ x, deriv (fun x => Real.lameEck ν m x k) x = 0 → Real.lameEck ν m x k ≠ 0 :=
+  have hnz : ∀ x, deriv (fun x => Real.lameEc ν m x k) x = 0 → Real.lameEc ν m x k ≠ 0 :=
     fun x hd h0 => hne (ODE.isSturmLiouvilleSolution_eq_zero_of_eq_zero_of_deriv_eq_zero
         (continuous_lamePotential hk) hw h0 hd)
   refine finite_and_ncard_of_encard_eq ?_
-  have hZ := encard_zeros_Ico_of_reflection (w := fun x => Real.lameEck ν m x k) hK (s := 1)
-    (fun x => by rw [one_mul]; exact (Real.lameEck_parity hk0 hk1 m x).2.1)
+  have hZ := encard_zeros_Ico_of_reflection (w := fun x => Real.lameEc ν m x k) hK (s := 1)
+    (fun x => by rw [one_mul]; exact (Real.lameEc_parity hk0 hk1 m x).2.1)
     (encard_zeros_lameEigenfunction hk0 hk1 _ _ _)
   rw [hZ]
   simp only [Real.LameBoundary, Bool.false_eq_true, ↓reduceIte] at hb
@@ -909,20 +937,22 @@ theorem Real.lameEck_zeros_Ico (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
 
 /-- §29.3(iv): the superscript `m` of `Es^m_ν` (`m ≥ 1`) is the number of zeros in `[0, 2K)`. -/
 @[dlmf 29.3.iv]
-theorem Real.lameEsk_zeros_Ico (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ)
+theorem Real.lameEs_zeros_Ico (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ)
     (hm : 1 ≤ m) :
-    {x ∈ Set.Ico 0 (2 * Real.compEllIntKm (k ^ 2)) | Real.lameEsk ν m x k = 0}.Finite ∧
-      {x ∈ Set.Ico 0 (2 * Real.compEllIntKm (k ^ 2)) | Real.lameEsk ν m x k = 0}.ncard = m := by
+    {x ∈ Set.Ico 0 (2 * Real.completeEllipticKOfParameter (k ^ 2)) | Real.lameEs ν m x
+        k = 0}.Finite ∧
+      {x ∈ Set.Ico 0 (2 * Real.completeEllipticKOfParameter (k ^ 2)) | Real.lameEs ν m x k =
+          0}.ncard = m := by
   have hk := modulus_sq_lt_one hk0 hk1
-  have hK := Real.compEllIntKm_pos hk
-  obtain ⟨hw, hb, hne⟩ := Real.lameEsk_isLameEigenfunction hk0 hk1 m
+  have hK := Real.completeEllipticKOfParameter_pos hk
+  obtain ⟨hw, hb, hne⟩ := Real.lameEs_isLameEigenfunction hk0 hk1 m
   rw [isLameSolution_iff_isSturmLiouvilleSolution] at hw
-  have hnz : ∀ x, deriv (fun x => Real.lameEsk ν m x k) x = 0 → Real.lameEsk ν m x k ≠ 0 :=
+  have hnz : ∀ x, deriv (fun x => Real.lameEs ν m x k) x = 0 → Real.lameEs ν m x k ≠ 0 :=
     fun x hd h0 => hne (ODE.isSturmLiouvilleSolution_eq_zero_of_eq_zero_of_deriv_eq_zero
         (continuous_lamePotential hk) hw h0 hd)
   refine finite_and_ncard_of_encard_eq ?_
-  have hZ := encard_zeros_Ico_of_reflection (w := fun x => Real.lameEsk ν m x k) hK (s := -1)
-    (fun x => by rw [neg_one_mul]; exact (Real.lameEsk_parity hk0 hk1 m x).2.1)
+  have hZ := encard_zeros_Ico_of_reflection (w := fun x => Real.lameEs ν m x k) hK (s := -1)
+    (fun x => by rw [neg_one_mul]; exact (Real.lameEs_parity hk0 hk1 m x).2.1)
     (encard_zeros_lameEigenfunction hk0 hk1 _ _ _)
   rw [hZ]
   simp only [Real.LameBoundary, ↓reduceIte] at hb
@@ -940,112 +970,68 @@ theorem Real.lameEsk_zeros_Ico (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ)
 
 /-- Interlacing 29.3.1: `a^m_ν(k²) < a^{m+1}_ν(k²)`. -/
 @[dlmf 29.3.E1]
-theorem Real.lameAk_lt_lameAk_succ (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
-    Real.lameAk ν m k < Real.lameAk ν (m + 1) k := by
-  obtain ⟨-, h1⟩ := lameAk_mem_separatedSpectrum_shift hk0 hk1 m
-  obtain ⟨hm2, h2⟩ := lameAk_mem_separatedSpectrum_shift hk0 hk1 (m + 1)
+theorem Real.lameA_lt_lameA_succ (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
+    Real.lameA ν m k < Real.lameA ν (m + 1) k := by
+  obtain ⟨-, h1⟩ := lameA_mem_separatedSpectrum_shift hk0 hk1 m
+  obtain ⟨hm2, h2⟩ := lameA_mem_separatedSpectrum_shift hk0 hk1 (m + 1)
   by_contra hle
   push Not at hle
   have := Set.encard_le_encard (Set.inter_subset_inter_right
-    (ODE.separatedSpectrum (fun x => lamePotential ν k (x - Real.compEllIntKm (k ^ 2)))
-      (2 * Real.compEllIntKm (k ^ 2)) false false) (Set.Iio_subset_Iio hle))
+    (ODE.separatedSpectrum
+        (fun x => lamePotential ν k (x - Real.completeEllipticKOfParameter (k ^ 2)))
+      (2 * Real.completeEllipticKOfParameter (k ^ 2)) false false) (Set.Iio_subset_Iio hle))
   rw [h1, h2] at this
   norm_cast at this
   omega
 
 /-- Interlacing 29.3.2: `a^m_ν(k²) < b^{m+1}_ν(k²)`. -/
 @[dlmf 29.3.E2]
-theorem Real.lameAk_lt_lameBk_succ (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
-    Real.lameAk ν m k < Real.lameBk ν (m + 1) k := by
+theorem Real.lameA_lt_lameB_succ (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
+    Real.lameA ν m k < Real.lameB ν (m + 1) k := by
   have h := (lameEigenvalue_interlace (ν := ν) hk0 hk1 m.bodd (m / 2)).1
-  rw [Real.lameAk, Real.lameBk, Nat.bodd_succ, Bool.not_not,
+  rw [Real.lameA, Real.lameB, Nat.bodd_succ, Bool.not_not,
     show (m + 1 - 1) / 2 = m / 2 by omega]
   exact h
 
 /-- Interlacing 29.3.3: `b^m_ν(k²) < b^{m+1}_ν(k²)`, `m ≥ 1`. -/
 @[dlmf 29.3.E3]
-theorem Real.lameBk_lt_lameBk_succ (hk0 : 0 < k) (hk1 : k < 1) {m : ℕ}
-    (hm : 1 ≤ m) : Real.lameBk ν m k < Real.lameBk ν (m + 1) k := by
-  obtain ⟨-, h1⟩ := lameBk_mem_separatedSpectrum_shift hk0 hk1 hm
-  obtain ⟨-, h2⟩ := lameBk_mem_separatedSpectrum_shift hk0 hk1 (by omega : 1 ≤ m + 1)
+theorem Real.lameB_lt_lameB_succ (hk0 : 0 < k) (hk1 : k < 1) {m : ℕ}
+    (hm : 1 ≤ m) : Real.lameB ν m k < Real.lameB ν (m + 1) k := by
+  obtain ⟨-, h1⟩ := lameB_mem_separatedSpectrum_shift hk0 hk1 hm
+  obtain ⟨-, h2⟩ := lameB_mem_separatedSpectrum_shift hk0 hk1 (by omega : 1 ≤ m + 1)
   by_contra hle
   push Not at hle
   have := Set.encard_le_encard (Set.inter_subset_inter_right
-    (ODE.separatedSpectrum (fun x => lamePotential ν k (x - Real.compEllIntKm (k ^ 2)))
-      (2 * Real.compEllIntKm (k ^ 2)) true true) (Set.Iio_subset_Iio hle))
+    (ODE.separatedSpectrum
+        (fun x => lamePotential ν k (x - Real.completeEllipticKOfParameter (k ^ 2)))
+      (2 * Real.completeEllipticKOfParameter (k ^ 2)) true true) (Set.Iio_subset_Iio hle))
   rw [h1, h2] at this
   norm_cast at this
   omega
 
 /-- Interlacing 29.3.4: `b^m_ν(k²) < a^{m+1}_ν(k²)`, `m ≥ 1`. -/
 @[dlmf 29.3.E4]
-theorem Real.lameBk_lt_lameAk_succ (hk0 : 0 < k) (hk1 : k < 1) {m : ℕ}
-    (hm : 1 ≤ m) : Real.lameBk ν m k < Real.lameAk ν (m + 1) k := by
+theorem Real.lameB_lt_lameA_succ (hk0 : 0 < k) (hk1 : k < 1) {m : ℕ}
+    (hm : 1 ≤ m) : Real.lameB ν m k < Real.lameA ν (m + 1) k := by
   have h := (lameEigenvalue_interlace (ν := ν) hk0 hk1 (!m.bodd) ((m - 1) / 2)).2
-  rw [Real.lameAk, Real.lameBk, Nat.bodd_succ, show (m + 1) / 2 = (m - 1) / 2 + 1 by omega]
+  rw [Real.lameA, Real.lameB, Nat.bodd_succ, show (m + 1) / 2 = (m - 1) / 2 + 1 by omega]
   exact h
 
 /-- Coalescence 29.3.5: `a^m_ν(k²) = b^m_ν(k²)` for `ν = 0, 1, …, m - 1`. Admitted. -/
 @[dlmf 29.3.E5]
-theorem Real.lameAk_eq_lameBk (hk0 : 0 < k) (hk1 : k < 1) {m n : ℕ} (hn : n < m) :
-    Real.lameAk n m k = Real.lameBk n m k := by
+theorem Real.lameA_eq_lameB (hk0 : 0 < k) (hk1 : k < 1) {m n : ℕ} (hn : n < m) :
+    Real.lameA n m k = Real.lameB n m k := by
   sorry
 
 /-- 29.3.6: if `ν ∉ {0, 1, …, m - 1}` then `(a^m_ν(k²) - b^m_ν(k²)) ν(ν-1)⋯(ν-m+1) > 0`
 (`m ≥ 1`). Admitted. -/
 @[dlmf 29.3.E6]
-theorem Real.lameAk_sub_lameBk_mul_pos (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) {m : ℕ}
+theorem Real.lameA_sub_lameB_mul_pos (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) {m : ℕ}
     (hm : 1 ≤ m) (hνm : ∀ j : ℕ, j < m → ν ≠ j) :
-    0 < (Real.lameAk ν m k - Real.lameBk ν m k) * ∏ j ∈ Finset.range m, (ν - j) := by
+    0 < (Real.lameA ν m k - Real.lameB ν m k) * ∏ j ∈ Finset.range m, (ν - j) := by
   sorry
 
 /-! ### Continued fractions (§29.3(iii)) -/
-
-/-- 29.3.9–29.3.12: `H = 2a^{2m}_ν(k²) - ν(ν+1)k²` satisfies the continued-fraction equation
-29.3.10 with the coefficients 29.3.11–29.3.12 (`LameRecurrence.A0`), for every `p`: the
-truncations of the right side converge to the (finite) left side. Stated for non-integer `ν`
-and nonvanishing denominators on the left (DLMF's genericity assumption; for integer `ν` see
-`Real.lameCF_A0_terminating`). Admitted. -/
-@[dlmf 29.3.E9, dlmf 29.3.E10]
-theorem Real.lameCF_A0 (hν : -1 / 2 ≤ ν) (hνZ : ∀ j : ℤ, ν ≠ j) (hk0 : 0 < k) (hk1 : k < 1)
-    (m p : ℕ)
-    (hden : ∀ q < p, lameCFLeft .A0 ν k (2 * Real.lameAk ν (2 * m) k - ν * (ν + 1) * k ^ 2) q ≠ 0) :
-    Tendsto (lameCFRight .A0 ν k (2 * Real.lameAk ν (2 * m) k - ν * (ν + 1) * k ^ 2) p) atTop
-      (𝓝 (lameCFLeft .A0 ν k (2 * Real.lameAk ν (2 * m) k - ν * (ν + 1) * k ^ 2) p)) := by
-  sorry
-
-/-- §29.3(iii): `H = 2a^{2m+1}_ν(k²) - ν(ν+1)k²` satisfies 29.3.10 with the coefficients
-29.3.13–29.3.14 (`LameRecurrence.A1`); non-integer `ν`. Admitted. -/
-@[dlmf 29.3.E10, dlmf 29.3.iii]
-theorem Real.lameCF_A1 (hν : -1 / 2 ≤ ν) (hνZ : ∀ j : ℤ, ν ≠ j) (hk0 : 0 < k) (hk1 : k < 1)
-    (m p : ℕ)
-    (hden : ∀ q < p,
-      lameCFLeft .A1 ν k (2 * Real.lameAk ν (2 * m + 1) k - ν * (ν + 1) * k ^ 2) q ≠ 0) :
-    Tendsto (lameCFRight .A1 ν k (2 * Real.lameAk ν (2 * m + 1) k - ν * (ν + 1) * k ^ 2) p)
-      atTop (𝓝 (lameCFLeft .A1 ν k (2 * Real.lameAk ν (2 * m + 1) k - ν * (ν + 1) * k ^ 2) p)) := by
-  sorry
-
-/-- §29.3(iii): `H = 2b^{2m+1}_ν(k²) - ν(ν+1)k²` satisfies 29.3.10 with the coefficients
-29.3.15–29.3.16 (`LameRecurrence.B1`); non-integer `ν`. Admitted. -/
-@[dlmf 29.3.E10, dlmf 29.3.iii]
-theorem Real.lameCF_B1 (hν : -1 / 2 ≤ ν) (hνZ : ∀ j : ℤ, ν ≠ j) (hk0 : 0 < k) (hk1 : k < 1)
-    (m p : ℕ)
-    (hden : ∀ q < p,
-      lameCFLeft .B1 ν k (2 * Real.lameBk ν (2 * m + 1) k - ν * (ν + 1) * k ^ 2) q ≠ 0) :
-    Tendsto (lameCFRight .B1 ν k (2 * Real.lameBk ν (2 * m + 1) k - ν * (ν + 1) * k ^ 2) p)
-      atTop (𝓝 (lameCFLeft .B1 ν k (2 * Real.lameBk ν (2 * m + 1) k - ν * (ν + 1) * k ^ 2) p)) := by
-  sorry
-
-/-- §29.3(iii): `H = 2b^{2m+2}_ν(k²) - ν(ν+1)k²` satisfies 29.3.10 with the coefficients
-29.3.17 (`LameRecurrence.B2`); non-integer `ν`. Admitted. -/
-@[dlmf 29.3.E10, dlmf 29.3.iii]
-theorem Real.lameCF_B2 (hν : -1 / 2 ≤ ν) (hνZ : ∀ j : ℤ, ν ≠ j) (hk0 : 0 < k) (hk1 : k < 1)
-    (m p : ℕ)
-    (hden : ∀ q < p,
-      lameCFLeft .B2 ν k (2 * Real.lameBk ν (2 * m + 2) k - ν * (ν + 1) * k ^ 2) q ≠ 0) :
-    Tendsto (lameCFRight .B2 ν k (2 * Real.lameBk ν (2 * m + 2) k - ν * (ν + 1) * k ^ 2) p)
-      atTop (𝓝 (lameCFLeft .B2 ν k (2 * Real.lameBk ν (2 * m + 2) k - ν * (ν + 1) * k ^ 2) p)) := by
-  sorry
 
 /-- §29.3(iii), terminating case: if `ν = n` is a nonnegative integer and `2p ≤ n`, the right
 side of 29.3.10 (type `A0`) terminates (its truncations are eventually constant), and the
@@ -1053,10 +1039,12 @@ solutions `H` of 29.3.10 (with nonvanishing left denominators) are exactly the
 `2a^{2m}_n(k²) - n(n+1)k²` with `2m ≤ n`. Admitted. -/
 @[dlmf 29.3.iii]
 theorem Real.lameCF_A0_terminating (hk0 : 0 < k) (hk1 : k < 1) {n p : ℕ} (hp : 2 * p ≤ n)
-    (H : ℝ) (hden : ∀ q < p, lameCFLeft .A0 n k H q ≠ 0) :
-    (∀ᶠ d in atTop, lameCFRight .A0 n k H p d = lameCFRight .A0 n k H p (n + 1)) ∧
-      (Tendsto (lameCFRight .A0 n k H p) atTop (𝓝 (lameCFLeft .A0 n k H p)) ↔
-        ∃ m : ℕ, 2 * m ≤ n ∧ H = 2 * Real.lameAk n (2 * m) k - n * (n + 1) * k ^ 2) := by
+    (H : ℝ) (hden : ∀ q < p, lameContinuedFractionLeft .A0 n k H q ≠ 0) :
+    (∀ᶠ d in atTop, lameContinuedFractionRight .A0 n k H p d =
+        lameContinuedFractionRight .A0 n k H p (n + 1)) ∧
+      (Tendsto (lameContinuedFractionRight .A0 n k H p) atTop
+          (𝓝 (lameContinuedFractionLeft .A0 n k H p)) ↔
+        ∃ m : ℕ, 2 * m ≤ n ∧ H = 2 * Real.lameA n (2 * m) k - n * (n + 1) * k ^ 2) := by
   sorry
 
 /-! ### Orthogonality (§29.3(vi)) -/
@@ -1064,7 +1052,7 @@ theorem Real.lameCF_A0_terminating (hk0 : 0 < k) (hk1 : k < 1) {n p : ℕ} (hp :
 /-- Orthogonality of eigenfunctions of one boundary type for distinct indices. -/
 theorem Real.lameEigenfunction_orthogonal (hk0 : 0 < k) (hk1 : k < 1)
     (odd0 oddK : Bool) {i j : ℕ} (hij : i ≠ j) :
-    ∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2),
+    ∫ x in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2),
       Real.lameEigenfunction ν k odd0 oddK i x * Real.lameEigenfunction ν k odd0 oddK j x = 0 := by
   have hi := (Real.isNormalizedLameEigenfunction_lameEigenfunction (ν := ν) hk0 hk1 odd0 oddK i).1
   have hj := (Real.isNormalizedLameEigenfunction_lameEigenfunction (ν := ν) hk0 hk1 odd0 oddK j).1
@@ -1075,41 +1063,41 @@ theorem Real.lameEigenfunction_orthogonal (hk0 : 0 < k) (hk1 : k < 1)
 
 /-- Orthogonality 29.3.19, first line: `∫₀^K Ec^{2m}_ν Ec^{2p}_ν dx = 0` for `m ≠ p`. -/
 @[dlmf 29.3.E19]
-theorem Real.lameEck_even_orthogonal (hk0 : 0 < k) (hk1 : k < 1) {m p : ℕ}
+theorem Real.lameEc_even_orthogonal (hk0 : 0 < k) (hk1 : k < 1) {m p : ℕ}
     (hmp : m ≠ p) :
-    ∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2),
-      Real.lameEck ν (2 * m) x k * Real.lameEck ν (2 * p) x k = 0 := by
+    ∫ x in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2),
+      Real.lameEc ν (2 * m) x k * Real.lameEc ν (2 * p) x k = 0 := by
   have := Real.lameEigenfunction_orthogonal (ν := ν) hk0 hk1 false false hmp
-  simpa [Real.lameEck, Nat.bodd_mul] using this
+  simpa [Real.lameEc, Nat.bodd_mul] using this
 
 /-- Orthogonality 29.3.19, second line: `∫₀^K Ec^{2m+1}_ν Ec^{2p+1}_ν dx = 0` for `m ≠ p`. -/
 @[dlmf 29.3.E19]
-theorem Real.lameEck_odd_orthogonal (hk0 : 0 < k) (hk1 : k < 1) {m p : ℕ}
+theorem Real.lameEc_odd_orthogonal (hk0 : 0 < k) (hk1 : k < 1) {m p : ℕ}
     (hmp : m ≠ p) :
-    ∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2),
-      Real.lameEck ν (2 * m + 1) x k * Real.lameEck ν (2 * p + 1) x k = 0 := by
+    ∫ x in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2),
+      Real.lameEc ν (2 * m + 1) x k * Real.lameEc ν (2 * p + 1) x k = 0 := by
   have := Real.lameEigenfunction_orthogonal (ν := ν) hk0 hk1 true false hmp
-  simpa [Real.lameEck, Nat.bodd_mul, Nat.bodd_add, Nat.mul_add_div] using this
+  simpa [Real.lameEc, Nat.bodd_mul, Nat.bodd_add, Nat.mul_add_div] using this
 
 /-- Orthogonality 29.3.19, third line: `∫₀^K Es^{2m+1}_ν Es^{2p+1}_ν dx = 0` for `m ≠ p`. -/
 @[dlmf 29.3.E19]
-theorem Real.lameEsk_odd_orthogonal (hk0 : 0 < k) (hk1 : k < 1) {m p : ℕ}
+theorem Real.lameEs_odd_orthogonal (hk0 : 0 < k) (hk1 : k < 1) {m p : ℕ}
     (hmp : m ≠ p) :
-    ∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2),
-      Real.lameEsk ν (2 * m + 1) x k * Real.lameEsk ν (2 * p + 1) x k = 0 := by
+    ∫ x in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2),
+      Real.lameEs ν (2 * m + 1) x k * Real.lameEs ν (2 * p + 1) x k = 0 := by
   have := Real.lameEigenfunction_orthogonal (ν := ν) hk0 hk1 false true hmp
-  simpa [Real.lameEsk, Nat.bodd_mul, Nat.bodd_add] using this
+  simpa [Real.lameEs, Nat.bodd_mul, Nat.bodd_add] using this
 
 /-- Orthogonality 29.3.19, fourth line: `∫₀^K Es^{2m+2}_ν Es^{2p+2}_ν dx = 0` for `m ≠ p`. -/
 @[dlmf 29.3.E19]
-theorem Real.lameEsk_even_orthogonal (hk0 : 0 < k) (hk1 : k < 1) {m p : ℕ}
+theorem Real.lameEs_even_orthogonal (hk0 : 0 < k) (hk1 : k < 1) {m p : ℕ}
     (hmp : m ≠ p) :
-    ∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2),
-      Real.lameEsk ν (2 * m + 2) x k * Real.lameEsk ν (2 * p + 2) x k = 0 := by
+    ∫ x in (0 : ℝ)..Real.completeEllipticKOfParameter (k ^ 2),
+      Real.lameEs ν (2 * m + 2) x k * Real.lameEs ν (2 * p + 2) x k = 0 := by
   have := Real.lameEigenfunction_orthogonal (ν := ν) hk0 hk1 true true hmp
   have e : ∀ q : ℕ, (2 * q + 2 - 1) / 2 = q := fun q => by omega
   have e' : ∀ q : ℕ, (2 * q + 1) / 2 = q := fun q => by omega
-  simpa [Real.lameEsk, Nat.bodd_mul, Nat.bodd_add, e, e'] using this
+  simpa [Real.lameEs, Nat.bodd_mul, Nat.bodd_add, e, e'] using this
 
 /-! ### Stability (§29.9) -/
 
@@ -1118,16 +1106,16 @@ of the closed intervals with endpoints `a^m_ν(k²)`, `b^m_ν(k²)`, `m ≥ 1`. 
 @[dlmf 29.9]
 theorem Real.not_isLameStable_iff (hν : -1 / 2 ≤ ν) (hνZ : ∀ j : ℤ, ν ≠ j) (hk0 : 0 < k)
     (hk1 : k < 1) (h : ℝ) :
-    ¬Real.IsLameStable h ν k ↔ h ≤ Real.lameAk ν 0 k ∨
-      ∃ m : ℕ, 1 ≤ m ∧ h ∈ Set.uIcc (Real.lameAk ν m k) (Real.lameBk ν m k) := by
+    ¬Real.IsLameStable h ν k ↔ h ≤ Real.lameA ν 0 k ∨
+      ∃ m : ℕ, 1 ≤ m ∧ h ∈ Set.uIcc (Real.lameA ν m k) (Real.lameB ν m k) := by
   sorry
 
 /-- §29.9, nonnegative integer `ν = n`: Lamé's equation is unstable iff `h ≤ a^0_n(k²)` or
 `h ∈ [b^m_n(k²), a^m_n(k²)]` for some `m = 1, …, n`. Admitted. -/
 @[dlmf 29.9]
 theorem Real.not_isLameStable_iff_nat (hk0 : 0 < k) (hk1 : k < 1) (n : ℕ) (h : ℝ) :
-    ¬Real.IsLameStable h n k ↔ h ≤ Real.lameAk n 0 k ∨
-      ∃ m : ℕ, 1 ≤ m ∧ m ≤ n ∧ h ∈ Set.Icc (Real.lameBk n m k) (Real.lameAk n m k) := by
+    ¬Real.IsLameStable h n k ↔ h ≤ Real.lameA n 0 k ∨
+      ∃ m : ℕ, 1 ≤ m ∧ m ≤ n ∧ h ∈ Set.Icc (Real.lameB n m k) (Real.lameA n m k) := by
   sorry
 
 end DLMF.Lame

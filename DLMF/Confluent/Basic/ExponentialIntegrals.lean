@@ -14,18 +14,18 @@ public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 
 ## Main definitions
 
-* `genExpIntE`: the generalized exponential integral `E_p(z) = z^{p-1} Γ(1-p, z)`
+* `expIntegralE`: the generalized exponential integral `E_p(z) = z^{p-1} Γ(1-p, z)`
   (DLMF 8.19.1).
-* `Real.expIntEin`: the entire function `Ein(x)` on the real line (DLMF 6.2.3).
-* `Real.sinInt`: the sine integral `Si(x)` (DLMF 6.2.9).
-* `Real.cosIntCin`: the entire function `Cin(x)` on the real line (DLMF 6.2.12).
-* `Real.cosInt`: the cosine integral `Ci(x) = -Cin(x) + log x + γ` for `x > 0` (DLMF 6.2.13).
+* `Real.expIntegralEin`: the entire function `Ein(x)` on the real line (DLMF 6.2.3).
+* `Real.sinIntegral`: the sine integral `Si(x)` (DLMF 6.2.9).
+* `Real.cosIntegralCin`: the entire function `Cin(x)` on the real line (DLMF 6.2.12).
+* `Real.cosIntegral`: the cosine integral `Ci(x) = -Cin(x) + log x + γ` for `x > 0` (DLMF 6.2.13).
 
 ## Implementation notes
 
-The real functions `Real.expIntEin`, `Real.sinInt`, `Real.cosIntCin` and `Real.cosInt` are
-older real-variable definitions, kept beside the complex functions of the exponential-integral
-area.
+The real functions `Real.expIntegralEin`, `Real.sinIntegral`, `Real.cosIntegralCin` and
+`Real.cosIntegral` are older real-variable definitions, kept beside the complex functions of the
+exponential-integral area.
 -/
 
 @[expose] public noncomputable section
@@ -39,27 +39,27 @@ namespace DLMF.Confluent
 
 /-- The generalized exponential integral `E_p(z) = z^{p-1} Γ(1-p, z)` (DLMF 8.19.1). -/
 @[dlmf 8.19.E1]
-def genExpIntE (p z : ℂ) : ℂ :=
-  z ^ (p - 1) * upperIncGamma (1 - p) z
+def expIntegralE (p z : ℂ) : ℂ :=
+  z ^ (p - 1) * upperIncompleteGamma (1 - p) z
 
 /-- The entire function `Ein(x) = ∫₀ˣ (1 - e^{-t})/t dt` (DLMF 6.2.3), on the real line. -/
 @[dlmf 6.2.E3]
-def Real.expIntEin (x : ℝ) : ℝ :=
+def Real.expIntegralEin (x : ℝ) : ℝ :=
   ∫ t in (0 : ℝ)..x, (1 - Real.exp (-t)) / t
 
 /-- The sine integral `Si(x) = ∫₀ˣ sin t / t dt` (DLMF 6.2.9). -/
 @[dlmf 6.2.E9]
-def Real.sinInt (x : ℝ) : ℝ :=
+def Real.sinIntegral (x : ℝ) : ℝ :=
   ∫ t in (0 : ℝ)..x, Real.sinc t
 
 /-- The entire function `Cin(x) = ∫₀ˣ (1 - cos t)/t dt` (DLMF 6.2.12), on the real line. -/
 @[dlmf 6.2.E12]
-def Real.cosIntCin (x : ℝ) : ℝ :=
+def Real.cosIntegralCin (x : ℝ) : ℝ :=
   ∫ t in (0 : ℝ)..x, (1 - Real.cos t) / t
 
 /-- The cosine integral `Ci(x) = -Cin(x) + log x + γ` (DLMF 6.2.13), for `x > 0`. -/
 @[dlmf 6.2.E13]
-def Real.cosInt (x : ℝ) : ℝ :=
-  -Real.cosIntCin x + Real.log x + Real.eulerMascheroniConstant
+def Real.cosIntegral (x : ℝ) : ℝ :=
+  -Real.cosIntegralCin x + Real.log x + Real.eulerMascheroniConstant
 
 end DLMF.Confluent

@@ -801,13 +801,13 @@ theorem watson_transformation {a b c d e q : ℂ} (n : ℕ) (ha : a ≠ 0) (hb :
     (hd : d ≠ 0) (he : e ≠ 0) (hq : q ≠ 0)
     (hden : ∀ x ∈ [a ^ (1 / 2 : ℂ), -a ^ (1 / 2 : ℂ), a * q / b, a * q / c, a * q / d,
       a * q / e, a * q * q ^ n, d * e * q⁻¹ ^ n / a, q], ∀ k : ℕ, k ≤ n → x * q ^ k ≠ 1) :
-    basicHG [a, q * a ^ (1 / 2 : ℂ), -q * a ^ (1 / 2 : ℂ), b, c, d, e, q⁻¹ ^ n]
+    basicHypergeometric [a, q * a ^ (1 / 2 : ℂ), -q * a ^ (1 / 2 : ℂ), b, c, d, e, q⁻¹ ^ n]
         [a ^ (1 / 2 : ℂ), -a ^ (1 / 2 : ℂ), a * q / b, a * q / c, a * q / d, a * q / e,
           a * q * q ^ n] q
         (a ^ 2 * q ^ 2 * q ^ n / (b * c * d * e)) =
       qPochhammer (a * q) q n * qPochhammer (a * q / (d * e)) q n /
           (qPochhammer (a * q / d) q n * qPochhammer (a * q / e) q n) *
-        basicHG [q⁻¹ ^ n, d, e, a * q / (b * c)]
+        basicHypergeometric [q⁻¹ ^ n, d, e, a * q / (b * c)]
           [a * q / b, a * q / c, d * e * q⁻¹ ^ n / a] q q := by
   have H : ∀ x ∈ [a ^ (1 / 2 : ℂ), -a ^ (1 / 2 : ℂ), a * q / b, a * q / c, a * q / d,
       a * q / e, a * q * q ^ n, d * e * q⁻¹ ^ n / a, q], ∀ m ≤ n + 1, qPochhammer x q m ≠ 0 :=
@@ -837,7 +837,7 @@ theorem watson_transformation {a b c d e q : ℂ} (n : ℕ) (ha : a ≠ 0) (hb :
     (HC n (by omega)) (HD n (by omega)) (HE n (by omega)) (HY n (by omega)) (HN n (by omega))
   have hzero : ∀ k, n < k → qPochhammer (q⁻¹ ^ n) q k = 0 :=
     fun k hk => by rw [inv_pow]; exact qPochhammer_recip_pow_eq_zero hq hk
-  unfold basicHG
+  unfold basicHypergeometric
   rw [tsum_eq_sum (s := range (n + 1)), tsum_eq_sum (s := range (n + 1))]
   rotate_left
   · intro k hk

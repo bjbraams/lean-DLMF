@@ -190,7 +190,7 @@ theorem integral_exp_cpow_regularized0F1 {a c w : ℂ} (ha : 0 < a.re) :
   have hcoeff (n : ℕ) : Gamma (a.re : ℂ) * regularizedHGFunCoeff {(a.re : ℂ)} {c} n =
       Gamma ((a.re : ℂ) + n) * d n := by
     dsimp only [d]
-    have hp : poch (a.re : ℂ) n = Gamma ((a.re : ℂ) + n) / Gamma (a.re : ℂ) :=
+    have hp : pochhammer (a.re : ℂ) n = Gamma ((a.re : ℂ) + n) / Gamma (a.re : ℂ) :=
       (Gamma_add_nat_div_Gamma_eq (n := n) (a.re : ℂ)
         (not_neg_nat_of_re_pos (by simpa using ha))).symm
     rw [regularizedHGFunCoeff_singleton, DLMF.Bessel.regularizedHGFunCoeff_empty, hp]
@@ -215,7 +215,7 @@ theorem integral_exp_cpow_regularized0F1 {a c w : ℂ} (ha : 0 < a.re) :
       ((Real.exp (-t) : ℂ) * (t : ℂ) ^ (a + n - 1)) from rfl,
       MeasureTheory.integral_const_mul, ← GammaIntegral, ← Gamma_eq_integral (han n)]
     dsimp only [d]
-    have hp : poch a n = Gamma (a + n) / Gamma a :=
+    have hp : pochhammer a n = Gamma (a + n) / Gamma a :=
       (Gamma_add_nat_div_Gamma_eq (n := n) a (not_neg_nat_of_re_pos ha)).symm
     rw [DLMF.Bessel.regularizedHGFunCoeff_empty, regularizedHGFunCoeff_singleton, hp]
     field_simp [Gamma_ne_zero_of_re_pos ha]
@@ -558,7 +558,7 @@ private lemma gauss_tricomi_rational_integral {a b : ℂ} (ha : 0 < a.re) {x T :
     linarith [div_pos hx hT]
   have he := DLMF.Hypergeometric.integral_Ioi (a := (T : ℂ)) (b := a)
     (c := T + a + 1 - b) ha hca hz
-  rw [DLMF.Hypergeometric.regularizedGaussHGFun_eq_div_Gamma (not_neg_nat_of_re_pos hc),
+  rw [DLMF.Hypergeometric.regularizedGaussHypergeometricFun_eq_div_Gamma (not_neg_nat_of_re_pos hc),
     DLMF.Hypergeometric.ordinaryHypergeometric_symm (T : ℂ) a,
     show (T + a + 1 - b : ℂ) - a = T + 1 - b by ring,
     show (T : ℂ) - (T + a + 1 - b) = b - a - 1 by ring] at he

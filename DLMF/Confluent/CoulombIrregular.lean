@@ -412,7 +412,7 @@ theorem coulomb_wronskian_HMinus (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ
 theorem tendsto_coulombHPlus_sub_exp (ℓ : ℕ) (η : ℝ) :
     Tendsto (fun ρ : ℝ => coulombHPlus ℓ η ρ - exp (I * coulombTheta ℓ η ρ)) atTop (𝓝 0) := by
   have h := hasAsymptoticExpansion_coulombHPlus ℓ η 1
-  simp only [Finset.range_one, Finset.sum_singleton, pow_zero, inv_one, poch_zero,
+  simp only [Finset.range_one, Finset.sum_singleton, pow_zero, inv_one, pochhammer_zero,
     Nat.factorial_zero,
     Nat.cast_one, mul_one, div_one, one_smul, pow_one] at h
   have h0 : Tendsto (fun ρ : ℝ => exp (-I * coulombTheta ℓ η ρ) * coulombHPlus ℓ η ρ - 1)

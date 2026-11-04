@@ -30,7 +30,7 @@ complex case follows by the identity theorem on `jacobiModulusDomain`.
 * `jacobiModulusDomain_eq`, `isOpen_jacobiModulusDomain`: the domain of moduli is open.
 * `eqOn_jacobiModulusDomain_of_real`: identity theorem on the domain from agreement on `(0, 1)`.
 * `jacobi_inversion_k`: DLMF 22.2.2 on `jacobiModulusDomain`.
-* `jacobiPQk_eq_jacobiPQTau`: the modulus form is the lattice form at `τ = iK'/K`.
+* `jacobiPQ_eq_jacobiPQOfTau`: the modulus form is the lattice form at `τ = iK'/K`.
 -/
 
 @[expose] public section
@@ -43,13 +43,13 @@ noncomputable section
 
 namespace DLMF.JacobiElliptic
 
-open DLMF.EllipticIntegrals (compEllIntKk compEllIntKpk)
+open DLMF.EllipticIntegrals (completeEllipticK completeEllipticKPrime)
 
 /-! ### DLMF 22.2.2: the inversion `k = θ₂²/θ₃²(iK'/K)`
 
 The real case `0 < k < 1` comes from Jacobi's `K = (π/2)θ₃²` for a real nome (the AGM,
-`Real.compEllIntKm_eq_jacobiThetaThreeNullQ`), the modular transformation `τ ↦ -1/τ` and
-Jacobi's identity `θ₃⁴ = θ₂⁴ + θ₄⁴` on the imaginary axis (proved here by lattice sums), with
+`Real.completeEllipticKOfParameter_eq_jacobiThetaThreeNullQ`), the modular transformation `τ ↦ -1/τ`
+and Jacobi's identity `θ₃⁴ = θ₂⁴ + θ₄⁴` on the imaginary axis (proved here by lattice sums), with
 the intermediate value theorem for `t ↦ θ₂²/θ₃²(it)`. The complex case follows by the identity
 theorem: both sides are holomorphic on the connected open domain. -/
 
@@ -412,12 +412,14 @@ theorem exists_jacobiModulusImag_eq {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) :
 /-- The real case of DLMF 22.2.2 at `τ = it`: `k = ρ(t) = θ₂²/θ₃²(0|it) ∈ (0, 1)`,
 `τ(k) = it`, the three relations at `τ = it`, and `K(k) = (π/2)θ₃²`, `K'(k) = t K(k)`. -/
 theorem jacobiModulusImag_spec {t : ℝ} (ht : 0 < t) :
-    0 < jacobiModulusImag t ∧ jacobiModulusImag t < 1 ∧ jacobiTauk (jacobiModulusImag t) = I * t ∧
-      jacobiModulusTau (I * t) = jacobiModulusImag t ∧
-      jacobiComodulusTau (I * t) = jacobiComodulusk (jacobiModulusImag t) ∧
-      compEllIntKTau (I * t) = compEllIntKk (jacobiModulusImag t) ∧
-      Real.compEllIntKm (jacobiModulusImag t ^ 2) = π / 2 * jacobiThetaThreeImag t ^ 2 ∧
-      Real.compEllIntKm (1 - jacobiModulusImag t ^ 2) = π / 2 * t * jacobiThetaThreeImag t ^ 2 := by
+    0 < jacobiModulusImag t ∧ jacobiModulusImag t < 1 ∧ jacobiTau (jacobiModulusImag t) = I * t ∧
+      jacobiModulusOfTau (I * t) = jacobiModulusImag t ∧
+      jacobiComodulusOfTau (I * t) = jacobiComodulus (jacobiModulusImag t) ∧
+      completeEllipticKOfTau (I * t) = completeEllipticK (jacobiModulusImag t) ∧
+      Real.completeEllipticKOfParameter (jacobiModulusImag t ^ 2) = π / 2 *
+          jacobiThetaThreeImag t ^ 2 ∧
+      Real.completeEllipticKOfParameter (1 - jacobiModulusImag t ^ 2) = π / 2 * t *
+          jacobiThetaThreeImag t ^ 2 := by
   set k := jacobiModulusImag t with hk
   have hρ : jacobiModulusImag t = k := rfl
   have hA := jacobiThetaTwoImag_pos ht
@@ -436,17 +438,18 @@ theorem jacobiModulusImag_spec {t : ℝ} (ht : 0 < t) :
       rw [hk2]; have : 0 < (jacobiThetaFourImag t / jacobiThetaThreeImag t) ^ 4 := by positivity
       linarith
     nlinarith
-  have hKm (s : ℝ) (hs : 0 < s) : Real.compEllIntKm
+  have hKm (s : ℝ) (hs : 0 < s) : Real.completeEllipticKOfParameter
       (1 - (jacobiThetaFourImag s / jacobiThetaThreeImag s) ^ 4) =
       π / 2 * jacobiThetaThreeImag s ^ 2 :=
-    Real.compEllIntKm_eq_jacobiThetaThreeNullQ (exp_neg_pi_mul_mem_Ioo hs).1
+    Real.completeEllipticKOfParameter_eq_jacobiThetaThreeNullQ (exp_neg_pi_mul_mem_Ioo hs).1
         (exp_neg_pi_mul_mem_Ioo hs).2
-  have hKk : compEllIntKk k = π / 2 * (jacobiThetaThreeImag t : ℂ) ^ 2 := by
-    rw [compEllIntKk_ofReal (by nlinarith), hk2, hKm t ht]
+  have hKk : completeEllipticK k = π / 2 * (jacobiThetaThreeImag t : ℂ) ^ 2 := by
+    rw [completeEllipticK_ofReal (by nlinarith), hk2, hKm t ht]
     push_cast; ring
-  have hKmk : Real.compEllIntKm (k ^ 2) = π / 2 * jacobiThetaThreeImag t ^ 2 :=
+  have hKmk : Real.completeEllipticKOfParameter (k ^ 2) = π / 2 * jacobiThetaThreeImag t ^ 2 :=
       by rw [hk2, hKm t ht]
-  have hKmk' : Real.compEllIntKm (1 - k ^ 2) = π / 2 * t * jacobiThetaThreeImag t ^ 2 := by
+  have hKmk' : Real.completeEllipticKOfParameter (1 - k ^ 2) = π / 2 * t *
+      jacobiThetaThreeImag t ^ 2 := by
     have ht' : (0 : ℝ) < 1 / t := by positivity
     have e : 1 - k ^ 2 = 1 - (jacobiThetaFourImag (1 / t) / jacobiThetaThreeImag (1 / t)) ^ 4 := by
       have h1 : jacobiThetaFourImag (1 / t) = jacobiThetaTwoImag t * Real.sqrt t := by
@@ -456,7 +459,7 @@ theorem jacobiModulusImag_spec {t : ℝ} (ht : 0 < t) :
       field_simp
     rw [e, hKm _ ht', jacobiThetaThreeImag_one_div ht, mul_pow, Real.sq_sqrt ht.le]
     ring
-  have hKpk : compEllIntKpk k = π / 2 * t * (jacobiThetaThreeImag t : ℂ) ^ 2 := by
+  have hKpk : completeEllipticKPrime k = π / 2 * t * (jacobiThetaThreeImag t : ℂ) ^ 2 := by
     have ht' : (0 : ℝ) < 1 / t := by positivity
     have e : 1 - k ^ 2 = 1 - (jacobiThetaFourImag (1 / t) / jacobiThetaThreeImag (1 / t)) ^ 4 := by
       have h1 : jacobiThetaFourImag (1 / t) = jacobiThetaTwoImag t * Real.sqrt t := by
@@ -464,23 +467,23 @@ theorem jacobiModulusImag_spec {t : ℝ} (ht : 0 < t) :
       rw [h1, jacobiThetaThreeImag_one_div ht, ← hρ, jacobiModulusImag]
       have := Real.sqrt_pos.mpr ht
       field_simp
-    rw [compEllIntKpk_ofReal (by positivity), e, hKm _ ht',
+    rw [completeEllipticKPrime_ofReal (by positivity), e, hKm _ ht',
         jacobiThetaThreeImag_one_div ht, mul_pow,
       Real.sq_sqrt ht.le]
     push_cast
     ring
-  have hKne : compEllIntKk k ≠ 0 := by
+  have hKne : completeEllipticK k ≠ 0 := by
     rw [hKk]
     exact mul_ne_zero (div_ne_zero pi_ne_zero' two_ne_zero)
       (pow_ne_zero _ (ofReal_ne_zero.mpr hB0.ne'))
   refine ⟨hk0, hk1, ?_, ?_, ?_, ?_, hKmk, hKmk'⟩
-  · rw [jacobiTauk, hKpk, hKk]
+  · rw [jacobiTau, hKpk, hKk]
     have : (jacobiThetaThreeImag t : ℂ) ≠ 0 := ofReal_ne_zero.mpr hB0.ne'
     have := pi_ne_zero'
     field_simp
-  · rw [jacobiModulusTau, hA', jacobiThetaThreeTau_zero_I_mul_eq_imag, ← hρ, jacobiModulusImag]
+  · rw [jacobiModulusOfTau, hA', jacobiThetaThreeTau_zero_I_mul_eq_imag, ← hρ, jacobiModulusImag]
     push_cast; ring
-  · rw [jacobiComodulusTau, jacobiComodulusk, jacobiThetaFourTau_zero_I_mul_eq_imag,
+  · rw [jacobiComodulusOfTau, jacobiComodulus, jacobiThetaFourTau_zero_I_mul_eq_imag,
         jacobiThetaThreeTau_zero_I_mul_eq_imag,
       show (1 : ℂ) - (k : ℂ) ^ 2 = ((1 - k ^ 2 : ℝ) : ℂ) by push_cast; ring,
       Carlson.ofReal_cpow_half (by nlinarith), hk2,
@@ -488,14 +491,14 @@ theorem jacobiModulusImag_spec {t : ℝ} (ht : 0 < t) :
           ((jacobiThetaFourImag t / jacobiThetaThreeImag t) ^ 2) ^ 2 by ring,
       Real.sqrt_sq (by positivity)]
     push_cast; ring
-  · rw [compEllIntKTau, jacobiThetaThreeTau_zero_I_mul_eq_imag, hKk]
+  · rw [completeEllipticKOfTau, jacobiThetaThreeTau_zero_I_mul_eq_imag, hKk]
 
 /-- The real case of DLMF 22.2.2: for `0 < k < 1`, `τ(k) = it` with `t > 0` and the three
 relations hold at `τ = it`. -/
-lemma exists_jacobiTauk_eq_I_mul_of_real {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) :
-    ∃ t : ℝ, 0 < t ∧ jacobiTauk k = I * t ∧ jacobiModulusTau (I * t) = k ∧
-      jacobiComodulusTau (I * t) = jacobiComodulusk k ∧ compEllIntKTau (I * t) =
-          compEllIntKk k := by
+lemma exists_jacobiTau_eq_I_mul_of_real {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) :
+    ∃ t : ℝ, 0 < t ∧ jacobiTau k = I * t ∧ jacobiModulusOfTau (I * t) = k ∧
+      jacobiComodulusOfTau (I * t) = jacobiComodulus k ∧ completeEllipticKOfTau (I * t) =
+          completeEllipticK k := by
   obtain ⟨t, ht, hρ⟩ := exists_jacobiModulusImag_eq hk0 hk1
   obtain ⟨-, -, h1, h2, h3, h4, -⟩ := jacobiModulusImag_spec ht
   rw [hρ] at h1 h2 h3 h4
@@ -538,11 +541,12 @@ private lemma differentiableOn_integral_one_sub_mul_sin_sq_rpow {U : Set ℂ}
       exact hM (y, Real.sin θ ^ 2) ⟨hy, sq_nonneg _, Real.sin_sq_le_one θ⟩
 
 /-- `K(k) ≠ 0` on `jacobiModulusDomain`. -/
-theorem compEllIntKk_ne_zero_of_mem_jacobiModulusDomain {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
-    compEllIntKk k ≠ 0 := by
+theorem completeEllipticK_ne_zero_of_mem_jacobiModulusDomain {k : ℂ}
+    (hk : k ∈ jacobiModulusDomain) :
+    completeEllipticK k ≠ 0 := by
   intro h
-  have := jacobiTauk_im_pos hk
-  simp [jacobiTauk, h] at this
+  have := jacobiTau_im_pos hk
+  simp [jacobiTau, h] at this
 
 /-- Estimate under the stated parameter and domain assumptions: `jacobiModulusDomain = {k : ℂ | 0
 < k.re} ∩ {k : ℂ | 1 - k ^ 2 ∈ slitPlane}`. -/
@@ -605,18 +609,19 @@ private lemma isPreconnected_jacobiModulusDomain : IsPreconnected jacobiModulusD
       have := hk1 this
       nlinarith
 
-/-- Differentiability throughout the specified domain: `DifferentiableOn ℂ compEllIntKk
+/-- Differentiability throughout the specified domain: `DifferentiableOn ℂ completeEllipticK
 jacobiModulusDomain`. -/
-lemma differentiableOn_compEllIntKk : DifferentiableOn ℂ compEllIntKk jacobiModulusDomain :=
+lemma differentiableOn_completeEllipticK : DifferentiableOn ℂ completeEllipticK
+    jacobiModulusDomain :=
   differentiableOn_integral_one_sub_mul_sin_sq_rpow (c := fun k => k ^ 2)
       isOpen_jacobiModulusDomain (by fun_prop)
     fun k hk s hs0 hs1 =>
         (one_sub_mul_mem_slitPlane
         (sq_im_ne_zero_or_mem_Ioo_of_mem_jacobiModulusDomain hk) hs0 hs1).2
 
-/-- Differentiability throughout the specified domain: `DifferentiableOn ℂ compEllIntKpk
+/-- Differentiability throughout the specified domain: `DifferentiableOn ℂ completeEllipticKPrime
 jacobiModulusDomain`. -/
-private lemma differentiableOn_compEllIntKpk : DifferentiableOn ℂ compEllIntKpk
+private lemma differentiableOn_completeEllipticKPrime : DifferentiableOn ℂ completeEllipticKPrime
     jacobiModulusDomain :=
   differentiableOn_integral_one_sub_mul_sin_sq_rpow (c := fun k => 1 - k ^ 2)
       isOpen_jacobiModulusDomain (by fun_prop)
@@ -624,11 +629,12 @@ private lemma differentiableOn_compEllIntKpk : DifferentiableOn ℂ compEllIntKp
         (one_sub_mul_mem_slitPlane
         (sq_im_ne_zero_or_mem_Ioo_of_mem_jacobiModulusDomain hk) hs0 hs1).1
 
-/-- Differentiability throughout the specified domain: `DifferentiableOn ℂ jacobiTauk
+/-- Differentiability throughout the specified domain: `DifferentiableOn ℂ jacobiTau
 jacobiModulusDomain`. -/
-lemma differentiableOn_jacobiTauk : DifferentiableOn ℂ jacobiTauk jacobiModulusDomain :=
-  ((differentiableOn_const I).mul differentiableOn_compEllIntKpk).div differentiableOn_compEllIntKk
-    fun _ hk => compEllIntKk_ne_zero_of_mem_jacobiModulusDomain hk
+lemma differentiableOn_jacobiTau : DifferentiableOn ℂ jacobiTau jacobiModulusDomain :=
+  ((differentiableOn_const I).mul differentiableOn_completeEllipticKPrime).div
+      differentiableOn_completeEllipticK
+    fun _ hk => completeEllipticK_ne_zero_of_mem_jacobiModulusDomain hk
 
 /-- Differentiability at the specified argument: `DifferentiableAt ℂ (fun τ => jacobiThetaThreeTau
 0 τ) τ`. -/
@@ -653,11 +659,11 @@ theorem differentiableAt_jacobiThetaTwoTau_zero {τ : ℂ} (hτ : 0 < τ.im) :
   exact (by fun_prop : DifferentiableAt ℂ (fun σ : ℂ => cexp (π * I * σ / 4 + I * 0)) τ).mul h
 
 /-- Composition of a theta constant with `τ(k)` is holomorphic on the domain. -/
-theorem differentiableOn_comp_jacobiTauk {f : ℂ → ℂ}
+theorem differentiableOn_comp_jacobiTau {f : ℂ → ℂ}
     (hf : ∀ τ : ℂ, 0 < τ.im → DifferentiableAt ℂ f τ) :
-    DifferentiableOn ℂ (fun k => f (jacobiTauk k)) jacobiModulusDomain := fun k hk =>
-  ((hf _ (jacobiTauk_im_pos hk)).comp k
-    (differentiableOn_jacobiTauk.differentiableAt
+    DifferentiableOn ℂ (fun k => f (jacobiTau k)) jacobiModulusDomain := fun k hk =>
+  ((hf _ (jacobiTau_im_pos hk)).comp k
+    (differentiableOn_jacobiTau.differentiableAt
       (isOpen_jacobiModulusDomain.mem_nhds hk))).differentiableWithinAt
 
 /-- Identity theorem on the domain from agreement on `(0, 1)`. -/
@@ -687,47 +693,48 @@ end ModulusInversion
 `k²` only. -/
 @[dlmf 22.2.E2 "domain: Re k > 0, k ∉ [1, ∞); fixes the sign of k and of k'"]
 theorem jacobi_inversion_k {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
-    jacobiModulusTau (jacobiTauk k) = k ∧
-      jacobiComodulusTau (jacobiTauk k) = jacobiComodulusk k ∧
-      compEllIntKTau (jacobiTauk k) = compEllIntKk k := by
-  have h3 := differentiableOn_comp_jacobiTauk fun τ hτ =>
+    jacobiModulusOfTau (jacobiTau k) = k ∧
+      jacobiComodulusOfTau (jacobiTau k) = jacobiComodulus k ∧
+      completeEllipticKOfTau (jacobiTau k) = completeEllipticK k := by
+  have h3 := differentiableOn_comp_jacobiTau fun τ hτ =>
       differentiableAt_jacobiThetaThreeTau_zero hτ
-  have h2 := differentiableOn_comp_jacobiTauk fun τ hτ => differentiableAt_jacobiThetaTwoTau_zero hτ
-  have h4 := differentiableOn_comp_jacobiTauk fun τ hτ =>
+  have h2 := differentiableOn_comp_jacobiTau fun τ hτ => differentiableAt_jacobiThetaTwoTau_zero hτ
+  have h4 := differentiableOn_comp_jacobiTau fun τ hτ =>
       differentiableAt_jacobiThetaFourTau_zero hτ
-  have h3ne : ∀ k ∈ jacobiModulusDomain, jacobiThetaThreeTau 0 (jacobiTauk k) ^ 2 ≠ 0 :=
-    fun k hk => pow_ne_zero _ (jacobiThetaThreeTau_zero_ne_zero (jacobiTauk_im_pos hk))
+  have h3ne : ∀ k ∈ jacobiModulusDomain, jacobiThetaThreeTau 0 (jacobiTau k) ^ 2 ≠ 0 :=
+    fun k hk => pow_ne_zero _ (jacobiThetaThreeTau_zero_ne_zero (jacobiTau_im_pos hk))
   refine ⟨?_, ?_, ?_⟩
   · refine eqOn_jacobiModulusDomain_of_real
-        (f := fun k => jacobiModulusTau (jacobiTauk k)) (g := id)
+        (f := fun k => jacobiModulusOfTau (jacobiTau k)) (g := id)
       ((h2.pow 2).div (h3.pow 2) h3ne) differentiableOn_id (fun x hx0 hx1 => ?_) hk
-    obtain ⟨t, -, ht, hm, -, -⟩ := exists_jacobiTauk_eq_I_mul_of_real hx0 hx1
+    obtain ⟨t, -, ht, hm, -, -⟩ := exists_jacobiTau_eq_I_mul_of_real hx0 hx1
     simp only [id, ht, hm]
-  · refine eqOn_jacobiModulusDomain_of_real (f := fun k => jacobiComodulusTau (jacobiTauk k))
-      (g := jacobiComodulusk) ((h4.pow 2).div (h3.pow 2) h3ne) ?_ (fun x hx0 hx1 => ?_) hk
+  · refine eqOn_jacobiModulusDomain_of_real (f := fun k => jacobiComodulusOfTau (jacobiTau k))
+      (g := jacobiComodulus) ((h4.pow 2).div (h3.pow 2) h3ne) ?_ (fun x hx0 hx1 => ?_) hk
     · intro k hk
       rw [jacobiModulusDomain_eq] at hk
       exact ((by fun_prop : DifferentiableAt ℂ (fun k : ℂ => 1 - k ^ 2) k).cpow_const
         hk.2).differentiableWithinAt
-    · obtain ⟨t, -, ht, -, hc, -⟩ := exists_jacobiTauk_eq_I_mul_of_real hx0 hx1
+    · obtain ⟨t, -, ht, -, hc, -⟩ := exists_jacobiTau_eq_I_mul_of_real hx0 hx1
       simp only [ht, hc]
-  · refine eqOn_jacobiModulusDomain_of_real (f := fun k => compEllIntKTau (jacobiTauk k))
-      (g := compEllIntKk) ((differentiableOn_const _).mul (h3.pow 2))
-      differentiableOn_compEllIntKk (fun x hx0 hx1 => ?_) hk
-    obtain ⟨t, -, ht, -, -, hK⟩ := exists_jacobiTauk_eq_I_mul_of_real hx0 hx1
+  · refine eqOn_jacobiModulusDomain_of_real (f := fun k => completeEllipticKOfTau (jacobiTau k))
+      (g := completeEllipticK) ((differentiableOn_const _).mul (h3.pow 2))
+      differentiableOn_completeEllipticK (fun x hx0 hx1 => ?_) hk
+    obtain ⟨t, -, ht, -, -, hK⟩ := exists_jacobiTau_eq_I_mul_of_real hx0 hx1
     simp only [ht, hK]
 
 /-- The modulus form is the lattice form at `τ = iK'/K`, given the third relation of
 DLMF 22.2.2. -/
-theorem jacobiPQk_eq_jacobiPQTau_of {k : ℂ} (hK : compEllIntKTau (jacobiTauk k) = compEllIntKk k)
-    (p q : JacobiLetter) (z : ℂ) : jacobiPQk p q z k = jacobiPQTau p q z (jacobiTauk k) := by
-  rw [jacobiPQk, jacobiPQTau, jacobiZetak, jacobiZetaTau, hK]
+theorem jacobiPQ_eq_jacobiPQOfTau_of {k : ℂ}
+    (hK : completeEllipticKOfTau (jacobiTau k) = completeEllipticK k)
+    (p q : JacobiLetter) (z : ℂ) : jacobiPQ p q z k = jacobiPQOfTau p q z (jacobiTau k) := by
+  rw [jacobiPQ, jacobiPQOfTau, jacobiThetaArgument, jacobiThetaArgumentOfTau, hK]
 
 /-- The modulus form is the lattice form at `τ = iK'/K` on `jacobiModulusDomain`
 (from the admitted DLMF 22.2.2). -/
-theorem jacobiPQk_eq_jacobiPQTau {k : ℂ} (hk : k ∈ jacobiModulusDomain) (p q : JacobiLetter)
-    (z : ℂ) : jacobiPQk p q z k = jacobiPQTau p q z (jacobiTauk k) :=
-  jacobiPQk_eq_jacobiPQTau_of (jacobi_inversion_k hk).2.2 p q z
+theorem jacobiPQ_eq_jacobiPQOfTau {k : ℂ} (hk : k ∈ jacobiModulusDomain) (p q : JacobiLetter)
+    (z : ℂ) : jacobiPQ p q z k = jacobiPQOfTau p q z (jacobiTau k) :=
+  jacobiPQ_eq_jacobiPQOfTau_of (jacobi_inversion_k hk).2.2 p q z
 
 end DLMF.JacobiElliptic
 end

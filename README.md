@@ -193,11 +193,11 @@ Chapter 1 is standard mathematics already in Mathlib or Tau Ceti and is recorded
 `dlmf_upstream` pointers rather than reproved. Ledgers: [Chapter 1](DLMF1Acquisition.md),
 [Chapter 2](DLMF2Acquisition.md).
 
-DLMF errata and source corrections found anywhere in the project are collected in
+Errata in DLMF found anywhere in the project are collected in
 the [DLMF errata report](https://bjbraams.github.io/lean-DLMF/DLMFErrata.pdf) (LaTeX source
 [reports/DLMFErrata.tex](reports/DLMFErrata.tex), built by CI and published on GitHub Pages):
-genuine DLMF errata, fixed transcription defects of our own, and formalization notes, each with
-evidence and the Lean declarations.
+confirmed errata, and suspected errata and unstated conditions, each with evidence and the Lean
+declarations.
 
 Since 2026-10-25 the companion project [lean-codes](../lean-codes) is a Lake dependency
 (package `LeanCodes`); its Carlson library underlies Chapter 19. The project's own general
@@ -231,21 +231,21 @@ theory, and the real connection formulas remain open; see the
   correct spellings (Appell, Carlson), and redundant words dropped.
 - **Plain name: the analytic continuation** on its standard domain, which is named by a domain
   predicate (`slitPlane`, `cutPlane`, `{z | 1 + z ∈ slitPlane}`, …) in the docstring and in theorem
-  hypotheses. Examples: `regularizedGaussHG` (on `cutPlane`), `kummerU`, `erf`, `besselJ`.
+  hypotheses. Examples: `regularizedGaussHypergeometric` (on `cutPlane`), `kummerU`, `erf`, `besselJ`.
 - **`…Series` / `…Integral`: the native representation**, when it is a separate definition with its
-  own natural domain. Examples: `regularizedGaussHGIntegral` (Euler's integral), `polylogSeries`
+  own natural domain. Examples: `regularizedGaussHypergeometricIntegral` (Euler's integral), `polylogSeries`
   (on the closed disc), `compEllIntKkSeries` (`₂F₁` in the modulus). The plain name is reserved
   for the continuation even when that is not defined yet, as for `polylog`.
 - **Real-variable forms live in a `Real` sub-namespace** of the area namespace, mirroring Mathlib's
-  `Real.Gamma`/`Complex.Gamma`: `DLMF.Polylog.Real.dilog`, `DLMF.Confluent.Real.sinInt`,
-  `DLMF.Statistical.Real.incBeta`. Their lemmas are `Real.hasDerivAt_dilog`, `Real.dilog_one`, ….
+  `Real.Gamma`/`Complex.Gamma`: `DLMF.Polylog.Real.dilog`, `DLMF.Confluent.Real.sinIntegral`,
+  `DLMF.Statistical.Real.incompleteBeta`. Their lemmas are `Real.hasDerivAt_dilog`, `Real.dilog_one`, ….
 - **Elliptic functions carry their argument convention as the last letter**, following Miller:
   `k` for the modulus, `m = k²` for the parameter, `Tau` or `Q` for theta functions in `τ` or in
   the nome `q`, and `Null` for theta constants (`z = 0`). Argument order is DLMF's.
 - **Bridge theorems** are named `X_eq_XSeries`, `X_eq_XIntegral`, or after the real form, with the
-  domain as hypothesis. Examples: `regularizedGaussHG_eq_regularizedGaussHGIntegral`,
+  domain as hypothesis. Examples: `regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricIntegral`,
   `polylogSeries_two_ofReal_eq_dilog`. Bridges to an upstream series use the upstream name, as in
-  `regularizedGaussHG_eq_regularizedGaussHGFun` (Mathlib's `regularizedGaussHGFun` is the series).
+  `regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricFun` (Mathlib's `regularizedGaussHGFun` is the series).
 
 - Kummer `M(a,b,z)`, `U(a,b,z)` (13.2): `kummerM`, `kummerU` (Miller: `KummerconfhyperM`, `KummerconfhyperU`).
 - Whittaker `M_{κ,μ}`, `W_{κ,μ}` (13.14): `whittakerM`, `whittakerW` (Miller: `WhittakerconfhyperM`, `…W`).
@@ -253,19 +253,19 @@ theory, and the real connection formulas remain open; see the
 - Modified Bessel `I_ν`, `K_ν` (10.25): `besselI`, `besselK` (Miller: `modBesselI`, `modBesselK`).
 - Legendre `P_ν`, `Q_ν` (14.3): `legendreP`, `legendreQ` (Miller: `assLegendreP`, `assLegendreQ`).
 - Ferrers `𝖯_ν^μ` (14.3): `ferrersP` (Miller: `FerrersP`).
-- Classical OPs (18.3): `jacobiPolyP`, `ultrasphPoly`, `legendrePolyP`, `laguerrePolyL`, `hermitePolyH` (Miller: `JacobipolyP`, …, `HermitepolyH`).
-- `γ(a,z)`, `Γ(a,z)` (8.2): `lowerIncGamma`, `upperIncGamma` (Miller: `incgamma`, `incGamma`).
-- `P(a,z)`, `Q(a,z)`, `γ*(a,z)` (8.2): `normIncGammaP`, `normIncGammaQ`, `scIncGamma` (Miller: `normincGammaP`, `…Q`, `scincgamma`).
-- `B_x(a,b)`, `I_x(a,b)` (8.17): `Real.incBeta`, `Real.normIncBetaI` (Miller: `incBeta`, `normincBetaI`).
+- Classical OPs (18.3): `jacobiPolynomialP`, `ultrasphericalPolynomial`, `legendrePolynomialP`, `laguerrePolynomialL`, `hermitePolynomialH` (Miller: `JacobipolyP`, …, `HermitepolyH`).
+- `γ(a,z)`, `Γ(a,z)` (8.2): `lowerIncompleteGamma`, `upperIncompleteGamma` (Miller: `incgamma`, `incGamma`).
+- `P(a,z)`, `Q(a,z)`, `γ*(a,z)` (8.2): `regularizedGamma`, `regularizedIncompleteGammaQ`, `tricomiIncompleteGamma` (Miller: `normincGammaP`, `…Q`, `scincgamma`).
+- `B_x(a,b)`, `I_x(a,b)` (8.17): `Real.incompleteBeta`, `Real.regularizedIncompleteBeta` (Miller: `incompleteBeta`, `normincBetaI`).
 - `erf`, `erfc`, Dawson `F` (7.2): `erf`, `erfc`, `Real.dawsonF` (Miller: `erf`, `erfc`, `DawsonintF`).
-- Fresnel `C`, `S` (7.2): `Real.fresnelCosInt`, `Real.fresnelSinInt` (Miller: `Fresnelcosint`, `Fresnelsinint`).
-- `Si`, `Ci`, `Cin`, `Ein`, `E_p` (6.2, 8.19): `Real.sinInt`, `Real.cosInt`, `Real.cosIntCin`, `Real.expIntEin`, `genExpIntE` (Miller: `sinint`, `cosint`, `cosintCin`, `expintEin`, `genexpintE`).
+- Fresnel `C`, `S` (7.2): `Real.fresnelC`, `Real.fresnelS` (Miller: `Fresnelcosint`, `Fresnelsinint`).
+- `Si`, `Ci`, `Cin`, `Ein`, `E_p` (6.2, 8.19): `Real.sinIntegral`, `Real.cosIntegral`, `Real.cosIntegralCin`, `Real.expIntegralEin`, `expIntegralE` (Miller: `sinint`, `cosint`, `cosintCin`, `expintEin`, `genexpintE`).
 - `Li_s`, `Li₂`, `Li₃` (25.12): `polylogSeries`, `Real.dilog`, `Real.trilog` (Miller: `polylog`, `dilog`).
 - Barnes `G`, `ψ^{(n)}`, `Γ_q`, `B_q`, `[n k]_q`: `barnesG`, `polygamma`, `qGamma`, `qBeta`, `qBinom` (Miller: `BarnesG`, `polygamma`, `qGamma`, `qBeta`, `qbinom`).
-- `K`, `E`, `Π`, `D` complete (19.2.8): `compEllIntKk`/`…Km`, `compEllIntEk`/`…Em`, `compEllIntPik`/`…Pim`, `compEllIntDk`/`…Dm`; now `compEllIntKkSeries`, `Real.compEllIntKm`, `Real.compEllIntEm`, `Real.compEllIntPim` (Miller: `compellintKk`, `compellintEk`, `compellintPik`, `compellintDk`).
-- `F(φ,k)`, `E(φ,k)`, `Π(φ,α²,k)` (19.2.4–7): `incEllIntFk`/`…Fm`, `incEllIntEk`/`…Em`, `incEllIntPik`/`…Pim`; now `Real.incEllIntFm`, `Real.incEllIntEm`, `Real.incEllIntPim` (Miller: `incellintFk`, `incellintEk`, `incellintPik`).
+- `K`, `E`, `Π`, `D` complete (19.2.8): `compEllIntKk`/`…Km`, `compEllIntEk`/`…Em`, `completeEllipticPi`/`…Pim`, `completeEllipticD`/`…Dm`; now `compEllIntKkSeries`, `Real.completeEllipticKOfParameter`, `Real.completeEllipticEOfParameter`, `Real.completeEllipticPiOfParameter` (Miller: `compellintKk`, `compellintEk`, `compellintPik`, `compellintDk`).
+- `F(φ,k)`, `E(φ,k)`, `Π(φ,α²,k)` (19.2.4–7): `incEllIntFk`/`…Fm`, `incEllIntEk`/`…Em`, `incEllIntPik`/`…Pim`; now `Real.incompleteEllipticFOfParameter`, `Real.incompleteEllipticEOfParameter`, `Real.incompleteEllipticPiOfParameter` (Miller: `incellintFk`, `incellintEk`, `incellintPik`).
 - `K′`, `E′` (19.2.9): `ccompEllIntKk`, `ccompEllIntEk` (planned) (Miller: `ccompellintKk`, `ccompellintEk`).
-- `am`, `sn`, `cn`, `dn`, `arcsn` (22.2, 22.15, 22.16): complex `DLMF.JacobiElliptic.jacobiSnk`, … (all twelve) and `jacobiSnTau`, …; real `Real.jacobiAmm`, `Real.jacobiSnm`, `Real.jacobiCnm`, `Real.jacobiDnm`, `Real.jacobiArcsnm` (Miller: `Jacobiamk`, `Jacobiellsnk`, …, `aJacobiellsnk`).
+- `am`, `sn`, `cn`, `dn`, `arcsn` (22.2, 22.15, 22.16): complex `DLMF.JacobiElliptic.jacobiSn`, … (all twelve) and `jacobiSnOfTau`, …; real `Real.jacobiAmOfParameter`, `Real.jacobiSnOfParameter`, `Real.jacobiCnOfParameter`, `Real.jacobiDnOfParameter`, `Real.jacobiArcsnOfParameter` (Miller: `Jacobiamk`, `Jacobiellsnk`, …, `aJacobiellsnk`).
 - `θ_j(z\|τ)`, `θ_j(z,q)`, `θ_j(q)` (20.2): `jacobiThetaOneTau`, …, `jacobiThetaFourTau`; `DLMF.Theta.jacobiThetaOneQ`, …; `Real.jacobiThetaThreeNullQ`, `Real.jacobiThetaFourNullQ` (Miller: `Jacobithetatau`, `Jacobithetaq`).
 - Carlson `R_F`, `R_D`, `R_C`, `R_J`, `R_G` (19.16): `carlsonRF`, … (planned) (Miller: `CarsonsymellintRF`, … (sic)).
 
@@ -285,27 +285,27 @@ foundational layer (for example `DLMF.Confluent.erf_ofReal` to TauCeti's `Real.e
 
 ### Statistics
 
-Counts as of 2026-11-02, after the fifth proof round of that day. Theorems include private
-helper lemmas, and a theorem counts as admitted when its proof contains `sorry`.
+Counts as of 2026-11-03, after the seventh proof round. Theorems include private helper lemmas,
+and a theorem counts as admitted when its proof contains `sorry`.
 
-- **Size.** 1,383 Lean files with 629,457 lines (501,186 lines of code without comments and
-  blank lines): 1,246 files under `DLMF/` and 137 under `DLMFMathlib/`. The foundational
+- **Size.** 1,416 Lean files with 650,207 lines (519,297 lines of code without comments and
+  blank lines): 1,273 files under `DLMF/` and 143 under `DLMFMathlib/`. The foundational
   layer (every `Basic.lean` and every file below a `Basic/` directory) has 236 files and
-  49,415 lines.
-- **Declarations.** 3,517 definitions, 62 structures, inductive types and classes, 19
-  instances, and 24,307 theorems.
-- **Proofs.** 23,144 theorems are fully proved and 1,163 are admitted (95.2% proved). No
+  49,417 lines.
+- **Declarations.** 3,575 definitions, 62 structures, inductive types and classes, 19
+  instances, and 24,869 theorems.
+- **Proofs.** 23,811 theorems are fully proved and 1,058 are admitted (95.7% proved). No
   definition is admitted. The foundational layer (1,559 definitions, 2,018 theorems) and
-  `DLMFMathlib/` (80 definitions, 1,022 theorems) contain no admissions. No axioms are used
+  `DLMFMathlib/` (81 definitions, 1,045 theorems) contain no admissions. No axioms are used
   beyond `propext`, `Classical.choice` and `Quot.sound`.
-- **DLMF coverage.** 10,789 index entries link DLMF items in 35 chapters (Chapter 3 is out of
-  scope) to Lean declarations: 9,739 `@[dlmf]` tags on 8,772 project declarations, 1,031
+- **DLMF coverage.** 10,814 index entries link DLMF items in 35 chapters (Chapter 3 is out of
+  scope) to Lean declarations: 9,764 `@[dlmf]` tags on 8,795 project declarations, 1,031
   checked `dlmf_upstream` pointers (987 to Mathlib, 31 to TauCeti, the rest to lean-codes and
-  other packages) and 19 tags carried by Mathlib itself. Of the 7,462 distinct DLMF items,
-  6,189 (83%) are proved, defined or covered upstream, 231 have both a proved and an admitted
-  formalization, and 1,042 (14%) are only admitted.
-- **History.** The project started on 2026-09-24 as lean-AAR. The five proof rounds of
-  2026-11-02 reduced the admissions from 1,482 to 1,163.
+  other packages) and 19 tags carried by Mathlib itself. Of the 7,463 distinct DLMF items,
+  6,500 (87%) are proved, defined or covered upstream, 225 have both a proved and an admitted
+  formalization, and 963 (13%) are only admitted.
+- **History.** The project started on 2026-09-24 as lean-AAR. Seven proof rounds on 2026-11-02
+  and 2026-11-03 reduced the admissions from 1,482 to 1,058.
 
 ### Reports
 
@@ -316,6 +316,7 @@ names:
 - [Review of the Basic layer](https://bjbraams.github.io/lean-DLMF/BasicLayerReview.pdf)
 - [Status review from a Mathlib perspective](https://bjbraams.github.io/lean-DLMF/MathlibReview.pdf)
 - [Namespaces of special functions in Mathlib and TauCeti](https://bjbraams.github.io/lean-DLMF/UpstreamNamespaces.pdf)
+- [TauCeti name map of the foundational layer](https://bjbraams.github.io/lean-DLMF/TauCetiNameMap.pdf), with the table [`reports/TauCetiNameMap.tsv`](reports/TauCetiNameMap.tsv)
 - [DLMF errata](https://bjbraams.github.io/lean-DLMF/DLMFErrata.pdf)
 
 ### Proof rounds
@@ -440,7 +441,7 @@ that inherit admissions, branch-dependent definitions, and corrected source form
 
 The [second parallel proof round](REVIEW.md#parallel-proofs-in-chapters-4-16-and-17-2026-10-24-second-round)
 proves 134 further statements: 92 Elementary, 14 generalized hypergeometric and 28
-q-hypergeometric. It also makes `genHG_entire` independent of the continuation
+q-hypergeometric. It also makes `generalizedHypergeometric_entire` independent of the continuation
 existence admission. The guarded function definition preserves the previous values
 under that explicitly retained existence theorem.
 

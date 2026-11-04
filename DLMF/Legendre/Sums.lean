@@ -7,6 +7,7 @@ module
 
 public import DLMF.Legendre.Harmonics
 public import DLMF.Legendre.QAdditionTools
+public import DLMF.Legendre.ZonalSeries
 
 /-!
 # Legendre addition theorems and zonal harmonic series
@@ -184,7 +185,7 @@ theorem legendre_christoffel_6 (n : ℕ) {x y : ℂ} (hx : x-1 ∈ slitPlane) (h
         y)=(n+1:ℂ)*(associatedP (n+1) 0 x*associatedP n 0 y-associatedP n 0 x*associatedP
         (n+1) 0 y) := by
   have hP : ∀ z : ℂ, z-1 ∈ slitPlane → ∀ k : ℕ, associatedP k 0 z =
-      DLMF.OrthogonalPolynomials.legendrePolyP k z := by
+      DLMF.OrthogonalPolynomials.legendrePolynomialP k z := by
     intro z hz k
     have hz' : 1+z ∈ slitPlane := by
       rw [mem_slitPlane_iff] at hz ⊢
@@ -194,23 +195,24 @@ theorem legendre_christoffel_6 (n : ℕ) {x y : ℂ} (hx : x-1 ∈ slitPlane) (h
       · right; simpa using h
     rw [associatedP_zero_order _ hz, legendreP_nat k hz']
   have key : ∀ n : ℕ, (x-y)*(∑ k ∈ Finset.range (n+1),
-      (2*k+1:ℂ)*DLMF.OrthogonalPolynomials.legendrePolyP k
-      x*DLMF.OrthogonalPolynomials.legendrePolyP k y) =
-      (n+1:ℂ)*(DLMF.OrthogonalPolynomials.legendrePolyP (n+1)
-          x*DLMF.OrthogonalPolynomials.legendrePolyP n y-DLMF.OrthogonalPolynomials.legendrePolyP n
-          x*DLMF.OrthogonalPolynomials.legendrePolyP (n+1) y) := by
+      (2*k+1:ℂ)*DLMF.OrthogonalPolynomials.legendrePolynomialP k
+      x*DLMF.OrthogonalPolynomials.legendrePolynomialP k y) =
+      (n+1:ℂ)*(DLMF.OrthogonalPolynomials.legendrePolynomialP (n+1)
+          x*DLMF.OrthogonalPolynomials.legendrePolynomialP n
+              y-DLMF.OrthogonalPolynomials.legendrePolynomialP n
+          x*DLMF.OrthogonalPolynomials.legendrePolynomialP (n+1) y) := by
     intro n
     induction n with
-    | zero => simp [DLMF.OrthogonalPolynomials.legendrePolyP_one,
-                DLMF.OrthogonalPolynomials.legendrePolyP_zero]
+    | zero => simp [DLMF.OrthogonalPolynomials.legendrePolynomialP_one,
+                DLMF.OrthogonalPolynomials.legendrePolynomialP_zero]
     | succ n ih =>
       rw [Finset.sum_range_succ, mul_add, ih]
-      have hx2 := DLMF.OrthogonalPolynomials.legendrePolyP_recurrence n x
-      have hy2 := DLMF.OrthogonalPolynomials.legendrePolyP_recurrence n y
+      have hx2 := DLMF.OrthogonalPolynomials.legendrePolynomialP_recurrence n x
+      have hy2 := DLMF.OrthogonalPolynomials.legendrePolynomialP_recurrence n y
       push_cast
       rw [show n+1+1 = n+2 by ring]
-      linear_combination DLMF.OrthogonalPolynomials.legendrePolyP (n+1) x * hy2 -
-          DLMF.OrthogonalPolynomials.legendrePolyP (n+1) y * hx2
+      linear_combination DLMF.OrthogonalPolynomials.legendrePolynomialP (n+1) x * hy2 -
+          DLMF.OrthogonalPolynomials.legendrePolynomialP (n+1) y * hx2
   have := key n
   simp only [← hP x hx, ← hP y hy] at this
   push_cast at this
@@ -227,9 +229,11 @@ theorem legendre_christoffel_7 (n : ℕ) {x y : ℂ} (hx : x-1 ∈ slitPlane) (h
   have hx' := one_add_mem_slitPlane_of_sub_one hx
   simp only [associatedP_zero_order _ hx, associatedQ_zero_order _]
   have hP0 : legendreP 0 x = 1 := by
-    have := legendreP_nat 0 hx'; simpa [DLMF.OrthogonalPolynomials.legendrePolyP_zero] using this
+    have := legendreP_nat 0 hx';
+        simpa [DLMF.OrthogonalPolynomials.legendrePolynomialP_zero] using this
   have hP1 : legendreP 1 x = x := by
-    have := legendreP_nat 1 hx'; simpa [DLMF.OrthogonalPolynomials.legendrePolyP_one] using this
+    have := legendreP_nat 1 hx';
+        simpa [DLMF.OrthogonalPolynomials.legendrePolynomialP_one] using this
   induction n with
   | zero =>
     simp only [zero_add, Finset.range_one, Finset.sum_singleton, Nat.cast_zero, mul_zero, one_mul]
@@ -248,7 +252,14 @@ theorem legendre_christoffel_7 (n : ℕ) {x y : ℂ} (hx : x-1 ∈ slitPlane) (h
 theorem ferrersP_zonal_series {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     HasSum (fun n : ℕ => sin (ν*π)/π*(2*n+1)/((ν-n)*(ν+n+1))*ferrersP n 0 x)
         (ferrersP ν 0 (-x)) := by
-  sorry
+  have hy : -x ∈ Ioo (-1:ℝ) 1 := ⟨by linarith [hx.2], by linarith [hx.1]⟩
+  convert ZonalSeries.hasSum_legendreCoeff_mul hν hy using 1
+  funext n
+  have hs : ((-1:ℂ) ^ n) ^ 2 = 1 := by rw [← pow_mul, mul_comm, pow_mul]; simp
+  rw [ferrersP_nat_polynomial n hx, ofReal_neg, ZonalSeries.legendrePolynomialP_neg,
+    ZonalSeries.legendreCoeff]
+  linear_combination (-(sin (ν*π)/π*(2*n+1)/((ν-n)*(ν+n+1))) *
+    DLMF.OrthogonalPolynomials.legendrePolynomialP n x) * hs
 
 /-- DLMF 14.18.9: for non-integer `ν`, real `μ ≥ 0` and `-1 < x ≤ 1`, the partial sums of
 `(sin(νπ)/π) Σ_{n≥0} (-1)^n (2n+1)/((ν-n)(ν+n+1)) 𝖯^{-μ}_n(x)` converge to `𝖯^{-μ}_ν(x)`. -/
@@ -312,18 +323,18 @@ private lemma heine_laplace_recurrence {z w : ℂ} (hw : w ^ 2 = z ^ 2 - 1) (n :
 /-- Laplace's integral for complex argument: `π P_n(z) = ∫₀^π (z + w cos t)^n dt` whenever
 `w² = z² - 1`. -/
 private lemma heine_laplace {z w : ℂ} (hw : w ^ 2 = z ^ 2 - 1) (n : ℕ) :
-    (π : ℂ) * DLMF.OrthogonalPolynomials.legendrePolyP n z =
+    (π : ℂ) * DLMF.OrthogonalPolynomials.legendrePolynomialP n z =
       ∫ t : ℝ in (0 : ℝ)..π, (z + w * Real.cos t) ^ n := by
-  suffices h : ∀ n : ℕ, (π : ℂ) * DLMF.OrthogonalPolynomials.legendrePolyP n z =
+  suffices h : ∀ n : ℕ, (π : ℂ) * DLMF.OrthogonalPolynomials.legendrePolynomialP n z =
       (∫ t : ℝ in (0 : ℝ)..π, (z + w * Real.cos t) ^ n) ∧
-      (π : ℂ) * DLMF.OrthogonalPolynomials.legendrePolyP (n + 1) z =
+      (π : ℂ) * DLMF.OrthogonalPolynomials.legendrePolynomialP (n + 1) z =
       ∫ t : ℝ in (0 : ℝ)..π, (z + w * Real.cos t) ^ (n + 1) from (h n).1
   intro n
   induction n with
   | zero =>
     refine ⟨?_, ?_⟩
-    · simp [DLMF.OrthogonalPolynomials.legendrePolyP_zero]
-    · simp only [zero_add, pow_one, DLMF.OrthogonalPolynomials.legendrePolyP_one]
+    · simp [DLMF.OrthogonalPolynomials.legendrePolynomialP_zero]
+    · simp only [zero_add, pow_one, DLMF.OrthogonalPolynomials.legendrePolynomialP_one]
       rw [intervalIntegral.integral_add intervalIntegrable_const
         ((by fun_prop : Continuous fun t : ℝ => w * Real.cos t).intervalIntegrable 0 π),
         intervalIntegral.integral_const_mul,
@@ -333,7 +344,7 @@ private lemma heine_laplace {z w : ℂ} (hw : w ^ 2 = z ^ 2 - 1) (n : ℕ) :
   | succ n ih =>
     refine ⟨ih.2, ?_⟩
     have hr := heine_laplace_recurrence hw n
-    have hP := DLMF.OrthogonalPolynomials.legendrePolyP_recurrence n z
+    have hP := DLMF.OrthogonalPolynomials.legendrePolynomialP_recurrence n z
     rw [← ih.1, ← ih.2] at hr
     have hn : (n + 2 : ℂ) ≠ 0 := by norm_cast
     apply mul_left_cancel₀ hn
@@ -359,8 +370,9 @@ private lemma heine_root (z : ℂ) : ∃ w : ℂ, w ^ 2 = z ^ 2 - 1 ∧ 1 ≤ �
     nlinarith [norm_nonneg (z - s)]
 
 /-- Bernstein-type bound: `|P_n(z)| ≤ |z + w|^n` when `w² = z² - 1` and `|z + w| ≥ 1`. -/
-private lemma heine_norm_legendrePolyP_le {z w : ℂ} (hw : w ^ 2 = z ^ 2 - 1) (hm : 1 ≤ ‖z + w‖)
-    (n : ℕ) : ‖DLMF.OrthogonalPolynomials.legendrePolyP n z‖ ≤ ‖z + w‖ ^ n := by
+private lemma heine_norm_legendrePolynomialP_le {z w : ℂ} (hw : w ^ 2 = z ^ 2 - 1)
+    (hm : 1 ≤ ‖z + w‖)
+    (n : ℕ) : ‖DLMF.OrthogonalPolynomials.legendrePolynomialP n z‖ ≤ ‖z + w‖ ^ n := by
   have hL := heine_laplace hw n
   have hprod : (z + w) * (z - w) = 1 := by linear_combination -hw
   have hq : ‖z - w‖ = ‖z + w‖⁻¹ := by
@@ -388,7 +400,7 @@ private lemma heine_norm_legendrePolyP_le {z w : ℂ} (hw : w ^ 2 = z ^ 2 - 1) (
     (f := fun t : ℝ => (z + w * Real.cos t) ^ n) (fun t _ => hpt t)
   rw [← hL, norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos Real.pi_pos,
     sub_zero, abs_of_pos Real.pi_pos] at hb
-  nlinarith [Real.pi_pos, norm_nonneg (DLMF.OrthogonalPolynomials.legendrePolyP n z)]
+  nlinarith [Real.pi_pos, norm_nonneg (DLMF.OrthogonalPolynomials.legendrePolynomialP n z)]
 
 /-- The confocal ellipse coordinate: `|z - 1| + |z + 1| = m + 1/m` with `m = |z + w|`. -/
 private lemma heine_ellipse {z w : ℂ} (hw : w ^ 2 = z ^ 2 - 1) (hm : 1 ≤ ‖z + w‖) :
@@ -412,7 +424,8 @@ private lemma heine_ellipse {z w : ℂ} (hw : w ^ 2 = z ^ 2 - 1) (hm : 1 ≤ ‖
 
 /-- `P_N` is orthogonal on `[-1, 1]` to every polynomial of degree less than `N`. -/
 private lemma heine_orthogonal (N : ℕ) (f : Polynomial ℂ) (hf : f.natDegree < N) :
-    ∫ t : ℝ in (-1 : ℝ)..1, DLMF.OrthogonalPolynomials.legendrePolyP N t * f.eval (t : ℂ) = 0 := by
+    ∫ t : ℝ in (-1 : ℝ)..1, DLMF.OrthogonalPolynomials.legendrePolynomialP N t *
+        f.eval (t : ℂ) = 0 := by
   have hexp : ∀ t : ℝ, f.eval (t : ℂ) = ∑ i ∈ Finset.range (f.natDegree + 1),
       (Polynomial.taylor (-1) f).coeff i * ((t : ℂ) + 1) ^ i := by
     intro t
@@ -425,20 +438,20 @@ private lemma heine_orthogonal (N : ℕ) (f : Polynomial ℂ) (hf : f.natDegree 
     have hi' : i < N := by have := Finset.mem_range.mp hi; omega
     have hJ := DLMF.OrthogonalPolynomials.jacobi_moment (α := 0) (β := 0) (by norm_num)
       (by norm_num) N i
-    rw [poch_neg_nat_eq_zero hi'] at hJ
+    rw [pochhammer_neg_nat_eq_zero hi'] at hJ
     simp only [ofReal_zero, cpow_zero, mul_one, mul_zero, zero_div] at hJ
-    have : (∫ t : ℝ in (-1 : ℝ)..1, DLMF.OrthogonalPolynomials.legendrePolyP N t *
+    have : (∫ t : ℝ in (-1 : ℝ)..1, DLMF.OrthogonalPolynomials.legendrePolynomialP N t *
         ((Polynomial.taylor (-1) f).coeff i * ((t : ℂ) + 1) ^ i)) =
         (Polynomial.taylor (-1) f).coeff i * ∫ t : ℝ in (-1 : ℝ)..1, ((t : ℂ) + 1) ^ i *
-          DLMF.OrthogonalPolynomials.jacobiPolyP 0 0 N t := by
+          DLMF.OrthogonalPolynomials.jacobiPolynomialP 0 0 N t := by
       rw [← intervalIntegral.integral_const_mul]
       refine intervalIntegral.integral_congr fun t _ => ?_
-      simp only [DLMF.OrthogonalPolynomials.legendrePolyP]; ring
+      simp only [DLMF.OrthogonalPolynomials.legendrePolynomialP]; ring
     rw [this, hJ, mul_zero]
   · intro i _
     refine Continuous.intervalIntegrable ?_ _ _
-    have hc : Continuous fun t : ℝ => DLMF.OrthogonalPolynomials.legendrePolyP N t := by
-      simp_rw [legendrePolyP_eq_eval]
+    have hc : Continuous fun t : ℝ => DLMF.OrthogonalPolynomials.legendrePolynomialP N t := by
+      simp_rw [legendrePolynomialP_eq_eval]
       exact (Polynomial.continuous _).comp continuous_ofReal
     exact hc.mul (continuous_const.mul ((continuous_ofReal.add continuous_const).pow _))
 
@@ -579,29 +592,30 @@ private lemma heine_norm_legendreQ_le {z w : ℂ} (hz : z - 1 ∈ slitPlane) (hw
     have : ‖z + w‖ ^ 2 = 1 := by rw [h, add_zero, ← norm_pow, hz2, norm_one]
     nlinarith
   have hwn : 0 < ‖w‖ := norm_pos_iff.mpr hw0
-  have hPc : Continuous fun t : ℝ => DLMF.OrthogonalPolynomials.legendrePolyP N t := by
-    simp_rw [legendrePolyP_eq_eval]
+  have hPc : Continuous fun t : ℝ => DLMF.OrthogonalPolynomials.legendrePolynomialP N t := by
+    simp_rw [legendrePolynomialP_eq_eval]
     exact (Polynomial.continuous _).comp continuous_ofReal
   have hcont : ContinuousOn (fun t : ℝ => 1 / (z - t)) (uIcc (-1 : ℝ) 1) := by
     refine ContinuousOn.div continuousOn_const (by fun_prop) fun t ht => ?_
     rw [uIcc_of_le (by norm_num)] at ht
     exact (heine_cheb hw hm ht 0).1
-  have hP1 : ∀ t ∈ uIoc (-1 : ℝ) 1, ‖DLMF.OrthogonalPolynomials.legendrePolyP N t‖ ≤ 1 := by
+  have hP1 : ∀ t ∈ uIoc (-1 : ℝ) 1, ‖DLMF.OrthogonalPolynomials.legendrePolynomialP N t‖ ≤ 1 := by
     intro t ht
     rw [uIoc_of_le (by norm_num)] at ht
-    exact DLMF.OrthogonalPolynomials.norm_legendrePolyP_le_one N (abs_le.mpr ⟨ht.1.le, ht.2⟩)
+    exact DLMF.OrthogonalPolynomials.norm_legendrePolynomialP_le_one N (abs_le.mpr ⟨ht.1.le, ht.2⟩)
   rw [legendreQ_nat_eq_integral N hz]
   have hIcc : ∀ t ∈ uIoc (-1 : ℝ) 1, t ∈ Icc (-1 : ℝ) 1 := by
     intro t ht; rw [uIoc_of_le (by norm_num)] at ht; exact ⟨ht.1.le, ht.2⟩
   rcases N with _ | M
   · -- `N = 0`: bound `1/(z - t)` directly
-    have hb : ∀ t ∈ uIoc (-1 : ℝ) 1, ‖DLMF.OrthogonalPolynomials.legendrePolyP 0 t / (z - t)‖ ≤
+    have hb : ∀ t ∈ uIoc (-1 : ℝ) 1,
+        ‖DLMF.OrthogonalPolynomials.legendrePolynomialP 0 t / (z - t)‖ ≤
         2 / (‖w‖ * (1 - m⁻¹)) := by
       intro t ht
       obtain ⟨_, he⟩ := heine_cheb hw hm (hIcc t ht) 0
       have hq0 : (heine_q z w 0).eval (t : ℂ) = w⁻¹ := by simp [heine_q]
       rw [hq0] at he
-      rw [DLMF.OrthogonalPolynomials.legendrePolyP_zero]
+      rw [DLMF.OrthogonalPolynomials.legendrePolynomialP_zero]
       calc ‖1 / (z - t)‖ ≤ ‖w⁻¹‖ + ‖1 / (z - t) - w⁻¹‖ := by
             have := norm_add_le w⁻¹ (1 / (z - t) - w⁻¹); simpa using this
         _ ≤ ‖w‖⁻¹ + 2 / ‖w‖ * m⁻¹ ^ (0 + 1) / (1 - m⁻¹) := by rw [norm_inv]; linarith
@@ -622,13 +636,15 @@ private lemma heine_norm_legendreQ_le {z w : ℂ} (hz : z - 1 ∈ slitPlane) (hw
       have := heine_q_natDegree z w M; omega)
     have hqc : Continuous fun t : ℝ => (heine_q z w M).eval (t : ℂ) :=
       (Polynomial.continuous _).comp continuous_ofReal
-    have hsplit : (∫ t : ℝ in (-1 : ℝ)..1, DLMF.OrthogonalPolynomials.legendrePolyP (M + 1) t /
-        (z - t)) = ∫ t : ℝ in (-1 : ℝ)..1, DLMF.OrthogonalPolynomials.legendrePolyP (M + 1) t *
+    have hsplit : (∫ t : ℝ in (-1 : ℝ)..1,
+        DLMF.OrthogonalPolynomials.legendrePolynomialP (M + 1) t /
+        (z - t)) = ∫ t : ℝ in (-1 : ℝ)..1,
+            DLMF.OrthogonalPolynomials.legendrePolynomialP (M + 1) t *
           (1 / (z - t) - (heine_q z w M).eval (t : ℂ)) := by
-      have h1 : IntervalIntegrable (fun t : ℝ => DLMF.OrthogonalPolynomials.legendrePolyP
+      have h1 : IntervalIntegrable (fun t : ℝ => DLMF.OrthogonalPolynomials.legendrePolynomialP
           (M + 1) t * (1 / (z - t))) volume (-1) 1 :=
         ((hPc.continuousOn).mul hcont).intervalIntegrable
-      have h2 : IntervalIntegrable (fun t : ℝ => DLMF.OrthogonalPolynomials.legendrePolyP
+      have h2 : IntervalIntegrable (fun t : ℝ => DLMF.OrthogonalPolynomials.legendrePolynomialP
           (M + 1) t * (heine_q z w M).eval (t : ℂ)) volume (-1) 1 :=
         (hPc.mul hqc).intervalIntegrable _ _
       simp_rw [mul_sub]
@@ -636,7 +652,7 @@ private lemma heine_norm_legendreQ_le {z w : ℂ} (hz : z - 1 ∈ slitPlane) (hw
       rw [hq, sub_zero]
       simp_rw [mul_one_div]
     rw [hsplit]
-    have hb : ∀ t ∈ uIoc (-1 : ℝ) 1, ‖DLMF.OrthogonalPolynomials.legendrePolyP (M + 1) t *
+    have hb : ∀ t ∈ uIoc (-1 : ℝ) 1, ‖DLMF.OrthogonalPolynomials.legendrePolynomialP (M + 1) t *
         (1 / (z - t) - (heine_q z w M).eval (t : ℂ))‖ ≤ 2 / ‖w‖ * m⁻¹ ^ (M + 1) / (1 - m⁻¹) := by
       intro t ht
       rw [norm_mul]
@@ -656,26 +672,26 @@ private lemma heine_norm_legendreQ_le {z w : ℂ} (hz : z - 1 ∈ slitPlane) (hw
 /-- Christoffel–Darboux with the polynomial `P_k(z₂)` (no condition on `z₂`). -/
 private lemma heine_christoffel (n : ℕ) {z₁ z₂ : ℂ} (hz₁ : z₁ - 1 ∈ slitPlane) :
     (z₂ - z₁) * (∑ k ∈ Finset.range (n + 1), (2 * k + 1 : ℂ) *
-      DLMF.OrthogonalPolynomials.legendrePolyP k z₂ * legendreQ k z₁) =
-      (n + 1 : ℂ) * (DLMF.OrthogonalPolynomials.legendrePolyP (n + 1) z₂ * legendreQ n z₁ -
-        DLMF.OrthogonalPolynomials.legendrePolyP n z₂ * legendreQ (n + 1) z₁) - 1 := by
+      DLMF.OrthogonalPolynomials.legendrePolynomialP k z₂ * legendreQ k z₁) =
+      (n + 1 : ℂ) * (DLMF.OrthogonalPolynomials.legendrePolynomialP (n + 1) z₂ * legendreQ n z₁ -
+        DLMF.OrthogonalPolynomials.legendrePolynomialP n z₂ * legendreQ (n + 1) z₁) - 1 := by
   induction n with
   | zero =>
     simp only [zero_add, Finset.range_one, Finset.sum_singleton, Nat.cast_zero, mul_zero,
-      one_mul, DLMF.OrthogonalPolynomials.legendrePolyP_zero,
-      DLMF.OrthogonalPolynomials.legendrePolyP_one]
+      one_mul, DLMF.OrthogonalPolynomials.legendrePolynomialP_zero,
+      DLMF.OrthogonalPolynomials.legendrePolynomialP_one]
     have h1 := legendreQ_one hz₁
     rw [h1]; ring
   | succ n ih =>
     rw [Finset.sum_range_succ, mul_add, ih]
-    have hp := DLMF.OrthogonalPolynomials.legendrePolyP_recurrence n z₂
+    have hp := DLMF.OrthogonalPolynomials.legendrePolynomialP_recurrence n z₂
     have hq := legendreQ_recurrence (ν := (n : ℂ) + 1) (by exact_mod_cast Nat.succ_ne_zero n) hz₁
     rw [show (n : ℂ) + 1 - 1 = n by ring] at hq
     push_cast
     rw [show n + 1 + 1 = n + 2 by ring]
     rw [show (n : ℂ) + 1 + 1 = n + 2 by ring] at hq ⊢
     linear_combination -legendreQ ((n : ℂ) + 1) z₁ * hp +
-      DLMF.OrthogonalPolynomials.legendrePolyP (n + 1) z₂ * hq
+      DLMF.OrthogonalPolynomials.legendrePolynomialP (n + 1) z₂ * hq
 
 /-- `x + 1/x` is strictly increasing on `[1, ∞)`. -/
 private lemma heine_add_recip_lt {a b : ℝ} (ha : 1 ≤ a) (hab : a < b) : a + a⁻¹ < b + b⁻¹ := by
@@ -706,7 +722,7 @@ private lemma heine_tail {z₁ z₂ w₁ w₂ : ℂ} (hz₁ : z₁ - 1 ∈ slitP
     (hw₂ : w₂ ^ 2 = z₂ ^ 2 - 1) (hm₁ : 1 < ‖z₁ + w₁‖) (hm₂ : 1 ≤ ‖z₂ + w₂‖) (hne : z₁ ≠ z₂)
     (n : ℕ) :
     ‖(∑ k ∈ Finset.range (n + 1), (2 * k + 1 : ℂ) * associatedQ k 0 z₁ *
-        DLMF.OrthogonalPolynomials.legendrePolyP k z₂) - 1 / (z₁ - z₂)‖ ≤
+        DLMF.OrthogonalPolynomials.legendrePolynomialP k z₂) - 1 / (z₁ - z₂)‖ ≤
       (n + 1) * (2 / (‖w₁‖ * (1 - ‖z₁ + w₁‖⁻¹))) * (‖z₂ + w₂‖ / ‖z₁ + w₁‖) ^ n *
         (‖z₂ + w₂‖ + 1) / ‖z₁ - z₂‖ := by
   set m₁ := ‖z₁ + w₁‖
@@ -718,17 +734,17 @@ private lemma heine_tail {z₁ z₂ w₁ w₂ : ℂ} (hz₁ : z₁ - 1 ∈ slitP
     have : 0 < 1 - m₁⁻¹ := by linarith
     positivity
   have hsum : (∑ k ∈ Finset.range (n + 1), (2 * k + 1 : ℂ) * associatedQ k 0 z₁ *
-      DLMF.OrthogonalPolynomials.legendrePolyP k z₂) = ∑ k ∈ Finset.range (n + 1),
-        (2 * k + 1 : ℂ) * DLMF.OrthogonalPolynomials.legendrePolyP k z₂ * legendreQ k z₁ := by
+      DLMF.OrthogonalPolynomials.legendrePolynomialP k z₂) = ∑ k ∈ Finset.range (n + 1),
+        (2 * k + 1 : ℂ) * DLMF.OrthogonalPolynomials.legendrePolynomialP k z₂ * legendreQ k z₁ := by
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [associatedQ_zero_order _]; ring
   rw [hsum]
   have hC := heine_christoffel n (z₂ := z₂) hz₁
-  set D := DLMF.OrthogonalPolynomials.legendrePolyP (n + 1) z₂ * legendreQ n z₁ -
-    DLMF.OrthogonalPolynomials.legendrePolyP n z₂ * legendreQ (n + 1) z₁ with hD
+  set D := DLMF.OrthogonalPolynomials.legendrePolynomialP (n + 1) z₂ * legendreQ n z₁ -
+    DLMF.OrthogonalPolynomials.legendrePolynomialP n z₂ * legendreQ (n + 1) z₁ with hD
   have hne' : z₂ - z₁ ≠ 0 := sub_ne_zero.mpr (Ne.symm hne)
   have hexpr : (∑ k ∈ Finset.range (n + 1), (2 * k + 1 : ℂ) *
-      DLMF.OrthogonalPolynomials.legendrePolyP k z₂ * legendreQ k z₁) - 1 / (z₁ - z₂) =
+      DLMF.OrthogonalPolynomials.legendrePolynomialP k z₂ * legendreQ k z₁) - 1 / (z₁ - z₂) =
         (n + 1 : ℂ) * D / (z₂ - z₁) := by
     have hne'' : z₁ - z₂ ≠ 0 := sub_ne_zero.mpr hne
     rw [eq_div_iff hne', sub_mul, mul_comm _ (z₂ - z₁), hC,
@@ -736,8 +752,8 @@ private lemma heine_tail {z₁ z₂ w₁ w₂ : ℂ} (hz₁ : z₁ - 1 ∈ slitP
     ring
   rw [hexpr, norm_div, norm_mul, norm_sub_rev z₂ z₁,
     show ‖(n + 1 : ℂ)‖ = n + 1 by exact_mod_cast Complex.norm_natCast (n + 1)]
-  have hP1 := heine_norm_legendrePolyP_le hw₂ hm₂ (n + 1)
-  have hP0 := heine_norm_legendrePolyP_le hw₂ hm₂ n
+  have hP1 := heine_norm_legendrePolynomialP_le hw₂ hm₂ (n + 1)
+  have hP0 := heine_norm_legendrePolynomialP_le hw₂ hm₂ n
   have hQ0 := heine_norm_legendreQ_le hz₁ hw₁ hm₁ n
   have hQ1 := heine_norm_legendreQ_le hz₁ hw₁ hm₁ (n + 1)
   push_cast at hQ0 hQ1
@@ -803,7 +819,8 @@ private lemma heine_ellipse_lip (z₁ z₂ : ℂ) :
 @[dlmf 14.28.E2]
 theorem legendre_heine_series {z₁ z₂ : ℂ} (hz₁ : z₁-1 ∈ slitPlane)
     (hr : legendreEllipseRadius z₂ < legendreEllipseRadius z₁) :
-    HasSum (fun n : ℕ => (2*n+1:ℂ)*associatedQ n 0 z₁*DLMF.OrthogonalPolynomials.legendrePolyP n z₂)
+    HasSum (fun n : ℕ =>
+        (2*n+1:ℂ)*associatedQ n 0 z₁*DLMF.OrthogonalPolynomials.legendrePolynomialP n z₂)
         (1/(z₁-z₂)) := by
   obtain ⟨w₁, hw₁, hm₁'⟩ := heine_root z₁
   obtain ⟨w₂, hw₂, hm₂⟩ := heine_root z₂
@@ -824,7 +841,7 @@ theorem legendre_heine_series {z₁ z₂ : ℂ} (hz₁ : z₁-1 ∈ slitPlane)
   have hρ1 : ρ < 1 := (div_lt_one hm₁0).mpr hlt
   set K := 2 / (‖w₁‖ * (1 - m₁⁻¹)) with hK
   have hS : Summable (fun n : ℕ => (2*n+1:ℂ)*associatedQ n 0 z₁*
-      DLMF.OrthogonalPolynomials.legendrePolyP n z₂) := by
+      DLMF.OrthogonalPolynomials.legendrePolynomialP n z₂) := by
     have hg : Summable (fun n : ℕ => 2 * K * ((n : ℝ) ^ 1 * ρ ^ n) + K * ρ ^ n) :=
       ((summable_pow_mul_geometric_of_norm_lt_one 1
         (by rwa [Real.norm_eq_abs, abs_of_nonneg hρ0])).mul_left (2 * K)).add
@@ -832,12 +849,12 @@ theorem legendre_heine_series {z₁ z₂ : ℂ} (hz₁ : z₁-1 ∈ slitPlane)
     refine Summable.of_norm_bounded hg fun n => ?_
     rw [associatedQ_zero_order _, norm_mul, norm_mul]
     have hQ := heine_norm_legendreQ_le hz₁ hw₁ hm₁ n
-    have hP := heine_norm_legendrePolyP_le hw₂ hm₂ n
+    have hP := heine_norm_legendrePolynomialP_le hw₂ hm₂ n
     have h2n : ‖(2 * n + 1 : ℂ)‖ = 2 * n + 1 := by
       rw [show (2 * n + 1 : ℂ) = ((2 * n + 1 : ℕ) : ℂ) by push_cast; ring, Complex.norm_natCast]
       push_cast; ring
     rw [h2n]
-    calc (2 * n + 1 : ℝ) * ‖legendreQ n z₁‖ * ‖DLMF.OrthogonalPolynomials.legendrePolyP n z₂‖
+    calc (2 * n + 1 : ℝ) * ‖legendreQ n z₁‖ * ‖DLMF.OrthogonalPolynomials.legendrePolynomialP n z₂‖
         ≤ (2 * n + 1) * (K * m₁⁻¹ ^ n) * m₂ ^ n := by
           have hK0 : 0 ≤ K := by
             have : 0 < 1 - m₁⁻¹ := by have := inv_lt_one_of_one_lt₀ hm₁; linarith
@@ -857,7 +874,7 @@ P_n(z₂)` converge to `1/(z₁ - z₂)` uniformly for `z₁ ∉ (-∞, 1]` with
 @[dlmf 14.28.E2]
 theorem legendre_heine_uniform {R₁ R₂ : ℝ} (hR₂ : 2 < R₂) (hR : R₂ < R₁) :
     TendstoUniformlyOn (fun N : ℕ => fun p : ℂ × ℂ => ∑ n ∈ Finset.range N,
-        (2*n+1:ℂ)*associatedQ n 0 p.1*DLMF.OrthogonalPolynomials.legendrePolyP n p.2)
+        (2*n+1:ℂ)*associatedQ n 0 p.1*DLMF.OrthogonalPolynomials.legendrePolynomialP n p.2)
         (fun p => 1/(p.1-p.2)) atTop
         {p : ℂ × ℂ | p.1-1 ∈ slitPlane ∧ R₁ ≤ legendreEllipseRadius p.1 ∧
            legendreEllipseRadius p.2 ≤ R₂} := by

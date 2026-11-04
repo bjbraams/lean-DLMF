@@ -24,8 +24,9 @@ estimates they need. The conventions are described in `DLMF.Zeta.IntegralReps`.
 * `riemannZeta_eq_integral_exp_add_one`, `riemannZeta_eq_integral_exp_add_one_sq`:
   DLMF 25.5.3–25.5.4 in multiplied form.
 * `tendsto_integral_fract_sub_half`: DLMF 25.5.5 as a limit of truncated integrals.
-* `riemannZeta_eq_half_add_integral`, `riemannZeta_eq_half_add_bernoulli_integral`:
-  DLMF 25.5.6–25.5.7.
+* `riemannZeta_eq_half_add_integral`: DLMF 25.5.6 (25.5.7 is
+  `riemannZeta_eq_half_add_bernoulli_integral` in `DLMF.Zeta.HurwitzIntegrals`, a corollary of
+  25.11.28).
 * `riemannZeta_eq_integral_sinh`, `riemannZeta_eq_integral_sinh_sq`: DLMF 25.5.8–25.5.9.
 * `riemannZeta_eq_integral_arctan_cosh`: DLMF 25.5.10 in multiplied form.
 * `riemannZeta_eq_integral_arctan_exp_sub_one`, `riemannZeta_eq_integral_arctan_exp_add_one`:
@@ -826,24 +827,6 @@ theorem riemannZeta_eq_half_add_integral {s : ℂ} (hs : -1 < s.re) (hs1 : s ≠
       · exfalso; apply hs1; apply Complex.ext <;> simp [hray.1, ← h]
       · exact h
     exact hgt s hre
-
-/-- DLMF 25.5.7: for `n ≥ 1`, `Re s > -(2n+1)`, `s ≠ 1`,
-`ζ(s) = ½ + 1/(s-1) + ∑_{m=1}^{n} (B_{2m}/(2m)!) (s)_{2m-1}
-  + Γ(s)⁻¹ ∫₀^∞ (1/(eˣ-1) - 1/x + ½ - ∑_{m=1}^{n} (B_{2m}/(2m)!) x^{2m-1}) x^{s-1} e^{-x} dx`,
-with the Pochhammer symbol `(s)_k = ascPochhammer ℂ k` evaluated at `s`. -/
-@[dlmf 25.5.E7]
-theorem riemannZeta_eq_half_add_bernoulli_integral {s : ℂ} {n : ℕ} (hn : 1 ≤ n)
-    (hs : -(2 * n + 1 : ℝ) < s.re) (hs1 : s ≠ 1) :
-    IntegrableOn (fun x : ℝ => (1 / (cexp x - 1) - 1 / x + 1 / 2 -
-        ∑ m ∈ Finset.Icc (1 : ℕ) n, (bernoulli (2 * m) : ℂ) / (2 * m).factorial *
-          (x : ℂ) ^ (2 * m - 1)) * (x : ℂ) ^ (s - 1) / cexp x) (Ioi 0) ∧
-      riemannZeta s = 1 / 2 + 1 / (s - 1) +
-        ∑ m ∈ Finset.Icc (1 : ℕ) n, (bernoulli (2 * m) : ℂ) / (2 * m).factorial *
-          (ascPochhammer ℂ (2 * m - 1)).eval s +
-        1 / Gamma s * ∫ x in Ioi (0 : ℝ), (1 / (cexp x - 1) - 1 / x + 1 / 2 -
-          ∑ m ∈ Finset.Icc (1 : ℕ) n, (bernoulli (2 * m) : ℂ) / (2 * m).factorial *
-            (x : ℂ) ^ (2 * m - 1)) * (x : ℂ) ^ (s - 1) / cexp x := by
-  sorry
 
 /-- DLMF 25.5.8: `ζ(s) = (2(1 - 2^{-s}) Γ(s))⁻¹ ∫₀^∞ x^{s-1}/sinh x dx` for `Re s > 1` (where
 `1 - 2^{-s} ≠ 0`). -/

@@ -22,15 +22,16 @@ Bessel forms at `ε = 0` (33.20.1–33.20.2), the convergent expansion of `f` in
 * `coulombGammaCoeff_recurrence`, `coulombBetaCoeff_recurrence`, `coulombDeltaCoeff_zero_one`,
   `coulombDeltaCoeff_recurrence`: the coefficients `γ_k`, `β_k`, `δ_k` (DLMF 33.19.4–33.19.7).
 * `coulombCkp_eq_zero`, `coulombCkp_recurrence`: the coefficients `C_{k,p}` (DLMF 33.20.6).
-* `coulombf_hasSum`: `f(ε,ℓ;r) = r^{ℓ+1} ∑_{k≥0} α_k r^k` for all real `r` and `ε`
+* `coulombEnergyF_hasSum`: `f(ε,ℓ;r) = r^{ℓ+1} ∑_{k≥0} α_k r^k` for all real `r` and `ε`
   (DLMF 33.19.1).
-* `coulombh_hasSum`: the series for `h` (DLMF 33.19.3, corrected).
-* `coulombf_zero_eq_besselJ`, `coulombf_zero_eq_besselI`, `coulombh_zero_eq_besselY`,
-  `coulombh_zero_eq_besselK`: the Bessel forms at `ε = 0` (DLMF 33.20.1–33.20.2).
-* `coulombf_hasSum_eps_pos`, `coulombf_hasSum_eps_neg`: the expansion of `f` in powers of `ε`
-  (DLMF 33.20.3–33.20.5).
-* `coulombh_asymptotic_eps_pos`, `coulombh_asymptotic_eps_neg`: the asymptotic expansion of `h`
-  as `ε → 0` (DLMF 33.20.7–33.20.9).
+* `coulombEnergyH_hasSum`: the series for `h` (DLMF 33.19.3, corrected).
+* `coulombEnergyF_zero_eq_besselJ`, `coulombEnergyF_zero_eq_besselI`,
+  `coulombEnergyH_zero_eq_besselY`, `coulombEnergyH_zero_eq_besselK`: the Bessel forms at `ε = 0`
+  (DLMF 33.20.1–33.20.2).
+* `coulombEnergyF_hasSum_eps_pos`, `coulombEnergyF_hasSum_eps_neg`: the expansion of `f` in powers
+  of `ε` (DLMF 33.20.3–33.20.5).
+* `coulombEnergyH_asymptotic_eps_pos`, `coulombEnergyH_asymptotic_eps_neg`: the asymptotic expansion
+  of `h` as `ε → 0` (DLMF 33.20.7–33.20.9).
 
 ## Implementation notes
 
@@ -43,7 +44,7 @@ coefficients):
 * for `ε < 0` and `r < 0` the digamma terms must be evaluated at `κ = +(-ε)^{-1/2}` (the
   `r > 0` value of 33.14.6), not at `κ = -(-ε)^{-1/2}`.
 
-The corrected statement `coulombh_hasSum` is
+The corrected statement `coulombEnergyH_hasSum` is
 `2πh = 2∑_{k=0}^{2ℓ} (2ℓ-k)! γ_k (2r)^{k-ℓ}/k! - ∑ δ_k r^{k+ℓ+1}
   - A(ε,ℓ)(2 ln|2r/κ| + Re ψ(ℓ+1+κ) + Re ψ(-ℓ+κ)) f(ε,ℓ;r)` with `κ = coulombKappa ε 1`.
 -/
@@ -157,10 +158,10 @@ theorem coulombCkp_recurrence (ℓ k p : ℕ) (hk : 0 < k) (hp : 2 * k ≤ p ∧
 /-- **DLMF 33.19.1**: `f(ε,ℓ;r) = r^{ℓ+1} ∑_{k≥0} α_k r^k`, convergent for all real `r` and
 `ε`. -/
 @[dlmf 33.19.E1]
-theorem coulombf_hasSum (ε : ℝ) (ℓ : ℕ) (r : ℝ) :
-    HasSum (fun k => coulombAlpha ε ℓ k * r ^ (k + ℓ + 1)) (coulombf ε ℓ r) := by
+theorem coulombEnergyF_hasSum (ε : ℝ) (ℓ : ℕ) (r : ℝ) :
+    HasSum (fun k => coulombAlpha ε ℓ k * r ^ (k + ℓ + 1)) (coulombEnergyF ε ℓ r) := by
   have h := Complex.hasSum_re (hasSum_coulombfComplex ε ℓ r)
-  rw [← coulombf_eq_re_coulombfComplex] at h
+  rw [← coulombEnergyF_eq_re_coulombfComplex] at h
   convert h using 1
   funext k
   rw [← Complex.ofReal_pow, ← Complex.ofReal_mul, Complex.ofReal_re]
@@ -171,15 +172,15 @@ theorem coulombf_hasSum (ε : ℝ) (ℓ : ℕ) (r : ℝ) :
   - A(ε,ℓ)(2 ln|2r/κ| + Re ψ(ℓ+1+κ) + Re ψ(-ℓ+κ)) f(ε,ℓ;r) - 2π h(ε,ℓ;r)`.
 The series converges for all `r ≠ 0`. -/
 @[dlmf 33.19.E3]
-theorem coulombh_hasSum {ε : ℝ} (hε : ε ≠ 0) (ℓ : ℕ) {r : ℝ} (hr : r ≠ 0)
+theorem coulombEnergyH_hasSum {ε : ℝ} (hε : ε ≠ 0) (ℓ : ℕ) {r : ℝ} (hr : r ≠ 0)
     (hA : coulombAProd ε ℓ ≠ 0) :
     HasSum (fun k => coulombDeltaCoeff ε ℓ k * r ^ (k + ℓ + 1))
       (2 * ∑ k ∈ Finset.range (2 * ℓ + 1),
           (2 * ℓ - k)! * coulombGammaCoeff ε ℓ k / k ! * (2 * r) ^ ((k : ℤ) - ℓ) -
         coulombAProd ε ℓ * (2 * Real.log ‖(2 * r : ℂ) / coulombKappa ε 1‖ +
           (digamma (ℓ + 1 + coulombKappa ε 1)).re + (digamma (-ℓ + coulombKappa ε 1)).re) *
-          coulombf ε ℓ r -
-        2 * π * coulombh ε ℓ r) := by
+          coulombEnergyF ε ℓ r -
+        2 * π * coulombEnergyH ε ℓ r) := by
   sorry
 
 /-! ### `ε = 0`: Bessel functions -/
@@ -198,10 +199,10 @@ private lemma ofReal_sqrt_mul_pow_odd {x : ℝ} (hx : 0 ≤ x) (ℓ : ℕ) :
 
 /-- **DLMF 33.20.1 (`f`)**: `f(0,ℓ;r) = (2r)^{1/2} J_{2ℓ+1}((8r)^{1/2})` for `r > 0`. -/
 @[dlmf 33.20.E1]
-theorem coulombf_zero_eq_besselJ (ℓ : ℕ) {r : ℝ} (hr : 0 < r) :
-    coulombf 0 ℓ r = Real.sqrt (2 * r) * (besselJ (2 * ℓ + 1) (Real.sqrt (8 * r))).re := by
+theorem coulombEnergyF_zero_eq_besselJ (ℓ : ℕ) {r : ℝ} (hr : 0 < r) :
+    coulombEnergyF 0 ℓ r = Real.sqrt (2 * r) * (besselJ (2 * ℓ + 1) (Real.sqrt (8 * r))).re := by
   rw [← Complex.re_ofReal_mul]
-  simp only [coulombf, ↓reduceIte]
+  simp only [coulombEnergyF, ↓reduceIte]
   congr 1
   rw [Complex.besselJ, show (2 * (ℓ : ℂ) + 1) = ((2 * ℓ + 1 : ℕ) : ℂ) by push_cast; ring,
     cpow_natCast, show ((Real.sqrt (8 * r) : ℝ) : ℂ) / 2 = ((Real.sqrt (8 * r) / 2 : ℝ) : ℂ) by
@@ -216,11 +217,11 @@ theorem coulombf_zero_eq_besselJ (ℓ : ℕ) {r : ℝ} (hr : 0 < r) :
 /-- **DLMF 33.20.2 (`f`)**: `f(0,ℓ;r) = (-1)^{ℓ+1} (2|r|)^{1/2} I_{2ℓ+1}((8|r|)^{1/2})` for
 `r < 0`. -/
 @[dlmf 33.20.E2]
-theorem coulombf_zero_eq_besselI (ℓ : ℕ) {r : ℝ} (hr : r < 0) :
-    coulombf 0 ℓ r =
+theorem coulombEnergyF_zero_eq_besselI (ℓ : ℕ) {r : ℝ} (hr : r < 0) :
+    coulombEnergyF 0 ℓ r =
       (-1) ^ (ℓ + 1) * Real.sqrt (2 * |r|) * (besselI (2 * ℓ + 1) (Real.sqrt (8 * |r|))).re := by
   rw [← Complex.re_ofReal_mul]
-  simp only [coulombf, ↓reduceIte]
+  simp only [coulombEnergyF, ↓reduceIte]
   congr 1
   rw [besselI, show (2 * (ℓ : ℂ) + 1) = ((2 * ℓ + 1 : ℕ) : ℂ) by push_cast; ring,
     cpow_natCast, show ((Real.sqrt (8 * |r|) : ℝ) : ℂ) / 2 = ((Real.sqrt (8 * |r|) / 2 : ℝ) : ℂ) by
@@ -246,15 +247,15 @@ theorem coulombf_zero_eq_besselI (ℓ : ℕ) {r : ℝ} (hr : r < 0) :
 
 /-- **DLMF 33.20.1 (`h`)**: `h(0,ℓ;r) = -(2r)^{1/2} Y_{2ℓ+1}((8r)^{1/2})` for `r > 0`. -/
 @[dlmf 33.20.E1]
-theorem coulombh_zero_eq_besselY (ℓ : ℕ) {r : ℝ} (hr : 0 < r) :
-    coulombh 0 ℓ r = -(Real.sqrt (2 * r) * (besselY (2 * ℓ + 1) (Real.sqrt (8 * r))).re) := by
+theorem coulombEnergyH_zero_eq_besselY (ℓ : ℕ) {r : ℝ} (hr : 0 < r) :
+    coulombEnergyH 0 ℓ r = -(Real.sqrt (2 * r) * (besselY (2 * ℓ + 1) (Real.sqrt (8 * r))).re) := by
   sorry
 
 /-- **DLMF 33.20.2 (`h`)**: `h(0,ℓ;r) = (-1)^ℓ (2/π) (2|r|)^{1/2} K_{2ℓ+1}((8|r|)^{1/2})` for
 `r < 0`. -/
 @[dlmf 33.20.E2]
-theorem coulombh_zero_eq_besselK (ℓ : ℕ) {r : ℝ} (hr : r < 0) :
-    coulombh 0 ℓ r =
+theorem coulombEnergyH_zero_eq_besselK (ℓ : ℕ) {r : ℝ} (hr : r < 0) :
+    coulombEnergyH 0 ℓ r =
       (-1) ^ ℓ * (2 / π) * Real.sqrt (2 * |r|) *
         (besselK (2 * ℓ + 1) (Real.sqrt (8 * |r|))).re := by
   sorry
@@ -265,22 +266,22 @@ theorem coulombh_zero_eq_besselK (ℓ : ℕ) {r : ℝ} (hr : r < 0) :
 `f(ε,ℓ;r) = ∑_{k≥0} ε^k 𝖥_k(ℓ;r)` with
 `𝖥_k(ℓ;r) = ∑_{p=2k}^{3k} (2r)^{(p+1)/2} C_{k,p} J_{2ℓ+1+p}((8r)^{1/2})`. -/
 @[dlmf 33.20.E3, dlmf 33.20.E4]
-theorem coulombf_hasSum_eps_pos (ε : ℝ) (ℓ : ℕ) {r : ℝ} (hr : 0 < r) :
+theorem coulombEnergyF_hasSum_eps_pos (ε : ℝ) (ℓ : ℕ) {r : ℝ} (hr : 0 < r) :
     HasSum (fun k : ℕ => ε ^ k * ∑ p ∈ Finset.Icc (2 * k) (3 * k),
         (2 * r) ^ (((p : ℝ) + 1) / 2) * coulombCkp ℓ k p *
           (besselJ (2 * ℓ + 1 + p) (Real.sqrt (8 * r))).re)
-      (coulombf ε ℓ r) := by
+      (coulombEnergyF ε ℓ r) := by
   sorry
 
 /-- **DLMF 33.20.3, 33.20.5**: for `r < 0` and every real `ε`,
 `f(ε,ℓ;r) = ∑_{k≥0} ε^k 𝖥_k(ℓ;r)` with
 `𝖥_k(ℓ;r) = ∑_{p=2k}^{3k} (-1)^{ℓ+1+p} (2|r|)^{(p+1)/2} C_{k,p} I_{2ℓ+1+p}((8|r|)^{1/2})`. -/
 @[dlmf 33.20.E3, dlmf 33.20.E5]
-theorem coulombf_hasSum_eps_neg (ε : ℝ) (ℓ : ℕ) {r : ℝ} (hr : r < 0) :
+theorem coulombEnergyF_hasSum_eps_neg (ε : ℝ) (ℓ : ℕ) {r : ℝ} (hr : r < 0) :
     HasSum (fun k : ℕ => ε ^ k * ∑ p ∈ Finset.Icc (2 * k) (3 * k),
         (-1) ^ (ℓ + 1 + p) * (2 * |r|) ^ (((p : ℝ) + 1) / 2) * coulombCkp ℓ k p *
           (besselI (2 * ℓ + 1 + p) (Real.sqrt (8 * |r|))).re)
-      (coulombf ε ℓ r) := by
+      (coulombEnergyF ε ℓ r) := by
   sorry
 
 /-- **DLMF 33.20.7–33.20.8**: for `r > 0`, as `ε → 0` (from either side),
@@ -288,8 +289,8 @@ theorem coulombf_hasSum_eps_neg (ε : ℝ) (ℓ : ℕ) {r : ℝ} (hr : r < 0) :
 `𝖧_k(ℓ;r) = ∑_{p=2k}^{3k} (2r)^{(p+1)/2} C_{k,p} Y_{2ℓ+1+p}((8r)^{1/2})`, in the sense that
 `h + A ∑_{k=0}^{n} ε^k 𝖧_k = O(ε^{n+1})` for every `n`. -/
 @[dlmf 33.20.E7, dlmf 33.20.E8]
-theorem coulombh_asymptotic_eps_pos (ℓ : ℕ) {r : ℝ} (hr : 0 < r) (n : ℕ) :
-    (fun ε : ℝ => coulombh ε ℓ r + coulombAProd ε ℓ * ∑ k ∈ Finset.range (n + 1), ε ^ k *
+theorem coulombEnergyH_asymptotic_eps_pos (ℓ : ℕ) {r : ℝ} (hr : 0 < r) (n : ℕ) :
+    (fun ε : ℝ => coulombEnergyH ε ℓ r + coulombAProd ε ℓ * ∑ k ∈ Finset.range (n + 1), ε ^ k *
         ∑ p ∈ Finset.Icc (2 * k) (3 * k), (2 * r) ^ (((p : ℝ) + 1) / 2) * coulombCkp ℓ k p *
           (besselY (2 * ℓ + 1 + p) (Real.sqrt (8 * r))).re)
       =O[𝓝[≠] 0] (fun ε : ℝ => ε ^ (n + 1)) := by
@@ -299,8 +300,8 @@ theorem coulombh_asymptotic_eps_pos (ℓ : ℕ) {r : ℝ} (hr : 0 < r) (n : ℕ)
 `h(ε,ℓ;r) ~ -A(ε,ℓ) ∑_{k≥0} ε^k 𝖧_k(ℓ;r)` with
 `𝖧_k(ℓ;r) = (-1)^{ℓ+1} (2/π) ∑_{p=2k}^{3k} (2|r|)^{(p+1)/2} C_{k,p} K_{2ℓ+1+p}((8|r|)^{1/2})`. -/
 @[dlmf 33.20.E7, dlmf 33.20.E9]
-theorem coulombh_asymptotic_eps_neg (ℓ : ℕ) {r : ℝ} (hr : r < 0) (n : ℕ) :
-    (fun ε : ℝ => coulombh ε ℓ r + coulombAProd ε ℓ * ∑ k ∈ Finset.range (n + 1), ε ^ k *
+theorem coulombEnergyH_asymptotic_eps_neg (ℓ : ℕ) {r : ℝ} (hr : r < 0) (n : ℕ) :
+    (fun ε : ℝ => coulombEnergyH ε ℓ r + coulombAProd ε ℓ * ∑ k ∈ Finset.range (n + 1), ε ^ k *
         ((-1) ^ (ℓ + 1) * (2 / π) * ∑ p ∈ Finset.Icc (2 * k) (3 * k),
           (2 * |r|) ^ (((p : ℝ) + 1) / 2) * coulombCkp ℓ k p *
             (besselK (2 * ℓ + 1 + p) (Real.sqrt (8 * |r|))).re))

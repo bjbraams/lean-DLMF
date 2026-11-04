@@ -156,7 +156,7 @@ theorem KummerLargeParameter.integrableOn (a z : ℂ) (ha : 0 < a.re) {b : ℝ} 
 `b^a Γ(b-a)/Γ(b) M(a,b,z)` when `re a > 0`. -/
 theorem KummerLargeParameter.isBigO_base (a z : ℂ) (ha : 0 < a.re) (n : ℕ) :
     (fun b : ℝ => (b : ℂ) ^ a * Gamma (b - a) / Gamma b * kummerM a b z -
-       ∑ s ∈ Finset.range n, poch a s * largeBCoeff a z s * ((b : ℂ)⁻¹) ^ s)
+       ∑ s ∈ Finset.range n, pochhammer a s * largeBCoeff a z s * ((b : ℂ)⁻¹) ^ s)
       =O[atTop] fun b => ((b : ℂ)⁻¹) ^ n := by
   set F : ℝ → ℂ := fun t => (t : ℂ) ^ (a - 1) * largeBGenerating a z t with hF
   have hF : ∀ N : ℕ, (fun t : ℝ => F t - ∑ k ∈ Finset.range N,
@@ -203,8 +203,8 @@ theorem KummerLargeParameter.isBigO_base (a z : ℂ) (ha : 0 < a.re) (n : ℕ) :
     congr 1
     · field_simp
     · refine Finset.sum_congr rfl fun s _ => ?_
-      have hp : Gamma ((s : ℂ) + a) = Gamma a * poch a s := by
-        have h1 := DLMF.Gamma.poch_mul_recip_Gamma_add_nat a s
+      have hp : Gamma ((s : ℂ) + a) = Gamma a * pochhammer a s := by
+        have h1 := DLMF.Gamma.pochhammer_mul_recip_Gamma_add_nat a s
         have h2 : Gamma (a + s) ≠ 0 := Gamma_ne_zero (not_neg_nat_of_re_pos (by simp; positivity))
         rw [add_comm]
         field_simp at h1
@@ -247,7 +247,8 @@ theorem KummerLargeParameter.ratio_isBigO_one (a : ℂ) :
 /-- Coefficients of 13.8.1 re-expanded in powers of `1/b` after multiplication by
 `b^a Γ(b-a)/Γ(b)`. -/
 noncomputable def KummerLargeParameter.mixedCoeff (a z : ℂ) (N : ℕ) : ℂ :=
-  ∑ s ∈ Finset.range (N + 1), poch a s * z ^ s / s ! * DLMF.Gamma.stirlingRatioG (-a) s (N - s)
+  ∑ s ∈ Finset.range (N + 1), pochhammer a s * z ^ s / s ! *
+      DLMF.Gamma.stirlingRatioG (-a) s (N - s)
 
 /-- 13.8.1 re-expanded: `b^a Γ(b-a)/Γ(b) M(a,b,z) ~ ∑ KummerLargeParameter.mixedCoeff a z N b^{-N}`
 for all `a`. -/
@@ -257,7 +258,7 @@ theorem KummerLargeParameter.isBigO_mixed (a z : ℂ) (n : ℕ) :
       =O[atTop] fun b => ((b : ℂ)⁻¹) ^ n := by
   have h1 := kummerM_large_b a z n
   have h2 := ((KummerLargeParameter.ratio_isBigO_one a).mul h1).congr_right fun b => one_mul _
-  have h3 : (fun b : ℝ => ∑ s ∈ Finset.range n, poch a s * z ^ s / s ! *
+  have h3 : (fun b : ℝ => ∑ s ∈ Finset.range n, pochhammer a s * z ^ s / s ! *
       ((b : ℂ) ^ a * Gamma ((b : ℂ) - a) / Gamma ((b : ℂ) + s) -
         ∑ k ∈ Finset.range (n - s), DLMF.Gamma.stirlingRatioG (-a) s k * ((b : ℂ)⁻¹) ^ (s + k)))
       =O[atTop] fun b => ((b : ℂ)⁻¹) ^ n :=
@@ -268,23 +269,23 @@ theorem KummerLargeParameter.isBigO_mixed (a z : ℂ) (n : ℕ) :
   have hb' : ∀ k : ℕ, (b : ℂ) ≠ -k := not_neg_nat_of_re_pos (by simpa using hb)
   have hGb : Gamma (b : ℂ) ≠ 0 := Gamma_ne_zero hb'
   have hflip := Finset.sum_range_diag_flip n fun s k =>
-    poch a s * z ^ s / s ! * (DLMF.Gamma.stirlingRatioG (-a) s k * ((b : ℂ)⁻¹) ^ (s + k))
+    pochhammer a s * z ^ s / s ! * (DLMF.Gamma.stirlingRatioG (-a) s k * ((b : ℂ)⁻¹) ^ (s + k))
   simp only [KummerLargeParameter.mixedCoeff, Finset.sum_mul]
   have hN : ∀ m ∈ Finset.range n, ∑ k ∈ Finset.range (m + 1),
-      poch a k * z ^ k / k ! * DLMF.Gamma.stirlingRatioG (-a) k (m - k) * ((b : ℂ)⁻¹) ^ m =
-      ∑ k ∈ Finset.range (m + 1), poch a k * z ^ k / k ! *
+      pochhammer a k * z ^ k / k ! * DLMF.Gamma.stirlingRatioG (-a) k (m - k) * ((b : ℂ)⁻¹) ^ m =
+      ∑ k ∈ Finset.range (m + 1), pochhammer a k * z ^ k / k ! *
         (DLMF.Gamma.stirlingRatioG (-a) k (m - k) * ((b : ℂ)⁻¹) ^ (k + (m - k))) := by
     intro m _
     refine Finset.sum_congr rfl fun k hk => ?_
     rw [Nat.add_sub_cancel' (Nat.lt_succ_iff.mp (Finset.mem_range.mp hk))]
     ring
   rw [Finset.sum_congr rfl hN, hflip]
-  have hS : ∀ s ∈ Finset.range n, poch a s / (poch (b : ℂ) s * s !) * z ^ s *
+  have hS : ∀ s ∈ Finset.range n, pochhammer a s / (pochhammer (b : ℂ) s * s !) * z ^ s *
       ((b : ℂ) ^ a * Gamma ((b : ℂ) - a) / Gamma (b : ℂ)) =
-      poch a s * z ^ s / s ! * ((b : ℂ) ^ a * Gamma ((b : ℂ) - a) / Gamma ((b : ℂ) + s)) := by
+      pochhammer a s * z ^ s / s ! * ((b : ℂ) ^ a * Gamma ((b : ℂ) - a) / Gamma ((b : ℂ) + s)) := by
     intro s _
-    have h := DLMF.Gamma.poch_mul_recip_Gamma_add_nat (b : ℂ) s
-    have hp : poch (b : ℂ) s ≠ 0 := poch_ne_zero_of_not_neg_nat hb' s
+    have h := DLMF.Gamma.pochhammer_mul_recip_Gamma_add_nat (b : ℂ) s
+    have hp : pochhammer (b : ℂ) s ≠ 0 := pochhammer_ne_zero_of_not_neg_nat hb' s
     have hGs : Gamma ((b : ℂ) + s) ≠ 0 :=
         Gamma_ne_zero (not_neg_nat_of_re_pos (by simp; positivity))
     have hf : (s ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
@@ -298,10 +299,10 @@ theorem KummerLargeParameter.isBigO_mixed (a z : ℂ) (n : ℕ) :
 
 /-- For `re a > 0` the re-expanded coefficients of 13.8.1 are those of 13.8.2. -/
 theorem KummerLargeParameter.mixedCoeff_eq_of_re_pos (a z : ℂ) (ha : 0 < a.re) (N : ℕ) :
-    KummerLargeParameter.mixedCoeff a z N = poch a N * largeBCoeff a z N := by
+    KummerLargeParameter.mixedCoeff a z N = pochhammer a N * largeBCoeff a z N := by
   have h := HasAsymptoticExpansion.unique LargeDenominator.isAsymptoticScale
       LargeDenominator.frequently_ne
-    (a := KummerLargeParameter.mixedCoeff a z) (b := fun N => poch a N * largeBCoeff a z N)
+    (a := KummerLargeParameter.mixedCoeff a z) (b := fun N => pochhammer a N * largeBCoeff a z N)
     (f := fun b : ℝ => (b : ℂ) ^ a * Gamma (b - a) / Gamma b * kummerM a b z)
     (fun n => (KummerLargeParameter.isBigO_mixed a z n).congr_left fun b => by
       simp only [smul_eq_mul]; congr 1; exact Finset.sum_congr rfl fun _ _ => mul_comm _ _)
@@ -361,8 +362,8 @@ theorem KummerLargeParameter.differentiable_largeBCoeff (z : ℂ) (N : ℕ) :
 coefficients `(a)_N q_N(a,z)`. Proved for `re a > 0` by uniqueness of asymptotic expansions
 (Watson's lemma on one side, 13.8.1 on the other) and continued by the identity theorem. -/
 theorem KummerLargeParameter.mixedCoeff_eq (a z : ℂ) (N : ℕ) :
-    KummerLargeParameter.mixedCoeff a z N = poch a N * largeBCoeff a z N := by
-  set f : ℂ → ℂ := fun a => KummerLargeParameter.mixedCoeff a z N - poch a N *
+    KummerLargeParameter.mixedCoeff a z N = pochhammer a N * largeBCoeff a z N := by
+  set f : ℂ → ℂ := fun a => KummerLargeParameter.mixedCoeff a z N - pochhammer a N *
       largeBCoeff a z N with hfdef
   have hf : Differentiable ℂ f := (KummerLargeParameter.differentiable_mixedCoeff z N).sub
     ((Polynomial.differentiable _).mul (KummerLargeParameter.differentiable_largeBCoeff z N))
@@ -391,14 +392,14 @@ end LargeBPoincare
 
 /- The Gamma ratio grows like b^a, so the absolute remainder is O(b^(-n)). -/
 /-- Formula under the stated hypotheses: `Asymptotics.IsBigO atTop (fun b : ℝ => kummerM a b z -
-Gamma (b : ℂ) / Gamma ((b : ℂ) - a) * ∑ s ∈ Finset.range n, poch a s * largeBCoeff a z s * (b
+Gamma (b : ℂ) / Gamma ((b : ℂ) - a) * ∑ s ∈ Finset.range n, pochhammer a s * largeBCoeff a z s * (b
 : ℂ) ^ (-(s : ℂ) - a)) (fun b : ℝ => (b : ℂ) ^ (-(n : ℂ)))`. -/
 @[dlmf 13.8.E2]
 theorem kummerM_large_b_poincare (a z : ℂ) (n : ℕ) :
     Asymptotics.IsBigO atTop
       (fun b : ℝ => kummerM a b z -
         Gamma (b : ℂ) / Gamma ((b : ℂ) - a) *
-          ∑ s ∈ Finset.range n, poch a s * largeBCoeff a z s * (b : ℂ) ^ (-(s : ℂ) - a))
+          ∑ s ∈ Finset.range n, pochhammer a s * largeBCoeff a z s * (b : ℂ) ^ (-(s : ℂ) - a))
       (fun b : ℝ => (b : ℂ) ^ (-(n : ℂ))) := by
   have hK := KummerLargeParameter.isBigO_mixed a z n
   simp only [KummerLargeParameter.mixedCoeff_eq] at hK
@@ -481,8 +482,8 @@ theorem kummerU_large_a_b (ν : ℝ) (z : ℂ) (hν : 0 < ν) (hν1 : ν < 1)
 
 /-- Formula under the stated hypotheses: `Asymptotics.IsBigO atTop (fun x : ℝ => whittakerM κ μ x
 - Gamma (1 + 2 * μ) / Gamma (1 / 2 + μ - κ) * exp (x / 2) * (x : ℂ) ^ (-κ) * ∑ s ∈
-Finset.range n, poch (1 / 2 - μ + κ) s * poch (1 / 2 + μ + κ) s / s.factorial * (x : ℂ) ^ (-(s
-: ℂ))) (fun x : ℝ => exp (x / 2) * (x : ℂ) ^ (-κ - n))`. -/
+Finset.range n, pochhammer (1 / 2 - μ + κ) s * pochhammer (1 / 2 + μ + κ) s / s.factorial * (x : ℂ)
+^ (-(s : ℂ))) (fun x : ℝ => exp (x / 2) * (x : ℂ) ^ (-κ - n))`. -/
 @[dlmf 13.19.E1]
 theorem whittakerM_poincare_real (κ μ : ℂ) (n : ℕ)
     (hμ : ∀ k : ℕ, 1 + 2 * μ ≠ -k) :
@@ -490,7 +491,7 @@ theorem whittakerM_poincare_real (κ μ : ℂ) (n : ℕ)
       (fun x : ℝ => whittakerM κ μ x -
         Gamma (1 + 2 * μ) / Gamma (1 / 2 + μ - κ) * exp (x / 2) * (x : ℂ) ^ (-κ) *
           ∑ s ∈ Finset.range n,
-            poch (1 / 2 - μ + κ) s * poch (1 / 2 + μ + κ) s / s.factorial *
+            pochhammer (1 / 2 - μ + κ) s * pochhammer (1 / 2 + μ + κ) s / s.factorial *
               (x : ℂ) ^ (-(s : ℂ)))
       (fun x : ℝ => exp (x / 2) * (x : ℂ) ^ (-κ - n)) := by
   have h := regularizedHGFun_poincare_real (μ - κ + 1 / 2) (1 + 2 * μ) n
@@ -512,7 +513,7 @@ theorem whittakerM_poincare_real (κ μ : ℂ) (n : ℕ)
       ring_nf
     rw [show 1 / 2 + μ - κ = μ - κ + 1 / 2 by ring] at hp ⊢
     linear_combination (-Gamma (1 + 2 * μ) / Gamma (μ - κ + 1 / 2) * ∑ s ∈ Finset.range n,
-      poch (1 / 2 - μ + κ) s * poch (1 / 2 + μ + κ) s / s.factorial *
+      pochhammer (1 / 2 - μ + κ) s * pochhammer (1 / 2 + μ + κ) s / s.factorial *
         (x : ℂ) ^ (-(s : ℂ))) * hp
   · filter_upwards [eventually_gt_atTop 0] with x hx
     have hx0 : (x : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hx.ne'
@@ -524,7 +525,8 @@ theorem whittakerM_poincare_real (κ μ : ℂ) (n : ℕ)
     ring_nf
 
 /-- Formula under the stated hypotheses: `Asymptotics.IsBigO atTop (fun x : ℝ => whittakerW κ μ x
-- exp (-x / 2) * (x : ℂ) ^ κ * ∑ s ∈ Finset.range n, poch (1 / 2 + μ - κ) s * poch (1 / 2 - μ
+- exp (-x / 2) * (x : ℂ) ^ κ * ∑ s ∈ Finset.range n, pochhammer (1 / 2 + μ - κ) s * pochhammer (1 /
+  2 - μ
 - κ) s / s.factorial * (-(x : ℂ)) ^ (-(s : ℂ))) (fun x : ℝ => exp (-x / 2) * (x : ℂ) ^ (κ -
 n))`. -/
 @[dlmf 13.19.E3]
@@ -533,7 +535,7 @@ theorem whittakerW_poincare (κ μ : ℂ) (n : ℕ) :
       (fun x : ℝ => whittakerW κ μ x -
         exp (-x / 2) * (x : ℂ) ^ κ *
           ∑ s ∈ Finset.range n,
-            poch (1 / 2 + μ - κ) s * poch (1 / 2 - μ - κ) s / s.factorial *
+            pochhammer (1 / 2 + μ - κ) s * pochhammer (1 / 2 - μ - κ) s / s.factorial *
               (-(x : ℂ)) ^ (-(s : ℂ)))
       (fun x : ℝ => exp (-x / 2) * (x : ℂ) ^ (κ - n)) := by
   have h := kummerU_poincare (1 / 2 + μ - κ) (1 + 2 * μ) n
@@ -546,7 +548,7 @@ theorem whittakerW_poincare (κ μ : ℂ) (n : ℕ) :
     have hp : (x : ℂ) ^ (1 / 2 + μ) * (x : ℂ) ^ (-(1 / 2 + μ - κ)) = (x : ℂ) ^ κ := by
       rw [← Complex.cpow_add _ _ hx0]; ring_nf
     linear_combination (-exp (-x / 2) * ∑ s ∈ Finset.range n,
-      poch (1 / 2 + μ - κ) s * poch (1 / 2 - μ - κ) s / s.factorial *
+      pochhammer (1 / 2 + μ - κ) s * pochhammer (1 / 2 - μ - κ) s / s.factorial *
         (-(x : ℂ)) ^ (-(s : ℂ))) * hp
   · filter_upwards [eventually_gt_atTop 0] with x hx
     have hx0 : (x : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hx.ne'

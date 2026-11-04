@@ -318,12 +318,12 @@ theorem gauss_sub_sum_isBigO (θ : ℝ) (N : ℕ) :
     _ = 3 * r ^ N := by ring
 
 /-- `(1/2)ₙ 4ⁿ n! = (2n)!`. -/
-theorem poch_half_mul_four_pow_mul_factorial (n : ℕ) :
-    poch (1 / 2) n * (4 ^ n * (n.factorial : ℂ)) = ((2 * n).factorial : ℂ) := by
+theorem pochhammer_half_mul_four_pow_mul_factorial (n : ℕ) :
+    pochhammer (1 / 2) n * (4 ^ n * (n.factorial : ℂ)) = ((2 * n).factorial : ℂ) := by
   induction n with
-  | zero => simp [poch]
+  | zero => simp [pochhammer]
   | succ n ih =>
-    rw [poch_succ, show 2 * (n + 1) = 2 * n + 1 + 1 by ring, Nat.factorial_succ (2 * n + 1),
+    rw [pochhammer_succ, show 2 * (n + 1) = 2 * n + 1 + 1 by ring, Nat.factorial_succ (2 * n + 1),
       Nat.factorial_succ (2 * n), Nat.factorial_succ n]
     push_cast
     rw [← ih]
@@ -333,7 +333,7 @@ theorem poch_half_mul_four_pow_mul_factorial (n : ℕ) :
 theorem erfc_rotSector_asymptotic {θ δ : ℝ} (hθ : |θ| < π / 4) (hδ : 0 < δ) :
     HasAsymptoticExpansion (comap (fun z : ℂ => z * exp (θ * I)) (sectorAtTop δ))
       (fun n z => exp (-z ^ 2) * z ^ (-(2 * (n : ℂ) + 1)))
-      (fun n => (-1 : ℂ) ^ n * poch (1 / 2) n / Real.sqrt π) erfc := by
+      (fun n => (-1 : ℂ) ^ n * pochhammer (1 / 2) n / Real.sqrt π) erfc := by
   have hθ' : |θ| < π / 2 := by linarith [Real.pi_pos]
   have hW := hasAsymptoticExpansion_integral_cexp_smul_rotate_comap
     (F := fun t => cexp (-(t ^ 2 / 4))) (a := gaussQuarterCoeff) (μ := 1) (c := 0) hθ'
@@ -353,7 +353,7 @@ theorem erfc_rotSector_asymptotic {θ δ : ℝ} (hθ : |θ| < π / 4) (hδ : 0 <
   · funext n
     have hπ : (Real.sqrt π : ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
     have hf : (n.factorial : ℂ) ≠ 0 := by exact_mod_cast n.factorial_ne_zero
-    have hp := poch_half_mul_four_pow_mul_factorial n
+    have hp := pochhammer_half_mul_four_pow_mul_factorial n
     simp only [Pi.smul_apply, smul_eq_mul, gaussQuarterCoeff, even_two_mul, ite_true,
       show 2 * n / 2 = n by omega]
     rw [show ((2 * n : ℕ) : ℂ) + 1 = ((2 * n : ℕ) : ℂ) + 1 from rfl,
@@ -363,16 +363,16 @@ theorem erfc_rotSector_asymptotic {θ δ : ℝ} (hθ : |θ| < π / 4) (hδ : 0 <
     norm_num
 
 /-- Identity under the stated parameter and domain assumptions: `HasAsymptoticExpansion (sector
-(3*π/4-δ)) (fun n z => exp (-z^2)*z^(-(2*(n : ℂ)+1))) (fun n => (-1 : ℂ)^n*poch (1/2)
+(3*π/4-δ)) (fun n z => exp (-z^2)*z^(-(2*(n : ℂ)+1))) (fun n => (-1 : ℂ)^n*pochhammer (1/2)
 n/Real.sqrt π) erfc ∧ HasAsymptoticExpansion (sector (3*π/4-δ)) (fun n z => exp
-(-z^2)*z^(-(2*(n : ℂ)+1))) (fun n => -(-1 : ℂ)^n*poch (1/2) n/Real.sqrt π) (fun z => erfc
+(-z^2)*z^(-(2*(n : ℂ)+1))) (fun n => -(-1 : ℂ)^n*pochhammer (1/2) n/Real.sqrt π) (fun z => erfc
 (-z)-2)`. -/
 @[dlmf 7.12.E1]
 theorem erfc_sector_asymptotic {δ : ℝ} (hδ : 0 < δ) :
     HasAsymptoticExpansion (sector (3*π/4-δ)) (fun n z => exp (-z^2)*z^(-(2*(n : ℂ)+1)))
-        (fun n => (-1 : ℂ)^n*poch (1/2) n/Real.sqrt π) erfc ∧
+        (fun n => (-1 : ℂ)^n*pochhammer (1/2) n/Real.sqrt π) erfc ∧
         HasAsymptoticExpansion (sector (3*π/4-δ)) (fun n z => exp (-z^2)*z^(-(2*(n : ℂ)+1)))
-        (fun n => -(-1 : ℂ)^n*poch (1/2) n/Real.sqrt π) (fun z => erfc (-z)-2) := by
+        (fun n => -(-1 : ℂ)^n*pochhammer (1/2) n/Real.sqrt π) (fun z => erfc (-z)-2) := by
   set d := min δ (π / 4) with hd
   have hd0 : 0 < d := lt_min hδ (by positivity)
   have hdδ : d ≤ δ := min_le_left _ _
@@ -387,7 +387,7 @@ theorem erfc_sector_asymptotic {δ : ℝ} (hδ : 0 < δ) :
   have h2 := erfc_rotSector_asymptotic (θ := π / 4 - d / 2) hβ hcos
   have hA : HasAsymptoticExpansion (sector (3 * π / 4 - δ))
       (fun n z => exp (-z ^ 2) * z ^ (-(2 * (n : ℂ) + 1)))
-      (fun n => (-1 : ℂ) ^ n * poch (1 / 2) n / Real.sqrt π) erfc :=
+      (fun n => (-1 : ℂ) ^ n * pochhammer (1 / 2) n / Real.sqrt π) erfc :=
     (h1.sup h2).mono hcov
   refine ⟨hA, ?_⟩
   refine (hA.neg.congr' (Eventually.of_forall fun z => ?_)).congr_coeff ?_
@@ -400,17 +400,17 @@ theorem erfc_sector_asymptotic {δ : ℝ} (hδ : 0 < δ) :
 
 /-- Unnormalized erfc remainder. -/
 def erfcAsymptoticRemainder (N : ℕ) (z : ℂ) : ℂ :=
-  erfc z-exp (-z^2)/Real.sqrt π*∑ n ∈ Finset.range N, (-1 : ℂ)^n*poch (1/2) n/z^(2*n+1)
+  erfc z-exp (-z^2)/Real.sqrt π*∑ n ∈ Finset.range N, (-1 : ℂ)^n*pochhammer (1/2) n/z^(2*n+1)
 
 /-- `(1/2)_n = Γ(n+1/2)/√π`, as a real number. -/
-theorem poch_half_eq_Gamma (n : ℕ) :
-    poch (1/2) n = ((Real.Gamma (n+1/2)/Real.sqrt π : ℝ) : ℂ) := by
+theorem pochhammer_half_eq_Gamma (n : ℕ) :
+    pochhammer (1/2) n = ((Real.Gamma (n+1/2)/Real.sqrt π : ℝ) : ℂ) := by
   induction n with
   | zero =>
-    rw [poch_zero]; simp only [Nat.cast_zero, zero_add, Real.Gamma_one_half_eq]
+    rw [pochhammer_zero]; simp only [Nat.cast_zero, zero_add, Real.Gamma_one_half_eq]
     rw [div_self (Real.sqrt_pos.mpr Real.pi_pos).ne']; simp
   | succ n ih =>
-    rw [poch_succ, ih]
+    rw [pochhammer_succ, ih]
     have : ((n+1:ℕ):ℝ)+1/2 = ((n:ℝ)+1/2)+1 := by push_cast; ring
     rw [this, Real.Gamma_add_one (by positivity)]
     push_cast; ring
@@ -587,7 +587,8 @@ theorem erfc_eq_integral_rotate_laplace {θ : ℝ} (hθ : |θ| < π) {z : ℂ}
 /-- Sector-dependent next-term bounds from DLMF §7.12(i). -/
 theorem erfc_remainder_bound {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/2) (N : ℕ) :
     ‖erfcAsymptoticRemainder N z‖ ≤
-        (if |arg z| ≤ π/4 then 1 else 1/Real.sin (2*|arg z|))*‖exp (-z^2)/Real.sqrt π*poch (1/2)
+        (if |arg z| ≤ π/4 then 1 else 1/Real.sin (2*|arg z|))*‖exp (-z^2)/Real.sqrt
+            π*pochhammer (1/2)
         N/z^(2*N+1)‖ := by
   set α := arg z with hα
   set θ : ℝ := -2 * α with hθdef
@@ -747,9 +748,9 @@ theorem erfc_remainder_bound {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/2) (N 
     intro n; rw [← hzω, mul_pow]; field_simp
   have hterm : ∀ n ∈ Finset.range N, exp (-z^2) / π * (e * (ω⁻¹ * (-e) ^ n *
       ((Real.Gamma (n+1/2) / s^(2*n+1) : ℝ) : ℂ))) =
-      exp (-z^2) / Real.sqrt π * ((-1 : ℂ)^n * poch (1/2) n / z^(2*n+1)) := by
+      exp (-z^2) / Real.sqrt π * ((-1 : ℂ)^n * pochhammer (1/2) n / z^(2*n+1)) := by
     intro n _
-    rw [poch_half_eq_Gamma, hzpow, heω, neg_pow (ω^2)]
+    rw [pochhammer_half_eq_Gamma, hzpow, heω, neg_pow (ω^2)]
     have hs' : (s:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hs0.ne'
     push_cast
     rw [← hsqrt]
@@ -757,7 +758,8 @@ theorem erfc_remainder_bound {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/2) (N 
     ring
   have hsum : exp (-z^2) / π * (e * ∑ n ∈ Finset.range N, ω⁻¹ * (-e) ^ n *
       ((Real.Gamma (n+1/2) / s^(2*n+1) : ℝ) : ℂ)) =
-      exp (-z^2) / Real.sqrt π * ∑ n ∈ Finset.range N, (-1 : ℂ)^n * poch (1/2) n / z^(2*n+1) := by
+      exp (-z^2) / Real.sqrt π * ∑ n ∈ Finset.range N, (-1 : ℂ)^n * pochhammer (1/2) n /
+          z^(2*n+1) := by
     rw [Finset.mul_sum, Finset.mul_sum, Finset.mul_sum]
     exact Finset.sum_congr rfl hterm
   have hmain : erfcAsymptoticRemainder N z = exp (-z^2) / π * (e * ∫ r in Ioi (0:ℝ), R r) := by
@@ -766,9 +768,10 @@ theorem erfc_remainder_bound {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/2) (N 
   rw [hmain, norm_mul, norm_mul, hen, one_mul, norm_div, Complex.norm_real,
     Real.norm_of_nonneg Real.pi_pos.le]
   have hG0 : 0 < Real.Gamma (N+1/2) := Real.Gamma_pos_of_pos (by positivity)
-  have hrhs : ‖exp (-z^2)/Real.sqrt π*poch (1/2) N/z^(2*N+1)‖ =
+  have hrhs : ‖exp (-z^2)/Real.sqrt π*pochhammer (1/2) N/z^(2*N+1)‖ =
       ‖exp (-z^2)‖ / π * (Real.Gamma (N+1/2) / s^(2*N+1)) := by
-    rw [poch_half_eq_Gamma, norm_div, norm_mul, norm_div, Complex.norm_real, Complex.norm_real,
+    rw [pochhammer_half_eq_Gamma, norm_div, norm_mul, norm_div, Complex.norm_real,
+        Complex.norm_real,
       norm_pow, ← hs, Real.norm_of_nonneg (Real.sqrt_nonneg _),
       Real.norm_of_nonneg (by positivity : 0 ≤ Real.Gamma (N+1/2) / Real.sqrt π)]
     have h := Real.mul_self_sqrt Real.pi_pos.le
@@ -877,10 +880,10 @@ theorem erfc_remainder_sign {x : ℝ} (hx : 0 < x) (N : ℕ) :
   have hR : (erfcAsymptoticRemainder N x).re = Real.exp (-x^2)/π *
       ((-1:ℝ)^N * ∫ u in Ioi (0:ℝ), g u) := by
     have hsum : (exp (-(x:ℂ)^2)/Real.sqrt π*∑ n ∈ Finset.range N,
-        (-1 : ℂ)^n*poch (1/2) n/(x:ℂ)^(2*n+1)) =
+        (-1 : ℂ)^n*pochhammer (1/2) n/(x:ℂ)^(2*n+1)) =
         ((Real.exp (-x^2)/π * ∑ n ∈ Finset.range N, (-1:ℝ)^n *
             (Real.Gamma (n+1/2) / x^(2*n+1)) : ℝ) : ℂ) := by
-      simp only [poch_half_eq_Gamma]
+      simp only [pochhammer_half_eq_Gamma]
       push_cast
       rw [Finset.mul_sum, Finset.mul_sum]
       refine Finset.sum_congr rfl fun n _ => ?_

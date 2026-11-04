@@ -15,7 +15,7 @@ and §18.28.
 
 ## Main definitions
 
-* `terminatingBasicHG`: a terminating basic hypergeometric sum.
+* `terminatingBasicHypergeometric`: a terminating basic hypergeometric sum.
 * `qHahn`, `bigQJacobi`, `littleQJacobi`, `littleQLaguerre`, `qLaguerre`: DLMF 18.27.3–18.27.15.
 * `stieltjesWigert`, `discreteQHermiteI`, `discreteQHermiteII`: DLMF 18.27.18–18.27.23.
 * `askeyWilson`, `askeyWilsonLaurent`, `alSalamChihara`: DLMF 18.28.1, 18.28.1_5, 18.28.7.
@@ -38,7 +38,7 @@ namespace DLMF.OrthogonalPolynomials
 
 /-- Terminating basic hypergeometric sum with the standard integer exponent
 `1 + s - r`; in particular this handles both ₁phi₁ and balanced ₄phi₃. -/
-def terminatingBasicHG (n : ℕ) (a b : List ℂ) (q z : ℂ) : ℂ :=
+def terminatingBasicHypergeometric (n : ℕ) (a b : List ℂ) (q z : ℂ) : ℂ :=
   ∑ k ∈ Finset.range (n + 1),
     (a.map (fun t => qPochhammer t q k)).prod /
       ((b.map (fun t => qPochhammer t q k)).prod * qPochhammer q q k) *
@@ -47,17 +47,17 @@ def terminatingBasicHG (n : ℕ) (a b : List ℂ) (q z : ℂ) : ℂ :=
 /-- The `q`-Hahn polynomial `Q_n(x; a, b, N; q)` as a terminating `₃φ₂` (DLMF 18.27.3). -/
 @[dlmf 18.27.E3]
 def qHahn (a b q : ℂ) (N n : ℕ) (x : ℂ) : ℂ :=
-  terminatingBasicHG n [q⁻¹ ^ n, a * b * q ^ (n + 1), x] [a * q, q⁻¹ ^ N] q q
+  terminatingBasicHypergeometric n [q⁻¹ ^ n, a * b * q ^ (n + 1), x] [a * q, q⁻¹ ^ N] q q
 
 /-- The big `q`-Jacobi polynomial `P_n(x; a, b, c; q)` as a terminating `₃φ₂` (DLMF 18.27.5). -/
 @[dlmf 18.27.E5]
 def bigQJacobi (a b c q : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
-  terminatingBasicHG n [q⁻¹ ^ n, a * b * q ^ (n + 1), x] [a * q, c * q] q q
+  terminatingBasicHypergeometric n [q⁻¹ ^ n, a * b * q ^ (n + 1), x] [a * q, c * q] q q
 
 /-- The little `q`-Jacobi polynomial `p_n(x; a, b; q)` as a terminating `₂φ₁` (DLMF 18.27.13). -/
 @[dlmf 18.27.E13]
 def littleQJacobi (a b q : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
-  terminatingBasicHG n [q⁻¹ ^ n, a * b * q ^ (n + 1)] [a * q] q (q * x)
+  terminatingBasicHypergeometric n [q⁻¹ ^ n, a * b * q ^ (n + 1)] [a * q] q (q * x)
 
 /-- The little `q`-Laguerre (Wall) polynomial, the little `q`-Jacobi polynomial with `b = 0`
 (DLMF 18.27.14_5). -/
@@ -68,7 +68,7 @@ def littleQLaguerre (a q : ℂ) (n : ℕ) (x : ℂ) : ℂ := littleQJacobi a 0 q
 @[dlmf 18.27.E15]
 def qLaguerre (α q : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
   qPochhammer (q ^ (α + 1)) q n / qPochhammer q q n *
-    terminatingBasicHG n [q⁻¹ ^ n] [q ^ (α + 1)] q (-x * q ^ (n + α + 1))
+    terminatingBasicHypergeometric n [q⁻¹ ^ n] [q ^ (α + 1)] q (-x * q ^ (n + α + 1))
 
 /-- The Stieltjes–Wigert polynomial `S_n(x; q)` as an explicit finite sum (DLMF 18.27.18). -/
 @[dlmf 18.27.E18]
@@ -105,7 +105,7 @@ def askeyWilson (a b c d q : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
 terminating `₄φ₃` (DLMF 18.28.1_5). -/
 @[dlmf 18.28.E1_5]
 def askeyWilsonLaurent (a b c d q : ℂ) (n : ℕ) (z : ℂ) : ℂ :=
-  terminatingBasicHG n [q⁻¹ ^ n, a * b * c * d * q ^ ((n : ℤ) - 1), a * z, a / z]
+  terminatingBasicHypergeometric n [q⁻¹ ^ n, a * b * c * d * q ^ ((n : ℤ) - 1), a * z, a / z]
     [a * b, a * c, a * d] q q
 
 /-- The Al-Salam–Chihara polynomials, the Askey–Wilson polynomials with `c = d = 0`

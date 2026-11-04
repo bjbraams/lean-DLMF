@@ -16,8 +16,8 @@ represented by analytic germs.
 
 ## Main definitions
 
-* `appF1Coeff`, `appF2Coeff`, `appF3Coeff`: the double-series coefficients.
-* `appF1`, `appF2`, `appF3`: Appell's `F₁`, `F₂`, `F₃`, DLMF 16.13.1–16.13.3.
+* `appellF1Coeff`, `appellF2Coeff`, `appellF3Coeff`: the double-series coefficients.
+* `appellF1`, `appellF2`, `appellF3`: Appell's `F₁`, `F₂`, `F₃`, DLMF 16.13.1–16.13.3.
 * `hornG2`, `hornG3`: Horn's `G₂`, `G₃` in the Gamma-ratio normalization, DLMF 16.14.5–16.14.6.
 * `AppellRegular`: the denominator parameters avoid the nonpositive integers.
 * `appellBidisc`, `appellDiamond`, `appellF4Domain`: the domains of absolute convergence.
@@ -75,36 +75,36 @@ def IsAppellBranchAt (seed : ℂ × ℂ→ℂ) (p : ℂ × ℂ) (f : ℂ × ℂ�
 
 /-- Appell F1 double-series coefficient. -/
 @[dlmf 16.13.E1]
-def appF1Coeff (a b b' c : ℂ) (m n : ℕ) : ℂ :=
-  poch a (m+n)*poch b m*poch b' n/(poch c (m+n)*(m !*n !))
+def appellF1Coeff (a b b' c : ℂ) (m n : ℕ) : ℂ :=
+  pochhammer a (m+n)*pochhammer b m*pochhammer b' n/(pochhammer c (m+n)*(m !*n !))
 
 /-- Appell F2 double-series coefficient. -/
 @[dlmf 16.13.E2]
-def appF2Coeff (a b b' c c' : ℂ) (m n : ℕ) : ℂ :=
-  poch a (m+n)*poch b m*poch b' n/(poch c m*poch c' n*(m !*n !))
+def appellF2Coeff (a b b' c c' : ℂ) (m n : ℕ) : ℂ :=
+  pochhammer a (m+n)*pochhammer b m*pochhammer b' n/(pochhammer c m*pochhammer c' n*(m !*n !))
 
 /-- Appell F3 double-series coefficient. -/
 @[dlmf 16.13.E3]
-def appF3Coeff (a a' b b' c : ℂ) (m n : ℕ) : ℂ :=
-  poch a m*poch a' n*poch b m*poch b' n/(poch c (m+n)*(m !*n !))
+def appellF3Coeff (a a' b b' c : ℂ) (m n : ℕ) : ℂ :=
+  pochhammer a m*pochhammer a' n*pochhammer b m*pochhammer b' n/(pochhammer c (m+n)*(m !*n !))
 
 /-- Appell's F₁ as the totalized double series `∑ₘₙ cₘₙ xᵐ yⁿ` (DLMF 16.13.E1);
 continuations are represented by analytic germs. -/
 @[dlmf 16.13.E1]
-def appF1 (a b b' c x y : ℂ) : ℂ :=
-  ∑' p : ℕ × ℕ,appF1Coeff a b b' c p.1 p.2*x^p.1*y^p.2
+def appellF1 (a b b' c x y : ℂ) : ℂ :=
+  ∑' p : ℕ × ℕ,appellF1Coeff a b b' c p.1 p.2*x^p.1*y^p.2
 
 /-- Appell's F₂ as the totalized double series `∑ₘₙ cₘₙ xᵐ yⁿ` (DLMF 16.13.E2);
 continuations are represented by analytic germs. -/
 @[dlmf 16.13.E2]
-def appF2 (a b b' c c' x y : ℂ) : ℂ :=
-  ∑' p : ℕ × ℕ,appF2Coeff a b b' c c' p.1 p.2*x^p.1*y^p.2
+def appellF2 (a b b' c c' x y : ℂ) : ℂ :=
+  ∑' p : ℕ × ℕ,appellF2Coeff a b b' c c' p.1 p.2*x^p.1*y^p.2
 
 /-- Appell's F₃ as the totalized double series `∑ₘₙ cₘₙ xᵐ yⁿ` (DLMF 16.13.E3);
 continuations are represented by analytic germs. -/
 @[dlmf 16.13.E3]
-def appF3 (a a' b b' c x y : ℂ) : ℂ :=
-  ∑' p : ℕ × ℕ,appF3Coeff a a' b b' c p.1 p.2*x^p.1*y^p.2
+def appellF3 (a a' b b' c x y : ℂ) : ℂ :=
+  ∑' p : ℕ × ℕ,appellF3Coeff a a' b b' c p.1 p.2*x^p.1*y^p.2
 
 /-- Horn G2 in the gamma-ratio normalization. -/
 @[dlmf 16.14.E5]

@@ -52,11 +52,12 @@ variable {a b : ℂ}
 
 /-- The normalized terms `(a)_n (b)_n (c)_n / ((1+a-b)_n n! Γ(1+a-c+n))` of Dixon's series. -/
 def s (a b c : ℂ) (n : ℕ) : ℂ :=
-  gaussHGCoeff a b (1 + a - b) n * poch c n * (Gamma (1 + a - c + n))⁻¹
+  gaussHypergeometricCoeff a b (1 + a - b) n * pochhammer c n * (Gamma (1 + a - c + n))⁻¹
 
 /-- The WZ certificate. -/
 def wzCertificate (a b c : ℂ) (n : ℕ) : ℂ :=
-  gaussHGCoeff a b (1 + a - b) n * (a + n) * (b + n) * poch c n * (Gamma (2 + a - c + n))⁻¹
+  gaussHypergeometricCoeff a b (1 + a - b) n * (a + n) * (b + n) * pochhammer c n *
+      (Gamma (2 + a - c + n))⁻¹
 
 /-- The WZ relation for Dixon's series at `n = 0`. -/
 theorem wz_zero (a b c : ℂ) :
@@ -64,7 +65,7 @@ theorem wz_zero (a b c : ℂ) :
       -(1 / 2) * wzCertificate a b c 0 := by
   have e : (Gamma (1 + a - c))⁻¹ = (1 + a - c) * (Gamma (2 + a - c))⁻¹ := by
     rw [← mul_recip_Gamma_add_one]; ring_nf
-  simp only [s, wzCertificate, gaussHGCoeff, poch_zero, Nat.factorial_zero,
+  simp only [s, wzCertificate, gaussHypergeometricCoeff, pochhammer_zero, Nat.factorial_zero,
       Nat.cast_one, Nat.cast_zero,
     add_zero, mul_one, div_one]
   rw [show 1 + a - (c - 1) = 2 + a - c by ring, e]
@@ -76,17 +77,18 @@ theorem wz_succ (hb : ∀ k : ℕ, 1 + a - b ≠ -k) (c : ℂ) (n : ℕ) :
     (1 + a / 2 - b - c) * s a b c (n + 1) -
         (1 + a / 2 - c) * (1 + a - b - c) * s a b (c - 1) (n + 1) =
       -(1 / 2) * (wzCertificate a b c (n + 1) - wzCertificate a b c n) := by
-  have hp : poch (1 + a - b) n ≠ 0 := poch_ne_zero_of_not_neg_nat hb n
+  have hp : pochhammer (1 + a - b) n ≠ 0 := pochhammer_ne_zero_of_not_neg_nat hb n
   have hq : 1 + a - b + n ≠ 0 := fun h => hb n (by linear_combination h)
   have hf : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
   have hn1 : (n : ℂ) + 1 ≠ 0 := by exact_mod_cast n.succ_ne_zero
   have e2 : (Gamma (2 + a - c + n))⁻¹ = (2 + a - c + n) * (Gamma (3 + a - c + n))⁻¹ := by
     rw [← mul_recip_Gamma_add_one]; ring_nf
-  have c1 : poch (c - 1) (n + 1) = (c - 1) * poch c n := by
-    rw [poch_succ_left]; ring_nf
+  have c1 : pochhammer (c - 1) (n + 1) = (c - 1) * pochhammer c n := by
+    rw [pochhammer_succ_left]; ring_nf
   simp only [s, wzCertificate]
   rw [c1]
-  simp only [gaussHGCoeff, poch_succ, Nat.factorial_succ, Nat.cast_mul, Nat.cast_succ]
+  simp only [gaussHypergeometricCoeff, pochhammer_succ, Nat.factorial_succ,
+      Nat.cast_mul, Nat.cast_succ]
   rw [show 1 + a - c + ((n : ℂ) + 1) = 2 + a - c + n by ring,
     show 1 + a - (c - 1) + ((n : ℂ) + 1) = 3 + a - c + n by ring,
     show 2 + a - c + ((n : ℂ) + 1) = 3 + a - c + n by ring, e2]
@@ -166,12 +168,12 @@ theorem isBigO_mul_add_mul_add (a b : ℂ) :
 
 /-- For `c = -j`, the Dixon terms vanish beyond index `j`. -/
 theorem s_neg_nat_eq_zero (a b : ℂ) {j n : ℕ} (h : j < n) : s a b (-(j : ℂ)) n = 0 := by
-  simp [s, poch_neg_nat_eq_zero h]
+  simp [s, pochhammer_neg_nat_eq_zero h]
 
 /-- For `c = -j`, the WZ certificate vanishes beyond index `j`. -/
 theorem wzCertificate_neg_nat_eq_zero (a b : ℂ) {j n : ℕ} (h : j < n) : wzCertificate a b
     (-(j : ℂ)) n = 0 := by
-  simp [wzCertificate, poch_neg_nat_eq_zero h]
+  simp [wzCertificate, pochhammer_neg_nat_eq_zero h]
 
 /-- For `c = -j` the Dixon series terminates, hence is summable. -/
 theorem summable_s_neg_nat (a b : ℂ) (j : ℕ) : Summable (s a b (-(j : ℂ))) :=
@@ -196,26 +198,27 @@ theorem summable_s_and_tendsto_wzCertificate (hb : ∀ k : ℕ, 1 + a - b ≠ -k
     exact ⟨summable_s_neg_nat a b j, tendsto_wzCertificate_neg_nat a b j⟩
   push Not at hneg
   have hGc : Gamma c ≠ 0 := Complex.Gamma_ne_zero hneg
-  have hpoch : ∀ n : ℕ, poch c n = Gamma (n + c) * (Gamma c)⁻¹ := by
+  have hpoch : ∀ n : ℕ, pochhammer c n = Gamma (n + c) * (Gamma c)⁻¹ := by
     intro n
     have h := Complex.Gamma_add_nat_div_Gamma_eq (n := n) c hneg
-    rw [poch, ← h, add_comm, div_eq_mul_inv]
+    rw [pochhammer, ← h, add_comm, div_eq_mul_inv]
   have hone : ∀ n : ℕ, Gamma ((n : ℂ) + 1) * (Gamma ((n : ℂ) + 1))⁻¹ = 1 := fun n =>
     mul_inv_cancel₀ (by rw [Complex.Gamma_nat_eq_factorial]; exact_mod_cast n.factorial_ne_zero)
-  have hcoef := isBigO_gaussHGCoeff a b (1 + a - b) hb
+  have hcoef := isBigO_gaussHypergeometricCoeff a b (1 + a - b) hb
   have hre : (a + b - (1 + a - b) - 1).re = 2 * b.re - 2 := by simp; ring
   rw [hre] at hcoef
   have hcre : 0 < 1 + a.re / 2 - b.re - c.re := by simpa using hc
   constructor
   · -- `s_n = O(n^{2Re b - 2} · n^{2 Re c - Re a - 1})`
     have hrat := isBigO_Gamma_ratio c 1 (1 + a - c) 1
-    have heq : (s a b c) = fun n : ℕ => (Gamma c)⁻¹ * (gaussHGCoeff a b (1 + a - b) n *
+    have heq : (s a b c) = fun n : ℕ => (Gamma c)⁻¹ * (gaussHypergeometricCoeff a b (1 + a - b) n *
         (Gamma (n + c) * Gamma (n + 1) * (Gamma (n + (1 + a - c)))⁻¹ * (Gamma (n + 1))⁻¹)) := by
       funext n
       simp only [s, hpoch]
       rw [show (1 : ℂ) + a - c + n = n + (1 + a - c) by ring]
       have := hone n
-      linear_combination (gaussHGCoeff a b (1 + a - b) n * Gamma (↑n + c) * (Gamma c)⁻¹ *
+      linear_combination (gaussHypergeometricCoeff a b (1 + a - b) n *
+          Gamma (↑n + c) * (Gamma c)⁻¹ *
         (Gamma (↑n + (1 + a - c)))⁻¹) * this.symm
     rw [heq]
     refine Summable.mul_left _ (summable_of_isBigO_nat
@@ -229,14 +232,15 @@ theorem summable_s_and_tendsto_wzCertificate (hb : ∀ k : ℕ, 1 + a - b ≠ -k
   · -- `H_n = O(n^{2 Re b + 2 Re c - Re a - 2})`, a negative exponent
     have hrat := isBigO_Gamma_ratio c 1 (2 + a - c) 1
     have hpoly := isBigO_mul_add_mul_add a b
-    have heq : (wzCertificate a b c) = fun n : ℕ => (Gamma c)⁻¹ * (gaussHGCoeff a b (1 + a - b) n *
+    have heq : (wzCertificate a b c) = fun n : ℕ => (Gamma c)⁻¹ *
+        (gaussHypergeometricCoeff a b (1 + a - b) n *
         ((a + n) * (b + n)) *
         (Gamma (n + c) * Gamma (n + 1) * (Gamma (n + (2 + a - c)))⁻¹ * (Gamma (n + 1))⁻¹)) := by
       funext n
       simp only [wzCertificate, hpoch]
       rw [show (2 : ℂ) + a - c + n = n + (2 + a - c) by ring]
       have := hone n
-      linear_combination (gaussHGCoeff a b (1 + a - b) n * (a + n) * (b + n) *
+      linear_combination (gaussHypergeometricCoeff a b (1 + a - b) n * (a + n) * (b + n) *
         Gamma (↑n + c) * (Gamma c)⁻¹ * (Gamma (↑n + (2 + a - c)))⁻¹) * this.symm
     rw [heq]
     have hexp : (2 * b.re - 2) + 2 + (c + 1 - (2 + a - c) - 1).re < 0 := by simp; linarith
@@ -246,7 +250,7 @@ theorem summable_s_and_tendsto_wzCertificate (hb : ∀ k : ℕ, 1 + a - b ≠ -k
         (c + 1 - (2 + a - c) - 1).re) by linarith)).comp tendsto_natCast_atTop_atTop
       refine this.congr fun n => ?_
       simp only [Function.comp, neg_neg]
-    have hbig : (fun n : ℕ => gaussHGCoeff a b (1 + a - b) n * ((a + n) * (b + n)) *
+    have hbig : (fun n : ℕ => gaussHypergeometricCoeff a b (1 + a - b) n * ((a + n) * (b + n)) *
         (Gamma (n + c) * Gamma (n + 1) * (Gamma (n + (2 + a - c)))⁻¹ * (Gamma (n + 1))⁻¹))
         =O[atTop] fun n : ℕ => (n : ℝ) ^ ((2 * b.re - 2) + 2 +
           (c + 1 - (2 + a - c) - 1).re) := by
@@ -265,7 +269,7 @@ def gammaConstant (a b : ℂ) : ℂ :=
 theorem periodicNormalization_zero (a b : ℂ) : periodicNormalization a b 0 = gammaConstant a b := by
   have hL : normalizedSeries a b 0 = (Gamma (1 + a))⁻¹ := by
     rw [normalizedSeries, tsum_eq_single 0]
-    · simp [s, gaussHGCoeff, poch_zero]
+    · simp [s, gaussHypergeometricCoeff, pochhammer_zero]
     · intro n hn
       obtain ⟨m, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hn
       simp [s]
@@ -288,22 +292,22 @@ theorem periodicNormalization_neg_nat (ha : ∀ k : ℕ, 1 + a / 2 ≠ -k)
     push_cast; ring
 
 /-- `(c)_n / Γ(1-c) = (-1)^n / Γ(1-c-n)`, for every `c`. -/
-theorem poch_mul_recip_Gamma_one_sub (c : ℂ) (n : ℕ) :
-    poch c n * (Gamma (1 - c))⁻¹ = (-1) ^ n * (Gamma (1 - c - n))⁻¹ := by
+theorem pochhammer_mul_recip_Gamma_one_sub (c : ℂ) (n : ℕ) :
+    pochhammer c n * (Gamma (1 - c))⁻¹ = (-1) ^ n * (Gamma (1 - c - n))⁻¹ := by
   induction n with
-  | zero => simp [poch_zero]
+  | zero => simp [pochhammer_zero]
   | succ n ih =>
     have h := mul_recip_Gamma_add_one (-c - n)
     rw [show -c - (n : ℂ) + 1 = 1 - c - n by ring] at h
-    rw [poch_succ, mul_right_comm, ih, show (1 : ℂ) - c - ((n + 1 : ℕ) : ℂ) = -c - n by
+    rw [pochhammer_succ, mul_right_comm, ih, show (1 : ℂ) - c - ((n + 1 : ℕ) : ℂ) = -c - n by
       push_cast; ring, ← h, pow_succ]
     ring
 
 /-- `‖(c)ₙ‖ = ‖Γ(1 - c)‖ ‖1/Γ(1 - c - n)‖` when `Γ(1 - c) ≠ 0` (reflection form of the Pochhammer
   symbol). -/
-theorem norm_poch_eq {c : ℂ} (hc : Gamma (1 - c) ≠ 0) (n : ℕ) :
-    ‖poch c n‖ = ‖Gamma (1 - c)‖ * ‖(Gamma (1 - c - n))⁻¹‖ := by
-  have h := congrArg norm (poch_mul_recip_Gamma_one_sub c n)
+theorem norm_pochhammer_eq {c : ℂ} (hc : Gamma (1 - c) ≠ 0) (n : ℕ) :
+    ‖pochhammer c n‖ = ‖Gamma (1 - c)‖ * ‖(Gamma (1 - c - n))⁻¹‖ := by
+  have h := congrArg norm (pochhammer_mul_recip_Gamma_one_sub c n)
   rw [norm_mul, norm_mul, norm_pow, norm_neg, norm_one, one_pow, one_mul, norm_inv] at h
   rw [← h]
   field_simp [norm_ne_zero_iff.mpr hc]
@@ -316,13 +320,13 @@ theorem exists_bound (hb : ∀ k : ℕ, 1 + a - b ≠ -k) {x₁ : ℝ} (hx₁ : 
         ‖s a b c n‖ ≤ ‖Gamma (1 - c)‖ * Real.exp (π * |c.im|) *
           Real.exp (π * (|c.im| + |a.im|) / 2) * u n := by
   obtain ⟨B, hB0, -, hBneg, hbound⟩ := exists_recip_Gamma_shift_bound x₁
-  set coef := gaussHGCoeff a b (1 + a - b)
+  set coef := gaussHypergeometricCoeff a b (1 + a - b)
   set u : ℕ → ℝ := fun n => ‖coef n‖ * B (-(n : ℤ)) * (Real.Gamma (a.re + x₁ + n))⁻¹ with hu
   have hu0 : ∀ n, 0 ≤ u n := fun n => mul_nonneg (mul_nonneg (norm_nonneg _) (hB0 _))
     (inv_nonneg.mpr (Real.Gamma_pos_of_pos (by positivity)).le)
   refine ⟨u, ?_, hu0, fun n c hc1 hc2 => ?_⟩
   · -- summability: `u_n = O(n^{2 Re b - 2} n^{1 - 2x₁ - Re a})`
-    have hcoef := isBigO_gaussHGCoeff a b (1 + a - b) hb
+    have hcoef := isBigO_gaussHypergeometricCoeff a b (1 + a - b) hb
     have hrat := isBigO_Gamma_ratio ((1 - x₁ : ℝ) : ℂ) 1 ((a.re + x₁ : ℝ) : ℂ) 1
     have hexp : (a + b - (1 + a - b) - 1).re +
         (((1 - x₁ : ℝ) : ℂ) + 1 - ((a.re + x₁ : ℝ) : ℂ) - 1).re < -1 := by
@@ -364,7 +368,7 @@ theorem exists_bound (hb : ∀ k : ℕ, 1 + a - b ≠ -k) {x₁ : ℝ} (hx₁ : 
   -- the pointwise bound
   have hre1 : 0 < (1 - c).re := by linarith
   have hG1 : Gamma (1 - c) ≠ 0 := Complex.Gamma_ne_zero_of_re_pos hre1
-  have hpoch := norm_poch_eq hG1 n
+  have hpoch := norm_pochhammer_eq hG1 n
   have hB := hbound (-(n : ℤ)) (1 - c) hc1 hc2
   rw [show (1 - c) + ((-(n : ℤ) : ℤ) : ℂ) = 1 - c - n by push_cast; ring,
     show (1 - c).im = -c.im by simp, abs_neg] at hB
@@ -385,7 +389,7 @@ theorem exists_bound (hb : ∀ k : ℕ, 1 + a - b ≠ -k) {x₁ : ℝ} (hx₁ : 
         ≤ Real.exp (π * (|c.im| + |a.im|) / 2) / Real.Gamma (a.re + x₁ + n) := by
           gcongr
       _ = _ := div_eq_mul_inv _ _
-  calc ‖s a b c n‖ = ‖coef n‖ * ‖poch c n‖ * ‖(Gamma z)⁻¹‖ := by
+  calc ‖s a b c n‖ = ‖coef n‖ * ‖pochhammer c n‖ * ‖(Gamma z)⁻¹‖ := by
         simp only [s, norm_mul, hz]; rfl
     _ ≤ ‖coef n‖ * (‖Gamma (1 - c)‖ * (Real.exp (π * |c.im|) * B (-(n : ℤ)))) *
           (Real.exp (π * (|c.im| + |a.im|) / 2) * (Real.Gamma (a.re + x₁ + n))⁻¹) := by
@@ -413,7 +417,7 @@ theorem differentiableOn_normalizedSeries (hb : ∀ k : ℕ, 1 + a - b ≠ -k) {
       (hu.mul_left (Real.Gamma (x₁ + 1) * Real.exp (π * (|c₀.im| + 1)) *
         Real.exp (π * ((|c₀.im| + 1) + |a.im|) / 2))) (fun n => ?_) Metric.isOpen_ball
       (fun n c hc => ?_)
-    · have hpoly : Differentiable ℂ fun c : ℂ => poch c n :=
+    · have hpoly : Differentiable ℂ fun c : ℂ => pochhammer c n :=
         (ascPochhammer ℂ n).differentiable
       exact (((hpoly.const_mul _).mul ((Complex.differentiable_one_div_Gamma).comp
         (by fun_prop))).differentiableOn)
@@ -625,8 +629,8 @@ theorem dixon_sum {a b c : ℂ}
     (ha : ∀ k : ℕ, (1 + a / 2 : ℂ) ≠ -k)
     (hb : ∀ k : ℕ, (1 + a - b : ℂ) ≠ -k)
     (hc : ∀ k : ℕ, (1 + a - c : ℂ) ≠ -k) :
-    (∑' n : ℕ, poch a n * poch b n * poch c n /
-        (poch (1 + a - b) n * poch (1 + a - c) n *
+    (∑' n : ℕ, pochhammer a n * pochhammer b n * pochhammer c n /
+        (pochhammer (1 + a - b) n * pochhammer (1 + a - c) n *
           (n.factorial : ℂ))) =
       Gamma (1 + a / 2) * Gamma (1 + a - b) * Gamma (1 + a - c) *
         Gamma (1 + a / 2 - b - c) /
@@ -696,18 +700,18 @@ theorem dixon_sum {a b c : ℂ}
   have hLR : normalizedSeries a b c = normalizedRhs a b c := sub_eq_zero.mp hEc
   -- back to the statement
   have hG : Gamma (1 + a - c) ≠ 0 := Complex.Gamma_ne_zero hc
-  have hterm : ∀ n : ℕ, poch a n * poch b n * poch c n /
-      (poch (1 + a - b) n * poch (1 + a - c) n * (n.factorial : ℂ)) =
+  have hterm : ∀ n : ℕ, pochhammer a n * pochhammer b n * pochhammer c n /
+      (pochhammer (1 + a - b) n * pochhammer (1 + a - c) n * (n.factorial : ℂ)) =
       Gamma (1 + a - c) * s a b c n := by
     intro n
-    have hp : poch (1 + a - c) n ≠ 0 := poch_ne_zero_of_not_neg_nat hc n
-    have hpb : poch (1 + a - b) n ≠ 0 := poch_ne_zero_of_not_neg_nat hb n
+    have hp : pochhammer (1 + a - c) n ≠ 0 := pochhammer_ne_zero_of_not_neg_nat hc n
+    have hpb : pochhammer (1 + a - b) n ≠ 0 := pochhammer_ne_zero_of_not_neg_nat hb n
     have hf : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
-    have hGn : Gamma (1 + a - c + n) = Gamma (1 + a - c) * poch (1 + a - c) n := by
+    have hGn : Gamma (1 + a - c + n) = Gamma (1 + a - c) * pochhammer (1 + a - c) n := by
       have h := Complex.Gamma_add_nat_div_Gamma_eq (n := n) (1 + a - c) hc
       rw [div_eq_iff hG] at h
-      rw [h, poch, mul_comm]
-    simp only [s, gaussHGCoeff, hGn]
+      rw [h, pochhammer, mul_comm]
+    simp only [s, gaussHypergeometricCoeff, hGn]
     field_simp
   simp_rw [hterm]
   rw [tsum_mul_left]

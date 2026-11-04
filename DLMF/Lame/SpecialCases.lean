@@ -24,17 +24,17 @@ as `k → 0⁺`, `ν → ∞` with `k²ν(ν+1) = 4θ` (DLMF §29.5).
 
 ## Main results
 
-* `Real.lameAk_zero`, `Real.lameAk_zero'`, `Real.lameBk_zero`, `Real.lameBk_zero'`:
+* `Real.lameA_zero`, `Real.lameA_zero'`, `Real.lameB_zero`, `Real.lameB_zero'`:
   `a^m_ν(0) = b^m_ν(0) = m²` (DLMF 29.5.1).
-* `Real.lameEck_zero_zero`, `Real.lameEck_zero_zero'`, `Real.lameEck_modulus_zero`,
-  `Real.lameEck_modulus_zero'`, `Real.lameEsk_modulus_zero`, `Real.lameEsk_modulus_zero'`:
+* `Real.lameEc_zero_zero`, `Real.lameEc_zero_zero'`, `Real.lameEc_modulus_zero`,
+  `Real.lameEc_modulus_zero'`, `Real.lameEs_modulus_zero`, `Real.lameEs_modulus_zero'`:
   `Ec^0_ν(x, 0) = 2^{-1/2}`, `Ec^m_ν(x, 0) = cos(m(π/2 - x))`, `Es^m_ν(x, 0) = sin(m(π/2 - x))`
   (DLMF 29.5.2–29.5.3).
-* `Real.tendsto_lameAk_one`, `Real.tendsto_lameBk_one`: the eigenvalue limits DLMF 29.5.4.
-* `Real.tendsto_lameEck_div_one`, `Real.tendsto_lameEsk_div_one`,
-  `Real.tendsto_lameEck_div_deriv_one`, `Real.tendsto_lameEsk_div_deriv_one`: the limits
+* `Real.tendsto_lameA_one`, `Real.tendsto_lameB_one`: the eigenvalue limits DLMF 29.5.4.
+* `Real.tendsto_lameEc_div_one`, `Real.tendsto_lameEs_div_one`,
+  `Real.tendsto_lameEc_div_deriv_one`, `Real.tendsto_lameEs_div_deriv_one`: the limits
   DLMF 29.5.5–29.5.6 of normalized Lamé functions.
-* `Real.tendsto_lameEck_mathieuCe`, `Real.tendsto_lameEsk_mathieuSe`: the Mathieu limits
+* `Real.tendsto_lameEc_mathieuCe`, `Real.tendsto_lameEs_mathieuSe`: the Mathieu limits
   DLMF 29.5.7.
 
 ## Implementation notes
@@ -237,14 +237,15 @@ private lemma cos_two_mul_nat_add_one_mul_pi_div_two (q : ℕ) : Real.cos
     Real.cos_add_pi_div_two, Real.sin_nat_mul_pi, neg_zero]
 
 /-- At `k = 0` the complete elliptic integral is `K(0) = π/2`. -/
-private lemma compEllIntKm_modulus_zero : Real.compEllIntKm ((0 : ℝ) ^ 2) = π / 2 := by
-  simp [Real.compEllIntKm_zero]
+private lemma completeEllipticKOfParameter_modulus_zero : Real.completeEllipticKOfParameter
+    ((0 : ℝ) ^ 2) = π / 2 := by
+  simp [Real.completeEllipticKOfParameter_zero]
 
 /-- `zeroModulusEigenfunction (2j + [odd0] + [oddK]) oddK` is an eigenfunction at `k = 0`. -/
 private lemma isLameEigenfunction_zeroModulusEigenfunction (ν : ℝ) (odd0 oddK : Bool) (j : ℕ) :
     Real.IsLameEigenfunction (((2 * j + odd0.toNat + oddK.toNat : ℕ) : ℝ) ^ 2) ν 0 odd0 oddK
       (zeroModulusEigenfunction (2 * j + odd0.toNat + oddK.toNat) oddK) := by
-  simp only [Real.IsLameEigenfunction, Real.LameBoundary, compEllIntKm_modulus_zero,
+  simp only [Real.IsLameEigenfunction, Real.LameBoundary, completeEllipticKOfParameter_modulus_zero,
     isLameSolution_modulus_zero_iff]
   refine ⟨isZeroModulusSolution_zeroModulusEigenfunction _ _, ?_, ?_⟩
   · rw [deriv_zeroModulusEigenfunction]
@@ -275,7 +276,7 @@ private lemma lameSpectrum_modulus_zero (ν : ℝ) (odd0 oddK : Bool) :
       range fun j : ℕ => (((2 * j + odd0.toNat + oddK.toNat : ℕ) : ℝ)) ^ 2 := by
   ext h
   simp only [Real.lameSpectrum, Real.IsLameEigenfunction, Real.LameBoundary,
-      compEllIntKm_modulus_zero,
+      completeEllipticKOfParameter_modulus_zero,
     isLameSolution_modulus_zero_iff, mem_ofPred_eq, mem_range]
   constructor
   · rintro ⟨w, hw, ⟨hb0, hbK⟩, hne⟩
@@ -341,7 +342,8 @@ private lemma lameSpectrum_modulus_zero (ν : ℝ) (odd0 oddK : Bool) :
         push_cast; ring
   · rintro ⟨j, rfl⟩
     have := isLameEigenfunction_zeroModulusEigenfunction ν odd0 oddK j
-    simp only [Real.IsLameEigenfunction, Real.LameBoundary, compEllIntKm_modulus_zero,
+    simp only [Real.IsLameEigenfunction, Real.LameBoundary,
+        completeEllipticKOfParameter_modulus_zero,
       isLameSolution_modulus_zero_iff] at this
     exact ⟨_, this⟩
 
@@ -411,7 +413,8 @@ private lemma isZeroModulusSolution_eq_const_mul {h : ℝ} {odd0 : Bool} {w ψ :
     · field_simp
 
 /-- At `k = 0`, `dn(x, 0) = 1`. -/
-private lemma jacobiDnm_modulus_zero (x : ℝ) : Real.jacobiDnm x ((0 : ℝ) ^ 2) = 1 := by
+private lemma jacobiDnOfParameter_modulus_zero (x : ℝ) : Real.jacobiDnOfParameter x
+    ((0 : ℝ) ^ 2) = 1 := by
   rw [show ((0 : ℝ) ^ 2) = 0 by norm_num]
   exact (jacobi_zero_param x).2.2
 
@@ -425,10 +428,10 @@ private lemma lameEigenfunction_modulus_zero_eq {ν : ℝ} {odd0 oddK : Bool} {j
     obtain ⟨⟨hψs, ⟨hψ0, hψK⟩, hψne⟩, hψi, hψsg⟩ := hψ
     rw [isLameSolution_modulus_zero_iff] at hws hψs
     obtain ⟨c, rfl⟩ := isZeroModulusSolution_eq_const_mul hws hψs hψne hw0 hψ0
-    simp only [jacobiDnm_modulus_zero, one_mul] at hwi hψi
+    simp only [jacobiDnOfParameter_modulus_zero, one_mul] at hwi hψi
     have hc2 : c ^ 2 = 1 := by
-      have : ∫ x in (0 : ℝ)..Real.compEllIntKm ((0 : ℝ) ^ 2), (c * ψ x) ^ 2 =
-          c ^ 2 * ∫ x in (0 : ℝ)..Real.compEllIntKm ((0 : ℝ) ^ 2), ψ x ^ 2 := by
+      have : ∫ x in (0 : ℝ)..Real.completeEllipticKOfParameter ((0 : ℝ) ^ 2), (c * ψ x) ^ 2 =
+          c ^ 2 * ∫ x in (0 : ℝ)..Real.completeEllipticKOfParameter ((0 : ℝ) ^ 2), ψ x ^ 2 := by
         rw [← intervalIntegral.integral_const_mul]
         congr 1; funext x; ring
       rw [this, hψi] at hwi
@@ -491,9 +494,9 @@ private lemma isNormalizedLameEigenfunction_zeroModulusEigenfunction (ν : ℝ) 
   refine ⟨?_, ?_, ?_⟩
   · rw [lameEigenvalue_modulus_zero]; exact isLameEigenfunction_zeroModulusEigenfunction ν odd0 oddK
         j
-  · simp only [jacobiDnm_modulus_zero, one_mul, compEllIntKm_modulus_zero]
+  · simp only [jacobiDnOfParameter_modulus_zero, one_mul, completeEllipticKOfParameter_modulus_zero]
     exact integral_zeroModulusEigenfunction_sq hN oddK
-  · rw [compEllIntKm_modulus_zero, deriv_zeroModulusEigenfunction]
+  · rw [completeEllipticKOfParameter_modulus_zero, deriv_zeroModulusEigenfunction]
     have : (0 : ℝ) < ((2 * j + odd0.toNat + oddK.toNat : ℕ) : ℝ) := by
       exact_mod_cast Nat.pos_of_ne_zero hN
     cases oddK
@@ -514,7 +517,7 @@ private lemma isNormalizedLameEigenfunction_const_modulus_zero (ν : ℝ) :
   · intro h0
     have := congrFun h0 0
     simp [h2.ne'] at this
-  · simp only [jacobiDnm_modulus_zero, one_mul, compEllIntKm_modulus_zero,
+  · simp only [jacobiDnOfParameter_modulus_zero, one_mul, completeEllipticKOfParameter_modulus_zero,
         intervalIntegral.integral_const, smul_eq_mul]
     rw [div_pow, Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 2)]
     ring
@@ -523,22 +526,22 @@ private lemma isNormalizedLameEigenfunction_const_modulus_zero (ν : ℝ) :
 /-- 29.5.1: `a^m_ν(0) = m²`. Proved: at `k = 0` Lamé's equation is
 `w'' + h w = 0` on `[0, π/2]`. This is stronger than DLMF, which assumes `ν ≥ -1/2`. -/
 @[dlmf 29.5.E1]
-theorem Real.lameAk_zero' {ν : ℝ} (m : ℕ) : Real.lameAk ν m 0 = m ^ 2 := by
-  rw [Real.lameAk, lameEigenvalue_modulus_zero, Bool.toNat_false, add_zero,
+theorem Real.lameA_zero' {ν : ℝ} (m : ℕ) : Real.lameA ν m 0 = m ^ 2 := by
+  rw [Real.lameA, lameEigenvalue_modulus_zero, Bool.toNat_false, add_zero,
       two_mul_div_two_add_bodd_toNat]
 
 /-- 29.5.1: `a^m_ν(0) = m²`. Proved: at `k = 0` Lamé's equation is
 `w'' + h w = 0` on `[0, π/2]`. -/
 @[dlmf 29.5.E1]
-theorem Real.lameAk_zero {ν : ℝ} (_hν : -1 / 2 ≤ ν) (m : ℕ) : Real.lameAk ν m 0 = m ^ 2 :=
-  Real.lameAk_zero' m
+theorem Real.lameA_zero {ν : ℝ} (_hν : -1 / 2 ≤ ν) (m : ℕ) : Real.lameA ν m 0 = m ^ 2 :=
+  Real.lameA_zero' m
 
 /-- 29.5.1: `b^m_ν(0) = m²`, `m ≥ 1`. Proved: at `k = 0` Lamé's equation is
 `w'' + h w = 0` on `[0, π/2]`. This is stronger than DLMF, which assumes `ν ≥ -1/2`. -/
 @[dlmf 29.5.E1]
-theorem Real.lameBk_zero' {ν : ℝ} {m : ℕ} (hm : 1 ≤ m) :
-    Real.lameBk ν m 0 = m ^ 2 := by
-  rw [Real.lameBk, lameEigenvalue_modulus_zero, Bool.toNat_true]
+theorem Real.lameB_zero' {ν : ℝ} {m : ℕ} (hm : 1 ≤ m) :
+    Real.lameB ν m 0 = m ^ 2 := by
+  rw [Real.lameB, lameEigenvalue_modulus_zero, Bool.toNat_true]
   congr 2
   rcases Nat.even_or_odd' m with ⟨q, rfl | rfl⟩
   · obtain ⟨q, rfl⟩ : ∃ r, q = r + 1 := ⟨q - 1, by omega⟩
@@ -548,74 +551,74 @@ theorem Real.lameBk_zero' {ν : ℝ} {m : ℕ} (hm : 1 ≤ m) :
 /-- 29.5.1: `b^m_ν(0) = m²`, `m ≥ 1`. Proved: at `k = 0` Lamé's equation is
 `w'' + h w = 0` on `[0, π/2]`. -/
 @[dlmf 29.5.E1]
-theorem Real.lameBk_zero {ν : ℝ} (_hν : -1 / 2 ≤ ν) {m : ℕ} (hm : 1 ≤ m) :
-    Real.lameBk ν m 0 = m ^ 2 :=
-  Real.lameBk_zero' hm
+theorem Real.lameB_zero {ν : ℝ} (_hν : -1 / 2 ≤ ν) {m : ℕ} (hm : 1 ≤ m) :
+    Real.lameB ν m 0 = m ^ 2 :=
+  Real.lameB_zero' hm
 
 /-- 29.5.2: `Ec^0_ν(x, 0) = 2^{-1/2}`. Proved: at `k = 0` Lamé's equation is
 `w'' + h w = 0` on `[0, π/2]`. This is stronger than DLMF, which assumes `ν ≥ -1/2`. -/
 @[dlmf 29.5.E2]
-theorem Real.lameEck_zero_zero' {ν : ℝ} (x : ℝ) :
-    Real.lameEck ν 0 x 0 = 1 / Real.sqrt 2 := by
-  rw [Real.lameEck, show (0 : ℕ).bodd = false from rfl, show (0 : ℕ) / 2 = 0 from rfl,
+theorem Real.lameEc_zero_zero' {ν : ℝ} (x : ℝ) :
+    Real.lameEc ν 0 x 0 = 1 / Real.sqrt 2 := by
+  rw [Real.lameEc, show (0 : ℕ).bodd = false from rfl, show (0 : ℕ) / 2 = 0 from rfl,
     lameEigenfunction_modulus_zero_eq (isNormalizedLameEigenfunction_const_modulus_zero ν)]
 
 /-- 29.5.2: `Ec^0_ν(x, 0) = 2^{-1/2}`. Proved: at `k = 0` Lamé's equation is
 `w'' + h w = 0` on `[0, π/2]`. -/
 @[dlmf 29.5.E2]
-theorem Real.lameEck_zero_zero {ν : ℝ} (_hν : -1 / 2 ≤ ν) (x : ℝ) :
-    Real.lameEck ν 0 x 0 = 1 / Real.sqrt 2 :=
-  Real.lameEck_zero_zero' x
+theorem Real.lameEc_zero_zero {ν : ℝ} (_hν : -1 / 2 ≤ ν) (x : ℝ) :
+    Real.lameEc ν 0 x 0 = 1 / Real.sqrt 2 :=
+  Real.lameEc_zero_zero' x
 
 /-- 29.5.3: `Ec^m_ν(x, 0) = cos(m(π/2 - x))`, `m ≥ 1`. Proved: at `k = 0` Lamé's equation is
 `w'' + h w = 0` on `[0, π/2]`. This is stronger than DLMF, which assumes `ν ≥ -1/2`. -/
 @[dlmf 29.5.E3]
-theorem Real.lameEck_modulus_zero' {ν : ℝ} {m : ℕ} (hm : 1 ≤ m) (x : ℝ) :
-    Real.lameEck ν m x 0 = Real.cos (m * (π / 2 - x)) := by
+theorem Real.lameEc_modulus_zero' {ν : ℝ} {m : ℕ} (hm : 1 ≤ m) (x : ℝ) :
+    Real.lameEc ν m x 0 = Real.cos (m * (π / 2 - x)) := by
   have hN : 2 * (m / 2) + m.bodd.toNat + false.toNat = m := by
     rw [Bool.toNat_false, add_zero, two_mul_div_two_add_bodd_toNat]
-  rw [Real.lameEck, lameEigenfunction_modulus_zero_eq
+  rw [Real.lameEc, lameEigenfunction_modulus_zero_eq
       (isNormalizedLameEigenfunction_zeroModulusEigenfunction ν _ _ _ (by omega)), hN]
   simp [zeroModulusEigenfunction]
 
 /-- 29.5.3: `Ec^m_ν(x, 0) = cos(m(π/2 - x))`, `m ≥ 1`. Proved: at `k = 0` Lamé's equation is
 `w'' + h w = 0` on `[0, π/2]`. -/
 @[dlmf 29.5.E3]
-theorem Real.lameEck_modulus_zero {ν : ℝ} (_hν : -1 / 2 ≤ ν) {m : ℕ} (hm : 1 ≤ m) (x : ℝ) :
-    Real.lameEck ν m x 0 = Real.cos (m * (π / 2 - x)) :=
-  Real.lameEck_modulus_zero' hm x
+theorem Real.lameEc_modulus_zero {ν : ℝ} (_hν : -1 / 2 ≤ ν) {m : ℕ} (hm : 1 ≤ m) (x : ℝ) :
+    Real.lameEc ν m x 0 = Real.cos (m * (π / 2 - x)) :=
+  Real.lameEc_modulus_zero' hm x
 
 /-- 29.5.3: `Es^m_ν(x, 0) = sin(m(π/2 - x))`, `m ≥ 1`. Proved: at `k = 0` Lamé's equation is
 `w'' + h w = 0` on `[0, π/2]`. This is stronger than DLMF, which assumes `ν ≥ -1/2`. -/
 @[dlmf 29.5.E3]
-theorem Real.lameEsk_modulus_zero' {ν : ℝ} {m : ℕ} (hm : 1 ≤ m) (x : ℝ) :
-    Real.lameEsk ν m x 0 = Real.sin (m * (π / 2 - x)) := by
+theorem Real.lameEs_modulus_zero' {ν : ℝ} {m : ℕ} (hm : 1 ≤ m) (x : ℝ) :
+    Real.lameEs ν m x 0 = Real.sin (m * (π / 2 - x)) := by
   have hN : 2 * ((m - 1) / 2) + (!m.bodd).toNat + true.toNat = m := by
     rcases Nat.even_or_odd' m with ⟨q, rfl | rfl⟩
     · obtain ⟨q, rfl⟩ : ∃ r, q = r + 1 := ⟨q - 1, by omega⟩
       simp [Nat.bodd_mul]; omega
     · simp [Nat.bodd_mul]
-  rw [Real.lameEsk, lameEigenfunction_modulus_zero_eq
+  rw [Real.lameEs, lameEigenfunction_modulus_zero_eq
       (isNormalizedLameEigenfunction_zeroModulusEigenfunction ν _ _ _ (by omega)), hN]
   simp [zeroModulusEigenfunction]
 
 /-- 29.5.3: `Es^m_ν(x, 0) = sin(m(π/2 - x))`, `m ≥ 1`. Proved: at `k = 0` Lamé's equation is
 `w'' + h w = 0` on `[0, π/2]`. -/
 @[dlmf 29.5.E3]
-theorem Real.lameEsk_modulus_zero {ν : ℝ} (_hν : -1 / 2 ≤ ν) {m : ℕ} (hm : 1 ≤ m) (x : ℝ) :
-    Real.lameEsk ν m x 0 = Real.sin (m * (π / 2 - x)) :=
-  Real.lameEsk_modulus_zero' hm x
+theorem Real.lameEs_modulus_zero {ν : ℝ} (_hν : -1 / 2 ≤ ν) {m : ℕ} (hm : 1 ≤ m) (x : ℝ) :
+    Real.lameEs ν m x 0 = Real.sin (m * (π / 2 - x)) :=
+  Real.lameEs_modulus_zero' hm x
 
 /-- 29.5.4: `lim_{k→1⁻} a^m_ν(k²) = ν(ν+1) - μ²` with `μ = max(ν - m, 0)`. Admitted. -/
 @[dlmf 29.5.E4]
-theorem Real.tendsto_lameAk_one {ν : ℝ} (hν : -1 / 2 ≤ ν) (m : ℕ) :
-    Tendsto (fun k => Real.lameAk ν m k) (𝓝[<] 1) (𝓝 (ν * (ν + 1) - max (ν - m) 0 ^ 2)) := by
+theorem Real.tendsto_lameA_one {ν : ℝ} (hν : -1 / 2 ≤ ν) (m : ℕ) :
+    Tendsto (fun k => Real.lameA ν m k) (𝓝[<] 1) (𝓝 (ν * (ν + 1) - max (ν - m) 0 ^ 2)) := by
   sorry
 
 /-- 29.5.4: `lim_{k→1⁻} b^{m+1}_ν(k²) = ν(ν+1) - μ²` with `μ = max(ν - m, 0)`. Admitted. -/
 @[dlmf 29.5.E4]
-theorem Real.tendsto_lameBk_one {ν : ℝ} (hν : -1 / 2 ≤ ν) (m : ℕ) :
-    Tendsto (fun k => Real.lameBk ν (m + 1) k) (𝓝[<] 1)
+theorem Real.tendsto_lameB_one {ν : ℝ} (hν : -1 / 2 ≤ ν) (m : ℕ) :
+    Tendsto (fun k => Real.lameB ν (m + 1) k) (𝓝[<] 1)
       (𝓝 (ν * (ν + 1) - max (ν - m) 0 ^ 2)) := by
   sorry
 
@@ -623,18 +626,18 @@ theorem Real.tendsto_lameBk_one {ν : ℝ} (hν : -1 / 2 ≤ ν) (m : ℕ) :
 `lim_{k→1⁻} Ec^m_ν(x, k²)/Ec^m_ν(0, k²) = (cosh x)^{-μ} F(½μ - ½ν, ½μ + ½ν + ½; ½; tanh² x)`,
 `μ = max(ν - m, 0)`, real `x`. Admitted. -/
 @[dlmf 29.5.E5]
-theorem Real.tendsto_lameEck_div_one {ν : ℝ} (hν : -1 / 2 ≤ ν) {m : ℕ} (hm : Even m) (x : ℝ) :
-    Tendsto (fun k => Real.lameEck ν m x k / Real.lameEck ν m 0 k) (𝓝[<] 1)
+theorem Real.tendsto_lameEc_div_one {ν : ℝ} (hν : -1 / 2 ≤ ν) {m : ℕ} (hm : Even m) (x : ℝ) :
+    Tendsto (fun k => Real.lameEc ν m x k / Real.lameEc ν m 0 k) (𝓝[<] 1)
       (𝓝 (Real.cosh x ^ (-max (ν - m) 0) *
         ordinaryHypergeometric (max (ν - m) 0 / 2 - ν / 2) (max (ν - m) 0 / 2 + ν / 2 + 1 / 2)
           (1 / 2 : ℝ) (Real.tanh x ^ 2))) := by
   sorry
 
 /-- 29.5.5, `Es`: for even `m`, `lim_{k→1⁻} Es^{m+1}_ν(x, k²)/Es^{m+1}_ν(0, k²)` is the same
-limit as in `Real.tendsto_lameEck_div_one`. Admitted. -/
+limit as in `Real.tendsto_lameEc_div_one`. Admitted. -/
 @[dlmf 29.5.E5]
-theorem Real.tendsto_lameEsk_div_one {ν : ℝ} (hν : -1 / 2 ≤ ν) {m : ℕ} (hm : Even m) (x : ℝ) :
-    Tendsto (fun k => Real.lameEsk ν (m + 1) x k / Real.lameEsk ν (m + 1) 0 k) (𝓝[<] 1)
+theorem Real.tendsto_lameEs_div_one {ν : ℝ} (hν : -1 / 2 ≤ ν) {m : ℕ} (hm : Even m) (x : ℝ) :
+    Tendsto (fun k => Real.lameEs ν (m + 1) x k / Real.lameEs ν (m + 1) 0 k) (𝓝[<] 1)
       (𝓝 (Real.cosh x ^ (-max (ν - m) 0) *
         ordinaryHypergeometric (max (ν - m) 0 / 2 - ν / 2) (max (ν - m) 0 / 2 + ν / 2 + 1 / 2)
           (1 / 2 : ℝ) (Real.tanh x ^ 2))) := by
@@ -644,20 +647,20 @@ theorem Real.tendsto_lameEsk_div_one {ν : ℝ} (hν : -1 / 2 ≤ ν) {m : ℕ} 
 tanh x (cosh x)^{-μ} F(½μ - ½ν + ½, ½μ + ½ν + 1; 3/2; tanh² x)`, `μ = max(ν - m, 0)`.
 Admitted. -/
 @[dlmf 29.5.E6]
-theorem Real.tendsto_lameEck_div_deriv_one {ν : ℝ} (hν : -1 / 2 ≤ ν) {m : ℕ} (hm : Odd m)
+theorem Real.tendsto_lameEc_div_deriv_one {ν : ℝ} (hν : -1 / 2 ≤ ν) {m : ℕ} (hm : Odd m)
     (x : ℝ) :
-    Tendsto (fun k => Real.lameEck ν m x k / deriv (fun z => Real.lameEck ν m z k) 0) (𝓝[<] 1)
+    Tendsto (fun k => Real.lameEc ν m x k / deriv (fun z => Real.lameEc ν m z k) 0) (𝓝[<] 1)
       (𝓝 (Real.tanh x * Real.cosh x ^ (-max (ν - m) 0) *
         ordinaryHypergeometric (max (ν - m) 0 / 2 - ν / 2 + 1 / 2) (max (ν - m) 0 / 2 + ν / 2 + 1)
           (3 / 2 : ℝ) (Real.tanh x ^ 2))) := by
   sorry
 
 /-- 29.5.6, `Es`: for odd `m`, `lim_{k→1⁻} Es^{m+1}_ν(x, k²)/(dEs^{m+1}_ν/dz)(0, k²)` is the
-same limit as in `Real.tendsto_lameEck_div_deriv_one`. Admitted. -/
+same limit as in `Real.tendsto_lameEc_div_deriv_one`. Admitted. -/
 @[dlmf 29.5.E6]
-theorem Real.tendsto_lameEsk_div_deriv_one {ν : ℝ} (hν : -1 / 2 ≤ ν) {m : ℕ} (hm : Odd m)
+theorem Real.tendsto_lameEs_div_deriv_one {ν : ℝ} (hν : -1 / 2 ≤ ν) {m : ℕ} (hm : Odd m)
     (x : ℝ) :
-    Tendsto (fun k => Real.lameEsk ν (m + 1) x k / deriv (fun z => Real.lameEsk ν (m + 1) z k) 0)
+    Tendsto (fun k => Real.lameEs ν (m + 1) x k / deriv (fun z => Real.lameEs ν (m + 1) z k) 0)
       (𝓝[<] 1)
       (𝓝 (Real.tanh x * Real.cosh x ^ (-max (ν - m) 0) *
         ordinaryHypergeometric (max (ν - m) 0 / 2 - ν / 2 + 1 / 2) (max (ν - m) 0 / 2 + ν / 2 + 1)
@@ -668,20 +671,20 @@ theorem Real.tendsto_lameEsk_div_deriv_one {ν : ℝ} (hν : -1 / 2 ≤ ν) {m :
 `Ec^m_ν(x, k²) → ce_m(π/2 - x, θ)` (Mathieu function, §28.2(vi)), real `x`. Stated along
 sequences `(νⱼ, kⱼ)`. Admitted. -/
 @[dlmf 29.5.E7]
-theorem Real.tendsto_lameEck_mathieuCe {θ : ℝ} (hθ : 0 < θ) (m : ℕ) (x : ℝ) {ν k : ℕ → ℝ}
+theorem Real.tendsto_lameEc_mathieuCe {θ : ℝ} (hθ : 0 < θ) (m : ℕ) (x : ℝ) {ν k : ℕ → ℝ}
     (hν : Tendsto ν atTop atTop) (hk : Tendsto k atTop (𝓝[>] 0))
     (hνk : ∀ j, k j ^ 2 * (ν j * (ν j + 1)) = 4 * θ) :
-    Tendsto (fun j => (Real.lameEck (ν j) m x (k j) : ℂ)) atTop
+    Tendsto (fun j => (Real.lameEc (ν j) m x (k j) : ℂ)) atTop
       (𝓝 (DLMF.Mathieu.mathieuCe m (π / 2 - x) θ)) := by
   sorry
 
 /-- 29.5.7, `Es`: under the same limit, `Es^m_ν(x, k²) → se_m(π/2 - x, θ)`, `m ≥ 1`.
 Admitted. -/
 @[dlmf 29.5.E7]
-theorem Real.tendsto_lameEsk_mathieuSe {θ : ℝ} (hθ : 0 < θ) {m : ℕ} (hm : 1 ≤ m) (x : ℝ)
+theorem Real.tendsto_lameEs_mathieuSe {θ : ℝ} (hθ : 0 < θ) {m : ℕ} (hm : 1 ≤ m) (x : ℝ)
     {ν k : ℕ → ℝ} (hν : Tendsto ν atTop atTop) (hk : Tendsto k atTop (𝓝[>] 0))
     (hνk : ∀ j, k j ^ 2 * (ν j * (ν j + 1)) = 4 * θ) :
-    Tendsto (fun j => (Real.lameEsk (ν j) m x (k j) : ℂ)) atTop
+    Tendsto (fun j => (Real.lameEs (ν j) m x (k j) : ℂ)) atTop
       (𝓝 (DLMF.Mathieu.mathieuSe m (π / 2 - x) θ)) := by
   sorry
 

@@ -14,6 +14,7 @@ public import Mathlib.MeasureTheory.Integral.IntervalIntegral.MeanValue
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.IntegrationByParts
 public import Mathlib.MeasureTheory.Integral.IntegralEqImproper
 public import Mathlib.Topology.EMetricSpace.BoundedVariation
+public import TauCeti.MeasureTheory.Function.MetricDerivative.Variation
 
 /-!
 # Calculus of one variable (DLMF §1.4)
@@ -388,6 +389,93 @@ theorem iterate_primitive_eq_integral {f : ℝ → ℝ} (hf : Continuous f) (a b
     field_simp
 
 
+/-- The mean-value bound `‖f u - f s‖ ≤ ∫ₛᵘ ‖f'‖` for `a ≤ s ≤ u ≤ b`. -/
+private lemma norm_sub_le_integral_norm_deriv {E : Type*} [NormedAddCommGroup E]
+    [NormedSpace ℝ E] {f : ℝ → E} {a b : ℝ} (hf : ContinuousOn f (Icc a b))
+    (hd : DifferentiableOn ℝ f (Ioo a b)) (hd' : ContinuousOn (deriv f) (Ioo a b))
+    (hi : IntegrableOn (fun x => ‖deriv f x‖) (Ioo a b)) {s u : ℝ} (has : a ≤ s) (hsu : s ≤ u)
+    (hub : u ≤ b) : ‖f u - f s‖ ≤ ∫ x in s..u, ‖deriv f x‖ := by
+  have hiI : ∀ c d, a ≤ c → c ≤ d → d ≤ b →
+      IntervalIntegrable (fun x => ‖deriv f x‖) volume c d := fun c d hc hcd hd =>
+    (intervalIntegrable_iff_integrableOn_Ioo_of_le hcd).mpr (hi.mono_set (Ioo_subset_Ioo hc hd))
+  -- interior case
+  have hint : ∀ s' u', a < s' → s' ≤ u' → u' < b →
+      ‖f u' - f s'‖ ≤ ∫ x in s'..u', ‖deriv f x‖ := by
+    intro s' u' hs' hsu' hu'
+    have hderB : ∀ t ∈ Ico s' u', HasDerivWithinAt (fun t => ∫ x in s'..t, ‖deriv f x‖)
+        ‖deriv f t‖ (Ici t) t := by
+      intro t ht
+      have htab : t ∈ Ioo a b := ⟨by linarith [ht.1], by linarith [ht.2]⟩
+      refine (intervalIntegral.integral_hasDerivAt_right (hiI s' t hs'.le ht.1 (by linarith [ht.2]))
+        ?_ ?_).hasDerivWithinAt
+      · exact (hd'.norm.mono (Ioo_subset_Ioo le_rfl le_rfl)).stronglyMeasurableAtFilter
+          isOpen_Ioo t htab
+      · exact (hd'.norm.continuousAt (Ioo_mem_nhds htab.1 htab.2))
+    have key := image_norm_le_of_norm_deriv_right_le_deriv_boundary'
+      (f := fun t => f t - f s') (a := s') (b := u') (f' := deriv f)
+      (B := fun t => ∫ x in s'..t, ‖deriv f x‖) (B' := fun t => ‖deriv f t‖)
+      ((hf.mono (Icc_subset_Icc hs'.le hu'.le)).sub continuousOn_const)
+      (fun t ht => by
+        have htab : t ∈ Ioo a b := ⟨by linarith [ht.1], by linarith [ht.2]⟩
+        have h := (hd.differentiableAt (Ioo_mem_nhds htab.1 htab.2)).hasDerivAt
+        exact (h.sub_const (f s')).hasDerivWithinAt)
+      (by simp)
+      ((intervalIntegral.continuousOn_primitive_interval' (hiI s' u' hs'.le hsu' hu'.le)
+        left_mem_uIcc).mono (by rw [uIcc_of_le hsu']))
+      hderB (fun t _ => le_rfl)
+    exact key ⟨hsu', le_rfl⟩
+  rcases hsu.eq_or_lt with rfl | hsu
+  · simp
+  have hδ : 0 < (u - s) / 2 := by linarith
+  have hev : ∀ᶠ ε in 𝓝[>] (0 : ℝ), 0 < ε ∧ ε < (u - s) / 2 :=
+    eventually_mem_nhdsWithin.and
+      (eventually_nhdsWithin_of_eventually_nhds (eventually_lt_nhds hδ))
+  have hcomp : ∀ {g : ℝ → ℝ} {F : ℝ → E} {K : Set ℝ}
+      {q : ℝ}, ContinuousOn F K → q ∈ K →
+      Tendsto g (𝓝[>] 0) (𝓝 q) → (∀ᶠ ε in 𝓝[>] (0 : ℝ), g ε ∈ K) →
+      Tendsto (fun ε => F (g ε)) (𝓝[>] 0) (𝓝 (F q)) := fun {_ _ _ q} hF hq hg hgK =>
+    (hF q hq).tendsto.comp (tendsto_nhdsWithin_iff.mpr ⟨hg, hgK⟩)
+  have hcompR : ∀ {g : ℝ → ℝ} {F : ℝ → ℝ} {K : Set ℝ}
+      {q : ℝ}, ContinuousOn F K → q ∈ K →
+      Tendsto g (𝓝[>] 0) (𝓝 q) → (∀ᶠ ε in 𝓝[>] (0 : ℝ), g ε ∈ K) →
+      Tendsto (fun ε => F (g ε)) (𝓝[>] 0) (𝓝 (F q)) := fun {_ _ _ q} hF hq hg hgK =>
+    (hF q hq).tendsto.comp (tendsto_nhdsWithin_iff.mpr ⟨hg, hgK⟩)
+  have hu' : Tendsto (fun ε : ℝ => u - ε) (𝓝[>] 0) (𝓝 u) := by
+    have h : Tendsto (fun ε : ℝ => u - ε) (𝓝 0) (𝓝 (u - 0)) := tendsto_const_nhds.sub tendsto_id
+    rw [sub_zero] at h
+    exact h.mono_left nhdsWithin_le_nhds
+  have hs' : Tendsto (fun ε : ℝ => s + ε) (𝓝[>] 0) (𝓝 s) := by
+    have h : Tendsto (fun ε : ℝ => s + ε) (𝓝 0) (𝓝 (s + 0)) := tendsto_const_nhds.add tendsto_id
+    rw [add_zero] at h
+    exact h.mono_left nhdsWithin_le_nhds
+  have hL : Tendsto (fun ε => ‖f (u - ε) - f (s + ε)‖) (𝓝[>] 0) (𝓝 ‖f u - f s‖) := by
+    refine ((hcomp hf ⟨by linarith, hub⟩ hu' ?_).sub (hcomp hf ⟨has, by linarith⟩ hs' ?_)).norm
+    · filter_upwards [hev] with ε hε using ⟨by linarith [hε.2], by linarith [hε.1]⟩
+    · filter_upwards [hev] with ε hε using ⟨by linarith [hε.1], by linarith [hε.2]⟩
+  have hP := intervalIntegral.continuousOn_primitive_interval' (hiI s u has hsu.le hub)
+    (left_mem_uIcc)
+  rw [uIcc_of_le hsu.le] at hP
+  have hR : Tendsto (fun ε => ∫ x in (s + ε)..(u - ε), ‖deriv f x‖) (𝓝[>] 0)
+      (𝓝 (∫ x in s..u, ‖deriv f x‖)) := by
+    have h1 : Tendsto (fun ε => ∫ x in s..(u - ε), ‖deriv f x‖) (𝓝[>] 0)
+        (𝓝 (∫ x in s..u, ‖deriv f x‖)) := by
+      refine hcompR (F := fun t => ∫ x in s..t, ‖deriv f x‖) hP ⟨hsu.le, le_rfl⟩ hu' ?_
+      filter_upwards [hev] with ε hε using ⟨by linarith [hε.2], by linarith [hε.1]⟩
+    have h2 : Tendsto (fun ε => ∫ x in s..(s + ε), ‖deriv f x‖) (𝓝[>] 0)
+        (𝓝 (∫ x in s..s, ‖deriv f x‖)) := by
+      refine hcompR (F := fun t => ∫ x in s..t, ‖deriv f x‖) hP ⟨le_rfl, hsu.le⟩ hs' ?_
+      filter_upwards [hev] with ε hε using ⟨by linarith [hε.1], by linarith [hε.2]⟩
+    have h3 := h1.sub h2
+    rw [intervalIntegral.integral_same, sub_zero] at h3
+    refine h3.congr' ?_
+    filter_upwards [hev] with ε hε
+    exact intervalIntegral.integral_interval_sub_left
+      (hiI s (u - ε) has (by linarith [hε.2]) (by linarith [hε.1]))
+      (hiI s (s + ε) has (by linarith [hε.1]) (by linarith [hε.2]))
+  refine le_of_tendsto_of_tendsto hL hR ?_
+  filter_upwards [hev] with ε hε
+  exact hint _ _ (by linarith [hε.1]) (by linarith [hε.2]) (by linarith [hε.1])
+
 /-- DLMF 1.4.34: if `f` is continuous on `[a, b]` and continuously differentiable on `(a, b)`
 with `∫ₐᵇ ‖f'‖ < ∞`, then its total variation on `[a, b]` is `∫ₐᵇ ‖f'(x)‖ dx`. Stated for
 functions with values in any real normed space, which covers the complex case of §1.4(v). -/
@@ -397,7 +485,37 @@ theorem eVariationOn_eq_integral_norm_deriv {E : Type*} [NormedAddCommGroup E]
     (hd : DifferentiableOn ℝ f (Ioo a b)) (hd' : ContinuousOn (deriv f) (Ioo a b))
     (hi : IntegrableOn (fun x => ‖deriv f x‖) (Ioo a b)) :
     eVariationOn f (Icc a b) = ENNReal.ofReal (∫ x in a..b, ‖deriv f x‖) := by
-  sorry
+  have hconv : ∀ s u, a ≤ s → s ≤ u → u ≤ b →
+      ENNReal.ofReal (∫ x in s..u, ‖deriv f x‖) = ∫⁻ x in Ioc s u, ‖deriv f x‖ₑ := by
+    intro s u hs hsu hu
+    rw [intervalIntegral.integral_of_le hsu, ofReal_integral_eq_lintegral_ofReal]
+    · simp_rw [ofReal_norm]
+    · exact (integrableOn_Ioc_iff_integrableOn_Ioo).mpr (hi.mono_set (Ioo_subset_Ioo hs hu))
+    · exact Eventually.of_forall fun x => norm_nonneg _
+  have hedist : ∀ s ∈ uIcc a b, ∀ u ∈ uIcc a b,
+      edist (f s) (f u) ≤ ∫⁻ r in uIoc s u, ‖deriv f r‖ₑ := by
+    rw [uIcc_of_le hab]
+    intro s hs u hu
+    rcases le_total s u with hsu | hsu
+    · rw [uIoc_of_le hsu, ← hconv s u hs.1 hsu hu.2, edist_comm, edist_eq_enorm_sub,
+        ← ofReal_norm]
+      exact ENNReal.ofReal_le_ofReal
+        (norm_sub_le_integral_norm_deriv hf hd hd' hi hs.1 hsu hu.2)
+    · rw [uIoc_of_ge hsu, ← hconv u s hu.1 hsu hs.2, edist_eq_enorm_sub, ← ofReal_norm]
+      exact ENNReal.ofReal_le_ofReal
+        (norm_sub_le_integral_norm_deriv hf hd hd' hi hu.1 hsu hs.2)
+  have hfin : ∫⁻ r in uIoc a b, ‖deriv f r‖ₑ ≠ ∞ := by
+    rw [uIoc_of_le hab, ← hconv a b le_rfl hab le_rfl]
+    exact ENNReal.ofReal_ne_top
+  have hAC := TauCeti.absolutelyContinuousOnInterval_of_edist_le_lintegral hfin hedist
+  have h := hAC.eVariationOn_eq_lintegral_metricDerivative
+  rw [uIcc_of_le hab, uIoc_of_le hab] at h
+  rw [h, hconv a b le_rfl hab le_rfl]
+  refine setLIntegral_congr_fun_ae measurableSet_Ioc ?_
+  have hb : ∀ᵐ t ∂volume, t ≠ b := by simp [ae_iff]
+  filter_upwards [hb] with t htb ht
+  exact (hd.differentiableAt (Ioo_mem_nhds ht.1 (lt_of_le_of_ne ht.2 htb))).hasDerivAt
+    |>.metricDerivative_eq
 
 /-! ### §1.4(vii) Maxima and minima -/
 

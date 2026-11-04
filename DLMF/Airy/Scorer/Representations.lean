@@ -64,7 +64,7 @@ def IsAiryInhomSol (c : ℂ) (w w' : ℂ → ℂ) : Prop :=
   ∀ z, HasDerivAt w (w' z) z ∧ HasDerivAt w' (z * w z + c) z
 
 /-- A solution of the Airy equation solves the inhomogeneous equation with forcing `0`. -/
-theorem IsAiryInhomSol.of_airy {w w' : ℂ → ℂ} (h : IsAirySol w w') : IsAiryInhomSol 0 w w' :=
+theorem IsAiryInhomSol.of_airy {w w' : ℂ → ℂ} (h : IsAirySolution w w') : IsAiryInhomSol 0 w w' :=
   fun z => ⟨(h z).1, (h z).2.congr_deriv (by ring)⟩
 
 /-- The sum of solutions with forcings `c` and `d` solves the equation with forcing `c + d`. -/
@@ -85,7 +85,7 @@ theorem IsAiryInhomSol.congr_const {c d : ℂ} {f f' : ℂ → ℂ} (hf : IsAiry
 /-- Inhomogeneous Airy solutions with the same forcing are determined by their initial data. -/
 theorem IsAiryInhomSol.eq_of_initial {c : ℂ} {f f' g g' : ℂ → ℂ} (hf : IsAiryInhomSol c f f')
     (hg : IsAiryInhomSol c g g') (h0 : f 0 = g 0) (h1 : f' 0 = g' 0) (z : ℂ) : f z = g z := by
-  have hd : IsAirySol (fun w => f w - g w) (fun w => f' w - g' w) := fun w =>
+  have hd : IsAirySolution (fun w => f w - g w) (fun w => f' w - g' w) := fun w =>
     ⟨(hf w).1.sub (hg w).1, ((hf w).2.sub (hg w).2).congr_deriv (by ring)⟩
   exact sub_eq_zero.mp (hd.eq_zero (by simp [h0]) (by simp [h1]) z)
 
@@ -103,7 +103,7 @@ theorem isAiryInhomSol_scorerGi : IsAiryInhomSol (-(1 / π)) scorerGi scorerGiDe
   exact ((hasDerivAt_airyBiDeriv z).sub (hasDerivAt_scorerHiDeriv z)).congr_deriv
     (by simp only [scorerGi]; ring)
 
-/-- Rotating the argument of an inhomogeneous solution by a cube root of unity. -/
+/-- Rotating the argument of an inhomogeneous solution by a unitCube root of unity. -/
 theorem IsAiryInhomSol.rotate {c ν : ℂ} (hν : ν ^ 3 = 1) {f f' : ℂ → ℂ}
     (hf : IsAiryInhomSol c f f') :
     IsAiryInhomSol (ν ^ 2 * c) (fun z => f (z * ν)) (fun z => ν * f' (z * ν)) := by
@@ -119,7 +119,7 @@ theorem IsAiryInhomSol.rotate {c ν : ℂ} (hν : ν ^ 3 = 1) {f f' : ℂ → �
 
 /-- The third-order Wronskian of an inhomogeneous solution and two Airy solutions. -/
 lemma airyWronskian3_eq {c : ℂ} {f f' g g' h h' : ℂ → ℂ} (hf : IsAiryInhomSol c f f')
-    (hg : IsAirySol g g') (hh : IsAirySol h h') (z : ℂ) :
+    (hg : IsAirySolution g g') (hh : IsAirySolution h h') (z : ℂ) :
     airyWronskian3 f g h z = c * (g z * h' z - h z * g' z) := by
   have df : deriv f = f' := funext fun w => (hf w).1.deriv
   have dg : deriv g = g' := funext fun w => (hg w).1.deriv
@@ -127,11 +127,11 @@ lemma airyWronskian3_eq {c : ℂ} {f f' g g' h h' : ℂ → ℂ} (hf : IsAiryInh
   simp only [airyWronskian3, df, dg, dh, (hf z).2.deriv, (hg z).2.deriv, (hh z).2.deriv]
   ring
 
-/-- For a cube root of unity `ν`, `t ↦ Ai(t ν)` (with derivative `ν Ai'(t ν)`) solves the Airy
+/-- For a unitCube root of unity `ν`, `t ↦ Ai(t ν)` (with derivative `ν Ai'(t ν)`) solves the Airy
 equation. -/
-theorem isAirySol_airyAi_mul {ν : ℂ} (hν : ν ^ 3 = 1) :
-    IsAirySol (fun t => airyAi (t * ν)) (fun t => ν * airyAiDeriv (t * ν)) := by
-  have h := isAirySol_rotated hν
+theorem isAirySolution_airyAi_mul {ν : ℂ} (hν : ν ^ 3 = 1) :
+    IsAirySolution (fun t => airyAi (t * ν)) (fun t => ν * airyAiDeriv (t * ν)) := by
+  have h := isAirySolution_rotated hν
   simp only [mul_comm _ ν]
   exact h
 
@@ -239,7 +239,7 @@ theorem scorerGi_standard_system (z : ℂ) :
     airyWronskian3 (fun t => -scorerGi t) airyAi airyBi z ≠ 0 := by
   have hf : IsAiryInhomSol (1 / π) (fun t => -scorerGi t) (fun t => -scorerGiDeriv t) :=
     scorerGi_ode
-  rw [airyWronskian3_eq hf isAirySol_airyAi isAirySol_airyBi,
+  rw [airyWronskian3_eq hf isAirySolution_airyAi isAirySolution_airyBi,
     show airyAi z * airyBiDeriv z - airyBi z * airyAiDeriv z = 1 / π by
       rw [← wronskian_airyAi_airyBi z]; ring]
   have hp : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
@@ -252,8 +252,8 @@ theorem scorerHi_standard_system (z : ℂ) :
       (fun t => airyAi (t * exp (2 * π * I / 3))) z ≠ 0 := by
   have h1 : exp (-2 * π * I / 3) ^ 3 = 1 := by
     rw [show (-2 * π * I / 3 : ℂ) = -(2 * π * I / 3) by ring]; exact omega_recip_cube
-  rw [airyWronskian3_eq isAiryInhomSol_scorerHi (isAirySol_airyAi_mul h1)
-    (isAirySol_airyAi_mul omega_cube)]
+  rw [airyWronskian3_eq isAiryInhomSol_scorerHi (isAirySolution_airyAi_mul h1)
+    (isAirySolution_airyAi_mul omega_cube)]
   have hW := wronskian_airyAi_rotations z
   have hp : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
   rw [show airyAi (z * exp (-2 * π * I / 3)) * (exp (2 * π * I / 3) *
@@ -271,7 +271,7 @@ theorem scorerHi_rotated_standard_system (z : ℂ) {ε : ℝ} (hε : ε = 1 ∨ 
   have h1 : exp (ε * (2 * π * I / 3)) ^ 3 = 1 := by
     have := exp_neg_eps_cube hε'; push_cast at this; simpa using this
   have hf : IsAiryInhomSol (1 / π) _ _ := scorerHi_rotated_ode hε
-  rw [airyWronskian3_eq hf isAirySol_airyAi (isAirySol_airyAi_mul h1)]
+  rw [airyWronskian3_eq hf isAirySolution_airyAi (isAirySolution_airyAi_mul h1)]
   have hW := wronskian_airyAi_rotated z hε'
   push_cast at hW
   simp only [neg_neg] at hW
@@ -328,7 +328,7 @@ theorem scorerGi_eq_rotated_scorerHi (z : ℂ) {ε : ℝ} (hε : ε = 1 ∨ ε =
   have hε3 : (ε : ℂ) ^ 3 = ε := by rcases hε with rfl | rfl <;> norm_num
   obtain ⟨e1, -, e3, -⟩ := exp_eps_values hε
   have hR := ((isAiryInhomSol_scorerHi.rotate h1).const_mul (exp (-ε * (π * I / 3)))).add
-    ((IsAiryInhomSol.of_airy isAirySol_airyAi).const_mul (ε * I))
+    ((IsAiryInhomSol.of_airy isAirySolution_airyAi).const_mul (ε * I))
   have hc : exp (-ε * (π * I / 3)) * (exp (ε * (2 * π * I / 3)) ^ 2 * (1 / π)) + ε * I * 0 =
       -(1 / π) := by
     rw [e1, e3]; push_cast; sqrt3_ring; try (simp only [hε2, hε3]; ring_nf)
@@ -352,7 +352,7 @@ theorem scorerHi_connection (z : ℂ) {ε : ℝ} (hε : ε = 1 ∨ ε = -1) :
   have h2 : exp (-ε * (2 * π * I / 3)) ^ 3 = 1 := exp_neg_eps_cube hε
   obtain ⟨e1, e2, -, e4⟩ := exp_eps_values hε
   have hR := ((isAiryInhomSol_scorerHi.rotate h1).const_mul (exp (ε * (2 * π * I / 3)))).add
-    ((IsAiryInhomSol.of_airy (isAirySol_airyAi_mul h2)).const_mul (2 * exp (-ε * (π * I / 6))))
+    ((IsAiryInhomSol.of_airy (isAirySolution_airyAi_mul h2)).const_mul (2 * exp (-ε * (π * I / 6))))
   have hc : exp (ε * (2 * π * I / 3)) * (exp (ε * (2 * π * I / 3)) ^ 2 * (1 / π)) +
       2 * exp (-ε * (π * I / 6)) * 0 = 1 / π := by
     rw [mul_zero, add_zero, ← mul_assoc, ← pow_succ', h1, one_mul]

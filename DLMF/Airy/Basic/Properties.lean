@@ -26,10 +26,10 @@ given by explicit series.
 ## Main results
 
 * `hasDerivAt_airyAi`, `hasDerivAt_airyAiDeriv` and the Bi analogues: Airy's equation
-  `w'' = z w` (9.2.1), packaged as `isAirySol_airyAi`, `isAirySol_airyBi`;
+  `w'' = z w` (9.2.1), packaged as `isAirySolution_airyAi`, `isAirySolution_airyBi`;
 * `airyAi_zero`, `airyAiDeriv_zero`, `airyBi_zero`, `airyBiDeriv_zero` (9.2.3–9.2.6);
 * `wronskian_airyAi_airyBi`: `𝒲{Ai, Bi} = 1/π` (9.2.7);
-* `IsAirySol.eq_of_initial`: solutions of Airy's equation are determined by `w(0), w'(0)`;
+* `IsAirySolution.eq_of_initial`: solutions of Airy's equation are determined by `w(0), w'(0)`;
 * rotations by `e^{±2πi/3}`: `airyBi_eq_airyAi_omega` (9.2.10), `airyAi_mul_omega`,
   `airyAi_mul_omega_recip` (9.2.11), `airyAi_add_omega` (9.2.12), `airyBi_add_omega` (9.2.13);
 * `airyAi_conj`, `airyBi_conj`, `airyAiDeriv_ofReal_im`, `airyBiDeriv_ofReal_im`: `Ai`, `Bi`
@@ -243,15 +243,16 @@ theorem airyBiDeriv_zero :
 /-! ### Solutions of Airy's equation -/
 
 /-- `(Ai, Ai')` solves Airy's equation. -/
-theorem isAirySol_airyAi : IsAirySol airyAi airyAiDeriv :=
+theorem isAirySolution_airyAi : IsAirySolution airyAi airyAiDeriv :=
   fun z => ⟨hasDerivAt_airyAi z, hasDerivAt_airyAiDeriv z⟩
 
 /-- `(Bi, Bi')` solves Airy's equation. -/
-theorem isAirySol_airyBi : IsAirySol airyBi airyBiDeriv :=
+theorem isAirySolution_airyBi : IsAirySolution airyBi airyBiDeriv :=
   fun z => ⟨hasDerivAt_airyBi z, hasDerivAt_airyBiDeriv z⟩
 
 /-- The Wronskian of two solutions of Airy's equation is constant (DLMF 9.2(iii)). -/
-theorem IsAirySol.wronskian_eq {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f') (hg : IsAirySol g g')
+theorem IsAirySolution.wronskian_eq {f f' g g' : ℂ → ℂ} (hf : IsAirySolution f f')
+    (hg : IsAirySolution g g')
     (z : ℂ) : f z * g' z - f' z * g z = f 0 * g' 0 - f' 0 * g 0 := by
   have hd : ∀ w, HasDerivAt (fun w => f w * g' w - f' w * g w) 0 w := fun w =>
     (((hf w).1.mul (hg w).2).sub ((hf w).2.mul (hg w).1)).congr_deriv (by ring)
@@ -276,7 +277,7 @@ theorem Gamma_one_third_mul_Gamma_two_thirds :
 @[dlmf 9.2.E7]
 theorem wronskian_airyAi_airyBi (z : ℂ) :
     airyAi z * airyBiDeriv z - airyAiDeriv z * airyBi z = 1 / π := by
-  rw [isAirySol_airyAi.wronskian_eq isAirySol_airyBi z, airyAi_zero, airyAiDeriv_zero,
+  rw [isAirySolution_airyAi.wronskian_eq isAirySolution_airyBi z, airyAi_zero, airyAiDeriv_zero,
     airyBi_zero, airyBiDeriv_zero]
   have hG : Gamma (1 / 3) * Gamma (2 / 3) ≠ 0 := by
     rw [Gamma_one_third_mul_Gamma_two_thirds]
@@ -319,10 +320,11 @@ theorem wronskian_airyAi_airyBi (z : ℂ) :
         ring
 
 /-- A solution of Airy's equation with vanishing initial data vanishes identically. -/
-theorem IsAirySol.eq_zero {f f' : ℂ → ℂ} (hf : IsAirySol f f') (h0 : f 0 = 0) (h1 : f' 0 = 0)
+theorem IsAirySolution.eq_zero {f f' : ℂ → ℂ} (hf : IsAirySolution f f') (h0 : f 0 = 0)
+    (h1 : f' 0 = 0)
     (z : ℂ) : f z = 0 := by
-  have h₁ := hf.wronskian_eq isAirySol_airyAi z
-  have h₂ := hf.wronskian_eq isAirySol_airyBi z
+  have h₁ := hf.wronskian_eq isAirySolution_airyAi z
+  have h₂ := hf.wronskian_eq isAirySolution_airyBi z
   have h₃ := wronskian_airyAi_airyBi z
   simp only [h0, h1, zero_mul, sub_zero] at h₁ h₂
   have hp : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
@@ -331,13 +333,14 @@ theorem IsAirySol.eq_zero {f f' : ℂ → ℂ} (hf : IsAirySol f f') (h0 : f 0 =
   simpa [hp] using this
 
 /-- Solutions of Airy's equation are determined by their initial data. -/
-theorem IsAirySol.eq_of_initial {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f') (hg : IsAirySol g g')
+theorem IsAirySolution.eq_of_initial {f f' g g' : ℂ → ℂ} (hf : IsAirySolution f f')
+    (hg : IsAirySolution g g')
     (h0 : f 0 = g 0) (h1 : f' 0 = g' 0) (z : ℂ) : f z = g z := by
-  have hd : IsAirySol (fun w => f w - g w) (fun w => f' w - g' w) := fun w =>
+  have hd : IsAirySolution (fun w => f w - g w) (fun w => f' w - g' w) := fun w =>
     ⟨(hf w).1.sub (hg w).1, ((hf w).2.sub (hg w).2).congr_deriv (by ring)⟩
   exact sub_eq_zero.mp (hd.eq_zero (by simp [h0]) (by simp [h1]) z)
 
-/-! ### Rotations by cube roots of unity (DLMF 9.2(iv)) -/
+/-! ### Rotations by unitCube roots of unity (DLMF 9.2(iv)) -/
 
 /-- `e^{2πi/3} = -1/2 + (√3/2) i`. -/
 theorem exp_two_pi_I_div_three :
@@ -349,7 +352,7 @@ theorem exp_two_pi_I_div_three :
   push_cast
   ring
 
-/-- `ω = e^{2πi/3}` is a cube root of unity: `ω³ = 1`. -/
+/-- `ω = e^{2πi/3}` is a unitCube root of unity: `ω³ = 1`. -/
 theorem omega_cube : exp (2 * π * I / 3) ^ 3 = 1 := by
   rw [← Complex.exp_nat_mul, show ((3 : ℕ) : ℂ) * (2 * π * I / 3) = 2 * π * I by push_cast; ring,
     exp_two_pi_mul_I]

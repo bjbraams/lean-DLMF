@@ -201,7 +201,7 @@ theorem FourierHypergeometric.PQ_hypergeometric (ν μ : ℂ) (hr : LegendreQReg
     {s : ℝ} (hs : s = 1 ∨ s = -1) :
     (s:ℂ)*π*I/2*ferrersP ν μ (Real.cos θ) + ferrersQ ν μ (Real.cos θ) =
       Real.sqrt π*Gamma (ν+μ+1)*(2*Real.sin θ:ℂ)^μ*exp ((s:ℂ)*(ν+μ+1)*I*θ)*
-        regularizedGaussHG (ν+μ+1) (μ+1/2) (ν+3/2) (exp ((s:ℂ)*2*I*θ)) := by
+        regularizedGaussHypergeometric (ν+μ+1) (μ+1/2) (ν+3/2) (exp ((s:ℂ)*2*I*θ)) := by
   have hσ : -s = 1 ∨ -s = -1 := by rcases hs with rfl | rfl <;> norm_num
   have hsin : 0 < Real.sin θ := Real.sin_pos_of_pos_of_lt_pi h0 hπ
   have hx : Real.cos θ ∈ Ioo (-1:ℝ) 1 := by
@@ -269,19 +269,19 @@ theorem FourierHypergeometric.PQ_hypergeometric (ν μ : ℂ) (hr : LegendreQReg
   have hsq2 : w₀^2 = exp ((s:ℂ)*2*I*θ) := by
     rw [hw₀, ← exp_nat_mul]; congr 1; push_cast; ring
   rw [key, OlverQZetaForm.rhs, hpow1, hpow2,
-      regularizedGaussHG_symm _ _ _ (show w₀^2 ∈ cutPlane from hw2),
+      regularizedGaussHypergeometric_symm _ _ _ (show w₀^2 ∈ cutPlane from hw2),
     hsq2]
   have hx : exp ((s:ℂ)*μ*π*I/2) * exp ((((s*(θ - π/2) : ℝ) : ℂ)*I)*μ) * exp ((s:ℂ)*θ*I*(ν+1)) =
       exp ((s:ℂ)*(ν+μ+1)*I*θ) := by
     rw [← exp_add, ← exp_add]; congr 1; push_cast; ring
   linear_combination (Gamma (ν+μ+1) * Real.sqrt π * (2*Real.sin θ:ℂ)^μ *
-    regularizedGaussHG (ν+μ+1) (μ+1/2) (ν+3/2) (exp ((s:ℂ)*2*I*θ))) * hx
+    regularizedGaussHypergeometric (ν+μ+1) (μ+1/2) (ν+3/2) (exp ((s:ℂ)*2*I*θ))) * hx
 
 
 /-! ### A Tannery limit for `𝐅(a, b+k; c+k; z)` -/
 
 /-- The ratio `(b+k)_n Γ(c+k)/Γ(c+k+n)` appearing in `Γ(c+k) 𝐅(a, b+k; c+k; z)`. -/
-def TanneryLimit.pochGammaRatio (b c : ℂ) (k n : ℕ) : ℂ := poch (b+k) n *
+def TanneryLimit.pochGammaRatio (b c : ℂ) (k n : ℕ) : ℂ := pochhammer (b+k) n *
     Gamma (c+k) / Gamma (c+k+n)
 
 /-- For `Re (c+k) > 0`, the recursion `q_{n+1} = q_n (b+k+n)/(c+k+n)`. -/
@@ -293,13 +293,13 @@ theorem TanneryLimit.pochGammaRatio_succ (b c : ℂ) {k : ℕ} (hk : 0 < (c+k).r
   have hG : Gamma (c+k+n) ≠ 0 := Gamma_ne_zero_of_re_pos hre
   have e : Gamma (c+k+((n+1:ℕ):ℂ)) = (c+k+n) * Gamma (c+k+n) := by
     rw [show c+k+((n+1:ℕ):ℂ) = (c+k+n)+1 by push_cast; ring, Gamma_add_one _ h1]
-  simp only [TanneryLimit.pochGammaRatio, poch, ascPochhammer_succ_eval, e]
+  simp only [TanneryLimit.pochGammaRatio, pochhammer, ascPochhammer_succ_eval, e]
   field_simp
 
 /-- For `Re (c+k) > 0`, `q_0 = 1`. -/
 theorem TanneryLimit.pochGammaRatio_zero (b c : ℂ) {k : ℕ} (hk : 0 < (c+k).re) :
     TanneryLimit.pochGammaRatio b c k 0 = 1 := by
-  simp [TanneryLimit.pochGammaRatio, poch, Gamma_ne_zero_of_re_pos hk]
+  simp [TanneryLimit.pochGammaRatio, pochhammer, Gamma_ne_zero_of_re_pos hk]
 
 /-- `(k+β)/(k+γ) → 1`. -/
 theorem TanneryLimit.ratio_tendsto (β γ : ℂ) :
@@ -375,24 +375,26 @@ theorem TanneryLimit.tannery (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
   have hlim := hasSum_one_sub_cpow_neg a hz
   rw [← hlim.tsum_eq]
   have key : ∀ k : ℕ, Gamma (c+k) * regularizedGaussHGFun a (b+k) (c+k) z =
-      ∑' n : ℕ, poch a n / n.factorial * z^n * TanneryLimit.pochGammaRatio b c k n := by
+      ∑' n : ℕ, pochhammer a n / n.factorial * z^n * TanneryLimit.pochGammaRatio b c k n := by
     intro k
-    rw [regularizedGaussHGFun_eq_tsum, ← tsum_mul_left]
+    rw [regularizedGaussHypergeometricFun_eq_tsum, ← tsum_mul_left]
     congr 1; funext n
-    simp only [TanneryLimit.pochGammaRatio, poch]; ring
+    simp only [TanneryLimit.pochGammaRatio, pochhammer]; ring
   simp only [key]
   refine tendsto_tsum_of_dominated_convergence hS (fun n => ?_) ?_
-  · have := (TanneryLimit.pochGammaRatio_tendsto b c n).const_mul (poch a n / n.factorial * z^n)
+  · have := (TanneryLimit.pochGammaRatio_tendsto b c n).const_mul
+        (pochhammer a n / n.factorial * z^n)
     rwa [mul_one] at this
   · filter_upwards [TanneryLimit.pochGammaRatio_bound b c hε] with k hk n
     rw [norm_mul, norm_mul, norm_mul, norm_div, norm_div, norm_pow, norm_pow, Complex.norm_real,
       Real.norm_of_nonneg hr0, show r^n = (1+ε)^n * ‖z‖^n from mul_pow _ _ _]
-    have h1 := DLMF.OrthogonalPolynomials.norm_poch_le_norm_poch_norm a n
+    have h1 := DLMF.OrthogonalPolynomials.norm_pochhammer_le_norm_pochhammer_norm a n
     have h2 := hk n
     have : 0 ≤ ‖z‖^n := by positivity
     have : 0 ≤ ‖((n.factorial : ℕ) : ℂ)‖ := norm_nonneg _
-    calc ‖poch a n‖ / ‖((n.factorial : ℕ) : ℂ)‖ * ‖z‖^n * ‖TanneryLimit.pochGammaRatio b c k n‖
-        ≤ ‖poch (‖a‖:ℂ) n‖ / ‖((n.factorial : ℕ) : ℂ)‖ * ‖z‖^n * (1+ε)^n := by gcongr
+    calc ‖pochhammer a n‖ / ‖((n.factorial : ℕ) : ℂ)‖ * ‖z‖^n *
+           ‖TanneryLimit.pochGammaRatio b c k n‖
+        ≤ ‖pochhammer (‖a‖:ℂ) n‖ / ‖((n.factorial : ℕ) : ℂ)‖ * ‖z‖^n * (1+ε)^n := by gcongr
       _ = _ := by ring
 
 /-! ### Terminating and Pincherle-type continued fractions -/
@@ -400,18 +402,19 @@ theorem TanneryLimit.tannery (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
 /-- Up to the first vanishing partial numerator `a_K`, the project's continuants are Mathlib's. -/
 theorem ContinuedFraction.continuants_eq {a b : ℕ → ℂ} {K : ℕ} (ha : ∀ k, 1 ≤ k → k < K → a k ≠ 0)
     (n : ℕ) (hn : n ≤ K) :
-    DLMF.Core.cfContinuants a b 0 n =
+    DLMF.Core.continuedFractionContinuants a b 0 n =
       ((GenContFract.ofFun 0 a b).nums n,
           (GenContFract.ofFun 0 a b).dens n, false) := by
   induction n using Nat.strong_induction_on with
   | _ n ih =>
     rcases n with _ | _ | n
-    · simp [DLMF.Core.cfContinuants]; rfl
-    · simp [DLMF.Core.cfContinuants, GenContFract.ofFun_nums_one, GenContFract.ofFun_dens_one]
+    · simp [DLMF.Core.continuedFractionContinuants]; rfl
+    · simp [DLMF.Core.continuedFractionContinuants, GenContFract.ofFun_nums_one,
+          GenContFract.ofFun_dens_one]
     · have h1 := ih (n + 1) (by omega) (by omega)
       have h0 := ih n (by omega) (by omega)
       have han : a (n + 1) ≠ 0 := ha (n + 1) (by omega) (by omega)
-      rw [DLMF.Core.cfContinuants, h1, h0, GenContFract.ofFun_nums_add_two,
+      rw [DLMF.Core.continuedFractionContinuants, h1, h0, GenContFract.ofFun_nums_add_two,
           GenContFract.ofFun_dens_add_two]
       simp [han, GenContFract.nextConts, GenContFract.nextNum, GenContFract.nextDen]
 
@@ -419,25 +422,25 @@ theorem ContinuedFraction.continuants_eq {a b : ℕ → ℂ} {K : ℕ} (ha : ∀
 fraction freezes at the `K`-th Mathlib convergent. -/
 theorem ContinuedFraction.tail_freeze {a b : ℕ → ℂ} {K : ℕ} (hK : 1 ≤ K)
     (ha : ∀ k, 1 ≤ k → k < K → a k ≠ 0) (haK : a K = 0) {N : ℕ} (hN : K ≤ N) :
-    DLMF.Core.cfTail a b 0 N = (GenContFract.ofFun 0 a b).convs K := by
-  have hfr : ∀ j, DLMF.Core.cfContinuants a b 0 (K + 1 + j) =
+    DLMF.Core.continuedFractionTail a b 0 N = (GenContFract.ofFun 0 a b).convs K := by
+  have hfr : ∀ j, DLMF.Core.continuedFractionContinuants a b 0 (K + 1 + j) =
       ((GenContFract.ofFun 0 a b).nums K,
           (GenContFract.ofFun 0 a b).dens K, true) := by
     intro j
     induction j with
     | zero =>
       obtain ⟨m, rfl⟩ : ∃ m, K = m + 1 := ⟨K - 1, by omega⟩
-      rw [show m + 1 + 1 + 0 = m + 2 by ring, DLMF.Core.cfContinuants,
+      rw [show m + 1 + 1 + 0 = m + 2 by ring, DLMF.Core.continuedFractionContinuants,
         ContinuedFraction.continuants_eq ha (m + 1) le_rfl]
       simp [haK]
     | succ j ih =>
-      rw [show K + 1 + (j + 1) = (K + j) + 2 by ring, DLMF.Core.cfContinuants,
+      rw [show K + 1 + (j + 1) = (K + j) + 2 by ring, DLMF.Core.continuedFractionContinuants,
         show K + j + 1 = K + 1 + j by ring, ih]
       simp
   rcases hN.eq_or_lt with rfl | hlt
-  · simp only [DLMF.Core.cfTail, ContinuedFraction.continuants_eq ha K le_rfl]; rfl
+  · simp only [DLMF.Core.continuedFractionTail, ContinuedFraction.continuants_eq ha K le_rfl]; rfl
   · obtain ⟨j, rfl⟩ : ∃ j, N = K + 1 + j := ⟨N - K - 1, by omega⟩
-    simp only [DLMF.Core.cfTail, hfr]; rfl
+    simp only [DLMF.Core.continuedFractionTail, hfr]; rfl
 
 /-- A terminating continued fraction (first vanishing numerator `a_K`, `K ≥ 1`) with a backward
 solution `w`, `w₀ ≠ 0`, has the value `a₀ w₁/w₀`. -/
@@ -473,19 +476,19 @@ theorem ContinuedFraction.hasContinuedFraction_of_ratio {a b w : ℕ → ℂ} (h
   unfold DLMF.Core.HasContinuedFraction
   refine h.congr fun N => ?_
   have := ContinuedFraction.continuants_eq (b := b) (K := N) (fun k _ _ => ha k) N le_rfl
-  simp only [DLMF.Core.cfTail, this]; rfl
+  simp only [DLMF.Core.continuedFractionTail, this]; rfl
 
 /-- If `a₀ = 0` every finite continued fraction has numerator `0`. -/
 theorem ContinuedFraction.continuants_fst_zero {a b : ℕ → ℂ} (h0 : a 0 = 0) (n : ℕ) :
-    (DLMF.Core.cfContinuants a b 0 n).1 = 0 := by
+    (DLMF.Core.continuedFractionContinuants a b 0 n).1 = 0 := by
   induction n using Nat.strong_induction_on with
   | _ n ih =>
     rcases n with _ | _ | n
-    · simp [DLMF.Core.cfContinuants]
-    · simp [DLMF.Core.cfContinuants, h0]
+    · simp [DLMF.Core.continuedFractionContinuants]
+    · simp [DLMF.Core.continuedFractionContinuants, h0]
     · have h1 := ih (n + 1) (by omega)
       have h2 := ih n (by omega)
-      rw [DLMF.Core.cfContinuants]
+      rw [DLMF.Core.continuedFractionContinuants]
       split_ifs
       · exact h1
       · simp [GenContFract.nextConts, GenContFract.nextNum, h1, h2]
@@ -502,7 +505,7 @@ theorem ContinuedFraction.hasContinuedFraction_of_exists_zero {a b w : ℕ → �
     rw [hK, zero_mul, zero_div]
     unfold DLMF.Core.HasContinuedFraction
     refine tendsto_const_nhds.congr fun N => ?_
-    simp only [DLMF.Core.cfTail, ContinuedFraction.continuants_fst_zero hK, zero_div]
+    simp only [DLMF.Core.continuedFractionTail, ContinuedFraction.continuants_fst_zero hK, zero_div]
   · exact ContinuedFraction.hasContinuedFraction_of_terminating h
         (fun k _ hk => Nat.find_min hex hk) hK hw hw0
 
