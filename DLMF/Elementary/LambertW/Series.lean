@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Elementary.LambertW.Asymptotics
+public import DLMF.Elementary.LambertW.GammaCoefficients
 
 /-!
 # Series, asymptotic expansions and integrals of Lambert W
@@ -497,7 +498,8 @@ theorem lambertC_stirling (n : ℕ) :
 theorem lambertC_hasSum {t : ℂ} (ht : ‖t‖ < 2 * Real.sqrt Real.pi) :
     ∃ w : ℂ, HasSum (fun n : ℕ => (-1 : ℂ) ^ ((n : ℤ) - 1) * lambertC n * t ^ n) w ∧
       w * Complex.exp w = -Complex.exp (-1 - t ^ 2 / 2) := by
-  sorry
+  exact ⟨-exp (DLMF.Confluent.gammaUniformInverseLog (-t)),
+    hasSum_lambertC_inverse ht, lambertC_inverse_equation ht⟩
 
 /-- The signs of the real parameter select the two real inverse branches. -/
 @[dlmf 4.13.E6]
@@ -505,7 +507,8 @@ theorem lambertC_real_branches {t : ℝ} (ht : |t| < 2 * Real.sqrt Real.pi) :
     HasSum (fun n : ℕ => (-1 : ℂ) ^ ((n : ℤ) - 1) * lambertC n * (t : ℂ) ^ n)
       (if 0 ≤ t then lambertW 0 (-Real.exp (-1 - t ^ 2 / 2))
        else lambertW (-1) (-Real.exp (-1 - t ^ 2 / 2))) := by
-  sorry
+  have h := hasSum_lambertC_inverse (t := (t : ℂ)) (by simpa using ht)
+  rwa [lambertC_inverse_ofReal ht] at h
 
 /-- Unfolding the defining recurrence of `lambertD` at `m + 2`. -/
 private lemma lambertD_add_two (m : ℕ) : lambertD (m + 2) =

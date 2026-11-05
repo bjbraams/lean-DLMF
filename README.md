@@ -6,6 +6,17 @@ Roy, *Special Functions* (1999), henceforth AAR, and was renamed from lean-AAR t
 on 2026-10-21, when the DLMF chapters became its organizing principle. AAR, Temme,
 Beals–Wong and Duverney remain supporting sources.
 
+The [2026-11-05 proof round](REVIEW.md#parallel-dlmf-proof-round-2026-11-05) removes
+25 further direct admissions, leaving **1,008**. Its [manifest](ProofRound20261105.json)
+records twelve elliptic, eight basic hypergeometric and five zeta completions, with compiled
+axiom audits and validation. Existing statements and definition bodies are preserved.
+
+Both [approved Chapter 17 repairs](REVIEW.md#approved-chapter-17-statement-repairs-2026-11-05)
+are now proved: Fine's corrected first transformation and the cancelled q-Dixon summation,
+with the literal q-Dixon quotient retained under its nonzero-denominator hypothesis.
+The [preceding proof round](REVIEW.md#parallel-dlmf-proof-round-2026-11-04) removed 25 admissions;
+its [manifest](ProofRound20261104.json) remains the record of that earlier work.
+
 ## Organization
 
 The older areas follow the chapter arrangement of AAR; the newer ones are organized by DLMF
@@ -15,8 +26,8 @@ umbrella module `DLMF/<Area>.lean` describes what Mathlib already provides and w
 area adds. Statements taken from the DLMF record their equation numbers with Mathlib's
 `@[dlmf]` cross-reference attribute.
 
-`DLMF.lean` imports all areas. The current library has 1,210 Lean files, including
-114 general supporting modules and the two library root entry points. Large topic modules
+`DLMF.lean` imports all areas. The current library has 1,451 Lean files, including
+157 general supporting modules and the two library root entry points. Large topic modules
 are split into mathematical subtopics; the former file remains as a small import umbrella.
 For example, `Gamma/IntegralRepresentations.lean` now imports the Hankel, Prym, Binet and
 moment modules below `Gamma/IntegralRepresentations/`.

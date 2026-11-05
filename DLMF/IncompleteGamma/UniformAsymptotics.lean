@@ -8,6 +8,7 @@ module
 public import DLMF.ErrorFunctions.AnalyticProperties
 public import DLMF.IncompleteGamma.ContinuedProperties
 public import DLMFMathlib.Analysis.Complex.StarPrimitive
+public import DLMFMathlib.Analysis.Complex.PowerSeriesOperations
 public import Mathlib.Topology.Homotopy.Lifting
 public import TauCeti.Topology.Covering.Proper
 
@@ -962,28 +963,62 @@ theorem gammaUniformAlpha_hasSum {η : ℂ} (hη : ‖η‖ < 2*Real.sqrt π) :
   simp only [gammaUniformAlpha, sub_zero, smul_eq_mul, div_eq_mul_inv]
   ring
 
+/-- The exponential of the inverse saddle coordinate satisfies `f'(η)(f(η)-1)=ηf(η)`
+on the full Maclaurin disk. -/
+theorem deriv_exp_gammaUniformInverseLog_mul_sub_one {η : ℂ}
+    (hη : ‖η‖ < 2 * Real.sqrt π) :
+    deriv (fun η => exp (gammaUniformInverseLog η)) η *
+      (exp (gammaUniformInverseLog η) - 1) = η * exp (gammaUniformInverseLog η) := by
+  have hf := (gammaUniformInverseLog_spec.2.2 η hη).1.hasDerivAt
+  have h1 := ((hf.cexp.sub_const 1).sub hf)
+  have he : (fun z => exp (gammaUniformInverseLog z)-1-gammaUniformInverseLog z) =ᶠ[𝓝 η]
+      fun z => z^2/2 := by
+    filter_upwards [Metric.isOpen_ball.mem_nhds
+        (show η ∈ Metric.ball 0 (2*Real.sqrt π) by simpa using hη)] with z hz
+    obtain ⟨_, hs, he⟩ := gammaUniformInverseLog_spec.2.2 z (by simpa using hz)
+    simpa only [he] using (gammaUniformEta_equation hs).symm
+  have h2 : HasDerivAt (fun z : ℂ => z^2/2) η η := by
+    convert ((hasDerivAt_id η).fun_pow 2).div_const 2 using 1 <;> simp
+  have h := h1.unique (h2.congr_of_eventuallyEq he)
+  rw [hf.cexp.deriv]
+  linear_combination exp (gammaUniformInverseLog η)*h
+
+/-- The constant inverse-series coefficient is one. -/
+@[simp]
+theorem gammaUniformAlpha_zero : gammaUniformAlpha 0 = 1 := by
+  simp [gammaUniformAlpha, gammaUniformInverseLog_spec.1]
+
+/-- The linear inverse-series coefficient is one. -/
+@[simp]
+theorem gammaUniformAlpha_one : gammaUniformAlpha 1 = 1 := by
+  have hd := (gammaUniformInverseLog_spec.2.2 0
+    (by simp; positivity)).1.hasDerivAt.cexp
+  simpa [gammaUniformAlpha, gammaUniformInverseLog_spec.1,
+    gammaUniformInverseLog_spec.2.1] using hd.deriv
+
+/-- The inverse-series coefficients satisfy the quadratic branch-point recurrence. -/
+theorem gammaUniformAlpha_recurrence (n : ℕ) :
+    gammaUniformAlpha (n + 2) = gammaUniformAlpha (n + 1) / (n + 3 : ℂ) - 1 / 2 *
+      ∑ k ∈ Finset.range n, gammaUniformAlpha (k + 2) * gammaUniformAlpha (n + 1 - k) := by
+  have ha : AnalyticAt ℂ (fun η => exp (gammaUniformInverseLog η)) 0 := by
+    have hd : DifferentiableOn ℂ (fun η => exp (gammaUniformInverseLog η))
+        (Metric.ball 0 (2 * Real.sqrt π)) := by
+      intro z hz
+      exact ((gammaUniformInverseLog_spec.2.2 z (by simpa using hz)).1.cexp).differentiableWithinAt
+    exact hd.analyticOnNhd Metric.isOpen_ball 0 (by simp; positivity)
+  apply Complex.taylorCoeff_recurrence_of_deriv_mul_sub_one ha (fun _ => rfl)
+    gammaUniformAlpha_zero gammaUniformAlpha_one
+  filter_upwards [Metric.ball_mem_nhds (0 : ℂ)
+      (show 0 < 2 * Real.sqrt π by positivity)] with z hz
+  exact deriv_exp_gammaUniformInverseLog_mul_sub_one (by simpa using hz)
+
 /-- Estimate under the stated parameter and domain assumptions: `∀ n < 6, gammaUniformAlpha
 (n+3)=([1/36,-1/270,1/4320,1/17010,-139/5443200,1/204120] : List ℂ)[n]!`. -/
 @[dlmf 8.12.E14]
 theorem gammaUniformAlpha_printed  :
     ∀ n < 6, gammaUniformAlpha
         (n+3)=([1/36, -1/270, 1/4320, 1/17010, -139/5443200, 1/204120] : List ℂ)[n]! := by
-  have hode {η : ℂ} (hη : ‖η‖ < 2*Real.sqrt π) :
-      deriv (fun η => exp (gammaUniformInverseLog η)) η *
-        (exp (gammaUniformInverseLog η)-1) = η*exp (gammaUniformInverseLog η) := by
-    have hf := (gammaUniformInverseLog_spec.2.2 η hη).1.hasDerivAt
-    have h1 := ((hf.cexp.sub_const 1).sub hf)
-    have he : (fun z => exp (gammaUniformInverseLog z)-1-gammaUniformInverseLog z) =ᶠ[𝓝 η]
-        fun z => z^2/2 := by
-      filter_upwards [Metric.isOpen_ball.mem_nhds
-          (show η ∈ Metric.ball 0 (2*Real.sqrt π) by simpa using hη)] with z hz
-      obtain ⟨_, hs, he⟩ := gammaUniformInverseLog_spec.2.2 z (by simpa using hz)
-      simpa only [he] using (gammaUniformEta_equation hs).symm
-    have h2 : HasDerivAt (fun z : ℂ => z^2/2) η η := by
-      convert ((hasDerivAt_id η).fun_pow 2).div_const 2 using 1 <;> simp
-    have h := h1.unique (h2.congr_of_eventuallyEq he)
-    rw [hf.cexp.deriv]
-    linear_combination exp (gammaUniformInverseLog η)*h
+  have hode := @deriv_exp_gammaUniformInverseLog_mul_sub_one
   let f : ℂ → ℂ := fun η => exp (gammaUniformInverseLog η)
   have hd : DifferentiableOn ℂ f (Metric.ball 0 (2*Real.sqrt π)) := by
     intro z hz

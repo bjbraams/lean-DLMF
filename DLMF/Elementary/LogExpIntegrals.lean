@@ -10,6 +10,8 @@ public import DLMF.Confluent.Relations
 public import DLMF.Core.Basic
 public import DLMF.IncompleteGamma.FractionTools
 public import DLMF.Elementary.OddContinuedFraction
+public import DLMF.Elementary.LogarithmContinuedFraction
+public import DLMF.Elementary.LogarithmContraction
 public import Mathlib.Analysis.SpecialFunctions.Complex.LogDeriv
 
 /-!
@@ -57,7 +59,7 @@ theorem log_one_add_continuedFraction {z : ℂ} (hz : 1 + z ∈ Complex.slitPlan
     DLMF.Core.HasContinuedFraction
       (fun k => if k = 0 then z else (((k + 1) / 2 : ℕ) : ℂ) ^ 2 * z)
       (fun k => (k + 1 : ℂ)) (Complex.log (1 + z)) := by
-  sorry
+  exact LogarithmContraction.hasContinuedFraction_log_one_add hz
 
 /-- Odd logarithm fraction outside the two real exterior rays. -/
 @[dlmf 4.9.E2]
@@ -65,7 +67,7 @@ theorem log_ratio_continuedFraction {z : ℂ} (hz : z.im ≠ 0 ∨ |z.re| < 1) :
     DLMF.Core.HasContinuedFraction
       (fun k => if k = 0 then 2 * z else -(k : ℂ) ^ 2 * z ^ 2)
       (fun k => (2 * k + 1 : ℂ)) (Complex.log ((1 + z) / (1 - z))) := by
-  sorry
+  exact LogarithmContinuedFraction.hasContinuedFraction_log_ratio hz
 
 section ExpFractions
 

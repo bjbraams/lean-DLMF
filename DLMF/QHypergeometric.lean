@@ -5,16 +5,26 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
+public import DLMF.QHypergeometric.TerminatingQuadraticTransformation
+public import DLMF.QHypergeometric.FiniteBilateralTransformations
+public import DLMF.QHypergeometric.FiniteDifferenceRational
+public import DLMF.QHypergeometric.ParitySummation
+
 public import DLMF.QHypergeometric.Appell
 public import DLMF.QHypergeometric.BaileyPairs
 public import DLMF.QHypergeometric.Convergence
+public import DLMF.QHypergeometric.Dixon
 public import DLMF.QHypergeometric.BasicSummations
+public import DLMF.QHypergeometric.BasicSummations.FineCounterexample
+public import DLMF.QHypergeometric.BasicSummations.HeineClassicalLimits
+public import DLMF.QHypergeometric.BasicSummations.RogersFine
 public import DLMF.QHypergeometric.BilateralSummations
 public import DLMF.QHypergeometric.BilateralTransformations
 public import DLMF.QHypergeometric.Calculus
 public import DLMF.QHypergeometric.ConstantTerms
 public import DLMF.QHypergeometric.Elementary
 public import DLMF.QHypergeometric.HigherSummations
+public import DLMF.QHypergeometric.HigherSummationCounterexamples
 public import DLMF.QHypergeometric.Integrals
 public import DLMF.QHypergeometric.MathlibCoverage
 public import DLMF.QHypergeometric.SearsTransformation

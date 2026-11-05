@@ -303,7 +303,7 @@ private lemma one_sub_mul_sin_sq_mem_slitPlane_of_le {φ θ : ℝ} (h1 : φ ≤ 
 
 /-- The function `(fun θ : ℝ => (1 - w * (Real.sin θ : ℂ) ^ 2) ^ s)` is continuous on `(uIcc 0
 φ)`. -/
-private lemma continuousOn_one_sub_mul_sin_sq_cpow {φ : ℝ} (h0 : 0 ≤ φ) (h1 : φ ≤ π / 2) {w : ℂ}
+theorem continuousOn_one_sub_mul_sin_sq_cpow {φ : ℝ} (h0 : 0 ≤ φ) (h1 : φ ≤ π / 2) {w : ℂ}
     (hk : 1 - w * (Real.sin φ : ℂ) ^ 2 ∈ slitPlane) (s : ℂ) :
     ContinuousOn (fun θ : ℝ => (1 - w * (Real.sin θ : ℂ) ^ 2) ^ s) (uIcc 0 φ) := by
   intro θ hθ
@@ -401,7 +401,7 @@ private lemma one_le_csc_sq {φ : ℝ} (h0 : 0 < φ) (h1 : φ ≤ π / 2) :
   nlinarith [Real.sin_le_one φ]
 
 /-- Estimate under the stated parameter and domain assumptions: `1 < 1 / Real.sin φ ^ 2`. -/
-private lemma one_lt_csc_sq {φ : ℝ} (h0 : 0 < φ) (h1 : φ < π / 2) :
+theorem one_lt_csc_sq {φ : ℝ} (h0 : 0 < φ) (h1 : φ < π / 2) :
     1 < 1 / Real.sin φ ^ 2 := by
   have hs : 0 < Real.sin φ := Real.sin_pos_of_pos_of_lt_pi h0 (by linarith [Real.pi_pos])
   have hs1 : Real.sin φ < 1 := by
@@ -848,7 +848,7 @@ theorem cot_mul_sqrt_eq_sqrt_csc_sq {φ : ℝ} (h0 : 0 < φ) (h1 : φ ≤ π / 2
 
 /-- Estimate under the stated parameter and domain assumptions: `0 < Real.arctan x ∧ Real.arctan x
 < π / 2 ∧ 1 / Real.sin (Real.arctan x) ^ 2 = 1 / x ^ 2 + 1`. -/
-private lemma arctan_mem_and_csc_sq {x : ℝ} (hx : 0 < x) :
+theorem arctan_mem_and_csc_sq {x : ℝ} (hx : 0 < x) :
     0 < Real.arctan x ∧ Real.arctan x < π / 2 ∧
       1 / Real.sin (Real.arctan x) ^ 2 = 1 / x ^ 2 + 1 := by
   refine ⟨Real.arctan_pos.mpr hx, Real.arctan_lt_pi_div_two x, ?_⟩

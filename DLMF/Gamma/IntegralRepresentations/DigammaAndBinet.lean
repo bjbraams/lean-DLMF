@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Gamma.IntegralRepresentations.PrymAndOscillatory
+public import DLMFMathlib.Analysis.SpecialFunctions.Trigonometric.BoseEinstein
 
 /-!
 # Digamma integrals and Binet's formulas (DLMF §5.9)
@@ -791,64 +792,7 @@ theorem cosh_div_sinh_half {s : ℝ} (hs : 0 < s) :
 `cot_series_rep'` at the imaginary point `x = i s/(2π)`. -/
 theorem hasSum_binetBeta {s : ℝ} (hs : 0 < s) :
     HasSum (fun m : ℕ => 2 * s / (s ^ 2 + (2 * π * (m + 1)) ^ 2)) (binetBeta s) := by
-  set f : ℕ → ℝ := fun m => 2 * s / (s ^ 2 + (2 * π * (m + 1)) ^ 2) with hf
-  set c : ℂ := -(2 * π) * I with hc
-  have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
-  have hc0 : c ≠ 0 := by simp [hc, Real.pi_ne_zero]
-  have hσ : 0 < s / (2 * π) := by positivity
-  set x : ℂ := ((s / (2 * π) : ℝ) : ℂ) * I with hxdef
-  have hxim : x.im = s / (2 * π) := by rw [hxdef, mul_I_im, ofReal_re]
-  have hx : x ∈ Complex.integerComplement := by
-    rintro ⟨n, hn⟩
-    have := congrArg Complex.im hn
-    rw [hxim, intCast_im] at this
-    linarith
-  have hterm : ∀ n : ℕ, cotTerm x n = c * (f n : ℂ) := by
-    intro n
-    have hprod : (x + (n + 1)) * (x - (n + 1)) =
-        -(((s / (2 * π)) ^ 2 + ((n : ℝ) + 1) ^ 2 : ℝ) : ℂ) := by
-      simp only [hxdef]
-      push_cast
-      linear_combination ((s : ℂ) / (2 * π)) ^ 2 * I_sq
-    have hD : (0 : ℝ) < (s / (2 * π)) ^ 2 + ((n : ℝ) + 1) ^ 2 := by positivity
-    have hD' : (0 : ℝ) < s ^ 2 + (2 * π * ((n : ℝ) + 1)) ^ 2 := by positivity
-    rw [cotTerm_identity hx n, hprod]
-    simp only [hf, hc, hxdef]
-    have h1 : (((s / (2 * π)) ^ 2 + ((n : ℝ) + 1) ^ 2 : ℝ) : ℂ) ≠ 0 := by exact_mod_cast hD.ne'
-    have h2 : ((s ^ 2 + (2 * π * ((n : ℝ) + 1)) ^ 2 : ℝ) : ℂ) ≠ 0 := by exact_mod_cast hD'.ne'
-    push_cast at h1 h2 ⊢
-    field_simp
-  have hcot : (π : ℂ) * Complex.cot (π * x) - 1 / x = c * (binetBeta s : ℂ) := by
-    have hpx : (π : ℂ) * x = ((s / 2 : ℝ) : ℂ) * I := by
-      rw [hxdef, ← mul_assoc, ← ofReal_mul, show π * (s / (2 * π)) = s / 2 by
-        field_simp]
-    have hsinh : Real.sinh (s / 2) ≠ 0 := (Real.sinh_pos_iff.mpr (by linarith)).ne'
-    have hC : Real.cosh (s / 2) = (2 * binetBeta s + 2 / s) * Real.sinh (s / 2) := by
-      rw [← cosh_div_sinh_half hs]; field_simp
-    rw [hpx, Complex.cot_eq_cos_div_sin, Complex.cos_mul_I, Complex.sin_mul_I, ← ofReal_cosh,
-      ← ofReal_sinh, hC, ofReal_mul]
-    have hs0 : (s : ℂ) ≠ 0 := ofReal_ne_zero.mpr hs.ne'
-    have hsh : (Real.sinh (s / 2) : ℂ) ≠ 0 := ofReal_ne_zero.mpr hsinh
-    generalize ((Real.sinh (s / 2) : ℝ) : ℂ) = S at hsh ⊢
-    have hσ0 : ((s / (2 * π) : ℝ) : ℂ) ≠ 0 := ofReal_ne_zero.mpr hσ.ne'
-    rw [mul_comm S I, mul_div_mul_right _ _ hsh, hxdef, ← div_div, Complex.div_I,
-      Complex.div_I, hc]
-    push_cast
-    field_simp
-    ring
-  have hsumC : Summable fun n => c * (f n : ℂ) := (summable_cotTerm hx).congr hterm
-  have hsumR : Summable f := by
-    have := hsumC.mul_left c⁻¹
-    simp only [← mul_assoc, inv_mul_cancel₀ hc0, one_mul] at this
-    exact Complex.summable_ofReal.mp this
-  have h := cot_series_rep' hx
-  rw [hcot] at h
-  have hterm' : ∀ n : ℕ, 1 / (x - (n + 1)) + 1 / (x + (n + 1)) = c * (f n : ℂ) := hterm
-  simp_rw [hterm'] at h
-  rw [tsum_mul_left, ← Complex.ofReal_tsum] at h
-  have h' : binetBeta s = ∑' n, f n := by exact_mod_cast mul_left_cancel₀ hc0 h
-  rw [h']
-  exact hsumR.hasSum
+  simpa only [binetBeta] using Real.hasSum_two_mul_div_sq_add_two_pi_mul_sq hs
 
 /-- `β(s)/s = ∑ₘ 2/(s² + (2π(m+1))²)`. -/
 theorem hasSum_binetBeta_div {s : ℝ} (hs : 0 < s) :
@@ -861,61 +805,13 @@ theorem hasSum_binetBeta_div {s : ℝ} (hs : 0 < s) :
 theorem hasSum_recip_exp_two_pi_sub_one {t : ℝ} (ht : 0 < t) :
     HasSum (fun m : ℕ => Real.exp (-(2 * π * (m + 1)) * t))
       (1 / (Real.exp (2 * π * t) - 1)) := by
-  set q := Real.exp (-(2 * π * t)) with hq
-  have hq0 : 0 ≤ q := (Real.exp_pos _).le
-  have hq1 : q < 1 := Real.exp_lt_one_iff.mpr (by nlinarith [Real.pi_pos])
-  have hterm : ∀ m : ℕ, Real.exp (-(2 * π * (m + 1)) * t) = q * q ^ m := by
-    intro m
-    rw [hq, ← Real.exp_nat_mul, ← Real.exp_add]
-    congr 1
-    ring
-  have hval : 1 / (Real.exp (2 * π * t) - 1) = q * (1 - q)⁻¹ := by
-    have h1 : Real.exp (2 * π * t) * q = 1 := by rw [hq, ← Real.exp_add]; simp
-    have h2 : Real.exp (2 * π * t) - 1 ≠ 0 := (exp_sub_one_pos (by positivity)).ne'
-    have h3 : 1 - q ≠ 0 := by linarith
-    field_simp
-    linear_combination -h1
-  simp_rw [hterm, hval]
-  exact (hasSum_geometric_of_lt_one hq0 hq1).mul_left q
+  simpa using Real.hasSum_exp_neg_two_pi_mul_succ ht
 
 /-- The Laplace transforms of `cos` and `sin`. -/
 theorem integral_exp_mul_cos_sin {x t : ℝ} (hx : 0 < x) :
     ∫ s in Ioi (0 : ℝ), Real.exp (-x * s) * Real.cos (t * s) = x / (x ^ 2 + t ^ 2) ∧
       ∫ s in Ioi (0 : ℝ), Real.exp (-x * s) * Real.sin (t * s) = t / (x ^ 2 + t ^ 2) := by
-  set a : ℂ := -x + t * I with ha
-  have hare : a.re < 0 := by simp [ha]; linarith
-  have hint := integrableOn_exp_mul_complex_Ioi hare 0
-  have h := integral_exp_mul_complex_Ioi hare 0
-  simp only [ofReal_zero, mul_zero, Complex.exp_zero] at h
-  have ha0 : a ≠ 0 := fun h0 => by rw [h0, zero_re] at hare; exact lt_irrefl _ hare
-  have hd : ((x ^ 2 + t ^ 2 : ℝ) : ℂ) ≠ 0 := by
-    have : (0 : ℝ) < x ^ 2 + t ^ 2 := by positivity
-    exact_mod_cast this.ne'
-  have hval : -1 / a = ((x / (x ^ 2 + t ^ 2) : ℝ) : ℂ) + ((t / (x ^ 2 + t ^ 2) : ℝ) : ℂ) * I := by
-    have hd' : (x : ℂ) ^ 2 + (t : ℂ) ^ 2 ≠ 0 := by exact_mod_cast hd
-    have e : ((x / (x ^ 2 + t ^ 2) : ℝ) : ℂ) + ((t / (x ^ 2 + t ^ 2) : ℝ) : ℂ) * I =
-        ((x : ℂ) + t * I) / ((x : ℂ) ^ 2 + (t : ℂ) ^ 2) := by
-      push_cast; field_simp
-    rw [e, div_eq_div_iff ha0 hd', ha]
-    linear_combination (-(t : ℂ) ^ 2) * I_sq
-  rw [hval] at h
-  have hre : ∀ s : ℝ, RCLike.re (Complex.exp (a * s)) =
-      Real.exp (-x * s) * Real.cos (t * s) := by
-    intro s
-    rw [RCLike.re_to_complex, Complex.exp_re]
-    simp [ha]
-  have him : ∀ s : ℝ, RCLike.im (Complex.exp (a * s)) =
-      Real.exp (-x * s) * Real.sin (t * s) := by
-    intro s
-    rw [RCLike.im_to_complex, Complex.exp_im]
-    simp [ha]
-  constructor
-  · have := integral_re hint
-    simp_rw [hre] at this
-    rw [this, h, RCLike.re_to_complex, add_re, ofReal_re, mul_I_re, ofReal_im, neg_zero, add_zero]
-  · have := integral_im hint
-    simp_rw [him] at this
-    rw [this, h, RCLike.im_to_complex, add_im, ofReal_im, mul_I_im, ofReal_re, zero_add]
+  exact Real.integral_exp_neg_mul_cos_and_sin hx
 
 /-- Integrability on `(0, ∞)²` of `e^{-xs} e^{-at} g(st)` with `|g| ≤ 1`. -/
 theorem integrable_exp_mul_exp_prod {x a : ℝ} (hx : 0 < x) (ha : 0 < a) {g : ℝ → ℝ}

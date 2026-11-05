@@ -7,11 +7,14 @@ module
 
 public import DLMF.GeneralizedHypergeometric.Basic.PrincipalContinuationExistence
 public import DLMF.GeneralizedHypergeometric.Basic
+public import DLMF.GeneralizedHypergeometric.AnalyticProperties
 public import DLMF.Hypergeometric.Basic.GeneralizedCalculus
 public import Mathlib.RingTheory.PowerSeries.Basic
 public import DLMF.Hypergeometric.ArgumentContinuation
 public import DLMF.Hypergeometric.Solutions
 public import DLMF.QHypergeometric.Basic.SeriesProperties
+public import DLMF.QHypergeometric.ClassicalLimits.TermBounds
+public import DLMFMathlib.Analysis.Normed.Group.TanneryRatio
 public import DLMF.QHypergeometric.Basic.ShiftedFactorials
 public import DLMF.QSeries.Identities
 public import DLMF.QSeries.QExponential
@@ -422,42 +425,6 @@ theorem qPsi_split_indices {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hq : ‖q
   congr 1
   ring
 
-/-- The normalized principal-power increment tends to its exponent as the real base approaches one.
--/
-lemma tendsto_cpow_increment (a : ℂ) :
-    Tendsto (fun q : ℝ => (1 - (q : ℂ) ^ a) / (1 - (q : ℂ))) (𝓝[<] 1) (𝓝 a) := by
-  have hd : HasDerivAt (fun z : ℂ => z ^ a) a 1 := by
-    simpa using (hasDerivAt_id (1 : ℂ)).cpow_const (by simp : (1 : ℂ) ∈ slitPlane)
-  have hq : Tendsto (fun q : ℝ => (q : ℂ)) (𝓝[<] 1) (𝓝[≠] 1) := by
-    apply tendsto_nhdsWithin_iff.mpr
-    constructor
-    · exact Complex.continuous_ofReal.continuousAt.tendsto.mono_left nhdsWithin_le_nhds
-    · filter_upwards [self_mem_nhdsWithin] with q (hq : q < 1)
-      simpa using (show (q : ℂ) ≠ 1 by exact_mod_cast hq.ne)
-  have h := hd.tendsto_slope.comp hq
-  simp only [Function.comp_def, slope_def_field, Complex.one_cpow] at h
-  convert h using 1
-  ext q
-  rw [show 1 - (q : ℂ) ^ a = -((q : ℂ) ^ a - 1) by ring,
-    show 1 - (q : ℂ) = -((q : ℂ) - 1) by ring, neg_div_neg_eq]
-
-/-- A normalized finite q-Pochhammer symbol tends to the ordinary rising factorial. -/
-lemma tendsto_qPochhammer_normalized (a : ℂ) (n : ℕ) :
-    Tendsto (fun q : ℝ => qPochhammer ((q : ℂ) ^ a) q n / (1 - (q : ℂ)) ^ n)
-      (𝓝[<] 1) (𝓝 (DLMF.Hypergeometric.pochhammer a n)) := by
-  induction n with
-  | zero =>
-    simp only [qPochhammer_zero, pow_zero, div_one, DLMF.Hypergeometric.pochhammer_zero]
-    exact tendsto_const_nhds
-  | succ n ih =>
-    have h := ih.mul (tendsto_cpow_increment (a + n))
-    rw [DLMF.Hypergeometric.pochhammer_succ]
-    refine h.congr' ?_
-    filter_upwards [Ioo_mem_nhdsLT (by norm_num : (0 : ℝ) < 1)] with q hq
-    have hq0 : (q : ℂ) ≠ 0 := by exact_mod_cast hq.1.ne'
-    rw [qPochhammer_succ, pow_succ, ← Complex.cpow_natCast q n,
-      ← Complex.cpow_add _ _ hq0, mul_div_mul_comm]
-
 /-- The normalized product limit retains the order and multiplicity of upper or lower parameters. -/
 private lemma tendsto_qPochhammerList_normalized (a : List ℂ) (n : ℕ) :
     Tendsto (fun q : ℝ =>
@@ -488,23 +455,6 @@ private lemma qPhi_scaling_power {D : ℂ} (hD : D ≠ 0) (r s n : ℕ) :
   congr 1
   push_cast
   ring
-
-/-- The signs in the phase and classical argument scaling cancel for every integer exponent. -/
-private lemma qPhi_scaling_phase (q z : ℂ) (n : ℕ) (e : ℤ) :
-    (((-1 : ℂ) ^ n * q ^ DLMF.QSeries.TripleProduct.tri (n : ℤ)) ^ e) *
-        (((q - 1) ^ e * z) ^ n) =
-      q ^ (DLMF.QSeries.TripleProduct.tri (n : ℤ) * e) *
-        (1 - q) ^ ((n : ℤ) * e) * z ^ n := by
-  have he : ((q - 1) ^ e) ^ n = ((q - 1) ^ n) ^ e := by
-    simp only [← zpow_natCast, ← zpow_mul, mul_comm]
-  have hs : (-1 : ℂ) ^ n * (q - 1) ^ n = (1 - q) ^ n := by
-    rw [← mul_pow]
-    congr 1
-    ring
-  rw [mul_pow, ← mul_assoc, he, ← mul_zpow]
-  rw [show ((-1 : ℂ) ^ n * q ^ DLMF.QSeries.TripleProduct.tri (n : ℤ)) * (q - 1) ^ n =
-    q ^ DLMF.QSeries.TripleProduct.tri (n : ℤ) * (1 - q) ^ n by rw [mul_right_comm, hs]; ring]
-  rw [mul_zpow, ← zpow_mul, ← zpow_natCast (1 - q) n, ← zpow_mul]
 
 /-- A finite ordinary denominator product is nonzero when its retained factors avoid poles. -/
 private lemma pochhammerProduct_list_ne_zero {b : List ℂ} {n : ℕ}
@@ -565,7 +515,7 @@ private lemma qPhiTerm_classical_limit (a b : List ℂ) (z : ℂ) (n : ℕ)
   dsimp [A, B, Q]
   rw [hnorm a, hnorm b]
   simp only [qPhiTerm, List.length_map, qPhiExponent]
-  conv_rhs => rw [mul_assoc, qPhi_scaling_phase]
+  conv_rhs => rw [mul_assoc, ClassicalLimit.scaling_phase]
   rw [← qPhi_scaling_power hq1 a.length b.length n]
   field_simp
 
@@ -588,7 +538,34 @@ theorem qPhi_classical_limit (a b : List ℂ) (z : ℂ)
       (b.map fun bi => (q:ℂ)^bi) q (((q:ℂ)-1)^qPhiExponent a b*z))
       (𝓝[<] 1) (𝓝 (DLMF.Hypergeometric.generalizedHypergeometric (a:Multiset ℂ)
           (b:Multiset ℂ) z)) := by
-  sorry
+  let f (q : ℝ) (n : ℕ) := qPhiTerm (a.map fun x => (q : ℂ) ^ x)
+    (b.map fun x => (q : ℂ) ^ x) q (((q : ℂ) - 1) ^ qPhiExponent a b * z) n
+  have hlim : ‖(if a.length = b.length + 1 then z else 0 : ℂ)‖ < 1 := by
+    split_ifs with he
+    · exact hz he
+    · simp
+  obtain ⟨r, hrlim, hr1⟩ := exists_between hlim
+  have hr0 : 0 ≤ r := (norm_nonneg _).trans hrlim.le
+  have hratio : ∀ᶠ p : ℝ × ℕ in (𝓝[<] 1) ×ˢ atTop,
+      ‖f p.1 (p.2 + 1)‖ ≤ r * ‖f p.1 p.2‖ := by
+    filter_upwards [
+      (ClassicalLimit.tendsto_ratioMultiplier a b z hr).norm.eventually_lt_const hrlim,
+      tendsto_fst.eventually (Ioo_mem_nhdsLT (by norm_num : (0 : ℝ) < 1))] with p hp hq
+    dsimp [f]
+    rw [ClassicalLimit.qPhiTerm_succ a b hq.1 hq.2 z hr, norm_mul]
+    exact mul_le_mul_of_nonneg_right hp.le (norm_nonneg _)
+  have h := tendsto_tsum_of_ratio_norm_eventually_le hr0 hr1
+    (fun n => qPhi_coefficient_classical_limit a b z n hb) hratio
+  have hs : HasSum (fun n =>
+      DLMF.Hypergeometric.generalizedHypergeometricCoeff (a : Multiset ℂ)
+        (b : Multiset ℂ) n * z ^ n)
+      (DLMF.Hypergeometric.generalizedHypergeometric (a : Multiset ℂ) (b : Multiset ℂ) z) := by
+    by_cases he : a.length = b.length + 1
+    · exact DLMF.Hypergeometric.generalizedHypergeometric_hasSum_disk
+        (by simpa using hr) hb (hz he)
+    · exact DLMF.Hypergeometric.generalizedHypergeometric_hasSum_entire
+        (by simp only [Multiset.coe_card]; omega) hb z
+  simpa only [qPhi, hs.tsum_eq] using h
 
 /-- The finite limit retains bottom poles that occur only after the final retained term. -/
 @[dlmf 17.4.E2]

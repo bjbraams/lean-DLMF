@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Zeta.Basic.Hurwitz
+public import DLMF.Zeta.Basic.HurwitzProperties
 public import DLMF.Zeta.Basic.Polylog
 public import DLMF.Zeta.Basic.Riemann
 public import DLMF.Zeta.Basic.RiemannProperties
@@ -23,6 +24,7 @@ their basic properties.
   the derivatives, the properties of `ξ` and the bridge of `Z` to Mathlib's `hardyZ`.
 * `DLMF.Zeta.Basic.Hurwitz`: the Hurwitz zeta function `ζ(s, a)` for complex `a` by
   Euler–Maclaurin continuation, its holomorphy and the bridge to Mathlib's `hurwitzZeta`.
+* `DLMF.Zeta.Basic.HurwitzProperties`: parameter derivatives and joint holomorphy.
 * `DLMF.Zeta.Basic.Polylog`: the polylogarithm `Li_s(z)`, Lerch's transcendent `Φ(z, s, a)` and
   the Fermi–Dirac and Bose–Einstein integrals.
 -/

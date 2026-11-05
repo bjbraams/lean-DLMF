@@ -7,6 +7,7 @@ module
 
 public import DLMF.QHypergeometric.Convergence
 public import DLMF.QHypergeometric.SearsTransformation
+public import DLMF.QHypergeometric.SearsLimit
 public import DLMF.QSeries.RamanujanPsi
 public import DLMF.QSeries.Saalschutz
 public import DLMFMathlib.Analysis.SpecificLimits.PowMulPowChoose
@@ -391,7 +392,35 @@ theorem qPhi3_sears_first (a b c d e q : ℂ)
     qPhi [a,b,c] [d,e] q (d*e/(a*b*c)) =
       qProductRatioInf [e/a, d*e/(b*c)] [e, d*e/(a*b*c)] q *
           qPhi [a, d/b, d/c] [d, d*e/(b*c)] q (e/a) := by
-  sorry
+  have ha0 : a ≠ 0 := hpar a (by simp)
+  have hb0 : b ≠ 0 := hpar b (by simp)
+  have hc0 : c ≠ 0 := hpar c (by simp)
+  have hI0 : qPochhammerInf (0 : ℂ) q = 1 := by simp [qPochhammerInf]
+  by_cases he0 : e = 0
+  · subst e
+    simp [qProductRatioInf, qPochhammerListInf, hI0]
+  by_cases hd0 : d = 0
+  · subst d
+    have hEI : qPochhammerInf e q ≠ 0 := qPochhammerInf_ne_zero hq
+      fun j h => hden e (by simp) j (sub_eq_zero.mp h).symm
+    have hWI := qPochhammerInf_ne_zero_of_norm_lt_one he hq
+    have hG := one_phi_zero (a := a) hq he
+    rw [show a * (e / a) = e by field_simp] at hG
+    simp only [zero_mul, zero_div, qPhi_zero, qProductRatioInf, qPochhammerListInf,
+      List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, hI0, mul_one]
+    rw [SearsLimit.qPhi_three_two_zero_parameters, hG]
+    field_simp
+  have hz0 : d * e / (a * b * c) ≠ 0 :=
+    div_ne_zero (mul_ne_zero hd0 he0) (mul_ne_zero (mul_ne_zero ha0 hb0) hc0)
+  have hbal : d * e = a * b * c * (d * e / (a * b * c)) := by field_simp
+  have hv : a * (d * e / (a * b * c)) = d * e / (b * c) := by field_simp
+  have hreg : QDenominatorRegular [d, e, a * (d * e / (a * b * c))] q := by
+    intro x hx j
+    rw [hv] at hx
+    exact hden x (by simp only [List.mem_cons, List.not_mem_nil, or_false] at hx ⊢; tauto) j
+  have H := SearsLimit.first_transformation hq0 hq ha0 hb0 hc0 hd0 he0 hz0 hz he hbal hreg
+  simpa only [hv, qProductRatioInf, qPochhammerListInf, List.map_cons, List.map_nil,
+    List.prod_cons, List.prod_nil, mul_one] using H
 
 /-- DLMF 17.9.E7: qPhi3 sears second. -/
 @[dlmf 17.9.E7]
@@ -404,7 +433,37 @@ theorem qPhi3_sears_second (a b c d e q : ℂ)
     qPhi [a,b,c] [d,e] q (d*e/(a*b*c)) =
       qProductRatioInf [b, d*e/(a*b), d*e/(b*c)] [d, e, d*e/(a*b*c)] q *
           qPhi [d/b, e/b, d*e/(a*b*c)] [d*e/(a*b), d*e/(b*c)] q (b) := by
-  sorry
+  have ha0 : a ≠ 0 := hpar a (by simp)
+  have hb0 : b ≠ 0 := hpar b (by simp)
+  have hc0 : c ≠ 0 := hpar c (by simp)
+  have hI0 : qPochhammerInf (0 : ℂ) q = 1 := by simp [qPochhammerInf]
+  have hBI := qPochhammerInf_ne_zero_of_norm_lt_one hb hq
+  by_cases he0 : e = 0
+  · subst e
+    have hDI : qPochhammerInf d q ≠ 0 := qPochhammerInf_ne_zero hq
+      fun j h => hden d (by simp) j (sub_eq_zero.mp h).symm
+    have hG := one_phi_zero (a := d / b) hq hb
+    rw [show d / b * b = d by field_simp] at hG
+    simp only [mul_zero, zero_div, qPhi_zero, qProductRatioInf, qPochhammerListInf,
+      List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, hI0, mul_one]
+    rw [SearsLimit.qPhi_three_two_zero_parameters, hG]
+    field_simp
+  by_cases hd0 : d = 0
+  · subst d
+    have hEI : qPochhammerInf e q ≠ 0 := qPochhammerInf_ne_zero hq
+      fun j h => hden e (by simp) j (sub_eq_zero.mp h).symm
+    have hG := one_phi_zero (a := e / b) hq hb
+    rw [show e / b * b = e by field_simp] at hG
+    simp only [zero_mul, zero_div, qPhi_zero, qProductRatioInf, qPochhammerListInf,
+      List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, hI0, mul_one, one_mul]
+    rw [SearsLimit.qPhi_three_two_zero_parameters_middle, hG]
+    field_simp
+  have hz0 : d * e / (a * b * c) ≠ 0 :=
+    div_ne_zero (mul_ne_zero hd0 he0) (mul_ne_zero (mul_ne_zero ha0 hb0) hc0)
+  have hbal : d * e = a * b * c * (d * e / (a * b * c)) := by field_simp
+  have H := SearsLimit.second_transformation hq0 hq ha0 hb0 hc0 hd0 he0 hz0 hz hb hbal hden
+  simpa only [qProductRatioInf, qPochhammerListInf, List.map_cons, List.map_nil,
+    List.prod_cons, List.prod_nil, mul_one, mul_assoc] using H
 
 /-- DLMF 17.9.E8: qPhi3 terminating first. -/
 @[dlmf 17.9.E8]
@@ -589,19 +648,6 @@ theorem nonterminating_watson (a b c d e f q : ℂ)
           [a*q/b, a*q/c, a*q/d, a*q/e, a*q/f, a^2*q^2/(b*c*d*e*f), d*e*f/(a*q)] q *
           qPhi [a*q/(d*e), a*q/(d*f), a*q/(e*f), a^2*q^2/(b*c*d*e*f)]
           [a^2*q^2/(b*d*e*f), a^2*q^2/(c*d*e*f), a*q^2/(d*e*f)] q (q) := by
-  sorry
-
-/-- DLMF 17.9.E17: qPhi3 terminating quadratic. -/
-@[dlmf 17.9.E17]
-theorem qPhi3_terminating_quadratic (n : ℕ) (a b c q z : ℂ)
-    (hq : ‖q‖<1) (hq0 : q≠0)
-    (hpar : ∀ x ∈ [b,c,z], x≠0)
-    (hden : QDenominatorRegular [a*q/b,a*q/c,z,a*z,q/z] q)
-    (ha : a=q^(-(n:ℤ))) :
-    qPhi [a,b,c] [a*q/b,a*q/c] q (a*q*z/(b*c)) =
-      qProductRatioInf [a*z] [z] q *
-          qPhi [a^(1/2:ℂ), -a^(1/2:ℂ), (a*q)^(1/2:ℂ), -(a*q)^(1/2:ℂ), a*q/(b*c)]
-          [a*q/b, a*q/c, a*z, q/z] q (q) := by
   sorry
 
 /-- DLMF 17.9.E18: qPhi4 square. -/

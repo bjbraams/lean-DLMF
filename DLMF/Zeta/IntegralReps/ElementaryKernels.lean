@@ -8,6 +8,8 @@ module
 public import DLMF.Gamma.Polygamma
 public import DLMF.Gamma.PolygammaHurwitz
 public import DLMF.Zeta.Riemann
+public import DLMF.Zeta.HyperbolicIntegral
+public import DLMF.Zeta.HermiteIntegral
 public import Mathlib.NumberTheory.ModularForms.JacobiTheta.OneVariable
 
 /-!
@@ -941,7 +943,56 @@ theorem riemannZeta_eq_integral_arctan_cosh {s : ℂ} (hs1 : s ≠ 1) :
         (((1 + x ^ 2 : ℝ) : ℂ) ^ (s / 2) * cosh (π * x / 2))) (Ioi 0) ∧
       (1 - 2 ^ (1 - s)) * riemannZeta s = 2 ^ (s - 1) * ∫ x in Ioi (0 : ℝ),
         cos (s * Real.arctan x) / (((1 + x ^ 2 : ℝ) : ℂ) ^ (s / 2) * cosh (π * x / 2)) := by
-  sorry
+  have hk (z : ℂ) : HyperbolicIntegral.kernel z = fun x : ℝ =>
+      cos (z * Real.arctan x) /
+        (((1 + x ^ 2 : ℝ) : ℂ) ^ (z / 2) * cosh (π * x / 2)) := by
+    funext x
+    simp only [HyperbolicIntegral.kernel, div_div]
+    push_cast
+    rfl
+  refine ⟨by simpa only [hk] using HyperbolicIntegral.integrableOn_kernel s, ?_⟩
+  have hbase (z : ℂ) (hz : 0 < z.re) (hz1 : z ≠ 1) :
+      (1 - 2 ^ (1 - z)) * riemannZeta z =
+        2 ^ (z - 1) * ∫ x in Set.Ioi (0 : ℝ), HyperbolicIntegral.kernel z x := by
+    have h := HyperbolicIntegral.gamma_mul_integral_kernel_eq_mellin hz
+    rw [← (riemannZeta_eq_integral_exp_add_one hz hz1).2] at h
+    have h2 : (2 : ℂ) ^ (z - 1) * 2 ^ (1 - z) = 1 := by
+      rw [← cpow_add _ _ (by norm_num), show z - 1 + (1 - z) = 0 by ring, cpow_zero]
+    apply mul_left_cancel₀ (Gamma_ne_zero_of_re_pos hz)
+    calc
+      Gamma z * ((1 - 2 ^ (1 - z)) * riemannZeta z) =
+          2 ^ (z - 1) * (2 ^ (1 - z) * ((1 - 2 ^ (1 - z)) * Gamma z * riemannZeta z)) := by
+        rw [show 2 ^ (z - 1) * (2 ^ (1 - z) *
+          ((1 - 2 ^ (1 - z)) * Gamma z * riemannZeta z)) =
+          (2 ^ (z - 1) * 2 ^ (1 - z)) *
+            ((1 - 2 ^ (1 - z)) * Gamma z * riemannZeta z) by ring, h2]
+        ring
+      _ = Gamma z * (2 ^ (z - 1) * ∫ x in Set.Ioi (0 : ℝ),
+          HyperbolicIntegral.kernel z x) := by rw [← h]; ring
+  let U : Set ℂ := {1}ᶜ
+  have hU : IsOpen U := isOpen_compl_singleton
+  have hUc : IsPreconnected U :=
+    (isConnected_compl_singleton_of_one_lt_rank (by simp) (1 : ℂ)).isPreconnected
+  have hleft : DifferentiableOn ℂ (fun z => (1 - 2 ^ (1 - z)) * riemannZeta z) U := by
+    intro z hz
+    exact (((differentiableAt_const _).sub
+      (((differentiableAt_const _).sub differentiableAt_id).const_cpow
+        (Or.inl (by norm_num : (2 : ℂ) ≠ 0)))).mul
+      (differentiableAt_riemannZeta hz)).differentiableWithinAt
+  have hright : DifferentiableOn ℂ (fun z =>
+      2 ^ (z - 1) * ∫ x in Set.Ioi (0 : ℝ), HyperbolicIntegral.kernel z x) U := by
+    intro z _
+    exact (((differentiableAt_id.sub_const 1).const_cpow
+      (Or.inl (by norm_num : (2 : ℂ) ≠ 0))).mul
+      (HyperbolicIntegral.differentiable_integral_kernel z)).differentiableWithinAt
+  have hEq := (hleft.analyticOnNhd hU).eqOn_of_preconnected_of_eventuallyEq
+    (hright.analyticOnNhd hU) hUc (z₀ := 2) (by norm_num [U])
+    (show (fun z => (1 - 2 ^ (1 - z)) * riemannZeta z) =ᶠ[𝓝 (2 : ℂ)]
+        (fun z => 2 ^ (z - 1) * ∫ x in Set.Ioi (0 : ℝ), HyperbolicIntegral.kernel z x) by
+      filter_upwards [(isOpen_lt continuous_const continuous_re).mem_nhds
+        (show (1 : ℝ) < (2 : ℂ).re by norm_num)] with z hz
+      exact hbase z (by linarith) (by intro h; rw [h] at hz; norm_num at hz))
+  simpa only [hk] using hEq hs1
 
 /-- DLMF 25.5.11: for `s ≠ 1`,
 `ζ(s) = ½ + 1/(s-1) + 2 ∫₀^∞ sin(s arctan x) / ((1+x²)^{s/2} (e^{2πx} - 1)) dx`. -/
@@ -951,7 +1002,20 @@ theorem riemannZeta_eq_integral_arctan_exp_sub_one {s : ℂ} (hs1 : s ≠ 1) :
         (((1 + x ^ 2 : ℝ) : ℂ) ^ (s / 2) * (cexp (2 * π * x) - 1))) (Ioi 0) ∧
       riemannZeta s = 1 / 2 + 1 / (s - 1) + 2 * ∫ x in Ioi (0 : ℝ),
         sin (s * Real.arctan x) / (((1 + x ^ 2 : ℝ) : ℂ) ^ (s / 2) * (cexp (2 * π * x) - 1)) := by
-  sorry
+  have hk : HermiteIntegral.kernel s 1 = fun x : ℝ => sin (s * Real.arctan x) /
+      (((1 + x ^ 2 : ℝ) : ℂ) ^ (s / 2) * (cexp (2 * π * x) - 1)) := by
+    funext x
+    simp only [HermiteIntegral.kernel, div_one, one_pow]
+    push_cast
+    simp only [div_eq_mul_inv, mul_inv]
+    ring
+  refine ⟨?_, ?_⟩
+  · rw [← hk]
+    exact HermiteIntegral.integrableOn_kernel (by norm_num : (0 : ℝ) < (1 : ℂ).re) s
+  · have h := HermiteIntegral.hurwitzZetaComplex_eq_kernel
+      (a := 1) (by norm_num) hs1
+    rw [hurwitzZetaComplex_one hs1, one_cpow, one_cpow, hk] at h
+    exact h
 
 /-- DLMF 25.5.12: for `s ≠ 1`,
 `ζ(s) = 2^{s-1}/(s-1) - 2^s ∫₀^∞ sin(s arctan x) / ((1+x²)^{s/2} (e^{πx} + 1)) dx`. -/
@@ -961,7 +1025,112 @@ theorem riemannZeta_eq_integral_arctan_exp_add_one {s : ℂ} (hs1 : s ≠ 1) :
         (((1 + x ^ 2 : ℝ) : ℂ) ^ (s / 2) * (cexp (π * x) + 1))) (Ioi 0) ∧
       riemannZeta s = 2 ^ (s - 1) / (s - 1) - 2 ^ s * ∫ x in Ioi (0 : ℝ),
         sin (s * Real.arctan x) / (((1 + x ^ 2 : ℝ) : ℂ) ^ (s / 2) * (cexp (π * x) + 1)) := by
-  sorry
+  let f : ℝ → ℂ := fun x => sin (s * Real.arctan x) / ((1 + x ^ 2 : ℝ) : ℂ) ^ (s / 2)
+  let A : ℝ → ℂ := fun x => f x / (cexp (2 * π * x) - 1)
+  let B : ℝ → ℂ := fun x => f x / (cexp (π * x) - 1)
+  let C : ℝ → ℂ := fun x => f x / (cexp (π * x) + 1)
+  have hA : IntegrableOn A (Set.Ioi 0) := by
+    simpa only [A, f, div_div] using (riemannZeta_eq_integral_arctan_exp_sub_one hs1).1
+  have hpow (w : ℂ) : (1 / 2 : ℂ) ^ w = (2 : ℂ) ^ (-w) := by
+    have harg : (2 : ℂ).arg ≠ π := by
+      norm_num [arg_ofReal_of_nonneg]
+      exact Real.pi_ne_zero.symm
+    rw [one_div, inv_cpow _ _ harg, cpow_neg]
+  have hquarter : (1 / 4 : ℂ) ^ (s / 2) = (2 : ℂ) ^ (-s) := by
+    calc
+      (1 / 4 : ℂ) ^ (s / 2) = (((1 / 2 : ℝ) ^ 2 : ℝ) : ℂ) ^ (s / 2) := by norm_num
+      _ = ((1 / 2 : ℝ) : ℂ) ^ (2 * (s / 2)) :=
+        ofReal_sq_cpow (by norm_num : (0 : ℝ) < 1 / 2) (s / 2)
+      _ = (1 / 2 : ℂ) ^ s := by congr 1 <;> push_cast <;> ring
+      _ = (2 : ℂ) ^ (-s) := hpow s
+  have hscaled (x : ℝ) : HermiteIntegral.kernel s (1 / 2) ((1 / 2) * x) =
+      (2 : ℂ) ^ s * B x := by
+    have hbase : (1 / 2 : ℂ) ^ 2 + (((1 / 2 : ℝ) * x : ℝ) : ℂ) ^ 2 =
+        ((1 / 4 : ℝ) : ℂ) * ((1 + x ^ 2 : ℝ) : ℂ) := by push_cast; ring
+    have hp : ((1 / 4 : ℝ) : ℂ) ^ (s / 2) = (2 : ℂ) ^ (-s) := by
+      simpa only [ofReal_div, ofReal_one, ofReal_ofNat] using hquarter
+    have hatan : (((1 / 2 : ℝ) * x : ℝ) : ℂ) / (1 / 2 : ℂ) = x := by push_cast; ring
+    have he : ((Real.exp (2 * π * ((1 / 2) * x)) - 1 : ℝ) : ℂ) = cexp (π * x) - 1 := by
+      rw [ofReal_sub, ofReal_one, ofReal_exp]
+      congr 2
+      push_cast
+      ring
+    rw [HermiteIntegral.kernel, hbase, mul_cpow_ofReal_nonneg (by norm_num)
+      (by positivity : 0 ≤ 1 + x ^ 2), hp, hatan, he, cpow_neg]
+    rw [← ofReal_arctan]
+    dsimp [B, f]
+    simp only [div_eq_mul_inv, mul_inv, inv_inv]
+    ring
+  have hH := HermiteIntegral.integrableOn_kernel (by norm_num : (0 : ℝ) < (1 / 2 : ℂ).re) s
+  have hHscaled : IntegrableOn (fun x : ℝ => HermiteIntegral.kernel s (1 / 2) ((1 / 2) * x))
+      (Set.Ioi 0) :=
+    (integrableOn_Ioi_comp_mul_left_iff (HermiteIntegral.kernel s (1 / 2)) 0
+      (by norm_num : (0 : ℝ) < 1 / 2)).mpr (by simpa using hH)
+  have htwo : (2 : ℂ) ^ s ≠ 0 := cpow_ne_zero_iff.mpr (Or.inl (by norm_num))
+  have hB : IntegrableOn B (Set.Ioi 0) := by
+    refine IntegrableOn.congr_fun (hHscaled.const_mul (((2 : ℂ) ^ s)⁻¹)) ?_ measurableSet_Ioi
+    intro x _
+    change ((2 : ℂ) ^ s)⁻¹ * HermiteIntegral.kernel s (1 / 2) ((1 / 2) * x) = B x
+    rw [hscaled, ← mul_assoc, inv_mul_cancel₀ htwo, one_mul]
+  have hscaleIntegral : (2 : ℂ) ^ s * (∫ x in Set.Ioi (0 : ℝ), B x) =
+      2 * ∫ x in Set.Ioi (0 : ℝ), HermiteIntegral.kernel s (1 / 2) x := by
+    have hi := integral_comp_mul_left_Ioi (HermiteIntegral.kernel s (1 / 2)) 0
+      (by norm_num : (0 : ℝ) < 1 / 2)
+    simp only [mul_zero, Complex.real_smul] at hi
+    rw [show (∫ x in Set.Ioi (0 : ℝ), HermiteIntegral.kernel s (1 / 2) ((1 / 2) * x)) =
+      (2 : ℂ) ^ s * ∫ x in Set.Ioi (0 : ℝ), B x from by
+        simp_rw [hscaled]; rw [integral_const_mul]] at hi
+    simpa using hi
+  have hCeq (x : ℝ) (hx : x ∈ Set.Ioi 0) : C x = B x - 2 * A x := by
+    have hx' : 0 < x := hx
+    have hE : 1 < Real.exp (π * x) := Real.one_lt_exp_iff.mpr (by positivity)
+    have hm : cexp (π * x) - 1 ≠ 0 := by
+      rw [← ofReal_mul, ← ofReal_exp, ← ofReal_one, ← ofReal_sub]
+      exact_mod_cast (sub_pos.mpr hE).ne'
+    have hp : cexp (π * x) + 1 ≠ 0 := by
+      have heq : cexp (π * x) + 1 = ((Real.exp (π * x) + 1 : ℝ) : ℂ) := by
+        push_cast; rfl
+      rw [heq]
+      exact_mod_cast (show 0 < Real.exp (π * x) + 1 by positivity).ne'
+    have he : cexp (2 * π * x) = cexp (π * x) ^ 2 := by
+      rw [← Complex.exp_nat_mul]
+      congr 1
+      push_cast
+      ring
+    have hsq : cexp (π * x) ^ 2 - 1 ≠ 0 := by
+      rw [show cexp (π * x) ^ 2 - 1 = (cexp (π * x) - 1) *
+        (cexp (π * x) + 1) by ring]
+      exact mul_ne_zero hm hp
+    dsimp [C, B, A]
+    rw [he]
+    field_simp
+    ring
+  have hC : IntegrableOn C (Set.Ioi 0) :=
+    IntegrableOn.congr_fun (hB.sub (hA.const_mul 2)) (fun x hx => (hCeq x hx).symm)
+      measurableSet_Ioi
+  have hIC : (∫ x in Set.Ioi (0 : ℝ), C x) = (∫ x in Set.Ioi (0 : ℝ), B x) -
+      2 * ∫ x in Set.Ioi (0 : ℝ), A x := by
+    rw [setIntegral_congr_fun measurableSet_Ioi hCeq,
+      integral_sub hB (hA.const_mul 2), integral_const_mul]
+  have hz := (riemannZeta_eq_integral_arctan_exp_sub_one hs1).2
+  have hh := HermiteIntegral.hurwitzZetaComplex_eq_kernel (a := 1 / 2) (by norm_num) hs1
+  have hhζ : hurwitzZetaComplex s (1 / 2) = ((2 : ℂ) ^ s - 1) * riemannZeta s := by
+    rw [show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by norm_num,
+      hurwitzZetaComplex_eq_hurwitzZeta (by norm_num) (by norm_num) hs1,
+      hurwitzZeta_one_half hs1]
+  rw [hhζ, hpow (-s), neg_neg, hpow (1 - s)] at hh
+  have he : (2 : ℂ) ^ (-(1 - s)) = (2 : ℂ) ^ s / 2 := by
+    rw [show -(1 - s) = s - 1 by ring, cpow_sub _ _ (by norm_num), cpow_one]
+  rw [he, ← hscaleIntegral] at hh
+  refine ⟨by simpa only [C, f, div_div] using hC, ?_⟩
+  suffices hfinal : riemannZeta s = (2 : ℂ) ^ (s - 1) / (s - 1) -
+      (2 : ℂ) ^ s * (∫ x in Set.Ioi (0 : ℝ), C x) by
+    simpa only [C, f, div_div] using hfinal
+  rw [hIC, cpow_sub _ _ (by norm_num), cpow_one]
+  have hzA : riemannZeta s = 1 / 2 + 1 / (s - 1) +
+      2 * (∫ x in Set.Ioi (0 : ℝ), A x) := by
+    simpa only [A, f, div_div] using hz
+  linear_combination (2 : ℂ) ^ s * hzA - hh
 
 end DLMF.Zeta
 end

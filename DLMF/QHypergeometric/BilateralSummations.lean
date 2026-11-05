@@ -8,6 +8,7 @@ module
 public import DLMF.QHypergeometric.Convergence
 public import DLMF.QHypergeometric.QuintupleProduct
 public import DLMF.QHypergeometric.VeryWellPoisedSums
+public import DLMF.QHypergeometric.BaileyBilateral
 
 /-!
 # Bilateral basic summations and continuation (DLMF §17.8)
@@ -113,7 +114,39 @@ theorem quintuple_product {q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz : z≠0
 theorem bilateral_two_sum {a b c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (ha : a≠0) (hz : ‖q*a‖<‖b*c‖)
     (hreg : QBilateralRegular [b,c] [a*q/b,a*q/c] q) :
     qPsi [b,c] [a*q/b,a*q/c] q (-a*q/(b*c))=qBilateralTwoValue a b c q := by
-  sorry
+  have hbc : b * c ≠ 0 := by
+    intro h
+    rw [h, norm_zero] at hz
+    exact (norm_nonneg _).not_gt hz
+  have hb : b ≠ 0 := left_ne_zero_of_mul hbc
+  have hc : c ≠ 0 := right_ne_zero_of_mul hbc
+  have hz' : ‖-a * q / (b * c)‖ < 1 := by
+    rw [norm_div, div_lt_one (norm_pos_iff.mpr hbc), norm_mul, norm_neg]
+    simpa only [norm_mul, mul_comm] using hz
+  have eB : a * q * (1 / c) = a * q / c := by ring
+  have eQ : q * (1 / c) = q / c := by ring
+  have eZ : -a * q * (1 / c) / b = -a * q / (b * c) := by field_simp
+  have hreg' : QBilateralRegular [b, 1 / (1 / c)] [a * q / b, a * q * (1 / c)] q := by
+    simpa only [one_div_one_div, eB] using hreg
+  have H := BaileyBilateral.denominator_mul_qPsi_eq_productSide hq0 hq ha hb
+    (one_div_ne_zero hc) (by simpa only [eZ] using hz') hreg'
+  unfold BaileyBilateral.denominator BaileyBilateral.productSide at H
+  rw [one_div_one_div, eB, eQ, eZ,
+    show a * q ^ 2 * (1 / c) ^ 2 = a * q ^ 2 / c ^ 2 by ring] at H
+  have hA : qPochhammerInf (a * q / b) q ≠ 0 :=
+    qPochhammerInf_ne_zero hq fun n h => hreg.1 _ (by simp) n (sub_eq_zero.mp h).symm
+  have hB : qPochhammerInf (a * q / c) q ≠ 0 :=
+    qPochhammerInf_ne_zero hq fun n h => hreg.1 _ (by simp) n (sub_eq_zero.mp h).symm
+  have hQb := RamanujanPsi.qPochhammerInf_q_div_ne_zero hq hb (hreg.2 _ (by simp))
+  have hQc := RamanujanPsi.qPochhammerInf_q_div_ne_zero hq hc (hreg.2 _ (by simp))
+  have hZ := qPochhammerInf_ne_zero_of_norm_lt_one hz' hq
+  have hZ' : qPochhammerInf (-(a * q / (b * c))) q ≠ 0 := by
+    simpa only [neg_div, neg_mul] using hZ
+  unfold qBilateralTwoValue
+  simp only [qPochhammerListInf, List.map_cons, List.map_nil, List.prod_cons,
+    List.prod_nil, mul_one] at H ⊢
+  field_simp [hZ'] at H ⊢
+  linear_combination H
 
 /-- A term of the very-well-poised `₆φ₅` series in the parameter `a`, multiplied by the
 lower-parameter products; it is continuous at `a = 1`. -/
@@ -520,7 +553,62 @@ theorem bilateral_two_continues {a₀ b c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1
     ((fun a => qPsi [b, c] [a*q/b, a*q/c] q (-a*q/(b*c)))=ᶠ[𝓝 a₀]
         (fun a => qBilateralTwoValue a b c q)) ∧
     TauCeti.ContinuesInside (fun a => qPsi [b,c] [a*q/b,a*q/c] q (-a*q/(b*c))) U a₀ := by
-  sorry
+  intro U
+  have hQ : ‖q ^ 2‖ < 1 := by
+    rw [norm_pow]
+    exact pow_lt_one₀ (norm_nonneg q) hq two_ne_zero
+  have hP := qPochhammerInf_analytic hq
+  have hP₂ := qPochhammerInf_analytic hQ
+  have hAz : ∀ {f : ℂ → ℂ} {z : ℂ}, AnalyticAt ℂ f z →
+      AnalyticAt ℂ (fun w => qPochhammerInf (f w) q) z :=
+    fun hf => (hP _ (mem_univ _)).comp hf
+  have hAz₂ : ∀ {f : ℂ → ℂ} {z : ℂ}, AnalyticAt ℂ f z →
+      AnalyticAt ℂ (fun w => qPochhammerInf (f w) (q ^ 2)) z :=
+    fun hf => (hP₂ _ (mem_univ _)).comp hf
+  have hden : ∀ z : ℂ, AnalyticAt ℂ
+      (fun a => qPochhammerListInf [a*q/b,a*q/c,q/b,q/c,-a*q/(b*c)] q) z := by
+    intro z
+    simp only [qPochhammerListInf, List.map_cons, List.map_nil, List.prod_cons,
+      List.prod_nil, mul_one]
+    exact (hAz (by fun_prop)).mul ((hAz (by fun_prop)).mul
+      (analyticAt_const.mul (analyticAt_const.mul (hAz (by fun_prop)))))
+  have hnum : ∀ z : ℂ, z ≠ 0 → AnalyticAt ℂ
+      (fun a => qPochhammerInf (a*q/(b*c)) q *
+        qPochhammerListInf [a*q^2/b^2,a*q^2/c^2,q^2,a*q,q/a] (q^2)) z := by
+    intro z hz0
+    simp only [qPochhammerListInf, List.map_cons, List.map_nil, List.prod_cons,
+      List.prod_nil, mul_one]
+    exact (hAz (by fun_prop)).mul ((hAz₂ (by fun_prop)).mul ((hAz₂ (by fun_prop)).mul
+      (analyticAt_const.mul ((hAz₂ (by fun_prop)).mul
+        (hAz₂ (analyticAt_const.div analyticAt_id hz0))))))
+  have hF : AnalyticOnNhd ℂ (fun a => qBilateralTwoValue a b c q) U := fun z hz =>
+    (hnum z hz.1).div (hden z) hz.2
+  have hUo : IsOpen U := by
+    have hdc : Continuous (fun a : ℂ =>
+        qPochhammerListInf [a*q/b,a*q/c,q/b,q/c,-a*q/(b*c)] q) :=
+      continuous_iff_continuousAt.mpr fun z => (hden z).continuousAt
+    exact isOpen_ne.inter (hdc.isOpen_preimage _ isOpen_ne)
+  have htB : Tendsto (fun a : ℂ => a * q / b) (𝓝 a₀) (𝓝 (a₀*q/b)) :=
+    ((continuousAt_id.mul continuousAt_const).div_const b).tendsto
+  have htC : Tendsto (fun a : ℂ => a * q / c) (𝓝 a₀) (𝓝 (a₀*q/c)) :=
+    ((continuousAt_id.mul continuousAt_const).div_const c).tendsto
+  have hopen : IsOpen {a : ℂ | ‖q*a‖ < ‖b*c‖} :=
+    isOpen_lt (continuous_const.mul continuous_id).norm continuous_const
+  have heq : (fun a => qPsi [b, c] [a*q/b,a*q/c] q (-a*q/(b*c))) =ᶠ[𝓝 a₀]
+      (fun a => qBilateralTwoValue a b c q) := by
+    filter_upwards [hopen.mem_nhds hz, isOpen_ne.mem_nhds ha,
+      htB.eventually (eventually_mul_pow_ne_one_nhds hq (hreg.1 _ (by simp))),
+      htC.eventually (eventually_mul_pow_ne_one_nhds hq (hreg.1 _ (by simp)))]
+      with a hza ha0 hba hca
+    apply bilateral_two_sum hq0 hq ha0 hza
+    refine ⟨?_, hreg.2⟩
+    intro t ht n
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at ht
+    rcases ht with rfl | rfl
+    · exact hba n
+    · exact hca n
+  exact ⟨hF, heq, (TauCeti.ContinuesInside.of_differentiableOn hUo hF.differentiableOn).congr
+    heq.symm⟩
 
 /-- The product side of the `3ψ3` sum, as a function of `d`, analytically continues the bilateral
 series. -/

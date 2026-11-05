@@ -5,6 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
+public import DLMF.Zeta.AlternatingIntegral
+public import DLMF.Zeta.HyperbolicIntegral
+public import DLMF.Zeta.HermiteIntegral
 public import DLMF.Zeta.Basic
 public import DLMF.Zeta.Riemann
 public import DLMF.Zeta.Reflection

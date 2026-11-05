@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMFMathlib.Analysis.SpecialFunctions.Gamma.BetaHalfLine
 public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 public import TauCeti.Analysis.SpecialFunctions.Beta
 public import Mathlib.Analysis.Analytic.Binomial
@@ -118,78 +119,7 @@ Lean's conventions. -/
 theorem beta_on_Ioi {a b : ℂ} :
     ∫ t : ℝ in Set.Ioi 0, (t : ℂ) ^ (a - 1) / (1 + (t : ℂ)) ^ (a + b) =
       betaIntegral a b := by
-  -- The substitution `u = t / (1 + t)` maps `(0, ∞)` onto `(0, 1)`.
-  set f : ℝ → ℝ := fun t => t / (1 + t) with hf
-  set f' : ℝ → ℝ := fun t => 1 / (1 + t) ^ 2 with hf'
-  have hderiv : ∀ t ∈ Set.Ioi (0 : ℝ), HasDerivWithinAt f (f' t) (Set.Ioi 0) t := by
-    intro t ht
-    have h1 : 1 + t ≠ 0 := ne_of_gt (by linarith [Set.mem_Ioi.mp ht])
-    have hd : HasDerivAt f (f' t) t := by
-      convert (hasDerivAt_id t).div ((hasDerivAt_id t).const_add 1) h1 using 1
-      · rfl
-      · simp only [hf', id]
-        ring
-    exact hd.hasDerivWithinAt
-  have hinj : Set.InjOn f (Set.Ioi 0) := by
-    intro x hx y hy hxy
-    have hx' : 1 + x ≠ 0 := ne_of_gt (by linarith [Set.mem_Ioi.mp hx])
-    have hy' : 1 + y ≠ 0 := ne_of_gt (by linarith [Set.mem_Ioi.mp hy])
-    simp only [hf] at hxy
-    field_simp at hxy
-    linarith
-  have himage : f '' Set.Ioi 0 = Set.Ioo 0 1 := by
-    ext u
-    constructor
-    · rintro ⟨t, ht, rfl⟩
-      have ht' : 0 < t := ht
-      refine ⟨by positivity, ?_⟩
-      rw [hf, div_lt_one (by linarith)]
-      linarith
-    · rintro ⟨h0, h1⟩
-      refine ⟨u / (1 - u), div_pos h0 (by linarith), ?_⟩
-      have : 1 - u ≠ 0 := ne_of_gt (by linarith)
-      simp only [hf]
-      field_simp
-      ring
-  have key := integral_image_eq_integral_abs_deriv_smul measurableSet_Ioi hderiv hinj
-    (fun u : ℝ => (u : ℂ) ^ (a - 1) * (1 - (u : ℂ)) ^ (b - 1))
-  rw [himage] at key
-  rw [betaIntegral, intervalIntegral.integral_of_le zero_le_one, integral_Ioc_eq_integral_Ioo,
-    key]
-  refine setIntegral_congr_fun measurableSet_Ioi fun t ht => ?_
-  have ht0 : 0 < t := ht
-  have ht1 : 0 < 1 + t := by linarith
-  have hft : 0 < f t := by simp only [hf]; positivity
-  have hcpow (x : ℝ) (hx : 0 < x) (s : ℂ) :
-      (x : ℂ) ^ s = Complex.exp (Real.log x * s) := by
-    rw [cpow_def_of_ne_zero (ofReal_ne_zero.mpr hx.ne'), ofReal_log hx.le]
-  have hlogf : Real.log (f t) = Real.log t - Real.log (1 + t) := by
-    simp only [hf]
-    exact Real.log_div ht0.ne' ht1.ne'
-  have h1f : 1 - f t = (1 + t)⁻¹ := by
-    simp only [hf]
-    field_simp
-    ring
-  have habs : |f' t| = Real.exp (-2 * Real.log (1 + t)) := by
-    rw [abs_of_pos (by simp only [hf']; positivity),
-      show -2 * Real.log (1 + t) = -(Real.log (1 + t) + Real.log (1 + t)) by ring,
-      Real.exp_neg, Real.exp_add, Real.exp_log ht1]
-    simp only [hf']
-    ring
-  have e2 : (1 + (t : ℂ)) ^ (a + b) = Complex.exp (Real.log (1 + t) * (a + b)) := by
-    rw [← hcpow _ ht1]
-    push_cast
-    rfl
-  have e4 : (1 - ((f t : ℝ) : ℂ)) ^ (b - 1) = Complex.exp (-Real.log (1 + t) * (b - 1)) := by
-    rw [show (1 - ((f t : ℝ) : ℂ)) = ((1 - f t : ℝ) : ℂ) by push_cast; rfl,
-      hcpow _ (by rw [h1f]; positivity), h1f, Real.log_inv]
-    push_cast
-    rfl
-  rw [hcpow _ ht0, e2, hcpow _ hft, e4, habs, Complex.real_smul, Complex.ofReal_exp, hlogf,
-    ← Complex.exp_sub, ← Complex.exp_add, ← Complex.exp_add]
-  congr 1
-  push_cast
-  ring
+  exact Complex.integral_cpow_div_one_add_cpow a b
 
 section BetaShifted
 

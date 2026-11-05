@@ -6,6 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Hypergeometric.Basic.Pochhammer
+public import DLMFMathlib.Analysis.Complex.SlitPlane
+public import DLMFMathlib.Analysis.SpecialFunctions.Pow.Decay
 public import Mathlib.Analysis.Complex.LocallyUniformLimit
 public import Mathlib.NumberTheory.LSeries.HurwitzZeta
 public import Mathlib.NumberTheory.ZetaValues
@@ -128,14 +130,22 @@ def cpowDerivFamily (s w : ℂ) (j : ℕ) (t : ℝ) : ℂ := (-1) ^ j * pochhamm
 
 /-- At `t`, the function `(cpowDerivFamily s w j)` has derivative `(cpowDerivFamily s w (j + 1)
 t)`. -/
-theorem hasDerivAt_cpowDerivFamily {s w : ℂ} (hw : 0 < w.re) (j : ℕ) {t : ℝ} (ht : 0 ≤ t) :
+theorem hasDerivAt_cpowDerivFamily_of_mem_slitPlane {s w : ℂ} (hw : w ∈ slitPlane)
+    (j : ℕ) {t : ℝ} (ht : 0 ≤ t) :
     HasDerivAt (cpowDerivFamily s w j) (cpowDerivFamily s w (j + 1) t) t := by
-  have h := (hasDerivAt_add_ofReal_cpow (c := -s - j) (add_ofReal_mem_slitPlane hw ht)).const_mul
+  have h := (hasDerivAt_add_ofReal_cpow (c := -s - j)
+    (Complex.add_ofReal_mem_slitPlane_of_nonneg hw ht)).const_mul
     ((-1) ^ j * pochhammer s j)
   unfold cpowDerivFamily
   convert h using 1
   rw [show -s - ((j + 1 : ℕ) : ℂ) = -s - j - 1 by push_cast; ring, pochhammer_succ, pow_succ]
   ring
+
+/-- At `t`, the function `(cpowDerivFamily s w j)` has derivative `(cpowDerivFamily s w (j + 1)
+t)`. -/
+theorem hasDerivAt_cpowDerivFamily {s w : ℂ} (hw : 0 < w.re) (j : ℕ) {t : ℝ} (ht : 0 ≤ t) :
+    HasDerivAt (cpowDerivFamily s w j) (cpowDerivFamily s w (j + 1) t) t :=
+  hasDerivAt_cpowDerivFamily_of_mem_slitPlane (Or.inl hw) j ht
 
 /-- The coefficient `B_{2k+2}/(2k+2)! · (s)_{2k+1}` of the Euler–Maclaurin correction terms. -/
 def eulerMaclaurinCoeff (s : ℂ) (k : ℕ) : ℂ :=
@@ -157,14 +167,15 @@ private lemma sum_range_two_mul_eq_sum_pairs_complex (T : ℕ → ℂ) (M : ℕ)
       ih, Finset.sum_range_succ]
     ring
 
-/-- **The one-step Euler–Maclaurin identity**: for `Re w > 0` and `s ≠ 1`,
+/-- **The one-step Euler–Maclaurin identity**: for `w` in the principal slit plane and `s ≠ 1`,
 `w^{-s} + F(w+1) - F(w) = -((s)_{2M+1}/(2M+1)!) ∫_0^1 (w+t)^{-s-2M-1} B_{2M+1}(t) dt`. -/
-theorem cpow_add_eulerMaclaurinTail_sub_eq_integral {s w : ℂ} (hs : s ≠ 1) (hw : 0 < w.re) (M : ℕ) :
+theorem cpow_add_eulerMaclaurinTail_sub_eq_integral_of_mem_slitPlane {s w : ℂ}
+    (hs : s ≠ 1) (hw : w ∈ slitPlane) (M : ℕ) :
     w ^ (-s) + eulerMaclaurinTail M s (w + 1) - eulerMaclaurinTail M s w =
       -(pochhammer s (2 * M + 1) / (2 * M + 1 : ℕ)!) *
         ∫ t in (0 : ℝ)..1, (w + t) ^ (-s - (2 * M + 1 : ℕ)) * (bernoulliFun (2 * M + 1) t : ℂ) := by
   have EM := integral_eq_sum_bernoulliFun_add_integral (cpowDerivFamily s w)
-    (fun j x hx => hasDerivAt_cpowDerivFamily hw j hx.1) (2 * M + 1)
+    (fun j x hx => hasDerivAt_cpowDerivFamily_of_mem_slitPlane hw j hx.1) (2 * M + 1)
   have hs1 : (1 : ℂ) - s ≠ 0 := sub_ne_zero.mpr (Ne.symm hs)
   have hs2 : s - 1 ≠ 0 := sub_ne_zero.mpr hs
   have hint :
@@ -173,7 +184,8 @@ theorem cpow_add_eulerMaclaurinTail_sub_eq_integral {s w : ℂ} (hs : s ≠ 1) (
         (cpowDerivFamily s w 0 x) x := by
       intro x hx
       rw [uIcc_of_le zero_le_one] at hx
-      have := (hasDerivAt_add_ofReal_cpow (c := 1 - s) (add_ofReal_mem_slitPlane hw hx.1)).div_const
+      have := (hasDerivAt_add_ofReal_cpow (c := 1 - s)
+        (Complex.add_ofReal_mem_slitPlane_of_nonneg hw hx.1)).div_const
         (1 - s)
       convert this using 1
       simp only [cpowDerivFamily, pow_zero, pochhammer_zero, Nat.cast_zero, sub_zero, one_mul]
@@ -183,8 +195,8 @@ theorem cpow_add_eulerMaclaurinTail_sub_eq_integral {s w : ℂ} (hs : s ≠ 1) (
     · simp; ring
     · apply ContinuousOn.intervalIntegrable
       intro x hx
-      exact (hasDerivAt_cpowDerivFamily hw 0 (by rw [uIcc_of_le zero_le_one] at hx; exact hx.1)
-        ).continuousAt.continuousWithinAt
+      exact (hasDerivAt_cpowDerivFamily_of_mem_slitPlane hw 0
+        (by rw [uIcc_of_le zero_le_one] at hx; exact hx.1)).continuousAt.continuousWithinAt
   rw [hint, Finset.sum_range_succ', sum_range_two_mul_eq_sum_pairs_complex] at EM
   have hodd : ∀ k : ℕ, (-1 : ℂ) ^ (2 * k + 1) / (((2 * k + 1 + 1)! : ℕ) : ℂ) *
       (cpowDerivFamily s w (2 * k + 1) 1 * (bernoulliFun (2 * k + 1 + 1) 1 : ℂ) -
@@ -230,19 +242,19 @@ theorem cpow_add_eulerMaclaurinTail_sub_eq_integral {s w : ℂ} (hs : s ≠ 1) (
   push_cast at EM
   linear_combination (-1 : ℂ) * EM - (pochhammer s (2 * M + 1) / ((2 * M + 1)! : ℕ) * I) * hm
 
+/-- **The one-step Euler–Maclaurin identity**: for `Re w > 0` and `s ≠ 1`,
+`w^{-s} + F(w+1) - F(w) = -((s)_{2M+1}/(2M+1)!) ∫_0^1 (w+t)^{-s-2M-1} B_{2M+1}(t) dt`. -/
+theorem cpow_add_eulerMaclaurinTail_sub_eq_integral {s w : ℂ} (hs : s ≠ 1) (hw : 0 < w.re) (M : ℕ) :
+    w ^ (-s) + eulerMaclaurinTail M s (w + 1) - eulerMaclaurinTail M s w =
+      -(pochhammer s (2 * M + 1) / (2 * M + 1 : ℕ)!) *
+        ∫ t in (0 : ℝ)..1, (w + t) ^ (-s - (2 * M + 1 : ℕ)) * (bernoulliFun (2 * M + 1) t : ℂ) :=
+  cpow_add_eulerMaclaurinTail_sub_eq_integral_of_mem_slitPlane hs (Or.inl hw) M
+
 /-- Bound for a principal power on a right half-plane with nonpositive real exponent. -/
 private lemma norm_cpow_le_of_re_nonpos {x u : ℂ} {c : ℝ} (hc : 0 < c) (hx : c ≤ x.re)
     (hu : u.re ≤ 0) :
-    ‖x ^ u‖ ≤ c ^ u.re * Real.exp (π * |u.im|) := by
-  refine (norm_cpow_le _ _).trans ?_
-  rw [div_eq_mul_inv, ← Real.exp_neg]
-  have h1 : ‖x‖ ^ u.re ≤ c ^ u.re := Real.rpow_le_rpow_of_nonpos hc (hx.trans (re_le_norm x)) hu
-  have h2 : Real.exp (-(arg x * u.im)) ≤ Real.exp (π * |u.im|) := by
-    rw [Real.exp_le_exp]
-    have harg := abs_arg_le_pi x
-    calc -(arg x * u.im) ≤ |arg x| * |u.im| := by rw [← abs_mul]; exact neg_le_abs _
-      _ ≤ π * |u.im| := by gcongr
-  exact mul_le_mul h1 h2 (Real.exp_pos _).le (by positivity)
+    ‖x ^ u‖ ≤ c ^ u.re * Real.exp (π * |u.im|) :=
+  Complex.norm_cpow_le_of_norm_lower_bound hc (hx.trans (re_le_norm x)) hu
 
 /-- **Bound for the Euler–Maclaurin step**: there is `C` with
 `‖w^{-s} + F(w+1) - F(w)‖ ≤ C ‖(s)_{2M+1}‖ (Re w)^{-(Re s + 2M + 1)} e^{π |Im s|}`

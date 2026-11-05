@@ -9,6 +9,7 @@ public import Carlson.TwoVariable.R.ElementaryValues
 public import Carlson.TwoVariable.Reduction
 public import DLMF.EllipticIntegrals.Legendre
 public import DLMF.EllipticIntegrals.LegendreIdentities
+public import DLMF.EllipticIntegrals.LegendrePrincipalValue
 public import DLMF.EllipticIntegrals.Symmetric
 public import DLMF.JacobiElliptic.SpecialValues
 public import Mathlib.Analysis.SpecialFunctions.Arsinh
@@ -191,15 +192,13 @@ theorem compEllInt_special_one : completeEllipticE 1 = 1 ∧ complementaryEllipt
   refine ⟨h1, ?_⟩
   rw [(complementaryEllipticK_of_re_pos (k := 0) (Or.inr (by simp))).2, jacobiComodulus_zero, h1]
 
-/-- DLMF 19.6.1: `K(1) = ∞`, as `|K(k)| → ∞` for `k → 1-` (from the admitted
-`DLMF.JacobiElliptic.tendsto_norm_completeEllipticK_one`). -/
+/-- DLMF 19.6.1: `K(1) = ∞`, as `|K(k)| → ∞` for `k → 1-`. -/
 @[dlmf 19.6.E1]
 theorem tendsto_norm_completeEllipticK_one' :
     Tendsto (fun k : ℝ => ‖completeEllipticK k‖) (𝓝[<] 1) atTop :=
   tendsto_norm_completeEllipticK_one
 
-/-- DLMF 19.6.1: `K'(0) = ∞`, as `|K'(k)| → ∞` for `k → 0+` (from the admitted
-`DLMF.JacobiElliptic.tendsto_norm_completeEllipticKPrime_zero`). -/
+/-- DLMF 19.6.1: `K'(0) = ∞`, as `|K'(k)| → ∞` for `k → 0+`. -/
 @[dlmf 19.6.E1]
 theorem tendsto_norm_complementaryEllipticK_zero :
     Tendsto (fun k : ℝ => ‖complementaryEllipticK k‖) (𝓝[>] 0) atTop := by
@@ -592,14 +591,31 @@ theorem tendsto_completeEllipticPi {k α2 : ℝ} (hk : k ^ 2 < 1) (hα : α2 < 1
     exact DLMF.Elliptic.Real.completeEllipticPiOfParameter_ge_min_mul_completeEllipticKOfParameter
         hα hr2
 
-/-- **Admitted.** DLMF 19.6.5: for real `1 < α²` and real `k` with `k² < 1`, the Cauchy principal
+/-- DLMF 19.6.5: for real `1 < α²` and real `k` with `k² < 1`, the Cauchy principal
 value satisfies `Π(α², k) = K(k) - Π(k²/α², k)`. -/
 @[dlmf 19.6.E5]
 theorem completeEllipticPi_of_one_lt {α2 k : ℝ} (hα : 1 < α2) (hk : k ^ 2 < 1) :
     completeEllipticPi α2 k = completeEllipticK k - completeEllipticPi (k ^ 2 / α2 : ℝ) k := by
-  sorry
+  have hslit : 1 - (k : ℂ) ^ 2 ∈ slitPlane := by
+    rw [← ofReal_pow, ← ofReal_one, ← ofReal_sub]
+    exact ofReal_mem_slitPlane.mpr (by linarith)
+  have hω : k ^ 2 / α2 < 1 := (div_lt_one (by linarith : 0 < α2)).mpr (by linarith)
+  have hP := completeEllipticPi_eq_symmetricEllipticRF_add_RJ hslit
+    (show α2 ≠ 1 by linarith)
+  have hQ := completeEllipticPi_eq_symmetricEllipticRF_add_RJ hslit hω.ne
+  have H := symmetricEllipticRJ_complete_reciprocal_parameter hk hα
+  have hK : completeEllipticK k = symmetricEllipticRF 0 (1 - (k : ℂ) ^ 2) 1 := by
+    rw [completeEllipticK_eq_incompleteEllipticF,
+      show ((π : ℂ) / 2) = ((π / 2 : ℝ) : ℂ) by push_cast; ring,
+      incompleteEllipticF_ofReal_eq_integral,
+      ← symmetricEllipticRF_csc_sq_eq_integral (by positivity) le_rfl (k : ℂ)]
+    norm_num [csc_sq_pi_div_two]
+  push_cast at H
+  rw [hP, hQ, hK]
+  push_cast
+  linear_combination (1 / 3 : ℂ) * H
 
-/-- **Admitted.** DLMF 19.6.6: for real `1 < α²` (Cauchy principal values), `Π(α², 0) = 0`;
+/-- DLMF 19.6.6: for real `1 < α²` (Cauchy principal values), `Π(α², 0) = 0`;
 for real `k` with `k² < 1`, `Π(α², k) → K(k) - E(k)/k'²` as `α² → 1+`; and for `1 < α²`,
 `Π(α², k) → -∞` as `k² → 1-`. -/
 @[dlmf 19.6.E6]
@@ -608,7 +624,51 @@ theorem completeEllipticPi_of_one_lt_special {α2 k : ℝ} (hα : 1 < α2) (hk :
       Tendsto (fun a : ℝ => completeEllipticPi a k) (𝓝[>] 1)
         (𝓝 (completeEllipticK k - completeEllipticE k / (1 - k ^ 2))) ∧
       Tendsto (fun k : ℝ => (completeEllipticPi α2 k).re) (𝓝[<] 1) atBot := by
-  sorry
+  have hα0 : 0 < α2 := by linarith
+  have hslit : 1 - (k : ℂ) ^ 2 ∈ slitPlane := by
+    rw [← ofReal_pow, ← ofReal_one, ← ofReal_sub]
+    exact ofReal_mem_slitPlane.mpr (by linarith)
+  constructor
+  · have H := completeEllipticPi_of_one_lt hα (k := 0) (by norm_num)
+    norm_num only [zero_pow (by decide : 2 ≠ 0), zero_div, ofReal_zero] at H
+    rw [(completeEllipticPi_special (α2 := 0) zero_lt_one 0).2, sub_self] at H
+    exact H
+  constructor
+  · have hC := continuousAt_completeEllipticPi_characteristic hslit hk
+    have hq : Tendsto (fun a : ℝ => k ^ 2 / a) (𝓝[>] 1) (𝓝 (k ^ 2)) := by
+      have H : ContinuousAt (fun a : ℝ => k ^ 2 / a) 1 := by fun_prop (disch := norm_num)
+      simpa using H.tendsto.mono_left (nhdsWithin_le_nhds (s := Ioi (1 : ℝ)))
+    have hvalue : completeEllipticPi (k ^ 2 : ℝ) k =
+        completeEllipticE k / (1 - k ^ 2 : ℝ) := by
+      simpa only [ofReal_pow, ofReal_sub, ofReal_one] using completeEllipticPi_sq_self hslit
+    have H := (tendsto_const_nhds (x := completeEllipticK k)).sub (hC.tendsto.comp hq)
+    rw [hvalue] at H
+    simp only [ofReal_sub, ofReal_pow, ofReal_one] at H
+    apply H.congr'
+    filter_upwards [self_mem_nhdsWithin] with a ha
+    exact (completeEllipticPi_of_one_lt ha hk).symm
+  · have hKlim : Tendsto (fun k : ℝ => (completeEllipticK k).re) (𝓝[<] 1) atTop := by
+      apply tendsto_norm_completeEllipticK_one.congr'
+      filter_upwards [Ioo_mem_nhdsLT (show (0 : ℝ) < 1 by norm_num)] with k hk
+      have hk2 : k ^ 2 < 1 := by nlinarith [hk.1, hk.2]
+      rw [completeEllipticK_eq_ofReal (m := k ^ 2) (by push_cast; rfl) hk2.le,
+        Complex.norm_real, Real.norm_of_nonneg
+          (DLMF.Elliptic.Real.completeEllipticKOfParameter_pos hk2).le, ofReal_re]
+    have H := (tendsto_atBot_add_const_right _ (π / 2)
+      (tendsto_neg_atTop_atBot.comp hKlim)).const_mul_atBot (inv_pos.mpr hα0)
+    refine tendsto_atBot_mono' _ ?_ H
+    filter_upwards [Ioo_mem_nhdsLT (show (0 : ℝ) < 1 by norm_num)] with k hk
+    have hk2 : k ^ 2 < 1 := by nlinarith [hk.1, hk.2]
+    have hn : k ^ 2 / α2 < 1 := (div_lt_one hα0).mpr (by linarith)
+    have hP := ThirdKindBounds.completeEllipticPiOfParameter_ge_add (sq_nonneg k) hk2 hα
+    have hE := ThirdKindBounds.completeEllipticEOfParameter_le_pi_div_two (sq_nonneg k) hk2
+    change (completeEllipticPi α2 k).re ≤ α2⁻¹ * (-(completeEllipticK k).re + π / 2)
+    rw [completeEllipticPi_of_one_lt hα hk2, sub_re,
+      completeEllipticPi_re_ofReal hn hk2,
+      completeEllipticK_eq_ofReal (m := k ^ 2) (by push_cast; rfl) hk2.le, ofReal_re]
+    have HE := mul_le_mul_of_nonneg_left hE (inv_pos.mpr hα0).le
+    simp only [one_div] at hP
+    nlinarith
 
 /-! ### §19.6(ii) `F(φ, k)` -/
 
@@ -843,7 +903,74 @@ theorem incompleteEllipticPi_special_RC {φ α2 : ℝ} (h0 : 0 < φ) (h1 : φ < 
       incompleteEllipticPi φ 1 1 =
           (symmetricEllipticRC (1 / Real.sin φ ^ 2 : ℝ) (1 / Real.sin φ ^ 2 - 1 : ℝ) +
         (Real.sqrt (1 / Real.sin φ ^ 2) / (1 / Real.sin φ ^ 2 - 1) : ℝ)) / 2 := by
-  sorry
+  let c : ℝ := 1 / Real.sin φ ^ 2
+  have hc1 : 1 < c := one_lt_csc_sq h0 h1
+  have hc : 0 < c := by linarith
+  have hcm : 0 < c - 1 := by linarith
+  have hs : 0 < Real.sin φ := Real.sin_pos_of_pos_of_lt_pi h0 (by linarith [Real.pi_pos])
+  have hcs : c * Real.sin φ ^ 2 = 1 := by dsimp [c]; field_simp [hs.ne']
+  have hks0 : 1 - (0 : ℂ) ^ 2 * (Real.sin φ : ℂ) ^ 2 ∈ slitPlane := by
+    norm_num
+  have hks1 : 1 - (1 : ℂ) ^ 2 * (Real.sin φ : ℂ) ^ 2 ∈ slitPlane := by
+    have hr : 0 < 1 - Real.sin φ ^ 2 := by nlinarith [sq_pos_of_pos hs]
+    convert ofReal_mem_slitPlane.mpr hr using 1
+    push_cast
+    ring
+  have hP0 := incompleteEllipticPi_eq_symmetricEllipticRF_add_RJ h0 h1.le hks0 hα
+  have hP1 := incompleteEllipticPi_eq_symmetricEllipticRF_add_RJ h0 h1.le hks1 hα
+  have hP11 := incompleteEllipticPi_eq_symmetricEllipticRF_add_RJ h0 h1.le hks1
+    (show (1 : ℝ) ≠ 1 / Real.sin φ ^ 2 by change 1 ≠ c; linarith)
+  change incompleteEllipticPi φ α2 0 =
+    symmetricEllipticRF ((c : ℂ) - 1) ((c : ℂ) - (0 : ℂ) ^ 2) c + (α2 : ℂ) / 3 *
+      symmetricEllipticRJ ((c : ℂ) - 1) ((c : ℂ) - (0 : ℂ) ^ 2) c (c - α2 : ℝ) at hP0
+  change incompleteEllipticPi φ α2 1 =
+    symmetricEllipticRF ((c : ℂ) - 1) ((c : ℂ) - (1 : ℂ) ^ 2) c + (α2 : ℂ) / 3 *
+      symmetricEllipticRJ ((c : ℂ) - 1) ((c : ℂ) - (1 : ℂ) ^ 2) c (c - α2 : ℝ) at hP1
+  change incompleteEllipticPi φ 1 1 =
+    symmetricEllipticRF ((c : ℂ) - 1) ((c : ℂ) - (1 : ℂ) ^ 2) c + (1 : ℂ) / 3 *
+      symmetricEllipticRJ ((c : ℂ) - 1) ((c : ℂ) - (1 : ℂ) ^ 2) c (c - 1 : ℝ) at hP11
+  have hp : c - α2 ≠ 0 := sub_ne_zero.mpr (Ne.symm hα)
+  have hJ0 := mul_symmetricEllipticRJ_self_right_ofReal hcm hc hp
+  have hJ1 := mul_symmetricEllipticRJ_self_right_ofReal hc hcm hp
+  rw [symmetricEllipticRJ_comm_left, symmetricEllipticRJ_comm_right] at hJ1
+  have hRC0 : symmetricEllipticRF (c - 1 : ℝ) c c = symmetricEllipticRC (c - 1 : ℝ) c :=
+    (symmetricEllipticRC_eq_symmetricEllipticRF _
+      (not_isNegReal_of_mem_slitPlane (ofReal_mem_slitPlane.mpr hc))).symm
+  have hRC1 : symmetricEllipticRF (c - 1 : ℝ) (c - 1 : ℝ) c =
+      symmetricEllipticRC c (c - 1 : ℝ) := by
+    rw [symmetricEllipticRF_comm_right, symmetricEllipticRF_comm_left]
+    exact (symmetricEllipticRC_eq_symmetricEllipticRF _
+      (not_isNegReal_of_mem_slitPlane (ofReal_mem_slitPlane.mpr hcm))).symm
+  have hRD := symmetricEllipticRD_self_right_of_mem_slitPlane
+    (ofReal_mem_slitPlane.mpr hc) (ofReal_mem_slitPlane.mpr hcm)
+    (by exact_mod_cast (show c ≠ c - 1 by linarith))
+  rw [Carlson.ofReal_cpow_half hc.le] at hRD
+  change incompleteEllipticPi φ α2 0 = symmetricEllipticRC (c - 1 : ℝ) (c - α2 : ℝ) ∧
+    (α2 ≠ 1 → incompleteEllipticPi φ α2 1 =
+      (symmetricEllipticRC c (c - 1 : ℝ) - α2 * symmetricEllipticRC c (c - α2 : ℝ)) /
+        (1 - α2)) ∧
+    incompleteEllipticPi φ 1 1 =
+      (symmetricEllipticRC c (c - 1 : ℝ) + (Real.sqrt c / (c - 1) : ℝ)) / 2
+  constructor
+  · push_cast at hRC0 hJ0 hP0 ⊢
+    norm_num only [zero_pow (by decide : 2 ≠ 0), sub_zero] at hP0
+    rw [hRC0] at hP0
+    linear_combination hP0 - (1 / 3 : ℂ) * hJ0
+  constructor
+  · intro hα1
+    push_cast at hRC1 hJ1 hP1 ⊢
+    norm_num only [one_pow] at hP1
+    rw [hRC1] at hP1
+    have ha : (1 : ℂ) - α2 ≠ 0 := by exact_mod_cast sub_ne_zero.mpr (Ne.symm hα1)
+    apply (eq_div_iff ha).mpr
+    linear_combination (1 - (α2 : ℂ)) * hP1 + (α2 : ℂ) / 3 * hJ1
+  · push_cast at hRC1 hP11 hRD ⊢
+    norm_num only [one_pow] at hP11
+    rw [hRC1, symmetricEllipticRJ_comm_right, symmetricEllipticRJ_comm_left] at hP11
+    change incompleteEllipticPi φ 1 1 = _ + (1 : ℂ) / 3 *
+      symmetricEllipticRD (c : ℂ) ((c : ℂ) - 1) ((c : ℂ) - 1) at hP11
+    norm_num [show (c : ℂ) - 1 - c = -1 by ring] at hRD
+    linear_combination hP11 + (1 / 3 : ℂ) * hRD
 
 /-- DLMF 19.6.13: with `Δ = √(1 - k² sin²φ)`, for real `|φ| < π/2` and `k` in the
 principal domain `1 - k² ∈ ℂ \ (-∞, 0]`,

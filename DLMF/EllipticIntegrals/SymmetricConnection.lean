@@ -193,7 +193,7 @@ theorem symmetricEllipticRJ_change_parameter {x y z p q : ℝ} (hx : 0 < x) (hy 
     ((p - x : ℝ) : ℂ) * symmetricEllipticRJ x y z p + ((q - x : ℝ) : ℂ) *
         symmetricEllipticRJ x y z q =
       3 * symmetricEllipticRF x y z - 3 * symmetricEllipticRC (y * z / x : ℝ) (p * q / x : ℝ) := by
-  sorry
+  exact symmetricEllipticRJ_change_parameter' hx hy hz hyz hp hq hpq
 
 /-- DLMF 19.21.14: under (19.21.13) (with `x ≠ y`, `x ≠ z`, `p, q ≠ x`),
 `η - ξ = p + q - y - z = (p-y)(p-z)/(p-x) = (q-y)(q-z)/(q-x) = (p-y)(q-y)/(x-y)

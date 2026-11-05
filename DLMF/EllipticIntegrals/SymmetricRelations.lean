@@ -8,10 +8,12 @@ module
 public import DLMF.EllipticIntegrals.Symmetric
 public import DLMF.EllipticIntegrals.Legendre
 public import DLMF.EllipticIntegrals.SymmetricAddition
+public import DLMF.EllipticIntegrals.LegendrePrincipalValue
 public import DLMF.EllipticIntegrals.LegendreSymmetricForms
 public import DLMF.EllipticIntegrals.SymmetricLegendreConnection
 public import DLMF.EllipticIntegrals.LegendreIdentities
 public import DLMF.EllipticIntegrals.Derivatives
+public import DLMF.EllipticIntegrals.Connection.ParameterChanges
 public import Carlson.TwoVariable.GaussHypergeometric
 public import DLMF.JacobiElliptic.Inverse
 public import DLMF.Weierstrass.EllipticFunctionsAndInvariants
@@ -104,8 +106,8 @@ and the inverse functions of `DLMF.JacobiElliptic.Inverse`; Weierstrass function
 
 @[expose] public noncomputable section
 
-open Complex Set MeasureTheory
-open scoped Real
+open Complex Set Filter MeasureTheory
+open scoped Real Topology
 
 open DLMF.Core
 
@@ -221,7 +223,16 @@ theorem completeEllipticPi_eq_symmetricEllipticR {k α2 : ℂ} (hk : 1 - k ^ 2 �
 theorem completeEllipticPi_pv_eq {k α2 : ℝ} (hk : k ^ 2 < 1) (hα : 1 < α2) :
     completeEllipticPi α2 k = -(1 / 3) * ((k ^ 2 / α2 : ℝ) : ℂ) *
       symmetricEllipticRJ 0 ((1 - k ^ 2 : ℝ) : ℂ) 1 ((1 - k ^ 2 / α2 : ℝ) : ℂ) := by
-  sorry
+  have hslit : 1 - (k : ℂ) ^ 2 ∈ slitPlane := by
+    rw [← ofReal_pow, ← ofReal_one, ← ofReal_sub]
+    exact ofReal_mem_slitPlane.mpr (by linarith)
+  have hP := completeEllipticPi_eq_symmetricEllipticRF_add_RJ hslit
+    (show α2 ≠ 1 by linarith)
+  have H := symmetricEllipticRJ_complete_reciprocal_parameter hk hα
+  push_cast at H ⊢
+  rw [hP]
+  push_cast
+  linear_combination (1 / 3 : ℂ) * H
 
 /-- DLMF 19.25.5 (and its rewriting (19.25.17)–(19.25.18)): `F(φ, k) = R_F(c - 1, c - k², c)`,
 `c = csc² φ`, i.e. `F(φ, k) = R_F(x, y, z)` with `(x, y, z) = (c - 1, c - k², c)`. Stated for
@@ -539,7 +550,54 @@ theorem incompleteEllipticPi_pv_eq {φ k α2 : ℝ} (hφ : 0 < φ) (hφ' : φ < 
       ((√((c - 1) * (c - k ^ 2) / ((α2 - 1) * (1 - ω2))) : ℝ) : ℂ) *
         symmetricEllipticRC ((c * (α2 - 1) * (1 - ω2) : ℝ) : ℂ)
             (((α2 - c) * (c - ω2) : ℝ) : ℂ) := by
-  sorry
+  intro c ω2
+  have hc1 : 1 < c := one_lt_csc_sq hφ hφ'
+  have hc : 0 < c := by linarith
+  have hα1 : 1 < α2 := by linarith
+  have hα0 : 0 < α2 := by linarith
+  have hω : ω2 < 1 := (div_lt_one hα0).mpr (by linarith)
+  have hαω : α2 * ω2 = k ^ 2 := by dsimp [ω2]; field_simp
+  have hck : 0 < c - k ^ 2 := by linarith
+  have hD : 0 < (α2 - 1) * (1 - ω2) := mul_pos (by linarith) (by linarith)
+  have hX : 0 < (c - 1) * (c - k ^ 2) := mul_pos (by linarith) hck
+  have hY : (c - α2) * (c - ω2) < 0 :=
+    mul_neg_of_neg_of_pos (by linarith) (by linarith)
+  have hdiff : (c - 1) * (c - k ^ 2) - (c - α2) * (c - ω2) =
+      c * (α2 - 1) * (1 - ω2) := by linear_combination (c - 1) * hαω
+  have hks : 1 - (k : ℂ) ^ 2 * (Real.sin φ : ℂ) ^ 2 ∈ slitPlane := by
+    rw [← ofReal_pow, ← ofReal_pow, ← ofReal_mul, ← ofReal_one, ← ofReal_sub]
+    exact ofReal_mem_slitPlane.mpr (by
+      nlinarith [Real.sin_sq_le_one φ, sq_nonneg (Real.sin φ), sq_nonneg k])
+  have hQ := incompleteEllipticPi_eq_symmetricEllipticRF_add_RJ hφ hφ'.le hks
+    (show ω2 ≠ 1 / Real.sin φ ^ 2 by change ω2 ≠ c; linarith)
+  change incompleteEllipticPi φ ω2 k =
+    symmetricEllipticRF ((c : ℂ) - 1) ((c : ℂ) - k ^ 2) c + (ω2 : ℂ) / 3 *
+      symmetricEllipticRJ ((c : ℂ) - 1) ((c : ℂ) - k ^ 2) c (c - ω2 : ℝ) at hQ
+  have hF : incompleteEllipticF φ k =
+      symmetricEllipticRF (c - 1 : ℝ) (c - k ^ 2 : ℝ) c := by
+    rw [incompleteEllipticF_ofReal_eq_integral]
+    push_cast
+    simpa only [ofReal_sin] using
+      (symmetricEllipticRF_csc_sq_eq_integral hφ hφ'.le (k : ℂ)).symm
+  have H := incompleteEllipticPi_add_first' hφ hφ' hk hαω
+    (show α2 ≠ 1 / Real.sin φ ^ 2 by linarith)
+    (show ω2 ≠ 1 / Real.sin φ ^ 2 by change ω2 ≠ c; linarith)
+  change incompleteEllipticPi φ α2 k + incompleteEllipticPi φ ω2 k =
+    incompleteEllipticF φ k + Real.sqrt c *
+      symmetricEllipticRC ((c - 1) * (c - k ^ 2) : ℝ) ((c - α2) * (c - ω2) : ℝ) at H
+  have hRC := (symmetricEllipticRC_of_neg hY hX.le).1
+  simp only [← ofReal_sub, ← ofReal_neg] at hRC
+  rw [hdiff, show -((c - α2) * (c - ω2)) = (α2 - c) * (c - ω2) by ring] at hRC
+  rw [hRC] at H
+  have hs : Real.sqrt c *
+      Real.sqrt ((c - 1) * (c - k ^ 2) / (c * (α2 - 1) * (1 - ω2))) =
+      Real.sqrt ((c - 1) * (c - k ^ 2) / ((α2 - 1) * (1 - ω2))) := by
+    rw [← Real.sqrt_mul hc.le]
+    congr 1
+    field_simp
+  rw [← mul_assoc, ← ofReal_mul, hs, hF] at H
+  push_cast at H hQ ⊢
+  linear_combination H - hQ
 
 /-! ### §19.25(ii) Bulirsch's integrals as symmetric integrals -/
 
@@ -551,7 +609,125 @@ theorem bulirschCel_eq_symmetricElliptic {kc : ℂ} {p a b : ℝ}
     bulirschCel kc p a b =
       a * symmetricEllipticRF 0 (kc ^ 2) 1 + (1 / 3) * ((b - p * a : ℝ) : ℂ) *
         symmetricEllipticRJ 0 (kc ^ 2) 1 p := by
-  sorry
+  let k : ℂ := jacobiComodulus kc
+  have hksq : 1 - k ^ 2 = kc ^ 2 := by
+    dsimp only [k]
+    rw [jacobiComodulus_sq_eq_one_sub_sq, sub_sub_cancel]
+  have hk : 1 - k ^ 2 ∈ slitPlane := by rw [hksq]; exact hkc
+  have hpi : (0 : ℝ) < π / 2 := by positivity
+  have hpiC : ((π : ℂ) / 2) = ((π / 2 : ℝ) : ℂ) := by push_cast; ring
+  let R : ℝ → ℂ := fun θ => (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ))
+  have hi := LegendrePrincipalValue.integrableOn_completeEllipticKernel hk
+  have hroot := continuousOn_one_sub_mul_sin_sq_cpow hpi.le le_rfl
+    (show 1 - k ^ 2 * (Real.sin (π / 2) : ℂ) ^ 2 ∈ slitPlane by simpa using hk)
+    (-(1 / 2 : ℂ))
+  have hRI : IntervalIntegrable R volume 0 (π / 2) := hroot.intervalIntegrable
+  have hSI : IntervalIntegrable (fun θ => (Real.sin θ : ℂ) ^ 2 * R θ) volume 0 (π / 2) :=
+    ((by fun_prop : ContinuousOn (fun θ : ℝ => (Real.sin θ : ℂ) ^ 2) (uIcc 0 (π / 2))).mul
+      hroot).intervalIntegrable
+  rcases eq_or_ne p 1 with rfl | hp1
+  · rw [bulirschCel_one_eq_primitive, hpiC, primitive_ofReal]
+    have heq (θ : ℝ) :
+        ((a : ℂ) * Complex.cos θ ^ 2 + b * Complex.sin θ ^ 2) *
+          (Complex.cos θ ^ 2 + kc ^ 2 * Complex.sin θ ^ 2) ^ (-(1 / 2 : ℂ)) =
+        (a : ℂ) * R θ + (b - a : ℝ) * ((Real.sin θ : ℂ) ^ 2 * R θ) := by
+      have hcs := Complex.cos_sq_add_sin_sq (θ : ℂ)
+      have harg : Complex.cos θ ^ 2 + kc ^ 2 * Complex.sin θ ^ 2 =
+          1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2 := by
+        rw [← hksq]
+        push_cast
+        linear_combination hcs
+      rw [harg]
+      dsimp only [R]
+      push_cast at hcs ⊢
+      linear_combination ((a : ℂ) *
+        (1 - k ^ 2 * Complex.sin (θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ))) * hcs
+    rw [intervalIntegral.integral_congr (fun θ _ => heq θ),
+      intervalIntegral.integral_add (hRI.const_mul _) (hSI.const_mul _),
+      intervalIntegral.integral_const_mul, intervalIntegral.integral_const_mul]
+    have hD := incompleteEllipticD_eq_one_third_symmetricEllipticRD hpi le_rfl k
+    rw [csc_sq_pi_div_two, sub_self, hksq] at hD
+    rw [incompleteEllipticD_ofReal_eq_integral] at hD
+    have hK : (∫ θ in (0 : ℝ)..(π / 2), R θ) = symmetricEllipticRF 0 (kc ^ 2) 1 := by
+      have H := (symmetricEllipticRF_csc_sq_eq_integral hpi le_rfl k).symm
+      simpa only [csc_sq_pi_div_two, sub_self, hksq] using H
+    change (a : ℂ) * (∫ θ in (0 : ℝ)..(π / 2), R θ) +
+      (b - a : ℝ) * (∫ θ in (0 : ℝ)..(π / 2), (Real.sin θ : ℂ) ^ 2 * R θ) = _
+    rw [hK]
+    change (a : ℂ) * symmetricEllipticRF 0 (kc ^ 2) 1 +
+      (b - a : ℝ) * (∫ θ in (0 : ℝ)..(π / 2), (Real.sin θ : ℂ) ^ 2 * R θ) =
+        (a : ℂ) * symmetricEllipticRF 0 (kc ^ 2) 1 +
+          (1 / 3) * (b - 1 * a : ℝ) * symmetricEllipticRD 0 (kc ^ 2) 1
+    dsimp only [R] at hD ⊢
+    push_cast at hD ⊢
+    linear_combination ((b : ℂ) - a) * hD
+  · let A : ℝ := (b - p * a) / (1 - p)
+    let B : ℝ := (a - b) / (1 - p)
+    have hα : 1 - p ≠ 1 := by intro H; apply hp; linarith
+    have hA : (1 - (p : ℂ)) ≠ 0 := by exact_mod_cast sub_ne_zero.mpr (Ne.symm hp1)
+    have hP := LegendrePrincipalValue.tendsto_integral_cutoff_completeEllipticPi hk hα
+    have hK := LegendrePrincipalValue.tendsto_integral_cutoff_completeEllipticK hk (1 - p)
+    have hEq : ∀ᶠ ε : ℝ in 𝓝[>] 0,
+        (∫ θ in (0 : ℝ)..(π / 2), if ε ≤ |1 - (1 - p) * Real.sin θ ^ 2| then
+          ((a : ℂ) + (b - a : ℝ) * (Real.sin θ : ℂ) ^ 2) /
+            (1 - ((1 - p : ℝ) : ℂ) * (Real.sin θ : ℂ) ^ 2) * R θ else 0) =
+        (A : ℂ) * (∫ θ in (0 : ℝ)..(π / 2), if ε ≤ |1 - (1 - p) * Real.sin θ ^ 2| then
+          (1 - ((1 - p : ℝ) : ℂ) * (Real.sin θ : ℂ) ^ 2)⁻¹ * R θ else 0) +
+        (B : ℂ) * (∫ θ in (0 : ℝ)..(π / 2), if ε ≤ |1 - (1 - p) * Real.sin θ ^ 2|
+          then R θ else 0) := by
+      filter_upwards [self_mem_nhdsWithin] with ε hε
+      have hε0 : 0 < ε := hε
+      have hM : MeasurableSet {θ | ε ≤ |1 - (1 - p) * Real.sin θ ^ 2|} := by
+        measurability
+      have hiP := integrable_indicator_abs_ge_inv_mul hi
+        (show Measurable (fun θ : ℝ => 1 - (1 - p) * Real.sin θ ^ 2) by fun_prop) hε0
+      simp only [ofReal_sub, ofReal_one, ofReal_mul, ofReal_pow] at hiP
+      have hiK : IntegrableOn (fun θ => if ε ≤ |1 - (1 - p) * Real.sin θ ^ 2| then R θ else 0)
+          (Ioc 0 (π / 2)) := by
+        change Integrable (fun θ => if ε ≤ |1 - (1 - p) * Real.sin θ ^ 2| then R θ else 0)
+          (volume.restrict (Ioc 0 (π / 2)))
+        convert (show Integrable R (volume.restrict (Ioc 0 (π / 2))) from hi).indicator hM using 1
+        funext θ
+        simp only [Set.indicator_apply, mem_ofPred_eq]
+      dsimp only [R] at hiK ⊢
+      simp only [intervalIntegral.integral_of_le hpi.le, ofReal_sub, ofReal_one]
+      rw [← integral_const_mul, ← integral_const_mul, ← integral_add (hiP.const_mul (A : ℂ))
+        (hiK.const_mul (B : ℂ))]
+      refine setIntegral_congr_fun measurableSet_Ioc fun θ _ => ?_
+      change (if ε ≤ |1 - (1 - p) * Real.sin θ ^ 2| then
+        ((a : ℂ) + ((b : ℂ) - a) * (Real.sin θ : ℂ) ^ 2) /
+          (1 - (1 - (p : ℂ)) * (Real.sin θ : ℂ) ^ 2) * R θ else 0) =
+        (A : ℂ) * (if ε ≤ |1 - (1 - p) * Real.sin θ ^ 2| then
+          (1 - (1 - (p : ℂ)) * (Real.sin θ : ℂ) ^ 2)⁻¹ * R θ else 0) +
+        (B : ℂ) * (if ε ≤ |1 - (1 - p) * Real.sin θ ^ 2| then R θ else 0)
+      by_cases hcut : ε ≤ |1 - (1 - p) * Real.sin θ ^ 2|
+      · simp only [ite_eq_left hcut]
+        have hgne : 1 - (1 - p) * Real.sin θ ^ 2 ≠ 0 := by
+          intro H; rw [H, abs_zero] at hcut; linarith
+        have hgc : 1 - (1 - (p : ℂ)) * (Real.sin θ : ℂ) ^ 2 ≠ 0 := by
+          exact_mod_cast hgne
+        have hnum : (a : ℂ) + ((b : ℂ) - a) * (Real.sin θ : ℂ) ^ 2 =
+            (A : ℂ) + (B : ℂ) * (1 - (1 - (p : ℂ)) * (Real.sin θ : ℂ) ^ 2) := by
+          dsimp only [A, B]
+          push_cast
+          field_simp [hA]
+          ring
+        rw [hnum, add_div, mul_div_cancel_right₀ _ hgc]
+        ring
+      · simp only [ite_eq_right hcut, mul_zero, add_zero]
+    have H := ((hP.const_mul (A : ℂ)).add (hK.const_mul (B : ℂ))).congr'
+      (hEq.mono fun ε h => h.symm)
+    rw [bulirschCel_eq_limUnder_cutoff]
+    calc limUnder _ _ = (A : ℂ) * completeEllipticPi (1 - p : ℝ) k +
+        (B : ℂ) * completeEllipticK k := H.limUnder_eq
+      _ = _ := by
+        rw [completeEllipticPi_eq_symmetricEllipticRF_add_RJ hk hα,
+          completeEllipticK_eq_symmetricEllipticRF hk, hksq]
+        simp only [show (1 - (1 - p) : ℝ) = p by ring]
+        dsimp only [A, B]
+        push_cast
+        field_simp [hA]
+        ring
 
 /-- DLMF 19.25.20: `el1(x, k_c) = R_F(r, r + k_c², r + 1)`, `r = 1/x²`, for real `x > 0` and
 `k_c² ∈ ℂ \ (-∞, 0]`. -/
@@ -584,7 +760,51 @@ theorem bulirschEl3_eq_symmetricElliptic {x : ℝ} {kc : ℂ} {p : ℝ} (hx : 0 
     bulirschEl3 x kc p = bulirschEl1 x kc + (1 / 3) * ((1 - p : ℝ) : ℂ) *
         symmetricEllipticRJ r (r + kc ^ 2)
         (r + 1) (r + p) := by
-  sorry
+  intro r
+  obtain ⟨h0, h1, hc⟩ := arctan_mem_and_csc_sq hx
+  have hpr : 1 / x ^ 2 + p ≠ 0 := by
+    intro H
+    have HH : 1 + p * x ^ 2 = 0 := by
+      field_simp [hx.ne'] at H
+      nlinarith
+    apply hxp
+    field_simp [hp]
+    linarith
+  have hα : 1 - p ≠ 1 / Real.sin (Real.arctan x) ^ 2 := by
+    rw [hc]
+    intro H
+    apply hpr
+    linarith
+  have hk : 1 - jacobiComodulus kc ^ 2 ∈ slitPlane := by
+    rw [jacobiComodulus_sq_eq_one_sub_sq, sub_sub_cancel]
+    exact hkc
+  have hks : 1 - jacobiComodulus kc ^ 2 * (Real.sin (Real.arctan x) : ℂ) ^ 2 ∈ slitPlane := by
+    have H := one_sub_mul_ofReal_mem_slitPlane hk (sq_nonneg (Real.sin (Real.arctan x)))
+      (Real.sin_sq_le_one (Real.arctan x))
+    simpa only [ofReal_pow] using H
+  have H := incompleteEllipticPi_eq_symmetricEllipticRF_add_RJ h0 h1.le hks hα
+  have hdouble : jacobiComodulus (jacobiComodulus kc) ^ 2 = kc ^ 2 := by
+    rw [jacobiComodulus_sq_eq_one_sub_sq, jacobiComodulus_sq_eq_one_sub_sq, sub_sub_cancel]
+  have hPi := bulirschEl3_eq_incompleteEllipticPi (x : ℂ) (jacobiComodulus kc) p
+  conv_lhs at hPi => rw [bulirschEl3, hdouble, ← bulirschEl3]
+  rw [← ofReal_arctan] at hPi
+  dsimp only at H
+  rw [hc] at H
+  have hr0 : (((1 / x ^ 2 : ℝ) : ℂ) + 1) - 1 = r := by dsimp [r]; ring
+  have hrk : (((1 / x ^ 2 : ℝ) : ℂ) + 1) - jacobiComodulus kc ^ 2 = r + kc ^ 2 := by
+    rw [jacobiComodulus_sq_eq_one_sub_sq]
+    dsimp [r]
+    ring
+  have hrp : ((1 / x ^ 2 + 1 - (1 - p) : ℝ) : ℂ) = r + p := by
+    dsimp [r]
+    push_cast
+    ring
+  simp only [ofReal_add, ofReal_one] at H
+  rw [hr0, hrk, hrp] at H
+  rw [hPi, bulirschEl1_eq_symmetricEllipticRF_of_pos hx kc]
+  dsimp only [r] at H ⊢
+  push_cast at H ⊢
+  linear_combination H
 
 /-! ### §19.25(iii) Symmetric integrals as Legendre's integrals -/
 

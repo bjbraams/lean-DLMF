@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module -- shake: keep-all
 
 public import DLMF.Hypergeometric.Basic.Pochhammer
+public import DLMF.Hypergeometric.Basic.PochhammerDerivatives
 public import DLMF.Hypergeometric.Basic.GaussCoefficients
 public import DLMF.Hypergeometric.Basic.PrincipalBranch
 public import DLMF.Hypergeometric.Basic.AppellF4
@@ -23,7 +24,8 @@ public import DLMF.Hypergeometric.Basic.GeneralizedIntegral
 # Definitions and elementary coefficient algebra for hypergeometric functions
 
 This module collects the foundational definitions for DLMF Chapter 15: Pochhammer symbols
-(`DLMF.Hypergeometric.Basic.Pochhammer`), the Gauss coefficients
+(`DLMF.Hypergeometric.Basic.Pochhammer`), their derivatives at negative integers
+(`DLMF.Hypergeometric.Basic.PochhammerDerivatives`), the Gauss coefficients
 (`DLMF.Hypergeometric.Basic.GaussCoefficients`), the cut plane and the continued Gauss function
 (`DLMF.Hypergeometric.Basic.PrincipalBranch`), Appell's `F₄`
 (`DLMF.Hypergeometric.Basic.AppellF4`), and the basic properties of the Gauss function: the series

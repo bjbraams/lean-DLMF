@@ -404,7 +404,7 @@ theorem jacobiComodulus_sq_eq_one_sub_sq (k : ℂ) : jacobiComodulus k ^ 2 = 1 -
   rw [jacobiComodulus, one_div, Complex.cpow_ofNat_inv_pow]
 
 /-- With `p = 1` Bulirsch's `cel` needs no principal value. -/
-private lemma bulirschCel_one_eq_primitive (kc : ℂ) (a b : ℝ) :
+theorem bulirschCel_one_eq_primitive (kc : ℂ) (a b : ℝ) :
     bulirschCel kc 1 a b = Core.primitive (fun θ => (a * Complex.cos θ ^ 2 +
       b * Complex.sin θ ^ 2) * (Complex.cos θ ^ 2 + kc ^ 2 * Complex.sin θ ^ 2) ^ (-(1 / 2 : ℂ)))
         (π / 2) := by

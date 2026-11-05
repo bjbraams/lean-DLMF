@@ -1,5 +1,17 @@
 # Mathematical review of the lean-DLMF project (formerly lean-AAR)
 
+**Approved Chapter 17 statement repairs, 2026-11-05:** the
+[statement correction](#approved-chapter-17-statement-repairs-2026-11-05) replaces Fine's
+first-series denominator and separates the cancelled q-Dixon form from its literal quotient.
+Both core summations remain admitted; the literal q-Dixon corollary has a checked algebraic proof.
+
+**Parallel DLMF proof round, 2026-11-04:** the
+[new round](#parallel-dlmf-proof-round-2026-11-04) removes 25 admissions, reducing
+1,058 to 1,033, with existing public statements and definition bodies unchanged. It completes
+elliptic principal values and series, elementary continued fractions, q-transformations and
+classical limits, and five zeta integrals. Two false Chapter 17 statements remain unchanged
+with independent Lean counterexamples pending review.
+
 **Foundational Basic layer, 2026-10-30:** the [reorganization](#foundational-basic-layer-2026-10-30)
 adds `DLMF.Basic`, with 59 Basic entry points and no dependencies on DLMF theorem files.
 All public source statements and definition bodies are preserved; 1,553 admissions remain.
@@ -10821,3 +10833,286 @@ The names that contained "DLMF" were spelled out:
 The infrastructure names `Core.dlmfUpstream` and `UpstreamPointer.dlmf` were kept. The tag count is
 unchanged (10,814 tags, 9,458 proved, 1,356 admitted). The tagged definitions of 2.6.8, 2.7.1 and
 2.10.26 are now tagged theorems. No new two-way area pairs were introduced.
+
+
+## Parallel DLMF proof round (2026-11-04)
+
+This round removes **25 direct admissions**, reducing **1,058 to 1,033**. Three agents worked
+in parallel with the coordinating zeta development. The requested aspiration of about 200 removals
+was not reached. The work concentrated on shared analytic identities with useful corollaries;
+existing public theorem statements and mathematical definition bodies are unchanged.
+The [machine-readable manifest](ProofRound20261104.json) records the exact theorem inventory,
+axiom checks, coverage comparison, and deferred statement issues.
+
+### Completed proofs
+
+**Elliptic integrals: eight admissions.** [Expansions](DLMF/EllipticIntegrals/Expansions.lean)
+proves `incompleteEllipticF_hasSum`, `incompleteEllipticE_hasSum`,
+`incompleteEllipticPi_hasSum` (19.5.4₁–₃), and `completeEllipticK_eq_nome_series` (19.5.8).
+[SymmetricConnection](DLMF/EllipticIntegrals/SymmetricConnection.lean) proves
+`symmetricEllipticRJ_change_parameter` (19.21.12–13), including negative-parameter principal
+values and a zero node. Its primed extension also permits `p = x` or `q = x`, retains both
+DLMF tags with the stronger-form comment, and makes the original a corollary.
+[SymmetricSpecialCases](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean) proves
+`symmetricEllipticRJ_special_p` (19.20.13), `symmetricEllipticRJ_principalValue`
+(19.20.14–15), and `symmetricEllipticRJ_principalValue_complete` (19.20.17).
+The parameter-change proof uses a smooth logarithmic primitive after subtracting comparison
+kernels at every pole, avoiding a change of excision intervals for the two-pole case.
+
+**Elementary and Lambert functions: six admissions.** The
+[Lambert series](DLMF/Elementary/LambertW/Series.lean) now has independent proofs of
+`lambertC_hasSum` and `lambertC_real_branches` (4.13.6), through the already proved incomplete
+Gamma inverse series and coefficient recurrence. The continued-fraction proofs establish
+`log_one_add_continuedFraction` (4.9.1), `log_ratio_continuedFraction` (4.9.2),
+`arctan_continued_fraction` (4.25.4), and `arctanh_continued_fraction` (4.39.3) on their original
+complex domains. The shared logarithmic Jacobi fraction is identified on the real axis by its
+minimal Legendre solution, then continued using pole-free value bounds and Vitali's theorem.
+Even contraction supplies the fraction for `log(1+z)`.
+
+**q-hypergeometric functions: six admissions.** The proofs complete `bilateral_two_sum`
+(17.8.4), `bilateral_two_continues`, the analytic `qPhi_classical_limit` (17.4.2),
+`heine_classical_derivative_limit`, `heine_fine_expansion_third` (17.6.11), and
+`heine_fine_expansion_fourth` (17.6.12). The bilateral identity uses Ismail continuation from
+Bailey–Daum with cleared infinite products. A uniform successive-term ratio supplies Tannery's
+majorant for the classical limit. Fine's third and fourth transformations follow from checked
+functional recurrences and vanishing iteration remainders; neither uses the false first formula.
+
+**Zeta functions: five admissions.** [HurwitzIntegrals](DLMF/Zeta/HurwitzIntegrals.lean)
+completes `hurwitzZetaComplex_hermite` (25.11.29) and
+`tendsto_integral_alternating_hurwitz` (25.11.35), including its conditionally convergent
+imaginary-axis case. [ElementaryKernels](DLMF/Zeta/IntegralReps/ElementaryKernels.lean)
+completes `riemannZeta_eq_integral_arctan_cosh`,
+`riemannZeta_eq_integral_arctan_exp_sub_one`, and
+`riemannZeta_eq_integral_arctan_exp_add_one` (25.5.10–12). Hermite's formula follows from the
+Bose–Einstein sine transform, Gamma Laplace integrals, Fubini, and continuation in the order.
+The hyperbolic-cosine formula uses the hyperbolic-secant Fourier transform, obtained from the
+second beta integral and Gamma reflection. Conditional convergence is proved before Abel damping
+identifies the alternating integral's boundary value.
+
+### Reusable support and validation
+
+General results live in `DLMFMathlib`, including uniform-ratio Tannery convergence, positive
+continued-fraction convergence and Jacobi value regions, normalized Taylor products, positivity
+propagation, punctured half-planes, improper tail derivatives, logarithmic principal-value
+comparison kernels, Gamma Fourier convergence, beta half-line integrals, vertical principal
+powers, Laplace sine/cosine integrals, and the Bose–Einstein and hyperbolic-secant transforms.
+The existing Gamma half-line beta and Binet APIs are adapters to the factored shared results.
+Upstream reuse is recorded in [CREDITS.md](CREDITS.md).
+
+The ordinary full build passes **15,516 jobs**. Every changed or new Lean file passes
+`lake env lean -DautoImplicit=false -DrelaxedAutoImplicit=false`, after rebuilding its imports.
+Every completed original theorem uses only `propext`, `Classical.choice`, and `Quot.sound`.
+The fresh full audit finds 1,059
+source-ranged theorem declarations depending on admissions, down from
+1,084.
+The tag dump records **10,816 reference/declaration entries**:
+**9,485 proved**, **1,331 admission-dependent**, and no nonstandard
+axioms. All 1,031 upstream pointers remain. The two new entries are the stronger elliptic
+parameter-change theorem's tags; no existing entry is removed or regresses.
+
+`import_survey.py --baseline scripts/import_baseline.json` reports no new two-way area pair,
+foundational imports outside the permitted layer, closure violations, missing modules, or file
+cycles. Existing public source headers and definition bodies compare unchanged against the
+starting commit. All changed/new Lean lines are at most 100 characters; all 1,452 project Lean
+files are at most 1,500 lines; `git diff --check` passes. The Chapter 4, 6–8, 17, 19 and 25
+acquisition ledgers are refreshed from the compiled dump. That refresh also corrects stale ledger
+statuses from earlier rounds; only the 25 manifest entries are credited to this round.
+
+### Statement issues identified in the proof round
+
+At the end of this round the tagged statements below were unchanged pending user approval.
+The [approved repairs](#approved-chapter-17-statement-repairs-2026-11-05) are now applied.
+The retained counterexamples describe the original printed forms and use only standard axioms.
+
+* **Fine's first transformation, 17.6.9:** the original `heine_fine_expansion` has regular terminating
+  parameters `q=1/2`, `a=4`, `b=3/4`, `z=0` for which the left side is `1` and the right side
+  is `1/5`. The permanent proof is
+  [`fine_first_transformation_counterexample`](DLMF/QHypergeometric/BasicSummations/FineCounterexample.lean).
+  The formula and its displayed constraint match the [current DLMF page](https://dlmf.nist.gov/17.6.E9).
+  A checked functional recurrence suggests replacing the first series denominator
+  `(azq²/b;q)ₙ` by `(aq²/b;q)ₙ`. The latter is already regular under the existing `aq/b`
+  regularity hypothesis; the `azq²/b` regularity condition becomes unnecessary. Temporary Lean
+  checks prove the recurrence, the proposed denominator's regularity, and the repaired
+  counterexample's series sum `5/2` and right side `1`. This is an **inferred repair**: the full
+  repaired transformation has not been proved, and Fine (1988), pp. 12–15, was inaccessible.
+* **Terminating q-Dixon sum, 17.7.6:** the original `q_dixon_terminating` permits `q=1/2`, `n=1`, `b=3`,
+  `c=1/3`. The lower parameters satisfy its finite regularity assumptions. Its series is
+  `-9/10`, whereas the uncancelled printed quotient has `(bc;q)₁=0` in its denominator and
+  totalizes to `0`. See
+  [`qDixon_terminating_quotient_counterexample`](DLMF/QHypergeometric/HigherSummationCounterexamples.lean)
+  and the [DLMF formula](https://dlmf.nist.gov/17.7.E6). This is an exceptional-parameter issue
+  in the local literal quotient. A repair should cancel the shifted-factorial factors before
+  division, or require regularity of the right-hand denominator.
+
+### Next priorities
+
+1. Prove the two corrected Chapter 17 summations; the approved statement repairs below
+   remove their known counterexamples.
+2. Use the proved symmetric principal-value machinery to bridge Legendre's `Π` to `R_F/R_J`.
+   This is expected to unlock 19.7.8–10, 19.6.5, and 19.25.4,16.
+3. Extend the zeta parameter-calculus API to the remaining Hurwitz derivative integrals and
+   digamma moments (25.11.32,34), with endpoint estimates and differentiation under integrals.
+4. Continue q-transformations through reusable recurrence and analytic-continuation packages.
+   Treat exceptional product zeros explicitly before using literal quotient identities.
+5. Plan the large Mathieu, spheroidal, and general asymptotic blocks as separate analytic
+   infrastructure projects. Their admission counts alone do not make them short proof rounds.
+   Supporting-source-only statements without a DLMF counterpart retain lower priority.
+
+
+## Approved Chapter 17 statement repairs (2026-11-05)
+
+The user approved both repairs after reviewing the counterexamples and proposed formulas.
+This section records the specification-only stage. Both core summations were left admitted
+at that stage; the following proof round proves both.
+
+* `heine_fine_expansion` now uses `(aq²/b;q)ₙ` as its first-series denominator, with
+  `QDenominatorRegular [b*q,a*q/b] q`. The obsolete `azq²/b` regularity condition is dropped.
+  Its `dlmf` comment explicitly records the difference from the printed DLMF 17.6.9 formula.
+  The recurrence supporting this repair was checked in the preceding round, and the permanent
+  `fine_first_shifted_denominator_rhs` verifies right side `1` at the original counterexample.
+  The full transformation was left admitted at this stage; the inferred reference typo was not
+  independently confirmed against Fine (1988).
+* `q_dixon_terminating'` is the cancelled-product form in
+  [Dixon](DLMF/QHypergeometric/Dixon.lean). It retains the original finite lower-parameter
+  regularity hypotheses and has right side
+  `(q^(n+1),bc*q^n;q)_n / (b*q^n,c*q^n;q)_n`. Its two denominator parameters are regular under
+  those hypotheses: a zero would force `b` or `c` to equal `q^(-n-j)`, `0 ≤ j < n`, which
+  makes a retained lower factor zero. The theorem was left admitted at this stage. The primed name and tag
+  comment record its extension to removable zeros of the printed quotient.
+* `q_dixon_terminating` retains the literal printed quotient and adds the explicit hypothesis
+  `(q,bc;q)_n (b,c;q)_(2n) ≠ 0`. It became an algebraic corollary of the primed theorem,
+  using `(x;q)_(2n) = (x;q)_n (x*q^n;q)_n`; it therefore depended on that admission at this stage.
+  The two declarations live together in `DLMF/QHypergeometric/Dixon.lean`, imported by the
+  area umbrella and `HigherSummations.lean`, keeping the latter below the file-length limit.
+  The permanent `qPhi_qDixon_eq_cancelled_quotient` verifies agreement with `-9/10` at the
+  original `bc=1` counterexample, independently of the admitted summation.
+
+Both original counterexamples are retained as evidence about the printed expressions.
+The statement changes are recorded in `reports/RenameMap20261101.tsv`; the Chapter 17
+acquisition ledger distinguishes the corrected formulas, the literal quotient's extra domain
+hypothesis, and the proof obligations at this stage. The preceding proof-round manifest is retained
+as a dated snapshot; this section supersedes its deferred-repair status.
+
+Validation at the repair stage: the full build passed 15,518 jobs. All six changed/new Lean modules pass strict
+source checks with `autoImplicit=false` and `relaxedAutoImplicit=false`. Both positive
+exceptional-parameter checks and both original counterexamples use only `propext`,
+`Classical.choice`, and `Quot.sound`; the two core summations and the literal q-Dixon corollary
+depended on `sorryAx` at this stage. The fresh tag dump reports no nonstandard axioms.
+The import survey reports no new two-way area pairs, foundational/closure violations, missing
+imports, or file cycles. Source comparison finds exactly the two approved public statement
+changes and no definition-body changes or missing declarations. Direct admissions remained
+1,033. Formatting checks pass, all changed Lean lines are at most 100 characters, and all
+1,453 Lean source files are at most 1,500 lines.
+
+## Parallel DLMF proof round (2026-11-05)
+
+This round removes **25 direct admissions**, reducing **1,033 to 1,008**. Three parallel
+agents worked with the coordinating zeta development. The baseline is the working tree after
+the approved Chapter 17 repairs; the preceding round's uncommitted work is retained.
+The [manifest](ProofRound20261105.json) records the completed declarations and validation.
+Existing public statements and public and private definition bodies are preserved.
+
+### Completed proofs
+
+**Elliptic integrals: twelve admissions.** The new
+[Legendre principal-value bridge](DLMF/EllipticIntegrals/LegendrePrincipalValue.lean) connects
+Legendre's `Π` to `R_F` and `R_J`, including interior poles. Its cutoff is transformed into
+asymmetric excision intervals whose distance ratio tends to one. This proves:
+
+- `completeEllipticPi_of_one_lt` and `completeEllipticPi_of_one_lt_special` (19.6.5–6),
+  including the characteristic and modulus limits in the three-part second statement;
+- `incompleteEllipticPi_special_RC` (19.6.12), with its principal-value cases;
+- `incompleteEllipticPi_add_first`, `incompleteEllipticPi_add_second` and
+  `incompleteEllipticPi_add_third` (19.7.8–10);
+- `tendsto_symmetricEllipticRJ_zero` and `tendsto_symmetricEllipticRJ_zero_left`
+  (19.20.7,10), including both signs of the parameter approaching zero;
+- `completeEllipticPi_pv_eq` and `incompleteEllipticPi_pv_eq` (19.25.4,16);
+- `bulirschCel_eq_symmetricElliptic` and `bulirschEl3_eq_symmetricElliptic` (19.25.19,22),
+  including negative-parameter principal values.
+
+The first addition formula has a new primed extension to real moduli satisfying `k² < 1`,
+with the original statement retained as a corollary and both tagged. Supporting results cover
+parameter continuity, repeated nodes, cutoff convergence and principal-value homogeneity.
+[SpecialCases](DLMF/EllipticIntegrals/SpecialCases.lean) now has no direct admissions.
+
+**Basic hypergeometric functions: eight admissions.** The corrected
+`heine_fine_expansion` (17.6.9) is proved by contiguous relations, finite telescoping and a
+uniform series limit in [FirstFine](DLMF/QHypergeometric/BasicSummations/FirstFine.lean).
+The cancelled-product `q_dixon_terminating'` (17.7.6) is proved from a denominator-free
+polynomial identity, preserving removable zeros and `n = 0`; the literal quotient's existing
+corollary `q_dixon_terminating` is now proved from this form.
+
+The finite polynomial and q-difference machinery proves `four_phi_three_parity` (17.7.9),
+`four_phi_three_base_square_first` (17.7.12) and `four_phi_three_base_square_second` (17.7.13).
+Finite-to-infinite limits prove `qPhi3_sears_first` and `qPhi3_sears_second` (17.9.6–7).
+Coefficientwise q-Pfaff–Saalschütz proves `qPhi3_terminating_quadratic` (17.9.17), whose
+unchanged statement moves into
+[TerminatingQuadraticTransformation](DLMF/QHypergeometric/TerminatingQuadraticTransformation.lean).
+All original finite regularity and exceptional-parameter cases remain covered.
+
+The proved finite bilateral support, shift and continuity API is retained in
+[FiniteBilateralTransformations](DLMF/QHypergeometric/FiniteBilateralTransformations.lean)
+for subsequent bilateral work. It introduces no admissions.
+
+**Zeta functions: five admissions.**
+[HurwitzDerivativeIntegrals](DLMF/Zeta/HurwitzDerivativeIntegrals.lean) proves
+`integral_pow_mul_digamma` and `integral_deriv_hurwitzZetaComplex` (25.11.32,34).
+Joint holomorphy gives commuting order and argument derivatives. The shift recurrence isolates
+the logarithmic endpoint at zero; a harmonic correction makes the order derivatives an Appell
+family, whose alternating binomial combination gives the digamma moments.
+[HurwitzIntegrals](DLMF/Zeta/HurwitzIntegrals.lean) now has no direct admissions.
+
+[HurwitzAsymptotics](DLMF/Zeta/HurwitzAsymptotics.lean) proves
+`hurwitzZetaComplex_asymptotic`, `deriv_hurwitzZetaComplex_neg_one_asymptotic` and
+`deriv_hurwitzZetaComplex_neg_two_asymptotic` (25.11.43–45). The one-step Euler–Maclaurin
+formula is extended to the principal slit plane. Uniform sector bounds and compact uniformity
+in the order give the remainder estimates; Cauchy's estimate controls its order derivative.
+The finite-tail derivatives come from the simple-root derivative of a Pochhammer polynomial.
+This file now also has no direct admissions.
+
+### Foundational and general support
+
+The existing Hurwitz parameter API moves unchanged into
+[Basic.HurwitzProperties](DLMF/Zeta/Basic/HurwitzProperties.lean), which also provides joint
+analyticity and the mixed derivative formula. It uses only foundational imports. The new
+[Pochhammer derivative module](DLMF/Hypergeometric/Basic/PochhammerDerivatives.lean) gives the
+value of the derivative at a negative integer when the rising factorial has a simple zero.
+
+The new general modules in `DLMFMathlib` provide Appell antiderivatives, logarithmic monomials
+on complex rays, slit-plane translation bounds, bounds for decaying powers and principal-value
+level-set cutoffs. All are registered in the umbrella. Source attribution is in
+[CREDITS](CREDITS.md#special-function-proof-round-2026-11-05).
+
+### Validation
+
+Every completed original theorem has a compiled axiom audit containing only `propext`,
+`Classical.choice` and `Quot.sound`. The complete project audit covers 70,574 declarations.
+The DLMF dump has 10,818 entries:
+9,512 proved, 1,306 admitted and none with nonstandard axioms, with all 1,031 upstream
+pointers retained. All baseline entries remain; 26 existing entries are newly proved, and
+the stronger 19.7.8 statement adds one proved entry. These figures are recorded by the manifest.
+The full build (15,566 jobs) and strict checks of 47 changed/new modules and
+entry points pass, with `autoImplicit` and `relaxedAutoImplicit` disabled.
+
+The independent source comparison covers 22,777 baseline public declarations and all existing
+public and private definition bodies: no missing declaration, changed public header, changed
+definition body, new admission or new axiom. Thirteen public declarations move files while
+retaining their names and statements. The import survey reports no new two-way area pair,
+foundational or closure violation, missing import or file cycle; the existing 22 two-way pairs
+are unchanged. All 1,477 project Lean files satisfy the 1,500-line limit; changed/new Lean lines
+satisfy the 100-character limit; `git diff --check` passes. The Chapter 17, 19 and 25 acquisition
+ledgers are refreshed from the compiled tag dump.
+
+### Next priorities
+
+1. Continue the remaining finite and bilateral Chapter 17 transformations. The finite bilateral
+   shift API is ready; the Watson-type bilateral transformation still needs its product
+   prefactor and an extension across exceptional shifted lower products.
+2. Apply the elliptic principal-value and parameter-continuity APIs to the remaining endpoint
+   asymptotics and conversions, preserving the distinction between convergent integrals and
+   principal values.
+3. Develop the logarithmic expansions of Lerch's transcendent and the polylogarithm
+   (25.14.3 and 25.12.12). The Hurwitz order-calculus API now supplies the needed analytic
+   input, but the expansions require additional series or contour arguments.
+4. Treat the large Mathieu, spheroidal and general asymptotic blocks as separate infrastructure
+   projects. Their admission counts do not imply correspondingly short proof rounds.

@@ -13534,3 +13534,5 @@ declaration	DLMF.Legendre.dlmf_14_27_no_boundary_zero	DLMF.Legendre.not_tendsto_
 declaration	DLMF.MatrixArgument.zonalPolynomial_eq_dlmf	DLMF.MatrixArgument.zonalPolynomial_eq_integral_leadingMinor	name contained DLMF
 declaration	DLMF.NumberTheory.isCarmichael_iff_dlmf	DLMF.NumberTheory.isCarmichael_iff_composite_pow_modEq	name contained DLMF
 declaration	DLMF.Weierstrass.instNonemptyPeriodPair_dLMF	DLMF.Weierstrass.instNonemptyPeriodPair	name contained DLMF
+statement	DLMF.QHypergeometric.heine_fine_expansion	DLMF.QHypergeometric.heine_fine_expansion	user-approved correction: first-series denominator (aq²/b;q)_n and regularity [bq,aq/b]
+statement	DLMF.QHypergeometric.q_dixon_terminating	DLMF.QHypergeometric.q_dixon_terminating	user-approved correction: literal quotient requires nonzero denominator; cancelled extension is q_dixon_terminating' in DLMF.QHypergeometric.Dixon

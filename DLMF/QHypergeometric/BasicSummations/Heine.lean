@@ -10,6 +10,8 @@ public import DLMFMathlib.Analysis.Complex.GeometricNewtonSeries
 public import DLMFMathlib.Analysis.Complex.SeparatingContour
 public import Mathlib.Analysis.Analytic.IsolatedZeros
 public import DLMF.QHypergeometric.BasicSummations.OnePhiZero
+public import DLMF.QHypergeometric.BasicSummations.RogersFine
+public import DLMF.QHypergeometric.BasicSummations.FirstFine
 public import DLMF.QSeries.RamanujanPsi
 public import DLMF.QSeries.Saalschutz
 public import DLMF.QHypergeometric.Transformations
@@ -85,13 +87,13 @@ private lemma differentiable_qPochhammer_mul (q α : ℂ) (k : ℕ) :
     exact ih.mul ((differentiable_const _).sub ((differentiable_const _).mul
       differentiable_id |>.mul (differentiable_const _)))
 
-/-- The Bailey–Daum q-Kummer sum `2φ1(a,b;aq/b;q,-q/b)` as a product of infinite q-shifted
-factorials (DLMF 17.6.E5). -/
-@[dlmf 17.6.E5]
-theorem q_bailey_daum {a b q : ℂ} (hq : ‖q‖<1) (hb : ‖q‖<‖b‖)
-    (hc : QDenominatorRegular [a*q/b] q) :
-    qPhi [a,b] [a*q/b] q (-q/b)=qPochhammerInf (-q) q*
-      qPochhammerListInf [a*q,a*q^2/b^2] (q^2)/qPochhammerListInf [-q/b,a*q/b] q := by
+/-- The Bailey–Daum sum with the lower-parameter product cleared, including its zeros. -/
+lemma tsum_baileyDaum_cleared {a b q : ℂ} (hq : ‖q‖ < 1) (hb : ‖q‖ < ‖b‖) :
+    (∑' n : ℕ, qPochhammer a q n *
+      (qPochhammer b q n / qPochhammer q q n * (-q / b) ^ n *
+        qPochhammerInf (a * q / b * q ^ n) q)) =
+      qPochhammerInf (-q) q * (qPochhammerInf (a * q) (q ^ 2) *
+        qPochhammerInf (a * q ^ 2 / b ^ 2) (q ^ 2)) / qPochhammerInf (-q / b) q := by
   have hb0 : b≠0 := by rintro rfl; simp at hb; exact absurd hb (not_lt.mpr (norm_nonneg q))
   set r := -q/b with hr
   have hr1 : ‖r‖<1 := by
@@ -191,17 +193,47 @@ theorem q_bailey_daum {a b q : ℂ} (hq : ‖q‖<1) (hb : ‖q‖<‖b‖)
       with x hx using key x hx
   have hFG := AnalyticOnNhd.eq_of_eventuallyEq (fun x _ => hFd.analyticAt x)
     (fun x _ => hGd.analyticAt x) hev
-  have hD : qPochhammerInf (a*q/b) q ≠ 0 :=
+  have H := congrFun hFG a
+  change (∑' n : ℕ, qPochhammer (1 * a) q n *
+    (qPochhammer b q n / qPochhammer q q n * r ^ n *
+      qPochhammerInf (a * (q / b * q ^ n)) q)) = G a at H
+  simpa only [G, hr, one_mul, mul_div_assoc, mul_assoc] using H
+
+/-- The Bailey–Daum q-Kummer sum `2φ1(a,b;aq/b;q,-q/b)` as a product of infinite q-shifted
+factorials (DLMF 17.6.E5). -/
+@[dlmf 17.6.E5]
+theorem q_bailey_daum {a b q : ℂ} (hq : ‖q‖<1) (hb : ‖q‖<‖b‖)
+    (hc : QDenominatorRegular [a*q/b] q) :
+    qPhi [a,b] [a*q/b] q (-q/b)=qPochhammerInf (-q) q*
+      qPochhammerListInf [a*q,a*q^2/b^2] (q^2)/qPochhammerListInf [-q/b,a*q/b] q := by
+  have hb0 : b ≠ 0 := by
+    rintro rfl
+    exact (norm_nonneg q).not_gt (by simpa using hb)
+  have hz : ‖-q / b‖ < 1 := by
+    rw [norm_div, norm_neg, div_lt_one (norm_pos_iff.mpr hb0)]
+    exact hb
+  have hD : qPochhammerInf (a * q / b) q ≠ 0 :=
     qPochhammerInf_ne_zero hq fun n h => hc _ (by simp) n (sub_eq_zero.mp h).symm
-  have := hFphi a hc
-  rw [hFG] at this
-  rw [eq_div_iff (by simp [qPochhammerListInf, hrI, hD]), mul_comm]
-  simp only [qPochhammerListInf, List.map_cons, List.map_nil, List.prod_cons, List.prod_nil,
-    mul_one]
-  have hG : qPochhammerInf r q*G a = qPochhammerInf (-q) q*(qPochhammerInf (a*q) (q^2)*
-      qPochhammerInf (a*q^2/b^2) (q^2)) := by
-    simp only [G]; field_simp
-  linear_combination (-qPochhammerInf r q)*this+hG
+  have hZ : qPochhammerInf (-q / b) q ≠ 0 :=
+    qPochhammerInf_ne_zero_of_norm_lt_one hz hq
+  have hcleared := tsum_baileyDaum_cleared (a := a) hq hb
+  have hleft : (∑' n : ℕ, qPochhammer a q n *
+      (qPochhammer b q n / qPochhammer q q n * (-q / b) ^ n *
+        qPochhammerInf (a * q / b * q ^ n) q)) =
+      qPochhammerInf (a * q / b) q * qPhi [a, b] [a * q / b] q (-q / b) := by
+    rw [qPhi_eq_basicHypergeometric (by simp), basicHypergeometric, ← tsum_mul_left]
+    refine tsum_congr fun n => ?_
+    simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one]
+    have hA := qPochhammer_ne_zero_of_qDenominatorRegular hq hc n
+    have hQ := qPochhammer_self_ne_zero hq n
+    rw [qPochhammerInf_mul_qPochhammer (a := a * q / b) hq n]
+    field_simp
+    rw [show q * a / b = a * q / b by ring, mul_div_cancel_right₀ _ hA]
+  rw [hleft] at hcleared
+  simp only [qPochhammerListInf, List.map_cons, List.map_nil, List.prod_cons,
+    List.prod_nil, mul_one]
+  field_simp at hcleared ⊢
+  linear_combination hcleared
 
 /-- Heine's first transformation of `2φ1(a,b;c;q,z)` into a multiple of `2φ1(c/b,z;az;q,b)` (DLMF
 17.6.E6). -/
@@ -417,15 +449,6 @@ theorem heine_third {a b c q z : ℂ} (ha : a≠0) (hb : b≠0) (hq : ‖q‖<1)
       qPhi [c/a,c/b] [c] q (a*b*z/c) :=
   heine_third_aux ha hb hq hz hc0 habz hc
 
-/-- Fine's first expansion of `2φ1(q,aq;bq;q,z)` (DLMF 17.6.E9). -/
-@[dlmf 17.6.E9]
-theorem heine_fine_expansion {a b q z : ℂ} (hb0 : b≠0) (hq : ‖q‖<1) (hz : ‖z‖<1)
-    (hd : QDenominatorRegular [b*q,a*z*q^2/b,a*q/b] q) :
-    qPhi [q,a*q] [b*q] q z= -(1-b)*(a*q/b)/(1-a*q/b)*
-      (∑' n : ℕ, qPochhammerList [a*q,a*z*q/b] q n*q^n/qPochhammer (a*z*q^2/b) q n)+
-      qPochhammerListInf [a*q,a*z*q/b] q/qPochhammerInf (a*q/b) q*qPhi [q,0] [b*q] q z := by
-  sorry
-
 /-- Fine's second expansion: `(1-z) 2φ1(q,aq;bq;q,z)` as a series in `(b/a;q)_n (-az)^n
 q^(n(n+1)/2)` (DLMF 17.6.E10). -/
 @[dlmf 17.6.E10]
@@ -497,7 +520,28 @@ theorem heine_fine_expansion_third {a b q z : ℂ} (hb0 : b≠0) (hq : ‖q‖<1
           [z*q, a*q/b] q n)-
       a*q*∑' n : ℕ, qPochhammer (a*q) q n*qPochhammer (a*z*q/b) q (2*n+1)*(b*q)^n/
         (qPochhammer (z*q) q n*qPochhammer (a*q/b) q (n+1)) := by
-  sorry
+  by_cases hq0 : q = 0
+  · subst q
+    have hF : qPhi [0, a * 0] [b * 0] 0 z = (1 - z)⁻¹ := by
+      rw [← tsum_geometric_of_norm_lt_one hz]
+      refine tsum_congr fun n => ?_
+      simp [qPhiTerm, qPhiExponent, qPochhammerList, qPochhammer_zero_param]
+    rw [hF]
+    simp only [mul_zero, zero_div, qPochhammer_zero_param, qPochhammerList,
+      List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, one_mul,
+      div_one, zero_mul, sub_zero]
+    rw [tsum_geometric_of_norm_lt_one hb]
+    field_simp [one_sub_ne_zero_of_norm_lt_one hz, one_sub_ne_zero_of_norm_lt_one hb]
+  have hB : QDenominatorRegular [b * q] q := by
+    intro x hx n
+    exact hd x (by simp only [List.mem_singleton] at hx; simp [hx]) n
+  have hA : QDenominatorRegular [a * q / b] q := by
+    intro x hx n
+    exact hd x (by simp only [List.mem_singleton] at hx; simp [hx]) n
+  have H := RogersFine.OddEvenExpansion.expansion (a := a) hb0 hq0 hq hz hb hB hA
+  simpa only [RogersFine.series, RogersFine.OddEvenExpansion.weight,
+    qPochhammerList, List.map_cons, List.map_nil, List.prod_cons, List.prod_nil,
+    add_zero, pow_zero, pow_one, mul_one] using H
 
 /-- Fine's fourth expansion of `(1-z) 2φ1(q,aq;bq;q,z)` as a well-poised type series (DLMF
 17.6.E12). -/
@@ -507,7 +551,23 @@ theorem heine_fine_expansion_fourth {a b q z : ℂ} (hb0 : b≠0) (hq : ‖q‖<
     (1-z)*qPhi [q,a*q] [b*q] q z=∑' n : ℕ,
       qPochhammerList [a*q,a*z*q/b] q n/qPochhammerList [b*q,z*q] q n*
         (1-a*z*q^(2*n+1))*(b*z)^n*q^(n*n) := by
-  sorry
+  by_cases hq0 : q = 0
+  · subst q
+    have hF : qPhi [0, a * 0] [b * 0] 0 z = (1 - z)⁻¹ := by
+      rw [← tsum_geometric_of_norm_lt_one hz]
+      refine tsum_congr fun n => ?_
+      simp [qPhiTerm, qPhiExponent, qPochhammerList, qPochhammer_zero_param]
+    rw [hF, mul_inv_cancel₀ (one_sub_ne_zero_of_norm_lt_one hz), tsum_eq_single 0]
+    · simp [qPochhammerList]
+    · intro n hn
+      simp [zero_pow (mul_ne_zero hn hn)]
+  have H := RogersFine.hasSum_expansion (a := a) hb0 hq0 hq hz hd
+  simp only [RogersFine.series] at H
+  rw [← H.tsum_eq]
+  refine tsum_congr fun n => ?_
+  simp only [RogersFine.weight, qPochhammerList, List.map_cons, List.map_nil,
+    List.prod_cons, List.prod_nil, mul_one]
+  ring
 
 /-- A nonterminating summation combining two `2φ1` series at argument `q` into infinite products
 (DLMF 17.6.E13). -/
@@ -1112,15 +1172,6 @@ theorem heine_qDifferentialEquation {a b c q z : ℂ} (hq0 : q≠0) (hq : ‖q�
     field_simp
     simp only [← hD0,← hD1,← hD2]
     ring
-
-/-- As `q → 1⁻`, the iterated q-derivatives of `2φ1(q^a,q^b;q^c;q,z)` tend to the derivatives of
-the Gauss function `F(a,b;c;z)`. -/
-theorem heine_classical_derivative_limit {a b c z : ℂ} (hc : ∀ n : ℕ, c≠ -(n:ℂ))
-    (hz : ‖z‖<1) (n : ℕ) :
-    Tendsto (fun q : ℝ => qDerivIterate n q
-      (fun w => qPhi [(q:ℂ)^a,(q:ℂ)^b] [(q:ℂ)^c] q w) z)
-      (𝓝[<] 1) (𝓝 (iteratedDeriv n (ordinaryHypergeometric a b c) z)) := by
-  sorry
 
 /-- As `q → 1⁻`, the coefficients of Heine's q-differential equation tend to those of the Gauss
 hypergeometric equation. -/

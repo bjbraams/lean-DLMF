@@ -4,6 +4,64 @@ The project formalizes material from Andrews, Askey and Roy, *Special Functions*
 (1999), and the NIST Digital Library of Mathematical Functions, using Mathlib.
 Existing module copyright and authorship notices remain authoritative.
 
+## Special-function proof round (2026-11-05)
+
+The cancelled terminating q-Dixon identity follows Victor J. W. Guo,
+“Elementary proofs of some q-identities of Jackson and Andrews–Jain,”
+*Discrete Mathematics* 295 (2005), 63–74, §2 (Lemma 2.1 and Theorem 1.1),
+[doi:10.1016/j.disc.2005.03.001](https://doi.org/10.1016/j.disc.2005.03.001).
+The proof first establishes a denominator-free polynomial identity, retaining all removable
+zeros, and then uses the original finite regularity hypotheses to recover the q-series.
+Fine's first transformation uses the project's contiguous relation, finite telescoping and
+Mathlib's dominated-convergence theorem for series. The nonterminating Sears transformations
+use the project's finite Sears identities and a uniform limit of moving q-factorials.
+
+The finite quadratic q-summations follow X. Wang and W. Chu,
+“Approach of q-Derivative Operators to Terminating q-Series Formulae,”
+*Communications in Mathematics* 26 (2018), 99–111, §§3–4,
+[doi:10.2478/cm-2018-0007](https://doi.org/10.2478/cm-2018-0007).
+The polynomial q-difference annihilator is factored into a reusable finite-difference API.
+
+Joint analyticity of the complex Hurwitz zeta function uses the project's Euler–Maclaurin
+uniform convergence, its Osgood lemma and the TauCeti contributors'
+`DifferentiableOn.analyticOnNhd_of_finiteDimensional` from
+`TauCeti.Analysis.Complex.CauchyIntegralPolydisc`. Mixed derivatives use Mathlib's symmetry of
+the second Fréchet derivative through the project's `BivariateCalculus` API. The derivative
+integral uses Mathlib's fundamental theorem of calculus with endpoint limits and the
+Bernoulli-polynomial derivative formula. The digamma moments use Mathlib's analytic identity
+theorem to extend Lerch's real formula and a finite Appell-family telescoping identity.
+The sector asymptotics use the Euler–Maclaurin increment formula on the principal slit plane,
+a product majorant for translated powers, compact uniformity in the order and Mathlib's
+Cauchy derivative estimate. The two finite-tail derivatives use the simple-root derivative
+of the Pochhammer polynomial at a negative integer.
+
+The Legendre principal-value bridge uses Mathlib's change of variables and the project's
+asymmetric-excision API. Exact level-set endpoints identify the logarithmic correction,
+whose limit is zero when the two exclusion distances have ratio tending to one.
+
+## Special-function proof round (2026-11-04)
+
+Hermite's Hurwitz-zeta integral and the Riemann-zeta arctangent integrals use the
+Mathlib contributors' `cot_series_rep'`, Gamma Laplace integral, Bochner Fubini theorem,
+and analytic identity theorem. The cotangent partial fractions and real Laplace
+transforms are factored from the project's existing Binet development into
+`DLMFMathlib.Analysis.SpecialFunctions.Trigonometric.BoseEinstein`; the Gamma API retains
+thin adapters with its existing names and statements.
+
+The hyperbolic-secant Fourier transform uses Mathlib's
+`Complex.Gamma_mul_Gamma_one_sub` and `Complex.betaIntegral_eq_Gamma_mul_div`.
+`DLMFMathlib.Analysis.SpecialFunctions.Gamma.BetaHalfLine` factors the project's
+complex half-line beta change of variables and uses the Tau Ceti contributors'
+`TauCeti.integrableOn_rpow_mul_one_add_rpow_iff` for absolute convergence.
+The existing DLMF 5.12.3 declaration is an adapter to that shared result.
+
+The Lambert coefficients use the project's proved inverse series for the incomplete
+Gamma uniform expansion. The elementary continued fractions use the project's
+Legendre minimal-solution recurrence, the Tau Ceti contributors' `TauCeti.vitali_of_tendsto`,
+and the analytic identity theorem.
+The q-to-classical limit uses Mathlib's dominated-convergence theorem for series,
+with a uniform geometric majorant derived from the successive-term ratio.
+
 ## `ToMathlib` layer, now `DLMFMathlib` (2026-10-15)
 
 `ToMathlib/Analysis/Integral/Laplace.lean` comes from the companion project `lean-codes`

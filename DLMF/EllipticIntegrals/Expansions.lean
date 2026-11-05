@@ -6,6 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.EllipticIntegrals.Quadratic
+public import DLMF.JacobiElliptic.ModulusInversion
+public import DLMF.GeneralizedHypergeometric.Appell.GermTransformations
 
 /-!
 # Maclaurin and related expansions of Legendre's integrals (DLMF §19.5)
@@ -35,11 +37,9 @@ Landen product for `K`.
 ## Implementation notes
 
 * Series are stated with `HasSum`, and `₂F₁` is Mathlib's `ordinaryHypergeometric`. The
-  Appell function is the project's `DLMF.Hypergeometric.appellF1` (DLMF 16.13.1, the totalized
-  double series), written out here as the `tsum` over `ℕ × ℕ` of the terms `appellF1Term`,
-  because the module `DLMF.GeneralizedHypergeometric.Appell` cannot be imported together with
-  `lean-codes` (both import a declaration `DifferentiableOn.analyticOnNhd_of_finiteDimensional`,
-  from TauCeti and from `SeveralComplexVariables`).
+  Appell function is `DLMF.Hypergeometric.appellF1` (DLMF 16.13.1), written explicitly as the
+  `tsum` over `ℕ × ℕ` of `appellF1Term` in the statements. Its convergent-series identities
+  give the incomplete modulus expansions after Carlson's angular integral representation.
 * The nome is the Chapter 22 definition
   `DLMF.JacobiElliptic.jacobiNome k = exp(-πK'(k)/K(k))`, with the literal `K'`, which is
   DLMF's `K'` for `Re k > 0`. The expansions 19.5.5–19.5.6 with "`+ ⋯`" are stated as
@@ -413,7 +413,144 @@ theorem completeEllipticPi_hasSum {α2 k : ℂ} (hk : ‖k‖ < 1) (hα : ‖α2
     funext n
     ring
 
-/-- **Admitted.** DLMF 19.5.4_1: for real `|φ| < π/2` and `|k| < 1`,
+/-- The first two Appell variables of an incomplete elliptic integral lie in the unit bidisc. -/
+private lemma norm_sin_sq_lt_one {φ : ℝ} (hφ : |φ| < π / 2) :
+    ‖(Real.sin φ : ℂ) ^ 2‖ < 1 := by
+  have hc : 0 < Real.cos φ := Real.cos_pos_of_mem_Ioo (abs_lt.mp hφ)
+  rw [norm_pow, norm_real, Real.norm_eq_abs, sq_abs]
+  nlinarith [Real.sin_sq_add_cos_sq φ]
+
+/-- The binomial angular integral is an Appell function on its convergent bidisc. -/
+private lemma integral_incomplete_binomial_eq_appellF1_pos (a : ℂ) {φ : ℝ}
+    (hφ : 0 < φ) (hφ' : φ < π / 2) {k : ℂ} (hk : ‖k‖ < 1) :
+    (∫ θ in (0 : ℝ)..φ, (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-a)) =
+      Real.sin φ * DLMF.Hypergeometric.appellF1 (1 / 2) (1 / 2) a (3 / 2)
+        ((Real.sin φ : ℂ) ^ 2) (k ^ 2 * (Real.sin φ : ℂ) ^ 2) := by
+  classical
+  set X : ℂ := (Real.sin φ : ℂ) ^ 2
+  set Y : ℂ := k ^ 2 * X
+  have hX : ‖X‖ < 1 := norm_sin_sq_lt_one (by rw [abs_of_pos hφ]; exact hφ')
+  have hY : ‖Y‖ < 1 := by
+    dsimp [Y]
+    rw [norm_mul]
+    calc ‖k ^ 2‖ * ‖X‖ ≤ ‖k ^ 2‖ * 1 := by gcongr
+      _ < 1 := by simpa using norm_sq_lt_one hk
+  have hslit : ∀ s ∈ Icc (0 : ℝ) (Real.sin φ ^ 2), 1 - k ^ 2 * (s : ℂ) ∈ slitPlane := by
+    intro s hs
+    have hs1 : s ≤ 1 := hs.2.trans (Real.sin_sq_le_one _)
+    exact one_sub_mul_ofReal_mem_slitPlane (by
+      left
+      have h := (re_le_norm (k ^ 2)).trans_lt (norm_sq_lt_one hk)
+      simp only [sub_re, one_re]
+      linarith) hs.1 hs1
+  have H := Carlson.integral_sin_cos_cpow (a := (1 / 2 : ℂ)) (β := (1 / 2 : ℂ))
+    (γ := a) (δ := (0 : ℂ)) (k := k) (α := (0 : ℂ)) hφ hφ' (by norm_num)
+    hslit (by intro s hs; simp)
+  have hSin : 0 < Real.sin φ := Real.sin_pos_of_pos_of_lt_pi hφ (by linarith)
+  have hsroot : ((Real.sin φ : ℂ) ^ 2) ^ (1 / 2 : ℂ) = Real.sin φ := by
+    rw [← ofReal_pow, Carlson.ofReal_cpow_half (sq_nonneg _), Real.sqrt_sq hSin.le]
+  have hcos : (Real.cos φ : ℂ) ^ 2 = 1 - X := by
+    dsimp [X]
+    exact_mod_cast (show Real.cos φ ^ 2 = 1 - Real.sin φ ^ 2 by
+      nlinarith [Real.sin_sq_add_cos_sq φ])
+  let q : Fin 4 → Fin 2 ⊕ Unit := ![Sum.inl 0, Sum.inl 1, Sum.inr (), Sum.inr ()]
+  have hq : Function.Surjective q := by
+    intro i
+    cases i with
+    | inl i => fin_cases i
+               · exact ⟨0, rfl⟩
+               · exact ⟨1, rfl⟩
+    | inr i => exact ⟨2, by cases i; rfl⟩
+  have hn : (![1 - X, 1 - Y, 1, 1] : Fin 4 → ℂ) =
+      Carlson.appellCarlsonNodes X Y ∘ q := by
+    funext i
+    fin_cases i <;> rfl
+  have hz : Carlson.appellCarlsonNodes X Y ∈ Carlson.carlsonRSlitDomain := by
+    intro i
+    cases i with
+    | inl i =>
+      fin_cases i
+      · left
+        simp [Carlson.appellCarlsonNodes, Carlson.TwoVariable.pair]
+        linarith [re_le_norm X]
+      · left
+        simp [Carlson.appellCarlsonNodes, Carlson.TwoVariable.pair]
+        linarith [re_le_norm Y]
+    | inr i => simp [Carlson.appellCarlsonNodes]
+  have hagg : stdSimplexAggregate q (![1 / 2, a, 1 - a, 0] : Fin 4 → ℂ) =
+      Carlson.appellDirichletParameters (1 / 2) a (3 / 2) := by
+    funext i
+    rw [stdSimplexAggregate, FunOnFinite.linearMap_apply_apply, Finset.sum_filter]
+    cases i with
+    | inl i =>
+      fin_cases i <;>
+        simp [q, Fin.sum_univ_four, Carlson.appellDirichletParameters,
+          Carlson.TwoVariable.pair]
+    | inr i =>
+      cases i
+      simp [q, Fin.sum_univ_four, Carlson.appellDirichletParameters]
+      ring
+  norm_num only [show (2 * (1 / 2) - 1 : ℂ) = 0 by norm_num,
+    show (1 - 2 * (1 / 2) : ℂ) = 0 by norm_num, cpow_zero, mul_one,
+    one_mul, neg_zero, zero_pow two_ne_zero, zero_mul, sub_zero, one_cpow] at H
+  rw [hsroot, hcos] at H
+  change (∫ θ in Ioo (0 : ℝ) φ, (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-a)) =
+    1 / 2 * Gamma (1 / 2) * (Real.sin φ : ℂ) *
+      Carlson.regCarlsonR (-(1 / 2)) ![1 / 2, a, 1 - a, 0] ![1 - X, 1 - Y, 1, 1] at H
+  rw [hn, Carlson.regCarlsonR_aggregate_of_slit hq _ hz, hagg] at H
+  have hA := appellF1_eq_gamma_mul_regCarlsonR (1 / 2) (1 / 2) a (3 / 2)
+    (not_neg_nat_of_re_pos (by norm_num)) hX hY
+  rw [intervalIntegral.integral_of_le hφ.le, MeasureTheory.integral_Ioc_eq_integral_Ioo, H,
+    hA, Carlson.Gamma_three_halves]
+  ring
+
+/-- Oddness extends the angular Appell representation to negative real amplitudes. -/
+private lemma integral_incomplete_binomial_eq_appellF1 (a : ℂ) {φ : ℝ}
+    (hφ : |φ| < π / 2) {k : ℂ} (hk : ‖k‖ < 1) :
+    (∫ θ in (0 : ℝ)..φ, (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-a)) =
+      Real.sin φ * DLMF.Hypergeometric.appellF1 (1 / 2) (1 / 2) a (3 / 2)
+        ((Real.sin φ : ℂ) ^ 2) (k ^ 2 * (Real.sin φ : ℂ) ^ 2) := by
+  rcases lt_trichotomy φ 0 with hn | rfl | hp
+  · have H := integral_incomplete_binomial_eq_appellF1_pos a (neg_pos.mpr hn)
+      (by rw [abs_of_neg hn] at hφ; exact hφ) hk
+    have hsub := intervalIntegral.integral_comp_neg (a := 0) (b := -φ)
+      (fun θ : ℝ => (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-a))
+    simp only [Real.sin_neg, ofReal_neg, neg_sq, neg_zero, neg_neg] at hsub H
+    rw [hsub, intervalIntegral.integral_symm] at H
+    linear_combination -H
+  · simp
+  · exact integral_incomplete_binomial_eq_appellF1_pos a hp ((abs_lt.mp hφ).2) hk
+
+/-- Summing Appell's first coordinate gives the modulus series of the incomplete integral. -/
+private lemma hasSum_integral_incomplete_binomial (a : ℂ) {φ : ℝ}
+    (hφ : |φ| < π / 2) {k : ℂ} (hk : ‖k‖ < 1) :
+    HasSum (fun m : ℕ => pochhammer a m * (Real.sin φ : ℂ) ^ (2 * m + 1) /
+      ((2 * m + 1) * Nat.factorial m : ℂ) *
+        ₂F₁ ((m : ℂ) + 1 / 2) (1 / 2) ((m : ℂ) + 3 / 2)
+          ((Real.sin φ : ℂ) ^ 2) * k ^ (2 * m))
+      (∫ θ in (0 : ℝ)..φ, (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-a)) := by
+  have hX := norm_sin_sq_lt_one hφ
+  have hY : ‖k ^ 2 * (Real.sin φ : ℂ) ^ 2‖ < 1 := by
+    rw [norm_mul]
+    calc ‖k ^ 2‖ * ‖(Real.sin φ : ℂ) ^ 2‖ ≤ ‖k ^ 2‖ * 1 := by gcongr
+      _ < 1 := by simpa using norm_sq_lt_one hk
+  have H := (hasSum_appellF1_gauss_fibers (1 / 2) a (1 / 2) (3 / 2)
+    (not_neg_nat_of_re_pos (by norm_num)) hY hX).mul_left (Real.sin φ : ℂ)
+  rw [integral_incomplete_binomial_eq_appellF1 a hφ hk, appellF1_swap]
+  refine H.congr_fun fun m => ?_
+  rw [pochhammer_three_halves_eq]
+  have hP := pochhammer_ne_zero_of_re_pos (z := (1 / 2 : ℂ)) (by norm_num) m
+  have hm : (2 * m + 1 : ℂ) ≠ 0 := by
+    exact_mod_cast (show (2 * m + 1 : ℕ) ≠ 0 by omega)
+  have hf : (Nat.factorial m : ℂ) ≠ 0 := by exact_mod_cast m.factorial_ne_zero
+  rw [mul_pow, ← pow_mul, ← pow_mul,
+    show ((1 / 2 : ℂ) + m) = m + 1 / 2 by ring,
+    show ((3 / 2 : ℂ) + m) = m + 3 / 2 by ring]
+  push_cast
+  field_simp
+  ring
+
+/-- DLMF 19.5.4_1: for real `|φ| < π/2` and `|k| < 1`,
 `F(φ, k) = ∑ₘ (1/2)ₘ sin^{2m+1}φ/((2m+1) m!) ₂F₁(m + 1/2, 1/2; m + 3/2; sin²φ) k^{2m}
 = sin φ F₁(1/2; 1/2, 1/2; 3/2; sin²φ, k² sin²φ)`. -/
 @[dlmf 19.5.E4_1]
@@ -425,9 +562,14 @@ theorem incompleteEllipticF_hasSum {φ : ℝ} (hφ : |φ| < π / 2) {k : ℂ} (h
       incompleteEllipticF φ k = Real.sin φ * ∑' p : ℕ × ℕ,
         appellF1Term (1 / 2) (1 / 2) (1 / 2) (3 / 2) ((Real.sin φ : ℂ) ^ 2)
           (k ^ 2 * (Real.sin φ : ℂ) ^ 2) p := by
-  sorry
+  constructor
+  · rw [incompleteEllipticF_ofReal_eq_integral]
+    exact hasSum_integral_incomplete_binomial (1 / 2) hφ hk
+  · rw [incompleteEllipticF_ofReal_eq_integral,
+      integral_incomplete_binomial_eq_appellF1 (1 / 2) hφ hk]
+    rfl
 
-/-- **Admitted.** DLMF 19.5.4_2: for real `|φ| < π/2` and `|k| < 1`,
+/-- DLMF 19.5.4_2: for real `|φ| < π/2` and `|k| < 1`,
 `E(φ, k) = ∑ₘ (-1/2)ₘ sin^{2m+1}φ/((2m+1) m!) ₂F₁(m + 1/2, 1/2; m + 3/2; sin²φ) k^{2m}
 = sin φ F₁(1/2; 1/2, -1/2; 3/2; sin²φ, k² sin²φ)`. -/
 @[dlmf 19.5.E4_2]
@@ -439,7 +581,214 @@ theorem incompleteEllipticE_hasSum {φ : ℝ} (hφ : |φ| < π / 2) {k : ℂ} (h
       incompleteEllipticE φ k = Real.sin φ * ∑' p : ℕ × ℕ,
         appellF1Term (1 / 2) (1 / 2) (-(1 / 2)) (3 / 2) ((Real.sin φ : ℂ) ^ 2)
           (k ^ 2 * (Real.sin φ : ℂ) ^ 2) p := by
-  sorry
+  constructor
+  · rw [incompleteEllipticE_ofReal_eq_integral]
+    simpa only [neg_neg] using hasSum_integral_incomplete_binomial (-(1 / 2)) hφ hk
+  · rw [incompleteEllipticE_ofReal_eq_integral]
+    have H := integral_incomplete_binomial_eq_appellF1 (-(1 / 2)) hφ hk
+    simpa only [neg_neg, DLMF.Hypergeometric.appellF1, appellF1Coeff, appellF1Term,
+      Nat.cast_mul] using H
+
+/-- The even sine moments of the third-kind denominator are Appell functions. -/
+private lemma integral_sin_pow_div_eq_appellF1_pos (m : ℕ) {φ : ℝ}
+    (hφ : 0 < φ) (hφ' : φ < π / 2) {α2 : ℂ} (hα : ‖α2‖ < 1) :
+    (∫ θ in (0 : ℝ)..φ, (Real.sin θ : ℂ) ^ (2 * m) *
+      (1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹) =
+      (Real.sin φ : ℂ) ^ (2 * m + 1) / (2 * m + 1) *
+        DLMF.Hypergeometric.appellF1 ((m : ℂ) + 1 / 2) (1 / 2) 1 ((m : ℂ) + 3 / 2)
+          ((Real.sin φ : ℂ) ^ 2) (α2 * (Real.sin φ : ℂ) ^ 2) := by
+  classical
+  set X : ℂ := (Real.sin φ : ℂ) ^ 2
+  set Y : ℂ := α2 * X
+  set A : ℂ := (m : ℂ) + 1 / 2
+  have hA : 0 < A.re := by dsimp [A]; simp; positivity
+  have hX : ‖X‖ < 1 := norm_sin_sq_lt_one (by rw [abs_of_pos hφ]; exact hφ')
+  have hY : ‖Y‖ < 1 := by
+    dsimp [Y]
+    rw [norm_mul]
+    calc ‖α2‖ * ‖X‖ ≤ ‖α2‖ * 1 := by gcongr
+      _ < 1 := by simpa using hα
+  have hslit : ∀ s ∈ Icc (0 : ℝ) (Real.sin φ ^ 2), 1 - α2 * (s : ℂ) ∈ slitPlane := by
+    intro s hs
+    exact one_sub_mul_ofReal_mem_slitPlane (by
+      left; simp only [sub_re, one_re]; linarith [re_le_norm α2]) hs.1
+      (hs.2.trans (Real.sin_sq_le_one _))
+  have H := Carlson.integral_sin_cos_cpow (a := A) (β := (1 / 2 : ℂ))
+    (γ := (0 : ℂ)) (δ := (1 : ℂ)) (k := (0 : ℂ)) (α := α2 ^ (1 / 2 : ℂ))
+    hφ hφ' hA (by intro s hs; simp)
+    (by intro s hs; rw [Carlson.cpow_half_sq]; exact hslit s hs)
+  have hSin : 0 < Real.sin φ := Real.sin_pos_of_pos_of_lt_pi hφ (by linarith)
+  have hsroot : ((Real.sin φ : ℂ) ^ 2) ^ A = (Real.sin φ : ℂ) ^ (2 * m + 1) := by
+    rw [Carlson.ofReal_sq_cpow hSin,
+      show 2 * A = ((2 * m + 1 : ℕ) : ℂ) by dsimp [A]; push_cast; ring, cpow_natCast]
+  have hcos : (Real.cos φ : ℂ) ^ 2 = 1 - X := by
+    dsimp [X]
+    exact_mod_cast (show Real.cos φ ^ 2 = 1 - Real.sin φ ^ 2 by
+      nlinarith [Real.sin_sq_add_cos_sq φ])
+  let q : Fin 4 → Fin 2 ⊕ Unit := ![Sum.inl 0, Sum.inr (), Sum.inr (), Sum.inl 1]
+  have hq : Function.Surjective q := by
+    intro i
+    cases i with
+    | inl i => fin_cases i
+               · exact ⟨0, rfl⟩
+               · exact ⟨3, rfl⟩
+    | inr i => exact ⟨1, by cases i; rfl⟩
+  have hn : (![1 - X, 1, 1, 1 - Y] : Fin 4 → ℂ) =
+      Carlson.appellCarlsonNodes X Y ∘ q := by
+    funext i
+    fin_cases i <;> rfl
+  have hz : Carlson.appellCarlsonNodes X Y ∈ Carlson.carlsonRSlitDomain := by
+    intro i
+    cases i with
+    | inl i =>
+      fin_cases i
+      · left
+        simp [Carlson.appellCarlsonNodes, Carlson.TwoVariable.pair]
+        linarith [re_le_norm X]
+      · left
+        simp [Carlson.appellCarlsonNodes, Carlson.TwoVariable.pair]
+        linarith [re_le_norm Y]
+    | inr i => simp [Carlson.appellCarlsonNodes]
+  have hagg : stdSimplexAggregate q (![1 / 2, 0, A - 1 / 2, 1] : Fin 4 → ℂ) =
+      Carlson.appellDirichletParameters (1 / 2) 1 (A + 1) := by
+    funext i
+    rw [stdSimplexAggregate, FunOnFinite.linearMap_apply_apply, Finset.sum_filter]
+    cases i with
+    | inl i =>
+      fin_cases i <;>
+        simp [q, Fin.sum_univ_four, Carlson.appellDirichletParameters,
+          Carlson.TwoVariable.pair]
+    | inr i =>
+      cases i
+      simp [q, Fin.sum_univ_four, Carlson.appellDirichletParameters]
+      ring
+  have hexp : (2 * A - 1) = ((2 * m : ℕ) : ℂ) := by dsimp [A]; push_cast; ring
+  norm_num only [hexp, show (1 - 2 * (1 / 2) : ℂ) = 0 by norm_num,
+    cpow_natCast, cpow_zero, mul_one, one_mul, neg_zero, zero_pow two_ne_zero,
+    zero_mul, sub_zero, cpow_neg_one, Carlson.cpow_half_sq] at H
+  rw [hsroot, hcos, show (1 + A - 1 / 2 - 1 : ℂ) = A - 1 / 2 by ring] at H
+  change (∫ θ in Ioo (0 : ℝ) φ, (Real.sin θ : ℂ) ^ (2 * m) *
+    (1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹) =
+    1 / 2 * Gamma A * (Real.sin φ : ℂ) ^ (2 * m + 1) *
+      Carlson.regCarlsonR (-A) ![1 / 2, 0, A - 1 / 2, 1] ![1 - X, 1, 1, 1 - Y] at H
+  rw [hn, Carlson.regCarlsonR_aggregate_of_slit hq _ hz, hagg] at H
+  have hF := appellF1_eq_gamma_mul_regCarlsonR A (1 / 2) 1 (A + 1)
+    (not_neg_nat_of_re_pos (by simp; linarith)) hX hY
+  have hm : (2 * m + 1 : ℂ) ≠ 0 := by
+    exact_mod_cast (show (2 * m + 1 : ℕ) ≠ 0 by omega)
+  rw [show (m : ℂ) + 3 / 2 = A + 1 by dsimp [A]; ring]
+  change _ = (Real.sin φ : ℂ) ^ (2 * m + 1) / (2 * m + 1) *
+    DLMF.Hypergeometric.appellF1 A (1 / 2) 1 (A + 1) X Y
+  rw [intervalIntegral.integral_of_le hφ.le, MeasureTheory.integral_Ioc_eq_integral_Ioo, H,
+    hF, Gamma_add_one A (ne_zero_of_re_pos hA)]
+  dsimp [A]
+  field_simp
+
+/-- The Appell moment formula is odd in the amplitude. -/
+private lemma integral_sin_pow_div_eq_appellF1 (m : ℕ) {φ : ℝ}
+    (hφ : |φ| < π / 2) {α2 : ℂ} (hα : ‖α2‖ < 1) :
+    (∫ θ in (0 : ℝ)..φ, (Real.sin θ : ℂ) ^ (2 * m) *
+      (1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹) =
+      (Real.sin φ : ℂ) ^ (2 * m + 1) / (2 * m + 1) *
+        DLMF.Hypergeometric.appellF1 ((m : ℂ) + 1 / 2) (1 / 2) 1 ((m : ℂ) + 3 / 2)
+          ((Real.sin φ : ℂ) ^ 2) (α2 * (Real.sin φ : ℂ) ^ 2) := by
+  have hpow (z : ℂ) : (-z) ^ (2 * m) = z ^ (2 * m) := by simp only [pow_mul, neg_sq]
+  have hodd (z : ℂ) : (-z) ^ (2 * m + 1) = -(z ^ (2 * m + 1)) := by
+    rw [pow_succ, hpow, pow_succ, mul_neg]
+  rcases lt_trichotomy φ 0 with hn | rfl | hp
+  · have H := integral_sin_pow_div_eq_appellF1_pos m (neg_pos.mpr hn)
+      (by rw [abs_of_neg hn] at hφ; exact hφ) hα
+    have hsub := intervalIntegral.integral_comp_neg (a := 0) (b := -φ)
+      (fun θ : ℝ => (Real.sin θ : ℂ) ^ (2 * m) *
+        (1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹)
+    simp only [Real.sin_neg, ofReal_neg, hpow, neg_sq, neg_zero, neg_neg] at hsub
+    rw [hsub, intervalIntegral.integral_symm] at H
+    simp only [Real.sin_neg, ofReal_neg, hodd, neg_sq] at H
+    linear_combination -H
+  · simp
+  · exact integral_sin_pow_div_eq_appellF1_pos m hp ((abs_lt.mp hφ).2) hα
+
+/-- No pole of the third-kind denominator occurs for a characteristic of norm less than one. -/
+private lemma incompleteEllipticPi_real_eq_integral_of_norm_lt_one (φ : ℝ) {α2 : ℂ}
+    (hα : ‖α2‖ < 1) (k : ℂ) :
+    incompleteEllipticPi φ α2 k = ∫ θ in (0 : ℝ)..φ,
+      (1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹ *
+        (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) := by
+  rw [incompleteEllipticPi_eq_primitive (δ := 1 - ‖α2‖) (by linarith),
+    DLMF.Core.primitive_ofReal]
+  · simp only [← Complex.ofReal_sin]
+  · intro t ht
+    rw [← Complex.ofReal_mul, ← Complex.ofReal_sin]
+    have hs : ‖(Real.sin (t * φ) : ℂ) ^ 2‖ ≤ 1 := by
+      rw [norm_pow, norm_real, Real.norm_eq_abs, sq_abs]
+      exact Real.sin_sq_le_one _
+    calc 1 - ‖α2‖ ≤ ‖(1 : ℂ)‖ - ‖α2 * (Real.sin (t * φ) : ℂ) ^ 2‖ := by
+          rw [norm_one, norm_mul]
+          nlinarith [norm_nonneg α2]
+      _ ≤ _ := norm_sub_norm_le _ _
+
+/-- Termwise integration of the binomial series for an incomplete integral of the third kind. -/
+private lemma hasSum_incompleteEllipticPi_moments {φ : ℝ} {α2 k : ℂ}
+    (hk : ‖k‖ < 1) (hα : ‖α2‖ < 1) :
+    HasSum (fun m : ℕ => (pochhammer (1 / 2) m / (m.factorial : ℂ) * k ^ (2 * m)) *
+      ∫ θ in (0 : ℝ)..φ, (Real.sin θ : ℂ) ^ (2 * m) *
+        (1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹) (incompleteEllipticPi φ α2 k) := by
+  let c : ℕ → ℂ := fun m => pochhammer (1 / 2) m / (m.factorial : ℂ) * k ^ (2 * m)
+  have hs (θ : ℝ) : ‖(Real.sin θ : ℂ) ^ 2‖ ≤ 1 := by
+    rw [norm_pow, norm_real, Real.norm_eq_abs, sq_abs]
+    exact Real.sin_sq_le_one _
+  have hc : Summable fun m => ‖c m‖ := by
+    simpa only [c, pow_mul, one_pow, mul_one] using
+      summable_norm_binomial_half hk (s := 1) (by simp)
+  have hb (θ : ℝ) : ‖(1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹‖ ≤ (1 - ‖α2‖)⁻¹ := by
+    rw [norm_inv]
+    have hL : 1 - ‖α2‖ ≤ ‖1 - α2 * (Real.sin θ : ℂ) ^ 2‖ := by
+      calc 1 - ‖α2‖ ≤ ‖(1 : ℂ)‖ - ‖α2 * (Real.sin θ : ℂ) ^ 2‖ := by
+            rw [norm_one, norm_mul]
+            nlinarith [hs θ, norm_nonneg α2]
+        _ ≤ _ := norm_sub_norm_le _ _
+    exact inv_anti₀ (by linarith) hL
+  have hsum (θ : ℝ) : HasSum
+      (fun m : ℕ => c m * ((Real.sin θ : ℂ) ^ (2 * m) *
+        (1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹))
+      ((1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹ *
+        (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ))) := by
+    have hz : ‖k ^ 2 * (Real.sin θ : ℂ) ^ 2‖ < 1 := by
+      rw [norm_mul]
+      calc ‖k ^ 2‖ * ‖(Real.sin θ : ℂ) ^ 2‖ ≤ ‖k ^ 2‖ * 1 := by
+            gcongr; exact hs θ
+        _ < 1 := by simpa using norm_sq_lt_one hk
+    have H := (hasSum_pochhammer_div_factorial (β := (1 / 2 : ℂ)) hz).mul_left
+      (1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹
+    refine H.congr_fun fun m => ?_
+    simp only [c, mul_pow, ← pow_mul]
+    ring
+  rw [incompleteEllipticPi_real_eq_integral_of_norm_lt_one φ hα]
+  have H := intervalIntegral.hasSum_integral_of_dominated_convergence
+    (F := fun m θ => c m * ((Real.sin θ : ℂ) ^ (2 * m) *
+      (1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹))
+    (fun m _ => ‖c m‖ * (1 - ‖α2‖)⁻¹)
+    (μ := MeasureTheory.volume) (a := 0) (b := φ)
+    (f := fun θ => (1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹ *
+      (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)))
+    (fun m => (by fun_prop : Measurable _).aestronglyMeasurable)
+    (fun m => Filter.Eventually.of_forall fun θ hθ => by
+      have hp : ‖(Real.sin θ : ℂ) ^ (2 * m)‖ ≤ 1 := by
+        rw [pow_mul, norm_pow]
+        exact pow_le_one₀ (norm_nonneg _) (hs θ)
+      calc
+        ‖c m * ((Real.sin θ : ℂ) ^ (2 * m) *
+            (1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹)‖ =
+            ‖c m‖ * (‖(Real.sin θ : ℂ) ^ (2 * m)‖ *
+              ‖(1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹‖) := by
+                rw [norm_mul]; congr 1; exact norm_mul _ _
+        _ ≤ ‖c m‖ * (1 * (1 - ‖α2‖)⁻¹) :=
+          mul_le_mul_of_nonneg_left
+            (mul_le_mul hp (hb θ) (norm_nonneg _) zero_le_one) (norm_nonneg _)
+        _ = _ := by rw [one_mul])
+    (Filter.Eventually.of_forall fun θ _ => hc.mul_right _)
+    intervalIntegrable_const (Filter.Eventually.of_forall fun θ _ => hsum θ)
+  simpa only [intervalIntegral.integral_const_mul] using H
 
 /-- **Admitted.** DLMF 19.5.4_3: for real `|φ| < π/2`, `|k| < 1` and `|α²| < 1`,
 `Π(φ, α², k) = ∑ₘ (1/2)ₘ sin^{2m+1}φ/((2m+1) m!) F₁(m + 1/2; 1/2, 1; m + 3/2; sin²φ, α² sin²φ)
@@ -452,7 +801,15 @@ theorem incompleteEllipticPi_hasSum {φ : ℝ} (hφ : |φ| < π / 2) {α2 k : �
         (∑' p : ℕ × ℕ, appellF1Term ((m : ℂ) + 1 / 2) (1 / 2) 1 ((m : ℂ) + 3 / 2)
           ((Real.sin φ : ℂ) ^ 2) (α2 * (Real.sin φ : ℂ) ^ 2) p) * k ^ (2 * m))
         (incompleteEllipticPi φ α2 k) := by
-  sorry
+  have H := hasSum_incompleteEllipticPi_moments (φ := φ) hk hα
+  simp_rw [integral_sin_pow_div_eq_appellF1 _ hφ hα] at H
+  refine H.congr_fun fun m => ?_
+  have hF : DLMF.Hypergeometric.appellF1 ((m : ℂ) + 1 / 2) (1 / 2) 1
+      ((m : ℂ) + 3 / 2) ((Real.sin φ : ℂ) ^ 2) (α2 * (Real.sin φ : ℂ) ^ 2) =
+      ∑' p : ℕ × ℕ, appellF1Term ((m : ℂ) + 1 / 2) (1 / 2) 1
+        ((m : ℂ) + 3 / 2) ((Real.sin φ : ℂ) ^ 2) (α2 * (Real.sin φ : ℂ) ^ 2) p := rfl
+  rw [hF]
+  field_simp
 
 /-- **Admitted.** DLMF 19.5.5: Jacobi's nome `q = exp(-πK'(k)/K(k)) = r + 8r² + 84r³ + 992r⁴ + ⋯`
 with `r = k²/16`, as `k → 0+` (the remainder is `O(r⁵)`). -/
@@ -473,12 +830,29 @@ theorem jacobiNome_isBigO_lambda :
         1707 * lam k ^ 17 : ℝ) : ℂ)) =O[𝓝[>] 0] fun k : ℝ => lam k ^ 21 := by
   sorry
 
-/-- **Admitted.** DLMF 19.5.8: `K(k) = (π/2)(1 + 2∑_{n ≥ 1} q^{n²})²` with `q = jacobiNome k`, on
+/-- DLMF 19.5.8: `K(k) = (π/2)(1 + 2∑_{n ≥ 1} q^{n²})²` with `q = jacobiNome k`, on
 `jacobiModulusDomain` (`Re k > 0`, `k ∉ [1, ∞)`, where `|q| < 1`). -/
 @[dlmf 19.5.E8]
 theorem completeEllipticK_eq_nome_series {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
     completeEllipticK k = (π / 2 : ℂ) * (1 + 2 * ∑' n : ℕ, jacobiNome k ^ ((n + 1) ^ 2)) ^ 2 := by
-  sorry
+  have hK := (jacobi_inversion_k hk).2.2
+  have hS := DLMF.Theta.jacobiThetaThreeTau_hasSum_cos 0 (jacobiTau_im_pos hk)
+  have hterm : ∀ n : ℕ, 2 * cexp (π * I * jacobiTau k * ((n : ℂ) + 1) ^ 2) *
+      cos (2 * ((n : ℂ) + 1) * 0) = 2 * jacobiNome k ^ ((n + 1) ^ 2) := by
+    intro n
+    simp only [mul_zero, cos_zero, mul_one, jacobiNome, jacobiTau]
+    rw [← Complex.exp_nat_mul]
+    congr 2
+    push_cast
+    ring_nf
+    simp
+    ring
+  have hsum := (hS.congr_fun fun n => (hterm n).symm).tsum_eq
+  rw [tsum_mul_left] at hsum
+  have htheta : DLMF.Elliptic.jacobiThetaThreeTau 0 (jacobiTau k) =
+      1 + 2 * ∑' n : ℕ, jacobiNome k ^ ((n + 1) ^ 2) := by
+    linear_combination -hsum
+  rw [← hK, completeEllipticKOfTau, htheta]
 
 /-- **Admitted.** DLMF 19.5.9:
 `E(k) = K(k) + (2π²/K(k)) ∑_{n≥1} (-1)ⁿ n² q^{n²} / (1 + 2∑_{n≥1} (-1)ⁿ q^{n²})` on

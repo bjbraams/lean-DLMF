@@ -5,6 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.Zeta.HurwitzSectorRemainder
+public import DLMF.Zeta.HurwitzTailDerivatives
+public import Mathlib.Analysis.Asymptotics.Ring
 public import DLMF.Zeta.HurwitzIntegrals
 
 /-!
@@ -195,7 +198,39 @@ theorem hurwitzZetaComplex_asymptotic {s : ℂ} (hs : s ≠ 1) {δ : ℝ} (hδ0 
         ∑ k ∈ Finset.Icc 1 K, (bernoulli (2 * k) : ℂ) / (2 * k)! * pochhammer s (2 * k - 1) *
           a ^ (1 - s - 2 * k))
       =O[Bornology.cobounded ℂ ⊓ 𝓟 (phaseSector δ)] (fun a => a ^ (-1 - s - 2 * K)) := by
-  sorry
+  have hsum (a : ℂ) :
+      (∑ k ∈ Finset.Icc 1 K, (bernoulli (2 * k) : ℂ) / (2 * k)! *
+        pochhammer s (2 * k - 1) * a ^ (1 - s - 2 * k)) =
+      ∑ k ∈ Finset.range K, eulerMaclaurinCoeff s k * a ^ (-s - (2 * k + 1)) := by
+    have hset : Finset.Icc 1 K = Finset.Ico 1 (K + 1) := by
+      ext k
+      simp only [Finset.mem_Icc, Finset.mem_Ico]
+      omega
+    rw [hset, Finset.sum_Ico_eq_sum_range]
+    simp only [Nat.add_sub_cancel]
+    apply Finset.sum_congr rfl
+    intro k _
+    have hidx : 2 * (1 + k) - 1 = 2 * k + 1 := by omega
+    have hidx2 : 2 * (1 + k) = 2 * k + 2 := by omega
+    rw [hidx, hidx2]
+    unfold eulerMaclaurinCoeff
+    push_cast
+    congr 1
+    congr 1
+    ring
+  have h := HurwitzSectorRemainder.isBigO_sub_tail hs hδ0 hδ K
+  change (fun a => hurwitzZetaComplex s a - eulerMaclaurinTail K s a)
+    =O[Bornology.cobounded ℂ ⊓ 𝓟 (phaseSector δ)]
+      (fun a => a ^ (-s - (2 * K + 1 : ℕ))) at h
+  convert h using 1
+  · funext a
+    rw [hsum]
+    unfold eulerMaclaurinTail
+    ring
+  · funext a
+    congr 1
+    push_cast
+    ring
 
 /-- **Large-`a` expansion of `ζ'(-1, a)`** (DLMF 25.11.44), `0 < δ < π`, `|ph a| ≤ π - δ`:
 `ζ'(-1,a) - 1/12 + a²/4 - (1/12 - a/2 + a²/2) ln a ∼ -∑_{k≥1} B_{2k+2}/((2k+2)(2k+1)2k) a^{-2k}`. -/
@@ -206,7 +241,49 @@ theorem deriv_hurwitzZetaComplex_neg_one_asymptotic {δ : ℝ} (hδ0 : 0 < δ) (
         ∑ k ∈ Finset.Icc 1 K, (bernoulli (2 * k + 2) : ℂ) / ((2 * k + 2) * (2 * k + 1) * (2 * k)) *
           a ^ (-(2 * k : ℤ)))
       =O[Bornology.cobounded ℂ ⊓ 𝓟 (phaseSector δ)] (fun a => a ^ (-(2 * K + 2 : ℤ))) := by
-  sorry
+  let M : ℕ := 2 * K + 4
+  let c : ℕ → ℂ := fun k => (bernoulli (2 * k + 2) : ℂ) / ((2 * k + 2) * (2 * k + 1) * (2 * k))
+  let T : ℕ → ℂ → ℂ := fun k a => c k * a ^ (-(2 * k : ℤ))
+  have hKM : K + 1 ≤ M := by dsimp [M]; omega
+  have hrem := HurwitzSectorRemainder.isBigO_deriv_sub_tail
+    (s₀ := -1) (by norm_num) M (2 * K + 2) (by
+      dsimp [M]
+      norm_num
+      linarith [Nat.cast_nonneg (α := ℝ) K]) (by
+      dsimp [M]
+      push_cast
+      norm_num
+      linarith [Nat.cast_nonneg (α := ℝ) K]) hδ0 hδ
+  have hrem' : (fun a => deriv (fun s => hurwitzZetaComplex s a) (-1) -
+      deriv (fun s => eulerMaclaurinTail M s a) (-1))
+      =O[Bornology.cobounded ℂ ⊓ 𝓟 (phaseSector δ)]
+        (fun a : ℂ => a ^ (-(2 * K + 2 : ℤ))) := by
+    simpa only [Nat.cast_add, Nat.cast_mul, Nat.cast_ofNat, Nat.cast_one, phaseSector] using hrem
+  have hterm (k : ℕ) (hk : k ∈ Finset.Ico (K + 1) M) :
+      T k =O[Bornology.cobounded ℂ] (fun a : ℂ => a ^ (-(2 * K + 2 : ℤ))) := by
+    have hkK : (K : ℤ) + 1 ≤ k := by exact_mod_cast (Finset.mem_Ico.mp hk).1
+    exact (Asymptotics.isBigO_zpow_zpow_cobounded_of_le
+      (by omega : (-(2 * k : ℤ)) ≤ -(2 * K + 2 : ℤ))).const_mul_left (c k)
+  have htail := (Asymptotics.IsBigO.sum (s := Finset.Ico (K + 1) M) hterm).mono
+    (show Bornology.cobounded ℂ ⊓ 𝓟 (phaseSector δ) ≤ Bornology.cobounded ℂ from inf_le_left)
+  have hsplit (a : ℂ) : (∑ k ∈ Finset.Ico 1 M, T k a) =
+      (∑ k ∈ Finset.Icc 1 K, T k a) + ∑ k ∈ Finset.Ico (K + 1) M, T k a := by
+    have h := Finset.sum_Ico_consecutive (fun k => T k a)
+      (by omega : 1 ≤ K + 1) hKM
+    simpa only [Finset.Ico_add_one_right_eq_Icc] using h.symm
+  have h := hrem'.sub htail
+  apply h.congr' ?_ Filter.EventuallyEq.rfl
+  have hr : ∀ᶠ a : ℂ in Bornology.cobounded ℂ ⊓ 𝓟 (phaseSector δ), 1 ≤ ‖a‖ :=
+    Filter.Eventually.filter_mono inf_le_left (eventually_cobounded_le_norm 1)
+  filter_upwards [hr] with a hr
+  have ha0 : a ≠ 0 := by intro h; norm_num [h] at hr
+  have hformula := EulerMaclaurinTailDerivatives.deriv_neg_one M (by dsimp [M]; omega) ha0
+  change deriv (fun s => eulerMaclaurinTail M s a) (-1) = _ at hformula
+  have hsplit' := hsplit a
+  dsimp only [T, c] at hsplit'
+  simp only [Finset.sum_apply]
+  rw [hformula, hsplit']
+  ring
 
 /-- **Large-`a` expansion of `ζ'(-2, a)`** (DLMF 25.11.45), `0 < δ < π`, `|ph a| ≤ π - δ`:
 `ζ'(-2,a) - a/12 + a³/9 - (a/6 - a²/2 + a³/3) ln a ∼
@@ -218,7 +295,50 @@ theorem deriv_hurwitzZetaComplex_neg_two_asymptotic {δ : ℝ} (hδ0 : 0 < δ) (
         ∑ k ∈ Finset.Icc 1 K, 2 * (bernoulli (2 * k + 2) : ℂ) /
           ((2 * k + 2) * (2 * k + 1) * (2 * k) * (2 * k - 1)) * a ^ (-(2 * k - 1 : ℤ)))
       =O[Bornology.cobounded ℂ ⊓ 𝓟 (phaseSector δ)] (fun a => a ^ (-(2 * K + 1 : ℤ))) := by
-  sorry
+  let M : ℕ := 2 * K + 4
+  let c : ℕ → ℂ := fun k => 2 * (bernoulli (2 * k + 2) : ℂ) /
+    ((2 * k + 2) * (2 * k + 1) * (2 * k) * (2 * k - 1))
+  let T : ℕ → ℂ → ℂ := fun k a => c k * a ^ (-(2 * k - 1 : ℤ))
+  have hKM : K + 1 ≤ M := by dsimp [M]; omega
+  have hrem := HurwitzSectorRemainder.isBigO_deriv_sub_tail
+    (s₀ := -2) (by norm_num) M (2 * K + 1) (by
+      dsimp [M]
+      norm_num
+      linarith [Nat.cast_nonneg (α := ℝ) K]) (by
+      dsimp [M]
+      push_cast
+      norm_num
+      linarith [Nat.cast_nonneg (α := ℝ) K]) hδ0 hδ
+  have hrem' : (fun a => deriv (fun s => hurwitzZetaComplex s a) (-2) -
+      deriv (fun s => eulerMaclaurinTail M s a) (-2))
+      =O[Bornology.cobounded ℂ ⊓ 𝓟 (phaseSector δ)]
+        (fun a : ℂ => a ^ (-(2 * K + 1 : ℤ))) := by
+    simpa only [Nat.cast_add, Nat.cast_mul, Nat.cast_ofNat, Nat.cast_one, phaseSector] using hrem
+  have hterm (k : ℕ) (hk : k ∈ Finset.Ico (K + 1) M) :
+      T k =O[Bornology.cobounded ℂ] (fun a : ℂ => a ^ (-(2 * K + 1 : ℤ))) := by
+    have hkK : (K : ℤ) + 1 ≤ k := by exact_mod_cast (Finset.mem_Ico.mp hk).1
+    exact (Asymptotics.isBigO_zpow_zpow_cobounded_of_le
+      (by omega : (-(2 * k - 1 : ℤ)) ≤ -(2 * K + 1 : ℤ))).const_mul_left (c k)
+  have htail := (Asymptotics.IsBigO.sum (s := Finset.Ico (K + 1) M) hterm).mono
+    (show Bornology.cobounded ℂ ⊓ 𝓟 (phaseSector δ) ≤ Bornology.cobounded ℂ from inf_le_left)
+  have hsplit (a : ℂ) : (∑ k ∈ Finset.Ico 1 M, T k a) =
+      (∑ k ∈ Finset.Icc 1 K, T k a) + ∑ k ∈ Finset.Ico (K + 1) M, T k a := by
+    have h := Finset.sum_Ico_consecutive (fun k => T k a)
+      (by omega : 1 ≤ K + 1) hKM
+    simpa only [Finset.Ico_add_one_right_eq_Icc] using h.symm
+  have h := hrem'.add htail
+  apply h.congr' ?_ Filter.EventuallyEq.rfl
+  have hr : ∀ᶠ a : ℂ in Bornology.cobounded ℂ ⊓ 𝓟 (phaseSector δ), 1 ≤ ‖a‖ :=
+    Filter.Eventually.filter_mono inf_le_left (eventually_cobounded_le_norm 1)
+  filter_upwards [hr] with a hr
+  have ha0 : a ≠ 0 := by intro h; norm_num [h] at hr
+  have hformula := EulerMaclaurinTailDerivatives.deriv_neg_two M (by dsimp [M]; omega) ha0
+  change deriv (fun s => eulerMaclaurinTail M s a) (-2) = _ at hformula
+  have hsplit' := hsplit a
+  dsimp only [T, c] at hsplit'
+  simp only [Finset.sum_apply]
+  rw [hformula, hsplit']
+  ring
 
 end DLMF.Zeta
 

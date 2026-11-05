@@ -5,6 +5,18 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
+public import DLMFMathlib.Analysis.SpecialFunctions.Log.Ray
+
+public import DLMFMathlib.Analysis.SpecialFunctions.Trigonometric.BoseEinstein
+public import DLMFMathlib.Analysis.SpecialFunctions.Pow.RightHalfPlane
+public import DLMFMathlib.Analysis.SpecialFunctions.Pow.Decay
+public import DLMFMathlib.Analysis.Normed.Group.TanneryRatio
+public import DLMFMathlib.Analysis.ContinuedFraction.JacobiValueRegion
+public import DLMFMathlib.Analysis.Complex.PuncturedHalfPlane
+public import DLMFMathlib.Analysis.Complex.SlitPlane
+public import DLMFMathlib.Analysis.Complex.RealSegmentComplement
+public import DLMFMathlib.Analysis.Integral.LaplaceSine
+public import DLMFMathlib.Analysis.Integral.ImproperDerivatives
 public import DLMFMathlib.Analysis.Asymptotics.AsymptoticExpansion
 public import DLMFMathlib.Analysis.Asymptotics.AsymptoticInversion
 public import DLMFMathlib.Analysis.Asymptotics.ExponentialGrowth
@@ -23,6 +35,7 @@ public import DLMFMathlib.Analysis.Calculus.DoubleZeroSqrt
 public import DLMFMathlib.Analysis.Calculus.InverseSeries
 public import DLMFMathlib.Analysis.Calculus.LHopitalInfinity
 public import DLMFMathlib.Analysis.Calculus.Deriv.MulComp
+public import DLMFMathlib.Analysis.Calculus.Deriv.Appell
 public import DLMFMathlib.Analysis.Complex.BarnesResidue
 public import DLMFMathlib.Analysis.Complex.BivariateCalculus
 public import DLMFMathlib.Analysis.Complex.BivariateDerivatives
@@ -51,9 +64,11 @@ public import DLMFMathlib.Analysis.Complex.TaylorParameter
 public import DLMFMathlib.Analysis.Complex.TrigSeriesExtension
 public import DLMFMathlib.Analysis.Complex.TrigonometricProducts
 public import DLMFMathlib.Analysis.Complex.ZeroLocalization
+public import DLMFMathlib.Analysis.ContinuedFraction.PositiveConvergence
 public import DLMFMathlib.Analysis.ContinuedFraction.Convergence
 public import DLMFMathlib.Analysis.Distribution.IteratedLineDeriv
 public import DLMFMathlib.Analysis.EulerMaclaurin
+public import DLMFMathlib.Analysis.Fourier.HyperbolicSecant
 public import DLMFMathlib.Analysis.Fourier.AddCircle
 public import DLMFMathlib.Analysis.Fourier.DirichletKernel
 public import DLMFMathlib.Analysis.Fourier.DirichletJordan
@@ -66,9 +81,12 @@ public import DLMFMathlib.Analysis.Fourier.Pairing
 public import DLMFMathlib.Analysis.InnerProductSpace.CauchySchwarz
 public import DLMFMathlib.Analysis.Integral.Frullani
 public import DLMFMathlib.Analysis.Integral.Improper
+public import DLMFMathlib.Analysis.Integral.ImproperFourier
 public import DLMFMathlib.Analysis.Integral.LaplaceRay
 public import DLMFMathlib.Analysis.Integral.PrincipalValue
+public import DLMFMathlib.Analysis.Integral.PrincipalValueLogarithm
 public import DLMFMathlib.Analysis.Integral.PrincipalValueExcision
+public import DLMFMathlib.Analysis.Integral.PrincipalValueLevelSets
 public import DLMFMathlib.Analysis.Integral.RepeatedIntegrationByParts
 public import DLMFMathlib.Analysis.MellinConvolution
 public import DLMFMathlib.Analysis.MellinParseval
@@ -126,6 +144,7 @@ public import DLMFMathlib.Analysis.Analytic.OfScalarsUnique
 public import DLMFMathlib.Analysis.Calculus.Deriv.CompCurve
 public import DLMFMathlib.Analysis.Calculus.Deriv.InjOn
 public import DLMFMathlib.Analysis.Calculus.Deriv.Sign
+public import DLMFMathlib.Analysis.Calculus.Deriv.SignPropagation
 public import DLMFMathlib.Analysis.Complex.IdentityTheoremStrip
 public import DLMFMathlib.Analysis.Complex.NonInteger
 public import DLMFMathlib.Analysis.Complex.SeparatingContour
@@ -135,6 +154,7 @@ public import DLMFMathlib.Analysis.ODE.Oscillation
 public import DLMFMathlib.Analysis.ODE.SturmOscillation
 public import DLMFMathlib.Analysis.ODE.SturmSpectrum
 public import DLMFMathlib.Analysis.SpecialFunctions.Complex.ArgLog
+public import DLMFMathlib.Analysis.SpecialFunctions.Gamma.BetaHalfLine
 public import DLMFMathlib.Analysis.SpecialFunctions.Gamma.Bounds
 public import DLMFMathlib.Analysis.SpecialFunctions.Gamma.Values
 public import DLMFMathlib.Analysis.SpecialFunctions.ImproperIntegralsExtra
@@ -157,6 +177,21 @@ public import DLMFMathlib.Topology.Order.Compact
 General results used by the special-function library but not specific to it, written in
 the namespaces of the Mathlib APIs they extend. These modules do not import `DLMF`.
 
+* `DLMFMathlib.Analysis.Fourier.HyperbolicSecant`: Fourier transform of the hyperbolic secant.
+* `DLMFMathlib.Analysis.SpecialFunctions.Gamma.BetaHalfLine`: the complex second beta integral.
+* `DLMFMathlib.Analysis.Complex.PuncturedHalfPlane`: connected punctured right half-planes.
+* `DLMFMathlib.Analysis.Complex.RealSegmentComplement`: the complement of a real segment.
+* `DLMFMathlib.Analysis.Normed.Group.TanneryRatio`: limits of series from uniform ratio bounds.
+* `DLMFMathlib.Analysis.ContinuedFraction.PositiveConvergence`: positive continued fractions.
+* `DLMFMathlib.Analysis.ContinuedFraction.JacobiValueRegion`: value regions of real
+  Jacobi fractions.
+* `DLMFMathlib.Analysis.Calculus.Deriv.SignPropagation`: propagation of positivity on an interval.
+* `DLMFMathlib.Analysis.SpecialFunctions.Trigonometric.BoseEinstein`: the partial fractions
+  and sine transform of the Bose–Einstein kernel.
+* `DLMFMathlib.Analysis.SpecialFunctions.Pow.RightHalfPlane`: principal powers of `a ± ix`.
+* `DLMFMathlib.Analysis.Integral.LaplaceSine`: sine-modulated Gamma integrals.
+* `DLMFMathlib.Analysis.Integral.ImproperFourier`: conditional Gamma Fourier integrals.
+* `DLMFMathlib.Analysis.Integral.ImproperDerivatives`: derivatives of variable integral tails.
 * `DLMFMathlib.Analysis.Asymptotics.PowerSums`: integral-comparison bounds for real power sums.
 * `DLMFMathlib.Analysis.Asymptotics.ExponentialGrowth`: exponential bounds for primitives.
 * `DLMFMathlib.Analysis.Complex.Sector`: uniform discs inside sectors and Cauchy derivative bounds.
@@ -290,12 +325,20 @@ the namespaces of the Mathlib APIs they extend. These modules do not import `DLM
   `∫_{f(s)} du/√Q(u) = 2 · vol(s)` when `|f'| = 2√(Q ∘ f)`.
 * `DLMFMathlib.Analysis.Complex.IdentityTheoremStrip`: the identity theorem on the strip
   `0 < Re z < 1` from agreement on `(0, 1)`.
+* `DLMFMathlib.Analysis.Integral.PrincipalValueLogarithm`: regularized logarithmic kernels.
 * `DLMFMathlib.Analysis.Integral.PrincipalValueExcision`: principal values under asymmetric
   excision; the change of variables `t ↦ K/t`.
+* `DLMFMathlib.Analysis.Integral.PrincipalValueLevelSets`: level-set cutoffs and asymmetric
+  interval excision at simple poles.
 * `DLMFMathlib.Analysis.ODE.SturmDeformationContinuity`: continuity of the `k`-th zero of a family
   of functions with simple zeros.
 * `DLMFMathlib.Analysis.SpecificLimits.PoincarePerron`: Perron's theorem for three-term
   recurrences (ratio limit of the minimal solution) and Pincherle's theorem for nested fractions.
 * `DLMFMathlib.MeasureTheory.Integral.ApproximateIdentity`: `L¹` convergence of approximate
   identities `∫ k(u) f(x - εu) du → f`.
+* `DLMFMathlib.Analysis.SpecialFunctions.Log.Ray`: integrability and endpoint limits of
+  logarithmic monomials along complex rays.
+* `DLMFMathlib.Analysis.Calculus.Deriv.Appell`: finite antiderivatives from Appell families.
+* `DLMFMathlib.Analysis.Complex.SlitPlane`: nonnegative translations and sector norm bounds.
+* `DLMFMathlib.Analysis.SpecialFunctions.Pow.Decay`: norm and product bounds for decaying powers.
 -/

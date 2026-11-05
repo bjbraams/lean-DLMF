@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.EllipticIntegrals.Connection.ModulusChanges
+public import DLMF.EllipticIntegrals.LegendrePrincipalValue
 
 /-!
 # Imaginary argument and changes of parameter (DLMF §19.7(ii)–(iii))
@@ -378,7 +379,60 @@ theorem incEllInt_imaginary_argument (φ : ℝ) {k α2 : ℂ} (hk : k ^ 2 ∈ sl
 
 /-! ### §19.7(iii) Change of parameter of `Π(φ, α², k)` -/
 
-/-- **Admitted.** DLMF 19.7.8: for real `0 < φ < π/2`, `c = csc²φ`, real `0 < k < 1` and real
+/-- The first parameter change, stronger than DLMF, which assumes `0 < k < 1`.
+
+DLMF 19.7.8: for real `0 < φ < π/2`, `c = csc²φ`, real `0 < k < 1` and real
+`α², ω²` with `α²ω² = k²`, `α² ≠ c`, `ω² ≠ c` (Cauchy principal values when `α²` or `ω²`
+exceeds `c`):
+`Π(φ, α², k) + Π(φ, ω², k) = F(φ, k) + √c R_C((c-1)(c-k²), (c-α²)(c-ω²))`. -/
+@[dlmf 19.7.E8 "stronger than DLMF: assumes only k² < 1"]
+theorem incompleteEllipticPi_add_first' {φ k α2 ω2 : ℝ} (hφ0 : 0 < φ) (hφ1 : φ < π / 2)
+    (hk : k ^ 2 < 1) (hαω : α2 * ω2 = k ^ 2) (hα : α2 ≠ 1 / Real.sin φ ^ 2)
+    (hω : ω2 ≠ 1 / Real.sin φ ^ 2) :
+    let c := 1 / Real.sin φ ^ 2
+    incompleteEllipticPi φ α2 k + incompleteEllipticPi φ ω2 k = incompleteEllipticF φ k +
+      Real.sqrt c * symmetricEllipticRC ((c - 1) * (c - k ^ 2) : ℝ) ((c - α2) * (c - ω2) : ℝ) := by
+  intro c
+  have hc1 : 1 < c := one_lt_csc_sq hφ0 hφ1
+  have hc : 0 < c := by linarith
+  have hck : 0 < c - k ^ 2 := by linarith
+  have hks : 1 - (k : ℂ) ^ 2 * (Real.sin φ : ℂ) ^ 2 ∈ slitPlane := by
+    rw [← ofReal_pow, ← ofReal_pow, ← ofReal_mul, ← ofReal_one, ← ofReal_sub]
+    exact ofReal_mem_slitPlane.mpr (by
+      nlinarith [Real.sin_sq_le_one φ, sq_nonneg (Real.sin φ), sq_nonneg k])
+  have hP := incompleteEllipticPi_eq_symmetricEllipticRF_add_RJ hφ0 hφ1.le hks hα
+  have hQ := incompleteEllipticPi_eq_symmetricEllipticRF_add_RJ hφ0 hφ1.le hks hω
+  have hF : incompleteEllipticF φ k =
+      symmetricEllipticRF (c - 1 : ℝ) (c - k ^ 2 : ℝ) c := by
+    rw [incompleteEllipticF_ofReal_eq_integral]
+    push_cast
+    simpa only [ofReal_sin] using
+      (symmetricEllipticRF_csc_sq_eq_integral hφ0 hφ1.le (k : ℂ)).symm
+  have hrel : (c - α2 - c) * (c - ω2 - c) = (c - 1 - c) * (c - k ^ 2 - c) := by
+    linear_combination hαω
+  have hp : c - α2 ≠ 0 := sub_ne_zero.mpr (Ne.symm hα)
+  have hq : c - ω2 ≠ 0 := sub_ne_zero.mpr (Ne.symm hω)
+  have H := symmetricEllipticRJ_change_parameter' hc (by linarith : 0 ≤ c - 1)
+    hck.le (fun _ => hck.ne') hp hq hrel
+  have hRC := symmetricEllipticRC_div_ofReal hc
+    (mul_pos (by linarith : 0 < c - 1) hck) (mul_ne_zero hp hq)
+  rw [hRC] at H
+  simp only [symmetricEllipticRJ_comm_left ((c - 1 : ℝ) : ℂ) c,
+    symmetricEllipticRJ_comm_right ((c - 1 : ℝ) : ℂ) ((c - k ^ 2 : ℝ) : ℂ) c,
+    symmetricEllipticRF_comm_left ((c - 1 : ℝ) : ℂ) c,
+    symmetricEllipticRF_comm_right ((c - 1 : ℝ) : ℂ) ((c - k ^ 2 : ℝ) : ℂ) c] at H
+  change _ + _ = _ + _
+  rw [hF]
+  change incompleteEllipticPi φ α2 k =
+    symmetricEllipticRF ((c : ℂ) - 1) ((c : ℂ) - k ^ 2) c + (α2 : ℂ) / 3 *
+      symmetricEllipticRJ ((c : ℂ) - 1) ((c : ℂ) - k ^ 2) c (c - α2 : ℝ) at hP
+  change incompleteEllipticPi φ ω2 k =
+    symmetricEllipticRF ((c : ℂ) - 1) ((c : ℂ) - k ^ 2) c + (ω2 : ℂ) / 3 *
+      symmetricEllipticRJ ((c : ℂ) - 1) ((c : ℂ) - k ^ 2) c (c - ω2 : ℝ) at hQ
+  push_cast at H hP hQ ⊢
+  linear_combination hP + hQ - (1 / 3 : ℂ) * H
+
+/-- DLMF 19.7.8: for real `0 < φ < π/2`, `c = csc²φ`, real `0 < k < 1` and real
 `α², ω²` with `α²ω² = k²`, `α² ≠ c`, `ω² ≠ c` (Cauchy principal values when `α²` or `ω²`
 exceeds `c`):
 `Π(φ, α², k) + Π(φ, ω², k) = F(φ, k) + √c R_C((c-1)(c-k²), (c-α²)(c-ω²))`. -/
@@ -389,9 +443,9 @@ theorem incompleteEllipticPi_add_first {φ k α2 ω2 : ℝ} (hφ0 : 0 < φ) (hφ
     let c := 1 / Real.sin φ ^ 2
     incompleteEllipticPi φ α2 k + incompleteEllipticPi φ ω2 k = incompleteEllipticF φ k +
       Real.sqrt c * symmetricEllipticRC ((c - 1) * (c - k ^ 2) : ℝ) ((c - α2) * (c - ω2) : ℝ) := by
-  sorry
+  exact incompleteEllipticPi_add_first' hφ0 hφ1 (by nlinarith) hαω hα hω
 
-/-- **Admitted.** DLMF 19.7.9: for real `0 < φ < π/2`, `c = csc²φ`, real `0 < k < 1` and real
+/-- DLMF 19.7.9: for real `0 < φ < π/2`, `c = csc²φ`, real `0 < k < 1` and real
 `α², ω²` with `(1 - α²)(1 - ω²) = 1 - k²`, `α² ≠ c`, `ω² ≠ c`:
 `(k² - α²)Π(φ, α², k) + (k² - ω²)Π(φ, ω², k)
 = k²F(φ, k) - α²ω² √(c - 1) R_C(c(c - k²), (c - α²)(c - ω²))`. -/
@@ -405,9 +459,52 @@ theorem incompleteEllipticPi_add_second {φ k α2 ω2 : ℝ} (hφ0 : 0 < φ)
         incompleteEllipticPi φ ω2 k =
       (k ^ 2 : ℝ) * incompleteEllipticF φ k - (α2 * ω2 * Real.sqrt (c - 1) : ℝ) *
         symmetricEllipticRC (c * (c - k ^ 2) : ℝ) ((c - α2) * (c - ω2) : ℝ) := by
-  sorry
+  intro c
+  have hc1 : 1 < c := one_lt_csc_sq hφ0 hφ1
+  have hc : 0 < c := by linarith
+  have hk : k ^ 2 < 1 := by nlinarith
+  have hck : 0 < c - k ^ 2 := by linarith
+  have hks : 1 - (k : ℂ) ^ 2 * (Real.sin φ : ℂ) ^ 2 ∈ slitPlane := by
+    rw [← ofReal_pow, ← ofReal_pow, ← ofReal_mul, ← ofReal_one, ← ofReal_sub]
+    exact ofReal_mem_slitPlane.mpr (by
+      nlinarith [Real.sin_sq_le_one φ, sq_nonneg (Real.sin φ), sq_nonneg k])
+  have hP := incompleteEllipticPi_eq_symmetricEllipticRF_add_RJ hφ0 hφ1.le hks hα
+  have hQ := incompleteEllipticPi_eq_symmetricEllipticRF_add_RJ hφ0 hφ1.le hks hω
+  have hF : incompleteEllipticF φ k =
+      symmetricEllipticRF (c - 1 : ℝ) (c - k ^ 2 : ℝ) c := by
+    rw [incompleteEllipticF_ofReal_eq_integral]
+    push_cast
+    simpa only [ofReal_sin] using
+      (symmetricEllipticRF_csc_sq_eq_integral hφ0 hφ1.le (k : ℂ)).symm
+  have hrel : (c - α2 - (c - 1)) * (c - ω2 - (c - 1)) =
+      (c - k ^ 2 - (c - 1)) * (c - (c - 1)) := by linear_combination hαω
+  have hp : c - α2 ≠ 0 := sub_ne_zero.mpr (Ne.symm hα)
+  have hq : c - ω2 ≠ 0 := sub_ne_zero.mpr (Ne.symm hω)
+  have H := symmetricEllipticRJ_change_parameter' (by linarith : 0 < c - 1)
+    hck.le hc.le (fun _ => hc.ne') hp hq hrel
+  have hRC := symmetricEllipticRC_div_ofReal (by linarith : 0 < c - 1)
+    (mul_pos hck hc) (mul_ne_zero hp hq)
+  rw [hRC] at H
+  rw [mul_comm (c - k ^ 2) c] at H
+  have hαωC : (1 - (α2 : ℂ)) * (1 - (ω2 : ℂ)) = 1 - (k : ℂ) ^ 2 := by
+    exact_mod_cast hαω
+  change incompleteEllipticPi φ α2 k =
+    symmetricEllipticRF ((c : ℂ) - 1) ((c : ℂ) - k ^ 2) c + (α2 : ℂ) / 3 *
+      symmetricEllipticRJ ((c : ℂ) - 1) ((c : ℂ) - k ^ 2) c (c - α2 : ℝ) at hP
+  change incompleteEllipticPi φ ω2 k =
+    symmetricEllipticRF ((c : ℂ) - 1) ((c : ℂ) - k ^ 2) c + (ω2 : ℂ) / 3 *
+      symmetricEllipticRJ ((c : ℂ) - 1) ((c : ℂ) - k ^ 2) c (c - ω2 : ℝ) at hQ
+  rw [hF]
+  push_cast at H hP hQ ⊢
+  linear_combination ((k : ℂ) ^ 2 - α2) * hP + ((k : ℂ) ^ 2 - ω2) * hQ +
+    ((α2 : ℂ) * ω2 / 3) * H +
+    (symmetricEllipticRF ((c : ℂ) - 1) ((c : ℂ) - k ^ 2) c +
+      (α2 : ℂ) / 3 * symmetricEllipticRJ ((c : ℂ) - 1) ((c : ℂ) - k ^ 2) c
+        ((c : ℂ) - α2) +
+      (ω2 : ℂ) / 3 * symmetricEllipticRJ ((c : ℂ) - 1) ((c : ℂ) - k ^ 2) c
+        ((c : ℂ) - ω2)) * hαωC
 
-/-- **Admitted.** DLMF 19.7.10: for real `0 < φ < π/2`, `c = csc²φ`, real `0 < k < 1` and real
+/-- DLMF 19.7.10: for real `0 < φ < π/2`, `c = csc²φ`, real `0 < k < 1` and real
 `α², ω²` with `(k² - α²)(k² - ω²) = k²(k² - 1)`, `α² ≠ c`, `ω² ≠ c`:
 `(1 - α²)Π(φ, α², k) + (1 - ω²)Π(φ, ω², k)
 = F(φ, k) + (1 - α² - ω²) √(c - k²) R_C(c(c - 1), (c - α²)(c - ω²))`. -/
@@ -420,7 +517,50 @@ theorem incompleteEllipticPi_add_third {φ k α2 ω2 : ℝ} (hφ0 : 0 < φ) (hφ
         incompleteEllipticPi φ ω2 k =
       incompleteEllipticF φ k + ((1 - α2 - ω2) * Real.sqrt (c - k ^ 2) : ℝ) *
         symmetricEllipticRC (c * (c - 1) : ℝ) ((c - α2) * (c - ω2) : ℝ) := by
-  sorry
+  intro c
+  have hc1 : 1 < c := one_lt_csc_sq hφ0 hφ1
+  have hc : 0 < c := by linarith
+  have hk : k ^ 2 < 1 := by nlinarith
+  have hck : 0 < c - k ^ 2 := by linarith
+  have hks : 1 - (k : ℂ) ^ 2 * (Real.sin φ : ℂ) ^ 2 ∈ slitPlane := by
+    rw [← ofReal_pow, ← ofReal_pow, ← ofReal_mul, ← ofReal_one, ← ofReal_sub]
+    exact ofReal_mem_slitPlane.mpr (by
+      nlinarith [Real.sin_sq_le_one φ, sq_nonneg (Real.sin φ), sq_nonneg k])
+  have hP := incompleteEllipticPi_eq_symmetricEllipticRF_add_RJ hφ0 hφ1.le hks hα
+  have hQ := incompleteEllipticPi_eq_symmetricEllipticRF_add_RJ hφ0 hφ1.le hks hω
+  have hF : incompleteEllipticF φ k =
+      symmetricEllipticRF (c - 1 : ℝ) (c - k ^ 2 : ℝ) c := by
+    rw [incompleteEllipticF_ofReal_eq_integral]
+    push_cast
+    simpa only [ofReal_sin] using
+      (symmetricEllipticRF_csc_sq_eq_integral hφ0 hφ1.le (k : ℂ)).symm
+  have hrel : (c - α2 - (c - k ^ 2)) * (c - ω2 - (c - k ^ 2)) =
+      (c - 1 - (c - k ^ 2)) * (c - (c - k ^ 2)) := by linear_combination hαω
+  have hp : c - α2 ≠ 0 := sub_ne_zero.mpr (Ne.symm hα)
+  have hq : c - ω2 ≠ 0 := sub_ne_zero.mpr (Ne.symm hω)
+  have H := symmetricEllipticRJ_change_parameter' hck (by linarith : 0 ≤ c - 1)
+    hc.le (fun _ => hc.ne') hp hq hrel
+  have hRC := symmetricEllipticRC_div_ofReal hck
+    (mul_pos (by linarith : 0 < c - 1) hc) (mul_ne_zero hp hq)
+  rw [hRC] at H
+  rw [mul_comm (c - 1) c] at H
+  simp only [symmetricEllipticRJ_comm_left ((c - 1 : ℝ) : ℂ) ((c - k ^ 2 : ℝ) : ℂ),
+    symmetricEllipticRF_comm_left ((c - 1 : ℝ) : ℂ) ((c - k ^ 2 : ℝ) : ℂ)] at H
+  have hαωC : ((k : ℂ) ^ 2 - α2) * ((k : ℂ) ^ 2 - ω2) =
+      (k : ℂ) ^ 2 * ((k : ℂ) ^ 2 - 1) := by exact_mod_cast hαω
+  change incompleteEllipticPi φ α2 k =
+    symmetricEllipticRF ((c : ℂ) - 1) ((c : ℂ) - k ^ 2) c + (α2 : ℂ) / 3 *
+      symmetricEllipticRJ ((c : ℂ) - 1) ((c : ℂ) - k ^ 2) c (c - α2 : ℝ) at hP
+  change incompleteEllipticPi φ ω2 k =
+    symmetricEllipticRF ((c : ℂ) - 1) ((c : ℂ) - k ^ 2) c + (ω2 : ℂ) / 3 *
+      symmetricEllipticRJ ((c : ℂ) - 1) ((c : ℂ) - k ^ 2) c (c - ω2 : ℝ) at hQ
+  rw [hF]
+  push_cast at H hP hQ ⊢
+  linear_combination (1 - (α2 : ℂ)) * hP + (1 - (ω2 : ℂ)) * hQ -
+    ((1 - (α2 : ℂ) - ω2) / 3) * H +
+    (symmetricEllipticRJ ((c : ℂ) - 1) ((c : ℂ) - k ^ 2) c ((c : ℂ) - α2) +
+      symmetricEllipticRJ ((c : ℂ) - 1) ((c : ℂ) - k ^ 2) c ((c : ℂ) - ω2)) /
+        3 * hαωC
 
 /-- DLMF §19.7(iii) (prose): under the relation `α²ω² = k²` of 19.7.8, since `k² ≤ c`, `α² > c`
 implies `ω² < 1 ≤ c` (for real `0 < k < 1` and `0 < φ < π/2`). -/

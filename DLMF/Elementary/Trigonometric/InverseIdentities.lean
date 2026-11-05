@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.Elementary.LogarithmContinuedFraction
 public import DLMF.Elementary.Basic.Gudermannian
 public import DLMF.Elementary.LogExpAnalysis
 public import DLMF.Elementary.OddContinuedFraction
@@ -1275,7 +1276,7 @@ theorem arcsin_continued_fraction {z : ℂ} (hz : z∈arcsinCutPlane) :
 theorem arctan_continued_fraction {z : ℂ} (hz : z∈arctanCutPlane) :
     DLMF.Core.HasContinuedFraction (fun k => if k=0 then z else (k:ℂ)^2*z^2)
       (fun k => 2*k+1) (Complex.arctan z) := by
-  sorry
+  exact LogarithmContinuedFraction.hasContinuedFraction_arctan hz
 
 /-- DLMF 4.25.E5: exp arccot continued fraction. -/
 @[dlmf 4.25.E5]

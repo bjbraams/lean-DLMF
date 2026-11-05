@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.Elementary.LogarithmContinuedFraction
 public import DLMF.Elementary.Hyperbolic.InverseIdentities
 public import DLMF.Elementary.OddContinuedFraction
 public import DLMF.Gamma.BetaFunction.Cosine
@@ -86,7 +87,7 @@ theorem arcsinh_continued_fraction {z : ℂ} (hz : z∈arcsinhDomain) :
 theorem arctanh_continued_fraction {z : ℂ} (hz : z∈arctanhDomain) :
     DLMF.Core.HasContinuedFraction (fun n => if n=0 then z else -(n:ℂ)^2*z^2)
       (fun n => (2*n+1:ℂ)) (arctanh z) := by
-  sorry
+  exact LogarithmContinuedFraction.hasContinuedFraction_arctanh hz
 
 /-- At `x`, the function `(fun t : ℝ => Real.log (Real.cosh t))` has derivative `(Real.tanh x)`. -/
 @[dlmf 4.40.E3]

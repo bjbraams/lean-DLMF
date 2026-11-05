@@ -1,0 +1,481 @@
+{
+  "date": "2026-11-05",
+  "base_commit": "451f12a4cc3c3e6795f5cbbfaea2552ca97ee240",
+  "baseline": "Working tree after the approved Chapter 17 repairs, retaining the preceding proof round.",
+  "started_utc": "2026-11-05T15:08:00+00:00",
+  "audited_utc": "2026-11-05T17:23:33.928628+00:00",
+  "direct_admissions_before": 1033,
+  "direct_admissions_after": 1008,
+  "completed_admissions": [
+    {
+      "name": "DLMF.EllipticIntegrals.completeEllipticPi_of_one_lt",
+      "file": "DLMF/EllipticIntegrals/SpecialCases.lean",
+      "line": 596,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.completeEllipticPi_of_one_lt_special",
+      "file": "DLMF/EllipticIntegrals/SpecialCases.lean",
+      "line": 621,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.incompleteEllipticPi_special_RC",
+      "file": "DLMF/EllipticIntegrals/SpecialCases.lean",
+      "line": 894,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.completeEllipticPi_pv_eq",
+      "file": "DLMF/EllipticIntegrals/SymmetricRelations.lean",
+      "line": 222,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.incompleteEllipticPi_pv_eq",
+      "file": "DLMF/EllipticIntegrals/SymmetricRelations.lean",
+      "line": 543,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.bulirschCel_eq_symmetricElliptic",
+      "file": "DLMF/EllipticIntegrals/SymmetricRelations.lean",
+      "line": 606,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.bulirschEl3_eq_symmetricElliptic",
+      "file": "DLMF/EllipticIntegrals/SymmetricRelations.lean",
+      "line": 755,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.tendsto_symmetricEllipticRJ_zero",
+      "file": "DLMF/EllipticIntegrals/SymmetricLimits.lean",
+      "line": 112,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.tendsto_symmetricEllipticRJ_zero_left",
+      "file": "DLMF/EllipticIntegrals/SymmetricLimits.lean",
+      "line": 123,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.incompleteEllipticPi_add_first",
+      "file": "DLMF/EllipticIntegrals/Connection/ParameterChanges.lean",
+      "line": 439,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.incompleteEllipticPi_add_second",
+      "file": "DLMF/EllipticIntegrals/Connection/ParameterChanges.lean",
+      "line": 452,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.incompleteEllipticPi_add_third",
+      "file": "DLMF/EllipticIntegrals/Connection/ParameterChanges.lean",
+      "line": 511,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.Zeta.integral_pow_mul_digamma",
+      "file": "DLMF/Zeta/HurwitzDerivativeIntegrals.lean",
+      "line": 409,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.Zeta.integral_deriv_hurwitzZetaComplex",
+      "file": "DLMF/Zeta/HurwitzDerivativeIntegrals.lean",
+      "line": 170,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.Zeta.hurwitzZetaComplex_asymptotic",
+      "file": "DLMF/Zeta/HurwitzAsymptotics.lean",
+      "line": 194,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.Zeta.deriv_hurwitzZetaComplex_neg_one_asymptotic",
+      "file": "DLMF/Zeta/HurwitzAsymptotics.lean",
+      "line": 237,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.Zeta.deriv_hurwitzZetaComplex_neg_two_asymptotic",
+      "file": "DLMF/Zeta/HurwitzAsymptotics.lean",
+      "line": 291,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.QHypergeometric.four_phi_three_parity",
+      "file": "DLMF/QHypergeometric/HigherSummations.lean",
+      "line": 118,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.QHypergeometric.four_phi_three_base_square_first",
+      "file": "DLMF/QHypergeometric/HigherSummations.lean",
+      "line": 149,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.QHypergeometric.four_phi_three_base_square_second",
+      "file": "DLMF/QHypergeometric/HigherSummations.lean",
+      "line": 157,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.QHypergeometric.q_dixon_terminating'",
+      "file": "DLMF/QHypergeometric/Dixon.lean",
+      "line": 29,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.QHypergeometric.qPhi3_sears_first",
+      "file": "DLMF/QHypergeometric/Transformations.lean",
+      "line": 385,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.QHypergeometric.qPhi3_sears_second",
+      "file": "DLMF/QHypergeometric/Transformations.lean",
+      "line": 426,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.QHypergeometric.qPhi3_terminating_quadratic",
+      "file": "DLMF/QHypergeometric/TerminatingQuadraticTransformation.lean",
+      "line": 578,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.QHypergeometric.heine_fine_expansion",
+      "file": "DLMF/QHypergeometric/BasicSummations/FirstFine.lean",
+      "line": 194,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  ],
+  "source_ranged_admission_dependent_theorems_after": 1034,
+  "existing_tagged_theorems_freed_from_admitted_dependencies": [
+    {
+      "dlmf": "17.7.E6",
+      "declaration": "DLMF.QHypergeometric.q_dixon_terminating"
+    }
+  ],
+  "dlmf_entries_before": 10817,
+  "dlmf_entries_after": 10818,
+  "dlmf_statuses_before": {
+    "proved": 9485,
+    "admitted": 1332,
+    "nonstandard": 0
+  },
+  "dlmf_statuses_after": {
+    "proved": 9512,
+    "admitted": 1306,
+    "nonstandard": 0
+  },
+  "dlmf_entries_newly_proved": 26,
+  "dlmf_entries_newly_proved_declarations": [
+    {
+      "dlmf": "19.25.E19",
+      "declaration": "DLMF.EllipticIntegrals.bulirschCel_eq_symmetricElliptic"
+    },
+    {
+      "dlmf": "19.25.E22",
+      "declaration": "DLMF.EllipticIntegrals.bulirschEl3_eq_symmetricElliptic"
+    },
+    {
+      "dlmf": "19.6.E5",
+      "declaration": "DLMF.EllipticIntegrals.completeEllipticPi_of_one_lt"
+    },
+    {
+      "dlmf": "19.6.E6",
+      "declaration": "DLMF.EllipticIntegrals.completeEllipticPi_of_one_lt_special"
+    },
+    {
+      "dlmf": "19.25.E4",
+      "declaration": "DLMF.EllipticIntegrals.completeEllipticPi_pv_eq"
+    },
+    {
+      "dlmf": "19.7.E8",
+      "declaration": "DLMF.EllipticIntegrals.incompleteEllipticPi_add_first"
+    },
+    {
+      "dlmf": "19.7.E9",
+      "declaration": "DLMF.EllipticIntegrals.incompleteEllipticPi_add_second"
+    },
+    {
+      "dlmf": "19.7.E10",
+      "declaration": "DLMF.EllipticIntegrals.incompleteEllipticPi_add_third"
+    },
+    {
+      "dlmf": "19.25.E16",
+      "declaration": "DLMF.EllipticIntegrals.incompleteEllipticPi_pv_eq"
+    },
+    {
+      "dlmf": "19.6.E12",
+      "declaration": "DLMF.EllipticIntegrals.incompleteEllipticPi_special_RC"
+    },
+    {
+      "dlmf": "19.20.E7",
+      "declaration": "DLMF.EllipticIntegrals.tendsto_symmetricEllipticRJ_zero"
+    },
+    {
+      "dlmf": "19.20.E10",
+      "declaration": "DLMF.EllipticIntegrals.tendsto_symmetricEllipticRJ_zero_left"
+    },
+    {
+      "dlmf": "17.7.E12",
+      "declaration": "DLMF.QHypergeometric.four_phi_three_base_square_first"
+    },
+    {
+      "dlmf": "17.7.E13",
+      "declaration": "DLMF.QHypergeometric.four_phi_three_base_square_second"
+    },
+    {
+      "dlmf": "17.7.E9",
+      "declaration": "DLMF.QHypergeometric.four_phi_three_parity"
+    },
+    {
+      "dlmf": "17.6.E9",
+      "declaration": "DLMF.QHypergeometric.heine_fine_expansion"
+    },
+    {
+      "dlmf": "17.9.E6",
+      "declaration": "DLMF.QHypergeometric.qPhi3_sears_first"
+    },
+    {
+      "dlmf": "17.9.E7",
+      "declaration": "DLMF.QHypergeometric.qPhi3_sears_second"
+    },
+    {
+      "dlmf": "17.9.E17",
+      "declaration": "DLMF.QHypergeometric.qPhi3_terminating_quadratic"
+    },
+    {
+      "dlmf": "17.7.E6",
+      "declaration": "DLMF.QHypergeometric.q_dixon_terminating"
+    },
+    {
+      "dlmf": "17.7.E6",
+      "declaration": "DLMF.QHypergeometric.q_dixon_terminating'"
+    },
+    {
+      "dlmf": "25.11.E44",
+      "declaration": "DLMF.Zeta.deriv_hurwitzZetaComplex_neg_one_asymptotic"
+    },
+    {
+      "dlmf": "25.11.E45",
+      "declaration": "DLMF.Zeta.deriv_hurwitzZetaComplex_neg_two_asymptotic"
+    },
+    {
+      "dlmf": "25.11.E43",
+      "declaration": "DLMF.Zeta.hurwitzZetaComplex_asymptotic"
+    },
+    {
+      "dlmf": "25.11.E34",
+      "declaration": "DLMF.Zeta.integral_deriv_hurwitzZetaComplex"
+    },
+    {
+      "dlmf": "25.11.E32",
+      "declaration": "DLMF.Zeta.integral_pow_mul_digamma"
+    }
+  ],
+  "dlmf_entries_added": [
+    {
+      "dlmf": "19.7.E8",
+      "declaration": "DLMF.EllipticIntegrals.incompleteEllipticPi_add_first'",
+      "status": "proved"
+    }
+  ],
+  "public_statement_changes": [],
+  "existing_definition_changes": [],
+  "new_admissions": [],
+  "nonstandard_axiom_dependencies": [],
+  "new_two_way_area_pairs": [],
+  "changed_lean_files": [
+    "DLMF/EllipticIntegrals.lean",
+    "DLMF/EllipticIntegrals/Connection/ParameterChanges.lean",
+    "DLMF/EllipticIntegrals/LegendreIdentities.lean",
+    "DLMF/EllipticIntegrals/LegendrePrincipalValue.lean",
+    "DLMF/EllipticIntegrals/LegendreSymmetricForms.lean",
+    "DLMF/EllipticIntegrals/SpecialCases.lean",
+    "DLMF/EllipticIntegrals/SymmetricConnection.lean",
+    "DLMF/EllipticIntegrals/SymmetricLimits.lean",
+    "DLMF/EllipticIntegrals/SymmetricPrincipalValue.lean",
+    "DLMF/EllipticIntegrals/SymmetricRelations.lean",
+    "DLMF/EllipticIntegrals/SymmetricSpecialCases.lean",
+    "DLMF/Hypergeometric/Basic.lean",
+    "DLMF/Hypergeometric/Basic/PochhammerDerivatives.lean",
+    "DLMF/QHypergeometric.lean",
+    "DLMF/QHypergeometric/BasicSummations/FirstFine.lean",
+    "DLMF/QHypergeometric/BasicSummations/Heine.lean",
+    "DLMF/QHypergeometric/Dixon.lean",
+    "DLMF/QHypergeometric/DixonFiniteSum.lean",
+    "DLMF/QHypergeometric/DixonPolynomial.lean",
+    "DLMF/QHypergeometric/FiniteBilateralTransformations.lean",
+    "DLMF/QHypergeometric/FiniteDifferencePolynomial.lean",
+    "DLMF/QHypergeometric/FiniteDifferenceRational.lean",
+    "DLMF/QHypergeometric/HigherSummations.lean",
+    "DLMF/QHypergeometric/ParitySummation.lean",
+    "DLMF/QHypergeometric/PfaffSaalschutz.lean",
+    "DLMF/QHypergeometric/QuadraticCompanion.lean",
+    "DLMF/QHypergeometric/QuadraticSummation.lean",
+    "DLMF/QHypergeometric/SearsLimit.lean",
+    "DLMF/QHypergeometric/TerminatingQuadraticTransformation.lean",
+    "DLMF/QHypergeometric/Transformations.lean",
+    "DLMF/Zeta/Basic.lean",
+    "DLMF/Zeta/Basic/Hurwitz.lean",
+    "DLMF/Zeta/Basic/HurwitzProperties.lean",
+    "DLMF/Zeta/HurwitzAsymptotics.lean",
+    "DLMF/Zeta/HurwitzContinuation.lean",
+    "DLMF/Zeta/HurwitzDerivativeIntegrals.lean",
+    "DLMF/Zeta/HurwitzIntegrals.lean",
+    "DLMF/Zeta/HurwitzSectorRemainder.lean",
+    "DLMF/Zeta/HurwitzTailDerivatives.lean",
+    "DLMFMathlib.lean",
+    "DLMFMathlib/Analysis/Calculus/Deriv/Appell.lean",
+    "DLMFMathlib/Analysis/Complex/SlitPlane.lean",
+    "DLMFMathlib/Analysis/Integral/PrincipalValueLevelSets.lean",
+    "DLMFMathlib/Analysis/SpecialFunctions/Log/Ray.lean",
+    "DLMFMathlib/Analysis/SpecialFunctions/Pow/Decay.lean"
+  ],
+  "new_lean_files": [
+    "DLMF/EllipticIntegrals/LegendrePrincipalValue.lean",
+    "DLMF/EllipticIntegrals/SymmetricLimits.lean",
+    "DLMF/Hypergeometric/Basic/PochhammerDerivatives.lean",
+    "DLMF/QHypergeometric/BasicSummations/FirstFine.lean",
+    "DLMF/QHypergeometric/DixonFiniteSum.lean",
+    "DLMF/QHypergeometric/DixonPolynomial.lean",
+    "DLMF/QHypergeometric/FiniteBilateralTransformations.lean",
+    "DLMF/QHypergeometric/FiniteDifferencePolynomial.lean",
+    "DLMF/QHypergeometric/FiniteDifferenceRational.lean",
+    "DLMF/QHypergeometric/ParitySummation.lean",
+    "DLMF/QHypergeometric/PfaffSaalschutz.lean",
+    "DLMF/QHypergeometric/QuadraticCompanion.lean",
+    "DLMF/QHypergeometric/QuadraticSummation.lean",
+    "DLMF/QHypergeometric/SearsLimit.lean",
+    "DLMF/QHypergeometric/TerminatingQuadraticTransformation.lean",
+    "DLMF/Zeta/Basic/HurwitzProperties.lean",
+    "DLMF/Zeta/HurwitzDerivativeIntegrals.lean",
+    "DLMF/Zeta/HurwitzSectorRemainder.lean",
+    "DLMF/Zeta/HurwitzTailDerivatives.lean",
+    "DLMFMathlib/Analysis/Calculus/Deriv/Appell.lean",
+    "DLMFMathlib/Analysis/Complex/SlitPlane.lean",
+    "DLMFMathlib/Analysis/Integral/PrincipalValueLevelSets.lean",
+    "DLMFMathlib/Analysis/SpecialFunctions/Log/Ray.lean",
+    "DLMFMathlib/Analysis/SpecialFunctions/Pow/Decay.lean"
+  ],
+  "deferred_statement_issues": [],
+  "validation": {
+    "ordinary_build": "lake build > /tmp/DLMF-build.log 2>&1",
+    "strict_source_checks": "All 47 changed/new and entry modules passed autoImplicit=false and relaxedAutoImplicit=false.",
+    "axiom_audit": "Every completed original theorem uses only propext, Classical.choice and Quot.sound; the full project axiom graph has no additional nonstandard axioms.",
+    "preservation": "Independent existing public-header and public/private definition-body comparison found no changes or missing declarations.",
+    "import_survey": "No new two-way area pairs, foundational violations, closure violations, missing modules or cycles.",
+    "formatting": "Changed Lean lines are at most 100 characters; all project Lean files are at most 1500 lines; git diff --check passed."
+  }
+}

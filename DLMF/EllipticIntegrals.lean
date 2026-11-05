@@ -18,6 +18,7 @@ public import DLMF.EllipticIntegrals.SymmetricBounds
 public import DLMF.EllipticIntegrals.SymmetricInverseJacobi
 public import DLMF.EllipticIntegrals.SymmetricLegendreConnection
 public import DLMF.EllipticIntegrals.LegendreSymmetricForms
+public import DLMF.EllipticIntegrals.LegendrePrincipalValue
 public import DLMF.EllipticIntegrals.Quadratic
 public import DLMF.EllipticIntegrals.Reduction
 public import DLMF.EllipticIntegrals.Relations
@@ -35,6 +36,7 @@ public import DLMF.EllipticIntegrals.SymmetricQuadratic
 public import DLMF.EllipticIntegrals.SymmetricReduction
 public import DLMF.EllipticIntegrals.SymmetricRelations
 public import DLMF.EllipticIntegrals.SymmetricSeries
+public import DLMF.EllipticIntegrals.SymmetricLimits
 public import DLMF.EllipticIntegrals.SymmetricSpecialCases
 public import DLMF.EllipticIntegrals.SymmetricSpecialCasesRD
 public import DLMF.EllipticIntegrals.SymmetricNodeDerivatives
