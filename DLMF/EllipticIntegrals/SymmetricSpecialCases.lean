@@ -34,8 +34,9 @@ Special values, homogeneity, degenerate cases, limits and principal values of `R
   `symmetricEllipticRJ_zero_self_self`, `symmetricEllipticRJ_self_right_eq`,
   `symmetricEllipticRJ_zero_sqrt`: special cases of `R_J` (DLMF 19.20.6, 19.20.8, 19.20.9).
 * `tendsto_symmetricEllipticRJ_zero`, `tendsto_symmetricEllipticRJ_zero_left`,
-  `symmetricEllipticRJ_zero_asymptotic`, `tendsto_mul_symmetricEllipticRJ`: limits of `R_J` (DLMF
-  19.20.7, 19.20.10–19.20.12).
+  `tendsto_mul_symmetricEllipticRJ`: limits of `R_J` (DLMF 19.20.7, 19.20.10, 19.20.12).
+  The logarithmic formula 19.20.11 is in
+  `DLMF.EllipticIntegrals.SymmetricThirdKindAsymptotics`.
 * `symmetricEllipticRJ_special_p`, `symmetricEllipticRJ_principalValue`,
   `symmetricEllipticRJ_principalValue_p`, `symmetricEllipticRJ_principalValue_complete`: DLMF
   19.20.13–19.20.17.
@@ -720,15 +721,6 @@ theorem symmetricEllipticRJ_zero_sqrt {y z : ℝ} (hy : 0 < y) (hz : 0 < z) :
     linear_combination h1
   · field_simp
     linear_combination -h2
-
-/-- DLMF 19.20.11: `R_J(0, y, z, p) = 3/(2p√z) ln(16z/y) - (3/p) R_C(z, p) + O(y ln y)` as
-`y → 0+`, for real `p ≠ 0` and `z > 0`. -/
-@[dlmf 19.20.E11]
-theorem symmetricEllipticRJ_zero_asymptotic {z p : ℝ} (hz : 0 < z) (hp : p ≠ 0) :
-    (fun y : ℝ => symmetricEllipticRJ 0 y z p -
-        ((3 / (2 * p * Real.sqrt z) * Real.log (16 * z / y) : ℝ) -
-        3 / (p : ℂ) * symmetricEllipticRC z p)) =O[𝓝[>] 0] fun y => ((y * Real.log y : ℝ) : ℂ) := by
-  sorry
 
 /-- A lower bound `u / 2 ≤ ‖u + w‖` for real `u ≥ 2‖w‖`. -/
 private theorem half_le_norm_ofReal_add {w : ℂ} {u : ℝ} (hu : 2 * ‖w‖ ≤ u) :

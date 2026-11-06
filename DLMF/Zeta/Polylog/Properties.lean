@@ -7,6 +7,7 @@ module
 
 public import DLMF.Polylog.Dilog
 public import DLMF.Zeta.Basic.PolylogProperties
+public import DLMF.Zeta.Polylog.LogarithmicExpansion
 public import DLMF.Zeta.Basic.Hurwitz
 public import DLMF.Zeta.Basic.Polylog
 public import Mathlib.Analysis.CStarAlgebra.Classes
@@ -603,15 +604,16 @@ theorem polylog_eq_integral {s z : ℂ}
     field_simp
 
 /-- **Expansion about `z = 1`** (DLMF 25.12.12): for `s ≠ 1, 2, 3, …` and `|ln z| < 2π`,
-`Li_s(z) = Γ(1-s)(ln(1/z))^{s-1} + ∑_{n≥0} ζ(s-n)(ln z)ⁿ/n!`. We take `z ∈ ℂ \ [1, ∞)`, `z ≠ 0`
+`Li_s(z) = Γ(1-s)(-ln z)^{s-1} + ∑_{n≥0} ζ(s-n)(ln z)ⁿ/n!`. We take `z ∈ ℂ \ [1, ∞)`, `z ≠ 0`
 (domain qualification: on the cut `(1, e^{2π})` the principal branch of `Li_s` is not defined, and
-at `z = 1` with `Re s ≤ 1` the left side is infinite). -/
+at `z = 1` with `Re s ≤ 1` the left side is infinite). The singular term uses `-ln z`
+also on the negative real axis, with principal logarithms throughout. -/
 @[dlmf 25.12.E12]
 theorem hasSum_polylog_log {s z : ℂ} (hs : ∀ n : ℕ, s ≠ n + 1) (hz : z ∈ slitOne)
     (hz0 : z ≠ 0) (hlog : ‖Complex.log z‖ < 2 * π) :
     HasSum (fun n : ℕ => riemannZeta (s - n) * Complex.log z ^ n / n !)
-      (polylog s z - Gamma (1 - s) * Complex.log (1 / z) ^ (s - 1)) := by
-  sorry
+      (polylog s z - Gamma (1 - s) * (-Complex.log z) ^ (s - 1)) := by
+  exact PolylogLogarithmic.hasSum_regularized hs hz hz0 hlog
 
 /-! ### §25.12(iii) Fermi–Dirac and Bose–Einstein integrals -/
 

@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Zeta.Basic.LerchContinuation
+public import Mathlib.Analysis.Normed.Group.Tannery
 public import DLMF.Zeta.Basic.PolylogProperties
 public import DLMFMathlib.Analysis.SpecialFunctions.Pow.Decay
 
@@ -190,5 +191,100 @@ theorem differentiable_lerchPhi_order_of_norm_lt_one {a z : ℂ} (ha : 0 < a.re)
     _ ≤ ‖z‖ ^ n * (C * (1 + (n : ℝ)) ^ N) :=
       mul_le_mul_of_nonneg_left h (by positivity)
     _ = _ := by rw [add_comm (1 : ℝ)]; ring
+
+/-- **Recurrence in `a`** (DLMF 25.14.4): under the conditions of 25.14.1 (`|z| < 1`, or `|z| = 1`
+and `Re s > 1`) and `m = 1, 2, 3, …`,
+`Φ(z, s, a) = z^m Φ(z, s, a+m) + ∑_{n=0}^{m-1} zⁿ/(a+n)^s` (valid also for `m = 0`). -/
+@[dlmf 25.14.E4]
+theorem lerchPhi_eq_add_nat {z s a : ℂ} (h : LerchParamAdmissible s a)
+    (hz : ‖z‖ < 1 ∨ (‖z‖ = 1 ∧ 1 < s.re)) (m : ℕ) :
+    lerchPhi z s a = z ^ m * lerchPhi z s (a + m) +
+      ∑ n ∈ Finset.range m, z ^ n / (a + n) ^ s := by
+  have h1 := (hasSum_nat_add_iff' m).mpr (hasSum_lerchPhi_of_lerchParamAdmissible h hz)
+  have h2 := (hasSum_lerchPhi_of_lerchParamAdmissible (lerchParamAdmissible_add_natCast h m)
+      hz).mul_left (z ^ m)
+  have h3 : HasSum (fun n : ℕ => z ^ (n + m) / (a + ↑(n + m)) ^ s)
+      (z ^ m * lerchPhi z s (a + m)) := by
+    refine h2.congr_fun fun n => ?_
+    rw [pow_add]; push_cast; ring_nf
+  rw [← h1.unique h3]
+  ring
+
+/-- The parameter recurrence continues throughout the principal Lerch cut plane. -/
+theorem lerchPhi_eq_add_nat_of_mem_slitOne {z s a : ℂ} (ha : LerchParamAdmissible s a)
+    (hz : z ∈ slitOne) (m : ℕ) :
+    lerchPhi z s a = z ^ m * lerchPhi z s (a + m) +
+      ∑ n ∈ Finset.range m, z ^ n / (a + n) ^ s := by
+  have hF := analyticOnNhd_lerchPhi ha
+  have hG : AnalyticOnNhd ℂ (fun z => z ^ m * lerchPhi z s (a + m) +
+      ∑ n ∈ Finset.range m, z ^ n / (a + n) ^ s) slitOne :=
+    ((analyticOnNhd_id.pow m).mul
+      (analyticOnNhd_lerchPhi (lerchParamAdmissible_add_natCast ha m))).add
+      (Finset.analyticOnNhd_fun_sum _ fun n _ => (analyticOnNhd_id.pow n).div_const)
+  exact eqOn_slitOne_of_eq_on_ball hF hG
+    (fun v hv => lerchPhi_eq_add_nat ha (Or.inl hv) m) hz
+
+/-- The principal polylogarithm is the parameter-one Lerch transcendent throughout its cut plane. -/
+theorem polylog_eq_mul_lerchPhi_of_mem_slitOne (s : ℂ) {z : ℂ} (hz : z ∈ slitOne) :
+    polylog s z = z * lerchPhi z s 1 := by
+  have hp : LerchParamAdmissible s 1 := lerchParamAdmissible_of_re_pos (by norm_num) s
+  apply eqOn_slitOne_of_eq_on_ball (analyticOnNhd_polylog s)
+    (analyticOnNhd_id.mul (analyticOnNhd_lerchPhi hp)) ?_ hz
+  intro v hv
+  have hL := (hasSum_lerchPhi (z := v) hp hv).mul_left v
+  apply (hasSum_polylog (s := s) hv).unique
+  refine hL.congr_fun fun n => ?_
+  rw [pow_succ, add_comm (1 : ℂ)]
+  ring
+
+/-- Differentiating the exponentially weighted Lerch function lowers its order. -/
+theorem hasDerivAt_exp_mul_lerchPhi {a w : ℂ} (ha : ∀ n : ℕ, a + n ≠ 0) (s : ℂ)
+    (hw : exp w ∈ slitOne) :
+    HasDerivAt (fun v => exp (a * v) * lerchPhi (exp v) s a)
+      (exp (a * w) * lerchPhi (exp w) (s - 1) a) w := by
+  obtain ⟨F, hF⟩ := exists_isLerchContinuation s a
+  have hG := isLerchContinuation_sub_one ha hF
+  have heq : (fun v => exp (a * v) * lerchPhi (exp v) s a) =ᶠ[𝓝 w]
+      fun v => exp (a * v) * F (exp v) := by
+    filter_upwards [continuous_exp.continuousAt.eventually
+      (isOpen_slitOne.mem_nhds hw)] with v hv
+    rw [lerchPhi_eq_of_isLerchContinuation hF hv]
+  have hd := (((hasDerivAt_id w).const_mul a).cexp).mul
+    (((hF.1 (exp w) hw).differentiableAt.hasDerivAt).comp w (Complex.hasDerivAt_exp w))
+  apply HasDerivAt.congr_of_eventuallyEq _ heq
+  convert hd using 1
+  · funext v; rfl
+  rw [lerchPhi_eq_of_isLerchContinuation hG hw]
+  simp only [id_eq, mul_one, Function.comp_apply]
+  ring
+
+/-- Absolute convergence gives Lerch's unit-circle value along negative real logarithms. -/
+theorem tendsto_lerchPhi_exp_zero {a s : ℂ} (ha : 0 < a.re) (hs : 1 < s.re) :
+    Tendsto (fun r : ℝ => lerchPhi (exp (r : ℂ)) s a) (𝓝[<] 0)
+      (𝓝 (lerchPhi 1 s a)) := by
+  have hsum := (summable_one_div_add_natCast_cpow hs a).norm
+  have hr : Tendsto (fun r : ℝ => (r : ℂ)) (𝓝[<] 0) (𝓝 0) :=
+    (continuous_ofReal.continuousAt.tendsto (x := (0 : ℝ))).mono_left nhdsWithin_le_nhds
+  have he : Tendsto (fun r : ℝ => exp (r : ℂ)) (𝓝[<] 0) (𝓝 1) := by
+    have hc : ContinuousAt (fun r : ℝ => exp (r : ℂ)) 0 := by fun_prop
+    simpa only [ofReal_zero, exp_zero] using hc.tendsto.mono_left nhdsWithin_le_nhds
+  have h := tendsto_tsum_of_dominated_convergence hsum
+    (f := fun (r : ℝ) (k : ℕ) => exp (r : ℂ) ^ k / (a + k) ^ s)
+    (g := fun k : ℕ => 1 / (a + k) ^ s)
+    (fun k => by simpa using (he.pow k).div_const ((a + k) ^ s)) ?_
+  · have hZ : HasSum (fun k : ℕ => 1 / (a + k) ^ s) (lerchPhi 1 s a) := by
+      simpa only [one_pow] using
+        (hasSum_lerchPhi_of_norm_eq_one' (z := 1) hs (by norm_num))
+    rw [hZ.tsum_eq] at h
+    refine h.congr' ?_
+    filter_upwards [self_mem_nhdsWithin] with r hr
+    exact (hasSum_lerchPhi (lerchParamAdmissible_of_re_pos ha s)
+      (by simpa only [norm_exp, ofReal_re] using Real.exp_lt_one_iff.mpr hr)).tsum_eq
+  · filter_upwards [self_mem_nhdsWithin] with r hr k
+    rw [norm_div, norm_pow, norm_div, norm_one]
+    apply div_le_div_of_nonneg_right _ (norm_nonneg _)
+    apply pow_le_one₀ (norm_nonneg _)
+    rw [norm_exp, ofReal_re]
+    exact Real.exp_le_one_iff.mpr hr.le
 
 end DLMF.Zeta

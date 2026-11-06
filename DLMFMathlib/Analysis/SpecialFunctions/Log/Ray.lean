@@ -71,4 +71,43 @@ lemma tendsto_log_mul_pow_ray {n : ℕ} (hn : 0 < n) (a : ℂ) :
   filter_upwards [self_mem_nhdsWithin] with t ht
   exact (log_mul_pow_ray ha ht n).symm
 
+/-- A positive power times the principal logarithm of its negative argument tends to zero
+when the real variable approaches zero from below. -/
+theorem tendsto_ofReal_pow_mul_log_neg_nhdsLT_zero {n : ℕ} (hn : 0 < n) :
+    Tendsto (fun r : ℝ => (r : ℂ) ^ n * log (-(r : ℂ))) (𝓝[<] 0) (𝓝 0) := by
+  have hneg : Tendsto (fun r : ℝ => -r) (𝓝[<] 0) (𝓝[>] 0) := by
+    refine tendsto_nhdsWithin_iff.mpr ⟨?_, ?_⟩
+    · simpa using (continuous_neg.continuousAt.tendsto (x := (0 : ℝ))).mono_left
+        nhdsWithin_le_nhds
+    · filter_upwards [self_mem_nhdsWithin] with r hr using neg_pos.mpr hr
+  have ht := (tendsto_log_mul_pow_ray hn (1 : ℂ)).comp hneg
+  simp only [Function.comp_def, mul_one] at ht
+  have hc := ht.const_mul ((-1 : ℂ) ^ n)
+  simp only [mul_zero] at hc
+  refine hc.congr' ?_
+  filter_upwards [self_mem_nhdsWithin] with r _
+  have he : (r : ℂ) ^ n = (-1 : ℂ) ^ n * (-(r : ℂ)) ^ n := by
+    rw [← mul_pow]
+    congr 1
+    ring
+  rw [he]
+  simp only [ofReal_neg]
+  ring
+
+/-- A fixed denominator and a constant subtracted from the logarithm preserve the vanishing
+positive-power boundary limit, including a totalized zero denominator. -/
+theorem tendsto_ofReal_pow_div_mul_sub_log_neg_nhdsLT_zero {n : ℕ} (hn : 0 < n) (C D : ℂ) :
+    Tendsto (fun r : ℝ => (r : ℂ) ^ n / D * (C - log (-(r : ℂ))))
+      (𝓝[<] 0) (𝓝 0) := by
+  have hr : Tendsto (fun r : ℝ => (r : ℂ)) (𝓝[<] 0) (𝓝 0) :=
+    (continuous_ofReal.continuousAt.tendsto (x := (0 : ℝ))).mono_left nhdsWithin_le_nhds
+  have hp := hr.pow n
+  simp only [zero_pow hn.ne'] at hp
+  have ht := (hp.div_const D).mul_const C |>.sub
+    ((tendsto_ofReal_pow_mul_log_neg_nhdsLT_zero hn).div_const D)
+  simp only [zero_div, zero_mul, sub_zero] at ht
+  convert ht using 1
+  funext r
+  ring
+
 end Complex

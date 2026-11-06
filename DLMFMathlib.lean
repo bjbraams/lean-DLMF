@@ -93,6 +93,8 @@ public import DLMFMathlib.Analysis.Integral.PrincipalValueExcision
 public import DLMFMathlib.Analysis.Integral.PrincipalValueLevelSets
 public import DLMFMathlib.Analysis.Integral.SquareRootKernel
 public import DLMFMathlib.Analysis.Integral.LogarithmicSquareRootKernel
+public import DLMFMathlib.Analysis.Integral.SquareRootPairRegularization
+public import DLMFMathlib.Analysis.Integral.QuadraticSquareRootSubstitution
 public import DLMFMathlib.Analysis.Integral.RepeatedIntegrationByParts
 public import DLMFMathlib.Analysis.MellinConvolution
 public import DLMFMathlib.Analysis.MellinParseval
@@ -202,6 +204,8 @@ the namespaces of the Mathlib APIs they extend. These modules do not import `DLM
 * `DLMFMathlib.Analysis.Fourier.HorizontalStrip`: holomorphic Fourier–Laplace integrals.
 * `DLMFMathlib.Analysis.Integral.SquareRootKernel`: square-root shift integrals and bounds.
 * `DLMFMathlib.Analysis.Integral.LogarithmicSquareRootKernel`: logarithmic kernel cancellations.
+* `DLMFMathlib.Analysis.Integral.SquareRootPairRegularization`: pair-root kernel regularization.
+* `DLMFMathlib.Analysis.Integral.QuadraticSquareRootSubstitution`: quadratic-root substitutions.
 * `DLMFMathlib.Analysis.Integral.LaplaceSine`: sine-modulated Gamma integrals.
 * `DLMFMathlib.Analysis.Integral.ImproperFourier`: conditional Gamma Fourier integrals.
 * `DLMFMathlib.Analysis.Integral.ImproperDerivatives`: derivatives of variable integral tails.

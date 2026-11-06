@@ -27,6 +27,9 @@ public import DLMF.EllipticIntegrals.SymmetricAddition
 public import DLMF.EllipticIntegrals.SymmetricAsymptotics
 public import DLMF.EllipticIntegrals.SymmetricEndpointRegularization
 public import DLMF.EllipticIntegrals.SymmetricLogarithmicAsymptotics
+public import DLMF.EllipticIntegrals.SymmetricThirdKindAsymptotics
+public import DLMF.EllipticIntegrals.SymmetricSecondKindAsymptotics
+public import DLMF.EllipticIntegrals.SymmetricLargeNodeAsymptotics
 public import DLMF.EllipticIntegrals.SymmetricConnection
 public import DLMF.EllipticIntegrals.SymmetricCoverage
 public import DLMF.EllipticIntegrals.SymmetricDerivatives

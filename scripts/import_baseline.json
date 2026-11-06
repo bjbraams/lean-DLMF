@@ -17,6 +17,7 @@
   "ExpIntegrals <-> IncompleteGamma",
   "Gamma <-> Hypergeometric",
   "GeneralizedHypergeometric <-> QHypergeometric",
+  "IncompleteGamma <-> Zeta",
   "JacobiElliptic <-> Theta",
   "JacobiElliptic <-> Weierstrass",
   "Legendre <-> SphericalHarmonics",

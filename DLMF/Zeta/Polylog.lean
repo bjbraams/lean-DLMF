@@ -7,6 +7,7 @@ module -- shake: keep-all
 
 public import DLMF.Zeta.Polylog.Properties
 public import DLMF.Zeta.Polylog.Inversion
+public import DLMF.Zeta.Polylog.LogarithmicExpansion
 
 /-!
 # Polylogarithms of complex order

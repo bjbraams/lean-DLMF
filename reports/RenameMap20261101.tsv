@@ -13539,3 +13539,6 @@ statement	DLMF.QHypergeometric.q_dixon_terminating	DLMF.QHypergeometric.q_dixon_
 module	DLMF.Zeta.LerchContinuation	DLMF.Zeta.Basic.LerchContinuation	foundational canonical home; original module retained as an import shim
 declaration	DLMF.Gamma.integrable_one_add_abs_pow_mul_exp_neg	Real.integrable_one_add_abs_pow_mul_exp_neg	general analysis moved to DLMFMathlib; original declaration retained as an adapter
 declaration	DLMF.Hypergeometric.Gamma_mul_one_add_cpow_neg_barnes	DLMF.Gamma.Gamma_mul_one_add_cpow_neg_barnes	Gamma-specific Mellin inversion moved to its area; original adapter retained
+declaration	DLMF.Zeta.LerchLogarithmic.tendsto_pow_mul_log_neg_zero	Complex.tendsto_ofReal_pow_mul_log_neg_nhdsLT_zero	Place the general logarithmic boundary limit in DLMFMathlib.
+declaration	DLMF.Zeta.LerchLogarithmic.tendsto_logarithmicTerm_zero	Complex.tendsto_ofReal_pow_div_mul_sub_log_neg_nhdsLT_zero	Generalize the constant denominator and place the boundary limit in DLMFMathlib.
+declaration	DLMF.Zeta.LerchLogarithmic.tendsto_lerchPhi_exp_zero	DLMF.Zeta.tendsto_lerchPhi_exp_zero	Place the proved unit-circle boundary limit in the foundational Lerch API.

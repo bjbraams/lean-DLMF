@@ -11266,3 +11266,156 @@ implicit-variable options disabled. The counterexample lemmas retain only standa
 axioms. A comment-stripped source comparison confirms the extra hypothesis is the only
 Lean code change in this repair. The import survey, file/line limits and `git diff --check`
 pass. No definition, conclusion, DLMF tag or admission count changes; no commit was made.
+
+## Parallel DLMF proof round (2026-11-06)
+
+This round begins at commit `4a5735564cebeceea6e0ea7093d5aadcb62f4f59`, after the
+approved Lerch positive-integer exclusion. It removes **11 direct admissions**, reducing
+**995 to 984**. The [manifest](ProofRound20261106.json) lists each completed original
+statement and its compiled axiom dependencies. Existing tagged statements, definition
+bodies, normalizations, branches and exceptional-parameter domains are preserved.
+
+### Bilateral basic hypergeometric identities
+
+The first two-psi-two transformation, `qPsi2_transformation_one` (17.10.1), follows by
+transposing two convergent Gaussian bilateral sums. Joint annular continuity retains
+the zero lower parameter, so the proof covers the full original statement.
+
+`bilateral_six_sum` (17.8.7) follows from a denominator-cleared six-phi-five identity,
+a semi-finite shift and holomorphic continuation of the root-free kernel. The argument
+retains zeros of shifted lower infinite products and does not divide by `(q/a;q)_∞`.
+An integer-index cancellation theorem handles the principal square roots, including
+negative indices. `bilateral_six_continues` then follows from the analytic product side
+and equality of the series germ on the original convergence annulus.
+
+### Symmetric elliptic endpoint estimates
+
+`symmetricEllipticRJ_zero_asymptotic` (19.20.11) and
+`symmetricEllipticRJ_asymp_small_xy` (19.27.13) follow by subtracting the singular
+first-kind and degenerate third-kind kernels. The regularized numerator is bounded by
+`a/(t+a)`, where `a=(x+y)/2`; integrating this bound gives a logarithmic remainder.
+The negative third-kind parameter in 19.20.11 uses the existing principal-value
+parameter-change identity, rather than a positive-parameter restriction.
+
+`symmetricEllipticRD_asymp_large_z` (19.27.7) and
+`symmetricEllipticRG_asymp_large_z` (19.27.4) use the first-kind logarithmic estimate
+and exact relations between Carlson's symmetric integrals. Their error comparisons
+retain one-zero-node endpoints where the original statements allow them.
+
+`symmetricEllipticRJ_asymp_large_x` (19.27.16) follows from a pair-root substitution
+that identifies the leading quadratic `R_C` term exactly. The difference is bounded
+by `(3/x) * ‖R_F‖`, uniformly in the positive third-kind parameter. The first-kind
+logarithmic estimate then gives the stated joint small-node limit.
+`symmetricEllipticRD_asymp_large_x` (19.27.9) is the specialization with the third-kind
+parameter equal to the repeated node, with the relative error controlled by a positive
+lower bound for the elementary leading factor.
+
+### Lerch logarithmic expansions
+
+`hasSum_lerchPhi_log` (25.14.3_1) regularizes the Hermite representation by an entire
+incomplete-Gamma/Kummer term. Its derivatives lower the order, and its Taylor
+coefficients at zero are the Hurwitz zeta values. An identity theorem extends the
+negative-real logarithmic calculation to the principal slit strip. Finite parameter
+shifts give the full admissible complex-parameter domain.
+
+`hasSum_lerchPhi_log_nat` (25.14.3_2) uses an order-one primitive normalized by the
+Binet digamma integral. Successive normalized holomorphic primitives give the higher
+orders; their derivatives and boundary limits identify the logarithmically corrected
+Lerch expression. Taylor expansion omits exactly the coefficient at `n=m-1`.
+Parameter shifts retain all originally allowed nonpositive-real nonintegral parameters.
+Both proofs preserve the entire original domains and their principal branches.
+
+The foundational Lerch API now includes its proved finite parameter recurrence,
+the cut-plane bridge to the polylogarithm, the weighted order-lowering derivative
+and the absolutely convergent unit-circle boundary limit. General logarithmic
+boundary estimates live in `DLMFMathlib`, with no theorem-layer imports into the
+foundations. Attribution is recorded in [CREDITS](CREDITS.md#special-function-proof-round-2026-11-06).
+
+### Polylogarithm branch correction
+
+The literal statement `hasSum_polylog_log` (25.12.12) uses `Complex.log (1/z)` in its
+singular term. At `z=-1`, this principal logarithm is `πi`, whereas `-Complex.log z`
+is `-πi`. At order `s=0` the inverse singular terms differ, and uniqueness of the
+convergent series gives a contradiction. All original hypotheses hold at this point.
+The [independent Lean check](scripts/CheckPolylogLogarithm.lean) proves the negation
+of that instance with standard axioms only.
+
+`PolylogLogarithmic.hasSum_regularized` proves the corrected formula with `-log z`
+on the entire existing domain, by specializing the proved Lerch expansion at `a=1`.
+The repair replaces only `Complex.log (1/z)` by `-Complex.log z` in the original
+tagged statement and adjusts its documentation. It was left pending approval at the
+end of the proof round and is not counted among that round's eleven removals. The
+subsequent [approved correction](#approved-polylogarithm-logarithm-correction-2026-11-06)
+applies it and proves the original tagged theorem.
+
+### Next priorities
+
+1. Specialize Bailey's six-psi-six sum to the remaining four-psi-four identity while
+   retaining removable central-parameter exceptions; derive its analytic continuation.
+2. Use the uniform elliptic remainder estimates for the remaining coupled endpoint
+   limits and degenerate specializations.
+3. Prove the repaired Lerch transformation (25.14.7); its positive-integer exclusion
+   is already approved. The large-argument formula (25.14.9) needs additional inversion
+   and parameter-derivative continuation infrastructure.
+4. Treat the large Mathieu and spheroidal admission blocks as dedicated projects.
+   Their numerous admissions share substantial spectral and asymptotic prerequisites.
+
+### Validation
+
+The full build passes with 15,686 jobs. All 38 changed/new modules and entry points
+pass strict checks with `autoImplicit=false` and `relaxedAutoImplicit=false`, with
+source hashes matching the final files. All eleven completed original theorems have
+only `propext`, `Classical.choice` and `Quot.sound` as axioms. The counterexample script
+also passes strict compilation and an independent standard-only axiom audit. The
+complete compiled dependency audit covers 71,868 project declarations, with no
+additional nonstandard axioms and no admitted dependencies in the foundational layer.
+
+The fresh DLMF dump contains 10,818 entries: **9,535 proved**, **1,283 admitted**,
+and zero with nonstandard axioms. All 1,031 upstream pointers remain. Ten existing
+entries become proved; no tag is added, removed or changed. The untagged analytic
+continuation of Bailey's summation accounts for the eleventh direct admission removal.
+The Chapter 17, 19 and 25 acquisition ledgers are refreshed from this dump; stale
+statuses of earlier Chapter 17 proofs are reconciled without counting them as new
+completions.
+
+Independent checks compare 23,424 baseline public declarations, every existing public
+and private definition body, and all 8,804 source-attached DLMF attributes: zero missing
+names, changed headers, changed definitions, changed tags, new admissions or new axioms.
+Seven declaration moves preserve their statements and names. Independent mathematical
+reviews of the Lerch and elliptic endpoint packages find no branch, normalization or
+domain defects; their recorded source hashes match the final files.
+
+The import survey reports one new allowed two-way area pair, **IncompleteGamma ↔ Zeta**:
+the integer Lerch base uses the canonical incomplete-Gamma special-value theorems.
+The reverse area import already existed. The file graph remains acyclic, and there are
+no foundational import, `DLMF.Basic` closure, missing-module or file-cycle violations.
+The baseline records the new pair, bringing its total to 23. No dependency pins,
+build settings or toolchain files change. All 1,539 project Lean files meet the
+1,500-line limit; changed Lean lines meet the 100-character limit, and
+`git diff --check` passes. No changes were committed by the agents.
+
+## Approved polylogarithm logarithm correction (2026-11-06)
+
+The user approved the branch correction for DLMF 25.12.12.
+`DLMF.Zeta.hasSum_polylog_log` now uses `(-Complex.log z) ^ (s - 1)` in its singular
+term, preserving its full domain, every hypothesis and the `@[dlmf 25.12.E12]` tag.
+Its proof applies `PolylogLogarithmic.hasSum_regularized`, the proved parameter-one
+specialization of Lerch's logarithmic expansion. The theorem is fully proved, reducing
+**984 to 983 direct admissions**. No definition body changes. The earlier proof round's
+eleven removals remain recorded separately in its [manifest](ProofRound20261106.json),
+which also records this subsequent approved repair.
+
+The [counterexample](scripts/CheckPolylogLogarithm.lean) remains as evidence against
+the original inverse-logarithm formulation at `s=0`, `z=-1`. The repaired formula retains
+the negative real axis rather than restricting its domain.
+
+Validation: the full ordinary build passes with 15,686 jobs. Strict checks of the
+changed module and `DLMF.lean` pass with both implicit-variable options disabled.
+The compiled original theorem uses only `propext`, `Classical.choice` and `Quot.sound`.
+A comment-stripped source comparison confirms that only the approved expression,
+proof wrapper and its import change; all previous proof-round source hashes remain
+unchanged. The fresh index has 10,818 entries: **9,536 proved**, **1,282 admitted**,
+zero with nonstandard axioms and all 1,031 upstream pointers retained. Only 25.12.12
+changes status. The Chapter 25 acquisition ledger is refreshed. Import, line/file
+length and whitespace checks pass, with no additional area pairs or file cycles.
+No changes were committed.

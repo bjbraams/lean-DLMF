@@ -295,6 +295,11 @@ DLMF/Polylog/Dilog.lean already existed.
   Euler–Maclaurin forms 25.11.5, 25.11.6, 25.11.19, 25.11.20 and the sawtooth integral 25.11.26
   were checked by exact cell-by-cell integration to 1e-10–1e-17.
 
+- In 25.12.12 the singular term is `Γ(1-s)(-ln z)^{s-1}` with principal logarithms.
+  The printed `ln(1/z)` differs on the negative real axis; at `z=-1`, `s=0` the
+  literal inverse-logarithm statement is false. The approved branch correction preserves
+  the full domain and is proved by specialization of 25.14.3_1 at `a=1`.
+
 ## Numbered formulas and prose items (part B)
 
 ## [§25.11 Hurwitz Zeta Function](https://dlmf.nist.gov/25.11)
@@ -348,22 +353,22 @@ DLMF/Polylog/Dilog.lean already existed.
 
 ## [§25.12 Polylogarithms](https://dlmf.nist.gov/25.12)
 
-- [25.12.E1](https://dlmf.nist.gov/25.12.E1): [`DLMF.Zeta.hasSum_dilog`](DLMF/Zeta/Polylog/Properties.lean#L143) (proved). Proved from admissions, |z| ≤ 1.
-- [25.12.E2](https://dlmf.nist.gov/25.12.E2): [`DLMF.Zeta.polylog_two_eq_integral`](DLMF/Zeta/Polylog/Properties.lean#L153) (proved); [`DLMF.Polylog.Real.dilog`](DLMF/Polylog/Basic/Dilog.lean#L74) (definition); [`DLMF.Polylog.polylogSeries_two_ofReal_eq_dilog`](DLMF/Polylog/Basic/Dilog.lean#L195) (proved). z ∈ ℂ \ (1, ∞); real x ≤ 1 integral form Real.dilog (tagged in place).
-- [25.12.E3](https://dlmf.nist.gov/25.12.E3): [`DLMF.Zeta.polylog_two_add_polylog_two_div_sub_one`](DLMF/Zeta/Polylog/Properties.lean#L210) (proved); [`DLMF.Polylog.Real.dilog_add_dilog_div_sub_one`](DLMF/Polylog/Dilog.lean#L121) (proved). z ∈ ℂ \ [1, ∞); real x < 1 proved (tagged in place).
-- [25.12.E4](https://dlmf.nist.gov/25.12.E4): [`DLMF.Zeta.polylog_two_add_polylog_two_inv`](DLMF/Zeta/Polylog/Properties.lean#L263) (proved); [`DLMF.Polylog.Real.dilog_add_dilog_recip`](DLMF/Polylog/Dilog.lean#L159) (proved). z ∈ ℂ \ [0, ∞); real x < 0 proved (tagged in place).
-- [25.12.E5](https://dlmf.nist.gov/25.12.E5): [`DLMF.Zeta.polylog_two_pow`](DLMF/Zeta/Polylog/Properties.lean#L321) (proved). m ≥ 1, |z| < 1.
-- [25.12.E6](https://dlmf.nist.gov/25.12.E6): [`DLMF.Zeta.polylog_two_add_polylog_two_one_sub`](DLMF/Zeta/Polylog/Properties.lean#L402) (proved); [`DLMF.Polylog.Real.dilog_add_dilog_one_sub`](DLMF/Polylog/Dilog.lean#L64) (proved). Complex z ∉ (-∞, 0] ∪ [1, ∞) admitted (stronger than the real case; checked numerically); real 0 < x < 1 proved (existing).
-- [25.12.E7](https://dlmf.nist.gov/25.12.E7): [`DLMF.Zeta.polylog_two_exp_mul_I`](DLMF/Zeta/Polylog/Properties.lean#L454) (proved). All real θ; proved from admissions.
-- [25.12.E8](https://dlmf.nist.gov/25.12.E8): [`DLMF.Zeta.hasSum_cos_div_sq`](DLMF/Zeta/Polylog/Properties.lean#L478) (proved). 0 ≤ θ ≤ 2π; fully proved from Mathlib's Bernoulli Fourier series.
-- [25.12.E9](https://dlmf.nist.gov/25.12.E9): [`DLMF.Zeta.hasSum_sin_div_sq`](DLMF/Zeta/Polylog/Properties.lean#L544) (proved). 0 ≤ θ ≤ 2π.
+- [25.12.E1](https://dlmf.nist.gov/25.12.E1): [`DLMF.Zeta.hasSum_dilog`](DLMF/Zeta/Polylog/Properties.lean#L144) (proved). Proved from admissions, |z| ≤ 1.
+- [25.12.E2](https://dlmf.nist.gov/25.12.E2): [`DLMF.Zeta.polylog_two_eq_integral`](DLMF/Zeta/Polylog/Properties.lean#L154) (proved); [`DLMF.Polylog.Real.dilog`](DLMF/Polylog/Basic/Dilog.lean#L74) (definition); [`DLMF.Polylog.polylogSeries_two_ofReal_eq_dilog`](DLMF/Polylog/Basic/Dilog.lean#L195) (proved). z ∈ ℂ \ (1, ∞); real x ≤ 1 integral form Real.dilog (tagged in place).
+- [25.12.E3](https://dlmf.nist.gov/25.12.E3): [`DLMF.Zeta.polylog_two_add_polylog_two_div_sub_one`](DLMF/Zeta/Polylog/Properties.lean#L211) (proved); [`DLMF.Polylog.Real.dilog_add_dilog_div_sub_one`](DLMF/Polylog/Dilog.lean#L121) (proved). z ∈ ℂ \ [1, ∞); real x < 1 proved (tagged in place).
+- [25.12.E4](https://dlmf.nist.gov/25.12.E4): [`DLMF.Zeta.polylog_two_add_polylog_two_inv`](DLMF/Zeta/Polylog/Properties.lean#L264) (proved); [`DLMF.Polylog.Real.dilog_add_dilog_recip`](DLMF/Polylog/Dilog.lean#L159) (proved). z ∈ ℂ \ [0, ∞); real x < 0 proved (tagged in place).
+- [25.12.E5](https://dlmf.nist.gov/25.12.E5): [`DLMF.Zeta.polylog_two_pow`](DLMF/Zeta/Polylog/Properties.lean#L322) (proved). m ≥ 1, |z| < 1.
+- [25.12.E6](https://dlmf.nist.gov/25.12.E6): [`DLMF.Zeta.polylog_two_add_polylog_two_one_sub`](DLMF/Zeta/Polylog/Properties.lean#L403) (proved); [`DLMF.Polylog.Real.dilog_add_dilog_one_sub`](DLMF/Polylog/Dilog.lean#L64) (proved). Complex z ∉ (-∞, 0] ∪ [1, ∞) admitted (stronger than the real case; checked numerically); real 0 < x < 1 proved (existing).
+- [25.12.E7](https://dlmf.nist.gov/25.12.E7): [`DLMF.Zeta.polylog_two_exp_mul_I`](DLMF/Zeta/Polylog/Properties.lean#L455) (proved). All real θ; proved from admissions.
+- [25.12.E8](https://dlmf.nist.gov/25.12.E8): [`DLMF.Zeta.hasSum_cos_div_sq`](DLMF/Zeta/Polylog/Properties.lean#L479) (proved). 0 ≤ θ ≤ 2π; fully proved from Mathlib's Bernoulli Fourier series.
+- [25.12.E9](https://dlmf.nist.gov/25.12.E9): [`DLMF.Zeta.hasSum_sin_div_sq`](DLMF/Zeta/Polylog/Properties.lean#L545) (proved). 0 ≤ θ ≤ 2π.
 - [25.12.E10](https://dlmf.nist.gov/25.12.E10): [`DLMF.Zeta.polylogSeries`](DLMF/Zeta/Basic/Polylog.lean#L70) (definition); [`DLMF.Zeta.hasSum_polylog`](DLMF/Zeta/Basic/PolylogProperties.lean#L117) (proved); [`DLMF.Zeta.hasSum_polylog_of_norm_eq_one`](DLMF/Zeta/Basic/PolylogProperties.lean#L214) (proved); [`DLMF.Polylog.polylogSeries`](DLMF/Zeta/Basic/Polylog.lean#L70) (definition). polylogSeries s z = ∑ z^n/n^s (complex order); HasSum for |z| < 1 (proved from admissions) and |z| = 1, Re s > 1 (admitted); natural order in DLMF.Polylog.
-- [25.12.E11](https://dlmf.nist.gov/25.12.E11): [`DLMF.Zeta.polylog_eq_integral`](DLMF/Zeta/Polylog/Properties.lean#L584) (proved). Re s > 0 for z ∈ ℂ \ [1, ∞), Re s > 1 for z = 1.
-- [25.12.E12](https://dlmf.nist.gov/25.12.E12): [`DLMF.Zeta.hasSum_polylog_log`](DLMF/Zeta/Polylog/Properties.lean#L605) (admitted). Series in ln z, |ln z| < 2π, s ∉ {1, 2, …}; z ∈ ℂ \ [1, ∞), z ≠ 0 (the principal branch is undefined on the cut).
+- [25.12.E11](https://dlmf.nist.gov/25.12.E11): [`DLMF.Zeta.polylog_eq_integral`](DLMF/Zeta/Polylog/Properties.lean#L585) (proved). Re s > 0 for z ∈ ℂ \ [1, ∞), Re s > 1 for z = 1.
+- [25.12.E12](https://dlmf.nist.gov/25.12.E12): [`DLMF.Zeta.hasSum_polylog_log`](DLMF/Zeta/Polylog/Properties.lean#L606) (proved). Series in ln z, |ln z| < 2π, s ∉ {1, 2, …}; z ∈ ℂ \ [1, ∞), z ≠ 0 (the principal branch is undefined on the cut).
 - [25.12.E13](https://dlmf.nist.gov/25.12.E13): [`DLMF.Zeta.polylog_add_exp_mul_polylog_inv`](DLMF/Zeta/Polylog/Inversion.lean#L286) (proved). **Branch corrected**: with principal ln z the printed formula fails for Im z < 0; stated with 0 < ph z < 2π, i.e. 1/2 + ln(-z)/(2πi); s ≠ 0.
 - [25.12.E14](https://dlmf.nist.gov/25.12.E14): [`DLMF.Zeta.fermiDiracF`](DLMF/Zeta/Basic/Polylog.lean#L120) (definition). Fermi–Dirac integral F_s(x), real s > -1.
 - [25.12.E15](https://dlmf.nist.gov/25.12.E15): [`DLMF.Zeta.boseEinsteinG`](DLMF/Zeta/Basic/Polylog.lean#L126) (definition). Bose–Einstein integral G_s(x), s > -1, x < 0 or s > 0, x ≤ 0.
-- [25.12.E16](https://dlmf.nist.gov/25.12.E16): [`DLMF.Zeta.fermiDiracF_eq_polylog`](DLMF/Zeta/Polylog/Properties.lean#L618) (proved); [`DLMF.Zeta.boseEinsteinG_eq_polylog`](DLMF/Zeta/Polylog/Properties.lean#L643) (proved). Two statements (F_s and G_s).
+- [25.12.E16](https://dlmf.nist.gov/25.12.E16): [`DLMF.Zeta.fermiDiracF_eq_polylog`](DLMF/Zeta/Polylog/Properties.lean#L620) (proved); [`DLMF.Zeta.boseEinsteinG_eq_polylog`](DLMF/Zeta/Polylog/Properties.lean#L645) (proved). Two statements (F_s and G_s).
 - [25.12.ii](https://dlmf.nist.gov/25.12.ii): [`DLMF.Zeta.polylog`](DLMF/Zeta/Basic/Polylog.lean#L77) (definition); [`DLMF.Zeta.summable_polylogSeries_of_norm_le_one`](DLMF/Zeta/Basic/PolylogProperties.lean#L48) (proved); [`DLMF.Zeta.exists_polylog_continuation`](DLMF/Zeta/Basic/PolylogProperties.lean#L67) (proved); [`DLMF.Zeta.analyticOnNhd_polylog`](DLMF/Zeta/Basic/PolylogProperties.lean#L126) (proved); [`DLMF.Zeta.polylog_one`](DLMF/Zeta/Basic/PolylogProperties.lean#L229) (proved); [`DLMF.Polylog.polylogSeries_one_eq_zeta`](DLMF/Polylog/Basic/Series.lean#L97) (proved). polylog s z: the analytic continuation of the series to ℂ \ [1, ∞), chosen classically (z25b_slitContinuation); its existence admitted. Convergence on |z| ≤ 1 for Re s > 1 and Li_s(1) = ζ(s) (Re s > 1) proved.
 
 ## [§25.13 Periodic Zeta Function](https://dlmf.nist.gov/25.13)
@@ -375,19 +380,19 @@ DLMF/Polylog/Dilog.lean already existed.
 
 ## [§25.14 Lerch's Transcendent](https://dlmf.nist.gov/25.14)
 
-- [25.14.E1](https://dlmf.nist.gov/25.14.E1): [`DLMF.Zeta.lerchPhiSeries`](DLMF/Zeta/Basic/Polylog.lean#L108) (definition); [`DLMF.Zeta.hasSum_lerchPhi`](DLMF/Zeta/Basic/LerchProperties.lean#L97) (proved); [`DLMF.Zeta.hasSum_lerchPhi_of_norm_eq_one`](DLMF/Zeta/Basic/LerchProperties.lean#L121) (proved). lerchPhiSeries; HasSum for |z| < 1 (proved from admissions), |z| = 1 with Re s > 1 (admitted); [`DLMF.Zeta.hasSum_lerchPhi_of_norm_eq_one'`](DLMF/Zeta/Basic/LerchProperties.lean#L105) (proved).
-- [25.14.E2](https://dlmf.nist.gov/25.14.E2): [`DLMF.Zeta.hurwitzZetaComplex_eq_lerchPhi`](DLMF/Zeta/Lerch.lean#L76) (proved). Proved from admissions.
-- [25.14.E3](https://dlmf.nist.gov/25.14.E3): [`DLMF.Zeta.polylog_eq_mul_lerchPhi`](DLMF/Zeta/Lerch.lean#L86) (proved). Proved from admissions.
-- [25.14.E3_1](https://dlmf.nist.gov/25.14.E3_1): [`DLMF.Zeta.hasSum_lerchPhi_log`](DLMF/Zeta/Lerch.lean#L107) (admitted). z ∈ ℂ \ [1, ∞), z ≠ 0, |ln z| < 2π, s ∉ {1, 2, …}.
-- [25.14.E3_2](https://dlmf.nist.gov/25.14.E3_2): [`DLMF.Zeta.hasSum_lerchPhi_log_nat`](DLMF/Zeta/Lerch.lean#L119) (admitted). m ≥ 2; the excluded term n = m - 1 written with an if.
-- [25.14.E3_3](https://dlmf.nist.gov/25.14.E3_3): [`DLMF.Zeta.mul_lerchPhi_one_eq_hypergeometric`](DLMF/Zeta/Lerch.lean#L131) (proved). |z| < 1, a ∉ {0, -1, …}; F = ordinaryHypergeometric.
-- [25.14.E4](https://dlmf.nist.gov/25.14.E4): [`DLMF.Zeta.lerchPhi_eq_add_nat`](DLMF/Zeta/Lerch.lean#L166) (proved). All m ≥ 0; proved from admissions.
-- [25.14.E5](https://dlmf.nist.gov/25.14.E5): [`DLMF.Zeta.lerchPhi_eq_integral`](DLMF/Zeta/Lerch.lean#L184) (proved). Re a > 0 with Re s > 1 at z = 1, Re s > 0 for z ∈ ℂ \ [1, ∞).
-- [25.14.E6](https://dlmf.nist.gov/25.14.E6): [`DLMF.Zeta.tendsto_lerchPhi_hermite`](DLMF/Zeta/Lerch.lean#L201) (proved). Re a > 0 with 0 < |z| < 1, or |z| = 1 and Re s > 1; the improper ∫_0^∞ z^x/(a+x)^s dx as a limit of ∫_0^X.
-- [25.14.E7](https://dlmf.nist.gov/25.14.E7): [`DLMF.Zeta.lerchPhi_transformation`](DLMF/Zeta/Lerch.lean#L214) (admitted). DLMF states no conditions; stated for 0 < Re a < 1, 0 < |z| < 1 and s outside the positive integers (verified numerically; it fails e.g. for a = 1.6 + 0.2i, a = 1, |z| = 1 and mixed cases with |z| > 1). The pointwise formula would be false at positive integer orders under totalized Gamma: [a proved check](scripts/CheckLerchTransformation.lean) gives `Re Φ(1/2,1,1/2) ≥ 2`, while its right-hand side is zero. The approved positive-integer exclusion is applied as `∀ n : ℕ, s ≠ (n : ℂ) + 1`; the corrected theorem remains admitted.
-- [25.14.E8](https://dlmf.nist.gov/25.14.E8): [`DLMF.Zeta.lerchPhi_neg_eq_mellinBarnes`](DLMF/Zeta/Lerch.lean#L228) (proved). |ph z| < π, Re a > 0, max(-Re a, -1) < σ < 0; the vertical line integral as ∫ over ℝ.
-- [25.14.E9](https://dlmf.nist.gov/25.14.E9): [`DLMF.Zeta.hasSum_lerchPhi_neg_large`](DLMF/Zeta/Lerch.lean#L241) (admitted). |z| > 1 (exact in that range; checked numerically).
-- [25.14.i](https://dlmf.nist.gov/25.14.i): [`DLMF.Zeta.lerchPhi`](DLMF/Zeta/Basic/Polylog.lean#L113) (definition); [`DLMF.Zeta.exists_lerchPhi_continuation`](DLMF/Zeta/Basic/LerchProperties.lean#L50) (proved); [`DLMF.Zeta.analyticOnNhd_lerchPhi`](DLMF/Zeta/Basic/LerchProperties.lean#L129) (proved). lerchPhi z s a: the continuation of the series to z ∈ ℂ \ [1, ∞) (classical choice, existence admitted); conditions a ∉ {0, -1, …} (Z25bLerchParamOK); [`DLMF.Zeta.exists_lerchPhi_continuation'`](DLMF/Zeta/Basic/LerchProperties.lean#L41) (proved).
+- [25.14.E1](https://dlmf.nist.gov/25.14.E1): [`DLMF.Zeta.lerchPhiSeries`](DLMF/Zeta/Basic/Polylog.lean#L108) (definition); [`DLMF.Zeta.hasSum_lerchPhi`](DLMF/Zeta/Basic/LerchProperties.lean#L98) (proved); [`DLMF.Zeta.hasSum_lerchPhi_of_norm_eq_one`](DLMF/Zeta/Basic/LerchProperties.lean#L122) (proved). lerchPhiSeries; HasSum for |z| < 1 (proved from admissions), |z| = 1 with Re s > 1 (admitted); [`DLMF.Zeta.hasSum_lerchPhi_of_norm_eq_one'`](DLMF/Zeta/Basic/LerchProperties.lean#L106) (proved).
+- [25.14.E2](https://dlmf.nist.gov/25.14.E2): [`DLMF.Zeta.hurwitzZetaComplex_eq_lerchPhi`](DLMF/Zeta/Lerch.lean#L79) (proved). Proved from admissions.
+- [25.14.E3](https://dlmf.nist.gov/25.14.E3): [`DLMF.Zeta.polylog_eq_mul_lerchPhi`](DLMF/Zeta/Lerch.lean#L89) (proved). Proved from admissions.
+- [25.14.E3_1](https://dlmf.nist.gov/25.14.E3_1): [`DLMF.Zeta.hasSum_lerchPhi_log`](DLMF/Zeta/Lerch.lean#L110) (proved). z ∈ ℂ \ [1, ∞), z ≠ 0, |ln z| < 2π, s ∉ {1, 2, …}.
+- [25.14.E3_2](https://dlmf.nist.gov/25.14.E3_2): [`DLMF.Zeta.hasSum_lerchPhi_log_nat`](DLMF/Zeta/Lerch.lean#L122) (proved). m ≥ 2; the excluded term n = m - 1 written with an if.
+- [25.14.E3_3](https://dlmf.nist.gov/25.14.E3_3): [`DLMF.Zeta.mul_lerchPhi_one_eq_hypergeometric`](DLMF/Zeta/Lerch.lean#L135) (proved). |z| < 1, a ∉ {0, -1, …}; F = ordinaryHypergeometric.
+- [25.14.E4](https://dlmf.nist.gov/25.14.E4): [`DLMF.Zeta.lerchPhi_eq_add_nat`](DLMF/Zeta/Basic/LerchProperties.lean#L195) (proved). All m ≥ 0; proved from admissions.
+- [25.14.E5](https://dlmf.nist.gov/25.14.E5): [`DLMF.Zeta.lerchPhi_eq_integral`](DLMF/Zeta/Lerch.lean#L170) (proved). Re a > 0 with Re s > 1 at z = 1, Re s > 0 for z ∈ ℂ \ [1, ∞).
+- [25.14.E6](https://dlmf.nist.gov/25.14.E6): [`DLMF.Zeta.tendsto_lerchPhi_hermite`](DLMF/Zeta/Lerch.lean#L187) (proved). Re a > 0 with 0 < |z| < 1, or |z| = 1 and Re s > 1; the improper ∫_0^∞ z^x/(a+x)^s dx as a limit of ∫_0^X.
+- [25.14.E7](https://dlmf.nist.gov/25.14.E7): [`DLMF.Zeta.lerchPhi_transformation`](DLMF/Zeta/Lerch.lean#L200) (admitted). DLMF states no conditions; stated for 0 < Re a < 1, 0 < |z| < 1 and s outside the positive integers (verified numerically; it fails e.g. for a = 1.6 + 0.2i, a = 1, |z| = 1 and mixed cases with |z| > 1). The pointwise formula would be false at positive integer orders under totalized Gamma: [a proved check](scripts/CheckLerchTransformation.lean) gives `Re Φ(1/2,1,1/2) ≥ 2`, while its right-hand side is zero. The approved positive-integer exclusion is applied as `∀ n : ℕ, s ≠ (n : ℂ) + 1`; the corrected theorem remains admitted.
+- [25.14.E8](https://dlmf.nist.gov/25.14.E8): [`DLMF.Zeta.lerchPhi_neg_eq_mellinBarnes`](DLMF/Zeta/Lerch.lean#L214) (proved). |ph z| < π, Re a > 0, max(-Re a, -1) < σ < 0; the vertical line integral as ∫ over ℝ.
+- [25.14.E9](https://dlmf.nist.gov/25.14.E9): [`DLMF.Zeta.hasSum_lerchPhi_neg_large`](DLMF/Zeta/Lerch.lean#L227) (admitted). |z| > 1 (exact in that range; checked numerically).
+- [25.14.i](https://dlmf.nist.gov/25.14.i): [`DLMF.Zeta.lerchPhi`](DLMF/Zeta/Basic/Polylog.lean#L113) (definition); [`DLMF.Zeta.exists_lerchPhi_continuation`](DLMF/Zeta/Basic/LerchProperties.lean#L51) (proved); [`DLMF.Zeta.analyticOnNhd_lerchPhi`](DLMF/Zeta/Basic/LerchProperties.lean#L130) (proved). lerchPhi z s a: the continuation of the series to z ∈ ℂ \ [1, ∞) (classical choice, existence admitted); conditions a ∉ {0, -1, …} (Z25bLerchParamOK); [`DLMF.Zeta.exists_lerchPhi_continuation'`](DLMF/Zeta/Basic/LerchProperties.lean#L42) (proved).
 
 ## [§25.15 Dirichlet L-functions](https://dlmf.nist.gov/25.15)
 

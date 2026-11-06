@@ -1,0 +1,313 @@
+{
+  "date": "2026-11-06",
+  "base_commit": "4a5735564cebeceea6e0ea7093d5aadcb62f4f59",
+  "baseline": "Commit 4a5735564cebeceea6e0ea7093d5aadcb62f4f59, containing the preceding proof round and approved Lerch order exclusion.",
+  "started_utc": "2026-11-06T07:20:57.912776+00:00",
+  "audited_utc": "2026-11-06T09:13:55.892593+00:00",
+  "direct_admissions_before": 995,
+  "direct_admissions_after": 984,
+  "completed_admissions": [
+    {
+      "name": "DLMF.EllipticIntegrals.symmetricEllipticRG_asymp_large_z",
+      "file": "DLMF/EllipticIntegrals/SymmetricSecondKindAsymptotics.lean",
+      "line": 250,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symmetricEllipticRD_asymp_large_z",
+      "file": "DLMF/EllipticIntegrals/SymmetricThirdKindAsymptotics.lean",
+      "line": 497,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symmetricEllipticRD_asymp_large_x",
+      "file": "DLMF/EllipticIntegrals/SymmetricLargeNodeAsymptotics.lean",
+      "line": 319,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symmetricEllipticRJ_asymp_small_xy",
+      "file": "DLMF/EllipticIntegrals/SymmetricThirdKindAsymptotics.lean",
+      "line": 444,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symmetricEllipticRJ_asymp_large_x",
+      "file": "DLMF/EllipticIntegrals/SymmetricLargeNodeAsymptotics.lean",
+      "line": 375,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symmetricEllipticRJ_zero_asymptotic",
+      "file": "DLMF/EllipticIntegrals/SymmetricThirdKindAsymptotics.lean",
+      "line": 479,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.Zeta.hasSum_lerchPhi_log",
+      "file": "DLMF/Zeta/Lerch.lean",
+      "line": 114,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.Zeta.hasSum_lerchPhi_log_nat",
+      "file": "DLMF/Zeta/Lerch.lean",
+      "line": 125,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.QHypergeometric.qPsi2_transformation_one",
+      "file": "DLMF/QHypergeometric/BilateralTransformations.lean",
+      "line": 45,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.QHypergeometric.bilateral_six_sum",
+      "file": "DLMF/QHypergeometric/BilateralSummations.lean",
+      "line": 488,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.QHypergeometric.bilateral_six_continues",
+      "file": "DLMF/QHypergeometric/BilateralSummations.lean",
+      "line": 733,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  ],
+  "compiled_declarations_after": 71868,
+  "baseline_public_declarations_compared": 23424,
+  "unchanged_public_declaration_moves": 7,
+  "source_ranged_admission_dependent_theorems_after": 1010,
+  "existing_tagged_theorems_freed_from_admitted_dependencies": [],
+  "dlmf_entries_before": 10818,
+  "dlmf_entries_after": 10818,
+  "dlmf_statuses_before": {
+    "proved": 9525,
+    "admitted": 1293,
+    "nonstandard": 0
+  },
+  "dlmf_statuses_after": {
+    "proved": 9535,
+    "admitted": 1283,
+    "nonstandard": 0
+  },
+  "dlmf_entries_newly_proved": 10,
+  "dlmf_entries_newly_proved_declarations": [
+    {
+      "dlmf": "19.27.E9",
+      "declaration": "DLMF.EllipticIntegrals.symmetricEllipticRD_asymp_large_x"
+    },
+    {
+      "dlmf": "19.27.E7",
+      "declaration": "DLMF.EllipticIntegrals.symmetricEllipticRD_asymp_large_z"
+    },
+    {
+      "dlmf": "19.27.E4",
+      "declaration": "DLMF.EllipticIntegrals.symmetricEllipticRG_asymp_large_z"
+    },
+    {
+      "dlmf": "19.27.E16",
+      "declaration": "DLMF.EllipticIntegrals.symmetricEllipticRJ_asymp_large_x"
+    },
+    {
+      "dlmf": "19.27.E13",
+      "declaration": "DLMF.EllipticIntegrals.symmetricEllipticRJ_asymp_small_xy"
+    },
+    {
+      "dlmf": "19.20.E11",
+      "declaration": "DLMF.EllipticIntegrals.symmetricEllipticRJ_zero_asymptotic"
+    },
+    {
+      "dlmf": "17.8.E7",
+      "declaration": "DLMF.QHypergeometric.bilateral_six_sum"
+    },
+    {
+      "dlmf": "17.10.E1",
+      "declaration": "DLMF.QHypergeometric.qPsi2_transformation_one"
+    },
+    {
+      "dlmf": "25.14.E3_1",
+      "declaration": "DLMF.Zeta.hasSum_lerchPhi_log"
+    },
+    {
+      "dlmf": "25.14.E3_2",
+      "declaration": "DLMF.Zeta.hasSum_lerchPhi_log_nat"
+    }
+  ],
+  "dlmf_entries_added": [],
+  "public_statement_changes": [],
+  "existing_definition_changes": [],
+  "new_admissions": [],
+  "nonstandard_axiom_dependencies": [],
+  "new_two_way_area_pairs": [
+    "IncompleteGamma <-> Zeta"
+  ],
+  "changed_lean_files": [
+    "DLMF/EllipticIntegrals.lean",
+    "DLMF/EllipticIntegrals/SymmetricAsymptotics.lean",
+    "DLMF/EllipticIntegrals/SymmetricLargeNodeAsymptotics.lean",
+    "DLMF/EllipticIntegrals/SymmetricSecondKindAsymptotics.lean",
+    "DLMF/EllipticIntegrals/SymmetricSpecialCases.lean",
+    "DLMF/EllipticIntegrals/SymmetricThirdKindAsymptotics.lean",
+    "DLMF/QHypergeometric/BaileySixBridge.lean",
+    "DLMF/QHypergeometric/BaileySixKernel.lean",
+    "DLMF/QHypergeometric/BaileySixProducts.lean",
+    "DLMF/QHypergeometric/BaileySixRootFactor.lean",
+    "DLMF/QHypergeometric/BaileySixRootless.lean",
+    "DLMF/QHypergeometric/BaileySixSeries.lean",
+    "DLMF/QHypergeometric/BaileySixShift.lean",
+    "DLMF/QHypergeometric/BaileySixSummation.lean",
+    "DLMF/QHypergeometric/BilateralFirstTransformation.lean",
+    "DLMF/QHypergeometric/BilateralGaussianTransposition.lean",
+    "DLMF/QHypergeometric/BilateralSummations.lean",
+    "DLMF/QHypergeometric/BilateralTransformations.lean",
+    "DLMF/QHypergeometric/BilateralZeroLowerContinuity.lean",
+    "DLMF/QHypergeometric/SixPhiFiveCleared.lean",
+    "DLMF/Zeta/Basic/LerchProperties.lean",
+    "DLMF/Zeta/Lerch.lean",
+    "DLMF/Zeta/Lerch/LogarithmicContinuation.lean",
+    "DLMF/Zeta/Lerch/LogarithmicExpansion.lean",
+    "DLMF/Zeta/Lerch/LogarithmicIntegerBase.lean",
+    "DLMF/Zeta/Lerch/LogarithmicIntegerBoundary.lean",
+    "DLMF/Zeta/Lerch/LogarithmicIntegerExpansion.lean",
+    "DLMF/Zeta/Lerch/LogarithmicIntegerPrimitives.lean",
+    "DLMF/Zeta/Lerch/LogarithmicIntegerShift.lean",
+    "DLMF/Zeta/Lerch/LogarithmicKernel.lean",
+    "DLMF/Zeta/Polylog.lean",
+    "DLMF/Zeta/Polylog/LogarithmicExpansion.lean",
+    "DLMFMathlib.lean",
+    "DLMFMathlib/Analysis/Integral/QuadraticSquareRootSubstitution.lean",
+    "DLMFMathlib/Analysis/Integral/SquareRootPairRegularization.lean",
+    "DLMFMathlib/Analysis/SpecialFunctions/Log/Ray.lean"
+  ],
+  "new_lean_files": [
+    "DLMF/EllipticIntegrals/SymmetricLargeNodeAsymptotics.lean",
+    "DLMF/EllipticIntegrals/SymmetricSecondKindAsymptotics.lean",
+    "DLMF/EllipticIntegrals/SymmetricThirdKindAsymptotics.lean",
+    "DLMF/QHypergeometric/BaileySixBridge.lean",
+    "DLMF/QHypergeometric/BaileySixKernel.lean",
+    "DLMF/QHypergeometric/BaileySixProducts.lean",
+    "DLMF/QHypergeometric/BaileySixRootFactor.lean",
+    "DLMF/QHypergeometric/BaileySixRootless.lean",
+    "DLMF/QHypergeometric/BaileySixSeries.lean",
+    "DLMF/QHypergeometric/BaileySixShift.lean",
+    "DLMF/QHypergeometric/BaileySixSummation.lean",
+    "DLMF/QHypergeometric/BilateralFirstTransformation.lean",
+    "DLMF/QHypergeometric/BilateralGaussianTransposition.lean",
+    "DLMF/QHypergeometric/BilateralZeroLowerContinuity.lean",
+    "DLMF/QHypergeometric/SixPhiFiveCleared.lean",
+    "DLMF/Zeta/Lerch/LogarithmicContinuation.lean",
+    "DLMF/Zeta/Lerch/LogarithmicExpansion.lean",
+    "DLMF/Zeta/Lerch/LogarithmicIntegerBase.lean",
+    "DLMF/Zeta/Lerch/LogarithmicIntegerBoundary.lean",
+    "DLMF/Zeta/Lerch/LogarithmicIntegerExpansion.lean",
+    "DLMF/Zeta/Lerch/LogarithmicIntegerPrimitives.lean",
+    "DLMF/Zeta/Lerch/LogarithmicIntegerShift.lean",
+    "DLMF/Zeta/Lerch/LogarithmicKernel.lean",
+    "DLMF/Zeta/Polylog/LogarithmicExpansion.lean",
+    "DLMFMathlib/Analysis/Integral/QuadraticSquareRootSubstitution.lean",
+    "DLMFMathlib/Analysis/Integral/SquareRootPairRegularization.lean"
+  ],
+  "deferred_statement_issues": [
+    {
+      "declaration": "DLMF.Zeta.hasSum_polylog_log",
+      "dlmf": "25.12.E12",
+      "issue": "At s=0 and z=-1, principal log(1/z)=pi*i differs from -log(z)=-pi*i; the claimed singular term gives a false HasSum.",
+      "proposed_repair": "Replace Complex.log (1 / z) by -Complex.log z, retaining all existing hypotheses.",
+      "approval": "Approved by the user and applied on 2026-11-06; the corrected tagged theorem is proved.",
+      "proved_corrected_formula": "DLMF.Zeta.PolylogLogarithmic.hasSum_regularized",
+      "evidence": "scripts/CheckPolylogLogarithm.lean",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "status": "resolved"
+    }
+  ],
+  "validation": {
+    "ordinary_build": "lake build > /tmp/DLMF-build.log 2>&1",
+    "strict_source_checks": "All 38 changed/new and entry modules passed autoImplicit=false and relaxedAutoImplicit=false.",
+    "axiom_audit": "Every completed original theorem uses only propext, Classical.choice and Quot.sound; the full project axiom graph has no additional nonstandard axioms.",
+    "preservation": "Independent existing public-header and public/private definition-body comparison found no changes or missing declarations.",
+    "independent_reviews": "The Lerch/polylogarithm and elliptic endpoint packages were independently reviewed for branches, normalization, exceptional parameters and foundational imports; no defects were found.",
+    "counterexample": "scripts/CheckPolylogLogarithm.lean passes strict checks and a standard-only compiled axiom audit.",
+    "import_survey": "One new allowed two-way area pair, IncompleteGamma <-> Zeta, recorded in the baseline (23 total). No foundational violations, closure violations, missing modules or file-import cycles.",
+    "formatting": "Changed Lean lines are at most 100 characters; all project Lean files are at most 1500 lines; git diff --check passed."
+  },
+  "subsequent_approved_repairs": [
+    {
+      "date": "2026-11-06",
+      "audited_utc": "2026-11-06T09:52:03.130362+00:00",
+      "declaration": "DLMF.Zeta.hasSum_polylog_log",
+      "dlmf": "25.12.E12",
+      "statement_change": "Replace Complex.log (1 / z) by -Complex.log z in the singular term; all hypotheses and the DLMF tag are unchanged.",
+      "proof": "PolylogLogarithmic.hasSum_regularized hs hz hz0 hlog",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "direct_admissions_before": 984,
+      "direct_admissions_after": 983,
+      "dlmf_statuses_after": {
+        "proved": 9536,
+        "admitted": 1282,
+        "nonstandard": 0
+      },
+      "source_sha256": "ad37ecb194c7a83c94ee84bb6266530397cb0c4b69bb0146f8eb594586afa0ad",
+      "validation": {
+        "build": "lake build > /tmp/DLMF-build.log 2>&1 passed (15686 jobs).",
+        "strict": "Properties.lean and DLMF.lean passed with autoImplicit=false and relaxedAutoImplicit=false.",
+        "preservation": "The approved expression, proved wrapper, its import and docstring are the only Lean changes; all previous proof-round source hashes remain unchanged. Definitions, hypotheses and tags are preserved.",
+        "index": "All 10818 entries and 1031 pointers remain; only the status of 25.12.E12 changes from admitted to proved.",
+        "imports": "No further two-way area pair, foundational violation, closure violation, missing import or file cycle.",
+        "formatting": "Lean line/file limits and git diff --check passed."
+      }
+    }
+  ]
+}

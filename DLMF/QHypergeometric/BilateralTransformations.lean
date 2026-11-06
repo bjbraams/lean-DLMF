@@ -11,6 +11,9 @@ public import DLMF.QHypergeometric.BilateralGaussianTransformation
 public import DLMF.QHypergeometric.BilateralGaussianLimit
 public import DLMF.QHypergeometric.BilateralContinuity
 public import DLMF.QHypergeometric.BilateralGaussianSymmetry
+public import DLMF.QHypergeometric.BilateralGaussianTransposition
+public import DLMF.QHypergeometric.BilateralZeroLowerContinuity
+public import DLMF.QHypergeometric.BilateralFirstTransformation
 
 /-!
 # Bilateral basic hypergeometric transformations (DLMF §17.10)
@@ -50,7 +53,7 @@ theorem qPsi2_transformation_one (a b c d q z : ℂ)
     qPsi [a,b] [c,d] q (z) =
       qProductRatioInf [a*z, d/a, c/b, d*q/(a*b*z)] [z, d, q/b, c*d/(a*b*z)] q *
           qPsi [a, a*b*z/d] [a*z, c] q (d/a) := by
-  sorry
+  exact BilateralFirstTransformation.transformation_one a b c d q z hq hq0 hpar hden hB hz hd
 
 /-- DLMF 17.10.2: qPsi2 transformation two. -/
 @[dlmf 17.10.E2]

@@ -9,6 +9,8 @@ public import DLMF.QHypergeometric.Convergence
 public import DLMF.QHypergeometric.QuintupleProduct
 public import DLMF.QHypergeometric.VeryWellPoisedSums
 public import DLMF.QHypergeometric.BaileyBilateral
+public import DLMF.QHypergeometric.BaileySixSummation
+public import DLMF.QHypergeometric.BaileySixBridge
 
 /-!
 # Bilateral basic summations and continuation (DLMF §17.8)
@@ -491,7 +493,37 @@ theorem bilateral_six_sum {a b c d e q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (ha
     qPsi [q*Complex.sqrt a,-q*Complex.sqrt a,b,c,d,e]
       [Complex.sqrt a,-Complex.sqrt a,a*q/b,a*q/c,a*q/d,a*q/e] q
       (q*a^2/(b*c*d*e))=qBilateralSixValue a b c d e q := by
-  sorry
+  have hB : b * c * d * e ≠ 0 := norm_pos_iff.mp ((norm_nonneg _).trans_lt hz)
+  have hbcd := left_ne_zero_of_mul hB
+  have hR := BaileySixSummation.rootless_regular_of_regular hreg
+  have hL : QDenominatorRegular [a * q / b, a * q / c, a * q / d] q := by
+    intro u hu j
+    apply hR.1 u _ j
+    simp only [List.mem_cons, List.mem_nil_iff, or_false] at hu ⊢
+    tauto
+  have hU : ∀ u ∈ [b, c, d], ∀ j : ℕ, u ≠ q ^ (j + 1) := by
+    intro u hu j
+    apply hR.2 u _ j
+    simp only [List.mem_cons, List.mem_nil_iff, or_false] at hu ⊢
+    tauto
+  have harg : BaileySixSummation.scale a b c d q * e⁻¹ = q * a ^ 2 / (b * c * d * e) := by
+    simp only [BaileySixSummation.scale, div_eq_mul_inv, mul_inv_rev]
+    ring
+  have hz' : ‖BaileySixSummation.scale a b c d q * e⁻¹‖ < 1 := by
+    rw [harg, norm_div, div_lt_one (norm_pos_iff.mpr hB)]
+    exact hz
+  have hT : 0 < ‖BaileySixSummation.scale a b c d q‖ :=
+    norm_pos_iff.mpr (div_ne_zero (mul_ne_zero hq0 (pow_ne_zero 2 ha)) hbcd)
+  have hx : ‖e⁻¹‖ < ‖BaileySixSummation.scale a b c d q‖⁻¹ := by
+    rw [← one_div ‖BaileySixSummation.scale a b c d q‖, lt_div_iff₀ hT]
+    simpa only [norm_mul, mul_comm] using hz'
+  have hs := BaileySixSummation.tsum_term_eq_productSide hq0 hq ha
+    (BaileySixSummation.ne_one_of_regular hreg) hbcd hL hU hx
+  rw [← BaileySixSummation.denominator_mul_qPsi_eq_tsum_term hq0 hq ha hz hreg] at hs
+  unfold qBilateralSixValue
+  rw [← BaileySixSummation.productSide_div_denominator a b c d e q]
+  apply (eq_div_iff (BaileySixSummation.denominator_ne_zero_of_regular hq0 hq ha hz hreg)).mpr
+  simpa only [mul_comm] using hs
 
 /-- The actual series identity uses the full bilateral annulus; the continuation below covers the
 larger printed region. -/
@@ -713,7 +745,94 @@ theorem bilateral_six_continues {a b c d e₀ q : ℂ} (hq0 : q≠0) (hq : ‖q�
         (fun e => qPsi [q*Complex.sqrt a, -q*Complex.sqrt a, b, c, d, e]
         [Complex.sqrt a, -Complex.sqrt a, a*q/b, a*q/c, a*q/d, a*q/e] q
         (q*a^2/(b*c*d*e))) U e₀ := by
-  sorry
+  intro U
+  have hB : b * c * d * e₀ ≠ 0 := norm_pos_iff.mp ((norm_nonneg _).trans_lt hz)
+  have hbcd := left_ne_zero_of_mul hB
+  have he₀ := right_ne_zero_of_mul hB
+  have hb := left_ne_zero_of_mul (left_ne_zero_of_mul hbcd)
+  have hc := right_ne_zero_of_mul (left_ne_zero_of_mul hbcd)
+  have hd := right_ne_zero_of_mul hbcd
+  have hP := qPochhammerInf_analytic hq
+  have hAz : ∀ {f : ℂ → ℂ} {z : ℂ}, AnalyticAt ℂ f z →
+      AnalyticAt ℂ (fun w => qPochhammerInf (f w) q) z :=
+    fun hf => (hP _ (mem_univ _)).comp hf
+  have hden : ∀ z : ℂ, z ≠ 0 → AnalyticAt ℂ
+      (fun e => qPochhammerListInf [a * q / b, a * q / c, a * q / d, a * q / e,
+        q / b, q / c, q / d, q / e, q * a ^ 2 / (b * c * d * e)] q) z := by
+    intro z hz0
+    simp only [qPochhammerListInf, List.map_cons, List.map_nil, List.prod_cons,
+      List.prod_nil, mul_one]
+    exact analyticAt_const.mul (analyticAt_const.mul (analyticAt_const.mul
+      ((hAz (analyticAt_const.div analyticAt_id hz0)).mul
+        (analyticAt_const.mul (analyticAt_const.mul (analyticAt_const.mul
+          ((hAz (analyticAt_const.div analyticAt_id hz0)).mul
+            (hAz (analyticAt_const.div (analyticAt_const.mul analyticAt_id)
+              (mul_ne_zero hbcd hz0))))))))))
+  have hnum : ∀ z : ℂ, z ≠ 0 → AnalyticAt ℂ
+      (fun e => qPochhammerListInf [a * q, a * q / (b * c), a * q / (b * d),
+        a * q / (b * e), a * q / (c * d), a * q / (c * e), a * q / (d * e), q, q / a] q) z := by
+    intro z hz0
+    simp only [qPochhammerListInf, List.map_cons, List.map_nil, List.prod_cons,
+      List.prod_nil, mul_one]
+    exact analyticAt_const.mul (analyticAt_const.mul (analyticAt_const.mul
+      ((hAz (analyticAt_const.div (analyticAt_const.mul analyticAt_id)
+        (mul_ne_zero hb hz0))).mul
+        (analyticAt_const.mul ((hAz (analyticAt_const.div
+          (analyticAt_const.mul analyticAt_id) (mul_ne_zero hc hz0))).mul
+          ((hAz (analyticAt_const.div (analyticAt_const.mul analyticAt_id)
+            (mul_ne_zero hd hz0))).mul (analyticAt_const.mul analyticAt_const)))))))
+  have hF : AnalyticOnNhd ℂ (fun e => qBilateralSixValue a b c d e q) U := fun z hz =>
+    (hnum z hz.1).div (hden z hz.1) hz.2
+  have hUo : IsOpen U := by
+    have hdc : ContinuousOn (fun e : ℂ => qPochhammerListInf
+        [a * q / b, a * q / c, a * q / d, a * q / e,
+          q / b, q / c, q / d, q / e, q * a ^ 2 / (b * c * d * e)] q) {z | z ≠ 0} :=
+      fun z hz => (hden z hz).continuousAt.continuousWithinAt
+    exact hdc.isOpen_inter_preimage isOpen_ne isOpen_ne
+  have heq : (fun e => qPsi [q * Complex.sqrt a, -q * Complex.sqrt a, b, c, d, e]
+      [Complex.sqrt a, -Complex.sqrt a, a * q / b, a * q / c, a * q / d, a * q / e]
+      q (q * a ^ 2 / (b * c * d * e))) =ᶠ[𝓝 e₀] (fun e => qBilateralSixValue a b c d e q) := by
+    have h0 : ∀ j : ℕ, a * q / e₀ * q ^ j ≠ 1 := hreg.1 _ (by simp)
+    have h1 : ∀ j : ℕ, q / e₀ * q ^ j ≠ 1 := by
+      intro j he
+      apply hreg.2 e₀ (by simp) j
+      rw [pow_succ']
+      field_simp at he
+      linear_combination -he
+    have ht0 : Tendsto (fun e : ℂ => a * q / e) (𝓝 e₀) (𝓝 (a * q / e₀)) :=
+      (continuousAt_const.div continuousAt_id he₀).tendsto
+    have ht1 : Tendsto (fun e : ℂ => q / e) (𝓝 e₀) (𝓝 (q / e₀)) :=
+      (continuousAt_const.div continuousAt_id he₀).tendsto
+    have hopen : IsOpen {e : ℂ | ‖q * a ^ 2‖ < ‖b * c * d * e‖} :=
+      isOpen_lt continuous_const (continuous_const.mul continuous_id).norm
+    filter_upwards [hopen.mem_nhds hz, isOpen_ne.mem_nhds he₀,
+      ht0.eventually (eventually_mul_pow_ne_one_nhds hq h0),
+      ht1.eventually (eventually_mul_pow_ne_one_nhds hq h1)] with e hze he0 hLe hUe
+    apply bilateral_six_sum hq0 hq ha hze
+    constructor
+    · intro u hu j
+      simp only [List.mem_cons, List.mem_nil_iff, or_false] at hu
+      rcases hu with rfl | rfl | rfl | rfl | rfl | rfl
+      · exact hreg.1 _ (by simp) j
+      · exact hreg.1 _ (by simp) j
+      · exact hreg.1 _ (by simp) j
+      · exact hreg.1 _ (by simp) j
+      · exact hreg.1 _ (by simp) j
+      · exact hLe j
+    · intro u hu j
+      simp only [List.mem_cons, List.mem_nil_iff, or_false] at hu
+      rcases hu with rfl | rfl | rfl | rfl | rfl | rfl
+      · exact hreg.2 _ (by simp) j
+      · exact hreg.2 _ (by simp) j
+      · exact hreg.2 _ (by simp) j
+      · exact hreg.2 _ (by simp) j
+      · exact hreg.2 _ (by simp) j
+      · intro he
+        apply hUe j
+        rw [he, pow_succ q j]
+        field_simp
+  exact ⟨hF, heq, (TauCeti.ContinuesInside.of_differentiableOn hUo hF.differentiableOn).congr
+    heq.symm⟩
 
 /-- The product side of the base-`q²` bilateral sum, as a function of `c`, analytically continues
 the bilateral series. -/

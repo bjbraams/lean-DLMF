@@ -4,6 +4,33 @@ The project formalizes material from Andrews, Askey and Roy, *Special Functions*
 (1999), and the NIST Digital Library of Mathematical Functions, using Mathlib.
 Existing module copyright and authorship notices remain authoritative.
 
+## Special-function proof round (2026-11-06)
+
+The first two-psi-two transformation combines the project's proved bilateral Gaussian
+transformations, double-series transposition and continuity at a zero lower parameter.
+Bailey's six-psi-six summation follows the semi-finite method used in the existing
+`BaileyBilateral` development. It reuses the proved Rogers six-phi-five sum (17.7.15),
+finite q-product reversal, integer q-Pochhammer shifts and bilateral term reflection.
+The denominator-cleared unilateral sum is continued in its central parameter before
+applying the complex identity theorem. Mathlib supplies holomorphic sums and identity
+theorems; the project's parametric holomorphy API supplies locally dominated sums.
+No external proof body was copied or adapted.
+
+The Lerch logarithmic expansions (25.14.3_1 and 25.14.3_2) use the project's proved
+Hermite formula, Hurwitz Hermite representation, incomplete Gamma and regularized Kummer
+identities, digamma recurrence and parameter shifts. Mathlib supplies analytic Taylor
+series, holomorphic primitives, dominated convergence and the analytic identity theorem.
+The order-one normalization uses the existing Binet digamma integral. The polylogarithm
+specialization preserves the principal logarithm boundary as `-log z`; its counterexample
+to the literal inverse-log formulation uses only proved results and uniqueness of sums.
+
+The symmetric elliptic endpoint estimates use the project's Carlson integral bridges,
+parameter-change formula for the principal value, and first-kind logarithmic bounds.
+Mathlib supplies Bochner change of variables, square-root inequalities and asymptotic
+comparison. Subtracting singular leading kernels leaves uniformly controlled remainders.
+The pair-root substitution and regularization estimates are general real integral
+results, factored into `DLMFMathlib`.
+
 ## Continued special-function proof round (2026-11-05)
 
 The terminating q-Whipple sum and bilateral transformations use the project's proved

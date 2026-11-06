@@ -29,17 +29,18 @@ arguments when some arguments are much smaller than the others, with relative or
 * `symmetricEllipticRF_asymp_small_x`: DLMF 19.27.3.
 * `symmetricEllipticRF_isEquivalent_atTop`, `symmetricEllipticRF_zero_isEquivalent`: the leading
   term of 19.27.2 as an asymptotic equivalence.
-* `symmetricEllipticRG_asymp_large_z`, `symmetricEllipticRG_asymp_small_x`,
-  `symmetricEllipticRG_zero_asymp`: DLMF 19.27.4–19.27.6.
-* `symmetricEllipticRD_asymp_large_z`, `symmetricEllipticRD_asymp_small_z`,
-  `symmetricEllipticRD_asymp_large_x`, `symmetricEllipticRD_asymp_small_x`: DLMF 19.27.7–19.27.10
-  (19.27.8 corrected).
+* `symmetricEllipticRG_asymp_small_x`, `symmetricEllipticRG_zero_asymp`: DLMF 19.27.5–19.27.6.
+* `symmetricEllipticRD_asymp_small_z`, `symmetricEllipticRD_asymp_small_x`: DLMF 19.27.8
+  and 19.27.10 (19.27.8 corrected).
 * `symmetricEllipticRJ_small_p_bounds`: the corrected DLMF 19.27.12.
-* `symmetricEllipticRJ_asymp_small_xy`, `symmetricEllipticRJ_asymp_large_x`: DLMF 19.27.13 and
-  19.27.16.
 
 The logarithmic formula 19.27.2 is in
 `DLMF.EllipticIntegrals.SymmetricLogarithmicAsymptotics`.
+The second-kind formula 19.27.4 is in `DLMF.EllipticIntegrals.SymmetricSecondKindAsymptotics`.
+The third-kind formulas 19.27.7 and 19.27.13 are in
+`DLMF.EllipticIntegrals.SymmetricThirdKindAsymptotics`.
+The large-first-node formulas 19.27.9 and 19.27.16 are in
+`DLMF.EllipticIntegrals.SymmetricLargeNodeAsymptotics`.
 The endpoint formulas 19.27.11, 19.27.14 and 19.27.15 are in
 `DLMF.EllipticIntegrals.SymmetricEndpointRegularization`.
 
@@ -406,15 +407,6 @@ theorem symmetricEllipticRF_zero_isEquivalent {z : ℝ} (hz : 0 < z) :
 
 /-! ### §19.27(iii) `R_G` -/
 
-/-- DLMF 19.27.4: `R_G(x, y, z) = (√z/2)(1 + O((a/z) ln(z/a)))` as `a/z → 0`: for fixed
-`z > 0`, as `(x, y) → 0` through nonnegative pairs not both zero. -/
-@[dlmf 19.27.E4]
-theorem symmetricEllipticRG_asymp_large_z {z : ℝ} (hz : 0 < z) :
-    (fun q : ℝ × ℝ => symmetricEllipticRG q.1 q.2 z - ((√z / 2 : ℝ) : ℂ)) =O[𝓝[ellAsymPair] 0]
-      (fun q : ℝ × ℝ => ((√z / 2 * (ellAsymA q.1 q.2 / z *
-        Real.log (z / ellAsymA q.1 q.2)) : ℝ) : ℂ)) := by
-  sorry
-
 /-- DLMF 19.27.5: `R_G(x, y, z) = R_G(0, y, z) + √x O(√(x/h))` as `x/h → 0`: for fixed
 `y, z > 0`, as `x → 0+`. -/
 @[dlmf 19.27.E5]
@@ -565,17 +557,6 @@ theorem symmetricEllipticRG_zero_asymp {z : ℝ} (hz : 0 < z) :
   sorry
 
 /-! ### §19.27(iv) `R_D` -/
-
-/-- DLMF 19.27.7: `R_D(x, y, z) = (3/(2z^{3/2}))(ln(8z/(a + g)) - 2)(1 + O(a/z))` as
-`a/z → 0`: for fixed `z > 0`, as `(x, y) → 0` through nonnegative pairs not both zero. -/
-@[dlmf 19.27.E7]
-theorem symmetricEllipticRD_asymp_large_z {z : ℝ} (hz : 0 < z) :
-    (fun q : ℝ × ℝ => symmetricEllipticRD q.1 q.2 z - ((3 / (2 * z ^ (3 / 2 : ℝ)) *
-        (Real.log (8 * z / (ellAsymA q.1 q.2 + ellAsymG q.1 q.2)) - 2) : ℝ) : ℂ))
-      =O[𝓝[ellAsymPair] 0]
-      (fun q : ℝ × ℝ => ((ellAsymA q.1 q.2 / z * (3 / (2 * z ^ (3 / 2 : ℝ)) *
-        (Real.log (8 * z / (ellAsymA q.1 q.2 + ellAsymG q.1 q.2)) - 2)) : ℝ) : ℂ)) := by
-  sorry
 
 /-- DLMF 19.27.8, **corrected** (see the module docstring: DLMF prints `O(z/g)`; the correct
 order is `O(√(z/g))`): `R_D(x, y, z) = 3/√(xyz) - (6/(xy)) R_G(x, y, 0)(1 + O(√(z/g)))` as
@@ -741,16 +722,6 @@ theorem symmetricEllipticRD_asymp_small_z {x y : ℝ} (hx : 0 < x) (hy : 0 < y) 
   apply le_of_eq
   field_simp
 
-/-- DLMF 19.27.9: `R_D(x, y, z) = 3/(√(xz)(√y + √z)) (1 + O((b/x) ln(x/b)))` as `b/x → 0`: for
-fixed `x > 0`, as `(y, z) → 0` with `y ≥ 0`, `z > 0`. -/
-@[dlmf 19.27.E9]
-theorem symmetricEllipticRD_asymp_large_x {x : ℝ} (hx : 0 < x) :
-    (fun q : ℝ × ℝ => symmetricEllipticRD x q.1 q.2 -
-        ((3 / (√(x * q.2) * (√q.1 + √q.2)) : ℝ) : ℂ)) =O[𝓝[{q | 0 ≤ q.1 ∧ 0 < q.2}] 0]
-      (fun q : ℝ × ℝ => ((3 / (√(x * q.2) * (√q.1 + √q.2)) *
-        (ellAsymB q.1 q.2 / x * Real.log (x / ellAsymB q.1 q.2)) : ℝ) : ℂ)) := by
-  sorry
-
 /-- DLMF 19.27.10: `R_D(x, y, z) = R_D(0, y, z) - (3√x/(hz))(1 + O(√(x/h)))` as `x/h → 0`: for
 fixed `y, z > 0`, as `x → 0+`. -/
 @[dlmf 19.27.E10]
@@ -915,30 +886,5 @@ theorem symmetricEllipticRJ_small_p_bounds {x y z p : ℝ} (hx : 0 < x) (hy : 0 
       r ≤ 3 * p / (2 * (ellAsymF x y z - p)) * Real.log (ellAsymF x y z / p) := by
   sorry
 
-/-- DLMF 19.27.13: `R_J(x, y, z, p) = (3/(2√z p))(ln(8z/(a + g)) - 2 R_C(1, p/z)
-+ O((a/z + a/p) ln(p/a)))` as `max(x, y)/min(z, p) → 0`: for fixed `z, p > 0`, as
-`(x, y) → 0` through nonnegative pairs not both zero. -/
-@[dlmf 19.27.E13]
-theorem symmetricEllipticRJ_asymp_small_xy {z p : ℝ} (hz : 0 < z) (hp : 0 < p) :
-    (fun q : ℝ × ℝ => symmetricEllipticRJ q.1 q.2 z p -
-        ((3 / (2 * √z * p) : ℝ) : ℂ) *
-          (((Real.log (8 * z / (ellAsymA q.1 q.2 + ellAsymG q.1 q.2)) : ℝ) : ℂ) -
-            2 * symmetricEllipticRC 1 (p / z : ℝ))) =O[𝓝[ellAsymPair] 0]
-      (fun q : ℝ × ℝ => ((3 / (2 * √z * p) * ((ellAsymA q.1 q.2 / z + ellAsymA q.1 q.2 / p) *
-        Real.log (p / ellAsymA q.1 q.2)) : ℝ) : ℂ)) := by
-  sorry
-
-/-- DLMF 19.27.16: `R_J(x, y, z, p) = (3/√x) R_C((h + p)², 2(b + h)p)
-+ O(x^{-3/2} ln(x/(b + h)))` as `max(y, z, p)/x → 0`: for fixed `x > 0`, as `(y, z, p) → 0` with
-`y, z ≥ 0` not both zero and `p > 0`. -/
-@[dlmf 19.27.E16]
-theorem symmetricEllipticRJ_asymp_large_x {x : ℝ} (hx : 0 < x) :
-    (fun q : ℝ × ℝ × ℝ => symmetricEllipticRJ x q.1 q.2.1 q.2.2 -
-        3 / (√x : ℝ) * symmetricEllipticRC ((ellAsymH q.1 q.2.1 + q.2.2) ^ 2 : ℝ)
-          (2 * (ellAsymB q.1 q.2.1 + ellAsymH q.1 q.2.1) * q.2.2 : ℝ))
-      =O[𝓝[{q | 0 ≤ q.1 ∧ 0 ≤ q.2.1 ∧ (q.1, q.2.1) ≠ 0 ∧ 0 < q.2.2}] 0]
-      (fun q : ℝ × ℝ × ℝ => ((x ^ (-(3 / 2) : ℝ) *
-        Real.log (x / (ellAsymB q.1 q.2.1 + ellAsymH q.1 q.2.1)) : ℝ) : ℂ)) := by
-  sorry
 
 end DLMF.EllipticIntegrals

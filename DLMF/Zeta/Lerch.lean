@@ -11,6 +11,9 @@ public import DLMF.Zeta.Basic.Polylog
 public import DLMF.Zeta.Basic.LerchProperties
 public import DLMF.Zeta.Lerch.Barnes
 public import DLMF.Zeta.Lerch.Hermite
+public import DLMF.Zeta.Lerch.LogarithmicExpansion
+public import DLMF.Zeta.Lerch.LogarithmicIntegerExpansion
+public import DLMF.Zeta.Lerch.LogarithmicIntegerShift
 
 /-!
 # Lerch's transcendent
@@ -114,7 +117,7 @@ theorem hasSum_lerchPhi_log {z s a : ℂ} (hs : ∀ n : ℕ, s ≠ n + 1) (ha : 
     (hlog : ‖Complex.log z‖ < 2 * π) :
     HasSum (fun n : ℕ => hurwitzZetaComplex (s - n) a * Complex.log z ^ n / n !)
       (z ^ a * lerchPhi z s a - Gamma (1 - s) * (-Complex.log z) ^ (s - 1)) := by
-  sorry
+  exact LerchLogarithmic.hasSum_lerchPhi_log hs ha ha' hz hz0 hlog
 
 /-- **Expansion about `z = 1`, integer order** (DLMF 25.14.3_2): for `m = 2, 3, …`, `|ln z| < 2π`,
 `a ≠ 0, -1, -2, …`, `z^a Φ(z, m, a) = ∑'_{n≥0} ζ(m-n, a)(ln z)ⁿ/n! + ((ln z)^{m-1}/(m-1)!)
@@ -126,7 +129,8 @@ theorem hasSum_lerchPhi_log_nat {m : ℕ} (hm : 2 ≤ m) {z a : ℂ} (ha : ∀ k
         hurwitzZetaComplex ((m : ℂ) - n) a * Complex.log z ^ n / n !)
       (z ^ a * lerchPhi z m a - Complex.log z ^ (m - 1) / (m - 1)! *
         (digamma m - digamma a - Complex.log (-Complex.log z))) := by
-  sorry
+  exact LerchLogarithmic.hasSum_lerchPhi_log_nat_of_right hm hz hz0 hlog ha
+    (fun A hA => LerchLogarithmic.hasSum_lerchPhi_log_nat_of_re_pos hA hm hz hz0 hlog)
 
 /-- **Order one** (DLMF 25.14.3_3): `a Φ(z, 1, a) = F(a, 1; a+1; z)` (Gauss's hypergeometric
 function) for `|z| < 1`, `a ≠ 0, -1, -2, …`. -/
@@ -162,24 +166,6 @@ theorem mul_lerchPhi_one_eq_hypergeometric {z a : ℂ} (hz : ‖z‖ < 1) (ha : 
   ring
 
 /-! ### §25.14(ii) Properties -/
-
-/-- **Recurrence in `a`** (DLMF 25.14.4): under the conditions of 25.14.1 (`|z| < 1`, or `|z| = 1`
-and `Re s > 1`) and `m = 1, 2, 3, …`,
-`Φ(z, s, a) = z^m Φ(z, s, a+m) + ∑_{n=0}^{m-1} zⁿ/(a+n)^s` (valid also for `m = 0`). -/
-@[dlmf 25.14.E4]
-theorem lerchPhi_eq_add_nat {z s a : ℂ} (h : LerchParamAdmissible s a)
-    (hz : ‖z‖ < 1 ∨ (‖z‖ = 1 ∧ 1 < s.re)) (m : ℕ) :
-    lerchPhi z s a = z ^ m * lerchPhi z s (a + m) +
-      ∑ n ∈ Finset.range m, z ^ n / (a + n) ^ s := by
-  have h1 := (hasSum_nat_add_iff' m).mpr (hasSum_lerchPhi_of_lerchParamAdmissible h hz)
-  have h2 := (hasSum_lerchPhi_of_lerchParamAdmissible (lerchParamAdmissible_add_natCast h m)
-      hz).mul_left (z ^ m)
-  have h3 : HasSum (fun n : ℕ => z ^ (n + m) / (a + ↑(n + m)) ^ s)
-      (z ^ m * lerchPhi z s (a + m)) := by
-    refine h2.congr_fun fun n => ?_
-    rw [pow_add]; push_cast; ring_nf
-  rw [← h1.unique h3]
-  ring
 
 /-- **Integral representation** (DLMF 25.14.5):
 `Φ(z, s, a) = (1/Γ(s)) ∫_0^∞ x^{s-1} e^{-ax}/(1 - z e^{-x}) dx` for `Re s > 1`, `Re a > 0` if
