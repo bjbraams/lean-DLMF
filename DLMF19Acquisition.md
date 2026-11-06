@@ -811,22 +811,22 @@ small arguments tending to `0` jointly through DLMF's domain (real, nonnegative,
 is not asserted. All 16 formulas were checked numerically along random directions of approach.
 Two printed formulas are false and are acquired in corrected form (see "Corrections" below).
 
-- [19.27.E1](https://dlmf.nist.gov/19.27.E1): [`DLMF.EllipticIntegrals.ellAsymA`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L212) (definition); [`DLMF.EllipticIntegrals.ellAsymB`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L216) (definition); [`DLMF.EllipticIntegrals.ellAsymC`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L220) (definition); [`DLMF.EllipticIntegrals.ellAsymF`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L224) (definition); [`DLMF.EllipticIntegrals.ellAsymG`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L228) (definition); [`DLMF.EllipticIntegrals.ellAsymH`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L232) (definition).
-- [19.27.E2](https://dlmf.nist.gov/19.27.E2): [`DLMF.EllipticIntegrals.symmetricEllipticRF_asymp_large_z`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L246) (admitted); [`DLMF.EllipticIntegrals.symmetricEllipticRF_isEquivalent_atTop`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L347) (proved); [`DLMF.EllipticIntegrals.symmetricEllipticRF_zero_isEquivalent`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L383) (proved).
-- [19.27.E3](https://dlmf.nist.gov/19.27.E3): [`DLMF.EllipticIntegrals.symmetricEllipticRF_asymp_small_x`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L257) (proved).
-- [19.27.E4](https://dlmf.nist.gov/19.27.E4): [`DLMF.EllipticIntegrals.symmetricEllipticRG_asymp_large_z`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L415) (admitted).
-- [19.27.E5](https://dlmf.nist.gov/19.27.E5): [`DLMF.EllipticIntegrals.symmetricEllipticRG_asymp_small_x`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L424) (proved).
-- [19.27.E6](https://dlmf.nist.gov/19.27.E6): [`DLMF.EllipticIntegrals.symmetricEllipticRG_zero_asymp`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L564) (admitted).
-- [19.27.E7](https://dlmf.nist.gov/19.27.E7): [`DLMF.EllipticIntegrals.symmetricEllipticRD_asymp_large_z`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L575) (admitted).
-- [19.27.E8](https://dlmf.nist.gov/19.27.E8): [`DLMF.EllipticIntegrals.symmetricEllipticRD_asymp_small_z`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L586) (admitted).
-- [19.27.E9](https://dlmf.nist.gov/19.27.E9): [`DLMF.EllipticIntegrals.symmetricEllipticRD_asymp_large_x`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L597) (admitted).
-- [19.27.E10](https://dlmf.nist.gov/19.27.E10): [`DLMF.EllipticIntegrals.symmetricEllipticRD_asymp_small_x`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L607) (proved).
-- [19.27.E11](https://dlmf.nist.gov/19.27.E11): [`DLMF.EllipticIntegrals.symmetricEllipticRJ_asymp_large_p`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L756) (admitted).
-- [19.27.E12](https://dlmf.nist.gov/19.27.E12): [`DLMF.EllipticIntegrals.symmetricEllipticRJ_small_p_bounds`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L769) (admitted).
-- [19.27.E13](https://dlmf.nist.gov/19.27.E13): [`DLMF.EllipticIntegrals.symmetricEllipticRJ_asymp_small_xy`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L784) (admitted).
-- [19.27.E14](https://dlmf.nist.gov/19.27.E14): [`DLMF.EllipticIntegrals.symmetricEllipticRJ_asymp_small_xp`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L797) (admitted).
-- [19.27.E15](https://dlmf.nist.gov/19.27.E15): [`DLMF.EllipticIntegrals.symmetricEllipticRJ_asymp_small_x`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L809) (admitted).
-- [19.27.E16](https://dlmf.nist.gov/19.27.E16): [`DLMF.EllipticIntegrals.symmetricEllipticRJ_asymp_large_x`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L819) (admitted).
+- [19.27.E1](https://dlmf.nist.gov/19.27.E1): [`DLMF.EllipticIntegrals.ellAsymA`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L217) (definition); [`DLMF.EllipticIntegrals.ellAsymB`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L221) (definition); [`DLMF.EllipticIntegrals.ellAsymC`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L225) (definition); [`DLMF.EllipticIntegrals.ellAsymF`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L229) (definition); [`DLMF.EllipticIntegrals.ellAsymG`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L233) (definition); [`DLMF.EllipticIntegrals.ellAsymH`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L237) (definition).
+- [19.27.E2](https://dlmf.nist.gov/19.27.E2): [`DLMF.EllipticIntegrals.symmetricEllipticRF_asymp_large_z`](DLMF/EllipticIntegrals/SymmetricLogarithmicAsymptotics.lean#L339) (proved); [`DLMF.EllipticIntegrals.symmetricEllipticRF_isEquivalent_atTop`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L341) (proved); [`DLMF.EllipticIntegrals.symmetricEllipticRF_zero_isEquivalent`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L377) (proved).
+- [19.27.E3](https://dlmf.nist.gov/19.27.E3): [`DLMF.EllipticIntegrals.symmetricEllipticRF_asymp_small_x`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L251) (proved).
+- [19.27.E4](https://dlmf.nist.gov/19.27.E4): [`DLMF.EllipticIntegrals.symmetricEllipticRG_asymp_large_z`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L409) (admitted).
+- [19.27.E5](https://dlmf.nist.gov/19.27.E5): [`DLMF.EllipticIntegrals.symmetricEllipticRG_asymp_small_x`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L418) (proved).
+- [19.27.E6](https://dlmf.nist.gov/19.27.E6): [`DLMF.EllipticIntegrals.symmetricEllipticRG_zero_asymp`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L558) (admitted).
+- [19.27.E7](https://dlmf.nist.gov/19.27.E7): [`DLMF.EllipticIntegrals.symmetricEllipticRD_asymp_large_z`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L569) (admitted).
+- [19.27.E8](https://dlmf.nist.gov/19.27.E8): [`DLMF.EllipticIntegrals.symmetricEllipticRD_asymp_small_z`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L580) (proved).
+- [19.27.E9](https://dlmf.nist.gov/19.27.E9): [`DLMF.EllipticIntegrals.symmetricEllipticRD_asymp_large_x`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L744) (admitted).
+- [19.27.E10](https://dlmf.nist.gov/19.27.E10): [`DLMF.EllipticIntegrals.symmetricEllipticRD_asymp_small_x`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L754) (proved).
+- [19.27.E11](https://dlmf.nist.gov/19.27.E11): [`DLMF.EllipticIntegrals.symmetricEllipticRJ_asymp_large_p`](DLMF/EllipticIntegrals/SymmetricEndpointRegularization.lean#L398) (proved).
+- [19.27.E12](https://dlmf.nist.gov/19.27.E12): [`DLMF.EllipticIntegrals.symmetricEllipticRJ_small_p_bounds`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L903) (admitted).
+- [19.27.E13](https://dlmf.nist.gov/19.27.E13): [`DLMF.EllipticIntegrals.symmetricEllipticRJ_asymp_small_xy`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L918) (admitted).
+- [19.27.E14](https://dlmf.nist.gov/19.27.E14): [`DLMF.EllipticIntegrals.symmetricEllipticRJ_asymp_small_xp`](DLMF/EllipticIntegrals/SymmetricEndpointRegularization.lean#L302) (proved).
+- [19.27.E15](https://dlmf.nist.gov/19.27.E15): [`DLMF.EllipticIntegrals.symmetricEllipticRJ_asymp_small_x`](DLMF/EllipticIntegrals/SymmetricEndpointRegularization.lean#L466) (proved).
+- [19.27.E16](https://dlmf.nist.gov/19.27.E16): [`DLMF.EllipticIntegrals.symmetricEllipticRJ_asymp_large_x`](DLMF/EllipticIntegrals/SymmetricAsymptotics.lean#L931) (admitted).
 
 ## [§19.28 Integrals of Elliptic Integrals](https://dlmf.nist.gov/19.28)
 

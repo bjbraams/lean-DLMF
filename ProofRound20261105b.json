@@ -1,0 +1,336 @@
+{
+  "date": "2026-11-05",
+  "base_commit": "1e4cfe603822948f9f46b42f1db41fded4b3fd59",
+  "baseline": "Commit 1e4cfe603822948f9f46b42f1db41fded4b3fd59, containing the preceding proof round.",
+  "started_utc": "2026-11-05T17:39:00+00:00",
+  "audited_utc": "2026-11-05T20:56:12.768076+00:00",
+  "direct_admissions_before": 1008,
+  "direct_admissions_after": 995,
+  "completed_admissions": [
+    {
+      "name": "DLMF.EllipticIntegrals.symmetricEllipticRF_asymp_large_z",
+      "file": "DLMF/EllipticIntegrals/SymmetricLogarithmicAsymptotics.lean",
+      "line": 341,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symmetricEllipticRD_asymp_small_z",
+      "file": "DLMF/EllipticIntegrals/SymmetricAsymptotics.lean",
+      "line": 583,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symmetricEllipticRJ_asymp_large_p",
+      "file": "DLMF/EllipticIntegrals/SymmetricEndpointRegularization.lean",
+      "line": 401,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symmetricEllipticRJ_asymp_small_xp",
+      "file": "DLMF/EllipticIntegrals/SymmetricEndpointRegularization.lean",
+      "line": 305,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symmetricEllipticRJ_asymp_small_x",
+      "file": "DLMF/EllipticIntegrals/SymmetricEndpointRegularization.lean",
+      "line": 468,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.Zeta.polylog_add_exp_mul_polylog_inv",
+      "file": "DLMF/Zeta/Polylog/Inversion.lean",
+      "line": 290,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.Zeta.tendsto_lerchPhi_hermite",
+      "file": "DLMF/Zeta/Lerch.lean",
+      "line": 204,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.Zeta.lerchPhi_neg_eq_mellinBarnes",
+      "file": "DLMF/Zeta/Lerch.lean",
+      "line": 230,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.QHypergeometric.qPsi2_transformation_two",
+      "file": "DLMF/QHypergeometric/BilateralTransformations.lean",
+      "line": 56,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.QHypergeometric.qPsi8_terminating_to_qPsi4",
+      "file": "DLMF/QHypergeometric/BilateralTransformations.lean",
+      "line": 69,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.QHypergeometric.qPsi2_gaussian_bilateral",
+      "file": "DLMF/QHypergeometric/BilateralTransformations.lean",
+      "line": 148,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.QHypergeometric.four_phi_three_infinite_product",
+      "file": "DLMF/QHypergeometric/HigherSummations.lean",
+      "line": 140,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.QHypergeometric.qPhi4_square",
+      "file": "DLMF/QHypergeometric/Transformations.lean",
+      "line": 655,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  ],
+  "compiled_declarations_after": 71396,
+  "baseline_public_declarations_compared": 23069,
+  "unchanged_public_declaration_moves": 54,
+  "source_ranged_admission_dependent_theorems_after": 1021,
+  "existing_tagged_theorems_freed_from_admitted_dependencies": [],
+  "dlmf_entries_before": 10818,
+  "dlmf_entries_after": 10818,
+  "dlmf_statuses_before": {
+    "proved": 9512,
+    "admitted": 1306,
+    "nonstandard": 0
+  },
+  "dlmf_statuses_after": {
+    "proved": 9525,
+    "admitted": 1293,
+    "nonstandard": 0
+  },
+  "dlmf_entries_newly_proved": 13,
+  "dlmf_entries_newly_proved_declarations": [
+    {
+      "dlmf": "19.27.E8",
+      "declaration": "DLMF.EllipticIntegrals.symmetricEllipticRD_asymp_small_z"
+    },
+    {
+      "dlmf": "19.27.E2",
+      "declaration": "DLMF.EllipticIntegrals.symmetricEllipticRF_asymp_large_z"
+    },
+    {
+      "dlmf": "19.27.E11",
+      "declaration": "DLMF.EllipticIntegrals.symmetricEllipticRJ_asymp_large_p"
+    },
+    {
+      "dlmf": "19.27.E15",
+      "declaration": "DLMF.EllipticIntegrals.symmetricEllipticRJ_asymp_small_x"
+    },
+    {
+      "dlmf": "19.27.E14",
+      "declaration": "DLMF.EllipticIntegrals.symmetricEllipticRJ_asymp_small_xp"
+    },
+    {
+      "dlmf": "17.7.E11",
+      "declaration": "DLMF.QHypergeometric.four_phi_three_infinite_product"
+    },
+    {
+      "dlmf": "17.9.E18",
+      "declaration": "DLMF.QHypergeometric.qPhi4_square"
+    },
+    {
+      "dlmf": "17.10.E4",
+      "declaration": "DLMF.QHypergeometric.qPsi2_gaussian_bilateral"
+    },
+    {
+      "dlmf": "17.10.E2",
+      "declaration": "DLMF.QHypergeometric.qPsi2_transformation_two"
+    },
+    {
+      "dlmf": "17.10.E3",
+      "declaration": "DLMF.QHypergeometric.qPsi8_terminating_to_qPsi4"
+    },
+    {
+      "dlmf": "25.14.E8",
+      "declaration": "DLMF.Zeta.lerchPhi_neg_eq_mellinBarnes"
+    },
+    {
+      "dlmf": "25.12.E13",
+      "declaration": "DLMF.Zeta.polylog_add_exp_mul_polylog_inv"
+    },
+    {
+      "dlmf": "25.14.E6",
+      "declaration": "DLMF.Zeta.tendsto_lerchPhi_hermite"
+    }
+  ],
+  "dlmf_entries_added": [],
+  "public_statement_changes": [],
+  "existing_definition_changes": [],
+  "new_admissions": [],
+  "nonstandard_axiom_dependencies": [],
+  "new_two_way_area_pairs": [],
+  "changed_lean_files": [
+    "DLMF/EllipticIntegrals.lean",
+    "DLMF/EllipticIntegrals/SymmetricAsymptotics.lean",
+    "DLMF/EllipticIntegrals/SymmetricEndpointRegularization.lean",
+    "DLMF/EllipticIntegrals/SymmetricLegendreConnection.lean",
+    "DLMF/EllipticIntegrals/SymmetricLogarithmicAsymptotics.lean",
+    "DLMF/Gamma/MellinBarnes.lean",
+    "DLMF/Gamma/VerticalBounds.lean",
+    "DLMF/Hypergeometric/BarnesAux.lean",
+    "DLMF/QHypergeometric/BilateralContinuity.lean",
+    "DLMF/QHypergeometric/BilateralGaussianLimit.lean",
+    "DLMF/QHypergeometric/BilateralGaussianSymmetry.lean",
+    "DLMF/QHypergeometric/BilateralGaussianTransformation.lean",
+    "DLMF/QHypergeometric/BilateralTransformations.lean",
+    "DLMF/QHypergeometric/BilateralWatson.lean",
+    "DLMF/QHypergeometric/ClausenCommonTermination.lean",
+    "DLMF/QHypergeometric/ClausenFirstRecurrence.lean",
+    "DLMF/QHypergeometric/ClausenInitialValues.lean",
+    "DLMF/QHypergeometric/ClausenKernel.lean",
+    "DLMF/QHypergeometric/ClausenLaurentPolynomial.lean",
+    "DLMF/QHypergeometric/ClausenSecondRecurrence.lean",
+    "DLMF/QHypergeometric/ClausenSummation.lean",
+    "DLMF/QHypergeometric/ClausenTerminatingLaurent.lean",
+    "DLMF/QHypergeometric/FiniteBilateralTransformations.lean",
+    "DLMF/QHypergeometric/HigherSummations.lean",
+    "DLMF/QHypergeometric/Transformations.lean",
+    "DLMF/QHypergeometric/WhippleProducts.lean",
+    "DLMF/QHypergeometric/WhippleRecurrence.lean",
+    "DLMF/QHypergeometric/WhippleSummation.lean",
+    "DLMF/Zeta/Basic.lean",
+    "DLMF/Zeta/Basic/LerchContinuation.lean",
+    "DLMF/Zeta/Basic/LerchProperties.lean",
+    "DLMF/Zeta/Basic/PolylogProperties.lean",
+    "DLMF/Zeta/Lerch.lean",
+    "DLMF/Zeta/Lerch/Barnes.lean",
+    "DLMF/Zeta/Lerch/Hermite.lean",
+    "DLMF/Zeta/Lerch/HermiteBounds.lean",
+    "DLMF/Zeta/Lerch/HermiteInitial.lean",
+    "DLMF/Zeta/Lerch/HermiteKernel.lean",
+    "DLMF/Zeta/LerchContinuation.lean",
+    "DLMF/Zeta/Periodic.lean",
+    "DLMF/Zeta/Polylog.lean",
+    "DLMF/Zeta/Polylog/Inversion.lean",
+    "DLMF/Zeta/Polylog/Properties.lean",
+    "DLMFMathlib.lean",
+    "DLMFMathlib/Analysis/Fourier/HorizontalStrip.lean",
+    "DLMFMathlib/Analysis/Integral/LogarithmicSquareRootKernel.lean",
+    "DLMFMathlib/Analysis/Integral/SquareRootKernel.lean",
+    "DLMFMathlib/Analysis/SpecialFunctions/Pow/ComplexReal.lean",
+    "DLMFMathlib/Analysis/SpecialFunctions/Pow/Decay.lean",
+    "DLMFMathlib/Analysis/SpecialFunctions/Pow/RightHalfPlane.lean",
+    "DLMFMathlib/Analysis/SpecialFunctions/Trigonometric/BoseEinsteinWeighted.lean",
+    "DLMFMathlib/Analysis/SpecialFunctions/Trigonometric/LinearBounds.lean",
+    "DLMFMathlib/Topology/Algebra/InfiniteSum/Int.lean"
+  ],
+  "new_lean_files": [
+    "DLMF/EllipticIntegrals/SymmetricEndpointRegularization.lean",
+    "DLMF/EllipticIntegrals/SymmetricLogarithmicAsymptotics.lean",
+    "DLMF/QHypergeometric/BilateralContinuity.lean",
+    "DLMF/QHypergeometric/BilateralGaussianLimit.lean",
+    "DLMF/QHypergeometric/BilateralGaussianSymmetry.lean",
+    "DLMF/QHypergeometric/BilateralGaussianTransformation.lean",
+    "DLMF/QHypergeometric/BilateralWatson.lean",
+    "DLMF/QHypergeometric/ClausenCommonTermination.lean",
+    "DLMF/QHypergeometric/ClausenFirstRecurrence.lean",
+    "DLMF/QHypergeometric/ClausenInitialValues.lean",
+    "DLMF/QHypergeometric/ClausenKernel.lean",
+    "DLMF/QHypergeometric/ClausenLaurentPolynomial.lean",
+    "DLMF/QHypergeometric/ClausenSecondRecurrence.lean",
+    "DLMF/QHypergeometric/ClausenSummation.lean",
+    "DLMF/QHypergeometric/ClausenTerminatingLaurent.lean",
+    "DLMF/QHypergeometric/WhippleProducts.lean",
+    "DLMF/QHypergeometric/WhippleRecurrence.lean",
+    "DLMF/QHypergeometric/WhippleSummation.lean",
+    "DLMF/Zeta/Basic/LerchContinuation.lean",
+    "DLMF/Zeta/Basic/LerchProperties.lean",
+    "DLMF/Zeta/Basic/PolylogProperties.lean",
+    "DLMF/Zeta/Lerch/Barnes.lean",
+    "DLMF/Zeta/Lerch/Hermite.lean",
+    "DLMF/Zeta/Lerch/HermiteBounds.lean",
+    "DLMF/Zeta/Lerch/HermiteInitial.lean",
+    "DLMF/Zeta/Lerch/HermiteKernel.lean",
+    "DLMF/Zeta/Polylog/Inversion.lean",
+    "DLMF/Zeta/Polylog/Properties.lean",
+    "DLMFMathlib/Analysis/Fourier/HorizontalStrip.lean",
+    "DLMFMathlib/Analysis/Integral/LogarithmicSquareRootKernel.lean",
+    "DLMFMathlib/Analysis/Integral/SquareRootKernel.lean",
+    "DLMFMathlib/Analysis/SpecialFunctions/Trigonometric/BoseEinsteinWeighted.lean",
+    "DLMFMathlib/Analysis/SpecialFunctions/Trigonometric/LinearBounds.lean",
+    "DLMFMathlib/Topology/Algebra/InfiniteSum/Int.lean"
+  ],
+  "deferred_statement_issues": [
+    {
+      "declaration": "DLMF.Zeta.lerchPhi_transformation",
+      "dlmf": "25.14.E7",
+      "issue": "Pointwise RHS vanishes at s=1 because Gamma(0)=0, while Re Phi(1/2,1,1/2)>=2.",
+      "proposed_repair": "Exclude s=n+1 for natural n; give positive integer orders a separate limiting formulation.",
+      "approval": "Approved by the user on 2026-11-06; exclusion applied after this proof round.",
+      "evidence": "scripts/CheckLerchTransformation.lean",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "applied_after_round": true,
+      "applied_hypothesis": "∀ n : ℕ, s ≠ (n : ℂ) + 1",
+      "status": "Statement corrected; proof remains admitted."
+    }
+  ],
+  "validation": {
+    "ordinary_build": "lake build > /tmp/DLMF-build.log 2>&1",
+    "strict_source_checks": "All 55 changed/new and entry modules passed autoImplicit=false and relaxedAutoImplicit=false.",
+    "axiom_audit": "Every completed original theorem uses only propext, Classical.choice and Quot.sound; the full project axiom graph has no additional nonstandard axioms.",
+    "preservation": "Independent existing public-header and public/private definition-body comparison found no changes or missing declarations.",
+    "import_survey": "No new two-way area pairs, foundational violations, closure violations, missing modules or cycles.",
+    "formatting": "Changed Lean lines are at most 100 characters; all project Lean files are at most 1500 lines; git diff --check passed."
+  }
+}

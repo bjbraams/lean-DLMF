@@ -7,6 +7,7 @@ module
 
 public import DLMF.Bailey
 public import DLMF.QHypergeometric.Dixon
+public import DLMF.QHypergeometric.WhippleSummation
 public import DLMF.QHypergeometric.QuadraticSummation
 public import DLMF.QHypergeometric.QuadraticCompanion
 public import DLMF.QHypergeometric.PfaffSaalschutz
@@ -143,7 +144,7 @@ theorem four_phi_three_infinite_product {c e q : ℂ} (he : e≠0) (hq0 : q≠0)
       q^((n+1).choose 2)*qPochhammerListInf
           [e*q^(-(n:ℤ)), e*q^(n+1), c^2*q^(1-(n:ℤ))/e, c^2*q^(n+2)/e] (q^2)/
         qPochhammerListInf [e,c^2*q/e] q := by
-  sorry
+  exact WhippleSummation.four_phi_three_infinite_product he hq0 hq n hd
 
 /-- The cleared product retains the regular upper parameter a=0. -/
 @[dlmf 17.7.E12]

@@ -6,6 +6,11 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.QHypergeometric.Transformations
+public import DLMF.QHypergeometric.BilateralWatson
+public import DLMF.QHypergeometric.BilateralGaussianTransformation
+public import DLMF.QHypergeometric.BilateralGaussianLimit
+public import DLMF.QHypergeometric.BilateralContinuity
+public import DLMF.QHypergeometric.BilateralGaussianSymmetry
 
 /-!
 # Bilateral basic hypergeometric transformations (DLMF §17.10)
@@ -58,7 +63,7 @@ theorem qPsi2_transformation_two (a b c d q z : ℂ)
     qPsi [a,b] [c,d] q (z) =
       qProductRatioInf [a*z, b*z, c*q/(a*b*z), d*q/(a*b*z)] [q/a, q/b, c, d] q *
           qPsi [a*b*z/c, a*b*z/d] [a*z, b*z] q (c*d/(a*b*z)) := by
-  sorry
+  exact BilateralGaussianSymmetry.transformation_two a b c d q z hq hq0 hpar hden hB hz
 
 /-- DLMF 17.10.3: qPsi8 terminating to qPsi4. -/
 @[dlmf 17.10.E3]
@@ -75,7 +80,69 @@ theorem qPsi8_terminating_to_qPsi4 (n : ℕ) (a c d e f q : ℂ)
         (a^2*q^(2*n+2)/(c*d*e*f)) =
       qProductRatio n [a*q, q/a, a*q/(c*d), a*q/(e*f)] [q/c, q/d, a*q/e, a*q/f] q *
           qPsi [e, f, a*q^(n+1)/(c*d), q^(-(n:ℤ))] [a*q/c, a*q/d, q^(n+1), e*f/(a*q^n)] q (q) := by
-  sorry
+  let r := a ^ (1 / 2 : ℂ)
+  have hs : r ^ 2 = a := by
+    dsimp [r]
+    rw [← Complex.cpow_nat_mul]
+    norm_num
+  have ha0 : a ≠ 0 := hpar a (by simp)
+  have hc0 : c ≠ 0 := hpar c (by simp)
+  have hd0 : d ≠ 0 := hpar d (by simp)
+  have he0 : e ≠ 0 := hpar e (by simp)
+  have hf0 : f ≠ 0 := hpar f (by simp)
+  have hr0 : r ≠ 0 := by
+    intro hr
+    rw [hr, zero_pow (by omega : 2 ≠ 0)] at hs
+    exact ha0 hs.symm
+  have hshift : a * q ^ (-(n : ℤ)) = a / q ^ n := by
+    simp only [zpow_neg, zpow_natCast, div_eq_mul_inv]
+  have htail : a * q ^ (n + 1) = a * q * q ^ n := by rw [pow_succ]; ring
+  rw [hshift, htail] at hB ⊢
+  have hU : [q * r, -q * r, c, d, e, f, a / q ^ n, q ^ (-(n : ℤ))].Perm
+      [q ^ (-(n : ℤ)), q * r, -q * r, c, d, e, f, a / q ^ n] := by
+    simpa only [List.cons_append, List.append_nil, List.nil_append] using
+      (List.perm_middle (a := q ^ (-(n : ℤ)))
+        (l₁ := [q * r, -q * r, c, d, e, f, a / q ^ n]) (l₂ := []))
+  have hL : [r, -r, a * q / c, a * q / d, a * q / e, a * q / f,
+      q ^ (n + 1), a * q * q ^ n].Perm
+      [q ^ (n + 1), r, -r, a * q / c, a * q / d, a * q / e, a * q / f, a * q * q ^ n] := by
+    simpa only [List.cons_append, List.append_nil, List.nil_append] using
+      (List.perm_middle (a := q ^ (n + 1))
+        (l₁ := [r, -r, a * q / c, a * q / d, a * q / e, a * q / f])
+        (l₂ := [a * q * q ^ n]))
+  have hU4 : [e, f, a * q * q ^ n / (c * d), q ^ (-(n : ℤ))].Perm
+      [q ^ (-(n : ℤ)), e, f, a * q * q ^ n / (c * d)] := by
+    simpa only [List.cons_append, List.append_nil, List.nil_append] using
+      (List.perm_middle (a := q ^ (-(n : ℤ))) (l₁ := [e, f, a * q * q ^ n / (c * d)])
+        (l₂ := []))
+  have hL4 : [a * q / c, a * q / d, q ^ (n + 1), e * f / (a * q ^ n)].Perm
+      [q ^ (n + 1), a * q / c, a * q / d, e * f / (a * q ^ n)] := by
+    simpa only [List.cons_append, List.append_nil, List.nil_append] using
+      (List.perm_middle (a := q ^ (n + 1)) (l₁ := [a * q / c, a * q / d])
+        (l₂ := [e * f / (a * q ^ n)]))
+  have hB1 : QBilateralRegular
+      [q ^ (-(n : ℤ)), q * r, -q * r, c, d, e, f, a / q ^ n]
+      [q ^ (n + 1), r, -r, a * q / c, a * q / d, a * q / e, a * q / f, a * q * q ^ n] q :=
+    ⟨fun x hx j => hB.1.1 x (hL.mem_iff.mpr hx) j,
+      fun x hx j => hB.1.2 x (hU.mem_iff.mpr hx) j⟩
+  have hB4 : QBilateralRegular [q ^ (-(n : ℤ)), e, f, a * q * q ^ n / (c * d)]
+      [q ^ (n + 1), a * q / c, a * q / d, e * f / (a * q ^ n)] q :=
+    ⟨fun x hx j => hB.2.1 x (hL4.mem_iff.mpr hx) j,
+      fun x hx j => hB.2.2 x (hU4.mem_iff.mpr hx) j⟩
+  have H := BilateralWatson.eightSeries_eq_fourSeries hr0 hc0 hd0 he0 hf0 hq0 hq n
+    (by simpa only [hs] using hden) (by simpa only [hs] using (And.intro
+      (FiniteBilateral.regularThrough_of_qBilateralRegular hq0 hq hB1 n)
+      (FiniteBilateral.regularThrough_of_qBilateralRegular hq0 hq hB4 n)))
+  rw [FiniteBilateral.qPsi_perm hU hL, FiniteBilateral.qPsi_perm hU4 hL4,
+    show a ^ 2 * q ^ (2 * n + 2) / (c * d * e * f) =
+      BilateralWatson.argument a c d e f q n by
+      unfold BilateralWatson.argument
+      rw [pow_add, show q ^ (2 * n) = (q ^ n) ^ 2 by rw [← pow_mul, Nat.mul_comm n 2]]
+      ring]
+  change BilateralWatson.eightSeries a r c d e f q n =
+    qProductRatio n [a * q, q / a, a * q / (c * d), a * q / (e * f)]
+      [q / c, q / d, a * q / e, a * q / f] q * BilateralWatson.fourSeries a c d e f q n
+  simpa only [hs] using H
 
 /-- DLMF 17.10.4: qPsi2 gaussian bilateral. -/
 @[dlmf 17.10.E4]
@@ -92,7 +159,12 @@ theorem qPsi2_gaussian_bilateral (a c d e f q : ℂ)
       qProductRatioInf [q/c, q/d, a*q/e, a*q/f] [a*q, q/a, a*q/(c*d), a*q/(e*f)] q *
           (∑' n : ℤ, (1-a*q^(2*n))/(1-a) * qPochhammerListInt [c, d, e, f] q n /
           qPochhammerListInt [a*q/c, a*q/d, a*q/e, a*q/f] q n * (q*a^3/(c*d*e*f))^n * q^(n*n)) := by
-  sorry
+  have hr : (a ^ (1 / 2 : ℂ)) ^ 2 = a := by
+    rw [← Complex.cpow_nat_mul]
+    norm_num
+  simpa only [BilateralGaussian.gaussianTerm] using
+    BilateralGaussian.qPsi_two_eq_gaussian hr (hpar a (by simp)) ha (hpar c (by simp))
+      (hpar d (by simp)) (hpar e (by simp)) (hpar f (by simp)) hq0 hq hden hB.1 hB.2 hcd hef
 
 /-- DLMF 17.10.5: qPsi8 connection. -/
 @[dlmf 17.10.E5]

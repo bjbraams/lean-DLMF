@@ -8,6 +8,7 @@ module
 public import DLMF.Gamma.VerticalBounds
 public import DLMF.Gamma.BetaFunction
 public import Mathlib.Analysis.MellinInversion
+public import DLMFMathlib.Analysis.Complex.BarnesResidue
 import DLMF.Gamma.RecipGammaDeriv
 
 /-!
@@ -24,6 +25,9 @@ vertical integrability comes from the bounds of `DLMF.Gamma.VerticalBounds`.
 
 ## Main results
 
+* `Gamma_one_add_mul_Gamma_neg`, `exists_norm_Gamma_one_add_mul_Gamma_neg_le`: reflection
+  and exponential decay for the two-Gamma Barnes kernel.
+* `Gamma_mul_one_add_cpow_neg_barnes`: Mellin inversion in Barnes's contour orientation.
 * `mellin_one_add_cpow_neg`: the Beta integral as a Mellin transform (DLMF 5.12.3).
 * `Gamma_mul_one_add_cpow_neg`: the basic Mellin–Barnes integral above.
 * `exp_neg_eq_integral`: the Cahen–Mellin integral `e^{-u} = 1/(2π) ∫ Γ(σ+iy) u^{-σ-iy} dy`.
@@ -43,6 +47,36 @@ open scoped Topology Real
 noncomputable section
 
 namespace DLMF.Gamma
+
+/-- The reflected Gamma product in a Barnes kernel is a cosecant, with Lean's totalized
+values at integer arguments. -/
+theorem Gamma_one_add_mul_Gamma_neg (t : ℂ) :
+    Gamma (1 + t) * Gamma (-t) = -(π : ℂ) / Complex.sin (π * t) := by
+  have h := Complex.Gamma_mul_Gamma_one_sub (-t)
+  rw [show 1 - -t = 1 + t by ring, show (π : ℂ) * -t = -(π * t) by ring,
+    Complex.sin_neg, div_neg] at h
+  simpa only [mul_comm, neg_div] using h
+
+/-- The two Gamma factors of the basic Barnes kernel decay at rate `π` on any vertical
+line strictly between the poles at `-1` and `0`. -/
+theorem exists_norm_Gamma_one_add_mul_Gamma_neg_le {σ : ℝ} (hσ0 : -1 < σ) (hσ1 : σ < 0) :
+    ∃ C : ℝ, 0 < C ∧ ∀ y : ℝ,
+      ‖Gamma (1 + ((σ : ℂ) + y * I)) * Gamma (-((σ : ℂ) + y * I))‖ ≤
+        C * Real.exp (-(π * |y|)) := by
+  have hs : Real.sin (π * σ) < 0 := Real.sin_neg_of_neg_of_neg_pi_lt
+    (mul_neg_of_pos_of_neg Real.pi_pos hσ1) (by nlinarith [Real.pi_pos])
+  let S := |Real.sin (π * σ)| / 2
+  have hS : 0 < S := div_pos (abs_pos.mpr hs.ne) (by norm_num)
+  refine ⟨π / S, div_pos Real.pi_pos hS, fun y => ?_⟩
+  have hlo := Complex.BarnesResidue.abs_sin_mul_exp_le_norm_sin σ y
+  have hn : 0 < ‖Complex.sin (π * ((σ : ℂ) + y * I))‖ :=
+    (mul_pos hS (Real.exp_pos _)).trans_le hlo
+  rw [Gamma_one_add_mul_Gamma_neg, norm_div, norm_neg, Complex.norm_real,
+    Real.norm_eq_abs, abs_of_pos Real.pi_pos]
+  calc
+    _ ≤ π / (S * Real.exp (π * |y|)) :=
+      div_le_div_of_nonneg_left Real.pi_pos.le (by positivity) hlo
+    _ = _ := by rw [div_mul_eq_div_div, Real.exp_neg]; ring
 
 /-- A bound `C (1+|y|)^K e^{-π|y|/2}` for `Γ(x + i(β+y))`, any real shift `β`. -/
 theorem exists_norm_Gamma_shift_le {x : ℝ} (hx : 0 < x) (β : ℝ) :
@@ -537,5 +571,20 @@ theorem exists_norm_recip_Gamma_shift_le (x β : ℝ) :
       ≤ C * ((1 + |β|) ^ K * (1 + |y|) ^ K) *
           (Real.exp (π * |β| / 2) * Real.exp (π * |y| / 2)) := by gcongr
     _ = _ := by ring
+
+/-- The Mellin–Barnes integral in Barnes's orientation: for `σ < 0 < re a + σ` and `v > 0`,
+`Γ(a)(1+v)^{-a} = 1/(2π) ∫ Γ(-(σ+iy)) Γ(a+σ+iy) v^{σ+iy} dy`. -/
+theorem Gamma_mul_one_add_cpow_neg_barnes {a : ℂ} {σ : ℝ} (hσ : σ < 0) (haσ : 0 < a.re + σ)
+    {v : ℝ} (hv : 0 < v) :
+    Gamma a * ((1 + v : ℝ) : ℂ) ^ (-a) =
+      1 / (2 * π) * ∫ y : ℝ, Gamma (-((σ : ℂ) + I * y)) * Gamma (a + σ + I * y) *
+        (v : ℂ) ^ ((σ : ℂ) + I * y) := by
+  rw [Gamma_mul_one_add_cpow_neg (σ := -σ) (by linarith) (by linarith) hv]
+  congr 1
+  rw [← integral_neg_eq_self]
+  congr 1
+  funext y
+  rw [show (((-σ : ℝ) : ℂ) + ((-y : ℝ) : ℂ) * I) = -((σ : ℂ) + I * y) by push_cast; ring,
+    show a - -((σ : ℂ) + I * y) = a + σ + I * y by ring, neg_neg]
 
 end DLMF.Gamma

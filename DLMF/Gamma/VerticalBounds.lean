@@ -7,7 +7,7 @@ module
 
 public import DLMF.Gamma.Products
 public import DLMF.Gamma.SpecialValues
-public import TauCeti.MeasureTheory.Integral.ExpDecay
+public import DLMFMathlib.Analysis.Fourier.HorizontalStrip
 
 /-!
 # Bounds for the Gamma function on vertical lines
@@ -315,41 +315,7 @@ theorem exists_norm_recip_Gamma_le (X : ℝ) :
 
 /-- Polynomial times `e^{-c|y|}` is integrable on `ℝ`. -/
 theorem integrable_one_add_abs_pow_mul_exp_neg {c : ℝ} (hc : 0 < c) (K : ℕ) :
-    Integrable (fun y : ℝ => (1 + |y|) ^ K * Real.exp (-(c * |y|))) := by
-  -- `(1+t)^K e^{-ct/2}` is bounded on `t ≥ 0`
-  have hlim : Tendsto (fun t : ℝ => (1 + t) ^ K * Real.exp (-(c / 2 * t))) atTop (𝓝 0) := by
-    have hu : Tendsto (fun t : ℝ => c / 2 * (1 + t)) atTop atTop :=
-      (tendsto_atTop_add_const_left _ 1 tendsto_id).const_mul_atTop (half_pos hc)
-    have h := (Real.tendsto_pow_mul_exp_neg_atTop_nhds_zero K).comp hu
-    have h' := h.const_mul ((2 / c) ^ K * Real.exp (c / 2))
-    rw [mul_zero] at h'
-    refine h'.congr' (Eventually.of_forall fun t => ?_)
-    simp only [Function.comp_apply]
-    have hc' : c ≠ 0 := hc.ne'
-    rw [show -(c / 2 * (1 + t)) = -(c / 2 * t) + -(c / 2) by ring, Real.exp_add, mul_pow]
-    have h1 : Real.exp (c / 2) * Real.exp (-(c / 2)) = 1 := by rw [← Real.exp_add]; simp
-    have h2 : (2 / c) ^ K * (c / 2) ^ K = 1 := by rw [← mul_pow]; field_simp; simp
-    linear_combination ((1 + t) ^ K * Real.exp (-(c / 2 * t))) *
-      ((2 / c) ^ K * (c / 2) ^ K * h1 + h2)
-  obtain ⟨M, hM⟩ := (hlim.eventually (gt_mem_nhds one_pos)).exists_forall_of_atTop
-  have hbd : ∃ D : ℝ, ∀ t : ℝ, 0 ≤ t → (1 + t) ^ K * Real.exp (-(c / 2 * t)) ≤ D := by
-    obtain ⟨D, hD⟩ := (isCompact_Icc (a := (0 : ℝ)) (b := max M 0)).exists_bound_of_continuousOn
-      (f := fun t : ℝ => (1 + t) ^ K * Real.exp (-(c / 2 * t))) (by fun_prop)
-    refine ⟨max D 1, fun t ht => ?_⟩
-    by_cases htM : t ≤ max M 0
-    · have := hD t ⟨ht, htM⟩
-      rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)] at this
-      exact this.trans (le_max_left _ _)
-    · push Not at htM
-      exact (hM t (le_of_lt (lt_of_le_of_lt (le_max_left _ _) htM))).le.trans (le_max_right _ _)
-  obtain ⟨D, hD⟩ := hbd
-  refine ((TauCeti.integrable_exp_neg_mul_abs (half_pos hc)).const_mul D).mono'
-    (by fun_prop) (Eventually.of_forall fun y => ?_)
-  rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
-  have h := hD |y| (abs_nonneg y)
-  have he : Real.exp (-(c * |y|)) = Real.exp (-(c / 2 * |y|)) * Real.exp (-(c / 2 * |y|)) := by
-    rw [← Real.exp_add]; ring_nf
-  rw [he, ← mul_assoc]
-  exact mul_le_mul_of_nonneg_right h (Real.exp_pos _).le
+    Integrable (fun y : ℝ => (1 + |y|) ^ K * Real.exp (-(c * |y|))) :=
+  Real.integrable_one_add_abs_pow_mul_exp_neg hc K
 
 end DLMF.Gamma

@@ -6,10 +6,13 @@ Roy, *Special Functions* (1999), henceforth AAR, and was renamed from lean-AAR t
 on 2026-10-21, when the DLMF chapters became its organizing principle. AAR, Temme,
 Beals–Wong and Duverney remain supporting sources.
 
-The [2026-11-05 proof round](REVIEW.md#parallel-dlmf-proof-round-2026-11-05) removes
-25 further direct admissions, leaving **1,008**. Its [manifest](ProofRound20261105.json)
-records twelve elliptic, eight basic hypergeometric and five zeta completions, with compiled
-axiom audits and validation. Existing statements and definition bodies are preserved.
+The [continued 2026-11-05 proof round](REVIEW.md#continued-parallel-dlmf-proof-round-2026-11-05)
+removes **13 further direct admissions**, reducing **1,008 to 995**. Its
+[manifest](ProofRound20261105b.json) records five elliptic, five basic hypergeometric and
+three zeta completions, with compiled axiom audits and validation. Existing statements and
+definition bodies are preserved. The [preceding round](ProofRound20261105.json) removed 25.
+The [approved Lerch transformation repair](REVIEW.md#lerch-transformation-order-exclusion-2026-11-06)
+excludes positive integer orders from its pointwise statement; its proof remains admitted.
 
 Both [approved Chapter 17 repairs](REVIEW.md#approved-chapter-17-statement-repairs-2026-11-05)
 are now proved: Fine's corrected first transformation and the cancelled q-Dixon summation,
@@ -543,7 +546,7 @@ function `G_ℓ`, `H^±_ℓ = G_ℓ ± iF_ℓ`, the Coulomb Wronskian and the li
 integrals for `₂F₁`, `𝐌`, `U`, `W` and AAR Theorem 4.2.1. The two-sided expansion 13.7.2 and the
 Whittaker connection formula are proved. New results include the loop integral 15.6.2 and the
 generalized hypergeometric equation. There are
-now 1,008 remaining source admissions (2026-10-19), including 363 in Airy and
+now 995 remaining source admissions (2026-11-05), including 363 in Airy and
 528 from the Chapters 6–8 acquisition described below. The first prioritized batch
 removed 11 admissions: the Laguerre and Hermite Mehler–Heine limits, Laguerre–Bessel
 integral and uniform bound, three monic moment determinant identities, disk-polynomial

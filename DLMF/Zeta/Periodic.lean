@@ -53,23 +53,6 @@ theorem tendsto_expZeta_partialSum {x : ℝ} (hx : ∀ m : ℤ, x ≠ m) {s : �
       (𝓝 (expZeta (x : UnitAddCircle) s)) :=
   tendsto_sum_exp_div_cpow_expZeta (Or.inl ⟨hx, hs⟩)
 
-/-- **`F(x, s)` is the polylogarithm on the unit circle** (DLMF §25.13): `F(x, s) = Li_s(e^{2πix})`
-for real `x` and `Re s > 1`. -/
-@[dlmf 25.13]
-theorem polylog_exp_eq_expZeta (x : ℝ) {s : ℂ} (hs : 1 < s.re) :
-    polylog s (cexp (2 * π * I * x)) = expZeta (x : UnitAddCircle) s := by
-  have hz : ‖cexp (2 * π * I * x)‖ = 1 := by
-    rw [show 2 * π * I * x = ((2 * π * x : ℝ) : ℂ) * I by push_cast; ring]
-    exact norm_exp_ofReal_mul_I _
-  have h1 := hasSum_polylog_of_norm_eq_one hs hz
-  have h2 := (hasSum_nat_add_iff' 1).mpr (hasSum_expZeta_of_one_lt_re x hs)
-  simp only [Finset.range_one, Finset.sum_singleton, Nat.cast_zero, mul_zero, Complex.exp_zero,
-    zero_cpow (ne_zero_of_one_lt_re hs), div_zero, sub_zero] at h2
-  refine h1.unique (h2.congr_fun fun n => ?_)
-  rw [← Complex.exp_nat_mul]
-  push_cast
-  ring_nf
-
 /-- **Periodicity** (DLMF §25.13): `F(x + 1, s) = F(x, s)`. -/
 @[dlmf 25.13]
 theorem expZeta_add_one (x : ℝ) (s : ℂ) :

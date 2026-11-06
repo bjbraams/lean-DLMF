@@ -13536,3 +13536,6 @@ declaration	DLMF.NumberTheory.isCarmichael_iff_dlmf	DLMF.NumberTheory.isCarmicha
 declaration	DLMF.Weierstrass.instNonemptyPeriodPair_dLMF	DLMF.Weierstrass.instNonemptyPeriodPair	name contained DLMF
 statement	DLMF.QHypergeometric.heine_fine_expansion	DLMF.QHypergeometric.heine_fine_expansion	user-approved correction: first-series denominator (aq²/b;q)_n and regularity [bq,aq/b]
 statement	DLMF.QHypergeometric.q_dixon_terminating	DLMF.QHypergeometric.q_dixon_terminating	user-approved correction: literal quotient requires nonzero denominator; cancelled extension is q_dixon_terminating' in DLMF.QHypergeometric.Dixon
+module	DLMF.Zeta.LerchContinuation	DLMF.Zeta.Basic.LerchContinuation	foundational canonical home; original module retained as an import shim
+declaration	DLMF.Gamma.integrable_one_add_abs_pow_mul_exp_neg	Real.integrable_one_add_abs_pow_mul_exp_neg	general analysis moved to DLMFMathlib; original declaration retained as an adapter
+declaration	DLMF.Hypergeometric.Gamma_mul_one_add_cpow_neg_barnes	DLMF.Gamma.Gamma_mul_one_add_cpow_neg_barnes	Gamma-specific Mellin inversion moved to its area; original adapter retained

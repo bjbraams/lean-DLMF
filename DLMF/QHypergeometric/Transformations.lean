@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.QHypergeometric.Convergence
+public import DLMF.QHypergeometric.ClausenSummation
 public import DLMF.QHypergeometric.SearsTransformation
 public import DLMF.QHypergeometric.SearsLimit
 public import DLMF.QSeries.RamanujanPsi
@@ -659,7 +660,12 @@ theorem qPhi4_square (a b q z : ℂ)
     (hterm : QTerminating [a,b,a*b*z,a*b/z] q ∧ QTerminating [a^2,b^2,a*b,a*b*z,a*b/z] q) :
     qPhi [a,b,a*b*z,a*b/z] [a*b*q^(1/2:ℂ),-a*b*q^(1/2:ℂ),-a*b] q (q) ^ 2 =
       qPhi [a^2,b^2,a*b,a*b*z,a*b/z] [a*b*q^(1/2:ℂ),-a*b*q^(1/2:ℂ),-a*b,a^2*b^2] q (q) := by
-  sorry
+  have hB : ∀ j : ℕ, (a * b) ^ 2 * q ^ j ≠ 1 := by
+    intro j
+    simpa only [mul_pow] using hden (a ^ 2 * b ^ 2) (by simp) j
+  simpa only [ClausenSummation.firstSeries, ClausenSummation.secondSeries,
+    neg_mul, mul_pow] using
+    ClausenSummation.square_of_terminating hq0 hq hB hterm.1 (hpar z (by simp))
 
 /-- The `q`-binomial sum along a shifted argument `w Q^j`. -/
 private lemma tsum_qBinomial_shift {a w Q : ℂ} (hQ : ‖Q‖<1) (hw : ‖w‖<1)

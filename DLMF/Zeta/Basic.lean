@@ -8,6 +8,9 @@ module
 public import DLMF.Zeta.Basic.Hurwitz
 public import DLMF.Zeta.Basic.HurwitzProperties
 public import DLMF.Zeta.Basic.Polylog
+public import DLMF.Zeta.Basic.PolylogProperties
+public import DLMF.Zeta.Basic.LerchContinuation
+public import DLMF.Zeta.Basic.LerchProperties
 public import DLMF.Zeta.Basic.Riemann
 public import DLMF.Zeta.Basic.RiemannProperties
 
@@ -27,4 +30,10 @@ their basic properties.
 * `DLMF.Zeta.Basic.HurwitzProperties`: parameter derivatives and joint holomorphy.
 * `DLMF.Zeta.Basic.Polylog`: the polylogarithm `Li_s(z)`, Lerch's transcendent `Φ(z, s, a)` and
   the Fermi–Dirac and Bose–Einstein integrals.
+* `DLMF.Zeta.Basic.LerchProperties`: the branch predicate and analytic API of Lerch’s
+  transcendent.
+* `DLMF.Zeta.Basic.LerchContinuation`: existence and uniqueness of the principal continuation
+  of Lerch's series, including its order-lowering recurrence.
+* `DLMF.Zeta.Basic.PolylogProperties`: holomorphy, the derivative recurrence, orders zero and
+  one, the unit-circle series and the bridge to Mathlib's periodic zeta function.
 -/

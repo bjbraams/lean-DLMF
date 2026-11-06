@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Bailey
-public import DLMF.QHypergeometric.BilateralTransformations
+public import DLMF.QHypergeometric.Transformations
 
 /-!
 # Finite bilateral transformations
@@ -319,5 +319,270 @@ lemma continuousAt_qPsi_finite {a b : List (ℂ → ℂ)} {z : ℂ → ℂ} {x :
     · exact continuousAt_const
     · exact hb f hf
   simpa only [List.map_cons] using (continuousAt_qPsiTerm hq0 hq hA hB hz hz0 hreg k).tendsto
+
+/-- A monomial upper parameter has no finite shifted-factorial zeros near a point except
+possibly at the point itself. -/
+lemma eventually_qPochhammer_mul_pow_ne_zero (u q r₀ : ℂ) (m N : ℕ) (hm : 0 < m) :
+    ∀ᶠ r in 𝓝[≠] r₀, qPochhammer (u * r ^ m) q N ≠ 0 := by
+  have H : ∀ᶠ r in 𝓝[≠] r₀, ∀ j ∈ range N, 1 - u * r ^ m * q ^ j ≠ 0 := by
+    rw [eventually_all_finset]
+    intro j hj
+    let P : Polynomial ℂ := 1 - Polynomial.C (u * q ^ j) * Polynomial.X ^ m
+    have hp : P ≠ 0 := by
+      intro he
+      have h := congrArg (fun p : Polynomial ℂ => p.eval 0) he
+      simp [P, Nat.ne_of_gt hm] at h
+    have h := (Polynomial.eventually_eval_ne_zero_cofinite hp).filter_mono
+      (nhdsNE_le_cofinite r₀)
+    simpa only [P, Polynomial.eval_sub, Polynomial.eval_one, Polynomial.eval_mul,
+      Polynomial.eval_C, Polynomial.eval_pow, Polynomial.eval_X, mul_assoc,
+      mul_left_comm, mul_comm] using h
+  filter_upwards [H] with r hr
+  rw [qPochhammer_eq_prod]
+  exact prod_ne_zero_iff.mpr hr
+
+/-- A reciprocal monomial upper parameter has no finite shifted-factorial zeros near a point
+except possibly at that point. -/
+lemma eventually_qPochhammer_div_pow_ne_zero {u q : ℂ} (hu0 : u ≠ 0) (hq0 : q ≠ 0)
+    (r₀ : ℂ) (m N : ℕ) (hm : 0 < m) :
+    ∀ᶠ r in 𝓝[≠] r₀, qPochhammer (u / r ^ m) q N ≠ 0 := by
+  have hr0 : ∀ᶠ r in 𝓝[≠] r₀, r ≠ 0 :=
+    le_cofinite_iff_eventually_ne.mp (nhdsNE_le_cofinite r₀) 0
+  filter_upwards [hr0, eventually_qPochhammer_mul_pow_ne_zero
+    (q ^ (1 - (N : ℤ)) / u) q r₀ m N hm] with r hr hp
+  have hz : u / r ^ m ≠ 0 := div_ne_zero hu0 (pow_ne_zero _ hr)
+  rw [qPochhammer_reverse hz hq0,
+    show q ^ (1 - (N : ℤ)) / (u / r ^ m) = (q ^ (1 - (N : ℤ)) / u) * r ^ m by field_simp]
+  exact mul_ne_zero (mul_ne_zero hp (pow_ne_zero _ (neg_ne_zero.mpr hz)))
+    (pow_ne_zero _ hq0)
+
+/-- The lower natural-index products and upper negative-index prefixes are regular on the
+finite bilateral interval `[-N,N]`. -/
+def RegularThrough (a b : List ℂ) (q : ℂ) (N : ℕ) : Prop :=
+  (∀ x ∈ b, qPochhammer x q N ≠ 0) ∧
+    (∀ x ∈ a, qPochhammer (x / q ^ N) q N ≠ 0)
+
+/-- Full bilateral regularity implies regularity on each finite interval. -/
+lemma regularThrough_of_qBilateralRegular {a b : List ℂ} {q : ℂ} (hq0 : q ≠ 0)
+    (hq : ‖q‖ < 1) (hB : QBilateralRegular a b q) (N : ℕ) : RegularThrough a b q N := by
+  exact ⟨fun x hx => qPochhammer_ne_zero_of_mem_qDenominatorRegular hq hB.1 hx N,
+    fun x hx => qPochhammer_div_pow_ne_zero hq0 (hB.2 x hx) N⟩
+
+/-- Nonvanishing of a negative-index prefix implies nonvanishing of every shorter suffix. -/
+lemma qPochhammer_div_pow_ne_zero_of_le {x q : ℂ} (hq0 : q ≠ 0) {m N : ℕ} (hm : m ≤ N)
+    (hN : qPochhammer (x / q ^ N) q N ≠ 0) : qPochhammer (x / q ^ m) q m ≠ 0 := by
+  have hpow : q ^ (N - m) * q ^ m = q ^ N := by
+    rw [← pow_add, Nat.sub_add_cancel hm]
+  have harg : x / q ^ N * q ^ (N - m) = x / q ^ m := by
+    rw [← hpow]
+    field_simp
+  have H := qPochhammer_add (x / q ^ N) q (N - m) m
+  rw [Nat.sub_add_cancel hm, harg] at H
+  rw [H] at hN
+  exact right_ne_zero_of_mul hN
+
+/-- Finite bilateral term continuity needs regularity only on the retained interval. -/
+lemma continuousAt_qPsiTerm_of_regularThrough {a b : List (ℂ → ℂ)} {z : ℂ → ℂ} {x : ℂ}
+    {q : ℂ} (hq0 : q ≠ 0) (ha : ∀ f ∈ a, ContinuousAt f x)
+    (hb : ∀ f ∈ b, ContinuousAt f x) (hz : ContinuousAt z x) (hz0 : z x ≠ 0)
+    (N : ℕ) (hreg : RegularThrough (a.map fun f => f x) (b.map fun f => f x) q N)
+    (k : ℤ) (hk : -(N : ℤ) ≤ k ∧ k ≤ N) :
+    ContinuousAt (fun y => qPsiTerm (a.map fun f => f y) (b.map fun f => f y) q (z y) k) x := by
+  have hnonzero (l : List ℂ) (n : ℕ) (hl : ∀ u ∈ l, qPochhammer u q n ≠ 0) :
+      qPochhammerList l q n ≠ 0 := by
+    apply List.prod_ne_zero
+    simp only [List.mem_map, not_exists, not_and]
+    intro u hu he
+    exact hl u hu he
+  cases k with
+  | ofNat j =>
+    simp only [Int.ofNat_eq_natCast] at hk
+    have hj : j ≤ N := by omega
+    have hd : qPochhammerList (b.map fun f => f x) q j ≠ 0 :=
+      hnonzero _ j fun u hu => qPochhammer_ne_zero_of_le (hreg.1 u hu) hj
+    simp only [Int.ofNat_eq_natCast, qPsiTerm, qPochhammerListInt_natCast,
+      qPsiExponent, List.length_map]
+    exact (((continuousAt_qPochhammerList ha q j).div₀
+      (continuousAt_qPochhammerList hb q j) hd).fun_mul continuousAt_const).fun_mul
+      (hz.zpow₀ _ (Or.inl hz0))
+  | negSucc j =>
+    have hj : j + 1 ≤ N := by omega
+    have hp (l : List (ℂ → ℂ)) (hl : ∀ f ∈ l, ContinuousAt f x) :
+        ContinuousAt (fun y => qPochhammerList
+          ((l.map fun f => f y).map fun u => u * q ^ (-((j : ℤ) + 1))) q (j + 1)) x := by
+      have hc : ∀ f ∈ l.map (fun f => fun y => f y * q ^ (-((j : ℤ) + 1))),
+          ContinuousAt f x := by
+        intro f hf
+        rcases List.mem_map.mp hf with ⟨g, hg, rfl⟩
+        exact (hl g hg).fun_mul continuousAt_const
+      simpa only [List.map_map, Function.comp_def] using
+        continuousAt_qPochhammerList hc q (j + 1)
+    have hd : qPochhammerList ((a.map fun f => f x).map
+        fun u => u * q ^ (-((j : ℤ) + 1))) q (j + 1) ≠ 0 := by
+      apply hnonzero
+      intro u hu
+      rcases List.mem_map.mp hu with ⟨v, hv, rfl⟩
+      rw [show v * q ^ (-((j : ℤ) + 1)) = v / q ^ (j + 1) by
+        rw [show (j : ℤ) + 1 = ((j + 1 : ℕ) : ℤ) by push_cast; rfl,
+          zpow_neg, zpow_natCast, div_eq_mul_inv]]
+      exact qPochhammer_div_pow_ne_zero_of_le hq0 hj (hreg.2 v hv)
+    simp only [qPsiTerm_negSucc, qPsiExponent, List.length_map]
+    exact (((hp b hb).div₀ (hp a ha) hd).fun_mul continuousAt_const).fun_mul
+      (hz.zpow₀ _ (Or.inl hz0))
+
+/-- Doubly terminating bilateral series are continuous on their finite regularity domain.
+No exclusion is imposed on upper products beyond the retained interval. -/
+lemma continuousAt_qPsi_finite_of_regularThrough {a b : List (ℂ → ℂ)} {z : ℂ → ℂ} {x : ℂ}
+    {q : ℂ} (hq0 : q ≠ 0) (ha : ∀ f ∈ a, ContinuousAt f x)
+    (hb : ∀ f ∈ b, ContinuousAt f x) (hz : ContinuousAt z x) (hz0 : z x ≠ 0) (N : ℕ)
+    (hreg : RegularThrough (q ^ (-(N : ℤ)) :: a.map fun f => f x)
+      (q ^ (N + 1) :: b.map fun f => f x) q N) :
+    ContinuousAt (fun y => qPsi (q ^ (-(N : ℤ)) :: a.map fun f => f y)
+      (q ^ (N + 1) :: b.map fun f => f y) q (z y)) x := by
+  simp_rw [qPsi_eq_sum_Icc hq0 N N]
+  change Tendsto _ (𝓝 x) (𝓝 _)
+  apply tendsto_finsetSum
+  intro k hk
+  have hA : ∀ f ∈ (fun _ : ℂ => q ^ (-(N : ℤ))) :: a, ContinuousAt f x := by
+    intro f hf
+    rcases List.mem_cons.mp hf with rfl | hf
+    · exact continuousAt_const
+    · exact ha f hf
+  have hB : ∀ f ∈ (fun _ : ℂ => q ^ (N + 1)) :: b, ContinuousAt f x := by
+    intro f hf
+    rcases List.mem_cons.mp hf with rfl | hf
+    · exact continuousAt_const
+    · exact hb f hf
+  simpa only [List.map_cons] using
+    (continuousAt_qPsiTerm_of_regularThrough hq0 hA hB hz hz0 N hreg k
+      (Finset.mem_Icc.mp hk)).tendsto
+
+/-- A negative integer index gives the inverse of an ordinary shifted-factorial product. -/
+lemma qPochhammerListInt_neg_natCast (a : List ℂ) (q : ℂ) (k : ℕ) :
+    qPochhammerListInt a q (-(k : ℤ)) =
+      (qPochhammerList (a.map fun x => x * q ^ (-(k : ℤ))) q k)⁻¹ := by
+  have hP (x : ℂ) : qPochhammerInt x q (-(k : ℤ)) =
+      (qPochhammer (x * q ^ (-(k : ℤ))) q k)⁻¹ := by
+    cases k with
+    | zero => simp [qPochhammerInt]
+    | succ j =>
+      simpa only [Nat.cast_add, Nat.cast_one, Int.negSucc_eq] using
+        qPochhammerInt_negSucc x q j
+  induction a with
+  | nil => simp [qPochhammerListInt, qPochhammerList]
+  | cons x a ih =>
+    simp only [qPochhammerListInt, qPochhammerList, List.map_cons,
+      List.prod_cons, hP, mul_inv] at ih ⊢
+    rw [ih]
+
+/-- Equal-length lists have a negative-shift quotient with no residual quadratic q-power.
+-/
+lemma qPochhammerList_shift_negative_ratio {a b : List ℂ} {q : ℂ} (hq0 : q ≠ 0)
+    (hlen : a.length = b.length) (ha : ∀ x ∈ a, x ≠ 0) (hb : ∀ x ∈ b, x ≠ 0) (k : ℕ) :
+    qPochhammerList (b.map fun x => x * q ^ (-(k : ℤ))) q k /
+        qPochhammerList (a.map fun x => x * q ^ (-(k : ℤ))) q k =
+      qPochhammerList (b.map fun x => q / x) q k /
+        qPochhammerList (a.map fun x => q / x) q k * (b.prod / a.prod) ^ k := by
+  induction a generalizing b with
+  | nil =>
+    have hb' : b = [] := List.eq_nil_of_length_eq_zero (by simpa using hlen.symm)
+    subst b
+    simp [qPochhammerList]
+  | cons x a ih =>
+    cases b with
+    | nil => simp at hlen
+    | cons y b =>
+      have hlen' : a.length = b.length := by simpa using hlen
+      have H := ih hlen' (fun u hu => ha u (by simp [hu]))
+        (fun u hu => hb u (by simp [hu]))
+      have hx := ha x (by simp)
+      have hy := hb y (by simp)
+      simp only [qPochhammerList, List.map_cons, List.prod_cons] at H ⊢
+      rw [mul_div_mul_comm, qPochhammer_shift_negative_ratio hy hx hq0 k, H]
+      simp only [mul_div_mul_comm, mul_pow]
+      ring
+
+/-- Reflection of an equal-order bilateral term interchanges reciprocal parameter lists.
+The identity retains totalized zeros of finite shifted products. -/
+lemma qPsiTerm_reflect {a b : List ℂ} {q z : ℂ} (hq0 : q ≠ 0)
+    (hlen : a.length = b.length) (ha : ∀ x ∈ a, x ≠ 0) (hb : ∀ x ∈ b, x ≠ 0) (k : ℕ) :
+    qPsiTerm a b q z (-(k : ℤ)) =
+      qPsiTerm (b.map fun x => q / x) (a.map fun x => q / x) q
+        (b.prod / (a.prod * z)) (k : ℤ) := by
+  have he : qPsiExponent a b = 0 := by simp [qPsiExponent, hlen]
+  have he' : qPsiExponent (b.map fun x => q / x) (a.map fun x => q / x) = 0 := by
+    simp [qPsiExponent, hlen]
+  simp only [qPsiTerm, he, he', zpow_zero, mul_one, qPochhammerListInt_neg_natCast,
+    qPochhammerListInt_natCast, inv_div_inv]
+  rw [qPochhammerList_shift_negative_ratio hq0 hlen ha hb k]
+  simp only [zpow_natCast, zpow_neg, ← inv_pow, mul_assoc, ← mul_pow]
+  congr 2
+  ring
+
+/-- Finite shifted-product inverses are bounded uniformly in both shift and length whenever
+the corresponding infinite product is nonzero. -/
+lemma exists_norm_inv_qPochhammer_shift_le {z q : ℂ} (hq : ‖q‖ < 1)
+    (hz : qPochhammerInf z q ≠ 0) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ M k : ℕ, ‖(qPochhammer (z * q ^ M) q k)⁻¹‖ ≤ C := by
+  obtain ⟨B, hB⟩ := RamanujanPsi.exists_norm_inv_qPochhammer_le hq hz
+  have hB0 : 0 ≤ B := (norm_nonneg _).trans (hB 0)
+  let E := Real.exp (‖z‖ / (1 - ‖q‖))
+  have hprefix (M : ℕ) : qPochhammer z q M ≠ 0 := by
+    intro he
+    apply hz
+    rw [qPochhammerInf_mul_qPochhammer hq M, he, zero_mul]
+  refine ⟨E * B, by positivity, ?_⟩
+  intro M k
+  have hM := hprefix M
+  have hMk := hprefix (M + k)
+  have he : (qPochhammer (z * q ^ M) q k)⁻¹ =
+      qPochhammer z q M * (qPochhammer z q (M + k))⁻¹ := by
+    rw [qPochhammer_add]
+    field_simp
+  rw [he, norm_mul]
+  exact mul_le_mul (norm_qPochhammer_le_exp hq M) (hB (M + k))
+    (norm_nonneg _) (by positivity)
+
+/-- A finite list of shifted factorials tends to the corresponding infinite product. -/
+lemma tendsto_qPochhammerList (a : List ℂ) {q : ℂ} (hq : ‖q‖ < 1) :
+    Tendsto (fun k : ℕ => qPochhammerList a q k) atTop (𝓝 (qPochhammerListInf a q)) := by
+  induction a with
+  | nil => simp only [qPochhammerList, qPochhammerListInf, List.map_nil, List.prod_nil]
+           exact tendsto_const_nhds
+  | cons x a ih =>
+    simpa only [qPochhammerList, qPochhammerListInf, List.map_cons, List.prod_cons] using
+      (tendsto_qPochhammer (w := x) hq).mul ih
+
+/-- Regular lower parameters have a nonzero product of infinite shifted factorials. -/
+lemma qPochhammerListInf_ne_zero {b : List ℂ} {q : ℂ} (hq : ‖q‖ < 1)
+    (hb : QDenominatorRegular b q) : qPochhammerListInf b q ≠ 0 := by
+  apply List.prod_ne_zero
+  simp only [List.mem_map, not_exists, not_and]
+  intro x hx he
+  apply qPochhammerInf_ne_zero hq (fun j => sub_ne_zero.mpr (Ne.symm (hb x hx j))) he
+
+/-- A quotient of fixed finite products is uniformly bounded when its lower parameters are
+regular in the open unit disk. -/
+lemma exists_norm_qPochhammerList_ratio_le (a : List ℂ) {b : List ℂ} {q : ℂ}
+    (hq : ‖q‖ < 1) (hb : QDenominatorRegular b q) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ k : ℕ, ‖qPochhammerList a q k / qPochhammerList b q k‖ ≤ C := by
+  have H := (tendsto_qPochhammerList a hq).div (tendsto_qPochhammerList b hq)
+    (qPochhammerListInf_ne_zero hq hb)
+  obtain ⟨C, hC⟩ := H.norm.bddAbove_range
+  have hbound (k : ℕ) : ‖qPochhammerList a q k / qPochhammerList b q k‖ ≤ C := hC ⟨k, rfl⟩
+  exact ⟨C, (norm_nonneg _).trans (hbound 0), hbound⟩
+
+/-- Upper parameters avoiding the positive q-lattice give regular reciprocal lower parameters.
+-/
+lemma qDenominatorRegular_reciprocal {a : List ℂ} {q : ℂ} (ha0 : ∀ x ∈ a, x ≠ 0)
+    (ha : ∀ x ∈ a, ∀ j : ℕ, x ≠ q ^ (j + 1)) :
+    QDenominatorRegular (a.map fun x => q / x) q := by
+  intro x hx j he
+  rcases List.mem_map.mp hx with ⟨u, hu, rfl⟩
+  have hu0 := ha0 u hu
+  have hpow : q * q ^ j = u := by field_simp at he; exact he
+  apply ha u hu j
+  rw [pow_succ]
+  linear_combination -hpow
 
 end DLMF.QHypergeometric.FiniteBilateral

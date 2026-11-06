@@ -9,6 +9,7 @@ public import DLMF.EllipticIntegrals.Symmetric
 public import Carlson.Elliptic.Asymptotic
 public import DLMF.EllipticIntegrals.SymmetricAddition
 public import DLMF.EllipticIntegrals.SymmetricSpecialCasesRD
+public import DLMF.EllipticIntegrals.SymmetricInequalities
 
 /-!
 # Asymptotic approximations of the symmetric elliptic integrals (DLMF §19.27)
@@ -25,7 +26,7 @@ arguments when some arguments are much smaller than the others, with relative or
 
 ## Main results
 
-* `symmetricEllipticRF_asymp_large_z`, `symmetricEllipticRF_asymp_small_x`: DLMF 19.27.2, 19.27.3.
+* `symmetricEllipticRF_asymp_small_x`: DLMF 19.27.3.
 * `symmetricEllipticRF_isEquivalent_atTop`, `symmetricEllipticRF_zero_isEquivalent`: the leading
   term of 19.27.2 as an asymptotic equivalence.
 * `symmetricEllipticRG_asymp_large_z`, `symmetricEllipticRG_asymp_small_x`,
@@ -33,10 +34,14 @@ arguments when some arguments are much smaller than the others, with relative or
 * `symmetricEllipticRD_asymp_large_z`, `symmetricEllipticRD_asymp_small_z`,
   `symmetricEllipticRD_asymp_large_x`, `symmetricEllipticRD_asymp_small_x`: DLMF 19.27.7–19.27.10
   (19.27.8 corrected).
-* `symmetricEllipticRJ_asymp_large_p`, `symmetricEllipticRJ_small_p_bounds`: DLMF 19.27.11 and the
-  corrected 19.27.12.
-* `symmetricEllipticRJ_asymp_small_xy`, `symmetricEllipticRJ_asymp_small_xp`,
-  `symmetricEllipticRJ_asymp_small_x`, `symmetricEllipticRJ_asymp_large_x`: DLMF 19.27.13–19.27.16.
+* `symmetricEllipticRJ_small_p_bounds`: the corrected DLMF 19.27.12.
+* `symmetricEllipticRJ_asymp_small_xy`, `symmetricEllipticRJ_asymp_large_x`: DLMF 19.27.13 and
+  19.27.16.
+
+The logarithmic formula 19.27.2 is in
+`DLMF.EllipticIntegrals.SymmetricLogarithmicAsymptotics`.
+The endpoint formulas 19.27.11, 19.27.14 and 19.27.15 are in
+`DLMF.EllipticIntegrals.SymmetricEndpointRegularization`.
 
 ## Implementation notes
 
@@ -242,17 +247,6 @@ def ellAsymTriple : Set (ℝ × ℝ × ℝ) :=
     (q.1 = 0 → q.2.1 ≠ 0 ∧ q.2.2 ≠ 0) ∧ (q.2.1 = 0 → q.2.2 ≠ 0)}
 
 /-! ### §19.27(ii) `R_F` -/
-
-/-- DLMF 19.27.2: `R_F(x, y, z) = (1/(2√z)) ln(8z/(a + g)) (1 + O(a/z))` as `a/z → 0`: for fixed
-`z > 0`, as `(x, y) → 0` through nonnegative pairs not both zero. -/
-@[dlmf 19.27.E2]
-theorem symmetricEllipticRF_asymp_large_z {z : ℝ} (hz : 0 < z) :
-    (fun q : ℝ × ℝ => symmetricEllipticRF q.1 q.2 z -
-        ((Real.log (8 * z / (ellAsymA q.1 q.2 + ellAsymG q.1 q.2)) / (2 * √z) : ℝ) : ℂ))
-            =O[𝓝[ellAsymPair] 0]
-      (fun q : ℝ × ℝ => ((ellAsymA q.1 q.2 / z *
-        (Real.log (8 * z / (ellAsymA q.1 q.2 + ellAsymG q.1 q.2)) / (2 * √z)) : ℝ) : ℂ)) := by
-  sorry
 
 /-- DLMF 19.27.3: `R_F(x, y, z) = R_F(0, y, z) - (1/√h)(√(x/h) + O(x/h))` as `x/h → 0`: for
 fixed `y, z > 0`, as `x → 0+`. -/
@@ -592,7 +586,160 @@ theorem symmetricEllipticRD_asymp_small_z {x y : ℝ} (hx : 0 < x) (hy : 0 < y) 
         (((3 / √(x * y * z) : ℝ) : ℂ) - 6 / (x * y : ℝ) * symmetricEllipticRG x y 0)) =O[𝓝[>] 0]
       (fun z : ℝ => 6 / (x * y : ℝ) * symmetricEllipticRG x y 0 *
           ((√(z / ellAsymG x y) : ℝ) : ℂ)) := by
-  sorry
+  let r : ℝ := √x * √y
+  let k : ℝ := √x + √y
+  let l : ℂ → ℂ := fun t => (r : ℂ) + (k : ℂ) * t
+  let q : ℂ → Fin 3 → ℂ := fun t => ![(x : ℂ) + l t, (y : ℂ) + l t, t ^ 2 + l t]
+  let G : ℂ → ℂ := fun t => Carlson.carlsonR (-3 / 2) ![1 / 2, 1 / 2, 3 / 2] (q t)
+  let F : ℂ → ℂ := fun t => 2 * G t - 3 * ((k : ℂ) + t) /
+    ((r : ℂ) * (t ^ 2 + l t))
+  have hr : 0 < r := by dsimp [r]; positivity
+  have hk : 0 < k := by dsimp [k]; positivity
+  have hxr : 0 < x + r := by positivity
+  have hyr : 0 < y + r := by positivity
+  have hp : q 0 ∈ Carlson.carlsonRSlitDomain := by
+    intro i
+    fin_cases i
+    · simpa [q, l, ← ofReal_add] using ofReal_mem_slitPlane.mpr hxr
+    · simpa [q, l, ← ofReal_add] using ofReal_mem_slitPlane.mpr hyr
+    · simpa [q, l] using ofReal_mem_slitPlane.mpr hr
+  have hl : AnalyticAt ℂ l 0 := analyticAt_const.add (analyticAt_const.mul analyticAt_id)
+  have hq : AnalyticAt ℂ q 0 := by
+    apply analyticAt_pi_iff.mpr
+    intro i
+    fin_cases i
+    · exact analyticAt_const.add hl
+    · exact analyticAt_const.add hl
+    · exact (analyticAt_id.pow 2).add hl
+  have hG : AnalyticAt ℂ G 0 := by
+    unfold G Carlson.carlsonR
+    exact analyticAt_const.mul ((Carlson.analyticOnNhd_regCarlsonR _ _ _ hp).comp hq)
+  have ha : AnalyticAt ℂ F 0 := by
+    apply (analyticAt_const.mul hG).sub
+    apply (analyticAt_const.mul (analyticAt_const.add analyticAt_id)).div
+      (analyticAt_const.mul ((analyticAt_id.pow 2).add hl))
+    simpa [l] using mul_ne_zero (ofReal_ne_zero.mpr hr.ne') (ofReal_ne_zero.mpr hr.ne')
+  have hGval (t : ℝ) (ht : 0 ≤ t) : G t =
+      symmetricEllipticRD (x + (r + k * t) : ℝ) (y + (r + k * t) : ℝ)
+        (t ^ 2 + (r + k * t) : ℝ) := by
+    have hlp : 0 < r + k * t := add_pos_of_pos_of_nonneg hr (mul_nonneg hk.le ht)
+    rw [symmetricEllipticRD_eq_symmetricEllipticR
+      (ofReal_mem_slitPlane.mpr (by linarith : 0 < x + (r + k * t)))
+      (ofReal_mem_slitPlane.mpr (by linarith : 0 < y + (r + k * t)))
+      (ofReal_mem_slitPlane.mpr (by nlinarith : 0 < t ^ 2 + (r + k * t))),
+      symmetricEllipticR_of_mem _ _ (by
+        intro i
+        fin_cases i <;> exact ofReal_mem_slitPlane.mpr (by positivity))]
+    dsimp only [G, q, l]
+    push_cast
+    simp only [neg_div]
+  have hF (z : ℝ) (hz : 0 < z) : F (√z : ℂ) =
+      symmetricEllipticRD x y z - ((3 / √(x * y * z) : ℝ) : ℂ) := by
+    have hd := symmetricEllipticRD_duplication_of_nonneg hx.le hy hz
+    have hlv : √x * √y + √y * √z + √z * √x = r + k * √z := by dsimp [r, k]; ring
+    rw [hlv] at hd
+    dsimp only at hd
+    dsimp only [F, l]
+    rw [hGval _ (Real.sqrt_nonneg z)]
+    simp only [← ofReal_pow, Real.sq_sqrt hz.le]
+    have hsr : √(x * y * z) = r * √z := by
+      rw [Real.sqrt_mul (mul_pos hx hy).le, Real.sqrt_mul hx.le]
+    rw [hsr]
+    have hrat : -(3 * (k + √z) / (r * (z + (r + k * √z)))) =
+        3 / (√z * (z + (r + k * √z))) - 3 / (r * √z) := by
+      field_simp [hr.ne', (Real.sqrt_pos.mpr hz).ne',
+        show z + (r + k * √z) ≠ 0 by positivity]
+      nlinarith [Real.sq_sqrt hz.le]
+    have hc := congrArg (fun v : ℝ => (v : ℂ)) hrat
+    push_cast at hd hc ⊢
+    linear_combination hc - hd
+  have hF0 : F 0 = -6 / (x * y : ℝ) * symmetricEllipticRG x y 0 := by
+    have hdup : 2 * symmetricEllipticRG 0 x y =
+        4 * symmetricEllipticRG r (x + r : ℝ) (y + r : ℝ) -
+          (r : ℂ) * symmetricEllipticRF 0 x y - k := by
+      have H := symmetricEllipticRG_duplication_of_nonneg (x := 0) le_rfl hx hy
+      simp only [Real.sqrt_zero, zero_mul, mul_zero, zero_add, add_zero, ofReal_zero] at H
+      dsimp only [r, k]
+      push_cast at H ⊢
+      linear_combination H
+    have hrf : symmetricEllipticRF 0 x y =
+        2 * symmetricEllipticRF r (x + r : ℝ) (y + r : ℝ) := by
+      have H := symmetricEllipticRF_duplication_sqrt (x := 0) le_rfl hx hy
+      simp only [Real.sqrt_zero, mul_zero, zero_add, add_zero, ofReal_zero] at H
+      rw [symmetricEllipticRF_eq_carlsonRF (ofReal_mem_slitPlane.mpr hr)
+        (ofReal_mem_slitPlane.mpr hxr) (ofReal_mem_slitPlane.mpr hyr)]
+      exact H
+    have htwo := two_mul_symmetricEllipticRG
+      (Or.inl (ofReal_mem_slitPlane.mpr hxr)) (ofReal_mem_slitPlane.mpr hyr)
+      (ofReal_mem_slitPlane.mpr hr)
+    rw [Carlson.ofReal_cpow_half hxr.le, Carlson.ofReal_cpow_half hyr.le,
+      show (-1 / 2 : ℂ) = -(1 / 2) by ring, cpow_neg, Carlson.ofReal_cpow_half hr.le] at htwo
+    have hs : √(x + r) * √(y + r) / √r = k := by
+      have H := sqrt_product_duplication_boundary hx.le hy.le
+      change √r * √(x + r) * √(y + r) = r * k at H
+      apply (div_eq_iff (Real.sqrt_pos.mpr hr).ne').mpr
+      apply mul_left_cancel₀ (Real.sqrt_pos.mpr hr).ne'
+      rw [← mul_assoc, H]
+      linear_combination -(k : ℝ) * Real.sq_sqrt hr.le
+    have hsC := congrArg (fun v : ℝ => (v : ℂ)) hs
+    push_cast at hsC
+    rw [show (√(x + r) : ℂ) * √(y + r) * (√r : ℂ)⁻¹ = (k : ℂ) by
+      exact hsC] at htwo
+    rw [symmetricEllipticRG_comm_right, symmetricEllipticRG_comm_left,
+      symmetricEllipticRF_comm_right, symmetricEllipticRF_comm_left] at htwo
+    have hr2 : r ^ 2 = x * y := by
+      dsimp [r]
+      rw [mul_pow, Real.sq_sqrt hx.le, Real.sq_sqrt hy.le]
+    have hg0 : G 0 = symmetricEllipticRD (x + r : ℝ) (y + r : ℝ) r := by
+      simpa only [ofReal_zero, mul_zero, zero_pow two_ne_zero, zero_add, add_zero] using
+        hGval 0 le_rfl
+    dsimp only [F, l]
+    rw [hg0]
+    simp only [zero_pow two_ne_zero, mul_zero, zero_add, add_zero]
+    rw [symmetricEllipticRG_comm_right, symmetricEllipticRG_comm_left, ← hr2]
+    push_cast at hdup hrf htwo ⊢
+    have hr2C : (r : ℂ) ^ 2 = (x : ℂ) * y := by exact_mod_cast hr2
+    field_simp [ofReal_ne_zero.mpr hr.ne']
+    linear_combination 3 * hdup - 3 * (r : ℂ) * hrf + 6 * htwo +
+      2 * symmetricEllipticRD ((x : ℂ) + r) ((y : ℂ) + r) r * hr2C
+  have hlim : Tendsto (fun z : ℝ => (√z : ℂ)) (𝓝[>] 0) (𝓝 0) := by
+    simpa only [Function.comp_def, Real.sqrt_zero, ofReal_zero] using
+      ((continuous_ofReal.comp Real.continuous_sqrt).tendsto (0 : ℝ)).mono_left
+        (nhdsWithin_le_nhds (s := Ioi (0 : ℝ)))
+  have H := ha.differentiableAt.isBigO_sub.comp_tendsto hlim
+  have he : (fun z : ℝ => F (√z : ℂ) - F 0) =ᶠ[𝓝[>] 0]
+      fun z : ℝ => symmetricEllipticRD x y z -
+        (((3 / √(x * y * z) : ℝ) : ℂ) - 6 / (x * y : ℝ) * symmetricEllipticRG x y 0) := by
+    filter_upwards [self_mem_nhdsWithin] with z hz
+    rw [hF z hz, hF0]
+    ring
+  refine (H.congr' he Filter.EventuallyEq.rfl).trans ?_
+  have hg : symmetricEllipticRG x y 0 ≠ 0 := by
+    have hpos : 0 < (symmetricEllipticRG 0 x y).re := by
+      rcases le_total x y with hxy | hxy
+      · have H := (symmetricEllipticRG_zero_bounds hx.le hxy hy).1
+        have hs := Real.sqrt_pos.mpr hy
+        nlinarith [inv_pos.mpr hs]
+      · have H := (symmetricEllipticRG_zero_bounds hy.le hxy hx).1
+        rw [symmetricEllipticRG_comm_right] at H
+        have hs := Real.sqrt_pos.mpr hx
+        nlinarith [inv_pos.mpr hs]
+    intro H
+    rw [symmetricEllipticRG_comm_right, symmetricEllipticRG_comm_left] at H
+    rw [H, zero_re] at hpos
+    exact lt_irrefl _ hpos
+  have hc : (6 : ℂ) / (x * y : ℝ) * symmetricEllipticRG x y 0 ≠ 0 :=
+    mul_ne_zero (div_ne_zero (by norm_num) (ofReal_ne_zero.mpr (mul_pos hx hy).ne')) hg
+  have hG : 0 < ellAsymG x y := by dsimp [ellAsymG]; positivity
+  apply IsBigO.of_bound ((√(ellAsymG x y)) * ‖(6 : ℂ) / (x * y : ℝ) * symmetricEllipticRG x y 0‖⁻¹)
+  filter_upwards [self_mem_nhdsWithin] with z hz
+  simp only [Function.comp_def, sub_zero, norm_mul, Complex.norm_real, Real.norm_eq_abs,
+    abs_of_nonneg (Real.sqrt_nonneg _)]
+  rw [Real.sqrt_div hz.le]
+  have hnorm := norm_pos_iff.mpr hc
+  have hs := Real.sqrt_pos.mpr hG
+  apply le_of_eq
+  field_simp
 
 /-- DLMF 19.27.9: `R_D(x, y, z) = 3/(√(xz)(√y + √z)) (1 + O((b/x) ln(x/b)))` as `b/x → 0`: for
 fixed `x > 0`, as `(y, z) → 0` with `y ≥ 0`, `z > 0`. -/
@@ -753,19 +900,6 @@ theorem symmetricEllipticRD_asymp_small_x {y z : ℝ} (hy : 0 < y) (hz : 0 < z) 
 
 /-! ### §19.27(v) `R_J` -/
 
-/-- DLMF 19.27.11: `R_J(x, y, z, p) = (3/p) R_F(x, y, z) - (3π/(2p^{3/2}))(1 + O(√(c/p)))` as
-`c/p → 0`: for fixed `p > 0`, as `(x, y, z) → 0` through nonnegative triples with at most one
-zero. -/
-@[dlmf 19.27.E11]
-theorem symmetricEllipticRJ_asymp_large_p {p : ℝ} (hp : 0 < p) :
-    (fun q : ℝ × ℝ × ℝ => symmetricEllipticRJ q.1 q.2.1 q.2.2 p -
-        (3 / (p : ℂ) * symmetricEllipticRF q.1 q.2.1 q.2.2 -
-            ((3 * π / (2 * p ^ (3 / 2 : ℝ)) : ℝ) : ℂ)))
-      =O[𝓝[ellAsymTriple] 0]
-      (fun q : ℝ × ℝ × ℝ => ((3 * π / (2 * p ^ (3 / 2 : ℝ)) *
-        √(ellAsymC q.1 q.2.1 q.2.2 / p) : ℝ) : ℂ)) := by
-  sorry
-
 /-- DLMF 19.27.12, **corrected** to Carlson–Gustafson (1994, (42)) (see the module docstring;
 DLMF's relative error `O(p/f)` is false unless `x = y = z`): for `x, y, z > 0` and `0 < p < f`,
 `R_J(x, y, z, p) = (3/(2√(xyz)))(ln(4f/p) - 2 + r)` with
@@ -792,28 +926,6 @@ theorem symmetricEllipticRJ_asymp_small_xy {z p : ℝ} (hz : 0 < z) (hp : 0 < p)
             2 * symmetricEllipticRC 1 (p / z : ℝ))) =O[𝓝[ellAsymPair] 0]
       (fun q : ℝ × ℝ => ((3 / (2 * √z * p) * ((ellAsymA q.1 q.2 / z + ellAsymA q.1 q.2 / p) *
         Real.log (p / ellAsymA q.1 q.2)) : ℝ) : ℂ)) := by
-  sorry
-
-/-- DLMF 19.27.14: `R_J(x, y, z, p) = (3/√(yz)) R_C(x, p) - (6/(yz)) R_G(0, y, z)
-+ O(√(x + 2p)/(yz))` as `max(x, p)/min(y, z) → 0`: for fixed `y, z > 0`, as `(x, p) → 0` with
-`x ≥ 0`, `p > 0`. -/
-@[dlmf 19.27.E14]
-theorem symmetricEllipticRJ_asymp_small_xp {y z : ℝ} (hy : 0 < y) (hz : 0 < z) :
-    (fun q : ℝ × ℝ => symmetricEllipticRJ q.1 y z q.2 -
-        (3 / (√(y * z) : ℝ) * symmetricEllipticRC q.1 q.2 - 6 / (y * z : ℝ) *
-            symmetricEllipticRG 0 y z))
-      =O[𝓝[{q | 0 ≤ q.1 ∧ 0 < q.2}] 0]
-      (fun q : ℝ × ℝ => ((√(q.1 + 2 * q.2) / (y * z) : ℝ) : ℂ)) := by
-  sorry
-
-/-- DLMF 19.27.15: `R_J(x, y, z, p) = R_J(0, y, z, p) - (3√x/(hp))(1 + O((b/h + h/p)√(x/h)))`
-as `x/min(y, z, p) → 0`: for fixed `y, z, p > 0`, as `x → 0+`. -/
-@[dlmf 19.27.E15]
-theorem symmetricEllipticRJ_asymp_small_x {y z p : ℝ} (hy : 0 < y) (hz : 0 < z) (hp : 0 < p) :
-    (fun x : ℝ => symmetricEllipticRJ x y z p - symmetricEllipticRJ 0 y z p +
-        ((3 * √x / (ellAsymH y z * p) : ℝ) : ℂ)) =O[𝓝[≥] 0]
-      (fun x : ℝ => ((3 * √x / (ellAsymH y z * p) *
-        ((ellAsymB y z / ellAsymH y z + ellAsymH y z / p) * √(x / ellAsymH y z)) : ℝ) : ℂ)) := by
   sorry
 
 /-- DLMF 19.27.16: `R_J(x, y, z, p) = (3/√x) R_C((h + p)², 2(b + h)p)

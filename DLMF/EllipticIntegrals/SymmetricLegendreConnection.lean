@@ -406,7 +406,7 @@ theorem six_mul_symmetricEllipticRG {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y
 
 /-- Integrability of `R_C`'s integrand `((t + x)^{1/2} (t + y))⁻¹`: `x` admissible, `y` in the
 slit plane. -/
-private lemma integrableOn_symmetricEllipticRC_integrand {x y : ℂ} (hx : IsCarlsonArgument x)
+theorem integrableOn_symmetricEllipticRC_integrand {x y : ℂ} (hx : IsCarlsonArgument x)
     (hy : y ∈ slitPlane) :
     IntegrableOn (fun t : ℝ => (((t : ℂ) + x) ^ (1 / 2 : ℂ) * ((t : ℂ) + y))⁻¹) (Ioi 0) := by
   obtain ⟨c1, hc1, h1⟩ := exists_mul_sqrt_le_norm_cpow_half hx

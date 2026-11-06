@@ -11116,3 +11116,153 @@ ledgers are refreshed from the compiled tag dump.
    input, but the expansions require additional series or contour arguments.
 4. Treat the large Mathieu, spheroidal and general asymptotic blocks as separate infrastructure
    projects. Their admission counts do not imply correspondingly short proof rounds.
+
+## Continued parallel DLMF proof round (2026-11-05)
+
+This round removes **13 direct admissions**, reducing **1,008 to 995**.
+The baseline is commit `1e4cfe603822948f9f46b42f1db41fded4b3fd59`, containing the preceding
+proof round. Three parallel agents worked with the coordinating Lerch and polylogarithm
+development. The [manifest](ProofRound20261105b.json) records the completed original
+admissions, compiled axiom checks and preservation audit. Existing public statements and
+public and private definition bodies are preserved.
+
+### Completed proofs
+
+**Basic hypergeometric functions.** The terminating q-Whipple product
+`four_phi_three_infinite_product` (17.7.11) follows a finite telescoping recurrence and two
+initial values. Paired upper parameters are combined before division, retaining vanishing
+upper parameters and product values.
+
+The terminating q-Clausen identity `qPhi4_square` (17.9.18) is proved by finite
+recurrences with explicit rational telescoping certificates. Squaring the two-step
+four-phi-three recurrence gives the same three-step recurrence as the five-phi-four
+series; three initial values identify them. Laurent polynomial continuation and separate
+zero-parameter cases cover every terminating alternative in the original statement.
+
+Three bilateral identities are proved with their original hypotheses:
+
+- `qPsi8_terminating_to_qPsi4` (17.10.3): a bilateral shift reduces the doubly terminating
+  sum to the project's finite Watson identity. Finite product reversal gives the prefactor;
+  finite-prefix regularity and continuity retain exceptional shifted lower products.
+- `qPsi2_gaussian_bilateral` (17.10.4): a two-sided limit of the terminating formula,
+  using a summable Gaussian majorant and convergence of the shifted products.
+- `qPsi2_transformation_two` (17.10.2): applying the Gaussian formula with exchanged
+  parameter pairs gives the cleared identity. Joint annular continuity and polynomial
+  avoidance remove the extra intermediate product exclusions.
+
+**Elliptic integrals.** The endpoint regularization proves
+`symmetricEllipticRD_asymp_small_z` (19.27.8),
+`symmetricEllipticRJ_asymp_large_p` (19.27.11),
+`symmetricEllipticRJ_asymp_small_xp` (19.27.14) and
+`symmetricEllipticRJ_asymp_small_x` (19.27.15). Subtracting the singular leading kernel
+makes the remaining integrals absolutely convergent. Exact square-root shift integrals
+control the joint small-node errors and the first-order remainder at a single zero node.
+These estimates retain the original exceptional-node and parameter ranges.
+
+`symmetricEllipticRF_asymp_large_z` (19.27.2) uses the comparison pole
+`σ = (√x + √y)²/4`. The difference between the pair-root kernel and `1/(t+σ)` has
+zero integral. Subtracting a constant outer weight produces a rational majorant with
+an explicit logarithmic integral. Combining that estimate with the `R_C` logarithmic
+remainder gives the original two-node asymptotic uniformly along its approach set.
+
+**Zeta functions.** `polylog_add_exp_mul_polylog_inv` (25.12.13) follows the Hurwitz
+functional identity on the unit circle, continuation to a logarithmic strip and the
+polylogarithm derivative recurrence. Negative integer orders, where the Gamma factor
+vanishes, are handled directly.
+
+`lerchPhi_neg_eq_mellinBarnes` (25.14.8) uses Gamma reflection to bound the vertical kernel
+by a polynomial times `exp(-π|y|)`. Mellin inversion and Fubini prove an initial domain;
+continuation in the order and logarithmic argument gives the full stated branch domain.
+
+`tendsto_lerchPhi_hermite` (25.14.6) uses the Gamma–Laplace integral and the Bose–Einstein
+sine integral in an initial half-plane. Integrable uniform bounds continue the formula
+in the order and logarithmic argument. Dominated convergence proves the unit-circle
+boundary for `Re s > 1`, and the finite ray integrals converge to the required limit.
+The theorem's docstring now correctly describes absolute convergence in that boundary
+range; its statement is unchanged.
+
+### Foundational and general support
+
+The proved Lerch continuation and parameter API moves into
+[Basic.LerchContinuation](DLMF/Zeta/Basic/LerchContinuation.lean) and
+[Basic.LerchProperties](DLMF/Zeta/Basic/LerchProperties.lean). The proved polylogarithm
+special-value, derivative and analytic API moves into
+[Basic.PolylogProperties](DLMF/Zeta/Basic/PolylogProperties.lean). Existing names,
+definitions, statements and DLMF tags are retained. The foundational layer supplies the
+entire order dependence of Lerch's function in the unit disk. The former continuation
+module remains an import shim; `Polylog.lean` is an umbrella for its theorem modules.
+
+New general modules cover horizontal-strip exponential integrals, polynomial power bounds,
+a linear exponential bound for the complex sine, weighted Bose–Einstein integrability,
+two-sided integer sums, and square-root and logarithmic comparison integrals. All are
+registered in `DLMFMathlib.lean`. The Gamma-product Barnes kernel moves to the Gamma area;
+the existing hypergeometric declaration remains an adapter. Attribution is recorded in
+[CREDITS](CREDITS.md#continued-special-function-proof-round-2026-11-05).
+
+### Deferred statement correction
+
+`lerchPhi_transformation` (25.14.7) is false as a pointwise identity at positive integer
+orders under Lean's totalized Gamma function. The independent
+[check](scripts/CheckLerchTransformation.lean), importing only proved foundational
+modules, establishes `Re Φ(1/2, 1, 1/2) ≥ 2`; the right-hand side is zero because
+`Γ(1-1) = 0`, regardless of its finite bracket. Both checking lemmas use only standard
+axioms. The tagged statement and its admission are left unchanged pending approval.
+The proposed repair excludes `s = n + 1` for every natural `n`; positive integer orders
+would require a separate limiting formulation. This exclusion was subsequently approved
+and applied in the [2026-11-06 repair](#lerch-transformation-order-exclusion-2026-11-06).
+
+### Validation
+
+The full build passes with 15,634 jobs. All 55 changed/new modules and entry points pass
+strict checks with `autoImplicit=false` and `relaxedAutoImplicit=false`; their recorded
+source hashes match the final files. All 13 completed original theorems have only
+`propext`, `Classical.choice` and `Quot.sound` as axioms. The complete compiled dependency
+and axiom audit covers 71,396 declarations, with no additional nonstandard axioms and
+no admitted dependencies in the foundational layer.
+
+The fresh DLMF dump contains 10,818 entries: **9,525 proved**, **1,293 admitted**, and
+zero with nonstandard axioms. All 1,031 upstream pointers and all baseline entries remain;
+13 existing entries become proved and no tag is added or removed. The Chapter 17, 19
+and 25 acquisition ledgers are refreshed from this dump; older stale status prose is
+reconciled without counting those earlier proofs as new completions.
+
+Independent preservation checks compare 23,069 baseline public declarations, all existing
+public and private definition bodies, and 8,795 tagged declarations: zero missing names,
+changed headers, changed definition bodies, changed tags, new admissions or new axioms.
+The 54 declaration moves retain their statements and bodies. The import survey reports
+no new two-way area pairs and no foundational/closure violations, missing modules or
+file cycles; the existing 22 pairs are unchanged. All 1,512 project Lean files satisfy
+the 1,500-line limit, changed Lean lines satisfy the 100-character limit, and
+`git diff --check` passes. The new counterexample script also passes its strict check
+and a standard-only axiom audit. No changes were committed by the agents.
+
+### Next priorities
+
+1. Use annular continuity and the bilateral Gaussian identities for the remaining
+   two-psi-two transformation and the eight-psi-eight and ten-psi-ten connections.
+2. Apply the Carlson logarithmic comparison to 19.20.11 and 19.27.13, then extend the
+   regularized-kernel estimates to the remaining endpoint asymptotics.
+3. Derive the Lerch and polylogarithm logarithmic expansions (25.14.3 and 25.12.12), using
+   the new Barnes representation and the foundational derivative API.
+4. Develop the large Mathieu and spheroidal admission blocks as dedicated infrastructure
+   projects; their high counts do not imply short independent proofs.
+
+## Lerch transformation order exclusion (2026-11-06)
+
+The user approved the positive-integer exclusion for DLMF 25.14.7. The statement of
+`DLMF.Zeta.lerchPhi_transformation` now includes
+`(hs : ∀ n : ℕ, s ≠ (n : ℂ) + 1)`. All other hypotheses, the conclusion and the DLMF tag
+are unchanged. No definition body changes. The theorem remains admitted, so the direct
+admission count remains 995. Positive integer orders require a separate limiting formulation.
+
+The existing [counterexample check](scripts/CheckLerchTransformation.lean) remains as evidence
+for the exclusion: `Re Φ(1/2, 1, 1/2) ≥ 2`, while the pointwise Gamma-factor expression
+vanishes at `s = 1`. The preceding proof-round manifest retains its original proof counts
+and records this approval as a subsequent statement repair.
+
+Validation: `lake build > /tmp/DLMF-build.log 2>&1` passes (15,634 jobs). Strict checks
+of `DLMF/Zeta/Lerch.lean`, `DLMF.lean` and the counterexample script pass with both
+implicit-variable options disabled. The counterexample lemmas retain only standard
+axioms. A comment-stripped source comparison confirms the extra hypothesis is the only
+Lean code change in this repair. The import survey, file/line limits and `git diff --check`
+pass. No definition, conclusion, DLMF tag or admission count changes; no commit was made.

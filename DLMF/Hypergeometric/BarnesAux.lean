@@ -43,13 +43,7 @@ theorem Gamma_mul_one_add_cpow_neg_barnes {a : ℂ} {σ : ℝ} (hσ : σ < 0) (h
     Gamma a * ((1 + v : ℝ) : ℂ) ^ (-a) =
       1 / (2 * π) * ∫ y : ℝ, Gamma (-((σ : ℂ) + I * y)) * Gamma (a + σ + I * y) *
         (v : ℂ) ^ ((σ : ℂ) + I * y) := by
-  rw [Gamma_mul_one_add_cpow_neg (σ := -σ) (by linarith) (by linarith) hv]
-  congr 1
-  rw [← integral_neg_eq_self]
-  congr 1
-  funext y
-  rw [show (((-σ : ℝ) : ℂ) + ((-y : ℝ) : ℂ) * I) = -((σ : ℂ) + I * y) by push_cast; ring,
-    show a - -((σ : ℂ) + I * y) = a + σ + I * y by ring, neg_neg]
+  exact DLMF.Gamma.Gamma_mul_one_add_cpow_neg_barnes hσ haσ hv
 
 /-- For `σ < 0 < Re a + σ`, `y ↦ Γ(-(σ + iy)) Γ(a + σ + iy)` is integrable on the real line. -/
 theorem integrable_Gamma_neg_mul_Gamma {a : ℂ} {σ : ℝ} (hσ : σ < 0) (haσ : 0 < a.re + σ) :

@@ -4,6 +4,35 @@ The project formalizes material from Andrews, Askey and Roy, *Special Functions*
 (1999), and the NIST Digital Library of Mathematical Functions, using Mathlib.
 Existing module copyright and authorship notices remain authoritative.
 
+## Continued special-function proof round (2026-11-05)
+
+The terminating q-Whipple sum and bilateral transformations use the project's proved
+finite Watson identity, q-product reversal and Mathlib's dominated convergence and
+continuity APIs. Finite product polynomial avoidance retains exceptional shifted lower
+parameters. The Gaussian bilateral formula uses a convergent two-sided limit of the
+terminating transformation; the two-psi-two symmetry uses joint annular continuity.
+
+The q-Clausen identity follows George Gasper, “q-Extensions of Clausen's Formula and of
+the Inequalities Used by de Branges…,” *SIAM Journal on Mathematical Analysis* 20 (1989), 1019–1034,
+[doi:10.1137/0520068](https://doi.org/10.1137/0520068).
+The finite recurrences and their rational telescoping certificates are proved directly;
+Laurent polynomial continuation supplies the other terminating parameter choices.
+
+The polylogarithm inversion formula uses the Mathlib contributors' Hurwitz functional
+identity and the project's principal-branch derivative API. Negative integer orders are
+handled explicitly. Lerch's Barnes integral uses Mathlib's Gamma reflection formula,
+Mellin inversion, Bochner Fubini and analytic identity theorems. The Gamma-product Barnes
+kernel is shared with the existing hypergeometric representation through a thin adapter.
+Lerch's Hermite formula combines the project's Gamma–Laplace and Bose–Einstein integrals,
+Mathlib's analytic identity theorem and dominated convergence on the unit circle.
+
+The symmetric elliptic endpoint estimates use the project's Carlson integral bridges
+and Mathlib's real integral, square-root and asymptotic APIs. Subtracting the singular
+leading kernel leaves an integrable remainder. Exact square-root shift integrals and a
+zero-mass logarithmic comparison kernel provide the endpoint bounds. The general
+Fourier-strip, power-decay, trigonometric and real-kernel estimates are factored into
+`DLMFMathlib`; the special-function modules retain their existing public statements.
+
 ## Special-function proof round (2026-11-05)
 
 The cancelled terminating q-Dixon identity follows Victor J. W. Guo,

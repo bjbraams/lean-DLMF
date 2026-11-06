@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMFMathlib.Analysis.SpecialFunctions.Pow.Decay
 public import Mathlib.Analysis.SpecialFunctions.Log.NegMulLog
 public import Mathlib.Analysis.SpecialFunctions.Pow.Complex
 public import Mathlib.Analysis.SpecialFunctions.Pow.Real
@@ -66,15 +67,6 @@ theorem conj_two_cpow (w : ℂ) : conj ((2 : ℂ) ^ w) = 2 ^ conj w := by
     rw [show (2 : ℂ) = ((2 : ℝ) : ℂ) by norm_num, arg_ofReal_of_nonneg (by norm_num)]
     exact Real.pi_ne_zero.symm
   rw [cpow_conj _ _ h2, map_ofNat]
-
-/-- `‖w ^ s‖ ≤ ‖w‖ ^ Re s · e^{π |Im s|}` for `w ≠ 0` (principal branch). -/
-theorem norm_cpow_le_rpow_mul_exp {w : ℂ} (hw : w ≠ 0) (s : ℂ) :
-    ‖w ^ s‖ ≤ ‖w‖ ^ s.re * Real.exp (π * |s.im|) := by
-  rw [norm_cpow_of_ne_zero hw, div_eq_mul_inv, ← Real.exp_neg]
-  gcongr
-  calc -(arg w * s.im) ≤ |arg w * s.im| := neg_le_abs _
-    _ = |arg w| * |s.im| := abs_mul _ _
-    _ ≤ π * |s.im| := by gcongr; exact abs_arg_le_pi w
 
 end Complex
 

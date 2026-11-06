@@ -6,6 +6,9 @@ Authors: Bastiaan J Braams
 module -- shake: keep-all
 
 public import DLMFMathlib.Analysis.SpecialFunctions.Log.Ray
+public import DLMFMathlib.Analysis.SpecialFunctions.Trigonometric.LinearBounds
+public import DLMFMathlib.Analysis.SpecialFunctions.Trigonometric.BoseEinsteinWeighted
+public import DLMFMathlib.Topology.Algebra.InfiniteSum.Int
 
 public import DLMFMathlib.Analysis.SpecialFunctions.Trigonometric.BoseEinstein
 public import DLMFMathlib.Analysis.SpecialFunctions.Pow.RightHalfPlane
@@ -68,6 +71,7 @@ public import DLMFMathlib.Analysis.ContinuedFraction.PositiveConvergence
 public import DLMFMathlib.Analysis.ContinuedFraction.Convergence
 public import DLMFMathlib.Analysis.Distribution.IteratedLineDeriv
 public import DLMFMathlib.Analysis.EulerMaclaurin
+public import DLMFMathlib.Analysis.Fourier.HorizontalStrip
 public import DLMFMathlib.Analysis.Fourier.HyperbolicSecant
 public import DLMFMathlib.Analysis.Fourier.AddCircle
 public import DLMFMathlib.Analysis.Fourier.DirichletKernel
@@ -87,6 +91,8 @@ public import DLMFMathlib.Analysis.Integral.PrincipalValue
 public import DLMFMathlib.Analysis.Integral.PrincipalValueLogarithm
 public import DLMFMathlib.Analysis.Integral.PrincipalValueExcision
 public import DLMFMathlib.Analysis.Integral.PrincipalValueLevelSets
+public import DLMFMathlib.Analysis.Integral.SquareRootKernel
+public import DLMFMathlib.Analysis.Integral.LogarithmicSquareRootKernel
 public import DLMFMathlib.Analysis.Integral.RepeatedIntegrationByParts
 public import DLMFMathlib.Analysis.MellinConvolution
 public import DLMFMathlib.Analysis.MellinParseval
@@ -189,6 +195,13 @@ the namespaces of the Mathlib APIs they extend. These modules do not import `DLM
 * `DLMFMathlib.Analysis.SpecialFunctions.Trigonometric.BoseEinstein`: the partial fractions
   and sine transform of the Bose–Einstein kernel.
 * `DLMFMathlib.Analysis.SpecialFunctions.Pow.RightHalfPlane`: principal powers of `a ± ix`.
+* `DLMFMathlib.Analysis.SpecialFunctions.Trigonometric.BoseEinsteinWeighted`: exponentially
+  weighted Bose–Einstein integrability.
+* `DLMFMathlib.Analysis.SpecialFunctions.Trigonometric.LinearBounds`: linear sine bounds.
+* `DLMFMathlib.Topology.Algebra.InfiniteSum.Int`: splitting bilateral series into natural halves.
+* `DLMFMathlib.Analysis.Fourier.HorizontalStrip`: holomorphic Fourier–Laplace integrals.
+* `DLMFMathlib.Analysis.Integral.SquareRootKernel`: square-root shift integrals and bounds.
+* `DLMFMathlib.Analysis.Integral.LogarithmicSquareRootKernel`: logarithmic kernel cancellations.
 * `DLMFMathlib.Analysis.Integral.LaplaceSine`: sine-modulated Gamma integrals.
 * `DLMFMathlib.Analysis.Integral.ImproperFourier`: conditional Gamma Fourier integrals.
 * `DLMFMathlib.Analysis.Integral.ImproperDerivatives`: derivatives of variable integral tails.

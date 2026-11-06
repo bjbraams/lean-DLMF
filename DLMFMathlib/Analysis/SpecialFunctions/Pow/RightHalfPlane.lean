@@ -112,54 +112,11 @@ uniformly for exponents in a fixed ball. -/
 theorem exists_bound_cpow_add_mul_I {a : ℂ} (ha : 0 < a.re) {M : ℝ} (hM : 0 ≤ M) :
     ∃ C : ℝ, 0 < C ∧ ∃ N : ℕ, ∀ s : ℂ, ‖s‖ ≤ M → ∀ x : ℝ,
       ‖(a + x * I) ^ s‖ ≤ C * (1 + |x|) ^ N := by
-  obtain ⟨N, hN⟩ := exists_nat_ge M
-  let A : ℝ := (‖a‖ + 1) ^ M
-  let B : ℝ := a.re ^ (-M)
-  have hA : 0 < A := Real.rpow_pos_of_pos (by positivity) _
-  have hB : 0 < B := Real.rpow_pos_of_pos ha _
-  refine ⟨Real.exp (Real.pi * M) * (A + B), by positivity, N, ?_⟩
-  intro s hs x
-  have hzre : 0 < (a + x * I).re := by simpa using ha
-  have hz0 : a + x * I ≠ 0 := fun h => by simp [h] at hzre
-  have hr : 0 < ‖a + x * I‖ := norm_pos_iff.mpr hz0
-  have hrlo : a.re ≤ ‖a + x * I‖ := by
-    simpa using (re_le_norm (a + x * I))
-  have hrhi : ‖a + x * I‖ ≤ ‖a‖ + |x| := by
-    simpa only [norm_mul, norm_I, mul_one, norm_real, Real.norm_eq_abs] using
+  obtain ⟨C, hC, N, hb⟩ := exists_bound_cpow_of_norm_bounds ha (norm_nonneg a) hM
+  refine ⟨C, hC, N, fun s hs x => hb s hs (a + x * I) |x| (abs_nonneg x) ?_ ?_⟩
+  · simpa using (re_le_norm (a + x * I))
+  · simpa only [norm_mul, norm_I, mul_one, norm_real, Real.norm_eq_abs] using
       norm_add_le a ((x : ℂ) * I)
-  have hsr : -M ≤ s.re ∧ s.re ≤ M := by
-    have := abs_le.mp ((abs_re_le_norm s).trans hs)
-    exact this
-  have hsi : |s.im| ≤ M := (abs_im_le_norm s).trans hs
-  have hpone : 1 ≤ (1 + |x|) ^ N := one_le_pow₀ (by linarith [abs_nonneg x])
-  have hpow : ‖a + x * I‖ ^ s.re ≤ (A + B) * (1 + |x|) ^ N := by
-    rcases le_or_gt ‖a + x * I‖ 1 with hr1 | hr1
-    · have h₁ := Real.rpow_le_rpow_of_exponent_ge hr hr1 hsr.1
-      have h₂ : ‖a + x * I‖ ^ (-M) ≤ B :=
-        Real.rpow_le_rpow_of_nonpos ha hrlo (by linarith)
-      have h₃ : B ≤ (A + B) * (1 + |x|) ^ N := by
-        nlinarith
-      exact h₁.trans (h₂.trans h₃)
-    · have h₁ := Real.rpow_le_rpow_of_exponent_le hr1.le hsr.2
-      have hb : ‖a + x * I‖ ≤ (‖a‖ + 1) * (1 + |x|) := by
-        nlinarith [norm_nonneg a, abs_nonneg x]
-      have h₂ : ‖a + x * I‖ ^ M ≤ A * (1 + |x|) ^ N := by
-        calc
-          ‖a + x * I‖ ^ M ≤ ((‖a‖ + 1) * (1 + |x|)) ^ M :=
-            Real.rpow_le_rpow hr.le hb hM
-          _ = A * (1 + |x|) ^ M := by rw [Real.mul_rpow (by positivity) (by positivity)]
-          _ ≤ A * (1 + |x|) ^ (N : ℝ) :=
-            mul_le_mul_of_nonneg_left
-              (Real.rpow_le_rpow_of_exponent_le (by linarith [abs_nonneg x]) hN) hA.le
-          _ = A * (1 + |x|) ^ N := by rw [Real.rpow_natCast]
-      have h₃ : A * (1 + |x|) ^ N ≤ (A + B) * (1 + |x|) ^ N := by
-        nlinarith [pow_nonneg (by linarith [abs_nonneg x] : 0 ≤ 1 + |x|) N]
-      exact h₁.trans (h₂.trans h₃)
-  calc
-    ‖(a + x * I) ^ s‖ ≤ ‖a + x * I‖ ^ s.re * Real.exp (Real.pi * |s.im|) :=
-      norm_cpow_le_rpow_mul_exp hz0 s
-    _ ≤ ((A + B) * (1 + |x|) ^ N) * Real.exp (Real.pi * M) := by gcongr
-    _ = _ := by ring
 
 /-- Differentiation of a principal power along a vertical line in the right half-plane. -/
 theorem hasDerivAt_cpow_add_mul_I {a : ℂ} (ha : 0 < a.re) (s : ℂ) (x : ℝ) :
