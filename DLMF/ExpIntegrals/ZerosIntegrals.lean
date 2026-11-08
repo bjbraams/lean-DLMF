@@ -517,14 +517,18 @@ theorem Real.sinIntTailZero_enumeration  :
   have hZ : Real.sinIntTailZero = z := funext he
   rw [hZ]; exact ⟨hm, hi⟩
 
-/-- Shared all-order zero expansions and signed next-term bounds. -/
+/-- The zeros `c_k` of `Ci` and `s_k` of `si` (DLMF 6.13.2): with `α = kπ` for `c_k` and
+`α = (k + 1/2)π` for `s_k`, both have the asymptotic expansion `∑ₙ cₙ α^{1-2n}` as `k → ∞`,
+with the first five coefficients as printed, and the remainder after `N ≥ 1` terms has the
+sign of the next term and at most its modulus, for `k ≥ 1` for `c_k` (where `α = 0` at
+`k = 0`) and for all `k` for `s_k`. -/
 @[dlmf 6.13.E2]
 theorem Real.trigonometric_integral_zero_asymptotics  :
     ∃ c : ℕ → ℝ, (∀ n < 5, c n=([1, 1, -16/3, 1673/15, -507746/105] : List ℝ)[n]!) ∧
         (∀ aux : Bool, let α := fun k : ℕ => ((k : ℝ)+(if aux then 1/2 else 0))*π;
         let zero := if aux then Real.sinIntTailZero else Real.cosIntZero;
-        HasAsymptoticExpansion atTop (fun n k => (α k)^(-(2*n : ℤ)+1)) c zero ∧ ∀ k N : ℕ, 1 ≤ k →
-        1 ≤ N → |zero k-∑ n ∈ Finset.range N,
+        HasAsymptoticExpansion atTop (fun n k => (α k)^(-(2*n : ℤ)+1)) c zero ∧ ∀ k N : ℕ,
+        (aux = true ∨ 1 ≤ k) → 1 ≤ N → |zero k-∑ n ∈ Finset.range N,
         c n*(α k)^(-(2*n : ℤ)+1)| ≤ |c N*(α k)^(-(2*N : ℤ)+1)| ∧ 0 ≤
         (zero k-∑ n ∈ Finset.range N, c n*(α k)^(-(2*n : ℤ)+1))*(c N*(α k)^(-(2*N : ℤ)+1))) := by
   sorry

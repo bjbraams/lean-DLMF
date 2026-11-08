@@ -49,6 +49,7 @@ public import DLMFMathlib.Analysis.Complex.GeometricNewtonSeries
 public import DLMFMathlib.Analysis.Complex.KeyholeIntegral
 public import DLMFMathlib.Analysis.Complex.LagrangeBurmann
 public import DLMFMathlib.Analysis.Complex.LagrangeInversion
+public import DLMFMathlib.Analysis.Complex.LagrangeBurmannQuotient
 public import DLMFMathlib.Analysis.Complex.MittagLeffler
 public import DLMFMathlib.Analysis.Complex.MellinBarnesSeries
 public import DLMFMathlib.Analysis.Complex.ParameterContinuity
@@ -178,6 +179,40 @@ public import DLMFMathlib.NumberTheory.LSeries.ZetaValues
 public import DLMFMathlib.NumberTheory.ModularForms.KleinJSurjective
 public import DLMFMathlib.RingTheory.PowerSeriesEvaluation
 public import DLMFMathlib.Topology.Order.Compact
+
+public import DLMFMathlib.Analysis.Asymptotics.BinomialPowerSeries
+
+public import DLMFMathlib.Analysis.ODE.LiouvilleGreenIntervalVolterra
+
+public import DLMFMathlib.Analysis.ODE.LiouvilleGreenInterval
+
+public import DLMFMathlib.Analysis.Asymptotics.RamifiedPowerSeries
+
+public import DLMFMathlib.Topology.Order.MonotoneUnbounded
+
+public import DLMFMathlib.Analysis.Complex.CircleSingularities
+
+public import DLMFMathlib.MeasureTheory.Integral.CompactParameterDomination
+
+public import DLMFMathlib.Analysis.Complex.BoundarySingularities
+
+public import DLMFMathlib.RingTheory.PowerSeries.LagrangeBurmann
+
+public import DLMFMathlib.Analysis.ODE.LinearInterval
+
+public import DLMFMathlib.Analysis.ODE.LiouvilleGreenEndpoint
+
+public import DLMFMathlib.Analysis.Asymptotics.LaplaceCoefficients
+
+public import DLMFMathlib.Analysis.ODE.LiouvilleGreenDominant
+
+public import DLMFMathlib.Analysis.Complex.CircleLaurent
+
+public import DLMFMathlib.Analysis.Complex.LaurentPowerSeries
+
+public import DLMFMathlib.Analysis.Asymptotics.LaplaceReversion
+
+public import DLMFMathlib.Analysis.Asymptotics.RamifiedDensityWeights
 
 /-!
 # Supporting results for Mathlib
@@ -358,4 +393,40 @@ the namespaces of the Mathlib APIs they extend. These modules do not import `DLM
 * `DLMFMathlib.Analysis.Calculus.Deriv.Appell`: finite antiderivatives from Appell families.
 * `DLMFMathlib.Analysis.Complex.SlitPlane`: nonnegative translations and sector norm bounds.
 * `DLMFMathlib.Analysis.SpecialFunctions.Pow.Decay`: norm and product bounds for decaying powers.
+* `DLMFMathlib.Analysis.Complex.LagrangeBurmannQuotient`:
+  the Lagrange–Bürmann quotient expansion with an arbitrary analytic numerator.
+* `DLMFMathlib.Analysis.Asymptotics.BinomialPowerSeries`:
+  binomial powers of asymptotic power series.
+* `DLMFMathlib.Analysis.ODE.LiouvilleGreenIntervalVolterra`:
+  Volterra equations with a singular finite endpoint.
+* `DLMFMathlib.Analysis.ODE.LiouvilleGreenInterval`:
+  Liouville–Green error bounds on bounded intervals.
+* `DLMFMathlib.Analysis.Asymptotics.RamifiedPowerSeries`:
+  normalization of asymptotic expansions with fractional leading powers.
+* `DLMFMathlib.Topology.Order.MonotoneUnbounded`:
+  signed endpoint divergence from unbounded absolute value of a monotone function.
+* `DLMFMathlib.Analysis.Complex.CircleSingularities`:
+  integrability and radial bounds at algebraic singularities on a circle.
+* `DLMFMathlib.MeasureTheory.Integral.CompactParameterDomination`:
+  compact parameter families with local integrable majorants.
+* `DLMFMathlib.Analysis.Complex.BoundarySingularities`:
+  radial boundary limits with finitely many integrable singularities.
+* `DLMFMathlib.RingTheory.PowerSeries.LagrangeBurmann`:
+  formal coefficient extraction for Lagrange–Bürmann reversion.
+* `DLMFMathlib.Analysis.ODE.LinearInterval`:
+  linear initial-value problems on open bounded intervals.
+* `DLMFMathlib.Analysis.ODE.LiouvilleGreenEndpoint`:
+  normalized recessive solutions at a singular endpoint.
+* `DLMFMathlib.Analysis.Asymptotics.LaplaceCoefficients`:
+  formal weighted coefficients for Laplace reversion.
+* `DLMFMathlib.Analysis.ODE.LiouvilleGreenDominant`:
+  dominant solutions normalized by the recessive Wronskian.
+* `DLMFMathlib.Analysis.Complex.CircleLaurent`:
+  circle-integral coefficient identities for derivatives.
+* `DLMFMathlib.Analysis.Complex.LaurentPowerSeries`:
+  Laurent coefficients of convergent natural power series.
+* `DLMFMathlib.Analysis.Asymptotics.LaplaceReversion`:
+  weighted asymptotic expansions in a ramified phase coordinate.
+* `DLMFMathlib.Analysis.Asymptotics.RamifiedDensityWeights`:
+  real-power cancellation in a positive ramified phase coordinate.
 -/

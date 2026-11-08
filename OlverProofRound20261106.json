@@ -1,0 +1,434 @@
+{
+  "date": "2026-11-06",
+  "base_commit": "06ad2e4315b3f4ce928762541c137b63df536df5",
+  "baseline": "Committed preceding proof round and approved polylogarithm correction; preexisting Olver source-review documentation preserved.",
+  "started_utc": "2026-11-06T11:00:11.620908+00:00",
+  "audited_utc": "2026-11-06T13:18:20.326036+00:00",
+  "book": {
+    "author": "Frank W. J. Olver",
+    "title": "Asymptotics and Special Functions",
+    "edition": "Corrected 1997 A K Peters edition; PDF imprint also records the CRC 2010 reprint",
+    "file": "References/Olver1997AsymptoticsSpecialFunctionsCorrectedEd-TaylorFrancis.pdf",
+    "pages": 591,
+    "sha256": "7fd55a3f02914bf469c200d29b8e2bbfd093bd500d8a406d774b25c506f10081",
+    "page_convention": "PDF page = printed Arabic page + 19; critical formula pages were visually checked because the embedded OCR misreads digits and omits formulas."
+  },
+  "direct_admissions_before": 983,
+  "direct_admissions_after": 976,
+  "completed_admissions": [
+    {
+      "name": "DLMF.AsymptoticApproximations.liouvilleGreen_interval",
+      "file": "DLMF/AsymptoticApproximations/ODE/LiouvilleGreen.lean",
+      "line": 91,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AsymptoticApproximations.liouvilleGreen_interval_isEquivalent",
+      "file": "DLMF/AsymptoticApproximations/ODE/LiouvilleGreen.lean",
+      "line": 286,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AsymptoticApproximations.liouvilleGreen_dominant",
+      "file": "DLMF/AsymptoticApproximations/ODE/LiouvilleGreen.lean",
+      "line": 392,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AsymptoticApproximations.laplaceCoeff_hasAsymptoticExpansion",
+      "file": "DLMF/AsymptoticApproximations/Integrals/Laplace.lean",
+      "line": 102,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AsymptoticApproximations.darboux_singular",
+      "file": "DLMF/AsymptoticApproximations/Sums/Darboux.lean",
+      "line": 473,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AsymptoticApproximations.darboux_smooth_singular",
+      "file": "DLMF/AsymptoticApproximations/Sums/Darboux.lean",
+      "line": 578,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AsymptoticApproximations.legendrePolynomialP_cos_asymptotic",
+      "file": "DLMF/AsymptoticApproximations/Sums/Darboux.lean",
+      "line": 730,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  ],
+  "compiled_declarations_after": 72136,
+  "baseline_public_declarations_compared": 23605,
+  "source_ranged_admission_dependent_theorems_after": 1002,
+  "dlmf_entries_before": 10818,
+  "dlmf_entries_after": 10818,
+  "dlmf_statuses_before": {
+    "proved": 9536,
+    "admitted": 1282,
+    "nonstandard": 0
+  },
+  "dlmf_statuses_after": {
+    "proved": 9555,
+    "admitted": 1263,
+    "nonstandard": 0
+  },
+  "dlmf_entries_newly_proved": 19,
+  "dlmf_entries_newly_proved_declarations": [
+    {
+      "dlmf": "2.10.E30",
+      "declaration": "DLMF.AsymptoticApproximations.darboux_singular"
+    },
+    {
+      "dlmf": "2.10.iv",
+      "declaration": "DLMF.AsymptoticApproximations.darboux_singular"
+    },
+    {
+      "dlmf": "2.10.E32",
+      "declaration": "DLMF.AsymptoticApproximations.darboux_smooth_singular"
+    },
+    {
+      "dlmf": "2.3.E16",
+      "declaration": "DLMF.AsymptoticApproximations.laplaceCoeff_hasAsymptoticExpansion"
+    },
+    {
+      "dlmf": "2.3.E18",
+      "declaration": "DLMF.AsymptoticApproximations.laplaceCoeff_hasAsymptoticExpansion"
+    },
+    {
+      "dlmf": "2.10.E36",
+      "declaration": "DLMF.AsymptoticApproximations.legendrePolynomialP_cos_asymptotic"
+    },
+    {
+      "dlmf": "2.10.iv",
+      "declaration": "DLMF.AsymptoticApproximations.legendrePolynomialP_cos_asymptotic"
+    },
+    {
+      "dlmf": "2.7.E28",
+      "declaration": "DLMF.AsymptoticApproximations.liouvilleGreen_dominant"
+    },
+    {
+      "dlmf": "2.7.E29",
+      "declaration": "DLMF.AsymptoticApproximations.liouvilleGreen_dominant"
+    },
+    {
+      "dlmf": "2.7.E30",
+      "declaration": "DLMF.AsymptoticApproximations.liouvilleGreen_dominant"
+    },
+    {
+      "dlmf": "2.7.iii",
+      "declaration": "DLMF.AsymptoticApproximations.liouvilleGreen_dominant"
+    },
+    {
+      "dlmf": "2.7.E20",
+      "declaration": "DLMF.AsymptoticApproximations.liouvilleGreen_interval"
+    },
+    {
+      "dlmf": "2.7.E21",
+      "declaration": "DLMF.AsymptoticApproximations.liouvilleGreen_interval"
+    },
+    {
+      "dlmf": "2.7.E22",
+      "declaration": "DLMF.AsymptoticApproximations.liouvilleGreen_interval"
+    },
+    {
+      "dlmf": "2.7.E23",
+      "declaration": "DLMF.AsymptoticApproximations.liouvilleGreen_interval"
+    },
+    {
+      "dlmf": "2.7.E24",
+      "declaration": "DLMF.AsymptoticApproximations.liouvilleGreen_interval"
+    },
+    {
+      "dlmf": "2.7.E25",
+      "declaration": "DLMF.AsymptoticApproximations.liouvilleGreen_interval"
+    },
+    {
+      "dlmf": "2.7.E26",
+      "declaration": "DLMF.AsymptoticApproximations.liouvilleGreen_interval_isEquivalent"
+    },
+    {
+      "dlmf": "2.7.E27",
+      "declaration": "DLMF.AsymptoticApproximations.liouvilleGreen_interval_isEquivalent"
+    }
+  ],
+  "existing_tagged_theorems_freed_from_admitted_dependencies": [],
+  "public_statement_changes": [],
+  "existing_definition_changes": [],
+  "new_admissions": [],
+  "nonstandard_axiom_dependencies": [],
+  "new_two_way_area_pairs": [],
+  "changed_lean_files": [
+    "DLMF/AsymptoticApproximations.lean",
+    "DLMF/AsymptoticApproximations/Integrals/Laplace.lean",
+    "DLMF/AsymptoticApproximations/ODE/LiouvilleGreen.lean",
+    "DLMF/AsymptoticApproximations/Sums/Darboux.lean",
+    "DLMF/AsymptoticApproximations/Sums/DarbouxDerivatives.lean",
+    "DLMF/AsymptoticApproximations/Sums/LegendreDarboux.lean",
+    "DLMFMathlib.lean",
+    "DLMFMathlib/Analysis/Asymptotics/BinomialPowerSeries.lean",
+    "DLMFMathlib/Analysis/Asymptotics/LaplaceCoefficients.lean",
+    "DLMFMathlib/Analysis/Asymptotics/LaplaceReversion.lean",
+    "DLMFMathlib/Analysis/Asymptotics/RamifiedDensityWeights.lean",
+    "DLMFMathlib/Analysis/Asymptotics/RamifiedPowerSeries.lean",
+    "DLMFMathlib/Analysis/Calculus/LHopitalInfinity.lean",
+    "DLMFMathlib/Analysis/Complex/BoundarySingularities.lean",
+    "DLMFMathlib/Analysis/Complex/CircleLaurent.lean",
+    "DLMFMathlib/Analysis/Complex/CircleSingularities.lean",
+    "DLMFMathlib/Analysis/Complex/LagrangeBurmannQuotient.lean",
+    "DLMFMathlib/Analysis/Complex/LaurentPowerSeries.lean",
+    "DLMFMathlib/Analysis/ODE/LinearInterval.lean",
+    "DLMFMathlib/Analysis/ODE/LiouvilleGreenDominant.lean",
+    "DLMFMathlib/Analysis/ODE/LiouvilleGreenEndpoint.lean",
+    "DLMFMathlib/Analysis/ODE/LiouvilleGreenInterval.lean",
+    "DLMFMathlib/Analysis/ODE/LiouvilleGreenIntervalVolterra.lean",
+    "DLMFMathlib/MeasureTheory/Integral/CompactParameterDomination.lean",
+    "DLMFMathlib/RingTheory/PowerSeries/LagrangeBurmann.lean",
+    "DLMFMathlib/Topology/Order/MonotoneUnbounded.lean"
+  ],
+  "new_lean_files": [
+    "DLMF/AsymptoticApproximations/Sums/DarbouxDerivatives.lean",
+    "DLMF/AsymptoticApproximations/Sums/LegendreDarboux.lean",
+    "DLMFMathlib/Analysis/Asymptotics/BinomialPowerSeries.lean",
+    "DLMFMathlib/Analysis/Asymptotics/LaplaceCoefficients.lean",
+    "DLMFMathlib/Analysis/Asymptotics/LaplaceReversion.lean",
+    "DLMFMathlib/Analysis/Asymptotics/RamifiedDensityWeights.lean",
+    "DLMFMathlib/Analysis/Asymptotics/RamifiedPowerSeries.lean",
+    "DLMFMathlib/Analysis/Complex/BoundarySingularities.lean",
+    "DLMFMathlib/Analysis/Complex/CircleLaurent.lean",
+    "DLMFMathlib/Analysis/Complex/CircleSingularities.lean",
+    "DLMFMathlib/Analysis/Complex/LagrangeBurmannQuotient.lean",
+    "DLMFMathlib/Analysis/Complex/LaurentPowerSeries.lean",
+    "DLMFMathlib/Analysis/ODE/LinearInterval.lean",
+    "DLMFMathlib/Analysis/ODE/LiouvilleGreenDominant.lean",
+    "DLMFMathlib/Analysis/ODE/LiouvilleGreenEndpoint.lean",
+    "DLMFMathlib/Analysis/ODE/LiouvilleGreenInterval.lean",
+    "DLMFMathlib/Analysis/ODE/LiouvilleGreenIntervalVolterra.lean",
+    "DLMFMathlib/MeasureTheory/Integral/CompactParameterDomination.lean",
+    "DLMFMathlib/RingTheory/PowerSeries/LagrangeBurmann.lean",
+    "DLMFMathlib/Topology/Order/MonotoneUnbounded.lean"
+  ],
+  "strict_source_checks": {
+    "DLMF/AsymptoticApproximations/Integrals/Laplace.lean": {
+      "sha256": "3c000fc85ddeff7e23fc1ae7c2844b785407e240440e70cc2e2e19bce9684fb5",
+      "exit_code": 0,
+      "log": "/tmp/DLMF-Olver-proof-round-20261106/strict/DLMF_AsymptoticApproximations_Integrals_Laplace.lean.log"
+    },
+    "DLMF/AsymptoticApproximations/ODE/LiouvilleGreen.lean": {
+      "sha256": "2e1fd4473ccae5cd453814d04295b3f03cb40e91ff86bdb405614e3c215e7750",
+      "exit_code": 0,
+      "log": "/tmp/DLMF-Olver-proof-round-20261106/strict/DLMF_AsymptoticApproximations_ODE_LiouvilleGreen.lean.log"
+    },
+    "DLMF/AsymptoticApproximations/Sums/Darboux.lean": {
+      "sha256": "35efd9a4ba8abd1cbb01b0da18296c87a4eece05ac57be4d4ece5f5e1f33da9b",
+      "exit_code": 0,
+      "log": "/tmp/DLMF-Olver-proof-round-20261106/strict/DLMF_AsymptoticApproximations_Sums_Darboux.lean.log"
+    },
+    "DLMF/AsymptoticApproximations/Sums/DarbouxDerivatives.lean": {
+      "sha256": "5700b006ea0e1fdfb0ab7b445393444a44d1578a31a5522833da859acb9bb591",
+      "exit_code": 0,
+      "log": "/tmp/DLMF-Olver-proof-round-20261106/strict/DLMF_AsymptoticApproximations_Sums_DarbouxDerivatives.lean.log"
+    },
+    "DLMF/AsymptoticApproximations/Sums/LegendreDarboux.lean": {
+      "sha256": "9d57474141c4779121a02aa192c19a714ebb64daf13f86c2bfebaf035694a37c",
+      "exit_code": 0,
+      "log": "/tmp/DLMF-Olver-proof-round-20261106/strict/DLMF_AsymptoticApproximations_Sums_LegendreDarboux.lean.log"
+    },
+    "DLMF/AsymptoticApproximations.lean": {
+      "sha256": "5d199c2fed9ade32236eb87f7466387ce9a0c5185ef88b53922a3216e2a242bb",
+      "exit_code": 0,
+      "log": "/tmp/DLMF-Olver-proof-round-20261106/strict/DLMF_AsymptoticApproximations.lean.log"
+    },
+    "DLMF/Basic.lean": {
+      "sha256": "c3cd1ee928639b1cfdc4c6aba7c1334f0632f629ccb367006fe5e4df75cac77d",
+      "exit_code": 0,
+      "log": "/tmp/DLMF-Olver-proof-round-20261106/strict/DLMF_Basic.lean.log"
+    },
+    "DLMF.lean": {
+      "sha256": "e8f641c0a9a6403217681eed835e03276dd0525a32f0aa67b594105ab5914b06",
+      "exit_code": 0,
+      "log": "/tmp/DLMF-Olver-proof-round-20261106/strict/DLMF.lean.log"
+    },
+    "DLMFMathlib/Analysis/Asymptotics/BinomialPowerSeries.lean": {
+      "sha256": "d7537e92749e8cfa3b55185d124c8c58de7d01588a3dfe027a9f414c38a3d804",
+      "exit_code": 0,
+      "log": "/tmp/DLMF-Olver-proof-round-20261106/strict/DLMFMathlib_Analysis_Asymptotics_BinomialPowerSeries.lean.log"
+    },
+    "DLMFMathlib/Analysis/Asymptotics/LaplaceCoefficients.lean": {
+      "sha256": "78fe7ce1bda0932eb0e6cc4523ca98b211e25e85ff87df73af5808c27ef4e20f",
+      "exit_code": 0,
+      "log": "/tmp/DLMF-Olver-proof-round-20261106/strict/DLMFMathlib_Analysis_Asymptotics_LaplaceCoefficients.lean.log"
+    },
+    "DLMFMathlib/Analysis/Asymptotics/LaplaceReversion.lean": {
+      "sha256": "dafa2e1dfcb9c64a526392d3378778d7e7ed1732f4a0067665d50d824593a5c8",
+      "exit_code": 0,
+      "log": "/tmp/DLMF-Olver-proof-round-20261106/strict/DLMFMathlib_Analysis_Asymptotics_LaplaceReversion.lean.log"
+    },
+    "DLMFMathlib/Analysis/Asymptotics/RamifiedDensityWeights.lean": {
+      "sha256": "2a3523a036b7d8e37e16bae039f0d1b6097349457807b2e6911e0dbd50289f61",
+      "exit_code": 0,
+      "log": "/tmp/DLMF-Olver-proof-round-20261106/strict/DLMFMathlib_Analysis_Asymptotics_RamifiedDensityWeights.lean.log"
+    },
+    "DLMFMathlib/Analysis/Asymptotics/RamifiedPowerSeries.lean": {
+      "sha256": "e1bc538fc66a23b24010db7720c71f782637efbf9ea9daa0e37992c49e8b7e55",
+      "exit_code": 0,
+      "log": "/tmp/DLMF-Olver-proof-round-20261106/strict/DLMFMathlib_Analysis_Asymptotics_RamifiedPowerSeries.lean.log"
+    },
+    "DLMFMathlib/Analysis/Calculus/LHopitalInfinity.lean": {
+      "sha256": "2613717c22e86e214afa04440a7920d9e2cd8d28abaae1e375decb6b26a7ef87",
+      "exit_code": 0,
+      "log": "/tmp/DLMF-Olver-proof-round-20261106/strict/DLMFMathlib_Analysis_Calculus_LHopitalInfinity.lean.log"
+    },
+    "DLMFMathlib/Analysis/Complex/BoundarySingularities.lean": {
+      "sha256": "c4409486749f0bc5c23461b38073b7bdbe08ea250dbc42d54c9b7dbf8321194f",
+      "exit_code": 0,
+      "log": "/tmp/DLMF-Olver-proof-round-20261106/strict/DLMFMathlib_Analysis_Complex_BoundarySingularities.lean.log"
+    },
+    "DLMFMathlib/Analysis/Complex/CircleLaurent.lean": {
+      "sha256": "a4f55bfbbfc87356e0617a400de0a5da0b2dadbc3984f009682d79cbd2dde3e6",
+      "exit_code": 0,
+      "log": "/tmp/DLMF-Olver-proof-round-20261106/strict/DLMFMathlib_Analysis_Complex_CircleLaurent.lean.log"
+    },
+    "DLMFMathlib/Analysis/Complex/CircleSingularities.lean": {
+      "sha256": "57aa04e78db763d8cbe9fab15ad8cd3daf436f0c231784652dab18e18862dede",
+      "exit_code": 0,
+      "log": "/tmp/DLMF-Olver-proof-round-20261106/strict/DLMFMathlib_Analysis_Complex_CircleSingularities.lean.log"
+    },
+    "DLMFMathlib/Analysis/Complex/LagrangeBurmannQuotient.lean": {
+      "sha256": "201f781ad007ce61620ef423cb275d7ec8f40f23ed1b143d2906cc52ab2f1ce2",
+      "exit_code": 0,
+      "log": "/tmp/DLMF-Olver-proof-round-20261106/strict/DLMFMathlib_Analysis_Complex_LagrangeBurmannQuotient.lean.log"
+    },
+    "DLMFMathlib/Analysis/Complex/LaurentPowerSeries.lean": {
+      "sha256": "2acfad2375e359cebfe339e2ca99cc934bcb76897949d72bfbdae00f9b1e2fa4",
+      "exit_code": 0,
+      "log": "/tmp/DLMF-Olver-proof-round-20261106/strict/DLMFMathlib_Analysis_Complex_LaurentPowerSeries.lean.log"
+    },
+    "DLMFMathlib/Analysis/ODE/LinearInterval.lean": {
+      "sha256": "ca4572f9715a9f8fb5f3c35903f37817a51f66076af7ce8afc46cee3b0067a8a",
+      "exit_code": 0,
+      "log": "/tmp/DLMF-Olver-proof-round-20261106/strict/DLMFMathlib_Analysis_ODE_LinearInterval.lean.log"
+    },
+    "DLMFMathlib/Analysis/ODE/LiouvilleGreenDominant.lean": {
+      "sha256": "8d269e8e76f50f5d4f1d9fbb59444a5c889de579fc4efeab994ce2fe0025d9dd",
+      "exit_code": 0,
+      "log": "/tmp/DLMF-Olver-proof-round-20261106/strict/DLMFMathlib_Analysis_ODE_LiouvilleGreenDominant.lean.log"
+    },
+    "DLMFMathlib/Analysis/ODE/LiouvilleGreenEndpoint.lean": {
+      "sha256": "770a056a346ac792617bb9efbd0bce61d15a2fd8b3ae2caad9990e939a02faf4",
+      "exit_code": 0,
+      "log": "/tmp/DLMF-Olver-proof-round-20261106/strict/DLMFMathlib_Analysis_ODE_LiouvilleGreenEndpoint.lean.log"
+    },
+    "DLMFMathlib/Analysis/ODE/LiouvilleGreenInterval.lean": {
+      "sha256": "465b803ec0f76ec2921d7aab91811e3b08361b3147fd3e0aaf7e877072a381fc",
+      "exit_code": 0,
+      "log": "/tmp/DLMF-Olver-proof-round-20261106/strict/DLMFMathlib_Analysis_ODE_LiouvilleGreenInterval.lean.log"
+    },
+    "DLMFMathlib/Analysis/ODE/LiouvilleGreenIntervalVolterra.lean": {
+      "sha256": "684ee5e13e7fb335e8ab8b5e0a385d32568e71e1f74dd39b2356e4c48726100a",
+      "exit_code": 0,
+      "log": "/tmp/DLMF-Olver-proof-round-20261106/strict/DLMFMathlib_Analysis_ODE_LiouvilleGreenIntervalVolterra.lean.log"
+    },
+    "DLMFMathlib/MeasureTheory/Integral/CompactParameterDomination.lean": {
+      "sha256": "ea5318a1d5a4107baba6deedf2a63b9592bfbfb089afe5532bcc4c4e5d254310",
+      "exit_code": 0,
+      "log": "/tmp/DLMF-Olver-proof-round-20261106/strict/DLMFMathlib_MeasureTheory_Integral_CompactParameterDomination.lean.log"
+    },
+    "DLMFMathlib/RingTheory/PowerSeries/LagrangeBurmann.lean": {
+      "sha256": "48cb9aa9494b9a203bb2c8ad275b3839de817e9f741e716e9d26fb68fcc46798",
+      "exit_code": 0,
+      "log": "/tmp/DLMF-Olver-proof-round-20261106/strict/DLMFMathlib_RingTheory_PowerSeries_LagrangeBurmann.lean.log"
+    },
+    "DLMFMathlib/Topology/Order/MonotoneUnbounded.lean": {
+      "sha256": "a096815bcafc003aed56e4038180b4a7cc521794a63e7f1d12db388f93ad40df",
+      "exit_code": 0,
+      "log": "/tmp/DLMF-Olver-proof-round-20261106/strict/DLMFMathlib_Topology_Order_MonotoneUnbounded.lean.log"
+    },
+    "DLMFMathlib.lean": {
+      "sha256": "27f0773a02cbb14e2ad7140bf678ff1de383412869710ca1f369cd59b61ae60a",
+      "exit_code": 0,
+      "log": "/tmp/DLMF-Olver-proof-round-20261106/strict/DLMFMathlib.lean.log"
+    }
+  },
+  "deferred_statement_issues": [
+    {
+      "declaration": "DLMF.AsymptoticApproximations.laplace_method",
+      "issue": "Only local regularity is assumed, while integrability at one parameter does not ensure measurability of the phase-dependent integrands at larger parameters.",
+      "counterexample": "Take x0=0, p(t)=t near zero and p=1 or 2 according to a non-Lebesgue-measurable subset of (1,2); q=1 on the finite interval, or q=exp(-t) away from zero on the halfline. The assumed integral exists at x0 but totalized integrals vanish for every x>0, contrary to the nonzero leading coefficient.",
+      "proposed_hypothesis": "∀ x, x₀ ≤ x → IntegrableOn (fun t => Real.exp (-x * p t) • q t) (Ioo a b)",
+      "source": "Olver, Chapter 3, §§7–8, pp.81–87: absolute convergence for all sufficiently large parameters.",
+      "approval": "Pending; original theorem statement and admission left unchanged."
+    },
+    {
+      "declaration": "DLMF.AsymptoticApproximations.laplace_method_Ioi",
+      "issue": "Only local regularity is assumed, while integrability at one parameter does not ensure measurability of the phase-dependent integrands at larger parameters.",
+      "counterexample": "Take x0=0, p(t)=t near zero and p=1 or 2 according to a non-Lebesgue-measurable subset of (1,2); q=1 on the finite interval, or q=exp(-t) away from zero on the halfline. The assumed integral exists at x0 but totalized integrals vanish for every x>0, contrary to the nonzero leading coefficient.",
+      "proposed_hypothesis": "∀ x, x₀ ≤ x → IntegrableOn (fun t => Real.exp (-x * p t) • q t) (Ioi a)",
+      "source": "Olver, Chapter 3, §§7–8, pp.81–87: absolute convergence for all sufficiently large parameters.",
+      "approval": "Pending; original theorem statement and admission left unchanged."
+    }
+  ],
+  "validation": {
+    "ordinary_build": "lake build > /tmp/DLMF-build.log 2>&1",
+    "axiom_audit": "Every completed original and every new helper theorem has only standard axioms; whole-project graph checked for nonstandard axioms and admitted foundational dependencies.",
+    "preservation": "All baseline public statement headers, public/private definition bodies and DLMF tags preserved; no missing declarations, added admissions or axioms.",
+    "independent_review": "Separate mathematical review of singular-endpoint Liouville–Green constructions, Darboux boundary estimates and Laplace ramified coefficient normalization.",
+    "import_survey": "No new two-way area pairs (23 baseline/current); zero foundational, closure, missing-module or file-cycle violations.",
+    "file_lengths": "All Lean files at most 1500 lines; changed sources at most 100 columns.",
+    "whitespace": "git diff --check passed."
+  },
+  "subsequent_corrections": [
+    {
+      "date": "2026-11-06",
+      "approval": "User requested: Please correct the single-parameter integrability.",
+      "declarations": [
+        "DLMF.AsymptoticApproximations.laplace_method",
+        "DLMF.AsymptoticApproximations.laplace_method_Ioi"
+      ],
+      "change": "Replace integrability at x₀ by integrability for every x ≥ x₀; other hypotheses, conclusions and tags are preserved.",
+      "proof_status": "Both theorems remain admitted; direct admissions remain 976.",
+      "review": "REVIEW.md#approved-laplace-integrability-correction-2026-11-06",
+      "audit_scope": "The proof-round statements and source hashes above describe the snapshot before this approved correction.",
+      "source_file": "DLMF/AsymptoticApproximations/Integrals/Laplace.lean",
+      "source_sha256": "a0f0542d16070cb216bfdfc04f87f78309f7084578533fb2e82a34f8411a1c25",
+      "validation": {
+        "ordinary_build": "passed (15728 jobs)",
+        "strict_checks": "Laplace.lean and DLMF.lean passed with autoImplicit=false and relaxedAutoImplicit=false.",
+        "declaration_check": "Only the two approved integrability hypotheses and their docstrings changed in the Lean source.",
+        "axioms": "The two integral theorems remain admitted; the coefficient theorem uses only standard axioms.",
+        "dlmf_entries": "All 10818 entries and their proof statuses preserved: 9555 proved, 1263 admitted, 0 nonstandard.",
+        "import_survey": "No new two-way area pairs; zero foundational, closure, missing-module or cycle violations.",
+        "formatting": "File and line limits and git diff --check passed."
+      }
+    }
+  ]
+}

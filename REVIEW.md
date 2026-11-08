@@ -11419,3 +11419,290 @@ zero with nonstandard axioms and all 1,031 upstream pointers retained. Only 25.1
 changes status. The Chapter 25 acquisition ledger is refreshed. Import, line/file
 length and whitespace checks pass, with no additional area pairs or file cycles.
 No changes were committed.
+
+## Olver proof-source review (2026-11-06)
+
+The added [reference](References/Olver1997AsymptoticsSpecialFunctionsCorrectedEd-TaylorFrancis.pdf)
+is F. W. J. Olver, *Asymptotics and Special Functions*, corrected A K Peters edition
+(1997); the PDF imprint also records the CRC 2010 reprint. The edition preface explains
+that it reprints the 1974 text with corrections. It is not a replacement for later
+papers on every DLMF asymptotic development.
+
+The [proof-source map](OlverProofMap20261106.json) identifies **26 current directly
+admitted declarations**, of which **25 are in the Chapter 2 asymptotic-method area**
+and one is Nicholson's integral. These are selected matches, not a count of everything
+in the project to which Olver could apply, and not completed Lean proofs. The direct
+admission count remains **983**. No Lean source or theorem statement changes in this
+review. The map records exact declaration names, source locations, book sections,
+printed and PDF pages, existing proved support and the remaining formalization work.
+
+Page numbers below are printed Arabic pages. Add 19 for the PDF page number. The
+embedded OCR drops formulas and misreads some page numbers; critical formula pages
+were inspected as images rather than trusting the extracted text alone.
+
+### The principal shared proof mechanism
+
+Chapter 6, §10, pp.218–220, gives a theorem for singular Volterra integral equations
+with weighted bounds for a solution and its derivative. The proof uses successive
+approximations, factorial bounds on successive differences, uniform convergence on
+compact sets, differentiation of the resulting series and an exponential majorant.
+Theorem 10.1 includes a derivative term in the equation; its specialization without
+that term already covers important Airy and Bessel applications. Implement that
+specialization first unless an application needs the greater generality.
+
+This is the mechanism explicitly reused in Chapter 11's Airy and Chapter 12's Bessel
+error estimates. It gives a concrete common proof project rather than a collection
+of independent coefficient computations.
+
+The project already has a proved rank-two, tail-integral specialization in
+`DLMFMathlib/Analysis/ODE/LiouvilleGreenVolterra.lean` and concrete exponential and
+oscillatory forms in `LiouvilleGreenReal.lean`. Those files already cite Olver.
+The remaining work is to extend the interval and weighted-kernel interfaces, provide
+the corresponding derivative bounds, and prove the special-function kernel estimates.
+The half-line specialization alone does not supply the full finite-interval or
+turning-point theorems.
+
+### Direct matches to remaining admissions
+
+- **Finite-interval Liouville–Green: four admissions.** Chapter 6, Theorem 2.1,
+  pp.193–196, constructs the two error-controlled solutions. Sections 3.1–3.5,
+  pp.197–199, give normalized recessive uniqueness and dominant solutions.
+  Section 3.6, p.200, works the exact `w''=(x+ln x)w` example of
+  `liouvilleGreen_example`. These match `liouvilleGreen_interval`,
+  `liouvilleGreen_interval_isEquivalent`, `liouvilleGreen_dominant` and the example.
+  Preserve the singular-endpoint conditions and normalize the integration constant
+  in the example. Extending the tail solution across the part where `x+ln x` is
+  negative also needs the existing ordinary-ODE theory.
+
+- **Real Laplace method: three admissions.** Chapter 3, Theorem 7.1, pp.81–82,
+  and Theorem 8.1, pp.85–87, match `laplace_method`, `laplace_method_Ioi` and
+  `laplaceCoeff_hasAsymptoticExpansion`. Olver explicitly allows merely asymptotic
+  local series. Substitute `v=p(t)-p(a)` near the endpoint, revert the expansion,
+  apply Watson's lemma, and bound the far tail using the strict phase gap.
+  Our Watson theory and first three coefficient formulas are proved; the main
+  missing bridge identifies the reverted coefficients with `laplaceCoeff` at every
+  order. The formal asymptotic-inversion API is available in `DLMFMathlib`.
+
+- **Complex Laplace and simple saddles: two admissions.** Chapter 4, §§6–7,
+  pp.121–126, gives the contour proof for `laplace_method_contour` and
+  `saddle_point`. The work is an analytic local inverse, consistent logarithmic
+  powers on the path, rotated Watson estimates and control of the two saddle
+  branches. The project's Watson sector and rotated-ray results supply support.
+
+- **Endpoint stationary phase: three admissions.** Chapter 3, §§12–14,
+  pp.98–104, supplies preliminary oscillatory integral lemmas, the endpoint
+  approximation proof and its all-order extension. This is the proof route for
+  `stationaryPhase_watson`, `stationaryPhase_endpoint` and
+  `stationaryPhase_endpoint_infinite`. Repeated integration by parts controls the
+  nonstationary tails; the endpoint model is a scaled oscillatory Gamma integral.
+  The existing cubic stationary-phase result does not already prove these general
+  endpoint theorems.
+
+- **Singular Darboux and the Legendre example: three admissions.** Chapter 8,
+  §9.3 and §§10.1–10.2, pp.310–313, directly address `darboux_singular`,
+  `darboux_smooth_singular` and `legendrePolynomialP_cos_asymptotic`.
+  The basic and smooth Darboux results and the comparison-function coefficients
+  are already proved locally. What remains is integrable boundary traces at
+  finitely many algebraic singularities, uniform radial convergence and integration
+  by parts for their derivatives. In the Legendre example the residual near each
+  branch point is a constant plus `O(distance^(1/2))`; applying the singular
+  derivative version with `m=1` gives the required `o(1/n)` error. Olver uses
+  `0<alpha<pi`, agreeing with the project's corrected domain.
+
+- **Fuchs–Frobenius solutions: two admissions.** Chapter 5, Theorem 4.1 and §5,
+  pp.148–152, supplies a Cauchy-majorant proof of convergence and a reduction-of-order
+  construction of the resonant logarithmic solution. These match
+  `frobenius_solutions` and `frobenius_log_solution`. The latter needs an adjustment
+  by a multiple of the first solution to enforce the project's omitted resonant
+  coefficient. The proof must retain the full stated convergence radius.
+  TauCeti's `Analysis/ODE/Frobenius` is the integrability theorem for total
+  differential equations, not this regular-singular series theorem.
+
+- **Rank-one irregular solutions and connection formulas: two admissions.**
+  Chapter 7, §§1–2, pp.229–236, provides a residual integral equation, its convergent
+  successive-approximation construction, and the rotated-solution argument for
+  the Stokes constants. These address `rankOne_exists_unique_solutions` and
+  `rankOne_stokes_multipliers`. Recessive uniqueness identifies the same solution
+  for every truncation order. The project's logarithmic-plane branches and sectors
+  of opening approaching `3pi` must be retained. This source does not by itself
+  settle the separate late-coefficient resurgence admission.
+
+- **Airy turning-point templates: two admissions.** Chapter 11, Theorem 7.1,
+  pp.410–411, supplies the exact remainder equation and invokes Chapter 6,
+  Theorem 10.1. Section 7.4 converts the weighted remainder to a compound expansion.
+  This matches `caseII_airy_expansion` and `caseII_airy_envelope`. For the project's
+  indexing use Olver's `n = Lean n - 1`, and interchange his Bi-first and Ai-second
+  labels. The substantial missing work is the weighted Airy Green-kernel estimate
+  and a comparison of Olver's `E,M,N` functions with the project envelopes.
+
+- **Bessel simple-pole templates: three admissions.** Chapter 12, §§2–5,
+  pp.439–448, contains the `I/K` and `J/Y` constructions, Theorems 3.1 and 4.1,
+  and their asymptotic consequences. These match `caseIII_bessel_expansion_pos`,
+  `caseIII_bessel_expansion_neg` and `caseIII_bessel_envelope`. The positive-kernel
+  argument is explicit; the negative case uses modulus estimates and the same
+  Volterra theorem. Again use Olver's `n = Lean n - 1`. Weighted kernel and
+  derivative bounds near zero are essential.
+
+- **Uniform endpoint/saddle transition: one admission.** Chapter 9, §§9–10,
+  pp.344–351, outlines Bleistein's method and works its uniform error estimate.
+  For `bleistein_uniform`, integrate the supplied amplitude remainder against the
+  positive Gaussian weight, rescale by `tau=sqrt(x)*w`, and control the discarded
+  upper tail using `kappa-a2>0`. The exact centered moments and all the project's
+  uniform parameter hypotheses still need to be checked in that estimate.
+
+- **Nicholson's integral: one admission.** Chapter 9, §7, pp.340–342, gives a full
+  proof of `DLMF.Bessel.nicholson_integral`. The integral satisfies the third-order
+  equation for products of Bessel solutions; large-argument asymptotics determine
+  the three constants. This is a direct proof source, but requires dominated
+  differentiation, a third-order solution-basis argument and the complex-order
+  convergence bounds. It is not an immediate consequence of the integral definition.
+
+### Applications and limits of the review
+
+Chapter 12, §§12–13, pp.463–474, gives worked Legendre identifications and conical
+examples. These can follow the Bessel model development, with separate work for
+normalization and simultaneous large-order/large-degree regimes. Chapter 6, §6,
+pp.206–207, works a leading parabolic-cylinder approximation for a large positive
+parameter; the remaining negative-parameter and turning-point statements require
+additional transformations and normalizers. Chapter 11, §§5–6 and §8, gives Airy
+zero arguments, but the project's combined all-order real/complex zero statement
+also needs the complex enumeration and coefficient identifications.
+
+There are also useful proofs for inverse Laplace asymptotics in Chapter 8, §11,
+pp.315–320, and series reversion in Chapter 1. They are recorded as secondary
+candidates, not included in the selected 26.
+
+No matching complete treatment was identified for every modern hyperasymptotic
+statement, the Chapter 2 distributional-asymptotics block or general difference-
+equation asymptotics. Mathieu occurs as an application/exercise, not a treatment
+of all 118 remaining Mathieu admissions. The book also does not supply the main
+missing matrix-argument, Painleve, combinatorial or number-theoretic developments.
+
+Recommended proof order: singular Darboux and finite-interval Liouville–Green
+extensions; real Laplace and its all-order coefficient bridge; the weighted
+Airy/Bessel Volterra estimates and five model templates; then complex contour and
+irregular-ODE extensions. These are proof projects of different sizes, not an
+estimate that 26 admissions can be removed in a short batch.
+
+Validation for this documentation review: every selected name resolves to a current
+direct admission, with no duplicate targets; the book's critical formula pages and
+normalizations were checked; existing upstream and project support was inspected.
+No Lean source, definition, statement, dependency or build setting was changed.
+
+
+## Olver-based asymptotic proof round (2026-11-06)
+
+The proof-source matches above have now been used to remove seven original admissions,
+reducing the project from **983 to 976** direct admissions. The inventory and compiled
+checks are recorded in [OlverProofRound20261106.json](OlverProofRound20261106.json).
+The [source map](OlverProofMap20261106.json) retains its original 26-target review and
+records the subsequent proof status separately.
+
+- **Finite-interval Liouville–Green:** `liouvilleGreen_interval`,
+  `liouvilleGreen_interval_isEquivalent` and `liouvilleGreen_dominant`, following
+  Olver, Chapter 6, §§2–3, pp.193–200, and §10, pp.218–220. Singular endpoints are
+  handled by factorial Picard bounds for improper Volterra tails. Wronskian
+  uniqueness identifies the normalized recessive solutions; an independent initial-value
+  solution with Wronskian one, scaled by two, supplies the dominant solution.
+  General support includes open-interval linear ODE existence, signed monotone
+  endpoint divergence and one-sided L’Hôpital with an unbounded denominator.
+- **Singular Darboux:** `darboux_singular` and `darboux_smooth_singular`, following
+  Olver, Chapter 8, §§9–10, pp.310–313. Integrable chord majorants control radial
+  limits at finitely many algebraic singularities. Dominated convergence and
+  Riemann–Lebesgue give coefficient decay; exact Laurent derivative identities
+  give the higher-order result without boundary integration by parts at singular points.
+- **Legendre large degree:** `legendrePolynomialP_cos_asymptotic` applies the
+  derivative Darboux theorem to the two principal inverse square roots of the
+  generating function. The subtracted derivative has order `distance^(-1/2)`
+  at each root. The Gamma-ratio remainder is `O(n^(-3/2))`, which preserves the
+  stated `o(n^(-1))` error. The existing angle restriction `0 < alpha < pi`
+  and principal branches are unchanged.
+- **Laplace coefficients:** `laplaceCoeff_hasAsymptoticExpansion`, following
+  Olver, Chapter 3, §§7–8, pp.81–87. Formal Lagrange–Bürmann extraction and
+  binomial powers identify the exact weighted coefficients after ramified
+  reversion. The proof allows nonconvergent asymptotic power series and arbitrary
+  positive real leading exponents; it introduces no analyticity assumption.
+
+The full `x + log x` Liouville–Green example remains admitted. The square-root
+expansion is already proved, and Olver §3.6 supplies its phase normalization, but
+extending tail solutions to `(0,infinity)` and controlling the integrated phase
+remainder are separate tasks. The Airy/Bessel model templates, complex contours,
+stationary phase and Nicholson integral remain further proof projects.
+
+### Two Laplace integral statements requiring approval
+
+**Subsequent update:** the user approved these repairs; they are applied in the
+[correction below](#approved-laplace-integrability-correction-2026-11-06). The discussion
+here records the statements and approval status at the end of the proof round.
+
+The tagged `laplace_method` and `laplace_method_Ioi` assume integrability at a single
+parameter `x0`, while assuming regularity of the phase and amplitude only near the
+endpoint. Those hypotheses do not ensure measurability of the integrands at larger
+parameters. Olver requires absolute convergence for all sufficiently large parameters.
+The two existing statements and their admissions have been left unchanged.
+
+A concrete mathematical counterexample to `laplace_method` takes `a=0`, `b=2`,
+`delta=lambda=mu=1`, `pc=qc=(1,0,...)`, `q=1`, `x0=0`, and `p(0)=0`. Set `p(t)=t`
+for `0<t<1`, and let `p` take values one and two on `(1,2)` according to a
+non-Lebesgue-measurable subset. Every local expansion and regularity hypothesis
+holds, the phase gap holds with `eta=min(epsilon,1)`, and the integral at `x0`
+is the integral of one. For every `x>0` the integrand fails almost-everywhere strong
+measurability, so its Lean totalized integral is zero. This contradicts the required
+nonzero leading term `1/x`. For `laplace_method_Ioi`, use `q=1` near zero and
+`q=exp(-t)` for `t>=1`, with the same nonmeasurable phase on `(1,2)` and `p=1`
+beyond two. The same argument applies. These are mathematical counterexamples;
+no claim of a compiled Lean counterexample is made.
+
+The proposed source-faithful repairs replace the single-parameter hypotheses by:
+
+```lean
+-- laplace_method
+(hint : ∀ x, x₀ ≤ x →
+  IntegrableOn (fun t => Real.exp (-x * p t) • q t) (Ioo a b))
+
+-- laplace_method_Ioi
+(hint : ∀ x, x₀ ≤ x →
+  IntegrableOn (fun t => Real.exp (-x * p t) • q t) (Ioi a))
+```
+
+All other hypotheses and conclusions would be retained. This change is pending
+approval under `AGENTS.md`: “Changing the statement of a tagged theorem or the body
+of a definition needs the user's approval.” The coefficient theorem proved in this
+round is unaffected by either issue.
+
+
+Final validation: the ordinary full build passes (15,728 jobs), and all 28 changed/new
+or entry modules pass strict checks with both implicit-variable options disabled.
+The compiled graph contains 72,136 project declarations; all seven completed originals
+and every theorem in the 20 new modules use only standard axioms. Independent comparison
+of 23,605 baseline public declarations finds no missing or changed statement headers,
+public/private definition bodies or DLMF tags, and no new admissions or axioms.
+All 8,804 source DLMF attribute annotations are preserved. Compiled DLMF entries change from 9,536 proved
+and 1,282 admitted to **9,555 proved and 1,263 admitted**, with no nonstandard axioms:
+19 existing entries become proved. The Chapter 2 acquisition ledger has been refreshed.
+The import survey retains the same 23 two-way area pairs, with no foundational,
+closure, missing-module or cycle violations. All 1,559 Lean files meet the 1,500-line
+limit, all changed source lines meet the 100-column limit, and `git diff --check` passes.
+
+
+## Approved Laplace integrability correction (2026-11-06)
+
+The user approved replacing single-parameter integrability in `laplace_method` and
+`laplace_method_Ioi`. Both now assume
+`∀ x, x₀ ≤ x → IntegrableOn (fun t => Real.exp (-x * p t) • q t) S`, with
+`S = Ioo a b` and `S = Ioi a`, respectively. Their docstrings state this same
+large-parameter convergence condition. This rules out the nonmeasurable-phase
+counterexamples described above and matches Olver's absolute-convergence assumption.
+
+All other hypotheses, conclusions, declaration names and DLMF attributes are preserved.
+The two proofs remain admitted; this statement correction removes no admission, so the
+project total remains **976**. The proved coefficient expansion is unchanged.
+
+
+Validation of the approved correction: the full build passes (15,728 jobs); strict
+checks of `Laplace.lean` and `DLMF.lean` pass. A source comparison confirms that only
+the two approved integrability hypotheses and their docstrings changed in Lean.
+All 10,818 compiled DLMF entries retain their proof status (9,555 proved, 1,263
+admitted, zero nonstandard axioms), and the Chapter 2 ledger links have been refreshed.
+The coefficient theorem still has only standard axioms. Import, file-length,
+line-length and whitespace checks pass; no new two-way area pair is introduced.

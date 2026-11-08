@@ -3,7 +3,7 @@
 A Lean 4 formalization of special functions following the NIST Digital Library of
 Mathematical Functions (DLMF). The project began as a formalization of Andrews, Askey and
 Roy, *Special Functions* (1999), henceforth AAR, and was renamed from lean-AAR to lean-DLMF
-on 2026-10-21, when the DLMF chapters became its organizing principle. AAR, Temme,
+on 2026-10-21, when the DLMF chapters became its organizing principle. AAR, Olver, Temme,
 Beals–Wong and Duverney remain supporting sources.
 
 The [2026-11-06 proof round](REVIEW.md#parallel-dlmf-proof-round-2026-11-06)
@@ -15,6 +15,16 @@ REVIEW.md#approved-polylogarithm-logarithm-correction-2026-11-06) replaces the i
 logarithm by `-log z` and proves the tagged theorem, removing one additional admission
 and leaving **983**.
 The preceding rounds removed [13](ProofRound20261105b.json) and [25](ProofRound20261105.json).
+The [Olver proof-source review](REVIEW.md#olver-proof-source-review-2026-11-06) maps
+26 admissions to proofs or detailed proof outlines in the corrected 1997 edition of
+*Asymptotics and Special Functions*. The subsequent
+[Olver-based proof round](REVIEW.md#olver-based-asymptotic-proof-round-2026-11-06)
+removes **seven**, reducing **983 to 976**: three Liouville–Green theorems, both
+singular Darboux theorems, the Legendre large-degree asymptotic and the all-order
+Laplace coefficient bridge. Its [manifest](OlverProofRound20261106.json) records the
+compiled axiom and preservation audits. The [approved Laplace integrability correction](
+REVIEW.md#approved-laplace-integrability-correction-2026-11-06) now requires integrability
+for every `x ≥ x₀` in both full integral statements; their proofs remain admitted.
 The [approved Lerch transformation repair](REVIEW.md#lerch-transformation-order-exclusion-2026-11-06)
 excludes positive integer orders from its pointwise statement; its proof remains admitted.
 
@@ -33,8 +43,8 @@ umbrella module `DLMF/<Area>.lean` describes what Mathlib already provides and w
 area adds. Statements taken from the DLMF record their equation numbers with Mathlib's
 `@[dlmf]` cross-reference attribute.
 
-`DLMF.lean` imports all areas. The current library has 1,535 Lean files, including
-170 general supporting modules and the two library root entry points. Large topic modules
+`DLMF.lean` imports all areas. The current library has 1,555 Lean files, including
+188 general supporting modules and the two library root entry points. Large topic modules
 are split into mathematical subtopics; the former file remains as a small import umbrella.
 For example, `Gamma/IntegralRepresentations.lean` now imports the Hankel, Prym, Binet and
 moment modules below `Gamma/IntegralRepresentations/`.

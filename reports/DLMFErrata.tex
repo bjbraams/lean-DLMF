@@ -18,8 +18,8 @@
   leftmargin=1.5em, labelindent=0pt, itemsep=0.3ex, topsep=0.3ex, parsep=0.3ex]\setlength{\parindent}{0pt}\RaggedRight}{\end{description}}
 
 % entry counts
-\newcommand{\NumA}{139}
-\newcommand{\NumB}{20}
+\newcommand{\NumA}{144}
+\newcommand{\NumB}{24}
 
 \begin{document}
 
@@ -27,7 +27,7 @@
   NIST Digital Library of Mathematical Functions\\[0.4ex]
   \large found in the Lean~4 formalization \texttt{lean-DLMF}}
 \author{Bastiaan J. Braams}
-\date{2026-11-04}
+\date{2026-11-08}
 \maketitle
 
 \begin{abstract}
@@ -301,6 +301,23 @@ Found by the acquisition agents on 2026-10-27 and confirmed by the coordinator f
   (\file{DLMF/AsymptoticApproximations/Mellin/BesselExample.lean}).
 \end{fields}
 
+\entry{\dlink{2.7.ii}{\S2.7(ii)} (sentence after \deq{2.7.13})}
+\begin{fields}
+\item[Printed] ``Hence unless the series (2.7.8) terminate (in which case the corresponding
+  $\Lambda_j$ is zero) they diverge.''
+\item[Correct] the series \deq{2.7.8} diverge unless $\Lambda_j=0$. Termination implies
+  $\Lambda_j=0$, but not conversely: when $\Lambda_j=0$ the estimates \deq{2.7.12}--\deq{2.7.13}
+  say nothing about divergence, and the series may converge without terminating.
+\item[Evidence] $f(z)=-1+2z^{-2}$, $g(z)=-z^{-2}-2z^{-3}+z^{-4}$ has a rank-one singularity at
+  $\infty$ with $\lambda_1=0$, $\lambda_2=1$, $\mu_1=\mu_2=0$. The solutions are $\eu^{1/z}$ and
+  $\eu^{z+1/z}$ (checked by differentiation), so both formal series are
+  $\sum_s z^{-s}/s!$, which converges and does not terminate, and $C_1=C_2=0$.
+\item[Lean] \lean{rankOne_late_coefficients}
+  (\file{DLMF/AsymptoticApproximations/ODE/Singularities.lean}), admitted; it states the
+  estimates only and makes no divergence claim.
+\item[Found] 2026-11-08, in the Tau~Ceti roadmap work.
+\end{fields}
+
 \entry{\dlink{2.10.iv}{\S2.10(iv)}, \deq{2.10.34}--\deq{2.10.36}}
 \begin{fields}
 \item[Printed] ``Let $\alpha$ be a constant in $(0,2\pi)$''.
@@ -448,7 +465,44 @@ Found by the acquisition agents on 2026-10-27 and confirmed by the coordinator f
 \item[Found] 2026-10-24.
 \end{fields}
 
+\subsection{Chapter 6 (exponential, logarithmic, sine and cosine integrals)}
+
+\entry{\deq{6.16.4}}
+\begin{fields}
+\item[Printed] $R_n(x)=O(n^{-1})$ as $n\to\infty$, ``uniformly for $x\in[-\pi,\pi]$'', where
+  $R_n(x)=\frac12\int_0^x(1/\sin t-1/t)\sin(2nt)\dd t$, as in \deq{6.16.3}.
+\item[Correct] uniformly for $x\in[-b,b]$, for each fixed $b\in(0,\pi)$. The kernel
+  $1/\sin t-1/t$ is unbounded at $t=\pm\pi$, so the integration by parts gives no uniform bound
+  there. The conclusions drawn in \dlink{6.16.i}{\S6.16(i)} need only the corrected form.
+\item[Evidence] every term of $S_n(\pi)$ vanishes, so
+  $R_n(\pi)=-\frac12\operatorname{Si}(2n\pi)\to-\frac14\pi$. mpmath: $R_{1000}(\pi)=-0.785319$,
+  and $n\,R_n(\pi-1/n)=0.1413$, $1.698$, $17.28$ at $n=10$, $100$, $1000$.
+\item[Lean] none; \S6.16 is not formalized in \texttt{lean-DLMF}.
+\item[Found] 2026-11-08, in the Tau~Ceti roadmap work.
+\end{fields}
+
 \subsection{Chapter 8 (incomplete Gamma and related functions)}
+
+\entry{\deq{8.6.12}}
+\begin{fields}
+\item[Printed] for
+  \begin{equation*}
+    \Gamma\left(a,z\right)=-\frac{z^{a-1}\eu^{-z}}{\Gamma\left(1-a\right)}\,\frac{1}{2\pi\iu}
+    \int_{c-\iu\infty}^{c+\iu\infty}\Gamma\left(s+1-a\right)
+    \frac{\pi z^{-s}}{\sin\left(\pi s\right)}\dd s,\qquad |\ph z|<\tfrac32\pi,\ a\neq1,2,3,\dots,
+  \end{equation*}
+  the path ``separates the poles of the gamma function from the poles at $s=0,1,2,\ldots$''.
+\item[Correct] the poles $s=-1,-2,\dots$ of $\pi/\sin(\pi s)$ must lie to the left of the path
+  as well: the path separates the poles of $\Gamma(s+1-a)$ and the poles $s=-1,-2,\dots$ from the
+  poles $s=0,1,2,\dots$. For a straight line, $\max(\Re a-1,-1)<c<0$.
+\item[Evidence] $a=-1.3$, $z=1.5\iu$: $\Gamma(a,z)=-0.083654+0.213692\iu$, which $c=-0.5$
+  reproduces. The line $c=-1.5$ also satisfies the printed condition (the Gamma poles are at
+  $-2.3-k$), but gives $0.334509+0.036677\iu$ (mpmath).
+\item[Lean] \lean{upperIncompleteGamma_mellinBarnes_continued}
+  (\file{DLMF/IncompleteGamma/Representations/UpperBarnes.lean}), proved, with $-1<c<0$ and the
+  residues of the Gamma poles to the right of the line added explicitly.
+\item[Found] 2026-11-08, in the Tau~Ceti roadmap work.
+\end{fields}
 
 \entry{\deq{8.10.11}}
 \begin{fields}
@@ -516,6 +570,19 @@ Found by the acquisition agents on 2026-10-27 and confirmed by the coordinator f
   derivative of the printed term is $-\Bi(x)$; proved in Lean.
 \item[Lean] \lean{airyBi_negative_integral_asymptotic} (\file{DLMF/Airy/Integrals.lean}), proved.
 \item[Found] 2026-10-21.
+\end{fields}
+
+\entry{\deq{9.13.18}}
+\begin{fields}
+\item[Printed] $w=U_m(t\eu^{-2j\pi\iu/m})$, $j=0,\pm1,\pm2,\dots$, ``is recessive in the sector
+  $-(2j-1)\pi/m\leq\ph z\leq(2j+1)\pi/m$''.
+\item[Correct] it is recessive in the open sector $(2j-1)\pi/m<\ph t<(2j+1)\pi/m$, uniformly in
+  closed subsectors. That sector is centred on the ray where $t\eu^{-2j\pi\iu/m}$ is positive,
+  and $U_m$ is recessive in $|\ph t|<\pi/m$. The printed sector has the wrong sign on its lower
+  end, which makes it the single ray $\ph=\pi/m$ at $j=0$, and it uses the variable $z$ of
+  \deq{9.13.1} in place of $t$.
+\item[Lean] \lean{olverAiry_rotated_recessive} (\file{DLMF/Airy/Generalized.lean}), admitted.
+\item[Found] 2026-11-08, in the Tau~Ceti roadmap work.
 \end{fields}
 
 \entry{\deq{9.13.36}}
@@ -603,6 +670,30 @@ Found by the acquisition agents on 2026-10-27 and confirmed by the coordinator f
 \end{fields}
 
 \subsection{Chapter 12 (parabolic cylinder functions)}
+
+\entry{\deq{12.13.5}}
+\begin{fields}
+\item[Printed] for $\Re a\leq-\frac12$, $0\leq t\leq\frac14\pi$,
+  \begin{multline*}
+    U\left(a,x\cos t+y\sin t\right)=\eu^{\frac14(x\sin t-y\cos t)^2}\\
+    \times\sum_{m=0}^{\infty}\binom{-a-\frac12}{m}(\tan t)^m\,U\left(m+a,x\right)
+    U\left(-m-\tfrac12,y\right).
+  \end{multline*}
+\item[Correct] the right side needs the factor $(\cos t)^{-a-\frac12}$:
+  \begin{multline*}
+    U\left(a,x\cos t+y\sin t\right)=(\cos t)^{-a-\frac12}\,\eu^{\frac14(x\sin t-y\cos t)^2}\\
+    \times\sum_{m=0}^{\infty}\binom{-a-\frac12}{m}(\tan t)^m\,U\left(m+a,x\right)
+    U\left(-m-\tfrac12,y\right).
+  \end{multline*}
+  The printed form holds only at $t=0$ or $a=-\frac12$.
+\item[Evidence] mpmath, $a=-\frac52$, $x=-0.7$, $y=0.4$, $t=0.6$: $U(a,x\cos t+y\sin t)=
+  -0.849476$; the printed right side is $-1.247067$, and with the factor it is $-0.849476$.
+  The corrected form also agrees at $a=-1$, $x=0.5$, $y=0.3$, $t=0.4$, and at complex
+  $a=-1.2+0.3\iu$, $x=0.5+0.2\iu$.
+\item[Lean] \lean{parabolicCylinderU_rotational_addition}
+  (\file{DLMF/ParabolicCylinder/Relations.lean}), corrected form, admitted.
+\item[Found] 2026-11-08, in the Tau~Ceti roadmap work.
+\end{fields}
 
 \entry{\deq{12.13.6}}
 \begin{fields}
@@ -2505,6 +2596,19 @@ as tacit, or a notation used outside its stated domain.
 \item[Lean] \lean{arcsin_general_add}, \lean{arcsin_arccos_general_add}, proved.
 \end{fields}
 
+\entry{\deq{6.13.2}}
+\begin{fields}
+\item[Note] The zeros $c_k$ are indexed from $k=0$, but $\alpha=k\pi$ vanishes at $k=0$, so the
+  expansion and the statement that the remainder ``does not exceed the $(n+1)$th term in
+  absolute value and has the same sign'' are meaningless for $c_0$; they need $k\geq1$ for
+  $c_k$.
+\item[Lean] \lean{Real.trigonometric_integral_zero_asymptotics}
+  (\file{DLMF/ExpIntegrals/ZerosIntegrals.lean}), admitted, with the remainder bounds for
+  $k\geq1$ for $c_k$ and $k\geq0$ for $s_k$; at $s_0$ ($\alpha=\frac12\pi$) they hold for the
+  first $11$ remainders (mpmath, with the coefficients computed to $n=11$).
+\item[Found] 2026-11-08, in the Tau~Ceti roadmap work.
+\end{fields}
+
 \entry{\deq{8.7.2}}
 \begin{fields}
 \item[Note] The segment from $x$ to $x+y$ must avoid the branch cut; otherwise the expansion
@@ -2518,6 +2622,37 @@ as tacit, or a notation used outside its stated domain.
   \deq{8.10.7} diverges at $a=0$; the case $a=0$ holds only as a limit.
 \item[Lean] \lean{incompleteGamma_positive_exponential_bounds} ($a>0$),
   \lean{incompleteGamma_positive_exponential_limit} ($a\to0$), proved.
+\end{fields}
+
+\entry{\deq{8.19.24}}
+\begin{fields}
+\item[Note] At $a=0$, inside the stated range $\Re a>-1$, the right side
+  $(-1)^{n-1}a^{-n}\bigl(\ln(1+a)+\sum_{k=1}^{n-1}(-1)^ka^k/k\bigr)$ is $0/0$; the integral
+  $\int_0^\infty E_n(t)\dd t=1/n$ is its limit as $a\to0$.
+\item[Lean] \lean{expIntegralE_nat_laplace} (\file{DLMF/IncompleteGamma/ExponentialIntegral.lean}),
+  proved, with the value $1/n$ at $a=0$.
+\item[Found] 2026-11-08, in the Tau~Ceti roadmap work.
+\end{fields}
+
+\entry{\deq{9.12.24}}
+\begin{fields}
+\item[Note] No condition on $z$ is printed. Since
+  $|\Gamma(\frac13+\frac13t)\Gamma(-t)|$ decays like $\eu^{-\frac23\pi|\Im t|}$, the integral
+  converges only for $|\ph(\eu^{\pi\iu}z)|<\frac23\pi$, that is $|\ph(-z)|<\frac23\pi$ with the
+  principal phase.
+\item[Lean] \lean{scorerHi_mellinBarnes} (\file{DLMF/Airy/Scorer/Representations.lean}),
+  admitted, for $|\ph(-z)|<\frac23\pi$ and $-1<\Re t<0$.
+\item[Found] 2026-11-08, in the Tau~Ceti roadmap work.
+\end{fields}
+
+\entry{\deq{9.13.22}--\deq{9.13.24}}
+\begin{fields}
+\item[Note] DLMF states the relations ``when $\alpha$ is a positive integer'', with $m=\alpha+2$,
+  but $W_m(\pm t)$ is defined only for even $m$ (\deq{9.13.17}), so $\alpha$ must be even. For odd
+  $m$ the terms of order $t^m$ in $W_m(t)\pm W_m(-t)$ do not cancel.
+\item[Lean] \lean{smirnovAiryU1_olver}, \lean{smirnovAiryU2_olver}
+  (\file{DLMF/Airy/Generalized.lean}), proved, for even $m$.
+\item[Found] 2026-11-08, in the Tau~Ceti roadmap work.
 \end{fields}
 
 \entry{\deq{9.13.27}, \deq{9.13.31}, \deq{9.13.32}}

@@ -19,6 +19,7 @@ is required.
 
 * `deriv.lhopital_infty_nhdsNE`: L'Hôpital's rule at a punctured finite point when the
   denominator is unbounded in absolute value.
+* `deriv.lhopital_infty_nhdsLT`: the corresponding one-sided endpoint rule.
 
 ## Implementation notes
 
@@ -183,4 +184,37 @@ theorem lhopital_infty_nhdsNE {f g : ℝ → ℝ} {a l : ℝ}
   rcases punctured_increment_bound_or hlocal hx hxne with hm' | hp'
   · exact abs_quotient_sub_lt_of_increment_bound hε hm.1 hm.2.1 hm.2.2 hm'
   · exact abs_quotient_sub_lt_of_increment_bound hε hp.1 hp.2.1 hp.2.2 hp'
+/-- L’Hôpital’s rule from the left at a finite endpoint when the absolute denominator
+ tends to infinity. No limit of the numerator is required. -/
+theorem lhopital_infty_nhdsLT {f g : ℝ → ℝ} {a l : ℝ}
+    (hf : ∀ᶠ x in 𝓝[<] a, DifferentiableAt ℝ f x)
+    (hg : ∀ᶠ x in 𝓝[<] a, DifferentiableAt ℝ g x)
+    (hg' : ∀ᶠ x in 𝓝[<] a, deriv g x ≠ 0)
+    (hgtop : Tendsto (fun x => |g x|) (𝓝[<] a) atTop)
+    (hdiv : Tendsto (fun x => deriv f x / deriv g x) (𝓝[<] a) (𝓝 l)) :
+    Tendsto (fun x => f x / g x) (𝓝[<] a) (𝓝 l) := by
+  apply Metric.tendsto_nhds.mpr
+  intro ε hε
+  have hder := (Metric.tendsto_nhds.mp hdiv) (ε / 4) (by positivity)
+  have hevent : ∀ᶠ x in 𝓝[<] a, DifferentiableAt ℝ f x ∧ DifferentiableAt ℝ g x ∧
+      deriv g x ≠ 0 ∧ |deriv f x / deriv g x - l| ≤ ε / 4 := by
+    filter_upwards [hf, hg, hg', hder] with x hfx hgx hgx' hx
+    exact ⟨hfx, hgx, hgx', (by simpa only [Real.dist_eq] using hx.le)⟩
+  obtain ⟨c, hca, hall⟩ := mem_nhdsLT_iff_exists_Ioo_subset.mp hevent
+  change c < a at hca
+  let d := (c + a) / 2
+  have hcd : c < d := by dsimp only [d]; linarith
+  have hda : d < a := by dsimp only [d]; linarith
+  have hanchor := eventually_quotient_anchor_bounds (F := f d) (G := g d)
+    (l := l) hgtop hε
+  filter_upwards [Ioo_mem_nhdsLT hda, hanchor] with x hx ha
+  have hlocal (z : ℝ) (hz : z ∈ Icc d x) := hall
+    (show z ∈ Ioo c a from ⟨hcd.trans_le hz.1, hz.2.trans_lt hx.2⟩)
+  have hinc := abs_increment_sub_mul_le_of_deriv_div_bound hx.1
+    (fun z hz => (hlocal z hz).1) (fun z hz => (hlocal z hz).2.1)
+    (fun z hz => (hlocal z (Ioo_subset_Icc_self hz)).2.2.1)
+    (fun z hz => (hlocal z (Ioo_subset_Icc_self hz)).2.2.2)
+  rw [Real.dist_eq]
+  exact abs_quotient_sub_lt_of_increment_bound hε ha.1 ha.2.1 ha.2.2 hinc
+
 end deriv

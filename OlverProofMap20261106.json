@@ -1,0 +1,754 @@
+{
+  "date": "2026-11-06",
+  "base_commit": "06ad2e4315b3f4ce928762541c137b63df536df5",
+  "book": {
+    "author": "Frank W. J. Olver",
+    "title": "Asymptotics and Special Functions",
+    "edition": "Corrected 1997 A K Peters edition; PDF imprint also records the CRC 2010 reprint",
+    "file": "References/Olver1997AsymptoticsSpecialFunctionsCorrectedEd-TaylorFrancis.pdf",
+    "pages": 591,
+    "sha256": "7fd55a3f02914bf469c200d29b8e2bbfd093bd500d8a406d774b25c506f10081",
+    "page_convention": "PDF page = printed Arabic page + 19; critical formula pages were visually checked because the embedded OCR misreads digits and omits formulas."
+  },
+  "scope": "Source-to-admission proof-route review at the recorded 983-admission baseline; subsequent implementation is recorded separately below.",
+  "direct_admissions_at_review": 983,
+  "selected_current_admissions": 26,
+  "chapter_two_selected": 25,
+  "other_selected": 1,
+  "groups": [
+    {
+      "topic": "Finite-interval Liouville-Green and dominant/recessive solutions",
+      "chapter": 6,
+      "sections": [
+        "2, Theorem 2.1",
+        "3, Theorem 3.1 and sections 3.4-3.6",
+        "10, Theorems 10.1-10.2"
+      ],
+      "printed_pages": [
+        193,
+        194,
+        195,
+        196,
+        197,
+        198,
+        199,
+        200,
+        218,
+        219,
+        220
+      ],
+      "pdf_pages": [
+        212,
+        213,
+        214,
+        215,
+        216,
+        217,
+        218,
+        219,
+        237,
+        238,
+        239
+      ],
+      "targets": [
+        {
+          "declaration": "DLMF.AsymptoticApproximations.liouvilleGreen_interval",
+          "file": "DLMF/AsymptoticApproximations/ODE/LiouvilleGreen.lean",
+          "line": 50,
+          "proof_status": "proved",
+          "proved_location": {
+            "file": "DLMF/AsymptoticApproximations/ODE/LiouvilleGreen.lean",
+            "line": 91
+          }
+        },
+        {
+          "declaration": "DLMF.AsymptoticApproximations.liouvilleGreen_interval_isEquivalent",
+          "file": "DLMF/AsymptoticApproximations/ODE/LiouvilleGreen.lean",
+          "line": 136,
+          "proof_status": "proved",
+          "proved_location": {
+            "file": "DLMF/AsymptoticApproximations/ODE/LiouvilleGreen.lean",
+            "line": 286
+          }
+        },
+        {
+          "declaration": "DLMF.AsymptoticApproximations.liouvilleGreen_dominant",
+          "file": "DLMF/AsymptoticApproximations/ODE/LiouvilleGreen.lean",
+          "line": 157,
+          "proof_status": "proved",
+          "proved_location": {
+            "file": "DLMF/AsymptoticApproximations/ODE/LiouvilleGreen.lean",
+            "line": 392
+          }
+        },
+        {
+          "declaration": "DLMF.AsymptoticApproximations.liouvilleGreen_example",
+          "file": "DLMF/AsymptoticApproximations/ODE/LiouvilleGreen.lean",
+          "line": 216,
+          "proof_status": "admitted"
+        }
+      ],
+      "proof_detail": "Detailed successive-approximation proof and endpoint arguments; the x+log x example is worked in section 3.6, p.200.",
+      "lean_route": "Extend the proved tail-integral Volterra result to finite intervals and both orientations; majorize successive differences by integrated powers divided by factorials. Derive derivative bounds, normalized endpoint limits, and dominant solutions. For the example retain an integration constant that normalizes the leading factor.",
+      "remaining_formalization": [
+        "Finite-endpoint Volterra existence and differentiation",
+        "Uniqueness of the normalized recessive solution and extension of the dominant solution",
+        "Example requires extending solutions from a positive-f tail to the full interval (0,infinity)"
+      ],
+      "existing_support": [
+        "DLMFMathlib.Analysis.ODE.LiouvilleGreenVolterra",
+        "DLMFMathlib.Analysis.ODE.LiouvilleGreenReal",
+        "DLMF.AsymptoticApproximations.liouvilleGreen_recessive_atTop",
+        "DLMF.AsymptoticApproximations.sqrt_add_log_expansion"
+      ],
+      "priority": "First shared-infrastructure project"
+    },
+    {
+      "topic": "Real Laplace expansions and coefficients",
+      "chapter": 3,
+      "sections": [
+        "7, Theorem 7.1",
+        "8, Theorem 8.1"
+      ],
+      "printed_pages": [
+        81,
+        82,
+        85,
+        86,
+        87
+      ],
+      "pdf_pages": [
+        100,
+        101,
+        104,
+        105,
+        106
+      ],
+      "targets": [
+        {
+          "declaration": "DLMF.AsymptoticApproximations.laplace_method",
+          "file": "DLMF/AsymptoticApproximations/Integrals/Laplace.lean",
+          "line": 58,
+          "proof_status": "admitted",
+          "statement_correction": "Approved and applied: integrability for every x ≥ x₀; proof remains admitted."
+        },
+        {
+          "declaration": "DLMF.AsymptoticApproximations.laplace_method_Ioi",
+          "file": "DLMF/AsymptoticApproximations/Integrals/Laplace.lean",
+          "line": 79,
+          "proof_status": "admitted",
+          "statement_correction": "Approved and applied: integrability for every x ≥ x₀; proof remains admitted."
+        },
+        {
+          "declaration": "DLMF.AsymptoticApproximations.laplaceCoeff_hasAsymptoticExpansion",
+          "file": "DLMF/AsymptoticApproximations/Integrals/Laplace.lean",
+          "line": 101,
+          "proof_status": "proved",
+          "proved_location": {
+            "file": "DLMF/AsymptoticApproximations/Integrals/Laplace.lean",
+            "line": 102
+          }
+        }
+      ],
+      "proof_detail": "Detailed proof. The text explicitly permits merely asymptotic, nonconvergent local series.",
+      "lean_route": "Split the integral near its endpoint; substitute v=p(t)-p(a); revert the local expansion and identify q/p-prime coefficients with laplaceCoeff; apply the proved Watson lemma. Bound the far tail by a strictly positive phase gap and the existing integrable majorant.",
+      "remaining_formalization": [
+        "General real-asymptotic reversion with the project coefficient normalization",
+        "One-dimensional change of variables on a sufficiently small monotonic interval",
+        "Exponential tail estimate with arbitrary integrable amplitude"
+      ],
+      "existing_support": [
+        "DLMFMathlib.Analysis.Asymptotics.Watson",
+        "DLMFMathlib.Analysis.Asymptotics.AsymptoticInversion",
+        "DLMF.AsymptoticApproximations.laplaceCoeff_zero",
+        "DLMF.AsymptoticApproximations.laplaceCoeff_one",
+        "DLMF.AsymptoticApproximations.laplaceCoeff_two"
+      ],
+      "priority": "Early proof project"
+    },
+    {
+      "topic": "Contour Laplace and saddle-point expansions",
+      "chapter": 4,
+      "sections": [
+        "6, Theorem 6.1",
+        "7"
+      ],
+      "printed_pages": [
+        121,
+        122,
+        123,
+        124,
+        125,
+        126
+      ],
+      "pdf_pages": [
+        140,
+        141,
+        142,
+        143,
+        144,
+        145
+      ],
+      "targets": [
+        {
+          "declaration": "DLMF.AsymptoticApproximations.laplace_method_contour",
+          "file": "DLMF/AsymptoticApproximations/Integrals/Laplace.lean",
+          "line": 189,
+          "proof_status": "admitted"
+        },
+        {
+          "declaration": "DLMF.AsymptoticApproximations.saddle_point",
+          "file": "DLMF/AsymptoticApproximations/Integrals/Laplace.lean",
+          "line": 244,
+          "proof_status": "admitted"
+        }
+      ],
+      "proof_detail": "Detailed contour-change and Watson argument, with branch choices and path conditions.",
+      "lean_route": "Use the analytic local inverse of v=p(t)-p(a), track the logarithmic powers on the chosen path, apply rotated Watson estimates and split the two sides of a simple saddle.",
+      "remaining_formalization": [
+        "Local inverse and coefficient bridge",
+        "Uniform contour-tail bounds",
+        "Consistent continuous arguments and the two saddle branches"
+      ],
+      "existing_support": [
+        "DLMFMathlib.Analysis.Asymptotics.WatsonRotated",
+        "DLMFMathlib.Analysis.Asymptotics.WatsonSector"
+      ],
+      "priority": "After real Laplace and coefficient bridge"
+    },
+    {
+      "topic": "Endpoint stationary phase and oscillatory Watson",
+      "chapter": 3,
+      "sections": [
+        "12, preliminary lemmas",
+        "13, Theorems 13.1-13.2",
+        "14"
+      ],
+      "printed_pages": [
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104
+      ],
+      "pdf_pages": [
+        117,
+        118,
+        119,
+        120,
+        121,
+        122,
+        123
+      ],
+      "targets": [
+        {
+          "declaration": "DLMF.AsymptoticApproximations.stationaryPhase_watson",
+          "file": "DLMF/AsymptoticApproximations/Integrals/StationaryPhase.lean",
+          "line": 50,
+          "proof_status": "admitted"
+        },
+        {
+          "declaration": "DLMF.AsymptoticApproximations.stationaryPhase_endpoint",
+          "file": "DLMF/AsymptoticApproximations/Integrals/StationaryPhase.lean",
+          "line": 72,
+          "proof_status": "admitted"
+        },
+        {
+          "declaration": "DLMF.AsymptoticApproximations.stationaryPhase_endpoint_infinite",
+          "file": "DLMF/AsymptoticApproximations/Integrals/StationaryPhase.lean",
+          "line": 101,
+          "proof_status": "admitted"
+        }
+      ],
+      "proof_detail": "Proofs and preliminary lemmas; the all-order extension is explained in section 14.",
+      "lean_route": "Separate the endpoint singular model from the smooth tail. Use repeated integration by parts on the tail and scaled oscillatory Gamma integrals on the endpoint model; pass to improper limits with the stated tail hypotheses.",
+      "remaining_formalization": [
+        "All-order oscillatory endpoint remainder estimate",
+        "Tail estimates for the exact finite- and infinite-endpoint hypotheses"
+      ],
+      "existing_support": [
+        "DLMFMathlib.Analysis.Asymptotics.StationaryPhase",
+        "DLMFMathlib.Analysis.Asymptotics.Watson"
+      ],
+      "priority": "Reusable integral-method project"
+    },
+    {
+      "topic": "Singular Darboux and Legendre coefficient asymptotics",
+      "chapter": 8,
+      "sections": [
+        "9.2-9.3",
+        "10.1-10.2"
+      ],
+      "printed_pages": [
+        310,
+        311,
+        312,
+        313
+      ],
+      "pdf_pages": [
+        329,
+        330,
+        331,
+        332
+      ],
+      "targets": [
+        {
+          "declaration": "DLMF.AsymptoticApproximations.darboux_singular",
+          "file": "DLMF/AsymptoticApproximations/Sums/Darboux.lean",
+          "line": 469,
+          "proof_status": "proved",
+          "proved_location": {
+            "file": "DLMF/AsymptoticApproximations/Sums/Darboux.lean",
+            "line": 473
+          }
+        },
+        {
+          "declaration": "DLMF.AsymptoticApproximations.darboux_smooth_singular",
+          "file": "DLMF/AsymptoticApproximations/Sums/Darboux.lean",
+          "line": 526,
+          "proof_status": "proved",
+          "proved_location": {
+            "file": "DLMF/AsymptoticApproximations/Sums/Darboux.lean",
+            "line": 578
+          }
+        },
+        {
+          "declaration": "DLMF.AsymptoticApproximations.legendrePolynomialP_cos_asymptotic",
+          "file": "DLMF/AsymptoticApproximations/Sums/Darboux.lean",
+          "line": 630,
+          "proof_status": "proved",
+          "proved_location": {
+            "file": "DLMF/AsymptoticApproximations/Sums/Darboux.lean",
+            "line": 730
+          }
+        }
+      ],
+      "proof_detail": "Boundary-Fourier proof outline and a worked Legendre example; singular-boundary details still need formalization.",
+      "lean_route": "Prove integrable boundary traces and radial convergence for finitely many algebraic singularities. Apply Riemann-Lebesgue and integration by parts. For Legendre subtract the existing comparison function, whose local residual is constant plus O(distance^(1/2)); use m=1 and the Gamma-ratio asymptotic.",
+      "remaining_formalization": [
+        "Uniform integrability of radial traces near finitely many boundary points",
+        "Periodic boundary integration by parts with integrable singular derivatives",
+        "Principal-branch residual estimates at exp(+/-i alpha)"
+      ],
+      "existing_support": [
+        "DLMF.AsymptoticApproximations.darboux",
+        "DLMF.AsymptoticApproximations.darboux_smooth",
+        "DLMF.AsymptoticApproximations.legendreComparison_hasSum"
+      ],
+      "priority": "Early focused project"
+    },
+    {
+      "topic": "Fuchs-Frobenius solutions including logarithmic resonance",
+      "chapter": 5,
+      "sections": [
+        "4, Theorem 4.1",
+        "5"
+      ],
+      "printed_pages": [
+        148,
+        149,
+        150,
+        151,
+        152
+      ],
+      "pdf_pages": [
+        167,
+        168,
+        169,
+        170,
+        171
+      ],
+      "targets": [
+        {
+          "declaration": "DLMF.AsymptoticApproximations.frobenius_solutions",
+          "file": "DLMF/AsymptoticApproximations/ODE/Singularities.lean",
+          "line": 111,
+          "proof_status": "admitted"
+        },
+        {
+          "declaration": "DLMF.AsymptoticApproximations.frobenius_log_solution",
+          "file": "DLMF/AsymptoticApproximations/ODE/Singularities.lean",
+          "line": 133,
+          "proof_status": "admitted"
+        }
+      ],
+      "proof_detail": "Explicit Cauchy-majorant convergence proof, reduction-of-order construction, and a parameter-limit alternative.",
+      "lean_route": "Bound the coefficient recurrence using Cauchy estimates on every smaller circle and a positive scalar majorant. For the resonant solution integrate z^(-N-1) times an analytic factor; its z^N coefficient produces the logarithm. Adjust by a multiple of the first solution to match the project normalization.",
+      "remaining_formalization": [
+        "Majorant proof for the full stated convergence radius",
+        "Logarithmic series and normalization at resonant indices",
+        "Independence and continuation across zeros of the first solution"
+      ],
+      "existing_support": [
+        "DLMFMathlib.Analysis.ODE.BallLinear",
+        "DLMFMathlib.Analysis.ODE.PowerSeriesUniqueness",
+        "DLMF.AsymptoticApproximations.frobeniusCoeff"
+      ],
+      "priority": "Separate reusable analytic-ODE project"
+    },
+    {
+      "topic": "Rank-one irregular solutions and Stokes connections",
+      "chapter": 7,
+      "sections": [
+        "1",
+        "2, Theorems 2.1-2.2"
+      ],
+      "printed_pages": [
+        229,
+        230,
+        231,
+        232,
+        233,
+        234,
+        235,
+        236
+      ],
+      "pdf_pages": [
+        248,
+        249,
+        250,
+        251,
+        252,
+        253,
+        254,
+        255
+      ],
+      "targets": [
+        {
+          "declaration": "DLMF.AsymptoticApproximations.rankOne_exists_unique_solutions",
+          "file": "DLMF/AsymptoticApproximations/ODE/Singularities.lean",
+          "line": 183,
+          "proof_status": "admitted"
+        },
+        {
+          "declaration": "DLMF.AsymptoticApproximations.rankOne_stokes_multipliers",
+          "file": "DLMF/AsymptoticApproximations/ODE/Singularities.lean",
+          "line": 208,
+          "proof_status": "admitted"
+        }
+      ],
+      "proof_detail": "Explicit remainder integral equation, successive-approximation proof, and rotated-solution connection argument.",
+      "lean_route": "Insert a truncated formal solution, solve the residual equation by a Volterra construction on progressive paths, and use recessivity to identify the same normalized solution for every truncation order. Compare rotated fundamental solutions to obtain the connection constants.",
+      "remaining_formalization": [
+        "Complex progressive-path integral equation",
+        "Holomorphic continuation on the logarithmic plane",
+        "Uniform sector bounds and normalized recessive uniqueness"
+      ],
+      "existing_support": [
+        "DLMF.AsymptoticApproximations.rankOneCoeff",
+        "DLMF.Core.logSectorFilter",
+        "DLMFMathlib.Analysis.ODE.LiouvilleGreenVolterra"
+      ],
+      "priority": "After complex weighted-Volterra support"
+    },
+    {
+      "topic": "Uniform Airy turning-point templates",
+      "chapter": 11,
+      "sections": [
+        "2-3",
+        "7, Theorem 7.1"
+      ],
+      "printed_pages": [
+        395,
+        396,
+        397,
+        398,
+        399,
+        400,
+        409,
+        410,
+        411
+      ],
+      "pdf_pages": [
+        414,
+        415,
+        416,
+        417,
+        418,
+        419,
+        428,
+        429,
+        430
+      ],
+      "targets": [
+        {
+          "declaration": "DLMF.AsymptoticApproximations.caseII_airy_expansion",
+          "file": "DLMF/AsymptoticApproximations/ODE/Parameter.lean",
+          "line": 483,
+          "proof_status": "admitted"
+        },
+        {
+          "declaration": "DLMF.AsymptoticApproximations.caseII_airy_envelope",
+          "file": "DLMF/AsymptoticApproximations/ODE/Parameter.lean",
+          "line": 511,
+          "proof_status": "admitted"
+        }
+      ],
+      "proof_detail": "Explicit error integral equation and proof outline using Chapter 6 Theorem 10.1; modulus/weight estimates occur earlier in the chapter.",
+      "lean_route": "Use the Airy pair and its Wronskian to form the Green kernel. Prove weighted kernel and derivative bounds, solve the forced error equation, then use section 7.4 to split the envelope error into bounded Ai/Ai-prime or Bi/Bi-prime components. Olver has W1 of Bi type and W2 of Ai type: swap labels; use Olver n = Lean n-1.",
+      "remaining_formalization": [
+        "Weighted Airy Green-kernel bounds",
+        "Finite-interval weighted Volterra theorem",
+        "Bridge between Olver E,M,N weights and project envelopes",
+        "Use positive envelopes rather than dividing by Ai or Ai-prime at their zeros."
+      ],
+      "existing_support": [
+        "DLMF.AsymptoticApproximations.IsAiryCoeffs",
+        "DLMF.Airy.Basic",
+        "DLMFMathlib.Analysis.ODE.LiouvilleGreenVolterra"
+      ],
+      "priority": "Highest-value turning-point foundation"
+    },
+    {
+      "topic": "Uniform Bessel simple-pole templates",
+      "chapter": 12,
+      "sections": [
+        "2",
+        "3, Theorem 3.1",
+        "4, Theorem 4.1",
+        "5"
+      ],
+      "printed_pages": [
+        439,
+        440,
+        441,
+        442,
+        443,
+        444,
+        445,
+        446,
+        447,
+        448
+      ],
+      "pdf_pages": [
+        458,
+        459,
+        460,
+        461,
+        462,
+        463,
+        464,
+        465,
+        466,
+        467
+      ],
+      "targets": [
+        {
+          "declaration": "DLMF.AsymptoticApproximations.caseIII_bessel_expansion_pos",
+          "file": "DLMF/AsymptoticApproximations/ODE/Parameter.lean",
+          "line": 543,
+          "proof_status": "admitted"
+        },
+        {
+          "declaration": "DLMF.AsymptoticApproximations.caseIII_bessel_expansion_neg",
+          "file": "DLMF/AsymptoticApproximations/ODE/Parameter.lean",
+          "line": 573,
+          "proof_status": "admitted"
+        },
+        {
+          "declaration": "DLMF.AsymptoticApproximations.caseIII_bessel_envelope",
+          "file": "DLMF/AsymptoticApproximations/ODE/Parameter.lean",
+          "line": 603,
+          "proof_status": "admitted"
+        }
+      ],
+      "proof_detail": "Explicit I/K Green-kernel proof; the J/Y case is developed with modulus bounds and the same integral-equation theorem.",
+      "lean_route": "Use the I/K and J/Y fundamental pairs with their Wronskians, normalize the kernels as in section 3.2, and control the error by weighted variations of sqrt(abs(xi))*B. Convert the result to the project compound expansions; use Olver n = Lean n-1.",
+      "remaining_formalization": [
+        "Weighted Bessel kernel and derivative estimates uniform near zero",
+        "Oscillatory modulus/envelope comparison",
+        "Positive and negative orientations with consistent normalizations"
+      ],
+      "existing_support": [
+        "DLMF.AsymptoticApproximations.IsBesselCoeffs",
+        "DLMF.Bessel.Basic",
+        "DLMFMathlib.Analysis.ODE.LiouvilleGreenVolterra"
+      ],
+      "priority": "After weighted Volterra; supports Legendre applications"
+    },
+    {
+      "topic": "Uniform endpoint-saddle transition integral",
+      "chapter": 9,
+      "sections": [
+        "9, Bleistein method",
+        "10, example and error estimate"
+      ],
+      "printed_pages": [
+        344,
+        345,
+        346,
+        347,
+        348,
+        349,
+        350,
+        351
+      ],
+      "pdf_pages": [
+        363,
+        364,
+        365,
+        366,
+        367,
+        368,
+        369,
+        370
+      ],
+      "targets": [
+        {
+          "declaration": "DLMF.AsymptoticApproximations.bleistein_uniform",
+          "file": "DLMF/AsymptoticApproximations/Integrals/Coalescing.lean",
+          "line": 250,
+          "proof_status": "admitted"
+        }
+      ],
+      "proof_detail": "Outline of the uniform method, followed by a detailed worked error-bound argument.",
+      "lean_route": "Integrate the uniform amplitude remainder against the positive Gaussian weight, rescale tau=sqrt(x)*w, and estimate the discarded upper tail uniformly using the gap kappa-a2>0. Retain the exact project centered moments and coefficient convention.",
+      "remaining_formalization": [
+        "Weighted-moment integrability and uniform tail comparison",
+        "Bounds on the finite polynomial part from the supplied uniform remainder hypotheses"
+      ],
+      "existing_support": [
+        "DLMF.AsymptoticApproximations.bleisteinF",
+        "DLMF.AsymptoticApproximations.bleistein_uniform hypothesis hT"
+      ],
+      "priority": "Focused integral estimate after checking exact uniform hypotheses"
+    },
+    {
+      "topic": "Nicholson integral for squared Bessel functions",
+      "chapter": 9,
+      "sections": [
+        "7"
+      ],
+      "printed_pages": [
+        340,
+        341,
+        342
+      ],
+      "pdf_pages": [
+        359,
+        360,
+        361
+      ],
+      "targets": [
+        {
+          "declaration": "DLMF.Bessel.nicholson_integral",
+          "file": "DLMF/Bessel/Modified.lean",
+          "line": 34,
+          "proof_status": "admitted"
+        }
+      ],
+      "proof_detail": "A full proof: the integral satisfies the third-order equation for products of Bessel solutions, and large-argument asymptotics fix its three constants.",
+      "lean_route": "Prove convergence and differentiation under the integral, derive the third-order product equation, establish a product-solution basis, and identify the constants using the real positive large-argument limit. Retain all complex orders in the project statement.",
+      "remaining_formalization": [
+        "Dominated derivative bounds near zero and infinity",
+        "Third-order product-ODE basis/uniqueness",
+        "Uniform asymptotics to exclude residual oscillatory Hankel-square terms"
+      ],
+      "existing_support": [
+        "DLMF.Bessel.Basic.Equation",
+        "DLMF.Bessel asymptotic and integral APIs"
+      ],
+      "priority": "A direct source, but a substantial dedicated proof"
+    }
+  ],
+  "recommended_order": [
+    "Singular Darboux and finite-interval Liouville-Green extensions",
+    "Real Laplace and its coefficient-reversion bridge",
+    "Weighted Airy/Bessel Green-kernel Volterra theorem and the five model templates",
+    "Complex contour/irregular-ODE extensions"
+  ],
+  "secondary_candidates": [
+    {
+      "topic": "Legendre uniform expansions",
+      "sources": [
+        "Chapter 12 sections 12-13, pp.463-474",
+        "Chapter 13 section 6"
+      ],
+      "files": [
+        "DLMF/Legendre/Uniform.lean",
+        "DLMF/Legendre/ConicalAsymptotics.lean"
+      ],
+      "caution": "Use the Bessel model plus a separate normalization/ODE transformation. Do not claim all simultaneous large-degree/order regimes follow from the fixed-order examples."
+    },
+    {
+      "topic": "Parabolic-cylinder uniform and zero expansions",
+      "sources": [
+        "Chapter 6 section 6, pp.206-207",
+        "Chapter 10 sections 2-6, general elementary-expansion method",
+        "Chapter 11 sections 3-7, turning-point and zero methods"
+      ],
+      "files": [
+        "DLMF/ParabolicCylinder/Uniform/ExpansionData.lean",
+        "DLMF/ParabolicCylinder/TurningPoint.lean"
+      ],
+      "caution": "The worked Chapter 6 example treats a large positive cylinder parameter and supplies a leading approximation. Remaining negative-parameter, all-order and turning-point statements need separate transformations, full DLMF normalizers, coefficient identities and zero enumeration; this is not a promise to close all 17 admissions."
+    },
+    {
+      "topic": "Airy zero expansions",
+      "sources": [
+        "Chapter 11 sections 5-6 and 8"
+      ],
+      "files": [
+        "DLMF/Airy/Zeros/ComplexBi.lean"
+      ],
+      "caution": "The single combined project statement includes real and complex families and all printed coefficients; real-zero asymptotics alone are insufficient."
+    },
+    {
+      "topic": "Inverse Laplace and series reversion",
+      "sources": [
+        "Chapter 8 section 11, pp.315-320",
+        "Chapter 1 sections 5 and 8"
+      ],
+      "files": [
+        "DLMF/AsymptoticApproximations/Integrals/Watson.lean",
+        "DLMF/AsymptoticApproximations/Basics/Transcendental.lean"
+      ],
+      "caution": "Need the exact improper-tail and coefficient-identification bridges, not just an existence assertion for an expansion."
+    }
+  ],
+  "coverage_limits": [
+    "The 1997 volume reprints the 1974 text with corrections, rather than rewriting every chapter to cover subsequent research.",
+    "No matching complete treatment was found for the Chapter 2 distributional-asymptotics block, general difference-equation asymptotics, or every modern hyperasymptotic/late-coefficient statement.",
+    "Mathieu appears as an exercise/application; the book does not supply direct proofs for all 118 remaining Mathieu admissions.",
+    "No direct proof source was identified for the main Painleve, matrix-argument, combinatorial or number-theoretic blocks."
+  ],
+  "validation": {
+    "all_targets_current_direct_admissions": true,
+    "unique_targets": 26,
+    "lean_sources_changed": false,
+    "upstream_check": "Mathlib and pinned TauCeti ODE/asymptotic APIs and local support were inspected. TauCeti Analysis/ODE/Frobenius is the integrability theorem, not the Fuchs-Frobenius regular-singular power-series theorem."
+  },
+  "implementation": {
+    "manifest": "OlverProofRound20261106.json",
+    "direct_admissions_after": 976,
+    "completed_selected_targets": 7,
+    "selected_targets_still_admitted": 19,
+    "status_note": "Target line numbers below refer to the source-review baseline; the proof-round manifest records current locations of completed targets.",
+    "completed_declarations": [
+      "DLMF.AsymptoticApproximations.liouvilleGreen_interval",
+      "DLMF.AsymptoticApproximations.liouvilleGreen_interval_isEquivalent",
+      "DLMF.AsymptoticApproximations.liouvilleGreen_dominant",
+      "DLMF.AsymptoticApproximations.laplaceCoeff_hasAsymptoticExpansion",
+      "DLMF.AsymptoticApproximations.darboux_singular",
+      "DLMF.AsymptoticApproximations.darboux_smooth_singular",
+      "DLMF.AsymptoticApproximations.legendrePolynomialP_cos_asymptotic"
+    ],
+    "deferred_statement_issues": [],
+    "approved_statement_corrections": [
+      {
+        "declaration": "DLMF.AsymptoticApproximations.laplace_method",
+        "hypothesis": "Integrability for every x ≥ x₀, replacing integrability at x₀ alone.",
+        "proof_status": "admitted",
+        "review": "REVIEW.md#approved-laplace-integrability-correction-2026-11-06"
+      },
+      {
+        "declaration": "DLMF.AsymptoticApproximations.laplace_method_Ioi",
+        "hypothesis": "Integrability for every x ≥ x₀, replacing integrability at x₀ alone.",
+        "proof_status": "admitted",
+        "review": "REVIEW.md#approved-laplace-integrability-correction-2026-11-06"
+      }
+    ]
+  }
+}

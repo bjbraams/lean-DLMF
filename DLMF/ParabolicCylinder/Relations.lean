@@ -30,7 +30,8 @@ parameters, their relations to Dawson's integral, Bessel, Kummer and Whittaker f
   `U` and Whittaker's `W` (DLMF 12.7.14).
 * `parabolicCylinderU_addition_1`, `parabolicCylinderU_addition_2`, `parabolicCylinderV_addition_3`,
   `parabolicCylinderV_addition_4`: the addition theorems DLMF 12.13.1–12.13.4.
-* `parabolicCylinderU_rotational_addition`: the rotational addition theorem DLMF 12.13.5.
+* `parabolicCylinderU_rotational_addition`: the rotational addition theorem DLMF 12.13.5, with
+  the factor `(cos t)^{-a-1/2}` that the DLMF display omits.
 
 ## Implementation notes
 
@@ -444,17 +445,21 @@ theorem parabolicCylinderV_addition_4 (a x y : ℂ) :
   · funext m; rw [he2]; ring
   · rw [← mul_assoc, he, one_mul]
 
-/-- The series with terms
-`(fun m : ℕ => exp ((x*Real.sin t-y*Real.cos t)^2/4)*(-1)^m*pochhammer (a+1/2)
-m/(m.factorial:ℂ)*(Real.tan t:ℂ)^m*parabolicCylinderU (m+a) x*parabolicCylinderU (-m-1/2)
-y)` converges to `(parabolicCylinderU a (x*Real.cos t+y*Real.sin t))`. -/
+/-- The rotational addition theorem, DLMF 12.13.5 with the factor `(cos t)^{-a-1/2}`:
+for `Re a ≤ -1/2` and `0 ≤ t ≤ π/4`,
+`U(a, x cos t + y sin t) = (cos t)^{-a-1/2} e^{(x sin t - y cos t)²/4}
+  ∑ₘ (-1)^m (a+1/2)_m/m! (tan t)^m U(m+a, x) U(-m-1/2, y)`,
+with `|Im y| ≤ Re x` at `t = π/4`. DLMF prints the right side without the factor
+`(cos t)^{-a-1/2}`, which is false for `0 < t` unless `a = -1/2`; see the DLMF errata
+report. -/
 @[dlmf 12.13.E5]
 theorem parabolicCylinderU_rotational_addition {a : ℂ} (ha : a.re ≤ -1/2) (x y : ℂ)
     {t : ℝ} (ht : 0 ≤ t)
     (htπ : t ≤ π/4) (hend : t = π/4 → |y.im| ≤ x.re) :
     HasSum (fun m : ℕ =>
-        exp ((x*Real.sin t-y*Real.cos t)^2/4)*(-1)^m*pochhammer (a+1/2)
-        m/(m.factorial:ℂ)*(Real.tan t:ℂ)^m*parabolicCylinderU (m+a) x*parabolicCylinderU (-m-1/2) y)
+        (Real.cos t : ℂ) ^ (-a-1/2)*exp ((x*Real.sin t-y*Real.cos t)^2/4)*(-1)^m*
+          pochhammer (a+1/2) m/(m.factorial:ℂ)*(Real.tan t:ℂ)^m*parabolicCylinderU (m+a) x*
+          parabolicCylinderU (-m-1/2) y)
         (parabolicCylinderU a (x*Real.cos t+y*Real.sin t)) := by
   sorry
 

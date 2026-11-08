@@ -127,7 +127,10 @@ Both counterexamples are independent of the new admissions.
   Absolute and conditional convergence assertions are separate.
 - The 12.13.5 rotation-addition statement has the endpoint hypothesis
   `t = pi/4 → abs(y.im) ≤ x.re`. The unrestricted complex endpoint convergence
-  is still to be assessed; no counterexample to 12.13.5 is claimed here.
+  is still to be assessed. The printed right side lacks the factor
+  `(cos t)^(-a-1/2)`: at `a = -5/2`, `x = -0.7`, `y = 0.4`, `t = 0.6` the printed
+  form gives `-1.24707` against `U = -0.84948` (mpmath). The Lean statement
+  carries the factor; see the DLMF errata report.
 - The 14.12.4 cosh integral includes `Re(mu+nu) > -1` to ensure convergence;
   extending by degree symmetry requires a separate statement. The singular
   `theta = pi` endpoint is excluded in 14.20.10.

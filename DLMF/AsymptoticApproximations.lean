@@ -31,6 +31,7 @@ public import DLMF.AsymptoticApproximations.ODE.Singularities
 public import DLMF.AsymptoticApproximations.Remainders.Basic
 public import DLMF.AsymptoticApproximations.Remainders.Stokes
 public import DLMF.AsymptoticApproximations.Sums.Darboux
+public import DLMF.AsymptoticApproximations.Sums.LegendreDarboux
 public import DLMF.AsymptoticApproximations.Sums.Basic
 public import DLMF.AsymptoticApproximations.Sums.EulerMaclaurin
 public import DLMF.AsymptoticApproximations.Sums.MathlibCoverage

@@ -16,6 +16,10 @@ public import DLMF.OrthogonalPolynomials.Series
 public import DLMF.AlgebraicAnalytic.Complex.Functions
 public import Mathlib.Analysis.Fourier.RiemannLebesgueLemma
 public import DLMF.Hypergeometric.Saalschutz
+public import DLMFMathlib.Analysis.Complex.BoundarySingularities
+public import DLMFMathlib.Analysis.Complex.LaurentPowerSeries
+public import DLMF.AsymptoticApproximations.Sums.LegendreDarboux
+public import DLMF.AsymptoticApproximations.Sums.DarbouxDerivatives
 
 /-!
 # Entire functions and Darboux's method
@@ -478,7 +482,55 @@ theorem darboux_singular {f g h : ℂ → ℂ} {r : ℝ} (hr : 0 < r)
         (AlgebraicAnalytic.laurentCoeff f 0 ρ n - AlgebraicAnalytic.laurentCoeff g 0 ρ n) *
         (r : ℂ) ^ n) cofinite
       (𝓝 0) := by
-  sorry
+  have hr0 : (r : ℂ) ≠ 0 := ofReal_ne_zero.mpr hr.ne'
+  have hpi : (2 * π : ℂ) ≠ 0 := mul_ne_zero two_ne_zero (ofReal_ne_zero.mpr Real.pi_ne_zero)
+  have hsH : ∀ w ∈ Z, h =O[𝓝[puncturedDisc r] w]
+      (fun z => ‖z - w‖ ^ (σ w - 1)) := by
+    intro w hw
+    apply (hsing w hw).congr' _ Filter.EventuallyEq.rfl
+    filter_upwards [self_mem_nhdsWithin] with z hz
+    exact (hfg hz).symm
+  let c : ℤ → ℂ := fun n => AlgebraicAnalytic.laurentCoeff f 0 ρ n -
+    AlgebraicAnalytic.laurentCoeff g 0 ρ n
+  let J : ℤ → ℂ := fun n => ∫ θ in (0 : ℝ)..2 * π,
+    Complex.CircleSingularities.trace h Z r r θ * Complex.exp (-(n * θ * I))
+  have hcoef (n : ℤ) : c n * (r : ℂ) ^ n = (2 * π : ℂ)⁻¹ * J n := by
+    have hlim := Complex.CircleSingularities.tendsto_integral_circle_mul_exp hr hZ hh
+      σ hσ hsH n (by positivity : (0 : ℝ) ≤ 2 * π)
+    have heq : (fun s : ℝ => ∫ θ in (0 : ℝ)..2 * π,
+        h (Complex.CircleSingularities.circle s θ) * Complex.exp (-(n * θ * I)))
+        =ᶠ[𝓝[<] r] fun s => (2 * π : ℂ) * (s : ℂ) ^ n * c n := by
+      filter_upwards [Ioo_mem_nhdsLT hρr] with s hs
+      have hs0 : 0 < s := hρ.trans hs.1
+      have hd : puncturedDisc s ⊆ puncturedDisc r := fun z hz => ⟨hz.1, hz.2.trans hs.2⟩
+      have hc : ContinuousOn h {z : ℂ | 0 < ‖z‖ ∧ ‖z‖ ≤ s} := by
+        apply hh.mono
+        intro z hz
+        refine ⟨⟨hz.1, hz.2.trans hs.2.le⟩, ?_⟩
+        intro hzZ
+        have H := hZ z hzZ
+        linarith [hz.2, hs.2]
+      have H := (darboux hs0 (hf.mono hd) (hg.mono hd) hc
+        (hfg.mono hd) hρ hs.1).1 n
+      have hsn : (s : ℂ) ^ n ≠ 0 := zpow_ne_zero n (ofReal_ne_zero.mpr hs0.ne')
+      change c n = _ at H
+      change _ = (2 * π : ℂ) * (s : ℂ) ^ n * c n
+      rw [H]
+      dsimp only [Complex.CircleSingularities.circle]
+      rw [← mul_assoc, mul_inv_cancel₀ (mul_ne_zero hpi hsn), one_mul]
+    have hrad : Tendsto (fun s : ℝ => (2 * π : ℂ) * (s : ℂ) ^ n * c n) (𝓝[<] r)
+        (𝓝 ((2 * π : ℂ) * (r : ℂ) ^ n * c n)) := by
+      exact ((tendsto_const_nhds.mul
+        ((continuous_ofReal.continuousAt.zpow₀ n (Or.inl hr0)).tendsto)).mul
+          tendsto_const_nhds).mono_left nhdsWithin_le_nhds
+    have H := tendsto_nhds_unique (hlim.congr' heq) hrad
+    change J n = (2 * π : ℂ) * (r : ℂ) ^ n * c n at H
+    rw [H]
+    field_simp
+  have HR := (tendsto_integral_mul_exp_cofinite
+    (fun θ => Complex.CircleSingularities.trace h Z r r θ)).const_mul ((2 * π : ℂ)⁻¹)
+  simp only [mul_zero] at HR
+  exact HR.congr (fun n => (hcoef n).symm)
 
 /-- DLMF 2.10.31: if in addition `θ ↦ h(re^{iθ})` (the boundary values of `f - g`) is `m` times
 continuously differentiable, then `f_n = g_n + o(r^{-n} |n|^{-m})` as `n → ±∞`. -/
@@ -537,7 +589,55 @@ theorem darboux_smooth_singular {f g : ℂ → ℂ} {r : ℝ} (hr : 0 < r)
         (AlgebraicAnalytic.laurentCoeff f 0 ρ n - AlgebraicAnalytic.laurentCoeff g 0 ρ n)
         * (r : ℂ) ^ n *
       ((|n| : ℤ) : ℂ) ^ m) cofinite (𝓝 0) := by
-  sorry
+  let H : ℂ → ℂ := f - g
+  have hH : DifferentiableOn ℂ H (puncturedDisc r) := hf.sub hg
+  have hA := DarbouxDerivatives.analyticOnNhd_puncturedDisc hH
+  have hDm : DifferentiableOn ℂ (iteratedDeriv m H) (puncturedDisc r) := by
+    rw [iteratedDeriv_eq_iterate]
+    exact (hA.iterated_deriv m).differentiableOn
+  obtain ⟨hmFun, hmCont, hmEq⟩ := hext m le_rfl
+  have hEq : EqOn hmFun (iteratedDeriv m H - 0) (puncturedDisc r) := by
+    simpa only [sub_zero] using hmEq
+  have hSing : ∀ w ∈ Z, (iteratedDeriv m H - 0) =O[𝓝[puncturedDisc r] w]
+      (fun z => ‖z - w‖ ^ (σ w - 1)) := by
+    simpa only [sub_zero] using hsing
+  have hT := darboux_singular hr hDm (differentiableOn_const (c := (0 : ℂ))) hZ
+    hmCont hEq σ hσ hSing hρ hρr
+  have hZero (k : ℤ) : AlgebraicAnalytic.laurentCoeff (fun _ : ℂ => 0) 0 ρ k = 0 := by
+    simp [AlgebraicAnalytic.laurentCoeff, circleIntegral]
+  simp only [hZero, sub_zero] at hT
+  let c : ℤ → ℂ := fun n => AlgebraicAnalytic.laurentCoeff f 0 ρ n -
+    AlgebraicAnalytic.laurentCoeff g 0 ρ n
+  let P : ℤ → ℂ := fun n => ∏ j ∈ Finset.range m, ((n : ℂ) - (j : ℂ))
+  have hderiv (n : ℤ) : AlgebraicAnalytic.laurentCoeff (iteratedDeriv m H) 0 ρ (n - m) =
+      P n * c n := by
+    rw [DarbouxDerivatives.laurentCoeff_iteratedDeriv hH hρ hρr,
+      DarbouxDerivatives.laurentCoeff_sub hf hg hρ hρr]
+  have hshift : Function.Injective (fun n : ℤ => n - (m : ℤ)) := by
+    intro n k he
+    have H := congrArg (fun z : ℤ => z + (m : ℤ)) he
+    simpa only [sub_add_cancel] using H
+  have hlim := (hT.comp hshift.tendsto_cofinite).mul_const ((r : ℂ) ^ (m : ℤ))
+  simp only [zero_mul] at hlim
+  have hr0 : (r : ℂ) ≠ 0 := ofReal_ne_zero.mpr hr.ne'
+  have hpoly : Tendsto (fun n : ℤ => P n * (c n * (r : ℂ) ^ n)) cofinite (𝓝 0) := by
+    apply hlim.congr
+    intro n
+    simp only [Function.comp_apply]
+    rw [hderiv, zpow_sub₀ hr0]
+    field_simp
+  have hbound := hpoly.norm.const_mul ((2 : ℝ) ^ m)
+  simp only [norm_zero, mul_zero] at hbound
+  refine squeeze_zero_norm' ?_ hbound
+  filter_upwards [Complex.eventually_norm_int_pow_le_prod_sub m] with n hn
+  change ‖c n * (r : ℂ) ^ n * ((|n| : ℤ) : ℂ) ^ m‖ ≤
+    (2 : ℝ) ^ m * ‖P n * (c n * (r : ℂ) ^ n)‖
+  have hnorm : ‖((|n| : ℤ) : ℂ)‖ = ‖(n : ℂ)‖ := by
+    rw [norm_intCast, norm_intCast, Int.cast_abs, abs_abs]
+  rw [norm_mul, norm_pow, hnorm]
+  calc _ ≤ ‖c n * (r : ℂ) ^ n‖ * ((2 : ℝ) ^ m * ‖P n‖) :=
+      mul_le_mul_of_nonneg_left hn (norm_nonneg _)
+    _ = _ := by simp only [norm_mul]; ring
 
 /-! ### Example: Legendre polynomials of large degree (2.10.33–2.10.36) -/
 
@@ -632,6 +732,152 @@ theorem legendrePolynomialP_cos_asymptotic {α : ℝ} (hα : α ∈ Ioo 0 π) :
     Tendsto (fun n : ℕ => (n : ℝ) * ‖DLMF.OrthogonalPolynomials.legendrePolynomialP n (Real.cos α) -
       (((2 / (π * n * Real.sin α)) ^ (1 / 2 : ℝ) *
         Real.cos (n * α + α / 2 - π / 4) : ℝ) : ℂ)‖) atTop (𝓝 0) := by
-  sorry
+  let F := LegendreDarboux.generatingFunction α
+  let G := LegendreDarboux.rootComparison α
+  let u := exp (-(I * α))
+  let v := exp (I * α)
+  let Z : Finset ℂ := {u, v}
+  have hu : ‖u‖ = 1 := by
+    simpa only [u, ← mul_neg, ← ofReal_neg] using LegendreDarboux.norm_phase (-α)
+  have hv : ‖v‖ = 1 := LegendreDarboux.norm_phase α
+  have huv : u ≠ v := (LegendreDarboux.phase_ne_neg_phase hα).symm
+  have hZ : ∀ w ∈ Z, ‖w‖ = 1 := by
+    intro w hw
+    rcases Finset.mem_insert.mp hw with rfl | hw
+    · exact hu
+    · rw [Finset.mem_singleton] at hw
+      simpa only [hw] using hv
+  have hroots {z : ℂ} (hz : ‖z‖ < 1) : z ≠ u ∧ z ≠ v := by
+    constructor <;> intro he <;> subst z <;> linarith
+  have hF {z : ℂ} (hz : ‖z‖ ≤ 1) (hzu : z ≠ u) (hzv : z ≠ v) : AnalyticAt ℂ F z :=
+    LegendreDarboux.analyticAt_generatingFunction α hz hzu hzv
+  have hG {z : ℂ} (hz : ‖z‖ ≤ 1) (hzu : z ≠ u) (hzv : z ≠ v) : AnalyticAt ℂ G z :=
+    LegendreDarboux.analyticAt_rootComparison α hz hzu hzv
+  have hFd : DifferentiableOn ℂ F (puncturedDisc 1) := by
+    intro z hz
+    exact (hF hz.2.le (hroots hz.2).1 (hroots hz.2).2).differentiableAt.differentiableWithinAt
+  have hGd : DifferentiableOn ℂ G (puncturedDisc 1) := by
+    intro z hz
+    exact (hG hz.2.le (hroots hz.2).1 (hroots hz.2).2).differentiableAt.differentiableWithinAt
+  have hext : ∀ k ≤ (1 : ℕ), ∃ hk : ℂ → ℂ,
+      ContinuousOn hk ({z : ℂ | 0 < ‖z‖ ∧ ‖z‖ ≤ 1} \ Z) ∧
+        EqOn hk (iteratedDeriv k (F - G)) (puncturedDisc 1) := by
+    intro k hk
+    refine ⟨iteratedDeriv k (F - G), ?_, fun _ _ => rfl⟩
+    intro z hz
+    have hzu : z ≠ u := fun he => hz.2 (by simp [Z, he])
+    have hzv : z ≠ v := fun he => hz.2 (by simp [Z, he])
+    rw [iteratedDeriv_eq_iterate]
+    exact ((hF hz.1.2 hzu hzv).sub (hG hz.1.2 hzu hzv)).iterated_deriv k
+      |>.continuousAt.continuousWithinAt
+  have hsing : ∀ w ∈ Z, iteratedDeriv 1 (F - G) =O[𝓝[puncturedDisc 1] w]
+      fun z => ‖z - w‖ ^ ((1 / 2 : ℝ) - 1) := by
+    intro w hw
+    rw [iteratedDeriv_one]
+    norm_num only [show (1 / 2 : ℝ) - 1 = -(1 / 2) by norm_num]
+    rcases Finset.mem_insert.mp hw with rfl | hw
+    · exact LegendreDarboux.isBigO_deriv_sub_rootComparison α huv
+    · rw [Finset.mem_singleton] at hw
+      subst w
+      exact LegendreDarboux.isBigO_deriv_sub_rootComparison_pos α huv
+  have hD := darboux_smooth_singular (f := F) (g := G) (r := 1) (by norm_num)
+    hFd hGd hZ hext (fun _ => (1 / 2 : ℝ)) (by intro w hw; norm_num) hsing
+    (ρ := 1 / 2) (by norm_num) (by norm_num)
+  have hFc : DifferentiableOn ℂ F (closedBall (0 : ℂ) (1 / 2)) := by
+    intro z hz
+    have hz1 : ‖z‖ < 1 := by
+      rw [mem_closedBall, dist_zero_right] at hz
+      linarith
+    exact (hF hz1.le (hroots hz1).1 (hroots hz1).2).differentiableAt.differentiableWithinAt
+  have hGc : DifferentiableOn ℂ G (closedBall (0 : ℂ) (1 / 2)) := by
+    intro z hz
+    have hz1 : ‖z‖ < 1 := by
+      rw [mem_closedBall, dist_zero_right] at hz
+      linarith
+    exact (hG hz1.le (hroots hz1).1 (hroots hz1).2).differentiableAt.differentiableWithinAt
+  let K : ℝ := (2 / (π * Real.sin α)) ^ (1 / 2 : ℝ)
+  let c : ℕ → ℂ := fun n => ((K * Real.Gamma (n + 1 / 2) / n.factorial *
+    Real.cos (n * α + α / 2 - π / 4) : ℝ) : ℂ)
+  have hcf : ∀ n : ℕ, AlgebraicAnalytic.laurentCoeff F 0 (1 / 2) n =
+      DLMF.OrthogonalPolynomials.legendrePolynomialP n (Real.cos α) := by
+    intro n
+    apply Complex.circleIntegral_mul_zpow_neg_nat_eq (by norm_num) hFc
+    filter_upwards [Metric.ball_mem_nhds (0 : ℂ) (by norm_num : (0 : ℝ) < 1)] with z hz
+    simpa only [zero_add] using LegendreDarboux.hasSum_generatingFunction α
+      (by simpa only [mem_ball, dist_zero_right] using hz)
+  have hcg : ∀ n : ℕ, AlgebraicAnalytic.laurentCoeff G 0 (1 / 2) n = c n := by
+    intro n
+    apply Complex.circleIntegral_mul_zpow_neg_nat_eq (by norm_num) hGc
+    filter_upwards [Metric.ball_mem_nhds (0 : ℂ) (by norm_num : (0 : ℝ) < 1)] with z hz
+    have hh := legendreComparison_hasSum hα (by simpa only [mem_ball, dist_zero_right] using hz)
+    rw [LegendreDarboux.legendreComparison_eq_rootComparison hα] at hh
+    simpa only [zero_add] using hh
+  have hN := hD.comp ((tendsto_natCast_atTop_atTop (R := ℤ)).mono_right atTop_le_cofinite)
+  have hN' : Tendsto (fun n : ℕ =>
+      (DLMF.OrthogonalPolynomials.legendrePolynomialP n (Real.cos α) - c n) * (n : ℂ))
+      atTop (𝓝 0) := by
+    simpa only [Function.comp_def, Complex.ofReal_one, hcf, hcg, one_zpow, mul_one, pow_one,
+      abs_of_nonneg (Int.natCast_nonneg _), Int.cast_natCast] using hN
+  have hPc : Tendsto (fun n : ℕ => (n : ℝ) *
+      ‖DLMF.OrthogonalPolynomials.legendrePolynomialP n (Real.cos α) - c n‖) atTop (𝓝 0) := by
+    simpa only [norm_zero, Function.comp_def, norm_mul, Complex.norm_natCast, mul_comm] using
+      continuous_norm.tendsto (0 : ℂ) |>.comp hN'
+  have hsin : 0 < Real.sin α := Real.sin_pos_of_pos_of_lt_pi hα.1 hα.2
+  have hK : 0 ≤ K := Real.rpow_nonneg (by positivity) _
+  have hΓ : Tendsto (fun n : ℕ => (n : ℝ) *
+      |Real.Gamma (n + 1 / 2) / n.factorial - (n : ℝ) ^ (-(1 / 2) : ℝ)|) atTop (𝓝 0) := by
+    have hh := LegendreDarboux.tendsto_nat_mul_gammaRatio_error
+    convert hh using 1
+    ext n
+    have hGN : Gamma ((n : ℂ) + 1 / 2) = ((Real.Gamma (n + 1 / 2) : ℝ) : ℂ) := by
+      rw [← Gamma_ofReal]
+      push_cast
+      ring_nf
+    have hpn : (((n : ℝ) ^ (-(1 / 2) : ℝ) : ℝ) : ℂ) = (n : ℂ) ^ (-(1 / 2) : ℂ) := by
+      rw [ofReal_cpow (Nat.cast_nonneg n)]
+      norm_num
+    rw [hGN, Gamma_nat_eq_factorial, ← hpn, ← ofReal_natCast, ← ofReal_div,
+      ← ofReal_sub, norm_real, Real.norm_eq_abs]
+  let l : ℕ → ℂ := fun n => ((K * (n : ℝ) ^ (-(1 / 2) : ℝ) *
+    Real.cos (n * α + α / 2 - π / 4) : ℝ) : ℂ)
+  have hcl : Tendsto (fun n : ℕ => (n : ℝ) * ‖c n - l n‖) atTop (𝓝 0) := by
+    have hb : ∀ n : ℕ, ‖c n - l n‖ ≤ K *
+        |Real.Gamma (n + 1 / 2) / n.factorial - (n : ℝ) ^ (-(1 / 2) : ℝ)| := by
+      intro n
+      have he : c n - l n = ((K *
+          (Real.Gamma (n + 1 / 2) / n.factorial - (n : ℝ) ^ (-(1 / 2) : ℝ)) *
+          Real.cos (n * α + α / 2 - π / 4) : ℝ) : ℂ) := by
+        dsimp [c, l]
+        push_cast
+        ring
+      rw [he, norm_real, Real.norm_eq_abs, abs_mul, abs_mul, abs_of_nonneg hK]
+      exact mul_le_of_le_one_right (by positivity) (Real.abs_cos_le_one _)
+    have hlim : Tendsto (fun n : ℕ => K * ((n : ℝ) *
+        |Real.Gamma (n + 1 / 2) / n.factorial - (n : ℝ) ^ (-(1 / 2) : ℝ)|))
+        atTop (𝓝 0) := by simpa only [mul_zero] using hΓ.const_mul K
+    refine squeeze_zero' (Eventually.of_forall fun _ => by positivity) ?_ hlim
+    exact Eventually.of_forall fun n => by
+      simpa only [mul_left_comm (n : ℝ) K] using
+        mul_le_mul_of_nonneg_left (hb n) (Nat.cast_nonneg n)
+  have ht := hPc.add hcl
+  simp only [zero_add] at ht
+  refine squeeze_zero' (Eventually.of_forall fun _ => by positivity) ?_ ht
+  filter_upwards [eventually_gt_atTop (0 : ℕ)] with n hn
+  have hnr : 0 < (n : ℝ) := by exact_mod_cast hn
+  have hs : (2 / (π * n * Real.sin α)) ^ (1 / 2 : ℝ) =
+      K * (n : ℝ) ^ (-(1 / 2) : ℝ) := by
+    rw [show 2 / (π * n * Real.sin α) = (2 / (π * Real.sin α)) / n by ring,
+      ← Real.sqrt_eq_rpow, Real.sqrt_div (by positivity), Real.rpow_neg hnr.le,
+      ← Real.sqrt_eq_rpow]
+    dsimp [K]
+    rw [← Real.sqrt_eq_rpow]
+    ring
+  rw [hs]
+  change (n : ℝ) * ‖DLMF.OrthogonalPolynomials.legendrePolynomialP n (Real.cos α) - l n‖ ≤ _
+  have hb : ‖DLMF.OrthogonalPolynomials.legendrePolynomialP n (Real.cos α) - l n‖ ≤
+      ‖DLMF.OrthogonalPolynomials.legendrePolynomialP n (Real.cos α) - c n‖ + ‖c n - l n‖ := by
+    simpa only [dist_eq_norm] using
+      dist_triangle (DLMF.OrthogonalPolynomials.legendrePolynomialP n (Real.cos α)) (c n) (l n)
+  simpa only [mul_add] using mul_le_mul_of_nonneg_left hb hnr.le
 
 end DLMF.AsymptoticApproximations

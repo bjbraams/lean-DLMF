@@ -1963,3 +1963,27 @@ previous round. The 3j and 6j recursions and the Heun kernel identities were fou
 checked by `ring`. The bound 14.15.1 uses `isBigO_gaussHypergeometricCoeff` of the Carlson development of
 lean-codes, and 17.7.23 uses Mathlib's Lagrange interpolation (`Lagrange.coeff_eq_sum`). No
 external proof body was copied.
+
+
+## Olver asymptotic proof development
+
+The singular-endpoint Liouville–Green proofs in
+`DLMF/AsymptoticApproximations/ODE/LiouvilleGreen.lean` follow F. W. J. Olver,
+*Asymptotics and Special Functions*, corrected 1997 edition, Chapter 6, §§2–3,
+pp.193–200, and the Volterra estimates in §10, pp.218–220. The general interval
+modules under `DLMFMathlib/Analysis/ODE/` implement factorial Picard bounds,
+Wronskian uniqueness and dominant-solution normalization. They reuse Mathlib's
+calculus and interval-integral API and the project's proved halfline Volterra pattern.
+
+The singular Darboux proofs and the Legendre comparison follow Olver, Chapter 8,
+§§9–10, pp.310–313. Their boundary-limit argument uses Mathlib's dominated convergence
+and Riemann–Lebesgue theorem, with new integrable chord majorants and exact Laurent
+coefficient identities. Principal-power normalization of the Legendre factors uses
+`TauCeti.ofReal_mul_cpow`; the error in replacing the Gamma quotient by its leading
+power uses the project's proved shifted Stirling expansion.
+
+The Laplace coefficient development follows the change of variable and series reversion
+in Olver, Chapter 3, §§7–8, pp.81–87. The general binomial and ramified-power-series
+modules preserve the possibility of nonconvergent asymptotic series. Formal
+Lagrange–Bürmann extraction uses Mathlib's power-series substitution and differentiation
+APIs. No external Lean proof body was copied.

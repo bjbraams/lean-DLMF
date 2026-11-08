@@ -8,6 +8,7 @@ module
 public import DLMF.AsymptoticApproximations.Integrals.Basic
 public import DLMFMathlib.RingTheory.Binomial
 public import DLMFMathlib.Analysis.Asymptotics.AsymptoticExpansion
+public import DLMFMathlib.Analysis.Asymptotics.LaplaceReversion
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
 
 /-!
@@ -52,7 +53,7 @@ minimum of `p` on `[a, b)` is approached only at `a` (for each `ε > 0`, `p ≥ 
 `[a + ε, b)` for some `η > 0`);
 (b) as `t → a⁺`, `p(t) ∼ p(a) + ∑ pₛ (t-a)^{s+μ}` with the differentiated expansion for `p'`,
 and `q(t) ∼ ∑ qₛ (t-a)^{s+λ-1}` (2.3.14), with `λ, μ, p₀ > 0`;
-(c) the integral 2.3.13 converges absolutely for large `x`.
+(c) the integral 2.3.13 converges absolutely for every `x ≥ x₀`.
 Then `∫ₐᵇ e^{-xp(t)} q(t) dt ∼ e^{-xp(a)} ∑ Γ((s+λ)/μ) bₛ x^{-(s+λ)/μ}` as `x → +∞` (2.3.15),
 with `bₛ = laplaceCoeff (ln p₀) p q λ μ s` (2.3.16–2.3.18). -/
 @[dlmf 2.3.E13, dlmf 2.3.E14, dlmf 2.3.E15, dlmf 2.3.iii]
@@ -66,7 +67,8 @@ theorem laplace_method {p : ℝ → ℝ} {q : ℝ → ℂ} {pc : ℕ → ℝ} {q
     (hp'exp : HasAsymptoticExpansion (𝓝[>] a) (fun (s : ℕ) t => (t - a) ^ ((s : ℝ) + mu - 1))
       (fun s => ((s : ℝ) + mu) * pc s) (deriv p))
     (hqexp : HasAsymptoticExpansion (𝓝[>] a) (fun (s : ℕ) t => (t - a) ^ ((s : ℝ) + lam - 1)) qc q)
-    (hint : IntegrableOn (fun t => Real.exp (-x₀ * p t) • q t) (Ioo a b)) :
+    (hint : ∀ x, x₀ ≤ x →
+      IntegrableOn (fun t => Real.exp (-x * p t) • q t) (Ioo a b)) :
     HasAsymptoticExpansion atTop
       (fun (s : ℕ) (x : ℝ) => Real.exp (-x * p a) * x ^ (-(((s : ℝ) + lam) / mu)))
       (fun s => (Real.Gamma (((s : ℝ) + lam) / mu) : ℂ) *
@@ -75,7 +77,7 @@ theorem laplace_method {p : ℝ → ℝ} {q : ℝ → ℂ} {pc : ℕ → ℝ} {q
   sorry
 
 /-- DLMF 2.3.15 with `b = ∞`: Laplace's method on `(a, ∞)`, with the hypotheses of
-`laplace_method` for `b = ∞`. -/
+`laplace_method` for `b = ∞`, including absolute convergence for every `x ≥ x₀`. -/
 @[dlmf 2.3.E13, dlmf 2.3.E15, dlmf 2.3.iii]
 theorem laplace_method_Ioi {p : ℝ → ℝ} {q : ℝ → ℂ} {pc : ℕ → ℝ} {qc : ℕ → ℂ} {a δ lam mu x₀ : ℝ}
     (hδ : 0 < δ) (hlam : 0 < lam) (hmu : 0 < mu) (hp0 : 0 < pc 0)
@@ -87,7 +89,8 @@ theorem laplace_method_Ioi {p : ℝ → ℝ} {q : ℝ → ℂ} {pc : ℕ → ℝ
     (hp'exp : HasAsymptoticExpansion (𝓝[>] a) (fun (s : ℕ) t => (t - a) ^ ((s : ℝ) + mu - 1))
       (fun s => ((s : ℝ) + mu) * pc s) (deriv p))
     (hqexp : HasAsymptoticExpansion (𝓝[>] a) (fun (s : ℕ) t => (t - a) ^ ((s : ℝ) + lam - 1)) qc q)
-    (hint : IntegrableOn (fun t => Real.exp (-x₀ * p t) • q t) (Ioi a)) :
+    (hint : ∀ x, x₀ ≤ x →
+      IntegrableOn (fun t => Real.exp (-x * p t) • q t) (Ioi a)) :
     HasAsymptoticExpansion atTop
       (fun (s : ℕ) (x : ℝ) => Real.exp (-x * p a) * x ^ (-(((s : ℝ) + lam) / mu)))
       (fun s => (Real.Gamma (((s : ℝ) + lam) / mu) : ℂ) *
@@ -111,7 +114,49 @@ theorem laplaceCoeff_hasAsymptoticExpansion {p : ℝ → ℝ} {q : ℝ → ℂ} 
       (fun (s : ℕ) t => (p t - p a) ^ (((s : ℝ) + lam - mu) / mu))
       (fun s => laplaceCoeff (Real.log (pc 0)) (fun s => (pc s : ℂ)) qc lam mu s)
       (fun t => q t / Complex.ofReal (deriv p t)) := by
-  sorry
+  have _hlam_ne_zero := hlam.ne'
+  let P : PowerSeries ℝ := PowerSeries.mk pc
+  let Q : PowerSeries ℂ := PowerSeries.mk qc
+  let Pc : PowerSeries ℂ := PowerSeries.mk (fun n => (pc n : ℂ))
+  let U : PowerSeries ℂ := PowerSeries.mk (fun j => if j = 0 then 0 else (pc j : ℂ) / pc 0)
+  have hw : Tendsto (fun t : ℝ => t - a) (𝓝[>] a) (𝓝 0) := by
+    have hc : Continuous (fun t : ℝ => t - a) := by fun_prop
+    simpa only [sub_self] using (hc.tendsto a).mono_left
+      (nhdsWithin_le_nhds : 𝓝[>] a ≤ 𝓝 a)
+  have hwpos : ∀ᶠ t : ℝ in 𝓝[>] a, 0 < t - a := by
+    filter_upwards [self_mem_nhdsWithin] with t ht
+    exact sub_pos.mpr ht
+  have hP0 : PowerSeries.constantCoeff P = pc 0 := by
+    rw [← PowerSeries.coeff_zero_eq_constantCoeff_apply, PowerSeries.coeff_mk]
+  have hPc0 : PowerSeries.constantCoeff Pc = (pc 0 : ℂ) := by
+    rw [← PowerSeries.coeff_zero_eq_constantCoeff_apply, PowerSeries.coeff_mk]
+  have hmap : PowerSeries.map Complex.ofRealHom P = Pc := by
+    ext n
+    rw [PowerSeries.coeff_map, PowerSeries.coeff_mk, PowerSeries.coeff_mk]
+    rfl
+  have hU : PowerSeries.C (pc 0 : ℂ)⁻¹ * Pc - 1 = U := by
+    ext n
+    rw [map_sub, PowerSeries.coeff_C_mul, PowerSeries.coeff_mk, PowerSeries.coeff_one,
+      PowerSeries.coeff_mk]
+    by_cases hn : n = 0
+    · subst n
+      simp only [ite_true, inv_mul_cancel₀ (Complex.ofReal_ne_zero.mpr hp0.ne'), sub_self]
+    · simp only [hn, ite_false, sub_zero, div_eq_mul_inv]
+      ring
+  have hU0 : PowerSeries.constantCoeff U = 0 := by
+    rw [← PowerSeries.coeff_zero_eq_constantCoeff_apply, PowerSeries.coeff_mk]
+    simp only [ite_true]
+  have H := hasAsymptoticExpansion_ramified_quotient (P := P) (Q := Q)
+    hw hwpos (by rwa [hP0]) hmu.ne'
+    (by simpa only [P, PowerSeries.coeff_mk] using hpexp)
+    (by simpa only [P, PowerSeries.coeff_mk] using hp'exp)
+    (by simpa only [Q, PowerSeries.coeff_mk] using hqexp)
+  rw [hP0, hmap, hPc0, hU] at H
+  refine H.congr_coeff ?_
+  funext n
+  rw [PowerSeries.coeff_mul_binomialSubstitution hU0]
+  simp only [Q, PowerSeries.coeff_mk, laplaceCoeff, binomSeriesCoeff, U]
+
 
 section Coefficients
 
