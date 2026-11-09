@@ -18,8 +18,8 @@
   leftmargin=1.5em, labelindent=0pt, itemsep=0.3ex, topsep=0.3ex, parsep=0.3ex]\setlength{\parindent}{0pt}\RaggedRight}{\end{description}}
 
 % entry counts
-\newcommand{\NumA}{148}
-\newcommand{\NumB}{27}
+\newcommand{\NumA}{149}
+\newcommand{\NumB}{28}
 
 \begin{document}
 
@@ -884,6 +884,26 @@ Found by the acquisition agents on 2026-10-27 and confirmed by the coordinator f
 \item[Lean] \lean{associatedP_one_neg_half}, \lean{not_tendsto_associatedP_one_neg_half_zero}
   (\file{DLMF/Legendre/SourceChecks.lean}), proved.
 \item[Found] 2026-10-19.
+\end{fields}
+
+\subsection{Chapter 15 (hypergeometric function)}
+
+\entry{\deq{15.10.35}}
+\begin{fields}
+\item[Printed] the second term begins with a stray $\exp$, both in the \TeX{} source and in
+  the displayed MathML:
+  \[
+    w_2(z)=\cdots+\exp\eu^{-a\pi\iu}\frac{\Gamma(2-c)\Gamma(c-b)}{\Gamma(a-b+1)\Gamma(1-a)}w_5(z).
+  \]
+\item[Correct] without it, as in \deq{15.10.33}, \deq{15.10.34} and \deq{15.10.36}:
+  \[
+    w_2(z)=\eu^{(1-a)\pi\iu}\frac{\Gamma(2-c)\Gamma(c-b)}{\Gamma(a-c+1)\Gamma(c-a-b+1)}w_4(z)
+      +\eu^{-a\pi\iu}\frac{\Gamma(2-c)\Gamma(c-b)}{\Gamma(a-b+1)\Gamma(1-a)}w_5(z);
+  \]
+  with mpmath this holds to $30$ digits for $\Im z>0$ (see the entry on \deq{15.10.15} in~(b)
+  for $\Im z<0$).
+\item[Lean] not formalized.
+\item[Found] 2026-11-09, in the Tau~Ceti roadmap work.
 \end{fields}
 
 \subsection{Chapters 16, 17 and 24}
@@ -2778,6 +2798,35 @@ as tacit, or a notation used outside its stated domain.
 \item[Note] The crossing point $X_0=0$ is degenerate; the statement holds for $0<c$, with
   $0<X_c$.
 \item[Lean] \lean{cylinderEnvelopeCross_spec}, proved.
+\end{fields}
+
+\entry{\deq{15.10.15}, \deq{15.10.16}, \deq{15.10.19}--\deq{15.10.36}}
+\begin{fields}
+\item[Note] DLMF gives these as identities between the principal branches of Kummer's
+  solutions but does not say that they hold only for $\Im z>0$. With principal powers, the
+  first, second and fourth expressions for $w_5$ in \deq{15.10.15} agree with the third,
+  $(1-z)^{-a}F(a,c-b;a-b+1;1/(1-z))$, only for $\Im z>0$; the third carries no factor
+  $\eu^{(\cdot)\pi\iu}$ and is holomorphic for $|\ph(-z)|<\pi$. For $\Im z<0$ they agree with it
+  after $\iu$ is replaced by $-\iu$ in their factors $\eu^{(\cdot)\pi\iu}$. The same holds for
+  $w_6$ in \deq{15.10.16}. Equivalently, $\eu^{\pm a\pi\iu}z^{-a}=(-z)^{-a}$ for $\pm\Im z>0$, as
+  in \deq{15.8.2}. With $w_5$, $w_6$ given by their third expressions, the fifteen connection
+  formulas that carry factors $\eu^{(\cdot)\pi\iu}$ (\deq{15.10.19}, \deq{15.10.20},
+  \deq{15.10.23}, \deq{15.10.24}, \deq{15.10.26}--\deq{15.10.36}) hold for $\Im z>0$; for
+  $\Im z<0$ they fail, and hold with $\iu$ replaced by $-\iu$. \deq{15.10.17}, \deq{15.10.18},
+  \deq{15.10.21}, \deq{15.10.22} and \deq{15.10.25} hold in both half-planes. With mpmath at
+  $a=0.3$, $b=0.7+0.2\iu$, $c=1.9+0.1\iu$ and $z=2\pm\iu$, $-3\pm0.5\iu$, $0.4\pm0.3\iu$, the
+  printed forms hold to $30$ digits for $\Im z>0$ and fail by $O(1)$ for $\Im z<0$; at
+  $z=2-\iu$ the first and third expressions for $w_5$ differ by $1.18$ in modulus.
+\item[Lean] \lean{kummer_five_representations}, \lean{kummer_six_representations}
+  (\deq{15.10.15}--\deq{15.10.16}), \lean{kummer_five_left_connection_zero},
+  \lean{kummer_six_left_connection_zero} (\deq{15.10.19}--\deq{15.10.20}),
+  \lean{kummer_five_connection_one} and \lean{kummer_six_connection_one}
+  (\deq{15.10.23}--\deq{15.10.24}), proved with the hypothesis $\Im z>0$;
+  \lean{zero_first_connection_left_gen} (\deq{15.10.25}, no phase hypothesis) and
+  \lean{zero_second_connection_left_gen} (\deq{15.10.26}, with a phase $\varphi=\mp\pi\iu$ for
+  the two half-planes), proved (\file{DLMF/Hypergeometric/Kummer.lean});
+  \deq{15.10.29}--\deq{15.10.36} are not formalized.
+\item[Found] 2026-11-09, in the Tau~Ceti roadmap work.
 \end{fields}
 
 \entry{\deq{19.16.11}, \deq{19.21.4}, \deq{19.21.5}}
