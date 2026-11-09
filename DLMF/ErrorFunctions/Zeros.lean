@@ -372,19 +372,24 @@ def fresnelZeroLambda (sine : Bool) (k : ℕ) : ℝ :=
 def fresnelZeroAlpha (sine : Bool) (k : ℕ) : ℝ :=
   2/π*Real.log (π*fresnelZeroLambda sine k)
 
-/-- All-order Fresnel zero expansions with logarithmic-polynomial coefficients. -/
+/-- DLMF 7.13.5 to all orders: `x_n` and `y_n` expand in odd powers of `λ` with polynomial
+coefficients in `α`, `x_n ∼ λ + (α(απ - 4)/(8π) + 1/π²) λ⁻³ + ⋯` and
+`y_n ∼ α/(2λ) - 1/(π³λ³) + ⋯`. The coefficient of `λ^{1-2j}` in `x_n` has degree at most `j`
+in `α`, and that of `λ^{-1-2j}` in `y_n` at most `j + 1`. -/
 @[dlmf 7.13.E5]
 theorem fresnelFunctionZero_asymptotic (sine : Bool) :
     ∃ p q : ℕ → Polynomial ℝ,
-        (∀ α : ℝ, (p 0).eval α=1 ∧ (p 1).eval α=α*(α*π-4)/(8*π) ∧ (q 0).eval α=α/2) ∧ ∀ N : ℕ,
+        (∀ α : ℝ, (p 0).eval α = 1 ∧ (p 1).eval α = 0 ∧
+          (p 2).eval α = α * (α * π - 4) / (8 * π) + 1 / π ^ 2 ∧
+          (q 0).eval α = α / 2 ∧ (q 1).eval α = -1 / π ^ 3) ∧ ∀ N : ℕ,
         (IsBigO atTop (fun k : ℕ => (fresnelFunctionZero sine (k+1)).re-∑ n ∈ Finset.range N,
-        (p n).eval (fresnelZeroAlpha sine (k+1))*fresnelZeroLambda sine (k+1)^((1 : ℤ)-4*n))
+        (p n).eval (fresnelZeroAlpha sine (k+1))*fresnelZeroLambda sine (k+1)^((1 : ℤ)-2*n))
         (fun k : ℕ => fresnelZeroLambda sine
-        (k+1)^((1 : ℤ)-4*N)*(1+|fresnelZeroAlpha sine (k+1)|)^(2*N))) ∧
+        (k+1)^((1 : ℤ)-2*N)*(1+|fresnelZeroAlpha sine (k+1)|)^N)) ∧
         (IsBigO atTop (fun k : ℕ => (fresnelFunctionZero sine (k+1)).im-∑ n ∈ Finset.range N,
-        (q n).eval (fresnelZeroAlpha sine (k+1))*fresnelZeroLambda sine (k+1)^((-1 : ℤ)-4*n))
+        (q n).eval (fresnelZeroAlpha sine (k+1))*fresnelZeroLambda sine (k+1)^((-1 : ℤ)-2*n))
         (fun k : ℕ => fresnelZeroLambda sine
-        (k+1)^((-1 : ℤ)-4*N)*(1+|fresnelZeroAlpha sine (k+1)|)^(2*N+1))) := by
+        (k+1)^((-1 : ℤ)-2*N)*(1+|fresnelZeroAlpha sine (k+1)|)^(N+1))) := by
   sorry
 
 end DLMF.Confluent

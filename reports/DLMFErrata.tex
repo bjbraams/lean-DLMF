@@ -18,8 +18,8 @@
   leftmargin=1.5em, labelindent=0pt, itemsep=0.3ex, topsep=0.3ex, parsep=0.3ex]\setlength{\parindent}{0pt}\RaggedRight}{\end{description}}
 
 % entry counts
-\newcommand{\NumA}{144}
-\newcommand{\NumB}{24}
+\newcommand{\NumA}{148}
+\newcommand{\NumB}{27}
 
 \begin{document}
 
@@ -27,7 +27,7 @@
   NIST Digital Library of Mathematical Functions\\[0.4ex]
   \large found in the Lean~4 formalization \texttt{lean-DLMF}}
 \author{Bastiaan J. Braams}
-\date{2026-11-08}
+\date{2026-11-09}
 \maketitle
 
 \begin{abstract}
@@ -712,6 +712,19 @@ Found by the acquisition agents on 2026-10-27 and confirmed by the coordinator f
 
 \subsection{Chapter 13 (confluent hypergeometric functions)}
 
+\entry{\deq{13.9.3}, \deq{13.9.4}}
+\begin{fields}
+\item[Printed] the number of positive zeros of $M(a,b,x)$ is $p(a,b)=1$ for $a\ge0$, $-1<b<0$
+  \DLMF{13.9.3}, and
+  $p(a,b)=\left\lfloor-\tfrac12b\right\rfloor-\left\lfloor-\tfrac12(b+1)\right\rfloor$ for $a\ge0$,
+  $b\le-1$ \DLMF{13.9.4}.
+\item[Correct] both need $a>0$. At $a=0$, $M(0,b,x)=1$ has no zeros, while \deq{13.9.3} at
+  $b=-\frac12$ and \deq{13.9.4} at $b=-\frac52$ give $p=1$.
+\item[Lean] \lean{kummerM_posZeros_one}, \lean{kummerM_posZeros_b_le_neg_one} (for $a>0$) and
+  \lean{kummerM_posZeros_zero} (\file{DLMF/Confluent/Zeros/RealZeros.lean}), proved.
+\item[Found] 2026-10-21.
+\end{fields}
+
 \entry{\deq{13.9.6}}
 \begin{fields}
 \item[Printed] the number of positive zeros of $M(a,b,x)$:
@@ -723,8 +736,51 @@ Found by the acquisition agents on 2026-10-27 and confirmed by the coordinator f
 \item[Correct] the count needs $a\notin-\NN$: $a=-1$, $b=-3/2$ gives $M=1+2x/3$ with no positive
   zero, while the formula gives one.
 \item[Lean] \lean{kummerM_posZeros_ceil_swap}, counterexample \lean{kummerM_posZeros_ceil_swap_ne}
-  (\file{DLMF/Confluent/Zeros.lean}), proved.
+  (\file{DLMF/Confluent/Zeros/RealZeros.lean}), proved.
 \item[Found] 2026-10-21.
+\end{fields}
+
+\entry{\dlink{13.9.i}{\S13.9(i)}, last sentence ($b$-zeros of $M$)}
+\begin{fields}
+\item[Printed] ``For fixed $a$ and $z$ in $\CC$ the function $M\left(a,b,z\right)$ has only a
+  finite number of $b$-zeros.''
+\item[Correct] only a finite number of $b$-zeros with $|b+n|\ge\delta$ for every $n\in\NN$, for
+  each fixed $\delta>0$; by \deq{13.8.1} there are none of large modulus in that region. Near the
+  poles $b=-n$ there can be infinitely many.
+\item[Evidence] $a=z=1$: $\mathbf M(1,-n,1)=\eu$ by \deq{13.2.5}, so $M(1,b,1)$ has the residue
+  $(-1)^n\eu/n!$ at $b=-n$ and tends to $-\infty$ as $b\uparrow-n$ for even $n$, while
+  $M(1,-n-\frac12,1)\to1$. Hence there is a zero in each interval $(-n-\frac12,-n)$ for large
+  even $n$. mpmath: $b=-10.00000\,08232\,66\ldots$; $M(1,-10.5,1)=0.9137$,
+  $M(1,-10-10^{-9},1)=-748.2$.
+\item[Lean] none; the statement is not formalized in \texttt{lean-DLMF}.
+\item[Found] 2026-11-08, in the Tau~Ceti roadmap work.
+\end{fields}
+
+\entry{\dlink{13.9.i}{\S13.9(i)}, paragraph after \deq{13.9.9} (partial sums)}
+\begin{fields}
+\item[Printed] $M(a,b,z)$ has no zeros in the closed parabolic regions $P_{b/a}$ ($0<b\le a$),
+  $P_1$ ($1\le a\le b$) and $P_\alpha$, $\alpha=(2a-b+ab)/(a(a+1))$ ($0<a<1$,
+  $a\le b<2a/(1-a)$); ``the same results apply for the $n$th partial sums of the Maclaurin
+  series \deq{13.2.2}''.
+\item[Correct] for the partial sums, only the interiors of these regions are zero-free.
+\item[Evidence] $a=b=1$, first range: the partial sum $1+z$ of degree one vanishes at $z=-1$,
+  the vertex of $P_1$; in general $1+(a/b)z$ vanishes at the vertex $-b/a$ of $P_{b/a}$.
+\item[Lean] none; the statement is not formalized in \texttt{lean-DLMF}.
+\item[Found] 2026-11-08, in the Tau~Ceti roadmap work.
+\end{fields}
+
+\entry{\dlink{13.9.ii}{\S13.9(ii)}, first sentence (zeros of $U$ in a sector)}
+\begin{fields}
+\item[Printed] ``For fixed $a$ and $b$ in $\CC$, $U\left(a,b,z\right)$ has a finite number of
+  $z$-zeros in the sector $|\ph z|\le\frac32\pi-\delta$.''
+\item[Correct] finitely many in each truncated sector $|\ph z|\le\frac32\pi-\delta$,
+  $|z|\ge r>0$; for real $a$, $b$ the whole sector is correct, by the limiting forms
+  \deq{13.2.16}--\deq{13.2.22} at $0$.
+\item[Evidence] by \deq{13.6.10},
+  $U(\frac12+\iu,1+2\iu,2x)=\pi^{-1/2}\eu^{x}(2x)^{-\iu}K_{\iu}(x)$, and $K_{\iu}(x)$ has infinitely
+  many zeros accumulating at $0^+$ (\deq{10.45.7}).
+\item[Lean] none; the statement is not formalized in \texttt{lean-DLMF}.
+\item[Found] 2026-11-08, in the Tau~Ceti roadmap work.
 \end{fields}
 
 \entry{\deq{13.11.3} (suspected: branch)}
@@ -2609,6 +2665,23 @@ as tacit, or a notation used outside its stated domain.
 \item[Found] 2026-11-08, in the Tau~Ceti roadmap work.
 \end{fields}
 
+\entry{\deq{7.13.5}}
+\begin{fields}
+\item[Note] The printed coefficient $\alpha(\alpha\pi-4)/(8\pi)$ of $\lambda^{-3}$ in $x_n$ is
+  only its part of degree at least $1$ in $\alpha$. Read as an expansion in odd powers of
+  $\lambda$ with coefficients polynomial in $\alpha$ (as \deq{7.13.1} and \deq{7.13.3} are), the
+  zeros of $C$ and of $S$ satisfy
+  $x_n\sim\lambda+\bigl(\alpha(\alpha\pi-4)/(8\pi)+1/\pi^2\bigr)\lambda^{-3}+\cdots$ and
+  $y_n\sim\alpha/(2\lambda)-1/(\pi^3\lambda^3)+\cdots$. The constants come from the term
+  $g(z)\cos(\frac12\pi z^2)$ of \deq{7.5.3} and the subdominant exponential, which add
+  $(2/\pi^2-2\iu/\pi^3)\lambda^{-2}$ to $z^2$. With mpmath, fits of the zeros for
+  $2000\le n\le4096000$ give the two constants as $0.101321183644$ and $-0.0322515344253$,
+  against $1/\pi^2=0.101321183642$ and $-1/\pi^3=-0.0322515344331$.
+\item[Lean] \lean{fresnelFunctionZero_asymptotic} (\file{DLMF/ErrorFunctions/Zeros.lean}),
+  \texttt{sorry}.
+\item[Found] 2026-11-09, in the Tau~Ceti roadmap work.
+\end{fields}
+
 \entry{\deq{8.7.2}}
 \begin{fields}
 \item[Note] The segment from $x$ to $x+y$ must avoid the branch cut; otherwise the expansion
@@ -2660,6 +2733,28 @@ as tacit, or a notation used outside its stated domain.
 \item[Note] For positive integer $p$ the ray integrals diverge at $0$. The Lean statements use a
   Hadamard finite part, and the homogeneous equations are asserted for $p\le0$.
 \item[Lean] \file{DLMF/Airy/GeneralizedContours.lean}, proved.
+\end{fields}
+
+\entry{\deq{10.17.14}--\deq{10.17.15}}
+\begin{fields}
+\item[Note] The paths of variation are required to have $|\Im t|$ changing monotonically. No
+  path from a point $z$ with $\ph z<0$ to $+\iu\infty$ satisfies this, since $\Im t$ must pass
+  through $0$, yet \deq{10.17.15} gives bounds for $\mathcal V_{z,\iu\infty}(t^{-\ell})$ in
+  $-\pi<\ph z\le0$. The condition should be that $\Im t$ is nondecreasing along the path (and
+  nonincreasing for $-\iu\infty$).
+\item[Lean] none; \S10.17(iv) is not formalized in \texttt{lean-DLMF}.
+\item[Found] 2026-11-09, in the Tau~Ceti roadmap work.
+\end{fields}
+
+\entry{\deq{13.9.1}, \deq{13.9.2}}
+\begin{fields}
+\item[Note] Both counts are stated for $b\ge0$, but $M(a,0,x)$ is undefined. They need $b>0$. The
+  regularized function $\mathbf M(a,0,x)=ax\,\mathbf M(a+1,2,x)$ has one positive zero fewer than
+  \deq{13.9.1} gives when $a<0$: as $b\downarrow0$ the smallest positive zero of $M(a,b,\cdot)$
+  tends to $0$.
+\item[Lean] \lean{kummerM_posZeros_neg_a} ($b>0$) and \lean{kummerM_posZeros_nonneg} (where the
+  totalized \lean{kummerM} at $b=0$ is $1$) (\file{DLMF/Confluent/Zeros/RealZeros.lean}), proved.
+\item[Found] 2026-11-08, in the Tau~Ceti roadmap work.
 \end{fields}
 
 \entry{\deq{13.16.8}}

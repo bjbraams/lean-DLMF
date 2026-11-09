@@ -345,14 +345,15 @@ theorem kPlusPairing_powKernel_conv_log {μ : ℝ} (hμ : 0 < μ) (s : ℕ) (φ 
   field_simp
 
 /-- DLMF 2.6.45 (with 2.6.47; the function form of the distributional identity 2.6.43): for
-`0 < α < 1`, `μ > 0`, `n ≥ 1` and `x > 0`,
+`f` continuous on `(0, ∞)`, `0 < α < 1`, `μ > 0`, `n ≥ 1` and `x > 0`,
 `I^μ f(x) = ∑_{s<n} a_s Γ(1-s-α)/Γ(μ+1-s-α) x^{μ-s-α} - ∑_{s=1}^{n} c_s/Γ(μ+1-s) x^{μ-s}
-  + x⁻ⁿ δ_n(x)`, with `c_s` as in 2.6.18. -/
+  + x⁻ⁿ δ_n(x)`, with `c_s` as in 2.6.18. Local integrability of `f` does not suffice: for
+`0 < μ < 1` a singularity `|t - 1|^{-3/4}` of `f` makes `I^μ f(1)` diverge. -/
 @[dlmf 2.6.E45, dlmf 2.6.E43]
 theorem riemannLiouvilleIntegral_eq_of_lt_one {f : ℝ → ℂ} {α : ℝ} {a : ℕ → ℂ}
-    (hf : IsStieltjesExpansion f α a) (hα : α < 1) {M : ℂ → ℂ}
-    (hM : IsMellinContinuation f α M) {μ : ℝ} (hμ : 0 < μ) {n : ℕ} (hn : 1 ≤ n) {x : ℝ}
-    (hx : 0 < x) :
+    (hf : IsStieltjesExpansion f α a) (hcont : ContinuousOn f (Ioi 0)) (hα : α < 1)
+    {M : ℂ → ℂ} (hM : IsMellinContinuation f α M) {μ : ℝ} (hμ : 0 < μ) {n : ℕ} (hn : 1 ≤ n)
+    {x : ℝ} (hx : 0 < x) :
     riemannLiouvilleIntegral μ f x =
       ∑ s ∈ range n, a s * (Real.Gamma (1 - s - α) / Real.Gamma (μ + 1 - s - α) *
           x ^ (μ - s - α) : ℝ) -
@@ -360,14 +361,15 @@ theorem riemannLiouvilleIntegral_eq_of_lt_one {f : ℝ → ℂ} {α : ℝ} {a : 
         ((x ^ n : ℝ) : ℂ)⁻¹ * fractionalRemainder μ (stieltjesRemainder f α a n) n x := by
   sorry
 
-/-- DLMF 2.6.46 (with 2.6.47; the function form of 2.6.44): for `α = 1`, `μ > 0`, `n ≥ 1` and
-`x > 0`,
+/-- DLMF 2.6.46 (with 2.6.47; the function form of 2.6.44): for `f` continuous on `(0, ∞)`,
+`α = 1`, `μ > 0`, `n ≥ 1` and `x > 0`,
 `I^μ f(x) = ∑_{s<n} (-1)^s a_s/(s! Γ(μ+1)) (d/dx)^{s+1}(x^μ(ln x - γ - ψ(μ+1)))
   - ∑_{s=1}^{n} d_s/Γ(μ-s+1) x^{μ-s} + x⁻ⁿ δ_n(x)`, with `d_s` as in 2.6.21. -/
 @[dlmf 2.6.E46, dlmf 2.6.E44]
 theorem riemannLiouvilleIntegral_eq_of_eq_one {f : ℝ → ℂ} {a : ℕ → ℂ}
-    (hf : IsStieltjesExpansion f 1 a) {M : ℂ → ℂ} (hM : IsMellinContinuation f 1 M) {μ : ℝ}
-    (hμ : 0 < μ) {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx : 0 < x) :
+    (hf : IsStieltjesExpansion f 1 a) (hcont : ContinuousOn f (Ioi 0)) {M : ℂ → ℂ}
+    (hM : IsMellinContinuation f 1 M) {μ : ℝ} (hμ : 0 < μ) {n : ℕ} (hn : 1 ≤ n) {x : ℝ}
+    (hx : 0 < x) :
     riemannLiouvilleIntegral μ f x =
       ∑ s ∈ range n, (-1 : ℂ) ^ s * a s / ((s.factorial : ℂ) * Real.Gamma (μ + 1)) *
           iteratedDeriv (s + 1) (logRpowKernel μ) x -
@@ -581,7 +583,10 @@ theorem mellin_continuation_eq_mellin_remainder {f : ℝ → ℂ} {a : ℕ → �
 /-- DLMF 2.6.62: for `α ≠ β`, under 2.6.55–2.6.56 with continued Mellin transforms `Mh` of
 `h` (to a domain containing `j + α`, `j < n`) and `Mf` of `f` (containing `1 - k - β`,
 `k < n`), `I(x) = ∑_{j<n} a_j 𝓜h(j+α) x^{-j-α} + ∑_{k<n} b_k 𝓜f(1-k-β) x^{-k-β} + δ_n(x)`
-for `x > 0`, with `δ_n(x) = ∫₀^∞ f_n(t) h_n(xt) dt`. -/
+for `x > 0`, with `δ_n(x) = ∫₀^∞ f_n(t) h_n(xt) dt`. Here `f` is locally integrable and `h`
+continuous on `(0, ∞)`, with `h(t) = O(t^{-c})` as `t → 0+` for some `c < α` and
+`f(t) = O(t^{-ρ})` as `t → ∞` for some `ρ > 1 - β`; local integrability of both `f` and `h`
+does not make `t ↦ f(t) h(xt)` locally integrable. -/
 @[dlmf 2.6.E62]
 theorem mellinConvolutionIntegral_eq {f h : ℝ → ℂ} {a b : ℕ → ℂ} {α β : ℝ} (hα0 : 0 < α)
     (hα1 : α ≤ 1) (hβ0 : 0 < β) (hβ1 : β ≤ 1) (hαβ : α ≠ β) {n : ℕ} (hn : 1 ≤ n)
@@ -589,7 +594,9 @@ theorem mellinConvolutionIntegral_eq {f h : ℝ → ℂ} {a b : ℕ → ℂ} {α
       =O[𝓝[>] 0] (fun t : ℝ => t ^ ((n : ℝ) + α - 1)))
     (hhn : (fun t : ℝ => h t - ∑ k ∈ range n, b k * ((t ^ (-(k : ℝ) - β) : ℝ) : ℂ))
       =O[atTop] (fun t : ℝ => t ^ (-(n : ℝ) - β)))
-    (hfloc : ∀ R, 0 < R → IntegrableOn f (Ioc 0 R)) (hhloc : ∀ R, 0 < R → IntegrableOn h (Ioc 0 R))
+    (hfloc : ∀ R, 0 < R → IntegrableOn f (Ioc 0 R)) (hhcont : ContinuousOn h (Ioi 0))
+    (hh0 : ∃ c < α, h =O[𝓝[>] 0] fun t : ℝ => t ^ (-c))
+    (hftop : ∃ ρ > 1 - β, f =O[atTop] fun t : ℝ => t ^ (-ρ))
     {Mf Mh : ℂ → ℂ} {Uf Uh : Set ℂ} (hMf : IsMellinContinuationOn f Mf Uf)
     (hMh : IsMellinContinuationOn h Mh Uh) (hUf : ∀ k < n, (1 - k - β : ℂ) ∈ Uf)
     (hUh : ∀ j < n, ((j : ℂ) + α) ∈ Uh) {x : ℝ} (hx : 0 < x) :

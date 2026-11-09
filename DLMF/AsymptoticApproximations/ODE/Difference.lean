@@ -14,7 +14,9 @@ public import DLMFMathlib.Analysis.Asymptotics.AsymptoticExpansion
 # Difference equations (DLMF §2.9)
 
 Asymptotic solutions of the three-term recurrence `w(n+2) + f(n) w(n+1) + g(n) w(n) = 0`
-(2.9.1) when `f(n) ~ ∑ f_s n^{-s}`, `g(n) ~ ∑ g_s n^{-s}` (2.9.3), `g₀ ≠ 0`.
+(2.9.1) when `f(n) ~ ∑ f_s n^{-s}`, `g(n) ~ ∑ g_s n^{-s}` (2.9.3), `g₀ ≠ 0`. The solutions
+are sequences on all of `ℕ`, so the theorems that produce them also assume `g(n) ≠ 0` for every
+`n`; DLMF works with large `n` only.
 
 ## Main results
 
@@ -62,13 +64,17 @@ theorem recurrence_iff_difference (f g w : ℕ → ℂ) :
 
 /-- DLMF 2.9.4–2.9.8 (distinct characteristic values): let `f(n) ~ ∑ f_s n^{-s}` and
 `g(n) ~ ∑ g_s n^{-s}` as `n → ∞` (2.9.3) with `g₀ ≠ 0` and `f₀² ≠ 4g₀`, and let `ρ` be a root
-of `ρ² + f₀ρ + g₀ = 0` (2.9.5). Then 2.9.1 has a solution
+of `ρ² + f₀ρ + g₀ = 0` (2.9.5). Assume also `g(n) ≠ 0` for every `n`, so that a solution for
+large `n` extends backwards to all of `ℕ`; DLMF states the result for large `n`, and without
+this hypothesis it fails on `ℕ` (for `f = (0, -3, -3, …)`, `g = (0, 2, 2, …)` and `ρ = 1`,
+every solution is `B(2ⁿ - 4)` for `n ≥ 1`). Then 2.9.1 has a solution
 `w(n) ~ ρⁿ n^{α} ∑ a_s n^{-s}` with `α` from 2.9.6 and `a_s` from 2.9.7. Applied to the two
 roots it gives the linearly independent solutions `w₁`, `w₂`. -/
 @[dlmf 2.9.E3, dlmf 2.9.E4, dlmf 2.9.E5, dlmf 2.9.E8, dlmf 2.9.i]
 theorem difference_distinct_roots_solution {f g : ℕ → ℂ} {fs gs : ℕ → ℂ}
     (hf : HasAsymptoticExpansion atTop invPowScale fs f)
     (hg : HasAsymptoticExpansion atTop invPowScale gs g) (hg0 : gs 0 ≠ 0)
+    (hgn : ∀ n, g n ≠ 0)
     (hdisc : fs 0 ^ 2 ≠ 4 * gs 0) {ρ : ℂ} (hρ : ρ ^ 2 + fs 0 * ρ + gs 0 = 0) :
     ∃ w : ℕ → ℂ, IsRecurrenceSolution f g w ∧
       HasAsymptoticExpansion atTop (geomCpowScale ρ (differenceExponent fs gs ρ))
@@ -227,6 +233,7 @@ solutions `w_j(n) ~ ρⁿ exp((-1)^j κ√n) n^{α} ∑ (-1)^{js} c_s n^{-s/2}`,
 theorem difference_coincident_sqrt {f g : ℕ → ℂ} {fs gs : ℕ → ℂ}
     (hf : HasAsymptoticExpansion atTop invPowScale fs f)
     (hg : HasAsymptoticExpansion atTop invPowScale gs g) (hg0 : gs 0 ≠ 0)
+    (hgn : ∀ n, g n ≠ 0)
     (hdisc : fs 0 ^ 2 = 4 * gs 0) (h1 : 2 * gs 1 ≠ fs 0 * fs 1) {κ α : ℂ}
     (hκ : κ ^ 2 * gs 0 = 2 * fs 0 * fs 1 - 4 * gs 1) (hα : 4 * gs 0 * α = gs 0 + 2 * gs 1) :
     ∃ c : ℕ → ℂ, c 0 = 1 ∧ ∃ w₁ w₂ : ℕ → ℂ,
@@ -246,6 +253,7 @@ now vanishes). Applied to both roots it gives the independent solutions `w₁`, 
 theorem difference_coincident_power {f g : ℕ → ℂ} {fs gs : ℕ → ℂ}
     (hf : HasAsymptoticExpansion atTop invPowScale fs f)
     (hg : HasAsymptoticExpansion atTop invPowScale gs g) (hg0 : gs 0 ≠ 0)
+    (hgn : ∀ n, g n ≠ 0)
     (hdisc : fs 0 ^ 2 = 4 * gs 0) (h1 : 2 * gs 1 = fs 0 * fs 1) {α α' : ℂ}
     (hroots : ∀ x : ℂ, 2 * gs 0 * x ^ 2 - (fs 0 * fs 1 + 2 * gs 0) * x + 2 * gs 2 -
       fs 0 * fs 2 = 2 * gs 0 * (x - α) * (x - α'))
@@ -262,6 +270,7 @@ a solution `w₁(n) ~ ρⁿ n^{α₁} ∑ a_s n^{-s}` with `a₀ = 1` and the `a
 theorem difference_coincident_power_int {f g : ℕ → ℂ} {fs gs : ℕ → ℂ}
     (hf : HasAsymptoticExpansion atTop invPowScale fs f)
     (hg : HasAsymptoticExpansion atTop invPowScale gs g) (hg0 : gs 0 ≠ 0)
+    (hgn : ∀ n, g n ≠ 0)
     (hdisc : fs 0 ^ 2 = 4 * gs 0) (h1 : 2 * gs 1 = fs 0 * fs 1) {α₁ α₂ : ℂ}
     (hroots : ∀ x : ℂ, 2 * gs 0 * x ^ 2 - (fs 0 * fs 1 + 2 * gs 0) * x + 2 * gs 2 -
       fs 0 * fs 2 = 2 * gs 0 * (x - α₁) * (x - α₂))
@@ -280,6 +289,7 @@ expansion with coefficients `b_s` and `b_d = 0`. The normalization is `c = 1` wh
 theorem difference_coincident_log {f g : ℕ → ℂ} {fs gs : ℕ → ℂ}
     (hf : HasAsymptoticExpansion atTop invPowScale fs f)
     (hg : HasAsymptoticExpansion atTop invPowScale gs g) (hg0 : gs 0 ≠ 0)
+    (hgn : ∀ n, g n ≠ 0)
     (hdisc : fs 0 ^ 2 = 4 * gs 0) (h1 : 2 * gs 1 = fs 0 * fs 1) {α₁ α₂ : ℂ}
     (hroots : ∀ x : ℂ, 2 * gs 0 * x ^ 2 - (fs 0 * fs 1 + 2 * gs 0) * x + 2 * gs 2 -
       fs 0 * fs 2 = 2 * gs 0 * (x - α₁) * (x - α₂))

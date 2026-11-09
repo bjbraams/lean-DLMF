@@ -276,8 +276,10 @@ powers) and `e^{-cr} q(r e^{iθ})` integrable on `(0, ∞)`. Then the rotated La
 `∫₀^{∞e^{iθ}} e^{-zt} q(t) dt = e^{iθ} ∫₀^∞ e^{-z r e^{iθ}} q(r e^{iθ}) dr` has the expansion 2.4.1
 as `z → ∞` in the closed sector `δ |z| ≤ ℜ(z e^{iθ})`, that is `|ph z + θ| ≤ arccos δ`. When `q`
 is analytic in `α₁ < ph t < α₂` with `q(t) = O(e^{σ|t|})` there, the rotated integrals continue
-the Laplace transform analytically, so 2.4.1 holds in closed sectors properly interior to
-`-α₂ - ½π < ph z < -α₁ + ½π`. The project's version with exponents `n + μ` is
+the Laplace transform analytically, so 2.4.1 holds as `z = |z| e^{iφ} → ∞` with `φ` in a closed
+subinterval of `(-α₂ - ½π, -α₁ + ½π)`. Here `φ` is a direction angle on the Riemann surface of
+the logarithm, not the principal phase: when the interval passes `±π`, the continuation is
+taken across the negative real axis. The project's version with exponents `n + μ` is
 `hasAsymptoticExpansion_integral_cexp_smul_rotate_comap`. -/
 @[dlmf 2.4.i]
 theorem watson_lemma_rotate {q : ℂ → V} {a : ℕ → V} {lam : ℂ} {mu c δ θ : ℝ}
