@@ -4,6 +4,52 @@ The project formalizes material from Andrews, Askey and Roy, *Special Functions*
 (1999), and the NIST Digital Library of Mathematical Functions, using Mathlib.
 Existing module copyright and authorship notices remain authoritative.
 
+## Asymptotic roadmap proofs (2026-11-09)
+
+The exterior Lagrange coefficient formula extends the project's formal Bürmann extraction
+and its McMahon inversion theorem. The real and complex inverse-branch statements retain
+the project's definitions of the DLMF reversion coefficients.
+
+The complex power and logarithm rules use Mathlib's binomial series,
+`hasFPowerSeriesAt_clog_one_add` and the project's proved analytic-composition theorem.
+The logarithmic Watson theorem uses Mathlib's `mellin_hasDerivAt_of_isBigO_rpow` and the
+project's Gamma moments and vector-valued Laplace remainder bound. The general-kernel
+complex-exponent theorem extends the project's real-exponent Watson kernel proof and
+uses Mathlib's Mellin dilation formula. No external proof body was copied.
+
+The uniform Gamma strip bounds extend the project's proved Gamma-product bounds and
+recurrence, rather than assuming a Stirling approximation. The complex Cahen–Mellin
+formula uses Mathlib's `mellinInv_mellin_eq`, the project's vertical Gamma bound and its
+holomorphic Fourier–Laplace integral and strip identity theorem.
+
+Termwise integration uses Mathlib's power-tail integral and the project's leading-term
+integral comparison. Termwise differentiation applies the project's proved Ritt bound
+to each remainder; closed-sector Borel–Ritt existence restricts its open-sector theorem.
+
+The explicit oscillatory Mellin tail uses a rectangle contour rotated from the real
+ray to the vertical ray from one, followed by Mathlib's dominated differentiation and
+analytic uniqueness for the finite continued transforms.
+Explicit nonoscillatory continuations reuse the project's remainder-transform lemmas.
+Meromorphic uniqueness uses Mathlib's connected-domain theorem for meromorphic orders;
+the finite-continuation residue computations use Tau Ceti's residue additivity.
+The residue adapters combine the project's vertical shift and contour iteration with
+Tau Ceti's classical residue theorem for circles and its simple-pole residue formula.
+Inverse Laplace asymptotics use the project's proved inversion theorem, Mathlib's
+complex Gamma moment and rectangle Cauchy theorem. The general exponent-sequence inverse
+uses Mathlib's Japanese-bracket integrability theorem for every power order greater than
+one, then integration by parts. The exact small-parameter residue identity uses the
+project's proved low-tail shift and finite-subtraction Mellin continuation, together
+with Tau Ceti's residue theorem. The uniform Fourier convergence criterion follows one
+integration by parts and Mathlib's absolute-tail convergence theorem. The `sin(t)/t`
+counterexample uses exponential polynomial amplitudes for every derivative, and the
+divergence of the absolute cosine tail follows from the cosine-square identity and
+the logarithmic integral.
+
+The logarithmic ray transform uses the project's rectangle-based rotation theorem and
+general complex-exponent Watson theorem. The small-parameter Laplace proof combines
+Mathlib's Taylor remainder bound with the project's proved noninteger exponential-integral
+series and uniqueness of holomorphic Mellin regular parts.
+
 ## Special-function proof round (2026-11-06)
 
 The first two-psi-two transformation combines the project's proved bilateral Gaussian

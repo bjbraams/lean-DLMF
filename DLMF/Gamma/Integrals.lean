@@ -7,6 +7,7 @@ module -- shake: keep-all
 
 public import DLMF.Gamma.Integrals.BarnesAndRamanujan
 public import DLMF.Gamma.Integrals.FourierAndTrigamma
+public import DLMF.Gamma.Integrals.ExponentialMellin
 
 /-!
 # Mellin–Barnes and related integrals; sums (DLMF §§5.13, 5.16)

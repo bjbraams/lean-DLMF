@@ -139,4 +139,54 @@ theorem coeff_subst_inverse_coordinate {Φ T F G : 𝕜⟦X⟧}
   rw [hcomp, hGF] at H
   exact H.symm
 
+/-- The logarithmic Jacobian of `X/(1 + X C)` gives the exterior reversion coefficients. -/
+theorem natCast_mul_coeff_reversion {C : 𝕜⟦X⟧} {n : ℕ} (hn : 0 < n) :
+    (n : 𝕜) * coeff n
+      (C * (1 - X * derivative (1 + X * C) * (1 + X * C)⁻¹) *
+        (1 + X * C) ^ n) = coeff (n + 1) ((1 + X * C) ^ n) := by
+  let Φ : 𝕜⟦X⟧ := 1 + X * C
+  have hΦ : constantCoeff Φ ≠ 0 := by simp [Φ]
+  have hd : derivative Φ = C + X * derivative C := by simp [Φ, mul_comm]
+  have hcancel : Φ⁻¹ * Φ ^ n = Φ ^ (n - 1) := by
+    conv_lhs => rw [show n = 1 + (n - 1) by omega, pow_add, pow_one]
+    rw [← mul_assoc, PowerSeries.inv_mul_cancel _ hΦ, one_mul]
+  have hproduct : derivative (C * Φ ^ n) =
+      derivative C * Φ ^ n + (n : 𝕜⟦X⟧) * (C * Φ ^ (n - 1) * derivative Φ) := by
+    rw [derivative.leibniz, derivative_pow]
+    simp only [smul_eq_mul]
+    ring
+  have hder := congrArg (coeff (n - 1)) hproduct
+  rw [coeff_derivative, show n - 1 + 1 = n by omega,
+    map_add, coeff_natCast_mul] at hder
+  have hcast : ((n - 1 : ℕ) : 𝕜) + 1 = n := by exact_mod_cast (show n - 1 + 1 = n by omega)
+  rw [hcast] at hder
+  have hnext := congrArg (coeff n) (derivative_pow Φ (n + 1))
+  rw [coeff_derivative, mul_assoc, coeff_natCast_mul] at hnext
+  have hnext' : coeff (n + 1) (Φ ^ (n + 1)) = coeff n (Φ ^ n * derivative Φ) := by
+    apply mul_left_cancel₀ (Nat.cast_ne_zero.mpr (by omega : n + 1 ≠ 0) :
+      ((n + 1 : ℕ) : 𝕜) ≠ 0)
+    simpa only [Nat.cast_add, Nat.cast_one, Nat.add_sub_cancel, mul_comm] using hnext
+  have hcoeff : coeff (n + 1) (Φ ^ n) = coeff (n - 1) (derivative C * Φ ^ n) := by
+    have he : Φ ^ (n + 1) = Φ ^ n + X * (C * Φ ^ n) := by
+      rw [pow_succ]
+      change Φ ^ n * (1 + X * C) = _
+      ring
+    have hX : coeff n (X * (derivative C * Φ ^ n)) =
+        coeff (n - 1) (derivative C * Φ ^ n) := by
+      rw [show X = X ^ 1 by rw [pow_one], coeff_X_pow_mul', ite_eq_left (by omega)]
+    rw [he, map_add, coeff_succ_X_mul, hd, mul_add, map_add,
+      show Φ ^ n * (X * derivative C) = X * (derivative C * Φ ^ n) by ring,
+      hX, mul_comm (Φ ^ n) C] at hnext'
+    linear_combination hnext'
+  change (n : 𝕜) * coeff n (C * (1 - X * derivative Φ * Φ⁻¹) * Φ ^ n) = _
+  rw [show C * (1 - X * derivative Φ * Φ⁻¹) * Φ ^ n =
+    C * Φ ^ n - X * (C * derivative Φ * (Φ⁻¹ * Φ ^ n)) by ring,
+    hcancel, map_sub,
+    show X * (C * derivative Φ * Φ ^ (n - 1)) =
+      X ^ 1 * (C * derivative Φ * Φ ^ (n - 1)) by rw [pow_one],
+    coeff_X_pow_mul', ite_eq_left (by omega : 1 ≤ n)]
+  rw [hcoeff]
+  rw [show C * derivative Φ * Φ ^ (n - 1) = C * Φ ^ (n - 1) * derivative Φ by ring]
+  linear_combination hder
+
 end PowerSeries

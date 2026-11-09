@@ -23,7 +23,7 @@ prevents convergence to a nonzero limit.
 @[expose] public noncomputable section
 
 open Filter Complex
-open scoped Topology
+open scoped Topology ComplexConjugate
 
 /-- If a function and its product with the phase `exp(π i t)` both have limits at
 positive infinity, the first limit is zero. Even and odd integer subsequences
@@ -56,3 +56,30 @@ theorem Complex.eq_zero_of_tendsto_mul_exp_pi_I {f : ℝ → ℂ} {A B : ℂ}
       push_cast
       rw [ho, mul_neg_one])
   linear_combination (hBA' - hBA) / 2
+
+/-- A complex exponential of nonzero real frequency has no limit at positive infinity. -/
+theorem Complex.not_tendsto_exp_mul_I_atTop {κ : ℝ} (hκ : κ ≠ 0) (L : ℂ) :
+    ¬ Tendsto (fun t : ℝ => Complex.exp (Complex.I * κ * t)) atTop (𝓝 L) := by
+  have hpos (a : ℝ) (ha : 0 < a) (B : ℂ) :
+      ¬ Tendsto (fun t : ℝ => Complex.exp (Complex.I * a * t)) atTop (𝓝 B) := by
+    intro h
+    have ht := h.comp (tendsto_id.const_mul_atTop (div_pos Real.pi_pos ha))
+    have hphase : Tendsto (fun t : ℝ => (1 : ℂ) * exp (Real.pi * I * t)) atTop (𝓝 B) := by
+      refine ht.congr fun t => ?_
+      dsimp only [Function.comp_def, id_eq]
+      rw [one_mul]
+      congr 1
+      push_cast
+      field_simp [ha.ne']
+    exact one_ne_zero (Complex.eq_zero_of_tendsto_mul_exp_pi_I tendsto_const_nhds hphase)
+  rcases lt_or_gt_of_ne hκ with hneg | hposκ
+  · intro h
+    have ht := Complex.continuous_conj.continuousAt.tendsto.comp h
+    apply hpos (-κ) (neg_pos.mpr hneg) (conj L)
+    refine ht.congr fun t => ?_
+    dsimp only [Function.comp_def]
+    rw [← exp_conj]
+    congr 1
+    simp only [map_mul, conj_I, conj_ofReal, ofReal_neg]
+    ring
+  · exact hpos κ hposκ L

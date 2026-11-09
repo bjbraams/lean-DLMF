@@ -45,6 +45,14 @@ def mellinTruncLow (f : ℝ → ℂ) : ℝ → ℂ :=
 def mellinTruncHigh (f : ℝ → ℂ) : ℝ → ℂ :=
   f - mellinTruncLow f
 
+/-- `f₂` is the restriction of `f` to `(1, ∞)`. -/
+lemma mellinTruncHigh_eq_indicator (g : ℝ → ℂ) :
+    mellinTruncHigh g = (Ioi (1 : ℝ)).indicator g := by
+  funext t
+  by_cases ht : t ≤ 1
+  · simp [mellinTruncHigh, mellinTruncLow, ht]
+  · simp [mellinTruncHigh, mellinTruncLow, ht, not_le.1 ht]
+
 /-- The factor `A(z) = 2^{z-1} Γ(ν + z/2) / (Γ²(1 - z/2) Γ(1 + ν - z/2) Γ(z))` in DLMF 2.5.10,
 `𝓜h(z) = A(z) π/sin(πz)` for `h(t) = J_ν²(t)`; reciprocal Gamma functions are entire. -/
 def besselSqMellinKernel (ν : ℝ) (z : ℂ) : ℂ :=

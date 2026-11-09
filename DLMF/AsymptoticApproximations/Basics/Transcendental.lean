@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.AsymptoticApproximations.Basics.Basic
+public import DLMFMathlib.Analysis.Asymptotics.AsymptoticInversion
 public import Mathlib.Analysis.SpecialFunctions.Log.Deriv
 public import Mathlib.Analysis.Asymptotics.SpecificAsymptotics
 
@@ -223,6 +224,74 @@ theorem sq_sub_log_root_second {t : ℝ → ℝ}
   field_simp
   nlinarith [hy.2]
 
+/-- DLMF's reversion coefficients are the negatives of the McMahon coefficients. -/
+theorem lagrangeReversionCoeff_eq_neg_coeff_mcMahonSeries {𝕜 : Type*}
+    [NormedField 𝕜] [CharZero 𝕜] (fc : ℕ → 𝕜) (n : ℕ) :
+    lagrangeReversionCoeff fc n = -PowerSeries.coeff n (mcMahonSeries (PowerSeries.mk fc)) := by
+  cases n with
+  | zero =>
+    simpa [lagrangeReversionCoeff] using
+      congrArg Neg.neg (mcMahonSeries_coeff_le_two (PowerSeries.mk fc)).1.symm
+  | succ n =>
+    have h := natCast_mul_coeff_mcMahonSeries (PowerSeries.mk fc) (Nat.succ_pos n)
+    dsimp only [lagrangeReversionCoeff]
+    have hn : ((n + 1 : ℕ) : 𝕜) ≠ 0 := Nat.cast_ne_zero.mpr (by omega)
+    apply mul_left_cancel₀ hn
+    rw [← mul_assoc, mul_inv_cancel₀ hn, one_mul, mul_neg, h, neg_neg]
+
+/-- The first three coefficients in DLMF's Lagrange reversion formula. -/
+theorem lagrangeReversionCoeff_le_two {𝕜 : Type*} [NormedField 𝕜] [CharZero 𝕜]
+    (fc : ℕ → 𝕜) :
+    lagrangeReversionCoeff fc 0 = fc 0 ∧ lagrangeReversionCoeff fc 1 = fc 1 ∧
+      lagrangeReversionCoeff fc 2 = fc 2 + fc 0 * fc 1 := by
+  have h := mcMahonSeries_coeff_le_two (PowerSeries.mk fc)
+  simp only [PowerSeries.coeff_mk] at h
+  simp only [lagrangeReversionCoeff_eq_neg_coeff_mcMahonSeries, h.1, h.2.1, h.2.2, neg_neg]
+  exact ⟨True.intro, True.intro, True.intro⟩
+
+/-- Affine translation has no positive-degree reversion coefficients: its inverse is
+exactly `y ↦ y-a`. -/
+theorem lagrangeReversionCoeff_affine {𝕜 : Type*} [NormedField 𝕜] [CharZero 𝕜] (a : 𝕜) :
+    lagrangeReversionCoeff (fun n => if n = 0 then a else 0) =
+      (fun n => if n = 0 then a else 0) := by
+  have hP : PowerSeries.mk (fun n : ℕ => if n = 0 then a else 0) = PowerSeries.C a := by
+    ext n
+    simp [PowerSeries.coeff_C]
+  have hM : mcMahonSeries (PowerSeries.C a) = -(PowerSeries.C a) := by
+    simpa only [PowerSeries.subst_C, ← PowerSeries.C_apply] using!
+      (mcMahonSeries_spec (PowerSeries.C a)).2
+  funext n
+  rw [lagrangeReversionCoeff_eq_neg_coeff_mcMahonSeries, hP, hM]
+  simp [PowerSeries.coeff_C]
+
+/-- Lagrange reversion on sets in a normed field, including complex inverse branches.
+The inverse branch is selected by `x(y) ∼ y` and eventual membership in the original set. -/
+theorem lagrange_reversion_of_isEquivalent {𝕜 : Type*} [NormedField 𝕜] [CharZero 𝕜]
+    {S T : Set 𝕜} {f x : 𝕜 → 𝕜} {fc : ℕ → 𝕜}
+    (hf : HasPoincareExpansion S fc fun z => f z - z)
+    (hx : x ~[Bornology.cobounded 𝕜 ⊓ 𝓟 T] id)
+    (hxy : ∀ᶠ y in Bornology.cobounded 𝕜 ⊓ 𝓟 T, x y ∈ S ∧ f (x y) = y) :
+    HasPoincareExpansion T (fun s => -lagrangeReversionCoeff fc s) (fun y => x y - y) := by
+  let l := Bornology.cobounded 𝕜 ⊓ 𝓟 T
+  have hnorm : Tendsto (fun y : 𝕜 => ‖y‖) l atTop :=
+    tendsto_norm_cobounded_atTop.mono_left inf_le_left
+  obtain ⟨C, hC, hb⟩ := hx.symm.isBigO.exists_pos
+  have hxc : Tendsto x l (Bornology.cobounded 𝕜) := by
+    apply tendsto_norm_atTop_iff_cobounded.mp
+    refine tendsto_atTop.mpr fun R => ?_
+    filter_upwards [hb.bound, hnorm.eventually (eventually_ge_atTop (C * R))] with y hy hyR
+    exact (mul_le_mul_iff_right₀ hC).mp (hyR.trans hy)
+  have hxs : Tendsto x l (Bornology.cobounded 𝕜 ⊓ 𝓟 S) :=
+    tendsto_inf.mpr ⟨hxc, tendsto_principal.mpr (hxy.mono fun _ h => h.1)⟩
+  have hi := HasAsymptoticPowerSeries.mcMahon_inversion
+    (ξ := id) (C := PowerSeries.mk fc)
+    (tendsto_inv₀_cobounded.mono_left inf_le_left)
+    ((Bornology.eventually_ne_cobounded (0 : 𝕜)).filter_mono inf_le_left)
+    (by simpa [HasAsymptoticPowerSeries, HasPoincareExpansion] using hf) hxs
+    (T := id) (hxy.mono fun _ h => by simpa using h.2)
+  exact hi.congr_coeff (funext fun n => by
+    simp only [lagrangeReversionCoeff_eq_neg_coeff_mcMahonSeries, neg_neg])
+
 /-- DLMF 2.2.7–2.2.8 (Lagrange's formula for the reversion of series): if
 `f(x) ∼ x + f₀ + f₁x⁻¹ + f₂x⁻² + ⋯` as `x → +∞` (2.2.7) and `x(y) → ∞` solves `f(x(y)) = y`
 for large `y`, then `x(y) ∼ y - F₀ - F₁y⁻¹ - F₂y⁻² - ⋯` as `y → +∞`, where `F₀ = f₀` and `sFₛ` is
@@ -233,6 +302,24 @@ theorem lagrange_reversion {f : ℝ → ℝ} {fc : ℕ → ℝ}
     (hf : HasPoincareExpansion (Ioi 0) fc fun x => f x - x) {x : ℝ → ℝ}
     (hx : Tendsto x atTop atTop) (hxy : ∀ᶠ y in atTop, f (x y) = y) :
     HasPoincareExpansion (Ioi 0) (fun s => -lagrangeReversionCoeff fc s) fun y => x y - y := by
-  sorry
+  have hl : Bornology.cobounded ℝ ⊓ 𝓟 (Ioi (0 : ℝ)) = atTop := by
+    apply le_antisymm
+    · change Tendsto id (Bornology.cobounded ℝ ⊓ 𝓟 (Ioi (0 : ℝ))) atTop
+      refine tendsto_atTop.mpr fun b => ?_
+      have hnorm := (tendsto_norm_cobounded_atTop.eventually (eventually_ge_atTop b)).filter_mono
+        (show Bornology.cobounded ℝ ⊓ 𝓟 (Ioi (0 : ℝ)) ≤ Bornology.cobounded ℝ from inf_le_left)
+      have hpos : ∀ᶠ y in Bornology.cobounded ℝ ⊓ 𝓟 (Ioi (0 : ℝ)), 0 < y :=
+        eventually_inf_principal.mpr (Eventually.of_forall fun y hy => hy)
+      filter_upwards [hnorm, hpos] with y hy hypos
+      simpa only [id_eq, Real.norm_eq_abs, abs_of_pos hypos] using hy
+    · exact le_inf IsOrderBornology.atTop_le_cobounded
+        (le_principal_iff.mpr (Ioi_mem_atTop 0))
+  rw [HasPoincareExpansion, hl] at hf ⊢
+  have hseries : HasAsymptoticPowerSeries atTop (fun y : ℝ => y⁻¹)
+      (PowerSeries.mk fc) (fun y => f y - y) := by simpa [HasAsymptoticPowerSeries] using hf
+  have hinv := hasAsymptoticPowerSeries_mcMahon_atTop hseries hx
+    (T := id) (hxy.mono fun y hy => by simpa using hy)
+  exact hinv.congr_coeff (funext fun n => by
+    simp only [lagrangeReversionCoeff_eq_neg_coeff_mcMahonSeries, neg_neg])
 
 end DLMF.AsymptoticApproximations

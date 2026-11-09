@@ -168,6 +168,31 @@ theorem unique (hφ : IsAsymptoticScale l φ) (hne : ∀ n, ∃ᶠ x in l, φ n 
 
 end HasAsymptoticExpansion
 
+/-- Powers of a scalar function tending to zero form an asymptotic scale. The statement
+also applies on punctured and restricted neighbourhoods. -/
+theorem isAsymptoticScale_pow {w : α → 𝕜} (hw : Tendsto w l (𝓝 0)) :
+    IsAsymptoticScale l (fun n x => w x ^ n) := by
+  intro n
+  have h := ((isLittleO_one_iff 𝕜).mpr hw).mul_isBigO
+    (isBigO_refl (fun x => w x ^ n) l)
+  simpa only [pow_succ, one_mul, mul_one, mul_comm] using h
+
+/-- Coefficients in powers of `z-c` are unique on a punctured relative neighbourhood
+when `c` is an accumulation point of the set. No value of the function at `c` is prescribed. -/
+theorem HasAsymptoticExpansion.unique_pow_sub {X : Set 𝕜} {c : 𝕜} {a b : ℕ → E}
+    {f : 𝕜 → E} (hX : (𝓝[X \ {c}] c).NeBot)
+    (ha : HasAsymptoticExpansion (𝓝[X \ {c}] c) (fun n z => (z - c) ^ n) a f)
+    (hb : HasAsymptoticExpansion (𝓝[X \ {c}] c) (fun n z => (z - c) ^ n) b f) : a = b := by
+  have hw : Tendsto (fun z : 𝕜 => z - c) (𝓝[X \ {c}] c) (𝓝 0) := by
+    have ht : Tendsto (fun z : 𝕜 => z - c) (𝓝 c) (𝓝 (c - c)) :=
+      (continuousAt_id.sub continuousAt_const).tendsto
+    simpa only [sub_self] using ht.mono_left (nhdsWithin_le_nhds (s := X \ {c}))
+  have hne : ∀ᶠ z : 𝕜 in 𝓝[X \ {c}] c, z ≠ c := by
+    filter_upwards [self_mem_nhdsWithin] with z hz
+    simpa using hz.2
+  exact HasAsymptoticExpansion.unique (isAsymptoticScale_pow hw)
+    (fun n => (hne.mono fun z hz => pow_ne_zero n (sub_ne_zero.mpr hz)).frequently) ha hb
+
 /-- The scale `x ↦ x^{-(n+μ)}` is an asymptotic scale at `+∞`. -/
 theorem isAsymptoticScale_rpow_neg (μ : ℝ) :
     IsAsymptoticScale atTop (fun (n : ℕ) (x : ℝ) => x ^ (-((n : ℝ) + μ))) := by

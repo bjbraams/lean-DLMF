@@ -22,8 +22,11 @@ public import DLMFMathlib.Analysis.Integral.LaplaceSine
 public import DLMFMathlib.Analysis.Integral.ImproperDerivatives
 public import DLMFMathlib.Analysis.Asymptotics.AsymptoticExpansion
 public import DLMFMathlib.Analysis.Asymptotics.AsymptoticInversion
+public import DLMFMathlib.Analysis.Asymptotics.ComplexPowerSeries
+public import DLMFMathlib.Analysis.Asymptotics.ElementaryPowerSeries
 public import DLMFMathlib.Analysis.Asymptotics.ExponentialGrowth
 public import DLMFMathlib.Analysis.Asymptotics.IntegralComparison
+public import DLMFMathlib.Analysis.Asymptotics.IntegralPowerSeries
 public import DLMFMathlib.Analysis.Asymptotics.LaplaceSaddle
 public import DLMFMathlib.Analysis.Asymptotics.PowerSums
 public import DLMFMathlib.Analysis.Asymptotics.StationaryPhase
@@ -31,6 +34,8 @@ public import DLMFMathlib.Analysis.Asymptotics.StieltjesRemainder
 public import DLMFMathlib.Analysis.Asymptotics.Watson
 public import DLMFMathlib.Analysis.Asymptotics.WatsonKernel
 public import DLMFMathlib.Analysis.Asymptotics.WatsonLog
+public import DLMFMathlib.Analysis.Asymptotics.WatsonComplexLog
+public import DLMFMathlib.Analysis.Asymptotics.WatsonComplexKernel
 public import DLMFMathlib.Analysis.Asymptotics.WatsonRotated
 public import DLMFMathlib.Analysis.BooleSummation
 public import DLMFMathlib.Analysis.Calculus.DifferentialOperators
@@ -56,6 +61,13 @@ public import DLMFMathlib.Analysis.Complex.ParameterContinuity
 public import DLMFMathlib.Analysis.Complex.RoucheFilledHull
 public import DLMFMathlib.Analysis.Complex.LaurentAnnulus
 public import DLMFMathlib.Analysis.Complex.VerticalLineShift
+public import DLMFMathlib.Analysis.Complex.VerticalResidues
+public import DLMFMathlib.Analysis.Complex.VerticalResidueExamples
+public import DLMFMathlib.Analysis.Complex.MeromorphicUniqueness
+public import DLMFMathlib.Analysis.Complex.LaplaceInversion
+public import DLMFMathlib.Analysis.Integral.RayLaplace
+public import DLMFMathlib.Analysis.Integral.LaplaceMoments
+public import DLMFMathlib.Analysis.Integral.LaplaceConvergence
 public import DLMFMathlib.Analysis.Complex.ParameterLimits
 public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 public import DLMFMathlib.Analysis.Complex.PowerSeriesOperations
@@ -76,6 +88,9 @@ public import DLMFMathlib.Analysis.Fourier.HorizontalStrip
 public import DLMFMathlib.Analysis.Fourier.HyperbolicSecant
 public import DLMFMathlib.Analysis.Fourier.AddCircle
 public import DLMFMathlib.Analysis.Fourier.DirichletKernel
+public import DLMFMathlib.Analysis.Fourier.ImproperConvergence
+public import DLMFMathlib.Analysis.Fourier.OscillatoryInversePowers
+public import DLMFMathlib.Analysis.Fourier.TrigonometricTails
 public import DLMFMathlib.Analysis.Fourier.DirichletJordan
 public import DLMFMathlib.Analysis.Fourier.PoissonKernel
 public import DLMFMathlib.Analysis.Fourier.GaussianSeries
@@ -98,6 +113,8 @@ public import DLMFMathlib.Analysis.Integral.SquareRootPairRegularization
 public import DLMFMathlib.Analysis.Integral.QuadraticSquareRootSubstitution
 public import DLMFMathlib.Analysis.Integral.RepeatedIntegrationByParts
 public import DLMFMathlib.Analysis.MellinConvolution
+public import DLMFMathlib.Analysis.MellinOscillation
+public import DLMFMathlib.Analysis.MellinBounds
 public import DLMFMathlib.Analysis.MellinParseval
 public import DLMFMathlib.Analysis.ODE.LiouvilleGreen
 public import DLMFMathlib.Analysis.ODE.LiouvilleGreenComparison
@@ -219,6 +236,28 @@ public import DLMFMathlib.Analysis.Asymptotics.RamifiedDensityWeights
 
 General results used by the special-function library but not specific to it, written in
 the namespaces of the Mathlib APIs they extend. These modules do not import `DLMF`.
+
+* `DLMFMathlib.Analysis.MellinBounds`: uniform bounds for high-tail Mellin transforms.
+* `DLMFMathlib.Analysis.MellinOscillation`: entire continuation of oscillatory Mellin tails.
+* `DLMFMathlib.Analysis.Fourier.TrigonometricTails`: trigonometric conditional convergence.
+* `DLMFMathlib.Analysis.Fourier.OscillatoryInversePowers`: conditional Fourier power tails.
+* `DLMFMathlib.Analysis.Fourier.ImproperConvergence`: uniform improper Fourier convergence.
+* `DLMFMathlib.Analysis.Complex.MeromorphicUniqueness`: meromorphic continuation uniqueness.
+* `DLMFMathlib.Analysis.Complex.VerticalResidueExamples`: a rational vertical contour example.
+* `DLMFMathlib.Analysis.Complex.VerticalResidues`: vertical shifts with Tau Ceti residues.
+* `DLMFMathlib.Analysis.Complex.LaplaceInversion`: inverse Laplace contour shifts and bounds.
+* `DLMFMathlib.Analysis.Integral.RayLaplace`: rotated Laplace transforms on logarithmic strips.
+* `DLMFMathlib.Analysis.Integral.LaplaceConvergence`: absolute convergence and boundary continuity.
+* `DLMFMathlib.Analysis.Integral.LaplaceMoments`: moment expansions at zero of Laplace integrals.
+* `DLMFMathlib.Analysis.Asymptotics.ElementaryPowerSeries`: elementary asymptotic series.
+* `DLMFMathlib.Analysis.Asymptotics.ComplexPowerSeries`: powers, logarithms and branches of
+  asymptotic power series with complex coefficients.
+* `DLMFMathlib.Analysis.Asymptotics.WatsonComplexLog`: logarithmic Gamma moments for complex
+  exponents in Watson's lemma.
+* `DLMFMathlib.Analysis.Asymptotics.WatsonComplexKernel`: general-kernel Watson expansions with
+  complex exponent sequences and Mellin-moment coefficients.
+* `DLMFMathlib.Analysis.Asymptotics.IntegralPowerSeries`: termwise tail integration of
+  asymptotic inverse power series.
 
 * `DLMFMathlib.Analysis.Fourier.HyperbolicSecant`: Fourier transform of the hyperbolic secant.
 * `DLMFMathlib.Analysis.SpecialFunctions.Gamma.BetaHalfLine`: the complex second beta integral.

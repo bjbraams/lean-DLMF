@@ -1,5 +1,127 @@
 # Mathematical review of the lean-DLMF project (formerly lean-AAR)
 
+## Asymptotic roadmap preparation, 2026-11-09
+
+The comparison is against `TauCetiProject/TauCetiRoadmap` revision
+`3987f939f1e4324a8b7ba1d7b24a0681863add7a`, specifically layers 1–4 and 8 of
+`TauCetiRoadmap/AsymptoticExpansions/README.md`. The selected mathematical scope is now
+proved locally, with the two roadmap corrections described below.
+The subsection inventory is `reports/AsymptoticRoadmapCoverage.tsv`.
+
+The existing admission `lagrange_reversion` (2.2.7–2.2.8) is replaced by a proof with
+its original statement. Formal Bürmann extraction now identifies every positive-degree
+McMahon coefficient with the explicit Lagrange coefficient. The additional
+`lagrange_reversion_of_isEquivalent` covers inverse branches on sets in a normed field,
+including complex branches, with the stated eventual inverse equation and `x(y) ∼ y`.
+The first three Lagrange coefficients, affine translation and the rational example
+`x+a+b/x` are checked.
+
+New proved modules supply the principal complex power and logarithm operations on
+asymptotic series (`ComplexPowerSeries`), the logarithmic Watson lemma for arbitrary
+complex exponent sequences (`WatsonComplexLog`), the general-kernel version for complex
+exponent sequences (`WatsonComplexKernel`), Gamma bounds uniform on pole-separated strips
+and their weighted vertical integrability consequences (`Gamma/VerticalStrips`), and the
+complex Cahen–Mellin inversion formula (`Gamma/Integrals/ExponentialMellin`). The logarithmic
+Watson theorem derives absolute convergence with the logarithmic factor from the original
+Laplace-convergence and zero-endpoint hypotheses; it does not require an extra convergence
+assumption. Existing tagged statements and definition bodies are preserved.
+
+Termwise tail integration is proved in `IntegralPowerSeries`, for a continuous complex-valued
+function with `a₀ = a₁ = 0`; it uses the original positive endpoint of the continuity domain.
+`Basics/Calculus` applies Ritt's theorem to each finite remainder to differentiate the full
+expansion in closed subsectors. `Basics/Existence` supplies the closed-sector Borel–Ritt
+statement and its positive-axis specialization, by restriction from a larger open sector.
+
+The oscillatory Mellin continuation admission is also replaced by a proof. Its canonical
+model is the explicit vertical-ray integral from one. It is entire, agrees with the real
+improper integral for `Re w < 1`, obeys conjugation under frequency reversal, and has the
+value `i exp(iκ)/κ` at `w = 1`. At that boundary exponent the real improper integral has
+no limit. The finite continued transforms are holomorphic and independent of truncation;
+the entire-tail existence proof does not assume monotonicity of the exponents. Explicit
+nonoscillatory continuations are proved on finite enlarged domains, including bounded
+exponent sequences; their independence, holomorphy, residues and agreement with the original
+transform are checked. Unbounded exponent sequences glue them into a meromorphic function
+on the appropriate half-plane. The exponential and reciprocal-linear examples agree with
+Gamma and `π/sin(πz)`, respectively, away from their poles. The oscillatory single-term,
+two-term and quadratic-phase examples check the Jacobian and exponent normalization.
+Adding the low tail gives the full oscillatory continuation on its convergence half-plane.
+`Mellin/ContourAsymptotics` combines the contour shift and little-o remainder for
+Handelsman–Lew. `VerticalResidues` expresses finite shifts and infinite residue sums using
+Tau Ceti residues.
+
+The inverse Laplace admission is replaced by a proof. The stronger primed theorem
+dispenses with the differentiated expansion for arithmetic positive exponents; the
+original statement is retained as a corollary. The proof subtracts sufficiently many
+powers to obtain an absolutely integrable remainder, shifts its inversion line, and
+uses the line `Re z = 1/t` for the small-argument bound. `LaplaceInversion` supplies
+the contour and remainder estimates, and the power-kernel inversion is proved for
+complex exponents with positive real part. `Integrals/InverseLaplace` proves the general
+complex exponent-sequence form from expansions of `Q` and `Q′`, without assuming that the
+real parts tend to infinity. The underlying inverse remainder estimate works for decay
+order greater than one; integration by parts handles positive orders. `LaplaceConvergence`
+proves boundary continuity on the closed half-plane and the equivalent tail-convergence
+formulation of the Watson hypotheses.
+
+The small-parameter Laplace admission is replaced by a proof using the convergent
+exponential-integral power series for each subtracted tail and the Taylor moment expansion
+for the integrable remainder. The regular-part uniqueness theorem identifies the moment
+coefficients with the prescribed continued Mellin transform. The real-order cutoff form
+is also proved. This proof does not use the admitted exact residue identity.
+
+The logarithmic ray Laplace modules prove holomorphy, overlap agreement, existence of a
+common holomorphic continuation, eventual coverage of closed substrips, complex-exponent
+Watson expansions, and the exact complex-power model. Gluing uses uniform power and
+exponential bounds on closed angular intervals. Local bounds at the two radial endpoints
+are extended through the compact middle, so the split radius one is not an extra growth
+assumption. The negative-axis values `±i√(π/R)` at `log R ∓ iπ` are checked for every
+`R > 0`, using the rays `±3π/4`.
+
+`Mellin/LaplaceResidueExpansion` proves the exact identity 2.5.43 under the actual
+nonoscillatory asymptotic hypotheses, with Tau Ceti residues. Finite-subtraction regular
+parts give a meromorphic continuation uniformly bounded at large imaginary height. Gamma
+strip decay supplies both contour shifts and absolute convergence on the inversion lines.
+The final interface chooses its intermediate line from the finite pole data. The exact
+identities and the general inverse Laplace theorem pass the standard-axiom audit. A further
+interface derives holomorphy directly from the stated exponent and Gamma pole locations.
+
+The older, wider `laplace_expansion_residues` statement remains admitted and unchanged:
+it does not assume the asymptotic expansion or finite-subtraction regular parts used in
+DLMF. The new proof of the DLMF case is independent of that admission. The Bessel example
+admissions are outside the roadmap's selected general-method scope.
+
+The Fourier convergence criterion and its converse counterexample are proved: all
+derivatives of `sin(t)/t` have uniformly convergent improper Fourier integrals for
+frequencies at least two, but its first derivative is not absolutely integrable. The
+reciprocal-linear factorial Watson expansion, the complex Gamma and inverse-power
+normalizations, the punctured finite-point uniqueness API, the rational contour example,
+and the elementary scale and formal-series checks are also proved. The half-line Gamma
+example gives the explicit bound with `K=0` and `C=√(2π)`.
+
+The roadmap's Layer 3 example has a sign error: its displayed definition
+`q_s = d^(2s-1)/dt^(2s-1) (1+t²)⁻¹` omits `(-1)^(s+1)`. The local definition
+`cosRationalCoeff` already includes this factor and agrees with DLMF 2.11.3. At `t = 2`,
+the signed second coefficient is `144/625` and the third derivative is `-144/625`.
+`scripts/CheckAsymptoticRoadmap.lean` checks this discrepancy without changing the correct
+local definition. No change to the external roadmap is made here.
+
+There is a second roadmap correction for 8.5: its phrase “every `δ ∈ (0,1)`” must retain
+a pole-free final line, and if the residue sum uses `Re z < l` as in DLMF, `δ` must be small
+enough not to omit a pole between `l-δ` and `l`. DLMF explicitly says “an arbitrary small
+positive constant.” For a high tail `h(t)=t^(-3/2)` on `t>1` and zero below, the continued
+transform is `1/(3/2-z)`. Choosing `l=2`, `δ=1/2` puts its pole on the integration line.
+The local proved identity requires a pole-free line and sums exactly the poles crossed.
+Source: <https://dlmf.nist.gov/2.5.iii>.
+
+Validation completed with the ordinary full build, strict individual checks of all 45
+changed library files, and `scripts/CheckAsymptoticRoadmap.lean`. Its 375-declaration axiom
+inventory contains only `propext`, `Classical.choice` and `Quot.sound`, with no `sorryAx`.
+The import survey against `scripts/import_baseline.json` reports no new two-way area pairs,
+foundational violations, forbidden Basic closure modules, missing imports or file cycles.
+All 1,592 Lean files satisfy the 1,500-line limit; changed Lean lines satisfy the 100-column
+limit, and `git diff --check` passes. The affected-source admission scan finds only the
+older, wider residue identity described above. No toolchain, dependency pin or build
+configuration is changed, and nothing is submitted to the external roadmap.
+
 **Approved Chapter 17 statement repairs, 2026-11-05:** the
 [statement correction](#approved-chapter-17-statement-repairs-2026-11-05) replaces Fine's
 first-series denominator and separates the cancelled q-Dixon form from its literal quotient.

@@ -10,6 +10,7 @@ public import Mathlib.RingTheory.PowerSeries.Substitution
 public import Mathlib.RingTheory.PowerSeries.Inverse
 public import Mathlib.Topology.Algebra.Polynomial
 public import Mathlib.Analysis.Analytic.Basic
+public import DLMFMathlib.RingTheory.PowerSeries.LagrangeBurmann
 
 /-!
 # Asymptotic power series: composition and inversion
@@ -500,6 +501,26 @@ theorem mcMahonSeries_spec (C : 𝕜⟦X⟧) :
     rw [mul_neg]; linear_combination this
   rw [← hQX]
   exact mul_left_cancel₀ X_ne_zero this
+
+/-- The exterior Lagrange formula for the positive-degree McMahon coefficients. -/
+theorem natCast_mul_coeff_mcMahonSeries [CharZero 𝕜] (C : 𝕜⟦X⟧) {n : ℕ} (hn : 0 < n) :
+    (n : 𝕜) * coeff n (mcMahonSeries C) = -coeff (n + 1) ((1 + X * C) ^ n) := by
+  let Φ : 𝕜⟦X⟧ := 1 + X * C
+  let P := AsymptoticInversion.mcMahonPhase C
+  let hu : IsUnit (coeff 1 P) := by
+    rw [AsymptoticInversion.coeff_one_mcMahonPhase]; exact isUnit_one
+  let Q := P.substInvOfIsUnit hu
+  have hΦ : constantCoeff Φ ≠ 0 := by simp [Φ]
+  have hQ : constantCoeff Q = 0 := constantCoeff_substInvOfIsUnit _ _
+  have hQP : Q.subst (X * Φ⁻¹) = X :=
+    subst_substInvOfIsUnit_left _ (AsymptoticInversion.constantCoeff_mcMahonPhase C) hu
+  have hD : mcMahonSeries C = -(C.subst Q) := by
+    simpa only [Q, P, (mcMahonSeries_spec C).1] using (mcMahonSeries_spec C).2
+  have hcoeff := coeff_subst_inverse_coordinate (G := C)
+    (F := C * (1 - X * derivative Φ * Φ⁻¹)) hΦ hQ hQP rfl n
+  rw [hD, map_neg, hcoeff, mul_neg]
+  congr 1
+  exact natCast_mul_coeff_reversion hn
 
 /-- The first three McMahon coefficients: `d₀ = -c₀`, `d₁ = -c₁`, `d₂ = -(c₂ + c₀ c₁)`. -/
 theorem mcMahonSeries_coeff_le_two (G : 𝕜⟦X⟧) :

@@ -13,6 +13,7 @@ public import DLMFMathlib.Analysis.Fourier.DirichletKernel
 public import DLMFMathlib.Analysis.Asymptotics.WatsonLog
 public import DLMFMathlib.Analysis.Asymptotics.WatsonSector
 public import DLMFMathlib.Analysis.Asymptotics.WatsonRotated
+public import DLMFMathlib.Analysis.Complex.LaplaceInversion
 public import Mathlib.Analysis.MellinTransform
 
 /-!
@@ -479,6 +480,200 @@ theorem laplace_inversion {q : ℝ → ℂ} {c σ t : ℝ} (hq : DifferentiableO
         simp only [hGdef, Set.indicator]
         split_ifs <;> simp
 
+/-- The inverse Laplace integral of `Γ(α) z^(-α)` is `t^(α-1)` for `Re α > 0`, on every
+positive inversion line. The integral is interpreted as a limit of symmetric truncations. -/
+theorem tendsto_bromwichPartialIntegral_Gamma_cpow {α : ℂ} (hα : 0 < α.re) {σ t : ℝ}
+    (hσ : 0 < σ) (ht : 0 < t) :
+    Tendsto (bromwichPartialIntegral (fun z => Gamma α * z ^ (-α)) σ t) atTop
+      (𝓝 ((t : ℂ) ^ (α - 1))) := by
+  have hq : DifferentiableOn ℝ (fun u : ℝ => (u : ℂ) ^ (α - 1)) (Ioi 0) := by
+    intro u hu
+    exact (((hasDerivAt_id (u : ℂ)).cpow_const (c := α - 1)
+      (ofReal_mem_slitPlane.mpr hu)).comp_ofReal).differentiableAt.differentiableWithinAt
+  have h := laplace_inversion hq (integrableOn_exp_neg_mul_smul_cpow_sub_one hα hσ)
+    le_rfl ht
+  apply h.congr
+  intro η
+  unfold bromwichPartialIntegral
+  congr 1
+  apply intervalIntegral.integral_congr
+  intro y _
+  dsimp only
+  congr 1
+  unfold DLMF.AlgebraicAnalytic.laplaceTransform
+  dsimp only
+  calc (∫ u in Ioi (0 : ℝ), exp (-(σ + y * I) * u) * (u : ℂ) ^ (α - 1)) =
+      ∫ u in Ioi (0 : ℝ), (u : ℂ) ^ (α - 1) * exp (-((σ + y * I) * u)) := by
+        apply setIntegral_congr_fun measurableSet_Ioi
+        intro u _
+        dsimp only
+        rw [neg_mul]
+        ring
+    _ = _ := integral_cpow_mul_cexp_neg_mul_Ioi hα (by simpa using hσ)
+
+/-- Stronger than DLMF 2.4.4–2.4.5, which assumes a differentiated expansion: for
+arithmetic positive exponents, holomorphy and the expansion of `Q` alone give its inverse
+Laplace expansion. The inverse is independent of the positive inversion line. -/
+@[dlmf 2.4.E4 "stronger than DLMF: no differentiated expansion is required",
+  dlmf 2.4.E5 "stronger than DLMF: no differentiated expansion is required"]
+theorem inverseLaplace_of_hasAsymptoticExpansion' {Q : ℂ → ℂ} {a : ℕ → ℂ} {lam mu c : ℝ}
+    (hc : 0 < c) (hlam : 0 < lam) (hmu : 0 < mu)
+    (hQ : DifferentiableOn ℂ Q {z | c ≤ z.re})
+    (hexp : HasAsymptoticExpansion (comap (fun z : ℂ => ‖z‖) atTop ⊓ 𝓟 {z | c ≤ z.re})
+      (fun (s : ℕ) (z : ℂ) => z ^ (-(((s : ℂ) + lam) / mu)))
+      (fun s => Complex.Gamma (((s : ℂ) + lam) / mu) * a s) Q) :
+    ∃ q : ℝ → ℂ, (∀ σ, c ≤ σ → ∀ t, 0 < t →
+        Tendsto (bromwichPartialIntegral Q σ t) atTop (𝓝 (q t))) ∧
+      HasAsymptoticExpansion (𝓝[>] 0)
+        (fun (s : ℕ) (t : ℝ) => (t : ℂ) ^ ((((s : ℝ) + lam - mu) / mu : ℝ) : ℂ)) a q := by
+  classical
+  let α : ℕ → ℝ := fun s => ((s : ℝ) + lam) / mu
+  have hαpos (s : ℕ) : 0 < α s := div_pos (by positivity) hmu
+  have hαmono : Monotone α := by
+    intro s u hsu
+    have hsu' : (s : ℝ) ≤ u := by exact_mod_cast hsu
+    exact div_le_div_of_nonneg_right (by linarith) hmu.le
+  have hαcast (s : ℕ) : (α s : ℂ) = ((s : ℂ) + lam) / mu := by
+    simp only [α, ofReal_div, ofReal_add, ofReal_natCast]
+  let P : ℕ → ℂ → ℂ := fun N z =>
+    ∑ s ∈ range N, z ^ (-(α s : ℂ)) * (Gamma (α s) * a s)
+  let R : ℕ → ℂ → ℂ := fun N z => Q z - P N z
+  have hPc (N : ℕ) : DifferentiableOn ℂ (P N) {z | c ≤ z.re} := by
+    intro z hz
+    apply DifferentiableWithinAt.fun_sum
+    intro s _
+    exact (((hasDerivAt_id z).cpow_const (c := -(α s : ℂ))
+      (Or.inl (hc.trans_le hz))).differentiableAt.mul_const _).differentiableWithinAt
+  have hRd (N : ℕ) : DifferentiableOn ℂ (R N) {z | c ≤ z.re} := hQ.sub (hPc N)
+  have hRi (N : ℕ) (hN : 2 ≤ α N) : ∃ qN : ℝ → ℂ,
+      (∀ σ, c ≤ σ → ∀ t, 0 < t →
+        Tendsto (bromwichPartialIntegral (R N) σ t) atTop (𝓝 (qN t))) ∧
+      qN =O[𝓝[>] 0] (fun t : ℝ => t ^ (α N - 1)) := by
+    obtain ⟨C, hC, hb⟩ := (hexp N).exists_pos
+    have hb' : ∀ᶠ z in comap (fun z : ℂ => ‖z‖) atTop ⊓ 𝓟 {z | c ≤ z.re},
+        ‖R N z‖ ≤ C * ‖z‖ ^ (-α N) := by
+      filter_upwards [hb.bound] with z hz
+      have hp : ‖z ^ (-(((N : ℂ) + lam) / mu))‖ = ‖z‖ ^ (-α N) := by
+        rw [← hαcast, ← ofReal_neg, norm_cpow_real]
+      rw [hp] at hz
+      simpa only [R, P, hαcast, smul_eq_mul] using hz
+    rw [eventually_inf_principal, eventually_comap] at hb'
+    obtain ⟨K, hK⟩ := eventually_atTop.mp hb'
+    obtain ⟨qN, hqN, hbN⟩ := exists_inverseLaplace_of_norm_le_rpow hc hC.le (by linarith) (hRd N)
+      (fun z hz hKz => hK ‖z‖ hKz z rfl hz)
+    refine ⟨qN, fun σ hσ t ht => ?_, hbN⟩
+    convert hqN σ hσ t ht using 1
+    funext η
+    unfold bromwichPartialIntegral
+    push_cast
+    rfl
+  have hlin (N : ℕ) (σ t η : ℝ) (hσ : c ≤ σ) :
+      bromwichPartialIntegral Q σ t η = bromwichPartialIntegral (R N) σ t η +
+        ∑ s ∈ range N,
+          bromwichPartialIntegral (fun z => Gamma (α s) * z ^ (-(α s : ℂ))) σ t η * a s := by
+    have hiQ : IntervalIntegrable (fun y : ℝ => exp (t * (σ + y * I)) * Q (σ + y * I))
+        volume (-η) η :=
+      ((by fun_prop : Continuous fun y : ℝ => exp (t * (σ + y * I))).mul
+        (hQ.continuousOn.comp_continuous (by fun_prop) fun y => by
+          simpa using hσ)).intervalIntegrable _ _
+    have hiP (s : ℕ) : IntervalIntegrable (fun y : ℝ =>
+        exp (t * (σ + y * I)) * ((σ + y * I) ^ (-(α s : ℂ)) * (Gamma (α s) * a s)))
+        volume (-η) η := by
+      apply Continuous.intervalIntegrable
+      refine (by fun_prop : Continuous fun y : ℝ => exp (t * (σ + y * I))).mul ?_
+      apply Continuous.mul_const
+      have hzz : Continuous (fun y : ℝ => (σ : ℂ) + y * I) := by fun_prop
+      exact continuous_iff_continuousAt.mpr fun y =>
+        hzz.continuousAt.cpow continuousAt_const (Or.inl (by simpa using hc.trans_le hσ))
+    have he : (fun y : ℝ => exp (t * (σ + y * I)) * R N (σ + y * I)) =
+        (fun y : ℝ => exp (t * (σ + y * I)) * Q (σ + y * I) -
+          ∑ s ∈ range N, exp (t * (σ + y * I)) *
+            ((σ + y * I) ^ (-(α s : ℂ)) * (Gamma (α s) * a s))) := by
+      funext y
+      dsimp [R, P]
+      rw [mul_sub, mul_sum]
+    unfold bromwichPartialIntegral
+    have hiSum : IntervalIntegrable (fun y : ℝ => ∑ s ∈ range N,
+        exp (t * (σ + y * I)) *
+          ((σ + y * I) ^ (-(α s : ℂ)) * (Gamma (α s) * a s))) volume (-η) η := by
+      convert IntervalIntegrable.sum (range N) (fun s _ => hiP s) using 1
+      funext y
+      simp only [Finset.sum_apply]
+    rw [he, intervalIntegral.integral_sub hiQ hiSum,
+      intervalIntegral.integral_finsetSum (fun s _ => hiP s), mul_sub, Finset.mul_sum]
+    have hterm (s : ℕ) :
+        ((2 * Real.pi : ℝ) : ℂ)⁻¹ * (∫ y in -η..η, exp (t * (σ + y * I)) *
+          ((σ + y * I) ^ (-(α s : ℂ)) * (Gamma (α s) * a s))) =
+        (((2 * Real.pi : ℝ) : ℂ)⁻¹ * ∫ y in -η..η, exp (t * (σ + y * I)) *
+          (Gamma (α s) * (σ + y * I) ^ (-(α s : ℂ)))) * a s := by
+      rw [mul_assoc, ← intervalIntegral.integral_mul_const]
+      congr 1
+      apply intervalIntegral.integral_congr
+      intro y _
+      dsimp only
+      ring
+    simp_rw [hterm]
+    ring
+  have hfull (N : ℕ) (qN : ℝ → ℂ)
+      (hN : ∀ σ, c ≤ σ → ∀ t, 0 < t →
+        Tendsto (bromwichPartialIntegral (R N) σ t) atTop (𝓝 (qN t)))
+      (σ t : ℝ) (hσ : c ≤ σ) (ht : 0 < t) :
+      Tendsto (bromwichPartialIntegral Q σ t) atTop
+        (𝓝 (qN t + ∑ s ∈ range N, (t : ℂ) ^ ((α s : ℂ) - 1) * a s)) := by
+    have hs := tendsto_finsetSum (range N) fun s _ =>
+      (tendsto_bromwichPartialIntegral_Gamma_cpow
+        (α := (α s : ℂ)) (by simpa using hαpos s) (hc.trans_le hσ) ht).mul_const (a s)
+    exact ((hN σ hσ t ht).add hs).congr fun η => (hlin N σ t η hσ).symm
+  obtain ⟨N₀, hN₀⟩ := exists_nat_ge (2 * mu - lam)
+  have hαN₀ : 2 ≤ α N₀ := (le_div_iff₀ hmu).mpr (by linarith)
+  obtain ⟨q₀, hq₀, hb₀⟩ := hRi N₀ hαN₀
+  let q : ℝ → ℂ := fun t => q₀ t + ∑ s ∈ range N₀, (t : ℂ) ^ ((α s : ℂ) - 1) * a s
+  have hq (σ t : ℝ) (hσ : c ≤ σ) (ht : 0 < t) :
+      Tendsto (bromwichPartialIntegral Q σ t) atTop (𝓝 (q t)) :=
+    hfull N₀ q₀ hq₀ σ t hσ ht
+  refine ⟨q, fun σ hσ t ht => hq σ t hσ ht, fun N => ?_⟩
+  let K := max N N₀
+  have hNK : N ≤ K := le_max_left _ _
+  have hN₀K : N₀ ≤ K := le_max_right _ _
+  obtain ⟨qK, hqK, hbK⟩ := hRi K (hαN₀.trans (hαmono hN₀K))
+  have heq (t : ℝ) (ht : 0 < t) : q t =
+      qK t + ∑ s ∈ range K, (t : ℂ) ^ ((α s : ℂ) - 1) * a s :=
+    tendsto_nhds_unique (hq c t le_rfl ht) (hfull K qK hqK c t le_rfl ht)
+  have hscale (u v : ℝ) (huv : u ≤ v) :
+      (fun t : ℝ => t ^ v) =O[𝓝[>] 0] (fun t : ℝ => t ^ u) := by
+    refine IsBigO.of_bound 1 ?_
+    filter_upwards [Ioo_mem_nhdsGT (show (0 : ℝ) < 1 by norm_num)] with t ht
+    simpa only [Real.norm_of_nonneg (Real.rpow_nonneg ht.1.le _), one_mul] using
+      Real.rpow_le_rpow_of_exponent_ge ht.1 ht.2.le huv
+  have htermO (s : ℕ) (hs : s ∈ Finset.Ico N K) :
+      (fun t : ℝ => (t : ℂ) ^ ((α s : ℂ) - 1) * a s) =O[𝓝[>] 0]
+        (fun t : ℝ => t ^ (α N - 1)) := by
+    refine IsBigO.of_bound ‖a s‖ ?_
+    filter_upwards [Ioo_mem_nhdsGT (show (0 : ℝ) < 1 by norm_num)] with t ht
+    rw [norm_mul, norm_cpow_eq_rpow_re_of_pos ht.1, sub_re, ofReal_re, one_re,
+      Real.norm_of_nonneg (Real.rpow_nonneg ht.1.le _), mul_comm ‖a s‖]
+    exact mul_le_mul_of_nonneg_right
+      (Real.rpow_le_rpow_of_exponent_ge ht.1 ht.2.le
+        (sub_le_sub_right (hαmono (Finset.mem_Ico.mp hs).1) 1)) (norm_nonneg _)
+  have hbound := (hbK.trans (hscale _ _ (sub_le_sub_right (hαmono hNK) 1))).add
+    (IsBigO.fun_sum fun s hs => htermO s hs)
+  have hpowN : (fun t : ℝ => t ^ (α N - 1)) =O[𝓝[>] 0]
+      (fun t : ℝ => (t : ℂ) ^ ((α N : ℂ) - 1)) := by
+    refine IsBigO.of_bound 1 ?_
+    filter_upwards [self_mem_nhdsWithin] with t ht
+    rw [one_mul, norm_cpow_eq_rpow_re_of_pos ht, sub_re, ofReal_re, one_re,
+      Real.norm_of_nonneg (Real.rpow_nonneg ht.le _)]
+  have hψ (s : ℕ) : ((((s : ℝ) + lam - mu) / mu : ℝ) : ℂ) = (α s : ℂ) - 1 := by
+    rw [← ofReal_one, ← ofReal_sub]
+    congr 1
+    dsimp [α]
+    field_simp
+  simp only [hψ, smul_eq_mul]
+  refine (hbound.trans hpowN).congr' ?_ EventuallyEq.rfl
+  filter_upwards [self_mem_nhdsWithin] with t ht
+  rw [heq t ht, ← sum_range_add_sum_Ico (fun s => (t : ℂ) ^ ((α s : ℂ) - 1) * a s) hNK]
+  ring
+
 /-- DLMF 2.4.4–2.4.5: let `c > 0` and let `Q` be analytic in `ℜz ≥ c` with the differentiable
 expansion `Q(z) ∼ ∑ Γ((s+λ)/μ) aₛ z^{-(s+λ)/μ}` as `z → ∞` there (2.4.4; `λ, μ > 0`, principal
 powers), the derivative having the termwise differentiated expansion. Then the inversion
@@ -500,7 +695,7 @@ theorem inverseLaplace_of_hasAsymptoticExpansion {Q : ℂ → ℂ} {a : ℕ → 
         Tendsto (bromwichPartialIntegral Q σ t) atTop (𝓝 (q t))) ∧
       HasAsymptoticExpansion (𝓝[>] 0)
         (fun (s : ℕ) (t : ℝ) => (t : ℂ) ^ ((((s : ℝ) + lam - mu) / mu : ℝ) : ℂ)) a q := by
-  sorry
+  exact inverseLaplace_of_hasAsymptoticExpansion' hc hlam hmu hQ hexp
 
 /-- DLMF 2.4.6–2.4.7 (Haar's method): if `q(t)` and `f(t)` are the inversion integrals 2.4.3 and
 2.4.6 of `Q` and of a comparison function `F` along `ℜz = σ`, then

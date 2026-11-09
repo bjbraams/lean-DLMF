@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.AsymptoticApproximations.Mellin.Transforms
+public import DLMF.AsymptoticApproximations.Mellin.SmallParameterPowers
 public import DLMF.AsymptoticApproximations.Mellin.Residues
 public import DLMF.AlgebraicAnalytic.Transforms.Basic
 public import DLMF.ExpIntegrals.Expansions
@@ -171,7 +172,7 @@ private lemma integrable_norm_Gamma_vertical {b : ℝ} (hb : 0 < b) :
     refine (hC y).trans (le_of_eq ?_)
     rw [show -(π * |y|) / 2 = -(π / 2 * |y|) by ring]; ring
 /-- `𝓜h₁` is holomorphic on `ℜz > -c` when `h(t) = O(t^c)` as `t → 0⁺`. -/
-private lemma mellin_truncLow_differentiableAt {h : ℝ → ℂ} {c : ℝ}
+lemma mellin_truncLow_differentiableAt {h : ℝ → ℂ} {c : ℝ}
     (hhc : LocallyIntegrableOn h (Ioi 0)) (h0 : h =O[𝓝[>] 0] fun t => t ^ c) {z : ℂ}
     (hz : -c < z.re) : DifferentiableAt ℂ (mellin (mellinTruncLow h)) z := by
   have hc : LocallyIntegrableOn (mellinTruncLow h) (Ioi 0) := by
@@ -189,7 +190,7 @@ private lemma mellin_truncLow_differentiableAt {h : ℝ → ℂ} {c : ℝ}
     rw [mellinTruncLow, indicator_of_mem (show t ∈ Set.Iic 1 from ht.2.le)]
 
 /-- `|𝓜h₁(z)| ≤ ∫₀¹ t^{p-1} |h(t)| dt` for `ℜz ≥ p`. -/
-private lemma norm_mellin_truncLow_le {h : ℝ → ℂ} {p : ℝ}
+lemma norm_mellin_truncLow_le {h : ℝ → ℂ} {p : ℝ}
     (hconv : MellinConvergent (mellinTruncLow h) p) {z : ℂ} (hz : p ≤ z.re) :
     ‖mellin (mellinTruncLow h) z‖ ≤ ∫ t in Ioi 0, t ^ (p - 1) * ‖mellinTruncLow h t‖ := by
   refine (norm_integral_le_integral_norm _).trans ?_
@@ -587,7 +588,107 @@ theorem laplace_small_parameter {h : ℝ → ℂ} {b β : ℕ → ℂ} {c : ℝ}
         ∑ n ∈ range M, (-(ζ : ℂ)) ^ n / n ! *
           (mellin (mellinTruncLow h) (n + 1) + H (n + 1)))
       =O[𝓝[>] 0] fun ζ => ζ ^ ((β N).re - 1) + ζ ^ M := by
-  sorry
+  obtain ⟨K₀, hK₀⟩ := (hβinf.eventually_gt_atTop ((M : ℝ) + 1)).exists
+  let K := max N K₀
+  have hNK : N ≤ K := le_max_left _ _
+  have hK₀K : K₀ ≤ K := le_max_right _ _
+  have hK : (M : ℝ) + 1 < (β K).re := hK₀.trans_le (hβ.monotone hK₀K)
+  have hmain := laplace_small_parameter_of_lt_re hc hhc h0 hβ hβint hh hH hHd K M hK
+  have hterm (s : ℕ) (hs : s ∈ Finset.Ico N K) :
+      (fun ζ : ℝ => b s * Gamma (1 - β s) * (ζ : ℂ) ^ (β s - 1))
+        =O[𝓝[>] 0] (fun ζ : ℝ => ζ ^ ((β N).re - 1)) := by
+    refine IsBigO.of_bound ‖b s * Gamma (1 - β s)‖ ?_
+    filter_upwards [Ioo_mem_nhdsGT (show (0 : ℝ) < 1 by norm_num)] with ζ hζ
+    rw [norm_mul, norm_cpow_eq_rpow_re_of_pos hζ.1, sub_re, one_re,
+      Real.norm_of_nonneg (Real.rpow_nonneg hζ.1.le _)]
+    exact mul_le_mul_of_nonneg_left
+      (Real.rpow_le_rpow_of_exponent_ge hζ.1 hζ.2.le
+        (sub_le_sub_right (hβ.monotone (Finset.mem_Ico.mp hs).1) 1)) (norm_nonneg _)
+  have htail := IsBigO.fun_sum fun s hs => hterm s hs
+  have hdom₁ : (fun ζ : ℝ => ζ ^ ((β N).re - 1)) =O[𝓝[>] 0]
+      (fun ζ : ℝ => ζ ^ ((β N).re - 1) + ζ ^ M) := by
+    refine IsBigO.of_bound 1 ?_
+    filter_upwards [self_mem_nhdsWithin] with ζ hζ
+    have hp : 0 ≤ ζ ^ ((β N).re - 1) := Real.rpow_nonneg hζ.le _
+    have hq : 0 ≤ ζ ^ M := pow_nonneg hζ.le M
+    rw [one_mul, Real.norm_of_nonneg hp, Real.norm_of_nonneg (add_nonneg hp hq)]
+    linarith
+  have hdom₂ : (fun ζ : ℝ => ζ ^ M) =O[𝓝[>] 0]
+      (fun ζ : ℝ => ζ ^ ((β N).re - 1) + ζ ^ M) := by
+    refine IsBigO.of_bound 1 ?_
+    filter_upwards [self_mem_nhdsWithin] with ζ hζ
+    have hp : 0 ≤ ζ ^ ((β N).re - 1) := Real.rpow_nonneg hζ.le _
+    have hq : 0 ≤ ζ ^ M := pow_nonneg hζ.le M
+    rw [one_mul, Real.norm_of_nonneg hq, Real.norm_of_nonneg (add_nonneg hp hq)]
+    linarith
+  refine ((hmain.trans hdom₂).add (htail.trans hdom₁)).congr' ?_ EventuallyEq.rfl
+  filter_upwards [] with ζ
+  rw [← sum_range_add_sum_Ico
+    (fun s => b s * Gamma (1 - β s) * (ζ : ℂ) ^ (β s - 1)) hNK]
+  ring
+
+/-- The small-parameter Laplace remainder is `O(ζ^L)` when the first omitted singular
+power and the first omitted ordinary power both have real order at least `L`. -/
+theorem laplace_small_parameter_isBigO_rpow {h : ℝ → ℂ} {b β : ℕ → ℂ} {c L : ℝ}
+    {H : ℂ → ℂ} (hc : -1 < c) (hhc : LocallyIntegrableOn h (Ioi 0))
+    (h0 : h =O[𝓝[>] 0] fun t => t ^ c) (hβ : StrictMono fun s => (β s).re)
+    (hβinf : Tendsto (fun s => (β s).re) atTop atTop)
+    (hβint : ∀ s (m : ℕ), β s ≠ m + 1)
+    (hh : HasAsymptoticExpansion atTop (fun s (t : ℝ) => (t : ℂ) ^ (-β s)) b h)
+    (hH : ∀ z : ℂ, z.re < (β 0).re → H z = mellin (mellinTruncHigh h) z)
+    (hHd : ∀ N : ℕ, DifferentiableOn ℂ (fun z => H z + ∑ s ∈ range N, b s / (z - β s))
+      {z : ℂ | z.re < (β N).re}) (N M : ℕ) (hLN : L + 1 ≤ (β N).re) (hLM : L ≤ M) :
+    (fun ζ : ℝ => laplaceTransform h ζ -
+      ∑ s ∈ range N, b s * Gamma (1 - β s) * (ζ : ℂ) ^ (β s - 1) -
+      ∑ m ∈ range M, (-(ζ : ℂ)) ^ m / (m.factorial : ℂ) *
+        (mellin (mellinTruncLow h) (m + 1) + H (m + 1)))
+      =O[𝓝[>] 0] (fun ζ : ℝ => ζ ^ L) := by
+  apply (laplace_small_parameter hc hhc h0 hβ hβinf hβint hh hH hHd N M).trans
+  refine IsBigO.of_bound 2 ?_
+  filter_upwards [Ioo_mem_nhdsGT (show (0 : ℝ) < 1 by norm_num)] with ζ hζ
+  have hp : 0 ≤ ζ ^ ((β N).re - 1) := Real.rpow_nonneg hζ.1.le _
+  have hq : 0 ≤ ζ ^ M := pow_nonneg hζ.1.le M
+  rw [Real.norm_of_nonneg (add_nonneg hp hq),
+    Real.norm_of_nonneg (Real.rpow_nonneg hζ.1.le _), ← Real.rpow_natCast]
+  linarith [Real.rpow_le_rpow_of_exponent_ge hζ.1 hζ.2.le
+    (show L ≤ (β N).re - 1 by linarith),
+      Real.rpow_le_rpow_of_exponent_ge hζ.1 hζ.2.le hLM]
+
+/-- DLMF 2.5.44 with a real order cutoff: exactly the singular powers of real order less
+than `L` and the ordinary powers of degree less than `L` are retained, and the remainder
+is `O(ζ^L)`. Both index sets are initial finite intervals. -/
+@[dlmf 2.5.E44]
+theorem laplace_small_parameter_cutoff {h : ℝ → ℂ} {b β : ℕ → ℂ} {c : ℝ} {H : ℂ → ℂ}
+    (hc : -1 < c) (hhc : LocallyIntegrableOn h (Ioi 0))
+    (h0 : h =O[𝓝[>] 0] fun t => t ^ c) (hβ : StrictMono fun s => (β s).re)
+    (hβinf : Tendsto (fun s => (β s).re) atTop atTop)
+    (hβint : ∀ s (m : ℕ), β s ≠ m + 1)
+    (hh : HasAsymptoticExpansion atTop (fun s (t : ℝ) => (t : ℂ) ^ (-β s)) b h)
+    (hH : ∀ z : ℂ, z.re < (β 0).re → H z = mellin (mellinTruncHigh h) z)
+    (hHd : ∀ N : ℕ, DifferentiableOn ℂ (fun z => H z + ∑ s ∈ range N, b s / (z - β s))
+      {z : ℂ | z.re < (β N).re}) (L : ℝ) :
+    ∃ N M : ℕ, (∀ s : ℕ, s < N ↔ (β s).re < L + 1) ∧
+      (∀ m : ℕ, m < M ↔ (m : ℝ) < L) ∧
+      (fun ζ : ℝ => laplaceTransform h ζ -
+        ∑ s ∈ range N, b s * Gamma (1 - β s) * (ζ : ℂ) ^ (β s - 1) -
+        ∑ m ∈ range M, (-(ζ : ℂ)) ^ m / (m.factorial : ℂ) *
+          (mellin (mellinTruncLow h) (m + 1) + H (m + 1)))
+        =O[𝓝[>] 0] (fun ζ : ℝ => ζ ^ L) := by
+  have hex : ∃ N : ℕ, L + 1 ≤ (β N).re := (hβinf.eventually_ge_atTop (L + 1)).exists
+  let N := Nat.find hex
+  have hN : L + 1 ≤ (β N).re := Nat.find_spec hex
+  refine ⟨N, ⌈L⌉₊, fun s => ?_, fun m => Nat.lt_ceil, ?_⟩
+  · constructor
+    · intro hs
+      by_contra hn
+      have hNs : N ≤ s := Nat.find_min' hex (le_of_not_gt hn)
+      omega
+    · intro hs
+      by_contra hn
+      have hNs : N ≤ s := le_of_not_gt hn
+      exact (not_le.mpr hs) (hN.trans (hβ.monotone hNs))
+  · exact laplace_small_parameter_isBigO_rpow hc hhc h0 hβ hβinf hβint hh hH hHd N ⌈L⌉₊
+      hN (Nat.le_ceil L)
 
 /-- The factor `u(z) = -ζ^{z-1}/Γ(z)` of the Laplace residues 2.5.46–2.5.47. -/
 private lemma hasDerivAt_neg_cpow_div_Gamma {ζ : ℝ} (hζ : 0 < ζ) (m : ℕ) :

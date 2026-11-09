@@ -33,6 +33,7 @@ public import DLMF.Gamma.BarnesG
 public import DLMF.Gamma.QGamma
 public import DLMF.Gamma.MathlibCoverage
 public import DLMF.Gamma.VerticalBounds
+public import DLMF.Gamma.VerticalStrips
 public import DLMF.Gamma.MellinBarnes
 public import DLMF.Gamma.RecipGammaDeriv
 public import DLMF.Gamma.ShiftedLineBounds

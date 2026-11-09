@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMFMathlib.Analysis.MellinConvolution
+public import DLMFMathlib.Analysis.MellinOscillation
 public import DLMF.AlgebraicAnalytic.Transforms.Basic
 public import DLMF.AsymptoticApproximations.Mellin.Basic
 public import DLMF.AlgebraicAnalytic.Complex.Basic
@@ -612,14 +613,6 @@ theorem mellin_eq_truncLow_add_truncHigh {f : ℝ → ℂ} {z : ℂ}
 private noncomputable def truncHighRemainder (h : ℝ → ℂ) (b β : ℕ → ℂ) (N : ℕ) : ℝ → ℂ :=
   mellinTruncHigh fun t => h t - ∑ s ∈ range N, (t : ℂ) ^ (-β s) • b s
 
-/-- `f₂` is the restriction of `f` to `(1, ∞)`. -/
-private lemma mellinTruncHigh_eq_indicator (g : ℝ → ℂ) :
-    mellinTruncHigh g = (Ioi (1 : ℝ)).indicator g := by
-  funext t
-  by_cases ht : t ≤ 1
-  · simp [mellinTruncHigh, mellinTruncLow, ht]
-  · simp [mellinTruncHigh, mellinTruncLow, ht, not_le.1 ht]
-
 /-- Peeling off one term of the remainder 2.5.18. -/
 private lemma truncHighRemainder_succ (h : ℝ → ℂ) (b β : ℕ → ℂ) (N : ℕ) :
     truncHighRemainder h b β N = truncHighRemainder h b β (N + 1) +
@@ -700,6 +693,15 @@ private lemma truncHighRemainder_mellin {h : ℝ → ℂ} {b β : ℕ → ℂ}
   exact ⟨mellinConvergent_of_isBigO_rpow hc htop hz hbot (by linarith),
     mellin_differentiableAt_of_isBigO_rpow hc htop hz hbot (by linarith)⟩
 
+/-- Absolute convergence of the high-tail Mellin remainder on its enlarged half-plane. -/
+theorem mellinConvergent_truncHigh_sub_sum {h : ℝ → ℂ} {b β : ℕ → ℂ}
+    (hhc : LocallyIntegrableOn h (Ioi 0))
+    (hh : HasAsymptoticExpansion atTop (fun s (t : ℝ) => (t : ℂ) ^ (-β s)) b h)
+    (N : ℕ) {z : ℂ} (hz : z.re < (β N).re) :
+    MellinConvergent (mellinTruncHigh (fun t => h t -
+      ∑ s ∈ range N, (t : ℂ) ^ (-β s) • b s)) z :=
+  (truncHighRemainder_mellin hhc hh N hz).1
+
 /-- Comparing the remainders after `K ≤ M` terms of 2.5.18. -/
 private lemma mellin_truncHighRemainder_eq {h : ℝ → ℂ} {b β : ℕ → ℂ}
     (hhc : LocallyIntegrableOn h (Ioi 0)) (hβ : StrictMono fun s => (β s).re)
@@ -753,19 +755,6 @@ theorem mellin_truncHigh_continuation {h : ℝ → ℂ} {b : ℕ → ℂ} {β : 
     filter_upwards [hopen.mem_nhds hz] with w hw
     rw [key w N hw]; ring
 
-/-- DLMF §2.5(ii), case `κ ≠ 0`: if `h(t) ∼ exp(iκt^p) ∑ bₛ t^{-βₛ}` as `t → ∞` (2.5.18) with
-real `κ ≠ 0`, `p > 0`, and `ℜβₛ → ∞`, then `𝓜h₂` continues analytically from `ℜz < ℜβ₀` to an
-entire function. -/
-@[dlmf 2.5.E18, dlmf 2.5.ii]
-theorem mellin_truncHigh_continuation_osc {h : ℝ → ℂ} {b : ℕ → ℂ} {β : ℕ → ℂ} {κ p : ℝ}
-    (hκ : κ ≠ 0) (hp : 0 < p) (hhc : LocallyIntegrableOn h (Ioi 0))
-    (hβinf : Tendsto (fun s => (β s).re) atTop atTop)
-    (hh : HasAsymptoticExpansion atTop
-      (fun s (t : ℝ) => Complex.exp (I * κ * ((t ^ p : ℝ) : ℂ)) * (t : ℂ) ^ (-β s)) b h) :
-    ∃ H : ℂ → ℂ, (∀ z : ℂ, z.re < (β 0).re → H z = mellin (mellinTruncHigh h) z) ∧
-      Differentiable ℂ H := by
-  sorry
-
 /-- DLMF 2.5.29–2.5.30: `I(x) = ∑_{j,k=1}^{2} I_{jk}(x)` with
 `I_{jk}(x) = ∫₀^∞ f_j(t) h_k(xt) dt`, provided the four integrals converge. -/
 @[dlmf 2.5.E29, dlmf 2.5.E30]
@@ -798,5 +787,489 @@ theorem integral_truncHigh_mul_truncLow (f h : ℝ → ℂ) {x : ℝ} (hx : 1 �
       have : 1 < t := not_le.1 ht1
       nlinarith)
     simp [mellinTruncLow, this]
+
+/-- The explicit Mellin continuation obtained by subtracting `N` terms at zero.
+It is defined on `-Re α_N < Re z`, up to the convergence boundary of the high tail,
+with principal parts `a_k/(z+α_k)`. -/
+def mellinContinuationAtZero (f : ℝ → ℂ) (a α : ℕ → ℂ) (N : ℕ) (z : ℂ) : ℂ :=
+  mellin (mellinTruncLow fun t => f t - ∑ k ∈ range N, (t : ℂ) ^ α k • a k) z +
+    ∑ k ∈ range N, a k / (z + α k) +
+    mellin (mellinTruncHigh f) z
+
+/-- The explicit Mellin continuation obtained by subtracting `N` terms at infinity.
+It is defined on `Re z < Re β_N`, above the convergence boundary of the low tail,
+with principal parts `-b_k/(z-β_k)`. -/
+def mellinContinuationAtTop (f : ℝ → ℂ) (b β : ℕ → ℂ) (N : ℕ) (z : ℂ) : ℂ :=
+  mellin (mellinTruncLow f) z +
+    mellin (mellinTruncHigh fun t => f t - ∑ k ∈ range N, (t : ℂ) ^ (-β k) • b k) z -
+    ∑ k ∈ range N, b k / (z - β k)
+
+/-- The explicit zero-endpoint continuation is independent of the truncation on overlapping
+domains. Only strict increase of the real parts is needed, not unboundedness. -/
+theorem mellinContinuationAtZero_eq {f : ℝ → ℂ} {a α : ℕ → ℂ}
+    (hfc : LocallyIntegrableOn f (Ioi 0)) (hα : StrictMono fun k => (α k).re)
+    (hf : HasAsymptoticExpansion (𝓝[>] 0) (fun k (t : ℝ) => (t : ℂ) ^ α k) a f)
+    {N M : ℕ} {z : ℂ} (hN : -(α N).re < z.re) (hM : -(α M).re < z.re) :
+    mellinContinuationAtZero f a α N z = mellinContinuationAtZero f a α M z := by
+  have hle (K L : ℕ) (hKL : K ≤ L) (hz : -(α K).re < z.re) :
+      mellinContinuationAtZero f a α K z = mellinContinuationAtZero f a α L z := by
+    change mellin (truncLowRemainder f a α K) z + _ + _ =
+      mellin (truncLowRemainder f a α L) z + _ + _
+    rw [mellin_truncLowRemainder_eq hfc hα hf hKL hz]
+    have hsum := sum_range_add_sum_Ico (fun k => a k / (z + α k)) hKL
+    linear_combination hsum
+  rcases le_total N M with h | h
+  · exact hle N M h hN
+  · exact (hle M N h hM).symm
+
+/-- The explicit infinity-endpoint continuation is independent of the truncation on overlapping
+domains, without requiring the exponent sequence to be unbounded. -/
+theorem mellinContinuationAtTop_eq {f : ℝ → ℂ} {b β : ℕ → ℂ}
+    (hfc : LocallyIntegrableOn f (Ioi 0)) (hβ : StrictMono fun k => (β k).re)
+    (hf : HasAsymptoticExpansion atTop (fun k (t : ℝ) => (t : ℂ) ^ (-β k)) b f)
+    {N M : ℕ} {z : ℂ} (hN : z.re < (β N).re) (hM : z.re < (β M).re) :
+    mellinContinuationAtTop f b β N z = mellinContinuationAtTop f b β M z := by
+  have hle (K L : ℕ) (hKL : K ≤ L) (hz : z.re < (β K).re) :
+      mellinContinuationAtTop f b β K z = mellinContinuationAtTop f b β L z := by
+    change _ + mellin (truncHighRemainder f b β K) z - _ =
+      _ + mellin (truncHighRemainder f b β L) z - _
+    rw [mellin_truncHighRemainder_eq hfc hβ hf hKL hz]
+    have hsum := sum_range_add_sum_Ico (fun k => b k / (z - β k)) hKL
+    linear_combination -hsum
+  rcases le_total N M with h | h
+  · exact hle N M h hN
+  · exact (hle M N h hM).symm
+
+/-- A high tail with a power bound has a holomorphic Mellin transform below that power. -/
+private theorem mellinTruncHigh_mellin_of_isBigO {f : ℝ → ℂ} {b : ℝ}
+    (hfc : LocallyIntegrableOn f (Ioi 0)) (hb : f =O[atTop] fun t => t ^ (-b))
+    {z : ℂ} (hz : z.re < b) :
+    MellinConvergent (mellinTruncHigh f) z ∧
+      DifferentiableAt ℂ (mellin (mellinTruncHigh f)) z := by
+  have hpow : (fun t : ℝ => t ^ (-b)) =O[atTop] fun t => (t : ℂ) ^ (-(b : ℂ)) := by
+    refine IsBigO.of_bound 1 ?_
+    filter_upwards [eventually_gt_atTop 0] with t ht
+    rw [one_mul, norm_cpow_eq_rpow_re_of_pos ht, neg_re, ofReal_re,
+      Real.norm_of_nonneg (Real.rpow_nonneg ht.le _)]
+  have hexp : HasAsymptoticExpansion atTop
+      (fun (_ : ℕ) (t : ℝ) => (t : ℂ) ^ (-(b : ℂ))) (fun _ => 0) f := by
+    intro N
+    simpa only [smul_zero, sum_const_zero, sub_zero] using hb.trans hpow
+  simpa only [truncHighRemainder, range_zero, sum_empty, sub_zero, ofReal_re] using
+    truncHighRemainder_mellin hfc hexp 0 (by simpa using hz)
+
+/-- A low tail with a power bound has a holomorphic Mellin transform above its lower boundary. -/
+private theorem mellinTruncLow_mellin_of_isBigO {f : ℝ → ℂ} {c : ℝ}
+    (hfc : LocallyIntegrableOn f (Ioi 0)) (hc : f =O[𝓝[>] 0] fun t => t ^ c)
+    {z : ℂ} (hz : -c < z.re) :
+    MellinConvergent (mellinTruncLow f) z ∧
+      DifferentiableAt ℂ (mellin (mellinTruncLow f)) z := by
+  have hpow : (fun t : ℝ => t ^ c) =O[𝓝[>] 0] fun t => (t : ℂ) ^ (c : ℂ) := by
+    refine IsBigO.of_bound 1 ?_
+    filter_upwards [self_mem_nhdsWithin] with t ht
+    rw [one_mul, norm_cpow_eq_rpow_re_of_pos ht, ofReal_re,
+      Real.norm_of_nonneg (Real.rpow_nonneg ht.le _)]
+  have hexp : HasAsymptoticExpansion (𝓝[>] 0)
+      (fun (_ : ℕ) (t : ℝ) => (t : ℂ) ^ (c : ℂ)) (fun _ => 0) f := by
+    intro N
+    simpa only [smul_zero, sum_const_zero, sub_zero] using hc.trans hpow
+  simpa only [truncLowRemainder, range_zero, sum_empty, sub_zero, ofReal_re] using
+    truncLowRemainder_mellin hfc hexp 0 (by simpa using hz)
+
+/-- Subtracting the displayed principal parts from the zero-endpoint continuation is
+holomorphic on the whole enlarged strip, including those pole locations. -/
+theorem mellinContinuationAtZero_sub_principalParts_differentiableAt {f : ℝ → ℂ} {a α : ℕ → ℂ}
+    {b : ℝ} (hfc : LocallyIntegrableOn f (Ioi 0))
+    (hf : HasAsymptoticExpansion (𝓝[>] 0) (fun k (t : ℝ) => (t : ℂ) ^ α k) a f)
+    (hb : f =O[atTop] fun t => t ^ (-b)) (N : ℕ) {z : ℂ}
+    (hz0 : -(α N).re < z.re) (hzb : z.re < b) :
+    DifferentiableAt ℂ (fun w => mellinContinuationAtZero f a α N w -
+      ∑ k ∈ range N, a k / (w + α k)) z := by
+  have hd := ((truncLowRemainder_mellin hfc hf N hz0).2).add
+    (mellinTruncHigh_mellin_of_isBigO hfc hb hzb).2
+  convert hd using 1
+  funext w
+  simp only [mellinContinuationAtZero, Pi.add_apply, truncLowRemainder]
+  ring
+
+/-- Adding the negatives of the principal parts to the infinity-endpoint continuation is
+holomorphic on its enlarged strip, including its pole locations. -/
+theorem mellinContinuationAtTop_add_principalParts_differentiableAt {f : ℝ → ℂ} {b β : ℕ → ℂ}
+    {c : ℝ} (hfc : LocallyIntegrableOn f (Ioi 0))
+    (hf : HasAsymptoticExpansion atTop (fun k (t : ℝ) => (t : ℂ) ^ (-β k)) b f)
+    (hc : f =O[𝓝[>] 0] fun t => t ^ c) (N : ℕ) {z : ℂ}
+    (hzc : -c < z.re) (hz0 : z.re < (β N).re) :
+    DifferentiableAt ℂ (fun w => mellinContinuationAtTop f b β N w +
+      ∑ k ∈ range N, b k / (w - β k)) z := by
+  have hd := ((mellinTruncLow_mellin_of_isBigO hfc hc hzc).2).add
+    (truncHighRemainder_mellin hfc hf N hz0).2
+  convert hd using 1
+  funext w
+  simp only [mellinContinuationAtTop, Pi.add_apply, truncHighRemainder]
+  ring
+
+/-- In the initial strip the explicit zero-endpoint continuation agrees with the Mellin integral. -/
+theorem mellinContinuationAtZero_eq_mellin {f : ℝ → ℂ} {a α : ℕ → ℂ} {b : ℝ}
+    (hfc : LocallyIntegrableOn f (Ioi 0)) (hα : StrictMono fun k => (α k).re)
+    (hf : HasAsymptoticExpansion (𝓝[>] 0) (fun k (t : ℝ) => (t : ℂ) ^ α k) a f)
+    (hb : f =O[atTop] fun t => t ^ (-b)) (N : ℕ) {z : ℂ}
+    (hz0 : -(α 0).re < z.re) (hzb : z.re < b) :
+    mellinContinuationAtZero f a α N z = mellin f z := by
+  have hzN : -(α N).re < z.re :=
+    lt_of_le_of_lt (neg_le_neg (hα.monotone (Nat.zero_le N))) hz0
+  rw [mellinContinuationAtZero_eq hfc hα hf hzN hz0]
+  have hl : MellinConvergent (mellinTruncLow f) z := by
+    simpa only [truncLowRemainder, range_zero, sum_empty, sub_zero] using
+      (truncLowRemainder_mellin hfc hf 0 hz0).1
+  simpa only [mellinContinuationAtZero, truncLowRemainder, range_zero, sum_empty,
+    sub_zero, add_zero]
+    using (mellin_eq_truncLow_add_truncHigh hl
+      (mellinTruncHigh_mellin_of_isBigO hfc hb hzb).1).symm
+
+/-- In the initial strip the explicit infinity-endpoint continuation agrees with
+the Mellin integral. -/
+theorem mellinContinuationAtTop_eq_mellin {f : ℝ → ℂ} {b β : ℕ → ℂ} {c : ℝ}
+    (hfc : LocallyIntegrableOn f (Ioi 0)) (hβ : StrictMono fun k => (β k).re)
+    (hf : HasAsymptoticExpansion atTop (fun k (t : ℝ) => (t : ℂ) ^ (-β k)) b f)
+    (hc : f =O[𝓝[>] 0] fun t => t ^ c) (N : ℕ) {z : ℂ}
+    (hzc : -c < z.re) (hz0 : z.re < (β 0).re) :
+    mellinContinuationAtTop f b β N z = mellin f z := by
+  have hzN : z.re < (β N).re := lt_of_lt_of_le hz0 (hβ.monotone (Nat.zero_le N))
+  rw [mellinContinuationAtTop_eq hfc hβ hf hzN hz0]
+  have hh : MellinConvergent (mellinTruncHigh f) z := by
+    simpa only [truncHighRemainder, range_zero, sum_empty, sub_zero] using
+      (truncHighRemainder_mellin hfc hf 0 hz0).1
+  simpa only [mellinContinuationAtTop, truncHighRemainder, range_zero, sum_empty, sub_zero]
+    using (mellin_eq_truncLow_add_truncHigh
+      (mellinTruncLow_mellin_of_isBigO hfc hc hzc).1 hh).symm
+
+/-- The zero-endpoint continuation is holomorphic away from its displayed pole locations. -/
+theorem differentiableAt_mellinContinuationAtZero {f : ℝ → ℂ} {a α : ℕ → ℂ} {b : ℝ}
+    (hfc : LocallyIntegrableOn f (Ioi 0))
+    (hf : HasAsymptoticExpansion (𝓝[>] 0) (fun k (t : ℝ) => (t : ℂ) ^ α k) a f)
+    (hb : f =O[atTop] fun t => t ^ (-b)) (N : ℕ) {z : ℂ}
+    (hz0 : -(α N).re < z.re) (hzb : z.re < b)
+    (hne : ∀ k ∈ range N, z + α k ≠ 0) :
+    DifferentiableAt ℂ (mellinContinuationAtZero f a α N) z := by
+  change DifferentiableAt ℂ (fun w => mellin (truncLowRemainder f a α N) w +
+    (∑ k ∈ range N, a k / (w + α k)) + mellin (mellinTruncHigh f) w) z
+  exact (((truncLowRemainder_mellin hfc hf N hz0).2).add
+    (DifferentiableAt.fun_sum fun k hk => (differentiableAt_const (a k)).div
+      (differentiableAt_id.add_const (α k)) (hne k hk))).add
+        (mellinTruncHigh_mellin_of_isBigO hfc hb hzb).2
+
+/-- The infinity-endpoint continuation is holomorphic away from its displayed pole locations. -/
+theorem differentiableAt_mellinContinuationAtTop {f : ℝ → ℂ} {b β : ℕ → ℂ} {c : ℝ}
+    (hfc : LocallyIntegrableOn f (Ioi 0))
+    (hf : HasAsymptoticExpansion atTop (fun k (t : ℝ) => (t : ℂ) ^ (-β k)) b f)
+    (hc : f =O[𝓝[>] 0] fun t => t ^ c) (N : ℕ) {z : ℂ}
+    (hzc : -c < z.re) (hz0 : z.re < (β N).re)
+    (hne : ∀ k ∈ range N, z - β k ≠ 0) :
+    DifferentiableAt ℂ (mellinContinuationAtTop f b β N) z := by
+  change DifferentiableAt ℂ (fun w => mellin (mellinTruncLow f) w +
+    mellin (truncHighRemainder f b β N) w - ∑ k ∈ range N, b k / (w - β k)) z
+  exact (((mellinTruncLow_mellin_of_isBigO hfc hc hzc).2).add
+    (truncHighRemainder_mellin hfc hf N hz0).2).sub
+      (DifferentiableAt.fun_sum fun k hk => (differentiableAt_const (b k)).div
+        (differentiableAt_id.sub_const (β k)) (hne k hk))
+
+/-- With no subtracted terms, the explicit zero-endpoint continuation is the original Mellin
+integral wherever that integral converges absolutely. No asymptotic hypothesis is needed. -/
+theorem mellinContinuationAtZero_zero {f : ℝ → ℂ} (a α : ℕ → ℂ) {z : ℂ}
+    (hf : MellinConvergent f z) : mellinContinuationAtZero f a α 0 z = mellin f z := by
+  have hl : MellinConvergent (mellinTruncLow f) z := by
+    refine IntegrableOn.congr_fun (hf.indicator (t := Iic (1 : ℝ)) measurableSet_Iic)
+      (fun t _ => ?_)
+      measurableSet_Ioi
+    by_cases ht : t ≤ 1
+    · simp [mellinTruncLow, ht]
+    · simp [mellinTruncLow, ht]
+  have hh : MellinConvergent (mellinTruncHigh f) z := by
+    rw [mellinTruncHigh_eq_indicator]
+    refine IntegrableOn.congr_fun (hf.indicator (t := Ioi (1 : ℝ)) measurableSet_Ioi)
+      (fun t _ => ?_)
+      measurableSet_Ioi
+    by_cases ht : 1 < t
+    · simp [ht]
+    · simp [ht]
+  simpa only [mellinContinuationAtZero, Finset.range_zero, sum_empty, sub_zero, add_zero] using
+    (mellin_eq_truncLow_add_truncHigh hl hh).symm
+
+/-- With no subtracted terms, the explicit infinity-endpoint continuation is the original
+Mellin integral wherever that integral converges absolutely. -/
+theorem mellinContinuationAtTop_zero {f : ℝ → ℂ} (b β : ℕ → ℂ) {z : ℂ}
+    (hf : MellinConvergent f z) : mellinContinuationAtTop f b β 0 z = mellin f z := by
+  simpa only [mellinContinuationAtTop, mellinContinuationAtZero, Finset.range_zero,
+    sum_empty, sub_zero, add_zero]
+    using mellinContinuationAtZero_zero b β hf
+
+/-- A continued high-tail Mellin transform is uniquely determined, including its regular
+parts at the displayed poles, by its initial values and the holomorphy of each regular part. -/
+theorem mellin_truncHigh_continuation_regularPart_eq {h : ℝ → ℂ} {b β : ℕ → ℂ}
+    {H : ℂ → ℂ} (hhc : LocallyIntegrableOn h (Ioi 0))
+    (hβ : StrictMono fun s => (β s).re)
+    (hh : HasAsymptoticExpansion atTop (fun s (t : ℝ) => (t : ℂ) ^ (-β s)) b h)
+    (hH : ∀ z : ℂ, z.re < (β 0).re → H z = mellin (mellinTruncHigh h) z)
+    (hHd : ∀ N : ℕ, DifferentiableOn ℂ (fun z => H z + ∑ s ∈ range N, b s / (z - β s))
+      {z : ℂ | z.re < (β N).re}) (N : ℕ) {z : ℂ} (hz : z.re < (β N).re) :
+    H z + ∑ s ∈ range N, b s / (z - β s) =
+      mellin (mellinTruncHigh (fun t => h t - ∑ s ∈ range N, (t : ℂ) ^ (-β s) • b s)) z := by
+  let U : Set ℂ := {z | z.re < (β N).re}
+  have hopen : IsOpen U := isOpen_lt continuous_re continuous_const
+  have ha : AnalyticOnNhd ℂ (fun z => H z + ∑ s ∈ range N, b s / (z - β s)) U :=
+    (hHd N).analyticOnNhd hopen
+  have hb : AnalyticOnNhd ℂ (mellin (truncHighRemainder h b β N)) U :=
+    (show DifferentiableOn ℂ (mellin (truncHighRemainder h b β N)) U from fun w hw =>
+      (truncHighRemainder_mellin hhc hh N hw).2.differentiableWithinAt).analyticOnNhd hopen
+  let w : ℂ := ((β 0).re - 1 : ℝ)
+  have hw0 : w.re < (β 0).re := by dsimp [w]; linarith
+  have hw : w ∈ U := hw0.trans_le (hβ.monotone (Nat.zero_le N))
+  have he : (fun z => H z + ∑ s ∈ range N, b s / (z - β s)) =ᶠ[𝓝 w]
+      mellin (truncHighRemainder h b β N) := by
+    filter_upwards [(isOpen_lt continuous_re continuous_const).mem_nhds hw0] with v hv
+    have hr := mellin_truncHighRemainder_eq hhc hβ hh (Nat.zero_le N) hv
+    simp only [truncHighRemainder, range_zero, sum_empty, sub_zero,
+      Nat.Ico_zero_eq_range] at hr
+    rw [hH v hv]
+    dsimp only [truncHighRemainder]
+    linear_combination hr
+  exact ha.eqOn_of_preconnected_of_eventuallyEq hb (convex_halfSpace_re_lt _).isPreconnected
+    hw he hz
+
+/-- The high-tail Mellin continuation after `N` oscillatory terms, with real frequency `κ`
+and power `p`. For `κ ≠ 0`, `p > 0`, its domain is `Re z < Re β_N`. The model terms use
+`Complex.oscillatoryMellinTail`, with principal powers on its vertical ray from one. -/
+def oscillatoryMellinContinuationAtTop (h : ℝ → ℂ) (κ p : ℝ) (b β : ℕ → ℂ) (N : ℕ) (z : ℂ) : ℂ :=
+  mellin (mellinTruncHigh (fun t => h t - ∑ s ∈ range N,
+    (exp (I * κ * (t ^ p : ℝ)) * (t : ℂ) ^ (-β s)) • b s)) z +
+      ∑ s ∈ range N, (b s * (p : ℂ)⁻¹) * oscillatoryMellinTail κ ((z - β s) / p)
+
+/-- The finite oscillatory Mellin continuations agree with one entire function when the
+real parts of the remainder exponents tend to infinity. Monotonicity is not required. -/
+theorem exists_entire_oscillatoryMellinContinuationAtTop {h : ℝ → ℂ}
+    {b : ℕ → ℂ} {β : ℕ → ℂ} {κ p : ℝ}
+    (hκ : κ ≠ 0) (hp : 0 < p) (hhc : LocallyIntegrableOn h (Ioi 0))
+    (hβinf : Tendsto (fun s => (β s).re) atTop atTop)
+    (hh : HasAsymptoticExpansion atTop
+      (fun s (t : ℝ) => Complex.exp (I * κ * ((t ^ p : ℝ) : ℂ)) * (t : ℂ) ^ (-β s)) b h) :
+    ∃ H : ℂ → ℂ, Differentiable ℂ H ∧ ∀ N : ℕ, ∀ z : ℂ,
+      z.re < (β N).re → H z = oscillatoryMellinContinuationAtTop h κ p b β N z := by
+  classical
+  let F := oscillatoryMellinTail κ
+  have hFd : Differentiable ℂ F := differentiable_oscillatoryMellinTail hκ
+  have hFe : ∀ w : ℂ, w.re < 0 → F w = oscillatoryMellinTailIntegral κ w :=
+    fun w hw => oscillatoryMellinTail_eq_integral hκ hw
+  let φ : ℕ → ℝ → ℂ := fun s t => exp (I * κ * (t ^ p : ℝ)) * (t : ℂ) ^ (-β s)
+  let r : ℕ → ℝ → ℂ := fun N t => h t - ∑ s ∈ range N, φ s t • b s
+  have hφc (s : ℕ) : ContinuousOn (φ s) (Ioi 0) := by
+    intro t ht
+    refine ContinuousAt.continuousWithinAt ?_
+    exact (by fun_prop : ContinuousAt (fun t : ℝ => exp (I * κ * (t ^ p : ℝ))) t).mul
+      ((continuous_ofReal.continuousAt).cpow continuousAt_const
+        (ofReal_mem_slitPlane.mpr ht))
+  have hrc (N : ℕ) : LocallyIntegrableOn (r N) (Ioi 0) :=
+    hhc.sub ((continuousOn_finsetSum _ fun s _ =>
+      (hφc s).smul continuousOn_const).locallyIntegrableOn measurableSet_Ioi)
+  have hrb (N : ℕ) : r N =O[atTop] fun t => t ^ (-(β N).re) := by
+    refine (hh N).trans (IsBigO.of_bound 1 ?_)
+    filter_upwards [eventually_gt_atTop 0] with t ht
+    rw [one_mul, Real.norm_of_nonneg (Real.rpow_nonneg ht.le _)]
+    rw [norm_mul, norm_exp, norm_cpow_eq_rpow_re_of_pos ht]
+    simp
+  have hri (N : ℕ) {z : ℂ} (hz : z.re < (β N).re) :
+      MellinConvergent (mellinTruncHigh (r N)) z ∧
+        DifferentiableAt ℂ (mellin (mellinTruncHigh (r N))) z :=
+    mellinTruncHigh_mellin_of_isBigO (hrc N) (hrb N) hz
+  let A : ℕ → ℂ → ℂ := fun N z => mellin (mellinTruncHigh (r N)) z +
+    ∑ s ∈ range N, (b s * (p : ℂ)⁻¹) * F ((z - β s) / p)
+  have hAd (N : ℕ) {z : ℂ} (hz : z.re < (β N).re) : DifferentiableAt ℂ (A N) z := by
+    exact (hri N hz).2.add (DifferentiableAt.fun_sum fun s _ =>
+      ((hFd _).comp z ((differentiableAt_id.sub_const _).div_const _)).const_mul _)
+  have hAe (N : ℕ) {z : ℂ} (hz : z.re < (β N).re)
+      (hbelow : ∀ s ∈ range N, z.re < (β s).re) :
+      A N z = mellin (mellinTruncHigh h) z := by
+    have hmodel (s : ℕ) (hs : s ∈ range N) :
+        HasMellin (mellinTruncHigh (fun t => φ s t • b s)) z
+          ((b s * (p : ℂ)⁻¹) * F ((z - β s) / p)) := by
+      have hm := hasMellin_indicator_exp_I_mul_rpow_cpow (κ := κ) hp (hbelow s hs)
+      rw [mellinTruncHigh_eq_indicator]
+      have hw : ((z - β s) / p).re < 0 := by
+        rw [div_ofReal_re, sub_re]
+        exact div_neg_of_neg_of_pos (sub_neg.mpr (hbelow s hs)) hp
+      rw [hFe _ hw]
+      refine ⟨?_, ?_⟩
+      · refine IntegrableOn.congr_fun (hm.1.mul_const (b s)) (fun t _ => ?_)
+          measurableSet_Ioi
+        by_cases ht : t ∈ Ioi (1 : ℝ) <;> simp [φ, ht, smul_eq_mul, mul_assoc]
+      · rw [mul_assoc, ← hm.2]
+        unfold mellin
+        rw [← integral_const_mul]
+        congr 1
+        funext t
+        by_cases ht : t ∈ Ioi (1 : ℝ) <;> simp [φ, ht, smul_eq_mul] <;> ring
+    have hsum : MellinConvergent
+        (fun t => ∑ s ∈ range N, mellinTruncHigh (fun t => φ s t • b s) t) z := by
+      unfold MellinConvergent
+      simp_rw [smul_sum]
+      exact integrable_finsetSum _ (fun s hs => (hmodel s hs).1)
+    have heq : mellinTruncHigh h = mellinTruncHigh (r N) +
+        (fun t => ∑ s ∈ range N, mellinTruncHigh (fun t => φ s t • b s) t) := by
+      funext t
+      simp only [mellinTruncHigh_eq_indicator, Pi.add_apply]
+      by_cases ht : t ∈ Ioi (1 : ℝ)
+      · simp [ht, r]
+      · simp [ht]
+    rw [heq, mellin_add_of_mellinConvergent (hri N hz).1 hsum]
+    dsimp only [A]
+    congr 1
+    unfold mellin
+    simp_rw [smul_sum]
+    rw [integral_finsetSum _ (fun s hs => (hmodel s hs).1)]
+    exact sum_congr rfl (fun s hs => (hmodel s hs).2.symm)
+  have hexB : ∀ N : ℕ, ∃ B : ℝ, ∀ s ≤ N, B < (β s).re := by
+    intro N
+    induction N with
+    | zero =>
+      refine ⟨(β 0).re - 1, fun s hs => ?_⟩
+      have hs0 : s = 0 := Nat.eq_zero_of_le_zero hs
+      simpa [hs0] using sub_one_lt (β 0).re
+    | succ N ih =>
+      obtain ⟨B, hB⟩ := ih
+      refine ⟨min B ((β (N + 1)).re - 1), fun s hs => ?_⟩
+      rcases eq_or_lt_of_le hs with rfl | hs
+      · exact lt_of_le_of_lt (min_le_right _ _) (sub_one_lt _)
+      · exact lt_of_le_of_lt (min_le_left _ _) (hB s (Nat.le_of_lt_succ hs))
+  choose B hB using hexB
+  have hAB (N : ℕ) {z : ℂ} (hz : z.re < B N) :
+      A N z = mellin (mellinTruncHigh h) z :=
+    hAe N (hz.trans (hB N N le_rfl))
+      (fun s hs => hz.trans (hB N s (Nat.le_of_lt (mem_range.mp hs))))
+  have hAA (N M : ℕ) {z : ℂ} (hN : z.re < (β N).re) (hM : z.re < (β M).re) :
+      A N z = A M z := by
+    let U : Set ℂ := {z | z.re < min (β N).re (β M).re}
+    have hopen : IsOpen U := isOpen_lt continuous_re continuous_const
+    have hdN : AnalyticOnNhd ℂ (A N) U :=
+      (show DifferentiableOn ℂ (A N) U from fun w hw =>
+        (hAd N (lt_of_lt_of_le hw (min_le_left _ _))).differentiableWithinAt).analyticOnNhd
+          hopen
+    have hdM : AnalyticOnNhd ℂ (A M) U :=
+      (show DifferentiableOn ℂ (A M) U from fun w hw =>
+        (hAd M (lt_of_lt_of_le hw (min_le_right _ _))).differentiableWithinAt).analyticOnNhd
+          hopen
+    let w : ℂ := (min (B N) (B M) - 1 : ℝ)
+    have hwN : w.re < B N := by dsimp [w]; linarith [min_le_left (B N) (B M)]
+    have hwM : w.re < B M := by dsimp [w]; linarith [min_le_right (B N) (B M)]
+    have hw : w ∈ U := lt_min (hwN.trans (hB N N le_rfl))
+      (hwM.trans (hB M M le_rfl))
+    have he : A N =ᶠ[𝓝 w] A M := by
+      filter_upwards [(isOpen_lt continuous_re continuous_const).mem_nhds hwN,
+        (isOpen_lt continuous_re continuous_const).mem_nhds hwM] with v hvN hvM
+      rw [hAB N hvN, hAB M hvM]
+    exact hdN.eqOn_of_preconnected_of_eventuallyEq hdM
+      (convex_halfSpace_re_lt _).isPreconnected hw he (lt_min hN hM)
+  have hex : ∀ z : ℂ, ∃ N, z.re < (β N).re := fun z =>
+    (hβinf.eventually_gt_atTop z.re).exists
+  let H : ℂ → ℂ := fun z => A (Nat.find (hex z)) z
+  have key (z : ℂ) (N : ℕ) (hN : z.re < (β N).re) : H z = A N z :=
+    hAA _ N (Nat.find_spec (hex z)) hN
+  refine ⟨H, fun z => ?_, fun N z hz => ?_⟩
+  · let N := Nat.find (hex z)
+    have hz : z.re < (β N).re := Nat.find_spec (hex z)
+    refine (hAd N hz).congr_of_eventuallyEq ?_
+    filter_upwards [(isOpen_lt continuous_re continuous_const).mem_nhds hz] with w hw
+    exact key w N hw
+  · simpa only [oscillatoryMellinContinuationAtTop, A, r, φ, F] using key z N hz
+
+/-- DLMF §2.5(ii), case `κ ≠ 0`: if `h(t) ∼ exp(iκt^p) ∑ bₛ t^{-βₛ}` as `t → ∞` (2.5.18) with
+real `κ ≠ 0`, `p > 0`, and `ℜβₛ → ∞`, then `𝓜h₂` continues analytically from `ℜz < ℜβ₀` to an
+entire function. -/
+@[dlmf 2.5.E18, dlmf 2.5.ii]
+theorem mellin_truncHigh_continuation_osc {h : ℝ → ℂ} {b : ℕ → ℂ} {β : ℕ → ℂ} {κ p : ℝ}
+    (hκ : κ ≠ 0) (hp : 0 < p) (hhc : LocallyIntegrableOn h (Ioi 0))
+    (hβinf : Tendsto (fun s => (β s).re) atTop atTop)
+    (hh : HasAsymptoticExpansion atTop
+      (fun s (t : ℝ) => Complex.exp (I * κ * ((t ^ p : ℝ) : ℂ)) * (t : ℂ) ^ (-β s)) b h) :
+    ∃ H : ℂ → ℂ, (∀ z : ℂ, z.re < (β 0).re → H z = mellin (mellinTruncHigh h) z) ∧
+      Differentiable ℂ H := by
+  obtain ⟨H, hHd, hkey⟩ := exists_entire_oscillatoryMellinContinuationAtTop hκ hp hhc hβinf hh
+  refine ⟨H, fun z hz => ?_, hHd⟩
+  rw [hkey 0 z hz]
+  simp [oscillatoryMellinContinuationAtTop]
+
+/-- With no subtracted oscillatory terms, the continued tail is the original totalized
+Mellin tail. No convergence or asymptotic hypothesis is needed for this equality. -/
+theorem oscillatoryMellinContinuationAtTop_zero (h : ℝ → ℂ) (κ p : ℝ) (b β : ℕ → ℂ) (z : ℂ) :
+    oscillatoryMellinContinuationAtTop h κ p b β 0 z = mellin (mellinTruncHigh h) z := by
+  simp [oscillatoryMellinContinuationAtTop]
+
+/-- Oscillatory finite continuations are independent of the truncation length wherever
+the two enlarged domains overlap. -/
+theorem oscillatoryMellinContinuationAtTop_eq {h : ℝ → ℂ} {b β : ℕ → ℂ} {κ p : ℝ}
+    (hκ : κ ≠ 0) (hp : 0 < p) (hhc : LocallyIntegrableOn h (Ioi 0))
+    (hβinf : Tendsto (fun s => (β s).re) atTop atTop)
+    (hh : HasAsymptoticExpansion atTop
+      (fun s (t : ℝ) => exp (I * κ * (t ^ p : ℝ)) * (t : ℂ) ^ (-β s)) b h)
+    (N M : ℕ) {z : ℂ} (hN : z.re < (β N).re) (hM : z.re < (β M).re) :
+    oscillatoryMellinContinuationAtTop h κ p b β N z =
+      oscillatoryMellinContinuationAtTop h κ p b β M z := by
+  obtain ⟨H, hHd, hkey⟩ := exists_entire_oscillatoryMellinContinuationAtTop hκ hp hhc hβinf hh
+  exact (hkey N z hN).symm.trans (hkey M z hM)
+
+/-- Each finite oscillatory Mellin continuation is holomorphic throughout its enlarged
+half-plane, including all exponent locations. -/
+theorem differentiableAt_oscillatoryMellinContinuationAtTop {h : ℝ → ℂ} {b β : ℕ → ℂ} {κ p : ℝ}
+    (hκ : κ ≠ 0) (hp : 0 < p) (hhc : LocallyIntegrableOn h (Ioi 0))
+    (hβinf : Tendsto (fun s => (β s).re) atTop atTop)
+    (hh : HasAsymptoticExpansion atTop
+      (fun s (t : ℝ) => exp (I * κ * (t ^ p : ℝ)) * (t : ℂ) ^ (-β s)) b h)
+    (N : ℕ) {z : ℂ} (hz : z.re < (β N).re) :
+    DifferentiableAt ℂ (oscillatoryMellinContinuationAtTop h κ p b β N) z := by
+  obtain ⟨H, hHd, hkey⟩ := exists_entire_oscillatoryMellinContinuationAtTop hκ hp hhc hβinf hh
+  refine (hHd z).congr_of_eventuallyEq ?_
+  filter_upwards [(isOpen_lt continuous_re continuous_const).mem_nhds hz] with w hw
+  exact (hkey N w hw).symm
+
+/-- In the original half-plane the finite oscillatory continuation agrees with the
+absolutely convergent high-tail Mellin integral. -/
+theorem oscillatoryMellinContinuationAtTop_eq_mellin {h : ℝ → ℂ} {b β : ℕ → ℂ} {κ p : ℝ}
+    (hκ : κ ≠ 0) (hp : 0 < p) (hhc : LocallyIntegrableOn h (Ioi 0))
+    (hβ : StrictMono fun s => (β s).re)
+    (hβinf : Tendsto (fun s => (β s).re) atTop atTop)
+    (hh : HasAsymptoticExpansion atTop
+      (fun s (t : ℝ) => exp (I * κ * (t ^ p : ℝ)) * (t : ℂ) ^ (-β s)) b h)
+    (N : ℕ) {z : ℂ} (hz : z.re < (β 0).re) :
+    oscillatoryMellinContinuationAtTop h κ p b β N z = mellin (mellinTruncHigh h) z := by
+  rw [oscillatoryMellinContinuationAtTop_eq hκ hp hhc hβinf hh N 0
+    (hz.trans_le (hβ.monotone (Nat.zero_le N))) hz, oscillatoryMellinContinuationAtTop_zero]
+
+/-- For an exact single oscillatory power, one subtraction leaves precisely its entire
+model transform. This equality also checks the positive-power substitution factor. -/
+theorem oscillatoryMellinContinuationAtTop_one_term (κ p : ℝ) (β d z : ℂ) :
+    oscillatoryMellinContinuationAtTop (fun t => (exp (I * κ * (t ^ p : ℝ)) * (t : ℂ) ^ (-β)) • d)
+      κ p (fun _ => d) (fun _ => β) 1 z =
+        (d * (p : ℂ)⁻¹) * oscillatoryMellinTail κ ((z - β) / p) := by
+  simp [oscillatoryMellinContinuationAtTop, mellinTruncHigh, mellinTruncLow, mellin]
+
+/-- Adding the low tail to the entire oscillatory continuation gives a holomorphic
+full continuation on the half-plane of convergence of that low tail. Its finite formulas
+agree on their domains; in particular the zero-term formula is the sum of both Mellin tails. -/
+theorem exists_differentiableOn_oscillatoryMellinContinuation {h : ℝ → ℂ}
+    {b β : ℕ → ℂ} {κ p c : ℝ} (hκ : κ ≠ 0) (hp : 0 < p)
+    (hhc : LocallyIntegrableOn h (Ioi 0))
+    (hc : h =O[𝓝[>] 0] fun t => t ^ c)
+    (hβinf : Tendsto (fun s => (β s).re) atTop atTop)
+    (hh : HasAsymptoticExpansion atTop
+      (fun s (t : ℝ) => exp (I * κ * (t ^ p : ℝ)) * (t : ℂ) ^ (-β s)) b h) :
+    ∃ G : ℂ → ℂ, DifferentiableOn ℂ G {z | -c < z.re} ∧
+      ∀ N z, -c < z.re → z.re < (β N).re →
+        G z = mellin (mellinTruncLow h) z +
+          oscillatoryMellinContinuationAtTop h κ p b β N z := by
+  obtain ⟨H, hHd, hkey⟩ := exists_entire_oscillatoryMellinContinuationAtTop hκ hp hhc hβinf hh
+  refine ⟨fun z => mellin (mellinTruncLow h) z + H z, ?_, ?_⟩
+  · intro z hz
+    exact ((mellinTruncLow_mellin_of_isBigO hhc hc hz).2.add (hHd z)).differentiableWithinAt
+  · intro N z _ hz
+    change mellin (mellinTruncLow h) z + H z = _
+    rw [hkey N z hz]
 
 end DLMF.AsymptoticApproximations
