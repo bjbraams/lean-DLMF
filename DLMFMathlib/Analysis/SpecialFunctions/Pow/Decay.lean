@@ -145,6 +145,41 @@ lemma add_rpow_le_mul_rpow_half {r t p : ℝ} (hr : 1 ≤ r) (ht : 0 ≤ t) (hp 
         ring
     _ ≤ _ := Real.rpow_le_rpow_of_nonpos (by positivity) hsq (by linarith)
 
+/-- A polynomial against an exponential has a uniform bound after rescaling. -/
+theorem pow_mul_exp_neg_le_mul_exp_neg_half (k : ℕ) {a u : ℝ} (ha : 0 < a) (hu : 0 ≤ u) :
+    u^k*Real.exp (-a*u) ≤ (k.factorial:ℝ)*(2/a)^k*Real.exp (-(a/2)*u) := by
+  have hp := Real.pow_div_factorial_le_exp ((a/2)*u) (by positivity) k
+  have hf : (0:ℝ) < k.factorial := Nat.cast_pos.mpr (Nat.factorial_pos k)
+  rw [div_le_iff₀ hf] at hp
+  have hmul := mul_le_mul_of_nonneg_right
+    (mul_le_mul_of_nonneg_left hp (show 0 ≤ (2/a)^k by positivity))
+    (Real.exp_pos (-a*u)).le
+  have he : Real.exp ((a/2)*u)*Real.exp (-a*u) = Real.exp (-(a/2)*u) := by
+    rw [← Real.exp_add]
+    congr 1
+    ring
+  have hc : (2/a)^k*((a/2)*u)^k = u^k := by
+    rw [← mul_pow]
+    field_simp
+  rw [hc] at hmul
+  calc u^k*Real.exp (-a*u) ≤ (2/a)^k *
+      (Real.exp ((a/2)*u) * k.factorial) * Real.exp (-a*u) := hmul
+    _ = (k.factorial:ℝ)*(2/a)^k *
+        (Real.exp ((a/2)*u)*Real.exp (-a*u)) := by ring
+    _ = _ := by rw [he]
+
+/-- Doubling the endpoint displacement increases its weight by a constant independent of `ξ`. -/
+theorem rpow_add_two_mul_le {r ξ u : ℝ} (hξ : 0 ≤ ξ) (hu : 0 < u) :
+    (ξ+2*u)^r ≤ 2^(max r 0) * (ξ+u)^r := by
+  have hpos : 0 < ξ+u := by linarith
+  rcases le_or_gt 0 r with hb | hb
+  · rw [max_eq_left hb]
+    calc (ξ+2*u)^r ≤ (2*(ξ+u))^r := by
+          apply Real.rpow_le_rpow (by positivity) (by linarith) hb
+      _ = _ := Real.mul_rpow (by norm_num) hpos.le
+  · rw [max_eq_right hb.le, Real.rpow_zero, one_mul]
+    exact Real.rpow_le_rpow_of_nonpos hpos (by linarith) hb.le
+
 end Real
 
 namespace Asymptotics

@@ -12,6 +12,7 @@ public import Mathlib.Analysis.SpecialFunctions.NonIntegrable
 public import Mathlib.Analysis.SpecialFunctions.Log.NegMulLog
 public import DLMF.Gamma.ComplexBinet
 public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
+public import DLMFMathlib.Analysis.Complex.IteratedDeriv
 
 /-!
 # Divergent integrals and the Stieltjes transform (DLMF §2.6(i)–(ii))
@@ -357,22 +358,6 @@ theorem functionPairing_eq_of_eq_one {f : ℝ → ℂ} {a : ℕ → ℂ}
         remainderPairing n (stieltjesRemainder f 1 a n) u := by
   sorry
 
-/-- Real iterated derivatives of the restriction of a holomorphic function to `ℝ`. -/
-private lemma iteratedDeriv_comp_ofReal_of_differentiableOn {Ψ : ℂ → ℂ} {U : Set ℂ}
-    (hU : IsOpen U) (hΨ : DifferentiableOn ℂ Ψ U) (k : ℕ) {t : ℝ} (ht : (t : ℂ) ∈ U) :
-    iteratedDeriv k (fun x : ℝ => Ψ x) t = iteratedDeriv k Ψ t := by
-  induction k generalizing t with
-  | zero => simp
-  | succ k ih =>
-    rw [iteratedDeriv_succ, iteratedDeriv_succ]
-    have hev : iteratedDeriv k (fun x : ℝ => Ψ x) =ᶠ[𝓝 t] fun x : ℝ => iteratedDeriv k Ψ x := by
-      filter_upwards [(hU.preimage Complex.continuous_ofReal).mem_nhds ht] with x hx using ih hx
-    rw [hev.deriv_eq]
-    have hd : DifferentiableAt ℂ (iteratedDeriv k Ψ) t := by
-      rw [iteratedDeriv_eq_iterate]
-      exact ((hΨ.analyticOnNhd hU).iterated_deriv k t ht).differentiableAt
-    exact hd.hasDerivAt.comp_ofReal.deriv
-
 /-- The iterated derivatives of `φ_ε(t) = e^{-εt}/(t+z)` (Leibniz rule). -/
 private lemma iteratedDeriv_stieltjesTestFunction (ε : ℝ) {z : ℂ} (n : ℕ) {t : ℝ}
     (ht : (t : ℂ) + z ≠ 0) :
@@ -391,7 +376,7 @@ private lemma iteratedDeriv_stieltjesTestFunction (ε : ℝ) {z : ℂ} (n : ℕ)
     funext x
     simp only [stieltjesTestFunction, Pi.mul_apply, f, g, one_mul]
     rw [div_eq_mul_inv, neg_mul]
-  rw [he, iteratedDeriv_comp_ofReal_of_differentiableOn hU hΨ n ht]
+  rw [he, Complex.iteratedDeriv_comp_ofReal_of_differentiableOn hU hΨ n ht]
   have hfc : ContDiffAt ℂ n f t := by fun_prop
   have hgc : ContDiffAt ℂ n g t :=
     (contDiffAt_inv ℂ (by simpa using ht)).comp _ (by fun_prop)

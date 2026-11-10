@@ -4,6 +4,35 @@ The project formalizes material from Andrews, Askey and Roy, *Special Functions*
 (1999), and the NIST Digital Library of Mathematical Functions, using Mathlib.
 Existing module copyright and authorship notices remain authoritative.
 
+## Chapters 6–8 and 12 proofs (2026-11-10)
+
+The parabolic-cylinder zero proof uses Mathlib's Sturm comparison and Rolle theorems with
+the project's proved differential equation and positive-axis asymptotics. Parameter zeros
+of the Tricomi incomplete Gamma use the project's convergent partial-fraction series and
+Mathlib's intermediate-value and monotone-series comparison theorems.
+
+The incomplete-Beta Mellin–Barnes proof uses Mathlib's Fourier Parseval theorem, the
+project's Gamma transform, and its regularized Kummer integral. The indented Gamma formula
+uses Mathlib's dominated-convergence and analytic-uniqueness theorems with the project's
+proved Stieltjes integral. Its signed Cauchy boundary and principal-value holomorphy proofs
+are local developments; no external proof body was copied.
+
+The inverse-erfc estimates combine the project's Gaussian remainder bounds with TauCeti's
+inverse-error-function identities. The first uniform-Gamma coefficient series uses
+Mathlib's analytic divided-difference and Taylor APIs and the project's proved analytic
+inverse saddle coordinate. The decreasing-exponential integral substitution is an adapter
+to Mathlib's one-dimensional change-of-variables theorem. The real-axis iterated-derivative
+bridge is moved from the project's Stieltjes-transform development without changing its proof.
+
+The positive-order uniform incomplete-Beta expansion combines Mathlib's Cauchy derivative
+bound, its Taylor remainder theorem, and elementary Gamma-moment estimates. The exact
+endpoint integral is obtained from the one-dimensional exponential substitution. The new
+moment and kernel bounds are local proofs and do not use the admitted uniform expansion.
+
+The three source-check counterexamples use the project's canonical definitions and proved
+recurrences, Mathlib's harmonic-series divergence and uniqueness of sums, and exact Beta
+integral comparisons. They do not rely on the statements being checked.
+
 ## Asymptotic roadmap proofs (2026-11-09)
 
 The exterior Lagrange coefficient formula extends the project's formal Bürmann extraction

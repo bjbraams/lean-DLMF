@@ -48,6 +48,8 @@ with the coefficient recursions, Paris's transition expansion and the inversion 
 * `gammaUniformC_first`: DLMF 8.12.9.
 * `gammaUniformC_maclaurin`, `gammaUniformD_recurrence`, `gammaUniformInverseLog_spec`,
   `gammaUniformAlpha_hasSum`: DLMF 8.12.11–8.12.13.
+* `gammaUniformC_maclaurin_zero`, `gammaUniformD_zero_zero`, `gammaUniformD_zero_succ`:
+  the full-disk series and inverse-series coefficients for `c₀`.
 * `gammaUniformAlpha_printed`, `gammaUniformC_at_zero_printed`: the printed coefficients of
   DLMF 8.12.14 and 8.12.17.
 * `regularizedIncompleteGammaQ_diagonal_uniform_asymptotic`,
@@ -1011,6 +1013,131 @@ theorem gammaUniformAlpha_recurrence (n : ℕ) :
   filter_upwards [Metric.ball_mem_nhds (0 : ℂ)
       (show 0 < 2 * Real.sqrt π by positivity)] with z hz
   exact deriv_exp_gammaUniformInverseLog_mul_sub_one (by simpa using hz)
+
+/-- The quadratic coefficient of the inverse saddle-coordinate series is `1/3`. -/
+theorem gammaUniformAlpha_two : gammaUniformAlpha 2 = 1/3 := by
+  have h := gammaUniformAlpha_recurrence 0
+  norm_num at h
+  exact h
+
+/-- The zeroth uniform coefficient in the inverse saddle coordinate is the removable
+difference quotient of the derivative of the inverse λ coordinate, minus one. -/
+theorem IncompleteGammaUniform.gammaUniformC_zero_comp_eq_dslope {η : ℂ}
+    (hη : ‖η‖ < 2*Real.sqrt π) :
+    gammaUniformC 0 (gammaUniformInverseLog η) =
+      dslope (deriv (fun η => exp (gammaUniformInverseLog η))) 0 η-1 := by
+  let f : ℂ → ℂ := fun η => exp (gammaUniformInverseLog η)
+  have hD1 : deriv f 0 = 1 := by
+    simpa [gammaUniformAlpha, f, iteratedDeriv_one] using gammaUniformAlpha_one
+  have hD2 : deriv (deriv f) 0 = 2/3 := by
+    have h := gammaUniformAlpha_two
+    norm_num [gammaUniformAlpha, iteratedDeriv_succ, iteratedDeriv_one] at h
+    change deriv (deriv f) 0 / 2 = 1/3 at h
+    linear_combination 2*h
+  by_cases hη0 : η=0
+  · subst η
+    simp only [gammaUniformInverseLog_spec.1, gammaUniformC, ↓reduceIte, dslope_same]
+    change -(1:ℂ)/3 = deriv (deriv f) 0-1
+    rw [hD2]
+    norm_num
+  have hs := gammaUniformInverseLog_spec.2.2 η hη
+  have hw0 : gammaUniformInverseLog η ≠ 0 := by
+    intro hw0
+    have h := hs.2.2
+    rw [hw0, gammaUniformEta_normalization.2] at h
+    exact hη0 h.symm
+  have hE := IncompleteGammaUniform.exp_sub_one_ne_zero hs.2.1 hw0
+  have hode := deriv_exp_gammaUniformInverseLog_mul_sub_one hη
+  change deriv f η*(f η-1) = η*f η at hode
+  rw [gammaUniformC, ite_eq_right hw0, hs.2.2]
+  change 1/(f η-1)-1/η = dslope (deriv f) 0 η-1
+  rw [dslope_of_ne _ hη0, slope_def_field, hD1, sub_zero]
+  change f η-1 ≠ 0 at hE
+  field_simp [hη0, hE]
+  linear_combination -hode
+
+/-- The zeroth uniform coefficient is holomorphic in `η` on the full Maclaurin disk. -/
+theorem IncompleteGammaUniform.differentiableOn_gammaUniformC_zero_comp :
+    DifferentiableOn ℂ (fun η => gammaUniformC 0 (gammaUniformInverseLog η))
+      (Metric.ball 0 (2*Real.sqrt π)) := by
+  have hd : DifferentiableOn ℂ (fun η => exp (gammaUniformInverseLog η))
+      (Metric.ball 0 (2*Real.sqrt π)) := by
+    intro z hz
+    exact ((gammaUniformInverseLog_spec.2.2 z (by simpa using hz)).1.cexp).differentiableWithinAt
+  have hdd : DifferentiableOn ℂ (deriv (fun η => exp (gammaUniformInverseLog η)))
+      (Metric.ball 0 (2*Real.sqrt π)) := by
+    intro z hz
+    exact ((hd.analyticOnNhd Metric.isOpen_ball).deriv z hz).differentiableAt.differentiableWithinAt
+  have h := ((differentiableOn_dslope (Metric.ball_mem_nhds (0:ℂ)
+    (show 0 < 2*Real.sqrt π by positivity))).mpr hdd).sub_const 1
+  exact h.congr fun η hη =>
+    IncompleteGammaUniform.gammaUniformC_zero_comp_eq_dslope (by simpa using hη)
+
+/-- The Maclaurin expansion of the zeroth uniform coefficient converges throughout
+`‖η‖ < 2√π` (DLMF 8.12.11, `k = 0`). -/
+theorem gammaUniformC_maclaurin_zero {η : ℂ} (hη : ‖η‖ < 2*Real.sqrt π) :
+    HasSum (fun n : ℕ => gammaUniformD 0 n*η^n)
+      (gammaUniformC 0 (gammaUniformInverseLog η)) := by
+  have h := Complex.hasSum_taylorSeries_on_ball
+    IncompleteGammaUniform.differentiableOn_gammaUniformC_zero_comp
+    (by simpa using hη)
+  convert h using 1
+  funext n
+  simp only [gammaUniformD, sub_zero, smul_eq_mul, div_eq_mul_inv]
+  ring
+
+/-- The constant Maclaurin coefficient of `c₀` is `-1/3`. -/
+theorem gammaUniformD_zero_zero : gammaUniformD 0 0 = -1/3 := by
+  simp [gammaUniformD, gammaUniformInverseLog_spec.1, gammaUniformC]
+
+/-- The positive-degree Maclaurin coefficients of `c₀` are determined by the inverse λ
+series (DLMF 8.12.12, first row). -/
+theorem gammaUniformD_zero_succ (n : ℕ) :
+    gammaUniformD 0 (n+1) = (n+3)*gammaUniformAlpha (n+3) := by
+  let f : ℂ → ℂ := fun η => exp (gammaUniformInverseLog η)
+  let G : ℂ → ℂ := fun η => gammaUniformC 0 (gammaUniformInverseLog η)
+  have hf : AnalyticAt ℂ f 0 := by
+    have hd : DifferentiableOn ℂ f (Metric.ball 0 (2*Real.sqrt π)) := by
+      intro z hz
+      exact ((gammaUniformInverseLog_spec.2.2 z (by simpa using hz)).1.cexp).differentiableWithinAt
+    exact hd.analyticOnNhd Metric.isOpen_ball 0 (by simp; positivity)
+  have hG : AnalyticAt ℂ G 0 :=
+    IncompleteGammaUniform.differentiableOn_gammaUniformC_zero_comp.analyticOnNhd
+      Metric.isOpen_ball 0
+      (by simp; positivity)
+  have hD1 : deriv f 0 = 1 := by
+    simpa [gammaUniformAlpha, f, iteratedDeriv_one] using gammaUniformAlpha_one
+  have he : (fun η => η*G η) =ᶠ[𝓝 (0:ℂ)] fun η => deriv f η-1-η := by
+    filter_upwards [Metric.ball_mem_nhds (0:ℂ)
+      (show 0 < 2*Real.sqrt π by positivity)] with η hη
+    have h := sub_smul_dslope (deriv f) 0 η
+    rw [sub_zero, smul_eq_mul, hD1] at h
+    have hg := IncompleteGammaUniform.gammaUniformC_zero_comp_eq_dslope (by simpa using hη)
+    change G η = dslope (deriv f) 0 η-1 at hg
+    rw [hg]
+    linear_combination h
+  have h := he.iteratedDeriv_eq (n+2)
+  rw [iteratedDeriv_fun_mul (f := fun z : ℂ => z) (g := G) contDiffAt_id hG.contDiffAt,
+    iteratedDeriv_fun_sub (f := fun z => deriv f z-1) (g := fun z : ℂ => z)
+      (hf.deriv.sub analyticAt_const).contDiffAt contDiffAt_id,
+    iteratedDeriv_fun_sub (f := deriv f) (g := fun _ : ℂ => 1)
+      hf.deriv.contDiffAt contDiffAt_const] at h
+  simp only [iteratedDeriv_fun_id_zero, iteratedDeriv_const] at h
+  have hn1 : n+2 ≠ 1 := by omega
+  have hm : n+2-1 = n+1 := by omega
+  simp [hn1, mul_ite, ite_mul, Finset.sum_ite_eq', hm] at h
+  rw [← iteratedDeriv_succ'] at h
+  change iteratedDeriv (n+1) G 0 / ((n+1).factorial:ℂ) =
+    (n+3)*(iteratedDeriv (n+3) f 0 / ((n+3).factorial:ℂ))
+  have hfac : ((n+3).factorial:ℂ) =
+      (n+3)*(n+2)*((n+1).factorial:ℂ) := by
+    rw [show n+3=(n+1+1)+1 by omega, Nat.factorial_succ, Nat.factorial_succ]
+    push_cast
+    ring
+  rw [← h, hfac]
+  have hn2 : (n:ℂ)+2 ≠ 0 := by exact_mod_cast (show n+2 ≠ 0 by omega)
+  have hn3 : (n:ℂ)+3 ≠ 0 := by exact_mod_cast (show n+3 ≠ 0 by omega)
+  field_simp [hn2, hn3]
 
 /-- Estimate under the stated parameter and domain assumptions: `∀ n < 6, gammaUniformAlpha
 (n+3)=([1/36,-1/270,1/4320,1/17010,-139/5443200,1/204120] : List ℂ)[n]!`. -/

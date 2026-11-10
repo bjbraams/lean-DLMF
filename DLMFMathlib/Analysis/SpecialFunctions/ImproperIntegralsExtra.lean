@@ -23,6 +23,8 @@ integral.
   `(0, ∞)` for `Re b > 0` and `Re z > 0`.
 * `integrableOn_and_integral_inv_one_add_sub_inv_one_add_mul_div`: the Frullani-type
   integral `∫₀^∞ ((1+τ)⁻¹ - (1+xτ)⁻¹)/τ dτ = log x` for `x > 0`, with integrability.
+* `MeasureTheory.integral_comp_exp_neg_Ioi`, `MeasureTheory.integrableOn_comp_exp_neg_Ioi`:
+  the decreasing exponential substitution and its integrability equivalence.
 -/
 
 @[expose] public section
@@ -110,3 +112,33 @@ theorem integrableOn_and_integral_inv_one_add_sub_inv_one_add_mul_div {x : ℝ} 
   refine ⟨hint, ?_⟩
   rw [integral_Ioi_of_hasDerivAt_of_tendsto hcont hderiv hint hlim]
   simp [hG]
+
+namespace MeasureTheory
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+/-- The decreasing exponential substitutes the positive half-line for an interval with
+left endpoint zero. -/
+theorem integral_comp_exp_neg_Ioi (g : ℝ → E) (a : ℝ) :
+    (∫ t : ℝ in Ioi a, Real.exp (-t) • g (Real.exp (-t))) =
+      ∫ y : ℝ in Ioo 0 (Real.exp (-a)), g y := by
+  have him : (fun t : ℝ => Real.exp (-t)) '' Ioi a = Ioo 0 (Real.exp (-a)) := by
+    rw [← Function.comp_def, image_comp, image_neg_Ioi, Real.image_exp_Iio]
+  symm
+  rw [← him]
+  simpa [abs_mul, abs_of_pos (Real.exp_pos _)] using
+    integral_image_eq_integral_abs_deriv_smul measurableSet_Ioi
+      (fun t _ => ((hasDerivAt_neg t).exp).hasDerivWithinAt)
+      (fun x _ y _ h => neg_injective (Real.exp_injective h)) g
+
+/-- Integrability is preserved by the decreasing exponential with its Jacobian factor. -/
+theorem integrableOn_comp_exp_neg_Ioi (g : ℝ → E) (a : ℝ) :
+    IntegrableOn (fun t : ℝ => Real.exp (-t) • g (Real.exp (-t))) (Ioi a) ↔
+      IntegrableOn g (Ioo 0 (Real.exp (-a))) := by
+  have him : (fun t : ℝ => Real.exp (-t)) '' Ioi a = Ioo 0 (Real.exp (-a)) := by
+    rw [← Function.comp_def, image_comp, image_neg_Ioi, Real.image_exp_Iio]
+  symm
+  rw [← him]
+  simpa [abs_mul, abs_of_pos (Real.exp_pos _)] using
+    integrableOn_image_iff_integrableOn_abs_deriv_smul measurableSet_Ioi
+      (fun t _ => ((hasDerivAt_neg t).exp).hasDerivWithinAt)
+      (fun x _ y _ h => neg_injective (Real.exp_injective h)) g
+end MeasureTheory

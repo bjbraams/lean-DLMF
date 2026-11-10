@@ -847,13 +847,13 @@ theorem tricomiIncompleteGamma_sphericalI_series (a z : ℂ) :
         (tricomiIncompleteGamma a z) := by
   exact IncompleteGammaSphericalSeries.hasSum_series a z
 
-/-- The series with terms `(fun n : ℕ => (x : ℂ)^a*exp (-x :
-ℂ)*DLMF.OrthogonalPolynomials.laguerrePolynomialL a n x/(n+1))` converges to `(upperIncompleteGamma
-a x)`. -/
+/-- The Laguerre expansion of the upper incomplete Gamma function, DLMF 8.7.6, for
+`Re a < 1/2` and positive real `x`. The Laguerre polynomials use their polynomial
+continuation in the parameter, including negative integers. -/
 @[dlmf 8.7.E6]
 theorem upperIncompleteGamma_laguerre_series {a : ℂ} (ha : a.re < 1/2) {x : ℝ} (hx : 0 < x) :
     HasSum (fun n : ℕ =>
-        (x : ℂ)^a*exp (-x : ℂ)*DLMF.OrthogonalPolynomials.laguerrePolynomialL a n x/(n+1))
+        (x : ℂ)^a*exp (-x : ℂ)*DLMF.OrthogonalPolynomials.laguerreExtended a n x/(n+1))
         (upperIncompleteGamma a x) := by
   sorry
 

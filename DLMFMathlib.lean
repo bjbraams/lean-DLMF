@@ -61,6 +61,7 @@ public import DLMFMathlib.Analysis.Complex.ParameterContinuity
 public import DLMFMathlib.Analysis.Complex.RoucheFilledHull
 public import DLMFMathlib.Analysis.Complex.LaurentAnnulus
 public import DLMFMathlib.Analysis.Complex.VerticalLineShift
+public import DLMFMathlib.Analysis.Complex.IteratedDeriv
 public import DLMFMathlib.Analysis.Complex.VerticalResidues
 public import DLMFMathlib.Analysis.Complex.VerticalResidueExamples
 public import DLMFMathlib.Analysis.Complex.MeromorphicUniqueness
@@ -104,6 +105,7 @@ public import DLMFMathlib.Analysis.Integral.Improper
 public import DLMFMathlib.Analysis.Integral.ImproperFourier
 public import DLMFMathlib.Analysis.Integral.LaplaceRay
 public import DLMFMathlib.Analysis.Integral.PrincipalValue
+public import DLMFMathlib.Analysis.Integral.CauchyBoundary
 public import DLMFMathlib.Analysis.Integral.PrincipalValueLogarithm
 public import DLMFMathlib.Analysis.Integral.PrincipalValueExcision
 public import DLMFMathlib.Analysis.Integral.PrincipalValueLevelSets
@@ -244,6 +246,7 @@ the namespaces of the Mathlib APIs they extend. These modules do not import `DLM
 * `DLMFMathlib.Analysis.Fourier.ImproperConvergence`: uniform improper Fourier convergence.
 * `DLMFMathlib.Analysis.Complex.MeromorphicUniqueness`: meromorphic continuation uniqueness.
 * `DLMFMathlib.Analysis.Complex.VerticalResidueExamples`: a rational vertical contour example.
+* `DLMFMathlib.Analysis.Complex.IteratedDeriv`: iterated derivatives on the real axis.
 * `DLMFMathlib.Analysis.Complex.VerticalResidues`: vertical shifts with Tau Ceti residues.
 * `DLMFMathlib.Analysis.Complex.LaplaceInversion`: inverse Laplace contour shifts and bounds.
 * `DLMFMathlib.Analysis.Integral.RayLaplace`: rotated Laplace transforms on logarithmic strips.
@@ -416,6 +419,7 @@ the namespaces of the Mathlib APIs they extend. These modules do not import `DLM
   `∫_{f(s)} du/√Q(u) = 2 · vol(s)` when `|f'| = 2√(Q ∘ f)`.
 * `DLMFMathlib.Analysis.Complex.IdentityTheoremStrip`: the identity theorem on the strip
   `0 < Re z < 1` from agreement on `(0, 1)`.
+* `DLMFMathlib.Analysis.Integral.CauchyBoundary`: boundary limits of Cauchy integrals.
 * `DLMFMathlib.Analysis.Integral.PrincipalValueLogarithm`: regularized logarithmic kernels.
 * `DLMFMathlib.Analysis.Integral.PrincipalValueExcision`: principal values under asymmetric
   excision; the change of variables `t ↦ K/t`.

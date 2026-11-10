@@ -3,6 +3,7 @@ module -- shake: keep-all
 public import DLMF.ErrorFunctions.AnalyticProperties
 public import DLMF.ErrorFunctions.Relations
 public import DLMF.ErrorFunctions.Series
+public import DLMF.ErrorFunctions.InverseAsymptotics
 public import DLMF.ErrorFunctions.InverseGeneralized
 public import DLMF.ErrorFunctions.Repeated
 public import DLMF.ErrorFunctions.Voigt

@@ -7,6 +7,7 @@ module -- shake: keep-all
 
 public import DLMF.ParabolicCylinder.Weber
 public import DLMF.ParabolicCylinder.Integrals
+public import DLMF.ParabolicCylinder.RealZeros
 public import DLMF.ParabolicCylinder.AsymptoticsZeros
 public import DLMF.ParabolicCylinder.SectorAsymptotics
 public import DLMF.ParabolicCylinder.Uniform

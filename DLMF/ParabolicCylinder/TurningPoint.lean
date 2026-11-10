@@ -7,6 +7,7 @@ module
 
 public import DLMF.Airy.Zeros
 public import DLMF.ParabolicCylinder.Uniform
+public import DLMF.ParabolicCylinder.RealZeros
 
 /-!
 # Turning-point expansions and large-parameter zeros of parabolic cylinder functions
@@ -128,13 +129,71 @@ def pcfDescendingZero (a : ℝ) (isDeriv : Bool) (s : ℕ) : ℝ :=
       F x=0 ∧
       ({y : ℝ | x < y ∧ F y=0}:Set ℝ).ncard=s-1)
 
+set_option maxHeartbeats 800000 in
 /-- The stated relation follows from the given hypotheses: `∀ᶠ μ : ℝ in atTop, let x`. -/
 theorem pcfDescendingZero_eventually (s : ℕ) (hs : 0 < s) (isDeriv : Bool) :
     ∀ᶠ μ : ℝ in atTop, let x:=pcfDescendingZero (-μ^2/2) isDeriv s;
         let F : ℝ → ℂ:=if isDeriv then fun x => parabolicCylinderUDeriv (-μ^2/2) x
           else fun x => parabolicCylinderU (-μ^2/2) x
         F x=0 ∧ Set.Finite {y : ℝ | x < y ∧ F y=0} ∧ ({y : ℝ | x < y ∧ F y=0}:Set ℝ).ncard=s-1 := by
-  sorry
+  have hmany : ∀ᶠ μ : ℝ in atTop, ∃ z : Fin s → ℝ, StrictMono z ∧
+      (∀ j, 0 < z j) ∧ ∀ j,
+        (if isDeriv then parabolicCylinderUDeriv ((-μ^2/2:ℝ):ℂ) (z j)
+          else parabolicCylinderU ((-μ^2/2:ℝ):ℂ) (z j)) = 0 := by
+    cases isDeriv
+    · exact CylinderRealZeros.eventually_strictMono_positive_zeros s
+    · exact CylinderRealZeros.eventually_strictMono_positive_derivative_zeros s
+  filter_upwards [hmany] with μ hμ
+  let F : ℝ → ℂ := if isDeriv then fun x => parabolicCylinderUDeriv ((-μ^2/2:ℝ):ℂ) x
+    else fun x => parabolicCylinderU ((-μ^2/2:ℝ):ℂ) x
+  have hfin : {x : ℝ | 0 < x ∧ F x = 0}.Finite := by
+    cases isDeriv
+    · exact CylinderRealZeros.finite_zeros_Ioi (-μ^2/2) 0
+    · exact CylinderRealZeros.finite_derivative_zeros_Ioi (-μ^2/2) 0
+  let f := hfin.toFinset
+  let e := f.orderEmbOfFin rfl
+  have he : ∀ j, 0 < e j ∧ F (e j) = 0 := by
+    intro j
+    exact hfin.mem_toFinset.mp (f.orderEmbOfFin_mem rfl j)
+  have hcard : s ≤ f.card := by
+    obtain ⟨z, hz, hzpos, hz0⟩ := hμ
+    have hmem : ∀ j, z j ∈ f := by
+      intro j
+      refine hfin.mem_toFinset.mpr ⟨hzpos j, ?_⟩
+      simpa only [F, ite_apply] using hz0 j
+    have h := Finset.card_le_card_of_injOn z (s := Finset.univ)
+      (fun j _ => hmem j) hz.injective.injOn
+    simpa using h
+  let i : Fin f.card := ⟨f.card-s, by omega⟩
+  have hset : {y : ℝ | e i < y ∧ F y = 0} = e '' Set.Ioi i := by
+    ext y
+    constructor
+    · intro hy
+      have hyf : y ∈ f := hfin.mem_toFinset.mpr ⟨(he i).1.trans hy.1, hy.2⟩
+      have hyr : y ∈ Set.range e := by
+        rw [Finset.range_orderEmbOfFin]
+        exact hyf
+      obtain ⟨j, rfl⟩ := hyr
+      exact ⟨j, e.lt_iff_lt.mp hy.1, rfl⟩
+    · rintro ⟨j, hj, rfl⟩
+      exact ⟨e.strictMono hj, (he j).2⟩
+  have htcard : ({y : ℝ | e i < y ∧ F y = 0} : Set ℝ).ncard = s-1 := by
+    rw [hset, Set.ncard_image_of_injective _ e.injective]
+    rw [← Finset.coe_Ioi, Set.ncard_coe_finset, Fin.card_Ioi]
+    dsimp [i]
+    omega
+  have hex : ∃ x : ℝ, F x = 0 ∧ ({y : ℝ | x < y ∧ F y=0} : Set ℝ).ncard=s-1 :=
+    ⟨e i, (he i).2, htcard⟩
+  have hchosen := Classical.epsilon_spec hex
+  have htopfin : Set.Finite {y : ℝ | pcfDescendingZero (-μ^2/2) isDeriv s < y ∧ F y=0} := by
+    cases isDeriv
+    · exact CylinderRealZeros.finite_zeros_Ioi (-μ^2/2) (pcfDescendingZero (-μ^2/2) false s)
+    · exact CylinderRealZeros.finite_derivative_zeros_Ioi (-μ^2/2)
+          (pcfDescendingZero (-μ^2/2) true s)
+  have hparam : -(μ:ℂ)^2/2 = ((-μ^2/2:ℝ):ℂ) := by push_cast; ring
+  dsimp only
+  rw [hparam]
+  exact ⟨hchosen.1, htopfin, hchosen.2⟩
 
 /-- The first correction in the cylinder turning-point zero expansion, defined by its removable
 limit in the uniform zeta coordinate. -/

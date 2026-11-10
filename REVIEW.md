@@ -1,5 +1,105 @@
 # Mathematical review of the lean-DLMF project (formerly lean-AAR)
 
+## Chapters 6–8 and 12 proof round, 2026-11-10
+
+The baseline is commit `84ce46335483b5c848c591206e6766614d2a5d80`. The four chapter
+areas contained 56 admissions: one in Chapter 6, five in Chapter 7, 33 in Chapter 8 and
+17 in Chapter 12. Four original admissions are now proved without changing their statements:
+
+- `pcfDescendingZero_eventually`: positive real zeros and derivative zeros eventually
+  supply any prescribed finite descending-zero index. The proof combines Sturm comparison,
+  Rolle's theorem and finiteness of zero tails.
+- `tricomiIncompleteGamma_two_parameter_zeros_negative_x`: every interval between consecutive
+  nonpositive integer parameters contains a unique zero for fixed negative real argument.
+  A strictly decreasing partial-fraction series gives uniqueness; the endpoint signs give
+  existence. Two adjacent intervals give the original cardinality statement.
+- `regularizedIncompleteBeta_mellinBarnes` (8.17.10): Fourier transforms of the Gamma and
+  Kummer kernels and Fourier Parseval give the stated vertical integral, including its
+  convergence hypotheses.
+- `upperIncompleteGamma_indented_integral` (8.6.9): subtracting the value at the pole gives
+  the regular part of the signed Cauchy boundary limit. The principal value is holomorphic
+  for positive-real-part Laplace parameter. The positive-real formula then extends to the
+  original complex domain by analytic uniqueness, with both logarithmic branches retained.
+
+Following the approved positive-order Beta repair, the current total is 51 admissions:
+Chapter 6 has one, Chapter 7 five, Chapter 8 29,
+and Chapter 12 16. The declaration inventory is `reports/Chapters67812Admissions.tsv`.
+`ZerosIntegrals` remains a compatibility umbrella for the split `Zeros` and
+`IntegralTransforms` files. The general real-axis iterated-derivative bridge moves unchanged
+from its private Stieltjes-transform proof to `DLMFMathlib.Analysis.Complex.IteratedDeriv`.
+
+Additional independent proofs give the leading inverse-erfc asymptotic
+`invErfc(x)/sqrt(log(1/x)) → 1`, an explicit first Gaussian remainder bound, and the
+full-disk Maclaurin expansion of the first uniform incomplete-Gamma coefficient. The latter
+also identifies every `D(0,n)` with the corresponding inverse-saddle coefficient. The
+all-order inverse-erfc and uniform-Gamma admissions remain: the latter need an all-order
+bridge between the actual scaled-Gamma asymptotic coefficients and the inverse-saddle
+Taylor coefficients.
+
+The separate theorem `DLMF.Confluent.incompleteBeta_large_a_uniform_of_pos_order`
+proves the uniform endpoint expansion for fixed `b > 0` and every `N ≥ 1` independently.
+The corrected canonical theorem `DLMF.Statistical.incompleteBeta_large_a_uniform` now
+requires `hN : 1 ≤ N` and follows from this proof. Its proof gives a bound for every positive `a`:
+positive-order derivatives of the generating kernel are bounded uniformly on the
+nonnegative axis, Taylor's theorem bounds the kernel remainder, and the endpoint moments
+satisfy a uniform `F_N = O(a⁻ᴺ F₀)` comparison. The exact decreasing-exponential change of
+variables connects the Beta integral to those moments. The specialized integral bridge in
+the source check reuses the general proved bridge.
+
+Three defective variants have independently proved counterexamples:
+
+- `parabolicCylinderU_rotational_addition`: at `a = -1/2 + 2i`, `x = y = 0` and
+  `t = π/4`, its nonzero even terms have norms bounded below by a positive multiple
+  of `1/n`. The series cannot have a sum. The endpoint requires the strict real-part
+  condition or a terminating parameter. The certificate is
+  `RotationalAdditionEndpoint.not_hasSum_rotational_addition_endpoint` in
+  `DLMF/ParabolicCylinder/SourceChecks.lean`.
+- `upperIncompleteGamma_laguerre_series`: at `a = -1`, `x = 1`, the totalized
+  hypergeometric Laguerre realization vanishes in every positive degree. Its series
+  sums to `exp(-1)`, while the upper-Gamma recurrence and `Γ(0,1) > 0` show that
+  `Γ(-1,1) ≠ exp(-1)`. The intended polynomial continuation is already available as
+  `laguerreExtended`. The certificate is
+  `LaguerreSeries.not_hasSum_laguerrePolynomialL_neg_one_one` in
+  `DLMF/IncompleteGamma/SourceChecks.lean`.
+- `incompleteBeta_large_a_uniform`: at `b = 1/2`, `N = 0`, the ratio of the exact
+  Gamma-normalized integral to `F₀` is at least `sqrt(ξ)`, where `ξ = -log x`.
+  This contradicts uniformity for all `0 < x ≤ 1`. The certificate is
+  `BetaUniformEndpoint.not_incompleteBeta_large_a_uniform_zero` in the same file.
+  The positive-order formulation requires `1 ≤ N`.
+
+The owner approved the three statement repairs, and they are now applied. Canonical
+definitions and declaration names are preserved. The source checks retain the independent
+counterexamples to the defective variants and do not invoke the statements they refute.
+The applied edits are:
+
+- The rotational-addition statement retains the existing hypotheses and adds
+  `t = π/4 → |y.im| = x.re → a.re < -1/2 ∨ ∃ n : ℕ, a = -(n : ℂ)-1/2`.
+  This restricts only the boundary where the counterexample occurs, and retains terminating
+  parameters.
+- The Laguerre series replaces `DLMF.OrthogonalPolynomials.laguerrePolynomialL a n x` by
+  `DLMF.OrthogonalPolynomials.laguerreExtended a n x` in the Laguerre series.
+  This preserves the intended parameter domain and uses the canonical polynomial continuation.
+- The uniform Beta theorem adds `hN : 1 ≤ N` and uses the independently proved
+  `incompleteBeta_large_a_uniform_of_pos_order`. The endpoint definitions and lemmas move
+  unchanged into `BetaEndpointData`, so `BetaAsymptotics` can import the completed proof
+  through `BetaEndpointBounds` without a cycle. Its existing public import interface is preserved.
+
+The rotational-addition and Laguerre statements remain admitted after their repairs. The
+corrected Beta theorem closes one further baseline entry, bringing the proof-round total
+to five closed admissions, of which four retain their original statements.
+
+Validation after the repairs passed: the ordinary
+`lake build > /tmp/DLMF-build.log 2>&1` (15,812 jobs), strict direct checking of the five
+repaired source files and the audit script, and the retained
+`scripts/CheckChapters67812.lean` audit of 107 declarations. Every audited declaration uses
+only standard axioms (`propext`, `Classical.choice`, `Quot.sound`, or a subset), with no
+`sorryAx`. The admission scan agrees with the 51 remaining admitted rows in the inventory. The import
+survey passes with no foundational-layer violations, forbidden foundational-closure imports,
+missing modules or file cycles, and no new two-way area pairs (23 remain). All source files
+satisfy the 1,500-line limit, changed sources satisfy the 100-column limit, and
+`git diff --check` passes. No dependency pins, build settings or existing definition bodies
+were changed. No commits or external submissions were made.
+
 ## Asymptotic roadmap preparation, 2026-11-09
 
 The comparison is against `TauCetiProject/TauCetiRoadmap` revision

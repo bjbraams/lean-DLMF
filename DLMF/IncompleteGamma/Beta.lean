@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.IncompleteGamma.BetaBarnes
 public import DLMF.Core.Basic
 public import DLMF.Hypergeometric.ArgumentContinuation
 public import DLMF.Statistical.IncompleteBeta
@@ -255,7 +256,34 @@ theorem regularizedIncompleteBeta_mellinBarnes {a b x c : ℝ} (ha : 0 < a) (hb 
     (hc1 : c < 1) :
     HasIntegralWholeLine (fun y : ℝ => let s : ℂ := c+y*I; s^(-(a : ℂ))*(1-s)^(-(b : ℂ))/(s-x))
         (2*π*regularizedIncompleteBeta a b x/((x : ℂ)^(a : ℂ)*(1-x : ℂ)^(b : ℂ))) := by
-  sorry
+  have h := DLMF.Confluent.IncompleteBetaBarnes.integral_vertical ha hb hx hxc hc1
+  have hx1 : x < 1 := hxc.trans hc1
+  have hc : (x:ℂ) ∈ cutPlane := by
+    change 1-(x:ℂ) ∈ slitPlane
+    left
+    simp only [sub_re, one_re, ofReal_re]
+    linarith
+  have hbeta : regularizedIncompleteBeta a b x = Gamma ((a:ℂ)+b)/Gamma b *
+      (x:ℂ)^(a:ℂ)*(1-x:ℂ)^(b:ℂ) *
+      regularizedGaussHypergeometric 1 ((a:ℂ)+b) ((a:ℂ)+1) x := by
+    rw [regularizedIncompleteBeta, if_neg (by exact_mod_cast hx1.ne),
+      regularizedGaussHypergeometric_euler _ _ _ hc,
+      show (a:ℂ)+1-a-(1-b) = b by ring,
+      show (a:ℂ)+1-a = 1 by ring,
+      show (a:ℂ)+1-(1-b) = a+b by ring]
+    ring
+  have hx0 : (x:ℂ) ≠ 0 := ofReal_ne_zero.mpr hx.ne'
+  have h1x0 : (1-x:ℂ) ≠ 0 := by exact_mod_cast (sub_pos.mpr hx1).ne'
+  have hval : (∫ y : ℝ, let s : ℂ := c+y*I;
+      s^(-(a:ℂ))*(1-s)^(-(b:ℂ))/(s-x)) =
+      2*π*regularizedIncompleteBeta a b x/((x:ℂ)^(a:ℂ)*(1-x:ℂ)^(b:ℂ)) := by
+    rw [h.2, hbeta]
+    field_simp [cpow_ne_zero_iff.mpr (Or.inl hx0),
+      cpow_ne_zero_iff.mpr (Or.inl h1x0)]
+  refine ⟨_, _, intervalIntegral_tendsto_integral_Iic 0 h.1.integrableOn tendsto_id,
+    intervalIntegral_tendsto_integral_Ioi 0 h.1.integrableOn tendsto_id, ?_⟩
+  rw [intervalIntegral.integral_Iic_add_Ioi h.1.integrableOn h.1.integrableOn]
+  exact hval
 
 /-- The complementary argument x prime. -/
 @[dlmf 8.17.E11]

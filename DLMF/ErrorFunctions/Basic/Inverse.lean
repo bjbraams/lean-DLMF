@@ -21,6 +21,7 @@ public import Mathlib.Analysis.Calculus.InverseFunctionTheorem.Analytic
 * `Real.invErf_spec`, `Real.invErfc_spec`: the inverse identities.
 * `invErf_analyticAt`, `hasDerivAt_invErf`: analyticity and the derivative on `(-1, 1)`.
 * `invErf_nonneg`: `inverf x ≥ 0` on `[0, 1)`.
+* `Real.tendsto_invErfc_nhdsGT_zero`: `inverfc x → +∞` as `x → 0+`.
 
 ## Implementation notes
 
@@ -88,5 +89,17 @@ theorem invErf_nonneg {x : ℝ} (hx0 : 0 ≤ x) (hx1 : x < 1) : 0 ≤ Real.invEr
     (show (0 : ℝ) ∈ Ioo (-1 : ℝ) 1 by norm_num)
     (show x ∈ Ioo (-1 : ℝ) 1 from ⟨by linarith, hx1⟩) hx0
   simpa only [_root_.Real.erfInv_zero, Real.invErf] using h
+
+/-- The inverse complementary error function tends to positive infinity at zero from above. -/
+theorem Real.tendsto_invErfc_nhdsGT_zero : Tendsto Real.invErfc (𝓝[>] (0 : ℝ)) atTop := by
+  exact _root_.Real.tendsto_erfInv_nhdsLT_one.comp
+    (show Tendsto (fun x : ℝ => 1-x) (𝓝[>] (0 : ℝ)) (𝓝[<] 1) from
+      tendsto_nhdsWithin_iff.mpr ⟨by
+          have hc : Continuous (fun x : ℝ => 1-x) := by fun_prop
+          have ht : Tendsto (fun x : ℝ => 1-x) (𝓝 0) (𝓝 1) := by
+            simpa only [sub_zero] using hc.tendsto (0 : ℝ)
+          exact ht.mono_left nhdsWithin_le_nhds,
+        by filter_upwards [self_mem_nhdsWithin] with x hx; simp only [mem_Ioi] at hx;
+           simp only [mem_Iio]; linarith⟩)
 
 end DLMF.Confluent

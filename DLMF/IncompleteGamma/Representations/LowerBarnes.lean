@@ -8,6 +8,9 @@ module
 public import DLMF.IncompleteGamma.SeriesRecurrences
 public import DLMFMathlib.Analysis.Complex.BarnesResidue
 public import DLMFMathlib.Analysis.Integral.PrincipalValue
+public import DLMFMathlib.Analysis.Integral.CauchyBoundary
+public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
+public import DLMFMathlib.Analysis.SpecialFunctions.ImproperIntegralsExtra
 
 /-!
 # Integral representations of the lower incomplete Gamma function
@@ -534,6 +537,240 @@ theorem upperGammaIndentPV_converges {a z : ℂ} (ha : -1 < a.re) (hz : 0 < z.re
   rw [hv, hl.limUnder_eq]
   exact hl
 
+namespace UpperGammaPrincipalValue
+
+open Metric
+
+/-- The difference quotient of the Gamma density is integrable across its pole. -/
+theorem integrableOn_compactIntegrand {a : ℂ} (ha : -1 < a.re) (z : ℂ) :
+    IntegrableOn (fun t : ℝ => (t:ℂ)^a*exp (-z*t)/((t:ℂ)-1)-exp (-z)/((t:ℂ)-1))
+      (Icc 0 2) := by
+  have hgi : IntegrableOn (fun t : ℝ => (t:ℂ)^a*exp (-z*t)) (Icc 0 2) := by
+    have h1 := intervalIntegral.intervalIntegrable_cpow' (a := 0) (b := 2) ha
+    exact (intervalIntegrable_iff_integrableOn_Icc_of_le (by norm_num)).mp
+      (h1.mul_continuousOn (Continuous.continuousOn (by fun_prop)))
+  have hgd : DifferentiableAt ℝ (fun t : ℝ => (t:ℂ)^a*exp (-z*t)) 1 := by
+    have h1 : DifferentiableAt ℝ (fun t : ℝ => (t:ℂ)^a) 1 := by
+      have h := (hasDerivAt_id ((1:ℝ):ℂ)).cpow_const (c := a) (by simp)
+      exact (h.comp_ofReal (z := 1)).differentiableAt
+    exact h1.mul (by fun_prop)
+  simpa only [ofReal_one, one_cpow, mul_one, one_mul] using
+    (pv_integrableOn_sub_of_differentiableAt (c := 1) hgi hgd)
+
+/-- The compact regularized Gamma integral is entire in its Laplace parameter. -/
+theorem differentiable_compactIntegral {a : ℂ} (ha : -1 < a.re) :
+    Differentiable ℂ (fun z : ℂ => ∫ t in (0:ℝ)..2,
+      ((t:ℂ)^a*exp (-z*t)/((t:ℂ)-1)-exp (-z)/((t:ℂ)-1))) := by
+  have hw : IntegrableOn (fun t : ℝ => (t:ℂ)^a) (Ioc 0 2) :=
+    (intervalIntegrable_iff_integrableOn_Ioc_of_le (by norm_num)).mp
+      (intervalIntegral.intervalIntegrable_cpow' (a := 0) (b := 2) ha)
+  have hb : IntegrableOn (fun t : ℝ => ((t:ℂ)^a-1)/((t:ℂ)-1)) (Ioc 0 2) := by
+    have h := (integrableOn_compactIntegrand ha 0).mono_set Ioc_subset_Icc_self
+    simpa only [neg_zero, zero_mul, exp_zero, mul_one, ← sub_div] using h
+  have hdiff : DifferentiableOn ℂ (fun z : ℂ => ∫ t in Ioc (0:ℝ) 2,
+      ((t:ℂ)^a*exp (-z*t)/((t:ℂ)-1)-exp (-z)/((t:ℂ)-1))) univ := by
+    refine Complex.differentiableOn_integral_of_locally_dominated isOpen_univ
+      (fun z _ =>
+        ((integrableOn_compactIntegrand ha z).mono_set Ioc_subset_Icc_self).aestronglyMeasurable)
+      (ae_of_all _ fun t => by intro z _; fun_prop) ?_
+    intro z₀ _
+    obtain ⟨C₀, hC₀⟩ := ((isCompact_closedBall z₀ 1).prod
+      (isCompact_Icc (a := (0:ℝ)) (b := 2))).exists_bound_of_continuousOn
+      continuous_exponentialDifferenceQuotient.continuousOn
+    obtain ⟨C₁, hC₁⟩ := (isCompact_closedBall z₀ 1).exists_bound_of_continuousOn
+      (by fun_prop : ContinuousOn (fun z : ℂ => exp (-z)) (closedBall z₀ 1))
+    let C := max (max C₀ C₁) 0
+    have hC0 : C₀ ≤ C := (le_max_left _ _).trans (le_max_left _ _)
+    have hC1 : C₁ ≤ C := (le_max_right _ _).trans (le_max_left _ _)
+    refine ⟨ball z₀ 1, ball_mem_nhds _ (by norm_num),
+      fun t => C*(‖((t:ℂ)^a-1)/((t:ℂ)-1)‖+‖(t:ℂ)^a‖),
+      (hb.norm.add hw.norm).const_mul C, ?_⟩
+    filter_upwards [ae_restrict_mem measurableSet_Ioc] with t ht
+    intro z hz
+    by_cases ht1 : t = 1
+    · subst t
+      simp only [ofReal_one, sub_self, div_zero, sub_self, norm_zero]
+      exact mul_nonneg (le_max_right _ _) (by positivity)
+    have hsplit : (t:ℂ)^a*exp (-z*t)/((t:ℂ)-1)-exp (-z)/((t:ℂ)-1) =
+        exp (-z)*(((t:ℂ)^a-1)/((t:ℂ)-1))+(t:ℂ)^a*exponentialDifferenceQuotient z t := by
+      rw [exponentialDifferenceQuotient_eq ht1]
+      ring
+    have hK : ‖exponentialDifferenceQuotient z t‖ ≤ C :=
+      (hC₀ (z,t) ⟨ball_subset_closedBall hz, ht.1.le, ht.2⟩).trans hC0
+    have hE : ‖exp (-z)‖ ≤ C := (hC₁ z (ball_subset_closedBall hz)).trans hC1
+    rw [hsplit]
+    calc
+      _ ≤ ‖exp (-z)*(((t:ℂ)^a-1)/((t:ℂ)-1))‖+
+          ‖(t:ℂ)^a*exponentialDifferenceQuotient z t‖ := norm_add_le _ _
+      _ ≤ C*‖((t:ℂ)^a-1)/((t:ℂ)-1)‖+‖(t:ℂ)^a‖*C := by
+        rw [norm_mul, norm_mul]
+        gcongr
+      _ = _ := by ring
+  simpa only [intervalIntegral.integral_of_le (by norm_num : (0:ℝ) ≤ 2)] using
+    differentiableOn_univ.mp hdiff
+
+/-- The Gamma principal-value tail is absolutely integrable beyond the pole. -/
+theorem integrableOn_tailIntegrand {a z : ℂ} (ha : -1 < a.re) (hz : 0 < z.re)
+    {d : ℝ} (hd : 1 < d) :
+    IntegrableOn (fun t : ℝ => (t:ℂ)^a*exp (-z*t)/((t:ℂ)-1)) (Ioi d) := by
+  have hb := integrableOn_rpow_mul_exp_neg_mul_rpow (p := 1) ha (by norm_num) hz
+  have hb' : IntegrableOn (fun t : ℝ => t ^ a.re * Real.exp (-z.re*t)/(d-1)) (Ioi d) :=
+    IntegrableOn.congr_fun ((hb.mono_set (Ioi_subset_Ioi (by linarith))).div_const (d-1))
+      (fun t _ => by simp [Real.rpow_one]) measurableSet_Ioi
+  refine hb'.mono' ?_ ?_
+  · refine ContinuousOn.aestronglyMeasurable (fun t ht => ?_) measurableSet_Ioi
+    have ht0 : 0 < t := by linarith [mem_Ioi.mp ht]
+    refine ContinuousAt.continuousWithinAt (ContinuousAt.div ?_ (by fun_prop) ?_)
+    · exact (continuousAt_ofReal_cpow_const _ _ (Or.inr ht0.ne')).mul (by fun_prop)
+    · intro h; have := congrArg re h; simp at this; linarith [mem_Ioi.mp ht]
+  · refine (ae_restrict_iff' measurableSet_Ioi).mpr (ae_of_all _ fun t ht => ?_)
+    have ht0 : 0 < t := by linarith [mem_Ioi.mp ht]
+    have ht1 : d-1 ≤ t-1 := by linarith [mem_Ioi.mp ht]
+    rw [norm_div, norm_mul, Complex.norm_cpow_eq_rpow_re_of_pos ht0, Complex.norm_exp,
+      show ((t:ℂ)-1) = ((t-1:ℝ):ℂ) by push_cast; ring, Complex.norm_real,
+      Real.norm_eq_abs, abs_of_pos (by linarith)]
+    simp only [neg_mul, Complex.neg_re, Complex.mul_re, Complex.ofReal_re,
+      Complex.ofReal_im, mul_zero, sub_zero]
+    exact div_le_div_of_nonneg_left (by positivity) (by linarith) ht1
+
+/-- The Gamma principal-value tail integral is holomorphic in the right half-plane. -/
+theorem differentiableOn_tailIntegral {a : ℂ} (ha : -1 < a.re) :
+    DifferentiableOn ℂ (fun z : ℂ => ∫ t in Ioi (2:ℝ),
+      (t:ℂ)^a*exp (-z*t)/((t:ℂ)-1)) {z : ℂ | 0 < z.re} := by
+  refine Complex.differentiableOn_integral_Ioi_of_locally_dominated
+    (isOpen_lt continuous_const continuous_re) 2
+    (fun z hz => (integrableOn_tailIntegrand ha hz (by norm_num)).aestronglyMeasurable)
+    (ae_of_all _ fun t => by intro z _; fun_prop) ?_
+  intro z₀ hz₀
+  change 0 < z₀.re at hz₀
+  let δ := z₀.re/2
+  have hδ : 0 < δ := by dsimp [δ]; exact half_pos hz₀
+  have hV : {z : ℂ | δ < z.re} ∈ 𝓝 z₀ :=
+    (isOpen_lt continuous_const continuous_re).mem_nhds (by dsimp [δ]; linarith)
+  have hb := integrableOn_rpow_mul_exp_neg_mul_rpow (p := 1) ha (by norm_num) hδ
+  have hbi : IntegrableOn (fun t : ℝ => t^a.re*Real.exp (-δ*t)) (Ioi 2) :=
+    IntegrableOn.congr_fun (hb.mono_set (Ioi_subset_Ioi (by norm_num)))
+      (fun t _ => by simp [Real.rpow_one]) measurableSet_Ioi
+  refine ⟨_, hV, _, hbi, ?_⟩
+  filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
+  intro z hz
+  have ht0 : 0 < t := by linarith [mem_Ioi.mp ht]
+  have ht1 : 1 ≤ t-1 := by linarith [mem_Ioi.mp ht]
+  rw [norm_div, norm_mul, Complex.norm_cpow_eq_rpow_re_of_pos ht0, Complex.norm_exp,
+    show ((t:ℂ)-1) = ((t-1:ℝ):ℂ) by push_cast; ring, Complex.norm_real,
+    Real.norm_eq_abs, abs_of_pos (by linarith)]
+  simp only [neg_mul, Complex.neg_re, Complex.mul_re, Complex.ofReal_re,
+    Complex.ofReal_im, mul_zero, sub_zero]
+  calc
+    _ ≤ t^a.re*Real.exp (-(z.re*t)) := div_le_self (by positivity) ht1
+    _ ≤ _ := by gcongr
+
+end UpperGammaPrincipalValue
+
+open UpperGammaPrincipalValue in
+/-- The indented Gamma principal value equals its compact regular part plus its tail. -/
+theorem upperGammaIndentPV_eq_compact_add_tail {a z : ℂ} (ha : -1 < a.re) (hz : 0 < z.re) :
+    upperGammaIndentPV a z =
+      (∫ t in (0:ℝ)..2,
+        ((t:ℂ)^a*exp (-z*t)/((t:ℂ)-1)-exp (-z)/((t:ℂ)-1)))+
+      ∫ t in Ioi (2:ℝ), (t:ℂ)^a*exp (-z*t)/((t:ℂ)-1) := by
+  have h := ugPV_hasPrincipalValueIoi (exp (-z)) (by norm_num : (0:ℝ)<1)
+    (by norm_num : (1:ℝ)<2) (integrableOn_compactIntegrand ha z)
+    (fun d hd => integrableOn_tailIntegrand ha hz hd)
+  have hh := tendsto_nhds_unique (upperGammaIndentPV_converges ha hz).2.2 h.2.2
+  norm_num at hh
+  simpa only [neg_mul] using hh
+
+open UpperGammaPrincipalValue in
+/-- The indented Gamma principal value is holomorphic when the Laplace parameter has
+positive real part. -/
+theorem differentiableOn_upperGammaIndentPV {a : ℂ} (ha : -1 < a.re) :
+    DifferentiableOn ℂ (upperGammaIndentPV a) {z : ℂ | 0 < z.re} := by
+  exact ((differentiable_compactIntegral ha).differentiableOn.add
+    (differentiableOn_tailIntegral ha)).congr fun z hz =>
+      upperGammaIndentPV_eq_compact_add_tail ha hz
+
+
+namespace UpperGammaPrincipalValue
+
+/-- The real positive indented Gamma formula follows from its signed Cauchy boundary limit. -/
+theorem upperIncompleteGammaOnLog_eq_of_tendsto {a : ℂ} (ha : -1<a.re)
+    {x ε : ℝ} (hx : 0<x) (hε : ε=1 ∨ ε = -1)
+    (hJ : Tendsto (fun η : ℝ => ∫ t : ℝ in Ioi 0,
+      (t:ℂ)^a*exp (-(x:ℂ)*t)/((t:ℂ)-1+(ε*η:ℝ)*I)) (𝓝[>] (0:ℝ))
+      (𝓝 (upperGammaIndentPV a x-(ε:ℂ)*π*I*exp (-(x:ℂ))))) :
+    upperIncompleteGammaOnLog (-a) (log (x:ℂ)+(ε:ℂ)*π*I) =
+      exp (x:ℂ)*exp (-(ε:ℂ)*π*I*a)/Gamma (1+a)*
+        (upperGammaIndentPV a x-(ε:ℂ)*π*I*exp (-(x:ℂ))) := by
+  let q := negativeAxisApproach x ε
+  let w : ℂ := log (x:ℂ)+(ε:ℂ)*π*I
+  have hq : Tendsto q (𝓝[>] (0:ℝ)) (𝓝 (-(x:ℂ))) := tendsto_negativeAxisApproach x ε
+  have hl : Tendsto (fun η => log (q η)) (𝓝[>] (0:ℝ)) (𝓝 w) :=
+    tendsto_log_negativeAxisApproach hx hε
+  have hleft := (hasDerivAt_upperIncompleteGammaOnLog (-a) w).continuousAt.tendsto.comp hl
+  have hfactor := (((hl.const_mul (-a)).sub hq).cexp.div_const (Gamma (1+a))).mul_const
+    ((x:ℂ)^a)
+  have hright := hfactor.mul hJ
+  have heq : (fun η : ℝ => upperIncompleteGammaOnLog (-a) (log (q η))) =ᶠ[𝓝[>] (0:ℝ)]
+      fun η => (exp (-a*log (q η)-q η)/Gamma (1+a)*(x:ℂ)^a)*
+        (∫ t : ℝ in Ioi 0, (t:ℂ)^a*exp (-(x:ℂ)*t)/((t:ℂ)-1+(ε*η:ℝ)*I)) := by
+    filter_upwards [self_mem_nhdsWithin] with η hη
+    have hη : 0<η := hη
+    have hqs : q η ∈ slitPlane := negativeAxisApproach_mem_slitPlane hx hε hη
+    have hqn : q η ≠ 0 := slitPlane_ne_zero hqs
+    rw [upperIncompleteGammaOnLog_eq_upperIncompleteGamma (-a)
+      (by simpa only [log_im] using neg_pi_lt_arg (q η))
+      (by simpa only [log_im] using arg_le_pi (q η)),
+      Complex.exp_log hqn, upperIncompleteGamma_stieltjes_integral
+        (a := -a) (by simp; linarith) hqs]
+    simp only [neg_neg, show (1:ℂ)-(-a)=1+a by ring]
+    rw [integral_cpow_mul_exp_neg_div_negativeAxisApproach a hx ε η,
+      Complex.cpow_def_of_ne_zero hqn]
+    have he : exp (log (q η)*(-a))*exp (-(q η)) = exp (-a*log (q η)-q η) := by
+      rw [← Complex.exp_add]
+      congr 1
+      ring
+    linear_combination ((x:ℂ)^a/Gamma (1+a)*
+      (∫ t : ℝ in Ioi 0, (t:ℂ)^a*exp (-(x:ℂ)*t)/((t:ℂ)-1+(ε*η:ℝ)*I)))*he
+  have hlim := tendsto_nhds_unique hleft (hright.congr' heq.symm)
+  have hxc : (x:ℂ) ≠ 0 := by exact_mod_cast hx.ne'
+  have hp : exp (-a*w+(x:ℂ))*(x:ℂ)^a = exp (x:ℂ)*exp (-(ε:ℂ)*π*I*a) := by
+    rw [Complex.cpow_def_of_ne_zero hxc, ← Complex.exp_add, ← Complex.exp_add]
+    congr 1
+    dsimp only [w]
+    ring
+  calc
+    _ = (exp (-a*w+(x:ℂ))/Gamma (1+a)*(x:ℂ)^a)*
+        (upperGammaIndentPV a x-(ε:ℂ)*π*I*exp (-(x:ℂ))) := by
+      simpa only [sub_neg_eq_add] using hlim
+    _ = _ := by rw [div_mul_eq_mul_div, hp]
+
+end UpperGammaPrincipalValue
+
+/-- The indented Gamma formula at a positive real argument, with either logarithmic branch. -/
+theorem upperIncompleteGamma_indented_integral_ofReal {a : ℂ} (ha : -1<a.re)
+    {x ε : ℝ} (hx : 0<x) (hε : ε=1 ∨ ε = -1) :
+    upperIncompleteGammaOnLog (-a) (log (x:ℂ)+(ε:ℂ)*π*I) =
+      exp (x:ℂ)*exp (-(ε:ℂ)*π*I*a)/Gamma (1+a)*
+        (upperGammaIndentPV a x-(ε:ℂ)*π*I*exp (-(x:ℂ))) := by
+  apply UpperGammaPrincipalValue.upperIncompleteGammaOnLog_eq_of_tendsto ha hx hε
+  have hi : IntegrableOn (fun t : ℝ => (t:ℂ)^a*exp (-(x:ℂ)*t)) (Ioi 0) := by
+    have h := Complex.integrableOn_cpow_mul_exp_neg_mul (b := a+1) (z := (x:ℂ))
+      (by simp; linarith) (by simpa using hx)
+    simpa only [add_sub_cancel_right, neg_mul] using h
+  have hd : DifferentiableAt ℝ (fun t : ℝ => (t:ℂ)^a*exp (-(x:ℂ)*t)) 1 := by
+    have h1 : DifferentiableAt ℝ (fun t : ℝ => (t:ℂ)^a) 1 := by
+      have h := (hasDerivAt_id ((1:ℝ):ℂ)).cpow_const (c := a) (by simp)
+      exact (h.comp_ofReal (z := 1)).differentiableAt
+    exact h1.mul (by fun_prop)
+  have hb := MeasureTheory.tendsto_integral_Ioi_div_sub_add_sign_mul_I
+    (by norm_num : (0:ℝ)<1) hε hi hd
+  have hp := upperGammaIndentPV_eq_compact_add_tail (z := (x:ℂ)) ha (by simpa using hx)
+  norm_num only [mul_one, ofReal_one, one_cpow, one_mul] at hb
+  simp only [neg_mul] at hp hb ⊢
+  simpa only [sub_div, ← hp] using hb
+
+
 /-- Identity under the stated parameter and domain assumptions: `upperIncompleteGammaOnLog (-a) (log
 z+ε*π*I)=exp z*exp (-ε*π*I*a)/Gamma (1+a)*(upperGammaIndentPV a z-ε*π*I*exp (-z))`. -/
 @[dlmf 8.6.E9]
@@ -541,7 +778,42 @@ theorem upperIncompleteGamma_indented_integral {a z : ℂ} (ha : -1 < a.re) (hz 
     (hε : ε=1 ∨ ε = -1) :
     upperIncompleteGammaOnLog (-a) (log z+ε*π*I)=exp z*exp (-ε*π*I*a)/Gamma
         (1+a)*(upperGammaIndentPV a z-ε*π*I*exp (-z)) := by
-  sorry
+  let U : Set ℂ := {w | 0 < w.re}
+  have hU : IsOpen U := isOpen_lt continuous_const continuous_re
+  let F : ℂ → ℂ := fun w => upperIncompleteGammaOnLog (-a) (log w + ε * π * I)
+  let G : ℂ → ℂ := fun w => exp w * exp (-ε * π * I * a) / Gamma (1 + a) *
+    (upperGammaIndentPV a w - ε * π * I * exp (-w))
+  have hF : AnalyticOnNhd ℂ F U := by
+    apply DifferentiableOn.analyticOnNhd _ hU
+    intro w hw
+    have hlog : DifferentiableAt ℂ (fun v => log v + ε * π * I) w :=
+      (Complex.differentiableAt_log (Or.inl hw)).add_const (ε * π * I)
+    simpa only [F, Function.comp_def] using!
+      ((hasDerivAt_upperIncompleteGammaOnLog (-a) (log w + ε * π * I)).differentiableAt.comp
+        w hlog).differentiableWithinAt
+  have hG : AnalyticOnNhd ℂ G U := by
+    apply DifferentiableOn.analyticOnNhd _ hU
+    intro w hw
+    have hpv : DifferentiableAt ℂ (upperGammaIndentPV a) w :=
+      (differentiableOn_upperGammaIndentPV ha).differentiableAt (hU.mem_nhds hw)
+    have hc : DifferentiableAt ℂ (fun v : ℂ =>
+        exp v * exp (-ε * π * I * a) / Gamma (1 + a)) w := by fun_prop
+    have he : DifferentiableAt ℂ (fun v : ℂ => ε * π * I * exp (-v)) w := by fun_prop
+    simpa only [G] using! (hc.mul (hpv.sub he)).differentiableWithinAt
+  have hfreq : ∃ᶠ w in 𝓝[≠] (1 : ℂ), F w = G w := by
+    have ht : Tendsto (fun x : ℝ => (x : ℂ)) (𝓝[≠] (1 : ℝ)) (𝓝[≠] (1 : ℂ)) := by
+      apply tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within
+      · have h := (continuous_ofReal.tendsto (1 : ℝ)).mono_left
+          (nhdsWithin_le_nhds (s := ({1}ᶜ : Set ℝ)))
+        rwa [ofReal_one] at h
+      · filter_upwards [self_mem_nhdsWithin] with x hx
+        simpa using hx
+    apply ht.frequently
+    apply Eventually.frequently
+    filter_upwards [nhdsWithin_le_nhds (Ioi_mem_nhds (zero_lt_one' ℝ))] with x hx
+    exact upperIncompleteGamma_indented_integral_ofReal ha hx hε
+  exact hF.eqOn_of_preconnected_of_frequently_eq hG
+    (convex_halfSpace_re_gt 0).isPreconnected (by simp [U]) hfreq hz
 
 /-- The Mellin–Barnes integrand `Γ(s+a) z^{-s}/s`, `s = c+iy`, of DLMF 8.6.11. -/
 noncomputable def upperIncGammaMBIntegrand (a z : ℂ) (c y : ℝ) : ℂ :=
