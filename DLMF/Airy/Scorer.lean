@@ -7,6 +7,7 @@ module -- shake: keep-all
 
 public import DLMF.Airy.Scorer.Representations
 public import DLMF.Airy.Scorer.ExpansionsAndZeros
+public import DLMF.Airy.Scorer.MellinBarnes
 
 /-!
 # Scorer functions (DLMF §9.12)

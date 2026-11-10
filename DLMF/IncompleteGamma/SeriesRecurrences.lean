@@ -7,6 +7,7 @@ module
 
 public import DLMF.Bessel.SphericalSeriesTools
 public import DLMF.IncompleteGamma.SpecialValues
+public import DLMF.IncompleteGamma.LaguerreSeries
 
 /-!
 # Series, recurrences and derivatives, DLMF §§8.7–8.8
@@ -855,7 +856,8 @@ theorem upperIncompleteGamma_laguerre_series {a : ℂ} (ha : a.re < 1/2) {x : �
     HasSum (fun n : ℕ =>
         (x : ℂ)^a*exp (-x : ℂ)*DLMF.OrthogonalPolynomials.laguerreExtended a n x/(n+1))
         (upperIncompleteGamma a x) := by
-  sorry
+  exact IncompleteGammaLaguerre.hasSum_laguerre_of_summable a hx
+    (IncompleteGammaLaguerre.summable_laguerre_div_succ ha hx)
 
 /-- Formula under the stated hypotheses:
 `∀ f ∈ ({lowerIncompleteGamma,upperIncompleteGamma} : Set (ℂ → ℂ → ℂ)), f (a+2) z-(a+1+z)*f (a+1)

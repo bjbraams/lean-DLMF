@@ -4,6 +4,34 @@ The project formalizes material from Andrews, Askey and Roy, *Special Functions*
 (1999), and the NIST Digital Library of Mathematical Functions, using Mathlib.
 Existing module copyright and authorship notices remain authoritative.
 
+## Airy and Bessel proofs (2026-11-10)
+
+The Airy Stieltjes formula reuses the project's Tricomi self-Stieltjes formula and its
+Airy–Kummer bridge, with Mathlib's half-line change-of-variables results. The nonreal Bi
+zero-sector proofs use Mathlib's interval fundamental theorem of calculus and positivity
+of integrals with the project's proved Airy differential equation and initial values.
+
+The Ai fourth-power integral uses the project's Mellin Parseval theorem, Gamma reflection,
+and vertical Gamma bounds. Its real hyperbolic integral uses Mathlib's
+`Frullani.integral_Ioi_eq` and the project's proved hyperbolic-secant transform.
+
+The generalized Airy results use Mathlib's Gamma duplication formula, the project's
+Kummer–Bessel identities, and its sector form of Watson's lemma. The Scorer Mellin–Barnes
+proof uses the project's cubic-contour rotation and Mellin Parseval theorem, together with
+Mathlib's Gamma integral and change-of-variables results. The cubic Laplace support is
+proved as general complex analysis in `DLMFMathlib`. No external proof body was copied.
+
+## Incomplete-Gamma Laguerre series (2026-11-10)
+
+The proof of DLMF 8.7.6 reuses the project's proved complex-order Bessel–Gaussian transform,
+Bessel large-argument expansion, and Tricomi Laplace integral. Absolute convergence follows
+from Mathlib's dominated-convergence theorem for series and elementary exponential-series
+majorants. The fractional substitution uses Mathlib's one-dimensional Jacobian theorem.
+The generating-series proof extends the project's existing Laguerre double-series argument
+to the polynomial continuation, retaining the quotient theorem as a corollary. The
+exceptional-parameter Kummer bridge uses the project's proved entire reciprocal-Gamma
+recurrence. No external proof body was copied.
+
 ## Chapters 6–8 and 12 proofs (2026-11-10)
 
 The parabolic-cylinder zero proof uses Mathlib's Sturm comparison and Rolle theorems with

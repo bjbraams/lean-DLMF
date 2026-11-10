@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Airy.Integrals.PrimitivesAndLaplace
+public import DLMF.Airy.Integrals.StieltjesRepresentation
 
 /-!
 # One-sided Laplace and Mellin transforms of Airy functions
@@ -996,7 +997,19 @@ theorem airyAi_stieltjes {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 2 * π / 3) :
     airyAi z = 3 * z ^ (5 / 4 : ℂ) * exp (-airyZetaComplex z) / (4 * π) *
       ∫ t : ℝ in Ioi 0, (t : ℂ) ^ (-3 / 4 : ℂ) * exp (-(airyZeta t : ℂ)) *
         airyAi t / (z ^ (3 / 2 : ℂ) + (t : ℂ) ^ (3 / 2 : ℂ)) := by
-  sorry
+  rw [StieltjesRepresentation.airyAi_eq_tricomi hz0 hz,
+    StieltjesRepresentation.kummerU_eq_stieltjes hz0 hz]
+  have hi := StieltjesRepresentation.integral_kernel_transform z
+  have hp := StieltjesRepresentation.cpow_normalization hz0 hz
+  unfold StieltjesRepresentation.airyKernel at hi
+  calc _ = exp (-airyZetaComplex z) * (2 * airyZetaComplex z) ^ (5 / 6 : ℂ) /
+      (2 * π) * (StieltjesRepresentation.normalization * ∫ t : ℝ in Ioi 0,
+        StieltjesRepresentation.tricomiKernel (2 * airyZetaComplex z) t) := by ring
+    _ = (3 * exp (-airyZetaComplex z) / (4 * π)) *
+        ((2 * airyZetaComplex z) ^ (5 / 6 : ℂ) * (4 / 3 : ℂ) ^ (-5 / 6 : ℂ)) *
+          ∫ t : ℝ in Ioi 0, (t : ℂ) ^ (-3 / 4 : ℂ) * exp (-(airyZeta t : ℂ)) *
+            airyAi t / (z ^ (3 / 2 : ℂ) + (t : ℂ) ^ (3 / 2 : ℂ)) := by rw [hi]; ring
+    _ = _ := by rw [hp]; ring
 
 /-- For `x > 0`:
 `Bi(x) = (3 x^{5/4} e^{ζ}/(2π)) ⨍₀^∞ t^{-3/4} e^{-(2/3)t^{3/2}} Ai(t)/(x^{3/2} - t^{3/2}) dt`, a

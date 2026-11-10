@@ -33,7 +33,7 @@ equations and the initial values (DLMF 9.12.1–9.12.3, 9.12.6–9.12.7, 9.12.17
 * `hasSum_scorerGi`, `hasSum_scorerGiDeriv`, `hasSum_scorerHi`, `hasSum_scorerHiDeriv`:
   DLMF 9.12.15–9.12.18.
 * `scorerHi_exp_integral`, `scorerGi_exp_cos_integral`, `scorerHi_stieltjes_integral`,
-  `scorerGi_principalValue`, `scorerHi_mellinBarnes`: DLMF 9.12.20–9.12.24.
+  `scorerGi_principalValue`: DLMF 9.12.20–9.12.23.
 -/
 
 @[expose] public noncomputable section
@@ -736,17 +736,6 @@ theorem scorerGi_principalValue {x : ℝ} (hx : 0 < x) :
     scorerGi x = 4 * (x : ℂ) ^ 2 / ((3 : ℂ) ^ (3 / 2 : ℂ) * π ^ 2) *
       principalValueIoi (fun t : ℝ => DLMF.Bessel.besselK (1 / 3) t /
         ((airyZeta x : ℂ) ^ 2 - (t : ℂ) ^ 2)) (airyZeta x) := by
-  sorry
-
-/-- Mellin–Barnes integral for `Hi` on a vertical line `Re s = σ ∈ (-1, 0)`, for
-`|arg(-z)| < 2π/3`; boundary values are ordinary improper integrals (DLMF 9.12.24). -/
-@[dlmf 9.12.E24]
-theorem scorerHi_mellinBarnes {z : ℂ} (hz0 : z ≠ 0) (hz : |arg (-z)| < 2 * π / 3) {σ : ℝ}
-    (hσ0 : -1 < σ) (hσ1 : σ < 0) :
-    HasIntegralWholeLine (fun y : ℝ => Gamma (1 / 3 + ((σ : ℂ) + y * I) / 3) *
-      Gamma (-((σ : ℂ) + y * I)) *
-        exp (((σ : ℂ) + y * I) * (log (3 : ℂ) / 3 + log (-z))))
-      (2 * π ^ 2 * (3 : ℂ) ^ (2 / 3 : ℂ) * scorerHi z) := by
   sorry
 
 /-- `I_{k+1}/k!` form of the Hi′ coefficients. -/

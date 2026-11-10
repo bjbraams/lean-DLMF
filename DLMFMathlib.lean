@@ -87,6 +87,7 @@ public import DLMFMathlib.Analysis.Distribution.IteratedLineDeriv
 public import DLMFMathlib.Analysis.EulerMaclaurin
 public import DLMFMathlib.Analysis.Fourier.HorizontalStrip
 public import DLMFMathlib.Analysis.Fourier.HyperbolicSecant
+public import DLMFMathlib.Analysis.Fourier.HyperbolicSecantLog
 public import DLMFMathlib.Analysis.Fourier.AddCircle
 public import DLMFMathlib.Analysis.Fourier.DirichletKernel
 public import DLMFMathlib.Analysis.Fourier.ImproperConvergence
@@ -118,6 +119,7 @@ public import DLMFMathlib.Analysis.MellinConvolution
 public import DLMFMathlib.Analysis.MellinOscillation
 public import DLMFMathlib.Analysis.MellinBounds
 public import DLMFMathlib.Analysis.MellinParseval
+public import DLMFMathlib.Analysis.MellinCubicLaplace
 public import DLMFMathlib.Analysis.ODE.LiouvilleGreen
 public import DLMFMathlib.Analysis.ODE.LiouvilleGreenComparison
 public import DLMFMathlib.Analysis.ODE.LiouvilleGreenExpansion
@@ -185,6 +187,8 @@ public import DLMFMathlib.Analysis.SpecialFunctions.Complex.ArgLog
 public import DLMFMathlib.Analysis.SpecialFunctions.Gamma.BetaHalfLine
 public import DLMFMathlib.Analysis.SpecialFunctions.Gamma.Bounds
 public import DLMFMathlib.Analysis.SpecialFunctions.Gamma.Values
+public import DLMFMathlib.Analysis.SpecialFunctions.ExponentialSeries
+public import DLMFMathlib.MeasureTheory.Integral.FractionalSubstitution
 public import DLMFMathlib.Analysis.SpecialFunctions.ImproperIntegralsExtra
 public import DLMFMathlib.Analysis.SpecialFunctions.Pow.ComplexReal
 public import DLMFMathlib.Analysis.SpecialFunctions.Trigonometric.Bounds
@@ -263,6 +267,7 @@ the namespaces of the Mathlib APIs they extend. These modules do not import `DLM
   asymptotic inverse power series.
 
 * `DLMFMathlib.Analysis.Fourier.HyperbolicSecant`: Fourier transform of the hyperbolic secant.
+* `DLMFMathlib.Analysis.Fourier.HyperbolicSecantLog`: a logarithmic hyperbolic secant integral.
 * `DLMFMathlib.Analysis.SpecialFunctions.Gamma.BetaHalfLine`: the complex second beta integral.
 * `DLMFMathlib.Analysis.Complex.PuncturedHalfPlane`: connected punctured right half-planes.
 * `DLMFMathlib.Analysis.Complex.RealSegmentComplement`: the complement of a real segment.
@@ -297,6 +302,7 @@ the namespaces of the Mathlib APIs they extend. These modules do not import `DLM
 * `DLMFMathlib.Analysis.Fourier.Pairing`: bilinear pairings of forward and inverse transforms.
 * `DLMFMathlib.Analysis.Fourier.L1Inversion`: almost-everywhere inversion and `L¹` Parseval.
 * `DLMFMathlib.Analysis.Fourier.L2Compatibility`: agreement of integral and unitary `L²` transforms.
+* `DLMFMathlib.Analysis.MellinCubicLaplace`: cubic Laplace moments and Mellin transforms.
 * `DLMFMathlib.Analysis.MellinParseval`: weighted `L¹` Mellin pairings in logarithmic coordinates.
 * `DLMFMathlib.Analysis.Asymptotics.WatsonKernel`: Watson estimates for rapidly decreasing kernels.
 * `DLMFMathlib.Analysis.Asymptotics.WatsonLog`: logarithmic moments and Watson remainder bounds.
@@ -419,6 +425,8 @@ the namespaces of the Mathlib APIs they extend. These modules do not import `DLM
   `∫_{f(s)} du/√Q(u) = 2 · vol(s)` when `|f'| = 2√(Q ∘ f)`.
 * `DLMFMathlib.Analysis.Complex.IdentityTheoremStrip`: the identity theorem on the strip
   `0 < Re z < 1` from agreement on `(0, 1)`.
+* `DLMFMathlib.Analysis.SpecialFunctions.ExponentialSeries`: weighted exponential-series tails.
+* `DLMFMathlib.MeasureTheory.Integral.FractionalSubstitution`: the substitution `u/(1+u)`.
 * `DLMFMathlib.Analysis.Integral.CauchyBoundary`: boundary limits of Cauchy integrals.
 * `DLMFMathlib.Analysis.Integral.PrincipalValueLogarithm`: regularized logarithmic kernels.
 * `DLMFMathlib.Analysis.Integral.PrincipalValueExcision`: principal values under asymmetric

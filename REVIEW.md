@@ -1,5 +1,119 @@
 # Mathematical review of the lean-DLMF project (formerly lean-AAR)
 
+## Airy and Bessel proof round, 2026-11-10
+
+This round starts from `7871bc5243ace72d43b5af83cbee0e2a7b541b11` together with the
+uncommitted Chapter 8 Laguerre-series work described below. Chapters 9 and 10 contained
+31 admissions: 30 in Airy and one in Bessel. Eight original Airy admissions are now proved:
+
+- `airyAi_stieltjes` (9.10.18), throughout `|arg z| < 2π/3`.
+- `airyBi_complex_zeros_sector` and `airyBiDeriv_complex_zeros_sector` (§9.9(i)).
+- `airyAi_fourth_integral` (9.11.18), with value `log 3/(24π²)`.
+- `generalizedAiryB_asymptotic` (9.13.11), with the stated `O(1/ζ)` error.
+- `generalizedAiryA_negative_even_asymptotic` (9.13.10), for every stated even order.
+- `olverAiry_rotated_recessive` (9.13.18), uniformly on the full closed subsectors.
+- `scorerHi_mellinBarnes` (9.12.24), throughout its original complex sector and for
+  every vertical line `-1 < Re s < 0`.
+
+The Airy Stieltjes proof transforms the self-Stieltjes formula for
+`U(1/6,1/3,2ζ)` using `u = (4/3)t^(3/2)`. Its helper module keeps the principal-power
+normalizations explicit. The Bi sector proof integrates Airy's equation on the segment
+from zero to a nonreal zero. The real and imaginary parts of the resulting energy identity,
+with the positive initial values, give `Re z > 0` and `3(Re z)² < (Im z)²` for zeros of
+either Bi or Bi′. These inequalities give `π/3 < |arg z| < π/2`.
+
+The fourth-power integral uses Mellin Parseval for Ai². Gamma reflection reduces its
+vertical integral to `sinh(t/3)/(t cosh t)`; the identity
+`2 sinh(t/3)/cosh t = tanh t - tanh(t/3)` and Frullani's formula give `log 3`.
+The generic real integral and its absolute convergence are in
+`DLMFMathlib/Analysis/Fourier/HyperbolicSecantLog.lean`.
+
+The generalized Airy proofs use a uniform right-half-plane Kummer expansion and its
+modified-Bessel I consequence. The sum of the two I terms gives the dominant generalized
+B solution; cancellation of their leading terms gives the recession of A relative to B.
+The quantitative I remainder supplies the required `O(1/ζ)` bound. The even-order symmetry
+then gives the negative-argument A result. `Generalized.lean` remains a public umbrella;
+its original declarations are split between `Generalized/Properties.lean` and
+`Generalized/Asymptotics.lean` to respect the file limit.
+
+The Scorer Mellin–Barnes proof rotates the cubic Laplace integral by `-arg(-z)/4`, placing
+both Laplace parameters in the right half-plane, and applies Mellin Parseval. Cubic moments,
+Mellin convergence and the vertical-line majorant are in
+`DLMFMathlib/Analysis/MellinCubicLaplace.lean`. The original tagged theorem moves unchanged
+from `Scorer/Representations.lean` to `Scorer/MellinBarnes.lean`, avoiding an import cycle.
+Its public name and its availability through the Scorer umbrella are preserved.
+
+There are 23 admissions left: 22 in Airy and Nicholson's integral in Bessel. The complete
+starting inventory, with current statuses and locations, is in
+`reports/Chapters910Admissions.tsv`. The principal remaining proof requirements are:
+
+- Nicholson's formula needs a modified-Bessel product identity and controlled boundary
+  limits for `Kν(ε ± ix)`, including the singular endpoint.
+- The Ai²/J₀ transform needs an oscillatory cubic Bessel transform. The whole-line Ai³ and
+  Ai²Bi integrals need conditional triple-product transforms; their negative-axis tails
+  have amplitude `|x|^(-3/4)`, so absolute Fubini alone does not suffice.
+- The four remaining generalized Airy expansions need continuation across the principal
+  cut in ζ, or uniform oscillatory J expansions on sectors approaching that cut.
+- The Hi Stieltjes formula needs a complex-parameter rational Mellin transform, Gamma
+  triplication and a vertical-line change of variables. The Bi and Gi principal-value
+  formulas need compatible boundary limits; the Bi substitution also needs invariance of
+  the symmetric principal value under `u = t^(3/2)`.
+- Repeated Ai integrals need uniform oscillatory-tail induction. The hyperasymptotic
+  remainder estimates, signed phase-error bounds, complex Scorer zero simplicity,
+  modulus-ordered complex Bi enumeration and common zero expansions remain open.
+
+No statement defect was found. All 31 original target statement types were compared with
+the baseline and remain unchanged; all 19 original generalized Airy definition bodies
+are unchanged. Existing branches, normalizations, dependency pins and build settings are
+preserved. The earlier Laguerre-series proof and its supporting sources are retained.
+No commits or external submissions were made.
+
+Validation passed: the ordinary `lake build > /tmp/DLMF-build.log 2>&1`
+(15,838 jobs), strict direct checks of all changed Lean files and registered umbrellas,
+and the retained `scripts/CheckChapters910.lean` audit of 54 declarations. Every audited
+proof uses only `propext`, `Classical.choice` and `Quot.sound`, or a subset; none depends on
+`sorryAx`. The preserved Chapter 6–8/12 audit also passes all 131 declarations. All 110
+original generalized Airy declaration statements are preserved through the split.
+The import survey reports no foundational violations, forbidden imports in the closure of
+`DLMF.Basic`, missing modules, cycles or new two-way area pairs (23 existing pairs).
+The admission scan agrees with the 23 remaining targets in the ledger. File and line limits
+and `git diff --check` pass.
+
+## Laguerre series proof for Chapter 8, 2026-11-10
+
+The baseline for this round is `7871bc5243ace72d43b5af83cbee0e2a7b541b11`, with
+51 admissions across Chapters 6–8 and 12. The repaired statement
+`DLMF.Confluent.upperIncompleteGamma_laguerre_series` (8.7.6) is now proved with its
+full domain `Re a < 1/2`, `x > 0`, using `laguerreExtended`. Its statement is unchanged
+from the approved repair. The total falls to 50: Chapter 6 has one, Chapter 7 five,
+Chapter 8 28, and Chapter 12 16. No other admission is closed in this round.
+
+`DLMF/IncompleteGamma/LaguerreSeries.lean` proves absolute convergence by a
+Bessel–Gaussian representation of the Laguerre coefficients. A finite shift ensures
+integrability at zero for every complex parameter, including negative integers. The
+weighted exponential-series tail cancels the Gaussian. At infinity the resulting
+majorant has exponent `Re a - 3/2`, giving exactly the required condition `Re a < 1/2`.
+The proof then integrates the Laguerre generating series termwise on `(0,1)` and uses
+`t = u/(1+u)` to identify its integral with the upper incomplete Gamma function.
+
+The supporting Laguerre generating-series theorem holds for every complex parameter,
+using the polynomial continuation. The existing quotient-version theorem retains its
+statement and is a corollary. A regularized Kummer bridge also covers exceptional
+parameters when the terminal Gamma argument has positive real part. The Bessel real-axis
+bounds, weighted exponential-series estimates, and fractional substitution are proved
+in their corresponding general library modules. Existing definitions, branches,
+normalizations, tagged statement types, dependency pins and build settings are preserved.
+
+Validation passed: the ordinary `lake build > /tmp/DLMF-build.log 2>&1` (15,820 jobs),
+strict direct checks of all nine changed Lean files, and the retained
+`scripts/CheckChapters67812.lean` audit of 131 declarations, including the closed admission
+and all new support. Every audited declaration depends only on standard axioms
+(`propext`, `Classical.choice`, `Quot.sound`, or a subset), with no `sorryAx`.
+The import survey reports no forbidden foundational imports, missing modules, cycles or new
+two-way area pairs; 23 two-way pairs remain. File and line limits and `git diff --check`
+pass. The admission scan agrees with the 50 remaining admissions in
+`reports/Chapters67812Admissions.tsv`. No commits or external submissions were made.
+
 ## Chapters 6–8 and 12 proof round, 2026-11-10
 
 The baseline is commit `84ce46335483b5c848c591206e6766614d2a5d80`. The four chapter

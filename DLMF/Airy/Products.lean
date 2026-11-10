@@ -6,6 +6,9 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Airy.SquareTools
+public import DLMF.Gamma.MellinBarnes
+public import DLMFMathlib.Analysis.MellinParseval
+public import DLMFMathlib.Analysis.Fourier.HyperbolicSecantLog
 
 /-!
 # Products of Airy functions (DLMF §9.11)
@@ -305,6 +308,178 @@ theorem airyAi_sq_mellin {α : ℂ} (hα : 0 < α.re) :
   field_simp
   ring
 
+namespace AiSquare
+
+/-- The Gamma quotient giving the Mellin transform of the square of `Ai`. -/
+def mellinValue (s : ℂ) : ℂ :=
+  2 * Complex.Gamma s /
+    (Real.sqrt Real.pi * (12 : ℂ) ^ ((2 * s + 5) / 6) * Complex.Gamma (s / 3 + 5 / 6))
+
+/-- The square of `Ai` has the stated Mellin transform in the right half-plane. -/
+lemma mellin_eq_value {s : ℂ} (hs : 0 < s.re) :
+    mellin (fun x : ℝ => airyAi x ^ 2) s = mellinValue s := by
+  simpa only [mellin, smul_eq_mul, mellinValue] using (airyAi_sq_mellin hs).2
+
+/-- Reflection evaluates the product of complementary Mellin values. -/
+lemma mellinValue_mul_mellinValue_one_sub (s : ℂ) (hs : 1 - 2 * s ≠ 0)
+    (hG : Complex.Gamma (s / 3 + 5 / 6) ≠ 0)
+    (hG' : Complex.Gamma (7 / 6 - s / 3) ≠ 0) :
+    mellinValue s * mellinValue (1 - s) =
+      Complex.sin (Real.pi * (s / 3 + 5 / 6)) /
+        (6 * Real.pi * (1 - 2 * s) * Complex.sin (Real.pi * s)) := by
+  have hP : (12 : ℂ) ^ ((2 * s + 5) / 6) *
+      (12 : ℂ) ^ ((2 * (1 - s) + 5) / 6) = 144 := by
+    rw [← Complex.cpow_add _ _ (by norm_num), show
+      (2 * s + 5) / 6 + (2 * (1 - s) + 5) / 6 = (2 : ℂ) by ring]
+    norm_num [Complex.cpow_two]
+  have hR := Complex.Gamma_mul_Gamma_one_sub s
+  have hA := Complex.Gamma_mul_Gamma_one_sub (s / 3 + 5 / 6)
+  have hr : 1 - (s / 3 + 5 / 6) ≠ 0 := by
+    intro h; apply hs; linear_combination 6 * h
+  have hstep := Complex.Gamma_add_one (1 - (s / 3 + 5 / 6)) hr
+  rw [show 1 - (s / 3 + 5 / 6) + 1 = 7 / 6 - s / 3 by ring] at hstep
+  have hprod : Complex.Gamma (s / 3 + 5 / 6) *
+      Complex.Gamma (7 / 6 - s / 3) =
+      (1 - 2 * s) * Real.pi / (6 * Complex.sin (Real.pi * (s / 3 + 5 / 6))) := by
+    rw [hstep, mul_left_comm, hA]
+    ring
+  have hsa : Complex.sin (Real.pi * (s / 3 + 5 / 6)) ≠ 0 := by
+    intro h
+    simp only [h, mul_zero, div_zero] at hprod
+    exact mul_ne_zero hG hG' hprod
+  dsimp [mellinValue]
+  rw [show (1 - s) / 3 + 5 / 6 = 7 / 6 - s / 3 by ring]
+  have hp : (Real.sqrt Real.pi : ℂ) ^ 2 = Real.pi := by
+    rw [← Complex.ofReal_pow, Real.sq_sqrt Real.pi_pos.le]
+  have heq :
+      2 * Complex.Gamma s /
+        (Real.sqrt Real.pi * (12 : ℂ) ^ ((2 * s + 5) / 6) * Complex.Gamma (s / 3 + 5 / 6)) *
+      (2 * Complex.Gamma (1 - s) /
+        (Real.sqrt Real.pi * (12 : ℂ) ^ ((2 * (1 - s) + 5) / 6) *
+          Complex.Gamma (7 / 6 - s / 3))) =
+      4 * (Complex.Gamma s * Complex.Gamma (1 - s)) /
+        ((Real.sqrt Real.pi : ℂ)^2 *
+          ((12 : ℂ)^((2*s+5)/6)*(12:ℂ)^((2*(1-s)+5)/6)) *
+          (Complex.Gamma (s/3+5/6)*Complex.Gamma (7/6-s/3))) := by ring
+  rw [heq, hp, hP, hR, hprod]
+  field_simp
+  ring
+
+end AiSquare
+
+namespace AiSquare
+
+/-- On the central vertical line, the reflected product is a hyperbolic secant kernel. -/
+lemma mellinValue_half_mul_reflected {y : ℝ} (hy : y ≠ 0) :
+    mellinValue ((1 / 2 : ℂ) + y * I) * mellinValue ((1 / 2 : ℂ) - y * I) =
+      (Real.sinh (Real.pi * y / 3) / (12 * Real.pi * y * Real.cosh (Real.pi * y)) : ℝ) := by
+  have hs : (1 : ℂ) - 2 * ((1 / 2 : ℂ) + y * I) ≠ 0 := by
+    intro h
+    have hi := congrArg Complex.im h
+    norm_num at hi
+    exact hy (by linarith)
+  have hG : Gamma (((1 / 2 : ℂ) + y * I) / 3 + 5 / 6) ≠ 0 :=
+    Complex.Gamma_ne_zero_of_re_pos (by norm_num)
+  have hG' : Gamma (7 / 6 - ((1 / 2 : ℂ) + y * I) / 3) ≠ 0 :=
+    Complex.Gamma_ne_zero_of_re_pos (by norm_num)
+  have h := mellinValue_mul_mellinValue_one_sub ((1 / 2 : ℂ) + y * I) hs hG hG'
+  rw [show (1 : ℂ) - ((1 / 2 : ℂ) + y * I) = 1 / 2 - y * I by ring] at h
+  rw [h]
+  have hs1 : Complex.sin (Real.pi * ((1 / 2 : ℂ) + y * I)) =
+      (Real.cosh (Real.pi * y) : ℝ) := by
+    rw [show (Real.pi : ℂ) * ((1 / 2 : ℂ) + y * I) =
+      (Real.pi : ℂ) / 2 + ((Real.pi * y : ℝ) : ℂ) * I by push_cast; ring,
+      Complex.sin_add, Complex.sin_pi_div_two, Complex.cos_pi_div_two]
+    simp [Complex.cos_mul_I, Complex.ofReal_cosh]
+  have hs2 : Complex.sin (Real.pi * (((1 / 2 : ℂ) + y * I) / 3 + 5 / 6)) =
+      -I * (Real.sinh (Real.pi * y / 3) : ℝ) := by
+    rw [show (Real.pi : ℂ) * (((1 / 2 : ℂ) + y * I) / 3 + 5 / 6) =
+      (Real.pi : ℂ) + ((Real.pi * y / 3 : ℝ) : ℂ) * I by push_cast; ring,
+      Complex.sin_add, Complex.sin_pi, Complex.cos_pi]
+    simp only [zero_mul, neg_mul, zero_add]
+    rw [Complex.sin_mul_I, ← Complex.ofReal_sinh]
+    ring
+  rw [hs1, hs2]
+  push_cast
+  have hyc : (y : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hy
+  have hpi : (Real.pi : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
+  have hcosh : (Real.cosh (Real.pi * y) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (Real.cosh_pos _).ne'
+  field_simp
+  ring
+
+/-- The norm of the central Mellin value factors into Gamma norms. -/
+lemma norm_mellinValue_half (y : ℝ) :
+    ‖mellinValue ((1 / 2 : ℂ) + y * I)‖ =
+      (1 / (6 * Real.sqrt Real.pi)) * ‖Gamma ((1 / 2 : ℂ) + I * y)‖ *
+        ‖(Gamma (1 + I * (y / 3 : ℝ)))⁻¹‖ := by
+  have hp : ‖(12 : ℂ) ^ ((2 * ((1 / 2 : ℂ) + y * I) + 5) / 6)‖ = 12 := by
+    rw [show (12 : ℂ) = ((12 : ℝ) : ℂ) by norm_num,
+      Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num)]
+    norm_num
+  have hsq : ‖(Real.sqrt Real.pi : ℂ)‖ = Real.sqrt Real.pi := by
+    rw [Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg (Real.sqrt_nonneg _)]
+  dsimp [mellinValue]
+  rw [norm_div, norm_mul, norm_mul, norm_mul, hp, hsq, norm_inv]
+  norm_num
+  rw [show ((1 / 2 : ℂ) + y * I) / 3 + 5 / 6 =
+    1 + I * (y / 3 : ℝ) by push_cast; ring, mul_comm (y : ℂ) I]
+  push_cast
+  ring
+
+/-- The Mellin transform of `Ai²` is absolutely integrable on its central vertical line. -/
+lemma integrable_mellinValue_half :
+    Integrable (fun y : ℝ => mellinValue ((1 / 2 : ℂ) + y * I)) := by
+  obtain ⟨C, K, hC⟩ := DLMF.Gamma.exists_norm_Gamma_le (x := 1 / 2) (by norm_num)
+  obtain ⟨D, L, hD⟩ := DLMF.Gamma.exists_norm_recip_Gamma_shift_le 1 0
+  have hC0 : 0 ≤ C := by
+    have h := (norm_nonneg _).trans (hC 0)
+    simpa using h
+  have hD0 : 0 ≤ D := by
+    have h := (norm_nonneg _).trans (hD 0)
+    simpa using h
+  have hcont : Continuous (fun y : ℝ => mellinValue ((1 / 2 : ℂ) + y * I)) := by
+    apply continuous_iff_continuousAt.mpr
+    intro y
+    dsimp [mellinValue]
+    refine ContinuousAt.div ?_ ?_ ?_
+    · exact continuousAt_const.mul
+        ((DLMF.Gamma.continuousAt_Gamma_of_re_pos (by norm_num)).comp (by fun_prop))
+    · refine (continuousAt_const.mul ?_).mul ?_
+      · exact (continuousAt_const_cpow (by norm_num)).comp (by fun_prop)
+      · exact (DLMF.Gamma.continuousAt_Gamma_of_re_pos (by norm_num)).comp (by fun_prop)
+    · refine mul_ne_zero (mul_ne_zero (Complex.ofReal_ne_zero.mpr
+        (Real.sqrt_pos.mpr Real.pi_pos).ne') ?_) ?_
+      · exact Complex.cpow_ne_zero_iff.mpr (Or.inl (by norm_num))
+      · exact Complex.Gamma_ne_zero_of_re_pos (by norm_num)
+  refine ((Real.integrable_one_add_abs_pow_mul_exp_neg
+    (c := Real.pi / 3) (by positivity) (K + L)).const_mul
+      ((1 / (6 * Real.sqrt Real.pi)) * C * D)).mono' hcont.aestronglyMeasurable ?_
+  filter_upwards [] with y
+  rw [norm_mellinValue_half]
+  have hn := hC y
+  norm_num only [Complex.ofReal_div, Complex.ofReal_one, Complex.ofReal_ofNat] at hn
+  have hd := hD (y / 3)
+  simp only [Complex.ofReal_one, Complex.ofReal_zero, zero_add] at hd
+  have hle : |y / 3| ≤ |y| := by rw [abs_div]; norm_num; linarith [abs_nonneg y]
+  calc
+    _ ≤ (1 / (6 * Real.sqrt Real.pi)) *
+        (C * (1 + |y|) ^ K * Real.exp (-(Real.pi * |y|) / 2)) *
+        (D * (1 + |y / 3|) ^ L * Real.exp (Real.pi * |y / 3| / 2)) := by
+      exact mul_le_mul (mul_le_mul_of_nonneg_left hn (by positivity)) hd
+        (norm_nonneg _) (by positivity)
+    _ ≤ (1 / (6 * Real.sqrt Real.pi)) *
+        (C * (1 + |y|) ^ K * Real.exp (-(Real.pi * |y|) / 2)) *
+        (D * (1 + |y|) ^ L * Real.exp (Real.pi * |y / 3| / 2)) := by
+      gcongr
+    _ = _ := by
+      rw [pow_add, abs_div, abs_of_pos (by norm_num : (0:ℝ) < 3)]
+      rw [show -(Real.pi / 3 * |y|) = -(Real.pi * |y|) / 2 +
+        Real.pi * (|y| / 3) / 2 by ring, Real.exp_add]
+      ring
+
+end AiSquare
+
 /-- `∫_{-∞}^{∞} Ai(t)³ dt = Γ(1/3)²/(4π²)` (DLMF 9.11.16). -/
 @[dlmf 9.11.E16]
 theorem airyAi_cube_integral  :
@@ -322,7 +497,56 @@ theorem airyAi_sq_airyBi_integral  :
 @[dlmf 9.11.E18]
 theorem airyAi_fourth_integral  :
     (∫ t : ℝ in Ioi 0, airyAi t ^ 4) = log 3 / (24 * π ^ 2) := by
-  sorry
+  have hmel : MellinConvergent (fun x : ℝ => airyAi x ^ 2) (1 / 2) := by
+    simpa only [MellinConvergent, smul_eq_mul] using
+      (airyAi_sq_mellin (α := 1 / 2) (by norm_num)).1
+  have hv : Complex.VerticalIntegrable (mellin (fun x : ℝ => airyAi x ^ 2)) (1 / 2) := by
+    refine AiSquare.integrable_mellinValue_half.congr (Eventually.of_forall fun y => ?_)
+    change AiSquare.mellinValue _ = mellin (fun x : ℝ => airyAi x ^ 2) _
+    rw [AiSquare.mellin_eq_value (by norm_num)]
+    norm_num
+  have hmel' : MellinConvergent (fun x : ℝ => airyAi x ^ 2) (1 - (1 / 2 : ℝ)) := by
+    norm_num
+    exact hmel
+  have hp := integral_mul_eq_mellin_parseval (f := fun x : ℝ => airyAi x ^ 2)
+    (g := fun x : ℝ => airyAi x ^ 2) (σ := 1 / 2)
+    hmel' (by norm_num; exact hmel) (Or.inl hv)
+  have ha : (∫ x in Ioi (0 : ℝ), airyAi x ^ 4) =
+      (1 / (2 * Real.pi) : ℂ) * ∫ y : ℝ,
+        (Real.sinh (Real.pi * y / 3) /
+          (12 * Real.pi * y * Real.cosh (Real.pi * y)) : ℝ) := by
+    convert hp using 1
+    · congr 1
+      funext x
+      ring
+    · congr 1
+      rw [← integral_complex_ofReal]
+      apply integral_congr_ae
+      filter_upwards [volume.ae_ne (0 : ℝ)] with y hy
+      rw [AiSquare.mellin_eq_value (by norm_num), AiSquare.mellin_eq_value (by norm_num),
+        show (1 : ℂ) - ((1 / 2 : ℝ) + y * I) = 1 / 2 - y * I by push_cast; ring,
+        show ((1 / 2 : ℝ) : ℂ) = 1 / 2 by push_cast; ring]
+      rw [mul_comm (AiSquare.mellinValue ((1 / 2 : ℂ) - y * I))]
+      exact (AiSquare.mellinValue_half_mul_reflected hy).symm
+  rw [ha]
+  have hscale : (∫ y : ℝ, Real.sinh (Real.pi * y / 3) /
+      (12 * Real.pi * y * Real.cosh (Real.pi * y))) = Real.log 3 / (12 * Real.pi) := by
+    have hi := MeasureTheory.Measure.integral_comp_mul_left
+      (fun x : ℝ => Real.sinh (x / 3) / (x * Real.cosh x)) Real.pi
+    simp only [abs_of_pos Real.pi_pos, smul_eq_mul,
+      Real.integral_sinh_div_three_div_mul_cosh, abs_inv] at hi
+    calc
+      _ = (1 / 12) * ∫ y : ℝ,
+          Real.sinh (Real.pi * y / 3) / (Real.pi * y * Real.cosh (Real.pi * y)) := by
+        rw [← integral_const_mul]
+        congr 1; ext y; ring
+      _ = _ := by rw [hi]; ring
+  rw [hscale]
+  have hl : Complex.log (3 : ℂ) = (Real.log 3 : ℝ) := by
+    simpa only [Complex.ofReal_ofNat] using (Complex.ofReal_log (by norm_num : (0 : ℝ) ≤ 3)).symm
+  rw [hl]
+  push_cast
+  ring
 
 /-- `Bi'(x) ≥ Bi'(0)` for `x ≥ 0`, since `Bi'' = x Bi ≥ 0` there. -/
 theorem Real.airyBiDeriv_ge {x : ℝ} (hx : 0 ≤ x) : DLMF.Airy.Real.airyBiDeriv 0 ≤

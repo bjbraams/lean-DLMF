@@ -81,6 +81,7 @@ namespace DLMF.Confluent
 #print axioms gammaUniformD_zero_succ
 #print axioms pcfDescendingZero_eventually
 #print axioms upperIncompleteGamma_indented_integral
+#print axioms upperIncompleteGamma_laguerre_series
 #print axioms tricomiIncompleteGamma_two_parameter_zeros_negative_x
 
 end DLMF.Confluent
@@ -199,4 +200,52 @@ namespace DLMF.Statistical
 #print axioms regularizedIncompleteBeta_mellinBarnes
 
 end DLMF.Statistical
+
+namespace DLMF.Confluent.IncompleteGammaLaguerre
+
+#print axioms normSeries
+#print axioms aestronglyMeasurable_normSeries
+#print axioms integrableOn_normSeries
+#print axioms integral_gaussian_eq_laguerre
+#print axioms gaussianTerm
+#print axioms norm_gaussianTerm
+#print axioms continuousOn_gaussianTerm
+#print axioms summable_norm_gaussianTerm
+#print axioms summable_integral_gaussianTerm
+#print axioms summable_laguerre_div_succ
+#print axioms generatingKernel
+#print axioms generatingKernel_substitution
+#print axioms integral_generatingKernel_eq_upperIncompleteGamma
+#print axioms hasSum_laguerre_of_summable
+
+end DLMF.Confluent.IncompleteGammaLaguerre
+
+namespace DLMF.Bessel
+
+#print axioms isBigO_besselJ_atTop
+#print axioms exists_norm_besselJ_mul_bounds
+
+end DLMF.Bessel
+
+namespace Real
+
+#print axioms summable_pow_div_factorial_mul_succ
+#print axioms tsum_pow_div_factorial_mul_succ_le
+#print axioms mul_tsum_pow_div_factorial_mul_succ_le
+
+end Real
+
+namespace MeasureTheory
+
+#print axioms integral_comp_div_one_add_Ioi
+
+end MeasureTheory
+
+namespace DLMF.OrthogonalPolynomials
+
+#print axioms hasSum_laguerreExtended_generating_function
+#print axioms laguerreExtended_eq_gamma_mul_regularized
+#print axioms laguerrePolynomialL_generating_function
+
+end DLMF.OrthogonalPolynomials
 

@@ -39,7 +39,7 @@ chapter	declaration	status	file	line
 8	upperIncompleteGamma_continuedFraction_complex	admitted	DLMF/IncompleteGamma/BoundsFractions.lean	107
 8	expIntegralE_continuedFraction	admitted	DLMF/IncompleteGamma/ExponentialIntegral.lean	613
 8	upperIncompleteGamma_indented_integral	proved	DLMF/IncompleteGamma/Representations/LowerBarnes.lean	777
-8	upperIncompleteGamma_laguerre_series	admitted	DLMF/IncompleteGamma/SeriesRecurrences.lean	854
+8	upperIncompleteGamma_laguerre_series	proved	DLMF/IncompleteGamma/SeriesRecurrences.lean	855
 8	gammaUniformS_uniform_expansion	admitted	DLMF/IncompleteGamma/UniformAsymptotics.lean	715
 8	gammaUniformT_uniform_expansion	admitted	DLMF/IncompleteGamma/UniformAsymptotics.lean	728
 8	gammaUniformC_maclaurin	admitted	DLMF/IncompleteGamma/UniformAsymptotics.lean	938

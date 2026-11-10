@@ -6,6 +6,15 @@ Roy, *Special Functions* (1999), henceforth AAR, and was renamed from lean-AAR t
 on 2026-10-21, when the DLMF chapters became its organizing principle. AAR, Olver, Temme,
 Beals–Wong and Duverney remain supporting sources.
 
+The [Airy and Bessel proof round](REVIEW.md#airy-and-bessel-proof-round-2026-11-10)
+proves **eight existing Airy admissions**, preserving their statements and complex domains.
+It covers the Airy Stieltjes formula, both nonreal Bi zero sectors, the Ai fourth-power
+integral, three generalized Airy results and the Scorer Hi Mellin–Barnes formula.
+Chapter 9 now has **22** direct admissions and Chapter 10 **one**; the
+[chapter inventory](reports/Chapters910Admissions.tsv) records all starting targets and
+current statuses. The retained [axiom audit](scripts/CheckChapters910.lean) checks the
+completed proofs and their support independently of the remaining admissions.
+
 The [2026-11-06 proof round](REVIEW.md#parallel-dlmf-proof-round-2026-11-06)
 removes **11 further direct admissions**, reducing **995 to 984**. Its
 [manifest](ProofRound20261106.json) records six elliptic, three basic hypergeometric and

@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.Gamma.RecipGammaDeriv
 public import DLMF.OrthogonalPolynomials.Basic.Classical
 public import DLMF.OrthogonalPolynomials.Basic.Definitions
 
@@ -305,12 +306,12 @@ theorem summable_laguerrePolynomialL_double (α x : ℂ) {t : ℂ} (ht : ‖t‖
   dsimp [B, s, r]
   gcongr
 
-/-- Generating function
-`(1-t)^{-α-1} exp(-xt/(1-t)) = ∑ L_n^{(α)}(x) t^n` (AAR §6.2). -/
+/-- The Laguerre generating series using the polynomial continuation in the parameter.
+It converges throughout the open unit disk for every complex parameter and argument. -/
 @[dlmf 18.12.E13]
-theorem laguerrePolynomialL_generating_function {α x t : ℂ}
-    (hα : ∀ k : ℕ, α + 1 ≠ -(k : ℂ)) (ht : ‖t‖ < 1) :
-    (1 - t) ^ (-α - 1) * exp (-x * t / (1 - t)) = ∑' n : ℕ, laguerrePolynomialL α n x * t ^ n := by
+theorem hasSum_laguerreExtended_generating_function {α x t : ℂ} (ht : ‖t‖ < 1) :
+    HasSum (fun n : ℕ => laguerreExtended α n x*t^n)
+      ((1-t)^(-α-1)*exp (-x*t/(1-t))) := by
   let L : ℕ × ℕ → ℂ := fun km =>
     (pochhammer (α + 1 + km.1) km.2 / km.2.factorial * t ^ km.2) *
       ((-x * t) ^ km.1 / km.1.factorial)
@@ -338,9 +339,9 @@ theorem laguerrePolynomialL_generating_function {α x t : ℂ}
         congr 1
         simpa only [Complex.exp_eq_exp_ℂ] using
           (NormedSpace.expSeries_div_hasSum_exp (-x * t / (1 - t))).tsum_eq
+  have hsig := Finset.HasAntidiagonal.sigmaAntidiagonalEquivProd.summable_iff.mpr hL
   have hdiag : ∑' km, L km =
       ∑' n : ℕ, ∑ k ∈ Finset.range (n + 1), L (k, n - k) := by
-    have hsig := Finset.HasAntidiagonal.sigmaAntidiagonalEquivProd.summable_iff.mpr hL
     simp only [Function.comp_def] at hsig
     rw [← Finset.HasAntidiagonal.sigmaAntidiagonalEquivProd.tsum_eq L,
       hsig.tsum_sigma]
@@ -350,21 +351,38 @@ theorem laguerrePolynomialL_generating_function {α x t : ℂ}
     change (∑ b : ↥(Finset.antidiagonal n), L b.val) = _
     exact (Finset.sum_finset_coe L (Finset.antidiagonal n)).trans
       (Finset.Nat.sum_antidiagonal_eq_sum_range_succ_mk L n)
-  rw [← hsum, hdiag]
-  apply tsum_congr
-  intro n
-  rw [laguerrePolynomialL_eq_sum hα, Finset.sum_mul]
-  apply Finset.sum_congr rfl
-  intro k hk
+  have hd : Summable (fun n : ℕ => ∑ k ∈ Finset.range (n+1), L (k,n-k)) := by
+    have h := hsig.sigma' fun n => (hasSum_fintype _).summable
+    convert h using 1
+    funext n
+    rw [tsum_fintype]
+    exact ((Finset.sum_finset_coe L (Finset.antidiagonal n)).trans
+      (Finset.Nat.sum_antidiagonal_eq_sum_range_succ_mk L n)).symm
+  have hs := hd.hasSum
+  rw [← hdiag, hsum] at hs
+  refine hs.congr_fun fun n => ?_
+  symm
+  rw [laguerreExtended, Finset.sum_mul]
+  refine Finset.sum_congr rfl fun k hk => ?_
   have hk' : k ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hk)
-  have htprod : t ^ (n - k) * t ^ k = t ^ n := by
+  have htprod : t ^ (n-k) * t ^ k = t ^ n := by
     rw [← pow_add, Nat.sub_add_cancel hk']
   dsimp [L]
   rw [mul_pow]
+  rw [show α+1+(k:ℂ) = α+k+1 by ring]
   calc
-    _ = pochhammer (α + 1 + k) (n - k) / ((n - k).factorial * k.factorial : ℂ) *
-        (-x) ^ k * (t ^ (n - k) * t ^ k) := by ring
+    _ = pochhammer (α+k+1) (n-k) / ((k.factorial:ℂ)*(n-k).factorial) *
+        (-x)^k * (t^(n-k)*t^k) := by ring
     _ = _ := by rw [htprod]
+
+/-- Generating function
+`(1-t)^{-α-1} exp(-xt/(1-t)) = ∑ L_n^{(α)}(x) t^n` (AAR §6.2). -/
+@[dlmf 18.12.E13]
+theorem laguerrePolynomialL_generating_function {α x t : ℂ}
+    (hα : ∀ k : ℕ, α + 1 ≠ -(k : ℂ)) (ht : ‖t‖ < 1) :
+    (1 - t) ^ (-α - 1) * exp (-x * t / (1 - t)) = ∑' n : ℕ, laguerrePolynomialL α n x * t ^ n := by
+  simpa only [laguerreExtended_eq hα] using
+    (hasSum_laguerreExtended_generating_function (α := α) (x := x) ht).tsum_eq.symm
 
 /-- Orthogonality of the terminating Gauss polynomials for the shifted Jacobi weight. -/
 theorem jacobi_shifted_orthogonal {α β : ℝ} (hα : -1 < α) (hβ : -1 < β)
@@ -506,5 +524,38 @@ theorem jacobiPolynomialP_orthogonal {α β : ℝ} {m n : ℕ}
           (1 - (x : ℂ)) ^ (α : ℂ) * (1 + (x : ℂ)) ^ (β : ℂ) :=
         intervalIntegral.integral_congr fun x _ => by ring
       _ = 0 := hlt n m h
+
+/-- A regularized Kummer expression for the Laguerre polynomial, valid even at exceptional
+denominator parameters when the terminal Gamma factor has positive real part. -/
+theorem laguerreExtended_eq_gamma_mul_regularized {a : ℂ} {n : ℕ}
+    (ha : 0 < (a+n+1).re) (x : ℂ) :
+    laguerreExtended a n x = Gamma (a+n+1)/(n.factorial:ℂ)*
+      regularizedHGFun {-(n:ℂ)} {a+1} x := by
+  have hf : regularizedHGFun {-(n:ℂ)} {a+1} x =
+      ∑ k ∈ Finset.range (n+1), pochhammer (-(n:ℂ)) k /
+        ((k.factorial:ℂ)*Gamma (a+1+k))*x^k := by
+    rw [DLMF.Confluent.regularizedHGFun_eq_tsum, tsum_eq_sum (s := Finset.range (n+1))]
+    · exact Finset.sum_congr rfl fun k _ => by rw [DLMF.Confluent.regularizedHGFunCoeff_singleton]
+    · intro k hk
+      have hk' : n < k := by simpa using hk
+      simp [DLMF.Confluent.regularizedHGFunCoeff_singleton,
+        pochhammer_neg_coe_nat, Nat.descFactorial_eq_zero_iff_lt.mpr hk']
+  rw [laguerreExtended, hf, Finset.mul_sum]
+  refine Finset.sum_congr rfl fun k hk => ?_
+  have hkn : k ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hk)
+  have hG : Gamma (a+n+1) ≠ 0 := Gamma_ne_zero_of_re_pos ha
+  have hrec := DLMF.Gamma.pochhammer_mul_recip_Gamma_add_nat (a+k+1) (n-k)
+  have he : a+k+1+((n-k:ℕ):ℂ) = a+n+1 := by push_cast [Nat.cast_sub hkn]; ring
+  rw [he] at hrec
+  have hp : pochhammer (a+k+1) (n-k) = Gamma (a+n+1) / Gamma (a+1+k) := by
+    have he' : a+k+1 = a+1+k := by ring
+    rw [he'] at hrec
+    field_simp at hrec ⊢
+    simpa only [he'] using hrec
+  have hdesc : (n.descFactorial k:ℂ) = (n.factorial:ℂ)/(n-k).factorial := by
+    rw [Nat.descFactorial_eq_div hkn, Nat.cast_div (Nat.factorial_dvd_factorial (Nat.sub_le n k))]
+    exact_mod_cast (Nat.factorial_ne_zero (n-k))
+  rw [hp, pochhammer_neg_coe_nat, hdesc, neg_pow]
+  field_simp [(Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero n) : (n.factorial:ℂ) ≠ 0)]
 
 end DLMF.OrthogonalPolynomials

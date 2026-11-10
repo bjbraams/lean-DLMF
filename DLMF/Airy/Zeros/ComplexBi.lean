@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Airy.Zeros.RealAndAi
+public import DLMF.Airy.Zeros.BiSectors
 
 /-!
 # Complex zeros of the Airy function Bi
@@ -492,7 +493,7 @@ end UpperZeros
 /-- The nonreal-zero sectors of Bi and Bi', DLMF §9.9(i). -/
 theorem airyBi_complex_zeros_sector {z : ℂ} (hz : airyBi z = 0) (him : z.im ≠ 0) :
     π / 3 < |arg z| ∧ |arg z| < π / 2 := by
-  sorry
+  exact ComplexBiZeros.zero_sector him (Or.inl hz)
 
 /-- Infinitely many zeros in the upper sector, DLMF §9.9(i). -/
 theorem airyBi_infinite_complex_zeros :
@@ -529,7 +530,7 @@ theorem airyBiComplexZero_enumeration :
 /-- The nonreal-zero sectors of Bi and Bi', DLMF §9.9(i). -/
 theorem airyBiDeriv_complex_zeros_sector {z : ℂ} (hz : airyBiDeriv z = 0) (him : z.im ≠ 0) :
     π / 3 < |arg z| ∧ |arg z| < π / 2 := by
-  sorry
+  exact ComplexBiZeros.zero_sector him (Or.inr hz)
 
 /-- Infinitely many zeros in the upper sector, DLMF §9.9(i). -/
 theorem airyBiDeriv_infinite_complex_zeros :
