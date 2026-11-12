@@ -157,7 +157,7 @@ theorem matrixLaplaceTransform_integrableOn_analyticOnNhd {m : ℕ} (f : Matrix 
       (continuous_pi fun ij => Complex.continuous_re.comp (continuous_apply ij))).sub
           continuous_const
     have hU : IsOpen {z | ((complexSymmetricOfCoords z).map Complex.re - X₀).PosDef} := by
-      have h := (TauCeti.isOpen_setOfPred_posDefMatrix m).preimage hC
+      have h := (TauCeti.isOpen_posDefMatrix m).preimage hC
       change IsOpen {z | (R z : Matrix (Fin m) (Fin m) ℝ).PosDef} at h
       simpa only [hR] using h
     refine DifferentiableOn.analyticOnNhd_of_finiteDimensional ?_ hU
@@ -240,7 +240,7 @@ lemma radianFourierIntegral_damped {m : ℕ} (f : Matrix (Fin m) (Fin m) ℝ →
 lemma continuousAt_damped {m : ℕ} (f : Matrix (Fin m) (Fin m) ℝ → ℂ) (U : SymMatrix m)
     (hfc : ContinuousOn f {X | X.PosDef}) (X : SymMatrix m) (hX : X ∈ posDefCone m) :
     ContinuousAt (damped f U) X := by
-  have hco : IsOpen (posDefCone m) := TauCeti.isOpen_setOfPred_posDefMatrix m
+  have hco : IsOpen (posDefCone m) := TauCeti.isOpen_posDefMatrix m
   have hfw : ContinuousWithinAt (fun Y : SymMatrix m => f Y) (posDefCone m) X :=
     (hfc _ hX).comp continuous_subtype_val.continuousAt.continuousWithinAt
       (fun Y hY => hY)

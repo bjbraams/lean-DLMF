@@ -55,7 +55,7 @@ theorem dirichletProduct_apply_hasSum (f g : ArithmeticFunction ℂ) {s a b : �
     (∀ n, (f * g) n = ∑ d ∈ n.divisors, f d * g (n / d)) ∧
       LSeriesHasSum ↗(f * g) s (a * b) := by
   refine ⟨fun n ↦ ?_, LSeriesHasSum_mul hf hg⟩
-  rw [mul_apply, Nat.sum_divisorsAntidiagonal (fun x y ↦ f x * g y)]
+  rw [ArithmeticFunction.mul_apply, Nat.sum_divisorsAntidiagonal (fun x y ↦ f x * g y)]
 
 /-- §27.5, after 27.5.1: the functions with `f(1) ≠ 0` are the units of the ring of
 arithmetic functions (an abelian group under Dirichlet multiplication), with identity
@@ -69,7 +69,7 @@ theorem isUnit_iff_apply_one_ne_zero (f : ArithmeticFunction ℂ) :
 @[dlmf 27.5]
 theorem one_apply_eq_floor {n : ℕ} (hn : 0 < n) :
     ((1 : ArithmeticFunction ℤ) n) = ⌊(1 : ℝ) / n⌋ := by
-  rw [floor_one_div hn, one_apply]
+  rw [floor_one_div hn, ArithmeticFunction.one_apply]
 
 /-- The multiplicative function with prescribed values `h(p^e)` at prime powers. -/
 def multiplicativeOfPrimePow {R : Type*} [CommMonoidWithZero R] (h : ℕ → R) :
@@ -116,7 +116,7 @@ private lemma isMultiplicative_of_mul_eq_one {f h : ArithmeticFunction ℂ}
     rcases e with _ | e
     · rw [pow_zero, hg.map_one]
       have := congrArg (fun F : ArithmeticFunction ℂ ↦ F 1) hh
-      simp only [mul_apply, Nat.divisorsAntidiagonal_one, sum_singleton, one_one,
+      simp only [ArithmeticFunction.mul_apply, Nat.divisorsAntidiagonal_one, sum_singleton, one_one,
         hf.map_one, one_mul] at this
       exact this.symm
     rw [hgdef, multiplicativeOfPrimePow_apply _ (pow_ne_zero _ hp.ne_zero),
@@ -232,7 +232,7 @@ private lemma sum_Icc_sum_Icc_div_eq_sum_divisorsAntidiagonal {R : Type*} [AddCo
 theorem sum_divisors_moebius_eq_ite (k : ℕ) :
     ∑ d ∈ k.divisors, (μ d : ℂ) = if k = 1 then 1 else 0 := by
   have := congrArg (fun F : ArithmeticFunction ℤ ↦ ((F k : ℤ) : ℂ)) coe_zeta_mul_moebius
-  simp only [coe_zeta_mul_apply, one_apply, Int.cast_sum] at this
+  simp only [coe_zeta_mul_apply, ArithmeticFunction.one_apply, Int.cast_sum] at this
   rw [this]; split_ifs <;> simp
 
 /-- DLMF 27.5.6 (proof). -/

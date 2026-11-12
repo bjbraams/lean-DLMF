@@ -182,7 +182,7 @@ theorem eval_nonneg_or_nonpos {p : ℝ[X]} (hp : p ≠ 0)
       (∀ x, 0 ≤ p.eval x) ∨ (∀ x, p.eval x ≤ 0) := by
     intro d
     induction d using Nat.strong_induction_on with
-    | h d ih =>
+    | ind d ih =>
       intro p hn hp heven
       subst hn
       by_cases hroots : p.roots = 0

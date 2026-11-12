@@ -229,7 +229,7 @@ private lemma exists_holomorphic_param_solution_Icc {a b R : ℝ} (hab : a ≤ b
   · rfl
   · simp only [L, paramVectorField, affineParamCoeff, ContinuousLinearMap.coe_restrictScalars',
       ContinuousLinearMap.coe_comp, Submodule.coe_subtypeL, Submodule.coe_subtype, evalCLM_apply,
-      coe_add, coe_mul, coe_smul, coe_one, Pi.add_apply, Pi.mul_apply, Pi.one_apply,
+      coe_add, coe_mul, coe_smul, coe_one, Pi.add_apply, Pi.mul_apply, Pi.smul_apply, Pi.one_apply,
       smul_eq_mul, mul_one, discRetract_apply_of_mem_closedBall hR hμ, Function.comp_apply]
     ring
 

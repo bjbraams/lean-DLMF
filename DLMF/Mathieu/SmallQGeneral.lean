@@ -566,7 +566,7 @@ theorem mathieuA_seven_sub_isBigO :
       | _ => 0)
     (by norm_num) (fun _ => rfl) (fun _ => rfl) (fun _ => rfl) ?_ ?_) ?_
   · intro i hi
-    interval_cases i <;> exact isBigO_one_of_continuous (by fun_prop)
+    interval_cases i <;> exact isBigO_one_of_continuous (by (try simp only); fun_prop)
   · intro i hi
     interval_cases i
     · exact isBigO_pow_of_eq_pow_mul (e := 4) (by decide)
@@ -657,7 +657,7 @@ theorem mathieuB_seven_sub_isBigO :
       | _ => 0)
     (by norm_num) (fun _ => rfl) (fun _ => rfl) (fun _ => rfl) ?_ ?_) ?_
   · intro i hi
-    interval_cases i <;> exact isBigO_one_of_continuous (by fun_prop)
+    interval_cases i <;> exact isBigO_one_of_continuous (by (try simp only); fun_prop)
   · intro i hi
     interval_cases i
     · exact isBigO_pow_of_eq_pow_mul (e := 4) (by decide)

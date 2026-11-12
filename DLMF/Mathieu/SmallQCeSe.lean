@@ -54,7 +54,7 @@ theorem mathieuCe_zero_sub_isBigO (z : ℂ) :
       | _ => 0)
     (fun q i hi => by obtain ⟨j, rfl⟩ : ∃ j, i = j + 4 := ⟨i - 4, by omega⟩; rfl)
     (fun _ => rfl)
-    (by intro i hi; interval_cases i <;> exact isBigO_one_of_continuous (by fun_prop))
+    (by intro i hi; interval_cases i <;> exact isBigO_one_of_continuous (by (try simp only); fun_prop))
     (by
       intro i hi
       interval_cases i
@@ -133,7 +133,7 @@ theorem mathieuCe_one_sub_isBigO (z : ℂ) :
       | _ => 0)
     (fun q i hi => by obtain ⟨j, rfl⟩ : ∃ j, i = j + 4 := ⟨i - 4, by omega⟩; rfl)
     (fun _ => rfl)
-    (by intro i hi; interval_cases i <;> exact isBigO_one_of_continuous (by fun_prop))
+    (by intro i hi; interval_cases i <;> exact isBigO_one_of_continuous (by (try simp only); fun_prop))
     (by
       intro i hi
       interval_cases i
@@ -223,7 +223,7 @@ theorem mathieuSe_one_sub_isBigO (z : ℂ) :
       | _ => 0)
     (fun q i hi => by obtain ⟨j, rfl⟩ : ∃ j, i = j + 4 := ⟨i - 4, by omega⟩; rfl)
     (fun _ => rfl)
-    (by intro i hi; interval_cases i <;> exact isBigO_one_of_continuous (by fun_prop))
+    (by intro i hi; interval_cases i <;> exact isBigO_one_of_continuous (by (try simp only); fun_prop))
     (by
       intro i hi
       interval_cases i
@@ -311,7 +311,7 @@ theorem mathieuCe_two_sub_isBigO (z : ℂ) :
       | _ => 0)
     (fun q i hi => by obtain ⟨j, rfl⟩ : ∃ j, i = j + 4 := ⟨i - 4, by omega⟩; rfl)
     (fun _ => rfl)
-    (by intro i hi; interval_cases i <;> exact isBigO_one_of_continuous (by fun_prop))
+    (by intro i hi; interval_cases i <;> exact isBigO_one_of_continuous (by (try simp only); fun_prop))
     (by
       intro i hi
       interval_cases i
@@ -385,7 +385,7 @@ theorem mathieuSe_two_sub_isBigO (z : ℂ) :
       | _ => 0)
     (fun q i hi => by obtain ⟨j, rfl⟩ : ∃ j, i = j + 3 := ⟨i - 3, by omega⟩; rfl)
     (fun _ => rfl)
-    (by intro i hi; interval_cases i <;> exact isBigO_one_of_continuous (by fun_prop))
+    (by intro i hi; interval_cases i <;> exact isBigO_one_of_continuous (by (try simp only); fun_prop))
     (by
       intro i hi
       interval_cases i
@@ -454,7 +454,7 @@ theorem mathieuCe_three_sub_isBigO {m : ℕ} (hm : m = 3) (z : ℂ) :
       | _ => 0)
     (fun q i hi => by obtain ⟨j, rfl⟩ : ∃ j, i = j + 4 := ⟨i - 4, by omega⟩; rfl)
     (fun _ => rfl)
-    (by intro i hi; interval_cases i <;> exact isBigO_one_of_continuous (by fun_prop))
+    (by intro i hi; interval_cases i <;> exact isBigO_one_of_continuous (by (try simp only); fun_prop))
     (by
       intro i hi
       interval_cases i
@@ -538,7 +538,7 @@ theorem mathieuSe_three_sub_isBigO {m : ℕ} (hm : m = 3) (z : ℂ) :
       | _ => 0)
     (fun q i hi => by obtain ⟨j, rfl⟩ : ∃ j, i = j + 4 := ⟨i - 4, by omega⟩; rfl)
     (fun _ => rfl)
-    (by intro i hi; interval_cases i <;> exact isBigO_one_of_continuous (by fun_prop))
+    (by intro i hi; interval_cases i <;> exact isBigO_one_of_continuous (by (try simp only); fun_prop))
     (by
       intro i hi
       interval_cases i
@@ -623,7 +623,7 @@ theorem mathieuCe_four_sub_isBigO {m : ℕ} (hm : m = 4) (z : ℂ) :
       | _ => 0)
     (fun q i hi => by obtain ⟨j, rfl⟩ : ∃ j, i = j + 5 := ⟨i - 5, by omega⟩; rfl)
     (fun _ => rfl)
-    (by intro i hi; interval_cases i <;> exact isBigO_one_of_continuous (by fun_prop))
+    (by intro i hi; interval_cases i <;> exact isBigO_one_of_continuous (by (try simp only); fun_prop))
     (by
       intro i hi
       interval_cases i
@@ -711,7 +711,7 @@ theorem mathieuSe_four_sub_isBigO {m : ℕ} (hm : m = 4) (z : ℂ) :
       | _ => 0)
     (fun q i hi => by obtain ⟨j, rfl⟩ : ∃ j, i = j + 4 := ⟨i - 4, by omega⟩; rfl)
     (fun _ => rfl)
-    (by intro i hi; interval_cases i <;> exact isBigO_one_of_continuous (by fun_prop))
+    (by intro i hi; interval_cases i <;> exact isBigO_one_of_continuous (by (try simp only); fun_prop))
     (by
       intro i hi
       interval_cases i
@@ -794,7 +794,7 @@ theorem mathieuCe_five_sub_isBigO {m : ℕ} (hm : m = 5) (z : ℂ) :
       | _ => 0)
     (fun q i hi => by obtain ⟨j, rfl⟩ : ∃ j, i = j + 5 := ⟨i - 5, by omega⟩; rfl)
     (fun _ => rfl)
-    (by intro i hi; interval_cases i <;> exact isBigO_one_of_continuous (by fun_prop))
+    (by intro i hi; interval_cases i <;> exact isBigO_one_of_continuous (by (try simp only); fun_prop))
     (by
       intro i hi
       interval_cases i
@@ -882,7 +882,7 @@ theorem mathieuSe_five_sub_isBigO {m : ℕ} (hm : m = 5) (z : ℂ) :
       | _ => 0)
     (fun q i hi => by obtain ⟨j, rfl⟩ : ∃ j, i = j + 5 := ⟨i - 5, by omega⟩; rfl)
     (fun _ => rfl)
-    (by intro i hi; interval_cases i <;> exact isBigO_one_of_continuous (by fun_prop))
+    (by intro i hi; interval_cases i <;> exact isBigO_one_of_continuous (by (try simp only); fun_prop))
     (by
       intro i hi
       interval_cases i

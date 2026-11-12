@@ -236,8 +236,6 @@ theorem zonal_poisson {n : ℕ} (hn : n ≠ 0)
   let g : sphere (0 : EuclideanSpace ℝ (Fin n)) 1 → ℝ := fun y => f y
   have hg : Continuous g := (hcont.mono sphere_subset_closedBall).comp_continuous
     continuous_subtype_val (fun y => y.2)
-  have hgi : Integrable g volume.toSphere :=
-    hg.integrable_of_hasCompactSupport (.of_compactSpace g)
   let u : EuclideanSpace ℝ (Fin n) → ℝ := fun z =>
     if hz : z ∈ sphere (0 : EuclideanSpace ℝ (Fin n)) 1 then g ⟨z, hz⟩
     else TauCeti.ballPoissonIntegral g z
@@ -246,7 +244,7 @@ theorem zonal_poisson {n : ℕ} (hn : n ≠ 0)
   have hu : EqOn u (TauCeti.ballPoissonIntegral g) (ball 0 1) :=
     fun z hz => dite_eq_right (hball z hz)
   have hP : HarmonicOnNhd (TauCeti.ballPoissonIntegral g) (ball 0 1) :=
-    (TauCeti.harmonicOnNhd_ballPoissonIntegral hgi).mono hball
+    (TauCeti.harmonicOnNhd_ballPoissonIntegral (g := g)).mono hball
   have huP : ∀ z ∈ ball (0 : EuclideanSpace ℝ (Fin n)) 1,
       u =ᶠ[𝓝 z] TauCeti.ballPoissonIntegral g :=
     fun z hz => Filter.eventually_of_mem (isOpen_ball.mem_nhds hz) hu

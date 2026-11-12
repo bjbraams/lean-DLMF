@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
-public import TauCeti.Analysis.SpecialFunctions.IncompleteBeta
+public import TauCeti.Analysis.SpecialFunctions.IncompleteBeta.Basic
 public import TauCeti.Probability.Distributions.Binomial.Tail
 
 /-!
@@ -299,7 +299,7 @@ theorem Real.regularizedIncompleteBeta_nat {m n : ℕ} (hm : 1 ≤ m) (hmn : m �
   have hb : (0 : ℝ) < (n : ℝ) - m + 1 := by
     have : (m : ℝ) ≤ n := by exact_mod_cast hmn
     linarith
-  have h := TauCeti.Probability.sum_Icc_choose_mul_pow_eq_regularizedIncompleteBeta hmn ⟨p, hp⟩
+  have h := TauCeti.Probability.sum_Icc_choose_mul_pow_eq_regularizedIncompleteBeta (m := m) (n := n) ⟨p, hp⟩
   rw [show Real.regularizedIncompleteBeta (m : ℂ) ((n : ℂ) - m + 1) p =
       Real.regularizedIncompleteBeta ((m : ℝ) : ℂ) (((n : ℝ) - m + 1 : ℝ) : ℂ) p by push_cast; rfl,
     Real.regularizedIncompleteBeta_ofReal hm' hb hp, ← h]

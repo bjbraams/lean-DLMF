@@ -95,7 +95,7 @@ theorem mathieuA_zero_small_q :
       | _ => 0)
     (by norm_num) (fun _ => rfl) (fun _ => rfl) (fun _ => rfl) ?_ ?_) ?_
   · intro i hi
-    interval_cases i <;> exact isBigO_one_of_continuous (by fun_prop)
+    interval_cases i <;> exact isBigO_one_of_continuous (by (try simp only); fun_prop)
   · intro i hi
     by_cases htail : 5 < i
     · refine isBigO_residual_of_support htail ?_
@@ -172,7 +172,7 @@ theorem mathieuA_one_small_q :
       | _ => 0)
     (by norm_num) (fun _ => rfl) (fun _ => rfl) (fun _ => rfl) ?_ ?_) ?_
   · intro i hi
-    interval_cases i <;> exact isBigO_one_of_continuous (by fun_prop)
+    interval_cases i <;> exact isBigO_one_of_continuous (by (try simp only); fun_prop)
   · intro i hi
     by_cases htail : 5 < i
     · refine isBigO_residual_of_support htail ?_
@@ -259,7 +259,7 @@ theorem mathieuB_one_small_q :
       | _ => 0)
     (by norm_num) (fun _ => rfl) (fun _ => rfl) (fun _ => rfl) ?_ ?_) ?_
   · intro i hi
-    interval_cases i <;> exact isBigO_one_of_continuous (by fun_prop)
+    interval_cases i <;> exact isBigO_one_of_continuous (by (try simp only); fun_prop)
   · intro i hi
     by_cases htail : 5 < i
     · refine isBigO_residual_of_support htail ?_
@@ -343,7 +343,7 @@ theorem mathieuA_two_small_q :
       | _ => 0)
     (by norm_num) (fun _ => rfl) (fun _ => rfl) (fun _ => rfl) ?_ ?_) ?_
   · intro i hi
-    interval_cases i <;> exact isBigO_one_of_continuous (by fun_prop)
+    interval_cases i <;> exact isBigO_one_of_continuous (by (try simp only); fun_prop)
   · intro i hi
     by_cases htail : 6 < i
     · refine isBigO_residual_of_support htail ?_
@@ -427,7 +427,7 @@ theorem mathieuB_two_small_q :
       | _ => 0)
     (by norm_num) (fun _ => rfl) (fun _ => rfl) (fun _ => rfl) ?_ ?_) ?_
   · intro i hi
-    interval_cases i <;> exact isBigO_one_of_continuous (by fun_prop)
+    interval_cases i <;> exact isBigO_one_of_continuous (by (try simp only); fun_prop)
   · intro i hi
     by_cases htail : 5 < i
     · refine isBigO_residual_of_support htail ?_
@@ -505,7 +505,7 @@ theorem mathieuA_three_small_q :
       | _ => 0)
     (by norm_num) (fun _ => rfl) (fun _ => rfl) (fun _ => rfl) ?_ ?_) ?_
   · intro i hi
-    interval_cases i <;> exact isBigO_one_of_continuous (by fun_prop)
+    interval_cases i <;> exact isBigO_one_of_continuous (by (try simp only); fun_prop)
   · intro i hi
     by_cases htail : 5 < i
     · refine isBigO_residual_of_support htail ?_
@@ -588,7 +588,7 @@ theorem mathieuB_three_small_q :
       | _ => 0)
     (by norm_num) (fun _ => rfl) (fun _ => rfl) (fun _ => rfl) ?_ ?_) ?_
   · intro i hi
-    interval_cases i <;> exact isBigO_one_of_continuous (by fun_prop)
+    interval_cases i <;> exact isBigO_one_of_continuous (by (try simp only); fun_prop)
   · intro i hi
     by_cases htail : 5 < i
     · refine isBigO_residual_of_support htail ?_
@@ -666,7 +666,7 @@ theorem mathieuA_four_small_q :
       | _ => 0)
     (by norm_num) (fun _ => rfl) (fun _ => rfl) (fun _ => rfl) ?_ ?_) ?_
   · intro i hi
-    interval_cases i <;> exact isBigO_one_of_continuous (by fun_prop)
+    interval_cases i <;> exact isBigO_one_of_continuous (by (try simp only); fun_prop)
   · intro i hi
     by_cases htail : 6 < i
     · refine isBigO_residual_of_support htail ?_
@@ -741,7 +741,7 @@ theorem mathieuB_four_small_q :
       | _ => 0)
     (by norm_num) (fun _ => rfl) (fun _ => rfl) (fun _ => rfl) ?_ ?_) ?_
   · intro i hi
-    interval_cases i <;> exact isBigO_one_of_continuous (by fun_prop)
+    interval_cases i <;> exact isBigO_one_of_continuous (by (try simp only); fun_prop)
   · intro i hi
     by_cases htail : 5 < i
     · refine isBigO_residual_of_support htail ?_
@@ -811,7 +811,7 @@ theorem mathieuA_five_small_q :
       | _ => 0)
     (by norm_num) (fun _ => rfl) (fun _ => rfl) (fun _ => rfl) ?_ ?_) ?_
   · intro i hi
-    interval_cases i <;> exact isBigO_one_of_continuous (by fun_prop)
+    interval_cases i <;> exact isBigO_one_of_continuous (by (try simp only); fun_prop)
   · intro i hi
     by_cases htail : 6 < i
     · refine isBigO_residual_of_support htail ?_
@@ -891,7 +891,7 @@ theorem mathieuB_five_small_q :
       | _ => 0)
     (by norm_num) (fun _ => rfl) (fun _ => rfl) (fun _ => rfl) ?_ ?_) ?_
   · intro i hi
-    interval_cases i <;> exact isBigO_one_of_continuous (by fun_prop)
+    interval_cases i <;> exact isBigO_one_of_continuous (by (try simp only); fun_prop)
   · intro i hi
     by_cases htail : 6 < i
     · refine isBigO_residual_of_support htail ?_
@@ -972,7 +972,7 @@ theorem mathieuA_six_small_q :
       | _ => 0)
     (by norm_num) (fun _ => rfl) (fun _ => rfl) (fun _ => rfl) ?_ ?_) ?_
   · intro i hi
-    interval_cases i <;> exact isBigO_one_of_continuous (by fun_prop)
+    interval_cases i <;> exact isBigO_one_of_continuous (by (try simp only); fun_prop)
   · intro i hi
     by_cases htail : 7 < i
     · refine isBigO_residual_of_support htail ?_
@@ -1056,7 +1056,7 @@ theorem mathieuB_six_small_q :
       | _ => 0)
     (by norm_num) (fun _ => rfl) (fun _ => rfl) (fun _ => rfl) ?_ ?_) ?_
   · intro i hi
-    interval_cases i <;> exact isBigO_one_of_continuous (by fun_prop)
+    interval_cases i <;> exact isBigO_one_of_continuous (by (try simp only); fun_prop)
   · intro i hi
     by_cases htail : 6 < i
     · refine isBigO_residual_of_support htail ?_

@@ -29,7 +29,7 @@ theorem ofFun_continuants_neg_denominators (a b : ℕ → ℂ) (n : ℕ) :
     (ofFun 0 a (fun k => -b k)).dens n = (-1 : ℂ) ^ n * (ofFun 0 a b).dens n ∧
       (ofFun 0 a (fun k => -b k)).nums n = (-1 : ℂ) ^ (n + 1) * (ofFun 0 a b).nums n := by
   induction n using Nat.strong_induction_on with
-  | h n ih =>
+  | ind n ih =>
     rcases n with _ | _ | n
     · simp only [ofFun_dens_zero, ofFun_nums_zero, pow_zero, one_mul, mul_zero]; trivial
     · simp [ofFun_dens_one, ofFun_nums_one]

@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Bessel.SecondKind
-public import TauCeti.Analysis.SpecialFunctions.IncompleteGamma
+public import TauCeti.Analysis.SpecialFunctions.IncompleteGamma.Basic
 
 /-!
 # The noncentral chi-squared distribution and Marcum's Q-function (Temme §11.4)
@@ -229,7 +229,7 @@ theorem integral_Ioi_rpow_mul_exp {s y : ℝ} (hs : 0 < s) (hy : 0 ≤ y) :
   have hG := Real.Gamma_eq_integral hs
   rw [← Ioc_union_Ioi_eq_Ioi hy, setIntegral_union (Ioc_disjoint_Ioi le_rfl) measurableSet_Ioi
     (hint.mono_set Ioc_subset_Ioi_self) (hint.mono_set (Ioi_subset_Ioi hy))] at hG
-  have hlow := TauCeti.lowerIncompleteGamma_eq_integral hs hy
+  have hlow := TauCeti.lowerIncompleteGamma_eq_integral (s := s) hy
   rw [intervalIntegral.integral_of_le hy] at hlow
   have hGpos := Real.Gamma_pos_of_pos hs
   rw [TauCeti.regularizedGamma_eq_div, hlow, mul_sub, mul_one, mul_div_cancel₀ _ hGpos.ne']

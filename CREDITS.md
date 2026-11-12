@@ -1678,7 +1678,7 @@ API. Slit-plane domination specializes
 `TauCeti.exists_pos_forall_mem_ball_mul_one_add_le_norm_add` from
 `TauCeti.Analysis.Complex.SlitPlane`. Weighted exponential integrability uses
 `TauCeti.integrableOn_pow_mul_exp_neg_mul_Ioi` from
-`TauCeti.MeasureTheory.Integral.ExpDecay` and
+`TauCeti.MeasureTheory.Integral.Exp.Decay` and
 `TauCeti.MeasureTheory.integrable_comp_abs` from
 `TauCeti.MeasureTheory.Integral.Bochner.Basic`. The pinned TauCeti revision remains
 `a049b4264d2cf4dbf4720796f844a3a3764914a5`.
@@ -2008,7 +2008,7 @@ new dependency or mathematical result is introduced by this reorganization.
 The review cleanup uses Mathlib's `Complex.sin_int_mul_pi` and `riemannZeta_four`
 directly, and uses lean-codes' `Complex.ofReal_cpow_eq_exp` in place of local copies.
 The exponential-decay integrability result is imported directly from
-`TauCeti.MeasureTheory.Integral.ExpDecay` (`TauCeti.integrable_exp_neg_mul_abs`).
+`TauCeti.MeasureTheory.Integral.Exp.Decay` (`TauCeti.integrable_exp_neg_mul_abs`).
 No upstream proof is copied and no dependency pin is changed.
 
 The primitive adapters derive continuity from Mathlib's `Differentiable.deriv`.

@@ -54,7 +54,7 @@ private lemma hasIntegralOn_of_cholesky {m : ℕ} {F : Matrix (Fin m) (Fin m) �
   refine ⟨⟨hF.aestronglyMeasurable, ?_⟩, ?_⟩
   · rw [hasFiniteIntegral_iff_enorm]
     have h := TauCeti.setLIntegral_posDef_symmetricLebesgue m
-      (f := fun X : SymMatrix m => ‖F X‖ₑ) hF.enorm
+      (fun X : SymMatrix m => ‖F X‖ₑ)
     change ∫⁻ X in {A : SymMatrix m | (A : Matrix (Fin m) (Fin m) ℝ).PosDef}, ‖F X‖ₑ
       ∂TauCeti.symmetricLebesgue m < ∞
     rw [h]
@@ -72,7 +72,7 @@ private lemma hasIntegralOn_of_cholesky {m : ℕ} {F : Matrix (Fin m) (Fin m) �
   · rw [← hI]
     change ∫ X in {A : SymMatrix m | (A : Matrix (Fin m) (Fin m) ℝ).PosDef}, F X
       ∂TauCeti.symmetricLebesgue m = _
-    rw [TauCeti.integral_posDef_symmetricLebesgue m hF.aestronglyMeasurable]
+    rw [TauCeti.integral_posDef_symmetricLebesgue m (fun X : SymMatrix m => F X)]
     refine setIntegral_congr_fun (TauCeti.measurableSet_posDiagLowerRegion m) fun x _ => ?_
     simp [choleskyJacobian, Complex.real_smul]
 

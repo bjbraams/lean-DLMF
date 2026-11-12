@@ -10,8 +10,8 @@ public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
 public import Mathlib.Analysis.SpecialFunctions.Gaussian.GaussianIntegral
 public import TauCeti.Analysis.SpecialFunctions.Erf
-public import TauCeti.Analysis.SpecialFunctions.IncompleteGamma
-public import TauCeti.Analysis.SpecialFunctions.IncompleteBeta
+public import TauCeti.Analysis.SpecialFunctions.IncompleteGamma.Basic
+public import TauCeti.Analysis.SpecialFunctions.IncompleteBeta.Basic
 
 /-!
 # DLMF Chapters 6–8 results already in Mathlib or TauCeti

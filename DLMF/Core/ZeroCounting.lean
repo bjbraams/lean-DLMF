@@ -349,6 +349,6 @@ theorem existsUnique_zero_of_rouche {f g : ℂ → ℂ} {c : ℂ} {R : ℝ} (hR 
     (hcount : (∑ᶠ z ∈ ball c R, analyticOrderNatAt g z) = 1) :
     ∃! z, z ∈ ball c R ∧ f z = 0 := by
   refine existsUnique_of_count_eq_one hf ?_
-  rw [← TauCeti.rouche hR hg hf (fun z hz => by rw [norm_sub_rev]; exact hs z hz), hcount]
+  rw [← TauCeti.rouche hg hf (fun z hz => by rw [norm_sub_rev]; exact hs z hz), hcount]
 
 end DLMF.Core

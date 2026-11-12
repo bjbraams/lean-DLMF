@@ -8,7 +8,7 @@ module
 public import Mathlib.MeasureTheory.Integral.CircleIntegral
 public import Mathlib.Topology.Compactification.OnePoint.Basic
 public import TauCeti.Analysis.Contour.Winding.Number.Basic
-public import TauCeti.Analysis.Contour.PiecewiseC1On
+public import TauCeti.Analysis.Calculus.ContDiff.PiecewiseC1On
 public import TauCeti.Topology.FilledHull
 
 /-!
@@ -18,7 +18,7 @@ Definitions for DLMF §§1.9–1.10 (namespace `DLMF.AlgebraicAnalytic`) that ar
 Tau Ceti. Most notions of these sections are upstream: `Complex.re`, `Complex.im`, `Complex.arg`
 (the principal phase, with values in `(-π, π]`, the single-valued convention of DLMF §1.9(i)),
 `HasDerivAt`, `AnalyticAt`, `MeromorphicAt`, `analyticOrderAt`, `circleIntegral`, Tau Ceti's
-`TauCeti.Contour.IsPiecewiseC1On` (contours), `TauCeti.Contour.windingNumber`,
+`TauCeti.IsPiecewiseC1On` (contours), `TauCeti.Contour.windingNumber`,
 `TauCeti.filledHull` and `TauCeti.Contour.residue` (residue at a pole).
 
 ## Main definitions
@@ -148,11 +148,11 @@ decreasing_by omega
 /-! ## §1.9(iii) Contours -/
 
 /-- DLMF §1.9(iii): `γ : [a, b] → ℂ` is a simple closed contour: piecewise `C¹`
-(`TauCeti.Contour.IsPiecewiseC1On`), closed (`γ a = γ b`) and without multiple points other than
+(`TauCeti.IsPiecewiseC1On`), closed (`γ a = γ b`) and without multiple points other than
 the endpoints (`γ` injective on `[a, b)`), with `a < b`. -/
 @[dlmf 1.9.iii]
 def IsSimpleClosedContour (γ : ℝ → ℂ) (a b : ℝ) : Prop :=
-  a < b ∧ TauCeti.Contour.IsPiecewiseC1On γ a b ∧ γ a = γ b ∧ InjOn γ (Ico a b)
+  a < b ∧ TauCeti.IsPiecewiseC1On γ a b ∧ γ a = γ b ∧ InjOn γ (Ico a b)
 
 /-- DLMF 1.9.28: the contour integral `∫_C f(z) dz = ∫_a^b f(z(t)) z'(t) dt` along
 `z = γ(t)`, `a ≤ t ≤ b` (Tau Ceti's convention `∫ t in a..b, deriv γ t • f (γ t)`; for a

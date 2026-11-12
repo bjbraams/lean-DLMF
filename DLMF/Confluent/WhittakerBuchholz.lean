@@ -928,7 +928,7 @@ private lemma BuchholzExpansion.normalized_ode_zero {f : ℂ → ℂ} (hf : Diff
   have hjet : ∀ n, iteratedDeriv n f 0=0 := by
     intro n
     induction n using Nat.strong_induction_on with
-    | h n ih =>
+    | ind n ih =>
       rcases n with _ | _ | n
       · simpa using h0
       · have hz := hode 0

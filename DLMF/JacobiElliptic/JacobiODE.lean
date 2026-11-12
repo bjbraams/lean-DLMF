@@ -46,7 +46,7 @@ theorem isBigO_pow_succ_of_deriv_isBigO_pow {e e' : ℂ → ℂ} {n : ℕ}
     (he : ∀ᶠ z in 𝓝 0, HasDerivAt e (e' z) z)
     (h0 : e 0 = 0) (h : e' =O[𝓝 0] fun z => z ^ n) : e =O[𝓝 0] fun z => z ^ (n + 1) := by
   obtain ⟨C, hC0, hC⟩ := h.exists_nonneg
-  rw [IsBigOWith] at hC
+  rw [isBigOWith_iff] at hC
   obtain ⟨r, hr0, hr⟩ := Metric.eventually_nhds_iff_ball.mp (he.and hC)
   refine IsBigO.of_bound C ?_
   filter_upwards [Metric.ball_mem_nhds 0 hr0] with z hz

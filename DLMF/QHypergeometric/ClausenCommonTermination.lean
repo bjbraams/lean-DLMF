@@ -39,7 +39,7 @@ theorem firstSum_sq_eq_secondSum {β q : ℂ} (hq0 : q ≠ 0) (hq : ‖q‖ < 1)
     (hB : ∀ j : ℕ, β ^ 2 * q ^ j ≠ 1) (S : ℂ) (n : ℕ) :
     (firstSum S β q n) ^ 2 = secondSum S β q n := by
   induction n using Nat.strong_induction_on with
-  | h n ih =>
+  | ind n ih =>
     cases n with
     | zero => simp
     | succ n =>

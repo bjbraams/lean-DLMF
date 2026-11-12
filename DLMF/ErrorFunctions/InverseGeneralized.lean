@@ -525,7 +525,7 @@ private lemma InverseErfTaylor.odd_recurrence (m : ℕ) :
 theorem invErfTaylorCoeff_odd (m : ℕ) :
     invErfTaylorCoeff (2*m+1) = (Real.sqrt π/2)^(2*m+1)*invErfSeriesCoeff m := by
   induction m using Nat.strong_induction_on with
-  | h m ih =>
+  | ind m ih =>
     cases m with
     | zero =>
       simp only [Nat.mul_zero, zero_add, invErfTaylorCoeff, iteratedDeriv_one,

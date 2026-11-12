@@ -110,7 +110,7 @@ theorem exists_posDef_sub_smul_one {m : ℕ} {T : Matrix (Fin m) (Fin m) ℝ} (h
     ∃ ε : ℝ, 0 < ε ∧ (T - ε • (1 : Matrix (Fin m) (Fin m) ℝ)).PosDef := by
   set T' : SymMatrix m := ⟨T, Matrix.isHermitian_iff_isSelfAdjoint.mp hT.isHermitian⟩
   set I' : SymMatrix m := ⟨1, Matrix.isHermitian_iff_isSelfAdjoint.mp Matrix.isHermitian_one⟩
-  have hU := TauCeti.isOpen_setOfPred_posDefMatrix m
+  have hU := TauCeti.isOpen_posDefMatrix m
   have hγ : Continuous fun ε : ℝ => T' - ε • I' :=
     continuous_const.sub (continuous_id.smul continuous_const)
   have h0 : (fun ε : ℝ => T' - ε • I') 0 ∈

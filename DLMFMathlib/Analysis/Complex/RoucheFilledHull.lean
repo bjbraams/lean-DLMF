@@ -223,7 +223,7 @@ theorem exists_finsum_analyticOrderNatAt_filledHull_eq (hC : IsCompact C) {h : �
   rw [hdecomp k hk hkL, hdecomp h hh hhL]
   refine Finset.sum_congr rfl fun z hz => ?_
   have hcb : closedBall z r ⊆ K := fun y hy => (hBI z hz hy).1
-  refine (TauCeti.rouche hr0' (hh.mono hcb) (hk.mono hcb) fun y hy => ?_).symm
+  refine (TauCeti.rouche (hh.mono hcb) (hk.mono hcb) fun y hy => ?_).symm
   rw [norm_sub_rev]
   exact (hkh y (hcb (sphere_subset_closedBall hy))).trans_le (hδL y (hsphere z hz hy))
 

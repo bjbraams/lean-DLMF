@@ -73,7 +73,7 @@ theorem even_eq_factorial_mul (z : ℂ) {u v : ℕ → ℂ}
     (h0 : u 0 = v 0) (h2 : u 2 = v 1) (n : ℕ) :
     u (2 * n) = (n.factorial : ℂ) * v n := by
   induction n using Nat.strong_induction_on with
-  | h n ih =>
+  | ind n ih =>
     rcases n with _ | _ | n
     · simpa using h0
     · simpa using h2

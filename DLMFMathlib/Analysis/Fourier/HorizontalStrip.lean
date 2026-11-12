@@ -8,7 +8,7 @@ module
 public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 public import Mathlib.Analysis.Complex.Convex
 public import Mathlib.Analysis.Analytic.IsolatedZeros
-public import TauCeti.MeasureTheory.Integral.ExpDecay
+public import TauCeti.MeasureTheory.Integral.Exp.Decay
 
 /-!
 # Holomorphic Fourier–Laplace integrals in a horizontal strip

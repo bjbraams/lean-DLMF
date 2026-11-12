@@ -430,8 +430,8 @@ dlmf_upstream 4.26.E1 Real.hasDerivAt_cos "exact: negative cosine is an antideri
 
 dlmf_upstream 4.26.E2 Real.hasDerivAt_sin "exact: sine is an antiderivative of cosine"
 
-dlmf_upstream 4.26.E9 TauCeti.integral_sin_nat_mul_mul_sin_nat_mul
-    "special case: natural frequencies; integer statement needs m != -n too"
+dlmf_upstream 4.26.E9 TauCeti.integral_sin_int_mul_mul_sin_int_mul
+    "integer frequencies, with the correction term that the formula needs when m = -n"
 
 dlmf_upstream 4.26.E11 integral_cos_sq "partial: cosine square, general finite interval"
 

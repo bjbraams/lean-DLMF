@@ -186,7 +186,7 @@ lemma genAsymptoticCRaw_continuousAt {p q : ℕ} (a : Fin p → ℂ) (b : Fin q 
     (hb : Function.Injective (genAsymptoticAugment b)) (k : ℕ) :
     ContinuousAt (fun c : Fin q → ℂ => genAsymptoticCRaw a c k) b := by
   induction k using Nat.strong_induction_on with
-  | h k ih =>
+  | ind k ih =>
     cases k with
     | zero => simpa [genAsymptoticCRaw] using (continuousAt_const :
         ContinuousAt (fun _ : Fin q → ℂ => (1 : ℂ)) b)
@@ -473,7 +473,7 @@ private lemma exists_continuous_cRaw {p q : ℕ} (a : Fin p → ℂ) (b : Fin q 
     ∃ G : ℂ → ℂ, Continuous G ∧
       ∀ᶠ ε in 𝓝[≠] (0 : ℂ), genAsymptoticCRaw a (genAsymptoticPerturb b ε) k = G ε := by
   induction k using Nat.strong_induction_on with
-  | h k ih =>
+  | ind k ih =>
     cases k with
     | zero => exact ⟨fun _ => 1, continuous_const, Eventually.of_forall fun ε => by
         simp [genAsymptoticCRaw]⟩
@@ -837,7 +837,7 @@ theorem genH_resonant_log_polynomial {p q : ℕ} (a : Fin p → ℂ) (b : Fin q 
       exact this
     rw [show (G0 * fun s => Complex.exp (s * w)) = fun s => G0 s * Complex.exp (s * w) from rfl, hL]
     simp only [hexp, Polynomial.eval_finsetSum, Polynomial.eval_mul, Polynomial.eval_C,
-      Polynomial.eval_pow, Polynomial.eval_X, mul_sum, sum_div]
+      Polynomial.eval_pow, Polynomial.eval_X, mul_sum, sum_div, Finset.smul_sum, smul_eq_mul]
     apply sum_congr rfl
     intro i _
     ring

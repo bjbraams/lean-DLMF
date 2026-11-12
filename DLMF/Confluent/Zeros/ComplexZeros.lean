@@ -108,7 +108,7 @@ theorem KummerZeros.sector_bound (a b : ℂ) :
   have h := regularizedHGFun_poincare_sector a b 1 (δ := π / 4) (by positivity)
     (by linarith [Real.pi_pos])
   obtain ⟨K₁, hK₁, hb⟩ := h.exists_pos
-  rw [IsBigOWith, eventually_inf_principal, eventually_comap, eventually_atTop] at hb
+  rw [isBigOWith_iff, eventually_inf_principal, eventually_comap, eventually_atTop] at hb
   obtain ⟨R, hR⟩ := hb
   refine ⟨K₁, hK₁, R, fun z hzR h1 h2 => ?_⟩
   have := hR ‖z‖ hzR z rfl ⟨h1, h2⟩

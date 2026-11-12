@@ -101,7 +101,7 @@ theorem arithmeticFunction_mul_apply_prime_pow {R : Type*} [Semiring R]
     (f g : ArithmeticFunction R) {p : ℕ}
     (hp : p.Prime) (e : ℕ) :
     (f * g) (p ^ e) = ∑ i ∈ range (e + 1), f (p ^ i) * g (p ^ (e - i)) := by
-  rw [mul_apply, Nat.sum_divisorsAntidiagonal (fun a b ↦ f a * g b), Nat.divisors_prime_pow hp,
+  rw [ArithmeticFunction.mul_apply, Nat.sum_divisorsAntidiagonal (fun a b ↦ f a * g b), Nat.divisors_prime_pow hp,
     sum_map]
   refine sum_congr rfl fun i hi ↦ ?_
   simp only [Function.Embedding.coeFn_mk]
@@ -220,7 +220,7 @@ theorem sum_divisors_sq_dvd_moebius {n : ℕ} (hn : n ≠ 0) :
   rw [hfilter]
   have hsum : ∑ d ∈ b.divisors, μ d = if b = 1 then 1 else 0 := by
     have := congrArg (fun f : ArithmeticFunction ℤ ↦ f b) coe_zeta_mul_moebius
-    simp only [coe_zeta_mul_apply, one_apply] at this
+    simp only [coe_zeta_mul_apply, ArithmeticFunction.one_apply] at this
     exact this
   rw [hsum]
   split_ifs with h1

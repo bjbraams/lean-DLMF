@@ -29,7 +29,7 @@ open DLMF.Confluent
 /-- The Lambert branch-point coefficients are the inverse incomplete-gamma coefficients. -/
 theorem ofReal_lambertC (n : ℕ) : (lambertC n : ℂ) = gammaUniformAlpha n := by
   induction n using Nat.strong_induction_on with
-  | h n ih =>
+  | ind n ih =>
     rcases n with _ | _ | n
     · simp [lambertC]
     · simp [lambertC]

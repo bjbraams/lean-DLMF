@@ -23,7 +23,7 @@ public import Mathlib.MeasureTheory.Integral.DominatedConvergence
 public import Mathlib.RingTheory.Polynomial.Pochhammer
 public import Mathlib.Tactic.CrossRefAttribute
 public import Mathlib.Topology.Compactification.OnePoint.Basic
-public import TauCeti.Analysis.Contour.AbsolutelyContinuous
+public import TauCeti.Analysis.Calculus.ContDiff.PiecewiseC1On.AbsolutelyContinuous
 public import TauCeti.Analysis.Contour.Curve.Integrability
 public import TauCeti.Analysis.Contour.Winding.AbsolutelyContinuous.Basic
 public import TauCeti.Analysis.Contour.Winding.UnboundedComponent
@@ -391,13 +391,13 @@ theorem IsSimpleClosedContour.cauchyIntegralFormula_iteratedDeriv {γ : ℝ → 
 the winding number `𝒩(C, z₀)` (Tau Ceti's `TauCeti.Contour.windingNumber`, which equals this
 integral off the curve). -/
 @[dlmf 1.9.E32]
-theorem windingNumber_eq_intCast {γ : ℝ → ℂ} {a b : ℝ} (hγ : TauCeti.Contour.IsPiecewiseC1On γ a b)
+theorem windingNumber_eq_intCast {γ : ℝ → ℂ} {a b : ℝ} (hγ : TauCeti.IsPiecewiseC1On γ a b)
     (hcl : γ a = γ b) {z₀ : ℂ} (hz₀ : z₀ ∉ γ '' uIcc a b) :
     ∃ n : ℤ, TauCeti.Contour.windingNumber γ a b z₀ = n ∧
       (2 * Real.pi * I)⁻¹ * contourIntegral γ a b (fun z => (z - z₀)⁻¹) = n := by
   -- TauCeti supplies both integrality and the ordinary integral formula for this contour.
   have hac : AbsolutelyContinuousOnInterval γ a b :=
-    TauCeti.Contour.IsPiecewiseC1On.absolutelyContinuousOnInterval hγ
+    TauCeti.IsPiecewiseC1On.absolutelyContinuousOnInterval hγ
   obtain ⟨n, hn⟩ := hac.exists_int_windingNumber hcl hz₀
   refine ⟨n, hn, ?_⟩
   rw [hac.windingNumber_eq_integral hz₀] at hn
@@ -415,10 +415,10 @@ theorem IsSimpleClosedContour.windingNumber_eq_one_or_neg_one {γ : ℝ → ℂ}
 
 /-- DLMF §1.9(iii) (winding number outside a closed contour): `𝒩(C, z₀) = 0` for `z₀` in the
 exterior of a closed contour. From Tau Ceti's
-`TauCeti.Contour.IsPiecewiseC1On.windingNumber_eq_zero_of_unbounded_component`. -/
+`TauCeti.IsPiecewiseC1On.windingNumber_eq_zero_of_unbounded_component`. -/
 @[dlmf 1.9.iii]
 theorem windingNumber_eq_zero_of_mem_contourExterior {γ : ℝ → ℂ} {a b : ℝ} (hab : a ≤ b)
-    (hγ : TauCeti.Contour.IsPiecewiseC1On γ a b) (hcl : γ a = γ b) {z₀ : ℂ}
+    (hγ : TauCeti.IsPiecewiseC1On γ a b) (hcl : γ a = γ b) {z₀ : ℂ}
     (hz₀ : z₀ ∈ contourExterior γ a b) : TauCeti.Contour.windingNumber γ a b z₀ = 0 := by
   refine hγ.windingNumber_eq_zero_of_unbounded_component hcl ?_
   rw [uIcc_of_le hab]
@@ -664,7 +664,7 @@ private lemma eq_recipCoeff_of_convolution {a b : ℕ → ℂ} (ha : a 0 ≠ 0)
     b = recipCoeff a := by
   funext n
   induction n using Nat.strong_induction_on with
-  | h n ih =>
+  | ind n ih =>
     have h := hab n
     by_cases hn : n = 0
     · subst n
@@ -745,7 +745,7 @@ private lemma eq_logCoeff_of_convolution {a b : ℕ → ℂ} (ha : a 0 = 1) (hb 
     b = logCoeff a := by
   funext n
   induction n using Nat.strong_induction_on with
-  | h n ih =>
+  | ind n ih =>
     by_cases hn : n = 0
     · subst n
       simpa [logCoeff] using hb
@@ -848,7 +848,7 @@ private lemma eq_powCoeff_of_convolution {a b : ℕ → ℂ} (ν : ℂ) (ha : a 
     b = powCoeff ν a := by
   funext n
   induction n using Nat.strong_induction_on with
-  | h n ih =>
+  | ind n ih =>
     by_cases hn : n = 0
     · subst n
       simpa [powCoeff] using hb
@@ -1047,7 +1047,7 @@ theorem tendsto_contourIntegral_tsum {D : Set ℂ} {f : ℕ → ℂ → ℂ}
     (hf : ∀ n, ContinuousOn (f n) D) {F : ℂ → ℂ}
     (hu : ∀ K ⊆ D, IsCompact K →
       TendstoUniformlyOn (fun N z => ∑ n ∈ Finset.range N, f n z) F atTop K)
-    {γ : ℝ → ℂ} {a b : ℝ} (hγ : TauCeti.Contour.IsPiecewiseC1On γ a b)
+    {γ : ℝ → ℂ} {a b : ℝ} (hγ : TauCeti.IsPiecewiseC1On γ a b)
     (hγD : ∀ t ∈ uIcc a b, γ t ∈ D) :
     Tendsto (fun N => ∑ n ∈ Finset.range N, contourIntegral γ a b (f n)) atTop
       (𝓝 (contourIntegral γ a b F)) := by

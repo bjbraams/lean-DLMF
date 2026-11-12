@@ -85,7 +85,7 @@ theorem count_eq_one_of_expModel {f : ℂ → ℂ} {w A : ℂ} {ρ : ℝ} (hρ :
   have han : AnalyticOnNhd ℂ (fun z => A * (exp (z - w) - 1)) (closedBall w ρ) := by
     intro z _
     fun_prop
-  rw [← TauCeti.rouche hρ han hf (fun z hz => ?_), expModel_count hρ hρ2 hA]
+  rw [← TauCeti.rouche han hf (fun z hz => ?_), expModel_count hρ hρ2 hA]
   have hzw : ‖z - w‖ = ρ := mem_sphere_iff_norm.mp hz
   have hlow := Complex.ZeroLocalization.norm_exp_sub_one_ge (ζ := z - w) (by linarith)
   rw [norm_sub_rev, norm_mul]
@@ -119,7 +119,7 @@ theorem exists_zero_of_expModel {f : ℂ → ℂ} {w A : ℂ} {ρ : ℝ} (hρ : 
       (expModel_ne_zero_sphere hρ2 hs)
   by_contra hno
   push Not at hno
-  have := (TauCeti.finsum_analyticOrderNatAt_ball_eq_zero_iff hf hne).2 hno
+  have := (hf.finsum_analyticOrderNatAt_ball_eq_zero_iff hne).2 hno
   omega
 
 /-- **Exponential-model Rouché criterion**, uniqueness form: under the hypotheses of
@@ -147,7 +147,7 @@ theorem existsUnique_zero_of_expModel {f : ℂ → ℂ} {w A : ℂ} {ρ : ℝ} (
       simp [analyticOrderNatAt, ENat.toNat_eq_zero, h1, h2]
     omega
   have hle : ∀ y ∈ ball w ρ, analyticOrderNatAt f y ≤ 1 := fun y hy =>
-    hcount ▸ TauCeti.analyticOrderNatAt_le_finsum_ball hf hy
+    hcount ▸ hf.meromorphicOn.analyticOrderNatAt_le_finsum_ball hy
   have hord : analyticOrderNatAt f z = 1 := le_antisymm (hle z hz) (hnetop z hz hz0)
   refine ⟨z, ⟨hz, hz0, hord⟩, ?_⟩
   rintro y ⟨hy, hy0, hyord⟩

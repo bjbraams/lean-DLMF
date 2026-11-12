@@ -107,8 +107,8 @@ dlmf_upstream 1.9.E26 AnalyticAt.harmonicAt_re "different notation: ℜf harmoni
 dlmf_upstream 1.9.E26 AnalyticAt.harmonicAt_im "different notation: ℑf harmonic (Laplacian)"
 
 /- §1.9(iii) Integration. -/
-dlmf_upstream 1.9.iii TauCeti.Contour.IsPiecewiseC1On "definition: contours (piecewise C¹)"
-dlmf_upstream 1.9.iii TauCeti.Contour.IsPiecewiseC1On.windingNumber_eq_zero_of_unbounded_component
+dlmf_upstream 1.9.iii TauCeti.IsPiecewiseC1On "definition: contours (piecewise C¹)"
+dlmf_upstream 1.9.iii TauCeti.IsPiecewiseC1On.windingNumber_eq_zero_of_unbounded_component
   "exact: winding number 0 in unbounded components of the complement"
 dlmf_upstream 1.9.E29 TauCeti.Contour.homologyCauchyTheorem
   "different hypotheses: f holomorphic on open Ω ⊇ C, C null-homologous in Ω"

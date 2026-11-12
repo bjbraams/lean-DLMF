@@ -115,7 +115,7 @@ theorem rec_unique {x y : ℂ} {c d : ℕ → ℂ} (h0 : c 0 = d 0)
     (hc : ∀ n, Rec x y c n) (hd : ∀ n, Rec x y d n) : c = d := by
   funext n
   induction n using Nat.strong_induction_on with
-  | h n ih =>
+  | ind n ih =>
     cases n with
     | zero => exact h0
     | succ n =>

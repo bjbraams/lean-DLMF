@@ -7,7 +7,7 @@ module
 
 public import DLMF.Confluent.Asymptotics
 public import DLMF.Confluent.Relations
-public import TauCeti.Analysis.SpecialFunctions.IncompleteGamma
+public import TauCeti.Analysis.SpecialFunctions.IncompleteGamma.Basic
 
 /-!
 # Incomplete Gamma functions (Temme §7.3.7; DLMF §§8.2–8.11)
@@ -188,7 +188,7 @@ theorem lowerIncompleteGamma_eq_integral {a : ℂ} (ha : 0 < a.re) {x : ℝ} (hx
 /-- The complex lower incomplete Gamma function restricts to TauCeti's real one. -/
 theorem lowerIncompleteGamma_ofReal {s x : ℝ} (hs : 0 < s) (hx : 0 < x) :
     lowerIncompleteGamma s x = (TauCeti.lowerIncompleteGamma s x : ℂ) := by
-  rw [TauCeti.ofReal_lowerIncompleteGamma_eq_partialGamma hs hx.le, Complex.partialGamma,
+  rw [TauCeti.ofReal_lowerIncompleteGamma_eq_partialGamma hx.le, Complex.partialGamma,
     lowerIncompleteGamma_eq_integral (by simpa using hs) hx]
   exact intervalIntegral.integral_congr fun t _ => by push_cast; ring
 

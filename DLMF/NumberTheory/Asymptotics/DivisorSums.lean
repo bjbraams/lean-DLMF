@@ -353,18 +353,18 @@ private lemma sum_totient_eq_sum_moebius_mul_triangle_floor (N : ℕ) :
       (((μ : ArithmeticFunction ℤ) : ArithmeticFunction ℝ) *
         ((pow 1 : ArithmeticFunction ℕ) : ArithmeticFunction ℝ)) n := by
     intro n hn
-    rw [totient_eq_sum_moebius_mul n (mem_Ioc.mp hn).1, mul_apply]
+    rw [totient_eq_sum_moebius_mul n (mem_Ioc.mp hn).1, ArithmeticFunction.mul_apply]
     refine sum_congr rfl fun x hx ↦ ?_
     have hx2 : x.2 ≠ 0 := (Nat.mem_divisorsAntidiagonal.mp hx |>.2) ∘ fun h ↦ by
       have := (Nat.mem_divisorsAntidiagonal.mp hx).1; rw [h, mul_zero] at this; exact this.symm
-    simp [pow_apply, hx2]
+    simp [ArithmeticFunction.pow_apply, hx2]
   rw [sum_congr rfl hl, h]
   refine sum_congr rfl fun d hd ↦ ?_
   rw [intCoe_apply, ← sum_Ioc_natCast_eq]
   congr 1
   refine sum_congr rfl fun m hm ↦ ?_
   have : m ≠ 0 := by have := (mem_Ioc.mp hm).1; omega
-  simp [pow_apply, this]
+  simp [ArithmeticFunction.pow_apply, this]
 
 /-- `∑_{n ≤ N} φ(n)/n = ∑_{d ≤ N} (μ(d)/d) ⌊N/d⌋`. -/
 private lemma sum_totient_div_eq_sum_moebius_div_mul_floor (N : ℕ) :
@@ -773,7 +773,7 @@ private lemma sum_sigma_zero_div_eq_sum_harmonic (N : ℕ) :
   have hl : ∀ n ∈ Ioc 0 N, (σ 0 n : ℝ) / n = (f * f) n := by
     intro n hn
     have hn0 := (mem_Ioc.mp hn).1
-    rw [mul_apply, Nat.sum_divisorsAntidiagonal (fun a b ↦ f a * f b), sigma_zero_apply]
+    rw [ArithmeticFunction.mul_apply, Nat.sum_divisorsAntidiagonal (fun a b ↦ f a * f b), sigma_zero_apply]
     have : ∀ i ∈ n.divisors, f i * f (n / i) = ((n : ℝ))⁻¹ := by
       intro i hi
       have hin := Nat.dvd_of_mem_divisors hi

@@ -128,12 +128,12 @@ theorem divisorCountK_eq_zeta_pow (k n : ℕ) :
     divisorCountK k n = ((ζ : ArithmeticFunction ℕ) ^ k) n := by
   induction k generalizing n with
   | zero =>
-    rw [pow_zero, one_apply, divisorCountK]
+    rw [pow_zero, ArithmeticFunction.one_apply, divisorCountK]
     split_ifs with h
     · subst h; rw [Nat.finMulAntidiag_one, card_singleton]
     · rw [Nat.finMulAntidiag_zero_left h, card_empty]
   | succ k ih =>
-    rw [divisorCountK, card_finMulAntidiag_succ, pow_succ', mul_apply]
+    rw [divisorCountK, card_finMulAntidiag_succ, pow_succ', ArithmeticFunction.mul_apply]
     refine sum_congr rfl fun ab hab ↦ ?_
     rw [← divisorCountK, ih, zeta_apply, ite_eq_right (Nat.ne_of_gt (Nat.pos_of_mem_divisors
       (Nat.fst_mem_divisors_of_mem_antidiagonal hab))), one_mul]

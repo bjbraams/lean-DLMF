@@ -20,18 +20,18 @@ root = "Main"
 [[require]]
 name = "mathlib"
 scope = "leanprover-community"
-# Shared upgrade snapshot, 2026-10-18: Lean v4.36.0-rc1.
-rev = "911003dd6dea5df215dff57f2717be762e11a6ca"
+# Shared upgrade snapshot, 2026-11-12: Lean v4.36.0-rc2 (TauCeti main 396c3bd971 and its Mathlib).
+rev = "1b1ccf4b088b32fa3f23f2de1127433254a81e1e"
 
 [[require]]
 name = "doc-gen4"
 scope = "leanprover"
-rev = "v4.36.0-rc1"
+rev = "v4.36.0-rc2"
 
 [[require]]
 name = "TauCeti"
 git = "https://github.com/TauCetiProject/TauCeti"
-rev = "a049b4264d2cf4dbf4720796f844a3a3764914a5"
+rev = "396c3bd971e9722aa8656231760e710fe641d8cf"
 
 [[require]]
 # Sibling project lean-codes (Carlson R-functions and elliptic integrals), user-approved 2026-10-25.
