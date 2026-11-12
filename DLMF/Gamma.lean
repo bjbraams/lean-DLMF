@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module -- shake: keep-all
 
 public import DLMF.Gamma.RatioBounds
+public import DLMF.Gamma.ScaledGammaEstimates
 public import DLMF.Gamma.Basic
 public import DLMF.Gamma.Digamma
 public import DLMF.Gamma.Dirichlet
@@ -23,6 +24,7 @@ public import DLMF.Gamma.IntegralRepresentations
 public import DLMF.Gamma.ComplexBinet
 public import DLMF.Gamma.ContinuedFractions
 public import DLMF.Gamma.Asymptotics
+public import DLMF.Gamma.Asymptotics.GammaRatioNormalization
 public import DLMF.Gamma.BetaFunction
 public import DLMF.Gamma.Integrals
 public import DLMF.Gamma.Polygamma

@@ -10,6 +10,7 @@ public import DLMF.Legendre.Singularities
 public import Mathlib.MeasureTheory.Integral.Asymptotics
 public import DLMF.Legendre.IntegerTheory
 public import DLMF.Legendre.IntegralTools
+public import DLMF.Legendre.Integrals.FerrersBarnes
 
 /-!
 # Green identities and Ferrers product integrals
@@ -66,7 +67,7 @@ namespace DLMF.Legendre
 theorem ferrers_barnes_integral {σ μ : ℂ} (hσ : -1 < σ.re) (hμ : -1 < μ.re) (ν : ℂ) :
     (∫ x : ℝ in 0..1, (x:ℂ)^σ*(1-x^2:ℂ)^(μ/2)*ferrersP ν (-μ) x)=Gamma ((σ+1)/2)*Gamma
         (σ/2+1)/(2^(μ+1)*Gamma ((σ-ν+μ)/2+1)*Gamma ((σ+ν+μ+3)/2)) := by
-  sorry
+  exact FerrersBarnes.integral_value hσ hμ ν
 
 /-- DLMF 14.17.6: for natural numbers `m ≤ n` (DLMF also assumes `m ≤ l`, which is not needed),
 `∫_{-1}^{1} 𝖯^m_l(x) 𝖯^m_n(x) dx = (n+m)!/((n-m)! (n+1/2)) δ_{l,n}`. -/

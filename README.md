@@ -6,6 +6,36 @@ Roy, *Special Functions* (1999), henceforth AAR, and was renamed from lean-AAR t
 on 2026-10-21, when the DLMF chapters became its organizing principle. AAR, Olver, Temme,
 Beals–Wong and Duverney remain supporting sources.
 
+The [Chapters 20–36 review and proof round](
+REVIEW.md#chapters-2036-status-review-and-proof-priorities-2026-11-12) proves **eight direct
+admissions**: two Jacobi identities, the odd Bernoulli-polynomial bounds, mixed Mathieu
+orthogonality, two Wigner/Legendre formulas, matrix Laplace inversion, and the Pearcey
+symmetry-line Bessel evaluation. It also removes an admitted dependency from the
+paraboloidal differential equation. These chapters now have **485 direct admissions**,
+down from 493, and nine further tagged theorems depending on admissions. The
+[chapter status](reports/Chapters2036Status.tsv),
+[target inventory](reports/Chapters2036Admissions.tsv) and
+[axiom audit](scripts/CheckChapters2036.lean) record the results. A
+[checked counterexample](scripts/CheckChapters2036Statements.lean) identifies a missing
+hypothesis in the Heun polynomial-count theorem; the approved correction adds `1 ≤ N`
+(at least two singular points). Its proof remains admitted.
+
+The [further Chapters 13–15 proof round](REVIEW.md#further-chapters-13-15-proofs-2026-11-11)
+proves **five more admissions**: both Kummer transition expansions, Dougall's series,
+the associated Legendre Q addition theorem, and the uniform large-order Legendre P
+approximation. Chapters 13, 14 and 15 now have **5, 21 and 1** direct admissions.
+The two remaining admissions in `Legendre/Sums.lean` are proved. The combined
+[axiom audit](scripts/CheckChapters131415.lean) also checks their supporting proofs.
+
+The [Chapters 13–15 proof round](REVIEW.md#chapters-13-15-proof-round-and-interruption-cleanup-2026-11-11)
+proves **four existing admissions**: Kummer M's joint-parameter expansion, the Ferrers
+Barnes and triple integrals, and the conical Stieltjes formula. Chapters 13, 14 and 15
+had **7, 24 and 1** direct admissions respectively after that round. The
+[chapter inventory](reports/Chapters131415Admissions.tsv) records all 36 starting targets;
+the retained [axiom audit](scripts/CheckChapters131415.lean) checks the completed proofs
+and their supporting declarations.
+The interrupted work has been checked and the integrated library builds successfully.
+
 The [Airy and Bessel proof round](REVIEW.md#airy-and-bessel-proof-round-2026-11-10)
 proves **eight existing Airy admissions**, preserving their statements and complex domains.
 It covers the Airy Stieltjes formula, both nonreal Bi zero sectors, the Ai fourth-power
@@ -52,8 +82,8 @@ umbrella module `DLMF/<Area>.lean` describes what Mathlib already provides and w
 area adds. Statements taken from the DLMF record their equation numbers with Mathlib's
 `@[dlmf]` cross-reference attribute.
 
-`DLMF.lean` imports all areas. The current library has 1,555 Lean files, including
-188 general supporting modules and the two library root entry points. Large topic modules
+`DLMF.lean` imports all areas. The current library has 1,641 Lean files, including
+216 general supporting modules and the two library root entry points. Large topic modules
 are split into mathematical subtopics; the former file remains as a small import umbrella.
 For example, `Gamma/IntegralRepresentations.lean` now imports the Hankel, Prym, Binet and
 moment modules below `Gamma/IntegralRepresentations/`.
@@ -104,7 +134,7 @@ umbrellas (2026-10-30):
 - [AsymptoticApproximations](DLMF/AsymptoticApproximations.lean): 30 files.
 - [BernoulliEuler](DLMF/BernoulliEuler.lean): 21 files.
 - [Bessel](DLMF/Bessel.lean): 29 files.
-- [CoalescingSaddles](DLMF/CoalescingSaddles.lean): 17 files.
+- [CoalescingSaddles](DLMF/CoalescingSaddles.lean): 19 files.
 - [Combinatorics](DLMF/Combinatorics.lean): 30 files.
 - [Confluent](DLMF/Confluent.lean): 64 files.
 - [Constants](DLMF/Constants.lean): 3 files.
@@ -120,11 +150,11 @@ umbrellas (2026-10-30):
 - [Heun](DLMF/Heun.lean): 9 files.
 - [Hypergeometric](DLMF/Hypergeometric.lean): 54 files.
 - [IncompleteGamma](DLMF/IncompleteGamma.lean): 24 files.
-- [JacobiElliptic](DLMF/JacobiElliptic.lean): 34 files.
+- [JacobiElliptic](DLMF/JacobiElliptic.lean): 42 files.
 - [Lame](DLMF/Lame.lean): 23 files.
 - [Legendre](DLMF/Legendre.lean): 60 files.
-- [Mathieu](DLMF/Mathieu.lean): 54 files.
-- [MatrixArgument](DLMF/MatrixArgument.lean): 9 files.
+- [Mathieu](DLMF/Mathieu.lean): 68 files.
+- [MatrixArgument](DLMF/MatrixArgument.lean): 13 files.
 - [NumberTheory](DLMF/NumberTheory.lean): 13 files.
 - [OrthogonalPolynomials](DLMF/OrthogonalPolynomials.lean): 61 files.
 - [Painleve](DLMF/Painleve.lean): 25 files.
@@ -141,7 +171,7 @@ umbrellas (2026-10-30):
 - [Theta](DLMF/Theta.lean): 14 files.
 - [WaveEquation](DLMF/WaveEquation.lean): 1 file.
 - [Weierstrass](DLMF/Weierstrass.lean): 18 files.
-- [WignerSymbols](DLMF/WignerSymbols.lean): 7 files.
+- [WignerSymbols](DLMF/WignerSymbols.lean): 12 files.
 - [Zeta](DLMF/Zeta.lean): 24 files.
 
 The single-file areas [Bailey](DLMF/Bailey.lean) and [Partitions](DLMF/Partitions.lean)

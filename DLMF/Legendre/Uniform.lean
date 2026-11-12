@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Legendre.UniformCoordinates
+public import DLMF.Legendre.Uniform.BesselApproximation
 public import DLMF.Legendre.IntegralRepresentations
 public import DLMF.Hypergeometric.Identities.CarlsonTools
 public import DLMF.Hypergeometric.Saalschutz
@@ -186,7 +187,7 @@ theorem associatedP_large_order_uniform {ν : ℝ} (hν : -1/2 ≤ ν) :
         p.2/(1/Gamma (p.1+1)*(2*p.1*legendreUCoordinate p.2/π:ℂ)^(1/2:ℂ)*besselK (ν+1/2)
         (p.1*legendreUCoordinate p.2))-1) =O[comap Prod.fst atTop ⊓ 𝓟 {p : ℝ × ℝ | 1 < p.2}]
         (fun p : ℝ × ℝ => (p.1:ℂ)⁻¹) := by
-  sorry
+  exact HyperbolicAssociatedP.isBigO_associatedP_large_order hν
 
 /-- DLMF 14.15.3: for fixed real `ν ≥ −1/2`, `𝑸^μ_ν(x) = μ^{−ν−1/2} (πu/2)^{1/2} I_{ν+1/2}(μu) (1 +
 O(1/μ))` as `μ → ∞`, uniformly for `x > 1`, where `u = ½ ln((x+1)/(x−1))`. -/

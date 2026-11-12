@@ -6,6 +6,9 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.MatrixArgument.Basic
+public import DLMFMathlib.Analysis.Fourier.RadianInversion
+import DLMFMathlib.LinearAlgebra.Matrix.Complexification
+import Mathlib.Data.Nat.Choose.Cast
 public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 public import TauCeti.Analysis.Matrix.Sqrt
 public import TauCeti.Analysis.Complex.CauchyIntegralPolydisc
@@ -29,6 +32,9 @@ absolute convergence of the Laplace transform 35.2.1 for `ℜZ > X₀`.
   factor `2^{m(m-1)/2}` explained in `DLMF.MatrixArgument.GammaBeta`.
 * `matrixLaplaceTransform_matrixConvolution`: the convolution theorem 35.2.3, by Fubini and
   translation invariance of `dX`.
+
+The inversion proof uses Mathlib's Fourier inversion through the radian-frequency API.
+TauCeti supplies the Frobenius trace pairing and its volume comparison with `dX`.
 -/
 
 @[expose] public noncomputable section
@@ -186,6 +192,69 @@ theorem matrixLaplaceTransform_integrableOn_analyticOnNhd {m : ℕ} (f : Matrix 
           (Real.exp_le_one_iff.mpr (neg_nonpos.mpr htrace))).trans
       simpa only [expTrace, Matrix.trace_neg] using (hbound X hX).le
 
+namespace MatrixLaplaceInversion
+/-- The Laplace damping factor times `f` on the positive cone, extended by zero. -/
+def damped {m : ℕ} (f : Matrix (Fin m) (Fin m) ℝ → ℂ) (U : SymMatrix m) :
+    SymMatrix m → ℂ :=
+  (posDefCone m).indicator (fun Y => Complex.exp (-(((U : Matrix (Fin m) (Fin m) ℝ) *
+    (Y : Matrix (Fin m) (Fin m) ℝ)).trace : ℂ)) * f Y)
+/-- The defining equation of the damped cone extension. -/
+lemma damped_def {m : ℕ} (f : Matrix (Fin m) (Fin m) ℝ → ℂ) (U : SymMatrix m) :
+    damped f U = (posDefCone m).indicator (fun Y =>
+      Complex.exp (-(((U : Matrix (Fin m) (Fin m) ℝ) *
+        (Y : Matrix (Fin m) (Fin m) ℝ)).trace : ℂ)) * f Y) := rfl
+
+/-- On the positive cone the damped extension equals the weighted original function. -/
+lemma damped_of_mem {m : ℕ} (f : Matrix (Fin m) (Fin m) ℝ → ℂ) (U Y : SymMatrix m)
+    (hY : Y ∈ posDefCone m) :
+    damped f U Y = Complex.exp (-(((U : Matrix (Fin m) (Fin m) ℝ) *
+      (Y : Matrix (Fin m) (Fin m) ℝ)).trace : ℂ)) * f Y :=
+  Set.indicator_of_mem hY _
+
+/-- Outside the positive cone the damped extension vanishes. -/
+lemma damped_of_notMem {m : ℕ} (f : Matrix (Fin m) (Fin m) ℝ → ℂ) (U Y : SymMatrix m)
+    (hY : Y ∉ posDefCone m) : damped f U Y = 0 :=
+  Set.indicator_of_notMem hY _
+
+/-- The radian Fourier transform of the damped cone extension is the vertical Laplace transform. -/
+lemma radianFourierIntegral_damped {m : ℕ} (f : Matrix (Fin m) (Fin m) ℝ → ℂ) (U V : SymMatrix m) :
+    Real.radianFourierIntegral (TauCeti.symmetricLebesgue m) (damped f U) V =
+      matrixLaplaceTransform f ((U : Matrix (Fin m) (Fin m) ℝ).map Complex.ofReal +
+        Complex.I • (V : Matrix (Fin m) (Fin m) ℝ).map Complex.ofReal) := by
+  rw [Real.radianFourierIntegral_def]
+  unfold damped matrixLaplaceTransform
+  simp only [smul_eq_mul]
+  have hmc : MeasurableSet (posDefCone m) := TauCeti.measurableSet_posDefMatrix m
+  rw [← integral_indicator hmc]
+  apply integral_congr_ae
+  filter_upwards [] with Y
+  by_cases hY : Y ∈ posDefCone m
+  · rw [Set.indicator_of_mem hY, Set.indicator_of_mem hY]
+    rw [← mul_assoc, ← Complex.exp_add, Matrix.trace_map_ofReal_add_I_smul_mul_map_ofReal]
+    congr 2
+    rw [selfAdjoint.inner_eq_trace_mul]
+    ring
+  · simp [hY]
+
+/-- The damped cone extension is continuous at interior continuity points of `f`. -/
+lemma continuousAt_damped {m : ℕ} (f : Matrix (Fin m) (Fin m) ℝ → ℂ) (U : SymMatrix m)
+    (hfc : ContinuousOn f {X | X.PosDef}) (X : SymMatrix m) (hX : X ∈ posDefCone m) :
+    ContinuousAt (damped f U) X := by
+  have hco : IsOpen (posDefCone m) := TauCeti.isOpen_setOfPred_posDefMatrix m
+  have hfw : ContinuousWithinAt (fun Y : SymMatrix m => f Y) (posDefCone m) X :=
+    (hfc _ hX).comp continuous_subtype_val.continuousAt.continuousWithinAt
+      (fun Y hY => hY)
+  have hf := hfw.continuousAt (hco.mem_nhds hX)
+  have hc : ContinuousAt (fun Y : SymMatrix m => Complex.exp (-(((U : Matrix (Fin m) (Fin m) ℝ) *
+    (Y : Matrix (Fin m) (Fin m) ℝ)).trace : ℂ)) * f Y) X := by
+    exact ((Complex.continuous_exp.comp
+      ((Complex.continuous_ofReal.comp (continuous_const.matrix_mul
+        continuous_subtype_val).matrix_trace).neg)).continuousAt).mul hf
+  apply hc.congr_of_eventuallyEq
+  filter_upwards [hco.mem_nhds hX] with Y hY
+  exact Set.indicator_of_mem hY _
+end MatrixLaplaceInversion
+
 /-- DLMF 35.2.2 (**corrected**): the inversion formula. Let `f` satisfy the bound of
 35.2 with `X₀ ∈ Ω`, let `U ∈ 𝓢` with `U > X₀`, and suppose `V ↦ g(U + iV)` is integrable over
 `𝓢`. Then for every `X ∈ Ω` at which `f` is continuous,
@@ -215,7 +284,93 @@ theorem matrixLaplaceTransform_inversion {m : ℕ} (f : Matrix (Fin m) (Fin m) �
           matrixLaplaceTransform f ((U : Matrix (Fin m) (Fin m) ℝ).map (fun x : ℝ => (x : ℂ)) +
             Complex.I • (V : Matrix (Fin m) (Fin m) ℝ).map (fun x : ℝ => (x : ℂ)))
         ∂TauCeti.symmetricLebesgue m := by
-  sorry
+  let Xs : SymMatrix m := ⟨X, hX.isHermitian⟩
+  let Z : Matrix (Fin m) (Fin m) ℂ := (U : Matrix (Fin m) (Fin m) ℝ).map Complex.ofReal
+  have hmc : MeasurableSet (posDefCone m) := TauCeti.measurableSet_posDefMatrix m
+  have hmap : Z.map Complex.re = (U : Matrix (Fin m) (Fin m) ℝ) := by
+    ext i j
+    simp [Z, Matrix.map_apply]
+  have hZi : (Z.map Complex.re - X₀).PosDef := by
+    rw [hmap]
+    exact hU
+  have hZT : Zᵀ = Z := by
+    ext i j
+    simp only [Z, Matrix.transpose_apply, Matrix.map_apply]
+    exact congrArg Complex.ofReal (congrFun (congrFun (selfAdjoint.transpose_coe U) i) j)
+  have hi := (matrixLaplaceTransform_integrableOn_analyticOnNhd f hf hX₀ hbound).1 Z hZT hZi
+  have hzero (Y : SymMatrix m) :
+      (Z * (Y : Matrix (Fin m) (Fin m) ℝ).map Complex.ofReal).trace =
+        (((U : Matrix (Fin m) (Fin m) ℝ) * (Y : Matrix (Fin m) (Fin m) ℝ)).trace : ℂ) := by
+    simpa only [Matrix.map_zero, zero_smul, add_zero, Matrix.zero_mul, Matrix.trace_zero,
+      Complex.ofReal_zero, mul_zero, smul_zero, Z] using
+      Matrix.trace_map_ofReal_add_I_smul_mul_map_ofReal (U : Matrix (Fin m) (Fin m) ℝ) 0 Y
+  have hg : Integrable (MatrixLaplaceInversion.damped f U) (TauCeti.symmetricLebesgue m) := by
+    rw [MatrixLaplaceInversion.damped]
+    apply (integrable_indicator_iff hmc).mpr
+    simpa only [hzero] using hi
+  have hFfun : Real.radianFourierIntegral (TauCeti.symmetricLebesgue m)
+      (MatrixLaplaceInversion.damped f U) = fun V : SymMatrix m =>
+        matrixLaplaceTransform f ((U : Matrix (Fin m) (Fin m) ℝ).map Complex.ofReal +
+          Complex.I • (V : Matrix (Fin m) (Fin m) ℝ).map Complex.ofReal) :=
+    funext (MatrixLaplaceInversion.radianFourierIntegral_damped f U)
+  have hG : Integrable (Real.radianFourierIntegral (TauCeti.symmetricLebesgue m)
+      (MatrixLaplaceInversion.damped f U)) (TauCeti.symmetricLebesgue m) := by
+    rw [hFfun]
+    exact hint
+  let s : ℝ := (2 : ℝ) ^ (((m : ℝ) * (m - 1)) / 4)
+  have hs : 0 < s := by dsimp [s]; positivity
+  have hvol : (volume : Measure (SymMatrix m)) = ENNReal.ofReal s • TauCeti.symmetricLebesgue m :=
+    TauCeti.volume_symmetricMatrix_eq_smul_symmetricLebesgue m
+  have hc := MatrixLaplaceInversion.continuousAt_damped f U hfc Xs hX
+  have heq := Real.radianFourierIntegral_inversion_of_volume_eq_smul
+    (TauCeti.symmetricLebesgue m) hs hvol hg hG hc
+  rw [hFfun, MatrixLaplaceInversion.damped,
+    Set.indicator_of_mem (show Xs ∈ posDefCone m from hX)] at heq
+  simp only [smul_eq_mul] at heq
+  have hfactor : s ^ 2 / (2 * Real.pi) ^ (Module.finrank ℝ (SymMatrix m)) =
+      (2 : ℝ) ^ (m * (m - 1) / 2) / (2 * Real.pi) ^ (m * (m + 1) / 2) := by
+
+    rw [TauCeti.finrank_symmetricMatrix, ← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    congr 1
+    have hn : ((m * (m - 1) / 2 : ℕ) : ℝ) = (m : ℝ) * (m - 1) / 2 := by
+      rw [← Nat.choose_two_right, Nat.cast_choose_two]
+    rw [show ((m : ℝ) * (m - 1) / 4) * (2 : ℕ) = (m : ℝ) * (m - 1) / 2 by push_cast; ring, ← hn,
+      Real.rpow_natCast]
+  have hex : Complex.exp (((U : Matrix (Fin m) (Fin m) ℝ) * X).trace : ℂ) *
+      Complex.exp (-(((U : Matrix (Fin m) (Fin m) ℝ) * X).trace : ℂ)) = 1 := by
+    rw [← Complex.exp_add]; simp only [add_neg_cancel, Complex.exp_zero]
+  calc f X = Complex.exp (((U : Matrix (Fin m) (Fin m) ℝ) * X).trace : ℂ) *
+        (Complex.exp (-(((U : Matrix (Fin m) (Fin m) ℝ) * X).trace : ℂ)) * f X) := by
+          rw [← mul_assoc, hex, one_mul]
+    _ = Complex.exp (((U : Matrix (Fin m) (Fin m) ℝ) * X).trace : ℂ) *
+        ((s ^ 2 / (2 * Real.pi) ^ (Module.finrank ℝ (SymMatrix m))) •
+          ∫ V : SymMatrix m, Complex.exp (Complex.I * (inner ℝ V Xs : ℝ)) *
+            matrixLaplaceTransform f ((U : Matrix (Fin m) (Fin m) ℝ).map Complex.ofReal +
+              Complex.I • (V : Matrix (Fin m) (Fin m) ℝ).map Complex.ofReal)
+            ∂TauCeti.symmetricLebesgue m) := by rw [heq]
+    _ = (s ^ 2 / (2 * Real.pi) ^ (Module.finrank ℝ (SymMatrix m))) •
+        ∫ V : SymMatrix m,
+          Complex.exp (((U : Matrix (Fin m) (Fin m) ℝ) * X).trace : ℂ) *
+            (Complex.exp (Complex.I * (inner ℝ V Xs : ℝ)) *
+              matrixLaplaceTransform f ((U : Matrix (Fin m) (Fin m) ℝ).map Complex.ofReal +
+                Complex.I • (V : Matrix (Fin m) (Fin m) ℝ).map Complex.ofReal))
+          ∂TauCeti.symmetricLebesgue m := by
+      rw [integral_const_mul]
+      simp only [Complex.real_smul]
+      ring
+    _ = _ := by
+      rw [show s ^ 2 / (2 * Real.pi) ^ (Module.finrank ℝ (SymMatrix m)) =
+        (2 : ℝ) ^ (m * (m - 1) / 2) / (2 * Real.pi) ^ (m * (m + 1) / 2) from hfactor]
+      simp only [Complex.real_smul, Complex.ofReal_div, Complex.ofReal_pow,
+        Complex.ofReal_mul, Complex.ofReal_ofNat]
+      congr 1
+      apply integral_congr_ae
+      filter_upwards [] with V
+      rw [← mul_assoc, ← Complex.exp_add, Matrix.trace_map_ofReal_add_I_smul_mul_map_ofReal,
+        selfAdjoint.inner_eq_trace_mul]
+      congr 2
+      simp only [Xs]
+      rw [Matrix.trace_mul_comm X (V : Matrix (Fin m) (Fin m) ℝ)]
 
 /-- DLMF 35.2.3 (convolution theorem): if `f₁, f₂` satisfy the bound of 35.2 with `X₀ ∈ Ω`,
 then for complex `𝐙` (DLMF: symmetric) with `ℜ𝐙 > X₀` the Laplace transform of the convolution

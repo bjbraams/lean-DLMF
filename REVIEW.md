@@ -1,5 +1,235 @@
 # Mathematical review of the lean-DLMF project (formerly lean-AAR)
 
+## Chapters 20–36 status review and proof priorities, 2026-11-12
+
+The review starts from the verified, uncommitted Chapters 13–15 proof state. The user
+sets those chapters aside for this round. The acquisition ledgers and area entry points
+exist for all seventeen later chapters. Source inventory and a fresh compiled tag dump
+agree on 493 direct admissions in the selected chapters. Among 2,913 local tagged
+theorems, 2,410 have standard axioms only, 493 have direct admissions and ten more depend
+on admitted results. Mathlib and TauCeti declarations and recorded pointers cover 184 distinct chapter items;
+including the other upstream dependency raises that count to 185. These are counts
+of Lean declarations and recorded pointers, not a claim that every DLMF prose assertion
+has an independently audited acquisition entry.
+
+The starting direct-admission inventory by chapter is:
+
+- Chapter 20, theta functions: 12.
+- Chapter 21, multidimensional theta functions: 7.
+- Chapter 22, Jacobi elliptic functions: 15.
+- Chapter 23, Weierstrass elliptic and modular functions: 8.
+- Chapter 24, Bernoulli and Euler polynomials: 17.
+- Chapter 25, zeta and related functions: 10.
+- Chapter 26, combinatorial analysis: 32.
+- Chapter 27, functions of number theory: 32.
+- Chapter 28, Mathieu functions and Hill equations: 118.
+- Chapter 29, Lamé functions: 24.
+- Chapter 30, spheroidal wave functions: 29.
+- Chapter 31, Heun functions: 18.
+- Chapter 32, Painlevé transcendents: 40.
+- Chapter 33, Coulomb functions: 35.
+- Chapter 34, Wigner symbols: 28.
+- Chapter 35, functions of matrix argument: 35.
+- Chapter 36, integrals with coalescing saddles: 33.
+
+The full starting inventory, with stable qualified declaration names and DLMF references,
+is in `reports/Chapters2036Admissions.tsv`. The per-chapter compiled status is in
+`reports/Chapters2036Status.tsv`; it distinguishes direct admissions from dependence
+on other admissions. Open conjectures in Chapter 27 are represented as propositions
+and are not selected as theorem-proving targets. Results retained solely from supporting
+sources without a DLMF counterpart have lower priority.
+
+The review shows several different mathematical gaps. Chapters 20–23 have substantial
+proved theta and elliptic APIs, with remaining exact identities, modular transformations,
+logarithmic expansions and parameter limits. Chapters 24–27 combine exact arithmetic
+and enumeration with much deeper congruences, partition asymptotics and analytic number
+theory. Chapters 28–33 have extensive canonical definitions and differential-equation
+APIs, but many remaining spectral, orthogonality, perturbation, global-existence and
+asymptotic theorems. Chapter 34 needs coefficient orthogonality and finite recoupling
+sums; Chapter 35 needs zonal-polynomial normalization, matrix-integral transformations
+and hypergeometric summations. Chapter 36 needs canonical-integral evaluations, contour
+and oscillatory representations, asymptotics, and global saddle-connection geometry.
+
+The chosen priorities are exact identities and reusable analysis that can be closed from
+existing proved APIs: Jacobi addition identities, Wigner/Legendre product integrals,
+matrix Laplace inversion, and canonical-integral evaluations. Further assignments cover
+arithmetic/combinatorics and the later differential-equation chapters. High admission
+counts alone do not set the order: a uniform Mathieu expansion, Painlevé connection
+formula or prime-number error term can require substantially more theory than a finite
+identity. Five focused workers completed their assignments in two waves using the three available
+concurrent worker slots, alongside integration and proof work by the root agent.
+
+The completed proofs remove eight original direct admissions, preserving their statements:
+
+- `DLMF.JacobiElliptic.jacobi_det_sum_zero` (22.8.19–20) and
+  `DLMF.JacobiElliptic.jacobi_prod_sum_zero` (22.8.21). Polynomial certificates from the
+  addition laws prove the identities away from auxiliary denominator zeros; entire theta
+  numerators and analytic continuation remove those temporary restrictions.
+- `DLMF.BernoulliEuler.bernoulliFun_two_mul_add_one_bounds` (24.9.4). The proof keeps the
+  first three sine Fourier modes and controls the tail by the zeta value at four. The
+  Chapter 24 inequalities file now contains no admissions.
+- `DLMF.Mathieu.paraboloidalHc_Hs_double_orthogonal` (28.31.24). Finite cosine/sine
+  polynomial parity makes the angular integral vanish. A tagged primed theorem also
+  permits arbitrary indices, parameter and complex vertical origin.
+- `DLMF.WignerSymbols.legendrePolynomialP_mul_legendrePolynomialP` (34.3.19) and
+  `DLMF.WignerSymbols.integral_legendrePolynomialP_mul_mul` (34.3.21). The existing
+  Gegenbauer product at parameter one half and the factorial formula for zero-projection
+  Wigner symbols give the coefficients. Legendre orthogonality and the cosine substitution
+  give the triple integral, including all degree configurations.
+- `DLMF.MatrixArgument.matrixLaplaceTransform_inversion` (35.2.2), including dimension
+  zero. General vector-valued radian Fourier inversion, the symmetric-matrix trace pairing
+  and the exact volume normalization give the corrected existing matrix formula.
+- `DLMF.CoalescingSaddles.cuspoidIntegral_two_zero_left` (36.2.19), for every real nonzero
+  symmetry-line argument. A quadratic substitution gives a parabolic-cylinder Laplace
+  integral, its Kummer expression and the quarter-order Bessel formula, with both signs
+  of the argument handled explicitly.
+
+One further original theorem, `DLMF.Mathieu.paraboloidal_isWhittakerHillSolution`
+(28.31.18), is now independent of admissions. The defining homogeneous equation holds
+both for the chosen Ince polynomial and for its zero fallback; the proof no longer uses
+admitted existence/specification theorems. The equation and finite-polynomial parity API
+are proved in foundational modules, with no theorem-layer imports.
+
+The final compiled inventory has 2,914 local tagged theorems: 2,420 use standard axioms
+only, 485 are directly admitted, and nine depend on other admissions. The additional
+local tagged theorem is the stronger primed Mathieu orthogonality statement. Direct
+admissions by chapter are now 12, 7, 13, 8, 16, 10, 32, 32, 117, 24, 29, 18, 40, 35, 26,
+34 and 32, respectively, for Chapters 20 through 36. The target inventory records all
+493 starting declarations and their current status; the chapter status file records the
+final compiled counts. The six proof-affected acquisition ledgers have been refreshed; the Chapter 31 ledger
+also records the approved domain correction.
+
+A separate boundary audit proves that `DLMF.Heun.stieltjes_card` is false for `N = 0`,
+`n = 1`, singular point zero and residue one: its solution set is empty, whereas its
+binomial expression is one. The five standard-axiom checks are retained in
+`scripts/CheckChapters2036Statements.lean`. With the user's approval, the statement now
+requires `1 ≤ N`, so there are at least two singular points. Its proof remains admitted.
+Comparison of all 493 starting statements finds this approved domain correction as the
+only statement change. Existing definition bodies are preserved.
+
+Validation: the ordinary full `lake build` passes all 15,902 jobs. Each changed library
+module passes its authoritative targeted build and direct check with the package options.
+The newly written proof modules also pass tactic-aware unused-variable checks with
+warnings treated as errors. The complete existing Bernoulli file has preexisting
+unused-name warnings outside the new proof under those extra flags; its package-option
+check and the isolated new proof's stricter check both pass. The retained
+`scripts/CheckChapters2036.lean` audits 56 declarations with standard axioms only;
+the preceding Chapters 13–15 audit also passes all 255 declarations. The fresh complete
+tag dump reports no nonstandard axioms. The import survey reports no foundational
+violations, missing modules, file cycles or new two-way area pairs (the existing baseline
+has 23). File and line limits and `git diff --check` pass. All five workers have finished;
+no proof experiments remain active, and toolchain and dependency pins are unchanged.
+
+## Further Chapters 13–15 proofs, 2026-11-11
+
+This round continues from the verified, uncommitted interruption-cleanup state described
+below, based on `e09cd1109fcda085e29fb68a835e088b860707e7`. Five additional original admissions
+are proved without changing their statements:
+
+- `DLMF.Confluent.kummerM_transition` (13.8.6), for every complex parameter `a`.
+- `DLMF.Confluent.kummerU_transition` (13.8.7), for every complex parameter `a`.
+- `DLMF.Legendre.ferrersP_dougall_series` (14.18.9), including `μ = 0` and `x = 1`.
+- `DLMF.Legendre.associatedQ_addition` (14.18.5), on the full stated exterior domain.
+- `DLMF.Legendre.associatedP_large_order_uniform` (14.15.2), uniformly for every `x > 1`.
+
+The Kummer U proof makes an analytic quadratic-saddle substitution in its Laplace
+integral. A Gaussian Watson estimate gives the first two terms for `Re a > 0`, with
+an exponentially small tail. The recurrence at `z = b` extends the result downwards to
+all complex `a`, and reciprocal-Gamma identities give the original normalization.
+The generic quadratic-Laplace and Gaussian-Watson APIs are in `DLMFMathlib`.
+The original tagged declaration moves unchanged to `Confluent/Asymptotics/Transition.lean`,
+which is imported by `LargeParameter.lean`. The M transition proof reflects the same
+saddle coordinate in its finite Euler integral. An exponential tail bound and a Gamma-ratio
+estimate give the expansion for positive real part; the diagonal M recurrence extends it
+to every complex parameter. Its original tagged declaration moves unchanged to
+`Confluent/Asymptotics/EulerTransition.lean`.
+
+Dougall's series follows by applying the Ferrers fractional integral to the proved
+order-zero Legendre expansion. A summable majorant justifies termwise integration when
+`μ > 0`. At `x = 1` the canonical totalized Ferrers values handle nonzero order, while
+the order-zero case uses the ordered, conditionally convergent endpoint coefficient sum.
+The Q addition proof continues its Fourier coefficients from the Ferrers interval through
+a connected complex strip to the exterior hyperbolic arguments, keeping the lower-bank
+Q–Ferrers connection and all integer-order phases explicit. Fourier reconstruction gives
+the original series. The finite-interval holomorphy adapter is general complex analysis
+in `DLMFMathlib/Analysis/Complex/ParametricHolomorphy.lean`. `Legendre/Sums.lean` now has
+no admissions.
+
+For the uniform P approximation, `x = coth u` transforms the equation into an integrable
+perturbation of the modified-Bessel normal form of order `ν + 1/2`. The total perturbation
+norm is `|ν(ν+1)|`. Exponential normalization at infinity and uniqueness identify the
+Legendre solution with the constructed recessive solution. The resulting relative error
+is at most `2|ν(ν+1)|/μ` for `μ > max 1 (4|ν(ν+1)|)`, uniformly for `u > 0`, and hence
+for every `x > 1`. Positive-real square roots and Gamma factors match the original
+principal-branch leading term, including degree `ν = -1/2`.
+
+The cumulative original-target inventory remains in `reports/Chapters131415Admissions.tsv`.
+Nine of the original 36 admissions are proved; 27 remain: five in Chapter 13, 21 in
+Chapter 14 and one in Chapter 15.
+Original statement types and definition bodies are preserved. No new axioms, admissions,
+dependency changes or build-setting changes are introduced. The pre-existing edits to
+`reports/DLMFErrata.tex` are preserved. No commits or external submissions are made.
+
+
+Validation passes: the ordinary `lake build > /tmp/DLMF-build.log 2>&1` completes
+15,882 jobs. Strict direct checks cover all 38 changed or new Lean sources and the two
+library entry modules. The expanded retained `scripts/CheckChapters131415.lean` audit
+checks 255 declarations; every dependency set is a subset of `propext`, `Classical.choice`
+and `Quot.sound`, with no `sorryAx`. All 36 original target types were compared with the
+baseline and remain unchanged. The inventory agrees with the direct admission scan.
+The import survey reports no foundational violations, forbidden closure imports, missing
+modules, cycles or new two-way area pairs (23 existing pairs). File and line limits,
+whitespace checks and `git diff --check` pass. No unfinished source module remains.
+
+## Chapters 13–15 proof round and interruption cleanup, 2026-11-11
+
+This round starts from `e09cd1109fcda085e29fb68a835e088b860707e7`, with 36 original
+admissions: eight in Chapter 13, 27 in Chapter 14 and one in Chapter 15. Four are now proved:
+
+- `DLMF.Confluent.kummerM_large_a_b` (13.8.17).
+- `DLMF.Legendre.ferrers_barnes_integral` (14.17.5).
+- `DLMF.Legendre.ferrers_triple_integral` (14.17.17).
+- `DLMF.Legendre.conical_stieltjes_integral` (14.20.13).
+
+The Kummer proof bounds the Pochhammer coefficient ratio to second order, sums the
+exponential-series majorant, and combines this with a Binet-integral estimate for the
+scaled-Gamma ratio. The original tagged theorem moves unchanged to
+`Confluent/Asymptotics/JointParameters.lean`, imported by `LargeParameter.lean`.
+The Barnes proof uses a boundary Gauss fractional integral and a quadratic Ferrers
+transformation. The triple-integral proof combines the skew pairing of P and Q with
+polynomial orthogonality and parity; a separate primed theorem also covers zero degrees.
+The original positive-degree theorem moves unchanged to `Legendre/Integrals/FerrersTriple.lean`.
+The conical proof derives a Gauss self-Stieltjes identity from its moments and analytic
+continuation, then transforms it to the conical kernel.
+
+The user requested an interruption check before the remaining proofs were integrated.
+No agents or builds were still running. The completed support is retained: modified-Bessel
+Green-kernel bounds and a perturbation solution constructor, an integrable hyperbolic
+remainder, uniqueness of normalized recessive solutions, a summable Legendre-series
+majorant and the ordered endpoint coefficient sum. These are proved lemmas, not closures
+of the remaining target admissions. The unfinished Kummer U transition, Dougall series,
+Legendre uniform approximation and Chapter 15 Bessel approximation remain admitted.
+Their exploratory files are outside the library in `/tmp`; no incomplete new module or
+new admission is left in the project.
+
+The inventory `reports/Chapters131415Admissions.tsv` records all 36 original targets,
+including current locations. There are 32 left: seven in Chapter 13, 24 in Chapter 14
+and one in Chapter 15. All 36 original statement types were compared with the baseline
+and remain unchanged. Existing definition bodies, branches, normalizations, dependencies
+and build settings are preserved. An earlier cylinder-normalization concern was withdrawn:
+the counterexample had different parentheses from the original statement. Its temporary
+production module and import were removed; no statement repair is required on that basis.
+The separately modified `reports/DLMFErrata.tex` was preserved untouched during this cleanup.
+No commits or external submissions were made.
+
+Validation passed: the ordinary `lake build > /tmp/DLMF-build.log 2>&1` (15,860 jobs),
+strict direct checks of all 24 changed or new Lean files, and the retained
+`scripts/CheckChapters131415.lean` audit of 102 declarations. Every audited declaration
+uses only `propext`, `Classical.choice` and `Quot.sound`, or a subset; none depends on
+`sorryAx`. The import survey reports no foundational violations, forbidden closure imports,
+missing modules, file cycles or new two-way area pairs (23 existing pairs). The admission
+inventory, file and line limits, and whitespace checks pass.
+
 ## Airy and Bessel proof round, 2026-11-10
 
 This round starts from `7871bc5243ace72d43b5af83cbee0e2a7b541b11` together with the

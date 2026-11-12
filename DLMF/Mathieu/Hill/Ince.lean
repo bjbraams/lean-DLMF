@@ -6,6 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Mathieu.Hill.Basic
+public import DLMF.Mathieu.Basic.InceEquation
+public import DLMF.Mathieu.Hill.ParaboloidalOrthogonality
 public import DLMF.Mathieu.Basic.SpectralExistence
 public import DLMF.Mathieu.Noninteger.Properties
 
@@ -75,87 +77,6 @@ open scoped Topology Classical
 namespace DLMF.Mathieu
 
 /-! ### §28.31(i)–(ii) Whittaker–Hill and Ince equations -/
-
-/-- `cos 4z = 1 - 2 sin² 2z`. -/
-private lemma cos_four_mul_eq_one_sub_two_mul_sin_sq (z : ℂ) : Complex.cos (4 * z) = 1 - 2 *
-    Complex.sin (2 * z) ^ 2 := by
-  rw [show (4 : ℂ) * z = 2 * (2 * z) by ring, Complex.cos_two_mul]
-  have := Complex.sin_sq_add_cos_sq (2 * z)
-  linear_combination (2 : ℂ) * this
-
-/-- The derivative of `-ξ cos(2z)/4`. -/
-private lemma hasDerivAt_neg_mul_cos_two_mul_div_four (ξ z : ℂ) :
-    HasDerivAt (fun z => -(ξ * Complex.cos (2 * z)) / 4) (ξ * Complex.sin (2 * z) / 2) z := by
-  have h2 : HasDerivAt (fun z : ℂ => 2 * z) 2 z := by
-    simpa using (hasDerivAt_id z).const_mul (2 : ℂ)
-  have := ((h2.ccos).const_mul ξ).neg.div_const 4
-  convert this using 1; ring
-
-/-- The derivative of `ξ sin(2z)/2`. -/
-private lemma hasDerivAt_mul_sin_two_mul_div_two (ξ z : ℂ) :
-    HasDerivAt (fun z => ξ * Complex.sin (2 * z) / 2) (ξ * Complex.cos (2 * z)) z := by
-  have h2 : HasDerivAt (fun z : ℂ => 2 * z) 2 z := by
-    simpa using (hasDerivAt_id z).const_mul (2 : ℂ)
-  have := ((h2.csin).const_mul ξ).div_const 2
-  convert this using 1; ring
-
-/-- **Reduction to Ince's equation** (DLMF 28.31.2–28.31.3): with `ξ² = -4k²c²`,
-`A = η - ξ²/8`, `B = -(p+1)ξ` and `W(z) = w(z) exp(-¼ξ cos 2z)`, `W` solves the Whittaker–Hill
-equation 28.31.1 iff `w` solves Ince's equation 28.31.3. (DLMF makes the substitution for
-`k² < 0`; the algebra holds for all complex parameters.) Proved. -/
-@[dlmf 28.31.E2]
-theorem isWhittakerHillSolution_iff_isInceSolution {k c ξ η p : ℂ}
-    (hξ : ξ ^ 2 = -4 * k ^ 2 * c ^ 2) {w : ℂ → ℂ} :
-    IsWhittakerHillSolution (η - ξ ^ 2 / 8) (-(p + 1) * ξ) k c
-        (fun z => w z * Complex.exp (-(ξ * Complex.cos (2 * z)) / 4)) ↔
-      IsInceSolution ξ η p w := by
-  set g : ℂ → ℂ := fun z => -(ξ * Complex.cos (2 * z)) / 4
-  set g' : ℂ → ℂ := fun z => ξ * Complex.sin (2 * z) / 2
-  set E : ℂ → ℂ := fun z => Complex.exp (g z)
-  have hE : ∀ z, HasDerivAt E (E z * g' z) z := fun z =>
-      (hasDerivAt_neg_mul_cos_two_mul_div_four ξ z).cexp
-  have hF : ∀ z, HasDerivAt (fun z => Complex.exp (-g z)) (Complex.exp (-g z) * -g' z) z :=
-    fun z => (hasDerivAt_neg_mul_cos_two_mul_div_four ξ z).neg.cexp
-  have hg' : ∀ z, HasDerivAt g' (ξ * Complex.cos (2 * z)) z := hasDerivAt_mul_sin_two_mul_div_two ξ
-  have hEF : ∀ z, E z * Complex.exp (-g z) = 1 := fun z => by
-    simp only [E]; rw [← Complex.exp_add, add_neg_cancel, Complex.exp_zero]
-  constructor
-  · rintro ⟨hWd, hW⟩
-    set W : ℂ → ℂ := fun z => w z * E z
-    have hw : w = fun z => W z * Complex.exp (-g z) := by
-      funext z; simp only [W]; rw [mul_assoc, hEF, mul_one]
-    have hWd' : ∀ z, HasDerivAt W (deriv W z) z := fun z => (hWd z).hasDerivAt
-    have hw' : ∀ z, HasDerivAt w ((deriv W z - g' z * W z) * Complex.exp (-g z)) z := by
-      intro z; rw [hw]
-      convert (hWd' z).mul (hF z) using 1; ring
-    have hdw : deriv w = fun z => (deriv W z - g' z * W z) * Complex.exp (-g z) :=
-      funext fun z => (hw' z).deriv
-    refine ⟨fun z => (hw' z).differentiableAt, fun z => ?_⟩
-    rw [hdw]
-    have := (((hW z).sub ((hg' z).mul (hWd' z))).mul (hF z))
-    convert this using 1
-    have h4 := cos_four_mul_eq_one_sub_two_mul_sin_sq z
-    have hwz : w z = W z * Complex.exp (-g z) := congrFun hw z
-    rw [hwz]
-    simp only [W, g', Pi.sub_apply, Pi.mul_apply]
-    rw [h4]
-    linear_combination
-      (-1/8 * w z * E z * Complex.exp (-g z) * (1 - 2 * Complex.sin (2 * z) ^ 2)) * hξ
-  · rintro ⟨hwd, hw⟩
-    have hwd' : ∀ z, HasDerivAt w (deriv w z) z := fun z => (hwd z).hasDerivAt
-    have hW' : ∀ z, HasDerivAt (fun z => w z * E z) ((deriv w z + w z * g' z) * E z) z := by
-      intro z; convert (hwd' z).mul (hE z) using 1; ring
-    have hdW : deriv (fun z => w z * E z) = fun z => (deriv w z + w z * g' z) * E z :=
-      funext fun z => (hW' z).deriv
-    refine ⟨fun z => (hW' z).differentiableAt, fun z => ?_⟩
-    rw [hdW]
-    have := (((hw z).add ((hwd' z).mul (hg' z))).mul (hE z))
-    convert this using 1
-    have h4 := cos_four_mul_eq_one_sub_two_mul_sin_sq z
-    simp only [g', Pi.mul_apply, Pi.add_apply]
-    rw [h4]
-    linear_combination (1/8 * w z * E z * (1 - 2 * Complex.sin (2 * z) ^ 2)) * hξ
-
 
 /-! ### Exponential-series solutions of Ince's equation -/
 
@@ -815,33 +736,6 @@ theorem ince_tendsto_mathieu {m : ℕ} {q : ℝ} {P : ℕ → ℕ} {Ξ : ℕ →
 
 /-! ### §28.31(iii) Paraboloidal wave functions -/
 
-/-- **Differential equation of the paraboloidal wave functions** (DLMF 28.31.18):
-`w'' + (η - ⅛ξ² - (p+1)ξ cos 2z + ⅛ξ² cos 4z) w = 0` with `η = a_p^m(ξ)` for `hc_p^m` and
-`η = b_p^m(ξ)` for `hs_p^m`; this is the Whittaker–Hill equation 28.31.1 with
-`A = η - ξ²/8`, `B = -(p+1)ξ`, `k = iξ/2`, `c = 1`. Proved from 28.31.2 and the admitted
-`inceC_spec`, `inceS_spec`. -/
-@[dlmf 28.31.E18]
-theorem paraboloidal_isWhittakerHillSolution {p m : ℕ} (hm : m ≤ p) (hpm : m % 2 = p % 2)
-    (ξ : ℝ) :
-    IsWhittakerHillSolution (inceA p m ξ - (ξ : ℂ) ^ 2 / 8) (-((p : ℂ) + 1) * ξ) (I * ξ / 2) 1
-        (fun z => paraboloidalHc p m z ξ) ∧
-      (1 ≤ m → IsWhittakerHillSolution (inceB p m ξ - (ξ : ℂ) ^ 2 / 8) (-((p : ℂ) + 1) * ξ)
-        (I * ξ / 2) 1 (fun z => paraboloidalHs p m z ξ)) := by
-  have hk : ((ξ : ℂ)) ^ 2 = -4 * (I * ξ / 2) ^ 2 * 1 ^ 2 := by
-    ring_nf; rw [Complex.I_sq]; ring
-  have hfun : ∀ (F : ℂ → ℂ), (fun z => F z * Complex.exp (-((ξ : ℂ) * Complex.cos (2 * z)) / 4)) =
-      fun z => Complex.exp (-((ξ : ℂ) * Complex.cos (2 * z)) / 4) * F z :=
-    fun F => funext fun z => mul_comm _ _
-  refine ⟨?_, fun hm1 => ?_⟩
-  · have := (isWhittakerHillSolution_iff_isInceSolution (η := (inceA p m ξ : ℂ)) (p := (p : ℂ))
-      hk).mpr (inceC_spec hm hpm ξ).2.1
-    rw [hfun] at this
-    exact this
-  · have := (isWhittakerHillSolution_iff_isInceSolution (η := (inceB p m ξ : ℂ)) (p := (p : ℂ))
-      hk).mpr (inceS_spec hm1 hm hpm ξ).2.1
-    rw [hfun] at this
-    exact this
-
 /-- **Change of sign of `ξ`** (DLMF 28.31.19):
 `hc_{2n}^{2m}(z, -ξ) = (-1)^m hc_{2n}^{2m}(½π - z, ξ)` and
 `hc_{2n+1}^{2m+1}(z, -ξ) = (-1)^m hs_{2n+1}^{2m+1}(½π - z, ξ)`, `m ≤ n`. -/
@@ -901,35 +795,6 @@ private lemma integral_whittakerHillSolution_mul_eq_zero {A₁ A₂ B k c : ℂ}
   rw [hG0, sub_self, intervalIntegral.integral_const_mul] at hftc
   exact (mul_eq_zero.mp hftc).resolve_left (sub_ne_zero.mpr hA)
 
-/-- Cosine Ince polynomials are `2π`-periodic. -/
-private lemma periodic_of_isInceCosPoly {p : ℕ} {f : ℂ → ℂ} (hf : IsInceCosPoly p f) :
-    Function.Periodic f (2 * Real.pi) := by
-  obtain ⟨A, hA⟩ := hf
-  intro z
-  rw [hA, hA]
-  refine Finset.sum_congr rfl fun k _ => ?_
-  rw [show (k : ℂ) * (z + 2 * Real.pi) = k * z + k * (2 * Real.pi) by ring,
-    Complex.cos_add_nat_mul_two_pi]
-
-/-- Sine Ince polynomials are `2π`-periodic. -/
-private lemma periodic_of_isInceSinPoly {p : ℕ} {f : ℂ → ℂ} (hf : IsInceSinPoly p f) :
-    Function.Periodic f (2 * Real.pi) := by
-  obtain ⟨B, hB⟩ := hf
-  intro z
-  rw [hB, hB]
-  refine Finset.sum_congr rfl fun k _ => ?_
-  rw [show (k : ℂ) * (z + 2 * Real.pi) = k * z + k * (2 * Real.pi) by ring,
-    Complex.sin_add_nat_mul_two_pi]
-
-/-- `e^{-ξ cos 2z / 4}` is `2π`-periodic. -/
-private lemma periodic_exp_cos_two_mul (ξ : ℂ) :
-    Function.Periodic (fun z : ℂ => Complex.exp (-(ξ * Complex.cos (2 * z)) / 4))
-      (2 * Real.pi) := by
-  intro z
-  simp only
-  rw [show (2 : ℂ) * (z + 2 * Real.pi) = 2 * z + (2 : ℕ) * (2 * Real.pi) by push_cast; ring,
-    Complex.cos_add_nat_mul_two_pi]
-
 /-- **Orthogonality** (DLMF 28.31.21): for `m₁ ≠ m₂` (admissible for `p`),
 `∫₀^{2π} hc_p^{m₁} hc_p^{m₂} dx = ∫₀^{2π} hs_p^{m₁} hs_p^{m₂} dx = 0`. Proved from the
 Wronskian identity for 28.31.18 and the admitted `inceC_spec`, `inceS_spec` (distinct
@@ -946,33 +811,17 @@ theorem integral_paraboloidal_orthogonal {p m₁ m₂ : ℕ} (h₁ : m₁ ≤ p)
     have hA : (inceA p m₁ ξ : ℂ) - (ξ : ℂ) ^ 2 / 8 ≠ (inceA p m₂ ξ : ℂ) - (ξ : ℂ) ^ 2 / 8 := by
       rw [ne_eq, sub_left_inj, Complex.ofReal_inj]
       exact s2.2.2.2.2.2.2.1 m₁ h₁ h₁' hne
-    have hper : ∀ {m : ℕ}, IsInceCosPoly p (fun z => inceC p m z ξ) →
-        Function.Periodic (fun z => paraboloidalHc p m z ξ) (2 * Real.pi) :=
-      fun {m} hc z => by
-        simp only [paraboloidalHc]
-        have e1 := periodic_exp_cos_two_mul ξ z
-        have e2 := periodic_of_isInceCosPoly hc z
-        simp only at e1 e2
-        rw [e1, e2]
     exact integral_whittakerHillSolution_mul_eq_zero
         (paraboloidal_isWhittakerHillSolution h₁ h₁' ξ).1
-      (paraboloidal_isWhittakerHillSolution h₂ h₂' ξ).1 hA (hper s1.1) (hper s2.1)
+      (paraboloidal_isWhittakerHillSolution h₂ h₂' ξ).1 hA (periodic_paraboloidalHc p m₁ ξ) (periodic_paraboloidalHc p m₂ ξ)
   · have s1 := inceS_spec k₁ h₁ h₁' ξ
     have s2 := inceS_spec k₂ h₂ h₂' ξ
     have hA : (inceB p m₁ ξ : ℂ) - (ξ : ℂ) ^ 2 / 8 ≠ (inceB p m₂ ξ : ℂ) - (ξ : ℂ) ^ 2 / 8 := by
       rw [ne_eq, sub_left_inj, Complex.ofReal_inj]
       exact s2.2.2.2.2.2.2.1 m₁ k₁ h₁ h₁' hne
-    have hper : ∀ {m : ℕ}, IsInceSinPoly p (fun z => inceS p m z ξ) →
-        Function.Periodic (fun z => paraboloidalHs p m z ξ) (2 * Real.pi) :=
-      fun {m} hc z => by
-        simp only [paraboloidalHs]
-        have e1 := periodic_exp_cos_two_mul ξ z
-        have e2 := periodic_of_isInceSinPoly hc z
-        simp only at e1 e2
-        rw [e1, e2]
     exact integral_whittakerHillSolution_mul_eq_zero
         ((paraboloidal_isWhittakerHillSolution h₁ h₁' ξ).2 k₁)
-      ((paraboloidal_isWhittakerHillSolution h₂ h₂' ξ).2 k₂) hA (hper s1.1) (hper s2.1)
+      ((paraboloidal_isWhittakerHillSolution h₂ h₂' ξ).2 k₂) hA (periodic_paraboloidalHs p m₁ ξ) (periodic_paraboloidalHs p m₂ ξ)
 
 /-- **Double orthogonality of `hc`** (DLMF 28.31.22): for real `ξ ≠ 0` and admissible
 `(p₁, m₁) ≠ (p₂, m₂)`, with `u₀ = 0` (`ξ > 0`) or `u₀ = ½π` (`ξ < 0`),
@@ -1013,7 +862,8 @@ theorem paraboloidalHc_Hs_double_orthogonal {ξ : ℝ} (hξ : ξ ≠ 0) {p₁ m�
       paraboloidalHc p₁ m₁ (u₀ + I * t) ξ * paraboloidalHc p₁ m₁ v ξ *
         paraboloidalHs p₂ m₂ (u₀ + I * t) ξ * paraboloidalHs p₂ m₂ v ξ *
         (Complex.cos (2 * (u₀ + I * t)) - Complex.cos (2 * v)) = 0 := by
-  sorry
+  exact paraboloidalHc_Hs_double_orthogonal' p₁ m₁ p₂ m₂ ξ
+    (if 0 < ξ then 0 else (Real.pi / 2 : ℝ))
 
 /-- **Asymptotic behaviour, `ξ > 0`** (DLMF §28.31(iii), Asymptotic Behavior, first
 paragraph): as `z → ±i∞`, `hc_p^m(z, ξ)` and `hs_p^m(z, ξ)` behave as nonzero multiples of

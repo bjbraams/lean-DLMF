@@ -14,6 +14,7 @@ public import Mathlib.Topology.Algebra.InfiniteSum.ENNReal
 The exponential-series tail with coefficients `1/(n!(n+1))` has two useful majorants:
 `r^N exp r` near zero and `exp r/r` for positive arguments. These estimates allow a
 Gaussian factor to cancel before checking integrability of a parameterized series.
+Polynomially weighted exponential series are summable by comparison with a larger argument.
 -/
 
 @[expose] public noncomputable section
@@ -67,4 +68,21 @@ theorem mul_tsum_pow_div_factorial_mul_succ_le (N : ℕ) {r : ℝ} (hr : 0 ≤ r
       intro n m h
       change n+N+1=m+N+1 at h
       omega)
+
+/-- Polynomially weighted exponential series are absolutely summable. -/
+theorem summable_nat_pow_mul_pow_div_factorial (k : ℕ) {r : ℝ} (hr : 0 ≤ r) :
+    Summable (fun n : ℕ => (n : ℝ) ^ k * r ^ n / n.factorial) := by
+  have hb := (isLittleO_pow_const_const_pow_of_one_lt (R := ℝ) k (by norm_num : (1 : ℝ) < 2)).isBigO
+  apply summable_of_isBigO_nat (Real.summable_pow_div_factorial (2 * r))
+  obtain ⟨C, hC⟩ := hb.bound
+  apply Asymptotics.IsBigO.of_bound C
+  filter_upwards [hC] with n hn
+  have hn' : (n : ℝ) ^ k ≤ C * 2 ^ n := by simpa using hn
+  rw [Real.norm_eq_abs, abs_of_nonneg (by positivity),
+    Real.norm_eq_abs, abs_of_nonneg (by positivity), mul_pow]
+  calc _ ≤ C * 2 ^ n * r ^ n / n.factorial :=
+        div_le_div_of_nonneg_right (mul_le_mul_of_nonneg_right hn' (by positivity))
+          (Nat.cast_nonneg _)
+    _ = _ := by ring
+
 end Real

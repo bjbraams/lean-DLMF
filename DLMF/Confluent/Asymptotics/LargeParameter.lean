@@ -6,6 +6,9 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Confluent.Asymptotics.LargeArgument
+public import DLMF.Confluent.Asymptotics.JointParameters
+public import DLMF.Confluent.Asymptotics.Transition
+public import DLMF.Confluent.Asymptotics.EulerTransition
 
 /-!
 # Large-parameter expansions of confluent hypergeometric functions (DLMF §13.8, §13.19)
@@ -424,47 +427,8 @@ theorem kummerM_large_b_poincare (a z : ℂ) (n : ℕ) :
   · filter_upwards [eventually_gt_atTop 0] with b hb
     rw [one_mul, cpow_neg, cpow_natCast, inv_pow]
 
-/-- Identity under the stated parameter and domain assumptions: `Asymptotics.IsBigO atTop (fun b :
-ℝ => kummerM a b b - (Real.sqrt π : ℂ) * (b / 2 : ℂ) ^ (a / 2) * (1 / Gamma ((a + 1) / 2) + (a
-+ 1) * (8 / b : ℂ) ^ (1 / 2 : ℂ) / (3 * Gamma (a / 2)))) (fun b : ℝ => (b : ℂ) ^ (a / 2 -
-1))`. -/
-@[dlmf 13.8.E6]
-theorem kummerM_transition (a : ℂ) :
-    Asymptotics.IsBigO atTop
-      (fun b : ℝ => kummerM a b b -
-        (Real.sqrt π : ℂ) * (b / 2 : ℂ) ^ (a / 2) *
-          (1 / Gamma ((a + 1) / 2) + (a + 1) * (8 / b : ℂ) ^ (1 / 2 : ℂ) / (3 * Gamma (a / 2))))
-      (fun b : ℝ => (b : ℂ) ^ (a / 2 - 1)) := by
-  sorry
-
-/-- Identity under the stated parameter and domain assumptions: `Asymptotics.IsBigO atTop (fun b :
-ℝ => kummerU a b b - (Real.sqrt π : ℂ) * (2 * b : ℂ) ^ (-(a / 2)) * (1 / Gamma ((a + 1) / 2) -
-(a + 1) * (8 / b : ℂ) ^ (1 / 2 : ℂ) / (3 * Gamma (a / 2)))) (fun b : ℝ => (b : ℂ) ^ (-(a / 2)
-- 1))`. -/
-@[dlmf 13.8.E7]
-theorem kummerU_transition (a : ℂ) :
-    Asymptotics.IsBigO atTop
-      (fun b : ℝ => kummerU a b b -
-        (Real.sqrt π : ℂ) * (2 * b : ℂ) ^ (-(a / 2)) *
-          (1 / Gamma ((a + 1) / 2) - (a + 1) * (8 / b : ℂ) ^ (1 / 2 : ℂ) / (3 * Gamma (a / 2))))
-      (fun b : ℝ => (b : ℂ) ^ (-(a / 2) - 1)) := by
-  sorry
-
 /- DLMF uses scaled Gamma in M, ordinary Gamma in U, and a relative error in U.
 The parameter ray is real and positive, as in the source statement. -/
-/-- Identity under the stated parameter and domain assumptions: `Asymptotics.IsBigO atTop (fun a :
-ℝ => kummerM a (a / ν) z - exp (ν * z) * DLMF.Gamma.scaledGamma (a / ν : ℂ) /
-DLMF.Gamma.scaledGamma (a : ℂ) * (1 + (1 - ν) * (1 + 6 * ν ^ 2 * z ^ 2) / (12 * a))) (fun a :
-ℝ => (a : ℂ)⁻¹ ^ 2)`. -/
-@[dlmf 13.8.E17]
-theorem kummerM_large_a_b (ν : ℝ) (z : ℂ) (hν : 0 < ν) (hν1 : ν < 1) :
-    Asymptotics.IsBigO atTop
-      (fun a : ℝ => kummerM a (a / ν) z -
-        exp (ν * z) * DLMF.Gamma.scaledGamma (a / ν : ℂ) / DLMF.Gamma.scaledGamma (a : ℂ) *
-          (1 + (1 - ν) * (1 + 6 * ν ^ 2 * z ^ 2) / (12 * a)))
-      (fun a : ℝ => (a : ℂ)⁻¹ ^ 2) := by
-  sorry
-
 /-- Identity under the stated parameter and domain assumptions: `Asymptotics.IsBigO atTop (fun a :
 ℝ => kummerU a (a / ν + 1) z - z ^ (-(a / ν : ℂ)) * exp ((1 - ν) * z) * Gamma (a / ν : ℂ) /
 Gamma (a : ℂ) * (1 + ν * z * (1 - ν) * (2 - ν * z) / (2 * a))) (fun a : ℝ => z ^ (-(a / ν :

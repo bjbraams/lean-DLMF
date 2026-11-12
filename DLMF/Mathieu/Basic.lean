@@ -14,6 +14,8 @@ public import DLMF.Mathieu.Basic.Properties
 public import DLMF.Mathieu.Basic.Floquet
 public import DLMF.Mathieu.Basic.Eigenfunctions
 public import DLMF.Mathieu.Basic.SpectralExistence
+public import DLMF.Mathieu.Basic.InceParity
+public import DLMF.Mathieu.Basic.InceEquation
 
 /-!
 # Mathieu's equation and the Mathieu functions of integer order (DLMF §28.2)
@@ -26,5 +28,7 @@ in `FundamentalSolutions`, and the symmetries, parity, Wronskian and half-period
 basic solutions (§28.2(i)–(ii)) are in `Properties`, Floquet's theorem and the characteristic
 equation (§28.2(iii)–(iv)) in `Floquet`, and the normalization and parity of `ce_n`, `se_n`
 (§28.2(vi)) in `Eigenfunctions`, and the existence and enumeration of the characteristic values
-(§28.2(v)) in `SpectralExistence`.
+(§28.2(v)) in `SpectralExistence`. The parity and period of the Ince polynomials and
+paraboloidal wave functions (§28.31) are in `InceParity`; their differential equations and
+the gauge transformation to the Whittaker–Hill equation are in `InceEquation`.
 -/

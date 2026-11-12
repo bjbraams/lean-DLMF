@@ -38,6 +38,8 @@ complex normed space (several complex parameters at once).
   `Complex.iteratedDeriv_integral_of_locally_dominated` and its interval form commute every
   parameter derivative with integration. Their bounds use Mathlib’s Cauchy estimate
   `Complex.norm_iteratedDeriv_le_of_forall_mem_sphere_norm_le`.
+* `Complex.differentiableOn_intervalIntegral_of_continuousOn`: joint continuity and
+  holomorphy in the parameter imply holomorphy of finite-interval integrals.
 * `Complex.differentiableOn_of_continuousOn_of_separately` (Osgood's lemma): a continuous function
   on an open subset of `ℂ × E`, `E` finite-dimensional, that is holomorphic in each variable
   separately is jointly holomorphic;
@@ -482,6 +484,36 @@ theorem differentiableOn_intervalIntegral_of_locally_dominated [FiniteDimensiona
   have h1 := key (s := Ioc a b) Ioc_subset_uIoc
   have h2 := key (s := Ioc b a) Ioc_subset_uIoc'
   exact (h1.sub h2).congr fun x _ => rfl
+
+open scoped Interval in
+/-- A finite-interval parameter integral is holomorphic when its integrand is jointly continuous
+and holomorphic in the parameter on an open set. Local domination follows from compactness;
+the integration measure may be any measure finite on compact sets. -/
+theorem differentiableOn_intervalIntegral_of_continuousOn [FiniteDimensional ℂ E]
+    {Φ : E → ℝ → F} {U : Set E} (hU : IsOpen U) {ν : Measure ℝ}
+    [IsFiniteMeasureOnCompacts ν] (a b : ℝ)
+    (hc : ContinuousOn (fun p : E × ℝ => Φ p.1 p.2) (U ×ˢ univ))
+    (hd : ∀ t : ℝ, DifferentiableOn ℂ (Φ · t) U) :
+    DifferentiableOn ℂ (fun z => ∫ t in a..b, Φ z t ∂ν) U := by
+  have : ProperSpace E := FiniteDimensional.proper ℂ E
+  have hct (z : E) (hz : z ∈ U) : Continuous (Φ z) :=
+    hc.comp_continuous (continuous_const.prodMk continuous_id) (fun t => ⟨hz, mem_univ t⟩)
+  apply differentiableOn_intervalIntegral_of_locally_dominated (ν := ν) hU a b
+  · exact fun z hz => (hct z hz).aestronglyMeasurable
+  · exact ae_of_all _ hd
+  · intro z hz
+    obtain ⟨r, hr, hball⟩ := Metric.isOpen_iff.mp hU z hz
+    have hK : IsCompact (Metric.closedBall z (r/2) ×ˢ uIcc a b) :=
+      (isCompact_closedBall _ _).prod isCompact_uIcc
+    obtain ⟨M, hM⟩ := hK.exists_bound_of_continuousOn
+      (hc.mono (Set.prod_mono
+        ((Metric.closedBall_subset_ball (by linarith)).trans hball) (subset_univ _)))
+    refine ⟨Metric.closedBall z (r/2), Metric.closedBall_mem_nhds z (by linarith),
+      fun _ => M, integrableOn_const (μ := ν) ?_, ?_⟩
+    · exact (lt_of_le_of_lt (measure_mono uIoc_subset_uIcc)
+        ((isCompact_uIcc (a := a) (b := b)).measure_lt_top (μ := ν))).ne
+    · filter_upwards [ae_restrict_mem measurableSet_uIoc] with t ht y hy
+      exact hM (y,t) ⟨hy,uIoc_subset_uIcc ht⟩
 
 /-- Every complex parameter derivative commutes with an interval integral under local integrable
 domination. -/

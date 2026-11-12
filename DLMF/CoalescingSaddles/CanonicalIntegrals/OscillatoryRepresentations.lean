@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.CoalescingSaddles.CanonicalIntegrals.ContoursAndSymmetries
+import DLMF.CoalescingSaddles.CanonicalIntegrals.PearceyBessel
 
 /-!
 # Oscillatory representations of canonical saddle integrals
@@ -870,7 +871,7 @@ theorem cuspoidIntegral_two_zero_left {y : ℝ} (hy : y ≠ 0) :
       (exp (I * π / 8) * Complex.besselJ (-1 / 4) ((y : ℂ) ^ 2 / 8) -
         (if 0 < y then 1 else -1 : ℂ) * exp (-I * π / 8) *
           Complex.besselJ (1 / 4) ((y : ℂ) ^ 2 / 8)) := by
-  sorry
+  exact PearceySymmetryLine.value_bessel hy
 
 /-- A ray integral of the elliptic umbilic integrand at `z = 0` as an Airy ray integral:
 for `d = i e^{iθ}` and `β³ = 3/2`, `∫₀^∞ d exp(i((rd)³ + c rd)/2) dr = (i/β) P_θ(c/(2β))`. -/

@@ -36,6 +36,7 @@ public import DLMFMathlib.Analysis.Asymptotics.WatsonKernel
 public import DLMFMathlib.Analysis.Asymptotics.WatsonLog
 public import DLMFMathlib.Analysis.Asymptotics.WatsonComplexLog
 public import DLMFMathlib.Analysis.Asymptotics.WatsonComplexKernel
+public import DLMFMathlib.Analysis.Asymptotics.WatsonGaussian
 public import DLMFMathlib.Analysis.Asymptotics.WatsonRotated
 public import DLMFMathlib.Analysis.BooleSummation
 public import DLMFMathlib.Analysis.Calculus.DifferentialOperators
@@ -87,6 +88,8 @@ public import DLMFMathlib.Analysis.Distribution.IteratedLineDeriv
 public import DLMFMathlib.Analysis.EulerMaclaurin
 public import DLMFMathlib.Analysis.Fourier.HorizontalStrip
 public import DLMFMathlib.Analysis.Fourier.HyperbolicSecant
+public import DLMFMathlib.Analysis.Fourier.RadianInversion
+public import DLMFMathlib.LinearAlgebra.Matrix.Complexification
 public import DLMFMathlib.Analysis.Fourier.HyperbolicSecantLog
 public import DLMFMathlib.Analysis.Fourier.AddCircle
 public import DLMFMathlib.Analysis.Fourier.DirichletKernel
@@ -122,6 +125,8 @@ public import DLMFMathlib.Analysis.MellinParseval
 public import DLMFMathlib.Analysis.MellinCubicLaplace
 public import DLMFMathlib.Analysis.ODE.LiouvilleGreen
 public import DLMFMathlib.Analysis.ODE.LiouvilleGreenComparison
+public import DLMFMathlib.Analysis.ODE.RecessiveUniqueness
+public import DLMFMathlib.Analysis.Integral.HyperbolicComparison
 public import DLMFMathlib.Analysis.ODE.LiouvilleGreenExpansion
 public import DLMFMathlib.Analysis.ODE.LiouvilleGreenFinite
 public import DLMFMathlib.Analysis.ODE.LiouvilleGreenReal
@@ -262,12 +267,17 @@ the namespaces of the Mathlib APIs they extend. These modules do not import `DLM
 * `DLMFMathlib.Analysis.Asymptotics.WatsonComplexLog`: logarithmic Gamma moments for complex
   exponents in Watson's lemma.
 * `DLMFMathlib.Analysis.Asymptotics.WatsonComplexKernel`: general-kernel Watson expansions with
+* `DLMFMathlib.Analysis.Asymptotics.WatsonGaussian`: complex-power Gaussian Watson expansions.
   complex exponent sequences and Mellin-moment coefficients.
 * `DLMFMathlib.Analysis.Asymptotics.IntegralPowerSeries`: termwise tail integration of
   asymptotic inverse power series.
 
 * `DLMFMathlib.Analysis.Fourier.HyperbolicSecant`: Fourier transform of the hyperbolic secant.
+* `DLMFMathlib.Analysis.Fourier.RadianInversion`: Fourier inversion with radian frequencies.
+* `DLMFMathlib.LinearAlgebra.Matrix.Complexification`: trace pairing on complexified real matrices.
 * `DLMFMathlib.Analysis.Fourier.HyperbolicSecantLog`: a logarithmic hyperbolic secant integral.
+* `DLMFMathlib.Analysis.Integral.HyperbolicComparison`: the variation of a hyperbolic remainder.
+* `DLMFMathlib.Analysis.ODE.RecessiveUniqueness`: uniqueness from normalized recessive behavior.
 * `DLMFMathlib.Analysis.SpecialFunctions.Gamma.BetaHalfLine`: the complex second beta integral.
 * `DLMFMathlib.Analysis.Complex.PuncturedHalfPlane`: connected punctured right half-planes.
 * `DLMFMathlib.Analysis.Complex.RealSegmentComplement`: the complement of a real segment.

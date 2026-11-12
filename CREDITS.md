@@ -4,6 +4,71 @@ The project formalizes material from Andrews, Askey and Roy, *Special Functions*
 (1999), and the NIST Digital Library of Mathematical Functions, using Mathlib.
 Existing module copyright and authorship notices remain authoritative.
 
+## Chapters 20–36 proofs (2026-11-12)
+
+The Jacobi four-point identities reuse the project's proved addition formulas and
+entire theta numerators, together with Mathlib's analytic identity theorem. The
+Wigner product and triple-integral formulas use the project's Gegenbauer linearization,
+zero-projection factorial formula and Legendre orthogonality, with Mathlib's Jacobian
+change of variables.
+
+Matrix Laplace inversion uses Mathlib's vector-valued Fourier inversion and Haar-measure
+scaling. TauCeti supplies the Euclidean structure, trace pairing and volume comparison for
+symmetric matrices. The radian-frequency inversion and complex matrix-trace adapters
+are general results in `DLMFMathlib`; the cone extension and damping argument are local.
+
+The Mathieu orthogonality and differential-equation proofs use the project's canonical
+finite cosine/sine polynomial choices, including their zero fallback. Mathlib supplies
+trigonometric differentiation, periodic interval integrals and odd-function integration.
+The Bernoulli bound uses the project's proved sine Fourier series and positivity, together
+with Mathlib's zeta-value, trigonometric and summable-tail APIs.
+
+The Pearcey evaluation uses the project's parabolic-cylinder Laplace integral, canonical
+Kummer normalization, Kummer transformation and Bessel–Kummer bridge. Mathlib supplies
+half-line substitutions, Gamma identities and complex-power rules. All completed proofs
+and their transitive dependencies use standard axioms only. No external proof body was
+copied.
+
+## Further Chapters 13–15 proofs (2026-11-11)
+
+The Kummer transition proofs use the project's Tricomi Laplace integral, analytic saddle
+inverse, contiguous recurrence and reciprocal-Gamma identities. Its Gaussian support uses
+Mathlib's Taylor and real-axis power APIs, the project's Watson-sector Gamma integral,
+and the existing asymptotic-expansion API. The reflected Euler saddle and Gamma-ratio normalization also use the project's proved
+Kummer Euler integral, Stirling estimates and contiguous M recurrence. The complete
+estimates and parameter descents are local proofs.
+
+Dougall's series uses the project's Ferrers fractional integral, proved Legendre series,
+Temme bounds and secant partial fractions, with Mathlib's dominated series integration.
+The exterior Q addition theorem uses the project's Ferrers addition coefficients,
+Q boundary connection and Fourier reconstruction. Its continuation uses Mathlib's
+analytic identity theorem and continuity of interval integrals. The finite-dimensional
+parameter integral adapter extends the project's existing holomorphic-integral API.
+
+The Legendre uniform approximation uses the project's modified-Bessel asymptotics,
+I–K Wronskian, positive-axis integral representations and quantitative Liouville–Green
+comparison theorem. The transformed equation and recessive normalization use the proved
+Legendre equation and regularized Gauss continuation. Mathlib supplies calculus,
+improper-integral estimates and the exponential remainder bound. No external proof body
+was copied.
+
+## Chapters 13–15 proofs and support (2026-11-11)
+
+The Kummer joint-parameter expansion uses the project's Pochhammer series and Binet
+integral, with Mathlib's exponential remainder and summability APIs. The Ferrers Barnes
+integral uses the project's quadratic transformation and boundary Gauss series, Mathlib's
+Beta identities and dominated termwise integration. The triple integral uses the project's
+Legendre recurrences, mixed P–Q pairing and polynomial orthogonality, together with
+Mathlib's parity and change-of-variables results.
+
+The conical Stieltjes formula uses the project's Pfaff transformation, Gauss summation,
+Gamma reflection and holomorphic Stieltjes-transform API, together with Mathlib's analytic
+uniqueness and integration results. The retained Bessel comparison support uses the
+project's K integral, I–K Wronskian and Liouville–Green comparison theorem. The endpoint
+Legendre coefficient sum uses the project's proved secant partial fractions. General
+ODE uniqueness and hyperbolic-integral support use Mathlib's calculus and improper-integral
+APIs. No external proof body was copied.
+
 ## Airy and Bessel proofs (2026-11-10)
 
 The Airy Stieltjes formula reuses the project's Tricomi self-Stieltjes formula and its

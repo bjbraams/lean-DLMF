@@ -7,6 +7,8 @@ module -- shake: keep-all
 
 public import DLMF.Hypergeometric.EulerHalfLine
 public import DLMF.Hypergeometric.Boundary
+public import DLMF.Hypergeometric.BoundaryIntegrals
+public import DLMF.Hypergeometric.Stieltjes
 public import DLMF.Hypergeometric.AnalyticProperties
 public import DLMF.Hypergeometric.Asymptotics
 public import DLMF.Hypergeometric.Basic.SpecialValues

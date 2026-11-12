@@ -6,6 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.JacobiElliptic.Addition.ThetaAndQuotients
+import DLMF.JacobiElliptic.Addition.FourPoint
+import DLMF.JacobiElliptic.Addition.FourPointAlgebra
 
 /-!
 # Symmetric and three-point Jacobi addition formulas
@@ -507,47 +509,29 @@ private lemma jacobiSn_sq_add_jacobiCn_sq_and_of_regular {k : ℂ}
     (hk : k ∈ jacobiModulusDomain) {z : ℂ}
     (hn : IsJacobiRegular .n z k) :
     jacobiSn z k ^ 2 + jacobiCn z k ^ 2 = 1 ∧ k ^ 2 * jacobiSn z k ^ 2 + jacobiDn z k ^ 2 = 1 :=
-        by
-  have hτ := jacobiTau_im_pos hk
-  have hmod := (jacobi_inversion_k hk).1
-  have hn' : jacobiThetaFourTau (jacobiThetaArgument z k) (jacobiTau k) ≠ 0 := by
-    intro h; apply hn; simp [jacobiLetterTheta, h]
-  simp only [jacobiSn, jacobiCn, jacobiDn, jacobiPQ, jacobiGlaisher, jacobiLetterTheta,
-    reduceCtorEq, ↓reduceIte]
-  rw [jacobiModulusOfTau] at hmod
-  generalize jacobiThetaArgument z k = ζ at hn' ⊢
-  generalize jacobiTau k = τ at hτ hn' hmod ⊢
-  subst hmod
-  have h2 := jacobiThetaTwoTau_zero_ne_zero hτ
-  have h3 := jacobiThetaThreeTau_zero_ne_zero hτ
-  have h4 := jacobiThetaFourTau_zero_ne_zero hτ
-  have e3 := DLMF.Theta.jacobiTheta_sq_two_four ζ τ hτ
-  have e2 := DLMF.Theta.jacobiTheta_sq_three_four ζ τ hτ
-  simp only [DLMF.Theta.jacobiThetaTwoNullTau, DLMF.Theta.jacobiThetaThreeNullTau,
-    DLMF.Theta.jacobiThetaFourNullTau] at e2 e3
-  constructor
-  · field_simp
-    linear_combination -e3
-  · field_simp
-    linear_combination -e2
+  FourPointAddition.squares hk hn
 
-/-- **Admitted.** DLMF 22.8.19–22.8.20: if `z₁ + z₂ + z₃ + z₄ = 0` then
+/-- DLMF 22.8.19–22.8.20: if `z₁ + z₂ + z₃ + z₄ = 0` then
 `det [sn zⱼ, cn zⱼ, dn zⱼ, 1] = 0` (at points where `sn, cn, dn` are finite). -/
 @[dlmf 22.8.E19, dlmf 22.8.E20]
 theorem jacobi_det_sum_zero {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : Fin 4 → ℂ)
     (hz : z 0 + z 1 + z 2 + z 3 = 0) (hreg : ∀ j, IsJacobiRegular .n (z j) k) :
     Matrix.det (Matrix.of fun i : Fin 4 =>
       ![jacobiSn (z i) k, jacobiCn (z i) k, jacobiDn (z i) k, 1]) = 0 := by
-  sorry
+  exact (FourPointAddition.det_and_product_eq_zero hk z hz hreg).1
 
-/-- **Admitted.** DLMF 22.8.21: if `z₁ + z₂ + z₃ + z₄ = 0` then
+/-- DLMF 22.8.21: if `z₁ + z₂ + z₃ + z₄ = 0` then
 `k'² - k'²k² ∏ sn zⱼ + k² ∏ cn zⱼ - ∏ dn zⱼ = 0`. -/
 @[dlmf 22.8.E19, dlmf 22.8.E21]
 theorem jacobi_prod_sum_zero {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : Fin 4 → ℂ)
     (hz : z 0 + z 1 + z 2 + z 3 = 0) (hreg : ∀ j, IsJacobiRegular .n (z j) k) :
     jacobiComodulus k ^ 2 - jacobiComodulus k ^ 2 * k ^ 2 * ∏ j, jacobiSn (z j) k +
       k ^ 2 * ∏ j, jacobiCn (z j) k - ∏ j, jacobiDn (z j) k = 0 := by
-  sorry
+  have hc : jacobiComodulus k ^ 2 = 1 - k ^ 2 := by
+    rw [jacobiComodulus, one_div]
+    exact cpow_ofNat_inv_pow (1 - k ^ 2) 2
+  rw [hc]
+  exact (FourPointAddition.det_and_product_eq_zero hk z hz hreg).2
 
 /-- **Admitted, corrected.** DLMF 22.8.22–22.8.23 with the third column corrected to `sn`: if
 `z₁ + z₂ + z₃ + z₄ = 2K` then `det [sn zⱼ cn zⱼ, cn zⱼ dn zⱼ, sn zⱼ, dn zⱼ] = 0`.

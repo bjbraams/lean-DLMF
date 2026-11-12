@@ -18,8 +18,8 @@
   leftmargin=1.5em, labelindent=0pt, itemsep=0.3ex, topsep=0.3ex, parsep=0.3ex]\setlength{\parindent}{0pt}\RaggedRight}{\end{description}}
 
 % entry counts
-\newcommand{\NumA}{149}
-\newcommand{\NumB}{28}
+\newcommand{\NumA}{151}
+\newcommand{\NumB}{29}
 
 \begin{document}
 
@@ -27,7 +27,7 @@
   NIST Digital Library of Mathematical Functions\\[0.4ex]
   \large found in the Lean~4 formalization \texttt{lean-DLMF}}
 \author{Bastiaan J. Braams}
-\date{2026-11-09}
+\date{2026-11-10}
 \maketitle
 
 \begin{abstract}
@@ -801,6 +801,45 @@ Found by the acquisition agents on 2026-10-27 and confirmed by the coordinator f
 \end{fields}
 
 \subsection{Chapter 14 (Legendre and related functions)}
+
+\entry{\dlink{14.2\#iii}{\S14.2(iii)}, recessive solutions}
+\begin{fields}
+\item[Printed] when $\Re\mu\geq0$, $\FerrersP^{-\mu}_{\nu}(x)$ and $\FerrersP^{-\mu}_{\nu}(-x)$ are
+  recessive at $x=1$ and $x=-1$, respectively; when $\Re\mu\geq0$ and $\Re\nu\geq-\tfrac12$,
+  $\LegendreP^{-\mu}_{\nu}(x)$ and $\LegendreQ^{\mu}_{\nu}(x)$ are recessive at $x=1$ and
+  $x=\infty$.
+\item[Correct] recessiveness at $x=\pm1$ needs $\Re\mu>0$ or $\mu=0$. For $\Re\mu=0$, $\mu\neq0$,
+  both exponents $\pm\tfrac12\mu$ at $x=\pm1$ have real part $0$, and no solution is recessive
+  there.
+\item[Evidence] $\nu=0$, $\mu=\iu$: $\FerrersP^{\mp\iu}_{0}(x)=R^{\mp\iu/2}/\GammaF(1\pm\iu)$
+  with $R=(1+x)/(1-x)$, so $\FerrersP^{-\iu}_{0}(x)/\FerrersP^{\iu}_{0}(x)$ has modulus $1$ on
+  $(-1,1)$.
+\item[Lean] none; \lean{associatedPQ_independent} (\file{DLMF/Legendre/LocalTheory.lean}) proves
+  the independence, and the recessiveness claim is not formalized in \texttt{lean-DLMF}.
+\item[Found] 2026-11-10, in the Tau~Ceti roadmap work.
+\end{fields}
+
+\entry{\deq{14.7.21}}
+\begin{fields}
+\item[Printed] for $-1<x<1$ and $|h|>1$,
+  \begin{equation*}
+    \sum_{n=0}^{\infty}\FerrersP_{n}\left(x\right)h^{-n-1}=\left(1-2xh+h^{2}\right)^{-1/2};
+  \end{equation*}
+  likewise for $x>1$, and, by \S14.21(iii), for $\LegendreP_n(z)$ with
+  $|h|>\max|z\pm(z^2-1)^{1/2}|$.
+\item[Correct]
+  \begin{equation*}
+    \sum_{n=0}^{\infty}\FerrersP_{n}\left(x\right)h^{-n-1}
+    =h^{-1}\left(1-2xh^{-1}+h^{-2}\right)^{-1/2},
+  \end{equation*}
+  which equals the printed right side for $h>1$ and is its negative for $h<-1$. In the complex
+  form the principal power is the continuous one: with $w=h^{-1}$ the base is
+  $(1-w/a)(1-w/b)$, $a,b=z\pm(z^2-1)^{1/2}$, and each factor has positive real part.
+\item[Evidence] $(x,h)=(0,-2)$: the sum is $-5^{-1/2}=-0.447213595500$, the printed right side
+  $+0.447213595500$; $(x,h)=(0.3,-2.5)$: the sum is $-0.338061701891$.
+\item[Lean] none; \texttt{lean-DLMF} formalizes \deq{14.7.19} but not \deq{14.7.21}.
+\item[Found] 2026-11-10, in the Tau~Ceti roadmap work.
+\end{fields}
 
 \entry{\deq{14.14.1}}
 \begin{fields}
@@ -2783,6 +2822,20 @@ as tacit, or a notation used outside its stated domain.
   does not state.
 \item[Lean] \lean{whittakerW_integral_besselK}
   (\file{DLMF/Confluent/IntegralRepresentations/BarnesAndConnections.lean}), proved.
+\end{fields}
+
+\entry{\deq{14.3.18}, \dlink{14.21\#iii}{\S14.21(iii)}}
+\begin{fields}
+\item[Note] \S14.21(iii) lists \deq{14.3.18} among the representations that extend to
+  $z\in\CC\setminus(-\infty,1]$, without naming a branch for the function
+  $\mathbf{F}(\tfrac12\mu-\tfrac12\nu,\tfrac12\mu-\tfrac12\nu+\tfrac12;\mu+1;1-z^{-2})$. With
+  the principal branch it holds only for $\Re z>0$: at $(\nu,\mu)=(0.3,0.4)$,
+  $z=-0.5+0.5\iu$, $\LegendreP^{-\mu}_{\nu}(z)=0.813110483704+0.570253092087\iu$ against
+  $0.810056501843+0.388355814619\iu$ on the right (with
+  $(z^2-1)^{\mu/2}=(z-1)^{\mu/2}(z+1)^{\mu/2}$). The argument $1-z^{-2}$ crosses the cut
+  $[1,\infty)$ on the imaginary axis.
+\item[Lean] \lean{associated_hypergeometric_18} (\file{DLMF/Legendre/Hypergeometric.lean}),
+  proved with the hypothesis $0<\Re z$.
 \end{fields}
 
 \entry{\deq{14.12.4}}

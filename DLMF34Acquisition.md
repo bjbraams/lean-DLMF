@@ -128,10 +128,10 @@ declarations:
 - [34.3.E16](https://dlmf.nist.gov/34.3.E16): [`DLMF.WignerSymbols.wigner3j_orthogonality_m`](DLMF/WignerSymbols/ThreeJ.lean#L1197) (admitted)
 - [34.3.E17](https://dlmf.nist.gov/34.3.E17): [`DLMF.WignerSymbols.wigner3j_orthogonality_j`](DLMF/WignerSymbols/ThreeJ.lean#L1206) (admitted)
 - [34.3.E18](https://dlmf.nist.gov/34.3.E18): [`DLMF.WignerSymbols.wigner3j_sum_sq`](DLMF/WignerSymbols/ThreeJ.lean#L1215) (admitted)
-- [34.3.E19](https://dlmf.nist.gov/34.3.E19): [`DLMF.WignerSymbols.legendrePolynomialP_mul_legendrePolynomialP`](DLMF/WignerSymbols/ThreeJLegendre.lean#L42) (admitted). Stated for all complex `x` (polynomial identity); stronger than DLMF.
-- [34.3.E20](https://dlmf.nist.gov/34.3.E20): [`DLMF.WignerSymbols.sphericalHarmonic_mul_sphericalHarmonic`](DLMF/WignerSymbols/ThreeJLegendre.lean#L51) (admitted)
-- [34.3.E21](https://dlmf.nist.gov/34.3.E21): [`DLMF.WignerSymbols.integral_legendrePolynomialP_mul_mul`](DLMF/WignerSymbols/ThreeJLegendre.lean#L62) (admitted)
-- [34.3.E22](https://dlmf.nist.gov/34.3.E22): [`DLMF.WignerSymbols.integral_sphericalHarmonic_mul_mul`](DLMF/WignerSymbols/ThreeJLegendre.lean#L71) (admitted)
+- [34.3.E19](https://dlmf.nist.gov/34.3.E19): [`DLMF.WignerSymbols.legendrePolynomialP_mul_legendrePolynomialP`](DLMF/WignerSymbols/ThreeJLegendre.lean#L43) (proved). Stated for all complex `x` (polynomial identity); stronger than DLMF.
+- [34.3.E20](https://dlmf.nist.gov/34.3.E20): [`DLMF.WignerSymbols.sphericalHarmonic_mul_sphericalHarmonic`](DLMF/WignerSymbols/ThreeJLegendre.lean#L52) (admitted)
+- [34.3.E21](https://dlmf.nist.gov/34.3.E21): [`DLMF.WignerSymbols.integral_legendrePolynomialP_mul_mul`](DLMF/WignerSymbols/ThreeJLegendre.lean#L63) (proved)
+- [34.3.E22](https://dlmf.nist.gov/34.3.E22): [`DLMF.WignerSymbols.integral_sphericalHarmonic_mul_mul`](DLMF/WignerSymbols/ThreeJLegendre.lean#L72) (admitted)
 - [34.3.v](https://dlmf.nist.gov/34.3.v): no statement (references only).
 - [34.3.vi](https://dlmf.nist.gov/34.3.vi): no statement (references only).
 

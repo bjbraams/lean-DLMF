@@ -570,32 +570,32 @@ Source corrections and checks (scripts in the agent's scratch directory `acq28b/
 
 ## [§28.31 Equations of Whittaker–Hill and Ince](https://dlmf.nist.gov/28.31)
 
-- [28.31.ii](https://dlmf.nist.gov/28.31.ii): [`DLMF.Mathieu.inceC_spec`](DLMF/Mathieu/Hill/Ince.lean#L754) (admitted); [`DLMF.Mathieu.inceS_spec`](DLMF/Mathieu/Hill/Ince.lean#L772) (admitted). Ince polynomials exist for nonnegative integer p, eigenvalues real, distinct, ordered by zeros (`inceC_spec`, `inceS_spec`).
-- [28.31.iii](https://dlmf.nist.gov/28.31.iii): [`DLMF.Mathieu.paraboloidal_asymptotic_pos`](DLMF/Mathieu/Hill/Ince.lean#L1018) (admitted); [`DLMF.Mathieu.paraboloidal_asymptotic_neg`](DLMF/Mathieu/Hill/Ince.lean#L1050) (admitted). Asymptotic behaviour for ξ > 0 (z = iy → ±i∞) and, **corrected**, for -ξ (z = ½π + iy): factors exp(¼ξ cos 2z)(sin z)^p and exp(-¼ξ cos 2z)(sin z)^{-p-2} instead of DLMF's (cos z)^{-p-2} and (cos z)^p; "other periodic solutions" taken as even or odd periodic solutions not proportional to hc, hs.
+- [28.31.ii](https://dlmf.nist.gov/28.31.ii): [`DLMF.Mathieu.inceC_spec`](DLMF/Mathieu/Hill/Ince.lean#L675) (admitted); [`DLMF.Mathieu.inceS_spec`](DLMF/Mathieu/Hill/Ince.lean#L693) (admitted). Ince polynomials exist for nonnegative integer p, eigenvalues real, distinct, ordered by zeros (`inceC_spec`, `inceS_spec`).
+- [28.31.iii](https://dlmf.nist.gov/28.31.iii): [`DLMF.Mathieu.paraboloidal_asymptotic_pos`](DLMF/Mathieu/Hill/Ince.lean#L868) (admitted); [`DLMF.Mathieu.paraboloidal_asymptotic_neg`](DLMF/Mathieu/Hill/Ince.lean#L900) (admitted). Asymptotic behaviour for ξ > 0 (z = iy → ±i∞) and, **corrected**, for -ξ (z = ½π + iy): factors exp(¼ξ cos 2z)(sin z)^p and exp(-¼ξ cos 2z)(sin z)^{-p-2} instead of DLMF's (cos z)^{-p-2} and (cos z)^p; "other periodic solutions" taken as even or odd periodic solutions not proportional to hc, hs.
 - [28.31.E1](https://dlmf.nist.gov/28.31.E1): [`DLMF.Mathieu.IsWhittakerHillSolution`](DLMF/Mathieu/Hill/Basic.lean#L240) (definition). `IsWhittakerHillSolution` (definition, entire W, complex parameters).
-- [28.31.E2](https://dlmf.nist.gov/28.31.E2): [`DLMF.Mathieu.isWhittakerHillSolution_iff_isInceSolution`](DLMF/Mathieu/Hill/Ince.lean#L102) (proved). Proved, for all complex parameters with ξ² = -4k²c² (DLMF: k² < 0).
+- [28.31.E2](https://dlmf.nist.gov/28.31.E2): [`DLMF.Mathieu.isWhittakerHillSolution_iff_isInceSolution`](DLMF/Mathieu/Basic/InceEquation.lean#L84) (proved). Proved, for all complex parameters with ξ² = -4k²c² (DLMF: k² < 0).
 - [28.31.E3](https://dlmf.nist.gov/28.31.E3): [`DLMF.Mathieu.IsInceSolution`](DLMF/Mathieu/Hill/Basic.lean#L248) (definition). `IsInceSolution` (definition).
-- [28.31.E4](https://dlmf.nist.gov/28.31.E4): [`DLMF.Mathieu.isInceSolution_cos_even_iff`](DLMF/Mathieu/Hill/Ince.lean#L394) (proved); [`DLMF.Mathieu.isInceSolution_cos_odd_iff`](DLMF/Mathieu/Hill/Ince.lean#L500) (proved). Fourier-series solutions with `IsEntireFourierCoeff` coefficients: solution ↔ recurrences (DLMF: "formal" solutions).
-- [28.31.E5](https://dlmf.nist.gov/28.31.E5): [`DLMF.Mathieu.isInceSolution_sin_odd_iff`](DLMF/Mathieu/Hill/Ince.lean#L575) (proved); [`DLMF.Mathieu.isInceSolution_sin_even_iff`](DLMF/Mathieu/Hill/Ince.lean#L655) (proved).
-- [28.31.E6](https://dlmf.nist.gov/28.31.E6): [`DLMF.Mathieu.isInceSolution_cos_even_iff`](DLMF/Mathieu/Hill/Ince.lean#L394) (proved).
-- [28.31.E7](https://dlmf.nist.gov/28.31.E7): [`DLMF.Mathieu.isInceSolution_cos_odd_iff`](DLMF/Mathieu/Hill/Ince.lean#L500) (proved).
-- [28.31.E8](https://dlmf.nist.gov/28.31.E8): [`DLMF.Mathieu.isInceSolution_sin_odd_iff`](DLMF/Mathieu/Hill/Ince.lean#L575) (proved).
-- [28.31.E9](https://dlmf.nist.gov/28.31.E9): [`DLMF.Mathieu.isInceSolution_sin_even_iff`](DLMF/Mathieu/Hill/Ince.lean#L655) (proved).
-- [28.31.E10](https://dlmf.nist.gov/28.31.E10): [`DLMF.Mathieu.inceC`](DLMF/Mathieu/Hill/Basic.lean#L291) (definition); [`DLMF.Mathieu.inceC_spec`](DLMF/Mathieu/Hill/Ince.lean#L754) (admitted). `inceC` (C_p^m): definition by choice (unique normalized cosine Ince polynomial for η = a_p^m(ξ), `inceA` chosen by zero count, real ξ).
-- [28.31.E11](https://dlmf.nist.gov/28.31.E11): [`DLMF.Mathieu.inceS`](DLMF/Mathieu/Hill/Basic.lean#L301) (definition); [`DLMF.Mathieu.inceS_spec`](DLMF/Mathieu/Hill/Ince.lean#L772) (admitted). `inceS` (S_p^m), `inceB`: as for C.
-- [28.31.E12](https://dlmf.nist.gov/28.31.E12): [`DLMF.Mathieu.inceC_spec`](DLMF/Mathieu/Hill/Ince.lean#L754) (admitted); [`DLMF.Mathieu.inceS_spec`](DLMF/Mathieu/Hill/Ince.lean#L772) (admitted).
-- [28.31.E13](https://dlmf.nist.gov/28.31.E13): [`DLMF.Mathieu.ince_tendsto_xi_zero`](DLMF/Mathieu/Hill/Ince.lean#L791) (admitted).
-- [28.31.E14](https://dlmf.nist.gov/28.31.E14): [`DLMF.Mathieu.ince_tendsto_mathieu`](DLMF/Mathieu/Hill/Ince.lean#L803) (admitted). Along sequences p_j → ∞, ξ_j → 0, p_j ξ_j → 2q (real q), using ce_m, se_m of DLMF.Mathieu.Basic.
-- [28.31.E15](https://dlmf.nist.gov/28.31.E15): [`DLMF.Mathieu.ince_tendsto_mathieu`](DLMF/Mathieu/Hill/Ince.lean#L803) (admitted).
+- [28.31.E4](https://dlmf.nist.gov/28.31.E4): [`DLMF.Mathieu.isInceSolution_cos_even_iff`](DLMF/Mathieu/Hill/Ince.lean#L315) (proved); [`DLMF.Mathieu.isInceSolution_cos_odd_iff`](DLMF/Mathieu/Hill/Ince.lean#L421) (proved). Fourier-series solutions with `IsEntireFourierCoeff` coefficients: solution ↔ recurrences (DLMF: "formal" solutions).
+- [28.31.E5](https://dlmf.nist.gov/28.31.E5): [`DLMF.Mathieu.isInceSolution_sin_odd_iff`](DLMF/Mathieu/Hill/Ince.lean#L496) (proved); [`DLMF.Mathieu.isInceSolution_sin_even_iff`](DLMF/Mathieu/Hill/Ince.lean#L576) (proved).
+- [28.31.E6](https://dlmf.nist.gov/28.31.E6): [`DLMF.Mathieu.isInceSolution_cos_even_iff`](DLMF/Mathieu/Hill/Ince.lean#L315) (proved).
+- [28.31.E7](https://dlmf.nist.gov/28.31.E7): [`DLMF.Mathieu.isInceSolution_cos_odd_iff`](DLMF/Mathieu/Hill/Ince.lean#L421) (proved).
+- [28.31.E8](https://dlmf.nist.gov/28.31.E8): [`DLMF.Mathieu.isInceSolution_sin_odd_iff`](DLMF/Mathieu/Hill/Ince.lean#L496) (proved).
+- [28.31.E9](https://dlmf.nist.gov/28.31.E9): [`DLMF.Mathieu.isInceSolution_sin_even_iff`](DLMF/Mathieu/Hill/Ince.lean#L576) (proved).
+- [28.31.E10](https://dlmf.nist.gov/28.31.E10): [`DLMF.Mathieu.inceC`](DLMF/Mathieu/Hill/Basic.lean#L291) (definition); [`DLMF.Mathieu.inceC_spec`](DLMF/Mathieu/Hill/Ince.lean#L675) (admitted). `inceC` (C_p^m): definition by choice (unique normalized cosine Ince polynomial for η = a_p^m(ξ), `inceA` chosen by zero count, real ξ).
+- [28.31.E11](https://dlmf.nist.gov/28.31.E11): [`DLMF.Mathieu.inceS`](DLMF/Mathieu/Hill/Basic.lean#L301) (definition); [`DLMF.Mathieu.inceS_spec`](DLMF/Mathieu/Hill/Ince.lean#L693) (admitted). `inceS` (S_p^m), `inceB`: as for C.
+- [28.31.E12](https://dlmf.nist.gov/28.31.E12): [`DLMF.Mathieu.inceC_spec`](DLMF/Mathieu/Hill/Ince.lean#L675) (admitted); [`DLMF.Mathieu.inceS_spec`](DLMF/Mathieu/Hill/Ince.lean#L693) (admitted).
+- [28.31.E13](https://dlmf.nist.gov/28.31.E13): [`DLMF.Mathieu.ince_tendsto_xi_zero`](DLMF/Mathieu/Hill/Ince.lean#L712) (admitted).
+- [28.31.E14](https://dlmf.nist.gov/28.31.E14): [`DLMF.Mathieu.ince_tendsto_mathieu`](DLMF/Mathieu/Hill/Ince.lean#L724) (admitted). Along sequences p_j → ∞, ξ_j → 0, p_j ξ_j → 2q (real q), using ce_m, se_m of DLMF.Mathieu.Basic.
+- [28.31.E15](https://dlmf.nist.gov/28.31.E15): [`DLMF.Mathieu.ince_tendsto_mathieu`](DLMF/Mathieu/Hill/Ince.lean#L724) (admitted).
 - [28.31.E16](https://dlmf.nist.gov/28.31.E16): [`DLMF.Mathieu.paraboloidalHc`](DLMF/Mathieu/Hill/Basic.lean#L310) (definition). `paraboloidalHc` (definition).
 - [28.31.E17](https://dlmf.nist.gov/28.31.E17): [`DLMF.Mathieu.paraboloidalHs`](DLMF/Mathieu/Hill/Basic.lean#L316) (definition). `paraboloidalHs` (definition).
-- [28.31.E18](https://dlmf.nist.gov/28.31.E18): [`DLMF.Mathieu.paraboloidal_isWhittakerHillSolution`](DLMF/Mathieu/Hill/Ince.lean#L818) (proved from admissions). As the Whittaker–Hill equation with k = iξ/2, c = 1; proved from 28.31.2 and the admitted Ince-polynomial specifications.
-- [28.31.E19](https://dlmf.nist.gov/28.31.E19): [`DLMF.Mathieu.paraboloidalHc_neg_xi`](DLMF/Mathieu/Hill/Ince.lean#L845) (admitted). Checked numerically (p ≤ 6, ξ = 0.8).
-- [28.31.E20](https://dlmf.nist.gov/28.31.E20): [`DLMF.Mathieu.paraboloidalHs_neg_xi`](DLMF/Mathieu/Hill/Ince.lean#L856) (admitted). Checked numerically.
-- [28.31.E21](https://dlmf.nist.gov/28.31.E21): [`DLMF.Mathieu.integral_paraboloidal_orthogonal`](DLMF/Mathieu/Hill/Ince.lean#L933) (proved from admissions).
-- [28.31.E22](https://dlmf.nist.gov/28.31.E22): [`DLMF.Mathieu.paraboloidalHc_double_orthogonal`](DLMF/Mathieu/Hill/Ince.lean#L977) (admitted). u-integral along u₀ + it, t ≥ 0 (u₀ = 0 for ξ > 0, ½π for ξ < 0, as DLMF); the factor i of du dropped.
-- [28.31.E23](https://dlmf.nist.gov/28.31.E23): [`DLMF.Mathieu.paraboloidalHs_double_orthogonal`](DLMF/Mathieu/Hill/Ince.lean#L993) (admitted).
-- [28.31.E24](https://dlmf.nist.gov/28.31.E24): [`DLMF.Mathieu.paraboloidalHc_Hs_double_orthogonal`](DLMF/Mathieu/Hill/Ince.lean#L1006) (admitted).
+- [28.31.E18](https://dlmf.nist.gov/28.31.E18): [`DLMF.Mathieu.paraboloidal_isWhittakerHillSolution`](DLMF/Mathieu/Basic/InceEquation.lean#L142) (proved). As the Whittaker–Hill equation with k = iξ/2, c = 1; proved from 28.31.2 and the canonical choices, including their zero fallback.
+- [28.31.E19](https://dlmf.nist.gov/28.31.E19): [`DLMF.Mathieu.paraboloidalHc_neg_xi`](DLMF/Mathieu/Hill/Ince.lean#L739) (admitted). Checked numerically (p ≤ 6, ξ = 0.8).
+- [28.31.E20](https://dlmf.nist.gov/28.31.E20): [`DLMF.Mathieu.paraboloidalHs_neg_xi`](DLMF/Mathieu/Hill/Ince.lean#L750) (admitted). Checked numerically.
+- [28.31.E21](https://dlmf.nist.gov/28.31.E21): [`DLMF.Mathieu.integral_paraboloidal_orthogonal`](DLMF/Mathieu/Hill/Ince.lean#L798) (proved from admissions).
+- [28.31.E22](https://dlmf.nist.gov/28.31.E22): [`DLMF.Mathieu.paraboloidalHc_double_orthogonal`](DLMF/Mathieu/Hill/Ince.lean#L826) (admitted). u-integral along u₀ + it, t ≥ 0 (u₀ = 0 for ξ > 0, ½π for ξ < 0, as DLMF); the factor i of du dropped.
+- [28.31.E23](https://dlmf.nist.gov/28.31.E23): [`DLMF.Mathieu.paraboloidalHs_double_orthogonal`](DLMF/Mathieu/Hill/Ince.lean#L842) (admitted).
+- [28.31.E24](https://dlmf.nist.gov/28.31.E24): [`DLMF.Mathieu.paraboloidalHc_Hs_double_orthogonal`](DLMF/Mathieu/Hill/Ince.lean#L855) (proved); [`DLMF.Mathieu.paraboloidalHc_Hs_double_orthogonal'`](DLMF/Mathieu/Hill/ParaboloidalOrthogonality.lean#L74) (proved).
 
 ## Prose, informal and excluded items (part B)
 

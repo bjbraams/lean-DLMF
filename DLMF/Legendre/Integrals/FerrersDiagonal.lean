@@ -12,7 +12,7 @@ public import DLMF.Legendre.Integrals.FerrersGreen
 
 This file evaluates the integrals over `(-1, 1)` of products of Ferrers functions of order zero
 (DLMF 14.17.10–14.17.15), the integral of `𝖯^m_l 𝖰^m_n` for integer parameters
-(DLMF 14.17.16) and a triple integral (DLMF 14.17.17). The diagonal integrals 14.17.11, 13, 15
+(DLMF 14.17.16). The diagonal integrals 14.17.11, 13, 15
 follow from the off-diagonal ones by dominated convergence, using bounds
 `𝖯_λ, 𝖰_λ = O((1-x²)^{-1/4})` that are uniform for `λ` near `ν`; these come from the
 zero-balanced expansion DLMF 15.8.10 at `m = 0`, with Cauchy's estimate in the third parameter.
@@ -30,7 +30,6 @@ Helper names live in the namespaces `UniformBound` and `FerrersGreen`.
 * `FerrersGreen.green_mu`, `FerrersGreen.integral_green_B`: Green's identity for two solutions of
   the same order.
 * `ferrersPQ_nat_integral`: DLMF 14.17.16.
-* `ferrers_triple_integral`: DLMF 14.17.17.
 -/
 
 @[expose] public noncomputable section
@@ -1050,14 +1049,6 @@ theorem ferrersPQ_nat_integral (l m n : ℕ) (h : l ≠ n) (hl : m ≤ l) :
     ring
   · exact FerrersGreen.PQ_nat_pos l m n hm h hl
 
-/-- DLMF 14.17.17: for positive integers `l, m, n` such that either `|m-n| < l < m+n` or `l+m+n` is
-even, `∫₀^π 𝖰_l(cos θ) 𝖯_m(cos θ) 𝖯_n(cos θ) sin θ dθ = 0`. -/
-@[dlmf 14.17.E17]
-theorem ferrers_triple_integral (l m n : ℕ) (hl : 0 < l) (hm : 0 < m) (hn : 0 < n)
-    (htri : (|((m:ℤ)-n)| < l ∧ l < m+n) ∨ Even (l+m+n)) :
-    (∫ θ : ℝ in 0..π, ferrersQ l 0 (Real.cos θ)*ferrersP m 0 (Real.cos θ)*ferrersP n 0
-        (Real.cos θ)*Real.sin θ)=0 := by
-  sorry
 
 end DLMF.Legendre
 end

@@ -25,6 +25,7 @@ the Weierstrass approximation theorem. This gives DLMF 14.18.8 in `DLMF.Legendre
 * `ZonalSeries.eqOn_zero_of_integral_mul_legendrePolynomialP_eq_zero`: a function continuous on
   `(-1,1)`, integrable on `[-1,1]`, with vanishing Legendre moments vanishes on `(-1,1)`.
 * `ZonalSeries.hasSum_legendreCoeff_mul`: the Legendre series of `𝖯_ν`, `ν ∉ ℤ`.
+* `ZonalSeries.exists_summable_bound`: a summable majorant for the expansion terms.
 -/
 
 @[expose] public section
@@ -370,6 +371,20 @@ theorem hasSum_legendreCoeff_mul {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) {y : �
 theorem legendrePolynomialP_neg (n : ℕ) (z : ℂ) :
     legendrePolynomialP n (-z) = (-1) ^ n * legendrePolynomialP n z := by
   simpa [legendrePolynomialP] using jacobi_reflection (α := 0) (β := 0) (by simp) (by simp) n z
+
+/-- A summable coefficient majorant controls the Legendre expansion by
+`(1-x²)^(-1/2)` on the open unit interval. -/
+theorem exists_summable_bound (ν : ℂ) :
+    ∃ u : ℕ → ℝ, Summable u ∧ (∀ n, 0 ≤ u n) ∧
+      ∀ n, ∀ x ∈ Ioo (-1:ℝ) 1,
+        ‖legendreCoeff ν n * legendrePolynomialP n x‖ ≤ u n * (1-x^2)^(-1/2:ℝ) := by
+  refine ⟨fun n => ‖legendreCoeff ν n‖ * temmeMajorant n,
+    summable_norm_legendreCoeff_mul ν,
+    fun n => mul_nonneg (norm_nonneg _) (temmeMajorant_nonneg n), ?_⟩
+  intro n x hx
+  have h0 : 0 ≤ 1-x^2 := by nlinarith [hx.1,hx.2]
+  rw [norm_mul,rpow_neg_half_eq h0,mul_assoc,mul_one_div]
+  exact mul_le_mul_of_nonneg_left (norm_legendrePolynomialP_le_div_sqrt n hx) (norm_nonneg _)
 
 end ZonalSeries
 

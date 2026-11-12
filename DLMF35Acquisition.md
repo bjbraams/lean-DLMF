@@ -148,10 +148,10 @@ All were checked before acquisition; `m = 2` checks use the zonal polynomials co
 
 ## [§35.2 Laplace Transform](https://dlmf.nist.gov/35.2)
 
-- [35.2](https://dlmf.nist.gov/35.2): [`DLMF.MatrixArgument.matrixLaplaceTransform_integrableOn_analyticOnNhd`](DLMF/MatrixArgument/GammaBeta/LaplaceTransform.lean#L122) (proved). Paragraph 35.2.Px1.p2 (absolute convergence for ℜ𝐙 > X₀ and holomorphy in the entries `z_{j,k}`); measurability of `f` added.
+- [35.2](https://dlmf.nist.gov/35.2): [`DLMF.MatrixArgument.matrixLaplaceTransform_integrableOn_analyticOnNhd`](DLMF/MatrixArgument/GammaBeta/LaplaceTransform.lean#L128) (proved). Paragraph 35.2.Px1.p2 (absolute convergence for ℜ𝐙 > X₀ and holomorphy in the entries `z_{j,k}`); measurability of `f` added.
 - [35.2.E1](https://dlmf.nist.gov/35.2.E1): [`DLMF.MatrixArgument.matrixLaplaceTransform`](DLMF/MatrixArgument/Basic.lean#L326) (definition)
-- [35.2.E2](https://dlmf.nist.gov/35.2.E2): [`DLMF.MatrixArgument.matrixLaplaceTransform_inversion`](DLMF/MatrixArgument/GammaBeta/LaplaceTransform.lean#L189) (admitted). **Corrected**: DLMF omits the factor `2^{m(m-1)/2}` (Fourier inversion on `𝓢` with `tr(VX)` doubling the off-diagonal frequencies; checked with a Gaussian). Continuity of `f` added; DLMF's limit hypothesis as `U → ∞` dropped (not needed).
-- [35.2.E3](https://dlmf.nist.gov/35.2.E3): [`DLMF.MatrixArgument.matrixConvolution`](DLMF/MatrixArgument/Basic.lean#L335) (definition); [`DLMF.MatrixArgument.matrixLaplaceTransform_matrixConvolution`](DLMF/MatrixArgument/GammaBeta/LaplaceTransform.lean#L220) (proved). The convolution theorem of 35.2.Px3.p1.
+- [35.2.E2](https://dlmf.nist.gov/35.2.E2): [`DLMF.MatrixArgument.matrixLaplaceTransform_inversion`](DLMF/MatrixArgument/GammaBeta/LaplaceTransform.lean#L258) (proved). **Corrected**: DLMF omits the factor `2^{m(m-1)/2}` (Fourier inversion on `𝓢` with `tr(VX)` doubling the off-diagonal frequencies; checked with a Gaussian). Continuity of `f` added; DLMF's limit hypothesis as `U → ∞` dropped (not needed).
+- [35.2.E3](https://dlmf.nist.gov/35.2.E3): [`DLMF.MatrixArgument.matrixConvolution`](DLMF/MatrixArgument/Basic.lean#L335) (definition); [`DLMF.MatrixArgument.matrixLaplaceTransform_matrixConvolution`](DLMF/MatrixArgument/GammaBeta/LaplaceTransform.lean#L375) (proved). The convolution theorem of 35.2.Px3.p1.
 
 ## [§35.3 Multivariate Gamma and Beta Functions](https://dlmf.nist.gov/35.3)
 

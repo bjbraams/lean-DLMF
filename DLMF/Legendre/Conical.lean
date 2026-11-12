@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Legendre.Basic.Associated
+public import DLMF.Legendre.Conical.Stieltjes
 public import DLMF.Legendre.Toroidal
 public import DLMF.Legendre.IntegralRepresentations.Ferrers
 
@@ -678,7 +679,7 @@ P_{-1/2+iτ}(t)/(x+t) dt` converges to `P_{-1/2+iτ}(x)`. -/
 theorem conical_stieltjes_integral (τ : ℝ) {x : ℝ} (hx : 1 < x) :
     HasIntegralAtTop (fun t : ℝ => Real.cosh (τ*π)/π*associatedP (-1/2+I*τ) 0 t/(x+t)) 1
         (associatedP (-1/2+I*τ) 0 x) := by
-  sorry
+  exact ConicalStieltjes.hasIntegralAtTop τ hx
 
 /-- DLMF 14.20.14: for `x, y > 1`, the improper integral `∫₀^∞ π τ tanh(τπ)/cosh(τπ) P_{-1/2+iτ}(x)
 P_{-1/2+iτ}(y) dτ` converges to `1/(x+y)`. -/

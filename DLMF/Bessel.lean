@@ -18,6 +18,8 @@ public import DLMF.Bessel.LaplaceTransform
 public import DLMF.Bessel.LargeOrder
 public import DLMF.Bessel.Lommel
 public import DLMF.Bessel.Modified
+public import DLMF.Bessel.ModifiedComparison
+public import DLMF.Bessel.ModifiedComparison.Asymptotics
 public import DLMF.Bessel.NeumannSeries
 public import DLMF.Bessel.ProductIntegral
 public import DLMF.Bessel.Schlafli

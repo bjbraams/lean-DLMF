@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.WignerSymbols.Basic
+import DLMF.WignerSymbols.LegendreProducts
 public import DLMF.Legendre.Harmonics
 
 /-!
@@ -30,7 +31,7 @@ spherical harmonics `Y_{l,m}` of §14.30 are `DLMF.Legendre.sphericalHarmonic` (
 `m = -l, …, l`; the summands vanish outside the triangle conditions.
 -/
 
-@[expose] public noncomputable section
+public noncomputable section
 
 open Finset MeasureTheory intervalIntegral
 open scoped Real
@@ -46,7 +47,7 @@ theorem legendrePolynomialP_mul_legendrePolynomialP (l₁ l₂ : ℕ) (x : ℂ) 
     legendrePolynomialP l₁ x * legendrePolynomialP l₂ x =
       ∑ l ∈ range (l₁ + l₂ + 1),
         ((2 * (l : ℝ) + 1) * wigner3j l₁ l₂ l 0 0 0 ^ 2 : ℝ) * legendrePolynomialP l x := by
-  sorry
+  exact LegendreProducts.linearization l₁ l₂ x
 
 /-- DLMF 34.3.20: `Y_{l₁,m₁} Y_{l₂,m₂}`
 `= ∑_{l,m} ((2l₁+1)(2l₂+1)(2l+1)/(4π))^{1/2} (l₁ l₂ l; m₁ m₂ m) conj(Y_{l,m}) (l₁ l₂ l; 0 0 0)`. -/
@@ -66,7 +67,7 @@ theorem integral_legendrePolynomialP_mul_mul (l₁ l₂ l₃ : ℕ) :
     ∫ θ in (0 : ℝ)..π, legendrePolynomialP l₁ (Real.cos θ) * legendrePolynomialP l₂ (Real.cos θ) *
         legendrePolynomialP l₃ (Real.cos θ) * (Real.sin θ : ℂ) =
       ((2 * wigner3j l₁ l₂ l₃ 0 0 0 ^ 2 : ℝ) : ℂ) := by
-  sorry
+  exact LegendreProducts.triple_integral_cos l₁ l₂ l₃
 
 /-- DLMF 34.3.22: Gaunt's integral
 `∫₀^{2π} ∫₀^π Y_{l₁,m₁} Y_{l₂,m₂} Y_{l₃,m₃} sin θ dθ dφ`

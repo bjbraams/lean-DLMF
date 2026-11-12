@@ -212,13 +212,13 @@ DLMFMathlib declarations are all proved or definitions. No proved theorem depend
 - [24.9.E1](https://dlmf.nist.gov/24.9.E1): [`DLMF.BernoulliEuler.abs_bernoulliFun_two_mul_lt`](DLMF/BernoulliEuler/Inequalities.lean#L46) (proved). n ≥ 1, 0 < x < 1.
 - [24.9.E2](https://dlmf.nist.gov/24.9.E2): [`DLMF.BernoulliEuler.abs_bernoulliFun_two_mul_sub_le`](DLMF/BernoulliEuler/Inequalities.lean#L313) (proved). n ≥ 1, 0 ≤ x ≤ 1.
 - [24.9.E3](https://dlmf.nist.gov/24.9.E3): [`DLMF.BernoulliEuler.eulerFun_two_mul_bounds`](DLMF/BernoulliEuler/Inequalities.lean#L360) (proved). n ≥ 1, 0 < x < 1/2.
-- [24.9.E4](https://dlmf.nist.gov/24.9.E4): [`DLMF.BernoulliEuler.bernoulliFun_two_mul_add_one_bounds`](DLMF/BernoulliEuler/Inequalities.lean#L384) (admitted). n ≥ 2, 0 < x < 1/2 (also true for n = 1 numerically; kept as printed).
-- [24.9.E5](https://dlmf.nist.gov/24.9.E5): [`DLMF.BernoulliEuler.eulerFun_two_mul_sub_one_bounds`](DLMF/BernoulliEuler/Inequalities.lean#L392) (proved). n ≥ 1, 0 < x < 1/2.
-- [24.9.E6](https://dlmf.nist.gov/24.9.E6): [`DLMF.BernoulliEuler.bernoulli_two_mul_stirling_bounds`](DLMF/BernoulliEuler/Inequalities.lean#L526) (proved). n ≥ 2.
-- [24.9.E7](https://dlmf.nist.gov/24.9.E7): [`DLMF.BernoulliEuler.eulerNumber_two_mul_stirling_bounds`](DLMF/BernoulliEuler/Inequalities.lean#L747) (proved). n ≥ 2.
-- [24.9.E8](https://dlmf.nist.gov/24.9.E8): [`DLMF.BernoulliEuler.bernoulli_two_mul_zeta_bounds`](DLMF/BernoulliEuler/Inequalities.lean#L609) (proved). n ≥ 1, non-strict as printed (equality in the upper bound at n = 1).
-- [24.9.E9](https://dlmf.nist.gov/24.9.E9): [`DLMF.BernoulliEuler.bernoulliIneqBeta`](DLMF/BernoulliEuler/Inequalities.lean#L604) (definition). β = 2 + ln(1 - 6/π²)/ln 2 defined exactly; its decimal value 0.6491… is excluded: numerical.
-- [24.9.E10](https://dlmf.nist.gov/24.9.E10): [`DLMF.BernoulliEuler.eulerNumber_two_mul_beta_bounds`](DLMF/BernoulliEuler/Inequalities.lean#L705) (proved). n ≥ 1.
+- [24.9.E4](https://dlmf.nist.gov/24.9.E4): [`DLMF.BernoulliEuler.bernoulliFun_two_mul_add_one_bounds`](DLMF/BernoulliEuler/Inequalities.lean#L384) (proved). n ≥ 2, 0 < x < 1/2 (also true for n = 1 numerically; kept as printed).
+- [24.9.E5](https://dlmf.nist.gov/24.9.E5): [`DLMF.BernoulliEuler.eulerFun_two_mul_sub_one_bounds`](DLMF/BernoulliEuler/Inequalities.lean#L502) (proved). n ≥ 1, 0 < x < 1/2.
+- [24.9.E6](https://dlmf.nist.gov/24.9.E6): [`DLMF.BernoulliEuler.bernoulli_two_mul_stirling_bounds`](DLMF/BernoulliEuler/Inequalities.lean#L636) (proved). n ≥ 2.
+- [24.9.E7](https://dlmf.nist.gov/24.9.E7): [`DLMF.BernoulliEuler.eulerNumber_two_mul_stirling_bounds`](DLMF/BernoulliEuler/Inequalities.lean#L857) (proved). n ≥ 2.
+- [24.9.E8](https://dlmf.nist.gov/24.9.E8): [`DLMF.BernoulliEuler.bernoulli_two_mul_zeta_bounds`](DLMF/BernoulliEuler/Inequalities.lean#L719) (proved). n ≥ 1, non-strict as printed (equality in the upper bound at n = 1).
+- [24.9.E9](https://dlmf.nist.gov/24.9.E9): [`DLMF.BernoulliEuler.bernoulliIneqBeta`](DLMF/BernoulliEuler/Inequalities.lean#L714) (definition). β = 2 + ln(1 - 6/π²)/ln 2 defined exactly; its decimal value 0.6491… is excluded: numerical.
+- [24.9.E10](https://dlmf.nist.gov/24.9.E10): [`DLMF.BernoulliEuler.eulerNumber_two_mul_beta_bounds`](DLMF/BernoulliEuler/Inequalities.lean#L815) (proved). n ≥ 1.
 
 ## [§24.10 Arithmetic Properties](https://dlmf.nist.gov/24.10)
 

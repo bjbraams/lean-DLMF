@@ -7,7 +7,9 @@ module
 
 public import DLMF.Legendre.Harmonics
 public import DLMF.Legendre.QAdditionTools
+public import DLMF.Legendre.ExteriorAddition
 public import DLMF.Legendre.ZonalSeries
+public import DLMF.Legendre.ZonalSeries.Fractional
 
 /-!
 # Legendre addition theorems and zonal harmonic series
@@ -174,7 +176,7 @@ theorem associatedQ_addition (ν : ℂ) {ξ₁ ξ₂ : ℝ} (h1 : 0 < ξ₁) (h2
         2*(-1)^m*associatedP ν (-m) (Real.cosh ξ₁)*associatedQ ν m (Real.cosh ξ₂)*Real.cos (m*phi))
         (associatedQ ν 0 (Real.cosh ξ₁*Real.cosh ξ₂-Real.sinh ξ₁*Real.sinh ξ₂*Real.cos
         phi)-associatedP ν 0 (Real.cosh ξ₁)*associatedQ ν 0 (Real.cosh ξ₂)) := by
-  sorry
+  exact ExteriorAddition.hasSum_addition hr h1 h2 h12 phi
 
 /-- DLMF 14.18.6 (Christoffel–Darboux): for `x, y ∉ (-∞, 1]`, `(x-y) Σ_{k=0}^{n} (2k+1) P_k(x)
 P_k(y) = (n+1)(P_{n+1}(x) P_n(y) - P_n(x) P_{n+1}(y))`. -/
@@ -269,7 +271,8 @@ theorem ferrersP_dougall_series {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) {μ : �
     Tendsto (fun N : ℕ => ∑ n ∈ Finset.range N,
         sin (ν*π)/π*(-1)^n*(2*n+1)/((ν-n)*(ν+n+1))*ferrersP n (-μ) x) atTop
         (𝓝 (ferrersP ν (-μ) x)) := by
-  sorry
+  simpa only [ZonalSeries.legendreCoeff] using
+    ZonalSeries.tendsto_partialSum_negative_order hν hμ hx
 
 /-- Confocal ellipse coordinate, with value two on the focal segment. -/
 def legendreEllipseRadius (z : ℂ) : ℝ :=

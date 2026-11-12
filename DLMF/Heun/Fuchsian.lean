@@ -682,11 +682,11 @@ theorem existsUnique_stieltjesOfIndex {N : ℕ} {a γ : Fin (N + 1) → ℝ} (ha
     (hγ : ∀ j, 0 < γ j) (m : Fin N → ℕ) : ∃! S, IsStieltjesOfIndex a γ m S := by
   sorry
 
-/-- DLMF 31.15.5–31.15.6, the count: under these conditions the monic Stieltjes polynomials of
-degree `n` are exactly the `(n+N-1 choose N-1)` polynomials `S_𝐦`, `∑ m_j = n`
-(here with `N + 1` singular points). -/
+/-- DLMF 31.15.5–31.15.6, the count: with at least two singular points, the monic
+Stieltjes polynomials of degree `n` are exactly the `(n+N-1 choose N-1)` polynomials
+`S_𝐦`, `∑ m_j = n` (here with `N + 1` singular points). -/
 @[dlmf 31.15.E5, dlmf 31.15.E6]
-theorem stieltjes_card {N : ℕ} {a γ : Fin (N + 1) → ℝ} (ha : StrictMono a)
+theorem stieltjes_card {N : ℕ} {a γ : Fin (N + 1) → ℝ} (hN : 1 ≤ N) (ha : StrictMono a)
     (hγ : ∀ j, 0 < γ j) (n : ℕ) :
     {S : ℂ[X] | S.Monic ∧ ∃ V, IsVanVleckStieltjes (fun j => (a j : ℂ)) (fun j => (γ j : ℂ)) n
       V S}.encard = ((n + N - 1).choose (N - 1) : ℕ) := by

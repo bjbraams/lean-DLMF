@@ -145,19 +145,19 @@ Table 22.4.3 in the τ-parametrization) are proved without any admission.
 - [22.8.E10](https://dlmf.nist.gov/22.8.E10): [`DLMF.JacobiElliptic.jacobiNs_add`](DLMF/JacobiElliptic/Addition/ThetaAndQuotients.lean#L707) (proved).
 - [22.8.E11](https://dlmf.nist.gov/22.8.E11): [`DLMF.JacobiElliptic.jacobiDs_add`](DLMF/JacobiElliptic/Addition/ThetaAndQuotients.lean#L743) (proved).
 - [22.8.E12](https://dlmf.nist.gov/22.8.E12): [`DLMF.JacobiElliptic.jacobiCs_add`](DLMF/JacobiElliptic/Addition/ThetaAndQuotients.lean#L779) (proved).
-- [22.8.E13](https://dlmf.nist.gov/22.8.E13): [`DLMF.JacobiElliptic.jacobiSn_add_alt`](DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean#L65) (proved).
-- [22.8.E14](https://dlmf.nist.gov/22.8.E14): [`DLMF.JacobiElliptic.jacobiSn_add_alt₂`](DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean#L102) (proved).
-- [22.8.E15](https://dlmf.nist.gov/22.8.E15): [`DLMF.JacobiElliptic.jacobiCn_add_alt`](DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean#L140) (proved).
-- [22.8.E16](https://dlmf.nist.gov/22.8.E16): [`DLMF.JacobiElliptic.jacobiCn_add_alt₂`](DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean#L178) (proved).
-- [22.8.E17](https://dlmf.nist.gov/22.8.E17): [`DLMF.JacobiElliptic.jacobiDn_add_alt`](DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean#L216) (proved).
-- [22.8.E18](https://dlmf.nist.gov/22.8.E18): [`DLMF.JacobiElliptic.jacobiDn_add_alt₂`](DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean#L254) (proved).
-- [22.8.E19](https://dlmf.nist.gov/22.8.E19): [`DLMF.JacobiElliptic.jacobi_det_sum_zero`](DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean#L534) (admitted); [`DLMF.JacobiElliptic.jacobi_prod_sum_zero`](DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean#L543) (admitted).
-- [22.8.E20](https://dlmf.nist.gov/22.8.E20): [`DLMF.JacobiElliptic.jacobi_det_sum_zero`](DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean#L534) (admitted).
-- [22.8.E21](https://dlmf.nist.gov/22.8.E21): [`DLMF.JacobiElliptic.jacobi_prod_sum_zero`](DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean#L543) (admitted).
-- [22.8.E22](https://dlmf.nist.gov/22.8.E22): [`DLMF.JacobiElliptic.jacobi_det_sum_two_K`](DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean#L552) (admitted); [`DLMF.JacobiElliptic.jacobi_det_sum_two_K'`](DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean#L566) (admitted).
-- [22.8.E23](https://dlmf.nist.gov/22.8.E23): [`DLMF.JacobiElliptic.jacobi_det_sum_two_K`](DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean#L552) (admitted); [`DLMF.JacobiElliptic.jacobi_det_sum_two_K'`](DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean#L566) (admitted). **Corrected** (DLMF erratum): as printed (columns sn cn, cn dn, cn, dn; Σz = 2K) the determinant is nonzero numerically (≈ -0.107 + 0.033i at k = 0.6). Two corrected forms acquired: third column sn (`jacobi_det_sum_two_K`) or second column sn dn (`jacobi_det_sum_two_K'`).
-- [22.8.E24](https://dlmf.nist.gov/22.8.E24): [`DLMF.JacobiElliptic.jacobiDnThreePointExpr_const`](DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean#L589) (proved).
-- [22.8.E25](https://dlmf.nist.gov/22.8.E25): [`DLMF.JacobiElliptic.jacobiDnThreePointExpr_const`](DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean#L589) (proved).
+- [22.8.E13](https://dlmf.nist.gov/22.8.E13): [`DLMF.JacobiElliptic.jacobiSn_add_alt`](DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean#L67) (proved).
+- [22.8.E14](https://dlmf.nist.gov/22.8.E14): [`DLMF.JacobiElliptic.jacobiSn_add_alt₂`](DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean#L104) (proved).
+- [22.8.E15](https://dlmf.nist.gov/22.8.E15): [`DLMF.JacobiElliptic.jacobiCn_add_alt`](DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean#L142) (proved).
+- [22.8.E16](https://dlmf.nist.gov/22.8.E16): [`DLMF.JacobiElliptic.jacobiCn_add_alt₂`](DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean#L180) (proved).
+- [22.8.E17](https://dlmf.nist.gov/22.8.E17): [`DLMF.JacobiElliptic.jacobiDn_add_alt`](DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean#L218) (proved).
+- [22.8.E18](https://dlmf.nist.gov/22.8.E18): [`DLMF.JacobiElliptic.jacobiDn_add_alt₂`](DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean#L256) (proved).
+- [22.8.E19](https://dlmf.nist.gov/22.8.E19): [`DLMF.JacobiElliptic.jacobi_det_sum_zero`](DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean#L514) (proved); [`DLMF.JacobiElliptic.jacobi_prod_sum_zero`](DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean#L523) (proved).
+- [22.8.E20](https://dlmf.nist.gov/22.8.E20): [`DLMF.JacobiElliptic.jacobi_det_sum_zero`](DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean#L514) (proved).
+- [22.8.E21](https://dlmf.nist.gov/22.8.E21): [`DLMF.JacobiElliptic.jacobi_prod_sum_zero`](DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean#L523) (proved).
+- [22.8.E22](https://dlmf.nist.gov/22.8.E22): [`DLMF.JacobiElliptic.jacobi_det_sum_two_K`](DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean#L536) (admitted); [`DLMF.JacobiElliptic.jacobi_det_sum_two_K'`](DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean#L550) (admitted).
+- [22.8.E23](https://dlmf.nist.gov/22.8.E23): [`DLMF.JacobiElliptic.jacobi_det_sum_two_K`](DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean#L536) (admitted); [`DLMF.JacobiElliptic.jacobi_det_sum_two_K'`](DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean#L550) (admitted). **Corrected** (DLMF erratum): as printed (columns sn cn, cn dn, cn, dn; Σz = 2K) the determinant is nonzero numerically (≈ -0.107 + 0.033i at k = 0.6). Two corrected forms acquired: third column sn (`jacobi_det_sum_two_K`) or second column sn dn (`jacobi_det_sum_two_K'`).
+- [22.8.E24](https://dlmf.nist.gov/22.8.E24): [`DLMF.JacobiElliptic.jacobiDnThreePointExpr_const`](DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean#L573) (proved).
+- [22.8.E25](https://dlmf.nist.gov/22.8.E25): [`DLMF.JacobiElliptic.jacobiDnThreePointExpr_const`](DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean#L573) (proved).
 - [22.8.E26](https://dlmf.nist.gov/22.8.E26): [`DLMF.JacobiElliptic.jacobiDn_four_point`](DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean#L787) (proved from admitted foundations). 22.8.26–27 proved (from the shift table, via dn(z + 2K) = dn z and dn(z+K) = k'/dn z).
 - [22.8.E27](https://dlmf.nist.gov/22.8.E27): [`DLMF.JacobiElliptic.jacobiDn_four_point`](DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean#L787) (proved from admitted foundations).
 

@@ -23,6 +23,7 @@ public import DLMF.Legendre.Toroidal
 public import DLMF.Legendre.Conical
 public import DLMF.Legendre.UniformCoordinates
 public import DLMF.Legendre.Uniform
+public import DLMF.Legendre.Uniform.HyperbolicEquation
 public import DLMF.Legendre.ConicalAsymptotics
 public import DLMF.Legendre.Sums
 public import DLMF.Legendre.Zeros
@@ -48,6 +49,7 @@ public import DLMF.Legendre.AdditionTools
 public import DLMF.Legendre.QAdditionTools
 public import DLMF.Legendre.FourierTools
 public import DLMF.Legendre.ZonalSeries
+public import DLMF.Legendre.ZonalSeries.Endpoint
 
 /-!
 # Legendre and related functions (DLMF Chapter 14; Temme Chapter 8)

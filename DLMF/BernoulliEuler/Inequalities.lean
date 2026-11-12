@@ -387,7 +387,117 @@ theorem bernoulliFun_two_mul_add_one_bounds {n : ℕ} (hn : 2 ≤ n) {x : ℝ} (
     (hx1 : x < 1 / 2) :
     0 < (-1) ^ (n + 1) * bernoulliFun (2 * n + 1) x ∧
       (-1) ^ (n + 1) * bernoulliFun (2 * n + 1) x < 2 * (2 * n + 1)! / (2 * π) ^ (2 * n + 1) := by
-  sorry
+  refine ⟨bernoulliFun_two_mul_add_one_pos (by omega) hx0 hx1, ?_⟩
+  -- Separate the first three Fourier modes; the remaining modes are bounded by ζ(4).
+  set p := 2 * n + 1
+  have hp : 5 ≤ p := by omega
+  set a := (1 / 2 : ℝ) ^ p
+  set b := (1 / 3 : ℝ) ^ p
+  set θ := 2 * π * x
+  set s := sin θ
+  set c := cos θ
+  have hb : 0 < b := by positivity
+  have hb_le : b ≤ 1 / 243 := by
+    calc b ≤ (1 / 3 : ℝ) ^ 5 :=
+          pow_le_pow_of_le_one (by norm_num) (by norm_num) hp
+      _ = 1 / 243 := by norm_num
+  have hab : a ^ 2 ≤ 243 / 1024 * b := by
+    have he : a ^ 2 = b * (3 / 4 : ℝ) ^ p := by
+      dsimp [a, b]
+      rw [← pow_mul, mul_comm p 2, pow_mul, ← mul_pow]
+      norm_num
+    rw [he]
+    have hr : (3 / 4 : ℝ) ^ p ≤ 243 / 1024 := by
+      calc (3 / 4 : ℝ) ^ p ≤ (3 / 4 : ℝ) ^ 5 :=
+          pow_le_pow_of_le_one (by norm_num) (by norm_num) hp
+        _ = 243 / 1024 := by norm_num
+    nlinarith
+  set C := (-1 : ℝ) ^ (n + 1) * (2 * π) ^ p / 2 / p.factorial
+  have hs : HasSum (fun m : ℕ => 1 / (m : ℝ) ^ p * sin (m * θ))
+      (C * bernoulliFun p x) := by
+    convert hasSum_one_div_nat_pow_mul_sin (by omega : n ≠ 0)
+      (x := x) ⟨hx0.le, by linarith⟩ using 1
+    · funext m
+      congr 2
+      dsimp [θ]
+      ring
+    · simp [C, p, bernoulliFun]
+  have hs_tail := (hasSum_nat_add_iff' 4).mpr hs
+  have hz_tail := (hasSum_nat_add_iff' 4).mpr hasSum_zeta_four
+  have htail := hasSum_le (f := fun k : ℕ =>
+      1 / ((k + 4 : ℕ) : ℝ) ^ p * sin (((k + 4 : ℕ) : ℝ) * θ))
+    (g := fun k : ℕ => b * (243 / 4) * (1 / ((k + 4 : ℕ) : ℝ) ^ 4))
+    (fun k => ?_) hs_tail (hz_tail.mul_left (b * (243 / 4)))
+  · have hZ : (243 / 4 : ℝ) * (π ^ 4 / 90 - 1 - 1 / 16 - 1 / 81) < 1 / 2 := by
+      have hπ4 : π ^ 4 < (3.1416 : ℝ) ^ 4 := by gcongr; exact pi_lt_d4
+      nlinarith
+    have hsum : ∑ m ∈ range 4, 1 / (m : ℝ) ^ p * sin (m * θ) =
+        s + a * sin (2 * θ) + b * sin (3 * θ) := by
+      simp only [sum_range_succ, range_zero, sum_empty]
+      simp [show p ≠ 0 by omega, a, b, s, div_pow]
+    have hsum_zeta : ∑ m ∈ range 4, 1 / (m : ℝ) ^ 4 = 1 + 1 / 16 + 1 / 81 := by
+      norm_num [sum_range_succ]
+    rw [hsum, hsum_zeta] at htail
+    have hS : C * bernoulliFun p x < s + a * sin (2 * θ) + b * sin (3 * θ) + b / 2 := by
+      nlinarith
+    -- The negative third mode controls the possible increase from the second mode.
+    have hsc : s ^ 2 + c ^ 2 = 1 := sin_sq_add_cos_sq θ
+    have hs0 : 0 ≤ s := (sin_pos_of_pos_of_lt_pi (by positivity : 0 < θ)
+      (by dsimp [θ]; nlinarith [pi_pos])).le
+    have hs1 : s ≤ 1 := sin_le_one θ
+    have hs_bound : s ≤ 1 - c ^ 2 / 2 := by nlinarith [sq_nonneg (s - 1)]
+    have hs_lower : 1 - c ^ 2 ≤ s := by nlinarith [mul_nonneg hs0 (sub_nonneg.mpr hs1)]
+    have htwo : sin (2 * θ) = 2 * s * c := sin_two_mul θ
+    have hthree : sin (3 * θ) = -s + 4 * s * c ^ 2 := by
+      rw [sin_three_mul]
+      dsimp [s, c] at hsc ⊢
+      nlinarith [sin_sq_add_cos_sq θ]
+    have hsin3 : sin (3 * θ) ≤ -1 + 5 * c ^ 2 := by
+      rw [hthree]
+      nlinarith [mul_nonneg (sub_nonneg.mpr hs1) (sq_nonneg c)]
+    have htwo_bound : a * sin (2 * θ) ≤ 19 / 40 * c ^ 2 + 40 / 19 * a ^ 2 := by
+      rw [htwo]
+      nlinarith [sq_nonneg (19 * c - 40 * a * s),
+        mul_nonneg (sq_nonneg a) (sub_nonneg.mpr (show s ^ 2 ≤ 1 by nlinarith))]
+    have hbmode : b * sin (3 * θ) ≤ b * (-1 + 5 * c ^ 2) :=
+      mul_le_mul_of_nonneg_left hsin3 hb.le
+    have hcoef : (5 * b - 1 / 40) * c ^ 2 ≤ 0 :=
+      mul_nonpos_of_nonpos_of_nonneg (by linarith) (sq_nonneg c)
+    have hnorm : C * bernoulliFun p x < 1 := by nlinarith
+    have hfactor : 0 < (2 * π) ^ p / 2 / p.factorial := by positivity
+    have heq : C * bernoulliFun p x =
+        ((-1 : ℝ) ^ (n + 1) * bernoulliFun p x) * ((2 * π) ^ p / 2 / p.factorial) := by
+      dsimp [C]
+      ring
+    rw [heq] at hnorm
+    have hrecip : (2 * (p.factorial : ℝ) / (2 * π) ^ p) * ((2 * π) ^ p / 2 / p.factorial) = 1 := by
+      field_simp
+    exact (mul_lt_mul_iff_left₀ hfactor).mp (by rw [hrecip]; exact hnorm)
+  · have hm : (4 : ℝ) ≤ (k + 4 : ℕ) := by norm_cast; omega
+    have hr : (3 / ((k + 4 : ℕ) : ℝ)) ^ p ≤
+        (3 / ((k + 4 : ℕ) : ℝ)) ^ 5 :=
+      pow_le_pow_of_le_one (by positivity) (by rw [div_le_one (by positivity)]; linarith) hp
+    have hpw : (3 / ((k + 4 : ℕ) : ℝ)) ^ 5 ≤
+        (243 / 4 : ℝ) / ((k + 4 : ℕ) : ℝ) ^ 4 := by
+      rw [div_pow]
+      norm_num
+      rw [div_le_div_iff₀ (by positivity) (by positivity)]
+      have hm' : (4 : ℝ) ≤ (k : ℝ) + 4 := by exact_mod_cast Nat.le_add_left 4 k
+      have hmul := mul_le_mul_of_nonneg_right hm'
+        (pow_nonneg (by positivity : (0 : ℝ) ≤ (k : ℝ) + 4) 4)
+      rw [pow_succ]
+      nlinarith only [hmul]
+    have hpow : 1 / ((k + 4 : ℕ) : ℝ) ^ p ≤
+        b * (243 / 4) * (1 / ((k + 4 : ℕ) : ℝ) ^ 4) := by
+      have := hr.trans hpw
+      dsimp [b]
+      rw [div_pow, one_pow]
+      rw [div_pow] at this
+      have hm0 : ((k + 4 : ℕ) : ℝ) ≠ 0 := by positivity
+      have h30 : (3 : ℝ) ^ p ≠ 0 := by positivity
+      field_simp [hm0, h30] at this ⊢
+      nlinarith
+    exact (mul_le_of_le_one_right (by positivity) (sin_le_one _)).trans hpow
 
 /-- **DLMF 24.9.5**: `4(2n-1)!/π^{2n} (2^{2n} - 1)/(2^{2n} - 2) > (-1)ⁿ E₂ₙ₋₁(x) > 0` for
 `0 < x < 1/2`, `n ≥ 1`. -/
