@@ -32,8 +32,10 @@ equations and the initial values (DLMF 9.12.1–9.12.3, 9.12.6–9.12.7, 9.12.17
   `scorerHi_connection`: DLMF 9.12.11–9.12.14.
 * `hasSum_scorerGi`, `hasSum_scorerGiDeriv`, `hasSum_scorerHi`, `hasSum_scorerHiDeriv`:
   DLMF 9.12.15–9.12.18.
-* `scorerHi_exp_integral`, `scorerGi_exp_cos_integral`, `scorerHi_stieltjes_integral`,
-  `scorerGi_principalValue`: DLMF 9.12.20–9.12.23.
+* `scorerHi_exp_integral`, `scorerGi_exp_cos_integral`: DLMF 9.12.20, 9.12.21.
+
+The Stieltjes and principal-value formulas 9.12.22, 9.12.23 are proved in
+`DLMF.Airy.Scorer.Stieltjes`.
 -/
 
 @[expose] public noncomputable section
@@ -720,23 +722,6 @@ theorem scorerGi_exp_cos_integral (z : ℂ) :
   rw [show exp (-(t : ℂ) ^ 3 / 3 - z * t / 2 + θ * I) =
       exp (-(t : ℂ) ^ 3 / 3 - z * t / 2) * exp (θ * I) by rw [← exp_add]] at e2
   linear_combination (1 / 2 : ℂ) * e1 + (1 / 2 : ℂ) * e2
-
-/-- For `|arg z| < π/3`,
-`Hi(-z) = 4z²/(3^{3/2} π²) ∫₀^∞ K_{1/3}(t)/(ζ² + t²) dt` with `ζ = (2/3) z^{3/2}` (DLMF 9.12.22). -/
-@[dlmf 9.12.E22]
-theorem scorerHi_stieltjes_integral {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π / 3) :
-    scorerHi (-z) = 4 * z ^ 2 / ((3 : ℂ) ^ (3 / 2 : ℂ) * π ^ 2) *
-      ∫ t : ℝ in Ioi 0, DLMF.Bessel.besselK (1 / 3) t / (airyZetaComplex z ^ 2 + (t : ℂ) ^ 2) := by
-  sorry
-
-/-- For `x > 0`, `Gi(x) = 4x²/(3^{3/2} π²) ⨍₀^∞ K_{1/3}(t)/(ζ² - t²) dt` (principal value at
-`t = ζ = (2/3) x^{3/2}`) (DLMF 9.12.23). -/
-@[dlmf 9.12.E23]
-theorem scorerGi_principalValue {x : ℝ} (hx : 0 < x) :
-    scorerGi x = 4 * (x : ℂ) ^ 2 / ((3 : ℂ) ^ (3 / 2 : ℂ) * π ^ 2) *
-      principalValueIoi (fun t : ℝ => DLMF.Bessel.besselK (1 / 3) t /
-        ((airyZeta x : ℂ) ^ 2 - (t : ℂ) ^ 2)) (airyZeta x) := by
-  sorry
 
 /-- `I_{k+1}/k!` form of the Hi′ coefficients. -/
 theorem scorerHiDeriv_coeff_eq_integral (k : ℕ) (z : ℂ) :

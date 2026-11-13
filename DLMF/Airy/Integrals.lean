@@ -7,6 +7,7 @@ module -- shake: keep-all
 
 public import DLMF.Airy.Integrals.PrimitivesAndLaplace
 public import DLMF.Airy.Integrals.HalfLineLaplace
+public import DLMF.Airy.Integrals.StieltjesBoundary
 
 /-!
 # Integrals of Airy functions (DLMF §9.10)

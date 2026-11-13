@@ -1,0 +1,484 @@
+{
+  "dependencies": {
+    "TauCeti": {
+      "rev": "396c3bd971e9722aa8656231760e710fe641d8cf",
+      "url": "https://github.com/TauCetiProject/TauCeti"
+    },
+    "mathlib": {
+      "rev": "1b1ccf4b088b32fa3f23f2de1127433254a81e1e",
+      "url": "https://github.com/leanprover-community/mathlib4"
+    }
+  },
+  "toolchain": "leanprover/lean4:v4.36.0-rc2",
+  "status": "proof_round_finished",
+  "baseline_commit": "095580c3193c4f3639ac6e1683a24333b54579dc",
+  "start_utc": "2026-11-12T20:31:29Z",
+  "deadline_utc": "2026-11-13T04:31:29Z",
+  "baseline_direct_admissions": 941,
+  "remaining_direct_admissions": 884,
+  "completed": [
+    {
+      "declaration": "DLMF.Combinatorics.card_latticePaths_above_eq_motzkin",
+      "references": "26.6.i",
+      "file": "DLMF/Combinatorics/LatticePaths.lean",
+      "line": 279
+    },
+    {
+      "declaration": "DLMF.Combinatorics.card_latticePaths_peaks_eq_narayana",
+      "references": "26.6.i",
+      "file": "DLMF/Combinatorics/LatticePaths.lean",
+      "line": 98
+    },
+    {
+      "declaration": "DLMF.Combinatorics.sum_pow_wordInversions_multisetPermutations",
+      "references": "26.16.E2",
+      "file": "DLMF/Combinatorics/MultisetPermutations.lean",
+      "line": 125
+    },
+    {
+      "declaration": "DLMF.Combinatorics.sum_pow_wordMajorIndex_multisetPermutations",
+      "references": "26.16.E3",
+      "file": "DLMF/Combinatorics/MultisetPermutations.lean",
+      "line": 131
+    },
+    {
+      "declaration": "DLMF.BernoulliEuler.eulerNumber_two_mul_eq_series",
+      "references": "24.8.E9",
+      "file": "DLMF/BernoulliEuler/Series.lean",
+      "line": 787
+    },
+    {
+      "declaration": "DLMF.JacobiElliptic.jacobiSn_sq_hasSum_fourier",
+      "references": "22.11.E13",
+      "file": "DLMF/JacobiElliptic/FourierSeries/SquaredSn.lean",
+      "line": 34
+    },
+    {
+      "declaration": "DLMF.JacobiElliptic.jacobiSn_sq_hasSum_sech",
+      "references": "22.11.E14",
+      "file": "DLMF/JacobiElliptic/FourierSeries/HyperbolicSn.lean",
+      "line": 125
+    },
+    {
+      "declaration": "DLMF.JacobiElliptic.Real.jacobiEpsilon_eq_theta",
+      "references": "22.16.E30",
+      "file": "DLMF/JacobiElliptic/Related.lean",
+      "line": 1252
+    },
+    {
+      "declaration": "DLMF.Theta.jacobiThetaOneTau_powerSeries",
+      "references": "20.6.E2",
+      "file": "DLMF/Theta/PowerSeries/ThetaOne.lean",
+      "line": 36
+    },
+    {
+      "declaration": "DLMF.Theta.jacobiThetaTwoTau_powerSeries",
+      "references": "20.6.E3",
+      "file": "DLMF/Theta/PowerSeries.lean",
+      "line": 494
+    },
+    {
+      "declaration": "DLMF.Theta.jacobiThetaThreeTau_powerSeries",
+      "references": "20.6.E4",
+      "file": "DLMF/Theta/PowerSeries.lean",
+      "line": 506
+    },
+    {
+      "declaration": "DLMF.Theta.jacobiThetaFourTau_powerSeries",
+      "references": "20.6.E5",
+      "file": "DLMF/Theta/PowerSeries.lean",
+      "line": 519
+    },
+    {
+      "declaration": "DLMF.Theta.thetaGaussSum_reciprocity",
+      "references": "20.11.E2",
+      "file": "DLMF/Theta/Generalizations.lean",
+      "line": 81
+    },
+    {
+      "declaration": "DLMF.CoalescingSaddles.cuspoidIntegral_two_zero_atBot",
+      "references": "36.11.E3",
+      "file": "DLMF/CoalescingSaddles/Asymptotics/Pearcey.lean",
+      "line": 36
+    },
+    {
+      "declaration": "DLMF.JacobiElliptic.jacobi_det_sum_two_K",
+      "references": "22.8.E22;22.8.E23",
+      "file": "DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean",
+      "line": 541
+    },
+    {
+      "declaration": "DLMF.JacobiElliptic.jacobi_det_sum_two_K'",
+      "references": "22.8.E22;22.8.E23",
+      "file": "DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean",
+      "line": 557
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.distrib_tendsto_iff",
+      "references": "1.16.E7",
+      "file": "DLMF/AlgebraicAnalytic/Distributions/Theory.lean",
+      "line": 220
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.stieltjes_eq_deriv",
+      "references": "1.16.E9_5",
+      "file": "DLMF/AlgebraicAnalytic/Distributions/Theory.lean",
+      "line": 229
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.deriv_stieltjes_of_density",
+      "references": "1.16.ii",
+      "file": "DLMF/AlgebraicAnalytic/Distributions/Theory.lean",
+      "line": 245
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.tendsto_mellin_inv_one_sub_pv",
+      "references": "1.14.T5",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/MellinTable.lean",
+      "line": 208
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.mellin_log_abs_one_add_div_one_sub",
+      "references": "1.14.T5",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/MellinTable.lean",
+      "line": 477
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.hilbertTruncated_eq_integral_Ioi",
+      "references": "1.14.E43",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/MellinHilbertStieltjes.lean",
+      "line": 359
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.fourierTransform_cosh_div_cosh",
+      "references": "1.14.T1",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean",
+      "line": 353
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.tendsto_fourierTransform_sin_sq",
+      "references": "1.14.T1",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean",
+      "line": 458
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.tendsto_fourierTransform_cos_sq",
+      "references": "1.14.T1",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean",
+      "line": 467
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.fourierCosTransform_quartic",
+      "references": "1.14.T2",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean",
+      "line": 647
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.tendsto_fourierCosTransform_sin_sq",
+      "references": "1.14.T2",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean",
+      "line": 769
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.tendsto_fourierCosTransform_cos_sq",
+      "references": "1.14.T2",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean",
+      "line": 784
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.fourierCosTransform_log_one_add",
+      "references": "1.14.T2",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/Tables/LogarithmicCosine.lean",
+      "line": 36
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.fourierCosTransform_log_sub_log",
+      "references": "1.14.T2",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/Tables/LogarithmicCosine.lean",
+      "line": 106
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.tendsto_fourierSinTransform_inv_sqrt",
+      "references": "1.14.T3",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean",
+      "line": 824
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.fourierSinTransform_rpow_neg_three_halves",
+      "references": "1.14.T3",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean",
+      "line": 890
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.tendsto_fourierSinTransform_sin_div",
+      "references": "1.14.T3",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean",
+      "line": 1206
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.tendsto_fourierSinTransform_arctan_abel",
+      "references": "1.14.T3",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean",
+      "line": 1301
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.vanVleck_arg_convs",
+      "references": "1.12.E26;1.12.E27",
+      "file": "DLMF/AlgebraicAnalytic/ContinuedFractions/Convergence.lean",
+      "line": 160
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.signVariations_sub_countP_pos_even",
+      "references": "1.11.ii",
+      "file": "DLMF/AlgebraicAnalytic/Polynomials/Zeros.lean",
+      "line": 235
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.fluxIntegral_curl_eq_lineIntegral",
+      "references": "1.6.E57",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/GreenStokes.lean",
+      "line": 183
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.surfaceArea_comp_diffeomorph",
+      "references": "1.6.v",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/VectorIntegrals.lean",
+      "line": 402
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.fluxIntegral_comp_diffeomorph",
+      "references": "1.6.E56",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/VectorIntegrals.lean",
+      "line": 423
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.laplacian_polar",
+      "references": "1.5.E13",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/SeveralVariables.lean",
+      "line": 364
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.laplacian_cylindrical",
+      "references": "1.5.E15",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/SeveralVariables.lean",
+      "line": 386
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.laplacian_spherical",
+      "references": "1.5.E17",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/SeveralVariables.lean",
+      "line": 418
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.taylor_isLittleO_prod",
+      "references": "1.5.E18",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/SeveralVariables.lean",
+      "line": 579
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.isLocalMin_of_hessian_posDef",
+      "references": "1.5.E19;1.5.E20;1.5.E21",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/SeveralVariables.lean",
+      "line": 606
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.isLocalMax_of_hessian_negDef",
+      "references": "1.5.E19;1.5.E20;1.5.E21",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/SeveralVariables.lean",
+      "line": 672
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.hausdorffMeasure_parallelogram",
+      "references": "1.6.i",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/Vectors.lean",
+      "line": 146
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.harmonic_polar",
+      "references": "1.9.E27",
+      "file": "DLMF/AlgebraicAnalytic/Complex/Calculus.lean",
+      "line": 329
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.IsHillType.exists_hasInfiniteDet",
+      "references": "1.3.iii;1.3.E19",
+      "file": "DLMF/AlgebraicAnalytic/Algebra/Determinants.lean",
+      "line": 493
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.sinEigenfunction_hilbertBasis",
+      "references": "1.18.E36",
+      "file": "DLMF/AlgebraicAnalytic/Spectral/Theory.lean",
+      "line": 301
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.cosEigenfunction_hilbertBasis",
+      "references": "1.18.E37",
+      "file": "DLMF/AlgebraicAnalytic/Spectral/Theory.lean",
+      "line": 427
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.expEigenfunction_hilbertBasis",
+      "references": "1.18.E38;1.18.E39;1.18.E40",
+      "file": "DLMF/AlgebraicAnalytic/Spectral/Theory.lean",
+      "line": 483
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.IsSelfAdjoint.operatorSpectrum_real",
+      "references": "1.18.ix",
+      "file": "DLMF/AlgebraicAnalytic/Spectral/Theory.lean",
+      "line": 1137
+    },
+    {
+      "declaration": "DLMF.Combinatorics.tendsto_signedStirlingFirst_div",
+      "references": "26.8.E40",
+      "file": "DLMF/Combinatorics/Stirling/AsymptoticsAndCycles.lean",
+      "line": 45
+    },
+    {
+      "declaration": "DLMF.Combinatorics.tendsto_stirlingSecond_add_div",
+      "references": "26.8.E43",
+      "file": "DLMF/Combinatorics/Stirling/AsymptoticsAndCycles.lean",
+      "line": 232
+    },
+    {
+      "declaration": "DLMF.Airy.scorerHi_stieltjes_integral",
+      "references": "9.12.E22",
+      "file": "DLMF/Airy/Scorer/Stieltjes.lean",
+      "line": 289
+    },
+    {
+      "declaration": "DLMF.Airy.scorerGi_principalValue",
+      "references": "9.12.E23",
+      "file": "DLMF/Airy/Scorer/Stieltjes.lean",
+      "line": 481
+    },
+    {
+      "declaration": "DLMF.Airy.airyBi_stieltjes_principalValue",
+      "references": "9.10.E19",
+      "file": "DLMF/Airy/Integrals/StieltjesBoundary.lean",
+      "line": 428
+    }
+  ],
+  "original_statement_changes": [
+    "DLMF.AlgebraicAnalytic.fourierCosTransform_quartic",
+    "DLMF.AlgebraicAnalytic.hausdorffMeasure_parallelogram"
+  ],
+  "not_yet_certified_in_tag_dump": [],
+  "inventory": "reports/Admissions20261112.tsv",
+  "preservation_audit": "reports/ProofRound20261112Preservation.json",
+  "axiom_audit": "scripts/CheckDLMFProofs20261112.lean",
+  "compiled_tag_summary": {
+    "proved": 9686,
+    "pointers": 1029,
+    "nonstandard": 0,
+    "entries": 10843,
+    "admitted": 1157
+  },
+  "validation": {
+    "full_build": {
+      "status": "passed",
+      "jobs": 17062,
+      "log": "/tmp/DLMF-proof-round-20261112-final-build.log"
+    },
+    "combined_axiom_audit": {
+      "status": "passed",
+      "declarations": 368,
+      "nonstandard_axioms": 0
+    },
+    "historical_axiom_regressions": [
+      "Chapters 6–8 and 12",
+      "Chapters 13–15",
+      "Chapters 20–36"
+    ],
+    "import_survey": {
+      "status": "passed",
+      "two_way_pairs": 24,
+      "new_pairs": [
+        "Theta <-> Weierstrass"
+      ],
+      "foundation_violations": 0,
+      "forbidden_foundational_closure_modules": 0,
+      "missing_imports": 0,
+      "file_cycles": 0,
+      "baseline_updated": true
+    },
+    "file_lengths": {
+      "status": "passed",
+      "source_files": 1699,
+      "limit": 1500
+    },
+    "new_source_line_lengths": {
+      "status": "passed",
+      "limit": 100
+    },
+    "whitespace": {
+      "status": "passed"
+    },
+    "all_completed_targets_in_retained_axiom_audit": true,
+    "new_modules_registered": true,
+    "statement_repair_patch": {
+      "status": "applied_and_checked",
+      "file": "reports/DLMFStatementCorrections20261112.patch",
+      "whole_source_prototypes": "passed",
+      "counterexamples_and_corrected_proofs": "standard_axioms_only"
+    },
+    "original_statement_comparison": {
+      "baseline_admissions": 941,
+      "changed": [
+        "DLMF.AlgebraicAnalytic.fourierCosTransform_quartic",
+        "DLMF.AlgebraicAnalytic.hausdorffMeasure_parallelogram"
+      ],
+      "approved_changes": [
+        "DLMF.AlgebraicAnalytic.fourierCosTransform_quartic",
+        "DLMF.AlgebraicAnalytic.hausdorffMeasure_parallelogram"
+      ]
+    },
+    "statement_repair_regressions": {
+      "affected_module_builds": "passed",
+      "affected_source_checks": "passed",
+      "strict_counterexample_script_checks": "passed",
+      "definition_body_changes": 0
+    }
+  },
+  "additional_original_results_now_independent_of_admissions": [
+    "DLMF.AlgebraicAnalytic.vanVleck_arg_limit"
+  ],
+  "correction_patch": "reports/DLMFStatementCorrections20261112.patch",
+  "approval_requested_for_statement_corrections": true,
+  "changes_committed": false,
+  "dependency_pins_changed": false,
+  "toolchain_changed": false,
+  "mathematical_definition_changes": [],
+  "new_admissions": [],
+  "generic_api_changes": [
+    "Generalize ContDiffAt.deriv_comp_curve to arbitrary scalar and target",
+    "Add RCLike scalar power-series uniqueness, retaining Complex specializations"
+  ],
+  "new_two_way_area_pairs": [
+    "Theta and Weierstrass"
+  ],
+  "statement_corrections_awaiting_approval": [],
+  "compatibility_changes": [
+    "Adopt TauCeti improper-tail derivative theorem",
+    "Adopt TauCeti squared L2 norm theorem",
+    "Rename imaginary-part nonvanishing lemma to avoid the TauCeti real-part lemma name"
+  ],
+  "finished_utc": "2026-11-13T04:06:29Z",
+  "approved_repairs_completed_utc": "2026-11-13T05:50:08Z",
+  "approved_statement_corrections_applied": [
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.hausdorffMeasure_parallelogram",
+      "correction": "Use euclideanHausdorffMeasure 2 instead of raw hausdorffMeasure 2",
+      "certificate": "scripts/CheckDLMFHausdorffNormalization.lean"
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.fourierCosTransform_quartic",
+      "correction": "Require |a.im| < a.re instead of 0 < a.re",
+      "certificate": "scripts/CheckDLMFQuarticTransform.lean"
+    }
+  ],
+  "statement_correction_approval": "User: Yes, please repair those statements",
+  "all_proof_workers_stopped": true,
+  "unfinished_new_proof_attempts_in_production": []
+}

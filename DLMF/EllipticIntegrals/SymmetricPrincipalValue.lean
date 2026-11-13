@@ -901,10 +901,8 @@ theorem symmetricEllipticRJ_change_parameter_of_pos {x y z p q : ℝ} (hx : 0 < 
       have H := (symmetricEllipticRC_eq_integral_quadratic_tail (sq_nonneg a) haC).1
       simpa only [Real.sqrt_sq ha.le, show ∀ s : ℝ, s ^ 2 + (a ^ 2 + C) - a ^ 2 =
         s ^ 2 + C by intro s; ring] using H
-    have hm : StronglyMeasurable (fun s : ℝ => ((s ^ 2 + C : ℝ) : ℂ)⁻¹) :=
-      (by fun_prop : Measurable fun s : ℝ => ((s ^ 2 + C : ℝ) : ℂ)⁻¹).stronglyMeasurable
-    exact hi.hasDerivAt_integral_Ioi hav hm.stronglyMeasurableAtFilter
-      (ContinuousAt.inv₀ (by fun_prop) (ofReal_ne_zero.mpr hden.ne'))
+    exact hi.hasDerivAt_integral_Ioi
+      (ContinuousAt.inv₀ (by fun_prop) (ofReal_ne_zero.mpr hden.ne')) hav
   have hu (t : ℝ) (ht : 0 < t) : 0 < u t :=
     SymmetricParameterChange.substitution_pos hx hy hz ht
   have hunonneg (t : ℝ) : 0 ≤ u t := Real.sqrt_nonneg _

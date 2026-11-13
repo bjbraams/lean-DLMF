@@ -10,6 +10,7 @@ public import DLMF.JacobiElliptic.Basic.Properties
 public import DLMF.JacobiElliptic.Basic.ThetaShifts
 public import DLMF.JacobiElliptic.Basic.Inverse
 public import DLMF.JacobiElliptic.Basic.Epsilon
+public import DLMF.JacobiElliptic.Basic.EpsilonProperties
 
 /-!
 # Jacobian elliptic functions: definitions (DLMF §22.2)

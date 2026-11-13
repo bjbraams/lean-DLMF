@@ -7,6 +7,7 @@ module
 
 public import Mathlib.MeasureTheory.Integral.Gamma
 public import DLMF.Bessel.KIntegralRep
+import TauCeti.Analysis.SpecialFunctions.Gamma.Vertical
 
 /-!
 # The Mellin transform of `K_ν` (DLMF 10.43.19)
@@ -26,6 +27,9 @@ bounding the absolute integrand) and evaluates the inner Gaussian moment
 * `besselK_mellin`: the Mellin transform of `K_ν` (DLMF 10.43.19).
 * `besselK_mellinConvergent`, `mellin_besselK`: the same in the language of Mathlib's `mellin`,
   so that `mellin_comp_rpow` and `mellin_comp_mul_left` apply to functions such as `K_ν(c t^p)`.
+* `verticalIntegrable_mellin_besselK`: absolute integrability of the Mellin transform on
+  every vertical line in its convergence half-plane. The proof uses TauCeti's Gamma bounds
+  and vertical Gamma integrability.
 * `BesselKMellin.integral_gaussian`: the complex Gaussian moment `∫₀^∞ x^{s-1} e^{-b x²} dx`.
 -/
 
@@ -223,5 +227,41 @@ theorem besselK_mellinConvergent {μ ν : ℂ} (h : |ν.re| < μ.re) :
 theorem mellin_besselK {μ ν : ℂ} (h : |ν.re| < μ.re) :
     mellin (fun t : ℝ => besselK ν t) μ = 2 ^ (μ - 2) * Gamma ((μ - ν) / 2) * Gamma ((μ + ν) / 2) :=
   (besselK_mellin h).2
+
+/-- The Mellin transform of `K_ν` is absolutely integrable on every vertical line in
+its convergence half-plane. -/
+theorem verticalIntegrable_mellin_besselK {ν : ℂ} {σ : ℝ} (hσ : |ν.re| < σ) :
+    VerticalIntegrable (mellin (fun t : ℝ => besselK ν t)) σ := by
+  have hm : 0 < (σ - ν.re) / 2 := by linarith [le_abs_self ν.re]
+  have hp : 0 < (σ + ν.re) / 2 := by linarith [neg_abs_le ν.re]
+  have hΓ := (Complex.verticalIntegrable_Gamma (σ := (σ - ν.re) / 2)
+    (fun n hn => by have := Nat.cast_nonneg (α := ℝ) n; linarith)).comp_div
+      (by norm_num : (2 : ℝ) ≠ 0)
+  have hΓ' : Integrable (fun y : ℝ => Gamma (((σ : ℂ) + y * I - ν) / 2)) := by
+    refine (hΓ.comp_add_right (-ν.im)).congr (Eventually.of_forall fun y => ?_)
+    dsimp only
+    congr 1
+    apply Complex.ext <;> simp; ring
+  have hmeas : AEStronglyMeasurable (fun y : ℝ =>
+      (2 : ℂ) ^ (((σ : ℂ) + y * I) - 2) * Gamma ((((σ : ℂ) + y * I) + ν) / 2)) := by
+    exact Measurable.aestronglyMeasurable (by fun_prop)
+  have hbound : ∀ᵐ y : ℝ, ‖(2 : ℂ) ^ (((σ : ℂ) + y * I) - 2) *
+      Gamma ((((σ : ℂ) + y * I) + ν) / 2)‖ ≤
+      (2 : ℝ) ^ (σ - 2) * Real.Gamma ((σ + ν.re) / 2) := by
+    filter_upwards [] with y
+    rw [norm_mul, show (2 : ℂ) = ((2 : ℝ) : ℂ) by norm_num,
+      norm_cpow_eq_rpow_re_of_pos (by norm_num : (0 : ℝ) < 2)]
+    have hre : ((((σ : ℂ) + y * I) + ν) / 2).re = (σ + ν.re) / 2 := by simp
+    have hΓbound := Complex.norm_Gamma_le_Gamma_re (s := (((σ : ℂ) + y * I) + ν) / 2)
+      (by rw [hre]; exact hp)
+    rw [hre] at hΓbound
+    simp only [sub_re, add_re, ofReal_re, mul_re, ofReal_im, I_re, I_im, mul_zero,
+      zero_mul, sub_zero, add_zero, ofReal_ofNat]
+    exact mul_le_mul_of_nonneg_left hΓbound (by positivity)
+  refine (hΓ'.bdd_mul hmeas hbound).congr (Eventually.of_forall fun y => ?_)
+  dsimp only
+  rw [mellin_besselK (by simpa using hσ)]
+  ring
+
 
 end DLMF.Bessel

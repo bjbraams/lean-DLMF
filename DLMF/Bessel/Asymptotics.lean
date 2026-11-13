@@ -448,6 +448,22 @@ theorem besselJ_sub_cos_isBigO (ν : ℂ) :
     (-I * s * (Real.sqrt π : ℂ)) * hA + (-I * s * (Real.sqrt π : ℂ)) * hB +
     (s * (Real.sqrt π : ℂ) * (T1 + T2)) * I_sq
 
+/-- The leading oscillatory approximation to `J_ν(t)` has error `o(t^{-1/2})`. -/
+theorem besselJ_sub_cos_mul_sqrt_tendsto_zero (ν : ℂ) :
+    Tendsto (fun t : ℝ =>
+      (Complex.besselJ ν t - (Real.sqrt (2 / (π * t)) : ℂ) *
+        cos ((t : ℂ) - ν * π / 2 - π / 4)) * (Real.sqrt t : ℂ)) atTop (𝓝 0) := by
+  have hs : (fun t : ℝ => (Real.sqrt t : ℂ)) =O[atTop] (fun t : ℝ => Real.sqrt t) :=
+    IsBigO.of_bound 1 (Eventually.of_forall fun t => by simp)
+  have h := (besselJ_sub_cos_isBigO ν).mul hs
+  have ht : Tendsto (fun t : ℝ => t ^ (-(3 / 2) : ℝ) * Real.sqrt t)
+      atTop (𝓝 0) := by
+    refine tendsto_inv_atTop_zero.congr' ?_
+    filter_upwards [eventually_gt_atTop 0] with t ht
+    rw [Real.sqrt_eq_rpow, ← Real.rpow_add ht, show (-(3 / 2) : ℝ) + 1 / 2 = -1 by norm_num,
+      Real.rpow_neg_one]
+  exact h.trans_tendsto ht
+
 /-- For real order and positive argument, `J_ν(x)` is real. -/
 theorem besselJ_ofReal_eq_re (ν x : ℝ) (hx : 0 < x) :
     besselJ ν x = ((besselJ ν x).re : ℂ) := by

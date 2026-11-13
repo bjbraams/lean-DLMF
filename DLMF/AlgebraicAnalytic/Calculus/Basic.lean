@@ -8,6 +8,8 @@ module
 public import Mathlib.Analysis.Calculus.ContDiff.Defs
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 public import Mathlib.LinearAlgebra.CrossProduct
+import Mathlib.Analysis.Calculus.Deriv.Prod
+import Mathlib.Analysis.Calculus.Deriv.Comp
 
 /-!
 # Calculus of one and several variables, vector calculus: definitions (DLMF §§1.4–1.7)
@@ -211,6 +213,20 @@ def tangentU (Φ : ℝ × ℝ → Fin 3 → ℝ) (p : ℝ × ℝ) : Fin 3 → �
 @[dlmf 1.6.E47]
 def tangentV (Φ : ℝ × ℝ → Fin 3 → ℝ) (p : ℝ × ℝ) : Fin 3 → ℝ :=
   deriv (fun v => Φ (p.1, v)) p.2
+
+/-- The first tangent vector is the derivative in the first coordinate direction. -/
+lemma tangentU_eq_fderiv {Φ : ℝ × ℝ → Fin 3 → ℝ} {p : ℝ × ℝ}
+    (hΦ : DifferentiableAt ℝ Φ p) : tangentU Φ p = fderiv ℝ Φ p (1, 0) := by
+  have h := hΦ.hasFDerivAt.comp_hasDerivAt p.1
+    ((hasDerivAt_id p.1).prodMk (hasDerivAt_const p.1 p.2))
+  simpa only [tangentU, id_eq, Function.comp_def, mul_one] using h.deriv
+
+/-- The second tangent vector is the derivative in the second coordinate direction. -/
+lemma tangentV_eq_fderiv {Φ : ℝ × ℝ → Fin 3 → ℝ} {p : ℝ × ℝ}
+    (hΦ : DifferentiableAt ℝ Φ p) : tangentV Φ p = fderiv ℝ Φ p (0, 1) := by
+  have h := hΦ.hasFDerivAt.comp_hasDerivAt p.2
+    ((hasDerivAt_const p.2 p.1).prodMk (hasDerivAt_id p.2))
+  simpa only [tangentV, id_eq, Function.comp_def, mul_one] using h.deriv
 
 /-- DLMF §1.6(v): the parametrized surface `Φ` is smooth at `p` if `T_u × T_v ≠ 0` there. -/
 @[dlmf 1.6.v]

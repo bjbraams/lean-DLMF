@@ -18,7 +18,7 @@
   leftmargin=1.5em, labelindent=0pt, itemsep=0.3ex, topsep=0.3ex, parsep=0.3ex]\setlength{\parindent}{0pt}\RaggedRight}{\end{description}}
 
 % entry counts
-\newcommand{\NumA}{151}
+\newcommand{\NumA}{152}
 \newcommand{\NumB}{29}
 
 \begin{document}
@@ -27,7 +27,7 @@
   NIST Digital Library of Mathematical Functions\\[0.4ex]
   \large found in the Lean~4 formalization \texttt{lean-DLMF}}
 \author{Bastiaan J. Braams}
-\date{2026-11-10}
+\date{2026-11-13}
 \maketitle
 
 \begin{abstract}
@@ -190,6 +190,23 @@ Later proof-review findings carry their own dates below.
   (\file{DLMF/AlgebraicAnalytic/Transforms/MellinHilbertStieltjes.lean}), admitted.
 \end{fields}
 
+\entry{\dlink{1.14.T2}{Table~1.14.2}, row 5}
+\begin{fields}
+\item[Printed] the cosine transform of $4a^3/(4a^4+t^4)$ is
+  $\sqrt\pi\,e^{-ax}\sin(ax+\pi/4)$ for $\Re a>0$.
+\item[Correct] the displayed formula holds in the sector $|\Im a|<\Re a$.
+\item[Evidence] take $a=1+\iu$ and $x=\pi/2$. The kernel is
+  $(-8+8\iu)/(t^4-16)$, with a real-axis pole at $t=2$.
+  The Lean totalized cosine integral satisfies $\Re F+\Im F=0$, whereas the displayed
+  right side satisfies $\Re F+\Im F<0$. Both this counterexample and the formula in the
+  restricted sector have formal proofs using standard axioms only.
+\item[Lean] \lean{fourierCosTransform_quartic}
+  (\file{DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean}), proved with the approved
+  sector correction. The counterexample is retained in
+  \file{scripts/CheckDLMFQuarticTransform.lean}; the applied correction patch is
+  \file{reports/DLMFStatementCorrections20261112.patch}.
+\end{fields}
+
 \entry{\dlink{1.14.T2}{Table~1.14.2}, row 11}
 \begin{fields}
 \item[Printed] $\ln\bigl((a^2+t^2)/(b^2+t^2)\bigr)\mapsto\sqrt{2\pi}\,(\eu^{-bx}-\eu^{-ax})/x$,
@@ -199,7 +216,7 @@ Later proof-review findings carry their own dates below.
 \item[Evidence] $a=1+10\iu$, $b=1-10\iu$, $x=0.7$: the cosine transform of the quotient form is
   $-2.1815\iu$, of the difference form $2.336535\iu$, the table $2.336535\iu$.
 \item[Lean] \lean{fourierCosTransform_log_sub_log}
-  (\file{DLMF/AlgebraicAnalytic/Transforms/Tables.lean}), admitted.
+  (\file{DLMF/AlgebraicAnalytic/Transforms/Tables/LogarithmicCosine.lean}), proved.
 \end{fields}
 
 \entry{\dlink{1.14.T4}{Table~1.14.4}, rows 15--17}
@@ -1550,7 +1567,7 @@ $\sn z_{j}\dn z_{j}$.
 \item[Evidence] determinant $\approx-0.107+0.033\iu$ at $k=0.6$ ($\approx-0.03+0.04\iu$ in the
 independent check).
 \item[Lean] \lean{jacobi_det_sum_two_K}, \lean{jacobi_det_sum_two_K'}
-(\file{DLMF/JacobiElliptic/Addition.lean}), admitted.
+(\file{DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean}), proved.
 \item[Found] 2026-10-25.
 \end{fields}
 

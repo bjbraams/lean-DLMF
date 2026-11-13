@@ -162,7 +162,52 @@ theorem vanVleck_arg_convs {b : ℕ → ℂ} {δ : ℝ} (hδ : 0 < δ) (hb0 : b 
     (hb : ∀ n, 1 ≤ n → b n ≠ 0 ∧ |(b n).arg| < Real.pi / 2 - δ) (n : ℕ) (hn : 1 ≤ n) :
     (contFrac (fun _ => 1) b).convs n ≠ 0 ∧
       |((contFrac (fun _ => 1) b).convs n).arg| < Real.pi / 2 - δ := by
-  sorry
+  let α := Real.pi / 2 - δ
+  have hα : 0 < α := (abs_nonneg (b 1).arg).trans_lt (hb 1 le_rfl).2
+  have hαπ : α < Real.pi / 2 := by dsimp only [α]; linarith
+  have hαcc : α ∈ Set.Icc (0 : ℝ) Real.pi := ⟨hα.le, by linarith [Real.pi_pos]⟩
+  have hcos : 0 < Real.cos α := Real.cos_pos_of_mem_Ioo ⟨by linarith [Real.pi_pos], hαπ⟩
+  have hcone (z : ℂ) (hz : z ≠ 0) : |z.arg| < α ↔ ‖z‖ * Real.cos α < z.re := by
+    rw [← Complex.norm_mul_cos_arg z, ← Real.cos_abs z.arg,
+      mul_lt_mul_iff_right₀ (norm_pos_iff.mpr hz)]
+    exact (Real.strictAntiOn_cos.lt_iff_gt hαcc
+      ⟨abs_nonneg z.arg, Complex.abs_arg_le_pi z⟩).symm
+  have hadd {z w : ℂ} (hz : z ≠ 0 ∧ |z.arg| < α) (hw : w ≠ 0 ∧ |w.arg| < α) :
+      z + w ≠ 0 ∧ |(z + w).arg| < α := by
+    have hc : ‖z + w‖ * Real.cos α < (z + w).re := by
+      calc
+        _ ≤ (‖z‖ + ‖w‖) * Real.cos α :=
+          mul_le_mul_of_nonneg_right (norm_add_le _ _) hcos.le
+        _ = ‖z‖ * Real.cos α + ‖w‖ * Real.cos α := add_mul _ _ _
+        _ < z.re + w.re := add_lt_add ((hcone z hz.1).mp hz.2) ((hcone w hw.1).mp hw.2)
+        _ = _ := rfl
+    have hne : z + w ≠ 0 := by
+      intro h
+      simp only [h, norm_zero, zero_mul, Complex.zero_re] at hc
+      exact (lt_irrefl _ hc)
+    exact ⟨hne, (hcone _ hne).mpr hc⟩
+  have hinv {z : ℂ} (hz : z ≠ 0 ∧ |z.arg| < α) : z⁻¹ ≠ 0 ∧ |z⁻¹.arg| < α :=
+    ⟨inv_ne_zero hz.1, by simpa only [Complex.abs_arg_inv] using hz.2⟩
+  have htail (m : ℕ) : ∀ c : ℕ → ℂ,
+      (∀ k, c k ≠ 0 ∧ |(c k).arg| < α) →
+      (contFrac (fun _ => 1) c).convs' m ≠ 0 ∧
+        |((contFrac (fun _ => 1) c).convs' m).arg| < α := by
+    induction m with
+    | zero => intro c hc; simpa only [zeroth_conv'_eq_h, contFrac, ofFun] using hc 0
+    | succ m ih =>
+      intro c hc
+      rw [contFrac_convs'_succ]
+      simp only [one_div]
+      exact hadd (hc 0) (hinv (ih (fun j => c (j + 1)) fun j => hc _))
+  have hden : ∀ k, 1 ≤ k → k ≤ n → contFracTail (fun _ => (1 : ℂ)) b k n ≠ 0 := by
+    intro k hk _
+    exact (htail (n - k) (fun j => b (j + k)) fun j => hb _ (by omega)).1
+  obtain ⟨heq, -⟩ := contFrac_convs'_eq_convs n (fun _ => (1 : ℂ)) b hden
+  rw [← heq]
+  obtain ⟨m, rfl⟩ := Nat.exists_eq_succ_of_ne_zero (by omega : n ≠ 0)
+  rw [contFrac_convs'_succ, hb0, zero_add]
+  simp only [one_div]
+  exact hinv (htail m (fun j => b (j + 1)) fun j => hb _ (by omega))
 
 /-- DLMF §1.12(v) (Van Vleck's theorem, second part): under 1.12.26 the even and odd parts of
 `1/(b₁ + 1/(b₂ + ⋯))` converge to finite values, i.e. `C_{2n}` and `C_{2n+1}` converge. -/

@@ -1,5 +1,10 @@
 # DLMF Chapter 36 acquisition: Integrals with Coalescing Saddles
 
+**Proof status (2026-11-13).** Chapter 36 has 31 direct source admissions. The [updated-dependency proof round](
+REVIEW.md#proofs-with-the-updated-dependencies-2026-11-12) proves 1 original admissions in this chapter.
+Per-entry statuses and source links below follow the compiled axiom audit; earlier
+dated counts describe their original batches.
+
 > Source paths and current layout notes were refreshed on 2026-10-30; generated per-entry
 > statuses follow the compiled ledger refresh. Dated acquisition and proof counts
 > describe their original batches.
@@ -409,13 +414,13 @@ declarations:
 ## [§36.11 Leading-Order Asymptotics](https://dlmf.nist.gov/36.11)
 
 - [36.11.E1](https://dlmf.nist.gov/36.11.E1): [`DLMF.CoalescingSaddles.cuspoidStationaryPhaseSum`](DLMF/CoalescingSaddles/Basic/AuxiliaryData.lean#L187) (definition)
-- [36.11.E2](https://dlmf.nist.gov/36.11.E2): [`DLMF.CoalescingSaddles.cuspoidStationaryPhaseSum`](DLMF/CoalescingSaddles/Basic/AuxiliaryData.lean#L187) (definition); [`DLMF.CoalescingSaddles.cuspoidIntegral_sub_stationaryPhaseSum_isLittleO`](DLMF/CoalescingSaddles/Asymptotics.lean#L77) (admitted)
-- [36.11.E3](https://dlmf.nist.gov/36.11.E3): [`DLMF.CoalescingSaddles.cuspoidIntegral_two_zero_atTop`](DLMF/CoalescingSaddles/Asymptotics.lean#L559) (proved); [`DLMF.CoalescingSaddles.cuspoidIntegral_two_zero_atBot`](DLMF/CoalescingSaddles/Asymptotics.lean#L586) (admitted)
-- [36.11.E4](https://dlmf.nist.gov/36.11.E4): [`DLMF.CoalescingSaddles.cuspoidIntegral_three_x_atTop`](DLMF/CoalescingSaddles/Asymptotics.lean#L596) (admitted); [`DLMF.CoalescingSaddles.cuspoidIntegral_three_x_atBot`](DLMF/CoalescingSaddles/Asymptotics.lean#L608) (admitted)
-- [36.11.E5](https://dlmf.nist.gov/36.11.E5): [`DLMF.CoalescingSaddles.cuspoidIntegral_three_y_conj`](DLMF/CoalescingSaddles/Asymptotics.lean#L618) (proved); [`DLMF.CoalescingSaddles.cuspoidIntegral_three_y_atTop`](DLMF/CoalescingSaddles/Asymptotics.lean#L627) (admitted)
-- [36.11.E6](https://dlmf.nist.gov/36.11.E6): [`DLMF.CoalescingSaddles.cuspoidIntegral_three_z_atTop`](DLMF/CoalescingSaddles/Asymptotics.lean#L638) (proved); [`DLMF.CoalescingSaddles.cuspoidIntegral_three_z_atBot`](DLMF/CoalescingSaddles/Asymptotics.lean#L682) (admitted)
-- [36.11.E7](https://dlmf.nist.gov/36.11.E7): [`DLMF.CoalescingSaddles.ellipticUmbilicIntegral_z_atTop`](DLMF/CoalescingSaddles/Asymptotics.lean#L694) (admitted); [`DLMF.CoalescingSaddles.ellipticUmbilicIntegral_z_atBot`](DLMF/CoalescingSaddles/Asymptotics.lean#L703) (proved from admissions)
-- [36.11.E8](https://dlmf.nist.gov/36.11.E8): [`DLMF.CoalescingSaddles.hyperbolicUmbilicIntegral_z_atTop`](DLMF/CoalescingSaddles/Asymptotics.lean#L723) (admitted); [`DLMF.CoalescingSaddles.hyperbolicUmbilicIntegral_z_atBot`](DLMF/CoalescingSaddles/Asymptotics.lean#L732) (proved from admissions)
+- [36.11.E2](https://dlmf.nist.gov/36.11.E2): [`DLMF.CoalescingSaddles.cuspoidStationaryPhaseSum`](DLMF/CoalescingSaddles/Basic/AuxiliaryData.lean#L187) (definition); [`DLMF.CoalescingSaddles.cuspoidIntegral_sub_stationaryPhaseSum_isLittleO`](DLMF/CoalescingSaddles/Asymptotics.lean#L78) (admitted)
+- [36.11.E3](https://dlmf.nist.gov/36.11.E3): [`DLMF.CoalescingSaddles.cuspoidIntegral_two_zero_atTop`](DLMF/CoalescingSaddles/Asymptotics.lean#L560) (proved); [`DLMF.CoalescingSaddles.cuspoidIntegral_two_zero_atBot`](DLMF/CoalescingSaddles/Asymptotics/Pearcey.lean#L34) (proved)
+- [36.11.E4](https://dlmf.nist.gov/36.11.E4): [`DLMF.CoalescingSaddles.cuspoidIntegral_three_x_atTop`](DLMF/CoalescingSaddles/Asymptotics.lean#L587) (admitted); [`DLMF.CoalescingSaddles.cuspoidIntegral_three_x_atBot`](DLMF/CoalescingSaddles/Asymptotics.lean#L599) (admitted)
+- [36.11.E5](https://dlmf.nist.gov/36.11.E5): [`DLMF.CoalescingSaddles.cuspoidIntegral_three_y_conj`](DLMF/CoalescingSaddles/Asymptotics.lean#L609) (proved); [`DLMF.CoalescingSaddles.cuspoidIntegral_three_y_atTop`](DLMF/CoalescingSaddles/Asymptotics.lean#L618) (admitted)
+- [36.11.E6](https://dlmf.nist.gov/36.11.E6): [`DLMF.CoalescingSaddles.cuspoidIntegral_three_z_atTop`](DLMF/CoalescingSaddles/Asymptotics.lean#L629) (proved); [`DLMF.CoalescingSaddles.cuspoidIntegral_three_z_atBot`](DLMF/CoalescingSaddles/Asymptotics.lean#L673) (admitted)
+- [36.11.E7](https://dlmf.nist.gov/36.11.E7): [`DLMF.CoalescingSaddles.ellipticUmbilicIntegral_z_atTop`](DLMF/CoalescingSaddles/Asymptotics.lean#L685) (admitted); [`DLMF.CoalescingSaddles.ellipticUmbilicIntegral_z_atBot`](DLMF/CoalescingSaddles/Asymptotics.lean#L694) (proved from admissions)
+- [36.11.E8](https://dlmf.nist.gov/36.11.E8): [`DLMF.CoalescingSaddles.hyperbolicUmbilicIntegral_z_atTop`](DLMF/CoalescingSaddles/Asymptotics.lean#L714) (admitted); [`DLMF.CoalescingSaddles.hyperbolicUmbilicIntegral_z_atBot`](DLMF/CoalescingSaddles/Asymptotics.lean#L723) (proved from admissions)
 
 ## [§36.12 Uniform Approximation of Integrals](https://dlmf.nist.gov/36.12)
 

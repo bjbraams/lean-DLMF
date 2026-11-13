@@ -1,5 +1,10 @@
 # DLMF Chapter 24 acquisition: Bernoulli and Euler Polynomials
 
+**Proof status (2026-11-13).** Chapter 24 has 15 direct source admissions. The [updated-dependency proof round](
+REVIEW.md#proofs-with-the-updated-dependencies-2026-11-12) proves 1 original admissions in this chapter.
+Per-entry statuses and source links below follow the compiled axiom audit; earlier
+dated counts describe their original batches.
+
 > Source paths and current layout notes were refreshed on 2026-10-30; generated per-entry
 > statuses follow the compiled ledger refresh. Dated acquisition and proof counts
 > describe their original batches.
@@ -198,14 +203,14 @@ DLMFMathlib declarations are all proved or definitions. No proved theorem depend
 ## [§24.8 Series Expansions](https://dlmf.nist.gov/24.8)
 
 - [24.8.E1](https://dlmf.nist.gov/24.8.E1): Mathlib: [`hasSum_one_div_nat_pow_mul_cos`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=hasSum_one_div_nat_pow_mul_cos#doc). n ≥ 1, 0 ≤ x ≤ 1, pointer in DLMF/Core/UpstreamElementary.lean.
-- [24.8.E2](https://dlmf.nist.gov/24.8.E2): [`DLMF.BernoulliEuler.tendsto_sum_sin_div_eq_bernoulliFun_one`](DLMF/BernoulliEuler/Series.lean#L187) (proved); Mathlib: [`hasSum_one_div_nat_pow_mul_sin`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=hasSum_one_div_nat_pow_mul_sin#doc). n ≥ 1 is the Mathlib pointer (in DLMF/Core/UpstreamElementary.lean); the conditionally convergent case n = 0, 0 < x < 1 is acquired as the limit of the natural partial sums.
-- [24.8.E3](https://dlmf.nist.gov/24.8.E3): [`DLMF.BernoulliEuler.tendsto_sum_exp_div_eq_bernoulliFun_one`](DLMF/BernoulliEuler/Series.lean#L213) (proved); Mathlib: [`hasSum_one_div_pow_mul_fourier_mul_bernoulliFun`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=hasSum_one_div_pow_mul_fourier_mul_bernoulliFun#doc). n ≥ 2 is the Mathlib pointer (in DLMF/Core/UpstreamElementary.lean); the case n = 1, 0 < x < 1 is acquired as the limit of the symmetric partial sums.
-- [24.8.E4](https://dlmf.nist.gov/24.8.E4): [`DLMF.BernoulliEuler.hasSum_sin_odd_eulerFun`](DLMF/BernoulliEuler/Series.lean#L245) (proved). n ≥ 1, 0 ≤ x ≤ 1.
-- [24.8.E5](https://dlmf.nist.gov/24.8.E5): [`DLMF.BernoulliEuler.hasSum_cos_odd_eulerFun`](DLMF/BernoulliEuler/Series.lean#L288) (proved). n ≥ 1, 0 ≤ x ≤ 1.
-- [24.8.E6](https://dlmf.nist.gov/24.8.E6): [`DLMF.BernoulliEuler.hasSum_bernoulli_four_mul_add_two`](DLMF/BernoulliEuler/Series.lean#L481) (proved). n ≥ 1.
-- [24.8.E7](https://dlmf.nist.gov/24.8.E7): [`DLMF.BernoulliEuler.hasSum_bernoulli_two_mul_alt`](DLMF/BernoulliEuler/Series.lean#L503) (proved). n ≥ 2.
-- [24.8.E8](https://dlmf.nist.gov/24.8.E8): [`DLMF.BernoulliEuler.bernoulli_two_mul_alpha_beta`](DLMF/BernoulliEuler/Series.lean#L428) (proved). α, β > 0 with αβ = π², n ≥ 2; summability of both series included.
-- [24.8.E9](https://dlmf.nist.gov/24.8.E9): [`DLMF.BernoulliEuler.eulerNumber_two_mul_eq_series`](DLMF/BernoulliEuler/Series.lean#L627) (admitted). n ≥ 1; summability of both series included.
+- [24.8.E2](https://dlmf.nist.gov/24.8.E2): [`DLMF.BernoulliEuler.tendsto_sum_sin_div_eq_bernoulliFun_one`](DLMF/BernoulliEuler/Series.lean#L191) (proved); Mathlib: [`hasSum_one_div_nat_pow_mul_sin`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=hasSum_one_div_nat_pow_mul_sin#doc). n ≥ 1 is the Mathlib pointer (in DLMF/Core/UpstreamElementary.lean); the conditionally convergent case n = 0, 0 < x < 1 is acquired as the limit of the natural partial sums.
+- [24.8.E3](https://dlmf.nist.gov/24.8.E3): [`DLMF.BernoulliEuler.tendsto_sum_exp_div_eq_bernoulliFun_one`](DLMF/BernoulliEuler/Series.lean#L217) (proved); Mathlib: [`hasSum_one_div_pow_mul_fourier_mul_bernoulliFun`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=hasSum_one_div_pow_mul_fourier_mul_bernoulliFun#doc). n ≥ 2 is the Mathlib pointer (in DLMF/Core/UpstreamElementary.lean); the case n = 1, 0 < x < 1 is acquired as the limit of the symmetric partial sums.
+- [24.8.E4](https://dlmf.nist.gov/24.8.E4): [`DLMF.BernoulliEuler.hasSum_sin_odd_eulerFun`](DLMF/BernoulliEuler/Series.lean#L249) (proved). n ≥ 1, 0 ≤ x ≤ 1.
+- [24.8.E5](https://dlmf.nist.gov/24.8.E5): [`DLMF.BernoulliEuler.hasSum_cos_odd_eulerFun`](DLMF/BernoulliEuler/Series.lean#L292) (proved). n ≥ 1, 0 ≤ x ≤ 1.
+- [24.8.E6](https://dlmf.nist.gov/24.8.E6): [`DLMF.BernoulliEuler.hasSum_bernoulli_four_mul_add_two`](DLMF/BernoulliEuler/Series.lean#L485) (proved). n ≥ 1.
+- [24.8.E7](https://dlmf.nist.gov/24.8.E7): [`DLMF.BernoulliEuler.hasSum_bernoulli_two_mul_alt`](DLMF/BernoulliEuler/Series.lean#L507) (proved). n ≥ 2.
+- [24.8.E8](https://dlmf.nist.gov/24.8.E8): [`DLMF.BernoulliEuler.bernoulli_two_mul_alpha_beta`](DLMF/BernoulliEuler/Series.lean#L432) (proved). α, β > 0 with αβ = π², n ≥ 2; summability of both series included.
+- [24.8.E9](https://dlmf.nist.gov/24.8.E9): [`DLMF.BernoulliEuler.eulerNumber_two_mul_eq_series`](DLMF/BernoulliEuler/Series.lean#L785) (proved). n ≥ 1; summability of both series included.
 
 ## [§24.9 Inequalities](https://dlmf.nist.gov/24.9)
 

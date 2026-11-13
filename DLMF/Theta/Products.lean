@@ -7,6 +7,7 @@ module -- shake: keep-all
 
 public import DLMF.Theta.Products.InfiniteProducts
 public import DLMF.Theta.Products.LogDerivativesAndDoubleProducts
+public import DLMF.Theta.Products.LogDerivativeFourier
 public import DLMF.Theta.Products.LogNormIntegral
 
 /-!

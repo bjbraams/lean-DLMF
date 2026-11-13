@@ -6,6 +6,12 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Theta.Basic.PowerSeries
+public import DLMF.Theta.PowerSeries.LatticeCoefficients
+public import DLMF.Theta.PowerSeries.ShiftedLattice
+public import DLMF.Theta.PowerSeries.ThetaOne
+public import DLMF.Theta.PowerSeries.ThetaTwo
+public import DLMF.Theta.PowerSeries.ThetaThree
+public import DLMF.Theta.PowerSeries.ThetaFour
 public import DLMF.Theta.Identities
 public import DLMF.Theta.SeriesAndZeros
 
@@ -40,49 +46,6 @@ noncomputable section
 namespace DLMF.Theta
 
 open DLMF.Elliptic
-
-/-- DLMF 20.6.2: for `|πz| < min |z_{m,n}|`,
-`θ₁(πz|τ) = πz θ₁'(0|τ) exp(-∑_{j≥1} δ_{2j}(τ) z^{2j}/(2j))`. -/
-@[dlmf 20.6.E2]
-theorem jacobiThetaOneTau_powerSeries {τ z : ℂ} (hτ : 0 < τ.im)
-    (hz : ‖π * z‖ < thetaLatticeMinNorm τ) :
-    ∃ S : ℂ, HasSum (fun j : ℕ => thetaDelta (2 * (j + 1)) τ * z ^ (2 * (j + 1)) /
-        (2 * (j + 1))) S ∧
-      jacobiThetaOneTau (π * z) τ = π * z * jacobiThetaOneDerivNullTau τ * cexp (-S) := by
-  sorry
-
-/-- DLMF 20.6.3: for `|πz|` below the distance to the shifted zero lattice
-`π(m - 1/2 + nτ)`,
-`θ₂(πz|τ) = θ₂(0|τ) exp(-∑_{j≥1} α_{2j}(τ) z^{2j}/(2j))`. -/
-@[dlmf 20.6.E3]
-theorem jacobiThetaTwoTau_powerSeries {τ z : ℂ} (hτ : 0 < τ.im)
-    (hz : ‖π * z‖ < thetaShiftedLatticeMinNorm (1 / 2) 0 τ) :
-    ∃ S : ℂ, HasSum (fun j : ℕ => thetaAlpha (2 * (j + 1)) τ * z ^ (2 * (j + 1)) /
-        (2 * (j + 1))) S ∧
-      jacobiThetaTwoTau (π * z) τ = jacobiThetaTwoNullTau τ * cexp (-S) := by
-  sorry
-
-/-- DLMF 20.6.4: for `|πz|` below the distance to the shifted zero lattice
-`π(m - 1/2 + (n - 1/2)τ)`,
-`θ₃(πz|τ) = θ₃(0|τ) exp(-∑_{j≥1} β_{2j}(τ) z^{2j}/(2j))`. -/
-@[dlmf 20.6.E4]
-theorem jacobiThetaThreeTau_powerSeries {τ z : ℂ} (hτ : 0 < τ.im)
-    (hz : ‖π * z‖ < thetaShiftedLatticeMinNorm (1 / 2) (1 / 2) τ) :
-    ∃ S : ℂ, HasSum (fun j : ℕ => thetaBeta (2 * (j + 1)) τ * z ^ (2 * (j + 1)) /
-        (2 * (j + 1))) S ∧
-      jacobiThetaThreeTau (π * z) τ = jacobiThetaThreeNullTau τ * cexp (-S) := by
-  sorry
-
-/-- DLMF 20.6.5: for `|πz|` below the distance to the shifted zero lattice
-`π(m + (n - 1/2)τ)`,
-`θ₄(πz|τ) = θ₄(0|τ) exp(-∑_{j≥1} γ_{2j}(τ) z^{2j}/(2j))`. -/
-@[dlmf 20.6.E5]
-theorem jacobiThetaFourTau_powerSeries {τ z : ℂ} (hτ : 0 < τ.im)
-    (hz : ‖π * z‖ < thetaShiftedLatticeMinNorm 0 (1 / 2) τ) :
-    ∃ S : ℂ, HasSum (fun j : ℕ => thetaGamma (2 * (j + 1)) τ * z ^ (2 * (j + 1)) /
-        (2 * (j + 1))) S ∧
-      jacobiThetaFourTau (π * z) τ = jacobiThetaFourNullTau τ * cexp (-S) := by
-  sorry
 
 /-- Absolute convergence of the (doubled, shifted) lattice sums for `k ≥ 3` (helper). -/
 private lemma summable_norm_inv_shifted_lattice_pow {τ : ℂ} (hτ : 0 < τ.im) (a b : ℤ)
@@ -451,6 +414,116 @@ theorem thetaDelta_two_not_summable {τ : ℂ} (hτ : 0 < τ.im) :
   calc (1 : ℝ) = (‖w‖ * ‖w‖)⁻¹ * (‖w‖ * ‖w‖) := by field_simp
     _ ≤ (‖w‖ * ‖w‖)⁻¹ * (C * ((a : ℝ) + b + 2)) ^ 2 := by gcongr
     _ = _ := by ring
+
+/-- Splitting the period into its even and odd rows gives the coefficient `γ₂ⱼ`. -/
+lemma thetaGamma_eq_thetaDelta_sub {τ : ℂ} (hτ : 0 < τ.im) (j : ℕ) (hj : 1 ≤ j) :
+    thetaGamma (2 * j) τ = thetaDelta (2 * j) (τ / 2) - thetaDelta (2 * j) τ := by
+  have hk0 : ((2 * j : ℕ) : ℤ) ≠ 0 := by omega
+  have hD : ∀ σ : ℂ, thetaDelta (2 * j) σ =
+      ∑' n : ℤ, ∑' m : ℤ, ((m : ℂ) + n * σ) ^ (-((2 * j : ℕ) : ℤ)) := by
+    intro σ
+    refine tsum_congr fun n => tsum_congr fun m => ?_
+    split_ifs with h
+    · simp only [h.1, h.2, Int.cast_zero, zero_mul, add_zero]
+      exact (zero_zpow _ (neg_ne_zero.mpr hk0)).symm
+    · rfl
+  have hτh : 0 < (τ / 2).im := by simpa using div_pos hτ two_pos
+  have sD : Summable (fun n : ℤ => ∑' m : ℤ,
+      ((m : ℂ) + n * τ) ^ (-((2 * j : ℕ) : ℤ))) :=
+    (summable_tsum_shifted_row hτ hj 0 0 (Or.inl rfl)).congr fun n => tsum_congr fun m => by
+      congr 1; push_cast; ring_nf
+  have sH : Summable (fun n : ℤ => ∑' m : ℤ,
+      ((m : ℂ) + n * (τ / 2)) ^ (-((2 * j : ℕ) : ℤ))) :=
+    (summable_tsum_shifted_row hτh hj 0 0 (Or.inl rfl)).congr fun n => tsum_congr fun m => by
+      congr 1; push_cast; ring_nf
+  have sG : Summable (fun n : ℤ => ∑' m : ℤ,
+      ((m : ℂ) + (n - 1 / 2) * τ) ^ (-((2 * j : ℕ) : ℤ))) :=
+    (summable_tsum_shifted_row hτ hj 0 (-1) (Or.inr rfl)).congr fun n => tsum_congr fun m => by
+      congr 1; push_cast; ring_nf
+  let f : ℤ → ℂ := fun n => ∑' m : ℤ,
+    ((m : ℂ) + n * (τ / 2)) ^ (-((2 * j : ℕ) : ℤ))
+  have hP := (parityEquivInt.hasSum_iff).mpr sH.hasSum
+  have hA : HasSum (f ∘ parityEquivInt ∘ Sum.inl) (thetaDelta (2 * j) τ) := by
+    rw [hD]
+    convert sD.hasSum using 1
+    funext n
+    dsimp only [f, Function.comp_apply, parityEquivInt, Equiv.coe_fn_mk, Sum.elim_inl]
+    refine tsum_congr fun m => ?_
+    congr 1
+    push_cast
+    ring_nf
+  have hG : HasSum (fun n : ℤ => ∑' m : ℤ,
+      ((m : ℂ) + ((n : ℂ) + 1 / 2) * τ) ^ (-((2 * j : ℕ) : ℤ))) (thetaGamma (2 * j) τ) := by
+    have h := (Equiv.addRight (1 : ℤ)).hasSum_iff.mpr sG.hasSum
+    convert h using 1
+    · funext n
+      dsimp only [Function.comp_apply, Equiv.coe_addRight]
+      refine tsum_congr fun m => ?_
+      congr 1
+      push_cast
+      ring_nf
+    · rfl
+  have hB : HasSum (f ∘ parityEquivInt ∘ Sum.inr) (thetaGamma (2 * j) τ) := by
+    convert hG using 1
+    funext n
+    dsimp only [f, Function.comp_apply, parityEquivInt, Equiv.coe_fn_mk, Sum.elim_inr]
+    refine tsum_congr fun m => ?_
+    congr 1
+    push_cast
+    ring_nf
+  have h := hP.unique (hA.sum hB)
+  rw [← hD] at h
+  linear_combination -h
+
+/-- The coefficient `β₂ⱼ` is the difference of two real-shifted lattice coefficients. -/
+lemma thetaBeta_eq_thetaAlpha_sub {τ : ℂ} (hτ : 0 < τ.im) (j : ℕ) (hj : 1 ≤ j) :
+    thetaBeta (2 * j) τ = thetaAlpha (2 * j) (τ / 2) - thetaAlpha (2 * j) τ := by
+  have hτh : 0 < (τ / 2).im := by simpa using div_pos hτ two_pos
+  have hτ2 : 0 < (2 * τ).im := by simpa using mul_pos two_pos hτ
+  rw [(thetaAlpha_thetaBeta_eq hτ j hj).2,
+    (thetaAlpha_thetaBeta_eq hτh j hj).1,
+    (thetaAlpha_thetaBeta_eq hτ j hj).1,
+    thetaGamma_eq_thetaDelta_sub hτ j hj,
+    thetaGamma_eq_thetaDelta_sub hτ2 j hj,
+    show 2 * (τ / 2) = τ by ring_nf, show 2 * τ / 2 = τ by ring_nf]
+  ring_nf
+
+/-- DLMF 20.6.3: for `|πz|` below the distance to the shifted zero lattice
+`π(m - 1/2 + nτ)`,
+`θ₂(πz|τ) = θ₂(0|τ) exp(-∑_{j≥1} α_{2j}(τ) z^{2j}/(2j))`. -/
+@[dlmf 20.6.E3]
+theorem jacobiThetaTwoTau_powerSeries {τ z : ℂ} (hτ : 0 < τ.im)
+    (hz : ‖π * z‖ < thetaShiftedLatticeMinNorm (1 / 2) 0 τ) :
+    ∃ S : ℂ, HasSum (fun j : ℕ => thetaAlpha (2 * (j + 1)) τ * z ^ (2 * (j + 1)) /
+        (2 * (j + 1))) S ∧
+      jacobiThetaTwoTau (π * z) τ = jacobiThetaTwoNullTau τ * cexp (-S) := by
+  exact LogarithmicTheta.thetaTwo_powerSeries_of_lattice_relation hτ
+    (fun j => (thetaAlpha_thetaBeta_eq hτ (j + 1) (by omega)).1) hz
+
+/-- DLMF 20.6.4: for `|πz|` below the distance to the shifted zero lattice
+`π(m - 1/2 + (n - 1/2)τ)`,
+`θ₃(πz|τ) = θ₃(0|τ) exp(-∑_{j≥1} β_{2j}(τ) z^{2j}/(2j))`. -/
+@[dlmf 20.6.E4]
+theorem jacobiThetaThreeTau_powerSeries {τ z : ℂ} (hτ : 0 < τ.im)
+    (hz : ‖π * z‖ < thetaShiftedLatticeMinNorm (1 / 2) (1 / 2) τ) :
+    ∃ S : ℂ, HasSum (fun j : ℕ => thetaBeta (2 * (j + 1)) τ * z ^ (2 * (j + 1)) /
+        (2 * (j + 1))) S ∧
+      jacobiThetaThreeTau (π * z) τ = jacobiThetaThreeNullTau τ * cexp (-S) := by
+  exact LogarithmicTheta.thetaThree_powerSeries_of_lattice_relation hτ
+    (fun j => thetaBeta_eq_thetaAlpha_sub hτ (j + 1) (by omega))
+    (fun σ hσ j => (thetaAlpha_thetaBeta_eq hσ (j + 1) (by omega)).1) hz
+
+/-- DLMF 20.6.5: for `|πz|` below the distance to the shifted zero lattice
+`π(m + (n - 1/2)τ)`,
+`θ₄(πz|τ) = θ₄(0|τ) exp(-∑_{j≥1} γ_{2j}(τ) z^{2j}/(2j))`. -/
+@[dlmf 20.6.E5]
+theorem jacobiThetaFourTau_powerSeries {τ z : ℂ} (hτ : 0 < τ.im)
+    (hz : ‖π * z‖ < thetaShiftedLatticeMinNorm 0 (1 / 2) τ) :
+    ∃ S : ℂ, HasSum (fun j : ℕ => thetaGamma (2 * (j + 1)) τ * z ^ (2 * (j + 1)) /
+        (2 * (j + 1))) S ∧
+      jacobiThetaFourTau (π * z) τ = jacobiThetaFourNullTau τ * cexp (-S) := by
+  exact LogarithmicTheta.thetaFour_powerSeries_of_lattice_relation hτ
+    (fun j => thetaGamma_eq_thetaDelta_sub hτ (j + 1) (by omega)) hz
 
 end DLMF.Theta
 

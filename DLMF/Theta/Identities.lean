@@ -307,7 +307,7 @@ private lemma jacobiThetaThreeTau_quarter_pi_sub_mul_add (z τ : ℂ) (hτ : 0 <
   linear_combination h
 
 /-- `2 θ₁(x|2τ)θ₄(x|2τ) = θ₁(x|τ)θ₂(0|τ)` (helper, 20.7.12). -/
-private lemma two_mul_jacobiThetaOneTau_mul_jacobiThetaFourTau_two_mul (x τ : ℂ) (hτ : 0 < τ.im) :
+lemma two_mul_jacobiThetaOneTau_mul_jacobiThetaFourTau_two_mul (x τ : ℂ) (hτ : 0 < τ.im) :
     2 * (jacobiThetaOneTau x (2 * τ) * jacobiThetaFourTau x (2 * τ)) =
       jacobiThetaOneTau x τ * jacobiThetaTwoNullTau τ := by
   have h := jacobiThetaTwoTau_mul_jacobiThetaTwoTau (x + π / 2) 0 τ hτ
@@ -316,7 +316,7 @@ private lemma two_mul_jacobiThetaOneTau_mul_jacobiThetaFourTau_two_mul (x τ : �
   linear_combination h
 
 /-- `2 θ₂(x|2τ)θ₃(x|2τ) = θ₂(x|τ)θ₂(0|τ)` (helper, 20.7.12). -/
-private lemma two_mul_jacobiThetaTwoTau_mul_jacobiThetaThreeTau_two_mul (x τ : ℂ) (hτ : 0 < τ.im) :
+lemma two_mul_jacobiThetaTwoTau_mul_jacobiThetaThreeTau_two_mul (x τ : ℂ) (hτ : 0 < τ.im) :
     2 * (jacobiThetaTwoTau x (2 * τ) * jacobiThetaThreeTau x (2 * τ)) =
       jacobiThetaTwoTau x τ * jacobiThetaTwoNullTau τ := by
   have h := jacobiThetaTwoTau_mul_jacobiThetaTwoTau x 0 τ hτ

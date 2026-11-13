@@ -9,6 +9,7 @@ public import DLMFMathlib.Analysis.SpecialFunctions.Gamma.BetaHalfLine
 public import DLMFMathlib.Analysis.SpecialFunctions.ImproperIntegralsExtra
 public import Mathlib.MeasureTheory.Measure.Lebesgue.Integral
 public import Mathlib.Analysis.Complex.Trigonometric
+import Mathlib.MeasureTheory.Measure.Haar.NormedSpace
 
 /-!
 # Fourier transform of the hyperbolic secant
@@ -79,7 +80,7 @@ theorem integral_exp_div_cosh {c : ℂ} (hc : |c.re| < 1 / 2) :
     push_cast
     rw [show 2 * c * t = (2 * (t : ℂ)) * (a - 1) + (t : ℂ) by dsimp [a]; ring,
       exp_add]
-    field_simp
+    field_simp [hD, hE]
     rw [← exp_add]
     ring_nf
   have hi : Integrable (fun t : ℝ => exp (2 * c * t) / (Real.cosh t : ℝ)) := by
@@ -97,6 +98,36 @@ theorem integral_exp_div_cosh {c : ℂ} (hc : |c.re| < 1 / 2) :
   rw [show (π : ℂ) * a = π / 2 + π * c by dsimp [a]; ring, sin_add, sin_pi_div_two,
     cos_pi_div_two]
   ring
+
+/-- The bilateral Laplace integral of the hyperbolic secant at any positive scale. -/
+theorem integral_exp_div_cosh_mul {b : ℝ} (hb : 0 < b) {c : ℂ} (hc : |c.re| < b) :
+    Integrable (fun t : ℝ => exp (c * t) / (Real.cosh (b * t) : ℝ)) ∧
+      (∫ t : ℝ, exp (c * t) / (Real.cosh (b * t) : ℝ)) =
+        (Real.pi : ℂ) / (b * cos (Real.pi * c / ((2 * b : ℝ) : ℂ))) := by
+  let d : ℂ := c / ((2 * b : ℝ) : ℂ)
+  have hd : |d.re| < 1 / 2 := by
+    dsimp [d]
+    rw [div_ofReal_re, abs_div, abs_of_pos (by positivity : (0 : ℝ) < 2 * b)]
+    exact (div_lt_iff₀ (by positivity : (0 : ℝ) < 2 * b)).mpr (by linarith)
+  obtain ⟨hi, hv⟩ := integral_exp_div_cosh hd
+  have he (t : ℝ) : exp (2 * d * (b * t)) / (Real.cosh (b * t) : ℝ) =
+      exp (c * t) / (Real.cosh (b * t) : ℝ) := by
+    congr 2
+    dsimp [d]
+    push_cast
+    field_simp [ofReal_ne_zero.mpr hb.ne']
+  refine ⟨?_, ?_⟩
+  · simpa only [ofReal_mul, he] using
+      (integrable_comp_mul_left_iff (fun t : ℝ => exp (2 * d * t) /
+        (Real.cosh t : ℝ)) hb.ne').mpr hi
+  · have h := MeasureTheory.Measure.integral_comp_mul_left (fun t : ℝ => exp (2 * d * t) /
+      (Real.cosh t : ℝ)) b
+    rw [hv] at h
+    simp only [ofReal_mul, he, Complex.real_smul, abs_of_pos (inv_pos.mpr hb)] at h
+    rw [h]
+    dsimp [d]
+    push_cast
+    field_simp [ofReal_ne_zero.mpr hb.ne']
 
 end Complex
 

@@ -7,6 +7,7 @@ module
 
 public import DLMF.CoalescingSaddles.Basic.AuxiliaryData
 public import DLMF.CoalescingSaddles.CanonicalIntegrals
+import DLMF.CoalescingSaddles.Asymptotics.Pearcey
 
 /-!
 # Leading-order asymptotics of the canonical integrals
@@ -582,16 +583,6 @@ theorem cuspoidIntegral_two_zero_atTop :
   have hLv : L = (Real.sqrt π : ℂ) * exp (I * π / 4) := integral_pearceyGaussianLimit
   rw [cuspoidIntegral_two_symmetryLine_eq_scaled hy, hLv, Real.sqrt_div' π hy.le]
   push_cast; ring
-
-/-- The Pearcey integral on the symmetry line `x = 0`, `y → -∞` (DLMF 36.11.3):
-`Ψ₂(0, y) = √(π/|y|) exp(-iπ/4)(1 + i√2 exp(-iy²/4) + o(1))`. -/
-@[dlmf 36.11.E3]
-theorem cuspoidIntegral_two_zero_atBot :
-    (fun y : ℝ => cuspoidIntegral 2 ![0, y] -
-        (Real.sqrt (π / |y|) : ℂ) * exp (-(I * π / 4)) *
-          (1 + I * Real.sqrt 2 * exp (-(I * y ^ 2 / 4)))) =o[atBot]
-      (fun y : ℝ => Real.sqrt (π / |y|)) := by
-  sorry
 
 /-- The swallowtail integral on the `x`-axis, `x → +∞` (DLMF 36.11.4):
 `Ψ₃(x, 0, 0) = (√(2π)/(5|x|³)^{1/8}) exp(-2√2(x/5)^{5/4})(cos(2√2(x/5)^{5/4} - π/8) + o(1))`. -/

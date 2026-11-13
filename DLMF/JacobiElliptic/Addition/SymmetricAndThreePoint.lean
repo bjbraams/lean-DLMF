@@ -8,6 +8,7 @@ module
 public import DLMF.JacobiElliptic.Addition.ThetaAndQuotients
 import DLMF.JacobiElliptic.Addition.FourPoint
 import DLMF.JacobiElliptic.Addition.FourPointAlgebra
+import DLMF.JacobiElliptic.Addition.FourPointPeriod
 
 /-!
 # Symmetric and three-point Jacobi addition formulas
@@ -533,7 +534,7 @@ theorem jacobi_prod_sum_zero {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : Fin
   rw [hc]
   exact (FourPointAddition.det_and_product_eq_zero hk z hz hreg).2
 
-/-- **Admitted, corrected.** DLMF 22.8.22–22.8.23 with the third column corrected to `sn`: if
+/-- **Corrected.** DLMF 22.8.22–22.8.23 with the third column corrected to `sn`: if
 `z₁ + z₂ + z₃ + z₄ = 2K` then `det [sn zⱼ cn zⱼ, cn zⱼ dn zⱼ, sn zⱼ, dn zⱼ] = 0`.
 Corrected from the printed DLMF formula: with the printed third column `cn zⱼ` the determinant
 is nonzero (≈ -0.107 + 0.033i at `k = 0.6`); with `sn zⱼ` it vanishes. -/
@@ -545,9 +546,9 @@ theorem jacobi_det_sum_two_K {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : Fin
     Matrix.det (Matrix.of fun i : Fin 4 =>
       ![jacobiSn (z i) k * jacobiCn (z i) k, jacobiCn (z i) k * jacobiDn (z i) k,
         jacobiSn (z i) k, jacobiDn (z i) k]) = 0 := by
-  sorry
+  exact (FourPointAddition.det_two_K_eq_zero hk z hz hreg).1
 
-/-- **Admitted, corrected.** DLMF 22.8.22–22.8.23 with the second column corrected to
+/-- **Corrected.** DLMF 22.8.22–22.8.23 with the second column corrected to
 `sn zⱼ dn zⱼ`: if `z₁ + z₂ + z₃ + z₄ = 2K` then
 `det [sn zⱼ cn zⱼ, sn zⱼ dn zⱼ, cn zⱼ, dn zⱼ] = 0`.
 Corrected from the printed DLMF formula: the printed determinant (second column `cn zⱼ dn zⱼ`)
@@ -561,7 +562,7 @@ theorem jacobi_det_sum_two_K' {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : Fi
     Matrix.det (Matrix.of fun i : Fin 4 =>
       ![jacobiSn (z i) k * jacobiCn (z i) k, jacobiSn (z i) k * jacobiDn (z i) k,
         jacobiCn (z i) k, jacobiDn (z i) k]) = 0 := by
-  sorry
+  exact (FourPointAddition.det_two_K_eq_zero hk z hz hreg).2
 
 /-- The expression of DLMF 22.8.25 at `z₁`, with `z₂ = z₁ - 2K/3`, `z₃ = z₂ - 2K/3`. -/
 def jacobiDnThreePointExpr (z k : ℂ) : ℂ :=

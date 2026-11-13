@@ -13586,3 +13586,6 @@ declaration	DLMF.Statistical.IncompleteBetaUniform.normalizedIncompleteBeta_eq_i
 declaration	DLMF.Statistical.IncompleteBetaUniform.exists_betaGeneratingKernel_taylor_bound	DLMF.Confluent.IncompleteBetaUniform.exists_betaGeneratingKernel_taylor_bound	Place the new chapter-8 helper API in its required area namespace
 declaration	DLMF.Statistical.IncompleteBetaUniform.shiftedMoment_nonneg	DLMF.Confluent.IncompleteBetaUniform.nonneg_shiftedMoment	Use the required area namespace and conclusion-first naming
 module	DLMF.IncompleteGamma.BetaAsymptotics	DLMF.IncompleteGamma.BetaEndpointData	Extract endpoint definitions and lemmas; original module retains the corrected uniform theorem and transition expansions
+declaration	Complex.ofReal_add_mul_I_ne_zero	Complex.ofReal_add_mul_I_ne_zero_of_im_ne_zero	Distinguish the imaginary-part hypothesis from the new TauCeti real-part lemma
+module	DLMF.AlgebraicAnalytic.Transforms.Tables	DLMF.AlgebraicAnalytic.Transforms.Tables.Fourier	Split Fourier table development; original module remains the stable umbrella
+module	DLMF.AlgebraicAnalytic.Transforms.Tables	DLMF.AlgebraicAnalytic.Transforms.Tables.LogarithmicCosine	Extract proved logarithmic cosine entries; original module imports both table leaves

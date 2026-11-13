@@ -26,6 +26,7 @@ of §26.15, and the `q`-multinomial coefficient of §26.16.
 * `excedanceNumber`, `weakExcedanceNumber`: the numbers of (weak) excedances.
 * `IsNonattacking`, `rookNumber`, `rookPolynomial`, `hitNumber`, `hitPolynomial`: rook
   placements and the polynomials 26.15.3, 26.15.6.
+* `multisetPermutations`: words with prescribed letter multiplicities (DLMF §26.16).
 * `qMultinomial`: the `q`-multinomial coefficient (DLMF 26.16.1).
 
 ## Main results
@@ -167,6 +168,22 @@ def hitPolynomial {n : ℕ} (B : Finset (Fin n × Fin n)) : ℤ[X] :=
 @[dlmf 26.16.E1]
 def qMultinomial (q : ℂ) {m : ℕ} (a : Fin m → ℕ) : ℂ :=
   ∏ k : Fin m, DLMF.QSeries.qBinom q (∑ i ∈ univ.filter (k ≤ ·), a i) (a k)
+
+/-- `𝔖_S` for `S = {1^{a_1}, …, m^{a_m}}`: the words of length `a_1 + ⋯ + a_m` with exactly
+`a_j` letters `j` (DLMF §26.16). -/
+@[dlmf 26.16]
+def multisetPermutations {m : ℕ} (a : Fin m → ℕ) : Finset (Fin (∑ i, a i) → Fin m) :=
+  univ.filter fun w => ∀ j, #{i | w i = j} = a j
+
+/-- The defining filtered set of words with prescribed multiplicities. -/
+lemma multisetPermutations_def {m : ℕ} (a : Fin m → ℕ) :
+    multisetPermutations a = univ.filter fun w => ∀ j, #{i | w i = j} = a j := rfl
+
+/-- Membership in the multiset permutations is the prescribed count of each letter. -/
+@[simp] lemma mem_multisetPermutations {m : ℕ} {a : Fin m → ℕ}
+    {w : Fin (∑ i, a i) → Fin m} :
+    w ∈ multisetPermutations a ↔ ∀ j, #{i | w i = j} = a j := by
+  simp only [multisetPermutations, mem_filter, mem_univ, true_and]
 
 end DLMF.Combinatorics
 

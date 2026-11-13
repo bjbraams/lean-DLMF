@@ -6,6 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.JacobiElliptic.PartialFractions
+public import DLMF.JacobiElliptic.FourierSeries.SquaredSn
+public import DLMF.JacobiElliptic.FourierSeries.HyperbolicSn
 
 /-!
 # Fourier and hyperbolic series of the Jacobian elliptic functions (DLMF §22.11)
@@ -492,31 +494,5 @@ theorem jacobiSc_hasSum_fourier (hk : k ∈ jacobiModulusDomain) {z : ℂ}
     field_simp
   · field_simp
     ring
-
-/-- DLMF 22.11.13: `sn²(z,k) = (1 - E/K)/k² - (2π²/(k²K²)) ∑_{n≥1} n qⁿ cos(2nζ)/(1 - q^{2n})`,
-for real `0 < k < 1`, `E = E(k)`, and `q e^{2|Im ζ|} < 1`. Admitted. -/
-@[dlmf 22.11.E13 "special case: real 0 < k < 1 (complex E(k) not yet defined)"]
-theorem jacobiSn_sq_hasSum_fourier {κ : ℝ} (hk0 : 0 < κ) (hk1 : κ < 1) {z : ℂ}
-    (hq : ‖jacobiNome κ‖ * Real.exp (2 * |(jacobiThetaArgument z κ).im|) < 1) :
-    HasSum (fun n : ℕ => 2 * π ^ 2 / ((κ : ℂ) ^ 2 * completeEllipticK κ ^ 2) * (n + 1) *
-        jacobiNome κ ^ (n + 1) / (1 - jacobiNome κ ^ (2 * (n + 1))) *
-          cos (2 * (n + 1) * jacobiThetaArgument z κ))
-      (1 / (κ : ℂ) ^ 2 * (1 - (DLMF.Elliptic.Real.completeEllipticEOfParameter (κ ^ 2) : ℂ) /
-          completeEllipticK κ) -
-        jacobiSn z κ ^ 2) := by
-  sorry
-
-/-- DLMF 22.11.14: the hyperbolic series
-`k² sn²(z,k) = E'/K' - (π/(2K'))² ∑_{n ∈ ℤ} sech²(π(z - 2nK)/(2K'))`, for real `0 < k < 1`,
-`E' = E(k')`, `K' = K(k')`, and `z` not a pole of `sn`. Admitted. -/
-@[dlmf 22.11.E14 "special case: real 0 < k < 1, z not a pole"]
-theorem jacobiSn_sq_hasSum_sech {κ : ℝ} (hk0 : 0 < κ) (hk1 : κ < 1) {z : ℂ}
-    (hz : jacobiLetterTheta .n (jacobiThetaArgument z κ) (jacobiTau κ) ≠ 0) :
-    HasSum (fun n : ℤ => (π / (2 * completeEllipticKPrime κ)) ^ 2 *
-        (1 / cosh (π / (2 * completeEllipticKPrime κ) * (z - 2 * n * completeEllipticK κ))) ^ 2)
-      ((DLMF.Elliptic.Real.completeEllipticEOfParameter (1 - κ ^ 2) : ℂ) /
-          completeEllipticKPrime κ -
-        (κ : ℂ) ^ 2 * jacobiSn z κ ^ 2) := by
-  sorry
 
 end DLMF.JacobiElliptic

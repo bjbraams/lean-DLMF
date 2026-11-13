@@ -126,7 +126,7 @@ namespace Complex
 #print axioms iteratedDeriv_comp_ofReal_of_differentiableOn
 #print axioms iteratedDeriv_re_comp_ofReal_of_differentiableOn
 #print axioms abs_le_norm_add_mul_I
-#print axioms ofReal_add_mul_I_ne_zero
+#print axioms Complex.ofReal_add_mul_I_ne_zero_of_im_ne_zero
 #print axioms integral_horizontal_inv_add_mul_I
 #print axioms tendsto_integral_inv_add_mul_I
 #print axioms tendsto_integral_inv_add_sign_mul_I

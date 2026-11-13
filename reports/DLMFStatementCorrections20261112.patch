@@ -1,0 +1,197 @@
+--- a/DLMF/AlgebraicAnalytic/Calculus/Vectors.lean
++++ b/DLMF/AlgebraicAnalytic/Calculus/Vectors.lean
+@@ -8,6 +8,10 @@
+ public import DLMF.AlgebraicAnalytic.Calculus.SeveralVariables
+ public import Mathlib.Geometry.Euclidean.Angle.Unoriented.Basic
+ public import Mathlib.MeasureTheory.Measure.Hausdorff
++public import Mathlib.Geometry.Euclidean.Volume.Measure
++import Mathlib.Analysis.InnerProductSpace.NormDet
++import Mathlib.MeasureTheory.Measure.Haar.InnerProductSpace
++import TauCeti.Geometry.Euclidean.Volume.Measure
+ public import Mathlib.Analysis.Normed.Lp.MeasurableSpace
+ 
+ /-!
+@@ -134,15 +138,63 @@
+     triple_product_eq_det]
+   rfl
+ 
+-/-- DLMF §1.6(i): the area (two-dimensional Hausdorff measure in `EuclideanSpace ℝ (Fin 3)`)
+-of the parallelogram with sides `a` and `b` is `‖a × b‖`. -/
++/-- DLMF §1.6(i): the Euclidean area (normalized two-dimensional Hausdorff measure)
++of the parallelogram with sides `a` and `b` is `‖a × b‖`, including dependent sides. -/
+ @[dlmf 1.6.i]
+ theorem hausdorffMeasure_parallelogram (a b : Fin 3 → ℝ) :
+-    Measure.hausdorffMeasure 2
++    Measure.euclideanHausdorffMeasure 2
+         ((fun st : ℝ × ℝ => (WithLp.toLp 2 (st.1 • a + st.2 • b) : EuclideanSpace ℝ (Fin 3))) ''
+           (Icc 0 1 ×ˢ Icc 0 1)) =
+       ENNReal.ofReal (vecNorm (a ⨯₃ b)) := by
+-  sorry
++  let v : Fin 2 → EuclideanSpace ℝ (Fin 3) := ![WithLp.toLp 2 a, WithLp.toLp 2 b]
++  let f : EuclideanSpace ℝ (Fin 2) →ₗ[ℝ] EuclideanSpace ℝ (Fin 3) :=
++    (EuclideanSpace.basisFun (Fin 2) ℝ).toBasis.constr ℝ v
++  have hfb (i : Fin 2) : f (EuclideanSpace.basisFun (Fin 2) ℝ i) = v i := by
++    simp [f]
++  have hset :
++      ((fun st : ℝ × ℝ => (WithLp.toLp 2 (st.1 • a + st.2 • b) :
++        EuclideanSpace ℝ (Fin 3))) '' (Icc 0 1 ×ˢ Icc 0 1)) =
++      parallelepiped v := by
++    ext x
++    rw [mem_parallelepiped_iff]
++    constructor
++    · rintro ⟨⟨s, t⟩, ⟨hs, ht⟩, rfl⟩
++      refine ⟨![s, t], ⟨?_, ?_⟩, ?_⟩
++      · intro i
++        fin_cases i
++        · exact hs.1
++        · exact ht.1
++      · intro i
++        fin_cases i
++        · exact hs.2
++        · exact ht.2
++      · simp [Fin.sum_univ_two, v]
++    · rintro ⟨t, ht, rfl⟩
++      refine ⟨(t 0, t 1), ⟨⟨ht.1 0, ht.2 0⟩, ⟨ht.1 1, ht.2 1⟩⟩, ?_⟩
++      simp [Fin.sum_univ_two, v]
++  have hnorm : f.normDet = vecNorm (a ⨯₃ b) := by
++    have h := f.normDet_sq_eq_det_gram (EuclideanSpace.basisFun (Fin 2) ℝ)
++    simp only [hfb] at h
++    have hreal : f.normDet ^ 2 = (Matrix.gram ℝ v).det := by simpa using h
++    have hi (u w : Fin 3 → ℝ) :
++        inner ℝ (WithLp.toLp 2 u : EuclideanSpace ℝ (Fin 3)) (WithLp.toLp 2 w) =
++          u ⬝ᵥ w := by
++      rw [EuclideanSpace.inner_eq_star_dotProduct]
++      simp [dotProduct_comm]
++    have hpos : 0 ≤ (a ⨯₃ b) ⬝ᵥ (a ⨯₃ b) := by
++      exact Finset.sum_nonneg fun i _ => mul_self_nonneg _
++    have hsq : f.normDet ^ 2 = vecNorm (a ⨯₃ b) ^ 2 := by
++      rw [hreal]
++      simp only [Matrix.det_fin_two, Matrix.gram_apply, v, Matrix.cons_val_zero,
++        Matrix.cons_val_one, Matrix.cons_val_fin_one, hi,
++        vecNorm, Real.sq_sqrt hpos]
++      rw [cross_dot_cross, dotProduct_comm b a]
++    exact (sq_eq_sq₀ f.normDet_nonneg (Real.sqrt_nonneg _)).mp hsq
++  rw [hset, ← show f ∘ EuclideanSpace.basisFun (Fin 2) ℝ = v from funext hfb,
++    ← image_parallelepiped]
++  have harea := f.euclideanHausdorffMeasure_image_eq_normDet_mul_volume
++    (parallelepiped (EuclideanSpace.basisFun (Fin 2) ℝ))
++  simpa [OrthonormalBasis.volume_parallelepiped, hnorm] using harea
+ 
+ /-! ### §1.6(ii) Levi-Civita symbol -/
+ 
+--- a/DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean
++++ b/DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean
+@@ -62,6 +62,9 @@
+ Parameters are complex where DLMF writes `ℜa > 0` or `|ph a| < …`; principal branches throughout.
+ 
+ **Corrections and precisions.**
++* 1.14.2.5: for complex `a`, the quartic formula requires `|Im a| < Re a`.
++  The printed condition `Re a > 0` includes `a = 1 + I`, where the denominator has a
++  real-axis zero and the proposed transform formula fails.
+ * 1.14.2.11: DLMF writes `ln((a² + t²)/(b² + t²))` with `ℜa, ℜb > 0`. With the principal logarithm
+   of the quotient the entry is false for some complex `a`, `b` (e.g. `a = 1 + 10i`, `b = 1 - 10i`,
+   `x = 0.7`: the integral is `-2.3288i`, the table value `2.3365i`); it holds for
+@@ -639,12 +642,99 @@
+   field_simp
+   linear_combination (-2 * J) * hs
+ 
+-/-- DLMF Table 1.14.2, row 5: `4a³/(4a⁴ + t⁴) ↦ √π e^{-ax} sin(ax + ¼π)`, `ℜa > 0`. -/
+-@[dlmf 1.14.T2]
+-theorem fourierCosTransform_quartic {a : ℂ} (ha : 0 < a.re) {x : ℝ} (hx : 0 < x) :
++/-- DLMF Table 1.14.2, row 5: `4a³/(4a⁴ + t⁴) ↦ √π e^{-ax} sin(ax + ¼π)`.
++The sector `|ℑa| < ℜa` is required; the printed condition `ℜa > 0` permits real-axis poles. -/
++@[dlmf 1.14.T2 "weaker than DLMF: require |Im a| < Re a for the complex-sector formula"]
++theorem fourierCosTransform_quartic {a : ℂ} (ha : |a.im| < a.re) {x : ℝ} (hx : 0 < x) :
+     fourierCosTransform (fun t => 4 * a ^ 3 / (4 * a ^ 4 + t ^ 4)) x =
+       (Real.sqrt Real.pi : ℂ) * cexp (-a * x) * Complex.sin (a * x + Real.pi / 4) := by
+-  sorry
++  let b : ℂ := a * (1 + I)
++  let c : ℂ := a * (1 - I)
++  have ha0 : a ≠ 0 := by
++    intro he
++    simp [he] at ha
++  have hb : 0 < b.re := by
++    dsimp [b]
++    simp only [mul_re, add_re, one_re, I_re, add_zero, add_im, one_im, I_im, zero_add]
++    linarith [le_abs_self a.im]
++  have hc : 0 < c.re := by
++    dsimp [c]
++    simp only [mul_re, sub_re, one_re, I_re, sub_zero, sub_im, one_im, I_im, zero_sub]
++    linarith [neg_abs_le a.im]
++  have hfactor (t : ℝ) : (b ^ 2 + (t : ℂ) ^ 2) * (c ^ 2 + (t : ℂ) ^ 2) =
++      4 * a ^ 4 + t ^ 4 := by
++    dsimp only [b, c]
++    ring_nf
++    simp only [I_sq, I_pow_four]
++    ring
++  have hpart (t : ℝ) : 4 * a ^ 3 / (4 * a ^ 4 + t ^ 4) =
++      I * a * (1 / (b ^ 2 + (t : ℂ) ^ 2) - 1 / (c ^ 2 + (t : ℂ) ^ 2)) := by
++    rw [← hfactor t]
++    have hb0 := sq_add_sq_ne_zero hb t
++    have hc0 := sq_add_sq_ne_zero hc t
++    field_simp [hb0, hc0]
++    dsimp only [b, c]
++    ring_nf
++    rw [I_sq]
++    ring
++  have hint {d : ℂ} (hd : 0 < d.re) :
++      IntegrableOn (fun t : ℝ => 1 / (d ^ 2 + (t : ℂ) ^ 2) *
++        (Real.cos (x * t) : ℂ)) (Ioi 0) := by
++    have hi := integrableOn_pow_div_sq_add_sq_pow hd 0 1 (by norm_num)
++    simp only [pow_zero, pow_one] at hi
++    refine hi.mul_bdd (c := 1) (by fun_prop) (Eventually.of_forall fun t => ?_)
++    rw [Complex.norm_real, Real.norm_eq_abs]
++    exact Real.abs_cos_le_one _
++  have hlin : fourierCosTransform (fun t => 4 * a ^ 3 / (4 * a ^ 4 + t ^ 4)) x =
++      I * a * (fourierCosTransform (fun t => 1 / (b ^ 2 + t ^ 2)) x -
++        fourierCosTransform (fun t => 1 / (c ^ 2 + t ^ 2)) x) := by
++    unfold fourierCosTransform
++    simp_rw [hpart]
++    have he : (fun t : ℝ => I * a *
++        (1 / (b ^ 2 + (t : ℂ) ^ 2) - 1 / (c ^ 2 + (t : ℂ) ^ 2)) *
++        (Real.cos (x * t) : ℂ)) = fun t : ℝ => I * a *
++          (1 / (b ^ 2 + (t : ℂ) ^ 2) * (Real.cos (x * t) : ℂ) -
++            1 / (c ^ 2 + (t : ℂ) ^ 2) * (Real.cos (x * t) : ℂ)) := by
++      funext t
++      ring
++    rw [he, integral_const_mul, integral_sub (hint hb) (hint hc)]
++    ring
++  rw [hlin, fourierCosTransform_inv_sq_add_sq hb hx,
++    fourierCosTransform_inv_sq_add_sq hc hx]
++  have heb : cexp (-b * x) = cexp (-a * x) *
++      (Complex.cos (a * x) - Complex.sin (a * x) * I) := by
++    rw [show -b * x = -a * x + (-(a * x)) * I by dsimp [b]; ring,
++      Complex.exp_add, Complex.exp_mul_I, Complex.cos_neg, Complex.sin_neg]
++    ring
++  have hec : cexp (-c * x) = cexp (-a * x) *
++      (Complex.cos (a * x) + Complex.sin (a * x) * I) := by
++    rw [show -c * x = -a * x + (a * x) * I by dsimp [c]; ring,
++      Complex.exp_add, Complex.exp_mul_I]
++  rw [heb, hec, Complex.sin_add,
++    show (Real.pi : ℂ) / 4 = ((Real.pi / 4 : ℝ) : ℂ) by push_cast; rfl,
++    ← Complex.ofReal_sin, ← Complex.ofReal_cos, Real.sin_pi_div_four, Real.cos_pi_div_four]
++  have hsqrt : ((Real.sqrt 2 : ℝ) : ℂ) ^ 2 = 2 := by
++    rw [← Complex.ofReal_pow, Real.sq_sqrt (by norm_num), Complex.ofReal_ofNat]
++  have hroot : ((Real.sqrt (Real.pi / 2) : ℝ) : ℂ) * Real.sqrt 2 = Real.sqrt Real.pi := by
++    rw [← Complex.ofReal_mul, ← Real.sqrt_mul (by positivity), div_mul_cancel₀ _ (by norm_num)]
++  have hplus : (1 + I : ℂ) ≠ 0 := by intro he; simpa using congrArg Complex.re he
++  have hminus : (1 - I : ℂ) ≠ 0 := by intro he; simpa using congrArg Complex.re he
++  push_cast
++  generalize Complex.cos (a * x) = C
++  generalize Complex.sin (a * x) = S
++  generalize cexp (-a * x) = E
++  generalize ((Real.sqrt (Real.pi / 2) : ℝ) : ℂ) = P at hroot ⊢
++  generalize ((Real.sqrt Real.pi : ℝ) : ℂ) = Q at hroot ⊢
++  generalize ((Real.sqrt 2 : ℝ) : ℂ) = R at hsqrt hroot ⊢
++  have hi : I * a * (P * (E * (C - S * I)) / b -
++      P * (E * (C + S * I)) / c) = P * E * (C + S) := by
++    dsimp only [b, c]
++    field_simp [ha0, hplus, hminus]
++    ring_nf
++    simp only [I_sq]
++    ring
++  rw [hi, ← hroot]
++  linear_combination -(P * E * (C + S) / 2) * hsqrt
+ 
+ /-- DLMF Table 1.14.2, row 7: `e^{-at²} ↦ (2a)^{-1/2} e^{-x²/(4a)}`, `ℜa > 0`, principal power. -/
+ @[dlmf 1.14.T2]

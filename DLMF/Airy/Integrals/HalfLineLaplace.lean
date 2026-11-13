@@ -30,8 +30,8 @@ it satisfies in the transform variable.
 * `airyBi_negative_laplace`: DLMF 9.10.16.
 * `airyAi_mellin`: the Mellin transform of `Ai` (DLMF 9.10.17).
 * `airyAi_stieltjes`: DLMF 9.10.18.
-* `airyBi_stieltjes_principalValue`, `airyBi_stieltjes_principalValue_converges`: the
-  principal-value representation of `Bi` (DLMF 9.10.19).
+* `airyBi_stieltjes_principalValue_converges`: convergence of the principal value in
+  DLMF 9.10.19. Its evaluated representation is in `StieltjesBoundary.lean`.
 * `airyAi_double_integral`, `airyBi_double_integral`: DLMF 9.10.20, 9.10.21.
 * `airyAi_repeated_integrals`: DLMF 9.10.22.
 -/
@@ -1011,16 +1011,6 @@ theorem airyAi_stieltjes {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 2 * π / 3) :
             airyAi t / (z ^ (3 / 2 : ℂ) + (t : ℂ) ^ (3 / 2 : ℂ)) := by rw [hi]; ring
     _ = _ := by rw [hp]; ring
 
-/-- For `x > 0`:
-`Bi(x) = (3 x^{5/4} e^{ζ}/(2π)) ⨍₀^∞ t^{-3/4} e^{-(2/3)t^{3/2}} Ai(t)/(x^{3/2} - t^{3/2}) dt`, a
-Cauchy principal value at `t = x` (DLMF 9.10.19). -/
-@[dlmf 9.10.E19]
-theorem airyBi_stieltjes_principalValue {x : ℝ} (hx : 0 < x) :
-    airyBi x = 3 * (x : ℂ) ^ (5 / 4 : ℂ) * exp (airyZeta x) / (2 * π) *
-      principalValueIoi (fun t : ℝ => (t : ℂ) ^ (-3 / 4 : ℂ) * exp (-(airyZeta t : ℂ)) *
-        airyAi t / ((x : ℂ) ^ (3 / 2 : ℂ) - (t : ℂ) ^ (3 / 2 : ℂ))) x := by
-  sorry
-
 /-- For a solution `w` of Airy's equation on the real line,
 `∫₀ˣ ∫₀ᵛ w = x ∫₀ˣ w - w'(x) + w'(0)`. -/
 theorem airySol_double_integral {w w' : ℂ → ℂ} (hw : IsAirySolution w w') (x : ℝ) :
@@ -1176,7 +1166,7 @@ private lemma PrincipalValue.dslope_facts {x : ℝ} (hx : 0 < x) :
 
 /-- The integrand of the principal value in DLMF 9.10.19 is integrable on `(d, ∞)` for
 `d > x > 0`: it is `O(t^{-3/2})` there. -/
-private lemma PrincipalValue.tail_integrableOn {x : ℝ} (hx : 0 < x) {d : ℝ} (hd : x < d) :
+lemma PrincipalValue.tail_integrableOn {x : ℝ} (hx : 0 < x) {d : ℝ} (hd : x < d) :
     IntegrableOn (fun t : ℝ => (t : ℂ) ^ (-3 / 4 : ℂ) * exp (-(airyZeta t : ℂ)) *
       airyAi t / ((x : ℂ) ^ (3 / 2 : ℂ) - (t : ℂ) ^ (3 / 2 : ℂ))) (Ioi d) := by
   have hAc : Continuous fun t : ℝ => airyAi t := differentiable_airyAi.continuous.comp

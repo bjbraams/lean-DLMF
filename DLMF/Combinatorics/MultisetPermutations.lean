@@ -9,6 +9,8 @@ public import DLMF.Combinatorics.Basic.Permutations
 public import DLMF.Combinatorics.Permutations
 public import DLMF.QSeries.QBinomial
 public import Mathlib.GroupTheory.Perm.DomMulAct
+import DLMF.Combinatorics.MultisetPermutations.Inversions
+import DLMF.Combinatorics.MultisetPermutations.MajorIndex
 
 /-!
 # Multiset permutations
@@ -49,12 +51,6 @@ noncomputable section
 open Finset Equiv
 
 namespace DLMF.Combinatorics
-
-/-- `𝔖_S` for `S = {1^{a_1}, …, m^{a_m}}`: the words of length `a_1 + ⋯ + a_m` with exactly
-`a_j` letters `j` (DLMF §26.16). -/
-@[dlmf 26.16]
-def multisetPermutations {m : ℕ} (a : Fin m → ℕ) : Finset (Fin (∑ i, a i) → Fin m) :=
-  univ.filter fun w => ∀ j, #{i | w i = j} = a j
 
 /-- §26.16: `|𝔖_S|` is the multinomial coefficient `(a_1 + ⋯ + a_m; a_1, …, a_m)`. -/
 @[dlmf 26.16]
@@ -129,12 +125,12 @@ theorem multisetPermutation_example :
 @[dlmf 26.16.E2]
 theorem sum_pow_wordInversions_multisetPermutations (q : ℂ) {m : ℕ} (a : Fin m → ℕ) :
     ∑ w ∈ multisetPermutations a, q ^ wordInversions (fun i => (w i : ℕ)) = qMultinomial q a := by
-  sorry
+  exact MultisetWords.sum_pow_wordInversions q a
 
 /-- (26.16.3): `∑_{σ ∈ 𝔖_S} q^{maj(σ)} = [a_1+⋯+a_m; a_1, …, a_m]_q` (MacMahon; every `q`). -/
 @[dlmf 26.16.E3]
 theorem sum_pow_wordMajorIndex_multisetPermutations (q : ℂ) {m : ℕ} (a : Fin m → ℕ) :
     ∑ w ∈ multisetPermutations a, q ^ wordMajorIndex (fun i => (w i : ℕ)) = qMultinomial q a := by
-  sorry
+  exact MultisetWords.sum_pow_wordMajorIndex q a
 
 end DLMF.Combinatorics

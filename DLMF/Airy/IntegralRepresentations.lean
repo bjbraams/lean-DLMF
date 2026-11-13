@@ -7,6 +7,7 @@ module
 
 public import DLMF.Airy.GeneralizedContours
 public import Carlson.Elliptic.Addition
+import DLMF.Airy.Scorer.ExpansionsAndZeros
 
 /-!
 # Integral representations of Airy functions (DLMF §9.5)

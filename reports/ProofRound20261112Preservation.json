@@ -1,0 +1,262 @@
+{
+  "baseline_commit": "095580c3193c4f3639ac6e1683a24333b54579dc",
+  "baseline_public_declarations": 24408,
+  "reviewed_public_declarations": 24704,
+  "changed_existing_definition_bodies": [],
+  "changed_existing_private_definition_bodies": [],
+  "added_admissions": [],
+  "new_admitted_declarations": [],
+  "new_axioms": [],
+  "tag_changes_on_existing_declarations": [],
+  "documented_generic_signature_generalization": [
+    "ContDiffAt.deriv_comp_curve"
+  ],
+  "compatibility_declaration_replacements": [
+    "Complex.ofReal_add_mul_I_ne_zero",
+    "MeasureTheory.IntegrableOn.hasDerivAt_integral_Ioi",
+    "MeasureTheory.Lp.integral_norm_sq_eq_norm_sq"
+  ],
+  "moved_declarations_preserving_signatures_and_tags": [
+    {
+      "name": "DLMF.Airy.airyBi_stieltjes_principalValue",
+      "before": "DLMF/Airy/Integrals/HalfLineLaplace.lean",
+      "after": "DLMF/Airy/Integrals/StieltjesBoundary.lean"
+    },
+    {
+      "name": "DLMF.Airy.scorerHi_stieltjes_integral",
+      "before": "DLMF/Airy/Scorer/Representations.lean",
+      "after": "DLMF/Airy/Scorer/Stieltjes.lean"
+    },
+    {
+      "name": "DLMF.Airy.scorerGi_principalValue",
+      "before": "DLMF/Airy/Scorer/Representations.lean",
+      "after": "DLMF/Airy/Scorer/Stieltjes.lean"
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.fourierTransform_indicator",
+      "before": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "after": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean"
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.fourierTransform_exp_neg_abs",
+      "before": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "after": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean"
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.fourierTransform_mul_exp_neg_abs",
+      "before": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "after": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean"
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.fourierTransform_abs_mul_exp_neg_abs",
+      "before": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "after": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean"
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.fourierTransform_exp_neg_abs_div_sqrt",
+      "before": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "after": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean"
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.fourierTransform_sinh_div_sinh",
+      "before": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "after": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean"
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.fourierTransform_cosh_div_cosh",
+      "before": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "after": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean"
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.fourierTransform_gaussian",
+      "before": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "after": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean"
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.tendsto_fourierTransform_sin_sq",
+      "before": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "after": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean"
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.tendsto_fourierTransform_cos_sq",
+      "before": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "after": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean"
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.fourierCosTransform_indicator",
+      "before": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "after": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean"
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.fourierCosTransform_exp_neg",
+      "before": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "after": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean"
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.fourierCosTransform_inv_sq_add_sq",
+      "before": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "after": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean"
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.fourierCosTransform_inv_sq_add_sq_sq",
+      "before": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "after": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean"
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.fourierCosTransform_gaussian",
+      "before": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "after": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean"
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.tendsto_fourierCosTransform_sin_sq",
+      "before": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "after": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean"
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.tendsto_fourierCosTransform_cos_sq",
+      "before": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "after": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean"
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.fourierCosTransform_log_one_add",
+      "before": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "after": "DLMF/AlgebraicAnalytic/Transforms/Tables/LogarithmicCosine.lean"
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.fourierCosTransform_log_sub_log",
+      "before": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "after": "DLMF/AlgebraicAnalytic/Transforms/Tables/LogarithmicCosine.lean"
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.tendsto_fourierSinTransform_inv",
+      "before": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "after": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean"
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.tendsto_fourierSinTransform_inv_sqrt",
+      "before": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "after": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean"
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.fourierSinTransform_rpow_neg_three_halves",
+      "before": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "after": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean"
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.fourierSinTransform_exp_neg",
+      "before": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "after": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean"
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.fourierSinTransform_mul_exp_neg",
+      "before": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "after": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean"
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.tendsto_fourierSinTransform_div_sq_add_sq",
+      "before": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "after": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean"
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.fourierSinTransform_div_sq_add_sq_sq",
+      "before": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "after": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean"
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.fourierSinTransform_inv_mul_sq_add_sq",
+      "before": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "after": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean"
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.fourierSinTransform_exp_neg_div'",
+      "before": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "after": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean"
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.fourierSinTransform_exp_neg_div",
+      "before": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "after": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean"
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.fourierSinTransform_mul_gaussian",
+      "before": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "after": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean"
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.tendsto_fourierSinTransform_sin_div",
+      "before": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "after": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean"
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.tendsto_fourierSinTransform_arctan_abel",
+      "before": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "after": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean"
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.tendsto_fourierSinTransform_log_abs",
+      "before": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "after": "DLMF/AlgebraicAnalytic/Transforms/Tables/Fourier.lean"
+    },
+    {
+      "name": "DLMF.CoalescingSaddles.cuspoidIntegral_two_zero_atBot",
+      "before": "DLMF/CoalescingSaddles/Asymptotics.lean",
+      "after": "DLMF/CoalescingSaddles/Asymptotics/Pearcey.lean"
+    },
+    {
+      "name": "DLMF.Combinatorics.numPeaks",
+      "before": "DLMF/Combinatorics/LatticePaths.lean",
+      "after": "DLMF/Combinatorics/LatticePaths/Narayana.lean"
+    },
+    {
+      "name": "DLMF.Combinatorics.multisetPermutations",
+      "before": "DLMF/Combinatorics/MultisetPermutations.lean",
+      "after": "DLMF/Combinatorics/Basic/Permutations.lean"
+    },
+    {
+      "name": "DLMF.JacobiElliptic.jacobiSn_sq_hasSum_fourier",
+      "before": "DLMF/JacobiElliptic/FourierSeries.lean",
+      "after": "DLMF/JacobiElliptic/FourierSeries/SquaredSn.lean"
+    },
+    {
+      "name": "DLMF.JacobiElliptic.jacobiSn_sq_hasSum_sech",
+      "before": "DLMF/JacobiElliptic/FourierSeries.lean",
+      "after": "DLMF/JacobiElliptic/FourierSeries/HyperbolicSn.lean"
+    },
+    {
+      "name": "DLMF.JacobiElliptic.Real.incompleteEllipticEOfParameter_jacobiAmOfParameter",
+      "before": "DLMF/JacobiElliptic/Related.lean",
+      "after": "DLMF/JacobiElliptic/Basic/EpsilonProperties.lean"
+    },
+    {
+      "name": "DLMF.JacobiElliptic.Real.jacobiEpsilon_add_two_completeEllipticKOfParameter",
+      "before": "DLMF/JacobiElliptic/Related.lean",
+      "after": "DLMF/JacobiElliptic/Basic/EpsilonProperties.lean"
+    },
+    {
+      "name": "DLMF.Theta.jacobiThetaOneTau_powerSeries",
+      "before": "DLMF/Theta/PowerSeries.lean",
+      "after": "DLMF/Theta/PowerSeries/ThetaOne.lean"
+    }
+  ],
+  "existing_dlmf_attribute_occurrences_preserved": 8826,
+  "new_stronger_dlmf_tag": "DLMF.Theta.thetaGaussSum_reciprocity'",
+  "approved_dlmf_statement_changes": [
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.hausdorffMeasure_parallelogram",
+      "correction": "Use euclideanHausdorffMeasure 2 instead of raw hausdorffMeasure 2",
+      "certificate": "scripts/CheckDLMFHausdorffNormalization.lean"
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.fourierCosTransform_quartic",
+      "correction": "Require |a.im| < a.re instead of 0 < a.re",
+      "certificate": "scripts/CheckDLMFQuarticTransform.lean"
+    }
+  ],
+  "approved_dlmf_tag_comment_changes": [
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.fourierCosTransform_quartic",
+      "change": "Explicit weaker-than-DLMF annotation for the required complex sector; reference retained"
+    }
+  ],
+  "all_other_existing_dlmf_statement_signatures_unchanged": true
+}

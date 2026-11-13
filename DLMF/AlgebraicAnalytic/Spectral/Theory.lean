@@ -18,9 +18,23 @@ public import TauCeti.Analysis.SpecialFunctions.Hermite.Function.HilbertBasis
 public import Mathlib.Analysis.Complex.RealDeriv
 public import DLMFMathlib.Analysis.Fourier.DirichletKernel
 public import DLMFMathlib.Analysis.Fourier.PoissonKernel
+import DLMFMathlib.Analysis.InnerProductSpace.LinearPMap.Spectrum
+import TauCeti.Analysis.SpecialFunctions.Trigonometric.Chebyshev.Cosine.HilbertBasis
+import TauCeti.Analysis.Fourier.SineSeries
+import TauCeti.Analysis.Fourier.Uniqueness
+import TauCeti.Analysis.Fourier.FourierCoeffOn
+import TauCeti.Analysis.SpecialFunctions.Trigonometric.Orthogonality
+import TauCeti.MeasureTheory.Function.LocallyIntegrable
 
 /-!
 # Linear second-order differential operators and eigenfunction expansions (DLMF §1.18)
+
+The Neumann cosine basis uses TauCeti's `chebyshevCosineHilbertBasis`, with its exact
+normalization and Lebesgue measure transferred from `(0, π]` to `(0, π)`. The Dirichlet
+sine basis combines TauCeti's sine orthogonality and its completeness theorem for real
+integrable functions, applied to both components of a complex function. The periodic
+exponential basis uses Mathlib's `fourierCoeffOn` normalization together with TauCeti's
+Fourier-monomial orthogonality and complex integrable-function uniqueness.
 
 DLMF §1.18 surveys the spectral theory of `𝓛 = -d²/dx² + q(x)` (1.18.28). The Hilbert-space
 facts of §1.18(i)–(ii) are Mathlib's (`HilbertBasis`, `lp`, `MeasureTheory.L2`; pointers in
@@ -288,7 +302,97 @@ theorem sinEigenfunction_spec (n : ℕ) :
 theorem sinEigenfunction_hilbertBasis :
     ∃ b : HilbertBasis ℕ ℂ (Lp ℂ 2 (volume.restrict (Ioo 0 Real.pi))),
       ∀ n, (b n : ℝ → ℂ) =ᵐ[volume.restrict (Ioo 0 Real.pi)] sinEigenfunction (n + 1) := by
-  sorry
+  rw [restrict_Ioo_eq_restrict_Ioc]
+  let μ := volume.restrict (Ioc (0 : ℝ) Real.pi)
+  have hmem (n : ℕ) : MemLp (sinEigenfunction (n + 1)) 2 μ :=
+    (by unfold sinEigenfunction; fun_prop : Continuous (sinEigenfunction (n + 1))).continuousOn
+      |>.memLp_restrict_of_subset_isCompact isCompact_Icc measurableSet_Ioc Ioc_subset_Icc_self 2
+  let v : ℕ → Lp ℂ 2 μ := fun n => (hmem n).toLp (sinEigenfunction (n + 1))
+  have hv (n : ℕ) : (v n : ℝ → ℂ) =ᵐ[μ] sinEigenfunction (n + 1) := (hmem n).coeFn_toLp
+  have hinner (m n : ℕ) : inner ℂ (v m) (v n) = if m = n then 1 else 0 := by
+    rw [L2.inner_def]
+    have he : (fun x => inner ℂ ((v m : ℝ → ℂ) x) ((v n : ℝ → ℂ) x)) =ᵐ[μ]
+        fun x => ((2 / Real.pi) *
+          (Real.sin (((m : ℝ) + 1) * x) * Real.sin (((n : ℝ) + 1) * x)) : ℝ) := by
+      filter_upwards [hv m, hv n] with x hm hn
+      rw [hm, hn]
+      simp only [sinEigenfunction, RCLike.inner_apply, Complex.conj_ofReal,
+        ← Complex.ofReal_mul, Nat.cast_add, Nat.cast_one]
+      have hs := Real.sq_sqrt (by positivity : (0 : ℝ) ≤ 2 / Real.pi)
+      have hreal :
+          (Real.sqrt (2 / Real.pi) * Real.sin (((n : ℝ) + 1) * x)) *
+              (Real.sqrt (2 / Real.pi) * Real.sin (((m : ℝ) + 1) * x)) =
+            2 / Real.pi * (Real.sin (((m : ℝ) + 1) * x) *
+              Real.sin (((n : ℝ) + 1) * x)) := by
+        calc
+          _ = Real.sqrt (2 / Real.pi) ^ 2 *
+              (Real.sin (((m : ℝ) + 1) * x) * Real.sin (((n : ℝ) + 1) * x)) := by ring
+          _ = _ := by rw [hs]
+      exact congrArg Complex.ofReal hreal
+    rw [integral_congr_ae he]
+    dsimp only [μ]
+    rw [← intervalIntegral.integral_of_le Real.pi_pos.le,
+      intervalIntegral.integral_ofReal, intervalIntegral.integral_const_mul,
+      TauCeti.two_div_pi_mul_integral_sin_succ_mul_sin_succ]
+    split_ifs <;> norm_num
+  have hon : Orthonormal ℂ v := orthonormal_iff_ite.mpr hinner
+  have hsp : (Submodule.span ℂ (range v))ᗮ = ⊥ := by
+    apply (Submodule.eq_bot_iff _).mpr
+    intro g hg
+    have hgint : Integrable g μ := (Lp.memLp g).integrable (by norm_num)
+    have hgi (n : ℕ) : Integrable
+        (fun x => g x * (Real.sin (((n : ℝ) + 1) * x) : ℂ)) μ := by
+      apply hgint.mul_bdd (by fun_prop : Continuous _).aestronglyMeasurable
+      exact Filter.Eventually.of_forall fun x => by
+        simpa only [Complex.norm_real, Real.norm_eq_abs] using Real.abs_sin_le_one _
+    have hzero (n : ℕ) : ∫ x, g x * (Real.sin (((n : ℝ) + 1) * x) : ℂ) ∂μ = 0 := by
+      have hi : inner ℂ (v n) g = 0 :=
+        (Submodule.mem_orthogonal _ _).mp hg _ (Submodule.subset_span (mem_range_self n))
+      rw [L2.inner_def] at hi
+      have he : (fun x => inner ℂ ((v n : ℝ → ℂ) x) (g x)) =ᵐ[μ]
+          fun x => (Real.sqrt (2 / Real.pi) : ℂ) *
+            (g x * (Real.sin (((n : ℝ) + 1) * x) : ℂ)) := by
+        filter_upwards [hv n] with x hx
+        rw [hx]
+        simp only [sinEigenfunction, RCLike.inner_apply, Complex.conj_ofReal,
+          Complex.ofReal_mul, map_mul, Nat.cast_add, Nat.cast_one]
+        ring
+      rw [integral_congr_ae he, MeasureTheory.integral_const_mul] at hi
+      exact (mul_eq_zero.mp hi).resolve_left (Complex.ofReal_ne_zero.mpr
+        (Real.sqrt_pos.mpr (by positivity)).ne')
+    have hcomplete (F : ℝ → ℝ) (hF : Integrable F μ)
+        (hFzero : ∀ n : ℕ, ∫ x in (0 : ℝ)..Real.pi,
+          F x * Real.sin (((n : ℝ) + 1) * x) = 0) : F =ᵐ[μ] 0 := by
+      apply TauCeti.ae_eq_zero_of_forall_integral_mul_sin_eq_zero
+        (a := 0) (b := Real.pi) (g := F) hF
+      intro k hk
+      obtain ⟨n, rfl⟩ := Nat.exists_eq_succ_of_ne_zero (by omega : k ≠ 0)
+      have harg (x : ℝ) : ((n + 1 : ℕ) : ℝ) * Real.pi * (x - 0) /
+          (Real.pi - 0) = ((n : ℝ) + 1) * x := by
+        push_cast
+        field_simp
+        ring
+      simpa only [harg] using hFzero n
+    have hreal : (fun x => (g x).re) =ᵐ[μ] 0 := by
+      apply hcomplete _ hgint.re
+      intro n
+      have h := (integral_re (hgi n)).trans (congrArg Complex.re (hzero n))
+      simpa only [μ, intervalIntegral.integral_of_le Real.pi_pos.le,
+        RCLike.re_to_complex, Complex.mul_re,
+        Complex.ofReal_re, Complex.ofReal_im, mul_zero, sub_zero, Complex.zero_re] using h
+    have himag : (fun x => (g x).im) =ᵐ[μ] 0 := by
+      apply hcomplete _ hgint.im
+      intro n
+      have h := (integral_im (hgi n)).trans (congrArg Complex.im (hzero n))
+      simpa only [μ, intervalIntegral.integral_of_le Real.pi_pos.le,
+        RCLike.im_to_complex, Complex.mul_im,
+        Complex.ofReal_re, Complex.ofReal_im, mul_zero, zero_add, Complex.zero_im] using h
+    apply Lp.ext
+    filter_upwards [hreal, himag, Lp.coeFn_zero ℂ 2 μ] with x hr hi hz
+    rw [hz]
+    exact Complex.ext hr hi
+  refine ⟨HilbertBasis.mkOfOrthogonalEqBot hon hsp, fun n => ?_⟩
+  simpa only [HilbertBasis.coe_mkOfOrthogonalEqBot] using hv n
 
 /-- DLMF 1.18.37 (Case 2): `1/√π` and `√(2/π) cos(nx)` satisfy `-φ'' = n² φ` with
 `φ'(0) = φ'(π) = 0`. -/
@@ -324,7 +428,23 @@ of `L²(0, π)`. -/
 theorem cosEigenfunction_hilbertBasis :
     ∃ b : HilbertBasis ℕ ℂ (Lp ℂ 2 (volume.restrict (Ioo 0 Real.pi))),
       ∀ n, (b n : ℝ → ℂ) =ᵐ[volume.restrict (Ioo 0 Real.pi)] cosEigenfunction n := by
-  sorry
+  -- TauCeti supplies the normalized cosine basis on the equivalent half-open interval.
+  have hm : TauCeti.chebyshevAngleMeasure = volume.restrict (Ioo 0 Real.pi) := by
+    rw [TauCeti.chebyshevAngleMeasure_def, restrict_Ioo_eq_restrict_Ioc]
+  rw [← hm]
+  refine ⟨TauCeti.chebyshevCosineHilbertBasis ℂ, fun n => ?_⟩
+  filter_upwards [TauCeti.coeFn_chebyshevCosineHilbertBasis ℂ n] with x hx
+  rw [hx]
+  by_cases hn : n = 0
+  · subst n
+    simp [TauCeti.normalizedChebyshevCosine_zero, cosEigenfunction]
+  · rw [TauCeti.normalizedChebyshevCosine_of_ne_zero hn]
+    have hs : (Real.sqrt (Real.pi / 2))⁻¹ = Real.sqrt (2 / Real.pi) := by
+      rw [← Real.sqrt_inv, inv_div]
+    rw [cosEigenfunction, ite_eq_right hn]
+    apply congrArg Complex.ofReal
+    rw [div_eq_mul_inv, hs, mul_comm]
+    simp
 
 /-- DLMF 1.18.38 (Case 3, periodic boundary conditions): `e^{±2inx}/√π` satisfies
 `-φ'' = (2n)² φ` with `φ(0) = φ(π)`, `φ'(0) = φ'(π)`; each eigenvalue `4n²` with `n ≠ 0` has
@@ -364,7 +484,68 @@ theorem expEigenfunction_spec (n : ℤ) :
 theorem expEigenfunction_hilbertBasis :
     ∃ b : HilbertBasis ℤ ℂ (Lp ℂ 2 (volume.restrict (Ioo 0 Real.pi))),
       ∀ n, (b n : ℝ → ℂ) =ᵐ[volume.restrict (Ioo 0 Real.pi)] expEigenfunction n := by
-  sorry
+  rw [restrict_Ioo_eq_restrict_Ioc]
+  let μ := volume.restrict (Ioc (0 : ℝ) Real.pi)
+  let c : ℝ := (Real.sqrt Real.pi)⁻¹
+  have hc : c ≠ 0 := inv_ne_zero (Real.sqrt_pos.mpr Real.pi_pos).ne'
+  have hcsq : c * c = Real.pi⁻¹ := by
+    dsimp only [c]
+    rw [← mul_inv, ← pow_two, Real.sq_sqrt Real.pi_pos.le]
+  have hfour (n : ℤ) (x : ℝ) : expEigenfunction n x =
+      (c : ℂ) * fourier n (x : AddCircle Real.pi) := by
+    dsimp only [expEigenfunction, c]
+    rw [ofReal_inv, fourier_coe_apply, div_eq_mul_inv, mul_comm]
+    congr 1
+    congr 1
+    field_simp
+  have hmem (n : ℤ) : MemLp (expEigenfunction n) 2 μ :=
+    (by unfold expEigenfunction; fun_prop : Continuous (expEigenfunction n)).continuousOn
+      |>.memLp_restrict_of_subset_isCompact isCompact_Icc measurableSet_Ioc Ioc_subset_Icc_self 2
+  let v : ℤ → Lp ℂ 2 μ := fun n => (hmem n).toLp (expEigenfunction n)
+  have hv (n : ℤ) : (v n : ℝ → ℂ) =ᵐ[μ] expEigenfunction n := (hmem n).coeFn_toLp
+  have hinner (m n : ℤ) : inner ℂ (v m) (v n) = if m = n then 1 else 0 := by
+    have hcoef := TauCeti.fourierCoeffOn_fourier Real.pi_pos n m
+    have heq : inner ℂ (v m) (v n) =
+        fourierCoeffOn Real.pi_pos (fun t : ℝ => fourier n (t : AddCircle (Real.pi - 0))) m := by
+      rw [L2.inner_def, fourierCoeffOn_eq_integral,
+        intervalIntegral.integral_of_le Real.pi_pos.le]
+      simp only [sub_zero, smul_eq_mul, real_smul]
+      rw [← MeasureTheory.integral_const_mul]
+      apply MeasureTheory.integral_congr_ae
+      filter_upwards [hv m, hv n] with x hm hn
+      rw [hm, hn, hfour, hfour, RCLike.inner_apply, map_mul, conj_ofReal, ← fourier_neg]
+      have hcsq' := congrArg Complex.ofReal hcsq
+      push_cast at hcsq'
+      simp only [one_div, ofReal_inv, fourier_coe_apply, sub_zero]
+      linear_combination (exp (2 * Real.pi * I * ((-m : ℤ) : ℂ) * x / Real.pi) *
+        exp (2 * Real.pi * I * n * x / Real.pi)) * hcsq'
+    rw [heq, hcoef]
+    simp only [Pi.single_apply]
+  have hon : Orthonormal ℂ v := orthonormal_iff_ite.mpr hinner
+  have hsp : (Submodule.span ℂ (range v))ᗮ = ⊥ := by
+    apply (Submodule.eq_bot_iff _).mpr
+    intro g hg
+    have hgint : Integrable g μ := (Lp.memLp g).integrable (by norm_num)
+    have hcoeff (n : ℤ) : fourierCoeffOn Real.pi_pos g n = 0 := by
+      have hi : inner ℂ (v n) g = 0 :=
+        (Submodule.mem_orthogonal _ _).mp hg _ (Submodule.subset_span (mem_range_self n))
+      rw [L2.inner_def] at hi
+      have he : (fun x => inner ℂ ((v n : ℝ → ℂ) x) (g x)) =ᵐ[μ]
+          fun x => (c : ℂ) * (fourier (-n) (x : AddCircle Real.pi) * g x) := by
+        filter_upwards [hv n] with x hx
+        rw [hx, hfour, RCLike.inner_apply, map_mul, conj_ofReal, ← fourier_neg]
+        ring
+      rw [integral_congr_ae he, MeasureTheory.integral_const_mul] at hi
+      have hzero := (mul_eq_zero.mp hi).resolve_left (ofReal_ne_zero.mpr hc)
+      rw [fourierCoeffOn_eq_integral, intervalIntegral.integral_of_le Real.pi_pos.le]
+      simpa only [μ, fourier_coe_apply, sub_zero, smul_eq_mul, real_smul, mul_zero] using
+        congrArg (fun z : ℂ => ((1 / Real.pi : ℝ) : ℂ) * z) hzero
+    have hzero := MeasureTheory.IntegrableOn.ae_eq_zero_of_forall_fourierCoeffOn_eq_zero
+      Real.pi_pos hgint hcoeff
+    apply Lp.ext
+    exact hzero.trans (Lp.coeFn_zero ℂ 2 μ).symm
+  refine ⟨HilbertBasis.mkOfOrthogonalEqBot hon hsp, fun n => ?_⟩
+  simpa only [HilbertBasis.coe_mkOfOrthogonalEqBot] using hv n
 
 /-! ### Hermite's equation on `ℝ` -/
 
@@ -957,7 +1138,36 @@ residual spectrum is empty. -/
 theorem IsSelfAdjoint.operatorSpectrum_real {T : E →ₗ.[ℂ] E} (hT : IsSelfAdjoint T) :
     IsClosed (operatorSpectrum T) ∧ (∀ z ∈ operatorSpectrum T, z.im = 0) ∧
         operatorResidualSpectrum T = ∅ := by
-  sorry
+  have hres : operatorResolventSet T =
+      {z : ℂ | ∃ K : ℝ, 0 < K ∧
+        ∀ v : T.domain, K * ‖(v : E)‖ ≤ ‖z • (v : E) - T v‖} := by
+    ext z
+    constructor
+    · rintro ⟨_, _, C, hC⟩
+      let D : ℝ := max C 1
+      have hD : 0 < D := lt_of_lt_of_le zero_lt_one (le_max_right _ _)
+      refine ⟨D⁻¹, inv_pos.mpr hD, fun v => ?_⟩
+      rw [inv_mul_le_iff₀ hD]
+      exact (hC v).trans (mul_le_mul_of_nonneg_right (le_max_left _ _)
+        (norm_nonneg _))
+    · rintro ⟨K, hK, hb⟩
+      refine ⟨?_, ?_, K⁻¹, fun v => ?_⟩
+      · exact LinearPMap.smul_sub_injective_of_norm_le hK hb
+      · exact hT.denseRange_smul_sub_of_norm_le hK hb
+      · rw [le_inv_mul_iff₀ hK]
+        exact hb v
+  refine ⟨?_, ?_, ?_⟩
+  · exact (by rw [operatorSpectrum, hres]; exact
+      (LinearPMap.isOpen_setOf_exists_pos_mul_norm_le_smul_sub T).isClosed_compl)
+  · intro z hz
+    by_contra hi
+    apply hz
+    refine ⟨hT.smul_sub_bijective hi |>.1, hT.denseRange_smul_sub hi, |z.im|⁻¹, ?_⟩
+    intro v
+    exact hT.isFormalAdjoint.norm_le_inv_abs_im_mul_norm_smul_sub hi v
+  · apply Set.eq_empty_iff_forall_notMem.mpr
+    intro z hz
+    exact hz.2 (hT.denseRange_smul_sub_of_injective hz.1)
 
 /-- §1.18(ix): eigenvectors of a self-adjoint operator for distinct eigenvalues are
 orthogonal. -/

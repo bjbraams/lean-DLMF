@@ -164,24 +164,24 @@ way (§§23.2–23.3, 23.5–23.7, 23.9–23.10, 23.12 and 23.15–23.19) agree 
 
 ## [§23.8 Trigonometric Series and Products](https://dlmf.nist.gov/23.8)
 
-- [23.8.E1](https://dlmf.nist.gov/23.8.E1): [`DLMF.Weierstrass.HalfPeriods.weierstrassP_fourier`](DLMF/Weierstrass/Series.lean#L145) (proved). **Corrected** (DLMF erratum): the condition must be |ℑ(z/ω₁)| < 2ℑτ (the series diverges otherwise: terms 10⁵, 10¹¹, 10²¹ at n = 10, 20, 40).
-- [23.8.E2](https://dlmf.nist.gov/23.8.E2): [`DLMF.Weierstrass.HalfPeriods.weierstrassZeta_fourier`](DLMF/Weierstrass/Series.lean#L71) (proved). **Corrected** (DLMF erratum): condition corrected as in 23.8.E1.
-- [23.8.E3](https://dlmf.nist.gov/23.8.E3): [`DLMF.Weierstrass.HalfPeriods.weierstrassP_csc_series`](DLMF/Weierstrass/Series.lean#L289) (proved).
-- [23.8.E4](https://dlmf.nist.gov/23.8.E4): [`DLMF.Weierstrass.HalfPeriods.weierstrassZeta_cot_series`](DLMF/Weierstrass/Series.lean#L328) (proved). the conditionally convergent sum brackets the terms n and -n (Eisenstein summation).
-- [23.8.E5](https://dlmf.nist.gov/23.8.E5): [`DLMF.Weierstrass.HalfPeriods.eta_one_csc_series`](DLMF/Weierstrass/Series.lean#L387) (proved).
-- [23.8.E6](https://dlmf.nist.gov/23.8.E6): [`DLMF.Weierstrass.HalfPeriods.weierstrassSigma_prod`](DLMF/Weierstrass/Series.lean#L450) (proved).
-- [23.8.E7](https://dlmf.nist.gov/23.8.E7): [`DLMF.Weierstrass.HalfPeriods.weierstrassSigma_sin_prod`](DLMF/Weierstrass/Series.lean#L416) (proved).
+- [23.8.E1](https://dlmf.nist.gov/23.8.E1): [`DLMF.Weierstrass.HalfPeriods.weierstrassP_fourier`](DLMF/Weierstrass/Series.lean#L146) (proved). **Corrected** (DLMF erratum): the condition must be |ℑ(z/ω₁)| < 2ℑτ (the series diverges otherwise: terms 10⁵, 10¹¹, 10²¹ at n = 10, 20, 40).
+- [23.8.E2](https://dlmf.nist.gov/23.8.E2): [`DLMF.Weierstrass.HalfPeriods.weierstrassZeta_fourier`](DLMF/Weierstrass/Series.lean#L72) (proved). **Corrected** (DLMF erratum): condition corrected as in 23.8.E1.
+- [23.8.E3](https://dlmf.nist.gov/23.8.E3): [`DLMF.Weierstrass.HalfPeriods.weierstrassP_csc_series`](DLMF/Weierstrass/Series.lean#L290) (proved).
+- [23.8.E4](https://dlmf.nist.gov/23.8.E4): [`DLMF.Weierstrass.HalfPeriods.weierstrassZeta_cot_series`](DLMF/Weierstrass/Series.lean#L329) (proved). the conditionally convergent sum brackets the terms n and -n (Eisenstein summation).
+- [23.8.E5](https://dlmf.nist.gov/23.8.E5): [`DLMF.Weierstrass.HalfPeriods.eta_one_csc_series`](DLMF/Weierstrass/Series.lean#L388) (proved).
+- [23.8.E6](https://dlmf.nist.gov/23.8.E6): [`DLMF.Weierstrass.HalfPeriods.weierstrassSigma_prod`](DLMF/Weierstrass/Series.lean#L451) (proved).
+- [23.8.E7](https://dlmf.nist.gov/23.8.E7): [`DLMF.Weierstrass.HalfPeriods.weierstrassSigma_sin_prod`](DLMF/Weierstrass/Series.lean#L417) (proved).
 
 ## [§23.9 Laurent and Other Power Series](https://dlmf.nist.gov/23.9)
 
-- [23.9.E1](https://dlmf.nist.gov/23.9.E1): [`DLMF.Weierstrass.laurentCoeff`](DLMF/Weierstrass/Series.lean#L503) (definition).
-- [23.9.E2](https://dlmf.nist.gov/23.9.E2): [`DLMF.Weierstrass.weierstrassP_laurent`](DLMF/Weierstrass/Series.lean#L518) (proved).
-- [23.9.E3](https://dlmf.nist.gov/23.9.E3): [`DLMF.Weierstrass.weierstrassZeta_laurent`](DLMF/Weierstrass/Series.lean#L557) (proved).
-- [23.9.E4](https://dlmf.nist.gov/23.9.E4): [`DLMF.Weierstrass.laurentCoeff_two`](DLMF/Weierstrass/Series.lean#L508) (proved); [`DLMF.Weierstrass.laurentCoeff_three`](DLMF/Weierstrass/Series.lean#L513) (proved).
-- [23.9.E5](https://dlmf.nist.gov/23.9.E5): [`DLMF.Weierstrass.laurentCoeff_recursion`](DLMF/Weierstrass/Series.lean#L722) (proved).
-- [23.9.E6](https://dlmf.nist.gov/23.9.E6): [`DLMF.Weierstrass.HalfPeriods.weierstrassP_halfPeriod_expansion`](DLMF/Weierstrass/Series.lean#L844) (proved). stated as a big-O remainder O(t⁸) as t → 0.
-- [23.9.E7](https://dlmf.nist.gov/23.9.E7): [`DLMF.Weierstrass.weierstrassSigma_series`](DLMF/Weierstrass/Series.lean#L909) (admitted).
-- [23.9.E8](https://dlmf.nist.gov/23.9.E8): [`DLMF.Weierstrass.sigmaCoeff`](DLMF/Weierstrass/Series.lean#L895) (definition). the recursion is a well-founded definition on 2m + 3n.
+- [23.9.E1](https://dlmf.nist.gov/23.9.E1): [`DLMF.Weierstrass.laurentCoeff`](DLMF/Weierstrass/Series.lean#L504) (definition).
+- [23.9.E2](https://dlmf.nist.gov/23.9.E2): [`DLMF.Weierstrass.weierstrassP_laurent`](DLMF/Weierstrass/Series.lean#L519) (proved).
+- [23.9.E3](https://dlmf.nist.gov/23.9.E3): [`DLMF.Weierstrass.weierstrassZeta_laurent`](DLMF/Weierstrass/Series.lean#L558) (proved).
+- [23.9.E4](https://dlmf.nist.gov/23.9.E4): [`DLMF.Weierstrass.laurentCoeff_two`](DLMF/Weierstrass/Series.lean#L509) (proved); [`DLMF.Weierstrass.laurentCoeff_three`](DLMF/Weierstrass/Series.lean#L514) (proved).
+- [23.9.E5](https://dlmf.nist.gov/23.9.E5): [`DLMF.Weierstrass.laurentCoeff_recursion`](DLMF/Weierstrass/Series.lean#L723) (proved).
+- [23.9.E6](https://dlmf.nist.gov/23.9.E6): [`DLMF.Weierstrass.HalfPeriods.weierstrassP_halfPeriod_expansion`](DLMF/Weierstrass/Series.lean#L845) (proved). stated as a big-O remainder O(t⁸) as t → 0.
+- [23.9.E7](https://dlmf.nist.gov/23.9.E7): [`DLMF.Weierstrass.weierstrassSigma_series`](DLMF/Weierstrass/Series.lean#L910) (admitted).
+- [23.9.E8](https://dlmf.nist.gov/23.9.E8): [`DLMF.Weierstrass.sigmaCoeff`](DLMF/Weierstrass/Series.lean#L896) (definition). the recursion is a well-founded definition on 2m + 3n.
 
 ## [§23.10 Addition Theorems and Other Identities](https://dlmf.nist.gov/23.10)
 

@@ -231,7 +231,7 @@ private lemma staysAbove_nil (d : ℤ) : StaysAbove d [] ↔ 0 ≤ d := by
 
 /-- A path stays in `x ≤ y + d` iff the origin does and the rest stays in the shifted
 half-plane. -/
-private lemma staysAbove_cons (d : ℤ) (s : ℕ × ℕ) (l : List (ℕ × ℕ)) :
+lemma staysAbove_cons (d : ℤ) (s : ℕ × ℕ) (l : List (ℕ × ℕ)) :
     StaysAbove d (s :: l) ↔ 0 ≤ d ∧ StaysAbove (d + s.2 - s.1) l := by
   simp only [StaysAbove, mem_range, List.length_cons]
   constructor

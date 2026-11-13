@@ -14,6 +14,8 @@ public import Mathlib.Analysis.MellinTransform
 public import Mathlib.Analysis.SpecialFunctions.Complex.Arctan
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Bounds
 public import TauCeti.MeasureTheory.Integral.Bochner.Basic
+import DLMFMathlib.Analysis.Integral.CauchyBoundary
+import DLMFMathlib.Analysis.MellinLogarithmicKernel
 
 /-!
 # Table of Mellin transforms (DLMF §1.14(vii), Table 1.14.5)
@@ -104,6 +106,103 @@ theorem mellin_log_indicator_lt {a : ℝ} (ha : 0 ≤ a) {s : ℂ} (hs : 0 < s.r
   rw [h]
   ring
 
+set_option maxHeartbeats 800000 in
+/-- The regular part of the Stieltjes boundary value gives the Mellin principal value. -/
+private lemma power_cauchy_finitePart {s : ℂ} (hs0 : 0 < s.re) (hs1 : s.re < 1) :
+    let f : ℝ → ℂ := fun t => (t : ℂ) ^ (s - 1) / (1 + t)
+    2 * ((∫ t : ℝ in 0..2, (f t - f 1) / ((t : ℂ) - 1)) +
+      ∫ t : ℝ in Ioi 2, f t / ((t : ℂ) - 1)) + (∫ t : ℝ in Ioi 0, f t) =
+      -Real.pi * Complex.cot (s * Real.pi) := by
+  let f : ℝ → ℂ := fun t => (t : ℂ) ^ (s - 1) / (1 + t)
+  change 2 * ((∫ t : ℝ in 0..2, (f t - f 1) / ((t : ℂ) - 1)) +
+      ∫ t : ℝ in Ioi 2, f t / ((t : ℂ) - 1)) + (∫ t : ℝ in Ioi 0, f t) = _
+  let F : ℂ := (∫ t : ℝ in 0..2, (f t - f 1) / ((t : ℂ) - 1)) +
+    ∫ t : ℝ in Ioi 2, f t / ((t : ℂ) - 1)
+  change 2 * F + (∫ t : ℝ in Ioi 0, f t) = _
+  have hf : IntegrableOn f (Ioi 0) := integrableOn_cpow_sub_one_div_one_add hs0 hs1
+  have hd : DifferentiableAt ℝ f 1 := by
+    have hc : DifferentiableAt ℂ (fun z : ℂ => z ^ (s - 1) / (1 + z)) 1 :=
+      (differentiableAt_id.cpow_const one_mem_slitPlane).div
+        (by fun_prop) (by norm_num)
+    exact hc.hasDerivAt.comp_ofReal.differentiableAt
+  have hf1 : f 1 = 1 / 2 := by norm_num [f]
+  have hB := MeasureTheory.tendsto_integral_Ioi_div_sub_add_sign_mul_I
+    (c := 1) (ε := 1) (by norm_num) (Or.inl rfl) hf hd
+  simp only [one_mul, hf1] at hB
+  have hpow := (Complex.tendsto_cpow_negativeAxisApproach
+    (x := 1) (ε := 1) (by norm_num) (Or.inl rfl) (s - 1)).const_mul (Real.pi : ℂ)
+  have hA := hpow.div_const (Complex.sin (s * Real.pi))
+  simp only [ofReal_one, one_cpow, one_mul] at hA
+  have hη : Tendsto (fun η : ℝ => (η : ℂ)) (𝓝[>] 0) (𝓝 0) :=
+    (continuous_ofReal.tendsto 0).mono_left nhdsWithin_le_nhds
+  have hden : Tendsto (fun η : ℝ => (2 : ℂ) - η * I) (𝓝[>] 0) (𝓝 2) := by
+    simpa only [zero_mul, sub_zero] using tendsto_const_nhds.sub (hη.mul_const I)
+  have hBA := (hA.sub_const (∫ t : ℝ in Ioi 0, f t)).div hden (by norm_num)
+  have hBA' : Tendsto (fun η : ℝ => ∫ t : ℝ in Ioi 0,
+      f t / ((t : ℂ) - 1 + (η : ℂ) * I)) (𝓝[>] 0)
+      (𝓝 ((Real.pi * exp ((Real.pi : ℂ) * I * (s - 1)) /
+        Complex.sin (s * Real.pi) - ∫ t : ℝ in Ioi 0, f t) / 2)) := by
+    refine hBA.congr' ?_
+    filter_upwards [self_mem_nhdsWithin] with η hη
+    let z := Complex.negativeAxisApproach 1 1 η
+    have hz : z ∈ slitPlane := Complex.negativeAxisApproach_mem_slitPlane
+      (by norm_num) (Or.inl rfl) hη
+    have hz0 : z ≠ 0 := slitPlane_ne_zero hz
+    have hAi : IntegrableOn (fun t : ℝ => (t : ℂ) ^ (s - 1) / (z + t)) (Ioi 0) := by
+      have hi := (integrableOn_cpow_sub_one_mul_div_add hs0 hs1 hz).div_const z
+      refine hi.congr (Eventually.of_forall fun t => ?_)
+      field_simp
+    change (Real.pi * z ^ (s - 1) / Complex.sin (s * Real.pi) -
+      ∫ t : ℝ in Ioi 0, f t) / (2 - (η : ℂ) * I) = _
+    rw [← integral_cpow_sub_one_div_add hs0 hs1 hz]
+    have h2 : (2 : ℂ) - (η : ℂ) * I ≠ 0 := by
+      intro he
+      have hre := congrArg Complex.re he
+      norm_num at hre
+    rw [← integral_sub hAi hf, ← integral_div]
+    apply setIntegral_congr_fun measurableSet_Ioi
+    intro t ht
+    dsimp only [f, z, Complex.negativeAxisApproach]
+    have ht1 : (1 : ℂ) + t ≠ 0 := by
+      exact_mod_cast (show (1 : ℝ) + t ≠ 0 by linarith [show 0 < t from ht])
+    have hzt : -(1 : ℂ) + (η : ℂ) * I + t ≠ 0 := by
+      have h := Complex.ofReal_add_mul_I_ne_zero_of_im_ne_zero hη.ne' (t - 1)
+      convert h using 1; push_cast; ring
+    norm_num only [ofReal_one, one_mul]
+    rw [show -(1 : ℂ) + (η : ℂ) * I + t = (t : ℂ) - 1 + η * I by ring]
+    have htd : (t : ℂ) - 1 + η * I ≠ 0 := by convert hzt using 1; ring
+    field_simp [htd]
+    ring
+  have he := tendsto_nhds_unique hB hBA'
+  have hsin : Complex.sin (s * Real.pi) ≠ 0 := by
+    rw [Ne, Complex.sin_eq_zero_iff]
+    rintro ⟨k, hk⟩
+    have hs : s = k := mul_right_cancel₀ (ofReal_ne_zero.mpr Real.pi_ne_zero) hk
+    have h0 : (0 : ℝ) < k := by simpa [hs] using hs0
+    have h1 : (k : ℝ) < 1 := by simpa [hs] using hs1
+    have h0' : 0 < k := by exact_mod_cast h0
+    have h1' : k < 1 := by exact_mod_cast h1
+    omega
+  have hexp : exp ((Real.pi : ℂ) * I * (s - 1)) =
+      -(Complex.cos (s * Real.pi) + Complex.sin (s * Real.pi) * I) := by
+    rw [show (Real.pi : ℂ) * I * (s - 1) = (s * Real.pi) * I - Real.pi * I by ring,
+      Complex.exp_sub, Complex.exp_pi_mul_I, div_neg, div_one, Complex.exp_mul_I]
+  have he' : F - Real.pi * I / 2 =
+      (Real.pi * exp ((Real.pi : ℂ) * I * (s - 1)) / Complex.sin (s * Real.pi) -
+        ∫ t : ℝ in Ioi 0, f t) / 2 := by
+    simpa only [F, hf1, one_mul, ofReal_one, mul_one, div_eq_mul_inv, mul_assoc] using he
+  have hv : Real.pi * exp ((Real.pi : ℂ) * I * (s - 1)) /
+      Complex.sin (s * Real.pi) = -Real.pi * Complex.cot (s * Real.pi) - Real.pi * I := by
+    rw [hexp, Complex.cot_eq_cos_div_sin]
+    generalize Complex.sin (s * Real.pi) = u at hsin ⊢
+    generalize Complex.cos (s * Real.pi) = v
+    field_simp [hsin]
+    ring
+  rw [hv] at he'
+  clear_value F
+  linear_combination 2 * he'
+
+
 /-- DLMF Table 1.14.5, row 4: `1/(1 - x) ↦ π cot(sπ)`, `0 < ℜs < 1`, Cauchy principal value at
 `x = 1`. -/
 @[dlmf 1.14.T5]
@@ -111,7 +210,47 @@ theorem tendsto_mellin_inv_one_sub_pv {s : ℂ} (hs0 : 0 < s.re) (hs1 : s.re < 1
     Tendsto (fun ε : ℝ => ∫ x in {x : ℝ | 0 < x ∧ ε < |x - 1|},
         (x : ℂ) ^ (s - 1) * (1 / (1 - x))) (𝓝[>] 0)
       (𝓝 (Real.pi * Complex.cot (s * Real.pi))) := by
-  sorry
+
+  let f : ℝ → ℂ := fun t => (t : ℂ) ^ (s - 1) / (1 + t)
+  let F : ℂ := (∫ t : ℝ in 0..2, (f t - f 1) / ((t : ℂ) - 1)) +
+    ∫ t : ℝ in Ioi 2, f t / ((t : ℂ) - 1)
+  have hf : IntegrableOn f (Ioi 0) := integrableOn_cpow_sub_one_div_one_add hs0 hs1
+  have hd : DifferentiableAt ℝ f 1 := by
+    have hc : DifferentiableAt ℂ (fun z : ℂ => z ^ (s - 1) / (1 + z)) 1 :=
+      (differentiableAt_id.cpow_const one_mem_slitPlane).div (by fun_prop) (by norm_num)
+    exact hc.hasDerivAt.comp_ofReal.differentiableAt
+  have hp := MeasureTheory.pv_tendsto_setIntegral_Ioi_div_sub (c := 1) (by norm_num) hf hd
+  norm_num only [mul_one, ofReal_one] at hp
+  have hr := MeasureTheory.tendsto_setIntegral_Ioi_cut hf 1
+  have h := (hp.const_mul (-2 : ℂ)).sub hr
+  have hval : (-2 : ℂ) * F - (∫ t : ℝ in Ioi 0, f t) =
+      Real.pi * Complex.cot (s * Real.pi) := by
+    have hv := power_cauchy_finitePart hs0 hs1
+    change 2 * F + (∫ t : ℝ in Ioi 0, f t) = _ at hv
+    linear_combination -hv
+  change Tendsto _ _ (𝓝 ((-2 : ℂ) * F - (∫ t : ℝ in Ioi 0, f t))) at h
+  rw [hval] at h
+  refine h.congr' ?_
+  filter_upwards [self_mem_nhdsWithin] with ε hε
+  have hi := MeasureTheory.integrableOn_Ioi_cut_div_sub (c := 1) hf hε
+  norm_num only [ofReal_one] at hi
+  have hfi := hf.mono_set (show {t : ℝ | 0 < t ∧ ε < |t - 1|} ⊆ Ioi 0 from fun t ht => ht.1)
+  rw [← integral_const_mul, ← integral_sub (hi.const_mul (-2)) hfi]
+  apply setIntegral_congr_fun (by measurability)
+  intro t ht
+  have ht1 : (1 : ℂ) + t ≠ 0 := by
+    exact_mod_cast (show (1 : ℝ) + t ≠ 0 by linarith [ht.1])
+  have ht0 : (t : ℂ) - 1 ≠ 0 := by
+    have hn : t ≠ 1 := by
+      intro he
+      have ht' := ht.2
+      rw [he, sub_self, abs_zero] at ht'
+      linarith [show 0 < ε from hε]
+    exact sub_ne_zero.mpr (by exact_mod_cast hn)
+  dsimp only [f]
+  rw [show (1 : ℂ) - t = -((t : ℂ) - 1) by ring]
+  field_simp [ht0, ht1]
+  ring
 
 /-- DLMF Table 1.14.5, row 5: `1/(1 + x) ↦ π csc(sπ)`, `0 < ℜs < 1`. -/
 @[dlmf 1.14.T5]
@@ -340,7 +479,7 @@ theorem mellin_log_abs_one_add_div_one_sub {s : ℂ} (hs0 : -1 < s.re) (hs1 : s.
     (hs : s ≠ 0) :
     mellin (fun x => (Real.log |(1 + x) / (1 - x)| : ℂ)) s =
       Real.pi * Complex.tan (s * Real.pi / 2) / s := by
-  sorry
+  exact _root_.mellin_log_abs_one_add_div_one_sub hs0 hs1 hs
 
 /-- A boundary term `F(t) tˢ/s` tends to zero where `|F(t)| ≤ C t^q` and `t^{q + ℜs} → 0`. -/
 private lemma tendsto_mul_cpow_div_of_abs_le {l : Filter ℝ} {F : ℝ → ℝ} {s : ℂ} {C q : ℝ}

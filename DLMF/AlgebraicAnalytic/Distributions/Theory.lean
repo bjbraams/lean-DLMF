@@ -6,16 +6,22 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.AlgebraicAnalytic.Distributions.Basic
+import DLMFMathlib.Analysis.Distribution.Barrelled
+import DLMFMathlib.Analysis.LocallyConvex.CompactConvergence
 public import Mathlib.Analysis.Calculus.FDeriv.Symmetric
 public import DLMFMathlib.Analysis.Distribution.IteratedLineDeriv
 public import Mathlib.Analysis.Distribution.AEEqOfIntegralContDiff
 public import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
+import DLMFMathlib.Analysis.Distribution.Stieltjes
+import Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap
 
 /-!
 # Distributions (DLMF §1.16)
 
 Theorems of DLMF §1.16 that are not already in Mathlib (the upstream pointers are in
-`DLMF.AlgebraicAnalytic.Distributions.MathlibCoverage`).
+`DLMF.AlgebraicAnalytic.Distributions.MathlibCoverage`). Sequential distribution convergence
+uses TauCeti's Fréchet fixed-support spaces and Mathlib's native test-function topology,
+Banach–Steinhaus theorem and Ascoli theorem, through the generic support modules.
 
 ## Main results
 
@@ -215,7 +221,7 @@ space `𝓓(Ω)`). -/
 theorem distrib_tendsto_iff {Ω : TopologicalSpace.Opens ℝ} (T : ℕ → 𝓓'(Ω, ℝ))
     (T₀ : 𝓓'(Ω, ℝ)) :
     Tendsto T atTop (𝓝 T₀) ↔ ∀ φ : 𝓓(Ω, ℝ), Tendsto (fun n => T n φ) atTop (𝓝 (T₀ φ)) := by
-  sorry
+  exact CompactConvergenceCLM.tendsto_atTop_iff_forall_apply T T₀
 
 /-- DLMF 1.16.9_5: `μ_α = Dα`: the distributional derivative of a Stieltjes function `α`
 (nondecreasing, right continuous, hence locally integrable) is its Lebesgue–Stieltjes
@@ -223,7 +229,16 @@ measure (1.16.3_5). With `α = H(· - x₀)` this is 1.16.16 (`deriv_heaviside_s
 @[dlmf 1.16.E9_5]
 theorem stieltjes_eq_deriv (α : StieltjesFunction ℝ) :
     stieltjesDistribution ⊤ α = ∂_{(1 : ℝ)} (lineDistrib ⇑α) := by
-  sorry
+  ext φ
+  rw [stieltjesDistribution, Distribution.ofFun_apply
+    ((locallyIntegrable_const (1 : ℝ)).locallyIntegrableOn _),
+    Distribution.lineDerivOp_apply_apply, lineDistrib,
+    Distribution.ofFun_apply (α.mono.locallyIntegrable.locallyIntegrableOn _)]
+  simp only [FunLike.coe_neg, Pi.neg_apply, coe_lineDerivOp_one, smul_eq_mul, neg_mul,
+    integral_neg, mul_one]
+  simpa only [mul_comm, neg_neg] using
+    (congrArg Neg.neg (α.integral_mul_deriv_eq_neg
+      (φ.contDiff.of_le (by simp)) φ.hasCompactSupport)).symm
 
 /-- §1.16(ii): if the Lebesgue–Stieltjes measure of `α` is absolutely continuous with density
 `w` (`dα = w dx`), then `Dα = Λ_w`. -/
@@ -232,7 +247,16 @@ theorem deriv_stieltjes_of_density (α : StieltjesFunction ℝ) {w : ℝ → ℝ
     (hw : α.measure = volume.withDensity fun x => ENNReal.ofReal (w x))
     (hw0 : ∀ x, 0 ≤ w x) (hwi : LocallyIntegrable w volume) :
     ∂_{(1 : ℝ)} (lineDistrib ⇑α) = lineDistrib w := by
-  sorry
+  rw [← stieltjes_eq_deriv]
+  ext φ
+  rw [stieltjesDistribution, Distribution.ofFun_apply
+    ((locallyIntegrable_const (1 : ℝ)).locallyIntegrableOn _), lineDistrib,
+    Distribution.ofFun_apply (hwi.locallyIntegrableOn _)]
+  simp only [smul_eq_mul, mul_one]
+  rw [hw, integral_withDensity_eq_integral_toReal_smul₀
+    hwi.aestronglyMeasurable.aemeasurable.ennreal_ofReal
+    (Filter.Eventually.of_forall fun x => ENNReal.ofReal_lt_top)]
+  simp only [ENNReal.toReal_ofReal (hw0 _), smul_eq_mul, mul_comm]
 
 /-- §1.16(iii): the Dirac delta distribution is singular: it is not `Λ_f` for any locally
 integrable `f`. -/

@@ -1,5 +1,10 @@
 # DLMF Chapter 26 acquisition: Combinatorial Analysis
 
+**Proof status (2026-11-13).** Chapter 26 has 26 direct source admissions. The [updated-dependency proof round](
+REVIEW.md#proofs-with-the-updated-dependencies-2026-11-12) proves 6 original admissions in this chapter.
+Per-entry statuses and source links below follow the compiled axiom audit; earlier
+dated counts describe their original batches.
+
 > Source paths and current layout notes were refreshed on 2026-10-30; generated per-entry
 > statuses follow the compiled ledger refresh. Dated acquisition and proof counts
 > describe their original batches.
@@ -132,21 +137,21 @@ pointers for 40 IDs.
 
 ## [§26.6 Other Lattice Path Numbers](https://dlmf.nist.gov/26.6)
 
-- [26.6.i](https://dlmf.nist.gov/26.6.i): [`DLMF.Combinatorics.delannoy`](DLMF/Combinatorics/Basic/LatticeNumbers.lean#L52) (definition); [`DLMF.Combinatorics.motzkin`](DLMF/Combinatorics/Basic/LatticeNumbers.lean#L73) (definition); [`DLMF.Combinatorics.narayana`](DLMF/Combinatorics/Basic/LatticeNumbers.lean#L100) (definition); [`DLMF.Combinatorics.card_latticePaths_eq_delannoy`](DLMF/Combinatorics/LatticePaths.lean#L59) (proved); [`DLMF.Combinatorics.card_latticePaths_above_eq_motzkin`](DLMF/Combinatorics/LatticePaths.lean#L92) (admitted); [`DLMF.Combinatorics.card_latticePaths_peaks_eq_narayana`](DLMF/Combinatorics/LatticePaths.lean#L102) (admitted); [`DLMF.Combinatorics.card_latticePaths_above_eq_largeSchroder`](DLMF/Combinatorics/LatticePaths.lean#L632) (proved); [`Nat.largeSchroder`](DLMF/Combinatorics/LatticePaths.lean#L186) (Mathlib, upstream pointer). Delannoy D(m, n), Motzkin M(n) and Narayana N(n, k) are new definitions (recurrence, recurrence, closed form with N(n, 0) = 0); r(n) is Mathlib `Nat.largeSchroder`. The path-count characterizations are admitted.
-- [26.6.E1](https://dlmf.nist.gov/26.6.E1): [`DLMF.Combinatorics.delannoy_eq_sum`](DLMF/Combinatorics/LatticePaths.lean#L417) (proved). Both closed forms of D(m, n) admitted.
-- [26.6.E2](https://dlmf.nist.gov/26.6.E2): [`DLMF.Combinatorics.motzkin_eq_sum`](DLMF/Combinatorics/LatticePaths.lean#L424) (proved). Motzkin closed form (admitted).
+- [26.6.i](https://dlmf.nist.gov/26.6.i): [`DLMF.Combinatorics.delannoy`](DLMF/Combinatorics/Basic/LatticeNumbers.lean#L52) (definition); [`DLMF.Combinatorics.motzkin`](DLMF/Combinatorics/Basic/LatticeNumbers.lean#L73) (definition); [`DLMF.Combinatorics.narayana`](DLMF/Combinatorics/Basic/LatticeNumbers.lean#L100) (definition); [`DLMF.Combinatorics.card_latticePaths_eq_delannoy`](DLMF/Combinatorics/LatticePaths.lean#L61) (proved); [`DLMF.Combinatorics.card_latticePaths_above_eq_motzkin`](DLMF/Combinatorics/LatticePaths.lean#L277) (proved); [`DLMF.Combinatorics.card_latticePaths_peaks_eq_narayana`](DLMF/Combinatorics/LatticePaths.lean#L94) (proved); [`DLMF.Combinatorics.card_latticePaths_above_eq_largeSchroder`](DLMF/Combinatorics/LatticePaths.lean#L615) (proved); [`Nat.largeSchroder`](DLMF/Combinatorics/LatticePaths.lean#L186) (Mathlib, upstream pointer). Delannoy D(m, n), Motzkin M(n) and Narayana N(n, k) are new definitions (recurrence, recurrence, closed form with N(n, 0) = 0); r(n) is Mathlib `Nat.largeSchroder`. The path-count characterizations are admitted.
+- [26.6.E1](https://dlmf.nist.gov/26.6.E1): [`DLMF.Combinatorics.delannoy_eq_sum`](DLMF/Combinatorics/LatticePaths.lean#L420) (proved). Both closed forms of D(m, n) admitted.
+- [26.6.E2](https://dlmf.nist.gov/26.6.E2): [`DLMF.Combinatorics.motzkin_eq_sum`](DLMF/Combinatorics/LatticePaths.lean#L427) (proved). Motzkin closed form (admitted).
 - [26.6.E3](https://dlmf.nist.gov/26.6.E3): [`DLMF.Combinatorics.narayana_eq`](DLMF/Combinatorics/Basic/LatticeNumbers.lean#L133) (proved). Narayana closed form N(n, k) = C(n, k)C(n, k−1)/n, proved in ℕ (divisibility proved).
-- [26.6.E4](https://dlmf.nist.gov/26.6.E4): [`DLMF.Combinatorics.largeSchroder_eq_delannoy_sub`](DLMF/Combinatorics/LatticePaths.lean#L442) (proved). r(n) = D(n, n) − D(n+1, n−1), n ≥ 1 (admitted).
-- [26.6.E5](https://dlmf.nist.gov/26.6.E5): [`DLMF.Combinatorics.hasSum_delannoy`](DLMF/Combinatorics/LatticePaths.lean#L652) (proved). Bivariate Delannoy generating function, |x| + |y| + |xy| < 1 (admitted).
-- [26.6.E6](https://dlmf.nist.gov/26.6.E6): [`DLMF.Combinatorics.hasSum_delannoy_diag`](DLMF/Combinatorics/LatticePaths.lean#L712) (proved). Diagonal Delannoy generating function 1/√(1 − 6x + x²), |x| < 3 − 2√2 (admitted).
-- [26.6.E7](https://dlmf.nist.gov/26.6.E7): [`DLMF.Combinatorics.hasSum_motzkin`](DLMF/Combinatorics/LatticePaths.lean#L749) (proved). Motzkin generating function, 0 < |x| < 1/3 (admitted).
-- [26.6.E8](https://dlmf.nist.gov/26.6.E8): [`DLMF.Combinatorics.hasSum_narayana`](DLMF/Combinatorics/LatticePaths.lean#L1053) (proved). Narayana generating function in a neighbourhood of 0; the proved helper gives |x|, |y| < 1/8.
-- [26.6.E9](https://dlmf.nist.gov/26.6.E9): [`DLMF.Combinatorics.hasSum_largeSchroder`](DLMF/Combinatorics/LatticePaths.lean#L1063) (proved). Large Schröder generating function (admitted).
+- [26.6.E4](https://dlmf.nist.gov/26.6.E4): [`DLMF.Combinatorics.largeSchroder_eq_delannoy_sub`](DLMF/Combinatorics/LatticePaths.lean#L445) (proved). r(n) = D(n, n) − D(n+1, n−1), n ≥ 1 (admitted).
+- [26.6.E5](https://dlmf.nist.gov/26.6.E5): [`DLMF.Combinatorics.hasSum_delannoy`](DLMF/Combinatorics/LatticePaths.lean#L635) (proved). Bivariate Delannoy generating function, |x| + |y| + |xy| < 1 (admitted).
+- [26.6.E6](https://dlmf.nist.gov/26.6.E6): [`DLMF.Combinatorics.hasSum_delannoy_diag`](DLMF/Combinatorics/LatticePaths.lean#L695) (proved). Diagonal Delannoy generating function 1/√(1 − 6x + x²), |x| < 3 − 2√2 (admitted).
+- [26.6.E7](https://dlmf.nist.gov/26.6.E7): [`DLMF.Combinatorics.hasSum_motzkin`](DLMF/Combinatorics/LatticePaths.lean#L732) (proved). Motzkin generating function, 0 < |x| < 1/3 (admitted).
+- [26.6.E8](https://dlmf.nist.gov/26.6.E8): [`DLMF.Combinatorics.hasSum_narayana`](DLMF/Combinatorics/LatticePaths.lean#L1036) (proved). Narayana generating function in a neighbourhood of 0; the proved helper gives |x|, |y| < 1/8.
+- [26.6.E9](https://dlmf.nist.gov/26.6.E9): [`DLMF.Combinatorics.hasSum_largeSchroder`](DLMF/Combinatorics/LatticePaths.lean#L1046) (proved). Large Schröder generating function (admitted).
 - [26.6.E10](https://dlmf.nist.gov/26.6.E10): [`DLMF.Combinatorics.delannoy_succ_succ`](DLMF/Combinatorics/Basic/LatticeNumbers.lean#L66) (proved). D(m+1, n+1) = D(m, n+1) + D(m+1, n) + D(m, n): the defining recurrence.
 - [26.6.E11](https://dlmf.nist.gov/26.6.E11): [`DLMF.Combinatorics.motzkin_eq`](DLMF/Combinatorics/Basic/LatticeNumbers.lean#L83) (proved). Motzkin recurrence, the defining equation.
-- [26.6.E12](https://dlmf.nist.gov/26.6.E12): [`DLMF.Combinatorics.catalan_eq_sum_narayana`](DLMF/Combinatorics/LatticePaths.lean#L1105) (proved). C(n) = ∑ₖ N(n, k) (admitted).
-- [26.6.E13](https://dlmf.nist.gov/26.6.E13): [`DLMF.Combinatorics.motzkin_eq_sum_catalan`](DLMF/Combinatorics/LatticePaths.lean#L1113) (proved). M(n) = ∑ C(n, 2k) C(k) (admitted).
-- [26.6.E14](https://dlmf.nist.gov/26.6.E14): [`DLMF.Combinatorics.catalan_eq_sum_motzkin`](DLMF/Combinatorics/LatticePaths.lean#L1119) (proved). C(n+1) = ∑ C(n, k) M(k) (admitted).
+- [26.6.E12](https://dlmf.nist.gov/26.6.E12): [`DLMF.Combinatorics.catalan_eq_sum_narayana`](DLMF/Combinatorics/LatticePaths.lean#L1088) (proved). C(n) = ∑ₖ N(n, k) (admitted).
+- [26.6.E13](https://dlmf.nist.gov/26.6.E13): [`DLMF.Combinatorics.motzkin_eq_sum_catalan`](DLMF/Combinatorics/LatticePaths.lean#L1096) (proved). M(n) = ∑ C(n, 2k) C(k) (admitted).
+- [26.6.E14](https://dlmf.nist.gov/26.6.E14): [`DLMF.Combinatorics.catalan_eq_sum_motzkin`](DLMF/Combinatorics/LatticePaths.lean#L1102) (proved). C(n+1) = ∑ C(n, k) M(k) (admitted).
 
 ## [§26.7 Set Partitions: Bell Numbers](https://dlmf.nist.gov/26.7)
 
@@ -162,7 +167,7 @@ pointers for 40 IDs.
 
 ## [§26.8 Set Partitions: Stirling Numbers](https://dlmf.nist.gov/26.8)
 
-- [26.8.i](https://dlmf.nist.gov/26.8.i): [`DLMF.Combinatorics.signedStirlingFirst`](DLMF/Combinatorics/Basic/Stirling.lean#L53) (definition); [`DLMF.Combinatorics.card_perm_numCycles`](DLMF/Combinatorics/Stirling/AsymptoticsAndCycles.lean#L420) (proved); [`DLMF.Combinatorics.signedStirlingFirst_eq_card`](DLMF/Combinatorics/Stirling/AsymptoticsAndCycles.lean#L429) (proved); [`DLMF.Combinatorics.card_finpartition_eq_stirlingSecond`](DLMF/Combinatorics/Stirling/AsymptoticsAndCycles.lean#L437) (proved); [`Nat.stirlingFirst`](DLMF/Combinatorics/Stirling/AsymptoticsAndCycles.lean#L421) (Mathlib, upstream pointer); [`Nat.stirlingSecond`](DLMF/Combinatorics/Stirling/AsymptoticsAndCycles.lean#L421) (Mathlib, upstream pointer). s(n, k) is the new `signedStirlingFirst` (ℤ-valued), S(n, k) is Mathlib `Nat.stirlingSecond`. Cycle and set-partition counts admitted; `signedStirlingFirst_eq_card` is proved from the admitted cycle count.
+- [26.8.i](https://dlmf.nist.gov/26.8.i): [`DLMF.Combinatorics.signedStirlingFirst`](DLMF/Combinatorics/Basic/Stirling.lean#L53) (definition); [`DLMF.Combinatorics.card_perm_numCycles`](DLMF/Combinatorics/Stirling/AsymptoticsAndCycles.lean#L446) (proved); [`DLMF.Combinatorics.signedStirlingFirst_eq_card`](DLMF/Combinatorics/Stirling/AsymptoticsAndCycles.lean#L455) (proved); [`DLMF.Combinatorics.card_finpartition_eq_stirlingSecond`](DLMF/Combinatorics/Stirling/AsymptoticsAndCycles.lean#L463) (proved); [`Nat.stirlingFirst`](DLMF/Combinatorics/Stirling/AsymptoticsAndCycles.lean#L421) (Mathlib, upstream pointer); [`Nat.stirlingSecond`](DLMF/Combinatorics/Stirling/AsymptoticsAndCycles.lean#L421) (Mathlib, upstream pointer). s(n, k) is the new `signedStirlingFirst` (ℤ-valued), S(n, k) is Mathlib `Nat.stirlingSecond`. Cycle and set-partition counts admitted; `signedStirlingFirst_eq_card` is proved from the admitted cycle count.
 - [26.8.E1](https://dlmf.nist.gov/26.8.E1): [`DLMF.Combinatorics.signedStirlingFirst_self`](DLMF/Combinatorics/Basic/Stirling.lean#L106) (proved); [`Nat.stirlingFirst_self`](DLMF/Combinatorics/Stirling/DefinitionsAndSeries.lean#L91) (Mathlib, upstream pointer).
 - [26.8.E2](https://dlmf.nist.gov/26.8.E2): [`DLMF.Combinatorics.signedStirlingFirst_one`](DLMF/Combinatorics/Basic/Stirling.lean#L111) (proved).
 - [26.8.E3](https://dlmf.nist.gov/26.8.E3): [`DLMF.Combinatorics.neg_one_pow_mul_signedStirlingFirst_eq_esymm`](DLMF/Combinatorics/Stirling/DefinitionsAndSeries.lean#L133) (proved). Elementary symmetric form (admitted).
@@ -202,10 +207,10 @@ pointers for 40 IDs.
 - [26.8.E37](https://dlmf.nist.gov/26.8.E37): [`DLMF.Combinatorics.hasSum_stirlingSecond_iteratedDeriv`](DLMF/Combinatorics/Stirling/RecurrencesAndIdentities.lean#L615) (proved). Entire f: admitted (route: Taylor expansion plus 26.8.6).
 - [26.8.E38](https://dlmf.nist.gov/26.8.E38): [`DLMF.Combinatorics.stirlingMatrix_inv`](DLMF/Combinatorics/Stirling/RecurrencesAndIdentities.lean#L713) (proved). The Stirling matrices are mutually inverse.
 - [26.8.E39](https://dlmf.nist.gov/26.8.E39): [`DLMF.Combinatorics.sum_signedStirlingFirst_mul_stirlingSecond`](DLMF/Combinatorics/Stirling/RecurrencesAndIdentities.lean#L646) (proved); [`DLMF.Combinatorics.sum_signedStirlingFirst_mul_stirlingSecond'`](DLMF/Combinatorics/Stirling/RecurrencesAndIdentities.lean#L691) (proved). Both orthogonality relations.
-- [26.8.E40](https://dlmf.nist.gov/26.8.E40): [`DLMF.Combinatorics.tendsto_signedStirlingFirst_div`](DLMF/Combinatorics/Stirling/AsymptoticsAndCycles.lean#L41) (admitted). Admitted.
-- [26.8.E41](https://dlmf.nist.gov/26.8.E41): [`DLMF.Combinatorics.signedStirlingFirst_add_isEquivalent`](DLMF/Combinatorics/Stirling/AsymptoticsAndCycles.lean#L170) (proved). Admitted.
-- [26.8.E42](https://dlmf.nist.gov/26.8.E42): [`DLMF.Combinatorics.stirlingSecond_isEquivalent`](DLMF/Combinatorics/Stirling/AsymptoticsAndCycles.lean#L181) (proved). Admitted.
-- [26.8.E43](https://dlmf.nist.gov/26.8.E43): [`DLMF.Combinatorics.tendsto_stirlingSecond_add_div`](DLMF/Combinatorics/Stirling/AsymptoticsAndCycles.lean#L217) (admitted). Admitted.
+- [26.8.E40](https://dlmf.nist.gov/26.8.E40): [`DLMF.Combinatorics.tendsto_signedStirlingFirst_div`](DLMF/Combinatorics/Stirling/AsymptoticsAndCycles.lean#L43) (proved). Admitted.
+- [26.8.E41](https://dlmf.nist.gov/26.8.E41): [`DLMF.Combinatorics.signedStirlingFirst_add_isEquivalent`](DLMF/Combinatorics/Stirling/AsymptoticsAndCycles.lean#L183) (proved). Admitted.
+- [26.8.E42](https://dlmf.nist.gov/26.8.E42): [`DLMF.Combinatorics.stirlingSecond_isEquivalent`](DLMF/Combinatorics/Stirling/AsymptoticsAndCycles.lean#L194) (proved). Admitted.
+- [26.8.E43](https://dlmf.nist.gov/26.8.E43): [`DLMF.Combinatorics.tendsto_stirlingSecond_add_div`](DLMF/Combinatorics/Stirling/AsymptoticsAndCycles.lean#L230) (proved). Admitted.
 
 ## Prose, informal and excluded items (part A)
 
@@ -385,12 +390,12 @@ Analytical prose (tagged with the subsection or section ID):
 
 Analytical prose (tagged with the subsection or section ID):
 
-- [26.13](https://dlmf.nist.gov/26.13): [`DLMF.Combinatorics.numCycles`](DLMF/Combinatorics/Basic/Permutations.lean#L53) (definition); [`DLMF.Combinatorics.exists_swap_factorization_numCycles`](DLMF/Combinatorics/Permutations/CyclesAndExcedances.lean#L191) (proved); [`DLMF.Combinatorics.examplePermutation_eq_swaps`](DLMF/Combinatorics/Permutations/CyclesAndExcedances.lean#L203) (proved); [`DLMF.Combinatorics.inversionNumber_eq_min_adjacent`](DLMF/Combinatorics/Permutations/CyclesAndExcedances.lean#L374) (proved); Mathlib: [`Equiv.Perm.sign_prod_list_swap`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/GroupTheory/Perm/Sign.html#Equiv.Perm.sign_prod_list_swap); Mathlib: [`Equiv.Perm.swap_induction_on`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/GroupTheory/Perm/Sign.html#Equiv.Perm.swap_induction_on); Mathlib: [`List.formPerm_cons_cons`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/GroupTheory/Perm/List.html#List.formPerm_cons_cons).
+- [26.13](https://dlmf.nist.gov/26.13): [`DLMF.Combinatorics.numCycles`](DLMF/Combinatorics/Basic/Permutations.lean#L54) (definition); [`DLMF.Combinatorics.exists_swap_factorization_numCycles`](DLMF/Combinatorics/Permutations/CyclesAndExcedances.lean#L191) (proved); [`DLMF.Combinatorics.examplePermutation_eq_swaps`](DLMF/Combinatorics/Permutations/CyclesAndExcedances.lean#L203) (proved); [`DLMF.Combinatorics.inversionNumber_eq_min_adjacent`](DLMF/Combinatorics/Permutations/CyclesAndExcedances.lean#L374) (proved); Mathlib: [`Equiv.Perm.sign_prod_list_swap`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/GroupTheory/Perm/Sign.html#Equiv.Perm.sign_prod_list_swap); Mathlib: [`Equiv.Perm.swap_induction_on`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/GroupTheory/Perm/Sign.html#Equiv.Perm.swap_induction_on); Mathlib: [`List.formPerm_cons_cons`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/GroupTheory/Perm/List.html#List.formPerm_cons_cons).
 
 ## [§26.14 Permutations: Order Notation](https://dlmf.nist.gov/26.14)
 
-- [26.14.E1](https://dlmf.nist.gov/26.14.E1): [`DLMF.Combinatorics.wordInversions`](DLMF/Combinatorics/Basic/Permutations.lean#L58) (definition); [`DLMF.Combinatorics.inversionNumber`](DLMF/Combinatorics/Basic/Permutations.lean#L73) (definition).
-- [26.14.E2](https://dlmf.nist.gov/26.14.E2): [`DLMF.Combinatorics.wordMajorIndex`](DLMF/Combinatorics/Basic/Permutations.lean#L68) (definition); [`DLMF.Combinatorics.majorIndex`](DLMF/Combinatorics/Basic/Permutations.lean#L81) (definition).
+- [26.14.E1](https://dlmf.nist.gov/26.14.E1): [`DLMF.Combinatorics.wordInversions`](DLMF/Combinatorics/Basic/Permutations.lean#L59) (definition); [`DLMF.Combinatorics.inversionNumber`](DLMF/Combinatorics/Basic/Permutations.lean#L74) (definition).
+- [26.14.E2](https://dlmf.nist.gov/26.14.E2): [`DLMF.Combinatorics.wordMajorIndex`](DLMF/Combinatorics/Basic/Permutations.lean#L69) (definition); [`DLMF.Combinatorics.majorIndex`](DLMF/Combinatorics/Basic/Permutations.lean#L82) (definition).
 - [26.14.E3](https://dlmf.nist.gov/26.14.E3): [`DLMF.Combinatorics.sum_pow_inversionNumber`](DLMF/Combinatorics/Permutations/EulerianNumbers.lean#L306) (proved). `q ≠ 1` (DLMF divides by `1 - q`).
 - [26.14.E4](https://dlmf.nist.gov/26.14.E4): [`DLMF.Combinatorics.hasSum_eulerianNumber`](DLMF/Combinatorics/Permutations/EulerianNumbers.lean#L845) (proved). Double series over `ℕ × ℕ`, `|x| < 1`, `|t| < 1` (absolute convergence holds there).
 - [26.14.E5](https://dlmf.nist.gov/26.14.E5): [`DLMF.Combinatorics.worpitzky`](DLMF/Combinatorics/Permutations/EulerianNumbers.lean#L345) (proved). `n ≥ 1` (for `n = 0` the printed sum is empty), complex `x`, `C(y, n) = y^{\underline n}/n!`.
@@ -409,17 +414,17 @@ Analytical prose (tagged with the subsection or section ID):
 
 Analytical prose (tagged with the subsection or section ID):
 
-- [26.14.i](https://dlmf.nist.gov/26.14#i): [`DLMF.Combinatorics.wordDescentSet`](DLMF/Combinatorics/Basic/Permutations.lean#L63) (definition); [`DLMF.Combinatorics.descentNumber`](DLMF/Combinatorics/Basic/Permutations.lean#L77) (definition); [`DLMF.Combinatorics.examplePermutation_stats`](DLMF/Combinatorics/Permutations/CyclesAndExcedances.lean#L242) (proved); [`DLMF.Combinatorics.eulerianNumber`](DLMF/Combinatorics/Basic/Permutations.lean#L85) (definition); [`DLMF.Combinatorics.eulerianNumber_eq_card_excedance`](DLMF/Combinatorics/Permutations/EulerianNumbers.lean#L243) (proved); [`DLMF.Combinatorics.eulerianNumber_eq_card_weakExcedance`](DLMF/Combinatorics/Permutations/EulerianNumbers.lean#L258) (proved).
-- [26.14.i](https://dlmf.nist.gov/26.14.i): [`DLMF.Combinatorics.descentNumber`](DLMF/Combinatorics/Basic/Permutations.lean#L77) (definition); [`DLMF.Combinatorics.examplePermutation_stats`](DLMF/Combinatorics/Permutations/CyclesAndExcedances.lean#L242) (proved); [`DLMF.Combinatorics.eulerianNumber`](DLMF/Combinatorics/Basic/Permutations.lean#L85) (definition); [`DLMF.Combinatorics.eulerianNumber_eq_card_excedance`](DLMF/Combinatorics/Permutations/EulerianNumbers.lean#L243) (proved); [`DLMF.Combinatorics.eulerianNumber_eq_card_weakExcedance`](DLMF/Combinatorics/Permutations/EulerianNumbers.lean#L258) (proved); [`DLMF.Combinatorics.wordDescentSet`](DLMF/Combinatorics/Basic/Permutations.lean#L63) (definition).
+- [26.14.i](https://dlmf.nist.gov/26.14#i): [`DLMF.Combinatorics.wordDescentSet`](DLMF/Combinatorics/Basic/Permutations.lean#L64) (definition); [`DLMF.Combinatorics.descentNumber`](DLMF/Combinatorics/Basic/Permutations.lean#L78) (definition); [`DLMF.Combinatorics.examplePermutation_stats`](DLMF/Combinatorics/Permutations/CyclesAndExcedances.lean#L242) (proved); [`DLMF.Combinatorics.eulerianNumber`](DLMF/Combinatorics/Basic/Permutations.lean#L86) (definition); [`DLMF.Combinatorics.eulerianNumber_eq_card_excedance`](DLMF/Combinatorics/Permutations/EulerianNumbers.lean#L243) (proved); [`DLMF.Combinatorics.eulerianNumber_eq_card_weakExcedance`](DLMF/Combinatorics/Permutations/EulerianNumbers.lean#L258) (proved).
+- [26.14.i](https://dlmf.nist.gov/26.14.i): [`DLMF.Combinatorics.descentNumber`](DLMF/Combinatorics/Basic/Permutations.lean#L78) (definition); [`DLMF.Combinatorics.examplePermutation_stats`](DLMF/Combinatorics/Permutations/CyclesAndExcedances.lean#L242) (proved); [`DLMF.Combinatorics.eulerianNumber`](DLMF/Combinatorics/Basic/Permutations.lean#L86) (definition); [`DLMF.Combinatorics.eulerianNumber_eq_card_excedance`](DLMF/Combinatorics/Permutations/EulerianNumbers.lean#L243) (proved); [`DLMF.Combinatorics.eulerianNumber_eq_card_weakExcedance`](DLMF/Combinatorics/Permutations/EulerianNumbers.lean#L258) (proved); [`DLMF.Combinatorics.wordDescentSet`](DLMF/Combinatorics/Basic/Permutations.lean#L64) (definition).
 
 ## [§26.15 Permutations: Matrix Notation](https://dlmf.nist.gov/26.15)
 
 - [26.15.E1](https://dlmf.nist.gov/26.15.E1): [`DLMF.Combinatorics.examplePermutation_permMatrix`](DLMF/Combinatorics/Permutations/RookPolynomials.lean#L55) (proved). Mathlib's `Equiv.Perm.permMatrix` (entry 1 at `(j, σ j)`), proved by `decide +kernel`; sign = sign of the determinant is Mathlib `Matrix.det_permutation` (pointer, 26.15).
 - [26.15.E2](https://dlmf.nist.gov/26.15.E2): [`DLMF.Combinatorics.inversionNumber_eq_sum_permMatrix`](DLMF/Combinatorics/Permutations/RookPolynomials.lean#L64) (proved).
-- [26.15.E3](https://dlmf.nist.gov/26.15.E3): [`DLMF.Combinatorics.rookPolynomial`](DLMF/Combinatorics/Basic/Permutations.lean#L149) (definition).
+- [26.15.E3](https://dlmf.nist.gov/26.15.E3): [`DLMF.Combinatorics.rookPolynomial`](DLMF/Combinatorics/Basic/Permutations.lean#L150) (definition).
 - [26.15.E4](https://dlmf.nist.gov/26.15.E4): [`DLMF.Combinatorics.rookPolynomial_union`](DLMF/Combinatorics/Permutations/RookPolynomials.lean#L164) (proved).
 - [26.15.E5](https://dlmf.nist.gov/26.15.E5): [`DLMF.Combinatorics.rookPolynomial_delete`](DLMF/Combinatorics/Permutations/RookPolynomials.lean#L233) (proved).
-- [26.15.E6](https://dlmf.nist.gov/26.15.E6): [`DLMF.Combinatorics.hitPolynomial`](DLMF/Combinatorics/Basic/Permutations.lean#L160) (definition).
+- [26.15.E6](https://dlmf.nist.gov/26.15.E6): [`DLMF.Combinatorics.hitPolynomial`](DLMF/Combinatorics/Basic/Permutations.lean#L161) (definition).
 - [26.15.E7](https://dlmf.nist.gov/26.15.E7): [`DLMF.Combinatorics.hitPolynomial_eq`](DLMF/Combinatorics/Permutations/RookPolynomials.lean#L328) (proved).
 - [26.15.E8](https://dlmf.nist.gov/26.15.E8): [`DLMF.Combinatorics.hitNumber_zero_eq`](DLMF/Combinatorics/Permutations/RookPolynomials.lean#L416) (proved). Both equalities; the second from (26.15.7) at `x = 0` ("proved from admissions"). Also 26.18.E3.
 - [26.15.E9](https://dlmf.nist.gov/26.15.E9): [`DLMF.Combinatorics.rookNumber_menageBoard`](DLMF/Combinatorics/Permutations/MenageAndFerrers.lean#L469) (proved). Ménage board `{(j,j), (j,j+1)}` with indices mod `n`, `n ≥ 2` (for `n = 1` the board has one square and the formula fails), `k ≤ n`; checked for `n ≤ 7`.
@@ -430,17 +435,17 @@ Analytical prose (tagged with the subsection or section ID):
 
 Analytical prose (tagged with the subsection or section ID):
 
-- [26.15](https://dlmf.nist.gov/26.15): [`DLMF.Combinatorics.rookNumber`](DLMF/Combinatorics/Basic/Permutations.lean#L143) (definition); [`DLMF.Combinatorics.hitNumber`](DLMF/Combinatorics/Basic/Permutations.lean#L154) (definition); [`DLMF.Combinatorics.hitNumber_diagonalBoard_zero`](DLMF/Combinatorics/Permutations/RookPolynomials.lean#L96) (proved); [`DLMF.Combinatorics.rookNumber_diagonalBoard`](DLMF/Combinatorics/Permutations/RookPolynomials.lean#L121) (proved); Mathlib: [`Matrix.det_permutation`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/LinearAlgebra/Matrix/Permutation.html#Matrix.det_permutation).
+- [26.15](https://dlmf.nist.gov/26.15): [`DLMF.Combinatorics.rookNumber`](DLMF/Combinatorics/Basic/Permutations.lean#L144) (definition); [`DLMF.Combinatorics.hitNumber`](DLMF/Combinatorics/Basic/Permutations.lean#L155) (definition); [`DLMF.Combinatorics.hitNumber_diagonalBoard_zero`](DLMF/Combinatorics/Permutations/RookPolynomials.lean#L96) (proved); [`DLMF.Combinatorics.rookNumber_diagonalBoard`](DLMF/Combinatorics/Permutations/RookPolynomials.lean#L121) (proved); Mathlib: [`Matrix.det_permutation`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/LinearAlgebra/Matrix/Permutation.html#Matrix.det_permutation).
 
 ## [§26.16 Multiset Permutations](https://dlmf.nist.gov/26.16)
 
-- [26.16.E1](https://dlmf.nist.gov/26.16.E1): [`DLMF.Combinatorics.qMultinomial`](DLMF/Combinatorics/Basic/Permutations.lean#L165) (definition). Product over all `k`; the factor `k = m` is `[a_m, a_m]_q = 1`.
-- [26.16.E2](https://dlmf.nist.gov/26.16.E2): [`DLMF.Combinatorics.sum_pow_wordInversions_multisetPermutations`](DLMF/Combinatorics/MultisetPermutations.lean#L128) (admitted). Every `q`; checked symbolically for small multisets.
-- [26.16.E3](https://dlmf.nist.gov/26.16.E3): [`DLMF.Combinatorics.sum_pow_wordMajorIndex_multisetPermutations`](DLMF/Combinatorics/MultisetPermutations.lean#L134) (admitted). Every `q`; checked symbolically for small multisets.
+- [26.16.E1](https://dlmf.nist.gov/26.16.E1): [`DLMF.Combinatorics.qMultinomial`](DLMF/Combinatorics/Basic/Permutations.lean#L166) (definition). Product over all `k`; the factor `k = m` is `[a_m, a_m]_q = 1`.
+- [26.16.E2](https://dlmf.nist.gov/26.16.E2): [`DLMF.Combinatorics.sum_pow_wordInversions_multisetPermutations`](DLMF/Combinatorics/MultisetPermutations.lean#L124) (proved). Every `q`; checked symbolically for small multisets.
+- [26.16.E3](https://dlmf.nist.gov/26.16.E3): [`DLMF.Combinatorics.sum_pow_wordMajorIndex_multisetPermutations`](DLMF/Combinatorics/MultisetPermutations.lean#L130) (proved). Every `q`; checked symbolically for small multisets.
 
 Analytical prose (tagged with the subsection or section ID):
 
-- [26.16](https://dlmf.nist.gov/26.16): [`DLMF.Combinatorics.multisetPermutations`](DLMF/Combinatorics/MultisetPermutations.lean#L53) (definition); [`DLMF.Combinatorics.card_multisetPermutations`](DLMF/Combinatorics/MultisetPermutations.lean#L59) (proved); [`DLMF.Combinatorics.multisetPermutation_example`](DLMF/Combinatorics/MultisetPermutations.lean#L121) (proved).
+- [26.16](https://dlmf.nist.gov/26.16): [`DLMF.Combinatorics.multisetPermutations`](DLMF/Combinatorics/Basic/Permutations.lean#L172) (definition); [`DLMF.Combinatorics.card_multisetPermutations`](DLMF/Combinatorics/MultisetPermutations.lean#L55) (proved); [`DLMF.Combinatorics.multisetPermutation_example`](DLMF/Combinatorics/MultisetPermutations.lean#L117) (proved).
 
 ## [§26.17 The Twelvefold Way](https://dlmf.nist.gov/26.17)
 

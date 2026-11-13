@@ -22,7 +22,8 @@
   "JacobiElliptic <-> Weierstrass",
   "Legendre <-> SphericalHarmonics",
   "NumberTheory <-> Partitions",
-  "Polylog <-> Zeta"
+  "Polylog <-> Zeta",
+  "Theta <-> Weierstrass"
  ],
  "defs_imports": []
 }

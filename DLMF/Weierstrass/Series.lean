@@ -7,6 +7,7 @@ module
 
 public import DLMF.Weierstrass.EllipticFunctionsAndInvariants
 public import DLMF.Weierstrass.DifferentialEquations
+public import DLMF.Weierstrass.Series.LogarithmicSigma
 public import DLMF.Weierstrass.Relations.ThetaIdentities
 public import DLMF.Theta.Products.InfiniteProducts
 public import DLMF.Theta.Products.LogDerivativesAndDoubleProducts

@@ -12,6 +12,8 @@ public import Mathlib.Combinatorics.Enumerative.Schroder
 public import Mathlib.Data.Nat.Choose.Vandermonde
 public import DLMFMathlib.Combinatorics.SeriesTransform
 public import DLMF.Combinatorics.Catalan
+import DLMF.Combinatorics.LatticePaths.Motzkin
+public import DLMF.Combinatorics.LatticePaths.Narayana
 
 /-!
 # Other lattice path numbers
@@ -89,16 +91,6 @@ theorem card_latticePaths_eq_delannoy (m n : ℕ) :
       simp only [Nat.add_sub_cancel, Nat.sub_zero, ih, ihn, delannoy_succ_succ]
       ring
 
-/-- DLMF §26.6(i): `M(n)` is the number of lattice paths from `(0, 0)` to `(n, n)` that stay on
-or above `y = x`, with steps `(2, 0)`, `(0, 2)`, `(1, 1)`. -/
-@[dlmf 26.6.i]
-theorem card_latticePaths_above_eq_motzkin (n : ℕ) :
-    #{l ∈ latticePaths {(2, 0), (0, 2), (1, 1)} n n | StaysWeaklyAboveDiagonal l} = motzkin n := by
-  sorry
-
-/-- The number of occurrences of a step `(0, 1)` immediately followed by a step `(1, 0)`. -/
-def numPeaks (l : List (ℕ × ℕ)) : ℕ := (l.zip l.tail).count ((0, 1), (1, 0))
-
 /-- DLMF §26.6(i): `N(n, k)` is the number of lattice paths from `(0, 0)` to `(n, n)` with
 steps `(1, 0)`, `(0, 1)` that stay on or above `y = x` and have exactly `k` occurrences of a
 step `(0, 1)` followed by a step `(1, 0)` (`n ≥ 1`; for `n = 0` the empty path has no such
@@ -107,7 +99,7 @@ occurrence and `N(0, 0) = 0` by convention). -/
 theorem card_latticePaths_peaks_eq_narayana {n : ℕ} (hn : 1 ≤ n) (k : ℕ) :
     #{l ∈ latticePaths unitSteps n n | StaysWeaklyAboveDiagonal l ∧ numPeaks l = k} =
       narayana n k := by
-  sorry
+  exact NarayanaPaths.card_latticePaths_peaks hn k
 
 /-! ### Helpers -/
 
@@ -281,6 +273,17 @@ private lemma motzkin_eq_sum_catalan_mul_choose (n : ℕ) :
   have h := congrArg (PowerSeries.coeff n) this
   rw [PowerSeries.coeff_catalanQuadraticSeries_two, PowerSeries.coeff_mk] at h
   simpa using h
+
+/-- DLMF §26.6(i): `M(n)` is the number of lattice paths from `(0, 0)` to `(n, n)` that stay on
+or above `y = x`, with steps `(2, 0)`, `(0, 2)`, `(1, 1)`. -/
+@[dlmf 26.6.i]
+theorem card_latticePaths_above_eq_motzkin (n : ℕ) :
+    #{l ∈ latticePaths {(2, 0), (0, 2), (1, 1)} n n | StaysWeaklyAboveDiagonal l} = motzkin n := by
+  have h := MotzkinPaths.latticeCount_eq_count n 0 (by omega)
+  simp only [Nat.cast_zero, add_zero, Nat.sub_zero, MotzkinPaths.latticeCount_def,
+    mul_zero, staysAbove_zero_iff] at h
+  rw [h, MotzkinPaths.count_zero_eq_sum]
+  exact_mod_cast (motzkin_eq_sum_catalan_mul_choose n).symm
 
 /-- `C(n+1) = ∑_k C(n, k) M(k)`. -/
 private lemma catalan_succ_eq_sum_choose_mul_motzkin (n : ℕ) :
@@ -497,26 +500,6 @@ private lemma zero_not_mem_delannoySteps :
 private def schroderCount (d : ℤ) (m n : ℕ) : ℕ :=
   #{l ∈ latticePaths {(1, 0), (0, 1), (1, 1)} m n | StaysAbove d l}
 
-/-- A path stays in `x ≤ y + d` iff the origin does and the rest stays in the shifted
-half-plane. -/
-private lemma staysAbove_cons_iff (d : ℤ) (s : ℕ × ℕ) (l : List (ℕ × ℕ)) :
-    StaysAbove d (s :: l) ↔ 0 ≤ d ∧ StaysAbove (d + s.2 - s.1) l := by
-  simp only [StaysAbove, mem_range, List.length_cons]
-  constructor
-  · intro h
-    refine ⟨by simpa using h 0 (by omega), fun i hi => ?_⟩
-    have := h (i + 1) (by omega)
-    simp only [List.take_succ_cons, List.sum_cons, Prod.fst_add, Prod.snd_add] at this
-    push_cast at this
-    linarith
-  · rintro ⟨hd, h⟩ i hi
-    rcases i with _ | i
-    · simpa using hd
-    · have := h i (by omega)
-      simp only [List.take_succ_cons, List.sum_cons, Prod.fst_add, Prod.snd_add]
-      push_cast
-      linarith
-
 private lemma schroderCount_of_neg {d : ℤ} (hd : d < 0) (m n : ℕ) :
     schroderCount d m n = 0 := by
   rw [schroderCount, card_eq_zero, filter_eq_empty_iff]
@@ -537,7 +520,7 @@ private lemma schroderCount_eq_sum {d : ℤ} (hd : 0 ≤ d) {m n : ℕ} (hmn : (
   rw [schroderCount]
   congr 1
   refine filter_congr fun l _ => ?_
-  rw [staysAbove_cons_iff]
+  rw [staysAbove_cons]
   simp [hd]
 
 private lemma schroderCount_succ_succ {d : ℤ} (hd : 0 ≤ d) (m n : ℕ) :

@@ -6,12 +6,25 @@ Roy, *Special Functions* (1999), henceforth AAR, and was renamed from lean-AAR t
 on 2026-10-21, when the DLMF chapters became its organizing principle. AAR, Olver, Temme,
 Beals–Wong and Duverney remain supporting sources.
 
+The [proof round with updated dependencies](
+REVIEW.md#proofs-with-the-updated-dependencies-2026-11-12) and its approved follow-up have removed **57 original
+admissions**, reducing the project total from **941 to 884**. Two tagged statements were
+corrected with approval; all other DLMF statements and existing definition bodies are preserved. It covers Airy and Scorer integrals, Jacobi and theta identities,
+combinatorial enumeration and Stirling asymptotics, the Pearcey asymptotic, multivariable
+calculus, Descartes parity, Stokes and surface reparametrization, infinite determinants,
+trigonometric bases, self-adjoint spectra, continued fractions, Fourier/Mellin transforms,
+and Hilbert and distribution identities.
+The [inventory](reports/Admissions20261112.tsv),
+[manifest](ProofRound20261112UpdatedPins.json) and
+[axiom audit](scripts/CheckDLMFProofs20261112.lean) record the work. The full build and
+standard-axiom audit pass. Both approved statement repairs are proved; no approval is pending.
+
 The [Chapters 20–36 review and proof round](
 REVIEW.md#chapters-2036-status-review-and-proof-priorities-2026-11-12) proves **eight direct
 admissions**: two Jacobi identities, the odd Bernoulli-polynomial bounds, mixed Mathieu
 orthogonality, two Wigner/Legendre formulas, matrix Laplace inversion, and the Pearcey
 symmetry-line Bessel evaluation. It also removes an admitted dependency from the
-paraboloidal differential equation. These chapters now have **485 direct admissions**,
+paraboloidal differential equation. That round left these chapters with **485 direct admissions**,
 down from 493, and nine further tagged theorems depending on admissions. The
 [chapter status](reports/Chapters2036Status.tsv),
 [target inventory](reports/Chapters2036Admissions.tsv) and
@@ -40,7 +53,7 @@ The [Airy and Bessel proof round](REVIEW.md#airy-and-bessel-proof-round-2026-11-
 proves **eight existing Airy admissions**, preserving their statements and complex domains.
 It covers the Airy Stieltjes formula, both nonreal Bi zero sectors, the Ai fourth-power
 integral, three generalized Airy results and the Scorer Hi Mellin–Barnes formula.
-Chapter 9 now has **22** direct admissions and Chapter 10 **one**; the
+That round left Chapter 9 with **22** direct admissions and Chapter 10 with **one**; the
 [chapter inventory](reports/Chapters910Admissions.tsv) records all starting targets and
 current statuses. The retained [axiom audit](scripts/CheckChapters910.lean) checks the
 completed proofs and their support independently of the remaining admissions.
@@ -82,8 +95,8 @@ umbrella module `DLMF/<Area>.lean` describes what Mathlib already provides and w
 area adds. Statements taken from the DLMF record their equation numbers with Mathlib's
 `@[dlmf]` cross-reference attribute.
 
-`DLMF.lean` imports all areas. The current library has 1,641 Lean files, including
-216 general supporting modules and the two library root entry points. Large topic modules
+`DLMF.lean` imports all areas. The current library has 1,686 Lean files, including
+234 general supporting modules and the two library root entry points. Large topic modules
 are split into mathematical subtopics; the former file remains as a small import umbrella.
 For example, `Gamma/IntegralRepresentations.lean` now imports the Hankel, Prym, Binet and
 moment modules below `Gamma/IntegralRepresentations/`.

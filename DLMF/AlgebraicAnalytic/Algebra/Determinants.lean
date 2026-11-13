@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.AlgebraicAnalytic.Algebra.Basic
+import DLMFMathlib.Analysis.Matrix.InfiniteDeterminant
 public import Mathlib.Analysis.InnerProductSpace.GramSchmidtOrtho
 public import Mathlib.Analysis.InnerProductSpace.PiL2
 public import Mathlib.LinearAlgebra.Vandermonde
@@ -18,7 +19,9 @@ The DLMF forms of determinant identities and inequalities that are not upstream.
 properties of determinants (1.3.1–1.3.7, the row and column rules of §1.3(i), triangular
 matrices) and the Vandermonde determinant 1.3.13 are in Mathlib; the pointers are in
 `DLMF/AlgebraicAnalytic/Algebra/MathlibCoverage.lean`. The truncations `D_n` (1.3.18) are
-defined in `DLMF/AlgebraicAnalytic/Algebra/Basic.lean`.
+defined in `DLMF/AlgebraicAnalytic/Algebra/Basic.lean`. The convergence proof uses the
+principal-minor expansion and absolute-value Hadamard inequality from TauCeti, through
+`DLMFMathlib.Analysis.Matrix.InfiniteDeterminant`.
 
 ## Main results
 
@@ -490,6 +493,65 @@ theorem det_krattenthaler {n : ℕ} {R : Type*} [CommRing R] (x a b : Fin n → 
 @[dlmf 1.3.iii, dlmf 1.3.E19]
 theorem IsHillType.exists_hasInfiniteDet {a : ℤ → ℤ → ℂ} (ha : IsHillType a) :
     ∃ L, HasInfiniteDet a L := by
-  sorry
+  let B : Matrix ℤ ℤ ℂ := fun i j => a i j - if i = j then 1 else 0
+  have hB : Summable (fun ij : ℤ × ℤ => ‖B ij.1 ij.2‖) := ha
+  let e (n : ℕ) : Fin (2 * n + 1) ↪ ℤ := ⟨fun i => (i : ℤ) - n, by
+    intro i j h
+    apply Fin.ext
+    dsimp only at h
+    have he : (i.val : ℤ) = j.val := by linarith
+    exact_mod_cast he⟩
+  have he_apply (n : ℕ) (i : Fin (2 * n + 1)) : e n i = (i : ℤ) - n := rfl
+  let S (n : ℕ) : Finset ℤ := univ.map (e n)
+  have hS : Tendsto S atTop atTop := by
+    apply tendsto_atTop.2
+    intro t
+    filter_upwards [eventually_ge_atTop (t.sup Int.natAbs)] with n hn
+    intro i hi
+    have hib : i.natAbs ≤ n := (Finset.le_sup (f := Int.natAbs) hi).trans hn
+    have hlo : -(i.natAbs : ℤ) ≤ i := by rw [Int.natCast_natAbs]; exact neg_abs_le i
+    have hhi : i ≤ (i.natAbs : ℤ) := Int.le_natAbs
+    have hicast : (i.natAbs : ℤ) ≤ n := by exact_mod_cast hib
+    have h0 : 0 ≤ i + (n : ℤ) := by linarith [hicast]
+    have h2 : i + (n : ℤ) < (2 * n + 1 : ℕ) := by omega
+    have hj : (i + (n : ℤ)).toNat < 2 * n + 1 := by omega
+    refine mem_map.mpr ⟨⟨(i + (n : ℤ)).toNat, hj⟩, mem_univ _, ?_⟩
+    rw [he_apply, Int.toNat_of_nonneg h0]
+    ring
+  have hdet (n : ℕ) : truncDet a n =
+      (1 + B.submatrix (Subtype.val : S n → ℤ) Subtype.val).det := by
+    let f : Fin (2 * n + 1) → S n := fun i =>
+      ⟨e n i, mem_map.mpr ⟨i, mem_univ _, rfl⟩⟩
+    have hf : Function.Bijective f := by
+      constructor
+      · intro i j h
+        exact (e n).injective (congrArg Subtype.val h)
+      · intro j
+        obtain ⟨i, _, hi⟩ := mem_map.mp j.property
+        exact ⟨i, Subtype.ext hi⟩
+    let E : Fin (2 * n + 1) ≃ S n := Equiv.ofBijective f hf
+    rw [← Matrix.det_submatrix_equiv_self E]
+    unfold truncDet
+    congr 1
+    ext i j
+    simp only [Matrix.submatrix_apply, Matrix.add_apply, Matrix.one_apply,
+      Matrix.of_apply]
+    have hE (i : Fin (2 * n + 1)) : (E i : ℤ) = (i : ℤ) - n := by rfl
+    rw [hE, hE]
+    dsimp only [B]
+    by_cases hij : i = j
+    · subst j
+      simp
+    · have hne : (i : ℤ) - n ≠ (j : ℤ) - n := by
+        intro h
+        apply hij
+        apply Fin.ext
+        have he : (i.val : ℤ) = j.val := by linarith
+        exact_mod_cast he
+      have hEne : E i ≠ E j := fun h => hij (E.injective h)
+      simp [hne, hEne]
+  refine ⟨∑' s : Finset ℤ, B.principalMinor s, ?_⟩
+  have h := (Matrix.tendsto_det_one_add_submatrix_of_summable_norm B hB).comp hS
+  exact h.congr' (Eventually.of_forall fun n => (hdet n).symm)
 
 end DLMF.AlgebraicAnalytic

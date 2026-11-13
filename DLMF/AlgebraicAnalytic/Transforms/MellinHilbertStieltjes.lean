@@ -20,6 +20,7 @@ public import Mathlib.Analysis.Calculus.IteratedDeriv.WithinZpow
 public import Mathlib.MeasureTheory.Integral.Asymptotics
 public import Mathlib.Analysis.SpecialFunctions.ImproperIntegrals
 public import DLMFMathlib.Analysis.Fourier.PoissonKernel
+import DLMFMathlib.Analysis.Integral.HilbertKernel
 
 /-!
 # Mellin, Hilbert and Stieltjes transforms (DLMF §1.14(iv)–(vi))
@@ -359,7 +360,18 @@ equal `(1/π) ∫_ε^∞ (f(x + t) - f(x - t))/t dt`; hence
 theorem hilbertTruncated_eq_integral_Ioi {f : ℝ → ℂ} {p : ℝ≥0∞} (hp : 1 ≤ p) (hpt : p ≠ ∞)
     (hf : MemLp f p) (x : ℝ) {ε : ℝ} (hε : 0 < ε) :
     hilbertTruncated f x ε = (Real.pi⁻¹ : ℂ) * ∫ t in Ioi ε, (f (x + t) - f (x - t)) / t := by
-  sorry
+
+  have hplus := hf.comp_measurePreserving (measurePreserving_add_left (volume : Measure ℝ) x)
+  have hminus := hf.comp_measurePreserving
+    ((measurePreserving_add_left (volume : Measure ℝ) x).comp
+      (Measure.measurePreserving_neg (volume : Measure ℝ)))
+  have hiP := MeasureTheory.integrableOn_Ioi_div_of_memLp hp hpt hplus hε
+  have hiM := MeasureTheory.integrableOn_Ioi_div_of_memLp hp hpt hminus hε
+  simp only [Function.comp_def] at hiP hiM
+  simp only [← sub_eq_add_neg] at hiM
+  have he := MeasureTheory.integral_abs_sub_cut_eq_integral_Ioi hε hiP hiM
+  unfold hilbertTruncated
+  exact congrArg (fun z : ℂ => (Real.pi⁻¹ : ℂ) * z) he
 
 /-- DLMF 1.14.44 (Hilbert inversion): if `f` is continuously differentiable with compact
 support, then `f(x) = -(1/π) P.V.∫ ℋ(f)(u)/(u - x) du`, i.e. `f = -ℋ(ℋ(f))`. -/

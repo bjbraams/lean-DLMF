@@ -5,7 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.JacobiElliptic.Basic.Epsilon
+public import DLMF.JacobiElliptic.Basic.EpsilonProperties
+import DLMF.JacobiElliptic.Related.EpsilonTheta
 public import DLMF.JacobiElliptic.Integrals
 public import DLMF.Elementary.Trigonometric
 public import DLMF.Elliptic.JacobiIdentities
@@ -449,26 +450,6 @@ private lemma intervalIntegrable_jacobiSnOfParameter_sq (hm : k ^ 2 < 1) (a b : 
     IntervalIntegrable (fun t => Real.jacobiSnOfParameter t (k ^ 2) ^ 2) MeasureTheory.volume a b :=
   ((Real.continuous_sin.comp (Real.continuous_jacobiAmOfParameter hm)).pow 2).intervalIntegrable a b
 
-/-- DLMF 22.16.31: `E(am(x,k), k) = ℰ(x, k)`; proved for all real `x` (stronger than DLMF,
-which states `-K ≤ x ≤ K`). -/
-@[dlmf 22.16.E31 "stronger than DLMF: all real x; real modulus with k² < 1"]
-theorem Real.incompleteEllipticEOfParameter_jacobiAmOfParameter (hm : k ^ 2 < 1) (x : ℝ) :
-    Real.incompleteEllipticEOfParameter (Real.jacobiAmOfParameter x (k ^ 2)) (k ^ 2) =
-        Real.jacobiEpsilon x k := by
-  have hd : ∀ t, HasDerivAt
-      (fun t => Real.incompleteEllipticEOfParameter (Real.jacobiAmOfParameter t (k ^ 2)) (k ^ 2))
-      (Real.jacobiDnOfParameter t (k ^ 2) ^ 2) t := fun t => by
-    have := (Real.hasDerivAt_incompleteEllipticEOfParameter hm
-        (Real.jacobiAmOfParameter t (k ^ 2))).comp t
-      (Real.hasDerivAt_jacobiAmOfParameter hm t)
-    refine this.congr_deriv ?_
-    rw [Real.jacobiDnOfParameter, Real.jacobiSnOfParameter]; ring
-  have h0 : Real.incompleteEllipticEOfParameter (Real.jacobiAmOfParameter 0 (k ^ 2))
-      (k ^ 2) = 0 := by
-    simp [Real.jacobiAmOfParameter_zero hm, Real.incompleteEllipticEOfParameter]
-  rw [Real.jacobiEpsilon, intervalIntegral.integral_eq_sub_of_hasDerivAt (fun t _ => hd t)
-    (intervalIntegrable_jacobiDnOfParameter_sq hm 0 x), h0, sub_zero]
-
 open MeasureTheory Set in
 /-- Substitution `t = f θ` for a continuous strictly increasing `f` on `[a, b]`. -/
 theorem integral_comp_strictMonoOn_eq {f f' g h : ℝ → ℝ} {a b : ℝ} (hab : a ≤ b)
@@ -560,22 +541,6 @@ theorem Real.jacobiEpsilon_eq_integral_jacobiCnOfParameter_sq (hm : k ^ 2 < 1) (
     Real.jacobiEpsilon_eq_integral_jacobiSnOfParameter_sq hm x, intervalIntegral.integral_const]
   simp
   ring
-
-/-- DLMF 22.16.29: `ℰ(x + 2K, k) = ℰ(x, k) + 2E(k)`. -/
-@[dlmf 22.16.E29 "special case: real modulus with k² < 1"]
-theorem Real.jacobiEpsilon_add_two_completeEllipticKOfParameter (hm : k ^ 2 < 1) (x : ℝ) :
-    Real.jacobiEpsilon (x + 2 * Real.completeEllipticKOfParameter (k ^ 2)) k =
-      Real.jacobiEpsilon x k + 2 * Real.completeEllipticEOfParameter (k ^ 2) := by
-  rw [← Real.incompleteEllipticEOfParameter_jacobiAmOfParameter hm,
-      ← Real.incompleteEllipticEOfParameter_jacobiAmOfParameter hm,
-    Real.jacobiAmOfParameter_add_two_completeEllipticKOfParameter hm,
-        Real.incompleteEllipticEOfParameter_add_pi hm]
-
-/-- At `x`, the function `(fun x => Real.jacobiEpsilon x k)` has derivative
-`(Real.jacobiDnOfParameter x (k ^ 2) ^ 2)`. -/
-private lemma hasDerivAt_jacobiEpsilon {k : ℝ} (hm : k ^ 2 < 1) (x : ℝ) :
-    HasDerivAt (fun x => Real.jacobiEpsilon x k) (Real.jacobiDnOfParameter x (k ^ 2) ^ 2) x :=
-  (((Real.continuous_jacobiDnOfParameter hm).pow 2).integral_hasStrictDerivAt 0 x).hasDerivAt
 
 /-- Identity under the stated parameter and domain assumptions: `∫ t in (0 : ℝ)..x, f t = F x - F
 0`. -/
@@ -1232,8 +1197,8 @@ theorem Real.jacobiEpsilon_add (hm : k ^ 2 < 1) (x₁ x₂ : ℝ) :
         Real.jacobiSnOfParameter (u + v) m
   have hG : ∀ u, HasDerivAt G 0 u := by
     intro u
-    have e1 := (hasDerivAt_jacobiEpsilon hm (u + v)).comp u ((hasDerivAt_id u).add_const v)
-    have e2 := hasDerivAt_jacobiEpsilon hm u
+    have e1 := (Real.hasDerivAt_jacobiEpsilon hm (u + v)).comp u ((hasDerivAt_id u).add_const v)
+    have e2 := Real.hasDerivAt_jacobiEpsilon hm u
     have s1 := Real.hasDerivAt_jacobiSnOfParameter hm u
     have s2 := (Real.hasDerivAt_jacobiSnOfParameter hm (u + v)).comp u
         ((hasDerivAt_id u).add_const v)
@@ -1283,7 +1248,7 @@ theorem Real.jacobiEpsilon_add_completeEllipticKOfParameter (hm : k ^ 2 < 1) (x 
 
 /-- DLMF 22.16.30: `ℰ(x,k) = θ₄'(ξ,q)/(θ₃²(0,q) θ₄(ξ,q)) + (E(k)/K(k)) x` with
 `ξ = x/θ₃²(0,q) = πx/(2K)` and `θ_j(·, q) = θ_j(·|τ)`, `τ = iK'/K`, for real `x` and
-`0 < k < 1`. Admitted. -/
+`0 < k < 1`. -/
 @[dlmf 22.16.E30 "special case: real x, 0 < k < 1"]
 theorem Real.jacobiEpsilon_eq_theta (hk0 : 0 < k) (hk1 : k < 1) (x : ℝ) :
     (Real.jacobiEpsilon x k : ℂ) =
@@ -1293,7 +1258,7 @@ theorem Real.jacobiEpsilon_eq_theta (hk0 : 0 < k) (hk1 : k < 1) (x : ℝ) :
           jacobiThetaFourTau (x / jacobiThetaThreeTau 0 (jacobiTau k) ^ 2) (jacobiTau k)) +
       (Real.completeEllipticEOfParameter (k ^ 2) /
           Real.completeEllipticKOfParameter (k ^ 2) * x : ℝ) := by
-  sorry
+  exact EpsilonTheta.epsilon_eq_theta hk0 hk1 x
 
 end Epsilon
 

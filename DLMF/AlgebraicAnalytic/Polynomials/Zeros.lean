@@ -7,6 +7,7 @@ module
 
 public import DLMF.AlgebraicAnalytic.Polynomials.Basic
 public import Mathlib.Algebra.Polynomial.RuleOfSigns
+import DLMFMathlib.Algebra.Polynomial.DescartesParity
 public import Mathlib.Analysis.Complex.Polynomial.Basic
 public import Mathlib.RingTheory.Polynomial.Resultant.Basic
 public import Mathlib.RingTheory.RootsOfUnity.Complex
@@ -234,7 +235,7 @@ coefficients have the same parity. (The inequality is Mathlib's
 @[dlmf 1.11.ii]
 theorem signVariations_sub_countP_pos_even {f : ℝ[X]} (hf : f ≠ 0) :
     Even (f.signVariations - f.roots.countP (0 < ·)) := by
-  sorry
+  exact Polynomial.even_signVariations_sub_countP_pos hf
 
 /-- DLMF §1.11(ii), Descartes' rule of signs for negative zeros: the number of negative zeros of
 `f` does not exceed the number of sign changes of the coefficients of `f(-z)`. -/

@@ -6,6 +6,12 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.AlgebraicAnalytic.Calculus.Basic
+import DLMFMathlib.Analysis.Calculus.TaylorRemainder
+import DLMFMathlib.Analysis.Calculus.SecondDerivativeTest
+import DLMFMathlib.Analysis.Calculus.Deriv.Prod
+import DLMFMathlib.Analysis.Calculus.Deriv.Polar
+import Mathlib.Analysis.Calculus.ContDiff.Deriv
+import Mathlib.Analysis.Calculus.Deriv.Pow
 public import DLMFMathlib.Topology.Order.Compact
 public import Mathlib.Analysis.Calculus.Deriv.Pi
 public import Mathlib.Analysis.Calculus.ImplicitContDiff
@@ -156,18 +162,14 @@ derivative `∂f/∂x = Df(x, y)(1, 0)`. -/
 @[dlmf 1.5.E3]
 theorem hasDerivAt_section_fst {f : ℝ × ℝ → ℝ} {p : ℝ × ℝ} (hf : DifferentiableAt ℝ f p) :
     HasDerivAt (fun t => f (t, p.2)) (fderiv ℝ f p (1, 0)) p.1 := by
-  have h := (hasDerivAt_id p.1).prodMk (hasDerivAt_const p.1 p.2)
-  have := hf.hasFDerivAt.comp_hasDerivAt (x := p.1) (by simpa using h)
-  simpa [Function.comp_def] using this
+  exact hf.hasDerivAt_section_fst
 
 /-- DLMF 1.5.4: at a point of differentiability of `f(x, y)` the section `t ↦ f(x, t)` has
 derivative `∂f/∂y = Df(x, y)(0, 1)`. -/
 @[dlmf 1.5.E4]
 theorem hasDerivAt_section_snd {f : ℝ × ℝ → ℝ} {p : ℝ × ℝ} (hf : DifferentiableAt ℝ f p) :
     HasDerivAt (fun t => f (p.1, t)) (fderiv ℝ f p (0, 1)) p.2 := by
-  have h := (hasDerivAt_const p.2 p.1).prodMk (hasDerivAt_id p.2)
-  have := hf.hasFDerivAt.comp_hasDerivAt (x := p.2) (by simpa using h)
-  simpa [Function.comp_def] using this
+  exact hf.hasDerivAt_section_snd
 
 /-- DLMF 1.5.5–1.5.6: for `f(x, y)` of class `C²` at `p` the mixed partial derivatives agree,
 `∂/∂y (∂f/∂x) = ∂/∂x (∂f/∂y)`. -/
@@ -175,28 +177,9 @@ theorem hasDerivAt_section_snd {f : ℝ × ℝ → ℝ} {p : ℝ × ℝ} (hf : D
 theorem deriv_section_comm {f : ℝ × ℝ → ℝ} {p : ℝ × ℝ} (hf : ContDiffAt ℝ 2 f p) :
     deriv (fun s => deriv (fun t => f (t, s)) p.1) p.2 =
       deriv (fun t => deriv (fun s => f (t, s)) p.2) p.1 := by
-  have hev : ∀ᶠ q in 𝓝 p, DifferentiableAt ℝ f q :=
-    (hf.eventually (by simp)).mono fun q hq => hq.differentiableAt (by simp)
-  have hd : DifferentiableAt ℝ (fderiv ℝ f) p :=
-    (hf.fderiv_right (m := 1) (by norm_num)).differentiableAt (by simp)
-  have h1 : (fun s => deriv (fun t => f (t, s)) p.1) =ᶠ[𝓝 p.2]
-      fun s => fderiv ℝ f (p.1, s) (1, 0) := by
-    have hc : ContinuousAt (fun s : ℝ => (p.1, s)) p.2 := by fun_prop
-    have := hc.eventually (by simpa using hev)
-    filter_upwards [this] with s hs using (hasDerivAt_section_fst (p := (p.1, s)) hs).deriv
-  have h2 : (fun t => deriv (fun s => f (t, s)) p.2) =ᶠ[𝓝 p.1]
-      fun t => fderiv ℝ f (t, p.2) (0, 1) := by
-    have hc : ContinuousAt (fun t : ℝ => (t, p.2)) p.1 := by fun_prop
-    have := hc.eventually (by simpa using hev)
-    filter_upwards [this] with t ht using (hasDerivAt_section_snd (p := (t, p.2)) ht).deriv
-  rw [h1.deriv_eq, h2.deriv_eq]
-  have g1 := hasDerivAt_section_snd (f := fun q => fderiv ℝ f q (1, 0)) (p := p)
-    (hd.clm_apply (differentiableAt_const _))
-  have g2 := hasDerivAt_section_fst (f := fun q => fderiv ℝ f q (0, 1)) (p := p)
-    (hd.clm_apply (differentiableAt_const _))
-  rw [g1.deriv, g2.deriv, fderiv_clm_apply hd (differentiableAt_const _),
-    fderiv_clm_apply hd (differentiableAt_const _)]
-  simpa using hf.isSymmSndFDerivAt (by simp) (0, 1) (1, 0)
+  rw [hf.deriv_deriv_section_snd_fst (a := p.1) (b := p.2),
+    hf.deriv_deriv_section_fst_snd (a := p.1) (b := p.2)]
+  exact hf.isSymmSndFDerivAt (by norm_num) (0, 1) (1, 0)
 
 /-- DLMF 1.5.7 (chain rule): `d/dt f(x(t), y(t)) = f_x x'(t) + f_y y'(t)`, the partial
 derivatives taken at `(x(t), y(t))`. -/
@@ -387,7 +370,15 @@ theorem laplacian_polar {f : ℝ × ℝ → ℝ} {r φ : ℝ} (hr : r ≠ 0)
       deriv (fun t => deriv (fun s => F (s, φ)) t) r +
         deriv (fun t => F (t, φ)) r / r +
         deriv (fun t => deriv (fun s => F (r, s)) t) φ / r ^ 2 := by
-  sorry
+  have hf' : ContDiffAt ℝ 2 f
+      (r • (Real.cos φ • ((1, 0) : ℝ × ℝ) + Real.sin φ • ((0, 1) : ℝ × ℝ))) := by
+    simpa only [Prod.smul_mk, Prod.mk_add_mk, smul_eq_mul, mul_one, mul_zero,
+      add_zero, zero_add] using hf
+  have hp := hf'.secondFDeriv_polar (v := ((1, 0) : ℝ × ℝ))
+    (w := ((0, 1) : ℝ × ℝ)) hr
+  simpa only [hf.deriv_deriv_section_fst, hf.deriv_deriv_section_snd,
+    Prod.smul_mk, Prod.mk_add_mk, smul_eq_mul, mul_one, mul_zero, add_zero, zero_add]
+    using hp
 
 /-- DLMF 1.5.15: the Laplacian in cylindrical coordinates (1.5.14). For `f` of class `C²` at
 `x = (r cos φ, r sin φ, z)` with `r ≠ 0` and `F = f ∘ cylindricalCoord`:
@@ -400,7 +391,26 @@ theorem laplacian_cylindrical {f : (Fin 3 → ℝ) → ℝ} {q : Fin 3 → ℝ} 
         partialDeriv 0 (f ∘ cylindricalCoord) q / q 0 +
         partialDeriv 1 (fun y => partialDeriv 1 (f ∘ cylindricalCoord) y) q / q 0 ^ 2 +
         partialDeriv 2 (fun y => partialDeriv 2 (f ∘ cylindricalCoord) y) q := by
-  sorry
+  let g : ℝ × ℝ → ℝ := fun p => f ![p.1, p.2, q 2]
+  have hg : ContDiffAt ℝ 2 g (q 0 * Real.cos (q 1), q 0 * Real.sin (q 1)) := by
+    exact hf.comp (x := (q 0 * Real.cos (q 1), q 0 * Real.sin (q 1))) (by
+      apply contDiffAt_pi.mpr
+      intro i
+      fin_cases i <;> dsimp <;> fun_prop)
+  have hp := laplacian_polar (f := g) hr hg
+  have hu0 (v : Fin 3 → ℝ) (t : ℝ) : Function.update v 0 t = ![t, v 1, v 2] := by
+    funext i
+    fin_cases i <;> simp
+  have hu1 (v : Fin 3 → ℝ) (t : ℝ) : Function.update v 1 t = ![v 0, t, v 2] := by
+    funext i
+    fin_cases i <;> simp
+  have hu2 (v : Fin 3 → ℝ) (t : ℝ) : Function.update v 2 t = ![v 0, v 1, t] := by
+    funext i
+    fin_cases i <;> simp
+  have heq := congrArg (fun y : ℝ => y +
+    partialDeriv 2 (fun z => partialDeriv 2 f z) (cylindricalCoord q)) hp
+  simpa [g, laplacian, partialDeriv, cylindricalCoord, Function.comp_def,
+    Fin.sum_univ_three, hu0, hu1, hu2] using heq
 
 /-- DLMF 1.5.17: the Laplacian in spherical coordinates (1.5.16). For `f` of class `C²` at
 `x = sphericalCoord (ρ, θ, φ)` with `ρ ≠ 0`, `sin θ ≠ 0` and `F = f ∘ sphericalCoord`:
@@ -414,7 +424,151 @@ theorem laplacian_spherical {f : (Fin 3 → ℝ) → ℝ} {q : Fin 3 → ℝ} (h
           (q 0 ^ 2 * Real.sin (q 1) ^ 2) +
         partialDeriv 1 (fun y => Real.sin (y 1) * partialDeriv 1 (f ∘ sphericalCoord) y) q /
           (q 0 ^ 2 * Real.sin (q 1)) := by
-  sorry
+  let R : ℝ → Fin 3 → ℝ := fun t =>
+    ![t * Real.sin (q 1) * Real.cos (q 2),
+      t * Real.sin (q 1) * Real.sin (q 2), t * Real.cos (q 1)]
+  let A : ℝ → Fin 3 → ℝ := fun t =>
+    ![q 0 * Real.sin t * Real.cos (q 2),
+      q 0 * Real.sin t * Real.sin (q 2), q 0 * Real.cos t]
+  let B : ℝ → Fin 3 → ℝ := fun t =>
+    ![q 0 * Real.sin (q 1) * Real.cos t,
+      q 0 * Real.sin (q 1) * Real.sin t, q 0 * Real.cos (q 1)]
+  have hvec {g₀ g₁ g₂ : ℝ → ℝ} {d₀ d₁ d₂ t : ℝ}
+      (h₀ : HasDerivAt g₀ d₀ t) (h₁ : HasDerivAt g₁ d₁ t)
+      (h₂ : HasDerivAt g₂ d₂ t) :
+      HasDerivAt (fun t => ![g₀ t, g₁ t, g₂ t]) ![d₀, d₁, d₂] t := by
+    apply hasDerivAt_pi.mpr
+    intro i
+    fin_cases i
+    · exact h₀
+    · exact h₁
+    · exact h₂
+  have hR (t : ℝ) : HasDerivAt R
+      ![Real.sin (q 1) * Real.cos (q 2),
+        Real.sin (q 1) * Real.sin (q 2), Real.cos (q 1)] t := by
+    simpa only [R, id_eq, one_mul] using hvec
+      (((hasDerivAt_id t).mul_const (Real.sin (q 1))).mul_const (Real.cos (q 2)))
+      (((hasDerivAt_id t).mul_const (Real.sin (q 1))).mul_const (Real.sin (q 2)))
+      ((hasDerivAt_id t).mul_const (Real.cos (q 1)))
+  have hRR := hf.deriv_comp_curve (c := R)
+    (c' := fun _ => ![Real.sin (q 1) * Real.cos (q 2),
+      Real.sin (q 1) * Real.sin (q 2), Real.cos (q 1)])
+    (c'' := (0 : Fin 3 → ℝ)) (Eventually.of_forall hR) (hasDerivAt_const _ _)
+  have hA (t : ℝ) : HasDerivAt A
+      ![q 0 * Real.cos t * Real.cos (q 2),
+        q 0 * Real.cos t * Real.sin (q 2), -q 0 * Real.sin t] t := by
+    simpa only [A, mul_neg, neg_mul] using hvec
+      (((Real.hasDerivAt_sin t).const_mul (q 0)).mul_const (Real.cos (q 2)))
+      (((Real.hasDerivAt_sin t).const_mul (q 0)).mul_const (Real.sin (q 2)))
+      ((Real.hasDerivAt_cos t).const_mul (q 0))
+  have hAA' : HasDerivAt (fun t : ℝ =>
+      ![q 0 * Real.cos t * Real.cos (q 2),
+        q 0 * Real.cos t * Real.sin (q 2), -q 0 * Real.sin t])
+      ![-q 0 * Real.sin (q 1) * Real.cos (q 2),
+        -q 0 * Real.sin (q 1) * Real.sin (q 2), -q 0 * Real.cos (q 1)] (q 1) := by
+    simpa only [mul_neg, neg_mul] using hvec
+      (((Real.hasDerivAt_cos (q 1)).const_mul (q 0)).mul_const (Real.cos (q 2)))
+      (((Real.hasDerivAt_cos (q 1)).const_mul (q 0)).mul_const (Real.sin (q 2)))
+      ((Real.hasDerivAt_sin (q 1)).const_mul (-q 0))
+  have hAA := hf.deriv_comp_curve (c := A) (Eventually.of_forall hA) hAA'
+  have hB (t : ℝ) : HasDerivAt B
+      ![-q 0 * Real.sin (q 1) * Real.sin t,
+        q 0 * Real.sin (q 1) * Real.cos t, 0] t := by
+    simpa only [B, mul_neg, neg_mul] using hvec
+      ((Real.hasDerivAt_cos t).const_mul (q 0 * Real.sin (q 1)))
+      ((Real.hasDerivAt_sin t).const_mul (q 0 * Real.sin (q 1)))
+      (hasDerivAt_const t (q 0 * Real.cos (q 1)))
+  have hBB' : HasDerivAt (fun t : ℝ =>
+      ![-q 0 * Real.sin (q 1) * Real.sin t,
+        q 0 * Real.sin (q 1) * Real.cos t, 0])
+      ![-q 0 * Real.sin (q 1) * Real.cos (q 2),
+        -q 0 * Real.sin (q 1) * Real.sin (q 2), 0] (q 2) := by
+    simpa only [mul_neg, neg_mul] using hvec
+      ((Real.hasDerivAt_sin (q 2)).const_mul (-q 0 * Real.sin (q 1)))
+      ((Real.hasDerivAt_cos (q 2)).const_mul (q 0 * Real.sin (q 1)))
+      (hasDerivAt_const (q 2) (0 : ℝ))
+  have hBB := hf.deriv_comp_curve (c := B) (Eventually.of_forall hB) hBB'
+  have hFR : ContDiffAt ℝ 2 (fun t => f (R t)) (q 0) := by
+    apply (show ContDiffAt ℝ 2 f (R (q 0)) from hf).comp (x := q 0)
+    apply contDiffAt_pi.mpr
+    intro i
+    fin_cases i <;> dsimp [R] <;> fun_prop
+  have hFA : ContDiffAt ℝ 2 (fun t => f (A t)) (q 1) := by
+    apply (show ContDiffAt ℝ 2 f (A (q 1)) from hf).comp (x := q 1)
+    apply contDiffAt_pi.mpr
+    intro i
+    fin_cases i <;> dsimp [A] <;> fun_prop
+  have hdR := ((hFR.derivWithin (m := 1) (by norm_num)).differentiableAt
+    (by norm_num)).hasDerivAt
+  have hdA := ((hFA.derivWithin (m := 1) (by norm_num)).differentiableAt
+    (by norm_num)).hasDerivAt
+  have hu0 (v : Fin 3 → ℝ) (t : ℝ) : Function.update v 0 t = ![t, v 1, v 2] := by
+    funext i
+    fin_cases i <;> simp
+  have hu1 (v : Fin 3 → ℝ) (t : ℝ) : Function.update v 1 t = ![v 0, t, v 2] := by
+    funext i
+    fin_cases i <;> simp
+  have hu2 (v : Fin 3 → ℝ) (t : ℝ) : Function.update v 2 t = ![v 0, v 1, t] := by
+    funext i
+    fin_cases i <;> simp
+  have hW0 : partialDeriv 0 (fun y => y 0 ^ 2 *
+      partialDeriv 0 (f ∘ sphericalCoord) y) q =
+      2 * q 0 * deriv (fun t => f (R t)) (q 0) +
+        q 0 ^ 2 * deriv (deriv fun t => f (R t)) (q 0) := by
+    simpa [partialDeriv, hu0, sphericalCoord, R, id_eq] using
+      (((hasDerivAt_id (q 0)).fun_pow 2).fun_mul hdR).deriv
+  have hW1 : partialDeriv 1 (fun y => Real.sin (y 1) *
+      partialDeriv 1 (f ∘ sphericalCoord) y) q =
+      Real.cos (q 1) * deriv (fun t => f (A t)) (q 1) +
+        Real.sin (q 1) * deriv (deriv fun t => f (A t)) (q 1) := by
+    simpa [partialDeriv, hu1, sphericalCoord, A] using
+      ((Real.hasDerivAt_sin (q 1)).fun_mul hdA).deriv
+  have hW2 : partialDeriv 2 (fun y => partialDeriv 2 (f ∘ sphericalCoord) y) q =
+      deriv (deriv fun t => f (B t)) (q 2) := by
+    simp [partialDeriv, hu2, sphericalCoord, B]
+  rw [hW0, hW1, hW2, hRR.1, hRR.2, hAA.1, hAA.2, hBB.2]
+  simp only [map_zero, add_zero]
+  simp only [laplacian, Fin.sum_univ_three, partialDeriv_partialDeriv _ _ hf]
+  set L := fderiv ℝ f (sphericalCoord q)
+  set S := fderiv ℝ (fderiv ℝ f) (sphericalCoord q)
+  have hv (v : Fin 3 → ℝ) : v =
+      v 0 • Pi.single 0 1 + v 1 • Pi.single 1 1 + v 2 • Pi.single 2 1 := by
+    ext i
+    fin_cases i <;> simp
+  -- Normalize the coordinate sum before expanding the radial and angular velocities.
+  change S (Pi.single 0 1) (Pi.single 0 1) + S (Pi.single 1 1) (Pi.single 1 1) +
+    S (Pi.single 2 1) (Pi.single 2 1) = _
+  rw [hv ![Real.sin (q 1) * Real.cos (q 2),
+        Real.sin (q 1) * Real.sin (q 2), Real.cos (q 1)],
+    hv ![q 0 * Real.cos (q 1) * Real.cos (q 2),
+        q 0 * Real.cos (q 1) * Real.sin (q 2), -q 0 * Real.sin (q 1)],
+    hv ![-q 0 * Real.sin (q 1) * Real.cos (q 2),
+        -q 0 * Real.sin (q 1) * Real.sin (q 2), -q 0 * Real.cos (q 1)],
+    hv ![-q 0 * Real.sin (q 1) * Real.sin (q 2),
+        q 0 * Real.sin (q 1) * Real.cos (q 2), 0],
+    hv ![-q 0 * Real.sin (q 1) * Real.cos (q 2),
+        -q 0 * Real.sin (q 1) * Real.sin (q 2), 0]]
+  simp only [map_add, map_smul, add_apply, smul_apply, smul_eq_mul,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two,
+    Matrix.head_cons, Matrix.tail_cons]
+  simp only [show R (q 0) = sphericalCoord q from rfl,
+    show A (q 1) = sphericalCoord q from rfl,
+    show B (q 2) = sphericalCoord q from rfl]
+  dsimp only [L, S]
+  have hcs := Real.cos_sq_add_sin_sq (q 1)
+  have hab := Real.cos_sq_add_sin_sq (q 2)
+  field_simp [hρ, hθ]
+  linear_combination
+    (-q 0 * Real.sin (q 1) *
+      (L (Pi.single 0 1) * Real.cos (q 2) +
+        L (Pi.single 1 1) * Real.sin (q 2) + q 0 * Real.sin (q 1) *
+          (Real.cos (q 2) ^ 2 * S (Pi.single 0 1) (Pi.single 0 1) +
+            Real.cos (q 2) * Real.sin (q 2) * S (Pi.single 0 1) (Pi.single 1 1) +
+            Real.cos (q 2) * Real.sin (q 2) * S (Pi.single 1 1) (Pi.single 0 1) +
+            Real.sin (q 2) ^ 2 * S (Pi.single 1 1) (Pi.single 1 1) +
+            S (Pi.single 2 1) (Pi.single 2 1)))) * hcs +
+      (-q 0 ^ 2 * Real.sin (q 1) ^ 2 *
+        (S (Pi.single 0 1) (Pi.single 0 1) + S (Pi.single 1 1) (Pi.single 1 1))) * hab
 
 /-! ### §1.5(iii) Taylor's theorem; maxima and minima -/
 
@@ -429,7 +583,22 @@ theorem taylor_isLittleO_prod {f : ℝ × ℝ → ℝ} {p : ℝ × ℝ} (n : ℕ
         ∑ k ∈ Finset.range (n + 1),
           (1 / (Nat.factorial k : ℝ)) * iteratedFDeriv ℝ k f p (fun _ => h))
       =o[𝓝 0] fun h => Real.sqrt (h.1 ^ 2 + h.2 ^ 2) ^ n := by
-  sorry
+  have hnorm (h : ℝ × ℝ) : ‖h‖ ≤ Real.sqrt (h.1 ^ 2 + h.2 ^ 2) := by
+    rw [Prod.norm_def, Real.norm_eq_abs, Real.norm_eq_abs]
+    apply max_le
+    · rw [← Real.sqrt_sq_eq_abs]
+      exact Real.sqrt_le_sqrt (le_add_of_nonneg_right (sq_nonneg h.2))
+    · rw [← Real.sqrt_sq_eq_abs]
+      exact Real.sqrt_le_sqrt (le_add_of_nonneg_left (sq_nonneg h.1))
+  have hbound : (fun h : ℝ × ℝ => ‖h‖ ^ n) =O[𝓝 0]
+      (fun h : ℝ × ℝ => Real.sqrt (h.1 ^ 2 + h.2 ^ 2) ^ n) := by
+    refine Asymptotics.IsBigO.of_bound 1 (Eventually.of_forall fun h => ?_)
+    simpa only [Real.norm_eq_abs, abs_of_nonneg (pow_nonneg (norm_nonneg h) n),
+      abs_of_nonneg (pow_nonneg (Real.sqrt_nonneg _) n), one_mul] using
+      pow_le_pow_left₀ (norm_nonneg h) (hnorm h) n
+  refine ((hf.isLittleO_sub_sum_iteratedFDeriv n).trans_isBigO hbound).congr_left ?_
+  intro h
+  simp only [one_div, smul_eq_mul]
 
 /-- DLMF 1.5.19–1.5.21 (second derivative test, minimum): if `f` is `C²` at `(a, b)`,
 `f_x = f_y = 0`, `f_xx > 0` and `f_xx f_yy - f_xy² > 0` at `(a, b)`, then `f` has a local
@@ -442,7 +611,61 @@ theorem isLocalMin_of_hessian_posDef {f : ℝ × ℝ → ℝ} {a b : ℝ} (hf : 
         deriv (fun s => deriv (fun t => f (a, t)) s) b -
           deriv (fun s => deriv (fun t => f (t, s)) a) b ^ 2) :
     IsLocalMin f (a, b) := by
-  sorry
+  have hd := hf.differentiableAt (by norm_num)
+  let S := fderiv ℝ (fderiv ℝ f) (a, b)
+  have h11 := hf.deriv_deriv_section_fst
+  have h22 := hf.deriv_deriv_section_snd
+  have h21 := hf.deriv_deriv_section_snd_fst
+  have hsymm : S (1, 0) (0, 1) = S (0, 1) (1, 0) :=
+    hf.isSymmSndFDerivAt (by norm_num) (1, 0) (0, 1)
+  let A := S (1, 0) (1, 0)
+  let B := S (0, 1) (1, 0)
+  let C := S (0, 1) (0, 1)
+  have hA : 0 < A := by simpa only [h11] using hxx
+  have hD : 0 < A * C - B ^ 2 := by simpa only [h11, h22, h21] using hdet
+  have hgrad : fderiv ℝ f (a, b) = 0 := by
+    apply ContinuousLinearMap.ext
+    intro v
+    have hfst := (hasDerivAt_section_fst (p := (a, b)) hd).deriv
+    have hsnd := (hasDerivAt_section_snd (p := (a, b)) hd).deriv
+    calc
+      fderiv ℝ f (a, b) v =
+          fderiv ℝ f (a, b) (v.1 • (1, 0) + v.2 • (0, 1)) := by
+        congr 1
+        ext <;> simp
+      _ = 0 := by
+        simp only [map_add, map_smul, smul_eq_mul, ← hfst, ← hsnd, hx, hy,
+          mul_zero, add_zero]
+  have hquad (v : ℝ × ℝ) : S v v = A * v.1 ^ 2 + 2 * B * v.1 * v.2 + C * v.2 ^ 2 := by
+    have hv : v = v.1 • (1, 0) + v.2 • (0, 1) := by ext <;> simp
+    calc
+      S v v = S (v.1 • (1, 0) + v.2 • (0, 1))
+          (v.1 • (1, 0) + v.2 • (0, 1)) := by
+        exact congrArg₂ (fun u w : ℝ × ℝ => S u w) hv hv
+      _ = _ := by
+        simp only [map_add, map_smul, add_apply, smul_apply, smul_eq_mul]
+        rw [hsymm]
+        dsimp only [A, B, C]
+        ring
+  apply hf.isLocalMin_of_fderiv_eq_zero_of_pos_secondFDeriv hgrad
+  intro v hv
+  by_cases hv2 : v.2 = 0
+  · have hv1 : v.1 ≠ 0 := by
+      intro hz
+      apply hv
+      exact Prod.ext hz hv2
+    rw [hquad, hv2]
+    simpa only [mul_zero, zero_pow two_ne_zero, add_zero] using
+      mul_pos hA (sq_pos_of_ne_zero hv1)
+  have hp : 0 < (A * v.1 + B * v.2) ^ 2 + (A * C - B ^ 2) * v.2 ^ 2 :=
+    add_pos_of_nonneg_of_pos (sq_nonneg _) (mul_pos hD (sq_pos_of_ne_zero hv2))
+  have heq : A * (S v v) = (A * v.1 + B * v.2) ^ 2 + (A * C - B ^ 2) * v.2 ^ 2 := by
+    rw [hquad]
+    ring
+  rw [← heq] at hp
+  rcases mul_pos_iff.mp hp with h | h
+  · exact h.2
+  · exact False.elim ((not_lt_of_ge hA.le) h.1)
 
 /-- DLMF 1.5.19–1.5.21 (second derivative test, maximum): as
 `isLocalMin_of_hessian_posDef` with `f_xx < 0`; then `f` has a local maximum at `(a, b)`. -/
@@ -454,7 +677,12 @@ theorem isLocalMax_of_hessian_negDef {f : ℝ × ℝ → ℝ} {a b : ℝ} (hf : 
         deriv (fun s => deriv (fun t => f (a, t)) s) b -
           deriv (fun s => deriv (fun t => f (t, s)) a) b ^ 2) :
     IsLocalMax f (a, b) := by
-  sorry
+  have hm := isLocalMin_of_hessian_posDef (f := fun p => -f p) hf.neg
+    (by simp only [deriv.fun_neg, hx, neg_zero])
+    (by simp only [deriv.fun_neg, hy, neg_zero])
+    (by simpa only [deriv.fun_neg] using neg_pos.mpr hxx)
+    (by simpa only [deriv.fun_neg, neg_mul, mul_neg, neg_neg, neg_sq] using hdet)
+  simpa only [neg_neg] using hm.neg
 
 /-! ### §1.5(iv) Leibniz's theorem for differentiation of integrals -/
 

@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Airy.Scorer
+public import DLMF.Airy.Scorer.Representations
 
 /-!
 # Reid's generalized Airy contour integrals (DLMF §9.13(ii))

@@ -1,5 +1,10 @@
 # DLMF Chapter 20 acquisition: Theta Functions
 
+**Proof status (2026-11-13).** Chapter 20 has 7 direct source admissions. The [updated-dependency proof round](
+REVIEW.md#proofs-with-the-updated-dependencies-2026-11-12) proves 5 original admissions in this chapter.
+Per-entry statuses and source links below follow the compiled axiom audit; earlier
+dated counts describe their original batches.
+
 > Source paths and current layout notes were refreshed on 2026-10-30; generated per-entry
 > statuses follow the compiled ledger refresh. Dated acquisition and proof counts
 > describe their original batches.
@@ -135,15 +140,15 @@ All 107 in-scope numbered IDs are covered by 124 tagged declarations (16 definit
 ## [§20.6 Power Series](https://dlmf.nist.gov/20.6)
 
 - [20.6.E1](https://dlmf.nist.gov/20.6.E1): [`DLMF.Theta.thetaLatticeMinNorm`](DLMF/Theta/Basic/PowerSeries.lean#L58) (definition). The radius min_{(m,n)≠0} |(m+nτ)π| as a definition (`⨅`).
-- [20.6.E2](https://dlmf.nist.gov/20.6.E2): [`DLMF.Theta.jacobiThetaOneTau_powerSeries`](DLMF/Theta/PowerSeries.lean#L44) (admitted). Hypothesis |πz| < radius; summability of the exponent series is part of the conclusion.
-- [20.6.E3](https://dlmf.nist.gov/20.6.E3): [`DLMF.Theta.jacobiThetaTwoTau_powerSeries`](DLMF/Theta/PowerSeries.lean#L54) (admitted). As 20.6.E2. The radius is the distance to the lattice shifted by (1/2,0), positive in the upper half-plane.
-- [20.6.E4](https://dlmf.nist.gov/20.6.E4): [`DLMF.Theta.jacobiThetaThreeTau_powerSeries`](DLMF/Theta/PowerSeries.lean#L65) (admitted). As 20.6.E2. The radius is the distance to the lattice shifted by (1/2,1/2), positive in the upper half-plane.
-- [20.6.E5](https://dlmf.nist.gov/20.6.E5): [`DLMF.Theta.jacobiThetaFourTau_powerSeries`](DLMF/Theta/PowerSeries.lean#L76) (admitted). As 20.6.E2. The radius is the distance to the lattice shifted by (0,1/2), positive in the upper half-plane.
+- [20.6.E2](https://dlmf.nist.gov/20.6.E2): [`DLMF.Theta.jacobiThetaOneTau_powerSeries`](DLMF/Theta/PowerSeries/ThetaOne.lean#L34) (proved). Hypothesis |πz| < radius; summability of the exponent series is part of the conclusion.
+- [20.6.E3](https://dlmf.nist.gov/20.6.E3): [`DLMF.Theta.jacobiThetaTwoTau_powerSeries`](DLMF/Theta/PowerSeries.lean#L491) (proved). As 20.6.E2. The radius is the distance to the lattice shifted by (1/2,0), positive in the upper half-plane.
+- [20.6.E4](https://dlmf.nist.gov/20.6.E4): [`DLMF.Theta.jacobiThetaThreeTau_powerSeries`](DLMF/Theta/PowerSeries.lean#L503) (proved). As 20.6.E2. The radius is the distance to the lattice shifted by (1/2,1/2), positive in the upper half-plane.
+- [20.6.E5](https://dlmf.nist.gov/20.6.E5): [`DLMF.Theta.jacobiThetaFourTau_powerSeries`](DLMF/Theta/PowerSeries.lean#L516) (proved). As 20.6.E2. The radius is the distance to the lattice shifted by (0,1/2), positive in the upper half-plane.
 - [20.6.E6](https://dlmf.nist.gov/20.6.E6): [`DLMF.Theta.thetaDelta`](DLMF/Theta/Basic/PowerSeries.lean#L36) (definition). Iterated sum, inner over m (Eisenstein order); index k = 2j.
 - [20.6.E7](https://dlmf.nist.gov/20.6.E7): [`DLMF.Theta.thetaAlpha`](DLMF/Theta/Basic/PowerSeries.lean#L43) (definition). Iterated sum.
 - [20.6.E8](https://dlmf.nist.gov/20.6.E8): [`DLMF.Theta.thetaBeta`](DLMF/Theta/Basic/PowerSeries.lean#L48) (definition). Iterated sum.
 - [20.6.E9](https://dlmf.nist.gov/20.6.E9): [`DLMF.Theta.thetaGamma`](DLMF/Theta/Basic/PowerSeries.lean#L53) (definition). Iterated sum.
-- [20.6.E10](https://dlmf.nist.gov/20.6.E10): [`DLMF.Theta.thetaAlpha_thetaBeta_eq`](DLMF/Theta/PowerSeries.lean#L293) (proved). Both identities, j ≥ 1, Im τ > 0 (numerically checked for j = 1, 2).
+- [20.6.E10](https://dlmf.nist.gov/20.6.E10): [`DLMF.Theta.thetaAlpha_thetaBeta_eq`](DLMF/Theta/PowerSeries.lean#L256) (proved). Both identities, j ≥ 1, Im τ > 0 (numerically checked for j = 1, 2).
 
 ## [§20.7 Identities](https://dlmf.nist.gov/20.7)
 
@@ -204,15 +209,15 @@ All 107 in-scope numbered IDs are covered by 124 tagged declarations (16 definit
 
 ## [§20.11 Generalizations and Analogs](https://dlmf.nist.gov/20.11)
 
-- [20.11.E1](https://dlmf.nist.gov/20.11.E1): [`DLMF.Theta.thetaGaussSum`](DLMF/Theta/Generalizations.lean#L53) (definition). Definition G(m,n) for m ∈ ℤ, n ∈ ℕ.
-- [20.11.E2](https://dlmf.nist.gov/20.11.E2): [`DLMF.Theta.thetaGaussSum_reciprocity`](DLMF/Theta/Generalizations.lean#L59) (admitted). m, n > 0 coprime, mn even; the second equality is proved, the reciprocity is admitted.
-- [20.11.E3](https://dlmf.nist.gov/20.11.E3): [`DLMF.Theta.ramanujanThetaF`](DLMF/Theta/Generalizations.lean#L79) (definition). Definition f(a,b) (integer exponents).
-- [20.11.E4](https://dlmf.nist.gov/20.11.E4): [`DLMF.Theta.ramanujanThetaF_eq_jacobiThetaThreeTau`](DLMF/Theta/Generalizations.lean#L84) (proved). All τ, termwise from the ℤ-series.
-- [20.11.E5](https://dlmf.nist.gov/20.11.E5): [`DLMF.Theta.ordinaryHypergeometric_half_half_one_thetaModulusK`](DLMF/Theta/Generalizations.lean#L165) (proved). Rectangular case τ = it, Mathlib’s series ₂F₁.
-- [20.11.E6](https://dlmf.nist.gov/20.11.E6): [`DLMF.Theta.combinedTheta`](DLMF/Theta/Generalizations.lean#L190) (definition); [`DLMF.Theta.combinedTheta_m_one`](DLMF/Theta/Generalizations.lean#L198) (proved). One definition `combinedTheta` covers 20.11.6–20.11.8; the three printed cases are proved as rewriting lemmas.
-- [20.11.E7](https://dlmf.nist.gov/20.11.E7): [`DLMF.Theta.combinedTheta_one_n`](DLMF/Theta/Generalizations.lean#L205) (proved). Proved case lemma.
-- [20.11.E8](https://dlmf.nist.gov/20.11.E8): [`DLMF.Theta.combinedTheta_m_n`](DLMF/Theta/Generalizations.lean#L212) (proved). Proved case lemma.
-- [20.11.E9](https://dlmf.nist.gov/20.11.E9): [`DLMF.Theta.combinedTheta_symmetry`](DLMF/Theta/Generalizations.lean#L219) (proved). **Corrected** (formalization): at points with θ₁(z), θ_m(z), θ_n(z) ≠ 0, since the quotient identities are false at the zeros under x/0 = 0; given nonzero normalizing constants (`th20_combinedConst_ne_zero` proves them for Im τ > 0).
+- [20.11.E1](https://dlmf.nist.gov/20.11.E1): [`DLMF.Theta.thetaGaussSum`](DLMF/Theta/Generalizations.lean#L54) (definition). Definition G(m,n) for m ∈ ℤ, n ∈ ℕ.
+- [20.11.E2](https://dlmf.nist.gov/20.11.E2): [`DLMF.Theta.thetaGaussSum_reciprocity`](DLMF/Theta/Generalizations.lean#L79) (proved). m, n > 0 coprime, mn even; both equalities are proved; the stronger primed theorem drops coprimality; [`DLMF.Theta.thetaGaussSum_reciprocity'`](DLMF/Theta/Generalizations.lean#L60) (proved).
+- [20.11.E3](https://dlmf.nist.gov/20.11.E3): [`DLMF.Theta.ramanujanThetaF`](DLMF/Theta/Generalizations.lean#L93) (definition). Definition f(a,b) (integer exponents).
+- [20.11.E4](https://dlmf.nist.gov/20.11.E4): [`DLMF.Theta.ramanujanThetaF_eq_jacobiThetaThreeTau`](DLMF/Theta/Generalizations.lean#L98) (proved). All τ, termwise from the ℤ-series.
+- [20.11.E5](https://dlmf.nist.gov/20.11.E5): [`DLMF.Theta.ordinaryHypergeometric_half_half_one_thetaModulusK`](DLMF/Theta/Generalizations.lean#L179) (proved). Rectangular case τ = it, Mathlib’s series ₂F₁.
+- [20.11.E6](https://dlmf.nist.gov/20.11.E6): [`DLMF.Theta.combinedTheta`](DLMF/Theta/Generalizations.lean#L204) (definition); [`DLMF.Theta.combinedTheta_m_one`](DLMF/Theta/Generalizations.lean#L212) (proved). One definition `combinedTheta` covers 20.11.6–20.11.8; the three printed cases are proved as rewriting lemmas.
+- [20.11.E7](https://dlmf.nist.gov/20.11.E7): [`DLMF.Theta.combinedTheta_one_n`](DLMF/Theta/Generalizations.lean#L219) (proved). Proved case lemma.
+- [20.11.E8](https://dlmf.nist.gov/20.11.E8): [`DLMF.Theta.combinedTheta_m_n`](DLMF/Theta/Generalizations.lean#L226) (proved). Proved case lemma.
+- [20.11.E9](https://dlmf.nist.gov/20.11.E9): [`DLMF.Theta.combinedTheta_symmetry`](DLMF/Theta/Generalizations.lean#L233) (proved). **Corrected** (formalization): at points with θ₁(z), θ_m(z), θ_n(z) ≠ 0, since the quotient identities are false at the zeros under x/0 = 0; given nonzero normalizing constants (`th20_combinedConst_ne_zero` proves them for Im τ > 0).
 
 ## Excluded numbered equations
 
@@ -249,8 +254,8 @@ A bibliographic pointer with no stated formula is not converted into an opaque a
 - [20.5.iii.p2](https://dlmf.nist.gov/20.5#iii.p2): Acquired: [`DLMF.Theta.jacobiTheta_doubleProd_not_absolutely_convergent`](DLMF/Theta/Products/LogDerivativesAndDoubleProducts.lean#L738) (proved). The double products are not absolutely convergent (lattice sum of `|z/((m+nτ)π)|` diverges); the Eisenstein order is built into 20.5.E14–E17.
 - [20.5.ii](https://dlmf.nist.gov/20.5.ii): [`DLMF.Theta.jacobiTheta_logDeriv_series_uniform`](DLMF/Theta/Products/LogDerivativesAndDoubleProducts.lean#L264) (proved).
 - [20.5.iii](https://dlmf.nist.gov/20.5.iii): [`DLMF.Theta.jacobiTheta_doubleProd_not_absolutely_convergent`](DLMF/Theta/Products/LogDerivativesAndDoubleProducts.lean#L738) (proved).
-- [20.6.p1](https://dlmf.nist.gov/20.6#p1): The hypothesis 20.6.1 and the coefficient definitions are numbered entries. Acquired: [`DLMF.Theta.thetaDelta_hasSum_lattice`](DLMF/Theta/PowerSeries.lean#L384) (proved); [`DLMF.Theta.thetaDelta_two_not_summable`](DLMF/Theta/PowerSeries.lean#L413) (proved). The remark that the order of summation matters only for `j = 1` is acquired as absolute summability for `2j ≥ 4` and non-summability for `j = 1`. The relation `δ_{2n} = c_n/(2n − 1)` (`n ≥ 2`) to the Weierstrass Laurent coefficients of §23.9 is left to the Chapter 23 acquisition (it needs `c_n`).
-- [20.6](https://dlmf.nist.gov/20.6): [`DLMF.Theta.thetaDelta_hasSum_lattice`](DLMF/Theta/PowerSeries.lean#L384) (proved); [`DLMF.Theta.thetaDelta_two_not_summable`](DLMF/Theta/PowerSeries.lean#L413) (proved).
+- [20.6.p1](https://dlmf.nist.gov/20.6#p1): The hypothesis 20.6.1 and the coefficient definitions are numbered entries. Acquired: [`DLMF.Theta.thetaDelta_hasSum_lattice`](DLMF/Theta/PowerSeries.lean#L347) (proved); [`DLMF.Theta.thetaDelta_two_not_summable`](DLMF/Theta/PowerSeries.lean#L376) (proved). The remark that the order of summation matters only for `j = 1` is acquired as absolute summability for `2j ≥ 4` and non-summability for `j = 1`. The relation `δ_{2n} = c_n/(2n − 1)` (`n ≥ 2`) to the Weierstrass Laurent coefficients of §23.9 is left to the Chapter 23 acquisition (it needs `c_n`).
+- [20.6](https://dlmf.nist.gov/20.6): [`DLMF.Theta.thetaDelta_hasSum_lattice`](DLMF/Theta/PowerSeries.lean#L347) (proved); [`DLMF.Theta.thetaDelta_two_not_summable`](DLMF/Theta/PowerSeries.lean#L376) (proved).
 - [20.7.i.p1](https://dlmf.nist.gov/20.7#i.p1), [20.7.i.p2](https://dlmf.nist.gov/20.7#i.p2): Introduce 20.7.1–20.7.5.
 - [20.7.i.p3](https://dlmf.nist.gov/20.7#i.p3), [20.7.iii.p2](https://dlmf.nist.gov/20.7#iii.p2), [20.7.vii.p2](https://dlmf.nist.gov/20.7#vii.p2): Bibliographic pointers (Carlson 2011); no assertion.
 - [20.7.ii.p1](https://dlmf.nist.gov/20.7#ii.p1): Introduces 20.7.6–20.7.9; references.
@@ -268,14 +273,14 @@ A bibliographic pointer with no stated formula is not converted into an opaque a
 - [20.10.i.p1](https://dlmf.nist.gov/20.10#i.p1), [20.10.ii.p1](https://dlmf.nist.gov/20.10#ii.p1): Hypotheses `Re s > 1`, `Re s > 0`, `ℓ > 0`, `|Re β| + |Im β| ≤ ℓ` are built into 20.10.E1–E5.
 - [20.10.i.p2](https://dlmf.nist.gov/20.10#i.p2), [20.10.ii.p2](https://dlmf.nist.gov/20.10#ii.p2), [20.10.iii.p1](https://dlmf.nist.gov/20.10#iii.p1): Bibliographic pointers; no assertion.
 - [20.11.i.p1](https://dlmf.nist.gov/20.11#i.p1): Gauss sum definition and reciprocity: 20.11.E1–E2; "discrete analog of theta/Poisson" is a remark.
-- [20.11.ii.p1](https://dlmf.nist.gov/20.11#ii.p1): Acquired: [`DLMF.Theta.summable_ramanujanThetaF`](DLMF/Theta/Generalizations.lean#L132) (proved). Ramanujan's `f(a,b)`: 20.11.E3–E4; absolute convergence for `|ab| < 1` is stated separately.
+- [20.11.ii.p1](https://dlmf.nist.gov/20.11#ii.p1): Acquired: [`DLMF.Theta.summable_ramanujanThetaF`](DLMF/Theta/Generalizations.lean#L146) (proved). Ramanujan's `f(a,b)`: 20.11.E3–E4; absolute convergence for `|ab| < 1` is stated separately.
 - [20.11.ii.p2](https://dlmf.nist.gov/20.11#ii.p2): Qualitative remark on `q`-identities with references; no formula.
 - [20.11.iii.p1](https://dlmf.nist.gov/20.11#iii.p1): Remark that `q` is tied to `k` (Jacobi inversion); covered by `thetaModulusK_inversion`.
 - [20.11.iii.p2](https://dlmf.nist.gov/20.11#iii.p2): 20.11.E5. The analogous changes of base for `₂F₁(1/3,2/3;1;k²)`, `₂F₁(1/4,3/4;1;k²)`, `₂F₁(1/6,5/6;1;k²)` are mentioned without formulas (Berndt et al.); not acquired.
 - [20.11.iv.p1](https://dlmf.nist.gov/20.11#iv.p1): Theta functions with characteristics: cross-reference to Chapter 21 (multidimensional theta functions); acquired there.
 - [20.11.v.p1](https://dlmf.nist.gov/20.11#v.p1), [20.11.v.p2](https://dlmf.nist.gov/20.11#v.p2): Definitions 20.11.6–20.11.8 and identity 20.11.9.
 - [20.11.v.p3](https://dlmf.nist.gov/20.11#v.p3), [20.11.v.p4](https://dlmf.nist.gov/20.11#v.p4): Qualitative remark (sets of twelve equations reduce to three) and reference; no formula.
-- [20.11.ii](https://dlmf.nist.gov/20.11.ii): [`DLMF.Theta.summable_ramanujanThetaF`](DLMF/Theta/Generalizations.lean#L132) (proved).
+- [20.11.ii](https://dlmf.nist.gov/20.11.ii): [`DLMF.Theta.summable_ramanujanThetaF`](DLMF/Theta/Generalizations.lean#L146) (proved).
 - [20.3](https://dlmf.nist.gov/20.3) (20.3.ii.p1, 20.3.iii.p1 and all figures): excluded: graphics.
 - [20.12.i.p1](https://dlmf.nist.gov/20.12#i.p1), [20.12.i.p2](https://dlmf.nist.gov/20.12#i.p2), [20.12.ii.p1](https://dlmf.nist.gov/20.12#ii.p1), [20.12.ii.p2](https://dlmf.nist.gov/20.12#ii.p2): excluded: application. Mathematical content for a later decision: θ₃(0,q) and sums of squares (§27.13(iv)); the triple product and Euler's pentagonal number theorem; the embedding `z ↦ (θ₁(2z|τ) : θ₂(2z|τ) : θ₃(2z|τ) : θ₄(2z|τ))` of the torus `ℂ/(ℤ + τℤ)` into `P³` (uniformization).
 - [20.13.p1](https://dlmf.nist.gov/20.13#p1)–[20.13.p3](https://dlmf.nist.gov/20.13#p3) and 20.13.E1–E5: excluded: application. Mathematical content for a later decision: the heat equation `∂θ/∂τ = −(iπ/4) ∂²θ/∂z²` (20.13.1) satisfied by all four `θⱼ`, its real-time form for `τ = it` (20.13.2), the Gaussian solution (20.13.3), and the periodized-Gaussian identities 20.13.4–20.13.5 (`θ₃(z|4iαt/π)`, `θ₂(z|4iαt/π)` as sums of Gaussians, consequences of 20.7.32–20.7.33).

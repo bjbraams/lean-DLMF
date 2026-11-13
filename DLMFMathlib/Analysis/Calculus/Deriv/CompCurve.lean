@@ -18,7 +18,8 @@ For a `C²` function `F` on a normed space and a curve `c` with velocity `c'` an
 `c''`, the second derivative of `F ∘ c` is `D²F(c)(c', c') + DF(c) c''`. On `ℂ × ℂ × ℂ` this gives
 the second derivative of `σ ↦ 𝒦(X σ, Y σ, Z σ)` in terms of the first and (symmetric) second
 partial derivatives of `𝒦`, which are themselves expressed as Fréchet derivatives on the
-coordinate vectors.
+coordinate vectors. The along-curve identity allows any nontrivially normed scalar field
+and any normed target.
 
 ## Main results
 
@@ -27,30 +28,32 @@ coordinate vectors.
 * `Complex.deriv_coord_three`: the coordinate partial derivatives of `𝒦` as Fréchet derivatives.
 -/
 
-@[expose] public section
+public section
 
 open Filter
 open scoped Topology
 
-/-- Second derivative of `F ∘ c` along a curve. -/
-theorem ContDiffAt.deriv_comp_curve {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E]
-    {F : E → ℂ} {c c' : ℂ → E} {τ : ℂ} {c'' : E} (hF : ContDiffAt ℂ 2 F (c τ))
+/-- First and second derivatives of a `C²` map along a twice differentiable curve,
+over any nontrivially normed field and with an arbitrary normed target. -/
+theorem ContDiffAt.deriv_comp_curve {𝕜 E G : Type*} [NontriviallyNormedField 𝕜]
+    [NormedAddCommGroup E] [NormedSpace 𝕜 E] [NormedAddCommGroup G] [NormedSpace 𝕜 G]
+    {F : E → G} {c c' : 𝕜 → E} {τ : 𝕜} {c'' : E} (hF : ContDiffAt 𝕜 2 F (c τ))
     (hc : ∀ᶠ σ in 𝓝 τ, HasDerivAt c (c' σ) σ) (hc' : HasDerivAt c' c'' τ) :
-    deriv (fun σ => F (c σ)) τ = fderiv ℂ F (c τ) (c' τ) ∧
+    deriv (fun σ => F (c σ)) τ = fderiv 𝕜 F (c τ) (c' τ) ∧
       deriv (deriv fun σ => F (c σ)) τ =
-        fderiv ℂ (fderiv ℂ F) (c τ) (c' τ) (c' τ) + fderiv ℂ F (c τ) c'' := by
-  have hFd : ∀ᶠ x in 𝓝 (c τ), DifferentiableAt ℂ F x :=
+        fderiv 𝕜 (fderiv 𝕜 F) (c τ) (c' τ) (c' τ) + fderiv 𝕜 F (c τ) c'' := by
+  have hFd : ∀ᶠ x in 𝓝 (c τ), DifferentiableAt 𝕜 F x :=
     (hF.eventually (by simp)).mono fun x hx => hx.differentiableAt (by norm_num)
   have hcont : ContinuousAt c τ := hc.self_of_nhds.continuousAt
-  have hFd' : ∀ᶠ σ in 𝓝 τ, DifferentiableAt ℂ F (c σ) := hcont.tendsto.eventually hFd
-  have hev : ∀ᶠ σ in 𝓝 τ, deriv (fun σ => F (c σ)) σ = fderiv ℂ F (c σ) (c' σ) := by
+  have hFd' : ∀ᶠ σ in 𝓝 τ, DifferentiableAt 𝕜 F (c σ) := hcont.tendsto.eventually hFd
+  have hev : ∀ᶠ σ in 𝓝 τ, deriv (fun σ => F (c σ)) σ = fderiv 𝕜 F (c σ) (c' σ) := by
     filter_upwards [hFd', hc] with σ h1 h2
     exact (h1.hasFDerivAt.comp_hasDerivAt σ h2).deriv
   refine ⟨hev.self_of_nhds, ?_⟩
-  have hD : DifferentiableAt ℂ (fderiv ℂ F) (c τ) :=
+  have hD : DifferentiableAt 𝕜 (fderiv 𝕜 F) (c τ) :=
     (hF.fderiv_right (m := 1) (by norm_num)).differentiableAt (by norm_num)
-  have h1 : HasDerivAt (fun σ => fderiv ℂ F (c σ))
-      (fderiv ℂ (fderiv ℂ F) (c τ) (c' τ)) τ :=
+  have h1 : HasDerivAt (fun σ => fderiv 𝕜 F (c σ))
+      (fderiv 𝕜 (fderiv 𝕜 F) (c τ) (c' τ)) τ :=
     hD.hasFDerivAt.comp_hasDerivAt τ hc.self_of_nhds
   exact ((h1.clm_apply hc').congr_of_eventuallyEq
     hev).deriv

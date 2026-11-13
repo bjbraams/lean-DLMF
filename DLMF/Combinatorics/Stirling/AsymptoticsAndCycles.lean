@@ -6,6 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Combinatorics.Stirling.RecurrencesAndIdentities
+import DLMF.Combinatorics.Stirling.NearDiagonalBounds
+import DLMF.Combinatorics.Stirling.FirstKindEstimates
 
 /-!
 # Stirling numbers: asymptotics and combinatorial interpretations (DLMF §26.8(i), §26.8(v))
@@ -46,7 +48,18 @@ theorem tendsto_signedStirlingFirst_div (k : ℕ → ℕ)
     Tendsto (fun n : ℕ => (signedStirlingFirst (n + 1) (k n + 1) : ℝ) /
         ((-1) ^ (n - k n) * n.factorial / (k n).factorial *
           (Real.eulerMascheroniConstant + Real.log n) ^ (k n))) atTop (𝓝 1) := by
-  sorry
+  apply (StirlingFirstEstimates.tendsto_normalized_div_log_add_constant_pow k hk).congr'
+  filter_upwards [eventually_ge_atTop 1] with n hn
+  rw [signedStirlingFirst]
+  push_cast
+  dsimp only [StirlingFirstEstimates.normalized]
+  have hfac : (n.factorial : ℝ) ≠ 0 := by positivity
+  have hfac' : ((k n).factorial : ℝ) ≠ 0 := by positivity
+  have hsign : (-1 : ℝ) ^ (n - k n) ≠ 0 := by positivity
+  have hL : Real.eulerMascheroniConstant + Real.log n ≠ 0 := ne_of_gt
+    (add_pos_of_pos_of_nonneg (by linarith [Real.one_half_lt_eulerMascheroniConstant])
+      (Real.log_nonneg (by exact_mod_cast hn)))
+  field_simp
 
 /-- Faulhaber asymptotics: `∑_{j<K} j^p ~ K^{p+1}/(p+1)`. -/
 private lemma isEquivalent_sum_range_pow (p : ℕ) :
@@ -221,7 +234,20 @@ theorem tendsto_stirlingSecond_add_div (n : ℕ → ℕ)
     (hn : (fun k => (n k : ℝ)) =o[atTop] fun k => Real.sqrt k) :
     Tendsto (fun k : ℕ => (Nat.stirlingSecond (n k + k) k : ℝ) /
         ((k : ℝ) ^ (2 * n k) / (2 ^ (n k) * (n k).factorial))) atTop (𝓝 1) := by
-  sorry
+  have hsmall : Tendsto (fun k : ℕ => 2 * (n k : ℝ) ^ 2 / k) atTop (𝓝 0) := by
+    convert (hn.tendsto_div_nhds_zero.pow 2).const_mul 2 using 1
+    · ext k
+      rw [div_pow, Real.sq_sqrt (Nat.cast_nonneg k)]
+      ring
+    · norm_num
+  have hexp : Tendsto (fun k : ℕ => Real.exp (2 * (n k : ℝ) ^ 2 / k)) atTop (𝓝 1) := by
+    simpa only [Function.comp_def, Real.exp_zero] using
+      (Real.continuous_exp.tendsto 0).comp hsmall
+  apply tendsto_of_tendsto_of_tendsto_of_le_of_le' tendsto_const_nhds hexp
+  · filter_upwards [eventually_ge_atTop 1] with k hk
+    exact (stirlingSecond_add_div_bounds (by omega : 0 < k) (n k)).1
+  · filter_upwards [eventually_ge_atTop 1] with k hk
+    exact (stirlingSecond_add_div_bounds (by omega : 0 < k) (n k)).2
 
 /-! ### Combinatorial interpretations (§26.8(i)) -/
 

@@ -7,6 +7,8 @@ module
 
 public import DLMF.AlgebraicAnalytic.Calculus.Vectors
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.IntegrationByParts
+import Mathlib.MeasureTheory.Function.Jacobian
+import Mathlib.LinearAlgebra.Basis.Fin
 
 /-!
 # Path, line and surface integrals; Gauss's theorem (DLMF §1.6(iv)–(v))
@@ -14,7 +16,8 @@ public import Mathlib.MeasureTheory.Integral.IntervalIntegral.IntegrationByParts
 Paths are `c : ℝ → ℝ³`, surfaces are parametrized by `Φ : ℝ × ℝ → ℝ³` on a parameter set
 `D ⊆ ℝ²` (definitions in `DLMF.AlgebraicAnalytic.Calculus.Basic`). Green's theorem in the
 plane (1.6.43–1.6.44) and Stokes's theorem (1.6.57) are in
-`DLMF.AlgebraicAnalytic.Calculus.GreenStokes`.
+`DLMF.AlgebraicAnalytic.Calculus.GreenStokes`. Reparametrization uses Mathlib’s Jacobian
+change-of-variables formula and the determinant law of the tangent cross product.
 
 ## Main results
 
@@ -356,6 +359,43 @@ theorem surfaceArea_revolution_y {f : ℝ → ℝ} {a b : ℝ} (hab : a ≤ b)
   obtain ⟨x, t⟩ := p
   exact vecNorm_tangent_cross_revolution_y (hf x)
 
+/-- Reparametrization multiplies the oriented tangent area element by the Jacobian determinant. -/
+private lemma cross_tangentU_tangentV_comp {Φ : ℝ × ℝ → Fin 3 → ℝ} {ψ : ℝ × ℝ → ℝ × ℝ}
+    {p : ℝ × ℝ} (hΦ : DifferentiableAt ℝ Φ (ψ p)) (hψ : DifferentiableAt ℝ ψ p) :
+    tangentU (Φ ∘ ψ) p ⨯₃ tangentV (Φ ∘ ψ) p =
+      (fderiv ℝ ψ p).det • (tangentU Φ (ψ p) ⨯₃ tangentV Φ (ψ p)) := by
+  have hdet (L : (ℝ × ℝ) →L[ℝ] (ℝ × ℝ)) :
+      L.det = (L (1, 0)).1 * (L (0, 1)).2 - (L (0, 1)).1 * (L (1, 0)).2 := by
+    rw [ContinuousLinearMap.det, ← LinearMap.det_toMatrix (Module.Basis.finTwoProd ℝ),
+      Matrix.det_fin_two]
+    simp [LinearMap.toMatrix_apply, Module.Basis.coe_finTwoProd_repr]
+  have hlin (A : (ℝ × ℝ) →L[ℝ] (Fin 3 → ℝ)) (x : ℝ × ℝ) :
+      A x = x.1 • A (1, 0) + x.2 • A (0, 1) := by
+    rw [← map_smul, ← map_smul, ← map_add]
+    congr 1
+    ext <;> simp
+  rw [tangentU_eq_fderiv (hΦ.comp p hψ), tangentV_eq_fderiv (hΦ.comp p hψ),
+    tangentU_eq_fderiv hΦ, tangentV_eq_fderiv hΦ, fderiv_comp p hΦ hψ]
+  simp only [ContinuousLinearMap.comp_apply]
+  rw [hdet, hlin _ ((fderiv ℝ ψ p) (1, 0)), hlin _ ((fderiv ℝ ψ p) (0, 1))]
+  ext i
+  fin_cases i
+  · simp only [crossProduct, Nat.succ_eq_add_one, Nat.reduceAdd, Fin.isValue, map_add,
+      map_smul, Fin.zero_eta, LinearMap.add_apply, LinearMap.smul_apply, LinearMap.mk₂_apply,
+      Pi.add_apply, Pi.smul_apply, smul_eq_mul, Matrix.smul_cons, Matrix.smul_empty,
+      Matrix.cons_val_zero]
+    ring
+  · simp only [crossProduct, Nat.succ_eq_add_one, Nat.reduceAdd, Fin.isValue, map_add,
+      map_smul, Fin.mk_one, LinearMap.add_apply, LinearMap.smul_apply, LinearMap.mk₂_apply,
+      Pi.add_apply, Pi.smul_apply, smul_eq_mul, Matrix.smul_cons, Matrix.smul_empty,
+      Matrix.cons_val_one, Matrix.cons_val_zero]
+    ring
+  · simp only [crossProduct, Nat.succ_eq_add_one, Nat.reduceAdd, Fin.isValue, map_add,
+      map_smul, Fin.reduceFinMk, LinearMap.add_apply, LinearMap.smul_apply, LinearMap.mk₂_apply,
+      Pi.add_apply, Pi.smul_apply, smul_eq_mul, Matrix.smul_cons, Matrix.smul_empty,
+      Matrix.cons_val]
+    ring
+
 /-- DLMF §1.6(v): the area is independent of the parametrization: if `Φ₁ = Φ₂ ∘ ψ` with
 `ψ : D₁ → D₂` a `C¹` diffeomorphism of open sets and `Φ₂` of class `C¹`, then
 `A(Φ₁(D₁)) = A(Φ₂(D₂))`. -/
@@ -364,7 +404,17 @@ theorem surfaceArea_comp_diffeomorph {Φ : ℝ × ℝ → Fin 3 → ℝ} {ψ : �
     {D₁ D₂ : Set (ℝ × ℝ)} (hD₁ : IsOpen D₁) (hΦ : ContDiff ℝ 1 Φ) (hψ : ContDiffOn ℝ 1 ψ D₁)
     (hbij : BijOn ψ D₁ D₂) (hdet : ∀ p ∈ D₁, (fderiv ℝ ψ p).det ≠ 0) :
     surfaceArea (Φ ∘ ψ) D₁ = surfaceArea Φ D₂ := by
-  sorry
+  have := Measure.prod.instIsAddHaarMeasure (volume : Measure ℝ) (volume : Measure ℝ)
+  have hψd (p : ℝ × ℝ) (hp : p ∈ D₁) : DifferentiableAt ℝ ψ p :=
+    ((hψ.differentiableOn one_ne_zero) p hp).differentiableAt (hD₁.mem_nhds hp)
+  rw [surfaceArea, surfaceArea, ← hbij.image_eq,
+    integral_image_eq_integral_abs_det_fderiv_smul volume hD₁.measurableSet
+      (fun p hp => (hψd p hp).hasFDerivAt.hasFDerivWithinAt) hbij.injOn]
+  apply setIntegral_congr_fun hD₁.measurableSet
+  intro p hp
+  dsimp only
+  rw [cross_tangentU_tangentV_comp (hΦ.differentiable one_ne_zero _) (hψd p hp), vecNorm_smul,
+    smul_eq_mul]
 
 /-- DLMF 1.6.56: the flux is invariant under orientation-preserving reparametrizations and
 changes sign under orientation-reversing ones: for `Φ₁ = Φ₂ ∘ ψ` with `ψ : D₁ → D₂` a `C¹`
@@ -377,7 +427,32 @@ theorem fluxIntegral_comp_diffeomorph {F : (Fin 3 → ℝ) → Fin 3 → ℝ} {�
     ((∀ p ∈ D₁, 0 < (fderiv ℝ ψ p).det) → fluxIntegral F (Φ ∘ ψ) D₁ = fluxIntegral F Φ D₂) ∧
       ((∀ p ∈ D₁, (fderiv ℝ ψ p).det < 0) →
         fluxIntegral F (Φ ∘ ψ) D₁ = -fluxIntegral F Φ D₂) := by
-  sorry
+  have := Measure.prod.instIsAddHaarMeasure (volume : Measure ℝ) (volume : Measure ℝ)
+  have hψd (p : ℝ × ℝ) (hp : p ∈ D₁) : DifferentiableAt ℝ ψ p :=
+    ((hψ.differentiableOn one_ne_zero) p hp).differentiableAt (hD₁.mem_nhds hp)
+  constructor
+  · intro hpos
+    rw [fluxIntegral, fluxIntegral, ← hbij.image_eq,
+      integral_image_eq_integral_abs_det_fderiv_smul volume hD₁.measurableSet
+        (fun p hp => (hψd p hp).hasFDerivAt.hasFDerivWithinAt) hbij.injOn]
+    apply setIntegral_congr_fun hD₁.measurableSet
+    intro p hp
+    dsimp only
+    rw [cross_tangentU_tangentV_comp (hΦ.differentiable one_ne_zero _) (hψd p hp), dotProduct_smul,
+      smul_eq_mul, smul_eq_mul, abs_of_pos (hpos p hp)]
+    rfl
+  · intro hneg
+    rw [fluxIntegral, fluxIntegral, ← hbij.image_eq,
+      integral_image_eq_integral_abs_det_fderiv_smul volume hD₁.measurableSet
+        (fun p hp => (hψd p hp).hasFDerivAt.hasFDerivWithinAt) hbij.injOn,
+      ← integral_neg]
+    apply setIntegral_congr_fun hD₁.measurableSet
+    intro p hp
+    dsimp only
+    rw [cross_tangentU_tangentV_comp (hΦ.differentiable one_ne_zero _) (hψd p hp), dotProduct_smul,
+      smul_eq_mul, smul_eq_mul, abs_of_neg (hneg p hp)]
+    simp only [neg_mul, neg_neg]
+    rfl
 
 /-! ### Gauss's theorem and Green's identities -/
 

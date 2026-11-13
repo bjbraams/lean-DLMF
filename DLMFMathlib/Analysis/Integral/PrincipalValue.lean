@@ -25,6 +25,8 @@ differentiable at `c`.
 
 * `MeasureTheory.pv_tendsto_of_integrableOn_sub`: existence and value of the principal value
   under the subtraction hypothesis.
+* `MeasureTheory.pv_tendsto_of_integrableOn_sub_of_tendsto_ratio`: invariance under
+  asymptotically equal excision widths.
 * `MeasureTheory.pv_integrableOn_sub_of_differentiableAt`: the subtraction hypothesis for
   `f t / (t - c)` with `f` integrable and differentiable at `c`.
 * `MeasureTheory.pv_tendsto_div_sub`: the principal value of `∫_a^b f(t)/(t - c) dt`.
@@ -146,6 +148,99 @@ theorem pv_tendsto_of_integrableOn_sub {F : ℝ → ℂ} {a b c : ℝ} (A : ℂ)
   refine Tendsto.congr' (EventuallyEq.symm hsplit) ?_
   convert h1.add (tendsto_const_nhds.sub h2) using 2
   ring
+
+set_option maxHeartbeats 1000000 in
+/-- The finite principal value is unchanged by asymptotically equal excision widths. -/
+theorem pv_tendsto_of_integrableOn_sub_of_tendsto_ratio
+    {ι : Type*} {l : Filter ι} {F : ℝ → ℂ} {a b c : ℝ} {u v : ι → ℝ}
+    (A : ℂ) (hac : a < c) (hcb : c < b)
+    (hF : IntegrableOn (fun t => F t - A / (t - c)) (Icc a b))
+    (hu : Tendsto u l (𝓝 c)) (hv : Tendsto v l (𝓝 c))
+    (hcut : ∀ᶠ i in l, u i < c ∧ c < v i)
+    (hratio : Tendsto (fun i => (c - u i) / (v i - c)) l (𝓝 1)) :
+    Tendsto (fun i => (∫ t in a..u i, F t) + ∫ t in v i..b, F t) l
+      (𝓝 ((∫ t in a..b, (F t - A / (t - c))) +
+        A * Real.log ((b - c) / (c - a)))) := by
+  let G : ℝ → ℂ := fun t => F t - A / (t - c)
+  have hab : a ≤ b := (hac.trans hcb).le
+  have hGi : ∀ x y : ℝ, x ∈ Icc a b → y ∈ Icc a b →
+      IntervalIntegrable G volume x y := fun x y hx hy =>
+    (hF.mono_set (uIcc_subset_Icc hx hy)).intervalIntegrable
+  have hGc : ContinuousAt (fun x => ∫ t in a..x, G t) c :=
+    (intervalIntegral.continuousOn_primitive_interval
+      (show IntegrableOn G (uIcc a b) from by rwa [uIcc_of_le hab])
+        c (by rw [uIcc_of_le hab]; exact ⟨hac.le, hcb.le⟩)).continuousAt
+      (by rw [uIcc_of_le hab]; exact Icc_mem_nhds hac hcb)
+  have hlog : Tendsto (fun i => (Real.log ((c - u i) / (v i - c)) : ℂ)) l (𝓝 0) := by
+    simpa only [Real.log_one, Complex.ofReal_zero, Function.comp_def] using
+      ((Real.continuousAt_log one_ne_zero).tendsto.comp hratio).ofReal
+  have hconstI : Tendsto (fun _ : ι => ∫ t in a..b, G t) l
+      (𝓝 (∫ t in a..b, G t)) := tendsto_const_nhds
+  have hconstC : Tendsto (fun _ : ι => (Real.log ((b - c) / (c - a)) : ℂ)) l
+      (𝓝 (Real.log ((b - c) / (c - a)) : ℂ)) := tendsto_const_nhds
+  have hlim := ((hGc.tendsto.comp hu).add
+    (hconstI.sub (hGc.tendsto.comp hv))).add ((hconstC.add hlog).const_mul A)
+  have hval : (∫ t in a..c, G t) + ((∫ t in a..b, G t) - ∫ t in a..c, G t) +
+      A * ((Real.log ((b - c) / (c - a)) : ℂ) + 0) =
+      (∫ t in a..b, G t) + A * Real.log ((b - c) / (c - a)) := by ring
+  rw [hval] at hlim
+  refine hlim.congr' ?_
+  filter_upwards [hcut, hu.eventually (Ioi_mem_nhds hac),
+    hv.eventually (Iio_mem_nhds hcb)] with i hi hui hvi
+  have hc1 : c ∉ uIcc a (u i) := by
+    rw [uIcc_of_le hui.le]; intro h; linarith [h.2]
+  have hc2 : c ∉ uIcc (v i) b := by
+    rw [uIcc_of_le hvi.le]; intro h; linarith [h.1]
+  have hSi : ∀ x y : ℝ, c ∉ uIcc x y →
+      IntervalIntegrable (fun t : ℝ => A / ((t : ℂ) - c)) volume x y := by
+    intro x y hxy
+    refine ContinuousOn.intervalIntegrable ?_
+    refine continuousOn_const.div (by fun_prop) fun t ht h => hxy ?_
+    have : t = c := by exact_mod_cast sub_eq_zero.mp h
+    rwa [← this]
+  have hsing : ∀ x y : ℝ,
+      (∫ t in x..y, A / ((t : ℂ) - c)) =
+        A * ((∫ t in x..y, (t - c)⁻¹ : ℝ) : ℂ) := by
+    intro x y
+    rw [← intervalIntegral.integral_ofReal, ← intervalIntegral.integral_const_mul]
+    congr 1; funext t; push_cast; ring
+  have hsplit1 : (∫ t in a..u i, F t) = (∫ t in a..u i, G t) +
+      ∫ t in a..u i, A / ((t : ℂ) - c) := by
+    rw [← intervalIntegral.integral_add
+      (hGi _ _ ⟨le_rfl, hab⟩ ⟨hui.le, (hi.1.trans hcb).le⟩) (hSi _ _ hc1)]
+    simp [G]
+  have hsplit2 : (∫ t in v i..b, F t) = (∫ t in v i..b, G t) +
+      ∫ t in v i..b, A / ((t : ℂ) - c) := by
+    rw [← intervalIntegral.integral_add
+      (hGi _ _ ⟨(hac.trans hi.2).le, hvi.le⟩ ⟨hab, le_rfl⟩) (hSi _ _ hc2)]
+    simp [G]
+  have hrecip : (∫ t in a..u i, (t - c)⁻¹) +
+      (∫ t in v i..b, (t - c)⁻¹) =
+      Real.log ((b - c) / (c - a)) + Real.log ((c - u i) / (v i - c)) := by
+    rw [intervalIntegral.integral_comp_sub_right (fun t => t⁻¹),
+      intervalIntegral.integral_comp_sub_right (fun t => t⁻¹),
+      integral_inv_of_neg (by linarith) (by linarith),
+      integral_inv_of_pos (by linarith) (by linarith),
+      ← Real.log_mul (by apply div_ne_zero <;> linarith)
+        (by apply div_ne_zero <;> linarith),
+      ← Real.log_mul (by apply div_ne_zero <;> linarith)
+        (by apply div_ne_zero <;> linarith)]
+    congr 1
+    field_simp [sub_ne_zero.mpr hac.ne, sub_ne_zero.mpr hac.ne',
+      sub_ne_zero.mpr hcb.ne, sub_ne_zero.mpr hcb.ne',
+      sub_ne_zero.mpr hi.1.ne, sub_ne_zero.mpr hi.1.ne',
+      sub_ne_zero.mpr hi.2.ne, sub_ne_zero.mpr hi.2.ne']
+    ring
+  rw [hsplit1, hsplit2, hsing, hsing]
+  have hright := intervalIntegral.integral_interval_sub_left
+    (hGi a b ⟨le_rfl, hab⟩ ⟨hab, le_rfl⟩)
+    (hGi a (v i) ⟨le_rfl, hab⟩ ⟨(hac.trans hi.2).le, hvi.le⟩)
+  rw [← hright]
+  have hrecipC := congrArg Complex.ofReal hrecip
+  push_cast at hrecipC
+  dsimp only [Function.comp_def]
+  linear_combination -A * hrecipC
+
 
 /-- If `f` is integrable on `[a, b]` and differentiable at `c`, then
 `f t / (t - c) - f c / (t - c)` is integrable on `[a, b]`. -/

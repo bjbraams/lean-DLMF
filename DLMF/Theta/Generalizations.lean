@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Theta.Relations
+import DLMF.Theta.GaussReciprocity
 
 /-!
 # Theta functions: generalizations and analogs (DLMF §20.11)
@@ -56,6 +57,25 @@ open DLMF.Elliptic
 def thetaGaussSum (m : ℤ) (n : ℕ) : ℂ :=
   ∑ k ∈ Finset.range n, cexp (-(π * I * k ^ 2 * m / n))
 
+/-- Gauss reciprocity for positive `m,n` with even product, stronger than DLMF,
+which assumes `m,n` are coprime. The square roots and `exp(-πi/4)` use their principal values. -/
+@[dlmf 20.11.E2 "stronger than DLMF: no coprimality assumption"]
+theorem thetaGaussSum_reciprocity' {m n : ℕ} (hm : 0 < m) (hn : 0 < n)
+    (heven : Even (m * n)) :
+    1 / Real.sqrt n * thetaGaussSum m n =
+        cexp (-(π * I / 4)) / Real.sqrt m *
+          ∑ j ∈ Finset.range m, cexp (π * I * j ^ 2 * n / m) ∧
+      cexp (-(π * I / 4)) / Real.sqrt m * ∑ j ∈ Finset.range m, cexp (π * I * j ^ 2 * n / m) =
+        cexp (-(π * I / 4)) / Real.sqrt m * thetaGaussSum (-(n : ℤ)) m := by
+  refine ⟨?_, ?_⟩
+  · simpa only [thetaGaussSum, Int.cast_natCast] using
+      GaussReciprocity.sum_reciprocity m n hm hn heven
+  · congr 1
+    refine Finset.sum_congr rfl fun j _ => ?_
+    congr 1
+    push_cast
+    ring_nf
+
 /-- DLMF 20.11.2: for coprime positive `m, n` with `mn` even,
 `n^{-1/2} G(m,n) = e^{-πi/4} m^{-1/2} ∑_{j=0}^{m-1} e^{πij²n/m} = e^{-πi/4} m^{-1/2} G(-n,m)`. -/
 @[dlmf 20.11.E2]
@@ -66,13 +86,7 @@ theorem thetaGaussSum_reciprocity {m n : ℕ} (hm : 0 < m) (hn : 0 < n) (hmn : N
           ∑ j ∈ Finset.range m, cexp (π * I * j ^ 2 * n / m) ∧
       cexp (-(π * I / 4)) / Real.sqrt m * ∑ j ∈ Finset.range m, cexp (π * I * j ^ 2 * n / m) =
         cexp (-(π * I / 4)) / Real.sqrt m * thetaGaussSum (-(n : ℤ)) m := by
-  refine ⟨?_, ?_⟩
-  · sorry
-  · congr 1
-    refine Finset.sum_congr rfl fun j _ => ?_
-    congr 1
-    push_cast
-    ring
+  exact thetaGaussSum_reciprocity' hm hn heven
 
 /-! ### §20.11(ii) Ramanujan's theta function -/
 

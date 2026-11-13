@@ -4,6 +4,103 @@ The project formalizes material from Andrews, Askey and Roy, *Special Functions*
 (1999), and the NIST Digital Library of Mathematical Functions, using Mathlib.
 Existing module copyright and authorship notices remain authoritative.
 
+## Proofs with updated dependencies (2026-11-12–13)
+
+The approved parallelogram-area proof uses Mathlib's norm determinant and Gram matrix
+identities with TauCeti's Euclidean Hausdorff linear-image formula. The approved quartic
+cosine-transform proof uses partial fractions and the project's proved quadratic cosine
+transform; its complex sector keeps both quadratic parameters in the right half-plane.
+
+The lattice-path proofs use Mathlib's Dyck-word and binary-tree equivalence and TauCeti's
+ballot and noncrossing-partition enumerators. The Narayana polynomial recurrence adapts
+a proof from `TauCeti.Combinatorics.NoncrossingPartition.Narayana`; its copyright notice
+is retained in `DLMF/Combinatorics/LatticePaths/Narayana.lean`. The multiset inversion and
+major-index proofs use finite-word recurrences and the project's q-factorial identities,
+with continuity extending the formulas to every complex parameter.
+
+The second-order calculus support adapts Yury G. Kudryashov's Mathlib mean-value proof
+`sub_isBigO_norm_rpow_add_one_of_fderiv` and TauCeti's
+`isBigO_sub_taylor_two_of_hasFDerivAt`. Their copyright and authorship notices are retained
+in `DLMFMathlib/Analysis/Calculus/SecondDerivativeTest.lean`. The multivariable Taylor
+proof uses Mathlib's integral remainder, while the Hessian tests and coordinate
+Laplacians use the Fréchet derivative and symmetry APIs. The polar identity is generalized
+to any pair of vectors and supplies the harmonic-function formula.
+
+The theta Gauss reciprocity proof combines Mathlib's theta functional equation with
+TauCeti's integer-sum splitting, theta bounds and complex-power rules. Its residue-class
+argument adapts `TauCeti.NumberTheory.ModularForms.JacobiTheta.GaussSum`, retaining the
+contributor notice in `DLMF/Theta/GaussReciprocity.lean`. Jacobi identities
+reuse the project's addition formulas, entire theta numerators, epsilon quasiperiods
+and Weierstrass bridges. The four theta logarithmic series use convergent lattice
+logarithms, the sigma product and Landen duplication. The Pearcey asymptotic uses its
+proved Bessel evaluation and
+the project's Bessel asymptotics.
+
+The Airy Bi and Scorer Hi/Gi formulas use the project's Airy connections, Bessel Mellin
+transform, Gamma multiplication and Mellin–Parseval theorem. The new generic support
+proves asymmetric principal-value cutoffs, quadratic Cauchy boundary limits and Mellin
+transforms of quadratic kernels. TauCeti's Gamma norm and vertical integrability estimates
+supply vertical integrability of the Bessel K Mellin transform. Existing branch choices,
+normalizations and principal-value conventions are preserved.
+
+The Stirling asymptotics use finite combinatorial recurrences, collision bounds, harmonic
+sum estimates and elementary exponential estimates. Descartes parity uses Mathlib's
+coefficient sign-variation API, polynomial factorization and real polynomial growth.
+
+The self-adjoint spectral proof uses TauCeti's shift lower bounds and surjectivity API.
+Its density argument in `DLMFMathlib/Analysis/InnerProductSpace/LinearPMap/Spectrum.lean`
+adapts TauCeti's `IsSelfAdjoint.denseRange_smul_sub_of_norm_le`; the contributor notice
+is retained. Surface reparametrization uses Mathlib's Jacobian substitution, and Stokes
+uses Mathlib exterior-derivative naturality and TauCeti's Green theorem for absolutely
+continuous boundaries. Fourier table proofs use the project's Gamma/Fresnel limits and
+hyperbolic-secant integral, together with TauCeti's power-weighted sine integral. The
+quadratic-phase argument completes the square and retains ordinary improper limits.
+
+The Euler-number series uses Mathlib's Poisson summation and scalar power-series uniqueness,
+the project's hyperbolic-secant integral, and TauCeti's
+`Summable.hasSum_lambert` from `TauCeti.Analysis.SpecificLimits.Normed`. The cosine basis
+uses `TauCeti.chebyshevCosineHilbertBasis` with the endpoint measure bridge. The sine
+basis uses TauCeti's normalized sine orthogonality and L¹ sine completeness, applied to
+real and imaginary parts. The complex exponential basis uses
+`TauCeti.fourierCoeffOn_fourier` and
+`MeasureTheory.IntegrableOn.ae_eq_zero_of_forall_fourierCoeffOn_eq_zero`, with Mathlib's
+Fourier coefficient normalization.
+
+The Hill determinant theorem uses TauCeti's finite-compression coefficient and Hadamard
+APIs. Its finite principal-minor identity adapts TauCeti's reversed characteristic-polynomial
+evaluation scaffold; the notice is retained in
+`DLMFMathlib/Analysis/Matrix/InfiniteDeterminant.lean`. The archimedean summability bound
+and convergence along finite truncations are proved from the matrix-entry norm sum.
+
+The logarithmic Mellin kernel uses TauCeti's `integrable_exp_neg_mul_abs` and
+`integral_exp_neg_mul_abs` from `TauCeti.MeasureTheory.Integral.Exp.Decay`, and
+`hasSum_cotTerm_two_mul` from
+`TauCeti.Analysis.SpecialFunctions.Trigonometric.TanhSeries`. The sine-over-variable
+transform uses the project's entire cosine-integral primitive and its asymptotic limit.
+The logarithmic cosine transforms use radial quadratic-resolvent integration and
+Mathlib's absolute Fubini theorem, with separate principal logarithms for complex parameters.
+The Abel arctangent transform uses integration by parts and dominated convergence for
+bounded antiderivatives with integrable derivative, retaining the Abel limit in its
+original statement.
+
+The Hilbert cutoff identity uses Mathlib's Young inequality, `Lᵖ` norm-power integrability,
+and translation/reflection invariance of Lebesgue integration. Its tail-integrability and
+symmetric-cutoff support is stated over an arbitrary `RCLike` scalar field.
+
+Distributional sequence convergence uses Mathlib's Banach–Steinhaus and Ascoli APIs.
+The test-function barrelledness proof combines TauCeti's
+`ContDiffMapSupportedIn.instBaireSpace` and its complete Fréchet fixed-support spaces
+with Mathlib's native final locally convex test-function topology. The reusable convergence
+criterion is stated for barrelled domains and polynormable targets over a nontrivially
+normed field. No upstream proof body is copied in these two developments.
+
+Stieltjes integration by parts restricts the measure to a finite horizon and uses
+TauCeti's `VectorMeasure.integral_deriv_smul_apply_Iic_eq_neg_integral`, with Mathlib's
+`VectorMeasure.integral_toSignedMeasure` bridge. The argument retains jump atoms and
+uses no bound at infinity. The distribution pairing and density corollaries use Mathlib's
+regular-distribution and with-density integral APIs. Contributor notices are retained in
+`DLMFMathlib/Analysis/Distribution/Stieltjes.lean`.
+
 ## Chapters 20–36 proofs (2026-11-12)
 
 The Jacobi four-point identities reuse the project's proved addition formulas and

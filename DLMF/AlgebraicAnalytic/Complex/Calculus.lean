@@ -7,6 +7,8 @@ module -- shake: keep-all
 
 public import DLMF.AlgebraicAnalytic.Complex.Basic
 public import DLMFMathlib.Analysis.Complex.PowerSeriesOperations
+import DLMFMathlib.Analysis.Calculus.Deriv.Polar
+import Mathlib.Analysis.Calculus.ContDiff.FTaylorSeries
 public import Mathlib.Analysis.Calculus.Deriv.Comp
 public import Mathlib.Analysis.Calculus.Deriv.Inv
 public import Mathlib.Analysis.Calculus.Deriv.Mul
@@ -330,7 +332,22 @@ theorem harmonic_polar {u : ℂ → ℝ} {r θ : ℝ} (hr : 0 < r)
     deriv (deriv fun ρ : ℝ => u (ρ * exp (θ * I))) r +
         r⁻¹ * deriv (fun ρ : ℝ => u (ρ * exp (θ * I))) r +
         (r ^ 2)⁻¹ * deriv (deriv fun φ : ℝ => u (r * exp (φ * I))) θ = 0 := by
-  sorry
+  have he (t : ℝ) : ((Real.cos t : ℂ) * 1 + (Real.sin t : ℂ) * I) = exp (t * I) := by
+    simp [Complex.exp_mul_I, Complex.ofReal_cos, Complex.ofReal_sin,
+      mul_one]
+  have hf : ContDiffAt ℝ 2 u (r • (Real.cos θ • (1 : ℂ) + Real.sin θ • I)) := by
+    simpa only [Complex.real_smul, he] using hu.1
+  have hp := hf.secondFDeriv_polar hr.ne'
+  have hz := hu.2.self_of_nhds
+  rw [InnerProductSpace.laplacian_eq_iteratedFDeriv_complexPlane] at hz
+  simp only [iteratedFDeriv_two_apply, Matrix.cons_val_zero, Matrix.cons_val_one] at hz
+  have hp' : fderiv ℝ (fderiv ℝ u) (r * exp (θ * I)) 1 1 +
+        fderiv ℝ (fderiv ℝ u) (r * exp (θ * I)) I I =
+      deriv (deriv fun ρ : ℝ => u (ρ * exp (θ * I))) r +
+        deriv (fun ρ : ℝ => u (ρ * exp (θ * I))) r / r +
+        deriv (deriv fun φ : ℝ => u (r * exp (φ * I))) θ / r ^ 2 := by
+    simpa only [Complex.real_smul, he] using hp
+  simpa only [div_eq_mul_inv, mul_comm, Pi.zero_apply] using hp'.symm.trans hz
 
 /-! ## §1.9(iii) Integration -/
 

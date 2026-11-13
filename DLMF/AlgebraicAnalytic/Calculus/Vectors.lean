@@ -8,12 +8,19 @@ module
 public import DLMF.AlgebraicAnalytic.Calculus.SeveralVariables
 public import Mathlib.Geometry.Euclidean.Angle.Unoriented.Basic
 public import Mathlib.MeasureTheory.Measure.Hausdorff
+public import Mathlib.Geometry.Euclidean.Volume.Measure
+import Mathlib.Analysis.InnerProductSpace.NormDet
+import Mathlib.MeasureTheory.Measure.Haar.InnerProductSpace
+import TauCeti.Geometry.Euclidean.Volume.Measure
 public import Mathlib.Analysis.Normed.Lp.MeasurableSpace
 
 /-!
 # Vectors and vector-valued functions (DLMF §1.6(i)–(iii))
 
 Dot and cross products, the Levi-Civita symbol and the identities of vector calculus in `ℝ³`.
+
+Parallelogram area uses Mathlib's Gram determinant and TauCeti's linear-image formula
+for Euclidean Hausdorff measure.
 
 ## Main results
 
@@ -134,15 +141,63 @@ theorem volume_parallelepiped_eq_abs_triple_product (a b c : Fin 3 → ℝ) :
     triple_product_eq_det]
   rfl
 
-/-- DLMF §1.6(i): the area (two-dimensional Hausdorff measure in `EuclideanSpace ℝ (Fin 3)`)
-of the parallelogram with sides `a` and `b` is `‖a × b‖`. -/
+/-- DLMF §1.6(i): the Euclidean area (normalized two-dimensional Hausdorff measure)
+of the parallelogram with sides `a` and `b` is `‖a × b‖`, including dependent sides. -/
 @[dlmf 1.6.i]
 theorem hausdorffMeasure_parallelogram (a b : Fin 3 → ℝ) :
-    Measure.hausdorffMeasure 2
+    Measure.euclideanHausdorffMeasure 2
         ((fun st : ℝ × ℝ => (WithLp.toLp 2 (st.1 • a + st.2 • b) : EuclideanSpace ℝ (Fin 3))) ''
           (Icc 0 1 ×ˢ Icc 0 1)) =
       ENNReal.ofReal (vecNorm (a ⨯₃ b)) := by
-  sorry
+  let v : Fin 2 → EuclideanSpace ℝ (Fin 3) := ![WithLp.toLp 2 a, WithLp.toLp 2 b]
+  let f : EuclideanSpace ℝ (Fin 2) →ₗ[ℝ] EuclideanSpace ℝ (Fin 3) :=
+    (EuclideanSpace.basisFun (Fin 2) ℝ).toBasis.constr ℝ v
+  have hfb (i : Fin 2) : f (EuclideanSpace.basisFun (Fin 2) ℝ i) = v i := by
+    simp [f]
+  have hset :
+      ((fun st : ℝ × ℝ => (WithLp.toLp 2 (st.1 • a + st.2 • b) :
+        EuclideanSpace ℝ (Fin 3))) '' (Icc 0 1 ×ˢ Icc 0 1)) =
+      parallelepiped v := by
+    ext x
+    rw [mem_parallelepiped_iff]
+    constructor
+    · rintro ⟨⟨s, t⟩, ⟨hs, ht⟩, rfl⟩
+      refine ⟨![s, t], ⟨?_, ?_⟩, ?_⟩
+      · intro i
+        fin_cases i
+        · exact hs.1
+        · exact ht.1
+      · intro i
+        fin_cases i
+        · exact hs.2
+        · exact ht.2
+      · simp [Fin.sum_univ_two, v]
+    · rintro ⟨t, ht, rfl⟩
+      refine ⟨(t 0, t 1), ⟨⟨ht.1 0, ht.2 0⟩, ⟨ht.1 1, ht.2 1⟩⟩, ?_⟩
+      simp [Fin.sum_univ_two, v]
+  have hnorm : f.normDet = vecNorm (a ⨯₃ b) := by
+    have h := f.normDet_sq_eq_det_gram (EuclideanSpace.basisFun (Fin 2) ℝ)
+    simp only [hfb] at h
+    have hreal : f.normDet ^ 2 = (Matrix.gram ℝ v).det := by simpa using h
+    have hi (u w : Fin 3 → ℝ) :
+        inner ℝ (WithLp.toLp 2 u : EuclideanSpace ℝ (Fin 3)) (WithLp.toLp 2 w) =
+          u ⬝ᵥ w := by
+      rw [EuclideanSpace.inner_eq_star_dotProduct]
+      simp [dotProduct_comm]
+    have hpos : 0 ≤ (a ⨯₃ b) ⬝ᵥ (a ⨯₃ b) := by
+      exact Finset.sum_nonneg fun i _ => mul_self_nonneg _
+    have hsq : f.normDet ^ 2 = vecNorm (a ⨯₃ b) ^ 2 := by
+      rw [hreal]
+      simp only [Matrix.det_fin_two, Matrix.gram_apply, v, Matrix.cons_val_zero,
+        Matrix.cons_val_one, Matrix.cons_val_fin_one, hi,
+        vecNorm, Real.sq_sqrt hpos]
+      rw [cross_dot_cross, dotProduct_comm b a]
+    exact (sq_eq_sq₀ f.normDet_nonneg (Real.sqrt_nonneg _)).mp hsq
+  rw [hset, ← show f ∘ EuclideanSpace.basisFun (Fin 2) ℝ = v from funext hfb,
+    ← image_parallelepiped]
+  have harea := f.euclideanHausdorffMeasure_image_eq_normDet_mul_volume
+    (parallelepiped (EuclideanSpace.basisFun (Fin 2) ℝ))
+  simpa [OrthonormalBasis.volume_parallelepiped, hnorm] using harea
 
 /-! ### §1.6(ii) Levi-Civita symbol -/
 

@@ -1,5 +1,144 @@
 # Mathematical review of the lean-DLMF project (formerly lean-AAR)
 
+## Approved parallelogram-area and quartic-transform repairs, 2026-11-13
+
+The user approved both prepared statement corrections. Both tagged theorems now have
+complete proofs, removing two further admissions and reducing the project total from
+886 to 884 (57 original admissions removed since the updated-dependency baseline).
+
+- `DLMF.AlgebraicAnalytic.hausdorffMeasure_parallelogram` uses
+  `Measure.euclideanHausdorffMeasure 2`, so the normalization agrees with ordinary area.
+  The Gram determinant and the linear-image formula prove it for arbitrary sides,
+  including zero and dependent sides.
+- `DLMF.AlgebraicAnalytic.fourierCosTransform_quartic` requires `|a.im| < a.re`.
+  Partial fractions use the positive-real-part parameters `a(1 + I)` and `a(1 - I)`.
+  The DLMF tag explicitly records the restriction relative to the printed wider domain.
+
+These are the only two changed DLMF statements. Existing definition bodies are unchanged.
+The correction patch is retained as an applied record in
+`reports/DLMFStatementCorrections20261112.patch`. The two certificate scripts now check
+these production theorems and retain the counterexamples to the original statements.
+The main inventory, manifest, preservation report and Chapter 1 ledger reflect the repairs.
+No further statement approval is pending. Changes are saved without a commit.
+
+Validation: both affected modules pass targeted builds and direct source checks; the full
+build passes 17,062 jobs. The combined audit checks 368 declarations with standard axioms
+only, and both counterexample scripts pass strict module-mode checks. The import survey,
+file/line limits and whitespace check pass.
+
+## Proofs with the updated dependencies, 2026-11-12
+
+This round starts from clean commit `095580c3193c4f3639ac6e1683a24333b54579dc`, with
+Mathlib `1b1ccf4b088b32fa3f23f2de1127433254a81e1e`, TauCeti
+`396c3bd971e9722aa8656231760e710fe641d8cf` and Lean `v4.36.0-rc2`. The starting full
+build passes all 16,794 jobs. A comment-stripped source inventory finds 941 direct
+admissions. The user authorizes up to eight hours of work throughout DLMF with four
+concurrent agents, including the integrating agent. Priority remains on DLMF results.
+
+Initial proof targets are corrected Jacobi determinant identities, Motzkin lattice-path
+enumeration, the Airy Bi principal-value formula and the negative-axis Pearcey asymptotic.
+Checked proofs are installed progressively in the library. Unfinished experiments remain
+outside the source tree. The two checked tagged-statement repairs were subsequently approved
+and proved in the follow-up recorded above.
+
+The combined audit imports exposed an upstream overlap not detected by the ordinary
+build: TauCeti now provides `MeasureTheory.IntegrableOn.hasDerivAt_integral_Ioi`.
+The redundant local proof is removed in favor of that stronger result, and the sole
+caller in `EllipticIntegrals/SymmetricPrincipalValue.lean` is adapted to its argument order.
+The endpoint continuity extension remains local. The Bessel asymptotic API now also
+includes its normalized leading-error limit for use in the Pearcey proof.
+
+Before the approved follow-up, the completed round contains 55 proofs of original admissions,
+with all 941 starting admitted statements preserved. The completed work includes:
+
+- Motzkin and Narayana lattice-path enumeration, both multiset permutation statistics,
+  and the two variable-index near-diagonal Stirling asymptotics (Chapter 26).
+- Both four-point Jacobi determinant identities, the epsilon/theta identity, and the
+  Fourier and hyperbolic series of squared sn (Chapter 22), plus theta Gauss reciprocity
+  and all four theta logarithmic lattice power series (Chapter 20).
+- The Airy Bi principal value and the full complex-sector Scorer Hi and positive-axis
+  Scorer Gi Stieltjes formulas (Chapter 9).
+- Multivariable Taylor's theorem, both Hessian tests, the polar, cylindrical and spherical
+  Laplacians, harmonicity in polar coordinates, Descartes parity, both surface
+  reparametrizations, Stokes, self-adjoint spectra, all three trigonometric Hilbert bases,
+  Hill determinant convergence, Van Vleck sector bounds, eleven Fourier transform entries,
+  the two remaining Mellin-table formulas, the Hilbert symmetric-cutoff identity,
+  distributional sequence convergence and both Stieltjes-distribution derivative identities
+  (Chapter 1).
+- The Euler-number hyperbolic series (Chapter 24) and negative-axis Pearcey asymptotic
+  (Chapter 36).
+
+`reports/Admissions20261112.tsv` records each starting declaration and its current source
+location and status. `ProofRound20261112UpdatedPins.json` records the dependency pins,
+completed declarations and statement comparison. The retained standard-axiom audit is
+`scripts/CheckDLMFProofs20261112.lean`. The independent preservation comparison is retained in
+`reports/ProofRound20261112Preservation.json`. These records include the final compiled proof status and source locations.
+
+The upgraded combined imports also expose a duplicate squared-L²-norm theorem; the local
+module now imports the TauCeti result and retains its existing `MemLp` orientation adapter.
+A complex nonvanishing helper had the same name as a different TauCeti result, so its name
+now explicitly indicates the nonzero imaginary part. Its type and proof are preserved,
+and the rename is recorded in `reports/RenameMap20261101.tsv`. The generic along-curve
+second derivative theorem is generalized from complex scalars and target to arbitrary
+nontrivially normed scalar fields and normed targets, preserving its name and all callers.
+That proof round changes no tagged statement or existing definition body; the two approved
+follow-up statement corrections are recorded above.
+
+The raw Hausdorff measure in `hausdorffMeasure_parallelogram` has a normalization defect.
+`scripts/CheckDLMFHausdorffNormalization.lean` proves the negation of its exact universally
+quantified original statement, using the coordinate unit square, and checks the corrected formula
+with `Measure.euclideanHausdorffMeasure 2` for every pair of sides, including dependent
+and zero sides. Both proofs use standard axioms only. The normalized production statement
+is now proved following the user's approval.
+
+The quartic cosine-transform formula also fails under its stated condition `0 < Re a`.
+At `a = 1 + I` and `x = π/2`, the transform has `Re + Im = 0`, whereas the proposed
+right side has `Re + Im < 0`. This argument respects Lean's totalized integral and does
+not assume integrability at the real-axis pole. The retained
+`scripts/CheckDLMFQuarticTransform.lean` proves this counterexample, the negation of the
+original universal statement, and the same transform formula under `|Im a| < Re a`.
+Its proof decomposes the kernel into quadratic denominators with positive-real-part
+parameters `a(1 + I)` and `a(1 - I)`. The wider domain is also printed in
+[DLMF Table 1.14.2](https://dlmf.nist.gov/1.14#T2). The production theorem now requires the
+corrected sector, and its tag records the restriction. Both corrections in
+`reports/DLMFStatementCorrections20261112.patch` are applied with the user's approval.
+
+The final full build passes all 17,060 jobs. The retained combined audit checks
+366 declarations with standard axioms only. The import survey finds no foundational
+violations, missing project imports or file cycles. It reports one new two-way area pair,
+Theta and Weierstrass: theta logarithmic coefficients use the foundational Weierstrass
+lattice definitions, while the existing Weierstrass modular foundation uses theta
+functions. The file graph remains acyclic. This reviewed pair is recorded in the
+import baseline, which now has 24 pairs. Earlier Chapters 6–8/12, 13–15 and 20–36 axiom
+checks also pass with the upgraded dependencies.
+
+The completed source proofs reduce the direct-admission inventory from 941 to 886.
+By chapter, the closures are 34 in Chapter 1, three in Chapter 9, five each in Chapters 20
+and 22, one in Chapter 24, six in Chapter 26 and one in Chapter 36. In addition, the
+existing `vanVleck_arg_limit` corollary no longer depends on an admitted sector bound.
+The Chapters 20–36 inventory now has 467 direct admissions, down from 485 at this round's
+start. Its 2,915 tagged local theorems comprise 2,439 standard-axiom proofs, 467 direct
+admissions and nine results depending on admissions; the additional theorem is the stronger
+Gauss reciprocity form. Definitions, theorem declarations and DLMF tag occurrences have
+different totals, so these compiled counts are not interchangeable with the source inventory.
+
+The initial source comparison checks 24,408 starting public declarations. Before the approved
+follow-up, it finds no changed mathematical definition bodies, private definition bodies or
+existing DLMF statements/tags; all 45 moved public declarations preserve their signatures.
+Its only changed theorem header is the documented untagged along-curve generalization.
+The refreshed preservation report additionally records the two approved DLMF statement changes. The three removed local declarations
+are the two adopted TauCeti results and the renamed imaginary-part helper. No new admission
+or axiom is added. All 1,699 Lean source files meet the 1,500-line limit; new source lines
+meet the 100-column limit, and `git diff --check` passes.
+
+The Wilson integral (5.13.5) was also inspected, but no safe short reuse route was found:
+upstream and the local proved Barnes API provide the first Barnes lemma, while the needed
+second-lemma/Wilson evaluation and local Wilson orthogonality remain unproved. Further
+unfinished experiments are kept outside the production tree. The final Stieltjes proofs use the finite restricted measure
+and its signed cumulative function, preserving jump atoms without clamping or a global
+variation bound. All proof workers have finished.
+Toolchain and dependency pins are unchanged, and the saved work is not committed.
+
 ## Chapters 20–36 status review and proof priorities, 2026-11-12
 
 The review starts from the verified, uncommitted Chapters 13–15 proof state. The user

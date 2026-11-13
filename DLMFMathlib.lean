@@ -5,6 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
+public import DLMFMathlib.Algebra.Polynomial.DescartesParity
+public import DLMFMathlib.Analysis.InnerProductSpace.LinearPMap.Spectrum
+
 public import DLMFMathlib.Analysis.SpecialFunctions.Log.Ray
 public import DLMFMathlib.Analysis.SpecialFunctions.Trigonometric.LinearBounds
 public import DLMFMathlib.Analysis.SpecialFunctions.Trigonometric.BoseEinsteinWeighted
@@ -43,6 +46,8 @@ public import DLMFMathlib.Analysis.Calculus.DifferentialOperators
 public import DLMFMathlib.Analysis.Calculus.DoubleZeroSqrt
 public import DLMFMathlib.Analysis.Calculus.InverseSeries
 public import DLMFMathlib.Analysis.Calculus.LHopitalInfinity
+public import DLMFMathlib.Analysis.Calculus.TaylorRemainder
+public import DLMFMathlib.Analysis.Calculus.SecondDerivativeTest
 public import DLMFMathlib.Analysis.Calculus.Deriv.MulComp
 public import DLMFMathlib.Analysis.Calculus.Deriv.Appell
 public import DLMFMathlib.Analysis.Complex.BarnesResidue
@@ -85,9 +90,15 @@ public import DLMFMathlib.Analysis.Complex.ZeroLocalization
 public import DLMFMathlib.Analysis.ContinuedFraction.PositiveConvergence
 public import DLMFMathlib.Analysis.ContinuedFraction.Convergence
 public import DLMFMathlib.Analysis.Distribution.IteratedLineDeriv
+public import DLMFMathlib.Analysis.Distribution.Stieltjes
+public import DLMFMathlib.Analysis.Distribution.Barrelled
+public import DLMFMathlib.Analysis.LocallyConvex.CompactConvergence
 public import DLMFMathlib.Analysis.EulerMaclaurin
 public import DLMFMathlib.Analysis.Fourier.HorizontalStrip
+public import DLMFMathlib.Analysis.Fourier.Even
+public import DLMFMathlib.Analysis.Fourier.AbelAntiderivative
 public import DLMFMathlib.Analysis.Fourier.HyperbolicSecant
+public import DLMFMathlib.Analysis.Fourier.HyperbolicSecantPoisson
 public import DLMFMathlib.Analysis.Fourier.RadianInversion
 public import DLMFMathlib.LinearAlgebra.Matrix.Complexification
 public import DLMFMathlib.Analysis.Fourier.HyperbolicSecantLog
@@ -110,6 +121,8 @@ public import DLMFMathlib.Analysis.Integral.ImproperFourier
 public import DLMFMathlib.Analysis.Integral.LaplaceRay
 public import DLMFMathlib.Analysis.Integral.PrincipalValue
 public import DLMFMathlib.Analysis.Integral.CauchyBoundary
+public import DLMFMathlib.Analysis.Integral.HilbertKernel
+public import DLMFMathlib.Analysis.Integral.QuadraticKernel
 public import DLMFMathlib.Analysis.Integral.PrincipalValueLogarithm
 public import DLMFMathlib.Analysis.Integral.PrincipalValueExcision
 public import DLMFMathlib.Analysis.Integral.PrincipalValueLevelSets
@@ -122,6 +135,8 @@ public import DLMFMathlib.Analysis.MellinConvolution
 public import DLMFMathlib.Analysis.MellinOscillation
 public import DLMFMathlib.Analysis.MellinBounds
 public import DLMFMathlib.Analysis.MellinParseval
+public import DLMFMathlib.Analysis.MellinQuadraticKernel
+public import DLMFMathlib.Analysis.MellinLogarithmicKernel
 public import DLMFMathlib.Analysis.MellinCubicLaplace
 public import DLMFMathlib.Analysis.ODE.LiouvilleGreen
 public import DLMFMathlib.Analysis.ODE.LiouvilleGreenComparison
@@ -176,7 +191,11 @@ public import DLMFMathlib.Algebra.BigOperators
 public import DLMFMathlib.Algebra.Polynomial.OfReal
 public import DLMFMathlib.Analysis.Analytic.OfScalarsDeriv
 public import DLMFMathlib.Analysis.Analytic.OfScalarsUnique
+public import DLMFMathlib.Analysis.Analytic.HyperbolicSeries
+public import DLMFMathlib.Analysis.Matrix.InfiniteDeterminant
 public import DLMFMathlib.Analysis.Calculus.Deriv.CompCurve
+public import DLMFMathlib.Analysis.Calculus.Deriv.Prod
+public import DLMFMathlib.Analysis.Calculus.Deriv.Polar
 public import DLMFMathlib.Analysis.Calculus.Deriv.InjOn
 public import DLMFMathlib.Analysis.Calculus.Deriv.Sign
 public import DLMFMathlib.Analysis.Calculus.Deriv.SignPropagation
@@ -248,6 +267,15 @@ public import DLMFMathlib.Analysis.Asymptotics.RamifiedDensityWeights
 General results used by the special-function library but not specific to it, written in
 the namespaces of the Mathlib APIs they extend. These modules do not import `DLMF`.
 
+* `DLMFMathlib.Analysis.Fourier.AbelAntiderivative`: Abel limits for bounded primitives.
+* `DLMFMathlib.Analysis.MellinLogarithmicKernel`: Mellin transform of a logarithmic ratio.
+* `DLMFMathlib.Analysis.Matrix.InfiniteDeterminant`: absolute principal-minor convergence.
+* `DLMFMathlib.Analysis.Analytic.HyperbolicSeries`: weighted cosine and hyperbolic cosine
+  moment series.
+* `DLMFMathlib.Analysis.Fourier.Even`: symmetric-interval Fourier and cosine integrals.
+* `DLMFMathlib.Analysis.Fourier.HyperbolicSecantPoisson`: secant Fourier series and decay.
+* `DLMFMathlib.Analysis.InnerProductSpace.LinearPMap.Spectrum`: openness and density of shifts.
+* `DLMFMathlib.Algebra.Polynomial.DescartesParity`: parity in Descartes' rule of signs.
 * `DLMFMathlib.Analysis.MellinBounds`: uniform bounds for high-tail Mellin transforms.
 * `DLMFMathlib.Analysis.MellinOscillation`: entire continuation of oscillatory Mellin tails.
 * `DLMFMathlib.Analysis.Fourier.TrigonometricTails`: trigonometric conditional convergence.
@@ -267,8 +295,14 @@ the namespaces of the Mathlib APIs they extend. These modules do not import `DLM
 * `DLMFMathlib.Analysis.Asymptotics.WatsonComplexLog`: logarithmic Gamma moments for complex
   exponents in Watson's lemma.
 * `DLMFMathlib.Analysis.Asymptotics.WatsonComplexKernel`: general-kernel Watson expansions with
-* `DLMFMathlib.Analysis.Asymptotics.WatsonGaussian`: complex-power Gaussian Watson expansions.
   complex exponent sequences and Mellin-moment coefficients.
+* `DLMFMathlib.Analysis.Asymptotics.WatsonGaussian`: complex-power Gaussian Watson expansions.
+* `DLMFMathlib.Analysis.Calculus.TaylorRemainder`: norm bounds for multivariable Taylor remainders.
+* `DLMFMathlib.Analysis.Calculus.Deriv.Polar`: second derivatives in polar coordinates.
+* `DLMFMathlib.Analysis.Calculus.Deriv.Prod`: coordinate derivatives on a product.
+* `DLMFMathlib.Analysis.MellinQuadraticKernel`: Mellin transforms of quadratic Cauchy kernels.
+* `DLMFMathlib.Analysis.Calculus.SecondDerivativeTest`: quadratic Peano remainders and
+  minimum tests.
 * `DLMFMathlib.Analysis.Asymptotics.IntegralPowerSeries`: termwise tail integration of
   asymptotic inverse power series.
 
@@ -293,6 +327,10 @@ the namespaces of the Mathlib APIs they extend. These modules do not import `DLM
   weighted Bose–Einstein integrability.
 * `DLMFMathlib.Analysis.SpecialFunctions.Trigonometric.LinearBounds`: linear sine bounds.
 * `DLMFMathlib.Topology.Algebra.InfiniteSum.Int`: splitting bilateral series into natural halves.
+* `DLMFMathlib.Analysis.Distribution.Stieltjes`: Lebesgue–Stieltjes integration by parts.
+* `DLMFMathlib.Analysis.Distribution.Barrelled`: barrelledness of native test-function spaces.
+* `DLMFMathlib.Analysis.LocallyConvex.CompactConvergence`: sequential pointwise and compact
+  convergence agree on barrelled domains.
 * `DLMFMathlib.Analysis.Fourier.HorizontalStrip`: holomorphic Fourier–Laplace integrals.
 * `DLMFMathlib.Analysis.Integral.SquareRootKernel`: square-root shift integrals and bounds.
 * `DLMFMathlib.Analysis.Integral.LogarithmicSquareRootKernel`: logarithmic kernel cancellations.
@@ -438,6 +476,8 @@ the namespaces of the Mathlib APIs they extend. These modules do not import `DLM
 * `DLMFMathlib.Analysis.SpecialFunctions.ExponentialSeries`: weighted exponential-series tails.
 * `DLMFMathlib.MeasureTheory.Integral.FractionalSubstitution`: the substitution `u/(1+u)`.
 * `DLMFMathlib.Analysis.Integral.CauchyBoundary`: boundary limits of Cauchy integrals.
+* `DLMFMathlib.Analysis.Integral.HilbertKernel`: weighted `Lᵖ` tails and symmetric cutoffs.
+* `DLMFMathlib.Analysis.Integral.QuadraticKernel`: quadratic resolvents and logarithmic kernels.
 * `DLMFMathlib.Analysis.Integral.PrincipalValueLogarithm`: regularized logarithmic kernels.
 * `DLMFMathlib.Analysis.Integral.PrincipalValueExcision`: principal values under asymmetric
   excision; the change of variables `t ↦ K/t`.

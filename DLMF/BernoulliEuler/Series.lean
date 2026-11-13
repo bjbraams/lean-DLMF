@@ -9,6 +9,10 @@ public import DLMF.BernoulliEuler.Properties
 public import Mathlib.Analysis.Complex.AbelLimit
 public import Mathlib.NumberTheory.ModularForms.EisensteinSeries.QExpansion
 public import Mathlib.NumberTheory.ModularForms.Identities
+import DLMFMathlib.Analysis.Fourier.HyperbolicSecantPoisson
+import DLMFMathlib.Analysis.Analytic.HyperbolicSeries
+import DLMFMathlib.Analysis.Analytic.OfScalarsUnique
+import DLMFMathlib.NumberTheory.EulerNumbers
 
 /-!
 # Bernoulli and Euler polynomials: series expansions
@@ -624,6 +628,160 @@ theorem hasSum_bernoulli_two_mul_alt {n : ℕ} (hn : 2 ≤ n) :
     field_simp at e1 e2
     linear_combination e1 - 2 * e2
 
+namespace EulerNumberSeries
+
+open Polynomial
+
+set_option maxHeartbeats 800000 in
+/-- Comparison of the even Taylor coefficients in the Poisson–Lambert secant identity. -/
+private lemma moments_identity (n : ℕ) (hn : n ≠ 0) :
+    (eulerNumber (2 * n) : ℝ) + 4 * (∑' j : ℕ, (-1) ^ j *
+      (2 * (j : ℝ) + 1) ^ (2 * n) / (exp (2 * π * (2 * j + 1)) - 1)) =
+      (-1) ^ n * ∑' k : ℕ, ((k : ℝ) + 1) ^ (2 * n) / cosh (π * (k + 1) / 2) := by
+  have hasSum_eulerNumber_even {z : ℝ} (hz : |z| < 1 / 2) :
+      HasSum (fun n : ℕ => (eulerNumber (2 * n) : ℝ) * z ^ (2 * n) / (2 * n).factorial)
+        (cosh z)⁻¹ := by
+    have h := Polynomial.hasSum_eulerNumber_mul_pow_div (z := (z : ℂ)) (by simpa using hz)
+    have hodd : ∀ m ∉ Set.range (fun k : ℕ => 2 * k),
+        (eulerNumber m : ℂ) * (z : ℂ) ^ m / m.factorial = 0 := by
+      intro m hm
+      have ho : Odd m := by
+        rcases Nat.even_or_odd m with ⟨k, hk⟩ | ho
+        · exact absurd ⟨k, by dsimp only; omega⟩ hm
+        · exact ho
+      simp [eulerNumber_eq_zero_of_odd ho]
+    have h2 := ((mul_right_injective₀ (two_ne_zero : (2 : ℕ) ≠ 0)).hasSum_iff hodd).mpr h
+    have hr := Complex.hasSum_re h2
+    rw [← Complex.ofReal_cosh, ← Complex.ofReal_inv, Complex.ofReal_re] at hr
+    refine hr.congr_fun fun n => ?_
+    simp only [Function.comp_def]
+    have he : ((eulerNumber (2 * n) : ℂ) * (z : ℂ) ^ (2 * n) / (2 * n).factorial) =
+        (((eulerNumber (2 * n) : ℝ) * z ^ (2 * n) / (2 * n).factorial : ℝ) : ℂ) := by
+      push_cast
+      rfl
+    rw [he, Complex.ofReal_re]
+
+  have summable_sech_exponential : Summable (fun k : ℕ =>
+      |1 / cosh (π * (k + 1) / 2)| * exp ((1 / 4) * |(k : ℝ) + 1|)) := by
+    have hr : 0 < π / 2 - (1 / 4 : ℝ) := by linarith [pi_gt_three]
+    have hs := (Real.summable_exp_nat_mul_iff.mpr (show -(π / 2 - (1 / 4 : ℝ)) < 0 by linarith))
+    have hs' := ((summable_nat_add_iff 1).mpr hs).mul_left 2
+    refine hs'.of_nonneg_of_le (fun k => by positivity) fun k => ?_
+    rw [abs_of_pos (by positivity), abs_of_pos (by positivity)]
+    have hc : 1 / cosh (π * ((k : ℝ) + 1) / 2) ≤
+        2 * exp (-(π * (k + 1) / 2)) := by
+      rw [exp_neg, ← div_eq_mul_inv]
+      apply (div_le_div_iff₀ (cosh_pos _) (exp_pos _)).mpr
+      rw [cosh_eq]
+      nlinarith [exp_pos (-(π * ((k : ℝ) + 1) / 2))]
+    calc
+      _ ≤ (2 * exp (-(π * (k + 1) / 2))) * exp ((1 / 4) * (k + 1)) :=
+        mul_le_mul_of_nonneg_right hc (by positivity)
+      _ = _ := by rw [mul_assoc, ← exp_add]; push_cast; congr 2; ring
+
+  have summable_lambert_exponential : Summable (fun j : ℕ =>
+      |(-1) ^ j / (exp (2 * π * (2 * j + 1)) - 1)| *
+        exp ((1 / 4) * |2 * (j : ℝ) + 1|)) := by
+    have ha : 0 < (2 * π - (1 / 4 : ℝ)) / 2 := by linarith [pi_gt_three]
+    have hinj : Function.Injective (fun j : ℕ => 2 * j) := by
+      intro i j he
+      dsimp only at he
+      omega
+    have hs := (summable_lambert ha 0).comp_injective hinj
+    refine hs.of_nonneg_of_le (fun j => by positivity) fun j => ?_
+    dsimp only [Function.comp_def]
+    rw [pow_zero, one_div]
+    have hb : 0 < 2 * (j : ℝ) + 1 := by positivity
+    have hu : 1 ≤ exp ((1 / 4) * (2 * (j : ℝ) + 1)) := one_le_exp (by positivity)
+    have hv : 1 < exp ((2 * π - (1 / 4 : ℝ)) * (2 * (j : ℝ) + 1)) :=
+      one_lt_exp_iff.mpr (mul_pos (by linarith [pi_gt_three]) hb)
+    have he : exp (2 * π * (2 * (j : ℝ) + 1)) =
+        exp ((1 / 4) * (2 * (j : ℝ) + 1)) *
+          exp ((2 * π - (1 / 4 : ℝ)) * (2 * (j : ℝ) + 1)) := by
+      rw [← exp_add]
+      congr 1
+      ring
+    have hd : 0 < exp (2 * π * (2 * (j : ℝ) + 1)) - 1 := by
+      rw [sub_pos, one_lt_exp_iff]
+      positivity
+    rw [abs_div, abs_pow, abs_neg, abs_one, one_pow, abs_of_pos hd,
+      abs_of_pos hb, one_div, he]
+    have hexp : 2 * ((2 * π - (1 / 4 : ℝ)) / 2) * ((2 * j : ℕ) + 1 : ℝ) =
+        (2 * π - (1 / 4 : ℝ)) * (2 * (j : ℝ) + 1) := by push_cast; ring
+    simp only [one_div] at hexp
+    rw [hexp]
+    rw [← div_eq_inv_mul]
+    norm_num only at hu hv he hd ⊢
+    apply (div_le_div_iff₀ (by rw [← he]; exact hd) (by linarith :
+      0 < exp ((2 * π - (1 / 4 : ℝ)) * (2 * (j : ℝ) + 1)) - 1)).mpr
+    nlinarith
+
+  let S : ℕ → ℝ := fun m => ∑' k : ℕ,
+    ((k : ℝ) + 1) ^ (2 * m) / cosh (π * (k + 1) / 2)
+  let T : ℕ → ℝ := fun m => ∑' j : ℕ, (-1) ^ j *
+    (2 * (j : ℝ) + 1) ^ (2 * m) / (exp (2 * π * (2 * j + 1)) - 1)
+  let c : ℕ → ℝ := fun m => ((eulerNumber (2 * m) : ℝ) + 4 * T m) / (2 * m).factorial
+  let d : ℕ → ℝ := fun m => (-1) ^ m * S m / (2 * m).factorial +
+    if m = 0 then 1 / 2 else 0
+  let g : ℝ → ℝ := fun z => 1 / 2 +
+    ∑' k : ℕ, (1 / cosh (π * (k + 1) / 2)) * cos (((k : ℝ) + 1) * z)
+  have hc (z : ℝ) (hz : ‖z‖ < 1 / 4) :
+      HasSum (fun m => c m * z ^ (2 * m)) (g z) := by
+    have hz' : |z| < 1 / 4 := by simpa only [Real.norm_eq_abs] using hz
+    have he := hasSum_eulerNumber_even (show |z| < 1 / 2 by linarith)
+    have ht := Real.hasSum_tsum_mul_cosh summable_lambert_exponential hz'.le
+    have htn : (fun m : ℕ => (∑' j : ℕ,
+        ((-1) ^ j / (exp (2 * π * (2 * j + 1)) - 1)) *
+          (2 * (j : ℝ) + 1) ^ (2 * m)) * z ^ (2 * m) / (2 * m).factorial) =
+        fun m => T m * z ^ (2 * m) / (2 * m).factorial := by
+      funext m
+      dsimp only [T]
+      congr 2
+      apply tsum_congr
+      intro j
+      ring
+    rw [htn] at ht
+    have h := he.add (ht.mul_left 4)
+    rw [Real.inv_cosh_add_lambert_eq_cos_sum hz'] at h
+    refine h.congr_fun fun m => ?_
+    dsimp only [c]
+    ring
+  have hd (z : ℝ) (hz : ‖z‖ < 1 / 4) :
+      HasSum (fun m => d m * z ^ (2 * m)) (g z) := by
+    have hz' : |z| < 1 / 4 := by simpa only [Real.norm_eq_abs] using hz
+    have hs := Real.hasSum_tsum_mul_cos summable_sech_exponential hz'.le
+    have hsn : (fun m : ℕ => (-1) ^ m * (∑' k : ℕ,
+        (1 / cosh (π * (k + 1) / 2)) * ((k : ℝ) + 1) ^ (2 * m)) *
+          z ^ (2 * m) / (2 * m).factorial) =
+        fun m => (-1) ^ m * S m * z ^ (2 * m) / (2 * m).factorial := by
+      funext m
+      dsimp only [S]
+      congr 3
+      apply tsum_congr
+      intro k
+      ring
+    rw [hsn] at hs
+    have hconst : HasSum (fun m : ℕ => (if m = 0 then (1 / 2 : ℝ) else 0) *
+        z ^ (2 * m)) (1 / 2) := by
+      convert (hasSum_ite_eq 0 (1 / 2 : ℝ)) using 1
+      funext m
+      by_cases hm : m = 0 <;> simp [hm]
+    have h := hconst.add hs
+    refine h.congr_fun fun m => ?_
+    dsimp only [d]
+    ring
+  have he := RCLike.eq_of_hasSum_mul_pow_mul_ball (by norm_num : (0 : ℝ) < 1 / 4)
+    (by norm_num : 0 < (2 : ℕ)) hc hd
+  have hen := congrFun he n
+  dsimp only [c, d] at hen
+  simp only [hn, ↓reduceIte, add_zero] at hen
+  have hfac : ((2 * n).factorial : ℝ) ≠ 0 := by positivity
+  have h := (div_left_inj' hfac).mp hen
+  exact h
+
+
+end EulerNumberSeries
+
 /-- **DLMF 24.8.9**: `E₂ₙ = (-1)ⁿ ∑_{k≥1} k^{2n}/cosh(πk/2) -
 4 ∑_{k≥0} (-1)ᵏ (2k+1)^{2n}/(e^{2π(2k+1)} - 1)`, `n ≥ 1`. -/
 @[dlmf 24.8.E9]
@@ -635,6 +793,32 @@ theorem eulerNumber_two_mul_eq_series {n : ℕ} (hn : 1 ≤ n) :
         (-1) ^ n * ∑' k : ℕ, ((k : ℝ) + 1) ^ (2 * n) / cosh (π * (k + 1) / 2) -
           4 * ∑' k : ℕ, (-1) ^ k * (2 * (k : ℝ) + 1) ^ (2 * n) /
             (exp (2 * π * (2 * k + 1)) - 1) := by
-  sorry
+
+  have hS : Summable (fun k : ℕ => ((k : ℝ) + 1) ^ (2 * n) /
+      cosh (π * (k + 1) / 2)) := by
+    have h := (summable_nat_add_iff 1).mpr
+      (Real.summable_nat_pow_div_cosh_mul (show 0 < π / 2 by positivity) (2 * n))
+    refine h.congr fun k => ?_
+    push_cast
+    rw [show π / 2 * ((k : ℝ) + 1) = π * (k + 1) / 2 by ring]
+  have hinj : Function.Injective (fun j : ℕ => 2 * j) := by
+    intro i j he
+    dsimp only at he
+    omega
+  have hT : Summable (fun k : ℕ => (-1) ^ k * (2 * (k : ℝ) + 1) ^ (2 * n) /
+      (exp (2 * π * (2 * k + 1)) - 1)) := by
+    have h := (summable_lambert pi_pos (2 * n)).comp_injective hinj
+    refine h.of_norm_bounded fun k => ?_
+    have hd : 0 < exp (2 * π * (2 * (k : ℝ) + 1)) - 1 := by
+      rw [sub_pos, one_lt_exp_iff]
+      positivity
+    rw [Real.norm_eq_abs, abs_div, abs_mul, abs_pow, abs_neg, abs_one, one_pow,
+      one_mul, abs_pow, abs_of_pos (by positivity), abs_of_pos hd]
+    dsimp only [Function.comp_def]
+    push_cast
+    rfl
+  refine ⟨hS, hT, ?_⟩
+  have h := EulerNumberSeries.moments_identity n (by omega)
+  linarith
 
 end DLMF.BernoulliEuler
