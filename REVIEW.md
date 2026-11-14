@@ -1,5 +1,106 @@
 # Mathematical review of the lean-DLMF project (formerly lean-AAR)
 
+## Parallel DLMF proof round, 2026-11-13
+
+This round starts from committed state `164d2dcd409e75be84cbf1fc0c75e286d1926b60`,
+with 884 direct admissions and the existing dependency pins. The baseline full build passes
+17,062 jobs. The requested working interval is 07:52–15:52 UTC, with three parallel proof
+workers and one integrating agent under the available concurrency limit. All agents are
+finished; changes are saved without an agent commit. The proof work and approved follow-up are complete: 64 original admissions are proved,
+leaving 820. Of these, 62 preserve their original statements and two use the approved
+transcription corrections described below.
+
+Completed proofs are saved progressively in `DLMF/` and reusable support in `DLMFMathlib/`:
+
+- Chapter 1: the distribution jump formula (1.16.17–18), both principal-value Fourier
+  transforms (1.16.48–51), Faà di Bruno (1.4.13), Jordan separation and the interior winding
+  sign (1.9(iii)), both argument-principle formulas (1.10.9–10), Poisson summation under
+  the original integrable-second-derivative hypothesis (1.8.14), its bounded-variation
+  cosine form (1.8.15), integration of an L¹ Fourier series including interval endpoints (1.8.12), and the Lebesgue-constant
+  asymptotic (1.8.9).
+- Chapter 4: the arcsine continued fraction on the full principal cut domain (4.25.3).
+  The arcsinh fraction (4.39.2) is also proved after the approved natural-number-division repair.
+- Chapter 16: the general square identity (16.12.3), three Appell identities
+  (16.15.4, 16.16.5_5 and 16.16.7), Watson and Whipple summation (16.4.6–7), the Thomae
+  transformation (16.4.11), and joint analyticity of the unit-argument 3F2 function.
+  The parameter proofs include terminating upper parameters; they add no exclusions.
+- Chapter 17: the bilateral 4ψ4 sum (17.8.6) and its parameter continuation, including
+  the exceptional upper parameters in the cancelled expression, and the even bilateral 2ψ2
+  sum and its continuation (17.8.8). `BilateralSummations.lean` has no remaining admissions.
+- Chapter 19: the symmetric Legendre relation (19.21.1), RC addition with zero arguments
+  (19.26.17), RJ integrals (19.28.7–8), all four elliptic Mellin integrals (19.28.1–4),
+  the RC Legendre representation (19.2.22), descending incomplete F/E Landen formulas
+  (19.8.13), complete E's nome series (19.5.9), RF and RG sphere integrals including
+  allowed zero nodes (19.23.6 and 19.23.6_5), the general spherical Carlson integral
+  (19.23.9) after the approved denominator-parentheses repair, both nome expansions (19.5.5–7),
+  the full complex logarithmic K/E series (19.12.1–2), the logarithmic RG remainder
+  (19.27.6), the complementary-K inequalities (19.9.5), and both third-kind logarithmic
+  asymptotics (19.12.4–5), including the principal-value case.
+  `EllipticIntegrals/Expansions.lean` and `Asymptotics.lean` have no remaining admissions.
+- Chapter 21: uniqueness up to a constant for entire functions with the Riemann-theta
+  quasiperiods (21.3(i)), including the empty coordinate type.
+- Chapter 24: the central-factorial Bernoulli formula (24.6.3), both Hankel determinants
+  (24.14.11–12), both Euler congruences and the Bernoulli, Kummer and Voronoi congruences
+  (24.10.2–4 and 24.10.6–9), together with the Bernoulli–Stirling congruences modulo
+  prime squares and cubes (24.15.9–10). `BernoulliEuler/Arithmetic.lean` and
+  `RelatedNumbers.lean` have no remaining admissions.
+- Chapter 26: both Stirling subtraction identities (26.8.27 and 26.8.33).
+
+Reusable support includes compact half-line integration by parts, regular-distribution
+jumps, Hilbert regularization, absolutely convergent Poisson summation, scalar Faà di Bruno,
+periodic complex translation invariance, weighted argument principles, continuous phase
+lifts, Fourier kernels and integrated Fourier convergence, periodic logarithmic averages,
+polynomial discrete integration, mixed-moment determinants, p-adic Bernoulli estimates,
+sparse power-series remainders, parameter-dependent bilateral sums and elliptic substitutions.
+The old private cosine partial-sum kernel is relocated to `Real.cosinePartialSumKernel`
+with its definition body preserved and its existing callers adapted.
+
+The Fourier-series file now has no admissions. Its stronger Poisson cosine theorem drops
+an unnecessary separate decay hypothesis; the original tagged statement and hypothesis
+names are retained as its corollary.
+
+The current inventory is `reports/Admissions20261113.tsv`, the manifest is
+`ProofRound20261113.json`, and the compiled audit is `scripts/CheckDLMFProofs20261113.lean`.
+`reports/ProofRound20261113ChapterCounts.tsv` classifies admissions by their first recorded
+DLMF reference, with untagged support in a separate group. Its counts therefore add to the
+project total rather than counting a multi-reference declaration more than once.
+The independent `scripts/verify_proof_preservation.py` comparison checks 24,704 existing
+public declarations, their tags and the public/private definition bodies against the
+committed baseline. It records exactly the two approved statement corrections, with unchanged DLMF tags,
+and finds no other statement changes, no definition changes, no new admissions and no
+new axioms. The optional correction record matches exact old and new theorem headers;
+without that option the audit reports both statement changes. The applied record is supplied
+with `--approved-corrections reports/ProofRound20261113Corrections.json`. The report is `reports/ProofRound20261113Preservation.json`. It also checks the mathematical
+docstrings of all 17 relocated public declarations; two obsolete admission labels are removed.
+The eight affected acquisition ledgers are refreshed from the compiled cross-reference dump,
+with no missing declaration links. Their current status paragraphs include untagged support
+in their source areas.
+
+The latest full build passes 18,076 jobs. The combined audit checks 437 declarations with standard axioms only, and direct checks
+pass for all 122 changed Lean source files. Both repaired modules also pass targeted builds,
+and both certificate scripts pass enhanced strict checks. The import survey has no cycles,
+missing modules or foundational violations. It reports one new two-way area pair,
+EllipticIntegrals/Theta: the nome-series proof imports foundational theta derivatives,
+while existing theta relations already import elliptic integrals. The import graph is acyclic.
+
+Two tagged-statement repairs are applied with user approval and complete proofs: the arcsinh
+numerator coercion (4.39.2) and the denominator product binder in the spherical Carlson formula
+(19.23.9). The patch is retained as an applied record. `StatementReview20261113.md` and two
+Lean certificate scripts record the evidence and audit the corrected production theorems.
+Neither repair changes a function definition or a parameter hypothesis. No further approval
+is pending. Six other admissions need mathematical review: rhombic-lattice monotonicity and
+five complex Landen transformations. Their counterexample evidence is numerical, explicitly
+distinguished from the Lean certificates; no unproved replacement domain is proposed.
+Those six statements remain unchanged.
+
+The next nearby arithmetic obstacles are the Bernoulli and Euler separability theorems
+and the Bernoulli real-zero-count asymptotic. A final review of neighboring hypergeometric
+admissions found no short corollary of the new 3F2 and bilateral formulas: the remaining
+7F6 transformations still need a nonterminating Dougall argument, and the remaining q-series
+identities need further connection or asymptotic-limit theory. No incomplete development
+for these targets is installed.
+
+
 ## Approved parallelogram-area and quartic-transform repairs, 2026-11-13
 
 The user approved both prepared statement corrections. Both tagged theorems now have
@@ -12411,3 +12512,123 @@ All 10,818 compiled DLMF entries retain their proof status (9,555 proved, 1,263
 admitted, zero nonstandard axioms), and the Chapter 2 ledger links have been refreshed.
 The coefficient theorem still has only standard axioms. Import, file-length,
 line-length and whitespace checks pass; no new two-way area pair is introduced.
+
+
+## Six-book statement acquisition (2026-11-14)
+
+Audited all 927 synopsis entry groups against pinned Mathlib, TauCeti and the local
+project, with parallel book/chapter ownership. The exact mappings are linked from
+`BookAcquisition.md`; missing valid statements have mathematical Lean targets with
+source provenance. The acquisition adds 481 modules and 1,581 explicit admissions.
+The project total is 2,401 literal admissions, including the 820 already present.
+Definitions and completed proofs are distinguished from admission-dependent targets
+by source checks and transitive axiom audits. New proofs include Bessel origin and
+order identities, spin/Pauli identities, polynomial Legendre addition, Airy order
+properties, ordinary alternating digamma sums, exponential majorants, Lipschitz
+transfer, circuit basis change and the recessive circuit multiplier.
+
+The ordinary full build passes, 19,494 jobs; all 550 affected source/entry modules
+pass strict Lean checks with matching final hashes. The final import survey has
+zero foundational violations, Basic-closure leaks, missing imports or file cycles.
+Eleven new two-way area pairs are listed in `BookAcquisition.md` and the exact
+integration record `reports/BookAcquisition20261114.json`. File/line limits and
+`git diff --check` pass. The q-Gegenbauer zero lemma moved unchanged into Basic;
+the generic slit-plane estimate was renamed to avoid its new upstream counterpart,
+with the rename and credit recorded. Dependency pins and build settings are unchanged.
+
+The six SYNOPSIS files were not edited. Twenty-one mathematical qualifications are
+retained in `BookAcquisition-RevisionNotes.md`, including false exceptional-parameter
+variants and source/synopsis sign, truncation, rate, branch and normalizer issues.
+The printed Olver higher-even-pole coordinate obstruction and finite Debye denominator
+qualification are additionally documented in `ERRATA-Olver.md`. No existing tagged
+statement or mathematical definition body was repaired in this acquisition round.
+
+## Approved synopsis, errata and logarithmic API corrections (2026-11-14)
+
+Applied the approved corrections to the Olver, AAR, Rao–Lakshminarayanan and
+Kristensson synopses, preserving their entry identifiers and theorem census.
+Temme and Duverney needed no additional changes. Errata records distinguish
+printed defects from synopsis transcription and interpretation corrections.
+The false strict refinement of AAR (7.3.29) is withheld pending its precise
+boundary formulation; the proposed 9-j phase repairs remain conjectural.
+Olver's spectral action error follows the source's O(1/u), and the higher-pole
+coordinate and inner-path assertions retain their necessary qualifications.
+
+Renamed the raw logarithmic expressions to kummerUConnectionOnLog and
+whittakerWConnectionOnLog, updated all internal callers, and retained deprecated
+aliases for all ten public renames. The raw W-to-U algebraic lemma has a
+foundational home. Its definition-level noninteger bridge and the raw exceptional
+zero values are proved. Canonical continued definitions retain whole-parameter
+limits. Proved the two principal-strip bridges to the principal Tricomi and
+Whittaker functions; their axiom audits contain no sorryAx. Four checked
+specializations distinguish the raw zero values from the actual continued values.
+The direct admission count falls from 2,401 to 2,399; no admission is introduced.
+
+Textual comparison preserves 233 existing declaration signatures modulo the
+recorded renames. Dependency pins and the Lake symlink are unchanged.
+Final validation is recorded in reports/BookCorrections20261114.json; acquisition
+snapshot records remain unchanged. BookAcquisition-RevisionNotes.md records the
+applied dispositions and separates the remaining mathematical questions.
+
+Validation: the full ordinary build passes (19,494 jobs), all 16 affected source/entry
+checks pass with matching final hashes, and all seven axiom-audited declarations
+have only standard axioms. Import, file/line-length and whitespace checks pass;
+no new two-way area pair is introduced. No approval request remains outstanding.
+
+## Elliptic reference-book additions (2026-11-14)
+
+Surveyed the nine elliptic-function books in References against all existing elliptic
+areas, Mathlib and the pinned TauCeti. The selection and source sections are recorded
+in BookAcquisition-Elliptic.md; the scope includes general function theory beyond
+DLMF Chapter 20 and avoids duplicating existing Chapters 19, 22 and 23 material.
+
+Six modules add 41 proved theorems and four definitions: integer quadratic equations
+and integrality of lattice multipliers; induced lattice-curve homomorphisms and the
+square count of division points; scalar-automorphism classification; finite zeta sums
+with prescribed simple principal parts; and sigma-product constructions with exact
+divisors, including the sufficient direction of Abel's theorem modulo the lattice.
+The multiplier ring, uniformization, lattice classification and torsion coordinates
+are used directly from upstream. The foundational zeta bridge identifies the two
+existing lattice series without changing either definition or its totalized values.
+The private zeta-meromorphy proof in Series is replaced by the public foundational result.
+
+No admission is added. Existing tagged statements and mathematical definition bodies
+are preserved. The existing admitted general divisor-count and rational-representation
+targets remain identified in the acquisition note. The validation record is
+reports/EllipticBooksValidation.json.
+
+Validation: the full ordinary build passes (19,778 jobs), the ten-module targeted
+build passes (14,169 jobs), and all ten direct source checks pass. The six new
+modules pass with warnings treated as errors. All 45 new declarations have only
+standard axioms. Import, file/line-length and whitespace checks pass, with no new
+two-way area pairs or foundational closure violations.
+
+## Igusa, Mumford and Beals–Wong theta additions (2026-11-14)
+
+Surveyed seven relevant PDFs from the sibling CKMA reference collection. The selected
+scope, overlap with existing classical theta coverage and remaining geometric topics
+are recorded in BookAcquisition-Theta.md. ERRATA-BealsWong.md records checked source
+defects in the negative-real-part convergence bound, the general translation formula,
+and the exact-order converse for theta quotients.
+
+Eight substantive modules add 54 proved theorems and eight definitions: joint entire
+analyticity, theta section spaces and their product API, higher-order theta functions,
+the alternative normalization, exact half-characteristic counts and odd vanishing,
+second-order addition, Heisenberg translation relations, and meromorphic genus-one
+quotients with all lattice periods. The entire-analyticity proof directly reuses
+TauCeti's Osgood lemma. Full basis, representation and geometric vanishing theorems
+are not claimed.
+
+A ninth module moves the existing Symmetry mathematical body into Basic/Periodicity.
+The seven public theorem names, one definition, tagged statements, docstrings and
+mathematical bodies are preserved. Symmetry remains an import-compatible umbrella;
+the move makes automorphy available to the foundational higher-order definitions.
+No existing definition body or tagged theorem statement is changed. No admission is
+added, and no new declaration depends on an existing admission.
+
+Validation: the ordinary build passes (19,796 jobs), the targeted build of all twelve
+affected modules and both entry modules passes (19,475 jobs), and all twelve direct
+source checks pass with warnings treated as errors. All 62 new declarations and all
+eight relocated public declarations have only standard axioms. Import, file/line-length
+and whitespace checks pass, with no new two-way area pairs or foundational violations.
+The inventory, source hashes and check results are in reports/ThetaBooksValidation.json.

@@ -13,6 +13,10 @@ public import DLMFMathlib.Analysis.Distribution.IteratedLineDeriv
 public import Mathlib.Analysis.Distribution.AEEqOfIntegralContDiff
 public import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
 import DLMFMathlib.Analysis.Distribution.Stieltjes
+import DLMFMathlib.Analysis.Distribution.JumpDerivatives
+import TauCeti.Analysis.Distribution.TestFunction.LineDeriv
+import DLMFMathlib.Analysis.Fourier.Sign
+import DLMFMathlib.Analysis.Integral.HilbertRegularization
 import Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap
 
 /-!
@@ -22,6 +26,8 @@ Theorems of DLMF §1.16 that are not already in Mathlib (the upstream pointers a
 `DLMF.AlgebraicAnalytic.Distributions.MathlibCoverage`). Sequential distribution convergence
 uses TauCeti's Fréchet fixed-support spaces and Mathlib's native test-function topology,
 Banach–Steinhaus theorem and Ascoli theorem, through the generic support modules.
+Test-function derivatives use TauCeti's
+`TestFunction.lineDerivOp_one_apply_eq_deriv` and `coe_iterate_lineDerivOp_one`.
 
 ## Main results
 
@@ -63,24 +69,9 @@ section Deriv
 variable {Ω : TopologicalSpace.Opens ℝ} {F : Type*} [AddCommGroup F] [Module ℝ F]
   [TopologicalSpace F] [IsTopologicalAddGroup F] [ContinuousSMul ℝ F]
 
-/-- The derivative of a test function on the line as a function: `∂_{1} φ = φ'`. -/
-private lemma coe_lineDerivOp_one (φ : 𝓓(Ω, ℝ)) : ⇑(∂_{(1 : ℝ)} φ : 𝓓(Ω, ℝ)) = deriv ⇑φ := by
-  ext x
-  rw [TestFunction.lineDerivOp_eq_lineDerivCLM ℝ, TestFunction.lineDerivCLM_apply_of_le le_top,
-    (φ.contDiff.differentiable (by simp)).differentiableAt.lineDeriv_eq_fderiv]
-  rfl
-
-/-- The `k`-fold derivative of a test function on the line: `(∂_{1})^[k] φ = φ^{(k)}`. -/
-private lemma coe_iterate_lineDerivOp_one (k : ℕ) (φ : 𝓓(Ω, ℝ)) :
-    ⇑((fun ψ : 𝓓(Ω, ℝ) => ∂_{(1 : ℝ)} ψ)^[k] φ) = iteratedDeriv k ⇑φ := by
-  induction k with
-  | zero => simp
-  | succ k ih =>
-    rw [Function.iterate_succ_apply', coe_lineDerivOp_one, ih, iteratedDeriv_succ]
-
 /-- DLMF 1.16.9: `⟨Λ^{(k)}, φ⟩ = (-1)^k ⟨Λ, φ^{(k)}⟩`, with `φ^{(k)}` the `k`-fold
 derivative of the test function (as an element of `𝓓(Ω, ℝ)`; its values are
-`iteratedDeriv k φ`, `coe_iterate_lineDerivOp_one`). The case `k = 1` is 1.16.8,
+`iteratedDeriv k φ`, `TestFunction.coe_iterate_lineDerivOp_one`). The case `k = 1` is 1.16.8,
 Mathlib's `Distribution.lineDerivOp_apply_apply`. -/
 @[dlmf 1.16.E9]
 theorem distribIterDeriv_apply (k : ℕ) (T : 𝓓'(Ω, F)) (φ : 𝓓(Ω, ℝ)) :
@@ -101,7 +92,8 @@ on an open set `Ω` of the line, 1.16.11). -/
 theorem distribIterDeriv_delta_apply (n : ℕ) (x₀ : ℝ) (φ : 𝓓(Ω, ℝ)) :
     distribIterDeriv n (Distribution.delta x₀ : 𝓓'(Ω, ℝ)) φ =
       (-1 : ℝ) ^ n * iteratedDeriv n ⇑φ x₀ := by
-  rw [distribIterDeriv_apply, Distribution.delta_apply, coe_iterate_lineDerivOp_one,
+  rw [distribIterDeriv_apply, Distribution.delta_apply,
+    TestFunction.coe_iterate_lineDerivOp_one, ← iteratedDeriv_eq_iterate,
     smul_eq_mul]
 
 end Deriv
@@ -147,7 +139,8 @@ theorem deriv_heaviside_shift (x₀ : ℝ) :
   rw [Distribution.lineDerivOp_apply_apply, lineDistrib,
     Distribution.ofFun_apply ((locallyIntegrable_heaviside_sub x₀).locallyIntegrableOn _),
     Distribution.delta_apply]
-  simp only [FunLike.coe_neg, Pi.neg_apply, coe_lineDerivOp_one, smul_eq_mul, neg_mul,
+  simp only [FunLike.coe_neg, Pi.neg_apply, funext (TestFunction.lineDerivOp_one_apply_eq_deriv φ),
+    smul_eq_mul, neg_mul,
     integral_neg, integral_deriv_mul_heaviside_sub, neg_neg]
 
 /-- DLMF 1.16.15: `D H = δ` as distributions on the line. -/
@@ -172,7 +165,8 @@ private lemma lineDerivOp_lineDistrib_const (c : ℝ) : ∂_{(1 : ℝ)} (lineDis
   have hd : ContDiff ℝ 1 ⇑φ := φ.contDiff.of_le (by simp)
   rw [Distribution.lineDerivOp_apply_apply, lineDistrib,
     Distribution.ofFun_apply ((locallyIntegrable_const c).locallyIntegrableOn _)]
-  simp only [FunLike.coe_neg, Pi.neg_apply, coe_lineDerivOp_one, smul_eq_mul, neg_mul,
+  simp only [FunLike.coe_neg, Pi.neg_apply, funext (TestFunction.lineDerivOp_one_apply_eq_deriv φ),
+    smul_eq_mul, neg_mul,
     integral_neg, integral_mul_const, zero_apply, neg_eq_zero,
     mul_eq_zero]
   left
@@ -234,7 +228,8 @@ theorem stieltjes_eq_deriv (α : StieltjesFunction ℝ) :
     ((locallyIntegrable_const (1 : ℝ)).locallyIntegrableOn _),
     Distribution.lineDerivOp_apply_apply, lineDistrib,
     Distribution.ofFun_apply (α.mono.locallyIntegrable.locallyIntegrableOn _)]
-  simp only [FunLike.coe_neg, Pi.neg_apply, coe_lineDerivOp_one, smul_eq_mul, neg_mul,
+  simp only [FunLike.coe_neg, Pi.neg_apply, funext (TestFunction.lineDerivOp_one_apply_eq_deriv φ),
+    smul_eq_mul, neg_mul,
     integral_neg, mul_one]
   simpa only [mul_comm, neg_neg] using
     (congrArg Neg.neg (α.integral_mul_deriv_eq_neg
@@ -288,7 +283,7 @@ theorem delta_not_regular :
   let φ : 𝓓((⊤ : TopologicalSpace.Opens ℝ), ℝ) := ⟨g, hgd, hgc, hgs⟩
   have hh := congrArg (fun T : 𝓓'((⊤ : TopologicalSpace.Opens ℝ), ℝ) => T φ)
     (he.symm.trans hzdis)
-  simpa [Distribution.delta_apply, φ, hg0] using hh
+  simp [Distribution.delta_apply, φ, hg0] at hh
 
 /-! ## §1.16(iv): jumps and the distributions `x₊^α` -/
 
@@ -306,14 +301,70 @@ theorem iterDeriv_piecewise {f g h : ℝ → ℝ} {x₀ : ℝ} (hg : ContDiff �
       lineDistrib (fun x => if x₀ < x then iteratedDeriv m g x else iteratedDeriv m h x) +
       ∑ k ∈ Finset.range m, (iteratedDeriv k g x₀ - iteratedDeriv k h x₀) •
         distribIterDeriv (m - 1 - k) (Distribution.delta x₀) := by
-  sorry
+  let p (n : ℕ) : ℝ → ℝ :=
+    fun x => if x₀ < x then iteratedDeriv n g x else iteratedDeriv n h x
+  have he : lineDistrib f = lineDistrib (p 0) := by
+    apply Distribution.ofFun_congr_ae
+    -- Identify the top open set with the whole line before removing the singleton.
+    change f =ᵐ[volume.restrict Set.univ] p 0
+    rw [Measure.restrict_univ]
+    have hne : ∀ᵐ x : ℝ ∂volume, x ≠ x₀ := by simp [ae_iff]
+    filter_upwards [hne] with x hx
+    dsimp [p]
+    split_ifs with hlt
+    · exact hfg x hlt
+    · exact hfh x (lt_of_le_of_ne (le_of_not_gt hlt) hx)
+  have hd (n : ℕ) : ∂_{(1 : ℝ)} (lineDistrib (p n)) =
+      lineDistrib (p (n + 1)) + (iteratedDeriv n g x₀ - iteratedDeriv n h x₀) •
+        Distribution.delta x₀ := by
+    have hg' : ContDiff ℝ 1 (iteratedDeriv n g) :=
+      (contDiff_nat_succ_iff_contDiff_one_iteratedDeriv.mp (hg.of_le (by simp))).2
+    have hh' : ContDiff ℝ 1 (iteratedDeriv n h) :=
+      (contDiff_nat_succ_iff_contDiff_one_iteratedDeriv.mp (hh.of_le (by simp))).2
+    simpa only [p, lineDistrib, iteratedDeriv_succ] using
+      Distribution.lineDerivOp_ofFun_piecewise hg' hh' x₀
+  have hall (n : ℕ) :
+      distribIterDeriv n (lineDistrib (p 0)) = lineDistrib (p n) +
+        ∑ k ∈ Finset.range n, (iteratedDeriv k g x₀ - iteratedDeriv k h x₀) •
+          distribIterDeriv (n - 1 - k) (Distribution.delta x₀) := by
+    induction n with
+    | zero => simp [distribIterDeriv]
+    | succ n ih =>
+      rw [show distribIterDeriv (n + 1) (lineDistrib (p 0)) =
+        ∂_{(1 : ℝ)} (distribIterDeriv n (lineDistrib (p 0))) by
+          simp only [distribIterDeriv, Function.iterate_succ_apply']]
+      rw [ih, LineDeriv.lineDerivOp_add, hd]
+      rw [Finset.sum_range_succ]
+      simp only [Nat.add_sub_cancel, Nat.sub_self, distribIterDeriv,
+        Function.iterate_zero, id_eq]
+      have hs : ∂_{(1 : ℝ)}
+          (∑ k ∈ Finset.range n, (iteratedDeriv k g x₀ - iteratedDeriv k h x₀) •
+            (fun S : 𝓓'((⊤ : TopologicalSpace.Opens ℝ), ℝ) => ∂_{(1 : ℝ)} S)^[n - 1 - k]
+              (Distribution.delta x₀)) =
+          ∑ k ∈ Finset.range n, (iteratedDeriv k g x₀ - iteratedDeriv k h x₀) •
+            (fun S : 𝓓'((⊤ : TopologicalSpace.Opens ℝ), ℝ) => ∂_{(1 : ℝ)} S)^[n - k]
+              (Distribution.delta x₀) := by
+        rw [LineDeriv.lineDerivOp_sum]
+        apply Finset.sum_congr rfl
+        intro k hk
+        rw [LineDeriv.lineDerivOp_smul]
+        congr 1
+        rw [← Function.iterate_succ_apply'
+          (fun S : 𝓓'((⊤ : TopologicalSpace.Opens ℝ), ℝ) => ∂_{(1 : ℝ)} S)]
+        congr 2
+        have hk' := Finset.mem_range.mp hk
+        omega
+      rw [hs]
+      abel
+  obtain ⟨n, rfl⟩ := Nat.exists_eq_succ_of_ne_zero (by omega : m ≠ 0)
+  rw [he]
+  exact hall (n + 1)
 
 /-- `x₊^β` is locally integrable for `β > -1`. -/
 private lemma locallyIntegrable_xPlusRpow {β : ℝ} (hβ : -1 < β) :
     LocallyIntegrable (xPlusRpow β) volume := by
   rw [locallyIntegrable_iff]
   intro K hK
-  obtain ⟨a, ha⟩ := hK.bddBelow
   obtain ⟨b, hb⟩ := hK.bddAbove
   have hsub : K ⊆ Iic 0 ∪ Ioc 0 (max b 0) := by
     intro x hx
@@ -340,7 +391,8 @@ theorem deriv_xPlusRpow {α : ℝ} (hα : 0 < α) :
     Distribution.ofFun_apply (hli.locallyIntegrableOn _)]
   rw [_root_.smul_apply, lineDistrib,
     Distribution.ofFun_apply (hli'.locallyIntegrableOn _)]
-  simp only [FunLike.coe_neg, Pi.neg_apply, coe_lineDerivOp_one, smul_eq_mul, neg_mul,
+  simp only [FunLike.coe_neg, Pi.neg_apply, funext (TestFunction.lineDerivOp_one_apply_eq_deriv φ),
+    smul_eq_mul, neg_mul,
     integral_neg]
   have h1 : (fun x => deriv ⇑φ x * xPlusRpow α x) =
       (Ioi 0).indicator (fun x => x ^ α * deriv ⇑φ x) := by
@@ -420,7 +472,7 @@ theorem xPlusDistrib_eq_iterDeriv {α : ℝ} (hα : α < -1) (hαZ : ∀ m : ℤ
   have hnotint : ¬ ∃ m : ℕ, α = -1 - m := by
     rintro ⟨m, hm⟩
     exact hαZ (-1 - m) (by rw [hm]; push_cast; ring)
-  rw [xPlusDistrib, if_neg (by linarith), if_neg hnotint, ← hn₀]
+  rw [xPlusDistrib, ite_eq_right (by linarith), ite_eq_right hnotint, ← hn₀]
   have hsplit : distribIterDeriv (n₀ + k) (lineDistrib (xPlusRpow (α + ↑(n₀ + k)))) =
       distribIterDeriv n₀ (distribIterDeriv k (lineDistrib (xPlusRpow (α + n₀ + k)))) := by
     simp only [distribIterDeriv, Function.iterate_add_apply]
@@ -514,7 +566,7 @@ lemma polynomialOperator_apply_eigenfunctional {V : Type*} [AddCommGroup V] [Mod
     induction k with
     | zero => simp
     | succ k ih =>
-      rw [pow_succ', Module.End.mul_apply, hL, pow_succ]
+      rw [pow_succ', mul_apply_eq_comp, hL, pow_succ]
       rw [ih]
       ring
   have hl (α : Fin n → ℕ) (l : List (Fin n)) (φ : V) :
@@ -523,7 +575,7 @@ lemma polynomialOperator_apply_eigenfunctional {V : Type*} [AddCommGroup V] [Mod
     induction l generalizing φ with
     | nil => simp
     | cons j l ih =>
-      simp only [List.map_cons, List.prod_cons, Module.End.mul_apply]
+      simp only [List.map_cons, List.prod_cons, mul_apply_eq_comp]
       rw [hp, ih]
       ring
   have hmono (α : Fin n →₀ ℕ) :
@@ -532,7 +584,7 @@ lemma polynomialOperator_apply_eigenfunctional {V : Type*} [AddCommGroup V] [Mod
       hl α (List.ofFn id) φ
   rw [polynomialOperator, LinearMap.sum_apply, map_sum, MvPolynomial.eval_eq', Finset.sum_mul]
   apply Finset.sum_congr rfl
-  intro α hα
+  intro α _
   rw [LinearMap.smul_apply, map_smul, smul_eq_mul, hmono]
   ring
 
@@ -614,14 +666,14 @@ lemma polynomialOperator_intertwine {V W : Type*} [AddCommGroup V] [Module ℂ V
     induction k with
     | zero => simp
     | succ k ih =>
-      rw [pow_succ', Module.End.mul_apply, hL, ih, pow_succ', Module.End.mul_apply]
+      rw [pow_succ', mul_apply_eq_comp, hL, ih, pow_succ', mul_apply_eq_comp]
   have hl (α : Fin n → ℕ) (l : List (Fin n)) (φ : V) :
       L ((l.map (fun j => D j ^ α j)).prod φ) =
         (l.map (fun j => T j ^ α j)).prod (L φ) := by
     induction l generalizing φ with
     | nil => simp
     | cons j l ih =>
-      simp only [List.map_cons, List.prod_cons, Module.End.mul_apply]
+      simp only [List.map_cons, List.prod_cons, mul_apply_eq_comp]
       rw [hp, ih]
   have hmono (α : Fin n →₀ ℕ) :
       L ((List.ofFn (fun j => D j ^ α j)).prod φ) =
@@ -671,19 +723,19 @@ lemma polynomialOperator_pairing {V W : Type*} [AddCommGroup V] [Module ℂ V]
     induction k generalizing v with
     | zero => simp
     | succ k ih =>
-      rw [pow_succ, Module.End.mul_apply, ih, hB, pow_succ', Module.End.mul_apply]
+      rw [pow_succ, mul_apply_eq_comp, ih, hB, pow_succ', mul_apply_eq_comp]
   have hl (α : Fin n → ℕ) (l : List (Fin n)) (v : V) (w : W) :
       B ((l.map (fun j => D j ^ α j)).prod v) w =
         B v ((l.map (fun j => T j ^ α j)).prod w) := by
     induction l generalizing v w with
     | nil => simp
     | cons j l ih =>
-      simp only [List.map_cons, List.prod_cons, Module.End.mul_apply]
+      simp only [List.map_cons, List.prod_cons, mul_apply_eq_comp]
       rw [hp, ih]
       have hc : Commute (T j ^ α j) (l.map (fun k => T k ^ α k)).prod := by
         apply Commute.list_prod_right
         intro t ht
-        obtain ⟨k, hk, rfl⟩ := List.mem_map.mp ht
+        obtain ⟨k, _, rfl⟩ := List.mem_map.mp ht
         exact (hT j k).pow_pow _ _
       exact congrArg (fun A : Module.End ℂ W => B v (A w)) hc.eq.symm
   have hmono (α : Fin n →₀ ℕ) :
@@ -708,7 +760,7 @@ lemma schwartz_lineDeriv_comm {E : Type*} [NormedAddCommGroup E] [NormedSpace �
 lemma normalizedPartialDeriv_commute {n : ℕ} (i j : Fin n) : Commute (normalizedPartialDeriv i)
     (normalizedPartialDeriv j) := by
   ext φ
-  simp only [Module.End.mul_apply, normalizedPartialDeriv, LinearMap.smul_apply,
+  simp only [mul_apply_eq_comp, normalizedPartialDeriv, LinearMap.smul_apply,
     ContinuousLinearMap.coe_coe, LineDeriv.lineDerivOpCLM_apply,
     LineDeriv.lineDerivOp_smul]
   rw [schwartz_lineDeriv_comm]
@@ -990,10 +1042,7 @@ theorem deriv_signTempered :
     memLp_top_of_bound hmeas.aestronglyMeasurable 1 (Eventually.of_forall fun x => by
       rcases Real.sign_apply_eq x with h | h | h <;> rw [h] <;> norm_num)
   have happ (ψ : 𝓢(ℝ, ℂ)) : signTempered ψ = ∫ x, ψ x * (Real.sign x : ℂ) := by
-    rw [signTempered, boundedTempered, dite_eq_left hmem, Lp.toTemperedDistribution_apply]
-    apply integral_congr_ae
-    filter_upwards [hmem.coeFn_toLp] with x hx
-    simp only [hx, smul_eq_mul]
+    simpa only [signTempered] using boundedTempered_apply hmem ψ
   ext φ
   rw [TemperedDistribution.derivCLM_apply_apply, happ]
   simp only [neg_apply, SchwartzMap.derivCLM_apply,
@@ -1086,7 +1135,75 @@ theorem fourierTransformTempered_deriv_sign' :
 theorem fourierTransformTempered_sign (φ : 𝓢(ℝ, ℂ)) :
     Tendsto (fun ε : ℝ => I * Real.sqrt (2 / Real.pi) * ∫ x in {x : ℝ | ε < |x|}, φ x / x)
       (𝓝[>] 0) (𝓝 (fourierTransformTempered signTempered φ)) := by
-  sorry
+  have hmeas : Measurable (fun x : ℝ => (Real.sign x : ℂ)) := by
+    have hs : Measurable Real.sign := by
+      unfold Real.sign
+      exact measurable_const.ite measurableSet_Iio
+        (measurable_const.ite measurableSet_Ioi measurable_const)
+    exact Complex.continuous_ofReal.measurable.comp hs
+  have hmem : MemLp (fun x : ℝ => (Real.sign x : ℂ)) ⊤ volume :=
+    memLp_top_of_bound hmeas.aestronglyMeasurable 1 (Eventually.of_forall fun x => by
+      rcases Real.sign_apply_eq x with h | h | h <;> rw [h] <;> norm_num)
+  have happ (ψ : 𝓢(ℝ, ℂ)) : signTempered ψ = ∫ x, ψ x * (Real.sign x : ℂ) := by
+    simpa only [signTempered] using boundedTempered_apply hmem ψ
+  have hsign (c : ℝ) (hc : 0 < c) (x : ℝ) : Real.sign (c * x) = Real.sign x := by
+    rcases lt_trichotomy x 0 with hx | rfl | hx
+    · rw [Real.sign_of_neg (mul_neg_of_pos_of_neg hc hx), Real.sign_of_neg hx]
+    · simp
+    · rw [Real.sign_of_pos (mul_pos hc hx), Real.sign_of_pos hx]
+  have he : fourierTransformTempered signTempered φ =
+      (((2 * Real.pi) ^ (-(1 : ℝ) / 2) : ℝ) : ℂ) * (2 * Real.pi) *
+        ∫ x, (Real.sign x : ℂ) * (𝓕⁻ φ) x := by
+    change signTempered (fourierTransformSchwartz φ) = _
+    rw [happ]
+    simp only [fourierTransformSchwartz, smul_apply, ContinuousLinearMap.comp_apply,
+      SchwartzMap.compCLMOfContinuousLinearEquiv_apply, Function.comp_apply,
+      FourierTransform.fourierInvCLM_apply, scaleEquiv,
+      ContinuousLinearEquiv.equivOfInverse_apply, smul_apply, ContinuousLinearMap.id_apply,
+      smul_eq_mul, Module.finrank_self, Nat.cast_one]
+    have hi : (∫ x : ℝ, (((2 * Real.pi) ^ (-(1 : ℝ) / 2) : ℝ) : ℂ) *
+        (𝓕⁻ φ : 𝓢(ℝ, ℂ)) ((2 * Real.pi)⁻¹ * x) * (Real.sign x : ℂ)) =
+        (((2 * Real.pi) ^ (-(1 : ℝ) / 2) : ℝ) : ℂ) *
+          ∫ x : ℝ, (Real.sign ((2 * Real.pi)⁻¹ * x) : ℂ) *
+            (𝓕⁻ φ : 𝓢(ℝ, ℂ)) ((2 * Real.pi)⁻¹ * x) := by
+      rw [← integral_const_mul]
+      congr 1
+      funext x
+      rw [hsign _ (by positivity)]
+      ring
+    rw [hi, Measure.integral_comp_mul_left
+      (fun x : ℝ => (Real.sign x : ℂ) * (𝓕⁻ φ : 𝓢(ℝ, ℂ)) x) ((2 * Real.pi)⁻¹)]
+    simp only [inv_inv, abs_of_pos (by positivity : 0 < 2 * Real.pi), Complex.real_smul]
+    push_cast
+    ring
+  have hFi : Integrable (𝓕⁻ (φ : ℝ → ℂ)) := by
+    rw [← SchwartzMap.fourierInv_coe]
+    exact (𝓕⁻ φ : 𝓢(ℝ, ℂ)).integrable
+  have hF := Real.integral_sign_mul_fourierInv_eq_integral_symmetric_div
+    φ.continuous (φ.differentiable 0) φ.integrable hFi
+  rw [← SchwartzMap.fourierInv_coe] at hF
+  have hc :
+      (((2 * Real.pi) ^ (-(1 : ℝ) / 2) : ℝ) : ℂ) * (2 * Real.pi) * (I / Real.pi) =
+        I * Real.sqrt (2 / Real.pi) := by
+    have hr : (2 * Real.pi) ^ (-(1 : ℝ) / 2) * (2 * Real.pi) / Real.pi =
+        Real.sqrt (2 / Real.pi) := by
+      rw [show -(1 : ℝ) / 2 = -(1 / 2) by ring, Real.rpow_neg (by positivity),
+        ← Real.sqrt_eq_rpow]
+      have he : Real.sqrt (2 / Real.pi) * Real.sqrt (2 * Real.pi) = 2 := by
+        rw [← Real.sqrt_mul (by positivity)]
+        have hh : 2 / Real.pi * (2 * Real.pi) = 4 := by field_simp; ring
+        rw [hh]
+        exact (Real.sqrt_eq_iff_eq_sq (by norm_num) (by norm_num)).mpr (by norm_num)
+      field_simp
+      nlinarith [he]
+    calc
+      _ = I * (((2 * Real.pi) ^ (-(1 : ℝ) / 2) * (2 * Real.pi) / Real.pi : ℝ) : ℂ) := by
+        push_cast
+        ring
+      _ = _ := by rw [hr]
+  rw [he, hF, ← mul_assoc, hc]
+  exact (tendsto_integral_cut_div_eq_integral_symmetric_div φ.continuous
+    (φ.differentiable 0) φ.integrable).const_mul _
 
 /-- DLMF 1.16.50–1.16.51: `𝓕(H) = √(π/2) (δ + i/(πx))`, that is
 `⟨𝓕(H), φ⟩ = √(π/2) φ(0) + (i/√(2π)) ⨍ φ(x)/x dx` (principal value). -/
@@ -1095,6 +1212,72 @@ theorem fourierTransformTempered_heaviside (φ : 𝓢(ℝ, ℂ)) :
     Tendsto (fun ε : ℝ => Real.sqrt (Real.pi / 2) * φ 0 +
         I / Real.sqrt (2 * Real.pi) * ∫ x in {x : ℝ | ε < |x|}, φ x / x)
       (𝓝[>] 0) (𝓝 (fourierTransformTempered heavisideTempered φ)) := by
-  sorry
+  have hmeas : Measurable (fun x : ℝ => (Real.sign x : ℂ)) := by
+    have hs : Measurable Real.sign := by
+      unfold Real.sign
+      exact measurable_const.ite measurableSet_Iio
+        (measurable_const.ite measurableSet_Ioi measurable_const)
+    exact Complex.continuous_ofReal.measurable.comp hs
+  have hb : ∀ᵐ x : ℝ ∂volume, ‖(Real.sign x : ℂ)‖ ≤ 1 := Eventually.of_forall fun x => by
+    rcases Real.sign_apply_eq x with h | h | h <;> rw [h] <;> norm_num
+  have hmem : MemLp (fun x : ℝ => (Real.sign x : ℂ)) ⊤ volume :=
+    memLp_top_of_bound hmeas.aestronglyMeasurable 1 hb
+  have hHmeas : Measurable (fun x : ℝ => (heaviside x : ℂ)) := by
+    have hs : Measurable heaviside := by
+      unfold heaviside
+      exact measurable_const.ite measurableSet_Ioi measurable_const
+    exact Complex.continuous_ofReal.measurable.comp hs
+  have hHmem : MemLp (fun x : ℝ => (heaviside x : ℂ)) ⊤ volume :=
+    memLp_top_of_bound hHmeas.aestronglyMeasurable 1 (Eventually.of_forall fun x => by
+      simp only [heaviside]
+      split_ifs <;> norm_num)
+  have hH (ψ : 𝓢(ℝ, ℂ)) : heavisideTempered ψ = (signTempered ψ + ∫ x, ψ x) / 2 := by
+    rw [heavisideTempered, boundedTempered_apply hHmem, signTempered,
+      boundedTempered_apply hmem, ← integral_add (ψ.integrable.mul_bdd
+        hmeas.aestronglyMeasurable hb) ψ.integrable, ← integral_div]
+    apply integral_congr_ae
+    filter_upwards [Measure.ae_ne volume (0 : ℝ)] with x hx
+    have hs : (Real.sign x : ℂ) = 2 * (heaviside x : ℂ) - 1 := by
+      exact_mod_cast sign_eq_two_mul_heaviside_sub_one hx
+    rw [hs]
+    ring
+  have hone : (∫ t : ℝ, fourierTransformSchwartz φ t) =
+      (Real.sqrt (2 * Real.pi) : ℂ) * φ 0 := by
+    have h := congrArg (fun T : 𝓢'(ℝ, ℂ) => T φ) fourierTransformTempered_one
+    exact h
+  have hvalue : fourierTransformTempered heavisideTempered φ =
+      (fourierTransformTempered signTempered φ + (Real.sqrt (2 * Real.pi) : ℂ) * φ 0) / 2 := by
+    change heavisideTempered (fourierTransformSchwartz φ) = _
+    rw [hH, hone]
+    rfl
+  have hc : (Real.sqrt (2 / Real.pi) : ℂ) / 2 =
+      1 / (Real.sqrt (2 * Real.pi) : ℂ) := by
+    have he : Real.sqrt (2 / Real.pi) * Real.sqrt (2 * Real.pi) = 2 := by
+      rw [← Real.sqrt_mul (by positivity)]
+      have hh : 2 / Real.pi * (2 * Real.pi) = 4 := by field_simp; ring
+      rw [hh]
+      exact (Real.sqrt_eq_iff_eq_sq (by norm_num) (by norm_num)).mpr (by norm_num)
+    have hr : Real.sqrt (2 / Real.pi) / 2 = 1 / Real.sqrt (2 * Real.pi) := by
+      apply (div_eq_div_iff (by norm_num) (Real.sqrt_pos.mpr (by positivity)).ne').mpr
+      nlinarith [he]
+    exact_mod_cast hr
+  have hd : (Real.sqrt (2 * Real.pi) : ℂ) / 2 =
+      (Real.sqrt (Real.pi / 2) : ℂ) := by
+    have hr : Real.sqrt (2 * Real.pi) / 2 = Real.sqrt (Real.pi / 2) := by
+      apply Eq.symm
+      apply (Real.sqrt_eq_iff_eq_sq (by positivity) (by positivity)).mpr
+      have hs := Real.sq_sqrt (show 0 ≤ 2 * Real.pi by positivity)
+      nlinarith [hs]
+    exact_mod_cast hr
+  have ht := ((fourierTransformTempered_sign φ).add_const
+    ((Real.sqrt (2 * Real.pi) : ℂ) * φ 0)).div_const (2 : ℂ)
+  rw [← hvalue] at ht
+  convert ht using 1
+  funext ε
+  rw [add_div,
+    ← div_mul_eq_mul_div (I * (Real.sqrt (2 / Real.pi) : ℂ)) (2 : ℂ),
+    mul_div_assoc I, hc,
+    ← div_mul_eq_mul_div (Real.sqrt (2 * Real.pi) : ℂ) (2 : ℂ), hd]
+  ring
 
 end DLMF.AlgebraicAnalytic

@@ -1,0 +1,179 @@
+{
+  "baseline_commit": "164d2dcd409e75be84cbf1fc0c75e286d1926b60",
+  "checked_public_declarations": 24704,
+  "baseline_direct_admissions": 884,
+  "remaining_direct_admissions": 820,
+  "completed_original_admissions": [
+    "DLMF.AlgebraicAnalytic.iteratedDeriv_comp_faaDiBruno",
+    "DLMF.AlgebraicAnalytic.IsSimpleClosedContour.jordan",
+    "DLMF.AlgebraicAnalytic.IsSimpleClosedContour.windingNumber_eq_one_or_neg_one",
+    "DLMF.AlgebraicAnalytic.IsSimpleClosedContour.argument_principle",
+    "DLMF.AlgebraicAnalytic.IsSimpleClosedContour.argumentPrinciple_mul_id",
+    "DLMF.AlgebraicAnalytic.iterDeriv_piecewise",
+    "DLMF.AlgebraicAnalytic.fourierTransformTempered_sign",
+    "DLMF.AlgebraicAnalytic.fourierTransformTempered_heaviside",
+    "DLMF.AlgebraicAnalytic.lebesgueConstant_isEquivalent",
+    "DLMF.AlgebraicAnalytic.tendsto_integral_fourierSeries",
+    "DLMF.AlgebraicAnalytic.poisson_summation",
+    "DLMF.AlgebraicAnalytic.poissonSummation_cos",
+    "DLMF.BernoulliEuler.prime_mul_bernoulli_two_mul_modEq",
+    "DLMF.BernoulliEuler.kummer_congruence",
+    "DLMF.BernoulliEuler.kummer_congruence_pow",
+    "DLMF.BernoulliEuler.eulerNumber_two_mul_modEq_two_pow",
+    "DLMF.BernoulliEuler.voronoi_congruence",
+    "DLMF.BernoulliEuler.prime_pow_dvd_bernoulli_num",
+    "DLMF.BernoulliEuler.eulerNumber_two_mul_modEq_prime_pow",
+    "DLMF.BernoulliEuler.bernoulli_two_mul_eq_explicit₃",
+    "DLMF.BernoulliEuler.det_hankel_bernoulli",
+    "DLMF.BernoulliEuler.det_hankel_eulerNumber",
+    "DLMF.BernoulliEuler.padicNorm_bernoulli_sub_stirlingSecond",
+    "DLMF.BernoulliEuler.padicNorm_bernoulli_sub_stirlingSecond_cube",
+    "DLMF.Combinatorics.signedStirlingFirst_sub_eq_sum",
+    "DLMF.Combinatorics.stirlingSecond_sub_eq_sum",
+    "DLMF.Elementary.arcsinh_continued_fraction",
+    "DLMF.Elementary.arcsin_continued_fraction",
+    "DLMF.EllipticIntegrals.completeEllipticK_hasSum_log",
+    "DLMF.EllipticIntegrals.completeEllipticE_hasSum_log",
+    "DLMF.EllipticIntegrals.completeEllipticPi_isBigO_log",
+    "DLMF.EllipticIntegrals.completeEllipticPi_isBigO_log_of_one_lt",
+    "DLMF.EllipticIntegrals.jacobiNome_isBigO",
+    "DLMF.EllipticIntegrals.jacobiNome_isBigO_lambda",
+    "DLMF.EllipticIntegrals.completeEllipticE_eq_nome_series",
+    "DLMF.EllipticIntegrals.pi_mul_complementaryEllipticK_div_bounds",
+    "DLMF.EllipticIntegrals.symmetricEllipticRC_eq_integral_RC",
+    "DLMF.EllipticIntegrals.incEllInt_landen_descending",
+    "DLMF.EllipticIntegrals.symmetricEllipticRC_addition_zero",
+    "DLMF.EllipticIntegrals.symmetricEllipticRG_zero_asymp",
+    "DLMF.EllipticIntegrals.legendreRelation_symmetricElliptic",
+    "DLMF.EllipticIntegrals.symmetricEllipticRF_eq_sphere_integral",
+    "DLMF.EllipticIntegrals.symmetricEllipticRG_eq_sphere_integral",
+    "DLMF.EllipticIntegrals.symmetricEllipticR_three_eq_integral_sphere",
+    "DLMF.EllipticIntegrals.integral_cpow_mul_symmetricEllipticRF_zero",
+    "DLMF.EllipticIntegrals.integral_cpow_mul_symmetricEllipticRG_zero",
+    "DLMF.EllipticIntegrals.integral_cpow_mul_symmetricEllipticRD_zero",
+    "DLMF.EllipticIntegrals.integral_cpow_mul_symmetricEllipticR_two",
+    "DLMF.EllipticIntegrals.integral_symmetricEllipticRJ_sq",
+    "DLMF.EllipticIntegrals.integral_symmetricEllipticRJ_scale",
+    "DLMF.Hypergeometric.appellF4_euler_germ",
+    "DLMF.Hypergeometric.appellF4_reduction_appellF1",
+    "DLMF.Hypergeometric.appellF4_burchnall_chaundy",
+    "DLMF.Hypergeometric.generalizedHypergeometric_general_square_hasSum",
+    "DLMF.Hypergeometric.generalizedHypergeometric_watson_sum",
+    "DLMF.Hypergeometric.generalizedHypergeometric_whipple_3F2_sum",
+    "DLMF.Hypergeometric.generalizedHypergeometric_3F2_unit_transformation",
+    "DLMF.Hypergeometric.analyticOnNhd_generalizedHypergeometric_three_two_one_params",
+    "DLMF.Hypergeometric.analyticOnNhd_gen3F2UnitThomae_params",
+    "DLMF.QHypergeometric.bilateral_four_sum",
+    "DLMF.QHypergeometric.bilateral_even_sum",
+    "DLMF.QHypergeometric.bilateral_four_continues",
+    "DLMF.QHypergeometric.bilateral_even_continues",
+    "DLMF.RiemannTheta.eq_const_mul_riemannTheta_of_quasiPeriodic"
+  ],
+  "new_public_declarations": 373,
+  "moved_public_declarations": [
+    {
+      "name": "DLMF.BernoulliEuler.bernoulli_two_mul_eq_explicit₃",
+      "before": "DLMF/BernoulliEuler/Explicit.lean",
+      "after": "DLMF/BernoulliEuler/CentralFactorial.lean"
+    },
+    {
+      "name": "DLMF.BernoulliEuler.det_hankel_bernoulli",
+      "before": "DLMF/BernoulliEuler/IntegralsSums.lean",
+      "after": "DLMF/BernoulliEuler/BernoulliHankel.lean"
+    },
+    {
+      "name": "DLMF.BernoulliEuler.det_hankel_eulerNumber",
+      "before": "DLMF/BernoulliEuler/IntegralsSums.lean",
+      "after": "DLMF/BernoulliEuler/EulerHankel.lean"
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.compEllIntLogCoeff",
+      "before": "DLMF/EllipticIntegrals/Asymptotics.lean",
+      "after": "DLMF/EllipticIntegrals/LogarithmicExpansions.lean"
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.compEllIntLogCoeff_zero",
+      "before": "DLMF/EllipticIntegrals/Asymptotics.lean",
+      "after": "DLMF/EllipticIntegrals/LogarithmicExpansions.lean"
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.compEllIntLogCoeff_succ",
+      "before": "DLMF/EllipticIntegrals/Asymptotics.lean",
+      "after": "DLMF/EllipticIntegrals/LogarithmicExpansions.lean"
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.completeEllipticK_hasSum_log",
+      "before": "DLMF/EllipticIntegrals/Asymptotics.lean",
+      "after": "DLMF/EllipticIntegrals/LogarithmicExpansions.lean"
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.completeEllipticE_hasSum_log",
+      "before": "DLMF/EllipticIntegrals/Asymptotics.lean",
+      "after": "DLMF/EllipticIntegrals/LogarithmicExpansions.lean"
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.completeEllipticPi_isBigO_log",
+      "before": "DLMF/EllipticIntegrals/Asymptotics.lean",
+      "after": "DLMF/EllipticIntegrals/ThirdKindLogarithmicAsymptotics.lean"
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.completeEllipticPi_isBigO_log_of_one_lt",
+      "before": "DLMF/EllipticIntegrals/Asymptotics.lean",
+      "after": "DLMF/EllipticIntegrals/ThirdKindLogarithmicAsymptotics.lean"
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.jacobiNome_isBigO",
+      "before": "DLMF/EllipticIntegrals/Expansions.lean",
+      "after": "DLMF/EllipticIntegrals/NomeAsymptotics.lean"
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.jacobiNome_isBigO_lambda",
+      "before": "DLMF/EllipticIntegrals/Expansions.lean",
+      "after": "DLMF/EllipticIntegrals/NomeLambdaAsymptotics.lean"
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.pi_mul_complementaryEllipticK_div_bounds",
+      "before": "DLMF/EllipticIntegrals/Inequalities.lean",
+      "after": "DLMF/EllipticIntegrals/NomeBounds.lean"
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symmetricEllipticRC_addition_zero",
+      "before": "DLMF/EllipticIntegrals/SymmetricAddition.lean",
+      "after": "DLMF/EllipticIntegrals/SymmetricRCAddition.lean"
+    },
+    {
+      "name": "DLMF.QHypergeometric.qRamanujanValue",
+      "before": "DLMF/QHypergeometric/BilateralSummations.lean",
+      "after": "DLMF/QHypergeometric/Ramanujan.lean"
+    },
+    {
+      "name": "DLMF.QHypergeometric.ramanujan_one_psi_one",
+      "before": "DLMF/QHypergeometric/BilateralSummations.lean",
+      "after": "DLMF/QHypergeometric/Ramanujan.lean"
+    },
+    {
+      "name": "DLMF.RiemannTheta.eq_const_mul_riemannTheta_of_quasiPeriodic",
+      "before": "DLMF/RiemannTheta/Symmetry.lean",
+      "after": "DLMF/RiemannTheta/Uniqueness.lean"
+    }
+  ],
+  "private_definition_relocations": [
+    {
+      "before": "DLMF.AlgebraicAnalytic.partialSumKernel",
+      "after": "Real.cosinePartialSumKernel",
+      "body_preserved": true
+    }
+  ],
+  "moved_public_docstrings_checked": 17,
+  "removed_obsolete_admission_markers": [
+    "DLMF.EllipticIntegrals.jacobiNome_isBigO",
+    "DLMF.EllipticIntegrals.jacobiNome_isBigO_lambda"
+  ],
+  "approved_statement_corrections": [
+    "DLMF.Elementary.arcsinh_continued_fraction",
+    "DLMF.EllipticIntegrals.symmetricEllipticR_three_eq_integral_sphere"
+  ],
+  "source_digest_sha256": "bab191cda9478129fcd1f09d5a0450aa33f04f460a3e1f52eebe6abfd066159b",
+  "issues": {},
+  "status": "passed"
+}

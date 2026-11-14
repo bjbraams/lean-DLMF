@@ -49,6 +49,7 @@ public import DLMF.AlgebraicAnalytic.Spectral.Theory
 public import DLMF.AlgebraicAnalytic.Summability.Basic
 public import DLMF.AlgebraicAnalytic.Summability.FourierSeries
 public import DLMF.AlgebraicAnalytic.Summability.Fractional
+public import DLMF.AlgebraicAnalytic.Summability.FubiniFractional
 public import DLMF.AlgebraicAnalytic.Summability.Integrals
 public import DLMF.AlgebraicAnalytic.Summability.MathlibCoverage
 public import DLMF.AlgebraicAnalytic.Summability.Series

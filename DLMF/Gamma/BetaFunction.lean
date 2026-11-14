@@ -5,6 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
+public import DLMF.Gamma.BetaFunction.ComplexTrigonometric
+
 public import DLMF.Gamma.BetaFunction.ParameterIntegrals
 public import DLMF.Gamma.BetaFunction.Cosine
 public import DLMF.Gamma.BetaFunction.Vertical

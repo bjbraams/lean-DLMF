@@ -5,13 +5,27 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
+public import DLMF.OrthogonalPolynomials.Integrals.LaguerreHankel
+
+public import DLMF.OrthogonalPolynomials.OrderMinimality
+
+public import DLMF.OrthogonalPolynomials.LegendreSeries
+public import DLMF.OrthogonalPolynomials.CharlierCoefficientNormalization
+public import DLMF.OrthogonalPolynomials.General
+public import DLMF.OrthogonalPolynomials.GeneralRodrigues
+public import DLMF.OrthogonalPolynomials.GegenbauerNorm
+public import DLMF.OrthogonalPolynomials.GeneralRecurrenceCoefficients
+
 public import DLMF.OrthogonalPolynomials.Basic
 public import DLMF.OrthogonalPolynomials.HahnMoments
 public import DLMF.OrthogonalPolynomials.ScalarSeries
 public import DLMF.OrthogonalPolynomials.Mehler
-public import DLMF.OrthogonalPolynomials.General
+public import DLMF.OrthogonalPolynomials.MeasureConstruction
 public import DLMF.OrthogonalPolynomials.Classical
 public import DLMF.OrthogonalPolynomials.Topics
+public import DLMF.OrthogonalPolynomials.Beukers
+public import DLMF.OrthogonalPolynomials.HermiteUncertainty
+public import DLMF.OrthogonalPolynomials.MatchingIntegrals
 public import DLMF.OrthogonalPolynomials.MathlibCoverage
 public import DLMF.OrthogonalPolynomials.GeneralIdentities
 public import DLMF.OrthogonalPolynomials.Explicit
@@ -27,18 +41,25 @@ public import DLMF.OrthogonalPolynomials.LaguerreSeries
 public import DLMF.OrthogonalPolynomials.Limits
 public import DLMF.OrthogonalPolynomials.Integrals
 public import DLMF.OrthogonalPolynomials.Legendre
+public import DLMF.OrthogonalPolynomials.LegendreIntegralRepresentations
+public import DLMF.OrthogonalPolynomials.JacobiFractionalTransforms
 public import DLMF.OrthogonalPolynomials.LegendreAddition
 public import DLMF.OrthogonalPolynomials.LegendreSingular
 public import DLMF.OrthogonalPolynomials.ChebyshevExpansion
+public import DLMF.OrthogonalPolynomials.ChebyshevUniformSeries
 public import DLMF.OrthogonalPolynomials.Series
 public import DLMF.OrthogonalPolynomials.BoundsZeros
 public import DLMF.OrthogonalPolynomials.JacobiZeroBounds
+public import DLMF.OrthogonalPolynomials.JacobiParameterZeros
 public import DLMF.OrthogonalPolynomials.ContinuedFractions
 public import DLMF.OrthogonalPolynomials.Hahn
 public import DLMF.OrthogonalPolynomials.DiscreteAddition
 public import DLMF.OrthogonalPolynomials.DiscreteRodrigues
 public import DLMF.OrthogonalPolynomials.HahnRodrigues
 public import DLMF.OrthogonalPolynomials.Wilson
+public import DLMF.OrthogonalPolynomials.WilsonRecurrences
+public import DLMF.OrthogonalPolynomials.WilsonHahnNorms
+public import DLMF.OrthogonalPolynomials.WilsonContourNorms
 public import DLMF.OrthogonalPolynomials.QFamilies
 public import DLMF.OrthogonalPolynomials.Associated
 public import DLMF.OrthogonalPolynomials.ExceptionalOrthogonality
@@ -47,6 +68,34 @@ public import DLMF.OrthogonalPolynomials.UnitCircle
 public import DLMF.OrthogonalPolynomials.Multivariate
 public import DLMF.OrthogonalPolynomials.InequalityTools
 public import DLMF.OrthogonalPolynomials.SzegoAskeyOrthogonality
+public import DLMF.OrthogonalPolynomials.QuadratureAndKernels
+public import DLMF.OrthogonalPolynomials.SecondKindContinuedFraction
+public import DLMF.OrthogonalPolynomials.QuadratureError
+public import DLMF.OrthogonalPolynomials.SpectralMoments
+public import DLMF.OrthogonalPolynomials.SummableRecurrencePerturbation
+public import DLMF.OrthogonalPolynomials.PolynomialContinuation
+public import DLMF.OrthogonalPolynomials.Darboux
+public import DLMF.OrthogonalPolynomials.ConnectionCoefficients
+public import DLMF.OrthogonalPolynomials.JacobiContinuation
+public import DLMF.OrthogonalPolynomials.JacobiMultiplication
+public import DLMF.OrthogonalPolynomials.LaguerreContinuation
+public import DLMF.OrthogonalPolynomials.PositivityCriteria
+
+public import DLMF.OrthogonalPolynomials.JacobiContours
+
+public import DLMF.OrthogonalPolynomials.PrescribedLeadingCoefficients
+public import DLMF.OrthogonalPolynomials.LeastSquaresProjection
+public import DLMF.OrthogonalPolynomials.LegendreComplexLaplace
+
+public import DLMF.OrthogonalPolynomials.LegendreDarbouxLeading
+
+public import DLMF.OrthogonalPolynomials.JacobiBesselZeroLimit
+
+public import DLMF.OrthogonalPolynomials.LaguerreDualSeries
+
+public import DLMF.OrthogonalPolynomials.NormProducts
+
+public import DLMF.OrthogonalPolynomials.ClassicalCoefficientIdentities
 
 /-!
 # Orthogonal polynomials (DLMF Chapter 18, AAR Chapters 5–7)

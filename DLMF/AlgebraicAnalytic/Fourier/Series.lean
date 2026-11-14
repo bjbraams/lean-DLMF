@@ -9,9 +9,15 @@ public import DLMF.AlgebraicAnalytic.Fourier.Basic
 public import DLMFMathlib.Analysis.Fourier.AddCircle
 public import DLMFMathlib.Analysis.Fourier.DirichletKernel
 public import DLMFMathlib.Analysis.Fourier.GaussianSeries
+import DLMFMathlib.Analysis.Fourier.PoissonSummation
+import DLMFMathlib.Analysis.Fourier.CosinePartialSumKernel
+import DLMFMathlib.Analysis.Fourier.IntegratedSeries
+import DLMFMathlib.Analysis.Fourier.LebesgueConstants
 public import Mathlib.Analysis.Fourier.RiemannLebesgueLemma
 public import Mathlib.Topology.EMetricSpace.BoundedVariation
 public import TauCeti.Analysis.Calculus.PeriodicDeriv
+
+import DLMFMathlib.Analysis.Fourier.EvenPoisson
 
 /-!
 # Fourier series (DLMF §1.8)
@@ -503,7 +509,7 @@ theorem eq_of_fourierCoeff_eq {f g : ℝ → ℂ} (hf : Continuous f) (hg : Cont
 @[dlmf 1.8.E9]
 theorem lebesgueConstant_isEquivalent :
     (fun n : ℕ => lebesgueConstant n) ~[atTop] (fun n : ℕ => 4 / π ^ 2 * Real.log n) := by
-  sorry
+  exact Real.isEquivalent_integral_abs_sin_div_sin_half
 
 /-- DLMF §1.8(i) (extension of the Riemann–Lebesgue lemma 1.8.10 to infinite intervals): for
 `f` Lebesgue integrable on `ℝ`, `∫ f(x) e^{iλx} dx → 0` as `λ → ∞` (no hypothesis is needed
@@ -542,102 +548,23 @@ theorem tendsto_intervalIntegral_mul_exp_atTop (f : ℝ → ℂ) {a b : ℝ} (ha
 
 /-! ## §1.8(ii) Convergence -/
 
-/-- The Dirichlet kernel `½ + ∑_{n=1}^N cos(nu)` of the Fourier partial sums. -/
-private noncomputable def partialSumKernel (N : ℕ) (u : ℝ) : ℝ :=
-  1 / 2 + ∑ n ∈ Finset.range N, Real.cos ((n + 1 : ℕ) * u)
-
-private lemma two_mul_sin_mul_partialSumKernel (N : ℕ) (u : ℝ) :
-    2 * Real.sin (u / 2) * partialSumKernel N u = Real.sin ((N + 1 / 2) * u) := by
-  induction N with
-  | zero => simp [partialSumKernel]; ring_nf
-  | succ N ih =>
-    have h := Real.sin_sub_sin (((N + 1 : ℕ) + 1 / 2) * u) ((N + 1 / 2) * u)
-    simp only [partialSumKernel, Finset.sum_range_succ] at ih ⊢
-    have h1 : (((N + 1 : ℕ) : ℝ) + 1 / 2) * u - (N + 1 / 2) * u = 2 * (u / 2) := by
-      push_cast; ring
-    have h2 : (((N + 1 : ℕ) : ℝ) + 1 / 2) * u + (N + 1 / 2) * u = 2 * (((N + 1 : ℕ) : ℝ) * u) := by
-      push_cast; ring
-    rw [h1, h2] at h
-    simp only [mul_div_cancel_left₀ _ (two_ne_zero' ℝ)] at h
-    push_cast at h ih ⊢
-    linear_combination ih - h
-
-private lemma partialSumKernel_neg (N : ℕ) (u : ℝ) :
-    partialSumKernel N (-u) = partialSumKernel N u := by
-  simp [partialSumKernel, mul_neg, Real.cos_neg]
-
-private lemma partialSumKernel_add_two_pi (N : ℕ) (u : ℝ) :
-    partialSumKernel N (u + 2 * π) = partialSumKernel N u := by
-  simp only [partialSumKernel]
-  congr 1
-  refine Finset.sum_congr rfl fun n _ => ?_
-  rw [mul_add, show ((n + 1 : ℕ) : ℝ) * (2 * π) = ((n + 1 : ℕ) : ℕ) * (2 * π) by rfl,
-    Real.cos_add_nat_mul_two_pi]
-
-private lemma continuous_partialSumKernel (N : ℕ) : Continuous (partialSumKernel N) := by
-  unfold partialSumKernel; fun_prop
-
-private lemma integral_partialSumKernel (N : ℕ) :
-    ∫ u in (0 : ℝ)..π, partialSumKernel N u = π / 2 := by
-  have hc : ∀ n : ℕ, ∫ u in (0 : ℝ)..π, Real.cos ((n + 1 : ℕ) * u) = 0 := by
-    intro n
-    have hn : ((n + 1 : ℕ) : ℝ) ≠ 0 := by positivity
-    rw [intervalIntegral.integral_comp_mul_left (fun u => Real.cos u) hn, integral_cos]
-    simp only [mul_zero, Real.sin_zero, sub_zero]
-    rw [Real.sin_nat_mul_pi, smul_zero]
-  simp only [partialSumKernel]
-  rw [intervalIntegral.integral_add intervalIntegrable_const
-      ((by fun_prop : Continuous fun u : ℝ => ∑ n ∈ Finset.range N,
-        Real.cos ((n + 1 : ℕ) * u)).intervalIntegrable _ _),
-    intervalIntegral.integral_finsetSum fun n _ =>
-      (by fun_prop : Continuous fun u => Real.cos ((n + 1 : ℕ) * u)).intervalIntegrable _ _]
-  simp only [hc, Finset.sum_const_zero, intervalIntegral.integral_const, smul_eq_mul]
-  ring
-
 /-- The Fourier partial sum as a Dirichlet-kernel integral. -/
 private lemma fourierPartialSum_eq_integral {f : ℝ → ℂ}
     (hf : IntervalIntegrable f volume (-π) π) (x : ℝ) (N : ℕ) :
     fourierCosCoeff f 0 / 2 + ∑ n ∈ Finset.range N,
         (fourierCosCoeff f (n + 1) * (Real.cos ((n + 1 : ℕ) * x) : ℂ) +
           fourierSinCoeff f (n + 1) * (Real.sin ((n + 1 : ℕ) * x) : ℂ)) =
-      (1 / π : ℂ) * ∫ t in (-π)..π, f t * (partialSumKernel N (t - x) : ℂ) := by
-  have hI : ∀ g : ℝ → ℝ, Continuous g →
-      IntervalIntegrable (fun t => f t * (g t : ℂ)) volume (-π) π := fun g hg =>
-    hf.mul_continuousOn (Complex.continuous_ofReal.comp hg).continuousOn
-  have hterm : ∀ n : ℕ, ∫ t in (-π)..π, f t * (Real.cos ((n + 1 : ℕ) * (t - x)) : ℂ) =
-      (Real.cos ((n + 1 : ℕ) * x) : ℂ) *
-        (∫ t in (-π)..π, f t * (Real.cos ((n + 1 : ℕ) * t) : ℂ)) +
-      (Real.sin ((n + 1 : ℕ) * x) : ℂ) *
-        ∫ t in (-π)..π, f t * (Real.sin ((n + 1 : ℕ) * t) : ℂ) := by
-    intro n
-    rw [← intervalIntegral.integral_const_mul, ← intervalIntegral.integral_const_mul,
-      ← intervalIntegral.integral_add
-        ((hI (fun t => Real.cos ((n + 1 : ℕ) * t)) (by fun_prop)).const_mul _)
-        ((hI (fun t => Real.sin ((n + 1 : ℕ) * t)) (by fun_prop)).const_mul _)]
-    refine intervalIntegral.integral_congr fun t _ => ?_
-    simp only [mul_sub, Real.cos_sub]
-    push_cast; ring
-  have hsplit : ∫ t in (-π)..π, f t * (partialSumKernel N (t - x) : ℂ) =
-      (∫ t in (-π)..π, f t * ((1 / 2 : ℝ) : ℂ)) + ∑ n ∈ Finset.range N,
-        ∫ t in (-π)..π, f t * (Real.cos ((n + 1 : ℕ) * (t - x)) : ℂ) := by
-    have hS : ∀ n ∈ Finset.range N, IntervalIntegrable
-        (fun t => f t * (Real.cos ((n + 1 : ℕ) * (t - x)) : ℂ)) volume (-π) π :=
-      fun n _ => hI (fun t => Real.cos ((n + 1 : ℕ) * (t - x))) (by fun_prop)
-    have hS' : IntervalIntegrable (fun t => ∑ n ∈ Finset.range N,
-        f t * (Real.cos ((n + 1 : ℕ) * (t - x)) : ℂ)) volume (-π) π := by
-      simpa only [Finset.sum_fn] using IntervalIntegrable.sum _ hS
-    rw [← intervalIntegral.integral_finsetSum hS,
-      ← intervalIntegral.integral_add (hI _ continuous_const) hS']
-    refine intervalIntegral.integral_congr fun t _ => ?_
-    simp only [partialSumKernel]; push_cast
-    rw [mul_add, Finset.mul_sum]
-  rw [hsplit, mul_add, Finset.mul_sum]
+      (1 / π : ℂ) * ∫ t in (-π)..π, f t * (Real.cosinePartialSumKernel N (t - x) : ℂ) := by
+  erw [Real.integral_mul_cosinePartialSumKernel_eq hf x N]
+  rw [mul_add, Finset.mul_sum]
   congr 1
-  · simp only [fourierCosCoeff, CharP.cast_eq_zero, zero_mul, Real.cos_zero, ofReal_one,
-      mul_one]
-    rw [intervalIntegral.integral_mul_const]; push_cast; ring
+  · simp only [fourierCosCoeff, CharP.cast_eq_zero, zero_mul, Real.cos_zero,
+      Complex.ofReal_one, mul_one]
+    ring
   · refine Finset.sum_congr rfl fun n _ => ?_
-    rw [hterm, fourierCosCoeff, fourierSinCoeff]; ring
+    rw [fourierCosCoeff, fourierSinCoeff]
+    simp only [RCLike.ofReal, Complex.coe_algebraMap]
+    ring_nf
 
 
 /-- DLMF 1.8.11, stronger than DLMF, which also assumes that `f` is continuous except at
@@ -662,33 +589,36 @@ theorem tendsto_fourierPartialSum_of_oneSidedDeriv' {f : ℝ → ℂ}
     simpa using (hfint (x + a) (x + b)).comp_add_left x
   have hfx' : ∀ a b, IntervalIntegrable (fun u => f (x - u)) volume a b := fun a b => by
     simpa using (hfint (x - a) (x - b)).comp_sub_left x
-  have hKc : ∀ N, Continuous fun u => (partialSumKernel N u : ℂ) := fun N =>
-    Complex.continuous_ofReal.comp (continuous_partialSumKernel N)
+  have hKc : ∀ N, Continuous fun u => (Real.cosinePartialSumKernel N u : ℂ) := fun N =>
+    Complex.continuous_ofReal.comp (Real.continuous_cosinePartialSumKernel N)
   -- shift to the point `x`
-  have hshift : ∀ N, ∫ t in (-π)..π, f t * (partialSumKernel N (t - x) : ℂ) =
-      ∫ u in (-π)..π, f (x + u) * (partialSumKernel N u : ℂ) := by
+  have hshift : ∀ N, ∫ t in (-π)..π, f t * (Real.cosinePartialSumKernel N (t - x) : ℂ) =
+      ∫ u in (-π)..π, f (x + u) * (Real.cosinePartialSumKernel N u : ℂ) := by
     intro N
-    have hP : Function.Periodic (fun t => f t * (partialSumKernel N (t - x) : ℂ)) (2 * π) := by
+    have hP : Function.Periodic
+        (fun t => f t * (Real.cosinePartialSumKernel N (t - x) : ℂ)) (2 * π) := by
       intro t
       simp only
-      rw [hper t, show t + 2 * π - x = (t - x) + 2 * π by ring, partialSumKernel_add_two_pi]
+      rw [hper t, show t + 2 * π - x = (t - x) + 2 * π by ring,
+        Real.cosinePartialSumKernel_add_two_pi]
     have h1 := intervalIntegral.integral_comp_add_left
-      (fun t => f t * (partialSumKernel N (t - x) : ℂ)) x (a := -π) (b := π)
+      (fun t => f t * (Real.cosinePartialSumKernel N (t - x) : ℂ)) x (a := -π) (b := π)
     simp only [add_sub_cancel_left] at h1
     rw [h1, show x + π = x + -π + 2 * π by ring, hP.intervalIntegral_add_eq (x + -π) (-π),
       show -π + 2 * π = π by ring]
   -- fold to `[0, π]`
-  have hfold : ∀ N, ∫ u in (-π)..π, f (x + u) * (partialSumKernel N u : ℂ) =
-      ∫ u in (0 : ℝ)..π, (f (x + u) + f (x - u)) * (partialSumKernel N u : ℂ) := by
+  have hfold : ∀ N, ∫ u in (-π)..π, f (x + u) * (Real.cosinePartialSumKernel N u : ℂ) =
+      ∫ u in (0 : ℝ)..π, (f (x + u) + f (x - u)) * (Real.cosinePartialSumKernel N u : ℂ) := by
     intro N
-    have hG : ∀ a b, IntervalIntegrable (fun u => f (x + u) * (partialSumKernel N u : ℂ))
+    have hG : ∀ a b, IntervalIntegrable (fun u => f (x + u) * (Real.cosinePartialSumKernel N u : ℂ))
         volume a b := fun a b => (hfx a b).mul_continuousOn (hKc N).continuousOn
-    have hG' : ∀ a b, IntervalIntegrable (fun u => f (x - u) * (partialSumKernel N u : ℂ))
+    have hG' : ∀ a b,
+        IntervalIntegrable (fun u => f (x - u) * (Real.cosinePartialSumKernel N u : ℂ))
         volume a b := fun a b => (hfx' a b).mul_continuousOn (hKc N).continuousOn
     rw [← intervalIntegral.integral_add_adjacent_intervals (hG (-π) 0) (hG 0 π)]
     have hneg := intervalIntegral.integral_comp_neg (a := 0) (b := π)
-      (fun u => f (x + u) * (partialSumKernel N u : ℂ))
-    simp only [neg_zero, partialSumKernel_neg, ← sub_eq_add_neg] at hneg
+      (fun u => f (x + u) * (Real.cosinePartialSumKernel N u : ℂ))
+    simp only [neg_zero, Real.cosinePartialSumKernel_neg, ← sub_eq_add_neg] at hneg
     rw [← hneg, ← intervalIntegral.integral_add (hG' 0 π) (hG 0 π)]
     refine intervalIntegral.integral_congr fun u _ => ?_
     ring
@@ -702,24 +632,26 @@ theorem tendsto_fourierPartialSum_of_oneSidedDeriv' {f : ℝ → ℂ}
       (1 / π : ℂ) * ∫ u in (0 : ℝ)..π, φ u * (Real.sin ((N + 1 / 2) * u) : ℂ) := by
     intro N
     rw [fourierPartialSum_eq_integral hf x N, hshift, hfold]
-    have hK : ∫ u in (0 : ℝ)..π, (partialSumKernel N u : ℂ) = ((π / 2 : ℝ) : ℂ) := by
-      rw [intervalIntegral.integral_ofReal, integral_partialSumKernel]
-    have hsplit : ∫ u in (0 : ℝ)..π, (f (x + u) + f (x - u)) * (partialSumKernel N u : ℂ) =
-        (∫ u in (0 : ℝ)..π, ψ u * (partialSumKernel N u : ℂ)) +
-          (fR + fL) * ∫ u in (0 : ℝ)..π, (partialSumKernel N u : ℂ) := by
+    have hK : ∫ u in (0 : ℝ)..π, (Real.cosinePartialSumKernel N u : ℂ) = ((π / 2 : ℝ) : ℂ) := by
+      rw [intervalIntegral.integral_ofReal, Real.integral_cosinePartialSumKernel]
+    have hsplit : ∫ u in (0 : ℝ)..π,
+        (f (x + u) + f (x - u)) * (Real.cosinePartialSumKernel N u : ℂ) =
+        (∫ u in (0 : ℝ)..π, ψ u * (Real.cosinePartialSumKernel N u : ℂ)) +
+          (fR + fL) * ∫ u in (0 : ℝ)..π, (Real.cosinePartialSumKernel N u : ℂ) := by
       rw [← intervalIntegral.integral_const_mul, ← intervalIntegral.integral_add
         (hψi.mul_continuousOn (hKc N).continuousOn) (((hKc N).intervalIntegrable _ _).const_mul _)]
       refine intervalIntegral.integral_congr fun u _ => ?_
       simp only [hψ]; ring
-    have hcongr : ∫ u in (0 : ℝ)..π, ψ u * (partialSumKernel N u : ℂ) =
+    have hcongr : ∫ u in (0 : ℝ)..π, ψ u * (Real.cosinePartialSumKernel N u : ℂ) =
         ∫ u in (0 : ℝ)..π, φ u * (Real.sin ((N + 1 / 2) * u) : ℂ) := by
       rw [intervalIntegral.integral_of_le pi_pos.le, intervalIntegral.integral_of_le pi_pos.le]
       refine setIntegral_congr_fun measurableSet_Ioc fun u hu => ?_
       have hs : 0 < Real.sin (u / 2) :=
         Real.sin_pos_of_pos_of_lt_pi (by linarith [hu.1]) (by linarith [hu.2, pi_pos])
-      rw [← two_mul_sin_mul_partialSumKernel N u]
-      have h1 : 1 / (2 * Real.sin (u / 2)) * (2 * Real.sin (u / 2) * partialSumKernel N u) =
-          partialSumKernel N u := by field_simp
+      rw [← Real.two_mul_sin_mul_cosinePartialSumKernel N u]
+      have h1 : 1 / (2 * Real.sin (u / 2)) *
+          (2 * Real.sin (u / 2) * Real.cosinePartialSumKernel N u) =
+          Real.cosinePartialSumKernel N u := by field_simp
       simp only [hφ]
       rw [mul_assoc, ← Complex.ofReal_mul, h1]
     rw [hsplit, hK, hcongr]
@@ -844,7 +776,7 @@ theorem tendsto_integral_fourierSeries {f : ℝ → ℂ} (hf : IntervalIntegrabl
         (a (n + 1) * (Real.sin ((n + 1 : ℕ) * x) : ℂ) +
           b (n + 1) * (1 - (Real.cos ((n + 1 : ℕ) * x) : ℂ))) / ((n + 1 : ℕ) : ℂ))
       atTop (𝓝 (∫ t in (0 : ℝ)..x, (f t - a 0 / 2))) := by
-  sorry
+  exact Real.tendsto_integral_fourierSeries_of_intervalIntegrable hf hx
 
 /-- Integration by parts for the Fourier coefficients of a derivative. -/
 private lemma fourierCoeff_deriv {f : ℝ → ℂ} (hf : ContDiff ℝ 1 f)
@@ -960,8 +892,20 @@ theorem poisson_summation {f : ℝ → ℂ} (hf : ContDiff ℝ 2 f) (hi : Integr
     ∃ s : ℂ, HasSum (fun n : ℤ => f (x + n)) s ∧
       HasSum (fun n : ℤ => Complex.exp (2 * π * Complex.I * n * x) *
         ∫ t, f t * Complex.exp (-(2 * π * Complex.I * n * t))) s := by
-  sorry
+  exact Real.hasSum_poisson_of_integrable_iteratedDeriv_two hf hi hi2 x
 
+/-- Poisson's cosine summation formula, stronger than DLMF, which also assumes decay at
+infinity: continuity, bounded variation and integrability on the half-line suffice. -/
+@[dlmf 1.8.E15 "stronger than DLMF: decay at infinity follows from the other hypotheses"]
+theorem poissonSummation_cos' {f : ℝ → ℂ} (hc : ContinuousOn f (Ici 0))
+    (hbv : BoundedVariationOn f (Ici 0)) (hi : IntegrableOn f (Ioi 0)) :
+    ∃ s : ℂ, Tendsto (fun N : ℕ => f 0 / 2 + ∑ n ∈ Finset.range N, f (n + 1)) atTop (𝓝 s) ∧
+      Tendsto (fun N : ℕ => (∫ x in Ioi (0 : ℝ), f x) + 2 * ∑ n ∈ Finset.range N,
+        ∫ x in Ioi (0 : ℝ), f x * (Real.cos (2 * π * (n + 1 : ℕ) * x) : ℂ)) atTop (𝓝 s) := by
+  exact Real.exists_limit_poisson_cos_of_boundedVariationOn hc hbv hi
+
+-- Keep the decay hypothesis in the DLMF interface, although the stronger theorem derives it.
+set_option linter.unusedVariables false in
 /-- DLMF 1.8.15 (Poisson's summation formula, alternative form): if `f` is continuous and of
 bounded variation on `[0, ∞)`, integrable on `[0, ∞)`, and `f(x) → 0` as `x → ∞`, then
 `½f(0) + ∑_{n ≥ 1} f(n) = ∫_0^∞ f(x) dx + 2 ∑_{n ≥ 1} ∫_0^∞ f(x) cos(2πnx) dx`; both series
@@ -973,7 +917,7 @@ theorem poissonSummation_cos {f : ℝ → ℂ} (hc : ContinuousOn f (Ici 0))
     ∃ s : ℂ, Tendsto (fun N : ℕ => f 0 / 2 + ∑ n ∈ Finset.range N, f (n + 1)) atTop (𝓝 s) ∧
       Tendsto (fun N : ℕ => (∫ x in Ioi (0 : ℝ), f x) + 2 * ∑ n ∈ Finset.range N,
         ∫ x in Ioi (0 : ℝ), f x * (Real.cos (2 * π * (n + 1 : ℕ) * x) : ℂ)) atTop (𝓝 s) := by
-  sorry
+  exact poissonSummation_cos' hc hbv hi
 
 /-- DLMF 1.8.16: for `ℜω > 0`,
 `∑_{n ∈ ℤ} e^{-(n+x)²ω} = √(π/ω) (1 + 2 ∑_{n ≥ 1} e^{-n²π²/ω} cos(2nπx))`, with the principal
@@ -1009,7 +953,7 @@ theorem hasSum_exp_neg_sq_mul {ω : ℂ} (hω : 0 < ω.re) (x : ℂ) :
     have he₁ : -π * (π / ω) * (n : ℂ) ^ 2 = -((n : ℂ) ^ 2 * π ^ 2 / ω) := by ring
     have he₂ : -π * (π / ω) * (-(n : ℂ)) ^ 2 = -((n : ℂ) ^ 2 * π ^ 2 / ω) := by ring
     rw [he₁, he₂]
-    ring
+    ring_nf
   have hsum : (∑' n : ℤ, cexp (-π * a * n ^ 2 + 2 * π * (-I * x) * n)) =
       1 + 2 * ∑' n : ℕ, cexp (-(((n + 1 : ℕ) : ℂ) ^ 2 * π ^ 2 / ω)) *
         Complex.cos (2 * ((n + 1 : ℕ) : ℂ) * π * x) := by

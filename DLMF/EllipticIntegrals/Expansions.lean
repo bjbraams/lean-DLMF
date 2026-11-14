@@ -5,9 +5,14 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.EllipticIntegrals.NomeAsymptotics
+public import DLMF.EllipticIntegrals.NomeLambdaAsymptotics
 public import DLMF.EllipticIntegrals.Quadratic
 public import DLMF.JacobiElliptic.ModulusInversion
 public import DLMF.GeneralizedHypergeometric.Appell.GermTransformations
+import DLMF.Theta.Basic.FourierDerivatives
+import DLMF.JacobiElliptic.Related.EpsilonTheta
+import DLMF.JacobiElliptic.Basic.ThetaShifts
 
 /-!
 # Maclaurin and related expansions of Legendre's integrals (DLMF §19.5)
@@ -35,6 +40,9 @@ Landen product for `K`.
 * `completeEllipticK_eq_landen_prod`: `K(k) = (π/2) ∏_{m ≥ 1} (1 + k_m)` (DLMF 19.5.10).
 
 ## Implementation notes
+
+The nome series for `E` follows from the theta expression for Jacobi’s epsilon, the second
+Fourier derivative of `θ₄`, and analytic continuation from real moduli.
 
 * Series are stated with `HasSum`, and `₂F₁` is Mathlib's `ordinaryHypergeometric`. The
   Appell function is `DLMF.Hypergeometric.appellF1` (DLMF 16.13.1), written explicitly as the
@@ -811,25 +819,6 @@ theorem incompleteEllipticPi_hasSum {φ : ℝ} (hφ : |φ| < π / 2) {α2 k : �
   rw [hF]
   field_simp
 
-/-- **Admitted.** DLMF 19.5.5: Jacobi's nome `q = exp(-πK'(k)/K(k)) = r + 8r² + 84r³ + 992r⁴ + ⋯`
-with `r = k²/16`, as `k → 0+` (the remainder is `O(r⁵)`). -/
-@[dlmf 19.5.E5]
-theorem jacobiNome_isBigO :
-    (fun k : ℝ => jacobiNome k - ((k ^ 2 / 16 : ℝ) + 8 * (k ^ 2 / 16 : ℝ) ^ 2 +
-        84 * (k ^ 2 / 16 : ℝ) ^ 3 + 992 * (k ^ 2 / 16 : ℝ) ^ 4 : ℂ)) =O[𝓝[>] 0]
-      fun k : ℝ => (k ^ 2 / 16) ^ 5 := by
-  sorry
-
-/-- **Admitted.** DLMF 19.5.6–19.5.7: with `λ = (1 - √k')/(2(1 + √k'))`,
-`q = λ + 2λ⁵ + 15λ⁹ + 150λ¹³ + 1707λ¹⁷ + ⋯` as `k → 0+` (the remainder is `O(λ²¹)`). -/
-@[dlmf 19.5.E6, dlmf 19.5.E7]
-theorem jacobiNome_isBigO_lambda :
-    let lam : ℝ → ℝ := fun k =>
-      (1 - Real.sqrt (Real.sqrt (1 - k ^ 2))) / (2 * (1 + Real.sqrt (Real.sqrt (1 - k ^ 2))))
-    (fun k : ℝ => jacobiNome k - ((lam k + 2 * lam k ^ 5 + 15 * lam k ^ 9 + 150 * lam k ^ 13 +
-        1707 * lam k ^ 17 : ℝ) : ℂ)) =O[𝓝[>] 0] fun k : ℝ => lam k ^ 21 := by
-  sorry
-
 /-- DLMF 19.5.8: `K(k) = (π/2)(1 + 2∑_{n ≥ 1} q^{n²})²` with `q = jacobiNome k`, on
 `jacobiModulusDomain` (`Re k > 0`, `k ∉ [1, ∞)`, where `|q| < 1`). -/
 @[dlmf 19.5.E8]
@@ -854,7 +843,46 @@ theorem completeEllipticK_eq_nome_series {k : ℂ} (hk : k ∈ jacobiModulusDoma
     linear_combination -hsum
   rw [← hK, completeEllipticKOfTau, htheta]
 
-/-- **Admitted.** DLMF 19.5.9:
+open DLMF.Elliptic DLMF.Theta in
+/-- The complete second-kind integral from the second theta-four derivative at zero,
+on the principal modulus domain. -/
+theorem completeEllipticE_eq_jacobiThetaFourTau_second_deriv {k : ℂ}
+    (hk : k ∈ jacobiModulusDomain) :
+    completeEllipticE k = completeEllipticK k - π ^ 2 / (4 * completeEllipticK k) *
+      (deriv (deriv (fun z => jacobiThetaFourTau z (jacobiTau k))) 0 /
+        jacobiThetaFourTau 0 (jacobiTau k)) := by
+  have hE : DifferentiableOn ℂ completeEllipticE jacobiModulusDomain :=
+    differentiableOn_completeEllipticK_completeEllipticE.2.mono
+      (fun k hk => (jacobiModulusDomain_eq ▸ hk).2)
+  have hK := DLMF.JacobiElliptic.differentiableOn_completeEllipticK
+  have hS := differentiableOn_comp_jacobiTau (fun τ hτ =>
+    differentiableOn_jacobiThetaFourTau_second_deriv_zero.differentiableAt
+      ((isOpen_lt continuous_const continuous_im).mem_nhds hτ))
+  have h4 := differentiableOn_comp_jacobiTau (fun τ hτ =>
+    differentiableAt_jacobiThetaFourTau_tau 0 hτ)
+  have hnK : ∀ k ∈ jacobiModulusDomain, 4 * completeEllipticK k ≠ 0 :=
+    fun k hk => mul_ne_zero (by norm_num) (completeEllipticK_ne_zero_of_mem_jacobiModulusDomain hk)
+  have hn4 : ∀ k ∈ jacobiModulusDomain, jacobiThetaFourTau 0 (jacobiTau k) ≠ 0 :=
+    fun k hk => jacobiThetaFourTau_zero_ne_zero (jacobiTau_im_pos hk)
+  apply eqOn_jacobiModulusDomain_of_real hE
+    (hK.sub (((differentiableOn_const _).div (hK.const_mul 4) hnK).mul (hS.div h4 hn4))) ?_ hk
+  intro x hx0 hx1
+  have hx := ofReal_mem_jacobiModulusDomain hx0 hx1
+  have hm : x ^ 2 < 1 := by nlinarith
+  have h := DLMF.JacobiElliptic.EpsilonTheta.thetaFour_second_deriv_zero_div_eq hx0 hx1
+  rw [← completeEllipticE_eq_ofReal (k := (x : ℂ)) (m := x ^ 2)
+    (by push_cast; rfl) hm.le] at h
+  have hKi := (jacobi_inversion_k hx).2.2
+  dsimp only [completeEllipticKOfTau] at hKi
+  have h3ne := jacobiThetaThreeTau_zero_ne_zero (jacobiTau_im_pos hx)
+  have h4ne := hn4 _ hx
+  dsimp only [Pi.sub_apply, Pi.mul_apply, Pi.div_apply]
+  rw [← hKi] at h ⊢
+  field_simp [h3ne, h4ne, Complex.ofReal_ne_zero.mpr Real.pi_ne_zero] at h ⊢
+  linear_combination 4 * h
+
+open DLMF.Elliptic DLMF.Theta in
+/-- DLMF 19.5.9:
 `E(k) = K(k) + (2π²/K(k)) ∑_{n≥1} (-1)ⁿ n² q^{n²} / (1 + 2∑_{n≥1} (-1)ⁿ q^{n²})` on
 `jacobiModulusDomain`. -/
 @[dlmf 19.5.E9]
@@ -862,7 +890,29 @@ theorem completeEllipticE_eq_nome_series {k : ℂ} (hk : k ∈ jacobiModulusDoma
     completeEllipticE k = completeEllipticK k + 2 * π ^ 2 / completeEllipticK k *
       ((∑' n : ℕ, (-1 : ℂ) ^ (n + 1) * ((n + 1 : ℕ) : ℂ) ^ 2 * jacobiNome k ^ ((n + 1) ^ 2)) /
         (1 + 2 * ∑' n : ℕ, (-1 : ℂ) ^ (n + 1) * jacobiNome k ^ ((n + 1) ^ 2))) := by
-  sorry
+  have hτ := jacobiTau_im_pos hk
+  have hs := jacobiThetaFourTau_second_deriv_zero_hasSum hτ
+  have hn := jacobiNome_eq_exp_tau k
+  rw [← hn] at hs
+  have h4 : jacobiThetaFourTau 0 (jacobiTau k) =
+      1 + 2 * ∑' n : ℕ, (-1 : ℂ) ^ (n + 1) * jacobiNome k ^ ((n + 1) ^ 2) := by
+    have h := jacobiThetaFourTau_hasSum_cos 0 hτ
+    simp only [mul_zero, cos_zero, mul_one] at h
+    have ht (n : ℕ) : cexp (π * I * jacobiTau k * ((n : ℂ) + 1) ^ 2) =
+        jacobiNome k ^ ((n + 1) ^ 2) := by
+      rw [hn, ← exp_nat_mul]
+      congr 1
+      push_cast
+      ring
+    have hh : HasSum (fun n : ℕ =>
+        2 * ((-1 : ℂ) ^ (n + 1) * jacobiNome k ^ ((n + 1) ^ 2)))
+        (jacobiThetaFourTau 0 (jacobiTau k) - 1) :=
+      h.congr_fun fun n => by rw [ht n]; ring
+    have hsum := hh.tsum_eq
+    rw [tsum_mul_left] at hsum
+    linear_combination -hsum
+  rw [completeEllipticE_eq_jacobiThetaFourTau_second_deriv hk, ← h4, hs.tsum_eq]
+  ring
 
 /-- The descending Landen sequence of moduli of DLMF 19.5.11: `k₀ = k`,
 `k_{m+1} = (1 - √(1 - k_m²))/(1 + √(1 - k_m²))` (principal square roots). -/

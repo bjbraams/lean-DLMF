@@ -5,6 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.BernoulliEuler.EulerHankel
+public import DLMF.BernoulliEuler.BernoulliHankel
 public import DLMFMathlib.NumberTheory.EulerNumbers
 public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 public import Mathlib.NumberTheory.ZetaValues
@@ -1223,21 +1225,5 @@ theorem sum_antidiagonal_bernoulli_quadruple {n : ℕ} (hn : 4 ≤ n) :
   rw [hch]
   linear_combination hc'
 
-/-- DLMF 24.14.11: the Hankel determinant `det[B_{r+s}]_{r,s=0}^{n}` equals
-`(-1)^{n(n+1)/2} (∏_{k=1}^n k!)⁶ / ∏_{k=1}^{2n+1} k!`. -/
-@[dlmf 24.14.E11]
-theorem det_hankel_bernoulli (n : ℕ) :
-    (Matrix.of fun r s : Fin (n + 1) => _root_.bernoulli (r + s : ℕ)).det =
-      (-1) ^ (n * (n + 1) / 2) * (∏ k ∈ Finset.Icc 1 n, (k ! : ℚ)) ^ 6 /
-        ∏ k ∈ Finset.Icc 1 (2 * n + 1), (k ! : ℚ) := by
-  sorry
-
-/-- DLMF 24.14.12: the Hankel determinant `det[E_{r+s}]_{r,s=0}^{n}` equals
-`(-1)^{n(n+1)/2} (∏_{k=1}^n k!)²`. -/
-@[dlmf 24.14.E12]
-theorem det_hankel_eulerNumber (n : ℕ) :
-    (Matrix.of fun r s : Fin (n + 1) => eulerNumber (r + s : ℕ)).det =
-      (-1) ^ (n * (n + 1) / 2) * (∏ k ∈ Finset.Icc 1 n, (k ! : ℚ)) ^ 2 := by
-  sorry
 
 end DLMF.BernoulliEuler

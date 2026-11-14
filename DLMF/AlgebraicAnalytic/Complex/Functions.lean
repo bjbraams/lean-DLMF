@@ -5,6 +5,15 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
+import DLMFMathlib.Analysis.Complex.ArgumentFilledHull
+import DLMFMathlib.Analysis.Complex.ContinuousPhase
+import TauCeti.MeasureTheory.Function.AbsolutelyContinuous.Comp
+import TauCeti.Analysis.Contour.LogDerivFTC
+import TauCeti.Analysis.Contour.Winding.AbsolutelyContinuous.Basic
+import TauCeti.Analysis.Calculus.ContDiff.PiecewiseC1On.AbsolutelyContinuous
+import TauCeti.Analysis.Complex.PlaneSeparation.Inside
+import TauCeti.Topology.JordanCurve.Interval
+
 public import DLMF.AlgebraicAnalytic.Complex.Basic
 public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 public import DLMFMathlib.Analysis.Complex.TrigSeriesExtension
@@ -79,6 +88,10 @@ The infinite products, partial fractions and generating functions of §1.10(ix)�
   (Weierstrass products, Mittag-Leffler series); DLMF's convergence of infinite products is
   `InfiniteProductConverges`.
 * Logarithms and powers are principal (`Complex.log`, `cpow`).
+
+The weighted argument principle uses TauCeti's null-homologous residue theorem and
+logarithmic-derivative principal-part APIs through
+`Complex.integral_deriv_smul_mul_logDeriv_eq_sum`.
 -/
 
 @[expose] public noncomputable section
@@ -437,6 +450,39 @@ theorem IsSimpleClosedContour.residue_theorem {γ : ℝ → ℂ} {a b : ℝ} {f 
     (2 * Real.pi * I)⁻¹ * contourIntegral γ a b f = ∑ s ∈ S, residueAt f s := by
   sorry
 
+/-- The weighted argument principle, stronger than DLMF, which uses the identity weight:
+any analytic weight may multiply the logarithmic derivative, and its values weight the
+meromorphic orders in the resulting sum. -/
+@[dlmf 1.10.E10 "stronger than DLMF: any analytic weight replaces the identity"]
+theorem IsSimpleClosedContour.argumentPrinciple_mul_id' {γ : ℝ → ℂ} {a b : ℝ} {f : ℂ → ℂ}
+    {S : Finset ℂ} (hγ : IsSimpleClosedContour γ a b) (hpos : IsPositivelyOriented γ a b)
+    (hS : ↑S ⊆ contourInterior γ a b)
+    (hf : ∀ z ∈ (contourInterior γ a b ∪ γ '' Icc a b) \ ↑S, AnalyticAt ℂ f z ∧ f z ≠ 0)
+    (hm : ∀ s ∈ S, MeromorphicAt f s ∧ meromorphicOrderAt f s ≠ ⊤)
+    {g : ℂ → ℂ} (hg : AnalyticOnNhd ℂ g (contourInterior γ a b ∪ γ '' Icc a b)) :
+    (2 * Real.pi * I)⁻¹ * contourIntegral γ a b (fun z => g z * logDeriv f z) =
+      ∑ s ∈ S, ((meromorphicOrderAt f s).untop₀ : ℂ) * g s := by
+  have hC := TauCeti.isJordanCurve_image_Icc hγ.1
+    (by simpa only [uIcc_of_le hγ.1.le] using hγ.2.1.continuousOn)
+    hγ.2.2.1 hγ.2.2.2
+  have hK : contourInterior γ a b ∪ γ '' Icc a b = TauCeti.filledHull (γ '' Icc a b) :=
+    sdiff_union_of_subset TauCeti.subset_filledHull
+  have hS' : (S : Set ℂ) ⊆ interior (TauCeti.filledHull (γ '' uIcc a b)) := by
+    simpa only [uIcc_of_le hγ.1.le, hC.interior_filledHull, contourInterior] using hS
+  have hoff : ∀ t ∈ uIcc a b, γ t ∉ (S : Set ℂ) := by
+    intro t ht hs
+    exact (hS hs).2 ⟨t, by simpa only [uIcc_of_le hγ.1.le] using ht, rfl⟩
+  have hf' : ∀ z ∈ TauCeti.filledHull (γ '' uIcc a b) \ (S : Set ℂ),
+      AnalyticAt ℂ f z ∧ f z ≠ 0 := by
+    simpa only [uIcc_of_le hγ.1.le, hK] using hf
+  have h := Complex.integral_deriv_smul_mul_logDeriv_eq_sum hγ.2.1 hγ.2.2.1 hS' hoff hf' hm
+    (by simpa only [uIcc_of_le hγ.1.le, hK] using hg)
+  rw [contourIntegral]
+  rw [h]
+  apply Finset.sum_congr rfl
+  intro z hz
+  rw [hpos z (hS hz), one_mul, mul_comm]
+
 /-- DLMF 1.10.9 (phase or argument principle): if the singularities of `f` within the simple
 closed contour `C` are poles, the zeros and poles within `C` lie in the finite set `S`, `f` is
 analytic and nonvanishing on `C` (and elsewhere within `C` off `S`), and `C` is described in the
@@ -454,7 +500,48 @@ theorem IsSimpleClosedContour.argument_principle {γ : ℝ → ℂ} {a b : ℝ} 
       ∀ θ : ℝ → ℝ, ContinuousOn θ (Icc a b) →
         (∀ t ∈ Icc a b, IsPhase (f (γ t)) (θ t)) →
         (θ b - θ a) / (2 * Real.pi) = ∑ s ∈ S, ((meromorphicOrderAt f s).untop₀ : ℝ) := by
-  sorry
+  have hcount : (2 * Real.pi * I)⁻¹ * contourIntegral γ a b (logDeriv f) =
+      ∑ s ∈ S, ((meromorphicOrderAt f s).untop₀ : ℂ) := by
+    simpa only [one_mul, mul_one] using
+      hγ.argumentPrinciple_mul_id' hpos hS hf hm
+        (analyticOnNhd_const : AnalyticOnNhd ℂ (fun _ : ℂ => (1 : ℂ)) _)
+  refine ⟨hcount, ?_⟩
+  intro θ hθ hphase
+  have hcurve (t : ℝ) (ht : t ∈ uIcc a b) : AnalyticAt ℂ f (γ t) ∧ f (γ t) ≠ 0 := by
+    have hi : γ t ∈ γ '' Icc a b := ⟨t, by simpa only [uIcc_of_le hγ.1.le] using ht, rfl⟩
+    exact hf (γ t) ⟨Or.inr hi, fun hs => (hS hs).2 hi⟩
+  have hσ : AbsolutelyContinuousOnInterval (f ∘ γ) a b :=
+    hγ.2.1.absolutelyContinuousOnInterval.comp_of_contDiffAt (by
+      rintro _ ⟨t, ht, rfl⟩
+      exact ((hcurve t ht).1.contDiffAt).restrict_scalars ℝ)
+  have hσne : (0 : ℂ) ∉ (f ∘ γ) '' uIcc a b := by
+    rintro ⟨t, ht, he⟩
+    exact (hcurve t ht).2 he
+  have hw := TauCeti.Contour.windingNumber_comp_eq_integral_logDeriv hγ.2.1
+    (fun t ht => (hcurve t ht).1) (fun t ht => (hcurve t ht).2)
+  rw [hσ.windingNumber_eq_integral hσne] at hw
+  have hJ : (∫ t in a..b, deriv (f ∘ γ) t / (f ∘ γ) t) =
+      contourIntegral γ a b (logDeriv f) := by
+    apply mul_left_cancel₀ (inv_ne_zero Complex.two_pi_I_ne_zero)
+    simpa only [contourIntegral, sub_zero, div_eq_mul_inv, mul_comm] using hw
+  have him := Complex.integral_deriv_div_im_eq_phase_sub hσ
+    (fun t ht => (hcurve t ht).2)
+    (by simpa only [uIcc_of_le hγ.1.le] using hθ)
+    (by simpa only [uIcc_of_le hγ.1.le, IsPhase, Function.comp_apply] using hphase)
+  rw [hJ] at him
+  have hI : contourIntegral γ a b (logDeriv f) =
+      (2 * Real.pi * I) * ∑ s ∈ S, ((meromorphicOrderAt f s).untop₀ : ℂ) := by
+    rw [← hcount]
+    field_simp
+  rw [hI] at him
+  have hcast : (∑ s ∈ S, ((meromorphicOrderAt f s).untop₀ : ℂ)) =
+      ((∑ s ∈ S, ((meromorphicOrderAt f s).untop₀ : ℝ) : ℝ) : ℂ) := by
+    push_cast
+    rfl
+  rw [hcast] at him
+  norm_num [mul_im, mul_re] at him
+  apply (div_eq_iff (by positivity : 2 * Real.pi ≠ 0)).mpr
+  nlinarith [him]
 
 /-- DLMF 1.10.10: under the hypotheses of 1.10.9,
 `(2πi)⁻¹ ∫_C z f'(z)/f(z) dz = (sum of locations of zeros) - (sum of locations of poles)`, each
@@ -467,7 +554,7 @@ theorem IsSimpleClosedContour.argumentPrinciple_mul_id {γ : ℝ → ℂ} {a b :
     (hm : ∀ s ∈ S, MeromorphicAt f s ∧ meromorphicOrderAt f s ≠ ⊤) :
     (2 * Real.pi * I)⁻¹ * contourIntegral γ a b (fun z => z * logDeriv f z) =
       ∑ s ∈ S, ((meromorphicOrderAt f s).untop₀ : ℂ) * s := by
-  sorry
+  exact hγ.argumentPrinciple_mul_id' hpos hS hf hm analyticOnNhd_id
 
 /-- DLMF §1.10(iv) (Rouché's theorem): if `f` and `g` are analytic on and inside a simple closed
 contour `C` and `|g(z)| < |f(z)|` on `C`, then `f` and `f + g` have the same number of zeros

@@ -1319,6 +1319,35 @@ meaning of `P(B(x))` with `(B(x))ⁿ = Bₙ(x)`. -/
 @[dlmf 24.4.viii]
 def umbralBernoulli (x : ℂ) (P : ℂ[X]) : ℂ := umbralFunctional (fun i => bernoulliPolyB i x) P
 
+/-- Bernoulli umbral substitution commutes with scalar multiplication. -/
+lemma umbralBernoulli_C_mul (x c : ℂ) (P : ℂ[X]) :
+    umbralBernoulli x (C c * P) = c * umbralBernoulli x P := by
+  unfold umbralBernoulli umbralFunctional
+  rw [← Polynomial.smul_eq_C_mul, Polynomial.sum_smul_index _ _ _ (fun i => by simp)]
+  rw [← smul_eq_mul c, Polynomial.smul_sum]
+  simp only [smul_eq_mul, mul_assoc]
+
+/-- Bernoulli umbral substitution is additive. -/
+lemma umbralBernoulli_add (x : ℂ) (P Q : ℂ[X]) :
+    umbralBernoulli x (P + Q) = umbralBernoulli x P + umbralBernoulli x Q := by
+  exact umbralFunctional_add _ P Q
+
+/-- Bernoulli umbral substitution commutes with subtraction. -/
+lemma umbralBernoulli_sub (x : ℂ) (P Q : ℂ[X]) :
+    umbralBernoulli x (P - Q) = umbralBernoulli x P - umbralBernoulli x Q := by
+  rw [sub_eq_add_neg, umbralBernoulli_add, show -Q = C (-1 : ℂ) * Q by simp,
+    umbralBernoulli_C_mul]
+  ring
+
+/-- Bernoulli umbral substitution commutes with finite sums. -/
+lemma umbralBernoulli_sum {ι : Type*} (x : ℂ) (s : Finset ι) (P : ι → ℂ[X]) :
+    umbralBernoulli x (∑ i ∈ s, P i) = ∑ i ∈ s, umbralBernoulli x (P i) := by
+  classical
+  induction s using Finset.induction_on with
+  | empty => simp [umbralBernoulli, umbralFunctional]
+  | insert i s hi ih => rw [sum_insert hi, sum_insert hi, umbralBernoulli_add, ih]
+
+
 /-- The umbral substitution `(E(x))ⁿ = Eₙ(x)` of DLMF §24.4(viii). -/
 @[dlmf 24.4.viii]
 def umbralEuler (x : ℂ) (P : ℂ[X]) : ℂ := umbralFunctional (fun i => eulerPolyE i x) P

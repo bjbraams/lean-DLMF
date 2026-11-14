@@ -55,7 +55,7 @@ theorem norm_pochhammer_le_mul_norm_pochhammer (μ ν : ℂ) (hν : ∀ k : ℕ,
   obtain ⟨K, hK⟩ := exists_nat_ge ((‖μ‖ + σ * ‖ν‖) / (σ - 1))
   have hpos : ∀ j, 0 < ‖pochhammer ν j‖ := fun j =>
       norm_pos_iff.mpr (pochhammer_ne_zero_of_not_neg_nat hν j)
-  set C := ∑ j ∈ Finset.range (K + 1), ‖pochhammer μ j‖ / ‖pochhammer ν j‖ with hC
+  set C := ∑ j ∈ Finset.range (K + 1), ‖pochhammer μ j‖ / ‖pochhammer ν j‖
   have hC0 : 0 ≤ C := Finset.sum_nonneg fun j _ => div_nonneg (norm_nonneg _) (hpos j).le
   have hsmall : ∀ j ≤ K, ‖pochhammer μ j‖ ≤ C * ‖pochhammer ν j‖ := by
     intro j hj
@@ -104,6 +104,48 @@ theorem factorial_le_mul_norm_pochhammer (ν : ℂ) (hν : ∀ k : ℕ, ν ≠ -
   obtain ⟨C, hC0, hC⟩ := norm_pochhammer_le_mul_norm_pochhammer 1 ν hν hσ
   refine ⟨C, hC0, fun m => ?_⟩
   simpa [pochhammer_nat_one, Complex.norm_natCast] using hC m
+
+/-- A factorial bound uniform in a natural shift of a Pochhammer parameter. -/
+lemma norm_pochhammer_add_mul_factorial_le (a : ℂ) (k m : ℕ) :
+    ‖pochhammer (a + k) m‖ * (k ! : ℝ) ≤ (1 + ‖a‖) ^ m * (k + m)! := by
+  induction m with
+  | zero => simp [pochhammer_zero]
+  | succ m ih =>
+    rw [pochhammer_succ, norm_mul, pow_succ,
+      show k + (m + 1) = k + m + 1 by omega, Nat.factorial_succ]
+    have hb : ‖a + k + m‖ ≤ (1 + ‖a‖) * ((k + m : ℕ) + 1) := by
+      have hn := norm_nonneg a
+      have hk : (0 : ℝ) ≤ k := Nat.cast_nonneg k
+      have hm : (0 : ℝ) ≤ m := Nat.cast_nonneg m
+      calc ‖a + k + m‖ ≤ ‖a + k‖ + ‖(m : ℂ)‖ := norm_add_le _ _
+        _ ≤ (‖a‖ + ‖(k : ℂ)‖) + ‖(m : ℂ)‖ := by
+          gcongr
+          exact norm_add_le _ _
+        _ ≤ _ := by
+          simp only [Complex.norm_natCast, Nat.cast_add]
+          nlinarith [mul_nonneg hn hk, mul_nonneg hn hm]
+    push_cast at hb ⊢
+    calc ‖pochhammer (a + k) m‖ * ‖a + k + m‖ * k !
+        = (‖pochhammer (a + k) m‖ * k !) * ‖a + k + m‖ := by ring
+      _ ≤ ((1 + ‖a‖) ^ m * (k + m)!) * ((1 + ‖a‖) * (k + m + 1)) := by
+        exact mul_le_mul ih hb (norm_nonneg _) (by positivity)
+      _ = _ := by ring
+
+/-- A shifted Pochhammer coefficient is controlled by a binomial coefficient. -/
+lemma norm_pochhammer_add_div_factorial_le (a : ℂ) (k n : ℕ) :
+    ‖pochhammer (a + k) n / (n ! : ℂ)‖ ≤
+      (1 + ‖a‖) ^ n * ((k + n).choose k : ℝ) := by
+  have hk : (0 : ℝ) < k ! := Nat.cast_pos.mpr k.factorial_pos
+  have hn : (0 : ℝ) < n ! := Nat.cast_pos.mpr n.factorial_pos
+  have hfac : ((k + n)! : ℝ) = ((k + n).choose k : ℝ) * k ! * n ! := by
+    have h := Nat.add_choose_mul_factorial_mul_factorial k n
+    rw [← Nat.choose_symm_add] at h
+    exact_mod_cast h.symm
+  rw [norm_div, Complex.norm_natCast, div_le_iff₀ hn]
+  apply (mul_le_mul_iff_left₀ hk).mp
+  calc ‖pochhammer (a + k) n‖ * k ! ≤ (1 + ‖a‖) ^ n * (k + n)! :=
+      norm_pochhammer_add_mul_factorial_le a k n
+    _ = _ := by rw [hfac]; ring
 
 /-- A single binomial term is bounded by the full binomial power. -/
 lemma choose_mul_pow_mul_pow_le {u v : ℝ} (hu : 0 ≤ u) (hv : 0 ≤ v) (m n : ℕ) :
@@ -168,7 +210,7 @@ theorem exists_summable_doubleSeries_of_bidisc (c : ℕ × ℕ → ℂ)
   obtain ⟨C, hC⟩ := hc ((1 + t) / (2 * t)) (by rw [lt_div_iff₀ (by linarith)]; linarith)
   refine ⟨t, t, by rw [ht]; linarith [le_max_left ‖x‖ ‖y‖],
     by rw [ht]; linarith [le_max_right ‖x‖ ‖y‖], ?_⟩
-  refine summable_of_le_geom_add (C := C) (s := (1 + t) / 2) (by linarith) (by linarith)
+  refine summable_of_le_geom_add (C := C) (s := (1 + t) / 2) (by linarith) (by linarith [ht1])
     (fun q => by positivity) (fun q => ?_)
   have hst : (1 + t) / (2 * t) * t = (1 + t) / 2 := by field_simp
   calc ‖c q‖ * t ^ q.1 * t ^ q.2 = ‖c q‖ * t ^ (q.1 + q.2) := by rw [pow_add]; ring
@@ -192,7 +234,7 @@ theorem exists_summable_doubleSeries_of_diamond (c : ℕ × ℕ → ℂ)
   have ht0 : 1 / 2 ≤ t := by rw [ht, hδ]; linarith
   obtain ⟨C, hC⟩ := hc ((1 + t) / (2 * t)) (by rw [lt_div_iff₀ (by linarith)]; linarith)
   refine ⟨‖x‖ + δ, ‖y‖ + δ, by linarith, by linarith, ?_⟩
-  refine summable_of_le_geom_add (C := C) (s := (1 + t) / 2) (by linarith) (by linarith)
+  refine summable_of_le_geom_add (C := C) (s := (1 + t) / 2) (by linarith) (by linarith [ht1])
     (fun q => by positivity) (fun q => ?_)
   have hst : (1 + t) / (2 * t) * t = (1 + t) / 2 := by field_simp
   have hb := choose_mul_pow_mul_pow_le (u := ‖x‖ + δ) (v := ‖y‖ + δ) (by linarith) (by linarith)
@@ -227,15 +269,15 @@ theorem exists_summable_doubleSeries_of_sqrt_add_sqrt (c : ℕ × ℕ → ℂ)
   set t := (α + β) ^ 2 with ht
   have hab1 : α + β < 1 := by rw [hα, hβ, hδ]; linarith
   have hab0 : 1 / 2 ≤ α + β := by rw [hα, hβ, hδ]; linarith
-  have ht1 : t < 1 := by rw [ht]; nlinarith
-  have ht0 : 1 / 4 ≤ t := by rw [ht]; nlinarith
+  have ht1 : t < 1 := by rw [ht]; nlinarith [hab1, hab0]
+  have ht0 : 1 / 4 ≤ t := by rw [ht]; nlinarith [hab0]
   have hxA : ‖x‖ < α ^ 2 := by
     rw [hα]; nlinarith [Real.sq_sqrt (norm_nonneg x)]
   have hyB : ‖y‖ < β ^ 2 := by
     rw [hβ]; nlinarith [Real.sq_sqrt (norm_nonneg y)]
   obtain ⟨C, hC⟩ := hc ((1 + t) / (2 * t)) (by rw [lt_div_iff₀ (by linarith)]; linarith)
   refine ⟨α ^ 2, β ^ 2, hxA, hyB, ?_⟩
-  refine summable_of_le_geom_add (C := C) (s := (1 + t) / 2) (by linarith) (by linarith)
+  refine summable_of_le_geom_add (C := C) (s := (1 + t) / 2) (by linarith) (by linarith [ht1])
     (fun q => by positivity) (fun q => ?_)
   have hst : (1 + t) / (2 * t) * t = (1 + t) / 2 := by field_simp
   have hb := choose_mul_pow_mul_pow_le (u := α) (v := β) (by linarith) (by linarith) q.1 q.2

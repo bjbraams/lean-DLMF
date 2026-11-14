@@ -5,6 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
+public import DLMF.Hypergeometric.Solutions.InfinityWronskian
+
 public import DLMF.Hypergeometric.Solutions.Equation
 public import DLMF.Hypergeometric.Solutions.Logarithmic
 public import DLMF.Hypergeometric.Solutions.Connections

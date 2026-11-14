@@ -8,6 +8,7 @@ module -- shake: keep-all
 public import DLMF.Polylog.Basic
 public import DLMF.Polylog.Dilog
 public import DLMF.Polylog.Trilog
+public import DLMF.Polylog.BookIdentities
 
 /-!
 # Polylogarithms (Duverney Chapter 8; DLMF §25.12)

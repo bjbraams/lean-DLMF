@@ -5,6 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.SphericalHarmonics.Basic.SymmetricPowerMatrix
+
 public import TauCeti.RingTheory.MvPolynomial.Homogeneous
 public import Mathlib.Algebra.MvPolynomial.PDeriv
 public import Mathlib.MeasureTheory.Constructions.HaarToSphere

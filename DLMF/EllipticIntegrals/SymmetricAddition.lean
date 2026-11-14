@@ -14,6 +14,7 @@ public import Carlson.TwoVariable.QuadraticHybrid
 public import Carlson.TwoVariable.R.ElementaryValues
 public import Carlson.TwoVariable.Reduction
 public import DLMF.EllipticIntegrals.Symmetric
+public import DLMF.EllipticIntegrals.SymmetricRCAddition
 
 /-!
 # Addition theorems for the symmetric elliptic integrals (DLMF §19.26)
@@ -899,16 +900,6 @@ theorem symmetricEllipticRC_addition_eta_sub_xi {x y p q : ℝ} (hx : x ≠ 0)
   linear_combination hpq
 
 /-! ### §19.26(ii) Case `x = 0` -/
-
-/-- DLMF 19.26.17: `√α R_C(β, α + β) + √β R_C(α, α + β) = π/2`, for
-`α, β ∈ ℂ \ (-∞, 0)` with `α + β > 0`. -/
-@[dlmf 19.26.E17]
-theorem symmetricEllipticRC_addition_zero {α β : ℂ} (hα : IsCarlsonArgument α)
-    (hβ : IsCarlsonArgument β)
-    (hαβ : 0 < (α + β).re) (hαβ' : (α + β).im = 0) :
-    α ^ (1 / 2 : ℂ) * symmetricEllipticRC β (α + β) + β ^ (1 / 2 : ℂ) *
-        symmetricEllipticRC α (α + β) = π / 2 := by
-  sorry
 
 /-! ### §19.26(iii) Duplication formulas -/
 

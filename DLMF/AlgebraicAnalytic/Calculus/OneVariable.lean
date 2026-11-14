@@ -16,6 +16,8 @@ public import Mathlib.MeasureTheory.Integral.IntegralEqImproper
 public import Mathlib.Topology.EMetricSpace.BoundedVariation
 public import TauCeti.MeasureTheory.Function.MetricDerivative.Variation
 
+import DLMFMathlib.Analysis.Calculus.IteratedDeriv.FaaDiBruno
+
 /-!
 # Calculus of one variable (DLMF §1.4)
 
@@ -82,6 +84,19 @@ theorem continuousWithinAt_Ici_iff_eps_delta {f : ℝ → ℝ} {c : ℝ} :
 
 /-! ### §1.4(iii) Derivatives -/
 
+/-- Faà di Bruno's formula under local `Cⁿ` regularity at the evaluation points.
+This is stronger than DLMF, which assumes `Cⁿ` functions. -/
+@[dlmf 1.4.E13 "stronger than DLMF: local C^n regularity at the evaluation points suffices"]
+theorem iteratedDeriv_comp_faaDiBruno' {f g : ℝ → ℝ} (n : ℕ) (x : ℝ)
+    (hf : ContDiffAt ℝ n f (g x)) (hg : ContDiffAt ℝ n g x) :
+    iteratedDeriv n (f ∘ g) x =
+      ∑ m ∈ (Finset.univ : Finset (Fin n → Fin (n + 1))).filter
+          (fun m => ∑ j : Fin n, (j.val + 1) * (m j).val = n),
+        ((n ! : ℝ) / ∏ j : Fin n, ((m j).val ! : ℝ)) *
+          iteratedDeriv (∑ j : Fin n, (m j).val) f (g x) *
+          ∏ j : Fin n, (iteratedDeriv (j.val + 1) g x / ((j.val + 1) ! : ℝ)) ^ (m j).val := by
+  exact iteratedDeriv_comp_eq_sum_multiplicities n hf hg
+
 /-- DLMF 1.4.13 (Faà di Bruno's formula): for `f`, `g` of class `Cⁿ`,
 `dⁿ/dxⁿ f(g(x)) = ∑ n!/(m₁! ⋯ mₙ!) f^{(k)}(g(x)) ∏ⱼ (g^{(j)}(x)/j!)^{mⱼ}`, the sum over
 `m₁ + 2m₂ + ⋯ + nmₙ = n` (here `m : Fin n → Fin (n + 1)`, `mⱼ ≤ n` being automatic) and
@@ -95,7 +110,7 @@ theorem iteratedDeriv_comp_faaDiBruno {f g : ℝ → ℝ} (n : ℕ) (hf : ContDi
         ((n ! : ℝ) / ∏ j : Fin n, ((m j).val ! : ℝ)) *
           iteratedDeriv (∑ j : Fin n, (m j).val) f (g x) *
           ∏ j : Fin n, (iteratedDeriv (j.val + 1) g x / ((j.val + 1) ! : ℝ)) ^ (m j).val := by
-  sorry
+  exact iteratedDeriv_comp_faaDiBruno' n x hf.contDiffAt hg.contDiffAt
 
 /-- DLMF 1.4.14–1.4.15 (L'Hôpital's rule, case `∞/∞`): if `f` and `g` are differentiable in a
 punctured neighbourhood of `a`, `g' ≠ 0` there, `|g(x)| → ∞` as `x → a`, and

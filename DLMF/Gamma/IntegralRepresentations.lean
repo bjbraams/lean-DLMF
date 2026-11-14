@@ -5,6 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
+public import DLMF.Gamma.IntegralRepresentations.JointComplex
+
 public import DLMF.Gamma.IntegralRepresentations.HankelAndGaussian
 public import DLMF.Gamma.IntegralRepresentations.PrymAndOscillatory
 public import DLMF.Gamma.IntegralRepresentations.DigammaAndBinet

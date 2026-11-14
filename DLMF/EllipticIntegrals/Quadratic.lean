@@ -8,6 +8,8 @@ module
 public import Carlson.Elliptic.AGMSecondKind
 public import DLMF.EllipticIntegrals.Connection
 public import DLMF.EllipticIntegrals.SymmetricQuadratic
+import DLMF.Elliptic.Basic.Amplitude
+import DLMFMathlib.Analysis.SpecialFunctions.Trigonometric.LandenAmplitude
 
 /-!
 # Quadratic transformations of Legendre's integrals (DLMF §19.8)
@@ -47,6 +49,9 @@ Gauss's arithmetic-geometric mean and its use for computing the complete integra
   `lean-codes`' `Carlson.hasSum_agmA_zero` and `Carlson.carlsonRE_eq_agm` (Carlson, Exercises
   9.5-3/9.5-4), with `E(k) = (π/2) R_E(1, k'²)` and `K(k) = (π/2) R_K(1, k'²)` from 19.25.1, for all
   real `k² < 1`.
+* The incomplete descending Landen identities use the derivative of
+  `φ + arctan(k' tan φ)` and the formulas of
+  `DLMFMathlib.Analysis.SpecialFunctions.Trigonometric.LandenAmplitude`.
 * The Landen and Gauss transformations are stated for real `0 < k < 1` and real amplitudes, as
   in DLMF's notes. DLMF 19.8.12 for real `k² < 1` comes from the real
   `Real.completeEllipticKOfParameter_landen_descending` and
@@ -481,7 +486,99 @@ theorem compEllInt_landen_descending {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) :
       ((((differentiableOn_const 1).add hc).mul (hD.2.comp hφd hmaps)).sub (hc.mul hD.1))
       (fun x h0 h1 => (compEllInt_landen_descending_ofReal (k := x) (by nlinarith)).2) hk
 
-/-- **Admitted.** DLMF 19.8.13 (descending Landen transformation of `F`, `E`): for real
+namespace Real
+
+/-- The real Landen identities after parameterizing the original parameter by `1 - r²`. -/
+private lemma incompleteElliptic_landen_descending {r φ : ℝ} (hr : 0 < r)
+    (hφ : φ ∈ Ioo (-(π / 2)) (π / 2)) :
+    DLMF.Elliptic.Real.incompleteEllipticFOfParameter φ (1 - r ^ 2) =
+      (1 + r)⁻¹ * DLMF.Elliptic.Real.incompleteEllipticFOfParameter
+        (φ + _root_.Real.arctan (r * _root_.Real.tan φ)) (((1 - r)/(1 + r))^ 2) ∧
+    DLMF.Elliptic.Real.incompleteEllipticEOfParameter φ (1 - r ^ 2) =
+      (1 + r) / 2 * DLMF.Elliptic.Real.incompleteEllipticEOfParameter
+        (φ + _root_.Real.arctan (r * _root_.Real.tan φ)) (((1 - r)/(1 + r))^ 2) -
+      r * DLMF.Elliptic.Real.incompleteEllipticFOfParameter φ (1 - r ^ 2) +
+      (1 - r) / 2 * _root_.Real.sin (φ + _root_.Real.arctan (r * _root_.Real.tan φ)) := by
+  let l : ℝ := (1 - r)/(1 + r)
+  let A : ℝ → ℝ := fun t => t + _root_.Real.arctan (r * _root_.Real.tan t)
+  let D : ℝ → ℝ := fun t => _root_.Real.sqrt (_root_.Real.cos t ^ 2 + r ^ 2 * _root_.Real.sin t ^ 2)
+  let F₁ : ℝ → ℝ := fun t => DLMF.Elliptic.Real.incompleteEllipticFOfParameter t (1 - r ^ 2)
+  let F₂ : ℝ → ℝ := fun t =>
+    (1 + r)⁻¹ * DLMF.Elliptic.Real.incompleteEllipticFOfParameter (A t) (l ^ 2)
+  let E₁ : ℝ → ℝ := fun t => DLMF.Elliptic.Real.incompleteEllipticEOfParameter t (1 - r ^ 2)
+  let E₂ : ℝ → ℝ := fun t =>
+    (1 + r) / 2 * DLMF.Elliptic.Real.incompleteEllipticEOfParameter (A t) (l ^ 2) -
+    r * DLMF.Elliptic.Real.incompleteEllipticFOfParameter t (1 - r ^ 2) +
+      (1 - r) / 2 * _root_.Real.sin (A t)
+  have hm : 1 - r ^ 2 < 1 := by nlinarith [sq_pos_of_pos hr]
+  have hp : 0 < 1 + r := by linarith
+  have hl : l ^ 2 < 1 := by
+    dsimp only [l]
+    rw [div_pow, div_lt_one (by positivity)]
+    nlinarith [hr]
+  have hDF (m : ℝ) (hm : m < 1) (t : ℝ) :
+      HasDerivAt (fun t => DLMF.Elliptic.Real.incompleteEllipticFOfParameter t m)
+        (_root_.Real.sqrt (1-m*_root_.Real.sin t ^ 2))⁻¹ t := by
+    have h := DLMF.Elliptic.Real.hasDerivAt_incompleteEllipticFOfParameter hm t
+    rwa [_root_.Real.rpow_neg (DLMF.Elliptic.one_sub_mul_sin_sq_pos hm t).le,
+      ← _root_.Real.sqrt_eq_rpow] at h
+  have hDE (m : ℝ) (hm : m < 1) (t : ℝ) :
+      HasDerivAt (fun t => DLMF.Elliptic.Real.incompleteEllipticEOfParameter t m)
+        (_root_.Real.sqrt (1-m*_root_.Real.sin t ^ 2)) t := by
+    simpa only [← _root_.Real.sqrt_eq_rpow] using
+      DLMF.Elliptic.Real.hasDerivAt_incompleteEllipticEOfParameter hm t
+  have hd (t : ℝ) (ht : t ∈ Ioo (-(π / 2)) (π / 2)) :
+      HasDerivAt F₁ (D t)⁻¹ t ∧ HasDerivAt F₂ (D t)⁻¹ t ∧
+      HasDerivAt E₁ (D t) t ∧ HasDerivAt E₂ (D t) t := by
+    have hc : 0 < _root_.Real.cos t := _root_.Real.cos_pos_of_mem_Ioo ht
+    have hD : 0 < D t := by dsimp only [D]; positivity
+    have hDs : D t ^ 2 = _root_.Real.cos t ^ 2 + r ^ 2 * _root_.Real.sin t ^ 2 := by
+      dsimp only [D]
+      rw [_root_.Real.sq_sqrt (by positivity)]
+    have hH : 0 < _root_.Real.cos t ^ 2 + r * _root_.Real.sin t ^ 2 := by positivity
+    have hroot : _root_.Real.sqrt (1-(1 - r ^ 2)*_root_.Real.sin t ^ 2) = D t := by
+      congr 1
+      nlinarith [_root_.Real.sin_sq_add_cos_sq t]
+    have hrootl : _root_.Real.sqrt (1 - l ^ 2 * _root_.Real.sin (A t) ^ 2) =
+        (_root_.Real.cos t ^ 2 + r * _root_.Real.sin t ^ 2) / D t :=
+      _root_.Real.sqrt_one_sub_landen_mul_sin_sq hr hc
+    have hA : HasDerivAt A (1 + r/(_root_.Real.cos t ^ 2+r ^ 2*_root_.Real.sin t ^ 2)) t :=
+      _root_.Real.hasDerivAt_add_arctan_mul_tan hc.ne'
+    refine ⟨by simpa only [hroot] using hDF (1 - r ^ 2) hm t, ?_,
+      by simpa only [hroot] using hDE (1 - r ^ 2) hm t, ?_⟩
+    · convert ((hDF (l ^ 2) hl (A t)).comp t hA).const_mul (1 + r)⁻¹ using 1
+      · rfl
+      · rw [hrootl]
+        rw [← hDs]
+        field_simp [hp.ne', hD.ne', hH.ne']
+        nlinarith [hDs, _root_.Real.sin_sq_add_cos_sq t]
+    · convert ((((hDE (l ^ 2) hl (A t)).comp t hA).const_mul ((1 + r) / 2)).sub
+        ((hDF (1 - r ^ 2) hm t).const_mul r)).add ((hA.sin).const_mul ((1 - r) / 2)) using 1
+      · rfl
+      · rw [hrootl, hroot]
+        have hcos : _root_.Real.cos (A t) =
+            (_root_.Real.cos t ^ 2 - r * _root_.Real.sin t ^ 2) / D t :=
+          _root_.Real.cos_add_arctan_mul_tan hc
+        rw [hcos, ← hDs]
+        field_simp [hD.ne']
+        nlinarith [_root_.Real.sin_sq_add_cos_sq t, hDs]
+  have hzero : (0 : ℝ) ∈ Ioo (-(π / 2)) (π / 2) := by constructor <;> linarith [_root_.Real.pi_pos]
+  have hFeq := isOpen_Ioo.eqOn_of_deriv_eq isPreconnected_Ioo
+    (fun t ht => (hd t ht).1.differentiableAt.differentiableWithinAt)
+    (fun t ht => (hd t ht).2.1.differentiableAt.differentiableWithinAt)
+    (fun t ht => (hd t ht).1.deriv.trans (hd t ht).2.1.deriv.symm) hzero (by
+      simp [F₁, F₂, A, DLMF.Elliptic.Real.incompleteEllipticFOfParameter]) hφ
+  have hEeq := isOpen_Ioo.eqOn_of_deriv_eq isPreconnected_Ioo
+    (fun t ht => (hd t ht).2.2.1.differentiableAt.differentiableWithinAt)
+    (fun t ht => (hd t ht).2.2.2.differentiableAt.differentiableWithinAt)
+    (fun t ht => (hd t ht).2.2.1.deriv.trans (hd t ht).2.2.2.deriv.symm) hzero (by
+      simp [E₁, E₂, A, DLMF.Elliptic.Real.incompleteEllipticEOfParameter,
+        DLMF.Elliptic.Real.incompleteEllipticFOfParameter]) hφ
+  exact ⟨hFeq, hEeq⟩
+
+end Real
+
+/-- DLMF 19.8.13 (descending Landen transformation of `F`, `E`): for real
 `0 < k < 1` and `0 < φ < π/2`, with `k₁ = (1 - k')/(1 + k')`, `φ₁ = φ + arctan(k' tan φ)`:
 `F(φ, k) = ½(1 + k₁)F(φ₁, k₁)` and
 `E(φ, k) = ½(1 + k')E(φ₁, k₁) - k'F(φ, k) + ½(1 - k') sin φ₁`. -/
@@ -495,7 +592,40 @@ theorem incEllInt_landen_descending {k φ : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (h�
       incompleteEllipticE φ k = (1 + kp : ℝ) / 2 * incompleteEllipticE φ₁ k₁ - kp *
           incompleteEllipticF φ k +
         ((1 - kp) / 2 * Real.sin φ₁ : ℝ) := by
-  sorry
+  let r : ℝ := Real.sqrt (1 - k ^ 2)
+  let l : ℝ := (1 - r)/(1 + r)
+  let A : ℝ := φ + Real.arctan (r * Real.tan φ)
+  have hk2 : k ^ 2 < 1 := by nlinarith [hk0, hk1]
+  have hr : 0 < r := Real.sqrt_pos.mpr (by linarith)
+  have hkr : k ^ 2 = 1 - r ^ 2 := by
+    have hs : r ^ 2 = 1 - k ^ 2 := Real.sq_sqrt (by linarith : 0 ≤ 1 - k ^ 2)
+    linarith
+  have hp : 0 < 1 + r := by linarith
+  have hl : l ^ 2 < 1 := by
+    dsimp only [l]
+    rw [div_pow, div_lt_one (by positivity)]
+    nlinarith [hr]
+  have hh := Real.incompleteElliptic_landen_descending hr (φ := φ) ⟨by linarith [Real.pi_pos], hφ1⟩
+  have hc : (1+l)/2 = (1 + r)⁻¹ := by dsimp only [l]; field_simp [hp.ne']; ring
+  dsimp only
+  constructor
+  · rw [incompleteEllipticF_eq_ofReal (m := k ^ 2) (by push_cast; rfl) hk2.le,
+      incompleteEllipticF_eq_ofReal (m := l ^ 2) (by dsimp only [l, r]; push_cast; rfl) hl.le]
+    have hFr : DLMF.Elliptic.Real.incompleteEllipticFOfParameter φ (k ^ 2) =
+        (1+l)/2 * DLMF.Elliptic.Real.incompleteEllipticFOfParameter A (l ^ 2) := by
+      rw [hkr, hc]
+      exact hh.1
+    exact_mod_cast hFr
+  · rw [incompleteEllipticE_eq_ofReal (m := k ^ 2) (by push_cast; rfl) hk2.le,
+      incompleteEllipticE_eq_ofReal (m := l ^ 2) (by dsimp only [l, r]; push_cast; rfl) hl.le,
+      incompleteEllipticF_eq_ofReal (m := k ^ 2) (by push_cast; rfl) hk2.le]
+    have hEr : DLMF.Elliptic.Real.incompleteEllipticEOfParameter φ (k ^ 2) =
+        (1 + r)/2 * DLMF.Elliptic.Real.incompleteEllipticEOfParameter A (l ^ 2) -
+        r * DLMF.Elliptic.Real.incompleteEllipticFOfParameter φ (k ^ 2) +
+        (1 - r) / 2 * _root_.Real.sin A := by
+      rw [hkr]
+      exact hh.2
+    exact_mod_cast hEr
 
 /-- **Admitted.** DLMF 19.8.14–19.8.15: for real `0 < k < 1`, `0 < φ < π/2` and real `α²` with
 `α² ≠ 1`, `α² ≠ k²`, with `ω² = (k² - α²)/(1 - α²)`, `α₁² = α²ω²/(1 + k')²`, `c₁ = csc²φ₁`

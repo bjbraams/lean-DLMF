@@ -1,0 +1,1113 @@
+{
+  "date": "2026-11-14",
+  "scope": "Selected basic theta and elliptic-function theory from Igusa, Mumford and Beals-Wong",
+  "new_modules": [
+    "DLMF/RiemannTheta/Basic/Analytic.lean",
+    "DLMF/RiemannTheta/Basic/Periodicity.lean",
+    "DLMF/RiemannTheta/Basic/Sections.lean",
+    "DLMF/RiemannTheta/Basic/HigherOrder.lean",
+    "DLMF/RiemannTheta/Basic/AlternativeNormalization.lean",
+    "DLMF/RiemannTheta/CharacteristicParity.lean",
+    "DLMF/RiemannTheta/HigherOrderAddition.lean",
+    "DLMF/RiemannTheta/Translations.lean",
+    "DLMF/RiemannTheta/EllipticQuotients.lean"
+  ],
+  "new_theorems": 54,
+  "new_definitions": 8,
+  "relocated_public_theorems": 7,
+  "relocated_definitions": 1,
+  "new_admissions": 0,
+  "books": [
+    {
+      "path": "../lean-CKMA/References/BealsWong2010SpecialFunctionsGraduateText-CambridgeStudiesAM126.pdf",
+      "sha256": "147f4a3175f2edddd54f93120f14371678e8a193363c251e105228ea5df3e5ef",
+      "pages": 466
+    },
+    {
+      "path": "../lean-CKMA/References/BealsWong2015SpecialFunctionsOrthogonalPolynomials2ndEd-CambridgeStudiesAM153.pdf",
+      "sha256": "63a7654bfc544e6f50e889e4763fd6ebed564d26c16d2ef12db04f2688929bba",
+      "pages": 488
+    },
+    {
+      "path": "../lean-CKMA/References/BealsWong2020ExplorationsComplexFunctions-Springer.GTM287.pdf",
+      "sha256": "4e3fb0bb0255c22d9ce9820389f27d9ed85f114908a2d6b1d137b08ca83637f1",
+      "pages": 356
+    },
+    {
+      "path": "../lean-CKMA/References/BealsWong2023MoreExplorationsComplexFunctions-Springer.GTM298.pdf",
+      "sha256": "6ab84ebc0fd9774193d9f63777dbd9f9335693b765a5195dd8c30c460ebfa7a9",
+      "pages": 410
+    },
+    {
+      "path": "../lean-CKMA/References/Igusa1972ThetaFunctions-SpringerGL194.pdf",
+      "sha256": "b2284fa07faaa87def6e14eb9b61d5be93df24dc3f68fd8158ec6c0367afa179",
+      "pages": 246
+    },
+    {
+      "path": "../lean-CKMA/References/Mumford2007TataLecturesOnTheta1-BirkhäuserMBC.pdf",
+      "sha256": "a8c778fdc0d3202c4a6b8c448fc87a1402b481424c42e26fc63ac6948b275841",
+      "pages": 248
+    },
+    {
+      "path": "../lean-CKMA/References/Mumford2007TataLecturesOnTheta2-BirkhäuserMBC.pdf",
+      "sha256": "7e0a253429b5c8ffc19a3327b1e332911bfa707a21221270fe4ff688aff3a4e2",
+      "pages": 285
+    }
+  ],
+  "preservation": {
+    "existing_tagged_statements_changed": [],
+    "existing_mathematical_definition_bodies_changed": [],
+    "public_renames": [],
+    "symmetry_body_unchanged_modulo_expose_attribute": true,
+    "symmetry_mathematical_body_sha256": "225e0b44e22e1b504befd350132fa0e23bf6739a1e04b7d6d9b6b9ba6382c950",
+    "compatibility_module": "DLMF.RiemannTheta.Symmetry"
+  },
+  "validation": {
+    "ordinary_build": {
+      "command": "lake build > /tmp/DLMF-build.log 2>&1",
+      "exit_code": 0,
+      "jobs": 19796
+    },
+    "targeted_build": {
+      "command": [
+        "lake",
+        "build",
+        "DLMF.RiemannTheta.Basic.Analytic",
+        "DLMF.RiemannTheta.Basic.Periodicity",
+        "DLMF.RiemannTheta.Basic.Sections",
+        "DLMF.RiemannTheta.Basic.HigherOrder",
+        "DLMF.RiemannTheta.Basic.AlternativeNormalization",
+        "DLMF.RiemannTheta.CharacteristicParity",
+        "DLMF.RiemannTheta.HigherOrderAddition",
+        "DLMF.RiemannTheta.Translations",
+        "DLMF.RiemannTheta.EllipticQuotients",
+        "DLMF.RiemannTheta.Basic",
+        "DLMF.RiemannTheta.Symmetry",
+        "DLMF.RiemannTheta",
+        "DLMF.Basic",
+        "DLMF"
+      ],
+      "exit_code": 0,
+      "jobs": 19475
+    },
+    "direct_source_checks": [
+      {
+        "file": "DLMF/RiemannTheta/Basic/Analytic.lean",
+        "command": [
+          "lake",
+          "env",
+          "lean",
+          "-DautoImplicit=false",
+          "-DrelaxedAutoImplicit=false",
+          "-DwarningAsError=true",
+          "DLMF/RiemannTheta/Basic/Analytic.lean"
+        ],
+        "exit_code": 0
+      },
+      {
+        "file": "DLMF/RiemannTheta/Basic/Periodicity.lean",
+        "command": [
+          "lake",
+          "env",
+          "lean",
+          "-DautoImplicit=false",
+          "-DrelaxedAutoImplicit=false",
+          "-DwarningAsError=true",
+          "DLMF/RiemannTheta/Basic/Periodicity.lean"
+        ],
+        "exit_code": 0
+      },
+      {
+        "file": "DLMF/RiemannTheta/Basic/Sections.lean",
+        "command": [
+          "lake",
+          "env",
+          "lean",
+          "-DautoImplicit=false",
+          "-DrelaxedAutoImplicit=false",
+          "-DwarningAsError=true",
+          "DLMF/RiemannTheta/Basic/Sections.lean"
+        ],
+        "exit_code": 0
+      },
+      {
+        "file": "DLMF/RiemannTheta/Basic/HigherOrder.lean",
+        "command": [
+          "lake",
+          "env",
+          "lean",
+          "-DautoImplicit=false",
+          "-DrelaxedAutoImplicit=false",
+          "-DwarningAsError=true",
+          "DLMF/RiemannTheta/Basic/HigherOrder.lean"
+        ],
+        "exit_code": 0
+      },
+      {
+        "file": "DLMF/RiemannTheta/Basic/AlternativeNormalization.lean",
+        "command": [
+          "lake",
+          "env",
+          "lean",
+          "-DautoImplicit=false",
+          "-DrelaxedAutoImplicit=false",
+          "-DwarningAsError=true",
+          "DLMF/RiemannTheta/Basic/AlternativeNormalization.lean"
+        ],
+        "exit_code": 0
+      },
+      {
+        "file": "DLMF/RiemannTheta/CharacteristicParity.lean",
+        "command": [
+          "lake",
+          "env",
+          "lean",
+          "-DautoImplicit=false",
+          "-DrelaxedAutoImplicit=false",
+          "-DwarningAsError=true",
+          "DLMF/RiemannTheta/CharacteristicParity.lean"
+        ],
+        "exit_code": 0
+      },
+      {
+        "file": "DLMF/RiemannTheta/HigherOrderAddition.lean",
+        "command": [
+          "lake",
+          "env",
+          "lean",
+          "-DautoImplicit=false",
+          "-DrelaxedAutoImplicit=false",
+          "-DwarningAsError=true",
+          "DLMF/RiemannTheta/HigherOrderAddition.lean"
+        ],
+        "exit_code": 0
+      },
+      {
+        "file": "DLMF/RiemannTheta/Translations.lean",
+        "command": [
+          "lake",
+          "env",
+          "lean",
+          "-DautoImplicit=false",
+          "-DrelaxedAutoImplicit=false",
+          "-DwarningAsError=true",
+          "DLMF/RiemannTheta/Translations.lean"
+        ],
+        "exit_code": 0
+      },
+      {
+        "file": "DLMF/RiemannTheta/EllipticQuotients.lean",
+        "command": [
+          "lake",
+          "env",
+          "lean",
+          "-DautoImplicit=false",
+          "-DrelaxedAutoImplicit=false",
+          "-DwarningAsError=true",
+          "DLMF/RiemannTheta/EllipticQuotients.lean"
+        ],
+        "exit_code": 0
+      },
+      {
+        "file": "DLMF/RiemannTheta/Basic.lean",
+        "command": [
+          "lake",
+          "env",
+          "lean",
+          "-DautoImplicit=false",
+          "-DrelaxedAutoImplicit=false",
+          "-DwarningAsError=true",
+          "DLMF/RiemannTheta/Basic.lean"
+        ],
+        "exit_code": 0
+      },
+      {
+        "file": "DLMF/RiemannTheta/Symmetry.lean",
+        "command": [
+          "lake",
+          "env",
+          "lean",
+          "-DautoImplicit=false",
+          "-DrelaxedAutoImplicit=false",
+          "-DwarningAsError=true",
+          "DLMF/RiemannTheta/Symmetry.lean"
+        ],
+        "exit_code": 0
+      },
+      {
+        "file": "DLMF/RiemannTheta.lean",
+        "command": [
+          "lake",
+          "env",
+          "lean",
+          "-DautoImplicit=false",
+          "-DrelaxedAutoImplicit=false",
+          "-DwarningAsError=true",
+          "DLMF/RiemannTheta.lean"
+        ],
+        "exit_code": 0
+      }
+    ],
+    "axiom_check": {
+      "command": "lake env lean -DautoImplicit=false -DrelaxedAutoImplicit=false /tmp/DLMF-ThetaBooks-axioms.lean",
+      "exit_code": 0,
+      "declarations": 70,
+      "allowed_axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "sorryAx": false
+    },
+    "import_survey": {
+      "command": "python3 scripts/import_survey.py",
+      "exit_code": 0,
+      "new_two_way_area_pairs": [],
+      "foundational_violations": 0,
+      "foundational_closure_violations": 0,
+      "missing_imports": 0,
+      "file_import_cycles": 0
+    },
+    "file_length_check": {
+      "command": "python3 scripts/check_file_lengths.py",
+      "exit_code": 0
+    },
+    "affected_source_line_lengths": {
+      "maximum": 98,
+      "limit": 100
+    },
+    "affected_source_admission_scan": {
+      "matches": 0
+    },
+    "git_diff_check": {
+      "command": "git diff --check",
+      "exit_code": 0
+    }
+  },
+  "declarations": [
+    {
+      "module": "DLMF/RiemannTheta/Basic/Analytic.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.analyticOnNhd_riemannTheta",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/Analytic.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.differentiable_riemannTheta",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/Analytic.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.analyticOnNhd_riemannThetaChar",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/Analytic.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.differentiable_riemannThetaChar",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/Sections.lean",
+      "kind": "def",
+      "name": "DLMF.RiemannTheta.thetaAutomorphyFactor",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/Sections.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.thetaAutomorphyFactor_def",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/Sections.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.thetaAutomorphyFactor_ne_zero",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/Sections.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.thetaAutomorphyFactor_zero",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/Sections.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.thetaAutomorphyFactor_add",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/Sections.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.thetaAutomorphyFactor_cocycle",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/Sections.lean",
+      "kind": "def",
+      "name": "DLMF.RiemannTheta.thetaSectionSpace",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/Sections.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.mem_thetaSectionSpace_iff",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/Sections.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.const_mem_thetaSectionSpace_zero",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/Sections.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.mul_mem_thetaSectionSpace",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/Sections.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.pow_mem_thetaSectionSpace",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/Sections.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.periodic_div_of_mem_thetaSectionSpace",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/Sections.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.riemannTheta_mem_thetaSectionSpace",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/HigherOrder.lean",
+      "kind": "def",
+      "name": "DLMF.RiemannTheta.thetaOfOrder",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/HigherOrder.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.thetaOfOrder_def",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/HigherOrder.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.natCast_smul_mem_siegelUpperHalfSpace",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/HigherOrder.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.thetaOfOrder_one",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/HigherOrder.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.differentiable_thetaOfOrder",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/HigherOrder.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.thetaOfOrder_add_order_smul",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/HigherOrder.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.thetaOfOrder_add_int",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/HigherOrder.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.thetaOfOrder_add_period",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/HigherOrder.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.thetaOfOrder_mem_thetaSectionSpace",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/HigherOrder.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.thetaOfOrder_two_neg",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/AlternativeNormalization.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.inv_two_pi_I_smul_mem_siegelUpperHalfSpace",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/AlternativeNormalization.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.riemannThetaBig_neg",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/AlternativeNormalization.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.riemannThetaBig_add_lattice",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/AlternativeNormalization.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.riemannThetaBig_add_int",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/AlternativeNormalization.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.differentiable_riemannThetaBig",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/CharacteristicParity.lean",
+      "kind": "def",
+      "name": "DLMF.RiemannTheta.characteristicSign",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/CharacteristicParity.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.characteristicSign_eq_pow",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/CharacteristicParity.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.characteristicSign_eq_one_or_neg_one",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/CharacteristicParity.lean",
+      "kind": "def",
+      "name": "DLMF.RiemannTheta.evenHalfCharacteristics",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/CharacteristicParity.lean",
+      "kind": "def",
+      "name": "DLMF.RiemannTheta.oddHalfCharacteristics",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/CharacteristicParity.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.mem_evenHalfCharacteristics",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/CharacteristicParity.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.mem_oddHalfCharacteristics",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/CharacteristicParity.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.sum_characteristicSign",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/CharacteristicParity.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.card_evenHalfCharacteristics_add_card_oddHalfCharacteristics",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/CharacteristicParity.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.card_evenHalfCharacteristics_sub_card_oddHalfCharacteristics",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/CharacteristicParity.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.card_evenHalfCharacteristics",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/CharacteristicParity.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.card_oddHalfCharacteristics",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/CharacteristicParity.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.riemannThetaChar_neg_binary",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/CharacteristicParity.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.riemannThetaChar_zero_of_odd",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/HigherOrderAddition.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.riemannTheta_add_mul_sub",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/HigherOrderAddition.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.riemannTheta_sq_eq_sum_thetaOfOrder_two",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/HigherOrderAddition.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.riemannTheta_add_mul_sub_mem_thetaSectionSpace",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Translations.lean",
+      "kind": "def",
+      "name": "DLMF.RiemannTheta.thetaTranslation",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Translations.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.thetaTranslation_apply",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Translations.lean",
+      "kind": "def",
+      "name": "DLMF.RiemannTheta.thetaDualTranslation",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Translations.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.thetaDualTranslation_apply",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Translations.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.thetaTranslation_zero",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Translations.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.thetaDualTranslation_zero",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Translations.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.thetaTranslation_comp",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Translations.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.thetaTranslation_thetaDualTranslation",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Translations.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.thetaTranslation_commutator_phase_pow",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Translations.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.thetaTranslation_order_smul",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Translations.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.thetaDualTranslation_order_smul",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/EllipticQuotients.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.meromorphic_thetaSectionSpace_quotient_fin_one",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/EllipticQuotients.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.periodic_thetaSectionSpace_quotient_fin_one",
+      "moved": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/Periodicity.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.exp_two_pi_I_intCast",
+      "moved": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/Periodicity.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.riemannTheta_neg",
+      "moved": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/Periodicity.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.riemannTheta_add_int",
+      "moved": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/Periodicity.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.riemannTheta_add_lattice",
+      "moved": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/Periodicity.lean",
+      "kind": "def",
+      "name": "DLMF.RiemannTheta.riemannThetaPeriodLattice",
+      "moved": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/Periodicity.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.riemannThetaChar_add_int",
+      "moved": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/Periodicity.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.riemannThetaChar_add_lattice",
+      "moved": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "module": "DLMF/RiemannTheta/Basic/Periodicity.lean",
+      "kind": "theorem",
+      "name": "DLMF.RiemannTheta.riemannThetaChar_neg_half",
+      "moved": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  ],
+  "source_issues": [
+    {
+      "book": "Beals-Wong 2023",
+      "page": 272,
+      "pdf_page": 281,
+      "issue": "An absolute value is bounded by a strictly negative quadratic form.",
+      "counterexample": "B=-1, N=1 gives 1 <= -1.",
+      "disposition": "Use the real part of the exponent; the new domain bridge and entire theorem use the standard convergent normalization."
+    },
+    {
+      "book": "Beals-Wong 2023",
+      "page": 273,
+      "pdf_page": 282,
+      "equation": "11.3.6",
+      "issue": "The linear exponent uses the integer-period vector and the theta(z) factor is missing.",
+      "disposition": "Proved the corrected full lattice translation law without changing the existing definition."
+    },
+    {
+      "book": "Beals-Wong 2020",
+      "page": 213,
+      "pdf_page": 222,
+      "theorem": "14.3.3 converse",
+      "issue": "Exact order k requires nonzero scalar and no zero/pole cancellation.",
+      "counterexample": "Identical numerator and denominator lists with k=2 and scalar one give a constant meromorphic germ.",
+      "disposition": "New theorem asserts meromorphy and periodicity, allowing cancellation."
+    }
+  ],
+  "remaining_scope": [
+    "N^g basis and dimension theorem",
+    "Preservation of theta section spaces and Heisenberg group representations",
+    "General polarization types",
+    "Riemann vanishing and singularity theorems",
+    "Thomae formulas",
+    "Fay identities"
+  ],
+  "source_hashes": {
+    "DLMF/RiemannTheta/Basic/Analytic.lean": "b303b840b0db7802bcc3e0a21a5dde30c4663fcbe67a4fb0ce89b9799be7a633",
+    "DLMF/RiemannTheta/Basic/Periodicity.lean": "2517e829d263fc7122351f8644a2014d3f24741c57ae9b1a516f26c403f34df5",
+    "DLMF/RiemannTheta/Basic/Sections.lean": "cfef5c2aca161cd29d15f7a01cc21661193aee02d9ca080791ec5fcfdbdced46",
+    "DLMF/RiemannTheta/Basic/HigherOrder.lean": "7dcf04e56b36b994a94aac1822ba97fac78999af269435f0eac2714f97e655cd",
+    "DLMF/RiemannTheta/Basic/AlternativeNormalization.lean": "33576338ca73a9a5cccd804fce7daf62834826a30cdd5989f2fb21bce82c0422",
+    "DLMF/RiemannTheta/CharacteristicParity.lean": "09d869aace9ff39deccd973fbc97e6ad49c9e3f0f9ddd643a1f64f92c1643e78",
+    "DLMF/RiemannTheta/HigherOrderAddition.lean": "23aa1b06c7060d677491ad1b86fed80b1b06ae6a835e7a4d34cdc5a5392e4853",
+    "DLMF/RiemannTheta/Translations.lean": "5576053a62d1dd0c784d753378a6bca228d89c118318ff7225e388b7c0144c27",
+    "DLMF/RiemannTheta/EllipticQuotients.lean": "a8c99a1e170e338a9c4233011b4759a848b40f3a9998dd44c26e5add52222aea",
+    "DLMF/RiemannTheta/Basic.lean": "764cd094ebe086214f0b573e5b4978581eb96c05b6a879748da3ae38b68ceda5",
+    "DLMF/RiemannTheta/Symmetry.lean": "ecf6d6c740a18b1dbb525cfb12e555444aabdbc38e762729bbb2467f019e85cb",
+    "DLMF/RiemannTheta.lean": "5126e2f3132fbcf2b55b5f1805b0eb9481bb2cece952061fd25b175346dd104a",
+    "BookAcquisition-Theta.md": "809c1aeee620afdf5fc0ff43b7b747006433c7128f1775a38ead4b44b12034e4",
+    "ERRATA-BealsWong.md": "533daf68896bc55e60c4bbd175ae6dc2ada216c628e71528c2d6ee39255827bf",
+    "README.md": "80fd2385f9ff7997b947a7d527f59ebe68ebb93f93f1e46a47c756d9c49b48a6",
+    "CREDITS.md": "e4d4683cd04fd255052d624df8ee71bf3a26fa37b2c2e9aa299bf4fc28ab371d",
+    "REVIEW.md": "3c8fb553a32c6d6c8a6347a4e302f98d037321590ffc4ed33e05f1335dad5868"
+  }
+}

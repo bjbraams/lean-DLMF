@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Confluent.BasicProperties
-public import DLMF.Confluent.Basic.Whittaker
+public import DLMF.Confluent.Basic.WhittakerLogarithmic
 
 /-!
 # Whittaker functions
@@ -216,7 +216,7 @@ theorem whittakerM_continuation {κ μ z : ℂ} (m : ℤ) (hz : z ∈ slitPlane)
 @[dlmf 13.14.E12]
 theorem whittakerW_continuation {κ μ z : ℂ} (m : ℤ) (hz : z ∈ slitPlane)
     (hμ : ∀ n : ℤ, 2 * μ ≠ n) :
-    whittakerWOnLog κ μ (log z + 2 * m * π * I) =
+    whittakerWConnectionOnLog κ μ (log z + 2 * m * π * I) =
       (-1 : ℂ) ^ (m + 1) * 2 * π * I * sin (2 * π * μ * m) /
           (Gamma (1 / 2 - μ - κ) * Gamma (1 + 2 * μ) * sin (2 * π * μ)) *
         whittakerM κ μ z +
@@ -235,7 +235,7 @@ theorem whittakerW_continuation {κ μ z : ℂ} (m : ℤ) (hz : z ∈ slitPlane)
     rw [sin, show -(2 * (π : ℂ) * μ * m) * I = -2 * m * μ * π * I by ring,
       show (2 * (π : ℂ) * μ * m) * I = 2 * m * μ * π * I by ring]
     linear_combination (exp (2 * m * μ * π * I) - exp (-2 * m * μ * π * I)) * I_sq
-  rw [whittakerWOnLog, whittakerM_continuation m hz, whittakerM_continuation m hz,
+  rw [whittakerWConnectionOnLog, whittakerM_continuation m hz, whittakerM_continuation m hz,
     whittakerW_eq_connection hz hμ, hG,
     show 2 * (m : ℂ) * -μ * π * I = -2 * m * μ * π * I by ring,
     zpow_add₀ (by norm_num : (-1 : ℂ) ≠ 0), zpow_one]
@@ -448,13 +448,14 @@ theorem whittakerW_even_mu (κ μ : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
   refine congrArg₂ (· + ·) ?_ ?_ <;> congr 1 <;> ring
 
 /-- The jump of `W` across the negative axis, with both continuations `z e^{±πi}` taken on
-the logarithmic argument plane. `whittakerWOnLog` represents `W` there for noninteger `2μ`. -/
+the logarithmic argument plane. `whittakerWConnectionOnLog` represents `W` there
+for noninteger `2μ`. -/
 @[dlmf 13.14.E34]
 theorem whittakerM_jump {κ μ z : ℂ} (hz : z ∈ slitPlane) (hμi : ∀ n : ℤ, 2 * μ ≠ n)
     (hμ : ∀ k : ℕ, 1 + 2 * μ ≠ -k) :
     2 * π / (Gamma (1 + 2 * μ) * Gamma (1 / 2 - μ - κ)) * whittakerM (-κ) μ z =
-      exp (μ * π * I) * whittakerWOnLog κ μ (log z + π * I) +
-        exp (-μ * π * I) * whittakerWOnLog κ μ (log z - π * I) := by
+      exp (μ * π * I) * whittakerWConnectionOnLog κ μ (log z + π * I) +
+        exp (-μ * π * I) * whittakerWConnectionOnLog κ μ (log z - π * I) := by
   have hp := whittakerM_neg_argument (κ := κ) hz true hμ
   have hm := whittakerM_neg_argument (κ := κ) hz false hμ
   have hμ' : ∀ k : ℕ, 1 + 2 * (-μ) ≠ -k := fun k hk =>
@@ -478,7 +479,7 @@ theorem whittakerM_jump {κ μ z : ℂ} (hz : z ∈ slitPlane) (hμi : ∀ n : �
     rw [← exp_add]; congr 1; ring
   have hmm : exp (-μ * π * I) * exp (-μ * π * I) = exp (-(2 * π * μ) * I) := by
     rw [← exp_add]; congr 1; ring
-  rw [whittakerWOnLog, whittakerWOnLog, hp, hm, hnp, hnm]
+  rw [whittakerWConnectionOnLog, whittakerWConnectionOnLog, hp, hm, hnp, hnm]
   calc _ = -2 * (Gamma (-2 * μ) * sin (2 * π * μ)) / Gamma (1 / 2 - μ - κ) *
       whittakerM (-κ) μ z := by rw [hG]; ring
     _ = Gamma (-2 * μ) / Gamma (1 / 2 - μ - κ) * I *
@@ -488,51 +489,36 @@ theorem whittakerM_jump {κ μ z : ℂ} (hz : z ∈ slitPlane) (hμi : ∀ n : �
         sin (2 * π * μ) * whittakerM (-κ) μ z) * I_sq
     _ = _ := by rw [← hpp, ← hmm]; ring
 
-/-- Whittaker W on the logarithmic plane, expressed through Tricomi U there. -/
-theorem whittakerWOnLog_eq_kummerUOnLog (κ μ w : ℂ) :
-    whittakerWOnLog κ μ w = exp (-exp w / 2) * exp ((μ + 1 / 2) * w) *
-      kummerUOnLog (1 / 2 + μ - κ) (1 + 2 * μ) w := by
-  unfold whittakerWOnLog whittakerMOnLog kummerUOnLog
-  rw [show 1 - (1 + 2 * μ) = -2 * μ by ring,
-    show 1 / 2 + μ - κ - (1 + 2 * μ) + 1 = 1 / 2 - μ - κ by ring,
-    show 1 + 2 * μ - 1 = 2 * μ by ring,
-    show 2 - (1 + 2 * μ) = 1 + 2 * -μ by ring,
-    show μ - κ + 1 / 2 = 1 / 2 + μ - κ by ring,
-    show -μ - κ + 1 / 2 = 1 / 2 - μ - κ by ring]
-  have he : exp ((-μ + 1 / 2) * w) = exp ((μ + 1 / 2) * w) * exp ((-2 * μ) * w) := by
-    rw [← exp_add]; congr 1; ring
-  rw [he]
-  ring
-
 /-- The prefactor in Whittaker W after a half-turn, with the turn retained. -/
-theorem whittakerWOnLog_half_turn (κ μ : ℂ) {z : ℂ} (hz : z ≠ 0) (sign : Bool) :
-    whittakerWOnLog κ μ (log z + (if sign then 1 else -1) * π * I) =
+theorem whittakerWConnectionOnLog_half_turn (κ μ : ℂ) {z : ℂ} (hz : z ≠ 0) (sign : Bool) :
+    whittakerWConnectionOnLog κ μ (log z + (if sign then 1 else -1) * π * I) =
       exp (z / 2) * z ^ (μ + 1 / 2) * exp ((if sign then 1 else -1) * (μ + 1 / 2) * π * I) *
-        kummerUOnLog (1 / 2 + μ - κ) (1 + 2 * μ)
+        kummerUConnectionOnLog (1 / 2 + μ - κ) (1 + 2 * μ)
           (log z + (if sign then 1 else -1) * π * I) := by
   set s : ℂ := if sign then 1 else -1 with hs
   have he : exp (log z + s * π * I) = -z := by
     have ht : exp (s * π * I) = -1 := by
       cases sign <;> simp [hs, exp_neg, exp_pi_mul_I]
     rw [exp_add, exp_log hz, ht]; ring
-  rw [whittakerWOnLog_eq_kummerUOnLog, he, neg_neg,
+  rw [whittakerWConnectionOnLog_eq_kummerUConnectionOnLog, he, neg_neg,
     show (μ + 1 / 2) * (log z + s * π * I) = log z * (μ + 1 / 2) + s * (μ + 1 / 2) * π * I by ring,
     exp_add, cpow_def_of_ne_zero hz]
   ring
 
 /-- The jump of `W` across the negative axis, with both continuations `z e^{±πi}` taken on
-the logarithmic argument plane. `whittakerWOnLog` represents `W` there for noninteger `2μ`. -/
+the logarithmic argument plane. `whittakerWConnectionOnLog` represents `W` there
+for noninteger `2μ`. -/
 @[dlmf 13.14.E35]
 theorem whittakerW_jump {κ μ z : ℂ} (hz : z ∈ slitPlane) (hμi : ∀ n : ℤ, 2 * μ ≠ n) :
     2 * π * I / (Gamma (1 / 2 + μ - κ) * Gamma (1 / 2 - μ - κ)) * whittakerW (-κ) μ z =
-      exp (-κ * π * I) * whittakerWOnLog κ μ (log z + π * I) -
-        exp (κ * π * I) * whittakerWOnLog κ μ (log z - π * I) := by
+      exp (-κ * π * I) * whittakerWConnectionOnLog κ μ (log z + π * I) -
+        exp (κ * π * I) * whittakerWConnectionOnLog κ μ (log z - π * I) := by
   have hz0 := slitPlane_ne_zero hz
   have hb : ∀ k : ℤ, 1 + 2 * μ ≠ k := fun k hk =>
     hμi (k - 1) (by push_cast; linear_combination hk)
   have h := kummerU_jump_all (1 / 2 + μ - κ) (1 + 2 * μ) hz hb
-  have hp := whittakerWOnLog_half_turn κ μ hz0 true
-  have hm := whittakerWOnLog_half_turn κ μ hz0 false
+  have hp := whittakerWConnectionOnLog_half_turn κ μ hz0 true
+  have hm := whittakerWConnectionOnLog_half_turn κ μ hz0 false
   simp only [Bool.false_eq_true, ↓reduceIte, one_mul, neg_one_mul, neg_neg, neg_mul,
     ← sub_eq_add_neg] at hp hm
   rw [show (1 / 2 + μ - κ) - (1 + 2 * μ) + 1 = 1 / 2 - μ - κ by ring,
@@ -555,8 +541,16 @@ theorem whittakerW_jump {κ μ z : ℂ} (hz : z ∈ slitPlane) (hμi : ∀ n : �
       rw [h]
       simp only [neg_mul] at he1 he2 ⊢
       linear_combination -(exp (z / 2) * z ^ (μ + 1 / 2) *
-        kummerUOnLog (1 / 2 + μ - κ) (1 + 2 * μ) (log z + π * I)) * he1 +
+        kummerUConnectionOnLog (1 / 2 + μ - κ) (1 + 2 * μ) (log z + π * I)) * he1 +
         (exp (z / 2) * z ^ (μ + 1 / 2) *
-          kummerUOnLog (1 / 2 + μ - κ) (1 + 2 * μ) (log z - π * I)) * he2
+          kummerUConnectionOnLog (1 / 2 + μ - κ) (1 + 2 * μ) (log z - π * I)) * he2
+
+/-- Compatibility spelling for the noninteger logarithmic connection expression. -/
+@[deprecated whittakerWConnectionOnLog_eq_kummerUConnectionOnLog (since := "2026-11-14")]
+alias whittakerWOnLog_eq_kummerUOnLog := whittakerWConnectionOnLog_eq_kummerUConnectionOnLog
+
+/-- Compatibility spelling for the noninteger logarithmic connection expression. -/
+@[deprecated whittakerWConnectionOnLog_half_turn (since := "2026-11-14")]
+alias whittakerWOnLog_half_turn := whittakerWConnectionOnLog_half_turn
 
 end DLMF.Confluent

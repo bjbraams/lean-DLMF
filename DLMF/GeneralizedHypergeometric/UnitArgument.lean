@@ -5,6 +5,10 @@ Authors: Bastiaan J Braams
 -/
 module
 
+import DLMF.GeneralizedHypergeometric.Watson
+import DLMF.GeneralizedHypergeometric.Whipple
+import DLMF.GeneralizedHypergeometric.Thomae
+import DLMF.GeneralizedHypergeometric.UnitParameterAnalyticity
 public import DLMF.GeneralizedHypergeometric.AnalyticProperties
 public import DLMF.GeneralizedHypergeometric.Basic.PrincipalContinuationExistence
 public import DLMF.GeneralizedHypergeometric.Basic
@@ -528,7 +532,7 @@ theorem generalizedHypergeometric_watson_sum (a b c : ℂ)
       Gamma (c + (1 - a - b) / 2) /
       (Gamma ((a + 1) / 2) * Gamma ((b + 1) / 2) *
         Gamma (c + (1 - a) / 2) * Gamma (c + (1 - b) / 2)) := by
-  sorry
+  exact WatsonSummation.generalizedHypergeometric_eq hb hconv
 
 /-- Watson even terminating evaluation without extra Gamma-pole exclusions. -/
 @[dlmf 16.4.E6]
@@ -668,7 +672,7 @@ theorem generalizedHypergeometric_whipple_3F2_sum (a c d : ℂ)
       Real.pi * Gamma d * Gamma (2 * c - d + 1) * (2 : ℂ) ^ (1 - 2 * c) /
       (Gamma (c + (a - d + 1) / 2) * Gamma (c + 1 - (a + d) / 2) *
         Gamma ((a + d) / 2) * Gamma ((d - a + 1) / 2)) := by
-  sorry
+  exact WhippleSummation.generalizedHypergeometric_eq hb h
 
 /-- Whipple terminating 3F2 sum in finite products. -/
 @[dlmf 16.4.E8]
@@ -700,7 +704,7 @@ theorem generalizedHypergeometric_3F2_unit_transformation (a b c d e : ℂ)
     generalizedHypergeometric {a, b, c} {d, e} 1 = Gamma e * Gamma (d + e - a - b - c) /
       (Gamma (e - a) * Gamma (d + e - b - c)) *
       generalizedHypergeometric {a, d - b, d - c} {d, d + e - b - c} 1 := by
-  sorry
+  exact ThomaeTransformation.generalizedHypergeometric_eq hb hconv hea
 
 /-- A balanced three-over-two unit series sums to the declared value throughout its
 absolute-convergence region, including every terminating upper-parameter case. -/
@@ -1112,7 +1116,8 @@ def gen3F2UnitThomae (a b c d e : ℂ) : ℂ :=
 private lemma analyticOnNhd_generalizedHypergeometric_three_two_one_params :
     AnalyticOnNhd ℂ (fun P : Fin 5 → ℂ => generalizedHypergeometric {P 0, P 1, P 2} {P 3, P 4} 1)
       {P | LowerParametersRegular {P 3, P 4} ∧ 0 < (P 3 + P 4 - P 0 - P 1 - P 2).re} := by
-  sorry
+  simpa only [UnitParameterSeries.convergenceRegion_def] using
+    UnitParameterSeries.analyticOnNhd_generalizedHypergeometric_one
 
 /-- The continued expression is jointly analytic at its regular parameter points in
 the full printed e−a half-space, including points outside original series convergence. -/
@@ -1121,6 +1126,48 @@ theorem analyticOnNhd_gen3F2UnitThomae_params :
     AnalyticOnNhd ℂ (fun P : Fin 5 → ℂ => gen3F2UnitThomae (P 0) (P 1) (P 2) (P 3) (P 4))
       {P | LowerParametersRegular {P 3, P 4, P 3 + P 4 - P 1 - P 2,
         P 3 + P 4 - P 0 - P 1 - P 2} ∧ 0 < (P 4 - P 0).re} := by
-  sorry
+  intro P hP
+  have hΓ : AnalyticOnNhd ℂ Gamma {z : ℂ | ∀ n : ℕ, z ≠ -(n:ℂ)} := by
+    apply DifferentiableOn.analyticOnNhd _ isOpen_not_neg_nat
+    intro z hz
+    exact (differentiableAt_Gamma z hz).differentiableWithinAt
+  have he : ∀ n : ℕ, P 4 ≠ -(n:ℂ) := hP.1 _ (by simp)
+  have hs : ∀ n : ℕ, P 3+P 4-P 0-P 1-P 2 ≠ -(n:ℂ) := hP.1 _ (by simp)
+  have hD : ∀ n : ℕ, P 3+P 4-P 1-P 2 ≠ -(n:ℂ) := hP.1 _ (by simp)
+  have hea : ∀ n : ℕ, P 4-P 0 ≠ -(n:ℂ) := not_neg_nat_of_re_pos hP.2
+  have hproj (i : Fin 5) : AnalyticAt ℂ (fun Q : Fin 5 → ℂ => Q i) P :=
+    (ContinuousLinearMap.proj i : (Fin 5 → ℂ) →L[ℂ] ℂ).analyticAt P
+  let T (Q : Fin 5 → ℂ) : Fin 5 → ℂ :=
+    ![Q 0,Q 3-Q 1,Q 3-Q 2,Q 3,Q 3+Q 4-Q 1-Q 2]
+  have hT : AnalyticAt ℂ T P := by
+    apply analyticAt_pi_iff.mpr
+    intro i
+    fin_cases i
+    · exact hproj 0
+    · exact (hproj 3).sub (hproj 1)
+    · exact (hproj 3).sub (hproj 2)
+    · exact hproj 3
+    · exact (((hproj 3).add (hproj 4)).sub (hproj 1)).sub (hproj 2)
+  have hTr : T P ∈ UnitParameterSeries.convergenceRegion := by
+    rw [UnitParameterSeries.convergenceRegion_def]
+    constructor
+    · intro u hu n
+      dsimp only [T] at hu
+      simp only [Multiset.insert_eq_cons,Multiset.mem_cons,Multiset.mem_singleton] at hu
+      rcases hu with rfl|rfl
+      · exact hP.1 _ (by simp) n
+      · exact hD n
+    · have he := hP.2
+      dsimp [T]
+      simp only [sub_re] at he ⊢
+      linarith
+  have hF := (UnitParameterSeries.analyticOnNhd_generalizedHypergeometric_one _ hTr).comp hT
+  have hRatio := (((hΓ _ he).comp (x := P) (hproj 4)).mul
+    ((hΓ _ hs).comp (x := P)
+      (((((hproj 3).add (hproj 4)).sub (hproj 0)).sub (hproj 1)).sub (hproj 2)))).div
+    (((hΓ _ hea).comp (x := P) ((hproj 4).sub (hproj 0))).mul
+      ((hΓ _ hD).comp (x := P) ((((hproj 3).add (hproj 4)).sub (hproj 1)).sub (hproj 2))))
+    (mul_ne_zero (Gamma_ne_zero hea) (Gamma_ne_zero hD))
+  exact hRatio.mul hF
 
 end DLMF.Hypergeometric

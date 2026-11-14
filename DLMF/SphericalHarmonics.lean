@@ -10,6 +10,12 @@ public import DLMF.SphericalHarmonics.AdditionTools
 public import DLMF.SphericalHarmonics.ZonalTools
 public import DLMF.SphericalHarmonics.BesselAddition
 public import DLMF.SphericalHarmonics.Theorems
+public import DLMF.SphericalHarmonics.CompactGroupRepresentations
+public import DLMF.SphericalHarmonics.EulerHaar
+public import DLMF.SphericalHarmonics.GegenbauerContinuation
+public import DLMF.SphericalHarmonics.PoissonSeries
+public import DLMF.SphericalHarmonics.HarmonicDecomposition
+public import DLMF.SphericalHarmonics.FourierBessel
 
 /-!
 # Spherical harmonics (AAR Chapter 9)

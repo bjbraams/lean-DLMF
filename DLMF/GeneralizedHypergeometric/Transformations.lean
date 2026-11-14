@@ -14,6 +14,7 @@ public import Mathlib.RingTheory.PowerSeries.Basic
 public import DLMF.Hypergeometric.ArgumentContinuation
 public import DLMF.Hypergeometric.Solutions
 public import DLMF.Hypergeometric.Clausen
+import DLMF.GeneralizedHypergeometric.GeneralSquare
 
 /-!
 # Transformations, expansions and products of `ₚF_q` (DLMF §§16.6, 16.10, 16.12)
@@ -570,6 +571,23 @@ theorem generalizedHypergeometric_general_square_hasSum (a b c : ℂ)
           {-(k : ℂ) / 2, (1 - (k : ℂ)) / 2, a + b - c + 1 / 2, 1 / 2}
         {a + 1 / 2, b + 1 / 2, 3 / 2 - (k : ℂ) - c} 1 *
             z ^ k) (generalizedHypergeometric {a, b} {c} z ^ 2) := by
-  sorry
+  have hc : LowerParametersRegular {c} := by
+    intro x hx
+    exact hb x (by simp only [Multiset.mem_singleton] at hx; simp [hx])
+  have hs := generalizedHypergeometric_hasSum_disk (a := {a, b}) (b := {c}) (by simp) hc hz
+  have hG : HasSum (fun n => gaussHypergeometricCoeff a b c n * z ^ n)
+      (generalizedHypergeometric {a, b} {c} z) := by
+    refine hs.congr_fun fun n => ?_
+    simp [generalizedHypergeometricCoeff, pochhammerProduct, gaussHypergeometricCoeff]
+  have hprod := hasSum_sum_range_mul_of_summable_norm hG.summable.norm hG.summable.norm
+  rw [hG.tsum_eq, ← pow_two] at hprod
+  refine hprod.congr_fun fun n => ?_
+  rw [← GeneralSquare.coeff_gaussPS_square a b c hb n, PowerSeries.coeff_mul,
+    Finset.Nat.sum_antidiagonal_eq_sum_range_succ_mk, Finset.sum_mul]
+  refine Finset.sum_congr rfl fun k hk => ?_
+  have hk' : k ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hk)
+  simp only [gaussPS, PowerSeries.coeff_mk]
+  rw [show z ^ n = z ^ k * z ^ (n - k) by rw [← pow_add, Nat.add_sub_cancel' hk']]
+  ring
 
 end DLMF.Hypergeometric

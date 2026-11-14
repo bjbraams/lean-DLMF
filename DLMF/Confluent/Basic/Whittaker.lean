@@ -20,7 +20,9 @@ continued Tricomi `U`.
 * `regularizedWhittakerM`: `M_{κ,μ}` regularized in its second parameter, meaningful also at
   `1 + 2μ = -n`.
 * `whittakerW`: Whittaker's principal-branch `W_{κ,μ}(z)` (DLMF 13.14.3).
-* `whittakerMOnLog`, `whittakerWOnLog`: Whittaker's functions on the logarithmic argument plane.
+* `whittakerMOnLog`: Whittaker M on the logarithmic argument plane.
+* `whittakerWConnectionOnLog`: the noninteger-twice-order connection expression.
+  The full-parameter function is `whittakerWContinuedOnLog` in `Basic.WhittakerLogarithmic`.
 
 ## Main results
 
@@ -82,9 +84,24 @@ def whittakerMOnLog (κ μ w : ℂ) : ℂ :=
 
 /-- Whittaker's W connection formula on the logarithmic argument plane.
 It represents W when `2 * μ` is not an integer. -/
-def whittakerWOnLog (κ μ w : ℂ) : ℂ :=
+def whittakerWConnectionOnLog (κ μ w : ℂ) : ℂ :=
   Gamma (-2 * μ) / Gamma (1 / 2 - μ - κ) * whittakerMOnLog κ μ w +
     Gamma (2 * μ) / Gamma (1 / 2 + μ - κ) * whittakerMOnLog κ (-μ) w
+
+
+/-- The logarithmic connection expression in terms of the two Kummer solutions.
+DLMF 13.14.33 applies to noninteger twice-order. -/
+theorem whittakerWConnectionOnLog_def (κ μ w : ℂ) :
+    whittakerWConnectionOnLog κ μ w =
+      Gamma (-2 * μ) / Gamma (1 / 2 - μ - κ) * whittakerMOnLog κ μ w +
+        Gamma (2 * μ) / Gamma (1 / 2 + μ - κ) * whittakerMOnLog κ (-μ) w := rfl
+
+/-- At order zero the raw totalized connection expression is zero.
+The continued Whittaker W uses the whole parameter limit instead.
+DLMF 13.14.33 is a noninteger-twice-order formula. -/
+@[simp] theorem whittakerWConnectionOnLog_zero (κ w : ℂ) :
+    whittakerWConnectionOnLog κ 0 w = 0 := by
+  simp [whittakerWConnectionOnLog]
 
 /-- Logarithmic derivative of the prefactor in Whittaker's `M`. -/
 theorem hasDerivAt_whittakerPrefactor (r : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
@@ -232,5 +249,9 @@ theorem whittakerW_eq_kummerU {κ μ z : ℂ} :
     whittakerW κ μ z =
       exp (-z / 2) * z ^ (1 / 2 + μ) * kummerU (1 / 2 + μ - κ) (1 + 2 * μ) z := by
   rfl
+
+/-- Compatibility spelling for the noninteger logarithmic connection expression. -/
+@[deprecated whittakerWConnectionOnLog (since := "2026-11-14")]
+noncomputable abbrev whittakerWOnLog (κ μ w : ℂ) : ℂ := whittakerWConnectionOnLog κ μ w
 
 end DLMF.Confluent

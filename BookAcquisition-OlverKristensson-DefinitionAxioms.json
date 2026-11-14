@@ -1,0 +1,624 @@
+[
+  {
+    "module": "DLMFMathlib.Analysis.Calculus.WeightedRayPrimitive",
+    "exitCode": 0,
+    "declarations": [
+      "MeasureTheory.weightedRayPrimitive"
+    ],
+    "axioms": [
+      "'MeasureTheory.weightedRayPrimitive' depends on axioms: [propext, Classical.choice, Quot.sound]"
+    ],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMFMathlib.Analysis.Calculus.WeightedRayPrimitive.log"
+  },
+  {
+    "module": "DLMFMathlib.Analysis.Asymptotics.LipschitzComposition",
+    "exitCode": 0,
+    "declarations": [],
+    "axioms": [],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMFMathlib.Analysis.Asymptotics.LipschitzComposition.log"
+  },
+  {
+    "module": "DLMFMathlib.Analysis.ODE.ComplexLiouvilleGreen",
+    "exitCode": 0,
+    "declarations": [
+      "Complex.IsComplexLiouvilleGreenData"
+    ],
+    "axioms": [
+      "'Complex.IsComplexLiouvilleGreenData' depends on axioms: [propext, Classical.choice, Quot.sound]"
+    ],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMFMathlib.Analysis.ODE.ComplexLiouvilleGreen.log"
+  },
+  {
+    "module": "DLMFMathlib.Analysis.ODE.ComplexLiouvilleGreenExpansion",
+    "exitCode": 0,
+    "declarations": [
+      "Complex.IsComplexLiouvilleGreenCoefficientSequence",
+      "Complex.liouvilleGreenPartialSum"
+    ],
+    "axioms": [
+      "'Complex.IsComplexLiouvilleGreenCoefficientSequence' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'Complex.liouvilleGreenPartialSum' depends on axioms: [propext, Classical.choice, Quot.sound]"
+    ],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMFMathlib.Analysis.ODE.ComplexLiouvilleGreenExpansion.log"
+  },
+  {
+    "module": "DLMFMathlib.Analysis.ODE.ComplexLiouvilleGreenUniform",
+    "exitCode": 0,
+    "declarations": [],
+    "axioms": [],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMFMathlib.Analysis.ODE.ComplexLiouvilleGreenUniform.log"
+  },
+  {
+    "module": "DLMFMathlib.Analysis.ODE.ComplexLiouvilleGreenLogarithm",
+    "exitCode": 0,
+    "declarations": [],
+    "axioms": [],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMFMathlib.Analysis.ODE.ComplexLiouvilleGreenLogarithm.log"
+  },
+  {
+    "module": "DLMFMathlib.Analysis.ODE.ComplexLiouvilleTransformation",
+    "exitCode": 0,
+    "declarations": [],
+    "axioms": [],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMFMathlib.Analysis.ODE.ComplexLiouvilleTransformation.log"
+  },
+  {
+    "module": "DLMFMathlib.Analysis.ODE.LiouvilleGreenSingularCoefficients",
+    "exitCode": 0,
+    "declarations": [
+      "Complex.IsOriginalVariableLiouvilleGreenCoefficientSequence"
+    ],
+    "axioms": [
+      "'Complex.IsOriginalVariableLiouvilleGreenCoefficientSequence' depends on axioms: [propext, Classical.choice, Quot.sound]"
+    ],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMFMathlib.Analysis.ODE.LiouvilleGreenSingularCoefficients.log"
+  },
+  {
+    "module": "DLMFMathlib.Analysis.ODE.AffineLiouvilleGreen",
+    "exitCode": 0,
+    "declarations": [
+      "Complex.IsAffineLiouvilleGreenCoefficientSequence",
+      "Complex.affineLiouvilleGreenRemainder",
+      "Complex.affineLiouvilleGreenPartialSum"
+    ],
+    "axioms": [
+      "'Complex.IsAffineLiouvilleGreenCoefficientSequence' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'Complex.affineLiouvilleGreenRemainder' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'Complex.affineLiouvilleGreenPartialSum' depends on axioms: [propext, Classical.choice, Quot.sound]"
+    ],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMFMathlib.Analysis.ODE.AffineLiouvilleGreen.log"
+  },
+  {
+    "module": "DLMFMathlib.Analysis.ODE.ComplexGreenEquation",
+    "exitCode": 0,
+    "declarations": [],
+    "axioms": [],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMFMathlib.Analysis.ODE.ComplexGreenEquation.log"
+  },
+  {
+    "module": "DLMFMathlib.Analysis.ODE.InhomogeneousExpansion",
+    "exitCode": 0,
+    "declarations": [
+      "Complex.inhomogeneousExpansionCoefficient",
+      "Complex.inhomogeneousExpansionPartialSum"
+    ],
+    "axioms": [
+      "'Complex.inhomogeneousExpansionCoefficient' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'Complex.inhomogeneousExpansionPartialSum' depends on axioms: [propext, Classical.choice, Quot.sound]"
+    ],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMFMathlib.Analysis.ODE.InhomogeneousExpansion.log"
+  },
+  {
+    "module": "DLMFMathlib.Analysis.ODE.InhomogeneousGreenBounds",
+    "exitCode": 0,
+    "declarations": [
+      "Complex.inhomogeneousTwoTailError"
+    ],
+    "axioms": [
+      "'Complex.inhomogeneousTwoTailError' depends on axioms: [propext, Classical.choice, Quot.sound]"
+    ],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMFMathlib.Analysis.ODE.InhomogeneousGreenBounds.log"
+  },
+  {
+    "module": "DLMFMathlib.Analysis.ODE.TurningPointCoordinates",
+    "exitCode": 0,
+    "declarations": [
+      "ODE.RealTurningPoint.ratio",
+      "ODE.RealTurningPoint.coordinate",
+      "ODE.RealTurningPoint.scale",
+      "ODE.RealTurningPoint.amplitude",
+      "ODE.RealTurningPoint.perturbation"
+    ],
+    "axioms": [
+      "'ODE.RealTurningPoint.ratio' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'ODE.RealTurningPoint.coordinate' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'ODE.RealTurningPoint.scale' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'ODE.RealTurningPoint.amplitude' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'ODE.RealTurningPoint.perturbation' depends on axioms: [propext, Classical.choice, Quot.sound]"
+    ],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMFMathlib.Analysis.ODE.TurningPointCoordinates.log"
+  },
+  {
+    "module": "DLMFMathlib.Analysis.ODE.TurningPointCoefficients",
+    "exitCode": 0,
+    "declarations": [
+      "ODE.IsTurningPointCoefficientSequence",
+      "ODE.turningPointPartialSum"
+    ],
+    "axioms": [
+      "'ODE.IsTurningPointCoefficientSequence' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'ODE.turningPointPartialSum' depends on axioms: [propext, Classical.choice, Quot.sound]"
+    ],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMFMathlib.Analysis.ODE.TurningPointCoefficients.log"
+  },
+  {
+    "module": "DLMFMathlib.Analysis.ODE.TurningPointCoefficientBounds",
+    "exitCode": 0,
+    "declarations": [],
+    "axioms": [],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMFMathlib.Analysis.ODE.TurningPointCoefficientBounds.log"
+  },
+  {
+    "module": "DLMFMathlib.Analysis.ODE.ForcedTurningPoint",
+    "exitCode": 0,
+    "declarations": [
+      "ODE.IsForcedTurningPointCoefficientSequence",
+      "ODE.forcedTurningPointPartialSum"
+    ],
+    "axioms": [
+      "'ODE.IsForcedTurningPointCoefficientSequence' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'ODE.forcedTurningPointPartialSum' depends on axioms: [propext, Classical.choice, Quot.sound]"
+    ],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMFMathlib.Analysis.ODE.ForcedTurningPoint.log"
+  },
+  {
+    "module": "DLMFMathlib.Analysis.ODE.ShiftedTurningPoint",
+    "exitCode": 0,
+    "declarations": [
+      "ODE.turningPointDisplacement",
+      "ODE.coefficientDerivative",
+      "ODE.shiftedTurningPointResiduals"
+    ],
+    "axioms": [
+      "'ODE.turningPointDisplacement' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'ODE.coefficientDerivative' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'ODE.shiftedTurningPointResiduals' depends on axioms: [propext, Classical.choice, Quot.sound]"
+    ],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMFMathlib.Analysis.ODE.ShiftedTurningPoint.log"
+  },
+  {
+    "module": "DLMFMathlib.Analysis.ODE.SimplePoleCoefficients",
+    "exitCode": 0,
+    "declarations": [
+      "ODE.IsSimplePoleCoefficientSequence",
+      "ODE.simplePolePartialSum"
+    ],
+    "axioms": [
+      "'ODE.IsSimplePoleCoefficientSequence' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'ODE.simplePolePartialSum' depends on axioms: [propext, Classical.choice, Quot.sound]"
+    ],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMFMathlib.Analysis.ODE.SimplePoleCoefficients.log"
+  },
+  {
+    "module": "DLMFMathlib.Analysis.ODE.SimplePoleCoefficientBounds",
+    "exitCode": 0,
+    "declarations": [],
+    "axioms": [],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMFMathlib.Analysis.ODE.SimplePoleCoefficientBounds.log"
+  },
+  {
+    "module": "DLMFMathlib.Analysis.ODE.SimplePoleRealUniform",
+    "exitCode": 0,
+    "declarations": [
+      "ODE.simplePoleDerivativeCoefficient",
+      "ODE.simplePoleDerivativeCompanion"
+    ],
+    "axioms": [
+      "'ODE.simplePoleDerivativeCoefficient' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'ODE.simplePoleDerivativeCompanion' depends on axioms: [propext, Classical.choice, Quot.sound]"
+    ],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMFMathlib.Analysis.ODE.SimplePoleRealUniform.log"
+  },
+  {
+    "module": "DLMFMathlib.Analysis.ODE.TransitionCoordinates",
+    "exitCode": 0,
+    "declarations": [],
+    "axioms": [],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMFMathlib.Analysis.ODE.TransitionCoordinates.log"
+  },
+  {
+    "module": "DLMFMathlib.Analysis.ODE.PowerTransitionCoefficients",
+    "exitCode": 0,
+    "declarations": [
+      "ODE.IsPowerTransitionCoefficientSequence"
+    ],
+    "axioms": [
+      "'ODE.IsPowerTransitionCoefficientSequence' depends on axioms: [propext, Classical.choice, Quot.sound]"
+    ],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMFMathlib.Analysis.ODE.PowerTransitionCoefficients.log"
+  },
+  {
+    "module": "DLMFMathlib.Analysis.ODE.SeparatedScaling",
+    "exitCode": 0,
+    "declarations": [],
+    "axioms": [],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMFMathlib.Analysis.ODE.SeparatedScaling.log"
+  },
+  {
+    "module": "DLMF.AsymptoticApproximations.ODE.AiryEnvelopes",
+    "exitCode": 0,
+    "declarations": [
+      "DLMF.AsymptoticApproximations.Real.AiryEnvelope.weight",
+      "DLMF.AsymptoticApproximations.Real.AiryEnvelope.modulus",
+      "DLMF.AsymptoticApproximations.Real.AiryEnvelope.derivativeModulus",
+      "DLMF.AsymptoticApproximations.Real.AiryEnvelope.phase",
+      "DLMF.AsymptoticApproximations.Real.AiryEnvelope.derivativePhase",
+      "DLMF.AsymptoticApproximations.Real.AiryEnvelope.errorConstant",
+      "DLMF.AsymptoticApproximations.Real.AiryEnvelope.aiErrorConstant",
+      "DLMF.AsymptoticApproximations.Real.AiryEnvelope.biErrorConstant"
+    ],
+    "axioms": [
+      "'DLMF.AsymptoticApproximations.Real.AiryEnvelope.weight' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'DLMF.AsymptoticApproximations.Real.AiryEnvelope.modulus' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'DLMF.AsymptoticApproximations.Real.AiryEnvelope.derivativeModulus' depends on axioms: [propext,",
+      "'DLMF.AsymptoticApproximations.Real.AiryEnvelope.phase' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'DLMF.AsymptoticApproximations.Real.AiryEnvelope.derivativePhase' depends on axioms: [propext,",
+      "'DLMF.AsymptoticApproximations.Real.AiryEnvelope.errorConstant' depends on axioms: [propext,",
+      "'DLMF.AsymptoticApproximations.Real.AiryEnvelope.aiErrorConstant' depends on axioms: [propext,",
+      "'DLMF.AsymptoticApproximations.Real.AiryEnvelope.biErrorConstant' depends on axioms: [propext,"
+    ],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMF.AsymptoticApproximations.ODE.AiryEnvelopes.log"
+  },
+  {
+    "module": "DLMF.AsymptoticApproximations.ODE.BesselEnvelopes",
+    "exitCode": 0,
+    "declarations": [
+      "DLMF.AsymptoticApproximations.Real.BesselEnvelope.weight",
+      "DLMF.AsymptoticApproximations.Real.BesselEnvelope.modulus",
+      "DLMF.AsymptoticApproximations.Real.BesselEnvelope.phase"
+    ],
+    "axioms": [
+      "'DLMF.AsymptoticApproximations.Real.BesselEnvelope.weight' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'DLMF.AsymptoticApproximations.Real.BesselEnvelope.modulus' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'DLMF.AsymptoticApproximations.Real.BesselEnvelope.phase' depends on axioms: [propext, Classical.choice, Quot.sound]"
+    ],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMF.AsymptoticApproximations.ODE.BesselEnvelopes.log"
+  },
+  {
+    "module": "DLMF.AsymptoticApproximations.ODE.RealAiryPerturbation",
+    "exitCode": 0,
+    "declarations": [
+      "DLMF.AsymptoticApproximations.Real.airyPerturbationControl"
+    ],
+    "axioms": [
+      "'DLMF.AsymptoticApproximations.Real.airyPerturbationControl' depends on axioms: [propext, Classical.choice, Quot.sound]"
+    ],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMF.AsymptoticApproximations.ODE.RealAiryPerturbation.log"
+  },
+  {
+    "module": "DLMF.AsymptoticApproximations.ODE.RealAiryExpansion",
+    "exitCode": 0,
+    "declarations": [],
+    "axioms": [],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMF.AsymptoticApproximations.ODE.RealAiryExpansion.log"
+  },
+  {
+    "module": "DLMF.AsymptoticApproximations.ODE.RealAiryZeros",
+    "exitCode": 0,
+    "declarations": [],
+    "axioms": [],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMF.AsymptoticApproximations.ODE.RealAiryZeros.log"
+  },
+  {
+    "module": "DLMF.AsymptoticApproximations.ODE.ComplexAiryExpansion",
+    "exitCode": 0,
+    "declarations": [],
+    "axioms": [],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMF.AsymptoticApproximations.ODE.ComplexAiryExpansion.log"
+  },
+  {
+    "module": "DLMF.AsymptoticApproximations.ODE.RealBesselExpansion",
+    "exitCode": 0,
+    "declarations": [
+      "DLMF.AsymptoticApproximations.Real.BesselComparison.positivePair",
+      "DLMF.AsymptoticApproximations.Real.BesselComparison.negativePair",
+      "DLMF.AsymptoticApproximations.Real.BesselComparison.modifiedConstant",
+      "DLMF.AsymptoticApproximations.Real.BesselComparison.oscillatoryConstant",
+      "DLMF.AsymptoticApproximations.Real.BesselComparison.oscillatoryErrorConstant",
+      "DLMF.AsymptoticApproximations.Real.BesselComparison.ordinaryGreenKernel",
+      "DLMF.AsymptoticApproximations.Real.BesselComparison.negativeErrorMajorant",
+      "DLMF.AsymptoticApproximations.Real.BesselComparison.negativeDerivativeMajorant"
+    ],
+    "axioms": [
+      "'DLMF.AsymptoticApproximations.Real.BesselComparison.positivePair' depends on axioms: [propext,",
+      "'DLMF.AsymptoticApproximations.Real.BesselComparison.negativePair' depends on axioms: [propext,",
+      "'DLMF.AsymptoticApproximations.Real.BesselComparison.modifiedConstant' depends on axioms: [propext,",
+      "'DLMF.AsymptoticApproximations.Real.BesselComparison.oscillatoryConstant' depends on axioms: [propext,",
+      "'DLMF.AsymptoticApproximations.Real.BesselComparison.oscillatoryErrorConstant' depends on axioms: [propext,",
+      "'DLMF.AsymptoticApproximations.Real.BesselComparison.ordinaryGreenKernel' depends on axioms: [propext,",
+      "'DLMF.AsymptoticApproximations.Real.BesselComparison.negativeErrorMajorant' depends on axioms: [propext,",
+      "'DLMF.AsymptoticApproximations.Real.BesselComparison.negativeDerivativeMajorant' depends on axioms: [propext,"
+    ],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMF.AsymptoticApproximations.ODE.RealBesselExpansion.log"
+  },
+  {
+    "module": "DLMF.AsymptoticApproximations.ODE.RealBesselZeros",
+    "exitCode": 0,
+    "declarations": [],
+    "axioms": [],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMF.AsymptoticApproximations.ODE.RealBesselZeros.log"
+  },
+  {
+    "module": "DLMF.AsymptoticApproximations.ODE.RealBesselUniform",
+    "exitCode": 0,
+    "declarations": [],
+    "axioms": [],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMF.AsymptoticApproximations.ODE.RealBesselUniform.log"
+  },
+  {
+    "module": "DLMF.AsymptoticApproximations.ODE.ComplexBesselEnvelopes",
+    "exitCode": 0,
+    "declarations": [
+      "DLMF.AsymptoticApproximations.BesselComplexEnvelope.comparisonRegion",
+      "DLMF.AsymptoticApproximations.BesselComplexEnvelope.weightSquared",
+      "DLMF.AsymptoticApproximations.BesselComplexEnvelope.weight",
+      "DLMF.AsymptoticApproximations.BesselComplexEnvelope.modulus"
+    ],
+    "axioms": [
+      "'DLMF.AsymptoticApproximations.BesselComplexEnvelope.comparisonRegion' depends on axioms: [propext,",
+      "'DLMF.AsymptoticApproximations.BesselComplexEnvelope.weightSquared' depends on axioms: [propext,",
+      "'DLMF.AsymptoticApproximations.BesselComplexEnvelope.weight' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'DLMF.AsymptoticApproximations.BesselComplexEnvelope.modulus' depends on axioms: [propext, Classical.choice, Quot.sound]"
+    ],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMF.AsymptoticApproximations.ODE.ComplexBesselEnvelopes.log"
+  },
+  {
+    "module": "DLMF.AsymptoticApproximations.ODE.ComplexBesselExpansion",
+    "exitCode": 0,
+    "declarations": [
+      "DLMF.AsymptoticApproximations.BesselComplexEnvelope.radiusWeightRatio",
+      "DLMF.AsymptoticApproximations.BesselComplexEnvelope.kernelConstant",
+      "DLMF.AsymptoticApproximations.ComplexBesselComparison.comparison",
+      "DLMF.AsymptoticApproximations.ComplexBesselComparison.companion",
+      "DLMF.AsymptoticApproximations.ComplexBesselComparison.greenKernel",
+      "DLMF.AsymptoticApproximations.ComplexBesselComparison.partialSum",
+      "DLMF.AsymptoticApproximations.ComplexBesselComparison.envelope",
+      "DLMF.AsymptoticApproximations.ComplexBesselComparison.derivativeMajorant"
+    ],
+    "axioms": [
+      "'DLMF.AsymptoticApproximations.BesselComplexEnvelope.radiusWeightRatio' depends on axioms: [propext,",
+      "'DLMF.AsymptoticApproximations.BesselComplexEnvelope.kernelConstant' depends on axioms: [propext,",
+      "'DLMF.AsymptoticApproximations.ComplexBesselComparison.comparison' depends on axioms: [propext,",
+      "'DLMF.AsymptoticApproximations.ComplexBesselComparison.companion' depends on axioms: [propext,",
+      "'DLMF.AsymptoticApproximations.ComplexBesselComparison.greenKernel' depends on axioms: [propext,",
+      "'DLMF.AsymptoticApproximations.ComplexBesselComparison.partialSum' depends on axioms: [propext,",
+      "'DLMF.AsymptoticApproximations.ComplexBesselComparison.envelope' depends on axioms: [propext,",
+      "'DLMF.AsymptoticApproximations.ComplexBesselComparison.derivativeMajorant' depends on axioms: [propext,"
+    ],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMF.AsymptoticApproximations.ODE.ComplexBesselExpansion.log"
+  },
+  {
+    "module": "DLMF.AsymptoticApproximations.ODE.RadialScattering",
+    "exitCode": 0,
+    "declarations": [
+      "DLMF.AsymptoticApproximations.Real.radialScatteringControl",
+      "DLMF.AsymptoticApproximations.Real.totalRadialScatteringControl",
+      "DLMF.AsymptoticApproximations.Real.bornPhaseShift",
+      "DLMF.AsymptoticApproximations.Real.IsRadialScatteringSolution"
+    ],
+    "axioms": [
+      "'DLMF.AsymptoticApproximations.Real.radialScatteringControl' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'DLMF.AsymptoticApproximations.Real.totalRadialScatteringControl' depends on axioms: [propext,",
+      "'DLMF.AsymptoticApproximations.Real.bornPhaseShift' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'DLMF.AsymptoticApproximations.Real.IsRadialScatteringSolution' depends on axioms: [propext,"
+    ],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMF.AsymptoticApproximations.ODE.RadialScattering.log"
+  },
+  {
+    "module": "DLMF.Airy.ComplexEnvelopes",
+    "exitCode": 0,
+    "declarations": [
+      "DLMF.Airy.ComplexEnvelope.rotation",
+      "DLMF.Airy.ComplexEnvelope.solution",
+      "DLMF.Airy.ComplexEnvelope.derivative",
+      "DLMF.Airy.ComplexEnvelope.sector",
+      "DLMF.Airy.ComplexEnvelope.weight",
+      "DLMF.Airy.ComplexEnvelope.modulus",
+      "DLMF.Airy.ComplexEnvelope.derivativeModulus",
+      "DLMF.Airy.ComplexEnvelope.firstErrorConstant",
+      "DLMF.Airy.ComplexEnvelope.secondErrorConstant"
+    ],
+    "axioms": [
+      "'DLMF.Airy.ComplexEnvelope.rotation' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'DLMF.Airy.ComplexEnvelope.solution' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'DLMF.Airy.ComplexEnvelope.derivative' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'DLMF.Airy.ComplexEnvelope.sector' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'DLMF.Airy.ComplexEnvelope.weight' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'DLMF.Airy.ComplexEnvelope.modulus' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'DLMF.Airy.ComplexEnvelope.derivativeModulus' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'DLMF.Airy.ComplexEnvelope.firstErrorConstant' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'DLMF.Airy.ComplexEnvelope.secondErrorConstant' depends on axioms: [propext, Classical.choice, Quot.sound]"
+    ],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMF.Airy.ComplexEnvelopes.log"
+  },
+  {
+    "module": "DLMF.Airy.RealOrderProperties",
+    "exitCode": 0,
+    "declarations": [],
+    "axioms": [],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMF.Airy.RealOrderProperties.log"
+  },
+  {
+    "module": "DLMF.Bessel.Debye",
+    "exitCode": 0,
+    "declarations": [
+      "DLMF.Bessel.Debye.polynomialU",
+      "DLMF.Bessel.Debye.polynomialV",
+      "DLMF.Bessel.Debye.coefficientU",
+      "DLMF.Bessel.Debye.coefficientV",
+      "DLMF.Bessel.Debye.phase"
+    ],
+    "axioms": [
+      "'DLMF.Bessel.Debye.polynomialU' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'DLMF.Bessel.Debye.polynomialV' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'DLMF.Bessel.Debye.coefficientU' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'DLMF.Bessel.Debye.coefficientV' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'DLMF.Bessel.Debye.phase' depends on axioms: [propext, Classical.choice, Quot.sound]"
+    ],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMF.Bessel.Debye.log"
+  },
+  {
+    "module": "DLMF.Bessel.DebyeContinuation",
+    "exitCode": 0,
+    "declarations": [
+      "DLMF.Bessel.Debye.liftDomain",
+      "DLMF.Bessel.Debye.phaseOnLog",
+      "DLMF.Bessel.Debye.originFactor",
+      "DLMF.Bessel.Debye.coefficientSum",
+      "DLMF.Bessel.Debye.normalizedFunction",
+      "DLMF.Bessel.Debye.remainder"
+    ],
+    "axioms": [
+      "'DLMF.Bessel.Debye.liftDomain' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'DLMF.Bessel.Debye.phaseOnLog' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'DLMF.Bessel.Debye.originFactor' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'DLMF.Bessel.Debye.coefficientSum' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'DLMF.Bessel.Debye.normalizedFunction' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'DLMF.Bessel.Debye.remainder' depends on axioms: [propext, Classical.choice, Quot.sound]"
+    ],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMF.Bessel.DebyeContinuation.log"
+  },
+  {
+    "module": "DLMF.Bessel.ForcedLargeOrder",
+    "exitCode": 0,
+    "declarations": [
+      "DLMF.Bessel.forcedModifiedBesselCoefficient",
+      "DLMF.Bessel.forcedModifiedBesselParticular"
+    ],
+    "axioms": [
+      "'DLMF.Bessel.forcedModifiedBesselCoefficient' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'DLMF.Bessel.forcedModifiedBesselParticular' depends on axioms: [propext, Classical.choice, Quot.sound]"
+    ],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMF.Bessel.ForcedLargeOrder.log"
+  },
+  {
+    "module": "DLMF.Bessel.TurningPointExpansion",
+    "exitCode": 0,
+    "declarations": [
+      "DLMF.Bessel.TurningPoint.actionRatio",
+      "DLMF.Bessel.TurningPoint.coordinate",
+      "DLMF.Bessel.TurningPoint.prefactor",
+      "DLMF.Bessel.TurningPoint.amplitude",
+      "DLMF.Bessel.TurningPoint.perturbation",
+      "DLMF.Bessel.TurningPoint.airyComparison",
+      "DLMF.Bessel.TurningPoint.cylinder",
+      "DLMF.Bessel.TurningPoint.approximation"
+    ],
+    "axioms": [
+      "'DLMF.Bessel.TurningPoint.actionRatio' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'DLMF.Bessel.TurningPoint.coordinate' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'DLMF.Bessel.TurningPoint.prefactor' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'DLMF.Bessel.TurningPoint.amplitude' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'DLMF.Bessel.TurningPoint.perturbation' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'DLMF.Bessel.TurningPoint.airyComparison' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'DLMF.Bessel.TurningPoint.cylinder' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'DLMF.Bessel.TurningPoint.approximation' depends on axioms: [propext, Classical.choice, Quot.sound]"
+    ],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMF.Bessel.TurningPointExpansion.log"
+  },
+  {
+    "module": "DLMF.Bessel.TurningPointZeros",
+    "exitCode": 0,
+    "declarations": [],
+    "axioms": [],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMF.Bessel.TurningPointZeros.log"
+  },
+  {
+    "module": "DLMF.Legendre.SimplePoleExpansion",
+    "exitCode": 0,
+    "declarations": [
+      "DLMF.Legendre.SimplePole.perturbation",
+      "DLMF.Legendre.SimplePole.IsCoefficientSequence",
+      "DLMF.Legendre.SimplePole.approximationP",
+      "DLMF.Legendre.SimplePole.approximationQ"
+    ],
+    "axioms": [
+      "'DLMF.Legendre.SimplePole.perturbation' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'DLMF.Legendre.SimplePole.IsCoefficientSequence' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'DLMF.Legendre.SimplePole.approximationP' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'DLMF.Legendre.SimplePole.approximationQ' depends on axioms: [propext, Classical.choice, Quot.sound]"
+    ],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMF.Legendre.SimplePoleExpansion.log"
+  },
+  {
+    "module": "DLMF.Legendre.AnalyticNeumannExpansion",
+    "exitCode": 0,
+    "declarations": [
+      "DLMF.Legendre.ellipsePath",
+      "DLMF.Legendre.analyticLegendreCoefficient"
+    ],
+    "axioms": [
+      "'DLMF.Legendre.ellipsePath' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'DLMF.Legendre.analyticLegendreCoefficient' depends on axioms: [propext, Classical.choice, Quot.sound]"
+    ],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMF.Legendre.AnalyticNeumannExpansion.log"
+  },
+  {
+    "module": "DLMF.Confluent.Basic.WhittakerLogarithmic",
+    "exitCode": 0,
+    "declarations": [
+      "DLMF.Confluent.whittakerWContinuedOnLog",
+      "DLMF.Confluent.whittakerWContinuedOnLog_def"
+    ],
+    "axioms": [
+      "'DLMF.Confluent.whittakerWContinuedOnLog' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "'DLMF.Confluent.whittakerWContinuedOnLog_def' depends on axioms: [propext, Classical.choice, Quot.sound]"
+    ],
+    "errors": [],
+    "log": "/tmp/olver-advanced-axiom-audit/DLMF.Confluent.Basic.WhittakerLogarithmic.log"
+  }
+]

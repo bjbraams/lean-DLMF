@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.WignerSymbols.Basic.SpinMatrices
 public import Mathlib.Analysis.SpecialFunctions.Pow.Real
 
 /-!

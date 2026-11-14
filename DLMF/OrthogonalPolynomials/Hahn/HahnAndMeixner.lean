@@ -9,6 +9,7 @@ public import DLMF.OrthogonalPolynomials.Basic.AskeyScheme
 public import DLMF.Confluent.Recurrence
 public import DLMF.OrthogonalPolynomials.BinomialSeries
 public import DLMF.OrthogonalPolynomials.PollaczekMoments
+import DLMF.Gamma.SpecialValues
 
 /-!
 # Hahn and Meixner polynomial identities
@@ -35,6 +36,7 @@ cutoff, which implements DLMF's convention when a lower parameter is a negative 
   `charlier_difference_equation`: the difference equations of Table 18.22.2.
 * `hahn_forward_difference`, `krawtchouk_forward_difference`, `meixner_forward_difference`,
   `charlier_forward_difference`: DLMF 18.22.19, 18.22.21, 18.22.23 and 18.22.25.
+* `integral_meixnerPollaczek_mul_div_cosh`: the orthonormal half-parameter case.
 * `meixnerPollaczek_recurrence`, `meixnerPollaczek_central_difference`: DLMF 18.22.8 and
   18.22.29.
 * `krawtchouk_generating_function`, `meixner_generating_function`: DLMF 18.23.3 and 18.23.4.
@@ -231,6 +233,44 @@ theorem meixnerPollaczek_orthogonality {lam phi : ℝ} (hlam : 0 < lam) (hphi : 
     change (pochhammer (2*(lam:ℂ)) n/n.factorial*(I*PollaczekMoments.phase (2*phi-π))^n)^2 * _ = _
     rw [PollaczekMoments.normalized_square hlam hθ, pollaczek_scale_angle, add_comm (n:ℂ)]
   · rw [ite_eq_right hmn, PollaczekMoments.poly_orthogonal hlam hθ hmn, mul_zero]
+
+/-- Meixner–Pollaczek polynomials with `λ = 1/2` and `φ = π/2` are orthonormal
+for the hyperbolic secant density on the real line. -/
+lemma integral_meixnerPollaczek_mul_div_cosh (m n : ℕ) :
+    (∫ x : ℝ, meixnerPollaczek (1 / 2) (Real.pi / 2) m x *
+      meixnerPollaczek (1 / 2) (Real.pi / 2) n x /
+        (Real.cosh (Real.pi * x) : ℂ)) = if m = n then 1 else 0 := by
+  have meixnerPollaczekWeight_half_pi_div_two (x : ℝ) :
+      meixnerPollaczekWeight (1 / 2) (Real.pi / 2) x =
+        (Real.pi : ℂ) / (Real.cosh (Real.pi * x) : ℂ) := by
+    rw [meixnerPollaczekWeight,
+      show (2 : ℂ) * (Real.pi / 2) - Real.pi = 0 by ring, zero_mul, exp_zero, mul_one]
+    exact (DLMF.Gamma.Gamma_half_add_mul_I x).1.trans
+      (by exact_mod_cast (DLMF.Gamma.Gamma_half_add_mul_I x).2)
+  have h := meixnerPollaczek_orthogonality
+    (lam := (1 / 2 : ℝ)) (phi := Real.pi/2) (by norm_num) (by positivity)
+    (by linarith [Real.pi_pos]) m n
+  have he (x : ℝ) : meixnerPollaczek (1 / 2) (Real.pi / 2) m x *
+      meixnerPollaczek (1 / 2) (Real.pi / 2) n x *
+        meixnerPollaczekWeight (1 / 2) (Real.pi / 2) x =
+      (Real.pi : ℂ) * (meixnerPollaczek (1 / 2) (Real.pi / 2) m x *
+        meixnerPollaczek (1 / 2) (Real.pi / 2) n x /
+          (Real.cosh (Real.pi * x) : ℂ)) := by
+    rw [meixnerPollaczekWeight_half_pi_div_two]
+    ring
+  simp only [ofReal_div, ofReal_one, ofReal_ofNat] at h
+  rw [integral_congr_ae (Filter.Eventually.of_forall he), integral_const_mul] at h
+  norm_num only [show (2 : ℂ) * (1 / 2)=1 by norm_num, sin_pi_div_two, cpow_one,
+    Gamma_nat_eq_factorial] at h
+  have hp : (Real.pi : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
+  by_cases hmn : m = n
+  · rw [ite_eq_left hmn] at h ⊢
+    have hn : (n ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero n)
+    field_simp [hn, hp] at h
+    exact h
+  · rw [ite_eq_right hmn] at h ⊢
+    exact (mul_eq_zero.mp h).resolve_left hp
+
 
 /-- A two-numerator terminating sum is a terminating Gauss series. -/
 theorem terminatingHypergeometric_eq_ordinaryHypergeometric (n : ℕ) (b c z : ℂ) :

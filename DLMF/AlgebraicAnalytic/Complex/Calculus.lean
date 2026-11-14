@@ -5,6 +5,11 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
+import TauCeti.Analysis.Complex.PlaneSeparation.Inside
+import TauCeti.Analysis.Contour.Winding.AbsolutelyContinuous.Jordan
+import TauCeti.Topology.JordanCurve.Interval
+import Mathlib.LinearAlgebra.Complex.FiniteDimensional
+
 public import DLMF.AlgebraicAnalytic.Complex.Basic
 public import DLMFMathlib.Analysis.Complex.PowerSeriesOperations
 import DLMFMathlib.Analysis.Calculus.Deriv.Polar
@@ -82,6 +87,10 @@ upstream items are recorded as `dlmf_upstream` pointers in
 * **Series.** DLMF's series converge as partial sums; Mathlib's `HasSum` is unconditional. They
   agree for absolutely convergent series; partial sums are used where DLMF's statement is about
   conditional convergence (1.9.51).
+
+The Jordan separation and winding sign assertions use TauCeti's plane separation and
+absolutely continuous Jordan index APIs; the contour hypotheses provide the required absolute
+continuity and injectivity without further regularity assumptions.
 -/
 
 @[expose] public noncomputable section
@@ -353,11 +362,9 @@ theorem harmonic_polar {u : ℂ → ℝ} {r θ : ℝ} (hr : 0 < r)
 
 /-- DLMF §1.9(iii) (Jordan curve theorem): a simple closed contour `C` divides `ℂ` into two open
 domains, the bounded interior and the unbounded exterior, that have `C` as common boundary.
-Tau Ceti proves the separation (`TauCeti.IsJordanCurve.not_isPreconnected_compl`), the
-nonemptiness of the inside (`TauCeti.IsJordanCurve.nonempty_filledHull_sdiff`) and that `C` is
-the frontier of every complementary component
-(`TauCeti.IsJordanCurve.frontier_connectedComponentIn`); the connectedness of the two domains
-is admitted here. -/
+TauCeti proves the inside is connected
+(`TauCeti.IsJordanCurve.isConnected_filledHull_sdiff`), the outside is connected
+(`TauCeti.isConnected_compl_filledHull`) and their frontiers are the curve. -/
 @[dlmf 1.9.iii]
 theorem IsSimpleClosedContour.jordan {γ : ℝ → ℂ} {a b : ℝ} (hγ : IsSimpleClosedContour γ a b) :
     IsOpen (contourInterior γ a b) ∧ IsConnected (contourInterior γ a b) ∧
@@ -367,7 +374,29 @@ theorem IsSimpleClosedContour.jordan {γ : ℝ → ℂ} {a b : ℝ} (hγ : IsSim
       (γ '' Icc a b)ᶜ = contourInterior γ a b ∪ contourExterior γ a b ∧
       frontier (contourInterior γ a b) = γ '' Icc a b ∧
       frontier (contourExterior γ a b) = γ '' Icc a b := by
-  sorry
+  have hac := hγ.2.1.absolutelyContinuousOnInterval
+  have hC := TauCeti.isJordanCurve_image_Icc hγ.1
+    (by simpa only [uIcc_of_le hγ.1.le] using hac.continuousOn) hγ.2.2.1 hγ.2.2.2
+  have hbound := TauCeti.isBounded_filledHull.mpr hC.isCompact.isBounded
+  have hrank : 1 < Module.rank ℝ ℂ := by
+    rw [Complex.rank_real_complex]
+    exact Cardinal.one_lt_two
+  refine ⟨?_, hC.isConnected_filledHull_sdiff, hbound.subset sdiff_subset, ?_,
+    TauCeti.isConnected_compl_filledHull hrank hC.isCompact.isBounded, ?_, ?_,
+    hC.frontier_filledHull_sdiff, ?_⟩
+  · simpa only [contourInterior, ← hC.interior_filledHull] using
+      (isOpen_interior : IsOpen (interior (TauCeti.filledHull (γ '' Icc a b))))
+  · exact hC.isCompact.isClosed.isClosed_filledHull.isOpen_compl
+  · intro h
+    exact NormedSpace.unbounded_univ ℝ ℂ
+      (by simpa only [contourExterior, union_compl_self] using hbound.union h)
+  · dsimp only [contourInterior, contourExterior]
+    ext z
+    have hsub : z ∈ γ '' Icc a b → z ∈ TauCeti.filledHull (γ '' Icc a b) :=
+      fun hz => TauCeti.subset_filledHull hz
+    simp only [mem_compl_iff, Set.mem_union, Set.mem_sdiff]
+    tauto
+  · simpa only [contourExterior, frontier_compl] using hC.frontier_filledHull
 
 /-- DLMF 1.9.29 (Cauchy's theorem): if `f` is continuous within and on a simple closed contour
 `C` and analytic within `C`, then `∫_C f(z) dz = 0`. (Tau Ceti's
@@ -428,7 +457,18 @@ theorem IsSimpleClosedContour.windingNumber_eq_one_or_neg_one {γ : ℝ → ℂ}
     (hγ : IsSimpleClosedContour γ a b) :
     (∀ z ∈ contourInterior γ a b, TauCeti.Contour.windingNumber γ a b z = 1) ∨
       ∀ z ∈ contourInterior γ a b, TauCeti.Contour.windingNumber γ a b z = -1 := by
-  sorry
+  have hac := hγ.2.1.absolutelyContinuousOnInterval
+  rcases hac.jordanSign_eq_one_or_neg_one hγ.1 hγ.2.2.1 hγ.2.2.2 with hs | hs
+  · left
+    intro z hz
+    rw [hac.windingNumber_eq_jordanSign_of_mem_filledHull_sdiff hγ.1 hγ.2.2.1 hγ.2.2.2
+      (by simpa only [uIcc_of_le hγ.1.le, contourInterior] using hz), hs]
+    norm_num
+  · right
+    intro z hz
+    rw [hac.windingNumber_eq_jordanSign_of_mem_filledHull_sdiff hγ.1 hγ.2.2.1 hγ.2.2.2
+      (by simpa only [uIcc_of_le hγ.1.le, contourInterior] using hz), hs]
+    norm_num
 
 /-- DLMF §1.9(iii) (winding number outside a closed contour): `𝒩(C, z₀) = 0` for `z₀` in the
 exterior of a closed contour. From Tau Ceti's

@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.BernoulliEuler.Basic.ComplexOrder
 public import DLMF.BernoulliEuler.Basic.Polynomials
 public import DLMF.BernoulliEuler.Basic.GeneratingFunctions
 public import DLMF.BernoulliEuler.Basic.HigherOrder

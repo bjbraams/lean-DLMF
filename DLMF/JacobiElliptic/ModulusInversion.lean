@@ -24,6 +24,8 @@ complex case follows by the identity theorem on `jacobiModulusDomain`.
 
 ## Main results
 
+* `Real.norm_jacobiNome_le_sq_mul_completeEllipticKOfParameter_sq`: a real-nome upper bound.
+
 * `jacobiThetaThreeImag_pow_four`: Jacobi's identity `θ₃⁴ = θ₂⁴ + θ₄⁴` on the imaginary axis.
 * `exists_jacobiModulusImag_eq`, `jacobiModulusImag_spec`: every `0 < k < 1` is `ρ(t)` for some
   `t > 0`, and `τ(k) = it` (the real case of DLMF 22.2.2).
@@ -72,6 +74,45 @@ private lemma summable_pow_sq_add_self {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) :
   rcases le_or_gt 0 n with h | h
   · rw [abs_of_nonneg h]; nlinarith
   · rw [abs_of_neg h]; nlinarith
+
+/-- The reduced theta-two series as a natural-index power series. -/
+theorem jacobiThetaTwoReducedQ_eq_two_mul_tsum {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) :
+    jacobiThetaTwoReducedQ q = 2 * ∑' n : ℕ, q ^ (n * (n + 1)) := by
+  have H := ((summable_pow_sq_add_self hq0 hq1).hasSum).nat_add_neg_add_one
+  have he (n : ℕ) : q ^ ((n : ℤ) ^ 2 + n) +
+      q ^ ((-((n : ℤ) + 1)) ^ 2 + -((n : ℤ) + 1)) =
+      2 * q ^ (n * (n + 1)) := by
+    have h1 : (n : ℤ) ^ 2 + n = ((n * (n + 1) : ℕ) : ℤ) := by push_cast; ring
+    have h2 : (-((n : ℤ) + 1)) ^ 2 + -((n : ℤ) + 1) =
+        ((n * (n + 1) : ℕ) : ℤ) := by push_cast; ring
+    rw [h1, h2, zpow_natCast]
+    ring
+  have H1 := (H.congr_fun fun n => (he n).symm).tsum_eq
+  rw [tsum_mul_left] at H1
+  exact H1.symm
+
+/-- The real theta-three null value as a natural-index power series. -/
+theorem jacobiThetaThreeNullQ_eq_two_mul_tsum_sub_one {q : ℝ}
+    (hq0 : 0 < q) (hq1 : q < 1) :
+    Real.jacobiThetaThreeNullQ q = 2 * (∑' n : ℕ, q ^ (n ^ 2)) - 1 := by
+  have H := ((summable_zpow_sq hq0 hq1).hasSum).nat_add_neg_add_one
+  have he (n : ℕ) : q ^ ((n : ℤ) ^ 2) + q ^ ((-((n : ℤ) + 1)) ^ 2) =
+      q ^ (n ^ 2) + q ^ ((n + 1) ^ 2) := by
+    rw [neg_sq, ← Nat.cast_add_one, ← Nat.cast_pow, ← Nat.cast_pow, zpow_natCast,
+      zpow_natCast]
+  have H1 := (H.congr_fun fun n => (he n).symm).tsum_eq
+  have hs : Summable (fun n : ℕ => q ^ (n ^ 2)) := by
+    exact (summable_zpow_sq hq0 hq1).comp_injective Nat.cast_injective |>.congr fun n => by
+      dsimp only [Function.comp_def]
+      rw [← Nat.cast_pow, zpow_natCast]
+  have hs' : Summable (fun n : ℕ => q ^ ((n + 1) ^ 2)) := by
+    simpa only [Function.comp_def, Nat.succ_eq_add_one] using
+      hs.comp_injective Nat.succ_injective
+  rw [hs.tsum_add hs'] at H1
+  have H2 := hs.sum_add_tsum_nat_add 1
+  simp only [Finset.sum_range_one, zero_pow (by decide : (2 : ℕ) ≠ 0), pow_zero] at H2
+  dsimp only [Real.jacobiThetaThreeNullQ]
+  linear_combination -H1 + H2
 
 /-- The odd sublattice `{(a,b) : a + b odd}` is parametrized by `(u,v) ↦ (u+v+1, u-v)`. -/
 def oddLatticeEquiv : ℤ × ℤ ≃ {p : ℤ × ℤ // ¬ Even (p.1 + p.2)} where
@@ -136,7 +177,7 @@ private lemma jacobiThetaThreeNullQ_sq_sub_jacobiThetaFourNullQ_sq {q : ℝ} (hq
   rw [e]; ring
 
 /-- `P(q)² = 2 P(q²) θ₃(q²)`. -/
-private lemma jacobiThetaTwoReducedQ_sq {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) :
+theorem jacobiThetaTwoReducedQ_sq {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) :
     jacobiThetaTwoReducedQ q ^ 2 = 2 *
         (jacobiThetaTwoReducedQ (q ^ 2) * Real.jacobiThetaThreeNullQ (q ^ 2)) := by
   have hq2 : 0 < q ^ 2 := by positivity
@@ -285,16 +326,20 @@ noncomputable def jacobiThetaTwoImag (t : ℝ) : ℝ := jacobiThetaFourImag (1 /
 theorem jacobiThetaTwoImag_pos {t : ℝ} (ht : 0 < t) : 0 < jacobiThetaTwoImag t :=
   div_pos (jacobiThetaFourImag_pos (by positivity)) (Real.sqrt_pos.mpr ht)
 
+/-- The imaginary-axis theta-two constant is its reduced real nome series times `q^{1/4}`. -/
+theorem jacobiThetaTwoImag_eq_exp_mul_reducedQ {t : ℝ} (ht : 0 < t) :
+    jacobiThetaTwoImag t = Real.exp (-(π * t) / 4) *
+      jacobiThetaTwoReducedQ (Real.exp (-(π * t))) := by
+  have e := (jacobiThetaTwoTau_zero_I_mul_eq_div_sqrt ht).symm.trans
+    (jacobiThetaTwoTau_zero_I_mul_eq_reducedQ t)
+  exact_mod_cast e
+
 /-- Jacobi's identity on the imaginary axis: `B⁴ = A⁴ + C⁴`. -/
 theorem jacobiThetaThreeImag_pow_four {t : ℝ} (ht : 0 < t) :
     jacobiThetaThreeImag t ^ 4 = jacobiThetaTwoImag t ^ 4 + jacobiThetaFourImag t ^ 4 := by
   have h := jacobiThetaThreeNullQ_pow_four_eq (exp_neg_pi_mul_mem_Ioo ht).1
       (exp_neg_pi_mul_mem_Ioo ht).2
-  have hA : jacobiThetaTwoImag t = Real.exp (-(π * t) / 4) *
-      jacobiThetaTwoReducedQ (Real.exp (-(π * t))) := by
-    have e := (jacobiThetaTwoTau_zero_I_mul_eq_div_sqrt ht).symm.trans
-        (jacobiThetaTwoTau_zero_I_mul_eq_reducedQ t)
-    exact_mod_cast e
+  have hA := jacobiThetaTwoImag_eq_exp_mul_reducedQ ht
   have he : Real.exp (-(π * t) / 4) ^ 4 = Real.exp (-(π * t)) := by
     rw [← Real.exp_nat_mul]; ring_nf
   rw [jacobiThetaThreeImag, jacobiThetaFourImag, h, hA, mul_pow, he]
@@ -472,10 +517,6 @@ theorem jacobiModulusImag_spec {t : ℝ} (ht : 0 < t) :
       Real.sq_sqrt ht.le]
     push_cast
     ring
-  have hKne : completeEllipticK k ≠ 0 := by
-    rw [hKk]
-    exact mul_ne_zero (div_ne_zero pi_ne_zero' two_ne_zero)
-      (pow_ne_zero _ (ofReal_ne_zero.mpr hB0.ne'))
   refine ⟨hk0, hk1, ?_, ?_, ?_, ?_, hKmk, hKmk'⟩
   · rw [jacobiTau, hKpk, hKk]
     have : (jacobiThetaThreeImag t : ℂ) ≠ 0 := ofReal_ne_zero.mpr hB0.ne'
@@ -503,6 +544,58 @@ lemma exists_jacobiTau_eq_I_mul_of_real {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) :
   obtain ⟨-, -, h1, h2, h3, h4, -⟩ := jacobiModulusImag_spec ht
   rw [hρ] at h1 h2 h3 h4
   exact ⟨t, ht, h1, h2, h3, h4⟩
+
+/-- The two zero-exponent terms give the reduced theta-two series a lower bound of two. -/
+private lemma two_le_jacobiThetaTwoReducedQ {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) :
+    2 ≤ jacobiThetaTwoReducedQ q := by
+  have h := (summable_pow_sq_add_self hq0 hq1).sum_le_tsum
+    ({(0 : ℤ), -1}) (fun n _ => (zpow_pos hq0 (n ^ 2 + n)).le)
+  norm_num [jacobiThetaTwoReducedQ] at h ⊢
+  exact h
+
+/-- The real nome is bounded above by its modulus squared times a normalized complete-integral
+factor, on `0 < k < 1`. -/
+theorem Real.norm_jacobiNome_le_sq_mul_completeEllipticKOfParameter_sq {k : ℝ}
+    (hk0 : 0 < k) (hk1 : k < 1) :
+    ‖jacobiNome k‖ ≤ k ^ 2 / 16 *
+      (2 / π * DLMF.Elliptic.Real.completeEllipticKOfParameter (k ^ 2)) ^ 2 := by
+  obtain ⟨t, ht, hρ⟩ := exists_jacobiModulusImag_eq hk0 hk1
+  obtain ⟨-, -, hτ, -, -, -, hKr, -⟩ := jacobiModulusImag_spec ht
+  rw [hρ] at hτ hKr
+  let q : ℝ := Real.exp (-(π * t))
+  let B := jacobiThetaThreeImag t
+  let P := jacobiThetaTwoReducedQ q
+  have hq0 : 0 < q := Real.exp_pos _
+  have hq1 : q < 1 := Real.exp_lt_one_iff.mpr (by nlinarith [Real.pi_pos, ht])
+  have hP : 2 ≤ P := two_le_jacobiThetaTwoReducedQ hq0 hq1
+  have hB : 0 < B := lt_of_lt_of_le one_pos (one_le_jacobiThetaThreeImag ht)
+  have he : Real.exp (-(π * t) / 4) ^ 4 = q := by
+    rw [← Real.exp_nat_mul]
+    congr 1
+    ring
+  have hrel : k ^ 2 * B ^ 4 = q * P ^ 4 := by
+    rw [← hρ, jacobiModulusImag, div_pow, div_pow]
+    dsimp only [B, P]
+    simp only [← pow_mul, Nat.reduceMul]
+    rw [div_mul_cancel₀ _ (pow_ne_zero _ hB.ne'), jacobiThetaTwoImag_eq_exp_mul_reducedQ ht,
+      mul_pow, he]
+  have hne : (π : ℝ) ≠ 0 := Real.pi_ne_zero
+  have hnorm : ‖jacobiNome k‖ = q := by
+    rw [jacobiNome_eq_exp_tau, hτ]
+    have heq : (π : ℂ) * I * (I * t) = ((-(π * t) : ℝ) : ℂ) := by
+      push_cast
+      ring_nf
+      simp only [I_sq]
+      ring
+    rw [heq, ← ofReal_exp, norm_real, Real.norm_of_nonneg hq0.le]
+  rw [hnorm, hKr]
+  have hbr : 2 / π * (π / 2 * B ^ 2) = B ^ 2 := by field_simp [hne]
+  rw [hbr, ← pow_mul]
+  have hP4 := pow_le_pow_left₀ (by norm_num : (0 : ℝ) ≤ 2) hP 4
+  norm_num only at hP4
+  have hmul := mul_le_mul_of_nonneg_left hP4 hq0.le
+  rw [← hrel] at hmul
+  nlinarith
 
 /-- Holomorphy of the parametric integrals `∫₀^{π/2} (1 - c(k) sin²θ)^{-1/2} dθ`. -/
 private lemma differentiableOn_integral_one_sub_mul_sin_sq_rpow {U : Set ℂ}

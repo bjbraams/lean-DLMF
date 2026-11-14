@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.Statistical.Basic.VonMises
 public import DLMF.Statistical.Basic.IncompleteGamma
 public import DLMF.Statistical.Basic.IncompleteBeta
 

@@ -5,6 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
+public import DLMF.Combinatorics.Stirling.ComplexGeneratingFunctions
+
 public import DLMF.Combinatorics.Stirling.DefinitionsAndSeries
 public import DLMF.Combinatorics.Stirling.RecurrencesAndIdentities
 public import DLMF.Combinatorics.Stirling.AsymptoticsAndCycles

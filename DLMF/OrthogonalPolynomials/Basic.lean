@@ -5,6 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
+public import DLMF.OrthogonalPolynomials.Basic.PolynomialContinuation
+
 public import DLMF.OrthogonalPolynomials.Basic.Definitions
 public import DLMF.OrthogonalPolynomials.Basic.Classical
 public import DLMF.OrthogonalPolynomials.Basic.General

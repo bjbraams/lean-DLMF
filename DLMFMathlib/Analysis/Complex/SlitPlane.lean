@@ -5,13 +5,14 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Analysis.SpecialFunctions.Complex.Arg
+public import TauCeti.Analysis.Complex.SectorBounds
 
 /-!
 # Nonnegative translations in the slit plane
 
 A nonnegative real translation preserves the principal slit plane. On a closed sector
 away from the negative real axis, the norm of `z+t` uniformly bounds `‖z‖+t` from below.
+The translation estimate uses TauCeti’s `Complex.mul_norm_add_le_norm_add_ofReal`.
 -/
 
 @[expose] public section
@@ -29,22 +30,14 @@ lemma add_ofReal_mem_slitPlane_of_nonneg {z : ℂ} (hz : z ∈ slitPlane) {t : �
   · exact mem_slitPlane_iff.mpr (Or.inr (by simpa using hi))
 
 /-- A lower bound for translations when the real part stays away from `-‖z‖`. -/
-lemma mul_norm_add_le_norm_add_ofReal {z : ℂ} {d t : ℝ} (hd : 0 < d) (hd1 : d ≤ 1)
+lemma mul_norm_add_le_norm_add_ofReal_of_le_re {z : ℂ} {d t : ℝ} (hd : 0 < d) (hd1 : d ≤ 1)
     (hz : (-1 + d) * ‖z‖ ≤ z.re) (ht : 0 ≤ t) :
     d / 2 * (‖z‖ + t) ≤ ‖z + t‖ := by
-  have hsq : ‖z + t‖ ^ 2 = ‖z‖ ^ 2 + 2 * z.re * t + t ^ 2 := by
-    simp only [Complex.sq_norm, Complex.normSq_apply, add_re, ofReal_re, add_im,
-      ofReal_im, add_zero]
-    ring
-  have h1 : 0 ≤ 1 - d ^ 2 / 4 := by nlinarith
-  have h2 : 0 ≤ 2 * d - d ^ 2 := by nlinarith
-  have h3 := mul_nonneg h1 (sq_nonneg (‖z‖ - t))
-  have h4 := mul_nonneg h2 (mul_nonneg (norm_nonneg z) ht)
-  have h5 := mul_le_mul_of_nonneg_right hz ht
-  have hbound : (d / 2 * (‖z‖ + t)) ^ 2 ≤ ‖z + t‖ ^ 2 := by
-    nlinarith
-  have hp : 0 ≤ d / 2 * (‖z‖ + t) := by positivity
-  nlinarith [norm_nonneg (z + t)]
+  apply Complex.mul_norm_add_le_norm_add_ofReal (c := d / 2)
+  · positivity
+  · linarith
+  · exact ht
+  · convert hz using 1 <;> ring
 
 /-- Uniform translation bound on a sector separated from the negative real axis. -/
 lemma sector_norm_add_ofReal_bound {δ : ℝ} (hδ0 : 0 < δ) (hδ : δ < π) :
@@ -59,7 +52,7 @@ lemma sector_norm_add_ofReal_bound {δ : ℝ} (hδ0 : 0 < δ) (hδ : δ < π) :
   have hd : 0 < d := by dsimp [d]; linarith
   have hd1 : d ≤ 1 := by dsimp [d]; linarith [Real.cos_le_one (π - δ)]
   refine ⟨d / 2, by positivity, fun z hz t ht => ?_⟩
-  apply mul_norm_add_le_norm_add_ofReal hd hd1 ?_ ht
+  apply mul_norm_add_le_norm_add_ofReal_of_le_re hd hd1 ?_ ht
   have h := Real.cos_le_cos_of_nonneg_of_le_pi (abs_nonneg (arg z))
     (by linarith : π - δ ≤ π) hz
   rw [Real.cos_abs] at h

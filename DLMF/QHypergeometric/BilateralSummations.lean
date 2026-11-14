@@ -5,12 +5,15 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.QHypergeometric.Ramanujan
 public import DLMF.QHypergeometric.Convergence
 public import DLMF.QHypergeometric.QuintupleProduct
 public import DLMF.QHypergeometric.VeryWellPoisedSums
 public import DLMF.QHypergeometric.BaileyBilateral
 public import DLMF.QHypergeometric.BaileySixSummation
 public import DLMF.QHypergeometric.BaileySixBridge
+import DLMF.QHypergeometric.BilateralParameterContinuity
+import DLMF.QHypergeometric.BilateralEven
 
 /-!
 # Bilateral basic summations and continuation (DLMF §17.8)
@@ -56,9 +59,6 @@ open Complex Filter Finset Set MeasureTheory DLMF.QSeries
 open scoped Real Topology
 namespace DLMF.QHypergeometric
 
-/-- Ramanujan's product quotient, giving continuation of one-psi-one. -/
-def qRamanujanValue (a b q z : ℂ) : ℂ :=
-  qPochhammerListInf [q,b/a,a*z,q/(a*z)] q/qPochhammerListInf [b,q/a,z,b/(a*z)] q
 /-- The product quotient in the bilateral two-psi-two sum. -/
 def qBilateralTwoValue (a b c q : ℂ) : ℂ :=
   qPochhammerInf (a*q/(b*c)) q*qPochhammerListInf [a*q^2/b^2,a*q^2/c^2,q^2,a*q,q/a] (q^2)/
@@ -85,20 +85,6 @@ def qBilateralEvenValue (b c q : ℂ) : ℂ :=
        qPochhammerInf (b*Complex.sqrt q) q*qPochhammerInf (-c*Complex.sqrt q/b) q)
 /-- The integer triangular exponent in the quintuple product. -/
 def qQuintupleExponent (n : ℤ) : ℤ := n*(3*n-1)/2
-/-- Ramanujan's `1ψ1` summation, valid for `|b/a| < |z| < 1` (DLMF 17.8.E2). -/
-@[dlmf 17.8.E2]
-theorem ramanujan_one_psi_one {a b q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (ha : a≠0)
-    (hab : QBilateralRegular [a] [b] q) (hz : ‖b/a‖<‖z‖ ∧ ‖z‖<1) :
-    qPsi [a] [b] q z=qRamanujanValue a b q z := by
-  have h := ramanujan_1psi1_of_regular hq0 hq ha (fun n => hab.2 a (by simp) n)
-    (fun n => hab.1 b (by simp) n) hz
-  unfold qPsi qRamanujanValue
-  simp only [qPsiTerm, qPochhammerListInt, qPsiExponent, qPochhammerListInf, List.map_cons,
-    List.map_nil, List.prod_cons, List.prod_nil, mul_one, List.length_singleton, sub_self,
-    zpow_zero]
-  rw [h]
-  ring
-
 /-- The quintuple product identity (DLMF 17.8.E3). -/
 @[dlmf 17.8.E3]
 theorem quintuple_product {q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz : z≠0) :
@@ -178,8 +164,7 @@ private lemma threeCleared_bound {b c d q : ℂ} (hq : ‖q‖ < 1) (hb : b ≠ 
   set ρ := ‖q‖ * R₁ / ‖b*c*d‖ with hρ
   have hρ1 : ρ < 1 := by rw [hρ, div_lt_one hbcd]; exact hqR
   have hρ0 : 0 ≤ ρ := by positivity
-  have hR0 : 0 ≤ R₁ := by positivity
-  set Y := ‖q‖*R₁ + ‖b‖ + ‖c‖ + ‖d‖ + R₁*‖q‖/‖b‖ + R₁*‖q‖/‖c‖ + R₁*‖q‖/‖d‖ with hY
+  set Y := ‖q‖*R₁ + ‖b‖ + ‖c‖ + ‖d‖ + R₁*‖q‖/‖b‖ + R₁*‖q‖/‖c‖ + R₁*‖q‖/‖d‖
   set E := Real.exp (Y / (1 - ‖q‖)) with hE
   obtain ⟨C, hC⟩ := RamanujanPsi.exists_norm_inv_qPochhammer_le hq
     (qPochhammerInf_ne_zero_of_norm_lt_one hq hq)
@@ -197,10 +182,6 @@ private lemma threeCleared_bound {b c d q : ℂ} (hq : ‖q‖ < 1) (hb : b ≠ 
   have hn2 : 0 ≤ R₁*‖q‖/‖c‖ := by positivity
   have hn3 : 0 ≤ R₁*‖q‖/‖d‖ := by positivity
   have hn4 : 0 ≤ ‖q‖*R₁ := by positivity
-  have hbn := norm_nonneg b
-  have hcn := norm_nonneg c
-  have hdn := norm_nonneg d
-  have hY0 : 0 ≤ Y := by rw [hY]; positivity
   have hE1 : 1 ≤ E := by rw [hE]; exact Real.one_le_exp (by have := hq; positivity)
   have hC0 : 0 ≤ C := (norm_nonneg _).trans (hC 0)
   refine ⟨δ, hδ0, E^7 * (1 + R₁) * C, ρ, hρ0, hρ1, fun a ha k => ?_⟩
@@ -240,7 +221,6 @@ private lemma threeCleared_bound {b c d q : ℂ} (hq : ‖q‖ < 1) (hb : b ≠ 
     unfold threeClearedTerm; ring
   rw [hform]
   simp only [norm_mul, norm_pow]
-  have hE0 : 0 ≤ E := by linarith
   calc _ ≤ E * (1 + R₁) * E * E * E * E * E * E * C * ρ^k := by
         gcongr
         all_goals first
@@ -475,15 +455,6 @@ theorem bilateral_three_sum {b c d q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz :
   have f3 := hregI _ hD
   field_simp
 
-/-- The `4ψ4` summation (DLMF 17.8.E6). -/
-@[dlmf 17.8.E6]
-theorem bilateral_four_sum {a b c d q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (ha : a≠0)
-    (hz : ‖q*a*Complex.sqrt a‖<‖b*c*d‖)
-    (hreg : QBilateralRegular [-q*Complex.sqrt a,b,c,d] [-Complex.sqrt a,a*q/b,a*q/c,a*q/d] q) :
-    qPsi [-q*Complex.sqrt a,b,c,d] [-Complex.sqrt a,a*q/b,a*q/c,a*q/d] q
-      (q*a*Complex.sqrt a/(b*c*d))=qBilateralFourValue a b c d q := by
-  sorry
-
 /-- The very-well-poised `6ψ6` summation (DLMF 17.8.E7). -/
 @[dlmf 17.8.E7]
 theorem bilateral_six_sum {a b c d e q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (ha : a≠0)
@@ -525,6 +496,349 @@ theorem bilateral_six_sum {a b c d e q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (ha
   apply (eq_div_iff (BaileySixSummation.denominator_ne_zero_of_regular hq0 hq ha hz hreg)).mpr
   simpa only [mul_comm] using hs
 
+namespace FourPsiFour
+
+/-- The cancelled `4ψ4` product with an arbitrary square-root parameter `r`; all products
+use the fixed base `q` and totalized division. -/
+def rootValue (r b c d q : ℂ) : ℂ :=
+  qPochhammerListInf [r*sqrt q,-r*sqrt q,-r*q,sqrt q/r,-sqrt q/r,-q/r,
+    r^2*q/(b*c),r^2*q/(b*d),r^2*q/(c*d),q*r/b,q*r/c,q*r/d,q] q /
+    qPochhammerListInf [r^2*q/b,r^2*q/c,r^2*q/d,q/b,q/c,q/d,q*r^3/(b*c*d)] q
+
+/-- The defining cancelled-root product quotient. -/
+lemma rootValue_def (r b c d q : ℂ) : rootValue r b c d q =
+    qPochhammerListInf [r*sqrt q,-r*sqrt q,-r*q,sqrt q/r,-sqrt q/r,-q/r,
+      r^2*q/(b*c),r^2*q/(b*d),r^2*q/(c*d),q*r/b,q*r/c,q*r/d,q] q /
+      qPochhammerListInf [r^2*q/b,r^2*q/c,r^2*q/d,q/b,q/c,q/d,q*r^3/(b*c*d)] q := by rfl
+
+/-- An integer q-shifted factorial is nonzero when both q-lattices are excluded. -/
+lemma qPochhammerInt_ne_zero {u q : ℂ} (hq0 : q ≠ 0) (hq : ‖q‖ < 1)
+    (hl : ∀ j : ℕ, u * q ^ j ≠ 1) (hu : ∀ j : ℕ, u ≠ q ^ (j+1)) (n : ℤ) :
+    qPochhammerInt u q n ≠ 0 := by
+  cases n with
+  | ofNat n =>
+    rw [Int.ofNat_eq_natCast,qPochhammerInt_natCast]
+    exact qPochhammer_ne_zero_of_factors hq (fun j hj => hl j (sub_eq_zero.mp hj).symm) n
+  | negSucc n =>
+    rw [qPochhammerInt_negSucc]
+    apply inv_ne_zero
+    have he : u * q ^ (-((n : ℤ)+1)) = u / q ^ (n+1) := by
+      rw [show (n : ℤ)+1 = ((n+1 : ℕ) : ℤ) by push_cast;rfl,zpow_neg,zpow_natCast,div_eq_mul_inv]
+    rw [he]
+    exact FiniteBilateral.qPochhammer_div_pow_ne_zero hq0 hu (n+1)
+
+/-- The symmetric pair of roots in Bailey’s `6ψ6` sum permits either square root. -/
+lemma qPsi_six_eq_product_of_square {a b c d e q r : ℂ} (hr : r ^ 2 = a) (hq0 : q ≠ 0)
+    (hq : ‖q‖ < 1) (ha : a ≠ 0) (hz : ‖q * a ^ 2‖ < ‖b * c * d * e‖)
+    (hreg : QBilateralRegular [q*r,-q*r,b,c,d,e] [r,-r,a*q/b,a*q/c,a*q/d,a*q/e] q) :
+    qPsi [q*r,-q*r,b,c,d,e] [r,-r,a*q/b,a*q/c,a*q/d,a*q/e] q
+      (q*a^2/(b*c*d*e)) = qBilateralSixValue a b c d e q := by
+  have hsq : (sqrt a)^2=a := by rw [Complex.sqrt,← cpow_nat_mul];norm_num
+  have hs : sqrt a = r ∨ sqrt a = -r :=
+    sq_eq_sq_iff_eq_or_eq_neg.mp (hsq.trans hr.symm)
+  rcases hs with hs | hs
+  · simpa only [hs] using bilateral_six_sum hq0 hq ha hz (by simpa only [hs] using hreg)
+  · have hreg' : QBilateralRegular [q * sqrt a,-q * sqrt a,b,c,d,e]
+        [sqrt a,-sqrt a,a*q/b,a*q/c,a*q/d,a*q/e] q := by
+      simp only [hs,mul_neg,neg_mul,neg_neg]
+      constructor
+      · intro u hu j
+        apply hreg.1 u _ j
+        simpa only [List.mem_cons,List.not_mem_nil,or_false,or_assoc,or_comm,
+          or_left_comm,neg_mul] using hu
+      · intro u hu j
+        apply hreg.2 u _ j
+        simpa only [List.mem_cons,List.not_mem_nil,or_false,or_assoc,or_comm,
+          or_left_comm,neg_mul] using hu
+    have H := bilateral_six_sum hq0 hq ha hz hreg'
+    simp only [hs,mul_neg,neg_mul,neg_neg] at H
+    rw [FiniteBilateral.qPsi_perm (List.Perm.swap _ _ _) (List.Perm.swap _ _ _)] at H
+    simpa only [neg_mul] using H
+
+/-- Cancelling the sixth upper parameter specializes `6ψ6` to `4ψ4` off the root q-lattice. -/
+lemma qPsi_four_eq_six {r b c d q : ℂ} (hq0 : q ≠ 0) (hq : ‖q‖ < 1)
+    (hr0 : r ≠ 0) (hz : ‖q*r^3‖ < ‖b*c*d‖)
+    (hneg : ∀ j : ℕ, r*q^j ≠ 1) (hpos : ∀ j : ℕ, r ≠ q^(j+1))
+    (hreg : QBilateralRegular [-q*r,b,c,d] [-r,r^2*q/b,r^2*q/c,r^2*q/d] q) :
+    qPsi [-q*r,b,c,d] [-r,r^2*q/b,r^2*q/c,r^2*q/d] q (q*r^3/(b*c*d)) =
+      qBilateralSixValue (r^2) b c d r q := by
+  have hqrNeg (j : ℕ) : (q*r)*q^j ≠ 1 := by
+    rw [show q*r*q^j=r*q^(j+1) by ring]
+    exact hneg _
+  have hqrPos (j : ℕ) : q*r ≠ q^(j+1) := by
+    intro he
+    have he' : r = q^j := by apply mul_left_cancel₀ hq0;rw [he];ring
+    cases j with
+    | zero => exact hneg 0 (by simpa using he')
+    | succ j => exact hpos j he'
+  have hreg6 : QBilateralRegular [q*r,-q*r,b,c,d,r]
+      [r,-r,r^2*q/b,r^2*q/c,r^2*q/d,r^2*q/r] q := by
+    constructor
+    · intro u hu j
+      simp only [List.mem_cons,List.not_mem_nil,or_false] at hu
+      rcases hu with rfl|rfl|rfl|rfl|rfl|rfl
+      · exact hneg j
+      · exact hreg.1 _ (by simp) j
+      · exact hreg.1 _ (by simp) j
+      · exact hreg.1 _ (by simp) j
+      · exact hreg.1 _ (by simp) j
+      · rw [show r^2*q/r=q*r by field_simp];exact hqrNeg j
+    · intro u hu j
+      simp only [List.mem_cons,List.not_mem_nil,or_false] at hu
+      rcases hu with rfl|rfl|rfl|rfl|rfl|rfl
+      · exact hqrPos j
+      · exact hreg.2 _ (by simp) j
+      · exact hreg.2 _ (by simp) j
+      · exact hreg.2 _ (by simp) j
+      · exact hreg.2 _ (by simp) j
+      · exact hpos j
+  have hz6 : ‖q*(r^2)^2‖ < ‖b*c*d*r‖ := by
+    have h := mul_lt_mul_of_pos_right hz (norm_pos_iff.mpr hr0)
+    simpa only [← norm_mul,show q*r^3*r=q*(r^2)^2 by ring] using h
+  have H := qPsi_six_eq_product_of_square rfl hq0 hq (pow_ne_zero _ hr0) hz6 hreg6
+  have hL : qPsi [q*r,-q*r,b,c,d,r] [r,-r,r^2*q/b,r^2*q/c,r^2*q/d,r^2*q/r]
+        q (q*(r^2)^2/(b*c*d*r)) =
+      qPsi [-q*r,b,c,d] [-r,r^2*q/b,r^2*q/c,r^2*q/d] q (q*r^3/(b*c*d)) := by
+    rw [show r^2*q/r=q*r by field_simp,show q*(r^2)^2/(b*c*d*r)=q*r^3/(b*c*d) by field_simp]
+    unfold qPsi
+    refine tsum_congr fun n => ?_
+    have hrn := qPochhammerInt_ne_zero hq0 hq hneg hpos n
+    have hqrn := qPochhammerInt_ne_zero hq0 hq hqrNeg hqrPos n
+    simp only [qPsiTerm,qPsiExponent,qPochhammerListInt,List.map_cons,List.map_nil,
+      List.prod_cons,List.prod_nil,List.length_cons,List.length_nil]
+    norm_num only [zpow_zero,mul_one]
+    field_simp [hrn,hqrn]
+  rw [hL] at H
+  exact H
+
+/-- Splitting both removable root products reduces the `6ψ6` quotient to the `4ψ4` quotient. -/
+lemma qBilateralSixValue_eq_rootValue (r b c d q : ℂ) (hq : ‖q‖ < 1) (hr0 : r ≠ 0)
+    (hneg : ∀ j : ℕ, r*q^j ≠ 1) (hpos : ∀ j : ℕ, r ≠ q^(j+1)) :
+    qBilateralSixValue (r^2) b c d r q =
+      qPochhammerListInf [r*sqrt q,-r*sqrt q,-r*q,sqrt q/r,-sqrt q/r,-q/r,
+        r^2*q/(b*c),r^2*q/(b*d),r^2*q/(c*d),q*r/b,q*r/c,q*r/d,q] q /
+      qPochhammerListInf [r^2*q/b,r^2*q/c,r^2*q/d,q/b,q/c,q/d,q*r^3/(b*c*d)] q := by
+  have hqrNeg (j : ℕ) : (q*r)*q^j ≠ 1 := by
+    rw [show q*r*q^j=r*q^(j+1) by ring]
+    exact hneg _
+  have split (u : ℂ) : qPochhammerInf (u^2*q) q =
+      qPochhammerInf (u*sqrt q) q * qPochhammerInf (-u*sqrt q) q *
+        qPochhammerInf (-u*q) q * qPochhammerInf (q*u) q := by
+    have hsq : (u*sqrt q)^2=u^2*q := by
+      rw [mul_pow]
+      congr 1
+      rw [Complex.sqrt,← cpow_nat_mul]
+      norm_num
+    rw [qPochhammerInf_split_sq hq (a := u^2*q),neg_mul,neg_mul,
+      qPochhammerInf_mul_qPochhammerInf_neg hq,hsq,
+      mul_assoc _ (qPochhammerInf (-(u*q)) q),mul_comm (qPochhammerInf (-(u*q)) q),
+      mul_comm q u,qPochhammerInf_mul_qPochhammerInf_neg hq]
+    ring_nf
+  have hqr := qPochhammerInf_ne_zero hq (fun j hj => hqrNeg j (sub_eq_zero.mp hj).symm)
+  have hqi : qPochhammerInf (q/r) q ≠ 0 := by
+    apply qPochhammerInf_ne_zero hq
+    intro j hj
+    apply hpos j
+    have he := sub_eq_zero.mp hj
+    have he' := congrArg (fun z : ℂ => z*r) he
+    field_simp at he'
+    rw [pow_succ]
+    linear_combination he'
+
+  let N := qPochhammerListInf [r*sqrt q,-r*sqrt q,-r*q,sqrt q/r,-sqrt q/r,-q/r,
+    r^2*q/(b*c),r^2*q/(b*d),r^2*q/(c*d),q*r/b,q*r/c,q*r/d,q] q
+  let D := qPochhammerListInf [r^2*q/b,r^2*q/c,r^2*q/d,q/b,q/c,q/d,q*r^3/(b*c*d)] q
+  have hN : qPochhammerListInf [r^2*q,r^2*q/(b*c),r^2*q/(b*d),r^2*q/(b*r),
+      r^2*q/(c*d),r^2*q/(c*r),r^2*q/(d*r),q,q/(r^2)] q =
+      N * (qPochhammerInf (q*r) q * qPochhammerInf (q/r) q) := by
+    dsimp only [N,qPochhammerListInf]
+    simp only [List.map_cons,List.map_nil,List.prod_cons,List.prod_nil,mul_one]
+    rw [show r^2*q/(b*r)=q*r/b by field_simp,show r^2*q/(c*r)=q*r/c by field_simp,
+      show r^2*q/(d*r)=q*r/d by field_simp,split r,show q/r^2=r⁻¹^2*q by ring,split r⁻¹,
+      show r⁻¹*sqrt q=sqrt q/r by ring,show -r⁻¹*sqrt q= -sqrt q/r by ring,
+      show -r⁻¹*q= -q/r by ring,show q*r⁻¹=q/r by ring]
+    ring
+  have hD : qPochhammerListInf [r^2*q/b,r^2*q/c,r^2*q/d,r^2*q/r,q/b,q/c,q/d,q/r,
+      q*(r^2)^2/(b*c*d*r)] q = D * (qPochhammerInf (q*r) q * qPochhammerInf (q/r) q) := by
+    dsimp only [D,qPochhammerListInf]
+    simp only [List.map_cons,List.map_nil,List.prod_cons,List.prod_nil,mul_one]
+    rw [show r^2*q/r=q*r by field_simp,show q*(r^2)^2/(b*c*d*r)=q*r^3/(b*c*d) by field_simp]
+    ring
+  rw [qBilateralSixValue,hN,hD]
+  exact mul_div_mul_right N D (mul_ne_zero hqr hqi)
+
+/-- Original bilateral regularity and the convergence inequality regularize all product divisors. -/
+lemma qDenominatorRegular_rootValue {r b c d q : ℂ} (hq0 : q ≠ 0) (hq : ‖q‖ < 1)
+    (hr0 : r ≠ 0) (hz : ‖q*r^3‖ < ‖b*c*d‖)
+    (hreg : QBilateralRegular [-q*r,b,c,d] [-r,r^2*q/b,r^2*q/c,r^2*q/d] q) :
+    QDenominatorRegular [r^2*q/b,r^2*q/c,r^2*q/d,q/b,q/c,q/d,q*r^3/(b*c*d)] q := by
+  have hbcd : b*c*d ≠ 0 := norm_pos_iff.mp ((norm_nonneg _).trans_lt hz)
+  have hb := left_ne_zero_of_mul (left_ne_zero_of_mul hbcd)
+  have hc := right_ne_zero_of_mul (left_ne_zero_of_mul hbcd)
+  have hd := right_ne_zero_of_mul hbcd
+  have hRec := FiniteBilateral.qDenominatorRegular_reciprocal
+    (a := [-q*r,b,c,d]) (by simp [hq0,hr0,hb,hc,hd]) hreg.2
+  have hz1 : ‖q*r^3/(b*c*d)‖ < 1 := by
+    rw [norm_div,div_lt_one (norm_pos_iff.mpr hbcd)];exact hz
+  intro u hu j
+  simp only [List.mem_cons,List.not_mem_nil,or_false] at hu
+  rcases hu with rfl|rfl|rfl|rfl|rfl|rfl|rfl
+  · exact hreg.1 _ (by simp) j
+  · exact hreg.1 _ (by simp) j
+  · exact hreg.1 _ (by simp) j
+  · exact hRec _ (by simp) j
+  · exact hRec _ (by simp) j
+  · exact hRec _ (by simp) j
+  · intro he
+    have hnorm : ‖q*r^3/(b*c*d)*q^j‖ < 1 := by
+      rw [norm_mul,norm_pow]
+      exact (mul_le_of_le_one_right (norm_nonneg _)
+        (pow_le_one₀ (norm_nonneg q) hq.le)).trans_lt hz1
+    rw [he,norm_one] at hnorm
+    exact (lt_irrefl _ hnorm)
+
+/-- The cancelled product depends continuously on the nonzero root parameter. -/
+lemma continuousAt_rootValue {r b c d q : ℂ} (hq : ‖q‖ < 1) (hr0 : r ≠ 0)
+    (hden : QDenominatorRegular [r^2*q/b,r^2*q/c,r^2*q/d,q/b,q/c,q/d,q*r^3/(b*c*d)] q) :
+    ContinuousAt (fun u => rootValue u b c d q) r := by
+  dsimp only [rootValue]
+  apply ContinuousAt.div₀
+  · apply BilateralContinuity.continuousAt_qPochhammerListInf (l :=
+      [fun u => u*sqrt q,fun u => -u*sqrt q,fun u => -u*q,
+        fun u => sqrt q/u,fun u => -sqrt q/u,fun u => -q/u,
+        fun u => u^2*q/(b*c),fun u => u^2*q/(b*d),fun u => u^2*q/(c*d),
+        fun u => q*u/b,fun u => q*u/c,fun u => q*u/d,fun _ => q]) hq
+    intro f hf
+    simp only [List.mem_cons,List.not_mem_nil,or_false] at hf
+    rcases hf with rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl <;> fun_prop
+  · apply BilateralContinuity.continuousAt_qPochhammerListInf (l :=
+      [fun u => u^2*q/b,fun u => u^2*q/c,fun u => u^2*q/d,fun _ => q/b,
+        fun _ => q/c,fun _ => q/d,fun u => q*u^3/(b*c*d)]) hq
+    intro f hf
+    simp only [List.mem_cons,List.not_mem_nil,or_false] at hf
+    rcases hf with rfl|rfl|rfl|rfl|rfl|rfl|rfl <;> fun_prop
+  · exact FiniteBilateral.qPochhammerListInf_ne_zero hq hden
+
+/-- The `4ψ4` series is continuous in its root parameter throughout its convergence annulus. -/
+lemma continuousAt_qPsi_four {r b c d q : ℂ} (hq0 : q ≠ 0) (hq : ‖q‖ < 1)
+    (hr0 : r ≠ 0) (hz : ‖q*r^3‖ < ‖b*c*d‖)
+    (hreg : QBilateralRegular [-q*r,b,c,d] [-r,r^2*q/b,r^2*q/c,r^2*q/d] q) :
+    ContinuousAt (fun u => qPsi [-q*u,b,c,d] [-u,u^2*q/b,u^2*q/c,u^2*q/d] q
+      (q*u^3/(b*c*d))) r := by
+  have hbcd : b*c*d ≠ 0 := norm_pos_iff.mp ((norm_nonneg _).trans_lt hz)
+  have hb := left_ne_zero_of_mul (left_ne_zero_of_mul hbcd)
+  have hc := right_ne_zero_of_mul (left_ne_zero_of_mul hbcd)
+  have hd := right_ne_zero_of_mul hbcd
+  have hz1 : ‖q*r^3/(b*c*d)‖ < 1 := by
+    rw [norm_div,div_lt_one (norm_pos_iff.mpr hbcd)];exact hz
+  apply BilateralContinuity.continuousAt_qPsi
+    (a := [fun u => -q*u,fun _ => b,fun _ => c,fun _ => d])
+    (b := [fun u => -u,fun u => u^2*q/b,fun u => u^2*q/c,fun u => u^2*q/d]) hq0 hq
+  · intro f hf
+    simp only [List.mem_cons,List.not_mem_nil,or_false] at hf
+    rcases hf with rfl|rfl|rfl|rfl <;> fun_prop
+  · intro f hf
+    simp only [List.mem_cons,List.not_mem_nil,or_false] at hf
+    rcases hf with rfl|rfl|rfl|rfl <;> fun_prop
+  · fun_prop
+  · intro f hf
+    simp only [List.mem_cons,List.not_mem_nil,or_false] at hf
+    rcases hf with rfl|rfl|rfl|rfl <;> simp [hq0,hr0,hb,hc,hd]
+  · intro f hf
+    simp only [List.mem_cons,List.not_mem_nil,or_false] at hf
+    rcases hf with rfl|rfl|rfl|rfl <;> simp [hq0,hr0,hb,hc,hd]
+  · exact div_ne_zero (mul_ne_zero hq0 (pow_ne_zero _ hr0)) hbcd
+  · rfl
+  · exact hreg
+  · have he : ((-r)*(r^2*q/b*(r^2*q/c*(r^2*q/d*1)))) /
+        ((-q*r)*(b*(c*(d*1)))*(q*r^3/(b*c*d))) = q*r^3/(b*c*d) := by field_simp
+    simpa only [List.map_cons,List.map_nil,List.prod_cons,List.prod_nil,he] using hz1
+  · exact hz1
+
+/-- The `4ψ4` summation retains every cancelled-root value by a parameter limit. -/
+lemma qPsi_four_eq_rootValue {r b c d q : ℂ} (hq0 : q ≠ 0) (hq : ‖q‖ < 1)
+    (hr0 : r ≠ 0) (hz : ‖q*r^3‖ < ‖b*c*d‖)
+    (hreg : QBilateralRegular [-q*r,b,c,d] [-r,r^2*q/b,r^2*q/c,r^2*q/d] q) :
+    qPsi [-q*r,b,c,d] [-r,r^2*q/b,r^2*q/c,r^2*q/d] q (q*r^3/(b*c*d)) =
+      rootValue r b c d q := by
+  have hbcd : b*c*d ≠ 0 := norm_pos_iff.mp ((norm_nonneg _).trans_lt hz)
+  have hb := left_ne_zero_of_mul (left_ne_zero_of_mul hbcd)
+  have hc := right_ne_zero_of_mul (left_ne_zero_of_mul hbcd)
+  have hd := right_ne_zero_of_mul hbcd
+  have hRec0 := FiniteBilateral.qDenominatorRegular_reciprocal
+    (a := [-q*r,b,c,d]) (by simp [hq0,hr0,hb,hc,hd]) hreg.2
+  let L : List (ℂ → ℂ) := [fun u => -u,fun u => u^2*q/b,fun u => u^2*q/c,fun u => u^2*q/d]
+  let R : List (ℂ → ℂ) := [fun u => q/(-q*u),fun _ => q/b,fun _ => q/c,fun _ => q/d]
+  have hL : ∀ f ∈ L, ContinuousAt f r := by
+    intro f hf
+    simp only [L,List.mem_cons,List.not_mem_nil,or_false] at hf
+    rcases hf with rfl|rfl|rfl|rfl <;> fun_prop
+  have hnqr : -q*r ≠ 0 := mul_ne_zero (neg_ne_zero.mpr hq0) hr0
+  have hR : ∀ f ∈ R, ContinuousAt f r := by
+    intro f hf
+    simp only [R,List.mem_cons,List.not_mem_nil,or_false] at hf
+    rcases hf with rfl|rfl|rfl|rfl <;> fun_prop
+  have hLreg : QDenominatorRegular (L.map fun f => f r) q := hreg.1
+  have hRreg : QDenominatorRegular (R.map fun f => f r) q := by
+    simpa only [R,List.map_cons,List.map_nil] using hRec0
+  have hmap : Tendsto (fun u : ℂ => q/u) (𝓝[≠] r) (𝓝[≠] (q/r)) := by
+    refine tendsto_nhdsWithin_iff.mpr ⟨?_,?_⟩
+    · exact (continuousAt_const.div₀ continuousAt_id hr0).tendsto.mono_left nhdsWithin_le_nhds
+    · filter_upwards [self_mem_nhdsWithin] with u hu he
+      apply hu
+      apply inv_injective
+      apply mul_left_cancel₀ hq0
+      simpa only [mem_singleton_iff,div_eq_mul_inv] using he
+  have epos : ∀ᶠ u in 𝓝[≠] r, ∀ j : ℕ, u ≠ q^(j+1) := by
+    filter_upwards [hmap.eventually (eventually_mul_pow_ne_one_nhdsNE hq (q/r))] with u hu j he
+    apply hu j
+    rw [he,pow_succ]
+    field_simp
+  have eL := BilateralContinuity.eventually_qDenominatorRegular_list hq hL hLreg
+  have eR := BilateralContinuity.eventually_qDenominatorRegular_list hq hR hRreg
+  have earg : ∀ᶠ u in 𝓝 r, ‖q*u^3‖ < ‖b*c*d‖ :=
+    ((continuous_const.mul (continuous_id.pow 3)).norm.tendsto r).eventually (Iio_mem_nhds hz)
+  have e0 : ∀ᶠ u in 𝓝 r, u ≠ 0 := continuousAt_id.eventually_ne hr0
+  have hEq : ∀ᶠ u in 𝓝[≠] r,
+      qPsi [-q*u,b,c,d] [-u,u^2*q/b,u^2*q/c,u^2*q/d] q (q*u^3/(b*c*d)) =
+        rootValue u b c d q := by
+    filter_upwards [nhdsWithin_le_nhds eL,nhdsWithin_le_nhds eR,
+      nhdsWithin_le_nhds earg,nhdsWithin_le_nhds e0,
+      eventually_mul_pow_ne_one_nhdsNE hq r,epos] with u huL huR huarg hu0 huneg hupos
+    have huRec : QDenominatorRegular ([-q*u,b,c,d].map fun v => q/v) q := by
+      simpa only [R,List.map_cons,List.map_nil] using huR
+    have huUpper : ∀ v ∈ [-q*u,b,c,d], ∀ j : ℕ, v ≠ q^(j+1) := by
+      intro v hv j he
+      apply huRec (q/v) (List.mem_map.mpr ⟨v,hv,rfl⟩) j
+      rw [he,pow_succ]
+      field_simp
+    exact (qPsi_four_eq_six hq0 hq hu0 huarg huneg hupos ⟨huL,huUpper⟩).trans
+      (qBilateralSixValue_eq_rootValue u b c d q hq hu0 huneg hupos)
+  exact tendsto_nhds_unique
+    ((continuousAt_qPsi_four hq0 hq hr0 hz hreg).tendsto.mono_left nhdsWithin_le_nhds)
+    (((continuousAt_rootValue hq hr0
+      (qDenominatorRegular_rootValue hq0 hq hr0 hz hreg)).tendsto.mono_left
+      nhdsWithin_le_nhds).congr' (hEq.mono fun _ he => he.symm))
+
+end FourPsiFour
+
+/-- The `4ψ4` summation (DLMF 17.8.E6). -/
+@[dlmf 17.8.E6]
+theorem bilateral_four_sum {a b c d q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (ha : a≠0)
+    (hz : ‖q*a*Complex.sqrt a‖<‖b*c*d‖)
+    (hreg : QBilateralRegular [-q*Complex.sqrt a,b,c,d] [-Complex.sqrt a,a*q/b,a*q/c,a*q/d] q) :
+    qPsi [-q*Complex.sqrt a,b,c,d] [-Complex.sqrt a,a*q/b,a*q/c,a*q/d] q
+      (q*a*Complex.sqrt a/(b*c*d))=qBilateralFourValue a b c d q := by
+  have hsq : (sqrt a)^2=a := by rw [Complex.sqrt,← cpow_nat_mul];norm_num
+  have hr0 : sqrt a ≠ 0 := by
+    intro h0
+    rw [h0,zero_pow two_ne_zero] at hsq
+    exact ha hsq.symm
+  have harg : q*(sqrt a)^3=q*a*sqrt a := by rw [pow_succ,hsq,mul_assoc]
+  have H := FourPsiFour.qPsi_four_eq_rootValue hq0 hq hr0 (by simpa only [harg] using hz)
+    (by simpa only [hsq] using hreg)
+  simpa only [harg,hsq,FourPsiFour.rootValue_def,qBilateralFourValue] using H
+
 /-- The actual series identity uses the full bilateral annulus; the continuation below covers the
 larger printed region. -/
 @[dlmf 17.8.E8]
@@ -532,7 +846,9 @@ theorem bilateral_even_sum {b c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hb : b�
     (hz : ‖c/b^2‖<1)
     (hreg : QBilateralRegular [b^2,b^2/c] [q,c*q] (q^2)) :
     qPsi [b^2,b^2/c] [q,c*q] (q^2) (c*q^2/b^2)=qBilateralEvenValue b c q := by
-  sorry
+  have hs : (sqrt q)^2=q := by rw [Complex.sqrt,← cpow_nat_mul];norm_num
+  simpa only [qBilateralEvenValue] using
+    BilateralEvenSummation.qPsi_even_eq hq0 hq hb hc hs hz hreg
 
 /-- The product side of Ramanujan's `1ψ1` sum is analytic off its zeros and continues the
 bilateral series analytically from its annulus of convergence. -/
@@ -726,7 +1042,88 @@ theorem bilateral_four_continues {a b c d₀ q : ℂ} (hq0 : q≠0) (hq : ‖q�
     TauCeti.ContinuesInside
         (fun d => qPsi [-q*Complex.sqrt a, b, c, d] [-Complex.sqrt a, a*q/b, a*q/c, a*q/d] q
         (q*a*Complex.sqrt a/(b*c*d))) U d₀ := by
-  sorry
+  intro U
+  have hB : b*c*d₀ ≠ 0 := norm_pos_iff.mp ((norm_nonneg _).trans_lt hz)
+  have hbc := left_ne_zero_of_mul hB
+  have hb := left_ne_zero_of_mul hbc
+  have hc := right_ne_zero_of_mul hbc
+  have hd₀ := right_ne_zero_of_mul hB
+  have hden : ∀ z : ℂ, z ≠ 0 → AnalyticAt ℂ
+      (fun d => qPochhammerListInf [a*q/b,a*q/c,a*q/d,q/b,q/c,q/d,
+        q*a*sqrt a/(b*c*d)] q) z := by
+    intro z hz0
+    apply BilateralContinuity.analyticAt_qPochhammerListInf (l :=
+      [fun _ => a*q/b,fun _ => a*q/c,fun d => a*q/d,fun _ => q/b,
+        fun _ => q/c,fun d => q/d,fun d => q*a*sqrt a/(b*c*d)]) hq
+    intro f hf
+    simp only [List.mem_cons,List.not_mem_nil,or_false] at hf
+    rcases hf with rfl|rfl|rfl|rfl|rfl|rfl|rfl
+    all_goals first
+      | exact analyticAt_const.div (analyticAt_const.mul analyticAt_id) (mul_ne_zero hbc hz0)
+      | fun_prop
+  have hnum : ∀ z : ℂ, z ≠ 0 → AnalyticAt ℂ
+      (fun d => qPochhammerListInf [sqrt a*sqrt q,-sqrt a*sqrt q,-sqrt a*q,
+        sqrt q/sqrt a,-sqrt q/sqrt a,-q/sqrt a,a*q/(b*c),a*q/(b*d),a*q/(c*d),
+        q*sqrt a/b,q*sqrt a/c,q*sqrt a/d,q] q) z := by
+    intro z hz0
+    apply BilateralContinuity.analyticAt_qPochhammerListInf (l :=
+      [fun _ => sqrt a*sqrt q,fun _ => -sqrt a*sqrt q,fun _ => -sqrt a*q,
+        fun _ => sqrt q/sqrt a,fun _ => -sqrt q/sqrt a,fun _ => -q/sqrt a,
+        fun _ => a*q/(b*c),fun d => a*q/(b*d),fun d => a*q/(c*d),
+        fun _ => q*sqrt a/b,fun _ => q*sqrt a/c,fun d => q*sqrt a/d,fun _ => q]) hq
+    intro f hf
+    simp only [List.mem_cons,List.not_mem_nil,or_false] at hf
+    rcases hf with rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl
+    all_goals first
+      | exact analyticAt_const.div (analyticAt_const.mul analyticAt_id) (mul_ne_zero hb hz0)
+      | exact analyticAt_const.div (analyticAt_const.mul analyticAt_id) (mul_ne_zero hc hz0)
+      | fun_prop
+  have hF : AnalyticOnNhd ℂ (fun d => qBilateralFourValue a b c d q) U := fun z hz =>
+    (hnum z hz.1).div (hden z hz.1) hz.2
+  have hUo : IsOpen U := by
+    have hdc : ContinuousOn (fun d : ℂ => qPochhammerListInf
+        [a*q/b,a*q/c,a*q/d,q/b,q/c,q/d,q*a*sqrt a/(b*c*d)] q) {z | z≠0} :=
+      fun z hz => (hden z hz).continuousAt.continuousWithinAt
+    exact hdc.isOpen_inter_preimage isOpen_ne isOpen_ne
+  have heq : (fun d => qPsi [-q*sqrt a,b,c,d] [-sqrt a,a*q/b,a*q/c,a*q/d] q
+      (q*a*sqrt a/(b*c*d))) =ᶠ[𝓝 d₀] (fun d => qBilateralFourValue a b c d q) := by
+    have h0 : ∀ j : ℕ, a*q/d₀*q^j ≠ 1 := hreg.1 _ (by simp)
+    have h1 : ∀ j : ℕ, q/d₀*q^j ≠ 1 := by
+      intro j he
+      apply hreg.2 d₀ (by simp) j
+      rw [pow_succ']
+      field_simp at he
+      linear_combination -he
+    have ht0 : Tendsto (fun d : ℂ => a*q/d) (𝓝 d₀) (𝓝 (a*q/d₀)) :=
+      (continuousAt_const.div continuousAt_id hd₀).tendsto
+    have ht1 : Tendsto (fun d : ℂ => q/d) (𝓝 d₀) (𝓝 (q/d₀)) :=
+      (continuousAt_const.div continuousAt_id hd₀).tendsto
+    have hopen : IsOpen {d : ℂ | ‖q*a*sqrt a‖ < ‖b*c*d‖} :=
+      isOpen_lt continuous_const (continuous_const.mul continuous_id).norm
+    filter_upwards [hopen.mem_nhds hz,isOpen_ne.mem_nhds hd₀,
+      ht0.eventually (eventually_mul_pow_ne_one_nhds hq h0),
+      ht1.eventually (eventually_mul_pow_ne_one_nhds hq h1)] with d hzd hd0 hLd hUd
+    apply bilateral_four_sum hq0 hq ha hzd
+    constructor
+    · intro u hu j
+      simp only [List.mem_cons,List.not_mem_nil,or_false] at hu
+      rcases hu with rfl|rfl|rfl|rfl
+      · exact hreg.1 _ (by simp) j
+      · exact hreg.1 _ (by simp) j
+      · exact hreg.1 _ (by simp) j
+      · exact hLd j
+    · intro u hu j
+      simp only [List.mem_cons,List.not_mem_nil,or_false] at hu
+      rcases hu with rfl|rfl|rfl|rfl
+      · exact hreg.2 _ (by simp) j
+      · exact hreg.2 _ (by simp) j
+      · exact hreg.2 _ (by simp) j
+      · intro he
+        apply hUd j
+        rw [he,pow_succ q j]
+        field_simp
+  exact ⟨hF,heq,(TauCeti.ContinuesInside.of_differentiableOn hUo hF.differentiableOn).congr
+    heq.symm⟩
 
 /-- The product side of the `6ψ6` sum, as a function of `e`, analytically continues the bilateral
 series. -/
@@ -843,6 +1240,61 @@ theorem bilateral_even_continues {b c₀ q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
     ((fun c => qPsi [b^2, b^2/c] [q, c*q] (q^2) (c*q^2/b^2))=ᶠ[𝓝 c₀]
         (fun c => qBilateralEvenValue b c q)) ∧
     TauCeti.ContinuesInside (fun c => qPsi [b^2,b^2/c] [q,c*q] (q^2) (c*q^2/b^2)) U c₀ := by
-  sorry
+  dsimp only
+  let U : Set ℂ := {c | qPochhammerListInf [c*q,c*q^2/b^2,q^2/b^2,c/b^2] (q^2)≠0}
+  have hQ0 := pow_ne_zero 2 hq0
+  have hQ : ‖q^2‖<1 := by rw [norm_pow];exact pow_lt_one₀ (norm_nonneg q) hq two_ne_zero
+  let N : List (ℂ → ℂ) := [fun _ => q^2,fun _ => q/b^2,fun t => t*q/b^2]
+  let D : List (ℂ → ℂ) := [fun t => t*q,fun t => t*q^2/b^2,fun _ => q^2/b^2,fun t => t/b^2]
+  have haN (x : ℂ) : ∀ f∈N,AnalyticAt ℂ f x := by
+    intro f hf
+    simp only [N,List.mem_cons,List.not_mem_nil,or_false] at hf
+    rcases hf with rfl|rfl|rfl
+    · exact analyticAt_const
+    · exact analyticAt_const
+    · exact (analyticAt_id.mul analyticAt_const).div_const
+  have haD (x : ℂ) : ∀ f∈D,AnalyticAt ℂ f x := by
+    intro f hf
+    simp only [D,List.mem_cons,List.not_mem_nil,or_false] at hf
+    rcases hf with rfl|rfl|rfl|rfl
+    · exact analyticAt_id.mul analyticAt_const
+    · exact (analyticAt_id.mul analyticAt_const).div_const
+    · exact analyticAt_const
+    · exact analyticAt_id.div_const
+  have hN (x : ℂ) := BilateralContinuity.analyticAt_qPochhammerListInf hQ (haN x)
+  have hD (x : ℂ) := BilateralContinuity.analyticAt_qPochhammerListInf hQ (haD x)
+  have hF : AnalyticOnNhd ℂ (fun c => qBilateralEvenValue b c q) U := by
+    intro x hx
+    have hS : AnalyticAt ℂ (fun t : ℂ => t*sqrt q/b) x :=
+      (analyticAt_id.mul analyticAt_const).div_const
+    have hSm : AnalyticAt ℂ (fun t : ℂ => -t*sqrt q/b) x :=
+      (analyticAt_id.neg.mul analyticAt_const).div_const
+    have hI := ((qPochhammerInf_analytic hq) _ (mem_univ _)).comp hS
+    have hIm := ((qPochhammerInf_analytic hq) _ (mem_univ _)).comp hSm
+    have hden : (2:ℂ)*qPochhammerListInf (D.map fun f => f x) (q^2)≠0 := by
+      apply mul_ne_zero (by norm_num)
+      simpa only [U,Set.mem_ofPred_eq,D,List.map_cons,List.map_nil] using hx
+    simpa only [qBilateralEvenValue,N,D,List.map_cons,List.map_nil,Pi.mul_def,Pi.add_def,
+      Pi.div_def,Function.comp_def] using
+      (((hN x).div (analyticAt_const.mul (hD x)) hden).mul
+        ((analyticAt_const.mul hI).add (analyticAt_const.mul hIm)))
+  have hUo : IsOpen U := by
+    have hDC : Continuous (fun x => qPochhammerListInf (D.map fun f => f x) (q^2)) :=
+      continuous_iff_continuousAt.mpr (fun x => (hD x).continuousAt)
+    simpa only [U,D,List.map_cons,List.map_nil] using isOpen_ne_fun hDC continuous_const
+  have heq : (fun c => qPsi [b^2,b^2/c] [q,c*q] (q^2) (c*q^2/b^2))=ᶠ[𝓝 c₀]
+      (fun c => qBilateralEvenValue b c q) := by
+    have hBR := BilateralContinuity.eventually_qBilateralRegular_two (a := fun _ : ℂ => b^2)
+      (b := fun t : ℂ => b^2/t) (c := fun _ : ℂ => q) (d := fun t : ℂ => t*q)
+      hQ0 hQ continuousAt_const (continuousAt_const.div₀ continuousAt_id hc)
+      continuousAt_const (continuousAt_id.mul_const _) (pow_ne_zero 2 hb)
+      (div_ne_zero (pow_ne_zero 2 hb) hc) hreg
+    have hZ : ∀ᶠ c : ℂ in 𝓝 c₀,‖c/b^2‖<1 :=
+      ((continuous_id.div_const (b^2)).norm.continuousAt).eventually_lt_const hz
+    have hne : ∀ᶠ c : ℂ in 𝓝 c₀,c≠0 := continuousAt_id.eventually_ne hc
+    filter_upwards [hBR,hZ,hne] with c hBc hZc hc0
+    exact bilateral_even_sum hq0 hq hb hc0 hZc hBc
+  exact ⟨hF, heq,
+    (TauCeti.ContinuesInside.of_differentiableOn hUo hF.differentiableOn).congr heq.symm⟩
 
 end DLMF.QHypergeometric

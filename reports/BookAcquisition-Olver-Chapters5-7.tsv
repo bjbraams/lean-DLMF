@@ -1,0 +1,315 @@
+synopsis_id	declaration	source_file	source_line	status
+O-5.01	ODE.existsUnique_secondOrder_continuous_interval	DLMFMathlib/Analysis/ODE/ContinuousSecondOrder.lean	54	direct admission
+O-5.01	ODE.secondOrderPicardIterate	DLMFMathlib/Analysis/ODE/ContinuousSecondOrder.lean	31	definition, no admission
+O-5.02	ODE.fundamentalPair_iff_linearIndependent_iff_wronskian	DLMFMathlib/Analysis/ODE/ContinuousSecondOrder.lean	84	direct admission
+O-5.02	ODE.wronskian_eq_exp_integral_continuous	DLMFMathlib/Analysis/ODE/ContinuousSecondOrder.lean	72	direct admission
+O-5.02	ODE.reduction_of_order_continuous	DLMFMathlib/Analysis/ODE/ContinuousSecondOrder.lean	102	direct admission
+O-5.03	ODE.continuousOn_parametric_linear_ode	DLMFMathlib/Analysis/ODE/ParameterDependence.lean	31	direct admission
+O-5.03	ODE.differentiable_parametric_linear_ode	DLMFMathlib/Analysis/ODE/ParameterDependence.lean	50	direct admission
+O-5.04	ODE.differentiable_complex_parametric_linear_ode	DLMFMathlib/Analysis/ODE/ParameterDependence.lean	86	direct admission
+O-5.05	DLMF.AlgebraicAnalytic.exists_isLinearODE2SolutionOn	DLMF/AlgebraicAnalytic/ODE/SecondOrder.lean	171	proved, no admission
+O-5.05	DLMF.AlgebraicAnalytic.isLinearODE2SolutionOn_unique	DLMF/AlgebraicAnalytic/ODE/SecondOrder.lean	219	proved, no admission
+O-5.05	Complex.existsUnique_linearSecondOrderContinuation	DLMFMathlib/Analysis/ODE/LinearODEContinuation.lean	65	direct admission
+O-5.05	Complex.IsLinearSecondOrderContinuation.isAnalyticContinuationAlong	DLMFMathlib/Analysis/ODE/LinearODEContinuation.lean	53	proved, no admission
+O-5.06	Complex.exists_linearSecondOrderContinuation_param_analytic	DLMFMathlib/Analysis/ODE/LinearODEContinuation.lean	79	direct admission
+O-5.06	DLMF.AlgebraicAnalytic.isLinearODE2SolutionOn_param_analytic	DLMF/AlgebraicAnalytic/ODE/SecondOrder.lean	414	direct admission
+O-5.07	PowerSeries.coeff_ordinary_second_order	DLMFMathlib/Analysis/ODE/FormalSeries.lean	26	direct admission
+O-5.07	ODE.linearOdeTaylorCoeff	DLMFMathlib/Analysis/ODE/EntireLinear.lean	47	definition, no admission
+O-5.07	ODE.exists_ball_solution_linear_ode	DLMFMathlib/Analysis/ODE/BallLinear.lean	176	proved, no admission
+O-5.08	Complex.LinearODEOrdinaryAt	DLMFMathlib/Analysis/ODE/Singularities.lean	51	definition, no admission
+O-5.08	Complex.LinearODERegularSingularAt	DLMFMathlib/Analysis/ODE/Singularities.lean	60	definition, no admission
+O-5.08	DLMF.AsymptoticApproximations.HasSingularityRank	DLMF/AsymptoticApproximations/ODE/Basic.lean	95	definition, no admission
+O-5.08	DLMF.AsymptoticApproximations.indicialPoly	DLMF/AsymptoticApproximations/ODE/Basic.lean	78	definition, no admission
+O-5.08	DLMF.AsymptoticApproximations.frobeniusCoeff	DLMF/AsymptoticApproximations/ODE/Basic.lean	85	definition, no admission
+O-5.08	DLMF.AsymptoticApproximations.summable_frobeniusCoeff_of_nonresonant	DLMF/AsymptoticApproximations/ODE/Frobenius.lean	52	direct admission
+O-5.08	DLMF.AsymptoticApproximations.analyticOnNhd_frobeniusAnalyticFactor	DLMF/AsymptoticApproximations/ODE/Frobenius.lean	65	direct admission
+O-5.08	DLMF.AsymptoticApproximations.frobeniusAnalyticFactor_isLinearODE2SolutionOn	DLMF/AsymptoticApproximations/ODE/Frobenius.lean	78	direct admission
+O-5.08	DLMF.AsymptoticApproximations.frobenius_solutions	DLMF/AsymptoticApproximations/ODE/Singularities.lean	112	direct admission
+O-5.09	DLMF.AsymptoticApproximations.frobenius_log_solution	DLMF/AsymptoticApproximations/ODE/Singularities.lean	134	direct admission
+O-5.09	Complex.exists_resonant_primitive	DLMFMathlib/Analysis/Complex/ResonantPrimitive.lean	35	direct admission
+O-5.09	Complex.reduction_of_order_of_primitives	DLMFMathlib/Analysis/ODE/ReductionOfOrder.lean	32	direct admission
+O-5.10	DLMF.AlgebraicAnalytic.isLinearODE2SolutionOn_inv	DLMF/AlgebraicAnalytic/ODE/Transformations.lean	61	proved, no admission
+O-5.10	ODE.IsRecessiveAt	DLMFMathlib/Analysis/ODE/EndpointBasis.lean	33	definition, no admission
+O-5.10	ODE.IsRecessiveAt.exists_smul_eq	DLMFMathlib/Analysis/ODE/EndpointBasis.lean	46	direct admission
+O-5.10	ODE.IsNumericallySatisfactoryPair	DLMFMathlib/Analysis/ODE/EndpointBasis.lean	55	definition, no admission
+O-5.11	Complex.eq_papperitz_coefficients_of_regularSingular	DLMFMathlib/Analysis/ODE/FuchsianClassification.lean	191	direct admission
+O-5.11	DLMF.Hypergeometric.coefficients_eq_gauss_of_regularSingular	DLMF/Hypergeometric/RiemannClassification.lean	33	direct admission
+O-5.11	DLMF.Hypergeometric.riemann_hypergeometric_solution_exp_log	DLMF/Hypergeometric/RiemannLogarithmicSolutions.lean	29	direct admission
+O-5.12	DLMF.Hypergeometric.regularizedGaussHypergeometric	DLMF/Hypergeometric/Basic/PrincipalBranch.lean	166	definition, no admission
+O-5.12	DLMF.Hypergeometric.differentiableOn_regularizedGaussHypergeometric_joint	DLMF/Hypergeometric/ParameterHolomorphy.lean	363	proved, no admission
+O-5.12	DLMF.Hypergeometric.differentiable_regularizedGaussHypergeometric_params	DLMF/Hypergeometric/ParameterHolomorphy.lean	400	proved, no admission
+O-5.12	DLMF.Hypergeometric.analyticOnNhd_regularizedGaussHypergeometric_comp	DLMF/Hypergeometric/ParameterHolomorphy.lean	418	proved, no admission
+O-5.12	DLMF.Hypergeometric.genContinued_parameter_entire	DLMF/GeneralizedHypergeometric/AnalyticProperties.lean	1098	direct admission
+O-5.12	DLMF.Hypergeometric.regularizedGaussHypergeometric_neg_nat	DLMF/Hypergeometric/Basic/CutPlane.lean	567	proved, no admission
+O-5.13	DLMF.Hypergeometric.regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricIntegral	DLMF/Hypergeometric/Basic/CutPlane.lean	457	proved, no admission
+O-5.13	DLMF.Hypergeometric.hasSum_regularizedGauss_one	DLMF/Hypergeometric/Boundary.lean	58	proved, no admission
+O-5.14	DLMF.Hypergeometric.iteratedDeriv_regularizedGaussHypergeometric	DLMF/Hypergeometric/Basic/CutPlane.lean	501	proved, no admission
+O-5.14	DLMF.Hypergeometric.regularizedGaussHypergeometric_euler	DLMF/Hypergeometric/ArgumentContinuation.lean	231	proved, no admission
+O-5.14	DLMF.Hypergeometric.regularizedGaussHypergeometric_pfaff	DLMF/Hypergeometric/ArgumentContinuation.lean	266	proved, no admission
+O-5.14	DLMF.Hypergeometric.regularizedGaussHypergeometric_contiguous_c	DLMF/Hypergeometric/ArgumentContinuation.lean	47	proved, no admission
+O-5.15	DLMF.Hypergeometric.wronskian_regularizedGauss_zero_pair	DLMF/Hypergeometric/RegularizedLocalWronskian.lean	31	direct admission
+O-5.15	DLMF.Hypergeometric.regularizedGaussHypergeometric_connection_inv	DLMF/Hypergeometric/PrincipalConnections.lean	71	direct admission
+O-5.15	DLMF.Hypergeometric.regularizedGaussHypergeometric_eq_connection_inv	DLMF/Hypergeometric/PrincipalConnections.lean	83	direct admission
+O-5.15	DLMF.Hypergeometric.tendsto_connection_inv	DLMF/Hypergeometric/PrincipalConnections.lean	92	direct admission
+O-5.15	DLMF.Hypergeometric.regularizedGaussHypergeometric_connection_one_sub	DLMF/Hypergeometric/PrincipalConnections.lean	100	direct admission
+O-5.15	DLMF.Hypergeometric.regularizedGaussHypergeometric_eq_connection_one_sub	DLMF/Hypergeometric/PrincipalConnections.lean	112	direct admission
+O-5.15	DLMF.Hypergeometric.tendsto_connection_one_sub	DLMF/Hypergeometric/PrincipalConnections.lean	122	direct admission
+O-5.16	DLMF.Hypergeometric.generalizedHypergeometricCoeff	DLMF/GeneralizedHypergeometric/Basic/ParametersAndSeries.lean	51	definition, no admission
+O-5.16	DLMF.Hypergeometric.generalizedHypergeometric_theta_ode	DLMF/GeneralizedHypergeometric/DifferentialEquations.lean	407	proved, no admission
+O-5.16	DLMF.Hypergeometric.generalizedHypergeometric_entire	DLMF/GeneralizedHypergeometric/AnalyticProperties.lean	66	proved, no admission
+O-5.16	DLMF.Hypergeometric.generalizedHypergeometric_radius_one	DLMF/GeneralizedHypergeometric/AnalyticProperties.lean	102	proved, no admission
+O-5.16	DLMF.Hypergeometric.generalizedHypergeometric_radius_zero	DLMF/GeneralizedHypergeometric/AnalyticProperties.lean	1036	proved, no admission
+O-5.16	DLMF.Hypergeometric.generalizedHypergeometric_diverges_nonzero	DLMF/GeneralizedHypergeometric/AnalyticProperties.lean	1057	proved, no admission
+O-5.16	DLMF.Hypergeometric.generalizedHypergeometric_terminating_entire	DLMF/GeneralizedHypergeometric/AnalyticProperties.lean	92	proved, no admission
+O-5.16	DLMF.Hypergeometric.generalizedHypergeometricTruncated_theta_ode	DLMF/GeneralizedHypergeometric/TerminatingDifferentialEquation.lean	25	direct admission
+O-5.17	DLMF.Hypergeometric.clausen_formula	DLMF/Hypergeometric/Clausen.lean	198	proved, no admission
+O-5.17	DLMF.Hypergeometric.generalizedHypergeometric_clausen_principal	DLMF/GeneralizedHypergeometric/Transformations.lean	528	proved, no admission
+O-5.17	ODE.product_symmetricSquare_equation	DLMFMathlib/Analysis/ODE/SymmetricSquareGeneral.lean	29	direct admission
+O-5.18	DLMF.Legendre.associatedP	DLMF/Legendre/Basic/Associated.lean	49	definition, no admission
+O-5.18	DLMF.Legendre.olverQ	DLMF/Legendre/Basic/Associated.lean	54	definition, no admission
+O-5.18	DLMF.Legendre.associatedQ	DLMF/Legendre/Basic/Associated.lean	61	definition, no admission
+O-5.18	DLMF.Legendre.legendreBranchPower	DLMF/Legendre/Basic/Associated.lean	42	definition, no admission
+O-5.18	DLMF.Legendre.associatedP_reflect_degree	DLMF/Legendre/Associated/BoundaryAndConnections.lean	457	proved, no admission
+O-5.18	DLMF.Legendre.associated_connection_14	DLMF/Legendre/Connections.lean	370	proved, no admission
+O-5.18	DLMF.Legendre.associatedP_entire_degree	DLMF/Legendre/Associated/ConjugationAndValues.lean	175	proved, no admission
+O-5.18	DLMF.Legendre.associatedP_entire_order	DLMF/Legendre/Associated/ConjugationAndValues.lean	185	proved, no admission
+O-5.18	DLMF.Legendre.olverQ_entire_degree	DLMF/Legendre/Associated/ConjugationAndValues.lean	319	proved, no admission
+O-5.18	DLMF.Legendre.olverQ_entire_order	DLMF/Legendre/Associated/ConjugationAndValues.lean	337	proved, no admission
+O-5.19	DLMF.Legendre.associated_wronskian_8	DLMF/Legendre/Associated/BoundaryAndConnections.lean	597	proved, no admission
+O-5.19	DLMF.Legendre.tendsto_associatedP_neg_order_scaled_one	DLMF/Legendre/EndpointPair.lean	29	direct admission
+O-5.19	DLMF.Legendre.tendsto_olverQ_scaled_cobounded	DLMF/Legendre/EndpointPair.lean	37	direct admission
+O-5.19	DLMF.Legendre.tendsto_olverQ_zero_order_div_log_one	DLMF/Legendre/EndpointPair.lean	45	direct admission
+O-5.19	DLMF.Legendre.isNumericallySatisfactoryPair_associatedP_olverQ	DLMF/Legendre/EndpointPair.lean	54	direct admission
+O-5.20	DLMF.Legendre.SchlafliPBasedLoop	DLMF/Legendre/AssociatedSchlafliContours.lean	32	definition, no admission
+O-5.20	DLMF.Legendre.nonempty_schlafliPBasedLoop	DLMF/Legendre/AssociatedSchlafliContours.lean	52	direct admission
+O-5.20	DLMF.Legendre.schlafliPFirstExpression	DLMF/Legendre/AssociatedSchlafliContours.lean	83	definition, no admission
+O-5.20	DLMF.Legendre.schlafliPSecondExpression	DLMF/Legendre/AssociatedSchlafliContours.lean	89	definition, no admission
+O-5.20	DLMF.Legendre.integrableOn_schlafliPFirstTail	DLMF/Legendre/AssociatedSchlafliContours.lean	133	direct admission
+O-5.20	DLMF.Legendre.integrableOn_schlafliPSecondTail	DLMF/Legendre/AssociatedSchlafliContours.lean	139	direct admission
+O-5.20	DLMF.Legendre.associatedP_eq_schlafliPFirstExpression	DLMF/Legendre/AssociatedSchlafliContours.lean	146	direct admission
+O-5.20	DLMF.Legendre.associatedP_eq_schlafliPSecondExpression	DLMF/Legendre/AssociatedSchlafliContours.lean	153	direct admission
+O-5.20	DLMF.Legendre.tendsto_schlafliPFirstExpression	DLMF/Legendre/AssociatedSchlafliContours.lean	160	direct admission
+O-5.20	DLMF.Legendre.tendsto_schlafliPSecondExpression	DLMF/Legendre/AssociatedSchlafliContours.lean	168	direct admission
+O-5.21	DLMF.Legendre.SchlafliQOppositeLobes	DLMF/Legendre/AssociatedSchlafliContours.lean	177	definition, no admission
+O-5.21	DLMF.Legendre.nonempty_schlafliQOppositeLobes	DLMF/Legendre/AssociatedSchlafliContours.lean	205	direct admission
+O-5.21	DLMF.Legendre.schlafliQExpression	DLMF/Legendre/AssociatedSchlafliContours.lean	211	definition, no admission
+O-5.21	DLMF.Legendre.olverQ_eq_schlafliQExpression	DLMF/Legendre/AssociatedSchlafliContours.lean	228	direct admission
+O-5.21	DLMF.Legendre.tendsto_schlafliQExpression	DLMF/Legendre/AssociatedSchlafliContours.lean	235	direct admission
+O-5.22	DLMF.Legendre.associatedP_recurrence_6	DLMF/Legendre/AssociatedRecurrences.lean	682	proved, no admission
+O-5.22	DLMF.Legendre.associatedP_recurrence_7	DLMF/Legendre/AssociatedRecurrences.lean	700	proved, no admission
+O-5.22	DLMF.Legendre.associatedP_recurrence_3	DLMF/Legendre/AssociatedRecurrences.lean	716	proved, no admission
+O-5.22	DLMF.Legendre.associatedP_recurrence_4	DLMF/Legendre/AssociatedRecurrences.lean	754	proved, no admission
+O-5.22	DLMF.Legendre.associatedP_recurrence_5	DLMF/Legendre/AssociatedRecurrences.lean	731	proved, no admission
+O-5.23	DLMF.Legendre.associatedP_nat_order_rodrigues	DLMF/Legendre/IntegerTheory.lean	181	proved, no admission
+O-5.23	DLMF.Legendre.associatedP_order_gt_degree	DLMF/Legendre/IntegerTheory.lean	233	proved, no admission
+O-5.23	DLMF.Legendre.associatedP_negative_integer_order	DLMF/Legendre/Connections.lean	944	proved, no admission
+O-5.23	DLMF.Legendre.legendreQ_nat_eq_neumann_integral	DLMF/Legendre/IntegerSecondKind.lean	55	direct admission
+O-5.23	DLMF.Legendre.legendreQPoly_eval_eq_convolution	DLMF/Legendre/IntegerSecondKind.lean	29	direct admission
+O-5.23	DLMF.Legendre.legendreQPoly_eval_eq_legendre_sum	DLMF/Legendre/IntegerSecondKind.lean	37	direct admission
+O-5.23	DLMF.Legendre.legendreQ_nat	DLMF/Legendre/Integer.lean	250	proved, no admission
+O-5.23	DLMF.Legendre.legendreQ_zero	DLMF/Legendre/SecondKind.lean	39	proved, no admission
+O-5.24	DLMF.Legendre.legendrePolynomialP_addition_sqrt_pair	DLMF/Legendre/PolynomialAddition.lean	30	proved, no admission
+O-5.24	DLMF.OrthogonalPolynomials.LegendreAddition.legendre_eq_kernel	DLMF/OrthogonalPolynomials/LegendreAddition.lean	533	proved, no admission
+O-5.24	DLMF.Legendre.associatedP_nat_order_rodrigues	DLMF/Legendre/IntegerTheory.lean	181	proved, no admission
+O-5.25	Real.integral_inv_affine_cos_sin	DLMFMathlib/Analysis/Integral/TrigonometricReciprocal.lean	26	direct admission
+O-5.26	DLMF.Legendre.ferrersP	DLMF/Legendre/Basic/Functions.lean	40	definition, no admission
+O-5.26	DLMF.Legendre.ferrersQ	DLMF/Legendre/Basic/Associated.lean	86	definition, no admission
+O-5.26	DLMF.Legendre.ferrersP_nat_order_rodrigues	DLMF/Legendre/IntegerTheory.lean	147	proved, no admission
+O-5.26	DLMF.Legendre.ferrersP_negative_integer_order	DLMF/Legendre/Connections.lean	302	proved, no admission
+O-5.26	DLMF.Legendre.ferrers_orthogonality_6	DLMF/Legendre/Integrals/FerrersGreen.lean	75	proved, no admission
+O-5.26	DLMF.Legendre.ferrers_orthogonality_8	DLMF/Legendre/Integrals/FerrersGreen.lean	128	proved, no admission
+O-5.26	DLMF.Legendre.ferrers_connection_10	DLMF/Legendre/Connections.lean	274	proved, no admission
+O-5.27	DLMF.Legendre.ferrersP_zero_1	DLMF/Legendre/SpecialValues.lean	58	proved, no admission
+O-5.27	DLMF.Legendre.ferrersP_zero_2	DLMF/Legendre/SpecialValues.lean	82	proved, no admission
+O-5.27	DLMF.Legendre.ferrersQ_zero_3	DLMF/Legendre/SpecialValues.lean	109	proved, no admission
+O-5.27	DLMF.Legendre.ferrersQ_zero_4	DLMF/Legendre/SpecialValues.lean	127	proved, no admission
+O-5.27	DLMF.Legendre.ferrersP_even_odd	DLMF/Legendre/Associated/QuadraticFerrers.lean	452	proved, no admission
+O-5.27	DLMF.Legendre.ferrersQ_even_odd	DLMF/Legendre/Associated/QuadraticFerrers.lean	467	proved, no admission
+O-5.27	DLMF.Legendre.ferrersP_eqOn_even_odd	DLMF/Legendre/Associated/Wronskians.lean	265	proved, no admission
+O-5.27	DLMF.Legendre.ferrersQ_eqOn_even_odd	DLMF/Legendre/Associated/Wronskians.lean	286	proved, no admission
+O-5.27	DLMF.Legendre.LegendreQRegular	DLMF/Legendre/Basic/Associated.lean	66	definition, no admission
+O-6.01	DLMF.AlgebraicAnalytic.liouville_transformation	DLMF/AlgebraicAnalytic/ODE/Transformations.lean	182	proved, no admission
+O-6.01	Real.iteratedDeriv_liouville_inverse	DLMFMathlib/Analysis/ODE/RealChangeOfVariables.lean	45	direct admission
+O-6.01	Real.schwarzian_quotient_comp	DLMFMathlib/Analysis/ODE/RealChangeOfVariables.lean	30	direct admission
+O-6.02	LiouvilleGreen.RealInterval.Data.density	DLMFMathlib/Analysis/ODE/LiouvilleGreenGeneralInterval.lean	55	definition, no admission
+O-6.02	LiouvilleGreen.RealInterval.Data.variation	DLMFMathlib/Analysis/ODE/LiouvilleGreenGeneralInterval.lean	75	definition, no admission
+O-6.02	Complex.IsComplexLiouvilleGreenData	DLMFMathlib/Analysis/ODE/ComplexLiouvilleGreen.lean	36	definition, no admission
+O-6.03	LiouvilleGreen.RealInterval.Data.exists_exponential	DLMFMathlib/Analysis/ODE/LiouvilleGreenGeneralInterval.lean	95	direct admission
+O-6.04	LiouvilleGreen.RealInterval.Data.exists_oscillatory_pair	DLMFMathlib/Analysis/ODE/LiouvilleGreenGeneralInterval.lean	117	direct admission
+O-6.05	LiouvilleGreen.RealInterval.Data.tendsto_exponential_error_opposite	DLMFMathlib/Analysis/ODE/LiouvilleGreenGeneralInterval.lean	144	direct admission
+O-6.05	LiouvilleGreen.Interval.eqOn_of_recessive_ratio	DLMFMathlib/Analysis/ODE/LiouvilleGreenEndpoint.lean	28	proved, no admission
+O-6.05	LiouvilleGreen.Interval.eqOn_of_recessive_ratio_left	DLMFMathlib/Analysis/ODE/LiouvilleGreenEndpoint.lean	141	proved, no admission
+O-6.05	LiouvilleGreen.Interval.exists_dominant_of_recessive	DLMFMathlib/Analysis/ODE/LiouvilleGreenDominant.lean	28	proved, no admission
+O-6.05	LiouvilleGreen.Interval.exists_dominant_of_recessive_left	DLMFMathlib/Analysis/ODE/LiouvilleGreenDominant.lean	133	proved, no admission
+O-6.05	ODE.IsRecessiveAt.exists_smul_eq	DLMFMathlib/Analysis/ODE/EndpointBasis.lean	46	direct admission
+O-6.06	LiouvilleGreen.integrable_errorDensity_of_power_at_zero	DLMFMathlib/Analysis/ODE/LiouvilleGreenPowerEndpoints.lean	30	direct admission
+O-6.06	LiouvilleGreen.integrable_errorDensity_of_power_atTop	DLMFMathlib/Analysis/ODE/LiouvilleGreenPowerEndpoints.lean	51	direct admission
+O-6.06	LiouvilleGreen.integrable_errorDensity_inverseSquare_split	DLMFMathlib/Analysis/ODE/LiouvilleGreenPowerEndpoints.lean	73	direct admission
+O-6.06	Complex.euler_equation_cpow	DLMFMathlib/Analysis/ODE/EulerEquation.lean	34	direct admission
+O-6.07	LiouvilleGreen.RealInterval.Data.exists_exponential	DLMFMathlib/Analysis/ODE/LiouvilleGreenGeneralInterval.lean	95	direct admission
+O-6.07	LiouvilleGreen.RealInterval.Data.exists_oscillatory_pair	DLMFMathlib/Analysis/ODE/LiouvilleGreenGeneralInterval.lean	117	direct admission
+O-6.07	Real.exp_div_sub_one_le_two_div	DLMFMathlib/Analysis/Asymptotics/ExponentialMajorant.lean	30	proved, no admission
+O-6.07	Real.norm_le_inv_parameter_of_exp_control	DLMFMathlib/Analysis/Asymptotics/ExponentialMajorant.lean	43	proved, no admission
+O-6.07	Real.eventually_norm_lt_of_exp_control	DLMFMathlib/Analysis/Asymptotics/ExponentialMajorant.lean	62	proved, no admission
+O-6.07	Complex.liouvilleGreen_doublePole_parameter_shift	DLMFMathlib/Analysis/ODE/LiouvilleGreenSingularCoefficients.lean	115	proved, no admission
+O-6.08	DLMF.Confluent.PositiveCylinderError.leadingFactor	DLMF/ParabolicCylinder/PositiveParameterError.lean	27	definition, no admission
+O-6.08	DLMF.Confluent.PositiveCylinderError.error	DLMF/ParabolicCylinder/PositiveParameterError.lean	37	definition, no admission
+O-6.08	DLMF.Confluent.PositiveCylinderError.amplitude_mul_secondDeriv	DLMF/ParabolicCylinder/PositiveParameterError.lean	61	direct admission
+O-6.08	DLMF.Confluent.PositiveCylinderError.integrable_density_and_variation	DLMF/ParabolicCylinder/PositiveParameterError.lean	68	direct admission
+O-6.08	DLMF.Confluent.PositiveCylinderError.norm_error_le	DLMF/ParabolicCylinder/PositiveParameterError.lean	76	direct admission
+O-6.08	DLMF.Confluent.PositiveCylinderError.error_uniform_parameter_and_tail	DLMF/ParabolicCylinder/PositiveParameterError.lean	84	direct admission
+O-6.09	Real.sineMajorant	DLMFMathlib/Analysis/ODE/SingularSinePotential.lean	30	definition, no admission
+O-6.09	Real.sineMajorant_eq	DLMFMathlib/Analysis/ODE/SingularSinePotential.lean	38	direct admission
+O-6.09	ODE.SingularSinePotential.control	DLMFMathlib/Analysis/ODE/SingularSinePotential.lean	48	definition, no admission
+O-6.09	ODE.SingularSinePotential.exists_solution	DLMFMathlib/Analysis/ODE/SingularSinePotential.lean	58	direct admission
+O-6.09	ODE.SingularSinePotential.exists_scattering_family	DLMFMathlib/Analysis/ODE/SingularSinePotential.lean	79	direct admission
+O-6.10	Real.exists_zero_sin_add_error	DLMFMathlib/Analysis/ODE/SineErrorZeros.lean	31	direct admission
+O-6.10	Real.existsUnique_zero_sin_add_error	DLMFMathlib/Analysis/ODE/SineErrorZeros.lean	42	direct admission
+O-6.10	Real.exists_sin_error_zero_sequence	DLMFMathlib/Analysis/ODE/SineErrorZeros.lean	56	direct admission
+O-6.11	Real.exp_mul_le_of_abs_logDeriv_le	DLMFMathlib/Analysis/ODE/RealChangeOfVariables.lean	59	direct admission
+O-6.12	LiouvilleGreen.CompactInterval.Data.exists_oscillatory_parameter_family	DLMFMathlib/Analysis/ODE/LiouvilleGreenParameterBounds.lean	98	direct admission
+O-6.12	LiouvilleGreen.CompactInterval.Data.parameterBound	DLMFMathlib/Analysis/ODE/LiouvilleGreenParameterBounds.lean	84	definition, no admission
+O-6.12	LiouvilleGreen.CompactInterval.Data.integratedVariation	DLMFMathlib/Analysis/ODE/LiouvilleGreenParameterBounds.lean	75	definition, no admission
+O-6.13	LiouvilleGreen.CompactInterval.Data.exists_dirichlet_frequency_sequence	DLMFMathlib/Analysis/ODE/LiouvilleGreenParameterBounds.lean	118	direct admission
+O-6.13	LiouvilleGreen.CompactInterval.Data.existsUnique_dirichlet_frequency_of_threshold	DLMFMathlib/Analysis/ODE/LiouvilleGreenParameterBounds.lean	139	direct admission
+O-6.14	ODE.WeightedVolterra.Data	DLMFMathlib/Analysis/ODE/GeneralWeightedVolterra.lean	49	definition, no admission
+O-6.14	ODE.WeightedVolterra.Data.variation	DLMFMathlib/Analysis/ODE/GeneralWeightedVolterra.lean	98	definition, no admission
+O-6.14	ODE.WeightedVolterra.Data.transform	DLMFMathlib/Analysis/ODE/GeneralWeightedVolterra.lean	106	definition, no admission
+O-6.14	ODE.WeightedVolterra.Data.iterate	DLMFMathlib/Analysis/ODE/GeneralWeightedVolterra.lean	127	definition, no admission
+O-6.15	ODE.WeightedVolterra.Data.existsUnique_isSolution	DLMFMathlib/Analysis/ODE/GeneralWeightedVolterra.lean	179	direct admission
+O-6.15	ODE.WeightedVolterra.Data.norm_iterate_succ_sub_le	DLMFMathlib/Analysis/ODE/GeneralWeightedVolterra.lean	165	direct admission
+O-6.16	ODE.WeightedVolterra.Data.norm_isSolution_le_selfForcingBound	DLMFMathlib/Analysis/ODE/GeneralWeightedVolterra.lean	217	direct admission
+O-6.16	ODE.WeightedVolterra.selfForcingBound	DLMFMathlib/Analysis/ODE/GeneralWeightedVolterra.lean	197	definition, no admission
+O-6.16	ODE.WeightedVolterra.tendsto_selfForcingBound_zero	DLMFMathlib/Analysis/ODE/GeneralWeightedVolterra.lean	210	direct admission
+O-6.16	Complex.complexGreen_error_integral_and_bound	DLMFMathlib/Analysis/ODE/ComplexGreenEquation.lean	33	direct admission
+O-6.16	Complex.exists_complexGreen_error_endpoint	DLMFMathlib/Analysis/ODE/ComplexGreenEquation.lean	66	direct admission
+O-6.16	Complex.complexGreen_derivative_coupling_error	DLMFMathlib/Analysis/ODE/ComplexGreenDerivativeCoupling.lean	29	direct admission
+O-6.17	Complex.IsComplexLiouvilleGreenData	DLMFMathlib/Analysis/ODE/ComplexLiouvilleGreen.lean	36	definition, no admission
+O-6.17	Complex.exists_complexLiouvilleGreenData	DLMFMathlib/Analysis/ODE/ComplexLiouvilleGreen.lean	75	direct admission
+O-6.17	Complex.exists_complexLiouvilleGreen_finite_reference	DLMFMathlib/Analysis/ODE/ComplexLiouvilleGreen.lean	87	direct admission
+O-6.17	Complex.exists_complexLiouvilleGreen_endpoint_reference	DLMFMathlib/Analysis/ODE/ComplexLiouvilleGreen.lean	108	direct admission
+O-6.17	Complex.IsLiouvilleGreenContinuation	DLMFMathlib/Analysis/ODE/LiouvilleGreenContinuation.lean	31	definition, no admission
+O-6.17	Complex.exists_liouvilleGreenContinuation	DLMFMathlib/Analysis/ODE/LiouvilleGreenContinuation.lean	56	direct admission
+O-6.17	Complex.exists_liouvilleGreenContinuation_error	DLMFMathlib/Analysis/ODE/LiouvilleGreenContinuation.lean	70	direct admission
+O-6.17	Complex.exists_liouvilleGreenContinuation_endpoint_error	DLMFMathlib/Analysis/ODE/LiouvilleGreenContinuation.lean	94	direct admission
+O-6.18	Complex.exists_complexLiouvilleGreen_connection_multiplier	DLMFMathlib/Analysis/ODE/ComplexLiouvilleGreen.lean	140	direct admission
+O-6.19	Complex.eVariationOn_exp_neg_mul_lift_line	DLMFMathlib/Analysis/Complex/PowerVariation.lean	43	direct admission
+O-6.19	Complex.powerVariationConstant	DLMFMathlib/Analysis/Complex/PowerVariation.lean	32	definition, no admission
+O-6.19	Complex.progressivePowerVariationCosts	DLMFMathlib/Analysis/Complex/PowerVariation.lean	53	definition, no admission
+O-6.19	Complex.csInf_progressivePowerVariationCosts	DLMFMathlib/Analysis/Complex/PowerVariation.lean	73	direct admission
+O-7.01	DLMF.AsymptoticApproximations.IsRankOneAtInfinity	DLMF/AsymptoticApproximations/ODE/Basic.lean	240	definition, no admission
+O-7.01	DLMF.AsymptoticApproximations.rankOneExponent	DLMF/AsymptoticApproximations/ODE/Basic.lean	104	definition, no admission
+O-7.01	DLMF.AsymptoticApproximations.rankOneCoeff	DLMF/AsymptoticApproximations/ODE/Basic.lean	112	definition, no admission
+O-7.01	DLMF.AsymptoticApproximations.RankOne.rankOneCoeff_formal_operator_eq_and_unique	DLMF/AsymptoticApproximations/ODE/RankOneFormalOperator.lean	26	direct admission
+O-7.01	DLMF.AsymptoticApproximations.RankOneForcing.operatorCoefficient	DLMF/AsymptoticApproximations/ODE/RankOneForcing.lean	57	definition, no admission
+O-7.02	DLMF.AsymptoticApproximations.RankOne.exists_unique_differentiated_solutions	DLMF/AsymptoticApproximations/ODE/RankOneParameterDependence.lean	44	direct admission
+O-7.02	DLMF.AsymptoticApproximations.rankOne_exists_unique_solutions	DLMF/AsymptoticApproximations/ODE/Singularities.lean	184	direct admission
+O-7.03	DLMF.AsymptoticApproximations.RankOne.canonicalSector	DLMF/AsymptoticApproximations/ODE/RankOneParameterDependence.lean	29	definition, no admission
+O-7.03	DLMF.AsymptoticApproximations.RankOne.exists_unique_differentiated_solutions	DLMF/AsymptoticApproximations/ODE/RankOneParameterDependence.lean	44	direct admission
+O-7.04	DLMF.AsymptoticApproximations.RankOne.ParameterData	DLMF/AsymptoticApproximations/ODE/RankOneParameterDependence.lean	67	definition, no admission
+O-7.04	DLMF.AsymptoticApproximations.RankOne.ParameterData.analyticOnNhd_exponent_coeff	DLMF/AsymptoticApproximations/ODE/RankOneParameterDependence.lean	95	direct admission
+O-7.04	DLMF.AsymptoticApproximations.RankOne.ParameterData.exists_analytic_canonical_family	DLMF/AsymptoticApproximations/ODE/RankOneParameterDependence.lean	108	direct admission
+O-7.05	DLMF.AsymptoticApproximations.fabry_transformation	DLMF/AsymptoticApproximations/ODE/Singularities.lean	262	proved, no admission
+O-7.05	DLMF.AsymptoticApproximations.fabry_coefficients	DLMF/AsymptoticApproximations/ODE/Singularities.lean	310	proved, no admission
+O-7.06	DLMF.Bessel.besselYOnLog	DLMF/Bessel/Basic.lean	93	definition, no admission
+O-7.06	DLMF.Bessel.hankelH1OnLog	DLMF/Bessel/Basic.lean	110	definition, no admission
+O-7.06	DLMF.Bessel.hankelH2OnLog	DLMF/Bessel/Basic.lean	113	definition, no admission
+O-7.06	DLMF.Bessel.analyticOnNhd_cylinderOnLog	DLMF/Bessel/LogarithmicMonodromy.lean	31	direct admission
+O-7.06	DLMF.Bessel.cylinderOnLog_recurrences	DLMF/Bessel/LogarithmicMonodromy.lean	40	direct admission
+O-7.06	DLMF.Bessel.cylinderOnLog_ode	DLMF/Bessel/LogarithmicMonodromy.lean	62	direct admission
+O-7.06	DLMF.Bessel.wronskian_besselJ_besselY	DLMF/Bessel/Basic/SecondKind.lean	524	proved, no admission
+O-7.06	DLMF.Bessel.wronskian_hankelH1_hankelH2	DLMF/Bessel/Basic/SecondKind.lean	550	proved, no admission
+O-7.07	DLMF.Bessel.largeArgumentCoefficient	DLMF/Bessel/LogarithmicAsymptotics.lean	27	definition, no admission
+O-7.07	DLMF.Bessel.hasAsymptoticExpansion_hankelH1OnLog	DLMF/Bessel/LogarithmicAsymptotics.lean	92	direct admission
+O-7.07	DLMF.Bessel.hasAsymptoticExpansion_hankelH2OnLog	DLMF/Bessel/LogarithmicAsymptotics.lean	105	direct admission
+O-7.07	DLMF.Bessel.isBigO_besselJOnLog_remainder	DLMF/Bessel/LogarithmicAsymptotics.lean	118	direct admission
+O-7.07	DLMF.Bessel.isBigO_besselYOnLog_remainder	DLMF/Bessel/LogarithmicAsymptotics.lean	129	direct admission
+O-7.07	DLMF.Bessel.isBigO_hankelOnLog_derivative_remainder	DLMF/Bessel/LogarithmicDerivativeExpansions.lean	44	direct admission
+O-7.07	DLMF.Bessel.hankelOnLogPartialSum	DLMF/Bessel/LogarithmicDerivativeExpansions.lean	28	definition, no admission
+O-7.08	DLMF.Bessel.deriv_ne_zero_of_bessel_solution_eq_zero	DLMF/Bessel/PositiveZeroSequence.lean	29	direct admission
+O-7.08	DLMF.Bessel.iteratedDeriv_two_ne_zero_of_bessel_solution_deriv_eq_zero	DLMF/Bessel/PositiveZeroSequence.lean	40	direct admission
+O-7.09	DLMF.Bessel.im_eq_zero_of_besselJ_eq_zero	DLMF/Bessel/DiniZeros.lean	52	direct admission
+O-7.09	Complex.besselJ_neg_int	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Bessel.lean	84	proved, no admission
+O-7.09	DLMF.Bessel.im_eq_zero_of_diniNormalized_eq_zero	DLMF/Bessel/DiniZeros.lean	58	direct admission
+O-7.09	DLMF.Bessel.existsUnique_imaginary_deriv_besselJ_zero	DLMF/Bessel/OrderAndZeroProperties.lean	46	direct admission
+O-7.09	DLMF.Bessel.exists_uniform_besselJ_ne_zero	DLMF/Bessel/OrderAndZeroProperties.lean	31	direct admission
+O-7.09	DLMF.Bessel.exists_uniform_deriv_besselJ_ne_zero	DLMF/Bessel/OrderAndZeroProperties.lean	38	direct admission
+O-7.10	DLMF.Bessel.exists_positive_besselJ_zero_family	DLMF/Bessel/OrderAndZeroProperties.lean	57	direct admission
+O-7.10	DLMF.Bessel.exists_positive_deriv_besselJ_zero_family	DLMF/Bessel/OrderAndZeroProperties.lean	69	direct admission
+O-7.10	DLMF.Bessel.besselJ_deriv_positive_zeros_interlace	DLMF/Bessel/OrderAndZeroProperties.lean	80	direct admission
+O-7.11	DLMF.Bessel.hankelCosineSeries	DLMF/Bessel/CompleteZeroExpansions.lean	33	definition, no admission
+O-7.11	DLMF.Bessel.hankelSineSeries	DLMF/Bessel/CompleteZeroExpansions.lean	39	definition, no admission
+O-7.11	DLMF.Bessel.besselZeroPhaseSeries	DLMF/Bessel/CompleteZeroExpansions.lean	46	definition, no admission
+O-7.11	DLMF.Bessel.besselZeroCorrectionSeries	DLMF/Bessel/CompleteZeroExpansions.lean	56	definition, no admission
+O-7.11	DLMF.Bessel.coeff_besselZeroCorrectionSeries_le_three	DLMF/Bessel/CompleteZeroExpansions.lean	83	direct admission
+O-7.11	DLMF.Bessel.Real.hasAsymptoticPowerSeries_besselJ_positive_zeros	DLMF/Bessel/CompleteZeroExpansions.lean	94	direct admission
+O-7.11	DLMF.Bessel.Real.hasAsymptoticPowerSeries_besselY_positive_zeros	DLMF/Bessel/CompleteZeroExpansions.lean	106	direct admission
+O-7.12	DLMF.Bessel.existsUnique_cylinder_zero_between	DLMF/Bessel/OrderAndZeroProperties.lean	90	direct admission
+O-7.12	DLMF.Bessel.exists_positive_besselY_zero_family	DLMF/Bessel/OrderAndZeroProperties.lean	100	direct admission
+O-7.12	DLMF.Bessel.besselY_besselJ_positive_zeros_interlace	DLMF/Bessel/OrderAndZeroProperties.lean	111	direct admission
+O-7.12	TauCeti.argumentPrinciple_windingNumber	.lake/packages/TauCeti/TauCeti/Analysis/Complex/Conformal/ArgumentPrinciple.lean	87	proved, no admission
+O-7.12	TauCeti.argumentPrinciple_windingNumber_of_analyticOnNhd	.lake/packages/TauCeti/TauCeti/Analysis/Complex/Conformal/ArgumentPrinciple.lean	114	proved, no admission
+O-7.13	DLMF.Bessel.besselIOnLog_eq_besselJOnLog	DLMF/Bessel/LogarithmicMonodromy.lean	72	direct admission
+O-7.13	DLMF.Bessel.modifiedCylinderOnLog_recurrences	DLMF/Bessel/LogarithmicMonodromy.lean	49	direct admission
+O-7.13	DLMF.Bessel.cylinderOnLog_ode	DLMF/Bessel/LogarithmicMonodromy.lean	62	direct admission
+O-7.13	DLMF.Bessel.besselK_neg	DLMF/Bessel/Basic/SecondKind.lean	913	proved, no admission
+O-7.13	DLMF.Bessel.wronskian_besselK_besselI	DLMF/Bessel/Basic/SecondKind.lean	905	proved, no admission
+O-7.13	DLMF.Bessel.besselK_eq_integral_cosh	DLMF/Bessel/KIntegralRep.lean	707	proved, no admission
+O-7.13	DLMF.Bessel.hasAsymptoticExpansion_besselKOnLog	DLMF/Bessel/LogarithmicAsymptotics.lean	74	direct admission
+O-7.13	DLMF.Bessel.hasAsymptoticExpansion_besselIOnLog	DLMF/Bessel/LogarithmicAsymptotics.lean	82	direct admission
+O-7.13	DLMF.Bessel.besselIOnLog_eq_besselKOnLog_connection	DLMF/Bessel/LogarithmicMonodromy.lean	104	direct admission
+O-7.13	DLMF.Bessel.besselKOnLog_add_int_mul_pi	DLMF/Bessel/LogarithmicMonodromy.lean	96	direct admission
+O-7.13	DLMF.Bessel.isBigO_besselIOnLog_two_exponentials	DLMF/Bessel/LogarithmicMonodromy.lean	115	direct admission
+O-7.14	DLMF.Bessel.besselI_ofReal_pos	DLMF/Bessel/Elementary.lean	338	proved, no admission
+O-7.14	DLMF.Bessel.besselK_ofReal_pos	DLMF/Bessel/Elementary.lean	416	proved, no admission
+O-7.14	DLMF.Bessel.Real.strictMonoOn_re_besselI	DLMF/Bessel/CylinderMagnitude.lean	32	direct admission
+O-7.14	DLMF.Bessel.Real.strictAntiOn_re_besselK	DLMF/Bessel/CylinderMagnitude.lean	38	direct admission
+O-7.14	DLMF.Bessel.Real.strictAntiOn_re_besselI_order	DLMF/Bessel/CylinderMagnitude.lean	44	direct admission
+O-7.14	DLMF.Bessel.Real.strictMonoOn_re_besselK_order	DLMF/Bessel/CylinderMagnitude.lean	50	direct admission
+O-7.14	DLMF.Bessel.besselK_ne_zero_of_nonneg_re	DLMF/Bessel/CylinderMagnitude.lean	56	direct admission
+O-7.14	DLMF.Bessel.besselK_isEquivalent_cpow_nhds_zero	DLMF/Bessel/CylinderMagnitude.lean	62	direct admission
+O-7.14	DLMF.Bessel.besselK_zero_isEquivalent_neg_log_nhds_zero	DLMF/Bessel/CylinderMagnitude.lean	69	direct admission
+O-7.15	DLMF.Confluent.kummerM	DLMF/Confluent/Basic/KummerM.lean	47	definition, no admission
+O-7.15	Complex.regularizedHGFun	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/RegularizedHypergeometric.lean	192	definition, no admission
+O-7.15	DLMF.Confluent.hasFPowerSeriesOnBall_kummerM	DLMF/Confluent/Basic/KummerProperties.lean	115	proved, no admission
+O-7.15	DLMF.Confluent.kummerM_ode	DLMF/Confluent/Basic/KummerProperties.lean	160	proved, no admission
+O-7.15	DLMF.Confluent.kummerM_eq_euler_integral	DLMF/Confluent/KummerProperties.lean	199	proved, no admission
+O-7.15	DLMF.Confluent.kummerM_kummer_transform	DLMF/Confluent/Basic/KummerProperties.lean	230	proved, no admission
+O-7.15	DLMF.Confluent.kummerU_kummer_transform_all	DLMF/Confluent/BasicProperties/Continuity.lean	577	proved, no admission
+O-7.15	DLMF.Confluent.differentiable_regularizedKummer_parameters_argument	DLMF/Confluent/JointRegularizedParameters.lean	24	direct admission
+O-7.15	DLMF.Confluent.wronskian_regularizedHGFun	DLMF/Confluent/BasicProperties/Wronskians.lean	336	proved, no admission
+O-7.16	DLMF.Confluent.kummerU_laplace	DLMF/Confluent/IntegralRepresentations/EulerAndBessel.lean	694	proved, no admission
+O-7.16	DLMF.Confluent.kummerU_eq_connection	DLMF/Confluent/Basic/Tricomi.lean	70	proved, no admission
+O-7.16	DLMF.Confluent.regularizedHGFun_eq_kummerU_connection	DLMF/Confluent/BasicProperties/Wronskians.lean	586	proved, no admission
+O-7.16	DLMF.Confluent.regularizedConfluent_eq_tricomi_continued	DLMF/Confluent/Asymptotics/LogarithmicTwoExponentials.lean	32	direct admission
+O-7.16	DLMF.Confluent.wronskian_regularizedHGFun_kummerU_all	DLMF/Confluent/BasicProperties/Wronskians.lean	376	proved, no admission
+O-7.17	DLMF.Confluent.kummerUContinuedOnLog	DLMF/Confluent/Basic/TricomiLogarithmic.lean	31	definition, no admission
+O-7.17	DLMF.Confluent.hasAsymptoticExpansion_kummerUContinuedOnLog	DLMF/Confluent/Asymptotics/LogarithmicSector.lean	62	direct admission
+O-7.17	DLMF.Confluent.isBigO_regularizedConfluentOnLog_two_exponentials	DLMF/Confluent/Asymptotics/LogarithmicTwoExponentials.lean	43	direct admission
+O-7.17	DLMF.Confluent.kummerU_besselK	DLMF/Confluent/Relations.lean	326	proved, no admission
+O-7.17	DLMF.Confluent.upperIncompleteGamma	DLMF/Confluent/Basic/IncompleteGamma.lean	35	definition, no admission
+O-7.17	DLMF.Confluent.kummerU_eq_laguerreExtended	DLMF/Confluent/LaguerreContinuation.lean	29	proved, no admission
+O-7.17	DLMF.Confluent.parabolicCylinderU_eq_kummerUContinuedOnLog	DLMF/Confluent/ParabolicCylinder/LogarithmicRelation.lean	30	direct admission
+O-7.17	DLMF.Confluent.whittakerWContinuedOnLog	DLMF/Confluent/Basic/WhittakerLogarithmic.lean	30	definition, no admission
+O-7.17	DLMF.Confluent.hasAsymptoticExpansion_whittakerWContinuedOnLog	DLMF/Confluent/Asymptotics/WhittakerLogarithmic.lean	45	direct admission
+O-7.18	DLMF.AsymptoticApproximations.RankOneComparison.shift	DLMF/AsymptoticApproximations/ODE/RankOneComparison.lean	30	definition, no admission
+O-7.18	DLMF.AsymptoticApproximations.RankOneComparison.comparisonFunction	DLMF/AsymptoticApproximations/ODE/RankOneComparison.lean	39	definition, no admission
+O-7.18	DLMF.AsymptoticApproximations.RankOneComparison.coefficientP	DLMF/AsymptoticApproximations/ODE/RankOneComparison.lean	48	definition, no admission
+O-7.18	DLMF.AsymptoticApproximations.RankOneComparison.coefficientQ	DLMF/AsymptoticApproximations/ODE/RankOneComparison.lean	55	definition, no admission
+O-7.18	DLMF.AsymptoticApproximations.RankOneComparison.truncation	DLMF/AsymptoticApproximations/ODE/RankOneComparison.lean	68	definition, no admission
+O-7.18	DLMF.AsymptoticApproximations.RankOneComparison.residual	DLMF/AsymptoticApproximations/ODE/RankOneComparison.lean	78	definition, no admission
+O-7.18	DLMF.AsymptoticApproximations.RankOneComparison.comparison_pair_equations	DLMF/AsymptoticApproximations/ODE/RankOneComparison.lean	89	direct admission
+O-7.18	Complex.complexGreen_derivative_coupling_error	DLMFMathlib/Analysis/ODE/ComplexGreenDerivativeCoupling.lean	29	direct admission
+O-7.18	Complex.exists_complexGreen_derivative_coupling_endpoint	DLMFMathlib/Analysis/ODE/ComplexGreenDerivativeCoupling.lean	60	direct admission
+O-7.18	ODE.WeightedVolterra.Data.existsUnique_isSolution	DLMFMathlib/Analysis/ODE/GeneralWeightedVolterra.lean	179	direct admission
+O-7.19	DLMF.AsymptoticApproximations.RankOneForcing.coefficient	DLMF/AsymptoticApproximations/ODE/RankOneForcing.lean	27	definition, no admission
+O-7.19	DLMF.AsymptoticApproximations.RankOneForcing.operatorCoefficient	DLMF/AsymptoticApproximations/ODE/RankOneForcing.lean	57	definition, no admission
+O-7.19	DLMF.AsymptoticApproximations.RankOneForcing.coefficient_operator_eq_and_unique	DLMF/AsymptoticApproximations/ODE/RankOneForcing.lean	72	direct admission
+O-7.19	DLMF.AsymptoticApproximations.RankOneForcing.exists_finite_sectorial_expansion	DLMF/AsymptoticApproximations/ODE/RankOneForcing.lean	82	direct admission
+O-7.20	DLMF.Struve.struveH	DLMF/Struve/Basic/Functions.lean	56	definition, no admission
+O-7.20	DLMF.Struve.struveK	DLMF/Struve/Basic/Functions.lean	83	definition, no admission
+O-7.20	DLMF.Struve.struveH_ode	DLMF/Struve/SeriesAndEquations.lean	522	proved, no admission
+O-7.20	DLMF.Struve.struveH_eq_poisson	DLMF/Struve/Poisson.lean	202	proved, no admission
+O-7.20	DLMF.Struve.struveK_laplace	DLMF/Struve/Representations/PoissonAndBarnesLoop.lean	86	proved, no admission
+O-7.20	DLMF.Struve.struveK_asymptotic_rotSector	DLMF/Struve/Asymptotics/Watson.lean	532	proved, no admission
+O-7.20	DLMF.Struve.struveK_asymptotic	DLMF/Struve/Asymptotics/Watson.lean	888	proved, no admission

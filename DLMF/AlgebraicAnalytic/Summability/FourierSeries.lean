@@ -1185,4 +1185,16 @@ theorem im_fourierAnalyticExtension {f : ℝ → ℝ}
         ((r ^ n.natAbs : ℝ) : ℂ) * cexp (n * θ * I) :=
   im_fourierAnalyticExtension' f hr0 hr1 θ
 
+/-- Every continuous periodic function has a uniformly close trigonometric Cesàro polynomial.
+Andrews, Askey and Roy, *Special Functions*, Theorem B.1.6, p. 602,
+synopsis AAR-B.1.1–B.1.6. The approximant is the canonical finite Fourier Cesàro mean. -/
+theorem exists_uniform_fourierCesaroMean_sub_lt {f : ℝ → ℂ}
+    (hper : Function.Periodic f (2 * Real.pi)) (hf : Continuous f) {ε : ℝ} (hε : 0 < ε) :
+    ∃ N : ℕ, ∀ θ : ℝ, ‖fourierCesaroMean f N θ - f θ‖ < ε := by
+  have h := Metric.tendstoUniformly_iff.mp (tendstoUniformly_fourierCesaroMean hper hf) ε hε
+  obtain ⟨N, hN⟩ := eventually_atTop.mp h
+  refine ⟨N, fun θ => ?_⟩
+  rw [norm_sub_rev]
+  simpa only [dist_eq_norm] using hN N le_rfl θ
+
 end DLMF.AlgebraicAnalytic

@@ -31,7 +31,7 @@ import os
 import re
 import sys
 
-DECL = re.compile(r'^(?:@\[[^\]]*\]\s*)?(?:(?:private|protected|noncomputable|nonrec|partial)\s+)*'
+DECL = re.compile(r'^(?:@\[[^\]]*\]\s*)?(?:(?:private|protected|public|noncomputable|nonrec|partial)\s+)*'
                   r'(theorem|lemma|def|abbrev|instance|structure|inductive|class)\s+([^\s(:{\[]+)', re.M)
 LINK = re.compile(r'\[(`?)([^\]`]+)`?\]\(([^)#]*\.lean)(?:#L(\d+))?\) '
                   r'\((admitted|proved|proved from admissions|definition|defined|nonstandard axioms)\)')

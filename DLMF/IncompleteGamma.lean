@@ -1,5 +1,18 @@
 module -- shake: keep-all
 
+public import DLMF.IncompleteGamma.BetaEndpointError
+
+public import DLMF.IncompleteGamma.GammaTransitionCoordinates
+public import DLMF.IncompleteGamma.ParameterRemainderBounds
+
+public import DLMF.IncompleteGamma.BetaGammaSaddle
+
+public import DLMF.IncompleteGamma.BetaSymmetricSaddle
+
+public import DLMF.IncompleteGamma.GammaInversion
+
+public import DLMF.IncompleteGamma.BetaOrderMinimality
+
 public import DLMF.IncompleteGamma.Regularized
 public import DLMF.IncompleteGamma.ContinuedProperties
 public import DLMF.Core.MathlibCoverage
@@ -21,6 +34,10 @@ public import DLMF.IncompleteGamma.BoundsFractions
 public import DLMF.IncompleteGamma.RealIntegrals
 public import DLMF.IncompleteGamma.FractionTools
 public import DLMF.IncompleteGamma.BoundTools
+
+public import DLMF.IncompleteGamma.StieltjesExponentialIntegral
+
+public import DLMF.IncompleteGamma.LaplaceTailMajorant
 
 /-!
 # Incomplete Gamma and related functions (DLMF Chapter 8)

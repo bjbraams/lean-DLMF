@@ -294,7 +294,7 @@ theorem one_sub_exp_neg_two_mul_I (t : ℂ) :
 theorem kummerU_analytic_continuation (a b z : ℂ) (m : ℤ) {w : ℂ}
     (hw : w = log z + 2 * π * I * m) (hz : z ∈ slitPlane)
     (hb : ∀ n : ℤ, b ≠ n) :
-    kummerUOnLog a b w =
+    kummerUConnectionOnLog a b w =
       (2 * π * I * exp (-π * I * b * m) * sin (π * b * m)) /
           (Gamma (1 + a - b) * sin (π * b)) * regularizedHGFun {a} {b} z +
         exp (-2 * π * I * b * m) * kummerU a b z := by
@@ -321,7 +321,7 @@ theorem kummerU_analytic_continuation (a b z : ℂ) (m : ℤ) {w : ℂ}
   have ht := one_sub_exp_neg_two_mul_I (π * b * m)
   rw [show -2 * (π * b * (m : ℂ)) * I = -2 * π * I * b * m by ring,
     show -(π * b * (m : ℂ)) * I = -π * I * b * m by ring] at ht
-  rw [kummerUOnLog, he, hp, kummerU_eq_connection a b z hb]
+  rw [kummerUConnectionOnLog, he, hp, kummerU_eq_connection a b z hb]
   unfold kummerUConnection
   calc _ = (1 - exp (-2 * π * I * b * m)) *
         (Gamma (1 - b) / Gamma (a - b + 1) * kummerM a b z) +

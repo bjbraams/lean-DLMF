@@ -7,6 +7,8 @@ module
 
 public import DLMF.QSeries.Basic.Series
 
+import DLMF.QSeries.Basic.PochhammerProperties
+
 /-!
 # The `q`-analogues of the Askey scheme
 
@@ -126,4 +128,18 @@ def qRacah (a b c d q : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
       (qPochhammer (a * q) q k * qPochhammer (b * d * q) q k *
         qPochhammer (c * q) q k * qPochhammer q q k) *
       ∏ j ∈ Finset.range k, (1 - q ^ j * x + c * d * q ^ (2 * j + 1))
+/-- The degree-zero continuous q-Hermite polynomial. Andrews, Askey and Roy,
+*Special Functions*, §10.11, synopsis AAR-10.11.1. -/
+@[simp] theorem continuousQHermiteLaurent_zero (q z : ℂ) :
+    continuousQHermiteLaurent q 0 z = 1 := by
+  simp [continuousQHermiteLaurent, qGegenbauer]
+
+/-- The degree-one continuous q-Hermite polynomial, on the regular base domain.
+Andrews–Askey–Roy, §10.11, synopsis AAR-10.11.1. -/
+theorem continuousQHermiteLaurent_one {q : ℂ} (hq : q ≠ 1) (z : ℂ) :
+    continuousQHermiteLaurent q 1 z = z + z⁻¹ := by
+  norm_num [continuousQHermiteLaurent, qGegenbauer, Finset.sum_range_succ,
+    qPochhammer_zero, qPochhammer_one]
+  field_simp
+
 end DLMF.OrthogonalPolynomials

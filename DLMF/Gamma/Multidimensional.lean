@@ -7,6 +7,7 @@ module -- shake: keep-all
 
 public import DLMF.Gamma.Multidimensional.SelbergLimits
 public import DLMF.Gamma.Multidimensional.Dyson
+public import DLMF.Gamma.Multidimensional.Liouville
 
 /-!
 # Multidimensional integrals (DLMF §5.14)

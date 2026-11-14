@@ -5,7 +5,18 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
+public import DLMF.WaveEquation.RadialBases
+
+public import DLMF.WaveEquation.SeparatedModes
+
+public import DLMF.WaveEquation.SphereScattering
+
+public import DLMF.WaveEquation.ConductingDisc
+
+public import DLMF.WaveEquation.RadialHeat
 public import DLMF.WaveEquation.Helmholtz
+
+public import DLMF.WaveEquation.ProlateSeparation
 
 /-!
 # Separating the wave equation (Temme Chapter 10)

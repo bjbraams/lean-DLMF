@@ -1,0 +1,35 @@
+synopsis_id	declaration	source_file	source_line	status
+O-13.03	DLMF.AsymptoticApproximations.ComplexBesselComparison.exists_complex_simplePole_K_recessive	DLMF/AsymptoticApproximations/ODE/ComplexBesselEndpoint.lean	32	direct admission
+O-13.03	ODE.SimplePoleScaling.dilated_residual	DLMFMathlib/Analysis/ODE/SimplePoleScaling.lean	35	direct admission
+O-13.03	ODE.SimplePoleScaling.exists_local_principalCut_parameterization	DLMFMathlib/Analysis/ODE/SimplePoleScaling.lean	49	direct admission
+O-13.03	DLMF.AsymptoticApproximations.SimplePoleConnection.tendsto_parameterRecessive_frobenius	DLMF/AsymptoticApproximations/Connections/SimplePoleParameter.lean	38	direct admission
+O-13.03	DLMF.AsymptoticApproximations.SimplePoleConnection.tendsto_physical_frobenius_normalizer	DLMF/AsymptoticApproximations/Connections/SimplePoleParameter.lean	51	direct admission
+O-13.08	Complex.SimpleTurningPoint.principalRay	DLMFMathlib/Analysis/ODE/SimpleTurningTrajectories.lean	31	definition, no admission
+O-13.08	Complex.SimpleTurningPoint.exists_three_principal_arcs	DLMFMathlib/Analysis/ODE/SimpleTurningTrajectories.lean	72	direct admission
+O-13.08	Complex.SimpleTurningPoint.principal_trajectories_no_crossing	DLMFMathlib/Analysis/ODE/SimpleTurningTrajectories.lean	94	direct admission
+O-13.08	Complex.SimpleTurningPoint.exists_three_principal_branch_domains	DLMFMathlib/Analysis/ODE/SimpleTurningTrajectories.lean	110	direct admission
+O-13.08	Complex.ThreeReferenceLiouvilleGreen.Data	DLMFMathlib/Analysis/ODE/ThreeReferenceLiouvilleGreen.lean	32	definition, no admission
+O-13.08	Complex.ThreeReferenceLiouvilleGreen.Data.exists_canonical_network	DLMFMathlib/Analysis/ODE/ThreeReferenceLiouvilleGreen.lean	136	direct admission
+O-13.09	Complex.ThreeReferenceLiouvilleGreen.Data.exists_canonical_network	DLMFMathlib/Analysis/ODE/ThreeReferenceLiouvilleGreen.lean	136	direct admission
+O-13.09	Complex.ThreeReferenceLiouvilleGreen.Data.relativeError	DLMFMathlib/Analysis/ODE/ThreeReferenceLiouvilleGreen.lean	106	definition, no admission
+O-13.09	Complex.ThreeReferenceLiouvilleGreen.Data.IsCanonicalFamily	DLMFMathlib/Analysis/ODE/ThreeReferenceLiouvilleGreen.lean	115	definition, no admission
+O-13.09	Complex.ThreeReferenceLiouvilleGreen.Data.IsCanonicalFamily.connection_limits	DLMFMathlib/Analysis/ODE/ThreeReferenceLiouvilleGreen.lean	219	direct admission
+O-13.09	Complex.ThreeReferenceLiouvilleGreen.Data.normalized_coefficient_endpoint_symmetry	DLMFMathlib/Analysis/ODE/ThreeReferenceLiouvilleGreen.lean	171	direct admission
+O-13.09	Complex.ThreeReferenceLiouvilleGreen.Data.exists_positive_parameter_connection_expansions	DLMFMathlib/Analysis/ODE/ThreeReferenceLiouvilleGreen.lean	187	direct admission
+O-13.09	ODE.wronskian_cyclic_sum	DLMFMathlib/Analysis/ODE/SymmetricSquareGeneral.lean	45	proved, no admission
+O-13.10	Complex.PowerSectorLiouvilleGreen.Data	DLMFMathlib/Analysis/ODE/VanishingLiouvilleGreenError.lean	63	definition, no admission
+O-13.10	Complex.PowerSectorLiouvilleGreen.Data.control_deriv_isBigO	DLMFMathlib/Analysis/ODE/VanishingLiouvilleGreenError.lean	99	direct admission
+O-13.10	Complex.PowerSectorLiouvilleGreen.AdjacentRayDirections	DLMFMathlib/Analysis/ODE/VanishingLiouvilleGreenError.lean	41	definition, no admission
+O-13.10	Complex.PowerSectorLiouvilleGreen.Data.exists_escaping_progressive_joins	DLMFMathlib/Analysis/ODE/VanishingLiouvilleGreenError.lean	110	direct admission
+O-13.10	Complex.PowerSectorLiouvilleGreen.Data.tendsto_error_adjacent_zero	DLMFMathlib/Analysis/ODE/VanishingLiouvilleGreenError.lean	131	direct admission
+O-13.11	Complex.ThreeReferenceLiouvilleGreen.IsRealGeometry	DLMFMathlib/Analysis/ODE/ThreeReferenceRealConnections.lean	32	definition, no admission
+O-13.11	Complex.ThreeReferenceLiouvilleGreen.real_connection_of_canonical_family	DLMFMathlib/Analysis/ODE/ThreeReferenceRealConnections.lean	62	direct admission
+O-13.11	Complex.ThreeReferenceLiouvilleGreen.cosine_connection_of_canonical_family	DLMFMathlib/Analysis/ODE/ThreeReferenceRealConnections.lean	98	direct admission
+O-13.11	Complex.exists_amplitude_phase_error	DLMFMathlib/Analysis/Complex/AmplitudePhaseError.lean	24	direct admission
+O-13.12	Complex.ThreeReferenceScattering.scattering_probabilities_of_canonical_family	DLMFMathlib/Analysis/ODE/ThreeReferenceScattering.lean	51	direct admission
+O-13.12	ODE.TwoTurningPoints.IsScatteringState	DLMFMathlib/Analysis/ODE/TwoTurningPoints.lean	78	definition, no admission
+O-13.12	Complex.ThreeReferenceScattering.rightRelativeError	DLMFMathlib/Analysis/ODE/ThreeReferenceScattering.lean	32	definition, no admission
+O-13.12	DLMF.Confluent.WeberScattering.transmission_and_reflection	DLMF/ParabolicCylinder/ScatteringAndBoundStates.lean	121	direct admission
+O-13.12	DLMF.Confluent.WeberScattering.outgoingRight_flux	DLMF/ParabolicCylinder/ScatteringAndBoundStates.lean	102	direct admission
+O-13.12	DLMF.Confluent.WeberScattering.outgoingRight_eq_incoming_add_reflected	DLMF/ParabolicCylinder/ScatteringAndBoundStates.lean	114	direct admission
+O-13.12	DLMF.Confluent.WeberScattering.isBoundState_iff_odd_square	DLMF/ParabolicCylinder/ScatteringAndBoundStates.lean	129	direct admission

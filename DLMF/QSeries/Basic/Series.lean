@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.QSeries.Basic.Pochhammer
+import DLMF.QSeries.Basic.PochhammerProperties
 
 /-!
 # Integer shifted factorials and basic `q`-series
@@ -46,6 +47,18 @@ def qGegenbauer (beta q : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
   ∑ k ∈ Finset.range (n + 1),
     qPochhammer beta q k * qPochhammer beta q (n - k) /
         (qPochhammer q q k * qPochhammer q q (n - k)) * x ^ ((n : ℤ) - 2 * k)
+
+/-- The degree-zero Rogers polynomial. Andrews, Askey and Roy, *Special Functions*,
+§10.11, synopsis AAR-10.11.1. -/
+@[simp] theorem qGegenbauer_zero (β q z : ℂ) : qGegenbauer β q 0 z = 1 := by
+  simp [qGegenbauer]
+
+/-- The degree-one Rogers polynomial, retaining the totalized exceptional base.
+Andrews–Askey–Roy, §10.11, synopsis AAR-10.11.1. -/
+theorem qGegenbauer_one (β q z : ℂ) :
+    qGegenbauer β q 1 z = (1 - β) / (1 - q) * (z + z⁻¹) := by
+  norm_num [qGegenbauer, Finset.sum_range_succ, qPochhammer_zero, qPochhammer_one]
+  ring
 
 namespace TripleProduct
 

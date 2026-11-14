@@ -12,6 +12,11 @@ public import Carlson.Mean.Real
 public import Dirichlet.Average.Merge
 public import Dirichlet.Average.TwoNode
 public import Carlson.R.IntegralExercises
+import DLMFMathlib.Analysis.Integral.ReciprocalSquareRootProducts
+import DLMF.EllipticIntegrals.LegendreSymmetricForms
+import TauCeti.Analysis.SpecialFunctions.Beta
+import DLMF.EllipticIntegrals.SymmetricRelations
+import DLMF.Hypergeometric.BetaIntegrals
 
 /-!
 # Integrals of elliptic integrals (DLMF §19.28)
@@ -46,13 +51,23 @@ identity holds for `x, y > 0` with `x + y ≤ π/2` and fails beyond, e.g. at `x
 the two sides are `2.6343` and `6.3569`, and at `x = y = 0.8` they differ by `0.0918`. The
 statement here adds the hypothesis `x + y ≤ π/2`.
 
-**Proofs.** The integral (19.28.5) follows from the node derivative of `R_F`, Mathlib's improper
+**Proofs.** The Mellin identities use the endpoint beta integral
+`DLMF.Hypergeometric.integral_cpow_mul_ordinaryHypergeometric`, which cancels a parameter in
+`Carlson.TwoVariable.betaIntegral_mul_threeFTwo` and applies Gauss summation. The `R_D` case
+then follows from the algebraic `R_F` and `R_G` relation.
+
+The integral (19.28.5) follows from the node derivative of `R_F`, Mathlib's improper
 fundamental theorem for a nonpositive derivative, and the Carlson asymptotic
 `Carlson.isEquivalent_carlsonRF_atTop`. Positivity and real-valuedness of `R_D` use
 `Carlson.ofReal_carlsonRReal` and `Carlson.carlsonRReal_pos`. The interpolation identity
 (19.28.6) uses the positive-parameter merging formula
 `Dirichlet.regCarlsonDirichletAverage_ofReal_eq_merge` from `lean-codes`, followed by the
 change of variable `u = v²` (`Carlson.integral_Ioo_sq_eq`).
+
+The integration in the square of the last `R_J` node uses Fubini,
+`TauCeti.integral_rpow_div_sq_add_sq`, and the reciprocal square-root kernel substitution.
+The simultaneous scaling of two `R_J` nodes uses Fubini and a positive linear scaling of
+the square-root kernel.
 
 ## References
 
@@ -66,27 +81,6 @@ open scoped Real Topology
 
 namespace DLMF.EllipticIntegrals
 
-/-- DLMF 19.28.1: `∫₀¹ t^{σ-1} R_F(0, t, 1) dt = (1/2) B(σ, 1/2)²`, `ℜσ > 0`. -/
-@[dlmf 19.28.E1]
-theorem integral_cpow_mul_symmetricEllipticRF_zero {σ : ℂ} (hσ : 0 < σ.re) :
-    ∫ t in Ioo (0 : ℝ) 1, (t : ℂ) ^ (σ - 1) * symmetricEllipticRF 0 t 1 =
-      1 / 2 * betaIntegral σ (1 / 2) ^ 2 := by
-  sorry
-
-/-- DLMF 19.28.2: `∫₀¹ t^{σ-1} R_G(0, t, 1) dt = σ/(4σ + 2) B(σ, 1/2)²`, `ℜσ > 0`. -/
-@[dlmf 19.28.E2]
-theorem integral_cpow_mul_symmetricEllipticRG_zero {σ : ℂ} (hσ : 0 < σ.re) :
-    ∫ t in Ioo (0 : ℝ) 1, (t : ℂ) ^ (σ - 1) * symmetricEllipticRG 0 t 1 =
-      σ / (4 * σ + 2) * betaIntegral σ (1 / 2) ^ 2 := by
-  sorry
-
-/-- DLMF 19.28.3: `∫₀¹ t^{σ-1} (1 - t) R_D(0, t, 1) dt = 3/(4σ + 2) B(σ, 1/2)²`, `ℜσ > 0`. -/
-@[dlmf 19.28.E3]
-theorem integral_cpow_mul_symmetricEllipticRD_zero {σ : ℂ} (hσ : 0 < σ.re) :
-    ∫ t in Ioo (0 : ℝ) 1, (t : ℂ) ^ (σ - 1) * (1 - t) * symmetricEllipticRD 0 t 1 =
-      3 / (4 * σ + 2) * betaIntegral σ (1 / 2) ^ 2 := by
-  sorry
-
 /-- DLMF 19.28.4: for real `a`, `b₁`, `b₂` with `c = b₁ + b₂ > 0` and `ℜσ > max(0, a - b₂)`,
 `∫₀¹ t^{σ-1} (1 - t)^{c-1} R_{-a}(b₁, b₂; t, 1) dt =
 Γ(c) Γ(σ) Γ(σ + b₂ - a) / (Γ(σ + c - a) Γ(σ + b₂))`. Here `R_{-a}` is DLMF's
@@ -98,7 +92,162 @@ theorem integral_cpow_mul_symmetricEllipticR_two {a b₁ b₂ : ℝ} {σ : ℂ} 
         symmetricEllipticR a ![(b₁ : ℂ), b₂] ![(t : ℂ), 1] =
       Gamma (b₁ + b₂ : ℝ) * Gamma σ * Gamma (σ + b₂ - a) /
         (Gamma (σ + (b₁ + b₂ : ℝ) - a) * Gamma (σ + b₂)) := by
-  sorry
+  let F : ℝ → ℂ := fun t => (t : ℂ) ^ (σ - 1) *
+    ((1 - t : ℝ) : ℂ) ^ ((b₁ + b₂ : ℝ) - 1 : ℂ) *
+      symmetricEllipticR a ![(b₁ : ℂ), b₂] ![(t : ℂ), 1]
+  have hrefl := intervalIntegral.integral_comp_sub_left F (a := 0) (b := 1) 1
+  norm_num only [sub_self, sub_zero] at hrefl
+  rw [intervalIntegral.integral_of_le zero_le_one, intervalIntegral.integral_of_le zero_le_one,
+    integral_Ioc_eq_integral_Ioo, integral_Ioc_eq_integral_Ioo] at hrefl
+  rw [← hrefl]
+  have hσ0 : 0 < σ.re := lt_of_le_of_lt (le_max_left 0 (a - b₂)) hσ
+  have hσb : a - b₂ < σ.re := lt_of_le_of_lt (le_max_right 0 (a - b₂)) hσ
+  have hreg : ∀ n : ℕ, (b₁ : ℂ) + b₂ ≠ -n := by
+    intro n he
+    have := congrArg Complex.re he
+    simp only [add_re, ofReal_re, neg_re, natCast_re] at this
+    linarith [Nat.cast_nonneg (α := ℝ) n]
+  have heq : ∀ u ∈ Ioo (0 : ℝ) 1, F (1 - u) =
+      (u : ℂ) ^ (((b₁ + b₂ : ℝ) : ℂ) - 1) * (1 - (u : ℂ)) ^ (σ - 1) *
+        ordinaryHypergeometric (a : ℂ) b₁ ((b₁ + b₂ : ℝ) : ℂ) (u : ℂ) := by
+    intro u hu
+    have hu0 : 0 < u := hu.1
+    have hu1 : 0 < 1 - u := sub_pos.mpr hu.2
+    dsimp only [F]
+    have harg : arg (((1 - u : ℝ) : ℂ)) - arg (1 : ℂ) ∈ Ioo (-π) π := by
+      rw [arg_one, arg_ofReal_of_nonneg hu1.le, sub_self]
+      exact ⟨by have := Real.pi_pos; linarith, Real.pi_pos⟩
+    rw [symmetricEllipticR_two_eq_ordinaryHypergeometric a b₁ b₂ hreg
+      (ofReal_mem_slitPlane.mpr hu1) one_mem_slitPlane (by
+        have hsub : (1 : ℂ) - ((1 - u : ℝ) : ℂ) = (u : ℂ) := by push_cast; ring
+        rw [div_one, hsub, norm_real, Real.norm_of_nonneg hu0.le]
+        exact hu.2) harg]
+    push_cast
+    simp only [one_cpow, one_mul, div_one]
+    rw [show (1 : ℂ) - (1 - u) = u by ring]
+    ring_nf
+  rw [setIntegral_congr_fun measurableSet_Ioo heq]
+  rw [DLMF.Hypergeometric.integral_cpow_mul_ordinaryHypergeometric
+    (by simpa only [ofReal_re] using hc) hσ0 (by
+      simp only [sub_re, add_re, ofReal_re]
+      linarith)]
+  congr 2 <;> push_cast <;> ring_nf
+
+
+/-- DLMF 19.28.1: `∫₀¹ t^{σ-1} R_F(0, t, 1) dt = (1/2) B(σ, 1/2)²`, `ℜσ > 0`. -/
+@[dlmf 19.28.E1]
+theorem integral_cpow_mul_symmetricEllipticRF_zero {σ : ℂ} (hσ : 0 < σ.re) :
+    ∫ t in Ioo (0 : ℝ) 1, (t : ℂ) ^ (σ - 1) * symmetricEllipticRF 0 t 1 =
+      1 / 2 * betaIntegral σ (1 / 2) ^ 2 := by
+  have H := integral_cpow_mul_symmetricEllipticR_two
+    (a := 1 / 2) (b₁ := 1 / 2) (b₂ := 1 / 2) (σ := σ)
+    (by norm_num) (by simpa using hσ)
+  have hR : (∫ t in Ioo (0 : ℝ) 1, (t : ℂ) ^ (σ - 1) *
+      symmetricEllipticR (1 / 2) ![1 / 2, 1 / 2] ![(t : ℂ), 1]) =
+      Gamma σ ^ 2 / Gamma (σ + 1 / 2) ^ 2 := by
+    convert H using 1 <;> norm_num; ring_nf
+  calc
+    _ = (π / 2) * ∫ t in Ioo (0 : ℝ) 1, (t : ℂ) ^ (σ - 1) *
+        symmetricEllipticR (1 / 2) ![1 / 2, 1 / 2] ![(t : ℂ), 1] := by
+      rw [← integral_const_mul]
+      refine setIntegral_congr_fun measurableSet_Ioo fun t ht => ?_
+      rw [symmetricEllipticRF_zero_left (ofReal_mem_slitPlane.mpr ht.1) one_mem_slitPlane]
+      ring
+    _ = _ := by
+      rw [hR, betaIntegral_eq_Gamma_mul_div σ (1 / 2) hσ (by norm_num),
+        div_pow, mul_pow, pow_two (Gamma (1 / 2)), Gamma_one_half_mul_self]
+      ring
+
+/-- DLMF 19.28.2: `∫₀¹ t^{σ-1} R_G(0, t, 1) dt = σ/(4σ + 2) B(σ, 1/2)²`, `ℜσ > 0`. -/
+@[dlmf 19.28.E2]
+theorem integral_cpow_mul_symmetricEllipticRG_zero {σ : ℂ} (hσ : 0 < σ.re) :
+    ∫ t in Ioo (0 : ℝ) 1, (t : ℂ) ^ (σ - 1) * symmetricEllipticRG 0 t 1 =
+      σ / (4 * σ + 2) * betaIntegral σ (1 / 2) ^ 2 := by
+  have H := integral_cpow_mul_symmetricEllipticR_two
+    (a := -1 / 2) (b₁ := 1 / 2) (b₂ := 1 / 2) (σ := σ)
+    (by norm_num) (lt_of_le_of_lt (by norm_num) hσ)
+  have hR : (∫ t in Ioo (0 : ℝ) 1, (t : ℂ) ^ (σ - 1) *
+      symmetricEllipticR (-1 / 2) ![1 / 2, 1 / 2] ![(t : ℂ), 1]) =
+      Gamma σ * Gamma (σ + 1) / (Gamma (σ + 3 / 2) * Gamma (σ + 1 / 2)) := by
+    convert H using 1 <;> norm_num; ring_nf
+  calc
+    _ = (π / 4) * ∫ t in Ioo (0 : ℝ) 1, (t : ℂ) ^ (σ - 1) *
+        symmetricEllipticR (-1 / 2) ![1 / 2, 1 / 2] ![(t : ℂ), 1] := by
+      rw [← integral_const_mul]
+      refine setIntegral_congr_fun measurableSet_Ioo fun t ht => ?_
+      rw [(symmetricEllipticRG_zero_left (ofReal_mem_slitPlane.mpr ht.1) one_mem_slitPlane).1]
+      ring
+    _ = _ := by
+      have hσ0 : σ ≠ 0 := ne_of_apply_ne Complex.re (ne_of_gt hσ)
+      have hh : 0 < (σ + 1 / 2).re := by norm_num; linarith [hσ]
+      have hh0 : σ + 1 / 2 ≠ 0 := ne_of_apply_ne Complex.re (ne_of_gt hh)
+      have h4 : 4 * σ + 2 ≠ 0 := by
+        intro he
+        have := congrArg Complex.re he
+        norm_num [mul_re] at this
+        linarith
+      rw [hR, betaIntegral_eq_Gamma_mul_div σ (1 / 2) hσ (by norm_num),
+        div_pow, mul_pow, pow_two (Gamma (1 / 2)), Gamma_one_half_mul_self,
+        show σ + 3 / 2 = (σ + 1 / 2) + 1 by ring,
+        Gamma_add_one _ hσ0, Gamma_add_one _ hh0]
+      generalize heq : Gamma (σ + 1 / 2) = G
+      have hG : G ≠ 0 := by rw [← heq]; exact Gamma_ne_zero_of_re_pos hh
+      have h2 : 1 + σ * 2 ≠ 0 := by
+        intro he
+        apply h4
+        linear_combination 2 * he
+      field_simp [hh0, h4, hG]
+      ring_nf
+      field_simp [h2]
+      ring
+
+/-- DLMF 19.28.3: `∫₀¹ t^{σ-1} (1 - t) R_D(0, t, 1) dt = 3/(4σ + 2) B(σ, 1/2)²`, `ℜσ > 0`. -/
+@[dlmf 19.28.E3]
+theorem integral_cpow_mul_symmetricEllipticRD_zero {σ : ℂ} (hσ : 0 < σ.re) :
+    ∫ t in Ioo (0 : ℝ) 1, (t : ℂ) ^ (σ - 1) * (1 - t) * symmetricEllipticRD 0 t 1 =
+      3 / (4 * σ + 2) * betaIntegral σ (1 / 2) ^ 2 := by
+  have hF := integral_cpow_mul_symmetricEllipticRF_zero hσ
+  have hG := integral_cpow_mul_symmetricEllipticRG_zero hσ
+  have hσ0 : σ ≠ 0 := ne_of_apply_ne Complex.re (ne_of_gt hσ)
+  have hh : 0 < (σ + 1 / 2).re := by norm_num; linarith [hσ]
+  have h4 : 4 * σ + 2 ≠ 0 := by
+    intro he
+    have := congrArg Complex.re he
+    norm_num [mul_re] at this
+    linarith [hσ]
+  have hB : betaIntegral σ (1 / 2) ≠ 0 := by
+    rw [betaIntegral_eq_Gamma_mul_div σ (1 / 2) hσ (by norm_num)]
+    exact div_ne_zero (mul_ne_zero (Gamma_ne_zero_of_re_pos hσ)
+      (Gamma_ne_zero_of_re_pos (by norm_num))) (Gamma_ne_zero_of_re_pos hh)
+  have hiF : IntegrableOn (fun t : ℝ => (t : ℂ) ^ (σ - 1) * symmetricEllipticRF 0 t 1)
+      (Ioo 0 1) := by
+    apply Integrable.of_integral_ne_zero
+    rw [hF]
+    exact mul_ne_zero (by norm_num) (pow_ne_zero 2 hB)
+  have hiG : IntegrableOn (fun t : ℝ => (t : ℂ) ^ (σ - 1) * symmetricEllipticRG 0 t 1)
+      (Ioo 0 1) := by
+    apply Integrable.of_integral_ne_zero
+    rw [hG]
+    exact mul_ne_zero (div_ne_zero hσ0 h4) (pow_ne_zero 2 hB)
+  have hpt : ∀ t ∈ Ioo (0 : ℝ) 1,
+      (t : ℂ) ^ (σ - 1) * (1 - t) * symmetricEllipticRD 0 t 1 =
+      3 * ((t : ℂ) ^ (σ - 1) * symmetricEllipticRF 0 t 1) -
+        6 * ((t : ℂ) ^ (σ - 1) * symmetricEllipticRG 0 t 1) := by
+    intro t ht
+    have h := two_mul_symmetricEllipticRG (Or.inr (rfl : (0 : ℂ) = 0))
+      (ofReal_mem_slitPlane.mpr ht.1) one_mem_slitPlane
+    norm_num only [one_mul, sub_zero, zero_sub, zero_cpow (by norm_num : (1 / 2 : ℂ) ≠ 0),
+      zero_mul, add_zero] at h
+    linear_combination (3 * (t : ℂ) ^ (σ - 1)) * h
+  rw [setIntegral_congr_fun measurableSet_Ioo hpt,
+    integral_sub (hiF.const_mul 3) (hiG.const_mul 6), integral_const_mul,
+    integral_const_mul, hF, hG]
+  have h4' : 2 + σ * 4 ≠ 0 := by rw [add_comm, mul_comm]; exact h4
+  field_simp [h4]
+  ring_nf
+  field_simp [h4']
+  ring
+
 
 /-- For positive real nodes, `R_D` is real and nonnegative, as a positive Carlson average. -/
 lemma symmetricEllipticRD_real_nonneg {x y z : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z) :
@@ -303,7 +452,133 @@ theorem integral_symmetricEllipticRD_interp {x y z p : ℝ} (hx : 0 < x) (hy : 0
 theorem integral_symmetricEllipticRJ_sq {x y z : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z) :
     ∫ r in Ioi (0 : ℝ), symmetricEllipticRJ x y z (r ^ 2 : ℝ) =
       3 / 2 * π * symmetricEllipticRF (x * y : ℝ) (x * z : ℝ) (y * z : ℝ) := by
-  sorry
+  have quadratic_resolvent_halfline {t : ℝ} (ht : 0 < t) :
+      (∫ r in Ioi (0 : ℝ), (t + r ^ 2)⁻¹) = π / (2 * Real.sqrt t) := by
+    have hs := Real.sqrt_pos.mpr ht
+    have h := TauCeti.integral_rpow_div_sq_add_sq (s := 1) (by norm_num) (by norm_num)
+      (t := Real.sqrt t) hs.ne'
+    norm_num [Real.sq_sqrt ht.le, abs_of_pos hs, Real.rpow_neg_one, add_comm] at h
+    rw [h]
+    ring
+
+  have quadratic_resolvent_halfline_integrable {t : ℝ} (ht : 0 < t) :
+      IntegrableOn (fun r : ℝ => (t + r ^ 2)⁻¹) (Ioi 0) := by
+    have h := TauCeti.integrableOn_rpow_div_sq_add_sq (s := 1) (by norm_num) (by norm_num)
+      (t := Real.sqrt t) (Real.sqrt_pos.mpr ht).ne'
+    simpa only [sub_self, Real.rpow_zero, one_div, Real.sq_sqrt ht.le, add_comm] using h
+  let f : ℝ × ℝ → ℝ := fun q =>
+    (Real.sqrt (q.1 + x) * Real.sqrt (q.1 + y) * Real.sqrt (q.1 + z))⁻¹ *
+      (q.1 + q.2 ^ 2)⁻¹
+  let g : ℝ → ℝ := fun t => (Real.sqrt t * (Real.sqrt (t + x) *
+    Real.sqrt (t + y) * Real.sqrt (t + z)))⁻¹
+  have hinner (t : ℝ) (ht : 0 < t) : ∫ r in Ioi (0 : ℝ), f (t, r) = π / 2 * g t := by
+    dsimp only [f, g]
+    rw [integral_const_mul, quadratic_resolvent_halfline ht]
+    ring
+  have hf : Integrable f ((volume.restrict (Ioi 0)).prod (volume.restrict (Ioi 0))) := by
+    refine (integrable_prod_iff ((by fun_prop : Measurable f).aestronglyMeasurable)).mpr ⟨?_, ?_⟩
+    · filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
+      dsimp only [f]
+      exact (quadratic_resolvent_halfline_integrable ht).const_mul _
+    · refine ((Real.integrableOn_inv_sqrt_mul_sqrt_add_mul_sqrt_add_mul_sqrt_add
+        hx hy hz).const_mul (π / 2)).congr ?_
+      filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
+      have ht0 : 0 < t := ht
+      rw [← hinner t ht]
+      refine integral_congr_ae (Eventually.of_forall fun r => ?_)
+      dsimp only
+      rw [Real.norm_eq_abs, abs_of_nonneg]
+      dsimp only [f]
+      positivity
+  have hf' : Integrable (Function.uncurry (fun t r : ℝ => f (t, r)))
+      ((volume.restrict (Ioi 0)).prod (volume.restrict (Ioi 0))) := by
+    have heq : Function.uncurry (fun t r : ℝ => f (t, r)) = f := by
+      funext q
+      rcases q with ⟨t, r⟩
+      rfl
+    rw [heq]
+    exact hf
+  have hswap := integral_integral_swap hf'
+  have hRJ (r : ℝ) (hr : 0 < r) :
+      symmetricEllipticRJ x y z (r ^ 2 : ℝ) = ((3 / 2 * ∫ t in Ioi (0 : ℝ), f (t, r) : ℝ) : ℂ) := by
+    have hp : ¬ IsNegReal ((r ^ 2 : ℝ) : ℂ) :=
+      not_isNegReal_of_mem_slitPlane (ofReal_mem_slitPlane.mpr (sq_pos_of_pos hr))
+    rw [symmetricEllipticRJ, ite_eq_right hp]
+    conv_rhs => rw [ofReal_mul, ← integral_complex_ofReal]
+    norm_num only [ofReal_div, ofReal_ofNat]
+    congr 1
+    refine setIntegral_congr_fun measurableSet_Ioi fun t ht => ?_
+    have ht0 : 0 < t := ht
+    simp only [f, carlsonRootProduct, ofReal_inv, ofReal_mul, ofReal_add, ofReal_pow,
+      mul_inv]
+    rw [
+      ofReal_sqrt_eq_cpow_half (by linarith [ht0] : 0 ≤ t + x),
+      ofReal_sqrt_eq_cpow_half (by linarith [ht0] : 0 ≤ t + y),
+      ofReal_sqrt_eq_cpow_half (by linarith [ht0] : 0 ≤ t + z)]
+    push_cast
+    ring
+  have hRF : symmetricEllipticRF (x * y : ℝ) (x * z : ℝ) (y * z : ℝ) =
+      ((1 / 2 * ∫ u in Ioi (0 : ℝ), (Real.sqrt (u + x * y) * Real.sqrt (u + x * z) *
+        Real.sqrt (u + y * z))⁻¹ : ℝ) : ℂ) := by
+    rw [symmetricEllipticRF]
+    conv_rhs => rw [ofReal_mul, ← integral_complex_ofReal]
+    norm_num only [ofReal_div, ofReal_ofNat]
+    congr 1
+    refine setIntegral_congr_fun measurableSet_Ioi fun u hu => ?_
+    have hu0 : 0 < u := hu
+    simp only [carlsonRootProduct, ofReal_inv, ofReal_mul]
+    rw [ofReal_sqrt_eq_cpow_half (by positivity : 0 ≤ u + x * y),
+      ofReal_sqrt_eq_cpow_half (by positivity : 0 ≤ u + x * z),
+      ofReal_sqrt_eq_cpow_half (by positivity : 0 ≤ u + y * z)]
+    push_cast
+    rfl
+  calc
+    _ = ∫ r in Ioi (0 : ℝ), ((3 / 2 * ∫ t in Ioi (0 : ℝ), f (t, r) : ℝ) : ℂ) :=
+      setIntegral_congr_fun measurableSet_Ioi hRJ
+    _ = ((3 / 2 * ∫ r in Ioi (0 : ℝ), ∫ t in Ioi (0 : ℝ), f (t, r) : ℝ) : ℂ) := by
+      rw [integral_complex_ofReal, integral_const_mul]
+    _ = ((3 / 2 * (π / 2 * ∫ t in Ioi (0 : ℝ), g t) : ℝ) : ℂ) := by
+      rw [hswap.symm]
+      congr 2
+      rw [← integral_const_mul]
+      exact setIntegral_congr_fun measurableSet_Ioi hinner
+    _ = _ := by
+      dsimp only [g]
+      rw [hRF, Real.integral_inv_sqrt_mul_sqrt_add_mul_sqrt_add_mul_sqrt_add hx hy hz]
+      push_cast
+      ring
+
+/-- The positive-real defining integral of `R_C`, written with real square roots. -/
+private lemma symmetricEllipticRC_ofReal_eq_half_integral {p x : ℝ} (hp : 0 < p) (hx : 0 < x) :
+    symmetricEllipticRC p x =
+      ((1 / 2 * ∫ v in Ioi (0 : ℝ), (Real.sqrt (v + p) * (v + x))⁻¹ : ℝ) : ℂ) := by
+  rw [symmetricEllipticRC,
+    ite_eq_right (not_isNegReal_of_mem_slitPlane (ofReal_mem_slitPlane.mpr hx))]
+  conv_rhs => rw [ofReal_mul, ← integral_complex_ofReal]
+  norm_num only [ofReal_div, ofReal_ofNat]
+  congr 1
+  refine setIntegral_congr_fun measurableSet_Ioi fun v hv => ?_
+  have hv0 : 0 < v := hv
+  rw [ofReal_inv, ofReal_mul, ofReal_sqrt_eq_cpow_half (by positivity : 0 ≤ v + p)]
+  push_cast
+  rfl
+
+/-- The positive-real defining integral of `R_F(0,y,z)`, written with real square roots. -/
+private lemma symmetricEllipticRF_zero_ofReal_eq_half_integral {y z : ℝ} (hy : 0 < y) (hz : 0 < z) :
+    symmetricEllipticRF 0 y z = ((1 / 2 * ∫ u in Ioi (0 : ℝ),
+      (Real.sqrt u * Real.sqrt (u + y) * Real.sqrt (u + z))⁻¹ : ℝ) : ℂ) := by
+  rw [symmetricEllipticRF]
+  conv_rhs => rw [ofReal_mul, ← integral_complex_ofReal]
+  norm_num only [ofReal_div, ofReal_ofNat]
+  congr 1
+  refine setIntegral_congr_fun measurableSet_Ioi fun u hu => ?_
+  have hu0 : 0 < u := hu
+  simp only [carlsonRootProduct, ofReal_inv, ofReal_mul, add_zero]
+  rw [ofReal_sqrt_eq_cpow_half hu.le, ofReal_sqrt_eq_cpow_half (by positivity : 0 ≤ u + y),
+    ofReal_sqrt_eq_cpow_half (by positivity : 0 ≤ u + z)]
+  push_cast
+  rfl
+
 
 /-- DLMF 19.28.8: `∫₀^∞ R_J(tx, y, z, tp) dt = (6/√p) R_C(p, x) R_F(0, y, z)` for
 `x, y, z, p > 0`. -/
@@ -312,7 +587,70 @@ theorem integral_symmetricEllipticRJ_scale {x y z p : ℝ} (hx : 0 < x) (hy : 0 
     (hp : 0 < p) :
     ∫ t in Ioi (0 : ℝ), symmetricEllipticRJ (t * x : ℝ) y z (t * p : ℝ) =
       6 / (√p : ℝ) * symmetricEllipticRC p x * symmetricEllipticRF 0 y z := by
-  sorry
+  let f : ℝ × ℝ → ℝ := fun q =>
+    (Real.sqrt (q.1 + y) * Real.sqrt (q.1 + z))⁻¹ *
+      (Real.sqrt (q.1 + x * q.2) * (q.1 + p * q.2))⁻¹
+  let g : ℝ → ℝ := fun u =>
+    (Real.sqrt u * Real.sqrt (u + y) * Real.sqrt (u + z))⁻¹
+  let c : ℝ := (Real.sqrt p)⁻¹ *
+    ∫ v in Ioi (0 : ℝ), (Real.sqrt (v + p) * (v + x))⁻¹
+  have hinner (u : ℝ) (hu : 0 < u) : ∫ t in Ioi (0 : ℝ), f (u, t) = c * g u := by
+    dsimp only [f, g, c]
+    rw [integral_const_mul, Real.integral_inv_sqrt_add_mul_add_linear hu hp hx]
+    ring
+  have hf : Integrable f ((volume.restrict (Ioi 0)).prod (volume.restrict (Ioi 0))) := by
+    refine (integrable_prod_iff ((by fun_prop : Measurable f).aestronglyMeasurable)).mpr ⟨?_, ?_⟩
+    · filter_upwards [ae_restrict_mem measurableSet_Ioi] with u hu
+      dsimp only [f]
+      exact (Real.integrableOn_inv_sqrt_add_mul_add_linear hu hp hx).const_mul _
+    · refine ((Real.integrableOn_inv_sqrt_mul_sqrt_add_mul_sqrt_add hy hz).const_mul c).congr ?_
+      filter_upwards [ae_restrict_mem measurableSet_Ioi] with u hu
+      have hu0 : 0 < u := hu
+      rw [← hinner u hu]
+      refine integral_congr_ae ?_
+      filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
+      have ht0 : 0 < t := ht
+      rw [Real.norm_eq_abs, abs_of_nonneg]
+      dsimp only [f]
+      positivity
+  have hf' : Integrable (Function.uncurry (fun u t : ℝ => f (u, t)))
+      ((volume.restrict (Ioi 0)).prod (volume.restrict (Ioi 0))) := by
+    simpa only [Function.uncurry_def] using hf
+  have hswap := integral_integral_swap hf'
+  have hRJ (t : ℝ) (ht : 0 < t) :
+      symmetricEllipticRJ (t * x : ℝ) y z (t * p : ℝ) =
+        ((3 / 2 * ∫ u in Ioi (0 : ℝ), f (u, t) : ℝ) : ℂ) := by
+    have htp : ¬ IsNegReal ((t * p : ℝ) : ℂ) :=
+      not_isNegReal_of_mem_slitPlane (ofReal_mem_slitPlane.mpr (mul_pos ht hp))
+    rw [symmetricEllipticRJ, ite_eq_right htp]
+    conv_rhs => rw [ofReal_mul, ← integral_complex_ofReal]
+    norm_num only [ofReal_div, ofReal_ofNat]
+    congr 1
+    refine setIntegral_congr_fun measurableSet_Ioi fun u hu => ?_
+    have hu0 : 0 < u := hu
+    simp only [f, carlsonRootProduct, ofReal_inv, ofReal_mul]
+    rw [ofReal_sqrt_eq_cpow_half (by positivity : 0 ≤ u + y),
+      ofReal_sqrt_eq_cpow_half (by positivity : 0 ≤ u + z),
+      ofReal_sqrt_eq_cpow_half (by positivity : 0 ≤ u + x * t)]
+    push_cast
+    simp only [mul_inv]
+    ring_nf
+  calc
+    _ = ∫ t in Ioi (0 : ℝ), ((3 / 2 * ∫ u in Ioi (0 : ℝ), f (u, t) : ℝ) : ℂ) :=
+      setIntegral_congr_fun measurableSet_Ioi hRJ
+    _ = ((3 / 2 * ∫ t in Ioi (0 : ℝ), ∫ u in Ioi (0 : ℝ), f (u, t) : ℝ) : ℂ) := by
+      rw [integral_complex_ofReal, integral_const_mul]
+    _ = ((3 / 2 * (c * ∫ u in Ioi (0 : ℝ), g u) : ℝ) : ℂ) := by
+      rw [hswap.symm]
+      congr 2
+      rw [← integral_const_mul]
+      exact setIntegral_congr_fun measurableSet_Ioi hinner
+    _ = _ := by
+      rw [symmetricEllipticRC_ofReal_eq_half_integral hp hx,
+        symmetricEllipticRF_zero_ofReal_eq_half_integral hy hz]
+      dsimp only [c, g]
+      push_cast
+      ring
 
 /-- DLMF 19.28.9, **with the added hypothesis `x + y ≤ π/2`** (see the module docstring; DLMF
 assumes only `x, y > 0`, under which the identity is false):

@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.Zeta.Basic.AlternatingHurwitz
 public import DLMF.Zeta.Basic.Hurwitz
 public import DLMF.Zeta.Basic.HurwitzProperties
 public import DLMF.Zeta.Basic.Polylog

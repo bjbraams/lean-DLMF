@@ -1,0 +1,689 @@
+synopsis_id	declaration	source_file	source_line	status
+DU-1.01	Real.GammaIntegral_convergent	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Gamma/Basic.lean	66	proved, no admission
+DU-1.01	Real.Gamma_eq_integral	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Gamma/Basic.lean	405	proved, no admission
+DU-1.01	Real.Gamma_pos_of_pos	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Gamma/Basic.lean	443	proved, no admission
+DU-1.01	DLMF.Gamma.analyticAt_Gamma	DLMF/Gamma/Polygamma.lean	95	proved, no admission
+DU-1.01	DLMF.Gamma.integrableOn_log_pow_mul_Gamma	DLMF/Gamma/IntegralRepresentations/FrullaniAndMoments.lean	572	proved, no admission
+DU-1.01	DLMF.Gamma.iteratedDeriv_Gamma	DLMF/Gamma/IntegralRepresentations/FrullaniAndMoments.lean	643	proved, no admission
+DU-1.02	Real.Gamma_one	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Gamma/Basic.lean	416	proved, no admission
+DU-1.02	Real.Gamma_add_one	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Gamma/Basic.lean	410	proved, no admission
+DU-1.02	Real.Gamma_nat_eq_factorial	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Gamma/Basic.lean	422	proved, no admission
+DU-1.02	Complex.Gamma_add_nat_div_Gamma_eq	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Gamma/Beta.lean	481	proved, no admission
+DU-1.02	Complex.Gamma_ofReal	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Gamma/Basic.lean	419	proved, no admission
+DU-1.02	DLMF.Gamma.analyticAt_Gamma	DLMF/Gamma/Polygamma.lean	95	proved, no admission
+DU-1.03	Ring.choose	.lake/packages/mathlib/Mathlib/RingTheory/Binomial.lean	386	definition, no admission
+DU-1.03	ascPochhammer	.lake/packages/mathlib/Mathlib/RingTheory/Polynomial/Pochhammer.lean	51	definition, no admission
+DU-1.03	descPochhammer	.lake/packages/mathlib/Mathlib/RingTheory/Polynomial/Pochhammer.lean	265	definition, no admission
+DU-1.03	Ring.choose_eq_descPochhammer_div	DLMFMathlib/RingTheory/Binomial.lean	34	proved, no admission
+DU-1.03	DLMF.Gamma.pochhammer_neg_eq	DLMF/Gamma/Pochhammer.lean	35	proved, no admission
+DU-1.03	Complex.Gamma_add_nat_div_Gamma_eq	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Gamma/Beta.lean	481	proved, no admission
+DU-1.04	Complex.betaIntegral	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Gamma/Beta.lean	60	definition, no admission
+DU-1.04	Complex.betaIntegral_convergent	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Gamma/Beta.lean	78	proved, no admission
+DU-1.04	Complex.betaIntegral_symm	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Gamma/Beta.lean	90	proved, no admission
+DU-1.04	Complex.betaIntegral_eq_Gamma_mul_div	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Gamma/Beta.lean	558	proved, no admission
+DU-1.04	Real.Gamma_nat_eq_factorial	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Gamma/Basic.lean	422	proved, no admission
+DU-1.05	Real.Gamma_one_half_eq	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Gaussian/GaussianIntegral.lean	306	proved, no admission
+DU-1.05	integral_gaussian_Ioi	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Gaussian/GaussianIntegral.lean	289	proved, no admission
+DU-1.06	Real.Gamma_mul_Gamma_add_half	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Gamma/Beta.lean	618	proved, no admission
+DU-1.06	Complex.Gamma_mul_Gamma_add_half	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Gamma/Beta.lean	580	proved, no admission
+DU-1.07	Real.GammaSeq_tendsto_Gamma	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Gamma/Beta.lean	502	proved, no admission
+DU-1.07	Complex.GammaSeq_tendsto_Gamma	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Gamma/Beta.lean	335	proved, no admission
+DU-1.07	Complex.GammaSeq	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Gamma/Beta.lean	230	definition, no admission
+DU-1.08	DLMF.Gamma.Gamma_ratio_power	DLMF/Gamma/Asymptotics/Stirling.lean	701	proved, no admission
+DU-1.08	DLMF.Gamma.tendsto_Gamma_add_div_Gamma_mul_cpow	DLMF/Gamma/Asymptotics/Stirling.lean	660	proved, no admission
+DU-1.09	Real.eulerMascheroniConstant	.lake/packages/mathlib/Mathlib/NumberTheory/Harmonic/EulerMascheroni.lean	131	definition, no admission
+DU-1.09	DLMF.Gamma.Real.one_div_Gamma_eq_tprod	DLMF/Gamma/Basic.lean	317	proved, no admission
+DU-1.09	DLMF.Gamma.Real.tendsto_weierstrassGamma_prod	DLMF/Gamma/Basic.lean	296	proved, no admission
+DU-1.09	DLMF.Gamma.multipliable_weierstrassGammaTerm	DLMF/Gamma/Basic.lean	135	proved, no admission
+DU-1.09	Complex.differentiable_one_div_Gamma	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Gamma/Beta.lean	543	proved, no admission
+DU-1.09	DLMF.Gamma.eulerMascheroni_integrals	DLMF/Gamma/IntegralRepresentations/FrullaniAndMoments.lean	484	proved, no admission
+DU-1.10	Real.Gamma_mul_Gamma_one_sub	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Gamma/Beta.lean	512	proved, no admission
+DU-1.10	Complex.Gamma_mul_Gamma_one_sub	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Gamma/Beta.lean	398	proved, no admission
+DU-1.11	HasProdLocallyUniformlyOn_euler_sin_prod	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Trigonometric/Cotangent.lean	136	proved, no admission
+DU-1.12	Polynomial.integerSinePolynomial	DLMFMathlib/Analysis/SpecialFunctions/Trigonometric/IntegerSinePolynomial.lean	27	definition, no admission
+DU-1.12	Polynomial.integerSinePolynomial_def	DLMFMathlib/Analysis/SpecialFunctions/Trigonometric/IntegerSinePolynomial.lean	33	proved, no admission
+DU-1.12	Polynomial.natDegree_integerSinePolynomial	DLMFMathlib/Analysis/SpecialFunctions/Trigonometric/IntegerSinePolynomial.lean	40	direct admission
+DU-1.12	Polynomial.integerSinePolynomial_eval_zero	DLMFMathlib/Analysis/SpecialFunctions/Trigonometric/IntegerSinePolynomial.lean	46	proved, no admission
+DU-1.12	Polynomial.derivative_integerSinePolynomial_eval_zero	DLMFMathlib/Analysis/SpecialFunctions/Trigonometric/IntegerSinePolynomial.lean	52	direct admission
+DU-1.12	Polynomial.integerSinePolynomial_eval_sin	DLMFMathlib/Analysis/SpecialFunctions/Trigonometric/IntegerSinePolynomial.lean	58	direct admission
+DU-1.13	Complex.differentiable_one_div_Gamma	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Gamma/Beta.lean	543	proved, no admission
+DU-1.13	DLMF.Gamma.differentiable_recipGammaDeriv	DLMF/Gamma/RecipGammaDeriv.lean	75	proved, no admission
+DU-1.13	DLMF.Gamma.recipGammaDeriv_one_neg_nat	DLMF/Gamma/RecipGammaDeriv.lean	144	proved, no admission
+DU-1.14	Real.eq_Gamma_of_log_convex	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Gamma/BohrMollerup.lean	307	proved, no admission
+DU-1.15	DLMF.Gamma.beta_sin_cos	DLMF/Gamma/BetaFunction/ParameterIntegrals.lean	57	proved, no admission
+DU-1.15	DLMF.Gamma.integral_rpow_div_one_add	DLMF/Gamma/IntegralRepresentations/PrymAndOscillatory.lean	450	proved, no admission
+DU-1.15	DLMF.Gamma.Real.Gamma_mul_nat	DLMF/Gamma/Multiplication.lean	696	proved, no admission
+DU-1.16	DLMF.Gamma.Gamma_laplace_power	DLMF/Gamma/IntegralRepresentations/HankelAndGaussian.lean	73	proved, no admission
+DU-1.16	DLMF.Gamma.integral_cpow_mul_exp_neg_mul_Ioi	DLMF/Gamma/IntegralRepresentations/HankelAndGaussian.lean	64	proved, no admission
+DU-1.16	DLMF.Gamma.tendsto_integral_rpow_mul_cos	DLMF/Gamma/IntegralRepresentations/PrymAndOscillatory.lean	709	proved, no admission
+DU-1.16	DLMF.Gamma.tendsto_integral_rpow_mul_sin	DLMF/Gamma/IntegralRepresentations/PrymAndOscillatory.lean	748	proved, no admission
+DU-2.01	DLMF.Gamma.Real.digamma	DLMF/Gamma/Basic/Digamma.lean	55	definition, no admission
+DU-2.01	Complex.digamma_apply_add_one	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Gamma/Digamma.lean	64	proved, no admission
+DU-2.01	DLMF.Gamma.digamma_ofReal_of_not_neg_nat	DLMF/Gamma/Basic/RealDigamma.lean	24	proved, no admission
+DU-2.01	DLMF.Gamma.Real.hasDerivAt_log_abs_Gamma	DLMF/Gamma/Basic/RealDigamma.lean	42	proved, no admission
+DU-2.01	DLMF.Gamma.Real.digamma_add_one_of_not_neg_nat	DLMF/Gamma/Basic/RealDigamma.lean	50	proved, no admission
+DU-2.02	DLMF.Gamma.Real.digamma_eq_tsum	DLMF/Gamma/Digamma.lean	268	proved, no admission
+DU-2.02	DLMF.Gamma.Real.hasDerivAt_digamma	DLMF/Gamma/Digamma.lean	297	proved, no admission
+DU-2.02	DLMF.Gamma.Real.trigamma_eq_tsum	DLMF/Gamma/Digamma.lean	345	proved, no admission
+DU-2.02	DLMF.Gamma.polygamma_add_one	DLMF/Gamma/Polygamma.lean	409	proved, no admission
+DU-2.03	DLMF.Gamma.polygamma_reflection	DLMF/Gamma/Polygamma.lean	455	proved, no admission
+DU-2.03	cot_series_rep'	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Trigonometric/Cotangent.lean	226	proved, no admission
+DU-2.03	Complex.hasSum_cotTerm	DLMFMathlib/Analysis/SpecialFunctions/Trigonometric/PartialFractions.lean	43	proved, no admission
+DU-2.04	DLMF.Hypergeometric.hasDerivAt_pochhammer	DLMF/Hypergeometric/ConnectionFormulas.lean	85	proved, no admission
+DU-2.04	DLMF.Hypergeometric.deriv_recip_Gamma_eq	DLMF/Hypergeometric/ConnectionFormulas.lean	177	proved, no admission
+DU-2.04	DLMF.Gamma.recipGammaDeriv_one_neg_nat	DLMF/Gamma/RecipGammaDeriv.lean	144	proved, no admission
+DU-2.05	DLMF.Gamma.digamma_gauss	DLMF/Gamma/IntegralRepresentations/FrullaniAndMoments.lean	52	proved, no admission
+DU-2.05	DLMF.Gamma.digamma_frullani	DLMF/Gamma/IntegralRepresentations/FrullaniAndMoments.lean	346	proved, no admission
+DU-2.05	DLMF.Gamma.digamma_add_euler_Ioo	DLMF/Gamma/IntegralRepresentations/DigammaAndBinet.lean	93	proved, no admission
+DU-2.05	DLMF.Gamma.digamma_add_euler_Ioi	DLMF/Gamma/IntegralRepresentations/DigammaAndBinet.lean	156	proved, no admission
+DU-2.05	Complex.digamma_one	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Gamma/Digamma.lean	56	proved, no admission
+DU-2.05	Complex.digamma_one_half	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Gamma/Digamma.lean	59	proved, no admission
+DU-2.05	DLMF.Gamma.deriv_Gamma_one	DLMF/Gamma/SpecialValues.lean	179	proved, no admission
+DU-2.06	DLMF.Gamma.integrableOn_exp_neg_sub_exp_neg_div	DLMF/Gamma/IntegralRepresentations/DigammaAndBinet.lean	259	proved, no admission
+DU-2.06	DLMF.Gamma.integral_exp_neg_sub_exp_neg_div	DLMF/Gamma/IntegralRepresentations/DigammaAndBinet.lean	273	proved, no admission
+DU-2.07	DLMF.Gamma.log_Gamma_binet_exp	DLMF/Gamma/IntegralRepresentations/DigammaAndBinet.lean	633	proved, no admission
+DU-2.07	DLMF.Gamma.log_Gamma_eq_add_binetIntegral	DLMF/Gamma/IntegralRepresentations/DigammaAndBinet.lean	761	proved, no admission
+DU-2.07	DLMF.Gamma.digamma_eq_log_sub_binetBeta	DLMF/Gamma/IntegralRepresentations/DigammaAndBinet.lean	596	proved, no admission
+DU-2.07	DLMF.Gamma.binetBeta	DLMF/Gamma/IntegralRepresentations/DigammaAndBinet.lean	434	definition, no admission
+DU-2.07	DLMF.Gamma.binetIntegral	DLMF/Gamma/IntegralRepresentations/DigammaAndBinet.lean	537	definition, no admission
+DU-2.08	DLMF.Gamma.log_Gamma_stirling	DLMF/Gamma/Asymptotics/Stirling.lean	318	proved, no admission
+DU-2.08	DLMF.Gamma.hasAsymptoticExpansion_log_Gamma	DLMF/Gamma/Asymptotics/Stirling.lean	510	proved, no admission
+DU-2.09	DLMF.Gamma.polygamma_eq_tsum	DLMF/Gamma/Polygamma.lean	304	proved, no admission
+DU-2.09	DLMF.Gamma.polygamma_eq_integral	DLMF/Gamma/PolygammaHurwitz.lean	157	proved, no admission
+DU-2.10	DLMF.Gamma.hasSum_polynomial_div_of_distinct_real_roots	DLMF/Gamma/PolynomialSeries.lean	28	direct admission
+DU-2.10	DLMF.Gamma.hasSum_sum_div_sub	DLMF/Gamma/RationalSeries.lean	55	proved, no admission
+DU-2.10	DLMF.Gamma.polygamma_eq_tsum	DLMF/Gamma/Polygamma.lean	304	proved, no admission
+DU-2.11	DLMF.Elementary.hasSum_csc_sq_partial_fraction	DLMF/Elementary/Trigonometric/DirectIdentities.lean	1125	proved, no admission
+DU-2.11	Complex.hasSum_csc_partial_fraction	DLMFMathlib/Analysis/SpecialFunctions/Trigonometric/PartialFractions.lean	114	proved, no admission
+DU-2.12	bernoulli_zero	.lake/packages/mathlib/Mathlib/NumberTheory/Bernoulli.lean	204	proved, no admission
+DU-2.12	bernoulli_one	.lake/packages/mathlib/Mathlib/NumberTheory/Bernoulli.lean	207	proved, no admission
+DU-2.12	DLMF.BernoulliEuler.bernoulli_two_mul_add_one_eq_zero_and_sign	DLMF/BernoulliEuler/Basic/GeneratingFunctions.lean	106	proved, no admission
+DU-2.12	DLMF.BernoulliEuler.hasSum_bernoulliPolyB_mul_pow_div	DLMF/BernoulliEuler/Basic/GeneratingFunctions.lean	138	proved, no admission
+DU-2.12	Complex.hasSum_pi_mul_cot_bernoulli	DLMFMathlib/NumberTheory/BernoulliTaylor.lean	138	proved, no admission
+DU-2.13	eulerNumber	DLMFMathlib/NumberTheory/EulerPolynomials.lean	312	definition, no admission
+DU-2.13	sum_choose_mul_eulerNumber	DLMFMathlib/NumberTheory/EulerPolynomials.lean	327	proved, no admission
+DU-2.13	eulerNumber_eq_zero_of_odd	DLMFMathlib/NumberTheory/EulerPolynomials.lean	320	proved, no admission
+DU-2.13	DLMF.BernoulliEuler.hasSum_eulerNumber_mul_pow_div'	DLMF/BernoulliEuler/GeneratingFunctions.lean	44	proved, no admission
+DU-2.13	DLMF.BernoulliEuler.eulerNumber_two_mul_add_one_eq_zero_and_sign	DLMF/BernoulliEuler/Basic/GeneratingFunctions.lean	209	proved, no admission
+DU-2.13	DLMF.BernoulliEuler.eulerNumber_eq_two_pow_mul_and_integer	DLMF/BernoulliEuler/Basic/GeneratingFunctions.lean	238	proved, no admission
+DU-2.13	DLMF.BernoulliEuler.eulerNumber_two_mul_modEq_two_pow'	DLMF/BernoulliEuler/Arithmetic.lean	462	proved, no admission
+DU-2.14	MeasureTheory.laplaceIntegral	DLMFMathlib/Analysis/Integral/LaplaceDomain.lean	30	definition, no admission
+DU-2.14	MeasureTheory.IsLaplaceTransformable	DLMFMathlib/Analysis/Integral/LaplaceDomain.lean	39	definition, no admission
+DU-2.14	MeasureTheory.laplaceAbscissa	DLMFMathlib/Analysis/Integral/LaplaceDomain.lean	66	definition, no admission
+DU-2.14	MeasureTheory.IsLaplaceTransformable.integrableOn_of_abscissa_lt	DLMFMathlib/Analysis/Integral/LaplaceDomain.lean	78	direct admission
+DU-2.15	Real.integral_rpow_mul_exp_neg_mul_Ioi	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Gamma/Basic.lean	465	proved, no admission
+DU-2.15	integral_exp_neg_mul_mul_rpow_sub_one	DLMFMathlib/Analysis/Asymptotics/Watson.lean	57	proved, no admission
+DU-2.15	Complex.integral_cpow_mul_cexp_neg_mul_mul_sin_Ioi	DLMFMathlib/Analysis/Integral/LaplaceSine.lean	28	proved, no admission
+DU-2.15	integral_exp_mul_complex_Ioi	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/ImproperIntegrals.lean	87	proved, no admission
+DU-2.15	integral_exp_neg_mul_rpow_sub_one_mul_log	DLMFMathlib/Analysis/Asymptotics/WatsonLog.lean	59	proved, no admission
+DU-2.16	hasAsymptoticExpansion_integral_exp_smul	DLMFMathlib/Analysis/Asymptotics/Watson.lean	183	proved, no admission
+DU-2.17	DLMF.Gamma.hasAsymptoticExpansion_log_Gamma	DLMF/Gamma/Asymptotics/Stirling.lean	510	proved, no admission
+DU-2.17	DLMF.Gamma.log_Gamma_stirling	DLMF/Gamma/Asymptotics/Stirling.lean	318	proved, no admission
+DU-2.18	DLMF.Constants.dirichletEta	DLMF/Constants/Dirichlet.lean	78	definition, no admission
+DU-2.18	DLMF.Constants.dirichletLambda	DLMF/Constants/Dirichlet.lean	81	definition, no admission
+DU-2.18	DLMF.Constants.hasSum_zeta	DLMF/Constants/Dirichlet.lean	91	proved, no admission
+DU-2.18	DLMF.Constants.dirichletEta_eq	DLMF/Constants/Dirichlet.lean	146	proved, no admission
+DU-2.18	DLMF.Constants.dirichletLambda_eq	DLMF/Constants/Dirichlet.lean	114	proved, no admission
+DU-2.18	DLMF.Constants.tendsto_dirichletEta_one	DLMF/Constants/Dirichlet.lean	152	proved, no admission
+DU-2.18	DLMF.Constants.tendsto_riemannZeta_atTop	DLMF/Constants/Dirichlet.lean	160	proved, no admission
+DU-2.18	DLMF.Zeta.Real.alternatingHurwitzZeta_one	DLMF/Zeta/AlternatingHurwitz.lean	57	direct admission
+DU-2.18	DLMF.Zeta.Real.tendsto_sum_alternatingHurwitzZeta	DLMF/Zeta/AlternatingHurwitz.lean	43	direct admission
+DU-2.18	DLMF.Zeta.Real.alternatingHurwitzZeta_one_bounds	DLMF/Zeta/AlternatingHurwitz.lean	83	direct admission
+DU-2.18	DLMF.Zeta.Real.alternatingHurwitzZeta_one_one	DLMF/Zeta/AlternatingHurwitz.lean	89	direct admission
+DU-2.18	DLMF.Zeta.Real.tendsto_alternatingHurwitzZeta_one	DLMF/Zeta/AlternatingHurwitz.lean	93	direct admission
+DU-2.19	DLMF.Gamma.polygamma_one	DLMF/Gamma/Polygamma.lean	355	proved, no admission
+DU-2.19	DLMF.BernoulliEuler.bernoulli_two_mul_isEquivalent	DLMF/BernoulliEuler/Asymptotics.lean	65	proved, no admission
+DU-2.20	DLMF.Zeta.hurwitzZetaComplex	DLMF/Zeta/Basic/Hurwitz.lean	477	definition, no admission
+DU-2.20	DLMF.Gamma.polygamma_eq_hurwitzZeta	DLMF/Gamma/PolygammaHurwitz.lean	48	proved, no admission
+DU-2.20	DLMF.Gamma.hurwitzZeta_one_half_nat	DLMF/Gamma/PolygammaHurwitz.lean	61	proved, no admission
+DU-2.20	DLMF.Zeta.Real.alternatingHurwitzZeta	DLMF/Zeta/Basic/AlternatingHurwitz.lean	25	definition, no admission
+DU-2.20	DLMF.Zeta.Real.tendsto_sum_alternatingHurwitzZeta	DLMF/Zeta/AlternatingHurwitz.lean	43	direct admission
+DU-2.21	DLMF.Zeta.Real.dirichletBeta	DLMF/Zeta/Basic/AlternatingHurwitz.lean	34	definition, no admission
+DU-2.21	DLMF.Zeta.Real.dirichletBeta_def	DLMF/Zeta/Basic/AlternatingHurwitz.lean	38	proved, no admission
+DU-2.21	DLMF.Zeta.Real.hasSum_dirichletBeta	DLMF/Zeta/AlternatingHurwitz.lean	36	direct admission
+DU-2.21	DLMF.Zeta.Real.dirichletBeta_two	DLMF/Zeta/AlternatingHurwitz.lean	98	depends on admission
+DU-2.21	DLMF.BernoulliEuler.hasSum_alt_inv_odd_pow_eulerNumber	DLMF/BernoulliEuler/Basic/GeneratingFunctions.lean	167	proved, no admission
+DU-2.21	DLMF.BernoulliEuler.eulerNumber_two_mul_isEquivalent	DLMF/BernoulliEuler/Asymptotics.lean	120	proved, no admission
+DU-2.21	DLMF.Constants.catalanConstant	DLMF/Constants/Basic.lean	38	definition, no admission
+DU-2.21	DLMF.Zeta.Real.tendsto_sum_dirichletBeta	DLMF/Zeta/AlternatingHurwitz.lean	50	direct admission
+DU-2.22	DLMF.Gamma.Gamma_mul_hurwitzZeta_eq_integral	DLMF/Gamma/PolygammaHurwitz.lean	148	proved, no admission
+DU-2.22	DLMF.Zeta.Real.integrableOn_alternatingHurwitzZeta_kernel	DLMF/Zeta/AlternatingHurwitz.lean	69	direct admission
+DU-2.22	DLMF.Zeta.Real.alternatingHurwitzZeta_eq_integral	DLMF/Zeta/AlternatingHurwitz.lean	77	direct admission
+DU-2.23	Polynomial.bernoulli	.lake/packages/mathlib/Mathlib/NumberTheory/BernoulliPolynomials.lean	48	definition, no admission
+DU-2.23	DLMF.BernoulliEuler.bernoulliPolyB_eq_sum	DLMF/BernoulliEuler/Basic/GeneratingFunctions.lean	128	proved, no admission
+DU-2.23	DLMF.BernoulliEuler.hasSum_bernoulliPolyB_mul_pow_div	DLMF/BernoulliEuler/Basic/GeneratingFunctions.lean	138	proved, no admission
+DU-2.24	Polynomial.euler	DLMFMathlib/NumberTheory/EulerPolynomials.lean	61	definition, no admission
+DU-2.24	Polynomial.derivative_euler_succ	DLMFMathlib/NumberTheory/EulerPolynomials.lean	90	proved, no admission
+DU-2.24	Polynomial.euler_comp_one_sub_X	DLMFMathlib/NumberTheory/EulerPolynomials.lean	259	proved, no admission
+DU-2.24	Polynomial.euler_eval_add_one_add	DLMFMathlib/NumberTheory/EulerPolynomials.lean	215	proved, no admission
+DU-2.24	eulerNumber	DLMFMathlib/NumberTheory/EulerPolynomials.lean	312	definition, no admission
+DU-2.24	DLMF.BernoulliEuler.eulerPolyE_eq_sum	DLMF/BernoulliEuler/Basic/GeneratingFunctions.lean	227	proved, no admission
+DU-2.25	euler_summation_one_cell	DLMFMathlib/Analysis/Summation/PolynomialRemainders.lean	63	direct admission
+DU-2.25	integral_eq_sum_bernoulliFun_add	DLMFMathlib/Analysis/EulerMaclaurin.lean	103	proved, no admission
+DU-2.26	DLMF.Constants.trigamma_one_quarter	DLMF/Constants/Catalan.lean	92	proved, no admission
+DU-2.26	DLMF.Constants.trigamma_three_quarters	DLMF/Constants/Catalan.lean	111	proved, no admission
+DU-3.01	DLMF.Hypergeometric.generalizedHypergeometricCoeff	DLMF/GeneralizedHypergeometric/Basic/ParametersAndSeries.lean	51	definition, no admission
+DU-3.01	DLMF.Hypergeometric.generalizedHypergeometric	DLMF/GeneralizedHypergeometric/Basic/PrincipalContinuation.lean	56	definition, no admission
+DU-3.01	DLMF.Hypergeometric.generalizedHypergeometricTruncated	DLMF/GeneralizedHypergeometric/Basic/ParametersAndSeries.lean	65	definition, no admission
+DU-3.01	DLMF.Hypergeometric.LowerParametersRegular	DLMF/GeneralizedHypergeometric/Basic/ParametersAndSeries.lean	55	definition, no admission
+DU-3.01	DLMF.Hypergeometric.IsTerminating	DLMF/GeneralizedHypergeometric/Basic/ParametersAndSeries.lean	58	definition, no admission
+DU-3.02	DLMF.Hypergeometric.generalizedHypergeometric_entire	DLMF/GeneralizedHypergeometric/AnalyticProperties.lean	66	proved, no admission
+DU-3.02	DLMF.Hypergeometric.generalizedHypergeometric_radius_one	DLMF/GeneralizedHypergeometric/AnalyticProperties.lean	102	proved, no admission
+DU-3.02	DLMF.Hypergeometric.generalizedHypergeometric_radius_zero	DLMF/GeneralizedHypergeometric/AnalyticProperties.lean	1036	proved, no admission
+DU-3.02	DLMF.Hypergeometric.generalizedHypergeometric_diverges_nonzero	DLMF/GeneralizedHypergeometric/AnalyticProperties.lean	1057	proved, no admission
+DU-3.02	DLMF.Hypergeometric.generalizedHypergeometric_unit_absolute_iff	DLMF/GeneralizedHypergeometric/AnalyticProperties.lean	299	proved, no admission
+DU-3.02	DLMF.Hypergeometric.generalizedHypergeometric_unit_conditional	DLMF/GeneralizedHypergeometric/AnalyticProperties.lean	892	proved, no admission
+DU-3.02	DLMF.Hypergeometric.generalizedHypergeometric_unit_diverges	DLMF/GeneralizedHypergeometric/AnalyticProperties.lean	345	proved, no admission
+DU-3.02	DLMF.Hypergeometric.generalizedHypergeometric_one_converges_iff	DLMF/GeneralizedHypergeometric/AnalyticProperties.lean	942	proved, no admission
+DU-3.03	DLMF.Hypergeometric.eq_generalizedHypergeometric_of_coefficient_recurrence	DLMF/GeneralizedHypergeometric/BookSeries.lean	56	direct admission
+DU-3.04	DLMF.Hypergeometric.generalizedHypergeometric_empty_empty	DLMF/GeneralizedHypergeometric/BookSeries.lean	30	direct admission
+DU-3.04	DLMF.Hypergeometric.generalizedHypergeometric_singleton_empty	DLMF/GeneralizedHypergeometric/BookSeries.lean	36	direct admission
+DU-3.04	DLMF.Hypergeometric.mul_regularizedGaussHypergeometric_one_one_two	DLMF/GeneralizedHypergeometric/BookSeries.lean	42	direct admission
+DU-3.04	DLMF.Bessel.regularized0F1_half_eq_cos	DLMF/Bessel/RegularizedSeries.lean	248	proved, no admission
+DU-3.04	DLMF.Bessel.regularized0F1_three_halves_eq_sinc	DLMF/Bessel/RegularizedSeries.lean	209	proved, no admission
+DU-3.05	DLMF.Confluent.Real.sinIntegral	DLMF/Confluent/Basic/ExponentialIntegrals.lean	52	definition, no admission
+DU-3.05	DLMF.Confluent.Real.hasSum_sinIntegral	DLMF/Confluent/Basic/ExponentialIntegralSeries.lean	115	proved, no admission
+DU-3.05	DLMF.Hypergeometric.Real.sinIntegral_eq_regularizedHGFun	DLMF/Hypergeometric/SpecialCases.lean	61	proved, no admission
+DU-3.06	Complex.regularizedHGFun	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/RegularizedHypergeometric.lean	192	definition, no admission
+DU-3.06	Complex.regularizedHGFunCoeff	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/RegularizedHypergeometric.lean	67	definition, no admission
+DU-3.06	DLMF.Hypergeometric.regularizedGeneralizedHypergeometric	DLMF/GeneralizedHypergeometric/Basic/PrincipalContinuation.lean	48	definition, no admission
+DU-3.06	DLMF.Hypergeometric.generalizedHypergeometricCoeff_eq_gamma_mul_regularized	DLMF/GeneralizedHypergeometric/Basic/SeriesProperties.lean	132	proved, no admission
+DU-3.06	DLMF.Hypergeometric.gammaProduct_ne_zero	DLMF/GeneralizedHypergeometric/Basic/SeriesProperties.lean	92	proved, no admission
+DU-3.06	DLMF.Hypergeometric.regularizedGeneralizedHypergeometric_eq_series	DLMF/GeneralizedHypergeometric/Basic/SeriesProperties.lean	120	proved, no admission
+DU-3.07	DLMF.Hypergeometric.deriv_regularizedHGFun	DLMF/Hypergeometric/Basic/GeneralizedCalculus.lean	77	proved, no admission
+DU-3.07	DLMF.Hypergeometric.regularizedGeneralizedHypergeometric_iteratedDeriv	DLMF/GeneralizedHypergeometric/Derivatives.lean	168	proved, no admission
+DU-3.07	DLMF.Hypergeometric.generalizedHypergeometric_iteratedDeriv	DLMF/GeneralizedHypergeometric/Derivatives.lean	217	proved, no admission
+DU-3.08	DLMF.Hypergeometric.regularizedHGFun_ode	DLMF/Hypergeometric/Basic/GeneralizedEquation.lean	145	proved, no admission
+DU-3.08	DLMF.Hypergeometric.regularizedHGFun_ode_of_card_le	DLMF/Hypergeometric/Basic/GeneralizedEquation.lean	175	proved, no admission
+DU-3.08	DLMF.Hypergeometric.regularizedHGFun_ode_of_card_eq_add_one	DLMF/Hypergeometric/Basic/GeneralizedEquation.lean	182	proved, no admission
+DU-3.08	DLMF.Hypergeometric.generalizedHypergeometric_theta_ode	DLMF/GeneralizedHypergeometric/DifferentialEquations.lean	407	proved, no admission
+DU-3.08	DLMF.Hypergeometric.eulerTheta	DLMF/Hypergeometric/Basic/GeneralizedEquation.lean	41	definition, no admission
+DU-3.08	DLMF.Hypergeometric.thetaPoly	DLMF/Hypergeometric/Basic/GeneralizedEquation.lean	44	definition, no admission
+DU-3.09	DLMF.Hypergeometric.coeff_eq_of_generalized_ode	DLMF/Hypergeometric/Basic/GeneralizedCalculus.lean	331	proved, no admission
+DU-3.09	DLMF.Hypergeometric.scalarSeries_unique_ball	DLMF/Hypergeometric/Basic/GeneralizedCalculus.lean	302	proved, no admission
+DU-3.10	DLMF.Hypergeometric.PrincipalContinuation	DLMF/GeneralizedHypergeometric/Basic/PrincipalContinuation.lean	31	definition, no admission
+DU-3.10	DLMF.Hypergeometric.principalContinuation_exists	DLMF/GeneralizedHypergeometric/Basic/PrincipalContinuationExistence.lean	747	proved, no admission
+DU-3.10	DLMF.Hypergeometric.nonempty_principalContinuation	DLMF/GeneralizedHypergeometric/Basic/PrincipalContinuationExistence.lean	711	proved, no admission
+DU-3.10	DLMF.Hypergeometric.principalContinuation_unique	DLMF/GeneralizedHypergeometric/Basic/SeriesProperties.lean	52	proved, no admission
+DU-3.10	DLMF.Hypergeometric.analyticOnNhd_regularizedGeneralizedHypergeometric	DLMF/GeneralizedHypergeometric/Basic/PrincipalContinuationExistence.lean	766	proved, no admission
+DU-3.11	DLMF.Hypergeometric.generalizedHypergeometric_principal_analytic	DLMF/GeneralizedHypergeometric/AnalyticProperties.lean	294	proved, no admission
+DU-3.11	DLMF.Hypergeometric.generalizedHypergeometric_terminating_entire	DLMF/GeneralizedHypergeometric/AnalyticProperties.lean	92	proved, no admission
+DU-3.11	DLMF.Hypergeometric.regularizedGeneralizedHypergeometric_iteratedDeriv	DLMF/GeneralizedHypergeometric/Derivatives.lean	168	proved, no admission
+DU-3.11	DLMF.Hypergeometric.generalizedHypergeometric_iteratedDeriv	DLMF/GeneralizedHypergeometric/Derivatives.lean	217	proved, no admission
+DU-3.11	DLMF.Hypergeometric.generalizedHypergeometric_theta_ode	DLMF/GeneralizedHypergeometric/DifferentialEquations.lean	407	proved, no admission
+DU-3.12	DLMF.Hypergeometric.regularizedHGFun_contiguous	DLMF/Hypergeometric/Basic/GeneralizedCalculus.lean	111	proved, no admission
+DU-3.12	DLMF.Hypergeometric.generalizedHypergeometric_raising_iterate	DLMF/GeneralizedHypergeometric/Derivatives.lean	729	proved, no admission
+DU-3.12	DLMF.Hypergeometric.generalizedHypergeometric_lower_weighted_iteratedDeriv	DLMF/GeneralizedHypergeometric/Derivatives.lean	739	proved, no admission
+DU-3.12	DLMF.Hypergeometric.GenContiguous	DLMF/GeneralizedHypergeometric/Derivatives.lean	61	definition, no admission
+DU-3.13	DLMF.Hypergeometric.regularizedGaussHypergeometric_contiguous_c_three	DLMF/Hypergeometric/ArgumentContinuation.lean	197	proved, no admission
+DU-3.13	DLMF.Hypergeometric.contiguous_c_three	DLMF/Hypergeometric/Derivatives.lean	417	proved, no admission
+DU-3.14	DLMF.Hypergeometric.generalizedHypergeometric_upper_confluence	DLMF/GeneralizedHypergeometric/DifferentialEquations.lean	1147	proved, no admission
+DU-3.15	DLMF.Hypergeometric.generalizedHypergeometric_euler_integral'	DLMF/GeneralizedHypergeometric/Integrals.lean	153	proved, no admission
+DU-3.15	DLMF.Hypergeometric.generalizedHypergeometric_euler_integral	DLMF/GeneralizedHypergeometric/Integrals.lean	186	proved, no admission
+DU-3.16	DLMF.Hypergeometric.hasDerivAt_generalizedHypergeometric_upper_parameter	DLMF/GeneralizedHypergeometric/BookSeries.lean	68	direct admission
+DU-3.16	DLMF.Hypergeometric.summable_generalizedHypergeometric_upper_parameter_derivative	DLMF/GeneralizedHypergeometric/BookSeries.lean	79	direct admission
+DU-3.16	DLMF.Hypergeometric.hasDerivAt_generalizedHypergeometric_lower_parameter	DLMF/GeneralizedHypergeometric/BookSeries.lean	89	direct admission
+DU-3.16	DLMF.Hypergeometric.summable_generalizedHypergeometric_lower_parameter_derivative	DLMF/GeneralizedHypergeometric/BookSeries.lean	99	direct admission
+DU-3.17	DLMF.Confluent.fresnelC	DLMF/ErrorFunctions/Basic/Functions.lean	61	definition, no admission
+DU-3.17	DLMF.Confluent.fresnelS	DLMF/ErrorFunctions/Basic/Functions.lean	66	definition, no admission
+DU-3.17	DLMF.Confluent.fresnelC_hypergeometric	DLMF/ErrorFunctions/Relations.lean	635	proved, no admission
+DU-3.17	DLMF.Confluent.fresnelS_hypergeometric	DLMF/ErrorFunctions/Relations.lean	661	proved, no admission
+DU-3.17	DLMF.Confluent.fresnelAuxiliaryFComplex_sector_asymptotic	DLMF/ErrorFunctions/BoundsAsymptotics/FresnelRemainders.lean	205	proved, no admission
+DU-3.17	DLMF.Confluent.fresnelAuxiliaryGComplex_sector_asymptotic	DLMF/ErrorFunctions/BoundsAsymptotics/FresnelRemainders.lean	603	proved, no admission
+DU-3.18	DLMF.Airy.Real.airy_equation_iff_existsUnique_hypergeometric_coordinates	DLMF/Airy/HypergeometricBasis.lean	26	direct admission
+DU-3.19	Complex.integral_exp_neg_mul_factorialSeries	DLMFMathlib/Analysis/Integral/BorelPowerSeries.lean	29	direct admission
+DU-3.19	DLMF.Hypergeometric.generalizedHypergeometric_hasSum_disk	DLMF/GeneralizedHypergeometric/Basic/SeriesProperties.lean	146	proved, no admission
+DU-3.19	DLMF.Hypergeometric.generalizedHypergeometric_hasSum_entire	DLMF/GeneralizedHypergeometric/AnalyticProperties.lean	74	proved, no admission
+DU-3.19	DLMF.Hypergeometric.generalizedHypergeometric_laplace_integral	DLMF/GeneralizedHypergeometric/Integrals.lean	199	direct admission
+DU-3.20	fwdDiff	.lake/packages/mathlib/Mathlib/Algebra/Group/ForwardDiff.lean	40	definition, no admission
+DU-3.20	shift_eq_sum_fwdDiff_iter	.lake/packages/mathlib/Mathlib/Algebra/Group/ForwardDiff.lean	165	proved, no admission
+DU-3.20	Ring.choose	.lake/packages/mathlib/Mathlib/RingTheory/Binomial.lean	386	definition, no admission
+DU-3.20	Polynomial.eval_eq_sum_fwdDiff_mul_choose	DLMFMathlib/Algebra/Polynomial/NewtonExpansion.lean	28	direct admission
+DU-4.01	DLMF.Hypergeometric.regularizedGaussHypergeometric_neg_nat	DLMF/Hypergeometric/Basic/CutPlane.lean	567	proved, no admission
+DU-4.02	DLMF.Hypergeometric.regularizedGaussHypergeometric_ode	DLMF/Hypergeometric/Basic/CutPlane.lean	536	proved, no admission
+DU-4.02	DLMF.Hypergeometric.regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricIntegral	DLMF/Hypergeometric/Basic/CutPlane.lean	457	proved, no admission
+DU-4.02	DLMF.Hypergeometric.intervalIntegrable_eulerKernel	DLMF/Hypergeometric/Basic/CutPlane.lean	201	proved, no admission
+DU-4.03	DLMF.Hypergeometric.arcsin_eq_ordinaryHypergeometric	DLMF/Hypergeometric/DiffEq.lean	143	proved, no admission
+DU-4.03	DLMF.Hypergeometric.arctan_eq_regularizedGaussHypergeometric	DLMF/GeneralizedHypergeometric/BookSeries.lean	49	direct admission
+DU-4.03	DLMF.Legendre.legendreP	DLMF/Legendre/Basic/Functions.lean	35	definition, no admission
+DU-4.03	DLMF.Legendre.legendreP_ode	DLMF/Legendre/Basic/Properties.lean	116	proved, no admission
+DU-4.04	DLMF.Hypergeometric.regularizedGaussHypergeometric_contiguous_ab	DLMF/Hypergeometric/ArgumentContinuation.lean	89	proved, no admission
+DU-4.04	DLMF.Hypergeometric.regularizedGaussHypergeometric_contiguous_a	DLMF/Hypergeometric/ArgumentContinuation.lean	73	proved, no admission
+DU-4.04	DLMF.Hypergeometric.regularizedGaussHypergeometric_contiguous_a_b_pred	DLMF/Hypergeometric/ArgumentContinuation.lean	104	proved, no admission
+DU-4.04	DLMF.Hypergeometric.regularizedGaussHypergeometric_contiguous_a_c_succ	DLMF/Hypergeometric/ArgumentContinuation.lean	134	proved, no admission
+DU-4.04	DLMF.Hypergeometric.regularizedGaussHypergeometric_contiguous_a_succ_c_pred	DLMF/Hypergeometric/ArgumentContinuation.lean	149	proved, no admission
+DU-4.04	DLMF.Hypergeometric.regularizedGaussHypergeometric_contiguous_a_pred_c_succ	DLMF/Hypergeometric/ArgumentContinuation.lean	165	proved, no admission
+DU-4.04	DLMF.Hypergeometric.regularizedGaussHypergeometric_contiguous_a_pred_c_pred	DLMF/Hypergeometric/ArgumentContinuation.lean	181	proved, no admission
+DU-4.04	DLMF.Hypergeometric.regularizedGaussHypergeometric_contiguous_c_three	DLMF/Hypergeometric/ArgumentContinuation.lean	197	proved, no admission
+DU-4.04	DLMF.Hypergeometric.regularizedGaussHypergeometric_contiguous_diagonal	DLMF/Hypergeometric/ArgumentContinuation.lean	214	proved, no admission
+DU-4.05	DLMF.Hypergeometric.KummerSolutions.eightSolutions	DLMF/Hypergeometric/RegularizedKummerSolutions.lean	30	definition, no admission
+DU-4.05	DLMF.Hypergeometric.KummerSolutions.eightSolutions_ode	DLMF/Hypergeometric/RegularizedKummerSolutions.lean	65	direct admission
+DU-4.05	DLMF.Hypergeometric.KummerSolutions.eightSolutions_inversion_ode	DLMF/Hypergeometric/RegularizedKummerSolutions.lean	73	direct admission
+DU-4.05	DLMF.Hypergeometric.KummerSolutions.eightSolutions_pfaff_inversion_ode	DLMF/Hypergeometric/RegularizedKummerSolutions.lean	82	direct admission
+DU-4.05	ODE.existsUnique_linearCombination_of_wronskian_ne_zero	DLMFMathlib/Analysis/ODE/FundamentalPair.lean	29	direct admission
+DU-4.06	DLMF.Hypergeometric.regularizedGaussHypergeometric_pfaff	DLMF/Hypergeometric/ArgumentContinuation.lean	266	proved, no admission
+DU-4.07	DLMF.Hypergeometric.regularizedGaussHypergeometric_euler	DLMF/Hypergeometric/ArgumentContinuation.lean	231	proved, no admission
+DU-4.08	DLMF.Hypergeometric.generalizedHypergeometric_clausen_principal	DLMF/GeneralizedHypergeometric/Transformations.lean	528	proved, no admission
+DU-4.08	DLMF.Hypergeometric.clausen_formula	DLMF/Hypergeometric/Clausen.lean	198	proved, no admission
+DU-4.09	DLMF.Hypergeometric.hasSum_arcsin_sq	DLMF/Hypergeometric/Clausen.lean	264	proved, no admission
+DU-4.10	DLMF.Hypergeometric.hasSum_regularizedGauss_one	DLMF/Hypergeometric/Boundary.lean	58	proved, no admission
+DU-4.11	DLMF.Hypergeometric.sum_pochhammer_mul_neg_nat_div	DLMF/Hypergeometric/TerminatingSummations.lean	27	direct admission
+DU-4.12	DLMF.Hypergeometric.bailey_summation	DLMF/Hypergeometric/Elementary/AlgebraicValues.lean	827	proved, no admission
+DU-4.13	DLMF.Hypergeometric.regularizedGaussHypergeometric_pfaff	DLMF/Hypergeometric/ArgumentContinuation.lean	266	proved, no admission
+DU-4.13	DLMF.Hypergeometric.gauss_second_summation	DLMF/Hypergeometric/Elementary/AlgebraicValues.lean	727	proved, no admission
+DU-4.13	DLMF.Hypergeometric.kummer_theorem	DLMF/Hypergeometric/Identities/CarlsonTools.lean	45	proved, no admission
+DU-4.14	DLMF.Hypergeometric.gauss_second_summation	DLMF/Hypergeometric/Elementary/AlgebraicValues.lean	727	proved, no admission
+DU-4.15	DLMF.Hypergeometric.tendsto_regularizedGaussHypergeometric_left_one	DLMF/Hypergeometric/Boundary.lean	119	proved, no admission
+DU-4.15	DLMF.Hypergeometric.tendsto_regularizedGaussHypergeometric_div_log_left_one	DLMF/Hypergeometric/EndpointLogarithm.lean	29	direct admission
+DU-4.16	DLMF.Hypergeometric.zero_first_connection_one_of_not_neg_nat	DLMF/Hypergeometric/Solutions/Connections.lean	540	proved, no admission
+DU-4.17	DLMF.Hypergeometric.logarithmic_connection_one_sub	DLMF/Hypergeometric/ConnectionFormulas.lean	228	proved, no admission
+DU-4.18	DLMF.Hypergeometric.sin_sq_sin	DLMF/Hypergeometric/Elementary/AlgebraicValues.lean	639	proved, no admission
+DU-4.18	DLMF.Hypergeometric.sin_sq_cos	DLMF/Hypergeometric/Elementary/AlgebraicValues.lean	492	proved, no admission
+DU-4.19	DLMF.Hypergeometric.pfaff_saalschutz_of_finite_regular	DLMF/Hypergeometric/TerminatingSummations.lean	35	direct admission
+DU-4.20	DLMF.Hypergeometric.kummer_quadratic	DLMF/Hypergeometric/FurtherTransformations/Quadratic.lean	626	proved, no admission
+DU-4.20	DLMF.Hypergeometric.gauss_quadratic	DLMF/Hypergeometric/FurtherTransformations/Quadratic.lean	466	proved, no admission
+DU-4.20	DLMF.Hypergeometric.quadratic_double_denominator	DLMF/Hypergeometric/FurtherTransformations/Quadratic.lean	636	proved, no admission
+DU-4.21	DLMF.Legendre.legendreQ	DLMF/Legendre/Basic/Functions.lean	48	definition, no admission
+DU-4.21	DLMF.Legendre.legendreP	DLMF/Legendre/Basic/Functions.lean	35	definition, no admission
+DU-4.21	DLMF.Legendre.associated_wronskian_11	DLMF/Legendre/AssociatedRecurrences.lean	1082	proved, no admission
+DU-4.21	DLMF.Legendre.legendreQ_eq_finite_weighted_integral	DLMF/Legendre/FiniteWeightedIntegral.lean	27	direct admission
+DU-4.22	DLMF.Hypergeometric.dixon_sum	DLMF/Hypergeometric/Identities/Dixon.lean	627	proved, no admission
+DU-5.01	DLMF.Elliptic.Real.completeEllipticKOfParameter	DLMF/Elliptic/Basic/Integrals.lean	60	definition, no admission
+DU-5.01	DLMF.Elliptic.Real.completeEllipticEOfParameter	DLMF/Elliptic/Basic/Integrals.lean	66	definition, no admission
+DU-5.01	DLMF.Elliptic.Real.incompleteEllipticFOfParameter	DLMF/Elliptic/Basic/Integrals.lean	72	definition, no admission
+DU-5.01	DLMF.Elliptic.Real.completeEllipticKOfParameter_eq_ordinaryHypergeometric	DLMF/Elliptic/Complete.lean	422	proved, no admission
+DU-5.01	DLMF.Elliptic.Real.completeEllipticEOfParameter_eq_ordinaryHypergeometric	DLMF/Elliptic/Complete.lean	431	proved, no admission
+DU-5.01	TauCeti.Real.legendreK	.lake/packages/TauCeti/TauCeti/Analysis/SpecialFunctions/EllipticIntegral/Legendre.lean	97	definition, no admission
+DU-5.01	TauCeti.Real.legendreEc	.lake/packages/TauCeti/TauCeti/Analysis/SpecialFunctions/EllipticIntegral/Legendre.lean	100	definition, no admission
+DU-5.02	DLMF.Elliptic.ellipsePerimeter	DLMF/Elliptic/SpecialValues.lean	206	definition, no admission
+DU-5.02	DLMF.Elliptic.ellipsePerimeter_eq	DLMF/Elliptic/SpecialValues.lean	211	proved, no admission
+DU-5.02	DLMF.Elliptic.ellipsePerimeter_eq_ordinaryHypergeometric	DLMF/Elliptic/SpecialValues.lean	232	proved, no admission
+DU-5.02	TauCeti.Real.lemniscateConstant_eq_Gamma	.lake/packages/TauCeti/TauCeti/Analysis/SpecialFunctions/EllipticIntegral/Lemniscate.lean	98	proved, no admission
+DU-5.02	TauCeti.Real.lemniscateConstant_eq_sqrt_two_mul_legendreK	.lake/packages/TauCeti/TauCeti/Analysis/SpecialFunctions/EllipticIntegral/Lemniscate.lean	137	proved, no admission
+DU-5.03	TauCeti.Real.legendreK_differential_equation	.lake/packages/TauCeti/TauCeti/Analysis/SpecialFunctions/EllipticIntegral/ModulusDerivative.lean	304	proved, no admission
+DU-5.03	TauCeti.Real.legendreEc_differential_equation	.lake/packages/TauCeti/TauCeti/Analysis/SpecialFunctions/EllipticIntegral/ModulusDerivative.lean	317	proved, no admission
+DU-5.03	TauCeti.Real.deriv_legendreK	.lake/packages/TauCeti/TauCeti/Analysis/SpecialFunctions/EllipticIntegral/ModulusDerivative.lean	248	proved, no admission
+DU-5.03	TauCeti.Real.deriv_legendreEc	.lake/packages/TauCeti/TauCeti/Analysis/SpecialFunctions/EllipticIntegral/ModulusDerivative.lean	253	proved, no admission
+DU-5.03	DLMF.Elliptic.Real.hasDerivAt_completeEllipticEOfParameter_sq	DLMF/Elliptic/Complete.lean	465	proved, no admission
+DU-5.03	DLMF.Elliptic.Real.hasDerivAt_completeEllipticKOfParameter_sq	DLMF/Elliptic/Complete.lean	451	proved, no admission
+DU-5.04	DLMF.Elliptic.legendre_relation	DLMF/Elliptic/Complete.lean	309	proved, no admission
+DU-5.05	DLMF.Elliptic.Real.completeEllipticKOfParameter_landen_descending	DLMF/Elliptic/AGM.lean	332	proved, no admission
+DU-5.05	DLMF.Elliptic.Real.completeEllipticEOfParameter_landen_descending	DLMF/Elliptic/AGM.lean	388	proved, no admission
+DU-5.05	TauCeti.Real.legendreK_eq_one_add_mul_legendreK	.lake/packages/TauCeti/TauCeti/Analysis/SpecialFunctions/EllipticIntegral/Gauss.lean	107	proved, no admission
+DU-5.06	NNReal.agmSequences	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/ArithmeticGeometricMean.lean	56	definition, no admission
+DU-5.06	NNReal.agm	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/ArithmeticGeometricMean.lean	165	definition, no admission
+DU-5.06	NNReal.agmSequences_snd_sub_fst_le	.lake/packages/TauCeti/TauCeti/Analysis/SpecialFunctions/ArithmeticGeometricMean.lean	78	proved, no admission
+DU-5.06	Real.half_add_sub_sqrt_mul_le	.lake/packages/TauCeti/TauCeti/Analysis/SpecialFunctions/ArithmeticGeometricMean.lean	42	proved, no admission
+DU-5.07	TauCeti.Real.legendreK_eq_pi_div_two_mul_agm	.lake/packages/TauCeti/TauCeti/Analysis/SpecialFunctions/EllipticIntegral/Gauss.lean	63	proved, no admission
+DU-5.07	TauCeti.Real.agmIntegral_eq_legendreK_div	.lake/packages/TauCeti/TauCeti/Analysis/SpecialFunctions/EllipticIntegral/Gauss.lean	71	proved, no admission
+DU-5.07	DLMF.Elliptic.agmIntegral_eq_pi_div_two_div_agm	DLMF/Elliptic/AGM.lean	290	proved, no admission
+DU-5.07	DLMF.Elliptic.Real.completeEllipticKOfParameter_eq_pi_div_agm	DLMF/Elliptic/AGM.lean	320	proved, no admission
+DU-5.08	TauCeti.Real.legendreK_one_div_sqrt_two	.lake/packages/TauCeti/TauCeti/Analysis/SpecialFunctions/EllipticIntegral/Lemniscate.lean	148	proved, no admission
+DU-5.08	DLMF.Elliptic.Real.completeEllipticKOfParameter_one_half	DLMF/Elliptic/SpecialValues.lean	109	proved, no admission
+DU-5.08	DLMF.Elliptic.Gamma_one_fourth_sq_mul_agm	DLMF/Elliptic/SpecialValues.lean	143	proved, no admission
+DU-5.09	DLMF.Elliptic.Real.strictMono_incompleteEllipticFOfParameter	DLMF/Elliptic/Basic/Amplitude.lean	135	proved, no admission
+DU-5.09	DLMF.Elliptic.Real.surjective_incompleteEllipticFOfParameter	DLMF/Elliptic/Basic/Amplitude.lean	142	proved, no admission
+DU-5.09	DLMF.Elliptic.Real.jacobiAmOfParameter_neg	DLMF/Elliptic/Basic/Jacobi.lean	119	proved, no admission
+DU-5.09	DLMF.Elliptic.Real.jacobiSnOfParameter_sq_add_jacobiCnOfParameter_sq	DLMF/Elliptic/Basic/Jacobi.lean	133	proved, no admission
+DU-5.09	DLMF.Elliptic.Real.mul_jacobiSnOfParameter_sq_add_jacobiDnOfParameter_sq	DLMF/Elliptic/Basic/Jacobi.lean	139	proved, no admission
+DU-5.09	DLMF.Elliptic.jacobi_zero	DLMF/Elliptic/Basic/Jacobi.lean	247	proved, no admission
+DU-5.09	DLMF.Elliptic.jacobi_neg	DLMF/Elliptic/Basic/Jacobi.lean	255	proved, no admission
+DU-5.09	DLMF.Elliptic.Real.jacobi_completeEllipticKOfParameter	DLMF/Elliptic/Basic/Jacobi.lean	238	proved, no admission
+DU-5.10	DLMF.Elliptic.Real.jacobi_add_two_completeEllipticKOfParameter	DLMF/Elliptic/Basic/Jacobi.lean	209	proved, no admission
+DU-5.11	DLMF.Elliptic.Real.hasDerivAt_jacobiAmOfParameter	DLMF/Elliptic/Basic/Jacobi.lean	87	proved, no admission
+DU-5.11	DLMF.Elliptic.Real.hasDerivAt_jacobiSnOfParameter	DLMF/Elliptic/Basic/Jacobi.lean	155	proved, no admission
+DU-5.11	DLMF.Elliptic.Real.hasDerivAt_jacobiCnOfParameter	DLMF/Elliptic/Basic/Jacobi.lean	162	proved, no admission
+DU-5.11	DLMF.Elliptic.Real.hasDerivAt_jacobiDnOfParameter	DLMF/Elliptic/Basic/Jacobi.lean	170	proved, no admission
+DU-5.12	DLMF.Elliptic.pendulumAngle	DLMF/Elliptic/JacobiIdentities.lean	395	definition, no admission
+DU-5.12	DLMF.Elliptic.pendulumAngle_ode	DLMF/Elliptic/JacobiIdentities.lean	400	proved, no admission
+DU-5.12	DLMF.Elliptic.pendulumAngle_periodic	DLMF/Elliptic/JacobiIdentities.lean	462	proved, no admission
+DU-5.12	Real.pendulumAngle_zero	.lake/packages/TauCeti/TauCeti/Analysis/SpecialFunctions/JacobiElliptic/Pendulum.lean	154	proved, no admission
+DU-5.12	Real.deriv_pendulumAngle_zero	.lake/packages/TauCeti/TauCeti/Analysis/SpecialFunctions/JacobiElliptic/Pendulum.lean	163	proved, no admission
+DU-5.12	Real.eq_pendulumAngle_of_hasDerivAt	.lake/packages/TauCeti/TauCeti/Analysis/SpecialFunctions/JacobiElliptic/Pendulum.lean	170	proved, no admission
+DU-5.13	DLMF.Elliptic.Real.jacobiArcsnOfParameter	DLMF/Elliptic/Basic/Jacobi.lean	272	definition, no admission
+DU-5.13	DLMF.Elliptic.Real.jacobiSnOfParameter_jacobiArcsnOfParameter	DLMF/Elliptic/Basic/Jacobi.lean	276	proved, no admission
+DU-5.13	DLMF.Elliptic.Real.jacobiArcsnOfParameter_jacobiSnOfParameter	DLMF/Elliptic/Basic/Jacobi.lean	283	proved, no admission
+DU-5.13	DLMF.Elliptic.Real.hasDerivAt_jacobiArcsnOfParameter	DLMF/Elliptic/Basic/Jacobi.lean	300	proved, no admission
+DU-5.13	DLMF.Elliptic.Real.integral_recip_sqrt_eq_incompleteEllipticFOfParameter	DLMF/Elliptic/SpecialValues.lean	74	proved, no admission
+DU-5.14	DLMF.Elliptic.integral_recip_sqrt_one_sub_pow_four_to	DLMF/Elliptic/BookReductions.lean	28	direct admission
+DU-5.14	DLMF.Elliptic.integral_recip_sqrt_one_add_pow_four	DLMF/Elliptic/BookReductions.lean	36	direct admission
+DU-5.14	DLMF.Elliptic.integral_recip_sqrt_sub_sq_mul_sub_sq	DLMF/Elliptic/BookReductions.lean	43	direct admission
+DU-5.14	DLMF.Elliptic.integral_Ioi_recip_sqrt_sq_sub_mul_sq_sub	DLMF/Elliptic/BookReductions.lean	51	direct admission
+DU-5.15	DLMF.Elliptic.integral_recip_sqrt_cubic	DLMF/Elliptic/BookReductions.lean	61	direct admission
+DU-6.01	DLMF.Confluent.kummerM	DLMF/Confluent/Basic/KummerM.lean	47	definition, no admission
+DU-6.01	DLMF.Confluent.hasSum_kummerM	DLMF/Confluent/Basic/KummerContiguous.lean	50	proved, no admission
+DU-6.01	DLMF.Confluent.analyticOnNhd_kummerM	DLMF/Confluent/Basic/KummerProperties.lean	139	proved, no admission
+DU-6.01	DLMF.Confluent.kummerM_ode	DLMF/Confluent/Basic/KummerProperties.lean	160	proved, no admission
+DU-6.01	DLMF.Confluent.regularized_euler_integral	DLMF/Confluent/IntegralRepresentations/EulerAndBessel.lean	70	proved, no admission
+DU-6.02	DLMF.Confluent.regularizedHGFun_of_neg_nat	DLMF/Confluent/BasicProperties/Continuity.lean	56	proved, no admission
+DU-6.03	DLMF.Confluent.erf	DLMF/Confluent/Basic/ErrorFunctions.lean	50	definition, no admission
+DU-6.03	DLMF.Confluent.erf_ofReal	DLMF/ErrorFunctions/Basic/Properties.lean	66	proved, no admission
+DU-6.03	TauCeti.Real.erf	.lake/packages/TauCeti/TauCeti/Analysis/SpecialFunctions/Erf.lean	61	definition, no admission
+DU-6.03	DLMF.Confluent.kummerM_erf	DLMF/Confluent/Relations.lean	166	proved, no admission
+DU-6.04	DLMF.Confluent.lowerIncompleteGamma	DLMF/Confluent/Basic/IncompleteGamma.lean	32	definition, no admission
+DU-6.04	DLMF.Confluent.lowerIncompleteGamma_eq_integral	DLMF/Confluent/IncompleteGamma.lean	169	proved, no admission
+DU-6.04	DLMF.Confluent.kummerM_lowerIncompleteGamma	DLMF/Confluent/Relations.lean	133	proved, no admission
+DU-6.04	DLMF.Confluent.erf_lowerIncompleteGamma	DLMF/ErrorFunctions/Relations.lean	529	proved, no admission
+DU-6.05	DLMF.Confluent.kummerM_kummer_transform	DLMF/Confluent/Basic/KummerProperties.lean	230	proved, no admission
+DU-6.05	DLMF.Confluent.regularizedConfluent_kummer_transform	DLMF/Confluent/Continuation.lean	287	proved, no admission
+DU-6.05	DLMF.Confluent.kummerM_lowerIncompleteGamma	DLMF/Confluent/Relations.lean	133	proved, no admission
+DU-6.06	DLMF.Confluent.kummerM_contiguous_a	DLMF/Confluent/Basic/KummerContiguous.lean	254	proved, no admission
+DU-6.06	DLMF.Confluent.kummerM_contiguous_b	DLMF/Confluent/Basic/KummerContiguous.lean	264	proved, no admission
+DU-6.06	DLMF.Confluent.kummerM_contiguous_a_b	DLMF/Confluent/Basic/KummerContiguous.lean	275	proved, no admission
+DU-6.06	DLMF.Confluent.kummerM_contiguous_shift_a	DLMF/Confluent/Basic/KummerContiguous.lean	286	proved, no admission
+DU-6.06	DLMF.Confluent.kummerM_contiguous_mixed	DLMF/Confluent/Basic/KummerContiguous.lean	300	proved, no admission
+DU-6.06	DLMF.Confluent.kummerM_contiguous_down	DLMF/Confluent/Basic/KummerContiguous.lean	310	proved, no admission
+DU-6.06	DLMF.Confluent.kummerM_ode_contiguous	DLMF/Confluent/Basic/KummerContiguous.lean	321	proved, no admission
+DU-6.06	DLMF.Confluent.kummerM_contiguous_shift_b_succ	DLMF/Confluent/Basic/KummerContiguous.lean	362	proved, no admission
+DU-6.06	DLMF.Confluent.kummerM_contiguous_mixed_b_pred	DLMF/Confluent/Basic/KummerContiguous.lean	374	proved, no admission
+DU-6.07	DLMF.Confluent.kummerM_ode	DLMF/Confluent/Basic/KummerProperties.lean	160	proved, no admission
+DU-6.07	DLMF.Confluent.wronskian_kummerM_pair	DLMF/Confluent/BasicProperties/Wronskians.lean	323	proved, no admission
+DU-6.07	ODE.existsUnique_linearCombination_of_wronskian_ne_zero	DLMFMathlib/Analysis/ODE/FundamentalPair.lean	29	direct admission
+DU-6.08	DLMF.Bessel.kummerM_eq_exp_mul_regularized0F1	DLMF/Bessel/RegularizedSeries.lean	308	proved, no admission
+DU-6.09	DLMF.Confluent.kummerU_laplace_integrable	DLMF/Confluent/IntegralRepresentations/EulerAndBessel.lean	309	proved, no admission
+DU-6.09	DLMF.Confluent.kummerU_laplace	DLMF/Confluent/IntegralRepresentations/EulerAndBessel.lean	694	proved, no admission
+DU-6.09	DLMF.Confluent.hasDerivAt_kummerU	DLMF/Confluent/Recurrence/Derivatives.lean	119	proved, no admission
+DU-6.09	DLMF.Confluent.kummerU_ode_contiguous	DLMF/Confluent/Recurrence/Contiguous.lean	501	proved, no admission
+DU-6.09	DLMF.Confluent.wronskian_regularizedHGFun_kummerU_all	DLMF/Confluent/BasicProperties/Wronskians.lean	376	proved, no admission
+DU-6.10	DLMF.Confluent.Real.hermite_equation_iff_existsUnique_kummer_coordinates	DLMF/Confluent/HermiteBasis.lean	25	direct admission
+DU-6.11	DLMF.Confluent.erfc	DLMF/Confluent/Basic/ErrorFunctions.lean	54	definition, no admission
+DU-6.11	DLMF.Confluent.erfc_sector_asymptotic	DLMF/ErrorFunctions/BoundsAsymptotics/GaussianRemainders.lean	371	proved, no admission
+DU-6.12	DLMF.Confluent.iteratedErfc	DLMF/ErrorFunctions/Basic/Functions.lean	123	definition, no admission
+DU-6.12	DLMF.Confluent.iteratedErfc_tail	DLMF/ErrorFunctions/Repeated.lean	289	proved, no admission
+DU-6.12	DLMF.Confluent.iteratedErfc_normalization	DLMF/ErrorFunctions/Repeated.lean	125	proved, no admission
+DU-6.12	DLMF.Confluent.iteratedDeriv_iteratedErfc_zero	DLMF/ErrorFunctions/Repeated.lean	524	proved, no admission
+DU-6.12	DLMF.Confluent.iteratedErfc_ode	DLMF/ErrorFunctions/Repeated.lean	419	proved, no admission
+DU-6.12	DLMF.Confluent.iteratedErfc_general_solution	DLMF/ErrorFunctions/Repeated.lean	474	proved, no admission
+DU-7.01	Complex.besselJ	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Bessel.lean	55	definition, no admission
+DU-7.01	DLMF.Bessel.besselJ_eq_regularized	DLMF/Bessel/Basic/RegularizedSeries.lean	52	proved, no admission
+DU-7.02	DLMF.Bessel.wronskian_besselJ_neg	DLMF/Bessel/Basic/SecondKind.lean	467	proved, no admission
+DU-7.02	ODE.existsUnique_linearCombination_of_wronskian_ne_zero	DLMFMathlib/Analysis/ODE/FundamentalPair.lean	29	direct admission
+DU-7.02	DLMF.Bessel.eq_besselJ_besselY_of_ode	DLMF/Bessel/WeberSeries.lean	280	proved, no admission
+DU-7.03	Complex.besselJ	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Bessel.lean	55	definition, no admission
+DU-7.03	DLMF.Bessel.besselJ_half	DLMF/Bessel/RegularizedSeries.lean	278	proved, no admission
+DU-7.03	DLMF.Bessel.besselJ_neg_half	DLMF/Bessel/RegularizedSeries.lean	289	proved, no admission
+DU-7.04	Complex.two_mul_self_mul_besselJ	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Bessel.lean	123	proved, no admission
+DU-7.04	DLMF.Bessel.hasDerivAt_besselJ	DLMF/Bessel/Basic/Equation.lean	138	proved, no admission
+DU-7.05	DLMF.Bessel.besselJ_eq_poisson_integral	DLMF/Bessel/Theorems.lean	37	proved, no admission
+DU-7.05	DLMF.Bessel.besselJ_eq_poisson_cos	DLMF/Bessel/YIntegralRep.lean	613	proved, no admission
+DU-7.05	DLMF.Bessel.besselJ_zero_eq_integral_cos	DLMF/Bessel/BesselIntegral.lean	150	proved, no admission
+DU-7.06	DLMF.Bessel.besselJ_eq_schlafli	DLMF/Bessel/Schlafli.lean	591	proved, no admission
+DU-7.06	DLMF.Bessel.integrableOn_schlafli	DLMF/Bessel/Schlafli.lean	654	proved, no admission
+DU-7.06	DLMF.Bessel.besselJ_int_eq_integral_cos	DLMF/Bessel/BesselIntegral.lean	114	proved, no admission
+DU-7.07	Asymptotics.isBigO_integral_exp_mul_phase_of_maximum	DLMFMathlib/Analysis/Asymptotics/QuadraticStationaryPhase.lean	48	direct admission
+DU-7.08	DLMF.Bessel.besselJ_sub_cos_isBigO	DLMF/Bessel/Asymptotics.lean	386	proved, no admission
+DU-7.09	DLMF.Bessel.besselJ_infinite_zeros_of_real	DLMF/Bessel/Asymptotics.lean	532	proved, no admission
+DU-7.09	DLMF.Bessel.besselJ_zeros_simple	DLMF/Bessel/Theorems.lean	159	proved, no admission
+DU-7.09	DLMF.Bessel.deriv_re_besselJ_ne_zero_of_eq_zero	DLMF/Bessel/PositiveZeroSequence.lean	51	direct admission
+DU-7.09	DLMF.Bessel.exists_strictMono_besselJ_positive_zeros	DLMF/Bessel/PositiveZeroSequence.lean	59	direct admission
+DU-7.10	DLMF.Bessel.integral_mul_besselJ_mul_besselJ	DLMF/Bessel/Lommel.lean	245	proved, no admission
+DU-7.10	DLMF.Bessel.integral_besselJ_orthogonal	DLMF/Bessel/Lommel.lean	280	proved, no admission
+DU-7.10	DLMF.Bessel.hasDerivAt_besselNormPrimitive	DLMF/Bessel/Lommel.lean	293	proved, no admission
+DU-7.10	DLMF.Bessel.tendsto_besselNormPrimitive	DLMF/Bessel/Lommel.lean	311	proved, no admission
+DU-7.10	DLMF.Bessel.integral_mul_besselJ_sq	DLMF/Bessel/Lommel.lean	375	proved, no admission
+DU-7.11	DLMF.Bessel.besselY	DLMF/Bessel/Basic.lean	41	definition, no admission
+DU-7.11	DLMF.Bessel.besselY_eq_schlafli	DLMF/Bessel/YSchlafli.lean	58	proved, no admission
+DU-7.12	DLMF.Bessel.besselY_nat_eq_series	DLMF/Bessel/WeberSeries.lean	174	proved, no admission
+DU-7.13	DLMF.Bessel.wronskian_besselJ_besselY	DLMF/Bessel/Basic/SecondKind.lean	524	proved, no admission
+DU-7.13	DLMF.Bessel.eq_besselJ_besselY_of_ode	DLMF/Bessel/WeberSeries.lean	280	proved, no admission
+DU-7.14	DLMF.Bessel.hasSum_besselJ_generating_function	DLMF/Bessel/Generating.lean	59	proved, no admission
+DU-7.14	DLMF.Bessel.hasSum_besselJ_cos	DLMF/Bessel/WeberSeries.lean	424	proved, no admission
+DU-7.14	DLMF.Bessel.hasSum_besselJ_sin	DLMF/Bessel/WeberSeries.lean	459	proved, no admission
+DU-7.15	DLMF.Airy.airyAi	DLMF/Airy/Basic.lean	53	definition, no admission
+DU-7.15	DLMF.Airy.airyAiDeriv	DLMF/Airy/Basic.lean	58	definition, no admission
+DU-7.15	DLMF.Airy.airyAi_neg_eq_besselJ_complex	DLMF/Airy/Relations/BesselRepresentations.lean	312	proved, no admission
+DU-7.16	DLMF.Struve.struveH	DLMF/Struve/Basic/Functions.lean	56	definition, no admission
+DU-7.16	DLMF.Struve.struveH_ode	DLMF/Struve/SeriesAndEquations.lean	522	proved, no admission
+DU-8.01	DLMF.Zeta.polylog	DLMF/Zeta/Basic/Polylog.lean	81	definition, no admission
+DU-8.01	DLMF.Zeta.polylog_zero_order	DLMF/Zeta/Basic/PolylogProperties.lean	165	proved, no admission
+DU-8.01	DLMF.Zeta.polylog_one_eq_neg_log	DLMF/Zeta/Basic/PolylogProperties.lean	181	proved, no admission
+DU-8.01	DLMF.Zeta.hasDerivAt_polylog	DLMF/Zeta/Basic/PolylogProperties.lean	158	proved, no admission
+DU-8.01	DLMF.Zeta.polylog_zero_arg	DLMF/Zeta/Basic/Polylog.lean	148	proved, no admission
+DU-8.01	DLMF.Polylog.polylog_natCast_eq_hypergeometric	DLMF/Polylog/BookIdentities.lean	126	direct admission
+DU-8.02	DLMF.Zeta.polylog_eq_integral	DLMF/Zeta/Polylog/Properties.lean	588	proved, no admission
+DU-8.03	DLMF.Zeta.polylog_one	DLMF/Zeta/Basic/PolylogProperties.lean	231	proved, no admission
+DU-8.03	DLMF.Polylog.polylogSeries_neg_one	DLMF/Polylog/Basic/Series.lean	145	proved, no admission
+DU-8.03	DLMF.Polylog.polylogSeries_add_polylogSeries_neg	DLMF/Polylog/Basic/Series.lean	109	proved, no admission
+DU-8.03	DLMF.Polylog.polylogSeries_add_polylogSeries_neg_of_norm_le	DLMF/Polylog/Basic/Series.lean	138	proved, no admission
+DU-8.03	DLMF.Zeta.polylog_one_eq_neg_log	DLMF/Zeta/Basic/PolylogProperties.lean	181	proved, no admission
+DU-8.04	DLMF.Polylog.Real.dilog	DLMF/Polylog/Basic/Dilog.lean	76	definition, no admission
+DU-8.04	DLMF.Polylog.Real.dilog_add_dilog_one_sub	DLMF/Polylog/Dilog.lean	67	proved, no admission
+DU-8.04	DLMF.Zeta.polylog_two_ofReal_eq_dilog	DLMF/Zeta/Polylog/Properties.lean	96	proved, no admission
+DU-8.04	DLMF.Polylog.Real.dilog_eq_double_integral	DLMF/Polylog/BookIdentities.lean	181	direct admission
+DU-8.05	DLMF.Polylog.Real.dilog_add_dilog_div_sub_one	DLMF/Polylog/Dilog.lean	124	proved, no admission
+DU-8.05	DLMF.Polylog.Real.dilog_one_half	DLMF/Polylog/Dilog.lean	116	proved, no admission
+DU-8.06	DLMF.Polylog.Real.dilog_goldenRatio	DLMF/Polylog/Dilog.lean	206	proved, no admission
+DU-8.07	DLMF.Polylog.Real.trilog_landen	DLMF/Polylog/Trilog.lean	189	proved, no admission
+DU-8.07	DLMF.Polylog.Real.trilog_one_half	DLMF/Polylog/Trilog.lean	254	proved, no admission
+DU-8.07	DLMF.Polylog.polylog_three_ofReal_eq_trilog	DLMF/Polylog/BookIdentities.lean	105	direct admission
+DU-8.07	DLMF.Polylog.Real.trilog_goldenRatio_inv_sq	DLMF/Polylog/BookIdentities.lean	111	direct admission
+DU-8.08	DLMF.Zeta.polylog	DLMF/Zeta/Basic/Polylog.lean	81	definition, no admission
+DU-8.08	DLMF.Zeta.slitOne	DLMF/Zeta/Basic/Polylog.lean	61	definition, no admission
+DU-8.08	DLMF.Zeta.polylog_eq_integral	DLMF/Zeta/Polylog/Properties.lean	588	proved, no admission
+DU-8.08	DLMF.Zeta.analyticOnNhd_polylog	DLMF/Zeta/Basic/PolylogProperties.lean	128	proved, no admission
+DU-8.08	DLMF.Polylog.polylog_natCast_conj	DLMF/Polylog/BookIdentities.lean	142	direct admission
+DU-8.09	DLMF.Polylog.tendsto_sum_polylog_natCast_closed_disk	DLMF/Polylog/BookIdentities.lean	118	direct admission
+DU-8.10	DLMF.Polylog.polylog_natCast_eq_unit_integral	DLMF/Polylog/BookIdentities.lean	134	direct admission
+DU-8.11	DLMF.Polylog.tendsto_sum_polylog_exp_mul_I	DLMF/Polylog/BookIdentities.lean	148	direct admission
+DU-8.11	DLMF.Polylog.polylog_natCast_I	DLMF/Polylog/BookIdentities.lean	165	direct admission
+DU-8.11	DLMF.Polylog.polylog_one_I	DLMF/Polylog/BookIdentities.lean	171	direct admission
+DU-8.11	DLMF.Polylog.polylog_two_I	DLMF/Polylog/BookIdentities.lean	175	direct admission
+DU-8.11	DLMF.Zeta.polylog_zero_order	DLMF/Zeta/Basic/PolylogProperties.lean	165	proved, no admission
+DU-8.12	DLMF.Polylog.hasDerivAt_polylog_exp_mul_I	DLMF/Polylog/BookIdentities.lean	157	direct admission
+DU-8.13	DLMF.Polylog.Real.inversePolytangent	DLMF/Polylog/BookIdentities.lean	34	definition, no admission
+DU-8.13	DLMF.Polylog.Real.inversePolytangent_zero	DLMF/Polylog/BookIdentities.lean	42	direct admission
+DU-8.13	DLMF.Polylog.Real.inversePolytangent_neg	DLMF/Polylog/BookIdentities.lean	47	direct admission
+DU-8.13	DLMF.Polylog.Real.inversePolytangent_one	DLMF/Polylog/BookIdentities.lean	52	direct admission
+DU-8.13	DLMF.Polylog.Real.inversePolytangent_succ	DLMF/Polylog/BookIdentities.lean	58	direct admission
+DU-8.13	DLMF.Polylog.Real.hasDerivAt_inversePolytangent_succ	DLMF/Polylog/BookIdentities.lean	65	direct admission
+DU-8.13	DLMF.Polylog.Real.inversePolytangent_one_arg	DLMF/Polylog/BookIdentities.lean	71	direct admission
+DU-8.13	DLMF.Polylog.Real.hasSum_inversePolytangent	DLMF/Polylog/BookIdentities.lean	76	direct admission
+DU-8.13	DLMF.Polylog.Real.inversePolytangent_eq_hypergeometric	DLMF/Polylog/BookIdentities.lean	83	direct admission
+DU-8.13	DLMF.Polylog.Real.inversePolytangent_eq_polylog	DLMF/Polylog/BookIdentities.lean	92	direct admission
+DU-8.13	DLMF.Polylog.Real.inversePolytangent_eq_integral	DLMF/Polylog/BookIdentities.lean	98	direct admission
+DU-8.14	Complex.log	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Complex/Log.lean	30	definition, no admission
+DU-8.14	Complex.log_eq_integral	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Complex/LogBounds.lean	44	proved, no admission
+DU-8.14	DLMF.Zeta.polylog_one_eq_neg_log	DLMF/Zeta/Basic/PolylogProperties.lean	181	proved, no admission
+DU-8.15	DLMF.Polylog.integral_pow_mul_cot	DLMF/Polylog/BookIdentities.lean	187	direct admission
+DU-8.15	DLMF.Polylog.integral_mul_cot_pi_div_two	DLMF/Polylog/BookIdentities.lean	197	direct admission
+DU-8.15	DLMF.Polylog.integral_mul_cot_pi_div_four	DLMF/Polylog/BookIdentities.lean	202	direct admission
+DU-8.16	DLMF.Polylog.integral_pow_mul_coth	DLMF/Polylog/BookIdentities.lean	209	direct admission
+DU-8.17	DLMF.Zeta.hasSum_riemannZeta_three_central_binom	DLMF/Zeta/IntegerArguments.lean	618	proved, no admission
+DU-8.17	DLMF.Polylog.integral_arsinh_sq_div	DLMF/Polylog/BookIdentities.lean	219	direct admission
+DU-8.18	DLMF.Constants.bbpSeries	DLMF/Constants/BBPFamily.lean	30	definition, no admission
+DU-8.18	DLMF.Constants.bbpSeries_def	DLMF/Constants/BBPFamily.lean	35	proved, no admission
+DU-8.18	DLMF.Constants.summable_bbpSeries	DLMF/Constants/BBPFamily.lean	41	direct admission
+DU-8.18	DLMF.Constants.bbpSeries_eq_integral	DLMF/Constants/BBPFamily.lean	49	direct admission
+DU-8.19	DLMF.Constants.bbpSeries_eq_sum_polylog	DLMF/Constants/BBPFamily.lean	60	direct admission
+DU-8.20	DLMF.Constants.hasSum_log_three	DLMF/Constants/BBP.lean	136	proved, no admission
+DU-8.20	DLMF.Constants.hasSum_log_two	DLMF/Constants/BBP.lean	157	proved, no admission
+DU-8.20	DLMF.Constants.hasSum_bbp_pi	DLMF/Constants/BBP.lean	87	proved, no admission
+DU-8.20	Real.arctan_inv_2_add_arctan_inv_3	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Trigonometric/Arctan.lean	329	proved, no admission
+DU-8.20	Real.two_mul_arctan_inv_2_sub_arctan_inv_7	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Trigonometric/Arctan.lean	332	proved, no admission
+DU-8.20	Real.four_mul_arctan_inv_5_sub_arctan_inv_239	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Trigonometric/Arctan.lean	339	proved, no admission
+DU-8.20	DLMF.Constants.gauss_machin	DLMF/Constants/BBP.lean	261	proved, no admission
+DU-9.01	DLMF.OrthogonalPolynomials.IsOrthogonalPolynomials	DLMF/OrthogonalPolynomials/Basic/General.lean	53	definition, no admission
+DU-9.01	DLMF.OrthogonalPolynomials.IsOrthogonalPolynomials.expansion	DLMF/OrthogonalPolynomials/Basic/General.lean	100	proved, no admission
+DU-9.01	DLMF.OrthogonalPolynomials.IsOrthogonalPolynomials.integral_eval_sq_pos	DLMF/OrthogonalPolynomials/Basic/General.lean	226	proved, no admission
+DU-9.01	DLMF.OrthogonalPolynomials.IsOrthogonalPolynomials.memLp_eval	DLMF/OrthogonalPolynomials/Basic/General.lean	117	proved, no admission
+DU-9.02	DLMF.OrthogonalPolynomials.three_term_recurrence_explicit	DLMF/OrthogonalPolynomials/GeneralRecurrenceCoefficients.lean	26	direct admission
+DU-9.02	DLMF.OrthogonalPolynomials.three_term_recurrence	DLMF/OrthogonalPolynomials/Basic/General.lean	245	proved, no admission
+DU-9.03	DLMF.OrthogonalPolynomials.orthogonal_polynomials_roots	DLMF/OrthogonalPolynomials/General.lean	351	proved, no admission
+DU-9.04	DLMF.OrthogonalPolynomials.orthogonal_and_norm_of_rodrigues	DLMF/OrthogonalPolynomials/GeneralRodrigues.lean	31	direct admission
+DU-9.05	DLMF.OrthogonalPolynomials.jacobiPolynomialP	DLMF/OrthogonalPolynomials/Basic/Definitions.lean	71	definition, no admission
+DU-9.05	DLMF.OrthogonalPolynomials.jacobiPolyPR	DLMF/OrthogonalPolynomials/ClassicalInstances.lean	515	definition, no admission
+DU-9.05	DLMF.OrthogonalPolynomials.jacobi_rodrigues	DLMF/OrthogonalPolynomials/Integrals/AngularRepresentations.lean	791	proved, no admission
+DU-9.06	DLMF.OrthogonalPolynomials.jacobi_differential_equation	DLMF/OrthogonalPolynomials/Differential/ClassicalEquations.lean	128	proved, no admission
+DU-9.07	DLMF.OrthogonalPolynomials.jacobi_reflection	DLMF/OrthogonalPolynomials/Differential/ClassicalEquations.lean	821	proved, no admission
+DU-9.07	DLMF.OrthogonalPolynomials.jacobiPolynomialP_one_eq	DLMF/OrthogonalPolynomials/Differential/ClassicalEquations.lean	781	proved, no admission
+DU-9.08	DLMF.OrthogonalPolynomials.jacobiPolynomialP_orthogonal	DLMF/OrthogonalPolynomials/Classical.lean	480	proved, no admission
+DU-9.08	DLMF.OrthogonalPolynomials.jacobi_norm_all	DLMF/OrthogonalPolynomials/Integrals/AngularRepresentations.lean	356	proved, no admission
+DU-9.08	DLMF.OrthogonalPolynomials.jacobi_recurrence	DLMF/OrthogonalPolynomials/Differential/ClassicalEquations.lean	303	proved, no admission
+DU-9.09	DLMF.OrthogonalPolynomials.ultrasphericalPolynomial	DLMF/OrthogonalPolynomials/Basic/Definitions.lean	83	definition, no admission
+DU-9.09	DLMF.OrthogonalPolynomials.ultrasphericalPolynomial_one_eq	DLMF/OrthogonalPolynomials/Differential/ClassicalEquations.lean	795	proved, no admission
+DU-9.09	DLMF.OrthogonalPolynomials.ultrasphericalPolynomial_even_at_zero	DLMF/OrthogonalPolynomials/Differential/ClassicalEquations.lean	872	proved, no admission
+DU-9.09	DLMF.OrthogonalPolynomials.ultrasphericalPolynomial_recurrence	DLMF/OrthogonalPolynomials/Differential/ClassicalEquations.lean	368	proved, no admission
+DU-9.09	DLMF.OrthogonalPolynomials.ultrasphericalPolynomial_differential_equation	DLMF/OrthogonalPolynomials/Differential/ClassicalEquations.lean	147	proved, no admission
+DU-9.09	DLMF.OrthogonalPolynomials.ultrasphericalPolynomial_norm_of_nonzero	DLMF/OrthogonalPolynomials/GegenbauerNorm.lean	27	direct admission
+DU-9.09	DLMF.OrthogonalPolynomials.ultrasphericalPolynomial_norm	DLMF/OrthogonalPolynomials/Integrals/AngularRepresentations.lean	616	proved, no admission
+DU-9.09	DLMF.OrthogonalPolynomials.ultrasph_isOrthogonalPolynomials	DLMF/OrthogonalPolynomials/ClassicalInstances.lean	926	proved, no admission
+DU-9.10	DLMF.OrthogonalPolynomials.ultrasphericalPolynomial_generating_function	DLMF/OrthogonalPolynomials/Series/ClassicalGenerating.lean	471	proved, no admission
+DU-9.11	DLMF.OrthogonalPolynomials.legendrePolynomialP	DLMF/OrthogonalPolynomials/Basic/Definitions.lean	76	definition, no admission
+DU-9.11	DLMF.OrthogonalPolynomials.legendre_differential_equation	DLMF/OrthogonalPolynomials/Differential/ClassicalEquations.lean	167	proved, no admission
+DU-9.11	DLMF.OrthogonalPolynomials.legendre_generating_function	DLMF/OrthogonalPolynomials/Series/ClassicalGenerating.lean	670	proved, no admission
+DU-9.12	Polynomial.Chebyshev.T	.lake/packages/mathlib/Mathlib/RingTheory/Polynomial/Chebyshev.lean	67	definition, no admission
+DU-9.12	Polynomial.Chebyshev.T_real_cos	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Trigonometric/Chebyshev/Basic.lean	149	proved, no admission
+DU-9.12	DLMF.OrthogonalPolynomials.chebyshevT_hypergeometric	DLMF/OrthogonalPolynomials/Differential/ClassicalEquations.lean	1017	proved, no admission
+DU-9.12	DLMF.OrthogonalPolynomials.chebyshevT_eq_jacobi	DLMF/OrthogonalPolynomials/Differential/ClassicalEquations.lean	1036	proved, no admission
+DU-9.12	Polynomial.Chebyshev.integral_eval_T_real_mul_eval_T_real_measureT_of_ne	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Trigonometric/Chebyshev/Orthogonality.lean	129	proved, no admission
+DU-9.12	Polynomial.Chebyshev.integral_eval_T_real_mul_self_measureT_zero	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Trigonometric/Chebyshev/Orthogonality.lean	136	proved, no admission
+DU-9.12	Polynomial.Chebyshev.integral_T_real_mul_self_measureT_of_ne_zero	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Trigonometric/Chebyshev/Orthogonality.lean	141	proved, no admission
+DU-9.13	Polynomial.Chebyshev.U	.lake/packages/mathlib/Mathlib/RingTheory/Polynomial/Chebyshev.lean	263	definition, no admission
+DU-9.13	DLMF.OrthogonalPolynomials.integral_eval_U_mul_of_ne	DLMF/OrthogonalPolynomials/General.lean	516	proved, no admission
+DU-9.13	DLMF.OrthogonalPolynomials.integral_eval_U_mul_self	DLMF/OrthogonalPolynomials/General.lean	568	proved, no admission
+DU-9.14	DLMF.OrthogonalPolynomials.laguerrePolynomialL	DLMF/OrthogonalPolynomials/Basic/Definitions.lean	64	definition, no admission
+DU-9.14	DLMF.OrthogonalPolynomials.laguerrePolyLR	DLMF/OrthogonalPolynomials/ClassicalInstances.lean	389	definition, no admission
+DU-9.14	DLMF.OrthogonalPolynomials.laguerrePolynomialL_differential_equation	DLMF/OrthogonalPolynomials/Differential/ClassicalEquations.lean	179	proved, no admission
+DU-9.15	DLMF.OrthogonalPolynomials.laguerrePolynomialL_orthogonal	DLMF/OrthogonalPolynomials/Classical.lean	220	proved, no admission
+DU-9.15	DLMF.OrthogonalPolynomials.laguerrePolynomialL_recurrence	DLMF/OrthogonalPolynomials/Differential/ClassicalEquations.lean	425	proved, no admission
+DU-9.15	DLMF.OrthogonalPolynomials.laguerrePolynomialL_generating_function	DLMF/OrthogonalPolynomials/Classical.lean	381	proved, no admission
+DU-9.15	DLMF.OrthogonalPolynomials.hasSum_laguerreExtended_generating_function	DLMF/OrthogonalPolynomials/Classical.lean	312	proved, no admission
+DU-9.16	DLMF.OrthogonalPolynomials.hermitePolynomialH	DLMF/OrthogonalPolynomials/Basic/Definitions.lean	56	definition, no admission
+DU-9.16	DLMF.OrthogonalPolynomials.deriv_gaussian_eq_hermitePolynomialH	DLMF/OrthogonalPolynomials/Classical.lean	58	proved, no admission
+DU-9.16	DLMF.OrthogonalPolynomials.iteratedDeriv_cexp_neg_sq	DLMF/OrthogonalPolynomials/Classical.lean	82	proved, no admission
+DU-9.16	DLMF.OrthogonalPolynomials.hermitePolynomialH_generating_function	DLMF/OrthogonalPolynomials/Classical.lean	137	proved, no admission
+DU-9.16	DLMF.OrthogonalPolynomials.hermitePolynomialH_differential_equation	DLMF/OrthogonalPolynomials/Differential/ClassicalEquations.lean	199	proved, no admission
+DU-9.17	DLMF.Confluent.kummerM_hermite_even	DLMF/Confluent/Relations.lean	769	proved, no admission
+DU-9.17	DLMF.Confluent.kummerM_hermite_odd	DLMF/Confluent/Relations.lean	788	proved, no admission
+DU-9.17	DLMF.OrthogonalPolynomials.hermitePolynomialH_even_eq_laguerrePolynomialL	DLMF/OrthogonalPolynomials/Explicit.lean	285	proved, no admission
+DU-9.17	DLMF.OrthogonalPolynomials.hermitePolynomialH_odd_eq_laguerrePolynomialL	DLMF/OrthogonalPolynomials/Explicit.lean	305	proved, no admission
+DU-9.18	DLMF.OrthogonalPolynomials.hermitePolynomialH_orthogonality	DLMF/OrthogonalPolynomials/Integrals/AngularRepresentations.lean	474	proved, no admission
+DU-9.18	DLMF.OrthogonalPolynomials.hermite_orthogonality	DLMF/OrthogonalPolynomials/Integrals/AngularRepresentations.lean	510	proved, no admission
+DU-9.18	DLMF.OrthogonalPolynomials.hermite_isOrthogonalPolynomials	DLMF/OrthogonalPolynomials/ClassicalInstances.lean	240	proved, no admission
+DU-9.19	DLMF.OrthogonalPolynomials.charlier	DLMF/OrthogonalPolynomials/Basic/AskeyScheme.lean	88	definition, no admission
+DU-9.19	DLMF.OrthogonalPolynomials.charlier_coefficient_eq_sum	DLMF/OrthogonalPolynomials/CharlierCoefficientNormalization.lean	27	direct admission
+DU-9.19	DLMF.OrthogonalPolynomials.hasSum_charlier_coefficient	DLMF/OrthogonalPolynomials/CharlierCoefficientNormalization.lean	35	direct admission
+DU-9.19	DLMF.OrthogonalPolynomials.charlier_orthogonality	DLMF/OrthogonalPolynomials/Hahn/Orthogonality.lean	370	proved, no admission
+DU-9.20	Polynomial.Chebyshev.irrational_of_isRoot_T_real	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Trigonometric/Chebyshev/RootsExtrema.lean	314	proved, no admission
+DU-9.20	irrational_cos_rat_mul_pi	.lake/packages/mathlib/Mathlib/NumberTheory/Niven.lean	164	proved, no admission
+DU-10.01	DLMF.QSeries.qPochhammer	DLMF/QSeries/Basic/Pochhammer.lean	33	definition, no admission
+DU-10.01	DLMF.QSeries.qPochhammerInf	DLMF/QSeries/Basic/Pochhammer.lean	39	definition, no admission
+DU-10.01	DLMF.QSeries.multipliable_one_sub_mul_pow	DLMF/QSeries/Basic/PochhammerProperties.lean	197	proved, no admission
+DU-10.01	DLMF.QSeries.tendsto_qPochhammer	DLMF/QSeries/Basic/PochhammerProperties.lean	206	proved, no admission
+DU-10.01	DLMF.QSeries.qPochhammerInf_ne_zero	DLMF/QSeries/Basic/PochhammerProperties.lean	90	proved, no admission
+DU-10.01	TauCeti.multipliable_one_sub_pow_mul	.lake/packages/TauCeti/TauCeti/Analysis/SpecialFunctions/QPochhammer.lean	168	proved, no admission
+DU-10.01	TauCeti.tprod_one_sub_pow_mul_ne_zero	.lake/packages/TauCeti/TauCeti/Analysis/SpecialFunctions/QPochhammer.lean	222	proved, no admission
+DU-10.01	DLMF.QHypergeometric.tendsto_qPochhammer_normalized	DLMF/QHypergeometric/ClassicalLimits/ShiftedFactorials.lean	50	proved, no admission
+DU-10.02	DLMF.QSeries.qBinom	DLMF/QSeries/Basic/Calculus.lean	28	definition, no admission
+DU-10.02	DLMF.QSeries.qBinom_succ_succ	DLMF/QSeries/Basic/CalculusProperties.lean	55	proved, no admission
+DU-10.02	DLMF.QSeries.qBinom_one	DLMF/QSeries/Basic/CalculusProperties.lean	73	proved, no admission
+DU-10.02	DLMF.QSeries.continuous_qBinom	DLMF/QSeries/Basic/CalculusProperties.lean	90	proved, no admission
+DU-10.02	DLMF.QSeries.tendsto_qBinom	DLMF/QSeries/Basic/CalculusProperties.lean	100	proved, no admission
+DU-10.02	DLMF.QSeries.qBinom_eq	DLMF/QSeries/QExponential.lean	72	proved, no admission
+DU-10.02	DLMF.QSeries.qPochhammer_eq_sum_qBinom	DLMF/QSeries/QBinomial.lean	38	proved, no admission
+DU-10.03	DLMF.QSeries.qDeriv	DLMF/QSeries/Basic/Calculus.lean	34	definition, no admission
+DU-10.03	DLMF.QSeries.qDeriv_mul	DLMF/QSeries/Basic/CalculusProperties.lean	115	proved, no admission
+DU-10.03	DLMF.QHypergeometric.qDeriv_leibniz	DLMF/QHypergeometric/Calculus/QDerivative.lean	194	proved, no admission
+DU-10.03	DLMF.QHypergeometric.qDerivIterate	DLMF/QHypergeometric/Basic/Calculus.lean	49	definition, no admission
+DU-10.03	DLMF.QSeries.qDeriv_cpow_real	DLMF/QSeries/BookIdentities.lean	30	direct admission
+DU-10.03	DLMF.QSeries.tendsto_qDeriv_of_hasDerivAt_real	DLMF/QSeries/BookIdentities.lean	38	direct admission
+DU-10.04	DLMF.QSeries.qDeriv_eq_zero_iff_eq_limit	DLMF/QSeries/BookIdentities.lean	59	direct admission
+DU-10.04	DLMF.QSeries.qDeriv_sin_log_eq_zero	DLMF/QSeries/BookIdentities.lean	45	direct admission
+DU-10.04	DLMF.QSeries.exists_pos_sin_log_ne_zero	DLMF/QSeries/BookIdentities.lean	53	direct admission
+DU-10.05	DLMF.QSeries.jacksonIntegral	DLMF/QSeries/Basic/Pochhammer.lean	44	definition, no admission
+DU-10.05	DLMF.QSeries.qDeriv_jacksonIntegral	DLMF/QSeries/QCalculus.lean	36	proved, no admission
+DU-10.05	DLMF.QSeries.jacksonIntegral_qDeriv	DLMF/QSeries/QCalculus.lean	52	proved, no admission
+DU-10.05	DLMF.QHypergeometric.jackson_series_hasSum	DLMF/QHypergeometric/Calculus/JacksonIntegral.lean	57	proved, no admission
+DU-10.05	DLMF.QSeries.summable_jackson_of_tendsto	DLMF/QSeries/BookIdentities.lean	68	direct admission
+DU-10.05	DLMF.QSeries.tendsto_jacksonIntegral_zero	DLMF/QSeries/BookIdentities.lean	76	direct admission
+DU-10.05	DLMF.QSeries.eq_jacksonIntegral_of_qDeriv_eq	DLMF/QSeries/BookIdentities.lean	83	direct admission
+DU-10.06	DLMF.QSeries.hasSum_qDeriv_powerSeries	DLMF/QSeries/BookIdentities.lean	93	direct admission
+DU-10.06	DLMF.QSeries.hasSum_jacksonIntegral_powerSeries	DLMF/QSeries/BookIdentities.lean	103	direct admission
+DU-10.06	DLMF.QHypergeometric.qDerivExtended_zero	DLMF/QHypergeometric/Basic/Calculus.lean	57	proved, no admission
+DU-10.06	DLMF.QSeries.hasSum_qLogarithm	DLMF/QSeries/Logarithm.lean	50	direct admission
+DU-10.06	DLMF.QSeries.qLogarithm_def	DLMF/QSeries/Basic/Logarithm.lean	27	proved, no admission
+DU-10.07	DLMF.QSeries.tsum_div_qPochhammer	DLMF/QSeries/Heine.lean	66	proved, no admission
+DU-10.07	DLMF.QSeries.tsum_qExp	DLMF/QSeries/QExponential.lean	90	proved, no admission
+DU-10.07	DLMF.QSeries.qExp_mul_qExp	DLMF/QSeries/QExponential.lean	146	proved, no admission
+DU-10.07	DLMF.QHypergeometric.qExp	DLMF/QHypergeometric/Basic/Elementary.lean	41	definition, no admission
+DU-10.07	DLMF.QHypergeometric.qExpBig	DLMF/QHypergeometric/Basic/Elementary.lean	45	definition, no admission
+DU-10.07	DLMF.QSeries.qDeriv_inv_qPochhammerInf	DLMF/QSeries/BookIdentities.lean	114	direct admission
+DU-10.07	DLMF.QHypergeometric.qPhi_classical_limit	DLMF/QHypergeometric/Convergence.lean	534	proved, no admission
+DU-10.08	DLMF.QSeries.qLogarithm	DLMF/QSeries/Basic/Logarithm.lean	24	definition, no admission
+DU-10.08	DLMF.QSeries.qLogarithm_def	DLMF/QSeries/Basic/Logarithm.lean	27	proved, no admission
+DU-10.08	DLMF.QSeries.summable_qLogarithm	DLMF/QSeries/Logarithm.lean	29	direct admission
+DU-10.08	DLMF.QSeries.qLogarithm_eq_logarithmicDeriv	DLMF/QSeries/Logarithm.lean	36	direct admission
+DU-10.08	DLMF.QSeries.qLogarithm_mul	DLMF/QSeries/Logarithm.lean	43	direct admission
+DU-10.08	DLMF.QSeries.hasSum_qLogarithm	DLMF/QSeries/Logarithm.lean	50	direct admission
+DU-10.08	DLMF.QSeries.tendsto_qLogarithm	DLMF/QSeries/Logarithm.lean	56	direct admission
+DU-10.09	DLMF.QHypergeometric.qPhiTerm	DLMF/QHypergeometric/Basic/Series.lean	69	definition, no admission
+DU-10.09	DLMF.QHypergeometric.qPhi	DLMF/QHypergeometric/Basic/Series.lean	74	definition, no admission
+DU-10.09	DLMF.QHypergeometric.qPhiExponent	DLMF/QHypergeometric/Basic/Series.lean	65	definition, no admission
+DU-10.09	DLMF.QHypergeometric.QDenominatorRegular	DLMF/QHypergeometric/Basic/Series.lean	86	definition, no admission
+DU-10.09	DLMF.QHypergeometric.QDenominatorRegularThrough	DLMF/QHypergeometric/Basic/Series.lean	103	definition, no admission
+DU-10.09	DLMF.QHypergeometric.QTerminating	DLMF/QHypergeometric/Basic/Series.lean	92	definition, no admission
+DU-10.09	DLMF.QHypergeometric.qPhiPartial	DLMF/QHypergeometric/Basic/Series.lean	83	definition, no admission
+DU-10.09	DLMF.QHypergeometric.qPhi_hasSum	DLMF/QHypergeometric/Convergence.lean	67	proved, no admission
+DU-10.09	DLMF.QHypergeometric.qPhi_analytic_disc	DLMF/QHypergeometric/Convergence.lean	713	proved, no admission
+DU-10.09	DLMF.QHypergeometric.qPhi_analytic_entire	DLMF/QHypergeometric/Convergence.lean	725	proved, no admission
+DU-10.09	DLMF.QHypergeometric.qPhi_terminates	DLMF/QHypergeometric/Convergence.lean	393	proved, no admission
+DU-10.10	DLMF.QHypergeometric.qPhi_classical_limit	DLMF/QHypergeometric/Convergence.lean	534	proved, no admission
+DU-10.11	DLMF.QSeries.q_binomial_theorem	DLMF/QSeries/Pochhammer.lean	190	proved, no admission
+DU-10.11	DLMF.QHypergeometric.one_phi_zero	DLMF/QHypergeometric/BasicSummations/OnePhiZero.lean	406	proved, no admission
+DU-10.12	DLMF.QSeries.heine_transformation	DLMF/QSeries/Identities.lean	333	proved, no admission
+DU-10.12	DLMF.QHypergeometric.heine_first	DLMF/QHypergeometric/BasicSummations/Heine.lean	241	proved, no admission
+DU-10.13	DLMF.QSeries.heine_transformation_three	DLMF/QSeries/Heine.lean	123	proved, no admission
+DU-10.14	DLMF.QSeries.q_gauss_summation	DLMF/QSeries/Heine.lean	87	proved, no admission
+DU-10.15	DLMF.QHypergeometric.q_chu_vandermonde_first	DLMF/QHypergeometric/BasicSummations/QGauss.lean	36	proved, no admission
+DU-10.15	DLMF.QHypergeometric.QDenominatorRegularThrough	DLMF/QHypergeometric/Basic/Series.lean	103	definition, no admission
+DU-10.15	DLMF.QSeries.q_chu_vandermonde	DLMF/QSeries/Heine.lean	145	proved, no admission
+DU-10.16	DLMF.QHypergeometric.QuadraticTransformation.q_pfaff_saalschutz_ratio	DLMF/QHypergeometric/TerminatingQuadraticTransformation.lean	139	proved, no admission
+DU-10.16	DLMF.QHypergeometric.PfaffSaalschutz.sum_eq_quotient_of_ne_zero	DLMF/QHypergeometric/PfaffSaalschutz.lean	77	proved, no admission
+DU-10.17	DLMF.OrthogonalPolynomials.littleQJacobi	DLMF/OrthogonalPolynomials/Basic/QFamilies.lean	59	definition, no admission
+DU-10.17	DLMF.OrthogonalPolynomials.bigQJacobi	DLMF/OrthogonalPolynomials/Basic/QFamilies.lean	54	definition, no admission
+DU-10.18	DLMF.QSeries.tsum_pow_div_one_sub_pow_sq	DLMF/QSeries/BookIdentities.lean	121	direct admission
+DU-10.18	DLMF.QSeries.Real.erdosBorweinConstant	DLMF/QSeries/BookIdentities.lean	130	definition, no admission
+DU-10.18	DLMF.QSeries.Real.summable_erdosBorweinConstant	DLMF/QSeries/BookIdentities.lean	138	direct admission
+DU-10.18	DLMF.QSeries.Real.hasSum_erdosBorweinConstant_accelerated	DLMF/QSeries/BookIdentities.lean	144	direct admission
+DU-10.18	DLMF.QSeries.Real.irrational_erdosBorweinConstant	DLMF/QSeries/BookIdentities.lean	152	direct admission
+DU-A.01	DLMF.Zeta.lerchPhi	DLMF/Zeta/Basic/Polylog.lean	116	definition, no admission
+DU-A.01	DLMF.Zeta.hasSum_lerchPhi	DLMF/Zeta/Basic/LerchProperties.lean	101	proved, no admission
+DU-A.01	DLMF.Zeta.lerchPhi_eq_integral	DLMF/Zeta/Lerch.lean	174	proved, no admission
+DU-A.01	DLMF.Zeta.analyticOnNhd_lerchPhi	DLMF/Zeta/Basic/LerchProperties.lean	132	proved, no admission
+DU-A.01	DLMF.Zeta.tendsto_lerchPhi_exp_zero	DLMF/Zeta/Basic/LerchProperties.lean	262	proved, no admission
+DU-A.01	DLMF.Zeta.hurwitzZetaComplex_eq_lerchPhi	DLMF/Zeta/Lerch.lean	82	proved, no admission
+DU-A.01	DLMF.Zeta.polylog_eq_mul_lerchPhi_of_mem_slitOne	DLMF/Zeta/Basic/LerchProperties.lean	228	proved, no admission
+DU-A.01	DLMF.Zeta.Real.alternatingHurwitzZeta_eq_lerchPhi	DLMF/Zeta/AlternatingHurwitz.lean	63	direct admission
+DU-B.01	AnalyticAt	.lake/packages/mathlib/Mathlib/Analysis/Analytic/Basic.lean	110	definition, no admission
+DU-B.01	AnalyticOnNhd	.lake/packages/mathlib/Mathlib/Analysis/Analytic/Basic.lean	120	definition, no admission
+DU-B.01	HasFPowerSeriesOnBall	.lake/packages/mathlib/Mathlib/Analysis/Analytic/Basic.lean	74	definition, no admission
+DU-B.01	FormalMultilinearSeries.ofScalars	.lake/packages/mathlib/Mathlib/Analysis/Analytic/OfScalars.lean	38	definition, no admission
+DU-B.01	HasFPowerSeriesOnBall.factorial_smul	.lake/packages/mathlib/Mathlib/Analysis/Calculus/FDeriv/Analytic.lean	864	proved, no admission
+DU-B.02	DLMF.AsymptoticApproximations.HasPoincareExpansion.deriv	DLMF/AsymptoticApproximations/Basics/Calculus.lean	39	proved, no admission
+DU-B.03	expNegInvGlue.contDiff	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/SmoothTransition.lean	140	proved, no admission
+DU-B.03	Real.contDiff_exp_neg_inv_sq	DLMFMathlib/Analysis/Analytic/DerivativeCriterion.lean	39	proved, no admission
+DU-B.03	Real.iteratedDeriv_exp_neg_inv_sq_zero	DLMFMathlib/Analysis/Analytic/DerivativeCriterion.lean	49	direct admission
+DU-B.03	Real.not_analyticAt_exp_neg_inv_sq_zero	DLMFMathlib/Analysis/Analytic/DerivativeCriterion.lean	55	direct admission
+DU-B.04	Real.analyticOnNhd_iff_iteratedDeriv_bound	DLMFMathlib/Analysis/Analytic/DerivativeCriterion.lean	30	direct admission
+DU-B.05	DLMF.Gamma.analyticAt_Gamma	DLMF/Gamma/Polygamma.lean	95	proved, no admission
+DU-B.05	Complex.Gamma_ofReal	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Gamma/Basic.lean	419	proved, no admission
+DU-B.06	AnalyticOnNhd.eqOn_of_preconnected_of_frequently_eq	.lake/packages/mathlib/Mathlib/Analysis/Analytic/IsolatedZeros.lean	234	proved, no admission
+DU-B.06	AnalyticOnNhd.eqOn_of_preconnected_of_mem_closure	.lake/packages/mathlib/Mathlib/Analysis/Analytic/IsolatedZeros.lean	247	proved, no admission
+DU-B.06	AnalyticAt.exists_eventuallyEq_pow_smul_ne_zero_iff	.lake/packages/mathlib/Mathlib/Analysis/Analytic/IsolatedZeros.lean	178	proved, no admission
+DU-B.06	AnalyticAt.analyticOrderAt_eq_natCast	.lake/packages/mathlib/Mathlib/Analysis/Analytic/Order.lean	92	proved, no admission
+DU-B.06	AnalyticOnNhd.analyticOrderAt_ne_top_of_isPreconnected	.lake/packages/mathlib/Mathlib/Analysis/Analytic/Order.lean	654	proved, no admission
+DU-B.07	ODE.analyticOnNhd_of_hasDerivAt_matrix_mulVec	DLMFMathlib/Analysis/ODE/RealAnalyticRegularity.lean	29	direct admission
+DU-B.07	ODE.analyticOnNhd_of_iteratedDeriv_eq_sum	DLMFMathlib/Analysis/ODE/RealAnalyticRegularity.lean	38	direct admission
+DU-C.01	Real.arsinh	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Arsinh.lean	54	definition, no admission
+DU-C.01	Real.sinh_arsinh	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Arsinh.lean	75	proved, no admission
+DU-C.01	Real.arsinh_sinh	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Arsinh.lean	96	proved, no admission
+DU-C.01	Real.hasDerivAt_arsinh	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Arsinh.lean	166	proved, no admission
+DU-C.01	Real.arcosh	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Arcosh.lean	61	definition, no admission
+DU-C.01	Real.cosh_arcosh	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Arcosh.lean	77	proved, no admission
+DU-C.01	Real.arcosh_cosh	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Arcosh.lean	93	proved, no admission
+DU-C.01	Real.hasDerivAt_arcosh	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Arcosh.lean	160	proved, no admission
+DU-C.02	DLMF.Elementary.arsinh_eq_ordinaryHypergeometric	DLMF/Elementary/InverseHyperbolicSeries.lean	28	direct admission
+DU-C.02	DLMF.Elementary.arsinh_sq_eq_generalizedHypergeometric	DLMF/Elementary/InverseHyperbolicSeries.lean	35	direct admission
+DU-C.02	DLMF.Elementary.hasSum_arsinh_sq	DLMF/Elementary/InverseHyperbolicSeries.lean	43	direct admission
+DU-D.01	Asymptotics.isBigO_integral_exp_neg_I_mul_sq	DLMFMathlib/Analysis/Asymptotics/QuadraticStationaryPhase.lean	30	direct admission
+DU-D.02	Asymptotics.isBigO_integral_mul_exp_neg_I_mul_sq	DLMFMathlib/Analysis/Asymptotics/QuadraticStationaryPhase.lean	39	direct admission

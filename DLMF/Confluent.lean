@@ -5,6 +5,14 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
+public import DLMF.Confluent.ParabolicCylinder.LogarithmicRelation
+public import DLMF.Confluent.JointRegularizedParameters
+public import DLMF.Confluent.Asymptotics.WhittakerLogarithmic
+
+public import DLMF.Confluent.LaguerreContinuation
+public import DLMF.Confluent.HermiteBasis
+
+public import DLMF.Confluent.ParameterMinimality
 public import DLMF.Confluent.TricomiLaplace
 public import DLMF.Confluent.MobiusTaylor
 public import DLMF.Confluent.KummerProperties
@@ -12,6 +20,9 @@ public import DLMF.Confluent.Regularized
 public import DLMF.Confluent.ParameterDerivatives
 public import DLMF.Confluent.LogSeries
 public import DLMF.Confluent.BasicProperties
+public import DLMF.Confluent.ConfluenceUniform
+public import DLMF.Confluent.Singularities
+public import DLMF.Confluent.BarnesContours
 public import DLMF.Confluent.Whittaker
 public import DLMF.Confluent.Recurrence
 public import DLMF.Confluent.ConnectionWronskians
@@ -39,6 +50,10 @@ public import DLMF.Confluent.MathlibCoverage
 public import DLMF.Confluent.Continuation
 public import DLMF.Confluent.LargeA
 public import DLMF.Confluent.LargeASharp
+
+public import DLMF.Confluent.ConvergingFactors
+
+public import DLMF.Confluent.FrobeniusPair
 
 /-!
 # Confluent hypergeometric functions (AAR Chapter 4, §§4.1–4.4; DLMF Chapter 13)

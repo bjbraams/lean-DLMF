@@ -1,0 +1,497 @@
+/-
+Copyright (c) 2026 Bastiaan J Braams. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Bastiaan J Braams
+-/
+import DLMF
+import DLMFMathlib
+
+/-!
+# Axiom audit for the DLMF proof round of 2026-11-13
+
+Completed proofs and their supporting APIs must use only Lean's standard axioms.
+-/
+
+#print axioms DLMF.EllipticIntegrals.analyticAt_symmetricEllipticRF_zero_comp
+#print axioms DLMF.EllipticIntegrals.analyticAt_symmetricEllipticRD_zero_comp
+#print axioms DLMF.EllipticIntegrals.legendreRelation_symmetricElliptic
+
+#print axioms DLMF.BernoulliEuler.eulerNumber_two_mul_modEq_prime_pow
+#print axioms MeasureTheory.integral_Ioi_deriv_mul_eq_of_hasCompactSupport
+#print axioms Distribution.lineDerivOp_ofFun_of_contDiff
+#print axioms Distribution.lineDerivOp_ofFun_indicator_Ioi
+#print axioms Distribution.lineDerivOp_ofFun_piecewise
+#print axioms Polynomial.natDegree_bernoulli_le
+#print axioms Polynomial.exists_eval_add_one_sub_eval_eq
+#print axioms Polynomial.eval_natCast_eq_sum_choose_mul_eval
+
+#print axioms DLMF.EllipticIntegrals.analyticAt_symmetricEllipticRC_comp
+#print axioms DLMF.EllipticIntegrals.sqrt_mul_symmetricEllipticRC_zero
+#print axioms DLMF.EllipticIntegrals.symmetricEllipticRC_addition_zero
+
+#print axioms DLMF.AlgebraicAnalytic.iterDeriv_piecewise
+#print axioms DLMF.Hypergeometric.gaussPS_square_recurrence
+#print axioms DLMF.Hypergeometric.GeneralSquare.coeff_gaussPS_square
+#print axioms DLMF.Hypergeometric.generalizedHypergeometric_general_square_hasSum
+
+#print axioms Polynomial.eval_natCast_eq_sum_neg_natCast
+
+#print axioms DLMF.Combinatorics.signedStirlingFirst_sub_eq_sum
+#print axioms DLMF.Combinatorics.stirlingSecond_sub_eq_sum
+#print axioms Real.integrableOn_inv_sqrt_add_mul_sqrt_add_mul_sqrt_add
+#print axioms Real.integral_inv_sqrt_mul_sqrt_add_mul_sqrt_add_mul_sqrt_add
+#print axioms Real.integral_inv_sqrt_add_mul_sqrt_add_mul_sqrt_add_pos
+#print axioms Real.integrableOn_inv_sqrt_mul_sqrt_add_mul_sqrt_add_mul_sqrt_add
+#print axioms DLMF.EllipticIntegrals.integral_symmetricEllipticRJ_sq
+
+#print axioms MeasureTheory.integrableOn_Ioi_symmetric_div
+#print axioms MeasureTheory.tendsto_integral_cut_div_eq_integral_symmetric_div
+#print axioms MeasureTheory.integrable_mul_conjugatePoissonKernel
+#print axioms MeasureTheory.integral_conjugatePoissonKernel_eq_integral_Ioi
+#print axioms MeasureTheory.tendsto_integral_conjugatePoissonKernel
+
+#print axioms Real.integral_exp_mul_I_mul_sign_mul_exp_neg_mul_abs
+#print axioms Real.integrable_sign_mul_exp_neg_mul_abs
+#print axioms Real.fourierInv_sign_mul_exp_neg_mul_abs
+#print axioms Real.fourierInv_sign_mul_exp_neg_two_pi_mul_abs
+#print axioms Real.integral_sign_mul_fourierInv_eq_integral_symmetric_div
+
+#print axioms DLMF.AlgebraicAnalytic.boundedTempered_apply
+#print axioms Real.integrableOn_inv_sqrt_add_mul_add
+#print axioms Real.integral_inv_sqrt_add_mul_add_linear
+#print axioms Real.integrableOn_inv_sqrt_add_mul_add_linear
+#print axioms Real.integrableOn_inv_sqrt_mul_sqrt_add_mul_sqrt_add
+#print axioms DLMF.EllipticIntegrals.integral_symmetricEllipticRJ_scale
+#print axioms DLMF.Hypergeometric.exists_norm_appellF4Coeff_le_geom
+#print axioms DLMF.Hypergeometric.hasSum_appellF4Family_fst
+#print axioms DLMF.Hypergeometric.summable_appellF4Family
+#print axioms DLMF.Hypergeometric.norm_pochhammer_add_mul_factorial_le
+#print axioms DLMF.Hypergeometric.norm_pochhammer_add_div_factorial_le
+
+#print axioms DLMF.AlgebraicAnalytic.fourierTransformTempered_sign
+
+#print axioms DLMF.AlgebraicAnalytic.fourierTransformTempered_heaviside
+
+#print axioms Polynomial.evenCentralFactorial
+#print axioms Polynomial.evenCentralFactorial_def
+#print axioms Polynomial.evenCentralFactorial_zero
+#print axioms Polynomial.evenCentralFactorial_succ
+#print axioms Polynomial.eval_evenCentralFactorial_natCast_of_lt
+#print axioms Polynomial.eval_evenCentralFactorial_neg
+#print axioms Polynomial.monic_evenCentralFactorial
+#print axioms Polynomial.natDegree_evenCentralFactorial
+#print axioms Polynomial.descPochhammer_eval_succ_add_one
+#print axioms Polynomial.descPochhammer_eval_add_one_sub
+#print axioms Polynomial.eval_evenCentralFactorial_succ_eq_mul_descPochhammer
+#print axioms Polynomial.descPochhammer_eval_neg_one
+#print axioms Polynomial.eval_derivative_descPochhammer_natCast
+#print axioms Polynomial.exists_sum_C_mul_evenCentralFactorial
+#print axioms Polynomial.exists_evenCentralFactorial_discreteAntiderivative
+#print axioms Polynomial.fwdDiff_iter_evenCentralFactorial
+#print axioms Polynomial.X_pow_two_mul_eq_sum_evenCentralFactorial
+#print axioms Finset.sum_neg_one_pow_mul_choose_mul_sub_pow_even
+#print axioms DLMF.BernoulliEuler.umbralBernoulli_evenCentralFactorial_succ
+#print axioms DLMF.BernoulliEuler.bernoulli_two_mul_eq_explicit₃
+#print axioms DLMF.BernoulliEuler.umbralBernoulli_C_mul
+#print axioms DLMF.BernoulliEuler.umbralBernoulli_add
+#print axioms DLMF.BernoulliEuler.umbralBernoulli_sub
+#print axioms DLMF.BernoulliEuler.umbralBernoulli_sum
+#print axioms Finset.sum_Icc_one_eq_sum_range_add_one
+#print axioms Finset.sum_range_succ_eq_sum_Icc_of_zero
+#print axioms neg_one_pow_sub_eq_mul
+
+#print axioms DLMF.Hypergeometric.regularized_euler_binomial_convolution
+#print axioms DLMF.Hypergeometric.BurchnallChaundy.coefficient_def
+#print axioms DLMF.Hypergeometric.BurchnallChaundy.coefficient_factorization
+#print axioms DLMF.Hypergeometric.BurchnallChaundy.exists_norm_coefficient_le
+#print axioms DLMF.Hypergeometric.BurchnallChaundy.coefficient_sum
+#print axioms DLMF.Hypergeometric.BurchnallChaundy.term_def
+#print axioms DLMF.Hypergeometric.BurchnallChaundy.exists_summable_term
+#print axioms DLMF.Hypergeometric.BurchnallChaundy.family_def
+#print axioms DLMF.Hypergeometric.BurchnallChaundy.hasSum_family
+#print axioms DLMF.Hypergeometric.BurchnallChaundy.hasSum_family_fst
+#print axioms DLMF.Hypergeometric.BurchnallChaundy.hasSum_appellF4Family_snd
+#print axioms DLMF.Hypergeometric.BurchnallChaundy.hasSum_term_fst
+#print axioms DLMF.Hypergeometric.BurchnallChaundy.hasSum_expansion
+#print axioms DLMF.Hypergeometric.appellF4_burchnall_chaundy
+#print axioms DLMF.Hypergeometric.appellF4_reduction_appellF1
+#print axioms DLMF.Hypergeometric.threeFTwo_self_lower_eq_ordinaryHypergeometric
+#print axioms DLMF.Hypergeometric.integral_cpow_mul_ordinaryHypergeometric
+#print axioms DLMF.EllipticIntegrals.integral_cpow_mul_symmetricEllipticR_two
+
+#print axioms ContDiff.deriv_eq_sub_sub_integral_iteratedDeriv_two
+#print axioms ContDiff.integrable_deriv_of_integrable_iteratedDeriv_two
+
+#print axioms DLMF.EllipticIntegrals.integral_cpow_mul_symmetricEllipticRF_zero
+#print axioms DLMF.EllipticIntegrals.integral_cpow_mul_symmetricEllipticRG_zero
+#print axioms DLMF.EllipticIntegrals.integral_cpow_mul_symmetricEllipticRD_zero
+
+#print axioms Matrix.det_polynomial_moment_matrix
+#print axioms Matrix.det_hankel_eq_prod_of_orthogonal_polynomials
+
+#print axioms MeasureTheory.hasSum_integral_mul_of_norm_le_one
+
+#print axioms RCLike.integrable_pow_div_cosh
+#print axioms RCLike.integrable_eval_polynomial_div_cosh
+
+#print axioms ContDiff.norm_le_integral_norm_add_integral_norm_deriv_unit
+#print axioms ContDiff.summable_norm_restrict_comp_add_int_unit
+#print axioms ContDiff.summable_norm_restrict_comp_add_int
+#print axioms ContDiff.summable_fourier_int_of_integrable_iteratedDeriv_two
+#print axioms Real.hasSum_poisson_of_integrable_iteratedDeriv_two
+#print axioms DLMF.AlgebraicAnalytic.poisson_summation
+
+#print axioms Real.sqrt_one_add_mul_tan_sq
+#print axioms Real.sin_add_arctan_mul_tan
+#print axioms Real.cos_add_arctan_mul_tan
+#print axioms Real.hasDerivAt_add_arctan_mul_tan
+#print axioms Real.sqrt_one_sub_landen_mul_sin_sq
+
+#print axioms DLMF.Hypergeometric.integral_eulerWeight_mul_div_pow
+#print axioms DLMF.Hypergeometric.integrableOn_eulerWeight_mul_div_pow
+#print axioms DLMF.Hypergeometric.F4EulerSeries.crossRatio_def
+#print axioms DLMF.Hypergeometric.F4EulerSeries.norm_crossRatio_lt
+#print axioms DLMF.Hypergeometric.F4EulerSeries.kernel_split
+#print axioms DLMF.Hypergeometric.F4EulerSeries.integral_moment
+#print axioms DLMF.Hypergeometric.F4EulerSeries.hasSum_kernel_integral
+#print axioms DLMF.Hypergeometric.F4EulerSeries.euler_germ
+#print axioms DLMF.Hypergeometric.appellF4_euler_germ
+#print axioms DLMF.EllipticIntegrals.symmetricEllipticRC_eq_integral_RC
+
+#print axioms Finset.sum_piAntidiag_eq_sum_bounded
+#print axioms Polynomial.prod_monomial_pow
+#print axioms Polynomial.coeff_pow_sum_monomial
+#print axioms Polynomial.coeff_sum_powers_sum_monomial
+
+#print axioms Matrix.det_polynomial_mixed_moment_matrix
+#print axioms Matrix.det_hilbert
+
+#print axioms iteratedDeriv_comp_eq_of_forall_iteratedDeriv_eq
+#print axioms iteratedDeriv_comp_eq_sum_multiplicities
+#print axioms DLMF.AlgebraicAnalytic.iteratedDeriv_comp_faaDiBruno'
+#print axioms DLMF.AlgebraicAnalytic.iteratedDeriv_comp_faaDiBruno
+
+#print axioms Polynomial.eval_ascPochhammer_add_one_mul_eval_descPochhammer
+#print axioms Polynomial.apply_ascPochhammer_mul_descPochhammer
+#print axioms Polynomial.exists_linearMap_pow_eq_bernoulli
+#print axioms DLMF.BernoulliEuler.det_hankel_eulerNumber
+#print axioms DLMF.BernoulliEuler.det_hankel_bernoulli
+#print axioms DLMF.OrthogonalPolynomials.integral_meixnerPollaczek_mul_div_cosh
+#print axioms DLMF.BernoulliEuler.EulerMomentPolynomials.polynomial
+#print axioms DLMF.BernoulliEuler.EulerMomentPolynomials.polynomial_zero
+#print axioms DLMF.BernoulliEuler.EulerMomentPolynomials.polynomial_one
+#print axioms DLMF.BernoulliEuler.EulerMomentPolynomials.polynomial_add_two
+#print axioms DLMF.BernoulliEuler.EulerMomentPolynomials.monic_polynomial_and_natDegree
+#print axioms DLMF.BernoulliEuler.EulerMomentPolynomials.eval_polynomial_two_mul_I
+#print axioms DLMF.BernoulliEuler.eulerNumber_eq_integral_moment
+#print axioms DLMF.BernoulliEuler.linearMap_eq_integral_euler_moment
+#print axioms DLMF.BernoulliEuler.linearMap_polynomial_mul
+#print axioms DLMF.EllipticIntegrals.incEllInt_landen_descending
+#print axioms DLMF.Theta.jacobiThetaFourTau_second_deriv_eq_tsum
+#print axioms DLMF.Theta.jacobiThetaFourTau_second_deriv_zero_hasSum
+#print axioms DLMF.Theta.differentiableOn_jacobiThetaFourTau_second_deriv_zero
+#print axioms DLMF.EllipticIntegrals.completeEllipticE_eq_jacobiThetaFourTau_second_deriv
+#print axioms DLMF.EllipticIntegrals.completeEllipticE_eq_nome_series
+#print axioms DLMF.Elementary.arcsin_continued_fraction
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.hasContinuedFraction_arcsin
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.hasContinuedFraction_arcsinh
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.tendsto_convergent
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.convergent_bound
+
+#print axioms Complex.setIntegral_unitCube_add_real_of_periodic
+#print axioms Complex.analyticOnNhd_integral_unitCube_affine
+#print axioms Complex.setIntegral_unitCube_add_complex_of_periodic
+
+#print axioms DLMF.RiemannTheta.eq_const_mul_riemannTheta_of_quasiPeriodic
+
+#print axioms DLMF.AlgebraicAnalytic.IsSimpleClosedContour.jordan
+#print axioms DLMF.AlgebraicAnalytic.IsSimpleClosedContour.windingNumber_eq_one_or_neg_one
+
+#print axioms Complex.exists_isOpen_superset_analyticAt_ne_zero_sdiff
+#print axioms Complex.residue_mul_logDeriv_eq_mul_order
+#print axioms Complex.integral_deriv_smul_mul_logDeriv_eq_sum
+
+#print axioms DLMF.AlgebraicAnalytic.IsSimpleClosedContour.argumentPrinciple_mul_id'
+#print axioms DLMF.AlgebraicAnalytic.IsSimpleClosedContour.argumentPrinciple_mul_id
+
+#print axioms Complex.integral_deriv_div_im_eq_phase_sub
+
+#print axioms DLMF.AlgebraicAnalytic.IsSimpleClosedContour.argument_principle
+#print axioms Real.tendsto_intervalIntegral_mul_sin_div_of_boundedVariationOn
+#print axioms Real.analyticAt_sinc
+#print axioms Real.contDiff_sinc
+#print axioms Real.cosinePartialSumKernel
+#print axioms Real.cosinePartialSumKernel_def
+#print axioms Real.cosinePartialSumKernel_zero
+#print axioms Real.cosinePartialSumKernel_succ
+#print axioms Real.two_mul_sin_mul_cosinePartialSumKernel
+#print axioms Real.cosinePartialSumKernel_neg
+#print axioms Real.cosinePartialSumKernel_add_two_pi
+#print axioms Real.continuous_cosinePartialSumKernel
+#print axioms Real.integral_cosinePartialSumKernel
+#print axioms Real.integral_mul_cosinePartialSumKernel_eq
+#print axioms Real.tendsto_integral_cosinePartialSumKernel_oneSided
+#print axioms Real.tendsto_integral_cosinePartialSumKernel_of_mem_Ioo
+#print axioms Real.tendsto_integral_cosinePartialSumKernel_zero
+#print axioms Real.integral_mul_cos_and_sin_of_ae_hasDerivAt
+#print axioms Real.tendsto_integral_fourierSeries_of_intervalIntegrable
+#print axioms DLMF.AlgebraicAnalytic.tendsto_integral_fourierSeries
+
+#print axioms Function.Periodic.isBigO_integral_div_sub_mean_mul_log
+
+#print axioms Real.intervalIntegrable_abs_sin_div
+#print axioms Real.isBigO_integral_abs_sin_div_sub_log
+#print axioms Real.exists_bound_integral_abs_sin_div_sin_half_sub
+#print axioms Real.isEquivalent_integral_abs_sin_div_sin_half
+#print axioms DLMF.AlgebraicAnalytic.lebesgueConstant_isEquivalent
+#print axioms Asymptotics.isBigO_tsum_nat_pow_sub_sum
+#print axioms Asymptotics.summable_nat_pow_of_le_exponent
+#print axioms Bernoulli.Regularization.padicNorm_powerSum_sub_scaled_sub_le
+#print axioms Bernoulli.Regularization.powerSum
+#print axioms Bernoulli.Regularization.powerSum_def
+#print axioms Bernoulli.Regularization.powerSum_sub_scaled_eq_sum_not_dvd
+#print axioms Bernoulli.Regularization.tendsto_padicNorm_sub_powerSum
+#print axioms Bernoulli.Regularization.tendsto_padicNorm_sub_powerSum_sub_scaled
+#print axioms Bernoulli.padicNorm_bernoulli_le
+#print axioms Bernoulli.padicNorm_bernoulli_le_of_prime_pow_dvd
+#print axioms Bernoulli.padicNorm_one_sub_pow_mul_bernoulli_div_le
+#print axioms Bernoulli.padicNorm_prime_mul_bernoulli_sub_sum_pow_le
+#print axioms Bernoulli.tendsto_padicNorm_sum_range_pow_div_sub
+#print axioms Complex.norm_add_ofReal_le_of_re_gap
+#print axioms DLMF.BernoulliEuler.eulerNumber_two_mul_modEq_two_pow'
+#print axioms DLMF.BernoulliEuler.prime_mul_bernoulli_two_mul_modEq'
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.arcsinPrincipal_eq_gauss
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.convergent
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.convergent_def
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.convergent_eq_gauss
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.denominator
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.denominator_def
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.differentiableOn_convergent
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.differentiableOn_value
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.gaussBackwardSolution_shift
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.gaussBackward_ratio
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.gaussDenominator
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.gaussDenominator_def
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.gaussNumerator
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.gaussNumerator_def
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.gaussPartialNumerator_eq_paired
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.gaussPartialNumerator_neg
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.gaussPartialNumerator_shift
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.hasContinuedFraction_scaled_arcsin
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.inv_mem_arcsinCutPlane
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.isLocallyBoundedOn_convergent
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.mul_gauss_eq_arcsin_div_sqrt
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.numerator
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.numerator_def
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.ofReal_gaussNumerator
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.pairedIndex
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.pairedIndex_add_succ
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.pairedIndex_def
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.pairedIndex_succ_two_le
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.scaled_numerator
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.tendsto_arcsin
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.tendsto_convergent_ofReal
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.tendsto_gauss_inverse
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.value
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.value_def
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.weight
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.weight_pos
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.weight_succ
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.weight_succ_mul_index
+#print axioms DLMF.Elementary.ArcsineContinuedFraction.weight_zero
+#print axioms DLMF.EllipticIntegrals.continuous_sphere_sqrt_integral
+#print axioms DLMF.EllipticIntegrals.integral_symmetricEllipticRC_quarter_eq_symmetricEllipticRF
+#print axioms DLMF.EllipticIntegrals.sphere_integral_eq_eight_mul_quarter
+#print axioms DLMF.EllipticIntegrals.symmetricEllipticR_three_half_eq_sphere_integral
+#print axioms DLMF.Hypergeometric.BurchnallChaundy.coefficient
+#print axioms DLMF.Hypergeometric.BurchnallChaundy.family
+#print axioms DLMF.Hypergeometric.BurchnallChaundy.term
+#print axioms DLMF.Hypergeometric.F4EulerSeries.crossRatio
+#print axioms DLMF.Hypergeometric.ThomaeTransformation.betaIntegral_mul_threeFTwo_eq
+#print axioms DLMF.Hypergeometric.ThomaeTransformation.generalizedHypergeometric_eq
+#print axioms DLMF.Hypergeometric.ThomaeTransformation.generalizedHypergeometric_eq_of_re_pos
+#print axioms DLMF.Hypergeometric.ThomaeTransformation.threeFTwo_eq_generalizedHypergeometric
+#print axioms DLMF.Hypergeometric.UnitParameterSeries.analyticAt_coefficient
+#print axioms DLMF.Hypergeometric.UnitParameterSeries.analyticOnNhd_generalizedHypergeometric_one
+#print axioms DLMF.Hypergeometric.UnitParameterSeries.coefficient
+#print axioms DLMF.Hypergeometric.UnitParameterSeries.coefficient_def
+#print axioms DLMF.Hypergeometric.UnitParameterSeries.coefficient_ne_zero
+#print axioms DLMF.Hypergeometric.UnitParameterSeries.convergenceRegion
+#print axioms DLMF.Hypergeometric.UnitParameterSeries.convergenceRegion_def
+#print axioms DLMF.Hypergeometric.UnitParameterSeries.exists_coefficient_majorant
+#print axioms DLMF.Hypergeometric.UnitParameterSeries.hasSum_coefficient
+#print axioms DLMF.Hypergeometric.UnitParameterSeries.norm_coefficient_succ
+#print axioms DLMF.JacobiElliptic.Real.norm_jacobiNome_le_sq_mul_completeEllipticKOfParameter_sq
+#print axioms DLMF.JacobiElliptic.jacobiThetaTwoImag_eq_exp_mul_reducedQ
+#print axioms DLMF.QHypergeometric.BilateralContinuity.analyticAt_qPochhammerListInf
+#print axioms DLMF.QHypergeometric.BilateralContinuity.clearedListTerm
+#print axioms DLMF.QHypergeometric.BilateralContinuity.clearedListTerm_def
+#print axioms DLMF.QHypergeometric.BilateralContinuity.continuousAt_qPochhammerListInf
+#print axioms DLMF.QHypergeometric.BilateralContinuity.continuousAt_qPsi
+#print axioms DLMF.QHypergeometric.BilateralContinuity.continuousAt_tsum_clearedListTerm
+#print axioms DLMF.QHypergeometric.BilateralContinuity.continuousAt_tsum_positive_list
+#print axioms DLMF.QHypergeometric.BilateralContinuity.eventually_qDenominatorRegular_list
+#print axioms
+  DLMF.QHypergeometric.BilateralContinuity.qDenominatorRegular_of_qPochhammerListInf_ne_zero
+#print axioms DLMF.QHypergeometric.BilateralContinuity.qPochhammerListInf_factor
+#print axioms DLMF.QHypergeometric.FourPsiFour.continuousAt_qPsi_four
+#print axioms DLMF.QHypergeometric.FourPsiFour.continuousAt_rootValue
+#print axioms DLMF.QHypergeometric.FourPsiFour.qBilateralSixValue_eq_rootValue
+#print axioms DLMF.QHypergeometric.FourPsiFour.qDenominatorRegular_rootValue
+#print axioms DLMF.QHypergeometric.FourPsiFour.qPochhammerInt_ne_zero
+#print axioms DLMF.QHypergeometric.FourPsiFour.qPsi_four_eq_rootValue
+#print axioms DLMF.QHypergeometric.FourPsiFour.qPsi_four_eq_six
+#print axioms DLMF.QHypergeometric.FourPsiFour.qPsi_six_eq_product_of_square
+#print axioms DLMF.QHypergeometric.FourPsiFour.rootValue
+#print axioms DLMF.QHypergeometric.FourPsiFour.rootValue_def
+#print axioms Dirichlet.regDirichletIntegral_fin_three_ofReal
+#print axioms Int.prime_pow_dvd_pow_sub_pow
+#print axioms Int.prime_pow_dvd_sum_range_pow
+#print axioms Int.sq_dvd_mul_sum_range_pow_sub_mul_sum_div
+#print axioms LinearMap.padicNorm_apply_choose_X_comp_natCast
+#print axioms LinearMap.padicNorm_apply_le_of_choose_X
+#print axioms MeasureTheory.integral_Ioo_eq_integral_sin_sq
+#print axioms Nat.multiplicity_mul_succ_le_sub_one
+#print axioms Polynomial.apply_comp_X_add_natCast_sub
+#print axioms Polynomial.apply_sum_comp_mul_X_add_natCast
+#print axioms Polynomial.choose_X_eq_C_mul_descPochhammer
+#print axioms Polynomial.comp_choose_X_add_one_sub
+#print axioms Polynomial.eval_choose_X_natCast
+#print axioms Polynomial.exists_derivative_eq
+#print axioms Polynomial.exists_linearMap_pow_eq_regularized_bernoulli
+#print axioms Polynomial.exists_sum_C_mul_choose_X
+#print axioms Polynomial.padicNorm_two_pow_mul_euler_eval_zero_div_factorial
+#print axioms Rat.prime_pow_dvd_num_of_padicNorm_le
+#print axioms ZMod.sum_univ_val
+#print axioms eulerNumber_eq_sum_descPochhammer
+#print axioms intervalIntegral.integral_eq_two_smul_of_reflection
+#print axioms padicNorm.pow_div_factorial_le_one
+#print axioms padicNorm.pow_div_mul_succ_le_neg_two
+#print axioms padicNorm.sum_range_pow_sub_le_of_totient_dvd
+#print axioms padicNorm_eulerNumber_sub_le_of_modEq
+#print axioms DLMF.BernoulliEuler.prime_mul_bernoulli_two_mul_modEq
+#print axioms DLMF.BernoulliEuler.kummer_congruence
+#print axioms DLMF.BernoulliEuler.kummer_congruence_pow
+#print axioms DLMF.BernoulliEuler.eulerNumber_two_mul_modEq_two_pow
+#print axioms DLMF.BernoulliEuler.prime_pow_dvd_bernoulli_num
+#print axioms DLMF.EllipticIntegrals.symmetricEllipticRF_eq_sphere_integral
+#print axioms DLMF.EllipticIntegrals.symmetricEllipticRG_eq_sphere_integral
+#print axioms DLMF.Hypergeometric.generalizedHypergeometric_3F2_unit_transformation
+#print axioms DLMF.Hypergeometric.analyticOnNhd_gen3F2UnitThomae_params
+#print axioms DLMF.QHypergeometric.bilateral_four_sum
+#print axioms DLMF.QHypergeometric.bilateral_four_continues
+
+#print axioms Asymptotics.tendsto_tsum_nat_pow_zero
+#print axioms Bernoulli.padicNorm_den_mul_faulhaber_sub_le
+#print axioms DLMF.BernoulliEuler.voronoi_congruence
+#print axioms DLMF.EllipticIntegrals.Real.jacobiNome_isBigO_sq_div_sixteen
+#print axioms DLMF.EllipticIntegrals.Real.tendsto_jacobiNome_zero
+#print axioms DLMF.EllipticIntegrals.jacobiNome_isBigO
+#print axioms DLMF.EllipticIntegrals.jacobiNome_isBigO_lambda
+#print axioms DLMF.EllipticIntegrals.jacobiNome_lambda_theta_relation
+#print axioms DLMF.EllipticIntegrals.jacobiNome_theta_series_relation
+#print axioms DLMF.Hypergeometric.WatsonSummation.generalizedHypergeometric_eq
+#print axioms DLMF.Hypergeometric.WatsonSummation.generalizedHypergeometric_eq_of_re_pos
+#print axioms DLMF.Hypergeometric.WhippleSummation.generalizedHypergeometric_dixon
+#print axioms DLMF.Hypergeometric.WhippleSummation.generalizedHypergeometric_eq
+#print axioms DLMF.Hypergeometric.WhippleSummation.generalizedHypergeometric_eq_of_re_pos
+#print axioms
+  DLMF.Hypergeometric.WhippleSummation.generalizedHypergeometric_eq_of_regular_parameters
+#print axioms DLMF.Hypergeometric.WhippleSummation.generalizedHypergeometric_eq_of_terminates
+#print axioms DLMF.Hypergeometric.generalizedHypergeometric_whipple_3F2_sum
+#print axioms Int.sq_dvd_mul_sum_range_pow_sub_mul_sum_ediv
+#print axioms Nat.multiplicity_succ_le_sub_two
+#print axioms padicNorm.pow_div_succ_le_of_multiplicity
+
+#print axioms BoundedVariationOn.norm_le_integral_norm_add_variation_unit
+#print axioms BoundedVariationOn.summable_variation_nat_unit
+#print axioms MeasureTheory.IntegrableOn.summable_integral_norm_nat_unit
+#print axioms BoundedVariationOn.summable_norm_comp_nat_add_of_integrableOn
+#print axioms BoundedVariationOn.exists_summable_bound_nat_unit
+
+#print axioms BoundedVariationOn.tendsto_zero_of_integrableOn_Ioi
+#print axioms BoundedVariationOn.norm_le_variation_Ici_of_integrableOn
+
+#print axioms Real.tendsto_integral_cosinePartialSumKernel_oneSided_of_boundedVariationOn
+#print axioms Real.tendsto_integral_cosinePartialSumKernel_zero_of_boundedVariationOn
+
+#print axioms BoundedVariationOn.comp_abs
+#print axioms Real.fourier_comp_abs_eq_cos_integral
+
+#print axioms Real.exists_limit_poisson_cos_of_boundedVariationOn
+#print axioms DLMF.AlgebraicAnalytic.poissonSummation_cos
+#print axioms DLMF.AlgebraicAnalytic.poissonSummation_cos'
+
+#print axioms Bernoulli.padicNorm_bernoulli_div_le_of_not_dvd
+#print axioms Bernoulli.padicNorm_bernoulli_le_one_of_lt
+#print axioms Bernoulli.padicNorm_sum_range_pow_sub_prime_mul_bernoulli_le
+#print axioms Bernoulli.padicNorm_sum_range_pow_sub_two_terms_le
+#print axioms Bernoulli.sum_bernoulli_mul_bernoulli_div_of_odd
+#print axioms BoundedVariationOn.boundedVariationOn_tsum_comp_add_int_unit
+#print axioms BoundedVariationOn.continuous_tsum_comp_add_int
+#print axioms BoundedVariationOn.summable_norm_restrict
+#print axioms BoundedVariationOn.summable_norm_restrict_unit
+#print axioms BoundedVariationOn.summable_variation_int_unit
+#print axioms DLMF.BernoulliEuler.padicNorm_bernoulli_sub_stirlingSecond
+#print axioms DLMF.BernoulliEuler.padicNorm_bernoulli_sub_stirlingSecond_cube
+#print axioms DLMF.EllipticIntegrals.completeEllipticK_hasSum_log
+#print axioms DLMF.EllipticIntegrals.norm_compEllIntLogCoeff_le
+#print axioms DLMF.EllipticIntegrals.pi_mul_complementaryEllipticK_div_bounds
+#print axioms DLMF.EllipticIntegrals.symmetricEllipticRF_zero_hasSum_log
+#print axioms DLMF.Hypergeometric.generalizedHypergeometric_watson_sum
+#print axioms DLMF.JacobiElliptic.jacobiThetaThreeNullQ_eq_two_mul_tsum_sub_one
+#print axioms DLMF.JacobiElliptic.jacobiThetaTwoReducedQ_eq_two_mul_tsum
+#print axioms DLMF.JacobiElliptic.jacobiThetaTwoReducedQ_lt_two_mul_jacobiThetaThreeNullQ
+#print axioms DLMF.JacobiElliptic.jacobiThetaTwoReducedQ_sq
+#print axioms DLMF.JacobiElliptic.two_mul_jacobiThetaThreeNullQ_pow_four_lt_jacobiThetaTwoReducedQ
+#print axioms DLMF.QHypergeometric.BilateralContinuity.analyticAt_tsum_clearedListTerm
+#print axioms DLMF.QHypergeometric.BilateralContinuity.exists_summable_norm_clearedListTerm_bound
+#print axioms DLMF.QHypergeometric.BilateralContinuity.tsum_clearedListTerm_eq_mul
+#print axioms DLMF.QHypergeometric.BilateralEvenSummation.analyticAt_clearedSeries
+#print axioms DLMF.QHypergeometric.BilateralEvenSummation.analyticAt_clearedValue
+#print axioms DLMF.QHypergeometric.BilateralEvenSummation.clearedSeries
+#print axioms DLMF.QHypergeometric.BilateralEvenSummation.clearedSeries_def
+#print axioms DLMF.QHypergeometric.BilateralEvenSummation.clearedSeries_eq_clearedValue
+#print axioms DLMF.QHypergeometric.BilateralEvenSummation.clearedSeries_eq_clearedValue_of_large
+#print axioms DLMF.QHypergeometric.BilateralEvenSummation.clearedSeries_eq_clearedValue_of_regular
+#print axioms DLMF.QHypergeometric.BilateralEvenSummation.clearedSeries_eq_mul
+#print axioms DLMF.QHypergeometric.BilateralEvenSummation.clearedValue
+#print axioms DLMF.QHypergeometric.BilateralEvenSummation.clearedValue_def
+#print axioms DLMF.QHypergeometric.BilateralEvenSummation.clearedValue_eq_mul
+#print axioms DLMF.QHypergeometric.BilateralEvenSummation.continuousAt_clearedSeries_right
+#print axioms DLMF.QHypergeometric.BilateralEvenSummation.continuousAt_clearedValue_right
+#print axioms DLMF.QHypergeometric.BilateralEvenSummation.qPsi_even_eq
+#print axioms DLMF.QHypergeometric.BilateralParity.qPochhammerInt_double
+#print axioms DLMF.QHypergeometric.BilateralParity.qPsi_even
+#print axioms DLMF.QHypergeometric.BilateralParity.qPsi_even_eq_of_ramanujan_annulus
+#print axioms DLMF.QHypergeometric.BilateralParity.qPsi_paired_eq_even_part
+#print axioms DLMF.QHypergeometric.bilateral_even_continues
+#print axioms DLMF.QHypergeometric.bilateral_even_sum
+#print axioms DLMF.QHypergeometric.ramanujan_one_psi_one
+#print axioms DLMF.Theta.jacobiThetaFourTau_zero_eq_four_mul_tau
+#print axioms Finset.sum_Icc_neg_natCast_eq_sum_range
+#print axioms FormalMultilinearSeries.analyticOnNhd_tsum_mul_pow_of_summable_norm
+#print axioms Nat.mul_stirlingSecond_add_eq_sum_pow
+#print axioms Nat.prime_dvd_stirlingSecond_add
+#print axioms Real.sum_fourierCoeff_eq_integral_cosinePartialSumKernel
+#print axioms Real.sum_fourier_eq_cosinePartialSumKernel
+#print axioms Real.tendsto_sum_Icc_fourierCoeff_of_boundedVariationOn
+#print axioms Real.tendsto_sum_Icc_fourier_of_boundedVariationOn
+#print axioms eVariationOn.tsum_le
+#print axioms padicNorm.mul_stirlingSecond_sub_sum_pow_le
+#print axioms padicNorm.stirlingSecond_le_inv
+#print axioms padicNorm.stirlingSecond_sub_prime_mul_bernoulli_div_le
+#print axioms padicNorm.stirlingSecond_sub_prime_sq_mul_bernoulli_le_of_odd
+#print axioms padicNorm.sum_pow_mul_stirlingSecond_sub_prime_sq_mul_bernoulli_le
+
+#print axioms DLMF.EllipticIntegrals.completeEllipticE_hasSum_log
+#print axioms DLMF.EllipticIntegrals.symmetricEllipticRG_zero_asymp
+
+#print axioms DLMF.EllipticIntegrals.symmetricEllipticRG_zero_one_isBigO_log
+
+#print axioms DLMF.EllipticIntegrals.completeEllipticPi_isBigO_log
+#print axioms DLMF.EllipticIntegrals.completeEllipticPi_isBigO_log'
+#print axioms DLMF.EllipticIntegrals.completeEllipticPi_isBigO_log_of_one_lt
+
+#print axioms DLMF.Elementary.arcsinh_continued_fraction
+#print axioms DLMF.EllipticIntegrals.symmetricEllipticR_three_eq_integral_sphere

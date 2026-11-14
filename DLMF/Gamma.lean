@@ -5,14 +5,29 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
+public import DLMF.Gamma.AlternatingDigamma
+
+public import DLMF.Gamma.HankelAndPrymConvergence
+
+public import DLMF.Gamma.SaddleCoordinates
+public import DLMF.Gamma.SectorExpansions
+public import DLMF.Gamma.StieltjesRemainder
+public import DLMF.Gamma.BarnesContours
+public import DLMF.Gamma.Integrals.BarnesDeformations
+public import DLMF.Gamma.PolynomialSeries
+
 public import DLMF.Gamma.RatioBounds
 public import DLMF.Gamma.ScaledGammaEstimates
 public import DLMF.Gamma.Basic
+public import DLMF.Gamma.Characterizations
+public import DLMF.Gamma.GlobalMagnitudeBounds
+public import DLMF.Gamma.PadicGamma
 public import DLMF.Gamma.Digamma
 public import DLMF.Gamma.Dirichlet
 public import DLMF.Gamma.GaussDigamma
 public import DLMF.Gamma.IntegralRep
 public import DLMF.Gamma.Kummer
+public import DLMF.Gamma.KummerFourier
 public import DLMF.Gamma.Multiplication
 public import DLMF.Gamma.Stirling
 public import DLMF.Gamma.Pochhammer
@@ -20,6 +35,7 @@ public import DLMF.Gamma.SpecialValues
 public import DLMF.Gamma.Inequalities
 public import DLMF.Gamma.SeriesExpansions
 public import DLMF.Gamma.Products
+public import DLMF.Gamma.ProductsUniform
 public import DLMF.Gamma.IntegralRepresentations
 public import DLMF.Gamma.ComplexBinet
 public import DLMF.Gamma.ContinuedFractions
@@ -33,6 +49,7 @@ public import DLMF.Gamma.PolygammaHurwitz
 public import DLMF.Gamma.Multidimensional
 public import DLMF.Gamma.BarnesG
 public import DLMF.Gamma.QGamma
+public import DLMF.Gamma.QGammaExtensions
 public import DLMF.Gamma.MathlibCoverage
 public import DLMF.Gamma.VerticalBounds
 public import DLMF.Gamma.VerticalStrips
@@ -40,6 +57,14 @@ public import DLMF.Gamma.MellinBarnes
 public import DLMF.Gamma.RecipGammaDeriv
 public import DLMF.Gamma.ShiftedLineBounds
 public import DLMF.Gamma.Simplex.PochhammerIdentities
+
+public import DLMF.Gamma.VerticalStripAsymptotics
+
+public import DLMF.Gamma.Volterra
+
+public import DLMF.Gamma.DigammaPoles
+
+public import DLMF.Gamma.PeriodicStirlingRemainder
 
 /-!
 # The Gamma and Beta functions (DLMF Chapter 5; AAR Chapter 1)

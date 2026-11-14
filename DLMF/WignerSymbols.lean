@@ -5,6 +5,20 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
+public import DLMF.WignerSymbols.NineJFactorialCoordinates
+public import DLMF.WignerSymbols.OrbitalModes
+
+public import DLMF.WignerSymbols.ReggeArrays
+
+public import DLMF.WignerSymbols.SpinCoupling
+
+public import DLMF.WignerSymbols.StretchedNineJ
+
+public import DLMF.WignerSymbols.Recoupling
+
+public import DLMF.WignerSymbols.SixJCoordinates
+
+public import DLMF.WignerSymbols.SpinMatrices
 public import DLMF.WignerSymbols.Basic
 public import DLMF.WignerSymbols.Basic.TriangleConditions
 public import DLMF.WignerSymbols.FactorialHelpers

@@ -313,7 +313,7 @@ private lemma tendsto_integral_boundedVariationOn_real {φ : ℝ → ℝ} {δ L 
 
 /-- One-sided Dirichlet–Jordan for a complex function of bounded variation on `[0, δ]`: if
 `g(0+) = L`, then `∫₀^δ g(v) sin(ηv)/(πv) dv → L/2`. -/
-private lemma tendsto_integral_boundedVariationOn_complex {g : ℝ → ℂ} {δ : ℝ} {L : ℂ}
+lemma tendsto_intervalIntegral_mul_sin_div_of_boundedVariationOn {g : ℝ → ℂ} {δ : ℝ} {L : ℂ}
     (hδ : 0 < δ) (hg : BoundedVariationOn g (Icc 0 δ)) (hL : Tendsto g (𝓝[>] 0) (𝓝 L)) :
     IntervalIntegrable g volume 0 δ ∧
       Tendsto (fun η : ℝ => ∫ v in (0 : ℝ)..δ,
@@ -408,8 +408,8 @@ theorem tendsto_integral_mul_sin_div_of_boundedVariationOn {g : ℝ → ℂ} (hg
       exact this.mono_left nhdsWithin_le_nhds
     · filter_upwards [self_mem_nhdsWithin] with v hv
       exact lt_add_of_pos_right t hv
-  obtain ⟨hi₁, h₁⟩ := tendsto_integral_boundedVariationOn_complex hδ hbv₁ hlim₁
-  obtain ⟨hi₂, h₂⟩ := tendsto_integral_boundedVariationOn_complex hδ hbv₂ hlim₂
+  obtain ⟨hi₁, h₁⟩ := tendsto_intervalIntegral_mul_sin_div_of_boundedVariationOn hδ hbv₁ hlim₁
+  obtain ⟨hi₂, h₂⟩ := tendsto_intervalIntegral_mul_sin_div_of_boundedVariationOn hδ hbv₂ hlim₂
   -- the regular part
   have hgs : Integrable fun v => g (t - v) := hg.comp_sub_left t
   set k : ℝ → ℂ := fun v => (Icc (-δ) δ)ᶜ.indicator (fun v => g (t - v) *

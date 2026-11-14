@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
+public import DLMF.QSeries.Basic.Logarithm
 public import DLMF.QSeries.Basic.Pochhammer
 public import DLMF.QSeries.Basic.Series
 public import DLMF.QSeries.Basic.Calculus

@@ -5,9 +5,13 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
+public import DLMF.Confluent.Asymptotics.LogarithmicSector
+
 public import DLMF.Confluent.Asymptotics.LargeArgument
 public import DLMF.Confluent.Asymptotics.LargeParameter
 public import DLMF.Confluent.Asymptotics.RightHalfPlane
+
+public import DLMF.Confluent.Asymptotics.LogarithmicTwoExponentials
 
 /-!
 # Asymptotic expansions of confluent hypergeometric functions (DLMF §§13.7, 13.8, 13.19)

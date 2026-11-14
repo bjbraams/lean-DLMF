@@ -1,0 +1,98 @@
+synopsis_id	declaration	source_file	source_line	status
+RL-1.01	Complex.Gamma_add_nat_div_Gamma_eq	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Gamma/Beta.lean	481	proved, no admission
+RL-1.01	DLMF.Hypergeometric.pochhammer	DLMF/Hypergeometric/Basic/Pochhammer.lean	39	definition, no admission
+RL-1.01	DLMF.Hypergeometric.pochhammer_zero	DLMF/Hypergeometric/Basic/Pochhammer.lean	44	proved, no admission
+RL-1.01	DLMF.Hypergeometric.pochhammer_succ	DLMF/Hypergeometric/Basic/Pochhammer.lean	52	proved, no admission
+RL-1.01	DLMF.Hypergeometric.pochhammer_neg_coe_nat	DLMF/Hypergeometric/Basic/Pochhammer.lean	141	proved, no admission
+RL-1.01	DLMF.Hypergeometric.pochhammer_neg_nat_eq_zero	DLMF/Hypergeometric/Basic/Pochhammer.lean	158	proved, no admission
+RL-1.01	Complex.Gamma_nat_eq_factorial	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Gamma/Basic.lean	325	proved, no admission
+RL-1.02	DLMF.Hypergeometric.pochhammerProduct	DLMF/GeneralizedHypergeometric/Basic/ParametersAndSeries.lean	44	definition, no admission
+RL-1.02	DLMF.Hypergeometric.generalizedHypergeometricCoeff	DLMF/GeneralizedHypergeometric/Basic/ParametersAndSeries.lean	51	definition, no admission
+RL-1.02	DLMF.Hypergeometric.generalizedHypergeometricSeries	DLMF/GeneralizedHypergeometric/Basic/ParametersAndSeries.lean	61	definition, no admission
+RL-1.02	DLMF.Hypergeometric.generalizedHypergeometric	DLMF/GeneralizedHypergeometric/Basic/PrincipalContinuation.lean	56	definition, no admission
+RL-1.02	DLMF.Hypergeometric.generalizedHypergeometric_hasSum_disk	DLMF/GeneralizedHypergeometric/Basic/SeriesProperties.lean	146	proved, no admission
+RL-1.02	DLMF.Hypergeometric.generalizedHypergeometricTruncated	DLMF/GeneralizedHypergeometric/Basic/ParametersAndSeries.lean	65	definition, no admission
+RL-1.02	DLMF.Hypergeometric.generalizedHypergeometric_eq_finite	DLMF/GeneralizedHypergeometric/Basic/SeriesProperties.lean	210	proved, no admission
+RL-1.02	ordinaryHypergeometric	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/OrdinaryHypergeometric.lean	81	definition, no admission
+RL-1.03	DLMF.Hypergeometric.generalizedHypergeometric_radius_one	DLMF/GeneralizedHypergeometric/AnalyticProperties.lean	102	proved, no admission
+RL-1.03	DLMF.Hypergeometric.generalizedHypergeometric_radius_zero	DLMF/GeneralizedHypergeometric/AnalyticProperties.lean	1036	proved, no admission
+RL-1.03	DLMF.Hypergeometric.generalizedHypergeometric_hasSum_entire	DLMF/GeneralizedHypergeometric/AnalyticProperties.lean	74	proved, no admission
+RL-1.03	DLMF.Hypergeometric.generalizedHypergeometric_unit_absolute_iff	DLMF/GeneralizedHypergeometric/AnalyticProperties.lean	299	proved, no admission
+RL-1.03	DLMF.Hypergeometric.generalizedHypergeometric_unit_conditional	DLMF/GeneralizedHypergeometric/AnalyticProperties.lean	892	proved, no admission
+RL-1.03	DLMF.Hypergeometric.generalizedHypergeometric_one_converges_iff	DLMF/GeneralizedHypergeometric/AnalyticProperties.lean	942	proved, no admission
+RL-1.03	DLMF.Hypergeometric.HypergeometricSeriesConvergesTo	DLMF/GeneralizedHypergeometric/Basic/ParametersAndSeries.lean	70	definition, no admission
+RL-1.04	TauCeti.Polynomial.eval₂_ofCoeffList_reverse	.lake/packages/TauCeti/TauCeti/Algebra/Polynomial/Coeff/List.lean	79	proved, no admission
+RL-1.05	DLMF.Hypergeometric.sum_pochhammer_mul_neg_nat_div	DLMF/Hypergeometric/TerminatingSummations.lean	27	direct admission
+RL-1.05	DLMF.Hypergeometric.generalizedHypergeometricTruncated	DLMF/GeneralizedHypergeometric/Basic/ParametersAndSeries.lean	65	definition, no admission
+RL-1.05	DLMF.Hypergeometric.gauss_summation	DLMF/Hypergeometric/EulerIntegral.lean	78	proved, no admission
+RL-1.05	DLMF.Hypergeometric.hasSum_regularizedGauss_one	DLMF/Hypergeometric/Boundary.lean	58	proved, no admission
+RL-1.06	Complex.betaIntegral	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Gamma/Beta.lean	60	definition, no admission
+RL-1.06	Complex.betaIntegral_convergent	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Gamma/Beta.lean	78	proved, no admission
+RL-1.06	Complex.Gamma_mul_Gamma_eq_betaIntegral	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Gamma/Beta.lean	124	proved, no admission
+RL-1.06	DLMF.Hypergeometric.regularizedGaussHypergeometric_eq_regularizedGaussHypergeometricIntegral	DLMF/Hypergeometric/Basic/CutPlane.lean	457	proved, no admission
+RL-1.06	DLMF.Hypergeometric.regularizedGaussHypergeometricIntegral	DLMF/Hypergeometric/Basic/PrincipalBranch.lean	137	definition, no admission
+RL-1.06	DLMF.Hypergeometric.eulerKernel	DLMF/Hypergeometric/Basic/PrincipalBranch.lean	127	definition, no admission
+RL-1.06	DLMF.Hypergeometric.intervalIntegrable_eulerKernel	DLMF/Hypergeometric/Basic/CutPlane.lean	201	proved, no admission
+RL-1.07	DLMF.Hypergeometric.ordinaryHypergeometric_ode	DLMF/Hypergeometric/Basic/GaussEquation.lean	121	proved, no admission
+RL-1.07	DLMF.Hypergeometric.regularizedGaussHypergeometric_ode	DLMF/Hypergeometric/Basic/CutPlane.lean	536	proved, no admission
+RL-1.07	DLMF.Hypergeometric.eq_ordinaryHypergeometric_of_gaussOperator	DLMF/Hypergeometric/FurtherTransformations/Quadratic.lean	362	proved, no admission
+RL-1.08	Complex.LinearODEAtMostRegularAt	DLMFMathlib/Analysis/ODE/Singularities.lean	55	definition, no admission
+RL-1.08	Complex.LinearODERegularSingularAt	DLMFMathlib/Analysis/ODE/Singularities.lean	60	definition, no admission
+RL-1.08	DLMF.AsymptoticApproximations.indicialPoly	DLMF/AsymptoticApproximations/ODE/Basic.lean	78	definition, no admission
+RL-1.08	DLMF.AsymptoticApproximations.frobeniusCoeff	DLMF/AsymptoticApproximations/ODE/Basic.lean	85	definition, no admission
+RL-1.08	PowerSeries.indicial_eq_zero_of_formal_frobenius	DLMFMathlib/Analysis/ODE/FormalSeries.lean	38	direct admission
+RL-1.08	PowerSeries.coeff_formal_frobenius	DLMFMathlib/Analysis/ODE/FormalSeries.lean	49	direct admission
+RL-1.08	DLMF.AsymptoticApproximations.summable_frobeniusCoeff_of_nonresonant	DLMF/AsymptoticApproximations/ODE/Frobenius.lean	52	direct admission
+RL-1.08	DLMF.AsymptoticApproximations.analyticOnNhd_frobeniusAnalyticFactor	DLMF/AsymptoticApproximations/ODE/Frobenius.lean	65	direct admission
+RL-1.08	DLMF.AsymptoticApproximations.frobeniusAnalyticFactor_exp_log_isLinearODE2SolutionOn	DLMF/AsymptoticApproximations/ODE/Frobenius.lean	93	direct admission
+RL-1.08	DLMF.Hypergeometric.riemannNormalOperator_gauss	DLMF/Hypergeometric/Riemann.lean	74	proved, no admission
+RL-1.08	DLMF.Hypergeometric.gauss_fuchs_relation	DLMF/Hypergeometric/Riemann.lean	69	proved, no admission
+RL-1.09	DLMF.Hypergeometric.zeroSecond	DLMF/Hypergeometric/Basic/GaussEquation.lean	144	definition, no admission
+RL-1.09	DLMF.Hypergeometric.oneFirst	DLMF/Hypergeometric/Basic/GaussEquation.lean	149	definition, no admission
+RL-1.09	DLMF.Hypergeometric.oneSecond	DLMF/Hypergeometric/Basic/GaussEquation.lean	154	definition, no admission
+RL-1.09	DLMF.Hypergeometric.infinityFirst	DLMF/Hypergeometric/Basic/GaussEquation.lean	159	definition, no admission
+RL-1.09	DLMF.Hypergeometric.zero_second_ode	DLMF/Hypergeometric/Basic/GaussEquation.lean	227	proved, no admission
+RL-1.09	DLMF.Hypergeometric.one_first_ode	DLMF/Hypergeometric/Basic/GaussEquation.lean	266	proved, no admission
+RL-1.09	DLMF.Hypergeometric.one_second_ode	DLMF/Hypergeometric/Basic/GaussEquation.lean	301	proved, no admission
+RL-1.09	DLMF.Hypergeometric.infinity_first_ode	DLMF/Hypergeometric/Basic/GaussEquation.lean	359	proved, no admission
+RL-1.09	DLMF.Hypergeometric.zero_wronskian	DLMF/Hypergeometric/Basic/GaussEquation.lean	397	proved, no admission
+RL-1.09	DLMF.Hypergeometric.one_wronskian	DLMF/Hypergeometric/Basic/GaussEquation.lean	494	proved, no admission
+RL-1.09	DLMF.Hypergeometric.infinity_wronskian_slit	DLMF/Hypergeometric/Solutions/InfinityWronskian.lean	28	direct admission
+RL-1.09	DLMF.AlgebraicAnalytic.isFundamentalPair_of_wronskian_ne_zero	DLMF/AlgebraicAnalytic/ODE/SecondOrder.lean	244	proved, no admission
+RL-1.10	DLMF.Hypergeometric.regularizedGaussHypergeometric_euler	DLMF/Hypergeometric/ArgumentContinuation.lean	231	proved, no admission
+RL-1.10	DLMF.Hypergeometric.regularizedGaussHypergeometric_pfaff	DLMF/Hypergeometric/ArgumentContinuation.lean	266	proved, no admission
+RL-1.10	DLMF.Hypergeometric.regularizedGaussHypergeometric_symm	DLMF/Hypergeometric/Basic/CutPlane.lean	475	proved, no admission
+RL-1.11	DLMF.Confluent.kummerM	DLMF/Confluent/Basic/KummerM.lean	47	definition, no admission
+RL-1.11	DLMF.Confluent.hasSum_kummerM	DLMF/Confluent/Basic/KummerContiguous.lean	50	proved, no admission
+RL-1.11	DLMF.Confluent.analyticOnNhd_kummerM	DLMF/Confluent/Basic/KummerProperties.lean	139	proved, no admission
+RL-1.11	DLMF.Confluent.kummerM_ode	DLMF/Confluent/Basic/KummerProperties.lean	160	proved, no admission
+RL-1.11	DLMF.Confluent.tendstoLocallyUniformly_ordinaryHypergeometric_add_div_atTop	DLMF/Confluent/ConfluenceUniform.lean	29	direct admission
+RL-1.12	DLMF.OrthogonalPolynomials.legendrePolynomialP	DLMF/OrthogonalPolynomials/Basic/Definitions.lean	76	definition, no admission
+RL-1.12	DLMF.Legendre.legendreP_nat	DLMF/Legendre/FirstKindProperties.lean	38	proved, no admission
+RL-1.12	DLMF.Legendre.iteratedDeriv_legendreP	DLMF/Legendre/Recurrences.lean	78	proved, no admission
+RL-1.12	DLMF.Legendre.ferrersP_nat	DLMF/Legendre/Ferrers.lean	37	proved, no admission
+RL-1.12	DLMF.Legendre.ferrersP_nat_order_rodrigues	DLMF/Legendre/IntegerTheory.lean	147	proved, no admission
+RL-1.13	DLMF.Bessel.besselJ_eq_kummerM	DLMF/Bessel/RegularizedSeries.lean	366	proved, no admission
+RL-1.14	DLMF.Confluent.hermitePolynomialHEval_even_mul	DLMF/Confluent/Relations.lean	674	proved, no admission
+RL-1.14	DLMF.Confluent.hermitePolynomialHEval_odd_mul	DLMF/Confluent/Relations.lean	719	proved, no admission
+RL-1.14	DLMF.OrthogonalPolynomials.hermitePolynomialH	DLMF/OrthogonalPolynomials/Basic/Definitions.lean	56	definition, no admission
+RL-1.15	DLMF.OrthogonalPolynomials.laguerrePolynomialL	DLMF/OrthogonalPolynomials/Basic/Definitions.lean	64	definition, no admission
+RL-1.15	DLMF.Hypergeometric.pochhammer_nat_one	DLMF/Hypergeometric/Basic/Pochhammer.lean	56	proved, no admission
+RL-1.15	DLMF.OrthogonalPolynomials.laguerreExtended	DLMF/OrthogonalPolynomials/Basic/Definitions.lean	103	definition, no admission
+RL-1.16	DLMF.OrthogonalPolynomials.chebyshevT_hypergeometric	DLMF/OrthogonalPolynomials/Differential/ClassicalEquations.lean	1017	proved, no admission
+RL-1.16	DLMF.OrthogonalPolynomials.eval_U_eq_ultrasphericalPolynomial	DLMF/OrthogonalPolynomials/Basic/Classical.lean	433	proved, no admission
+RL-1.16	DLMF.OrthogonalPolynomials.ultrasphericalPolynomial_param_one_eq	DLMF/OrthogonalPolynomials/Basic/Classical.lean	267	proved, no admission
+RL-1.16	Polynomial.Chebyshev.T_real_cos	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Trigonometric/Chebyshev/Basic.lean	149	proved, no admission
+RL-1.16	Polynomial.Chebyshev.U_real_cos	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Trigonometric/Chebyshev/Basic.lean	154	proved, no admission
+RL-1.17	DLMF.OrthogonalPolynomials.ultrasphericalPolynomial	DLMF/OrthogonalPolynomials/Basic/Definitions.lean	83	definition, no admission
+RL-1.17	DLMF.OrthogonalPolynomials.jacobiPolynomialP	DLMF/OrthogonalPolynomials/Basic/Definitions.lean	71	definition, no admission
+RL-1.18	DLMF.Confluent.kummerM_self	DLMF/Confluent/Basic/KummerProperties.lean	57	proved, no admission
+RL-1.18	DLMF.Hypergeometric.sum_pochhammer_neg_nat_div_factorial_mul_pow	DLMF/Hypergeometric/Basic/Pochhammer.lean	147	proved, no admission
+RL-1.18	DLMF.Hypergeometric.mul_regularizedGaussHypergeometric_one_one_two	DLMF/GeneralizedHypergeometric/BookSeries.lean	42	direct admission
+RL-1.18	DLMF.Hypergeometric.arcsin_eq_ordinaryHypergeometric	DLMF/Hypergeometric/DiffEq.lean	143	proved, no admission
+RL-1.18	DLMF.Hypergeometric.arctan_eq_regularizedGaussHypergeometric	DLMF/GeneralizedHypergeometric/BookSeries.lean	49	direct admission
+RL-1.18	DLMF.Confluent.tendstoLocallyUniformly_ordinaryHypergeometric_sqrt_div_atTop	DLMF/Confluent/ConfluenceUniform.lean	39	direct admission
+RL-1.18	DLMF.Bessel.regularized0F1_half_eq_cos	DLMF/Bessel/RegularizedSeries.lean	248	proved, no admission
+RL-1.18	DLMF.Bessel.regularized0F1_three_halves_eq_sinc	DLMF/Bessel/RegularizedSeries.lean	209	proved, no admission
+RL-1.19	DLMF.OrthogonalPolynomials.legendre_differential_equation	DLMF/OrthogonalPolynomials/Differential/ClassicalEquations.lean	167	proved, no admission
+RL-1.19	DLMF.OrthogonalPolynomials.laguerrePolynomialL_differential_equation	DLMF/OrthogonalPolynomials/Differential/ClassicalEquations.lean	179	proved, no admission

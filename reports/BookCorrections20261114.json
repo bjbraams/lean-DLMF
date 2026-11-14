@@ -1,0 +1,282 @@
+{
+  "status": "complete",
+  "scope": "Owner-approved synopsis, errata and logarithmic connection API corrections",
+  "synopses_changed": [
+    "SYNOPSIS-Olver.md",
+    "SYNOPSIS-AAR.md",
+    "SYNOPSIS-LaoLaksh.md",
+    "SYNOPSIS-Kristensson.md"
+  ],
+  "errata_changed": [
+    "ERRATA-Olver.md",
+    "ERRATA-AAR.md",
+    "ERRATA-LaoLaksh.md",
+    "ERRATA-Kristensson.md"
+  ],
+  "unchanged_books": [
+    "Temme",
+    "Duverney"
+  ],
+  "public_renames": [
+    [
+      "declaration",
+      "DLMF.Confluent.iteratedErfc_kummerUOnLog",
+      "DLMF.Confluent.iteratedErfc_kummerUConnectionOnLog",
+      "Distinguish raw noninteger connection formulas from continued functions"
+    ],
+    [
+      "declaration",
+      "DLMF.Confluent.whittakerWOnLog_eq_kummerUOnLog",
+      "DLMF.Confluent.whittakerWConnectionOnLog_eq_kummerUConnectionOnLog",
+      "Distinguish raw noninteger connection formulas from continued functions"
+    ],
+    [
+      "declaration",
+      "DLMF.Confluent.whittakerWOnLog_half_turn",
+      "DLMF.Confluent.whittakerWConnectionOnLog_half_turn",
+      "Distinguish raw noninteger connection formulas from continued functions"
+    ],
+    [
+      "declaration",
+      "DLMF.Confluent.erfc_kummerUOnLog_square",
+      "DLMF.Confluent.erfc_kummerUConnectionOnLog_square",
+      "Distinguish raw noninteger connection formulas from continued functions"
+    ],
+    [
+      "declaration",
+      "DLMF.Confluent.kummerUOnLog_half_turn",
+      "DLMF.Confluent.kummerUConnectionOnLog_half_turn",
+      "Distinguish raw noninteger connection formulas from continued functions"
+    ],
+    [
+      "declaration",
+      "DLMF.Confluent.whittakerWOnLog",
+      "DLMF.Confluent.whittakerWConnectionOnLog",
+      "Distinguish raw noninteger connection formulas from continued functions"
+    ],
+    [
+      "declaration",
+      "DLMF.Confluent.kummerUOnLog",
+      "DLMF.Confluent.kummerUConnectionOnLog",
+      "Distinguish raw noninteger connection formulas from continued functions"
+    ],
+    [
+      "declaration",
+      "DLMF.Airy.airyWhittakerWOnLog",
+      "DLMF.Airy.airyWhittakerWConnectionOnLog",
+      "Distinguish raw noninteger connection formulas from continued functions"
+    ],
+    [
+      "declaration",
+      "DLMF.Airy.kummerUOnLog_five_sixths",
+      "DLMF.Airy.kummerUConnectionOnLog_five_sixths",
+      "Distinguish raw noninteger connection formulas from continued functions"
+    ],
+    [
+      "declaration",
+      "DLMF.Airy.kummerUOnLog_seven_sixths",
+      "DLMF.Airy.kummerUConnectionOnLog_seven_sixths",
+      "Distinguish raw noninteger connection formulas from continued functions"
+    ]
+  ],
+  "compatibility": "Deprecated aliases retain every renamed public declaration",
+  "existing_signatures": {
+    "checked": 233,
+    "issues": []
+  },
+  "proved_original_admissions": [
+    "DLMF.Confluent.kummerUContinuedOnLog_eq_principal",
+    "DLMF.Confluent.whittakerWContinuedOnLog_eq_principal"
+  ],
+  "axiom_audit": {
+    "declarations": 7,
+    "sorryAx": false,
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "exceptional_parameter_examples": 4
+  },
+  "direct_admissions_before": 2401,
+  "direct_admissions_after": 2399,
+  "new_standalone_axioms": 0,
+  "new_admissions": 0,
+  "remaining_questions": [
+    "Precise boundary replacement for AAR (7.3.29)",
+    "General proof of the proposed 9-j phase repair",
+    "Interpretation of Olver admissible-path conventions",
+    "Any stronger spectral-index error rate",
+    "Proofs of globally lifted parameter-limit/analyticity targets"
+  ],
+  "source_hashes": {
+    "DLMF/ErrorFunctions/Repeated.lean": "ccb4e925ba618381a2c6c9e334c59a7fce46750d4bc9c5cca709d734eb77a3b0",
+    "DLMF/Confluent/Whittaker.lean": "f02ab99aa18c57b9952f9a2302ba1c1f7d82461c150e9967b12c560dd4160338",
+    "DLMF/IncompleteGamma/SpecialValues.lean": "022473cc2fe04191593cbdf0a1baff4d6b861470c7b50cb7935ca3832fe62972",
+    "DLMF/Confluent/Asymptotics/LogarithmicSector.lean": "6ee85aa6f57a181912da9e30957cac121b29465df96752e6f500b8f3b7d18f00",
+    "DLMF/Confluent/Asymptotics/WhittakerLogarithmic.lean": "71f58fcd142dc9c254aedf6806bf36b331d1e30789fe432607679a59a9adf583",
+    "DLMF/Confluent/BasicProperties/IntegerParametersAndLimits.lean": "b5b0f3fcb0dd21523d3e7839fd0833dc83cabcaf483827e49687f97b2d13aa47",
+    "DLMF/Confluent/BasicProperties/Wronskians.lean": "8719bd103747f9d0b534c075c8b3d7060510c8cac31020d9c47f1fd664d30561",
+    "DLMF/Confluent/Basic/Whittaker.lean": "97a8797c2d53ba036a5bfbb6e0b925b7795d1cfb08d25ea04c82729eadc41875",
+    "DLMF/Confluent/Basic/WhittakerLogarithmic.lean": "6b008655349b1b05a29e62fded739e41e87530f92af09615057fef3189ebf631",
+    "DLMF/Confluent/Basic/TricomiLogarithmic.lean": "edc56a5c4c1cd806d8ded6146d7efcfca5e1f4be5789a321231cb30800802b26",
+    "DLMF/Confluent/Basic/Tricomi.lean": "8ca6510f407d47c23cfe2a32f1919c7505371b2ac92e6e5957ba36f78cdaa118",
+    "DLMF/Airy/Relations/InverseBesselRelations.lean": "fb4c481e415c49634d06ee587f49aa6d5b556627490cfd3ece7aaffcc9077b90"
+  },
+  "backup_directory": "/tmp/DLMF-book-corrections-before",
+  "validation": {
+    "full_build": {
+      "command": "lake build > /tmp/DLMF-build.log 2>&1",
+      "exit_code": 0,
+      "jobs": 19494
+    },
+    "strict_checks": {
+      "results": {
+        "DLMF/Airy/Relations/InverseBesselRelations.lean": {
+          "exit_code": 0,
+          "sha256": "fb4c481e415c49634d06ee587f49aa6d5b556627490cfd3ece7aaffcc9077b90",
+          "seconds": 8.382157564163208,
+          "log": "/tmp/DLMF-book-correction-strict-DLMF_Airy_Relations_InverseBesselRelations.lean.log",
+          "errors": []
+        },
+        "DLMF.lean": {
+          "exit_code": 0,
+          "sha256": "e8f641c0a9a6403217681eed835e03276dd0525a32f0aa67b594105ab5914b06",
+          "seconds": 3.2030532360076904,
+          "log": "/tmp/DLMF-book-correction-strict-DLMF.lean.log",
+          "errors": []
+        },
+        "DLMF/Confluent.lean": {
+          "exit_code": 0,
+          "sha256": "8d58f1f987fa87b56815882a8ac240f411ceb038f2d7e19094b8c9a4ed81cc65",
+          "seconds": 2.2222023010253906,
+          "log": "/tmp/DLMF-book-correction-strict-DLMF_Confluent.lean.log",
+          "errors": []
+        },
+        "DLMF/Basic.lean": {
+          "exit_code": 0,
+          "sha256": "c3cd1ee928639b1cfdc4c6aba7c1334f0632f629ccb367006fe5e4df75cac77d",
+          "seconds": 9.42036771774292,
+          "log": "/tmp/DLMF-book-correction-strict-DLMF_Basic.lean.log",
+          "errors": []
+        },
+        "DLMF/Confluent/Asymptotics/LogarithmicSector.lean": {
+          "exit_code": 0,
+          "sha256": "6ee85aa6f57a181912da9e30957cac121b29465df96752e6f500b8f3b7d18f00",
+          "seconds": 8.894330263137817,
+          "log": "/tmp/DLMF-book-correction-strict-DLMF_Confluent_Asymptotics_LogarithmicSector.lean.log",
+          "errors": []
+        },
+        "DLMF/Confluent/Asymptotics/WhittakerLogarithmic.lean": {
+          "exit_code": 0,
+          "sha256": "71f58fcd142dc9c254aedf6806bf36b331d1e30789fe432607679a59a9adf583",
+          "seconds": 7.660526514053345,
+          "log": "/tmp/DLMF-book-correction-strict-DLMF_Confluent_Asymptotics_WhittakerLogarithmic.lean.log",
+          "errors": []
+        },
+        "DLMF/Confluent/Basic/Tricomi.lean": {
+          "exit_code": 0,
+          "sha256": "8ca6510f407d47c23cfe2a32f1919c7505371b2ac92e6e5957ba36f78cdaa118",
+          "seconds": 9.43581485748291,
+          "log": "/tmp/DLMF-book-correction-strict-DLMF_Confluent_Basic_Tricomi.lean.log",
+          "errors": []
+        },
+        "DLMF/Confluent/Basic.lean": {
+          "exit_code": 0,
+          "sha256": "a944c7a9ab8e1dc7e77e28370e7ced2c7387a689b3afde57fd32a30ada876082",
+          "seconds": 10.091284275054932,
+          "log": "/tmp/DLMF-book-correction-strict-DLMF_Confluent_Basic.lean.log",
+          "errors": []
+        },
+        "DLMF/Confluent/Basic/TricomiLogarithmic.lean": {
+          "exit_code": 0,
+          "sha256": "edc56a5c4c1cd806d8ded6146d7efcfca5e1f4be5789a321231cb30800802b26",
+          "seconds": 8.11520767211914,
+          "log": "/tmp/DLMF-book-correction-strict-DLMF_Confluent_Basic_TricomiLogarithmic.lean.log",
+          "errors": []
+        },
+        "DLMF/Confluent/Basic/Whittaker.lean": {
+          "exit_code": 0,
+          "sha256": "97a8797c2d53ba036a5bfbb6e0b925b7795d1cfb08d25ea04c82729eadc41875",
+          "seconds": 17.45987033843994,
+          "log": "/tmp/DLMF-book-correction-strict-DLMF_Confluent_Basic_Whittaker.lean.log",
+          "errors": []
+        },
+        "DLMF/Confluent/Basic/WhittakerLogarithmic.lean": {
+          "exit_code": 0,
+          "sha256": "6b008655349b1b05a29e62fded739e41e87530f92af09615057fef3189ebf631",
+          "seconds": 10.863709449768066,
+          "log": "/tmp/DLMF-book-correction-strict-DLMF_Confluent_Basic_WhittakerLogarithmic.lean.log",
+          "errors": []
+        },
+        "DLMF/Confluent/BasicProperties/IntegerParametersAndLimits.lean": {
+          "exit_code": 0,
+          "sha256": "b5b0f3fcb0dd21523d3e7839fd0833dc83cabcaf483827e49687f97b2d13aa47",
+          "seconds": 23.190034866333008,
+          "log": "/tmp/DLMF-book-correction-strict-DLMF_Confluent_BasicProperties_IntegerParametersAndLimits.lean.log",
+          "errors": []
+        },
+        "DLMF/Confluent/BasicProperties/Wronskians.lean": {
+          "exit_code": 0,
+          "sha256": "8719bd103747f9d0b534c075c8b3d7060510c8cac31020d9c47f1fd664d30561",
+          "seconds": 22.751941680908203,
+          "log": "/tmp/DLMF-book-correction-strict-DLMF_Confluent_BasicProperties_Wronskians.lean.log",
+          "errors": []
+        },
+        "DLMF/ErrorFunctions/Repeated.lean": {
+          "exit_code": 0,
+          "sha256": "ccb4e925ba618381a2c6c9e334c59a7fce46750d4bc9c5cca709d734eb77a3b0",
+          "seconds": 9.065367698669434,
+          "log": "/tmp/DLMF-book-correction-strict-DLMF_ErrorFunctions_Repeated.lean.log",
+          "errors": []
+        },
+        "DLMF/IncompleteGamma/SpecialValues.lean": {
+          "exit_code": 0,
+          "sha256": "022473cc2fe04191593cbdf0a1baff4d6b861470c7b50cb7935ca3832fe62972",
+          "seconds": 4.576048135757446,
+          "log": "/tmp/DLMF-book-correction-strict-DLMF_IncompleteGamma_SpecialValues.lean.log",
+          "errors": []
+        },
+        "DLMF/Confluent/Whittaker.lean": {
+          "exit_code": 0,
+          "sha256": "f02ab99aa18c57b9952f9a2302ba1c1f7d82461c150e9967b12c560dd4160338",
+          "seconds": 18.2909095287323,
+          "log": "/tmp/DLMF-book-correction-strict-DLMF_Confluent_Whittaker.lean.log",
+          "errors": []
+        }
+      },
+      "seconds": 89.67236256599426
+    },
+    "import_survey": {
+      "foundation_violations": 0,
+      "basic_closure_violations": 0,
+      "missing_imports": 0,
+      "file_cycles": 0,
+      "two_way_area_pairs": 36,
+      "new_two_way_area_pairs": []
+    },
+    "max_lean_lines": 1500,
+    "max_lean_line_characters": 100,
+    "whitespace_check": "passed"
+  },
+  "documentation_hashes": {
+    "REVIEW.md": "4243d47bd2ea816802879117fa59669634c204261fc995eb249d6e29f238a519",
+    "BookAcquisition-Kristensson.md": "72aeb0040c7628bdea90a591b4b397473ae60a7784ae58b1a6b4549b62b63518",
+    "BookAcquisition-Olver-Outstanding.md": "9238a8acbf231cd66870c33129a368bf6f0f0e0c5bfec99acfc4a4dda91b9a60",
+    "BookAcquisition-LaoLaksh.md": "30dcf68bbf6dd2c95e7ba88c4b348592245dac215949746cb2f563a958196f0a",
+    "BookAcquisition-Olver.md": "24472736d9497e1368666958ef747e3c3d7933c7fb35c250f2054ef935e28473",
+    "BookAcquisition.md": "b8f91f037025d603801932d3e588bcf4e2ba61bd21a93ff6d349b496351f3018",
+    "BookAcquisition-RevisionNotes.md": "4c3d76b88e142409b0d78fcfe2ad1f66ff9a18f7ac7f0d50db4bb836838586ea",
+    "BookAcquisition-AAR.md": "61a73b0e8846fdcf16f30f62923a9f69571e56ae2998ad1beebaafd5d0e8931b",
+    "ERRATA-AAR.md": "3904c7358a0cf043d4ee41dcf071b9e5e7c0517b0f7a338051136723e7aae1ce",
+    "ERRATA-Olver.md": "99f8c11565216c7b4b6bbef418ddd05d9b4200cf13907a7e418e09ad610eed62",
+    "ERRATA-LaoLaksh.md": "8afcf47dcf81df844e3b3948a52e14d9524a8f9cf73c37a3f78c5115008f73b8",
+    "ERRATA-Kristensson.md": "609f3bf136772ac44c3f8d978a5981303f663f9164959ed01194776bc5c52d88",
+    "SYNOPSIS-LaoLaksh.md": "cb3ae0a41533de077d9c6ef3c61b71ca3d230c5f8a26497cc662373d9943d15b",
+    "SYNOPSIS-Olver.md": "f01360d72459a43d4af485e2c8405a230f0ba77e951d19cbe693f57ab78420bf",
+    "SYNOPSIS-Kristensson.md": "189450dacca196fab8886589108c3fda329933ebae610e0bf91aa208a73f382d",
+    "SYNOPSIS-AAR.md": "f5e878969b253fe168474242760b3e35e43c621eb075cbcddab323f4d40c9c62"
+  },
+  "pins_preserved": true,
+  "lake_symlink_preserved": true
+}

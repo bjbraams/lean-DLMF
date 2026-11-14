@@ -20,6 +20,8 @@ public import DLMF.Struve.BarnesTools
 public import DLMF.Struve.LargeOrderTools
 public import DLMF.Struve.RelativeBounds
 
+public import DLMF.Struve.Asymptotics.ScorerTransition
+
 /-!
 # Struve, Lommel and Anger–Weber functions (DLMF Chapter 11)
 

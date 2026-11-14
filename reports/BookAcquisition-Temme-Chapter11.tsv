@@ -1,0 +1,201 @@
+synopsis_id	declaration	source_file	source_line	status
+TEM-11-01	TauCeti.Probability.cdf_gaussianReal_zero_one	.lake/packages/TauCeti/TauCeti/Probability/Distributions/Gaussian/Cdf.lean	150	proved, no admission
+TEM-11-01	TauCeti.Probability.hasDerivAt_cdf_gaussianReal	.lake/packages/TauCeti/TauCeti/Probability/Distributions/Gaussian/Cdf.lean	228	proved, no admission
+TEM-11-01	DLMF.Confluent.erf_ofReal	DLMF/ErrorFunctions/Basic/Properties.lean	66	proved, no admission
+TEM-11-01	DLMF.Confluent.faddeevaW	DLMF/ErrorFunctions/Basic/Functions.lean	51	definition, no admission
+TEM-11-01	DLMF.Confluent.faddeevaW_cauchy_integral	DLMF/ErrorFunctions/Integrals/GaussianAndCauchy.lean	461	proved, no admission
+TEM-11-01	DLMF.Confluent.faddeevaW_entire	DLMF/ErrorFunctions/Basic/Properties.lean	163	proved, no admission
+TEM-11-01	DLMF.Confluent.faddeevaW_negative	DLMF/ErrorFunctions/Relations.lean	70	proved, no admission
+TEM-11-01	DLMF.Confluent.hasDerivAt_faddeevaW	DLMF/ErrorFunctions/Relations.lean	411	proved, no admission
+TEM-11-01	DLMF.Confluent.dawsonF	DLMF/ErrorFunctions/Basic/Functions.lean	56	definition, no admission
+TEM-11-01	DLMF.Confluent.dawsonF_negative	DLMF/ErrorFunctions/Relations.lean	77	proved, no admission
+TEM-11-01	DLMF.Confluent.dawsonF_entire	DLMF/ErrorFunctions/Basic/Properties.lean	169	proved, no admission
+TEM-11-01	DLMF.Confluent.hasDerivAt_dawsonF_complex	DLMF/ErrorFunctions/Basic/Properties.lean	153	proved, no admission
+TEM-11-01	DLMF.Confluent.dawsonF_faddeeva	DLMF/ErrorFunctions/Relations.lean	171	proved, no admission
+TEM-11-02	DLMF.Confluent.lowerIncompleteGamma_segment_integral	DLMF/IncompleteGamma/ContinuedProperties.lean	127	proved, no admission
+TEM-11-02	DLMF.Confluent.upperIncompleteGamma_parameter_entire	DLMF/IncompleteGamma/ContinuedProperties.lean	276	proved, no admission
+TEM-11-02	DLMF.Confluent.regularizedGamma_eq	DLMF/IncompleteGamma/Regularized.lean	49	proved, no admission
+TEM-11-02	DLMF.Confluent.regularizedIncompleteGammaQ_eq	DLMF/IncompleteGamma/Regularized.lean	91	proved, no admission
+TEM-11-02	DLMF.Confluent.regularizedGamma_add_regularizedIncompleteGammaQ'	DLMF/IncompleteGamma/Regularized.lean	60	proved, no admission
+TEM-11-02	DLMF.Statistical.tricomiIncompleteGamma	DLMF/Statistical/Basic/IncompleteGamma.lean	34	definition, no admission
+TEM-11-02	DLMF.Confluent.tricomiIncompleteGamma_hasSum_exponential	DLMF/IncompleteGamma/ContinuedProperties.lean	51	proved, no admission
+TEM-11-02	DLMF.Confluent.tricomiIncompleteGamma_joint_entire	DLMF/IncompleteGamma/ContinuedProperties.lean	158	proved, no admission
+TEM-11-02	DLMF.Statistical.tricomiIncompleteGamma_neg_nat	DLMF/Statistical/IncompleteGamma.lean	138	proved, no admission
+TEM-11-02	DLMF.Confluent.lowerIncompleteGamma_parameter_residue	DLMF/IncompleteGamma/ContinuedProperties.lean	317	proved, no admission
+TEM-11-03	DLMF.Confluent.regularizedIncompleteGammaQ_nat_succ_expPartialSum	DLMF/IncompleteGamma/SpecialValues.lean	137	proved, no admission
+TEM-11-03	DLMF.Confluent.regularizedGamma_nat_succ_expPartialSum	DLMF/IncompleteGamma/SpecialValues.lean	129	proved, no admission
+TEM-11-03	DLMF.Confluent.upperIncompleteGamma_add_one	DLMF/Confluent/IncompleteGamma.lean	197	proved, no admission
+TEM-11-03	DLMF.Statistical.lowerIncompleteGamma_add_one	DLMF/Statistical/IncompleteGamma.lean	44	proved, no admission
+TEM-11-03	DLMF.Confluent.regularizedGamma_add_one	DLMF/IncompleteGamma/Regularized.lean	124	proved, no admission
+TEM-11-03	DLMF.Confluent.regularizedIncompleteGammaQ_add_one	DLMF/IncompleteGamma/Regularized.lean	112	proved, no admission
+TEM-11-03	DLMF.Confluent.regularizedGamma_ofReal	DLMF/IncompleteGamma/Regularized.lean	158	proved, no admission
+TEM-11-03	DLMF.Confluent.regularizedIncompleteGammaQ_ofReal	DLMF/IncompleteGamma/Regularized.lean	168	proved, no admission
+TEM-11-03	TauCeti.regularizedGamma_pos	.lake/packages/TauCeti/TauCeti/Analysis/SpecialFunctions/IncompleteGamma/Basic.lean	502	proved, no admission
+TEM-11-03	TauCeti.regularizedGamma_lt_one	.lake/packages/TauCeti/TauCeti/Analysis/SpecialFunctions/IncompleteGamma/Basic.lean	507	proved, no admission
+TEM-11-03	TauCeti.Probability.cdf_gammaMeasure_eq	.lake/packages/TauCeti/TauCeti/Probability/Distributions/Gamma/Cdf.lean	101	proved, no admission
+TEM-11-03	TauCeti.Probability.cdf_chiSquaredMeasure_eq	.lake/packages/TauCeti/TauCeti/Probability/Distributions/ChiSquared/Basic.lean	320	proved, no admission
+TEM-11-04	DLMF.Statistical.lowerIncompleteGamma_eq_tsum	DLMF/Statistical/IncompleteGamma.lean	61	proved, no admission
+TEM-11-04	DLMF.Confluent.tricomiIncompleteGamma_hasSum_exponential	DLMF/IncompleteGamma/ContinuedProperties.lean	51	proved, no admission
+TEM-11-04	DLMF.Confluent.IncompleteGammaRealIntegrals.upperIncompleteGamma_expansion	DLMF/IncompleteGamma/RealIntegrals.lean	220	proved, no admission
+TEM-11-04	DLMF.Confluent.norm_upperIncompleteGamma_le_of_lt_argument	DLMF/IncompleteGamma/ParameterRemainderBounds.lean	28	direct admission
+TEM-11-04	DLMF.Confluent.norm_upperIncompleteGamma_remainder_le	DLMF/IncompleteGamma/ParameterRemainderBounds.lean	35	direct admission
+TEM-11-04	DLMF.Confluent.upperIncompleteGamma_log_asymptotic	DLMF/IncompleteGamma/Asymptotics/LargeArgument.lean	67	proved, no admission
+TEM-11-05	DLMF.Statistical.gammaIncCFNum	DLMF/Statistical/ContinuedFraction.lean	468	definition, no admission
+TEM-11-05	DLMF.Statistical.gammaIncCFDen	DLMF/Statistical/ContinuedFraction.lean	473	definition, no admission
+TEM-11-05	DLMF.Statistical.gammaIncContFract	DLMF/Statistical/ContinuedFraction.lean	477	definition, no admission
+TEM-11-05	DLMF.Confluent.upperIncompleteGamma_continuedFraction_complex	DLMF/IncompleteGamma/BoundsFractions.lean	107	direct admission
+TEM-11-05	DLMF.Core.HasContinuedFraction	DLMF/Core/Basic.lean	206	definition, no admission
+TEM-11-06	DLMF.Confluent.gammaInversionKernel	DLMF/IncompleteGamma/GammaInversion.lean	27	definition, no admission
+TEM-11-06	DLMF.Confluent.integrable_gammaInversionKernel	DLMF/IncompleteGamma/GammaInversion.lean	38	direct admission
+TEM-11-06	DLMF.Confluent.regularizedGamma_eq_vertical_integral	DLMF/IncompleteGamma/GammaInversion.lean	45	direct admission
+TEM-11-06	DLMF.Confluent.regularizedIncompleteGammaQ_eq_vertical_integral	DLMF/IncompleteGamma/GammaInversion.lean	53	direct admission
+TEM-11-07	DLMF.Confluent.Real.gammaTransitionEta	DLMF/IncompleteGamma/GammaTransitionCoordinates.lean	28	definition, no admission
+TEM-11-07	DLMF.Confluent.Real.gammaTransitionInverse	DLMF/IncompleteGamma/GammaTransitionCoordinates.lean	33	definition, no admission
+TEM-11-07	DLMF.Confluent.Real.gammaTransitionEta_strictMonoOn_bijOn	DLMF/IncompleteGamma/GammaTransitionCoordinates.lean	49	direct admission
+TEM-11-07	DLMF.Confluent.Real.gammaTransitionInverse_spec	DLMF/IncompleteGamma/GammaTransitionCoordinates.lean	56	depends on admission
+TEM-11-07	DLMF.Confluent.gammaUniformEtaOnLog_ofReal	DLMF/IncompleteGamma/GammaTransitionCoordinates.lean	64	direct admission
+TEM-11-07	DLMF.Confluent.Real.analyticAt_gammaTransitionInverse_zero	DLMF/IncompleteGamma/GammaTransitionCoordinates.lean	70	direct admission
+TEM-11-07	DLMF.Confluent.Real.gammaTransitionInverse_zero_hasDerivAt	DLMF/IncompleteGamma/GammaTransitionCoordinates.lean	76	direct admission
+TEM-11-07	DLMF.Confluent.gammaUniformC	DLMF/IncompleteGamma/UniformAsymptotics.lean	498	definition, no admission
+TEM-11-07	DLMF.Confluent.gammaUniformC_first	DLMF/IncompleteGamma/UniformAsymptotics.lean	636	proved, no admission
+TEM-11-07	DLMF.Confluent.gammaUniformS_uniform_expansion	DLMF/IncompleteGamma/UniformAsymptotics.lean	715	direct admission
+TEM-11-07	DLMF.Confluent.gammaUniformC_real_coordinate_succ	DLMF/IncompleteGamma/GammaTransitionCoordinates.lean	82	direct admission
+TEM-11-07	DLMF.Confluent.analyticAt_gammaUniformC_real_coordinate_zero	DLMF/IncompleteGamma/GammaTransitionCoordinates.lean	92	direct admission
+TEM-11-08	DLMF.Confluent.gamma_density_scaled_identity	DLMF/IncompleteGamma/ParameterRemainderBounds.lean	46	direct admission
+TEM-11-08	DLMF.Confluent.gammaScaled	DLMF/IncompleteGamma/UniformAsymptotics.lean	81	definition, no admission
+TEM-11-08	Real.hasSum_pow_div_log_of_abs_lt_one	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Log/Deriv.lean	352	proved, no admission
+TEM-11-08	Real.log_le_sub_one_of_pos	.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Log/Basic.lean	307	proved, no admission
+TEM-11-09	DLMF.Statistical.Real.incompleteBeta	DLMF/Statistical/Basic/IncompleteBeta.lean	59	definition, no admission
+TEM-11-09	DLMF.Statistical.Real.regularizedIncompleteBeta	DLMF/Statistical/Basic/IncompleteBeta.lean	64	definition, no admission
+TEM-11-09	DLMF.Statistical.Real.regularizedIncompleteBeta_ofReal	DLMF/Statistical/Basic/IncompleteBeta.lean	277	proved, no admission
+TEM-11-09	DLMF.Statistical.regularizedIncompleteBeta_ofReal	DLMF/IncompleteGamma/Beta.lean	86	proved, no admission
+TEM-11-09	DLMF.Statistical.Real.incompleteBeta_eq_ordinaryHypergeometric	DLMF/Statistical/IncompleteBeta.lean	37	proved, no admission
+TEM-11-09	DLMF.Statistical.incompleteBeta_hypergeometric_euler	DLMF/IncompleteGamma/Beta.lean	211	proved, no admission
+TEM-11-09	DLMF.Statistical.incompleteBeta_hypergeometric_pfaff	DLMF/IncompleteGamma/Beta.lean	232	proved, no admission
+TEM-11-10	DLMF.Statistical.Real.regularizedIncompleteBeta_add_one_left	DLMF/Statistical/Basic/IncompleteBeta.lean	214	proved, no admission
+TEM-11-10	DLMF.Statistical.Real.regularizedIncompleteBeta_add_one_right	DLMF/Statistical/Basic/IncompleteBeta.lean	241	proved, no admission
+TEM-11-10	DLMF.Statistical.regularizedIncompleteBeta_neighbors	DLMF/IncompleteGamma/Beta.lean	368	proved, no admission
+TEM-11-10	DLMF.Statistical.regularizedIncompleteBeta_neighbors_down	DLMF/IncompleteGamma/Beta.lean	411	proved, no admission
+TEM-11-10	DLMF.Statistical.regularizedIncompleteBeta_contiguous_12	DLMF/IncompleteGamma/Beta.lean	466	proved, no admission
+TEM-11-11	DLMF.Statistical.incompleteBeta_continuedFraction	DLMF/IncompleteGamma/Beta.lean	789	proved, no admission
+TEM-11-12	DLMF.Statistical.regularizedIncompleteBeta_mellinBarnes	DLMF/IncompleteGamma/Beta.lean	254	proved, no admission
+TEM-11-12	DLMF.Confluent.IncompleteBetaBarnes.integral_vertical	DLMF/IncompleteGamma/BetaBarnes.lean	169	proved, no admission
+TEM-11-13	DLMF.Statistical.Real.betaXi	DLMF/IncompleteGamma/BetaEndpointData.lean	257	definition, no admission
+TEM-11-13	DLMF.Statistical.Real.betaGeneratingKernel	DLMF/IncompleteGamma/BetaEndpointData.lean	261	definition, no admission
+TEM-11-13	DLMF.Statistical.Real.betaGeneratingCoeff	DLMF/IncompleteGamma/BetaEndpointData.lean	266	definition, no admission
+TEM-11-13	DLMF.Statistical.betaAuxF	DLMF/IncompleteGamma/BetaEndpointData.lean	270	definition, no admission
+TEM-11-13	DLMF.Statistical.betaAuxF_initial	DLMF/IncompleteGamma/BetaEndpointData.lean	417	proved, no admission
+TEM-11-13	DLMF.Statistical.betaAuxF_recurrence	DLMF/IncompleteGamma/BetaEndpointData.lean	359	proved, no admission
+TEM-11-13	DLMF.Confluent.IncompleteBetaUniform.normalizedIncompleteBeta_eq_laplace_integral	DLMF/IncompleteGamma/BetaEndpointBounds.lean	348	proved, no admission
+TEM-11-13	DLMF.Confluent.IncompleteBetaUniform.exists_norm_iteratedDeriv_betaGeneratingKernel_le	DLMF/IncompleteGamma/BetaEndpointBounds.lean	282	proved, no admission
+TEM-11-13	DLMF.Statistical.norm_betaAuxF_le_pochhammer	DLMF/IncompleteGamma/BetaEndpointError.lean	46	direct admission
+TEM-11-13	DLMF.Statistical.betaEndpointApproximation	DLMF/IncompleteGamma/BetaEndpointError.lean	27	definition, no admission
+TEM-11-13	DLMF.Statistical.norm_regularizedIncompleteBeta_sub_endpointApproximation_le	DLMF/IncompleteGamma/BetaEndpointError.lean	56	direct admission
+TEM-11-13	DLMF.Statistical.exists_betaEndpointApproximation_uniform_remainder	DLMF/IncompleteGamma/BetaEndpointError.lean	68	direct admission
+TEM-11-14	DLMF.Statistical.Real.betaCenter	DLMF/IncompleteGamma/BetaAsymptotics.lean	62	definition, no admission
+TEM-11-14	DLMF.Statistical.Real.betaEta	DLMF/IncompleteGamma/BetaAsymptotics.lean	67	definition, no admission
+TEM-11-14	DLMF.Statistical.betaSymmetricC	DLMF/IncompleteGamma/BetaAsymptotics.lean	218	definition, no admission
+TEM-11-14	DLMF.Statistical.betaSymmetricC_first	DLMF/IncompleteGamma/BetaAsymptotics.lean	228	direct admission
+TEM-11-14	DLMF.Statistical.betaSymmetricC_at_zero	DLMF/IncompleteGamma/BetaAsymptotics.lean	235	direct admission
+TEM-11-14	DLMF.Statistical.betaSymmetricC_analytic	DLMF/IncompleteGamma/BetaAsymptotics.lean	240	direct admission
+TEM-11-14	DLMF.Statistical.incompleteBeta_symmetric_uniform_expansion	DLMF/IncompleteGamma/BetaAsymptotics.lean	247	direct admission
+TEM-11-14	DLMF.Statistical.betaSymmetricPhase	DLMF/IncompleteGamma/BetaSymmetricSaddle.lean	29	definition, no admission
+TEM-11-14	DLMF.Statistical.betaSymmetricSaddleInverse	DLMF/IncompleteGamma/BetaSymmetricSaddle.lean	34	definition, no admission
+TEM-11-14	DLMF.Statistical.betaSymmetricSaddleAmplitude	DLMF/IncompleteGamma/BetaSymmetricSaddle.lean	39	definition, no admission
+TEM-11-14	DLMF.Statistical.betaSymmetricSaddleCoefficient	DLMF/IncompleteGamma/BetaSymmetricSaddle.lean	47	definition, no admission
+TEM-11-14	DLMF.Statistical.betaSymmetricSaddleInverse_spec	DLMF/IncompleteGamma/BetaSymmetricSaddle.lean	78	direct admission
+TEM-11-14	DLMF.Statistical.analyticAt_betaSymmetricSaddleAmplitude	DLMF/IncompleteGamma/BetaSymmetricSaddle.lean	85	direct admission
+TEM-11-14	DLMF.Statistical.betaSymmetricSaddleCoefficient_eq	DLMF/IncompleteGamma/BetaSymmetricSaddle.lean	93	direct admission
+TEM-11-15	DLMF.Statistical.Real.betaGammaPhaseConstant	DLMF/IncompleteGamma/BetaGammaSaddle.lean	29	definition, no admission
+TEM-11-15	DLMF.Statistical.betaGammaBetaPhase	DLMF/IncompleteGamma/BetaGammaSaddle.lean	33	definition, no admission
+TEM-11-15	DLMF.Statistical.betaGammaGammaPhase	DLMF/IncompleteGamma/BetaGammaSaddle.lean	36	definition, no admission
+TEM-11-15	DLMF.Statistical.betaGammaLocalInverse	DLMF/IncompleteGamma/BetaGammaSaddle.lean	40	definition, no admission
+TEM-11-15	DLMF.Statistical.betaGammaHankelPoint	DLMF/IncompleteGamma/BetaGammaSaddle.lean	46	definition, no admission
+TEM-11-15	DLMF.Statistical.IsBetaGammaContinuation	DLMF/IncompleteGamma/BetaGammaSaddle.lean	52	definition, no admission
+TEM-11-15	DLMF.Statistical.betaGammaContinuation	DLMF/IncompleteGamma/BetaGammaSaddle.lean	64	definition, no admission
+TEM-11-15	DLMF.Statistical.betaGammaLocalInverse_spec	DLMF/IncompleteGamma/BetaGammaSaddle.lean	168	direct admission
+TEM-11-15	DLMF.Statistical.exists_isBetaGammaContinuation	DLMF/IncompleteGamma/BetaGammaSaddle.lean	176	direct admission
+TEM-11-15	DLMF.Statistical.betaGammaContinuation_spec	DLMF/IncompleteGamma/BetaGammaSaddle.lean	182	depends on admission
+TEM-11-15	DLMF.Statistical.betaGammaContinuation_ofReal	DLMF/IncompleteGamma/BetaGammaSaddle.lean	188	direct admission
+TEM-11-15	DLMF.Statistical.Real.betaZeta_strictAntiOn_bijOn	DLMF/IncompleteGamma/BetaGammaSaddle.lean	194	direct admission
+TEM-11-15	DLMF.Statistical.Real.hasDerivAt_betaZeta_saddle	DLMF/IncompleteGamma/BetaGammaSaddle.lean	201	direct admission
+TEM-11-15	DLMF.Statistical.Real.hasDerivAt_betaZeta	DLMF/IncompleteGamma/BetaGammaSaddle.lean	207	direct admission
+TEM-11-15	DLMF.Statistical.betaGammaAmplitude	DLMF/IncompleteGamma/BetaGammaSaddle.lean	69	definition, no admission
+TEM-11-15	DLMF.Statistical.betaGammaContourCoefficient	DLMF/IncompleteGamma/BetaGammaSaddle.lean	77	definition, no admission
+TEM-11-15	DLMF.Statistical.betaGammaMomentCoefficient	DLMF/IncompleteGamma/BetaGammaSaddle.lean	82	definition, no admission
+TEM-11-15	DLMF.Statistical.betaGammaMomentCoefficient_initial	DLMF/IncompleteGamma/BetaGammaSaddle.lean	222	proved, no admission
+TEM-11-15	DLMF.Statistical.betaGammaMomentCoefficient_recurrence	DLMF/IncompleteGamma/BetaGammaSaddle.lean	228	direct admission
+TEM-11-15	DLMF.Statistical.betaGammaMomentCoefficient_two	DLMF/IncompleteGamma/BetaGammaSaddle.lean	235	proved, no admission
+TEM-11-15	DLMF.Statistical.integral_betaGammaContour_monomial	DLMF/IncompleteGamma/BetaGammaSaddle.lean	250	direct admission
+TEM-11-15	DLMF.Statistical.integrableOn_betaGammaContour_taylor_remainder	DLMF/IncompleteGamma/BetaGammaSaddle.lean	260	direct admission
+TEM-11-15	DLMF.Statistical.regularizedIncompleteBeta_eq_gamma_sub_finite_contour	DLMF/IncompleteGamma/BetaGammaSaddle.lean	269	direct admission
+TEM-11-15	DLMF.Statistical.norm_regularizedIncompleteBeta_sub_gamma_sum_le_contour	DLMF/IncompleteGamma/BetaGammaSaddle.lean	285	direct admission
+TEM-11-16	DLMF.Statistical.marcumP	DLMF/Statistical/MarcumQ.lean	63	definition, no admission
+TEM-11-16	DLMF.Statistical.marcumQ	DLMF/Statistical/MarcumQ.lean	67	definition, no admission
+TEM-11-16	DLMF.Statistical.summable_marcumP_term	DLMF/Statistical/MarcumQ.lean	71	proved, no admission
+TEM-11-16	DLMF.Statistical.summable_marcumQ_term	DLMF/Statistical/MarcumQ.lean	81	proved, no admission
+TEM-11-16	DLMF.Statistical.marcumP_add_marcumQ	DLMF/Statistical/MarcumQ.lean	87	proved, no admission
+TEM-11-16	DLMF.Statistical.marcumP_nonneg	DLMF/Statistical/MarcumQ.lean	94	proved, no admission
+TEM-11-16	DLMF.Statistical.marcumP_le_one	DLMF/Statistical/MarcumQ.lean	99	proved, no admission
+TEM-11-16	DLMF.Statistical.marcumP_zero_left	DLMF/Statistical/MarcumQ.lean	106	proved, no admission
+TEM-11-16	DLMF.Statistical.marcumQ_eq_integral	DLMF/Statistical/MarcumQ.lean	283	proved, no admission
+TEM-11-16	DLMF.Statistical.marcumQ_nonneg	DLMF/Statistical/MarcumProbability.lean	28	proved, no admission
+TEM-11-16	DLMF.Statistical.marcumQ_le_one	DLMF/Statistical/MarcumProbability.lean	36	proved, no admission
+TEM-11-16	DLMF.Statistical.marcumQ_zero_left	DLMF/Statistical/MarcumProbability.lean	44	proved, no admission
+TEM-11-16	DLMF.Statistical.integrableOn_marcumBesselDensity	DLMF/Statistical/MarcumProbability.lean	64	direct admission
+TEM-11-16	DLMF.Statistical.marcumP_eq_integral	DLMF/Statistical/MarcumProbability.lean	72	direct admission
+TEM-11-16	DLMF.Statistical.Real.cdf_noncentralChiSquaredMeasure_eq_marcumP	DLMF/Statistical/MarcumProbability.lean	52	proved, no admission
+TEM-11-17	DLMF.Statistical.marcumQ_add_one	DLMF/Statistical/MarcumQ.lean	140	proved, no admission
+TEM-11-17	DLMF.Statistical.marcumQ_recurrence	DLMF/Statistical/MarcumQ.lean	189	proved, no admission
+TEM-11-17	DLMF.Statistical.marcumVerticalKernel	DLMF/Statistical/MarcumContours.lean	28	definition, no admission
+TEM-11-17	DLMF.Statistical.integrable_marcumVerticalKernel	DLMF/Statistical/MarcumContours.lean	40	direct admission
+TEM-11-17	DLMF.Statistical.marcumQ_eq_vertical_integral	DLMF/Statistical/MarcumContours.lean	47	direct admission
+TEM-11-17	DLMF.Statistical.marcumP_eq_vertical_integral	DLMF/Statistical/MarcumContours.lean	55	direct admission
+TEM-11-18	DLMF.Statistical.Real.marcumXi	DLMF/Statistical/MarcumFixedOrder.lean	29	definition, no admission
+TEM-11-18	DLMF.Statistical.Real.marcumRho	DLMF/Statistical/MarcumFixedOrder.lean	32	definition, no admission
+TEM-11-18	DLMF.Statistical.Real.marcumSigma	DLMF/Statistical/MarcumFixedOrder.lean	35	definition, no admission
+TEM-11-18	DLMF.Statistical.marcumBesselTail	DLMF/Statistical/MarcumFixedOrder.lean	52	definition, no admission
+TEM-11-18	DLMF.Statistical.Real.marcumTransitionMoment	DLMF/Statistical/MarcumFixedOrder.lean	61	definition, no admission
+TEM-11-18	DLMF.Statistical.marcumBesselCoefficient	DLMF/Statistical/MarcumFixedOrder.lean	71	definition, no admission
+TEM-11-18	DLMF.Statistical.integrableOn_marcumBesselTail_kernel	DLMF/Statistical/MarcumFixedOrder.lean	81	direct admission
+TEM-11-18	DLMF.Statistical.not_integrableOn_marcumBesselTail_kernel_zero	DLMF/Statistical/MarcumFixedOrder.lean	89	direct admission
+TEM-11-18	DLMF.Statistical.marcumQ_eq_besselTail	DLMF/Statistical/MarcumFixedOrder.lean	95	direct admission
+TEM-11-18	DLMF.Statistical.marcumP_eq_besselTail	DLMF/Statistical/MarcumFixedOrder.lean	103	direct admission
+TEM-11-18	DLMF.Statistical.tendsto_marcumQ_besselTail_diagonal	DLMF/Statistical/MarcumFixedOrder.lean	112	direct admission
+TEM-11-18	DLMF.Statistical.tendsto_marcumP_besselTail_diagonal	DLMF/Statistical/MarcumFixedOrder.lean	122	direct admission
+TEM-11-18	DLMF.Statistical.marcumBesselCoefficient_zero	DLMF/Statistical/MarcumFixedOrder.lean	131	proved, no admission
+TEM-11-18	DLMF.Statistical.marcumBesselCoefficient_succ	DLMF/Statistical/MarcumFixedOrder.lean	135	direct admission
+TEM-11-18	DLMF.Statistical.Real.marcumTransitionMoment_eq_upperIncompleteGamma	DLMF/Statistical/MarcumFixedOrder.lean	150	direct admission
+TEM-11-18	DLMF.Statistical.Real.marcumTransitionMoment_succ	DLMF/Statistical/MarcumFixedOrder.lean	158	direct admission
+TEM-11-18	DLMF.Statistical.Real.marcumTransitionMoment_zero	DLMF/Statistical/MarcumFixedOrder.lean	166	direct admission
+TEM-11-18	DLMF.Statistical.norm_marcumBesselTail_sub_sum_le	DLMF/Statistical/MarcumFixedOrder.lean	174	direct admission
+TEM-11-18	DLMF.Statistical.exists_marcumBesselTail_uniform_remainder	DLMF/Statistical/MarcumFixedOrder.lean	188	direct admission
+TEM-11-18	DLMF.Statistical.marcumQ_besselTail_leading_term	DLMF/Statistical/MarcumFixedOrder.lean	197	direct admission
+TEM-11-19	DLMF.Statistical.marcumSaddlePhase	DLMF/Statistical/MarcumVariableOrder.lean	30	definition, no admission
+TEM-11-19	DLMF.Statistical.marcumSaddleInverse	DLMF/Statistical/MarcumVariableOrder.lean	34	definition, no admission
+TEM-11-19	DLMF.Statistical.Real.marcumPoleCoordinate	DLMF/Statistical/MarcumVariableOrder.lean	41	definition, no admission
+TEM-11-19	DLMF.Statistical.marcumSaddleAmplitude	DLMF/Statistical/MarcumVariableOrder.lean	49	definition, no admission
+TEM-11-19	DLMF.Statistical.marcumSaddleCoefficient	DLMF/Statistical/MarcumVariableOrder.lean	56	definition, no admission
+TEM-11-19	DLMF.Statistical.Real.marcumQZeroOrder	DLMF/Statistical/MarcumVariableOrder.lean	62	definition, no admission
+TEM-11-19	DLMF.Statistical.marcumSaddleInverse_spec	DLMF/Statistical/MarcumVariableOrder.lean	106	direct admission
+TEM-11-19	DLMF.Statistical.Real.marcumPoleCoordinate_sq	DLMF/Statistical/MarcumVariableOrder.lean	116	direct admission
+TEM-11-19	DLMF.Statistical.analyticAt_marcumSaddleAmplitude	DLMF/Statistical/MarcumVariableOrder.lean	124	direct admission
+TEM-11-19	DLMF.Statistical.im_marcumSaddleCoefficient_even	DLMF/Statistical/MarcumVariableOrder.lean	130	direct admission
+TEM-11-19	DLMF.Statistical.Real.tendsto_marcumQ_zero_order	DLMF/Statistical/MarcumVariableOrder.lean	136	direct admission
+TEM-11-19	DLMF.Statistical.Real.marcumPoleCoordinate_eq_zero_iff	DLMF/Statistical/MarcumVariableOrder.lean	141	direct admission
+TEM-11-19	DLMF.Statistical.exists_marcumQ_variable_order_uniform_remainder	DLMF/Statistical/MarcumVariableOrder.lean	150	direct admission
+TEM-11-20	DLMF.Statistical.Real.vonMisesCDF	DLMF/Statistical/Basic/VonMises.lean	25	definition, no admission
+TEM-11-20	DLMF.Statistical.Real.vonMisesCDF_neg	DLMF/Statistical/VonMises.lean	35	direct admission
+TEM-11-20	DLMF.Statistical.Real.hasSum_vonMisesCDF_fourier	DLMF/Statistical/VonMises.lean	40	direct admission
+TEM-11-20	DLMF.Statistical.Real.vonMisesGaussianMoment	DLMF/Statistical/VonMises.lean	26	definition, no admission
+TEM-11-20	DLMF.Statistical.Real.hasSum_vonMisesGaussianMoment	DLMF/Statistical/VonMises.lean	48	direct admission
+TEM-11-20	DLMF.Statistical.Real.vonMisesGaussianMoment_eq_lowerIncompleteGamma	DLMF/Statistical/VonMises.lean	58	direct admission
+TEM-11-20	DLMF.Statistical.Real.vonMisesCDF_gaussian_uniform	DLMF/Statistical/VonMises.lean	68	direct admission
+TEM-11-20	DLMF.Statistical.Real.vonMisesCDF_erfc_uniform	DLMF/Statistical/VonMises.lean	77	direct admission
+TEM-11-21	DLMF.Confluent.Real.integrableOn_erfc_gammaTail_kernel	DLMF/ErrorFunctions/Integrals/GammaTail.lean	29	direct admission
+TEM-11-21	DLMF.Confluent.erfc_eq_gammaTail_integral	DLMF/ErrorFunctions/Integrals/GammaTail.lean	36	direct admission
+TEM-11-21	DLMF.Confluent.erfc_sector_asymptotic	DLMF/ErrorFunctions/BoundsAsymptotics/GaussianRemainders.lean	371	proved, no admission
+TEM-11-21	DLMF.Confluent.erfc_remainder_bound	DLMF/ErrorFunctions/BoundsAsymptotics/GaussianRemainders.lean	588	proved, no admission
+TEM-11-21	DLMF.Confluent.erfc_remainder_sign	DLMF/ErrorFunctions/BoundsAsymptotics/GaussianRemainders.lean	813	proved, no admission
+TEM-11-21	DLMF.Confluent.upperIncompleteGammaOnLog_monodromy	DLMF/IncompleteGamma/ContinuedProperties.lean	486	proved, no admission
+TEM-11-21	DLMF.Confluent.upperIncompleteGammaOnLog_monodromy_limit	DLMF/IncompleteGamma/ContinuedProperties.lean	500	proved, no admission

@@ -1148,4 +1148,12 @@ theorem partitionCountAtMostParts_isEquivalent {k : ℕ} (hk : 1 ≤ k) :
     exact (hb n).2
 
 
+/-- Conjugation transposes the bounding rectangle of a partition.
+Andrews, Askey and Roy, *Special Functions*, Theorem 11.5.1, p. 563,
+synopsis AAR-11.5.1–11.7. -/
+theorem partitionCountBoxed_comm (k m n : ℕ) :
+    partitionCountBoxed k m n = partitionCountBoxed m k n := by
+  rw [partitionCountBoxed_eq_card_conj]
+  simp only [partitionCountBoxed, and_comm]
+
 end DLMF.Combinatorics

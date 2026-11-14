@@ -5,11 +5,14 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
+public import DLMF.Elliptic.PendulumEnergy
+
 public import DLMF.Elliptic.Complete
 public import DLMF.Elliptic.AGM
 public import DLMF.Elliptic.Jacobi
 public import DLMF.Elliptic.JacobiIdentities
 public import DLMF.Elliptic.SpecialValues
+public import DLMF.Elliptic.BookReductions
 public import DLMF.Elliptic.Theta
 public import DLMF.Elliptic.ThirdKind
 public import DLMF.Elliptic.ThetaAGM

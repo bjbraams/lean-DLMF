@@ -5,6 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
+public import DLMF.ErrorFunctions.Integrals.GammaTail
+
 public import DLMF.ErrorFunctions.Integrals.GaussianAndCauchy
 public import DLMF.ErrorFunctions.Integrals.FresnelTransforms
 public import DLMF.ErrorFunctions.Integrals.ReciprocalLaplace

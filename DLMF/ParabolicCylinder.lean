@@ -25,6 +25,11 @@ public import DLMF.ParabolicCylinder.Relations
 public import DLMF.ParabolicCylinder.MathlibCoverage
 public import DLMF.ParabolicCylinder.ContourTools
 
+public import DLMF.ParabolicCylinder.TransitionScale
+public import DLMF.ParabolicCylinder.PositiveParameterError
+
+public import DLMF.ParabolicCylinder.ScatteringAndBoundStates
+
 /-!
 # Parabolic cylinder functions
 

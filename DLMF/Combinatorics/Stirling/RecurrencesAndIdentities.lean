@@ -6,6 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Combinatorics.Stirling.DefinitionsAndSeries
+import DLMFMathlib.Algebra.Polynomial.FiniteDifference
+import DLMFMathlib.Algebra.BigOperators
 
 /-!
 # Stirling numbers: recurrences and identities (DLMF §26.8(iv))
@@ -43,6 +45,9 @@ public import DLMF.Combinatorics.Stirling.DefinitionsAndSeries
 ## References
 
 * NIST DLMF §26.8.
+
+The near-diagonal identities use the generic discrete-antiderivative and polynomial
+extrapolation results in `DLMFMathlib.Algebra.Polynomial.FiniteDifference`.
 -/
 
 @[expose] public section
@@ -378,18 +383,99 @@ theorem stirlingSecond_add_succ (n k : ℕ) :
 
 /-! ### Identities (§26.8(v)) -/
 
-/-- Dropping a vanishing `k = 0` term: `∑_{k=0}^n f k = ∑_{k=1}^n f k` when `f 0 = 0`. -/
-private lemma sum_range_succ_eq_sum_Icc_of_zero {M : Type*} [AddCommMonoid M] (n : ℕ) {f : ℕ → M}
-    (h : f 0 = 0) : ∑ k ∈ range (n + 1), f k = ∑ k ∈ Icc 1 n, f k := by
-  rw [range_eq_Ico, sum_eq_sum_Ico_succ_bot (by omega), h, zero_add]
-  rfl
+/-- The near-diagonal recurrence for signed Stirling numbers, extended by zero below
+the diagonal index. -/
+private lemma signedStirlingFirst_sub_succ (n k : ℕ) :
+    (if k + 1 ≤ n + 1 then (signedStirlingFirst (n + 1) (n + 1 - (k + 1)) : ℚ) else 0) =
+      (if k + 1 ≤ n then (signedStirlingFirst n (n - (k + 1)) : ℚ) else 0) -
+        n * (if k ≤ n then (signedStirlingFirst n (n - k) : ℚ) else 0) := by
+  rcases lt_trichotomy n k with hnk | rfl | hkn
+  · simp only [ite_eq_right (by omega : ¬k + 1 ≤ n + 1), ite_eq_right (by omega : ¬k + 1 ≤ n),
+      ite_eq_right (by omega : ¬k ≤ n), mul_zero, sub_self]
+  · simp only [Nat.sub_self, le_refl, ↓reduceIte,
+      ite_eq_right (by omega : ¬n + 1 ≤ n)]
+    cases n with
+    | zero => simp
+    | succ n => simp
+  · rw [ite_eq_left (by omega), ite_eq_left (by omega), ite_eq_left (by omega),
+      show n + 1 - (k + 1) = (n - (k + 1)) + 1 by omega,
+      signedStirlingFirst_succ_succ,
+      show n - (k + 1) + 1 = n - k by omega]
+    push_cast
+    rfl
 
-/-- `(-1)^{n-k} = (-1)^n (-1)^k` for `k ≤ n`. -/
-private lemma neg_one_pow_sub_eq_mul {R : Type*} [Monoid R] [HasDistribNeg R]
-    {n k : ℕ} (hk : k ≤ n) :
-    (-1 : R) ^ (n - k) = (-1) ^ n * (-1) ^ k := by
-  have : (-1 : R) ^ n = (-1) ^ (n - k) * (-1) ^ k := by rw [← pow_add, Nat.sub_add_cancel hk]
-  rw [this, mul_assoc, ← pow_add, ← two_mul, pow_mul]; simp
+/-- The near-diagonal signed Stirling numbers extend to a polynomial of degree at most
+`2k`; at negative arguments its values are signed Stirling numbers of the second kind. -/
+private lemma exists_polynomial_signedStirlingFirst_sub (k : ℕ) :
+    ∃ P : ℚ[X], P.natDegree ≤ 2 * k ∧
+      (∀ n : ℕ, P.eval (n : ℚ) = if k ≤ n then (signedStirlingFirst n (n - k) : ℚ) else 0) ∧
+      (∀ j : ℕ, P.eval (-(j : ℚ)) = (-1) ^ k * Nat.stirlingSecond (k + j) j) := by
+  induction k with
+  | zero =>
+    refine ⟨1, by simp, ?_, ?_⟩
+    · intro n; simp [signedStirlingFirst_self]
+    · intro j; simp [Nat.stirlingSecond_self]
+  | succ k ih =>
+    obtain ⟨P, hP, hPnat, hPneg⟩ := ih
+    have hdeg : (-X * P).natDegree ≤ 2 * k + 1 := by
+      calc (-X * P).natDegree ≤ (-X : ℚ[X]).natDegree + P.natDegree := natDegree_mul_le
+        _ ≤ 2 * k + 1 := by simp only [natDegree_neg, natDegree_X]; omega
+    obtain ⟨Q, hQ0, hQdeg, hQdiff⟩ := exists_eval_add_one_sub_eval_eq (-X * P) hdeg
+    refine ⟨Q, by omega, ?_, ?_⟩
+    · intro n
+      induction n with
+      | zero => simp [hQ0]
+      | succ n ih =>
+        have h := hQdiff (n : ℚ)
+        simp only [eval_mul, eval_neg, eval_X, hPnat, ih] at h
+        rw [signedStirlingFirst_sub_succ]
+        push_cast
+        linear_combination h
+    · intro j
+      induction j with
+      | zero => simp [hQ0]
+      | succ j ih =>
+        have h := hQdiff (-((j + 1 : ℕ) : ℚ))
+        have hx : -((j + 1 : ℕ) : ℚ) + 1 = -(j : ℚ) := by push_cast; ring
+        rw [hx] at h
+        simp only [eval_mul, eval_neg, eval_X, hPneg, ih, neg_neg] at h
+        rw [show k + 1 + (j + 1) = (k + (j + 1)) + 1 by omega,
+          Nat.stirlingSecond_succ_succ, pow_succ]
+        push_cast at h ⊢
+        rw [show k + (j + 1) = k + 1 + j by omega] at h ⊢
+        linear_combination -h
+
+/-- The near-diagonal Stirling numbers of the second kind extend to a polynomial of degree
+at most `2k`; at negative arguments its values are signed Stirling numbers of the first kind. -/
+private lemma exists_polynomial_stirlingSecond_sub (k : ℕ) :
+    ∃ Q : ℚ[X], Q.natDegree ≤ 2 * k ∧
+      (∀ n : ℕ, Q.eval (n : ℚ) = if k ≤ n then (Nat.stirlingSecond n (n - k) : ℚ) else 0) ∧
+      (∀ j : ℕ, Q.eval (-(j : ℚ)) = (-1) ^ k * signedStirlingFirst (k + j) j) := by
+  obtain ⟨P, hP, hPnat, hPneg⟩ := exists_polynomial_signedStirlingFirst_sub k
+  let Q : ℚ[X] := C ((-1 : ℚ) ^ k) * P.comp (C (k : ℚ) - X)
+  have hsign : (-1 : ℚ) ^ k * (-1) ^ k = 1 := by
+    rw [← pow_add, ← two_mul, pow_mul]; norm_num
+  refine ⟨Q, ?_, ?_, ?_⟩
+  · calc Q.natDegree ≤ (P.comp (C (k : ℚ) - X)).natDegree := natDegree_C_mul_le _ _
+      _ ≤ P.natDegree * (C (k : ℚ) - X).natDegree := natDegree_comp_le
+      _ = P.natDegree := by
+        rw [← neg_sub X (C (k : ℚ)), natDegree_neg, natDegree_X_sub_C, mul_one]
+      _ ≤ 2 * k := hP
+  · intro n
+    simp only [Q, eval_mul, eval_C, eval_comp, eval_sub, eval_X]
+    split_ifs with hkn
+    · have harg : (k : ℚ) - n = -((n - k : ℕ) : ℚ) := by rw [Nat.cast_sub hkn]; ring
+      rw [harg, hPneg, ← mul_assoc, hsign, one_mul,
+        show k + (n - k) = n by omega]
+    · have hnk : n ≤ k := by omega
+      rw [← Nat.cast_sub hnk, hPnat]
+      split_ifs with h
+      · rw [show k - n - k = 0 by omega, signedStirlingFirst_zero_right (by omega),
+          Int.cast_zero, mul_zero]
+      · rw [mul_zero]
+  · intro j
+    simp only [Q, eval_mul, eval_C, eval_comp, eval_sub, eval_X, sub_neg_eq_add]
+    rw [← Nat.cast_add, hPnat, ite_eq_left (by omega), Nat.add_sub_cancel_left]
 
 /-- DLMF 26.8.27: `s(n, n-k) = ∑_{j=0}^{k} (-1)^j C(n-1+j, k+j) C(n+k, k-j) S(k+j, j)`,
 `0 ≤ k ≤ n` (implicit in DLMF). -/
@@ -398,14 +484,48 @@ theorem signedStirlingFirst_sub_eq_sum {n k : ℕ} (hk : k ≤ n) :
     signedStirlingFirst n (n - k) =
       ∑ j ∈ range (k + 1), (-1) ^ j * ((n - 1 + j).choose (k + j) : ℤ) *
         ((n + k).choose (k - j) : ℤ) * (Nat.stirlingSecond (k + j) j : ℤ) := by
-  sorry
+  by_cases hk0 : k = 0
+  · subst k; simp [signedStirlingFirst_self]
+  rcases eq_or_lt_of_le hk with rfl | hkn
+  · rw [Nat.sub_self, signedStirlingFirst_zero_right (by omega)]
+    symm
+    refine sum_eq_zero fun j _ => ?_
+    rw [Nat.choose_eq_zero_of_lt (by omega : k - 1 + j < k + j), Nat.cast_zero,
+      mul_zero, zero_mul, zero_mul]
+  · obtain ⟨P, hP, hPnat, hPneg⟩ := exists_polynomial_signedStirlingFirst_sub k
+    have hzero : ∀ i ∈ Icc 1 k, P.eval (i : ℚ) = 0 := by
+      intro i hi
+      rw [hPnat]
+      split_ifs with hki
+      · rw [show i - k = 0 by have := mem_Icc.mp hi; omega,
+          signedStirlingFirst_zero_right (mem_Icc.mp hi).1, Int.cast_zero]
+      · rfl
+    have h := eval_natCast_eq_sum_neg_natCast P hP hkn hzero
+    rw [hPnat, ite_eq_left hk] at h
+    have hterm : ∀ j ∈ range (k + 1), (-1 : ℚ) ^ (k + j) *
+        ((n + k).choose (k - j) : ℚ) * ((n - 1 + j).choose (k + j) : ℚ) *
+        P.eval (-(j : ℚ)) = (-1) ^ j * ((n - 1 + j).choose (k + j) : ℚ) *
+          ((n + k).choose (k - j) : ℚ) * Nat.stirlingSecond (k + j) j := by
+      intro j _
+      rw [hPneg]
+      have hsign : (-1 : ℚ) ^ (k + j) * (-1) ^ k = (-1) ^ j := by
+        rw [← pow_add, show k + j + k = j + 2 * k by omega, pow_add, pow_mul]
+        norm_num
+      calc (-1 : ℚ) ^ (k + j) * ((n + k).choose (k - j) : ℚ) *
+          ((n - 1 + j).choose (k + j) : ℚ) *
+          ((-1) ^ k * Nat.stirlingSecond (k + j) j) =
+          ((-1) ^ (k + j) * (-1) ^ k) * ((n - 1 + j).choose (k + j) : ℚ) *
+            ((n + k).choose (k - j) : ℚ) * Nat.stirlingSecond (k + j) j := by ring
+        _ = _ := by rw [hsign]
+    rw [sum_congr rfl hterm] at h
+    exact_mod_cast h
 
 /-- DLMF 26.8.28: `∑_{k=1}^n s(n, k) = 0` for `n > 1`. -/
 @[dlmf 26.8.E28]
 theorem sum_signedStirlingFirst {n : ℕ} (hn : 1 < n) :
     ∑ k ∈ Icc 1 n, signedStirlingFirst n k = 0 := by
   have h := congrArg (Polynomial.eval (1 : ℤ)) (descPochhammer_eq_sum ℤ n)
-  rw [show (1 : ℤ) = ((1 : ℕ) : ℤ) by simp, descPochhammer_eval_coe_nat_of_lt hn] at h
+  rw [show (1 : ℤ) = ((1 : ℕ) : ℤ) by simp, descPochhammer_eval_natCast_of_lt hn] at h
   simp only [eval_finsetSum, eval_mul, eval_C, eval_pow, eval_X, Nat.cast_one, one_pow,
     mul_one, Int.cast_id] at h
   rw [← sum_range_succ_eq_sum_Icc_of_zero n (signedStirlingFirst_zero_right (by omega)), h]
@@ -556,7 +676,46 @@ theorem stirlingSecond_sub_eq_sum {n k : ℕ} (hk : k ≤ n) :
     (Nat.stirlingSecond n (n - k) : ℤ) =
       ∑ j ∈ range (k + 1), (-1) ^ j * ((n - 1 + j).choose (k + j) : ℤ) *
         ((n + k).choose (k - j) : ℤ) * signedStirlingFirst (k + j) j := by
-  sorry
+  by_cases hk0 : k = 0
+  · subst k; simp [Nat.stirlingSecond_self]
+  have hzeroRight : ∀ {a : ℕ}, 1 ≤ a → Nat.stirlingSecond a 0 = 0 := by
+    intro a ha
+    cases a with
+    | zero => omega
+    | succ a => rfl
+  rcases eq_or_lt_of_le hk with rfl | hkn
+  · rw [Nat.sub_self, hzeroRight (by omega)]
+    symm
+    refine sum_eq_zero fun j _ => ?_
+    rw [Nat.choose_eq_zero_of_lt (by omega : k - 1 + j < k + j), Nat.cast_zero,
+      mul_zero, zero_mul, zero_mul]
+  · obtain ⟨P, hP, hPnat, hPneg⟩ := exists_polynomial_stirlingSecond_sub k
+    have hzero : ∀ i ∈ Icc 1 k, P.eval (i : ℚ) = 0 := by
+      intro i hi
+      rw [hPnat]
+      split_ifs with hki
+      · rw [show i - k = 0 by have := mem_Icc.mp hi; omega,
+          hzeroRight (mem_Icc.mp hi).1, Nat.cast_zero]
+      · rfl
+    have h := eval_natCast_eq_sum_neg_natCast P hP hkn hzero
+    rw [hPnat, ite_eq_left hk] at h
+    have hterm : ∀ j ∈ range (k + 1), (-1 : ℚ) ^ (k + j) *
+        ((n + k).choose (k - j) : ℚ) * ((n - 1 + j).choose (k + j) : ℚ) *
+        P.eval (-(j : ℚ)) = (-1) ^ j * ((n - 1 + j).choose (k + j) : ℚ) *
+          ((n + k).choose (k - j) : ℚ) * (signedStirlingFirst (k + j) j : ℚ) := by
+      intro j _
+      rw [hPneg]
+      have hsign : (-1 : ℚ) ^ (k + j) * (-1) ^ k = (-1) ^ j := by
+        rw [← pow_add, show k + j + k = j + 2 * k by omega, pow_add, pow_mul]
+        norm_num
+      calc (-1 : ℚ) ^ (k + j) * ((n + k).choose (k - j) : ℚ) *
+          ((n - 1 + j).choose (k + j) : ℚ) *
+          ((-1) ^ k * (signedStirlingFirst (k + j) j : ℚ)) =
+          ((-1) ^ (k + j) * (-1) ^ k) * ((n - 1 + j).choose (k + j) : ℚ) *
+            ((n + k).choose (k - j) : ℚ) * (signedStirlingFirst (k + j) j : ℚ) := by ring
+        _ = _ := by rw [hsign]
+    rw [sum_congr rfl hterm] at h
+    exact_mod_cast h
 
 /-- DLMF 26.8.34: `∑_{j=0}^n j^k x^j = ∑_{j=0}^k S(k, j) x^j (d/dx)^j ((1-x^{n+1})/(1-x))`,
 as a polynomial identity: `(1-x^{n+1})/(1-x)` is the polynomial `1 + x + ⋯ + xⁿ` (its value
@@ -719,7 +878,6 @@ theorem stirlingMatrix_inv (n : ℕ) :
   apply Matrix.inv_eq_right_inv
   ext a b
   have ha := a.isLt
-  have hb := b.isLt
   simp only [Matrix.mul_apply, Matrix.of_apply, Matrix.one_apply, Fin.ext_iff]
   have h := sum_signedStirlingFirst_mul_stirlingSecond' ((a : ℕ) + 1) ((b : ℕ) + 1)
   rw [Fin.sum_univ_eq_sum_range (fun j => (signedStirlingFirst ((a : ℕ) + 1) (j + 1) : ℚ) *

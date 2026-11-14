@@ -1,5 +1,8 @@
 module -- shake: keep-all
 
+public import DLMF.ExpIntegrals.EnvelopingModel
+
+public import DLMF.ExpIntegrals.GibbsLimit
 public import DLMF.ExpIntegrals.AnalyticProperties
 public import DLMF.ExpIntegrals.Continuation
 public import DLMF.ExpIntegrals.Representations
@@ -7,6 +10,12 @@ public import DLMF.ExpIntegrals.Expansions
 public import DLMF.ExpIntegrals.Asymptotics
 public import DLMF.ExpIntegrals.ZerosIntegrals
 public import DLMF.ExpIntegrals.TransformTools
+
+public import DLMF.ExpIntegrals.ConvergingFactors
+
+public import DLMF.ExpIntegrals.EiConvergingFactors
+
+public import DLMF.ExpIntegrals.EulerRemainders
 
 /-!
 # Exponential, logarithmic, sine and cosine integrals (DLMF Chapter 6)

@@ -1,0 +1,749 @@
+{
+  "base_command": [
+    "lake",
+    "env",
+    "lean",
+    "-DautoImplicit=false",
+    "-DrelaxedAutoImplicit=false"
+  ],
+  "enhanced_strict_options": [
+    "-Dlinter.unusedVariables.analyzeTactics=true",
+    "-DwarningAsError=true"
+  ],
+  "checked_files": 122,
+  "status": "passed",
+  "files": [
+    {
+      "file": "DLMF/AlgebraicAnalytic/Calculus/OneVariable.lean",
+      "sha256": "6c5148281b1783c00e9608bc39b5c38818deb91bd5c4d1bc81d35887806daf25",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/AlgebraicAnalytic/Complex/Calculus.lean",
+      "sha256": "c08bf2e61560cac682baa730343f2313309f9ee4384dda6aced8a3963e04af2c",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/AlgebraicAnalytic/Complex/Functions.lean",
+      "sha256": "8cd055a4ab332d90b09fb8f2f9c453f190fba90d517188aad09e6996df37243b",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/AlgebraicAnalytic/Distributions/Basic.lean",
+      "sha256": "392357875a85d76490a8830882b7f1d9bc10108285e20299183d810ab89097cd",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/AlgebraicAnalytic/Distributions/Theory.lean",
+      "sha256": "b962fc38155a1c99c6d34bd49545e47e0976f31af568e7c4bdda9371cb3604db",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/AlgebraicAnalytic/Fourier/Series.lean",
+      "sha256": "e3f31e3864e4a9c347f6d5b0a8d8f5c95c656ffb8f6e7c50117ce27bb14e8802",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/BernoulliEuler.lean",
+      "sha256": "c6293f033424332b7a59543d85d596822aa915c3d7126d85cd2f3aa1b101354b",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/BernoulliEuler/Arithmetic.lean",
+      "sha256": "4088f0f2aa5e399db5f7e397352a22ca91a393f1623d7941847531917c4cd9bb",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/BernoulliEuler/BernoulliHankel.lean",
+      "sha256": "6b02564b85410e2bf306d16c6cbed42ce790de4dbc6b45f2a158a333a7bcbb91",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMF/BernoulliEuler/CentralFactorial.lean",
+      "sha256": "6681f2eaa06e3d2296358eb586da7712c66c891b4cb35ac16e0545a7b6652cbb",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMF/BernoulliEuler/EulerHankel.lean",
+      "sha256": "021422f10d6ca81805071fc62dae04c5fcbdebbe453b1c8115a56bfcb14895c4",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMF/BernoulliEuler/Explicit.lean",
+      "sha256": "86495695c52ced151132119496c66182cb1be45e8ad8359b008377c98e7d1f2b",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/BernoulliEuler/IntegralsSums.lean",
+      "sha256": "0eefc4fcbc918cdfcfdc720e2e571c996a7584709572031a8c6c53c11599f1e7",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/BernoulliEuler/Properties.lean",
+      "sha256": "5f21e86fed36906257978e69a1d0cf7097e71d9f5170f35b32cdbea48121a7b3",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/BernoulliEuler/RelatedNumbers.lean",
+      "sha256": "4aca16403cbdfbd378342d866b5173153fca34ecbd5388095b12e29d12eeb28f",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/Combinatorics/Stirling/RecurrencesAndIdentities.lean",
+      "sha256": "d447405a00dff2766ba32fa002ff090ca2cb56de4180594ca31a44bd469a1f4f",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/Elementary.lean",
+      "sha256": "02edc4b6f396e60d1c0e92a58a33d22ab682c2d5fb8dfd14028da42852ea2d02",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/Elementary/ArcsineContinuedFraction.lean",
+      "sha256": "e737efa4fe49708aa4e6123a854d90b303fa23776fe2c8149f884fb60d232a98",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMF/Elementary/Hyperbolic/Integrals.lean",
+      "sha256": "958d67e359340dbcfaa76611ec5512533283f9851ace9e439b26e98d857d5f13",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/Elementary/Trigonometric/InverseIdentities.lean",
+      "sha256": "1e01aa84225a5a6eb08271c05c76a3ce171443a3e60d9a04ea5835ebce868df8",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/EllipticIntegrals.lean",
+      "sha256": "1ae8ef9bc9defd0d7efa3a1504d8cf5a7a6488057585e9e6142c1b87eb334e4a",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/Asymptotics.lean",
+      "sha256": "a33f0cf63f9a4663fafcddfef43a7f719d9bbc9a9dba3952e2d668993f5dca02",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/Expansions.lean",
+      "sha256": "c81026238f45ed93ee45b47b0fb120fd2ffe6e5e6e5b80761bfac647e8c38de5",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/Inequalities.lean",
+      "sha256": "a262a0fdf0358f3e7d7879e6a7bdfb112b9a5da77a5df739a9684e28ce02d6dd",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/LegendreIdentities.lean",
+      "sha256": "33c6758ba594568e921932f989b2f45ad4c252498c31e7f47b88ad5fe80ed0c2",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/LogarithmicExpansions.lean",
+      "sha256": "018ded9f869f0fca95a58331abcf3c765bc4535a23e014c57f81e914251c9170",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/NomeAsymptotics.lean",
+      "sha256": "a628dd1f943255c6bf5f47e65e3f6358146e25f7afeffb77a29445c59cc50299",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/NomeBounds.lean",
+      "sha256": "91b1f0cbf5af8fcce0fe98e04ff985ac11e3e08304509c432ba22bd8c7c7e4c6",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/NomeLambdaAsymptotics.lean",
+      "sha256": "e7cb6b1f9e37c54b2af29a6f48d648c6dd9263bb3d3fd1939fa16419e0781641",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/Quadratic.lean",
+      "sha256": "8b0dcd59e2f62f96e9640facb0da5a31565fc32ef715321ae19daacd877fbdaf",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/SymmetricAddition.lean",
+      "sha256": "a904dc7ed18a25ecfbd7492e222292bace8a4c0cf70a66cbce07e149a1c065c3",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/SymmetricAsymptotics.lean",
+      "sha256": "de522f9db28c0470761bba64e0f440ca4a5abb329cb9bc0fdcf1148e7115cd9e",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/SymmetricConnection.lean",
+      "sha256": "c200158fbc429c4f0fa7eb2f1fb87f9c23e6424b8ea8a5fd707e3778a2a79996",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/SymmetricIntegrals.lean",
+      "sha256": "c1299c112a442b6df1091978272785d516ed1790dfa5920c01e87b0e0333cea3",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/SymmetricIntegralsOfIntegrals.lean",
+      "sha256": "bf7de1054ce570759cea2d9185942c0400408705dd016ffa571eb8007ca19a75",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/SymmetricRCAddition.lean",
+      "sha256": "7ba68b447def6a6486ed16d5033dfa98ed5e31592b5aa1fe2f2f4382f52081ca",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/ThirdKindLogarithmicAsymptotics.lean",
+      "sha256": "79e623fe04eb63e829ed1de62e572e91759feb27bc8824d93112dd2fec976ffb",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMF/GeneralizedHypergeometric.lean",
+      "sha256": "b2590171027ecc6826ec6bb6b12dccbb83326f8c8b9cab3f50a1bbaa5e248611",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/GeneralizedHypergeometric/Appell.lean",
+      "sha256": "471f353a08c3ff6a8145b102c054d6f29eca9a18dc6dc7e0c195e13b08bde987",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/GeneralizedHypergeometric/Appell/BurchnallChaundy.lean",
+      "sha256": "a51b177fe874f7198e927cfa81f67ae814302c12994e0e1b7cb0d809aff2d275",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMF/GeneralizedHypergeometric/Appell/ComposedF4.lean",
+      "sha256": "2a79000109808f2b6609e66a943b98cafa7f72bf258a529bab5181219764bdbe",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMF/GeneralizedHypergeometric/Appell/EulerF4.lean",
+      "sha256": "9740272b1b25b55f5285f70cbb9b293ae65abfb1a9de2a818124e63b6a1b2092",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMF/GeneralizedHypergeometric/Appell/EulerIntegrals.lean",
+      "sha256": "71455faeadf27353381f4fa422ce3aca7d45095ab480907f0e46e5c91f22aa61",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/GeneralizedHypergeometric/GHATools.lean",
+      "sha256": "e0886bee5ba4908bb4bda59b470f8de30f46ed14b4b25330a755cceff3b54d84",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/GeneralizedHypergeometric/GeneralSquare.lean",
+      "sha256": "6ba44bf1d7c4633cbbbf8fbcf070cb188799ac53657d10707e7df6002b8c54a0",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMF/GeneralizedHypergeometric/Thomae.lean",
+      "sha256": "5da2e6a65aaa153b5a979ab0d19503fbb96f3c3efdaa5b43d277cbe893bd0b2f",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMF/GeneralizedHypergeometric/Transformations.lean",
+      "sha256": "ba200a85719fd2450e5d251389f152b724563b5fc7119646e923395813f91e9c",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/GeneralizedHypergeometric/UnitArgument.lean",
+      "sha256": "00c861790820e1b6b7931589b578b80a17b26b0797b49c7c6f5fc9eb21d11812",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/GeneralizedHypergeometric/UnitParameterAnalyticity.lean",
+      "sha256": "15578702e581e51b271482bd4d4978800e1963c7bf592e9ee91c159f7f66b057",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMF/GeneralizedHypergeometric/Watson.lean",
+      "sha256": "fc4763f56e9e176c195a6673247c6f4a264b4002926ae53c1a11dae0575ff689",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMF/GeneralizedHypergeometric/Whipple.lean",
+      "sha256": "33480420da2967c66ae0e87b7249c9ce9d14e07241b936db6680a6865827c475",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMF/Hypergeometric.lean",
+      "sha256": "4b592b78af837463203ffc001fcec89bc24966ca9f2d9c109f2d995e4d084710",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/Hypergeometric/BetaIntegrals.lean",
+      "sha256": "212d1719bf74c153c0c997635606fc650af6c10f9d994022bcf2dfa7f295c040",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMF/JacobiElliptic/ModulusInversion.lean",
+      "sha256": "b7b020057aa2a3d1cf69bffdd3b9a77caec5f17528552441d3ddf08d2ca549f4",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/JacobiElliptic/NomeBounds.lean",
+      "sha256": "4b62c325fb0b4c2325801b5dca6870f2e6d00ea0fa845cac662d750126623f2f",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMF/OrthogonalPolynomials/Hahn/HahnAndMeixner.lean",
+      "sha256": "9c74164d28af69245bbdca67e200ca39c1ea5e6c13145b95d86e0cd9464b7d4f",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/QHypergeometric.lean",
+      "sha256": "0e228d69f63423bb53450bbb9381a6c183105f72567b9e366775b8949524a748",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/QHypergeometric/BilateralEven.lean",
+      "sha256": "28d493446239982c9db3e7d6f5e09c74bb9914d277177332445c28a0ca12e457",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMF/QHypergeometric/BilateralParameterContinuity.lean",
+      "sha256": "1273c407c8d384c56e2ee982726ec1ca89ac9a9a8543bf36d053f065503a1699",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMF/QHypergeometric/BilateralParity.lean",
+      "sha256": "8cef23e4b814f8ea5d40a81023e77a1f164662418b2113b318278d86bfe44dc1",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMF/QHypergeometric/BilateralSummations.lean",
+      "sha256": "34a5e7632bfdb13976fc05852fd44feb0d4b78cf58769d79b90116528c6d6d1a",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/QHypergeometric/Ramanujan.lean",
+      "sha256": "1f1b07acf08cc9ab2e51276c2c576ae69be1fb2b1efa977d16504a28c16dd0dc",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMF/RiemannTheta.lean",
+      "sha256": "62f63c597140bb9bd46829db22c5e948364c5a228e2b4acfcf29fc173033af6a",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/RiemannTheta/Symmetry.lean",
+      "sha256": "2b148068c607a89d43d6e78e6df560b7ef731c1f1589dc8d643fea70ee317564",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/RiemannTheta/Uniqueness.lean",
+      "sha256": "2e2af2093f6e3dc8b0660dd852941207b45f75984e67a635da3d32f28a33d57b",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMF/Theta/Basic.lean",
+      "sha256": "92cc957ad6e746a89c6ea0c95f496cbe82f880bb837d336749afd835e087121b",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMF/Theta/Basic/FourierDerivatives.lean",
+      "sha256": "0fed351146895185bc918e9ba3259c0c685f5fba5c5f7fe1587f3738397cfc92",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMF/Theta/Identities.lean",
+      "sha256": "580c45f093b6406934b206cff0193badd5819efa6fead0dc0f27f634dd4dfeb2",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMFMathlib.lean",
+      "sha256": "930676cd551af4557601a0c62632db819c92909a6fdb412c704bd9ea1f4453c6",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMFMathlib/Algebra/BigOperators.lean",
+      "sha256": "540ba032c6e9693fae61ba2cf74d80d4b7ec948c9d242f83b4dba8e6013a914c",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMFMathlib/Algebra/Order/Antidiag/Pi.lean",
+      "sha256": "80b7bb0f16f8663c082745c1babaab7bf0370067bbc6d12515de36d24ba15775",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/Algebra/Polynomial/Antiderivative.lean",
+      "sha256": "1eba13d84c6e3219fed7f10f2df5292f809137ee4b05c8f5e1e1a4b067446bb8",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/Algebra/Polynomial/Binomial.lean",
+      "sha256": "b2390d57d67c5b04cfc3e90d7e8a288bb719dfac77b3e35aa1beda389eed6010",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/Algebra/Polynomial/CentralFactorial.lean",
+      "sha256": "86eb63a3e87d6562afeb52daef774f972024534710323b4da0c1dbbdca4d31c2",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/Algebra/Polynomial/CompositionCoefficients.lean",
+      "sha256": "d7cdb0d3bdfca4b4a3fa88025a9a904342e92fbfed8581e6ced6977fcce3a484",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/Algebra/Polynomial/FiniteDifference.lean",
+      "sha256": "9e532cb5dc74302c11e6b370ee422ecf3ac9c198a129f0ae273bcf0704e1a001",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/Analysis/Analytic/ScalarSeries.lean",
+      "sha256": "9165eed0a276137f9473a1124475bd07bd421a783a52189a0d4b33257f6cefb0",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/Analysis/Asymptotics/PeriodicLogAverage.lean",
+      "sha256": "c419b5b9cd99af077aa70f0145aeac01d593fabab502034e57e3d38efe9d5efd",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/Analysis/Asymptotics/SparsePowerSeries.lean",
+      "sha256": "9c1a41036f301c3cfdb2e2a517cd407cf2777decdb25659aa8f50f9720e88318",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/Analysis/BoundedVariation/Sampling.lean",
+      "sha256": "c4ee2dde3b1e58ca69e457fc02e45701e2f4f4ea6a3e7303203d5ed2b5e55948",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/Analysis/BoundedVariation/Series.lean",
+      "sha256": "53078efa6b0bcee263372c519cc1e8d0fdbddd286a63e5bb23fd7e72a1f79027",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/Analysis/Calculus/IntegrableDerivatives.lean",
+      "sha256": "21bfb7ec23ee438f594633542cb7eac61b411e352619fc5cfb7e787ab375e4f3",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/Analysis/Calculus/IteratedDeriv/FaaDiBruno.lean",
+      "sha256": "c77e5fb58ceab16ea9943286269e0113f5372a66848077b0cdbb2f4b467960e5",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/Analysis/Complex/ArgumentFilledHull.lean",
+      "sha256": "e0505f0144a515ded2e9c932b6ff35c65cccb1510c9375146a8cbd27423a4a6c",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/Analysis/Complex/ContinuousPhase.lean",
+      "sha256": "f3861d0f417bf5eaa2388a905c579fb2cc4f32fbcaa1a46a31a0de000cf74f53",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/Analysis/Complex/ShiftedNorm.lean",
+      "sha256": "a7fb6490057ede7ae068055f06b6ec07bbd79347bd106933c9725bde0b4daf72",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/Analysis/Distribution/JumpDerivatives.lean",
+      "sha256": "890c4ce3d2ae11c654e295c56fa6d638af189b3ff1e2291f67ec152d1f926558",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/Analysis/Fourier/BoundedVariationPeriodization.lean",
+      "sha256": "5a5c0b14c77949b08dd1a740adc6fd668723efff7063ebf881f187e65bfa59d0",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/Analysis/Fourier/CosineKernelConvergence.lean",
+      "sha256": "db93910f44055be6af93df6a18255d4f6645b3f3f8a5d046e835c46e3854c068",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/Analysis/Fourier/CosinePartialSumKernel.lean",
+      "sha256": "15e3e8dd6765fdc0d049b8b3de4c0877aaf08a94d0c782b9fc6daf2ed10e246c",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/Analysis/Fourier/DirichletJordan.lean",
+      "sha256": "fbc29ec075e5467a8ac03a8160d4f14872d54c7bfaed3467f1acccc7f0ccd96a",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMFMathlib/Analysis/Fourier/EvenPoisson.lean",
+      "sha256": "f6e91f824517e41c6d8b7aeedcd1a1f0546892165e0a9a19c989d591c1a184ef",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/Analysis/Fourier/IntegratedSeries.lean",
+      "sha256": "951933d479523d6348ae82b892ed112f0de7673f4b6e516e7dc3e08fccf8046e",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/Analysis/Fourier/LebesgueConstants.lean",
+      "sha256": "5b9f7f1b226f9cae0d0a58592f55b1e32a3f2f2c47bcd1d01a97e1c36bf3fbe3",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/Analysis/Fourier/PeriodicMean.lean",
+      "sha256": "32d0cbae253bc537b583900c0b04fd539c4c563a60f32ac58d7bca742fe46aca",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/Analysis/Fourier/PoissonSummation.lean",
+      "sha256": "516cbab7a3ce5b6b0904cbf01b8468182535264837753de441e6c4215158fd23",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/Analysis/Fourier/Sign.lean",
+      "sha256": "2fad74d4a109a7da7752674636f993faf80abbe4eae6b51b76f15e983da8e5d7",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/Analysis/Integral/DirichletThreeNode.lean",
+      "sha256": "94b45a2dda151042de5e5b107997dbd961cdfb7c4f855d4f40730f52349090d7",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/Analysis/Integral/HilbertRegularization.lean",
+      "sha256": "3f71cb10fe824486cc4783d5a7ae4a81075890c902df7d78a06cc08af2fb4798",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/Analysis/Integral/HyperbolicCosineMoments.lean",
+      "sha256": "e3ce19041f2bdcbffe1a60cb60358e73308d4f7263022d026ebc7ae13e86fadd",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/Analysis/Integral/ImproperDerivatives.lean",
+      "sha256": "361a6b4dfd822036b2f4d502f29515c0e4eff122041caab3b5065e103f1b4f79",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMFMathlib/Analysis/Integral/ReciprocalSquareRootProducts.lean",
+      "sha256": "446aefbe2d72adf7b2d49f29163ad718e41207f94940135acefcbdb1f7c90dc2",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/Analysis/Integral/WeightedSeries.lean",
+      "sha256": "93ac5f6fb854a9b755627925679801287b50425addecbed1a76f555b3567a464",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/Analysis/SpecialFunctions/Trigonometric/LandenAmplitude.lean",
+      "sha256": "8e84cc1ec84d607a8917d9a8db0957f783690fa9f2e2cb86b1238fccf494c1f9",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/Analysis/SpecialFunctions/Trigonometric/Sinc.lean",
+      "sha256": "4ea79c658a4197fac3541a090719a4c964bcfeb6643c407788e8e07a18990f60",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/Combinatorics/StirlingPowerSums.lean",
+      "sha256": "8d620dba7c4263af25c86e122c31b8e11d32d76fe89dbf5908726ebbe9b6c861",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/Data/ZMod/BigOperators.lean",
+      "sha256": "fbc79b61667c73fd8f1d4a276ef3b4a00a071f14186d4e0d1aa029640efa5e36",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/LinearAlgebra/Matrix/HilbertDeterminant.lean",
+      "sha256": "06829ff004611841ea0e8ae5697cee2a120240b785bdca3e34fd1689f797ed7f",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/LinearAlgebra/Matrix/PolynomialMoments.lean",
+      "sha256": "f1710bdbcfac03d2d981e7c8ef729bc89d32ca4cf69e838cb9c9b6cfa207dddb",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/MeasureTheory/Integral/IntervalSymmetry.lean",
+      "sha256": "04ed38ca0494feade9e1c27d10a7ea248a8c901be1151c4ee26b82d7b95762b6",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/MeasureTheory/Integral/Trigonometric.lean",
+      "sha256": "9b1742a214e14f42f0e6d97ec12d421354f4271bd7a727667f4d37a03ff4afc9",
+      "status": "passed",
+      "enhanced_strict": false
+    },
+    {
+      "file": "DLMFMathlib/NumberTheory/BernoulliCongruences.lean",
+      "sha256": "1c0f968365cdfd0ced817d11ada504c0946cce6365d8d211a75233f7e123681f",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/NumberTheory/BernoulliMoments.lean",
+      "sha256": "c96ad9ac82e097e988744f71d5f0f42d849df671466673ea3aee5cfe4b9f065a",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/NumberTheory/BernoulliRegularization.lean",
+      "sha256": "2030b91d7c4d09dc373dda502c331126c1987b3116cbaf512b62b605b221707b",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/NumberTheory/EulerCongruences.lean",
+      "sha256": "35ac31340f587f96664d66d5452179e0df8cf9ccbc04ebf1faa39a49a04957ef",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/NumberTheory/PadicNorm.lean",
+      "sha256": "322ca61e8af086889a8c390026990d49c7e2bbf7510979c37e84ac16b4a0b4ad",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/NumberTheory/PadicPolynomial.lean",
+      "sha256": "a9fb23099b7305d4d5dd3638a4d340a686c8a7b640ec46d36f9e605d46d450b6",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/NumberTheory/PowerSums.lean",
+      "sha256": "58cff39a521e7f24758da27586d9e03220b15272de5b43f0d3a9a908b9fa5d10",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "DLMFMathlib/NumberTheory/StirlingCongruences.lean",
+      "sha256": "de4899611b2255c13c267ac50dd2afc758a1209080304450c89264251c024abe",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "scripts/CheckDLMFArcsinhStatement.lean",
+      "sha256": "8eebacfe8ae9bde7d168982f50a69150ba722bdb784554dae9ece973e088ba2a",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "scripts/CheckDLMFProofs20261113.lean",
+      "sha256": "23f66442805fac4ccc5c1a44d4f9c17ea77c4c5a187897229f5824d5d140c24a",
+      "status": "passed",
+      "enhanced_strict": true
+    },
+    {
+      "file": "scripts/CheckDLMFSphericalStatement.lean",
+      "sha256": "c9bfbcee8810cbac5ed24c120709c59ecb3cb7e30b27547813dd3399d9646066",
+      "status": "passed",
+      "enhanced_strict": true
+    }
+  ]
+}

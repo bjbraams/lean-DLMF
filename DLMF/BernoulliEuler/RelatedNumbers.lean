@@ -9,6 +9,8 @@ public import DLMF.BernoulliEuler.Basic.RelatedNumbers
 public import DLMF.BernoulliEuler.GeneratingFunctions
 public import DLMF.Combinatorics.Stirling
 public import Pochhammer.PochhammerTransform
+import DLMFMathlib.NumberTheory.StirlingCongruences
+import DLMFMathlib.NumberTheory.BernoulliCongruences
 
 /-!
 # Sequences of numbers related to Bernoulli and Euler numbers
@@ -285,7 +287,10 @@ theorem padicNorm_bernoulli_sub_stirlingSecond {p n : ℕ} (hp : p.Prime) (hn : 
     (hnp : n ≤ p - 2) :
     padicNorm p (p * bernoulli n / n - Nat.stirlingSecond (p - 1 + n) (p - 1)) ≤
       (p : ℚ) ^ (-2 : ℤ) := by
-  sorry
+  let _ : Fact p.Prime := ⟨hp⟩
+  have h := padicNorm.stirlingSecond_sub_prime_mul_bernoulli_div_le (p := p) hn hnp
+  rw [← padicNorm.neg] at h
+  simpa only [neg_sub] using h
 
 /-- DLMF 24.15.10: for a prime `p` and `2 ≤ 2n ≤ p - 3`,
 `(2n - 1)/(4n) · p² B₂ₙ ≡ S(p + 2n, p - 1) (mod p³)`. -/
@@ -294,7 +299,17 @@ theorem padicNorm_bernoulli_sub_stirlingSecond_cube {p n : ℕ} (hp : p.Prime) (
     (hnp : 2 * n ≤ p - 3) :
     padicNorm p ((2 * n - 1) / (4 * n) * p ^ 2 * bernoulli (2 * n) -
       Nat.stirlingSecond (p + 2 * n) (p - 1)) ≤ (p : ℚ) ^ (-3 : ℤ) := by
-  sorry
+  let _ : Fact p.Prime := ⟨hp⟩
+  have h := padicNorm.stirlingSecond_sub_prime_sq_mul_bernoulli_le_of_odd (p := p) (d := 2 * n + 1)
+    (by omega) (by have := hp.two_le; omega) (by exact ⟨n, by omega⟩)
+  have he : p - 1 + (2 * n + 1) = p + 2 * n := by have := hp.one_le; omega
+  rw [he, Nat.add_sub_cancel] at h
+  norm_num only [Nat.cast_add, Nat.cast_mul, Nat.cast_ofNat, Nat.cast_one] at h
+  have hc : ((2 * (n : ℚ) + 1 - 2) / (2 * (2 * n + 1 - 1))) =
+      (2 * (n : ℚ) - 1) / (4 * n) := by ring
+  rw [hc] at h
+  rw [← padicNorm.neg] at h
+  simpa only [neg_sub] using h
 
 /-! ### §24.15(iv) Fibonacci and Lucas numbers -/
 

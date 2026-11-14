@@ -1,0 +1,461 @@
+{
+  "status": "completed",
+  "baseline_commit": "164d2dcd409e75be84cbf1fc0c75e286d1926b60",
+  "start_utc": "2026-11-13T07:52:41Z",
+  "deadline_utc": "2026-11-13T15:52:41Z",
+  "baseline_direct_admissions": 884,
+  "remaining_direct_admissions": 820,
+  "completed": [
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.iteratedDeriv_comp_faaDiBruno",
+      "references": "1.4.E13",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/OneVariable.lean",
+      "line": 105
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.IsSimpleClosedContour.jordan",
+      "references": "1.9.iii",
+      "file": "DLMF/AlgebraicAnalytic/Complex/Calculus.lean",
+      "line": 369
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.IsSimpleClosedContour.windingNumber_eq_one_or_neg_one",
+      "references": "1.9.iii",
+      "file": "DLMF/AlgebraicAnalytic/Complex/Calculus.lean",
+      "line": 456
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.IsSimpleClosedContour.argument_principle",
+      "references": "1.10.E9",
+      "file": "DLMF/AlgebraicAnalytic/Complex/Functions.lean",
+      "line": 493
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.IsSimpleClosedContour.argumentPrinciple_mul_id",
+      "references": "1.10.E10",
+      "file": "DLMF/AlgebraicAnalytic/Complex/Functions.lean",
+      "line": 550
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.iterDeriv_piecewise",
+      "references": "1.16.E17;1.16.E18",
+      "file": "DLMF/AlgebraicAnalytic/Distributions/Theory.lean",
+      "line": 297
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.fourierTransformTempered_sign",
+      "references": "1.16.E48;1.16.E49",
+      "file": "DLMF/AlgebraicAnalytic/Distributions/Theory.lean",
+      "line": 1135
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.fourierTransformTempered_heaviside",
+      "references": "1.16.E50;1.16.E51",
+      "file": "DLMF/AlgebraicAnalytic/Distributions/Theory.lean",
+      "line": 1211
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.lebesgueConstant_isEquivalent",
+      "references": "1.8.E9",
+      "file": "DLMF/AlgebraicAnalytic/Fourier/Series.lean",
+      "line": 510
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.tendsto_integral_fourierSeries",
+      "references": "1.8.E12",
+      "file": "DLMF/AlgebraicAnalytic/Fourier/Series.lean",
+      "line": 771
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.poisson_summation",
+      "references": "1.8.E14",
+      "file": "DLMF/AlgebraicAnalytic/Fourier/Series.lean",
+      "line": 890
+    },
+    {
+      "declaration": "DLMF.AlgebraicAnalytic.poissonSummation_cos",
+      "references": "1.8.E15",
+      "file": "DLMF/AlgebraicAnalytic/Fourier/Series.lean",
+      "line": 914
+    },
+    {
+      "declaration": "DLMF.BernoulliEuler.prime_mul_bernoulli_two_mul_modEq",
+      "references": "24.10.E2",
+      "file": "DLMF/BernoulliEuler/Arithmetic.lean",
+      "line": 140
+    },
+    {
+      "declaration": "DLMF.BernoulliEuler.kummer_congruence",
+      "references": "24.10.E3",
+      "file": "DLMF/BernoulliEuler/Arithmetic.lean",
+      "line": 151
+    },
+    {
+      "declaration": "DLMF.BernoulliEuler.kummer_congruence_pow",
+      "references": "24.10.E4",
+      "file": "DLMF/BernoulliEuler/Arithmetic.lean",
+      "line": 265
+    },
+    {
+      "declaration": "DLMF.BernoulliEuler.eulerNumber_two_mul_modEq_two_pow",
+      "references": "24.10.E6",
+      "file": "DLMF/BernoulliEuler/Arithmetic.lean",
+      "line": 469
+    },
+    {
+      "declaration": "DLMF.BernoulliEuler.voronoi_congruence",
+      "references": "24.10.E7",
+      "file": "DLMF/BernoulliEuler/Arithmetic.lean",
+      "line": 480
+    },
+    {
+      "declaration": "DLMF.BernoulliEuler.prime_pow_dvd_bernoulli_num",
+      "references": "24.10.E8",
+      "file": "DLMF/BernoulliEuler/Arithmetic.lean",
+      "line": 568
+    },
+    {
+      "declaration": "DLMF.BernoulliEuler.eulerNumber_two_mul_modEq_prime_pow",
+      "references": "24.10.E9",
+      "file": "DLMF/BernoulliEuler/Arithmetic.lean",
+      "line": 753
+    },
+    {
+      "declaration": "DLMF.BernoulliEuler.bernoulli_two_mul_eq_explicit₃",
+      "references": "24.6.E3",
+      "file": "DLMF/BernoulliEuler/CentralFactorial.lean",
+      "line": 43
+    },
+    {
+      "declaration": "DLMF.BernoulliEuler.det_hankel_bernoulli",
+      "references": "24.14.E11",
+      "file": "DLMF/BernoulliEuler/BernoulliHankel.lean",
+      "line": 35
+    },
+    {
+      "declaration": "DLMF.BernoulliEuler.det_hankel_eulerNumber",
+      "references": "24.14.E12",
+      "file": "DLMF/BernoulliEuler/EulerHankel.lean",
+      "line": 196
+    },
+    {
+      "declaration": "DLMF.BernoulliEuler.padicNorm_bernoulli_sub_stirlingSecond",
+      "references": "24.15.E9",
+      "file": "DLMF/BernoulliEuler/RelatedNumbers.lean",
+      "line": 286
+    },
+    {
+      "declaration": "DLMF.BernoulliEuler.padicNorm_bernoulli_sub_stirlingSecond_cube",
+      "references": "24.15.E10",
+      "file": "DLMF/BernoulliEuler/RelatedNumbers.lean",
+      "line": 298
+    },
+    {
+      "declaration": "DLMF.Combinatorics.signedStirlingFirst_sub_eq_sum",
+      "references": "26.8.E27",
+      "file": "DLMF/Combinatorics/Stirling/RecurrencesAndIdentities.lean",
+      "line": 483
+    },
+    {
+      "declaration": "DLMF.Combinatorics.stirlingSecond_sub_eq_sum",
+      "references": "26.8.E33",
+      "file": "DLMF/Combinatorics/Stirling/RecurrencesAndIdentities.lean",
+      "line": 675
+    },
+    {
+      "declaration": "DLMF.Elementary.arcsinh_continued_fraction",
+      "references": "4.39.E2",
+      "file": "DLMF/Elementary/Hyperbolic/Integrals.lean",
+      "line": 78,
+      "approved_statement_correction": true
+    },
+    {
+      "declaration": "DLMF.Elementary.arcsin_continued_fraction",
+      "references": "4.25.E3",
+      "file": "DLMF/Elementary/Trigonometric/InverseIdentities.lean",
+      "line": 1269
+    },
+    {
+      "declaration": "DLMF.EllipticIntegrals.completeEllipticK_hasSum_log",
+      "references": "19.12.E1",
+      "file": "DLMF/EllipticIntegrals/LogarithmicExpansions.lean",
+      "line": 243
+    },
+    {
+      "declaration": "DLMF.EllipticIntegrals.completeEllipticE_hasSum_log",
+      "references": "19.12.E2",
+      "file": "DLMF/EllipticIntegrals/LogarithmicExpansions.lean",
+      "line": 508
+    },
+    {
+      "declaration": "DLMF.EllipticIntegrals.completeEllipticPi_isBigO_log",
+      "references": "19.12.E4",
+      "file": "DLMF/EllipticIntegrals/ThirdKindLogarithmicAsymptotics.lean",
+      "line": 96
+    },
+    {
+      "declaration": "DLMF.EllipticIntegrals.completeEllipticPi_isBigO_log_of_one_lt",
+      "references": "19.12.E5",
+      "file": "DLMF/EllipticIntegrals/ThirdKindLogarithmicAsymptotics.lean",
+      "line": 111
+    },
+    {
+      "declaration": "DLMF.EllipticIntegrals.jacobiNome_isBigO",
+      "references": "19.5.E5",
+      "file": "DLMF/EllipticIntegrals/NomeAsymptotics.lean",
+      "line": 227
+    },
+    {
+      "declaration": "DLMF.EllipticIntegrals.jacobiNome_isBigO_lambda",
+      "references": "19.5.E6;19.5.E7",
+      "file": "DLMF/EllipticIntegrals/NomeLambdaAsymptotics.lean",
+      "line": 212
+    },
+    {
+      "declaration": "DLMF.EllipticIntegrals.completeEllipticE_eq_nome_series",
+      "references": "19.5.E9",
+      "file": "DLMF/EllipticIntegrals/Expansions.lean",
+      "line": 889
+    },
+    {
+      "declaration": "DLMF.EllipticIntegrals.pi_mul_complementaryEllipticK_div_bounds",
+      "references": "19.9.E5",
+      "file": "DLMF/EllipticIntegrals/NomeBounds.lean",
+      "line": 27
+    },
+    {
+      "declaration": "DLMF.EllipticIntegrals.symmetricEllipticRC_eq_integral_RC",
+      "references": "19.2.E22",
+      "file": "DLMF/EllipticIntegrals/LegendreIdentities.lean",
+      "line": 1182
+    },
+    {
+      "declaration": "DLMF.EllipticIntegrals.incEllInt_landen_descending",
+      "references": "19.8.E13",
+      "file": "DLMF/EllipticIntegrals/Quadratic.lean",
+      "line": 586
+    },
+    {
+      "declaration": "DLMF.EllipticIntegrals.symmetricEllipticRC_addition_zero",
+      "references": "19.26.E17",
+      "file": "DLMF/EllipticIntegrals/SymmetricRCAddition.lean",
+      "line": 145
+    },
+    {
+      "declaration": "DLMF.EllipticIntegrals.symmetricEllipticRG_zero_asymp",
+      "references": "19.27.E6",
+      "file": "DLMF/EllipticIntegrals/SymmetricAsymptotics.lean",
+      "line": 555
+    },
+    {
+      "declaration": "DLMF.EllipticIntegrals.legendreRelation_symmetricElliptic",
+      "references": "19.21.E1",
+      "file": "DLMF/EllipticIntegrals/SymmetricConnection.lean",
+      "line": 188
+    },
+    {
+      "declaration": "DLMF.EllipticIntegrals.symmetricEllipticRF_eq_sphere_integral",
+      "references": "19.23.E6",
+      "file": "DLMF/EllipticIntegrals/SymmetricIntegrals.lean",
+      "line": 834
+    },
+    {
+      "declaration": "DLMF.EllipticIntegrals.symmetricEllipticRG_eq_sphere_integral",
+      "references": "19.23.E6_5",
+      "file": "DLMF/EllipticIntegrals/SymmetricIntegrals.lean",
+      "line": 985
+    },
+    {
+      "declaration": "DLMF.EllipticIntegrals.symmetricEllipticR_three_eq_integral_sphere",
+      "references": "19.23.E9",
+      "file": "DLMF/EllipticIntegrals/SymmetricIntegrals.lean",
+      "line": 1051,
+      "approved_statement_correction": true
+    },
+    {
+      "declaration": "DLMF.EllipticIntegrals.integral_cpow_mul_symmetricEllipticRF_zero",
+      "references": "19.28.E1",
+      "file": "DLMF/EllipticIntegrals/SymmetricIntegralsOfIntegrals.lean",
+      "line": 139
+    },
+    {
+      "declaration": "DLMF.EllipticIntegrals.integral_cpow_mul_symmetricEllipticRG_zero",
+      "references": "19.28.E2",
+      "file": "DLMF/EllipticIntegrals/SymmetricIntegralsOfIntegrals.lean",
+      "line": 163
+    },
+    {
+      "declaration": "DLMF.EllipticIntegrals.integral_cpow_mul_symmetricEllipticRD_zero",
+      "references": "19.28.E3",
+      "file": "DLMF/EllipticIntegrals/SymmetricIntegralsOfIntegrals.lean",
+      "line": 206
+    },
+    {
+      "declaration": "DLMF.EllipticIntegrals.integral_cpow_mul_symmetricEllipticR_two",
+      "references": "19.28.E4",
+      "file": "DLMF/EllipticIntegrals/SymmetricIntegralsOfIntegrals.lean",
+      "line": 89
+    },
+    {
+      "declaration": "DLMF.EllipticIntegrals.integral_symmetricEllipticRJ_sq",
+      "references": "19.28.E7",
+      "file": "DLMF/EllipticIntegrals/SymmetricIntegralsOfIntegrals.lean",
+      "line": 452
+    },
+    {
+      "declaration": "DLMF.EllipticIntegrals.integral_symmetricEllipticRJ_scale",
+      "references": "19.28.E8",
+      "file": "DLMF/EllipticIntegrals/SymmetricIntegralsOfIntegrals.lean",
+      "line": 586
+    },
+    {
+      "declaration": "DLMF.Hypergeometric.appellF4_euler_germ",
+      "references": "16.15.E4",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/EulerIntegrals.lean",
+      "line": 946
+    },
+    {
+      "declaration": "DLMF.Hypergeometric.appellF4_reduction_appellF1",
+      "references": "16.16.E5_5",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/EulerIntegrals.lean",
+      "line": 1078
+    },
+    {
+      "declaration": "DLMF.Hypergeometric.appellF4_burchnall_chaundy",
+      "references": "16.16.E7",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/EulerIntegrals.lean",
+      "line": 1340
+    },
+    {
+      "declaration": "DLMF.Hypergeometric.generalizedHypergeometric_general_square_hasSum",
+      "references": "16.12.E3",
+      "file": "DLMF/GeneralizedHypergeometric/Transformations.lean",
+      "line": 565
+    },
+    {
+      "declaration": "DLMF.Hypergeometric.generalizedHypergeometric_watson_sum",
+      "references": "16.4.E6",
+      "file": "DLMF/GeneralizedHypergeometric/UnitArgument.lean",
+      "line": 527
+    },
+    {
+      "declaration": "DLMF.Hypergeometric.generalizedHypergeometric_whipple_3F2_sum",
+      "references": "16.4.E7",
+      "file": "DLMF/GeneralizedHypergeometric/UnitArgument.lean",
+      "line": 668
+    },
+    {
+      "declaration": "DLMF.Hypergeometric.generalizedHypergeometric_3F2_unit_transformation",
+      "references": "16.4.E11",
+      "file": "DLMF/GeneralizedHypergeometric/UnitArgument.lean",
+      "line": 701
+    },
+    {
+      "declaration": "DLMF.Hypergeometric.analyticOnNhd_generalizedHypergeometric_three_two_one_params",
+      "references": "",
+      "file": "DLMF/GeneralizedHypergeometric/UnitArgument.lean",
+      "line": 1116
+    },
+    {
+      "declaration": "DLMF.Hypergeometric.analyticOnNhd_gen3F2UnitThomae_params",
+      "references": "16.4.E11",
+      "file": "DLMF/GeneralizedHypergeometric/UnitArgument.lean",
+      "line": 1125
+    },
+    {
+      "declaration": "DLMF.QHypergeometric.bilateral_four_sum",
+      "references": "17.8.E6",
+      "file": "DLMF/QHypergeometric/BilateralSummations.lean",
+      "line": 827
+    },
+    {
+      "declaration": "DLMF.QHypergeometric.bilateral_even_sum",
+      "references": "17.8.E8",
+      "file": "DLMF/QHypergeometric/BilateralSummations.lean",
+      "line": 845
+    },
+    {
+      "declaration": "DLMF.QHypergeometric.bilateral_four_continues",
+      "references": "",
+      "file": "DLMF/QHypergeometric/BilateralSummations.lean",
+      "line": 1033
+    },
+    {
+      "declaration": "DLMF.QHypergeometric.bilateral_even_continues",
+      "references": "",
+      "file": "DLMF/QHypergeometric/BilateralSummations.lean",
+      "line": 1236
+    },
+    {
+      "declaration": "DLMF.RiemannTheta.eq_const_mul_riemannTheta_of_quasiPeriodic",
+      "references": "21.3.i",
+      "file": "DLMF/RiemannTheta/Uniqueness.lean",
+      "line": 38
+    }
+  ],
+  "validation": {
+    "baseline_full_build_jobs": 17062,
+    "baseline_full_build": "passed",
+    "final_full_build": "passed",
+    "axiom_audit": "scripts/CheckDLMFProofs20261113.lean",
+    "import_survey": "no file cycles, missing imports or foundational violations; new two-way area pair EllipticIntegrals / Theta",
+    "preservation": "reports/ProofRound20261113Preservation.json",
+    "latest_full_build_jobs": 18076,
+    "latest_full_build": "passed",
+    "latest_full_build_log": "/tmp/DLMF-approved-corrections-build-20261113.log",
+    "file_lengths": "passed; 1774 Lean source files <=1500 lines",
+    "axiom_audit_status": "passed; 437 declarations use only standard axioms",
+    "axiom_audit_report": "reports/ProofRound20261113Axioms.json",
+    "direct_source_checks": "reports/ProofRound20261113SourceChecks.json",
+    "pins": "unchanged",
+    "statement_review": "StatementReview20261113.md",
+    "statement_correction_patch": "reports/DLMFStatementCorrections20261113.patch",
+    "statement_corrections": "both applied with user approval; no further approval pending",
+    "compiled_cross_reference_audit": {
+      "entries": 10849,
+      "nonstandard_entries": 0,
+      "ledger_refresh": "passed; no unresolved links",
+      "ledgers": [
+        "DLMF1Acquisition.md",
+        "DLMF4Acquisition.md",
+        "DLMF16Acquisition.md",
+        "DLMF17Acquisition.md",
+        "DLMF19Acquisition.md",
+        "DLMF21Acquisition.md",
+        "DLMF24Acquisition.md",
+        "DLMF26Acquisition.md"
+      ],
+      "proved": 9757,
+      "admitted": 1092
+    },
+    "moved_docstring_preservation": "passed; 17 moved declarations; obsolete admission markers removed",
+    "statement_correction_review": "reports/ProofRound20261113Corrections.json",
+    "script_checks": "ledger regeneration recognizes explicit public declarations and is idempotent",
+    "final_full_build_jobs": 18076,
+    "final_full_build_log": "/tmp/DLMF-approved-corrections-build-20261113.log",
+    "direct_source_checks_status": "passed; 122 changed Lean files",
+    "whitespace": "passed",
+    "approved_correction_target_builds": "passed; Elementary.Hyperbolic.Integrals and EllipticIntegrals.SymmetricIntegrals",
+    "preservation_command": "python3 scripts/verify_proof_preservation.py --baseline 164d2dcd409e75be84cbf1fc0c75e286d1926b60 --approved-corrections reports/ProofRound20261113Corrections.json --output reports/ProofRound20261113Preservation.json"
+  },
+  "toolchain": "leanprover/lean4:v4.36.0-rc2",
+  "dependencies": {
+    "TauCeti": {
+      "url": "https://github.com/TauCetiProject/TauCeti",
+      "rev": "396c3bd971e9722aa8656231760e710fe641d8cf"
+    },
+    "mathlib": {
+      "url": "https://github.com/leanprover-community/mathlib4",
+      "rev": "1b1ccf4b088b32fa3f23f2de1127433254a81e1e"
+    }
+  },
+  "completed_utc": "2026-11-13T15:25:34Z",
+  "all_proof_agents_finished": true,
+  "committed_by_agent": false,
+  "pending_user_approval": [],
+  "approved_statement_corrections": [
+    "DLMF.Elementary.arcsinh_continued_fraction",
+    "DLMF.EllipticIntegrals.symmetricEllipticR_three_eq_integral_sphere"
+  ],
+  "approved_followup_completed_utc": "2026-11-13T15:37:29Z"
+}

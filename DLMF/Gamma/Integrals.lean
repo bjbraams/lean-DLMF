@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module -- shake: keep-all
 
 public import DLMF.Gamma.Integrals.BarnesAndRamanujan
+public import DLMF.Gamma.Integrals.BarnesSummations
 public import DLMF.Gamma.Integrals.FourierAndTrigamma
 public import DLMF.Gamma.Integrals.ExponentialMellin
 

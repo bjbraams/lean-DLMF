@@ -22,7 +22,7 @@ branch through the connection formula DLMF 13.2.42.
 * `kummerUConnection`: the connection formula in terms of Kummer's `M`, valid at noninteger `b`.
 * `kummerU`: Tricomi's function; at integer `b` it is the limit of the connection formula along
   noninteger parameters.
-* `kummerUOnLog`: the connection formula on the logarithmic argument plane, with `w` a
+* `kummerUConnectionOnLog`: the connection formula on the logarithmic argument plane, with `w` a
   logarithm of the argument.
 
 ## Main results
@@ -62,13 +62,32 @@ def kummerU (a b z : ℂ) : ℂ := by
 
 /-- The noninteger connection formula on the logarithmic argument plane.
 The variable `w` represents a logarithm of the actual argument `exp w`. -/
-def kummerUOnLog (a b w : ℂ) : ℂ :=
+def kummerUConnectionOnLog (a b w : ℂ) : ℂ :=
   Gamma (1 - b) / Gamma (a - b + 1) * kummerM a b (exp w) +
     Gamma (b - 1) / Gamma a * exp ((1 - b) * w) *
       kummerM (a - b + 1) (2 - b) (exp w)
+
+/-- The complete logarithmic connection expression. DLMF 13.2.42. -/
+theorem kummerUConnectionOnLog_def (a b w : ℂ) :
+    kummerUConnectionOnLog a b w =
+      Gamma (1 - b) / Gamma (a - b + 1) * kummerM a b (exp w) +
+        Gamma (b - 1) / Gamma a * exp ((1 - b) * w) *
+          kummerM (a - b + 1) (2 - b) (exp w) := rfl
+
+/-- At second parameter one the raw totalized connection expression is zero.
+It therefore does not define the continued Tricomi function at that parameter.
+DLMF 13.2.42 is a noninteger-parameter formula. -/
+@[simp] theorem kummerUConnectionOnLog_one (a w : ℂ) :
+    kummerUConnectionOnLog a 1 w = 0 := by
+  simp [kummerUConnectionOnLog]
+
 /-- Tricomi's function agrees with its connection formula at noninteger parameters. -/
 theorem kummerU_eq_connection (a b z : ℂ) (hb : ∀ k : ℤ, b ≠ k) :
     kummerU a b z = kummerUConnection a b z := by
   simp [kummerU, hb]
+
+/-- Compatibility spelling for the noninteger logarithmic connection expression. -/
+@[deprecated kummerUConnectionOnLog (since := "2026-11-14")]
+noncomputable abbrev kummerUOnLog (a b w : ℂ) : ℂ := kummerUConnectionOnLog a b w
 
 end DLMF.Confluent

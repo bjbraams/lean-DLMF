@@ -5,6 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
+public import DLMF.Airy.HypergeometricBasis
+
 public import DLMF.Airy.Properties
 public import DLMF.Airy.Bessel
 public import DLMF.Airy.Framework
@@ -27,6 +29,12 @@ public import DLMF.Airy.GeneralizedContours
 public import DLMF.Airy.GeneralizedFinitePart
 public import DLMF.Airy.Incomplete
 public import DLMF.Airy.SquareTools
+
+public import DLMF.Airy.Scorer.ShiftedMoments
+
+public import DLMF.Airy.MaclaurinRecurrence
+
+public import DLMF.Airy.RealOrderProperties
 
 /-!
 # Airy functions (DLMF Chapter 9; Beals–Wong §9.9)

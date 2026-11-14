@@ -1,0 +1,14 @@
+{
+  "commands": 437,
+  "checked": 437,
+  "nonstandard": [],
+  "missing": [],
+  "errors": 0,
+  "allowed_axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "audit_source_sha256": "23f66442805fac4ccc5c1a44d4f9c17ea77c4c5a187897229f5824d5d140c24a",
+  "status": "passed"
+}

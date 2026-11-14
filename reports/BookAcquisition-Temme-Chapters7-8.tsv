@@ -1,0 +1,182 @@
+synopsis_id	declaration	source_file	source_line	status
+TEM-07-01	DLMF.Confluent.kummerM	DLMF/Confluent/Basic/KummerM.lean	47	definition, no admission
+TEM-07-01	DLMF.Confluent.hasSum_kummerM	DLMF/Confluent/Basic/KummerContiguous.lean	50	proved, no admission
+TEM-07-01	DLMF.Confluent.analyticOnNhd_kummerM	DLMF/Confluent/Basic/KummerProperties.lean	139	proved, no admission
+TEM-07-01	DLMF.Confluent.kummerM_ode	DLMF/Confluent/Basic/KummerProperties.lean	160	proved, no admission
+TEM-07-01	DLMF.Confluent.kummerM_kummer_transform	DLMF/Confluent/Basic/KummerProperties.lean	230	proved, no admission
+TEM-07-01	DLMF.Confluent.wronskian_kummerM_pair	DLMF/Confluent/BasicProperties/Wronskians.lean	323	proved, no admission
+TEM-07-01	DLMF.Confluent.kummerM_eq_mul_regularizedHGFun	DLMF/Confluent/Basic/KummerProperties.lean	104	proved, no admission
+TEM-07-01	DLMF.Confluent.analyticOnNhd_regularizedConfluent_comp	DLMF/Confluent/Regularized.lean	112	proved, no admission
+TEM-07-01	DLMF.Confluent.tendstoLocallyUniformly_ordinaryHypergeometric_add_div_atTop	DLMF/Confluent/ConfluenceUniform.lean	29	direct admission
+TEM-07-02	DLMF.Confluent.regularized_euler_integral	DLMF/Confluent/IntegralRepresentations/EulerAndBessel.lean	70	proved, no admission
+TEM-07-02	DLMF.Confluent.kummerM_eq_mul_regularizedHGFun	DLMF/Confluent/Basic/KummerProperties.lean	104	proved, no admission
+TEM-07-02	DLMF.Confluent.iteratedDeriv_kummerM	DLMF/Confluent/Recurrence/Contiguous.lean	515	proved, no admission
+TEM-07-02	DLMF.Confluent.hasAsymptoticExpansion_regularizedConfluent_sector	DLMF/Confluent/Asymptotics/LogarithmicSector.lean	31	direct admission
+TEM-07-02	DLMF.Confluent.kummerCoeff	DLMF/Confluent/Asymptotics/LargeArgument.lean	444	definition, no admission
+TEM-07-03	DLMF.Confluent.kummerU_laplace_integrable	DLMF/Confluent/IntegralRepresentations/EulerAndBessel.lean	309	proved, no admission
+TEM-07-03	DLMF.Confluent.kummerU_laplace	DLMF/Confluent/IntegralRepresentations/EulerAndBessel.lean	694	proved, no admission
+TEM-07-03	DLMF.Confluent.kummerU_eq_connection	DLMF/Confluent/Basic/Tricomi.lean	70	proved, no admission
+TEM-07-03	DLMF.Confluent.tendsto_kummerUConnection	DLMF/Confluent/BasicProperties/Continuity.lean	210	proved, no admission
+TEM-07-03	DLMF.Confluent.differentiableOn_kummerU	DLMF/Confluent/BasicProperties/Wronskians.lean	185	proved, no admission
+TEM-07-03	DLMF.Confluent.iteratedDeriv_kummerU	DLMF/Confluent/Recurrence/Derivatives.lean	184	proved, no admission
+TEM-07-03	DLMF.Confluent.deriv_kummerU	DLMF/Confluent/Recurrence/Derivatives.lean	143	proved, no admission
+TEM-07-03	DLMF.Confluent.kummerU_ode_contiguous	DLMF/Confluent/Recurrence/Contiguous.lean	501	proved, no admission
+TEM-07-03	DLMF.Confluent.kummerU_kummer_transform_all	DLMF/Confluent/BasicProperties/Continuity.lean	577	proved, no admission
+TEM-07-03	DLMF.Confluent.kummerU_zero_arg	DLMF/Confluent/BasicProperties/IntegerParametersAndLimits.lean	835	proved, no admission
+TEM-07-03	DLMF.Confluent.kummerUContinuedOnLog	DLMF/Confluent/Basic/TricomiLogarithmic.lean	31	definition, no admission
+TEM-07-03	DLMF.Confluent.tendsto_kummerUContinuedOnLog	DLMF/Confluent/Asymptotics/LogarithmicSector.lean	40	direct admission
+TEM-07-03	DLMF.Confluent.kummerUContinuedOnLog_eq_principal	DLMF/Confluent/Asymptotics/LogarithmicSector.lean	47	direct admission
+TEM-07-03	DLMF.Confluent.analyticAt_kummerUContinuedOnLog	DLMF/Confluent/Asymptotics/LogarithmicSector.lean	54	direct admission
+TEM-07-04	DLMF.Confluent.hasAsymptoticExpansion_kummerUContinuedOnLog	DLMF/Confluent/Asymptotics/LogarithmicSector.lean	62	direct admission
+TEM-07-04	DLMF.Confluent.tricomiCoeff	DLMF/Confluent/Asymptotics/LargeArgument.lean	66	definition, no admission
+TEM-07-04	DLMF.Confluent.kummerU_nat_log	DLMF/Confluent/BasicProperties/IntegerParametersAndLimits.lean	112	proved, no admission
+TEM-07-04	DLMF.Confluent.tricomiLogSeries	DLMF/Confluent/LogSeries.lean	55	definition, no admission
+TEM-07-04	DLMF.Confluent.summable_tricomiLogSeries	DLMF/Confluent/LogSeries.lean	59	proved, no admission
+TEM-07-04	DLMF.Confluent.tricomi_log_series_split	DLMF/Confluent/LogSeries.lean	96	proved, no admission
+TEM-07-04	DLMF.Confluent.kummerU_nat_log_recipGamma	DLMF/Confluent/BasicProperties/IntegerParametersAndLimits.lean	132	proved, no admission
+TEM-07-04	DLMF.Confluent.tricomi_log_series_split_recipGamma	DLMF/Confluent/LogSeries.lean	171	proved, no admission
+TEM-07-04	DLMF.Confluent.kummerU_kummer_transform_all	DLMF/Confluent/BasicProperties/Continuity.lean	577	proved, no admission
+TEM-07-05	DLMF.Confluent.whittakerM	DLMF/Confluent/Basic/Whittaker.lean	51	definition, no admission
+TEM-07-05	DLMF.Confluent.whittakerW	DLMF/Confluent/Basic/Whittaker.lean	70	definition, no admission
+TEM-07-05	DLMF.Confluent.whittakerW_eq_kummerU	DLMF/Confluent/Basic/Whittaker.lean	231	proved, no admission
+TEM-07-05	DLMF.Confluent.whittakerM_ode	DLMF/Confluent/Basic/Whittaker.lean	103	proved, no admission
+TEM-07-05	DLMF.Confluent.whittakerW_ode	DLMF/Confluent/Basic/Whittaker.lean	199	proved, no admission
+TEM-07-05	DLMF.Confluent.whittakerW_even_mu	DLMF/Confluent/Whittaker.lean	437	proved, no admission
+TEM-07-06	DLMF.Coulomb.Real.coulombNormalization	DLMF/Coulomb/Basic/RealOrder.lean	28	definition, no admission
+TEM-07-06	DLMF.Coulomb.Real.coulombSigma	DLMF/Coulomb/Basic/RealOrder.lean	34	definition, no admission
+TEM-07-06	DLMF.Coulomb.Real.coulombTheta	DLMF/Coulomb/Basic/RealOrder.lean	38	definition, no admission
+TEM-07-06	DLMF.Coulomb.Real.coulombF	DLMF/Coulomb/Basic/RealOrder.lean	43	definition, no admission
+TEM-07-06	DLMF.Coulomb.Real.coulombIncoming	DLMF/Coulomb/Basic/RealOrder.lean	48	definition, no admission
+TEM-07-06	DLMF.Coulomb.Real.coulombG	DLMF/Coulomb/Basic/RealOrder.lean	55	definition, no admission
+TEM-07-06	DLMF.Coulomb.Real.coulombF_of_normalized_complex_wave	DLMF/Coulomb/RealOrder.lean	29	direct admission
+TEM-07-06	DLMF.Coulomb.Real.coulombG_eq_tricomi_combination	DLMF/Coulomb/RealOrder.lean	37	direct admission
+TEM-07-06	DLMF.Coulomb.Real.coulombF_natCast	DLMF/Coulomb/RealOrder.lean	44	direct admission
+TEM-07-06	DLMF.Coulomb.Real.coulombG_natCast	DLMF/Coulomb/RealOrder.lean	50	direct admission
+TEM-07-06	DLMF.Coulomb.Real.analyticOnNhd_coulombF_coulombG	DLMF/Coulomb/RealOrder.lean	56	direct admission
+TEM-07-06	DLMF.Coulomb.Real.coulombF_coulombG_ode	DLMF/Coulomb/RealOrder.lean	63	direct admission
+TEM-07-06	DLMF.Coulomb.Real.isBigO_coulombF_sub_sin	DLMF/Coulomb/RealOrder.lean	72	direct admission
+TEM-07-06	DLMF.Coulomb.Real.isBigO_coulombG_sub_cos	DLMF/Coulomb/RealOrder.lean	79	direct admission
+TEM-07-07	DLMF.Confluent.parabolicCylinderEven	DLMF/ParabolicCylinder/Basic/Functions.lean	50	definition, no admission
+TEM-07-07	DLMF.Confluent.parabolicCylinderOdd	DLMF/ParabolicCylinder/Basic/Functions.lean	55	definition, no admission
+TEM-07-07	DLMF.Confluent.parabolicCylinderU	DLMF/ParabolicCylinder/Basic/Functions.lean	73	definition, no admission
+TEM-07-07	DLMF.Confluent.parabolicCylinderV	DLMF/ParabolicCylinder/Basic/Functions.lean	109	definition, no admission
+TEM-07-07	DLMF.Confluent.parabolicCylinderD	DLMF/ParabolicCylinder/Basic/Functions.lean	88	definition, no admission
+TEM-07-07	DLMF.Confluent.isWeberSolution_parabolicCylinderEven	DLMF/ParabolicCylinder/Basic/WeberEquation.lean	207	proved, no admission
+TEM-07-07	DLMF.Confluent.isWeberSolution_parabolicCylinderOdd	DLMF/ParabolicCylinder/Basic/WeberEquation.lean	213	proved, no admission
+TEM-07-07	DLMF.Confluent.parabolicCylinderEven_zero	DLMF/ParabolicCylinder/Basic/WeberEquation.lean	190	proved, no admission
+TEM-07-07	DLMF.Confluent.parabolicCylinderEvenDeriv_zero	DLMF/ParabolicCylinder/Basic/WeberEquation.lean	194	proved, no admission
+TEM-07-07	DLMF.Confluent.parabolicCylinderOdd_zero	DLMF/ParabolicCylinder/Basic/WeberEquation.lean	198	proved, no admission
+TEM-07-07	DLMF.Confluent.parabolicCylinderOddDeriv_zero	DLMF/ParabolicCylinder/Basic/WeberEquation.lean	202	proved, no admission
+TEM-07-07	DLMF.Confluent.IsWeberSolution.wronskian_eq	DLMF/ParabolicCylinder/Basic/WeberEquation.lean	223	proved, no admission
+TEM-07-07	DLMF.Confluent.parabolicCylinderV_eq	DLMF/Confluent/ParabolicCylinder/WronskiansAndConnections.lean	201	proved, no admission
+TEM-07-07	DLMF.Confluent.parabolicCylinderV_entire_order	DLMF/ParabolicCylinder/ElementaryProperties.lean	181	proved, no admission
+TEM-07-07	DLMF.Confluent.parabolicCylinderV_wronskian	DLMF/ParabolicCylinder/Basic/Wronskians.lean	455	proved, no admission
+TEM-07-07	DLMF.Confluent.parabolicCylinderD_nat	DLMF/ParabolicCylinder/Basic/WeberEquation.lean	403	proved, no admission
+TEM-07-08	DLMF.Confluent.erf	DLMF/Confluent/Basic/ErrorFunctions.lean	50	definition, no admission
+TEM-07-08	DLMF.Confluent.erfc	DLMF/Confluent/Basic/ErrorFunctions.lean	54	definition, no admission
+TEM-07-08	DLMF.Confluent.erf_complex_segment_integral	DLMF/ErrorFunctions/Basic/Properties.lean	245	proved, no admission
+TEM-07-08	DLMF.Confluent.differentiable_erf_complex	DLMF/ErrorFunctions/Basic/Properties.lean	90	proved, no admission
+TEM-07-08	DLMF.Confluent.erf_negative	DLMF/ErrorFunctions/Relations.lean	56	proved, no admission
+TEM-07-08	DLMF.Confluent.hasDerivAt_erf_complex	DLMF/ErrorFunctions/Basic/Properties.lean	80	proved, no admission
+TEM-07-08	DLMF.Confluent.erf_ofReal	DLMF/ErrorFunctions/Basic/Properties.lean	66	proved, no admission
+TEM-07-08	DLMF.Confluent.erfc_ofReal	DLMF/ErrorFunctions/Basic/Properties.lean	76	proved, no admission
+TEM-07-08	DLMF.Confluent.erfc_horizontal_integral	DLMF/ErrorFunctions/AnalyticProperties.lean	142	proved, no admission
+TEM-07-08	DLMF.Confluent.kummerM_erf	DLMF/Confluent/Relations.lean	166	proved, no admission
+TEM-07-09	DLMF.Confluent.expIntegralE	DLMF/Confluent/Basic/ExponentialIntegrals.lean	42	definition, no admission
+TEM-07-09	DLMF.Confluent.expIntegralE_laplace_complex	DLMF/IncompleteGamma/ExponentialIntegral.lean	88	proved, no admission
+TEM-07-09	DLMF.Confluent.expIntegralE_stieltjes	DLMF/IncompleteGamma/ExponentialIntegral.lean	109	proved, no admission
+TEM-07-09	DLMF.Confluent.expIntegralE_eq_exp_mul_kummerU	DLMF/Confluent/ExpIntegral.lean	55	proved, no admission
+TEM-07-09	DLMF.Confluent.expIntegralE_add_one	DLMF/Confluent/ExpIntegral.lean	79	proved, no admission
+TEM-07-09	DLMF.Confluent.hasDerivAt_expIntegralE	DLMF/Confluent/ExpIntegral.lean	93	proved, no admission
+TEM-07-09	DLMF.Confluent.expIntegralE_nat_hasSum	DLMF/IncompleteGamma/ExponentialIntegral.lean	236	proved, no admission
+TEM-07-09	DLMF.Confluent.Real.expIntegralEi_principalValue	DLMF/ExpIntegrals/AnalyticProperties.lean	191	proved, no admission
+TEM-07-09	DLMF.Confluent.sinIntegral_entire	DLMF/ExpIntegrals/Basic/Properties.lean	84	proved, no admission
+TEM-07-09	DLMF.Confluent.sinIntegral_segment_integral	DLMF/ExpIntegrals/Basic/Properties.lean	246	proved, no admission
+TEM-07-09	DLMF.Confluent.cosIntegralCin_entire	DLMF/ExpIntegrals/Basic/Properties.lean	93	proved, no admission
+TEM-07-09	DLMF.Confluent.cosIntegralCin_segment_integral	DLMF/ExpIntegrals/Basic/Properties.lean	266	proved, no admission
+TEM-07-09	DLMF.Confluent.cosIntegral	DLMF/ExpIntegrals/Basic/Functions.lean	58	definition, no admission
+TEM-07-09	DLMF.Confluent.cosIntegral_horizontal_integral	DLMF/ExpIntegrals/AnalyticProperties.lean	828	proved, no admission
+TEM-07-09	DLMF.Confluent.tendsto_sinIntegralTail_add_ofReal	DLMF/ExpIntegrals/AnalyticProperties.lean	750	proved, no admission
+TEM-07-10	DLMF.Confluent.Real.squareWaveFourierSum	DLMF/ExpIntegrals/GibbsLimit.lean	25	definition, no admission
+TEM-07-10	DLMF.Confluent.Real.squareWaveFourierSum_sinIntegral_uniform	DLMF/ExpIntegrals/GibbsLimit.lean	34	direct admission
+TEM-07-10	DLMF.Confluent.Real.tendsto_squareWaveFourierSum_scaled	DLMF/ExpIntegrals/GibbsLimit.lean	43	direct admission
+TEM-07-10	DLMF.Confluent.Real.squareWaveFourierSum_le_first_peak	DLMF/ExpIntegrals/GibbsLimit.lean	50	direct admission
+TEM-07-10	DLMF.Confluent.Real.one_lt_gibbs_peak	DLMF/ExpIntegrals/GibbsLimit.lean	57	direct admission
+TEM-07-11	DLMF.Confluent.fresnelC_entire	DLMF/ErrorFunctions/Basic/Properties.lean	174	proved, no admission
+TEM-07-11	DLMF.Confluent.fresnelS_entire	DLMF/ErrorFunctions/Basic/Properties.lean	179	proved, no admission
+TEM-07-11	DLMF.Confluent.fresnel_negative	DLMF/ErrorFunctions/Relations.lean	84	proved, no admission
+TEM-07-11	DLMF.Confluent.Real.tendsto_fresnelC_atTop	DLMF/Confluent/ErrorFunctions.lean	116	proved, no admission
+TEM-07-11	DLMF.Confluent.Real.tendsto_fresnelS_atTop	DLMF/Confluent/ErrorFunctions.lean	134	proved, no admission
+TEM-07-11	DLMF.Confluent.hasAsymptoticExpansion_fresnelAuxiliaryG_add_I_mul_fresnelAuxiliaryF	DLMF/Confluent/FresnelAsymptotics.lean	106	proved, no admission
+TEM-07-11	DLMF.Confluent.Real.cornuCurve_def	DLMF/ErrorFunctions/CornuCurve.lean	31	proved, no admission
+TEM-07-11	DLMF.Confluent.Real.norm_deriv_cornuCurve	DLMF/ErrorFunctions/CornuCurve.lean	35	direct admission
+TEM-07-11	DLMF.Confluent.Real.integral_norm_deriv_cornuCurve	DLMF/ErrorFunctions/CornuCurve.lean	40	direct admission
+TEM-07-11	DLMF.Confluent.Real.curvature_cornuCurve	DLMF/ErrorFunctions/CornuCurve.lean	47	direct admission
+TEM-07-11	DLMF.Confluent.fresnelC	DLMF/ErrorFunctions/Basic/Functions.lean	61	definition, no admission
+TEM-07-11	DLMF.Confluent.fresnelS	DLMF/ErrorFunctions/Basic/Functions.lean	66	definition, no admission
+TEM-07-12	DLMF.Confluent.kummerM_lowerIncompleteGamma	DLMF/Confluent/Relations.lean	133	proved, no admission
+TEM-07-12	DLMF.Confluent.kummerM_kummer_transform	DLMF/Confluent/Basic/KummerProperties.lean	230	proved, no admission
+TEM-07-12	DLMF.Confluent.upperIncompleteGamma_eq_cpow_mul_kummerU	DLMF/Confluent/IncompleteGamma.lean	56	proved, no admission
+TEM-07-12	DLMF.Confluent.kummerU_kummer_transform_all	DLMF/Confluent/BasicProperties/Continuity.lean	577	proved, no admission
+TEM-07-12	DLMF.Confluent.kummerU_laguerrePolynomialL	DLMF/Confluent/Relations.lean	841	proved, no admission
+TEM-07-12	DLMF.Confluent.kummerU_neg_nat	DLMF/Confluent/BasicProperties/Continuity.lean	652	proved, no admission
+TEM-07-12	DLMF.Confluent.kummerU_eq_laguerreExtended	DLMF/Confluent/LaguerreContinuation.lean	29	proved, no admission
+TEM-07-12	DLMF.OrthogonalPolynomials.laguerreExtended	DLMF/OrthogonalPolynomials/Basic/Definitions.lean	103	definition, no admission
+TEM-07-12	DLMF.OrthogonalPolynomials.laguerreExtended_eq	DLMF/OrthogonalPolynomials/Basic/Classical.lean	478	proved, no admission
+TEM-08-01	DLMF.Legendre.legendreP	DLMF/Legendre/Basic/Functions.lean	35	definition, no admission
+TEM-08-01	DLMF.Legendre.legendreQ	DLMF/Legendre/Basic/Functions.lean	48	definition, no admission
+TEM-08-01	DLMF.Legendre.legendreP_ode	DLMF/Legendre/Basic/Properties.lean	116	proved, no admission
+TEM-08-01	DLMF.Legendre.legendreQ_ode	DLMF/Legendre/Basic/Properties.lean	306	proved, no admission
+TEM-08-01	DLMF.Legendre.legendreP_one	DLMF/Legendre/Basic/Properties.lean	56	proved, no admission
+TEM-08-01	DLMF.Legendre.legendreP_neg_sub_one	DLMF/Legendre/Basic/Properties.lean	65	proved, no admission
+TEM-08-01	DLMF.Legendre.legendreP_nat	DLMF/Legendre/FirstKindProperties.lean	38	proved, no admission
+TEM-08-01	DLMF.Legendre.analyticAt_legendreQ	DLMF/Legendre/Basic/Properties.lean	389	proved, no admission
+TEM-08-01	DLMF.Legendre.associated_wronskian_11	DLMF/Legendre/AssociatedRecurrences.lean	1082	proved, no admission
+TEM-08-01	DLMF.Legendre.associatedP_recurrence_4	DLMF/Legendre/AssociatedRecurrences.lean	754	proved, no admission
+TEM-08-01	DLMF.Legendre.associatedQ_recurrence_4	DLMF/Legendre/AssociatedRecurrences.lean	991	proved, no admission
+TEM-08-02	DLMF.Legendre.associated_connection_12	DLMF/Legendre/Connections.lean	392	proved, no admission
+TEM-08-02	DLMF.Legendre.olverQ_boundary_aux	DLMF/Legendre/Continuation/LogarithmicBranches.lean	377	proved, no admission
+TEM-08-02	DLMF.Legendre.associatedP_boundary_upper	DLMF/Legendre/Continuation/LogarithmicBranches.lean	135	proved, no admission
+TEM-08-02	DLMF.Legendre.ferrersQ_boundary_average	DLMF/Legendre/Continuation/LogarithmicBranches.lean	702	proved, no admission
+TEM-08-02	DLMF.Legendre.ferrers_connection_10	DLMF/Legendre/Connections.lean	274	proved, no admission
+TEM-08-02	DLMF.Legendre.continuousAt_ferrersQ_degree	DLMF/Legendre/AssociatedRecurrences.lean	353	proved, no admission
+TEM-08-03	DLMF.Legendre.legendreP_eq_even_add_odd_hypergeometric	DLMF/Legendre/OrdinaryLocalSeries.lean	30	direct admission
+TEM-08-03	DLMF.Legendre.legendreP_zero_arg	DLMF/Legendre/Recurrences.lean	101	proved, no admission
+TEM-08-03	DLMF.Legendre.deriv_legendreP_zero	DLMF/Legendre/OrdinaryLocalSeries.lean	40	direct admission
+TEM-08-03	DLMF.Legendre.hasSum_legendreP_logarithmic_endpoint	DLMF/Legendre/OrdinaryLocalSeries.lean	48	direct admission
+TEM-08-04	DLMF.Legendre.legendreQ_zero	DLMF/Legendre/SecondKind.lean	39	proved, no admission
+TEM-08-04	DLMF.Legendre.legendreQ_one	DLMF/Legendre/Integer.lean	204	proved, no admission
+TEM-08-04	DLMF.Legendre.legendreQ_recurrence	DLMF/Legendre/Integer.lean	143	proved, no admission
+TEM-08-04	DLMF.Legendre.legendreQ_nat	DLMF/Legendre/Integer.lean	250	proved, no admission
+TEM-08-04	DLMF.Legendre.legendreQPoly	DLMF/Legendre/Integer.lean	235	definition, no admission
+TEM-08-04	DLMF.Legendre.legendreQPoly_eval_eq_convolution	DLMF/Legendre/IntegerSecondKind.lean	29	direct admission
+TEM-08-04	DLMF.Legendre.legendreQPoly_eval_eq_legendre_sum	DLMF/Legendre/IntegerSecondKind.lean	37	direct admission
+TEM-08-04	DLMF.Legendre.intervalIntegrable_neumann_kernel	DLMF/Legendre/IntegerSecondKind.lean	46	direct admission
+TEM-08-04	DLMF.Legendre.legendreQ_nat_eq_neumann_integral	DLMF/Legendre/IntegerSecondKind.lean	55	direct admission
+TEM-08-04	DLMF.Legendre.tendsto_neumann_principalValue_ferrersQ	DLMF/Legendre/IntegerSecondKind.lean	64	direct admission
+TEM-08-05	DLMF.Legendre.legendreP_laplace	DLMF/Legendre/Laplace.lean	233	proved, no admission
+TEM-08-05	DLMF.Legendre.olverQ_real_integral	DLMF/Legendre/IntegralRepresentations/Ferrers.lean	337	proved, no admission
+TEM-08-05	DLMF.Legendre.ferrersP_mehler_dirichlet	DLMF/Legendre/IntegralRepresentations/Ferrers.lean	175	proved, no admission
+TEM-08-05	DLMF.Legendre.ferrersP_zero	DLMF/Legendre/Basic/Properties.lean	128	proved, no admission
+TEM-08-06	DLMF.Legendre.legendreP_recurrence	DLMF/Legendre/Recurrences.lean	41	proved, no admission
+TEM-08-06	DLMF.Legendre.legendreP_deriv_recurrence	DLMF/Legendre/Recurrences.lean	60	proved, no admission
+TEM-08-06	DLMF.Legendre.associatedQ_recurrence_3	DLMF/Legendre/AssociatedRecurrences.lean	819	proved, no admission
+TEM-08-06	DLMF.Legendre.associatedQ_recurrence_5	DLMF/Legendre/AssociatedRecurrences.lean	1031	proved, no admission
+TEM-08-06	DLMF.Legendre.associatedQ_recurrence_4	DLMF/Legendre/AssociatedRecurrences.lean	991	proved, no admission
+TEM-08-07	DLMF.Legendre.associatedP	DLMF/Legendre/Basic/Associated.lean	49	definition, no admission
+TEM-08-07	DLMF.Legendre.olverQ	DLMF/Legendre/Basic/Associated.lean	54	definition, no admission
+TEM-08-07	DLMF.Legendre.associatedQ	DLMF/Legendre/Basic/Associated.lean	61	definition, no admission
+TEM-08-07	DLMF.Legendre.legendreBranchPower	DLMF/Legendre/Basic/Associated.lean	42	definition, no admission
+TEM-08-07	DLMF.Legendre.ferrersP	DLMF/Legendre/Basic/Functions.lean	40	definition, no admission
+TEM-08-07	DLMF.Legendre.ferrersP_ode	DLMF/Legendre/Basic/Properties.lean	170	proved, no admission
+TEM-08-07	DLMF.Legendre.ferrersP_nat	DLMF/Legendre/Ferrers.lean	37	proved, no admission
+TEM-08-07	DLMF.Legendre.ferrersPNat	DLMF/Legendre/Basic/Harmonics.lean	40	definition, no admission
+TEM-08-08	DLMF.Legendre.ferrersP_negative_integer_order	DLMF/Legendre/Connections.lean	302	proved, no admission
+TEM-08-08	DLMF.Legendre.ferrers_orthogonality_6	DLMF/Legendre/Integrals/FerrersGreen.lean	75	proved, no admission
+TEM-08-08	DLMF.OrthogonalPolynomials.LegendreAddition.legendre_eq_kernel	DLMF/OrthogonalPolynomials/LegendreAddition.lean	533	proved, no admission
+TEM-08-08	DLMF.OrthogonalPolynomials.LegendreAddition.kernel	DLMF/OrthogonalPolynomials/LegendreAddition.lean	480	definition, no admission
+TEM-08-08	DLMF.OrthogonalPolynomials.LegendreAddition.coeff	DLMF/OrthogonalPolynomials/LegendreAddition.lean	221	definition, no admission
+TEM-08-08	DLMF.OrthogonalPolynomials.LegendreAddition.weight	DLMF/OrthogonalPolynomials/LegendreAddition.lean	219	definition, no admission
+TEM-08-08	DLMF.OrthogonalPolynomials.LegendreAddition.jet	DLMF/OrthogonalPolynomials/LegendreAddition.lean	46	definition, no admission
+TEM-08-08	DLMF.Legendre.ferrersPNat	DLMF/Legendre/Basic/Harmonics.lean	40	definition, no admission
+TEM-08-08	DLMF.Legendre.ferrersPNat_eq	DLMF/Legendre/Harmonics.lean	58	proved, no admission

@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.EllipticIntegrals.Legendre
+public import DLMF.EllipticIntegrals.NomeBounds
 public import DLMF.EllipticIntegrals.Expansions
 public import DLMF.EllipticIntegrals.LegendreIdentities
 public import DLMF.Hypergeometric.Basic.RealPochhammer
@@ -522,16 +523,6 @@ theorem completeEllipticE_bounds {k : ℝ} (hk0 : 0 ≤ k) (hk1 : k ≤ 1) :
     ((1 + Real.sqrt (1 - k ^ 2) ^ (3 / 2 : ℝ)) / 2) ^ (2 / 3 : ℝ) ≤ 2 / π *
         (completeEllipticE k).re ∧
       2 / π * (completeEllipticE k).re ≤ Real.sqrt ((1 + (1 - k ^ 2)) / 2) := by
-  sorry
-
-/-- DLMF 19.9.5: `ln((1 + √k')²/k) < π K'(k)/(2K(k)) < ln(2(1 + k')/k)` for `0 < k < 1`, with
-DLMF's complementary integral `K'(k)` (`complementaryEllipticK`, equal to `K(k')` here). -/
-@[dlmf 19.9.E5]
-theorem pi_mul_complementaryEllipticK_div_bounds {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) :
-    Real.log ((1 + Real.sqrt (Real.sqrt (1 - k ^ 2))) ^ 2 / k) <
-        π * (complementaryEllipticK k).re / (2 * (completeEllipticK k).re) ∧
-      π * (complementaryEllipticK k).re / (2 * (completeEllipticK k).re) <
-        Real.log (2 * (1 + Real.sqrt (1 - k ^ 2)) / k) := by
   sorry
 
 /-- The real binomial series `∑ (β)ₘ/m! xᵐ = (1 - x)^{-β}` for `0 ≤ x < 1`. -/

@@ -1,5 +1,6 @@
 .lake
 *.olean
+SYNOPSIS*
 References/
 # Report PDFs are built by CI (.github/workflows/reports.yml) and published on GitHub Pages.
 reports/*.pdf

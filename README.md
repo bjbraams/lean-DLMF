@@ -6,6 +6,19 @@ Roy, *Special Functions* (1999), henceforth AAR, and was renamed from lean-AAR t
 on 2026-10-21, when the DLMF chapters became its organizing principle. AAR, Olver, Temme,
 Beals–Wong and Duverney remain supporting sources.
 
+The [parallel proof round](REVIEW.md#parallel-dlmf-proof-round-2026-11-13) removes
+**64 original admissions**, reducing **884 to 820**. It covers Fourier and complex
+analysis, Bernoulli and Euler arithmetic, hypergeometric summations and Appell identities,
+elliptic integrals and expansions, Stirling identities, and Riemann theta uniqueness.
+The [inventory](reports/Admissions20261113.tsv),
+[chapter counts](reports/ProofRound20261113ChapterCounts.tsv),
+[manifest](ProofRound20261113.json) and
+[axiom audit](scripts/CheckDLMFProofs20261113.lean) record the completed proofs.
+Two transcription repairs are applied with user approval and complete proofs: natural-number
+division in the arcsinh continued fraction and denominator parentheses in the spherical
+Carlson integral. Further branch and domain issues remain unchanged and are documented in
+the [statement review](StatementReview20261113.md).
+
 The [proof round with updated dependencies](
 REVIEW.md#proofs-with-the-updated-dependencies-2026-11-12) and its approved follow-up have removed **57 original
 admissions**, reducing the project total from **941 to 884**. Two tagged statements were
@@ -398,6 +411,34 @@ names:
 - [Namespaces of special functions in Mathlib and TauCeti](https://bjbraams.github.io/lean-DLMF/UpstreamNamespaces.pdf)
 - [TauCeti name map of the foundational layer](https://bjbraams.github.io/lean-DLMF/TauCetiNameMap.pdf), with the table [`reports/TauCetiNameMap.tsv`](reports/TauCetiNameMap.tsv)
 - [DLMF errata](https://bjbraams.github.io/lean-DLMF/DLMFErrata.pdf)
+
+The reference-book synopses give chapter-organized mathematical specifications for
+formalization, including the labelled theorems, necessary definitions, domains and
+normalizations. Their companion errata distinguish checked print defects from
+interpretation and branch issues. They describe statement acquisition, not Lean proof status.
+
+- Temme: [synopsis](SYNOPSIS-Temme.md), [errata](ERRATA-Temme.md).
+- Olver: [synopsis](SYNOPSIS-Olver.md), [errata](ERRATA-Olver.md).
+- Duverney: [synopsis](SYNOPSIS-Duverney.md), [errata](ERRATA-Duverney.md).
+- Rao–Lakshminarayanan: [synopsis](SYNOPSIS-LaoLaksh.md), [errata](ERRATA-LaoLaksh.md).
+- Andrews–Askey–Roy: [synopsis](SYNOPSIS-AAR.md), [errata](ERRATA-AAR.md).
+- Kristensson: [synopsis](SYNOPSIS-Kristensson.md), [errata](ERRATA-Kristensson.md).
+
+The [book acquisition audit](BookAcquisition.md) compares these specifications with the
+pinned Mathlib, TauCeti and DLMF declarations. Its ledgers distinguish reusable results,
+new specifications and proved adapters. [Revision notes](BookAcquisition-RevisionNotes.md)
+retain source qualifications for review; the synopsis files remain unchanged.
+
+The [elliptic-book survey and additions](BookAcquisition-Elliptic.md) compare nine further
+references with the existing elliptic areas. They add proved lattice-multiplier and
+automorphism theory, maps of lattice curves and division-point counts, and constructions
+with prescribed divisors and simple principal parts.
+
+The [theta-book additions](BookAcquisition-Theta.md) use Igusa, Mumford I–II and
+Beals–Wong from the sibling CKMA reference collection. They add higher-order theta
+spaces and functions, half-characteristic counts, second-order addition, theta
+translation relations and meromorphic elliptic quotients. The
+[source checks](ERRATA-BealsWong.md) record qualifications to three printed formulas.
 
 ### Proof rounds
 

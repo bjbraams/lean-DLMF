@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module -- shake: keep-all
 
 public import DLMF.GeneralizedHypergeometric.Basic.ParametersAndSeries
+public import DLMF.GeneralizedHypergeometric.Basic.MultipleSeries
 public import DLMF.GeneralizedHypergeometric.Basic.PrincipalContinuation
 public import DLMF.GeneralizedHypergeometric.Basic.BilateralAndBarnes
 public import DLMF.GeneralizedHypergeometric.Basic.SeriesProperties

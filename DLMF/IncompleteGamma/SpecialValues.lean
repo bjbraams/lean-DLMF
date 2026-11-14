@@ -31,7 +31,7 @@ parameters (DLMF §8.4), their representations through Kummer and Whittaker func
   `upperIncompleteGamma_kummerU_pair`, `lowerIncompleteGamma_whittakerM`,
   `upperIncompleteGamma_whittakerW`: the confluent representations DLMF 8.5.1–8.5.5.
 * `erf_lowerIncompleteGammaOnLog_square`, `erfc_upperIncompleteGammaOnLog_square`,
-  `erfc_kummerUOnLog_square`: DLMF 7.11.1, 7.11.2 and 7.11.5.
+  `erfc_kummerUConnectionOnLog_square`: DLMF 7.11.1, 7.11.2 and 7.11.5.
 
 ## Implementation notes
 
@@ -393,12 +393,12 @@ theorem erfc_upperIncompleteGammaOnLog_square {z : ℂ} (hz : z ≠ 0) :
   field_simp
 
 /-- Identity under the stated parameter and domain assumptions: `erfc z=exp (-z^2)/Real.sqrt
-π*kummerUOnLog (1/2) (1/2) (2*log z) ∧ erfc z=z/Real.sqrt π*exp (-z^2)*kummerUOnLog 1 (3/2)
-(2*log z)`. -/
+π*kummerUConnectionOnLog (1/2) (1/2) (2*log z) ∧
+erfc z=z/Real.sqrt π*exp (-z^2)*kummerUConnectionOnLog 1 (3/2) (2*log z)`. -/
 @[dlmf 7.11.E5]
-theorem erfc_kummerUOnLog_square {z : ℂ} (hz : z ≠ 0) :
-    erfc z=exp (-z^2)/Real.sqrt π*kummerUOnLog (1/2) (1/2) (2*log z) ∧
-        erfc z=z/Real.sqrt π*exp (-z^2)*kummerUOnLog 1 (3/2) (2*log z) := by
+theorem erfc_kummerUConnectionOnLog_square {z : ℂ} (hz : z ≠ 0) :
+    erfc z=exp (-z^2)/Real.sqrt π*kummerUConnectionOnLog (1/2) (1/2) (2*log z) ∧
+        erfc z=z/Real.sqrt π*exp (-z^2)*kummerUConnectionOnLog 1 (3/2) (2*log z) := by
   have hp0 : (Real.sqrt π:ℂ)≠0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hGm : Gamma (-(1/2):ℂ)= -2*(Real.sqrt π:ℂ) := by
     have h := Gamma_add_one (-(1/2):ℂ) (by norm_num)
@@ -411,9 +411,9 @@ theorem erfc_kummerUOnLog_square {z : ℂ} (hz : z ≠ 0) :
                                              by ring, Complex.exp_log hz]
   have hm : exp ((-(1/2):ℂ)*(2*log z))=z⁻¹ := by
     rw [show (-(1/2):ℂ)*(2*log z)= -log z by ring,Complex.exp_neg,Complex.exp_log hz]
-  have hhalf : kummerUOnLog (1/2) (1/2) (2*log z)=
+  have hhalf : kummerUConnectionOnLog (1/2) (1/2) (2*log z)=
       (Real.sqrt π:ℂ)*exp (z^2)*erfc z := by
-    unfold kummerUOnLog
+    unfold kummerUConnectionOnLog
     norm_num only
     rw [he, hp, kummerM_self Complex.one_div_two_ne_neg_natCast, Gamma_one, hGm,
         Complex.Gamma_one_half_eq_sqrt,
@@ -423,9 +423,9 @@ theorem erfc_kummerUOnLog_square {z : ℂ} (hz : z ≠ 0) :
     simp only [erfc]
     field_simp
     ring
-  have hrel : kummerUOnLog 1 (3/2) (2*log z)=
-      kummerUOnLog (1/2) (1/2) (2*log z)/z := by
-    unfold kummerUOnLog
+  have hrel : kummerUConnectionOnLog 1 (3/2) (2*log z)=
+      kummerUConnectionOnLog (1/2) (1/2) (2*log z)/z := by
+    unfold kummerUConnectionOnLog
     norm_num only
     rw [he, hp, hm, Gamma_one, hGm, Complex.Gamma_one_half_eq_sqrt,
         kummerM_self Complex.one_div_two_ne_neg_natCast]
@@ -439,5 +439,9 @@ theorem erfc_kummerUOnLog_square {z : ℂ} (hz : z ≠ 0) :
   · rw [hrel,hhalf]
     field_simp
     linear_combination -erfc z*hexp
+
+/-- Compatibility spelling for the noninteger logarithmic connection expression. -/
+@[deprecated erfc_kummerUConnectionOnLog_square (since := "2026-11-14")]
+alias erfc_kummerUOnLog_square := erfc_kummerUConnectionOnLog_square
 
 end DLMF.Confluent

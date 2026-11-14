@@ -6,6 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.BernoulliEuler.Properties
+public import DLMF.BernoulliEuler.CentralFactorial
+import DLMFMathlib.Algebra.BigOperators
 public import Mathlib.Algebra.Group.ForwardDiff
 
 /-!
@@ -277,13 +279,6 @@ private lemma sum_alt_choose_mul_bernoulliPolyB_add (n : ℕ) (x : ℂ) :
   have hi' : i ≤ n := Nat.lt_succ_iff.mp (mem_range.mp hi)
   rw [show n + 1 - 1 - i = n - i by omega, Nat.sub_sub_self hi']
 
-/-- Reindexing `Icc 1 n` to `range n`. -/
-private lemma sum_Icc_one_eq_sum_range' {M : Type*} [AddCommMonoid M] (f : ℕ → M) (n : ℕ) :
-    ∑ k ∈ Icc 1 n, f k = ∑ k ∈ range n, f (k + 1) := by
-  induction n with
-  | zero => simp
-  | succ n ih => rw [sum_Icc_succ_top (by omega), ih, sum_range_succ]
-
 /-- **Euler polynomials as a Newton series**: `Eₘ(x) = ∑_{k=0}^{m} 2⁻ᵏ ∑_{j=0}^{k} (-1)ʲ
 (k choose j) (x + j)ᵐ`. -/
 theorem eulerPolyE_eq_newton_series (m : ℕ) (x : ℂ) :
@@ -509,7 +504,7 @@ theorem bernoulli_eq_explicit₂ {n : ℕ} (hn : 1 ≤ n) :
   have hs : ∑ k ∈ Icc 1 n, (k.choose i : ℚ) = ((n + 1).choose (i + 1) : ℚ) := by
     have := sum_range_add_one_choose_eq_choose n i
     rw [sum_range_succ', Nat.choose_eq_zero_of_lt hi0, add_zero] at this
-    rw [sum_Icc_one_eq_sum_range']
+    rw [sum_Icc_one_eq_sum_range_add_one]
     exact_mod_cast this
   have hsc := Nat.add_one_mul_choose_eq n i
   have hsc' : ((n : ℚ) + 1) * (n.choose i : ℚ) =
@@ -522,13 +517,6 @@ theorem bernoulli_eq_explicit₂ {n : ℕ} (hn : 1 ≤ n) :
   field_simp
   linear_combination T i * hsc'
 
-/-- **DLMF 24.6.3**: `B₂ₙ = ∑_{k=1}^{n} ((k-1)! k!/(2k+1)!) ∑_{j=1}^{k} (-1)^{j-1} (2k choose k+j)
-j^{2n}`, `n ≥ 1`. -/
-@[dlmf 24.6.E3]
-theorem bernoulli_two_mul_eq_explicit₃ {n : ℕ} (hn : 1 ≤ n) :
-    bernoulli (2 * n) = ∑ k ∈ Icc 1 n, ((k - 1)! * k ! / (2 * k + 1)! : ℚ) *
-      ∑ j ∈ Icc 1 k, (-1 : ℚ) ^ (j - 1) * ((2 * k).choose (k + j) : ℚ) * (j : ℚ) ^ (2 * n) := by
-  sorry
 
 /-! ### Helpers for 24.6.4–24.6.5: central differences -/
 
@@ -640,41 +628,6 @@ private lemma eulerNumber_two_mul_eq_centralDiffSeries (n : ℕ) :
   rw [h0]
   simp only [GP, eval_mul, eval_C, eval_comp, eval_add, eval_X, mul_zero, zero_add, eulerNumber]
 
-/-- Folding the central difference of the even function `x^{2n}`:
-`∑_{i=0}^{2k} (-1)^{2k-i} (2k choose i)(i-k)^{2n} =
-2(-1)ᵏ ∑_{j=1}^{k} (-1)ʲ (2k choose k-j) j^{2n}`. -/
-private lemma sum_choose_mul_sub_pow_two_mul_eq_fold (n k : ℕ) (hn : 1 ≤ n) :
-    ∑ i ∈ range (2 * k + 1), (-1 : ℚ) ^ (2 * k - i) * ((2 * k).choose i : ℚ) *
-      ((i : ℚ) - k) ^ (2 * n) = 2 * (-1) ^ k * ∑ j ∈ Icc 1 k, (-1 : ℚ) ^ j *
-        ((2 * k).choose (k - j) : ℚ) * (j : ℚ) ^ (2 * n) := by
-  rw [show 2 * k + 1 = k + (k + 1) by ring, sum_range_add, sum_range_succ', ← sum_range_reflect,
-    sum_Icc_one_eq_sum_range', mul_sum]
-  simp only [Nat.cast_add, add_zero, sub_self, zero_pow (show 2 * n ≠ 0 by omega), mul_zero,
-    add_zero]
-  rw [← sum_add_distrib]
-  refine sum_congr rfl fun j hj => ?_
-  have hj' : j < k := mem_range.mp hj
-  rw [show 2 * k - (k - 1 - j) = (k - j - 1) + 2 * (j + 1) by omega,
-    show 2 * k - (k + (j + 1)) = k - j - 1 by omega,
-    show (2 * k).choose (k + (j + 1)) = (2 * k).choose (k - 1 - j) by
-      rw [← Nat.choose_symm (show k - 1 - j ≤ 2 * k by omega)]; congr 1; omega,
-    show k - (j + 1) = k - 1 - j by omega]
-  rw [Nat.cast_sub (by omega), Nat.cast_sub (by omega)]
-  push_cast
-  rw [pow_add, pow_mul]
-  have e1 : ((k : ℚ) - 1 - j - k) ^ (2 * n) = ((j : ℚ) + 1) ^ (2 * n) := by
-    rw [show (k : ℚ) - 1 - j - k = -((j : ℚ) + 1) by ring, neg_pow, pow_mul]; norm_num
-  have e2 : ((k : ℚ) + (j + 1) - k) = (j : ℚ) + 1 := by ring
-  rw [e1, e2]
-  have e3 : (-1 : ℚ) ^ k = (-1) ^ (k - j - 1) * (-1) ^ (j + 1) := by
-    rw [← pow_add]; congr 1; omega
-  rw [e3]
-  have e4 : (-1 : ℚ) ^ (j * 2) = 1 := by rw [mul_comm, pow_mul]; norm_num
-  ring_nf
-  rw [e4]
-  ring
-
-
 /-- Reflected summation over a final segment: `∑_{k=n-m}^{n} G k = ∑_{i=0}^{m} G (n - i)`. -/
 private lemma sum_Icc_sub_eq_sum_range_reflect {M : Type*} [AddCommMonoid M] (G : ℕ → M)
     {m n : ℕ} (h : m ≤ n) :
@@ -694,7 +647,7 @@ end
 theorem eulerNumber_two_mul_eq_explicit₄ {n : ℕ} (hn : 1 ≤ n) :
     eulerNumber (2 * n) = ∑ k ∈ Icc 1 n, 1 / (2 : ℚ) ^ (k - 1) *
       ∑ j ∈ Icc 1 k, (-1 : ℚ) ^ j * ((2 * k).choose (k - j) : ℚ) * (j : ℚ) ^ (2 * n) := by
-  rw [eulerNumber_two_mul_eq_centralDiffSeries, sum_range_succ', sum_Icc_one_eq_sum_range']
+  rw [eulerNumber_two_mul_eq_centralDiffSeries, sum_range_succ', sum_Icc_one_eq_sum_range_add_one]
   simp only [pow_zero, mul_zero, Function.iterate_zero, id, Nat.cast_zero, sub_zero,
     zero_pow (show 2 * n ≠ 0 by omega), add_zero]
   refine sum_congr rfl fun k _ => ?_
@@ -706,7 +659,7 @@ theorem eulerNumber_two_mul_eq_explicit₄ {n : ℕ} (hn : 1 ≤ n) :
         ((i : ℚ) - ((k + 1 : ℕ) : ℚ)) ^ (2 * n) := by
     refine sum_congr rfl fun i _ => ?_
     rw [zsmul_eq_mul, nsmul_eq_mul, mul_one]; push_cast; ring
-  rw [this, sum_choose_mul_sub_pow_two_mul_eq_fold n (k + 1) hn, Nat.add_sub_cancel]
+  rw [this, Finset.sum_neg_one_pow_mul_choose_mul_sub_pow_even n (k + 1) hn, Nat.add_sub_cancel]
   rw [show (-1 / 2 : ℚ) ^ (k + 1) = (-1) ^ (k + 1) / (2 * 2 ^ k) by
     rw [div_pow, pow_succ (2 : ℚ) k]; ring]
   have h1 : ((-1 : ℚ) ^ (k + 1)) ^ 2 = 1 := by rw [← pow_mul, mul_comm, pow_mul]; norm_num
@@ -725,7 +678,7 @@ theorem eulerNumber_two_mul_eq_explicit₅ {n : ℕ} (hn : 1 ≤ n) :
   simp_rw [mul_sum]
   rw [sum_comm' (t' := Icc 1 n) (s' := fun j => Icc j n) (fun k j => by
     simp only [mem_Icc]; omega)]
-  rw [sum_Icc_one_eq_sum_range', ← sum_range_reflect]
+  rw [sum_Icc_one_eq_sum_range_add_one, ← sum_range_reflect]
   refine sum_congr rfl fun k hk => ?_
   have hk' : k < n := mem_range.mp hk
   rw [show n - 1 - k + 1 = n - k by omega,
@@ -915,7 +868,7 @@ private lemma eulerNumber_two_mul_eq_sum_Icc_choose_pow {n : ℕ} (hn : 1 ≤ n)
     simp only [GP, eval_mul, eval_C, eval_comp, eval_add, eval_X, mul_zero, zero_add, eulerNumber]
   rw [hE]
   simp only [Q, symmShift_pow_apply, p, zero_add]
-  rw [sum_range_succ', sum_Icc_one_eq_sum_range']
+  rw [sum_range_succ', sum_Icc_one_eq_sum_range_add_one]
   simp only [pow_zero, zero_add, Nat.choose_zero_right, Nat.sub_zero, Nat.cast_one, one_mul,
     sum_range_one, Nat.cast_zero, sub_zero, zero_pow (show 2 * n ≠ 0 by omega), mul_zero,
     add_zero]
@@ -975,7 +928,7 @@ theorem eulerPolyE_eq_explicit (n : ℕ) (x : ℂ) :
     rw [show (-1 : ℂ) ^ k = -(-1) ^ (k - 1) by
       rw [show k = k - 1 + 1 by omega, pow_succ]; simp]
     ring
-  rw [sum_congr rfl hin, sum_Icc_one_eq_sum_range']
+  rw [sum_congr rfl hin, sum_Icc_one_eq_sum_range_add_one]
   have h0 := sum_alt_choose_mul_eulerPolyE_add n x
   rw [sum_range_succ'] at h0
   simp only [pow_zero, Nat.choose_zero_right, Nat.cast_one, one_mul, Nat.cast_zero, add_zero] at h0

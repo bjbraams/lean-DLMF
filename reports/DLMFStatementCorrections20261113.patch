@@ -1,0 +1,63 @@
+--- a/DLMF/Elementary/Hyperbolic/Integrals.lean
++++ b/DLMF/Elementary/Hyperbolic/Integrals.lean
+@@ -5,6 +5,7 @@
+ -/
+ module
+ 
++public import DLMF.Elementary.ArcsineContinuedFraction
+ public import DLMF.Elementary.LogarithmContinuedFraction
+ public import DLMF.Elementary.Hyperbolic.InverseIdentities
+ public import DLMF.Elementary.OddContinuedFraction
+@@ -71,14 +72,14 @@
+ 
+ /-- Identity under the stated parameter and domain assumptions:
+ `DLMF.Core.HasContinuedFraction (fun n => if n=0 then z else
+-((2*((n+1)/2)-1:ℕ):ℂ)*(2*((n+1)/2):ℂ)*z^2) (fun n => (2*n+1:ℂ)) (arcsinh z/Complex.sqrt
++((2*((n+1)/2)-1:ℕ):ℂ)*((2*((n+1)/2):ℕ):ℂ)*z^2) (fun n => (2*n+1:ℂ)) (arcsinh z/Complex.sqrt
+ (1+z^2))`. -/
+ @[dlmf 4.39.E2]
+ theorem arcsinh_continued_fraction {z : ℂ} (hz : z∈arcsinhDomain) :
+     DLMF.Core.HasContinuedFraction
+-      (fun n => if n=0 then z else ((2*((n+1)/2)-1:ℕ):ℂ)*(2*((n+1)/2):ℂ)*z^2)
++      (fun n => if n=0 then z else ((2*((n+1)/2)-1:ℕ):ℂ)*((2*((n+1)/2):ℕ):ℂ)*z^2)
+       (fun n => (2*n+1:ℂ)) (arcsinh z/Complex.sqrt (1+z^2)) := by
+-  sorry
++  exact ArcsineContinuedFraction.hasContinuedFraction_arcsinh hz
+ 
+ /-- Identity under the stated parameter and domain assumptions:
+ `DLMF.Core.HasContinuedFraction (fun n => if n=0 then z else -(n:ℂ)^2*z^2) (fun n => (2*n+1:ℂ))
+--- a/DLMF/EllipticIntegrals/SymmetricIntegrals.lean
++++ b/DLMF/EllipticIntegrals/SymmetricIntegrals.lean
+@@ -1051,12 +1051,30 @@
+ theorem symmetricEllipticR_three_eq_integral_sphere (a : ℂ) {b : Fin 3 → ℝ} (hb : ∀ j, 0 < b j)
+     {z : Fin 3 → ℂ} (hz : ∀ j, 0 < (z j).re) (σ : Equiv.Perm (Fin 3)) :
+     symmetricEllipticR a (fun j => (b j : ℂ)) z =
+-      4 * Gamma (∑ j, (b j : ℂ)) / ∏ j, Gamma (b j : ℂ) *
++      4 * Gamma (∑ j, (b j : ℂ)) / (∏ j, Gamma (b j : ℂ)) *
+         ∫ φ in (0 : ℝ)..(π / 2), ∫ θ in (0 : ℝ)..(π / 2),
+           (∑ j, z j * ((directionCosines θ φ (σ j) : ℝ) : ℂ) ^ 2) ^ (-a) *
+             ((∏ j, directionCosines θ φ (σ j) ^ (2 * b j - 1) : ℝ) : ℂ) *
+               (Real.sin θ : ℂ) := by
+-  sorry
++  have h := symmetricEllipticR_three_eq_integral_sphere_identity a
++    (b := b ∘ σ.symm) (z := z ∘ σ.symm) (fun j => hb (σ.symm j))
++    (fun j => hz (σ.symm j))
++  have hperm := symmetricEllipticR_comp_perm σ.symm a (fun j => (b j : ℂ))
++    (z := z) (fun j => Or.inl (hz j))
++  simp only [Function.comp_def] at h hperm
++  rw [hperm, Equiv.sum_comp σ.symm (fun j => (b j : ℂ)),
++    Equiv.prod_comp σ.symm (fun j => Gamma (b j : ℂ))] at h
++  have hsum (θ φ : ℝ) :
++      (∑ j, z (σ.symm j) * ((directionCosines θ φ j : ℝ) : ℂ) ^ 2) =
++        ∑ j, z j * ((directionCosines θ φ (σ j) : ℝ) : ℂ) ^ 2 := by
++    simpa only [Equiv.symm_apply_apply] using
++      (Equiv.sum_comp σ (fun j => z (σ.symm j) * ((directionCosines θ φ j : ℝ) : ℂ) ^ 2)).symm
++  have hprod (θ φ : ℝ) :
++      (∏ j, directionCosines θ φ j ^ (2 * b (σ.symm j) - 1)) =
++        ∏ j, directionCosines θ φ (σ j) ^ (2 * b j - 1) := by
++    simpa only [Equiv.symm_apply_apply] using
++      (Equiv.prod_comp σ (fun j => directionCosines θ φ j ^ (2 * b (σ.symm j) - 1))).symm
++  simpa only [hsum, hprod] using h
+ 
+ /-- DLMF 19.23.10, **stronger than DLMF**: Euler's integral
+ `R_{-a}(𝐛; 𝐳) = B(a, a')⁻¹ ∫₀¹ u^{a-1} (1 - u)^{a'-1} ∏ⱼ (1 - u + u zⱼ)^{-bⱼ} du`,

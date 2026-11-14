@@ -9,6 +9,10 @@ public import DLMF.Zeta.Polylog.Properties
 public import DLMF.Zeta.Polylog.Inversion
 public import DLMF.Zeta.Polylog.LogarithmicExpansion
 
+public import DLMF.Zeta.Polylog.HypergeometricSeries
+
+public import DLMF.Zeta.Polylog.OrderAndRemovableLog
+
 /-!
 # Polylogarithms of complex order
 

@@ -8,6 +8,10 @@ module
 public import DLMF.GeneralizedHypergeometric.Appell.Basic.EulerBranches
 
 public import DLMF.GeneralizedHypergeometric.Appell.SeriesAndDifferentialEquations
+import DLMF.GeneralizedHypergeometric.Appell.ComposedF4
+import DLMF.GeneralizedHypergeometric.Appell.BurchnallChaundy
+import DLMF.GeneralizedHypergeometric.Appell.EulerF4
+import DLMFMathlib.Analysis.Integral.WeightedSeries
 public import DLMF.GeneralizedHypergeometric.Appell.TriangleDirichlet
 
 /-!
@@ -157,29 +161,6 @@ private lemma differentiableAt_inv_one_sub_mul_sub_mul_cpow {p : ℂ × ℂ} {u 
   refine (hf.cpow (differentiableAt_const b) hs).inv ?_
   rw [Ne, Complex.cpow_eq_zero_iff]
   exact fun h => slitPlane_ne_zero hs h.1
-
-/-- Termwise integration of a series with a bounded integrable weight. -/
-private lemma hasSum_integral_mul_of_norm_le_one {α ι : Type*} [MeasurableSpace α] [Countable ι]
-    {μ : Measure α}
-    {w : α → ℂ} (hw : Integrable w μ) {d : ι → ℂ} (hd : Summable fun i => ‖d i‖)
-    {e : ι → α → ℂ} (he : ∀ i, AEStronglyMeasurable (e i) μ) (hbd : ∀ i, ∀ᵐ t ∂μ, ‖e i t‖ ≤ 1)
-    {g : α → ℂ} (hg : ∀ᵐ t ∂μ, HasSum (fun i => d i * e i t) (g t)) :
-    HasSum (fun i => d i * ∫ t, w t * e i t ∂μ) (∫ t, w t * g t ∂μ) := by
-  have h := hasSum_integral_of_dominated_convergence (μ := μ)
-    (F := fun i t => w t * (d i * e i t)) (f := fun t => w t * g t)
-    (fun i t => ‖d i‖ * ‖w t‖)
-    (fun i => hw.aestronglyMeasurable.mul (aestronglyMeasurable_const.mul (he i)))
-    (fun i => by
-      filter_upwards [hbd i] with t ht
-      rw [norm_mul, norm_mul]
-      calc ‖w t‖ * (‖d i‖ * ‖e i t‖) ≤ ‖w t‖ * (‖d i‖ * 1) := by gcongr
-        _ = _ := by ring)
-    (Eventually.of_forall fun t => hd.mul_right _)
-    (by simp_rw [tsum_mul_right]; exact hw.norm.const_mul _)
-    (by filter_upwards [hg] with t ht using ht.mul_left (w t))
-  refine h.congr_fun fun i => ?_
-  rw [← integral_const_mul]
-  congr 1; funext t; ring
 
 /-- Absolute convergence of the binomial series `∑ (b)ₘ xᵐ/m!` in the unit disk. -/
 private lemma summable_norm_pochhammer_div_factorial_mul_pow_of_norm_lt_one (b : ℂ) {x : ℂ}
@@ -966,7 +947,7 @@ theorem appellF4_euler_germ (a b c c' : ℂ) (ha : 0<a.re) (hb : 0<b.re) (hca : 
     (hcb : b.re<c'.re) :
     (fun p : ℂ × ℂ => appellF4 a b c c' (p.1*(1-p.2)) (p.2*(1-p.1)))=ᶠ[𝓝 (0, 0)]
         (fun p => appellF4Euler a b c c' p.1 p.2) := by
-  sorry
+  exact F4EulerSeries.euler_germ a b c c' ha hb hca hcb
 
 /-- The Gauss series in the unit disk, as a scalar `HasSum`. -/
 private lemma hasSum_gaussHypergeometricCoeff_mul_pow {a b c z : ℂ} (hz : ‖z‖ < 1) :
@@ -1081,68 +1062,85 @@ theorem appellF3_reduction_appellF1 (a b b' c : ℂ) (hc : AppellRegular c) :
     show c+(m : ℂ)-(c - a) = a + m by ring, ordinaryHypergeometric_symm b' (a + m)]
   ring
 
+/-- Exchanging the two separate upper parameters exchanges the F1 variables. -/
+lemma appellF1_swap (a b b' c x y : ℂ) :
+    appellF1 a b b' c x y = appellF1 a b' b c y x := by
+  rw [appellF1, appellF1, ← (Equiv.prodComm ℕ ℕ).tsum_eq]
+  apply tsum_congr
+  rintro ⟨m, n⟩
+  simp only [Equiv.prodComm_apply, Prod.swap_prod_mk]
+  rw [appellF1Coeff_swap a b b' c n m]
+  ring
+
+
 /-- 16.16.E5_5: appellF4 reduction appellF1. -/
 @[dlmf 16.16.E5_5]
 theorem appellF4_reduction_appellF1 (a b c : ℂ) (hc : AppellRegular c) (hb : AppellRegular b) :
     (fun p : ℂ × ℂ => let x:=p.1; let y:=p.2; appellF4 a b c b (x*(1-y)) (y*(1-x)))=ᶠ[𝓝 (0,0)]
       (fun p => let x:=p.1; let y:=p.2;
           (1-x)^(-a)*(1-y)^(-a)*appellF1 a (c-b) (a-c+1) c (x/(x-1)) (x*y/((1-x)*(1-y)))) := by
-  sorry
-
-/-- A geometric bound for the F4 coefficients at regular lower parameters. -/
-private lemma exists_norm_appellF4Coeff_le_geom (a b c c' : ℂ) (hc : AppellRegular c)
-    (hc' : AppellRegular c') :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ m n : ℕ, ‖appellF4Coeff a b c c' m n‖ ≤ C * (8 ^ m * 8 ^ n) := by
-  obtain ⟨C, hC⟩ := exists_norm_appellF4Coeff_le a b c c' hc hc' (σ := 2) (by norm_num)
-  have hC0 : 0 ≤ C := by
-    have := (norm_nonneg _).trans (hC (0, 0))
-    simpa using this
-  refine ⟨C, hC0, fun m n => (hC (m, n)).trans ?_⟩
-  have h1 : (((m + n).choose m : ℕ) : ℝ) ≤ 2 ^ (m + n) := by
-                                                            exact_mod_cast Nat.choose_le_two_pow _ _
-  calc C * 2 ^ (m + n) * (((m + n).choose m : ℕ) : ℝ) ^ 2 ≤ C * 2 ^ (m + n) *
-         (2 ^ (m + n)) ^ 2 := by
-        gcongr
-    _ = C * (8 ^ m * 8 ^ n) := by
-        have : (8:ℝ) ^ m * 8 ^ n = (2 ^ (m + n)) ^ 3 := by
-          rw [← pow_add, show (8:ℝ) = 2 ^ 3 by norm_num, ← pow_mul, ← pow_mul, mul_comm]
-        rw [this]; ring
-
-/-- Summing the four-index family `appellF4Family` over its last two indices gives the `(m, n)`
-term `c_{mn} (X(1-Y))ᵐ (Y(1-X))ⁿ` of the `F₄` double series. -/
-private lemma hasSum_appellF4Family_fst (a b c c' X Y : ℂ) (p : ℕ × ℕ) :
-    HasSum (fun q => appellF4Family a b c c' X Y (p, q))
-      (appellF4Coeff a b c c' p.1 p.2 * (X * (1 - Y)) ^ p.1 * (Y * (1 - X)) ^ p.2) := by
-  obtain ⟨m, n⟩ := p
-  have hfin := hasSum_sum_of_ne_finset_zero (L := SummationFilter.unconditional _)
-    (s := Finset.range (m + n + 1) ×ˢ Finset.range (m + n + 1))
-    (f := fun q => appellF4Family a b c c' X Y ((m, n), q)) (fun q hq => by
-      obtain ⟨M, N⟩ := q
-      simp only [Finset.mem_product, Finset.mem_range, not_and_or, not_lt] at hq
-      unfold appellF4Family
-      simp only
-      rcases hq with h | h
-      · rw [appellF4BinomialCoeff_eq_zero_of_lt (by omega)]; simp
-      · rw [appellF4BinomialCoeff_eq_zero_of_lt (m := n) (n := m) (by omega)]; simp)
-  convert hfin using 1
-  rw [Finset.sum_product]
-  simp only [appellF4Family]
-  have h1 := appellF4BinomialCoeff_sum m n X
-  have h2 := appellF4BinomialCoeff_sum n m Y
-  rw [show n + m + 1 = m + n + 1 by ring] at h2
-  have : ∑ x ∈ Finset.range (m + n + 1), ∑ y ∈ Finset.range (m + n + 1),
-      appellF4Coeff a b c c' m n * (appellF4BinomialCoeff m n x * X ^ x) *
-          (appellF4BinomialCoeff n m y * Y ^ y) =
-      appellF4Coeff a b c c' m n *
-          ((∑ x ∈ Finset.range (m + n + 1), appellF4BinomialCoeff m n x * X ^ x) *
-        (∑ y ∈ Finset.range (m + n + 1), appellF4BinomialCoeff n m y * Y ^ y)) := by
-    rw [Finset.sum_mul_sum, Finset.mul_sum]
-    refine Finset.sum_congr rfl fun x _ => ?_
-    rw [Finset.mul_sum]
-    exact Finset.sum_congr rfl fun y _ => by ring
-  rw [this, h1, h2]
-  simp only [mul_pow]
-  ring
+  obtain ⟨δ, hδ, hBC⟩ := BurchnallChaundy.hasSum_expansion a b c b hc hb
+  have hδ' : 0 < min δ (1 / 8) := lt_min hδ (by norm_num)
+  have hU : {p : ℂ × ℂ | ‖p.1‖ < min δ (1 / 8) ∧ ‖p.2‖ < min δ (1 / 8)} ∈
+      𝓝 ((0 : ℂ),(0 : ℂ)) :=
+    ((isOpen_lt (continuous_norm.comp continuous_fst) continuous_const).inter
+      (isOpen_lt (continuous_norm.comp continuous_snd) continuous_const)).mem_nhds
+      (by simpa using And.intro hδ' hδ')
+  filter_upwards [hU] with p hp
+  obtain ⟨x, y⟩ := p
+  simp only at hp ⊢
+  have hx : ‖x‖ < 1 / 8 := hp.1.trans_le (min_le_right _ _)
+  have hy : ‖y‖ < 1 / 8 := hp.2.trans_le (min_le_right _ _)
+  have hx1 : 1 - x ≠ 0 := by
+    intro h
+    have he : x = 1 := by linear_combination -h
+    rw [he, norm_one] at hx
+    norm_num at hx
+  have hy1 : 1 - y ≠ 0 := by
+    intro h
+    have he : y = 1 := by linear_combination -h
+    rw [he, norm_one] at hy
+    norm_num at hy
+  have hxden : 1 - ‖x‖ ≤ ‖1 - x‖ := by simpa using norm_sub_norm_le (1 : ℂ) x
+  have hyden : 1 - ‖y‖ ≤ ‖1 - y‖ := by simpa using norm_sub_norm_le (1 : ℂ) y
+  have hxden0 : 0 < ‖1 - x‖ := norm_pos_iff.mpr hx1
+  have hyden0 : 0 < ‖1 - y‖ := norm_pos_iff.mpr hy1
+  have htx : ‖x / (x - 1)‖ < 1 := by
+    rw [norm_div, norm_sub_rev x 1, div_lt_one hxden0]
+    linarith
+  have huxy : ‖x * y / ((1 - x) * (1 - y))‖ < 1 := by
+    rw [norm_div, norm_mul, norm_mul, div_lt_one (mul_pos hxden0 hyden0)]
+    have hprod : (1 - ‖x‖) * (1 - ‖y‖) ≤ ‖1 - x‖ * ‖1 - y‖ :=
+      mul_le_mul hxden hyden (by linarith) (by positivity)
+    nlinarith [norm_nonneg x, norm_nonneg y]
+  have hF1 := (hasSum_appellF1_gauss_fibers a (a - c + 1) (c - b) c hc huxy htx).mul_left
+    ((1 - x) ^ (-a) * (1 - y) ^ (-a))
+  rw [appellF1_swap a (a - c + 1) (c - b) c] at hF1
+  apply (hBC x y (hp.1.trans_le (min_le_left _ _))
+    (hp.2.trans_le (min_le_left _ _))).unique
+  refine hF1.congr_fun fun k => ?_
+  have hck : ∀ j : ℕ, c + k ≠ -(j : ℂ) := by
+    intro j h
+    apply hc (k + j)
+    push_cast
+    linear_combination h
+  have hbk : ∀ j : ℕ, (j : ℂ) ≠ -(b + k) := by
+    intro j h
+    apply hb (k + j)
+    push_cast
+    linear_combination h
+  rw [ordinaryHypergeometric_eq_one_sub_neg_cpow hbk (by linarith),
+    pfaff_transformation_of_ne_neg_nat hck (by linarith) htx,
+    show c + k - (b + k) = c - b by ring]
+  rw [show -(a + (k : ℂ)) = -a + -(k : ℂ) by ring,
+    cpow_add _ _ hx1, cpow_add _ _ hy1,
+    cpow_neg (1 - x) (k : ℂ), cpow_neg (1 - y) (k : ℂ), cpow_natCast, cpow_natCast,
+    div_pow, mul_pow, mul_pow]
+  have hbp := pochhammer_ne_zero_of_not_neg_nat hb k
+  have hcp := pochhammer_ne_zero_of_not_neg_nat hc k
+  have hfac : (k ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr k.factorial_ne_zero
+  rw [show a + b - c - b + 1 = a - c + 1 by ring]
+  field_simp [hbp, hcp, hfac, hx1, hy1]
 
 /-- Under `c + c' = a + b + 1`, summing `appellF4Family` over its first two indices gives the
 product of the `(M, N)` terms of `₂F₁(a,b;c;X)` and `₂F₁(a,b;c';Y)`. -/
@@ -1188,54 +1186,10 @@ private lemma appellF4_bailey_of_appellRegular {a b c c' : ℂ} (hcc : c + c' = 
     (hc' : AppellRegular c') : ∃ δ > 0, ∀ X Y : ℂ, ‖X‖ < δ → ‖Y‖ < δ →
       HasSum (fun p : ℕ × ℕ => appellF4Coeff a b c c' p.1 p.2 * (X * (1 - Y)) ^ p.1 *
         (Y * (1 - X)) ^ p.2) (₂F₁ a b c X * ₂F₁ a b c' Y) := by
-  obtain ⟨C, hC0, hCb⟩ := exists_norm_appellF4Coeff_le_geom a b c c' hc hc'
   refine ⟨1 / 1024, by norm_num, fun X Y hX hY => ?_⟩
   have hpc : ∀ k, pochhammer c k ≠ 0 := pochhammer_ne_zero_of_not_neg_nat hc
   have hpc' : ∀ k, pochhammer c' k ≠ 0 := pochhammer_ne_zero_of_not_neg_nat hc'
-  have hsq : ∀ W : ℂ, ‖W‖ < 1 / 1024 → Real.sqrt ‖W‖ < 1 / 32 := by
-    intro W hW
-    rw [show (1 / 32 : ℝ) = Real.sqrt (1 / 1024) by
-      rw [show (1 / 1024 : ℝ) = (1 / 32) ^ 2 by norm_num, Real.sqrt_sq (by norm_num)] ]
-    exact Real.sqrt_lt_sqrt (norm_nonneg _) hW
-  have hX1 : ‖X‖ ≤ 1 := by linarith
-  have hY1 : ‖Y‖ ≤ 1 := by linarith
-  set sX := Real.sqrt ‖X‖ with hsX
-  set sY := Real.sqrt ‖Y‖ with hsY
-  have hsX0 : 0 ≤ sX := Real.sqrt_nonneg _
-  have hsY0 : 0 ≤ sY := Real.sqrt_nonneg _
-  have hsXQ : sX < 1 / 32 := hsq X hX
-  have hsYQ : sY < 1 / 32 := hsq Y hY
-  have hsX1 : sX < 1 := by linarith
-  have hsY1 : sY < 1 := by linarith
-  set rX := 2 * 8 * sX with hrX
-  set rY := 2 * 8 * sY with hrY
-  have hrX0 : 0 ≤ rX := by positivity
-  have hrY0 : 0 ≤ rY := by positivity
-  have hrX1 : rX < 1 := by rw [hrX]; linarith
-  have hrY1 : rY < 1 := by rw [hrY]; linarith
-  have hgeo : ∀ u v : ℝ, 0 ≤ u → u < 1 → 0 ≤ v → v < 1 →
-      Summable fun p : ℕ × ℕ => u ^ p.1 * v ^ p.2 := fun u v hu0 hu1 hv0 hv1 =>
-    (summable_geometric_of_lt_one hu0 hu1).mul_of_nonneg (summable_geometric_of_lt_one hv0 hv1)
-      (fun _ => by positivity) (fun _ => by positivity)
-  have hD : Summable fun p : (ℕ × ℕ) × (ℕ × ℕ) =>
-      C * ((rX ^ p.1.1 * rY ^ p.1.2) * (sX ^ p.2.1 * sY ^ p.2.2)) :=
-    ((hgeo rX rY hrX0 hrX1 hrY0 hrY1).mul_of_nonneg (hgeo sX sY hsX0 hsX1 hsY0 hsY1)
-      (fun _ => by positivity) (fun _ => by positivity)).mul_left C
-  have hsum : Summable (appellF4Family a b c c' X Y) := by
-    refine Summable.of_norm_bounded hD fun p => ?_
-    obtain ⟨⟨m, n⟩, ⟨M, N⟩⟩ := p
-    unfold appellF4Family
-    simp only
-    rw [norm_mul, norm_mul]
-    have h1 := hCb m n
-    have h2 := appellF4BinomialCoeff_norm_le m n M hX1
-    have h3 := appellF4BinomialCoeff_norm_le n m N hY1
-    calc ‖appellF4Coeff a b c c' m n‖ * ‖appellF4BinomialCoeff m n M * X ^ M‖ *
-           ‖appellF4BinomialCoeff n m N * Y ^ N‖
-        ≤ (C * (8 ^ m * 8 ^ n)) * (2 ^ n * sX ^ m * sX ^ M) * (2 ^ m * sY ^ n * sY ^ N) := by
-          gcongr
-      _ = _ := by rw [hrX, hrY]; simp only [mul_pow]; ring
-  have hS := hsum.hasSum
+  have hS := (summable_appellF4Family a b c c' hc hc' hX hY).hasSum
   have hfib1 := hasSum_appellF4Family_fst a b c c' X Y
   have hF4 := hS.prod_fiberwise hfib1
   have hfib2 := hasSum_appellF4Family_snd hcc hpc hpc' X Y
@@ -1277,15 +1231,6 @@ lemma appellF3_swap (a a' b b' c x y : ℂ) :
   rw [appellF3Coeff_swap a a' b b' c n m]
   ring
 
-/-- Exchanging the two separate upper parameters exchanges the F1 variables. -/
-lemma appellF1_swap (a b b' c x y : ℂ) :
-    appellF1 a b b' c x y = appellF1 a b' b c y x := by
-  rw [appellF1, appellF1, ← (Equiv.prodComm ℕ ℕ).tsum_eq]
-  apply tsum_congr
-  rintro ⟨m, n⟩
-  simp only [Equiv.prodComm_apply, Prod.swap_prod_mk]
-  rw [appellF1Coeff_swap a b b' c n m]
-  ring
 
 /-- Pfaff's simultaneous fractional linear change of both Appell F1 variables,
 as analytic germs at the origin (DLMF 16.16.E8). -/
@@ -1397,7 +1342,7 @@ theorem appellF4_burchnall_chaundy (a b c c' : ℂ) (hc : AppellRegular c) (hc' 
       HasSum (fun k : ℕ => pochhammer a k*pochhammer b k*pochhammer (a+b-c-c'+1) k/
         (pochhammer c k*pochhammer c' k*k !)*x^k*y^k*₂F₁ (a+k) (b+k) (c+k) x*
           ₂F₁ (a+k) (b+k) (c'+k) y) (appellF4 a b c c' (x*(1-y)) (y*(1-x))) := by
-  sorry
+  exact BurchnallChaundy.hasSum_expansion a b c c' hc hc'
 
 /-- The large-variable formula is a branch reached by analytic continuation, not a divergent-series
 identity. -/

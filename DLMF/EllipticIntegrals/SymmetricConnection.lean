@@ -17,6 +17,8 @@ of parameter of `R_J` (§19.21(iii)).
 
 ## Main results
 
+* `analyticAt_symmetricEllipticRF_zero_comp`, `analyticAt_symmetricEllipticRD_zero_comp`: analytic
+  dependence of the complete symmetric integrals on slit-plane arguments.
 * `legendreRelation_symmetricElliptic`, `lemniscate_product`: Legendre's relation in symmetric form
   and its case `z = 1` (DLMF 19.21.1).
 * `symmetricEllipticRF_zero_eq_symmetricEllipticRD`, `symmetricEllipticRG_zero_eq`: DLMF 19.21.2,
@@ -40,6 +42,9 @@ slit-plane variables (nonzero where DLMF divides). The relations were checked nu
 parameters `p, q` real and nonzero (Cauchy principal values when negative). The prose
 19.21.ii.p2 (connection formulas for `R_{-a}` in Carlson (1977b)) is bibliographic.
 
+The analytic composition lemmas use `lean-codes`' `Carlson.analyticAt_carlsonR_comp`; the
+symmetric Legendre relation uses `DLMF.Elliptic.legendre_relation` and analytic continuation.
+
 ## References
 
 * NIST DLMF §19.21.
@@ -54,13 +59,161 @@ namespace DLMF.EllipticIntegrals
 
 /-! ### §19.21(i) Complete integrals -/
 
+/-- Legendre's relation in symmetric form for positive real arguments. -/
+private lemma legendreRelation_symmetricElliptic_ofReal {x : ℝ} (hx : 0 < x) :
+    symmetricEllipticRF 0 ((x + 1 : ℝ) : ℂ) x * symmetricEllipticRD 0 ((x + 1 : ℝ) : ℂ) 1 +
+      symmetricEllipticRD 0 ((x + 1 : ℝ) : ℂ) x *
+        symmetricEllipticRF 0 ((x + 1 : ℝ) : ℂ) 1 = 3 * π / (2 * (x : ℂ)) := by
+  set m : ℝ := 1 / (x + 1)
+  have hm0 : 0 < m := by dsimp only [m]; positivity
+  have hm1 : m < 1 := by dsimp only [m]; rw [div_lt_one (by positivity)]; linarith
+  set k : ℂ := (Real.sqrt m : ℂ)
+  set l : ℂ := (Real.sqrt (1 - m) : ℂ)
+  have hk : k ^ 2 = (m : ℂ) := by simpa [k] using ofReal_sqrt_sq_of_nonneg hm0.le
+  have hl : l ^ 2 = ((1 - m : ℝ) : ℂ) := by
+    simpa [l] using ofReal_sqrt_sq_of_nonneg (by linarith : 0 ≤ 1 - m)
+  have hkm : 1 - k ^ 2 ∈ slitPlane := by
+    rw [hk, ← ofReal_one, ← ofReal_sub]; exact ofReal_mem_slitPlane.mpr (by linarith)
+  have hlm : 1 - l ^ 2 ∈ slitPlane := by
+    rw [hl, ← ofReal_one, ← ofReal_sub, sub_sub_cancel]
+    exact ofReal_mem_slitPlane.mpr hm0
+  have hE := (completeEllipticE_eq_symmetricElliptic hkm).2.2.2.2
+  have hE' := (completeEllipticE_eq_symmetricElliptic hlm).2.2.2.2
+  have hK := completeEllipticK_eq_symmetricEllipticRF hkm
+  have hK' := completeEllipticK_eq_symmetricEllipticRF hlm
+  rw [hk] at hE hK
+  rw [hl] at hE' hK'
+  have hL := DLMF.Elliptic.legendre_relation hm0 hm1
+  have hLc : completeEllipticE k * completeEllipticK l + completeEllipticE l *
+      completeEllipticK k - completeEllipticK k * completeEllipticK l = π / 2 := by
+    rw [completeEllipticK_eq_ofReal hk hm1.le, completeEllipticE_eq_ofReal hk hm1.le,
+      completeEllipticK_eq_ofReal hl (by linarith), completeEllipticE_eq_ofReal hl (by linarith)]
+    exact_mod_cast hL
+  have hxp : 0 < x + 1 := by linarith
+  have hscaleK := symmetricEllipticRF_scale hxp 0 (1 - m) 1
+  have hscaleK' := symmetricEllipticRF_scale hxp 0 m 1
+  have hma : 1 - (m : ℂ) ∈ slitPlane := by simpa [hk] using hkm
+  have hscaleD := symmetricEllipticRD_scale hxp 0 1 (1 - m)
+    (not_isNegReal_of_mem_slitPlane hma)
+  have hscaleD' := symmetricEllipticRD_scale hxp 0 1 m
+    (not_isNegReal_of_mem_slitPlane (ofReal_mem_slitPlane.mpr hm0))
+  have hxp0 : (x : ℂ) + 1 ≠ 0 := by exact_mod_cast hxp.ne'
+  have ex : ((x + 1 : ℝ) : ℂ) * (1 - (m : ℂ)) = x := by
+    dsimp only [m]
+    push_cast
+    field_simp [hxp0]
+    ring
+  have em : ((x + 1 : ℝ) : ℂ) * (m : ℂ) = 1 := by
+    dsimp only [m]
+    push_cast
+    field_simp [hxp0]
+  simp only [mul_zero, mul_one] at hscaleK hscaleK' hscaleD hscaleD'
+  rw [ex] at hscaleK hscaleD
+  rw [em] at hscaleK' hscaleD'
+  rw [symmetricEllipticRF_comm_right] at hscaleK hscaleK'
+  rw [hscaleK, hscaleK', hscaleD, hscaleD']
+  rw [← hK]
+  rw [show 1 - ((1 - m : ℝ) : ℂ) = (m : ℂ) by push_cast; ring] at hK' hE'
+  rw [← hK']
+  have hroot2 := ofReal_cpow_half_sq (l := x + 1)
+  have hroot0 := ofReal_cpow_half_ne_zero hxp
+  generalize ((x + 1 : ℝ) : ℂ) ^ (1 / 2 : ℂ) = r at hroot2 hroot0 ⊢
+  have hmc : (m : ℂ) ≠ 0 := ofReal_ne_zero.mpr hm0.ne'
+  have hac : 1 - (m : ℂ) ≠ 0 := by exact_mod_cast (by linarith : 1 - m ≠ 0)
+  have hx0 : (x : ℂ) ≠ 0 := ofReal_ne_zero.mpr hx.ne'
+  have hprod : (m : ℂ) * (1 - (m : ℂ)) * r ^ 4 = x := by
+    rw [show r ^ 4 = (r ^ 2) ^ 2 by ring, hroot2]
+    dsimp only [m]
+    push_cast
+    field_simp [hxp0]
+    ring
+  field_simp [hroot0, hx0]
+  apply mul_left_cancel₀ (mul_ne_zero hmc hac)
+  push_cast at hE'
+  linear_combination (6 * (x : ℂ)) * hLc -
+    (6 * (x : ℂ) * completeEllipticK l) * hE -
+    (6 * (x : ℂ) * completeEllipticK k) * hE' -
+    (3 * (π : ℂ)) * hprod
+
+/-- A complete first-kind symmetric integral is analytic in its two slit-plane arguments. -/
+theorem analyticAt_symmetricEllipticRF_zero_comp
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E] {f g : E → ℂ} {p : E}
+    (hf : AnalyticAt ℂ f p) (hg : AnalyticAt ℂ g p)
+    (hfp : f p ∈ slitPlane) (hgp : g p ∈ slitPlane) :
+    AnalyticAt ℂ (fun q => symmetricEllipticRF 0 (f q) (g q)) p := by
+  have ha : AnalyticAt ℂ (fun q => (π / 2 : ℂ) *
+      Carlson.carlsonR (-(1 / 2)) ![1 / 2, 1 / 2] ![f q, g q]) p := by
+    refine analyticAt_const.mul (Carlson.analyticAt_carlsonR_comp analyticAt_const
+      analyticAt_const ?_ (vec2_mem_carlsonRSlitDomain hfp hgp) ?_)
+    · refine analyticAt_pi_iff.mpr fun i => ?_
+      fin_cases i <;> simpa
+    · intro n
+      simp only [Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one]
+      norm_num
+      exact_mod_cast (by omega : (1 : ℤ) ≠ -(n : ℤ))
+  refine ha.congr ?_
+  have hfe := hf.continuousAt.preimage_mem_nhds (isOpen_slitPlane.mem_nhds hfp)
+  have hge := hg.continuousAt.preimage_mem_nhds (isOpen_slitPlane.mem_nhds hgp)
+  filter_upwards [hfe, hge] with q hqf hqg
+  rw [symmetricEllipticRF_zero_left hqf hqg,
+    symmetricEllipticR_of_mem _ _ (vec2_mem_carlsonRSlitDomain hqf hqg)]
+
+/-- A complete second-kind symmetric integral is analytic in its two slit-plane arguments. -/
+theorem analyticAt_symmetricEllipticRD_zero_comp
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E] {f g : E → ℂ} {p : E}
+    (hf : AnalyticAt ℂ f p) (hg : AnalyticAt ℂ g p)
+    (hfp : f p ∈ slitPlane) (hgp : g p ∈ slitPlane) :
+    AnalyticAt ℂ (fun q => symmetricEllipticRD 0 (f q) (g q)) p := by
+  have ha : AnalyticAt ℂ (fun q => (3 * π / 4 : ℂ) *
+      Carlson.carlsonR (-(3 / 2)) ![1 / 2, 3 / 2] ![f q, g q]) p := by
+    refine analyticAt_const.mul (Carlson.analyticAt_carlsonR_comp analyticAt_const
+      analyticAt_const ?_ (vec2_mem_carlsonRSlitDomain hfp hgp) ?_)
+    · refine analyticAt_pi_iff.mpr fun i => ?_
+      fin_cases i <;> simpa
+    · intro n
+      simp only [Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one]
+      norm_num
+      exact_mod_cast (by omega : (2 : ℤ) ≠ -(n : ℤ))
+  refine ha.congr ?_
+  have hfe := hf.continuousAt.preimage_mem_nhds (isOpen_slitPlane.mem_nhds hfp)
+  have hge := hg.continuousAt.preimage_mem_nhds (isOpen_slitPlane.mem_nhds hgp)
+  filter_upwards [hfe, hge] with q hqf hqg
+  rw [symmetricEllipticRD_zero_left hqf hqg,
+    symmetricEllipticR_of_mem _ _ (vec2_mem_carlsonRSlitDomain hqf hqg)]
+
+
 /-- DLMF 19.21.1: Legendre's relation (19.7.1) in symmetric form,
 `R_F(0, z+1, z) R_D(0, z+1, 1) + R_D(0, z+1, z) R_F(0, z+1, 1) = 3π/(2z)`, `z ∈ ℂ \ (-∞, 0]`. -/
 @[dlmf 19.21.E1]
 theorem legendreRelation_symmetricElliptic {z : ℂ} (hz : z ∈ slitPlane) :
     symmetricEllipticRF 0 (z + 1) z * symmetricEllipticRD 0 (z + 1) 1 +
       symmetricEllipticRD 0 (z + 1) z * symmetricEllipticRF 0 (z + 1) 1 = 3 * π / (2 * z) := by
-  sorry
+  have hA : AnalyticOnNhd ℂ (fun z => symmetricEllipticRF 0 (z + 1) z *
+      symmetricEllipticRD 0 (z + 1) 1 +
+      symmetricEllipticRD 0 (z + 1) z * symmetricEllipticRF 0 (z + 1) 1) slitPlane := by
+    intro w hw
+    have hw1 : w + 1 ∈ slitPlane := by
+      rcases hw with hw | hw
+      · left; simpa using (by linarith : 0 < w.re + 1)
+      · right; simpa using hw
+    exact ((analyticAt_symmetricEllipticRF_zero_comp (analyticAt_id.add analyticAt_const)
+      analyticAt_id hw1 hw).mul
+      (analyticAt_symmetricEllipticRD_zero_comp (analyticAt_id.add analyticAt_const)
+      analyticAt_const hw1 one_mem_slitPlane)).add
+      ((analyticAt_symmetricEllipticRD_zero_comp (analyticAt_id.add analyticAt_const)
+      analyticAt_id hw1 hw).mul
+      (analyticAt_symmetricEllipticRF_zero_comp (analyticAt_id.add analyticAt_const)
+      analyticAt_const hw1 one_mem_slitPlane))
+  have hB : AnalyticOnNhd ℂ (fun z => 3 * (π : ℂ) / (2 * z)) slitPlane := fun w hw =>
+    analyticAt_const.div (analyticAt_const.mul analyticAt_id)
+      (mul_ne_zero two_ne_zero (slitPlane_ne_zero hw))
+  refine hA.eqOn_of_preconnected_of_frequently_eq hB
+    (starConvex_one_slitPlane.isPathConnected one_mem_slitPlane).isConnected.isPreconnected
+    one_mem_slitPlane ?_ hz
+  refine Carlson.TwoVariable.frequently_ofReal_Ioo (a := 1) (ε := 1 / 2) (by norm_num)
+    (fun x h1 _ => ?_)
+  have h := legendreRelation_symmetricElliptic_ofReal (x := x) (by linarith)
+  simpa only [ofReal_add, ofReal_one] using h
 
 /-- DLMF 19.21.1, case `z = 1`: the product of the two lemniscate constants (19.20.2), (19.20.22)
 is `π/4`: `R_F(0, 1, 2) · (1/3) R_D(0, 2, 1) = π/4`. -/

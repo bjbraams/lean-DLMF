@@ -6,6 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Gamma.Basic.Digamma
+public import DLMF.Gamma.Basic.RealDigamma
+public import DLMF.Gamma.Basic.PadicGamma
 public import Mathlib.Analysis.PSeries
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
 public import Mathlib.Analysis.SpecialFunctions.Log.Summable

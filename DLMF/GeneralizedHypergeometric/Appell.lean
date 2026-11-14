@@ -5,8 +5,13 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
+public import DLMF.GeneralizedHypergeometric.Appell.DiagonalReduction
+
 public import DLMF.GeneralizedHypergeometric.Appell.SeriesAndDifferentialEquations
 public import DLMF.GeneralizedHypergeometric.Appell.EulerIntegrals
+public import DLMF.GeneralizedHypergeometric.Appell.ComposedF4
+public import DLMF.GeneralizedHypergeometric.Appell.EulerF4
+public import DLMF.GeneralizedHypergeometric.Appell.BurchnallChaundy
 public import DLMF.GeneralizedHypergeometric.Appell.TriangleDirichlet
 public import DLMF.GeneralizedHypergeometric.Appell.GermTransformations
 public import DLMF.GeneralizedHypergeometric.Appell.HornDifferentialEquations

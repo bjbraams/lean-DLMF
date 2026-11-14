@@ -1,0 +1,46 @@
+{
+  "status": "applied with user approval",
+  "patch": "reports/DLMFStatementCorrections20261113.patch",
+  "patch_sha256": "9671f736d8a56cef387292861a941dcba677f62ae8d2cc431b43b8e84b7546b6",
+  "independent_review": "passed",
+  "apply_check": "applied; reverse apply check passed",
+  "new_import_cycle_check": "no cycle",
+  "items": [
+    {
+      "declaration": "DLMF.Elementary.arcsinh_continued_fraction",
+      "reference": "4.39.E2",
+      "file": "DLMF/Elementary/Hyperbolic/Integrals.lean",
+      "unmodified_source_sha256": "3bbc02a30084f9e27d157ef61c9c63b0297b5ffae5c6d90982b28f5bac14e91c",
+      "corrected_full_module_check": "passed in production: targeted build, full build and direct source check",
+      "corrected_theorem_axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "certificate": "scripts/CheckDLMFArcsinhStatement.lean",
+      "baseline_head": "theoremarcsinh_continued_fraction{z:ℂ}(hz:z∈arcsinhDomain):DLMF.Core.HasContinuedFraction(funn=>ifn=0thenzelse((2*((n+1)/2)-1:ℕ):ℂ)*(2*((n+1)/2):ℂ)*z^2)(funn=>(2*n+1:ℂ))(arcsinhz/Complex.sqrt(1+z^2))",
+      "approved_head": "theoremarcsinh_continued_fraction{z:ℂ}(hz:z∈arcsinhDomain):DLMF.Core.HasContinuedFraction(funn=>ifn=0thenzelse((2*((n+1)/2)-1:ℕ):ℂ)*((2*((n+1)/2):ℕ):ℂ)*z^2)(funn=>(2*n+1:ℂ))(arcsinhz/Complex.sqrt(1+z^2))",
+      "applied_source_sha256": "958d67e359340dbcfaa76611ec5512533283f9851ace9e439b26e98d857d5f13",
+      "certificate_check": "passed with enhanced strict options; standard axioms only"
+    },
+    {
+      "declaration": "DLMF.EllipticIntegrals.symmetricEllipticR_three_eq_integral_sphere",
+      "reference": "19.23.E9",
+      "file": "DLMF/EllipticIntegrals/SymmetricIntegrals.lean",
+      "unmodified_source_sha256": "d7bf089f1bb74ac4a6fe6407827afc6d757dc94cfe38fe6093c9b00563e033b4",
+      "corrected_full_module_check": "passed in production: targeted build, full build and direct source check",
+      "corrected_theorem_axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "certificate": "scripts/CheckDLMFSphericalStatement.lean",
+      "baseline_head": "theoremsymmetricEllipticR_three_eq_integral_sphere(a:ℂ){b:Fin3→ℝ}(hb:∀j,0<bj){z:Fin3→ℂ}(hz:∀j,0<(zj).re)(σ:Equiv.Perm(Fin3)):symmetricEllipticRa(funj=>(bj:ℂ))z=4*Gamma(∑j,(bj:ℂ))/∏j,Gamma(bj:ℂ)*∫φin(0:ℝ)..(π/2),∫θin(0:ℝ)..(π/2),(∑j,zj*((directionCosinesθφ(σj):ℝ):ℂ)^2)^(-a)*((∏j,directionCosinesθφ(σj)^(2*bj-1):ℝ):ℂ)*(Real.sinθ:ℂ)",
+      "approved_head": "theoremsymmetricEllipticR_three_eq_integral_sphere(a:ℂ){b:Fin3→ℝ}(hb:∀j,0<bj){z:Fin3→ℂ}(hz:∀j,0<(zj).re)(σ:Equiv.Perm(Fin3)):symmetricEllipticRa(funj=>(bj:ℂ))z=4*Gamma(∑j,(bj:ℂ))/(∏j,Gamma(bj:ℂ))*∫φin(0:ℝ)..(π/2),∫θin(0:ℝ)..(π/2),(∑j,zj*((directionCosinesθφ(σj):ℝ):ℂ)^2)^(-a)*((∏j,directionCosinesθφ(σj)^(2*bj-1):ℝ):ℂ)*(Real.sinθ:ℂ)",
+      "applied_source_sha256": "c1299c112a442b6df1091978272785d516ed1790dfa5920c01e87b0e0333cea3",
+      "certificate_check": "passed with enhanced strict options; standard axioms only"
+    }
+  ],
+  "approval": "User: Yes, please apply those repairs",
+  "applied_followup_completed_utc": "2026-11-13T15:37:29Z"
+}

@@ -5,6 +5,11 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
+public import DLMF.Elementary.ExponentialTailStability
+
+public import DLMF.Elementary.InverseHyperbolicSeries
+
+public import DLMF.Elementary.ArcsineContinuedFraction
 public import DLMF.Elementary.Basic
 public import DLMF.Elementary.LogExpAnalysis
 public import DLMF.Elementary.LogExpIntegrals

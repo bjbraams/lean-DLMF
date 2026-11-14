@@ -8,6 +8,7 @@ module
 public import Mathlib.Analysis.Calculus.Deriv.Pow
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Deriv
 public import Mathlib.MeasureTheory.Function.JacobianOneDim
+import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 
 /-!
 # Trigonometric changes of variables on a quarter period
@@ -16,12 +17,15 @@ public import Mathlib.MeasureTheory.Function.JacobianOneDim
 
 * `MeasureTheory.integral_Ioo_eq_integral_cos_sq`: the substitution `u = cos² θ` between
   `(0, 1)` and `(0, π/2)`, with the absolute Jacobian `2 sin θ cos θ`.
+* `MeasureTheory.integral_Ioo_eq_integral_sin_sq`: the corresponding substitution
+  `u = sin² θ`, obtained by reflecting the unit interval.
 
 ## Implementation notes
 
 The substitution applies to arbitrary real normed target spaces and retains Mathlib's
 totalized Bochner-integral convention. The open intervals omit both endpoints, so no
-endpoint regularity is needed.
+endpoint regularity is needed. The sine substitution reuses Mathlib’s
+`intervalIntegral.integral_comp_sub_left`.
 -/
 
 @[expose] public noncomputable section
@@ -62,5 +66,20 @@ lemma integral_Ioo_eq_integral_cos_sq {E : Type*} [NormedAddCommGroup E] [Normed
   have hc : 0 < Real.cos θ :=
     Real.cos_pos_of_mem_Ioo ⟨by linarith [hθ.1, Real.pi_pos], hθ.2⟩
   simp [abs_neg, abs_of_pos (by positivity : 0 < 2 * Real.sin θ * Real.cos θ)]
+
+/-- The substitution `u = sin² θ` on a quarter period. -/
+lemma integral_Ioo_eq_integral_sin_sq {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    (G : ℝ → E) :
+    ∫ u in Ioo (0 : ℝ) 1, G u =
+      ∫ θ in Ioo (0 : ℝ) (π / 2), (2 * Real.sin θ * Real.cos θ) • G (Real.sin θ ^ 2) := by
+  have h := intervalIntegral.integral_comp_sub_left (a := (0 : ℝ)) (b := 1) G 1
+  norm_num only [sub_self, sub_zero] at h
+  rw [intervalIntegral.integral_of_le zero_le_one, intervalIntegral.integral_of_le zero_le_one,
+    integral_Ioc_eq_integral_Ioo, integral_Ioc_eq_integral_Ioo] at h
+  rw [← h, integral_Ioo_eq_integral_cos_sq]
+  apply setIntegral_congr_fun measurableSet_Ioo
+  intro θ _
+  dsimp only
+  rw [show 1 - Real.cos θ ^ 2 = Real.sin θ ^ 2 by nlinarith [Real.sin_sq_add_cos_sq θ]]
 
 end MeasureTheory

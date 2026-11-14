@@ -10,6 +10,8 @@ public import DLMF.EllipticIntegrals.Symmetric
 public import DLMF.EllipticIntegrals.SymmetricIntegrals
 public import Carlson.R.IntegralEvaluation
 public import Mathlib.MeasureTheory.Integral.IntegralEqImproper
+import DLMF.EllipticIntegrals.SymmetricRCAddition
+import TauCeti.Analysis.Complex.CauchyIntegralPolydisc
 
 /-!
 # Legendre's integrals: the statements of DLMF §19.2
@@ -47,6 +49,11 @@ integrals as Legendre integrals (§19.2(iii)), and the function `R_C = symmetric
   19.2.22.
 
 ## Implementation notes
+
+The complex `R_C` averaging identity follows from the repeated-node `R_F` average in the
+right half-plane and analytic continuation along nonnegative real translations. Joint
+analyticity under the compact angular integral uses
+`TauCeti.analyticAt_integral_smul`.
 
 Real amplitudes `φ` are used where DLMF's identities are path statements; the principal domain
 `1 - k² ∈ ℂ \ (-∞, 0]` makes the integrand `(1 - k² sin²θ)^{∓1/2}` continuous for real `θ`.
@@ -1169,12 +1176,102 @@ theorem symmetricEllipticRC_eq_integral_segment {x y : ℂ} (h : segment ℝ x y
   norm_num
 
 
-/-- **Admitted.** DLMF 19.2.22: if the segment with endpoints `x` and `y` lies in
+/-- DLMF 19.2.22: if the segment with endpoints `x` and `y` lies in
 `ℂ \ (-∞, 0]`, `R_C(x, y) = (2/π) ∫₀^{π/2} R_C(y, x cos²θ + y sin²θ) dθ`. -/
 @[dlmf 19.2.E22]
 theorem symmetricEllipticRC_eq_integral_RC {x y : ℂ} (h : segment ℝ x y ⊆ slitPlane) :
     symmetricEllipticRC x y = 2 / π * ∫ θ in (0 : ℝ)..(π / 2),
       symmetricEllipticRC y (x * (Real.cos θ : ℂ) ^ 2 + y * (Real.sin θ : ℂ) ^ 2) := by
-  sorry
+  have hx : x ∈ slitPlane := h (left_mem_segment ℝ x y)
+  have hy : y ∈ slitPlane := h (right_mem_segment ℝ x y)
+  -- Nonnegative real translations remain in the slit plane and eventually enter the
+  -- right half-plane.
+  let S : Set ℂ := Complex.ofReal '' Ici (0 : ℝ)
+  let F : ℂ → ℂ := fun ζ => symmetricEllipticRC (x + ζ) (y + ζ)
+  let f : ℂ × ℂ → ℂ := fun q => symmetricEllipticRC (y + q.1)
+    (x * q.2 + y * (1 - q.2) + q.1)
+  let G : ℂ → ℂ := fun ζ => 2 / π * ∫ θ in Ioc (0 : ℝ) (π / 2),
+    f (ζ, (Real.cos θ : ℂ) ^ 2)
+  have hshift {w : ℂ} (hw : w ∈ slitPlane) {r : ℝ} (hr : 0 ≤ r) :
+      w + (r : ℂ) ∈ slitPlane := by
+    simpa only [add_comm] using TauCeti.ofReal_add_mem_slitPlane hw hr
+  have hS : IsPreconnected S := isPreconnected_Ici.image _ continuous_ofReal.continuousOn
+  have hF : AnalyticOnNhd ℂ F S := by
+    rintro ζ ⟨r, hr, rfl⟩
+    exact analyticAt_symmetricEllipticRC_comp (by fun_prop) (by fun_prop)
+      (hshift hx hr) (hshift hy hr)
+  -- Joint analyticity and compactness of the angular parameter permit integration.
+  have hG : AnalyticOnNhd ℂ G S := by
+    rintro ζ ⟨r, hr, rfl⟩
+    let K : Set ℂ := Complex.ofReal '' Icc (0 : ℝ) 1
+    have hK : IsCompact K := isCompact_Icc.image continuous_ofReal
+    have hφ : Continuous (fun θ : ℝ => (Real.cos θ : ℂ) ^ 2) := by fun_prop
+    have hφK (θ : ℝ) : (Real.cos θ : ℂ) ^ 2 ∈ K := by
+      refine ⟨Real.cos θ ^ 2, ⟨sq_nonneg _, ?_⟩, by push_cast; rfl⟩
+      nlinarith [Real.sin_sq_add_cos_sq θ, sq_nonneg (Real.sin θ)]
+    have hf : ∀ v ∈ K, AnalyticAt ℂ f ((r : ℂ), v) := by
+      rintro v ⟨u, hu, rfl⟩
+      refine analyticAt_symmetricEllipticRC_comp
+        (analyticAt_const.add analyticAt_fst)
+        (((analyticAt_const.mul analyticAt_snd).add
+          (analyticAt_const.mul (analyticAt_const.sub analyticAt_snd))).add analyticAt_fst)
+        (hshift hy hr) ?_
+      apply hshift (h ?_) hr
+      exact ⟨u, 1 - u, hu.1, sub_nonneg.mpr hu.2, by ring, by
+        simp only [Complex.real_smul]
+        push_cast
+        ring⟩
+    have hi : Integrable (fun _ : ℝ => (1 : ℂ)) (volume.restrict (Ioc (0 : ℝ) (π / 2))) :=
+      integrable_const _
+    have ha := TauCeti.analyticAt_integral_smul hK hφ hφK hf hi
+    exact analyticAt_const.mul (by simpa only [one_smul] using ha)
+  -- The right-half-plane identity is the repeated-node specialization of the RF average.
+  have hbase {ζ : ℂ} (hζx : 0 < (x + ζ).re) (hζy : 0 < (y + ζ).re) : F ζ = G ζ := by
+    dsimp only [F, G]
+    rw [symmetricEllipticRC_eq_symmetricEllipticRF _
+      (not_isNegReal_of_mem_slitPlane (Or.inl hζy)), symmetricEllipticRF_comm_left,
+      symmetricEllipticRF_eq_integral_symmetricEllipticRC (Or.inl (Or.inl hζy)) hζx hζy,
+      intervalIntegral.integral_of_le (by positivity : (0 : ℝ) ≤ π/2)]
+    congr 1
+    refine setIntegral_congr_fun measurableSet_Ioc fun θ _ => ?_
+    dsimp only [f]
+    congr 1
+    have hs : (Real.cos θ : ℂ) ^ 2 + (Real.sin θ : ℂ) ^ 2 = 1 := by
+      exact_mod_cast Real.cos_sq_add_sin_sq θ
+    linear_combination (y + ζ) * hs
+  let T : ℝ := max 0 (max (-x.re) (-y.re)) + 1
+  have hT : 0 ≤ T := by dsimp [T]; positivity
+  have hTx : 0 < (x + (T : ℂ)).re := by
+    simp only [add_re, ofReal_re]
+    have ht := le_max_left (-x.re) (-y.re)
+    have ht' := le_max_right 0 (max (-x.re) (-y.re))
+    dsimp only [T]
+    linarith
+  have hTy : 0 < (y + (T : ℂ)).re := by
+    simp only [add_re, ofReal_re]
+    have ht := le_max_right (-x.re) (-y.re)
+    have ht' := le_max_right 0 (max (-x.re) (-y.re))
+    dsimp only [T]
+    linarith
+  have hEq : F =ᶠ[𝓝 (T : ℂ)] G := by
+    have hxN : ∀ᶠ ζ in 𝓝 (T : ℂ), 0 < (x + ζ).re :=
+      (isOpen_lt continuous_const (by fun_prop)).mem_nhds hTx
+    have hyN : ∀ᶠ ζ in 𝓝 (T : ℂ), 0 < (y + ζ).re :=
+      (isOpen_lt continuous_const (by fun_prop)).mem_nhds hTy
+    filter_upwards [hxN, hyN] with ζ hζx hζy
+    exact hbase hζx hζy
+  have h0 := hF.eqOn_of_preconnected_of_eventuallyEq hG hS ⟨T, hT, rfl⟩ hEq
+    (show (0 : ℂ) ∈ S from ⟨0, le_rfl, by simp⟩)
+  dsimp only [F, G] at h0
+  simp only [add_zero] at h0
+  rw [h0, intervalIntegral.integral_of_le (by positivity : (0 : ℝ) ≤ π/2)]
+  congr 1
+  refine setIntegral_congr_fun measurableSet_Ioc fun θ _ => ?_
+  dsimp only [f]
+  simp only [add_zero]
+  congr 1
+  have hs : (Real.cos θ : ℂ) ^ 2 + (Real.sin θ : ℂ) ^ 2 = 1 := by
+    exact_mod_cast Real.cos_sq_add_sin_sq θ
+  linear_combination -y * hs
 
 end DLMF.EllipticIntegrals

@@ -1,5 +1,11 @@
 # DLMF Chapter 21 acquisition: Multidimensional Theta Functions
 
+**Proof status (2026-11-13).** The [parallel proof round](
+REVIEW.md#parallel-dlmf-proof-round-2026-11-13) removes 1 original admissions from
+`DLMF/RiemannTheta/`, leaving 6 direct source admissions in that area.
+Per-entry statuses and source links below follow the compiled axiom audit; earlier
+dated counts describe their original batches.
+
 > Source paths and current layout notes were refreshed on 2026-10-30; generated per-entry
 > statuses follow the compiled ledger refresh. Dated acquisition and proof counts
 > describe their original batches.
@@ -113,14 +119,14 @@ the addition formula 21.6.E8 and the four-product formulas 21.6.E6 and 21.6.E7.
 
 ## [§21.3 Symmetry Properties and Quasi-Periodicity](https://dlmf.nist.gov/21.3)
 
-- [21.3.E1](https://dlmf.nist.gov/21.3.E1): [`DLMF.RiemannTheta.riemannTheta_neg`](DLMF/RiemannTheta/Symmetry.lean#L74) (proved); Mathlib: [`jacobiTheta₂_neg_left`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/NumberTheory/ModularForms/JacobiTheta/TwoVariable.html#jacobiTheta₂_neg_left).
-- [21.3.E2](https://dlmf.nist.gov/21.3.E2): [`DLMF.RiemannTheta.riemannTheta_add_int`](DLMF/RiemannTheta/Symmetry.lean#L83) (proved); Mathlib: [`jacobiTheta₂_add_left`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/NumberTheory/ModularForms/JacobiTheta/TwoVariable.html#jacobiTheta₂_add_left).
-- [21.3.E3](https://dlmf.nist.gov/21.3.E3): [`DLMF.RiemannTheta.riemannTheta_add_lattice`](DLMF/RiemannTheta/Symmetry.lean#L94) (proved); Mathlib: [`jacobiTheta₂_add_left'`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/NumberTheory/ModularForms/JacobiTheta/TwoVariable.html#jacobiTheta₂_add_left').
-- [21.3.E4](https://dlmf.nist.gov/21.3.E4): [`DLMF.RiemannTheta.riemannThetaChar_add_int`](DLMF/RiemannTheta/Symmetry.lean#L142) (proved).
-- [21.3.E5](https://dlmf.nist.gov/21.3.E5): [`DLMF.RiemannTheta.riemannThetaChar_add_lattice`](DLMF/RiemannTheta/Symmetry.lean#L169) (proved).
-- [21.3.E6](https://dlmf.nist.gov/21.3.E6): [`DLMF.RiemannTheta.riemannThetaChar_neg_half`](DLMF/RiemannTheta/Symmetry.lean#L209) (proved). Stronger than DLMF: all integer a, b with α = a/2, β = b/2.
-- [21.3.i](https://dlmf.nist.gov/21.3#i): [`DLMF.RiemannTheta.riemannThetaPeriodLattice`](DLMF/RiemannTheta/Symmetry.lean#L123) (definition). The period lattice of the Riemann theta function.
-- [21.3.i](https://dlmf.nist.gov/21.3#i): [`DLMF.RiemannTheta.eq_const_mul_riemannTheta_of_quasiPeriodic`](DLMF/RiemannTheta/Symmetry.lean#L129) (admitted). Quasi-periodicity determines θ up to a constant factor.
+- [21.3.E1](https://dlmf.nist.gov/21.3.E1): [`DLMF.RiemannTheta.riemannTheta_neg`](DLMF/RiemannTheta/Symmetry.lean#L75) (proved); Mathlib: [`jacobiTheta₂_neg_left`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/NumberTheory/ModularForms/JacobiTheta/TwoVariable.html#jacobiTheta₂_neg_left).
+- [21.3.E2](https://dlmf.nist.gov/21.3.E2): [`DLMF.RiemannTheta.riemannTheta_add_int`](DLMF/RiemannTheta/Symmetry.lean#L84) (proved); Mathlib: [`jacobiTheta₂_add_left`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/NumberTheory/ModularForms/JacobiTheta/TwoVariable.html#jacobiTheta₂_add_left).
+- [21.3.E3](https://dlmf.nist.gov/21.3.E3): [`DLMF.RiemannTheta.riemannTheta_add_lattice`](DLMF/RiemannTheta/Symmetry.lean#L95) (proved); Mathlib: [`jacobiTheta₂_add_left'`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/NumberTheory/ModularForms/JacobiTheta/TwoVariable.html#jacobiTheta₂_add_left').
+- [21.3.E4](https://dlmf.nist.gov/21.3.E4): [`DLMF.RiemannTheta.riemannThetaChar_add_int`](DLMF/RiemannTheta/Symmetry.lean#L130) (proved).
+- [21.3.E5](https://dlmf.nist.gov/21.3.E5): [`DLMF.RiemannTheta.riemannThetaChar_add_lattice`](DLMF/RiemannTheta/Symmetry.lean#L157) (proved).
+- [21.3.E6](https://dlmf.nist.gov/21.3.E6): [`DLMF.RiemannTheta.riemannThetaChar_neg_half`](DLMF/RiemannTheta/Symmetry.lean#L197) (proved). Stronger than DLMF: all integer a, b with α = a/2, β = b/2.
+- [21.3.i](https://dlmf.nist.gov/21.3#i): [`DLMF.RiemannTheta.riemannThetaPeriodLattice`](DLMF/RiemannTheta/Symmetry.lean#L124) (definition). The period lattice of the Riemann theta function.
+- [21.3.i](https://dlmf.nist.gov/21.3#i): [`DLMF.RiemannTheta.eq_const_mul_riemannTheta_of_quasiPeriodic`](DLMF/RiemannTheta/Uniqueness.lean#L34) (proved). Quasi-periodicity determines θ up to a constant factor.
 
 ## [§21.4 Graphics](https://dlmf.nist.gov/21.4)
 
@@ -172,7 +178,7 @@ the addition formula 21.6.E8 and the four-product formulas 21.6.E6 and 21.6.E7.
 - [21.2.ii](https://dlmf.nist.gov/21.2.ii): [`DLMF.RiemannTheta.halfPeriodCharacteristics`](DLMF/RiemannTheta/Basic/Definitions.lean#L110) (definition); [`DLMF.RiemannTheta.ncard_halfPeriodCharacteristics`](DLMF/RiemannTheta/Basic/Characteristics.lean#L91) (proved); [`DLMF.RiemannTheta.summable_norm_riemannThetaCharTerm`](DLMF/RiemannTheta/Basic/Characteristics.lean#L83) (proved).
 - [21.3.i.p1](https://dlmf.nist.gov/21.3#i.p1): the period lattice and the quasi-periodicity that determines θ up to a constant. `riemannThetaPeriodLattice` (definition), `eq_const_mul_riemannTheta_of_quasiPeriodic` (admitted).
 - [21.3.ii.p1](https://dlmf.nist.gov/21.3#ii.p1): the convention α, β ∈ [0,1). Not imposed; see the conventions above.
-- [21.3.i](https://dlmf.nist.gov/21.3.i): [`DLMF.RiemannTheta.eq_const_mul_riemannTheta_of_quasiPeriodic`](DLMF/RiemannTheta/Symmetry.lean#L129) (admitted); [`DLMF.RiemannTheta.riemannThetaPeriodLattice`](DLMF/RiemannTheta/Symmetry.lean#L123) (definition).
+- [21.3.i](https://dlmf.nist.gov/21.3.i): [`DLMF.RiemannTheta.eq_const_mul_riemannTheta_of_quasiPeriodic`](DLMF/RiemannTheta/Uniqueness.lean#L34) (proved); [`DLMF.RiemannTheta.riemannThetaPeriodLattice`](DLMF/RiemannTheta/Symmetry.lean#L124) (definition).
 - [21.5.i.p1](https://dlmf.nist.gov/21.5#i.p1), [21.5.i.p2](https://dlmf.nist.gov/21.5#i.p2): the modular action preserves the Siegel space, and the square-root branch. `modular_mem_siegel` and `exists_continuous_sqrt_det` (both admitted).
 - [21.5.ii.p1](https://dlmf.nist.gov/21.5#ii.p1), [21.5.ii.p2](https://dlmf.nist.gov/21.5#ii.p2): characteristics under modular transformations, κ independent of z and Ω. Covered by `riemannThetaChar_modular`.
 - [21.5.i](https://dlmf.nist.gov/21.5.i): [`DLMF.RiemannTheta.exists_continuous_sqrt_det`](DLMF/RiemannTheta/Modular.lean#L323) (proved); [`DLMF.RiemannTheta.modular_mem_siegel`](DLMF/RiemannTheta/Modular.lean#L193) (proved).

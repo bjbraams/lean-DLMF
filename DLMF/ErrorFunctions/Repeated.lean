@@ -30,7 +30,7 @@ expansion.
 * `iteratedErfc_hasSum`: the power series (DLMF 7.18.6).
 * `iteratedErfc_recurrence`: the three-term recurrence (DLMF 7.18.7).
 * `iteratedErfc_hermite`: the relation to Hermite polynomials (DLMF 7.18.8).
-* `iteratedErfc_kummerM`, `iteratedErfc_kummerU`, `iteratedErfc_kummerUOnLog`,
+* `iteratedErfc_kummerM`, `iteratedErfc_kummerU`, `iteratedErfc_kummerUConnectionOnLog`,
   `iteratedErfc_parabolicCylinderU`, `iteratedErfc_probability`: confluent hypergeometric, parabolic
   cylinder and probability-function representations (DLMF 7.18.9–7.18.12).
 * `iteratedErfc_continuedFraction`: the continued fraction (DLMF 7.18.13).
@@ -713,10 +713,10 @@ theorem iteratedErfc_kummerU (n : ℕ) {z : ℂ} (hz : 0 < z.re) :
     _ = _ := by rw [hscale,he]; ring
 
 /-- Identity under the stated parameter and domain assumptions: `iteratedErfc n z=exp (-z^2)/((2 :
-ℂ)^n*Real.sqrt π)*kummerUOnLog ((n : ℂ)/2+1/2) (1/2) (2*log z)`. -/
+ℂ)^n*Real.sqrt π)*kummerUConnectionOnLog ((n : ℂ)/2+1/2) (1/2) (2*log z)`. -/
 @[dlmf 7.18.E10]
-theorem iteratedErfc_kummerUOnLog (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
-    iteratedErfc n z=exp (-z^2)/((2 : ℂ)^n*Real.sqrt π)*kummerUOnLog ((n : ℂ)/2+1/2) (1/2)
+theorem iteratedErfc_kummerUConnectionOnLog (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
+    iteratedErfc n z=exp (-z^2)/((2 : ℂ)^n*Real.sqrt π)*kummerUConnectionOnLog ((n : ℂ)/2+1/2) (1/2)
         (2*log z) := by
   have hp0 : (Real.sqrt π:ℂ)≠0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hg : Gamma (-1/2:ℂ)= -2*(Real.sqrt π:ℂ) := by
@@ -726,7 +726,7 @@ theorem iteratedErfc_kummerUOnLog (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
   have he : exp (2*log z)=z^2 := by
                                    simpa only [Nat.cast_ofNat, Complex.exp_log hz] using
                                      Complex.exp_nat_mul (log z) 2
-  rw [iteratedErfc_kummerM,kummerUOnLog]
+  rw [iteratedErfc_kummerM,kummerUConnectionOnLog]
   norm_num only [show (1:ℂ)-1/2=1/2 by ring,show (1/2:ℂ)-1= -1/2 by ring,
     show (2:ℂ)-1/2=3/2 by ring]
   rw [show (n:ℂ)/2+1/2-1/2+1=n/2+1 by ring,
@@ -1098,5 +1098,9 @@ theorem iteratedErfc_asymptotic (n : ℕ) {δ : ℝ} (hδ : 0 < δ) :
       (by rwa [abs_neg]) hcos
   have h2 := IteratedErfcLaplace.iteratedErfc_rotatedSector n (θ := π / 4 - d / 2) hβ hcos
   exact (h1.sup h2).mono hcov
+
+/-- Compatibility spelling for the noninteger logarithmic connection expression. -/
+@[deprecated iteratedErfc_kummerUConnectionOnLog (since := "2026-11-14")]
+alias iteratedErfc_kummerUOnLog := iteratedErfc_kummerUConnectionOnLog
 
 end DLMF.Confluent

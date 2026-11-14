@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Weierstrass.EllipticFunctionsAndInvariants
+public import DLMF.Weierstrass.Basic.ZetaProperties
 public import DLMF.Weierstrass.DifferentialEquations
 public import DLMF.Weierstrass.Series.LogarithmicSigma
 public import DLMF.Weierstrass.Relations.ThetaIdentities
@@ -221,16 +222,6 @@ private lemma two_mul_ω₁_mul_mem_lattice_iff (t : ℂ) :
   · rintro ⟨m, n, h⟩; exact ⟨m, n, by field_simp; linear_combination -h / 2⟩
   · rintro ⟨m, n, h⟩; exact ⟨m, n, by rw [h]; field_simp⟩
 
-/-- Meromorphy of `ζ`. -/
-private lemma meromorphicAt_weierstrassZeta' (L : PeriodPair) (a : ℂ) :
-    MeromorphicAt (DLMF.Weierstrass.weierstrassZeta L) a := by
-  by_cases ha : a ∈ L.lattice
-  · have h := (analyticAt_weierstrassZeta_sub L ha).meromorphicAt.add
-      ((MeromorphicAt.id a).sub (MeromorphicAt.const a a)).inv
-    convert h using 1; funext z; simp
-  · exact (analyticOnNhd_weierstrassZeta L a ha).meromorphicAt
-
-
 open DLMF.JacobiElliptic in
 /-- Off the lattice, `2ω₁ζ(2ω₁t) - 4ω₁η₁t` is the cotangent series `∑ₙ π cot(π(t - nτ))`
 (regularized), by the Liouville argument. -/
@@ -249,7 +240,7 @@ private lemma weierstrassZeta_eq_eisensteinCotSeries {t : ℂ}
     (fun t => by
       refine ((MeromorphicAt.const _ _).mul ?_).sub (by fun_prop : AnalyticAt ℂ
         (fun t : ℂ => 4 * H.ω₁ * H.eta 1 * t) t).meromorphicAt
-      exact (meromorphicAt_weierstrassZeta' H.periodPair _).comp_analyticAt (hlin t))
+      exact (meromorphic_weierstrassZeta H.periodPair _).comp_analyticAt (hlin t))
     (fun t ht => by
       have ht' : 2 * H.ω₁ * t ∉ H.lattice := fun h => ht ((H.two_mul_ω₁_mul_mem_lattice_iff t).mp h)
       have := H.weierstrassZeta_add_two_mul_halfPeriod ht' (j := 1) (by simp)

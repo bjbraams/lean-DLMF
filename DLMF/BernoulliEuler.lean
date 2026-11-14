@@ -5,19 +5,26 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
+public import DLMF.BernoulliEuler.TangentCoefficients
+
+public import DLMF.BernoulliEuler.Generalizations.ComplexOrder
 public import DLMF.BernoulliEuler.Basic
 public import DLMF.BernoulliEuler.GeneratingFunctions
 public import DLMF.BernoulliEuler.Properties
 public import DLMF.BernoulliEuler.Recurrences
+public import DLMF.BernoulliEuler.CentralFactorial
 public import DLMF.BernoulliEuler.Explicit
 public import DLMF.BernoulliEuler.IntegralKernels
 public import DLMF.BernoulliEuler.Integrals
 public import DLMF.BernoulliEuler.Series
 public import DLMF.BernoulliEuler.Inequalities
+public import DLMF.BernoulliEuler.ElementaryBounds
 public import DLMF.BernoulliEuler.Arithmetic
 public import DLMF.BernoulliEuler.MathlibCoverage
 public import DLMF.BernoulliEuler.Asymptotics
 public import DLMF.BernoulliEuler.Zeros
+public import DLMF.BernoulliEuler.EulerHankel
+public import DLMF.BernoulliEuler.BernoulliHankel
 public import DLMF.BernoulliEuler.IntegralsSums
 public import DLMF.BernoulliEuler.RelatedNumbers
 public import DLMF.BernoulliEuler.Generalizations

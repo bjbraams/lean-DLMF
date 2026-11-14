@@ -16,7 +16,9 @@ public import DLMF.NumberTheory.Characters
 public import DLMF.NumberTheory.Asymptotics
 public import DLMF.NumberTheory.Primes
 public import DLMF.NumberTheory.Additive
+public import DLMF.NumberTheory.BinaryQuadraticCounts
 public import DLMF.NumberTheory.Partitions
+public import DLMF.NumberTheory.PartitionDissections
 public import DLMF.NumberTheory.RamanujanCongruences
 public import DLMF.NumberTheory.MathlibCoverage
 

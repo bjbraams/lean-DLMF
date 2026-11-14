@@ -4,6 +4,84 @@ The project formalizes material from Andrews, Askey and Roy, *Special Functions*
 (1999), and the NIST Digital Library of Mathematical Functions, using Mathlib.
 Existing module copyright and authorship notices remain authoritative.
 
+## Parallel proof round (2026-11-13)
+
+The proofs use Mathlib, the pinned TauCeti library and the path dependency lean-codes.
+Module documentation credits the specific upstream APIs; no dependency is mirrored here.
+
+The distribution jump support uses Mathlib's compact-support integration by parts and
+regular distributions, and TauCeti's `TestFunction.lineDerivOp_one_apply_eq_deriv`.
+The principal-value Fourier support uses TauCeti's two-sided exponential integrals and
+exponential-product identity, Mathlib's half-line complex exponential integrals and
+continuous divided slopes, and the project's Fourier pairing and cutoff APIs.
+Poisson summation uses Mathlib's periodization and Fourier coefficient estimates after
+proving integrability of the first derivative from the original second-derivative
+hypothesis. The bounded-variation Poisson formula uses new summable cell-variation bounds,
+normal periodization and endpoint Fourier-kernel convergence. Its even-extension step uses
+`MeasureTheory.integral_eq_integral_Ioi_add_neg` from the project and TauCeti's
+`MeasureTheory.integrable_comp_abs`. Faà di Bruno uses Mathlib Taylor jets and polynomial composition coefficients.
+These are new proofs using upstream APIs.
+
+The Jordan and winding proofs use TauCeti's rectifiable Jordan-curve and absolutely
+continuous winding-number theorems. The weighted argument principle uses TauCeti's
+null-homologous residue theorem and logarithmic-derivative principal parts. The continuous
+phase proof combines Mathlib's exponential covering and unique lifting with TauCeti's
+absolutely continuous endpoint-ratio identity. The Fourier-kernel, L¹ integrated-series
+and Lebesgue-constant proofs use the project's proved Dirichlet–Jordan theorem and
+Mathlib's absolutely continuous integration by parts, periodicity and compactness APIs.
+The finite cosine kernel is extracted from the project's existing proof unchanged.
+
+Riemann-theta uniqueness uses Mathlib's unit-torus integration, Haar invariance, Fourier
+completeness and analytic identity theorem. TauCeti supplies the unit-torus descent and
+compact-parameter analytic integration APIs. The new generic periodic-mean results include
+the empty coordinate type and general normed targets.
+
+The symmetric Legendre and RC addition proofs use the project's proved elliptic relation
+and lean-codes Carlson functions, including `Carlson.analyticAt_carlsonR_comp`,
+`Carlson.TwoVariable.arcsin_eq_mul_carlsonRC`,
+`Carlson.TwoVariable.arccos_eq_mul_carlsonRC`, and
+`Carlson.TwoVariable.carlsonRC_mul_of_pos`, with TauCeti's slit-plane complex-power APIs.
+The elliptic Mellin calculations use the directly imported lean-codes Dirichlet and
+Carlson beta integrals. The spherical formulas use lean-codes Dirichlet aggregation and
+Mathlib change of variables. The E nome series uses the project's theta bridges and new
+foundational theta derivatives. The nome asymptotics use proved theta series, sparse-series
+remainder bounds and the project's modulus identities. The full complex logarithmic K/E expansions reuse the project's
+resonant hypergeometric connection formula, digamma values and analytic continuation; the
+RG expansion follows through the proved E representation and homogeneity. The third-kind
+logarithmic asymptotics use the project's regularized RJ endpoint estimate, including its
+principal-value branch.
+No Carlson or Dirichlet proof body
+is copied into DLMF.
+
+The Appell proofs use normal convergence, coefficient rearrangement and analytic
+continuation. The unit-argument 3F2 analyticity proof uses TauCeti's several-variable
+Osgood theorem. The Thomae beta step directly imports lean-codes
+`Carlson.TwoVariable.betaIntegral_mul_threeFTwo`. Whipple then uses the project's proved
+Dixon formula and Thomae transformation, Mathlib's Gamma duplication, reciprocal-Gamma
+analyticity and countable-complement connectedness. Watson follows from Thomae and
+Whipple with the same Gamma and identity-principle APIs. The continued-fraction proof uses
+the project's proved Gauss continued fraction and hypergeometric representations. The
+bilateral 4ψ4 proof uses the project's proved 6ψ6 theorem and new parameter continuity,
+including terminating upper parameters. The even bilateral 2ψ2 sum uses the project's
+first 2ψ2 transformation and Ramanujan 1ψ1 sum, even/odd integer reindexing, and analytic
+continuation of denominator-cleared sums. These proofs copy no external proof bodies.
+
+The Euler congruence proof uses Mathlib's Euler polynomials, integer congruences and Euler's
+totient theorem. Polynomial discrete integration and extrapolation use Mathlib's Bernoulli
+polynomials and finite-difference APIs. The Hankel determinant proofs use Mathlib linear
+algebra with new mixed-moment determinant identities and the project's orthogonal
+polynomials. The Hilbert determinant calculation imports lean-codes'
+`Polynomial.integral_shiftedLegendre_sq` and shifted-Jacobi orthogonality; the Euler
+calculation uses the project's secant moments and Meixner–Pollaczek orthogonality, with
+TauCeti's `MeasureTheory.integrable_comp_abs` for the whole-line extension.
+The Bernoulli congruences use Mathlib's von Staudt–Clausen theorem, p-adic norms, power
+sums, factorial multiplicity bounds and finite-field identities, with new denominator and
+regularization estimates. The Bernoulli–Stirling congruences modulo prime squares and
+cubes use Mathlib's formal-power-series differentiation, Stirling generating functions,
+Newton identities and Faulhaber estimates. No external proof bodies are copied or adapted. They retain the
+original prime-power, zero-index and negative-integer cases.
+
+
 ## Proofs with updated dependencies (2026-11-12–13)
 
 The approved parallelogram-area proof uses Mathlib's norm determinant and Gram matrix
@@ -2252,3 +2330,57 @@ in Olver, Chapter 3, §§7–8, pp.81–87. The general binomial and ramified-po
 modules preserve the possibility of nonconvergent asymptotic series. Formal
 Lagrange–Bürmann extraction uses Mathlib's power-series substitution and differentiation
 APIs. No external Lean proof body was copied.
+
+The book-acquisition integration reuses TauCeti’s
+`Complex.mul_norm_add_le_norm_add_ofReal` for the slit-plane translation
+estimate; the local adapter retains its original hypotheses.
+
+The AAR acquisition reuses pinned TauCeti's `SU2.symPower` and its irreducibility/
+classification theorems, the harmonic-polynomial decomposition and sphere APIs,
+and Mathlib's `MulChar`, Gauss/Jacobi sums, partitions, Laurent polynomials and
+formal power series. The proved least-common-multiple growth adapter uses the
+existing `Chebyshev.psi_isEquivalent` prime-number-theorem adapter and Mathlib's
+`psi_eq_log_lcmUpto`. New source-target admissions do not supply upstream proofs.
+
+The book-acquisition noncentral chi-square bridge directly imports
+`TauCeti.Probability.cdf_noncentralChiSquaredMeasure_eq`;
+`DLMF.Statistical.Real.cdf_noncentralChiSquaredMeasure_eq_marcumP` reuses
+that theorem without copying its proof. Normal, gamma and chi-square
+distribution coverage is recorded directly against the upstream APIs.
+
+The Jacobi-sum magnitude proof in
+`DLMFMathlib/NumberTheory/JacobiSum/Norm.lean` adopts pinned TauCeti's
+`TauCeti.norm_gaussSum` together with Mathlib's
+`jacobiSum_eq_gaussSum_mul_gaussSum_div_gaussSum`; no upstream proof body is copied.
+The AAR Dirichlet-boundary audit reuses TauCeti's proved
+`DirichletCharacter.tendsto_sum_Icc_div_LFunction_one`, preserving its ordered
+cutoff limit. Chebyshev minimax and equality coverage reuse Mathlib's
+`Polynomial.Chebyshev.leadingCoeff_le_of_forall_abs_le_one` and
+`coeff_eq_iff_of_forall_abs_le_one` directly. The finite Vandermonde recurrence,
+positive diagonal kernel, squared-norm product, q-polynomial initial values and
+uniform Fejér approximation are local proved adapters to their canonical APIs.
+
+The elliptic-book additions surveyed in `BookAcquisition-Elliptic.md` draw on the nine
+elliptic-function references in `References/`, particularly Lang Chapter 1 §5 and
+Chapter 2, Chandrasekharan Chapter IV §3, Lawden §§8.9 and 8.11, and Koecher–Krieg
+Chapter I §§5–7. The lattice-specific multiplier, divisor and prescribed-residue proofs
+are local; the multiplier-ring definition itself is TauCeti's `AddSubgroup.multiplierRing`,
+used directly.
+The lattice-curve maps, division-point count and scalar-automorphism classification
+reuse pinned TauCeti's `PeriodPair.weierstrassPointEquiv`, explicit
+`torsionEquivCoordinates`, lattice classification and invariant homogeneity formulas.
+The zeta bridge uses uniqueness of Mathlib/TauCeti lattice sums and reuses TauCeti's
+additive `quasiPeriod` API. No upstream proof body is copied.
+
+The theta-book additions in `BookAcquisition-Theta.md` draw on Igusa's *Theta Functions*,
+Mumford's *Tata Lectures on Theta I–II*, and Beals–Wong's *Explorations in Complex
+Functions* and *More Explorations in Complex Functions*. The PDFs are read from the
+sibling CKMA reference collection. The theta section spaces and higher-order functions
+follow Mumford I, Chapter II, Definition 1.2 and Proposition 1.3; the characteristic
+counts follow Mumford I, Chapter II, §3 and Igusa, Chapter V, §6.
+Joint entire analyticity directly reuses pinned TauCeti's
+`ContinuousOn.analyticOnNhd_of_differentiableAt_update` from
+`TauCeti.Analysis.Complex.CauchyIntegralPolydisc`, combined with the project's existing
+convergence and coordinate derivative API. The addition identities use the project's
+proved characteristic addition formula. Genus-one meromorphy uses Mathlib's local
+meromorphic quotient API. No upstream proof body is copied.

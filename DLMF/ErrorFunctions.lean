@@ -1,5 +1,7 @@
 module -- shake: keep-all
 
+public import DLMF.ErrorFunctions.CornuCurve
+public import DLMF.ErrorFunctions.OrderMinimality
 public import DLMF.ErrorFunctions.AnalyticProperties
 public import DLMF.ErrorFunctions.Relations
 public import DLMF.ErrorFunctions.Series
@@ -12,6 +14,7 @@ public import DLMF.ErrorFunctions.ZeroTools
 public import DLMF.ErrorFunctions.Zeros
 public import DLMF.ErrorFunctions.Integrals
 public import DLMF.ErrorFunctions.BoundsAsymptotics
+public import DLMF.ErrorFunctions.AsymptoticStrictBounds
 public import DLMF.ErrorFunctions.ZeroClassification
 
 /-!

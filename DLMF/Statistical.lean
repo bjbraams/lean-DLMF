@@ -5,6 +5,15 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
+public import DLMF.Statistical.MarcumProbability
+
+public import DLMF.Statistical.MarcumVariableOrder
+
+public import DLMF.Statistical.MarcumFixedOrder
+
+public import DLMF.Statistical.MarcumContours
+
+public import DLMF.Statistical.VonMises
 public import DLMF.Statistical.ContinuedFraction
 public import DLMF.Statistical.IncompleteBeta
 public import DLMF.Statistical.IncompleteGamma

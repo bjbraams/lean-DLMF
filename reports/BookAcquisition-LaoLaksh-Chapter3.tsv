@@ -1,0 +1,48 @@
+synopsis_id	declaration	source_file	source_line	status
+RL-3.01	DLMF.Hypergeometric.TransformationGroups.cubeGenerator	DLMF/GeneralizedHypergeometric/FiniteTransformationGroups.lean	32	definition, no admission
+RL-3.01	DLMF.Hypergeometric.TransformationGroups.cubeRotations	DLMF/GeneralizedHypergeometric/FiniteTransformationGroups.lean	37	definition, no admission
+RL-3.01	DLMF.Hypergeometric.TransformationGroups.card_cubeRotations	DLMF/GeneralizedHypergeometric/FiniteTransformationGroups.lean	57	direct admission
+RL-3.01	DLMF.Hypergeometric.TransformationGroups.card_cubeSymmetries	DLMF/GeneralizedHypergeometric/FiniteTransformationGroups.lean	67	direct admission
+RL-3.01	DLMF.Hypergeometric.TransformationGroups.nonempty_cubeRotations_mulEquiv_perm_four	DLMF/GeneralizedHypergeometric/FiniteTransformationGroups.lean	62	direct admission
+RL-3.01	DLMF.Hypergeometric.TransformationGroups.cubeOppositeFace	DLMF/GeneralizedHypergeometric/CubeDiagonalAction.lean	27	definition, no admission
+RL-3.01	DLMF.Hypergeometric.TransformationGroups.cubeBodyDiagonal	DLMF/GeneralizedHypergeometric/CubeDiagonalAction.lean	35	definition, no admission
+RL-3.01	DLMF.Hypergeometric.TransformationGroups.exists_cubeBodyDiagonal_mulEquiv	DLMF/GeneralizedHypergeometric/CubeDiagonalAction.lean	53	direct admission
+RL-3.02	DLMF.Hypergeometric.TransformationGroups.kummerCubeParameters	DLMF/GeneralizedHypergeometric/KummerCubeCoordinates.lean	24	definition, no admission
+RL-3.02	DLMF.Hypergeometric.TransformationGroups.kummerCubeParameters_def	DLMF/GeneralizedHypergeometric/KummerCubeCoordinates.lean	29	proved, no admission
+RL-3.02	DLMF.Hypergeometric.TransformationGroups.kummerCubeParameters_mirror	DLMF/GeneralizedHypergeometric/KummerCubeCoordinates.lean	35	proved, no admission
+RL-3.02	DLMF.Hypergeometric.TransformationGroups.kummerCubeParameters_argument_mem	DLMF/GeneralizedHypergeometric/KummerCubeCoordinates.lean	45	direct admission
+RL-3.02	DLMF.Hypergeometric.TransformationGroups.kummerCubeParameters_exponent_differences	DLMF/GeneralizedHypergeometric/KummerCubeAction.lean	28	proved, no admission
+RL-3.02	DLMF.Hypergeometric.TransformationGroups.kummerCubeParameters_mem_kummer_orbit	DLMF/GeneralizedHypergeometric/KummerCubeAction.lean	48	direct admission
+RL-3.02	DLMF.Hypergeometric.KummerPermutations.parameters	DLMF/Hypergeometric/KummerPermutations.lean	65	definition, no admission
+RL-3.02	DLMF.Hypergeometric.KummerPermutations.coordinate	DLMF/Hypergeometric/KummerPermutations.lean	41	definition, no admission
+RL-3.03	DLMF.Hypergeometric.KummerSeedForms.parameters	DLMF/Hypergeometric/KummerSeedForms.lean	30	definition, no admission
+RL-3.03	DLMF.Hypergeometric.KummerSeedForms.argument	DLMF/Hypergeometric/KummerSeedForms.lean	37	definition, no admission
+RL-3.03	DLMF.Hypergeometric.KummerSeedForms.prefactor	DLMF/Hypergeometric/KummerSeedForms.lean	42	definition, no admission
+RL-3.03	DLMF.Hypergeometric.KummerSeedForms.fourForms	DLMF/Hypergeometric/KummerSeedForms.lean	47	definition, no admission
+RL-3.03	DLMF.Hypergeometric.KummerSeedForms.expression	DLMF/Hypergeometric/KummerSeedForms.lean	55	definition, no admission
+RL-3.03	DLMF.Hypergeometric.KummerSeedForms.domain	DLMF/Hypergeometric/KummerSeedForms.lean	62	definition, no admission
+RL-3.03	DLMF.Hypergeometric.KummerSeedForms.fourForms_eq_first	DLMF/Hypergeometric/KummerSeedForms.lean	104	proved, no admission
+RL-3.03	DLMF.Hypergeometric.KummerSeedForms.expression_eq_first	DLMF/Hypergeometric/KummerSeedForms.lean	118	proved, no admission
+RL-3.03	DLMF.Hypergeometric.KummerSeedForms.analyticOnNhd_and_gaussOperator_expression	DLMF/Hypergeometric/KummerSeedForms.lean	133	direct admission
+RL-3.03	DLMF.Hypergeometric.KummerSeedForms.expression_eq_const_mul_permutation_solution	DLMF/Hypergeometric/KummerSeedForms.lean	143	direct admission
+RL-3.03	DLMF.Hypergeometric.KummerPermutations.solution	DLMF/Hypergeometric/KummerPermutations.lean	97	definition, no admission
+RL-3.03	DLMF.Hypergeometric.KummerPermutations.card_indices	DLMF/Hypergeometric/KummerPermutations.lean	111	proved, no admission
+RL-3.03	DLMF.Hypergeometric.KummerSeedForms.card_indices	DLMF/Hypergeometric/KummerSeedForms.lean	126	proved, no admission
+RL-3.03	DLMF.AlgebraicAnalytic.isFundamentalPair_of_wronskian_ne_zero	DLMF/AlgebraicAnalytic/ODE/SecondOrder.lean	244	proved, no admission
+RL-3.03	DLMF.Hypergeometric.generalizedHypergeometricTruncated_theta_ode	DLMF/GeneralizedHypergeometric/TerminatingDifferentialEquation.lean	25	direct admission
+RL-3.04	DLMF.Hypergeometric.riemannOperator	DLMF/Hypergeometric/Riemann.lean	50	definition, no admission
+RL-3.04	DLMF.Hypergeometric.riemannSolutions	DLMF/Hypergeometric/Riemann.lean	59	definition, no admission
+RL-3.04	Complex.eq_papperitz_coefficients_of_regularSingular	DLMFMathlib/Analysis/ODE/FuchsianClassification.lean	191	direct admission
+RL-3.04	DLMF.Hypergeometric.coefficients_eq_gauss_of_regularSingular	DLMF/Hypergeometric/RiemannClassification.lean	33	direct admission
+RL-3.04	DLMF.Hypergeometric.riemann_hypergeometric_solution	DLMF/Hypergeometric/Riemann.lean	95	proved, no admission
+RL-3.04	DLMF.Hypergeometric.riemann_hypergeometric_solution_exp_log	DLMF/Hypergeometric/RiemannLogarithmicSolutions.lean	29	direct admission
+RL-3.04	DLMF.Hypergeometric.TransformationGroups.riemannFaceLabelEquiv	DLMF/Hypergeometric/RiemannLabelAction.lean	29	definition, no admission
+RL-3.04	DLMF.Hypergeometric.TransformationGroups.riemannLabelAction	DLMF/Hypergeometric/RiemannLabelAction.lean	38	definition, no admission
+RL-3.04	DLMF.Hypergeometric.TransformationGroups.riemannPointAction	DLMF/Hypergeometric/RiemannLabelAction.lean	43	definition, no admission
+RL-3.04	DLMF.Hypergeometric.TransformationGroups.injective_riemannLabelAction	DLMF/Hypergeometric/RiemannLabelAction.lean	69	proved, no admission
+RL-3.04	DLMF.Hypergeometric.TransformationGroups.card_range_riemannLabelAction	DLMF/Hypergeometric/RiemannLabelAction.lean	76	depends on admission
+RL-3.04	DLMF.Hypergeometric.TransformationGroups.exists_riemannPointAction_perm	DLMF/Hypergeometric/RiemannLabelAction.lean	84	direct admission
+RL-3.04	DLMF.Hypergeometric.TransformationGroups.riemannOperator_labelAction	DLMF/Hypergeometric/RiemannLabelAction.lean	91	direct admission
+RL-3.04	DLMF.Hypergeometric.KummerPermutations.exponents	DLMF/Hypergeometric/KummerPermutations.lean	32	definition, no admission
+RL-3.04	DLMF.Hypergeometric.gauss_fuchs_relation	DLMF/Hypergeometric/Riemann.lean	69	proved, no admission
+RL-3.04	DLMF.Hypergeometric.riemannNormalOperator_gauss	DLMF/Hypergeometric/Riemann.lean	74	proved, no admission

@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module -- shake: keep-all
 
 public import DLMF.BernoulliEuler.Generalizations.HigherOrder
+public import DLMF.BernoulliEuler.Generalizations.ComplexOrderProperties
 public import DLMF.BernoulliEuler.Generalizations.DegenerateAndCharacter
 
 /-!

@@ -5,6 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
+import DLMF.EllipticIntegrals.LogarithmicExpansions
+import DLMFMathlib.Analysis.Integral.SquareRootPairRegularization
 public import DLMF.EllipticIntegrals.Symmetric
 public import Carlson.Elliptic.Asymptotic
 public import DLMF.EllipticIntegrals.SymmetricAddition
@@ -554,7 +556,56 @@ theorem symmetricEllipticRG_zero_asymp {z : ℝ} (hz : 0 < z) :
     (fun y : ℝ => symmetricEllipticRG 0 y z -
         ((√z / 2 + y / (8 * √z) * (Real.log (16 * z / y) - 1) : ℝ) : ℂ)) =O[𝓝[>] 0]
       (fun y : ℝ => ((y / (8 * √z) * (Real.log (16 * z / y) - 1) * (y / z) : ℝ) : ℂ)) := by
-  sorry
+  have hy : Tendsto (fun y : ℝ => y / z) (𝓝[>] 0) (𝓝[>] 0) := by
+    exact (tendsto_nhdsWithin_iff.mpr ⟨by
+      simpa using ((continuous_id.div_const z).tendsto (0 : ℝ)).mono_left nhdsWithin_le_nhds,
+      (show ∀ᶠ y : ℝ in 𝓝[>] 0, 0 < y from self_mem_nhdsWithin).mono fun _ hy =>
+      div_pos hy hz⟩)
+  let p : ℝ := 16 * z / Real.exp 1
+  have hp : 0 < p := by dsimp only [p]; positivity
+  have hlog : (fun y : ℝ => Real.log (y / z)) =O[𝓝[>] 0]
+      fun y : ℝ => Real.log (16 * z / y) - 1 := by
+    apply (_root_.Real.isBigO_log_const_div_log_const_div_nhdsGT_zero hz hp).neg_left.congr'
+    · filter_upwards [self_mem_nhdsWithin] with y hy
+      rw [Real.log_div hz.ne' hy.ne', Real.log_div hy.ne' hz.ne']
+      ring
+    · filter_upwards [self_mem_nhdsWithin] with y hy
+      dsimp only [p]
+      rw [Real.log_div (by positivity : (16 * z / Real.exp 1) ≠ 0) hy.ne',
+        Real.log_div (by positivity : (16 * z) ≠ 0) (Real.exp_ne_zero _), Real.log_exp,
+        Real.log_div (by positivity : (16 * z) ≠ 0) hy.ne']
+      ring
+  have hpow : (fun y : ℝ => (y / z) ^ 2) =O[𝓝[>] 0] fun y : ℝ => y ^ 2 := by
+    convert (isBigO_refl (fun y : ℝ => y ^ 2) (𝓝[>] 0)).const_mul_left (1 / z ^ 2) using 1
+    funext y
+    field_simp
+  have H := ((symmetricEllipticRG_zero_one_isBigO_log.comp_tendsto hy).trans
+    (hpow.mul hlog)).const_mul_left ((√z : ℝ) : ℂ)
+  have hc : (1 / (8 * √z * z) : ℝ) ≠ 0 := by positivity
+  have H1 := H.const_mul_right hc
+  have HS : √z ^ 2 = z := Real.sq_sqrt hz.le
+  have HS0 : √z ≠ 0 := (Real.sqrt_pos.mpr hz).ne'
+  have H2 : (fun y : ℝ => symmetricEllipticRG 0 y z -
+        ((√z / 2 + y / (8 * √z) * (Real.log (16 * z / y) - 1) : ℝ) : ℂ)) =O[𝓝[>] 0]
+      fun y : ℝ => y / (8 * √z) * (Real.log (16 * z / y) - 1) * (y / z) := by
+    apply H1.congr'
+    · filter_upwards [self_mem_nhdsWithin] with y _
+      dsimp only [Function.comp_def]
+      have hscale := symmetricEllipticRG_scale hz 0 (((y / z : ℝ) : ℂ)) 1
+      rw [mul_zero, mul_one, ← ofReal_mul, mul_div_cancel₀ _ hz.ne',
+        Carlson.ofReal_cpow_half hz.le] at hscale
+      have hratio : (16 : ℝ) / (y / z) = 16 * z / y := by field_simp
+      rw [mul_sub, ← hscale, hratio]
+      congr 1
+      push_cast
+      field_simp [ofReal_ne_zero.mpr HS0, ofReal_ne_zero.mpr hz.ne']
+      have HH := congrArg (fun u : ℝ => (u : ℂ)) HS
+      push_cast at HH
+      ring_nf
+      rw [HH]
+    · exact Eventually.of_forall fun y => by field_simp
+  apply IsBigO.of_norm_right
+  simpa only [norm_real] using H2.norm_right
 
 /-! ### §19.27(iv) `R_D` -/
 

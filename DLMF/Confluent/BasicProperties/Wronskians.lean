@@ -33,9 +33,10 @@ formula 13.2.41 and the jump of `U` across the negative real axis (DLMF §13.2).
 
 ## Implementation notes
 
-DLMF's `U(b-a,b,z e^{±πi})` is represented by the principal value at `-z`, or by `kummerUOnLog`
-when both continuations are needed. The `_all` variants drop nonpole hypotheses on the
-parameters.
+DLMF's `U(b-a,b,z e^{±πi})` is represented by the principal value at `-z`, or by
+`kummerUConnectionOnLog` at noninteger second parameter when both continuations
+are needed. The full parameter lift is `kummerUContinuedOnLog`.
+The `_all` variants drop nonpole hypotheses on the parameters.
 -/
 
 @[expose] public section
@@ -654,8 +655,8 @@ theorem exp_weighted_jump (a b u v : ℂ) :
     _ = _ := by simp only [Carlson.TwoVariable.exp_mul_I_sub_exp_neg_mul_I]
 
 /-- The half-turn of U, with its branch recorded in the logarithmic argument. -/
-theorem kummerUOnLog_half_turn (a b : ℂ) {z : ℂ} (hz : z ≠ 0) (sign : Bool) :
-    kummerUOnLog a b (log z + (if sign then 1 else -1) * π * I) =
+theorem kummerUConnectionOnLog_half_turn (a b : ℂ) {z : ℂ} (hz : z ≠ 0) (sign : Bool) :
+    kummerUConnectionOnLog a b (log z + (if sign then 1 else -1) * π * I) =
       Gamma (1 - b) / Gamma (a - b + 1) * kummerM a b (-z) -
         Gamma (b - 1) / Gamma a * z ^ (1 - b) *
           exp (-(if sign then 1 else -1) * b * π * I) *
@@ -671,17 +672,17 @@ theorem kummerUOnLog_half_turn (a b : ℂ) {z : ℂ} (hz : z ≠ 0) (sign : Bool
       log z * (1 - b) + (s * π * I + (-s * b * π * I)) by ring,
       exp_add, exp_add, he, cpow_def_of_ne_zero hz]
     ring
-  rw [kummerUOnLog, hz', hp]
+  rw [kummerUConnectionOnLog, hz', hp]
   ring
 
 /-- The jump of `U` across the negative axis, with both continuations `z e^{±πi}` taken on
-the logarithmic argument plane. `kummerUOnLog` represents `U` there for noninteger `b`. -/
+the logarithmic argument plane. `kummerUConnectionOnLog` represents `U` there for noninteger `b`. -/
 @[dlmf 13.2.E43]
 theorem kummerM_eq_kummerU_jump (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
     (hbi : ∀ k : ℤ, b ≠ k) :
     2 * π * I * exp (-z) / (Gamma b * Gamma (a - b + 1)) * kummerM (b - a) b z =
-      exp (b * π * I) * kummerUOnLog a b (log z + π * I) -
-        exp (-b * π * I) * kummerUOnLog a b (log z - π * I) := by
+      exp (b * π * I) * kummerUConnectionOnLog a b (log z + π * I) -
+        exp (-b * π * I) * kummerUConnectionOnLog a b (log z - π * I) := by
   have hz0 := slitPlane_ne_zero hz
   have hb : ∀ k : ℕ, b ≠ -(k : ℂ) := not_neg_nat_of_mem_integerComplement
     (mem_integerComplement_of_forall hbi)
@@ -691,8 +692,8 @@ theorem kummerM_eq_kummerU_jump (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
     have h := Gamma_mul_Gamma_one_sub b
     apply (eq_div_iff hGb).mpr
     linear_combination (eq_div_iff hsin).mp h
-  have hp := kummerUOnLog_half_turn a b hz0 true
-  have hm := kummerUOnLog_half_turn a b hz0 false
+  have hp := kummerUConnectionOnLog_half_turn a b hz0 true
+  have hm := kummerUConnectionOnLog_half_turn a b hz0 false
   simp only [Bool.false_eq_true, ↓reduceIte, one_mul, neg_one_mul, neg_neg, neg_mul,
     ← sub_eq_add_neg] at hp hm
   rw [hp, hm]
@@ -710,15 +711,15 @@ theorem kummerM_eq_kummerU_jump (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
 /-- The U jump identity without nonpole assumptions on the first parameter. -/
 theorem kummerU_jump_all (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane) (hbi : ∀ k : ℤ, b ≠ k) :
     2 * π * I * exp (-z) / (Gamma a * Gamma (a - b + 1)) * kummerU (b - a) b z =
-      exp (a * π * I) * kummerUOnLog a b (log z + π * I) -
-        exp (-a * π * I) * kummerUOnLog a b (log z - π * I) := by
+      exp (a * π * I) * kummerUConnectionOnLog a b (log z + π * I) -
+        exp (-a * π * I) * kummerUConnectionOnLog a b (log z - π * I) := by
   have hz0 := slitPlane_ne_zero hz
   have hb : ∀ k : ℕ, b ≠ -(k : ℂ) := not_neg_nat_of_mem_integerComplement
     (mem_integerComplement_of_forall hbi)
   have hB : ∀ k : ℕ, 2 - b ≠ -(k : ℂ) := fun k hk =>
     hbi (2 + k) (by push_cast; linear_combination -hk)
-  have hp := kummerUOnLog_half_turn a b hz0 true
-  have hm := kummerUOnLog_half_turn a b hz0 false
+  have hp := kummerUConnectionOnLog_half_turn a b hz0 true
+  have hm := kummerUConnectionOnLog_half_turn a b hz0 false
   simp only [Bool.false_eq_true, ↓reduceIte, one_mul, neg_one_mul, neg_neg, neg_mul,
     ← sub_eq_add_neg] at hp hm
   have hphase := exp_weighted_jump (a * π) (b * π)
@@ -754,13 +755,17 @@ theorem kummerU_jump_all (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane) (hbi : ∀
     _ = _ := by rw [hs1, hs2, hM, hN]; ring
 
 /-- The jump of `U` across the negative axis, with both continuations `z e^{±πi}` taken on
-the logarithmic argument plane. `kummerUOnLog` represents `U` there for noninteger `b`. -/
+the logarithmic argument plane. `kummerUConnectionOnLog` represents `U` there for noninteger `b`. -/
 @[dlmf 13.2.E44]
 theorem kummerU_jump (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane) (hbi : ∀ k : ℤ, b ≠ k) :
     2 * π * I * exp (-z) / (Gamma a * Gamma (a - b + 1)) * kummerU (b - a) b z =
-      exp (a * π * I) * kummerUOnLog a b (log z + π * I) -
-        exp (-a * π * I) * kummerUOnLog a b (log z - π * I) := by
+      exp (a * π * I) * kummerUConnectionOnLog a b (log z + π * I) -
+        exp (-a * π * I) * kummerUConnectionOnLog a b (log z - π * I) := by
   exact kummerU_jump_all a b hz hbi
+
+/-- Compatibility spelling for the noninteger logarithmic connection expression. -/
+@[deprecated kummerUConnectionOnLog_half_turn (since := "2026-11-14")]
+alias kummerUOnLog_half_turn := kummerUConnectionOnLog_half_turn
 
 end DLMF.Confluent
 

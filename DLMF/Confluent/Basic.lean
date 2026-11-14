@@ -5,6 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
+public import DLMF.Confluent.Basic.TricomiLogarithmic
+
 public import DLMF.Confluent.Basic.KummerM
 public import DLMF.Confluent.Basic.Tricomi
 public import DLMF.Confluent.Basic.IncompleteGamma
@@ -16,6 +18,7 @@ public import DLMF.Confluent.Basic.Buchholz
 public import DLMF.Confluent.Basic.KummerProperties
 public import DLMF.Confluent.Basic.KummerContiguous
 public import DLMF.Confluent.Basic.Whittaker
+public import DLMF.Confluent.Basic.WhittakerLogarithmic
 
 /-!
 # Confluent hypergeometric functions: foundational definitions

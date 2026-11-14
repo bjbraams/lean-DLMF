@@ -424,10 +424,6 @@ theorem heine_transformation {a b c q z : ℂ}
   dsimp only [K, L]
   ring
 
-/-- The degree-zero `q`-ultraspherical polynomial is `1`. -/
-theorem qGegenbauer_zero (beta q x : ℂ) : qGegenbauer beta q 0 x = 1 := by
-  simp [qGegenbauer]
-
 /-- Jackson's `q`-beta integral (AAR §10.8). -/
 @[dlmf 5.18.E12]
 theorem q_beta_integral {a b : ℂ} {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1)

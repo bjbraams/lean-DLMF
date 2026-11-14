@@ -5,6 +5,12 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
+public import DLMF.Weierstrass.LatticeHomomorphisms
+public import DLMF.Weierstrass.ComplexMultiplication
+public import DLMF.Weierstrass.PrescribedResidues
+public import DLMF.Weierstrass.PrescribedDivisors
+public import DLMF.Weierstrass.RationalRepresentation
+
 public import DLMF.Weierstrass.EllipticFunctionsAndInvariants
 public import DLMF.Weierstrass.DifferentialEquations
 public import DLMF.Weierstrass.SpecialLattices
@@ -31,4 +37,10 @@ parametrization (`ω₁, ω₃`, `ω₂ = -ω₁ - ω₃`, `τ = ω₃/ω₁`, `
 modular functions `λ` and `J`, and covers DLMF §§23.2–23.3, 23.5–23.15 and 23.17–23.19.
 Graphics (§§23.4, 23.16), applications (§§23.20–23.21) and computation (§§23.22–23.24) are
 excluded.
+
+The reference-book modules supplement these identities with scalar maps between lattice
+curves and division-point counts (`LatticeHomomorphisms`), elementary complex multiplication
+and automorphisms (`ComplexMultiplication`), and constructions of elliptic functions with
+prescribed simple principal parts (`PrescribedResidues`) and divisors (`PrescribedDivisors`).
+Their source comparison is recorded in `BookAcquisition-Elliptic.md`.
 -/

@@ -1,7 +1,8 @@
 # DLMF Chapter 24 acquisition: Bernoulli and Euler Polynomials
 
-**Proof status (2026-11-13).** Chapter 24 has 15 direct source admissions. The [updated-dependency proof round](
-REVIEW.md#proofs-with-the-updated-dependencies-2026-11-12) proves 1 original admissions in this chapter.
+**Proof status (2026-11-13).** The [parallel proof round](
+REVIEW.md#parallel-dlmf-proof-round-2026-11-13) removes 12 original admissions from
+`DLMF/BernoulliEuler/`, leaving 3 direct source admissions in that area.
 Per-entry statuses and source links below follow the compiled axiom audit; earlier
 dated counts describe their original batches.
 
@@ -152,11 +153,11 @@ DLMFMathlib declarations are all proved or definitions. No proved theorem depend
 - [24.4.E33](https://dlmf.nist.gov/24.4.E33): [`DLMF.BernoulliEuler.eulerPolyE_sixth`](DLMF/BernoulliEuler/Properties.lean#L1007) (proved). All n.
 - [24.4.E34](https://dlmf.nist.gov/24.4.E34): [`DLMF.BernoulliEuler.hasDerivAt_bernoulliPolyB`](DLMF/BernoulliEuler/Basic/Polynomials.lean#L212) (proved); Mathlib: [`Polynomial.derivative_bernoulli`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=Polynomial.derivative_bernoulli#doc). HasDerivAt in complex x.
 - [24.4.E35](https://dlmf.nist.gov/24.4.E35): [`DLMF.BernoulliEuler.hasDerivAt_eulerPolyE`](DLMF/BernoulliEuler/Basic/Polynomials.lean#L222) (proved); [`Polynomial.derivative_euler`](DLMFMathlib/NumberTheory/EulerPolynomials.lean#L115) (proved). HasDerivAt in complex x.
-- [24.4.viii](https://dlmf.nist.gov/24.4.viii): [`DLMF.BernoulliEuler.umbralBernoulli`](DLMF/BernoulliEuler/Properties.lean#L1316) (definition); [`DLMF.BernoulliEuler.umbralEuler`](DLMF/BernoulliEuler/Properties.lean#L1322) (definition). The symbolic evaluation P(B(x)) is the linear map on ℂ[X] sending Xⁿ to Bₙ(x) (`umbralBernoulli`, `umbralEuler`).
-- [24.4.E36](https://dlmf.nist.gov/24.4.E36): [`DLMF.BernoulliEuler.umbralBernoulli_comp_add_one_sub`](DLMF/BernoulliEuler/Properties.lean#L1326) (proved). Every polynomial P, complex x.
-- [24.4.E37](https://dlmf.nist.gov/24.4.E37): [`DLMF.BernoulliEuler.umbralBernoulli_X_add_C_pow`](DLMF/BernoulliEuler/Properties.lean#L1346) (proved). Complex x, h.
-- [24.4.E38](https://dlmf.nist.gov/24.4.E38): [`DLMF.BernoulliEuler.umbralEuler_comp_add_one_add`](DLMF/BernoulliEuler/Properties.lean#L1353) (proved). Every polynomial P, complex x.
-- [24.4.E39](https://dlmf.nist.gov/24.4.E39): [`DLMF.BernoulliEuler.umbralEuler_X_add_C_pow`](DLMF/BernoulliEuler/Properties.lean#L1370) (proved). Complex x, h.
+- [24.4.viii](https://dlmf.nist.gov/24.4.viii): [`DLMF.BernoulliEuler.umbralBernoulli`](DLMF/BernoulliEuler/Properties.lean#L1316) (definition); [`DLMF.BernoulliEuler.umbralEuler`](DLMF/BernoulliEuler/Properties.lean#L1351) (definition). The symbolic evaluation P(B(x)) is the linear map on ℂ[X] sending Xⁿ to Bₙ(x) (`umbralBernoulli`, `umbralEuler`).
+- [24.4.E36](https://dlmf.nist.gov/24.4.E36): [`DLMF.BernoulliEuler.umbralBernoulli_comp_add_one_sub`](DLMF/BernoulliEuler/Properties.lean#L1355) (proved). Every polynomial P, complex x.
+- [24.4.E37](https://dlmf.nist.gov/24.4.E37): [`DLMF.BernoulliEuler.umbralBernoulli_X_add_C_pow`](DLMF/BernoulliEuler/Properties.lean#L1375) (proved). Complex x, h.
+- [24.4.E38](https://dlmf.nist.gov/24.4.E38): [`DLMF.BernoulliEuler.umbralEuler_comp_add_one_add`](DLMF/BernoulliEuler/Properties.lean#L1382) (proved). Every polynomial P, complex x.
+- [24.4.E39](https://dlmf.nist.gov/24.4.E39): [`DLMF.BernoulliEuler.umbralEuler_X_add_C_pow`](DLMF/BernoulliEuler/Properties.lean#L1399) (proved). Complex x, h.
 
 ## [§24.5 Recurrence Relations](https://dlmf.nist.gov/24.5)
 
@@ -173,18 +174,18 @@ DLMFMathlib declarations are all proved or definitions. No proved theorem depend
 
 ## [§24.6 Explicit Formulas](https://dlmf.nist.gov/24.6)
 
-- [24.6.E1](https://dlmf.nist.gov/24.6.E1): [`DLMF.BernoulliEuler.bernoulli_two_mul_eq_explicit₁`](DLMF/BernoulliEuler/Explicit.lean#L348) (proved). n ≥ 1.
-- [24.6.E2](https://dlmf.nist.gov/24.6.E2): [`DLMF.BernoulliEuler.bernoulli_eq_explicit₂`](DLMF/BernoulliEuler/Explicit.lean#L475) (proved). n ≥ 1.
-- [24.6.E3](https://dlmf.nist.gov/24.6.E3): [`DLMF.BernoulliEuler.bernoulli_two_mul_eq_explicit₃`](DLMF/BernoulliEuler/Explicit.lean#L525) (admitted). n ≥ 1.
-- [24.6.E4](https://dlmf.nist.gov/24.6.E4): [`DLMF.BernoulliEuler.eulerNumber_two_mul_eq_explicit₄`](DLMF/BernoulliEuler/Explicit.lean#L691) (proved). n ≥ 1.
-- [24.6.E5](https://dlmf.nist.gov/24.6.E5): [`DLMF.BernoulliEuler.eulerNumber_two_mul_eq_explicit₅`](DLMF/BernoulliEuler/Explicit.lean#L717) (proved). n ≥ 1.
-- [24.6.E6](https://dlmf.nist.gov/24.6.E6): [`DLMF.BernoulliEuler.eulerNumber_two_mul_eq_explicit₆`](DLMF/BernoulliEuler/Explicit.lean#L930) (proved). n ≥ 1.
-- [24.6.E7](https://dlmf.nist.gov/24.6.E7): [`DLMF.BernoulliEuler.bernoulliPolyB_eq_explicit`](DLMF/BernoulliEuler/Explicit.lean#L939) (proved). All n, complex x.
-- [24.6.E8](https://dlmf.nist.gov/24.6.E8): [`DLMF.BernoulliEuler.eulerPolyE_eq_explicit`](DLMF/BernoulliEuler/Explicit.lean#L960) (proved). All n, complex x.
-- [24.6.E9](https://dlmf.nist.gov/24.6.E9): [`DLMF.BernoulliEuler.bernoulli_eq_explicit₉`](DLMF/BernoulliEuler/Explicit.lean#L462) (proved). All n (stronger than DLMF, which states n ≥ 1).
-- [24.6.E10](https://dlmf.nist.gov/24.6.E10): [`DLMF.BernoulliEuler.eulerNumber_eq_explicit₁₀`](DLMF/BernoulliEuler/Explicit.lean#L1001) (proved). All n.
-- [24.6.E11](https://dlmf.nist.gov/24.6.E11): [`DLMF.BernoulliEuler.bernoulli_eq_explicit₁₁`](DLMF/BernoulliEuler/Explicit.lean#L1022) (proved). n ≥ 1.
-- [24.6.E12](https://dlmf.nist.gov/24.6.E12): [`DLMF.BernoulliEuler.eulerNumber_two_mul_eq_explicit₁₂`](DLMF/BernoulliEuler/Explicit.lean#L1060) (proved). All n.
+- [24.6.E1](https://dlmf.nist.gov/24.6.E1): [`DLMF.BernoulliEuler.bernoulli_two_mul_eq_explicit₁`](DLMF/BernoulliEuler/Explicit.lean#L343) (proved). n ≥ 1.
+- [24.6.E2](https://dlmf.nist.gov/24.6.E2): [`DLMF.BernoulliEuler.bernoulli_eq_explicit₂`](DLMF/BernoulliEuler/Explicit.lean#L470) (proved). n ≥ 1.
+- [24.6.E3](https://dlmf.nist.gov/24.6.E3): [`DLMF.BernoulliEuler.bernoulli_two_mul_eq_explicit₃`](DLMF/BernoulliEuler/CentralFactorial.lean#L40) (proved). n ≥ 1.
+- [24.6.E4](https://dlmf.nist.gov/24.6.E4): [`DLMF.BernoulliEuler.eulerNumber_two_mul_eq_explicit₄`](DLMF/BernoulliEuler/Explicit.lean#L644) (proved). n ≥ 1.
+- [24.6.E5](https://dlmf.nist.gov/24.6.E5): [`DLMF.BernoulliEuler.eulerNumber_two_mul_eq_explicit₅`](DLMF/BernoulliEuler/Explicit.lean#L670) (proved). n ≥ 1.
+- [24.6.E6](https://dlmf.nist.gov/24.6.E6): [`DLMF.BernoulliEuler.eulerNumber_two_mul_eq_explicit₆`](DLMF/BernoulliEuler/Explicit.lean#L883) (proved). n ≥ 1.
+- [24.6.E7](https://dlmf.nist.gov/24.6.E7): [`DLMF.BernoulliEuler.bernoulliPolyB_eq_explicit`](DLMF/BernoulliEuler/Explicit.lean#L892) (proved). All n, complex x.
+- [24.6.E8](https://dlmf.nist.gov/24.6.E8): [`DLMF.BernoulliEuler.eulerPolyE_eq_explicit`](DLMF/BernoulliEuler/Explicit.lean#L913) (proved). All n, complex x.
+- [24.6.E9](https://dlmf.nist.gov/24.6.E9): [`DLMF.BernoulliEuler.bernoulli_eq_explicit₉`](DLMF/BernoulliEuler/Explicit.lean#L457) (proved). All n (stronger than DLMF, which states n ≥ 1).
+- [24.6.E10](https://dlmf.nist.gov/24.6.E10): [`DLMF.BernoulliEuler.eulerNumber_eq_explicit₁₀`](DLMF/BernoulliEuler/Explicit.lean#L954) (proved). All n.
+- [24.6.E11](https://dlmf.nist.gov/24.6.E11): [`DLMF.BernoulliEuler.bernoulli_eq_explicit₁₁`](DLMF/BernoulliEuler/Explicit.lean#L975) (proved). n ≥ 1.
+- [24.6.E12](https://dlmf.nist.gov/24.6.E12): [`DLMF.BernoulliEuler.eulerNumber_two_mul_eq_explicit₁₂`](DLMF/BernoulliEuler/Explicit.lean#L1013) (proved). All n.
 
 ## [§24.7 Integral Representations](https://dlmf.nist.gov/24.7)
 
@@ -227,16 +228,16 @@ DLMFMathlib declarations are all proved or definitions. No proved theorem depend
 
 ## [§24.10 Arithmetic Properties](https://dlmf.nist.gov/24.10)
 
-- [24.10.i](https://dlmf.nist.gov/24.10.i): [`DLMF.BernoulliEuler.RatModEq`](DLMF/BernoulliEuler/Arithmetic.lean#L59) (definition). Congruence of rationals: M divides the numerator of a - b (`RatModEq`).
-- [24.10.E1](https://dlmf.nist.gov/24.10.E1): [`DLMF.BernoulliEuler.bernoulli_two_mul_den_eq_prod`](DLMF/BernoulliEuler/Arithmetic.lean#L78) (proved); Mathlib: [`Bernoulli.vonStaudt_clausen`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=Bernoulli.vonStaudt_clausen#doc); Mathlib: [`Bernoulli.dvd_den_bernoulli`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=Bernoulli.dvd_den_bernoulli#doc); Mathlib: [`Bernoulli.not_sq_dvd_den_bernoulli`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=Bernoulli.not_sq_dvd_den_bernoulli#doc). First assertion is Mathlib's von Staudt–Clausen theorem; the denominator statement (prose) is acquired for n ≥ 1 as `bernoulli_two_mul_den_eq_prod`.
-- [24.10.E2](https://dlmf.nist.gov/24.10.E2): [`DLMF.BernoulliEuler.prime_mul_bernoulli_two_mul_modEq`](DLMF/BernoulliEuler/Arithmetic.lean#L94) (admitted). n ≥ 2, ℓ ≥ 1, (p-1)pˡ ∣ 2n.
-- [24.10.E3](https://dlmf.nist.gov/24.10.E3): [`DLMF.BernoulliEuler.kummer_congruence`](DLMF/BernoulliEuler/Arithmetic.lean#L103) (admitted). Corrected range m, n ≥ 2 (fails for m = 1 or n = 1).
-- [24.10.E4](https://dlmf.nist.gov/24.10.E4): [`DLMF.BernoulliEuler.kummer_congruence_pow`](DLMF/BernoulliEuler/Arithmetic.lean#L111) (admitted). All m, n with the printed congruence conditions, ℓ ≥ 0.
-- [24.10.E5](https://dlmf.nist.gov/24.10.E5): [`DLMF.BernoulliEuler.eulerNumber_modEq_add_prime_sub_one`](DLMF/BernoulliEuler/Arithmetic.lean#L162) (proved). p > 2, n ≥ 2 as printed (also true for n = 1, false for n = 0).
-- [24.10.E6](https://dlmf.nist.gov/24.10.E6): [`DLMF.BernoulliEuler.eulerNumber_two_mul_modEq_two_pow`](DLMF/BernoulliEuler/Arithmetic.lean#L197) (admitted). All n, ℓ, w with 2ˡ ∣ w.
-- [24.10.E7](https://dlmf.nist.gov/24.10.E7): [`DLMF.BernoulliEuler.voronoi_congruence`](DLMF/BernoulliEuler/Arithmetic.lean#L205) (admitted). M ≥ 2, b prime to M, n ≥ 1; N₂ₙ, D₂ₙ are `(bernoulli (2n)).num`, `.den`.
-- [24.10.E8](https://dlmf.nist.gov/24.10.E8): [`DLMF.BernoulliEuler.prime_pow_dvd_bernoulli_num`](DLMF/BernoulliEuler/Arithmetic.lean#L218) (admitted). n ≥ 1, ℓ ≥ 1, p - 1 ∤ 2n, pˡ ∣ 2n.
-- [24.10.E9](https://dlmf.nist.gov/24.10.E9): [`DLMF.BernoulliEuler.eulerNumber_two_mul_modEq_prime_pow`](DLMF/BernoulliEuler/Arithmetic.lean#L226) (admitted). n ≥ 1, ℓ ≥ 1, (p-1)p^{ℓ-1} ∣ 2n; both cases p ≡ 1, 3 (mod 4).
+- [24.10.i](https://dlmf.nist.gov/24.10.i): [`DLMF.BernoulliEuler.RatModEq`](DLMF/BernoulliEuler/Arithmetic.lean#L73) (definition). Congruence of rationals: M divides the numerator of a - b (`RatModEq`).
+- [24.10.E1](https://dlmf.nist.gov/24.10.E1): [`DLMF.BernoulliEuler.bernoulli_two_mul_den_eq_prod`](DLMF/BernoulliEuler/Arithmetic.lean#L92) (proved); Mathlib: [`Bernoulli.vonStaudt_clausen`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=Bernoulli.vonStaudt_clausen#doc); Mathlib: [`Bernoulli.dvd_den_bernoulli`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=Bernoulli.dvd_den_bernoulli#doc); Mathlib: [`Bernoulli.not_sq_dvd_den_bernoulli`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=Bernoulli.not_sq_dvd_den_bernoulli#doc). First assertion is Mathlib's von Staudt–Clausen theorem; the denominator statement (prose) is acquired for n ≥ 1 as `bernoulli_two_mul_den_eq_prod`.
+- [24.10.E2](https://dlmf.nist.gov/24.10.E2): [`DLMF.BernoulliEuler.prime_mul_bernoulli_two_mul_modEq`](DLMF/BernoulliEuler/Arithmetic.lean#L138) (proved). n ≥ 2, ℓ ≥ 1, (p-1)pˡ ∣ 2n; [`DLMF.BernoulliEuler.prime_mul_bernoulli_two_mul_modEq'`](DLMF/BernoulliEuler/Arithmetic.lean#L108) (proved).
+- [24.10.E3](https://dlmf.nist.gov/24.10.E3): [`DLMF.BernoulliEuler.kummer_congruence`](DLMF/BernoulliEuler/Arithmetic.lean#L148) (proved). Corrected range m, n ≥ 2 (fails for m = 1 or n = 1).
+- [24.10.E4](https://dlmf.nist.gov/24.10.E4): [`DLMF.BernoulliEuler.kummer_congruence_pow`](DLMF/BernoulliEuler/Arithmetic.lean#L262) (proved). All m, n with the printed congruence conditions, ℓ ≥ 0.
+- [24.10.E5](https://dlmf.nist.gov/24.10.E5): [`DLMF.BernoulliEuler.eulerNumber_modEq_add_prime_sub_one`](DLMF/BernoulliEuler/Arithmetic.lean#L423) (proved). p > 2, n ≥ 2 as printed (also true for n = 1, false for n = 0).
+- [24.10.E6](https://dlmf.nist.gov/24.10.E6): [`DLMF.BernoulliEuler.eulerNumber_two_mul_modEq_two_pow`](DLMF/BernoulliEuler/Arithmetic.lean#L467) (proved). All n, ℓ, w with 2ˡ ∣ w; [`DLMF.BernoulliEuler.eulerNumber_two_mul_modEq_two_pow'`](DLMF/BernoulliEuler/Arithmetic.lean#L458) (proved).
+- [24.10.E7](https://dlmf.nist.gov/24.10.E7): [`DLMF.BernoulliEuler.voronoi_congruence`](DLMF/BernoulliEuler/Arithmetic.lean#L476) (proved). M ≥ 2, b prime to M, n ≥ 1; N₂ₙ, D₂ₙ are `(bernoulli (2n)).num`, `.den`.
+- [24.10.E8](https://dlmf.nist.gov/24.10.E8): [`DLMF.BernoulliEuler.prime_pow_dvd_bernoulli_num`](DLMF/BernoulliEuler/Arithmetic.lean#L565) (proved). n ≥ 1, ℓ ≥ 1, p - 1 ∤ 2n, pˡ ∣ 2n.
+- [24.10.E9](https://dlmf.nist.gov/24.10.E9): [`DLMF.BernoulliEuler.eulerNumber_two_mul_modEq_prime_pow`](DLMF/BernoulliEuler/Arithmetic.lean#L750) (proved). n ≥ 1, ℓ ≥ 1, (p-1)p^{ℓ-1} ∣ 2n; both cases p ≡ 1, 3 (mod 4).
 
 ## Prose, informal and excluded items (part A)
 
@@ -374,16 +375,16 @@ Analytical prose:
 ## [§24.13 Integrals](https://dlmf.nist.gov/24.13)
 
 - [24.13.E1](https://dlmf.nist.gov/24.13.E1): Mathlib: [`antideriv_bernoulliFun`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=antideriv_bernoulliFun#doc) (exact: real `t`; pointer in `DLMF.Core.UpstreamElementary`)
-- [24.13.E2](https://dlmf.nist.gov/24.13.E2): [`DLMF.BernoulliEuler.integral_bernoulliFun_add_one`](DLMF/BernoulliEuler/IntegralsSums.lean#L257) (proved); Mathlib: [`integral_bernoulliFun_eq_zero`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=integral_bernoulliFun_eq_zero#doc) (special case `x = 0`; pointer in `DLMF.Core.UpstreamElementary`). Stated for all `n ≥ 0` and real `x` (stronger than DLMF: `n ≥ 1`).
-- [24.13.E3](https://dlmf.nist.gov/24.13.E3): [`DLMF.BernoulliEuler.integral_bernoulliFun_add_half`](DLMF/BernoulliEuler/IntegralsSums.lean#L266) (proved)
-- [24.13.E4](https://dlmf.nist.gov/24.13.E4): [`DLMF.BernoulliEuler.integral_bernoulliFun_zero_half`](DLMF/BernoulliEuler/IntegralsSums.lean#L276) (proved)
-- [24.13.E5](https://dlmf.nist.gov/24.13.E5): [`DLMF.BernoulliEuler.integral_bernoulliFun_quarter`](DLMF/BernoulliEuler/IntegralsSums.lean#L287) (proved)
-- [24.13.E6](https://dlmf.nist.gov/24.13.E6): [`DLMF.BernoulliEuler.integral_bernoulliFun_mul_bernoulliFun`](DLMF/BernoulliEuler/IntegralsSums.lean#L298) (proved)
-- [24.13.E7](https://dlmf.nist.gov/24.13.E7): [`DLMF.BernoulliEuler.hasDerivAt_eulerFun_succ_div`](DLMF/BernoulliEuler/IntegralsSums.lean#L314) (proved)
-- [24.13.E8](https://dlmf.nist.gov/24.13.E8): [`DLMF.BernoulliEuler.integral_eulerFun_zero_one`](DLMF/BernoulliEuler/IntegralsSums.lean#L320) (proved). Both equalities.
-- [24.13.E9](https://dlmf.nist.gov/24.13.E9): [`DLMF.BernoulliEuler.integral_eulerFun_even_zero_half`](DLMF/BernoulliEuler/IntegralsSums.lean#L336) (proved). Both equalities.
-- [24.13.E10](https://dlmf.nist.gov/24.13.E10): [`DLMF.BernoulliEuler.integral_eulerFun_odd_zero_half`](DLMF/BernoulliEuler/IntegralsSums.lean#L356) (proved)
-- [24.13.E11](https://dlmf.nist.gov/24.13.E11): [`DLMF.BernoulliEuler.integral_eulerFun_mul_eulerFun`](DLMF/BernoulliEuler/IntegralsSums.lean#L371) (proved)
+- [24.13.E2](https://dlmf.nist.gov/24.13.E2): [`DLMF.BernoulliEuler.integral_bernoulliFun_add_one`](DLMF/BernoulliEuler/IntegralsSums.lean#L259) (proved); Mathlib: [`integral_bernoulliFun_eq_zero`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=integral_bernoulliFun_eq_zero#doc) (special case `x = 0`; pointer in `DLMF.Core.UpstreamElementary`). Stated for all `n ≥ 0` and real `x` (stronger than DLMF: `n ≥ 1`).
+- [24.13.E3](https://dlmf.nist.gov/24.13.E3): [`DLMF.BernoulliEuler.integral_bernoulliFun_add_half`](DLMF/BernoulliEuler/IntegralsSums.lean#L268) (proved)
+- [24.13.E4](https://dlmf.nist.gov/24.13.E4): [`DLMF.BernoulliEuler.integral_bernoulliFun_zero_half`](DLMF/BernoulliEuler/IntegralsSums.lean#L278) (proved)
+- [24.13.E5](https://dlmf.nist.gov/24.13.E5): [`DLMF.BernoulliEuler.integral_bernoulliFun_quarter`](DLMF/BernoulliEuler/IntegralsSums.lean#L289) (proved)
+- [24.13.E6](https://dlmf.nist.gov/24.13.E6): [`DLMF.BernoulliEuler.integral_bernoulliFun_mul_bernoulliFun`](DLMF/BernoulliEuler/IntegralsSums.lean#L300) (proved)
+- [24.13.E7](https://dlmf.nist.gov/24.13.E7): [`DLMF.BernoulliEuler.hasDerivAt_eulerFun_succ_div`](DLMF/BernoulliEuler/IntegralsSums.lean#L316) (proved)
+- [24.13.E8](https://dlmf.nist.gov/24.13.E8): [`DLMF.BernoulliEuler.integral_eulerFun_zero_one`](DLMF/BernoulliEuler/IntegralsSums.lean#L322) (proved). Both equalities.
+- [24.13.E9](https://dlmf.nist.gov/24.13.E9): [`DLMF.BernoulliEuler.integral_eulerFun_even_zero_half`](DLMF/BernoulliEuler/IntegralsSums.lean#L338) (proved). Both equalities.
+- [24.13.E10](https://dlmf.nist.gov/24.13.E10): [`DLMF.BernoulliEuler.integral_eulerFun_odd_zero_half`](DLMF/BernoulliEuler/IntegralsSums.lean#L358) (proved)
+- [24.13.E11](https://dlmf.nist.gov/24.13.E11): [`DLMF.BernoulliEuler.integral_eulerFun_mul_eulerFun`](DLMF/BernoulliEuler/IntegralsSums.lean#L373) (proved)
 
 Analytical prose:
 
@@ -396,18 +397,18 @@ Analytical prose:
 
 ## [§24.14 Sums](https://dlmf.nist.gov/24.14)
 
-- [24.14.E1](https://dlmf.nist.gov/24.14.E1): [`DLMF.BernoulliEuler.sum_choose_bernoulli_mul_bernoulli`](DLMF/BernoulliEuler/IntegralsSums.lean#L546) (proved). Arbitrary commutative `ℚ`-algebra; the `n B_{n-1}` term is `n • B_{n-1}`.
+- [24.14.E1](https://dlmf.nist.gov/24.14.E1): [`DLMF.BernoulliEuler.sum_choose_bernoulli_mul_bernoulli`](DLMF/BernoulliEuler/IntegralsSums.lean#L548) (proved). Arbitrary commutative `ℚ`-algebra; the `n B_{n-1}` term is `n • B_{n-1}`.
 - [24.14.E2](https://dlmf.nist.gov/24.14.E2): [`DLMF.BernoulliEuler.sum_choose_bernoulli_mul_bernoulli_number`](DLMF/BernoulliEuler/IntegralsSums.lean#L567) (proved from the admitted sum_choose_bernoulli_mul_bernoulli (24.14.1))
-- [24.14.E3](https://dlmf.nist.gov/24.14.E3): [`DLMF.BernoulliEuler.sum_choose_euler_mul_euler`](DLMF/BernoulliEuler/IntegralsSums.lean#L600) (proved)
-- [24.14.E4](https://dlmf.nist.gov/24.14.E4): [`DLMF.BernoulliEuler.sum_choose_eulerNumber_mul_eulerNumber`](DLMF/BernoulliEuler/IntegralsSums.lean#L645) (proved); [`DLMF.BernoulliEuler.neg_two_pow_mul_euler_eval_zero`](DLMF/BernoulliEuler/IntegralsSums.lean#L664) (proved). First equality admitted (it follows from 24.14.3 at `x = h = 1/2`), second equality proved.
-- [24.14.E5](https://dlmf.nist.gov/24.14.E5): [`DLMF.BernoulliEuler.sum_choose_euler_mul_bernoulli`](DLMF/BernoulliEuler/IntegralsSums.lean#L682) (proved). `(x+h)/2` written `(2⁻¹ : ℚ) • (x + h)`.
-- [24.14.E6](https://dlmf.nist.gov/24.14.E6): [`DLMF.BernoulliEuler.sum_choose_two_pow_bernoulli_mul_eulerNumber`](DLMF/BernoulliEuler/IntegralsSums.lean#L725) (proved). `2^{n-1}` written `2ⁿ/2` (value `1/2` at `n = 0`).
-- [24.14.E7](https://dlmf.nist.gov/24.14.E7): [`DLMF.BernoulliEuler.sum_choose_mul_bernoulli_mul_bernoulli_div`](DLMF/BernoulliEuler/IntegralsSums.lean#L779) (proved)
-- [24.14.E8](https://dlmf.nist.gov/24.14.E8): [`DLMF.BernoulliEuler.sum_antidiagonal_bernoulli_triple`](DLMF/BernoulliEuler/IntegralsSums.lean#L966) (proved)
-- [24.14.E9](https://dlmf.nist.gov/24.14.E9): [`DLMF.BernoulliEuler.sum_antidiagonal_eulerNumber_triple`](DLMF/BernoulliEuler/IntegralsSums.lean#L1090) (proved); [`DLMF.BernoulliEuler.sum_antidiagonal_eulerNumber_triple'`](DLMF/BernoulliEuler/IntegralsSums.lean#L1037) (proved).
-- [24.14.E10](https://dlmf.nist.gov/24.14.E10): [`DLMF.BernoulliEuler.sum_antidiagonal_bernoulli_quadruple`](DLMF/BernoulliEuler/IntegralsSums.lean#L1100) (proved)
-- [24.14.E11](https://dlmf.nist.gov/24.14.E11): [`DLMF.BernoulliEuler.det_hankel_bernoulli`](DLMF/BernoulliEuler/IntegralsSums.lean#L1226) (admitted)
-- [24.14.E12](https://dlmf.nist.gov/24.14.E12): [`DLMF.BernoulliEuler.det_hankel_eulerNumber`](DLMF/BernoulliEuler/IntegralsSums.lean#L1235) (admitted)
+- [24.14.E3](https://dlmf.nist.gov/24.14.E3): [`DLMF.BernoulliEuler.sum_choose_euler_mul_euler`](DLMF/BernoulliEuler/IntegralsSums.lean#L602) (proved)
+- [24.14.E4](https://dlmf.nist.gov/24.14.E4): [`DLMF.BernoulliEuler.sum_choose_eulerNumber_mul_eulerNumber`](DLMF/BernoulliEuler/IntegralsSums.lean#L647) (proved); [`DLMF.BernoulliEuler.neg_two_pow_mul_euler_eval_zero`](DLMF/BernoulliEuler/IntegralsSums.lean#L666) (proved). First equality admitted (it follows from 24.14.3 at `x = h = 1/2`), second equality proved.
+- [24.14.E5](https://dlmf.nist.gov/24.14.E5): [`DLMF.BernoulliEuler.sum_choose_euler_mul_bernoulli`](DLMF/BernoulliEuler/IntegralsSums.lean#L684) (proved). `(x+h)/2` written `(2⁻¹ : ℚ) • (x + h)`.
+- [24.14.E6](https://dlmf.nist.gov/24.14.E6): [`DLMF.BernoulliEuler.sum_choose_two_pow_bernoulli_mul_eulerNumber`](DLMF/BernoulliEuler/IntegralsSums.lean#L727) (proved). `2^{n-1}` written `2ⁿ/2` (value `1/2` at `n = 0`).
+- [24.14.E7](https://dlmf.nist.gov/24.14.E7): [`DLMF.BernoulliEuler.sum_choose_mul_bernoulli_mul_bernoulli_div`](DLMF/BernoulliEuler/IntegralsSums.lean#L781) (proved)
+- [24.14.E8](https://dlmf.nist.gov/24.14.E8): [`DLMF.BernoulliEuler.sum_antidiagonal_bernoulli_triple`](DLMF/BernoulliEuler/IntegralsSums.lean#L968) (proved)
+- [24.14.E9](https://dlmf.nist.gov/24.14.E9): [`DLMF.BernoulliEuler.sum_antidiagonal_eulerNumber_triple`](DLMF/BernoulliEuler/IntegralsSums.lean#L1092) (proved); [`DLMF.BernoulliEuler.sum_antidiagonal_eulerNumber_triple'`](DLMF/BernoulliEuler/IntegralsSums.lean#L1039) (proved).
+- [24.14.E10](https://dlmf.nist.gov/24.14.E10): [`DLMF.BernoulliEuler.sum_antidiagonal_bernoulli_quadruple`](DLMF/BernoulliEuler/IntegralsSums.lean#L1102) (proved)
+- [24.14.E11](https://dlmf.nist.gov/24.14.E11): [`DLMF.BernoulliEuler.det_hankel_bernoulli`](DLMF/BernoulliEuler/BernoulliHankel.lean#L32) (proved)
+- [24.14.E12](https://dlmf.nist.gov/24.14.E12): [`DLMF.BernoulliEuler.det_hankel_eulerNumber`](DLMF/BernoulliEuler/EulerHankel.lean#L193) (proved)
 
 Analytical prose:
 
@@ -427,13 +428,13 @@ Analytical prose:
 - [24.15.E4](https://dlmf.nist.gov/24.15.E4): [`DLMF.BernoulliEuler.tangentNumber`](DLMF/BernoulliEuler/Basic/RelatedNumbers.lean#L100) (definition); [`DLMF.BernoulliEuler.tangentNumber_odd`](DLMF/BernoulliEuler/Basic/RelatedNumbers.lean#L108) (proved)
 - [24.15.E5](https://dlmf.nist.gov/24.15.E5): [`DLMF.BernoulliEuler.tangentNumber_even`](DLMF/BernoulliEuler/Basic/RelatedNumbers.lean#L122) (proved)
 - [24.15.T1](https://dlmf.nist.gov/24.15.T1): [`DLMF.BernoulliEuler.genocchiNumber_table`](DLMF/BernoulliEuler/Basic/RelatedNumbers.lean#L198) (proved); [`DLMF.BernoulliEuler.tangentNumber_table`](DLMF/BernoulliEuler/Basic/RelatedNumbers.lean#L208) (proved). Exact integer table (`G₀ … G₈`, `T₀ … T₈`), proved from the exact values `B₀ … B₉` (helper `b24b_bernoulli_values`).
-- [24.15.E6](https://dlmf.nist.gov/24.15.E6): [`DLMF.BernoulliEuler.bernoulli_eq_sum_stirlingSecond`](DLMF/BernoulliEuler/RelatedNumbers.lean#L177) (proved)
-- [24.15.E7](https://dlmf.nist.gov/24.15.E7): [`DLMF.BernoulliEuler.bernoulli_eq_sum_stirlingSecond_choose`](DLMF/BernoulliEuler/RelatedNumbers.lean#L214) (proved)
-- [24.15.E8](https://dlmf.nist.gov/24.15.E8): [`DLMF.BernoulliEuler.sum_stirlingFirst_mul_bernoulli`](DLMF/BernoulliEuler/RelatedNumbers.lean#L271) (proved). Signed `s(n+1, k+1)` written as `(-1)^{n-k} |s(n+1, k+1)|`.
-- [24.15.E9](https://dlmf.nist.gov/24.15.E9): [`DLMF.BernoulliEuler.padicNorm_bernoulli_sub_stirlingSecond`](DLMF/BernoulliEuler/RelatedNumbers.lean#L281) (admitted). Congruence in `ℤ_(p)` stated as `padicNorm p (a - b) ≤ p^{-2}`; checked for all primes `p < 40`.
-- [24.15.E10](https://dlmf.nist.gov/24.15.E10): [`DLMF.BernoulliEuler.padicNorm_bernoulli_sub_stirlingSecond_cube`](DLMF/BernoulliEuler/RelatedNumbers.lean#L290) (admitted). Congruence stated as `padicNorm p (a - b) ≤ p^{-3}`; checked for all primes `p < 40`.
-- [24.15.E11](https://dlmf.nist.gov/24.15.E11): [`DLMF.BernoulliEuler.sum_choose_bernoulli_fib`](DLMF/BernoulliEuler/RelatedNumbers.lean#L419) (proved)
-- [24.15.E12](https://dlmf.nist.gov/24.15.E12): [`DLMF.BernoulliEuler.sum_choose_eulerNumber_lucas`](DLMF/BernoulliEuler/RelatedNumbers.lean#L510) (proved)
+- [24.15.E6](https://dlmf.nist.gov/24.15.E6): [`DLMF.BernoulliEuler.bernoulli_eq_sum_stirlingSecond`](DLMF/BernoulliEuler/RelatedNumbers.lean#L179) (proved)
+- [24.15.E7](https://dlmf.nist.gov/24.15.E7): [`DLMF.BernoulliEuler.bernoulli_eq_sum_stirlingSecond_choose`](DLMF/BernoulliEuler/RelatedNumbers.lean#L216) (proved)
+- [24.15.E8](https://dlmf.nist.gov/24.15.E8): [`DLMF.BernoulliEuler.sum_stirlingFirst_mul_bernoulli`](DLMF/BernoulliEuler/RelatedNumbers.lean#L273) (proved). Signed `s(n+1, k+1)` written as `(-1)^{n-k} |s(n+1, k+1)|`.
+- [24.15.E9](https://dlmf.nist.gov/24.15.E9): [`DLMF.BernoulliEuler.padicNorm_bernoulli_sub_stirlingSecond`](DLMF/BernoulliEuler/RelatedNumbers.lean#L283) (proved). Congruence in `ℤ_(p)` stated as `padicNorm p (a - b) ≤ p^{-2}`; checked for all primes `p < 40`.
+- [24.15.E10](https://dlmf.nist.gov/24.15.E10): [`DLMF.BernoulliEuler.padicNorm_bernoulli_sub_stirlingSecond_cube`](DLMF/BernoulliEuler/RelatedNumbers.lean#L295) (proved). Congruence stated as `padicNorm p (a - b) ≤ p^{-3}`; checked for all primes `p < 40`.
+- [24.15.E11](https://dlmf.nist.gov/24.15.E11): [`DLMF.BernoulliEuler.sum_choose_bernoulli_fib`](DLMF/BernoulliEuler/RelatedNumbers.lean#L434) (proved)
+- [24.15.E12](https://dlmf.nist.gov/24.15.E12): [`DLMF.BernoulliEuler.sum_choose_eulerNumber_lucas`](DLMF/BernoulliEuler/RelatedNumbers.lean#L525) (proved)
 
 Analytical prose:
 
@@ -444,7 +445,7 @@ Analytical prose:
 - [24.15.iii.p2](https://dlmf.nist.gov/24.15#iii.p2): `p` denotes a prime in 24.15.9–24.15.10 (hypothesis `p.Prime`); the congruences between rationals are stated with `padicNorm p`; the reference (Horata 1991) is bibliographic.
 - [24.15.iv.p1](https://dlmf.nist.gov/24.15#iv.p1): Fibonacci numbers `uₙ` = Mathlib's `Nat.fib` (pointer); the Lucas numbers `vₙ` are `lucasNumber` with `lucasNumber_add_two` and the bridge `lucasNumber_succ : v_{n+1} = u_n + u_{n+2}` (proved).
 - [24.15.iv.p2](https://dlmf.nist.gov/24.15#iv.p2): Cross-reference to §26.11; no formula stated.
-- [24.15.iv](https://dlmf.nist.gov/24.15.iv): [`DLMF.BernoulliEuler.lucasNumber`](DLMF/BernoulliEuler/RelatedNumbers.lean#L301) (definition); [`DLMF.BernoulliEuler.lucasNumber_add_two`](DLMF/BernoulliEuler/RelatedNumbers.lean#L309) (proved); [`DLMF.BernoulliEuler.lucasNumber_succ`](DLMF/BernoulliEuler/RelatedNumbers.lean#L314) (proved); Mathlib: [`Nat.fib`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/Data/Nat/Fib/Basic.html#Nat.fib); Mathlib: [`Nat.fib_add_two`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/Data/Nat/Fib/Basic.html#Nat.fib_add_two).
+- [24.15.iv](https://dlmf.nist.gov/24.15.iv): [`DLMF.BernoulliEuler.lucasNumber`](DLMF/BernoulliEuler/RelatedNumbers.lean#L316) (definition); [`DLMF.BernoulliEuler.lucasNumber_add_two`](DLMF/BernoulliEuler/RelatedNumbers.lean#L324) (proved); [`DLMF.BernoulliEuler.lucasNumber_succ`](DLMF/BernoulliEuler/RelatedNumbers.lean#L329) (proved); Mathlib: [`Nat.fib`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/Data/Nat/Fib/Basic.html#Nat.fib); Mathlib: [`Nat.fib_add_two`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/Data/Nat/Fib/Basic.html#Nat.fib_add_two).
 
 ## [§24.16 Generalizations](https://dlmf.nist.gov/24.16)
 

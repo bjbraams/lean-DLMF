@@ -16,7 +16,8 @@ functions (DLMF 9.6.21–9.6.26), on the logarithmic plane and in the principal 
 
 ## Main definitions
 
-* `airyWhittakerMOnLog`, `airyWhittakerWOnLog`: Whittaker functions on the logarithmic plane.
+* `airyWhittakerMOnLog`, `airyWhittakerWConnectionOnLog`: the Whittaker expressions
+  on the logarithmic plane, with the W connection formula used at noninteger twice-order.
 
 ## Main results
 
@@ -447,8 +448,8 @@ theorem airyBiDeriv_eq_kummerM {z : ℂ} (hz : z ≠ 0) :
 def airyWhittakerMOnLog (κ μ w : ℂ) : ℂ :=
   exp (-exp w / 2 + (μ + 1 / 2) * w) * kummerM (μ - κ + 1 / 2) (1 + 2 * μ) (exp w)
 /-- Whittaker W on the logarithmic plane at nonintegral second Kummer parameter. -/
-def airyWhittakerWOnLog (κ μ w : ℂ) : ℂ :=
-  exp (-exp w / 2 + (μ + 1 / 2) * w) * kummerUOnLog (μ - κ + 1 / 2) (1 + 2 * μ) w
+def airyWhittakerWConnectionOnLog (κ μ w : ℂ) : ℂ :=
+  exp (-exp w / 2 + (μ + 1 / 2) * w) * kummerUConnectionOnLog (μ - κ + 1 / 2) (1 + 2 * μ) w
 
 /-- `e^{log 2 + L} = 2ζ`. -/
 theorem exp_log_two_add_airyLogZeta {z : ℂ} (hz : z ≠ 0) :
@@ -550,11 +551,11 @@ theorem Gamma_neg_two_thirds : Gamma (-2 / 3) = -(3 / 2) * Gamma (1 / 3) := by
   rw [h]; ring
 
 /-- Tricomi's `U` on the logarithmic plane, unfolded at `(5/6, 5/3)`. -/
-theorem kummerUOnLog_five_sixths (w : ℂ) :
-    kummerUOnLog (5 / 6) (5 / 3) w = Gamma (-2 / 3) / Gamma (1 / 6) *
+theorem kummerUConnectionOnLog_five_sixths (w : ℂ) :
+    kummerUConnectionOnLog (5 / 6) (5 / 3) w = Gamma (-2 / 3) / Gamma (1 / 6) *
         kummerM (5 / 6) (5 / 3) (exp w) +
       Gamma (2 / 3) / Gamma (5 / 6) * exp (-2 / 3 * w) * kummerM (1 / 6) (1 / 3) (exp w) := by
-  rw [kummerUOnLog]; norm_num
+  rw [kummerUConnectionOnLog]; norm_num
 
 /-- `Ai(z) = 3^{-1/6} π^{-1/2} ζ^{2/3} e^{-ζ} U(5/6, 5/3, 2ζ)` for `z ≠ 0`, with `U` continued
 on the logarithmic plane of `2ζ` (DLMF 9.6.21). -/
@@ -562,14 +563,14 @@ on the logarithmic plane of `2ζ` (DLMF 9.6.21). -/
 theorem airyAi_eq_kummerU_onLog {z : ℂ} (hz : z ≠ 0) :
     airyAi z = ((3 : ℂ) ^ (-1 / 6 : ℂ) / Real.sqrt π) *
       exp ((2 / 3) * airyLogZeta z - airyZetaComplex z) *
-        kummerUOnLog (5 / 6) (5 / 3) (log 2 + airyLogZeta z) := by
+        kummerUConnectionOnLog (5 / 6) (5 / 3) (log 2 + airyLogZeta z) := by
   have k1 := kummerM_two_mul_eq (ν := -1 / 3) (a := 1 / 6) (b := 1 / 3) (c := 2 / 3) (by norm_num)
     (by norm_num) (by norm_num) (Hypergeometric.not_neg_nat_of_re_pos (by norm_num))
     (Hypergeometric.not_neg_nat_of_re_pos (by norm_num)) (2 * airyZetaComplex z)
   have k2 := kummerM_two_mul_eq (ν := 1 / 3) (a := 5 / 6) (b := 5 / 3) (c := 4 / 3) (by norm_num)
     (by norm_num) (by norm_num) (Hypergeometric.not_neg_nat_of_re_pos (by norm_num))
     (Hypergeometric.not_neg_nat_of_re_pos (by norm_num)) (2 * airyZetaComplex z)
-  rw [kummerUOnLog_five_sixths, exp_log_two_add_airyLogZeta hz, k1, k2,
+  rw [kummerUConnectionOnLog_five_sixths, exp_log_two_add_airyLogZeta hz, k1, k2,
     two_airyZetaComplex_sq_div, sub_eq_add_neg, exp_add, exp_mul_airyLogZeta]
   have ez : exp (3 / 2 * (2 / 3) * log z) = z := by
     rw [show (3 / 2 * (2 / 3) * log z) = log z by ring, exp_log hz]
@@ -635,11 +636,11 @@ theorem Gamma_seven_sixths : Gamma (7 / 6) = 1 / 6 * Gamma (1 / 6) := by
   rw [show (7 / 6 : ℂ) = 1 / 6 + 1 by norm_num, Complex.Gamma_add_one _ (by norm_num)]
 
 /-- Tricomi's `U` on the logarithmic plane, unfolded at `(7/6, 7/3)`. -/
-theorem kummerUOnLog_seven_sixths (w : ℂ) :
-    kummerUOnLog (7 / 6) (7 / 3) w = Gamma (-4 / 3) / Gamma (-1 / 6) *
+theorem kummerUConnectionOnLog_seven_sixths (w : ℂ) :
+    kummerUConnectionOnLog (7 / 6) (7 / 3) w = Gamma (-4 / 3) / Gamma (-1 / 6) *
         kummerM (7 / 6) (7 / 3) (exp w) +
       Gamma (4 / 3) / Gamma (7 / 6) * exp (-4 / 3 * w) * kummerM (-1 / 6) (-1 / 3) (exp w) := by
-  rw [kummerUOnLog]; norm_num
+  rw [kummerUConnectionOnLog]; norm_num
 
 /-- `Ai'(z) = -3^{1/6} π^{-1/2} ζ^{4/3} e^{-ζ} U(7/6, 7/3, 2ζ)` for `z ≠ 0`, with `U` continued
 on the logarithmic plane of `2ζ` (DLMF 9.6.22). -/
@@ -647,14 +648,14 @@ on the logarithmic plane of `2ζ` (DLMF 9.6.22). -/
 theorem airyAiDeriv_eq_kummerU_onLog {z : ℂ} (hz : z ≠ 0) :
     airyAiDeriv z = -((3 : ℂ) ^ (1 / 6 : ℂ) / Real.sqrt π) *
       exp ((4 / 3) * airyLogZeta z - airyZetaComplex z) *
-        kummerUOnLog (7 / 6) (7 / 3) (log 2 + airyLogZeta z) := by
+        kummerUConnectionOnLog (7 / 6) (7 / 3) (log 2 + airyLogZeta z) := by
   have k1 := kummerM_two_mul_eq (ν := -2 / 3) (a := -1 / 6) (b := -1 / 3) (c := 1 / 3) (by norm_num)
     (by norm_num) (by norm_num) (Hypergeometric.not_neg_nat_of_re_pos (by norm_num))
     (by convert neg_one_third_ne_neg_nat using 2; norm_num) (2 * airyZetaComplex z)
   have k2 := kummerM_two_mul_eq (ν := 2 / 3) (a := 7 / 6) (b := 7 / 3) (c := 5 / 3) (by norm_num)
     (by norm_num) (by norm_num) (Hypergeometric.not_neg_nat_of_re_pos (by norm_num))
     (Hypergeometric.not_neg_nat_of_re_pos (by norm_num)) (2 * airyZetaComplex z)
-  rw [kummerUOnLog_seven_sixths, exp_log_two_add_airyLogZeta hz, k1, k2,
+  rw [kummerUConnectionOnLog_seven_sixths, exp_log_two_add_airyLogZeta hz, k1, k2,
     two_airyZetaComplex_sq_div, sub_eq_add_neg, exp_add, exp_mul_airyLogZeta]
   have ez : exp (3 / 2 * (4 / 3) * log z) = z ^ 2 := by
     rw [show (3 / 2 * (4 / 3) * log z) = ((2 : ℕ) : ℂ) * log z by push_cast; ring, exp_nat_mul,
@@ -720,15 +721,15 @@ theorem div_three_ne_int {p : ℤ} (hp : p % 3 ≠ 0) : ∀ k : ℤ, ((p : ℂ) 
 
 /-- Tricomi's `U` at `e^w`, with `w` in the principal strip, is its logarithmic-plane form. -/
 theorem kummerU_exp_eq_onLog (a : ℂ) {b : ℂ} (hb : ∀ k : ℤ, b ≠ k) {w : ℂ} (h1 : -π < w.im)
-    (h2 : w.im ≤ π) : kummerU a b (exp w) = kummerUOnLog a b w := by
-  rw [kummerU_eq_connection a b _ hb, kummerUConnection, kummerUOnLog,
+    (h2 : w.im ≤ π) : kummerU a b (exp w) = kummerUConnectionOnLog a b w := by
+  rw [kummerU_eq_connection a b _ hb, kummerUConnection, kummerUConnectionOnLog,
     cpow_def_of_ne_zero (exp_ne_zero w), log_exp h1 h2, mul_comm w]
 
 /-- Whittaker `W` at `e^w`, with `w` in the principal strip, is its logarithmic-plane form. -/
 theorem whittakerW_exp_eq_onLog (κ μ : ℂ) (hb : ∀ k : ℤ, 1 + 2 * μ ≠ k) {w : ℂ}
     (h1 : -π < w.im) (h2 : w.im ≤ π) :
-    whittakerW κ μ (exp w) = airyWhittakerWOnLog κ μ w := by
-  rw [whittakerW, airyWhittakerWOnLog, kummerU_exp_eq_onLog _ hb h1 h2,
+    whittakerW κ μ (exp w) = airyWhittakerWConnectionOnLog κ μ w := by
+  rw [whittakerW, airyWhittakerWConnectionOnLog, kummerU_exp_eq_onLog _ hb h1 h2,
     cpow_def_of_ne_zero (exp_ne_zero w), log_exp h1 h2, neg_div, ← exp_add,
     show (1 / 2 + μ - κ) = μ - κ + 1 / 2 by ring]
   ring_nf
@@ -737,8 +738,8 @@ theorem whittakerW_exp_eq_onLog (κ μ : ℂ) (hb : ∀ k : ℤ, 1 + 2 * μ ≠ 
 @[dlmf 9.6.E21]
 theorem airyAi_eq_whittakerW_onLog {z : ℂ} (hz : z ≠ 0) :
     airyAi z = (1 / (2 * Real.sqrt π)) * z ^ (-1 / 4 : ℂ) *
-      airyWhittakerWOnLog 0 (1 / 3) (log 2 + airyLogZeta z) := by
-  rw [airyAi_eq_kummerU_onLog hz, airyWhittakerWOnLog, exp_log_two_add_airyLogZeta hz,
+      airyWhittakerWConnectionOnLog 0 (1 / 3) (log 2 + airyLogZeta z) := by
+  rw [airyAi_eq_kummerU_onLog hz, airyWhittakerWConnectionOnLog, exp_log_two_add_airyLogZeta hz,
     show (1 / 3 : ℂ) - 0 + 1 / 2 = 5 / 6 by norm_num,
     show (1 : ℂ) + 2 * (1 / 3) = 5 / 3 by norm_num]
   have hsp : (Real.sqrt π : ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
@@ -755,8 +756,9 @@ theorem airyAi_eq_whittakerW_onLog {z : ℂ} (hz : z ≠ 0) :
 @[dlmf 9.6.E22]
 theorem airyAiDeriv_eq_whittakerW_onLog {z : ℂ} (hz : z ≠ 0) :
     airyAiDeriv z = -(1 / (2 * Real.sqrt π)) * z ^ (1 / 4 : ℂ) *
-      airyWhittakerWOnLog 0 (2 / 3) (log 2 + airyLogZeta z) := by
-  rw [airyAiDeriv_eq_kummerU_onLog hz, airyWhittakerWOnLog, exp_log_two_add_airyLogZeta hz,
+      airyWhittakerWConnectionOnLog 0 (2 / 3) (log 2 + airyLogZeta z) := by
+  rw [airyAiDeriv_eq_kummerU_onLog hz, airyWhittakerWConnectionOnLog,
+    exp_log_two_add_airyLogZeta hz,
     show (2 / 3 : ℂ) - 0 + 1 / 2 = 7 / 6 by norm_num,
     show (1 : ℂ) + 2 * (2 / 3) = 7 / 3 by norm_num]
   have hsp : (Real.sqrt π : ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
@@ -914,6 +916,18 @@ theorem airyBiDeriv_eq_whittakerM {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 2 * 
   rw [← exp_log_two_add_airyLogZeta hz0, whittakerM_exp_eq_onLog _ _ h1 h2,
     whittakerM_exp_eq_onLog _ _ h1 h2]
   exact airyBiDeriv_eq_whittakerM_onLog hz0
+
+/-- Compatibility spelling for the noninteger logarithmic connection expression. -/
+@[deprecated airyWhittakerWConnectionOnLog (since := "2026-11-14")]
+noncomputable abbrev airyWhittakerWOnLog (κ μ w : ℂ) : ℂ := airyWhittakerWConnectionOnLog κ μ w
+
+/-- Compatibility spelling for the noninteger logarithmic connection expression. -/
+@[deprecated kummerUConnectionOnLog_five_sixths (since := "2026-11-14")]
+alias kummerUOnLog_five_sixths := kummerUConnectionOnLog_five_sixths
+
+/-- Compatibility spelling for the noninteger logarithmic connection expression. -/
+@[deprecated kummerUConnectionOnLog_seven_sixths (since := "2026-11-14")]
+alias kummerUOnLog_seven_sixths := kummerUConnectionOnLog_seven_sixths
 
 end DLMF.Airy
 

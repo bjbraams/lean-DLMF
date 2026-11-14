@@ -8,11 +8,18 @@ module -- shake: keep-all
 public import DLMF.QSeries.Heine
 public import DLMF.QSeries.Identities
 public import DLMF.QSeries.Pochhammer
+public import DLMF.QSeries.ProductConvergence
+public import DLMF.QSeries.RogersIdentities
 public import DLMF.QSeries.QBinomial
 public import DLMF.QSeries.QCalculus
+public import DLMF.QSeries.ClassicalLimitsAndParts
+public import DLMF.QSeries.Logarithm
+public import DLMF.QSeries.BookIdentities
 public import DLMF.QSeries.QExponential
 public import DLMF.QSeries.RamanujanPsi
 public import DLMF.QSeries.Saalschutz
+
+public import DLMF.QSeries.RogersBilateral
 
 /-!
 # `q`-series (AAR Chapter 10; Duverney Chapter 10)

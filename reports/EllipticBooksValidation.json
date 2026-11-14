@@ -1,0 +1,774 @@
+{
+  "date": "2026-11-14",
+  "scope": "Selected basic elliptic-function theory from nine reference books",
+  "new_modules": [
+    "DLMFMathlib/Analysis/Complex/LatticeMultipliers.lean",
+    "DLMF/Weierstrass/Basic/ZetaProperties.lean",
+    "DLMF/Weierstrass/LatticeHomomorphisms.lean",
+    "DLMF/Weierstrass/ComplexMultiplication.lean",
+    "DLMF/Weierstrass/PrescribedResidues.lean",
+    "DLMF/Weierstrass/PrescribedDivisors.lean"
+  ],
+  "new_theorems": 41,
+  "new_definitions": 4,
+  "new_admissions": 0,
+  "preservation": {
+    "existing_tagged_statements_changed": [],
+    "existing_mathematical_definition_bodies_changed": [],
+    "public_renames": [],
+    "private_helper_replacement": "Weierstrass.Series private zeta-meromorphy proof replaced by DLMF.Weierstrass.meromorphic_weierstrassZeta; the upstream multiplier-ring definition is used directly."
+  },
+  "source_hashes": {
+    "DLMFMathlib/Analysis/Complex/LatticeMultipliers.lean": "ac5bcac2049ffbfb95fa4f8001e7eae4cbd61ffd7835c6ab320ae70596a96a8c",
+    "DLMF/Weierstrass/Basic/ZetaProperties.lean": "20b94348a7ac587bace57b5afbf6b637ae9759ea4366dc824bdfbb426d154abb",
+    "DLMF/Weierstrass/LatticeHomomorphisms.lean": "f4ba993edd808630037f36005512b11b585105fe29b83b7d40fcd1fcc9c31a14",
+    "DLMF/Weierstrass/ComplexMultiplication.lean": "a2c5c0d9c29e1933e8d07ee64f3cc93ed609a035ca933ff4eb203fb6ba91247f",
+    "DLMF/Weierstrass/PrescribedResidues.lean": "7ead069c35fa7d9641558f8787c2ffebfb143a26cfefd0e89246b9a9764c1786",
+    "DLMF/Weierstrass/PrescribedDivisors.lean": "5bec12aff5cba0647e6f14d16e6926ec3858a4d5a4f58f41569c4e7598ca6677",
+    "DLMF/Weierstrass.lean": "3522195ecefde461bfe3a3eb092bcfb652d6ec8f6ae758a045350e805032dbdd",
+    "DLMF/Weierstrass/Basic.lean": "fb96b56ad1689f1c1b8921898d1d3efe6ad7d6192c423929d1662bf7e5beff3b",
+    "DLMF/Weierstrass/Series.lean": "4d459ee826eaf6515e5ee61e7fb54e2539903d6707965ec97a2244d305a0b3a9",
+    "DLMFMathlib.lean": "e0d749501de48ab4ae1b89ab4450025c9c508caf2aa675024ca861779d3ddd21",
+    "BookAcquisition-Elliptic.md": "10101c65b882128d930364eaa6c9705ccc52ee213842baaff362546d206cfc22",
+    "README.md": "1636d99679e65e0b54ae82da0c9373331f363f84b43df1b96686c048aebd9f61",
+    "CREDITS.md": "d9676f723716c6ab3b1e1dcf32b554979ab48b1583073cf7a1daaafbc899f5cd",
+    "REVIEW.md": "01e1d753e7dcaaf20931ec0a7820decd696803309bf76ef050fb77c9c3ee1cc8"
+  },
+  "books": [
+    {
+      "path": "References/ArmitageEberlein2006EllipticFunctions-CambridgeLMSST67.pdf",
+      "sha256": "798d658ce976c709fd4d9351c1ee1009e8f0a93e50a0681a36948704ff35f54a",
+      "pages": 401
+    },
+    {
+      "path": "References/Chandrasekharan1985EllipticFunctions-Springer.GL281.pdf",
+      "sha256": "c82ee7d424b0ac9217d96fd40c5fa8a900cada82b11a126e2306e1c4263fdfb7",
+      "pages": 199
+    },
+    {
+      "path": "References/KoecherKrieg2025EllipticFunctionsModularForms-Springer.UTX.pdf",
+      "sha256": "e258ca1cf3e4767d3266f4107b2c47a7fc339fa0500cab4d2cc2f5f6ececb628",
+      "pages": 373
+    },
+    {
+      "path": "References/Lang1987EllipticFunctions2ndEd-SpringerGTM112.pdf",
+      "sha256": "c9220d56b90e657308380ef6f882f8036fdf370a2f2c0992613d154e4af297ff",
+      "pages": 319
+    },
+    {
+      "path": "References/Lawden1989EllipticFunctionsApplications-SpringerAMS80.pdf",
+      "sha256": "06e3eba2a67eeccbc1a43a7cfe6e94e7e9a2a3c240584f114ced25601558cc79",
+      "pages": 349
+    },
+    {
+      "path": "References/Roy2017EllipticModularFunctionsGaussDedekindHecke-Cambridge.pdf",
+      "sha256": "b8bc19969c0815b76c8f556560e36500ab13f2716382540317b38360fc80148d",
+      "pages": 489
+    },
+    {
+      "path": "References/Schwalm2015LecturesSelectedTopicsMathematicalPhysicsEllipticFunctionsEllipticIntegrals-IOPPublishing.pdf",
+      "sha256": "7ca44865ccc1a92be59605e5b23ef915bfc9754d38f984a52a461e8fb3d6a951",
+      "pages": 68
+    },
+    {
+      "path": "References/Takebe2023EllipticIntegralsEllipticFunctions-Springer.MoscowLectures09.pdf",
+      "sha256": "e25751088423c443cac2b75d6dc2ec5ad7708816745eac4f666dd7d35db3b13f",
+      "pages": 329
+    },
+    {
+      "path": "References/Weil1976EllipticFunctionsAccordingEisensteinKronecker-SpringerErgeb88.pdf",
+      "sha256": "4d01de3837956289986ef6510e144d2eda8483eb4967952feb82f805009edb96",
+      "pages": 102
+    }
+  ],
+  "validation": {
+    "ordinary_build": {
+      "command": "lake build > /tmp/DLMF-build.log 2>&1",
+      "exit_code": 0,
+      "jobs": 19778,
+      "log_sha256": "80671dc693d456bb0f36dc986b8ec2a479f5e5d9581a7a444291ebc25b8ad6e6"
+    },
+    "targeted_build": {
+      "command": "lake build DLMFMathlib.Analysis.Complex.LatticeMultipliers DLMF.Weierstrass.Basic.ZetaProperties DLMF.Weierstrass.LatticeHomomorphisms DLMF.Weierstrass.ComplexMultiplication DLMF.Weierstrass.PrescribedResidues DLMF.Weierstrass.PrescribedDivisors DLMF.Weierstrass.Series DLMF.Weierstrass.Basic DLMF.Weierstrass DLMFMathlib > /tmp/DLMF-elliptic-modules.log 2>&1",
+      "exit_code": 0,
+      "jobs": 14169,
+      "log_sha256": "34f2db8759531b3311b10d59e9f0fd1b1c6750f29b38f42ecac6d1949169311a"
+    },
+    "direct_checks": [
+      {
+        "source": "DLMFMathlib/Analysis/Complex/LatticeMultipliers.lean",
+        "command": [
+          "lake",
+          "env",
+          "lean",
+          "-DautoImplicit=false",
+          "-DrelaxedAutoImplicit=false",
+          "-DwarningAsError=true",
+          "DLMFMathlib/Analysis/Complex/LatticeMultipliers.lean"
+        ],
+        "exit_code": 0,
+        "log": "/tmp/DLMF-elliptic-direct/DLMFMathlib_Analysis_Complex_LatticeMultipliers.lean.log",
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "source": "DLMF/Weierstrass/Basic/ZetaProperties.lean",
+        "command": [
+          "lake",
+          "env",
+          "lean",
+          "-DautoImplicit=false",
+          "-DrelaxedAutoImplicit=false",
+          "-DwarningAsError=true",
+          "DLMF/Weierstrass/Basic/ZetaProperties.lean"
+        ],
+        "exit_code": 0,
+        "log": "/tmp/DLMF-elliptic-direct/DLMF_Weierstrass_Basic_ZetaProperties.lean.log",
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "source": "DLMF/Weierstrass/LatticeHomomorphisms.lean",
+        "command": [
+          "lake",
+          "env",
+          "lean",
+          "-DautoImplicit=false",
+          "-DrelaxedAutoImplicit=false",
+          "-DwarningAsError=true",
+          "DLMF/Weierstrass/LatticeHomomorphisms.lean"
+        ],
+        "exit_code": 0,
+        "log": "/tmp/DLMF-elliptic-direct/DLMF_Weierstrass_LatticeHomomorphisms.lean.log",
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "source": "DLMF/Weierstrass/ComplexMultiplication.lean",
+        "command": [
+          "lake",
+          "env",
+          "lean",
+          "-DautoImplicit=false",
+          "-DrelaxedAutoImplicit=false",
+          "-DwarningAsError=true",
+          "DLMF/Weierstrass/ComplexMultiplication.lean"
+        ],
+        "exit_code": 0,
+        "log": "/tmp/DLMF-elliptic-direct/DLMF_Weierstrass_ComplexMultiplication.lean.log",
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "source": "DLMF/Weierstrass/PrescribedResidues.lean",
+        "command": [
+          "lake",
+          "env",
+          "lean",
+          "-DautoImplicit=false",
+          "-DrelaxedAutoImplicit=false",
+          "-DwarningAsError=true",
+          "DLMF/Weierstrass/PrescribedResidues.lean"
+        ],
+        "exit_code": 0,
+        "log": "/tmp/DLMF-elliptic-direct/DLMF_Weierstrass_PrescribedResidues.lean.log",
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "source": "DLMF/Weierstrass/PrescribedDivisors.lean",
+        "command": [
+          "lake",
+          "env",
+          "lean",
+          "-DautoImplicit=false",
+          "-DrelaxedAutoImplicit=false",
+          "-DwarningAsError=true",
+          "DLMF/Weierstrass/PrescribedDivisors.lean"
+        ],
+        "exit_code": 0,
+        "log": "/tmp/DLMF-elliptic-direct/DLMF_Weierstrass_PrescribedDivisors.lean.log",
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "source": "DLMF/Weierstrass.lean",
+        "command": [
+          "lake",
+          "env",
+          "lean",
+          "-DautoImplicit=false",
+          "-DrelaxedAutoImplicit=false",
+          "DLMF/Weierstrass.lean"
+        ],
+        "exit_code": 0,
+        "log": "/tmp/DLMF-elliptic-direct/DLMF_Weierstrass.lean.log",
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "source": "DLMF/Weierstrass/Basic.lean",
+        "command": [
+          "lake",
+          "env",
+          "lean",
+          "-DautoImplicit=false",
+          "-DrelaxedAutoImplicit=false",
+          "DLMF/Weierstrass/Basic.lean"
+        ],
+        "exit_code": 0,
+        "log": "/tmp/DLMF-elliptic-direct/DLMF_Weierstrass_Basic.lean.log",
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "source": "DLMF/Weierstrass/Series.lean",
+        "command": [
+          "lake",
+          "env",
+          "lean",
+          "-DautoImplicit=false",
+          "-DrelaxedAutoImplicit=false",
+          "DLMF/Weierstrass/Series.lean"
+        ],
+        "exit_code": 0,
+        "log": "/tmp/DLMF-elliptic-direct/DLMF_Weierstrass_Series.lean.log",
+        "log_sha256": "b99635aab634abe6288ce33f43e8ff1c203a95125f4e69901be9c369fb11a958"
+      },
+      {
+        "source": "DLMFMathlib.lean",
+        "command": [
+          "lake",
+          "env",
+          "lean",
+          "-DautoImplicit=false",
+          "-DrelaxedAutoImplicit=false",
+          "DLMFMathlib.lean"
+        ],
+        "exit_code": 0,
+        "log": "/tmp/DLMF-elliptic-direct/DLMFMathlib.lean.log",
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "axiom_audit": {
+      "command": "lake env lean -DautoImplicit=false -DrelaxedAutoImplicit=false /tmp/DLMF-elliptic-axioms.lean > /tmp/DLMF-elliptic-axioms.log 2>&1",
+      "exit_code": 0,
+      "declarations": [
+        {
+          "name": "PeriodPair.mem_multiplierRing_iff_periods",
+          "kind": "theorem",
+          "source": "DLMFMathlib/Analysis/Complex/LatticeMultipliers.lean",
+          "line": 32,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PeriodPair.exists_integer_matrix_of_mem_multiplierRing",
+          "kind": "theorem",
+          "source": "DLMFMathlib/Analysis/Complex/LatticeMultipliers.lean",
+          "line": 45,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PeriodPair.exists_quadratic_of_mem_multiplierRing",
+          "kind": "theorem",
+          "source": "DLMFMathlib/Analysis/Complex/LatticeMultipliers.lean",
+          "line": 55,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PeriodPair.isIntegral_of_mem_multiplierRing",
+          "kind": "theorem",
+          "source": "DLMFMathlib/Analysis/Complex/LatticeMultipliers.lean",
+          "line": 68,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PeriodPair.ofReal_mem_multiplierRing_iff",
+          "kind": "theorem",
+          "source": "DLMFMathlib/Analysis/Complex/LatticeMultipliers.lean",
+          "line": 79,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PeriodPair.im_eq_zero_iff_of_mem_multiplierRing",
+          "kind": "theorem",
+          "source": "DLMFMathlib/Analysis/Complex/LatticeMultipliers.lean",
+          "line": 95,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PeriodPair.exists_quadratic_negative_discriminant_of_mem_multiplierRing",
+          "kind": "theorem",
+          "source": "DLMFMathlib/Analysis/Complex/LatticeMultipliers.lean",
+          "line": 107,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "DLMF.Weierstrass.weierstrassZeta_eq_periodPair_weierstrassZeta",
+          "kind": "theorem",
+          "source": "DLMF/Weierstrass/Basic/ZetaProperties.lean",
+          "line": 28,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "DLMF.Weierstrass.meromorphic_weierstrassZeta",
+          "kind": "theorem",
+          "source": "DLMF/Weierstrass/Basic/ZetaProperties.lean",
+          "line": 35,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "DLMF.Weierstrass.latticeCurveHom",
+          "kind": "def",
+          "source": "DLMF/Weierstrass/LatticeHomomorphisms.lean",
+          "line": 33,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "DLMF.Weierstrass.latticeCurveHom_weierstrassPoint",
+          "kind": "theorem",
+          "source": "DLMF/Weierstrass/LatticeHomomorphisms.lean",
+          "line": 43,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "DLMF.Weierstrass.eq_latticeCurveHom_iff",
+          "kind": "theorem",
+          "source": "DLMF/Weierstrass/LatticeHomomorphisms.lean",
+          "line": 55,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "DLMF.Weierstrass.latticeCurveHom_weierstrassPoint_eq_zero_iff",
+          "kind": "theorem",
+          "source": "DLMF/Weierstrass/LatticeHomomorphisms.lean",
+          "line": 69,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "DLMF.Weierstrass.surjective_latticeCurveHom",
+          "kind": "theorem",
+          "source": "DLMF/Weierstrass/LatticeHomomorphisms.lean",
+          "line": 75,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "DLMF.Weierstrass.injective_latticeCurveHom_iff",
+          "kind": "theorem",
+          "source": "DLMF/Weierstrass/LatticeHomomorphisms.lean",
+          "line": 84,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "DLMF.Weierstrass.latticeCurveHom_comp",
+          "kind": "theorem",
+          "source": "DLMF/Weierstrass/LatticeHomomorphisms.lean",
+          "line": 104,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "DLMF.Weierstrass.latticeCurveHom_natCast",
+          "kind": "theorem",
+          "source": "DLMF/Weierstrass/LatticeHomomorphisms.lean",
+          "line": 115,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "DLMF.Weierstrass.natCard_torsionBy_latticeCurve",
+          "kind": "theorem",
+          "source": "DLMF/Weierstrass/LatticeHomomorphisms.lean",
+          "line": 125,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "DLMF.Weierstrass.lattice_smul_eq_self_iff_invariant_weights",
+          "kind": "theorem",
+          "source": "DLMF/Weierstrass/ComplexMultiplication.lean",
+          "line": 32,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "DLMF.Weierstrass.lattice_smul_eq_self_iff_of_invariants_ne_zero",
+          "kind": "theorem",
+          "source": "DLMF/Weierstrass/ComplexMultiplication.lean",
+          "line": 54,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "DLMF.Weierstrass.lattice_smul_eq_self_iff_of_g₃_eq_zero",
+          "kind": "theorem",
+          "source": "DLMF/Weierstrass/ComplexMultiplication.lean",
+          "line": 67,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "DLMF.Weierstrass.lattice_smul_eq_self_iff_of_g₂_eq_zero",
+          "kind": "theorem",
+          "source": "DLMF/Weierstrass/ComplexMultiplication.lean",
+          "line": 78,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "DLMF.Weierstrass.pow_twelve_eq_one_of_lattice_smul_eq_self",
+          "kind": "theorem",
+          "source": "DLMF/Weierstrass/ComplexMultiplication.lean",
+          "line": 89,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "DLMF.Weierstrass.norm_eq_one_of_lattice_smul_eq_self",
+          "kind": "theorem",
+          "source": "DLMF/Weierstrass/ComplexMultiplication.lean",
+          "line": 102,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "DLMF.Weierstrass.zetaSum",
+          "kind": "def",
+          "source": "DLMF/Weierstrass/PrescribedResidues.lean",
+          "line": 36,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "DLMF.Weierstrass.zetaSum_def",
+          "kind": "theorem",
+          "source": "DLMF/Weierstrass/PrescribedResidues.lean",
+          "line": 40,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "DLMF.Weierstrass.zetaSum_add_coe",
+          "kind": "theorem",
+          "source": "DLMF/Weierstrass/PrescribedResidues.lean",
+          "line": 44,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "DLMF.Weierstrass.periodic_zetaSum",
+          "kind": "theorem",
+          "source": "DLMF/Weierstrass/PrescribedResidues.lean",
+          "line": 52,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "DLMF.Weierstrass.meromorphic_zetaSum",
+          "kind": "theorem",
+          "source": "DLMF/Weierstrass/PrescribedResidues.lean",
+          "line": 59,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "DLMF.Weierstrass.hasDerivAt_zetaSum",
+          "kind": "theorem",
+          "source": "DLMF/Weierstrass/PrescribedResidues.lean",
+          "line": 69,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "DLMF.Weierstrass.analyticAt_zetaSum_sub_principalPart",
+          "kind": "theorem",
+          "source": "DLMF/Weierstrass/PrescribedResidues.lean",
+          "line": 79,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "DLMF.Weierstrass.sigmaProduct",
+          "kind": "def",
+          "source": "DLMF/Weierstrass/PrescribedDivisors.lean",
+          "line": 40,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "DLMF.Weierstrass.sigmaProduct_def",
+          "kind": "theorem",
+          "source": "DLMF/Weierstrass/PrescribedDivisors.lean",
+          "line": 44,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "DLMF.Weierstrass.sigmaQuotient",
+          "kind": "def",
+          "source": "DLMF/Weierstrass/PrescribedDivisors.lean",
+          "line": 49,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "DLMF.Weierstrass.sigmaQuotient_def",
+          "kind": "theorem",
+          "source": "DLMF/Weierstrass/PrescribedDivisors.lean",
+          "line": 53,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "DLMF.Weierstrass.sigmaQuotient_empty",
+          "kind": "theorem",
+          "source": "DLMF/Weierstrass/PrescribedDivisors.lean",
+          "line": 58,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "DLMF.Weierstrass.sigmaProduct_eq_zero_iff",
+          "kind": "theorem",
+          "source": "DLMF/Weierstrass/PrescribedDivisors.lean",
+          "line": 62,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "DLMF.Weierstrass.analyticAt_sigmaProduct",
+          "kind": "theorem",
+          "source": "DLMF/Weierstrass/PrescribedDivisors.lean",
+          "line": 68,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "DLMF.Weierstrass.exists_sigmaProduct_add_coe",
+          "kind": "theorem",
+          "source": "DLMF/Weierstrass/PrescribedDivisors.lean",
+          "line": 77,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "DLMF.Weierstrass.periodic_sigmaQuotient",
+          "kind": "theorem",
+          "source": "DLMF/Weierstrass/PrescribedDivisors.lean",
+          "line": 103,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "DLMF.Weierstrass.meromorphic_sigmaQuotient",
+          "kind": "theorem",
+          "source": "DLMF/Weierstrass/PrescribedDivisors.lean",
+          "line": 113,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "DLMF.Weierstrass.sigmaQuotient_eq_zero_iff",
+          "kind": "theorem",
+          "source": "DLMF/Weierstrass/PrescribedDivisors.lean",
+          "line": 120,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "DLMF.Weierstrass.meromorphicOrderAt_weierstrassSigma",
+          "kind": "theorem",
+          "source": "DLMF/Weierstrass/PrescribedDivisors.lean",
+          "line": 130,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "DLMF.Weierstrass.meromorphicOrderAt_sigmaQuotient",
+          "kind": "theorem",
+          "source": "DLMF/Weierstrass/PrescribedDivisors.lean",
+          "line": 144,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "DLMF.Weierstrass.exists_elliptic_with_prescribed_orders",
+          "kind": "theorem",
+          "source": "DLMF/Weierstrass/PrescribedDivisors.lean",
+          "line": 170,
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        }
+      ],
+      "sorryAx": false,
+      "log_sha256": "c5d1b4174642a2cdcd42a4da8f764390674f7e334f07d18d3969ecd7e24e9df0"
+    },
+    "import_survey": {
+      "command": "python3 scripts/import_survey.py",
+      "exit_code": 0,
+      "new_two_way_area_pairs": [],
+      "foundational_violations": 0,
+      "basic_closure_violations": 0,
+      "missing_imports": 0,
+      "file_cycles": 0,
+      "before_sha256": "6a75781cc0558f5264d1e16099ec12aed851845c05fffd1013d91e25fe1b8033",
+      "after_sha256": "b00602f277e1132d3d07fcddf7a7cbbfabd72b3f9b0dd67b8343617ce5cfe7bb"
+    },
+    "file_lengths": {
+      "command": "python3 scripts/check_file_lengths.py",
+      "exit_code": 0,
+      "lean_source_files": 2261
+    },
+    "line_lengths": {
+      "limit": 100,
+      "actual_maximum": 98,
+      "exit_code": 0
+    },
+    "diff_check": {
+      "command": "git diff --check",
+      "exit_code": 0
+    }
+  }
+}

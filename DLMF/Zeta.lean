@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module -- shake: keep-all
 
 public import DLMF.Zeta.AlternatingIntegral
+public import DLMF.Zeta.AlternatingHurwitz
 public import DLMF.Zeta.HyperbolicIntegral
 public import DLMF.Zeta.HermiteIntegral
 public import DLMF.Zeta.Basic
@@ -16,6 +17,7 @@ public import DLMF.Zeta.IntegerArguments
 public import DLMF.Zeta.Sums
 public import DLMF.Zeta.Asymptotics
 public import DLMF.Zeta.Zeros
+public import DLMF.Zeta.NearOneBounds
 public import DLMF.Zeta.MathlibCoverage
 public import DLMF.Zeta.HurwitzEulerMaclaurin
 public import DLMF.Zeta.DirichletTest

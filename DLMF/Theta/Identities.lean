@@ -396,6 +396,17 @@ theorem jacobiThetaThreeTau_eq_four_mul_tau (z τ : ℂ) (hτ : 0 < τ.im) :
   congr 2
   congr 1; field_simp
 
+/-- The even and odd sublattices give `θ₄(0|τ) = θ₃(0|4τ) - θ₂(0|4τ)`. -/
+theorem jacobiThetaFourTau_zero_eq_four_mul_tau {τ : ℂ} (hτ : 0 < τ.im) :
+    jacobiThetaFourTau 0 τ =
+      jacobiThetaThreeTau 0 (4 * τ) - jacobiThetaTwoTau 0 (4 * τ) := by
+  have H := DLMF.Theta.jacobiThetaThreeTau_eq_four_mul_tau (π / 2) τ hτ
+  have he0 : jacobiThetaThreeTau (π / 2) τ = jacobiThetaFourTau 0 τ := by
+    simp only [jacobiThetaFourTau, zero_add]
+  rw [he0] at H
+  have he : 2 * (π / 2 : ℂ) = 0 + π := by ring
+  rw [he, jacobiThetaThreeTau_add_pi, jacobiThetaTwoTau_add_pi] at H
+  exact H
 /-- `θ₃(π/4|τ) = θ₄(0|4τ)` (helper). -/
 private lemma jacobiThetaThreeTau_quarter_pi (τ : ℂ) (hτ : 0 < τ.im) :
     jacobiThetaThreeTau (π / 4) τ = jacobiThetaFourNullTau (4 * τ) := by

@@ -10,6 +10,7 @@ public import DLMF.Theta.Basic.PowerSeries
 public import DLMF.Theta.Basic.Series
 public import DLMF.Theta.Basic.Periodicity
 public import DLMF.Theta.Basic.Analytic
+public import DLMF.Theta.Basic.FourierDerivatives
 
 /-!
 # Theta functions: foundations (DLMF §§20.1–20.2)

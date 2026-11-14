@@ -5,6 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
+public import DLMF.Theta.JointConvergence
+
 public import DLMF.Theta.SeriesAndZeros
 public import DLMF.Theta.ZeroValues
 public import DLMF.Theta.Products

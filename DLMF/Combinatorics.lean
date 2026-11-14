@@ -14,6 +14,7 @@ public import DLMF.Combinatorics.Multinomial
 public import DLMF.Combinatorics.LatticePaths
 public import DLMF.Combinatorics.MathlibCoverage
 public import DLMF.Combinatorics.RestrictedPartitions
+public import DLMF.Combinatorics.PartitionRefinements
 public import DLMF.Combinatorics.Staircase
 public import DLMF.Combinatorics.PartitionIdentities
 public import DLMF.Combinatorics.Compositions
@@ -23,6 +24,11 @@ public import DLMF.Combinatorics.MultisetPermutations
 public import DLMF.Combinatorics.CountingTechniques
 public import DLMF.Combinatorics.TwelvefoldWay
 public import DLMF.Combinatorics.MathlibCoverageB
+
+public import DLMF.Combinatorics.BellSaddle
+
+public import DLMF.Combinatorics.PartitionDiagrams
+public import DLMF.Combinatorics.PartitionFormalRefinements
 
 /-!
 # Combinatorial analysis (DLMF Chapter 26)

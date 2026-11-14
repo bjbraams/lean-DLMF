@@ -990,4 +990,38 @@ theorem hankelH2_neg (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
   rw [I_sq]
   ring
 
+/-- The normalized first-kind Bessel function tends to reciprocal Gamma at zero
+along the positive real axis. Temme, *Special Functions* (1996), Chapter 9,
+(9.1), (9.12), pp. 219, 227, synopsis TEM-09-01. The statement includes
+exceptional orders where the limiting reciprocal Gamma factor vanishes. -/
+theorem tendsto_cpow_neg_mul_besselJ (ν : ℂ) :
+    Tendsto (fun x : ℝ => (x / 2 : ℂ) ^ (-ν) * besselJ ν x)
+      (𝓝[>] 0) (𝓝 ((Gamma (ν + 1))⁻¹)) := by
+  have hcmap : Continuous (fun x : ℝ =>
+      ((ν + 1 : ℂ), -((x : ℂ) ^ 2) / 4)) :=
+    continuous_const.prodMk ((continuous_ofReal.pow 2).neg.div_const 4)
+  have hc := continuous_regularized0F1.comp hcmap
+  have ht := hc.continuousAt.tendsto.mono_left
+    (nhdsWithin_le_nhds : 𝓝[>] (0 : ℝ) ≤ 𝓝 0)
+  have heq : (fun x : ℝ => (x / 2 : ℂ) ^ (-ν) * besselJ ν x) =ᶠ[𝓝[>] 0]
+      (fun x : ℝ => regularizedHGFun (∅ : Multiset ℂ) {ν + 1}
+        (-((x : ℂ) ^ 2) / 4)) := by
+    filter_upwards [self_mem_nhdsWithin] with x hx
+    have hx0 : (x / 2 : ℂ) ≠ 0 :=
+      div_ne_zero (ofReal_ne_zero.mpr hx.ne') (by norm_num)
+    rw [besselJ_eq_regularized, ← mul_assoc, ← cpow_add _ _ hx0,
+      neg_add_cancel, cpow_zero, one_mul]
+    simp only [neg_div]
+  apply Tendsto.congr' heq.symm
+  simpa [Function.comp_def, Complex.regularizedHGFun_zero, regularizedHGFunCoeff] using ht
+
+/-- The squared cylinder magnitude is even in the order. Olver,
+*Asymptotics and Special Functions*, Chapter 9, Theorem 7.1, pp. 340–342.
+The algebraic identity holds for complex order and every principal slit argument. -/
+theorem besselJ_sq_add_besselY_sq_neg_order (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
+    besselJ (-ν) z ^ 2 + besselY (-ν) z ^ 2 = besselJ ν z ^ 2 + besselY ν z ^ 2 := by
+  rw [besselJ_neg_eq ν hz, besselY_neg ν hz]
+  linear_combination (besselJ ν z ^ 2 + besselY ν z ^ 2) *
+    Complex.cos_sq_add_sin_sq (ν * π)
+
 end DLMF.Bessel

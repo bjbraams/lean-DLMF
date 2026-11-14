@@ -6,7 +6,13 @@ Authors: Bastiaan J Braams
 module -- shake: keep-all
 
 public import DLMF.Selberg.Applications
+public import DLMF.Selberg.FiniteFieldRecurrence
+public import DLMF.Selberg.ConstrainedDiscriminant
+public import DLMF.Selberg.NearlyPoisedSummations
 public import DLMF.Selberg.ContinuationAndAomoto
+public import DLMF.Selberg.EquilibriumAndTrace
+public import DLMF.Selberg.IntegralExtensions
+public import DLMF.Selberg.InterlacingCoordinates
 
 /-!
 # The Selberg integral (AAR Chapter 8)

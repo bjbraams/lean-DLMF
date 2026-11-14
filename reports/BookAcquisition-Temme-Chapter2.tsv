@@ -1,0 +1,43 @@
+synopsis_id	declaration	source_file	source_line	status
+TEM-02-01	MeasureTheory.hasSum_integral_of_summable_integral_norm	.lake/packages/mathlib/Mathlib/MeasureTheory/Integral/DominatedConvergence.lean	97	proved, no admission
+TEM-02-01	MeasureTheory.integral_tsum_of_summable_integral_norm	.lake/packages/mathlib/Mathlib/MeasureTheory/Integral/DominatedConvergence.lean	112	proved, no admission
+TEM-02-01	MeasureTheory.lintegral_tsum	.lake/packages/mathlib/Mathlib/MeasureTheory/Integral/Lebesgue/Add.lean	362	proved, no admission
+TEM-02-01	MeasureTheory.Integrable.mono'	.lake/packages/mathlib/Mathlib/MeasureTheory/Function/L1Space/Integrable.lean	104	proved, no admission
+TEM-02-01	norm_tsum_le_tsum_norm	.lake/packages/mathlib/Mathlib/Analysis/Normed/Group/InfiniteSum.lean	149	proved, no admission
+TEM-02-02	MeasureTheory.integrable_prod_iff	.lake/packages/mathlib/Mathlib/MeasureTheory/Integral/Prod.lean	230	proved, no admission
+TEM-02-02	MeasureTheory.integrable_prod_iff'	.lake/packages/mathlib/Mathlib/MeasureTheory/Integral/Prod.lean	238	proved, no admission
+TEM-02-02	MeasureTheory.integral_integral_swap	.lake/packages/mathlib/Mathlib/MeasureTheory/Integral/Prod.lean	481	proved, no admission
+TEM-02-02	MeasureTheory.Integrable.integral_prod_left	.lake/packages/mathlib/Mathlib/MeasureTheory/Integral/Prod.lean	334	proved, no admission
+TEM-02-02	MeasureTheory.Integrable.integral_prod_right	.lake/packages/mathlib/Mathlib/MeasureTheory/Integral/Prod.lean	341	proved, no admission
+TEM-02-02	MeasureTheory.lintegral_lintegral	.lake/packages/mathlib/Mathlib/MeasureTheory/Measure/Prod.lean	1090	proved, no admission
+TEM-02-03	Complex.differentiableOn_and_tendstoLocallyUniformlyOn_integral_iteratedDeriv	DLMFMathlib/Analysis/Complex/ImproperParameterIntegral.lean	31	direct admission
+TEM-02-04	Asymptotics.HasAsymptoticExpansion	DLMFMathlib/Analysis/Asymptotics/AsymptoticExpansion.lean	61	definition, no admission
+TEM-02-04	Asymptotics.IsBigO	.lake/packages/mathlib/Mathlib/Analysis/Asymptotics/Defs.lean	87	definition, no admission
+TEM-02-04	Asymptotics.isAsymptoticScale_pow	DLMFMathlib/Analysis/Asymptotics/AsymptoticExpansion.lean	173	proved, no admission
+TEM-02-04	Asymptotics.HasAsymptoticExpansion.unique	DLMFMathlib/Analysis/Asymptotics/AsymptoticExpansion.lean	157	proved, no admission
+TEM-02-04	DLMF.Confluent.Real.not_tendsto_envelopingExpIntegral_terms	DLMF/ExpIntegrals/EnvelopingModel.lean	97	direct admission
+TEM-02-05	DLMF.Confluent.Real.envelopingExpIntegral	DLMF/ExpIntegrals/EnvelopingModel.lean	28	definition, no admission
+TEM-02-05	DLMF.Confluent.Real.envelopingExpIntegralRemainder	DLMF/ExpIntegrals/EnvelopingModel.lean	33	definition, no admission
+TEM-02-05	DLMF.Confluent.Real.envelopingExpIntegral_eq_integral	DLMF/ExpIntegrals/EnvelopingModel.lean	49	direct admission
+TEM-02-05	DLMF.Confluent.Real.envelopingExpIntegral_eq_sum_add_remainder	DLMF/ExpIntegrals/EnvelopingModel.lean	56	direct admission
+TEM-02-05	DLMF.Confluent.Real.envelopingExpIntegralRemainder_sign	DLMF/ExpIntegrals/EnvelopingModel.lean	64	direct admission
+TEM-02-05	DLMF.Confluent.Real.abs_envelopingExpIntegralRemainder_le	DLMF/ExpIntegrals/EnvelopingModel.lean	70	direct admission
+TEM-02-05	DLMF.Confluent.Real.not_tendsto_envelopingExpIntegral_terms	DLMF/ExpIntegrals/EnvelopingModel.lean	97	direct admission
+TEM-02-05	DLMF.Confluent.Real.hasAsymptoticExpansion_envelopingExpIntegral	DLMF/ExpIntegrals/EnvelopingModel.lean	76	depends on admission
+TEM-02-05	DLMF.Confluent.expIntegralE_exact_remainder	DLMF/IncompleteGamma/ExpIntegralAsymptotics.lean	53	proved, no admission
+TEM-02-06	MeasureTheory.IsImproperLaplacePrimitive	DLMFMathlib/Analysis/Integral/ConditionalLaplace.lean	33	definition, no admission
+TEM-02-06	Asymptotics.watson_lemma_sector_conditional	DLMFMathlib/Analysis/Asymptotics/WatsonConditional.lean	48	direct admission
+TEM-02-07	Asymptotics.LiftedWatson.IsKernel	DLMFMathlib/Analysis/Asymptotics/LiftedWatson.lean	32	definition, no admission
+TEM-02-07	Asymptotics.LiftedWatson.rayAngle	DLMFMathlib/Analysis/Asymptotics/LiftedWatson.lean	46	definition, no admission
+TEM-02-07	Asymptotics.LiftedWatson.transform	DLMFMathlib/Analysis/Asymptotics/LiftedWatson.lean	53	definition, no admission
+TEM-02-07	Asymptotics.LiftedWatson.rayAngle_mem	DLMFMathlib/Analysis/Asymptotics/LiftedWatson.lean	73	proved, no admission
+TEM-02-07	Asymptotics.LiftedWatson.exists_analyticOnNhd_transform	DLMFMathlib/Analysis/Asymptotics/LiftedWatson.lean	102	direct admission
+TEM-02-07	Asymptotics.LiftedWatson.exists_transform_ofReal	DLMFMathlib/Analysis/Asymptotics/LiftedWatson.lean	118	direct admission
+TEM-02-07	Asymptotics.LiftedWatson.hasAsymptoticExpansion_transform	DLMFMathlib/Analysis/Asymptotics/LiftedWatson.lean	129	direct admission
+TEM-02-08	Complex.tangent_level_im_eq_real_mul_conj_deriv	DLMFMathlib/Analysis/Complex/SteepestDescent.lean	30	direct admission
+TEM-02-08	Complex.exists_isAnalyticSaddleMap	DLMFMathlib/Analysis/Analytic/QuadraticInverse.lean	49	direct admission
+TEM-02-08	Complex.analyticSaddleMap	DLMFMathlib/Analysis/Analytic/QuadraticInverse.lean	59	definition, no admission
+TEM-02-08	Complex.analyticSaddleMap_spec	DLMFMathlib/Analysis/Analytic/QuadraticInverse.lean	69	depends on admission
+TEM-02-08	Complex.tendsto_integral_homotopy_of_joining_arcs_zero	DLMFMathlib/Analysis/Complex/SteepestDescent.lean	41	direct admission
+TEM-02-08	Asymptotics.hasAsymptoticExpansion_integral_gaussian_of_analyticAt	DLMFMathlib/Analysis/Complex/SteepestDescent.lean	62	direct admission
+TEM-02-08	Asymptotics.HasAsymptoticExpansion.mul_left	DLMFMathlib/Analysis/Asymptotics/AsymptoticExpansion.lean	101	proved, no admission

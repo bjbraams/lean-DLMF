@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.Elementary.ArcsineContinuedFraction
 public import DLMF.Elementary.LogarithmContinuedFraction
 public import DLMF.Elementary.Hyperbolic.InverseIdentities
 public import DLMF.Elementary.OddContinuedFraction
@@ -71,14 +72,14 @@ theorem tanh_continued_fraction {z : ℂ} (hz : Complex.cosh z≠0) :
 
 /-- Identity under the stated parameter and domain assumptions:
 `DLMF.Core.HasContinuedFraction (fun n => if n=0 then z else
-((2*((n+1)/2)-1:ℕ):ℂ)*(2*((n+1)/2):ℂ)*z^2) (fun n => (2*n+1:ℂ)) (arcsinh z/Complex.sqrt
+((2*((n+1)/2)-1:ℕ):ℂ)*((2*((n+1)/2):ℕ):ℂ)*z^2) (fun n => (2*n+1:ℂ)) (arcsinh z/Complex.sqrt
 (1+z^2))`. -/
 @[dlmf 4.39.E2]
 theorem arcsinh_continued_fraction {z : ℂ} (hz : z∈arcsinhDomain) :
     DLMF.Core.HasContinuedFraction
-      (fun n => if n=0 then z else ((2*((n+1)/2)-1:ℕ):ℂ)*(2*((n+1)/2):ℂ)*z^2)
+      (fun n => if n=0 then z else ((2*((n+1)/2)-1:ℕ):ℂ)*((2*((n+1)/2):ℕ):ℂ)*z^2)
       (fun n => (2*n+1:ℂ)) (arcsinh z/Complex.sqrt (1+z^2)) := by
-  sorry
+  exact ArcsineContinuedFraction.hasContinuedFraction_arcsinh hz
 
 /-- Identity under the stated parameter and domain assumptions:
 `DLMF.Core.HasContinuedFraction (fun n => if n=0 then z else -(n:ℂ)^2*z^2) (fun n => (2*n+1:ℂ))

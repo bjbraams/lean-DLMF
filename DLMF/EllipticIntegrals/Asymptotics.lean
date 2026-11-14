@@ -6,6 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.EllipticIntegrals.Legendre
+public import DLMF.EllipticIntegrals.LogarithmicExpansions
+public import DLMF.EllipticIntegrals.ThirdKindLogarithmicAsymptotics
 public import DLMF.EllipticIntegrals.Symmetric
 public import DLMF.EllipticIntegrals.Relations
 public import DLMF.EllipticIntegrals.LegendreIdentities
@@ -59,96 +61,6 @@ open scoped Real Topology
 namespace DLMF.EllipticIntegrals
 
 open DLMF.JacobiElliptic
-
-/-- DLMF 19.12.3: `d(m) = ψ(1 + m) - ψ(½ + m)`, `ψ` the digamma function
-(`Complex.digamma`). -/
-@[dlmf 19.12.E3]
-def compEllIntLogCoeff (m : ℕ) : ℂ := digamma (1 + m) - digamma (1 / 2 + m)
-
-/-- DLMF 19.12.3: `d(0) = 2 ln 2`. -/
-@[dlmf 19.12.E3]
-theorem compEllIntLogCoeff_zero : compEllIntLogCoeff 0 = 2 * Complex.log 2 := by
-  simp only [compEllIntLogCoeff, Nat.cast_zero, add_zero]
-  rw [digamma_one, digamma_one_half]
-  ring
-
-/-- DLMF 19.12.3: `d(m + 1) = d(m) - 2/((2m + 1)(2m + 2))`. -/
-@[dlmf 19.12.E3]
-theorem compEllIntLogCoeff_succ (m : ℕ) :
-    compEllIntLogCoeff (m + 1) =
-      compEllIntLogCoeff m - 2 / ((2 * m + 1) * (2 * m + 2)) := by
-  have h1 : ∀ n : ℕ, (1 + (m : ℂ)) ≠ -n := by
-    intro n h
-    have := congrArg Complex.re h
-    simp at this
-    linarith [(m.cast_nonneg : (0 : ℝ) ≤ m), (n.cast_nonneg : (0 : ℝ) ≤ n)]
-  have h2 : ∀ n : ℕ, (1 / 2 + (m : ℂ)) ≠ -n := by
-    intro n h
-    have := congrArg Complex.re h
-    simp at this
-    linarith [(m.cast_nonneg : (0 : ℝ) ≤ m), (n.cast_nonneg : (0 : ℝ) ≤ n)]
-  simp only [compEllIntLogCoeff]
-  push_cast
-  rw [show (1 : ℂ) + (m + 1) = 1 + m + 1 by ring,
-    show (1 / 2 : ℂ) + (m + 1) = 1 / 2 + m + 1 by ring,
-    digamma_apply_add_one _ h1, digamma_apply_add_one _ h2]
-  have hm1 : (1 + (m : ℂ)) ≠ 0 := by simpa using h1 0
-  have hm2 : (1 / 2 + (m : ℂ)) ≠ 0 := by simpa using h2 0
-  rw [show (2 * (m : ℂ) + 1) * (2 * m + 2) = 4 * ((1 / 2 + m) * (1 + m)) by ring]
-  have hm3 : (1 + (m : ℂ) * 2) ≠ 0 := by
-    rw [show 1 + (m : ℂ) * 2 = 2 * (1 / 2 + m) by ring]; exact mul_ne_zero two_ne_zero hm2
-  field_simp
-  ring
-
-/-- DLMF 19.12.1: `K(k) = Σ_{m ≥ 0} ((½)_m)²/(m!)² k'^{2m} (ln(1/k') + d(m))`, for complex
-`k` with `0 < |k'| < 1`, `k' = (1 - k²)^{1/2}` principal, and `1 - k² ∉ (-∞, 0]`. -/
-@[dlmf 19.12.E1]
-theorem completeEllipticK_hasSum_log {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane)
-    (h1 : ‖jacobiComodulus k‖ < 1) :
-    HasSum (fun m : ℕ => ((ascPochhammer ℂ m).eval (1 / 2 : ℂ)) ^ 2 / (m.factorial : ℂ) ^ 2 *
-        jacobiComodulus k ^ (2 * m) *
-          (Complex.log (1 / jacobiComodulus k) + compEllIntLogCoeff m))
-      (completeEllipticK k) := by
-  sorry
-
-/-- DLMF 19.12.2:
-`E(k) = 1 + ½ Σ_{m ≥ 0} (½)_m (3/2)_m/((2)_m m!) k'^{2m+2} (ln(1/k') + d(m) - 1/((2m+1)(2m+2)))`,
-for complex `k` with `|k'| < 1`, `k' = (1 - k²)^{1/2}` principal, and `1 - k² ∉ (-∞, 0)`. -/
-@[dlmf 19.12.E2]
-theorem completeEllipticE_hasSum_log {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane ∨ k ^ 2 = 1)
-    (h1 : ‖jacobiComodulus k‖ < 1) :
-    HasSum (fun m : ℕ => (1 / 2 : ℂ) * ((ascPochhammer ℂ m).eval (1 / 2 : ℂ) *
-        (ascPochhammer ℂ m).eval (3 / 2 : ℂ) /
-          ((ascPochhammer ℂ m).eval (2 : ℂ) * (m.factorial : ℂ)) *
-        jacobiComodulus k ^ (2 * m + 2) *
-          (Complex.log (1 / jacobiComodulus k) + compEllIntLogCoeff m -
-            1 / ((2 * m + 1) * (2 * m + 2)))))
-      (completeEllipticE k - 1) := by
-  sorry
-
-/-- DLMF 19.12.4: as `k² → 1-` (real `k → 1-`), for real `α² < 1`,
-`(1 - α²) Π(α², k) = (ln(4/k'))(1 + O(k'²)) - α² R_C(1, 1 - α²)`, stated as
-`(1 - α²) Π(α², k) + α² R_C(1, 1 - α²) - ln(4/k') = O(k'² ln(4/k'))`. -/
-@[dlmf 19.12.E4]
-theorem completeEllipticPi_isBigO_log {α2 : ℝ} (hα : α2 < 1) :
-    (fun k : ℝ => (1 - α2) * completeEllipticPi α2 k + α2 *
-        symmetricEllipticRC 1 ((1 - α2 : ℝ) : ℂ) -
-        (Real.log (4 / Real.sqrt (1 - k ^ 2)) : ℂ)) =O[𝓝[<] 1]
-      fun k : ℝ => (1 - k ^ 2) * Real.log (4 / Real.sqrt (1 - k ^ 2)) := by
-  sorry
-
-/-- DLMF 19.12.5: as `k² → 1-` (real `k → 1-`), for real `α² > 1` (Cauchy principal value
-`Π`), `(1 - α²) Π(α², k) = (ln(4/k') - R_C(1, 1 - α⁻²))(1 + O(k'²))`, stated as
-`(1 - α²) Π(α², k) - (ln(4/k') - R_C(1, 1 - α⁻²)) = O(k'² (ln(4/k') - R_C(1, 1 - α⁻²)))`. -/
-@[dlmf 19.12.E5]
-theorem completeEllipticPi_isBigO_log_of_one_lt {α2 : ℝ} (hα : 1 < α2) :
-    (fun k : ℝ => (1 - α2) * completeEllipticPi α2 k -
-        ((Real.log (4 / Real.sqrt (1 - k ^ 2)) : ℂ) -
-          symmetricEllipticRC 1 ((1 - α2⁻¹ : ℝ) : ℂ))) =O[𝓝[<] 1]
-      fun k : ℝ => ((1 - k ^ 2 : ℝ) : ℂ) *
-        ((Real.log (4 / Real.sqrt (1 - k ^ 2)) : ℂ) -
-            symmetricEllipticRC 1 ((1 - α2⁻¹ : ℝ) : ℂ)) := by
-  sorry
 
 /-- The filter of DLMF 19.12.6: `x ≥ 0`, `y > 0`, `x/y → 0`. -/
 def smallRatioFilter : Filter (ℝ × ℝ) :=

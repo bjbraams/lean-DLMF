@@ -157,6 +157,14 @@ def boundedTempered (f : ℝ → ℂ) : 𝓢'(ℝ, ℂ) :=
   open Classical in
   if h : MemLp f ⊤ volume then MeasureTheory.Lp.toTemperedDistribution (h.toLp f) else 0
 
+/-- The tempered distribution of an essentially bounded function acts by integration. -/
+theorem boundedTempered_apply {f : ℝ → ℂ} (hf : MemLp f ⊤ volume) (φ : 𝓢(ℝ, ℂ)) :
+    boundedTempered f φ = ∫ x, φ x * f x := by
+  rw [boundedTempered, dite_eq_left hf, Lp.toTemperedDistribution_apply]
+  apply integral_congr_ae
+  filter_upwards [hf.coeFn_toLp] with x hx
+  simp only [hx, smul_eq_mul]
+
 /-- The sign function `sign x` (DLMF 1.16.44) as a tempered distribution. -/
 def signTempered : 𝓢'(ℝ, ℂ) := boundedTempered fun x => (Real.sign x : ℂ)
 

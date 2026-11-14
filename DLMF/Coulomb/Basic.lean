@@ -5,6 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
+public import DLMF.Coulomb.Basic.RealOrder
+
 public import DLMF.Coulomb.Basic.Functions
 public import DLMF.Coulomb.Basic.AuxiliaryData
 public import DLMF.Coulomb.Basic.Properties

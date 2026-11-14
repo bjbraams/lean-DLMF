@@ -7,6 +7,7 @@ module -- shake: keep-all
 
 public import DLMF.OrthogonalPolynomials.QFamilies.BasicIdentities
 public import DLMF.OrthogonalPolynomials.QFamilies.ClassicalLimits
+public import DLMF.OrthogonalPolynomials.QFamilies.RogersAndHermite
 
 /-!
 # The q-Hahn and Askey–Wilson classes

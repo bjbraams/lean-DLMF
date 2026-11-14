@@ -5,7 +5,21 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
+public import DLMF.Hypergeometric.RegularizedLocalWronskian
+public import DLMF.Hypergeometric.QuadraticGerms
+public import DLMF.Hypergeometric.KummerSeedForms
+
+public import DLMF.Hypergeometric.RiemannLogarithmicSolutions
+
+public import DLMF.Hypergeometric.RiemannLabelAction
+
+public import DLMF.Hypergeometric.KummerBoundary
+
+public import DLMF.Hypergeometric.Mellin
+
 public import DLMF.Hypergeometric.EulerHalfLine
+public import DLMF.Hypergeometric.TransformedEulerIntegral
+public import DLMF.Hypergeometric.BetaIntegrals
 public import DLMF.Hypergeometric.Boundary
 public import DLMF.Hypergeometric.BoundaryIntegrals
 public import DLMF.Hypergeometric.Stieltjes
@@ -14,6 +28,7 @@ public import DLMF.Hypergeometric.Asymptotics
 public import DLMF.Hypergeometric.Basic.SpecialValues
 public import DLMF.Hypergeometric.QuadraticConnections
 public import DLMF.Hypergeometric.ConnectionFormulas
+public import DLMF.Hypergeometric.PrincipalConnections
 public import DLMF.Hypergeometric.LogConnectionsRecipGamma
 public import DLMF.Hypergeometric.Contiguous
 public import DLMF.Hypergeometric.ContinuedFractions
@@ -22,18 +37,31 @@ public import DLMF.Hypergeometric.ArgumentContinuation
 public import DLMF.Hypergeometric.Derivatives
 public import DLMF.Hypergeometric.DiffEq
 public import DLMF.Hypergeometric.Elementary
+public import DLMF.Hypergeometric.Elliott
+public import DLMF.Hypergeometric.FiniteReciprocity
+public import DLMF.Hypergeometric.FiniteBalancedTransformations
+public import DLMF.Hypergeometric.WellPoisedSummations
 public import DLMF.Hypergeometric.EulerIntegral
 public import DLMF.Hypergeometric.FurtherTransformations
 public import DLMF.Hypergeometric.Identities
 public import DLMF.Hypergeometric.IntegralRepresentations
 public import DLMF.Hypergeometric.Kummer
+public import DLMF.Hypergeometric.KummerPermutations
 public import DLMF.Hypergeometric.Riemann
+public import DLMF.Hypergeometric.RiemannSolutionSpaces
+public import DLMF.Hypergeometric.RiemannClassification
+public import DLMF.Hypergeometric.RiemannQuadratic
 public import DLMF.Hypergeometric.Solutions
 public import DLMF.Hypergeometric.Transformations
 public import DLMF.Hypergeometric.BarnesAux
+public import DLMF.Hypergeometric.BarnesContours
 public import DLMF.Hypergeometric.Basic.GeneralizedEquation
 public import DLMF.Hypergeometric.LoopIntegral
 public import DLMF.Hypergeometric.Saalschutz
+public import DLMF.Hypergeometric.TerminatingSummations
+public import DLMF.Hypergeometric.EndpointLogarithm
+public import DLMF.Hypergeometric.EndpointPartialSums
+public import DLMF.Hypergeometric.RegularizedKummerSolutions
 public import DLMF.Hypergeometric.AppellF4
 public import DLMF.Hypergeometric.FiniteConvolution
 public import DLMF.Hypergeometric.Basic.GeneralizedCalculus
@@ -45,6 +73,13 @@ public import DLMF.Hypergeometric.ParameterHolomorphy
 public import DLMF.Hypergeometric.MathlibCoverage
 public import DLMF.Hypergeometric.SpecialValueTools
 public import DLMF.Hypergeometric.CubicTools
+
+public import DLMF.Hypergeometric.PrincipalBetaTransform
+public import DLMF.Hypergeometric.Solutions.AbelWronskian
+
+public import DLMF.Hypergeometric.BarnesLeftResidues
+
+public import DLMF.Hypergeometric.ClassicalQuadraticGerms
 
 /-!
 # The hypergeometric function (DLMF Chapter 15; AAR Chapters 2 and 3)

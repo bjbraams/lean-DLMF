@@ -9,6 +9,7 @@ public import DLMF.Weierstrass.Basic.Periods
 public import DLMF.Weierstrass.Basic.Functions
 public import DLMF.Weierstrass.Basic.Invariants
 public import DLMF.Weierstrass.Basic.LatticesAndSigma
+public import DLMF.Weierstrass.Basic.ZetaProperties
 public import DLMF.Weierstrass.Basic.Modular
 
 /-!
